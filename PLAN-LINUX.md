@@ -158,24 +158,69 @@ Observações:
 
 Testados 4 offsets do editor em cada imagem:
 
-| Offset | European Deluxe | Japan (Track 1) | PES2 Europe (Track 1) |
-|---|---|---|---|
-| `1012640` `NOMI_SQ1` | `AEK KIEV GALATASARAY` ✅ | `PATAGONIA MARMARA` ✅ | idem Japan ✅ |
-| `387792` `NOMI_G` | `Toldo` ✅ | Shift-JIS ✅ | `Dyer` ✅ |
-| `2002316` `NOMI_SQK` | Shift-JIS ✅ | Shift-JIS ✅ | tabela de ponteiros ❌ |
-| `5651448` `NOMI_SQ6` | `AEK KIEV` ✅ | katakana ✅ | texto de erro francês ❌ |
+| Offset | European Deluxe | Japan multi-track | Japan arquivo único | PES2 Europe |
+|---|---|---|---|---|
+| `1012640` `NOMI_SQ1` | `AEK KIEV GALATASARAY` ✅ | `PATAGONIA MARMARA` ✅ | `PATAGONIA MARMARA` ✅ | idem Japan ✅ |
+| `387792` `NOMI_G` | `Toldo` ✅ | Shift-JIS ✅ | Shift-JIS ✅ | `Dyer` ✅ |
+| `2002316` `NOMI_SQK` | Shift-JIS ✅ | Shift-JIS ✅ | Shift-JIS ✅ | tabela de ponteiros ❌ |
+| `5651448` `NOMI_SQ6` | `AEK KIEV` ✅ | katakana ✅ | katakana ✅ | texto de erro francês ❌ |
 
 **Veredito:**
 
 - `/home/ingmar/ROMs/psx/Winning Eleven 2002 - European Deluxe 2002-03/` →
   **imagem golden.** Todos os offsets batem, nomes latinos, fácil de
   inspecionar visualmente.
+- `/home/ingmar/ROMs/psx/World Soccer Winning Eleven 2002/` →
+  **melhor imagem japonesa.** Ver comparação abaixo.
 - `/home/ingmar/ROMs/psx/World Soccer Winning Eleven 2002 (Japan)/` →
-  compatível estruturalmente, conteúdo Shift-JIS. Segundo caso de teste;
-  valida `kanjitoascii`/`asciitokanji` (`edDlg.cpp:732-773`).
+  compatível, mas redundante com a anterior e com ECC degradado.
 - `/home/ingmar/ROMs/psx/Pro Evolution Soccer 2 (Europe) (EnFrDe)/` →
   **NÃO USAR.** Layout diverge depois de ~2 MB; o editor grava por cima de
   outros dados e corrompe a imagem.
+
+### Os dois dumps japoneses
+
+São a **mesma release** (SLPM-87056), dumps diferentes. Comparação byte-a-byte
+dos primeiros 14 MiB — a faixa que cobre todos os 69 offsets do editor, o maior
+sendo `OFS_BANDIERE_COLORE2` = 12552648:
+
+| | `World Soccer Winning Eleven 2002/` | `... 2002 (Japan)/` |
+|---|---|---|
+| Forma | arquivo único, 307.187.664 B | 9 tracks, Track 1 = 306.834.864 B |
+| Setores | 130.607 | 130.457 |
+| Origem | CoolROM (tem `readme.html` deles) | — |
+| `.cue` | **quebrado** — aponta para 9 arquivos `(Track N) [SLPM-87056].bin` inexistentes | válido |
+| ECC | íntegro (0/300 setores amostrados zerados) | **degradado (211/300 zerados)** |
+
+Divergências nos 14 MiB, classificadas por posição dentro do setor:
+
+| Região do setor | Bytes divergentes |
+|---|---|
+| ECC (2076..2351) | 14.356 |
+| EDC (2072..2075) | 8 |
+| **Dados (24..2071)** | **3** |
+
+Os 3 bytes de dados estão em `1922552`, `1922553` e `1924018` — no vão entre
+`OFS_NOMI_SQ2` (1881968) e `OFS_BANDIERE_FORMA1` (1929004), ou seja, **fora de
+qualquer região que o editor toca**. São instruções MIPS: em `1924018` o
+`0x1040` (`BEQ`) vira `0x1000` (`BEQ $zero,$zero`, salto incondicional). É o
+padrão de um patch de anti-pirataria. O dump de arquivo único é a versão
+modificada.
+
+Os 352.800 bytes a mais (150 setores, o pregap de 2 s) são **zeros no fim** do
+arquivo — não deslocam nada.
+
+**Qual usar:** `World Soccer Winning Eleven 2002/` (arquivo único), pelo ECC
+íntegro. E aqui está o ponto que importa: o editor **não recalcula EDC/ECC ao
+gravar** (seção 2). Num dump com ECC já zerado esse comportamento fica
+invisível — não há o que corromper. Com ECC íntegro, gravar produz ECC
+inválido de um jeito específico, e o golden test passa a verificar que o port
+reproduz **exatamente** o mesmo ECC inválido que o `ed.exe`. É um teste
+estritamente mais forte.
+
+Antes de usar, corrigir o `.cue` quebrado (uma linha apontando para o `.bin`
+real) ou simplesmente ignorá-lo — o editor abre o `.bin` direto, o `.cue` só
+importa para emulador.
 
 ---
 
