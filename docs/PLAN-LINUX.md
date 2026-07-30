@@ -22,6 +22,9 @@
 >
 > Progresso: Fases 0, 1, 2, 3, 3.5 e **4 concluídas**. Fase 5 em diante ainda
 > **não autorizada** — não iniciar sem pedido explícito.
+>
+> **A Fase 5 tem um pré-requisito de máquina: instalar o Qt6.** Aqui só há
+> Qt 5.15. Detalhe e comando na seção da Fase 5.
 
 ---
 
@@ -131,6 +134,30 @@ comentário para os dois lados continuarem grepáveis.
 ---
 
 ## 3. Ambiente validado
+
+### Dependências do host
+
+Zorin OS 18.1, base Ubuntu noble.
+
+| O quê | Situação | Para quê |
+|---|---|---|
+| GCC, CMake ≥ 3.21 | ✅ | core e testes |
+| libcurl | ✅ 8.5.0 | import do SoFIFA |
+| Python 3 | ✅ | os geradores em `tools/` |
+| Wine (runner soda do Bottles) | ✅ | rodar o `ed.exe`, oráculo dos golden tests |
+| Xvfb no `:99`, `xdotool`, `import` | ✅ | validação visual |
+| Qt 5.15.13 | ✅ | só o `tools/uipreview` da Fase 4 |
+| **Qt6** | ❌ **falta instalar** | **a aplicação — pré-requisito da Fase 5** |
+
+```sh
+sudo apt install qt6-base-dev qt6-base-dev-tools qt6-tools-dev
+```
+
+O `universe` do noble tem Qt **6.4.2**, que serve: o
+`qt_standard_project_setup()` usado pelo `CMakeLists.txt` da raiz existe desde
+o 6.3. Enquanto o Qt6 não estiver instalado, o `find_package(Qt6)` falha, a
+raiz pula `src/app`, e tudo o que existe hoje continua compilando — mas não há
+como começar a Fase 5.
 
 ### Bottles / Wine — Fase 0 **já testada e funcionando**
 
@@ -814,10 +841,33 @@ o que está commitado. Editar um `.ui` à mão, ou mexer no `ed.rc` sem
 regenerar, falha aqui em vez de silenciosamente lá na Fase 5. O `--check`
 também revalida o XML, sem precisar de Qt.
 
-Qt6 ainda **não** está instalado — é pré-requisito da Fase 5, não desta.
+Qt6 ainda **não** está instalado. Não faz falta aqui, mas é
+pré-requisito da Fase 5 — ver o aviso no começo dela.
 
 
 ### Fase 5 — Portar handlers (~3–5 dias)
+
+> ⚠️ **Pré-requisito: instalar o Qt6.** Não está na máquina — só Qt 5.15.13.
+> Sem ele não há nada para compilar nesta fase: o `CMakeLists.txt` da raiz
+> pula `src/app` quando o `find_package(Qt6)` falha.
+>
+> ```sh
+> sudo apt install qt6-base-dev qt6-base-dev-tools qt6-tools-dev
+> ```
+>
+> Zorin OS 18.1 (base Ubuntu noble) tem Qt **6.4.2** no `universe`. Serve: o
+> projeto pede CMake ≥ 3.21 e C++20, e o `qt_standard_project_setup()` que o
+> `CMakeLists.txt` da raiz chama existe desde o 6.3.
+>
+> Conferir depois de instalar:
+>
+> ```sh
+> cmake -B build -DCMAKE_BUILD_TYPE=Debug   # deve parar de dizer "Qt6 GUI not built"
+> ```
+>
+> Até lá o Qt5 cobre o que a Fase 4 precisava — o `tools/uipreview` cai para
+> ele sozinho. Isso vale só para renderizar os `.ui`; **o alvo do port é Qt6**
+> e a Fase 5 não deve ser começada sobre o Qt5.
 
 A maior parte das 8.456 linhas é repetição indexada: `OnCarat1..23`,
 `OnSost1..23`, `OnChangeURL1..23`, `OnKillfocusNum1..23`,
