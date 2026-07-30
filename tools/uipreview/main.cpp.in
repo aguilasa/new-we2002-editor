@@ -1,0 +1,49 @@
+// Render one generated .ui to a PNG, so the Qt form can be put next to a
+// screenshot of ed.exe and compared.
+//
+// Not part of the application. It exists because phase 4's only claim is
+// visual fidelity, and the way to check that claim is to look.
+//
+// QWidget::grab() paints into an off-screen pixmap, so the 1077 px main
+// dialog renders whole even though the Xvfb screen is 960 px wide -- which
+// is more than can be said for the screenshot of ed.exe.
+//
+// The form to render is chosen at compile time: CMake configures this
+// template once per .ui, substituting the uic-generated class name, and
+// builds one executable each.
+
+#include <QApplication>
+#include <QDialog>
+#include <QPixmap>
+
+#include <cstdio>
+
+#include "ui_@FORM_NAME@.h"
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::fprintf(stderr, "uso: %s <saida.png>\n", argv[0]);
+        return 2;
+    }
+
+    QApplication app(argc, argv);
+
+    QDialog dialog;
+    Ui::@FORM_NAME@ form;
+    form.setupUi(&dialog);
+
+    // Let the style resolve before grabbing, but do NOT call adjustSize():
+    // the forms carry absolute geometry transcribed from the .rc, and asking
+    // Qt for a size hint throws that away. setupUi() has already applied the
+    // dialog's own geometry, which is the size that must be compared against
+    // ed.exe.
+    dialog.ensurePolished();
+
+    const QPixmap shot = dialog.grab();
+    if (!shot.save(QString::fromLocal8Bit(argv[1]), "PNG")) {
+        std::fprintf(stderr, "falha ao gravar %s\n", argv[1]);
+        return 1;
+    }
+    std::printf("%s: %dx%d\n", argv[1], shot.width(), shot.height());
+    return 0;
+}

@@ -218,34 +218,38 @@ comparação na seção 3 do [PLAN-LINUX.md](PLAN-LINUX.md).
 
 ## Arquitetura
 
-### Layout do repositório (pós-Fase 2)
+### Layout do repositório (pós-Fase 4)
 
 ```
 src/core/            we2002_core — logica pura. ZERO Qt, ZERO API de plataforma.
   include/we2002/    API publica
-tests/               61 checks, sem framework externo
-tools/               os dois geradores (ver abaixo)
+src/app/ui/          os 6 .ui gerados do ed.rc + controls.json
+tests/               61 checks + golden test + guarda dos .ui
+tools/               geradores e ferramentas de verificacao
 legacy/mfc/          o app MFC original — REFERENCIA, nao compila
 data/                dados lidos em runtime
 docs/                PLAN-LINUX.md
 ```
 
-`src/app/` (a UI Qt) ainda não existe — chega nas Fases 4–5. O `CMakeLists.txt`
-da raiz só adiciona `src/app` se o Qt6 for encontrado **e** o diretório
-existir, então o core e os testes compilam numa máquina com apenas compilador
-e libcurl.
+`src/app/` já tem os formulários mas **ainda não tem código** — o executável Qt
+chega na Fase 5. Não há `src/app/CMakeLists.txt`, e o `CMakeLists.txt` da raiz
+só adiciona `src/app` se o Qt6 for encontrado **e** esse arquivo existir, então
+o core e os testes compilam numa máquina com apenas compilador e libcurl. Qt6
+não está instalado aqui; é pré-requisito da Fase 5.
 
 **Regra dura: `src/core/` não pode incluir Qt nem `windows.h` nem POSIX.** É o
 que permite os golden tests da Fase 3 rodarem headless.
 
 ### Código gerado — não editar à mão
 
-`src/core/Database.cpp`, `Tables.cpp`, `include/we2002/Offsets.hpp` e
-`Tables.hpp` são **gerados**. Para mudá-los, mexa no gerador e reexecute:
+`src/core/Database.cpp`, `Tables.cpp`, `include/we2002/Offsets.hpp`,
+`Tables.hpp` e todo o `src/app/ui/` são **gerados**. Para mudá-los, mexa no
+gerador e reexecute:
 
 ```sh
 python3 tools/extract_legacy_data.py   # 69 offsets + 15 tabelas
 python3 tools/port_database.py          # Load/Save/custo a partir do legacy
+python3 tools/rc2ui.py                  # os 6 .ui + controls.json, do ed.rc
 ```
 
 `port_database.py` extrai `carica_dabin` e `OnWriteCD` verbatim do legacy e
@@ -276,6 +280,46 @@ aplica substituições listadas. Se algo que ele não reconhece sobrar, ele
   `squadra_ml`/`tattica`.
 - `TextCodec` — `kanjitoascii`/`asciitokanji` portados verbatim, como
   `KanjiToAscii`/`AsciiToKanji`.
+
+### Os formulários `.ui`
+
+`src/app/ui/*.ui` sai do `ed.rc` por `tools/rc2ui.py`. Geometria **absoluta**,
+sem layouts Qt: os 434 controles foram posicionados à mão em 2002 e a
+fidelidade é o critério. DLU→px com as base units 6×13 do MS Sans Serif 8pt.
+
+`ctest -R ui_forms` regenera em memória e compara com o commitado — editar um
+`.ui` à mão falha ali.
+
+`src/app/ui/controls.json` guarda o que o `.ui` não expressa: símbolo de
+recurso, keyword `.rc` de origem, estilo Win32 cru e geometria em DLU e px.
+`ES_NUMBER` e `ES_UPPERCASE` são validadores, não propriedades de widget — a
+Fase 5 lê o JSON, não o `.rc`.
+
+Três coisas a saber antes de mexer:
+
+- **`COMBOBOX` no `.rc` guarda a altura do dropdown**, não a do controle. Os
+  39 combos são desenhados com 12 DLU; a altura original fica no manifesto
+  como `dropdown_dlu`. Levar o `.rc` ao pé da letra faz um combo de 104 px
+  engolir o grupo atrás dele.
+- **Nomes de controle continuam sendo os símbolos do `.rc`** (`TXT_NSQUAD1`,
+  `CMD_CARAT1`). Vários são italianos, contrariando a regra da Fase 3.5 — é
+  deliberado: o `.ui` precisa ficar diffável contra `ed.rc`/`resource.h`
+  enquanto os handlers são portados. Renomear é Fase 5.
+- **MS Sans Serif não está instalada**, então o Qt substitui e alguns rótulos
+  apertados cortam ("Position" vira "Positior"). O `ed.exe` sob Wine corta os
+  mesmos, pelo mesmo motivo.
+
+Para conferir visualmente:
+
+```sh
+cmake -B build-uipreview -S tools/uipreview
+cmake --build build-uipreview -j
+DISPLAY=:99 ./build-uipreview/preview_MainDialog /tmp/main.png
+```
+
+`QWidget::grab()` pinta fora da tela, então o diálogo de 1077 px sai inteiro
+mesmo com o `:99` em 960 — a captura do `ed.exe` não consegue isso. O
+`uipreview` usa Qt6 se existir e cai para Qt5.
 
 ### Nomenclatura
 
@@ -314,7 +358,7 @@ e `Player::Encode()`.
 
 `legacy/mfc/` guarda o app MFC inteiro como referência. `edDlg.cpp` (8.456
 linhas) tem a UI, os offsets, a codificação e o estado global misturados.
-`ed.rc` são 6 diálogos e 393 controles, e continua em **ISO-8859-1** (14 × `°`
+`ed.rc` são 6 diálogos e 434 controles, e continua em **ISO-8859-1** (14 × `°`
 em labels) — deliberado: o consumidor dele é o conversor da Fase 4 (que declara
 o encoding) e o `rc.exe` do MSVC, que quebraria com UTF-8 sem BOM.
 
@@ -360,14 +404,14 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 
 ## Estado do repositório
 
-Fases 1 (higiene), 2 (core portável), 3 (golden tests) e 3.5 (nomenclatura)
-concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por
-fase.
+Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura) e
+4 (`.rc` → `.ui`) concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md)
+para o estado por fase.
 
 O port está verificado contra o `ed.exe`: nas imagens European Deluxe e
 japonesa, gravação limpa ou com edição pela GUI, a saída é byte-idêntica à do
-original salvo a faixa de 16 bytes já descrita. A próxima fase é a **4**
-(`.rc` → `.ui`), e ela ainda não foi autorizada.
+original salvo a faixa de 16 bytes já descrita. A próxima fase é a **5**
+(portar os handlers), ela ainda não foi autorizada, e exige instalar o Qt6.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto

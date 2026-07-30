@@ -1,0 +1,8813 @@
+{
+  "source": "legacy/mfc/ed.rc",
+  "generator": "tools/rc2ui.py",
+  "base_units": {
+    "x": 6,
+    "y": 13
+  },
+  "dialogs": {
+    "IDD_ED_DIALOG": {
+      "class": "MainDialog",
+      "caption": "",
+      "dlu": [
+        718,
+        337
+      ],
+      "px": [
+        1077,
+        547
+      ],
+      "controls": [
+        {
+          "object": "LAB_NSQUAD1",
+          "id": "LAB_NSQUAD1",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "1° Name",
+          "style": "",
+          "dlu": [
+            88,
+            32,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            52,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD2",
+          "id": "LAB_NSQUAD2",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "2° Name",
+          "style": "",
+          "dlu": [
+            88,
+            46,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            74,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD3",
+          "id": "LAB_NSQUAD3",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "3° Name",
+          "style": "",
+          "dlu": [
+            88,
+            59,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            95,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD4",
+          "id": "LAB_NSQUAD4",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "4° Name",
+          "style": "",
+          "dlu": [
+            88,
+            72,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            117,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD5",
+          "id": "LAB_NSQUAD5",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "5° Name",
+          "style": "",
+          "dlu": [
+            88,
+            85,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            138,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD6",
+          "id": "LAB_NSQUAD6",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "6° Name",
+          "style": "",
+          "dlu": [
+            88,
+            98,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            159,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD_M",
+          "id": "LAB_NSQUAD_M",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "L. Name",
+          "style": "",
+          "dlu": [
+            88,
+            111,
+            33,
+            8
+          ],
+          "px": [
+            132,
+            180,
+            49,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD_A1",
+          "id": "LAB_NSQUAD_A1",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "1° Abbrev.",
+          "style": "",
+          "dlu": [
+            47,
+            140,
+            53,
+            8
+          ],
+          "px": [
+            70,
+            227,
+            79,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD_A2",
+          "id": "LAB_NSQUAD_A2",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "2° Abbrev.",
+          "style": "",
+          "dlu": [
+            47,
+            153,
+            53,
+            8
+          ],
+          "px": [
+            70,
+            248,
+            79,
+            13
+          ]
+        },
+        {
+          "object": "LAB_BAR_1",
+          "id": "LAB_BAR_1",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "OFFENSE",
+          "style": "",
+          "dlu": [
+            128,
+            177,
+            34,
+            8
+          ],
+          "px": [
+            192,
+            287,
+            51,
+            13
+          ]
+        },
+        {
+          "object": "LAB_BAR_2",
+          "id": "LAB_BAR_2",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "DEFENSE",
+          "style": "",
+          "dlu": [
+            128,
+            189,
+            34,
+            8
+          ],
+          "px": [
+            192,
+            307,
+            51,
+            13
+          ]
+        },
+        {
+          "object": "LAB_BAR_3",
+          "id": "LAB_BAR_3",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "POWER",
+          "style": "",
+          "dlu": [
+            128,
+            202,
+            28,
+            8
+          ],
+          "px": [
+            192,
+            328,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_BAR_4",
+          "id": "LAB_BAR_4",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "SPEED",
+          "style": "",
+          "dlu": [
+            128,
+            215,
+            25,
+            8
+          ],
+          "px": [
+            192,
+            349,
+            37,
+            13
+          ]
+        },
+        {
+          "object": "LAB_BAR_5",
+          "id": "LAB_BAR_5",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "TECNIQUE",
+          "style": "",
+          "dlu": [
+            128,
+            228,
+            38,
+            8
+          ],
+          "px": [
+            192,
+            370,
+            57,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_PUNC",
+          "id": "LAB_KIK_PUNC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "SHORT F.K.",
+          "style": "",
+          "dlu": [
+            15,
+            241,
+            41,
+            8
+          ],
+          "px": [
+            22,
+            391,
+            61,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_PUNL",
+          "id": "LAB_KIK_PUNL",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "LONG F.K.",
+          "style": "",
+          "dlu": [
+            20,
+            255,
+            36,
+            8
+          ],
+          "px": [
+            30,
+            414,
+            54,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_ANGSX",
+          "id": "LAB_KIK_ANGSX",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "L. CORNER",
+          "style": "",
+          "dlu": [
+            16,
+            269,
+            40,
+            8
+          ],
+          "px": [
+            24,
+            437,
+            60,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_ANGDX",
+          "id": "LAB_KIK_ANGDX",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "R. CORNER",
+          "style": "",
+          "dlu": [
+            15,
+            283,
+            41,
+            8
+          ],
+          "px": [
+            22,
+            459,
+            61,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_CAP",
+          "id": "LAB_KIK_CAP",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "CAPTAIN",
+          "style": "",
+          "dlu": [
+            24,
+            310,
+            32,
+            8
+          ],
+          "px": [
+            36,
+            503,
+            48,
+            13
+          ]
+        },
+        {
+          "object": "static_1",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "BAR",
+          "style": "BS_CENTER",
+          "dlu": [
+            124,
+            168,
+            61,
+            73
+          ],
+          "px": [
+            186,
+            273,
+            91,
+            118
+          ]
+        },
+        {
+          "object": "static_2",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "KICKERS-CAPTAIN",
+          "style": "BS_CENTER",
+          "dlu": [
+            7,
+            227,
+            114,
+            103
+          ],
+          "px": [
+            10,
+            368,
+            171,
+            167
+          ]
+        },
+        {
+          "object": "static_3",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "TEAM NAME",
+          "style": "BS_LEFT",
+          "dlu": [
+            7,
+            18,
+            116,
+            208
+          ],
+          "px": [
+            10,
+            29,
+            174,
+            338
+          ]
+        },
+        {
+          "object": "static_4",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "DEFAULT TACTICS",
+          "style": "BS_CENTER",
+          "dlu": [
+            123,
+            23,
+            162,
+            67
+          ],
+          "px": [
+            184,
+            37,
+            243,
+            108
+          ]
+        },
+        {
+          "object": "CAMPO_",
+          "id": "CAMPO_",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "",
+          "style": "BS_CENTER | BS_FLAT",
+          "dlu": [
+            123,
+            86,
+            162,
+            81
+          ],
+          "px": [
+            184,
+            139,
+            243,
+            131
+          ]
+        },
+        {
+          "object": "static_5",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "PLAYERS",
+          "style": "BS_CENTER",
+          "dlu": [
+            292,
+            8,
+            418,
+            326
+          ],
+          "px": [
+            438,
+            13,
+            627,
+            529
+          ]
+        },
+        {
+          "object": "static_6",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "TEAM SEL.",
+          "style": "",
+          "dlu": [
+            99,
+            8,
+            38,
+            8
+          ],
+          "px": [
+            148,
+            13,
+            57,
+            13
+          ]
+        },
+        {
+          "object": "static_7",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "N°",
+          "style": "",
+          "dlu": [
+            294,
+            18,
+            9,
+            8
+          ],
+          "px": [
+            441,
+            29,
+            13,
+            13
+          ]
+        },
+        {
+          "object": "static_8",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Tactic",
+          "style": "",
+          "dlu": [
+            433,
+            18,
+            63,
+            8
+          ],
+          "px": [
+            649,
+            29,
+            94,
+            13
+          ]
+        },
+        {
+          "object": "static_9",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Position",
+          "style": "",
+          "dlu": [
+            433,
+            32,
+            26,
+            8
+          ],
+          "px": [
+            649,
+            52,
+            39,
+            13
+          ]
+        },
+        {
+          "object": "static_10",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "X",
+          "style": "",
+          "dlu": [
+            472,
+            32,
+            8,
+            8
+          ],
+          "px": [
+            708,
+            52,
+            12,
+            13
+          ]
+        },
+        {
+          "object": "static_11",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Y",
+          "style": "",
+          "dlu": [
+            489,
+            32,
+            8,
+            8
+          ],
+          "px": [
+            733,
+            52,
+            12,
+            13
+          ]
+        },
+        {
+          "object": "static_12",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "URL",
+          "style": "",
+          "dlu": [
+            600,
+            18,
+            28,
+            8
+          ],
+          "px": [
+            900,
+            29,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "LAB_ML_NOMEADD",
+          "id": "LAB_ML_NOMEADD",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Add ML Name",
+          "style": "NOT WS_VISIBLE | NOT WS_GROUP | WS_TABSTOP",
+          "dlu": [
+            27,
+            181,
+            46,
+            8
+          ],
+          "px": [
+            40,
+            294,
+            69,
+            13
+          ]
+        },
+        {
+          "object": "LBL_NOMEMLADD1",
+          "id": "LBL_NOMEMLADD1",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "ml",
+          "style": "NOT WS_VISIBLE",
+          "dlu": [
+            104,
+            192,
+            13,
+            8
+          ],
+          "px": [
+            156,
+            312,
+            19,
+            13
+          ]
+        },
+        {
+          "object": "LBL_NOMEMLADD2",
+          "id": "LBL_NOMEMLADD2",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "ml",
+          "style": "NOT WS_VISIBLE",
+          "dlu": [
+            104,
+            207,
+            14,
+            8
+          ],
+          "px": [
+            156,
+            336,
+            21,
+            13
+          ]
+        },
+        {
+          "object": "LAB_KIK_CAP2",
+          "id": "LAB_KIK_CAP2",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "PENALTY",
+          "style": "",
+          "dlu": [
+            22,
+            296,
+            34,
+            8
+          ],
+          "px": [
+            33,
+            481,
+            51,
+            13
+          ]
+        },
+        {
+          "object": "LAB_NSQUAD_A3",
+          "id": "LAB_NSQUAD_A3",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "3° Abbrev.",
+          "style": "",
+          "dlu": [
+            47,
+            167,
+            53,
+            8
+          ],
+          "px": [
+            70,
+            271,
+            79,
+            13
+          ]
+        },
+        {
+          "object": "CMB_NSQUADRE",
+          "id": "CMB_NSQUADRE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            142,
+            7,
+            137,
+            12
+          ],
+          "px": [
+            213,
+            11,
+            205,
+            19
+          ],
+          "dropdown_dlu": 64
+        },
+        {
+          "object": "TXT_NSQUAD1",
+          "id": "TXT_NSQUAD1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            31,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            50,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD2",
+          "id": "TXT_NSQUAD2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            44,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            71,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD3",
+          "id": "TXT_NSQUAD3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            57,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            92,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD4",
+          "id": "TXT_NSQUAD4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            70,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            113,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD5",
+          "id": "TXT_NSQUAD5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            83,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            134,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD6",
+          "id": "TXT_NSQUAD6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            96,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            156,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD_M",
+          "id": "TXT_NSQUAD_M",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            109,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            177,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD_A1",
+          "id": "TXT_NSQUAD_A1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            138,
+            30,
+            12
+          ],
+          "px": [
+            15,
+            224,
+            45,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD_A2",
+          "id": "TXT_NSQUAD_A2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            150,
+            30,
+            12
+          ],
+          "px": [
+            15,
+            243,
+            45,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NSQUAD_A3",
+          "id": "TXT_NSQUAD_A3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            163,
+            30,
+            12
+          ],
+          "px": [
+            15,
+            264,
+            45,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NOMIML1",
+          "id": "TXT_NOMIML1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | NOT WS_VISIBLE",
+          "dlu": [
+            12,
+            189,
+            89,
+            12
+          ],
+          "px": [
+            18,
+            307,
+            133,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NOMIML2",
+          "id": "TXT_NOMIML2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | NOT WS_VISIBLE",
+          "dlu": [
+            12,
+            205,
+            89,
+            12
+          ],
+          "px": [
+            18,
+            333,
+            133,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAR_OFF",
+          "id": "TXT_BAR_OFF",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            174,
+            13,
+            12
+          ],
+          "px": [
+            253,
+            282,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAR_DEF",
+          "id": "TXT_BAR_DEF",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            187,
+            13,
+            12
+          ],
+          "px": [
+            253,
+            303,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAR_POW",
+          "id": "TXT_BAR_POW",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            200,
+            13,
+            12
+          ],
+          "px": [
+            253,
+            325,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAR_SPE",
+          "id": "TXT_BAR_SPE",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            213,
+            13,
+            12
+          ],
+          "px": [
+            253,
+            346,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAR_TEC",
+          "id": "TXT_BAR_TEC",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            226,
+            13,
+            12
+          ],
+          "px": [
+            253,
+            367,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM1",
+          "id": "TXT_NUM1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            30,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            48,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM2",
+          "id": "TXT_NUM2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            43,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            69,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM3",
+          "id": "TXT_NUM3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            56,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            91,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM4",
+          "id": "TXT_NUM4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            69,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            112,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM5",
+          "id": "TXT_NUM5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            82,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            133,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM6",
+          "id": "TXT_NUM6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            95,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            154,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM7",
+          "id": "TXT_NUM7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            107,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            173,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM8",
+          "id": "TXT_NUM8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            120,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            195,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM9",
+          "id": "TXT_NUM9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            133,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            216,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM10",
+          "id": "TXT_NUM10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            146,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            237,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM11",
+          "id": "TXT_NUM11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            294,
+            159,
+            13,
+            12
+          ],
+          "px": [
+            441,
+            258,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM12",
+          "id": "TXT_NUM12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            175,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            284,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM13",
+          "id": "TXT_NUM13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            188,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            305,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM14",
+          "id": "TXT_NUM14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            201,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            326,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM15",
+          "id": "TXT_NUM15",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            214,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            347,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM16",
+          "id": "TXT_NUM16",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            227,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            368,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM17",
+          "id": "TXT_NUM17",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            240,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            390,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM18",
+          "id": "TXT_NUM18",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            253,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            411,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM19",
+          "id": "TXT_NUM19",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            266,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            432,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM20",
+          "id": "TXT_NUM20",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            279,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            453,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM21",
+          "id": "TXT_NUM21",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            291,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            472,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM22",
+          "id": "TXT_NUM22",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            304,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            494,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_NUM23",
+          "id": "TXT_NUM23",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            303,
+            316,
+            13,
+            12
+          ],
+          "px": [
+            454,
+            513,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATX2",
+          "id": "TXT_TATX2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            43,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            69,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY2",
+          "id": "TXT_TATY2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            43,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            69,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT2",
+          "id": "CMB_TAT2",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            43,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            69,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX3",
+          "id": "TXT_TATX3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            56,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            91,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY3",
+          "id": "TXT_TATY3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            56,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            91,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT3",
+          "id": "CMB_TAT3",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            56,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            91,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TXT_TATX4",
+          "id": "TXT_TATX4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            69,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            112,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY4",
+          "id": "TXT_TATY4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            69,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            112,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT4",
+          "id": "CMB_TAT4",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            68,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            110,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX5",
+          "id": "TXT_TATX5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            82,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            133,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY5",
+          "id": "TXT_TATY5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            82,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            133,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT5",
+          "id": "CMB_TAT5",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            81,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            131,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TXT_TATX6",
+          "id": "TXT_TATX6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            95,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            154,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY6",
+          "id": "TXT_TATY6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            95,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            154,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT6",
+          "id": "CMB_TAT6",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            94,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            152,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX7",
+          "id": "TXT_TATX7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            107,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            173,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY7",
+          "id": "TXT_TATY7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            107,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            173,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT7",
+          "id": "CMB_TAT7",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            107,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            173,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX8",
+          "id": "TXT_TATX8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            120,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            195,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY8",
+          "id": "TXT_TATY8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            120,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            195,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT8",
+          "id": "CMB_TAT8",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            120,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            195,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX9",
+          "id": "TXT_TATX9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            133,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            216,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY9",
+          "id": "TXT_TATY9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            133,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            216,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT9",
+          "id": "CMB_TAT9",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            133,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            216,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TXT_TATX10",
+          "id": "TXT_TATX10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            146,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            237,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY10",
+          "id": "TXT_TATY10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            146,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            237,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT10",
+          "id": "CMB_TAT10",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            146,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            237,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TXT_TATX11",
+          "id": "TXT_TATX11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            468,
+            159,
+            13,
+            12
+          ],
+          "px": [
+            702,
+            258,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TXT_TATY11",
+          "id": "TXT_TATY11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            483,
+            159,
+            17,
+            12
+          ],
+          "px": [
+            724,
+            258,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "CMB_TAT11",
+          "id": "CMB_TAT11",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            428,
+            159,
+            38,
+            12
+          ],
+          "px": [
+            642,
+            258,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "CMD_CARAT1",
+          "id": "CMD_CARAT1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            32,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            52,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT2",
+          "id": "CMD_CARAT2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            45,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            73,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT3",
+          "id": "CMD_CARAT3",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            58,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            94,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT4",
+          "id": "CMD_CARAT4",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            71,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            115,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT5",
+          "id": "CMD_CARAT5",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            84,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            136,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT6",
+          "id": "CMD_CARAT6",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            97,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            157,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT7",
+          "id": "CMD_CARAT7",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            110,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            178,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT8",
+          "id": "CMD_CARAT8",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            123,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            199,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT9",
+          "id": "CMD_CARAT9",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            136,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            221,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT10",
+          "id": "CMD_CARAT10",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            149,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            242,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT11",
+          "id": "CMD_CARAT11",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            382,
+            161,
+            20,
+            9
+          ],
+          "px": [
+            573,
+            261,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT12",
+          "id": "CMD_CARAT12",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            175,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            284,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT13",
+          "id": "CMD_CARAT13",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            188,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            305,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT14",
+          "id": "CMD_CARAT14",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            201,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            326,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT15",
+          "id": "CMD_CARAT15",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            214,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            347,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT16",
+          "id": "CMD_CARAT16",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            227,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            368,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT17",
+          "id": "CMD_CARAT17",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            240,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            390,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT18",
+          "id": "CMD_CARAT18",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            253,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            411,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT19",
+          "id": "CMD_CARAT19",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            266,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            432,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT20",
+          "id": "CMD_CARAT20",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            279,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            453,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT21",
+          "id": "CMD_CARAT21",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            291,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            472,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT22",
+          "id": "CMD_CARAT22",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            304,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            494,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_CARAT23",
+          "id": "CMD_CARAT23",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "skill",
+          "style": "",
+          "dlu": [
+            389,
+            316,
+            20,
+            9
+          ],
+          "px": [
+            583,
+            513,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST1",
+          "id": "CMD_SOST1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            32,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            52,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST2",
+          "id": "CMD_SOST2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            45,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            73,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST3",
+          "id": "CMD_SOST3",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            58,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            94,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST4",
+          "id": "CMD_SOST4",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            71,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            115,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST5",
+          "id": "CMD_SOST5",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            84,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            136,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST6",
+          "id": "CMD_SOST6",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            97,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            157,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST7",
+          "id": "CMD_SOST7",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            110,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            178,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST8",
+          "id": "CMD_SOST8",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            123,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            199,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST9",
+          "id": "CMD_SOST9",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            136,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            221,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST10",
+          "id": "CMD_SOST10",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            149,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            242,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST11",
+          "id": "CMD_SOST11",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            405,
+            161,
+            20,
+            9
+          ],
+          "px": [
+            607,
+            261,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST12",
+          "id": "CMD_SOST12",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            175,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            284,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST13",
+          "id": "CMD_SOST13",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            188,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            305,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST14",
+          "id": "CMD_SOST14",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            201,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            326,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST15",
+          "id": "CMD_SOST15",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            214,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            347,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST16",
+          "id": "CMD_SOST16",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            227,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            368,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST17",
+          "id": "CMD_SOST17",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            240,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            390,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST18",
+          "id": "CMD_SOST18",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            253,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            411,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST19",
+          "id": "CMD_SOST19",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            266,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            432,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST20",
+          "id": "CMD_SOST20",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            279,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            453,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST21",
+          "id": "CMD_SOST21",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            291,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            472,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST22",
+          "id": "CMD_SOST22",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            304,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            494,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_SOST23",
+          "id": "CMD_SOST23",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "subs.",
+          "style": "",
+          "dlu": [
+            413,
+            316,
+            20,
+            9
+          ],
+          "px": [
+            619,
+            513,
+            30,
+            14
+          ]
+        },
+        {
+          "object": "CMD_TACT1",
+          "id": "CMD_TACT1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-5-1 A",
+          "style": "",
+          "dlu": [
+            131,
+            35,
+            34,
+            10
+          ],
+          "px": [
+            196,
+            56,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT2",
+          "id": "CMD_TACT2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-5-1 B",
+          "style": "",
+          "dlu": [
+            131,
+            48,
+            34,
+            10
+          ],
+          "px": [
+            196,
+            78,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT3",
+          "id": "CMD_TACT3",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-4-2 A",
+          "style": "",
+          "dlu": [
+            131,
+            62,
+            34,
+            10
+          ],
+          "px": [
+            196,
+            100,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT4",
+          "id": "CMD_TACT4",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-4-2 B",
+          "style": "",
+          "dlu": [
+            131,
+            75,
+            34,
+            10
+          ],
+          "px": [
+            196,
+            121,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT5",
+          "id": "CMD_TACT5",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-3-3 A",
+          "style": "",
+          "dlu": [
+            169,
+            35,
+            34,
+            10
+          ],
+          "px": [
+            253,
+            56,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT6",
+          "id": "CMD_TACT6",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "4-3-3 B",
+          "style": "",
+          "dlu": [
+            169,
+            48,
+            34,
+            10
+          ],
+          "px": [
+            253,
+            78,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT7",
+          "id": "CMD_TACT7",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-6-1 A",
+          "style": "",
+          "dlu": [
+            169,
+            62,
+            34,
+            10
+          ],
+          "px": [
+            253,
+            100,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT8",
+          "id": "CMD_TACT8",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-6-1 B",
+          "style": "",
+          "dlu": [
+            169,
+            75,
+            34,
+            10
+          ],
+          "px": [
+            253,
+            121,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT9",
+          "id": "CMD_TACT9",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-5-2 A",
+          "style": "",
+          "dlu": [
+            208,
+            35,
+            34,
+            10
+          ],
+          "px": [
+            312,
+            56,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT10",
+          "id": "CMD_TACT10",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-5-2 B",
+          "style": "",
+          "dlu": [
+            208,
+            48,
+            34,
+            10
+          ],
+          "px": [
+            312,
+            78,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT11",
+          "id": "CMD_TACT11",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-4-3 A",
+          "style": "",
+          "dlu": [
+            208,
+            62,
+            34,
+            10
+          ],
+          "px": [
+            312,
+            100,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT12",
+          "id": "CMD_TACT12",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "3-4-3 B",
+          "style": "",
+          "dlu": [
+            208,
+            75,
+            34,
+            10
+          ],
+          "px": [
+            312,
+            121,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT13",
+          "id": "CMD_TACT13",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "5-4-1 A",
+          "style": "",
+          "dlu": [
+            246,
+            35,
+            34,
+            10
+          ],
+          "px": [
+            369,
+            56,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT14",
+          "id": "CMD_TACT14",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "5-4-1 B",
+          "style": "",
+          "dlu": [
+            246,
+            48,
+            34,
+            10
+          ],
+          "px": [
+            369,
+            78,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT15",
+          "id": "CMD_TACT15",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "5-3-2 A",
+          "style": "",
+          "dlu": [
+            246,
+            62,
+            34,
+            10
+          ],
+          "px": [
+            369,
+            100,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_TACT16",
+          "id": "CMD_TACT16",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "5-3-2 B",
+          "style": "",
+          "dlu": [
+            246,
+            75,
+            34,
+            10
+          ],
+          "px": [
+            369,
+            121,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT1",
+          "id": "CMD_VT1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            149,
+            111,
+            24,
+            10
+          ],
+          "px": [
+            223,
+            180,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT2",
+          "id": "CMD_VT2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "LIB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            134,
+            131,
+            24,
+            10
+          ],
+          "px": [
+            201,
+            212,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT3",
+          "id": "CMD_VT3",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "SB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            164,
+            95,
+            24,
+            10
+          ],
+          "px": [
+            246,
+            154,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT4",
+          "id": "CMD_VT4",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            152,
+            145,
+            24,
+            10
+          ],
+          "px": [
+            228,
+            235,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT5",
+          "id": "CMD_VT5",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "DH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            190,
+            141,
+            24,
+            10
+          ],
+          "px": [
+            285,
+            229,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT6",
+          "id": "CMD_VT6",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "DH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            177,
+            126,
+            24,
+            10
+          ],
+          "px": [
+            265,
+            204,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT7",
+          "id": "CMD_VT7",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "WG",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            219,
+            154,
+            24,
+            10
+          ],
+          "px": [
+            328,
+            250,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT8",
+          "id": "CMD_VT8",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "OH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            203,
+            110,
+            24,
+            10
+          ],
+          "px": [
+            304,
+            178,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT9",
+          "id": "CMD_VT9",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CF",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            233,
+            99,
+            24,
+            10
+          ],
+          "px": [
+            349,
+            160,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_VT10",
+          "id": "CMD_VT10",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CF",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            245,
+            126,
+            24,
+            10
+          ],
+          "px": [
+            367,
+            204,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "CMD_COPIA_NOMISQUADRA",
+          "id": "CMD_COPIA_NOMISQUADRA",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "copy",
+          "style": "NOT WS_TABSTOP WS_EX_STATICEDGE",
+          "dlu": [
+            75,
+            17,
+            34,
+            10
+          ],
+          "px": [
+            112,
+            27,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "TXT_GIOC1",
+          "id": "TXT_GIOC1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            30,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            48,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC2",
+          "id": "TXT_GIOC2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            43,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            69,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC3",
+          "id": "TXT_GIOC3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            56,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            91,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC4",
+          "id": "TXT_GIOC4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            69,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            112,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC5",
+          "id": "TXT_GIOC5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            81,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            131,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC6",
+          "id": "TXT_GIOC6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            94,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            152,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC7",
+          "id": "TXT_GIOC7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            107,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            173,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC8",
+          "id": "TXT_GIOC8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            120,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            195,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC9",
+          "id": "TXT_GIOC9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            133,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            216,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC10",
+          "id": "TXT_GIOC10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            146,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            237,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC11",
+          "id": "TXT_GIOC11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            312,
+            159,
+            66,
+            12
+          ],
+          "px": [
+            468,
+            258,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC12",
+          "id": "TXT_GIOC12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            175,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            284,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC13",
+          "id": "TXT_GIOC13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            188,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            305,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC14",
+          "id": "TXT_GIOC14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            201,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            326,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC15",
+          "id": "TXT_GIOC15",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            214,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            347,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC16",
+          "id": "TXT_GIOC16",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            227,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            368,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC17",
+          "id": "TXT_GIOC17",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            240,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            390,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC18",
+          "id": "TXT_GIOC18",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            253,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            411,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC19",
+          "id": "TXT_GIOC19",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            266,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            432,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC20",
+          "id": "TXT_GIOC20",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            279,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            453,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC21",
+          "id": "TXT_GIOC21",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            291,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            472,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC22",
+          "id": "TXT_GIOC22",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            304,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            494,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "TXT_GIOC23",
+          "id": "TXT_GIOC23",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL | ES_READONLY",
+          "dlu": [
+            318,
+            316,
+            66,
+            12
+          ],
+          "px": [
+            477,
+            513,
+            99,
+            19
+          ]
+        },
+        {
+          "object": "CMB_KIK_PUNL",
+          "id": "CMB_KIK_PUNL",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            241,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            391,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "CMB_KIK_PUNC",
+          "id": "CMB_KIK_PUNC",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            255,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            414,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "CMB_KIK_ANGSX",
+          "id": "CMB_KIK_ANGSX",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            269,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            437,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "CMB_KIK_ANGDX",
+          "id": "CMB_KIK_ANGDX",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            283,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            459,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "CMB_KIK_RIG",
+          "id": "CMB_KIK_RIG",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            296,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            481,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "CMB_KIK_CAP",
+          "id": "CMB_KIK_CAP",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            60,
+            310,
+            57,
+            12
+          ],
+          "px": [
+            90,
+            503,
+            85,
+            19
+          ],
+          "dropdown_dlu": 51
+        },
+        {
+          "object": "LAB_NSQUADK",
+          "id": "LAB_NSQUADK",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "K. Name",
+          "style": "",
+          "dlu": [
+            88,
+            125,
+            28,
+            8
+          ],
+          "px": [
+            132,
+            203,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "TXT_NSQUADK",
+          "id": "TXT_NSQUADK",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            10,
+            123,
+            76,
+            12
+          ],
+          "px": [
+            15,
+            199,
+            114,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTGRAF",
+          "id": "IDC_BUTTGRAF",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Flag - Shirt preview",
+          "style": "",
+          "dlu": [
+            190,
+            173,
+            100,
+            18
+          ],
+          "px": [
+            285,
+            281,
+            150,
+            29
+          ]
+        },
+        {
+          "object": "CMD_NUMDEF",
+          "id": "CMD_NUMDEF",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "pl. n° = team n°",
+          "style": "",
+          "dlu": [
+            639,
+            178,
+            62,
+            15
+          ],
+          "px": [
+            958,
+            289,
+            93,
+            24
+          ]
+        },
+        {
+          "object": "CMD_CALCCOSTI",
+          "id": "CMD_CALCCOSTI",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "upd. player cost",
+          "style": "",
+          "dlu": [
+            639,
+            195,
+            62,
+            15
+          ],
+          "px": [
+            958,
+            316,
+            93,
+            24
+          ]
+        },
+        {
+          "object": "CMB_RELOAD",
+          "id": "CMB_RELOAD",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Reload from CD image",
+          "style": "",
+          "dlu": [
+            145,
+            295,
+            130,
+            15
+          ],
+          "px": [
+            217,
+            479,
+            195,
+            24
+          ]
+        },
+        {
+          "object": "CMB_WRITE",
+          "id": "CMB_WRITE",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Write into CD image",
+          "style": "",
+          "dlu": [
+            145,
+            312,
+            130,
+            18
+          ],
+          "px": [
+            217,
+            507,
+            195,
+            29
+          ]
+        },
+        {
+          "object": "CMD_CALCFORZA2",
+          "id": "CMD_CALCFORZA2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "sort reserve",
+          "style": "NOT WS_VISIBLE",
+          "dlu": [
+            439,
+            243,
+            72,
+            15
+          ],
+          "px": [
+            658,
+            394,
+            108,
+            24
+          ]
+        },
+        {
+          "object": "CMD_TATT_PREDEF",
+          "id": "CMD_TATT_PREDEF",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "modify",
+          "style": "NOT WS_TABSTOP WS_EX_STATICEDGE",
+          "dlu": [
+            251,
+            23,
+            34,
+            10
+          ],
+          "px": [
+            376,
+            37,
+            51,
+            16
+          ]
+        },
+        {
+          "object": "CMB_IMPFIFAWEB",
+          "id": "CMB_IMPFIFAWEB",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import SOFIFA db from web",
+          "style": "",
+          "dlu": [
+            145,
+            245,
+            130,
+            15
+          ],
+          "px": [
+            217,
+            398,
+            195,
+            24
+          ]
+        },
+        {
+          "object": "CMB_IMPFIFATXT",
+          "id": "CMB_IMPFIFATXT",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import SOFIFA db from local",
+          "style": "",
+          "dlu": [
+            145,
+            262,
+            130,
+            15
+          ],
+          "px": [
+            217,
+            425,
+            195,
+            24
+          ]
+        },
+        {
+          "object": "CMB_EDITALLTXT",
+          "id": "CMB_EDITALLTXT",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Edit all players from FIFA",
+          "style": "",
+          "dlu": [
+            145,
+            279,
+            110,
+            15
+          ],
+          "px": [
+            217,
+            453,
+            165,
+            24
+          ]
+        },
+        {
+          "object": "CMB_SHOWEDITOPT",
+          "id": "CMB_SHOWEDITOPT",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "opt.",
+          "style": "",
+          "dlu": [
+            260,
+            279,
+            15,
+            15
+          ],
+          "px": [
+            390,
+            453,
+            22,
+            24
+          ]
+        },
+        {
+          "object": "CMB_EDITALLLOOK",
+          "id": "CMB_EDITALLLOOK",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "reset def. look",
+          "style": "",
+          "dlu": [
+            639,
+            212,
+            62,
+            15
+          ],
+          "px": [
+            958,
+            344,
+            93,
+            24
+          ]
+        },
+        {
+          "object": "CMB_EDITALLBARS",
+          "id": "CMB_EDITALLBARS",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Update all team bars",
+          "style": "",
+          "dlu": [
+            190,
+            195,
+            100,
+            18
+          ],
+          "px": [
+            285,
+            316,
+            150,
+            29
+          ]
+        },
+        {
+          "object": "TXT_URL1",
+          "id": "TXT_URL1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            30,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            48,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL2",
+          "id": "TXT_URL2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            43,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            69,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL3",
+          "id": "TXT_URL3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            56,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            91,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL4",
+          "id": "TXT_URL4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            69,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            112,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL5",
+          "id": "TXT_URL5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            82,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            133,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL6",
+          "id": "TXT_URL6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            95,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            154,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL7",
+          "id": "TXT_URL7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            108,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            175,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL8",
+          "id": "TXT_URL8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            121,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            196,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL9",
+          "id": "TXT_URL9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            134,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            217,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL10",
+          "id": "TXT_URL10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            147,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            238,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL11",
+          "id": "TXT_URL11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            504,
+            160,
+            200,
+            12
+          ],
+          "px": [
+            756,
+            260,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL12",
+          "id": "TXT_URL12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            175,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            284,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL13",
+          "id": "TXT_URL13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            188,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            305,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL14",
+          "id": "TXT_URL14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            201,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            326,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL15",
+          "id": "TXT_URL15",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            214,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            347,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL16",
+          "id": "TXT_URL16",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            227,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            368,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL17",
+          "id": "TXT_URL17",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            240,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            390,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL18",
+          "id": "TXT_URL18",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            253,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            411,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL19",
+          "id": "TXT_URL19",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            266,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            432,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL20",
+          "id": "TXT_URL20",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            279,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            453,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL21",
+          "id": "TXT_URL21",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            292,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            474,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL22",
+          "id": "TXT_URL22",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            305,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            495,
+            300,
+            19
+          ]
+        },
+        {
+          "object": "TXT_URL23",
+          "id": "TXT_URL23",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            436,
+            318,
+            200,
+            12
+          ],
+          "px": [
+            654,
+            516,
+            300,
+            19
+          ]
+        }
+      ]
+    },
+    "DLG_SELECT_GIOC": {
+      "class": "PlayerSelectDialog",
+      "caption": " Player's selection",
+      "dlu": [
+        260,
+        249
+      ],
+      "px": [
+        390,
+        404
+      ],
+      "controls": [
+        {
+          "object": "static_1",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Team",
+          "style": "",
+          "dlu": [
+            57,
+            15,
+            19,
+            8
+          ],
+          "px": [
+            85,
+            24,
+            28,
+            13
+          ]
+        },
+        {
+          "object": "static_2",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Player",
+          "style": "",
+          "dlu": [
+            188,
+            15,
+            20,
+            8
+          ],
+          "px": [
+            282,
+            24,
+            30,
+            13
+          ]
+        },
+        {
+          "object": "LIST_SQUADRE",
+          "id": "LIST_SQUADRE",
+          "rc": "LISTBOX",
+          "qt": "QListWidget",
+          "text": null,
+          "style": "LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            17,
+            26,
+            127,
+            158
+          ],
+          "px": [
+            25,
+            42,
+            190,
+            256
+          ]
+        },
+        {
+          "object": "LIST_GIOCATORI",
+          "id": "LIST_GIOCATORI",
+          "rc": "LISTBOX",
+          "qt": "QListWidget",
+          "text": null,
+          "style": "LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            154,
+            26,
+            89,
+            158
+          ],
+          "px": [
+            231,
+            42,
+            133,
+            256
+          ]
+        },
+        {
+          "object": "CHK_SC",
+          "id": "CHK_SC",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "incomplete substitution",
+          "style": "BS_AUTOCHECKBOX | WS_TABSTOP",
+          "dlu": [
+            19,
+            197,
+            93,
+            10
+          ],
+          "px": [
+            28,
+            320,
+            139,
+            16
+          ]
+        },
+        {
+          "object": "CHK_ML",
+          "id": "CHK_ML",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "link",
+          "style": "BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP",
+          "dlu": [
+            127,
+            197,
+            89,
+            10
+          ],
+          "px": [
+            190,
+            320,
+            133,
+            16
+          ]
+        },
+        {
+          "object": "LBL_NAZML",
+          "id": "LBL_NAZML",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "",
+          "style": "",
+          "dlu": [
+            101,
+            7,
+            152,
+            8
+          ],
+          "px": [
+            151,
+            11,
+            228,
+            13
+          ]
+        },
+        {
+          "object": "LBL_LK",
+          "id": "LBL_LK",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "nazionality",
+          "style": "NOT WS_VISIBLE",
+          "dlu": [
+            97,
+            212,
+            34,
+            8
+          ],
+          "px": [
+            145,
+            344,
+            51,
+            13
+          ]
+        },
+        {
+          "object": "CHK_LK_DEF",
+          "id": "CHK_LK_DEF",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "default",
+          "style": "BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP",
+          "dlu": [
+            29,
+            224,
+            44,
+            10
+          ],
+          "px": [
+            43,
+            364,
+            66,
+            16
+          ]
+        },
+        {
+          "object": "CHK_LK_NDEF",
+          "id": "CHK_LK_NDEF",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "change nat.",
+          "style": "BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP",
+          "dlu": [
+            87,
+            224,
+            54,
+            10
+          ],
+          "px": [
+            130,
+            364,
+            81,
+            16
+          ]
+        },
+        {
+          "object": "CMB_NAZIONALITA",
+          "id": "CMB_NAZIONALITA",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            143,
+            224,
+            110,
+            12
+          ],
+          "px": [
+            214,
+            364,
+            165,
+            19
+          ],
+          "dropdown_dlu": 64
+        },
+        {
+          "object": "IDC_BUTTON1",
+          "id": "IDC_BUTTON1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "ok",
+          "style": "",
+          "dlu": [
+            176,
+            213,
+            22,
+            9
+          ],
+          "px": [
+            264,
+            346,
+            33,
+            14
+          ]
+        }
+      ]
+    },
+    "DLG_CARATT": {
+      "class": "PlayerSkillsDialog",
+      "caption": " Player's skill",
+      "dlu": [
+        329,
+        199
+      ],
+      "px": [
+        493,
+        323
+      ],
+      "controls": [
+        {
+          "object": "static_1",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Name",
+          "style": "",
+          "dlu": [
+            30,
+            15,
+            20,
+            8
+          ],
+          "px": [
+            45,
+            24,
+            30,
+            13
+          ]
+        },
+        {
+          "object": "static_2",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Position",
+          "style": "",
+          "dlu": [
+            24,
+            30,
+            26,
+            8
+          ],
+          "px": [
+            36,
+            48,
+            39,
+            13
+          ]
+        },
+        {
+          "object": "static_3",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Skin colour",
+          "style": "",
+          "dlu": [
+            14,
+            44,
+            36,
+            8
+          ],
+          "px": [
+            21,
+            71,
+            54,
+            13
+          ]
+        },
+        {
+          "object": "static_4",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Hair style",
+          "style": "",
+          "dlu": [
+            20,
+            58,
+            30,
+            8
+          ],
+          "px": [
+            30,
+            94,
+            45,
+            13
+          ]
+        },
+        {
+          "object": "static_5",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "F.hair style",
+          "style": "",
+          "dlu": [
+            16,
+            87,
+            34,
+            8
+          ],
+          "px": [
+            24,
+            141,
+            51,
+            13
+          ]
+        },
+        {
+          "object": "static_6",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Hair colour",
+          "style": "",
+          "dlu": [
+            15,
+            72,
+            35,
+            8
+          ],
+          "px": [
+            22,
+            117,
+            52,
+            13
+          ]
+        },
+        {
+          "object": "static_7",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "F.hair colour",
+          "style": "",
+          "dlu": [
+            10,
+            101,
+            40,
+            8
+          ],
+          "px": [
+            15,
+            164,
+            60,
+            13
+          ]
+        },
+        {
+          "object": "static_8",
+          "id": "IDC_STATIC",
+          "rc": "CTEXT",
+          "qt": "QLabel",
+          "text": "Height",
+          "style": "",
+          "dlu": [
+            28,
+            131,
+            22,
+            8
+          ],
+          "px": [
+            42,
+            212,
+            33,
+            13
+          ]
+        },
+        {
+          "object": "static_9",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Body",
+          "style": "",
+          "dlu": [
+            33,
+            114,
+            17,
+            8
+          ],
+          "px": [
+            49,
+            185,
+            25,
+            13
+          ]
+        },
+        {
+          "object": "static_10",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Age",
+          "style": "",
+          "dlu": [
+            36,
+            145,
+            14,
+            8
+          ],
+          "px": [
+            54,
+            235,
+            21,
+            13
+          ]
+        },
+        {
+          "object": "static_11",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Shoes",
+          "style": "",
+          "dlu": [
+            29,
+            161,
+            21,
+            8
+          ],
+          "px": [
+            43,
+            261,
+            31,
+            13
+          ]
+        },
+        {
+          "object": "static_12",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Foot",
+          "style": "",
+          "dlu": [
+            31,
+            176,
+            19,
+            8
+          ],
+          "px": [
+            46,
+            286,
+            28,
+            13
+          ]
+        },
+        {
+          "object": "static_13",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Offense",
+          "style": "",
+          "dlu": [
+            144,
+            15,
+            26,
+            8
+          ],
+          "px": [
+            216,
+            24,
+            39,
+            13
+          ]
+        },
+        {
+          "object": "static_14",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Defense",
+          "style": "",
+          "dlu": [
+            142,
+            31,
+            28,
+            8
+          ],
+          "px": [
+            213,
+            50,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "static_15",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Balance",
+          "style": "",
+          "dlu": [
+            143,
+            48,
+            27,
+            8
+          ],
+          "px": [
+            214,
+            78,
+            40,
+            13
+          ]
+        },
+        {
+          "object": "static_16",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Stamina",
+          "style": "",
+          "dlu": [
+            144,
+            63,
+            26,
+            8
+          ],
+          "px": [
+            216,
+            102,
+            39,
+            13
+          ]
+        },
+        {
+          "object": "static_17",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Speed",
+          "style": "",
+          "dlu": [
+            148,
+            79,
+            22,
+            8
+          ],
+          "px": [
+            222,
+            128,
+            33,
+            13
+          ]
+        },
+        {
+          "object": "static_18",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Acceleration",
+          "style": "",
+          "dlu": [
+            128,
+            95,
+            42,
+            8
+          ],
+          "px": [
+            192,
+            154,
+            63,
+            13
+          ]
+        },
+        {
+          "object": "static_19",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Pass",
+          "style": "",
+          "dlu": [
+            154,
+            111,
+            16,
+            8
+          ],
+          "px": [
+            231,
+            180,
+            24,
+            13
+          ]
+        },
+        {
+          "object": "static_20",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Shoot power",
+          "style": "",
+          "dlu": [
+            129,
+            128,
+            41,
+            8
+          ],
+          "px": [
+            193,
+            208,
+            61,
+            13
+          ]
+        },
+        {
+          "object": "static_21",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Shoot accuracy ",
+          "style": "",
+          "dlu": [
+            113,
+            142,
+            57,
+            8
+          ],
+          "px": [
+            169,
+            230,
+            85,
+            13
+          ]
+        },
+        {
+          "object": "static_22",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Jump",
+          "style": "",
+          "dlu": [
+            152,
+            158,
+            18,
+            8
+          ],
+          "px": [
+            228,
+            256,
+            27,
+            13
+          ]
+        },
+        {
+          "object": "static_23",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Header accuracy",
+          "style": "",
+          "dlu": [
+            106,
+            173,
+            64,
+            8
+          ],
+          "px": [
+            159,
+            281,
+            96,
+            13
+          ]
+        },
+        {
+          "object": "static_24",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Tecnique",
+          "style": "",
+          "dlu": [
+            236,
+            17,
+            31,
+            8
+          ],
+          "px": [
+            354,
+            27,
+            46,
+            13
+          ]
+        },
+        {
+          "object": "static_25",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Dribbling",
+          "style": "",
+          "dlu": [
+            239,
+            33,
+            28,
+            8
+          ],
+          "px": [
+            358,
+            53,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "static_26",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Curve",
+          "style": "",
+          "dlu": [
+            247,
+            47,
+            20,
+            8
+          ],
+          "px": [
+            370,
+            76,
+            30,
+            13
+          ]
+        },
+        {
+          "object": "static_27",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Aggressive",
+          "style": "",
+          "dlu": [
+            231,
+            62,
+            36,
+            8
+          ],
+          "px": [
+            346,
+            100,
+            54,
+            13
+          ]
+        },
+        {
+          "object": "static_28",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Response",
+          "style": "",
+          "dlu": [
+            234,
+            78,
+            33,
+            8
+          ],
+          "px": [
+            351,
+            126,
+            49,
+            13
+          ]
+        },
+        {
+          "object": "static_29",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Outside",
+          "style": "",
+          "dlu": [
+            242,
+            93,
+            25,
+            8
+          ],
+          "px": [
+            363,
+            151,
+            37,
+            13
+          ]
+        },
+        {
+          "object": "static_30",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "ML price",
+          "style": "",
+          "dlu": [
+            239,
+            118,
+            28,
+            8
+          ],
+          "px": [
+            358,
+            191,
+            42,
+            13
+          ]
+        },
+        {
+          "object": "TXT_GNOME",
+          "id": "TXT_GNOME",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "",
+          "dlu": [
+            55,
+            13,
+            62,
+            13
+          ],
+          "px": [
+            82,
+            21,
+            93,
+            21
+          ]
+        },
+        {
+          "object": "CMB_GRUOLO",
+          "id": "CMB_GRUOLO",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            28,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            45,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GPELLE",
+          "id": "CMB_GPELLE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            42,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            68,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GCAPSTILE",
+          "id": "CMB_GCAPSTILE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            56,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            91,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GCAPCOL",
+          "id": "CMB_GCAPCOL",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            70,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            113,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GBARBASTILE",
+          "id": "CMB_GBARBASTILE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            84,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            136,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GBARBACOL",
+          "id": "CMB_GBARBACOL",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            98,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            159,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GCORPO",
+          "id": "CMB_GCORPO",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            112,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            182,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "TXT_ALTEZZA",
+          "id": "TXT_ALTEZZA",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            55,
+            129,
+            24,
+            13
+          ],
+          "px": [
+            82,
+            209,
+            36,
+            21
+          ]
+        },
+        {
+          "object": "TXT_ETA",
+          "id": "TXT_ETA",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            55,
+            144,
+            24,
+            13
+          ],
+          "px": [
+            82,
+            234,
+            36,
+            21
+          ]
+        },
+        {
+          "object": "CMB_GSCARPE",
+          "id": "CMB_GSCARPE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            159,
+            37,
+            12
+          ],
+          "px": [
+            82,
+            258,
+            55,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "CMB_GPIEDE",
+          "id": "CMB_GPIEDE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            55,
+            174,
+            50,
+            12
+          ],
+          "px": [
+            82,
+            282,
+            75,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "TXT_GATT",
+          "id": "TXT_GATT",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            13,
+            21,
+            13
+          ],
+          "px": [
+            262,
+            21,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GDIF",
+          "id": "TXT_GDIF",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            29,
+            21,
+            13
+          ],
+          "px": [
+            262,
+            47,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GFZF",
+          "id": "TXT_GFZF",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            45,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            73,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GRES",
+          "id": "TXT_GRES",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            61,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            99,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GVEL",
+          "id": "TXT_GVEL",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            77,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            125,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GACC",
+          "id": "TXT_GACC",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            93,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            151,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GPASS",
+          "id": "TXT_GPASS",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            109,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            177,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GPZT",
+          "id": "TXT_GPZT",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            125,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            203,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GPRET",
+          "id": "TXT_GPRET",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            140,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            227,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GELE",
+          "id": "TXT_GELE",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            155,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            251,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GTEST",
+          "id": "TXT_GTEST",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            175,
+            170,
+            22,
+            13
+          ],
+          "px": [
+            262,
+            276,
+            33,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GTECN",
+          "id": "TXT_GTECN",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            14,
+            21,
+            13
+          ],
+          "px": [
+            411,
+            22,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GDRIB",
+          "id": "TXT_GDRIB",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            29,
+            21,
+            13
+          ],
+          "px": [
+            411,
+            47,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GEFF",
+          "id": "TXT_GEFF",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            44,
+            21,
+            13
+          ],
+          "px": [
+            411,
+            71,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GAGGR",
+          "id": "TXT_GAGGR",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            59,
+            21,
+            13
+          ],
+          "px": [
+            411,
+            95,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "TXT_GRIFL",
+          "id": "TXT_GRIFL",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            75,
+            21,
+            13
+          ],
+          "px": [
+            411,
+            121,
+            31,
+            21
+          ]
+        },
+        {
+          "object": "CMB_GFRUOLO",
+          "id": "CMB_GFRUOLO",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            274,
+            90,
+            33,
+            12
+          ],
+          "px": [
+            411,
+            146,
+            49,
+            19
+          ],
+          "dropdown_dlu": 123
+        },
+        {
+          "object": "TXT_GCOSTO",
+          "id": "TXT_GCOSTO",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            115,
+            16,
+            13
+          ],
+          "px": [
+            411,
+            186,
+            24,
+            21
+          ]
+        },
+        {
+          "object": "static_31",
+          "id": "IDC_STATIC",
+          "rc": "RTEXT",
+          "qt": "QLabel",
+          "text": "Personal number",
+          "style": "",
+          "dlu": [
+            213,
+            134,
+            54,
+            8
+          ],
+          "px": [
+            319,
+            217,
+            81,
+            13
+          ]
+        },
+        {
+          "object": "TXT_GNUMERO",
+          "id": "TXT_GNUMERO",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_NUMBER",
+          "dlu": [
+            274,
+            131,
+            16,
+            13
+          ],
+          "px": [
+            411,
+            212,
+            24,
+            21
+          ]
+        },
+        {
+          "object": "CMD_READ_URL",
+          "id": "CMD_READ_URL",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import from URL",
+          "style": "",
+          "dlu": [
+            213,
+            170,
+            100,
+            15
+          ],
+          "px": [
+            319,
+            276,
+            150,
+            24
+          ]
+        }
+      ]
+    },
+    "DLG_GRAF": {
+      "class": "FlagKitPreviewDialog",
+      "caption": "Flag/Shirt preview",
+      "dlu": [
+        239,
+        194
+      ],
+      "px": [
+        358,
+        315
+      ],
+      "controls": [
+        {
+          "object": "IDOK",
+          "id": "IDOK",
+          "rc": "DEFPUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Close",
+          "style": "",
+          "dlu": [
+            196,
+            26,
+            36,
+            14
+          ],
+          "px": [
+            294,
+            42,
+            54,
+            22
+          ]
+        },
+        {
+          "object": "static_1",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Style",
+          "style": "",
+          "dlu": [
+            132,
+            21,
+            16,
+            8
+          ],
+          "px": [
+            198,
+            34,
+            24,
+            13
+          ]
+        },
+        {
+          "object": "static_2",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Colour",
+          "style": "",
+          "dlu": [
+            14,
+            20,
+            21,
+            8
+          ],
+          "px": [
+            21,
+            32,
+            31,
+            13
+          ]
+        },
+        {
+          "object": "static_3",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "FLAGS",
+          "style": "BS_CENTER",
+          "dlu": [
+            7,
+            14,
+            181,
+            68
+          ],
+          "px": [
+            10,
+            22,
+            271,
+            110
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL1",
+          "id": "TXT_BAND_COL1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            10,
+            28,
+            26,
+            12
+          ],
+          "px": [
+            15,
+            45,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL2",
+          "id": "TXT_BAND_COL2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            28,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            45,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL3",
+          "id": "TXT_BAND_COL3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            28,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            45,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL4",
+          "id": "TXT_BAND_COL4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            93,
+            28,
+            26,
+            12
+          ],
+          "px": [
+            139,
+            45,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL5",
+          "id": "TXT_BAND_COL5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            10,
+            41,
+            26,
+            12
+          ],
+          "px": [
+            15,
+            66,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL6",
+          "id": "TXT_BAND_COL6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            41,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            66,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL7",
+          "id": "TXT_BAND_COL7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            41,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            66,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL8",
+          "id": "TXT_BAND_COL8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            93,
+            41,
+            26,
+            12
+          ],
+          "px": [
+            139,
+            66,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL9",
+          "id": "TXT_BAND_COL9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            10,
+            54,
+            26,
+            12
+          ],
+          "px": [
+            15,
+            87,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL10",
+          "id": "TXT_BAND_COL10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            54,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            87,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL11",
+          "id": "TXT_BAND_COL11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            54,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            87,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL12",
+          "id": "TXT_BAND_COL12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            93,
+            54,
+            26,
+            12
+          ],
+          "px": [
+            139,
+            87,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL13",
+          "id": "TXT_BAND_COL13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            10,
+            67,
+            26,
+            12
+          ],
+          "px": [
+            15,
+            108,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL14",
+          "id": "TXT_BAND_COL14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            67,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            108,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_COL15",
+          "id": "TXT_BAND_COL15",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            67,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            108,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_BAND_STILE",
+          "id": "TXT_BAND_STILE",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            133,
+            32,
+            15,
+            12
+          ],
+          "px": [
+            199,
+            52,
+            22,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTONINB",
+          "id": "IDC_BUTTONINB",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import",
+          "style": "",
+          "dlu": [
+            124,
+            48,
+            44,
+            12
+          ],
+          "px": [
+            186,
+            78,
+            66,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTONESB",
+          "id": "IDC_BUTTONESB",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Export",
+          "style": "",
+          "dlu": [
+            124,
+            65,
+            44,
+            12
+          ],
+          "px": [
+            186,
+            105,
+            66,
+            19
+          ]
+        },
+        {
+          "object": "static_4",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "1° SHIRT PREVIEW",
+          "style": "BS_CENTER",
+          "dlu": [
+            7,
+            90,
+            87,
+            79
+          ],
+          "px": [
+            10,
+            146,
+            130,
+            128
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL1",
+          "id": "TXT_1MAG_COL1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            11,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            16,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL2",
+          "id": "TXT_1MAG_COL2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL3",
+          "id": "TXT_1MAG_COL3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL4",
+          "id": "TXT_1MAG_COL4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            11,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            16,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL5",
+          "id": "TXT_1MAG_COL5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL6",
+          "id": "TXT_1MAG_COL6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL7",
+          "id": "TXT_1MAG_COL7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            11,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            16,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL8",
+          "id": "TXT_1MAG_COL8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL9",
+          "id": "TXT_1MAG_COL9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL10",
+          "id": "TXT_1MAG_COL10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            11,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            16,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL11",
+          "id": "TXT_1MAG_COL11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL12",
+          "id": "TXT_1MAG_COL12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            65,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            97,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL13",
+          "id": "TXT_1MAG_COL13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            11,
+            153,
+            26,
+            12
+          ],
+          "px": [
+            16,
+            248,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_1MAG_COL14",
+          "id": "TXT_1MAG_COL14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            38,
+            153,
+            26,
+            12
+          ],
+          "px": [
+            57,
+            248,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "static_5",
+          "id": "IDC_STATIC",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "2° SHIRT PREVIEW",
+          "style": "BS_CENTER",
+          "dlu": [
+            111,
+            90,
+            87,
+            79
+          ],
+          "px": [
+            166,
+            146,
+            130,
+            128
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL1",
+          "id": "TXT_2MAG_COL1",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            115,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            172,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL2",
+          "id": "TXT_2MAG_COL2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            142,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            213,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL3",
+          "id": "TXT_2MAG_COL3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            101,
+            26,
+            12
+          ],
+          "px": [
+            253,
+            164,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL4",
+          "id": "TXT_2MAG_COL4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            115,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            172,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL5",
+          "id": "TXT_2MAG_COL5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            142,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            213,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL6",
+          "id": "TXT_2MAG_COL6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            114,
+            26,
+            12
+          ],
+          "px": [
+            253,
+            185,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL7",
+          "id": "TXT_2MAG_COL7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            115,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            172,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL8",
+          "id": "TXT_2MAG_COL8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            142,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            213,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL9",
+          "id": "TXT_2MAG_COL9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            127,
+            26,
+            12
+          ],
+          "px": [
+            253,
+            206,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL10",
+          "id": "TXT_2MAG_COL10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            115,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            172,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL11",
+          "id": "TXT_2MAG_COL11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            142,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            213,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL12",
+          "id": "TXT_2MAG_COL12",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            169,
+            140,
+            26,
+            12
+          ],
+          "px": [
+            253,
+            227,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL13",
+          "id": "TXT_2MAG_COL13",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            115,
+            153,
+            26,
+            12
+          ],
+          "px": [
+            172,
+            248,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "TXT_2MAG_COL14",
+          "id": "TXT_2MAG_COL14",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_UPPERCASE | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            142,
+            153,
+            26,
+            12
+          ],
+          "px": [
+            213,
+            248,
+            39,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTON1IM",
+          "id": "IDC_BUTTON1IM",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import",
+          "style": "",
+          "dlu": [
+            7,
+            174,
+            44,
+            12
+          ],
+          "px": [
+            10,
+            282,
+            66,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTON1EM",
+          "id": "IDC_BUTTON1EM",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Export",
+          "style": "",
+          "dlu": [
+            55,
+            174,
+            44,
+            12
+          ],
+          "px": [
+            82,
+            282,
+            66,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTON2IM",
+          "id": "IDC_BUTTON2IM",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import",
+          "style": "",
+          "dlu": [
+            112,
+            174,
+            44,
+            12
+          ],
+          "px": [
+            168,
+            282,
+            66,
+            19
+          ]
+        },
+        {
+          "object": "IDC_BUTTON2EM",
+          "id": "IDC_BUTTON2EM",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Export",
+          "style": "",
+          "dlu": [
+            160,
+            174,
+            44,
+            12
+          ],
+          "px": [
+            240,
+            282,
+            66,
+            19
+          ]
+        }
+      ]
+    },
+    "DLG_PTATTICHE": {
+      "class": "DefaultTacticsDialog",
+      "caption": " Modify default tactics",
+      "dlu": [
+        321,
+        183
+      ],
+      "px": [
+        481,
+        297
+      ],
+      "controls": [
+        {
+          "object": "IDOK",
+          "id": "IDOK",
+          "rc": "DEFPUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "OK",
+          "style": "NOT WS_VISIBLE",
+          "dlu": [
+            197,
+            17,
+            50,
+            14
+          ],
+          "px": [
+            295,
+            27,
+            75,
+            22
+          ]
+        },
+        {
+          "object": "TCAMPO_",
+          "id": "TCAMPO_",
+          "rc": "GROUPBOX",
+          "qt": "QGroupBox",
+          "text": "",
+          "style": "BS_CENTER | BS_FLAT",
+          "dlu": [
+            16,
+            63,
+            162,
+            81
+          ],
+          "px": [
+            24,
+            102,
+            243,
+            131
+          ]
+        },
+        {
+          "object": "static_1",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Position",
+          "style": "",
+          "dlu": [
+            205,
+            34,
+            26,
+            8
+          ],
+          "px": [
+            307,
+            55,
+            39,
+            13
+          ]
+        },
+        {
+          "object": "static_2",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "X",
+          "style": "",
+          "dlu": [
+            278,
+            34,
+            8,
+            8
+          ],
+          "px": [
+            417,
+            55,
+            12,
+            13
+          ]
+        },
+        {
+          "object": "static_3",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Y",
+          "style": "",
+          "dlu": [
+            295,
+            34,
+            8,
+            8
+          ],
+          "px": [
+            442,
+            55,
+            12,
+            13
+          ]
+        },
+        {
+          "object": "TCMB_NSQUADRE",
+          "id": "TCMB_NSQUADRE",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            21,
+            31,
+            42,
+            12
+          ],
+          "px": [
+            31,
+            50,
+            63,
+            19
+          ],
+          "dropdown_dlu": 64
+        },
+        {
+          "object": "TTXT_NOMETATTICA",
+          "id": "TTXT_NOMETATTICA",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_AUTOHSCROLL",
+          "dlu": [
+            80,
+            31,
+            27,
+            12
+          ],
+          "px": [
+            120,
+            50,
+            40,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATX2",
+          "id": "TTXT_TATX2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            47,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            76,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY2",
+          "id": "TTXT_TATY2",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            47,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            76,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT2",
+          "id": "TCMB_TAT2",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            46,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            74,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX3",
+          "id": "TTXT_TATX3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            59,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            95,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY3",
+          "id": "TTXT_TATY3",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            59,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            95,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT3",
+          "id": "TCMB_TAT3",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            59,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            95,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TTXT_TATX4",
+          "id": "TTXT_TATX4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            72,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            117,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY4",
+          "id": "TTXT_TATY4",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            72,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            117,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT4",
+          "id": "TCMB_TAT4",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            72,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            117,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX5",
+          "id": "TTXT_TATX5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            84,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            136,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY5",
+          "id": "TTXT_TATY5",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            84,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            136,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT5",
+          "id": "TCMB_TAT5",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            84,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            136,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TTXT_TATX6",
+          "id": "TTXT_TATX6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            97,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            157,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY6",
+          "id": "TTXT_TATY6",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            97,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            157,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT6",
+          "id": "TCMB_TAT6",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            97,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            157,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX7",
+          "id": "TTXT_TATX7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            110,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            178,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY7",
+          "id": "TTXT_TATY7",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            110,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            178,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT7",
+          "id": "TCMB_TAT7",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            110,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            178,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX8",
+          "id": "TTXT_TATX8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            123,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            199,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY8",
+          "id": "TTXT_TATY8",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            123,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            199,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT8",
+          "id": "TCMB_TAT8",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            123,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            199,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX9",
+          "id": "TTXT_TATX9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            136,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            221,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY9",
+          "id": "TTXT_TATY9",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            136,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            221,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT9",
+          "id": "TCMB_TAT9",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            136,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            221,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TTXT_TATX10",
+          "id": "TTXT_TATX10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            148,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            240,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY10",
+          "id": "TTXT_TATY10",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            148,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            240,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT10",
+          "id": "TCMB_TAT10",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            148,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            240,
+            57,
+            19
+          ],
+          "dropdown_dlu": 62
+        },
+        {
+          "object": "TTXT_TATX11",
+          "id": "TTXT_TATX11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            273,
+            161,
+            13,
+            12
+          ],
+          "px": [
+            409,
+            261,
+            19,
+            19
+          ]
+        },
+        {
+          "object": "TTXT_TATY11",
+          "id": "TTXT_TATY11",
+          "rc": "EDITTEXT",
+          "qt": "QLineEdit",
+          "text": null,
+          "style": "ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER",
+          "dlu": [
+            289,
+            161,
+            17,
+            12
+          ],
+          "px": [
+            433,
+            261,
+            25,
+            19
+          ]
+        },
+        {
+          "object": "TCMB_TAT11",
+          "id": "TCMB_TAT11",
+          "rc": "COMBOBOX",
+          "qt": "QComboBox",
+          "text": null,
+          "style": "CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP",
+          "dlu": [
+            199,
+            161,
+            38,
+            12
+          ],
+          "px": [
+            298,
+            261,
+            57,
+            19
+          ],
+          "dropdown_dlu": 63
+        },
+        {
+          "object": "TCMD_VT1",
+          "id": "TCMD_VT1",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            42,
+            87,
+            24,
+            10
+          ],
+          "px": [
+            63,
+            141,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT2",
+          "id": "TCMD_VT2",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "LIB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            27,
+            108,
+            24,
+            10
+          ],
+          "px": [
+            40,
+            175,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT3",
+          "id": "TCMD_VT3",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "SB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            57,
+            71,
+            24,
+            10
+          ],
+          "px": [
+            85,
+            115,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT4",
+          "id": "TCMD_VT4",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CB",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            45,
+            122,
+            24,
+            10
+          ],
+          "px": [
+            67,
+            198,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT5",
+          "id": "TCMD_VT5",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "DH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            83,
+            118,
+            24,
+            10
+          ],
+          "px": [
+            124,
+            191,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT6",
+          "id": "TCMD_VT6",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "DH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            70,
+            103,
+            24,
+            10
+          ],
+          "px": [
+            105,
+            167,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT7",
+          "id": "TCMD_VT7",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "WG",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            112,
+            130,
+            24,
+            10
+          ],
+          "px": [
+            168,
+            211,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT8",
+          "id": "TCMD_VT8",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "OH",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            96,
+            87,
+            24,
+            10
+          ],
+          "px": [
+            144,
+            141,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT9",
+          "id": "TCMD_VT9",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CF",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            126,
+            76,
+            24,
+            10
+          ],
+          "px": [
+            189,
+            123,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "TCMD_VT10",
+          "id": "TCMD_VT10",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "CF",
+          "style": "0 WS_EX_STATICEDGE",
+          "dlu": [
+            138,
+            103,
+            24,
+            10
+          ],
+          "px": [
+            207,
+            167,
+            36,
+            16
+          ]
+        },
+        {
+          "object": "static_4",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Selection",
+          "style": "",
+          "dlu": [
+            25,
+            15,
+            30,
+            8
+          ],
+          "px": [
+            37,
+            24,
+            45,
+            13
+          ]
+        },
+        {
+          "object": "static_5",
+          "id": "IDC_STATIC",
+          "rc": "LTEXT",
+          "qt": "QLabel",
+          "text": "Name",
+          "style": "",
+          "dlu": [
+            84,
+            15,
+            20,
+            8
+          ],
+          "px": [
+            126,
+            24,
+            30,
+            13
+          ]
+        },
+        {
+          "object": "CMD_IMP",
+          "id": "CMD_IMP",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Import",
+          "style": "",
+          "dlu": [
+            24,
+            151,
+            31,
+            12
+          ],
+          "px": [
+            36,
+            245,
+            46,
+            19
+          ]
+        },
+        {
+          "object": "CMD_EXP",
+          "id": "CMD_EXP",
+          "rc": "PUSHBUTTON",
+          "qt": "QPushButton",
+          "text": "Export",
+          "style": "",
+          "dlu": [
+            60,
+            151,
+            32,
+            12
+          ],
+          "px": [
+            90,
+            245,
+            48,
+            19
+          ]
+        }
+      ]
+    },
+    "DLG_EDITOPT": {
+      "class": "EditOptionsDialog",
+      "caption": " Edit options",
+      "dlu": [
+        130,
+        90
+      ],
+      "px": [
+        195,
+        146
+      ],
+      "controls": [
+        {
+          "object": "CHK_EDITNAME",
+          "id": "CHK_EDITNAME",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "Name",
+          "style": "BS_AUTOCHECKBOX | WS_TABSTOP",
+          "dlu": [
+            10,
+            10,
+            100,
+            10
+          ],
+          "px": [
+            15,
+            16,
+            150,
+            16
+          ]
+        },
+        {
+          "object": "CHK_EDITLOOK",
+          "id": "CHK_EDITLOOK",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "Body, height, age and foot",
+          "style": "BS_AUTOCHECKBOX | WS_TABSTOP",
+          "dlu": [
+            10,
+            30,
+            100,
+            10
+          ],
+          "px": [
+            15,
+            48,
+            150,
+            16
+          ]
+        },
+        {
+          "object": "CHK_EDITCHAR",
+          "id": "CHK_EDITCHAR",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "Position and skills",
+          "style": "BS_AUTOCHECKBOX | WS_TABSTOP",
+          "dlu": [
+            10,
+            50,
+            100,
+            10
+          ],
+          "px": [
+            15,
+            81,
+            150,
+            16
+          ]
+        },
+        {
+          "object": "CHK_EDITNUMS",
+          "id": "CHK_EDITNUMS",
+          "rc": "CONTROL",
+          "qt": "QCheckBox",
+          "text": "Shirt numbers",
+          "style": "BS_AUTOCHECKBOX | WS_TABSTOP",
+          "dlu": [
+            10,
+            70,
+            100,
+            10
+          ],
+          "px": [
+            15,
+            113,
+            150,
+            16
+          ]
+        }
+      ]
+    }
+  }
+}

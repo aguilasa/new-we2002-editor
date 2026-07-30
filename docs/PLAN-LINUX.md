@@ -20,7 +20,7 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fases 0, 1, 2, 3 e **3.5 concluídas**. Fase 4 em diante ainda
+> Progresso: Fases 0, 1, 2, 3, 3.5 e **4 concluídas**. Fase 5 em diante ainda
 > **não autorizada** — não iniciar sem pedido explícito.
 
 ---
@@ -37,7 +37,7 @@ Winning Eleven 2002 (PSX).
 | C++ total | 13.929 linhas |
 | `edDlg.cpp` | 8.456 linhas (60% do total) |
 | Diálogos em `ed.rc` | 6 |
-| Controles no `.rc` | 393 |
+| Controles no `.rc` | 434 (ver Fase 4; a contagem antiga de 393 estava baixa) |
 | `DDX_Control` | 319 |
 | `afx_msg` handlers | 376 |
 | Macros `ON_*` | 303 |
@@ -304,6 +304,7 @@ new-we2002-editor/
 │     ├─ main.cpp
 │     ├─ MainWindow.{hpp,cpp}
 │     ├─ ui/                   # .ui gerados na Fase 4 a partir do ed.rc
+│     │  └─ controls.json      #   estilos Win32 que o .ui nao expressa
 │     └─ resources/app.qrc     # icone etc, embutidos no binario
 │
 ├─ tests/                      # golden tests da Fase 3
@@ -314,6 +315,7 @@ new-we2002-editor/
 │
 ├─ tools/                      # scripts de apoio, nao entram no binario
 │  ├─ rc2ui.py                 # conversor .rc -> .ui (Fase 4)
+│  ├─ uipreview/               # renderiza um .ui em PNG p/ conferir (Fase 4)
 │  ├─ golden_run.sh            # dirige o ed.exe sob Wine (Fase 3)
 │  ├─ golden_compare.py        # diff anotado por OFS_/setor (Fase 3)
 │  ├─ golden_check.sh          # oraculo + port + diff = o teste `golden`
@@ -705,15 +707,115 @@ Nenhuma mudança de comportamento, e não por inspeção:
 - ASan + UBSan limpos;
 - compilação sem um único warning.
 
-### Fase 4 — `.rc` → Qt `.ui` (~2–3 dias)
+### Fase 4 — `.rc` → Qt `.ui` ✅ concluída
 
-Script Python converte os 6 blocos `DIALOG`/`DIALOGEX` de `ed.rc` em `.ui`.
-Trata `LTEXT`/`CTEXT`/`EDITTEXT`/`PUSHBUTTON`/`COMBOBOX`/`LISTBOX`/
-`GROUPBOX`/`CONTROL(BS_AUTOCHECKBOX)`. Conversão DLU→px (MS Sans Serif 8:
-baseX=6, baseY=13; `x*baseX/4`, `y*baseY/8`). Layout absoluto preserva o
-visual original.
+[tools/rc2ui.py](../tools/rc2ui.py) converte os 6 diálogos de `ed.rc` em
+`src/app/ui/*.ui`. Layout absoluto: os 434 controles foram posicionados à mão
+em 2002, o original não tem comportamento de redimensionamento a preservar, e
+manter as coordenadas é o que torna o resultado revisável contra uma captura
+do `ed.exe`.
 
-Qt6 precisa ser instalado (só `qmake` do Qt5 presente no host).
+Saída:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `src/app/ui/*.ui` | os 6 formulários, consumidos pelo `uic` |
+| `src/app/ui/controls.json` | o que o `.ui` não expressa |
+
+O manifesto existe porque estilos Win32 carregam informação sem propriedade Qt
+equivalente: `ES_NUMBER` e `ES_UPPERCASE` são validadores, não flags de widget.
+A Fase 5 lê o JSON em vez de voltar ao `.rc`. Ele também guarda, por controle,
+o símbolo de recurso, o keyword `.rc` de origem, o estilo cru e a geometria em
+DLU e em px.
+
+#### Contagem
+
+O plano falava em 393 controles; são **434**. A métrica antiga vinha de uma
+contagem crua que perdia continuações e um `PUSHBUTTON` indentado com tab. O
+conversor confere a sua saída contra o `.rc` por keyword:
+
+| | EDITTEXT | PUSHBUTTON | LTEXT | COMBOBOX | RTEXT | GROUPBOX | CTEXT | CONTROL | LISTBOX | DEFPUSH | total |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `ed.rc` | 193 | 106 | 41 | 39 | 23 | 10 | 10 | 8 | 2 | 2 | **434** |
+| `.ui` | 193 | 106 | 41 | 39 | 23 | 10 | 10 | 8 | 2 | 2 | **434** |
+
+#### Três armadilhas do formato `.rc`
+
+1. **`COMBOBOX` guarda a altura do *dropdown*, não do controle.** Win32 desenha
+   o combo fechado com uma linha de texto e só usa o resto com a lista aberta.
+   Levado ao pé da letra, o `CMB_NSQUADRE` de 64 DLU vira uma caixa de 104 px
+   que engole o grupo `DEFAULT TACTICS` atrás dele — foi exatamente o que a
+   primeira renderização mostrou. Os 39 combos são desenhados com 12 DLU, que é
+   o que o `ed.exe` mede sob Wine, e a altura original fica no manifesto como
+   `dropdown_dlu`.
+2. **Continuação de linha não dá para detectar por indentação.** 192 dos 434
+   controles quebram em várias linhas, um deles partindo `NOT WS_VISIBLE` no
+   meio, e um `PUSHBUTTON` é indentado com tab em vez de quatro espaços. O
+   conversor reconhece início de statement pela palavra-chave; linha
+   continuada sempre retoma dentro de uma expressão de estilo, começando com
+   `WS_`/`BS_`/`ES_`/`CBS_`/`LBS_`/`NOT`.
+3. **Há controles comentados com `//` dentro dos diálogos.** Precisam sair
+   antes de juntar continuações, senão um `PUSHBUTTON` morto cola nas
+   coordenadas do vivo acima dele.
+
+Mais duas, do lado do Qt: a legenda de um `QGroupBox` é `title`, não `text` (o
+`uic` emite `setText()` alegremente e quem reclama é o compilador), e `--` é
+proibido dentro de comentário XML — o `uic` rejeita o arquivo inteiro.
+
+#### Validação
+
+O ponto da fase é fidelidade visual, então a verificação é olhar.
+[tools/uipreview](../tools/uipreview) compila um executável por formulário que
+renderiza o diálogo com `QWidget::grab()` e grava um PNG:
+
+```sh
+cmake -B build-uipreview -S tools/uipreview
+cmake --build build-uipreview -j
+DISPLAY=:99 ./build-uipreview/preview_MainDialog /tmp/main.png
+```
+
+`grab()` pinta fora da tela, então o diálogo principal de 1077 px sai inteiro
+mesmo com o Xvfb em 960 — coisa que a captura do `ed.exe` não consegue. O
+`tools/uipreview` usa Qt6 se existir e cai para Qt5, que é o que há na máquina
+até a Fase 5.
+
+Resultados:
+
+- os 6 formulários renderizam **exatamente** no tamanho derivado das DLU
+  (1077×547, 390×404, 493×323, 358×315, 481×297, 195×146);
+- o `uic` aceita os 6;
+- comparação lado a lado do diálogo principal contra a captura do `ed.exe`
+  sob Wine: mesmos grupos, mesmas linhas, mesmas colunas.
+
+A confirmação mais objetiva veio de graça: o centro do `CMB_WRITE` calculado
+pelo conversor é (314, 521), e o `tools/golden_run.sh` da Fase 3 clica em
+(315, 521) no `ed.exe` real há semanas. A conversão DLU→px acerta o pixel.
+
+#### O que não foi feito, de propósito
+
+- **Nomes de controle continuam sendo os símbolos do `.rc`** (`TXT_NSQUAD1`,
+  `CMD_CARAT1`, `CMB_KIK_PUNC`). Vários são abreviações italianas, então isso
+  contraria o critério da Fase 3.5 — mas ali a renomeação era gratuita porque
+  o golden test provava que nada mudava, e aqui não há prova equivalente. O
+  `.ui` precisa ficar diffável contra `ed.rc` e `resource.h` enquanto os 376
+  handlers são portados. **Renomear controles é trabalho da Fase 5**, e o
+  `controls.json` já é o ponto de mapeamento.
+- **Sem layouts Qt.** Geometria absoluta, como no original.
+- **A fonte não é a original.** Os `.ui` declaram `MS Sans Serif` 8pt
+  fielmente, mas ela não está instalada e o Qt substitui, o que corta o texto
+  de alguns rótulos apertados — `Position` vira `Positior`. O `ed.exe` sob
+  Wine corta exatamente os mesmos, pelo mesmo motivo. Decidir a política de
+  fonte é da Fase 5.
+
+#### Guarda
+
+`ctest -R ui_forms` roda `rc2ui.py --check`: regenera em memória e compara com
+o que está commitado. Editar um `.ui` à mão, ou mexer no `ed.rc` sem
+regenerar, falha aqui em vez de silenciosamente lá na Fase 5. O `--check`
+também revalida o XML, sem precisar de Qt.
+
+Qt6 ainda **não** está instalado — é pré-requisito da Fase 5, não desta.
+
 
 ### Fase 5 — Portar handlers (~3–5 dias)
 
