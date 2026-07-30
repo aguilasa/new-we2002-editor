@@ -1,5 +1,22 @@
-# Plano de portabilidade para Linux — WE2002 Editor
+# Plano de portabilidade — WE2002 Editor
 
+> **Objetivo: aplicação multiplataforma, Linux e Windows.**
+>
+> | Plataforma | Situação |
+> |---|---|
+> | **Linux** (Debian/Ubuntu) | Alvo primário. Todo o esforço inicial vai aqui. |
+> | **Windows** | Alvo suportado, atacado **depois** que o Linux estiver redondo. |
+> | **macOS** | **Fora de escopo.** Não portar, não testar, não empacotar. |
+>
+> Windows ser "depois" é ordem de trabalho, não segunda classe: as decisões
+> técnicas são tomadas desde já sem barrar o Windows. Na prática isso significa
+> um único `CMakeLists.txt` para as duas plataformas, nada de API específica de
+> SO fora de uma camada isolada, e nenhuma suposição de caminho estilo POSIX.
+> O que **não** significa é gastar tempo com Windows antes do Linux fechar.
+>
+> Fora de escopo não é "talvez depois": macOS não entra nas matrizes de CI, nem
+> nos scripts de empacotamento, nem justifica `#ifdef`.
+>
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
@@ -280,8 +297,14 @@ project(we2002 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# char precisa ser signed: o codigo herdado assume o padrao do MSVC/x86
-add_compile_options(-fsigned-char)
+# O codigo herdado assume char SIGNED (padrao do MSVC e do GCC em x86).
+# GCC/Clang: fixar explicitamente, porque em ARM o padrao e unsigned.
+# MSVC: nao mexer — ja e signed; a flag /J inverteria isso e quebraria tudo.
+if(NOT MSVC)
+    add_compile_options(-fsigned-char)
+else()
+    add_compile_options(/utf-8)   # fontes sao UTF-8; sem isso o MSVC assume a codepage ANSI
+endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 qt_standard_project_setup()      # liga AUTOMOC/AUTOUIC/AUTORCC
@@ -293,7 +316,7 @@ enable_testing()
 add_subdirectory(tests)
 ```
 
-Compilar:
+Compilar (idêntico nas duas plataformas):
 
 ```sh
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
@@ -301,8 +324,41 @@ cmake --build build -j
 ctest --test-dir build
 ```
 
-O mesmo `CMakeLists.txt` gera solução do Visual Studio no Windows. É esse o
-mecanismo que entrega o multiplataforma — não há projeto separado a manter.
+O mesmo `CMakeLists.txt` gera Makefile no Linux e solução do Visual Studio no
+Windows. É esse o mecanismo que entrega o multiplataforma — não há projeto
+separado a manter.
+
+### Suporte a plataformas
+
+O que muda entre as duas, e o que precisa estar decidido desde já para não
+travar o Windows depois.
+
+| | Linux (primário) | Windows (depois) |
+|---|---|---|
+| Compilador | GCC ou Clang | MSVC preferido; MinGW-w64 também serve |
+| Qt 6 | `apt install qt6-base-dev` (6.4.2 no Zorin/Ubuntu atual) | Instalador oficial do Qt, ou vcpkg |
+| libcurl | `apt install libcurl4-openssl-dev` (8.5.0) | vcpkg, ou `FetchContent` no CMake |
+| CMake | `apt install cmake` (3.28.3) | acompanha o Visual Studio |
+| Empacotamento | AppImage ou Flatpak | `windeployqt` + Inno Setup, ou zip portátil |
+
+Com o MFC fora do caminho, o MinGW-w64 volta a ser viável — era descartado
+(seção 4, opção B) só porque não distribui MFC. Isso abre inclusive a
+possibilidade de *cross-compilar* o `.exe` a partir do Linux, útil para
+smoke-test antes de ter uma máquina Windows na mão.
+
+Regras para não criar dívida de portabilidade enquanto se trabalha só no Linux:
+
+- **Caminhos**: `std::filesystem::path`, nunca concatenação de string com `/`.
+  O código herdado usa `char[MAX_PATH]` e `strcat`; isso morre na Fase 2.
+- **Arquivos binários**: sempre `std::ios::binary`. No Windows, sem isso o
+  runtime traduz `0x0A` ↔ `0x0D 0x0A` e **corrompe a imagem de CD**. É a
+  armadilha mais séria da lista.
+- **`#ifdef`**: só dentro de uma camada fina e isolada. Se começar a espalhar
+  pelo `core`, o desenho está errado.
+- **Nada de `windows.h` nem de POSIX no `core`.** Só biblioteca padrão e
+  libcurl — a mesma regra que já proíbe o Qt ali.
+- **CI**: matriz com `ubuntu-latest` e `windows-latest` desde o primeiro
+  workflow, mesmo que o Windows comece vermelho. Sem macOS.
 
 ### Para onde vai cada arquivo de hoje
 
@@ -405,13 +461,34 @@ redução do arquivo.
 
 Arrays `CEdit txt_gioc1..23` viram `QLineEdit* txt_gioc[23]`.
 
-### Fase 6 — Acabamento e empacotamento (~1 dia)
+### Fase 6 — Acabamento e empacotamento Linux (~1 dia)
 
 `CFileDialog` → `QFileDialog`; `AfxMessageBox` → `QMessageBox`;
 `GetModuleFileName` → `QCoreApplication::applicationDirPath()`.
 Empacotar AppImage ou Flatpak.
 
-**Total Fases 1–6: ~1,5 a 2 semanas.**
+**Fim do escopo Linux. Total Fases 1–6: ~1,5 a 2 semanas.**
+
+### Fase 7 — Windows (~2–3 dias, só depois do Linux redondo)
+
+Não começar antes da Fase 6 fechada e dos golden tests verdes no Linux.
+
+- Configurar dependências: Qt 6 e libcurl via vcpkg (ou instalador oficial do
+  Qt).
+- Build com MSVC. Esperado que já compile — o CMake é o mesmo e o `core` não
+  tem código específico de plataforma. O que costuma quebrar aqui: warnings
+  virando erro, `std::filesystem` em caminhos com acento, e a codepage dos
+  fontes UTF-8 (resolvida pela flag `/utf-8`).
+- **Rodar os golden tests no Windows.** É o único jeito de provar que o
+  round-trip byte-a-byte sobrevive à troca de compilador — em especial o layout
+  dos bitfields de `NUMERI` e a abertura em modo binário.
+- Comparar o `.exe` novo contra o `Debug/ed.exe` original **na mesma máquina**,
+  sem Wine no meio. É o teste de paridade mais forte que existe neste projeto.
+- Empacotar: `windeployqt` para juntar as DLLs do Qt, depois Inno Setup ou um
+  zip portátil.
+- Habilitar `windows-latest` como obrigatório no CI.
+
+**Total Fases 1–7: ~2 a 2,5 semanas.**
 
 ---
 
@@ -424,3 +501,16 @@ Empacotar AppImage ou Flatpak.
 - Se um golden test falhar, suspeitar primeiro de fronteira de setor
   MODE2/2352 (ver seção 2).
 - Cada rodada de golden test consome ~474 MB de disco por cópia da imagem.
+
+Específicos do Windows (Fase 7):
+
+- **Abrir arquivo sem `std::ios::binary` corrompe a imagem.** No Linux passa
+  despercebido porque não há tradução de fim de linha; no Windows, todo `0x0A`
+  vira `0x0D 0x0A`. Se um golden test só falhar no Windows, é a primeira
+  suspeita.
+- Layout de bitfields de `NUMERI` pode divergir entre GCC e MSVC. O
+  `static_assert` da Fase 2 pega o tamanho, mas não a ordem dos bits — só o
+  golden test rodando no Windows resolve isso.
+- Adiar o Windows até a Fase 7 concentra o risco: se algo estrutural estiver
+  errado, a descoberta vem tarde. Mitigação barata — deixar `windows-latest` na
+  matriz de CI desde o começo, mesmo vermelho, só para ver *quando* quebra.
