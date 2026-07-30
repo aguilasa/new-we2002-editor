@@ -85,12 +85,43 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
-O teste mais forte disponível carrega uma imagem real; é pulado se a variável
-não estiver definida. **Sempre sobre cópia** — 474 MB por cópia:
+Os 61 checks unitários rodam sem imagem. Dois testes ficam mais fortes com
+uma, e se reportam como *skipped* sem ela:
 
 ```sh
+# unitários contra uma imagem real (só leitura, mas passe cópia mesmo assim)
 WE2002_TEST_IMAGE=/caminho/copia.bin ./build/tests/we2002_tests
+
+# golden test: ed.exe sob Wine vs o port, byte a byte
+WE2002_GOLDEN_IMAGE=/caminho/imagem.bin ctest --test-dir build -R golden
 ```
+
+### O golden test
+
+`tools/golden_check.sh` é o teste de regressão que importa. Ele faz duas
+cópias da imagem, passa uma pelo `ed.exe` sob Wine (`tools/golden_run.sh`) e a
+outra pelo core (`tests/golden_tool.cpp`), e compara com
+`tools/golden_compare.py`. Falha se aparecer **qualquer** divergência além de
+uma faixa conhecida.
+
+Essa faixa é `405724..405739` (`OFS_NUMERI_NAZ+1008`): o slot 64 de um array
+de 63, que o original lê e grava por engano a partir da memória vizinha
+(`squad_ml[0]`). O port preserva o que está na imagem em vez de reproduzir
+comportamento indefinido. É a única divergência aceita — se aparecer outra, é
+bug do port. Detalhe na Fase 3 do [PLAN-LINUX.md](docs/PLAN-LINUX.md).
+
+O script não toca na imagem de origem, mas usa ~950 MB de temporário. Precisa
+do `Debug/ed.exe`, de Wine e do `:99`; por isso não roda em CI.
+
+Duas armadilhas conhecidas ao mexer nisso:
+
+- **O editor não é idempotente.** `Load`+`Save` troca os dois primeiros
+  cobradores de cada clube de ML (`OFS_KICKER`), porque `Load` lê o par
+  trocado e `Save` grava na ordem declarada. Gravar duas vezes volta ao
+  início. É bug do original, reproduzido de propósito.
+- **`Load`+`Save` sem editar nada não devolve a imagem intacta**, e não
+  deveria: o `Save` reconstrói as all-star a partir dos links
+  (`OFS_CARAT_G8`). O oráculo faz o mesmo.
 
 ### Sanitizers e o bloqueio da Citrix
 
@@ -129,7 +160,12 @@ diferentes.
 
 ## Rodar o editor original (oráculo)
 
-Não existe build para Linux. O binário pré-compilado `Debug/ed.exe` (PE32+
+Para o ciclo abrir → gravar, use `tools/golden_run.sh <copia.bin>`: ele sobe o
+Wine num prefix próprio, atravessa os diálogos e encerra sozinho. Aceita
+`GOLDEN_EDIT` com um trecho de shell para fazer edições na tela antes de
+gravar (`dlu_x`/`dlu_y` convertem coordenadas direto do `ed.rc`).
+
+Para mexer na interface à mão, o binário pré-compilado `Debug/ed.exe` (PE32+
 x86-64, MFC estático) roda sob o runner Wine do Bottles:
 
 ```sh
@@ -152,6 +188,13 @@ Notas:
   `libAppProtection.so` (Citrix). Ambos benignos — as fontes renderizam.
 - `Debug/ed.exe` é o **oráculo de referência** para os golden tests do port.
   Manter no disco mesmo depois de adicionar `.gitignore`.
+- O `ed.exe` abre um `CFileDialog` já no `OnInitDialog` e depois avisa que a
+  imagem não tem 474.431.328 bytes. O aviso é só aviso — ele carrega assim
+  mesmo. O diálogo principal **não tem título**, então só dá para achá-lo pelo
+  tamanho; é o que o `wait_for_main` faz.
+- O diálogo principal tem 1077 px de largura e o `:99` tem 960: o Wine corta a
+  borda direita. O `CMB_WRITE` fica em x≈315, dentro da parte visível, então o
+  golden test funciona mesmo cortado.
 
 Rebuild do `.exe` exige MSVC + MFC estático no Windows. MinGW e Winelib não
 servem: nenhum dos dois distribui MFC.
@@ -206,8 +249,15 @@ python3 tools/port_database.py          # Load/Save/custo a partir do legacy
 
 `port_database.py` extrai `carica_dabin` e `OnWriteCD` verbatim do legacy e
 aplica substituições listadas. Se algo que ele não reconhece sobrar, ele
-**falha** em vez de emitir código quebrado — a lista `FORBIDDEN` existe para
-isso. Já pegou dois erros reais durante a Fase 2.
+**falha** em vez de emitir código quebrado. Dois guards:
+
+- `FORBIDDEN` — recusa se sobrar construção MFC. Pegou dois erros na Fase 2.
+- `check_seeks()` — conta seeks absolutos e relativos no legado e na saída e
+  recusa se não baterem. Existe porque na Fase 3 uma regex com `[^,]`
+  atravessou uma quebra de linha e **trocou** um `Seek(begin)` por um
+  `SeekCurrent`. Compilava, passava nos testes e passava no ASan; só o
+  `ed.exe` mostrou. Ao escrever regra nova em `SUBS`, lembre que `[^x]` casa
+  `\n`.
 
 ### Core
 
@@ -279,13 +329,13 @@ exatamente esses saltos. Consequências:
 
 ## Estado do repositório
 
-Fases 1 (higiene) e 2 (core portável) concluídas. Ver
+Fases 1 (higiene), 2 (core portável) e 3 (golden tests) concluídas. Ver
 [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
 
-Achado que aguarda a Fase 3: `Load` seguido de `Save` sem editar nada **não**
-devolve a imagem idêntica — 1.664 bytes em três blocos (all-stars, kickers de
-ML, custos). Provavelmente recomputação deliberada do `OnWriteCD` original, mas
-só a comparação contra o `ed.exe` sob Wine decide. Detalhe na Fase 3 do plano.
+O port está verificado contra o `ed.exe`: nas imagens European Deluxe e
+japonesa, gravação limpa ou com edição pela GUI, a saída é byte-idêntica à do
+original salvo a faixa de 16 bytes já descrita. A próxima fase é a **3.5**
+(nomenclatura para inglês), e ela ainda não foi autorizada.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto

@@ -35,3 +35,6 @@ compile_commands.json
 *.cue
 *.img
 *.iso
+
+# Python bytecode from tools/
+__pycache__/

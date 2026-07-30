@@ -725,12 +725,12 @@ bool Database::Load(const std::filesystem::path& image, const Reporter& report)
 	}
 
 	//caricare costi ml
-	fil_ctrl.SeekCurrent(OFS_COSTI_NAZ);
+	fil_ctrl.Seek(OFS_COSTI_NAZ);
 	for(i=PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		if(i == 1704)
 		{
-			fil_ctrl.Seek(2);
+			fil_ctrl.SeekCurrent(2);
 			i = 1750;
 		}
 		fil_ctrl.Read(&gioc[i].costo, 1);

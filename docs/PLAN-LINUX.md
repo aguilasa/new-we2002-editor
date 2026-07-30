@@ -20,7 +20,7 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fase 0 validada, **Fase 1 concluída**. Fase 2 em diante ainda
+> Progresso: Fases 0, 1, 2 e **3 concluídas**. Fase 3.5 em diante ainda
 > **não autorizada** — não iniciar sem pedido explícito.
 
 ---
@@ -304,11 +304,15 @@ new-we2002-editor/
 │
 ├─ tests/                      # golden tests da Fase 3
 │  ├─ CMakeLists.txt
+│  ├─ test_main.cpp            # os 61 checks
+│  ├─ golden_tool.cpp          # metade headless do golden test
 │  └─ fixtures/                # dados pequenos; NUNCA imagens de CD
 │
 ├─ tools/                      # scripts de apoio, nao entram no binario
 │  ├─ rc2ui.py                 # conversor .rc -> .ui (Fase 4)
-│  └─ golden_run.sh            # dirige o ed.exe sob Wine (Fase 3)
+│  ├─ golden_run.sh            # dirige o ed.exe sob Wine (Fase 3)
+│  ├─ golden_compare.py        # diff anotado por OFS_/setor (Fase 3)
+│  └─ golden_check.sh          # oraculo + port + diff = o teste `golden`
 │
 ├─ legacy/                     # fonte MFC original — referencia, nao compila
 │  └─ mfc/                     # edDlg.cpp, ed.rc, res/, ed.vcxproj...
@@ -512,34 +516,100 @@ Citrix no caminho o processo morre antes do `main`, sem output —
 privilégio e mascarando o `/etc/ld.so.preload` só para aquele processo. Em CI
 não há preload nenhum e o wrapper vira no-op.
 
-### Fase 3 — Golden tests (~1 dia)
+### Fase 3 — Golden tests ✅ concluída
 
-- Sequência fixa de edições no `ed.exe` sob Bottles → salvar.
-- Mesma sequência headless via `libwe2002`.
-- `cmp` byte-a-byte.
-- Rodar contra European Deluxe **e** Japan.
-- **Trabalhar sobre cópia** — os testes mutam a imagem (474 MB por cópia).
+O método: rodar o `ed.exe` original sob Wine e o port headless sobre **cópias
+da mesma imagem**, no mesmo ciclo abrir → gravar, e comparar byte a byte. Onde
+os dois discordam, o port está errado até prova em contrário.
 
-Sem essa fase o port é chute. É aqui que a suspeita de bitfield/endianness
-morre ou se confirma.
+Três peças novas:
 
-**Ponto de partida já medido.** Um `Load` seguido de `Save` sem editar nada,
-sobre a European Deluxe, **não** devolve a imagem idêntica: 1.664 bytes diferem,
-em três blocos, todos na região de dados (nenhum em EDC/ECC, como esperado):
+| Arquivo | Papel |
+|---|---|
+| `tests/golden_tool.cpp` | metade headless — `roundtrip` e `digest` sobre o core |
+| `tools/golden_run.sh` | metade oráculo — dirige o `ed.exe` com `xdotool` no `:99` |
+| `tools/golden_compare.py` | diff que agrupa em faixas e anota `OFS_*`, setor e se caiu em dados ou em EDC/ECC |
+| `tools/golden_check.sh` | junta os três e decide passa/falha; é o teste `golden` do ctest |
 
-| Faixa | Bytes | Região |
-|---|---|---|
-| `2196831..2197377` | 547 | atributos de jogadores, em `OFS_CARAT_G8` — zona das all-star |
-| `2329440..2329631` | 192 | kickers dos 32 clubes de ML, em `OFS_KICKER` |
-| `3067404..3068808` | 1405 | custos, em `OFS_COSTI_NAZ` |
+Dirigir uma caixa de diálogo MFC com `xdotool` funciona porque o layout é fixo
+em tempo de compilação: as coordenadas saem direto do `ed.rc`, convertidas de
+DLU com as base units 6×13 do "MS Sans Serif" 8pt. Daí `IDD_ED_DIALOG` de
+718×337 DLU virar 1077×548 px e o `CMB_WRITE` cair em (315, 521).
 
-Isso **não** é necessariamente bug do port: o `OnWriteCD` original recalcula
-coisas ao gravar em vez de devolver o que leu — os slots das all-star são
-sobrescritos a partir dos links (`TrovaIdMl(&link_euroas[...])`), e os custos
-são regravados. A primeira tarefa da Fase 3 é rodar o `ed.exe` sob Wine no
-mesmo ciclo abrir → gravar e comparar as três faixas. Se o oráculo produzir a
-mesma divergência, é comportamento original e o port está fiel; se não,
-o culpado já está localizado em três blocos de código.
+**Resultado.** Oráculo e port produzem imagens **byte-idênticas**, com uma
+única exceção documentada:
+
+| Caso | Divergência |
+|---|---|
+| European Deluxe, gravação limpa | só a faixa `405724..405739` |
+| Japonesa (SLPM-87056, arquivo único) | só a faixa `405724..405739` |
+| European Deluxe com uma edição de nome pela GUI | **nenhuma** |
+| Oráculo aplicado 2× vs oráculo depois port | **nenhuma** |
+
+A imagem japonesa importa mais do que parece: nela o oráculo reescreve 1.097
+bytes de nomes em Shift-JIS (`OFS_NOMI_SQK`) e o port reescreve exatamente os
+mesmos. `kanjitoascii`/`asciitokanji` estão fiéis.
+
+#### O bug que os golden tests pegaram
+
+O `Load` posicionava a tabela de custos da Master League no lugar errado.
+Causa: uma substituição do `tools/port_database.py`. A classe `[^,]` casa
+`\n`, então depois que a regra de `CFile::begin` reescreveu a primeira linha,
+a regra de `CFile::current` casou a partir *dela* atravessando a quebra de
+linha até o `, CFile::current)` da linha seguinte — trocando as duas:
+
+```c
+// legacy                                    // gerado, errado
+Seek(OFS_COSTI_NAZ, CFile::begin);           SeekCurrent(OFS_COSTI_NAZ);
+    Seek(2, CFile::current);                     Seek(2);
+```
+
+Compilava, passava nos 61 checks e passava limpo no ASan — só a comparação
+contra o `ed.exe` expôs os 1.394 bytes errados. Corrigido em duas frentes:
+`[^,\n]` nas duas regras, e um guard novo, `check_seeks()`, que conta seeks
+absolutos e relativos no legado e na saída e recusa gerar se os números não
+baterem. O `FORBIDDEN` não pegava isso porque nenhum token MFC sobrava.
+
+#### As três faixas que o "ponto de partida" apontava
+
+Todas explicadas, nenhuma é bug do port:
+
+| Faixa | Veredicto |
+|---|---|
+| `OFS_CARAT_G8` (204 bytes) | comportamento original — as all-star são reconstruídas a partir dos links no `Save`. Oráculo faz igual. |
+| `OFS_KICKER` (66 bytes) | **bug do original, reproduzido de propósito.** Ver abaixo. |
+| `OFS_COSTI_NAZ` (1.394 bytes) | era o bug do gerador. Zerado. |
+
+O `OFS_KICKER` merece nota: `Load` lê os cobradores de ML trocados
+(`kik_punl = auxstr[1]`, `kik_punc = auxstr[0]`) e `Save` grava na ordem
+declarada, então **cada gravação troca o par**. O editor não é idempotente:
+gravar duas vezes devolve o estado inicial. Confirmado nos dois lados — o
+oráculo aplicado duas vezes dá um arquivo idêntico ao oráculo seguido do port.
+
+#### A única divergência aceita
+
+`405724..405739`, 16 bytes, `OFS_NUMERI_NAZ+1008` — o slot 64 de um array de
+63. É o estouro já descrito na Fase 2 (`edDlg.cpp:1928`, `:5821`, `:7667`). O
+original lê e grava 16 bytes do que vier depois na memória, que é
+`squad_ml[0]`; daí os bytes Shift-JIS de nome de clube que aparecem lá
+(`5a6b 5a6b 5a6b 734e …`). É determinístico no Windows por acidente do layout
+do linker, não por design.
+
+O port dá ao array os 64 slots que o disco tem, lê esses 16 bytes da imagem e
+grava de volta sem mexer. Reproduzir o estouro seria reproduzir comportamento
+indefinido cujo valor depende do compilador — recusado de propósito e fixado
+no `tools/golden_check.sh` como a **única** faixa tolerada.
+
+#### Como rodar
+
+```sh
+WE2002_GOLDEN_IMAGE=/caminho/imagem.bin ctest --test-dir build -R golden
+```
+
+Sem a variável o teste se reporta como *skipped*, não como falha: ele precisa
+de uma imagem de ~474 MB, do `Debug/ed.exe` e de Wine com display X — nada
+disso existe em CI. A imagem de origem não é tocada; o script faz duas cópias
+num diretório temporário e apaga no fim. Rodando na European Deluxe leva ~20 s.
 
 ### Fase 3.5 — Traduzir a nomenclatura para inglês (~meio dia)
 
