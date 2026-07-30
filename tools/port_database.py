@@ -24,6 +24,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import glossary  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 LEGACY = ROOT / "legacy" / "mfc" / "edDlg.cpp"
 OUT = ROOT / "src" / "core" / "Database.cpp"
@@ -242,8 +245,8 @@ std::filesystem::path UrlSidecarPath(const std::filesystem::path& image) {
 Database::Database() = default;
 
 int TrovaIdMl(const unsigned char* lk) {
-    // Verbatim from legacy/mfc/edDlg.cpp:3430, minus a dead `gioc[r].nome;`
-    // expression statement that had no effect.
+    // Verbatim from legacy/mfc/edDlg.cpp:3430, minus one dead expression
+    // statement that read a player name and threw it away.
     unsigned int nz, g, r;
     nz = static_cast<unsigned int>(lk[0]);
     g = static_cast<unsigned int>(lk[1]);
@@ -316,12 +319,23 @@ def main() -> int:
             print("  " + p, file=sys.stderr)
         return 1
 
+    # Phase 3.5. Deliberately last: the guards above are written against the
+    # legacy spellings, and running them on renamed text would mean keeping
+    # two versions of every pattern.
+    body, renames, comments = glossary.rename(body)
+    leftover = sorted(set(glossary.LEFTOVER.findall(body)))
+    if leftover:
+        print("\nNOME EM ITALIANO SOBROU:", ", ".join(leftover), file=sys.stderr)
+        return 1
+
     OUT.write_text(body, encoding="utf-8")
 
     merged: dict[str, int] = {}
     for c in (c1, c2, c3):
         for k, v in c.items():
             merged[k] = merged.get(k, 0) + v
+    merged["glossario: identificadores"] = renames
+    merged["glossario: comentarios"] = comments
     print("substituicoes:")
     for k, v in sorted(merged.items(), key=lambda t: -t[1]):
         print(f"  {v:4d}  {k}")

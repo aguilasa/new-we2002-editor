@@ -18,6 +18,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import glossary  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 LEGACY = ROOT / "legacy" / "mfc" / "edDlg.cpp"
 INCLUDE = ROOT / "src" / "core" / "include" / "we2002"
@@ -78,6 +81,18 @@ def main() -> int:
     if len(offsets) != 69:
         print(f"aviso: esperados 69 OFS_*, achados {len(offsets)}", file=sys.stderr)
 
+    # Rename to English (phase 3.5) but keep the legacy spelling in a trailing
+    # comment: legacy/mfc/ stays in the tree as reference, and grepping an
+    # offset across both trees has to keep working.
+    renamed = []
+    for name, value, comment in offsets:
+        new = glossary.OFFSETS.get(name, name)
+        note = comment
+        if new != name:
+            note = f"{comment} ({name})" if comment else f"was {name}"
+        renamed.append((new, value, note))
+    offsets = renamed
+
     width = max(len(n) for n, _, _ in offsets)
     body = []
     for name, value, comment in offsets:
@@ -137,17 +152,22 @@ inline constexpr Offset SECTOR_DATA_END = 2072;
         "nomi_squadre": r"^char nomi_squadre\[120\]\[20\]",
     }
 
+    # Names go through the glossary, so the legacy spellings survive in one
+    # place only (tools/glossary.py) rather than being retyped here.
+    def table_name(legacy_upper: str) -> str:
+        return glossary.TABLES.get(legacy_upper, legacy_upper)
+
     decls = {
         "ruoli": "const char ROLE_NAMES[N_ROLES][6] =",
         "start_link": "const int START_LINK[] =",
-        "nc_naz_seq": "const int NC_NAZ_SEQ[] =",
-        "nc_naz_qt": "const char NC_NAZ_QT[] =",
+        "nc_naz_seq": f"const int {table_name('NC_NAZ_SEQ')}[] =",
+        "nc_naz_qt": f"const char {table_name('NC_NAZ_QT')}[] =",
         "nomi_squadre": "const char TEAM_NAMES[120][20] =",
     }
     for k in blocks:
         if k.startswith("lun_"):
             n = 32 if "add" in k else 95
-            decls[k] = f"const char {k.upper()}[{n}] ="
+            decls[k] = f"const char {table_name(k.upper())}[{n}] ="
 
     parts = []
     counts = {}
@@ -171,8 +191,35 @@ namespace we2002 {
         encoding="utf-8",
     )
 
+    # One doc comment per table. Keyed by the legacy block name, so renaming a
+    # table in the glossary does not orphan its documentation.
+    docs = {
+        "lun_nomi1":
+            "/// Per-team byte length of each of the six all-caps name slots, in\n"
+            "/// disc order (national teams, then all-stars, then Master League\n"
+            "/// clubs). The trailing NUL separator is counted, which is why the\n"
+            "/// reads use these verbatim rather than strlen().",
+        "lun_nomi_min": "/// Byte length of the mixed-case team name.",
+        "lun_nomi_add1":
+            "/// Byte length of the 7th and 8th name slots, Master League only.",
+        "lun_nomik": "/// Length in characters of the Japanese team name; the\n"
+                     "/// encoded form on disc is twice this many bytes.",
+        "ruoli": "/// The 21 role abbreviations shown on the tactics screen.",
+        "start_link":
+            "/// First squad index of each national team inside the shared player\n"
+            "/// pool. ResolveMlLink() uses it to turn a two-byte link into an\n"
+            "/// index into Database::players.",
+        "nc_naz_seq":
+            "/// The non-contract player pool is stored as runs, one per team:\n"
+            "/// NC_TEAM_CODE gives the team and NC_PLAYER_COUNT how many of its\n"
+            "/// players follow.",
+        "nomi_squadre": "/// Team names as the editor displays them.",
+    }
+
     externs = []
     for key in blocks:
+        if key in docs:
+            externs.append(docs[key])
         d = decls[key].replace(" =", ";").replace("const ", "extern const ")
         externs.append(d)
 
@@ -185,10 +232,6 @@ namespace we2002 {
 
 inline constexpr int N_ROLES = 21;
 
-/// Per-team byte length of each of the six name slots, in disc order
-/// (national teams, then all-stars, then Master League clubs). The trailing
-/// NUL separator is included in the count, which is why the reads use these
-/// verbatim rather than strlen().
 """
         + "\n".join(externs)
         + """

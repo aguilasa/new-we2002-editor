@@ -49,9 +49,9 @@ std::filesystem::path UrlSidecarPath(const std::filesystem::path& image) {
 
 Database::Database() = default;
 
-int TrovaIdMl(const unsigned char* lk) {
-    // Verbatim from legacy/mfc/edDlg.cpp:3430, minus a dead `gioc[r].nome;`
-    // expression statement that had no effect.
+int ResolveMlLink(const unsigned char* lk) {
+    // Verbatim from legacy/mfc/edDlg.cpp:3430, minus one dead expression
+    // statement that read a player name and threw it away.
     unsigned int nz, g, r;
     nz = static_cast<unsigned int>(lk[0]);
     g = static_cast<unsigned int>(lk[1]);
@@ -63,1609 +63,1609 @@ int TrovaIdMl(const unsigned char* lk) {
     return static_cast<int>(r);
 }
 
-void Database::NomiAllStar() {
+void Database::CopyAllStarNames() {
     // Verbatim from legacy/mfc/edDlg.cpp:8418.
     for (int i = 0; i < 23; i++) {
         // euro
-        std::strcpy(gioc[462 + (54 * 23) + i].nome, gioc[TrovaIdMl(&link_euroas[i * 2])].nome);
+        std::strcpy(players[462 + (54 * 23) + i].name, players[ResolveMlLink(&link_euro_allstar[i * 2])].name);
         // world
-        std::strcpy(gioc[462 + (55 * 23) + i].nome, gioc[TrovaIdMl(&link_worldas[i * 2])].nome);
+        std::strcpy(players[462 + (55 * 23) + i].name, players[ResolveMlLink(&link_world_allstar[i * 2])].name);
     }
 }
 
 bool Database::Load(const std::filesystem::path& image, const Reporter& report)
 {
 	int i,j;
-	unsigned short auxcol[16];
-	char auxstr[50], auxstr1[50], auxnome[11];
-	CdImage fil_ctrl;
-	if(!fil_ctrl.OpenRead(image))
+	unsigned short colour_buf[16];
+	char buf[50], buf1[50], name_buf[11];
+	CdImage image_file;
+	if(!image_file.OpenRead(image))
 	{
 		Report(report, "Error ! Impossible to open CD image !");
 		return false;
 	}
 
-// squadre
-	//caricare i nomi 
-		// lotto kanji - ml
-	fil_ctrl.Seek(OFS_NOMI_SQK);
+// teams
+	//load names 
+		// kanji batch, ml clubs
+	image_file.Seek(OFS_TEAM_NAME_KANJI);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(&squad_ml[31-i].nomekanji,LUN_NOMIK[94-i]*2);
-		KanjiToAscii((unsigned char*)squad_ml[31-i].nomekanji, (unsigned char*)squad_ml[31-i].nomek, LUN_NOMIK[94-i]);
+		image_file.Read(&ml_teams[31-i].raw_kanji_name,TEAM_NAME_KANJI_LEN[94-i]*2);
+		KanjiToAscii((unsigned char*)ml_teams[31-i].raw_kanji_name, (unsigned char*)ml_teams[31-i].kanji_name, TEAM_NAME_KANJI_LEN[94-i]);
 	}
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 58)
 		{
-			fil_ctrl.Read(&squad_nazall[62-i].nomekanji,4);
-			fil_ctrl.Seek(OFS_NOMI_SQK1);
-			fil_ctrl.Read(auxstr,8);
+			image_file.Read(&teams[62-i].raw_kanji_name,4);
+			image_file.Seek(OFS_TEAM_NAME_KANJI_A);
+			image_file.Read(buf,8);
 			for(j = 0;j < 8;j++)
-				squad_nazall[62-i].nomekanji[4+j] = auxstr[j];
+				teams[62-i].raw_kanji_name[4+j] = buf[j];
 		} else
-			fil_ctrl.Read(&squad_nazall[62-i].nomekanji,LUN_NOMIK[62-i]*2);
-		KanjiToAscii((unsigned char*)squad_nazall[62-i].nomekanji, (unsigned char*)squad_nazall[62-i].nomek, LUN_NOMIK[62-i]);
+			image_file.Read(&teams[62-i].raw_kanji_name,TEAM_NAME_KANJI_LEN[62-i]*2);
+		KanjiToAscii((unsigned char*)teams[62-i].raw_kanji_name, (unsigned char*)teams[62-i].kanji_name, TEAM_NAME_KANJI_LEN[62-i]);
 	}
 
-		//1° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ1);
+		//1st batch - ml
+	image_file.Seek(OFS_TEAM_NAME_1);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI1[94-i]);
-		strcpy(squad_ml[31-i].nomi[0],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_1[94-i]);
+		strcpy(ml_teams[31-i].names[0],buf);
 	}
-		//1° lotto - naz/alls - salto - jugoslavia (24°)
+		//1st batch - national and all-star - jump - yugoslavia (24th)
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 40)
-			fil_ctrl.Seek(OFS_NOMI_SQ1A);
-		fil_ctrl.Read(auxstr,LUN_NOMI1[62-i]);
-		strcpy(squad_nazall[62-i].nomi[0],auxstr);
+			image_file.Seek(OFS_TEAM_NAME_1_A);
+		image_file.Read(buf,TEAM_NAME_LEN_1[62-i]);
+		strcpy(teams[62-i].names[0],buf);
 	}
-		//2° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ2);
+		//2nd batch - ml
+	image_file.Seek(OFS_TEAM_NAME_2);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI2[94-i]);
-		strcpy(squad_ml[31-i].nomi[1],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_2[94-i]);
+		strcpy(ml_teams[31-i].names[1],buf);
 	}
-		//2° lotto - naz/alls 
+		//2nd batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI2[62-i]);
-		strcpy(squad_nazall[62-i].nomi[1],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_2[62-i]);
+		strcpy(teams[62-i].names[1],buf);
 	}
-		//3° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ3);
+		//3rd batch - ml
+	image_file.Seek(OFS_TEAM_NAME_3);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI3[94-i]);
-		strcpy(squad_ml[31-i].nomi[2],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_3[94-i]);
+		strcpy(ml_teams[31-i].names[2],buf);
 	}
-		//3° lotto - naz/alls 
+		//3rd batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI3[62-i]);
-		strcpy(squad_nazall[62-i].nomi[2],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_3[62-i]);
+		strcpy(teams[62-i].names[2],buf);
 	}
 
-		//4° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ4);
+		//4th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_4);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI4[94-i]);
-		strcpy(squad_ml[31-i].nomi[3],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_4[94-i]);
+		strcpy(ml_teams[31-i].names[3],buf);
 	}
-		//4° lotto - naz/alls 
+		//4th batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI4[62-i]);
-		strcpy(squad_nazall[62-i].nomi[3],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_4[62-i]);
+		strcpy(teams[62-i].names[3],buf);
 	}
-		//5° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ5);
+		//5th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_5);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI5[94-i]);
-		strcpy(squad_ml[31-i].nomi[4],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_5[94-i]);
+		strcpy(ml_teams[31-i].names[4],buf);
 	}
-		//5° lotto - naz/alls - salto - francia (7°)
+		//5th batch - national and all-star - jump - france (7th)
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 57)
 		{
-			fil_ctrl.Read(auxstr1, 4);
-			auxstr1[4] = 0;
-			strcpy(auxstr, auxstr1);
-			fil_ctrl.Seek(OFS_NOMI_SQ5A);
-			fil_ctrl.Read(auxstr1, 4);
-			strcat(auxstr, auxstr1);
+			image_file.Read(buf1, 4);
+			buf1[4] = 0;
+			strcpy(buf, buf1);
+			image_file.Seek(OFS_TEAM_NAME_5_A);
+			image_file.Read(buf1, 4);
+			strcat(buf, buf1);
 		} else
-			fil_ctrl.Read(auxstr,LUN_NOMI5[62-i]);
-		strcpy(squad_nazall[62-i].nomi[4],auxstr);
+			image_file.Read(buf,TEAM_NAME_LEN_5[62-i]);
+		strcpy(teams[62-i].names[4],buf);
 	}
-		//6° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ6);
+		//6th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_6);
 	for(i = 0;i < 32;i ++)
 	{
 		if(i == 15)
-			fil_ctrl.Seek(OFS_NOMI_SQ6A);
-		fil_ctrl.Read(auxstr,LUN_NOMI6[94-i]);
-		strcpy(squad_ml[31-i].nomi[5],auxstr);
+			image_file.Seek(OFS_TEAM_NAME_6_A);
+		image_file.Read(buf,TEAM_NAME_LEN_6[94-i]);
+		strcpy(ml_teams[31-i].names[5],buf);
 	}
-		//6° lotto - naz/alls 
-	fil_ctrl.Seek(OFS_NOMI_SQ6B);
+		//6th batch - national and all-star 
+	image_file.Seek(OFS_TEAM_NAME_6_B);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI6[62-i]);
-		strcpy(squad_nazall[62-i].nomi[5],auxstr);
+		image_file.Read(buf,TEAM_NAME_LEN_6[62-i]);
+		strcpy(teams[62-i].names[5],buf);
 	}
-		//minuscolo - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_M);
+		//mixed case, ml clubs
+	image_file.Seek(OFS_TEAM_MIXED_CASE_NAME);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI_MIN[94-i]);
-		strcpy(squad_ml[31-i].nome_m,auxstr);
+		image_file.Read(buf,TEAM_MIXED_CASE_NAME_LEN[94-i]);
+		strcpy(ml_teams[31-i].mixed_case_name,buf);
 	}
-		//minuscolo - naz/alls 
+		//mixed case, national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI_MIN[62-i]);
-		strcpy(squad_nazall[62-i].nome_m,auxstr);
+		image_file.Read(buf,TEAM_MIXED_CASE_NAME_LEN[62-i]);
+		strcpy(teams[62-i].mixed_case_name,buf);
 	}
 		//abbrev.1 - ml
-	auxstr1[4] = 0;
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB1);
+	buf1[4] = 0;
+	image_file.Seek(OFS_TEAM_ABBREV_1);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_ml[31-i].nomi_a[0],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(ml_teams[31-i].abbreviations[0],buf1);
 	}
-		//abbrev.1 - naz/alls 
+		//abbrev.1 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_nazall[62-i].nomi_a[0],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(teams[62-i].abbreviations[0],buf1);
 	}
 		//abbrev.2 - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB2);
+	image_file.Seek(OFS_TEAM_ABBREV_2);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_ml[31-i].nomi_a[1],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(ml_teams[31-i].abbreviations[1],buf1);
 	}
-		//abbrev.2 - naz/alls 
+		//abbrev.2 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_nazall[62-i].nomi_a[1],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(teams[62-i].abbreviations[1],buf1);
 	}
 		//abbrev.3 - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB3);
+	image_file.Seek(OFS_TEAM_ABBREV_3);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_ml[31-i].nomi_a[2],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(ml_teams[31-i].abbreviations[2],buf1);
 	}
-		//abbrev.3 - naz/alls 
+		//abbrev.3 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr1,4);
-		strcpy(squad_nazall[62-i].nomi_a[2],auxstr1);
+		image_file.Read(buf1,4);
+		strcpy(teams[62-i].abbreviations[2],buf1);
 	}
-		// nomi aggiuntivi ml - 1° lotto
-	fil_ctrl.Seek(OFS_NOMI_PML1);
+		// ml clubs, 7th name slot
+	image_file.Seek(OFS_ML_TEAM_NAME_7);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,LUN_NOMI_ADD1[31-i]);
-		strcpy(squad_ml[31-i].nomi[6],auxstr);
+		image_file.Read(buf,ML_TEAM_NAME_LEN_7[31-i]);
+		strcpy(ml_teams[31-i].names[6],buf);
 	}
-		// nomi aggiuntivi ml - 2° lotto
-	fil_ctrl.Seek(OFS_NOMI_PML2);
+		// ml clubs, 8th name slot
+	image_file.Seek(OFS_ML_TEAM_NAME_8);
 	for(i = 0;i < 32;i ++)
 	{
 		if(i == 30)
 		{
-			fil_ctrl.Read(auxstr1, 4);
-			auxstr1[4] = 0;
-			strcpy(auxstr, auxstr1);
-			fil_ctrl.Seek(OFS_NOMI_PML2A);
-			fil_ctrl.Read(auxstr1, 4);
-			strcat(auxstr, auxstr1);
+			image_file.Read(buf1, 4);
+			buf1[4] = 0;
+			strcpy(buf, buf1);
+			image_file.Seek(OFS_ML_TEAM_NAME_8_A);
+			image_file.Read(buf1, 4);
+			strcat(buf, buf1);
 		} else
-			fil_ctrl.Read(auxstr,LUN_NOMI_ADD2[31-i]);
-		strcpy(squad_ml[31-i].nomi[7],auxstr);
+			image_file.Read(buf,ML_TEAM_NAME_LEN_8[31-i]);
+		strcpy(ml_teams[31-i].names[7],buf);
 	}
 	for(i=0;i<10;i++)
-		auxstr[i] = 0;
-	//caricare bar forza
-		//nazionali-allstar
-	fil_ctrl.Seek(OFS_BAR);
+		buf[i] = 0;
+	//load strength bars
+		//national and all-star
+	image_file.Seek(OFS_TEAM_BARS);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,1);
-		squad_nazall[i].bar_attacco = auxstr[0];
+		image_file.Read(buf,1);
+		teams[i].bar_attack = buf[0];
 		if(i == 3)
-			fil_ctrl.Seek(OFS_BAR1);
-		fil_ctrl.Read(auxstr,4);
-		squad_nazall[i].bar_difesa = auxstr[0];
-		squad_nazall[i].bar_potenza = auxstr[1];
-		squad_nazall[i].bar_velocita = auxstr[2];
-		squad_nazall[i].bar_tecnica = auxstr[3];
+			image_file.Seek(OFS_TEAM_BARS_A);
+		image_file.Read(buf,4);
+		teams[i].bar_defence = buf[0];
+		teams[i].bar_power = buf[1];
+		teams[i].bar_speed = buf[2];
+		teams[i].bar_technique = buf[3];
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,5);
-		squad_ml[i].bar_attacco = auxstr[0];
-		squad_ml[i].bar_difesa = auxstr[1];
-		squad_ml[i].bar_potenza = auxstr[2];
-		squad_ml[i].bar_velocita = auxstr[3];
-		squad_ml[i].bar_tecnica = auxstr[4];
+		image_file.Read(buf,5);
+		ml_teams[i].bar_attack = buf[0];
+		ml_teams[i].bar_defence = buf[1];
+		ml_teams[i].bar_power = buf[2];
+		ml_teams[i].bar_speed = buf[3];
+		ml_teams[i].bar_technique = buf[4];
 	}
 
-	//caricare kik
-		//nazionali-allstar
-	fil_ctrl.Seek(OFS_KICKER);
+	//load set-piece takers
+		//national and all-star
+	image_file.Seek(OFS_KICKER);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(auxstr,6);
-		squad_nazall[i].kik_punl = auxstr[0];
-		squad_nazall[i].kik_punc = auxstr[1];
-		squad_nazall[i].kik_angdx = auxstr[2];
-		squad_nazall[i].kik_angsx = auxstr[3];
-		squad_nazall[i].kik_rigori = auxstr[4];
-		squad_nazall[i].kik_cap = auxstr[5];
+		image_file.Read(buf,6);
+		teams[i].kick_long_fk = buf[0];
+		teams[i].kick_short_fk = buf[1];
+		teams[i].kick_right_corner = buf[2];
+		teams[i].kick_left_corner = buf[3];
+		teams[i].kick_penalty = buf[4];
+		teams[i].captain = buf[5];
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,6);
-		squad_ml[i].kik_punl = auxstr[1];
-		squad_ml[i].kik_punc = auxstr[0];
-		squad_ml[i].kik_angdx = auxstr[3];
-		squad_ml[i].kik_angsx = auxstr[2];
-		squad_ml[i].kik_rigori = auxstr[4];
-		squad_ml[i].kik_cap = auxstr[5];
+		image_file.Read(buf,6);
+		ml_teams[i].kick_long_fk = buf[1];
+		ml_teams[i].kick_short_fk = buf[0];
+		ml_teams[i].kick_right_corner = buf[3];
+		ml_teams[i].kick_left_corner = buf[2];
+		ml_teams[i].kick_penalty = buf[4];
+		ml_teams[i].captain = buf[5];
 	}
-		//default ml
-	fil_ctrl.Read(auxstr,2);
-	fil_ctrl.Read(auxstr,6);
-	squad_defml.kik_punl = auxstr[1];
-	squad_defml.kik_punc = auxstr[0];
-	squad_defml.kik_angdx = auxstr[3];
-	squad_defml.kik_angsx = auxstr[2];
-	squad_defml.kik_rigori = auxstr[4];
-	squad_defml.kik_cap = auxstr[5];
+		//ml default
+	image_file.Read(buf,2);
+	image_file.Read(buf,6);
+	ml_default.kick_long_fk = buf[1];
+	ml_default.kick_short_fk = buf[0];
+	ml_default.kick_right_corner = buf[3];
+	ml_default.kick_left_corner = buf[2];
+	ml_default.kick_penalty = buf[4];
+	ml_default.captain = buf[5];
 
-	//caricare tattiche 
-		//nazionali-allstar
-	auxstr[30] = 0;
-	fil_ctrl.Seek(OFS_TATTICHE);
+	//load formations 
+		//national and all-star
+	buf[30] = 0;
+	image_file.Seek(OFS_FORMATIONS);
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 32)
 		{
-			fil_ctrl.Read(auxstr1,20);
+			image_file.Read(buf1,20);
 			for(j=0;j<20;j++)
-				auxstr[j] = auxstr1[j];
-			fil_ctrl.Seek(OFS_TATTICHEA);
-			fil_ctrl.Read(auxstr1, 10);
+				buf[j] = buf1[j];
+			image_file.Seek(OFS_FORMATIONS_A);
+			image_file.Read(buf1, 10);
 			for(j=0;j<10;j++)
-				auxstr[j+20] = auxstr1[j];
-			auxstr[30] = 0;
+				buf[j+20] = buf1[j];
+			buf[30] = 0;
 		} else
-			fil_ctrl.Read(auxstr,30);
+			image_file.Read(buf,30);
 
-		strcpy(squad_nazall[i].str_tattica, auxstr);
+		strcpy(teams[i].raw_formation, buf);
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Read(auxstr,30);
-		strcpy(squad_ml[i].str_tattica, auxstr);
+		image_file.Read(buf,30);
+		strcpy(ml_teams[i].raw_formation, buf);
 	}
-		//default ml
-	fil_ctrl.Read(auxstr,2);
-	fil_ctrl.Read(auxstr,30);
-	auxstr[30] = 0;
-	strcpy(squad_defml.str_tattica, auxstr);
-	//caricare stringa numeri
-		//per squadre ml
-	fil_ctrl.Seek(OFS_NUMERI_ML);
-	fil_ctrl.Read(squad_defml.str_numeri,23);
-	fil_ctrl.Read(auxstr,1);
+		//ml default
+	image_file.Read(buf,2);
+	image_file.Read(buf,30);
+	buf[30] = 0;
+	strcpy(ml_default.raw_formation, buf);
+	//load the squad-number blob
+		//for ml clubs
+	image_file.Seek(OFS_SQUAD_NUMBERS_ML);
+	image_file.Read(ml_default.raw_numbers,23);
+	image_file.Read(buf,1);
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Read(&squad_ml[i].str_numeri,23);
-		//per squadre naz/all
-	fil_ctrl.Seek(OFS_NUMERI_NAZ);
+		image_file.Read(&ml_teams[i].raw_numbers,23);
+		//for national and all-star teams
+	image_file.Seek(OFS_SQUAD_NUMBERS_NATIONAL);
 	for(i = 0;i < 64;i ++)
-		fil_ctrl.Read(&squad_nazall[i].stc_numeri,16);
+		image_file.Read(&teams[i].squad_numbers,16);
 
 
-	//caricare bandiera
-		//forma, la 1° (sono tutte ok e uguali)
-		//naz/all
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA1);
+	//load flags
+		//shape, 1st copy (all five copies agree)
+		//national and all-star
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_1);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Read(&squad_nazall[i].stile_bandiera,1);
+		image_file.Read(&teams[i].flag_shape,1);
 	}
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Read(&squad_ml[i].stile_bandiera,1);
-		//colori  
-		//naz/all 
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE);
+		image_file.Read(&ml_teams[i].flag_shape,1);
+		//colours  
+		//national and all-star 
+	image_file.Seek(OFS_FLAG_COLOURS);
 	for(i = 0;i < 56;i ++)
 	{
 		switch(i)
 		{
 			case 13:
-				fil_ctrl.Read(&squad_nazall[i].col_bandiera,26);
-				fil_ctrl.Seek(OFS_BANDIERE_COLORE1);
-				fil_ctrl.Read(auxcol,6);
+				image_file.Read(&teams[i].flag_colours,26);
+				image_file.Seek(OFS_FLAG_COLOURS_A);
+				image_file.Read(colour_buf,6);
 				for(j=0;j<3;j++)
-					squad_nazall[i].col_bandiera[j+13] = auxcol[j];
+					teams[i].flag_colours[j+13] = colour_buf[j];
 				break;
-			// le nuove nazionali non sono li...
+			// the new national sides are elsewhere
 			case 36:
 			case 39:
 			case 47:
 				break;
-			// ci sono nel mezzo le vecchie nazionali nord irlanda, giamaica, uae
+			// the retired national sides -- northern ireland, jamaica, uae -- sit in between
 			case 1:
 			case 40:
 			case 52:
-				fil_ctrl.SeekCurrent(32);
+				image_file.SeekCurrent(32);
 			[[fallthrough]];
 			default:
-				fil_ctrl.Read(&squad_nazall[i].col_bandiera,32);
+				image_file.Read(&teams[i].flag_colours,32);
 				break;
 		}
 	}
 
-	fil_ctrl.SeekCurrent(64);
+	image_file.SeekCurrent(64);
 	for(i = 0;i < 5;i ++)
-		fil_ctrl.Read(&squad_ml[i].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[10].col_bandiera,32);
+		image_file.Read(&ml_teams[i].flag_colours,32);
+	image_file.Read(&ml_teams[10].flag_colours,32);
 	for(i = 0;i < 3;i ++)
-		fil_ctrl.Read(&squad_ml[i+7].col_bandiera,32);
+		image_file.Read(&ml_teams[i+7].flag_colours,32);
 	for(i = 0;i < 2;i ++)
-		fil_ctrl.Read(&squad_ml[i+11].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[15].col_bandiera,32);
+		image_file.Read(&ml_teams[i+11].flag_colours,32);
+	image_file.Read(&ml_teams[15].flag_colours,32);
 	for(i = 0;i < 4;i ++)
-		fil_ctrl.Read(&squad_ml[i+18].col_bandiera,32);
-	fil_ctrl.SeekCurrent(32);
-	fil_ctrl.Read(&squad_ml[14].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[24].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[25].col_bandiera,32);
-	//bayern monaco
-	fil_ctrl.Read(&squad_ml[26].col_bandiera,26);
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE2);
-	fil_ctrl.Read(auxcol,6);
+		image_file.Read(&ml_teams[i+18].flag_colours,32);
+	image_file.SeekCurrent(32);
+	image_file.Read(&ml_teams[14].flag_colours,32);
+	image_file.Read(&ml_teams[24].flag_colours,32);
+	image_file.Read(&ml_teams[25].flag_colours,32);
+	//bayern munich
+	image_file.Read(&ml_teams[26].flag_colours,26);
+	image_file.Seek(OFS_FLAG_COLOURS_B);
+	image_file.Read(colour_buf,6);
 	for(j=0;j<3;j++)
-		squad_ml[26].col_bandiera[j+13] = auxcol[j];
-	fil_ctrl.Read(&squad_ml[27].col_bandiera,32);
+		ml_teams[26].flag_colours[j+13] = colour_buf[j];
+	image_file.Read(&ml_teams[27].flag_colours,32);
 	for(i = 0;i < 2;i ++)
-		fil_ctrl.Read(&squad_ml[i+16].col_bandiera,32);
-	fil_ctrl.SeekCurrent(64);
-	fil_ctrl.Read(&squad_ml[13].col_bandiera,32);
-	fil_ctrl.SeekCurrent(288);
-	fil_ctrl.Read(&squad_nazall[39].col_bandiera,32);
-	fil_ctrl.SeekCurrent(64);
-	fil_ctrl.Read(&squad_nazall[47].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[6].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[23].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[28].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[29].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[30].col_bandiera,32);
-	fil_ctrl.Read(&squad_ml[31].col_bandiera,32);
+		image_file.Read(&ml_teams[i+16].flag_colours,32);
+	image_file.SeekCurrent(64);
+	image_file.Read(&ml_teams[13].flag_colours,32);
+	image_file.SeekCurrent(288);
+	image_file.Read(&teams[39].flag_colours,32);
+	image_file.SeekCurrent(64);
+	image_file.Read(&teams[47].flag_colours,32);
+	image_file.Read(&ml_teams[6].flag_colours,32);
+	image_file.Read(&ml_teams[23].flag_colours,32);
+	image_file.Read(&ml_teams[28].flag_colours,32);
+	image_file.Read(&ml_teams[29].flag_colours,32);
+	image_file.Read(&ml_teams[30].flag_colours,32);
+	image_file.Read(&ml_teams[31].flag_colours,32);
 	//senegal
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE_SEN);
-	fil_ctrl.Read(&squad_nazall[36].col_bandiera,32);
+	image_file.Seek(OFS_FLAG_COLOURS_SENEGAL);
+	image_file.Read(&teams[36].flag_colours,32);
 
-	//anteprima maglia !!!!!!!!!!!!!!!!
-	fil_ctrl.Seek(OFS_ANT_MAGLIE);
+	//kit preview !!!!!!!!!!!!!!!!
+	image_file.Seek(OFS_KIT_PREVIEW);
 	for(i = 0;i < 63;i ++)
 	{
 		switch(i)
 		{	
 			case 30 :
-				fil_ctrl.Read(&squad_nazall[i].maglia1,32);
-				fil_ctrl.Read(&squad_nazall[i].maglia2,32);
-				fil_ctrl.Seek(OFS_ANT_MAGLIE1);
+				image_file.Read(&teams[i].home_kit,32);
+				image_file.Read(&teams[i].away_kit,32);
+				image_file.Seek(OFS_KIT_PREVIEW_A);
 				break;
 			default :
-				fil_ctrl.Read(&squad_nazall[i].maglia1,32);
-				fil_ctrl.Read(&squad_nazall[i].maglia2,32);
+				image_file.Read(&teams[i].home_kit,32);
+				image_file.Read(&teams[i].away_kit,32);
 				break;
 		}
 	}
 	//ml
-	fil_ctrl.Seek(OFS_ANT_MAGLIE2);
+	image_file.Seek(OFS_KIT_PREVIEW_B);
 	for(i = 0;i < TEAMS_ML;i ++)
 	{
-		fil_ctrl.Read(&squad_ml[i].maglia1,32);
-		fil_ctrl.Read(&squad_ml[i].maglia2,32);
+		image_file.Read(&ml_teams[i].home_kit,32);
+		image_file.Read(&ml_teams[i].away_kit,32);
 	}
 	
-// giocatori
-	//caricare nomi
-		//giocatori nazionali-alls
-	fil_ctrl.Seek(OFS_NOMI_G);
-	fil_ctrl.Read(auxstr, 8);
-	auxstr[8] = 0;
-	strcpy(auxnome,auxstr);
-	fil_ctrl.Seek(OFS_NOMI_G+312);
-	fil_ctrl.Read(auxstr, 2);
-	auxstr[2] = 0;
-	strcat(auxnome,auxstr);
-	strcpy(gioc[PLAYERS_NC].nome,auxnome);
+// players
+	//load names
+		//national and all-star players
+	image_file.Seek(OFS_PLAYER_NAME);
+	image_file.Read(buf, 8);
+	buf[8] = 0;
+	strcpy(name_buf,buf);
+	image_file.Seek(OFS_PLAYER_NAME+312);
+	image_file.Read(buf, 2);
+	buf[2] = 0;
+	strcat(name_buf,buf);
+	strcpy(players[PLAYERS_NC].name,name_buf);
 	for(i=1+PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		switch(i)
 		{
 			case 205+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 6);
-				auxstr[6] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G2);
-				fil_ctrl.Read(auxstr, 4);
-				auxstr[4] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 6);
+				buf[6] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_2);
+				image_file.Read(buf, 4);
+				buf[4] = 0;
+				strcat(name_buf,buf);
 				break;
 			case 410+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 4);
-				auxstr[4] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G3);
-				fil_ctrl.Read(auxstr, 6);
-				auxstr[6] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 4);
+				buf[4] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_3);
+				image_file.Read(buf, 6);
+				buf[6] = 0;
+				strcat(name_buf,buf);
 				break;
 			case 615+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 2);
-				auxstr[2] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G4);
-				fil_ctrl.Read(auxstr, 8);
-				auxstr[8] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 2);
+				buf[2] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_4);
+				image_file.Read(buf, 8);
+				buf[8] = 0;
+				strcat(name_buf,buf);
 				break;
 			case 820+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_NOMI_G5);
-				fil_ctrl.Read(auxnome, 10);
+				image_file.Seek(OFS_PLAYER_NAME_5);
+				image_file.Read(name_buf, 10);
 				break;
 			case 1024+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 8);
-				auxstr[8] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G6);
-				fil_ctrl.Read(auxstr, 2);
-				auxstr[2] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 8);
+				buf[8] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_6);
+				image_file.Read(buf, 2);
+				buf[2] = 0;
+				strcat(name_buf,buf);
 				break;
 			case 1229+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 6);
-				auxstr[6] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G7);
-				fil_ctrl.Read(auxstr, 4);
-				auxstr[4] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 6);
+				buf[6] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_7);
+				image_file.Read(buf, 4);
+				buf[4] = 0;
+				strcat(name_buf,buf);
 				break;
 			case 1434+PLAYERS_NC :
-				fil_ctrl.Read(auxstr, 4);
-				auxstr[4] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_G8);
-				fil_ctrl.Read(auxstr, 6);
-				auxstr[6] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 4);
+				buf[4] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_PLAYER_NAME_8);
+				image_file.Read(buf, 6);
+				buf[6] = 0;
+				strcat(name_buf,buf);
 				break;
 			default :
-				fil_ctrl.Read(auxnome, 10);
+				image_file.Read(name_buf, 10);
 				break;
 		}
-		auxnome[10] = 0;
-		strcpy(gioc[i].nome,auxnome);
+		name_buf[10] = 0;
+		strcpy(players[i].name,name_buf);
 	}
-		//giocatori non contact ml
-	fil_ctrl.Seek(OFS_NOMI_GML);
+		//non-contract ml players
+	image_file.Seek(OFS_ML_PLAYER_NAME);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
 		switch(i)
 		{
 			case 203 :
-				fil_ctrl.Read(auxnome, 10);
-				fil_ctrl.Seek(OFS_NOMI_GML2);
+				image_file.Read(name_buf, 10);
+				image_file.Seek(OFS_ML_PLAYER_NAME_2);
 				break;
 			case 408 :
-				fil_ctrl.Read(auxstr, 8);
-				auxstr[8] = 0;
-				strcpy(auxnome,auxstr);
-				fil_ctrl.Seek(OFS_NOMI_GML3);
-				fil_ctrl.Read(auxstr, 2);
-				auxstr[2] = 0;
-				strcat(auxnome,auxstr);
+				image_file.Read(buf, 8);
+				buf[8] = 0;
+				strcpy(name_buf,buf);
+				image_file.Seek(OFS_ML_PLAYER_NAME_3);
+				image_file.Read(buf, 2);
+				buf[2] = 0;
+				strcat(name_buf,buf);
 				break;
 			default :
-				fil_ctrl.Read(auxnome, 10);
+				image_file.Read(name_buf, 10);
 				break;
 		}
-		auxnome[10] = 0;
-		strcpy(gioc[i].nome, auxnome);
+		name_buf[10] = 0;
+		strcpy(players[i].name, name_buf);
 	}
 
-	//caricare caratteristiche
-		//naz-all
-	fil_ctrl.Seek(OFS_CARAT_G);
+	//load attributes
+		//national and all-star
+	image_file.Seek(OFS_PLAYER_ATTR);
 	for(i=PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		switch(i)
 		{
 			case 44+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 4);
-				fil_ctrl.Seek(OFS_CARAT_G1);
-				fil_ctrl.Read(auxstr, 8);
+				image_file.Read(buf1, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_1);
+				image_file.Read(buf, 8);
 				for(j=0;j<8;j++)
-					auxstr1[j+4] = auxstr[j];
+					buf1[j+4] = buf[j];
 				break;
 			case 215+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G2);
-				fil_ctrl.Read(auxstr1, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_2);
+				image_file.Read(buf1, 12);
 				break;
 			case 385+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 8);
-				fil_ctrl.Seek(OFS_CARAT_G3);
-				fil_ctrl.Read(auxstr, 4);
+				image_file.Read(buf1, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_3);
+				image_file.Read(buf, 4);
 				for(j=0;j<4;j++)
-					auxstr1[j+8] = auxstr[j];
+					buf1[j+8] = buf[j];
 				break;
 			case 556+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 4);
-				fil_ctrl.Seek(OFS_CARAT_G4);
-				fil_ctrl.Read(auxstr, 8);
+				image_file.Read(buf1, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_4);
+				image_file.Read(buf, 8);
 				for(j=0;j<8;j++)
-					auxstr1[j+4] = auxstr[j];
+					buf1[j+4] = buf[j];
 				break;
 			case 727+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G5);
-				fil_ctrl.Read(auxstr1, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_5);
+				image_file.Read(buf1, 12);
 				break;
 			case 897+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 8);
-				fil_ctrl.Seek(OFS_CARAT_G6);
-				fil_ctrl.Read(auxstr, 4);
+				image_file.Read(buf1, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_6);
+				image_file.Read(buf, 4);
 				for(j=0;j<4;j++)
-					auxstr1[j+8] = auxstr[j];
+					buf1[j+8] = buf[j];
 				break;
 			case 1068+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 4);
-				fil_ctrl.Seek(OFS_CARAT_G7);
-				fil_ctrl.Read(auxstr, 8);
+				image_file.Read(buf1, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_7);
+				image_file.Read(buf, 8);
 				for(j=0;j<8;j++)
-					auxstr1[j+4] = auxstr[j];
+					buf1[j+4] = buf[j];
 				break;
 			case 1239+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G8);
-				fil_ctrl.Read(auxstr1, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_8);
+				image_file.Read(buf1, 12);
 				break;
 			case 1409+PLAYERS_NC :
-				fil_ctrl.Read(auxstr1, 8);
-				fil_ctrl.Seek(OFS_CARAT_G9);
-				fil_ctrl.Read(auxstr, 4);
+				image_file.Read(buf1, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_9);
+				image_file.Read(buf, 4);
 				for(j=0;j<4;j++)
-					auxstr1[j+8] = auxstr[j];
+					buf1[j+8] = buf[j];
 				break;
 			default :
-				fil_ctrl.Read(auxstr1, 12);
+				image_file.Read(buf1, 12);
 				break;
 		}
 		for(j=0;j<12;j++)
-			gioc[i].str_carat[j] = auxstr1[j];
-		gioc[i].codifica_carat();
+			players[i].raw_attributes[j] = buf1[j];
+		players[i].Decode();
 	}
-		//giocatori non contact ml
-	fil_ctrl.Seek(OFS_CARAT_GML);
+		//non-contract ml players
+	image_file.Seek(OFS_ML_PLAYER_ATTR);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
 		switch(i)
 		{
 			case 148 :
-				fil_ctrl.Read(auxstr1, 8);
-				fil_ctrl.Seek(OFS_CARAT_GML1);
-				fil_ctrl.Read(auxstr, 4);
+				image_file.Read(buf1, 8);
+				image_file.Seek(OFS_ML_PLAYER_ATTR_1);
+				image_file.Read(buf, 4);
 				for(j=0;j<4;j++)
-					auxstr1[j+8] = auxstr[j];
+					buf1[j+8] = buf[j];
 				break;
 			case 319 :
-				fil_ctrl.Read(auxstr1, 4);
-				fil_ctrl.Seek(OFS_CARAT_GML2);
-				fil_ctrl.Read(auxstr, 8);
+				image_file.Read(buf1, 4);
+				image_file.Seek(OFS_ML_PLAYER_ATTR_2);
+				image_file.Read(buf, 8);
 				for(j=0;j<8;j++)
-					auxstr1[j+4] = auxstr[j];
+					buf1[j+4] = buf[j];
 				break;
 			default :
-				fil_ctrl.Read(auxstr1, 12);
+				image_file.Read(buf1, 12);
 				break;
 		}
 		for(j=0;j<12;j++)
-			gioc[i].str_carat[j] = auxstr1[j];
-		gioc[i].codifica_carat();
+			players[i].raw_attributes[j] = buf1[j];
+		players[i].Decode();
 	}
 
-	//assegnare link ml
+	//assign ml links
 		//default
-	fil_ctrl.Seek(OFS_LINK_ML);
-	fil_ctrl.Read(auxstr, 46);
+	image_file.Seek(OFS_LINK_ML);
+	image_file.Read(buf, 46);
 	for(j=0;j<46;j++)
-		squad_defml.link[j] = auxstr[j];
-		// tutte ml
-	fil_ctrl.Seek(OFS_LINK_ML1);
+		ml_default.link[j] = buf[j];
+		// all ml clubs
+	image_file.Seek(OFS_LINK_ML1);
 	for(i=0;i<TEAMS_ML;i++)
 	{
 		if(i == 6)
 		{
-			fil_ctrl.Read(auxstr, 28);
+			image_file.Read(buf, 28);
 			for(j=0;j<28;j++)
-				squad_ml[i].link[j] = auxstr[j];
-			fil_ctrl.Seek(OFS_LINK_ML2);
-			fil_ctrl.Read(auxstr, 18);
+				ml_teams[i].link[j] = buf[j];
+			image_file.Seek(OFS_LINK_ML2);
+			image_file.Read(buf, 18);
 			for(j=0;j<18;j++)
-				squad_ml[i].link[j+28] = auxstr[j];
+				ml_teams[i].link[j+28] = buf[j];
 		} else
 		{
-			fil_ctrl.Read(auxstr, 46);
+			image_file.Read(buf, 46);
 			for(j=0;j<46;j++)
-				squad_ml[i].link[j] = auxstr[j];
+				ml_teams[i].link[j] = buf[j];
 		}
 	}
 
-	//caricare costi ml
-	fil_ctrl.Seek(OFS_COSTI_NAZ);
+	//load ml costs
+	image_file.Seek(OFS_COST_NATIONAL);
 	for(i=PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		if(i == 1704)
 		{
-			fil_ctrl.SeekCurrent(2);
+			image_file.SeekCurrent(2);
 			i = 1750;
 		}
-		fil_ctrl.Read(&gioc[i].costo, 1);
+		image_file.Read(&players[i].cost, 1);
 	}
-	fil_ctrl.Seek(OFS_COSTI_NC);
+	image_file.Seek(OFS_COST_NC);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
-		fil_ctrl.Read(auxstr1, 1);
-		gioc[i].costo = auxstr1[0];
+		image_file.Read(buf1, 1);
+		players[i].cost = buf1[0];
 	}
 
-	// link nomi all-star
-	fil_ctrl.Seek(2328964);
-	fil_ctrl.Read(link_euroas, 46);
-	fil_ctrl.Seek(2329010);
-	fil_ctrl.Read(link_worldas, 46);
-	NomiAllStar();
+	// all-star name links
+	image_file.Seek(2328964);
+	image_file.Read(link_euro_allstar, 46);
+	image_file.Seek(2329010);
+	image_file.Read(link_world_allstar, 46);
+	CopyAllStarNames();
 
-	//tattiche predefinite
-	fil_ctrl.Seek(4822152);
+	//preset formations
+	image_file.Seek(4822152);
 	for(i=0;i<16;i++)
 	{
-		fil_ctrl.Read(tattpred[15-i].nome, 6);
-		tattpred[15-i].nome[6] = 0;
-		fil_ctrl.Read(auxstr, 2);
+		image_file.Read(preset_formations[15-i].name, 6);
+		preset_formations[15-i].name[6] = 0;
+		image_file.Read(buf, 2);
 	}
-	fil_ctrl.Seek(374188);
+	image_file.Seek(374188);
 	for(i=0;i<16;i++)
-		fil_ctrl.Read(tattpred[i].ruoli, 11);
-	fil_ctrl.Seek(374780);
+		image_file.Read(preset_formations[i].roles, 11);
+	image_file.Seek(374780);
 	for(i=0;i<16;i++)
 	{
-		fil_ctrl.Read(tattpred[i].x, 10);
-		fil_ctrl.Read(tattpred[i].y, 10);
+		image_file.Read(preset_formations[i].x, 10);
+		image_file.Read(preset_formations[i].y, 10);
 	}
 
 
-	fil_ctrl.Close();
+	image_file.Close();
 	return true;
 }
 
 bool Database::Save(const std::filesystem::path& image, const Reporter& report) 
 {
 	int i,j,p;
-	char auxstr[50], auxstr1[50];
-	unsigned short auxcol[16];
-	CdImage fil_ctrl;
-	if(!fil_ctrl.OpenReadWrite(image))
+	char buf[50], buf1[50];
+	unsigned short colour_buf[16];
+	CdImage image_file;
+	if(!image_file.OpenReadWrite(image))
 	{
 		Report(report, "Error ! Impossible to write into CD image !");
 		return false;
 	}
-// squadre
-	//salvare i nomi -
-		// lotto kanji - ml
-	fil_ctrl.Seek(OFS_NOMI_SQK);
+// teams
+	//save names
+		// kanji batch, ml clubs
+	image_file.Seek(OFS_TEAM_NAME_KANJI);
 	for(i = 0;i < 32;i ++)
 	{
-		AsciiToKanji((unsigned char*)squad_ml[31-i].nomek, (unsigned char*)squad_ml[31-i].nomekanji, LUN_NOMIK[94-i]);
-		fil_ctrl.Write(&squad_ml[31-i].nomekanji,LUN_NOMIK[94-i]*2);
+		AsciiToKanji((unsigned char*)ml_teams[31-i].kanji_name, (unsigned char*)ml_teams[31-i].raw_kanji_name, TEAM_NAME_KANJI_LEN[94-i]);
+		image_file.Write(&ml_teams[31-i].raw_kanji_name,TEAM_NAME_KANJI_LEN[94-i]*2);
 	}
 	for(i = 0;i < 63;i ++)
 	{
-		AsciiToKanji((unsigned char*)squad_nazall[62-i].nomek, (unsigned char*)squad_nazall[62-i].nomekanji, LUN_NOMIK[62-i]);
+		AsciiToKanji((unsigned char*)teams[62-i].kanji_name, (unsigned char*)teams[62-i].raw_kanji_name, TEAM_NAME_KANJI_LEN[62-i]);
 		if(i == 58)
 		{
-			fil_ctrl.Write(&squad_nazall[62-i].nomekanji,4);
-			fil_ctrl.Seek(OFS_NOMI_SQK1);
+			image_file.Write(&teams[62-i].raw_kanji_name,4);
+			image_file.Seek(OFS_TEAM_NAME_KANJI_A);
 			for(j = 0;j < 8;j++)
-				auxstr[j] = squad_nazall[62-i].nomekanji[4+j];
-			fil_ctrl.Write(auxstr,8);
+				buf[j] = teams[62-i].raw_kanji_name[4+j];
+			image_file.Write(buf,8);
 		} else
-			fil_ctrl.Write(&squad_nazall[62-i].nomekanji,LUN_NOMIK[62-i]*2);
+			image_file.Write(&teams[62-i].raw_kanji_name,TEAM_NAME_KANJI_LEN[62-i]*2);
 	}
 
-		//1° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ1);
+		//1st batch - ml
+	image_file.Seek(OFS_TEAM_NAME_1);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[0], LUN_NOMI1[94-i]);
+		image_file.Write(ml_teams[31-i].names[0], TEAM_NAME_LEN_1[94-i]);
 	}
-		//1° lotto - naz/alls - salto - jugoslavia (24°)
+		//1st batch - national and all-star - jump - yugoslavia (24th)
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 40)
-			fil_ctrl.Seek(OFS_NOMI_SQ1A);
-		fil_ctrl.Write(squad_nazall[62-i].nomi[0], LUN_NOMI1[62-i]);
+			image_file.Seek(OFS_TEAM_NAME_1_A);
+		image_file.Write(teams[62-i].names[0], TEAM_NAME_LEN_1[62-i]);
 	}
-		//2° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ2);
+		//2nd batch - ml
+	image_file.Seek(OFS_TEAM_NAME_2);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[1],LUN_NOMI2[94-i]);
+		image_file.Write(ml_teams[31-i].names[1],TEAM_NAME_LEN_2[94-i]);
 	}
-		//2° lotto - naz/alls 
+		//2nd batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi[1],LUN_NOMI2[62-i]);
+		image_file.Write(teams[62-i].names[1],TEAM_NAME_LEN_2[62-i]);
 	}
-		//3° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ3);
+		//3rd batch - ml
+	image_file.Seek(OFS_TEAM_NAME_3);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[2],LUN_NOMI3[94-i]);
+		image_file.Write(ml_teams[31-i].names[2],TEAM_NAME_LEN_3[94-i]);
 	}
-		//3° lotto - naz/alls 
+		//3rd batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi[2],LUN_NOMI3[62-i]);
+		image_file.Write(teams[62-i].names[2],TEAM_NAME_LEN_3[62-i]);
 	}
 
-		//4° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ4);
+		//4th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_4);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[3],LUN_NOMI4[94-i]);
+		image_file.Write(ml_teams[31-i].names[3],TEAM_NAME_LEN_4[94-i]);
 	}
-		//4° lotto - naz/alls 
+		//4th batch - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi[3],LUN_NOMI4[62-i]);
+		image_file.Write(teams[62-i].names[3],TEAM_NAME_LEN_4[62-i]);
 	}
-		//5° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ5);
+		//5th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_5);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[4],LUN_NOMI5[94-i]);
+		image_file.Write(ml_teams[31-i].names[4],TEAM_NAME_LEN_5[94-i]);
 	}
-		//5° lotto - naz/alls - salto - francia (7°)
+		//5th batch - national and all-star - jump - france (7th)
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 57)
 		{
-			fil_ctrl.Write(squad_nazall[62-i].nomi[4], 4);
-			fil_ctrl.Seek(OFS_NOMI_SQ5A);
+			image_file.Write(teams[62-i].names[4], 4);
+			image_file.Seek(OFS_TEAM_NAME_5_A);
 			for(j=0;j<4;j++)
-				auxstr[j] = squad_nazall[62-i].nomi[4][j+4]; 
-			fil_ctrl.Write(auxstr, 4);
+				buf[j] = teams[62-i].names[4][j+4]; 
+			image_file.Write(buf, 4);
 		} else
-			fil_ctrl.Write(squad_nazall[62-i].nomi[4],LUN_NOMI5[62-i]);
+			image_file.Write(teams[62-i].names[4],TEAM_NAME_LEN_5[62-i]);
 	}
-		//6° lotto - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ6);
+		//6th batch - ml
+	image_file.Seek(OFS_TEAM_NAME_6);
 	for(i = 0;i < 32;i ++)
 	{
 		if(i == 15)
-			fil_ctrl.Seek(OFS_NOMI_SQ6A);
-		fil_ctrl.Write(squad_ml[31-i].nomi[5],LUN_NOMI6[94-i]);
+			image_file.Seek(OFS_TEAM_NAME_6_A);
+		image_file.Write(ml_teams[31-i].names[5],TEAM_NAME_LEN_6[94-i]);
 	}
-		//6° lotto - naz/alls 
-	fil_ctrl.Seek(OFS_NOMI_SQ6B);
+		//6th batch - national and all-star 
+	image_file.Seek(OFS_TEAM_NAME_6_B);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi[5],LUN_NOMI6[62-i]);
+		image_file.Write(teams[62-i].names[5],TEAM_NAME_LEN_6[62-i]);
 	}
-		//minuscolo - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_M);
+		//mixed case, ml clubs
+	image_file.Seek(OFS_TEAM_MIXED_CASE_NAME);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nome_m,LUN_NOMI_MIN[94-i]);
+		image_file.Write(ml_teams[31-i].mixed_case_name,TEAM_MIXED_CASE_NAME_LEN[94-i]);
 	}
-		//minuscolo - naz/alls 
+		//mixed case, national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nome_m,LUN_NOMI_MIN[62-i]);
+		image_file.Write(teams[62-i].mixed_case_name,TEAM_MIXED_CASE_NAME_LEN[62-i]);
 	}
 		//abbrev.1 - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB1);
+	image_file.Seek(OFS_TEAM_ABBREV_1);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi_a[0],4);
+		image_file.Write(ml_teams[31-i].abbreviations[0],4);
 	}
-		//abbrev.1 - naz/alls 
+		//abbrev.1 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi_a[0],4);
+		image_file.Write(teams[62-i].abbreviations[0],4);
 	}
 		//abbrev.2 - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB2);
+	image_file.Seek(OFS_TEAM_ABBREV_2);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi_a[1],4);
+		image_file.Write(ml_teams[31-i].abbreviations[1],4);
 	}
-		//abbrev.2 - naz/alls 
+		//abbrev.2 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi_a[1],4);
+		image_file.Write(teams[62-i].abbreviations[1],4);
 	}
 		//abbrev.3 - ml
-	fil_ctrl.Seek(OFS_NOMI_SQ_AB3);
+	image_file.Seek(OFS_TEAM_ABBREV_3);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi_a[2],4);
+		image_file.Write(ml_teams[31-i].abbreviations[2],4);
 	}
-		//abbrev.3 - naz/alls 
+		//abbrev.3 - national and all-star 
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(squad_nazall[62-i].nomi_a[2],4);
+		image_file.Write(teams[62-i].abbreviations[2],4);
 	}
-		// nomi aggiuntivi ml - 1° lotto
-	fil_ctrl.Seek(OFS_NOMI_PML1);
+		// ml clubs, 7th name slot
+	image_file.Seek(OFS_ML_TEAM_NAME_7);
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[31-i].nomi[6],LUN_NOMI_ADD1[31-i]);
+		image_file.Write(ml_teams[31-i].names[6],ML_TEAM_NAME_LEN_7[31-i]);
 	}
-		// nomi aggiuntivi ml - 2° lotto
-	fil_ctrl.Seek(OFS_NOMI_PML2);
+		// ml clubs, 8th name slot
+	image_file.Seek(OFS_ML_TEAM_NAME_8);
 	for(i = 0;i < 32;i ++)
 	{
 		if(i == 30)
 		{
-			fil_ctrl.Write(squad_ml[31-i].nomi[7], 4);
-			fil_ctrl.Seek(OFS_NOMI_PML2A);
+			image_file.Write(ml_teams[31-i].names[7], 4);
+			image_file.Seek(OFS_ML_TEAM_NAME_8_A);
 			for(j=0;j<4;j++)
-				auxstr[j] = squad_ml[31-i].nomi[7][j+4]; 
-			fil_ctrl.Write(auxstr, 4);
+				buf[j] = ml_teams[31-i].names[7][j+4]; 
+			image_file.Write(buf, 4);
 		} else
-			fil_ctrl.Write(squad_ml[31-i].nomi[7],LUN_NOMI_ADD2[31-i]);
+			image_file.Write(ml_teams[31-i].names[7],ML_TEAM_NAME_LEN_8[31-i]);
 	}
-	//salvare bar forza
-		//nazionali-allstar
-	fil_ctrl.Seek(OFS_BAR);
+	//save strength bars
+		//national and all-star
+	image_file.Seek(OFS_TEAM_BARS);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(&squad_nazall[i].bar_attacco,1);
+		image_file.Write(&teams[i].bar_attack,1);
 		if(i == 3)
-			fil_ctrl.Seek(OFS_BAR1);
-		fil_ctrl.Write(&squad_nazall[i].bar_difesa,1);
-		fil_ctrl.Write(&squad_nazall[i].bar_potenza,1);
-		fil_ctrl.Write(&squad_nazall[i].bar_velocita,1);
-		fil_ctrl.Write(&squad_nazall[i].bar_tecnica,1);
+			image_file.Seek(OFS_TEAM_BARS_A);
+		image_file.Write(&teams[i].bar_defence,1);
+		image_file.Write(&teams[i].bar_power,1);
+		image_file.Write(&teams[i].bar_speed,1);
+		image_file.Write(&teams[i].bar_technique,1);
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(&squad_ml[i].bar_attacco,1);
-		fil_ctrl.Write(&squad_ml[i].bar_difesa,1);
-		fil_ctrl.Write(&squad_ml[i].bar_potenza,1);
-		fil_ctrl.Write(&squad_ml[i].bar_velocita,1);
-		fil_ctrl.Write(&squad_ml[i].bar_tecnica,1);
+		image_file.Write(&ml_teams[i].bar_attack,1);
+		image_file.Write(&ml_teams[i].bar_defence,1);
+		image_file.Write(&ml_teams[i].bar_power,1);
+		image_file.Write(&ml_teams[i].bar_speed,1);
+		image_file.Write(&ml_teams[i].bar_technique,1);
 	}
 
-	//salvare kik
-		//nazionali-allstar
-	fil_ctrl.Seek(OFS_KICKER);
+	//save set-piece takers
+		//national and all-star
+	image_file.Seek(OFS_KICKER);
 	for(i = 0;i < 63;i ++)
 	{
-		fil_ctrl.Write(&squad_nazall[i].kik_punl, 1);
-		fil_ctrl.Write(&squad_nazall[i].kik_punc, 1);
-		fil_ctrl.Write(&squad_nazall[i].kik_angdx, 1);
-		fil_ctrl.Write(&squad_nazall[i].kik_angsx, 1);
-		fil_ctrl.Write(&squad_nazall[i].kik_rigori, 1);
-		fil_ctrl.Write(&squad_nazall[i].kik_cap, 1);
+		image_file.Write(&teams[i].kick_long_fk, 1);
+		image_file.Write(&teams[i].kick_short_fk, 1);
+		image_file.Write(&teams[i].kick_right_corner, 1);
+		image_file.Write(&teams[i].kick_left_corner, 1);
+		image_file.Write(&teams[i].kick_penalty, 1);
+		image_file.Write(&teams[i].captain, 1);
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(&squad_ml[i].kik_punl, 1);
-		fil_ctrl.Write(&squad_ml[i].kik_punc, 1);
-		fil_ctrl.Write(&squad_ml[i].kik_angdx, 1);
-		fil_ctrl.Write(&squad_ml[i].kik_angsx, 1);
-		fil_ctrl.Write(&squad_ml[i].kik_rigori, 1);
-		fil_ctrl.Write(&squad_ml[i].kik_cap, 1);
+		image_file.Write(&ml_teams[i].kick_long_fk, 1);
+		image_file.Write(&ml_teams[i].kick_short_fk, 1);
+		image_file.Write(&ml_teams[i].kick_right_corner, 1);
+		image_file.Write(&ml_teams[i].kick_left_corner, 1);
+		image_file.Write(&ml_teams[i].kick_penalty, 1);
+		image_file.Write(&ml_teams[i].captain, 1);
 	}
-		//default ml
-	fil_ctrl.SeekCurrent(2);
-	fil_ctrl.Write(&squad_defml.kik_punl, 1);
-	fil_ctrl.Write(&squad_defml.kik_punc, 1);
-	fil_ctrl.Write(&squad_defml.kik_angdx, 1);
-	fil_ctrl.Write(&squad_defml.kik_angsx, 1);
-	fil_ctrl.Write(&squad_defml.kik_rigori, 1);
-	fil_ctrl.Write(&squad_defml.kik_cap, 1);
+		//ml default
+	image_file.SeekCurrent(2);
+	image_file.Write(&ml_default.kick_long_fk, 1);
+	image_file.Write(&ml_default.kick_short_fk, 1);
+	image_file.Write(&ml_default.kick_right_corner, 1);
+	image_file.Write(&ml_default.kick_left_corner, 1);
+	image_file.Write(&ml_default.kick_penalty, 1);
+	image_file.Write(&ml_default.captain, 1);
 
-	//salvare tattiche - vedere salto
-		//nazionali-allstar
-	fil_ctrl.Seek(OFS_TATTICHE);
+	//save formations -- mind the jump
+		//national and all-star
+	image_file.Seek(OFS_FORMATIONS);
 	for(i = 0;i < 63;i ++)
 	{
 		if(i == 32)
 		{
-			fil_ctrl.Write(squad_nazall[i].str_tattica,20);
+			image_file.Write(teams[i].raw_formation,20);
 			for(j=0;j<10;j++)
-				auxstr[j] = squad_nazall[i].str_tattica[j+20];
-			fil_ctrl.Seek(OFS_TATTICHEA);
-			fil_ctrl.Write(auxstr, 10);
+				buf[j] = teams[i].raw_formation[j+20];
+			image_file.Seek(OFS_FORMATIONS_A);
+			image_file.Write(buf, 10);
 		} else
-			fil_ctrl.Write(squad_nazall[i].str_tattica,30);
+			image_file.Write(teams[i].raw_formation,30);
 	}
 		//ml
 	for(i = 0;i < 32;i ++)
 	{
-		fil_ctrl.Write(squad_ml[i].str_tattica,30);
+		image_file.Write(ml_teams[i].raw_formation,30);
 	}
-		//default ml
-	fil_ctrl.SeekCurrent(2);
-	fil_ctrl.Write(squad_defml.str_tattica,30);
+		//ml default
+	image_file.SeekCurrent(2);
+	image_file.Write(ml_default.raw_formation,30);
 
-	//salvare stringa numeri
-		//per squadre ml
-	fil_ctrl.Seek(OFS_NUMERI_ML);
-	fil_ctrl.Write(squad_defml.str_numeri,23);
-	fil_ctrl.SeekCurrent(1);
+	//save the squad-number blob
+		//for ml clubs
+	image_file.Seek(OFS_SQUAD_NUMBERS_ML);
+	image_file.Write(ml_default.raw_numbers,23);
+	image_file.SeekCurrent(1);
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(squad_ml[i].str_numeri,23);
-		//per squadre naz/all
-	fil_ctrl.Seek(OFS_NUMERI_NAZ);
+		image_file.Write(ml_teams[i].raw_numbers,23);
+		//for national and all-star teams
+	image_file.Seek(OFS_SQUAD_NUMBERS_NATIONAL);
 	for(i = 0;i < 64;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stc_numeri,16);
+		image_file.Write(&teams[i].squad_numbers,16);
 
-	//anteprima maglia !!!!!!!!!!!!!!!!
-	fil_ctrl.Seek(OFS_ANT_MAGLIE);
+	//kit preview !!!!!!!!!!!!!!!!
+	image_file.Seek(OFS_KIT_PREVIEW);
 	for(i = 0;i < 63;i ++)
 	{
 		switch(i)
 		{	
 			case 30 :
-				fil_ctrl.Write(&squad_nazall[i].maglia1,32);
-				fil_ctrl.Write(&squad_nazall[i].maglia2,32);
-				fil_ctrl.Seek(OFS_ANT_MAGLIE1);
+				image_file.Write(&teams[i].home_kit,32);
+				image_file.Write(&teams[i].away_kit,32);
+				image_file.Seek(OFS_KIT_PREVIEW_A);
 				break;
 			default :
-				fil_ctrl.Write(&squad_nazall[i].maglia1,32);
-				fil_ctrl.Write(&squad_nazall[i].maglia2,32);
+				image_file.Write(&teams[i].home_kit,32);
+				image_file.Write(&teams[i].away_kit,32);
 				break;
 		}
 	}
-	fil_ctrl.Seek(OFS_ANT_MAGLIE2);
+	image_file.Seek(OFS_KIT_PREVIEW_B);
 	for(i = 0;i < TEAMS_ML;i ++)
 	{
-		fil_ctrl.Write(&squad_ml[i].maglia1,32);
-		fil_ctrl.Write(&squad_ml[i].maglia2,32);
+		image_file.Write(&ml_teams[i].home_kit,32);
+		image_file.Write(&ml_teams[i].away_kit,32);
 	}
-// giocatori
-	//salvare nomi
-		//giocatori nazionali-alls
-	fil_ctrl.Seek(OFS_NOMI_G);
-	fil_ctrl.Write(gioc[PLAYERS_NC].nome, 8);
-	fil_ctrl.Seek(OFS_NOMI_G+312);
+// players
+	//save names
+		//national and all-star players
+	image_file.Seek(OFS_PLAYER_NAME);
+	image_file.Write(players[PLAYERS_NC].name, 8);
+	image_file.Seek(OFS_PLAYER_NAME+312);
 	for(j=0;j<2;j++)
-		auxstr[j] = gioc[PLAYERS_NC].nome[j+8];
-	fil_ctrl.Write(auxstr, 2);
+		buf[j] = players[PLAYERS_NC].name[j+8];
+	image_file.Write(buf, 2);
 	for(i=1+PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		switch(i)
 		{
 			case 205+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 6);
-				fil_ctrl.Seek(OFS_NOMI_G2);
+				image_file.Write(players[i].name, 6);
+				image_file.Seek(OFS_PLAYER_NAME_2);
 				for(j=0;j<4;j++)
-					auxstr[j] = gioc[i].nome[j+6];
-				fil_ctrl.Write(auxstr, 4);
+					buf[j] = players[i].name[j+6];
+				image_file.Write(buf, 4);
 				break;
 			case 410+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 4);
-				fil_ctrl.Seek(OFS_NOMI_G3);
+				image_file.Write(players[i].name, 4);
+				image_file.Seek(OFS_PLAYER_NAME_3);
 				for(j=0;j<6;j++)
-					auxstr[j] = gioc[i].nome[j+4];
-				fil_ctrl.Write(auxstr, 6);
+					buf[j] = players[i].name[j+4];
+				image_file.Write(buf, 6);
 				break;
 			case 615+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 2);
-				fil_ctrl.Seek(OFS_NOMI_G4);
+				image_file.Write(players[i].name, 2);
+				image_file.Seek(OFS_PLAYER_NAME_4);
 				for(j=0;j<8;j++)
-					auxstr[j] = gioc[i].nome[j+2];
-				fil_ctrl.Write(auxstr, 8);
+					buf[j] = players[i].name[j+2];
+				image_file.Write(buf, 8);
 				break;
 			case 820+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_NOMI_G5);
-				fil_ctrl.Write(gioc[i].nome, 10);
+				image_file.Seek(OFS_PLAYER_NAME_5);
+				image_file.Write(players[i].name, 10);
 				break;
 			case 1024+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 8);
-				fil_ctrl.Seek(OFS_NOMI_G6);
+				image_file.Write(players[i].name, 8);
+				image_file.Seek(OFS_PLAYER_NAME_6);
 				for(j=0;j<2;j++)
-					auxstr[j] = gioc[i].nome[j+8];
-				fil_ctrl.Write(auxstr, 2);
+					buf[j] = players[i].name[j+8];
+				image_file.Write(buf, 2);
 				break;
 			case 1229+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 6);
-				fil_ctrl.Seek(OFS_NOMI_G7);
+				image_file.Write(players[i].name, 6);
+				image_file.Seek(OFS_PLAYER_NAME_7);
 				for(j=0;j<4;j++)
-					auxstr[j] = gioc[i].nome[j+6];
-				fil_ctrl.Write(auxstr, 4);
+					buf[j] = players[i].name[j+6];
+				image_file.Write(buf, 4);
 				break;
 			case 1434+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].nome, 4);
-				fil_ctrl.Seek(OFS_NOMI_G8);
+				image_file.Write(players[i].name, 4);
+				image_file.Seek(OFS_PLAYER_NAME_8);
 				for(j=0;j<6;j++)
-					auxstr[j] = gioc[i].nome[j+4];
-				fil_ctrl.Write(auxstr, 6);
+					buf[j] = players[i].name[j+4];
+				image_file.Write(buf, 6);
 				break;
 			default :
-				fil_ctrl.Write(gioc[i].nome, 10);
+				image_file.Write(players[i].name, 10);
 				break;
 		}
 	}
-		//giocatori non contact ml
-	fil_ctrl.Seek(OFS_NOMI_GML);
+		//non-contract ml players
+	image_file.Seek(OFS_ML_PLAYER_NAME);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
 		switch(i)
 		{
 			case 203 :
-				fil_ctrl.Write(gioc[i].nome, 10);
-				fil_ctrl.Seek(OFS_NOMI_GML2);
+				image_file.Write(players[i].name, 10);
+				image_file.Seek(OFS_ML_PLAYER_NAME_2);
 				break;
 			case 408 :
-				fil_ctrl.Write(gioc[i].nome, 8);
-				fil_ctrl.Seek(OFS_NOMI_GML3);
+				image_file.Write(players[i].name, 8);
+				image_file.Seek(OFS_ML_PLAYER_NAME_3);
 				for(j=0;j<2;j++)
-					auxstr[j] = gioc[i].nome[j+8];
-				fil_ctrl.Write(auxstr, 2);
+					buf[j] = players[i].name[j+8];
+				image_file.Write(buf, 2);
 				break;
 			default :
-				fil_ctrl.Write(gioc[i].nome, 10);
+				image_file.Write(players[i].name, 10);
 				break;
 		}
 	}
 
-	//assegnare link ml
+	//assign ml links
 		//default
-	fil_ctrl.Seek(OFS_LINK_ML);
-	fil_ctrl.Write(squad_defml.link, 46);
-		// tutte ml
-	fil_ctrl.Seek(OFS_LINK_ML1);
+	image_file.Seek(OFS_LINK_ML);
+	image_file.Write(ml_default.link, 46);
+		// all ml clubs
+	image_file.Seek(OFS_LINK_ML1);
 	for(i=0;i<TEAMS_ML;i++)
 	{
 		if(i == 6)
 		{
-			fil_ctrl.Write(squad_ml[i].link, 28);
-			fil_ctrl.Seek(OFS_LINK_ML2);
+			image_file.Write(ml_teams[i].link, 28);
+			image_file.Seek(OFS_LINK_ML2);
 			for(j=0;j<18;j++)
-				auxstr[j] = squad_ml[i].link[j+28];
-			fil_ctrl.Write(auxstr, 18);
+				buf[j] = ml_teams[i].link[j+28];
+			image_file.Write(buf, 18);
 		} else
 		{
-			fil_ctrl.Write(squad_ml[i].link, 46);
+			image_file.Write(ml_teams[i].link, 46);
 		}
 	}
 
-	//salvare bandiera, forma * 5
-		//naz-all
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA1);
+	//save flags: the shape table five times over
+		//national and all-star
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_1);
 	for(i = 0;i < 63;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stile_bandiera,1);
+		image_file.Write(&teams[i].flag_shape,1);
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(&squad_ml[i].stile_bandiera,1);
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA2);
+		image_file.Write(&ml_teams[i].flag_shape,1);
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_2);
 	for(i = 0;i < 63;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stile_bandiera,1);
+		image_file.Write(&teams[i].flag_shape,1);
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(&squad_ml[i].stile_bandiera,1);
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA3);
+		image_file.Write(&ml_teams[i].flag_shape,1);
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_3);
 	for(i = 0;i < 63;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stile_bandiera,1);
+		image_file.Write(&teams[i].flag_shape,1);
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(&squad_ml[i].stile_bandiera,1);
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA4);
+		image_file.Write(&ml_teams[i].flag_shape,1);
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_4);
 	for(i = 0;i < 63;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stile_bandiera,1);
+		image_file.Write(&teams[i].flag_shape,1);
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(&squad_ml[i].stile_bandiera,1);
-	fil_ctrl.Seek(OFS_BANDIERE_FORMA5);
+		image_file.Write(&ml_teams[i].flag_shape,1);
+	image_file.Seek(OFS_FLAG_SHAPE_COPY_5);
 	for(i = 0;i < 63;i ++)
-		fil_ctrl.Write(&squad_nazall[i].stile_bandiera,1);
+		image_file.Write(&teams[i].flag_shape,1);
 		//ml
 	for(i = 0;i < TEAMS_ML;i ++)
-		fil_ctrl.Write(&squad_ml[i].stile_bandiera,1);
-		//colori  !!!!!!!!!!!!!!!!
-		//naz/all 
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE);
+		image_file.Write(&ml_teams[i].flag_shape,1);
+		//colours  !!!!!!!!!!!!!!!!
+		//national and all-star 
+	image_file.Seek(OFS_FLAG_COLOURS);
 	for(i = 0;i < 56;i ++)
 	{
 		switch(i)
 		{
 			case 13:
-				fil_ctrl.Write(&squad_nazall[i].col_bandiera,26);
-				fil_ctrl.Seek(OFS_BANDIERE_COLORE1);
+				image_file.Write(&teams[i].flag_colours,26);
+				image_file.Seek(OFS_FLAG_COLOURS_A);
 				for(j=0;j<3;j++)
-					auxcol[j] = squad_nazall[i].col_bandiera[j+13];
-				fil_ctrl.Write(auxcol,6);
+					colour_buf[j] = teams[i].flag_colours[j+13];
+				image_file.Write(colour_buf,6);
 				break;
-			// le nuove nazionali non sono li...
+			// the new national sides are elsewhere
 			case 36:
 			case 39:
 			case 47:
 				break;
-			// ci sono nel mezzo le vecchie nazionali nord irlanda, giamaica, uae
+			// the retired national sides -- northern ireland, jamaica, uae -- sit in between
 			case 1:
 			case 40:
 			case 52:
-				fil_ctrl.SeekCurrent(32);
+				image_file.SeekCurrent(32);
 			[[fallthrough]];
 			default:
-				fil_ctrl.Write(&squad_nazall[i].col_bandiera,32);
+				image_file.Write(&teams[i].flag_colours,32);
 				break;
 		}
 	}
 
-	fil_ctrl.SeekCurrent(64);
+	image_file.SeekCurrent(64);
 	for(i = 0;i < 5;i ++)
-		fil_ctrl.Write(&squad_ml[i].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[10].col_bandiera,32);
+		image_file.Write(&ml_teams[i].flag_colours,32);
+	image_file.Write(&ml_teams[10].flag_colours,32);
 	for(i = 0;i < 3;i ++)
-		fil_ctrl.Write(&squad_ml[i+7].col_bandiera,32);
+		image_file.Write(&ml_teams[i+7].flag_colours,32);
 	for(i = 0;i < 2;i ++)
-		fil_ctrl.Write(&squad_ml[i+11].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[15].col_bandiera,32);
+		image_file.Write(&ml_teams[i+11].flag_colours,32);
+	image_file.Write(&ml_teams[15].flag_colours,32);
 	for(i = 0;i < 4;i ++)
-		fil_ctrl.Write(&squad_ml[i+18].col_bandiera,32);
-	fil_ctrl.SeekCurrent(32);
-	fil_ctrl.Write(&squad_ml[14].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[24].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[25].col_bandiera,32);
-	//bayern monaco
-	fil_ctrl.Write(&squad_ml[26].col_bandiera,26);
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE2);
+		image_file.Write(&ml_teams[i+18].flag_colours,32);
+	image_file.SeekCurrent(32);
+	image_file.Write(&ml_teams[14].flag_colours,32);
+	image_file.Write(&ml_teams[24].flag_colours,32);
+	image_file.Write(&ml_teams[25].flag_colours,32);
+	//bayern munich
+	image_file.Write(&ml_teams[26].flag_colours,26);
+	image_file.Seek(OFS_FLAG_COLOURS_B);
 	for(j=0;j<3;j++)
-		auxcol[j] = squad_ml[26].col_bandiera[j+13];
-	fil_ctrl.Write(auxcol,6);
-	fil_ctrl.Write(&squad_ml[27].col_bandiera,32);
+		colour_buf[j] = ml_teams[26].flag_colours[j+13];
+	image_file.Write(colour_buf,6);
+	image_file.Write(&ml_teams[27].flag_colours,32);
 	for(i = 0;i < 2;i ++)
-		fil_ctrl.Write(&squad_ml[i+16].col_bandiera,32);
-	fil_ctrl.SeekCurrent(64);
-	fil_ctrl.Write(&squad_ml[13].col_bandiera,32);
-	fil_ctrl.SeekCurrent(288);
-	fil_ctrl.Write(&squad_nazall[39].col_bandiera,32);
-	fil_ctrl.SeekCurrent(64);
-	fil_ctrl.Write(&squad_nazall[47].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[6].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[23].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[28].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[29].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[30].col_bandiera,32);
-	fil_ctrl.Write(&squad_ml[31].col_bandiera,32);
+		image_file.Write(&ml_teams[i+16].flag_colours,32);
+	image_file.SeekCurrent(64);
+	image_file.Write(&ml_teams[13].flag_colours,32);
+	image_file.SeekCurrent(288);
+	image_file.Write(&teams[39].flag_colours,32);
+	image_file.SeekCurrent(64);
+	image_file.Write(&teams[47].flag_colours,32);
+	image_file.Write(&ml_teams[6].flag_colours,32);
+	image_file.Write(&ml_teams[23].flag_colours,32);
+	image_file.Write(&ml_teams[28].flag_colours,32);
+	image_file.Write(&ml_teams[29].flag_colours,32);
+	image_file.Write(&ml_teams[30].flag_colours,32);
+	image_file.Write(&ml_teams[31].flag_colours,32);
 	//senegal
-	fil_ctrl.Seek(OFS_BANDIERE_COLORE_SEN);
-	fil_ctrl.Write(&squad_nazall[36].col_bandiera,32);
+	image_file.Seek(OFS_FLAG_COLOURS_SENEGAL);
+	image_file.Write(&teams[36].flag_colours,32);
 
-	//salvare abilita - decodifica
-		//naz-all
-	fil_ctrl.Seek(OFS_CARAT_G);
+	//save attributes -- repacked into the raw blob
+		//national and all-star
+	image_file.Seek(OFS_PLAYER_ATTR);
 	for(p=PLAYERS_NC;p<PLAYERS_TOTAL;p++)
 	{
 		if( p >= 1704 && p <= 1749 )
 		{
 			if( p < 1727 )
-			{i=TrovaIdMl(&link_euroas[(p-1704)*2]);}
+			{i=ResolveMlLink(&link_euro_allstar[(p-1704)*2]);}
 			else
-			{i=TrovaIdMl(&link_worldas[(p-1727)*2]);}
+			{i=ResolveMlLink(&link_world_allstar[(p-1727)*2]);}
 		}
 		else
 		{i=p;}
 
-		gioc[i].decodifica();
+		players[i].Encode();
 		switch(p)
 		{
 			case 44+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 4);
-				fil_ctrl.Seek(OFS_CARAT_G1);
+				image_file.Write(players[i].raw_attributes, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_1);
 				for(j=0;j<8;j++)
-					auxstr1[j] = gioc[i].str_carat[j+4];
-				fil_ctrl.Write(auxstr1, 8);
+					buf1[j] = players[i].raw_attributes[j+4];
+				image_file.Write(buf1, 8);
 				break;
 			case 215+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G2);
-				fil_ctrl.Write(gioc[i].str_carat, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_2);
+				image_file.Write(players[i].raw_attributes, 12);
 				break;
 			case 385+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 8);
-				fil_ctrl.Seek(OFS_CARAT_G3);
+				image_file.Write(players[i].raw_attributes, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_3);
 				for(j=0;j<4;j++)
-					auxstr1[j] = gioc[i].str_carat[j+8];
-				fil_ctrl.Write(auxstr1, 4);
+					buf1[j] = players[i].raw_attributes[j+8];
+				image_file.Write(buf1, 4);
 				break;
 			case 556+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 4);
-				fil_ctrl.Seek(OFS_CARAT_G4);
+				image_file.Write(players[i].raw_attributes, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_4);
 				for(j=0;j<8;j++)
-					auxstr1[j] = gioc[i].str_carat[j+4];
-				fil_ctrl.Write(auxstr1, 8);
+					buf1[j] = players[i].raw_attributes[j+4];
+				image_file.Write(buf1, 8);
 				break;
 			case 727+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G5);
-				fil_ctrl.Write(gioc[i].str_carat, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_5);
+				image_file.Write(players[i].raw_attributes, 12);
 				break;
 			case 897+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 8);
-				fil_ctrl.Seek(OFS_CARAT_G6);
+				image_file.Write(players[i].raw_attributes, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_6);
 				for(j=0;j<4;j++)
-					auxstr1[j] = gioc[i].str_carat[j+8];
-				fil_ctrl.Write(auxstr1, 4);
+					buf1[j] = players[i].raw_attributes[j+8];
+				image_file.Write(buf1, 4);
 				break;
 			case 1068+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 4);
-				fil_ctrl.Seek(OFS_CARAT_G7);
+				image_file.Write(players[i].raw_attributes, 4);
+				image_file.Seek(OFS_PLAYER_ATTR_7);
 				for(j=0;j<8;j++)
-					auxstr1[j] = gioc[i].str_carat[j+4];
-				fil_ctrl.Write(auxstr1, 8);
+					buf1[j] = players[i].raw_attributes[j+4];
+				image_file.Write(buf1, 8);
 				break;
 			case 1239+PLAYERS_NC :
-				fil_ctrl.Seek(OFS_CARAT_G8);
-				fil_ctrl.Write(gioc[i].str_carat, 12);
+				image_file.Seek(OFS_PLAYER_ATTR_8);
+				image_file.Write(players[i].raw_attributes, 12);
 				break;
 			case 1409+PLAYERS_NC :
-				fil_ctrl.Write(gioc[i].str_carat, 8);
-				fil_ctrl.Seek(OFS_CARAT_G9);
+				image_file.Write(players[i].raw_attributes, 8);
+				image_file.Seek(OFS_PLAYER_ATTR_9);
 				for(j=0;j<4;j++)
-					auxstr1[j] = gioc[i].str_carat[j+8];
-				fil_ctrl.Write(auxstr1, 4);
+					buf1[j] = players[i].raw_attributes[j+8];
+				image_file.Write(buf1, 4);
 				break;
 			default :
-				fil_ctrl.Write(gioc[i].str_carat, 12);
+				image_file.Write(players[i].raw_attributes, 12);
 				break;
 		}
 	}
-		//giocatori non contact ml
-	fil_ctrl.Seek(OFS_CARAT_GML);
+		//non-contract ml players
+	image_file.Seek(OFS_ML_PLAYER_ATTR);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
-		gioc[i].decodifica();
+		players[i].Encode();
 		switch(i)
 		{
 			case 148 :
-				fil_ctrl.Write(gioc[i].str_carat, 8);
-				fil_ctrl.Seek(OFS_CARAT_GML1);
+				image_file.Write(players[i].raw_attributes, 8);
+				image_file.Seek(OFS_ML_PLAYER_ATTR_1);
 				for(j=0;j<4;j++)
-					auxstr1[j] = gioc[i].str_carat[j+8];
-				fil_ctrl.Write(auxstr1, 4);
+					buf1[j] = players[i].raw_attributes[j+8];
+				image_file.Write(buf1, 4);
 				break;
 			case 319 :
-				fil_ctrl.Write(gioc[i].str_carat, 4);
-				fil_ctrl.Seek(OFS_CARAT_GML2);
+				image_file.Write(players[i].raw_attributes, 4);
+				image_file.Seek(OFS_ML_PLAYER_ATTR_2);
 				for(j=0;j<8;j++)
-					auxstr1[j] = gioc[i].str_carat[j+4];
-				fil_ctrl.Write(auxstr1, 8);
+					buf1[j] = players[i].raw_attributes[j+4];
+				image_file.Write(buf1, 8);
 				break;
 			default :
-				fil_ctrl.Write(gioc[i].str_carat, 12);
+				image_file.Write(players[i].raw_attributes, 12);
 				break;
 		}
 	}
 
-	//salvare costi ml
-	fil_ctrl.Seek(OFS_COSTI_NAZ);
-	auxstr[0] = auxstr[1] = 0;
+	//save ml costs
+	image_file.Seek(OFS_COST_NATIONAL);
+	buf[0] = buf[1] = 0;
 	for(i=PLAYERS_NC;i<PLAYERS_TOTAL;i++)
 	{
 		if(i==1704)
 		{
-			fil_ctrl.Write(auxstr,2);
+			image_file.Write(buf,2);
 			i = 1750;
 		}
-		fil_ctrl.Write(&gioc[i].costo, 1);
+		image_file.Write(&players[i].cost, 1);
 	}
-	fil_ctrl.Seek(OFS_COSTI_NC);
+	image_file.Seek(OFS_COST_NC);
 	for(i=0;i<PLAYERS_NC;i++)
 	{
-		fil_ctrl.Write(&gioc[i].costo, 1);
+		image_file.Write(&players[i].cost, 1);
 	}
 
-	//link delle all-star
-	fil_ctrl.Seek(2328964);
-	fil_ctrl.Write(link_euroas, 46);
-	fil_ctrl.Seek(2329010);
-	fil_ctrl.Write(link_worldas, 46);
+	//all-star links
+	image_file.Seek(2328964);
+	image_file.Write(link_euro_allstar, 46);
+	image_file.Seek(2329010);
+	image_file.Write(link_world_allstar, 46);
 
-	//tattiche predefinite
-	fil_ctrl.Seek(4822152);
-	auxstr[0] = auxstr[1] = auxstr[2] = 0;
+	//preset formations
+	image_file.Seek(4822152);
+	buf[0] = buf[1] = buf[2] = 0;
 	for(i=0;i<16;i++)
 	{
-		fil_ctrl.Write(tattpred[15-i].nome, 6);
-		fil_ctrl.Write(auxstr, 2);
+		image_file.Write(preset_formations[15-i].name, 6);
+		image_file.Write(buf, 2);
 	}
-	fil_ctrl.Seek(374188);
+	image_file.Seek(374188);
 	for(i=0;i<16;i++)
-		fil_ctrl.Write(tattpred[i].ruoli, 11);
-	fil_ctrl.Seek(374780);
+		image_file.Write(preset_formations[i].roles, 11);
+	image_file.Seek(374780);
 	for(i=0;i<16;i++)
 	{
-		fil_ctrl.Write(tattpred[i].x, 10);
-		fil_ctrl.Write(tattpred[i].y, 10);
+		image_file.Write(preset_formations[i].x, 10);
+		image_file.Write(preset_formations[i].y, 10);
 	}
 
-	fil_ctrl.Close();
+	image_file.Close();
 
-		std::ofstream fil_url;
-	fil_url.open(UrlSidecarPath(image), std::ios::trunc);
+		std::ofstream url_file;
+	url_file.open(UrlSidecarPath(image), std::ios::trunc);
 	for(i=0;i<PLAYERS_TOTAL;i++)
 	{
-		fil_url << gioc[i].url << std::endl;
+		url_file << players[i].url << std::endl;
 	}
-	fil_url.close();
+	url_file.close();
 
 	Report(report, "CD image edited !");
 	return true;
 }
 
-int CalcolaCostoGiocatore(const Database& db, int i)
+int ComputePlayerCost(const Database& db, int i)
 {
 //{"GK", "CB", "SB", "DH", "SH", "OH", "CF", "WG"};
 	double k = 16;
-	switch(db.gioc[i].posizione)
+	switch(db.players[i].position)
 	{
-		//portiere
+		//goalkeeper
 		case 0:
-			k += (db.gioc[i].accel-15) * 0.45;
-			k += (db.gioc[i].velocita-15) * 0.45;
-			k += (db.gioc[i].aggress-12) * 0.05;
-			k += (db.gioc[i].riflessi-16) * 0.7;
-			k += (db.gioc[i].altezza-180) * 0.07;
-			k += db.gioc[i].fuori_ruolo * 0.5;
-			k += (db.gioc[i].forza-16) * 0.7;
-			k += (db.gioc[i].resistenza-14) * 0.15;
-			k += (db.gioc[i].tecnica-13) * 0.15;
-			k += (db.gioc[i].attacco-12) * 0.05;
-			k += (db.gioc[i].difesa-16) * 0.8;
-			k += (db.gioc[i].dribbling-14) * 0.08;
-			k += (db.gioc[i].effetto-14) * 0.08;
-			k += (db.gioc[i].passaggio-14) * 0.08;
-			k += (db.gioc[i].pot_tiro-15) * 0.3;
-			k += (db.gioc[i].prec_tiro-14) * 0.2;
-			k += (db.gioc[i].salto-15) * 0.8;
-			k += (db.gioc[i].testa-13) * 0.15;
+			k += (db.players[i].acceleration-15) * 0.45;
+			k += (db.players[i].speed-15) * 0.45;
+			k += (db.players[i].aggression-12) * 0.05;
+			k += (db.players[i].reflexes-16) * 0.7;
+			k += (db.players[i].height-180) * 0.07;
+			k += db.players[i].out_of_position * 0.5;
+			k += (db.players[i].strength-16) * 0.7;
+			k += (db.players[i].stamina-14) * 0.15;
+			k += (db.players[i].technique-13) * 0.15;
+			k += (db.players[i].attack-12) * 0.05;
+			k += (db.players[i].defence-16) * 0.8;
+			k += (db.players[i].dribbling-14) * 0.08;
+			k += (db.players[i].swerve-14) * 0.08;
+			k += (db.players[i].passing-14) * 0.08;
+			k += (db.players[i].shot_power-15) * 0.3;
+			k += (db.players[i].shot_accuracy-14) * 0.2;
+			k += (db.players[i].jump-15) * 0.8;
+			k += (db.players[i].heading-13) * 0.15;
 				
 			// i 9!!
-			if(db.gioc[i].accel == 19)
+			if(db.players[i].acceleration == 19)
 				k += 0.4;
-			if(db.gioc[i].velocita == 19)
+			if(db.players[i].speed == 19)
 				k += 0.4;
-			if(db.gioc[i].riflessi == 19)
+			if(db.players[i].reflexes == 19)
 				k += 0.8;
-			if(db.gioc[i].forza == 19)
+			if(db.players[i].strength == 19)
 				k += 0.8;
-			if(db.gioc[i].resistenza == 19)
+			if(db.players[i].stamina == 19)
 				k += 0.3;
-			if(db.gioc[i].tecnica == 19)
+			if(db.players[i].technique == 19)
 				k += 0.4;
-			if(db.gioc[i].attacco == 19)
+			if(db.players[i].attack == 19)
 				k += 0.2;
-			if(db.gioc[i].difesa == 19)
+			if(db.players[i].defence == 19)
 				k += 0.9;
-			if(db.gioc[i].effetto == 19)
+			if(db.players[i].swerve == 19)
 				k += 0.15;
-			if(db.gioc[i].passaggio == 19)
+			if(db.players[i].passing == 19)
 				k += 0.25;
-			if(db.gioc[i].pot_tiro == 19)
+			if(db.players[i].shot_power == 19)
 				k += 0.2;
-			if(db.gioc[i].prec_tiro == 19)
+			if(db.players[i].shot_accuracy == 19)
 				k += 0.2;
-			if(db.gioc[i].salto == 19)
+			if(db.players[i].jump == 19)
 				k += 0.8;
-			if(db.gioc[i].testa == 19)
+			if(db.players[i].heading == 19)
 				k += 0.2;
 
 			break;
-		//difensore
+		//defender
 		case 1:
 		case 2:
 			k += 1;
-			if(db.gioc[i].piede == 2) k += 1;
-			k += (db.gioc[i].accel-16) * 0.55;
-			k += (db.gioc[i].velocita-16) * 0.55;
-			k += (db.gioc[i].aggress-13) * 0.2;
-			k += (db.gioc[i].riflessi-15) * 0.35;
-			k += (db.gioc[i].altezza-170) * 0.045;
-			k += db.gioc[i].fuori_ruolo * 1;
-			k += (db.gioc[i].forza-16) * 0.6;
-			k += (db.gioc[i].resistenza-16) * 0.4;
-			k += (db.gioc[i].tecnica-15) * 0.4;
-			k += (db.gioc[i].attacco-14) * 0.3;
-			k += (db.gioc[i].difesa-16) * 0.85;
-			k += (db.gioc[i].dribbling-14) * 0.25;
-			k += (db.gioc[i].effetto-14) * 0.25;
-			k += (db.gioc[i].passaggio-15) * 0.35;
-			k += (db.gioc[i].pot_tiro-16) * 0.35;
-			k += (db.gioc[i].prec_tiro-14) * 0.3;
-			k += (db.gioc[i].salto-16) * 0.5;
-			k += (db.gioc[i].testa-15) * 0.5;
+			if(db.players[i].foot == 2) k += 1;
+			k += (db.players[i].acceleration-16) * 0.55;
+			k += (db.players[i].speed-16) * 0.55;
+			k += (db.players[i].aggression-13) * 0.2;
+			k += (db.players[i].reflexes-15) * 0.35;
+			k += (db.players[i].height-170) * 0.045;
+			k += db.players[i].out_of_position * 1;
+			k += (db.players[i].strength-16) * 0.6;
+			k += (db.players[i].stamina-16) * 0.4;
+			k += (db.players[i].technique-15) * 0.4;
+			k += (db.players[i].attack-14) * 0.3;
+			k += (db.players[i].defence-16) * 0.85;
+			k += (db.players[i].dribbling-14) * 0.25;
+			k += (db.players[i].swerve-14) * 0.25;
+			k += (db.players[i].passing-15) * 0.35;
+			k += (db.players[i].shot_power-16) * 0.35;
+			k += (db.players[i].shot_accuracy-14) * 0.3;
+			k += (db.players[i].jump-16) * 0.5;
+			k += (db.players[i].heading-15) * 0.5;
 				
 			// i 9!!
-			if(db.gioc[i].accel == 19)
+			if(db.players[i].acceleration == 19)
 				k += 0.5;
-			if(db.gioc[i].velocita == 19)
+			if(db.players[i].speed == 19)
 				k += 0.5;
-			if(db.gioc[i].riflessi == 19)
+			if(db.players[i].reflexes == 19)
 				k += 0.35;
-			if(db.gioc[i].aggress == 19)
+			if(db.players[i].aggression == 19)
 				k += 0.25;
-			if(db.gioc[i].forza == 19)
+			if(db.players[i].strength == 19)
 				k += 0.8;
-			if(db.gioc[i].resistenza == 19)
+			if(db.players[i].stamina == 19)
 				k += 0.45;
-			if(db.gioc[i].tecnica == 19)
+			if(db.players[i].technique == 19)
 				k += 0.5;
-			if(db.gioc[i].attacco == 19)
+			if(db.players[i].attack == 19)
 				k += 0.5;
-			if(db.gioc[i].difesa == 19)
+			if(db.players[i].defence == 19)
 				k += 0.9;
-			if(db.gioc[i].dribbling == 19)
+			if(db.players[i].dribbling == 19)
 				k += 0.4;
-			if(db.gioc[i].effetto == 19)
+			if(db.players[i].swerve == 19)
 				k += 0.5;
-			if(db.gioc[i].passaggio == 19)
+			if(db.players[i].passing == 19)
 				k += 0.4;
-			if(db.gioc[i].pot_tiro == 19)
+			if(db.players[i].shot_power == 19)
 				k += 0.5;
-			if(db.gioc[i].prec_tiro == 19)
+			if(db.players[i].shot_accuracy == 19)
 				k += 0.5;
-			if(db.gioc[i].salto == 19)
+			if(db.players[i].jump == 19)
 				k += 0.7;
-			if(db.gioc[i].testa == 19)
+			if(db.players[i].heading == 19)
 				k += 0.7;
 
 			break;
-		//centrocampista
+		//midfielder
 		case 3:
 		case 4:
 		case 5:
 			k += 3;
-			if(db.gioc[i].piede == 2) k += 1.5;
-			k += (db.gioc[i].accel-16) * 0.4;
-			k += (db.gioc[i].velocita-16) * 0.4;
-			k += (db.gioc[i].aggress-12) * 0.1;
-			k += (db.gioc[i].riflessi-14) * 0.3;
-			k += (db.gioc[i].altezza-170) * 0.04;
-			k += db.gioc[i].fuori_ruolo * 1;
-			k += (db.gioc[i].forza-16) * 0.3;
-			k += (db.gioc[i].resistenza-16) * 0.45;
-			k += (db.gioc[i].tecnica-16) * 0.6;
-			k += (db.gioc[i].attacco-15) * 0.4;
-			k += (db.gioc[i].difesa-15) * 0.3;
-			k += (db.gioc[i].dribbling-14) * 0.4;
-			k += (db.gioc[i].effetto-14) * 0.5;
-			k += (db.gioc[i].passaggio-16) * 0.6;
-			k += (db.gioc[i].pot_tiro-16) * 0.5;
-			k += (db.gioc[i].prec_tiro-16) * 0.6;
-			k += (db.gioc[i].salto-16) * 0.5;
-			k += (db.gioc[i].testa-15) * 0.55;
+			if(db.players[i].foot == 2) k += 1.5;
+			k += (db.players[i].acceleration-16) * 0.4;
+			k += (db.players[i].speed-16) * 0.4;
+			k += (db.players[i].aggression-12) * 0.1;
+			k += (db.players[i].reflexes-14) * 0.3;
+			k += (db.players[i].height-170) * 0.04;
+			k += db.players[i].out_of_position * 1;
+			k += (db.players[i].strength-16) * 0.3;
+			k += (db.players[i].stamina-16) * 0.45;
+			k += (db.players[i].technique-16) * 0.6;
+			k += (db.players[i].attack-15) * 0.4;
+			k += (db.players[i].defence-15) * 0.3;
+			k += (db.players[i].dribbling-14) * 0.4;
+			k += (db.players[i].swerve-14) * 0.5;
+			k += (db.players[i].passing-16) * 0.6;
+			k += (db.players[i].shot_power-16) * 0.5;
+			k += (db.players[i].shot_accuracy-16) * 0.6;
+			k += (db.players[i].jump-16) * 0.5;
+			k += (db.players[i].heading-15) * 0.55;
 				
 			// i 9!!
-			if(db.gioc[i].accel == 19)
+			if(db.players[i].acceleration == 19)
 				k += 0.4;
-			if(db.gioc[i].velocita == 19)
+			if(db.players[i].speed == 19)
 				k += 0.4;
-			if(db.gioc[i].riflessi == 19)
+			if(db.players[i].reflexes == 19)
 				k += 0.3;
-			if(db.gioc[i].aggress == 19)
+			if(db.players[i].aggression == 19)
 				k += 0.2;
-			if(db.gioc[i].forza == 19)
+			if(db.players[i].strength == 19)
 				k += 0.5;
-			if(db.gioc[i].resistenza == 19)
+			if(db.players[i].stamina == 19)
 				k += 0.5;
-			if(db.gioc[i].tecnica == 19)
+			if(db.players[i].technique == 19)
 				k += 0.8;
-			if(db.gioc[i].attacco == 19)
+			if(db.players[i].attack == 19)
 				k += 0.7;
-			if(db.gioc[i].difesa == 19)
+			if(db.players[i].defence == 19)
 				k += 0.5;
-			if(db.gioc[i].dribbling == 19)
+			if(db.players[i].dribbling == 19)
 				k += 0.5;
-			if(db.gioc[i].effetto == 19)
+			if(db.players[i].swerve == 19)
 				k += 0.8;
-			if(db.gioc[i].passaggio == 19)
+			if(db.players[i].passing == 19)
 				k += 0.7;
-			if(db.gioc[i].pot_tiro == 19)
+			if(db.players[i].shot_power == 19)
 				k += 0.7;
-			if(db.gioc[i].prec_tiro == 19)
+			if(db.players[i].shot_accuracy == 19)
 				k += 0.8;
-			if(db.gioc[i].salto == 19)
+			if(db.players[i].jump == 19)
 				k += 0.5;
-			if(db.gioc[i].testa == 19)
+			if(db.players[i].heading == 19)
 				k += 0.6;
 			break;
-		//attaccante
+		//forward
 		case 6:
 		case 7:
 			k += 7;
-			if(db.gioc[i].piede == 2) k += 2;
-			k += (db.gioc[i].accel-16) * 0.6;
-			k += (db.gioc[i].velocita-16) * 0.6;
-			k += (db.gioc[i].aggress-14) * 0.4;
-			k += (db.gioc[i].riflessi-16) * 0.4;
-			k += (db.gioc[i].altezza-170) * 0.04;
-			k += db.gioc[i].fuori_ruolo * 1.5;
-			k += (db.gioc[i].forza-16) * 0.45;
-			k += (db.gioc[i].resistenza-16) * 0.45;
-			k += (db.gioc[i].tecnica-16) * 0.9;
-			k += (db.gioc[i].attacco-16) * 0.9;
-			k += (db.gioc[i].difesa-13) * 0.3;
-			k += (db.gioc[i].dribbling-16) * 0.8;
-			k += (db.gioc[i].effetto-16) * 0.8;
-			k += (db.gioc[i].passaggio-16) * 0.7;
-			k += (db.gioc[i].pot_tiro-16) * 0.9;
-			k += (db.gioc[i].prec_tiro-16) * 0.9;
-			k += (db.gioc[i].salto-16) * 0.6;
-			k += (db.gioc[i].testa-16) * 0.7;
+			if(db.players[i].foot == 2) k += 2;
+			k += (db.players[i].acceleration-16) * 0.6;
+			k += (db.players[i].speed-16) * 0.6;
+			k += (db.players[i].aggression-14) * 0.4;
+			k += (db.players[i].reflexes-16) * 0.4;
+			k += (db.players[i].height-170) * 0.04;
+			k += db.players[i].out_of_position * 1.5;
+			k += (db.players[i].strength-16) * 0.45;
+			k += (db.players[i].stamina-16) * 0.45;
+			k += (db.players[i].technique-16) * 0.9;
+			k += (db.players[i].attack-16) * 0.9;
+			k += (db.players[i].defence-13) * 0.3;
+			k += (db.players[i].dribbling-16) * 0.8;
+			k += (db.players[i].swerve-16) * 0.8;
+			k += (db.players[i].passing-16) * 0.7;
+			k += (db.players[i].shot_power-16) * 0.9;
+			k += (db.players[i].shot_accuracy-16) * 0.9;
+			k += (db.players[i].jump-16) * 0.6;
+			k += (db.players[i].heading-16) * 0.7;
 				
 			// i 9!!
-			if(db.gioc[i].accel == 19)
+			if(db.players[i].acceleration == 19)
 				k += 0.6;
-			if(db.gioc[i].velocita == 19)
+			if(db.players[i].speed == 19)
 				k += 0.6;
-			if(db.gioc[i].riflessi == 19)
+			if(db.players[i].reflexes == 19)
 				k += 0.5;
-			if(db.gioc[i].aggress == 19)
+			if(db.players[i].aggression == 19)
 				k += 0.4;
-			if(db.gioc[i].forza == 19)
+			if(db.players[i].strength == 19)
 				k += 0.5;
-			if(db.gioc[i].resistenza == 19)
+			if(db.players[i].stamina == 19)
 				k += 0.5;
-			if(db.gioc[i].tecnica == 19)
+			if(db.players[i].technique == 19)
 				k += 0.9;
-			if(db.gioc[i].attacco == 19)
+			if(db.players[i].attack == 19)
 				k += 0.9;
-			if(db.gioc[i].difesa == 19)
+			if(db.players[i].defence == 19)
 				k += 0.3;
-			if(db.gioc[i].dribbling == 19)
+			if(db.players[i].dribbling == 19)
 				k += 0.9;
-			if(db.gioc[i].effetto == 19)
+			if(db.players[i].swerve == 19)
 				k += 0.9;
-			if(db.gioc[i].passaggio == 19)
+			if(db.players[i].passing == 19)
 				k += 0.9;
-			if(db.gioc[i].pot_tiro == 19)
+			if(db.players[i].shot_power == 19)
 				k += 0.9;
-			if(db.gioc[i].prec_tiro == 19)
+			if(db.players[i].shot_accuracy == 19)
 				k += 0.9;
-			if(db.gioc[i].salto == 19)
+			if(db.players[i].jump == 19)
 				k += 0.7;
-			if(db.gioc[i].testa == 19)
+			if(db.players[i].heading == 19)
 				k += 0.8;
 			break;
 	}

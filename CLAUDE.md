@@ -104,11 +104,12 @@ outra pelo core (`tests/golden_tool.cpp`), e compara com
 `tools/golden_compare.py`. Falha se aparecer **qualquer** divergência além de
 uma faixa conhecida.
 
-Essa faixa é `405724..405739` (`OFS_NUMERI_NAZ+1008`): o slot 64 de um array
-de 63, que o original lê e grava por engano a partir da memória vizinha
-(`squad_ml[0]`). O port preserva o que está na imagem em vez de reproduzir
-comportamento indefinido. É a única divergência aceita — se aparecer outra, é
-bug do port. Detalhe na Fase 3 do [PLAN-LINUX.md](docs/PLAN-LINUX.md).
+Essa faixa é `405724..405739` (`OFS_SQUAD_NUMBERS_NATIONAL+1008`): o slot 64
+de um array de 63, que o original lê e grava por engano a partir da memória
+vizinha (`ml_teams[0]`). O port preserva o que está na imagem em vez de
+reproduzir comportamento indefinido. É a única divergência aceita — se
+aparecer outra, é bug do port. Detalhe na Fase 3 do
+[PLAN-LINUX.md](docs/PLAN-LINUX.md).
 
 O script não toca na imagem de origem, mas usa ~950 MB de temporário. Precisa
 do `Debug/ed.exe`, de Wine e do `:99`; por isso não roda em CI.
@@ -121,7 +122,7 @@ Duas armadilhas conhecidas ao mexer nisso:
   início. É bug do original, reproduzido de propósito.
 - **`Load`+`Save` sem editar nada não devolve a imagem intacta**, e não
   deveria: o `Save` reconstrói as all-star a partir dos links
-  (`OFS_CARAT_G8`). O oráculo faz o mesmo.
+  (`OFS_PLAYER_ATTR_8`). O oráculo faz o mesmo.
 
 ### Sanitizers e o bloqueio da Citrix
 
@@ -261,8 +262,9 @@ aplica substituições listadas. Se algo que ele não reconhece sobrar, ele
 
 ### Core
 
-- `Database` — o ex-estado global (`gioc[]`, `squad_nazall[]`, `squad_ml[]`,
-  `tattpred[]`) mais `Load()` (ex-`carica_dabin`) e `Save()` (ex-`OnWriteCD`).
+- `Database` — o ex-estado global (`players[]`, `teams[]`, `ml_teams[]`,
+  `preset_formations[]`) mais `Load()` (ex-`carica_dabin`) e `Save()`
+  (ex-`OnWriteCD`).
 - `CdImage` — substituto do `CFile`. Imita a semântica dele de propósito:
   ponteiro de arquivo único, leitura curta não é erro, e **sempre**
   `std::ios::binary`.
@@ -271,16 +273,42 @@ aplica substituições listadas. Se algo que ele não reconhece sobrar, ele
   `std::uint32_t`, **não** `DWORD`: no Linux LP64 `DWORD` seria 64-bit e
   embaralharia todos os números de camisa.
 - `Player` / `Team` / `MlTeam` / `Formation` — ex-`giocatore`/`squadra`/
-  `squadra_ml`/`tattica`. Classes e arquivos em inglês, **membros ainda em
-  italiano** de propósito: mantém a rastreabilidade 1:1 com o legacy durante os
-  golden tests. Glossário no topo de `Player.hpp`.
-  **O destino é tudo em inglês** — a tradução dos membros é a Fase 3.5 do
-  plano, agendada para depois dos golden tests. Não antecipe, e não renomeie
-  `Database.cpp` à mão: ele é gerado.
-- `TextCodec` — `kanjitoascii`/`asciitokanji` portados verbatim.
+  `squadra_ml`/`tattica`.
+- `TextCodec` — `kanjitoascii`/`asciitokanji` portados verbatim, como
+  `KanjiToAscii`/`AsciiToKanji`.
 
-Nomes invertidos herdados: `Player::codifica_carat()` **decodifica** o blob em
-membros, `Player::decodifica()` **codifica** de volta. Mantidos assim.
+### Nomenclatura
+
+Desde a Fase 3.5 **não existe identificador em italiano fora de `legacy/`** —
+membros, offsets, tabelas, locais e comentários foram traduzidos.
+
+O mapa está em [tools/glossary.py](tools/glossary.py) e é a única fonte:
+`port_database.py` e `extract_legacy_data.py` o importam, e
+`tools/apply_glossary.py` aplica o mesmo mapa nos fontes escritos à mão.
+Para renomear qualquer coisa do core, mexa no glossário e rode:
+
+```sh
+python3 tools/apply_glossary.py          # fontes à mão
+python3 tools/apply_glossary.py --check  # acusa italiano sobrando
+python3 tools/port_database.py           # Database.cpp
+python3 tools/extract_legacy_data.py     # Offsets.hpp, Tables.*
+```
+
+Rastreabilidade contra o legado: cada offset renomeado carrega o nome antigo
+num comentário (`// was OFS_NOMI_SQ1`), então grepar um nome nas duas árvores
+continua funcionando.
+
+Duas correções de semântica saíram dessa fase:
+
+- `nome_m` não é "long name" como a Fase 2 anotou. O `_m` é de *minuscolo*: é
+  o nome do time em caixa mista ("Bayern" em vez de "BAYERN"). Virou
+  `mixed_case_name`.
+- `OFS_NOMI_PML1/2` não são nomes de jogador apesar do prefixo — são o 7º e o
+  8º slot de nome de clube de ML. Viraram `OFS_ML_TEAM_NAME_7/8`.
+
+Nomes invertidos herdados, agora corrigidos: o decodificador do original se
+chamava `codifica_carat()` e o codificador `decodifica()`. São `Player::Decode()`
+e `Player::Encode()`.
 
 ### Legacy
 
@@ -296,13 +324,14 @@ Setor PSX = 2352 bytes = 24 header + 2048 dados + 280 EDC/ECC. Os offsets
 hardcoded **pulam os cabeçalhos de setor manualmente**:
 
 ```
-OFS_NOMI_SQ1   = 1012640  → setor 430, byte 1280 (região de dados = 24..2071)
-OFS_NOMI_SQ1_F = 1013431  → último byte de dados do setor 430
-OFS_NOMI_SQ1A  = 1013736  → 1011360 + 2352 + 24 = 1º byte de dados do setor 431
+OFS_TEAM_NAME_1     = 1012640  → setor 430, byte 1280 (dados = 24..2071)
+OFS_TEAM_NAME_1_END = 1013431  → último byte de dados do setor 430
+OFS_TEAM_NAME_1_A   = 1013736  → 1011360 + 2352 + 24 = 1º byte do setor 431
 ```
 
 Os `if (i == 40) fil_ctrl.Seek(OFS_NOMI_SQ1A, ...)` (`edDlg.cpp:1665-1667`) são
-exatamente esses saltos. Consequências:
+exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`,
+`_F` e `1A`. Consequências:
 
 1. Não dá para extrair o arquivo do ISO9660 e editar — tem que ser o `.bin` cru.
 2. O editor **não recalcula EDC/ECC** ao gravar. Comportamento original: um
@@ -323,19 +352,22 @@ exatamente esses saltos. Consequências:
 - Nomes de identificadores em **italiano** (`giocatore` = jogador, `squadra` =
   time, `tattica` = tática, `bandiera` = bandeira, `maglia` = camisa,
   `carat`/`caratteristiche` = atributos, `sost`/`sostituzione` =
-  substituição, `nomi` = nomes, `costi` = custos, `numeri` = números).
+  substituição, `nomi` = nomes, `costi` = custos, `numeri` = números). Isso
+  vale só para `legacy/`; o mapa completo para o port está em
+  [tools/glossary.py](tools/glossary.py).
 - Zero desenho GDI. O único `OnPaint` (`edDlg.cpp:1493`) só desenha o ícone
   quando minimizado. O "campo tático" move `CButton`s com `MoveWindow`.
 
 ## Estado do repositório
 
-Fases 1 (higiene), 2 (core portável) e 3 (golden tests) concluídas. Ver
-[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
+Fases 1 (higiene), 2 (core portável), 3 (golden tests) e 3.5 (nomenclatura)
+concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por
+fase.
 
 O port está verificado contra o `ed.exe`: nas imagens European Deluxe e
 japonesa, gravação limpa ou com edição pela GUI, a saída é byte-idêntica à do
-original salvo a faixa de 16 bytes já descrita. A próxima fase é a **3.5**
-(nomenclatura para inglês), e ela ainda não foi autorizada.
+original salvo a faixa de 16 bytes já descrita. A próxima fase é a **4**
+(`.rc` → `.ui`), e ela ainda não foi autorizada.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto

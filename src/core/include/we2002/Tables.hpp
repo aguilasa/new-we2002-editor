@@ -7,24 +7,36 @@ namespace we2002 {
 
 inline constexpr int N_ROLES = 21;
 
-/// Per-team byte length of each of the six name slots, in disc order
-/// (national teams, then all-stars, then Master League clubs). The trailing
-/// NUL separator is included in the count, which is why the reads use these
-/// verbatim rather than strlen().
-extern const char LUN_NOMI1[95];
-extern const char LUN_NOMI2[95];
-extern const char LUN_NOMI3[95];
-extern const char LUN_NOMI4[95];
-extern const char LUN_NOMI5[95];
-extern const char LUN_NOMI6[95];
-extern const char LUN_NOMI_MIN[95];
-extern const char LUN_NOMI_ADD1[32];
-extern const char LUN_NOMI_ADD2[32];
-extern const char LUN_NOMIK[95];
+/// Per-team byte length of each of the six all-caps name slots, in
+/// disc order (national teams, then all-stars, then Master League
+/// clubs). The trailing NUL separator is counted, which is why the
+/// reads use these verbatim rather than strlen().
+extern const char TEAM_NAME_LEN_1[95];
+extern const char TEAM_NAME_LEN_2[95];
+extern const char TEAM_NAME_LEN_3[95];
+extern const char TEAM_NAME_LEN_4[95];
+extern const char TEAM_NAME_LEN_5[95];
+extern const char TEAM_NAME_LEN_6[95];
+/// Byte length of the mixed-case team name.
+extern const char TEAM_MIXED_CASE_NAME_LEN[95];
+/// Byte length of the 7th and 8th name slots, Master League only.
+extern const char ML_TEAM_NAME_LEN_7[32];
+extern const char ML_TEAM_NAME_LEN_8[32];
+/// Length in characters of the Japanese team name; the
+/// encoded form on disc is twice this many bytes.
+extern const char TEAM_NAME_KANJI_LEN[95];
+/// The 21 role abbreviations shown on the tactics screen.
 extern const char ROLE_NAMES[N_ROLES][6];
+/// First squad index of each national team inside the shared player
+/// pool. ResolveMlLink() uses it to turn a two-byte link into an
+/// index into Database::players.
 extern const int START_LINK[];
-extern const int NC_NAZ_SEQ[];
-extern const char NC_NAZ_QT[];
+/// The non-contract player pool is stored as runs, one per team:
+/// NC_TEAM_CODE gives the team and NC_PLAYER_COUNT how many of its
+/// players follow.
+extern const int NC_TEAM_CODE[];
+extern const char NC_PLAYER_COUNT[];
+/// Team names as the editor displays them.
 extern const char TEAM_NAMES[120][20];
 
 }  // namespace we2002

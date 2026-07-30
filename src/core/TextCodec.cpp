@@ -21,7 +21,7 @@ void AsciiToKanji(const unsigned char* as, unsigned char* kj, int l) {
             kj[i * 2] = (char)130;
             // 32 = 129-97, 129 = 0x(82)81 a in kanji, 97 = a in ascii
             kj[(i * 2) + 1] = as[i] + (char)32;
-            // numeri
+            // digits
         } else if (as[i] > 47 && as[i] < 58) {
             kj[i * 2] = (char)130;
             kj[(i * 2) + 1] = as[i] + (char)31;
@@ -53,7 +53,7 @@ void KanjiToAscii(const unsigned char* kj, unsigned char* as, int l) {
             // lettere minuscole
         } else if (kj[i] == 130 && kj[i + 1] > 128 && kj[i + 1] < 155) {
             aux[i] = kj[i + 1] - (char)32;
-            // numeri
+            // digits
         } else if (kj[i] == 130 && kj[i + 1] > 78 && kj[i + 1] < 89) {
             aux[i] = kj[i + 1] - (char)31;
             // punto

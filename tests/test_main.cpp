@@ -93,18 +93,18 @@ void TestSectorMath() {
     // The three facts documented in docs/PLAN-LINUX.md section 2. If a future
     // change to Offsets.hpp breaks these, the offsets are no longer calibrated
     // to sector boundaries and reads will run into ECC bytes.
-    const auto a = we2002::Locate(we2002::OFS_NOMI_SQ1);
+    const auto a = we2002::Locate(we2002::OFS_TEAM_NAME_1);
     CHECK(a.sector == 430);
     CHECK(a.byte_in_sector == 1280);
     CHECK(a.in_data_region);
 
-    // OFS_NOMI_SQ1_F is the last data byte of sector 430.
-    const auto f = we2002::Locate(we2002::OFS_NOMI_SQ1_F);
+    // OFS_TEAM_NAME_1_END is the last data byte of sector 430.
+    const auto f = we2002::Locate(we2002::OFS_TEAM_NAME_1_END);
     CHECK(f.sector == 430);
     CHECK(f.byte_in_sector == we2002::SECTOR_DATA_END - 1);
 
-    // OFS_NOMI_SQ1A is the first data byte of the next sector.
-    const auto b = we2002::Locate(we2002::OFS_NOMI_SQ1A);
+    // OFS_TEAM_NAME_1_A is the first data byte of the next sector.
+    const auto b = we2002::Locate(we2002::OFS_TEAM_NAME_1_A);
     CHECK(b.sector == 431);
     CHECK(b.byte_in_sector == we2002::SECTOR_DATA_BEGIN);
 
@@ -115,15 +115,15 @@ void TestSectorMath() {
         we2002::Offset value;
     };
     const Named offsets[] = {
-        {"OFS_NOMI_SQ1", we2002::OFS_NOMI_SQ1},
-        {"OFS_NOMI_SQ2", we2002::OFS_NOMI_SQ2},
-        {"OFS_NOMI_SQK", we2002::OFS_NOMI_SQK},
-        {"OFS_NOMI_G", we2002::OFS_NOMI_G},
-        {"OFS_CARAT_G", we2002::OFS_CARAT_G},
-        {"OFS_BANDIERE_COLORE", we2002::OFS_BANDIERE_COLORE},
-        {"OFS_BANDIERE_COLORE2", we2002::OFS_BANDIERE_COLORE2},
-        {"OFS_NUMERI_ML", we2002::OFS_NUMERI_ML},
-        {"OFS_NUMERI_NAZ", we2002::OFS_NUMERI_NAZ},
+        {"OFS_TEAM_NAME_1", we2002::OFS_TEAM_NAME_1},
+        {"OFS_TEAM_NAME_2", we2002::OFS_TEAM_NAME_2},
+        {"OFS_TEAM_NAME_KANJI", we2002::OFS_TEAM_NAME_KANJI},
+        {"OFS_PLAYER_NAME", we2002::OFS_PLAYER_NAME},
+        {"OFS_PLAYER_ATTR", we2002::OFS_PLAYER_ATTR},
+        {"OFS_FLAG_COLOURS", we2002::OFS_FLAG_COLOURS},
+        {"OFS_FLAG_COLOURS_B", we2002::OFS_FLAG_COLOURS_B},
+        {"OFS_SQUAD_NUMBERS_ML", we2002::OFS_SQUAD_NUMBERS_ML},
+        {"OFS_SQUAD_NUMBERS_NATIONAL", we2002::OFS_SQUAD_NUMBERS_NATIONAL},
         {"OFS_KICKER", we2002::OFS_KICKER},
     };
     for (const auto& o : offsets) {
@@ -181,47 +181,47 @@ void TestPlayerBitPacking() {
     Section("Player attribute packing");
 
     we2002::Player p;
-    p.posizione = 5;
-    p.altezza = 191;
-    p.eta = 28;
-    p.numero = 10;
-    p.attacco = 18;
-    p.difesa = 15;
-    p.velocita = 17;
-    p.riflessi = 13;
-    p.piede = 1;
-    p.fuori_ruolo = 1;
+    p.position = 5;
+    p.height = 191;
+    p.age = 28;
+    p.number = 10;
+    p.attack = 18;
+    p.defence = 15;
+    p.speed = 17;
+    p.reflexes = 13;
+    p.foot = 1;
+    p.out_of_position = 1;
     // The rest sit at the format's base value of 12.
-    p.forza = 12;
-    p.resistenza = 12;
-    p.accel = 12;
-    p.passaggio = 12;
-    p.pot_tiro = 12;
-    p.prec_tiro = 12;
-    p.salto = 12;
-    p.testa = 12;
-    p.tecnica = 12;
+    p.strength = 12;
+    p.stamina = 12;
+    p.acceleration = 12;
+    p.passing = 12;
+    p.shot_power = 12;
+    p.shot_accuracy = 12;
+    p.jump = 12;
+    p.heading = 12;
+    p.technique = 12;
     p.dribbling = 12;
-    p.effetto = 12;
-    p.aggress = 12;
+    p.swerve = 12;
+    p.aggression = 12;
 
     // The names are backwards in the original; see Player.cpp.
-    p.decodifica();  // members -> str_carat
+    p.Encode();  // members -> raw_attributes
 
     we2002::Player q;
-    std::memcpy(q.str_carat, p.str_carat, sizeof(q.str_carat));
-    q.codifica_carat();  // str_carat -> members
+    std::memcpy(q.raw_attributes, p.raw_attributes, sizeof(q.raw_attributes));
+    q.Decode();  // raw_attributes -> members
 
-    CHECK(q.posizione == 5);
-    CHECK(q.altezza == 191);
-    CHECK(q.eta == 28);
-    CHECK(q.numero == 10);
-    CHECK(q.attacco == 18);
-    CHECK(q.difesa == 15);
-    CHECK(q.velocita == 17);
-    CHECK(q.riflessi == 13);
-    CHECK(q.piede == 1);
-    CHECK(q.fuori_ruolo == 1);
+    CHECK(q.position == 5);
+    CHECK(q.height == 191);
+    CHECK(q.age == 28);
+    CHECK(q.number == 10);
+    CHECK(q.attack == 18);
+    CHECK(q.defence == 15);
+    CHECK(q.speed == 17);
+    CHECK(q.reflexes == 13);
+    CHECK(q.foot == 1);
+    CHECK(q.out_of_position == 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -281,8 +281,8 @@ void TestTables() {
 
     // Length tables are indexed by team in disc order: 95 = 63 national and
     // all-star sides plus 32 Master League clubs.
-    CHECK(we2002::LUN_NOMI1[0] == 8);
-    CHECK(we2002::LUN_NOMIK[0] == 8);
+    CHECK(we2002::TEAM_NAME_LEN_1[0] == 8);
+    CHECK(we2002::TEAM_NAME_KANJI_LEN[0] == 8);
     CHECK(std::strcmp(we2002::ROLE_NAMES[0], "GK") == 0);
     CHECK(std::strcmp(we2002::ROLE_NAMES[we2002::N_ROLES - 1], "RW") == 0);
     CHECK(std::strcmp(we2002::TEAM_NAMES[0], "Ireland") == 0);
@@ -319,26 +319,26 @@ void TestRealImage() {
     if (!ok) return;
 
     int nonempty = 0;
-    for (int i = 0; i < we2002::TEAMS_NAZALL; ++i) {
-        const auto& t = db->squad_nazall[i];
-        if (t.nomi[0][0] != '\0') ++nonempty;
+    for (int i = 0; i < we2002::TEAMS_NATIONAL_ALLSTAR; ++i) {
+        const auto& t = db->teams[i];
+        if (t.names[0][0] != '\0') ++nonempty;
     }
-    std::printf("  times nazall com nome: %d/%d\n", nonempty, we2002::TEAMS_NAZALL);
+    std::printf("  times nazionais/all-star com nome: %d/%d\n", nonempty, we2002::TEAMS_NATIONAL_ALLSTAR);
     CHECK(nonempty > 50);
 
     int ml_named = 0;
-    for (const auto& t : db->squad_ml) {
-        if (t.nomi[0][0] != '\0') ++ml_named;
+    for (const auto& t : db->ml_teams) {
+        if (t.names[0][0] != '\0') ++ml_named;
     }
     std::printf("  clubes ML com nome: %d/%d\n", ml_named, we2002::TEAMS_ML);
     CHECK(ml_named > 25);
 
     // Five bits allow 0..31; the game only ever stores 0..22 here.
-    CHECK(db->squad_nazall[0].stc_numeri.order_1 < 32);
+    CHECK(db->teams[0].squad_numbers.order_1 < 32);
 
-    std::printf("  squad_ml[0].nomi[0]     = \"%s\"\n", db->squad_ml[0].nomi[0]);
-    std::printf("  squad_nazall[0].nomi[0] = \"%s\"\n", db->squad_nazall[0].nomi[0]);
-    std::printf("  gioc[0].nome            = \"%s\"\n", db->gioc[0].nome);
+    std::printf("  ml_teams[0].names[0] = \"%s\"\n", db->ml_teams[0].names[0]);
+    std::printf("  teams[0].names[0]    = \"%s\"\n", db->teams[0].names[0]);
+    std::printf("  players[0].name      = \"%s\"\n", db->players[0].name);
 }
 
 }  // namespace

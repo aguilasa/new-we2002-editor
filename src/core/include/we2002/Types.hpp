@@ -5,14 +5,14 @@
 namespace we2002 {
 
 // Population of the three player pools, in the order they sit on the disc.
-inline constexpr int PLAYERS_NC = 462;       // "non-contract" free agents
-inline constexpr int PLAYERS_NAZALL = 1449;  // national teams + all-stars
+inline constexpr int PLAYERS_NC = 462;  // "non-contract" free agents
+inline constexpr int PLAYERS_NATIONAL_ALLSTAR = 1449;
 inline constexpr int PLAYERS_TOTAL = 1911;
 
 inline constexpr int TEAMS_NATIONAL = 54;
 inline constexpr int TEAMS_ALLSTAR = 9;
 inline constexpr int TEAMS_ML = 32;
-inline constexpr int TEAMS_NAZALL = TEAMS_NATIONAL + TEAMS_ALLSTAR;  // 63
+inline constexpr int TEAMS_NATIONAL_ALLSTAR = TEAMS_NATIONAL + TEAMS_ALLSTAR;  // 63
 
 /// Storage for the national/all-star array: 64 slots, not 63.
 ///
@@ -23,11 +23,13 @@ inline constexpr int TEAMS_NAZALL = TEAMS_NATIONAL + TEAMS_ALLSTAR;  // 63
 /// entirely, so the overrun could never be reproduced faithfully -- it is
 /// undefined behaviour, not a behaviour.
 ///
-/// The disc genuinely holds 64 squad-number records at OFS_NUMERI_NAZ, so the
-/// fix is to give the array its 64th slot. Load() then reads all 64 and Save()
-/// writes the same 64 back, which makes that region round-trip unchanged.
-/// Only slots 0..62 are ever shown in the UI.
-inline constexpr int TEAMS_NAZALL_SLOTS = 64;
+/// The disc genuinely holds 64 squad-number records at
+/// OFS_SQUAD_NUMBERS_NATIONAL, so the fix is to give the array its 64th slot.
+/// Load() then reads all 64 and Save() writes the same 64 back, which makes
+/// that region round-trip unchanged. Only slots 0..62 are ever shown in the
+/// UI, and the golden test against ed.exe pins the 64th down -- it is the one
+/// place where the port deliberately differs from the original.
+inline constexpr int TEAMS_NATIONAL_ALLSTAR_SLOTS = 64;
 
 /// Squad numbers for one team: 23 players, five bits each, read as a raw
 /// 16-byte blob straight off the disc.

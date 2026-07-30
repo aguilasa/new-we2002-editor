@@ -36,24 +36,25 @@ public:
 
     /// Copy the all-star squads' player names in from whoever their link
     /// tables point at. Called at the end of Load().
-    void NomiAllStar();
+    void CopyAllStarNames();
 
-    Player gioc[PLAYERS_TOTAL];  ///< non-contract players first, then national
+    /// Non-contract players first, then the national and all-star squads.
+    Player players[PLAYERS_TOTAL];
     /// National teams then all-stars. 64 slots, of which only 0..62 are real
-    /// teams -- see TEAMS_NAZALL_SLOTS for why the 64th exists.
-    Team squad_nazall[TEAMS_NAZALL_SLOTS];
-    MlTeam squad_ml[TEAMS_ML];       ///< Master League clubs
-    MlTeam squad_defml;              ///< the default-ML template
-    Formation tattpred[16];          ///< the 16 preset formations
+    /// teams -- see TEAMS_NATIONAL_ALLSTAR_SLOTS for why the 64th exists.
+    Team teams[TEAMS_NATIONAL_ALLSTAR_SLOTS];
+    MlTeam ml_teams[TEAMS_ML];        ///< Master League clubs
+    MlTeam ml_default;                ///< the default-ML template
+    Formation preset_formations[16];  ///< the 16 preset formations
 
-    unsigned char link_euroas[46]{};
-    unsigned char link_worldas[46]{};
+    unsigned char link_euro_allstar[46]{};
+    unsigned char link_world_allstar[46]{};
 };
 
-/// Resolve a two-byte Master League link into an index into Database::gioc.
-int TrovaIdMl(const unsigned char* lk);
+/// Resolve a two-byte Master League link into an index into Database::players.
+int ResolveMlLink(const unsigned char* lk);
 
-/// Transfer value for gioc[i], derived from the player's attributes.
-int CalcolaCostoGiocatore(const Database& db, int i);
+/// Transfer value for players[i], derived from the player's attributes.
+int ComputePlayerCost(const Database& db, int i);
 
 }  // namespace we2002

@@ -5,26 +5,6 @@
 
 namespace we2002 {
 
-// NOTE ON NAMING
-// Class and file names are anglicised, but *member* names stay in the
-// original Italian. During the port the golden tests compare this code
-// byte-for-byte against legacy/mfc/, and keeping the field names identical
-// keeps that comparison readable. Renaming them is cheap to do later and
-// pointless to do now.
-//
-//   attacco = attack      difesa = defence     forza = strength
-//   resistenza = stamina  velocita = speed     accel = acceleration
-//   passaggio = passing   pot_tiro = shot power
-//   prec_tiro = shot accuracy                  salto = jump
-//   testa = heading       tecnica = technique  effetto = swerve
-//   aggress = aggression  riflessi = reflexes  fuori_ruolo = out of position
-//   posizione = position  col_pelle = skin colour
-//   stile_capelli = hair style                 col_capelli = hair colour
-//   stile_barba = beard style                  col_barba = beard colour
-//   altezza = height      corporatura = build  eta = age
-//   scarpe = boots        piede = footedness   numero = shirt number
-//   costo = transfer cost
-
 /// A player as scraped from SoFIFA, before conversion to WE attributes.
 class FifaPlayer {
 public:
@@ -50,46 +30,50 @@ class Player {
 public:
     Player();
 
-    /// Unpack `str_carat` (12 packed bytes off the disc) into the members.
-    void codifica_carat();
-    /// Repack the members back into `str_carat`.
-    void decodifica();
+    /// Unpack `raw_attributes` (12 packed bytes off the disc) into the members.
+    ///
+    /// The original spelled this pair backwards: its decoder was called
+    /// "codifica_carat" and its encoder "decodifica". Decode/Encode here,
+    /// matching the direction of travel.
+    void Decode();
+    /// Repack the members back into `raw_attributes`.
+    void Encode();
 
     char url[500]{};
-    char nome[11]{};
-    int posizione{};
-    int col_pelle{};
-    int stile_capelli{};
-    int col_capelli{};
-    int stile_barba{};
-    int col_barba{};
-    int altezza{};
-    int corporatura{};
-    int eta{};
-    int scarpe{};
-    int piede{};
-    int attacco{};
-    int difesa{};
-    int forza{};
-    int resistenza{};
-    int velocita{};
-    int accel{};
-    int passaggio{};
-    int pot_tiro{};
-    int prec_tiro{};
-    int salto{};
-    int testa{};
-    int tecnica{};
+    char name[11]{};
+    int position{};
+    int skin_colour{};
+    int hair_style{};
+    int hair_colour{};
+    int beard_style{};
+    int beard_colour{};
+    int height{};
+    int build{};
+    int age{};
+    int boots{};
+    int foot{};
+    int attack{};
+    int defence{};
+    int strength{};
+    int stamina{};
+    int speed{};
+    int acceleration{};
+    int passing{};
+    int shot_power{};
+    int shot_accuracy{};
+    int jump{};
+    int heading{};
+    int technique{};
     int dribbling{};
-    int effetto{};
-    int aggress{};
-    int riflessi{};
-    int fuori_ruolo{};
-    int numero{};
-    int costo{};
+    int swerve{};
+    int aggression{};
+    int reflexes{};
+    int out_of_position{};
+    int number{};
+    int cost{};
 
     /// The 12 raw bytes as they appear on the disc.
-    char str_carat[12]{};
+    char raw_attributes[12]{};
 };
 
 }  // namespace we2002

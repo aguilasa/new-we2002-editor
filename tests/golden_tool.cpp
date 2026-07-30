@@ -54,34 +54,34 @@ int Digest(const std::filesystem::path& image) {
     }
 
     Fnv players;
-    for (const auto& p : db.gioc) {
-        players.Feed(p.nome, sizeof(p.nome));
-        players.Feed(p.str_carat, sizeof(p.str_carat));
+    for (const auto& p : db.players) {
+        players.Feed(p.name, sizeof(p.name));
+        players.Feed(p.raw_attributes, sizeof(p.raw_attributes));
     }
 
     Fnv teams;
-    for (const auto& t : db.squad_nazall) {
-        teams.Feed(t.nomi, sizeof(t.nomi));
-        teams.Feed(t.nomi_a, sizeof(t.nomi_a));
-        teams.Feed(t.str_tattica, sizeof(t.str_tattica));
-        teams.Feed(t.col_bandiera, sizeof(t.col_bandiera));
-        teams.Feed(t.maglia1, sizeof(t.maglia1));
-        teams.Feed(t.maglia2, sizeof(t.maglia2));
-        teams.Feed(&t.stc_numeri, sizeof(t.stc_numeri));
+    for (const auto& t : db.teams) {
+        teams.Feed(t.names, sizeof(t.names));
+        teams.Feed(t.abbreviations, sizeof(t.abbreviations));
+        teams.Feed(t.raw_formation, sizeof(t.raw_formation));
+        teams.Feed(t.flag_colours, sizeof(t.flag_colours));
+        teams.Feed(t.home_kit, sizeof(t.home_kit));
+        teams.Feed(t.away_kit, sizeof(t.away_kit));
+        teams.Feed(&t.squad_numbers, sizeof(t.squad_numbers));
     }
 
     Fnv ml;
-    for (const auto& t : db.squad_ml) {
-        ml.Feed(t.nomi, sizeof(t.nomi));
+    for (const auto& t : db.ml_teams) {
+        ml.Feed(t.names, sizeof(t.names));
         ml.Feed(t.link, sizeof(t.link));
-        ml.Feed(t.str_numeri, sizeof(t.str_numeri));
+        ml.Feed(t.raw_numbers, sizeof(t.raw_numbers));
     }
 
     std::printf("players %016llx\n", static_cast<unsigned long long>(players.h));
     std::printf("teams   %016llx\n", static_cast<unsigned long long>(teams.h));
     std::printf("ml      %016llx\n", static_cast<unsigned long long>(ml.h));
-    std::printf("team[0] %s\n", db.squad_nazall[0].nomi[0]);
-    std::printf("gioc[0] %s\n", db.gioc[0].nome);
+    std::printf("team[0]   %s\n", db.teams[0].names[0]);
+    std::printf("player[0] %s\n", db.players[0].name);
     return 0;
 }
 
