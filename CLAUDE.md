@@ -92,16 +92,40 @@ não estiver definida. **Sempre sobre cópia** — 474 MB por cópia:
 WE2002_TEST_IMAGE=/caminho/copia.bin ./build/tests/we2002_tests
 ```
 
-**ASan não roda nesta máquina.** O `libAppProtection.so` da Citrix em
-`/etc/ld.so.preload` mata qualquer binário com ASan — até hello-world dá
-SIGSEGV, com ou sem `-static-libasan`. Use UBSan:
+### Sanitizers e o bloqueio da Citrix
+
+```sh
+cmake -B build-asan -DCMAKE_BUILD_TYPE=Debug -DWE2002_SANITIZE=ON
+cmake --build build-asan -j
+tools/run-sanitized.sh ./build-asan/tests/we2002_tests
+```
+
+O wrapper `tools/run-sanitized.sh` é **obrigatório** para ASan nesta máquina.
+Motivo: a Citrix põe `/usr/local/lib/AppProtection/libAppProtection.so` em
+`/etc/ld.so.preload`, e essa lib exporta o próprio **`dlsym`** (os demais
+símbolos são hooks de X11 — `XGetImage`, `XNextEvent`, `XQueryExtension` — que
+implementam a proteção anti-screenshot).
+
+O runtime do ASan chama `dlsym(RTLD_NEXT, "malloc")` na própria inicialização,
+antes de libc e libstdc++ subirem. Com o `dlsym` da Citrix no caminho, isso
+estoura: **qualquer** binário com ASan morre antes do `main`, sem imprimir nada.
+`-static-libasan` não resolve — o problema não é ordem de carregamento, é o
+`dlsym` substituído.
+
+O script entra num user+mount namespace sem privilégio e monta um arquivo vazio
+por cima do `/etc/ld.so.preload`. Só a árvore daquele processo enxerga isso;
+nada no sistema muda, não precisa de root, e a App Protection continua ativa no
+resto da sessão.
+
+UBSan não é afetado e roda direto:
 
 ```sh
 cmake -B build-ubsan -DWE2002_SANITIZE=ON -DWE2002_SANITIZERS=undefined
 ```
 
-Existe uma skill `zorin-citrix-dconf-fix` para o estrago que essa instalação da
-Citrix faz no desktop; o `ld.so.preload` é problema irmão, ainda não resolvido.
+Existe uma skill `zorin-citrix-dconf-fix` para outro estrago da mesma
+instalação da Citrix (dock e Zorin Appearance). São problemas irmãos, causas
+diferentes.
 
 ## Rodar o editor original (oráculo)
 

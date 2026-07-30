@@ -499,9 +499,18 @@ commitado.
    no Linux cai em outro lugar. Corrigido dando ao array os 64 slots que o
    disco realmente tem (`TEAMS_NAZALL_SLOTS`).
 
-**Nota de ambiente:** ASan não roda nesta máquina — o `libAppProtection.so` da
-Citrix em `/etc/ld.so.preload` mata qualquer binário com ASan, até
-hello-world. UBSan roda limpo. Em CI, usar `address,undefined`.
+**Resultado dos sanitizers:** ASan + UBSan rodam **limpos**, tanto na suíte
+completa contra a imagem real quanto num ciclo `Load` + `Save` — zero erros de
+memória nas duas funções geradas.
+
+Chegar lá exigiu contornar a Citrix. Ela põe `libAppProtection.so` em
+`/etc/ld.so.preload`, e essa lib exporta o próprio `dlsym`. O runtime do ASan
+chama `dlsym(RTLD_NEXT, "malloc")` antes de libc subir, e com o `dlsym` da
+Citrix no caminho o processo morre antes do `main`, sem output —
+`-static-libasan` não ajuda, porque o problema não é ordem de carregamento.
+`tools/run-sanitized.sh` resolve entrando num user+mount namespace sem
+privilégio e mascarando o `/etc/ld.so.preload` só para aquele processo. Em CI
+não há preload nenhum e o wrapper vira no-op.
 
 ### Fase 3 — Golden tests (~1 dia)
 
