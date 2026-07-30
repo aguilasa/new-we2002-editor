@@ -1,10 +1,10 @@
 # Plano de portabilidade para Linux — WE2002 Editor
 
-> Status: **plano aprovado, execução NÃO autorizada.** Nenhuma fase iniciada
-> exceto a validação da Fase 0 (feita em prefix descartável, sem alterar o repo).
->
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
+>
+> Progresso: Fase 0 validada, **Fase 1 concluída**. Fase 2 em diante ainda
+> **não autorizada** — não iniciar sem pedido explícito.
 
 ---
 
@@ -173,22 +173,191 @@ Testados 4 offsets do editor em cada imagem:
 
 ---
 
-## 5. Fases
+## 5. Estrutura do projeto
+
+### Por que a atual não serve
+
+Hoje os 60 arquivos estão todos jogados na raiz: fonte, projeto do Visual
+Studio, ícones, dados de runtime e dumps de depuração misturados. Isso
+funcionava porque o Visual Studio lia o `ed.vcxproj` e não se importava com
+pastas. Para um projeto C++/Qt multiplataforma, três coisas faltam:
+
+1. **Separação entre biblioteca e aplicação.** O objetivo do port é ter a
+   lógica de leitura/gravação do `.bin` isolada da interface. Se tudo mora no
+   mesmo lugar, é fácil a UI vazar para dentro da lógica — que é exatamente a
+   doença do `edDlg.cpp` atual.
+2. **Um build que funcione fora do Visual Studio.** Não existe `CMakeLists.txt`;
+   sem ele não há como compilar no Linux nem no Windows com outro compilador.
+3. **Lugar para o que não é código de produção** — testes, scripts, dados de
+   fixture, e o próprio código MFC antigo que vira material de referência.
+
+### Vocabulário mínimo
+
+Termos que aparecem daqui pra frente:
+
+| Termo | O que é |
+|---|---|
+| **Header** (`.hpp`) | Arquivo que **declara** o que existe (nomes de funções, classes). Outros arquivos fazem `#include` dele para saber que aquilo existe. |
+| **Implementação** (`.cpp`) | Arquivo que **define** como aquilo funciona. É o que de fato é compilado. |
+| **Header público vs privado** | Público = fica em `include/`, é a API que o resto do projeto pode usar. Privado = fica junto do `.cpp`, é detalhe interno. |
+| **Target** | Unidade que o CMake constrói: uma biblioteca ou um executável. Este projeto terá três. |
+| **CMake** | O sistema de build padrão de C++ hoje. Um `CMakeLists.txt` descreve os targets; o CMake gera Makefiles no Linux e projetos do Visual Studio no Windows a partir do **mesmo** arquivo. É isso que dá o multiplataforma. |
+| **Build out-of-source** | Compilar dentro de `build/`, nunca misturado ao fonte. É o que permite jogar tudo fora com `rm -rf build/`. |
+| **moc / uic / rcc** | Geradores de código do Qt. `moc` processa classes com sinais e slots; `uic` transforma arquivos `.ui` (layout) em C++; `rcc` embute recursos (ícones) no binário. O CMake roda os três sozinho — ver `AUTOMOC` abaixo. |
+
+### Árvore alvo
+
+```
+new-we2002-editor/
+├─ CMakeLists.txt              # raiz: acha o Qt, agrega os subdiretorios
+├─ CMakePresets.json           # perfis nomeados: debug-asan, release, ...
+│
+├─ src/
+│  ├─ core/                    # libwe2002 — logica pura. ZERO Qt, ZERO UI.
+│  │  ├─ CMakeLists.txt
+│  │  ├─ include/we2002/       # API publica
+│  │  │  ├─ CdImage.hpp        #   abrir/ler/gravar a imagem MODE2/2352
+│  │  │  ├─ Offsets.hpp        #   os 69 OFS_*, hoje presos no edDlg.cpp
+│  │  │  ├─ Player.hpp         #   ex-giocatore
+│  │  │  ├─ Team.hpp           #   ex-squadra / squadra_ml
+│  │  │  ├─ Tactics.hpp        #   ex-tattica
+│  │  │  ├─ TextCodec.hpp      #   kanjitoascii / asciitokanji
+│  │  │  └─ SofifaImport.hpp   #   ex-myiotxt + parser
+│  │  └─ *.cpp
+│  │
+│  └─ app/                     # o executavel Qt
+│     ├─ CMakeLists.txt
+│     ├─ main.cpp
+│     ├─ MainWindow.{hpp,cpp}
+│     ├─ ui/                   # .ui gerados na Fase 4 a partir do ed.rc
+│     └─ resources/app.qrc     # icone etc, embutidos no binario
+│
+├─ tests/                      # golden tests da Fase 3
+│  ├─ CMakeLists.txt
+│  └─ fixtures/                # dados pequenos; NUNCA imagens de CD
+│
+├─ tools/                      # scripts de apoio, nao entram no binario
+│  ├─ rc2ui.py                 # conversor .rc -> .ui (Fase 4)
+│  └─ golden_run.sh            # dirige o ed.exe sob Wine (Fase 3)
+│
+├─ legacy/                     # fonte MFC original — referencia, nao compila
+│  └─ mfc/                     # edDlg.cpp, ed.rc, res/, ed.vcxproj...
+│
+├─ data/                       # dados lidos em runtime
+│  ├─ defaultlook.txt
+│  └─ naz.txt
+│
+└─ docs/                       # PLAN-LINUX.md, notas de formato
+```
+
+### A regra que mais importa
+
+**`src/core/` não pode incluir nada de Qt.** Nem `QString`, nem `QFile`. Só
+biblioteca padrão de C++ e libcurl.
+
+Isso não é purismo. É o que torna a Fase 3 possível: os golden tests precisam
+rodar sem abrir janela nenhuma, comparando bytes. Se o núcleo depender do Qt,
+todo teste vira teste de GUI — lento, frágil e impossível de rodar em CI. É
+também o que deixa a porta aberta para uma versão CLI ou web depois, sem
+reescrever a lógica.
+
+A direção de dependência é de mão única: `app` → `core`. Nunca o contrário.
+
+### Os três targets
+
+| Target | Tipo | Depende de |
+|---|---|---|
+| `we2002_core` | biblioteca estática | libcurl |
+| `we2002` | executável | `we2002_core`, `Qt6::Widgets` |
+| `we2002_tests` | executável de teste | `we2002_core` |
+
+Esqueleto do `CMakeLists.txt` da raiz:
+
+```cmake
+cmake_minimum_required(VERSION 3.21)
+project(we2002 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# char precisa ser signed: o codigo herdado assume o padrao do MSVC/x86
+add_compile_options(-fsigned-char)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()      # liga AUTOMOC/AUTOUIC/AUTORCC
+
+add_subdirectory(src/core)
+add_subdirectory(src/app)
+
+enable_testing()
+add_subdirectory(tests)
+```
+
+Compilar:
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j
+ctest --test-dir build
+```
+
+O mesmo `CMakeLists.txt` gera solução do Visual Studio no Windows. É esse o
+mecanismo que entrega o multiplataforma — não há projeto separado a manter.
+
+### Para onde vai cada arquivo de hoje
+
+| Hoje na raiz | Destino |
+|---|---|
+| `edDlg.cpp`, `edDlg.h` | Fatiado: offsets e I/O → `src/core/`; UI → `src/app/`. Cópia integral fica em `legacy/mfc/`. |
+| `giocatore.*`, `squadra*.*`, `tattica.*` | `src/core/` (renomeados para inglês) |
+| `myiotxt.*` | `src/core/` — já é portável |
+| `graf.cpp`, `tattDlg.cpp`, `carattDlg.cpp`, `selezDlg.cpp`, `editOptForm.cpp` | Reescritos em `src/app/`; originais em `legacy/mfc/` |
+| `ed.cpp`, `StdAfx.*`, `gui.*` | Descartados. `main.cpp` novo os substitui. |
+| `ed.rc`, `resource.h`, `res/` | `legacy/mfc/` — vira entrada do `tools/rc2ui.py` |
+| `ed.vcxproj`, `ed.sln`, `ed.dsp`, `ed.dsw`, `ed.vcproj`, `ed.clw`, `ed.odl`, `ed.reg` | `legacy/mfc/`. Substituídos pelo CMake. |
+| `defaultlook.txt`, `naz.txt` | `data/` |
+| `SOFIFA attributes.txt`, `WE attributes conversion rules.txt` | `data/` |
+| `libcurl.dll` | Removido. No Linux vem do sistema; no Windows, do gerenciador de pacotes do CMake. |
+| `debugio*.txt`, `debugread*.txt` | `docs/samples/` ou apagados — são dumps HTML do SoFIFA de 2015 |
+| `Debug/ed.exe` | Fora do git, mas **fica no disco**: é o oráculo da Fase 3 |
+
+### Quando fazer
+
+**No início da Fase 2, antes de escrever qualquer código novo.** Mover arquivo
+depois que já existe código novo referenciando os caminhos antigos custa mais.
+
+Duas consequências a lembrar: mover os fontes MFC para `legacy/mfc/` invalida
+todas as referências de caminho do `CLAUDE.md`, que precisa ser atualizado no
+mesmo commit; e como o git detecta renomeação, o histórico dos arquivos
+sobrevive desde que o movimento seja commitado sem alterações de conteúdo
+misturadas.
+
+---
+
+## 6. Fases
 
 ### Fase 0 — Rodar via Bottles ✅ validado
 
 Falta apenas: criar a bottle dedicada e o wrapper (`Makefile` no padrão do
 projeto snes).
 
-### Fase 1 — Higiene (~1 h)
+### Fase 1 — Higiene ✅ concluída
 
-- `.gitignore` para `*.sdf *.suo *.ncb *.opt *.plg ipch/ Debug/ Release/
-  _UpgradeReport_Files/`.
-- Purgar os artefatos do índice (347 MB → poucos MB).
-- **Manter `Debug/ed.exe` no disco, fora do git** — é o oráculo da Fase 3.
-- Converter fontes ISO-8859-1 → UTF-8.
+- `.gitignore` criado; artefatos fora do versionamento (60 arquivos / ~1,2 MB).
+- `Debug/ed.exe` mantido no disco, fora do git — é o oráculo da Fase 3.
+- `edDlg.cpp` e `selezDlg.cpp` convertidos para UTF-8. `ed.rc` (entrada do
+  `rc2ui.py`) e `defaultlook.txt` (dado de runtime) mantidos no encoding
+  original de propósito.
+- Histórico reescrito a partir de um commit raiz novo; `.git` de 72 MB → 470 KB.
+- Repo movido para `aguilasa/new-we2002-editor` (standalone, branch `main`); o
+  fork antigo foi deletado. Original permanece em
+  `thyddralisk/WE2002-editor-2.0`.
+- `README.md` e `NOTICE.md` documentando linhagem e ausência de licença.
 
 ### Fase 2 — Core portável `libwe2002` (~1–2 dias)
+
+**Passo 2.0 — reorganizar a árvore** conforme a seção 5, e só então escrever
+código.
 
 Biblioteca sem MFC:
 
@@ -246,7 +415,7 @@ Empacotar AppImage ou Flatpak.
 
 ---
 
-## 6. Riscos
+## 7. Riscos
 
 - Bugs de memória latentes vão aparecer sob ASan — bom, mas custa tempo não
   estimado.
