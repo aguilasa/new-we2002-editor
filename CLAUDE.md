@@ -200,6 +200,9 @@ isso. Já pegou dois erros reais durante a Fase 2.
   `squadra_ml`/`tattica`. Classes e arquivos em inglês, **membros ainda em
   italiano** de propósito: mantém a rastreabilidade 1:1 com o legacy durante os
   golden tests. Glossário no topo de `Player.hpp`.
+  **O destino é tudo em inglês** — a tradução dos membros é a Fase 3.5 do
+  plano, agendada para depois dos golden tests. Não antecipe, e não renomeie
+  `Database.cpp` à mão: ele é gerado.
 - `TextCodec` — `kanjitoascii`/`asciitokanji` portados verbatim.
 
 Nomes invertidos herdados: `Player::codifica_carat()` **decodifica** o blob em

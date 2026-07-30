@@ -532,6 +532,72 @@ mesmo ciclo abrir → gravar e comparar as três faixas. Se o oráculo produzir 
 mesma divergência, é comportamento original e o port está fiel; se não,
 o culpado já está localizado em três blocos de código.
 
+### Fase 3.5 — Traduzir a nomenclatura para inglês (~meio dia)
+
+**Decisão tomada: o projeto inteiro fica em inglês.** A Fase 2 anglicizou
+classes e arquivos mas deixou os *membros* em italiano de propósito — durante
+os golden tests, poder comparar campo a campo com o legacy vale mais que a
+consistência. Passada a Fase 3, esse motivo acaba.
+
+Por que aqui e não antes ou depois:
+
+- **Depois da Fase 3**, porque os golden tests são a rede de segurança: uma
+  renomeação em massa que não muda comportamento é exatamente o que eles sabem
+  provar. Fazer antes seria renomear no escuro.
+- **Antes da Fase 5**, porque é lá que se escreve o grosso do código novo de UI
+  referenciando esses campos. Renomear depois multiplica o trabalho.
+- A Fase 4 não toca em nomes de membros do core, então pode vir antes ou
+  depois desta.
+
+Escopo:
+
+1. Membros de `Player`, `Team`, `MlTeam`, `Formation` (glossário no topo de
+   `src/core/include/we2002/Player.hpp` e `Team.hpp`).
+2. Variáveis locais e nomes de campo dentro de `Database.cpp`.
+3. Os dois métodos de nome invertido: `Player::codifica_carat()` na verdade
+   **decodifica** o blob em membros e `Player::decodifica()` **codifica** de
+   volta. Viram `Decode()` / `Encode()`.
+4. Comentários em italiano que sobraram no código gerado.
+
+Glossário (o mesmo que está nos headers):
+
+| Italiano | Inglês |
+|---|---|
+| `attacco` / `difesa` | attack / defence |
+| `forza` / `resistenza` | strength / stamina |
+| `velocita` / `accel` | speed / acceleration |
+| `passaggio` | passing |
+| `pot_tiro` / `prec_tiro` | shot power / shot accuracy |
+| `salto` / `testa` | jump / heading |
+| `tecnica` / `effetto` | technique / swerve |
+| `aggress` / `riflessi` | aggression / reflexes |
+| `fuori_ruolo` | out of position |
+| `posizione` / `numero` / `costo` | position / number / cost |
+| `altezza` / `corporatura` / `eta` | height / build / age |
+| `col_pelle` / `stile_capelli` / `col_capelli` | skin colour / hair style / hair colour |
+| `stile_barba` / `col_barba` | beard style / beard colour |
+| `scarpe` / `piede` | boots / footedness |
+| `nomi` / `nome_m` / `nomi_a` | names / long name / abbreviations |
+| `nomek` / `nomekanji` | decoded / raw Shift-JIS name |
+| `bar_*` | the five strength bars |
+| `kik_punl` / `kik_punc` | long / short free kick taker |
+| `kik_angsx` / `kik_angdx` | left / right corner taker |
+| `kik_rigori` / `kik_cap` | penalty taker / captain |
+| `tattica` / `tat_ruolo` / `tat_x` / `tat_y` | formation / role / pitch x / pitch y |
+| `bandiera` / `maglia1` / `maglia2` | flag / home kit / away kit |
+| `strategia` / `numeri` | strategy / squad numbers |
+| `squad_nazall` / `squad_ml` / `gioc` | national+allstar teams / ML clubs / players |
+| `tattpred` | preset formations |
+
+Cuidado com o método: **`tools/port_database.py` gera `Database.cpp`.**
+Renomear o arquivo gerado à mão é jogar o trabalho fora na próxima execução.
+Os nomes novos entram como substituições no gerador, e o `Database.cpp` sai
+renomeado. Depois disso o gerador pode ser aposentado, já que o código deixa de
+ser um decalque do legacy — mas só depois que a Fase 3 estiver verde.
+
+Critério de pronto: nenhum identificador em italiano fora de `legacy/`, e os
+golden tests continuam passando byte a byte.
+
 ### Fase 4 — `.rc` → Qt `.ui` (~2–3 dias)
 
 Script Python converte os 6 blocos `DIALOG`/`DIALOGEX` de `ed.rc` em `.ui`.
