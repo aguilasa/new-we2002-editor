@@ -49,11 +49,33 @@ O código é Windows-only. Há um plano de port para Linux em
 portabilidade**; ele contém o diagnóstico completo, as armadilhas já mapeadas e
 o faseamento acordado.
 
-**Licença: não existe.** Nem Moriero (2002) nem thyddralisk (2015, que publicou
-no GitHub e adicionou o import do SoFIFA) concederam licença — o código herdado
-é todos-os-direitos-reservados. Por isso o repo **não tem `LICENSE`**; a
-linhagem e as ressalvas estão em [NOTICE.md](NOTICE.md). Não adicione um
-arquivo de licença nem headers de licença aos fontes.
+### Upstream
+
+O código original vive em
+**<https://github.com/thyddralisk/WE2002-editor-2.0>** — repo público, parado
+desde 2015-05-24, com os dois commits originais (`dbba1c8` "Loaded my original
+files", `46f097b` ".gitattributes") e a árvore intacta sob `ed-eng2/`.
+
+Essa é a **fonte canônica** para comparar contra o estado original ou recuperar
+qualquer coisa perdida no caminho:
+
+```sh
+git clone https://github.com/thyddralisk/WE2002-editor-2.0.git
+```
+
+Este repositório já foi um fork dele. O vínculo foi cortado: o histórico local
+foi reescrito a partir de um commit raiz novo, e o fork antigo
+(`aguilasa/WE2002-editor-2.0`) foi deletado para tirar da rede de forks os
+~340 MB de artefatos de build. Nada exclusivo se perdeu — como era fork, todo o
+histórico apagado era do thyddralisk e continua lá.
+
+### Licença: não existe
+
+Nem Moriero (2002) nem thyddralisk (2015, que publicou no GitHub e adicionou o
+import do SoFIFA) concederam licença — o código herdado é
+todos-os-direitos-reservados. Por isso o repo **não tem `LICENSE`**; a linhagem
+e as ressalvas estão em [NOTICE.md](NOTICE.md). Não adicione um arquivo de
+licença nem headers de licença aos fontes.
 
 ## Rodar o editor
 
@@ -162,15 +184,15 @@ exatamente esses saltos. Consequências:
 ## Estado do repositório
 
 Fase 1 (higiene) aplicada: `.gitignore` criado, artefatos de build fora do
-versionamento. Rastreados 59 arquivos / ~1,2 MB.
+versionamento. Rastreados 60 arquivos / ~1,2 MB; `.git` em ~470 KB.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto
 ignorado.
 
-`.git` ainda tem 72 MB porque o histórico carrega os artefatos. Encolher exige
-reescrever histórico (`git filter-repo`) + force-push para `origin` —
-**destrutivo, só com autorização explícita.**
+Remote: `git@github.com:aguilasa/new-we2002-editor.git`, branch padrão `main`.
+O diretório local ainda se chama `WE2002-editor-2.0` — descasado do nome do
+repo, mas inofensivo.
 
 Encoding: `edDlg.cpp` e `selezDlg.cpp` foram convertidos para UTF-8. O resto
 dos fontes é ASCII puro. Exceções que devem permanecer como estão:
