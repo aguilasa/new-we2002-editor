@@ -463,25 +463,45 @@ projeto snes).
   `thyddralisk/WE2002-editor-2.0`.
 - `README.md` e `NOTICE.md` documentando linhagem e ausência de licença.
 
-### Fase 2 — Core portável `libwe2002` (~1–2 dias)
+### Fase 2 — Core portável `libwe2002` ✅ concluída
 
-**Passo 2.0 — reorganizar a árvore** conforme a seção 5, e só então escrever
-código.
+Árvore reorganizada conforme a seção 5. `we2002_core` compila com g++ sob
+`-Wall -Wextra` sem um único warning, e não linka Qt nem API de plataforma.
 
-Biblioteca sem MFC:
+Como foi feito: `carica_dabin` (696 linhas) e `OnWriteCD` (663) **não foram
+retipadas**. `tools/port_database.py` extrai os corpos verbatim do legacy e
+aplica uma lista auditável de substituições; o que ele não reconhece sobra e
+quebra a compilação de propósito. `tools/extract_legacy_data.py` faz o mesmo
+com os 69 offsets e as 15 tabelas. Ambos são reexecutáveis e o resultado é
+commitado.
 
-- `CFile` → `std::fstream` (wrapper fino com `Seek`/`Read`/`Write` para
-  minimizar o diff).
-- `_itoa` → `std::to_string`.
-- `CString` → `std::string`.
-- `AfxMessageBox` → callback / `std::function` injetado.
-- Deletar todo o OLE de `ed.cpp`.
-- Mover de `edDlg.cpp`: os 69 `OFS_*`, `carica_dabin`, `OnWriteCD`,
-  `kanjitoascii`/`asciitokanji`, `CalcolaCostoGiocatore`, import SoFIFA.
-- Manter `giocatore.cpp`, `squadra.cpp`, `squadra_ml.cpp`, `tattica.cpp`,
-  `myiotxt.cpp` quase intactos.
-- `static_assert(sizeof(NUMERI) == 16)` + teste de layout de bits.
-- CMake + g++, `-fsigned-char`, build de dev com ASan/UBSan.
+- `CFile` → `CdImage` (`std::fstream`, sempre `std::ios::binary`), com
+  `Seek`/`SeekCurrent`/`Read`/`Write` imitando a semântica do `CFile`,
+  inclusive ponteiro de arquivo único e leitura curta não sendo erro.
+- `AfxMessageBox` → `Reporter` (`std::function`) injetado.
+- `CString`/`_itoa` eliminados; caminho é `std::filesystem::path`.
+- OLE de `ed.cpp` descartado junto com o resto do app MFC.
+- Estado global (`gioc[]`, `squad_nazall[]`, `squad_ml[]`, `tattpred[]`) virou
+  a classe `Database`.
+- Testes: 61 checks, sem framework externo. Cobrem layout de bits de
+  `SquadNumbers`, aritmética de setor, round-trip do codec, empacotamento de
+  atributos, `CdImage` e as tabelas geradas.
+
+**Dois bugs reais encontrados:**
+
+1. **`DWORD` nos bitfields de `NUMERI`.** `DWORD` é 32-bit no Windows e 64-bit
+   no Linux LP64 — manter o tipo teria embaralhado todos os números de camisa
+   silenciosamente. Agora é `std::uint32_t`, com `static_assert` de tamanho e
+   teste de posição de bits.
+2. **Estouro de array no original.** `squadra squad_nazall[63]` com três laços
+   indo até 64 (`edDlg.cpp:1928`, `:5821`, `:7667`), lendo e gravando 16 bytes
+   além do fim. É UB, não comportamento: no Windows sujava o global seguinte,
+   no Linux cai em outro lugar. Corrigido dando ao array os 64 slots que o
+   disco realmente tem (`TEAMS_NAZALL_SLOTS`).
+
+**Nota de ambiente:** ASan não roda nesta máquina — o `libAppProtection.so` da
+Citrix em `/etc/ld.so.preload` mata qualquer binário com ASan, até
+hello-world. UBSan roda limpo. Em CI, usar `address,undefined`.
 
 ### Fase 3 — Golden tests (~1 dia)
 
@@ -493,6 +513,24 @@ Biblioteca sem MFC:
 
 Sem essa fase o port é chute. É aqui que a suspeita de bitfield/endianness
 morre ou se confirma.
+
+**Ponto de partida já medido.** Um `Load` seguido de `Save` sem editar nada,
+sobre a European Deluxe, **não** devolve a imagem idêntica: 1.664 bytes diferem,
+em três blocos, todos na região de dados (nenhum em EDC/ECC, como esperado):
+
+| Faixa | Bytes | Região |
+|---|---|---|
+| `2196831..2197377` | 547 | atributos de jogadores, em `OFS_CARAT_G8` — zona das all-star |
+| `2329440..2329631` | 192 | kickers dos 32 clubes de ML, em `OFS_KICKER` |
+| `3067404..3068808` | 1405 | custos, em `OFS_COSTI_NAZ` |
+
+Isso **não** é necessariamente bug do port: o `OnWriteCD` original recalcula
+coisas ao gravar em vez de devolver o que leu — os slots das all-star são
+sobrescritos a partir dos links (`TrovaIdMl(&link_euroas[...])`), e os custos
+são regravados. A primeira tarefa da Fase 3 é rodar o `ed.exe` sob Wine no
+mesmo ciclo abrir → gravar e comparar as três faixas. Se o oráculo produzir a
+mesma divergência, é comportamento original e o port está fiel; se não,
+o culpado já está localizado em três blocos de código.
 
 ### Fase 4 — `.rc` → Qt `.ui` (~2–3 dias)
 

@@ -21,6 +21,7 @@ UpgradeLog.XML
 
 # ---- Saidas de build (port Linux, a partir da Fase 2) ----
 build/
+build-*/
 cmake-build-*/
 *.o
 *.a

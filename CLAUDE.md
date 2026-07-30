@@ -77,7 +77,33 @@ todos-os-direitos-reservados. Por isso o repo **não tem `LICENSE`**; a linhagem
 e as ressalvas estão em [NOTICE.md](NOTICE.md). Não adicione um arquivo de
 licença nem headers de licença aos fontes.
 
-## Rodar o editor
+## Compilar e testar
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+```
+
+O teste mais forte disponível carrega uma imagem real; é pulado se a variável
+não estiver definida. **Sempre sobre cópia** — 474 MB por cópia:
+
+```sh
+WE2002_TEST_IMAGE=/caminho/copia.bin ./build/tests/we2002_tests
+```
+
+**ASan não roda nesta máquina.** O `libAppProtection.so` da Citrix em
+`/etc/ld.so.preload` mata qualquer binário com ASan — até hello-world dá
+SIGSEGV, com ou sem `-static-libasan`. Use UBSan:
+
+```sh
+cmake -B build-ubsan -DWE2002_SANITIZE=ON -DWE2002_SANITIZERS=undefined
+```
+
+Existe uma skill `zorin-citrix-dconf-fix` para o estrago que essa instalação da
+Citrix faz no desktop; o `ld.so.preload` é problema irmão, ainda não resolvido.
+
+## Rodar o editor original (oráculo)
 
 Não existe build para Linux. O binário pré-compilado `Debug/ed.exe` (PE32+
 x86-64, MFC estático) roda sob o runner Wine do Bottles:
@@ -124,30 +150,68 @@ comparação na seção 3 do [PLAN-LINUX.md](PLAN-LINUX.md).
 
 ## Arquitetura
 
-### Camadas
+### Layout do repositório (pós-Fase 2)
 
-O app é um diálogo MFC único e gigante mais 5 diálogos filhos. Não há separação
-entre UI e dados: `edDlg.cpp` (8.456 linhas, 60% do código) contém a UI, os
-offsets do formato binário, a lógica de codificação e o estado global.
+```
+src/core/            we2002_core — logica pura. ZERO Qt, ZERO API de plataforma.
+  include/we2002/    API publica
+tests/               61 checks, sem framework externo
+tools/               os dois geradores (ver abaixo)
+legacy/mfc/          o app MFC original — REFERENCIA, nao compila
+data/                dados lidos em runtime
+docs/                PLAN-LINUX.md
+```
 
-- `ed.cpp` — `CWinApp::InitInstance`. O bloco OLE (`AfxOleInit`,
-  `COleTemplateServer`, `COleObjectFactory`) é **vestigial**:
-  `CEdDlgAutoProxy` só é forward-declared em `edDlg.h:14`, nunca implementado.
-- `edDlg.cpp` / `edDlg.h` — diálogo principal. Contém os 69 `#define OFS_*`,
-  `carica_dabin()` (leitura), `OnWriteCD()` (gravação),
-  `kanjitoascii`/`asciitokanji` (`edDlg.cpp:732-773`), cálculo de custo,
-  import SoFIFA.
-- `giocatore` / `squadra` / `squadra_ml` / `tattica` — structs de domínio.
-  `squadra.h:15-45` define `struct NUMERI` com bitfields `DWORD` lidos crus
-  do disco (16 bytes).
-- `graf.cpp`, `tattDlg.cpp`, `carattDlg.cpp`, `selezDlg.cpp`,
-  `editOptForm.cpp` — diálogos filhos (bandeira/uniforme, táticas, atributos
-  do jogador, seleção, opções).
-- `myiotxt.cpp` — o único código já portável: libcurl + helpers de string.
-- `ed.rc` — 6 diálogos, 393 controles. Continua em **ISO-8859-1** (14 × `°`
-  em labels). Deliberado: o consumidor dele é o script conversor da Fase 4
-  (que declara o encoding) e o `rc.exe` do MSVC, que quebraria com UTF-8 sem
-  BOM. Ler sempre com encoding explícito.
+`src/app/` (a UI Qt) ainda não existe — chega nas Fases 4–5. O `CMakeLists.txt`
+da raiz só adiciona `src/app` se o Qt6 for encontrado **e** o diretório
+existir, então o core e os testes compilam numa máquina com apenas compilador
+e libcurl.
+
+**Regra dura: `src/core/` não pode incluir Qt nem `windows.h` nem POSIX.** É o
+que permite os golden tests da Fase 3 rodarem headless.
+
+### Código gerado — não editar à mão
+
+`src/core/Database.cpp`, `Tables.cpp`, `include/we2002/Offsets.hpp` e
+`Tables.hpp` são **gerados**. Para mudá-los, mexa no gerador e reexecute:
+
+```sh
+python3 tools/extract_legacy_data.py   # 69 offsets + 15 tabelas
+python3 tools/port_database.py          # Load/Save/custo a partir do legacy
+```
+
+`port_database.py` extrai `carica_dabin` e `OnWriteCD` verbatim do legacy e
+aplica substituições listadas. Se algo que ele não reconhece sobrar, ele
+**falha** em vez de emitir código quebrado — a lista `FORBIDDEN` existe para
+isso. Já pegou dois erros reais durante a Fase 2.
+
+### Core
+
+- `Database` — o ex-estado global (`gioc[]`, `squad_nazall[]`, `squad_ml[]`,
+  `tattpred[]`) mais `Load()` (ex-`carica_dabin`) e `Save()` (ex-`OnWriteCD`).
+- `CdImage` — substituto do `CFile`. Imita a semântica dele de propósito:
+  ponteiro de arquivo único, leitura curta não é erro, e **sempre**
+  `std::ios::binary`.
+- `Offsets.hpp` — os 69 `OFS_*`.
+- `SquadNumbers` (`Types.hpp`) — o ex-`struct NUMERI`. Bitfields agora são
+  `std::uint32_t`, **não** `DWORD`: no Linux LP64 `DWORD` seria 64-bit e
+  embaralharia todos os números de camisa.
+- `Player` / `Team` / `MlTeam` / `Formation` — ex-`giocatore`/`squadra`/
+  `squadra_ml`/`tattica`. Classes e arquivos em inglês, **membros ainda em
+  italiano** de propósito: mantém a rastreabilidade 1:1 com o legacy durante os
+  golden tests. Glossário no topo de `Player.hpp`.
+- `TextCodec` — `kanjitoascii`/`asciitokanji` portados verbatim.
+
+Nomes invertidos herdados: `Player::codifica_carat()` **decodifica** o blob em
+membros, `Player::decodifica()` **codifica** de volta. Mantidos assim.
+
+### Legacy
+
+`legacy/mfc/` guarda o app MFC inteiro como referência. `edDlg.cpp` (8.456
+linhas) tem a UI, os offsets, a codificação e o estado global misturados.
+`ed.rc` são 6 diálogos e 393 controles, e continua em **ISO-8859-1** (14 × `°`
+em labels) — deliberado: o consumidor dele é o conversor da Fase 4 (que declara
+o encoding) e o `rc.exe` do MSVC, que quebraria com UTF-8 sem BOM.
 
 ### Formato da imagem: MODE2/2352 sector-aware
 
@@ -188,8 +252,13 @@ exatamente esses saltos. Consequências:
 
 ## Estado do repositório
 
-Fase 1 (higiene) aplicada: `.gitignore` criado, artefatos de build fora do
-versionamento. Rastreados 60 arquivos / ~1,2 MB; `.git` em ~470 KB.
+Fases 1 (higiene) e 2 (core portável) concluídas. Ver
+[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
+
+Achado que aguarda a Fase 3: `Load` seguido de `Save` sem editar nada **não**
+devolve a imagem idêntica — 1.664 bytes em três blocos (all-stars, kickers de
+ML, custos). Provavelmente recomputação deliberada do `OnWriteCD` original, mas
+só a comparação contra o `ed.exe` sob Wine decide. Detalhe na Fase 3 do plano.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto
