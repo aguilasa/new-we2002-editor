@@ -111,8 +111,8 @@ servem: nenhum dos dois distribui MFC.
 | Caminho em `~/ROMs/psx/` | Uso |
 |---|---|
 | `Winning Eleven 2002 - European Deluxe 2002-03/` | **Imagem golden.** Todos os offsets batem, nomes latinos. |
-| `World Soccer Winning Eleven 2002/` | **Melhor imagem japonesa** (arquivo único, SLPM-87056). Valida `kanjitoascii`/`asciitokanji`. ECC íntegro — use esta para testar que o port reproduz o mesmo ECC inválido que o `ed.exe` ao gravar. `.cue` vem quebrado; irrelevante para o editor, que abre o `.bin` direto. |
-| `World Soccer Winning Eleven 2002 (Japan)/` | Mesma release, dump multi-track. Redundante e com ECC degradado (211/300 setores zerados). Preferir a de cima. |
+| `World Soccer Winning Eleven 2002/` | **Melhor imagem japonesa para testes** (arquivo único, SLPM-87056). Valida `kanjitoascii`/`asciitokanji`. ECC íntegro — use esta para testar que o port reproduz o mesmo ECC inválido que o `ed.exe` ao gravar. Só track de dados, sem `.cue`: não serve para jogar. |
+| `World Soccer Winning Eleven 2002 (Japan)/` | Mesma release, dump multi-track completo (9 tracks + `.cue` válido). É a de jogar. Para testes é redundante e tem ECC degradado (211/300 setores zerados). |
 | `Pro Evolution Soccer 2 (Europe) (EnFrDe)/` | **NÃO USAR.** Layout diverge após ~2 MB; o editor corrompe a imagem. |
 
 Os dois dumps japoneses divergem em 3 bytes de dados (um patch de

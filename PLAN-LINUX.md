@@ -189,7 +189,8 @@ sendo `OFS_BANDIERE_COLORE2` = 12552648:
 | Forma | arquivo único, 307.187.664 B | 9 tracks, Track 1 = 306.834.864 B |
 | Setores | 130.607 | 130.457 |
 | Origem | CoolROM (tem `readme.html` deles) | — |
-| `.cue` | **quebrado** — aponta para 9 arquivos `(Track N) [SLPM-87056].bin` inexistentes | válido |
+| Tracks de áudio | **ausentes** (~160 MiB não estão no arquivo) | presentes (tracks 2–9) |
+| `.cue` | nenhum — o que vinha era inválido e foi removido | válido |
 | ECC | íntegro (0/300 setores amostrados zerados) | **degradado (211/300 zerados)** |
 
 Divergências nos 14 MiB, classificadas por posição dentro do setor:
@@ -218,9 +219,16 @@ inválido de um jeito específico, e o golden test passa a verificar que o port
 reproduz **exatamente** o mesmo ECC inválido que o `ed.exe`. É um teste
 estritamente mais forte.
 
-Antes de usar, corrigir o `.cue` quebrado (uma linha apontando para o `.bin`
-real) ou simplesmente ignorá-lo — o editor abre o `.bin` direto, o `.cue` só
-importa para emulador.
+Esse dump **não serve para jogar**: contém só a track de dados. As 8 tracks de
+áudio (167.949.264 B) não estão no arquivo — uma imagem completa teria
+474.784.128 B. O `.cue` que vinha junto declarava 9 tracks apontando para
+arquivos inexistentes; foi removido, já que qualquer `.cue` válido ali
+produziria um jogo sem música.
+
+Irrelevante para este projeto: o editor abre o `.bin` direto e nunca lê `.cue`.
+Para jogar a versão japonesa em emulador, usar
+`World Soccer Winning Eleven 2002 (Japan)/`, que tem as 9 tracks e um `.cue`
+válido.
 
 ---
 
