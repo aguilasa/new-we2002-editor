@@ -1,0 +1,27 @@
+// squadra_ml.cpp: implementation of the squadra_ml class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "ed.h"
+#include "squadra_ml.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+squadra_ml::squadra_ml()
+{
+
+}
+
+squadra_ml::~squadra_ml()
+{
+
+}

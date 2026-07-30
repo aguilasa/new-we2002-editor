@@ -1,0 +1,36 @@
+# ---- Visual Studio: estado do IDE e bancos de dados ----
+*.sdf
+*.suo
+*.ncb
+*.opt
+*.plg
+*.aps
+*.vcxproj.user
+.vs/
+ipch/
+
+# ---- Saidas de build (MSVC) ----
+Debug/
+Release/
+x64/
+Win32/
+
+# Relatorio da migracao VC6 -> VS2010 (gerado)
+_UpgradeReport_Files/
+UpgradeLog.XML
+
+# ---- Saidas de build (port Linux, a partir da Fase 2) ----
+build/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.so.*
+compile_commands.json
+
+# ---- Imagens de CD / dados grandes ----
+# Nunca versionar: ~474 MB cada, e sao copias de trabalho mutaveis.
+*.bin
+*.cue
+*.img
+*.iso

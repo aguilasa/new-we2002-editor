@@ -1,0 +1,42 @@
+// ed.odl : type library source for ed.exe
+
+// This file will be processed by the MIDL compiler to produce the
+// type library (ed.tlb).
+
+[ uuid(C19753E4-8B46-11D6-9298-D487BCB91A01), version(1.0) ]
+library Ed
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+
+	//  Primary dispatch interface for CEdDoc
+	
+	[ uuid(C19753E5-8B46-11D6-9298-D487BCB91A01) ]
+	dispinterface IEd
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(CEdDlgAutoProxy)
+			//}}AFX_ODL_PROP
+			
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(CEdDlgAutoProxy)
+			//}}AFX_ODL_METHOD
+
+	};
+
+	//  Class information for CEdDoc
+	
+	[ uuid(C19753E3-8B46-11D6-9298-D487BCB91A01) ]
+	coclass Ed
+	{
+		[default] dispinterface IEd;
+	};
+
+	//{{AFX_APPEND_ODL}}
+	//}}AFX_APPEND_ODL}}
+};

@@ -1,0 +1,27 @@
+// tattica.cpp: implementation of the tattica class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "ed.h"
+#include "tattica.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+tattica::tattica()
+{
+
+}
+
+tattica::~tattica()
+{
+
+}

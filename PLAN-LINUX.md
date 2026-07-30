@@ -1,0 +1,257 @@
+# Plano de portabilidade para Linux — WE2002 Editor
+
+> Status: **plano aprovado, execução NÃO autorizada.** Nenhuma fase iniciada
+> exceto a validação da Fase 0 (feita em prefix descartável, sem alterar o repo).
+>
+> Data da análise: 2026-07-30
+> Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
+
+---
+
+## 1. Diagnóstico do código
+
+App MFC clássico (VC6 → migrado para VS2010). Editor de imagem de CD do
+Winning Eleven 2002 (PSX).
+
+### Métricas
+
+| Item | Valor |
+|---|---|
+| C++ total | 13.929 linhas |
+| `edDlg.cpp` | 8.456 linhas (60% do total) |
+| Diálogos em `ed.rc` | 6 |
+| Controles no `.rc` | 393 |
+| `DDX_Control` | 319 |
+| `afx_msg` handlers | 376 |
+| Macros `ON_*` | 303 |
+| `Get/SetWindowText` | 799 |
+| `CFile::` | 199 |
+| `_itoa` (MSVC-only) | 241 |
+| `strcpy` / `strcat` | 198 |
+| `#define OFS_*` | 69 |
+
+Config do projeto: `UseOfMfc=Static`, `CharacterSet=MultiByte` (MBCS, não
+Unicode), linka `libcurl.lib`. O binário publicado em `Debug/ed.exe` é
+**PE32+ x86-64**.
+
+### Dependências Windows
+
+**Bloqueadores reais**
+
+- MFC inteiro: `CWinApp`, `CDialog`, DDX/DDV, message maps,
+  `CEdit`/`CComboBox`/`CButton`/`CStatic`, `CFileDialog`, `AfxMessageBox`,
+  `CFile`.
+- CRT MSVC: `_itoa` × 241.
+
+**Triviais**
+
+- `GetModuleFileName` × 11, `GetSystemMetrics`, `DrawIcon`, `IsIconic`,
+  `MoveWindow` × 12.
+- OLE: `AfxOleInit`, `COleTemplateServer::RegisterAll`,
+  `COleObjectFactory::UpdateRegistryAll` em `ed.cpp:42-76`. **Vestigial** —
+  `CEdDlgAutoProxy` só é forward-declared em `edDlg.h:14`, nunca implementado.
+  Deletar tudo.
+
+**Já portável**
+
+- libcurl em `myiotxt.cpp` — host tem libcurl 8.5.0.
+- `<fstream>`, `<string>`, `<vector>`, `<map>`.
+
+**Notícia boa: zero desenho GDI.** Nenhum `CDC`, `CPen`, `CBrush`, `CBitmap`,
+`BitBlt`. O único `OnPaint` (`edDlg.cpp:1493`) só desenha o ícone quando
+minimizado. O campo tático usa `MoveWindow` sobre `CButton`, não pintura.
+
+### Armadilhas de portabilidade
+
+1. **Bitfields `DWORD`** em `struct NUMERI` (`squadra.h:15-45`) lidos crus:
+   `fil_ctrl.Read(&squad_nazall[i].stc_numeri, 16)` (`edDlg.cpp:1929`).
+   MSVC e GCC concordam em x86-64 little-endian para bitfields do mesmo tipo,
+   mas precisa `static_assert` + teste golden. Não assumir.
+2. **Encoding dos fontes**: `.cpp`/`.rc` são ISO-8859-1 (strings tipo
+   `"1° Name"`). Converter para UTF-8 ou usar `-finput-charset=ISO-8859-1`.
+3. **`char` signedness**: MSVC e GCC/x86 = signed. Fixar `-fsigned-char`
+   (ARM difere).
+4. **`strcpy` em buffers fixos** × 146. MSVC tolerava; GCC com
+   `_FORTIFY_SOURCE` + ASan vai expor bugs latentes reais.
+5. **Estado global** espalhado em `edDlg.cpp` — dificulta extrair o core.
+
+### Higiene do repositório
+
+347 MB. Artefatos commitados: `ed.sdf` (68 MB), `ipch/`, `Debug/` (com
+`ed.exe`), `Release/`, `ed.suo`, `ed.ncb`, `ed.opt`,
+`_UpgradeReport_Files/`. Sem `.gitignore`.
+
+---
+
+## 2. Formato da imagem — descoberta crítica
+
+Formato: **MODE2/2352 raw** (sync `00 FF×10 00` no byte 0, confirmado pelo
+`.cue`). Setor de 2352 bytes = 24 header + 2048 dados + 280 EDC/ECC.
+
+Os offsets do autor são **calibrados nas fronteiras de setor**:
+
+```
+OFS_NOMI_SQ1   = 1012640  → setor 430, byte 1280 (dentro da região 24..2071)
+OFS_NOMI_SQ1_F = 1013431  → exatamente o último byte de dados do setor 430
+OFS_NOMI_SQ1A  = 1013736  → 1011360 + 2352 + 24 = 1º byte de dados do setor 431
+```
+
+Os `if(i == 40) fil_ctrl.Seek(OFS_NOMI_SQ1A, ...)` em `edDlg.cpp:1665-1667`
+são pulos manuais de cabeçalho de setor. Presumir que os 69 `OFS_*` seguem a
+mesma lógica.
+
+**Duas consequências para o port:**
+
+1. Não dá para extrair o arquivo do ISO9660 e editar. Tem que ser o `.bin` cru.
+2. O editor **não recalcula EDC/ECC** ao gravar. Comportamento original — o
+   port deve **preservar**, não "corrigir". Se um golden test falhar, a
+   primeira suspeita é fronteira de setor.
+
+---
+
+## 3. Ambiente validado
+
+### Bottles / Wine — Fase 0 **já testada e funcionando**
+
+Runner `soda-9.0-1` invocável direto do host com `WINEPREFIX`, mesmo padrão
+usado em `/home/ingmar/desenvolvimento/snes/Makefile:55-56`.
+
+```sh
+WINEPREFIX=<prefix> \
+/home/ingmar/.var/app/com.usebottles.bottles/data/bottles/runners/soda-9.0-1/bin/wine64 \
+  ed.exe
+```
+
+Verificado em 2026-07-30: `ed.exe` sobe e abre o diálogo
+`IMAGE CD SELECTION`; fontes e controles renderizam corretamente.
+
+Observações:
+
+- `ed.exe` é x86-64; o runner soda só tem `x86_64-windows`. Casa perfeito,
+  sem necessidade de WoW64 / 32-bit.
+- `wineboot` reclama de FreeType — benigno, as fontes renderizaram.
+- `/etc/ld.so.preload` tem `libAppProtection.so` (Citrix) gerando ruído no
+  stderr. Ignorável.
+- **Usar bottle dedicada, não reusar a `DiztinGUIsh`**: `ed.cpp:75` chama
+  `COleObjectFactory::UpdateRegistryAll()`, que escreve no registry do prefix.
+- Existe `Debug/WE2002.bin.lnk` (atalho do autor original). Recriar apontando
+  para a imagem local.
+
+### Imagens de CD disponíveis
+
+Testados 4 offsets do editor em cada imagem:
+
+| Offset | European Deluxe | Japan (Track 1) | PES2 Europe (Track 1) |
+|---|---|---|---|
+| `1012640` `NOMI_SQ1` | `AEK KIEV GALATASARAY` ✅ | `PATAGONIA MARMARA` ✅ | idem Japan ✅ |
+| `387792` `NOMI_G` | `Toldo` ✅ | Shift-JIS ✅ | `Dyer` ✅ |
+| `2002316` `NOMI_SQK` | Shift-JIS ✅ | Shift-JIS ✅ | tabela de ponteiros ❌ |
+| `5651448` `NOMI_SQ6` | `AEK KIEV` ✅ | katakana ✅ | texto de erro francês ❌ |
+
+**Veredito:**
+
+- `/home/ingmar/ROMs/psx/Winning Eleven 2002 - European Deluxe 2002-03/` →
+  **imagem golden.** Todos os offsets batem, nomes latinos, fácil de
+  inspecionar visualmente.
+- `/home/ingmar/ROMs/psx/World Soccer Winning Eleven 2002 (Japan)/` →
+  compatível estruturalmente, conteúdo Shift-JIS. Segundo caso de teste;
+  valida `kanjitoascii`/`asciitokanji` (`edDlg.cpp:732-773`).
+- `/home/ingmar/ROMs/psx/Pro Evolution Soccer 2 (Europe) (EnFrDe)/` →
+  **NÃO USAR.** Layout diverge depois de ~2 MB; o editor grava por cima de
+  outros dados e corrompe a imagem.
+
+---
+
+## 4. Opções avaliadas
+
+| Opção | Esforço | Resultado |
+|---|---|---|
+| **A. Bottles/Wine** | feito | Roda hoje. Não é port, e sem caminho de rebuild (MFC estático exige MSVC). Serve como **oráculo de referência**. |
+| **B. MinGW-w64 cross** | — | **Inviável.** MinGW não tem MFC. Winelib idem — Wine não distribui MFC. |
+| **C. Core portável + Qt6** | ~1,5–2 semanas | Port real, nativo. **Escolhido.** |
+| **D. Core portável + CLI/web** | ~1 semana | Modernização; perde paridade de UI. |
+
+---
+
+## 5. Fases
+
+### Fase 0 — Rodar via Bottles ✅ validado
+
+Falta apenas: criar a bottle dedicada e o wrapper (`Makefile` no padrão do
+projeto snes).
+
+### Fase 1 — Higiene (~1 h)
+
+- `.gitignore` para `*.sdf *.suo *.ncb *.opt *.plg ipch/ Debug/ Release/
+  _UpgradeReport_Files/`.
+- Purgar os artefatos do índice (347 MB → poucos MB).
+- **Manter `Debug/ed.exe` no disco, fora do git** — é o oráculo da Fase 3.
+- Converter fontes ISO-8859-1 → UTF-8.
+
+### Fase 2 — Core portável `libwe2002` (~1–2 dias)
+
+Biblioteca sem MFC:
+
+- `CFile` → `std::fstream` (wrapper fino com `Seek`/`Read`/`Write` para
+  minimizar o diff).
+- `_itoa` → `std::to_string`.
+- `CString` → `std::string`.
+- `AfxMessageBox` → callback / `std::function` injetado.
+- Deletar todo o OLE de `ed.cpp`.
+- Mover de `edDlg.cpp`: os 69 `OFS_*`, `carica_dabin`, `OnWriteCD`,
+  `kanjitoascii`/`asciitokanji`, `CalcolaCostoGiocatore`, import SoFIFA.
+- Manter `giocatore.cpp`, `squadra.cpp`, `squadra_ml.cpp`, `tattica.cpp`,
+  `myiotxt.cpp` quase intactos.
+- `static_assert(sizeof(NUMERI) == 16)` + teste de layout de bits.
+- CMake + g++, `-fsigned-char`, build de dev com ASan/UBSan.
+
+### Fase 3 — Golden tests (~1 dia)
+
+- Sequência fixa de edições no `ed.exe` sob Bottles → salvar.
+- Mesma sequência headless via `libwe2002`.
+- `cmp` byte-a-byte.
+- Rodar contra European Deluxe **e** Japan.
+- **Trabalhar sobre cópia** — os testes mutam a imagem (474 MB por cópia).
+
+Sem essa fase o port é chute. É aqui que a suspeita de bitfield/endianness
+morre ou se confirma.
+
+### Fase 4 — `.rc` → Qt `.ui` (~2–3 dias)
+
+Script Python converte os 6 blocos `DIALOG`/`DIALOGEX` de `ed.rc` em `.ui`.
+Trata `LTEXT`/`CTEXT`/`EDITTEXT`/`PUSHBUTTON`/`COMBOBOX`/`LISTBOX`/
+`GROUPBOX`/`CONTROL(BS_AUTOCHECKBOX)`. Conversão DLU→px (MS Sans Serif 8:
+baseX=6, baseY=13; `x*baseX/4`, `y*baseY/8`). Layout absoluto preserva o
+visual original.
+
+Qt6 precisa ser instalado (só `qmake` do Qt5 presente no host).
+
+### Fase 5 — Portar handlers (~3–5 dias)
+
+A maior parte das 8.456 linhas é repetição indexada: `OnCarat1..23`,
+`OnSost1..23`, `OnChangeURL1..23`, `OnKillfocusNum1..23`,
+`OnKillfocusTatx2..11`, `OnKillfocusTaty2..11`, `OnSelchangeTat2..11`.
+Colapsar em loops com lambdas capturando o índice. Estimativa: ~60% de
+redução do arquivo.
+
+Arrays `CEdit txt_gioc1..23` viram `QLineEdit* txt_gioc[23]`.
+
+### Fase 6 — Acabamento e empacotamento (~1 dia)
+
+`CFileDialog` → `QFileDialog`; `AfxMessageBox` → `QMessageBox`;
+`GetModuleFileName` → `QCoreApplication::applicationDirPath()`.
+Empacotar AppImage ou Flatpak.
+
+**Total Fases 1–6: ~1,5 a 2 semanas.**
+
+---
+
+## 6. Riscos
+
+- Bugs de memória latentes vão aparecer sob ASan — bom, mas custa tempo não
+  estimado.
+- Estado global em `edDlg.cpp` pode resistir à extração limpa; talvez precise
+  de um passo intermediário de encapsulamento.
+- Se um golden test falhar, suspeitar primeiro de fronteira de setor
+  MODE2/2352 (ver seção 2).
+- Cada rodada de golden test consome ~474 MB de disco por cópia da imagem.

@@ -1,0 +1,34 @@
+VERSION;GROUP;ATTRIBUTE
+15;Attacking;Crossing
+15;Attacking;Finishing
+15;Attacking;Heading Accuracy
+15;Attacking;Short Passing
+15;Attacking;Volleys
+15;Skill;Dribbling
+15;Skill;Curve
+15;Skill;Free Kick Accuracy
+15;Skill;Long Passing
+15;Skill;Ball Control
+15;Movement;Acceleration
+15;Movement;Sprint Speed
+15;Movement;Agility
+15;Movement;Reactions
+15;Movement;Balance
+15;Power;Shot Power
+15;Power;Jumping
+15;Power;Stamina
+15;Power;Strength
+15;Power;Long Shots
+15;Mentality;Aggression
+15;Mentality;Interceptions
+15;Mentality;Positioning
+15;Mentality;Vision
+15;Mentality;Penalties
+15;Defending;Marking
+15;Defending;Standing Tackle
+15;Defending;Sliding Tackle
+15;Goalkeeping;GK Diving
+15;Goalkeeping;GK Handling
+15;Goalkeeping;GK Kicking
+15;Goalkeeping;GK Positioning
+15;Goalkeeping;GK Reflexes

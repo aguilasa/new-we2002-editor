@@ -1,0 +1,27 @@
+// squadra.cpp: implementation of the squadra class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "ed.h"
+#include "squadra.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+squadra::squadra()
+{
+
+}
+
+squadra::~squadra()
+{
+
+}

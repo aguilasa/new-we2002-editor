@@ -1,0 +1,24 @@
+char nc_naz_qt[] = 
+{
+4 irl,
+1n.irl, 4sco, 1gla, 41ing, 7por,
+42spa, 68fra, 5bel, 37ola, 1svi, 64ita,
+1cec, 25ger, 3dan, 2nor, 5sve, 1fin, 1pol,
+1aut, 4cro, 3jug, 4rom, 8gre, 10tur, 4ucr,
+2rus, 1mar, 1??, 1nig, 1usa, 1col, 36bra,
+1par, 3uru, 34arg, 4gia, 2aus, 
+1islanda, 
+1uzbekistan,
+2georgia,
+2bielorussia,
+2bosnia,
+1lussemburgo,
+1algeria,
+7ghana,
+5costa avorio,
+1congo,
+1togo,
+1burundi,
+1sierra leone,
+2trinidad
+}; 462

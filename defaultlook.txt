@@ -1,0 +1,96 @@
+TEAM;NAME;SKINCOL;HAIRSTYLE;HAIRCOL;FACEHAIRSTYLE;FACEHAIRCOL
+0;Ireland;A;I1;G;A;A
+1;Scotland;A;I1;B;A;A
+2;Wales;A;I1;B;A;A
+3;England;A;I1;B;A;A
+4;Portugal;B;I1;A;A;A
+5;Spain;A;I1;A;A;A
+6;France;A;I1;A;A;A
+7;Belgium;A;I1;A;A;A
+8;Netherlands;A;I1;C;A;A
+9;Switzerland;A;I1;A;A;A
+10;Italy;A;I1;A;A;A
+11;Czech Rep.;A;I1;H;A;A
+12;Germany;A;I1;H;A;A
+13;Denmark;A;I1;H;A;A
+14;Norway;A;I1;B;A;A
+15;Sweden;A;I1;H;A;A
+16;Islanda;A;I1;B;A;A
+17;Poland;A;I1;C;A;A
+18;Slovakia;A;I1;B;A;A
+19;Austria;A;I1;B;A;A
+20;Hungary;A;I1;C;A;A
+21;Albania;A;I1;B;A;A
+22;Croatia;A;I1;B;A;A
+23;Serbia;A;I1;A;A;A
+24;Romania;A;I1;C;A;A
+25;Bosnia Erzegovina;A;I1;A;A;A
+26;Greece;A;I1;A;A;A
+27;Turkey;B;I1;A;A;A
+28;Ukraine;A;I1;C;A;A
+29;Russia;A;I1;C;A;A
+30;Morocco;B;I1;A;A;A
+31;Costa d’Avorio;D;I1;A;A;A
+32;Egypt;C;I1;A;A;A
+33;Nigeria;D;I1;A;A;A
+34;Cameroon;C;I1;A;A;A
+35;Algeria;B;I1;A;A;A
+36;Ghana;D;I1;A;A;A
+37;U.S.A.;A;I1;B;A;A
+38;Mexico;B;I1;A;A;A
+39;Venezuela;B;I1;B;A;A
+40;Colombia;B;I1;B;A;A
+41;Brazil;B;I1;A;A;A
+42;Peru;B;I1;A;A;A
+43;Chile;B;I1;A;A;A
+44;Paraguay;A;I1;B;A;A
+45;Uruguay;A;I1;A;A;A
+46;Argentina;A;I1;A;A;A
+47;Ecuador;C;I1;A;A;A
+48;Japan;A;I1;A;A;A
+49;South Korea;B;I1;A;A;A
+50;China;B;I1;A;A;A
+51;India;C;I1;A;A;A
+52;New Zealand;A;I1;A;A;A
+53;Australia;A;I1;B;A;A
+54;Euro All Stars;;;;;
+55;World All Stars;;;;;
+56;Clas. England;;;;;
+57;Clas. France;;;;;
+58;Clas. Netherlands;;;;;
+59;Clas. Italy;;;;;
+60;Clas. Germany;;;;;
+61;Clas. Brazil;;;;;
+62;Clas. Argentina;;;;;
+63;Manchester United;A;I1;B;A;A
+64;Arsenal;A;I1;B;A;A
+65;Chelsea;A;I1;B;A;A
+66;Liverpool;A;I1;B;A;A
+67;Manchester City;A;I1;B;A;A
+68;Tottenham;A;I1;B;A;A
+69;Atletico Madrid;A;I1;A;A;A
+70;Barcellona;A;I1;A;A;A
+71;Real Madrid;A;I1;A;A;A
+72;Valencia;A;I1;A;A;A
+73;Siviglia;A;I1;A;A;A
+74;Monaco;A;I1;A;A;A
+75;Porto;B;I1;A;A;A
+76;PSG;A;I1;A;A;A
+77;Benfica;B;I1;A;A;A
+78;Ajax;A;I1;C;A;A
+79;Dinamo Mosca;A;I1;C;A;A
+80;Zenit;A;I1;C;A;A
+81;Inter;A;I1;A;A;A
+82;Juventus;A;I1;A;A;A
+83;Milan;A;I1;A;A;A
+84;Lazio;A;I1;A;A;A
+85;Napoli;A;I1;A;A;A
+86;Fiorentina;A;I1;A;A;A
+87;Roma;A;I1;A;A;A
+88;Dortmund;A;I1;H;A;A
+89;Bayern;A;I1;H;A;A
+90;Leverkusen;A;I1;H;A;A
+91;Wolfsburg;A;I1;H;A;A
+92;Galatasaray;A;I1;A;A;A
+93;Dinamo Kiev;A;I1;C;A;A
+94;Basilea;A;I1;A;A;A
