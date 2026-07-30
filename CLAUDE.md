@@ -49,6 +49,12 @@ O código é Windows-only. Há um plano de port para Linux em
 portabilidade**; ele contém o diagnóstico completo, as armadilhas já mapeadas e
 o faseamento acordado.
 
+**Licença: não existe.** Nem Moriero (2002) nem thyddralisk (2015, que publicou
+no GitHub e adicionou o import do SoFIFA) concederam licença — o código herdado
+é todos-os-direitos-reservados. Por isso o repo **não tem `LICENSE`**; a
+linhagem e as ressalvas estão em [NOTICE.md](NOTICE.md). Não adicione um
+arquivo de licença nem headers de licença aos fontes.
+
 ## Rodar o editor
 
 Não existe build para Linux. O binário pré-compilado `Debug/ed.exe` (PE32+
