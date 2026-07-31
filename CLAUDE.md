@@ -92,17 +92,23 @@ uma, e se reportam como *skipped* sem ela:
 # unitários contra uma imagem real (só leitura, mas passe cópia mesmo assim)
 WE2002_TEST_IMAGE=/caminho/copia.bin ./build/tests/we2002_tests
 
-# golden test: ed.exe sob Wine vs o port, byte a byte
+# golden tests: ed.exe sob Wine vs o port, byte a byte
 WE2002_GOLDEN_IMAGE=/caminho/imagem.bin ctest --test-dir build -R golden
 ```
+
+São dois: `golden` compara o core headless com o `ed.exe`, `golden_gui` põe a
+janela Qt no lugar do core. Os dois usam Wine e o `:99`.
 
 ### O golden test
 
 `tools/golden_check.sh` é o teste de regressão que importa. Ele faz duas
 cópias da imagem, passa uma pelo `ed.exe` sob Wine (`tools/golden_run.sh`) e a
-outra pelo core (`tests/golden_tool.cpp`), e compara com
-`tools/golden_compare.py`. Falha se aparecer **qualquer** divergência além de
-uma faixa conhecida.
+outra pelo port, e compara com `tools/golden_compare.py`. Falha se aparecer
+**qualquer** divergência além de uma faixa conhecida.
+
+`WE2002_GOLDEN_MODE=gui` troca o lado do port: em vez do `tests/golden_tool.cpp`
+headless, dirige a janela Qt com `tools/golden_gui.sh`. É o teste `golden_gui`
+do ctest, e é o que cobre a camada de widgets da Fase 5.
 
 Essa faixa é `405724..405739` (`OFS_SQUAD_NUMBERS_NATIONAL+1008`): o slot 64
 de um array de 63, que o original lê e grava por engano a partir da memória
@@ -200,6 +206,21 @@ Notas:
 Rebuild do `.exe` exige MSVC + MFC estático no Windows. MinGW e Winelib não
 servem: nenhum dos dois distribui MFC.
 
+**`Ctrl+A` não seleciona tudo num `CEdit` do Win32.** Ao escrever um teste que
+digita a mesma coisa no `ed.exe` e no port, limpar o campo com `End`,
+`shift+Home`, `BackSpace` — com `ctrl+a` os dois recebem textos diferentes e o
+diff acusa uma divergência que não existe.
+
+## Rodar o port
+
+```sh
+DISPLAY=:99 ./build/src/app/we2002 /caminho/copia.bin
+```
+
+O argumento é opcional; sem ele abre o `QFileDialog`, como o original. Ele
+existe para o `golden_gui.sh` conseguir dirigir a janela. O aviso de
+"não tem 474.431.328 bytes" aparece igual ao do `ed.exe` e é só aviso.
+
 ## Imagens de CD para teste
 
 | Caminho em `~/ROMs/psx/` | Uso |
@@ -218,27 +239,56 @@ comparação na seção 3 do [PLAN-LINUX.md](PLAN-LINUX.md).
 
 ## Arquitetura
 
-### Layout do repositório (pós-Fase 4)
+### Layout do repositório (pós-Fase 5)
 
 ```
 src/core/            we2002_core — logica pura. ZERO Qt, ZERO API de plataforma.
   include/we2002/    API publica
+src/app/             o executavel Qt: MainWindow + 5 dialogos
 src/app/ui/          os 6 .ui gerados do ed.rc + controls.json
-tests/               61 checks + golden test + guarda dos .ui
+tests/               61 checks + 2 golden tests + guarda dos .ui
 tools/               geradores e ferramentas de verificacao
 legacy/mfc/          o app MFC original — REFERENCIA, nao compila
 data/                dados lidos em runtime
 docs/                PLAN-LINUX.md
 ```
 
-`src/app/` já tem os formulários mas **ainda não tem código** — o executável Qt
-chega na Fase 5. Não há `src/app/CMakeLists.txt`, e o `CMakeLists.txt` da raiz
-só adiciona `src/app` se o Qt6 for encontrado **e** esse arquivo existir, então
-o core e os testes compilam numa máquina com apenas compilador e libcurl. Qt6
-não está instalado aqui; é pré-requisito da Fase 5.
+O `CMakeLists.txt` da raiz só adiciona `src/app` se achar o Qt6, então o core e
+os testes ainda compilam numa máquina com apenas compilador e libcurl.
 
 **Regra dura: `src/core/` não pode incluir Qt nem `windows.h` nem POSIX.** É o
 que permite os golden tests da Fase 3 rodarem headless.
+
+### App
+
+Um arquivo por área do diálogo, todos métodos do mesmo `MainWindow`:
+`MainWindow.cpp` (construção e ligação), `TeamView.cpp` (o ex-
+`OnSelezioneSquadraV` e os killfocus de nome/barra/cobrador/número),
+`TacticsView.cpp`, `Commands.cpp`, `SofifaView.cpp`. Mais os cinco diálogos:
+`PlayerSelectDialog`, `PlayerSkillsDialog`, `FlagKitDialog`,
+`DefaultTacticsDialog`, `EditOptionsDialog`.
+
+As 376 famílias indexadas do original (`OnCarat1..23`, `OnSost1..23`,
+`OnKillfocusNum1..23`, `OnKillfocusTatx2..11`, ...) viraram um método por
+família recebendo o índice, ligado num laço sobre arrays de ponteiro
+(`txt_player_[23]`, `cmb_role_[10]`, ...) resolvidos por `findChild<T*>()`.
+**Ao mexer num handler, lembre que ele atende os 22 irmãos.**
+
+Três diferenças de sinal entre Qt e MFC que valem saber antes de mexer:
+
+- `setText` não dispara `editingFinished`, como `SetWindowText` não dispara
+  `EN_KILLFOCUS`. Por isso os commits usam `editingFinished` sem flag de
+  "estou carregando".
+- `EN_CHANGE` **dispara** em `SetWindowText`, e é o que move os marcadores do
+  campinho ao trocar de time. Os `TXT_TATX/TATY` usam `textChanged`, não
+  `textEdited`. Não "otimize" isso.
+- `QComboBox` não tem `killFocus`. Os combos de papel e de cobrador gravavam em
+  `CBN_KILLFOCUS`; um `eventFilter` de `FocusOut` no `MainWindow` reproduz.
+  E como `setCurrentIndex` **dispara** `currentIndexChanged` (`SetCurSel` não
+  disparava `CBN_SELCHANGE`), as cargas de time usam `QSignalBlocker`.
+
+Cuidado com `slots`: é macro do Qt. Uma variável local com esse nome não
+compila, com erro que não menciona macro nenhuma.
 
 ### Código gerado — não editar à mão
 
@@ -404,14 +454,24 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 
 ## Estado do repositório
 
-Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura) e
-4 (`.rc` → `.ui`) concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md)
-para o estado por fase.
+Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura),
+4 (`.rc` → `.ui`) e 5 (handlers) concluídas. Ver
+[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
 
-O port está verificado contra o `ed.exe`: nas imagens European Deluxe e
-japonesa, gravação limpa ou com edição pela GUI, a saída é byte-idêntica à do
-original salvo a faixa de 16 bytes já descrita. A próxima fase é a **5**
-(portar os handlers), ela ainda não foi autorizada, e exige instalar o Qt6.
+O port está verificado contra o `ed.exe` nos dois níveis: o core headless
+(teste `golden`) e a janela Qt dirigida por `xdotool` (teste `golden_gui`). Nas
+imagens European Deluxe e japonesa, gravação limpa ou com edição pela tela, a
+saída é byte-idêntica à do original salvo a faixa de 16 bytes já descrita.
+
+A próxima fase é a **5.5** — traduzir para inglês o que sobrou de italiano na
+UI, incluindo os nomes de objeto dos `.ui`, que a Fase 4 manteve de propósito
+para ficarem diffáveis contra o `ed.rc`. Não foi autorizada. Por isso o
+`src/app/` ainda não está na lista do `tools/apply_glossary.py`.
+
+Quatro divergências deliberadas do original entraram na Fase 5 (preço do
+jogador importado, o swap fora do array no ordenar-banco, gravar as URLs de
+volta, e o teste único de "tem bandeira própria"). Estão listadas na seção da
+Fase 5 do plano; nenhuma aparece nos golden tests.
 
 Os artefatos continuam **no disco** (worktree ~276 MB) — `Debug/ed.exe` é o
 oráculo dos golden tests, `ed.sdf` (68 MB) e `ipch/` são só peso morto

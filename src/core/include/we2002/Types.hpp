@@ -80,4 +80,68 @@ static_assert(sizeof(SquadNumbers) == 16,
               "verbatim from the CD image.");
 static_assert(alignof(SquadNumbers) == 4, "unexpected alignment");
 
+/// Indexed access to the 23 numbers, `slot` running 0..22.
+///
+/// Bitfields cannot be put in an array, which is why the original spelled out
+/// twenty-three copies of every handler that touched them. The UI addresses
+/// squad slots by index, so it needs this; out-of-range slots return 0 and
+/// ignore writes rather than reading a neighbouring field.
+constexpr std::uint32_t SquadNumberAt(const SquadNumbers& n, int slot) {
+    switch (slot) {
+        case 0: return n.order_1;
+        case 1: return n.order_2;
+        case 2: return n.order_3;
+        case 3: return n.order_4;
+        case 4: return n.order_5;
+        case 5: return n.order_6;
+        case 6: return n.order_7;
+        case 7: return n.order_8;
+        case 8: return n.order_9;
+        case 9: return n.order_10;
+        case 10: return n.order_11;
+        case 11: return n.order_12;
+        case 12: return n.order_13;
+        case 13: return n.order_14;
+        case 14: return n.order_15;
+        case 15: return n.order_16;
+        case 16: return n.order_17;
+        case 17: return n.order_18;
+        case 18: return n.order_19;
+        case 19: return n.order_20;
+        case 20: return n.order_21;
+        case 21: return n.order_22;
+        case 22: return n.order_23;
+        default: return 0;
+    }
+}
+
+constexpr void SetSquadNumberAt(SquadNumbers& n, int slot, std::uint32_t v) {
+    switch (slot) {
+        case 0: n.order_1 = v; break;
+        case 1: n.order_2 = v; break;
+        case 2: n.order_3 = v; break;
+        case 3: n.order_4 = v; break;
+        case 4: n.order_5 = v; break;
+        case 5: n.order_6 = v; break;
+        case 6: n.order_7 = v; break;
+        case 7: n.order_8 = v; break;
+        case 8: n.order_9 = v; break;
+        case 9: n.order_10 = v; break;
+        case 10: n.order_11 = v; break;
+        case 11: n.order_12 = v; break;
+        case 12: n.order_13 = v; break;
+        case 13: n.order_14 = v; break;
+        case 14: n.order_15 = v; break;
+        case 15: n.order_16 = v; break;
+        case 16: n.order_17 = v; break;
+        case 17: n.order_18 = v; break;
+        case 18: n.order_19 = v; break;
+        case 19: n.order_20 = v; break;
+        case 20: n.order_21 = v; break;
+        case 21: n.order_22 = v; break;
+        case 22: n.order_23 = v; break;
+        default: break;
+    }
+}
+
 }  // namespace we2002

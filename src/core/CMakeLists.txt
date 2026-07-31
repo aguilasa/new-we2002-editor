@@ -4,6 +4,7 @@ add_library(we2002_core STATIC
     CdImage.cpp
     Database.cpp
     Player.cpp
+    Sofifa.cpp
     Tables.cpp
     Team.cpp
     TextCodec.cpp

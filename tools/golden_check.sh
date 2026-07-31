@@ -20,12 +20,25 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IMAGE="${1:-${WE2002_GOLDEN_IMAGE:-}}"
 TOOL="${2:-${WE2002_GOLDEN_TOOL:-$REPO/build/tests/we2002_golden_tool}}"
 
+# WE2002_GOLDEN_MODE=gui puts the Qt window on the port side instead of the
+# headless tool, so the same comparison also covers the widget layer added in
+# phase 5. It needs a built src/app and an X display; "core" is the default.
+MODE="${WE2002_GOLDEN_MODE:-core}"
+
 if [ -z "$IMAGE" ]; then
     echo "golden_check: WE2002_GOLDEN_IMAGE nao definida -- pulando" >&2
     exit 77
 fi
 [ -f "$IMAGE" ] || { echo "golden_check: nao existe: $IMAGE" >&2; exit 1; }
-[ -x "$TOOL" ] || { echo "golden_check: falta $TOOL (compile primeiro)" >&2; exit 1; }
+if [ "$MODE" = gui ]; then
+    TOOL="${WE2002_GOLDEN_APP:-$REPO/build/src/app/we2002}"
+    [ -x "$TOOL" ] || {
+        echo "golden_check: falta $TOOL -- o app Qt nao foi compilado" >&2
+        exit 77
+    }
+else
+    [ -x "$TOOL" ] || { echo "golden_check: falta $TOOL (compile primeiro)" >&2; exit 1; }
+fi
 [ -f "$REPO/Debug/ed.exe" ] || {
     echo "golden_check: Debug/ed.exe ausente -- sem oraculo, sem teste" >&2
     exit 1
@@ -56,8 +69,13 @@ cp "$IMAGE" "$WORK/port.bin"
 echo "golden_check: rodando o oraculo (ed.exe sob Wine)"
 "$REPO/tools/golden_run.sh" "$WORK/oracle.bin"
 
-echo "golden_check: rodando o port"
-"$TOOL" roundtrip "$WORK/port.bin"
+if [ "$MODE" = gui ]; then
+    echo "golden_check: rodando o port (janela Qt)"
+    "$REPO/tools/golden_gui.sh" "$WORK/port.bin" "$TOOL"
+else
+    echo "golden_check: rodando o port"
+    "$TOOL" roundtrip "$WORK/port.bin"
+fi
 
 echo "golden_check: comparando"
 python3 "$REPO/tools/golden_compare.py" --json "$WORK/oracle.bin" "$WORK/port.bin" \

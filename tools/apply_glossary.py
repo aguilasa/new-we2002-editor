@@ -28,17 +28,23 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_FILES = [
     "src/core/CdImage.cpp",
     "src/core/Player.cpp",
+    "src/core/Sofifa.cpp",
     "src/core/Team.cpp",
     "src/core/TextCodec.cpp",
     "src/core/include/we2002/CdImage.hpp",
     "src/core/include/we2002/Database.hpp",
     "src/core/include/we2002/Player.hpp",
+    "src/core/include/we2002/Sofifa.hpp",
     "src/core/include/we2002/Team.hpp",
     "src/core/include/we2002/TextCodec.hpp",
     "src/core/include/we2002/Types.hpp",
     "tests/golden_tool.cpp",
     "tests/test_main.cpp",
 ]
+
+# src/app/ is deliberately absent: its widgets still carry the .rc's Italian
+# symbols as object names, and the handlers that address them follow suit.
+# Phase 5.5 renames both together and adds the directory here -- see the plan.
 
 # Everything the port compiles, generated or not. --check scans all of it.
 CHECKED_FILES = DEFAULT_FILES + [

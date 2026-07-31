@@ -2,27 +2,43 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace we2002 {
+
+class SofifaRules;
 
 /// A player as scraped from SoFIFA, before conversion to WE attributes.
 class FifaPlayer {
 public:
-    int UpdatePlayerFromURL(const std::string& link);
-    void SetPlayerToDummy();
+    /// Fetch and parse one SoFIFA player page. Returns 1 on success and 0 on
+    /// anything else -- a URL that is not SoFIFA's, an empty response, or a
+    /// page whose markup no longer matches. See Sofifa.hpp on why the last of
+    /// those is now the usual outcome.
+    ///
+    /// `rules` supplies the attribute layout: which fields the page carries,
+    /// in what order, and where each lands in `attribute_values`. The original
+    /// reached for four globals here instead.
+    int UpdatePlayerFromURL(const std::string& link, const SofifaRules& rules);
+
+    /// A neutral stand-in, for filling out a club squad without a real page.
+    /// Every attribute is 1, which converts to the lowest WE value.
+    void SetPlayerToDummy(const SofifaRules& rules);
 
     std::string name;
     std::string positions;
-    int number[2]{};  // 0 = national team, 1 = club
+    int number[2]{-1, -1};  // 0 = national team, 1 = club
     int weight{};
     int height{};
     int age{};
     char foot{};
-    int weakFootSkill{};
-    int skillMoves{};
-    std::string offWeight;
-    std::string defWeight;
-    int* attributeValues{nullptr};
+    int weak_foot_skill{};
+    int skill_moves{};
+    std::string offensive_work_rate;
+    std::string defensive_work_rate;
+    /// One entry per field the rules file lists, in that file's order. The
+    /// original carried a bare `int*` and delete[]/new[]'d it on every fetch.
+    std::vector<int> attribute_values;
 };
 
 /// A player as stored on the CD image.

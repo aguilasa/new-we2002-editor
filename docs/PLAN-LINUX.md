@@ -20,11 +20,11 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fases 0, 1, 2, 3, 3.5 e **4 concluídas**. Fase 5 em diante ainda
-> **não autorizada** — não iniciar sem pedido explícito.
+> Progresso: Fases 0, 1, 2, 3, 3.5, 4 e **5 concluídas**. Fase 5.5 em diante
+> ainda **não autorizada** — não iniciar sem pedido explícito.
 >
-> **A Fase 5 tem um pré-requisito de máquina: instalar o Qt6.** Aqui só há
-> Qt 5.15. Detalhe e comando na seção da Fase 5.
+> O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
+> `CMakeLists.txt` da raiz acha e compila o `src/app`.
 
 ---
 
@@ -146,8 +146,8 @@ Zorin OS 18.1, base Ubuntu noble.
 | Python 3 | ✅ | os geradores em `tools/` |
 | Wine (runner soda do Bottles) | ✅ | rodar o `ed.exe`, oráculo dos golden tests |
 | Xvfb no `:99`, `xdotool`, `import` | ✅ | validação visual |
-| Qt 5.15.13 | ✅ | só o `tools/uipreview` da Fase 4 |
-| **Qt6** | ❌ **falta instalar** | **a aplicação — pré-requisito da Fase 5** |
+| Qt 5.15.13 | ✅ | fallback do `tools/uipreview` da Fase 4 |
+| Qt6 6.4.2 | ✅ instalado na Fase 5 | a aplicação |
 
 ```sh
 sudo apt install qt6-base-dev qt6-base-dev-tools qt6-tools-dev
@@ -155,9 +155,8 @@ sudo apt install qt6-base-dev qt6-base-dev-tools qt6-tools-dev
 
 O `universe` do noble tem Qt **6.4.2**, que serve: o
 `qt_standard_project_setup()` usado pelo `CMakeLists.txt` da raiz existe desde
-o 6.3. Enquanto o Qt6 não estiver instalado, o `find_package(Qt6)` falha, a
-raiz pula `src/app`, e tudo o que existe hoje continua compilando — mas não há
-como começar a Fase 5.
+o 6.3. Sem Qt6 o `find_package(Qt6)` falha e a raiz pula `src/app` — o core e
+os testes continuam compilando, mas não há aplicação.
 
 ### Bottles / Wine — Fase 0 **já testada e funcionando**
 
@@ -841,41 +840,179 @@ o que está commitado. Editar um `.ui` à mão, ou mexer no `ed.rc` sem
 regenerar, falha aqui em vez de silenciosamente lá na Fase 5. O `--check`
 também revalida o XML, sem precisar de Qt.
 
-Qt6 ainda **não** está instalado. Não faz falta aqui, mas é
-pré-requisito da Fase 5 — ver o aviso no começo dela.
+O `tools/uipreview` desta fase compila com Qt5 ou Qt6. Foi escrito quando só
+havia Qt5 na máquina; o Qt6 chegou na Fase 5 e o `find_package` prefere ele.
 
 
-### Fase 5 — Portar handlers (~3–5 dias)
+### Fase 5 — Portar handlers ✅ concluída
 
-> ⚠️ **Pré-requisito: instalar o Qt6.** Não está na máquina — só Qt 5.15.13.
-> Sem ele não há nada para compilar nesta fase: o `CMakeLists.txt` da raiz
-> pula `src/app` quando o `find_package(Qt6)` falha.
->
-> ```sh
-> sudo apt install qt6-base-dev qt6-base-dev-tools qt6-tools-dev
-> ```
->
-> Zorin OS 18.1 (base Ubuntu noble) tem Qt **6.4.2** no `universe`. Serve: o
-> projeto pede CMake ≥ 3.21 e C++20, e o `qt_standard_project_setup()` que o
-> `CMakeLists.txt` da raiz chama existe desde o 6.3.
->
-> Conferir depois de instalar:
->
-> ```sh
-> cmake -B build -DCMAKE_BUILD_TYPE=Debug   # deve parar de dizer "Qt6 GUI not built"
-> ```
->
-> Até lá o Qt5 cobre o que a Fase 4 precisava — o `tools/uipreview` cai para
-> ele sozinho. Isso vale só para renderizar os `.ui`; **o alvo do port é Qt6**
-> e a Fase 5 não deve ser começada sobre o Qt5.
+O Qt6 6.4.2 foi instalado no começo desta fase
+(`qt6-base-dev qt6-base-dev-tools qt6-tools-dev` do `universe` do noble); o
+`CMakeLists.txt` da raiz passou a achar o Qt e a compilar o `src/app`.
 
-A maior parte das 8.456 linhas é repetição indexada: `OnCarat1..23`,
-`OnSost1..23`, `OnChangeURL1..23`, `OnKillfocusNum1..23`,
-`OnKillfocusTatx2..11`, `OnKillfocusTaty2..11`, `OnSelchangeTat2..11`.
-Colapsar em loops com lambdas capturando o índice. Estimativa: ~60% de
-redução do arquivo.
+#### O que existe agora
 
-Arrays `CEdit txt_gioc1..23` viram `QLineEdit* txt_gioc[23]`.
+`src/app/` tem o executável `we2002`: 12 fontes, ~3.100 linhas contra as
+~9.800 do MFC (`edDlg.cpp` + os cinco diálogos + `giocatore.cpp` +
+`myiotxt.cpp`).
+
+| Arquivo | Origem no legado |
+|---|---|
+| `main.cpp` | `ed.cpp` |
+| `MainWindow.{hpp,cpp}` | `CEdDlg` — construção, ligação dos widgets, `OnInitDialog` |
+| `TeamView.cpp` | `OnSelezioneSquadraV` e as famílias de killfocus de nome/barra/cobrador/número |
+| `TacticsView.cpp` | tudo de tática, incluindo `muovitattica` e `applica_tatt` |
+| `Commands.cpp` | write, reload, custos, ordenar banco, números default, copiar nomes, `OnEditAll*` |
+| `SofifaView.cpp` | os quatro botões de SoFIFA |
+| `PlayerSelectDialog.{hpp,cpp}` | `selezDlg` |
+| `PlayerSkillsDialog.{hpp,cpp}` | `carattDlg` |
+| `FlagKitDialog.{hpp,cpp}` | `graf` |
+| `DefaultTacticsDialog.{hpp,cpp}` | `tattDlg` |
+| `EditOptionsDialog.{hpp,cpp}` | `editOptForm` |
+| `PlayerFields.hpp` | a cópia campo-a-campo que o legado abria à mão 4 vezes |
+
+O core ganhou `Sofifa.{hpp,cpp}` — o motor de conversão FIFA→WE, o scraper e
+`FetchUrl`, vindos de `giocatore.cpp` e `myiotxt.cpp`. É o único lugar do
+`src/core/` que usa libcurl, e continua sem Qt.
+
+#### A redução
+
+As 376 `afx_msg` viraram um punhado de métodos indexados. Onde o original
+tinha `OnCarat1()`..`OnCarat23()`, cada um chamando `caratteristiche(k)` com
+um literal diferente, agora há `OnPlayerSkills(int)` ligado num laço:
+
+```cpp
+for (int i = 0; i < 23; ++i) {
+    connect(cmd_skills_[i], &QPushButton::clicked, this,
+            [this, i] { OnPlayerSkills(i); });
+}
+```
+
+Os arrays de widget (`txt_player_[23]`, `cmb_role_[10]`, ...) são resolvidos
+uma vez por `findChild<T*>()` a partir do nome de objeto do `.ui`. O comentário
+que abria `OnSelezioneSquadraV` — *"accidenti a non poter usare i vettori!!!!"*
+— era exatamente sobre isso.
+
+#### Onde o Qt não bate com o MFC
+
+Três diferenças de sinal precisaram de decisão explícita:
+
+- **`SetWindowText` não dispara `EN_KILLFOCUS`; `setText` também não dispara
+  `editingFinished`.** Coincidem, então os handlers de commit usam
+  `editingFinished` direto, sem flag de "estou carregando".
+- **`EN_CHANGE` dispara em `SetWindowText`.** É o que redesenha o campinho ao
+  trocar de time, então esses ficaram em `textChanged` (e não em `textEdited`),
+  de propósito.
+- **`QComboBox` não tem `killFocus`.** Os combos de papel e de cobrador
+  gravavam em `CBN_KILLFOCUS` justamente para navegar a lista sem escrever no
+  banco; um `eventFilter` de `FocusOut` no `MainWindow` reproduz o momento.
+  `SetCurSel` não dispara `CBN_SELCHANGE`, mas `setCurrentIndex` dispara
+  `currentIndexChanged` — por isso as cargas de time usam `QSignalBlocker`.
+
+#### Verificação
+
+`tools/golden_gui.sh` é a contraparte de `golden_run.sh` da Fase 3: dirige a
+janela Qt pelo mesmo ciclo abrir → *Write into CD image*, com `xdotool` no
+`:99`. O `golden_check.sh` aceita `WE2002_GOLDEN_MODE=gui` para pôr a janela no
+lugar do `we2002_golden_tool`, e o `ctest` ganhou o alvo `golden_gui`.
+
+Isso é o que a Fase 3 não cobria: ela provou que o **core** grava o que o
+`ed.exe` grava; o `golden_gui` prova que a camada de widgets no meio não muda a
+resposta — que nenhum sinal dispara durante a carga e regrava um campo velho.
+
+Resultado na imagem European Deluxe:
+
+| Caso | Divergência |
+|---|---|
+| `ed.exe` vs janela Qt, gravação limpa | só `405724..405739` |
+| `ed.exe` vs janela Qt, ambos com o mesmo nome de time editado na tela | só `405724..405739` |
+
+O nome editado cai em `OFS_TEAM_NAME_1_A+200`, 7 bytes, idêntico nos dois.
+
+Armadilha de quem for repetir o teste: **`Ctrl+A` não seleciona tudo num
+`CEdit` do Win32.** Mandar `ctrl+a` para o `ed.exe` sob Wine e para o Qt produz
+textos diferentes (`INTERZO` contra `ZORINFC`) e o diff acusa uma divergência
+que não existe. Limpar com `End`, `shift+Home`, `BackSpace` funciona nos dois.
+
+Para o teste ser dirigível, o `we2002` aceita o caminho da imagem como
+argumento e pula o `QFileDialog`. O original não tinha argumento nenhum.
+
+#### Divergências deliberadas
+
+Além do slot 64 herdado da Fase 3, quatro:
+
+- **`editFromFIFA` terminava com `costo = CalcolaCostoGiocatore(i)`**, onde `i`
+  era o contador que sobrou da varredura de posições — sempre 8. Todo jogador
+  importado saía com o preço do jogador 8. O port usa o índice do próprio
+  jogador. Não afeta os golden tests (não há SoFIFA neles) e o botão
+  *upd. player cost* recalcula tudo de qualquer jeito.
+- **`OnOrdinaPanchina` gravava `auxlk[1]` e `auxlk[2]` num `char[2]`** — um
+  byte além do fim. O port usa `std::swap`, mesmo efeito sem sair do array.
+- **As URLs do SoFIFA agora são gravadas** no `<imagem>_url.txt` junto com a
+  imagem. O original só lia esse arquivo, nunca escrevia, então uma URL digitada
+  na tela se perdia ao fechar. Não toca na imagem.
+- **`FlagKitDialog` usa um único teste para "tem bandeira própria"** (`id>0 &&
+  id!=69 && id!=86 && (id<56 || id>63)`). O original tinha dois que discordavam
+  na borda: o `OnInitDialog` desabilitava as caixas para 57..63 e o
+  import/export recusava 56..63. 56 é a World All-Stars, que também não tem
+  bandeira própria, então o teste mais largo é o certo.
+
+#### O que não foi portado, e por quê
+
+`OnEsporta`/`OnImporta` (time em `.2002`) e `OnImportaTot`/`OnEsportaTot`
+(`.tt2002`) ficaram de fora. Dois motivos, ambos suficientes:
+
+1. **Os botões não existem.** `ed.rc:347,348,368,369` tem os quatro
+   `PUSHBUTTON` comentados com `//`. O `ON_BN_CLICKED` continua no message map,
+   mas não há controle para clicar: são código morto no binário que os usuários
+   receberam.
+2. **O formato não é reproduzível.** Os quatro gravam `sizeof(squadra)` /
+   `sizeof(giocatore)` cru no arquivo — imagem de memória do MSVC 32-bit,
+   incluindo padding. Reimplementar exigiria inventar uma serialização, e o
+   resultado não leria os arquivos antigos nem seria lido por eles.
+
+O `.t2002` de tática (`tattDlg`) e o `.b2002`/`.m2002` de bandeira e uniforme
+(`graf`) **foram** portados, porque ali os botões existem. O `.t2002` também é
+uma imagem de memória, mas de uma classe com destrutor virtual: 4 bytes de
+vptr, depois `nome[7]`, `ruoli[11]`, `x[10]`, `y[10]`, 2 de padding, 44 no
+total. O port escreve os 4 bytes de vptr como zero e os ignora na leitura — o
+vptr era um endereço de processo, não significava nada no arquivo nem então.
+
+Ainda não portado, e conhecido: o `ed.exe` mostra o ícone quando minimizado
+(`OnPaint`) e tem um item "About" no menu de sistema. Nenhum dos dois existe em
+Qt sem trabalho específico e nenhum edita a imagem.
+
+### Fase 5.5 — Nomenclatura da UI em inglês (bloqueia a Fase 6)
+
+**Antes de começar a Fase 6, revisar todo o código da parte de UI e traduzir
+para inglês qualquer identificador que tenha sobrado em italiano** — nomes de
+classes, métodos, slots, variáveis, membros, campos, parâmetros, constantes,
+nomes de objeto dos widgets nos `.ui` e comentários.
+
+Alcance: tudo em `src/app/` — o código escrito na Fase 5 e os `.ui` gerados na
+Fase 4. O `legacy/mfc/` fica como está: é referência histórica e continua em
+italiano de propósito.
+
+Isso é a continuação da Fase 3.5, que já limpou o `src/core/`. A Fase 4
+deliberadamente manteve os símbolos italianos do `.rc` (`TXT_NSQUAD1`,
+`CMD_CARAT1`) para os `.ui` ficarem diffáveis contra `ed.rc`/`resource.h`
+enquanto os handlers eram portados, e a Fase 5 herda esses nomes ao escrever os
+handlers. Terminada a Fase 5, essa justificativa acaba: o `.rc` já não é
+consultado, e deixar o italiano entrar no código definitivo repete o problema
+que a 3.5 resolveu.
+
+Regras:
+
+- O mapa é [tools/glossary.py](../tools/glossary.py) — mesma fonte única da
+  Fase 3.5. Termo novo que aparecer na UI entra lá, não numa renomeação
+  avulsa.
+- `python3 tools/apply_glossary.py --check` tem de passar limpo em `src/app/`
+  também, não só no core.
+- Renomear objeto de `.ui` exige mexer no `tools/rc2ui.py` e regenerar — o
+  `ctest -R ui_forms` falha se editarem o `.ui` à mão.
+- Rastreabilidade: manter o símbolo original em comentário (`// was
+  CMD_CARAT1`), como os offsets fazem.
+- Golden tests verdes antes e depois. Renomeação não pode mudar byte de saída.
 
 ### Fase 6 — Acabamento e empacotamento Linux (~1 dia)
 
@@ -883,7 +1020,7 @@ Arrays `CEdit txt_gioc1..23` viram `QLineEdit* txt_gioc[23]`.
 `GetModuleFileName` → `QCoreApplication::applicationDirPath()`.
 Empacotar AppImage ou Flatpak.
 
-**Fim do escopo Linux. Total Fases 1–6: ~1,5 a 2 semanas.**
+**Fim do escopo Linux. Total Fases 1–6 (incluindo a 5.5): ~1,5 a 2 semanas.**
 
 ### Fase 7 — Windows (~2–3 dias, só depois do Linux redondo)
 

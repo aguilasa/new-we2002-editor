@@ -22,6 +22,21 @@ set_tests_properties(golden PROPERTIES
     SKIP_RETURN_CODE 77
     TIMEOUT 900)
 
+# The same comparison with the Qt window on the port side instead of the
+# headless tool. `golden` proves the core writes what ed.exe writes; this
+# proves the widget layer between the two does not change the answer. Skips
+# itself when the app was not built (no Qt6).
+if(TARGET we2002)
+    add_test(NAME golden_gui
+        COMMAND ${CMAKE_COMMAND} -E env
+                WE2002_GOLDEN_MODE=gui
+                WE2002_GOLDEN_APP=$<TARGET_FILE:we2002>
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/golden_check.sh)
+    set_tests_properties(golden_gui PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 1200)
+endif()
+
 # The .ui forms are generated from legacy/mfc/ed.rc and committed. This checks
 # they are still what the converter produces -- editing a .ui by hand, or
 # touching ed.rc without regenerating, fails here rather than silently at some
