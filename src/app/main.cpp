@@ -9,6 +9,7 @@
 // that way, and the proxy class it needed died with MFC.
 
 #include <QApplication>
+#include <QIcon>
 
 #include "MainWindow.hpp"
 
@@ -16,6 +17,14 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     QApplication::setApplicationName(QStringLiteral("we2002"));
     QApplication::setApplicationDisplayName(QStringLiteral("WE2002 Editor"));
+
+    // The original's SetIcon(m_hIcon) pair. Both sizes come out of
+    // legacy/mfc/res/ed.ico and are compiled in, so this works wherever the
+    // executable is run from.
+    QIcon icon;
+    icon.addFile(QStringLiteral(":/icons/we2002-16.png"));
+    icon.addFile(QStringLiteral(":/icons/we2002-32.png"));
+    QApplication::setWindowIcon(icon);
 
     // An image named on the command line skips the file dialog. The original
     // had no arguments at all; this exists so the window can be driven from a

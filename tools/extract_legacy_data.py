@@ -241,12 +241,17 @@ namespace we2002 {
 
     (INCLUDE / "Tables.hpp").write_text(
         BANNER
-        + """
+        + f"""
 #pragma once
 
-namespace we2002 {
+namespace we2002 {{
 
 inline constexpr int N_ROLES = 21;
+
+/// Length of START_LINK. ResolveMlLink() indexes it with a byte straight off
+/// the disc, which on a file that is not a WE2002 image can be anything up to
+/// 255, so it needs to know where the table ends.
+inline constexpr int START_LINK_COUNT = {counts["start_link"]};
 
 """
         + "\n".join(externs)

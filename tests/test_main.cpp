@@ -287,6 +287,59 @@ void TestTables() {
     CHECK(std::strcmp(we2002::ROLE_NAMES[we2002::N_ROLES - 1], "RW") == 0);
     CHECK(std::strcmp(we2002::TEAM_NAMES[0], "Ireland") == 0);
     CHECK(we2002::START_LINK[0] == 0);
+    CHECK(we2002::PICKER_TEAM_NAMES[0][0] != '\0');
+    // The picker dialog's copy of the team names differs from edDlg's in six
+    // places. Both spellings are what the shipped editor shows, so both are
+    // extracted; if they ever became identical, one of the two tables is being
+    // read from the wrong source file.
+    CHECK(std::strcmp(we2002::TEAM_NAMES[0], we2002::PICKER_TEAM_NAMES[0]) != 0);
+}
+
+// ---------------------------------------------------------------------------
+
+/// ResolveMlLink turns a two-byte Master League link into a player index.
+///
+/// The bounds checks are phase 6 additions. The original indexed START_LINK
+/// with lk[0] unchecked -- a byte, so up to 255, against a 120-entry table --
+/// and then used the result to index players[]. On a real image the values are
+/// always in range; on any other file the editor crashed before its window
+/// appeared.
+void TestResolveMlLinkBounds() {
+    Section("ResolveMlLink bounds");
+
+    // Slot 0..22 is the team's own squad: (team * 23) + slot, past the
+    // non-contract pool.
+    const unsigned char first[2] = {0, 0};
+    CHECK(we2002::ResolveMlLink(first) == we2002::PLAYERS_NC);
+    const unsigned char second[2] = {0, 1};
+    CHECK(we2002::ResolveMlLink(second) == we2002::PLAYERS_NC + 1);
+    const unsigned char other_team[2] = {1, 0};
+    CHECK(we2002::ResolveMlLink(other_team) == we2002::PLAYERS_NC + 23);
+
+    // Slot 23 and up reaches into the non-contract pool through the team's run.
+    const unsigned char free_agent[2] = {0, 23};
+    CHECK(we2002::ResolveMlLink(free_agent) == we2002::START_LINK[0]);
+
+    // Every possible pair of bytes must land inside players[]. This is the
+    // whole point of the change: 65536 combinations, none of them able to
+    // produce an out-of-range index.
+    bool all_in_range = true;
+    for (int a = 0; a < 256; ++a) {
+        for (int b = 0; b < 256; ++b) {
+            const unsigned char link[2] = {static_cast<unsigned char>(a),
+                                           static_cast<unsigned char>(b)};
+            const int index = we2002::ResolveMlLink(link);
+            if (index < 0 || index >= we2002::PLAYERS_TOTAL) {
+                all_in_range = false;
+            }
+        }
+    }
+    CHECK(all_in_range);
+
+    // A team code past the end of START_LINK resolves to player 0 rather than
+    // reading the table out of bounds.
+    const unsigned char bad_team[2] = {255, 30};
+    CHECK(we2002::ResolveMlLink(bad_team) == 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -350,6 +403,7 @@ int main() {
     TestPlayerBitPacking();
     TestCdImage();
     TestTables();
+    TestResolveMlLinkBounds();
     TestRealImage();
 
     std::printf("\n%d checks, %d failures\n", g_checks, g_failures);

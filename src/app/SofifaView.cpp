@@ -3,7 +3,6 @@
 // here is reading the two rule files at startup, walking the player list, and
 // the two text-file round trips.
 
-#include <QCoreApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
 
@@ -13,8 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "DataFiles.hpp"
 #include "MainWindow.hpp"
-#include "Sofifa.hpp"
 #include "we2002/Sofifa.hpp"
 #include "we2002/Tables.hpp"
 #include "ui_MainDialog.h"
@@ -23,27 +22,6 @@ using we2002::PLAYERS_NC;
 using we2002::PLAYERS_TOTAL;
 using we2002::ResolveMlLink;
 using we2002::TEAMS_ML;
-
-namespace sofifa {
-
-std::filesystem::path DataFile(const char* name) {
-    const std::filesystem::path beside_binary =
-        std::filesystem::path(QCoreApplication::applicationDirPath().toStdString()) /
-        name;
-    if (std::filesystem::exists(beside_binary)) {
-        return beside_binary;
-    }
-#ifdef WE2002_SOURCE_DATA_DIR
-    const std::filesystem::path in_source =
-        std::filesystem::path(WE2002_SOURCE_DATA_DIR) / name;
-    if (std::filesystem::exists(in_source)) {
-        return in_source;
-    }
-#endif
-    return name;
-}
-
-}  // namespace sofifa
 
 namespace {
 
@@ -81,7 +59,7 @@ int ToInt(const std::string& s) {
 // ---------------------------------------------------------------------------
 
 void MainWindow::LoadSofifaFields() {
-    if (!sofifa_rules_.LoadFields(sofifa::DataFile("SOFIFA attributes.txt"))) {
+    if (!sofifa_rules_.LoadFields(app::DataFile("SOFIFA attributes.txt"))) {
         QMessageBox::warning(
             this, windowTitle(),
             QStringLiteral("Error ! Impossible to read SOFIFA attributes !"));
@@ -92,7 +70,7 @@ void MainWindow::LoadSofifaConversionRules() {
     // Silent on failure, as in the original: without the rules the import
     // buttons simply produce nothing, and the editor is still usable.
     sofifa_rules_.LoadConversions(
-        sofifa::DataFile("WE attributes conversion rules.txt"));
+        app::DataFile("WE attributes conversion rules.txt"));
 }
 
 // ---------------------------------------------------------------------------

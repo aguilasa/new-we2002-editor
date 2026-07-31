@@ -495,6 +495,9 @@
    <property name="text">
     <string>CB</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT2">
    <property name="geometry">
@@ -507,6 +510,9 @@
    </property>
    <property name="text">
     <string>LIB</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT3">
@@ -521,6 +527,9 @@
    <property name="text">
     <string>SB</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT4">
    <property name="geometry">
@@ -533,6 +542,9 @@
    </property>
    <property name="text">
     <string>CB</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT5">
@@ -547,6 +559,9 @@
    <property name="text">
     <string>DH</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT6">
    <property name="geometry">
@@ -559,6 +574,9 @@
    </property>
    <property name="text">
     <string>DH</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT7">
@@ -573,6 +591,9 @@
    <property name="text">
     <string>WG</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT8">
    <property name="geometry">
@@ -585,6 +606,9 @@
    </property>
    <property name="text">
     <string>OH</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT9">
@@ -599,6 +623,9 @@
    <property name="text">
     <string>CF</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT10">
    <property name="geometry">
@@ -611,6 +638,9 @@
    </property>
    <property name="text">
     <string>CF</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="static_4">
@@ -657,6 +687,9 @@
    <property name="text">
     <string>Import</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_EXP">
    <property name="geometry">
@@ -669,6 +702,9 @@
    </property>
    <property name="text">
     <string>Export</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>

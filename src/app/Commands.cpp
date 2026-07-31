@@ -18,7 +18,7 @@
 #include "FlagKitDialog.hpp"
 #include "MainWindow.hpp"
 #include "PlayerFields.hpp"
-#include "Sofifa.hpp"
+#include "DataFiles.hpp"
 #include "we2002/Tables.hpp"
 #include "ui_MainDialog.h"
 
@@ -279,7 +279,7 @@ void MainWindow::OnEditAllPlayersLook() {
     // Note the file is cp1252, not UTF-8: it carries a 0x92 curly apostrophe
     // in "Costa d'Avorio". Only the two leading columns are text and neither
     // is parsed, so the bytes are read as Latin-1 and never decoded.
-    const std::filesystem::path path = sofifa::DataFile("defaultlook.txt");
+    const std::filesystem::path path = app::DataFile("defaultlook.txt");
     std::ifstream in(path);
     if (!in) {
         QMessageBox::warning(

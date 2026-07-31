@@ -304,6 +304,9 @@
    <property name="text">
     <string>Import</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_EXPORT_FLAG">
    <property name="geometry">
@@ -316,6 +319,9 @@
    </property>
    <property name="text">
     <string>Export</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QGroupBox" name="static_4">
@@ -726,6 +732,9 @@
    <property name="text">
     <string>Import</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_EXPORT_KIT1">
    <property name="geometry">
@@ -738,6 +747,9 @@
    </property>
    <property name="text">
     <string>Export</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_IMPORT_KIT2">
@@ -752,6 +764,9 @@
    <property name="text">
     <string>Import</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_EXPORT_KIT2">
    <property name="geometry">
@@ -764,6 +779,9 @@
    </property>
    <property name="text">
     <string>Export</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>

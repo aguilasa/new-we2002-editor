@@ -1,0 +1,130 @@
+# Build and test on both target platforms.
+#
+# The golden tests need three things a runner does not have -- a ~474 MB CD
+# image, the prebuilt Debug/ed.exe, and Wine on an X display -- so they report
+# themselves skipped here. What CI covers is that the thing compiles clean, the
+# unit checks pass, and the generated files are in sync with their generators.
+#
+# Windows is a first-class target but is not attacked until phase 7, so its job
+# is allowed to fail: the point of having it now is to see *when* it breaks, not
+# to block on it. Turn continue-on-error off once phase 7 is done.
+#
+# macOS is out of scope. Not "maybe later" -- it is not in this matrix, not in
+# the packaging, and does not justify an #ifdef.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: Linux (GCC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build \
+            qt6-base-dev qt6-base-dev-tools \
+            libcurl4-openssl-dev \
+            desktop-file-utils appstream
+
+      - name: Configure
+        run: cmake --preset debug -G Ninja
+
+      - name: Build
+        run: cmake --build --preset debug
+
+      # The golden and golden_gui tests skip themselves; core, ui_forms and
+      # glossary are the ones that actually run.
+      - name: Test
+        run: ctest --preset debug
+
+      # The two guards that keep the generators honest, run directly as well as
+      # through ctest, so a failure here names the generator rather than a test.
+      - name: Generated files are in sync
+        run: |
+          python3 tools/rc2ui.py --check
+          python3 tools/apply_glossary.py --check
+
+      - name: Validate the packaging metadata
+        run: |
+          desktop-file-validate packaging/io.github.aguilasa.we2002.desktop
+          appstreamcli validate packaging/io.github.aguilasa.we2002.metainfo.xml
+
+      # Proves the install rules produce a tree the binary can actually find its
+      # data in -- the failure mode a package would hit and a build tree hides.
+      - name: Install and check the layout
+        run: |
+          cmake --install build --prefix "$PWD/stage"
+          test -x stage/bin/we2002
+          test -f "stage/share/we2002/SOFIFA attributes.txt"
+          test -f stage/share/applications/io.github.aguilasa.we2002.desktop
+          test -f stage/share/metainfo/io.github.aguilasa.we2002.metainfo.xml
+          test -f stage/share/icons/hicolor/32x32/apps/we2002.png
+
+  linux-ubsan:
+    name: Linux (UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build \
+            qt6-base-dev qt6-base-dev-tools libcurl4-openssl-dev
+
+      # AddressSanitizer is left out on purpose: the development machine cannot
+      # run it (Citrix replaces dlsym via /etc/ld.so.preload, see CLAUDE.md), so
+      # nobody can reproduce a CI-only ASan failure locally. UBSan runs
+      # everywhere.
+      - name: Configure
+        run: cmake --preset ubsan -G Ninja
+
+      - name: Build
+        run: cmake --build --preset ubsan
+
+      - name: Test
+        run: ctest --preset ubsan
+        env:
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+
+  windows:
+    name: Windows (MSVC)
+    runs-on: windows-latest
+    # Phase 7 work. Red here is expected and is the signal, not a failure.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.5.3
+
+      - name: Install libcurl
+        run: vcpkg install curl:x64-windows
+
+      - name: Configure
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      # The bitfield layout of SquadNumbers and the binary-mode file opens are
+      # the two things only a Windows run can settle. The unit checks pin the
+      # first; the golden tests, which need an image, settle the second and
+      # cannot run here.
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure

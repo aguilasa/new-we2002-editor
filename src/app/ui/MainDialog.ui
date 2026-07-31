@@ -1490,6 +1490,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS2">
    <property name="geometry">
@@ -1502,6 +1505,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS3">
@@ -1516,6 +1522,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS4">
    <property name="geometry">
@@ -1528,6 +1537,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS5">
@@ -1542,6 +1554,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS6">
    <property name="geometry">
@@ -1554,6 +1569,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS7">
@@ -1568,6 +1586,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS8">
    <property name="geometry">
@@ -1580,6 +1601,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS9">
@@ -1594,6 +1618,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS10">
    <property name="geometry">
@@ -1606,6 +1633,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS11">
@@ -1620,6 +1650,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS12">
    <property name="geometry">
@@ -1632,6 +1665,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS13">
@@ -1646,6 +1682,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS14">
    <property name="geometry">
@@ -1658,6 +1697,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS15">
@@ -1672,6 +1714,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS16">
    <property name="geometry">
@@ -1684,6 +1729,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS17">
@@ -1698,6 +1746,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS18">
    <property name="geometry">
@@ -1710,6 +1761,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS19">
@@ -1724,6 +1778,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS20">
    <property name="geometry">
@@ -1736,6 +1793,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS21">
@@ -1750,6 +1810,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS22">
    <property name="geometry">
@@ -1762,6 +1825,9 @@
    </property>
    <property name="text">
     <string>skill</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SKILLS23">
@@ -1776,6 +1842,9 @@
    <property name="text">
     <string>skill</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP1">
    <property name="geometry">
@@ -1788,6 +1857,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP2">
@@ -1802,6 +1874,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP3">
    <property name="geometry">
@@ -1814,6 +1889,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP4">
@@ -1828,6 +1906,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP5">
    <property name="geometry">
@@ -1840,6 +1921,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP6">
@@ -1854,6 +1938,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP7">
    <property name="geometry">
@@ -1866,6 +1953,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP8">
@@ -1880,6 +1970,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP9">
    <property name="geometry">
@@ -1892,6 +1985,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP10">
@@ -1906,6 +2002,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP11">
    <property name="geometry">
@@ -1918,6 +2017,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP12">
@@ -1932,6 +2034,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP13">
    <property name="geometry">
@@ -1944,6 +2049,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP14">
@@ -1958,6 +2066,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP15">
    <property name="geometry">
@@ -1970,6 +2081,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP16">
@@ -1984,6 +2098,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP17">
    <property name="geometry">
@@ -1996,6 +2113,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP18">
@@ -2010,6 +2130,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP19">
    <property name="geometry">
@@ -2022,6 +2145,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP20">
@@ -2036,6 +2162,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP21">
    <property name="geometry">
@@ -2048,6 +2177,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP22">
@@ -2062,6 +2194,9 @@
    <property name="text">
     <string>subs.</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SWAP23">
    <property name="geometry">
@@ -2074,6 +2209,9 @@
    </property>
    <property name="text">
     <string>subs.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT1">
@@ -2088,6 +2226,9 @@
    <property name="text">
     <string>4-5-1 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT2">
    <property name="geometry">
@@ -2100,6 +2241,9 @@
    </property>
    <property name="text">
     <string>4-5-1 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT3">
@@ -2114,6 +2258,9 @@
    <property name="text">
     <string>4-4-2 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT4">
    <property name="geometry">
@@ -2126,6 +2273,9 @@
    </property>
    <property name="text">
     <string>4-4-2 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT5">
@@ -2140,6 +2290,9 @@
    <property name="text">
     <string>4-3-3 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT6">
    <property name="geometry">
@@ -2152,6 +2305,9 @@
    </property>
    <property name="text">
     <string>4-3-3 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT7">
@@ -2166,6 +2322,9 @@
    <property name="text">
     <string>3-6-1 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT8">
    <property name="geometry">
@@ -2178,6 +2337,9 @@
    </property>
    <property name="text">
     <string>3-6-1 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT9">
@@ -2192,6 +2354,9 @@
    <property name="text">
     <string>3-5-2 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT10">
    <property name="geometry">
@@ -2204,6 +2369,9 @@
    </property>
    <property name="text">
     <string>3-5-2 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT11">
@@ -2218,6 +2386,9 @@
    <property name="text">
     <string>3-4-3 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT12">
    <property name="geometry">
@@ -2230,6 +2401,9 @@
    </property>
    <property name="text">
     <string>3-4-3 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT13">
@@ -2244,6 +2418,9 @@
    <property name="text">
     <string>5-4-1 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT14">
    <property name="geometry">
@@ -2256,6 +2433,9 @@
    </property>
    <property name="text">
     <string>5-4-1 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT15">
@@ -2270,6 +2450,9 @@
    <property name="text">
     <string>5-3-2 A</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_TACT16">
    <property name="geometry">
@@ -2282,6 +2465,9 @@
    </property>
    <property name="text">
     <string>5-3-2 B</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT1">
@@ -2296,6 +2482,9 @@
    <property name="text">
     <string>CB</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT2">
    <property name="geometry">
@@ -2308,6 +2497,9 @@
    </property>
    <property name="text">
     <string>LIB</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT3">
@@ -2322,6 +2514,9 @@
    <property name="text">
     <string>SB</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT4">
    <property name="geometry">
@@ -2334,6 +2529,9 @@
    </property>
    <property name="text">
     <string>CB</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT5">
@@ -2348,6 +2546,9 @@
    <property name="text">
     <string>DH</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT6">
    <property name="geometry">
@@ -2360,6 +2561,9 @@
    </property>
    <property name="text">
     <string>DH</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT7">
@@ -2374,6 +2578,9 @@
    <property name="text">
     <string>WG</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT8">
    <property name="geometry">
@@ -2386,6 +2593,9 @@
    </property>
    <property name="text">
     <string>OH</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT9">
@@ -2400,6 +2610,9 @@
    <property name="text">
     <string>CF</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SLOT10">
    <property name="geometry">
@@ -2413,6 +2626,9 @@
    <property name="text">
     <string>CF</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_COPY_TEAM_NAMES">
    <property name="geometry">
@@ -2425,6 +2641,9 @@
    </property>
    <property name="text">
     <string>copy</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
@@ -2827,6 +3046,9 @@
    <property name="text">
     <string>Flag - Shirt preview</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_DEFAULT_NUMBERS">
    <property name="geometry">
@@ -2839,6 +3061,9 @@
    </property>
    <property name="text">
     <string>pl. n° = team n°</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMD_UPDATE_COSTS">
@@ -2853,6 +3078,9 @@
    <property name="text">
     <string>upd. player cost</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMB_RELOAD">
    <property name="geometry">
@@ -2865,6 +3093,9 @@
    </property>
    <property name="text">
     <string>Reload from CD image</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMB_WRITE">
@@ -2879,6 +3110,9 @@
    <property name="text">
     <string>Write into CD image</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMD_SORT_RESERVES">
    <property name="geometry">
@@ -2891,6 +3125,9 @@
    </property>
    <property name="text">
     <string>sort reserve</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
    <property name="visible">
     <bool>false</bool>
@@ -2908,6 +3145,9 @@
    <property name="text">
     <string>modify</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
    </property>
@@ -2924,6 +3164,9 @@
    <property name="text">
     <string>Import SOFIFA db from web</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMB_IMPFIFATXT">
    <property name="geometry">
@@ -2936,6 +3179,9 @@
    </property>
    <property name="text">
     <string>Import SOFIFA db from local</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMB_EDITALLTXT">
@@ -2950,6 +3196,9 @@
    <property name="text">
     <string>Edit all players from FIFA</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMB_SHOWEDITOPT">
    <property name="geometry">
@@ -2962,6 +3211,9 @@
    </property>
    <property name="text">
     <string>opt.</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QPushButton" name="CMB_EDITALLLOOK">
@@ -2976,6 +3228,9 @@
    <property name="text">
     <string>reset def. look</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
   <widget class="QPushButton" name="CMB_EDITALLBARS">
    <property name="geometry">
@@ -2988,6 +3243,9 @@
    </property>
    <property name="text">
     <string>Update all team bars</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLineEdit" name="TXT_URL1">

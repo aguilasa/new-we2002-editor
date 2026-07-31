@@ -333,6 +333,21 @@ def widget_xml(c: Control, name: str, indent: str) -> list[str]:
         out.append(f"{indent}  <bool>true</bool>")
         out.append(f"{indent} </property>")
 
+    if c.kind == "PUSHBUTTON":
+        # Inside a QDialog, Qt makes every push button autoDefault, so Return
+        # clicks whichever one happens to come first in the tab order. Four of
+        # the six dialogs here -- including the main one, with 86 buttons --
+        # declare no DEFPUSHBUTTON at all, so that would be an arbitrary
+        # action, and one of the candidates applies a preset formation over the
+        # selected team.
+        #
+        # A plain PUSHBUTTON in a .rc is not a default button. Saying so keeps
+        # Return from doing anything, and leaves DEFPUSHBUTTON as the only way
+        # to be one -- which is what the resource script means.
+        out.append(f"{indent} <property name=\"autoDefault\">")
+        out.append(f"{indent}  <bool>false</bool>")
+        out.append(f"{indent} </property>")
+
     if c.cls == "QGroupBox":
         if c.has("BS_CENTER"):
             out.append(f"{indent} <property name=\"alignment\">")

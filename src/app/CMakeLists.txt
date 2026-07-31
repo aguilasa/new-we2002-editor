@@ -8,12 +8,14 @@ qt_add_executable(we2002
     TeamView.cpp
     TacticsView.cpp
     Commands.cpp
+    DataFiles.cpp
     SofifaView.cpp
     PlayerSelectDialog.cpp
     PlayerSkillsDialog.cpp
     FlagKitDialog.cpp
     DefaultTacticsDialog.cpp
     EditOptionsDialog.cpp
+    resources/app.qrc
 )
 
 # The forms are generated from legacy/mfc/ed.rc by tools/rc2ui.py and committed
@@ -35,7 +37,21 @@ if(NOT MSVC)
     target_compile_options(we2002 PRIVATE -Wall -Wextra)
 endif()
 
-# Where the runtime data files (naz.txt, defaultlook.txt, the SoFIFA rule
-# files) are looked up when the binary runs straight out of the build tree.
+# ---------------------------------------------------------------------------
+# Where the runtime data files are looked up. See DataFiles.cpp for the order.
+# ---------------------------------------------------------------------------
+
+# Running straight out of the build tree.
 target_compile_definitions(we2002 PRIVATE
     WE2002_SOURCE_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
+
+# Installed. Baked in as a path *relative to the executable* rather than as an
+# absolute prefix, so the installed tree can be moved or staged -- and so that
+# a self-contained bundle would work without a rebuild.
+file(RELATIVE_PATH WE2002_DATA_FROM_BIN
+    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
+    "${CMAKE_INSTALL_PREFIX}/${WE2002_APPDATADIR}")
+target_compile_definitions(we2002 PRIVATE
+    WE2002_DATA_DIR_FROM_BIN="${WE2002_DATA_FROM_BIN}")
+
+install(TARGETS we2002 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")

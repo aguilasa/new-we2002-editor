@@ -898,6 +898,9 @@
    <property name="text">
     <string>Import from URL</string>
    </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
   </widget>
  </widget>
  <resources/>

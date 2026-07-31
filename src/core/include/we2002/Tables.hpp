@@ -7,6 +7,11 @@ namespace we2002 {
 
 inline constexpr int N_ROLES = 21;
 
+/// Length of START_LINK. ResolveMlLink() indexes it with a byte straight off
+/// the disc, which on a file that is not a WE2002 image can be anything up to
+/// 255, so it needs to know where the table ends.
+inline constexpr int START_LINK_COUNT = 120;
+
 /// Per-team byte length of each of the six all-caps name slots, in
 /// disc order (national teams, then all-stars, then Master League
 /// clubs). The trailing NUL separator is counted, which is why the

@@ -1,0 +1,14 @@
+<!-- Compiled into the binary, so the window icon works however the editor was
+     started: from an install prefix, out of a build tree, or from a copy of
+     the executable on its own.
+
+     The two PNGs are the two images inside legacy/mfc/res/ed.ico, converted
+     with no rescaling. That icon has only 32x32 and 16x16, in 16 colours, so
+     those are the only sizes there are -- inventing a 256x256 would mean
+     drawing new art, which is not what a port is for. -->
+<RCC>
+  <qresource prefix="/icons">
+    <file>we2002-16.png</file>
+    <file>we2002-32.png</file>
+  </qresource>
+</RCC>

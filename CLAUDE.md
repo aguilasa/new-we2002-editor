@@ -80,10 +80,27 @@ licença nem headers de licença aos fontes.
 ## Compilar e testar
 
 ```sh
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build -j
-ctest --test-dir build --output-on-failure
+cmake --preset debug        # ou: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build --preset debug
+ctest --preset debug
 ```
+
+Presets em [CMakePresets.json](CMakePresets.json): `debug`, `release`, `asan`,
+`ubsan`. O `asan` só roda por dentro do `tools/run-sanitized.sh` nesta máquina
+(ver a seção de sanitizers).
+
+Instalar:
+
+```sh
+cmake --install build-release --prefix ~/.local
+```
+
+Põe `bin/we2002`, os `.txt` em `share/we2002/`, o `.desktop`, os dois tamanhos
+de ícone e o AppStream. O binário acha os dados **relativo a si mesmo**
+(`../share/we2002`), não por caminho absoluto compilado, então a árvore
+instalada pode ser movida. Ordem de busca em
+[src/app/DataFiles.cpp](src/app/DataFiles.cpp): `$WE2002_DATA_DIR`, ao lado do
+executável, o prefixo instalado, o `data/` do fonte.
 
 Os 61 checks unitários rodam sem imagem. Dois testes ficam mais fortes com
 uma, e se reportam como *skipped* sem ela:
@@ -246,11 +263,14 @@ src/core/            we2002_core — logica pura. ZERO Qt, ZERO API de plataform
   include/we2002/    API publica
 src/app/             o executavel Qt: MainWindow + 5 dialogos
 src/app/ui/          os 6 .ui gerados do ed.rc + controls.json
-tests/               61 checks + 2 golden tests + guarda dos .ui
+src/app/resources/   o icone (de legacy/mfc/res/ed.ico) + app.qrc
+tests/               65 checks + 2 golden tests + guardas dos geradores
 tools/               geradores e ferramentas de verificacao
 legacy/mfc/          o app MFC original — REFERENCIA, nao compila
 data/                dados lidos em runtime
+packaging/           .desktop + AppStream
 docs/                PLAN-LINUX.md
+.github/workflows/   CI: linux, linux-ubsan, windows (este pode falhar)
 ```
 
 O `CMakeLists.txt` da raiz só adiciona `src/app` se achar o Qt6, então o core e
@@ -294,6 +314,13 @@ Três diferenças de sinal entre Qt e MFC que valem saber antes de mexer:
 
 Cuidado com `slots`: é macro do Qt. Uma variável local com esse nome não
 compila, com erro que não menciona macro nenhuma.
+
+**`PUSHBUTTON` do `.rc` sai com `autoDefault=false`.** Dentro de um `QDialog` o
+Qt torna todo botão auto-default, e `Return` clicaria o primeiro da ordem de
+tabulação — num diálogo com 86 botões e nenhum `DEFPUSHBUTTON`, uma ação
+arbitrária, e um dos candidatos aplica formação predefinida sobre o time
+selecionado. Quem decide isso é o `rc2ui.py`; só `DEFPUSHBUTTON` vira default,
+que é o que o `.rc` quer dizer.
 
 ### Código gerado — não editar à mão
 
@@ -478,16 +505,18 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 ## Estado do repositório
 
 Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura do
-core), 4 (`.rc` → `.ui`), 5 (handlers) e 5.5 (nomenclatura da UI) concluídas.
-Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
+core), 4 (`.rc` → `.ui`), 5 (handlers), 5.5 (nomenclatura da UI) e 6
+(acabamento) concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o
+estado por fase.
 
-O port está verificado contra o `ed.exe` nos dois níveis: o core headless
-(teste `golden`) e a janela Qt dirigida por `xdotool` (teste `golden_gui`). Nas
-imagens European Deluxe e japonesa, gravação limpa ou com edição pela tela, a
-saída é byte-idêntica à do original salvo a faixa de 16 bytes já descrita.
+**O escopo Linux está fechado.** O port está verificado contra o `ed.exe` nos
+dois níveis: o core headless (teste `golden`) e a janela Qt dirigida por
+`xdotool` (teste `golden_gui`). Nas imagens European Deluxe e japonesa,
+gravação limpa ou com edição pela tela, a saída é byte-idêntica à do original
+salvo a faixa de 16 bytes já descrita.
 
-A próxima fase é a **6** — `QFileDialog`/`QMessageBox` já estão feitos desde a
-Fase 5, então o que resta ali é empacotamento (AppImage ou Flatpak). Não foi
+Formato de pacote (AppImage/Flatpak) foi **decidido ficar de fora** por
+enquanto: só as regras de `install()`. A próxima fase é a **7** (Windows), não
 autorizada.
 
 Quatro divergências deliberadas do original entraram na Fase 5 (preço do

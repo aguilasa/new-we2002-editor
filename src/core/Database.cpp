@@ -50,17 +50,36 @@ std::filesystem::path UrlSidecarPath(const std::filesystem::path& image) {
 Database::Database() = default;
 
 int ResolveMlLink(const unsigned char* lk) {
-    // Verbatim from legacy/mfc/edDlg.cpp:3430, minus one dead expression
-    // statement that read a player name and threw it away.
-    unsigned int nz, g, r;
-    nz = static_cast<unsigned int>(lk[0]);
-    g = static_cast<unsigned int>(lk[1]);
-    if (g > 22) {
-        r = g + START_LINK[nz] - 23;
+    // From legacy/mfc/edDlg.cpp:3430, minus one dead expression statement that
+    // read a player name and threw it away, and plus two bounds checks the
+    // original did not have.
+    //
+    // A link is (team code, position). On a real image the team code is 0..119
+    // and the result lands inside players[], so neither check ever fires --
+    // which is what the golden tests demonstrate. On anything else, which is to
+    // say on whatever file a user opens by mistake, the original read past the
+    // end of START_LINK's 120 entries and then indexed players[] with the
+    // garbage that came out. The first symptom was a crash before the window
+    // even appeared, with nothing on stderr.
+    //
+    // Out of range resolves to player 0 rather than to nothing, because every
+    // caller uses the result as an index immediately and none of them has an
+    // error path to take.
+    const unsigned int team = lk[0];
+    const unsigned int slot = lk[1];
+    int r = 0;
+    if (slot > 22) {
+        if (team >= static_cast<unsigned int>(START_LINK_COUNT)) {
+            return 0;
+        }
+        r = static_cast<int>(slot) + START_LINK[team] - 23;
     } else {
-        r = (nz * 23) + g + PLAYERS_NC;
+        r = static_cast<int>((team * 23) + slot) + PLAYERS_NC;
     }
-    return static_cast<int>(r);
+    if (r < 0 || r >= PLAYERS_TOTAL) {
+        return 0;
+    }
+    return r;
 }
 
 void Database::CopyAllStarNames() {

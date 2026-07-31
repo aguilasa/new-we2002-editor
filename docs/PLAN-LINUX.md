@@ -20,8 +20,9 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fases 0, 1, 2, 3, 3.5, 4, 5 e **5.5 concluídas**. Fase 6 em
-> diante ainda **não autorizada** — não iniciar sem pedido explícito.
+> Progresso: Fases 0 a **6 concluídas** — o escopo Linux está fechado.
+> A Fase 7 (Windows) ainda **não autorizada** — não iniciar sem pedido
+> explícito.
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
@@ -1082,16 +1083,129 @@ Renomeação não pode mudar byte de saída, e não mudou:
 - Os cinco sub-diálogos abertos e exercitados no `:99` — a busca por nome é em
   runtime, então compilar não prova nada aqui.
 
-### Fase 6 — Acabamento e empacotamento Linux (~1 dia)
+### Fase 6 — Acabamento Linux ✅ concluída
 
 As três trocas que esta fase previa — `CFileDialog` → `QFileDialog`,
 `AfxMessageBox` → `QMessageBox`, `GetModuleFileName` →
 `QCoreApplication::applicationDirPath()` — saíram na Fase 5: sem elas não havia
 como abrir uma imagem nem avisar de nada, então não dava para adiar.
 
-O que resta aqui é empacotar: AppImage ou Flatpak. Mais o que a Fase 4 deixou
-em aberto e ninguém decidiu ainda — a política de fonte, já que MS Sans Serif
-não está instalada e o Qt substitui.
+#### Decisões tomadas nesta fase
+
+**Formato de pacote: nenhum, por ora.** Só as regras de `install()`. AppImage e
+Flatpak ficam para quando houver alguém para distribuir. Se/quando vier, o
+AppImage é o candidato: o editor abre um `.bin` de ~474 MB em qualquer lugar do
+disco e grava um `_url.txt` ao lado, e o sandbox do Flatpak exigiria
+`--filesystem=host`, que é abrir mão do sandbox.
+
+**Fonte: fica como está.** MS Sans Serif não está instalada, o Qt substitui, e
+alguns rótulos apertados cortam ("Position" vira "Positior"). O `ed.exe` sob
+Wine corta exatamente os mesmos, pelo mesmo motivo. Fidelidade é o critério
+desde a Fase 4; custo zero, e agora documentado em vez de pendente.
+
+#### Instalar
+
+```sh
+cmake --preset release
+cmake --build --preset release
+cmake --install build-release --prefix ~/.local
+```
+
+| Vai para | O quê |
+|---|---|
+| `bin/we2002` | o executável |
+| `share/we2002/` | `defaultlook.txt`, `SOFIFA attributes.txt`, `WE attributes conversion rules.txt` |
+| `share/applications/` | `io.github.aguilasa.we2002.desktop` |
+| `share/metainfo/` | AppStream |
+| `share/icons/hicolor/{16x16,32x32}/apps/we2002.png` | o ícone |
+| `share/doc/we2002/` | `NOTICE.md` e `README.md` |
+
+`naz.txt` **não** é instalado: apesar de estar em `data/`, não é dado — é um
+array em C que o autor colou na árvore, e nada o lê. Fica no repositório como
+história.
+
+Os dois tamanhos de ícone são os dois que existem dentro do
+`legacy/mfc/res/ed.ico` (32×32 e 16×16, 16 cores), convertidos sem reescalar.
+Inventar um 256×256 seria desenhar arte nova, o que não é trabalho de port.
+
+#### Onde o app acha os dados
+
+Isso é o que um pacote quebra e uma árvore de build esconde. A ordem está em
+[src/app/DataFiles.cpp](../src/app/DataFiles.cpp):
+
+1. `$WE2002_DATA_DIR` — escape hatch explícito.
+2. Ao lado do executável — a única busca que o original fazia, e como fica uma
+   cópia portátil descompactada.
+3. O prefixo instalado, **relativo ao executável** (`../share/we2002`), não por
+   caminho absoluto compilado. Mover a árvore instalada não quebra, e é também
+   o que um AppImage precisaria de graça.
+4. O `data/` do fonte, para rodar direto da árvore de build.
+
+Verificado do jeito difícil: mascarando o `data/` do fonte com um bind mount num
+user+mount namespace (a mesma técnica do `tools/run-sanitized.sh`) e rodando o
+binário instalado. Sem o aviso de SoFIFA, então achou pelo caminho relativo.
+
+Detalhe que atrapalha a conferência: `strings` **não** encontra
+`../share/we2002` no binário. Com `-O2` o GCC monta a string de 15 bytes em dois
+`movabs` imediatos na pilha, e ela nunca existe contígua em `.rodata`. Conferir
+pelas flags de compilação (`grep WE2002_DATA_DIR_FROM_BIN
+build/src/app/CMakeFiles/we2002.dir/flags.make`), não pelo binário.
+
+#### Dois defeitos achados e corrigidos aqui
+
+Nenhum dos dois muda byte de saída — os golden tests provam.
+
+- **`Return` na janela principal clicava um botão arbitrário.** Dentro de um
+  `QDialog` o Qt torna todo `QPushButton` auto-default, então `Return` acionava
+  o primeiro da ordem de tabulação. O diálogo principal tem 86 botões e nenhum
+  `DEFPUSHBUTTON`, e um dos candidatos aplica formação predefinida sobre o time
+  selecionado. O `rc2ui.py` passou a emitir `autoDefault=false` em
+  `PUSHBUTTON`, deixando `DEFPUSHBUTTON` como o único jeito de ser default —
+  que é o que o `.rc` quer dizer. Dos seis diálogos, só `DLG_GRAF` e
+  `DLG_PTATTICHE` declaram um.
+
+  No original o `Return` ia para o `IDOK` implícito do `CDialog` e **fechava** o
+  editor (o `CanExit()` é um stub que retorna `TRUE`). Agora não faz nada, que
+  é mais seguro que os dois comportamentos. `Escape` continua fechando, como
+  nos dois.
+
+- **`ResolveMlLink` estourava os limites.** `START_LINK[lk[0]]` com `lk[0]`
+  sendo um byte — até 255 — numa tabela de 120 entradas, e o resultado indexando
+  `players[1911]` sem checagem. Numa imagem válida os valores estão sempre na
+  faixa; em qualquer outro arquivo o editor **morria de segfault antes da janela
+  aparecer**, sem nada no stderr. Foi assim que apareceu: apontando o app para
+  um arquivo de bytes aleatórios.
+
+  Agora há duas checagens, e fora da faixa resolve para o jogador 0 — todos os
+  chamadores usam o resultado como índice na hora e nenhum tem caminho de erro.
+  Mesma categoria do `auxlk[2]` da Fase 5: reproduzir a intenção, não o acesso
+  fora dos limites. Fixado por `TestResolveMlLinkBounds`, que varre as 65.536
+  combinações de dois bytes e exige que nenhuma escape da faixa.
+
+#### Infraestrutura
+
+- **[CMakePresets.json](../CMakePresets.json)** — `debug`, `release`, `asan`,
+  `ubsan`. A seção 5 previa isso desde o começo e nunca tinha sido escrito.
+- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** — três jobs:
+  `linux` (compila, testa, valida `.desktop`/AppStream, instala e confere o
+  layout), `linux-ubsan`, e `windows` com `continue-on-error: true`. A seção 5
+  pede a matriz com `windows-latest` desde o primeiro workflow "mesmo que comece
+  vermelho": vermelho ali é o sinal, não uma falha, e a Fase 7 tira o
+  `continue-on-error`.
+
+  ASan **não** entra no CI: esta máquina não consegue rodar (a Citrix substitui
+  o `dlsym`, ver CLAUDE.md), então ninguém reproduziria localmente uma falha que
+  só o CI vê. UBSan roda em todo lugar.
+- **[README.md](../README.md)** reescrito. Dizia "the Qt application does not
+  exist yet" e mandava procurar os fontes MFC na raiz.
+
+#### O que continua de fora
+
+- O item "About" que o original punha no menu de sistema. Um `QDialog` não tem
+  menu de sistema em Qt, e a caixa não editava nada.
+- O `OnPaint` que desenhava o ícone com a janela minimizada. Não existe
+  equivalente e não faz falta.
+- Pacote de distribuição, por decisão acima.
 
 **Fim do escopo Linux. Total Fases 1–6 (incluindo a 5.5): ~1,5 a 2 semanas.**
 
