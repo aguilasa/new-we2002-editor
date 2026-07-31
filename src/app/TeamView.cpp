@@ -70,8 +70,8 @@ void MainWindow::OnTeamSelected() {
         for (int i = 0; i < 3; ++i) {
             txt_abbrev_[i]->setEnabled(true);
         }
-        ui_->TXT_NSQUADK->setEnabled(true);
-        ui_->TXT_NSQUAD_M->setEnabled(true);
+        ui_->TXT_TEAM_NAME_KANJI->setEnabled(true);
+        ui_->TXT_TEAM_NAME_MIXED->setEnabled(true);
         for (QLineEdit* bar : txt_bar_) {
             bar->setEnabled(true);
         }
@@ -79,11 +79,11 @@ void MainWindow::OnTeamSelected() {
             url->setEnabled(true);
         }
         // The two extra Master League name slots are hidden for everyone else.
-        ui_->TXT_NOMIML1->setVisible(false);
-        ui_->TXT_NOMIML2->setVisible(false);
-        ui_->LAB_ML_NOMEADD->setVisible(false);
-        ui_->LBL_NOMEMLADD1->setVisible(false);
-        ui_->LBL_NOMEMLADD2->setVisible(false);
+        ui_->TXT_ML_EXTRA_NAME1->setVisible(false);
+        ui_->TXT_ML_EXTRA_NAME2->setVisible(false);
+        ui_->LAB_ML_EXTRA_NAMES->setVisible(false);
+        ui_->LBL_ML_EXTRA_NAME1->setVisible(false);
+        ui_->LBL_ML_EXTRA_NAME2->setVisible(false);
 
         // Name lengths are per team and fixed by the disc layout. Index id-1
         // spans national teams, all-stars and Master League clubs in disc
@@ -103,11 +103,11 @@ void MainWindow::OnTeamSelected() {
                 lab_team_name_[i]->setText(LengthHint(lengths[i]));
                 txt_team_name_[i]->setMaxLength(lengths[i] - 1);
             }
-            ui_->LAB_NSQUADK->setText(LengthHint(we2002::TEAM_NAME_KANJI_LEN[t]));
-            ui_->TXT_NSQUADK->setMaxLength(we2002::TEAM_NAME_KANJI_LEN[t] - 1);
-            ui_->LAB_NSQUAD_M->setText(
+            ui_->LAB_TEAM_NAME_KANJI->setText(LengthHint(we2002::TEAM_NAME_KANJI_LEN[t]));
+            ui_->TXT_TEAM_NAME_KANJI->setMaxLength(we2002::TEAM_NAME_KANJI_LEN[t] - 1);
+            ui_->LAB_TEAM_NAME_MIXED->setText(
                 LengthHint(we2002::TEAM_MIXED_CASE_NAME_LEN[t]));
-            ui_->TXT_NSQUAD_M->setMaxLength(
+            ui_->TXT_TEAM_NAME_MIXED->setMaxLength(
                 we2002::TEAM_MIXED_CASE_NAME_LEN[t] - 1);
         }
 
@@ -142,8 +142,8 @@ void MainWindow::ShowNationalOrAllStar(int id) {
     for (int i = 0; i < 3; ++i) {
         txt_abbrev_[i]->setText(QLatin1String(team.abbreviations[i]));
     }
-    ui_->TXT_NSQUADK->setText(QLatin1String(team.kanji_name));
-    ui_->TXT_NSQUAD_M->setText(QLatin1String(team.mixed_case_name));
+    ui_->TXT_TEAM_NAME_KANJI->setText(QLatin1String(team.kanji_name));
+    ui_->TXT_TEAM_NAME_MIXED->setText(QLatin1String(team.mixed_case_name));
 
     const char bars[5] = {team.bar_attack, team.bar_defence, team.bar_power,
                           team.bar_speed, team.bar_technique};
@@ -198,11 +198,11 @@ void MainWindow::ShowNationalOrAllStar(int id) {
 void MainWindow::ShowMlClub(int id) {
     const we2002::MlTeam& club = db_.ml_teams[id - 64];
 
-    ui_->TXT_NOMIML1->setVisible(true);
-    ui_->TXT_NOMIML2->setVisible(true);
-    ui_->LAB_ML_NOMEADD->setVisible(true);
-    ui_->LBL_NOMEMLADD1->setVisible(true);
-    ui_->LBL_NOMEMLADD2->setVisible(true);
+    ui_->TXT_ML_EXTRA_NAME1->setVisible(true);
+    ui_->TXT_ML_EXTRA_NAME2->setVisible(true);
+    ui_->LAB_ML_EXTRA_NAMES->setVisible(true);
+    ui_->LBL_ML_EXTRA_NAME1->setVisible(true);
+    ui_->LBL_ML_EXTRA_NAME2->setVisible(true);
 
     for (int i = 0; i < 6; ++i) {
         txt_team_name_[i]->setText(QLatin1String(club.names[i]));
@@ -210,16 +210,16 @@ void MainWindow::ShowMlClub(int id) {
     for (int i = 0; i < 3; ++i) {
         txt_abbrev_[i]->setText(QLatin1String(club.abbreviations[i]));
     }
-    ui_->TXT_NSQUADK->setText(QLatin1String(club.kanji_name));
-    ui_->TXT_NSQUAD_M->setText(QLatin1String(club.mixed_case_name));
-    ui_->TXT_NOMIML1->setText(QLatin1String(club.names[6]));
-    ui_->TXT_NOMIML2->setText(QLatin1String(club.names[7]));
+    ui_->TXT_TEAM_NAME_KANJI->setText(QLatin1String(club.kanji_name));
+    ui_->TXT_TEAM_NAME_MIXED->setText(QLatin1String(club.mixed_case_name));
+    ui_->TXT_ML_EXTRA_NAME1->setText(QLatin1String(club.names[6]));
+    ui_->TXT_ML_EXTRA_NAME2->setText(QLatin1String(club.names[7]));
 
     const int c = id - 64;
-    ui_->LBL_NOMEMLADD1->setText(LengthHint(we2002::ML_TEAM_NAME_LEN_7[c]));
-    ui_->TXT_NOMIML1->setMaxLength(we2002::ML_TEAM_NAME_LEN_7[c] - 1);
-    ui_->LBL_NOMEMLADD2->setText(LengthHint(we2002::ML_TEAM_NAME_LEN_8[c]));
-    ui_->TXT_NOMIML2->setMaxLength(we2002::ML_TEAM_NAME_LEN_8[c] - 1);
+    ui_->LBL_ML_EXTRA_NAME1->setText(LengthHint(we2002::ML_TEAM_NAME_LEN_7[c]));
+    ui_->TXT_ML_EXTRA_NAME1->setMaxLength(we2002::ML_TEAM_NAME_LEN_7[c] - 1);
+    ui_->LBL_ML_EXTRA_NAME2->setText(LengthHint(we2002::ML_TEAM_NAME_LEN_8[c]));
+    ui_->TXT_ML_EXTRA_NAME2->setMaxLength(we2002::ML_TEAM_NAME_LEN_8[c] - 1);
 
     const char bars[5] = {club.bar_attack, club.bar_defence, club.bar_power,
                           club.bar_speed, club.bar_technique};
@@ -277,12 +277,12 @@ void MainWindow::ShowMlDefault() {
         txt_abbrev_[i]->setText(QStringLiteral("---"));
         txt_abbrev_[i]->setEnabled(false);
     }
-    ui_->TXT_NSQUADK->setText(QStringLiteral("---"));
-    ui_->TXT_NSQUADK->setEnabled(false);
-    ui_->TXT_NSQUAD_M->setText(QStringLiteral("---"));
-    ui_->TXT_NSQUAD_M->setEnabled(false);
-    ui_->LAB_NSQUADK->clear();
-    ui_->LAB_NSQUAD_M->clear();
+    ui_->TXT_TEAM_NAME_KANJI->setText(QStringLiteral("---"));
+    ui_->TXT_TEAM_NAME_KANJI->setEnabled(false);
+    ui_->TXT_TEAM_NAME_MIXED->setText(QStringLiteral("---"));
+    ui_->TXT_TEAM_NAME_MIXED->setEnabled(false);
+    ui_->LAB_TEAM_NAME_KANJI->clear();
+    ui_->LAB_TEAM_NAME_MIXED->clear();
     for (QLineEdit* bar : txt_bar_) {
         bar->setText(QStringLiteral("-"));
         bar->setEnabled(false);
@@ -338,10 +338,10 @@ void MainWindow::ClearTeamForm() {
     for (int i = 0; i < 3; ++i) {
         txt_abbrev_[i]->clear();
     }
-    ui_->LAB_NSQUADK->clear();
-    ui_->LAB_NSQUAD_M->clear();
-    ui_->TXT_NSQUADK->clear();
-    ui_->TXT_NSQUAD_M->clear();
+    ui_->LAB_TEAM_NAME_KANJI->clear();
+    ui_->LAB_TEAM_NAME_MIXED->clear();
+    ui_->TXT_TEAM_NAME_KANJI->clear();
+    ui_->TXT_TEAM_NAME_MIXED->clear();
     for (QLineEdit* bar : txt_bar_) {
         bar->clear();
     }
@@ -371,14 +371,14 @@ void MainWindow::OnTeamNameEdited(int slot) {
 void MainWindow::OnMlExtraNameEdited(int slot) {
     const int id = SelectedTeam();
     if (id > 63 && id < 96) {
-        QLineEdit* box = (slot == 0) ? ui_->TXT_NOMIML1 : ui_->TXT_NOMIML2;
+        QLineEdit* box = (slot == 0) ? ui_->TXT_ML_EXTRA_NAME1 : ui_->TXT_ML_EXTRA_NAME2;
         CopyInto(db_.ml_teams[id - 64].names[6 + slot], box->text());
     }
 }
 
 void MainWindow::OnKanjiNameEdited() {
     const int id = SelectedTeam();
-    const QString text = ui_->TXT_NSQUADK->text();
+    const QString text = ui_->TXT_TEAM_NAME_KANJI->text();
     if (id > 0 && id < 64) {
         CopyInto(db_.teams[id - 1].kanji_name, text);
     } else if (id > 63 && id < 96) {
@@ -388,7 +388,7 @@ void MainWindow::OnKanjiNameEdited() {
 
 void MainWindow::OnMixedCaseNameEdited() {
     const int id = SelectedTeam();
-    const QString text = ui_->TXT_NSQUAD_M->text();
+    const QString text = ui_->TXT_TEAM_NAME_MIXED->text();
     if (id > 0 && id < 64) {
         CopyInto(db_.teams[id - 1].mixed_case_name, text);
     } else if (id > 63 && id < 96) {

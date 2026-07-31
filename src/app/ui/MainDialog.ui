@@ -20,7 +20,7 @@
     <pointsize>8</pointsize>
    </font>
   </property>
-  <widget class="QLabel" name="LAB_NSQUAD1">
+  <widget class="QLabel" name="LAB_TEAM_NAME1">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -36,7 +36,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD2">
+  <widget class="QLabel" name="LAB_TEAM_NAME2">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -52,7 +52,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD3">
+  <widget class="QLabel" name="LAB_TEAM_NAME3">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -68,7 +68,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD4">
+  <widget class="QLabel" name="LAB_TEAM_NAME4">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -84,7 +84,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD5">
+  <widget class="QLabel" name="LAB_TEAM_NAME5">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -100,7 +100,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD6">
+  <widget class="QLabel" name="LAB_TEAM_NAME6">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -116,7 +116,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD_M">
+  <widget class="QLabel" name="LAB_TEAM_NAME_MIXED">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -132,7 +132,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD_A1">
+  <widget class="QLabel" name="LAB_TEAM_ABBREV1">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -148,7 +148,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD_A2">
+  <widget class="QLabel" name="LAB_TEAM_ABBREV2">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -244,7 +244,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_PUNC">
+  <widget class="QLabel" name="LAB_KICK_SHORT_FK">
    <property name="geometry">
     <rect>
      <x>22</x>
@@ -260,7 +260,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_PUNL">
+  <widget class="QLabel" name="LAB_KICK_LONG_FK">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -276,7 +276,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_ANGSX">
+  <widget class="QLabel" name="LAB_KICK_LEFT_CORNER">
    <property name="geometry">
     <rect>
      <x>24</x>
@@ -292,7 +292,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_ANGDX">
+  <widget class="QLabel" name="LAB_KICK_RIGHT_CORNER">
    <property name="geometry">
     <rect>
      <x>22</x>
@@ -308,7 +308,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_CAP">
+  <widget class="QLabel" name="LAB_CAPTAIN">
    <property name="geometry">
     <rect>
      <x>36</x>
@@ -385,7 +385,7 @@
     <set>Qt::AlignHCenter|Qt::AlignTop</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="CAMPO_">
+  <widget class="QGroupBox" name="PITCH">
    <property name="geometry">
     <rect>
      <x>184</x>
@@ -529,7 +529,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_ML_NOMEADD">
+  <widget class="QLabel" name="LAB_ML_EXTRA_NAMES">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -548,7 +548,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="LBL_NOMEMLADD1">
+  <widget class="QLabel" name="LBL_ML_EXTRA_NAME1">
    <property name="geometry">
     <rect>
      <x>156</x>
@@ -567,7 +567,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="LBL_NOMEMLADD2">
+  <widget class="QLabel" name="LBL_ML_EXTRA_NAME2">
    <property name="geometry">
     <rect>
      <x>156</x>
@@ -586,7 +586,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_KIK_CAP2">
+  <widget class="QLabel" name="LAB_KICK_PENALTY">
    <property name="geometry">
     <rect>
      <x>33</x>
@@ -602,7 +602,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUAD_A3">
+  <widget class="QLabel" name="LAB_TEAM_ABBREV3">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -618,7 +618,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_NSQUADRE">
+  <widget class="QComboBox" name="CMB_TEAM">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -628,7 +628,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD1">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME1">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -638,7 +638,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD2">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME2">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -648,7 +648,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD3">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME3">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -658,7 +658,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD4">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME4">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -668,7 +668,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD5">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME5">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -678,7 +678,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD6">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME6">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -688,7 +688,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD_M">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME_MIXED">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -698,7 +698,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD_A1">
+  <widget class="QLineEdit" name="TXT_TEAM_ABBREV1">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -708,7 +708,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD_A2">
+  <widget class="QLineEdit" name="TXT_TEAM_ABBREV2">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -718,7 +718,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUAD_A3">
+  <widget class="QLineEdit" name="TXT_TEAM_ABBREV3">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -728,7 +728,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NOMIML1">
+  <widget class="QLineEdit" name="TXT_ML_EXTRA_NAME1">
    <property name="geometry">
     <rect>
      <x>18</x>
@@ -741,7 +741,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NOMIML2">
+  <widget class="QLineEdit" name="TXT_ML_EXTRA_NAME2">
    <property name="geometry">
     <rect>
      <x>18</x>
@@ -1118,7 +1118,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX2">
+  <widget class="QLineEdit" name="TXT_SLOT_X2">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1131,7 +1131,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY2">
+  <widget class="QLineEdit" name="TXT_SLOT_Y2">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1144,7 +1144,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT2">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE2">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1154,7 +1154,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX3">
+  <widget class="QLineEdit" name="TXT_SLOT_X3">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1167,7 +1167,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY3">
+  <widget class="QLineEdit" name="TXT_SLOT_Y3">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1180,7 +1180,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT3">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE3">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1190,7 +1190,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX4">
+  <widget class="QLineEdit" name="TXT_SLOT_X4">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1203,7 +1203,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY4">
+  <widget class="QLineEdit" name="TXT_SLOT_Y4">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1216,7 +1216,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT4">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE4">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1226,7 +1226,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX5">
+  <widget class="QLineEdit" name="TXT_SLOT_X5">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1239,7 +1239,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY5">
+  <widget class="QLineEdit" name="TXT_SLOT_Y5">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1252,7 +1252,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT5">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE5">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1262,7 +1262,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX6">
+  <widget class="QLineEdit" name="TXT_SLOT_X6">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1275,7 +1275,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY6">
+  <widget class="QLineEdit" name="TXT_SLOT_Y6">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1288,7 +1288,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT6">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE6">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1298,7 +1298,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX7">
+  <widget class="QLineEdit" name="TXT_SLOT_X7">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1311,7 +1311,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY7">
+  <widget class="QLineEdit" name="TXT_SLOT_Y7">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1324,7 +1324,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT7">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE7">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1334,7 +1334,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX8">
+  <widget class="QLineEdit" name="TXT_SLOT_X8">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1347,7 +1347,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY8">
+  <widget class="QLineEdit" name="TXT_SLOT_Y8">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1360,7 +1360,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT8">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE8">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1370,7 +1370,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX9">
+  <widget class="QLineEdit" name="TXT_SLOT_X9">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1383,7 +1383,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY9">
+  <widget class="QLineEdit" name="TXT_SLOT_Y9">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1396,7 +1396,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT9">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE9">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1406,7 +1406,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX10">
+  <widget class="QLineEdit" name="TXT_SLOT_X10">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1419,7 +1419,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY10">
+  <widget class="QLineEdit" name="TXT_SLOT_Y10">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1432,7 +1432,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT10">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE10">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1442,7 +1442,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATX11">
+  <widget class="QLineEdit" name="TXT_SLOT_X11">
    <property name="geometry">
     <rect>
      <x>702</x>
@@ -1455,7 +1455,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_TATY11">
+  <widget class="QLineEdit" name="TXT_SLOT_Y11">
    <property name="geometry">
     <rect>
      <x>724</x>
@@ -1468,7 +1468,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_TAT11">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE11">
    <property name="geometry">
     <rect>
      <x>642</x>
@@ -1478,7 +1478,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT1">
+  <widget class="QPushButton" name="CMD_SKILLS1">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1491,7 +1491,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT2">
+  <widget class="QPushButton" name="CMD_SKILLS2">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1504,7 +1504,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT3">
+  <widget class="QPushButton" name="CMD_SKILLS3">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1517,7 +1517,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT4">
+  <widget class="QPushButton" name="CMD_SKILLS4">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1530,7 +1530,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT5">
+  <widget class="QPushButton" name="CMD_SKILLS5">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1543,7 +1543,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT6">
+  <widget class="QPushButton" name="CMD_SKILLS6">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1556,7 +1556,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT7">
+  <widget class="QPushButton" name="CMD_SKILLS7">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1569,7 +1569,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT8">
+  <widget class="QPushButton" name="CMD_SKILLS8">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1582,7 +1582,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT9">
+  <widget class="QPushButton" name="CMD_SKILLS9">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1595,7 +1595,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT10">
+  <widget class="QPushButton" name="CMD_SKILLS10">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1608,7 +1608,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT11">
+  <widget class="QPushButton" name="CMD_SKILLS11">
    <property name="geometry">
     <rect>
      <x>573</x>
@@ -1621,7 +1621,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT12">
+  <widget class="QPushButton" name="CMD_SKILLS12">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1634,7 +1634,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT13">
+  <widget class="QPushButton" name="CMD_SKILLS13">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1647,7 +1647,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT14">
+  <widget class="QPushButton" name="CMD_SKILLS14">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1660,7 +1660,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT15">
+  <widget class="QPushButton" name="CMD_SKILLS15">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1673,7 +1673,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT16">
+  <widget class="QPushButton" name="CMD_SKILLS16">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1686,7 +1686,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT17">
+  <widget class="QPushButton" name="CMD_SKILLS17">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1699,7 +1699,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT18">
+  <widget class="QPushButton" name="CMD_SKILLS18">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1712,7 +1712,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT19">
+  <widget class="QPushButton" name="CMD_SKILLS19">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1725,7 +1725,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT20">
+  <widget class="QPushButton" name="CMD_SKILLS20">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1738,7 +1738,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT21">
+  <widget class="QPushButton" name="CMD_SKILLS21">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1751,7 +1751,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT22">
+  <widget class="QPushButton" name="CMD_SKILLS22">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1764,7 +1764,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CARAT23">
+  <widget class="QPushButton" name="CMD_SKILLS23">
    <property name="geometry">
     <rect>
      <x>583</x>
@@ -1777,7 +1777,7 @@
     <string>skill</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST1">
+  <widget class="QPushButton" name="CMD_SWAP1">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1790,7 +1790,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST2">
+  <widget class="QPushButton" name="CMD_SWAP2">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1803,7 +1803,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST3">
+  <widget class="QPushButton" name="CMD_SWAP3">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1816,7 +1816,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST4">
+  <widget class="QPushButton" name="CMD_SWAP4">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1829,7 +1829,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST5">
+  <widget class="QPushButton" name="CMD_SWAP5">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1842,7 +1842,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST6">
+  <widget class="QPushButton" name="CMD_SWAP6">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1855,7 +1855,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST7">
+  <widget class="QPushButton" name="CMD_SWAP7">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1868,7 +1868,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST8">
+  <widget class="QPushButton" name="CMD_SWAP8">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1881,7 +1881,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST9">
+  <widget class="QPushButton" name="CMD_SWAP9">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1894,7 +1894,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST10">
+  <widget class="QPushButton" name="CMD_SWAP10">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1907,7 +1907,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST11">
+  <widget class="QPushButton" name="CMD_SWAP11">
    <property name="geometry">
     <rect>
      <x>607</x>
@@ -1920,7 +1920,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST12">
+  <widget class="QPushButton" name="CMD_SWAP12">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1933,7 +1933,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST13">
+  <widget class="QPushButton" name="CMD_SWAP13">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1946,7 +1946,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST14">
+  <widget class="QPushButton" name="CMD_SWAP14">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1959,7 +1959,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST15">
+  <widget class="QPushButton" name="CMD_SWAP15">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1972,7 +1972,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST16">
+  <widget class="QPushButton" name="CMD_SWAP16">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1985,7 +1985,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST17">
+  <widget class="QPushButton" name="CMD_SWAP17">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -1998,7 +1998,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST18">
+  <widget class="QPushButton" name="CMD_SWAP18">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2011,7 +2011,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST19">
+  <widget class="QPushButton" name="CMD_SWAP19">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2024,7 +2024,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST20">
+  <widget class="QPushButton" name="CMD_SWAP20">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2037,7 +2037,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST21">
+  <widget class="QPushButton" name="CMD_SWAP21">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2050,7 +2050,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST22">
+  <widget class="QPushButton" name="CMD_SWAP22">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2063,7 +2063,7 @@
     <string>subs.</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_SOST23">
+  <widget class="QPushButton" name="CMD_SWAP23">
    <property name="geometry">
     <rect>
      <x>619</x>
@@ -2284,7 +2284,7 @@
     <string>5-3-2 B</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT1">
+  <widget class="QPushButton" name="CMD_SLOT1">
    <property name="geometry">
     <rect>
      <x>223</x>
@@ -2297,7 +2297,7 @@
     <string>CB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT2">
+  <widget class="QPushButton" name="CMD_SLOT2">
    <property name="geometry">
     <rect>
      <x>201</x>
@@ -2310,7 +2310,7 @@
     <string>LIB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT3">
+  <widget class="QPushButton" name="CMD_SLOT3">
    <property name="geometry">
     <rect>
      <x>246</x>
@@ -2323,7 +2323,7 @@
     <string>SB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT4">
+  <widget class="QPushButton" name="CMD_SLOT4">
    <property name="geometry">
     <rect>
      <x>228</x>
@@ -2336,7 +2336,7 @@
     <string>CB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT5">
+  <widget class="QPushButton" name="CMD_SLOT5">
    <property name="geometry">
     <rect>
      <x>285</x>
@@ -2349,7 +2349,7 @@
     <string>DH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT6">
+  <widget class="QPushButton" name="CMD_SLOT6">
    <property name="geometry">
     <rect>
      <x>265</x>
@@ -2362,7 +2362,7 @@
     <string>DH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT7">
+  <widget class="QPushButton" name="CMD_SLOT7">
    <property name="geometry">
     <rect>
      <x>328</x>
@@ -2375,7 +2375,7 @@
     <string>WG</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT8">
+  <widget class="QPushButton" name="CMD_SLOT8">
    <property name="geometry">
     <rect>
      <x>304</x>
@@ -2388,7 +2388,7 @@
     <string>OH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT9">
+  <widget class="QPushButton" name="CMD_SLOT9">
    <property name="geometry">
     <rect>
      <x>349</x>
@@ -2401,7 +2401,7 @@
     <string>CF</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_VT10">
+  <widget class="QPushButton" name="CMD_SLOT10">
    <property name="geometry">
     <rect>
      <x>367</x>
@@ -2414,7 +2414,7 @@
     <string>CF</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_COPIA_NOMISQUADRA">
+  <widget class="QPushButton" name="CMD_COPY_TEAM_NAMES">
    <property name="geometry">
     <rect>
      <x>112</x>
@@ -2430,7 +2430,7 @@
     <enum>Qt::NoFocus</enum>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC1">
+  <widget class="QLineEdit" name="TXT_PLAYER1">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2443,7 +2443,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC2">
+  <widget class="QLineEdit" name="TXT_PLAYER2">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2456,7 +2456,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC3">
+  <widget class="QLineEdit" name="TXT_PLAYER3">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2469,7 +2469,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC4">
+  <widget class="QLineEdit" name="TXT_PLAYER4">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2482,7 +2482,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC5">
+  <widget class="QLineEdit" name="TXT_PLAYER5">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2495,7 +2495,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC6">
+  <widget class="QLineEdit" name="TXT_PLAYER6">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2508,7 +2508,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC7">
+  <widget class="QLineEdit" name="TXT_PLAYER7">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2521,7 +2521,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC8">
+  <widget class="QLineEdit" name="TXT_PLAYER8">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2534,7 +2534,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC9">
+  <widget class="QLineEdit" name="TXT_PLAYER9">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2547,7 +2547,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC10">
+  <widget class="QLineEdit" name="TXT_PLAYER10">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2560,7 +2560,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC11">
+  <widget class="QLineEdit" name="TXT_PLAYER11">
    <property name="geometry">
     <rect>
      <x>468</x>
@@ -2573,7 +2573,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC12">
+  <widget class="QLineEdit" name="TXT_PLAYER12">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2586,7 +2586,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC13">
+  <widget class="QLineEdit" name="TXT_PLAYER13">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2599,7 +2599,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC14">
+  <widget class="QLineEdit" name="TXT_PLAYER14">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2612,7 +2612,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC15">
+  <widget class="QLineEdit" name="TXT_PLAYER15">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2625,7 +2625,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC16">
+  <widget class="QLineEdit" name="TXT_PLAYER16">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2638,7 +2638,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC17">
+  <widget class="QLineEdit" name="TXT_PLAYER17">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2651,7 +2651,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC18">
+  <widget class="QLineEdit" name="TXT_PLAYER18">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2664,7 +2664,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC19">
+  <widget class="QLineEdit" name="TXT_PLAYER19">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2677,7 +2677,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC20">
+  <widget class="QLineEdit" name="TXT_PLAYER20">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2690,7 +2690,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC21">
+  <widget class="QLineEdit" name="TXT_PLAYER21">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2703,7 +2703,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC22">
+  <widget class="QLineEdit" name="TXT_PLAYER22">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2716,7 +2716,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_GIOC23">
+  <widget class="QLineEdit" name="TXT_PLAYER23">
    <property name="geometry">
     <rect>
      <x>477</x>
@@ -2729,7 +2729,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_PUNL">
+  <widget class="QComboBox" name="CMB_KICK_LONG_FK">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2739,7 +2739,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_PUNC">
+  <widget class="QComboBox" name="CMB_KICK_SHORT_FK">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2749,7 +2749,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_ANGSX">
+  <widget class="QComboBox" name="CMB_KICK_LEFT_CORNER">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2759,7 +2759,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_ANGDX">
+  <widget class="QComboBox" name="CMB_KICK_RIGHT_CORNER">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2769,7 +2769,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_RIG">
+  <widget class="QComboBox" name="CMB_KICK_PENALTY">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2779,7 +2779,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_KIK_CAP">
+  <widget class="QComboBox" name="CMB_CAPTAIN">
    <property name="geometry">
     <rect>
      <x>90</x>
@@ -2789,7 +2789,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="LAB_NSQUADK">
+  <widget class="QLabel" name="LAB_TEAM_NAME_KANJI">
    <property name="geometry">
     <rect>
      <x>132</x>
@@ -2805,7 +2805,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_NSQUADK">
+  <widget class="QLineEdit" name="TXT_TEAM_NAME_KANJI">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -2815,7 +2815,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTGRAF">
+  <widget class="QPushButton" name="CMD_FLAG_KIT">
    <property name="geometry">
     <rect>
      <x>285</x>
@@ -2828,7 +2828,7 @@
     <string>Flag - Shirt preview</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_NUMDEF">
+  <widget class="QPushButton" name="CMD_DEFAULT_NUMBERS">
    <property name="geometry">
     <rect>
      <x>958</x>
@@ -2841,7 +2841,7 @@
     <string>pl. n° = team n°</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CALCCOSTI">
+  <widget class="QPushButton" name="CMD_UPDATE_COSTS">
    <property name="geometry">
     <rect>
      <x>958</x>
@@ -2880,7 +2880,7 @@
     <string>Write into CD image</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_CALCFORZA2">
+  <widget class="QPushButton" name="CMD_SORT_RESERVES">
    <property name="geometry">
     <rect>
      <x>658</x>
@@ -2896,7 +2896,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QPushButton" name="CMD_TATT_PREDEF">
+  <widget class="QPushButton" name="CMD_EDIT_PRESETS">
    <property name="geometry">
     <rect>
      <x>376</x>

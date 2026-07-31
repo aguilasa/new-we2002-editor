@@ -246,7 +246,7 @@ void MainWindow::OnCopyTeamNames() {
 
     const QString mixed_text = title_case(we2002::TEAM_MIXED_CASE_NAME_LEN[t]);
     store(mixed, 20, mixed_text);
-    ui_->TXT_NSQUAD_M->setText(mixed_text);
+    ui_->TXT_TEAM_NAME_MIXED->setText(mixed_text);
 
     // The Japanese slot's length is read at row id-64 for Master League clubs
     // but id-1 for everything else -- including the five other name slots just
@@ -256,17 +256,17 @@ void MainWindow::OnCopyTeamNames() {
     const QString kanji_text =
         title_case(we2002::TEAM_NAME_KANJI_LEN[is_ml ? id - 64 : t]);
     store(kanji, 20, kanji_text);
-    ui_->TXT_NSQUADK->setText(kanji_text);
+    ui_->TXT_TEAM_NAME_KANJI->setText(kanji_text);
 
     if (is_ml) {
         const int c = id - 64;
         const QString extra1 = source.left(we2002::ML_TEAM_NAME_LEN_7[c] - 1);
         store(db_.ml_teams[c].names[6], 20, extra1);
-        ui_->TXT_NOMIML1->setText(extra1);
+        ui_->TXT_ML_EXTRA_NAME1->setText(extra1);
 
         const QString extra2 = source.left(we2002::ML_TEAM_NAME_LEN_8[c] - 1);
         store(db_.ml_teams[c].names[7], 20, extra2);
-        ui_->TXT_NOMIML2->setText(extra2);
+        ui_->TXT_ML_EXTRA_NAME2->setText(extra2);
     }
 }
 

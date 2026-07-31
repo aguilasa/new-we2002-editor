@@ -39,7 +39,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QGroupBox" name="TCAMPO_">
+  <widget class="QGroupBox" name="PITCH">
    <property name="geometry">
     <rect>
      <x>24</x>
@@ -103,7 +103,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_NSQUADRE">
+  <widget class="QComboBox" name="CMB_FORMATION">
    <property name="geometry">
     <rect>
      <x>31</x>
@@ -113,7 +113,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_NOMETATTICA">
+  <widget class="QLineEdit" name="TXT_FORMATION_NAME">
    <property name="geometry">
     <rect>
      <x>120</x>
@@ -123,7 +123,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX2">
+  <widget class="QLineEdit" name="TXT_SLOT_X2">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -136,7 +136,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY2">
+  <widget class="QLineEdit" name="TXT_SLOT_Y2">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -149,7 +149,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT2">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE2">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -159,7 +159,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX3">
+  <widget class="QLineEdit" name="TXT_SLOT_X3">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -172,7 +172,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY3">
+  <widget class="QLineEdit" name="TXT_SLOT_Y3">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -185,7 +185,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT3">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE3">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -195,7 +195,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX4">
+  <widget class="QLineEdit" name="TXT_SLOT_X4">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -208,7 +208,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY4">
+  <widget class="QLineEdit" name="TXT_SLOT_Y4">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -221,7 +221,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT4">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE4">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -231,7 +231,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX5">
+  <widget class="QLineEdit" name="TXT_SLOT_X5">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -244,7 +244,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY5">
+  <widget class="QLineEdit" name="TXT_SLOT_Y5">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -257,7 +257,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT5">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE5">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -267,7 +267,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX6">
+  <widget class="QLineEdit" name="TXT_SLOT_X6">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -280,7 +280,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY6">
+  <widget class="QLineEdit" name="TXT_SLOT_Y6">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -293,7 +293,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT6">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE6">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -303,7 +303,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX7">
+  <widget class="QLineEdit" name="TXT_SLOT_X7">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -316,7 +316,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY7">
+  <widget class="QLineEdit" name="TXT_SLOT_Y7">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -329,7 +329,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT7">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE7">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -339,7 +339,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX8">
+  <widget class="QLineEdit" name="TXT_SLOT_X8">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -352,7 +352,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY8">
+  <widget class="QLineEdit" name="TXT_SLOT_Y8">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -365,7 +365,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT8">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE8">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -375,7 +375,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX9">
+  <widget class="QLineEdit" name="TXT_SLOT_X9">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -388,7 +388,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY9">
+  <widget class="QLineEdit" name="TXT_SLOT_Y9">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -401,7 +401,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT9">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE9">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -411,7 +411,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX10">
+  <widget class="QLineEdit" name="TXT_SLOT_X10">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -424,7 +424,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY10">
+  <widget class="QLineEdit" name="TXT_SLOT_Y10">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -437,7 +437,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT10">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE10">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -447,7 +447,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATX11">
+  <widget class="QLineEdit" name="TXT_SLOT_X11">
    <property name="geometry">
     <rect>
      <x>409</x>
@@ -460,7 +460,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TTXT_TATY11">
+  <widget class="QLineEdit" name="TXT_SLOT_Y11">
    <property name="geometry">
     <rect>
      <x>433</x>
@@ -473,7 +473,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QComboBox" name="TCMB_TAT11">
+  <widget class="QComboBox" name="CMB_SLOT_ROLE11">
    <property name="geometry">
     <rect>
      <x>298</x>
@@ -483,7 +483,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT1">
+  <widget class="QPushButton" name="CMD_SLOT1">
    <property name="geometry">
     <rect>
      <x>63</x>
@@ -496,7 +496,7 @@
     <string>CB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT2">
+  <widget class="QPushButton" name="CMD_SLOT2">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -509,7 +509,7 @@
     <string>LIB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT3">
+  <widget class="QPushButton" name="CMD_SLOT3">
    <property name="geometry">
     <rect>
      <x>85</x>
@@ -522,7 +522,7 @@
     <string>SB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT4">
+  <widget class="QPushButton" name="CMD_SLOT4">
    <property name="geometry">
     <rect>
      <x>67</x>
@@ -535,7 +535,7 @@
     <string>CB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT5">
+  <widget class="QPushButton" name="CMD_SLOT5">
    <property name="geometry">
     <rect>
      <x>124</x>
@@ -548,7 +548,7 @@
     <string>DH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT6">
+  <widget class="QPushButton" name="CMD_SLOT6">
    <property name="geometry">
     <rect>
      <x>105</x>
@@ -561,7 +561,7 @@
     <string>DH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT7">
+  <widget class="QPushButton" name="CMD_SLOT7">
    <property name="geometry">
     <rect>
      <x>168</x>
@@ -574,7 +574,7 @@
     <string>WG</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT8">
+  <widget class="QPushButton" name="CMD_SLOT8">
    <property name="geometry">
     <rect>
      <x>144</x>
@@ -587,7 +587,7 @@
     <string>OH</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT9">
+  <widget class="QPushButton" name="CMD_SLOT9">
    <property name="geometry">
     <rect>
      <x>189</x>
@@ -600,7 +600,7 @@
     <string>CF</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="TCMD_VT10">
+  <widget class="QPushButton" name="CMD_SLOT10">
    <property name="geometry">
     <rect>
      <x>207</x>

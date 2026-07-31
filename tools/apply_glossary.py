@@ -42,17 +42,28 @@ DEFAULT_FILES = [
     "tests/test_main.cpp",
 ]
 
-# src/app/ is deliberately absent: its widgets still carry the .rc's Italian
-# symbols as object names, and the handlers that address them follow suit.
-# Phase 5.5 renames both together and adds the directory here -- see the plan.
+# The Qt application (phase 5.5). Its widget names went through
+# glossary.UI_CONTROLS, so it is checked against that map as well as the core
+# one -- see APP_FILES below.
+APP_FILES = sorted(
+    str(p.relative_to(ROOT))
+    for p in (ROOT / "src" / "app").glob("*.?pp")
+)
 
 # Everything the port compiles, generated or not. --check scans all of it.
-CHECKED_FILES = DEFAULT_FILES + [
+CHECKED_FILES = DEFAULT_FILES + APP_FILES + [
     "src/core/Database.cpp",
     "src/core/Tables.cpp",
     "src/core/include/we2002/Offsets.hpp",
     "src/core/include/we2002/Tables.hpp",
 ]
+
+# The .ui forms and their manifest are generated, so a stale widget name there
+# means tools/rc2ui.py was not re-run. Checked as text: the names appear as
+# XML attributes and JSON values, neither of which the code scanner would see.
+GENERATED_UI = ["src/app/ui/controls.json"] + sorted(
+    str(p.relative_to(ROOT)) for p in (ROOT / "src" / "app" / "ui").glob("*.ui")
+)
 
 
 def check() -> int:
@@ -70,15 +81,35 @@ def check() -> int:
         path = ROOT / rel
         if not path.exists():
             continue
+        # Widget names only apply to the application; sweeping the core for
+        # them would be noise, and the core map must not reach the .ui.
+        patterns = [glossary.LEFTOVER]
+        if rel in APP_FILES:
+            patterns.append(glossary.UI_LEFTOVER)
         for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             code = glossary.PROTECTED.sub("", line).split("//", 1)[0]
-            for m in glossary.LEFTOVER.finditer(code):
-                print(f"{rel}:{n}: {m.group(0)}")
+            for pattern in patterns:
+                for m in pattern.finditer(code):
+                    print(f"{rel}:{n}: {m.group(0)}")
+                    bad += 1
+
+    # Whole-file scan, comments included: these have no code to separate out.
+    for rel in GENERATED_UI:
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            # `id` records the original ed.rc symbol on purpose.
+            if '"id":' in line:
+                continue
+            for m in glossary.UI_LEFTOVER.finditer(line):
+                print(f"{rel}:{n}: {m.group(0)} (rode tools/rc2ui.py)")
                 bad += 1
+
     if bad:
         print(f"\n{bad} identificador(es) em italiano restante(s)", file=sys.stderr)
         return 1
-    print(f"{len(CHECKED_FILES)} arquivos limpos")
+    print(f"{len(CHECKED_FILES) + len(GENERATED_UI)} arquivos limpos")
     return 0
 
 

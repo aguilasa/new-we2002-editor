@@ -64,29 +64,29 @@ void PlayerSelectDialog::Build() {
     setFixedSize(size());
 
     for (int i = 0; i < 54; ++i) {
-        ui_->LIST_SQUADRE->addItem(QStringLiteral("National %1 - %2")
+        ui_->LIST_TEAMS->addItem(QStringLiteral("National %1 - %2")
                                        .arg(i + 1)
                                        .arg(QLatin1String(PICKER_TEAM_NAMES[i])));
     }
     for (int i = 0; i < 9; ++i) {
-        ui_->LIST_SQUADRE->addItem(
+        ui_->LIST_TEAMS->addItem(
             QStringLiteral("All-star %1 - %2")
                 .arg(i + 1)
                 .arg(QLatin1String(PICKER_TEAM_NAMES[i + 54])));
     }
-    ui_->LIST_SQUADRE->addItem(QStringLiteral("- ML (non contacted) "));
+    ui_->LIST_TEAMS->addItem(QStringLiteral("- ML (non contacted) "));
 
-    connect(ui_->LIST_SQUADRE, &QListWidget::currentRowChanged, this,
+    connect(ui_->LIST_TEAMS, &QListWidget::currentRowChanged, this,
             &PlayerSelectDialog::OnTeamSelected);
-    connect(ui_->LIST_GIOCATORI, &QListWidget::currentRowChanged, this,
+    connect(ui_->LIST_PLAYERS, &QListWidget::currentRowChanged, this,
             &PlayerSelectDialog::OnPlayerSelected);
-    connect(ui_->LIST_GIOCATORI, &QListWidget::itemDoubleClicked, this,
+    connect(ui_->LIST_PLAYERS, &QListWidget::itemDoubleClicked, this,
             &PlayerSelectDialog::OnAccept);
     connect(ui_->IDC_BUTTON1, &QPushButton::clicked, this,
             &PlayerSelectDialog::OnAccept);
     connect(ui_->CHK_ML, &QCheckBox::clicked, this,
             &PlayerSelectDialog::OnLinkModeToggled);
-    connect(ui_->CHK_SC, &QCheckBox::clicked, this,
+    connect(ui_->CHK_COMPLETE_SWAP, &QCheckBox::clicked, this,
             &PlayerSelectDialog::OnSwapModeToggled);
     connect(ui_->CHK_LK_DEF, &QCheckBox::clicked, this,
             &PlayerSelectDialog::OnDefaultNationalityToggled);
@@ -97,7 +97,7 @@ void PlayerSelectDialog::Build() {
         // Link teams may still edit skills instead, so the checkbox is shown
         // and starts ticked; copy/swap teams never see it.
         ui_->CHK_ML->setVisible(true);
-        ui_->CHK_SC->setVisible(false);
+        ui_->CHK_COMPLETE_SWAP->setVisible(false);
         ui_->CHK_ML->setChecked(true);
     }
     OnLinkModeToggled();
@@ -106,8 +106,8 @@ void PlayerSelectDialog::Build() {
 // ---------------------------------------------------------------------------
 
 void PlayerSelectDialog::OnTeamSelected() {
-    const int id = ui_->LIST_SQUADRE->currentRow();
-    ui_->LIST_GIOCATORI->clear();
+    const int id = ui_->LIST_TEAMS->currentRow();
+    ui_->LIST_PLAYERS->clear();
     if (id < 0) {
         return;
     }
@@ -120,19 +120,19 @@ void PlayerSelectDialog::OnTeamSelected() {
         if (!hint.isEmpty()) {
             label += QStringLiteral(" | ") + hint;
         }
-        ui_->LIST_GIOCATORI->addItem(label);
+        ui_->LIST_PLAYERS->addItem(label);
     }
     OnLinkModeToggled();
 }
 
 void PlayerSelectDialog::OnPlayerSelected() {
-    if (ui_->LIST_SQUADRE->currentRow() != NON_CONTRACT_ROW) {
-        ui_->LBL_NAZML->clear();
+    if (ui_->LIST_TEAMS->currentRow() != NON_CONTRACT_ROW) {
+        ui_->LBL_ML_NATIONALITY->clear();
         return;
     }
-    const int id = ui_->LIST_GIOCATORI->currentRow();
+    const int id = ui_->LIST_PLAYERS->currentRow();
     if (id < 0) {
-        ui_->LBL_NAZML->clear();
+        ui_->LBL_ML_NATIONALITY->clear();
         return;
     }
 
@@ -145,7 +145,7 @@ void PlayerSelectDialog::OnPlayerSelected() {
         ++run;
     }
     const int team = we2002::NC_TEAM_CODE[run];
-    ui_->LBL_NAZML->setText(QStringLiteral("%1° (nazionality %2 - %3 )")
+    ui_->LBL_ML_NATIONALITY->setText(QStringLiteral("%1° (nazionality %2 - %3 )")
                                 .arg(id + 1)
                                 .arg(team)
                                 .arg(QLatin1String(PICKER_TEAM_NAMES[team])));
@@ -153,53 +153,53 @@ void PlayerSelectDialog::OnPlayerSelected() {
     // Every team whose run starts at or before this player and is within the
     // one-byte position field can address them. Offering the choice is what
     // lets a free agent be linked under a different flag.
-    ui_->CMB_NAZIONALITA->clear();
+    ui_->CMB_NATIONALITY->clear();
     int offered = 0;
     for (int i = 0; i < 120; ++i) {
         const int start = we2002::START_LINK[i];
         if (start != -1 && start <= id && id - start < 255) {
-            ui_->CMB_NAZIONALITA->addItem(QLatin1String(PICKER_TEAM_NAMES[i]));
+            ui_->CMB_NATIONALITY->addItem(QLatin1String(PICKER_TEAM_NAMES[i]));
             nationality_codes_[offered] = i;
             ++offered;
         }
     }
-    ui_->CMB_NAZIONALITA->setCurrentIndex(0);
+    ui_->CMB_NATIONALITY->setCurrentIndex(0);
 }
 
 void PlayerSelectDialog::OnLinkModeToggled() {
     const bool linking = ui_->CHK_ML->isChecked();
     const bool non_contract =
-        ui_->LIST_SQUADRE->currentRow() == NON_CONTRACT_ROW;
+        ui_->LIST_TEAMS->currentRow() == NON_CONTRACT_ROW;
 
     if (linking) {
         ui_->CHK_ML->setText(QStringLiteral("link"));
-        ui_->CHK_SC->setVisible(false);
+        ui_->CHK_COMPLETE_SWAP->setVisible(false);
         if (non_contract) {
-            ui_->LBL_NAZML->setVisible(true);
+            ui_->LBL_ML_NATIONALITY->setVisible(true);
             ui_->CHK_LK_DEF->setVisible(true);
             ui_->CHK_LK_NDEF->setVisible(true);
-            ui_->CMB_NAZIONALITA->setVisible(true);
+            ui_->CMB_NATIONALITY->setVisible(true);
             ui_->CHK_LK_DEF->setChecked(true);
         }
     } else {
         ui_->CHK_ML->setText(QStringLiteral("skill"));
-        ui_->CHK_SC->setVisible(true);
-        ui_->LBL_NAZML->setVisible(false);
+        ui_->CHK_COMPLETE_SWAP->setVisible(true);
+        ui_->LBL_ML_NATIONALITY->setVisible(false);
         ui_->CHK_LK_DEF->setVisible(false);
         ui_->CHK_LK_NDEF->setVisible(false);
-        ui_->CMB_NAZIONALITA->setVisible(false);
+        ui_->CMB_NATIONALITY->setVisible(false);
     }
     if (!non_contract) {
-        ui_->LBL_NAZML->setVisible(false);
+        ui_->LBL_ML_NATIONALITY->setVisible(false);
         ui_->CHK_LK_DEF->setVisible(false);
         ui_->CHK_LK_NDEF->setVisible(false);
-        ui_->CMB_NAZIONALITA->setVisible(false);
+        ui_->CMB_NATIONALITY->setVisible(false);
         ui_->CHK_LK_DEF->setChecked(false);
     }
 }
 
 void PlayerSelectDialog::OnSwapModeToggled() {
-    ui_->CHK_SC->setText(ui_->CHK_SC->isChecked()
+    ui_->CHK_COMPLETE_SWAP->setText(ui_->CHK_COMPLETE_SWAP->isChecked()
                              ? QStringLiteral("complete substitution")
                              : QStringLiteral("incomplete substitution"));
 }
@@ -233,16 +233,16 @@ void PlayerSelectDialog::MakeLink(int player, unsigned char* out) const {
         out[1] = static_cast<unsigned char>(player - seen + 23);
     } else {
         // Whichever team the user picked in the nationality combo.
-        const int code = nationality_codes_[ui_->CMB_NAZIONALITA->currentIndex()];
+        const int code = nationality_codes_[ui_->CMB_NATIONALITY->currentIndex()];
         out[0] = static_cast<unsigned char>(code);
         out[1] = static_cast<unsigned char>(
-            ui_->LIST_GIOCATORI->currentRow() - we2002::START_LINK[code] + 23);
+            ui_->LIST_PLAYERS->currentRow() - we2002::START_LINK[code] + 23);
     }
 }
 
 void PlayerSelectDialog::OnAccept() {
-    const int team_row = ui_->LIST_SQUADRE->currentRow();
-    int chosen = ui_->LIST_GIOCATORI->currentRow();
+    const int team_row = ui_->LIST_TEAMS->currentRow();
+    int chosen = ui_->LIST_PLAYERS->currentRow();
     if (team_row < 0 || chosen < 0) {
         return;
     }
@@ -251,7 +251,7 @@ void PlayerSelectDialog::OnAccept() {
     }
 
     if (!link_mode_ || !ui_->CHK_ML->isChecked()) {
-        if (ui_->CHK_SC->isChecked()) {
+        if (ui_->CHK_COMPLETE_SWAP->isChecked()) {
             // "Complete substitution": the two players trade places, so the
             // squad the chosen player came from gets the one being replaced.
             we2002::Player spare;

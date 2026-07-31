@@ -52,7 +52,7 @@
     <set>Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QListWidget" name="LIST_SQUADRE">
+  <widget class="QListWidget" name="LIST_TEAMS">
    <property name="geometry">
     <rect>
      <x>25</x>
@@ -62,7 +62,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QListWidget" name="LIST_GIOCATORI">
+  <widget class="QListWidget" name="LIST_PLAYERS">
    <property name="geometry">
     <rect>
      <x>231</x>
@@ -72,7 +72,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QCheckBox" name="CHK_SC">
+  <widget class="QCheckBox" name="CHK_COMPLETE_SWAP">
    <property name="geometry">
     <rect>
      <x>28</x>
@@ -101,7 +101,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="LBL_NAZML">
+  <widget class="QLabel" name="LBL_ML_NATIONALITY">
    <property name="geometry">
     <rect>
      <x>151</x>
@@ -168,7 +168,7 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QComboBox" name="CMB_NAZIONALITA">
+  <widget class="QComboBox" name="CMB_NATIONALITY">
    <property name="geometry">
     <rect>
      <x>214</x>

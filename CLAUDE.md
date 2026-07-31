@@ -271,8 +271,13 @@ Um arquivo por área do diálogo, todos métodos do mesmo `MainWindow`:
 As 376 famílias indexadas do original (`OnCarat1..23`, `OnSost1..23`,
 `OnKillfocusNum1..23`, `OnKillfocusTatx2..11`, ...) viraram um método por
 família recebendo o índice, ligado num laço sobre arrays de ponteiro
-(`txt_player_[23]`, `cmb_role_[10]`, ...) resolvidos por `findChild<T*>()`.
+(`txt_player_[23]`, `cmb_role_[10]`, ...) resolvidos por nome de objeto.
 **Ao mexer num handler, lembre que ele atende os 22 irmãos.**
+
+A busca por nome passa por `Bind<T>()` ([src/app/Bind.hpp](src/app/Bind.hpp)),
+não por `findChild` cru: nome que não casa com o formulário aborta na hora com
+a mensagem certa, em vez de virar um ponteiro nulo que estoura três frames
+adiante. `ctest -R glossary` pega o mesmo erro estaticamente.
 
 Três diferenças de sinal entre Qt e MFC que valem saber antes de mexer:
 
@@ -297,7 +302,7 @@ compila, com erro que não menciona macro nenhuma.
 gerador e reexecute:
 
 ```sh
-python3 tools/extract_legacy_data.py   # 69 offsets + 15 tabelas
+python3 tools/extract_legacy_data.py   # 69 offsets + 16 tabelas
 python3 tools/port_database.py          # Load/Save/custo a partir do legacy
 python3 tools/rc2ui.py                  # os 6 .ui + controls.json, do ed.rc
 ```
@@ -340,10 +345,10 @@ fidelidade é o critério. DLU→px com as base units 6×13 do MS Sans Serif 8pt
 `ctest -R ui_forms` regenera em memória e compara com o commitado — editar um
 `.ui` à mão falha ali.
 
-`src/app/ui/controls.json` guarda o que o `.ui` não expressa: símbolo de
-recurso, keyword `.rc` de origem, estilo Win32 cru e geometria em DLU e px.
-`ES_NUMBER` e `ES_UPPERCASE` são validadores, não propriedades de widget — a
-Fase 5 lê o JSON, não o `.rc`.
+`src/app/ui/controls.json` guarda o que o `.ui` não expressa: o símbolo de
+recurso de origem (`id`), keyword `.rc`, estilo Win32 cru e geometria em DLU e
+px. `ES_NUMBER` e `ES_UPPERCASE` são validadores, não propriedades de widget —
+o app lê o JSON, não o `.rc`.
 
 Três coisas a saber antes de mexer:
 
@@ -351,10 +356,12 @@ Três coisas a saber antes de mexer:
   39 combos são desenhados com 12 DLU; a altura original fica no manifesto
   como `dropdown_dlu`. Levar o `.rc` ao pé da letra faz um combo de 104 px
   engolir o grupo atrás dele.
-- **Nomes de controle continuam sendo os símbolos do `.rc`** (`TXT_NSQUAD1`,
-  `CMD_CARAT1`). Vários são italianos, contrariando a regra da Fase 3.5 — é
-  deliberado: o `.ui` precisa ficar diffável contra `ed.rc`/`resource.h`
-  enquanto os handlers são portados. Renomear é Fase 5.
+- **Nomes de controle passam pelo glossário** (`UI_CONTROLS`) desde a Fase
+  5.5: `TXT_NSQUAD1` virou `TXT_TEAM_NAME1`, `CMD_CARAT1` virou `CMD_SKILLS1`.
+  O símbolo original de cada controle continua no `controls.json` como `id`,
+  então grepar contra `ed.rc`/`resource.h` ainda funciona. Só nomes italianos
+  foram trocados — `CMB_WRITE` num botão, `IDOK`, `IDC_BUTTON1`, `LAB_BAR_1..5`
+  e `CMD_TACT1..16` ficaram como o `.rc` escreveu.
 - **MS Sans Serif não está instalada**, então o Qt substitui e alguns rótulos
   apertados cortam ("Position" vira "Positior"). O `ed.exe` sob Wine corta os
   mesmos, pelo mesmo motivo.
@@ -373,24 +380,40 @@ mesmo com o `:99` em 960 — a captura do `ed.exe` não consegue isso. O
 
 ### Nomenclatura
 
-Desde a Fase 3.5 **não existe identificador em italiano fora de `legacy/`** —
-membros, offsets, tabelas, locais e comentários foram traduzidos.
+Desde as Fases 3.5 (core) e 5.5 (UI) **não existe identificador em italiano
+fora de `legacy/`** — membros, offsets, tabelas, locais, comentários e nomes de
+objeto dos widgets foram traduzidos.
 
-O mapa está em [tools/glossary.py](tools/glossary.py) e é a única fonte:
-`port_database.py` e `extract_legacy_data.py` o importam, e
-`tools/apply_glossary.py` aplica o mesmo mapa nos fontes escritos à mão.
-Para renomear qualquer coisa do core, mexa no glossário e rode:
+O mapa está em [tools/glossary.py](tools/glossary.py) e é a única fonte. São
+dois dicionários, deliberadamente separados:
+
+| | Conteúdo | Quem aplica |
+|---|---|---|
+| `IDENTIFIERS` | membros, locais, offsets, tabelas | `port_database.py`, `extract_legacy_data.py`, `apply_glossary.py` |
+| `UI_CONTROLS` | nomes de objeto dos widgets | `rc2ui.py` |
+
+`UI_CONTROLS` fica **fora** de `IDENTIFIERS` de propósito: `IDENTIFIERS` é
+varrido sobre o código *legado* pelos dois geradores, e nome de controle não
+tem o que fazer ali.
+
+Para renomear qualquer coisa, mexa no glossário e rode:
 
 ```sh
 python3 tools/apply_glossary.py          # fontes à mão
-python3 tools/apply_glossary.py --check  # acusa italiano sobrando
+python3 tools/apply_glossary.py --check  # acusa italiano sobrando (= ctest -R glossary)
 python3 tools/port_database.py           # Database.cpp
 python3 tools/extract_legacy_data.py     # Offsets.hpp, Tables.*
+python3 tools/rc2ui.py                   # os .ui e o controls.json
 ```
 
+`--check` cobre core, `src/app/` e os arquivos gerados em `src/app/ui/`. Nos
+`.ui` e no `controls.json` um nome velho significa que o `rc2ui.py` não foi
+reexecutado, e a mensagem diz isso.
+
 Rastreabilidade contra o legado: cada offset renomeado carrega o nome antigo
-num comentário (`// was OFS_NOMI_SQ1`), então grepar um nome nas duas árvores
-continua funcionando.
+num comentário (`// was OFS_NOMI_SQ1`), cada handler renomeado idem
+(`///< was caratteristiche()`), e cada controle guarda o símbolo do `.rc` no
+`controls.json`. Grepar um nome nas duas árvores continua funcionando.
 
 Duas correções de semântica saíram dessa fase:
 
@@ -454,19 +477,18 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 
 ## Estado do repositório
 
-Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura),
-4 (`.rc` → `.ui`) e 5 (handlers) concluídas. Ver
-[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
+Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura do
+core), 4 (`.rc` → `.ui`), 5 (handlers) e 5.5 (nomenclatura da UI) concluídas.
+Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase.
 
 O port está verificado contra o `ed.exe` nos dois níveis: o core headless
 (teste `golden`) e a janela Qt dirigida por `xdotool` (teste `golden_gui`). Nas
 imagens European Deluxe e japonesa, gravação limpa ou com edição pela tela, a
 saída é byte-idêntica à do original salvo a faixa de 16 bytes já descrita.
 
-A próxima fase é a **5.5** — traduzir para inglês o que sobrou de italiano na
-UI, incluindo os nomes de objeto dos `.ui`, que a Fase 4 manteve de propósito
-para ficarem diffáveis contra o `ed.rc`. Não foi autorizada. Por isso o
-`src/app/` ainda não está na lista do `tools/apply_glossary.py`.
+A próxima fase é a **6** — `QFileDialog`/`QMessageBox` já estão feitos desde a
+Fase 5, então o que resta ali é empacotamento (AppImage ou Flatpak). Não foi
+autorizada.
 
 Quatro divergências deliberadas do original entraram na Fase 5 (preço do
 jogador importado, o swap fora do array no ordenar-banco, gravar as URLs de

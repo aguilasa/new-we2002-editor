@@ -35,7 +35,7 @@ void MainWindow::PitchPosition(float x, float y, int* out_x, int* out_y) const {
     // Map disc coordinates onto the pitch group box, then centre the button on
     // the result. TCORRX/TCORRY were the original's fudge for the group box's
     // border; keeping them keeps the markers where ed.exe puts them.
-    const QRect pitch = ui_->CAMPO_->geometry();
+    const QRect pitch = ui_->PITCH->geometry();
     const float step_x =
         static_cast<float>(pitch.width()) / (PITCH_X_MAX - PITCH_X_MIN);
     const float step_y =

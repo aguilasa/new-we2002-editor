@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert the six dialogs of legacy/mfc/ed.rc into Qt .ui files (phase 4).
 
-393 controls placed by hand at absolute coordinates. Retyping them is out of
+434 controls placed by hand at absolute coordinates. Retyping them is out of
 the question, and so is redesigning the layout: the point of this phase is a
 transcription faithful enough that the Qt window can be put next to a
 screenshot of ed.exe under Wine and compared.
@@ -19,6 +19,11 @@ The manifest exists because Win32 styles carry information Qt has no property
 for -- ES_NUMBER and ES_UPPERCASE are validators, not widget flags. Phase 5
 reads it rather than going back to the .rc.
 
+Widget names went through glossary.UI_CONTROLS in phase 5.5. Phase 4 had kept
+ed.rc's Italian symbols so the forms stayed diffable against ed.rc while the
+handlers were ported; that job is done. Every manifest entry still carries the
+original symbol as `id`, so grepping a name across both trees still works.
+
     python3 tools/rc2ui.py
     python3 tools/rc2ui.py --check    # regenerate into memory and diff
 """
@@ -31,6 +36,9 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.sax.saxutils import escape
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import glossary  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 RC = ROOT / "legacy" / "mfc" / "ed.rc"
@@ -68,10 +76,9 @@ def dlu_y(v: int) -> int:
 COMBO_HEIGHT_DLU = 12
 
 
-# The .rc identifies dialogs by resource symbol. The generated C++ class takes
-# an English name; the *controls* keep their resource symbols, because the .ui
-# has to stay diffable against ed.rc and resource.h while the 376 handlers are
-# ported in phase 5.
+# The .rc identifies dialogs by resource symbol; the generated C++ class takes
+# an English name. Controls are renamed too since phase 5.5 -- see
+# glossary.UI_CONTROLS.
 DIALOG_CLASS = {
     "IDD_ED_DIALOG": "MainDialog",
     "DLG_SELECT_GIOC": "PlayerSelectDialog",
@@ -395,9 +402,9 @@ def build_ui(dialog: dict) -> tuple[str, list[dict]]:
             anonymous += 1
             obj = f"static_{anonymous}"
         else:
-            obj = c.ident
+            obj = glossary.UI_CONTROLS.get(c.ident, c.ident)
             if obj in used:
-                raise SystemExit(f"{name}: id repetido: {obj}")
+                raise SystemExit(f"{name}: id repetido: {obj} ({c.ident})")
             used.add(obj)
 
         xml += widget_xml(c, obj, "  ")
@@ -442,8 +449,10 @@ def generate() -> dict[str, str]:
         except ET.ParseError as exc:
             raise SystemExit(f"{cls}.ui: XML invalido: {exc}") from exc
         files[f"{cls}.ui"] = ui
-        manifest[d["name"]] = {
-            "class": cls,
+        # Keyed by the Qt class, not by the .rc symbol: three of the six
+        # symbols are Italian, and the manifest is read by the app.
+        manifest[cls] = {
+            "id": d["name"],
             "caption": d["caption"],
             "dlu": [d["width"], d["height"]],
             "px": [dlu_x(d["width"]), dlu_y(d["height"])],

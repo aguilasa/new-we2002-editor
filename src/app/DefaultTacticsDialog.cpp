@@ -11,6 +11,7 @@
 
 #include <cstring>
 
+#include "Bind.hpp"
 #include "MainWindow.hpp"  // the pitch constants, shared with the main dialog
 #include "we2002/Tables.hpp"
 #include "ui_DefaultTacticsDialog.h"
@@ -21,10 +22,11 @@ namespace {
 ///
 /// The record is a straight memory image of the original's `tattica` class as
 /// 32-bit MSVC laid it out -- four bytes of vtable pointer (the class has a
-/// virtual destructor), then nome[7], ruoli[11], x[10], y[10], then two bytes
-/// of tail padding. The vptr is a process address: it meant nothing in the
-/// file then and means nothing now, so it is written as zero and skipped on
-/// read. Everything a reader cares about lands at the byte it always did.
+/// virtual destructor), then the name (7 bytes), the eleven roles, the ten x
+/// and the ten y, then two bytes of tail padding. The vptr is a process
+/// address: it meant nothing in the file then and means nothing now, so it is
+/// written as zero and skipped on read. Everything a reader cares about lands
+/// at the byte it always did.
 constexpr char MAGIC[8] = {'f', '.', 'm', '.', 't', 'a', 't', 't'};
 constexpr int RECORD_BYTES = 44;
 constexpr int FILE_BYTES = static_cast<int>(sizeof(MAGIC)) + RECORD_BYTES;
@@ -38,15 +40,14 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
     ui_->setupUi(this);
     setFixedSize(size());
 
+    // These were TCMB_TAT/TTXT_TATX/TTXT_TATY/TCMD_VT in ed.rc; the T kept
+    // them out of the main dialog's way in one flat resource namespace, which
+    // stopped mattering once each form became its own class.
     for (int i = 0; i < 10; ++i) {
-        cmb_role_[i] =
-            findChild<QComboBox*>(QString::asprintf("TCMB_TAT%d", i + 2));
-        txt_slot_x_[i] =
-            findChild<QLineEdit*>(QString::asprintf("TTXT_TATX%d", i + 2));
-        txt_slot_y_[i] =
-            findChild<QLineEdit*>(QString::asprintf("TTXT_TATY%d", i + 2));
-        cmd_slot_[i] =
-            findChild<QPushButton*>(QString::asprintf("TCMD_VT%d", i + 1));
+        cmb_role_[i] = Bind<QComboBox>(this, "CMB_SLOT_ROLE%d", i + 2);
+        txt_slot_x_[i] = Bind<QLineEdit>(this, "TXT_SLOT_X%d", i + 2);
+        txt_slot_y_[i] = Bind<QLineEdit>(this, "TXT_SLOT_Y%d", i + 2);
+        cmd_slot_[i] = Bind<QPushButton>(this, "CMD_SLOT%d", i + 1);
 
         for (int r = 1; r < we2002::N_ROLES; ++r) {
             cmb_role_[i]->addItem(QLatin1String(we2002::ROLE_NAMES[r]));
@@ -80,14 +81,14 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
         });
     }
 
-    ui_->TTXT_NOMETATTICA->setMaxLength(6);
+    ui_->TXT_FORMATION_NAME->setMaxLength(6);
     for (int i = 0; i < 16; ++i) {
-        ui_->TCMB_NSQUADRE->addItem(QLatin1String(formations_[i].name));
+        ui_->CMB_FORMATION->addItem(QLatin1String(formations_[i].name));
     }
 
-    connect(ui_->TCMB_NSQUADRE, &QComboBox::currentIndexChanged, this,
+    connect(ui_->CMB_FORMATION, &QComboBox::currentIndexChanged, this,
             &DefaultTacticsDialog::OnFormationSelected);
-    connect(ui_->TTXT_NOMETATTICA, &QLineEdit::editingFinished, this,
+    connect(ui_->TXT_FORMATION_NAME, &QLineEdit::editingFinished, this,
             &DefaultTacticsDialog::OnNameEdited);
     connect(ui_->CMD_IMP, &QPushButton::clicked, this,
             &DefaultTacticsDialog::OnImport);
@@ -95,7 +96,7 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
             &DefaultTacticsDialog::OnExport);
     connect(ui_->IDOK, &QPushButton::clicked, this, &QDialog::accept);
 
-    ui_->TCMB_NSQUADRE->setCurrentIndex(0);
+    ui_->CMB_FORMATION->setCurrentIndex(0);
     Load();
 }
 
@@ -104,7 +105,7 @@ DefaultTacticsDialog::~DefaultTacticsDialog() {
 }
 
 int DefaultTacticsDialog::Current() const {
-    return qMax(0, ui_->TCMB_NSQUADRE->currentIndex());
+    return qMax(0, ui_->CMB_FORMATION->currentIndex());
 }
 
 void DefaultTacticsDialog::OnFormationSelected() {
@@ -113,7 +114,7 @@ void DefaultTacticsDialog::OnFormationSelected() {
 
 void DefaultTacticsDialog::Load() {
     const we2002::Formation& f = formations_[Current()];
-    ui_->TTXT_NOMETATTICA->setText(QLatin1String(f.name));
+    ui_->TXT_FORMATION_NAME->setText(QLatin1String(f.name));
     for (int i = 0; i < 10; ++i) {
         const QSignalBlocker block(cmb_role_[i]);
         cmb_role_[i]->setCurrentIndex(f.roles[i + 1] - 2);
@@ -125,15 +126,15 @@ void DefaultTacticsDialog::Load() {
 
 void DefaultTacticsDialog::OnNameEdited() {
     we2002::Formation& f = formations_[Current()];
-    const QByteArray text = ui_->TTXT_NOMETATTICA->text().toLatin1();
+    const QByteArray text = ui_->TXT_FORMATION_NAME->text().toLatin1();
     std::snprintf(f.name, sizeof(f.name), "%s", text.constData());
     // The combo names the formations, so it has to follow the rename.
-    const QSignalBlocker block(ui_->TCMB_NSQUADRE);
-    ui_->TCMB_NSQUADRE->setItemText(Current(), QLatin1String(f.name));
+    const QSignalBlocker block(ui_->CMB_FORMATION);
+    ui_->CMB_FORMATION->setItemText(Current(), QLatin1String(f.name));
 }
 
 void DefaultTacticsDialog::MoveMarker(int slot) {
-    const QRect pitch = ui_->TCAMPO_->geometry();
+    const QRect pitch = ui_->PITCH->geometry();
     const float x =
         static_cast<float>(txt_slot_x_[slot]->text().toInt() - PITCH_X_MIN);
     const float y =

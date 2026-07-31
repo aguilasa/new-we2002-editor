@@ -84,7 +84,7 @@
     <set>Qt::AlignHCenter|Qt::AlignTop</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL1">
+  <widget class="QLineEdit" name="TXT_FLAG_COL1">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -97,7 +97,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL2">
+  <widget class="QLineEdit" name="TXT_FLAG_COL2">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -110,7 +110,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL3">
+  <widget class="QLineEdit" name="TXT_FLAG_COL3">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -123,7 +123,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL4">
+  <widget class="QLineEdit" name="TXT_FLAG_COL4">
    <property name="geometry">
     <rect>
      <x>139</x>
@@ -136,7 +136,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL5">
+  <widget class="QLineEdit" name="TXT_FLAG_COL5">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -149,7 +149,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL6">
+  <widget class="QLineEdit" name="TXT_FLAG_COL6">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -162,7 +162,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL7">
+  <widget class="QLineEdit" name="TXT_FLAG_COL7">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -175,7 +175,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL8">
+  <widget class="QLineEdit" name="TXT_FLAG_COL8">
    <property name="geometry">
     <rect>
      <x>139</x>
@@ -188,7 +188,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL9">
+  <widget class="QLineEdit" name="TXT_FLAG_COL9">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -201,7 +201,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL10">
+  <widget class="QLineEdit" name="TXT_FLAG_COL10">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -214,7 +214,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL11">
+  <widget class="QLineEdit" name="TXT_FLAG_COL11">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -227,7 +227,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL12">
+  <widget class="QLineEdit" name="TXT_FLAG_COL12">
    <property name="geometry">
     <rect>
      <x>139</x>
@@ -240,7 +240,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL13">
+  <widget class="QLineEdit" name="TXT_FLAG_COL13">
    <property name="geometry">
     <rect>
      <x>15</x>
@@ -253,7 +253,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL14">
+  <widget class="QLineEdit" name="TXT_FLAG_COL14">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -266,7 +266,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_COL15">
+  <widget class="QLineEdit" name="TXT_FLAG_COL15">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -279,7 +279,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_BAND_STILE">
+  <widget class="QLineEdit" name="TXT_FLAG_STYLE">
    <property name="geometry">
     <rect>
      <x>199</x>
@@ -292,7 +292,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTONINB">
+  <widget class="QPushButton" name="CMD_IMPORT_FLAG">
    <property name="geometry">
     <rect>
      <x>186</x>
@@ -305,7 +305,7 @@
     <string>Import</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTONESB">
+  <widget class="QPushButton" name="CMD_EXPORT_FLAG">
    <property name="geometry">
     <rect>
      <x>186</x>
@@ -334,7 +334,7 @@
     <set>Qt::AlignHCenter|Qt::AlignTop</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL1">
+  <widget class="QLineEdit" name="TXT_KIT1_COL1">
    <property name="geometry">
     <rect>
      <x>16</x>
@@ -347,7 +347,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL2">
+  <widget class="QLineEdit" name="TXT_KIT1_COL2">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -360,7 +360,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL3">
+  <widget class="QLineEdit" name="TXT_KIT1_COL3">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -373,7 +373,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL4">
+  <widget class="QLineEdit" name="TXT_KIT1_COL4">
    <property name="geometry">
     <rect>
      <x>16</x>
@@ -386,7 +386,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL5">
+  <widget class="QLineEdit" name="TXT_KIT1_COL5">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -399,7 +399,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL6">
+  <widget class="QLineEdit" name="TXT_KIT1_COL6">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -412,7 +412,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL7">
+  <widget class="QLineEdit" name="TXT_KIT1_COL7">
    <property name="geometry">
     <rect>
      <x>16</x>
@@ -425,7 +425,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL8">
+  <widget class="QLineEdit" name="TXT_KIT1_COL8">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -438,7 +438,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL9">
+  <widget class="QLineEdit" name="TXT_KIT1_COL9">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -451,7 +451,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL10">
+  <widget class="QLineEdit" name="TXT_KIT1_COL10">
    <property name="geometry">
     <rect>
      <x>16</x>
@@ -464,7 +464,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL11">
+  <widget class="QLineEdit" name="TXT_KIT1_COL11">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -477,7 +477,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL12">
+  <widget class="QLineEdit" name="TXT_KIT1_COL12">
    <property name="geometry">
     <rect>
      <x>97</x>
@@ -490,7 +490,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL13">
+  <widget class="QLineEdit" name="TXT_KIT1_COL13">
    <property name="geometry">
     <rect>
      <x>16</x>
@@ -503,7 +503,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_1MAG_COL14">
+  <widget class="QLineEdit" name="TXT_KIT1_COL14">
    <property name="geometry">
     <rect>
      <x>57</x>
@@ -532,7 +532,7 @@
     <set>Qt::AlignHCenter|Qt::AlignTop</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL1">
+  <widget class="QLineEdit" name="TXT_KIT2_COL1">
    <property name="geometry">
     <rect>
      <x>172</x>
@@ -545,7 +545,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL2">
+  <widget class="QLineEdit" name="TXT_KIT2_COL2">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -558,7 +558,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL3">
+  <widget class="QLineEdit" name="TXT_KIT2_COL3">
    <property name="geometry">
     <rect>
      <x>253</x>
@@ -571,7 +571,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL4">
+  <widget class="QLineEdit" name="TXT_KIT2_COL4">
    <property name="geometry">
     <rect>
      <x>172</x>
@@ -584,7 +584,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL5">
+  <widget class="QLineEdit" name="TXT_KIT2_COL5">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -597,7 +597,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL6">
+  <widget class="QLineEdit" name="TXT_KIT2_COL6">
    <property name="geometry">
     <rect>
      <x>253</x>
@@ -610,7 +610,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL7">
+  <widget class="QLineEdit" name="TXT_KIT2_COL7">
    <property name="geometry">
     <rect>
      <x>172</x>
@@ -623,7 +623,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL8">
+  <widget class="QLineEdit" name="TXT_KIT2_COL8">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -636,7 +636,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL9">
+  <widget class="QLineEdit" name="TXT_KIT2_COL9">
    <property name="geometry">
     <rect>
      <x>253</x>
@@ -649,7 +649,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL10">
+  <widget class="QLineEdit" name="TXT_KIT2_COL10">
    <property name="geometry">
     <rect>
      <x>172</x>
@@ -662,7 +662,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL11">
+  <widget class="QLineEdit" name="TXT_KIT2_COL11">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -675,7 +675,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL12">
+  <widget class="QLineEdit" name="TXT_KIT2_COL12">
    <property name="geometry">
     <rect>
      <x>253</x>
@@ -688,7 +688,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL13">
+  <widget class="QLineEdit" name="TXT_KIT2_COL13">
    <property name="geometry">
     <rect>
      <x>172</x>
@@ -701,7 +701,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="TXT_2MAG_COL14">
+  <widget class="QLineEdit" name="TXT_KIT2_COL14">
    <property name="geometry">
     <rect>
      <x>213</x>
@@ -714,7 +714,7 @@
     <set>Qt::AlignRight|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTON1IM">
+  <widget class="QPushButton" name="CMD_IMPORT_KIT1">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -727,7 +727,7 @@
     <string>Import</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTON1EM">
+  <widget class="QPushButton" name="CMD_EXPORT_KIT1">
    <property name="geometry">
     <rect>
      <x>82</x>
@@ -740,7 +740,7 @@
     <string>Export</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTON2IM">
+  <widget class="QPushButton" name="CMD_IMPORT_KIT2">
    <property name="geometry">
     <rect>
      <x>168</x>
@@ -753,7 +753,7 @@
     <string>Import</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="IDC_BUTTON2EM">
+  <widget class="QPushButton" name="CMD_EXPORT_KIT2">
    <property name="geometry">
     <rect>
      <x>240</x>

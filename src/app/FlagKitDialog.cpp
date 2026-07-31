@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+#include "Bind.hpp"
 #include "ui_FlagKitPreviewDialog.h"
 
 namespace {
@@ -48,9 +49,10 @@ FlagKitDialog::FlagKitDialog(int team_id, char& flag_shape,
     kit_[0] = home_kit;
     kit_[1] = away_kit;
 
+    // TXT_BAND_COL and TXT_1MAG_COL / TXT_2MAG_COL in ed.rc -- bandiera and
+    // maglia.
     for (int i = 0; i < 15; ++i) {
-        txt_flag_[i] =
-            findChild<QLineEdit*>(QString::asprintf("TXT_BAND_COL%d", i + 1));
+        txt_flag_[i] = Bind<QLineEdit>(this, "TXT_FLAG_COL%d", i + 1);
         txt_flag_[i]->setMaxLength(5);  // 65535
         connect(txt_flag_[i], &QLineEdit::editingFinished, this, [this, i] {
             const int v = qMin(txt_flag_[i]->text().toInt(), 65535);
@@ -62,8 +64,8 @@ FlagKitDialog::FlagKitDialog(int team_id, char& flag_shape,
     }
     for (int k = 0; k < 2; ++k) {
         for (int i = 0; i < 14; ++i) {
-            txt_kit_[k][i] = findChild<QLineEdit*>(
-                QString::asprintf("TXT_%dMAG_COL%d", k + 1, i + 1));
+            txt_kit_[k][i] = Bind<QLineEdit>(
+                this, QString::asprintf("TXT_KIT%d_COL%d", k + 1, i + 1));
             txt_kit_[k][i]->setMaxLength(5);
             connect(txt_kit_[k][i], &QLineEdit::editingFinished, this, [this, k, i] {
                 const int v = qMin(txt_kit_[k][i]->text().toInt(), 65535);
@@ -76,22 +78,22 @@ FlagKitDialog::FlagKitDialog(int team_id, char& flag_shape,
         }
     }
 
-    ui_->TXT_BAND_STILE->setMaxLength(2);
-    connect(ui_->TXT_BAND_STILE, &QLineEdit::editingFinished, this, [this] {
-        flag_shape_ = static_cast<char>(ui_->TXT_BAND_STILE->text().toInt());
+    ui_->TXT_FLAG_STYLE->setMaxLength(2);
+    connect(ui_->TXT_FLAG_STYLE, &QLineEdit::editingFinished, this, [this] {
+        flag_shape_ = static_cast<char>(ui_->TXT_FLAG_STYLE->text().toInt());
     });
 
-    connect(ui_->IDC_BUTTONINB, &QPushButton::clicked, this,
+    connect(ui_->CMD_IMPORT_FLAG, &QPushButton::clicked, this,
             &FlagKitDialog::OnImportFlag);
-    connect(ui_->IDC_BUTTONESB, &QPushButton::clicked, this,
+    connect(ui_->CMD_EXPORT_FLAG, &QPushButton::clicked, this,
             &FlagKitDialog::OnExportFlag);
-    connect(ui_->IDC_BUTTON1IM, &QPushButton::clicked, this,
+    connect(ui_->CMD_IMPORT_KIT1, &QPushButton::clicked, this,
             [this] { ImportKit(0); });
-    connect(ui_->IDC_BUTTON1EM, &QPushButton::clicked, this,
+    connect(ui_->CMD_EXPORT_KIT1, &QPushButton::clicked, this,
             [this] { ExportKit(0); });
-    connect(ui_->IDC_BUTTON2IM, &QPushButton::clicked, this,
+    connect(ui_->CMD_IMPORT_KIT2, &QPushButton::clicked, this,
             [this] { ImportKit(1); });
-    connect(ui_->IDC_BUTTON2EM, &QPushButton::clicked, this,
+    connect(ui_->CMD_EXPORT_KIT2, &QPushButton::clicked, this,
             [this] { ExportKit(1); });
     connect(ui_->IDOK, &QPushButton::clicked, this, &QDialog::accept);
 
@@ -118,7 +120,7 @@ bool FlagKitDialog::HasOwnFlag() const {
 }
 
 void FlagKitDialog::Load() {
-    ui_->TXT_BAND_STILE->setText(QString::number(static_cast<int>(flag_shape_)));
+    ui_->TXT_FLAG_STYLE->setText(QString::number(static_cast<int>(flag_shape_)));
     for (int i = 0; i < 15; ++i) {
         txt_flag_[i]->setText(QString::number(flag_colours_[i]));
     }

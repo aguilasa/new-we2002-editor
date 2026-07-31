@@ -20,8 +20,8 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fases 0, 1, 2, 3, 3.5, 4 e **5 concluídas**. Fase 5.5 em diante
-> ainda **não autorizada** — não iniciar sem pedido explícito.
+> Progresso: Fases 0, 1, 2, 3, 3.5, 4, 5 e **5.5 concluídas**. Fase 6 em
+> diante ainda **não autorizada** — não iniciar sem pedido explícito.
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
@@ -824,21 +824,22 @@ pelo conversor é (314, 521), e o `tools/golden_run.sh` da Fase 3 clica em
   contraria o critério da Fase 3.5 — mas ali a renomeação era gratuita porque
   o golden test provava que nada mudava, e aqui não há prova equivalente. O
   `.ui` precisa ficar diffável contra `ed.rc` e `resource.h` enquanto os 376
-  handlers são portados. **Renomear controles é trabalho da Fase 5**, e o
-  `controls.json` já é o ponto de mapeamento.
+  handlers são portados. Renomear controles ficou para depois, com o
+  `controls.json` como ponto de mapeamento — foi o que a Fase 5.5 fez, já com
+  o `golden_gui` para provar que nada mudou.
 - **Sem layouts Qt.** Geometria absoluta, como no original.
 - **A fonte não é a original.** Os `.ui` declaram `MS Sans Serif` 8pt
   fielmente, mas ela não está instalada e o Qt substitui, o que corta o texto
   de alguns rótulos apertados — `Position` vira `Positior`. O `ed.exe` sob
-  Wine corta exatamente os mesmos, pelo mesmo motivo. Decidir a política de
-  fonte é da Fase 5.
+  Wine corta exatamente os mesmos, pelo mesmo motivo. A política de fonte
+  continua sem decidir; nem a Fase 5 nem a 5.5 mexeram nisso.
 
 #### Guarda
 
 `ctest -R ui_forms` roda `rc2ui.py --check`: regenera em memória e compara com
 o que está commitado. Editar um `.ui` à mão, ou mexer no `ed.rc` sem
-regenerar, falha aqui em vez de silenciosamente lá na Fase 5. O `--check`
-também revalida o XML, sem precisar de Qt.
+regenerar, falha aqui em vez de silenciosamente na hora de compilar o app. O
+`--check` também revalida o XML, sem precisar de Qt.
 
 O `tools/uipreview` desta fase compila com Qt5 ou Qt6. Foi escrito quando só
 havia Qt5 na máquina; o Qt6 chegou na Fase 5 e o `find_package` prefere ele.
@@ -982,43 +983,115 @@ Ainda não portado, e conhecido: o `ed.exe` mostra o ícone quando minimizado
 (`OnPaint`) e tem um item "About" no menu de sistema. Nenhum dos dois existe em
 Qt sem trabalho específico e nenhum edita a imagem.
 
-### Fase 5.5 — Nomenclatura da UI em inglês (bloqueia a Fase 6)
+### Fase 5.5 — Nomenclatura da UI em inglês ✅ concluída
 
-**Antes de começar a Fase 6, revisar todo o código da parte de UI e traduzir
-para inglês qualquer identificador que tenha sobrado em italiano** — nomes de
-classes, métodos, slots, variáveis, membros, campos, parâmetros, constantes,
-nomes de objeto dos widgets nos `.ui` e comentários.
+Continuação da Fase 3.5, que já tinha limpado o `src/core/`. A Fase 4 manteve
+de propósito os símbolos italianos do `.rc` nos `.ui`, para os formulários
+ficarem diffáveis contra `ed.rc`/`resource.h` enquanto os handlers eram
+portados; a Fase 5 fechou isso, e a justificativa acabou junto.
 
-Alcance: tudo em `src/app/` — o código escrito na Fase 5 e os `.ui` gerados na
-Fase 4. O `legacy/mfc/` fica como está: é referência histórica e continua em
-italiano de propósito.
+#### O mapa
 
-Isso é a continuação da Fase 3.5, que já limpou o `src/core/`. A Fase 4
-deliberadamente manteve os símbolos italianos do `.rc` (`TXT_NSQUAD1`,
-`CMD_CARAT1`) para os `.ui` ficarem diffáveis contra `ed.rc`/`resource.h`
-enquanto os handlers eram portados, e a Fase 5 herda esses nomes ao escrever os
-handlers. Terminada a Fase 5, essa justificativa acaba: o `.rc` já não é
-consultado, e deixar o italiano entrar no código definitivo repete o problema
-que a 3.5 resolveu.
+`tools/glossary.py` ganhou `UI_CONTROLS`, 285 entradas. Fica **fora** de
+`IDENTIFIERS` de propósito: `IDENTIFIERS` é varrido sobre o código *legado*
+pelo `port_database.py` e pelo `extract_legacy_data.py`, e nome de controle não
+tem o que fazer ali.
 
-Regras:
+Quem aplica é o `tools/rc2ui.py`, na hora de nomear o widget — os `.ui` e o
+`controls.json` são **regerados**, não editados. O `ctest -R ui_forms` continua
+falhando se alguém editar um `.ui` à mão.
 
-- O mapa é [tools/glossary.py](../tools/glossary.py) — mesma fonte única da
-  Fase 3.5. Termo novo que aparecer na UI entra lá, não numa renomeação
-  avulsa.
-- `python3 tools/apply_glossary.py --check` tem de passar limpo em `src/app/`
-  também, não só no core.
-- Renomear objeto de `.ui` exige mexer no `tools/rc2ui.py` e regenerar — o
-  `ctest -R ui_forms` falha se editarem o `.ui` à mão.
-- Rastreabilidade: manter o símbolo original em comentário (`// was
-  CMD_CARAT1`), como os offsets fazem.
-- Golden tests verdes antes e depois. Renomeação não pode mudar byte de saída.
+Exemplos do que mudou:
+
+| ed.rc | agora | por quê |
+|---|---|---|
+| `TXT_GIOC1..23` | `TXT_PLAYER1..23` | giocatore |
+| `CMD_CARAT1..23` | `CMD_SKILLS1..23` | caratteristiche |
+| `CMD_SOST1..23` | `CMD_SWAP1..23` | sostituzione |
+| `TXT_TATX2..11` / `TXT_TATY2..11` | `TXT_SLOT_X2..11` / `TXT_SLOT_Y2..11` | tattica |
+| `CMD_VT1..10` | `CMD_SLOT1..10` | visual tattica |
+| `CAMPO_` / `TCAMPO_` | `PITCH` | campo |
+| `TXT_NSQUAD1..6` | `TXT_TEAM_NAME1..6` | nome squadra |
+| `CMB_KIK_PUNL` / `_PUNC` | `CMB_KICK_LONG_FK` / `_SHORT_FK` | punizione lunga/corta |
+| `CMB_KIK_ANGSX` / `_ANGDX` | `CMB_KICK_LEFT_CORNER` / `_RIGHT_CORNER` | angolo sinistro/destro |
+| `CMB_KIK_RIG` | `CMB_KICK_PENALTY` | rigori |
+| `TXT_BAND_COL1..15` | `TXT_FLAG_COL1..15` | bandiera |
+| `TXT_1MAG_COL1..14` | `TXT_KIT1_COL1..14` | maglia |
+| `CMB_GCORPO` | `CMB_BUILD` | corporatura |
+| `CMB_GFRUOLO` | `CMB_OUT_OF_POSITION` | fuori ruolo |
+| `TXT_GPZT` / `TXT_GPRET` | `TXT_SHOT_POWER` / `TXT_SHOT_ACCURACY` | potenza/precisione tiro |
+
+O `T` de `TCMB_TAT` e `TCMD_VT` existia só para não colidir com o diálogo
+principal num namespace de recursos único. Cada formulário é uma classe agora,
+então caiu.
+
+Uma correção de nome saiu daqui: `LAB_KIK_CAP2` não é um segundo rótulo de
+capitão — é a legenda **PENALTY**. Virou `LAB_KICK_PENALTY`.
+
+#### O que ficou como estava
+
+Só nomes italianos entraram no mapa. Ficaram intactos:
+
+- `CMB_WRITE`, `CMB_RELOAD`, `CMB_IMPFIFAWEB`, `CMB_EDITALL*`,
+  `CMB_SHOWEDITOPT` — prefixo `CMB_` em `PUSHBUTTON` é esquisitice do `.rc`,
+  mas é inglês.
+- `IDOK`, `IDC_BUTTON1`, `LAB_BAR_1..5`, `CMD_TACT1..16`, `TXT_URL#`,
+  `TXT_NUM#`, `TXT_BAR_*`, `CHK_ML`, `CHK_LK_DEF`, `LBL_LK`, `CMD_IMP`,
+  `CMD_EXP`, `CMD_READ_URL`, `CHK_EDIT*`.
+
+Renomear esses seria barulho sem leitor para ajudar, e afastaria os `.ui` do
+`ed.rc` sem ganho.
+
+O `legacy/mfc/` continua em italiano, como sempre esteve — é referência
+histórica.
+
+#### Rastreabilidade
+
+Cada entrada do `controls.json` guarda o símbolo original em `id`. O manifesto
+passou a ser chaveado pela classe Qt (`MainDialog`, `PlayerSkillsDialog`, ...)
+em vez do símbolo do `.rc` — três dos seis eram italianos — e o símbolo do
+diálogo virou o campo `id` do mesmo jeito.
+
+No C++, cada handler renomeado aponta para o nome legado
+(`///< was caratteristiche()`), e o `BindWidgets()` lista as famílias que
+mudaram.
+
+#### Guardas
+
+Duas novas, ambas no `ctest`:
+
+- **`glossary`** roda `tools/apply_glossary.py --check`, que agora varre
+  `src/core/`, `src/app/` **e** os arquivos gerados em `src/app/ui/`. No código
+  da aplicação ele checa contra `IDENTIFIERS` e `UI_CONTROLS`; no core, só
+  contra `IDENTIFIERS`. Nos `.ui` e no `controls.json` um nome velho significa
+  que o `rc2ui.py` não foi reexecutado, e a mensagem diz isso. A linha do
+  campo `id` é pulada — é ali que o símbolo original mora de propósito.
+- **`Bind<T>()`** (`src/app/Bind.hpp`) substituiu o `findChild` cru. Nome que
+  não casa com o formulário aborta na hora dizendo qual, em vez de virar um
+  ponteiro nulo que estoura três frames adiante. É a rede para o caso do `.ui`
+  na árvore de build estar velho, que o teste estático não cobre.
+
+#### Verificação
+
+Renomeação não pode mudar byte de saída, e não mudou:
+
+- O diff dos `.ui` toca **só** linhas `<widget class=... name=...>`; o do
+  `controls.json`, só `object`/`id` e as chaves de diálogo. Geometria, estilo e
+  ordem intactos.
+- Os cinco testes verdes, incluindo `golden` e `golden_gui` na European Deluxe.
+- Os cinco sub-diálogos abertos e exercitados no `:99` — a busca por nome é em
+  runtime, então compilar não prova nada aqui.
 
 ### Fase 6 — Acabamento e empacotamento Linux (~1 dia)
 
-`CFileDialog` → `QFileDialog`; `AfxMessageBox` → `QMessageBox`;
-`GetModuleFileName` → `QCoreApplication::applicationDirPath()`.
-Empacotar AppImage ou Flatpak.
+As três trocas que esta fase previa — `CFileDialog` → `QFileDialog`,
+`AfxMessageBox` → `QMessageBox`, `GetModuleFileName` →
+`QCoreApplication::applicationDirPath()` — saíram na Fase 5: sem elas não havia
+como abrir uma imagem nem avisar de nada, então não dava para adiar.
+
+O que resta aqui é empacotar: AppImage ou Flatpak. Mais o que a Fase 4 deixou
+em aberto e ninguém decidiu ainda — a política de fonte, já que MS Sans Serif
+não está instalada e o Qt substitui.
 
 **Fim do escopo Linux. Total Fases 1–6 (incluindo a 5.5): ~1,5 a 2 semanas.**
 

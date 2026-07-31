@@ -6,8 +6,8 @@
     "y": 13
   },
   "dialogs": {
-    "IDD_ED_DIALOG": {
-      "class": "MainDialog",
+    "MainDialog": {
+      "id": "IDD_ED_DIALOG",
       "caption": "",
       "dlu": [
         718,
@@ -19,7 +19,7 @@
       ],
       "controls": [
         {
-          "object": "LAB_NSQUAD1",
+          "object": "LAB_TEAM_NAME1",
           "id": "LAB_NSQUAD1",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -39,7 +39,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD2",
+          "object": "LAB_TEAM_NAME2",
           "id": "LAB_NSQUAD2",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -59,7 +59,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD3",
+          "object": "LAB_TEAM_NAME3",
           "id": "LAB_NSQUAD3",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -79,7 +79,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD4",
+          "object": "LAB_TEAM_NAME4",
           "id": "LAB_NSQUAD4",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -99,7 +99,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD5",
+          "object": "LAB_TEAM_NAME5",
           "id": "LAB_NSQUAD5",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -119,7 +119,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD6",
+          "object": "LAB_TEAM_NAME6",
           "id": "LAB_NSQUAD6",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -139,7 +139,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD_M",
+          "object": "LAB_TEAM_NAME_MIXED",
           "id": "LAB_NSQUAD_M",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -159,7 +159,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD_A1",
+          "object": "LAB_TEAM_ABBREV1",
           "id": "LAB_NSQUAD_A1",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -179,7 +179,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD_A2",
+          "object": "LAB_TEAM_ABBREV2",
           "id": "LAB_NSQUAD_A2",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -299,7 +299,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_PUNC",
+          "object": "LAB_KICK_SHORT_FK",
           "id": "LAB_KIK_PUNC",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -319,7 +319,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_PUNL",
+          "object": "LAB_KICK_LONG_FK",
           "id": "LAB_KIK_PUNL",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -339,7 +339,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_ANGSX",
+          "object": "LAB_KICK_LEFT_CORNER",
           "id": "LAB_KIK_ANGSX",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -359,7 +359,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_ANGDX",
+          "object": "LAB_KICK_RIGHT_CORNER",
           "id": "LAB_KIK_ANGDX",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -379,7 +379,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_CAP",
+          "object": "LAB_CAPTAIN",
           "id": "LAB_KIK_CAP",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -479,7 +479,7 @@
           ]
         },
         {
-          "object": "CAMPO_",
+          "object": "PITCH",
           "id": "CAMPO_",
           "rc": "GROUPBOX",
           "qt": "QGroupBox",
@@ -659,7 +659,7 @@
           ]
         },
         {
-          "object": "LAB_ML_NOMEADD",
+          "object": "LAB_ML_EXTRA_NAMES",
           "id": "LAB_ML_NOMEADD",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -679,7 +679,7 @@
           ]
         },
         {
-          "object": "LBL_NOMEMLADD1",
+          "object": "LBL_ML_EXTRA_NAME1",
           "id": "LBL_NOMEMLADD1",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -699,7 +699,7 @@
           ]
         },
         {
-          "object": "LBL_NOMEMLADD2",
+          "object": "LBL_ML_EXTRA_NAME2",
           "id": "LBL_NOMEMLADD2",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -719,7 +719,7 @@
           ]
         },
         {
-          "object": "LAB_KIK_CAP2",
+          "object": "LAB_KICK_PENALTY",
           "id": "LAB_KIK_CAP2",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -739,7 +739,7 @@
           ]
         },
         {
-          "object": "LAB_NSQUAD_A3",
+          "object": "LAB_TEAM_ABBREV3",
           "id": "LAB_NSQUAD_A3",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -759,7 +759,7 @@
           ]
         },
         {
-          "object": "CMB_NSQUADRE",
+          "object": "CMB_TEAM",
           "id": "CMB_NSQUADRE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -780,7 +780,7 @@
           "dropdown_dlu": 64
         },
         {
-          "object": "TXT_NSQUAD1",
+          "object": "TXT_TEAM_NAME1",
           "id": "TXT_NSQUAD1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -800,7 +800,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD2",
+          "object": "TXT_TEAM_NAME2",
           "id": "TXT_NSQUAD2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -820,7 +820,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD3",
+          "object": "TXT_TEAM_NAME3",
           "id": "TXT_NSQUAD3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -840,7 +840,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD4",
+          "object": "TXT_TEAM_NAME4",
           "id": "TXT_NSQUAD4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -860,7 +860,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD5",
+          "object": "TXT_TEAM_NAME5",
           "id": "TXT_NSQUAD5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -880,7 +880,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD6",
+          "object": "TXT_TEAM_NAME6",
           "id": "TXT_NSQUAD6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -900,7 +900,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD_M",
+          "object": "TXT_TEAM_NAME_MIXED",
           "id": "TXT_NSQUAD_M",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -920,7 +920,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD_A1",
+          "object": "TXT_TEAM_ABBREV1",
           "id": "TXT_NSQUAD_A1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -940,7 +940,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD_A2",
+          "object": "TXT_TEAM_ABBREV2",
           "id": "TXT_NSQUAD_A2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -960,7 +960,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUAD_A3",
+          "object": "TXT_TEAM_ABBREV3",
           "id": "TXT_NSQUAD_A3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -980,7 +980,7 @@
           ]
         },
         {
-          "object": "TXT_NOMIML1",
+          "object": "TXT_ML_EXTRA_NAME1",
           "id": "TXT_NOMIML1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1000,7 +1000,7 @@
           ]
         },
         {
-          "object": "TXT_NOMIML2",
+          "object": "TXT_ML_EXTRA_NAME2",
           "id": "TXT_NOMIML2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1580,7 +1580,7 @@
           ]
         },
         {
-          "object": "TXT_TATX2",
+          "object": "TXT_SLOT_X2",
           "id": "TXT_TATX2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1600,7 +1600,7 @@
           ]
         },
         {
-          "object": "TXT_TATY2",
+          "object": "TXT_SLOT_Y2",
           "id": "TXT_TATY2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1620,7 +1620,7 @@
           ]
         },
         {
-          "object": "CMB_TAT2",
+          "object": "CMB_SLOT_ROLE2",
           "id": "CMB_TAT2",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1641,7 +1641,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX3",
+          "object": "TXT_SLOT_X3",
           "id": "TXT_TATX3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1661,7 +1661,7 @@
           ]
         },
         {
-          "object": "TXT_TATY3",
+          "object": "TXT_SLOT_Y3",
           "id": "TXT_TATY3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1681,7 +1681,7 @@
           ]
         },
         {
-          "object": "CMB_TAT3",
+          "object": "CMB_SLOT_ROLE3",
           "id": "CMB_TAT3",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1702,7 +1702,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TXT_TATX4",
+          "object": "TXT_SLOT_X4",
           "id": "TXT_TATX4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1722,7 +1722,7 @@
           ]
         },
         {
-          "object": "TXT_TATY4",
+          "object": "TXT_SLOT_Y4",
           "id": "TXT_TATY4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1742,7 +1742,7 @@
           ]
         },
         {
-          "object": "CMB_TAT4",
+          "object": "CMB_SLOT_ROLE4",
           "id": "CMB_TAT4",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1763,7 +1763,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX5",
+          "object": "TXT_SLOT_X5",
           "id": "TXT_TATX5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1783,7 +1783,7 @@
           ]
         },
         {
-          "object": "TXT_TATY5",
+          "object": "TXT_SLOT_Y5",
           "id": "TXT_TATY5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1803,7 +1803,7 @@
           ]
         },
         {
-          "object": "CMB_TAT5",
+          "object": "CMB_SLOT_ROLE5",
           "id": "CMB_TAT5",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1824,7 +1824,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TXT_TATX6",
+          "object": "TXT_SLOT_X6",
           "id": "TXT_TATX6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1844,7 +1844,7 @@
           ]
         },
         {
-          "object": "TXT_TATY6",
+          "object": "TXT_SLOT_Y6",
           "id": "TXT_TATY6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1864,7 +1864,7 @@
           ]
         },
         {
-          "object": "CMB_TAT6",
+          "object": "CMB_SLOT_ROLE6",
           "id": "CMB_TAT6",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1885,7 +1885,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX7",
+          "object": "TXT_SLOT_X7",
           "id": "TXT_TATX7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1905,7 +1905,7 @@
           ]
         },
         {
-          "object": "TXT_TATY7",
+          "object": "TXT_SLOT_Y7",
           "id": "TXT_TATY7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1925,7 +1925,7 @@
           ]
         },
         {
-          "object": "CMB_TAT7",
+          "object": "CMB_SLOT_ROLE7",
           "id": "CMB_TAT7",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -1946,7 +1946,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX8",
+          "object": "TXT_SLOT_X8",
           "id": "TXT_TATX8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1966,7 +1966,7 @@
           ]
         },
         {
-          "object": "TXT_TATY8",
+          "object": "TXT_SLOT_Y8",
           "id": "TXT_TATY8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -1986,7 +1986,7 @@
           ]
         },
         {
-          "object": "CMB_TAT8",
+          "object": "CMB_SLOT_ROLE8",
           "id": "CMB_TAT8",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -2007,7 +2007,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX9",
+          "object": "TXT_SLOT_X9",
           "id": "TXT_TATX9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2027,7 +2027,7 @@
           ]
         },
         {
-          "object": "TXT_TATY9",
+          "object": "TXT_SLOT_Y9",
           "id": "TXT_TATY9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2047,7 +2047,7 @@
           ]
         },
         {
-          "object": "CMB_TAT9",
+          "object": "CMB_SLOT_ROLE9",
           "id": "CMB_TAT9",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -2068,7 +2068,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TXT_TATX10",
+          "object": "TXT_SLOT_X10",
           "id": "TXT_TATX10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2088,7 +2088,7 @@
           ]
         },
         {
-          "object": "TXT_TATY10",
+          "object": "TXT_SLOT_Y10",
           "id": "TXT_TATY10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2108,7 +2108,7 @@
           ]
         },
         {
-          "object": "CMB_TAT10",
+          "object": "CMB_SLOT_ROLE10",
           "id": "CMB_TAT10",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -2129,7 +2129,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TXT_TATX11",
+          "object": "TXT_SLOT_X11",
           "id": "TXT_TATX11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2149,7 +2149,7 @@
           ]
         },
         {
-          "object": "TXT_TATY11",
+          "object": "TXT_SLOT_Y11",
           "id": "TXT_TATY11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -2169,7 +2169,7 @@
           ]
         },
         {
-          "object": "CMB_TAT11",
+          "object": "CMB_SLOT_ROLE11",
           "id": "CMB_TAT11",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -2190,7 +2190,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "CMD_CARAT1",
+          "object": "CMD_SKILLS1",
           "id": "CMD_CARAT1",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2210,7 +2210,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT2",
+          "object": "CMD_SKILLS2",
           "id": "CMD_CARAT2",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2230,7 +2230,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT3",
+          "object": "CMD_SKILLS3",
           "id": "CMD_CARAT3",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2250,7 +2250,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT4",
+          "object": "CMD_SKILLS4",
           "id": "CMD_CARAT4",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2270,7 +2270,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT5",
+          "object": "CMD_SKILLS5",
           "id": "CMD_CARAT5",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2290,7 +2290,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT6",
+          "object": "CMD_SKILLS6",
           "id": "CMD_CARAT6",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2310,7 +2310,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT7",
+          "object": "CMD_SKILLS7",
           "id": "CMD_CARAT7",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2330,7 +2330,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT8",
+          "object": "CMD_SKILLS8",
           "id": "CMD_CARAT8",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2350,7 +2350,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT9",
+          "object": "CMD_SKILLS9",
           "id": "CMD_CARAT9",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2370,7 +2370,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT10",
+          "object": "CMD_SKILLS10",
           "id": "CMD_CARAT10",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2390,7 +2390,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT11",
+          "object": "CMD_SKILLS11",
           "id": "CMD_CARAT11",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2410,7 +2410,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT12",
+          "object": "CMD_SKILLS12",
           "id": "CMD_CARAT12",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2430,7 +2430,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT13",
+          "object": "CMD_SKILLS13",
           "id": "CMD_CARAT13",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2450,7 +2450,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT14",
+          "object": "CMD_SKILLS14",
           "id": "CMD_CARAT14",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2470,7 +2470,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT15",
+          "object": "CMD_SKILLS15",
           "id": "CMD_CARAT15",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2490,7 +2490,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT16",
+          "object": "CMD_SKILLS16",
           "id": "CMD_CARAT16",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2510,7 +2510,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT17",
+          "object": "CMD_SKILLS17",
           "id": "CMD_CARAT17",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2530,7 +2530,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT18",
+          "object": "CMD_SKILLS18",
           "id": "CMD_CARAT18",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2550,7 +2550,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT19",
+          "object": "CMD_SKILLS19",
           "id": "CMD_CARAT19",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2570,7 +2570,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT20",
+          "object": "CMD_SKILLS20",
           "id": "CMD_CARAT20",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2590,7 +2590,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT21",
+          "object": "CMD_SKILLS21",
           "id": "CMD_CARAT21",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2610,7 +2610,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT22",
+          "object": "CMD_SKILLS22",
           "id": "CMD_CARAT22",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2630,7 +2630,7 @@
           ]
         },
         {
-          "object": "CMD_CARAT23",
+          "object": "CMD_SKILLS23",
           "id": "CMD_CARAT23",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2650,7 +2650,7 @@
           ]
         },
         {
-          "object": "CMD_SOST1",
+          "object": "CMD_SWAP1",
           "id": "CMD_SOST1",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2670,7 +2670,7 @@
           ]
         },
         {
-          "object": "CMD_SOST2",
+          "object": "CMD_SWAP2",
           "id": "CMD_SOST2",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2690,7 +2690,7 @@
           ]
         },
         {
-          "object": "CMD_SOST3",
+          "object": "CMD_SWAP3",
           "id": "CMD_SOST3",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2710,7 +2710,7 @@
           ]
         },
         {
-          "object": "CMD_SOST4",
+          "object": "CMD_SWAP4",
           "id": "CMD_SOST4",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2730,7 +2730,7 @@
           ]
         },
         {
-          "object": "CMD_SOST5",
+          "object": "CMD_SWAP5",
           "id": "CMD_SOST5",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2750,7 +2750,7 @@
           ]
         },
         {
-          "object": "CMD_SOST6",
+          "object": "CMD_SWAP6",
           "id": "CMD_SOST6",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2770,7 +2770,7 @@
           ]
         },
         {
-          "object": "CMD_SOST7",
+          "object": "CMD_SWAP7",
           "id": "CMD_SOST7",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2790,7 +2790,7 @@
           ]
         },
         {
-          "object": "CMD_SOST8",
+          "object": "CMD_SWAP8",
           "id": "CMD_SOST8",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2810,7 +2810,7 @@
           ]
         },
         {
-          "object": "CMD_SOST9",
+          "object": "CMD_SWAP9",
           "id": "CMD_SOST9",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2830,7 +2830,7 @@
           ]
         },
         {
-          "object": "CMD_SOST10",
+          "object": "CMD_SWAP10",
           "id": "CMD_SOST10",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2850,7 +2850,7 @@
           ]
         },
         {
-          "object": "CMD_SOST11",
+          "object": "CMD_SWAP11",
           "id": "CMD_SOST11",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2870,7 +2870,7 @@
           ]
         },
         {
-          "object": "CMD_SOST12",
+          "object": "CMD_SWAP12",
           "id": "CMD_SOST12",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2890,7 +2890,7 @@
           ]
         },
         {
-          "object": "CMD_SOST13",
+          "object": "CMD_SWAP13",
           "id": "CMD_SOST13",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2910,7 +2910,7 @@
           ]
         },
         {
-          "object": "CMD_SOST14",
+          "object": "CMD_SWAP14",
           "id": "CMD_SOST14",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2930,7 +2930,7 @@
           ]
         },
         {
-          "object": "CMD_SOST15",
+          "object": "CMD_SWAP15",
           "id": "CMD_SOST15",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2950,7 +2950,7 @@
           ]
         },
         {
-          "object": "CMD_SOST16",
+          "object": "CMD_SWAP16",
           "id": "CMD_SOST16",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2970,7 +2970,7 @@
           ]
         },
         {
-          "object": "CMD_SOST17",
+          "object": "CMD_SWAP17",
           "id": "CMD_SOST17",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -2990,7 +2990,7 @@
           ]
         },
         {
-          "object": "CMD_SOST18",
+          "object": "CMD_SWAP18",
           "id": "CMD_SOST18",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3010,7 +3010,7 @@
           ]
         },
         {
-          "object": "CMD_SOST19",
+          "object": "CMD_SWAP19",
           "id": "CMD_SOST19",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3030,7 +3030,7 @@
           ]
         },
         {
-          "object": "CMD_SOST20",
+          "object": "CMD_SWAP20",
           "id": "CMD_SOST20",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3050,7 +3050,7 @@
           ]
         },
         {
-          "object": "CMD_SOST21",
+          "object": "CMD_SWAP21",
           "id": "CMD_SOST21",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3070,7 +3070,7 @@
           ]
         },
         {
-          "object": "CMD_SOST22",
+          "object": "CMD_SWAP22",
           "id": "CMD_SOST22",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3090,7 +3090,7 @@
           ]
         },
         {
-          "object": "CMD_SOST23",
+          "object": "CMD_SWAP23",
           "id": "CMD_SOST23",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3430,7 +3430,7 @@
           ]
         },
         {
-          "object": "CMD_VT1",
+          "object": "CMD_SLOT1",
           "id": "CMD_VT1",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3450,7 +3450,7 @@
           ]
         },
         {
-          "object": "CMD_VT2",
+          "object": "CMD_SLOT2",
           "id": "CMD_VT2",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3470,7 +3470,7 @@
           ]
         },
         {
-          "object": "CMD_VT3",
+          "object": "CMD_SLOT3",
           "id": "CMD_VT3",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3490,7 +3490,7 @@
           ]
         },
         {
-          "object": "CMD_VT4",
+          "object": "CMD_SLOT4",
           "id": "CMD_VT4",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3510,7 +3510,7 @@
           ]
         },
         {
-          "object": "CMD_VT5",
+          "object": "CMD_SLOT5",
           "id": "CMD_VT5",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3530,7 +3530,7 @@
           ]
         },
         {
-          "object": "CMD_VT6",
+          "object": "CMD_SLOT6",
           "id": "CMD_VT6",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3550,7 +3550,7 @@
           ]
         },
         {
-          "object": "CMD_VT7",
+          "object": "CMD_SLOT7",
           "id": "CMD_VT7",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3570,7 +3570,7 @@
           ]
         },
         {
-          "object": "CMD_VT8",
+          "object": "CMD_SLOT8",
           "id": "CMD_VT8",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3590,7 +3590,7 @@
           ]
         },
         {
-          "object": "CMD_VT9",
+          "object": "CMD_SLOT9",
           "id": "CMD_VT9",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3610,7 +3610,7 @@
           ]
         },
         {
-          "object": "CMD_VT10",
+          "object": "CMD_SLOT10",
           "id": "CMD_VT10",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3630,7 +3630,7 @@
           ]
         },
         {
-          "object": "CMD_COPIA_NOMISQUADRA",
+          "object": "CMD_COPY_TEAM_NAMES",
           "id": "CMD_COPIA_NOMISQUADRA",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -3650,7 +3650,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC1",
+          "object": "TXT_PLAYER1",
           "id": "TXT_GIOC1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3670,7 +3670,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC2",
+          "object": "TXT_PLAYER2",
           "id": "TXT_GIOC2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3690,7 +3690,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC3",
+          "object": "TXT_PLAYER3",
           "id": "TXT_GIOC3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3710,7 +3710,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC4",
+          "object": "TXT_PLAYER4",
           "id": "TXT_GIOC4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3730,7 +3730,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC5",
+          "object": "TXT_PLAYER5",
           "id": "TXT_GIOC5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3750,7 +3750,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC6",
+          "object": "TXT_PLAYER6",
           "id": "TXT_GIOC6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3770,7 +3770,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC7",
+          "object": "TXT_PLAYER7",
           "id": "TXT_GIOC7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3790,7 +3790,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC8",
+          "object": "TXT_PLAYER8",
           "id": "TXT_GIOC8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3810,7 +3810,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC9",
+          "object": "TXT_PLAYER9",
           "id": "TXT_GIOC9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3830,7 +3830,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC10",
+          "object": "TXT_PLAYER10",
           "id": "TXT_GIOC10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3850,7 +3850,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC11",
+          "object": "TXT_PLAYER11",
           "id": "TXT_GIOC11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3870,7 +3870,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC12",
+          "object": "TXT_PLAYER12",
           "id": "TXT_GIOC12",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3890,7 +3890,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC13",
+          "object": "TXT_PLAYER13",
           "id": "TXT_GIOC13",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3910,7 +3910,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC14",
+          "object": "TXT_PLAYER14",
           "id": "TXT_GIOC14",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3930,7 +3930,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC15",
+          "object": "TXT_PLAYER15",
           "id": "TXT_GIOC15",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3950,7 +3950,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC16",
+          "object": "TXT_PLAYER16",
           "id": "TXT_GIOC16",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3970,7 +3970,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC17",
+          "object": "TXT_PLAYER17",
           "id": "TXT_GIOC17",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -3990,7 +3990,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC18",
+          "object": "TXT_PLAYER18",
           "id": "TXT_GIOC18",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4010,7 +4010,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC19",
+          "object": "TXT_PLAYER19",
           "id": "TXT_GIOC19",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4030,7 +4030,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC20",
+          "object": "TXT_PLAYER20",
           "id": "TXT_GIOC20",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4050,7 +4050,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC21",
+          "object": "TXT_PLAYER21",
           "id": "TXT_GIOC21",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4070,7 +4070,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC22",
+          "object": "TXT_PLAYER22",
           "id": "TXT_GIOC22",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4090,7 +4090,7 @@
           ]
         },
         {
-          "object": "TXT_GIOC23",
+          "object": "TXT_PLAYER23",
           "id": "TXT_GIOC23",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4110,7 +4110,7 @@
           ]
         },
         {
-          "object": "CMB_KIK_PUNL",
+          "object": "CMB_KICK_LONG_FK",
           "id": "CMB_KIK_PUNL",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4131,7 +4131,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "CMB_KIK_PUNC",
+          "object": "CMB_KICK_SHORT_FK",
           "id": "CMB_KIK_PUNC",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4152,7 +4152,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "CMB_KIK_ANGSX",
+          "object": "CMB_KICK_LEFT_CORNER",
           "id": "CMB_KIK_ANGSX",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4173,7 +4173,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "CMB_KIK_ANGDX",
+          "object": "CMB_KICK_RIGHT_CORNER",
           "id": "CMB_KIK_ANGDX",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4194,7 +4194,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "CMB_KIK_RIG",
+          "object": "CMB_KICK_PENALTY",
           "id": "CMB_KIK_RIG",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4215,7 +4215,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "CMB_KIK_CAP",
+          "object": "CMB_CAPTAIN",
           "id": "CMB_KIK_CAP",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -4236,7 +4236,7 @@
           "dropdown_dlu": 51
         },
         {
-          "object": "LAB_NSQUADK",
+          "object": "LAB_TEAM_NAME_KANJI",
           "id": "LAB_NSQUADK",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -4256,7 +4256,7 @@
           ]
         },
         {
-          "object": "TXT_NSQUADK",
+          "object": "TXT_TEAM_NAME_KANJI",
           "id": "TXT_NSQUADK",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -4276,7 +4276,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTGRAF",
+          "object": "CMD_FLAG_KIT",
           "id": "IDC_BUTTGRAF",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -4296,7 +4296,7 @@
           ]
         },
         {
-          "object": "CMD_NUMDEF",
+          "object": "CMD_DEFAULT_NUMBERS",
           "id": "CMD_NUMDEF",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -4316,7 +4316,7 @@
           ]
         },
         {
-          "object": "CMD_CALCCOSTI",
+          "object": "CMD_UPDATE_COSTS",
           "id": "CMD_CALCCOSTI",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -4376,7 +4376,7 @@
           ]
         },
         {
-          "object": "CMD_CALCFORZA2",
+          "object": "CMD_SORT_RESERVES",
           "id": "CMD_CALCFORZA2",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -4396,7 +4396,7 @@
           ]
         },
         {
-          "object": "CMD_TATT_PREDEF",
+          "object": "CMD_EDIT_PRESETS",
           "id": "CMD_TATT_PREDEF",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -4997,8 +4997,8 @@
         }
       ]
     },
-    "DLG_SELECT_GIOC": {
-      "class": "PlayerSelectDialog",
+    "PlayerSelectDialog": {
+      "id": "DLG_SELECT_GIOC",
       "caption": " Player's selection",
       "dlu": [
         260,
@@ -5050,7 +5050,7 @@
           ]
         },
         {
-          "object": "LIST_SQUADRE",
+          "object": "LIST_TEAMS",
           "id": "LIST_SQUADRE",
           "rc": "LISTBOX",
           "qt": "QListWidget",
@@ -5070,7 +5070,7 @@
           ]
         },
         {
-          "object": "LIST_GIOCATORI",
+          "object": "LIST_PLAYERS",
           "id": "LIST_GIOCATORI",
           "rc": "LISTBOX",
           "qt": "QListWidget",
@@ -5090,7 +5090,7 @@
           ]
         },
         {
-          "object": "CHK_SC",
+          "object": "CHK_COMPLETE_SWAP",
           "id": "CHK_SC",
           "rc": "CONTROL",
           "qt": "QCheckBox",
@@ -5130,7 +5130,7 @@
           ]
         },
         {
-          "object": "LBL_NAZML",
+          "object": "LBL_ML_NATIONALITY",
           "id": "LBL_NAZML",
           "rc": "LTEXT",
           "qt": "QLabel",
@@ -5210,7 +5210,7 @@
           ]
         },
         {
-          "object": "CMB_NAZIONALITA",
+          "object": "CMB_NATIONALITY",
           "id": "CMB_NAZIONALITA",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5252,8 +5252,8 @@
         }
       ]
     },
-    "DLG_CARATT": {
-      "class": "PlayerSkillsDialog",
+    "PlayerSkillsDialog": {
+      "id": "DLG_CARATT",
       "caption": " Player's skill",
       "dlu": [
         329,
@@ -5865,7 +5865,7 @@
           ]
         },
         {
-          "object": "TXT_GNOME",
+          "object": "TXT_NAME",
           "id": "TXT_GNOME",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -5885,7 +5885,7 @@
           ]
         },
         {
-          "object": "CMB_GRUOLO",
+          "object": "CMB_POSITION",
           "id": "CMB_GRUOLO",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5906,7 +5906,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GPELLE",
+          "object": "CMB_SKIN_COLOUR",
           "id": "CMB_GPELLE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5927,7 +5927,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GCAPSTILE",
+          "object": "CMB_HAIR_STYLE",
           "id": "CMB_GCAPSTILE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5948,7 +5948,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GCAPCOL",
+          "object": "CMB_HAIR_COLOUR",
           "id": "CMB_GCAPCOL",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5969,7 +5969,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GBARBASTILE",
+          "object": "CMB_BEARD_STYLE",
           "id": "CMB_GBARBASTILE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -5990,7 +5990,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GBARBACOL",
+          "object": "CMB_BEARD_COLOUR",
           "id": "CMB_GBARBACOL",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -6011,7 +6011,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GCORPO",
+          "object": "CMB_BUILD",
           "id": "CMB_GCORPO",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -6032,7 +6032,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "TXT_ALTEZZA",
+          "object": "TXT_HEIGHT",
           "id": "TXT_ALTEZZA",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6052,7 +6052,7 @@
           ]
         },
         {
-          "object": "TXT_ETA",
+          "object": "TXT_AGE",
           "id": "TXT_ETA",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6072,7 +6072,7 @@
           ]
         },
         {
-          "object": "CMB_GSCARPE",
+          "object": "CMB_BOOTS",
           "id": "CMB_GSCARPE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -6093,7 +6093,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "CMB_GPIEDE",
+          "object": "CMB_FOOT",
           "id": "CMB_GPIEDE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -6114,7 +6114,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "TXT_GATT",
+          "object": "TXT_ATTACK",
           "id": "TXT_GATT",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6134,7 +6134,7 @@
           ]
         },
         {
-          "object": "TXT_GDIF",
+          "object": "TXT_DEFENCE",
           "id": "TXT_GDIF",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6154,7 +6154,7 @@
           ]
         },
         {
-          "object": "TXT_GFZF",
+          "object": "TXT_STRENGTH",
           "id": "TXT_GFZF",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6174,7 +6174,7 @@
           ]
         },
         {
-          "object": "TXT_GRES",
+          "object": "TXT_STAMINA",
           "id": "TXT_GRES",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6194,7 +6194,7 @@
           ]
         },
         {
-          "object": "TXT_GVEL",
+          "object": "TXT_SPEED",
           "id": "TXT_GVEL",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6214,7 +6214,7 @@
           ]
         },
         {
-          "object": "TXT_GACC",
+          "object": "TXT_ACCELERATION",
           "id": "TXT_GACC",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6234,7 +6234,7 @@
           ]
         },
         {
-          "object": "TXT_GPASS",
+          "object": "TXT_PASSING",
           "id": "TXT_GPASS",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6254,7 +6254,7 @@
           ]
         },
         {
-          "object": "TXT_GPZT",
+          "object": "TXT_SHOT_POWER",
           "id": "TXT_GPZT",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6274,7 +6274,7 @@
           ]
         },
         {
-          "object": "TXT_GPRET",
+          "object": "TXT_SHOT_ACCURACY",
           "id": "TXT_GPRET",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6294,7 +6294,7 @@
           ]
         },
         {
-          "object": "TXT_GELE",
+          "object": "TXT_JUMP",
           "id": "TXT_GELE",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6314,7 +6314,7 @@
           ]
         },
         {
-          "object": "TXT_GTEST",
+          "object": "TXT_HEADING",
           "id": "TXT_GTEST",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6334,7 +6334,7 @@
           ]
         },
         {
-          "object": "TXT_GTECN",
+          "object": "TXT_TECHNIQUE",
           "id": "TXT_GTECN",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6354,7 +6354,7 @@
           ]
         },
         {
-          "object": "TXT_GDRIB",
+          "object": "TXT_DRIBBLING",
           "id": "TXT_GDRIB",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6374,7 +6374,7 @@
           ]
         },
         {
-          "object": "TXT_GEFF",
+          "object": "TXT_SWERVE",
           "id": "TXT_GEFF",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6394,7 +6394,7 @@
           ]
         },
         {
-          "object": "TXT_GAGGR",
+          "object": "TXT_AGGRESSION",
           "id": "TXT_GAGGR",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6414,7 +6414,7 @@
           ]
         },
         {
-          "object": "TXT_GRIFL",
+          "object": "TXT_REFLEXES",
           "id": "TXT_GRIFL",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6434,7 +6434,7 @@
           ]
         },
         {
-          "object": "CMB_GFRUOLO",
+          "object": "CMB_OUT_OF_POSITION",
           "id": "CMB_GFRUOLO",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -6455,7 +6455,7 @@
           "dropdown_dlu": 123
         },
         {
-          "object": "TXT_GCOSTO",
+          "object": "TXT_COST",
           "id": "TXT_GCOSTO",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6495,7 +6495,7 @@
           ]
         },
         {
-          "object": "TXT_GNUMERO",
+          "object": "TXT_NUMBER",
           "id": "TXT_GNUMERO",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6536,8 +6536,8 @@
         }
       ]
     },
-    "DLG_GRAF": {
-      "class": "FlagKitPreviewDialog",
+    "FlagKitPreviewDialog": {
+      "id": "DLG_GRAF",
       "caption": "Flag/Shirt preview",
       "dlu": [
         239,
@@ -6629,7 +6629,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL1",
+          "object": "TXT_FLAG_COL1",
           "id": "TXT_BAND_COL1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6649,7 +6649,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL2",
+          "object": "TXT_FLAG_COL2",
           "id": "TXT_BAND_COL2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6669,7 +6669,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL3",
+          "object": "TXT_FLAG_COL3",
           "id": "TXT_BAND_COL3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6689,7 +6689,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL4",
+          "object": "TXT_FLAG_COL4",
           "id": "TXT_BAND_COL4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6709,7 +6709,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL5",
+          "object": "TXT_FLAG_COL5",
           "id": "TXT_BAND_COL5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6729,7 +6729,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL6",
+          "object": "TXT_FLAG_COL6",
           "id": "TXT_BAND_COL6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6749,7 +6749,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL7",
+          "object": "TXT_FLAG_COL7",
           "id": "TXT_BAND_COL7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6769,7 +6769,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL8",
+          "object": "TXT_FLAG_COL8",
           "id": "TXT_BAND_COL8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6789,7 +6789,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL9",
+          "object": "TXT_FLAG_COL9",
           "id": "TXT_BAND_COL9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6809,7 +6809,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL10",
+          "object": "TXT_FLAG_COL10",
           "id": "TXT_BAND_COL10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6829,7 +6829,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL11",
+          "object": "TXT_FLAG_COL11",
           "id": "TXT_BAND_COL11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6849,7 +6849,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL12",
+          "object": "TXT_FLAG_COL12",
           "id": "TXT_BAND_COL12",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6869,7 +6869,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL13",
+          "object": "TXT_FLAG_COL13",
           "id": "TXT_BAND_COL13",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6889,7 +6889,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL14",
+          "object": "TXT_FLAG_COL14",
           "id": "TXT_BAND_COL14",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6909,7 +6909,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_COL15",
+          "object": "TXT_FLAG_COL15",
           "id": "TXT_BAND_COL15",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6929,7 +6929,7 @@
           ]
         },
         {
-          "object": "TXT_BAND_STILE",
+          "object": "TXT_FLAG_STYLE",
           "id": "TXT_BAND_STILE",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -6949,7 +6949,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTONINB",
+          "object": "CMD_IMPORT_FLAG",
           "id": "IDC_BUTTONINB",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -6969,7 +6969,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTONESB",
+          "object": "CMD_EXPORT_FLAG",
           "id": "IDC_BUTTONESB",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -7009,7 +7009,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL1",
+          "object": "TXT_KIT1_COL1",
           "id": "TXT_1MAG_COL1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7029,7 +7029,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL2",
+          "object": "TXT_KIT1_COL2",
           "id": "TXT_1MAG_COL2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7049,7 +7049,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL3",
+          "object": "TXT_KIT1_COL3",
           "id": "TXT_1MAG_COL3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7069,7 +7069,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL4",
+          "object": "TXT_KIT1_COL4",
           "id": "TXT_1MAG_COL4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7089,7 +7089,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL5",
+          "object": "TXT_KIT1_COL5",
           "id": "TXT_1MAG_COL5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7109,7 +7109,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL6",
+          "object": "TXT_KIT1_COL6",
           "id": "TXT_1MAG_COL6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7129,7 +7129,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL7",
+          "object": "TXT_KIT1_COL7",
           "id": "TXT_1MAG_COL7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7149,7 +7149,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL8",
+          "object": "TXT_KIT1_COL8",
           "id": "TXT_1MAG_COL8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7169,7 +7169,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL9",
+          "object": "TXT_KIT1_COL9",
           "id": "TXT_1MAG_COL9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7189,7 +7189,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL10",
+          "object": "TXT_KIT1_COL10",
           "id": "TXT_1MAG_COL10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7209,7 +7209,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL11",
+          "object": "TXT_KIT1_COL11",
           "id": "TXT_1MAG_COL11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7229,7 +7229,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL12",
+          "object": "TXT_KIT1_COL12",
           "id": "TXT_1MAG_COL12",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7249,7 +7249,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL13",
+          "object": "TXT_KIT1_COL13",
           "id": "TXT_1MAG_COL13",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7269,7 +7269,7 @@
           ]
         },
         {
-          "object": "TXT_1MAG_COL14",
+          "object": "TXT_KIT1_COL14",
           "id": "TXT_1MAG_COL14",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7309,7 +7309,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL1",
+          "object": "TXT_KIT2_COL1",
           "id": "TXT_2MAG_COL1",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7329,7 +7329,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL2",
+          "object": "TXT_KIT2_COL2",
           "id": "TXT_2MAG_COL2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7349,7 +7349,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL3",
+          "object": "TXT_KIT2_COL3",
           "id": "TXT_2MAG_COL3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7369,7 +7369,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL4",
+          "object": "TXT_KIT2_COL4",
           "id": "TXT_2MAG_COL4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7389,7 +7389,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL5",
+          "object": "TXT_KIT2_COL5",
           "id": "TXT_2MAG_COL5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7409,7 +7409,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL6",
+          "object": "TXT_KIT2_COL6",
           "id": "TXT_2MAG_COL6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7429,7 +7429,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL7",
+          "object": "TXT_KIT2_COL7",
           "id": "TXT_2MAG_COL7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7449,7 +7449,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL8",
+          "object": "TXT_KIT2_COL8",
           "id": "TXT_2MAG_COL8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7469,7 +7469,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL9",
+          "object": "TXT_KIT2_COL9",
           "id": "TXT_2MAG_COL9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7489,7 +7489,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL10",
+          "object": "TXT_KIT2_COL10",
           "id": "TXT_2MAG_COL10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7509,7 +7509,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL11",
+          "object": "TXT_KIT2_COL11",
           "id": "TXT_2MAG_COL11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7529,7 +7529,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL12",
+          "object": "TXT_KIT2_COL12",
           "id": "TXT_2MAG_COL12",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7549,7 +7549,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL13",
+          "object": "TXT_KIT2_COL13",
           "id": "TXT_2MAG_COL13",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7569,7 +7569,7 @@
           ]
         },
         {
-          "object": "TXT_2MAG_COL14",
+          "object": "TXT_KIT2_COL14",
           "id": "TXT_2MAG_COL14",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7589,7 +7589,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTON1IM",
+          "object": "CMD_IMPORT_KIT1",
           "id": "IDC_BUTTON1IM",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -7609,7 +7609,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTON1EM",
+          "object": "CMD_EXPORT_KIT1",
           "id": "IDC_BUTTON1EM",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -7629,7 +7629,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTON2IM",
+          "object": "CMD_IMPORT_KIT2",
           "id": "IDC_BUTTON2IM",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -7649,7 +7649,7 @@
           ]
         },
         {
-          "object": "IDC_BUTTON2EM",
+          "object": "CMD_EXPORT_KIT2",
           "id": "IDC_BUTTON2EM",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -7670,8 +7670,8 @@
         }
       ]
     },
-    "DLG_PTATTICHE": {
-      "class": "DefaultTacticsDialog",
+    "DefaultTacticsDialog": {
+      "id": "DLG_PTATTICHE",
       "caption": " Modify default tactics",
       "dlu": [
         321,
@@ -7703,7 +7703,7 @@
           ]
         },
         {
-          "object": "TCAMPO_",
+          "object": "PITCH",
           "id": "TCAMPO_",
           "rc": "GROUPBOX",
           "qt": "QGroupBox",
@@ -7783,7 +7783,7 @@
           ]
         },
         {
-          "object": "TCMB_NSQUADRE",
+          "object": "CMB_FORMATION",
           "id": "TCMB_NSQUADRE",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -7804,7 +7804,7 @@
           "dropdown_dlu": 64
         },
         {
-          "object": "TTXT_NOMETATTICA",
+          "object": "TXT_FORMATION_NAME",
           "id": "TTXT_NOMETATTICA",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7824,7 +7824,7 @@
           ]
         },
         {
-          "object": "TTXT_TATX2",
+          "object": "TXT_SLOT_X2",
           "id": "TTXT_TATX2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7844,7 +7844,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY2",
+          "object": "TXT_SLOT_Y2",
           "id": "TTXT_TATY2",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7864,7 +7864,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT2",
+          "object": "CMB_SLOT_ROLE2",
           "id": "TCMB_TAT2",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -7885,7 +7885,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX3",
+          "object": "TXT_SLOT_X3",
           "id": "TTXT_TATX3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7905,7 +7905,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY3",
+          "object": "TXT_SLOT_Y3",
           "id": "TTXT_TATY3",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7925,7 +7925,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT3",
+          "object": "CMB_SLOT_ROLE3",
           "id": "TCMB_TAT3",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -7946,7 +7946,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TTXT_TATX4",
+          "object": "TXT_SLOT_X4",
           "id": "TTXT_TATX4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7966,7 +7966,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY4",
+          "object": "TXT_SLOT_Y4",
           "id": "TTXT_TATY4",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -7986,7 +7986,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT4",
+          "object": "CMB_SLOT_ROLE4",
           "id": "TCMB_TAT4",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8007,7 +8007,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX5",
+          "object": "TXT_SLOT_X5",
           "id": "TTXT_TATX5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8027,7 +8027,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY5",
+          "object": "TXT_SLOT_Y5",
           "id": "TTXT_TATY5",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8047,7 +8047,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT5",
+          "object": "CMB_SLOT_ROLE5",
           "id": "TCMB_TAT5",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8068,7 +8068,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TTXT_TATX6",
+          "object": "TXT_SLOT_X6",
           "id": "TTXT_TATX6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8088,7 +8088,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY6",
+          "object": "TXT_SLOT_Y6",
           "id": "TTXT_TATY6",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8108,7 +8108,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT6",
+          "object": "CMB_SLOT_ROLE6",
           "id": "TCMB_TAT6",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8129,7 +8129,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX7",
+          "object": "TXT_SLOT_X7",
           "id": "TTXT_TATX7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8149,7 +8149,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY7",
+          "object": "TXT_SLOT_Y7",
           "id": "TTXT_TATY7",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8169,7 +8169,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT7",
+          "object": "CMB_SLOT_ROLE7",
           "id": "TCMB_TAT7",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8190,7 +8190,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX8",
+          "object": "TXT_SLOT_X8",
           "id": "TTXT_TATX8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8210,7 +8210,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY8",
+          "object": "TXT_SLOT_Y8",
           "id": "TTXT_TATY8",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8230,7 +8230,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT8",
+          "object": "CMB_SLOT_ROLE8",
           "id": "TCMB_TAT8",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8251,7 +8251,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX9",
+          "object": "TXT_SLOT_X9",
           "id": "TTXT_TATX9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8271,7 +8271,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY9",
+          "object": "TXT_SLOT_Y9",
           "id": "TTXT_TATY9",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8291,7 +8291,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT9",
+          "object": "CMB_SLOT_ROLE9",
           "id": "TCMB_TAT9",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8312,7 +8312,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TTXT_TATX10",
+          "object": "TXT_SLOT_X10",
           "id": "TTXT_TATX10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8332,7 +8332,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY10",
+          "object": "TXT_SLOT_Y10",
           "id": "TTXT_TATY10",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8352,7 +8352,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT10",
+          "object": "CMB_SLOT_ROLE10",
           "id": "TCMB_TAT10",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8373,7 +8373,7 @@
           "dropdown_dlu": 62
         },
         {
-          "object": "TTXT_TATX11",
+          "object": "TXT_SLOT_X11",
           "id": "TTXT_TATX11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8393,7 +8393,7 @@
           ]
         },
         {
-          "object": "TTXT_TATY11",
+          "object": "TXT_SLOT_Y11",
           "id": "TTXT_TATY11",
           "rc": "EDITTEXT",
           "qt": "QLineEdit",
@@ -8413,7 +8413,7 @@
           ]
         },
         {
-          "object": "TCMB_TAT11",
+          "object": "CMB_SLOT_ROLE11",
           "id": "TCMB_TAT11",
           "rc": "COMBOBOX",
           "qt": "QComboBox",
@@ -8434,7 +8434,7 @@
           "dropdown_dlu": 63
         },
         {
-          "object": "TCMD_VT1",
+          "object": "CMD_SLOT1",
           "id": "TCMD_VT1",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8454,7 +8454,7 @@
           ]
         },
         {
-          "object": "TCMD_VT2",
+          "object": "CMD_SLOT2",
           "id": "TCMD_VT2",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8474,7 +8474,7 @@
           ]
         },
         {
-          "object": "TCMD_VT3",
+          "object": "CMD_SLOT3",
           "id": "TCMD_VT3",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8494,7 +8494,7 @@
           ]
         },
         {
-          "object": "TCMD_VT4",
+          "object": "CMD_SLOT4",
           "id": "TCMD_VT4",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8514,7 +8514,7 @@
           ]
         },
         {
-          "object": "TCMD_VT5",
+          "object": "CMD_SLOT5",
           "id": "TCMD_VT5",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8534,7 +8534,7 @@
           ]
         },
         {
-          "object": "TCMD_VT6",
+          "object": "CMD_SLOT6",
           "id": "TCMD_VT6",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8554,7 +8554,7 @@
           ]
         },
         {
-          "object": "TCMD_VT7",
+          "object": "CMD_SLOT7",
           "id": "TCMD_VT7",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8574,7 +8574,7 @@
           ]
         },
         {
-          "object": "TCMD_VT8",
+          "object": "CMD_SLOT8",
           "id": "TCMD_VT8",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8594,7 +8594,7 @@
           ]
         },
         {
-          "object": "TCMD_VT9",
+          "object": "CMD_SLOT9",
           "id": "TCMD_VT9",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8614,7 +8614,7 @@
           ]
         },
         {
-          "object": "TCMD_VT10",
+          "object": "CMD_SLOT10",
           "id": "TCMD_VT10",
           "rc": "PUSHBUTTON",
           "qt": "QPushButton",
@@ -8715,8 +8715,8 @@
         }
       ]
     },
-    "DLG_EDITOPT": {
-      "class": "EditOptionsDialog",
+    "EditOptionsDialog": {
+      "id": "DLG_EDITOPT",
       "caption": " Edit options",
       "dlu": [
         130,

@@ -110,7 +110,7 @@ private:
     void InitLimits();
     void FillTeamCombo();
     void FillRoleCombos();
-    void RefreshPresetButtons();  ///< aggiornaNtatt()
+    void RefreshPresetButtons();  ///< was aggiornaNtatt()
 
     // ---- team view (TeamView.cpp) -----------------------------------------
     void ClearTeamForm();
@@ -118,25 +118,25 @@ private:
     void ShowMlClub(int id);
     void ShowMlDefault();
 
-    void OnTeamNameEdited(int slot);      ///< OnKillfocusNsquad1..6
-    void OnMlExtraNameEdited(int slot);   ///< OnKillfocusNomiml1..2
-    void OnKanjiNameEdited();             ///< OnKillfocusNsquadk
-    void OnMixedCaseNameEdited();         ///< OnKillfocusNsquadM
-    void OnAbbreviationEdited(int slot);  ///< OnKillfocusNsquadA1..3
-    void OnBarEdited(int bar);            ///< OnKillfocusBarOff/Def/Pow/Spe/Tec
-    void OnKickerChanged(int which);      ///< OnKillfocusKik*
-    void OnSquadNumberEdited(int slot);   ///< OnKillfocusNum1..23
-    void OnPlayerUrlEdited(int slot);     ///< OnChangeURL1..23
-    void OnPlayerSkills(int slot);        ///< caratteristiche()
-    void OnPlayerSwap(int slot);          ///< sostituzione()
+    void OnTeamNameEdited(int slot);      ///< was OnKillfocusNsquad1..6
+    void OnMlExtraNameEdited(int slot);   ///< was OnKillfocusNomiml1..2
+    void OnKanjiNameEdited();             ///< was OnKillfocusNsquadk
+    void OnMixedCaseNameEdited();         ///< was OnKillfocusNsquadM
+    void OnAbbreviationEdited(int slot);  ///< was OnKillfocusNsquadA1..3
+    void OnBarEdited(int bar);            ///< was OnKillfocusBarOff/Def/Pow/Spe/Tec
+    void OnKickerChanged(int which);      ///< was OnKillfocusKik*
+    void OnSquadNumberEdited(int slot);   ///< was OnKillfocusNum1..23
+    void OnPlayerUrlEdited(int slot);     ///< was OnChangeURL1..23
+    void OnPlayerSkills(int slot);        ///< was caratteristiche()
+    void OnPlayerSwap(int slot);          ///< was sostituzione()
 
     // ---- tactics (TacticsView.cpp) ----------------------------------------
-    void OnRoleShown(int slot);        ///< OnSelchangeTat2..11
-    void OnRoleCommitted(int slot);    ///< OnKillfocusTat2..11
-    void OnSlotMoved(int slot);        ///< OnChangeTatx2..11 / OnChangeTaty2..11
-    void OnSlotXCommitted(int slot);   ///< OnKillfocusTatx2..11
-    void OnSlotYCommitted(int slot);   ///< OnKillfocusTaty2..11
-    void ApplyPresetFormation(int k);  ///< applica_tatt()
+    void OnRoleShown(int slot);        ///< was OnSelchangeTat2..11
+    void OnRoleCommitted(int slot);    ///< was OnKillfocusTat2..11
+    void OnSlotMoved(int slot);        ///< was OnChangeTatx2..11 / OnChangeTaty2..11
+    void OnSlotXCommitted(int slot);   ///< was OnKillfocusTatx2..11
+    void OnSlotYCommitted(int slot);   ///< was OnKillfocusTaty2..11
+    void ApplyPresetFormation(int k);  ///< was applica_tatt()
     void PitchPosition(float x, float y, int* out_x, int* out_y) const;
 
     // ---- SoFIFA (SofifaView.cpp) ------------------------------------------
@@ -178,15 +178,8 @@ private:
     QLineEdit* txt_bar_[5]{};
     QComboBox* cmb_kicker_[6]{};
 
-    /// Guards the *_Edited slots while a team is being loaded into the form:
-    /// setText() fires the same signals a user would, and without this the
-    /// load would write the widgets' pre-load contents back into the database.
-    /// The original did not need it -- MFC's SetWindowText does not raise
-    /// EN_KILLFOCUS -- but Qt's editingFinished/textChanged do.
-    bool loading_{false};
-
-    /// Edit-all options, from the DLG_EDITOPT dialog. All four default on,
-    /// as OnInitDialog() set them.
+    /// Edit-all options, from EditOptionsDialog. All four default on, as
+    /// OnInitDialog() set them.
     struct {
         bool names{true};
         bool age_height_weight_foot{true};

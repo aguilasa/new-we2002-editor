@@ -47,4 +47,11 @@ if(Python3_FOUND)
     add_test(NAME ui_forms
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/rc2ui.py --check)
+
+    # Phase 3.5 banned Italian identifiers from the core and phase 5.5 from
+    # the application, including the widget names. Both maps live in
+    # tools/glossary.py; this fails if one of them stops being applied.
+    add_test(NAME glossary
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/apply_glossary.py --check)
 endif()

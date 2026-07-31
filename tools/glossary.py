@@ -397,3 +397,157 @@ LEFTOVER = re.compile(
         sorted((re.escape(k) for k in IDENTIFIERS), key=len, reverse=True)
     ) + r")\b"
 )
+
+
+# ---------------------------------------------------------------------------
+# Widget object names (phase 5.5).
+#
+# The .ui forms generated in phase 4 kept ed.rc's resource symbols verbatim, so
+# that the forms stayed diffable against ed.rc and resource.h while the 376
+# handlers were being ported. Phase 5 finished that, and the symbols are now
+# just Italian in the definitive code -- the same thing phase 3.5 removed from
+# the core.
+#
+# This map is applied by tools/rc2ui.py when it names the widgets, so the .ui
+# and controls.json are regenerated rather than edited. The original symbol is
+# not lost: every entry in controls.json still carries it as `id`.
+#
+# Scope is Italian only. Names that are merely terse or oddly prefixed --
+# CMB_RELOAD and CMB_WRITE on pushbuttons, IDC_BUTTON1, IDOK, LAB_BAR_1..5,
+# CMD_TACT1..16 -- are left as ed.rc wrote them. Renaming those would be churn
+# with no reader to help.
+# ---------------------------------------------------------------------------
+
+
+def _series(old: str, new: str, first: int, last: int) -> dict[str, str]:
+    """One entry per index, for the families the .rc numbers by hand."""
+    return {f"{old}{i}": f"{new}{i}" for i in range(first, last + 1)}
+
+
+UI_CONTROLS: dict[str, str] = {
+    # --- IDD_ED_DIALOG: team names ----------------------------------------
+    **_series("LAB_NSQUAD", "LAB_TEAM_NAME", 1, 6),
+    **_series("TXT_NSQUAD", "TXT_TEAM_NAME", 1, 6),
+    "LAB_NSQUADK": "LAB_TEAM_NAME_KANJI",
+    "TXT_NSQUADK": "TXT_TEAM_NAME_KANJI",
+    "LAB_NSQUAD_M": "LAB_TEAM_NAME_MIXED",
+    "TXT_NSQUAD_M": "TXT_TEAM_NAME_MIXED",
+    **_series("LAB_NSQUAD_A", "LAB_TEAM_ABBREV", 1, 3),
+    **_series("TXT_NSQUAD_A", "TXT_TEAM_ABBREV", 1, 3),
+    "LAB_ML_NOMEADD": "LAB_ML_EXTRA_NAMES",
+    **_series("LBL_NOMEMLADD", "LBL_ML_EXTRA_NAME", 1, 2),
+    **_series("TXT_NOMIML", "TXT_ML_EXTRA_NAME", 1, 2),
+    "CMB_NSQUADRE": "CMB_TEAM",
+    "CMD_COPIA_NOMISQUADRA": "CMD_COPY_TEAM_NAMES",
+
+    # --- IDD_ED_DIALOG: set pieces ----------------------------------------
+    # punizione lunga/corta = long/short free kick, angolo sinistro/destro =
+    # left/right corner, rigori = penalties, capitano = captain.
+    "LAB_KIK_PUNL": "LAB_KICK_LONG_FK",
+    "LAB_KIK_PUNC": "LAB_KICK_SHORT_FK",
+    "LAB_KIK_ANGSX": "LAB_KICK_LEFT_CORNER",
+    "LAB_KIK_ANGDX": "LAB_KICK_RIGHT_CORNER",
+    "LAB_KIK_CAP": "LAB_CAPTAIN",
+    # A misnomer in ed.rc, not here: LAB_KIK_CAP2 is the PENALTY caption.
+    "LAB_KIK_CAP2": "LAB_KICK_PENALTY",
+    "CMB_KIK_PUNL": "CMB_KICK_LONG_FK",
+    "CMB_KIK_PUNC": "CMB_KICK_SHORT_FK",
+    "CMB_KIK_ANGSX": "CMB_KICK_LEFT_CORNER",
+    "CMB_KIK_ANGDX": "CMB_KICK_RIGHT_CORNER",
+    "CMB_KIK_RIG": "CMB_KICK_PENALTY",
+    "CMB_KIK_CAP": "CMB_CAPTAIN",
+
+    # --- IDD_ED_DIALOG: squad and tactics ---------------------------------
+    **_series("TXT_GIOC", "TXT_PLAYER", 1, 23),
+    **_series("CMD_CARAT", "CMD_SKILLS", 1, 23),
+    **_series("CMD_SOST", "CMD_SWAP", 1, 23),
+    # The ten outfield slots are numbered 2..11 in the .rc: slot 1 is the
+    # keeper, whose position is not editable.
+    **_series("TXT_TATX", "TXT_SLOT_X", 2, 11),
+    **_series("TXT_TATY", "TXT_SLOT_Y", 2, 11),
+    **_series("CMB_TAT", "CMB_SLOT_ROLE", 2, 11),
+    # ...but the markers on the pitch are numbered 1..10 for the same slots.
+    **_series("CMD_VT", "CMD_SLOT", 1, 10),
+    "CAMPO_": "PITCH",
+
+    # --- IDD_ED_DIALOG: commands ------------------------------------------
+    "IDC_BUTTGRAF": "CMD_FLAG_KIT",           # grafica
+    "CMD_NUMDEF": "CMD_DEFAULT_NUMBERS",      # numeri default
+    "CMD_CALCCOSTI": "CMD_UPDATE_COSTS",      # calcola costi
+    "CMD_CALCFORZA2": "CMD_SORT_RESERVES",    # calcola forza
+    "CMD_TATT_PREDEF": "CMD_EDIT_PRESETS",    # tattiche predefinite
+
+    # --- DLG_SELECT_GIOC ---------------------------------------------------
+    "LIST_SQUADRE": "LIST_TEAMS",
+    "LIST_GIOCATORI": "LIST_PLAYERS",
+    "CHK_SC": "CHK_COMPLETE_SWAP",            # sostituzione completa
+    "LBL_NAZML": "LBL_ML_NATIONALITY",
+    "CMB_NAZIONALITA": "CMB_NATIONALITY",
+
+    # --- DLG_CARATT --------------------------------------------------------
+    # The G prefix is for giocatore; every one of these is a player field.
+    "TXT_GNOME": "TXT_NAME",
+    "TXT_GNUMERO": "TXT_NUMBER",
+    "TXT_GCOSTO": "TXT_COST",
+    "TXT_ALTEZZA": "TXT_HEIGHT",
+    "TXT_ETA": "TXT_AGE",
+    "CMB_GRUOLO": "CMB_POSITION",
+    "CMB_GFRUOLO": "CMB_OUT_OF_POSITION",     # fuori ruolo
+    "CMB_GPELLE": "CMB_SKIN_COLOUR",
+    "CMB_GCAPSTILE": "CMB_HAIR_STYLE",
+    "CMB_GCAPCOL": "CMB_HAIR_COLOUR",
+    "CMB_GBARBASTILE": "CMB_BEARD_STYLE",
+    "CMB_GBARBACOL": "CMB_BEARD_COLOUR",
+    "CMB_GCORPO": "CMB_BUILD",                # corporatura
+    "CMB_GSCARPE": "CMB_BOOTS",
+    "CMB_GPIEDE": "CMB_FOOT",
+    "TXT_GATT": "TXT_ATTACK",
+    "TXT_GDIF": "TXT_DEFENCE",
+    "TXT_GFZF": "TXT_STRENGTH",               # forza fisica
+    "TXT_GRES": "TXT_STAMINA",                # resistenza
+    "TXT_GVEL": "TXT_SPEED",
+    "TXT_GACC": "TXT_ACCELERATION",
+    "TXT_GPASS": "TXT_PASSING",
+    "TXT_GPZT": "TXT_SHOT_POWER",             # potenza tiro
+    "TXT_GPRET": "TXT_SHOT_ACCURACY",         # precisione tiro
+    "TXT_GELE": "TXT_JUMP",                   # elevazione
+    "TXT_GTEST": "TXT_HEADING",               # testa
+    "TXT_GTECN": "TXT_TECHNIQUE",
+    "TXT_GDRIB": "TXT_DRIBBLING",
+    "TXT_GEFF": "TXT_SWERVE",                 # effetto
+    "TXT_GAGGR": "TXT_AGGRESSION",
+    "TXT_GRIFL": "TXT_REFLEXES",              # riflessi
+
+    # --- DLG_GRAF ----------------------------------------------------------
+    # bandiera = flag, maglia = kit.
+    "TXT_BAND_STILE": "TXT_FLAG_STYLE",
+    **_series("TXT_BAND_COL", "TXT_FLAG_COL", 1, 15),
+    **_series("TXT_1MAG_COL", "TXT_KIT1_COL", 1, 14),
+    **_series("TXT_2MAG_COL", "TXT_KIT2_COL", 1, 14),
+    "IDC_BUTTONINB": "CMD_IMPORT_FLAG",
+    "IDC_BUTTONESB": "CMD_EXPORT_FLAG",
+    "IDC_BUTTON1IM": "CMD_IMPORT_KIT1",
+    "IDC_BUTTON1EM": "CMD_EXPORT_KIT1",
+    "IDC_BUTTON2IM": "CMD_IMPORT_KIT2",
+    "IDC_BUTTON2EM": "CMD_EXPORT_KIT2",
+
+    # --- DLG_PTATTICHE -----------------------------------------------------
+    # The T prefix existed to keep these out of the main dialog's way in one
+    # flat resource namespace. Each form is its own class now, so it goes.
+    "TCAMPO_": "PITCH",
+    "TCMB_NSQUADRE": "CMB_FORMATION",
+    "TTXT_NOMETATTICA": "TXT_FORMATION_NAME",
+    **_series("TTXT_TATX", "TXT_SLOT_X", 2, 11),
+    **_series("TTXT_TATY", "TXT_SLOT_Y", 2, 11),
+    **_series("TCMB_TAT", "CMB_SLOT_ROLE", 2, 11),
+    **_series("TCMD_VT", "CMD_SLOT", 1, 10),
+}
+
+# Kept out of IDENTIFIERS on purpose. IDENTIFIERS is swept over the *legacy*
+# sources by port_database.py and extract_legacy_data.py, and a control name
+# has no business being renamed there.
+UI_LEFTOVER = re.compile(
+    r"\b(" + "|".join(
+        sorted((re.escape(k) for k in UI_CONTROLS), key=len, reverse=True)
+    ) + r")\b"
+)

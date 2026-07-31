@@ -17,6 +17,7 @@
 #include <fstream>
 #include <string>
 
+#include "Bind.hpp"
 #include "DefaultTacticsDialog.hpp"
 #include "EditOptionsDialog.hpp"
 #include "we2002/Tables.hpp"
@@ -61,59 +62,64 @@ MainWindow::~MainWindow() {
 // ---------------------------------------------------------------------------
 
 void MainWindow::BindWidgets() {
-    // objectNames are the resource symbols from ed.rc, which tools/rc2ui.py
-    // carried over verbatim so the forms stay diffable against the original.
+    // objectNames come from tools/glossary.py's UI_CONTROLS, applied by
+    // tools/rc2ui.py when it generates the forms. Each control's original
+    // ed.rc symbol is still recorded in ui/controls.json as `id`, so a name
+    // can be traced back to the resource script it came from.
+    //
+    // The families below were CMD_CARAT/CMD_SOST/CMB_TAT/TXT_TATX/TXT_TATY/
+    // CMD_VT/TXT_GIOC/TXT_NSQUAD/LAB_NSQUAD/TXT_NSQUAD_A there.
     const auto edit = [this](const char* fmt, int n) {
-        return findChild<QLineEdit*>(QString::asprintf(fmt, n));
+        return Bind<QLineEdit>(this, fmt, n);
     };
     const auto button = [this](const char* fmt, int n) {
-        return findChild<QPushButton*>(QString::asprintf(fmt, n));
+        return Bind<QPushButton>(this, fmt, n);
     };
 
     for (int i = 0; i < 23; ++i) {
-        txt_player_[i] = edit("TXT_GIOC%d", i + 1);
+        txt_player_[i] = edit("TXT_PLAYER%d", i + 1);
         txt_url_[i] = edit("TXT_URL%d", i + 1);
         txt_number_[i] = edit("TXT_NUM%d", i + 1);
-        cmd_skills_[i] = button("CMD_CARAT%d", i + 1);
-        cmd_swap_[i] = button("CMD_SOST%d", i + 1);
+        cmd_skills_[i] = button("CMD_SKILLS%d", i + 1);
+        cmd_swap_[i] = button("CMD_SWAP%d", i + 1);
     }
     // Tactics slots are numbered 2..11 in the resource: slot 1 is the keeper,
     // whose position is not editable. Array index 0 is resource slot 2.
     for (int i = 0; i < 10; ++i) {
-        cmb_role_[i] = findChild<QComboBox*>(QString::asprintf("CMB_TAT%d", i + 2));
-        txt_slot_x_[i] = edit("TXT_TATX%d", i + 2);
-        txt_slot_y_[i] = edit("TXT_TATY%d", i + 2);
-        cmd_slot_[i] = button("CMD_VT%d", i + 1);
+        cmb_role_[i] = Bind<QComboBox>(this, "CMB_SLOT_ROLE%d", i + 2);
+        txt_slot_x_[i] = edit("TXT_SLOT_X%d", i + 2);
+        txt_slot_y_[i] = edit("TXT_SLOT_Y%d", i + 2);
+        cmd_slot_[i] = button("CMD_SLOT%d", i + 1);
     }
     for (int i = 0; i < 16; ++i) {
         cmd_preset_[i] = button("CMD_TACT%d", i + 1);
     }
     for (int i = 0; i < 6; ++i) {
-        txt_team_name_[i] = edit("TXT_NSQUAD%d", i + 1);
-        lab_team_name_[i] = findChild<QLabel*>(QString::asprintf("LAB_NSQUAD%d", i + 1));
+        txt_team_name_[i] = edit("TXT_TEAM_NAME%d", i + 1);
+        lab_team_name_[i] = Bind<QLabel>(this, "LAB_TEAM_NAME%d", i + 1);
     }
     for (int i = 0; i < 3; ++i) {
-        txt_abbrev_[i] = edit("TXT_NSQUAD_A%d", i + 1);
+        txt_abbrev_[i] = edit("TXT_TEAM_ABBREV%d", i + 1);
     }
 
     static const char* const kBars[5] = {"TXT_BAR_OFF", "TXT_BAR_DEF", "TXT_BAR_POW",
                                          "TXT_BAR_SPE", "TXT_BAR_TEC"};
     for (int i = 0; i < 5; ++i) {
-        txt_bar_[i] = findChild<QLineEdit*>(QLatin1String(kBars[i]));
+        txt_bar_[i] = Bind<QLineEdit>(this, QLatin1String(kBars[i]));
     }
     // Order matters: it is the order the commit handler switches on, and it
     // matches Team's kick_long_fk / kick_short_fk / kick_left_corner /
     // kick_right_corner / kick_penalty / captain.
-    static const char* const kKickers[6] = {"CMB_KIK_PUNL",  "CMB_KIK_PUNC",
-                                            "CMB_KIK_ANGSX", "CMB_KIK_ANGDX",
-                                            "CMB_KIK_RIG",   "CMB_KIK_CAP"};
+    static const char* const kKickers[6] = {"CMB_KICK_LONG_FK",  "CMB_KICK_SHORT_FK",
+                                            "CMB_KICK_LEFT_CORNER", "CMB_KICK_RIGHT_CORNER",
+                                            "CMB_KICK_PENALTY",   "CMB_CAPTAIN"};
     for (int i = 0; i < 6; ++i) {
-        cmb_kicker_[i] = findChild<QComboBox*>(QLatin1String(kKickers[i]));
+        cmb_kicker_[i] = Bind<QComboBox>(this, QLatin1String(kKickers[i]));
     }
 }
 
 void MainWindow::ConnectSignals() {
-    connect(ui_->CMB_NSQUADRE, &QComboBox::currentIndexChanged, this,
+    connect(ui_->CMB_TEAM, &QComboBox::currentIndexChanged, this,
             &MainWindow::OnTeamSelected);
 
     for (int i = 0; i < 23; ++i) {
@@ -169,27 +175,27 @@ void MainWindow::ConnectSignals() {
                 [this, i] { OnBarEdited(i); });
     }
 
-    connect(ui_->TXT_NSQUADK, &QLineEdit::editingFinished, this,
+    connect(ui_->TXT_TEAM_NAME_KANJI, &QLineEdit::editingFinished, this,
             &MainWindow::OnKanjiNameEdited);
-    connect(ui_->TXT_NSQUAD_M, &QLineEdit::editingFinished, this,
+    connect(ui_->TXT_TEAM_NAME_MIXED, &QLineEdit::editingFinished, this,
             &MainWindow::OnMixedCaseNameEdited);
-    connect(ui_->TXT_NOMIML1, &QLineEdit::editingFinished, this,
+    connect(ui_->TXT_ML_EXTRA_NAME1, &QLineEdit::editingFinished, this,
             [this] { OnMlExtraNameEdited(0); });
-    connect(ui_->TXT_NOMIML2, &QLineEdit::editingFinished, this,
+    connect(ui_->TXT_ML_EXTRA_NAME2, &QLineEdit::editingFinished, this,
             [this] { OnMlExtraNameEdited(1); });
 
-    connect(ui_->CMD_COPIA_NOMISQUADRA, &QPushButton::clicked, this,
+    connect(ui_->CMD_COPY_TEAM_NAMES, &QPushButton::clicked, this,
             &MainWindow::OnCopyTeamNames);
     connect(ui_->CMB_WRITE, &QPushButton::clicked, this, &MainWindow::OnWriteCd);
     connect(ui_->CMB_RELOAD, &QPushButton::clicked, this, &MainWindow::OnReload);
-    connect(ui_->CMD_NUMDEF, &QPushButton::clicked, this, &MainWindow::OnDefaultNumbers);
-    connect(ui_->CMD_CALCCOSTI, &QPushButton::clicked, this,
+    connect(ui_->CMD_DEFAULT_NUMBERS, &QPushButton::clicked, this, &MainWindow::OnDefaultNumbers);
+    connect(ui_->CMD_UPDATE_COSTS, &QPushButton::clicked, this,
             &MainWindow::OnRecomputeCosts);
-    connect(ui_->CMD_CALCFORZA2, &QPushButton::clicked, this,
+    connect(ui_->CMD_SORT_RESERVES, &QPushButton::clicked, this,
             &MainWindow::OnSortReserves);
-    connect(ui_->IDC_BUTTGRAF, &QPushButton::clicked, this,
+    connect(ui_->CMD_FLAG_KIT, &QPushButton::clicked, this,
             &MainWindow::OnFlagKitPreview);
-    connect(ui_->CMD_TATT_PREDEF, &QPushButton::clicked, this,
+    connect(ui_->CMD_EDIT_PRESETS, &QPushButton::clicked, this,
             &MainWindow::OnPresetTactics);
     connect(ui_->CMB_SHOWEDITOPT, &QPushButton::clicked, this,
             &MainWindow::OnEditOptions);
@@ -269,7 +275,7 @@ void MainWindow::FillRoleCombos() {
 }
 
 void MainWindow::FillTeamCombo() {
-    QComboBox* combo = ui_->CMB_NSQUADRE;
+    QComboBox* combo = ui_->CMB_TEAM;
     const QSignalBlocker block(combo);
     combo->clear();
     combo->addItem(QStringLiteral("---"));
@@ -391,7 +397,7 @@ void MainWindow::SaveUrls() const {
 // ---------------------------------------------------------------------------
 
 int MainWindow::SelectedTeam() const {
-    return ui_->CMB_NSQUADRE->currentIndex();
+    return ui_->CMB_TEAM->currentIndex();
 }
 
 char* MainWindow::SelectedFormation() {
