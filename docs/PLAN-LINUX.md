@@ -1117,7 +1117,7 @@ cmake --install build-release --prefix ~/.local
 | `share/newWe2002/` | `defaultlook.txt`, `SOFIFA attributes.txt`, `WE attributes conversion rules.txt` |
 | `share/applications/` | `io.github.aguilasa.newWe2002.desktop` |
 | `share/metainfo/` | AppStream |
-| `share/icons/hicolor/{16x16,32x32}/apps/newWe2002.png` | o ícone |
+| `share/icons/hicolor/{16x16,...,256x256}/apps/newWe2002.png` | o ícone, sete tamanhos |
 | `share/doc/newWe2002/` | `NOTICE.md` e `README.md` |
 
 `naz.txt` **não** é instalado: apesar de estar em `data/`, não é dado — é um
@@ -1139,9 +1139,20 @@ variável de **cache**, então um `build/` configurado antes da renomeação
 continua instalando em `share/we2002/`. Reconfigurar do zero, ou passar
 `-DWE2002_APPDATADIR=share/newWe2002`.
 
-Os dois tamanhos de ícone são os dois que existem dentro do
-`legacy/mfc/res/ed.ico` (32×32 e 16×16, 16 cores), convertidos sem reescalar.
-Inventar um 256×256 seria desenhar arte nova, o que não é trabalho de port.
+O ícone era, nesta fase, os dois tamanhos de dentro do `legacy/mfc/res/ed.ico`
+(32×32 e 16×16, 16 cores, as palavras "W.E. 2002" em marrom), convertidos sem
+reescalar — inventar um 256×256 seria desenhar arte nova, e isso não é trabalho
+de port.
+
+**Substituído depois, a pedido:** [tools/make_icon.py](../tools/make_icon.py)
+desenha uma camisa listrada em sete tamanhos. Arte nova, não derivada do
+`ed.ico`; o marrom das listras é o marrom do original e é a única coisa
+herdada. Cada tamanho é desenhado naquele tamanho, não escalado de um master:
+em 16 e 24 as listras ficariam com um terço de pixel de largura e virariam
+borrão, então lá a camisa é lisa. O `ed.ico` continua em `legacy/` como
+história. Os candidatos descartados — campo visto de cima, disco, bola — viravam
+todos o mesmo círculo de centro escuro em 16 px; camisa tem silhueta, e é o que
+o programa edita.
 
 #### Onde o app acha os dados
 

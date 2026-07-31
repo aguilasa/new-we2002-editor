@@ -90,9 +90,10 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.newWe200
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.newWe2002.metainfo.xml"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo")
 
-# 16x16 and 32x32 are the only sizes legacy/mfc/res/ed.ico holds. A scaled-up
-# 48 or 256 would be invented art, so there is none.
-foreach(size 16 32)
+# Drawn by tools/make_icon.py. Each size is drawn at that size rather than
+# scaled from one master: 16 and 24 lose the shirt's stripes, which at that size
+# are a third of a pixel wide and come out as grey mush.
+foreach(size 16 24 32 48 64 128 256)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/resources/newWe2002-${size}.png"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/${size}x${size}/apps"
         RENAME newWe2002.png)

@@ -21,12 +21,13 @@ int main(int argc, char** argv) {
     QApplication::setApplicationName(QStringLiteral("newWe2002"));
     QApplication::setApplicationDisplayName(QStringLiteral("WE2002 Editor"));
 
-    // The original's SetIcon(m_hIcon) pair. Both sizes come out of
-    // legacy/mfc/res/ed.ico and are compiled in, so this works wherever the
-    // executable is run from.
+    // The original's SetIcon(m_hIcon) pair, which had only 16 and 32 to offer.
+    // Every size is compiled in (see resources/app.qrc), so this works wherever
+    // the executable is run from and a HiDPI panel has something to pick.
     QIcon icon;
-    icon.addFile(QStringLiteral(":/icons/newWe2002-16.png"));
-    icon.addFile(QStringLiteral(":/icons/newWe2002-32.png"));
+    for (const int size : {16, 24, 32, 48, 64, 128, 256}) {
+        icon.addFile(QStringLiteral(":/icons/newWe2002-%1.png").arg(size));
+    }
     QApplication::setWindowIcon(icon);
 
     // An image named on the command line skips the file dialog. The original

@@ -95,7 +95,7 @@ Instalar:
 cmake --install build-release --prefix ~/.local
 ```
 
-Põe `bin/newWe2002`, os `.txt` em `share/newWe2002/`, o `.desktop`, os dois
+Põe `bin/newWe2002`, os `.txt` em `share/newWe2002/`, o `.desktop`, os sete
 tamanhos de ícone e o AppStream. O binário acha os dados **relativo a si mesmo**
 (`../share/newWe2002`), não por caminho absoluto compilado, então a árvore
 instalada pode ser movida. Ordem de busca em
@@ -281,7 +281,7 @@ src/core/            we2002_core — logica pura. ZERO Qt, ZERO API de plataform
   include/we2002/    API publica
 src/app/             o executavel Qt: MainWindow + 5 dialogos
 src/app/ui/          os 6 .ui gerados do ed.rc + controls.json
-src/app/resources/   o icone (de legacy/mfc/res/ed.ico) + app.qrc
+src/app/resources/   o icone (gerado por tools/make_icon.py) + app.qrc
 tests/               65 checks + 2 golden tests + guardas dos geradores
 tools/               geradores e ferramentas de verificacao
 legacy/mfc/          o app MFC original — REFERENCIA, nao compila
@@ -343,14 +343,21 @@ que é o que o `.rc` quer dizer.
 ### Código gerado — não editar à mão
 
 `src/core/Database.cpp`, `Tables.cpp`, `include/we2002/Offsets.hpp`,
-`Tables.hpp` e todo o `src/app/ui/` são **gerados**. Para mudá-los, mexa no
-gerador e reexecute:
+`Tables.hpp`, todo o `src/app/ui/` e os PNGs de `src/app/resources/` são
+**gerados**. Para mudá-los, mexa no gerador e reexecute:
 
 ```sh
 python3 tools/extract_legacy_data.py   # 69 offsets + 16 tabelas
 python3 tools/port_database.py          # Load/Save/custo a partir do legacy
 python3 tools/rc2ui.py                  # os 6 .ui + controls.json, do ed.rc
+python3 tools/make_icon.py              # os 7 PNGs do ícone
 ```
+
+O `make_icon.py` é a exceção do grupo: **não tem `--check`**. Os outros três
+comparam com o commitado e falham no `ctest`; a saída do PIL não é
+byte-determinística entre versões, e um guard que quebra o CI quando o Pillow
+sobe é pior do que nenhum. Ao mexer no ícone, **olhe** o resultado — é a única
+coisa gerada aqui que teste não julga.
 
 `port_database.py` extrai `carica_dabin` e `OnWriteCD` verbatim do legacy e
 aplica substituições listadas. Se algo que ele não reconhece sobrar, ele

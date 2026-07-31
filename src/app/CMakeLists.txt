@@ -22,6 +22,13 @@ qt_add_executable(newWe2002
 # under ui/. AUTOUIC turns each into a ui_<Form>.h in the build tree.
 set_property(TARGET newWe2002 PROPERTY AUTOUIC_SEARCH_PATHS
     "${CMAKE_CURRENT_SOURCE_DIR}/ui")
+
+# Needed for resources/app.qrc, and easy to miss: qt_standard_project_setup()
+# turns on AUTOMOC and AUTOUIC but NOT AUTORCC. Without this the .qrc is treated
+# as an ordinary source file that nothing knows how to compile, rcc never runs,
+# and the build succeeds with the icon simply absent -- which is what happened
+# from phase 6 until the icon was redrawn and someone finally looked for it.
+set_property(TARGET newWe2002 PROPERTY AUTORCC ON)
 target_sources(newWe2002 PRIVATE
     ui/MainDialog.ui
     ui/PlayerSelectDialog.ui

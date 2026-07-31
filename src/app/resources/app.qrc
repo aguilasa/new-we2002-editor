@@ -2,13 +2,18 @@
      started: from an install prefix, out of a build tree, or from a copy of
      the executable on its own.
 
-     The two PNGs are the two images inside legacy/mfc/res/ed.ico, converted
-     with no rescaling. That icon has only 32x32 and 16x16, in 16 colours, so
-     those are the only sizes there are -- inventing a 256x256 would mean
-     drawing new art, which is not what a port is for. -->
+     Drawn by tools/make_icon.py; change that, not these. The 2002 icon in
+     legacy/mfc/res/ed.ico held only 16x16 and 32x32, both of them the words
+     "W.E. 2002" in three colours; it stays there as history. This set is new
+     art, so it goes as far up as anything asks for. -->
 <RCC>
   <qresource prefix="/icons">
     <file>newWe2002-16.png</file>
+    <file>newWe2002-24.png</file>
     <file>newWe2002-32.png</file>
+    <file>newWe2002-48.png</file>
+    <file>newWe2002-64.png</file>
+    <file>newWe2002-128.png</file>
+    <file>newWe2002-256.png</file>
   </qresource>
 </RCC>

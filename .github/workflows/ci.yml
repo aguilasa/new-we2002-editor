@@ -69,6 +69,7 @@ jobs:
           test -f stage/share/applications/io.github.aguilasa.newWe2002.desktop
           test -f stage/share/metainfo/io.github.aguilasa.newWe2002.metainfo.xml
           test -f stage/share/icons/hicolor/32x32/apps/newWe2002.png
+          test -f stage/share/icons/hicolor/256x256/apps/newWe2002.png
 
   # A Release build is not the same test as a Debug one. -O2 turns on glibc's
   # _FORTIFY_SOURCE, which checks strcpy and friends against the destination

@@ -51,8 +51,8 @@ cmake --install build-release --prefix ~/.local
 ```
 
 That gives you `bin/newWe2002`, the runtime data files under `share/newWe2002/`,
-a desktop entry, both icon sizes and the AppStream metadata. The binary finds
-its data files relative to itself, so the installed tree can be moved.
+a desktop entry, the icon in seven sizes and the AppStream metadata. The binary
+finds its data files relative to itself, so the installed tree can be moved.
 
 `newWe2002` names the *product*: the executable, the data directory,
 `share/doc/`, the icon and the AppStream id `io.github.aguilasa.newWe2002`. The

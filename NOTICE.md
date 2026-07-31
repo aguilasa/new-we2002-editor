@@ -8,7 +8,14 @@ This project descends from a chain of prior work. Credit where it is due:
 |---|---|---|
 | **Francesco Moriero** | 2002 | Original tool, *"we2002 mania editor 1.2 English (final version)"*. Wrote the MFC application and reverse-engineered the WE2002 CD image layout — the ~69 hardcoded byte offsets that make this program possible. See [`readme.txt`](readme.txt) for the original release notes and the community credits (cicco, walxer, honome_wec, luha, haplo, adesy, actaruss, alex1, `#winningmania`, walxer's forum). |
 | **thyddralisk** | 2015 | Published the sources on GitHub at <https://github.com/thyddralisk/WE2002-editor-2.0> and added the SoFIFA database import feature. |
-| **aguilasa** | 2026 | Cross-platform Qt port (in progress). |
+| **aguilasa** | 2026 | Cross-platform Qt port (in progress), and the application icon. |
+
+The icon in `src/app/resources/` is **not** inherited work. It is drawn from
+scratch by [`tools/make_icon.py`](tools/make_icon.py) and is not derived from
+Moriero's `legacy/mfc/res/ed.ico`, which stays in the tree unchanged as history.
+The only thing taken from it is the maroon of the stripes. This matters because
+everything else here is unlicensed third-party code, and the boundary is worth
+recording.
 
 ## Copyright and license status
 
