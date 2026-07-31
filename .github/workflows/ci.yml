@@ -56,19 +56,47 @@ jobs:
 
       - name: Validate the packaging metadata
         run: |
-          desktop-file-validate packaging/io.github.aguilasa.we2002.desktop
-          appstreamcli validate packaging/io.github.aguilasa.we2002.metainfo.xml
+          desktop-file-validate packaging/io.github.aguilasa.newWe2002.desktop
+          appstreamcli validate packaging/io.github.aguilasa.newWe2002.metainfo.xml
 
       # Proves the install rules produce a tree the binary can actually find its
       # data in -- the failure mode a package would hit and a build tree hides.
       - name: Install and check the layout
         run: |
           cmake --install build --prefix "$PWD/stage"
-          test -x stage/bin/we2002
-          test -f "stage/share/we2002/SOFIFA attributes.txt"
-          test -f stage/share/applications/io.github.aguilasa.we2002.desktop
-          test -f stage/share/metainfo/io.github.aguilasa.we2002.metainfo.xml
-          test -f stage/share/icons/hicolor/32x32/apps/we2002.png
+          test -x stage/bin/newWe2002
+          test -f "stage/share/newWe2002/SOFIFA attributes.txt"
+          test -f stage/share/applications/io.github.aguilasa.newWe2002.desktop
+          test -f stage/share/metainfo/io.github.aguilasa.newWe2002.metainfo.xml
+          test -f stage/share/icons/hicolor/32x32/apps/newWe2002.png
+
+  # A Release build is not the same test as a Debug one. -O2 turns on glibc's
+  # _FORTIFY_SOURCE, which checks strcpy and friends against the destination
+  # size -- and the inherited code has 198 strcpy calls into fixed char
+  # buffers. One of them overflowed by a byte on every image the editor opened,
+  # which no Debug build and no sanitizer-less test could see. Load() runs here
+  # against a sparse synthetic image, so a repeat of that aborts in CI.
+  linux-release:
+    name: Linux (Release, fortified)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build \
+            qt6-base-dev qt6-base-dev-tools libcurl4-openssl-dev
+
+      - name: Configure
+        run: cmake --preset release -G Ninja
+
+      - name: Build
+        run: cmake --build --preset release
+
+      - name: Test
+        run: ctest --preset release
 
   linux-ubsan:
     name: Linux (UBSan)

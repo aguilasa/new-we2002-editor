@@ -95,12 +95,20 @@ Instalar:
 cmake --install build-release --prefix ~/.local
 ```
 
-Põe `bin/we2002`, os `.txt` em `share/we2002/`, o `.desktop`, os dois tamanhos
-de ícone e o AppStream. O binário acha os dados **relativo a si mesmo**
-(`../share/we2002`), não por caminho absoluto compilado, então a árvore
+Põe `bin/newWe2002`, os `.txt` em `share/newWe2002/`, o `.desktop`, os dois
+tamanhos de ícone e o AppStream. O binário acha os dados **relativo a si mesmo**
+(`../share/newWe2002`), não por caminho absoluto compilado, então a árvore
 instalada pode ser movida. Ordem de busca em
 [src/app/DataFiles.cpp](src/app/DataFiles.cpp): `$WE2002_DATA_DIR`, ao lado do
 executável, o prefixo instalado, o `data/` do fonte.
+
+**`newWe2002` é o nome do produto, `we2002` é o nome do formato.** O executável,
+`share/newWe2002/`, `share/doc/newWe2002/`, o ícone, o appid
+`io.github.aguilasa.newWe2002` e o `project()` do CMake usam `newWe2002`. O
+namespace C++, os headers em `include/we2002/`, os alvos `we2002_core` /
+`we2002::core` / `we2002_tests` / `we2002_golden_tool` e todas as variáveis
+`WE2002_*` (de CMake e de ambiente) continuam `we2002`. Renomear o namespace
+arrastaria os geradores e o glossário inteiro sem ganho nenhum.
 
 Os 61 checks unitários rodam sem imagem. Dois testes ficam mais fortes com
 uma, e se reportam como *skipped* sem ela:
@@ -136,6 +144,16 @@ aparecer outra, é bug do port. Detalhe na Fase 3 do
 
 O script não toca na imagem de origem, mas usa ~950 MB de temporário. Precisa
 do `Debug/ed.exe`, de Wine e do `:99`; por isso não roda em CI.
+
+**Feche qualquer editor aberto no `:99` antes de rodar.** Os dois lados acham o
+diálogo principal **pelo tamanho** — ele não tem título —, então uma janela
+esquecida de um teste manual é dirigida em vez da que está sob teste, e o
+resultado é um diff de bytes que parece bug do port. Duas guardas: o
+`golden_check.sh` se recusa a começar se houver janela ≥ 900×450 no `:99`, e o
+`golden_gui.sh` restringe os candidatos ao `_NET_WM_PID` do processo que ele
+mesmo lançou. O `golden_check.sh` fixa `DISPLAY=:99` por conta própria: o
+`ctest` repassa o `DISPLAY` do shell (`:1` aqui), e as janelas normais da sessão
+real derrubariam a guarda.
 
 Duas armadilhas conhecidas ao mexer nisso:
 
@@ -231,7 +249,7 @@ diff acusa uma divergência que não existe.
 ## Rodar o port
 
 ```sh
-DISPLAY=:99 ./build/src/app/we2002 /caminho/copia.bin
+DISPLAY=:99 ./build/src/app/newWe2002 /caminho/copia.bin
 ```
 
 O argumento é opcional; sem ele abre o `QFileDialog`, como o original. Ele
@@ -493,6 +511,14 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 - **Inseguro por design**: `strcpy`/`strcat` × 198 em buffers `char` fixos.
   MSVC tolerava. Não "consertar" isoladamente sem golden test — o
   comportamento de truncamento pode ser load-bearing no formato.
+- **Build Release não é o mesmo teste que Debug.** Com `-O2` a glibc liga
+  `_FORTIFY_SOURCE`, que confere `strcpy` contra o tamanho do destino. Um dos
+  198 estourava um byte em **toda** imagem aberta (`raw_formation[30]` recebendo
+  30 bytes + terminador) e derrubava o editor com `*** buffer overflow
+  detected ***` antes de qualquer coisa aparecer — invisível em Debug, e o ASan
+  não roda nesta máquina. Ao mexer num desses `strcpy`, confira em Release:
+  `ctest --preset release` (o `TestLoadUnterminatedFormation` roda o `Load`
+  inteiro contra uma imagem esparsa sintética) e o job `linux-release` do CI.
 - Nomes de identificadores em **italiano** (`giocatore` = jogador, `squadra` =
   time, `tattica` = tática, `bandiera` = bandeira, `maglia` = camisa,
   `carat`/`caratteristiche` = atributos, `sost`/`sostituzione` =

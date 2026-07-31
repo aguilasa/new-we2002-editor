@@ -2,7 +2,7 @@
 # that knows about the CD image lives in we2002::core. The dependency runs one
 # way only -- see docs/PLAN-LINUX.md section 5.
 
-qt_add_executable(we2002
+qt_add_executable(newWe2002
     main.cpp
     MainWindow.cpp
     TeamView.cpp
@@ -20,9 +20,9 @@ qt_add_executable(we2002
 
 # The forms are generated from legacy/mfc/ed.rc by tools/rc2ui.py and committed
 # under ui/. AUTOUIC turns each into a ui_<Form>.h in the build tree.
-set_property(TARGET we2002 PROPERTY AUTOUIC_SEARCH_PATHS
+set_property(TARGET newWe2002 PROPERTY AUTOUIC_SEARCH_PATHS
     "${CMAKE_CURRENT_SOURCE_DIR}/ui")
-target_sources(we2002 PRIVATE
+target_sources(newWe2002 PRIVATE
     ui/MainDialog.ui
     ui/PlayerSelectDialog.ui
     ui/PlayerSkillsDialog.ui
@@ -31,10 +31,10 @@ target_sources(we2002 PRIVATE
     ui/EditOptionsDialog.ui
 )
 
-target_link_libraries(we2002 PRIVATE we2002::core Qt6::Widgets)
+target_link_libraries(newWe2002 PRIVATE we2002::core Qt6::Widgets)
 
 if(NOT MSVC)
-    target_compile_options(we2002 PRIVATE -Wall -Wextra)
+    target_compile_options(newWe2002 PRIVATE -Wall -Wextra)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -42,7 +42,7 @@ endif()
 # ---------------------------------------------------------------------------
 
 # Running straight out of the build tree.
-target_compile_definitions(we2002 PRIVATE
+target_compile_definitions(newWe2002 PRIVATE
     WE2002_SOURCE_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
 
 # Installed. Baked in as a path *relative to the executable* rather than as an
@@ -51,7 +51,7 @@ target_compile_definitions(we2002 PRIVATE
 file(RELATIVE_PATH WE2002_DATA_FROM_BIN
     "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}"
     "${CMAKE_INSTALL_PREFIX}/${WE2002_APPDATADIR}")
-target_compile_definitions(we2002 PRIVATE
+target_compile_definitions(newWe2002 PRIVATE
     WE2002_DATA_DIR_FROM_BIN="${WE2002_DATA_FROM_BIN}")
 
-install(TARGETS we2002 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(TARGETS newWe2002 RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")

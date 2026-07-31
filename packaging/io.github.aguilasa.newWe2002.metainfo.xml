@@ -12,7 +12,7 @@
      appstreamcli rejects the whole file rather than skipping the comment. The
      same trap caught tools/rc2ui.py in phase 4. -->
 <component type="desktop-application">
-  <id>io.github.aguilasa.we2002</id>
+  <id>io.github.aguilasa.newWe2002</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LicenseRef-proprietary</project_license>
 
@@ -43,7 +43,7 @@
     <name>aguilasa</name>
   </developer>
 
-  <launchable type="desktop-id">io.github.aguilasa.we2002.desktop</launchable>
+  <launchable type="desktop-id">io.github.aguilasa.newWe2002.desktop</launchable>
   <url type="homepage">https://github.com/aguilasa/new-we2002-editor</url>
   <url type="bugtracker">https://github.com/aguilasa/new-we2002-editor/issues</url>
 
@@ -52,7 +52,7 @@
   </categories>
 
   <provides>
-    <binary>we2002</binary>
+    <binary>newWe2002</binary>
   </provides>
 
   <content_rating type="oars-1.1"/>

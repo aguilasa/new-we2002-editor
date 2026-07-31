@@ -32,7 +32,13 @@ public:
 
     /// The formation, as the 30-byte blob the disc stores, plus the role and
     /// pitch position of each of the ten outfield slots.
-    char raw_formation[30]{}, slot_role[10]{}, slot_x[10]{}, slot_y[10]{};
+    ///
+    /// 31 and not 30: Load() reads the 30 bytes and then strcpy()s them here,
+    /// so the terminator needs a byte of its own. The original declared 30 and
+    /// wrote the NUL one past the end, into slot_role[0]; every -O2 build with
+    /// _FORTIFY_SOURCE aborts on that. Save() writes a fixed 30 bytes, so the
+    /// extra byte never reaches the disc. See docs/PLAN-LINUX.md phase 6.
+    char raw_formation[31]{}, slot_role[10]{}, slot_x[10]{}, slot_y[10]{};
 
     char flag_shape{};
     unsigned short flag_colours[16]{};
@@ -60,7 +66,8 @@ public:
     char kick_long_fk{}, kick_short_fk{}, kick_left_corner{},
         kick_right_corner{}, kick_penalty{}, captain{};
 
-    char raw_formation[30]{}, slot_role[10]{}, slot_x[10]{}, slot_y[10]{};
+    /// 31 for the same reason as Team::raw_formation.
+    char raw_formation[31]{}, slot_role[10]{}, slot_x[10]{}, slot_y[10]{};
 
     char flag_shape{};
     unsigned short flag_colours[16]{};

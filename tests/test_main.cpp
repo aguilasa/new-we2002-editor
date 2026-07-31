@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -344,6 +345,55 @@ void TestResolveMlLinkBounds() {
 
 // ---------------------------------------------------------------------------
 
+/// Load() must survive a 30-byte formation blob that contains no zero byte.
+///
+/// Load reads 30 bytes and strcpy()s them into Team::raw_formation, so the
+/// destination needs 31 bytes. The original declared 30 and let the terminator
+/// land one past the end, in slot_role[0]. That is invisible in a -O0 build and
+/// aborts every -O2 one, because _FORTIFY_SOURCE checks strcpy against the
+/// destination size: the whole editor died with "*** buffer overflow detected
+/// ***" the first time a release build opened an image.
+///
+/// The image here is sparse -- full length so every seek in Load lands
+/// somewhere real, but only the formation regions are written, with 0xFF so
+/// there is no terminator anywhere in the blob.
+void TestLoadUnterminatedFormation() {
+    Section("Load with an unterminated formation blob");
+
+    static_assert(sizeof(we2002::Team::raw_formation) >= 31,
+                  "raw_formation must hold 30 bytes plus a terminator");
+    static_assert(sizeof(we2002::MlTeam::raw_formation) >= 31,
+                  "raw_formation must hold 30 bytes plus a terminator");
+
+    const auto tmp =
+        std::filesystem::temp_directory_path() / "we2002_unterminated_test.bin";
+    {
+        std::ofstream out(tmp, std::ios::binary | std::ios::trunc);
+        CHECK(out.good());
+        if (!out.good()) return;
+        // Sparse: seek to the last byte and write it. Nothing in between is
+        // allocated, so this costs kilobytes and not 474 MB.
+        out.seekp(474431328 - 1);
+        out.put('\0');
+        const std::vector<char> filler(8192, '\xff');
+        out.seekp(we2002::OFS_FORMATIONS);
+        out.write(filler.data(), static_cast<std::streamsize>(filler.size()));
+        out.seekp(we2002::OFS_FORMATIONS_A);
+        out.write(filler.data(), static_cast<std::streamsize>(filler.size()));
+    }
+
+    auto db = std::make_unique<we2002::Database>();
+    CHECK(db->Load(tmp, [](const std::string&) {}));
+
+    // 30 payload bytes and the terminator, all inside the member.
+    CHECK(std::strlen(db->teams[0].raw_formation) == 30);
+    CHECK(std::strlen(db->ml_teams[0].raw_formation) == 30);
+
+    std::filesystem::remove(tmp);
+}
+
+// ---------------------------------------------------------------------------
+
 /// Load a real CD image and check the data lands where it should.
 ///
 /// Skipped unless WE2002_TEST_IMAGE points at a raw MODE2/2352 .bin. This is
@@ -404,6 +454,7 @@ int main() {
     TestCdImage();
     TestTables();
     TestResolveMlLinkBounds();
+    TestLoadUnterminatedFormation();
     TestRealImage();
 
     std::printf("\n%d checks, %d failures\n", g_checks, g_failures);

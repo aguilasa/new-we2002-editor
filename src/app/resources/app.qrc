@@ -8,7 +8,7 @@
      drawing new art, which is not what a port is for. -->
 <RCC>
   <qresource prefix="/icons">
-    <file>we2002-16.png</file>
-    <file>we2002-32.png</file>
+    <file>newWe2002-16.png</file>
+    <file>newWe2002-32.png</file>
   </qresource>
 </RCC>

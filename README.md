@@ -31,7 +31,7 @@ skipped. That is deliberate — the byte-comparison tests have to run headless.
 ## Running
 
 ```sh
-./build/src/app/we2002 [image.bin]
+./build/src/app/newWe2002 [image.bin]
 ```
 
 The path is optional; without it the editor asks for one, as the original did.
@@ -50,9 +50,15 @@ cmake --build --preset release
 cmake --install build-release --prefix ~/.local
 ```
 
-That gives you `bin/we2002`, the runtime data files under `share/we2002/`, a
-desktop entry, both icon sizes and the AppStream metadata. The binary finds its
-data files relative to itself, so the installed tree can be moved.
+That gives you `bin/newWe2002`, the runtime data files under `share/newWe2002/`,
+a desktop entry, both icon sizes and the AppStream metadata. The binary finds
+its data files relative to itself, so the installed tree can be moved.
+
+`newWe2002` names the *product*: the executable, the data directory,
+`share/doc/`, the icon and the AppStream id `io.github.aguilasa.newWe2002`. The
+C++ namespace, the `we2002_core` library and the `WE2002_*` build and
+environment variables stay `we2002`, because they name the game and its image
+format rather than this editor.
 
 There is no distro package or AppImage yet.
 

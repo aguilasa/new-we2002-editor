@@ -17,6 +17,12 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Pinned here and not just in golden_run.sh / golden_gui.sh, which set the same
+# thing: the stray-window check below inspects a display, and ctest passes
+# whatever DISPLAY the developer's shell had -- :1, the real session, whose
+# ordinary windows are big enough to trip the check. Never :1 (see CLAUDE.md).
+export DISPLAY="${GOLDEN_DISPLAY:-:99}"
+
 IMAGE="${1:-${WE2002_GOLDEN_IMAGE:-}}"
 TOOL="${2:-${WE2002_GOLDEN_TOOL:-$REPO/build/tests/we2002_golden_tool}}"
 
@@ -31,7 +37,7 @@ if [ -z "$IMAGE" ]; then
 fi
 [ -f "$IMAGE" ] || { echo "golden_check: nao existe: $IMAGE" >&2; exit 1; }
 if [ "$MODE" = gui ]; then
-    TOOL="${WE2002_GOLDEN_APP:-$REPO/build/src/app/we2002}"
+    TOOL="${WE2002_GOLDEN_APP:-$REPO/build/src/app/newWe2002}"
     [ -x "$TOOL" ] || {
         echo "golden_check: falta $TOOL -- o app Qt nao foi compilado" >&2
         exit 77
@@ -43,6 +49,25 @@ fi
     echo "golden_check: Debug/ed.exe ausente -- sem oraculo, sem teste" >&2
     exit 1
 }
+
+# Both halves find the main dialog by its size, because it has no title. So an
+# editor already open on this display -- a leftover from poking at the GUI by
+# hand -- gets driven instead of the one under test, and the run fails with
+# byte differences that look like a port bug. Refuse to start instead.
+# Anything this big is an editor: the dialog is 1077x547, and Wine clips it to
+# the width of the screen, so the test is a floor and not an exact size.
+if command -v xwininfo >/dev/null 2>&1; then
+    while read -r line; do
+        [[ "$line" =~ ([0-9]+)x([0-9]+)\+ ]] || continue
+        if [ "${BASH_REMATCH[1]}" -ge 900 ] && [ "${BASH_REMATCH[2]}" -ge 450 ]; then
+            echo "golden_check: ja existe uma janela de editor em $DISPLAY:" >&2
+            echo "  $line" >&2
+            echo "  Feche-a antes (o ed.exe pede 'wineserver -k'). Os dois lados" >&2
+            echo "  acham o dialogo pelo tamanho e dirigiriam a janela errada." >&2
+            exit 1
+        fi
+    done < <(xwininfo -root -children 2>/dev/null | grep -F '": (')
+fi
 
 # The one place ed.exe and the port are allowed to disagree.
 #

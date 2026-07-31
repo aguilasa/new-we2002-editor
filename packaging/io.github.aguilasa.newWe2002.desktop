@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=WE2002 Editor
+GenericName=CD Image Editor
+Comment=Edit teams, players, tactics, kits and flags in a Winning Eleven 2002 CD image
+Exec=newWe2002 %f
+Icon=newWe2002
+Terminal=false
+# Matches QApplication::setApplicationName() in src/app/main.cpp: without it the
+# shell cannot tie the running window to this entry, because the entry is named
+# after the appstream id and the window after the executable.
+StartupWMClass=newWe2002
+Categories=Game;
+Keywords=winning eleven;pro evolution soccer;playstation;psx;rom;

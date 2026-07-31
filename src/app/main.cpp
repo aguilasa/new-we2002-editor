@@ -15,15 +15,18 @@
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
-    QApplication::setApplicationName(QStringLiteral("we2002"));
+    // This is what ends up in WM_CLASS, which is how a desktop shell matches a
+    // window back to its .desktop entry. Keep it equal to the executable name
+    // and to StartupWMClass in packaging/io.github.aguilasa.newWe2002.desktop.
+    QApplication::setApplicationName(QStringLiteral("newWe2002"));
     QApplication::setApplicationDisplayName(QStringLiteral("WE2002 Editor"));
 
     // The original's SetIcon(m_hIcon) pair. Both sizes come out of
     // legacy/mfc/res/ed.ico and are compiled in, so this works wherever the
     // executable is run from.
     QIcon icon;
-    icon.addFile(QStringLiteral(":/icons/we2002-16.png"));
-    icon.addFile(QStringLiteral(":/icons/we2002-32.png"));
+    icon.addFile(QStringLiteral(":/icons/newWe2002-16.png"));
+    icon.addFile(QStringLiteral(":/icons/newWe2002-32.png"));
     QApplication::setWindowIcon(icon);
 
     // An image named on the command line skips the file dialog. The original

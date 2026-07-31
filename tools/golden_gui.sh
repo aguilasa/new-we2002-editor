@@ -2,7 +2,7 @@
 # Drive the Qt port through one open -> "Write into CD image" cycle, the same
 # way tools/golden_run.sh drives ed.exe.
 #
-#   tools/golden_gui.sh /path/to/copy-of-image.bin [/path/to/we2002]
+#   tools/golden_gui.sh /path/to/copy-of-image.bin [/path/to/newWe2002]
 #
 # The image is edited IN PLACE. Always pass a copy -- each one is ~474 MB.
 #
@@ -27,7 +27,7 @@ if [ $# -lt 1 ]; then
 fi
 
 IMAGE="$(readlink -f "$1")"
-APP="${2:-$REPO/build/src/app/we2002}"
+APP="${2:-$REPO/build/src/app/newWe2002}"
 [ -f "$IMAGE" ] || { echo "$0: nao existe: $IMAGE" >&2; exit 1; }
 [ -x "$APP" ] || { echo "$0: falta $APP (compile primeiro)" >&2; exit 1; }
 
@@ -58,16 +58,23 @@ APP_PID=$!
 # Windows are matched by size, not by title: the main dialog and every message
 # box share one. 1077x547 is the dialog's own geometry, transcribed from the
 # .rc, so anything that big is the main window and anything smaller is a box.
+#
+# The candidates are restricted to windows this process owns, via the
+# _NET_WM_PID Qt sets. Size alone is not enough: an editor left open on the
+# display has a dialog of exactly the same size, and driving that one produces a
+# byte diff that reads like a port bug. golden_check.sh also refuses to start in
+# that situation; this is the second half of the same guard.
 find_window() {   # find_window <min_w> <min_h> [max_w]
-    local min_w="$1" min_h="$2" max_w="${3:-99999}" line w h
-    while read -r line; do
-        [[ "$line" =~ ([0-9]+)x([0-9]+)\+ ]] || continue
+    local min_w="$1" min_h="$2" max_w="${3:-99999}" id geo w h
+    for id in $(xdotool search --pid "$APP_PID" 2>/dev/null); do
+        geo="$(xdotool getwindowgeometry "$id" 2>/dev/null | grep -o 'Geometry: [0-9]*x[0-9]*')"
+        [[ "$geo" =~ ([0-9]+)x([0-9]+) ]] || continue
         w="${BASH_REMATCH[1]}"; h="${BASH_REMATCH[2]}"
         if [ "$w" -ge "$min_w" ] && [ "$h" -ge "$min_h" ] && [ "$w" -le "$max_w" ]; then
-            printf '%s' "$(printf '%s' "$line" | grep -o '0x[0-9a-f]*' | head -1)"
+            printf '0x%x' "$id"
             return 0
         fi
-    done < <(xwininfo -root -children 2>/dev/null | grep -F '": (')
+    done
     return 1
 }
 

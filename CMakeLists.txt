@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
-project(we2002
+# The project name is the name of the *product*: the installed executable, the
+# data directory, share/doc/. It is deliberately not the same as the C++
+# namespace, the core library or the WE2002_* variables, which are all named
+# after the game and its image format rather than after this editor.
+project(newWe2002
     VERSION 0.1.0
     DESCRIPTION "Cross-platform editor for Winning Eleven 2002 PSX CD images"
     LANGUAGES CXX)
@@ -43,7 +47,7 @@ include(GNUInstallDirs)
 # The runtime data files. The application resolves this at run time relative to
 # its own executable, not from an absolute path baked in here -- see
 # src/app/DataFiles.cpp.
-set(WE2002_APPDATADIR "${CMAKE_INSTALL_DATADIR}/we2002"
+set(WE2002_APPDATADIR "${CMAKE_INSTALL_DATADIR}/newWe2002"
     CACHE STRING "Where the runtime .txt data files are installed")
 
 add_subdirectory(src/core)
@@ -56,7 +60,7 @@ if(Qt6_FOUND)
     qt_standard_project_setup()
     add_subdirectory(src/app)
 else()
-    message(STATUS "we2002: Qt6 GUI not built -- install qt6-base-dev")
+    message(STATUS "newWe2002: Qt6 GUI not built -- install qt6-base-dev")
 endif()
 
 include(CTest)
@@ -81,17 +85,17 @@ install(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/data/WE attributes conversion rules.txt"
     DESTINATION "${WE2002_APPDATADIR}")
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.we2002.desktop"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.newWe2002.desktop"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.we2002.metainfo.xml"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/io.github.aguilasa.newWe2002.metainfo.xml"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo")
 
 # 16x16 and 32x32 are the only sizes legacy/mfc/res/ed.ico holds. A scaled-up
 # 48 or 256 would be invented art, so there is none.
 foreach(size 16 32)
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/resources/we2002-${size}.png"
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/resources/newWe2002-${size}.png"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/${size}x${size}/apps"
-        RENAME we2002.png)
+        RENAME newWe2002.png)
 endforeach()
 
 # The documents that say what may and may not be done with this code. Shipping

@@ -377,14 +377,14 @@ A direção de dependência é de mão única: `app` → `core`. Nunca o contrá
 | Target | Tipo | Depende de |
 |---|---|---|
 | `we2002_core` | biblioteca estática | libcurl |
-| `we2002` | executável | `we2002_core`, `Qt6::Widgets` |
+| `newWe2002` | executável | `we2002_core`, `Qt6::Widgets` |
 | `we2002_tests` | executável de teste | `we2002_core` |
 
 Esqueleto do `CMakeLists.txt` da raiz:
 
 ```cmake
 cmake_minimum_required(VERSION 3.21)
-project(we2002 LANGUAGES CXX)
+project(newWe2002 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -854,7 +854,7 @@ O Qt6 6.4.2 foi instalado no começo desta fase
 
 #### O que existe agora
 
-`src/app/` tem o executável `we2002`: 12 fontes, ~3.100 linhas contra as
+`src/app/` tem o executável `newWe2002`: 12 fontes, ~3.100 linhas contra as
 ~9.800 do MFC (`edDlg.cpp` + os cinco diálogos + `giocatore.cpp` +
 `myiotxt.cpp`).
 
@@ -936,7 +936,7 @@ Armadilha de quem for repetir o teste: **`Ctrl+A` não seleciona tudo num
 textos diferentes (`INTERZO` contra `ZORINFC`) e o diff acusa uma divergência
 que não existe. Limpar com `End`, `shift+Home`, `BackSpace` funciona nos dois.
 
-Para o teste ser dirigível, o `we2002` aceita o caminho da imagem como
+Para o teste ser dirigível, o `newWe2002` aceita o caminho da imagem como
 argumento e pula o `QFileDialog`. O original não tinha argumento nenhum.
 
 #### Divergências deliberadas
@@ -1113,16 +1113,31 @@ cmake --install build-release --prefix ~/.local
 
 | Vai para | O quê |
 |---|---|
-| `bin/we2002` | o executável |
-| `share/we2002/` | `defaultlook.txt`, `SOFIFA attributes.txt`, `WE attributes conversion rules.txt` |
-| `share/applications/` | `io.github.aguilasa.we2002.desktop` |
+| `bin/newWe2002` | o executável |
+| `share/newWe2002/` | `defaultlook.txt`, `SOFIFA attributes.txt`, `WE attributes conversion rules.txt` |
+| `share/applications/` | `io.github.aguilasa.newWe2002.desktop` |
 | `share/metainfo/` | AppStream |
-| `share/icons/hicolor/{16x16,32x32}/apps/we2002.png` | o ícone |
-| `share/doc/we2002/` | `NOTICE.md` e `README.md` |
+| `share/icons/hicolor/{16x16,32x32}/apps/newWe2002.png` | o ícone |
+| `share/doc/newWe2002/` | `NOTICE.md` e `README.md` |
 
 `naz.txt` **não** é instalado: apesar de estar em `data/`, não é dado — é um
 array em C que o autor colou na árvore, e nada o lê. Fica no repositório como
 história.
+
+**O nome do produto é `newWe2002`; `we2002` é o nome do formato.** A árvore
+instalada, o `project()` do CMake, o alvo do executável, o ícone e o appid
+`io.github.aguilasa.newWe2002` usam `newWe2002`. Ficaram deliberadamente como
+`we2002`: o namespace C++, os headers em `src/core/include/we2002/`, os alvos
+`we2002_core` / `we2002::core` / `we2002_tests` / `we2002_golden_tool` e todas as
+variáveis `WE2002_*` de CMake e de ambiente (`WE2002_DATA_DIR`,
+`WE2002_GOLDEN_IMAGE`, `WE2002_APPDATADIR`, ...) — esses nomeiam o jogo e o
+layout da imagem, não este editor, e renomear o namespace arrastaria os
+geradores, o glossário e todo arquivo gerado sem ganho nenhum.
+
+Consequência para quem tem árvore de build antiga: `WE2002_APPDATADIR` é
+variável de **cache**, então um `build/` configurado antes da renomeação
+continua instalando em `share/we2002/`. Reconfigurar do zero, ou passar
+`-DWE2002_APPDATADIR=share/newWe2002`.
 
 Os dois tamanhos de ícone são os dois que existem dentro do
 `legacy/mfc/res/ed.ico` (32×32 e 16×16, 16 cores), convertidos sem reescalar.
@@ -1136,7 +1151,7 @@ Isso é o que um pacote quebra e uma árvore de build esconde. A ordem está em
 1. `$WE2002_DATA_DIR` — escape hatch explícito.
 2. Ao lado do executável — a única busca que o original fazia, e como fica uma
    cópia portátil descompactada.
-3. O prefixo instalado, **relativo ao executável** (`../share/we2002`), não por
+3. O prefixo instalado, **relativo ao executável** (`../share/newWe2002`), não por
    caminho absoluto compilado. Mover a árvore instalada não quebra, e é também
    o que um AppImage precisaria de graça.
 4. O `data/` do fonte, para rodar direto da árvore de build.
@@ -1146,14 +1161,14 @@ user+mount namespace (a mesma técnica do `tools/run-sanitized.sh`) e rodando o
 binário instalado. Sem o aviso de SoFIFA, então achou pelo caminho relativo.
 
 Detalhe que atrapalha a conferência: `strings` **não** encontra
-`../share/we2002` no binário. Com `-O2` o GCC monta a string de 15 bytes em dois
+`../share/newWe2002` no binário. Com `-O2` o GCC monta a string em dois
 `movabs` imediatos na pilha, e ela nunca existe contígua em `.rodata`. Conferir
 pelas flags de compilação (`grep WE2002_DATA_DIR_FROM_BIN
-build/src/app/CMakeFiles/we2002.dir/flags.make`), não pelo binário.
+build/src/app/CMakeFiles/newWe2002.dir/flags.make`), não pelo binário.
 
-#### Dois defeitos achados e corrigidos aqui
+#### Três defeitos achados e corrigidos aqui
 
-Nenhum dos dois muda byte de saída — os golden tests provam.
+Nenhum dos três muda byte de saída — os golden tests provam.
 
 - **`Return` na janela principal clicava um botão arbitrário.** Dentro de um
   `QDialog` o Qt torna todo `QPushButton` auto-default, então `Return` acionava
@@ -1182,13 +1197,43 @@ Nenhum dos dois muda byte de saída — os golden tests provam.
   fora dos limites. Fixado por `TestResolveMlLinkBounds`, que varre as 65.536
   combinações de dois bytes e exige que nenhuma escape da faixa.
 
+- **O build Release morria em toda imagem.** `*** buffer overflow detected ***`
+  logo depois do aviso de tamanho, antes de qualquer coisa aparecer. Achado ao
+  conferir a árvore instalada, que é Release; o Debug não tem nada.
+
+  Causa: `Load` lê 30 bytes de formação e faz `strcpy` para
+  `Team::raw_formation`, declarado com **30** bytes. O terminador caía um byte
+  além, em `slot_role[0]`. Com `-O2` a glibc liga o `_FORTIFY_SOURCE`, que
+  confere `strcpy` contra o tamanho do destino (`__strcpy_chk(..., destlen=30)`)
+  e aborta. É `Team` e `MlTeam`, 96 vezes por carga.
+
+  O original declarava 30 e escrevia 31; o MSVC não conferia e o zero ia para
+  `ruolo[0]`. `slot_role`/`slot_x`/`slot_y` são campos mortos no port — o
+  `OnWriteCD` nunca os gravou e a tela lê os 30 bytes de `raw_formation`
+  direto — então o byte extra nunca chegou ao disco em nenhum dos dois. Por isso
+  passar o array para **31** não muda saída: `Save` grava 30 bytes fixos.
+  Conferido dos dois lados — `roundtrip` em Debug e em Release dão arquivos
+  byte-idênticos, e o `golden_gui` rodado com o binário Release fecha igual ao
+  oráculo.
+
+  Duas guardas: um `static_assert(sizeof(raw_formation) >= 31)` (quebra o build
+  em qualquer configuração se alguém reduzir de volta) e
+  `TestLoadUnterminatedFormation`, que monta uma imagem **esparsa** do tamanho
+  cheio com `0xFF` nas regiões de formação — assim os 30 bytes não têm zero
+  nenhum — e roda o `Load` inteiro. Sob `_FORTIFY_SOURCE` esse teste é o que
+  pega qualquer outro dos 198 `strcpy` que estoure dentro do `Load`, sem precisar
+  de imagem de verdade.
+
+  Lição registrada em CLAUDE.md: **Release não é o mesmo teste que Debug.**
+
 #### Infraestrutura
 
 - **[CMakePresets.json](../CMakePresets.json)** — `debug`, `release`, `asan`,
   `ubsan`. A seção 5 previa isso desde o começo e nunca tinha sido escrito.
-- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** — três jobs:
+- **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** — quatro jobs:
   `linux` (compila, testa, valida `.desktop`/AppStream, instala e confere o
-  layout), `linux-ubsan`, e `windows` com `continue-on-error: true`. A seção 5
+  layout), `linux-release` (Release, para o `_FORTIFY_SOURCE` rodar),
+  `linux-ubsan`, e `windows` com `continue-on-error: true`. A seção 5
   pede a matriz com `windows-latest` desde o primeiro workflow "mesmo que comece
   vermelho": vermelho ali é o sinal, não uma falha, e a Fase 7 tira o
   `continue-on-error`.
