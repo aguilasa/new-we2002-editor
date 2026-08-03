@@ -22,7 +22,8 @@
 >
 > Progresso: Fases 0 a **6 concluídas** — o escopo Linux está fechado.
 > A Fase 7 (Windows) ainda **não autorizada** — não iniciar sem pedido
-> explícito.
+> explícito. O roteiro dela está pronto em
+> [PLAN-WINDOWS.md](PLAN-WINDOWS.md), para ser executado na máquina Windows.
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
@@ -1266,6 +1267,27 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 **Fim do escopo Linux. Total Fases 1–6 (incluindo a 5.5): ~1,5 a 2 semanas.**
 
 ### Fase 7 — Windows (~2–3 dias, só depois do Linux redondo)
+
+> **O roteiro de execução está em [PLAN-WINDOWS.md](PLAN-WINDOWS.md)** —
+> ambiente de desenvolvimento passo a passo, os defeitos já localizados que só
+> aparecem no MSVC, as tarefas em ordem e o checklist de aceitação. Este arquivo
+> fica com o *o quê*; o outro tem o *como*, para ser seguido sentado na máquina
+> Windows.
+>
+> Duas coisas que aquele documento resolve e que o resumo abaixo ainda não
+> sabia:
+>
+> - **Os golden tests não rodam no Windows** como estão. Os três scripts são
+>   bash e dependem de Wine e `xdotool`. Em vez de portá-los, a paridade de
+>   bytes se prova por transitividade: se `port(MSVC) == port(GCC)` e o Linux já
+>   provou `port(GCC) == ed.exe`, está provado — e isso é comparação de
+>   SHA-256 de dois `roundtrip`, sem GUI e sem Wine. O confronto direto com o
+>   `Debug/ed.exe` **nativo** continua valendo a pena uma vez, e não precisa de
+>   automação: é clicar.
+> - **O ASan só roda no Windows.** Nesta máquina Linux a Citrix o inviabiliza
+>   (ver CLAUDE.md); o MSVC tem `/fsanitize=address`, hoje desligado pelo
+>   `NOT MSVC` da linha 36 do `CMakeLists.txt`. É a primeira chance real de
+>   varrer os 198 `strcpy` herdados.
 
 Não começar antes da Fase 6 fechada e dos golden tests verdes no Linux.
 
