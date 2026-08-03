@@ -38,3 +38,8 @@ compile_commands.json
 
 # Python bytecode from tools/
 __pycache__/
+
+# ---- Imagens de teste ----
+# roms/ guarda as imagens de CD usadas pelos testes (~780 MB). O usuario mantem
+# a pasta populada; ela nunca entra no versionamento. Ver CLAUDE.md.
+roms/

@@ -66,7 +66,7 @@ MOVIE/WE2002.STR  37.486.592   SLPM_870.56      337.920 (executável)
 
 **(b) O `DAT2D.BIN` de amostra do repositório do CARP é byte a byte igual ao
 do nosso disco japonês.** Ele publica um `DAT2D.BIN` de 81.124 bytes dentro do
-Image Manager; extraído do `World Soccer Winning Eleven 2002 (Japan).bin`
+Image Manager; extraído do `roms/japanese-shift-jis.bin`
 (LBA 5300, 81.124 bytes) o arquivo é **idêntico**. Contra o European Deluxe o
 tamanho e o cabeçalho batem e 3.798 bytes (4,7%) divergem — é o mesmo arquivo
 com gráficos trocados pelo hack.

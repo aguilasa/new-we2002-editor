@@ -182,8 +182,10 @@ Presets próprios para Windows são a tarefa T2.
 
 ### 2.8 Uma imagem de CD
 
-Copie **uma cópia** de `Winning Eleven 2002 - European Deluxe 2002-03.bin`
-(474.784.128 bytes) para a máquina. É a imagem de referência dos golden tests.
+Copie **uma cópia** da imagem European Deluxe 2002-03 (474.784.128 bytes) para
+a máquina. É a imagem de referência dos golden tests. Na árvore Linux ela fica
+em `roms/golden-european-deluxe.bin`, na raiz do repositório — pasta fora do
+versionamento, então ela **não** vem junto no `git clone`; copie à mão.
 
 O editor grava **in-place**. Nunca aponte para a única cópia que você tem.
 

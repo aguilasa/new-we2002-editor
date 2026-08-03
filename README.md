@@ -28,6 +28,13 @@ ctest --preset debug
 Without Qt 6 the core library and its tests still build; only the GUI is
 skipped. That is deliberate — the byte-comparison tests have to run headless.
 
+The unit checks pass with no image. Two of them, and the byte-comparison tests,
+want a real one; point `WE2002_TEST_IMAGE` / `WE2002_GOLDEN_IMAGE` at a **copy**
+of a supported release. In this working tree those images live in `roms/` as
+`golden-european-deluxe.bin` and `japanese-shift-jis.bin` — named for what they
+test, not for the dump they came from. The directory is deliberately not
+versioned; ~780 MB of CD dumps do not belong in git.
+
 ## Running
 
 ```sh

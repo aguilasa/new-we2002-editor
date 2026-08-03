@@ -258,19 +258,36 @@ existe para o `golden_gui.sh` conseguir dirigir a janela. O aviso de
 
 ## Imagens de CD para teste
 
-| Caminho em `~/ROMs/psx/` | Uso |
-|---|---|
-| `Winning Eleven 2002 - European Deluxe 2002-03/` | **Imagem golden.** Todos os offsets batem, nomes latinos. |
-| `World Soccer Winning Eleven 2002/` | **Melhor imagem japonesa para testes** (arquivo único, SLPM-87056). Valida `kanjitoascii`/`asciitokanji`. ECC íntegro — use esta para testar que o port reproduz o mesmo ECC inválido que o `ed.exe` ao gravar. Só track de dados, sem `.cue`: não serve para jogar. |
-| `World Soccer Winning Eleven 2002 (Japan)/` | Mesma release, dump multi-track completo (9 tracks + `.cue` válido). É a de jogar. Para testes é redundante e tem ECC degradado (211/300 setores zerados). |
-| `Pro Evolution Soccer 2 (Europe) (EnFrDe)/` | **NÃO USAR.** Layout diverge após ~2 MB; o editor corrompe a imagem. |
+As duas imagens que os testes usam ficam em **`roms/`, na raiz deste
+repositório**:
 
-Os dois dumps japoneses divergem em 3 bytes de dados (um patch de
-anti-pirataria em código MIPS), fora de qualquer região do editor. Detalhe da
-comparação na seção 3 do [PLAN-LINUX.md](PLAN-LINUX.md).
+| Arquivo em `roms/` | Release | Uso |
+|---|---|---|
+| `golden-european-deluxe.bin` | Winning Eleven 2002 – European Deluxe 2002-03 | **Imagem golden.** Todos os offsets batem, nomes latinos. Vem com `golden-european-deluxe.cue` ao lado. |
+| `japanese-shift-jis.bin` | World Soccer Winning Eleven 2002 (Japan), SLPM-87056, dump de arquivo único | **Melhor imagem japonesa para testes.** Valida `kanjitoascii`/`asciitokanji`. ECC íntegro — use esta para testar que o port reproduz o mesmo ECC inválido que o `ed.exe` ao gravar. Só track de dados, sem `.cue`: não serve para jogar. |
+
+Os nomes são deste repositório, não dos dumps: minúsculas, sem espaço, e dizem
+para que a imagem serve. O `.cue` foi ajustado para apontar para o `.bin`
+renomeado.
+
+`roms/` está no `.gitignore` — são ~780 MB e não entram no versionamento. O
+usuário garante que os arquivos estão lá; **não copie de outro lugar nem baixe
+nada**. Se a pasta estiver vazia, avise em vez de improvisar.
+
+Duas releases que não vale usar:
+
+- `World Soccer Winning Eleven 2002 (Japan)` em dump multi-track (9 tracks +
+  `.cue` válido) — é a de jogar, mas para testes é redundante com a de arquivo
+  único e tem ECC degradado (211/300 setores zerados). Os dois dumps japoneses
+  divergem em 3 bytes de dados (patch anti-pirataria em código MIPS), fora de
+  qualquer região do editor; comparação na seção 3 do
+  [PLAN-LINUX.md](docs/PLAN-LINUX.md).
+- `Pro Evolution Soccer 2 (Europe) (EnFrDe)` — **NÃO USAR.** Layout diverge
+  após ~2 MB; o editor corrompe a imagem.
 
 **Sempre trabalhar sobre cópia** — o editor grava in-place e cada imagem tem
-~474 MB.
+~474 MB. As de `roms/` são as originais: copie para o scratchpad antes de
+apontar o editor ou o golden test para elas.
 
 ## Arquitetura
 

@@ -199,16 +199,23 @@ Testados 4 offsets do editor em cada imagem:
 
 **Veredito:**
 
-- `/home/ingmar/ROMs/psx/Winning Eleven 2002 - European Deluxe 2002-03/` →
-  **imagem golden.** Todos os offsets batem, nomes latinos, fácil de
-  inspecionar visualmente.
-- `/home/ingmar/ROMs/psx/World Soccer Winning Eleven 2002/` →
-  **melhor imagem japonesa.** Ver comparação abaixo.
-- `/home/ingmar/ROMs/psx/World Soccer Winning Eleven 2002 (Japan)/` →
-  compatível, mas redundante com a anterior e com ECC degradado.
-- `/home/ingmar/ROMs/psx/Pro Evolution Soccer 2 (Europe) (EnFrDe)/` →
-  **NÃO USAR.** Layout diverge depois de ~2 MB; o editor grava por cima de
-  outros dados e corrompe a imagem.
+- Winning Eleven 2002 – European Deluxe 2002-03 → **imagem golden.** Todos os
+  offsets batem, nomes latinos, fácil de inspecionar visualmente.
+- World Soccer Winning Eleven 2002 (Japan), dump de arquivo único → **melhor
+  imagem japonesa.** Ver comparação abaixo.
+- A mesma release em dump multi-track → compatível, mas redundante com a
+  anterior e com ECC degradado.
+- `Pro Evolution Soccer 2 (Europe) (EnFrDe)` → **NÃO USAR.** Layout diverge
+  depois de ~2 MB; o editor grava por cima de outros dados e corrompe a imagem.
+
+As duas escolhidas ficam em **`roms/`, na raiz do repositório** — pasta fora do
+versionamento (`.gitignore`), mantida pelo usuário. As outras duas não estão
+lá, de propósito. Os arquivos foram renomeados pelo papel que cumprem:
+
+| Arquivo | Release |
+|---|---|
+| `golden-european-deluxe.bin` (+ `.cue`) | European Deluxe 2002-03 |
+| `japanese-shift-jis.bin` | SLPM-87056, arquivo único |
 
 ### Os dois dumps japoneses
 
