@@ -66,8 +66,14 @@ wte/assets
 *.lps
 *.ppu
 *.compiled
-lib/
-backup/
+# As duas abaixo sao ancoradas e as tres de cima nao, de proposito: `.lps`,
+# `.ppu` e `.compiled` so o toolchain Pascal emite, mas `lib` e `backup` sao
+# nome de pasta generico -- sem o `wte/` casariam em qualquer profundidade e
+# engoliriam `src/lib/`, `tools/lib/`, `legacy/backup/`. Nenhuma das duas e
+# usada por este projeto (o .lpi grava em `build/units`); ficam pelo caso de
+# alguem abrir o wte.lpi na IDE grafica, que as cria.
+wte/lib/
+wte/backup/
 # ATENCAO: nao acrescente `*.lfm` nem `*.pas` a nenhuma regra daqui. A partir
 # da fase 2 os dois sao GERADOS pelo dfm2lfm.py e, ainda assim, versionados --
 # e o `--check` que prova que ninguem os editou a mao.

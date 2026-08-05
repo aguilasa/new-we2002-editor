@@ -3,7 +3,7 @@ id: CORR-WTE-003
 title: "Correção: a seção `wte/` do `.gitignore` ignora `lib/` e `backup/` no repositório inteiro"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -118,24 +118,49 @@ ancoradas e as três de extensão não — a seção já explica cada regra, e e
 
 ## Verificação
 
-- [ ] As duas regras deixaram de alcançar o `newWe2002`:
+- [x] As duas regras deixaram de alcançar o `newWe2002`:
       `git check-ignore -v src/lib/x.cpp tools/lib/z.py legacy/backup/y.txt`
       não devolve nada
-- [ ] Continuam alcançando o `wte/`:
+- [x] Continuam alcançando o `wte/`:
       `git check-ignore -v wte/lib/x.o wte/backup/y.pas` devolve as duas linhas
-- [ ] Nada saiu do índice por engano: `git status --short` limpo e
+- [x] Nada saiu do índice por engano: `git status --short` limpo e
       `git ls-files | wc -l` inalterado antes e depois
-- [ ] `wte/re/` segue **não** ignorado:
+- [x] `wte/re/` segue **não** ignorado:
       `git check-ignore wte/re/ambiente.md` não devolve nada
-- [ ] `lazbuild wte/wte.lpi` continua compilando
-- [ ] `roms/` intocada
+- [x] `lazbuild wte/wte.lpi` continua compilando
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-05
 
 **Resumo do que foi feito:**
 
+Ancoradas as duas regras: `lib/` → `wte/lib/`, `backup/` → `wte/backup/`, na
+mesma seção onde já estavam. As três de extensão (`*.lps`, `*.ppu`,
+`*.compiled`) ficaram sem âncora, como a Correção manda. Escolhida a rota de
+ancorar, não a de remover, pela razão registrada na CORR: a IDE gráfica cria as
+duas pastas, e o `lazbuild` por linha de comando não.
+
+Números medidos: `git ls-files` = **211 antes e depois**; `lazbuild` sai **0**,
+com 0 linhas de `warning`/`error` e 2 hints (os mesmos de antes — expansão do
+`{$R *.lfm}` e o `SetOutputDirectoryOverride`).
+
 **Problemas encontrados:**
 
+Nenhum. A varredura de discrepância (`grep -rn` em `docs`, `wte/re`, `.claude`,
+`CLAUDE.md`) não achou doc que descrevesse as duas regras no estado antigo — só
+esta CORR e o bloco de detalhe do `correcoes-progresso.md`, que narram o sintoma
+e continuam corretos como registro histórico. O critério da WTE-TASK-02
+(".gitignore cobrindo saída de build, e **não** cobrindo `wte/re/`") segue
+verdadeiro: `git check-ignore wte/re/ambiente.md` não devolve nada.
+
+Acrescentado o comentário que a Correção pedia, dizendo **por que** estas duas
+são ancoradas e as três de extensão não — era a única regra da seção sem razão
+escrita ao lado.
+
 **Arquivos criados/modificados:**
+
+- `.gitignore` (modificado)
+- `docs/tasks/correcoes-progresso.md` (modificado)
+- `docs/tasks/CORR-WTE-003.md` (modificado)
