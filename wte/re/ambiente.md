@@ -146,6 +146,31 @@ blocks=9
 symbols=509
 ```
 
+Reproduzir:
+
+    $GHIDRA/support/analyzeHeadless <proj-dir> <proj> \
+        -import we-team-editor/we-team-editor.exe \
+        -scriptPath <dir do ShowInfo.java> -postScript ShowInfo.java \
+        -noanalysis -overwrite
+
+com `ShowInfo.java`:
+
+    import ghidra.app.script.GhidraScript;
+    public class ShowInfo extends GhidraScript {
+      public void run() throws Exception {
+        println("SMOKE format="   + currentProgram.getExecutableFormat());
+        println("SMOKE lang="     + currentProgram.getLanguageID());
+        println("SMOKE compiler=" + currentProgram.getCompilerSpec().getCompilerSpecID());
+        println("SMOKE imagebase="+ currentProgram.getImageBase());
+        println("SMOKE blocks="   + currentProgram.getMemory().getBlocks().length);
+        println("SMOKE symbols="  + currentProgram.getSymbolTable().getNumSymbols());
+      }
+    }
+
+O `-noanalysis` é o que torna o número reproduzível: com análise o Ghidra cria
+símbolos e `symbols=509` vira outra coisa. O script é ad-hoc de propósito —
+não é ferramenta do projeto, e por isso mora aqui e não em `wte/tools/`.
+
 `compiler=borlandcpp` **não prova** que a convenção de chamada da §8.1 está
 resolvida — a WTE-TASK-24 continua tendo de conferir `this` em `EAX` num
 handler conhecido. Mas o ponto de partida é melhor do que o plano assumia.
@@ -172,8 +197,18 @@ Mover todos                            239x124     Fechar W11TE           231x12
 Warning                                340x172     Number                 135x153
 ```
 
-A contagem saiu de `xdotool` + `grep -vc`, não de contar na tela; a lista crua
-está em `wte-windows.tsv` no scratchpad da execução.
+A contagem saiu de `xdotool`, não de contar na tela. Reproduzir (com o
+`make wte-99` no ar, `DISPLAY`/`XAUTHORITY` como manda o `CLAUDE.md`):
+
+    xdotool search --name '.' 2>/dev/null | while read i; do
+      n=$(xdotool getwindowname "$i" 2>/dev/null) || continue
+      g=$(xdotool getwindowgeometry "$i" | sed -n 's/.*Geometry: //p')
+      [ -n "$n" ] && printf '%s\t%s\n' "$n" "$g"
+    done | sort
+
+24 linhas; descontando as seis não-formulário citadas acima, sobram 18.
+Encerrar depois com `wineserver -k` no prefix `work/wineprefix-wte` — o `:99`
+é recurso serializado, e janela esquecida ali é dirigida pelo teste seguinte.
 
 Isto é `Application.CreateForm` para tudo no `.cpp` do projeto, o padrão do
 C++Builder 6 — e é **material para a fase 2**: a casca pode reproduzir a mesma

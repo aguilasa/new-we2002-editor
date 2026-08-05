@@ -12,12 +12,12 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
 | [CORR-WTE-001](CORR-WTE-001.md) | [WTE-TASK-01](01-ferramental.md) | Frontmatter da task diz `pendente` numa tarefa concluída | Baixa | [x] concluída | 2026-08-05 |
-| [CORR-WTE-002](CORR-WTE-002.md) | [WTE-TASK-01](01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [ ] pendente | — |
+| [CORR-WTE-002](CORR-WTE-002.md) | [WTE-TASK-01](01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [x] concluída | 2026-08-05 |
 
 ## Checklist
 
 - [x] CORR-WTE-001 — sincronizar `status:` do frontmatter, e citá-lo no `01-executar.md`
-- [ ] CORR-WTE-002 — escrever no `ambiente.md` como remedir os dois números derivados
+- [x] CORR-WTE-002 — escrever no `ambiente.md` como remedir os dois números derivados
 
 ## Detalhes por correção
 
