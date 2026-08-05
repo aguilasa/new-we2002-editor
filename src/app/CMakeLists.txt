@@ -44,6 +44,22 @@ if(NOT MSVC)
     target_compile_options(newWe2002 PRIVATE -Wall -Wextra)
 endif()
 
+if(WIN32)
+    # The icon Explorer, the taskbar and shortcuts show. The .qrc one is only
+    # the window's -- see resources/newWe2002.rc. RC is not among the languages
+    # project() enables, so it has to be asked for before a .rc can be a source.
+    enable_language(RC)
+    target_sources(newWe2002 PRIVATE resources/newWe2002.rc)
+
+    # A GUI subsystem binary, so no console window opens behind the dialog.
+    # qt_add_executable normally arranges this already; stating it means the
+    # answer does not depend on the Qt version or on QT_WANT_CONSOLE_APP. The
+    # cost is that stderr goes nowhere -- which is the original's behaviour too:
+    # the image-size warning and everything Load() reports arrive as message
+    # boxes.
+    set_property(TARGET newWe2002 PROPERTY WIN32_EXECUTABLE TRUE)
+endif()
+
 # ---------------------------------------------------------------------------
 # Where the runtime data files are looked up. See DataFiles.cpp for the order.
 # ---------------------------------------------------------------------------

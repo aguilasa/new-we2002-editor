@@ -144,10 +144,32 @@ def icon(size: int) -> Image.Image:
 def main() -> int:
     if not OUT.is_dir():
         raise SystemExit(f"nao existe: {OUT}")
+    drawn = {}
     for size in SIZES:
         path = OUT / f"newWe2002-{size}.png"
-        icon(size).save(path, optimize=True)
+        drawn[size] = icon(size)
+        drawn[size].save(path, optimize=True)
         print(f"{path.relative_to(ROOT)}  {path.stat().st_size} bytes")
+
+    # Windows only reads the icon of an .exe from an embedded ICON resource;
+    # the .qrc icon is the *window's*, and Explorer, the taskbar and any
+    # shortcut never see it. So the same seven drawings go out again as one
+    # .ico, which src/app/resources/newWe2002.rc names and MSVC links in.
+    #
+    # append_images carries the drawings Pillow would otherwise produce by
+    # rescaling one master, which is exactly what this script refuses to do --
+    # 16 and 24 are drawn without the stripes, and rescaling 256 would put the
+    # mush back. `sizes` still has to be spelled out, and the largest drawing
+    # has to be the one .save() is called on: Pillow drops from `sizes`
+    # everything bigger than that image, so calling it on the 16 would silently
+    # write a one-entry .ico.
+    ico = OUT / "newWe2002.ico"
+    largest = SIZES[-1]
+    drawn[largest].save(ico, format="ICO",
+                        sizes=[(s, s) for s in SIZES],
+                        append_images=[drawn[s] for s in SIZES
+                                       if s != largest])
+    print(f"{ico.relative_to(ROOT)}  {ico.stat().st_size} bytes")
     return 0
 
 
