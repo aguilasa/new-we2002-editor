@@ -314,6 +314,9 @@ Se concluída:
 - Trocar a coluna **"Revisado em"** de `—` para `⬜ pendente` — a tarefa passou
   a existir para ser revisada, e o `02-revisar.md` procura por esse marcador.
   **Não escreva data aí**: quem revisa é o `/revisar`, em invocação separada
+- Trocar `status: pendente` por `status: concluído` no **frontmatter do arquivo
+  da tarefa**. O campo duplica a coluna Status do `progresso.md`; os dois têm de
+  concordar, senão o arquivo da task afirma o contrário do índice
 - Preencher o **Log de Execução** no arquivo da tarefa:
   - **Executado em:** data de hoje
   - **Resumo do que foi feito:** 2-3 linhas, dizendo **o que se aprendeu**

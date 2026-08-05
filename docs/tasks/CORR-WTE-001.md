@@ -99,18 +99,36 @@ registrada; a rota escolhida acima é a de menor toque.
 
 ## Verificação
 
-- [ ] `grep '^status:' docs/tasks/01-ferramental.md` devolve `concluído`
-- [ ] O `01-executar.md` §4 cita o frontmatter na lista de "Se concluída"
-- [ ] Nenhuma outra task teve o `status:` alterado:
+- [x] `grep '^status:' docs/tasks/01-ferramental.md` devolve `concluído`
+- [x] O `01-executar.md` §4 cita o frontmatter na lista de "Se concluída"
+- [x] Nenhuma outra task teve o `status:` alterado:
       `git diff --stat` mostra só os dois arquivos acima
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-05
 
 **Resumo do que foi feito:**
 
+Trocado `status: pendente` por `status: concluído` no frontmatter do
+`01-ferramental.md`, e acrescentado o passo correspondente à seção "4) Atualizar
+progresso" do `01-executar.md`, antes do item do Log de Execução — é o que
+impede o defeito de se repetir nas 39 tarefas restantes. As outras 39 não foram
+tocadas: nelas o valor está certo.
+
 **Problemas encontrados:**
 
+A varredura de discrepância mostrou que o buraco não é só das tasks. O
+`02-revisar.md` emite todo `CORR-WTE-XXX.md` com `status: pendente` no
+frontmatter, e nem o `03-corrigir.md` §4 nem o `04-corrigir-tudo.md` fase 2
+mandam sincronizá-lo ao fechar. Consertar só o lado das tasks deixaria o
+repositório com duas regras para o mesmo campo — foi reconciliado em commit
+próprio, junto com o `status:` deste arquivo.
+
 **Arquivos criados/modificados:**
+
+- `docs/prompts/01-executar.md` (modificado)
+- `docs/tasks/01-ferramental.md` (modificado)
+- `docs/tasks/correcoes-progresso.md` (modificado)
+- `docs/tasks/CORR-WTE-001.md` (modificado)

@@ -5,7 +5,7 @@ type: infra
 category: infra
 phase: 0
 depends_on: []
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-01: Ferramental
