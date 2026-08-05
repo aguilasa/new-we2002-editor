@@ -1,6 +1,6 @@
 # Progresso — de `.exe` a editor em Lazarus (WE2002 Team Editor, Obocaman)
 
-Rastreamento das tasks de [`../PLAN-WTE-LAZARUS.md`](../PLAN-WTE-LAZARUS.md),
+Rastreamento das tasks de [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md),
 que é a fonte de verdade do projeto. Este arquivo registra **andamento**; o
 plano registra **objetivo e critério**. Divergência entre os dois se resolve a
 favor do plano.
@@ -13,46 +13,46 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [WTE-TASK-01](01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ✅ Concluído | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-02](02-esqueleto-do-projeto.md) | Esqueleto de `wte/` e build | 0 | 01 | ✅ Concluído | 2026-08-05 | ⬜ pendente |
-| [WTE-TASK-03](03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-04](04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-05](05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-06](06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-07](07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-08](08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ⬜ Pendente | — | — |
-| [WTE-TASK-09](09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
-| [WTE-TASK-10](10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ⬜ Pendente | — | — |
-| [WTE-TASK-11](11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ⬜ Pendente | — | — |
-| [WTE-TASK-12](12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ⬜ Pendente | — | — |
-| [WTE-TASK-13](13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ⬜ Pendente | — | — |
-| [WTE-TASK-14](14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ⬜ Pendente | — | — |
-| [WTE-TASK-15](15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-16](16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ⬜ Pendente | — | — |
-| [WTE-TASK-17](17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ⬜ Pendente | — | — |
-| [WTE-TASK-18](18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ⬜ Pendente | — | — |
-| [WTE-TASK-19](19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ⬜ Pendente | — | — |
-| [WTE-TASK-20](20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
-| [WTE-TASK-21](21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
-| [WTE-TASK-22](22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
-| [WTE-TASK-23](23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ⬜ Pendente | — | — |
-| [WTE-TASK-24](24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ⬜ Pendente | — | — |
-| [WTE-TASK-25](25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ⬜ Pendente | — | — |
-| [WTE-TASK-26](26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-27](27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ⬜ Pendente | — | — |
-| [WTE-TASK-28](28-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-29](29-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-28 | ⬜ Pendente | — | — |
-| [WTE-TASK-30](30-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-31](31-import-de-mcr.md) | Import e export de `.mcr` | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
-| [WTE-TASK-32](32-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
-| [WTE-TASK-33](33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ⬜ Pendente | — | — |
-| [WTE-TASK-34](34-bateria-golden-completa.md) | Bateria golden completa | 6 | 29-33 | ⬜ Pendente | — | — |
-| [WTE-TASK-35](35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
-| [WTE-TASK-36](36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
-| [WTE-TASK-37](37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
-| [WTE-TASK-38](38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
-| [WTE-TASK-39](39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
-| [WTE-TASK-40](40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
+| [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ✅ Concluído | 2026-08-05 | 2026-08-05 |
+| [WTE-TASK-02](/docs/tasks/02-esqueleto-do-projeto.md) | Esqueleto de `wte/` e build | 0 | 01 | ✅ Concluído | 2026-08-05 | ⬜ pendente |
+| [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ⬜ Pendente | — | — |
+| [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
+| [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ⬜ Pendente | — | — |
+| [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ⬜ Pendente | — | — |
+| [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ⬜ Pendente | — | — |
+| [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ⬜ Pendente | — | — |
+| [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ⬜ Pendente | — | — |
+| [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ⬜ Pendente | — | — |
+| [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ⬜ Pendente | — | — |
+| [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ⬜ Pendente | — | — |
+| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ⬜ Pendente | — | — |
+| [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
+| [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
+| [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
+| [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ⬜ Pendente | — | — |
+| [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ⬜ Pendente | — | — |
+| [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ⬜ Pendente | — | — |
+| [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ⬜ Pendente | — | — |
+| [WTE-TASK-28](/docs/tasks/28-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-29](/docs/tasks/29-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-28 | ⬜ Pendente | — | — |
+| [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-31](/docs/tasks/31-import-de-mcr.md) | Import e export de `.mcr` | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ⬜ Pendente | — | — |
+| [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 29-33 | ⬜ Pendente | — | — |
+| [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
+| [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
+| [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -72,7 +72,7 @@ sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
 Reimplementar o **WE2002 Team Editor v0.99** do Obocaman como aplicação
 **Lazarus/FPC nativa no Linux**, com paridade verificada byte a byte contra o
-binário original. Ver [`../PLAN-WTE-LAZARUS.md`](../PLAN-WTE-LAZARUS.md) para o
+binário original. Ver [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md) para o
 objetivo completo e o modelo de verificação.
 
 | Fase | Tasks | O que entrega |
@@ -241,7 +241,7 @@ conferível.
 
 ## Decisões de design
 
-Vindas de [`../PLAN-WTE-LAZARUS.md`](../PLAN-WTE-LAZARUS.md) e de erro já pago
+Vindas de [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md) e de erro já pago
 no `newWe2002`.
 
 | Decisão | Escolha | Razão |

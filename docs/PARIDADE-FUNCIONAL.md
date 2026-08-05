@@ -1,6 +1,6 @@
 # Paridade funcional — `ed.exe` (2002) × `newWe2002` (port Qt)
 
-> **Para que serve este arquivo.** O [PLAN-LINUX.md](PLAN-LINUX.md) conta *como*
+> **Para que serve este arquivo.** O [PLAN-LINUX.md](/docs/PLAN-LINUX.md) conta *como*
 > o port foi feito, fase a fase. Este conta *o que* o original faz, item por
 > item, e onde cada item foi parar no port — para que a validação futura seja
 > uma conferência de lista, e não uma releitura de 8.456 linhas de MFC.
@@ -582,7 +582,7 @@ Para cada bloco, o critério de aprovação é o mesmo: **fazer a mesma coisa no
 - [ ] Editar nome de time pela janela Qt no Windows e comparar com o
       `Debug\ed.exe` nativo. Bloqueado por: a Citrix filtra input sintético e a
       UIA do Qt não expõe os itens do combo de forma estável. Ver §5.3 e §11 do
-      [PLAN-WINDOWS.md](PLAN-WINDOWS.md)
+      [PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md)
 
 ---
 

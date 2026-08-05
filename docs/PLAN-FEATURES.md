@@ -6,12 +6,12 @@
 > Origem: análise das ferramentas de **Maximiliano Ducoli (CARP)** em
 > <https://github.com/maxiducoli>, feita em **2026-08-02**.
 >
-> Pré-requisito: o escopo Linux (Fases 0–6 do [PLAN-LINUX.md](PLAN-LINUX.md))
+> Pré-requisito: o escopo Linux (Fases 0–6 do [PLAN-LINUX.md](/docs/PLAN-LINUX.md))
 > está fechado. Este plano começa na **Fase 8** para não colidir com a Fase 7
 > (Windows), que continua não autorizada e é independente desta.
 >
 > Ordem de prioridade, decidida em **2026-08-05**: primeiro a paridade com o
-> `ed.exe` conferida tela a tela ([PARIDADE-FUNCIONAL.md](PARIDADE-FUNCIONAL.md)),
+> `ed.exe` conferida tela a tela ([PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md)),
 > depois features. Na mesma decisão o **import do SoFIFA foi desligado** —
 > continua compilado, só inalcançável pela janela, via `app::SOFIFA_ENABLED` em
 > [src/app/Features.hpp](../src/app/Features.hpp). Nada neste plano depende
@@ -41,7 +41,7 @@ trabalho de faculdade, fora de escopo.
 | [RA-Maker](https://github.com/maxiducoli/Winning-Eleven-2002---RA-Maker) | Monta `.RA` do zero | C# | **Parcial** — o autor marca "obsoleta"; só o layout do `.RA` interessa |
 | [ISO-protect / File Extractor](https://github.com/maxiducoli/Winning-Eleven-ISO-protect---File-Extractor) | Extrai/insere arquivos na ISO | Pascal | **Entra a ideia**, não o código |
 | [Nombres largos](https://github.com/maxiducoli/Winning-Eleven---Nombres-largos) | Nomes de time de até 11 chars no menu | C# | **Adiado** — ver §6 |
-| [WE_TMD_Tools](https://github.com/maxiducoli/WE_TMD_Tools) | Extrai e remonta estádios (TMD, malha 3D) | C# | **Projeto à parte** — [PLAN-STADIUMS.md](PLAN-STADIUMS.md) |
+| [WE_TMD_Tools](https://github.com/maxiducoli/WE_TMD_Tools) | Extrai e remonta estádios (TMD, malha 3D) | C# | **Projeto à parte** — [PLAN-STADIUMS.md](/docs/PLAN-STADIUMS.md) |
 | [WE2002-MultiTool](https://github.com/maxiducoli/WE2002-MultiTool) | Launcher das ferramentas acima | C# | **Fora** — somos um app só |
 
 Nada disso é biblioteca: são todos WinForms/VCL com a lógica dentro do
@@ -283,7 +283,7 @@ próprio, o que a Fase 10 vai ter que mapear.
 
 - **TMD / estádios.** Malha 3D, UV, texturas — precisaria de um visualizador
   3D dentro de um app que hoje não desenha nada. É um projeto próprio, não uma
-  feature: **está em [PLAN-STADIUMS.md](PLAN-STADIUMS.md)**, com fases próprias
+  feature: **está em [PLAN-STADIUMS.md](/docs/PLAN-STADIUMS.md)**, com fases próprias
   (`S1..S7`) e pré-requisito de este plano estar concluído até a Fase 12.
 - **Nomes longos (11 caracteres).** O que a ferramenta faz é reescrever uma
   tabela de ponteiros de glifos e o texto codificado (`ABCDario*.csv` mapeia

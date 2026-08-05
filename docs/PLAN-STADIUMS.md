@@ -4,7 +4,7 @@
 > WE2002.**
 >
 > Este plano é **separado de propósito**. Ele não é uma fase do
-> [PLAN-FEATURES.md](PLAN-FEATURES.md): é um projeto próprio, com dependência
+> [PLAN-FEATURES.md](/docs/PLAN-FEATURES.md): é um projeto próprio, com dependência
 > nova (renderização 3D), paradigma de UI novo e um risco de corromper disco
 > que nenhuma outra feature tem.
 >

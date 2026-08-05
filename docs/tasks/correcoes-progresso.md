@@ -1,8 +1,8 @@
 # Progresso de Correções — WE2002 Team Editor → Lazarus
 
-Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](../prompts/02-revisar.md))
+Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](/docs/prompts/02-revisar.md))
 e fechadas pelo `/corrigir`. O andamento das **tarefas** fica em
-[`progresso.md`](progresso.md); este arquivo só rastreia correção.
+[`progresso.md`](/docs/tasks/progresso.md); este arquivo só rastreia correção.
 
 **"Concluída em" nasce `—`** e é preenchida por quem executa a correção, com a
 data do commit — o `/revisar` abre a correção, não a fecha.
@@ -11,8 +11,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-WTE-001](CORR-WTE-001.md) | [WTE-TASK-01](01-ferramental.md) | Frontmatter da task diz `pendente` numa tarefa concluída | Baixa | [x] concluída | 2026-08-05 |
-| [CORR-WTE-002](CORR-WTE-002.md) | [WTE-TASK-01](01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [x] concluída | 2026-08-05 |
+| [CORR-WTE-001](/docs/tasks/CORR-WTE-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Frontmatter da task diz `pendente` numa tarefa concluída | Baixa | [x] concluída | 2026-08-05 |
+| [CORR-WTE-002](/docs/tasks/CORR-WTE-002.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [x] concluída | 2026-08-05 |
 
 ## Checklist
 

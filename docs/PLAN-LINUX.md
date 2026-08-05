@@ -22,7 +22,7 @@
 >
 > Progresso: Fases 0 a **7 concluídas**. O escopo Linux fechou na Fase 6; a
 > Fase 7 (Windows) foi executada em 2026-08-04 e o registro está na seção 11 do
-> [PLAN-WINDOWS.md](PLAN-WINDOWS.md).
+> [PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md).
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
@@ -32,7 +32,7 @@
 > código continua compilado; só ficou inalcançável pela janela, via
 > `app::SOFIFA_ENABLED` em [src/app/Features.hpp](../src/app/Features.hpp). O
 > inventário de paridade e o roteiro do que falta clicar estão em
-> [PARIDADE-FUNCIONAL.md](PARIDADE-FUNCIONAL.md).
+> [PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md).
 
 ---
 
@@ -1297,7 +1297,7 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 ### Fase 7 — Windows ✅ concluída (2026-08-04)
 
 > **O registro de execução — hashes, o que quebrou, o que ficou aberto — está
-> na seção 11 do [PLAN-WINDOWS.md](PLAN-WINDOWS.md).** O resumo:
+> na seção 11 do [PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md).** O resumo:
 >
 > **O `.exe` do MSVC grava os mesmos bytes que o binário do GCC**, nas duas
 > imagens, no `Load` e no `Save`. Com o Linux já tendo provado
@@ -1332,7 +1332,7 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 > existe, mas o `if(WE2002_SANITIZE AND NOT MSVC)` do `CMakeLists.txt` ainda
 > desliga tudo no MSVC. Continua sendo o item de maior retorno da lista.
 
-> **O roteiro de execução está em [PLAN-WINDOWS.md](PLAN-WINDOWS.md)** —
+> **O roteiro de execução está em [PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md)** —
 > ambiente de desenvolvimento passo a passo, os defeitos já localizados que só
 > aparecem no MSVC, as tarefas em ordem e o checklist de aceitação. Este arquivo
 > fica com o *o quê*; o outro tem o *como*, para ser seguido sentado na máquina

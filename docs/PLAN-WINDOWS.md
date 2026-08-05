@@ -2,7 +2,7 @@
 
 > Documento de **execução**, para ser seguido sentado na máquina Windows.
 > O plano geral e todo o histórico das Fases 0–6 estão em
-> [PLAN-LINUX.md](PLAN-LINUX.md); a arquitetura e as armadilhas do código em
+> [PLAN-LINUX.md](/docs/PLAN-LINUX.md); a arquitetura e as armadilhas do código em
 > [../CLAUDE.md](../CLAUDE.md). Este arquivo não repete nada dos dois — ele
 > assume que você leu a seção *Suporte a plataformas* do plano.
 >
@@ -417,7 +417,7 @@ Faça na ordem: cada uma depende da anterior estar verde.
 | **T9** | Paridade contra `Debug\ed.exe` nativo, §5.2 | — |
 | **T10** | Empacotar (seção 7) | — |
 | **T11** | CI (seção 8) | [.github/workflows/ci.yml](../.github/workflows/ci.yml) |
-| **T12** | Registrar o resultado na seção Fase 7 do [PLAN-LINUX.md](PLAN-LINUX.md) e neste arquivo | — |
+| **T12** | Registrar o resultado na seção Fase 7 do [PLAN-LINUX.md](/docs/PLAN-LINUX.md) e neste arquivo | — |
 
 Depois de qualquer mexida em gerador, **rode o gerador e o `--check`**:
 
@@ -531,7 +531,7 @@ A fase fecha quando **todas** derem certo:
       sozinho**: os gatilhos ficaram desligados até o fim do projeto (§8)
 - [x] `python tools\rc2ui.py --check` e `apply_glossary.py --check` verdes no Windows
 - [x] `ctest` continua verde no **Linux** depois de tudo
-- [x] Resultado escrito na Fase 7 do [PLAN-LINUX.md](PLAN-LINUX.md)
+- [x] Resultado escrito na Fase 7 do [PLAN-LINUX.md](/docs/PLAN-LINUX.md)
 
 ## 10. O que não fazer
 

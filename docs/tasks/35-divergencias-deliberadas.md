@@ -32,7 +32,7 @@ do original — mas exige registro.
 ## Objetivo
 
 Um documento no formato que o
-[`PARIDADE-FUNCIONAL.md`](../PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
+[`PARIDADE-FUNCIONAL.md`](/docs/PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
 quê, e que evidência sustenta.
 
 ### Cada entrada precisa de

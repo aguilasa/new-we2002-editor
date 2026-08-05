@@ -785,7 +785,7 @@ e conta vagos. Depende só da Fase 3.
 
 1. **Bateria golden completa**, todas as operações de gravação, nas duas ROMs.
 2. **Registro de divergências deliberadas** — no formato que o
-   [PARIDADE-FUNCIONAL.md](PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
+   [PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
    que, e que evidência sustenta.
 3. **Robustez que o original não tem** — o `newWe2002` aprendeu em Release que
    `strcpy` sem terminador derruba o app em toda imagem aberta. O Pascal com
@@ -973,4 +973,4 @@ terminar, e valida o ferramental de decompilação num alvo pequeno e conferíve
 ## 11. Registro de execução
 
 *(vazio — preencher ao concluir cada fase, no formato da seção 11 do
-[PLAN-WINDOWS.md](PLAN-WINDOWS.md))*
+[PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md))*
