@@ -250,8 +250,9 @@ Se concluída:
   correção (`git log -1 --date=short --pretty=%ad`), formato `AAAA-MM-DD`. É a
   mesma data do `Executado em` do Log — se divergirem, uma delas está errada
 - Conferir que a célula do ID é link para o markdown da correção
-  (`[CORR-WTE-XXX](CORR-WTE-XXX.md)`, **relativo simples**); se a linha veio sem
-  link, ponha
+  (`[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`, **sempre `/docs/` + caminho
+  do arquivo**, como manda `.claude/rules/links.md`); se a linha
+  veio sem link, ponha
 - Trocar `status: pendente` por `status: concluído` no **frontmatter do
   `CORR-WTE-XXX.md`**. O `02-revisar.md` abre toda correção com `pendente`, e o
   campo duplica a coluna Status do `correcoes-progresso.md`; os dois têm de

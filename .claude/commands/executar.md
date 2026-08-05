@@ -28,8 +28,9 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
    - tabela de resumo E checklist da fase trocados de `⬜ Pendente` para
      `✅ Concluído`
    - coluna **"Concluída em"** da tabela de resumo com a data do commit
-     (`AAAA-MM-DD`), e a célula do ID como link relativo para o markdown da
-     tarefa (`[WTE-TASK-XX](XX-nome.md)` — tudo mora no mesmo diretório)
+     (`AAAA-MM-DD`), e a célula do ID como link para o markdown da tarefa
+     (`[WTE-TASK-XX](/docs/tasks/XX-nome.md)` — sempre `/docs/` + caminho do
+     arquivo, ver `.claude/rules/links.md`)
    - coluna **"Revisado em"** de `—` para `⬜ pendente`, que é o marcador pelo
      qual o `/revisar` escolhe a próxima. A data ali é do `/revisar`, nunca
      deste comando

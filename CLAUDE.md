@@ -686,6 +686,15 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 - Zero desenho GDI. O único `OnPaint` (`edDlg.cpp:1493`) só desenha o ícone
   quando minimizado. O "campo tático" move `CButton`s com `MoveWindow`.
 
+## Convenções da documentação
+
+Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há uma:
+
+- [.claude/rules/links.md](.claude/rules/links.md)
+  — link de um markdown de `docs/` para outro markdown dentro de `docs/` usa
+  `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`
+  (`../NOTICE.md`, `../CLAUDE.md`) continua relativo.
+
 ## Estado do repositório
 
 Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura do

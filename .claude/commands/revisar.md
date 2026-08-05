@@ -41,7 +41,8 @@ Se `$ARGUMENTS` estiver preenchido, trate como a tarefa a revisar (ex.:
 5. **Saída em `docs/tasks/`:** um `CORR-WTE-XXX.md` por discrepância, no
    formato do prompt, mais `correcoes-progresso.md` atualizado sem alterar as
    entradas anteriores. Linha nova na tabela nasce com o ID **linkado**
-   (`[CORR-WTE-XXX](CORR-WTE-XXX.md)`, relativo simples), a coluna **"ID Task
+   (`[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`, sempre `/docs/` + caminho do
+   arquivo — ver `.claude/rules/links.md`), a coluna **"ID Task
    Origem"** com a tarefa revisada, também linkada, e a "Concluída em" em `—` —
    quem preenche a data é quem executa a correção. Sem discrepância, diga isso
    **explicitamente e diga quais gates você mediu** para poder afirmar.

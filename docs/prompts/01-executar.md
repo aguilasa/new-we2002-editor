@@ -308,9 +308,10 @@ Se concluída:
   de commit, não data de hoje — quem lê o histórico depois cruza a tabela com o
   `git log`
 - Conferir que a célula do ID é **link para o markdown da tarefa**, no formato
-  `[WTE-TASK-XX](XX-nome-do-arquivo.md)` — **caminho relativo simples**, porque
-  o `progresso.md` mora no mesmo diretório das tasks. Linha de tabela sem link
-  é defeito, mesmo em linha pendente
+  `[WTE-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)` — **sempre no formato
+  `/docs/` + caminho do arquivo**, nunca relativo, como manda
+  `.claude/rules/links.md`. Linha de tabela sem link é defeito,
+  mesmo em linha pendente
 - Trocar a coluna **"Revisado em"** de `—` para `⬜ pendente` — a tarefa passou
   a existir para ser revisada, e o `02-revisar.md` procura por esse marcador.
   **Não escreva data aí**: quem revisa é o `/revisar`, em invocação separada

@@ -260,7 +260,7 @@ Se ainda não existir:
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-WTE-001](CORR-WTE-001.md) | [WTE-TASK-01](01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
+| [CORR-WTE-001](/docs/tasks/CORR-WTE-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -281,12 +281,14 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 **Três regras da tabela de resumo, que valem para toda linha nova:**
 
 1. **A célula do ID é link** para o markdown da correção —
-   `[CORR-WTE-XXX](CORR-WTE-XXX.md)`. **Caminho relativo simples**, porque tudo
-   mora no mesmo diretório. O `/revisar` cria o `.md` na mesma invocação, então
-   o link nunca nasce quebrado.
+   `[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`. **Sempre `/docs/` + caminho
+   do arquivo**, nunca relativo, como manda
+   `.claude/rules/links.md`. O `/revisar` cria o `.md` na mesma
+   invocação, então o link nunca nasce quebrado.
 2. **A coluna "ID Task Origem" é a tarefa que esta revisão estava revisando**,
-   também linkada: `[WTE-TASK-XX](XX-nome-do-arquivo.md)`. É sempre a mesma
-   para todas as CORRs abertas numa invocação — a que você escolheu no passo 1.
+   também linkada: `[WTE-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)`. É sempre
+   a mesma para todas as CORRs abertas numa invocação — a que você escolheu no
+   passo 1.
    **Não é a task que a correção menciona no texto**: uma CORR aberta revisando
    a 17 pode falar da 18, e as duas coisas são diferentes.
 3. **A coluna "Concluída em" nasce `—`** e só é preenchida por quem executa a
