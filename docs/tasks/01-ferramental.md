@@ -36,9 +36,39 @@ Deixar a máquina pronta, e **provar** que está, em vez de supor.
 | `lazarus`, `fpc`, `fpc-src` | `apt` | o alvo |
 | `python3-pefile` | `apt` | parsing de PE em script |
 | Ghidra ≥ 11 | download manual | decompilador (Fase 4 e 5) |
-| JDK 17 ou 21 | `apt` | requisito do Ghidra |
+| JDK 17 ou 21 | **já instalado — via `mise`, não `apt`** | requisito do Ghidra |
 
-Conferir qual JDK já existe antes de instalar outro.
+**O Java desta máquina é gerenciado pelo [`mise`](https://mise.jdx.dev/).** Não
+instalar JDK pelo `apt`: sairia um segundo Java fora do gerenciador, e o que
+manda no `PATH` é o shim do `mise`. Medido em 2026-08-05:
+
+```
+$ mise ls java
+java  temurin-17.0.19+10   ~/.config/mise/config.toml  temurin-17   (ativo)
+java  temurin-21.0.11+10.0.LTS
+java  temurin-8.0.492+9
+java  corretto-8.422.05.1
+java  17.0.2
+java  25.0.2
+```
+
+O global já é `temurin-17`, que **atende o requisito do Ghidra**; o 21 também
+está no disco se for preciso. `java` resolve para
+`~/.local/share/mise/installs/java/temurin-17/bin/java`.
+
+Duas consequências práticas:
+
+- O `ghidraRun` procura o JDK pelo `PATH` ou pelo `JAVA_HOME`. O shim do `mise`
+  está no `PATH` de shell interativo, mas **não** necessariamente no ambiente de
+  um `.desktop` ou de um serviço. Se o Ghidra reclamar de Java, apontar
+  `JAVA_HOME=$(mise where java)` — ou gravar o caminho no
+  `support/launch.properties` do Ghidra.
+- Para fixar a versão só neste projeto, `mise use java@temurin-21` escreve num
+  `mise.toml` local em vez de mexer no global. Não fazer isso sem necessidade —
+  o `temurin-17` já serve.
+
+Conferir com `mise ls java` antes de mexer em qualquer coisa de Java; **não**
+usar `apt install openjdk-*`.
 
 ### 2. Provar que o Lazarus funciona no alvo real
 
@@ -58,7 +88,9 @@ o plano muda. Descobrir isso agora, não na Fase 4.
 ### 4. Registrar as versões
 
 Versão exata de `fpc`, `lazbuild`, widgetset padrão, Ghidra e JDK, num arquivo
-que as tasks seguintes possam citar. Versão de compilador muda layout de
+que as tasks seguintes possam citar. No JDK, registrar também que veio do
+`mise` e qual é o global ativo — trocar de versão pelo `mise` muda o Java que o
+Ghidra pega, sem nada mudar no `apt`. Versão de compilador muda layout de
 `bitpacked record` (§8.11) — não é detalhe cosmético.
 
 ---
