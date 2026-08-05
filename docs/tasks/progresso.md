@@ -16,7 +16,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ✅ Concluído | 2026-08-05 | 2026-08-05 |
 | [WTE-TASK-02](/docs/tasks/02-esqueleto-do-projeto.md) | Esqueleto de `wte/` e build | 0 | 01 | ✅ Concluído | 2026-08-05 | 2026-08-05 |
 | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-05 |
-| [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ✅ Concluído | 2026-08-05 | ⬜ pendente |
 | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ⬜ Pendente | — | — |
 | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ✅ Concluído | 2026-08-05 | ⬜ pendente |
 | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ⬜ Pendente | — | — |
@@ -171,7 +171,7 @@ conferível.
 ### Fase 1 — Extração estática
 
 - [x] Os 18 formulários decodificados inteiros, blobs binários preservados
-- [ ] Os 96 handlers com endereço **e formulário dono**
+- [x] Os 96 handlers com endereço **e formulário dono**
 - [ ] Strings com referência cruzada para os handlers
 - [x] Limite da tabela de offsets **medido**, não estimado
 - [x] Offsets que o `newWe2002` não tem, listados
