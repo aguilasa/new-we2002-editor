@@ -97,7 +97,12 @@ Trate como conflito provável qualquer par que possa cair nos mesmos:
 `CLAUDE.md`, `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`,
 `wte/re/offsets.md`, `wte/re/strings.tsv`, `wte/re/published_methods.tsv`,
 `wte/re/tipos.md`, `wte/re/divergencias.md`, `wte/re/spec/*`,
-`docs/prompts/*`.
+`docs/prompts/*`, `.claude/commands/*`.
+
+Os wrappers de `.claude/commands/` entram nessa lista pelo mesmo motivo que os
+prompts: são versionados e reafirmam o mesmo rito com outras palavras. Correção
+de processo costuma ter de tocar o par prompt+wrapper, e duas CORRs de processo
+em paralelo colidem ali.
 
 **Na dúvida, sequencial.** O ganho de paralelizar duas correções de doc é de
 minutos; o custo de duas edições concorrentes no mesmo `.md` é uma reconciliação
@@ -176,7 +181,7 @@ Para cada onda, na ordem:
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
 git status --short          # limpo para a correção que acabou
-grep -rn "<o termo que voce mudou>" docs wte/re CLAUDE.md
+grep -rn "<o termo que voce mudou>" docs wte/re .claude CLAUDE.md
 ```
 
 **A varredura de discrepância se repete a cada CORR, não uma vez no fim.** Num

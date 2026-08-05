@@ -38,8 +38,10 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
    Ghidra, `git`, e o próprio `correcoes-progresso.md`.
 
 5. **Doc quente presume conflito.** `CLAUDE.md`, `docs/PLAN-WTE-LAZARUS.md`,
-   `docs/tasks/progresso.md`, `wte/re/*` — a varredura de discrepância puxa doc
-   que a lista da CORR não previa. **Na dúvida, sequencial.**
+   `docs/tasks/progresso.md`, `wte/re/*`, `.claude/commands/*` — a varredura de
+   discrepância puxa doc que a lista da CORR não previa. Estes wrappers entram
+   na lista porque reafirmam o mesmo rito dos prompts com outras palavras.
+   **Na dúvida, sequencial.**
 
 6. **Subagente edita; o thread principal commita.** Subagente não roda `git`,
    nem `lazbuild`, nem `golden_check.sh`, nem gerador em modo de escrita, e não

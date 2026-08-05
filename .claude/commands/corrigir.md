@@ -49,7 +49,9 @@ primeira `[ ]` em `correcoes-progresso.md`".
 7. **Discrepância achada no caminho se conserta, não se registra.** A lista de
    arquivos da CORR é o mínimo. Doc que o seu conserto tornou falso ou
    incompleto entra nesta mesma invocação, em commit próprio — `grep -rn` pelo
-   termo que você mudou, em `docs`, `wte/re` e `CLAUDE.md`, antes de fechar.
+   termo que você mudou, em `docs`, `wte/re`, `.claude` e `CLAUDE.md`, antes de
+   fechar. O `.claude/` está aí porque estes wrappers repetem o mesmo rito com
+   outras palavras, e já ficaram para trás de uma mudança de processo uma vez.
    Registrar no Log e seguir não vale: quem lê o doc errado amanhã não lê o seu
    Log. O limite continua sendo `WTE-TASK` e implementação de handler, que não
    são deste comando.

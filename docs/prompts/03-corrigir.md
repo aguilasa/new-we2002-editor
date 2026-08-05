@@ -88,12 +88,17 @@ Alvos prováveis de varredura, por serem os que repetem número e afirmação:
 - `docs/tasks/<a task de origem>.md`
 - `wte/re/*.md`
 - `CLAUDE.md`
+- `.claude/commands/*.md` — os wrappers dos slash commands. **Eles são
+  versionados e reafirmam com outras palavras o rito que estes prompts
+  descrevem**, então mudança de processo tem de entrar nos dois lugares. Já
+  falhou uma vez: a CORR-WTE-001 acrescentou um passo à §4 do `01-executar.md`
+  e o wrapper continuou enumerando o fechamento sem ele
 
 Antes de commitar, faça a varredura:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rn "<o termo ou numero que voce mudou>" docs wte/re CLAUDE.md
+grep -rn "<o termo ou numero que voce mudou>" docs wte/re .claude CLAUDE.md
 ```
 
 Toda ocorrência que ficou falsa, incompleta ou apontando para o estado velho
@@ -227,7 +232,7 @@ Antes de fechar, a varredura de discrepância:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rn "<o termo que voce mudou>" docs wte/re CLAUDE.md
+grep -rn "<o termo que voce mudou>" docs wte/re .claude CLAUDE.md
 ```
 
 Toda ocorrência que ficou falsa, incompleta ou apontando para o estado velho é
