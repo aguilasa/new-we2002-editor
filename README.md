@@ -56,6 +56,9 @@ equivalent. `make` with no target prints the list.
 | `make build` | configure if needed, then build |
 | `make run` | build, copy the image to `work/`, open the editor on the **copy** |
 | `make run-jp` | the same with the Japanese image |
+| `make run-99` | `run` on the local `Xvfb :99`, sorting out that server's `XAUTHORITY` |
+| `make oracle` | open the **original Windows `ed.exe`** under Wine (Bottles runner) |
+| `make oracle-99` | the same on `:99` |
 | `make fresh` | throw the working copies away and re-copy from the original |
 | `make test` | unit checks (`ctest` without the byte-comparison tests) |
 | `make test-release` | the same in Release, where `_FORTIFY_SOURCE` is active |
@@ -73,11 +76,41 @@ original by mistake edits it; the target always copies to `work/` first and
 never touches the source. The copy survives between runs, so edits persist —
 `make fresh` starts over.
 
-Two targets exist for this working tree specifically. `make run-99` runs the
-editor on the local `Xvfb :99` used for visual checks, resolving that server's
-`XAUTHORITY` on its own. `make oracle` (and `oracle-99`) opens the original
-`Debug/ed.exe` under Wine in a dedicated prefix, for comparing behaviour side by
-side; it needs the Bottles runner, overridable with `WINE_BIN=`.
+#### Running the original editor: `make oracle`
+
+`make oracle` opens `Debug/ed.exe` — the 2002 Windows/MFC binary this project
+ports — under Wine, so its behaviour can be compared against the port screen by
+screen. It is the same binary the byte-comparison tests measure against.
+
+```sh
+make oracle                                    # inherits DISPLAY
+make oracle-99                                 # on the Xvfb :99
+make oracle IMAGE=roms/japanese-shift-jis.bin  # any image
+```
+
+It runs on the Wine runner that ships with Bottles. Override the path with
+`WINE_BIN=<directory containing wine64>` for a different runner or a system
+Wine.
+
+Three things the target handles that a bare `wine ed.exe` does not:
+
+- **A dedicated Wine prefix**, kept in `work/wineprefix` and created once. Never
+  an existing bottle: `ed.cpp` calls `COleObjectFactory::UpdateRegistryAll()`,
+  which writes to the prefix's registry.
+- **Its own copy of the image**, separate from the one `make run` uses, so the
+  two editors never fight over the same file.
+- **The file dialog.** `ed.exe` takes no argument — it opens a `CFileDialog` at
+  startup, whose default filter is the literal name `we2002.bin`. The copy is
+  named exactly that, and the target symlinks it into `Debug/`, which is where
+  the dialog opens. So the image is in the first screen, already selectable.
+
+`make run-99` is the equivalent for the port: it runs the Qt editor on the local
+`Xvfb :99` used for visual checks, resolving that server's `XAUTHORITY` on its
+own.
+
+Neither target has anything to do with the port's own Windows build. That one is
+built with MSVC on Windows (`--preset windows-release`) and run natively; there
+is no `make` target that runs `newWe2002.exe` under Wine.
 
 The unit checks pass with no image. Two of them, and the byte-comparison tests,
 want a real one; point `WE2002_TEST_IMAGE` / `WE2002_GOLDEN_IMAGE` at a **copy**
