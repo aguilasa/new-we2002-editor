@@ -52,3 +52,29 @@ work/
 # rodado so para comparar interface. Como as imagens de CD, o usuario mantem a
 # pasta no disco e ela nunca entra no versionamento.
 we-team-editor/
+
+# ---- Projeto Lazarus em wte/ (WTE-TASK-02) ----
+# wte/build/ ja seria pego pelo `build/` la em cima; esta linha esta aqui para
+# quem le a secao nao precisar deduzir isso.
+wte/build/
+# Symlink de conveniencia para a pasta do Obocaman, criado por `make -C wte
+# assets`. Aponta para diretorio gitignored: versiona-lo daria um link quebrado
+# em qualquer clone.
+wte/assets
+# Estado de sessao e artefatos do Lazarus/FPC. O .lpi (projeto) e versionado;
+# o .lps (sessao: janelas abertas, breakpoints) nao.
+*.lps
+*.ppu
+*.compiled
+lib/
+backup/
+# ATENCAO: nao acrescente `*.lfm` nem `*.pas` a nenhuma regra daqui. A partir
+# da fase 2 os dois sao GERADOS pelo dfm2lfm.py e, ainda assim, versionados --
+# e o `--check` que prova que ninguem os editou a mao.
+
+# ---- NAO ignorar ----
+# wte/re/ e o produto da engenharia reversa: documentacao, versionada de
+# proposito. Esta linha existe para o caso de alguem acrescentar um `re/` ou um
+# `*.md` generico acima.
+!wte/re/
+!wte/re/**

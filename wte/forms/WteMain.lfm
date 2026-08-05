@@ -1,0 +1,17 @@
+object WteMainForm: TWteMainForm
+  Left = 100
+  Height = 300
+  Top = 100
+  Width = 520
+  Caption = 'WE2002 Team Editor (Lazarus) -- esqueleto'
+  ClientHeight = 300
+  ClientWidth = 520
+  LCLVersion = '3.0'
+  object LabelPlaceholder: TLabel
+    Left = 24
+    Height = 15
+    Top = 24
+    Width = 400
+    Caption = 'Esqueleto da WTE-TASK-02. Os 18 formularios chegam na fase 2.'
+  end
+end
