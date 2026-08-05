@@ -20,6 +20,7 @@
 #include "Bind.hpp"
 #include "DefaultTacticsDialog.hpp"
 #include "EditOptionsDialog.hpp"
+#include "QtPath.hpp"
 #include "we2002/Tables.hpp"
 #include "we2002/Types.hpp"
 #include "ui_MainDialog.h"
@@ -327,7 +328,7 @@ bool MainWindow::OpenImage(const QString& preselected) {
                              QStringLiteral("Not WE2002 CD image (474.431.328 bytes)! "
                                             "Suggest to close the program !"));
     }
-    image_ = chosen.toStdString();
+    image_ = app::PathFromQString(chosen);
 
     if (!db_.Load(image_, [this](const std::string& m) {
             Report(QString::fromStdString(m));

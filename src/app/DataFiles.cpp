@@ -1,16 +1,15 @@
 #include "DataFiles.hpp"
 
-#include <QByteArray>
 #include <QCoreApplication>
+#include <QString>
 
-#include <string>
+#include "QtPath.hpp"
 
 namespace app {
 namespace {
 
 std::filesystem::path BinaryDir() {
-    return std::filesystem::path(
-        QCoreApplication::applicationDirPath().toStdString());
+    return PathFromQString(QCoreApplication::applicationDirPath());
 }
 
 }  // namespace
@@ -18,10 +17,11 @@ std::filesystem::path BinaryDir() {
 std::filesystem::path DataFile(const char* name) {
     // An explicit override first. The tests use it, and it is the escape hatch
     // for a layout none of the guesses below match.
-    const QByteArray from_env = qgetenv("WE2002_DATA_DIR");
+    // qEnvironmentVariable, not qgetenv: on Windows the environment is UTF-16
+    // and qgetenv flattens it through the ANSI codepage on the way out.
+    const QString from_env = qEnvironmentVariable("WE2002_DATA_DIR");
     if (!from_env.isEmpty()) {
-        const std::filesystem::path candidate =
-            std::filesystem::path(from_env.toStdString()) / name;
+        const std::filesystem::path candidate = PathFromQString(from_env) / name;
         if (std::filesystem::exists(candidate)) {
             return candidate;
         }

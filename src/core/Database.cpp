@@ -34,11 +34,20 @@ void Report(const Reporter& report, const char* message) {
 /// replaces *every* occurrence rather than just the extension. Reproduced as
 /// is: a directory called "foo.bin" would be rewritten too, and changing that
 /// would change which file the editor reads back.
+///
+/// The substitution runs on path::string_type -- wstring on Windows, string on
+/// Linux -- so that no encoding conversion happens anywhere. path::string()
+/// would convert to the system ANSI codepage on MSVC and *throw*
+/// std::system_error for anything it cannot represent, which is every accented
+/// directory name. See docs/PLAN-WINDOWS.md section 4.2.
 std::filesystem::path UrlSidecarPath(const std::filesystem::path& image) {
-    std::string s = image.string();
-    const std::string from = ".bin";
-    const std::string to = "_url.txt";
-    for (std::size_t at = s.find(from); at != std::string::npos;
+    using String = std::filesystem::path::string_type;
+    String s = image.native();
+    // Spelled through path so that each literal lands in the native character
+    // type; both are ASCII, so nothing is lost on the way in.
+    const String from = std::filesystem::path(".bin").native();
+    const String to = std::filesystem::path("_url.txt").native();
+    for (std::size_t at = s.find(from); at != String::npos;
          at = s.find(from, at + to.size())) {
         s.replace(at, from.size(), to);
     }
