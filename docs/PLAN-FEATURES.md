@@ -10,6 +10,13 @@
 > está fechado. Este plano começa na **Fase 8** para não colidir com a Fase 7
 > (Windows), que continua não autorizada e é independente desta.
 >
+> Ordem de prioridade, decidida em **2026-08-05**: primeiro a paridade com o
+> `ed.exe` conferida tela a tela ([PARIDADE-FUNCIONAL.md](PARIDADE-FUNCIONAL.md)),
+> depois features. Na mesma decisão o **import do SoFIFA foi desligado** —
+> continua compilado, só inalcançável pela janela, via `app::SOFIFA_ENABLED` em
+> [src/app/Features.hpp](../src/app/Features.hpp). Nada neste plano depende
+> dele, e o `we2002_core` continua inalterado como a §4 exige.
+>
 > Regra que atravessa o plano inteiro: **`golden` e `golden_gui` continuam
 > verdes**. Nenhuma feature aqui toca os 69 offsets legados nem o caminho de
 > `Database::Load`/`Save`. O que este plano adiciona vive ao lado, não no

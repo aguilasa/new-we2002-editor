@@ -45,6 +45,40 @@ ignores `CMAKE_BUILD_TYPE` — asking for Release would quietly build Debug. The
 Without Qt 6 the core library and its tests still build; only the GUI is
 skipped. That is deliberate — the byte-comparison tests have to run headless.
 
+### The Makefile
+
+There is a `Makefile` at the root. It is a thin wrapper over the presets, not a
+second build system, and it is optional — everything below has a plain CMake
+equivalent. `make` with no target prints the list.
+
+| Target | What it does |
+|---|---|
+| `make build` | configure if needed, then build |
+| `make run` | build, copy the image to `work/`, open the editor on the **copy** |
+| `make run-jp` | the same with the Japanese image |
+| `make fresh` | throw the working copies away and re-copy from the original |
+| `make test` | unit checks (`ctest` without the byte-comparison tests) |
+| `make test-release` | the same in Release, where `_FORTIFY_SOURCE` is active |
+| `make golden`, `make golden-gui` | the byte-comparison tests, with `WE2002_GOLDEN_IMAGE` filled in |
+| `make gen`, `make gen-check` | re-run the code generators / check the tree against them |
+| `make install` | Release build, then install into `PREFIX` (default `~/.local`) |
+| `make clean`, `make distclean` | current preset's artefacts / every `build*/` and `work/` |
+
+`PRESET=debug|release|asan|ubsan` picks the preset and the matching build
+directory; `IMAGE=` picks the CD image; `JOBS=` the parallelism. So
+`make run PRESET=release IMAGE=roms/japanese-shift-jis.bin` does what it says.
+
+The point of `make run` is the copy. The editor writes in place, so opening an
+original by mistake edits it; the target always copies to `work/` first and
+never touches the source. The copy survives between runs, so edits persist —
+`make fresh` starts over.
+
+Two targets exist for this working tree specifically. `make run-99` runs the
+editor on the local `Xvfb :99` used for visual checks, resolving that server's
+`XAUTHORITY` on its own. `make oracle` (and `oracle-99`) opens the original
+`Debug/ed.exe` under Wine in a dedicated prefix, for comparing behaviour side by
+side; it needs the Bottles runner, overridable with `WINE_BIN=`.
+
 The unit checks pass with no image. Two of them, and the byte-comparison tests,
 want a real one; point `WE2002_TEST_IMAGE` / `WE2002_GOLDEN_IMAGE` at a **copy**
 of a supported release. In this working tree those images live in `roms/` as
@@ -61,6 +95,8 @@ versioned; ~780 MB of CD dumps do not belong in git.
 The path is optional; without it the editor asks for one, as the original did.
 
 **Always work on a copy.** Writes happen in place, and each image is ~474 MB.
+`make run` handles that for you: it copies the image into `work/` and opens the
+copy, so the file in `roms/` is never the one being edited.
 
 An image that is not exactly 474,431,328 bytes long draws a warning and loads
 anyway — the original behaves the same way, and dumps of the right layout but a
@@ -73,6 +109,8 @@ cmake --preset release
 cmake --build --preset release
 cmake --install build-release --prefix ~/.local
 ```
+
+Or `make install PREFIX=~/.local`, which runs those three.
 
 That gives you `bin/newWe2002`, the runtime data files under `share/newWe2002/`,
 a desktop entry, the icon in seven sizes and the AppStream metadata. The binary
@@ -128,16 +166,21 @@ which is the original's behaviour and is preserved on purpose.
 Everything the original's dialogs expose works: the six team-name slots, the
 strength bars, set-piece takers, squad numbers, the tactics pitch and its
 sixteen preset formations, per-player attributes, player swaps and links, flag
-and kit colours with their `.b2002`/`.m2002` import and export, the `.t2002`
-formation files, and the SoFIFA import.
+and kit colours with their `.b2002`/`.m2002` import and export, and the `.t2002`
+formation files.
 
 Not ported: the `.2002` team and `.tt2002` total import/export. Their buttons
 are commented out in `ed.rc`, so they were already dead in the binary users
 received, and the file format is a raw MSVC struct dump that cannot be
 reproduced portably.
 
-The SoFIFA scraper targets the site as it was in 2015 and will not match it
-today. It is ported as it was; fixing it is a separate job.
+**The SoFIFA import is ported but switched off.** It was the fork's own
+addition, not part of the 2002 editor, and its scraper targets the site as it
+was in 2015, so it will not match it today. The buttons, the 23 URL boxes and
+the per-player "Import from URL" are greyed out until the port's parity with the
+original has been checked screen by screen. The code is still compiled; the
+switch is `app::SOFIFA_ENABLED` in `src/app/Features.hpp`. The `<image>_url.txt`
+sidecar is still read and written, exactly as the original did.
 
 ## Credits and license
 
@@ -155,6 +198,7 @@ No game data is distributed here. Bring your own CD image.
 ## Repository layout
 
 ```
+Makefile      convenience wrapper over the CMake presets
 src/core/     we2002_core -- the CD image format and all the logic. No Qt.
 src/app/      the Qt application. No parsing, no file format.
 src/app/ui/   the six forms, generated from legacy/mfc/ed.rc

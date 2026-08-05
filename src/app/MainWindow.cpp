@@ -19,6 +19,7 @@
 
 #include "Bind.hpp"
 #include "DefaultTacticsDialog.hpp"
+#include "Features.hpp"
 #include "EditOptionsDialog.hpp"
 #include "QtPath.hpp"
 #include "we2002/Tables.hpp"
@@ -51,6 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     BindWidgets();
     ConnectSignals();
     InitLimits();
+    ApplySofifaSwitch();
     FillRoleCombos();
 }
 
@@ -263,6 +265,23 @@ void MainWindow::InitLimits() {
     }
 }
 
+void MainWindow::ApplySofifaSwitch() {
+    if (app::SOFIFA_ENABLED) {
+        return;
+    }
+    // Greyed out, not hidden: the form carries ed.rc's absolute geometry and
+    // has no layout to close the gap a hidden control would leave, and the
+    // screen has to stay comparable against a capture of ed.exe.
+    ui_->CMB_IMPFIFAWEB->setEnabled(false);
+    ui_->CMB_IMPFIFATXT->setEnabled(false);
+    ui_->CMB_EDITALLTXT->setEnabled(false);
+    // The four edit-option checkboxes only ever fed "edit all from SoFIFA".
+    ui_->CMB_SHOWEDITOPT->setEnabled(false);
+    for (QLineEdit* url : txt_url_) {
+        url->setEnabled(false);
+    }
+}
+
 void MainWindow::FillRoleCombos() {
     // Role 0 is "no role"; the combos start at 1, so the stored role is the
     // index plus two -- hence the +2/-2 that every tactics handler carries.
@@ -337,10 +356,16 @@ bool MainWindow::OpenImage(const QString& preselected) {
                               QStringLiteral("Could not read the CD image."));
         return false;
     }
+    // LoadUrls() runs even with SoFIFA parked, and must: Database::Save() is
+    // generated from OnWriteCD, which writes the <image>_url.txt sidecar out of
+    // players[].url on every write (legacy/mfc/edDlg.cpp:6207). Skipping the
+    // load would leave those fields empty and the next write would truncate the
+    // user's sidecar to 1911 blank lines. Loading keeps the round trip exact.
     LoadUrls();
-    LoadSofifaFields();
-    LoadSofifaConversionRules();
-
+    if (app::SOFIFA_ENABLED) {
+        LoadSofifaFields();
+        LoadSofifaConversionRules();
+    }
     fifa_players_.assign(PLAYERS_TOTAL, we2002::FifaPlayer{});
 
     FillTeamCombo();

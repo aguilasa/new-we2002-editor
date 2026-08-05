@@ -108,6 +108,8 @@ private:
     void BindWidgets();
     void ConnectSignals();
     void InitLimits();
+    /// Grey out everything SoFIFA while app::SOFIFA_ENABLED is false.
+    void ApplySofifaSwitch();
     void FillTeamCombo();
     void FillRoleCombos();
     void RefreshPresetButtons();  ///< was aggiornaNtatt()

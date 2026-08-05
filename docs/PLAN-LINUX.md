@@ -26,6 +26,13 @@
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
+>
+> **Desde 2026-08-05 o import do SoFIFA está desligado**, por decisão: fica em
+> último plano até a paridade com o `ed.exe` estar conferida tela a tela. O
+> código continua compilado; só ficou inalcançável pela janela, via
+> `app::SOFIFA_ENABLED` em [src/app/Features.hpp](../src/app/Features.hpp). O
+> inventário de paridade e o roteiro do que falta clicar estão em
+> [PARIDADE-FUNCIONAL.md](PARIDADE-FUNCIONAL.md).
 
 ---
 
@@ -959,9 +966,16 @@ Além do slot 64 herdado da Fase 3, quatro:
   *upd. player cost* recalcula tudo de qualquer jeito.
 - **`OnOrdinaPanchina` gravava `auxlk[1]` e `auxlk[2]` num `char[2]`** — um
   byte além do fim. O port usa `std::swap`, mesmo efeito sem sair do array.
-- **As URLs do SoFIFA agora são gravadas** no `<imagem>_url.txt` junto com a
-  imagem. O original só lia esse arquivo, nunca escrevia, então uma URL digitada
-  na tela se perdia ao fechar. Não toca na imagem.
+- ~~**As URLs do SoFIFA agora são gravadas** no `<imagem>_url.txt` junto com a
+  imagem. O original só lia esse arquivo, nunca escrevia.~~ **Errado, corrigido
+  em 2026-08-05:** `OnWriteCD` grava o sidecar desde 2015
+  (`legacy/mfc/edDlg.cpp:6207-6214`), e o `Database::Save()` gerado herda isso
+  verbatim. O `MainWindow::SaveUrls()` que a Fase 5 acrescentou só reescreve o
+  mesmo arquivo com o mesmo conteúdo — redundante, não divergência. Está
+  desligado junto com o resto do SoFIFA. A **leitura** (`LoadUrls()`) continua
+  rodando mesmo assim: o `Save()` monta o sidecar a partir de `players[].url`,
+  então pular a carga truncaria o arquivo do usuário para 1.911 linhas em
+  branco.
 - **`FlagKitDialog` usa um único teste para "tem bandeira própria"** (`id>0 &&
   id!=69 && id!=86 && (id<56 || id>63)`). O original tinha dois que discordavam
   na borda: o `OnInitDialog` desabilitava as caixas para 57..63 e o

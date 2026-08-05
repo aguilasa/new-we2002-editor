@@ -19,6 +19,7 @@
 
 #include <cstring>
 
+#include "Features.hpp"
 #include "MainWindow.hpp"
 #include "PlayerSelectDialog.hpp"
 #include "PlayerSkillsDialog.hpp"
@@ -76,7 +77,7 @@ void MainWindow::OnTeamSelected() {
             bar->setEnabled(true);
         }
         for (QLineEdit* url : txt_url_) {
-            url->setEnabled(true);
+            url->setEnabled(app::SOFIFA_ENABLED);
         }
         // The two extra Master League name slots are hidden for everyone else.
         ui_->TXT_ML_EXTRA_NAME1->setVisible(false);
@@ -168,7 +169,7 @@ void MainWindow::ShowNationalOrAllStar(int id) {
         txt_url_[k]->setText(QLatin1String(db_.players[lk].url));
         // The all-star squads are assembled from links into other teams, so
         // there is no stable player record to hang a SoFIFA URL on.
-        txt_url_[k]->setEnabled(!is_all_star);
+        txt_url_[k]->setEnabled(app::SOFIFA_ENABLED && !is_all_star);
     }
 
     // The kicker lists are filled by arithmetic even for the two all-star

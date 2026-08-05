@@ -633,6 +633,21 @@ core), 4 (`.rc` → `.ui`), 5 (handlers), 5.5 (nomenclatura da UI), 6
 [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase e
 [docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md) seção 11 para o registro da 7.
 
+**O import do SoFIFA está desligado** desde 2026-08-05, por decisão: fica em
+último plano até a paridade com o `ed.exe` estar conferida tela a tela. O código
+continua compilado e linkado; só ficou inalcançável pela janela. O interruptor é
+`app::SOFIFA_ENABLED` em [src/app/Features.hpp](src/app/Features.hpp), e ele
+apaga (em cinza, não escondido) os três botões de SoFIFA, o botão de edit
+options, as 23 caixas de URL, o `CMD_READ_URL` do diálogo de atributos e a
+leitura dos dois arquivos de regras no startup. Nada disso toca a imagem.
+
+**O que não pode ser desligado junto: o `<imagem>_url.txt`.** O `OnWriteCD`
+original grava esse sidecar (`legacy/mfc/edDlg.cpp:6207`) e o `Database::Save()`
+gerado herda isso, montando o arquivo a partir de `players[].url`. Por isso o
+`LoadUrls()` roda mesmo com o SoFIFA desligado — sem ele a gravação truncaria o
+arquivo do usuário para 1.911 linhas em branco. Detalhe na §1.1 do
+`docs/PARIDADE-FUNCIONAL.md`.
+
 **O escopo Linux está fechado.** O port está verificado contra o `ed.exe` nos
 dois níveis: o core headless (teste `golden`) e a janela Qt dirigida por
 `xdotool` (teste `golden_gui`). Nas imagens European Deluxe e japonesa,

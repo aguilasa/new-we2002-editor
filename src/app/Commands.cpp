@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include "Features.hpp"
 #include "FlagKitDialog.hpp"
 #include "MainWindow.hpp"
 #include "PlayerFields.hpp"
@@ -44,19 +45,20 @@ void MainWindow::OnWriteCd() {
                               QStringLiteral("Could not write the CD image."));
         return;
     }
-    // The URLs live in a sidecar file, not on the disc, so they are written
-    // together with it. The original never saved them back at all -- it only
-    // ever read the file, which meant a URL typed into the form was lost on
-    // exit. Writing it is the one behaviour added here, and it cannot affect
-    // the image or the golden tests.
-    SaveUrls();
+    // db_.Save() has already written the <image>_url.txt sidecar: OnWriteCD did
+    // that itself (legacy/mfc/edDlg.cpp:6207) and the generated Save() keeps it.
+    // SaveUrls() here would only write the same file again with the same
+    // contents, so it is skipped while SoFIFA is parked.
+    if (app::SOFIFA_ENABLED) {
+        SaveUrls();
+    }
     Report(QStringLiteral("CD image edited !"));
 }
 
 void MainWindow::OnReload() {
     db_.Load(image_,
              [this](const std::string& m) { Report(QString::fromStdString(m)); });
-    LoadUrls();
+    LoadUrls();  // see OpenImage(): required even with SoFIFA parked
     OnTeamSelected();
 }
 

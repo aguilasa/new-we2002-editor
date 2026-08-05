@@ -10,6 +10,7 @@
 #include <cstring>
 #include <string>
 
+#include "Features.hpp"
 #include "we2002/Sofifa.hpp"
 #include "ui_PlayerSkillsDialog.h"
 
@@ -138,6 +139,8 @@ PlayerSkillsDialog::PlayerSkillsDialog(we2002::Database& db,
 
     connect(ui_->CMD_READ_URL, &QPushButton::clicked, this,
             &PlayerSkillsDialog::OnImportFromUrl);
+    // Parked with the rest of SoFIFA -- see src/app/Features.hpp.
+    ui_->CMD_READ_URL->setEnabled(app::SOFIFA_ENABLED);
 
     Load();
 }
