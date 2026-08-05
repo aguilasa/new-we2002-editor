@@ -59,6 +59,8 @@ equivalent. `make` with no target prints the list.
 | `make run-99` | `run` on the local `Xvfb :99`, sorting out that server's `XAUTHORITY` |
 | `make oracle` | open the **original Windows `ed.exe`** under Wine (Bottles runner) |
 | `make oracle-99` | the same on `:99` |
+| `make wte` | open **Obocaman's WE2002 Team Editor** under Wine, on the current display |
+| `make wte-99` | the same on `:99` |
 | `make fresh` | throw the working copies away and re-copy from the original |
 | `make test` | unit checks (`ctest` without the byte-comparison tests) |
 | `make test-release` | the same in Release, where `_FORTIFY_SOURCE` is active |
@@ -107,6 +109,41 @@ Three things the target handles that a bare `wine ed.exe` does not:
 `make run-99` is the equivalent for the port: it runs the Qt editor on the local
 `Xvfb :99` used for visual checks, resolving that server's `XAUTHORITY` on its
 own.
+
+#### Looking at a rival editor: `make wte`
+
+`make wte` runs **WE2002 Team Editor v0.99** by *Obocaman* (2002) — a different,
+third-party editor for the same game, in a Brazilian-Portuguese translation. It
+is no one's oracle and nothing is measured against it; it is there to compare
+interfaces and mine ideas. Its v0.99 does several things the original `ed.exe`
+never did: live 2D kit and flag rendering with colour copy-paste, a selectable
+radar colour, deriving a player's price from his attributes (or a whole squad in
+one click), importing a player from a `.mcr` memory-card file, and a free
+Master-League-slot counter kept on screen.
+
+```sh
+make wte                                    # the current display
+make wte-99                                 # the Xvfb :99
+make wte IMAGE=roms/japanese-shift-jis.bin  # any image
+```
+
+Unlike the other run targets, this one uses whatever `DISPLAY` the shell has —
+it is meant to be looked at.
+
+It shares no Wine state with `make oracle`, and cannot: the thing is a Delphi 6
+**32-bit** PE, so it gets its own `WINEARCH=win32` prefix in
+`work/wineprefix-wte` and the 32-bit `wine` loader rather than `wine64`. It also
+gets its own copy of the image, since all three editors write in place.
+
+Its open dialog will not take a long typed path, so the target maps drive `E:`
+to `work/` and prints the short path to paste. The size warning is the same one
+`ed.exe` shows, and is equally harmless — answer *Sim*.
+
+Two things it needs that nothing else here does. The editor is not versioned:
+put its directory at `we-team-editor/` in the root, alongside `roms/`. And the
+32-bit `winex11.drv` needs the i386 X stack on the host, or the app dies before
+it draws a window — the target checks for it and prints the `apt` line if it is
+missing.
 
 Neither target has anything to do with the port's own Windows build. That one is
 built with MSVC on Windows (`--preset windows-release`) and run natively; there

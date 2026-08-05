@@ -46,3 +46,9 @@ roms/
 
 # ---- Copias de trabalho do `make run` ----
 work/
+
+# ---- Editor de terceiro (`make wte`) ----
+# O "WE2002 Team Editor v0.99" do Obocaman: binario sem fonte e sem licenca,
+# rodado so para comparar interface. Como as imagens de CD, o usuario mantem a
+# pasta no disco e ela nunca entra no versionamento.
+we-team-editor/

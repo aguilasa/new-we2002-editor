@@ -61,6 +61,8 @@ help:
 	@echo '  run-99        run forcando DISPLAY=:99 (validacao visual)'
 	@echo '  oracle        abre o ed.exe original sob Wine (runner do Bottles)'
 	@echo '  oracle-99     oracle forcando DISPLAY=:99'
+	@echo '  wte           abre o WE Team Editor do Obocaman na tela ATUAL'
+	@echo '  wte-99        idem, forcando DISPLAY=:99'
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -105,7 +107,7 @@ $(WORK):
 copy: $(COPY)
 
 fresh:
-	@rm -rf '$(COPY)' '$(ORACLE_DIR)'
+	@rm -rf '$(COPY)' '$(ORACLE_DIR)' '$(WTE_COPY)'
 	@$(MAKE) --no-print-directory copy
 
 run: build $(COPY)
@@ -184,6 +186,69 @@ oracle: $(ORACLE_COPY)
 
 oracle-99:
 	@$(MAKE) --no-print-directory oracle DISPLAY=:99 XAUTH='$(XAUTH_99)'
+
+# ------------------------------------------------------- WE Team Editor -----
+#
+# O "WE2002 Team Editor v0.99" do Obocaman (2002), traduzido para PT-BR --
+# um editor de terceiro, sem fonte, em we-team-editor/. Nao e oraculo de nada:
+# roda so para comparar interface e garimpar ideias.
+#
+# E um app Delphi 6, PE32 (32 bits), e por isso NAO reusa nada do oraculo:
+#   - prefix proprio, WINEARCH=win32   ($(WTE_PREFIX))
+#   - o loader e $(WINE_BIN)/wine, nao o wine64
+#
+# Ao contrario do oracle/run-99, este alvo roda no DISPLAY que estiver no
+# ambiente -- e o alvo "na tela atual". Use `make wte-99` para o Xvfb.
+#
+# O dialogo de abrir nao aceita caminho longo digitado por xdotool, e de todo
+# jeito e chato de digitar: o alvo mapeia a unidade E: para $(WORK)/, entao
+# basta colar o caminho curto que ele imprime.
+
+WTE_DIR    := we-team-editor
+WTE_PREFIX ?= $(abspath $(WORK))/wineprefix-wte
+WTE_COPY   := $(WORK)/wte-$(notdir $(IMAGE))
+
+.PHONY: wte wte-99
+
+$(WTE_COPY): $(IMAGE) | $(WORK)
+	@test -s '$(IMAGE)' || { echo 'ERRO: imagem ausente: $(IMAGE)'; exit 1; }
+	@echo '>> copiando $(IMAGE) -> $@  (~474 MB)'
+	@cp --reflink=auto '$(IMAGE)' '$@'
+
+wte: $(WTE_COPY)
+	@test -f '$(WTE_DIR)/we-team-editor.exe' || { \
+	  echo 'ERRO: $(WTE_DIR)/we-team-editor.exe ausente.'; \
+	  echo '      esse editor nao e versionado; coloque a pasta na raiz.'; exit 1; }
+	@test -x '$(WINE_BIN)/wine' || { \
+	  echo 'ERRO: loader Wine de 32 bits nao encontrado: $(WINE_BIN)/wine'; \
+	  exit 1; }
+	@# winex11.drv de 32 bits precisa do stack X i386 no host; sem ele o app
+	@# morre antes de abrir janela, com "Initialization of winex11.drv failed".
+	@ldconfig -p | grep -q 'libX11\.so\.6 (libc6)' || { \
+	  echo 'ERRO: faltam as libs X de 32 bits. Instale com:'; \
+	  echo '  sudo apt install libx11-6:i386 libxext6:i386 libxrender1:i386 \'; \
+	  echo '    libxcursor1:i386 libxi6:i386 libxrandr2:i386 libxinerama1:i386 \'; \
+	  echo '    libxcomposite1:i386 libxfixes3:i386 libfreetype6:i386 \'; \
+	  echo '    libfontconfig1:i386 libgl1:i386 libglu1-mesa:i386'; exit 1; }
+	@if [ ! -d '$(WTE_PREFIX)' ]; then \
+	  echo '>> criando o prefix win32 em $(WTE_PREFIX) (primeira vez, demora)'; \
+	  mkdir -p '$(WTE_PREFIX)'; \
+	  env WINEPREFIX='$(WTE_PREFIX)' WINEARCH=win32 WINEDEBUG=-all \
+	    $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
+	    '$(WINE_BIN)/wineboot' -i >/dev/null 2>&1 || true; \
+	fi
+	@ln -sfn '$(abspath $(WORK))' '$(WTE_PREFIX)/dosdevices/e:'
+	@echo '>> no dialogo "Abre", digite:  E:\$(notdir $(WTE_COPY))'
+	@echo '   (aponta para $(WTE_COPY))'
+	@echo '>> o aviso de tamanho e o mesmo do ed.exe -- responda "Sim"'
+	@echo '>> we-team-editor.exe   (DISPLAY=$(DISPLAY), prefix $(WTE_PREFIX))'
+	@cd '$(WTE_DIR)' && env WINEPREFIX='$(WTE_PREFIX)' WINEARCH=win32 \
+	  WINEDEBUG=-all $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
+	  '$(WINE_BIN)/wine' we-team-editor.exe; \
+	  env WINEPREFIX='$(WTE_PREFIX)' '$(WINE_BIN)/wineserver' -k >/dev/null 2>&1 || true
+
+wte-99:
+	@$(MAKE) --no-print-directory wte DISPLAY=:99 XAUTH='$(XAUTH_99)'
 
 # ----------------------------------------------------------------- testes ---
 
