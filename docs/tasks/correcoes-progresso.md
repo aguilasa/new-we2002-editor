@@ -13,11 +13,13 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 |---|---|---|---|---|---|
 | [CORR-WTE-001](/docs/tasks/CORR-WTE-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Frontmatter da task diz `pendente` numa tarefa concluída | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-002](/docs/tasks/CORR-WTE-002.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [x] concluída | 2026-08-05 |
+| [CORR-WTE-003](/docs/tasks/CORR-WTE-003.md) | [WTE-TASK-02](/docs/tasks/02-esqueleto-do-projeto.md) | A seção `wte/` do `.gitignore` ignora `lib/` e `backup/` no repositório inteiro | Baixa | [ ] pendente | — |
 
 ## Checklist
 
 - [x] CORR-WTE-001 — sincronizar `status:` do frontmatter, e citá-lo no `01-executar.md`
 - [x] CORR-WTE-002 — escrever no `ambiente.md` como remedir os dois números derivados
+- [ ] CORR-WTE-003 — ancorar `lib/` e `backup/` no `wte/`, onde a seção diz que valem
 
 ## Detalhes por correção
 
@@ -45,3 +47,18 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** inlinar no `ambiente.md` o `analyzeHeadless` + `ShowInfo.java` e o
   laço `xdotool` do censo de janelas, e remover a referência ao caminho volátil.
   Os valores estão certos; o que falta é a rota de volta
+
+### CORR-WTE-003
+
+- **Arquivo com problema:** `.gitignore`, seção
+  `# ---- Projeto Lazarus em wte/ (WTE-TASK-02) ----`
+- **Sintoma:** `lib/` e `backup/` entraram sem âncora, então valem para o
+  repositório inteiro — inclusive a árvore do `newWe2002`, que a task tinha o
+  critério explícito de não tocar. As regras vizinhas da mesma seção
+  (`wte/build/`, `wte/assets`) são ancoradas
+- **Como foi detectado:** `git check-ignore -v src/lib/x.cpp tools/lib/z.py
+  legacy/backup/y.txt` casa nas linhas 69 e 70 do `.gitignore`
+- **Fix:** trocar por `wte/lib/` e `wte/backup/`. Impacto atual é zero — nada
+  rastreado casa —, o defeito é latente: arquivo que some sem aparecer no
+  `git status`. As três regras de extensão (`*.lps`, `*.ppu`, `*.compiled`)
+  ficam como estão
