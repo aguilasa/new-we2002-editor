@@ -43,3 +43,6 @@ __pycache__/
 # roms/ guarda as imagens de CD usadas pelos testes (~780 MB). O usuario mantem
 # a pasta populada; ela nunca entra no versionamento. Ver CLAUDE.md.
 roms/
+
+# ---- Copias de trabalho do `make run` ----
+work/

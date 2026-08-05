@@ -8,21 +8,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `xdotool` — deve acontecer no `DISPLAY=:99`.** O `:1` é a sessão real do usuário;
 abrir janelas nele atrapalha o uso da máquina.
 
-Já existe um Xvfb rodando:
+Já existe um Xvfb rodando. **Ele sobe via `xvfb-run`, então tem cookie
+próprio** — não basta exportar `DISPLAY`:
 
 ```
-Xvfb :99 -screen 0 960x672x24
+Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp -auth /tmp/xvfb-run.XXXXXX/Xauthority
 ```
+
+Sem apontar o `XAUTHORITY` para esse arquivo, o Qt morre antes de abrir janela
+com `Invalid MIT-MAGIC-COOKIE-1 key` seguido de
+`qt.qpa.xcb: could not connect to display :99`. O caminho do cookie muda a cada
+reinício do Xvfb; descubra pelo `ps`:
+
+```sh
+export DISPLAY=:99
+export XAUTHORITY=$(ps -o args= -C Xvfb \
+  | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)
+```
+
+O `make run-99` faz isso sozinho (ver a seção do Makefile).
 
 Se por qualquer motivo não for possível usar o `:99` — servidor caído, resolução
 insuficiente, app que exige compositor Wayland, ferramenta que não respeita
 `DISPLAY` — **pergunte ao usuário antes de cair para o `:1`**. Nunca faça esse
 fallback silenciosamente.
 
-Limitação conhecida: o diálogo principal `IDD_ED_DIALOG` tem 718×337 DLU ≈
-**1077×548 px**, mais largo que os 960 px do `:99` atual. Para validar a janela
-principal inteira é preciso um screen maior. Isso exige reiniciar o Xvfb —
-**pergunte antes**.
+O diálogo principal `IDD_ED_DIALOG` tem 718×337 DLU ≈ **1077×548 px** e **cabe
+inteiro** nos 1280×1024 atuais. (Isso já foi limitação: o `:99` era 960×672 e
+cortava a borda direita. Se o Xvfb voltar a subir numa resolução menor que 1077
+de largura, validar a janela inteira exige reiniciá-lo — **pergunte antes**.)
 
 Screenshot de uma janela específica:
 
@@ -31,6 +45,11 @@ DISPLAY=:99 xdotool search --pid <PID> | while read i; do \
   echo "$i :: $(DISPLAY=:99 xdotool getwindowname $i)"; done
 DISPLAY=:99 import -window <WINDOW_ID> out.png
 ```
+
+`import -window <id>` falha com `unable to read X window image: Resource
+temporarily unavailable` quando a janela está obscurecida por um modal — e o
+port abre um aviso modal já na carga. Dispense o aviso primeiro, ou capture
+`-window root`, que sempre funciona.
 
 Disponível no host: `Xvfb`, `xvfb-run`, `xdotool`, `import` (ImageMagick),
 `ffmpeg`. **Não** instalados: `wmctrl`, `scrot`, `x11vnc`.
@@ -78,6 +97,40 @@ e as ressalvas estão em [NOTICE.md](NOTICE.md). Não adicione um arquivo de
 licença nem headers de licença aos fontes.
 
 ## Compilar e testar
+
+O [Makefile](Makefile) da raiz é um wrapper fino sobre os presets — não
+substitui o CMake, e é opcional. `make` sem alvo lista tudo. O que ele resolve
+que a linha de comando crua não resolve:
+
+| Alvo | O que faz |
+|---|---|
+| `make run` | compila, **copia** `roms/golden-european-deluxe.bin` para `work/` e abre o editor sobre a cópia |
+| `make run-jp` | idem com `roms/japanese-shift-jis.bin` |
+| `make run-99` | `run` no `:99`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
+| `make oracle` / `oracle-99` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
+| `make fresh` | descarta as cópias de trabalho e refaz do original |
+| `make test` / `test-release` | `ctest` sem os golden |
+| `make golden` / `golden-gui` | exportam `WE2002_GOLDEN_IMAGE` absoluto |
+| `make gen` / `gen-check` | os geradores; o `-check` complementa o `ctest` com `git diff` |
+| `make distclean` | remove todos os `build*/` e o `work/` |
+
+`PRESET=debug|release|asan|ubsan` escolhe o preset (e o `binaryDir` certo);
+`IMAGE=` troca a imagem. `work/` está no `.gitignore`.
+
+O `oracle` mantém o prefix Wine em `work/wineprefix` (criado uma vez, reusado
+depois) e **nunca** toca numa bottle existente — `ed.cpp:75` chama
+`COleObjectFactory::UpdateRegistryAll()`, que escreve no registry. A cópia do
+oráculo é separada da do port e se chama `we2002.bin`, porque o filtro default
+do `CFileDialog` é literalmente esse nome (`edDlg.cpp:1331`); o alvo ainda
+cria `Debug/we2002.bin` como symlink para ela, já que o diálogo abre no CWD —
+assim o arquivo aparece na primeira tela sem navegar.
+
+O `gen-check` confere `extract_legacy_data.py` e `port_database.py` por
+`git diff` porque **esses dois não têm `--check`** — só `rc2ui.py` e
+`apply_glossary.py` têm, e são os que o `ctest` registra (`ui_forms`,
+`glossary`).
+
+Direto pelo CMake:
 
 ```sh
 cmake --preset debug        # ou: cmake -B build -DCMAKE_BUILD_TYPE=Debug
@@ -266,7 +319,9 @@ diff acusa uma divergência que não existe.
 ## Rodar o port
 
 ```sh
-DISPLAY=:99 ./build/src/app/newWe2002 /caminho/copia.bin
+make run-99                 # cuida da cópia e do XAUTHORITY
+# ou, à mão (exige DISPLAY e XAUTHORITY já exportados — ver a regra do :99):
+./build/src/app/newWe2002 /caminho/copia.bin
 ```
 
 O argumento é opcional; sem ele abre o `QFileDialog`, como o original. Ele
