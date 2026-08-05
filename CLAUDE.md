@@ -369,6 +369,14 @@ colar. O aviso de tamanho é o mesmo do `ed.exe` e é igualmente inofensivo.
 `we-team-editor/` está no `.gitignore`: binário sem fonte e sem licença não
 entra no repositório. O usuário mantém a pasta, como faz com `roms/`.
 
+Existe um plano de engenharia reversa desse binário, com alvo em Lazarus/FPC
+nativo no Linux, em [docs/PLAN-WTE-LAZARUS.md](docs/PLAN-WTE-LAZARUS.md). É
+**projeto separado** do `newWe2002` — não compartilha build nem código, só o
+conhecimento de formato (`Offsets.hpp`, `we2002_core`). Nenhuma fase foi
+executada. O plano traz o diagnóstico do binário já medido: 18 formulários
+`.dfm` extraíveis, 96 handlers com nome e endereço recuperados do VMT, e 19 dos
+nossos 69 `OFS_*` batendo numa tabela em `.data` do próprio `.exe`.
+
 ## Rodar o port
 
 ```sh
