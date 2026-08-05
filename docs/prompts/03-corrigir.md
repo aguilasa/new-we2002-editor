@@ -247,6 +247,10 @@ Se concluída:
 - Conferir que a célula do ID é link para o markdown da correção
   (`[CORR-WTE-XXX](CORR-WTE-XXX.md)`, **relativo simples**); se a linha veio sem
   link, ponha
+- Trocar `status: pendente` por `status: concluído` no **frontmatter do
+  `CORR-WTE-XXX.md`**. O `02-revisar.md` abre toda correção com `pendente`, e o
+  campo duplica a coluna Status do `correcoes-progresso.md`; os dois têm de
+  concordar. Mesma regra do `01-executar.md` §4 para as tasks
 - Preencher o **Log de Execução**:
   - **Executado em:** data de hoje
   - **Resumo do que foi feito:** 2-3 linhas

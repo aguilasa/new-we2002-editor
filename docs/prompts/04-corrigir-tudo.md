@@ -155,7 +155,8 @@ Para cada onda, na ordem:
 5. Marcar `[x]` no `correcoes-progresso.md` (tabela **e** checklist), preencher
    a coluna **"Concluída em"** com a data do commit daquela CORR (`AAAA-MM-DD`,
    a mesma do `Executado em`), conferir que a célula do ID é link para o
-   `CORR-WTE-XXX.md`, e preencher o **Log de Execução**. `[x]` descreve estado
+   `CORR-WTE-XXX.md`, trocar o `status:` do frontmatter da CORR para
+   `concluído`, e preencher o **Log de Execução**. `[x]` descreve estado
    **já commitado**, nunca intenção. Num lote as CORRs podem cair em dias
    diferentes: a data é **por CORR**, não a do fechamento do lote.
 

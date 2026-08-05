@@ -3,7 +3,7 @@ id: CORR-WTE-001
 title: "Correção: frontmatter da task diz `pendente` numa tarefa concluída"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
