@@ -134,6 +134,7 @@ inline constexpr Offset SECTOR_DATA_END = 2072;
 }  // namespace we2002
 """,
         encoding="utf-8",
+        newline="\n",
     )
     print(f"Offsets.hpp: {len(offsets)} offsets")
 
@@ -199,6 +200,7 @@ namespace we2002 {
 }  // namespace we2002
 """,
         encoding="utf-8",
+        newline="\n",
     )
 
     # One doc comment per table. Keyed by the legacy block name, so renaming a
@@ -260,6 +262,7 @@ inline constexpr int START_LINK_COUNT = {counts["start_link"]};
 }  // namespace we2002
 """,
         encoding="utf-8",
+        newline="\n",
     )
     print("Tables.cpp/.hpp:", ", ".join(f"{k}={v}" for k, v in counts.items()))
     return 0

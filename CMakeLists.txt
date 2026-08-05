@@ -22,6 +22,19 @@ endif()
 # /utf-8, since the sources were converted to UTF-8 in phase 1.
 if(MSVC)
     add_compile_options(/utf-8)
+
+    # we2002::Database is 1.21 MB -- players[1911] alone is 1.17 MB, since the
+    # 2002 code held the whole database in file-scope arrays and the port kept
+    # the layout. Every one of them is declared as a local: golden_tool does,
+    # the unit tests do, and MainWindow holds one by value.
+    #
+    # Linux reserves 8 MB of stack per thread and never noticed. MSVC reserves
+    # 1 MB, so the very first `Database db;` overflows before main() gets
+    # anywhere -- STATUS_STACK_OVERFLOW, exit code 0xC00000FD, and not one byte
+    # of output. Reserve the same 8 MB the code was written against rather than
+    # move the object to the heap in a dozen places: this changes no semantics
+    # and keeps the two platforms running identical source.
+    add_link_options(/STACK:8388608)
 else()
     add_compile_options(-fsigned-char)
 endif()

@@ -510,7 +510,9 @@ def main(argv: list[str]) -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     for name, content in files.items():
-        (OUT / name).write_text(content, encoding="utf-8")
+        # newline="\n": these files are committed and compared byte for byte by
+        # `ctest -R ui_forms`; Python would write CRLF on Windows.
+        (OUT / name).write_text(content, encoding="utf-8", newline="\n")
         widgets = content.count('<widget class="') - 1
         if name.endswith(".ui"):
             print(f"  {name}: {widgets} controles")

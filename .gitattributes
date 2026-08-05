@@ -1,17 +1,57 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Line endings
+#
+# Everything textual is LF in the working tree, on every platform. The inherited
+# file said only `* text=auto`, which leaves the working tree up to the client:
+# with the Git for Windows default (core.autocrlf=true) the whole tree checks
+# out as CRLF. The generators in tools/ read in text mode -- so they would still
+# agree -- but they *write* '\n', which the Python text layer turns into '\r\n'
+# on Windows. Every generated file would come back modified with no real change,
+# and `ctest -R ui_forms` would be comparing CRLF against LF.
+#
+# `eol=lf` settles this in the repository instead of in each developer's config.
+# See docs/PLAN-WINDOWS.md, task T1.
+* text=auto eol=lf
 
-# Custom for Visual Studio
+# Belt and braces for what the generators read and write, so that a future edit
+# to the line above cannot silently take these with it. The .sh files are the
+# ones that break outright rather than noisily: bash reads the shebang and every
+# line after it verbatim, and CRLF gives `$'\r': command not found`.
+*.sh    text eol=lf
+*.py    text eol=lf
+*.cpp   text eol=lf
+*.hpp   text eol=lf
+*.h     text eol=lf
+*.ui    text eol=lf
+*.json  text eol=lf
+*.rc    text eol=lf
+*.txt   text eol=lf
+*.qrc   text eol=lf
+*.yml   text eol=lf
+*.xml   text eol=lf
+
+# Binary. Git's heuristic already gets these right; saying so means `text=auto`
+# never has to guess, and no diff is attempted.
+*.png   binary
+*.ico   binary
+*.xlsx  binary
+*.bin   binary
+*.exe   binary
+*.dll   binary
+
+# The author's own debug dumps, committed as they were produced: CRLF, and not
+# ours to renormalise. Nothing reads them -- they are history, not fixtures.
+docs/samples/debugio.txt        -text
+docs/samples/debugio_robben.txt -text
+
+# Diff drivers inherited from the original .gitattributes.
 *.cs     diff=csharp
-
-# Standard to msysgit
-*.doc	 diff=astextplain
-*.DOC	 diff=astextplain
-*.docx diff=astextplain
-*.DOCX diff=astextplain
-*.dot  diff=astextplain
-*.DOT  diff=astextplain
-*.pdf  diff=astextplain
-*.PDF	 diff=astextplain
-*.rtf	 diff=astextplain
-*.RTF	 diff=astextplain
+*.doc    diff=astextplain
+*.DOC    diff=astextplain
+*.docx   diff=astextplain
+*.DOCX   diff=astextplain
+*.dot    diff=astextplain
+*.DOT    diff=astextplain
+*.pdf    diff=astextplain
+*.PDF    diff=astextplain
+*.rtf    diff=astextplain
+*.RTF    diff=astextplain

@@ -6,13 +6,23 @@
       "name": "debug",
       "displayName": "Debug",
       "binaryDir": "${sourceDir}/build",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     },
     {
       "name": "release",
       "displayName": "Release",
       "binaryDir": "${sourceDir}/build-release",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
     },
     {
       "name": "asan",
@@ -22,6 +32,11 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "WE2002_SANITIZE": "ON",
         "WE2002_SANITIZERS": "address,undefined"
+      },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
       }
     },
     {
@@ -32,6 +47,49 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "WE2002_SANITIZE": "ON",
         "WE2002_SANITIZERS": "undefined"
+      },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.5.3/msvc2019_64"
+      }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "windows-base",
+      "displayName": "Windows Debug (MSVC + Ninja)",
+      "binaryDir": "${sourceDir}/build-windows-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "windows-base",
+      "displayName": "Windows Release (MSVC + Ninja)",
+      "binaryDir": "${sourceDir}/build-windows-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "windows-asan",
+      "inherits": "windows-base",
+      "displayName": "Windows Debug + AddressSanitizer (MSVC)",
+      "binaryDir": "${sourceDir}/build-windows-asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "WE2002_SANITIZE": "ON"
       }
     }
   ],
@@ -39,7 +97,10 @@
     { "name": "debug", "configurePreset": "debug" },
     { "name": "release", "configurePreset": "release" },
     { "name": "asan", "configurePreset": "asan" },
-    { "name": "ubsan", "configurePreset": "ubsan" }
+    { "name": "ubsan", "configurePreset": "ubsan" },
+    { "name": "windows-debug", "configurePreset": "windows-debug" },
+    { "name": "windows-release", "configurePreset": "windows-release" },
+    { "name": "windows-asan", "configurePreset": "windows-asan" }
   ],
   "testPresets": [
     {
@@ -55,6 +116,21 @@
     {
       "name": "ubsan",
       "configurePreset": "ubsan",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows-debug",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-release",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-asan",
+      "configurePreset": "windows-asan",
       "output": { "outputOnFailure": true }
     }
   ]

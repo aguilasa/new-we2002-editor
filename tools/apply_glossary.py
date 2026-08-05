@@ -127,7 +127,9 @@ def main(argv: list[str]) -> int:
         after, ids, comments = glossary.rename(before)
         if after == before:
             continue
-        path.write_text(after, encoding="utf-8")
+        # newline="\n": the repository is LF everywhere (.gitattributes), and
+        # Python would otherwise write CRLF on Windows.
+        path.write_text(after, encoding="utf-8", newline="\n")
         print(f"{rel}: {ids} identificador(es), {comments} comentario(s)")
     return 0
 
