@@ -13,7 +13,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [WTE-TASK-01](01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ⬜ Pendente | — | — |
+| [WTE-TASK-01](01-ferramental.md) | Ferramental (Lazarus, FPC, Ghidra) | 0 | — | ✅ Concluído | 2026-08-05 | ⬜ pendente |
 | [WTE-TASK-02](02-esqueleto-do-projeto.md) | Esqueleto de `wte/` e build | 0 | 01 | ⬜ Pendente | — | — |
 | [WTE-TASK-03](03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ⬜ Pendente | — | — |
 | [WTE-TASK-04](04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ⬜ Pendente | — | — |
@@ -161,9 +161,9 @@ conferível.
 
 ### Fase 0 — Infra
 
-- [ ] `lazbuild` compila projeto LCL vazio e abre janela no `:99`
-- [ ] `make wte` ainda abre o original (o oráculo A depende do stack X i386)
-- [ ] Ghidra importa o `.exe`
+- [x] `lazbuild` compila projeto LCL vazio e abre janela no `:99`
+- [x] `make wte` ainda abre o original (o oráculo A depende do stack X i386)
+- [x] Ghidra importa o `.exe`
 - [ ] `wte/` compilando, com `re/` versionado e saída de build ignorada
 - [ ] Decidido onde mora a bateria de `--check` dos geradores
 
@@ -391,7 +391,7 @@ nova.
 | Offsets nossos que batem | **19 de 69**, em tabela a partir de `0x004231a0` |
 | Strings com padding do tradutor | 70 |
 | Assets externos | 197 `.bmp` + `dat.bin` de 145.408 B |
-| Ferramental instalado | **nenhum** — sem Lazarus, FPC, Ghidra ou `pefile` |
+| Ferramental instalado | **nenhum** — sem Lazarus, FPC, Ghidra ou `pefile`. **Superado pela WTE-TASK-01**: ver [`../../wte/re/ambiente.md`](../../wte/re/ambiente.md) |
 
 Censo de componentes, medido nos 18 DFM:
 
