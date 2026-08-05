@@ -519,7 +519,7 @@ Dezenove das vinte classes são diretas. A LCL foi feita para isso.
 | `TForm`, `TLabel`, `TEdit`, `TListBox`, `TComboBox`, `TGroupBox`, `TRadioButton`, `TBevel`, `TTimer`, `TShape`, `TImage`, `TScrollBar`, `TTrackBar`, `TUpDown`, `TSpeedButton`, `TBitBtn`, `TOpenDialog`, `TSaveDialog` | mesmo nome | 1:1 |
 | `TStaticText` | `TStaticText` | existe, mas com quirks de fundo transparente no GTK2 — 37 instâncias, conferir cedo |
 | `TActionList` | `TActionList` | existe; checar se as ações padrão (`Stdactns`) usadas têm par |
-| **`TBrowseURL`** | **sem par** | componente de terceiro. Substituir por `TLabel` + `OpenURL()` de `LCLIntf`. 2 instâncias. |
+| **`TBrowseURL`** | **sem par** | ação padrão da VCL (unidade `Extactns`), não componente de terceiro — medido na WTE-TASK-07. A LCL não a tem; substituir por `TLabel` + `OpenURL()` de `LCLIntf`. 2 instâncias. |
 
 Unidades VCL vistas nos imports e o que fazer com cada uma:
 
@@ -527,14 +527,31 @@ Unidades VCL vistas nos imports e o que fazer com cada uma:
 |---|---|
 | `Forms`, `Controls`, `Stdctrls`, `Extctrls`, `Buttons`, `Graphics`, `Classes`, `Dialogs`, `Comctrls` | par direto na LCL |
 | `Sysutils`, `Strutils`, `Types`, `Variants`, `Typinfo` | FPC tem todas |
-| `Registry` | **investigar.** Se o app guarda config no registry, virar arquivo INI em `~/.config/`. |
-| `Printers` | **investigar.** Provavelmente arrastado pela VCL sem uso; se houver impressão de verdade, decidir escopo. |
-| `Comobj` | OLE. Quase certamente só o `ShellExecute` do `TBrowseURL`. Some com a substituição. |
-| `Winhelpviewer` | ajuda `.hlp` do Windows. Não portar; o texto de ajuda vira janela própria. |
+| `Registry` | **transitiva.** Nenhum símbolo além do par de ciclo de vida, nenhuma chamada. Nada a portar. |
+| `Printers` | **transitiva.** Idem: o app não imprime, e nenhum formulário tem diálogo de impressão. |
+| `Comobj` | **transitiva.** Tem uma chamada — o `EOleException` do caminho de asserção da RTL —, e ela não está em handler nenhum. Não é o `TBrowseURL`. |
+| `Winhelpviewer` | **transitiva.** Não há ajuda `.hlp`, nem `HelpFile`/`HelpContext` em formulário nenhum. |
 
-Essas quatro últimas linhas são **itens de investigação da Fase 1**, não
-conclusões. Import de unidade em app C++Builder frequentemente é dependência
-transitiva sem uso real.
+Essas quatro linhas eram itens de investigação da Fase 1 e foram **fechadas
+pela WTE-TASK-07**, com a medida em
+[`wte/re/unidades-vcl.md`](../wte/re/unidades-vcl.md). O palpite que as
+enquadrava — "import de unidade em app C++Builder frequentemente é dependência
+transitiva sem uso real" — se confirmou nas quatro, e o motivo é estrutural:
+**27 das 42 unidades Borland importadas trazem apenas
+`@X@initialization$qqrv` e `@X@Finalization$qqrv`**, que não são API, e sim o
+par que a tabela de módulos do executável percorre no arranque.
+
+Duas hipóteses desta seção morreram junto, e vale registrar por quê:
+
+- **não há configuração nenhuma a migrar.** `Inifiles` também é só ciclo de
+  vida, e nenhuma string do binário cita chave de registry ou `.ini`. O
+  `~/.config/` não ganha arquivo.
+- **`Comobj` não é o `ShellExecute` do `TBrowseURL`.** O `.exe` não importa
+  `SHELL32.DLL`; o `TBrowseURL` é a ação padrão da VCL (unidade `Extactns`,
+  não componente de terceiro) e é disparado por método dinâmico através do
+  VMT, resolvido dentro do `vcl60.bpl`.
+
+Nenhuma das quatro gera item para fase alguma.
 
 ### Duas diferenças de plataforma já conhecidas
 
