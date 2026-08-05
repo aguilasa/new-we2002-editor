@@ -322,7 +322,8 @@ legacy/mfc/          o app MFC original — REFERENCIA, nao compila
 data/                dados lidos em runtime
 packaging/           .desktop + AppStream
 docs/                PLAN-LINUX.md
-.github/workflows/   CI: linux, linux-ubsan, windows (este pode falhar)
+.github/workflows/   CI: linux, linux-release, linux-ubsan, windows.
+                     So roda por workflow_dispatch -- ver abaixo.
 ```
 
 O `CMakeLists.txt` da raiz só adiciona `src/app` se achar o Qt6, então o core e
@@ -585,6 +586,15 @@ salvo a faixa de 16 bytes já descrita.
 
 Formato de pacote (AppImage/Flatpak) foi **decidido ficar de fora** por
 enquanto: só as regras de `install()`.
+
+**O CI não roda sozinho.** Os gatilhos `push` e `pull_request` do
+[.github/workflows/ci.yml](.github/workflows/ci.yml) estão desligados **por
+decisão**, não por descuido: enquanto o projeto está sendo construído, runner
+queimando minuto a cada commit não diz nada que o build local não diga antes, e
+não diz o que importa — contra o `ed.exe` nenhum runner roda. Sobrou o
+`workflow_dispatch`, então a matriz inteira roda à mão pela aba Actions.
+Religar é descomentar as quatro linhas no cabeçalho do `ci.yml`, e isso é para
+o **fim do projeto**. Não religue por conta própria.
 
 **O Windows também está verificado.** O `.exe` do MSVC grava os mesmos bytes
 que o do GCC nas duas imagens, e o confronto direto com o `Debug\ed.exe`

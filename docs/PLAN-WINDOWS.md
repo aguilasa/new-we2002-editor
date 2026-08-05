@@ -474,21 +474,37 @@ empacote exatamente o conteúdo do zip que você já testou.
 
 ## 8. CI
 
-O job `windows` do [ci.yml](../.github/workflows/ci.yml) já existe com
-`continue-on-error: true`, de propósito: vermelho ali sempre foi o sinal de
-"Fase 7 pendente", não uma falha. Fechar a fase significa:
+> **O CI não roda sozinho, por decisão — e isso vale até o fim do projeto.**
+> Os gatilhos `push` e `pull_request` do
+> [ci.yml](../.github/workflows/ci.yml) estão desligados; sobrou o
+> `workflow_dispatch`, então a matriz inteira roda à mão pelo Actions quando
+> valer a pena. Enquanto a árvore está em movimento, runner queimando minuto a
+> cada commit não diz nada que o build local não diga antes — e não diz o que
+> importa: contra o `ed.exe` nenhum runner roda.
+>
+> Ligar de volta é descomentar as quatro linhas que ficaram no cabeçalho do
+> `ci.yml`. Fazer isso **no fim do projeto**, quando verde-a-cada-commit passar
+> a ser o objetivo.
 
-1. Tirar o `continue-on-error: true`.
-2. Passar `--config Release` no build **e** no `ctest` (já está).
-3. Depois da T4, o `ctest` do Windows roda `core`, `ui_forms` e `glossary`, e
-   pula `golden`/`golden_gui`. Confira que ele **pula**, não que passa por
-   acidente.
-4. Acrescentar os `--check` dos geradores, como o job `linux` faz — é onde um
+O job `windows` foi ajustado do jeito que a Fase 7 pedia, mesmo sem rodar
+automaticamente:
+
+1. `continue-on-error: true` fora — quando ele rodar, vermelho é falha.
+2. Ninja no lugar do gerador do Visual Studio, para o `CMAKE_BUILD_TYPE` valer
+   alguma coisa (o gerador do VS é multi-config e o ignora). Some a necessidade
+   de `--config` em cada comando.
+3. Depois da T4, o `ctest` do Windows roda `core`, `ui_forms` e `glossary`. Os
+   `golden`/`golden_gui` **não são nem registrados** fora do UNIX — não é que
+   passem por acidente, é que não existem lá.
+4. Os `--check` dos geradores acrescentados, como no job `linux` — é onde um
    CRLF vazado aparece.
-5. Considerar rodar a §5.1 em CI: dois jobs produzindo o mesmo `roundtrip` e um
-   terceiro comparando os hashes. Barra a divergência de compilador para sempre,
-   sem imagem de CD no runner — só precisa de uma imagem sintética esparsa, que
-   o `TestLoadUnterminatedFormation` já mostra como montar.
+
+Fica por fazer, para quando o CI voltar a rodar:
+
+5. Rodar a §5.1 em CI: dois jobs produzindo o mesmo `roundtrip` e um terceiro
+   comparando os hashes. Barra a divergência de compilador para sempre, sem
+   imagem de CD no runner — só precisa de uma imagem sintética esparsa, que o
+   `TestLoadUnterminatedFormation` já mostra como montar.
 
 Nada de macOS. Não é "talvez depois".
 
@@ -511,7 +527,8 @@ A fase fecha quando **todas** derem certo:
       sai no mesmo diretório acentuado (§4.2)
 - [x] Ícone certo no Explorer, na barra de tarefas e na janela
 - [x] Zip portátil roda **sem Qt instalado** e sem variável de ambiente
-- [x] Job `windows` do CI sem `continue-on-error` (verde ainda por confirmar no runner)
+- [x] Job `windows` do CI sem `continue-on-error` — mas o CI **não roda
+      sozinho**: os gatilhos ficaram desligados até o fim do projeto (§8)
 - [x] `python tools\rc2ui.py --check` e `apply_glossary.py --check` verdes no Windows
 - [x] `ctest` continua verde no **Linux** depois de tudo
 - [x] Resultado escrito na Fase 7 do [PLAN-LINUX.md](PLAN-LINUX.md)
@@ -647,5 +664,5 @@ que a UIA do Qt precisa de retry.
 | 2026-08-04 | T8 §5.1 | SHA-256 idêntico ao do GCC nas duas imagens |
 | 2026-08-04 | T9 §5.2 | só `405724..405739` |
 | 2026-08-04 | T10 zip | 44,9 MB, roda com PATH limpo e sem Qt |
-| 2026-08-04 | T11 CI | `continue-on-error` fora, Ninja no lugar do gerador do VS, `--check` dos geradores acrescentado |
+| 2026-08-04 | T11 CI | `continue-on-error` fora, Ninja no lugar do gerador do VS, `--check` dos geradores acrescentado. Depois disso, **os gatilhos automáticos foram desligados** — o CI só roda por `workflow_dispatch` até o fim do projeto (§8) |
 | 2026-08-04 | T12 | este registro |

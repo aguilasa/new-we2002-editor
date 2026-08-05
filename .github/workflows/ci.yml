@@ -11,13 +11,27 @@
 #
 # macOS is out of scope. Not "maybe later" -- it is not in this matrix, not in
 # the packaging, and does not justify an #ifdef.
+#
+# NOTHING RUNS AUTOMATICALLY. The push and pull_request triggers are off by
+# decision, not by accident: while the project is still being built out, a
+# runner burning minutes on every commit buys nothing that the local build does
+# not already say sooner. Verification happens on the development machines --
+# both platforms are checked there, including against ed.exe, which no runner
+# can do.
+#
+# workflow_dispatch is left on, so the whole matrix can be run by hand from the
+# Actions tab whenever it is worth knowing.
+#
+# Turn the triggers back on at the end of the project, when the tree stops
+# moving and green-on-every-commit starts being the point. Uncomment:
+#
+#   push:
+#     branches: [main]
+#   pull_request:
 
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 jobs:

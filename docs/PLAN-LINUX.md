@@ -457,7 +457,9 @@ Regras para não criar dívida de portabilidade enquanto se trabalha só no Linu
 - **Nada de `windows.h` nem de POSIX no `core`.** Só biblioteca padrão e
   libcurl — a mesma regra que já proíbe o Qt ali.
 - **CI**: matriz com `ubuntu-latest` e `windows-latest` desde o primeiro
-  workflow, mesmo que o Windows comece vermelho. Sem macOS.
+  workflow, mesmo que o Windows comece vermelho. Sem macOS. (Desde a Fase 7 a
+  matriz existe mas só roda por `workflow_dispatch` — ver a seção do `ci.yml`
+  na Fase 6.)
 
 ### Para onde vai cada arquivo de hoje
 
@@ -1251,10 +1253,16 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 - **[.github/workflows/ci.yml](../.github/workflows/ci.yml)** — quatro jobs:
   `linux` (compila, testa, valida `.desktop`/AppStream, instala e confere o
   layout), `linux-release` (Release, para o `_FORTIFY_SOURCE` rodar),
-  `linux-ubsan`, e `windows` com `continue-on-error: true`. A seção 5
-  pede a matriz com `windows-latest` desde o primeiro workflow "mesmo que comece
-  vermelho": vermelho ali é o sinal, não uma falha, e a Fase 7 tira o
-  `continue-on-error`.
+  `linux-ubsan`, e `windows`. A seção 5 pede a matriz com `windows-latest`
+  desde o primeiro workflow "mesmo que comece vermelho": vermelho ali era o
+  sinal, não uma falha, e a Fase 7 tirou o `continue-on-error`.
+
+  **Desde a Fase 7 o CI não roda sozinho.** Os gatilhos `push` e
+  `pull_request` estão desligados por decisão, até o fim do projeto: enquanto a
+  árvore está em movimento, o build local diz a mesma coisa antes e diz mais —
+  contra o `ed.exe` nenhum runner roda. Sobrou o `workflow_dispatch`, então a
+  matriz inteira roda à mão pelo Actions. Religar é descomentar as quatro
+  linhas no cabeçalho do `ci.yml`.
 
   ASan **não** entra no CI: esta máquina não consegue rodar (a Citrix substitui
   o `dlsym`, ver CLAUDE.md), então ninguém reproduziria localmente uma falha que
