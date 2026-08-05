@@ -40,7 +40,10 @@ Consequencias, todas deliberadas:
   contem o blob integral, extraido do `.exe` a cada execucao;
 - `--check` continua verificando os 798 KiB byte a byte, pelo SHA-256 que esta
   no `.dfm` -- versionar o hash e o que substitui versionar os bytes;
-- `blobs/` e ignorado pelo git e renasce do `.exe`, como `wte/assets`;
+- `blobs/` e ignorado pelo git e renasce do `.exe`, como `wte/assets` -- mas so
+  no **modo de escrita**. `--check` nao materializa nada: blob ausente e o
+  estado normal de um clone limpo, e sai como aviso, nao como divergencia.
+  Blob presente e diferente do `.exe`, ou blob sobrando, continuam falha;
 - o `{...}` com texto nao-hexadecimal faz um leitor de DFM padrao **falhar** ao
   encontrar a referencia, em vez de aceitar lixo em silencio. E o desfecho
   desejado: quem consumir isto tem de saber o que esta lendo.
@@ -701,8 +704,12 @@ def render_census(forms: list[tuple[str, Obj, list[Blob]]]) -> str:
         "fora dele. O SHA-256 no `.dfm` e o que preserva a\nverificacao byte "
         "a byte sem versionar os bytes: `--check` confere os 798 KiB\ncontra "
         "o hash.\n")
-    lines.append("`blobs/` e ignorado pelo git e renasce do `.exe`, como "
-                 "`wte/assets`.\n")
+    lines.append(
+        "`blobs/` e ignorado pelo git e renasce do `.exe`, como `wte/assets` "
+        "-- mas so no\n**modo de escrita**. O `--check` nao materializa nada: "
+        "num clone limpo os 118\n`.bin` faltam, e isso sai como aviso, nao "
+        "como divergencia. Blob presente e\ndiferente do `.exe`, ou blob "
+        "sobrando, continuam falha.\n")
 
     lines.append("## Por formulario\n")
     lines.append(
@@ -813,10 +820,18 @@ def do_check(text_files: dict[str, str], blob_files: dict[str, bytes]) -> int:
                     f"{name}: {len(on_disk.splitlines())} linhas no disco "
                     f"contra {len(content.splitlines())} regeradas")
 
+    # Blob ausente NAO e falha de conferencia: `blobs/` e cache regeneravel,
+    # gitignored por decisao da WTE-TASK-03, e este modo nao materializa nada.
+    # Num clone limpo os 118 faltam, e tratar isso como divergencia daria o
+    # mesmo codigo de saida de um `.dfm` editado a mao -- que e o que o gate
+    # existe para pegar. A garantia byte a byte nao depende do `.bin` no disco:
+    # ela vem do SHA-256 dentro do `.dfm` versionado, ja coberto pela
+    # comparacao de texto acima.
+    missing_blobs = 0
     for name, data in sorted(blob_files.items()):
         path = BLOBS / name
         if not path.exists():
-            problems.append(f"blobs/{name}: nao existe")
+            missing_blobs += 1
         elif path.read_bytes() != data:
             problems.append(f"blobs/{name}: conteudo diverge do .exe")
 
@@ -831,6 +846,10 @@ def do_check(text_files: dict[str, str], blob_files: dict[str, bytes]) -> int:
             if rel not in expected_blobs:
                 problems.append(f"blobs/{rel}: sobra, nao sai do .exe")
 
+    if missing_blobs:
+        print(f"AVISO: {missing_blobs} blobs ainda nao materializados -- "
+              f"rode `python3 {GENERATOR}` sem --check para gera-los")
+
     if problems:
         print(f"{REL_OUT} nao corresponde a {REL_EXE}:", file=sys.stderr)
         for p in problems:
@@ -838,8 +857,8 @@ def do_check(text_files: dict[str, str], blob_files: dict[str, bytes]) -> int:
         print(f"rode: python3 {GENERATOR}", file=sys.stderr)
         return 1
 
-    print(f"{len(text_files)} arquivos e {len(blob_files)} blobs em dia com "
-          f"{REL_EXE}")
+    present = len(blob_files) - missing_blobs
+    print(f"{len(text_files)} arquivos e {present} blobs em dia com {REL_EXE}")
     return 0
 
 

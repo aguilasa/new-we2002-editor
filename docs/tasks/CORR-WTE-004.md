@@ -3,7 +3,7 @@ id: CORR-WTE-004
 title: "Correção: `--check` fica vermelho num clone limpo, porque `blobs/` é gitignored e o modo de conferência nunca o materializa"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -119,23 +119,45 @@ uma vez antes de consumir os blobs (a WTE-TASK-10 precisa deles no disco).
 
 ## Verificação
 
-- [ ] `python3 wte/tools/dfm_extract.py --check` continua verde na árvore atual,
+- [x] `python3 wte/tools/dfm_extract.py --check` continua verde na árvore atual,
       com os 118 blobs materializados
-- [ ] Com `BLOBS` apontado para diretório vazio (sandbox, sem mexer na árvore),
+- [x] Com `BLOBS` apontado para diretório vazio (sandbox, sem mexer na árvore),
       o comando sai **0** e imprime o aviso de blobs não materializados
-- [ ] Com um `.bin` alterado na sandbox, o comando sai **1** com
+- [x] Com um `.bin` alterado na sandbox, o comando sai **1** com
       `conteudo diverge do .exe`
-- [ ] Com uma linha de `.dfm` alterada na sandbox, o comando sai **1** com
+- [x] Com uma linha de `.dfm` alterada na sandbox, o comando sai **1** com
       `linha N diverge`
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-05
 
 **Resumo do que foi feito:**
 
+`do_check()` passou a contar blob ausente num `missing_blobs` que **não** entra
+em `problems`: sai como `AVISO: N blobs ainda nao materializados`, na saída
+padrão, e o código de retorno continua 0. Blob presente e divergente, blob
+sobrando, `.dfm` divergente e `.dfm` ausente continuam falha. A linha final
+passou a contar os blobs **presentes** (`19 arquivos e 0 blobs em dia` no clone
+limpo), para não afirmar conferência de arquivo que não foi lido.
+
+Os cinco estados foram medidos em sandbox, com `OUT`/`BLOBS` redirecionados —
+a árvore real nunca foi tocada: árvore íntegra → 0; sem `blobs/` → 0 com aviso;
+`.bin` alterado → 1; linha de `.dfm` alterada → 1; blob sobrando → 1.
+
 **Problemas encontrados:**
 
+A varredura de discrepância pegou um terceiro arquivo, que a lista da CORR não
+previa: `wte/re/dfm/censo.md` repetia a mesma frase obsoleta ("`blobs/` renasce
+do `.exe` a cada execução"). Ele é **gerado** por `render_census()`, então a
+correção entrou no gerador e o `censo.md` foi regerado — não editado à mão.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dfm_extract.py` — `do_check()`, o docstring do módulo e o texto de
+  `render_census()`
+- `wte/re/dfm/README.md`
+- `wte/re/dfm/censo.md` — regerado
+- `docs/tasks/correcoes-progresso.md`

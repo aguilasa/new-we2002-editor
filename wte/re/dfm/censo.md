@@ -22,7 +22,10 @@ o `.gitignore` mantem fora dele. O SHA-256 no `.dfm` e o que preserva a
 verificacao byte a byte sem versionar os bytes: `--check` confere os 798 KiB
 contra o hash.
 
-`blobs/` e ignorado pelo git e renasce do `.exe`, como `wte/assets`.
+`blobs/` e ignorado pelo git e renasce do `.exe`, como `wte/assets` -- mas so no
+**modo de escrita**. O `--check` nao materializa nada: num clone limpo os 118
+`.bin` faltam, e isso sai como aviso, nao como divergencia. Blob presente e
+diferente do `.exe`, ou blob sobrando, continuam falha.
 
 ## Por formulario
 

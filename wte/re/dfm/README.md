@@ -34,10 +34,15 @@ fase 2 precisa versionado é a **estrutura** dos formulários, e é ela que fica
 
 Consequências:
 
-- `blobs/` é **ignorado pelo git** e renasce do `.exe` a cada execução, como
-  `wte/assets`;
+- `blobs/` é **ignorado pelo git** e renasce do `.exe` — mas só no **modo de
+  escrita**, como `wte/assets`. O `--check` não materializa nada: num clone
+  limpo os 118 `.bin` faltam, e isso sai como aviso, não como divergência
+  (blob presente e diferente do `.exe`, ou blob sobrando, continuam falha).
+  Quem for consumir os blobs — a **WTE-TASK-10** precisa deles no disco — roda
+  `python3 wte/tools/dfm_extract.py` uma vez antes;
 - o SHA-256 no `.dfm` versionado é o que substitui versionar os bytes: o
-  `--check` confere os 798 KiB byte a byte contra ele;
+  `--check` confere os 798 KiB byte a byte contra ele, e essa garantia não
+  depende do `.bin` no disco — o hash está no texto versionado;
 - `{...}` com texto não-hexadecimal faz um leitor de DFM padrão **falhar** ao
   encontrar a referência, em vez de aceitar lixo em silêncio.
 
