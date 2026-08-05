@@ -110,6 +110,13 @@ divergência é achado a registrar.
 > Após concluir e commitar a tarefa selecionada, **pare imediatamente**.
 > Não avance para a próxima tarefa pendente — aguarde nova invocação.
 
+A exclusão acima vale para **este** prompt e não tem exceção aqui. Quem executa
+mais de uma tarefa por invocação é o irmão em lote,
+[`/docs/prompts/05-executar-lote.md`](/docs/prompts/05-executar-lote.md) (o
+comando `/executar-lote`) — que relaxa essa regra e **só** ela, e cuja seleção,
+ordem, gates e marcação de progresso continuam sendo os deste arquivo. Se você
+foi invocado por aqui, o lote não é opção: uma tarefa, e pare.
+
 ---
 
 ## Contexto essencial — decisões já confirmadas

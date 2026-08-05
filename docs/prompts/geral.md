@@ -22,9 +22,22 @@ Execute o que está em `/home/ingmar/desenvolvimento/github/new-we2002-editor/do
 sempre releia o arquivo
 ```
 
-O `03` executa **uma** correção por invocação; o `04` executa o lote inteiro,
-em ordem de dependência, paralelizando só o que a matriz de conflito autoriza.
-As demais regras do `03` valem nos dois.
+```
+Execute o que está em `/home/ingmar/desenvolvimento/github/new-we2002-editor/docs/prompts/05-executar-lote.md`,
+sempre releia o arquivo
+```
+
+**Dois pares, a mesma forma.** Em cada par o prompt em lote relaxa exatamente
+uma regra do singular — "uma por invocação" — e nenhuma outra:
+
+| Singular | Lote | Tamanho do lote |
+| --- | --- | --- |
+| `01-executar.md` — uma task | `05-executar-lote.md` | **2** por padrão, ou o número pedido. Nunca "tudo" |
+| `03-corrigir.md` — uma CORR | `04-corrigir-tudo.md` | todas as pendentes |
+
+Os dois lotes paralelizam só o que a matriz de conflito autoriza, e o `:99` é
+sempre sequencial. As demais regras do singular valem palavra por palavra nos
+dois.
 
 **Duas regras que valem nos quatro prompts:**
 

@@ -16,7 +16,11 @@ Quero que você:
 
 1. Leia o `progresso.md` e identifique a **última tarefa marcada como
    `✅ Concluído`** cuja coluna **"Revisado em"** ainda esteja em
-   `⬜ pendente` — a coluna é o registro de quais já passaram por aqui
+   `⬜ pendente` — a coluna é o registro de quais já passaram por aqui.
+   **Havendo mais de uma `⬜ pendente`, revise a de menor ID**, e só ela: o
+   `/executar-lote` fecha várias tarefas numa invocação, então a fila de espera
+   por revisão tem mais de um item com frequência, e "última" ficaria ambíguo.
+   A ordem de revisão é a ordem de execução
 2. Use a tabela de mapeamento (em `01-executar.md`, ou os links da tabela de
    resumo do `progresso.md`) para achar o markdown da tarefa e leia-o
 3. **Inspecione o artefato real** — cada arquivo que a tarefa dizia criar ou
@@ -312,8 +316,11 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 > implementação.
 >
 > **EXCLUSÃO OBRIGATÓRIA 2 — uma revisão por execução:**
-> Revise **somente a última tarefa concluída**.
+> Revise **somente a última tarefa concluída** — a de **menor ID** entre as que
+> estão em `⬜ pendente`, se houver mais de uma.
 > Após criar os arquivos de correção e commitar, **pare imediatamente**.
+> Não existe irmão em lote deste prompt: fila de várias esperando revisão se
+> esvazia uma invocação por vez.
 >
 > **EXCLUSÃO OBRIGATÓRIA 3 — nada de escrever no binário nem nas ROMs:**
 > O `we-team-editor.exe` é leitura pura. As imagens de `roms/` também.
