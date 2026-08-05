@@ -18,7 +18,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `dfm_extract.py` — os 18 formulários | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-05 |
 | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | `published_methods.tsv` — os 96, com dono | 1 | 02 | ⬜ Pendente | — | — |
 | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ⬜ Pendente | — | — |
-| [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ⬜ Pendente | — | — |
+| [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ✅ Concluído | 2026-08-05 | ⬜ pendente |
 | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ⬜ Pendente | — | — |
 | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ⬜ Pendente | — | — |
 | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
@@ -173,8 +173,8 @@ conferível.
 - [x] Os 18 formulários decodificados inteiros, blobs binários preservados
 - [ ] Os 96 handlers com endereço **e formulário dono**
 - [ ] Strings com referência cruzada para os handlers
-- [ ] Limite da tabela de offsets **medido**, não estimado
-- [ ] Offsets que o `newWe2002` não tem, listados
+- [x] Limite da tabela de offsets **medido**, não estimado
+- [x] Offsets que o `newWe2002` não tem, listados
 - [ ] `Registry`, `Printers`, `Comobj`, `Winhelpviewer` com veredito
 - [ ] Convenção de nome dos 197 bitmaps resolvida
 - [ ] Os cinco números da §1 do plano remedidos por ferramenta versionada

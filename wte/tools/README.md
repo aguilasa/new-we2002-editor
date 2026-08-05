@@ -5,6 +5,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | Script | Task | O que gera |
 |---|---|---|
 | `dfm_extract.py` ✅ | 03 | `.rsrc` → os 18 DFM em texto |
+| `dump_offsets.py` ✅ | 06 | `.data`/`.text` → o mapa de offsets |
 | `dfm2lfm.py` | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |

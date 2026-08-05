@@ -1,0 +1,189 @@
+registro	nome	valor	hex	setor	byte_no_setor	va	ocorrencias	classe	base	base_nome	relacao	delta	nota
+tabela_slot	OFS_TEAM_NAME_KANJI	2002316	0x001e8d8c	851	764	0x004231a0							tabela1 slot 0
+tabela_slot	OFS_TEAM_MIXED_CASE_NAME	4598596	0x00462b44	1955	436	0x004231a4							tabela1 slot 1
+tabela_slot		0	0x00000000			0x004231a8							tabela1 slot 2 (buraco)
+tabela_slot		0	0x00000000			0x004231ac							tabela1 slot 3 (buraco)
+tabela_slot		0	0x00000000			0x004231b0							tabela1 slot 4 (buraco)
+tabela_slot		0	0x00000000			0x004231b4							tabela1 slot 5 (buraco)
+tabela_slot	OFS_TEAM_NAME_3	2003996	0x001e941c	852	92	0x004231b8							tabela1 slot 6
+tabela_slot	OFS_TEAM_NAME_1	1012640	0x000f73a0	430	1280	0x004231bc							tabela1 slot 7
+tabela_slot	OFS_TEAM_NAME_4	2830160	0x002b2f50	1203	704	0x004231c0							tabela1 slot 8
+tabela_slot	OFS_ML_TEAM_NAME_7	2028267	0x001ef2eb	862	843	0x004231c4							tabela1 slot 9
+tabela_slot	OFS_TEAM_NAME_2	1881968	0x001cb770	800	368	0x004231c8							tabela1 slot 10
+tabela_slot	OFS_TEAM_NAME_6	5651448	0x00563bf8	2402	1944	0x004231cc							tabela1 slot 11
+tabela_slot	OFS_TEAM_ABBREV_1	2004996	0x001e9804	852	1092	0x004231d0							tabela1 slot 12
+tabela_slot	OFS_TEAM_ABBREV_3	4234484	0x00409cf4	1800	884	0x004231d4							tabela1 slot 13
+tabela_slot	OFS_TEAM_ABBREV_2	5651068	0x00563a7c	2402	1564	0x004231d8							tabela1 slot 14
+tabela_slot		0	0x00000000			0x004231dc							tabela1 slot 15 (buraco)
+tabela_slot		0	0x00000000			0x004231e0							tabela1 slot 16 (buraco)
+tabela_slot		0	0x00000000			0x004231e4							tabela1 slot 17 (buraco)
+tabela_slot	OFS_FLAG_SHAPE_COPY_1	1929004	0x001d6f2c	820	364	0x00423634							tabela2 slot 0
+tabela_slot	OFS_FLAG_SHAPE_COPY_2	2005412	0x001e99a4	852	1508	0x00423638							tabela2 slot 1
+tabela_slot	OFS_FLAG_SHAPE_COPY_3	2328060	0x002385fc	989	1932	0x0042363c							tabela2 slot 2
+tabela_slot	OFS_FLAG_SHAPE_COPY_4	4904664	0x004ad6d8	2085	744	0x00423640							tabela2 slot 3
+tabela_slot	OFS_FLAG_SHAPE_COPY_5	5711640	0x00572718	2428	984	0x00423644							tabela2 slot 4
+tabela_copia						0x0042b750							copia identica de 0x004231a0, 72 bytes
+tabela_copia						0x0042d244							copia identica de 0x004231a0, 72 bytes
+tabela_copia						0x0042e6d4							copia identica de 0x004231a0, 72 bytes
+tabela_copia						0x0042bbe4							copia identica de 0x00423634, 20 bytes
+tabela_copia						0x0042d6d8							copia identica de 0x00423634, 20 bytes
+tabela_copia						0x0042eb68							copia identica de 0x00423634, 20 bytes
+confirmado	OFS_TEAM_NAME_1	1012640	0x000f73a0	430	1280	0x004231bc|0x0042b76c|0x0042d260|0x0042e6f0	4	confirmado					.data
+confirmado	OFS_TEAM_NAME_2	1881968	0x001cb770	800	368	0x004231c8|0x0042b778|0x0042d26c|0x0042e6fc	4	confirmado					.data
+confirmado	OFS_TEAM_NAME_3	2003996	0x001e941c	852	92	0x004231b8|0x0042b768|0x0042d25c|0x0042e6ec	4	confirmado					.data
+confirmado	OFS_TEAM_NAME_4	2830160	0x002b2f50	1203	704	0x004231c0|0x0042b770|0x0042d264|0x0042e6f4	4	confirmado					.data
+confirmado	OFS_TEAM_NAME_6	5651448	0x00563bf8	2402	1944	0x004231cc|0x0042b77c|0x0042d270|0x0042e700	4	confirmado					.data
+confirmado	OFS_TEAM_NAME_KANJI	2002316	0x001e8d8c	851	764	0x004231a0|0x0042b750|0x0042d244|0x0042e6d4	4	confirmado					.data
+confirmado	OFS_TEAM_MIXED_CASE_NAME	4598596	0x00462b44	1955	436	0x004231a4|0x0042b754|0x0042d248|0x0042e6d8	4	confirmado					.data
+confirmado	OFS_TEAM_ABBREV_1	2004996	0x001e9804	852	1092	0x004231d0|0x0042b780|0x0042d274|0x0042e704	4	confirmado					.data
+confirmado	OFS_TEAM_ABBREV_2	5651068	0x00563a7c	2402	1564	0x004231d8|0x0042b788|0x0042d27c|0x0042e70c	4	confirmado					.data
+confirmado	OFS_TEAM_ABBREV_3	4234484	0x00409cf4	1800	884	0x004231d4|0x0042b784|0x0042d278|0x0042e708	4	confirmado					.data
+confirmado	OFS_ML_TEAM_NAME_7	2028267	0x001ef2eb	862	843	0x004231c4|0x0042b774|0x0042d268|0x0042e6f8	4	confirmado					.data
+confirmado	OFS_FLAG_SHAPE_COPY_1	1929004	0x001d6f2c	820	364	0x00423634|0x0042bbe4|0x0042d6d8|0x0042eb68	4	confirmado					.data
+confirmado	OFS_FLAG_SHAPE_COPY_2	2005412	0x001e99a4	852	1508	0x00423638|0x0042bbe8|0x0042d6dc|0x0042eb6c	4	confirmado					.data
+confirmado	OFS_FLAG_SHAPE_COPY_3	2328060	0x002385fc	989	1932	0x004054b7|0x0042363c|0x0042bbec|0x0042d6e0|0x0042eb70	5	confirmado					.data,.text
+confirmado	OFS_FLAG_SHAPE_COPY_4	4904664	0x004ad6d8	2085	744	0x00423640|0x0042bbf0|0x0042d6e4|0x0042eb74	4	confirmado					.data
+confirmado	OFS_FLAG_SHAPE_COPY_5	5711640	0x00572718	2428	984	0x00423644|0x0042bbf4|0x0042d6e8|0x0042eb78	4	confirmado					.data
+confirmado	OFS_COST_NATIONAL	3067404	0x002ece0c	1304	396	0x0040448c|0x00404628	2	confirmado					.text
+confirmado	OFS_COST_NC	3069512	0x002ed648	1305	152	0x004046b9|0x00404b66	2	confirmado					.text
+confirmado	OFS_LINK_ML	2012680	0x001eb608	855	1720	0x004042fd	1	confirmado					.text
+ausente	OFS_TEAM_NAME_1_END	1013431	0x000f76b7	430	2071			H1	1012640	OFS_TEAM_NAME_1	mesmo setor	791	profundidade 1
+ausente	OFS_TEAM_NAME_1_A	1013736	0x000f77e8	431	24			H1	1012640	OFS_TEAM_NAME_1	mesmo setor	1096	profundidade 1
+ausente	OFS_TEAM_NAME_5	4822908	0x0049977c	2050	1308			H3	4904664	OFS_FLAG_SHAPE_COPY_4	-	-81756	sem base derivavel
+ausente	OFS_TEAM_NAME_5_A	4823976	0x00499ba8	2051	24			H3	4904664	OFS_FLAG_SHAPE_COPY_4	-	-80688	sem base derivavel
+ausente	OFS_TEAM_NAME_6_A	5651880	0x00563da8	2403	24			H1	5651448	OFS_TEAM_NAME_6	mesmo setor	432	profundidade 1
+ausente	OFS_TEAM_NAME_6_B	5652364	0x00563f8c	2403	508			H1	5651448	OFS_TEAM_NAME_6	mesmo setor	916	profundidade 1
+ausente	OFS_TEAM_NAME_KANJI_A	2003928	0x001e93d8	852	24			H1	2003996	OFS_TEAM_NAME_3	mesmo setor	-68	profundidade 1
+ausente	OFS_ML_TEAM_NAME_8	2476048	0x0025c810	1052	1744			H2	2476680	OFS_ML_TEAM_NAME_8_A	mesmo setor	-632	profundidade 2
+ausente	OFS_ML_TEAM_NAME_8_A	2476680	0x0025ca88	1053	24			H2	2469624		+3 setores	7056	profundidade 1
+ausente	OFS_TEAM_BARS	2328184	0x00238678	989	2056			H1	2328060	OFS_FLAG_SHAPE_COPY_3	mesmo setor	124	profundidade 1
+ausente	OFS_TEAM_BARS_A	2328504	0x002387b8	990	24			H1	2328060	OFS_FLAG_SHAPE_COPY_3	mesmo setor	444	profundidade 1
+ausente	OFS_KICKER	2329056	0x002389e0	990	576			H1	2328060	OFS_FLAG_SHAPE_COPY_3	mesmo setor	996	profundidade 1
+ausente	OFS_PLAYER_NAME	387792	0x0005ead0	164	2064			H2	389920		mesmo setor	-2128	profundidade 1
+ausente	OFS_PLAYER_NAME_2	390456	0x0005f538	166	24			H2	389920		mesmo setor	536	profundidade 1
+ausente	OFS_PLAYER_NAME_3	392808	0x0005fe68	167	24			H2	390456	OFS_PLAYER_NAME_2	+1 setor	2352	profundidade 2
+ausente	OFS_PLAYER_NAME_4	395160	0x00060798	168	24			H2	390456	OFS_PLAYER_NAME_2	+2 setores	4704	profundidade 2
+ausente	OFS_PLAYER_NAME_5	397512	0x000610c8	169	24			H2	390456	OFS_PLAYER_NAME_2	+3 setores	7056	profundidade 2
+ausente	OFS_PLAYER_NAME_6	399864	0x000619f8	170	24			H2	390456	OFS_PLAYER_NAME_2	+4 setores	9408	profundidade 2
+ausente	OFS_PLAYER_NAME_7	402216	0x00062328	171	24			H2	390456	OFS_PLAYER_NAME_2	+5 setores	11760	profundidade 2
+ausente	OFS_PLAYER_NAME_8	404568	0x00062c58	172	24			H2	390456	OFS_PLAYER_NAME_2	+6 setores	14112	profundidade 2
+ausente	OFS_ML_PLAYER_NAME	2006288	0x001e9d10	853	32			H1	2005412	OFS_FLAG_SHAPE_COPY_2	mesmo setor	876	profundidade 1
+ausente	OFS_ML_PLAYER_NAME_2	2008632	0x001ea638	854	24			H2	1999224		+4 setores	9408	profundidade 1
+ausente	OFS_ML_PLAYER_NAME_3	2010984	0x001eaf68	855	24			H1	2012680	OFS_LINK_ML	mesmo setor	-1696	profundidade 1
+ausente	OFS_PLAYER_ATTR	2179492	0x002141a4	926	1540			H2	2180328	OFS_PLAYER_ATTR_1	mesmo setor	-836	profundidade 3
+ausente	OFS_PLAYER_ATTR_1	2180328	0x002144e8	927	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-11 setores	-25872	profundidade 2
+ausente	OFS_PLAYER_ATTR_2	2182680	0x00214e18	928	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-10 setores	-23520	profundidade 2
+ausente	OFS_PLAYER_ATTR_3	2185032	0x00215748	929	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-9 setores	-21168	profundidade 2
+ausente	OFS_PLAYER_ATTR_4	2187384	0x00216078	930	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-8 setores	-18816	profundidade 2
+ausente	OFS_PLAYER_ATTR_5	2189736	0x002169a8	931	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-7 setores	-16464	profundidade 2
+ausente	OFS_PLAYER_ATTR_6	2192088	0x002172d8	932	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-6 setores	-14112	profundidade 2
+ausente	OFS_PLAYER_ATTR_7	2194440	0x00217c08	933	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-5 setores	-11760	profundidade 2
+ausente	OFS_PLAYER_ATTR_8	2196792	0x00218538	934	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-4 setores	-9408	profundidade 2
+ausente	OFS_PLAYER_ATTR_9	2199144	0x00218e68	935	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	-3 setores	-7056	profundidade 2
+ausente	OFS_ML_PLAYER_ATTR	2204112	0x0021a1d0	937	288			H2	2204904		mesmo setor	-792	profundidade 1
+ausente	OFS_ML_PLAYER_ATTR_1	2206200	0x0021a9f8	938	24			H2	2204904		mesmo setor	1296	profundidade 1
+ausente	OFS_ML_PLAYER_ATTR_2	2208552	0x0021b328	939	24			H2	2206200	OFS_ML_PLAYER_ATTR_1	+1 setor	2352	profundidade 2
+ausente	OFS_FLAG_COLOURS	12549518	0x00bf7d8e	5335	1598			H3	5711640	OFS_FLAG_SHAPE_COPY_5	-	6837878	sem base derivavel
+ausente	OFS_FLAG_COLOURS_A	12550296	0x00bf8098	5336	24			H3	5711640	OFS_FLAG_SHAPE_COPY_5	-	6838656	sem base derivavel
+ausente	OFS_FLAG_COLOURS_B	12552648	0x00bf89c8	5337	24			H3	5711640	OFS_FLAG_SHAPE_COPY_5	-	6841008	sem base derivavel
+ausente	OFS_FLAG_COLOURS_SENEGAL	12545758	0x00bf6ede	5334	190			H2	12544268		mesmo setor	1490	profundidade 1
+ausente	OFS_SQUAD_NUMBERS_ML	2014504	0x001ebd28	856	1192			H1	2012680	OFS_LINK_ML	mesmo setor	1824	profundidade 1
+ausente	OFS_SQUAD_NUMBERS_NATIONAL	404716	0x00062cec	172	172			H2	404568	OFS_PLAYER_NAME_8	mesmo setor	148	profundidade 3
+ausente	OFS_FORMATIONS	2303700	0x002326d4	979	1092			H1	2304984	OFS_FORMATIONS_A	mesmo setor	-1284	profundidade 3
+ausente	OFS_FORMATIONS_A	2304984	0x00232bd8	980	24			H1	2328504	OFS_TEAM_BARS_A	-10 setores	-23520	profundidade 2
+ausente	OFS_LINK_ML1	2012728	0x001eb638	855	1768			H1	2012680	OFS_LINK_ML	mesmo setor	48	profundidade 1
+ausente	OFS_LINK_ML2	2013336	0x001eb898	856	24			H1	2012680	OFS_LINK_ML	mesmo setor	656	profundidade 1
+ausente	OFS_KIT_PREVIEW	2667256	0x0028b2f8	1134	88			H3	2830160	OFS_TEAM_NAME_4	-	-162904	sem base derivavel
+ausente	OFS_KIT_PREVIEW_A	2669544	0x0028bbe8	1135	24			H3	2830160	OFS_TEAM_NAME_4	-	-160616	sem base derivavel
+ausente	OFS_KIT_PREVIEW_B	2671896	0x0028c518	1136	24			H3	2830160	OFS_TEAM_NAME_4	-	-158264	sem base derivavel
+ausente	OFS_KIT_PREVIEW_C	2674248	0x0028ce48	1137	24			H3	2830160	OFS_TEAM_NAME_4	-	-155912	sem base derivavel
+candidato		1999224	0x001e8178	850	24	0x00403f45|0x00404097|0x00404423|0x004044eb|0x004045d3|0x0040467c|0x004046ad|0x00404af7	30	rota .text					imm32
+candidato		524037	0x0007ff05	222	1893	0x00404f18|0x0041031f|0x00410353|0x0041041d|0x00410488|0x004104c5	6	rota .text					imm32
+candidato		887140	0x000d8964	377	436	0x00409f3b|0x0040a6e7|0x0040a77f|0x0040addd|0x0040cd95	5	rota .text					mov
+candidato		3988700	0x003cdcdc	1695	2060	0x00402c55|0x00402e85|0x00402f09|0x0040b035	4	rota .text					mov
+candidato		1411428	0x00158964	600	228	0x00406f24|0x004084e2|0x0040af82	3	rota .text					mov
+candidato		12465624	0x00be35d8	5300	24	0x00404eb2|0x00404f67|0x004054cb	3	rota .text					imm32
+candidato		1080707	0x00107d83	459	1139	0x00419493|0x004195fd	2	rota .text					imm32
+candidato		2012984	0x001eb738	855	2024	0x0040c1a1|0x00411645	2	rota .text					imm32
+candidato		2469624	0x0025aef8	1050	24	0x00404f00|0x00404f2d	2	rota .text					imm32
+candidato		2736690	0x0029c232	1163	1314	0x0040c055|0x004114cd	2	rota .text					imm32
+candidato		2736694	0x0029c236	1163	1318	0x0040c02a|0x004114a2	2	rota .text					imm32
+candidato		3000000	0x002dc6c0	1275	1200	0x00408c4c|0x004110ea	2	rota .text					mov
+candidato		3947740	0x003c3cdc	1678	1084	0x00402cdd|0x00408d89	2	rota .text					mov
+candidato		6880767	0x0068fdff	2925	1167	0x004182f6|0x00418330	2	rota .text					imm32
+candidato		7012351	0x006affff	2981	1039	0x0040c7b5|0x0040c7ec	2	rota .text					imm32
+candidato		389920	0x0005f320	165	1840	0x0040498a	1	rota .text					imm32
+candidato		430568	0x000691e8	183	152	0x00421c53	1	rota .text					imm32
+candidato		555907	0x00087b83	236	835	0x00417604	1	rota .text					imm32
+candidato		577605	0x0008d045	245	1365	0x0040bb99	1	rota .text					imm32
+candidato		606952	0x000942e8	258	136	0x004219a2	1	rota .text					imm32
+candidato		625128	0x000989e8	265	1848	0x0042195b	1	rota .text					imm32
+candidato		756968	0x000b8ce8	321	1976	0x00421de1	1	rota .text					imm32
+candidato		1048643	0x00100043	445	2003	0x00405e38	1	rota .text					imm32
+candidato		1311976	0x001404e8	557	1912	0x00420ee0	1	rota .text					imm32
+candidato		1324264	0x001434e8	563	88	0x00420ea3	1	rota .text					imm32
+candidato		1345768	0x001488e8	572	424	0x00420e5c	1	rota .text					imm32
+candidato		1358056	0x0014b8e8	577	952	0x00420e1f	1	rota .text					imm32
+candidato		1412840	0x00158ee8	600	1640	0x00416829	1	rota .text					imm32
+candidato		1604992	0x00187d80	682	928	0x00419e45	1	rota .text					imm32
+candidato		1690600	0x0019cbe8	718	1864	0x0041493c	1	rota .text					imm32
+candidato		1921862	0x001d5346	817	278	0x00411619	1	rota .text					imm32
+candidato		1999234	0x001e8182	850	34	0x00410372	1	rota .text					imm32
+candidato		1999244	0x001e818c	850	44	0x004103a9	1	rota .text					imm32
+candidato		2097165	0x0020000d	891	1533	0x00417c77	1	rota .text					imm32
+candidato		2204904	0x0021a4e8	937	1080	0x00420140	1	rota .text					imm32
+candidato		2248936	0x002250e8	956	424	0x00420094	1	rota .text					imm32
+candidato		2282984	0x0022d5e8	970	1544	0x00420002	1	rota .text					imm32
+candidato		2326480	0x00237fd0	989	352	0x004049ad	1	rota .text					imm32
+candidato		2327016	0x002381e8	989	888	0x0041ff56	1	rota .text					imm32
+candidato		2337000	0x0023a8e8	993	1464	0x0041ff3c	1	rota .text					imm32
+candidato		2371048	0x00242de8	1008	232	0x0041feaa	1	rota .text					imm32
+candidato		2381032	0x002454e8	1012	808	0x0041fe90	1	rota .text					imm32
+candidato		2415080	0x0024d9e8	1026	1928	0x0041fdfe	1	rota .text					imm32
+candidato		2425064	0x002500e8	1031	152	0x0041fde4	1	rota .text					imm32
+candidato		2459112	0x002585e8	1045	1272	0x0041fd52	1	rota .text					imm32
+candidato		2469096	0x0025ace8	1049	1848	0x0041fd38	1	rota .text					imm32
+candidato		2498661	0x00262065	1062	837	0x00420339	1	rota .text					imm32
+candidato		2503144	0x002631e8	1064	616	0x0041fca6	1	rota .text					imm32
+candidato		2513128	0x002658e8	1068	1192	0x0041fc8c	1	rota .text					imm32
+candidato		2557160	0x002704e8	1087	536	0x0041fbe0	1	rota .text					imm32
+candidato		2591208	0x002789e8	1101	1656	0x0041fb4e	1	rota .text					imm32
+candidato		2635240	0x002835e8	1120	1000	0x0041faa2	1	rota .text					imm32
+candidato		2645224	0x00285ce8	1124	1576	0x0041fa88	1	rota .text					imm32
+candidato		2679272	0x0028e1e8	1139	344	0x0041f9f6	1	rota .text					imm32
+candidato		2689256	0x002908e8	1143	920	0x0041f9dc	1	rota .text					imm32
+candidato		2723304	0x00298de8	1157	2040	0x0041f94a	1	rota .text					imm32
+candidato		2733288	0x0029b4e8	1162	264	0x0041f930	1	rota .text					imm32
+candidato		2760805	0x002a2065	1173	1909	0x004201e5	1	rota .text					imm32
+candidato		2760815	0x002a206f	1173	1919	0x00402f86	1	rota .text					imm32
+candidato		2760820	0x002a2074	1173	1924	0x00411846	1	rota .text					imm32
+candidato		2767336	0x002a39e8	1176	1384	0x0041f89e	1	rota .text					imm32
+candidato		2777320	0x002a60e8	1180	1960	0x0041f884	1	rota .text					imm32
+candidato		2811368	0x002ae5e8	1195	728	0x0041f7f2	1	rota .text					imm32
+candidato		2887751	0x002c1047	1227	1847	0x00407e4d	1	rota .text					imm32
+candidato		4096024	0x003e8018	1741	1192	0x00418634	1	rota .text					imm32
+candidato		4279105	0x00414b41	1819	817	0x0040960e	1	rota .text					mov
+candidato		4460615	0x00441047	1896	1223	0x0040b51d	1	rota .text					imm32
+candidato		5100520	0x004dd3e8	2168	1384	0x0041829c	1	rota .text					imm32
+candidato		5539816	0x005487e8	2355	856	0x00417be8	1	rota .text					imm32
+candidato		5652365	0x00563f8d	2403	509	0x00403c7a	1	rota .text					imm32
+candidato		6109275	0x005d385b	2597	1131	0x0040afae	1	rota .text					imm32
+candidato		6273480	0x005fb9c8	2667	696	0x0040f191	1	rota .text					imm32
+candidato		6816256	0x00680200	2898	160	0x004174c3	1	rota .text					imm32
+candidato		6845281	0x00687361	2910	961	0x004161fb	1	rota .text					imm32
+candidato		6947178	0x006a016a	2953	1722	0x0041815f	1	rota .text					imm32
+candidato		6947278	0x006a01ce	2953	1822	0x004042f8	1	rota .text					imm32
+candidato		6947434	0x006a026a	2953	1978	0x0041672d	1	rota .text					imm32
+candidato		6970474	0x006a5c6a	2963	1498	0x0041cf03	1	rota .text					imm32
+candidato		7002748	0x006ada7c	2977	844	0x0040bb5c	1	rota .text					imm32
+candidato		7172719	0x006d726f	3049	1471	0x0041193e	1	rota .text					imm32
+candidato		7630437	0x00746e65	3244	549	0x00412b01	1	rota .text					imm32
+candidato		8155624	0x007c71e8	3467	1240	0x0041629c	1	rota .text					imm32
+candidato		8388621	0x0080000d	3566	1389	0x00417c88	1	rota .text					imm32
+candidato		8421504	0x00808080	3580	1344	0x0040b1e6	1	rota .text					mov
+candidato		8585250	0x00830022	3650	450	0x0041c48a	1	rota .text					imm32
+candidato		8585308	0x0083005c	3650	508	0x0041c4ae	1	rota .text					imm32
+candidato		12090755	0x00b87d83	5140	1475	0x0041e8e9	1	rota .text					mov
+candidato		12189788	0x00ba005c	5182	1724	0x0041d444	1	rota .text					imm32
+candidato		12189836	0x00ba008c	5182	1772	0x00411756	1	rota .text					imm32
+candidato		12544268	0x00bf690c	5333	1052	0x00404f7c	1	rota .text					imm32
