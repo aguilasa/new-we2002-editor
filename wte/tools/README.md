@@ -1,10 +1,10 @@
 # `tools/` — geradores e scripts de verificação
 
-Vazio até a **WTE-TASK-03**. O que vai morar aqui, e em que task:
+O que mora aqui, e em que task. Quem já existe leva ✅.
 
 | Script | Task | O que gera |
 |---|---|---|
-| `dfm_extract.py` | 03 | `.rsrc` → os 18 DFM em texto |
+| `dfm_extract.py` ✅ | 03 | `.rsrc` → os 18 DFM em texto |
 | `dfm2lfm.py` | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |

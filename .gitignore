@@ -84,3 +84,16 @@ wte/backup/
 # `*.md` generico acima.
 !wte/re/
 !wte/re/**
+
+# ---- ...com uma excecao: os blobs binarios dos formularios (WTE-TASK-03) ----
+# `wte/re/dfm/*.dfm` e documentacao e fica versionado. Os 118 blobs que ele
+# referencia -- `Icon.Data`, `Picture.Data`, `Glyph.Data` -- nao: sao 798 KiB
+# de arte do Obocaman, da mesma natureza dos 198 `.bmp` de `we-team-editor/`,
+# que este arquivo ignora por serem binario de terceiro sem licenca. Hex inline
+# no `.dfm` seria a mesma coisa numa codificacao diferente.
+#
+# Nada se perde: `dfm_extract.py` os regera do `.exe`, e o SHA-256 de cada um
+# esta no `.dfm` versionado -- e o que permite ao `--check` conferir os 798 KiB
+# byte a byte sem versionar os bytes. Vem DEPOIS do `!wte/re/**` de proposito:
+# em .gitignore a ultima regra que casa e a que vale.
+wte/re/dfm/blobs/
