@@ -119,7 +119,7 @@ que a linha de comando crua não resolve:
 | `make run-jp` | idem com `roms/japanese-shift-jis.bin` |
 | `make run-99` | `run` no `:99`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
 | `make oracle` / `oracle-99` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
-| `make wte` / `wte-99` | abre o editor de terceiro do Obocaman (Delphi 6, PE32), em prefix `win32` próprio |
+| `make wte` / `wte-99` | abre o editor de terceiro do Obocaman (C++Builder 6, PE32), em prefix `win32` próprio |
 | `make fresh` | descarta as cópias de trabalho e refaz do original |
 | `make test` / `test-release` | `ctest` sem os golden |
 | `make golden` / `golden-gui` | exportam `WE2002_GOLDEN_IMAGE` absoluto |
@@ -346,8 +346,16 @@ make wte-99   # no Xvfb
 
 O que ele não compartilha com o `make oracle`, e não pode:
 
-- É **Delphi 6, PE32**. Precisa de prefix `WINEARCH=win32` próprio
+- É **Borland C++Builder 6, PE32**. Precisa de prefix `WINEARCH=win32` próprio
   (`work/wineprefix-wte`) e do loader `wine`, não do `wine64`.
+
+  Este `CLAUDE.md` dizia "Delphi 6" até 2026-08-05, e o engano é fácil: os dois
+  produtos são do mesmo ano, usam a mesma VCL, os mesmos runtime packages
+  (`rtl60.bpl`/`vcl60.bpl`, ambos na pasta) e o mesmo formato de formulário
+  `.dfm`. O que separa é o *name mangling* (`$qqr`, do `__fastcall` da Borland,
+  que o Delphi não emite), os símbolos `___CPPdebugHook` /
+  `__GetExceptDLLinfo`, e a string `c:\bcb\emuvcl\utilcls.h` — `emuvcl` é a
+  camada que emula em C++ os recursos de linguagem do Delphi.
 - Cópia própria da imagem, porque os três editores gravam in-place.
 - O `winex11.drv` de 32 bits exige o stack X **i386** no host. Sem ele o app
   morre antes de desenhar janela, sem nada na tela e só
