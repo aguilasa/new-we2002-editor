@@ -633,6 +633,11 @@ core), 4 (`.rc` → `.ui`), 5 (handlers), 5.5 (nomenclatura da UI), 6
 [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase e
 [docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md) seção 11 para o registro da 7.
 
+O inventário de funcionalidade — cada comportamento do original, onde ele foi
+parar no port, que evidência sustenta cada um e o roteiro do que ainda falta
+clicar na tela — está em
+[docs/PARIDADE-FUNCIONAL.md](docs/PARIDADE-FUNCIONAL.md).
+
 **O import do SoFIFA está desligado** desde 2026-08-05, por decisão: fica em
 último plano até a paridade com o `ed.exe` estar conferida tela a tela. O código
 continua compilado e linkado; só ficou inalcançável pela janela. O interruptor é
