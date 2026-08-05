@@ -33,6 +33,10 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
    - coluna **"Revisado em"** de `—` para `⬜ pendente`, que é o marcador pelo
      qual o `/revisar` escolhe a próxima. A data ali é do `/revisar`, nunca
      deste comando
+   - `status: pendente` → `status: concluído` no **frontmatter do markdown da
+     tarefa**. Ele duplica a coluna Status da tabela; as 40 tasks nascem
+     `pendente` e o campo é fácil de esquecer, porque nenhum consumidor o lê
+     ainda — foi assim que a WTE-TASK-01 fechou afirmando o contrário do índice
    - o **Log de Execução** preenchido no markdown da tarefa em `docs/tasks/`:
      data, resumo do que se aprendeu, arquivos tocados, problemas encontrados
 

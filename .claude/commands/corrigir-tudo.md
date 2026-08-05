@@ -52,7 +52,7 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 8. **`[x]` só depois do commit**, e escopo de arquivo por correção: ao
    corrigir a 013 você não abre a 016. A data da coluna "Concluída em" é **por
    CORR** — num lote que atravessa a meia-noite elas divergem, e a do lote não
-   serve.
+   serve. O `status:` do frontmatter da CORR acompanha o `[x]`, também por CORR.
 
 9. **Falha isolada não aborta o lote** — siga para quem não depende dela. Gate
    global quebrado **para o lote**: `lazbuild` não compila, `ctest` do

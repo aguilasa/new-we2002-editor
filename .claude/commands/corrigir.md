@@ -42,7 +42,9 @@ primeira `[ ]` em `correcoes-progresso.md`".
 6. **`[x]` só depois do commit.** Ele descreve estado já commitado, não
    intenção. Correção parcial não vira `[x]` — registre a pendência no Log de
    Execução. Junto do `[x]` vai a data do commit na coluna "Concluída em" da
-   tabela de resumo, igual à do `Executado em` do Log.
+   tabela de resumo, igual à do `Executado em` do Log, e o `status:` do
+   frontmatter do `CORR-WTE-XXX.md` vira `concluído` — o `/revisar` abre toda
+   correção com `pendente`, e o campo duplica a coluna Status.
 
 7. **Discrepância achada no caminho se conserta, não se registra.** A lista de
    arquivos da CORR é o mínimo. Doc que o seu conserto tornou falso ou
