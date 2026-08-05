@@ -20,10 +20,9 @@
 > Data da análise: 2026-07-30
 > Estratégia acordada: **A (Bottles/Wine agora) + C (port real para Qt6)**
 >
-> Progresso: Fases 0 a **6 concluídas** — o escopo Linux está fechado.
-> A Fase 7 (Windows) ainda **não autorizada** — não iniciar sem pedido
-> explícito. O roteiro dela está pronto em
-> [PLAN-WINDOWS.md](PLAN-WINDOWS.md), para ser executado na máquina Windows.
+> Progresso: Fases 0 a **7 concluídas**. O escopo Linux fechou na Fase 6; a
+> Fase 7 (Windows) foi executada em 2026-08-04 e o registro está na seção 11 do
+> [PLAN-WINDOWS.md](PLAN-WINDOWS.md).
 >
 > O Qt6 (6.4.2) foi instalado na Fase 5; o `find_package(Qt6)` do
 > `CMakeLists.txt` da raiz acha e compila o `src/app`.
@@ -1273,7 +1272,43 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 
 **Fim do escopo Linux. Total Fases 1–6 (incluindo a 5.5): ~1,5 a 2 semanas.**
 
-### Fase 7 — Windows (~2–3 dias, só depois do Linux redondo)
+### Fase 7 — Windows ✅ concluída (2026-08-04)
+
+> **O registro de execução — hashes, o que quebrou, o que ficou aberto — está
+> na seção 11 do [PLAN-WINDOWS.md](PLAN-WINDOWS.md).** O resumo:
+>
+> **O `.exe` do MSVC grava os mesmos bytes que o binário do GCC**, nas duas
+> imagens, no `Load` e no `Save`. Com o Linux já tendo provado
+> `port(GCC) == ed.exe`, a paridade com o original de 2002 sai por
+> transitividade — e foi confirmada de novo diretamente, contra o
+> `Debug\ed.exe` rodando **nativo**, sem Wine: só a faixa `405724..405739`, a
+> mesma de sempre. Isso encerra a dúvida sobre o corte da janela no `:99`: o
+> corte nunca importou.
+>
+> A janela Qt, rodando do zip portátil e com a imagem num caminho acentuado,
+> gravou byte a byte o mesmo que o core headless.
+>
+> Três defeitos que este plano não previa apareceram, e o primeiro é o que vale
+> lembrar:
+>
+> - **`Database` tem 1,21 MB e é declarado como local em toda parte.** O Linux
+>   reserva 8 MB de pilha e nunca reclamou; o MSVC reserva 1 MB, e *todo*
+>   binário morria antes do `main` com `STATUS_STACK_OVERFLOW` e nenhuma saída.
+>   Resolvido com `/STACK:8388608` — a mesma pilha contra a qual o código de
+>   2002 foi escrito.
+> - `curl/curl.h` puxa `windows.h`, que define `min`/`max` como macro e come os
+>   `std::max`/`std::min` de `Sofifa.cpp`. `NOMINMAX` no CMake, não `#ifdef` no
+>   fonte.
+> - O Pillow escrevia um `.ico` de uma única entrada 16×16 sem avisar.
+>
+> Ficou aberto **um** item do checklist: editar um nome de time *pela janela
+> Qt* e comparar com o oráculo. A Citrix desta máquina filtra input sintético e
+> a UIA do Qt só publica os itens do combo com o popup aberto, de forma
+> intermitente. É o que a §5.3 daquele plano manda não perseguir agora.
+>
+> **O ASan no MSVC continua sem ser explorado** — o preset `windows-asan`
+> existe, mas o `if(WE2002_SANITIZE AND NOT MSVC)` do `CMakeLists.txt` ainda
+> desliga tudo no MSVC. Continua sendo o item de maior retorno da lista.
 
 > **O roteiro de execução está em [PLAN-WINDOWS.md](PLAN-WINDOWS.md)** —
 > ambiente de desenvolvimento passo a passo, os defeitos já localizados que só

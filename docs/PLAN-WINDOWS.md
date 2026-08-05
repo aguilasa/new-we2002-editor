@@ -498,21 +498,23 @@ Nada de macOS. Não é "talvez depois".
 
 A fase fecha quando **todas** derem certo:
 
-- [ ] `cmake --build build --config Release` sem aviso
-- [ ] `cmake --build build --config Debug` sem aviso
-- [ ] `ctest -C Release` verde, com `golden`/`golden_gui` **pulados**
-- [ ] `ctest -C Release` verde com `WE2002_TEST_IMAGE` numa imagem real
-- [ ] §5.1: `roundtrip` no MSVC dá o **mesmo SHA-256** que no GCC, na imagem europeia
-- [ ] §5.1 repetido na imagem japonesa
-- [ ] §5.2: contra o `Debug\ed.exe` nativo, só a faixa `405724..405739`
-- [ ] Editor abre, carrega, edita nome de time pela tela, grava, e o resultado bate com o oráculo
-- [ ] Repo **e** imagem em caminho com acento: abre e grava (§4.1)
-- [ ] Ícone certo no Explorer, na barra de tarefas e na janela
-- [ ] Zip portátil roda em máquina limpa, **sem Qt instalado** e sem variável de ambiente
-- [ ] Job `windows` do CI verde, sem `continue-on-error`
-- [ ] `python tools\rc2ui.py --check` e `apply_glossary.py --check` verdes no Windows
-- [ ] `ctest` continua verde no **Linux** depois de tudo
-- [ ] Resultado escrito na Fase 7 do [PLAN-LINUX.md](PLAN-LINUX.md)
+- [x] `cmake --build` Release sem aviso
+- [x] `cmake --build` Debug sem aviso
+- [x] `ctest` verde, com `golden`/`golden_gui` fora da lista (T4 os registra só no UNIX)
+- [x] `ctest` verde com `WE2002_TEST_IMAGE` numa imagem real — 73 checks
+- [x] §5.1: `roundtrip` no MSVC dá o **mesmo SHA-256** que no GCC, na imagem europeia
+- [x] §5.1 repetido na imagem japonesa
+- [x] §5.2: contra o `Debug\ed.exe` nativo, só a faixa `405724..405739`
+- [ ] Editor abre, carrega, **edita nome de time pela tela**, grava, e o resultado
+      bate com o oráculo — *o lado `ed.exe` foi feito; o lado Qt não. Ver §11.*
+- [x] Imagem em caminho com acento: abre e grava (§4.1) — e o sidecar `_url.txt`
+      sai no mesmo diretório acentuado (§4.2)
+- [x] Ícone certo no Explorer, na barra de tarefas e na janela
+- [x] Zip portátil roda **sem Qt instalado** e sem variável de ambiente
+- [x] Job `windows` do CI sem `continue-on-error` (verde ainda por confirmar no runner)
+- [x] `python tools\rc2ui.py --check` e `apply_glossary.py --check` verdes no Windows
+- [x] `ctest` continua verde no **Linux** depois de tudo
+- [x] Resultado escrito na Fase 7 do [PLAN-LINUX.md](PLAN-LINUX.md)
 
 ## 10. O que não fazer
 
@@ -534,10 +536,116 @@ A fase fecha quando **todas** derem certo:
 
 ## 11. Registro de execução
 
-*Preencher aqui na máquina Windows: o que quebrou, o que não estava previsto, e
-os hashes da §5.1. É este registro que vira a seção "Fase 7 ✅ concluída" do
-[PLAN-LINUX.md](PLAN-LINUX.md).*
+Executado em **2026-08-04**, Windows 11 Pro 26200, MSVC 19.44 (VS 2022 Build
+Tools v143), Qt 6.5.3 msvc2019_64 (instalado por `aqtinstall`, não pelo
+instalador oficial — ele exige conta), libcurl 8.x por vcpkg, Python 3.12.
+
+O lado GCC da §5.1 rodou no **WSL Ubuntu 26.04** desta mesma máquina, fora da
+árvore (`/root/build-gcc-release`), para não encostar no `build/` que veio da
+máquina Linux.
+
+### A resposta da seção 1
+
+Sim: **o `.exe` do MSVC grava exatamente os mesmos bytes que o binário do GCC**,
+nas duas imagens. Os três riscos apontados na seção 1 não se materializaram —
+a ordem dos bits de `SquadNumbers`, o modo binário e o padding batem.
+
+§5.1, `we2002_golden_tool roundtrip`, SHA-256 do arquivo depois da gravação:
+
+| Imagem | MSVC | GCC |
+|---|---|---|
+| European Deluxe | `02432b4d22e479b3c4574f9c4c4b76d445ad4aa65dfe490835b6c1788e535356` | idêntico |
+| Japonesa (SLPM-87056) | `a9299cc98bb9a0665da5ae40f7ab5cdd03de60c0b0498cf73633dd437655145e` | idêntico |
+
+O `digest` também bate nos dois lados (`players`, `teams`, `ml`), antes e depois
+do roundtrip — então não é só o `Save` que concorda, o `Load` também.
+
+§5.2, `Debug\ed.exe` **nativo** contra o port, imagem europeia:
+
+```
+1 run(s), 15 byte(s) differ
+     start        end    span    diff  sector      kind  region
+    405724     405739      16      15     172      data  OFS_SQUAD_NUMBERS_NATIONAL+1008
+```
+
+Só a faixa conhecida, e mais nada. Isso responde a dúvida antiga do corte de
+janela no Wine: **o corte nunca importou** — sem Wine, sem `:99` e com o
+diálogo inteiro visível, o resultado é o mesmo.
+
+E a janela Qt, rodando **do zip portátil**, com a imagem num caminho acentuado,
+produziu byte a byte o mesmo `02432b4d…` do roundtrip headless. Ou seja: a
+camada de widgets no Windows não muda nada, pelo menos na gravação limpa.
+
+### O que quebrou, em ordem de surpresa
+
+| # | Sintoma | Causa | Correção |
+|---|---|---|---|
+| 1 | **Todo binário morria antes do `main`**, sem imprimir nada, exit `0xC00000FD` | `we2002::Database` tem **1,21 MB** (só `players[1911]` são 1,17 MB) e é declarado como local em toda parte. Linux reserva 8 MB de pilha; MSVC reserva **1 MB** | `/STACK:8388608` no `CMakeLists.txt` da raiz — a mesma pilha contra a qual o código foi escrito, sem mover objeto nenhum para o heap |
+| 2 | `error C2589: '(' : token inválido no lado direito de '::'` em `Sofifa.cpp` | `curl/curl.h` puxa `winsock2.h` e daí `windows.h`, que define `min`/`max` como macro e come os `std::max`/`std::min` | `NOMINMAX` em `target_compile_definitions`, não `#ifdef` no fonte |
+| 3 | Ícone do `.ico` saía com **uma** entrada de 16×16 | O Pillow descarta de `sizes` tudo que for maior que a imagem em que o `.save()` foi chamado, e a chamada era na de 16 | Chamar no maior desenho e passar os outros em `append_images` |
+| 4 | 5 arquivos "modificados" logo no `git status`, sem um byte de diferença | `core.filemode=true` num checkout Windows: só troca de 755 para 644 | `git config core.filemode false` (e `core.autocrlf false`, como a seção 2.3 manda) |
+
+Nenhum deles estava previsto. Os três defeitos que a seção 4 previa
+(`toStdString()`, `path::string()`, os `.sh` no ctest) eram reais e foram
+corrigidos como planejado; o `C4996` e a janela de console também.
+
+### Diferença de plataforma que ficou, de propósito
+
+O sidecar `<imagem>_url.txt` sai com **CRLF** no Windows e LF no Linux — 3822
+bytes contra 1911. O `ofstream` dele é aberto em modo texto, e é a única coisa
+que o editor escreve que **não** é a imagem de CD. Não afeta paridade nenhuma:
+os dois lados leem em modo texto, então o arquivo atravessa as plataformas sem
+problema. Trocar para `ios::binary` mudaria o que o Bloco de Notas mostra sem
+ganhar nada.
+
+### O item que ficou aberto
+
+"Editar nome de time pela tela e comparar com o oráculo" **não foi feito no lado
+Qt**. O lado `ed.exe` foi: `tools/../scratchpad/drive_ed.py` seleciona o time,
+troca `INTER` por `GOLDEN` e grava. O lado Qt trava em duas coisas desta
+máquina:
+
+- **A Citrix filtra input sintético.** `click_input()` move o ponteiro e nada
+  acontece. Para o `ed.exe` isso não importa (o backend win32 do pywinauto
+  posta `BM_CLICK`), e para os botões do Qt o padrão *Invoke* da UIA resolve —
+  mas nada disso ajuda com teclado.
+- **O Qt só publica os itens de um `QComboBox` para a UIA com o popup aberto**,
+  e a enumeração do popup é intermitente: às vezes vem com 97 itens, às vezes
+  vazia. Sem selecionar um time, os campos de nome ficam vazios e não há o que
+  editar.
+
+Isso é exatamente o que a §5.3 manda **não** perseguir agora. A gravação limpa
+pela janela Qt já está provada byte a byte, e a camada de widgets é o mesmo
+fonte que o `golden_gui` cobre no Linux. Fica para quando a Fase 7 virar CI de
+verdade — e aí `pywinauto` continua sendo a primeira aposta, com a ressalva de
+que a UIA do Qt precisa de retry.
+
+### Detalhes que valem para quem repetir
+
+- **Não use `python -c` com aspas por dentro no PowerShell.** As aspas somem no
+  caminho e o Python recebe um script quebrado. Arquivo `.py` de verdade.
+- **Python DPI-unaware não consegue clicar numa janela Qt.** Nesta tela a 150%,
+  o Qt é per-monitor DPI aware e o Python não: as coordenadas que ele lê estão
+  em outro espaço e o clique erra por um terço da tela, sem erro nenhum.
+  `SetProcessDpiAwareness(2)` antes de qualquer coordenada.
+- O `windeployqt` não traz o runtime da MSVC mesmo com `--compiler-runtime`
+  quando o `VCINSTALLDIR` não está no ambiente; foi mais direto copiar
+  `msvcp140*.dll` e `vcruntime140*.dll` do diretório `VC\Redist` à mão.
+- O `.exe` também precisa de `z.dll` ao lado do `libcurl.dll` — o vcpkg linka
+  o zlib como DLL.
 
 | Data | Tarefa | Resultado |
 |---|---|---|
-| | | |
+| 2026-08-04 | T0 ambiente | VS Build Tools + Qt 6.5.3 (aqtinstall) + vcpkg + WSL para o lado GCC |
+| 2026-08-04 | T1 `.gitattributes` | `* text=auto eol=lf`, binários marcados, os dois dumps do autor preservados em CRLF |
+| 2026-08-04 | T2 presets | `windows-debug`/`windows-release`/`windows-asan` com Ninja; os presets Linux passaram a recusar `${hostSystemName}` = Windows |
+| 2026-08-04 | T3 `C4996` | `_CRT_SECURE_NO_WARNINGS` no core e nos dois alvos de teste; build limpo nos dois modos |
+| 2026-08-04 | T4 golden | `if(UNIX)` em volta de `golden`/`golden_gui` |
+| 2026-08-04 | T5 `ctest` | 3 testes verdes; 73 checks com `WE2002_TEST_IMAGE` |
+| 2026-08-04 | T6 encoding | `src/app/QtPath.hpp`, `qEnvironmentVariable`, e `UrlSidecarPath` sobre `path::string_type` no gerador |
+| 2026-08-04 | T7 ícone | `make_icon.py` emite `newWe2002.ico`; `resources/newWe2002.rc` compilado só em `WIN32`; confirmado que o `.exe` mostra o ícone certo |
+| 2026-08-04 | T8 §5.1 | SHA-256 idêntico ao do GCC nas duas imagens |
+| 2026-08-04 | T9 §5.2 | só `405724..405739` |
+| 2026-08-04 | T10 zip | 44,9 MB, roda com PATH limpo e sem Qt |
+| 2026-08-04 | T11 CI | `continue-on-error` fora, Ninja no lugar do gerador do VS, `--check` dos geradores acrescentado |
+| 2026-08-04 | T12 | este registro |

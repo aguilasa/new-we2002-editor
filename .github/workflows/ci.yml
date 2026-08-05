@@ -5,9 +5,9 @@
 # themselves skipped here. What CI covers is that the thing compiles clean, the
 # unit checks pass, and the generated files are in sync with their generators.
 #
-# Windows is a first-class target but is not attacked until phase 7, so its job
-# is allowed to fail: the point of having it now is to see *when* it breaks, not
-# to block on it. Turn continue-on-error off once phase 7 is done.
+# Windows is a first-class target and its job blocks like any other since phase
+# 7. It builds with Ninja rather than the Visual Studio generator so that
+# CMAKE_BUILD_TYPE means something -- see the job for why.
 #
 # macOS is out of scope. Not "maybe later" -- it is not in this matrix, not in
 # the packaging, and does not justify an #ifdef.
@@ -130,8 +130,6 @@ jobs:
   windows:
     name: Windows (MSVC)
     runs-on: windows-latest
-    # Phase 7 work. Red here is expected and is the signal, not a failure.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -143,17 +141,33 @@ jobs:
       - name: Install libcurl
         run: vcpkg install curl:x64-windows
 
+      # Ninja, not the Visual Studio generator: that one is multi-config and
+      # ignores CMAKE_BUILD_TYPE, so asking for Release would quietly produce
+      # Debug unless every later command repeated --config. ilammy/msvc-dev-cmd
+      # puts cl.exe and ninja on PATH.
+      - uses: ilammy/msvc-dev-cmd@v1
+
       - name: Configure
         run: >
-          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build
 
       # The bitfield layout of SquadNumbers and the binary-mode file opens are
       # the two things only a Windows run can settle. The unit checks pin the
       # first; the golden tests, which need an image, settle the second and
-      # cannot run here.
+      # cannot run here -- tests/CMakeLists.txt does not even register them off
+      # UNIX, since they are bash plus Wine plus xdotool. What runs here is
+      # core, ui_forms and glossary.
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: ctest --test-dir build --output-on-failure
+
+      # Where a leaked CRLF shows up: the generators write '\n', and if the
+      # checkout turned the committed files into CRLF the comparison fails
+      # here. Same two guards the linux job runs.
+      - name: Generated files are in sync
+        run: |
+          python tools/rc2ui.py --check
+          python tools/apply_glossary.py --check

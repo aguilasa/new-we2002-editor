@@ -89,6 +89,23 @@ Presets em [CMakePresets.json](CMakePresets.json): `debug`, `release`, `asan`,
 `ubsan`. O `asan` só roda por dentro do `tools/run-sanitized.sh` nesta máquina
 (ver a seção de sanitizers).
 
+No Windows os presets são outros — `windows-debug`, `windows-release`,
+`windows-asan` — e os quatro de cima se **recusam** a configurar ali. Não é
+implicância: sem `generator` explícito o CMake escolhe o gerador do Visual
+Studio, que é multi-config e **ignora** `CMAKE_BUILD_TYPE`; pedir `release`
+entregaria Debug em silêncio. Os presets de Windows usam Ninja e assumem os
+caminhos da seção 2 do [docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md)
+(`C:/vcpkg`, `C:/Qt/6.5.3/msvc2019_64`); para outros, `-D` na linha de comando
+ganha do preset. Rode de dentro do *x64 Native Tools Command Prompt*.
+
+Duas coisas específicas do MSVC que já custaram tempo e estão no CMake:
+
+- **`/STACK:8388608`.** `Database` tem 1,21 MB e é declarado como local em toda
+  parte. O MSVC reserva 1 MB de pilha contra os 8 MB do Linux, e sem isso todo
+  binário morre antes do `main` com `STATUS_STACK_OVERFLOW` — sem imprimir nada.
+- **`NOMINMAX`.** O core não inclui `windows.h`, mas `curl/curl.h` inclui, e as
+  macros `min`/`max` de lá comem os `std::max`/`std::min` de `Sofifa.cpp`.
+
 Instalar:
 
 ```sh
@@ -555,9 +572,10 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 ## Estado do repositório
 
 Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura do
-core), 4 (`.rc` → `.ui`), 5 (handlers), 5.5 (nomenclatura da UI) e 6
-(acabamento) concluídas. Ver [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o
-estado por fase.
+core), 4 (`.rc` → `.ui`), 5 (handlers), 5.5 (nomenclatura da UI), 6
+(acabamento) e 7 (Windows) concluídas. Ver
+[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) para o estado por fase e
+[docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md) seção 11 para o registro da 7.
 
 **O escopo Linux está fechado.** O port está verificado contra o `ed.exe` nos
 dois níveis: o core headless (teste `golden`) e a janela Qt dirigida por
@@ -566,8 +584,15 @@ gravação limpa ou com edição pela tela, a saída é byte-idêntica à do ori
 salvo a faixa de 16 bytes já descrita.
 
 Formato de pacote (AppImage/Flatpak) foi **decidido ficar de fora** por
-enquanto: só as regras de `install()`. A próxima fase é a **7** (Windows), não
-autorizada.
+enquanto: só as regras de `install()`.
+
+**O Windows também está verificado.** O `.exe` do MSVC grava os mesmos bytes
+que o do GCC nas duas imagens, e o confronto direto com o `Debug\ed.exe`
+rodando nativo (sem Wine) dá a mesma faixa de 16 bytes e nada mais. Um item do
+checklist ficou aberto — editar nome de time pela janela Qt e comparar com o
+oráculo — porque a Citrix filtra input sintético e a UIA do Qt não expõe os
+itens do combo de forma estável. Detalhe na seção 11 do
+[docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md).
 
 Quatro divergências deliberadas do original entraram na Fase 5 (preço do
 jogador importado, o swap fora do array no ordenar-banco, gravar as URLs de

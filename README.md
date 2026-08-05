@@ -6,12 +6,13 @@ tactics, kits and flags, written straight into the `.bin`.
 A port of the original Windows/MFC tool to a cross-platform **Qt 6**
 application. Linux first; Windows is a first-class target, not an afterthought.
 
-> **Status: the Linux application works.** It is verified byte for byte against
-> the original `ed.exe` running under Wine — both through the core and through
-> the Qt window. Windows is not built yet.
+> **Status: it works on Linux and on Windows.** Both are verified byte for byte
+> against the original `ed.exe` — under Wine on Linux, natively on Windows. The
+> MSVC build writes exactly the bytes the GCC build writes, on both test images.
 >
-> See [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) for the phase-by-phase plan and
-> [CLAUDE.md](CLAUDE.md) for the architecture.
+> See [docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) for the phase-by-phase plan,
+> [docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md) for how the Windows parity was
+> proved, and [CLAUDE.md](CLAUDE.md) for the architecture.
 
 ## Building
 
@@ -24,6 +25,22 @@ cmake --preset debug
 cmake --build --preset debug
 ctest --preset debug
 ```
+
+On Windows, from an *x64 Native Tools Command Prompt for VS 2022*, with Qt in
+`C:\Qt\6.5.3\msvc2019_64` and vcpkg in `C:\vcpkg`:
+
+```bat
+vcpkg install curl:x64-windows
+cmake --preset windows-release
+cmake --build --preset windows-release
+ctest --preset windows-release
+```
+
+The Linux presets refuse to configure on Windows on purpose: without an
+explicit generator CMake picks the Visual Studio one, which is multi-config and
+ignores `CMAKE_BUILD_TYPE` — asking for Release would quietly build Debug. The
+`windows-*` presets use Ninja. For Qt or vcpkg somewhere else, override with
+`-DCMAKE_PREFIX_PATH=` / `-DCMAKE_TOOLCHAIN_FILE=`.
 
 Without Qt 6 the core library and its tests still build; only the GUI is
 skipped. That is deliberate — the byte-comparison tests have to run headless.
@@ -68,6 +85,30 @@ environment variables stay `we2002`, because they name the game and its image
 format rather than this editor.
 
 There is no distro package or AppImage yet.
+
+On Windows the same `install` rules produce the portable tree; `windeployqt`
+fills in the Qt libraries, and the rest is copied beside the executable:
+
+```bat
+cmake --install build-windows-release --prefix dist\newWe2002
+C:\Qt\6.5.3\msvc2019_64\bin\windeployqt.exe dist\newWe2002\bin\newWe2002.exe
+copy data\defaultlook.txt dist\newWe2002\bin\
+copy "data\SOFIFA attributes.txt" dist\newWe2002\bin\
+copy "data\WE attributes conversion rules.txt" dist\newWe2002\bin\
+copy C:\vcpkg\installed\x64-windows\bin\libcurl.dll dist\newWe2002\bin\
+copy C:\vcpkg\installed\x64-windows\bin\z.dll dist\newWe2002\bin\
+```
+
+Copying the `.txt` files next to the `.exe` is what makes the tree immune to
+being rearranged: that directory is the first place the editor looks. The
+MSVC runtime (`msvcp140*.dll`, `vcruntime140*.dll`) has to go in too, from
+`VC\Redist\MSVC\<version>\x64\Microsoft.VC143.CRT` — `windeployqt
+--compiler-runtime` only finds them with the Visual Studio environment loaded.
+And the curl licence ships with the binary, as [NOTICE.md](NOTICE.md) requires;
+vcpkg leaves it in `installed\x64-windows\share\curl\copyright`.
+
+Do **not** copy `data/naz.txt`. Nothing reads it — it is a C array the original
+author pasted into the tree, kept as history.
 
 ## Image compatibility
 
