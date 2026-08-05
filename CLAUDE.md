@@ -54,6 +54,17 @@ port abre um aviso modal já na carga. Dispense o aviso primeiro, ou capture
 Disponível no host: `Xvfb`, `xvfb-run`, `xdotool`, `import` (ImageMagick),
 `ffmpeg`. **Não** instalados: `wmctrl`, `scrot`, `x11vnc`.
 
+**Não há window manager no `:99`.** Duas consequências ao dirigir janela:
+
+- `xdotool windowactivate` falha com `XGetInputFocus returned the focused
+  window of 1`. Não há foco para transferir. Dirija por coordenada absoluta —
+  `xdotool mousemove <x> <y> click 1` —, que independe de foco.
+- `xdotool type --window <id>` usa `XSendEvent` e **embaralha string longa**.
+  Um caminho de 60 caracteres chegou truncado num `CFileDialog` e produziu
+  "Path does not exist" que parecia bug do app. Prefira digitar curto: o
+  `make wte` existe em parte por isso, mapeando uma letra de unidade para
+  encurtar o caminho.
+
 ---
 
 ## O que é este repositório
@@ -108,6 +119,7 @@ que a linha de comando crua não resolve:
 | `make run-jp` | idem com `roms/japanese-shift-jis.bin` |
 | `make run-99` | `run` no `:99`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
 | `make oracle` / `oracle-99` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
+| `make wte` / `wte-99` | abre o editor de terceiro do Obocaman (Delphi 6, PE32), em prefix `win32` próprio |
 | `make fresh` | descarta as cópias de trabalho e refaz do original |
 | `make test` / `test-release` | `ctest` sem os golden |
 | `make golden` / `golden-gui` | exportam `WE2002_GOLDEN_IMAGE` absoluto |
@@ -294,8 +306,10 @@ Notas:
 
 - **Não reusar a bottle `DiztinGUIsh`.** `ed.cpp:75` chama
   `COleObjectFactory::UpdateRegistryAll()`, que escreve no registry do prefix.
-- O runner soda só tem `x86_64-windows`; o `ed.exe` é x64, então casa. Não há
-  suporte 32-bit nesse runner.
+- O `ed.exe` é x64 e casa com o `wine64`. O runner **também** roda 32-bit —
+  tem `lib32/wine/i386-{unix,windows}` e o `bin/wine` é um ELF 32-bit —, o que
+  é o que faz o `make wte` funcionar. Isso depende do stack X i386 no host;
+  sem ele o `winex11.drv` de 32 bits não carrega e o app morre antes da janela.
 - `wineboot` reclama de FreeType e `/etc/ld.so.preload` reclama de
   `libAppProtection.so` (Citrix). Ambos benignos — as fontes renderizam.
 - `Debug/ed.exe` é o **oráculo de referência** para os golden tests do port.
@@ -315,6 +329,37 @@ servem: nenhum dos dois distribui MFC.
 digita a mesma coisa no `ed.exe` e no port, limpar o campo com `End`,
 `shift+Home`, `BackSpace` — com `ctrl+a` os dois recebem textos diferentes e o
 diff acusa uma divergência que não existe.
+
+## Rodar o editor de terceiro (`make wte`)
+
+O **WE2002 Team Editor v0.99** do Obocaman (2002), em tradução PT-BR, mora em
+`we-team-editor/`. É outro editor do mesmo jogo, de outro autor. **Não é
+oráculo de nada** — nenhum teste o mede; ele roda só para comparar interface e
+garimpar ideia. Tem coisa que o `ed.exe` não tem: camisa e bandeira 2D em tempo
+real com colar-cores, preço derivado dos atributos (do jogador ou do time
+inteiro), import de jogador de `.mcr`, contador de slots de ML livres na tela.
+
+```sh
+make wte      # DISPLAY do shell -- o ponto do alvo é olhar
+make wte-99   # no Xvfb
+```
+
+O que ele não compartilha com o `make oracle`, e não pode:
+
+- É **Delphi 6, PE32**. Precisa de prefix `WINEARCH=win32` próprio
+  (`work/wineprefix-wte`) e do loader `wine`, não do `wine64`.
+- Cópia própria da imagem, porque os três editores gravam in-place.
+- O `winex11.drv` de 32 bits exige o stack X **i386** no host. Sem ele o app
+  morre antes de desenhar janela, sem nada na tela e só
+  `Initialization of L"winex11.drv" failed` no log do Wine. O alvo confere e
+  imprime a linha do `apt`.
+
+O diálogo de abrir não engole caminho longo digitado (ver a nota do `:99`
+acima), então o alvo mapeia `E:` para `work/` e imprime o caminho curto para
+colar. O aviso de tamanho é o mesmo do `ed.exe` e é igualmente inofensivo.
+
+`we-team-editor/` está no `.gitignore`: binário sem fonte e sem licença não
+entra no repositório. O usuário mantém a pasta, como faz com `roms/`.
 
 ## Rodar o port
 
