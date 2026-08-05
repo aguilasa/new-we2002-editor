@@ -14,12 +14,16 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-001](/docs/tasks/CORR-WTE-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Frontmatter da task diz `pendente` numa tarefa concluída | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-002](/docs/tasks/CORR-WTE-002.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | Dois números do `ambiente.md` só são reproduzíveis pelo scratchpad | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-003](/docs/tasks/CORR-WTE-003.md) | [WTE-TASK-02](/docs/tasks/02-esqueleto-do-projeto.md) | A seção `wte/` do `.gitignore` ignora `lib/` e `backup/` no repositório inteiro | Baixa | [x] concluída | 2026-08-05 |
+| [CORR-WTE-004](/docs/tasks/CORR-WTE-004.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `--check` fica vermelho num clone limpo, porque `blobs/` é gitignored | Baixa | [ ] pendente | — |
+| [CORR-WTE-005](/docs/tasks/CORR-WTE-005.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | Os streams sintéticos que sustentam "os 21 `TValueType` exercitados" não são versionados | Baixa | [ ] pendente | — |
 
 ## Checklist
 
 - [x] CORR-WTE-001 — sincronizar `status:` do frontmatter, e citá-lo no `01-executar.md`
 - [x] CORR-WTE-002 — escrever no `ambiente.md` como remedir os dois números derivados
 - [x] CORR-WTE-003 — ancorar `lib/` e `backup/` no `wte/`, onde a seção diz que valem
+- [ ] CORR-WTE-004 — blob ausente vira aviso; blob divergente continua falha
+- [ ] CORR-WTE-005 — versionar os streams sintéticos do `dfm_extract.py`
 
 ## Detalhes por correção
 
@@ -62,3 +66,37 @@ data do commit — o `/revisar` abre a correção, não a fecha.
   rastreado casa —, o defeito é latente: arquivo que some sem aparecer no
   `git status`. As três regras de extensão (`*.lps`, `*.ppu`, `*.compiled`)
   ficam como estão
+
+### CORR-WTE-004
+
+- **Arquivo com problema:** `wte/tools/dfm_extract.py`, função `do_check()`
+- **Sintoma:** os 118 `.bin` de `wte/re/dfm/blobs/` são gitignored e só nascem
+  no modo de escrita, mas `--check` exige que existam. Num clone limpo com o
+  `.exe` presente e a árvore versionada intacta, `make -C wte check` sai
+  vermelho com 118 linhas de `nao existe` — o mesmo código de saída de um `.dfm`
+  editado à mão, que é o que o gate existe para pegar
+- **Como foi detectado:** `do_check()` rodado contra uma sandbox com a árvore
+  versionada correta e `blobs/` ausente (cópia em scratchpad, sem tocar na
+  árvore real); e a mesma sandbox com uma linha de `ficha_about.dfm` alterada.
+  Os dois estados devolvem 1
+- **Fix:** blob ausente vira aviso e sai 0; blob presente e divergente, ou blob
+  sobrando, continuam falha. A garantia byte a byte não muda — ela vem do
+  SHA-256 dentro do `.dfm` versionado, que a comparação de texto já cobre
+
+### CORR-WTE-005
+
+- **Arquivo com problema:** `wte/tools/` — falta o teste; o Log da WTE-TASK-03 é
+  quem afirma a cobertura
+- **Sintoma:** o Log diz que os `TValueType` ausentes dos 18 formulários "foram
+  exercitados contra streams sintéticos", e o critério "tipo desconhecido aborta
+  com offset" está `[x]`. Os streams não estão no repositório. Metade dos
+  caminhos afirmados (`vaCollection`, `vaSet`, `vaExtended`, `vaInt64`,
+  `vaWString`, as três flags de objeto, as quatro rotas de aborto) não ocorre no
+  `.exe`, então `--check` verde não diz nada sobre eles
+- **Como foi detectado:** `git ls-files wte | grep -i test` devolve só
+  `wte/tests/README.md`, que reserva a pasta para o lado Pascal a partir da
+  WTE-TASK-20. Os caminhos foram refeitos à mão nesta revisão e respondem como o
+  Log descreve — é esse trabalho que precisa virar arquivo
+- **Fix:** `wte/tools/test_dfm_extract.py` em stdlib pura (ou `--selftest` no
+  próprio gerador), cobrindo os 21 tipos, as três flags e cada rota de aborto
+  com o offset absoluto conferido na mensagem
