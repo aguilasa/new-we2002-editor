@@ -6,6 +6,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 |---|---|---|
 | `dfm_extract.py` ✅ | 03 | `.rsrc` → os 18 DFM em texto |
 | `dump_published.py` ✅ | 04 | VMT + DFM → os 96 handlers, com dono |
+| `dump_strings.py` ✅ | 05 | `.data`/`.text` → o inventário de strings |
 | `dump_offsets.py` ✅ | 06 | `.data`/`.text` → o mapa de offsets |
 | `dfm2lfm.py` | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |

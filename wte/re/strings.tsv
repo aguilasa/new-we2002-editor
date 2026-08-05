@@ -1,0 +1,766 @@
+va	tipo	tamanho	texto	suspeita_patch	referenciada_por	handler	copia_de
+0x00423000	c	48	Borland C++ - Copyright 2002 Borland Corporation				
+0x004230c4	c	18	W11 Team Editor PT		0x004019b5		
+0x0042316a	c	53	ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz		0x0040380f		
+0x00423284	c	34	).:;<=>$b@AB?CDTKEPQFGHI?cLMNOdefg				
+0x00423a98	c	3	000		0x004072b7		
+0x00423b38	c	3	0Rz		0x004074ea		
+0x00423d25	c	4	""++				
+0x00423d3b	c	4	"+++				
+0x00423d67	c	4	""++				0x00423d25
+0x00423d83	c	4	K4&B				
+0x00423d99	c	4	K(@4				
+0x00423daf	c	4	K4&B				0x00423d83
+0x00423db7	c	7	U+="F&B				
+0x00423dc2	c	7	U4(@4 H				
+0x00423dcd	c	7	U+=44 H				
+0x00423dda	c	5	M4(@4				
+0x00423de6	c	4	M(@4				
+0x00423df0	c	5	M(@&B				
+0x00423dfc	c	4	M4&B				
+0x00423e06	c	5	M44 H				
+0x00423e0c	c	10	\x204H+="F4 H				
+0x00423e26	c	6	W+="F4				
+0x00423e31	c	6	W4(@&B				
+0x00423e3c	c	6	W+=4&B				
+0x00423f84	c	2	Oa		0x0040bb34|0x0040f429		
+0x00424758	c	1	\x20		0x00403490		
+0x0042475a	c	1	.		0x004034e9		
+0x0042475d	c	1	\x20		0x0040364b		0x00424758
+0x0042475f	c	1	\x20		0x004036bb		0x00424758
+0x00424761	c	1	.		0x00403718		0x0042475a
+0x00424763	c	1	.		0x00403887		0x0042475a
+0x00424765	c	1	\x20		0x004038e3		0x00424758
+0x00424767	c	37	It's the same player in both teams...		0x00403e61		
+0x0042478d	c	48	You need at least 1 memory block free to do that		0x00403eae		
+0x004247be	c	11	in another\x20		0x00404c21		
+0x004247ca	c	31	\x20different place(s) in the game		0x00404c2f		
+0x004247ea	c	8	\\bandera		0x004052c4		
+0x004247f3	c	4	.bmp		0x00405304		
+0x004247f8	c	3	r+b		0x0040537e		
+0x004247fd	c	8	\\bandera		0x00405528		0x004247ea
+0x00424806	c	4	.bmp		0x00405568		0x004247f3
+0x0042480b	c	3	r+b		0x004055e2		0x004247f8
+0x00424810	c	9	\\camiseta		0x00405757		
+0x0042481a	c	4	.bmp		0x00405797		0x004247f3
+0x0042481f	c	3	r+b		0x00405826		0x004247f8
+0x00424824	c	9	\\pantalon		0x0040592a		
+0x0042482e	c	4	.bmp		0x0040596a		0x004247f3
+0x00424833	c	3	r+b		0x004059f9		0x004247f8
+0x00424838	c	5	color		0x00405c27		
+0x0042483e	c	5	color		0x00405e9f	ficha_color.barraChange	0x00424838
+0x00424844	c	9	lista_col		0x0040612d	ficha_color.botonClick	
+0x0042484e	c	9	lista_col		0x004061c0	ficha_color.botonClick	0x00424844
+0x00424858	c	9	lista_col		0x00406253	ficha_color.botonClick	0x00424844
+0x00424862	c	6	colcop		0x00406b34	ficha_color.colorMouseDown	
+0x00424869	c	5	color		0x00406ad0	ficha_color.colorMouseDown	0x00424838
+0x0042486f	c	5	color		0x00406daf	ficha_color.colorMouseDown	0x00424838
+0x0042491d	c	5	Dire.				
+0x00424923	c	4	Esq.				
+0x00424928	c	4	Dois				
+0x004249aa	c	16	\\careto_base.bmp		0x00406ff8		
+0x004249bb	c	3	r+b		0x00407036		0x004247f8
+0x004249c1	c	6	\\pelo_		0x00407173		
+0x004249c8	c	4	.bmp		0x004071b3		0x004247f3
+0x004249cd	c	3	r+b		0x0040722d		0x004247f8
+0x004249d3	c	7	\\barba_		0x004073a1		
+0x004249db	c	4	.bmp		0x004073e1		0x004247f3
+0x004249e0	c	3	r+b		0x0040745b		0x004247f8
+0x004249e6	c	7	barrhab		0x004075e7		
+0x004249ee	c	8	valorhab		0x0040764a		
+0x004249f7	c	6	imghab		0x004076dd		
+0x004249fe	c	10	flechasapa		0x004077b9		
+0x00424a09	c	8	valorapa		0x0040781c		
+0x00424a12	c	3	\x20--		0x004079b4		
+0x00424a16	c	8	valorhab		0x00407ae1	jugador.barrhabScroll	0x004249ee
+0x00424a1f	c	6	imghab		0x00407b52	jugador.barrhabScroll	0x004249f7
+0x00424a26	c	8	valorhab		0x00407c0d	jugador.barrhab_bisScroll	0x004249ee
+0x00424a2f	c	6	imghab		0x00407c7e	jugador.barrhab_bisScroll	0x004249f7
+0x00424a36	c	8	valorhab		0x00407d3e	jugador.FormCreate	0x004249ee
+0x00424a3f	c	7	etiqhab		0x00407d9f	jugador.FormCreate	
+0x00424a47	c	7	etiqapa		0x00407e09	jugador.FormCreate	
+0x00424a4f	c	8	valorapa		0x00407e6a	jugador.FormCreate	0x00424a09
+0x00424a58	c	8	valorhab		0x00407ed0	jugador.FormCreate	0x004249ee
+0x00424a61	c	7	etiqhab		0x00407f31	jugador.FormCreate	0x00424a3f
+0x00424a69	c	7	etiqapa		0x00407f9b	jugador.FormCreate	0x00424a47
+0x00424a71	c	8	valorapa		0x00407ffc	jugador.FormCreate	0x00424a09
+0x00424a7a	c	1	7		0x004080fc	jugador.flechasapaClick	
+0x00424a7c	c	1	9		0x0040817a	jugador.flechasapaClick	
+0x00424a7e	c	1	3		0x004081f5	jugador.flechasapaClick	
+0x00424a80	c	8	valorapa		0x0040825f	jugador.flechasapaClick	0x00424a09
+0x00424a89	c	1	2		0x004082fa	jugador.flechasapaClick	
+0x00424a8b	c	1	3		0x00408340	jugador.flechasapaClick	0x00424a7e
+0x00424a8d	c	1	4		0x0040835f	jugador.flechasapaClick	
+0x00424a8f	c	1	5		0x004083c2	jugador.flechasapaClick	
+0x00424a91	c	1	6		0x004083e1	jugador.flechasapaClick	
+0x00424a93	c	44	Insert a valid number of credits (1 ... 250)		0x00408620	jugador.BitBtn3Click	
+0x00424ac0	c	63	Numero do uniforme invalido ([33 ... 99] somente na Mastere\x20\x20\x20\x20	enchimento+truncada+gemea_difere	0x004086f9	jugador.BitBtn3Click	
+0x00424b00	c	7	barrhab		0x00408794	jugador.BitBtn3Click	0x004249e6
+0x00424b08	c	10	flechasapa		0x00408836	jugador.BitBtn3Click	0x004249fe
+0x00424b13	c	7	barrhab		0x00408bf4	jugador.etiqprecioClick	0x004249e6
+0x00424b5e	c	7	etiqjug		0x00408ea0	estrategia.bolaMouseMove	
+0x00424b66	c	8	etiqestr		0x004093ae	estrategia.FormCreate	
+0x00424b6f	c	7	jugador		0x0040940f	estrategia.FormCreate	
+0x00424b77	c	7	etiqpos		0x00409470	estrategia.FormCreate	
+0x00424b7f	c	8	etiqestr		0x004094da	estrategia.FormCreate	0x00424b66
+0x00424b88	c	7	jugador		0x0040953b	estrategia.FormCreate	0x00424b6f
+0x00424b90	c	7	etiqpos		0x0040959c	estrategia.FormCreate	0x00424b77
+0x00424b98	c	4	bola		0x004098bf		
+0x00424b9d	c	7	etiqpos		0x004099fa		0x00424b77
+0x00424ba5	c	4	bola		0x00409c1e	estrategia.relojTimer	0x00424b98
+0x00424baa	c	7	etiqjug		0x00409cda	estrategia.relojTimer	0x00424b5e
+0x00424bb2	c	4	bola		0x00409dd6	estrategia.relojTimer	0x00424b98
+0x00424bb7	c	7	etiqjug		0x00409eb1	estrategia.relojTimer	0x00424b5e
+0x00424bbf	c	7	simbolo		0x00409f94	estrategia.malla1MouseDown	
+0x00424bc7	c	7	tirador		0x0040a048	estrategia.malla2MouseDown	
+0x00424bcf	c	7	etiqjug		0x0040a133		0x00424b5e
+0x00424bd7	c	7	jugador		0x0040a1f7		0x00424b6f
+0x00424bdf	c	7	etiqjug		0x0040a2bf		0x00424b5e
+0x00424be7	c	7	jugador		0x0040a383		0x00424b6f
+0x00424bef	c	7	tirador		0x0040a416		0x00424bc7
+0x00424bf7	c	54	You should use different Home && Away radar colours...		0x0040a72d	estrategia.BitBtn3Click	
+0x00424c2e	c	4	bola		0x0040a889	estrategia.BitBtn3Click	0x00424b98
+0x00424c33	c	4	bola		0x0040a944	estrategia.BitBtn3Click	0x00424b98
+0x00424c38	c	7	tirador		0x0040a9d2	estrategia.BitBtn3Click	0x00424bc7
+0x00424c40	c	7	simbolo		0x0040aaa1	estrategia.BitBtn3Click	0x00424bbf
+0x00424c48	c	5	Branc		0x0040ae19	estrategia.ComboBoxDrawItem	
+0x00424c4e	c	5	Preto		0x0040ae33	estrategia.ComboBoxDrawItem	
+0x00424c54	c	5	Verde		0x0040ae43	estrategia.ComboBoxDrawItem	
+0x00424c5a	c	6	Amarel		0x0040ae53	estrategia.ComboBoxDrawItem	
+0x00424c61	c	3	Ver		0x0040ae63	estrategia.ComboBoxDrawItem	
+0x00424c65	c	4	Azul		0x0040ae73	estrategia.ComboBoxDrawItem	
+0x00424c6a	c	4	Turq		0x0040ae83	estrategia.ComboBoxDrawItem	
+0x00424c6f	c	4	Rosa		0x0040ae93	estrategia.ComboBoxDrawItem	
+0x00424c74	c	6	dorsal		0x0040b0ec		
+0x00424c7b	c	6	dorsal		0x0040b226		0x00424c74
+0x00424c83	c	1	?		0x0040b3da		
+0x00424c85	c	1	.		0x0040b445		0x0042475a
+0x00424c87	c	1	\x20		0x0040b4b1		0x00424758
+0x00424c89	c	1	\x20		0x0040b710		0x00424758
+0x00424c8b	c	2	\x20\x20		0x0040b7d3		
+0x00424c8e	c	4	\x20(L)		0x0040b81f		
+0x00424c93	c	1	\x20		0x0040bc09		0x00424758
+0x00424c95	c	2	\x20\x20		0x0040bccc		0x00424c8b
+0x00424c98	c	10	OBOCARULEZ		0x0040bd8d	MainForm.boton_dialogo_weClick	
+0x00424ca4	c	8	\\dat.bin		0x0040bea1	MainForm.boton_dialogo_weClick	
+0x00424cad	c	2	rb		0x0040be9c	MainForm.boton_dialogo_weClick	
+0x00424cb1	c	50	O arquivo dat.bin esta fora do seu diretorio\x20\x20\x20\x20\x20\x20	enchimento	0x0040bf25	MainForm.boton_dialogo_weClick	
+0x00424ce4	c	1	\\		0x0040bfc0	MainForm.boton_dialogo_weClick	
+0x00424ce6	c	3	r+b		0x0040c015	MainForm.boton_dialogo_weClick	0x004247f8
+0x00424ceb	c	27	O arquivo nao e uma MCR!!!\x20		0x0040c385	MainForm.boton_mcrClick	
+0x00424d07	c	1	\\		0x0040c3db	MainForm.boton_mcrClick	0x00424ce4
+0x00424d09	c	3	r+b		0x0040c423	MainForm.boton_mcrClick	0x004247f8
+0x00424d0d	c	18	Voce precisa de\x20\x20\x20	enchimento	0x0040c5af	MainForm.boton_mcr2isoClick	
+0x00424d20	c	30	\x20mais blocos livres!!!.\x20\x20\x20\x20\x20\x20\x20	enchimento	0x0040c5bd	MainForm.boton_mcr2isoClick	
+0x00424d3f	c	41	MCR inserida no jogo!!!.\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20	enchimento	0x0040c975	MainForm.boton_mcr2isoClick	
+0x00424d69	c	5	barra		0x0040ca48	MainForm.track_barraChange	
+0x00424d6f	c	32	Barras inseridas no jogo!!!\x20\x20\x20\x20\x20	enchimento	0x0040cb78	MainForm.boton_barras2isoClick	
+0x00424d90	c	5	barra		0x0040cfd3	MainForm.lista_equiposChange	0x00424d69
+0x00424d96	c	9	sel_barra		0x0040d040	MainForm.lista_equiposChange	
+0x00424da0	c	5	barra		0x0040d0d6	MainForm.lista_equiposChange	0x00424d69
+0x00424da6	c	9	sel_barra		0x0040d136	MainForm.lista_equiposChange	0x00424d96
+0x00424db1	c	20	Insira o nome (1)\x20\x20\x20	enchimento	0x0040d5dc	MainForm.boton_nombres2isoClick	
+0x00424dc7	c	20	Insira o nome (2)\x20\x20\x20	enchimento	0x0040d6c2	MainForm.boton_nombres2isoClick	
+0x00424ddc	c	30	Insira o nome (3) de 3 letras\x20		0x0040d794	MainForm.boton_nombres2isoClick	
+0x00424dfb	c	2	\x20\x20		0x0040d88b	MainForm.boton_nombres2isoClick	0x00424c8b
+0x00424dfe	c	1	\x20		0x0040d899	MainForm.boton_nombres2isoClick	0x00424758
+0x00424e00	c	1	\x20		0x0040d9bc	MainForm.boton_nombres2isoClick	0x00424758
+0x00424e02	c	14	lista_equipos_		0x0040dac5	MainForm.boton_nombres2isoClick	
+0x00424e11	c	11	edit_nombre		0x0040dbdf	MainForm.boton_nombres2isoClick	
+0x00424e1d	c	1	?		0x0040dc8e	MainForm.boton_nombres2isoClick	0x00424c83
+0x00424e1f	c	31	Nomes inseridos no jogo!!!\x20\x20\x20\x20\x20	enchimento	0x0040ddb4	MainForm.boton_nombres2isoClick	
+0x00424e3f	c	32	Uniforme inserido no jogo!!!.\x20\x20\x20	enchimento	0x0040df96	MainForm.boton_tex2isoClick	
+0x00424e61	c	29	Isto nao e um uniforme!!!.\x20\x20\x20	enchimento	0x0040e0a5	MainForm.boton_dialogo_texClick	
+0x00424e7f	c	1	\\		0x0040e10e	MainForm.boton_dialogo_texClick	0x00424ce4
+0x00424e81	c	3	r+b		0x0040e166	MainForm.boton_dialogo_texClick	0x004247f8
+0x00424e85	c	2	\x20\x20		0x0040eafb	MainForm.parribaClick	0x00424c8b
+0x00424e88	c	1	\x20		0x0040eb09	MainForm.parribaClick	0x00424758
+0x00424e8a	c	1	\x20		0x0040ebf2	MainForm.parribaClick	0x00424758
+0x00424e8c	c	34	Selecione um jogador para mover!!!		0x0040ecf3	MainForm.pabajoClick	
+0x00424eaf	c	51	That file name is already being used by Team Editor		0x0040ef3c	MainForm.grabar_camisetaClick	
+0x00424ee3	c	2	wb		0x0040ef8f	MainForm.grabar_camisetaClick	
+0x00424ee7	c	24	O uni foi salvo!!!.\x20\x20\x20\x20\x20	enchimento	0x0040f0e8	MainForm.grabar_camisetaClick	
+0x00424f00	c	6	dorsal		0x0040f5a6		0x00424c74
+0x00424f07	c	51	That file name is already being used by Team Editor		0x0040f76b	MainForm.grabar_memoryClick	0x00424eaf
+0x00424f3b	c	2	wb		0x0040f7be	MainForm.grabar_memoryClick	0x00424ee3
+0x00424f3f	c	23	A MCR foi salva!!!.\x20\x20\x20\x20	enchimento	0x0040f852	MainForm.grabar_memoryClick	
+0x00424f57	c	17	mostrar_jugador_1		0x0040f8fc	MainForm.mostrar_jugadorClick	
+0x00424f69	c	1	)		0x0040fae3	MainForm.mostrar_jugadorClick	
+0x00424f6b	c	14	player number\x20		0x0040fc41	MainForm.mostrar_jugadorClick	
+0x00424f7a	c	9	\x20of team\x20		0x0040fc4f	MainForm.mostrar_jugadorClick	
+0x00424f84	c	49	\x20You need at least 1 memory block free to do that	gemea_difere	0x0040fda8	MainForm.mostrar_jugadorClick	
+0x00424fb6	c	72	\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20		0x0040fe52	MainForm.mostrar_jugadorClick	
+0x00424fff	c	1	\x20		0x0040fea7	MainForm.mostrar_jugadorClick	0x00424758
+0x00425001	c	20	mostrar_estrategia_1		0x00410247	MainForm.mostrar_estrategiaClick	
+0x00425016	c	45	\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20		0x0041062f	MainForm.mostrar_estrategiaClick	
+0x00425044	c	1	\x20		0x00410684	MainForm.mostrar_estrategiaClick	0x00424758
+0x00425046	c	6	\\image				
+0x0042504d	c	6	\\barba				
+0x00425054	c	5	\\pelo				
+0x0042505a	c	9	\\banderas				
+0x00425064	c	12	\\uniformes2d				
+0x00425071	c	5	\\data				
+0x00425077	c	1	\x20		0x00410cef	MainForm.dorsalClick	0x00424758
+0x00425079	c	42	Precos dos jogadores calculados!!!!!!!!!!!		0x00411189	MainForm.base_teamClick	
+0x004250a4	c	10	OBOCARULEZ		0x00411205	MainForm.FormShow	0x00424c98
+0x004250b0	c	8	\\dat.bin		0x00411319	MainForm.FormShow	0x00424ca4
+0x004250b9	c	2	rb		0x00411314	MainForm.FormShow	0x00424cad
+0x004250bd	c	50	The file "dat.bin" must be in the "data" directory		0x0041139d	MainForm.FormShow	
+0x004250f0	c	1	\\		0x00411438	MainForm.FormShow	0x00424ce4
+0x004250f2	c	3	r+b		0x0041148d	MainForm.FormShow	0x004247f8
+0x004250f6	c	9	$00ffb676		0x00411720	MainForm.FormShow	
+0x00425100	c	9	$00ffb676		0x00411759	MainForm.FormShow	0x004250f6
+0x0042510a	c	9	$00ffb676		0x00411793	MainForm.FormShow	0x004250f6
+0x00427f0e	c	16	grupo_memorycard				
+0x0042835f	c	8	dorsal14				
+0x00428699	c	7	Image4%				
+0x00428d72	c	8	etiqjug0				
+0x00429127	c	8	etiqpos8				
+0x00429515	c	7	BitBtn1				
+0x004296ce	c	8	etiqhab2				
+0x00429ac1	c	9	valorapa8				
+0x0042a059	c	6	color1				
+0x0042a9fb	c	6	Label3				
+0x0042aef3	c	11	ActionList1				
+0x0042b261	c	7	BitBtn1				0x00429515
+0x0042b411	c	5	etiq4				
+0x0042b71a	c	53	ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz				0x0042316a
+0x0042b834	c	34	).:;<=>$b@AB?CDTKEPQFGHI?cLMNOdefg				0x00423284
+0x0042c2d5	c	4	""++				0x00423d25
+0x0042c2eb	c	4	"+++				0x00423d3b
+0x0042c317	c	4	""++				0x00423d25
+0x0042c333	c	4	K4&B				0x00423d83
+0x0042c349	c	4	K(@4				0x00423d99
+0x0042c35f	c	4	K4&B				0x00423d83
+0x0042c367	c	7	U+="F&B				0x00423db7
+0x0042c372	c	7	U4(@4 H				0x00423dc2
+0x0042c37d	c	7	U+=44 H				0x00423dcd
+0x0042c38a	c	5	M4(@4				0x00423dda
+0x0042c396	c	4	M(@4				0x00423de6
+0x0042c3a0	c	5	M(@&B				0x00423df0
+0x0042c3ac	c	4	M4&B				0x00423dfc
+0x0042c3b6	c	5	M44 H				0x00423e06
+0x0042c3bc	c	10	\x204H+="F4 H				0x00423e0c
+0x0042c3d6	c	6	W+="F4				0x00423e26
+0x0042c3e1	c	6	W4(@&B				0x00423e31
+0x0042c3ec	c	6	W+=4&B				0x00423e3c
+0x0042ccff	c	37	It's the same player in both teams...				0x00424767
+0x0042cd25	c	48	You need at least 1 memory block free to do that				0x0042478d
+0x0042cd56	c	11	in another\x20				0x004247be
+0x0042cd62	c	31	\x20different place(s) in the game				0x004247ca
+0x0042cd82	c	8	\\bandera				0x004247ea
+0x0042cd8b	c	4	.bmp				0x004247f3
+0x0042cd95	c	8	\\bandera				0x004247ea
+0x0042cd9e	c	4	.bmp				0x004247f3
+0x0042cda8	c	9	\\camiseta				0x00424810
+0x0042cdb2	c	4	.bmp				0x004247f3
+0x0042cdbc	c	9	\\pantalon				0x00424824
+0x0042cdc6	c	4	.bmp				0x004247f3
+0x0042cdd0	c	5	color				0x00424838
+0x0042cdd6	c	5	color				0x00424838
+0x0042cddc	c	9	lista_col				0x00424844
+0x0042cde6	c	9	lista_col				0x00424844
+0x0042cdf0	c	9	lista_col				0x00424844
+0x0042cdfa	c	6	colcop				0x00424862
+0x0042ce01	c	5	color				0x00424838
+0x0042ce07	c	5	color				0x00424838
+0x0042ceb5	c	5	RIGHT				
+0x0042cebb	c	4	LEFT				
+0x0042cec0	c	4	BOTH				
+0x0042cf42	c	16	\\careto_base.bmp				0x004249aa
+0x0042cf59	c	6	\\pelo_				0x004249c1
+0x0042cf60	c	4	.bmp				0x004247f3
+0x0042cf6b	c	7	\\barba_				0x004249d3
+0x0042cf73	c	4	.bmp				0x004247f3
+0x0042cf7e	c	7	barrhab				0x004249e6
+0x0042cf86	c	8	valorhab				0x004249ee
+0x0042cf8f	c	6	imghab				0x004249f7
+0x0042cf96	c	10	flechasapa				0x004249fe
+0x0042cfa1	c	8	valorapa				0x00424a09
+0x0042cfae	c	8	valorhab				0x004249ee
+0x0042cfb7	c	6	imghab				0x004249f7
+0x0042cfbe	c	8	valorhab				0x004249ee
+0x0042cfc7	c	6	imghab				0x004249f7
+0x0042cfce	c	8	valorhab				0x004249ee
+0x0042cfd7	c	7	etiqhab				0x00424a3f
+0x0042cfdf	c	7	etiqapa				0x00424a47
+0x0042cfe7	c	8	valorapa				0x00424a09
+0x0042cff0	c	8	valorhab				0x004249ee
+0x0042cff9	c	7	etiqhab				0x00424a3f
+0x0042d001	c	7	etiqapa				0x00424a47
+0x0042d009	c	8	valorapa				0x00424a09
+0x0042d018	c	8	valorapa				0x00424a09
+0x0042d02b	c	44	Preco invalido                   (1 ... 250)	buraco			
+0x0042d058	c	63	Numero da camisa          r ([33 ... 99] somente na Master    )	buraco			
+0x0042d098	c	7	barrhab				0x004249e6
+0x0042d0a0	c	10	flechasapa				0x004249fe
+0x0042d0ab	c	7	barrhab				0x004249e6
+0x0042d0f6	c	7	etiqjug				0x00424b5e
+0x0042d0fe	c	8	etiqestr				0x00424b66
+0x0042d107	c	7	jugador				0x00424b6f
+0x0042d10f	c	7	etiqpos				0x00424b77
+0x0042d117	c	8	etiqestr				0x00424b66
+0x0042d120	c	7	jugador				0x00424b6f
+0x0042d128	c	7	etiqpos				0x00424b77
+0x0042d130	c	4	bola				0x00424b98
+0x0042d135	c	7	etiqpos				0x00424b77
+0x0042d13d	c	4	bola				0x00424b98
+0x0042d142	c	7	etiqjug				0x00424b5e
+0x0042d14a	c	4	bola				0x00424b98
+0x0042d14f	c	7	etiqjug				0x00424b5e
+0x0042d157	c	7	simbolo				0x00424bbf
+0x0042d15f	c	7	tirador				0x00424bc7
+0x0042d167	c	7	etiqjug				0x00424b5e
+0x0042d16f	c	7	jugador				0x00424b6f
+0x0042d177	c	7	etiqjug				0x00424b5e
+0x0042d17f	c	7	jugador				0x00424b6f
+0x0042d187	c	7	tirador				0x00424bc7
+0x0042d18f	c	54	You should use different Home && Away radar colours...				0x00424bf7
+0x0042d1c6	c	4	bola				0x00424b98
+0x0042d1cb	c	4	bola				0x00424b98
+0x0042d1d0	c	7	tirador				0x00424bc7
+0x0042d1d8	c	7	simbolo				0x00424bbf
+0x0042d1e0	c	5	Branc				0x00424c48
+0x0042d1e6	c	5	Preto				0x00424c4e
+0x0042d1ec	c	5	Verde				0x00424c54
+0x0042d1f2	c	6	Amarel				0x00424c5a
+0x0042d1fd	c	4	Azul				0x00424c65
+0x0042d202	c	4	Turq				0x00424c6a
+0x0042d207	c	4	Rosa				0x00424c6f
+0x0042d20e	c	53	ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz				0x0042316a
+0x0042d328	c	34	).:;<=>$b@AB?CDTKEPQFGHI?cLMNOdefg				0x00423284
+0x0042e2e7	c	37	It's the same player in both teams...				0x00424767
+0x0042e30d	c	48	You need at least 1 memory block free to do that				0x0042478d
+0x0042e33e	c	11	in another\x20				0x004247be
+0x0042e34a	c	31	\x20different place(s) in the game				0x004247ca
+0x0042e36a	c	8	\\bandera				0x004247ea
+0x0042e373	c	4	.bmp				0x004247f3
+0x0042e37d	c	8	\\bandera				0x004247ea
+0x0042e386	c	4	.bmp				0x004247f3
+0x0042e390	c	9	\\camiseta				0x00424810
+0x0042e39a	c	4	.bmp				0x004247f3
+0x0042e3a4	c	9	\\pantalon				0x00424824
+0x0042e3ae	c	4	.bmp				0x004247f3
+0x0042e3b8	c	5	color				0x00424838
+0x0042e3be	c	5	color				0x00424838
+0x0042e3c4	c	9	lista_col				0x00424844
+0x0042e3ce	c	9	lista_col				0x00424844
+0x0042e3d8	c	9	lista_col				0x00424844
+0x0042e3e2	c	6	colcop				0x00424862
+0x0042e3e9	c	5	color				0x00424838
+0x0042e3ef	c	5	color				0x00424838
+0x0042e49d	c	5	RIGHT				0x0042ceb5
+0x0042e4a3	c	4	LEFT				0x0042cebb
+0x0042e4a8	c	4	BOTH				0x0042cec0
+0x0042e52a	c	16	\\careto_base.bmp				0x004249aa
+0x0042e541	c	6	\\pelo_				0x004249c1
+0x0042e548	c	4	.bmp				0x004247f3
+0x0042e553	c	7	\\barba_				0x004249d3
+0x0042e55b	c	4	.bmp				0x004247f3
+0x0042e566	c	7	barrhab				0x004249e6
+0x0042e56e	c	8	valorhab				0x004249ee
+0x0042e577	c	6	imghab				0x004249f7
+0x0042e57e	c	10	flechasapa				0x004249fe
+0x0042e589	c	8	valorapa				0x00424a09
+0x0042e596	c	8	valorhab				0x004249ee
+0x0042e59f	c	6	imghab				0x004249f7
+0x0042e5a6	c	8	valorhab				0x004249ee
+0x0042e5af	c	6	imghab				0x004249f7
+0x0042e5b6	c	8	valorhab				0x004249ee
+0x0042e5bf	c	7	etiqhab				0x00424a3f
+0x0042e5c7	c	7	etiqapa				0x00424a47
+0x0042e5cf	c	8	valorapa				0x00424a09
+0x0042e5d8	c	8	valorhab				0x004249ee
+0x0042e5e1	c	7	etiqhab				0x00424a3f
+0x0042e5e9	c	7	etiqapa				0x00424a47
+0x0042e5f1	c	8	valorapa				0x00424a09
+0x0042e600	c	8	valorapa				0x00424a09
+0x0042e613	c	44	Insert a valid number of credits (1 ... 250)				0x00424a93
+0x0042e640	c	63	Insert a valid shirt number ([33 ... 99] only for Master teams)				
+0x0042e680	c	7	barrhab				0x004249e6
+0x0042e688	c	10	flechasapa				0x004249fe
+0x0042e693	c	7	barrhab				0x004249e6
+0x0042e69e	c	53	ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz				0x0042316a
+0x0042e7b8	c	34	).:;<=>$b@AB?CDTKEPQFGHI?cLMNOdefg				0x00423284
+0x0042ec1b	c	37	It's the same player in both teams...				0x00424767
+0x0042ec41	c	48	You need at least 1 memory block free to do that				0x0042478d
+0x0042ec72	c	11	in another\x20				0x004247be
+0x0042ec7e	c	31	\x20different place(s) in the game				0x004247ca
+0x0042ec9e	c	8	\\bandera				0x004247ea
+0x0042eca7	c	4	.bmp				0x004247f3
+0x0042ecb1	c	8	\\bandera				0x004247ea
+0x0042ecba	c	4	.bmp				0x004247f3
+0x0042ecc4	c	9	\\camiseta				0x00424810
+0x0042ecce	c	4	.bmp				0x004247f3
+0x0042ecd8	c	9	\\pantalon				0x00424824
+0x0042ece2	c	4	.bmp				0x004247f3
+0x0042ecec	c	5	color				0x00424838
+0x0042ecf2	c	5	color				0x00424838
+0x0042ecf8	c	9	lista_col				0x00424844
+0x0042ed02	c	9	lista_col				0x00424844
+0x0042ed0c	c	9	lista_col				0x00424844
+0x0042ed16	c	6	colcop				0x00424862
+0x0042ed1d	c	5	color				0x00424838
+0x0042ed23	c	5	color				0x00424838
+0x0042ee44	c	31	Illegal mode in _vector_delete_		0x004148eb		
+0x0042ee98	c	28	Illegal mode in _vector_new_		0x00414a67		
+0x0042eeb5	c	32	Illegal dtorMode in _vector_new_		0x00414af6		
+0x0042eed8	c	8	borlndmm		0x00414b49		
+0x0042eee1	c	47	hrdir_b.c: LoadLibrary != mmdll borlndmm failed		0x00414b5b		
+0x0042ef11	c	8	borlndmm		0x00414b87		0x0042eed8
+0x0042ef1a	c	24	@Borlndmm@SysGetMem$qqri		0x00414b9b		
+0x0042ef33	c	26	@Borlndmm@SysFreeMem$qqrpv		0x00414ba8		
+0x0042ef4e	c	30	@Borlndmm@SysReallocMem$qqrpvi		0x00414bb5		
+0x0042ef6d	c	8	borlndmm		0x00414bec		0x0042eed8
+0x0042ef76	c	25	@Borlndmm@HeapAddRef$qqrv		0x00414c23		
+0x0042ef90	c	26	@Borlndmm@HeapRelease$qqrv		0x00414c39		
+0x0042efab	c	63	hrdir_b.c: GetMem or FreeMem or ReallocMem from borlndmm failed		0x00414ca7		
+0x0042efeb	c	76	hrdir_b.c: FATAL!!! memory has been allocated prior to heap redirector hook!		0x00414cbe		
+0x0042f12c	c	25	no named exception thrown				
+0x0042f146	c	20	bad exception thrown				
+0x0042f15b	c	26	bad alloc exception thrown				
+0x0042f176	c	5	Error				
+0x0042f17c	c	8	rwstderr				
+0x0042f1b8	c	8	<notype>		0x00415c94		
+0x0042f1c1	c	10	id->tpName		0x00415caa		
+0x0042f1cc	c	10	xxtype.cpp		0x00415ca5		
+0x0042f1d7	c	3	tp1		0x00415cdb		
+0x0042f1db	c	10	xxtype.cpp		0x00415cd6		0x0042f1cc
+0x0042f1e6	c	3	tp2		0x00415cf6		
+0x0042f1ea	c	10	xxtype.cpp		0x00415cf1		0x0042f1cc
+0x0042f1f5	c	11	tp1->tpName		0x00415d4d		
+0x0042f201	c	10	xxtype.cpp		0x00415d48		0x0042f1cc
+0x0042f20c	c	11	tp2->tpName		0x00415d71		
+0x0042f218	c	10	xxtype.cpp		0x00415d6c		0x0042f1cc
+0x0042f223	c	22	IS_STRUC(base->tpMask)		0x004157a5		
+0x0042f23a	c	10	xxtype.cpp		0x004157a0		0x0042f1cc
+0x0042f245	c	22	IS_STRUC(derv->tpMask)		0x004157c5		
+0x0042f25c	c	10	xxtype.cpp		0x004157c0		0x0042f1cc
+0x0042f267	c	37	derv->tpClass.tpcFlags & CF_HAS_BASES		0x004157e5		
+0x0042f28d	c	10	xxtype.cpp		0x004157e0		0x0042f1cc
+0x0042f298	c	38	((unsigned __far *)vtablePtr)[-1] == 0		0x00415fb5		
+0x0042f2bf	c	10	xxtype.cpp		0x00415fb0		0x0042f1cc
+0x0042f2ca	c	8	<notype>		0x004160b3		0x0042f1b8
+0x0042f2d3	c	45	topTypPtr != 0 && IS_STRUC(topTypPtr->tpMask)		0x00415964		
+0x0042f301	c	10	xxtype.cpp		0x0041595f		0x0042f1cc
+0x0042f30c	c	45	tgtTypPtr != 0 && IS_STRUC(tgtTypPtr->tpMask)		0x0041598a		
+0x0042f33a	c	10	xxtype.cpp		0x00415985		0x0042f1cc
+0x0042f345	c	45	srcTypPtr == 0 || IS_STRUC(srcTypPtr->tpMask)		0x004159b0		
+0x0042f373	c	10	xxtype.cpp		0x004159ab		0x0042f1cc
+0x0042f37e	c	41	__isSameTypeID(srcTypPtr, tgtTypPtr) == 0		0x004159df		
+0x0042f3a8	c	10	xxtype.cpp		0x004159da		0x0042f1cc
+0x0042f3b3	c	59	tgtTypPtr != 0 && __isSameTypeID(topTypPtr, tgtTypPtr) == 0		0x00415a27		
+0x0042f3ef	c	10	xxtype.cpp		0x00415a22		0x0042f1cc
+0x0042f3fa	c	9	srcTypPtr		0x00415b12		
+0x0042f404	c	10	xxtype.cpp		0x00415b0d		0x0042f1cc
+0x0042f40f	c	38	((unsigned __far *)vtablePtr)[-1] == 0				0x0042f298
+0x0042f436	c	10	xxtype.cpp				0x0042f1cc
+0x0042f441	c	4	addr		0x00415bb6		
+0x0042f446	c	10	xxtype.cpp		0x00415bb1		0x0042f1cc
+0x0042f451	c	54	Can't adjust class address (no base class entry found)		0x0041614d		
+0x0042f488	c	57	!"Can't adjust class address (no base class entry found)"		0x00416160		
+0x0042f4c2	c	10	xxtype.cpp		0x0041615b		0x0042f1cc
+0x0042f5d4	c	15	___CPPdebugHook		0x004162e1		
+0x0042f61c	c	15	Stack Overflow!		0x00416489		
+0x0042fae8	c	1	2		0x0041666c|0x004166e3|0x00416779|0x004167c3|0x00416abd|0x00416e0c|0x00416f90|0x00416ff1|0x0041708d|0x004172b2|0x00417301|0x0041750d|0x004179c3|0x00417a8f|0x00417a97|0x00417ad5|0x00417ae2|0x00417b28|0x00417b43|0x00417b50|0x00417bf1|0x00417bff|0x00417c07|0x00417cb5|0x004182de|0x00418417|0x00418f2e|0x00418f5f		0x00424a89
+0x0042faed	c	1	`		0x00416af0|0x00416b15|0x00416e3f|0x00416e5c|0x004174b8|0x004178b7|0x004182eb|0x00418322		
+0x0042fbc0	c	28	allocating handle lock table		0x004179db		
+0x0042fbdd	c	20	creating handle lock		0x00417a03		
+0x0042fbf2	c	6	hlocks		0x00417a47		
+0x0042fbf9	c	9	handles.c		0x00417a42		
+0x0042fc03	c	27	creating global handle lock		0x00417bdf		
+0x0042fd4c	c	3	TMP		0x004180a4		
+0x0042fd50	c	4	.$$$		0x004180c5		
+0x0042fe1c	c	1	1		0x00417d7e		
+0x0042fe20	c	7	Error 0				
+0x0042fe28	c	23	Invalid function number				
+0x0042fe40	c	25	No such file or directory				
+0x0042fe5a	c	14	Path not found				
+0x0042fe69	c	19	Too many open files				
+0x0042fe7d	c	17	Permission denied				
+0x0042fe8f	c	15	Bad file number				
+0x0042fe9f	c	20	Memory arena trashed				
+0x0042feb4	c	17	Not enough memory				
+0x0042fec6	c	28	Invalid memory block address				
+0x0042fee3	c	19	Invalid environment				
+0x0042fef7	c	14	Invalid format				
+0x0042ff06	c	19	Invalid access code				
+0x0042ff1a	c	12	Invalid data				
+0x0042ff27	c	11	Bad address				
+0x0042ff33	c	14	No such device				
+0x0042ff42	c	37	Attempted to remove current directory				
+0x0042ff68	c	15	Not same device				
+0x0042ff78	c	13	No more files				
+0x0042ff86	c	16	Invalid argument				
+0x0042ff97	c	16	Arg list too big				
+0x0042ffa8	c	17	Exec format error				
+0x0042ffba	c	17	Cross-device link				
+0x0042ffcc	c	19	Too many open files				0x0042fe69
+0x0042ffe0	c	18	No child processes				
+0x0042fff3	c	35	Inappropriate I/O control operation				
+0x00430017	c	22	Executable file in use				
+0x0043002e	c	14	File too large				
+0x0043003d	c	23	No space left on device				
+0x00430055	c	12	Illegal seek				
+0x00430062	c	21	Read-only file system				
+0x00430078	c	14	Too many links				
+0x00430087	c	11	Broken pipe				
+0x00430093	c	13	Math argument				
+0x004300a1	c	16	Result too large				
+0x004300b2	c	19	File already exists				
+0x004300c6	c	17	Possible deadlock				
+0x004300d8	c	23	Operation not permitted				
+0x004300f0	c	15	No such process				
+0x00430100	c	25	Interrupted function call				
+0x0043011a	c	18	Input/output error				
+0x0043012d	c	25	No such device or address				
+0x00430147	c	32	Resource temporarily unavailable				
+0x00430168	c	21	Block device required				
+0x0043017e	c	13	Resource busy				
+0x0043018c	c	15	Not a directory				
+0x0043019c	c	14	Is a directory				
+0x004301ac	c	19	Directory not empty				
+0x004301c0	c	13	Unknown error				
+0x004301d8	c	27	creating global stream lock		0x00418293		
+0x004301f4	c	28	allocating stream lock table		0x0041842f		
+0x00430211	c	20	creating stream lock		0x00418457		
+0x00430226	c	10	strm_locks		0x004184bf		
+0x00430231	c	9	streams.c		0x004184ba		
+0x0043023c	c	6	(null)		0x00418b76		
+0x00430244	utf16	6	(null)		0x00418b55		
+0x004302b6	c	1	\x20		0x0041924d|0x00419296		0x00424758
+0x00430601	c	4	($v)				
+0x00430611	c	8	%H:%M:%S				
+0x0043061a	c	8	%m/%d/%y				
+0x00430623	c	13	%A, %B %d, %Y				
+0x00430637	c	6	Monday				
+0x0043063e	c	7	Tuesday				
+0x00430646	c	9	Wednesday				
+0x00430650	c	8	Thursday				
+0x00430659	c	6	Friday				
+0x00430660	c	8	Saturday				
+0x00430669	c	6	Sunday				
+0x0043068c	c	7	January				
+0x00430694	c	8	February				
+0x0043069d	c	5	March				
+0x004306a3	c	5	April				
+0x004306ad	c	4	June				
+0x004306b2	c	4	July				
+0x004306b7	c	6	August				
+0x004306be	c	9	September				
+0x004306c8	c	7	October				
+0x004306d0	c	8	November				
+0x004306d9	c	8	December				
+0x00430718	c	12	%s: %s error		0x004199ef		
+0x004307f8	c	42	printf : floating point formats not linked		0x00419c21		
+0x00430823	c	41	scanf : floating point formats not linked		0x00419c2d		
+0x00430860	c	42	printf : floating point formats not linked		0x00419c39		0x004307f8
+0x0043088b	c	41	scanf : floating point formats not linked		0x00419c45		0x00430823
+0x0043098c	c	6	DOMAIN				
+0x00430993	c	4	SING				
+0x00430998	c	8	OVERFLOW				
+0x004309a1	c	9	UNDERFLOW				
+0x004309ab	c	5	TLOSS				
+0x004309b1	c	5	PLOSS				
+0x004309cf	c	4	?pow				
+0x004309d4	c	4	-INF		0x0041a462		
+0x004309d9	c	4	+INF		0x0041a469		
+0x004309de	c	4	-NAN		0x0041a4a2		
+0x004309e3	c	4	+NAN		0x0041a4a9		
+0x004309e8	utf16	4	-INF		0x0041a76e		
+0x004309f2	utf16	4	+INF		0x0041a775		
+0x004309fc	utf16	4	-NAN		0x0041a797		
+0x00430a06	utf16	4	+NAN		0x0041a79e		
+0x00430a64	c	66	Error: system code page access failure; MBCS table not initialized		0x0041b992		
+0x00430aa8	c	18	Assertion failed:\x20		0x0041bb5c		
+0x00430abb	c	7	, file\x20		0x0041bb53		
+0x00430ac3	c	7	, line\x20		0x0041bb4a		
+0x00430acc	c	35	%02d/%02d/%04d %02d:%02d:%02d.%03d\x20		0x0041bbd8		
+0x00430b00	c	28	Abnormal program termination		0x0041be19		
+0x00430b44	c	41	No space for command line argument vector		0x0041c064		
+0x00430b6e	c	34	No space for command line argument		0x0041c08a		
+0x00430b98	c	33	No space for copy of command line		0x0041c15b		
+0x00430bbc	c	33	No space for copy of command line		0x0041c35d		0x00430b98
+0x00430bec	c	26	Out of memory in _setargv0		0x0041c4fd		
+0x00430c0c	c	28	GetEnvironmentStrings failed		0x0041c5a6		
+0x00430c29	c	47	Could not allocate memory for environment block		0x0041c6d6		
+0x00430c59	c	25	creating environment lock		0x0041c6ec		
+0x00430cdc	c	20	creating atexit lock		0x0041cc01		
+0x00430cf4	c	25	creating thread data lock		0x0041cfb1		
+0x00430d10	c	16	Semaphore error\x20		0x0041d101		
+0x004317a0	c	15	___CPPdebugHook		0x0041d14d		0x0042f5d4
+0x004317b0	c	10	EDivByZero		0x0041d2a3		
+0x004317bb	c	11	ERangeError		0x0041d2df		
+0x004317c7	c	12	EIntOverflow		0x0041d31b		
+0x004317d4	c	10	EInvalidOp		0x0041d357		
+0x004317df	c	11	EZeroDivide		0x0041d393		
+0x004317eb	c	9	EOverflow		0x0041d3cf		
+0x004317f5	c	10	EUnderflow		0x0041d40b		
+0x00431800	c	16	EAccessViolation		0x0041d447		
+0x00431811	c	10	EPrivilege		0x0041d483		
+0x0043181c	c	9	EControlC		0x0041d4bf		
+0x00431826	c	14	EStackOverflow		0x0041d4f8		
+0x00431835	c	20	Bad exception number		0x0041d52b		
+0x0043184a	c	23	!"Bad exception number"		0x0041d53e		
+0x00431862	c	6	xx.cpp		0x0041d539		
+0x00431869	c	16	mask & TM_IS_REF		0x0041d560		
+0x0043187a	c	6	xx.cpp		0x0041d55b		0x00431862
+0x00431881	c	19	srcmask & TM_IS_REF		0x0041d6d1		
+0x00431895	c	6	xx.cpp		0x0041d6cc		0x00431862
+0x0043189c	c	52	(ctorMask & 0x0100) != 0 || (ctorMask & 0x0020) == 0		0x0041d7b3		
+0x004318d1	c	6	xx.cpp		0x0041d7ae		0x00431862
+0x004318d8	c	24	(ctorMask & 0x0080) == 0		0x0041d7cf		
+0x004318f1	c	6	xx.cpp		0x0041d7ca		0x00431862
+0x004318f8	c	5	what?		0x0041d823		
+0x004318fe	c	8	!"what?"		0x0041d836		
+0x00431907	c	6	xx.cpp		0x0041d831		0x00431862
+0x0043190e	c	5	what?		0x0041d879		0x004318f8
+0x00431914	c	8	!"what?"		0x0041d88c		0x004318fe
+0x0043191d	c	6	xx.cpp		0x0041d887		0x00431862
+0x00431924	c	24	(dtorMask & 0x0080) == 0		0x0041d936		
+0x0043193d	c	6	xx.cpp		0x0041d931		0x00431862
+0x00431944	c	5	what?		0x0041d97e		0x004318f8
+0x0043194a	c	8	!"what?"		0x0041d991		0x004318fe
+0x00431953	c	6	xx.cpp		0x0041d98c		0x00431862
+0x0043195a	c	23	(mfnMask & 0x0080) == 0		0x0041d9b9		
+0x00431972	c	6	xx.cpp		0x0041d9b4		0x00431862
+0x00431979	c	5	what?		0x0041d9fe		0x004318f8
+0x0043197f	c	8	!"what?"		0x0041da11		0x004318fe
+0x00431988	c	6	xx.cpp		0x0041da0c		0x00431862
+0x0043198f	c	54	typeID || (reThrow && (flags & XDF_ISDELPHIEXCEPTION))		0x0041da92		
+0x004319c6	c	6	xx.cpp		0x0041da8d		0x00431862
+0x004319cd	c	8	cctrAddr		0x0041dc62		
+0x004319d6	c	6	xx.cpp		0x0041dc5d		0x00431862
+0x004319dd	c	14	xdp->xdArgBuff		0x0041dd6e		
+0x004319ec	c	6	xx.cpp		0x0041dd69		0x00431862
+0x004319f3	c	8	dtorAddr		0x0041de27		
+0x004319fc	c	6	xx.cpp		0x0041de22		0x00431862
+0x00431a03	c	7	argType		0x0041dede		
+0x00431a0b	c	6	xx.cpp		0x0041ded9		0x00431862
+0x00431a12	c	18	__CPPexceptionList		0x0041df3d		
+0x00431a25	c	6	xx.cpp		0x0041df38		0x00431862
+0x00431a2c	c	2	xl		0x0041df7c		
+0x00431a2f	c	6	xx.cpp		0x0041df77		0x00431862
+0x00431a36	c	23	xdrPtr->xdERRaddr == xl		0x0041df98		
+0x00431a4e	c	6	xx.cpp		0x0041df93		0x00431862
+0x00431a55	c	47	!tpid || tpid->tpMask & (TM_IS_PTR | TM_IS_REF)		0x0041e066		
+0x00431a85	c	6	xx.cpp		0x0041e061		0x00431862
+0x00431a8c	c	27	dscPtr->xdERRaddr == errPtr		0x0041e186		
+0x00431aa8	c	6	xx.cpp		0x0041e181		0x00431862
+0x00431aaf	c	27	dscPtr->xdHtabAdr == hdtPtr		0x0041e1a5		
+0x00431acb	c	6	xx.cpp		0x0041e1a0		0x00431862
+0x00431ad2	c	22	dscPtr->xdArgCopy == 0		0x0041e1c2		
+0x00431ae9	c	6	xx.cpp		0x0041e1bd		0x00431862
+0x00431af0	c	33	(dscPtr->xdMask & TM_IS_PTR) == 0		0x0041e275		
+0x00431b12	c	6	xx.cpp		0x0041e270		0x00431862
+0x00431b19	c	16	mask & TM_IS_PTR		0x0041e2a7		
+0x00431b2a	c	6	xx.cpp		0x0041e2a2		0x00431862
+0x00431b31	c	26	dscPtr->xdMask & TM_IS_PTR		0x0041e2c4		
+0x00431b4c	c	6	xx.cpp		0x0041e2bf		0x00431862
+0x00431b53	c	34	dscPtr->xdTypeID == dscPtr->xdBase		0x0041e341		
+0x00431b76	c	6	xx.cpp		0x0041e33c		0x00431862
+0x00431b7d	c	18	hdtPtr->HDcctrAddr		0x0041e390		
+0x00431b90	c	6	xx.cpp		0x0041e38b		0x00431862
+0x00431b97	c	22	dscPtr->xdSize == size		0x0041e3fd		
+0x00431bae	c	6	xx.cpp		0x0041e3f8		0x00431862
+0x00431bb5	c	27	xdrPtr && xdrPtr == *xdrLPP		0x0041e536		
+0x00431bd1	c	6	xx.cpp		0x0041e531		0x00431862
+0x00431bd8	c	31	bogus context in Local_unwind()		0x0041e57f		
+0x00431bf8	c	34	!"bogus context in Local_unwind()"		0x0041e592		
+0x00431c1b	c	6	xx.cpp		0x0041e58d		0x00431862
+0x00431c22	c	6	const\x20		0x0041e620		
+0x00431c29	c	9	volatile\x20		0x0041e639		
+0x00431c33	c	36	bogus context in _ExceptionHandler()		0x0041eba6		
+0x00431c58	c	39	!"bogus context in _ExceptionHandler()"		0x0041ebb9		
+0x00431c80	c	6	xx.cpp		0x0041ebb4		0x00431862
+0x00431c87	c	39	varType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041ec12		
+0x00431caf	c	6	xx.cpp		0x0041ec0d		0x00431862
+0x00431cb6	c	28	varType->tpClass.tpcDtorAddr		0x0041ec2f		
+0x00431cd3	c	6	xx.cpp		0x0041ec2a		0x00431862
+0x00431cda	c	63	(errPtr->ERRcInitDtc >= varType->tpClass.tpcDtorCount) || flags		0x0041ec61		
+0x00431d1a	c	6	xx.cpp		0x0041ec5c		0x00431862
+0x00431d21	c	39	varType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041ed47		0x00431c87
+0x00431d49	c	6	xx.cpp		0x0041ed42		0x00431862
+0x00431d50	c	2	bl		0x0041eda4		
+0x00431d53	c	6	xx.cpp		0x0041ed9f		0x00431862
+0x00431d5a	c	15	bl->blOffs == 0		0x0041edcd		
+0x00431d6a	c	6	xx.cpp		0x0041edc8		0x00431862
+0x00431d71	c	18	dtorCnt < varCount		0x0041ee1d		
+0x00431d84	c	6	xx.cpp		0x0041ee18		0x00431862
+0x00431d8b	c	24	IS_STRUC(blType->tpMask)		0x0041ee5b		
+0x00431da4	c	6	xx.cpp		0x0041ee56		0x00431862
+0x00431dab	c	24	IS_STRUC(blType->tpMask)		0x0041eed0		0x00431d8b
+0x00431dc4	c	6	xx.cpp		0x0041eecb		0x00431862
+0x00431dcb	c	7	memType		0x0041ef60		
+0x00431dd3	c	6	xx.cpp		0x0041ef5b		0x00431862
+0x00431dda	c	39	memType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041ef93		
+0x00431e02	c	6	xx.cpp		0x0041ef8e		0x00431862
+0x00431e09	c	29	varType->tpMask & TM_IS_ARRAY		0x0041f07a		
+0x00431e27	c	6	xx.cpp		0x0041f075		0x00431862
+0x00431e2e	c	58	varType->tpArr.tpaElemType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041f09a		
+0x00431e69	c	6	xx.cpp		0x0041f095		0x00431862
+0x00431e70	c	8	vdtCount		0x0041f0c1		
+0x00431e79	c	6	xx.cpp		0x0041f0bc		0x00431862
+0x00431e80	c	39	etdCount <= elemCount || elemCount == 0		0x0041f0fe		
+0x00431ea8	c	6	xx.cpp		0x0041f0f9		0x00431862
+0x00431eaf	c	20	dtrCount <= vdtCount		0x0041f122		
+0x00431ec4	c	6	xx.cpp		0x0041f11d		0x00431862
+0x00431ecb	c	25	IS_CLASS(varType->tpMask)		0x0041f19d		
+0x00431ee5	c	6	xx.cpp		0x0041f198		0x00431862
+0x00431eec	c	36	((unsigned __far *)vftAddr)[-1] == 0	gemea_difere	0x0041f1ed		
+0x00431f11	c	6	xx.cpp		0x0041f1e8		0x00431862
+0x00431f18	c	46	dttPtr->dttFlags & (DTCVF_PTRVAL|DTCVF_RETVAL)		0x0041f24c		
+0x00431f47	c	6	xx.cpp		0x0041f247		0x00431862
+0x00431f4e	c	35	dttPtr->dttType->tpMask & TM_IS_PTR		0x0041f26e		
+0x00431f72	c	6	xx.cpp		0x0041f269		0x00431862
+0x00431f79	c	66	dttPtr->dttType->tpPtr.tppBaseType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041f293		
+0x00431fbc	c	6	xx.cpp		0x0041f28e		0x00431862
+0x00431fc3	c	86	IS_CLASS(dttPtr->dttType->tpMask) && (dttPtr->dttType->tpClass.tpcFlags & CF_HAS_DTOR)		0x0041f2d7		
+0x0043201a	c	6	xx.cpp		0x0041f2d2		0x00431862
+0x00432021	c	38	dtvtPtr->dttType->tpMask & TM_IS_ARRAY		0x0041f348		
+0x00432048	c	6	xx.cpp		0x0041f343		0x00431862
+0x0043204f	c	39	varType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041f3ac		0x00431c87
+0x00432077	c	6	xx.cpp		0x0041f3a7		0x00431862
+0x0043207e	c	40	elemType->tpClass.tpcFlags & CF_HAS_DTOR		0x0041f420		
+0x004320a7	c	6	xx.cpp		0x0041f41b		0x00431862
+0x004320ae	c	29	varType->tpMask & TM_IS_ARRAY		0x0041f47d		0x00431e09
+0x004320cc	c	6	xx.cpp		0x0041f478		0x00431862
+0x004320d3	c	27	varType->tpMask & TM_IS_PTR		0x0041f4b4		
+0x004320ef	c	6	xx.cpp		0x0041f4af		0x00431862
+0x004320f6	c	2	bl		0x0041f558		0x00431d50
+0x004320f9	c	6	xx.cpp		0x0041f553		0x00431862
+0x00432100	c	8	**BCCxh1		0x0041f6bf		
+0x00432468	c	6	Label4				
+0x004324c4	c	2	%c		0x00421305		
+0x004324cb	c	3	%hu		0x00421350		
+0x004324cf	c	2	%i		0x00421395		
+0x004328a8	c	23	_noParam.vt == VT_ERROR				
+0x004328c0	c	11	VARIANT.CPP				
+0x004328cc	c	42	V_ERROR(&_noParam) == DISP_E_PARAMNOTFOUND				
+0x004328f7	c	11	VARIANT.CPP				0x004328c0
+0x00432903	c	10	%s @ %s/%d		0x00421a34		
+0x0043290e	c	10	_ASSERTE:\x20		0x00421a4f		
+0x00432919	c	17	%s failed - %s/%d		0x00421a68		
+0x0043292b	c	2	%s		0x00421a7d		
+0x00432931	c	64	Press [Y]es to terminate, [N]o to continue and [C]ancel to Debug				
+0x00432973	c	21	_empty.vt == VT_EMPTY				
+0x00432989	c	11	VARIANT.CPP				0x004328c0
+0x00432995	c	12	vt == rhs.vt		0x00421dd0		
+0x004329a2	c	11	VARIANT.CPP		0x00421dcb		0x004328c0
+0x004329b0	c	4	name				
+0x004329b5	c	23	c:\\bcb\\emuvcl\\utilcls.h				
+0x004329cd	c	9	IsBound()				
+0x004329d7	c	23	c:\\bcb\\emuvcl\\utilcls.h				0x004329b5
+0x004329ef	c	9	IsBound()				0x004329cd
+0x004329f9	c	23	c:\\bcb\\emuvcl\\utilcls.h				0x004329b5
+0x00432a11	c	94	(hasRetVal==false && args==0) || (hasRetVal==false && args!=0) || (hasRetVal==true && args!=0)				
+0x00432a70	c	23	c:\\bcb\\emuvcl\\utilcls.h				0x004329b5
+0x00432aba	c	26	bufSize < sizeof(szBuffer)				
+0x00432ad5	c	23	c:\\bcb\\emuvcl\\utilcls.h				0x004329b5
+0x00432aee	c	33	Parms.vt == (VT_ARRAY|VT_VARIANT)				
+0x00432b10	c	11	VARIANT.CPP				0x004328c0
+0x00432b1c	c	32	ParmTypes.vt == (VT_ARRAY|VT_I4)				
+0x00432b3d	c	11	VARIANT.CPP				0x004328c0
+0x00432d28	c	5	false		0x00422237		
+0x00432d2e	c	4	true		0x0042226a		
+0x00432d33	c	2	->		0x004222a0		
