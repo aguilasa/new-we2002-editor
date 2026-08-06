@@ -39,6 +39,22 @@ cortes, todos derivados de medida e nenhum escolhido a olho:
 O corte 4 é o que faz o trabalho. Sem ele, a varredura de `.text` devolve mais
 de mil e quinhentos candidatos, quase todos VAs do próprio módulo.
 
+**O corte 1 sai do nosso próprio `Offsets.hpp`, e isso tem consequência.** A faixa
+é literalmente o `[min, max]` dos 69 valores declarados lá, então a guarda
+que confere "o filtro aceita 100% do que já se sabe ser offset" é **tautológica na
+parte de faixa** — ela morde de verdade nos cortes 2 e 3, que não vêm dali.
+
+A consequência é uma acoplagem entre dois projetos que não compartilham build: o
+limite medido da tabela do Obocaman se move quando alguém mexe no `Offsets.hpp`
+do `newWe2002`. A **WTE-TASK-19** existe justamente para acrescentar offsets lá; um
+valor novo fora da faixa atual alarga a janela, e a corrida pode passar a engolir
+o dword seguinte — a armadilha §8.7 entrando pela porta dos fundos. **Quem
+acrescentar offset tem de reconferir o limite das duas tabelas.**
+
+Congelar a faixa numa constante foi considerado e recusado: a faixa derivada é o
+que faz o filtro acompanhar o que o projeto aprende. O que faltava não era
+rigidez, era esta acoplagem escrita.
+
 O corte 3 parou onde parou de propósito. Um terceiro caso tentador — "prefixo
 imprimível seguido de NUL", que é a forma do `xyz` + NUL que fecha a tabela de
 alfabeto logo abaixo da tabela 1 — foi testado e **descartado**: como todo valor da
@@ -145,15 +161,24 @@ Conteúdo, na ordem em que está na memória:
 
 ### O critério, escrito
 
-O limite superior é medido por **dois testes independentes que têm de concordar**,
-e o script aborta se não concordarem:
+O limite superior é medido por **dois testes independentes**, que se confrontam:
 
 - **pelo conteúdo** — a corrida acaba no primeiro dword que não é plausível nem
   zero. Zero **não** encerra: é buraco. Tratar zero como terminador cortaria a
   tabela 1 no slot 2 e perderia 9 offsets;
 - **por quem aponta para lá** — a tabela vai até o próximo endereço de `.data`
-  que o `.text` referencia, e o script aborta se os dois limites não coincidirem.
-  Nada dentro do intervalo é referenciado; só a base é.
+  que o `.text` referencia. Nada dentro do intervalo é referenciado; só a base é.
+
+**A discordância entre os dois não é tratada igual nos dois sentidos**, e o motivo
+é que ela não significa a mesma coisa:
+
+- **referência antes do fim medido pelo conteúdo — aborta.** É a armadilha §8.7
+  em pessoa: o conteúdo estica a tabela além do que o código sustenta, e publicar
+  isso seria dar como offset um slot que ninguém referencia;
+- **referência depois do fim — avisa e segue.** O intervalo publicado continua
+  sendo o que o conteúdo sustenta, então não há número errado a emitir; o que há é
+  um vizinho que talvez pertença à tabela. Sai como `AVISO:` na saída padrão e
+  na tabela de limites acima.
 
 O limite **inferior** é o endereço-base referenciado pelo código, e esse critério
 não é decorativo: no caso da tabela 1, o dword logo abaixo é numericamente

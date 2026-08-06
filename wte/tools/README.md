@@ -31,6 +31,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 |---|---|
 | `test_dfm_extract.py` ✅ | os 21 `TValueType`, as três flags de objeto e as rotas de aborto do `dfm_extract.py` |
 | `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 do `dump_strings.py`: mapa de opcodes caso a caso, os sete abortos, o `extent()`, e a conferência contra o `objdump` |
+| `test_dump_offsets.py` ✅ | o critério de limite da tabela em `.data`: os dois sentidos da discordância (um aborta, o outro avisa) e a faixa de plausibilidade herdada do `Offsets.hpp` |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
 o prefixo `test_`. (Teste do lado **Pascal** é outra coisa e mora em

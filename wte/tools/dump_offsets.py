@@ -684,13 +684,27 @@ class Measurement:
         return out
 
     def check_table_bounds(self) -> None:
-        """Os dois criterios de limite superior tem de concordar.
+        """Confronta os dois criterios de limite superior. Assimetrico.
 
         Criterio A: a corrida acaba no primeiro dword que nao e plausivel nem
         zero. Criterio B: a tabela vai ate o proximo endereco de `.data` que o
         codigo referencia. Sao independentes -- um olha o conteudo, o outro
-        olha quem aponta para la. Se discordarem, a tabela nao esta medida, e
-        emitir numero nesse estado seria exatamente a armadilha 8.7 do plano.
+        olha quem aponta para la.
+
+        **Os dois sentidos da discordancia nao sao equivalentes, e o
+        tratamento tambem nao e:**
+
+        - `B < A` -- o conteudo diz que a tabela vai mais longe do que o codigo
+          sustenta. E a armadilha 8.7 em pessoa: emitir numero assim seria
+          publicar slot que ninguem referencia como se fosse offset. **Aborta.**
+        - `B > A` -- o codigo referencia algo depois do fim medido pelo
+          conteudo. O intervalo publicado continua sendo o que o conteudo
+          sustenta, entao nao ha numero errado a emitir; o que ha e um vizinho
+          que talvez pertenca a tabela. **Avisa**, na saida padrao e no
+          markdown.
+
+        Prometer as duas direcoes seria pior do que abortar so numa: quem le
+        supoe que `agrees=False` nao passa, e passa.
         """
         self.bounds: list[tuple[Run, int | None, bool]] = []
         for table in self.tables:
@@ -705,6 +719,14 @@ class Measurement:
                     f"{nxt:#x} antes disso. Os dois criterios de limite "
                     f"discordam e a tabela nao esta medida -- ver a armadilha "
                     f"8.7 do plano.")
+            if nxt is not None and not agrees and nxt > table.end_va:
+                print(
+                    f"AVISO: a tabela em {table.va:#x} termina em "
+                    f"{table.end_va:#x} pelo conteudo, mas a proxima "
+                    f"referencia de codigo e {nxt:#x}, "
+                    f"{nxt - table.end_va} bytes adiante. O intervalo "
+                    f"publicado e o do conteudo; o vizinho pode pertencer a "
+                    f"tabela.")
 
 
 # ------------------------------------------------------------------- TSV ---
@@ -865,6 +887,23 @@ def render_md(m: Measurement) -> str:
     add("O corte 4 é o que faz o trabalho. Sem ele, a varredura de `.text` "
         "devolve mais\nde mil e quinhentos candidatos, quase todos VAs do "
         "próprio módulo.\n")
+    add(f"**O corte 1 sai do nosso próprio `Offsets.hpp`, e isso tem "
+        f"consequência.** A faixa\né literalmente o `[min, max]` dos "
+        f"{n_declared} valores declarados lá, então a guarda\nque confere "
+        f"\"o filtro aceita 100% do que já se sabe ser offset\" é "
+        f"**tautológica na\nparte de faixa** — ela morde de verdade nos "
+        f"cortes 2 e 3, que não vêm dali.\n")
+    add("A consequência é uma acoplagem entre dois projetos que não "
+        "compartilham build: o\nlimite medido da tabela do Obocaman se move "
+        "quando alguém mexe no `Offsets.hpp`\ndo `newWe2002`. A "
+        "**WTE-TASK-19** existe justamente para acrescentar offsets lá; um\n"
+        "valor novo fora da faixa atual alarga a janela, e a corrida pode "
+        "passar a engolir\no dword seguinte — a armadilha §8.7 entrando pela "
+        "porta dos fundos. **Quem\nacrescentar offset tem de reconferir o "
+        "limite das duas tabelas.**\n")
+    add("Congelar a faixa numa constante foi considerado e recusado: a faixa "
+        "derivada é o\nque faz o filtro acompanhar o que o projeto aprende. O "
+        "que faltava não era\nrigidez, era esta acoplagem escrita.\n")
     add("O corte 3 parou onde parou de propósito. Um terceiro caso tentador — "
         "\"prefixo\nimprimível seguido de NUL\", que é a forma do `xyz` + NUL "
         "que fecha a tabela de\nalfabeto logo abaixo da tabela 1 — foi testado "
@@ -959,6 +998,16 @@ def render_md(m: Measurement) -> str:
         add(f"| os dois critérios de limite | "
             + ("**coincidem**" if agrees else "divergem") + " |")
         add("")
+        # Discordancia no sentido que nao aborta nao pode sumir dentro de
+        # `self.bounds`: sem esta linha, `divergem` acima seria a unica pista,
+        # e um leitor supoe que divergencia derruba a geracao.
+        if not agrees and nxt is not None and nxt > table.end_va:
+            add(f"> **Aviso.** O código referencia `0x{nxt:08x}`, "
+                f"{nxt - table.end_va} bytes além do fim medido pelo "
+                f"conteúdo.\n> O intervalo acima é o que o conteúdo sustenta; "
+                f"o vizinho pode pertencer à\n> tabela. Este sentido da "
+                f"discordância **não** derruba a geração — o que derruba é\n> "
+                f"a referência *antes* do fim, que é a armadilha §8.7.\n")
         add("Conteúdo, na ordem em que está na memória:\n")
         add("| slot | VA | valor | `Offsets.hpp` |")
         add("|---:|---|---:|---|")
@@ -972,8 +1021,8 @@ def render_md(m: Measurement) -> str:
         add("")
 
     add("### O critério, escrito\n")
-    add("O limite superior é medido por **dois testes independentes que têm de "
-        "concordar**,\ne o script aborta se não concordarem:\n")
+    add("O limite superior é medido por **dois testes independentes**, que se "
+        "confrontam:\n")
     if m.tables:
         t0 = m.tables[0]
         first_hole = next((k for k, v in enumerate(t0.slots) if v == 0),
@@ -986,9 +1035,19 @@ def render_md(m: Measurement) -> str:
     add("- **pelo conteúdo** — a corrida acaba no primeiro dword que não é "
         "plausível nem\n  zero. Zero **não** encerra: é buraco. " + cut + ";\n"
         "- **por quem aponta para lá** — a tabela vai até o próximo endereço "
-        "de `.data`\n  que o `.text` referencia, e o script aborta se os dois "
-        "limites não coincidirem.\n  Nada dentro do intervalo é referenciado; "
-        "só a base é.\n")
+        "de `.data`\n  que o `.text` referencia. Nada dentro do intervalo é "
+        "referenciado; só a base é.\n")
+    add("**A discordância entre os dois não é tratada igual nos dois "
+        "sentidos**, e o motivo\né que ela não significa a mesma coisa:\n")
+    add("- **referência antes do fim medido pelo conteúdo — aborta.** É a "
+        "armadilha §8.7\n  em pessoa: o conteúdo estica a tabela além do que o "
+        "código sustenta, e publicar\n  isso seria dar como offset um slot que "
+        "ninguém referencia;\n"
+        "- **referência depois do fim — avisa e segue.** O intervalo publicado "
+        "continua\n  sendo o que o conteúdo sustenta, então não há número "
+        "errado a emitir; o que há é\n  um vizinho que talvez pertença à "
+        "tabela. Sai como `AVISO:` na saída padrão e\n  na tabela de limites "
+        "acima.\n")
     add("O limite **inferior** é o endereço-base referenciado pelo código, e "
         "esse critério\nnão é decorativo: no caso da tabela 1, o dword logo "
         "abaixo é numericamente\nplausível — é o `xyz` + NUL que fecha a "

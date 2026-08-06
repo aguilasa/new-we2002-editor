@@ -3,7 +3,7 @@ id: CORR-WTE-011
 title: "Correção: o critério de limite do dump_offsets.py aborta num sentido só, e a janela de plausibilidade sai do nosso próprio header"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -160,24 +160,69 @@ que precisar do binário fica sob `skipUnless`.
 
 ## Verificação
 
-- [ ] O `offsets.md` gerado descreve a regra de aborto que o código tem
-- [ ] Discordância no sentido que não aborta sai como aviso e aparece no
-      markdown
-- [ ] A seção do critério registra que a faixa vem do `Offsets.hpp` e o que isso
-      implica para a WTE-TASK-19
-- [ ] `python3 -m unittest` sobre `wte/tools/test_dump_offsets.py` verde, com os
-      três casos plantados
-- [ ] `python3 wte/tools/dump_offsets.py --check` verde depois de regerar
-- [ ] Rodar o gerador duas vezes dá bytes iguais
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] O `offsets.md` gerado descreve a regra de aborto que o código tem
+- [x] Discordância no sentido que não aborta sai como aviso e aparece no
+      markdown — o bloco `> **Aviso.**` é emitido por tabela discordante.
+      **Não aparece no `offsets.md` de hoje**, e não deveria: as duas tabelas
+      concordam. O caminho está coberto por teste, não por observação
+- [x] A seção do critério registra que a faixa vem do `Offsets.hpp` e o que isso
+      implica para a WTE-TASK-19 — `offsets.md:49`
+- [x] `python3 -m unittest` sobre `wte/tools/test_dump_offsets.py` verde, com os
+      três casos plantados — **14 casos**, os três entre eles
+- [x] `python3 wte/tools/dump_offsets.py --check` verde depois de regerar
+- [x] Rodar o gerador duas vezes dá bytes iguais
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+As três correções entraram no gerador; o `offsets.md` foi regerado.
+
+1. **A regra que existe, dita.** O texto e o docstring de
+   `check_table_bounds()` passaram a descrever a assimetria em vez de prometer
+   simetria: referência **antes** do fim medido pelo conteúdo aborta — é a §8.7
+   em pessoa, publicar ali daria como offset um slot que ninguém aponta —, e
+   referência **depois** avisa e segue, porque o intervalo publicado continua
+   sendo o que o conteúdo sustenta e não há número errado a emitir.
+2. **O aviso.** Sai como `AVISO:` na saída padrão, no molde da CORR-WTE-004, e
+   como um bloco de citação na seção da tabela, para não sumir dentro de
+   `self.bounds` — sem ele o único rastro seria a palavra "divergem" numa
+   célula, que um leitor supõe impossível.
+3. **A acoplagem, escrita.** A seção do critério agora diz que a faixa é
+   literalmente o `[min, max]` dos 69 valores do nosso `Offsets.hpp`, que por
+   isso a guarda de "aceita 100% do que já se sabe" é **tautológica na parte
+   de faixa** (ela morde nos cortes de geometria e de texto), e que a
+   WTE-TASK-19 move essa janela ao acrescentar offsets — quem acrescentar tem
+   de reconferir o limite das duas tabelas. Congelar a faixa numa constante foi
+   considerado e recusado, com o motivo escrito.
+
+`wte/tools/test_dump_offsets.py`, **14 casos**. Os três plantados pela revisão
+mais: sem referência alguma depois; referência à própria base não conta como
+próxima (senão abortaria sempre); segunda tabela ainda conferida quando a
+primeira passa; e a faixa de plausibilidade como propriedade — o `[min, max]`,
+o alargamento por valor novo, a tautologia da guarda, e os dois cortes que
+**não** vêm do header. A regra de confronto é exercitada chamando o método
+desligado da classe sobre um objeto mínimo: monta-se `Run` em memória, sem
+`.exe`. A medida real das duas tabelas fica sob `skipUnless`.
+
 **Problemas encontrados:**
 
+Nenhum. Oito mutações do gerador rodadas numa cópia em sandbox: abortar nos
+dois sentidos, nunca abortar, apagar o aviso, contar a base como próxima
+referência, tirar a faixa do header, desligar o corte de faixa e o de geometria
+— as sete reprovam. A oitava era controle (`break` → `continue` num laço
+inócuo) e **passa**, que é o resultado desejado: bateria que reprova qualquer
+mudança não mede nada.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_offsets.py` — `check_table_bounds()` e três trechos de
+  `render_md()`
+- `wte/re/offsets.md` — regerado
+- `wte/tools/test_dump_offsets.py` — criado
+- `wte/tools/README.md` — linha na tabela de testes
+- `docs/tasks/correcoes-progresso.md`
