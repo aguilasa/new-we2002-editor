@@ -110,7 +110,7 @@ no plano e pode ter mudado: 18 formulários, ~430 componentes, 96 handlers, 19 d
 - Propriedade que a LCL não tem virou **comentário**, ou sumiu calado? Sumir
   calado é diferença visual que só aparece muito depois da causa
 - Os 96 stubs estão na **unidade certa**? A coluna `formulario` existe e foi
-  usada? `FormCreate` aparece 17 vezes
+  usada? `FormCreate` aparece 16 vezes
 - A comparação visual tem **veredito escrito por formulário**, ou uma frase
   geral? Frase geral não é conferência
 - O roteiro de eventos é **arquivo fixo**, ou driver que reage à tela? Driver

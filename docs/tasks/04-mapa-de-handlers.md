@@ -29,7 +29,7 @@ formulário cada handler pertence**.
 
 ### Por que o dono importa
 
-Há colisão de nome — `FormCreate` aparece 17 vezes, `BitBtn1Click` duas,
+Há colisão de nome — `FormCreate` aparece 16 vezes, `BitBtn1Click` quatro,
 `SpeedButton1Click` três. Sem o dono, "implementar `FormCreate`" é ambíguo, e a
 Fase 2 precisa gerar o stub na unidade certa.
 

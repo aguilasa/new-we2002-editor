@@ -39,10 +39,11 @@ Implementar o grupo de carga, com spec e verificação por handler.
 | `mostrar_estrategiaClick` | `0x00410220` | abre a tela de tática |
 | `lista_formacionesClick` | `0x00409aa0` | aplica formação predefinida |
 | `ComboBoxDrawItem` | `0x0040adec` | owner-draw do combo |
-| `FormCreate` / `FormShow` | 19 endereços | inicialização de cada formulário |
+| `FormCreate` / `FormShow` | 18 endereços | inicialização de cada formulário |
 
-Os 19 `FormCreate`/`FormShow` são um por formulário; a coluna `formulario` do
-`published_methods.tsv` diz qual é qual.
+São **16 `FormCreate` mais 2 `FormShow`** — não um por formulário:
+`ficha_error` e `ficha_error2` não publicam nenhum dos dois. A coluna
+`formulario` do `published_methods.tsv` diz qual é qual.
 
 ### Duas armadilhas de framework
 

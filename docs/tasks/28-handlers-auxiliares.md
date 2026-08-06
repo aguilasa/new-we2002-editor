@@ -32,23 +32,28 @@ Os `ficha_*`: `about`, `color`, `creditos_equipo`, `dorsal`, `enlaza`, `error`,
 `error2`, `info`, `info2`, `info3`, `info4`, `movertodos`, `salida`, `warning`,
 `warning_2`.
 
-Handlers repetidos por vários formulários — `BitBtn1Click` (3×),
-`BitBtn2Click` (2×), `BitBtn3Click` (3×), `SpeedButton1Click` (3×),
-`SpeedButton2Click`, `Button2Click`, `Image3Click`, `botonClick`,
-`base_teamClick`, `imagen_urlClick`.
+Handlers repetidos por vários formulários — `BitBtn1Click` (4×),
+`BitBtn2Click` (2×), `BitBtn3Click` (3×), `SpeedButton1Click` (3×).
+
+Os outros seis do escopo têm nome parecido mas **não** se repetem — cada um
+aparece uma vez só: `SpeedButton2Click`, `Button2Click`, `Image3Click`,
+`base_teamClick` (todos de `MainForm`), `botonClick` (`ficha_color`) e
+`imagen_urlClick` (`ficha_about`).
 
 **A coluna `formulario` do `published_methods.tsv` é indispensável aqui** — sem
-ela, "implementar `BitBtn1Click`" é ambíguo entre três formulários.
+ela, "implementar `BitBtn1Click`" é ambíguo entre quatro formulários.
 
 ### O que fica de fora, e por quê
 
-Estes pertencem a `ficha_color` e `ficha_creditos_equipo` mas são **fórmula**,
-não diálogo, e são das tasks 30 e 32:
+Estes pertencem a `ficha_color`, `jugador`, `MainForm` e `estrategia` mas são
+**fórmula**, não diálogo, e são das tasks 30 e 32:
 
-| Handler | Dono |
-|---|---|
-| `etiqprecioClick`, `casilla_precioKeyPress` | WTE-TASK-30 (preço) |
-| `colorearClick`, `gradienteClick`, `oscurecerClick`, `aclararClick`, `lista_col0..3Change`, `colorMouseDown`, `barraChange`, `barra1Change`, `barra2Change`, `malla1MouseDown`, `malla2MouseDown` | WTE-TASK-32 (render 2D) |
+| Handler | Formulário | Dono |
+|---|---|---|
+| `etiqprecioClick`, `casilla_precioKeyPress` | `jugador` | WTE-TASK-30 (preço) |
+| `colorearClick` | `MainForm` | WTE-TASK-32 (render 2D) |
+| `gradienteClick`, `oscurecerClick`, `aclararClick`, `lista_col0..3Change`, `colorMouseDown`, `barraChange`, `barra1Change`, `barra2Change` | `ficha_color` | WTE-TASK-32 (render 2D) |
+| `malla1MouseDown`, `malla2MouseDown` | `estrategia` | WTE-TASK-32 (render 2D) |
 
 Aqui se implementa **a moldura** desses formulários — abrir, fechar, OK/Cancelar
 — e as tasks 30 e 32 preenchem o miolo.

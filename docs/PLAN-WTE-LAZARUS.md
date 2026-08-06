@@ -767,7 +767,7 @@ Estas quatro são as únicas que exigem **fórmula**, não só posição de byte
 são a única parte onde o decompilador é insubstituível.
 
 **5.1 Preço derivado dos atributos.** `etiqprecioClick` (`0x00408bb8`) e o
-formulário `ficha_creditos_equipo`. É aritmética pura sobre os atributos já
+formulário `jugador`. É aritmética pura sobre os atributos já
 decodificados — testável de forma exaustiva: variar um atributo por vez no
 original, ler o preço na tela, tabelar, e conferir a fórmula recuperada contra
 a tabela. **Não precisa de golden test de imagem**, precisa de tabela de

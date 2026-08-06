@@ -3,7 +3,7 @@ id: CORR-WTE-006
 title: "Correção: os fatos medidos pela WTE-TASK-04 não chegaram aos documentos que serão executados"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -145,23 +145,56 @@ com 17 ele reprova um `dfm2lfm.py` correto.
 
 ## Verificação
 
-- [ ] `grep -rn "19 endereços\|ficha_creditos_equipo" docs/tasks/25-*.md
+- [x] `grep -rn "19 endereços\|ficha_creditos_equipo" docs/tasks/25-*.md
       docs/tasks/30-*.md` não devolve mais a afirmação errada
-- [ ] `grep -n "malla" docs/tasks/28-handlers-auxiliares.md` diz `estrategia`
-- [ ] `grep -n "17 vezes" docs/` não devolve nada
-- [ ] Cada número escrito bate com
+- [x] `grep -n "malla" docs/tasks/28-handlers-auxiliares.md` diz `estrategia`
+- [x] `grep -n "17 vezes" docs/` não devolve nada — **fora** dos registros de
+      correção (`CORR-WTE-006.md`, `CORR-WTE-007.md`,
+      `correcoes-progresso.md`), que citam o sintoma e têm de continuar citando
+- [x] Cada número escrito bate com
       `cut -f2,3 wte/re/published_methods.tsv | sort | uniq -c`
-- [ ] `python3 wte/tools/dump_published.py --check` continua verde (nenhum
+- [x] `python3 wte/tools/dump_published.py --check` continua verde (nenhum
       arquivo gerado foi tocado por esta correção)
-- [ ] Links de markdown conforme `.claude/rules/links.md`
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] Links de markdown conforme `.claude/rules/links.md`
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+Os seis lugares passaram a dizer o medido. Nenhuma medição nova: os valores
+saem de `wte/re/published_methods.tsv`, reconferidos antes de escrever —
+`FormCreate` 16, `FormShow` 2, `BitBtn1Click` 4, `SpeedButton1Click` 3,
+`BitBtn3Click` 3, `BitBtn2Click` 2, e 1 para cada um dos seis restantes.
+
+Na 28, a tabela "O que fica de fora" ganhou uma coluna **Formulário**: o
+parágrafo que a introduzia nomeava dois donos para dezesseis handlers de quatro
+formulários diferentes, e trocar só os nomes do parágrafo deixaria o executor
+sem saber qual linha pertence a qual. Agora cada linha carrega o dono, e a de
+`malla1MouseDown`/`malla2MouseDown` diz `estrategia`.
+
 **Problemas encontrados:**
 
+A varredura achou um sétimo lugar, que a lista da CORR não previa e que a
+própria correção tornou incoerente: `28-handlers-auxiliares.md:44` dizia que
+sem a coluna `formulario` o `BitBtn1Click` é "ambíguo entre **três**
+formulários". São quatro — o mesmo número que a linha acima acabara de ganhar.
+Corrigido na mesma invocação.
+
+O critério `grep -n "17 vezes" docs/` não devolve nada só **fora** dos
+registros de correção: `CORR-WTE-006.md`, `CORR-WTE-007.md` e
+`correcoes-progresso.md` citam a frase como sintoma, e apagá-la ali destruiria
+o registro do que foi consertado. Nenhuma afirmação viva sobrou.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/25-handlers-de-carga.md` — 19 → 18, e o "um por formulário"
+- `docs/tasks/28-handlers-auxiliares.md` — contagens, donos por linha, e o
+  "três formulários" que a correção revelou
+- `docs/PLAN-WTE-LAZARUS.md` — §5.1: `ficha_creditos_equipo` → `jugador`
+- `docs/tasks/30-preco-do-jogador.md` — idem, na tabela de entrada
+- `docs/tasks/04-mapa-de-handlers.md` — 17 → 16, duas → quatro
+- `docs/prompts/02-revisar.md` — o gate da fase 2 pedia 17
+- `docs/tasks/correcoes-progresso.md`

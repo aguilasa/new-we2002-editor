@@ -34,7 +34,7 @@ Recuperar a fórmula e implementá-la, com prova numérica.
 |---|---|
 | `etiqprecioClick` | `0x00408bb8` |
 | `casilla_precioKeyPress` | `0x00408b9c` |
-| formulário `ficha_creditos_equipo` | — |
+| formulário `jugador` | — |
 
 ### O método que **não** precisa de decompilador
 
