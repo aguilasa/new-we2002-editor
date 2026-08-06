@@ -22,7 +22,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
 | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
-| [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ⬜ Pendente | — | — |
+| [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ⬜ Pendente | — | — |
 | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ⬜ Pendente | — | — |
 | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ⬜ Pendente | — | — |
@@ -181,7 +181,7 @@ conferível.
 
 ### Fase 2 — Casca
 
-- [ ] Os 18 `.lfm` gerados e aceitos pelo `lazbuild`
+- [x] Os 18 `.lfm` gerados e aceitos pelo `lazbuild`
 - [ ] Os 96 stubs na unidade certa, logando
 - [ ] Comparação visual dos 18, com veredito escrito
 - [ ] Diferenças de ordem de evento LCL × VCL registradas

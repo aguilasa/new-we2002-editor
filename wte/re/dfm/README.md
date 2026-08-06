@@ -47,3 +47,19 @@ Consequências:
   encontrar a referência, em vez de aceitar lixo em silêncio.
 
 O `dfm2lfm.py` da **WTE-TASK-10** resolve a referência lendo o `.bin` ao lado.
+
+### E os `.lfm` da WTE-TASK-10 **têm** o hex, por decisão do usuário
+
+Os 18 `wte/forms/*.lfm` levam os mesmos 118 blobs em hex inline, versionados —
+1,6 MiB. Isso parece contradizer a regra de cima, e a contradição é real: foi
+posta na mesa em 2026-08-06 e **resolvida a favor de versionar**. A razão é que
+o `.lfm` não é documentação, é o formulário: sem o hex a janela abre sem ícone
+e sem glifo, e a comparação visual da **WTE-TASK-12** — que é o gate da fase 2 —
+compararia contra uma tela que não é a do port.
+
+A regra desta pasta continua valendo para o `re/`, que é documentação. O que
+mudou é o alcance: ela nunca alcançou `wte/forms/`.
+
+O `--check` do `dfm2lfm.py` **não lê `blobs/`**: ele confere o hex já versionado
+contra o tamanho e o SHA-256 que estão no `.dfm`. Roda verde em clone limpo, e
+ainda assim pega um único dígito trocado.

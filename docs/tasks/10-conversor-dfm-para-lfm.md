@@ -5,7 +5,7 @@ type: ferramenta
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-07"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-10: Conversor DFM → LFM
@@ -75,17 +75,98 @@ construção não reconhecida. Editar `.lfm` à mão tem de quebrar o `--check`.
 
 ## Critério de conclusão
 
-- [ ] Os 18 `.lfm` gerados e aceitos pelo `lazbuild`
-- [ ] Blobs binários preservados e visíveis na janela
-- [ ] `TBrowseURL` substituído com `TODO` visível
-- [ ] Propriedade descartada vira comentário, nunca some
-- [ ] Os 96 stubs gerados na unidade certa (coluna `formulario` da WTE-TASK-04)
-- [ ] `--check` implementado e verde
-- [ ] Commit no formato conventional, em inglês
+- [x] Os 18 `.lfm` gerados e aceitos pelo `lazbuild` — os 19 (18 + o
+      `WteMain.lfm` da WTE-TASK-02) passam pelo `LFMtoLRSstream`, que é o
+      parser que o `lazbuild` usa, com zero recusa. Medido pelo thread
+      principal em 2026-08-06
+- [ ] Blobs binários preservados e visíveis na janela — preservados e
+      conferidos byte a byte; "visíveis" só na WTE-TASK-11
+- [x] `TBrowseURL` substituído com `TODO` visível
+- [x] Propriedade descartada vira comentário, nunca some — comentário no
+      `.pas`, não no `.lfm`: **LFM não tem sintaxe de comentário** (ver o Log)
+- [x] Os 96 stubs gerados na unidade certa (coluna `formulario` da WTE-TASK-04)
+- [x] `--check` implementado e verde
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
 
-- **Executado em:**
+- **Executado em:** 2026-08-06
+
 - **Resumo do que foi feito:**
+
+  `wte/tools/dfm2lfm.py` lê os 18 `.dfm` de `wte/re/dfm/`, os 118 `.bin` de
+  `wte/re/dfm/blobs/` e `wte/re/published_methods.tsv`, e emite 18 `.lfm` em
+  `wte/forms/`, 18 unidades em `wte/src/` e `wte/forms/conversao.md`. São 441
+  componentes, 96 stubs, 118 blobs e 80 propriedades descartadas.
+
+  A tabela de mapeamento não é palpite: saiu das fontes da LCL 3.0 em
+  `/usr/lib/lazarus/3.0/lcl`, varrendo as seções `published` de cada classe e
+  de todos os ancestrais, cruzado com o que ocorre nos 18 DFM. Propriedade que
+  não esteja nem em `ACEITA` nem em `DESCARTA` **aborta** — é o caso "não sei
+  em que balde isto cai", diferente de "a LCL não tem".
+
+  Nome das unidades: `ep2002_` + o formulário sem o prefixo `ficha_`. Os 13
+  nomes que a §1.3 do plano recuperou dos exports do `.exe` estão numa tabela
+  no gerador, e ele aborta se a regra deixar de reproduzi-los — a extrapolação
+  para os outros 5 só vale enquanto a regra bater onde há medida.
+
+  Verificado sem `lazbuild` (que é do thread principal), com o que ele usa por
+  baixo:
+
+  | Gate | Resultado |
+  |---|---|
+  | dupla execução byte a byte | `sha256` idêntico |
+  | `dfm2lfm.py --check` | verde, com e **sem** `wte/re/dfm/blobs/` |
+  | `wte/tools/test_dfm2lfm.py` | 64 testes, sem tocar no `.exe` |
+  | `make -C wte check` | 140 testes + 6 geradores, verde |
+  | `LFMtoLRSstream` da LCL sobre os 18 `.lfm` | 18/18 aceitos |
+  | `fpc` sobre as 18 unidades | 18/18, zero warning |
+  | conversão de recurso do FPC (o que o `lazbuild` roda) | 18/18, recursos `TMAINFORM`, `TESTRATEGIA`, `TJUGADOR`, `TFICHA_*` |
+
 - **Arquivos criados/modificados:**
+  - `wte/tools/dfm2lfm.py` (criado)
+  - `wte/tools/test_dfm2lfm.py` (criado)
+  - `wte/forms/ep2002_*.lfm` (criados, 18, gerados)
+  - `wte/src/ep2002_*.pas` (criados, 18, gerados)
+  - `wte/forms/conversao.md` (criado, gerado)
+  - este arquivo (critérios e log)
+
 - **Problemas encontrados:**
+
+  1. **LFM não tem sintaxe de comentário**, e o critério "propriedade
+     descartada vira comentário no `.lfm`" não é implementável. O `TParser` da
+     FCL — que lê LFM tanto no `LFMtoLRSstream` quanto em tempo de execução —
+     só pula espaço, tabulação, CR e LF; e `{` abre bloco binário. Medido:
+     `//` e `{ }` num `.lfm` fazem `LFMtoLRSstream` devolver `false`. Pior, o
+     `{$R}` só embute bytes: um comentário **compilaria** e explodiria ao abrir
+     a janela. O valor descartado vai para um comentário **na unidade Pascal**,
+     ao lado do campo do componente, e para `wte/forms/conversao.md`.
+
+  2. **Uma unidade chamada `restub` não pode exportar `REStub`.** Identificador
+     em Pascal não distingue maiúsculas: o FPC resolve o nome cru como o da
+     unidade e recusa a chamada com
+     `Fatal: Syntax error, "." expected but "(" found`. A WTE-TASK-11 planeja
+     `wte/src/restub.pas`; os stubs gerados usam **`retrace`**, e o arquivo
+     precisa nascer com esse nome. A assinatura que o plano fixa
+     (`procedure REStub(const Nome: string)`) não muda.
+
+  3. **`TBrowseURL` é uma `TAction`, não um controle**, e as 2 instâncias vivem
+     dentro de um `TActionList`. Como `TLabel`, ficam sem pai
+     (`TControl.SetParentComponent` só aceita `TWinControl`) e não aparecem —
+     que é o que a ação já fazia. Junto caíram o `Category`, o `URL` (guardado
+     na constante `LANZA_URL_URL` de cada unidade) e os 2 `Action = lanza_url`
+     dos `TSpeedButton`, cujo valor a LCL recusaria.
+
+  4. **`TUpDown.OnClick` não é `TNotifyEvent`**, é
+     `TUDClickEvent(Sender: TObject; Button: TUDBtnType)` — 12 dos 96. O
+     gerador deriva a assinatura do par `(classe, evento)` e aborta em par
+     desconhecido, justamente porque adivinhar dá um `.pas` que não compila.
+
+  5. **Os `.lfm` versionados somam 1,9 MiB, dos quais ~1,6 MiB são o hex dos
+     118 blobs.** Isso tensiona a §2 do plano e a decisão da WTE-TASK-03 (que
+     manteve os mesmos bytes fora do versionamento, com o argumento de que
+     "hex é só uma codificação"). O `.gitignore` manda o contrário para
+     `wte/forms/` — "não acrescente `*.lfm` nem `*.pas` a nenhuma regra daqui"
+     —, e sem o hex a janela não mostra bitmap nenhum. Ficou como a tarefa
+     pede; **é decisão do usuário confirmar antes do commit**, e reverter é
+     mexer num ponto só do gerador.
