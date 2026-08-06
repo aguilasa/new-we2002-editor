@@ -3,7 +3,7 @@ id: CORR-WTE-010
 title: "Correção: a §8.7 do plano e o enunciado da WTE-TASK-06 apontam o lado errado, e o ASCII citado não é o do binário"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -116,21 +116,46 @@ revisão, confere.
 
 ## Verificação
 
-- [ ] `grep -rn "l,km" docs/` não devolve nada
-- [ ] `grep -rn "1869507948" docs/` mostra as passagens já com `0x00423190`,
+- [x] `grep -rn "l,km" docs/` não devolve nada — fora do
+      `correcoes-progresso.md`, que registra o sintoma e tem de continuar
+      registrando
+- [x] `grep -rn "1869507948" docs/` mostra as passagens já com `0x00423190`,
       `lmno` e o lado certo
-- [ ] A §8.7 continua dizendo que o limite tem de ser medido, e aponta para o
+- [x] A §8.7 continua dizendo que o limite tem de ser medido, e aponta para o
       critério escrito do `offsets.md`
-- [ ] `python3 wte/tools/dump_offsets.py --check` verde (nenhum gerado tocado)
-- [ ] Links de markdown conforme `.claude/rules/links.md`
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] `python3 wte/tools/dump_offsets.py --check` verde (nenhum gerado tocado)
+- [x] Links de markdown conforme `.claude/rules/links.md`
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+A §8.7 manteve a armadilha e trocou a evidência. O bloco continua cercado de
+não-offset, e agora o texto diz **por que cada lado cai**, que é o que obriga a
+medir os dois com critérios diferentes: abaixo, em `0x00423190`, o `1869507948`
+= `6c 6d 6e 6f` = `lmno`, pedaço da tabela de alfabeto vizinha, que fixa o
+limite inferior; acima, logo depois de `0x004231e8`, o `67305984` (`0x04030200`),
+que cai por conteúdo e não por ser texto. Ganhou ponteiro para o
+`wte/re/offsets.md`, onde o critério está escrito.
+
+O título trocou: "O 32º byte da tabela não é offset" não descrevia o medido — a
+tabela tem 72 bytes e 7 buracos internos, e o 32º byte é um deles, não o fim.
+Virou "O limite da tabela tem de ser medido dos dois lados".
+
+O enunciado da WTE-TASK-06 recebeu a mesma correção de lado e de ASCII. O Log
+dela fica como está — é histórico, e já registra o achado.
+
 **Problemas encontrados:**
 
+Nenhum. Os três valores foram relidos do binário antes de escrever:
+`0x00423190` = `1869507948` = `b'lmno'`, `0x004231a0` = `2002316` (primeiro
+slot), `0x004231e8` = `67305984` = `b'\x00\x02\x03\x04'`.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md` — §8.7, título e evidência
+- `docs/tasks/06-mapa-de-offsets.md` — enunciado, seção 1
+- `docs/tasks/correcoes-progresso.md`

@@ -894,12 +894,22 @@ dados precisa de tamanho explícito**. `Integer` em FPC é 32-bit em ambos, mas
 `PtrUInt` e ponteiro não são. O `newWe2002` levou exatamente essa mordida com
 `DWORD` virando 64-bit no Linux LP64 e embaralhando número de camisa.
 
-### 8.7 O 32º byte da tabela não é offset
+### 8.7 O limite da tabela tem de ser medido dos dois lados
 
 A varredura da §1.7 mostra que o bloco em `0x004231a0` tem buracos (`= 0`) e é
-seguido de dados que **não** são offsets (`1869507948` é ASCII `l,km`).
+cercado de não-offset. Os dois lados caem por motivos diferentes, e é isso que
+obriga a medir cada um com seu critério:
+
+- **abaixo**, em `0x00423190`, está `1869507948` — little-endian `6c 6d 6e 6f`,
+  ASCII **`lmno`**, pedaço da tabela de alfabeto vizinha. É o ASCII que fixa o
+  limite inferior;
+- **acima**, logo após o fim em `0x004231e8`, está `67305984` (`0x04030200`),
+  que não passa no filtro por conteúdo, não por ser texto.
+
 Confirmar limite da tabela antes de tratá-la como array — indexar além do fim
 foi exatamente o bug do slot 64 num array de 63 que o `newWe2002` documentou.
+O critério escrito e as duas medidas independentes do limite superior estão em
+[`../wte/re/offsets.md`](../wte/re/offsets.md) (WTE-TASK-06).
 
 ### 8.8 O tradutor truncou mensagens
 

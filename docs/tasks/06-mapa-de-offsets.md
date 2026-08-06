@@ -41,9 +41,9 @@ de time**, e isso se sabe sem decompilar.
 
 ### 1. Onde a tabela começa e onde termina
 
-Medido no protótipo: o bloco tem buracos (`= 0`) e é seguido de dados que **não
-são offsets** — `1869507948` é ASCII `l,km`. Achar o limite superior e o
-inferior, com critério escrito.
+Medido no protótipo: o bloco tem buracos (`= 0`) e é cercado de dados que **não
+são offsets** — 16 bytes **abaixo** dele, em `0x00423190`, está `1869507948`,
+que é ASCII `lmno`. Achar o limite superior e o inferior, com critério escrito.
 
 **Esta é a armadilha §8.7 do plano.** Tratar como array algo que termina antes
 do que se pensa é exatamente o bug do slot 64 num array de 63 que o `newWe2002`
