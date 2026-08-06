@@ -18,7 +18,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-005](/docs/tasks/CORR-WTE-005.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | Os streams sintéticos que sustentam "os 21 `TValueType` exercitados" não são versionados | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-006](/docs/tasks/CORR-WTE-006.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | Os fatos medidos pela WTE-TASK-04 não chegaram aos seis documentos que serão executados | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | A tabela de envelhecimento do `published_methods.md` erra uma atribuição e omite três divergências | Baixa | [x] concluída | 2026-08-06 |
-| [CORR-WTE-008](/docs/tasks/CORR-WTE-008.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | O decodificador de instrução x86 só foi conferido à mão, e a coluna `handler` inteira depende dele | Baixa | [ ] pendente | — |
+| [CORR-WTE-008](/docs/tasks/CORR-WTE-008.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | O decodificador de instrução x86 só foi conferido à mão, e a coluna `handler` inteira depende dele | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-009](/docs/tasks/CORR-WTE-009.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | A §8.8 e a pendência do `progresso.md` ainda tratam o binário espanhol como única rota para as mensagens decepadas | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -30,7 +30,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-005 — versionar os streams sintéticos do `dfm_extract.py`
 - [x] CORR-WTE-006 — propagar dono e contagem medidos para as tasks 25, 28, 30, o plano §5.1 e o prompt de revisão
 - [x] CORR-WTE-007 — corrigir a atribuição e completar a tabela de envelhecimento, no gerador
-- [ ] CORR-WTE-008 — versionar a conferência do decodificador x86 contra o `objdump`
+- [x] CORR-WTE-008 — versionar a conferência do decodificador x86 contra o `objdump`
 - [ ] CORR-WTE-009 — dizer na §8.8 que as mensagens decepadas têm cópia dentro do próprio `.exe`
 
 ## Detalhes por correção

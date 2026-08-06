@@ -30,6 +30,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | Teste | Cobre |
 |---|---|
 | `test_dfm_extract.py` ✅ | os 21 `TValueType`, as três flags de objeto e as rotas de aborto do `dfm_extract.py` |
+| `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 do `dump_strings.py`: mapa de opcodes caso a caso, os sete abortos, o `extent()`, e a conferência contra o `objdump` |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
 o prefixo `test_`. (Teste do lado **Pascal** é outra coisa e mora em
@@ -46,8 +47,16 @@ TESTS      := $(wildcard $(CURDIR)/tools/test_*.py)
 Eles rodam pelo alvo `test`, do qual `check` depende — `make -C wte check`
 continua sendo o único comando a decorar.
 
-**Regra:** o teste é `unittest` de stdlib pura e **não abre o `.exe`** — monta
-os streams em memória. Isso não é preciosismo: `--check` verde só mede o que os
-18 formulários exercitam, e é justamente o que eles *não* têm (12 dos 21
-`TValueType`, o byte de flags de objeto em 0 dos 459 objetos, todo aborto) que
-precisa de teste. O gerador roda sem o binário do Obocaman só neste caminho.
+**Regra:** o teste é `unittest` de stdlib pura, e **a bateria padrão não depende
+do `.exe`** — monta as entradas em memória. Isso não é preciosismo: `--check`
+verde só mede o que o binário exercita, e é justamente o que ele *não* exercita
+(12 dos 21 `TValueType`, o byte de flags de objeto em 0 dos 459 objetos, todo
+aborto) que precisa de teste. Este é o único caminho em que as ferramentas
+rodam sem o binário do Obocaman.
+
+Caso que precise do `.exe` — ou de ferramenta externa, como o `objdump` — vai
+atrás de `@unittest.skipUnless`, nunca solto: o `test_dump_strings.py` faz isso
+com a conferência do decodificador contra o `objdump`, a única medida
+independente que o projeto tem dele. Pular é o desfecho certo onde falta o
+insumo; **falhar** ali ensinaria a ignorar vermelho, e **jogar a conferência
+fora** devolveria o número à memória de quem o mediu uma vez.

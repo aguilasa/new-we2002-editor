@@ -94,7 +94,9 @@ proxima comecar.
 
 Isso e desmontagem de verdade, nao casamento de padrao, e por isso vale como
 medida. Foi conferido contra o `objdump`: as fronteiras de instrucao dos 96
-corpos coincidem nas 10.416 instrucoes. O comando esta no `.md`.
+corpos coincidem nas 10.416 instrucoes. A conferencia esta versionada em
+`wte/tools/test_dump_strings.py` e roda por `make -C wte test`; o comando cru
+esta no `.md`.
 
 Consequencia: os 96 cobrem 27% do `.text`, e a maioria das referencias a string
 sai de codigo que nao e handler publicado -- que e a resposta da pergunta 1.
@@ -1324,9 +1326,18 @@ def render_md(m: Measurement) -> str:
         "        --start-address=<início> --stop-address=<fim> text.bin\n"
         "```\n")
     add("As fronteiras de instrução dos 96 corpos coincidem com as do "
-        "`objdump` nas **10.416\ninstruções**, sem uma divergência. Essa "
-        "conferência é manual e não roda no\n`--check`; o que roda no "
-        "`--check` é a consequência dela, que são os números desta\npágina.\n")
+        "`objdump` nas **10.416\ninstruções**, sem uma divergência.\n")
+    add("Essa conferência **está versionada** em "
+        "[`../tools/test_dump_strings.py`](../tools/test_dump_strings.py) e "
+        "roda por\n`make -C wte test`, de que o `check` depende. Ela se pula "
+        "sozinha onde faltar o\n`objdump` ou o `.exe`; o resto do arquivo — o "
+        "mapa de opcodes caso a caso, os\nabortos e o `extent()` — roda em "
+        "qualquer máquina.\n")
+    add("Ao refazê-la à mão, a armadilha é uma: o `objdump` emite **linhas de "
+        "continuação**\npara instrução longa, com endereço e mnemônico "
+        "vazio. Contá-las como instrução dá\n48 divergências que não "
+        "existem. O teste as descarta e afirma que são 48 — se\nvirarem outro "
+        "número, o recorte mudou.\n")
 
     # ------------------------------------------------------ pergunta 1 ---
     add(f"## 1. Quantas não são referenciadas por nenhum dos {len(m.handlers)}"

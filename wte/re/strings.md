@@ -137,9 +137,17 @@ objdump -D -b binary -m i386 -M intel --adjust-vma=0x401000 \
 ```
 
 As fronteiras de instrução dos 96 corpos coincidem com as do `objdump` nas **10.416
-instruções**, sem uma divergência. Essa conferência é manual e não roda no
-`--check`; o que roda no `--check` é a consequência dela, que são os números desta
-página.
+instruções**, sem uma divergência.
+
+Essa conferência **está versionada** em [`../tools/test_dump_strings.py`](../tools/test_dump_strings.py) e roda por
+`make -C wte test`, de que o `check` depende. Ela se pula sozinha onde faltar o
+`objdump` ou o `.exe`; o resto do arquivo — o mapa de opcodes caso a caso, os
+abortos e o `extent()` — roda em qualquer máquina.
+
+Ao refazê-la à mão, a armadilha é uma: o `objdump` emite **linhas de continuação**
+para instrução longa, com endereço e mnemônico vazio. Contá-las como instrução dá
+48 divergências que não existem. O teste as descarta e afirma que são 48 — se
+virarem outro número, o recorte mudou.
 
 ## 1. Quantas não são referenciadas por nenhum dos 96
 

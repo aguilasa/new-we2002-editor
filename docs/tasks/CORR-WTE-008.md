@@ -3,7 +3,7 @@ id: CORR-WTE-008
 title: "Correção: o decodificador de instrução x86 do dump_strings.py só foi conferido à mão, e a coluna `handler` inteira depende dele"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -130,22 +130,71 @@ Uma linha na tabela de testes, ao lado da do `test_dfm_extract.py`.
 
 ## Verificação
 
-- [ ] `python3 -m unittest wte.tools.test_dump_strings` (ou o alvo `test` do
-      Makefile) verde
-- [ ] A metade sem `.exe` roda com o binário do Obocaman ausente
-- [ ] A conferência contra o `objdump` afirma **10.416** fronteiras coincidentes
+- [x] `python3 -m unittest wte.tools.test_dump_strings` (ou o alvo `test` do
+      Makefile) verde — **17 casos**, e `make -C wte test` passou de 43 para 60
+- [x] A metade sem `.exe` roda com o binário do Obocaman ausente — medido numa
+      cópia em árvore onde `EXE.is_file()` é falso: `OK (skipped=2)`
+- [x] A conferência contra o `objdump` afirma **10.416** fronteiras coincidentes
       e falha se uma divergir
-- [ ] Um comprimento plantado errado na tabela de opcodes **reprova** o teste
-- [ ] `python3 wte/tools/dump_strings.py --check` verde depois de regerar o `.md`
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] Um comprimento plantado errado na tabela de opcodes **reprova** o teste —
+      oito mutações, oito reprovadas
+- [x] `python3 wte/tools/dump_strings.py --check` verde depois de regerar o `.md`
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+`wte/tools/test_dump_strings.py`, 17 casos, no molde do `test_dfm_extract.py`.
+Duas metades, como a CORR pede:
+
+1. **Comprimento por caso**, sem `.exe` e sem `objdump`: 66 entradas de
+   (bytes, comprimento, classe de fluxo) cobrindo prefixos (`66`, `f2`, `f3`,
+   `lock`, segmento, dois encadeados), os quatro modos de ModRM com e sem SIB,
+   `disp` de 0/1/4 bytes, SIB com base=5, imediato que segue o prefixo de
+   tamanho de operando, o grupo 3 (`f6`/`f7`, imediato só no `/0` e no `/1`),
+   saltos curtos e longos, o escape `0f`, x87 e ponteiro far. Mais os **sete
+   abortos**, o `ff ff` que **não** aborta, o alvo de cada desvio relativo, e
+   quatro casos de `extent()` — inclusive o que a regra do teto de alvos
+   existe para acertar: `ret` no meio do corpo com desvio apontando além dele
+   **não** encerra a função.
+2. **A conferência contra o `objdump`**, atrás de
+   `skipUnless(objdump e .exe e published_methods.tsv e re/dfm)`. Recorta a
+   `.text`, roda corpo a corpo e compara conjuntos de fronteira. Afirma
+   `10416 == 10416`, `36.983` bytes nos 96 corpos (menor 1, maior 2378), e
+   **48** linhas de continuação descartadas — a armadilha documentada. Afirmar
+   o 48 é deliberado: se virar outro número, o recorte mudou e a comparação
+   merece um olhar.
+
+O texto da conferência saiu do `render_md()` e do docstring do módulo: a frase
+"essa conferência é manual e não roda no `--check`" deixou de valer.
+
 **Problemas encontrados:**
 
+Um erro meu, pego pelo próprio teste: escrevi que `eb fe` tem alvo 1. É 0 — o
+deslocamento −2 aponta para a própria instrução, o autoloop clássico.
+
+A varredura de mutação enganou-me primeiro. Duas das oito passaram como "OK"
+até eu conferir à mão: as duas trocavam bytes de **mesmo tamanho**
+(`(False, 1)` → `(False, 2)`), e com mtime colidindo no mesmo segundo o
+CPython reusou o `__pycache__` obsoleto. Com `python3 -B` as oito reprovam.
+Vale a lição para a próxima varredura de mutação neste repositório.
+
+A regra que a CORR-WTE-005 escreveu no `wte/tools/README.md` — "o teste **não
+abre o `.exe`**" — ficou falsa com este arquivo. Reescrita para o que
+realmente vale: *a bateria padrão* não depende do `.exe`, e caso que precise
+dele ou de ferramenta externa vai atrás de `skipUnless`, nunca solto. Pular é
+o desfecho certo onde falta o insumo; falhar ensinaria a ignorar vermelho, e
+jogar a conferência fora devolveria o número à memória de quem o mediu.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/test_dump_strings.py` — criado
+- `wte/tools/dump_strings.py` — o texto da conferência em `render_md()` e no
+  docstring do módulo
+- `wte/re/strings.md` — regerado
+- `wte/tools/README.md` — a linha na tabela de testes e a regra do `.exe`
+- `docs/tasks/correcoes-progresso.md`
