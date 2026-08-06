@@ -57,7 +57,7 @@ O que a seção deve poder afirmar, e que as fases anteriores construíram:
 - os formulários vêm de conversão de formato, não de cópia de código
 - os assets (`image/`, `data/`) **não** são redistribuídos
 
-O último item precisa de decisão: sem os 197 BMP o app não desenha camisa. O
+O último item precisa de decisão: sem os 198 BMP o app não desenha camisa. O
 usuário mantém a pasta, como faz com `roms/` — mas isso tem de estar escrito, e
 o app tem de falhar com mensagem clara quando a pasta faltar.
 

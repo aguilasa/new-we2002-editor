@@ -9,6 +9,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `dump_strings.py` ✅ | 05 | `.data`/`.text` → o inventário de strings |
 | `dump_offsets.py` ✅ | 06 | `.data`/`.text` → o mapa de offsets |
 | `dump_units.py` ✅ | 07 | imports → veredito sobre as quatro unidades VCL duvidosas |
+| `check_fase1.py` ✅ | 09 | os produtos da fase 1 → as quatro conferências cruzadas e a reconciliação |
 | `dfm2lfm.py` ✅ | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |
@@ -33,6 +34,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 — mapa de opcodes caso a caso, os sete abortos, o `extent()`, a conferência contra o `objdump`, e a identidade entre as **duas** cópias (`dump_strings.py` e `dump_units.py`) |
 | `test_dump_offsets.py` ✅ | o critério de limite da tabela em `.data`: os dois sentidos da discordância (um aborta, o outro avisa) e a faixa de plausibilidade herdada do `Offsets.hpp` |
 | `test_dfm2lfm.py` ✅ | o mapeamento VCL→LCL do `dfm2lfm.py`: as assinaturas por par (classe, evento), as propriedades sem par na LCL, a rota de blob ausente e os abortos |
+| `test_check_fase1.py` ✅ | o perímetro da varredura de sítios do `check_fase1.py`: quem entra, onde a leitura para (o Log de Execução), e o corte por contexto que separa os `430` componentes do setor 430 do outro projeto |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
 o prefixo `test_`. (Teste do lado **Pascal** é outra coisa e mora em

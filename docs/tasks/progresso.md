@@ -20,8 +20,8 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
 | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
 | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ✅ Concluído | 2026-08-06 | 2026-08-06 |
-| [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
+| [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 198 bitmaps e do `dat.bin` | 1 | 05 | ✅ Concluído | 2026-08-06 | 2026-08-06 |
+| [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ⬜ Pendente | — | — |
@@ -176,8 +176,8 @@ conferível.
 - [x] Limite da tabela de offsets **medido**, não estimado
 - [x] Offsets que o `newWe2002` não tem, listados
 - [x] `Registry`, `Printers`, `Comobj`, `Winhelpviewer` com veredito
-- [x] Convenção de nome dos 197 bitmaps resolvida
-- [ ] Os cinco números da §1 do plano remedidos por ferramenta versionada
+- [x] Convenção de nome dos 198 bitmaps resolvida
+- [x] Os números da §1 do plano remedidos por ferramenta versionada
 
 ### Fase 2 — Casca
 
@@ -253,7 +253,7 @@ no `newWe2002`.
 | Oráculos | dois — `wte.exe` (comportamento) e `we2002_core` (formato) | o diff diz *onde* mudou, o core diz *o que* aquilo significa |
 | Ordem de ataque | casca antes de recheio | o stub que loga vira ferramenta de RE: mostra a ordem real de disparo |
 | Prioridade de método | diff antes de decompilador | cada offset custa dois minutos de tela contra horas de disassembly |
-| Layout de formulário | geometria absoluta, sem layout automático | 430 controles posicionados à mão em 2002; fidelidade é o critério |
+| Layout de formulário | geometria absoluta, sem layout automático | 441 controles posicionados à mão em 2002; fidelidade é o critério |
 | Reprodução de bug do original | permitida **não** reproduzir, obrigatório registrar | diferente do `newWe2002`, onde clonar o `ed.exe` inclusive nos defeitos era o objetivo |
 | Idioma | docs em português; **commits em inglês, conventional** | convenção deste repositório, diferente da do projeto `snes` |
 
@@ -302,13 +302,14 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Publicação depende do usuário.** O binário do Obocaman é sem licença, como
   todo o código herdado que o [`../../NOTICE.md`](../../NOTICE.md) registra. A
   WTE-TASK-38 prepara a linhagem; **publicar não é decisão do executor.**
-- **Assets não redistribuídos.** Os 197 BMP e o `dat.bin` ficam com o usuário,
+- **Assets não redistribuídos.** Os 198 BMP e o `dat.bin` ficam com o usuário,
   como `roms/`. O app precisa falhar com mensagem clara sem eles.
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
-  a tradução PT-BR com 70 strings truncadas por padding. As três mensagens em
+  a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
+  literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em
   que isso importa já têm cópia legível **dentro do próprio `.exe`** — o bloco
   de literais aparece três vezes na `.data`, e as duas cópias mortas
   preservaram o texto original (WTE-TASK-05; marcadas `gemea_difere` no
@@ -352,6 +353,7 @@ new-we2002-editor/
 │   │   ├── offsets.md                ← WTE-TASK-06, 19
 │   │   ├── unidades-vcl.md           ← WTE-TASK-07
 │   │   ├── assets.md                 ← WTE-TASK-08
+│   │   ├── fase-1.md                 ← WTE-TASK-09
 │   │   ├── eventos.md                ← WTE-TASK-13
 │   │   ├── tipos.md                  ← WTE-TASK-15
 │   │   ├── recusas.md                ← WTE-TASK-18
@@ -362,6 +364,7 @@ new-we2002-editor/
 │   │   └── buffers.md                ← WTE-TASK-36
 │   ├── tools/
 │   │   ├── dfm_extract.py            ← WTE-TASK-03
+│   │   ├── check_fase1.py            ← WTE-TASK-09
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
@@ -376,11 +379,13 @@ new-we2002-editor/
 
 ---
 
-## Estado medido na criação destas tasks (2026-08-05)
+## Estado medido, reconciliado pela WTE-TASK-09
 
-Números de `objdump`, `strings` e script Python descartável. **A WTE-TASK-09 os
-remede com ferramenta versionada** — divergência se resolve a favor da medição
-nova.
+A primeira medição foi feita na criação destas tasks (2026-08-05), com
+`objdump`, `strings` e script Python descartável. A **WTE-TASK-09 remediu tudo
+com ferramenta versionada** e corrigiu quatro linhas; o confronto item a item,
+com a causa de cada correção, está em
+[`../../wte/re/fase-1.md`](../../wte/re/fase-1.md).
 
 | Eixo | Estado |
 | --- | --- |
@@ -388,30 +393,35 @@ nova.
 | Tamanho do `.exe` | 1.151.488 bytes, PE32 i386, 8 seções |
 | `.text` (código do autor) | 138.240 bytes — a VCL está em runtime packages |
 | `.rsrc` | 912.384 bytes, 79% do arquivo |
-| Imports | 322, sendo 300 de `rtl60.bpl`/`vcl60.bpl` |
-| Formulários DFM | 18, ~430 componentes, 20 classes distintas |
+| Imports | 322, sendo 267 de `rtl60.bpl`/`vcl60.bpl` — *corrigido* |
+| Formulários DFM | 18, 441 componentes, 20 classes distintas — *corrigido* |
 | Handlers publicados | 96, com endereço recuperado do VMT |
 | Unidades nomeadas | 13 (`Tep2002_*`), pelos exports de finalização |
 | Offsets nossos que batem | **19 de 69**, em tabela a partir de `0x004231a0` |
-| Strings com padding do tradutor | 70 |
-| Assets externos | 197 `.bmp` + `dat.bin` de 145.408 B |
+| Strings com enchimento do tradutor | 13 em `.data`, 80 nos DFM — *corrigido* |
+| Assets externos | 198 `.bmp` + `dat.bin` de 145.408 B — *corrigido* |
 | Ferramental instalado | **nenhum** — sem Lazarus, FPC, Ghidra ou `pefile`. **Superado pela WTE-TASK-01**: ver [`../../wte/re/ambiente.md`](../../wte/re/ambiente.md) |
 
-Censo de componentes, medido nos 18 DFM:
+Censo de componentes, medido nos 18 DFM pelo `dfm_extract.py` — o detalhe por
+formulário está em [`../../wte/re/dfm/censo.md`](../../wte/re/dfm/censo.md):
 
 ```
-TLabel        177     TGroupBox      10
+TLabel        182     TGroupBox      10
 TImage         45     TRadioButton    9
 TStaticText    37     TEdit           6
+TBitBtn        32     TOpenDialog     3
 TShape         32     TTrackBar       3
-TSpeedButton   28     TOpenDialog     3
-TBitBtn        26     TSaveDialog     2
-TScrollBar     20     TListBox        2
-TUpDown        12     TBevel          2
-TComboBox      11     TActionList     2
-                      TBrowseURL      2   <- unico sem par na LCL
+TSpeedButton   28     TActionList     2
+TScrollBar     20     TBevel          2
+TUpDown        12     TBrowseURL      2   <- unico sem par na LCL
+TComboBox      11     TListBox        2
+                      TSaveDialog     2
                       TTimer          1
 ```
+
+Um dos 441 **não tem nome** — um `TStaticText` de 4×4 px no `MainForm`. É o que
+separa a contagem exata da apressada, e o `check_fase1.py` aborta se a
+recontagem dos `.dfm` discordar do censo.
 
 ---
 
@@ -420,3 +430,14 @@ TComboBox      11     TActionList     2
 *(preenchido conforme as tasks forem executadas — mesmo formato do "Log de
 Execução" de cada arquivo de task, resumido aqui quando houver algo relevante
 para o conjunto)*
+
+**WTE-TASK-09 — número velho agora é falha de build, não achado de revisão.**
+O `check_fase1.py` varre os markdowns de `docs/` e `wte/re/` atrás de afirmação
+viva dos quatro números que a fase 1 corrigiu, e **aborta** se achar alguma. Vale
+para o resto do projeto: reintroduzir 197, ~430, 300 ou 70 num doc derruba
+`make -C wte check`. O perímetro deixa de fora o documento que **narra** a
+correção (os `CORR-*`, o `correcoes-progresso.md`, o `assets.md`, o
+`strings.md`), o **Log de Execução** de qualquer tarefa, e o **enunciado de
+tarefa já concluída** — este último porque enunciado executado é história;
+tarefa pendente continua dentro, e foi assim que a 38 e a 39 entraram na
+correção antes de serem executadas contra um número inexistente.

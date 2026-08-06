@@ -1,6 +1,6 @@
 ---
 id: WTE-TASK-08
-title: "Convenção de nome dos 197 bitmaps e do dat.bin"
+title: "Convenção de nome dos 198 bitmaps e do dat.bin"
 type: extração
 category: engenharia-reversa
 phase: 1

@@ -114,14 +114,20 @@ padrão. Ver a armadilha §8.1.
 | `.text` (código do autor) | 138.240 bytes (`0x21c00`) |
 | `.data` | 65.024 bytes |
 | `.rsrc` | 912.384 bytes — **79% do arquivo** |
-| Imports | 322, sendo 300 de `rtl60.bpl`/`vcl60.bpl` |
+| Imports | 322, sendo 267 de `rtl60.bpl`/`vcl60.bpl` |
 | Imports de SO | só `KERNEL32.DLL`, `USER32.DLL`, `OLEAUT32.DLL` |
 | Formulários DFM | 18 |
-| Componentes nos formulários | ~430 |
+| Componentes nos formulários | 441 |
 | Métodos publicados (handlers) | 96 |
 | Unidades identificadas por nome | 13 |
-| Bitmaps externos em `image/` | 197 |
+| Bitmaps externos em `image/` | 198 |
 | `data/dat.bin` | 145.408 bytes |
+
+**Esta tabela foi remedida por ferramenta versionada na WTE-TASK-09** e traz os
+valores reconciliados. Quatro números da primeira medição (2026-08-05, script
+descartável) mudaram — componentes, imports de package, strings com enchimento e
+bitmaps —, e o confronto linha a linha, com a causa de cada correção, está em
+[`../wte/re/fase-1.md`](../wte/re/fase-1.md).
 
 **A VCL está fora do executável.** O app usa runtime packages (`rtl60.bpl`,
 1.324 KB; `vcl60.bpl`, 637 KB, ambos na pasta). Isso significa que os 138 KB de
@@ -189,9 +195,9 @@ nomeado — em RE normal, descobrir 96 nomes de função custa dias.
 ### 1.5 O binário é a tradução PT-BR, e isso não atrapalha
 
 O caption diz `W11 Team Editor PT by chagas_michel!` e o `Leia - Me.txt`
-confirma. O patch é **só string, in-place, com padding de espaço** — 70 strings
-terminam em espaço de enchimento, sinal de texto mais curto escrito por cima do
-original:
+confirma. O patch é **só string, in-place, com padding de espaço** — 13 strings
+de `.data` e 80 literais dos DFM terminam em espaço de enchimento, sinal de
+texto mais curto escrito por cima do original:
 
 ```
 Uniforme inserido no jogo!!!.
@@ -208,11 +214,22 @@ Os identificadores continuam em espanhol (`jugador`, `bandera`, `equipo`,
 `estrategia`, `tirador`, `dorsal`, `careto`) porque são símbolos de compilação,
 fora do alcance de um patch de string.
 
+**Onde o enchimento está, e onde não está.** Esta seção afirmava um número
+maior sem dizer onde contou. A WTE-TASK-05 mediu `.data` e achou **13**; o resto
+está em `.rsrc`, isto é, em *caption* de formulário — pelo mesmo critério, os 18
+DFM trazem **80** literais com enchimento. A conclusão desta seção continua de
+pé; o que muda é onde procurar as outras, e a resposta é **nos `.dfm`**. Detalhe em
+[`../wte/re/strings.md`](../wte/re/strings.md) e a reconciliação em
+[`../wte/re/fase-1.md`](../wte/re/fase-1.md).
+
+E não há acento errado: das 765 strings de `.data`, **zero** trazem byte acima
+de `0x7E`. O tradutor **removeu** os acentos (`Numero`, `invalido`, `Preco`), em
+vez de errar a codificação — não há encoding a consertar, há texto a reescrever.
+
 **Decisão:** o app Lazarus nasce com strings em **pt-BR reescritas do zero**,
-não copiadas do patch. As do patch estão truncadas, com erro de acentuação
-(o arquivo está em cp1252 quebrado) e são trabalho de terceiro sem licença.
-As mensagens originais em espanhol, quando recuperáveis, servem de referência
-de *sentido*.
+não copiadas do patch. As do patch estão truncadas, sem acento, e são trabalho
+de terceiro sem licença. As mensagens originais em espanhol, quando
+recuperáveis, servem de referência de *sentido*.
 
 ### 1.6 Os formulários saem inteiros
 
@@ -231,29 +248,38 @@ object MainForm: TMainForm
     ...
 ```
 
-Censo de componentes nos 18 formulários:
+Censo de componentes nos 18 formulários, **medido pelo `dfm_extract.py`** — o
+censo por formulário está em
+[`../wte/re/dfm/censo.md`](../wte/re/dfm/censo.md):
 
 | Classe | Qtd | | Classe | Qtd |
 |---|---:|---|---|---:|
-| `TLabel` | 177 | | `TGroupBox` | 10 |
+| `TLabel` | 182 | | `TGroupBox` | 10 |
 | `TImage` | 45 | | `TRadioButton` | 9 |
 | `TStaticText` | 37 | | `TEdit` | 6 |
+| `TBitBtn` | 32 | | `TOpenDialog` | 3 |
 | `TShape` | 32 | | `TTrackBar` | 3 |
-| `TSpeedButton` | 28 | | `TOpenDialog` | 3 |
-| `TBitBtn` | 26 | | `TSaveDialog` | 2 |
-| `TScrollBar` | 20 | | `TListBox` | 2 |
-| `TUpDown` | 12 | | `TBevel` | 2 |
-| `TComboBox` | 11 | | `TActionList` | 2 |
-| | | | `TBrowseURL` | 2 |
+| `TSpeedButton` | 28 | | `TActionList` | 2 |
+| `TScrollBar` | 20 | | `TBevel` | 2 |
+| `TUpDown` | 12 | | `TBrowseURL` | 2 |
+| `TComboBox` | 11 | | `TListBox` | 2 |
+| | | | `TSaveDialog` | 2 |
 | | | | `TTimer` | 1 |
 
-Vinte classes distintas. **Dezenove têm equivalente direto na LCL** — ver §5.
+Vinte classes distintas, **441 componentes**. Um deles não tem nome — um
+`TStaticText` de 4×4 px no `MainForm`, que o DFM escreve como `object
+TStaticText`, sem identificador. É o tipo de objeto que uma contagem apressada
+perde, e por isso a WTE-TASK-09 reconta os `.dfm` e aborta se discordar do
+censo.
+
+**Dezenove das vinte classes têm equivalente direto na LCL** — ver §5.
 `TBrowseURL` é a ação padrão da própria VCL (unidade `Extactns`), não
 componente de terceiro, e é o único a substituir — medido na WTE-TASK-07.
 
-Os `<bin N>` no dump (ícones, `Picture.Data` de 45 `TImage`, glyphs de 28
-`TSpeedButton`) são bitmaps embutidos; o decodificador da Fase 1 tem que
-preservá-los, não descartar.
+Os `<bin N>` no dump são bitmaps embutidos, e são **118**: 18 ícones de
+formulário, 41 `Picture.Data` (dos 45 `TImage`; as quatro bandeiras só existem
+em runtime), 32 glyphs de `TBitBtn` e 27 de `TSpeedButton`. O decodificador da
+Fase 1 tem que preservá-los, não descartar.
 
 ### 1.7 A tabela de offsets, e por que ela é o atalho
 
@@ -298,9 +324,13 @@ image/barba/             7 .bmp
 image/careto_base.bmp    1 .bmp
 ```
 
-197 bitmaps e um blob, todos em formato aberto, todos em disco. O app Lazarus
-lê os mesmos arquivos. **Zero trabalho de RE aqui** — só descobrir a convenção
-de nome↔índice, que os handlers revelam.
+`53 + 105 + 32 + 7 + 1 =` **198** bitmaps e um blob, todos em formato aberto,
+todos em disco. O app Lazarus lê os mesmos arquivos. **Zero trabalho de RE
+aqui** — só descobrir a convenção de nome↔índice, que os handlers revelam, e
+que a WTE-TASK-08 reconstruiu em
+[`../wte/re/assets.md`](../wte/re/assets.md).
+
+*(Esta prosa somava errado as cinco linhas acima; corrigido na WTE-TASK-09.)*
 
 ---
 
@@ -559,7 +589,7 @@ Nenhuma das quatro gera item para fase alguma.
 - **`MS Sans Serif` não existe no host.** O `newWe2002` já sofreu isso: o Qt
   substitui e rótulo apertado corta. Mesmo problema aqui, mesma resposta —
   aceitar, e conferir os rótulos apertados na comparação visual da Fase 2.
-- **Geometria absoluta.** Os ~430 controles têm `Left`/`Top` fixos, como os 434
+- **Geometria absoluta.** Os 441 controles têm `Left`/`Top` fixos, como os 434
   do `ed.rc`. **Não** introduzir layout automático: a fidelidade é o critério, e
   o `newWe2002` já provou que geometria absoluta funciona.
 
@@ -914,7 +944,8 @@ O critério escrito e as duas medidas independentes do limite superior estão em
 
 ### 8.8 O tradutor truncou mensagens
 
-70 strings estão com padding, e pelo menos uma perdeu conteúdo
+13 strings de `.data` — e 80 literais dos DFM, que são outra população, ver
+§1.5 — estão com padding, e pelo menos uma perdeu conteúdo
 (`somente na Mastere`). Se a spec de um handler depender de ler a mensagem de
 erro para entender a regra de validação, a mensagem pode estar incompleta.
 

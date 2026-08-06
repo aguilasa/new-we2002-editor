@@ -5,7 +5,7 @@ type: fechamento
 category: engenharia-reversa
 phase: 1
 depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-05", "WTE-TASK-06", "WTE-TASK-07", "WTE-TASK-08"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-09: Fechamento da fase 1
@@ -87,17 +87,77 @@ número velho é citação histórica e fica. Registrar em `wte/re/fase-1.md` o
 
 ## Critério de conclusão
 
-- [ ] As quatro conferências cruzadas feitas, com o resultado escrito
-- [ ] Os sete números do plano remedidos por ferramenta versionada
-- [ ] Divergência corrigida no plano, não escondida
-- [ ] Cada número reconciliado varrido com `grep -rn` em `docs/` e `wte/re/`, e
-      o `wc -l` de antes e de depois registrado em `wte/re/fase-1.md`
-- [ ] Nenhum item da Fase 1 em aberto sem justificativa
-- [ ] Commit no formato conventional, em inglês
+- [x] As quatro conferências cruzadas feitas, com o resultado escrito
+- [x] Os sete números do plano remedidos por ferramenta versionada
+- [x] Divergência corrigida no plano, não escondida
+- [x] Cada número reconciliado varrido em `docs/` e `wte/re/`, e a contagem de
+      antes e de depois registrada em `wte/re/fase-1.md` — a varredura virou
+      guarda do `check_fase1.py`, não `grep` à mão; ver o Log
+- [x] Nenhum item da Fase 1 em aberto sem justificativa
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-06
+
 - **Resumo do que foi feito:**
+
+  As quatro conferências cruzadas fecharam, e três delas **sem achado novo** —
+  o que é resultado: as WTE-TASK-04 a 08 já tinham antecipado a pergunta. A
+  quarta achou. A recontagem dos 18 `.dfm` dá **441** componentes contra os
+  "~430" do plano, e a diferença não é só o `~`: um dos 441 **não tem nome** —
+  um `TStaticText` de 4×4 px no `MainForm`, que o DFM escreve como `object
+  TStaticText`, sem identificador. Um regex que exija `nome: Classe` devolve
+  440 e não avisa. O `dfm2lfm.py` já o tratava.
+
+  Quatro dos sete números do plano estavam errados, e as quatro causas são
+  diferentes — só uma é erro de medição (os imports de package, 300 → 267). Os
+  bitmaps eram **erro de soma na prosa** (a §1.8 lista as cinco pastas certas e
+  soma 197); as strings com enchimento eram **população diferente** (13 em
+  `.data`, 80 nos DFM, e a §1.5 contou o binário inteiro); os componentes eram
+  estimativa declarada. Registrar a causa importa mais que o número: só a de
+  imports pede desconfiar da ferramenta.
+
+  A varredura de sítios virou **guarda de build**, não `grep` à mão. Eram 18
+  afirmações vivas dos quatro números; hoje são 0, e o `check_fase1.py` aborta
+  se alguma voltar. O perímetro é a parte que exigiu decisão: fica de fora o
+  documento que **narra** a correção, o Log de Execução de qualquer tarefa, e o
+  **enunciado de tarefa já concluída** — este último medido pelo `status:` do
+  frontmatter. Enunciado executado é história; enunciado **pendente** é
+  instrução, e foi essa distinção que trouxe a WTE-TASK-38 e a 39 para dentro
+  da correção antes de serem executadas contra uma contagem inexistente.
+
 - **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/tools/check_fase1.py` | criado — gerador com `--check`, entra sozinho no `make -C wte check` |
+  | `wte/tools/test_check_fase1.py` | criado — 11 testes do perímetro e do corte por contexto, sem abrir o `.exe` |
+  | `wte/re/fase-1.md` | criado (gerado) |
+  | `wte/tools/README.md` | modificado — as duas tabelas |
+  | `docs/PLAN-WTE-LAZARUS.md` | modificado — §1.2, §1.5, §1.6, §1.8, §5, §8.8 |
+  | `docs/tasks/progresso.md` | modificado — marcação, tabela de estado, censo, três seções de prosa, estrutura de pastas, nota de execução |
+  | `docs/tasks/08-convencao-dos-assets.md` | modificado — o título dizia 197 |
+  | `docs/tasks/38-nome-e-linhagem.md`, `39-empacotamento.md` | modificados — pendentes, iam pedir mensagem de erro e regra de empacotamento sobre 197 |
+
 - **Problemas encontrados:**
+
+  **O documento gerado é ponto fixo da própria varredura.** A primeira versão
+  do `fase-1.md` listava os sítios residuais numa tabela; como o arquivo mora
+  no perímetro varrido, publicar o número velho ali mudava a contagem que ele
+  mesmo publicava. A saída foi tirar a tabela e fazer resíduo **abortar**, como
+  o `FORBIDDEN` do `port_database.py` — resíduo é falha, não linha de relatório.
+  O mesmo pegou duas vezes na prosa do plano: a frase que eu escrevi para
+  explicar a correção citava `"70 strings"` e virou resíduo dela mesma. Quem
+  narra a correção é o `fase-1.md`, não o documento corrigido.
+
+  **A coluna "sítios antes" não é remedível.** Ela é constante no script, com a
+  data e o perímetro escritos ao lado. Não há como medi-la depois de corrigir,
+  e fingir que sai de ferramenta seria pior do que dizer que é constante.
+
+  **Dois números vêm de uma frase, não de um TSV.** A cobertura de `.text` e os
+  literais com enchimento dos DFM são casados por regex no `strings.md`, e os
+  imports no `unidades-vcl.md`. Os três abortam se a frase mudar de forma —
+  desfecho certo, e ainda assim acoplamento a registrar. A alternativa era um
+  quinto leitor de PE nesta árvore, sem o teste que a cópia do `dump_units.py`
+  tem.

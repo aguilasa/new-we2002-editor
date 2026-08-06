@@ -50,7 +50,7 @@ conforme a WTE-TASK-38.
 
 ### Os assets são o caso especial
 
-Os 197 BMP e o `dat.bin` **não são redistribuídos** (WTE-TASK-38). Então a busca
+Os 198 BMP e o `dat.bin` **não são redistribuídos** (WTE-TASK-38). Então a busca
 tem um caso a mais: se a pasta não estiver lá, o app precisa falhar com mensagem
 que diga **o que falta e onde colocar** — não um erro genérico de arquivo não
 encontrado.
