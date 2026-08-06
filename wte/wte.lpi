@@ -26,12 +26,158 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="src/WteMain.pas"/>
+        <Filename Value="src/retrace.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="WteMainForm"/>
+        <UnitName Value="retrace"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/wtemain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="wtemain"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_mainform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="WteMain"/>
+        <UnitName Value="ep2002_mainform"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_estrategia.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="estrategia"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_estrategia"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_jugador.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="jugador"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_jugador"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_dorsal.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_dorsal"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_dorsal"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_enlaza.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_enlaza"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_enlaza"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_color.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_color"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_color"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_info.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_info"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_info"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_warning.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_warning"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_warning"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_error.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_error"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_error"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_info2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_info2"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_info2"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_about.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_about"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_about"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_error2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_error2"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_error2"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_salida.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_salida"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_salida"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_info4.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_info4"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_info4"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_info3.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_info3"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_info3"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_movertodos.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_movertodos"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_movertodos"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_creditos_equipo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_creditos_equipo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_creditos_equipo"/>
+      </Unit>
+      <Unit>
+        <Filename Value="src/ep2002_warning_2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ficha_warning_2"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ep2002_warning_2"/>
       </Unit>
     </Units>
   </ProjectOptions>

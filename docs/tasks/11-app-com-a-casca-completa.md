@@ -5,7 +5,7 @@ type: implementação
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-10"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-11: A casca completa
@@ -67,24 +67,94 @@ por título vão pegar o lado errado a partir da WTE-TASK-22.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/src/wtemain.pas` | criar — auto-create e navegação |
-| `wte/src/restub.pas` | criar |
+| `wte/src/wtemain.pas` | criar — auto-create e linha de comando |
+| `wte/src/retrace.pas` | criar — **não `restub.pas`**, ver o Log |
 | `wte/wte.lpr` | modificar |
+| `wte/wte.lpi` | modificar — as 20 unidades entram no projeto |
+| `wte/src/WteMain.pas`, `wte/forms/WteMain.lfm` | remover — o provisório da WTE-TASK-02 |
+| `.gitignore` | modificar — `wte/re/trace.log` é saída de execução |
 
 ---
 
 ## Critério de conclusão
 
-- [ ] `lazbuild` compila sem warning novo
-- [ ] Os 18 formulários abrem e fecham no `:99`
-- [ ] Os 96 stubs logam em `trace.log`, formato estável
-- [ ] Título da janela distinto do original
-- [ ] Nenhum acesso a arquivo de imagem de CD no código
-- [ ] Commit no formato conventional, em inglês
+- [x] `lazbuild` compila sem warning novo — 2.482 linhas, 0 warning, 2 hints
+      (ambos do Lazarus sobre diretório de pacote do sistema, não do código)
+- [x] Os 18 formulários abrem e fecham no `:99` — `--show all` mapeia 18
+      janelas; depois do `kill`, zero
+- [x] Os 96 stubs logam em `trace.log`, formato estável — carimbo **relativo**
+      ao início do processo, não hora do dia, senão toda linha divergiria no
+      `diff` da WTE-TASK-13
+- [x] Título da janela distinto do original — sufixo ` [Lazarus]` posto em
+      tempo de execução, ver o Log
+- [x] Nenhum acesso a arquivo de imagem de CD no código
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-06
+
 - **Resumo do que foi feito:**
-- **Arquivos criados/modificados:**
+
+  A ordem de auto-create **não foi escolhida, foi medida**. O `WinMain` do
+  original chama `Application->CreateForm` 18 vezes entre `0x401a2e` e
+  `0x401bc6`; cada sítio carrega a referência de classe de um endereço de
+  `.data`, e resolvendo cada uma pelo `vmtClassName` (o mesmo `-44` do
+  `dump_published.py`) sai a lista inteira:
+
+  `TMainForm`, `Testrategia`, `Tjugador`, `Tficha_dorsal`, `Tficha_enlaza`,
+  `Tficha_color`, `Tficha_info`, `Tficha_warning`, `Tficha_error`,
+  `Tficha_info2`, `Tficha_about`, `Tficha_error2`, `Tficha_salida`,
+  `Tficha_info4`, `Tficha_info3`, `Tficha_movertodos`,
+  `Tficha_creditos_equipo`, `Tficha_warning_2`.
+
+  Isso importa porque `OnCreate` dispara na criação: **os 18 primeiros
+  `FormCreate` do `trace.log` são essa lista**, e é contra ela que a
+  WTE-TASK-13 compara. Reproduzir:
+
+  ```sh
+  objdump -d -M intel we-team-editor/we-team-editor.exe \
+    | sed -n '/401a2e:/,/401bc6:/p' | grep -E 'mov +(ecx|edx),DWORD PTR ds:'
+  ```
+
+  O `trace.log` sai com **16** `FormCreate`, não 18, e está certo:
+  `ficha_error` e `ficha_error2` não têm `OnCreate`. Bate com a WTE-TASK-04,
+  que mediu `FormCreate` × 16 — e é a primeira confirmação dinâmica de um
+  número que até aqui só tinha medida estática.
+
 - **Problemas encontrados:**
+
+  1. **`restub.pas` não pode existir com esse nome, e `RETrace` também não.**
+     Identificador em Pascal não distingue maiúscula, então uma unidade
+     `restub` exportando `REStub` não compila. A WTE-TASK-10 já tinha
+     previsto e gerado os stubs chamando `retrace`. O que ela não previu é
+     que a **segunda** rotina da unidade caía na mesma armadilha: `RETrace`
+     colide com a unidade `retrace`, e o erro (`Syntax error, "." expected
+     but "(" found`) só aparece no primeiro **uso**, não na declaração.
+     Virou `REMark`.
+  2. **`Application.Title` não torna a janela distinguível.** O critério
+     "título distinto do original" parece resolvido pelo `.lpr`, e não é: o
+     que os scripts leem é o `Caption`, que vem do DFM — e o do `MainForm` é
+     literalmente `' W11 Team Editor PT by chagas_michel!'`, igual ao do
+     original. A partir da WTE-TASK-22 os dois rodam no mesmo `:99`. O
+     sufixo ` [Lazarus]` é posto **em tempo de execução** nos 18, não no
+     `.lfm` (que é gerado, e editar saída de gerador está proibido). No
+     `:99` não há window manager, então nenhuma barra de título é desenhada
+     e a captura da WTE-TASK-12 não enxerga o sufixo. **Divergência
+     deliberada — registrar na WTE-TASK-35.**
+  3. **Não há navegação de verdade, e não podia haver.** Quem abre
+     formulário são os handlers, e na fase 2 eles são stub. Ligar
+     botão→formulário exige saber o que cada handler faz, que é da
+     WTE-TASK-25 em diante. No lugar ficou `--show <nome>` / `--show all`,
+     andaime explícito para a captura da WTE-TASK-12.
+
+- **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/src/retrace.pas` | criar |
+  | `wte/src/wtemain.pas` | criar |
+  | `wte/wte.lpr` | modificar |
+  | `wte/wte.lpi` | modificar — 20 unidades |
+  | `wte/src/WteMain.pas`, `wte/forms/WteMain.lfm` | remover |
+  | `.gitignore` | modificar |

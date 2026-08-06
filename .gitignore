@@ -97,3 +97,10 @@ wte/backup/
 # byte a byte sem versionar os bytes. Vem DEPOIS do `!wte/re/**` de proposito:
 # em .gitignore a ultima regra que casa e a que vale.
 wte/re/dfm/blobs/
+
+# ---- ...e a saida de execucao da casca (WTE-TASK-11) ----
+# `wte/re/trace.log` e o log de disparo de evento que o `retrace.pas` escreve
+# a cada execucao. E saida de execucao, nao achado: renasce inteiro a cada
+# rodada e diverge no carimbo. O que a WTE-TASK-13 concluir dele vai para
+# `wte/re/eventos.md`, esse sim versionado. Vem DEPOIS do `!wte/re/**`.
+wte/re/trace.log

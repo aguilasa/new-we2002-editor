@@ -13,13 +13,19 @@ program wte;
 uses
   Interfaces,   // widgetset da LCL -- tem de vir antes de Forms
   Forms,
-  WteMain;
+  wtemain;      // auto-create na ordem medida, e a linha de comando
 
 begin
   RequireDerivedFormResource := True;
   Application.Scaled := True;
+  // O TITULO TEM DE SER DIFERENTE DO ORIGINAL. O wte.exe se chama
+  // "W11 Team Editor PT by chagas_michel!"; a partir da WTE-TASK-22 os dois
+  // rodam no mesmo :99, e os scripts acham janela por titulo e por tamanho.
+  // Titulo igual faria o harness dirigir o lado errado, e o diff pareceria
+  // bug do port -- e a armadilha 6 do progresso.md.
   Application.Title := 'WE2002 Team Editor (Lazarus)';
   Application.Initialize;
-  Application.CreateForm(TWteMainForm, WteMainForm);
-  Application.Run;
+  CriaFormularios;
+  if TrataLinhaDeComando then
+    Application.Run;
 end.
