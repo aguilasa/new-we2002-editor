@@ -24,6 +24,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-011](/docs/tasks/CORR-WTE-011.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | O critério de limite do `dump_offsets.py` aborta num sentido só, e a janela de plausibilidade sai do nosso `Offsets.hpp` | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-012](/docs/tasks/CORR-WTE-012.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | A §1 do plano diz 300 imports de `rtl60`/`vcl60` (são 267) e chama o `TBrowseURL` de componente de terceiro | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [x] concluída | 2026-08-06 |
+| [CORR-WTE-014](/docs/tasks/CORR-WTE-014.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | O "197 bitmaps" (são 198) não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares | Alta | [ ] pendente | — |
+| [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -40,6 +42,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-011 — dizer a regra de aborto que existe, avisar no outro sentido, fixar em teste
 - [x] CORR-WTE-012 — corrigir a §1.6 e dar dono ao número de imports da §1.2
 - [x] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
+- [ ] CORR-WTE-014 — dar dono ao número de bitmaps e fechar o buraco do quadro da 09
+- [ ] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
 
 ## Detalhes por correção
 
@@ -259,3 +263,35 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** parametrizar a tabela de comprimento sobre os dois módulos e
   acrescentar um teste de identidade entre as cópias, que falhe nomeando a que
   divergiu. A decisão de cada gerador rodar sozinho não é reaberta
+
+### CORR-WTE-014
+
+- **Arquivo com problema:** `docs/tasks/09-fechamento-fase-1.md` (quadro de
+  reconciliação) e `docs/prompts/01-executar.md`
+- **Sintoma:** a WTE-TASK-08 mediu 198 bitmaps, registrou que a §1.8 do plano
+  erra a soma na prosa ("197") e encaminhou para a WTE-TASK-09 — mas o quadro que
+  a 09 executa não tem linha de assets. É a segunda vez que isso acontece: a
+  CORR-WTE-012 acrescentou a linha dos imports pela mesma razão. O número errado
+  está em nove lugares, dois deles no plano e dois em tarefas da fase 7 ainda por
+  executar
+- **Como foi detectado:** `find we-team-editor -iname '*.bmp' | wc -l` = 198,
+  contra as cinco linhas da §1.8 que somam 198 e a prosa que diz 197;
+  `grep -rn "197" docs/` lista os nove sítios; o quadro da 09 lido em seguida
+- **Fix:** acrescentar a linha dos bitmaps ao quadro da 09 (a rota é comando
+  inline, não gerador — a WTE-TASK-08 decidiu assim), mandar a 09 varrer os
+  sítios além da §1, e pôr no `01-executar.md` a regra que impede a terceira
+  ocorrência
+
+### CORR-WTE-015
+
+- **Arquivo com problema:** `wte/re/assets.md`, §6.1 e §8.1
+- **Sintoma:** duas evidências transcritas à mão não batem com a medida. §6.1
+  diz que "os outros 195 mantêm o `mtime` de 2006" — são 176 de 2002 e 19 de
+  2006. §8.1 rotula o `fread` do molde de memory card como `0x0040f80c`, onde
+  está um `push 0x1`; a chamada é em `0x0040f81a`. Nenhuma conclusão muda
+- **Como foi detectado:** `find … -printf '%TY\n' | sort | uniq -c` para o ano,
+  e o próprio comando `objdump` que o `.md` traz ao lado do bloco. Os demais
+  números do arquivo foram rodados verbatim nesta revisão e reproduzem
+- **Fix:** colar da saída as duas linhas, e acrescentar ao `.md` o comando da
+  quebra por ano. A rota inline da WTE-TASK-08 não é reaberta — o que a correção
+  fixa é que evidência transcrita tem de vir colada
