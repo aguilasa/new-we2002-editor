@@ -20,6 +20,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | A tabela de envelhecimento do `published_methods.md` erra uma atribuição e omite três divergências | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-008](/docs/tasks/CORR-WTE-008.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | O decodificador de instrução x86 só foi conferido à mão, e a coluna `handler` inteira depende dele | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-009](/docs/tasks/CORR-WTE-009.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | A §8.8 e a pendência do `progresso.md` ainda tratam o binário espanhol como única rota para as mensagens decepadas | Baixa | [x] concluída | 2026-08-06 |
+| [CORR-WTE-010](/docs/tasks/CORR-WTE-010.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | A §8.7 do plano aponta o lado errado da tabela, e o ASCII citado não é o do binário | Alta | [ ] pendente | — |
+| [CORR-WTE-011](/docs/tasks/CORR-WTE-011.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | O critério de limite do `dump_offsets.py` aborta num sentido só, e a janela de plausibilidade sai do nosso `Offsets.hpp` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -32,6 +34,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-007 — corrigir a atribuição e completar a tabela de envelhecimento, no gerador
 - [x] CORR-WTE-008 — versionar a conferência do decodificador x86 contra o `objdump`
 - [x] CORR-WTE-009 — dizer na §8.8 que as mensagens decepadas têm cópia dentro do próprio `.exe`
+- [ ] CORR-WTE-010 — corrigir lado e ASCII na §8.7 do plano e no enunciado da 06
+- [ ] CORR-WTE-011 — dizer a regra de aborto que existe, avisar no outro sentido, fixar em teste
 
 ## Detalhes por correção
 
@@ -181,3 +185,39 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** trocar a saída nas duas passagens — o binário espanhol continua bom
   de ter e continua não bloqueante, mas deixa de ser a única rota. O número "70"
   fica onde está: é da WTE-TASK-09
+
+### CORR-WTE-010
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md` (§8.7) e
+  `docs/tasks/06-mapa-de-offsets.md` (enunciado, linha 45)
+- **Sintoma:** a §8.7 diz que a tabela de `0x004231a0` "é **seguido** de dados
+  que não são offsets" e cita `1869507948` como ASCII `l,km`. Medido: esse dword
+  está em `0x00423190`, **16 bytes abaixo** da tabela, e é `lmno`. Quem obriga a
+  medir é o limite *inferior*; o superior fecha por conteúdo e por referência,
+  que concordam. A §8.7 é o que o executor da WTE-TASK-19 lê antes de mexer em
+  offset
+- **Como foi detectado:** leitura do dword em `0x00423190` pelo leitor de PE do
+  `dump_offsets.py` (`= 1869507948 = b'lmno'`), confrontada com o texto da §8.7
+- **Fix:** manter a armadilha e trocar a evidência de lado nos dois arquivos; o
+  título "O 32º byte da tabela não é offset" também não descreve o medido — são
+  72 bytes com 7 buracos internos
+
+### CORR-WTE-011
+
+- **Arquivo com problema:** `wte/tools/dump_offsets.py` —
+  `check_table_bounds()` e o texto de `render_md()` (a saída `wte/re/offsets.md`
+  é gerada)
+- **Sintoma:** o `offsets.md` promete que "o script aborta se os dois limites não
+  coincidirem". Ele aborta só quando o código referencia endereço **antes** do
+  fim medido pelo conteúdo; no sentido oposto marca `agrees=False` e segue em
+  silêncio. E a janela de plausibilidade é o `[min, max]` dos 69 valores do
+  nosso `Offsets.hpp`, o que torna tautológica a guarda "o filtro aceita 100% do
+  que já se sabe" na parte de faixa — e acopla o limite medido da tabela do
+  Obocaman a um arquivo que a WTE-TASK-19 vai mexer
+- **Como foi detectado:** três faltas plantadas em memória — referência dentro
+  da tabela (aborta), referências removidas para o fim ficar antes da próxima
+  (não aborta, `agrees=False`), e `OFS_PLANTADO = 999999999` no header, que
+  alargou a faixa e empurrou o fim da tabela de `0x4231e8` para `0x4231ec`
+- **Fix:** no gerador — dizer a regra que existe, emitir aviso no sentido que
+  não aborta, escrever a acoplagem com o `Offsets.hpp`, e fixar os três casos
+  num `wte/tools/test_dump_offsets.py`, no molde do `test_dump_strings.py`
