@@ -22,6 +22,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-009](/docs/tasks/CORR-WTE-009.md) | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | A §8.8 e a pendência do `progresso.md` ainda tratam o binário espanhol como única rota para as mensagens decepadas | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-010](/docs/tasks/CORR-WTE-010.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | A §8.7 do plano aponta o lado errado da tabela, e o ASCII citado não é o do binário | Alta | [ ] pendente | — |
 | [CORR-WTE-011](/docs/tasks/CORR-WTE-011.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | O critério de limite do `dump_offsets.py` aborta num sentido só, e a janela de plausibilidade sai do nosso `Offsets.hpp` | Baixa | [ ] pendente | — |
+| [CORR-WTE-012](/docs/tasks/CORR-WTE-012.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | A §1 do plano diz 300 imports de `rtl60`/`vcl60` (são 267) e chama o `TBrowseURL` de componente de terceiro | Alta | [ ] pendente | — |
+| [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -36,6 +38,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-009 — dizer na §8.8 que as mensagens decepadas têm cópia dentro do próprio `.exe`
 - [ ] CORR-WTE-010 — corrigir lado e ASCII na §8.7 do plano e no enunciado da 06
 - [ ] CORR-WTE-011 — dizer a regra de aborto que existe, avisar no outro sentido, fixar em teste
+- [ ] CORR-WTE-012 — corrigir a §1.6 e dar dono ao número de imports da §1.2
+- [ ] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
 
 ## Detalhes por correção
 
@@ -221,3 +225,37 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** no gerador — dizer a regra que existe, emitir aviso no sentido que
   não aborta, escrever a acoplagem com o `Offsets.hpp`, e fixar os três casos
   num `wte/tools/test_dump_offsets.py`, no molde do `test_dump_strings.py`
+
+### CORR-WTE-012
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md` (§1.2 linha 117, §1.6
+  linha 251) e `docs/tasks/09-fechamento-fase-1.md` (quadro de reconciliação)
+- **Sintoma:** a §1.2 diz "322 imports, sendo **300** de `rtl60.bpl`/`vcl60.bpl`"
+  — são **267** (103 + 164), e o número não está no quadro que a WTE-TASK-09
+  remede, então não tem dono. A §1.6 chama o `TBrowseURL` de "componente de
+  terceiro", enquanto a §5 do mesmo arquivo, já corrigida pela WTE-TASK-07, diz
+  que é ação padrão da VCL (`Extactns`) — o plano se contradiz internamente
+- **Como foi detectado:** `objdump -x` contando imports por DLL (KERNEL32 51,
+  USER32 3, OLEAUT32 1, rtl60 103, vcl60 164, total 322), confrontado com a
+  §1.2; e `grep -n "TBrowseURL" docs/PLAN-WTE-LAZARUS.md`, que devolve as duas
+  passagens discordantes
+- **Fix:** corrigir a frase da §1.6 e acrescentar a linha dos imports ao quadro
+  da WTE-TASK-09, apontando para `dump_units.py` — que é quem mede e já publica
+  o valor certo
+
+### CORR-WTE-013
+
+- **Arquivo com problema:** `wte/tools/dump_units.py` (cópia de `_fill`,
+  `decode`, `extent`) e `wte/tools/test_dump_strings.py` (que só alcança o
+  original)
+- **Sintoma:** as três funções são byte a byte idênticas às do
+  `dump_strings.py`, e a CORR-WTE-008 fixou em teste apenas as do
+  `dump_strings.py`. Divergência entre as cópias passa com a bateria verde — e é
+  a cópia do `dump_units.py` que delimita os 96 corpos de handler, fronteira de
+  que depende o veredito "a chamada do `Comobj` está fora de todo handler"
+- **Como foi detectado:** hash do texto-fonte das três funções nos dois
+  arquivos (iguais), mais `grep "^import dump" wte/tools/test_dump_strings.py`,
+  que devolve só `dump_strings`
+- **Fix:** parametrizar a tabela de comprimento sobre os dois módulos e
+  acrescentar um teste de identidade entre as cópias, que falhe nomeando a que
+  divergiu. A decisão de cada gerador rodar sozinho não é reaberta
