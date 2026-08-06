@@ -17,7 +17,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-004](/docs/tasks/CORR-WTE-004.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `--check` fica vermelho num clone limpo, porque `blobs/` é gitignored | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-005](/docs/tasks/CORR-WTE-005.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | Os streams sintéticos que sustentam "os 21 `TValueType` exercitados" não são versionados | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-006](/docs/tasks/CORR-WTE-006.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | Os fatos medidos pela WTE-TASK-04 não chegaram aos seis documentos que serão executados | Alta | [x] concluída | 2026-08-06 |
-| [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | A tabela de envelhecimento do `published_methods.md` erra uma atribuição e omite três divergências | Baixa | [ ] pendente | — |
+| [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | A tabela de envelhecimento do `published_methods.md` erra uma atribuição e omite três divergências | Baixa | [x] concluída | 2026-08-06 |
 
 ## Checklist
 
@@ -27,7 +27,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-004 — blob ausente vira aviso; blob divergente continua falha
 - [x] CORR-WTE-005 — versionar os streams sintéticos do `dfm_extract.py`
 - [x] CORR-WTE-006 — propagar dono e contagem medidos para as tasks 25, 28, 30, o plano §5.1 e o prompt de revisão
-- [ ] CORR-WTE-007 — corrigir a atribuição e completar a tabela de envelhecimento, no gerador
+- [x] CORR-WTE-007 — corrigir a atribuição e completar a tabela de envelhecimento, no gerador
 
 ## Detalhes por correção
 

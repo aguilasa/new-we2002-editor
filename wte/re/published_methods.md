@@ -357,14 +357,22 @@ está no TSV.
 Tudo abaixo é contagem do script contra texto já escrito. Nenhuma delas muda uma
 conclusão; todas mudam um número que alguém usaria para se conferir.
 
+A coluna **Diz** cita o texto como ele estava quando a WTE-TASK-04 mediu. A
+[CORR-WTE-006](../../docs/tasks/CORR-WTE-006.md) propagou estas linhas para os
+arquivos citados, então a citação já não é o que se lê lá — é o registro do que
+foi corrigido, e envelhece junto. Quem decide se a seção inteira vira histórico
+ao fechar a fase 1 é a WTE-TASK-09.
+
 | Onde | Diz | Medido |
 |---|---|---|
-| §1.4 do plano e WTE-TASK-04 | `FormCreate` aparece **17** vezes | **16** — `ficha_error` e `ficha_error2` não têm |
+| WTE-TASK-04 e `docs/prompts/02-revisar.md` | `FormCreate` aparece **17** vezes | **16** — `ficha_error` e `ficha_error2` não têm |
 | WTE-TASK-04 | `BitBtn1Click` **duas** | **4** — `estrategia`, `ficha_color`, `ficha_dorsal`, `jugador` |
 | WTE-TASK-25 | `FormCreate` / `FormShow` — **19 endereços** | **18** = 16 `FormCreate` + 2 `FormShow` |
 | §5.1 do plano | `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` só publica `FormCreate` |
+| WTE-TASK-30 | `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` só publica `FormCreate` |
 | WTE-TASK-28 | `malla1MouseDown` / `malla2MouseDown` pertencem a `ficha_color` e `ficha_creditos_equipo` | o dono é **`estrategia`** |
-| WTE-TASK-28 | `botonClick` entre os "handlers repetidos por vários formulários" | aparece **1 vez**, em `ficha_color` |
+| WTE-TASK-28 | `SpeedButton2Click` e mais 5 entre os "handlers repetidos por vários formulários" | aparecem **uma vez cada**: `SpeedButton2Click` (`MainForm`), `Button2Click` (`MainForm`), `Image3Click` (`MainForm`), `botonClick` (`ficha_color`), `base_teamClick` (`MainForm`), `imagen_urlClick` (`ficha_about`) |
+| WTE-TASK-28 | `BitBtn1Click` (**3×**) na mesma lista | **4×** |
 | WTE-TASK-28 | "os **13** diálogos", e o escopo lista **15** formulários `ficha_*` | os 13 são as **unidades exportadas**; `ficha_color` e `ficha_error` são telas grandes e ficam de fora deles |
 
 Duas observações que não são correção, e sim coisa que ninguém tinha contado:

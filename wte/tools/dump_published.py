@@ -193,6 +193,18 @@ EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
 # os implemente duas vezes. Transcrito da tabela "O que fica de fora, e por
 # que" daquela tarefa, com uma correcao medida: `malla1MouseDown` e
 # `malla2MouseDown` pertencem a `estrategia`, nao a `ficha_color`.
+# Os dez nomes que a WTE-TASK-28 lista como "handlers repetidos por varios
+# formularios". A lista e literal -- e citacao de outro documento --, mas o
+# veredito de cada nome sai de count_by_name(), e um nome que nao exista entre
+# os 96 aborta, como em EXCEPTIONS e FORMULA_OWNERS. A linha de envelhecimento
+# saia escrita a mao para um unico nome (`botonClick`) quando a mesma consulta
+# responde pelos dez.
+TASK28_REPEATED: tuple[str, ...] = (
+    "BitBtn1Click", "BitBtn2Click", "BitBtn3Click", "SpeedButton1Click",
+    "SpeedButton2Click", "Button2Click", "Image3Click", "botonClick",
+    "base_teamClick", "imagen_urlClick",
+)
+
 FORMULA_OWNERS: dict[tuple[str, str], str] = {
     ("jugador", "etiqprecioClick"): "WTE-TASK-30",
     ("jugador", "casilla_precioKeyPress"): "WTE-TASK-30",
@@ -823,6 +835,16 @@ class Measurement:
                 "entrada(s) de FORMULA_OWNERS sem handler correspondente: "
                 + ", ".join(f"{f}.{h}" for f, h in dead) + ".")
 
+        medidos = {r.method.name for r in self.rows}
+        dead = sorted(set(TASK28_REPEATED) - medidos)
+        if dead:
+            raise DumpError(
+                "nome(s) citado(s) da WTE-TASK-28 que nao existem entre os "
+                f"{len(self.rows)} handlers medidos: " + ", ".join(dead)
+                + ".\n       A tabela de envelhecimento emitiria uma linha "
+                  "sobre um handler que nao\n       existe. Corrija a citacao "
+                  "ou remova o nome de TASK28_REPEATED.")
+
         self.distribution = {g: sum(1 for r in self.rows if r.group == g)
                              for g in GROUPS}
 
@@ -1167,32 +1189,48 @@ def render_md(m: Measurement) -> str:
     add("Tudo abaixo é contagem do script contra texto já escrito. Nenhuma "
         "delas muda uma\nconclusão; todas mudam um número que alguém usaria "
         "para se conferir.\n")
+    add("A coluna **Diz** cita o texto como ele estava quando a WTE-TASK-04 "
+        "mediu. A\n[CORR-WTE-006](../../docs/tasks/CORR-WTE-006.md) propagou "
+        "estas linhas para os\narquivos citados, então a citação já não é o "
+        "que se lê lá — é o registro do que\nfoi corrigido, e envelhece "
+        "junto. Quem decide se a seção inteira vira histórico\nao fechar a "
+        "fase 1 é a WTE-TASK-09.\n")
     counts = count_by_name(m)
     form_create = len(counts.get("FormCreate", []))
     form_show = len(counts.get("FormShow", []))
     bitbtn1 = len(counts.get("BitBtn1Click", []))
     add("| Onde | Diz | Medido |")
     add("|---|---|---|")
-    add(f"| §1.4 do plano e WTE-TASK-04 | `FormCreate` aparece **17** vezes | "
-        f"**{form_create}** — `ficha_error` e `ficha_error2` não têm |")
+    # Atribuicao pelo arquivo que carrega a frase, nao pelo que se supoe.
+    # O "17" nunca esteve no plano: esta na task 04 e no prompt de revisao --
+    # e o do prompt reprovaria um dfm2lfm.py correto na fase 2.
+    add(f"| WTE-TASK-04 e `docs/prompts/02-revisar.md` | `FormCreate` aparece "
+        f"**17** vezes | **{form_create}** — `ficha_error` e `ficha_error2` "
+        f"não têm |")
     add(f"| WTE-TASK-04 | `BitBtn1Click` **duas** | **{bitbtn1}** — "
         + ", ".join(f"`{f}`" for f in sorted(counts['BitBtn1Click'])) + " |")
     add(f"| WTE-TASK-25 | `FormCreate` / `FormShow` — **19 endereços** | "
         f"**{form_create + form_show}** = {form_create} `FormCreate` + "
         f"{form_show} `FormShow` |")
     etiq = next(r for r in m.rows if r.method.name == "etiqprecioClick")
-    add(f"| §5.1 do plano | `etiqprecioClick` e o formulário "
-        f"`ficha_creditos_equipo` | o dono é **`{etiq.method.form}`**; "
-        f"`ficha_creditos_equipo` só publica `FormCreate` |")
+    for onde in ("§5.1 do plano", "WTE-TASK-30"):
+        add(f"| {onde} | `etiqprecioClick` e o formulário "
+            f"`ficha_creditos_equipo` | o dono é **`{etiq.method.form}`**; "
+            f"`ficha_creditos_equipo` só publica `FormCreate` |")
     malla = sorted({r.method.form for r in m.rows
                     if r.method.name.startswith("malla")})
     add(f"| WTE-TASK-28 | `malla1MouseDown` / `malla2MouseDown` pertencem a "
         f"`ficha_color` e `ficha_creditos_equipo` | o dono é "
         + ", ".join(f"**`{f}`**" for f in malla) + " |")
-    boton = counts.get("botonClick", [])
-    add(f"| WTE-TASK-28 | `botonClick` entre os \"handlers repetidos por "
-        f"vários formulários\" | aparece **{len(boton)} vez**, em "
-        + ", ".join(f"`{f}`" for f in boton) + " |")
+    # Os dez nomes que a 28 chama de "repetidos", julgados pela contagem
+    # medida em vez de um a um a mao.
+    unicos = [n for n in TASK28_REPEATED if len(counts[n]) == 1]
+    add(f"| WTE-TASK-28 | `{unicos[0]}` e mais "
+        f"{len(unicos) - 1} entre os \"handlers repetidos por vários "
+        f"formulários\" | aparecem **uma vez cada**: "
+        + ", ".join(f"`{n}` (`{counts[n][0]}`)" for n in unicos) + " |")
+    add(f"| WTE-TASK-28 | `BitBtn1Click` (**3×**) na mesma lista | "
+        f"**{bitbtn1}×** |")
     ficha = sorted({v.form for v in m.vmts if v.form.startswith("ficha_")})
     add(f"| WTE-TASK-28 | \"os **13** diálogos\", e o escopo lista **"
         f"{len(ficha)}** formulários `ficha_*` | os 13 são as **unidades "

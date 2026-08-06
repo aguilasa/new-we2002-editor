@@ -3,7 +3,7 @@ id: CORR-WTE-007
 title: "Correção: a tabela \"onde o plano envelheceu\" atribui ao plano uma frase que só existe na task, e não registra três divergências medidas"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,22 +120,72 @@ inteira vira histórico ao fechar a fase 1.
 
 ## Verificação
 
-- [ ] `python3 wte/tools/dump_published.py --check` verde depois de regerar
-- [ ] Rodar o gerador duas vezes dá bytes iguais (determinismo preservado)
-- [ ] Toda citação da tabela nomeia um arquivo que contém a frase citada:
-      `grep -n "<frase>" <arquivo>` acha
-- [ ] Nome citado da WTE-TASK-28 que não exista entre os 96 faz o script
+- [x] `python3 wte/tools/dump_published.py --check` verde depois de regerar
+- [x] Rodar o gerador duas vezes dá bytes iguais (determinismo preservado)
+- [~] Toda citação da tabela nomeia um arquivo que contém a frase citada:
+      `grep -n "<frase>" <arquivo>` acha — **não é mais satisfazível**, e a
+      razão está no Log: a CORR-WTE-006 corrigiu os arquivos citados antes
+      desta correção rodar. A coluna **Diz** virou registro do que foi
+      consertado, e a seção passou a dizer isso em vez de fingir que a citação
+      ainda se lê lá. A atribuição, que era o defeito de verdade, aponta agora
+      para os arquivos que **carregavam** a frase
+- [x] Nome citado da WTE-TASK-28 que não exista entre os 96 faz o script
       **abortar**, testado com uma entrada plantada
-- [ ] A tabela lista os seis handlers de contagem 1 e o `BitBtn1Click` com 4
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] A tabela lista os seis handlers de contagem 1 e o `BitBtn1Click` com 4
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+Três mudanças em `render_md()`, nenhuma no `.md` à mão:
+
+1. A atribuição da primeira linha saiu de `§1.4 do plano e WTE-TASK-04` para
+   `WTE-TASK-04 e docs/prompts/02-revisar.md` — os dois arquivos que de fato
+   carregavam o "17". O plano não contém a frase.
+2. A linha da `WTE-TASK-30` entrou ao lado da da §5.1: os dois documentos
+   repetem o mesmo erro de dono, e o valor sai de `m.rows` nas duas.
+3. A linha escrita à mão para `botonClick` virou uma varredura sobre
+   `TASK28_REPEATED`, os dez nomes que a WTE-TASK-28 chama de "repetidos". A
+   lista é literal (é citação de outro documento), mas o veredito de cada nome
+   vem de `count_by_name()`: seis dão 1 e saem numa linha só, com o formulário
+   de cada um, e o `BitBtn1Click` ganhou linha própria com a contagem real.
+
+Como em `EXCEPTIONS` e `FORMULA_OWNERS`, um nome citado que não exista entre os
+96 **aborta** em vez de gerar linha sobre handler inexistente. Testado com
+`NaoExisteClick` plantado: `rc=2` e a mensagem nomeando o nome morto.
+
 **Problemas encontrados:**
 
+O critério "toda citação nomeia um arquivo que contém a frase citada" deixou de
+ser satisfazível no meio do lote, e não por defeito desta correção: a
+[CORR-WTE-006](/docs/tasks/CORR-WTE-006.md) rodou antes e consertou os seis
+arquivos citados. Qualquer ordem daria o mesmo — as duas correções tratam os
+dois lados da mesma citação. A saída foi enquadrar a seção em vez de fingir: um
+parágrafo novo diz que a coluna **Diz** cita o texto como ele estava quando a
+WTE-TASK-04 mediu, que a CORR-WTE-006 propagou as linhas, e que a WTE-TASK-09 é
+quem decide se a seção inteira vira histórico ao fechar a fase 1. O defeito real
+que a CORR aponta — a atribuição a um arquivo que nunca teve a frase — está
+consertado, e é o que sobrevive à propagação.
+
+A varredura achou a mesma má-atribuição fora do gerador: o Log da WTE-TASK-04
+dizia "§1.4 do plano e esta tarefa dizem `FormCreate` 17 vezes". A CORR-WTE-006
+deixou o Log de fora por ser histórico, mas histórico errado sobre qual arquivo
+dizia o quê continua mandando alguém procurar o que não existe — a linha passou
+a nomear os arquivos certos, marcando a atribuição original como corrigida.
+
+O link que escrevi no parágrafo novo saiu como `/docs/tasks/...`. Errado:
+`.claude/rules/links.md` restringe essa forma a markdown **dentro** de `docs/`,
+e `wte/re/published_methods.md` está fora — os vizinhos dele usam
+`../../docs/tasks/`. Corrigido no gerador antes do commit.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_published.py` — `TASK28_REPEATED`, a guarda de nome morto e a
+  tabela de envelhecimento em `render_md()`
+- `wte/re/published_methods.md` — regerado
+- `docs/tasks/04-mapa-de-handlers.md` — a mesma má-atribuição no Log
+- `docs/tasks/correcoes-progresso.md`

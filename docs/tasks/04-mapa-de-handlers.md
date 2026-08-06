@@ -127,8 +127,10 @@ A coluna `grupo` é o que ordena as tasks 25 a 28.
   Nenhum bloqueio. Sete divergências entre texto já escrito e medida, todas
   detalhadas em `wte/re/published_methods.md`:
 
-  1. §1.4 do plano e esta tarefa dizem `FormCreate` **17** vezes — são **16**
-     (`ficha_error` e `ficha_error2` não têm).
+  1. Esta tarefa e o `docs/prompts/02-revisar.md` diziam `FormCreate` **17**
+     vezes — são **16** (`ficha_error` e `ficha_error2` não têm). *(A atribuição
+     original dava a frase à §1.4 do plano, que não a contém; corrigido pela
+     [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md).)*
   2. Esta tarefa diz `BitBtn1Click` **duas** — são **quatro**.
   3. A WTE-TASK-25 diz `FormCreate`/`FormShow` em **19 endereços** — são
      **18** (16 + 2).
