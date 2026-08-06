@@ -28,6 +28,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | A varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` ainda diz que a §1 do plano registra 197 bitmaps | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [x] concluída | 2026-08-06 |
+| [CORR-WTE-018](/docs/tasks/CORR-WTE-018.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `02-revisar.md` cita `~430`, `70` e `197` como "o que já está no plano", e o plano não diz mais isso | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -48,6 +49,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
 - [x] CORR-WTE-016 — alargar o perímetro da varredura para `wte/` e fechar o sítio do `wte/README.md`
 - [x] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
+- [ ] CORR-WTE-018 — trocar os três números aposentados do `02-revisar.md` e decidir o perímetro de `docs/prompts/`
 
 ## Detalhes por correção
 
@@ -336,3 +338,21 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** comparar `int(a, 16) >= DATA_VA` em vez de substring, levantar
   `CheckError` quando `confirmados − fora_da_tabela ≠ slots_com_nome`, e plantar
   um `va = 0x00422abc` no teste para exercitar a guarda
+
+### CORR-WTE-018
+
+- **Arquivo com problema:** `docs/prompts/02-revisar.md` (linha 88), com a
+  decisão de perímetro em `wte/tools/check_fase1.py`
+- **Sintoma:** a linha promete "o que já está no plano" e lista sete contagens;
+  três estão aposentadas desde a WTE-TASK-09 — componentes `~430` (são 441),
+  strings com enchimento `70` (são 13) e bitmaps `197` (são 198). Quem revisa lê
+  o número como referência e reprova task correta, que é o modo de falha que a
+  CORR-WTE-006 já registrou neste mesmo arquivo
+- **Como foi detectado:** `sed -n '86,88p' docs/prompts/02-revisar.md`
+  confrontado com a §5 do `wte/re/fase-1.md`, com o `check_fase1.py --check`
+  verde ao lado — `docs/prompts/` está fora do perímetro por decisão
+- **Fix:** trocar a lista por ponteiro para a §5 gerada, citando os três velhos
+  ao lado dos novos como história; e decidir se `docs/prompts/` entra no
+  perímetro (a exclusão foi escrita para **destino de link** placeholder, não
+  para número de referência). Se entrar, a coluna `antes` de `SITIOS` é remedida
+  de novo
