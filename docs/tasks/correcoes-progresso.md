@@ -26,6 +26,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-014](/docs/tasks/CORR-WTE-014.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | O "197 bitmaps" (são 198) não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [x] concluída | 2026-08-06 |
+| [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | A varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` ainda diz que a §1 do plano registra 197 bitmaps | Baixa | [ ] pendente | — |
+| [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -44,6 +46,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
 - [x] CORR-WTE-014 — dar dono ao número de bitmaps e fechar o buraco do quadro da 09
 - [x] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
+- [ ] CORR-WTE-016 — alargar o perímetro da varredura para `wte/` e fechar o sítio do `wte/README.md`
+- [ ] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
 
 ## Detalhes por correção
 
@@ -295,3 +299,40 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** colar da saída as duas linhas, e acrescentar ao `.md` o comando da
   quebra por ano. A rota inline da WTE-TASK-08 não é reaberta — o que a correção
   fixa é que evidência transcrita tem de vir colada
+
+### CORR-WTE-016
+
+- **Arquivo com problema:** `wte/tools/check_fase1.py` (`_markdowns()`), com o
+  sítio vivo em `wte/README.md:95`
+- **Sintoma:** a guarda de número velho enumera só `docs/` e `wte/re/`, que é o
+  que o enunciado da 09 pediu — e ali ela fecha em zero, remedido. Fora dali, o
+  `wte/README.md` continua afirmando "A §1 do plano registra 197 `.bmp`" (a §1
+  registra 198 desde a 09), atribuindo a diferença ao `careto_base.bmp` (era erro
+  de soma na prosa, não de inventário) e encaminhando a reconciliação para a
+  WTE-TASK-08 e a 09, ambas concluídas. Quatro linhas acima, no mesmo arquivo, o
+  alvo `assets` já diz 198
+- **Como foi detectado:** `grep -n '197' wte/README.md` com o
+  `check_fase1.py --check` verde ao lado; o "18 → 0" da §6 foi remedido
+  reextraindo a árvore anterior (`git archive 65cc4be docs wte/re`) e rodando o
+  `varrer()` atual sobre ela — devolve 8/4/2/4, batendo com a tabela `SITIOS`
+- **Fix:** `rglob` sobre `wte` inteiro (que já cobre `wte/re/`), `wte/tools/README.md`
+  para `NARRACAO` (cita `430` para explicar o corte por contexto), dois testes de
+  perímetro, e o bloco do `wte/README.md` reescrito como história com destino
+
+### CORR-WTE-017
+
+- **Arquivo com problema:** `wte/tools/check_fase1.py:363-367`, publicado na §3
+  do `wte/re/fase-1.md`
+- **Sintoma:** a partição "16 na tabela × 3 imediato de `.text`" sai de
+  `"0x0042" not in r["va"]` — teste de faixa de endereço escrito como teste de
+  substring. `.text` vai até `0x00423000`, então qualquer imediato em
+  `0x00422000..0x00422fff` casaria o prefixo e seria contado como morando numa
+  tabela de `.data`. Hoje acerta por coincidência de dígito. E a igualdade que a
+  prosa afirma logo abaixo — "os outros são exatamente os slots preenchidos",
+  `19 − 3 = 16` — não é asserção nenhuma no script
+- **Como foi detectado:** cabeçalho de seção do `.exe` lido em Python
+  (`.text VA 0x00401000..0x00423000`, `.data VA 0x00423000..`) confrontado com a
+  coluna `va` dos 19 `confirmado` do `offsets.tsv`
+- **Fix:** comparar `int(a, 16) >= DATA_VA` em vez de substring, levantar
+  `CheckError` quando `confirmados − fora_da_tabela ≠ slots_com_nome`, e plantar
+  um `va = 0x00422abc` no teste para exercitar a guarda
