@@ -25,7 +25,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-012](/docs/tasks/CORR-WTE-012.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | A §1 do plano diz 300 imports de `rtl60`/`vcl60` (são 267) e chama o `TBrowseURL` de componente de terceiro | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-014](/docs/tasks/CORR-WTE-014.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | O "197 bitmaps" (são 198) não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares | Alta | [x] concluída | 2026-08-06 |
-| [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [ ] pendente | — |
+| [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [x] concluída | 2026-08-06 |
 
 ## Checklist
 
@@ -43,7 +43,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-012 — corrigir a §1.6 e dar dono ao número de imports da §1.2
 - [x] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
 - [x] CORR-WTE-014 — dar dono ao número de bitmaps e fechar o buraco do quadro da 09
-- [ ] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
+- [x] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
 
 ## Detalhes por correção
 

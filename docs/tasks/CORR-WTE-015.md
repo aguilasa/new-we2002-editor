@@ -3,7 +3,7 @@ id: CORR-WTE-015
 title: "Correção: duas transcrições de evidência do assets.md não batem com a medida — o ano dos 195 .bmp e o endereço do fread"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -136,10 +136,37 @@ ser colada da saída**, e é isso que a correção faz.
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+As duas transcrições viraram saída colada.
+
+Na §6.1, "os outros 195 mantêm o `mtime` de 2006" deu lugar à quebra por ano
+real — 176 de **2002**, 19 de 2006 —, com o `find … -printf '%TY\n' | sort |
+uniq -c` acrescentado ao bloco de comandos, no padrão do resto do arquivo. A
+proveniência sai mais forte do que estava escrita: a maioria dos bitmaps carrega
+a data do próprio lançamento do editor, não a do pacote de 2006. As conclusões
+não mudam — 176 + 19 = 195, e os três reescritos continuam três, no mesmo
+segundo, com tamanho intacto.
+
+Na §8.1, `40f80c` virou `40f81a`. Os outros quatro endereços do bloco foram
+reconferidos no mesmo `objdump` e batem exatos.
+
 **Problemas encontrados:**
 
+Nenhum. Uma observação sobre o bloco da §8.1: o `objdump` mostra **dois**
+`call 0x417810` na faixa (`40f7eb` no `dat.bin`, `40f7fe` no arquivo de saída) e
+o bloco lista só o primeiro. Não é erro — o bloco é o resumo da sequência, não a
+listagem completa, e o rótulo `fseek(dat.bin, 0, SEEK_SET)` descreve com precisão
+o `40f7eb`.
+
+O que estas duas linhas ensinam, e que a rota inline da WTE-TASK-08 não
+invalida: **evidência transcrita à mão tem de vir colada da saída.** Nenhum
+`--check` cobre prosa, e os dois erros sobreviveram a uma revisão inteira
+justamente por parecerem certos.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/assets.md` — §6.1 (quebra por ano + o comando) e §8.1 (endereço do
+  `fread`)

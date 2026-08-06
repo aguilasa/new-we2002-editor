@@ -517,6 +517,7 @@ Isto não precisou de teste destrutivo — a pasta já carrega a marca:
 ls -l --time-style=full-iso $(find we-team-editor -iname '*.bmp' -newermt 2007-01-01)
 find we-team-editor -iname '*.bmp' | wc -l                    # 198
 find we-team-editor -iname '*.bmp' -newermt 2007-01-01 | wc -l  #   3
+find we-team-editor -iname '*.bmp' -printf '%TY\n' | sort | uniq -c   # a quebra por ano
 ```
 
 ```
@@ -525,7 +526,15 @@ find we-team-editor -iname '*.bmp' -newermt 2007-01-01 | wc -l  #   3
 1958 2026-08-05 12:44:59.528184150 -0300  image/uniformes2d/pantalon0.bmp
 ```
 
-Os outros 195 mantêm o `mtime` de 2006 do pacote do Obocaman. Estes três foram
+```
+    176 2002
+     19 2006
+      3 2026
+```
+
+Os outros 195 não foram tocados, e a maioria é **mais velha** que o pacote de
+2006: 176 carregam `mtime` de **2002**, o ano do próprio lançamento do editor, e
+19 são de 2006. Estes três foram
 reescritos **no mesmo segundo** — a sessão de `make wte` de 2026-08-05, a
 primeira vez que o editor rodou nesta máquina —, e o **tamanho não mudou**: 1398,
 2758 e 1958 são exatamente os do §1.1. Reescrita in-place de paleta, como o
@@ -645,7 +654,7 @@ só depois grava os dados do jogador por cima:
 ```
 40f7d3:  call 0x417530              ; fopen(<arquivo do usuario>)
 40f7eb:  call 0x417810              ; fseek(dat.bin, 0, SEEK_SET)
-40f80c:  call 0x417770              ; fread (buf, 0x20000, 1, dat.bin)
+40f81a:  call 0x417770              ; fread (buf, 0x20000, 1, dat.bin)
 40f837:  call 0x417910              ; fwrite(buf, 0x20000, 1, saida)
 40f83f:  call 0x40f150              ; grava o save por cima
 ```
