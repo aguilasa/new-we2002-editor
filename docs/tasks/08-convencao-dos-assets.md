@@ -5,7 +5,7 @@ type: extração
 category: engenharia-reversa
 phase: 1
 depends_on: ["WTE-TASK-05"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-08: Convenção dos assets
@@ -78,16 +78,74 @@ teste destrutivo barato — em cópia da pasta, nunca na original.
 
 ## Critério de conclusão
 
-- [ ] Convenção das bandeiras resolvida, buracos explicados
-- [ ] Convenção dos 105 uniformes resolvida
-- [ ] Cabelo/barba/`careto_base` ligados ao campo de `Player` que os seleciona
-- [ ] `dat.bin` classificado, e os 14.336 bytes de diferença explicados
-- [ ] Nenhum teste rodado sobre a pasta original
-- [ ] Commit no formato conventional, em inglês
+- [x] Convenção das bandeiras resolvida, buracos explicados
+- [x] Convenção dos 105 uniformes resolvida
+- [x] Cabelo/barba/`careto_base` ligados ao campo de `Player` que os seleciona
+- [x] `dat.bin` classificado, e os 14.336 bytes de diferença explicados
+- [x] Nenhum teste rodado sobre a pasta original
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
 
-- **Executado em:**
+- **Executado em:** 2026-08-06
+
 - **Resumo do que foi feito:**
+
+  Criado [`wte/re/assets.md`](../../wte/re/assets.md). **Rota escolhida: comando
+  inline, sem gerador** — o produto são ~15 medidas e um texto que as amarra, não
+  uma enumeração; cada número traz o comando que o reproduz, como a CORR-WTE-002
+  exigiu do `ambiente.md`. As três tabelas de 95 entradas, que *são* enumeráveis,
+  ficam com o comando de extração no `.md` para a WTE-TASK-32 decidir se viram
+  TSV.
+
+  Achados principais:
+
+  - **Bandeira é forma, não país.** `bandera<n>.bmp` é um estêncil de 20×16 com
+    16 cores úteis; a cor sai da imagem de CD. Agrupar a tabela de 95 bytes em
+    `0x004231e8` por valor mostra tricolor vertical, tricolor horizontal, cruz
+    nórdica. Casa com o nome `OFS_FLAG_SHAPE_COPY_*` que o `newWe2002` já usa.
+  - **Os buracos são oito (44..51), não sete** — 61 − 53 = 8. E não são buracos:
+    o conjunto usado pela tabela é exatamente o conjunto em disco, e o combo
+    `ficha_color.lista_col0` indexa a tabela, então índice ausente é
+    inalcançável.
+  - **Uniformes por tabela**, `0x004232a6`, 95 × 4 bytes = 2 jogos ×
+    {camiseta, pantalon}. Cobre as 99 camisas e os 6 calções sem sobra. Times
+    0..62 usam `camiseta0..49` (40 px), 63..94 usam `camiseta50..98` (51 px).
+  - **Cabelo/barba/rosto** vêm de `Player::hair_style` / `beard_style` /
+    `skin_colour` / `hair_colour` / `beard_colour`, que o `we2002_core` já
+    decodifica, pela via dos `TUpDown` `flechasapa2..6`.
+  - **O app grava dentro dos `.bmp`** (`fopen` em `"r+b"`, reescrita da paleta).
+    Confirmado pelo `mtime`: três arquivos da pasta do usuário datam da sessão de
+    `make wte` de 2026-08-05, com tamanho intacto; os outros 195 são de 2006.
+  - **`dat.bin` são dois blobs**: `[0..0x1FFFF]` é molde de memory card copiado
+    por `grabar_memoryClick`; os 14.336 bytes restantes são 7 setores injetados
+    **na imagem de CD** em `0x2e08` ao abri-la, com sentinela `0xfc` em `0x2e14`.
+  - **Resolução de caminho por `GetCurrentDir()`**, não pelo diretório do
+    executável — a ordem acordada na decisão 1 do `wte/README.md` é divergência
+    deliberada.
+  - **198 é o número certo**; a §1.8 do plano lista as cinco linhas corretas e
+    erra a soma na prosa ("197 bitmaps"). Reconciliação é da WTE-TASK-09.
+  - **41 dos 45 `TImage`** dos DFM trazem bitmap embutido, mas isso não dispensa
+    nenhum dos 198 arquivos: os blobs de `imagen_base`, `imagen_pelo`,
+    `imagen_barba`, `home1` e `home2` são placeholder de IDE, sobrescritos em
+    runtime.
+
+  Nenhuma ferramenta criada, logo nenhum `tools/test_*.py` novo. `make -C wte
+  check` rodado assim mesmo, como guarda de regressão: 76 testes e os cinco
+  `--check` verdes.
+
 - **Arquivos criados/modificados:**
+  - `wte/re/assets.md` — criado
+  - `docs/tasks/08-convencao-dos-assets.md` — critérios e este log
+
 - **Problemas encontrados:**
+  - A coluna `handler` do `strings.tsv` está vazia para as seis strings de asset.
+    **Não é falha**: os sítios estão em auxiliares não publicados
+    (`sub_405270`, `sub_4056c8`, …), fora dos 96 corpos delimitados pela
+    WTE-TASK-04. O dono publicado é o chamador, e o `assets.md` o nomeia.
+  - A ordem dos campos publicados do C++Builder **não** é a ordem do DFM quando
+    há aninhamento — calibrar por ela produz contradição. Os nomes de `TImage`
+    alvo foram amarrados por dimensão (as alturas 42 e 22 de `home1`/`home2`
+    batem exatamente com `camiseta`/`pantalon`) e por vizinhança de campo.
+  - `beard_style` cabe 0..7 no disco e só existem `barba_0..6`; o original
+    satura em 6 via `TUpDown::Position`. Anotado para a WTE-TASK-32.

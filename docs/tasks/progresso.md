@@ -20,7 +20,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-05](/docs/tasks/05-inventario-de-strings.md) | `re/strings.tsv` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
 | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | `re/offsets.md` — a tabela em `.data` | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
 | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | Veredito das 4 unidades VCL duvidosas | 1 | 02 | ✅ Concluído | 2026-08-05 | 2026-08-06 |
-| [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ⬜ Pendente | — | — |
+| [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Convenção dos 197 bitmaps e do `dat.bin` | 1 | 05 | ✅ Concluído | 2026-08-06 | ⬜ pendente |
 | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | Fechamento da fase 1 | 1 | 03-08 | ⬜ Pendente | — | — |
 | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ⬜ Pendente | — | — |
 | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ⬜ Pendente | — | — |
@@ -176,7 +176,7 @@ conferível.
 - [x] Limite da tabela de offsets **medido**, não estimado
 - [x] Offsets que o `newWe2002` não tem, listados
 - [x] `Registry`, `Printers`, `Comobj`, `Winhelpviewer` com veredito
-- [ ] Convenção de nome dos 197 bitmaps resolvida
+- [x] Convenção de nome dos 197 bitmaps resolvida
 - [ ] Os cinco números da §1 do plano remedidos por ferramenta versionada
 
 ### Fase 2 — Casca
