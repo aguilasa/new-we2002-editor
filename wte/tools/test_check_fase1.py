@@ -64,7 +64,7 @@ class TesteCorteContexto(unittest.TestCase):
         # A coluna "sitios antes" nao e remedivel depois da correcao. Se
         # alguem zerar as constantes, a tabela da saida passa a dizer 0 -> 0 e
         # perde o unico registro que existe da varredura.
-        self.assertEqual(sum(a for *_, a in mod.SITIOS), 18)
+        self.assertEqual(sum(a for *_, a in mod.SITIOS), 19)
 
 
 class TestePerimetro(unittest.TestCase):
@@ -105,12 +105,16 @@ class TestePerimetro(unittest.TestCase):
                     "docs/prompts/01-executar.md",
                     "wte/re/assets.md",
                     "wte/re/strings.md",
+                    # narra a propria guarda, e cita 430 para explicar o corte
+                    "wte/tools/README.md",
                     f"wte/re/{mod.MD_NAME}"):
             self.assertFalse(mod._no_perimetro(self._escreve(rel, "x\n")), rel)
 
     def test_plano_e_progresso_ficam_no_perimetro(self):
+        # `wte/README.md` entrou com a CORR-WTE-016: era o sitio vivo que o
+        # perimetro antigo (`docs/` + `wte/re/`) nao alcancava.
         for rel in ("docs/PLAN-WTE-LAZARUS.md", "docs/tasks/progresso.md",
-                    "wte/re/offsets.md"):
+                    "wte/re/offsets.md", "wte/README.md"):
             self.assertTrue(mod._no_perimetro(self._escreve(rel, "x\n")), rel)
 
     def test_log_de_execucao_nao_e_lido(self):
@@ -128,6 +132,31 @@ class TestePerimetro(unittest.TestCase):
     def test_arquivo_sem_log_e_lido_inteiro(self):
         p = self._escreve("docs/PLAN-WTE-LAZARUS.md", "a\nb\nc\n")
         self.assertEqual([l for _, l in mod._linhas_vivas(p)], ["a", "b", "c"])
+
+    def test_markdowns_alcanca_wte_inteiro(self):
+        # O `_no_perimetro` sozinho nao segura o alargamento: ele diria True
+        # para `wte/README.md` mesmo com a base velha, porque nunca e chamado.
+        # Quem escolhe os candidatos e o `_markdowns`, e e ele que a
+        # CORR-WTE-016 mudou.
+        for rel in ("docs/PLAN-WTE-LAZARUS.md", "wte/re/offsets.md",
+                    "wte/README.md", "wte/tools/README.md"):
+            self._escreve(rel, "x\n")
+        achados = {p.relative_to(self.raiz).as_posix()
+                   for p in mod._markdowns()}
+        self.assertIn("wte/README.md", achados)
+        self.assertIn("wte/tools/README.md", achados)
+        self.assertIn("wte/re/offsets.md", achados)
+        # e nenhum arquivo aparece duas vezes: `rglob` sobre `wte` ja cobre
+        # `wte/re/`, entao a segunda base saiu
+        self.assertEqual(len(mod._markdowns()), len(achados))
+
+    def test_varrer_acha_residuo_no_readme_do_wte(self):
+        alvo = self._escreve("wte/README.md",
+                             "> **198, não 197.** A §1 registra 197 `.bmp`\n")
+        self.assertEqual(len(dict(mod.varrer())["197 bitmaps"]), 1)
+        alvo.write_text("> **São 198.** A §1 já registra 198 `.bmp`\n",
+                        encoding="utf-8")
+        self.assertEqual(dict(mod.varrer())["197 bitmaps"], [])
 
     def test_varrer_acha_residuo_e_zera_quando_corrigido(self):
         alvo = self._escreve("docs/tasks/progresso.md",

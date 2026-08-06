@@ -92,12 +92,12 @@ caminho absoluto e crie trabalho de desfazer.
 O alvo `assets` **conta o que alcançou** em vez de dizer "ok": 198 bitmaps e o
 `data/dat.bin`. Se a pasta faltar, ele falha dizendo o que colocar onde.
 
-> **198, não 197.** A §1 do plano registra 197 `.bmp`; `find -iname '*.bmp'`
-> acha **198**. A diferença provável é o `image/careto_base.bmp`, que está solto
-> na raiz de `image/` em vez de num dos quatro subdiretórios
-> (`banderas`, `barba`, `pelo`, `uniformes2d`). Não foi investigado aqui —
-> a convenção dos assets é da **WTE-TASK-08** e a reconciliação dos números da
-> §1 é da **WTE-TASK-09**. Registrado para que a divergência não se perca.
+> **São 198.** A §1 do plano já registra 198 — a WTE-TASK-08 mediu o inventário
+> e a WTE-TASK-09 reconciliou. O "197" que circulava era **erro de soma na
+> prosa** da §1.8, que lista `53 + 105 + 32 + 7 + 1` e escrevia 197; o
+> `image/careto_base.bmp`, solto na raiz de `image/` em vez de num dos quatro
+> subdiretórios (`banderas`, `barba`, `pelo`, `uniformes2d`), sempre esteve
+> contado. Ver [`re/assets.md`](re/assets.md) e [`re/fase-1.md`](re/fase-1.md).
 
 ### 2. O `--check` mora num `Makefile` próprio, em `wte/`
 

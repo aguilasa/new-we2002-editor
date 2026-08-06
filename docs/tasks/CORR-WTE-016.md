@@ -3,7 +3,7 @@ id: CORR-WTE-016
 title: "Correção: a varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` continua afirmando que a §1 do plano registra 197 bitmaps"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -175,12 +175,34 @@ pendência.
 - [ ] O `fase-1.md` §6 nomeia o perímetro novo, e foi **regerado**, não editado
 - [ ] `roms/` intocada; `we-team-editor.exe` só para leitura
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+`_markdowns()` passou a varrer `docs/` + `wte/` (o `rglob` sobre `wte` já cobre
+`wte/re/`, então a segunda base saiu), o `wte/tools/README.md` entrou em
+`NARRACAO` com a razão ao lado, e o bloco do `wte/README.md` virou registro
+fechado — sem encaminhamento para tarefa concluída e sem atribuir 197 ao plano.
+Três testes novos no `test_check_fase1.py`, um deles sobre o `_markdowns()`
+direto: o `_no_perimetro` sozinho não segurava o alargamento, porque ele diria
+`True` para `wte/README.md` mesmo com a base velha — nunca era chamado.
+
 **Problemas encontrados:**
 
+Um que a CORR não previu: alargar o perímetro invalida a coluna "sítios antes".
+Os 18 foram medidos com `docs/` + `wte/re/`; sob o perímetro novo, a mesma
+árvore (`git archive 65cc4be docs wte`) devolve **19** — o nono sítio de bitmaps
+é justamente o `wte/README.md`. A constante de `SITIOS` foi remedida e a §6 da
+saída passou a dizer com que comando o número volta.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase1.py` — perímetro, `NARRACAO`, `SITIOS[0].antes` 8 → 9,
+  docstring e §6 da saída
+- `wte/tools/test_check_fase1.py` — `wte/README.md` no perímetro,
+  `wte/tools/README.md` fora, teste do `_markdowns()`, teste de resíduo no
+  `wte/README.md`, e o total de `SITIOS` 18 → 19
+- `wte/README.md` — o bloco dos bitmaps
+- `wte/re/fase-1.md` — regerado

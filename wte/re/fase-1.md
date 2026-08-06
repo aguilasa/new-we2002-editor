@@ -182,33 +182,43 @@ porque só uma delas é erro de medição:
 ## 6. A varredura dos sítios
 
 Corrigir a §1 não fecha um número errado — ele se espalha. Cada número
-reconciliado foi varrido nos markdowns de `docs/` e de `wte/re/`, e o
+reconciliado foi varrido nos markdowns de `docs/` e de `wte/`, e o
 script **aborta** se sobrar afirmação viva. Não há tabela de resíduo
 aqui porque resíduo é falha, como o `FORBIDDEN` do `port_database.py`.
 
 | Número velho | Sítios antes | Sítios agora |
 |---|---:|---:|
-| 197 bitmaps | 8 | 0 |
+| 197 bitmaps | 9 | 0 |
 | ~430 componentes | 4 | 0 |
 | 300 imports de rtl60/vcl60 | 2 | 0 |
 | 70 strings com enchimento | 4 | 0 |
 
-**18 → 0.** Os 18 de antes foram medidos com este
-mesmo perímetro em 2026-08-06, antes de a correção ser aplicada; estão
-fixos na tabela `SITIOS` do script, porque não há como remedi-los
-depois. Os sítios corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5
-e a §8.8 do plano, a tabela de estado e três seções do `progresso.md`, e os
-enunciados ainda **pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que
-iriam pedir mensagem de erro e regra de empacotamento sobre uma
-contagem inexistente.
+**19 → 0.** Os 19 de antes foram medidos com este
+mesmo perímetro em 2026-08-06, sobre a árvore anterior à correção
+(`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do
+script, porque não há como remedi-los sobre a árvore de hoje. Os sítios
+corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,
+a tabela de estado e três seções do `progresso.md`, os enunciados ainda
+**pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que iriam pedir mensagem
+de erro e regra de empacotamento sobre uma contagem inexistente — e o
+[`README.md`](../README.md) do `wte/`.
+
+**O perímetro nasceu menor.** Ele parava em `docs/` e `wte/re/`, que foi
+o que o enunciado da WTE-TASK-09 pediu, e ali fechou em zero — mas o
+`wte/README.md` continuava afirmando 197 fora do alcance da guarda, que
+é exatamente o espalhamento que esta seção diz combater. A
+[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) trocou as duas bases
+por `docs/` e `wte/`; o `rglob` sobre `wte` já cobre `wte/re/`.
 
 Fica fora do perímetro o documento que **narra** a correção: os
 `CORR-WTE-*.md` e o `correcoes-progresso.md`, o [`assets.md`](assets.md)
 e o [`strings.md`](strings.md) — que registram, cada um, a divergência
-que mediram —, o enunciado da própria WTE-TASK-09, o Log de Execução de
-qualquer tarefa, e `docs/prompts/`. Fica fora também o **enunciado de
-tarefa já concluída**: é história, não instrução. Tarefa pendente
-continua dentro, e é o que fez a 38 e a 39 entrarem.
+que mediram —, o [`README.md`](../tools/README.md) de `wte/tools/`, que
+narra esta guarda e cita `430` para explicar o corte por contexto, o
+enunciado da própria WTE-TASK-09, o Log de Execução de qualquer tarefa,
+e `docs/prompts/`. Fica fora também o **enunciado de tarefa já
+concluída**: é história, não instrução. Tarefa pendente continua dentro,
+e é o que fez a 38 e a 39 entrarem.
 
 O corte exige o número **e** uma palavra de contexto na mesma linha.
 Sem isso, `430` casaria o setor 430 do `PLAN-LINUX.md` e `300` casaria

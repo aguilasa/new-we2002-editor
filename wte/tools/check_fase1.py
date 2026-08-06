@@ -33,16 +33,24 @@ componente sem nome do `MainForm`.
 ## A varredura de sitios
 
 Corrigir a §1 do plano nao fecha um numero errado -- ele se espalha. Este
-script varre os markdowns de `docs/` e `wte/re/` procurando **afirmacao viva**
+script varre os markdowns de `docs/` e de `wte/` procurando **afirmacao viva**
 do numero velho e **aborta** se achar alguma, listando arquivo e linha. Nao ha
 tabela de residuo na saida: residuo e falha, do mesmo jeito que o `FORBIDDEN`
 do `port_database.py` e falha.
+
+O perimetro nasceu em `docs/` + `wte/re/`, que foi o que o enunciado da
+WTE-TASK-09 pediu, e ali fechou em zero. Ficou estreito demais para a propria
+tese da §6: o `wte/README.md` seguia afirmando 197 fora do alcance da guarda.
+A CORR-WTE-016 trocou as duas bases por `docs/` + `wte/` -- o `rglob` sobre
+`wte` ja cobre `wte/re/`.
 
 O que fica de fora do perimetro, e por que:
 
 - **documento que narra a correcao** -- `correcoes-progresso.md`, os
   `CORR-WTE-*.md`, o `assets.md` e o `strings.md` (que registram, cada um, a
-  divergencia que mediram), e o enunciado da propria WTE-TASK-09;
+  divergencia que mediram), o `wte/tools/README.md` (que narra **esta** guarda,
+  e cita `430` para explicar o corte por contexto), e o enunciado da propria
+  WTE-TASK-09;
 - **enunciado de tarefa ja executada** (`status: concluído` no frontmatter) --
   e historia, nao instrucao; quem le uma task concluida le o que ela pediu na
   epoca. Tarefa **pendente** continua no perimetro: ela ainda vai ser executada
@@ -101,15 +109,19 @@ NARRACAO = {
     "docs/tasks/09-fechamento-fase-1.md",
     "wte/re/assets.md",
     "wte/re/strings.md",
+    "wte/tools/README.md",   # narra esta guarda: cita 430 para explicar o corte
     f"wte/re/{MD_NAME}",
 }
 
 # Os quatro numeros que a fase 1 reconciliou. Cada um leva o regex do digito e
 # o regex de contexto; os dois tem de casar na mesma linha para a linha contar
 # como afirmacao viva. `antes` foi medido com este mesmo perimetro em
-# 2026-08-06, antes de a correcao ser aplicada -- nao da para remedir depois.
+# 2026-08-06, sobre a arvore anterior a correcao (`git archive 65cc4be docs
+# wte`) -- nao da para remedir sobre a arvore de hoje. O 9 de bitmaps era 8
+# quando o perimetro parava em `wte/re/`: o nono sitio e o `wte/README.md`, que
+# a CORR-WTE-016 trouxe para dentro.
 SITIOS = (
-    ("197 bitmaps", r"197", r"(?i)bitmap|\.bmp|\bBMP\b|image/", 8),
+    ("197 bitmaps", r"197", r"(?i)bitmap|\.bmp|\bBMP\b|image/", 9),
     ("~430 componentes", r"430", r"(?i)componente|controle", 4),
     ("300 imports de rtl60/vcl60", r"300", r"(?i)rtl60|vcl60|import", 2),
     ("70 strings com enchimento", r"70", r"(?i)string|padding|enchimento|truncad", 4),
@@ -120,7 +132,9 @@ LOG_HEADER = "## Log de Execução"
 
 def _markdowns() -> list[Path]:
     achados: list[Path] = []
-    for base in ("docs", "wte/re"):
+    # `rglob` sobre `wte` ja cobre `wte/re/`. A base larga entrou com a
+    # CORR-WTE-016: o sitio vivo estava em `wte/README.md`, fora do alcance.
+    for base in ("docs", "wte"):
         achados.extend(sorted((ROOT / base).rglob("*.md")))
     return achados
 
@@ -632,7 +646,7 @@ def montar(**d) -> str:
     w("## 6. A varredura dos sítios")
     w("")
     w("Corrigir a §1 não fecha um número errado — ele se espalha. Cada número")
-    w("reconciliado foi varrido nos markdowns de `docs/` e de `wte/re/`, e o")
+    w("reconciliado foi varrido nos markdowns de `docs/` e de `wte/`, e o")
     w("script **aborta** se sobrar afirmação viva. Não há tabela de resíduo")
     w("aqui porque resíduo é falha, como o `FORBIDDEN` do `port_database.py`.")
     w("")
@@ -643,21 +657,31 @@ def montar(**d) -> str:
     w("")
     total_antes = sum(a for _, _, _, a in SITIOS)
     w(f"**{total_antes} → 0.** Os {total_antes} de antes foram medidos com este")
-    w("mesmo perímetro em 2026-08-06, antes de a correção ser aplicada; estão")
-    w("fixos na tabela `SITIOS` do script, porque não há como remedi-los")
-    w("depois. Os sítios corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5")
-    w("e a §8.8 do plano, a tabela de estado e três seções do `progresso.md`, e os")
-    w("enunciados ainda **pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que")
-    w("iriam pedir mensagem de erro e regra de empacotamento sobre uma")
-    w("contagem inexistente.")
+    w("mesmo perímetro em 2026-08-06, sobre a árvore anterior à correção")
+    w("(`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do")
+    w("script, porque não há como remedi-los sobre a árvore de hoje. Os sítios")
+    w("corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,")
+    w("a tabela de estado e três seções do `progresso.md`, os enunciados ainda")
+    w("**pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que iriam pedir mensagem")
+    w("de erro e regra de empacotamento sobre uma contagem inexistente — e o")
+    w("[`README.md`](../README.md) do `wte/`.")
+    w("")
+    w("**O perímetro nasceu menor.** Ele parava em `docs/` e `wte/re/`, que foi")
+    w("o que o enunciado da WTE-TASK-09 pediu, e ali fechou em zero — mas o")
+    w("`wte/README.md` continuava afirmando 197 fora do alcance da guarda, que")
+    w("é exatamente o espalhamento que esta seção diz combater. A")
+    w("[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) trocou as duas bases")
+    w("por `docs/` e `wte/`; o `rglob` sobre `wte` já cobre `wte/re/`.")
     w("")
     w("Fica fora do perímetro o documento que **narra** a correção: os")
     w("`CORR-WTE-*.md` e o `correcoes-progresso.md`, o [`assets.md`](assets.md)")
     w("e o [`strings.md`](strings.md) — que registram, cada um, a divergência")
-    w("que mediram —, o enunciado da própria WTE-TASK-09, o Log de Execução de")
-    w("qualquer tarefa, e `docs/prompts/`. Fica fora também o **enunciado de")
-    w("tarefa já concluída**: é história, não instrução. Tarefa pendente")
-    w("continua dentro, e é o que fez a 38 e a 39 entrarem.")
+    w("que mediram —, o [`README.md`](../tools/README.md) de `wte/tools/`, que")
+    w("narra esta guarda e cita `430` para explicar o corte por contexto, o")
+    w("enunciado da própria WTE-TASK-09, o Log de Execução de qualquer tarefa,")
+    w("e `docs/prompts/`. Fica fora também o **enunciado de tarefa já")
+    w("concluída**: é história, não instrução. Tarefa pendente continua dentro,")
+    w("e é o que fez a 38 e a 39 entrarem.")
     w("")
     w("O corte exige o número **e** uma palavra de contexto na mesma linha.")
     w("Sem isso, `430` casaria o setor 430 do `PLAN-LINUX.md` e `300` casaria")
