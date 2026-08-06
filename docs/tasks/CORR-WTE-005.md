@@ -3,7 +3,7 @@ id: CORR-WTE-005
 title: "Correção: os streams sintéticos que sustentam \"os 21 TValueType exercitados\" não são versionados"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -128,22 +128,80 @@ verificação para o descartável.
 
 ## Verificação
 
-- [ ] O teste roda **sem** o `we-team-editor.exe` presente
-- [ ] Todo `TValueType` de 0 a 20 é exercitado por pelo menos um caso
-- [ ] As três flags de objeto têm caso, com a palavra-chave textual conferida
-- [ ] Cada rota de aborto confere o **offset absoluto** na mensagem, não só que
+- [x] O teste roda **sem** o `we-team-editor.exe` presente
+- [x] Todo `TValueType` de 0 a 20 é exercitado por pelo menos um caso
+- [x] As três flags de objeto têm caso, com a palavra-chave textual conferida
+- [x] Cada rota de aborto confere o **offset absoluto** na mensagem, não só que
       levantou `DfmError`
-- [ ] `make -C wte check` verde, e o alvo não passa a exigir `--check` de um
+- [x] `make -C wte check` verde, e o alvo não passa a exigir `--check` de um
       arquivo de teste
-- [ ] `python3 wte/tools/dfm_extract.py --check` continua verde
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] `python3 wte/tools/dfm_extract.py --check` continua verde
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+Rota escolhida: **arquivo separado**, `wte/tools/test_dfm_extract.py`, 43 casos
+de `unittest` em stdlib pura. Os streams são montados byte a byte em memória e
+o `.exe` nunca é aberto — o teste passa num clone sem `we-team-editor/`, o que
+foi medido copiando o par gerador+teste para uma árvore onde `EXE` não existe.
+
+Cobre os 21 `TValueType` (uma tabela de 32 casos valor→texto, mais `vaNull` nas
+duas rotas dedicadas, com um teste que falha se algum dos 21 ficar sem caso), as
+três flags de objeto com a palavra-chave textual (`object`/`inherited`/`inline`,
+mais `[n]` do `ffChildPos` e a precedência de `inherited` sobre `inline`), e 19
+rotas de aborto. Todo aborto confere o **offset absoluto** na mensagem, e o
+offset esperado é derivado do próprio prefixo do stream (`BASE + len(prefixo)`),
+nunca escrito à mão. `BASE` é 4118, não zero: com base zero um bug na soma da
+base passaria despercebido.
+
+A colisão de nome de formulário mora em `generate()`, que lê o `.exe`. Para
+alcançá-la sem o binário do Obocaman, o teste monta um **PE32 sintético** com o
+diretório de recursos mínimo que `read_rcdata` sabe ler — o que de quebra põe
+sob teste os abortos do leitor de PE (sem `MZ`, sem assinatura `PE`, PE32+),
+que nenhum outro caminho alcança.
+
+`wte/Makefile` ganhou o alvo `test`, e `check` passou a depender dele.
+`GENERATORS` filtra `tools/test_%.py` do `wildcard`: sem isso o teste seria
+cobrado por um `--check` que ele não tem, e quebraria o alvo.
+
 **Problemas encontrados:**
 
+Dois erros meus no primeiro esboço, os dois pegos pelo próprio teste: escrevi
+`Icon.Data` como duas short strings, quando no DFM é **um** nome de propriedade
+com ponto; e `vaBinary` ficou de fora da tabela de cobertura por estar testado
+noutra classe — o teste dos 21 tipos acusou. Ficou uma lição no arquivo: as duas
+pilhas do `Reader` (objetos e propriedades) existem para o blob dentro de
+coleção sair como `Form1.Items.Glyph.Data.bin`, e agora isso tem caso.
+
+Para provar que a bateria não é vazia, sete mutações no `dfm_extract.py` foram
+rodadas numa **cópia** em sandbox (a árvore real nunca foi tocada): trocar
+`inherited` por `inline` (3 falhas), zerar a base do offset (18), desligar o
+encurtamento do `fmt_float` (2), desligar a detecção de colisão de blob (2),
+errar o expoente do `extended` (2), ignorar bytes sobrando (1) e desligar a
+conferência de ASCII (5 erros). As sete foram pegas.
+
+Duas discrepâncias que a mudança criou, consertadas em commit próprio:
+`wte/README.md` afirmava que o `check` roda `--check` em cada `tools/*.py` por
+`wildcard`, o que deixou de ser verdade; e o Log da WTE-TASK-03 — a afirmação
+que originou esta CORR — continuava dizendo "streams sintéticos" sem dizer onde
+eles moram.
+
+A CORR lista `vaList` entre os tipos ausentes dos 18 formulários; ele **ocorre**.
+Os ausentes medidos são doze: `vaNull`, `vaInt32`, `vaExtended`, `vaLString`,
+`vaNil`, `vaCollection`, `vaSingle`, `vaCurrency`, `vaDate`, `vaWString`,
+`vaInt64` e `vaUTF8String`. O teste cobre os 21 de qualquer modo, e a lista
+correta está no cabeçalho dele.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/test_dfm_extract.py` — criado
+- `wte/Makefile` — alvo `test`; `check` depende dele; `GENERATORS` filtrado
+- `wte/tools/README.md` — a convenção `tools/test_<gerador>.py`
+- `wte/tests/README.md` — diz que teste de ferramenta Python não mora ali
+- `docs/tasks/correcoes-progresso.md`
+- `wte/README.md`, `docs/tasks/03-extrator-de-dfm.md` — reconciliação, em
+  commit próprio

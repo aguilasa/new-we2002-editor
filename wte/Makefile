@@ -20,9 +20,14 @@ ASSETS_SRC ?= $(ROOT)/we-team-editor
 # Os geradores das fases 1 a 3 entram aqui conforme forem existindo. Cada um
 # tem de aceitar --check; o alvo `check` roda todos e falha no primeiro que
 # divergir do commitado.
-GENERATORS := $(wildcard $(CURDIR)/tools/*.py)
+#
+# `tools/test_*.py` sao testes de ferramenta, nao geradores: nao aceitam
+# --check, e sem o filter-out o wildcard os arrastaria para a bateria e
+# quebraria o alvo. Eles rodam pelo alvo `test`, do qual `check` depende.
+GENERATORS := $(filter-out $(CURDIR)/tools/test_%.py,$(wildcard $(CURDIR)/tools/*.py))
+TESTS      := $(wildcard $(CURDIR)/tools/test_*.py)
 
-.PHONY: help build run run-99 assets check clean distclean
+.PHONY: help build run run-99 assets check test clean distclean
 
 help:
 	@echo 'Alvos:'
@@ -30,7 +35,8 @@ help:
 	@echo '  run        roda o binario no DISPLAY do shell'
 	@echo '  run-99     roda no Xvfb :99, resolvendo o XAUTHORITY sozinho'
 	@echo '  assets     cria o symlink assets/ -> $(ASSETS_SRC)'
-	@echo '  check      --check de todos os geradores de tools/'
+	@echo '  test       unittest de tools/test_*.py (nao precisa do .exe)'
+	@echo '  check      test + --check de todos os geradores de tools/'
 	@echo '  clean      remove build/'
 	@echo '  distclean  clean + remove o symlink assets/'
 	@echo
@@ -79,12 +85,25 @@ assets:
 	  && echo '>> data/dat.bin: ok' \
 	  || echo '>> data/dat.bin: AUSENTE'
 
+# ------------------------------------------------------------------ test ----
+
+# Testes das ferramentas Python. Montam os streams em memoria e NAO abrem o
+# `.exe`: rodam num clone sem a pasta we-team-editor/. Cobrem o que nenhum
+# formulario real alcanca -- os 12 TValueType ausentes dos 18, o byte de flags
+# de objeto (zero ocorrencias em 459 objetos) e as rotas de aborto.
+test:
+	@if [ -z '$(TESTS)' ]; then \
+	  echo 'AVISO: nenhum teste de ferramenta em tools/ -- nada medido.'; \
+	  exit 0; \
+	fi
+	@cd '$(CURDIR)/tools' && $(PYTHON) -m unittest discover -p 'test_*.py'
+
 # ----------------------------------------------------------------- check ----
 
 # Gate das fases 1 a 3: nenhum arquivo gerado foi editado a mao. Enquanto nao
 # houver gerador, o alvo diz isso em vez de fingir que passou -- alvo verde
 # sem nada medido e pior do que alvo ausente.
-check:
+check: test
 	@if [ -z '$(GENERATORS)' ]; then \
 	  echo 'AVISO: nenhum gerador em tools/ ainda -- nada medido.'; \
 	  echo '       O primeiro chega na WTE-TASK-03 (dfm_extract.py).'; \

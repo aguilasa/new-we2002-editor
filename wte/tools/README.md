@@ -24,3 +24,30 @@ da §4.4 do plano.
 O `check` do Makefile enumera `tools/*.py` por `wildcard`: script novo entra na
 bateria sozinho, sem editar o Makefile. O preço é que um script que **não**
 aceite `--check` quebra o alvo — o que é o comportamento desejado.
+
+## Teste de ferramenta: `tools/test_<gerador>.py`
+
+| Teste | Cobre |
+|---|---|
+| `test_dfm_extract.py` ✅ | os 21 `TValueType`, as três flags de objeto e as rotas de aborto do `dfm_extract.py` |
+
+Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
+o prefixo `test_`. (Teste do lado **Pascal** é outra coisa e mora em
+[`../tests/`](../tests/README.md).)
+
+O `wildcard` acima faria do `test_*.py` um gerador e cobraria dele um `--check`
+que ele não tem, então o Makefile o filtra:
+
+```make
+GENERATORS := $(filter-out $(CURDIR)/tools/test_%.py,$(wildcard $(CURDIR)/tools/*.py))
+TESTS      := $(wildcard $(CURDIR)/tools/test_*.py)
+```
+
+Eles rodam pelo alvo `test`, do qual `check` depende — `make -C wte check`
+continua sendo o único comando a decorar.
+
+**Regra:** o teste é `unittest` de stdlib pura e **não abre o `.exe`** — monta
+os streams em memória. Isso não é preciosismo: `--check` verde só mede o que os
+18 formulários exercitam, e é justamente o que eles *não* têm (12 dos 21
+`TValueType`, o byte de flags de objeto em 0 dos 459 objetos, todo aborto) que
+precisa de teste. O gerador roda sem o binário do Obocaman só neste caminho.
