@@ -1497,10 +1497,11 @@ def render_md(m: Measurement) -> str:
 
     if m.recoverable:
         add("### As cópias mortas preservam conteúdo que a viva perdeu\n")
-        add("É o que a §8.8 do plano dá como perdido — \"conseguir o binário "
-            "original em espanhol\nresolveria isso\". Em parte, não é "
-            "preciso: o próprio arquivo carrega outra versão\ndo mesmo "
-            "texto.\n")
+        add("É o que a §8.8 do plano dava como perdido — \"conseguir o "
+            "binário original em\nespanhol resolveria isso\". Em parte, não "
+            "é preciso: o próprio arquivo carrega\noutra versão do mesmo "
+            "texto, e a §8.8 passou a dizer isso "
+            "([CORR-WTE-009](../../docs/tasks/CORR-WTE-009.md)).\n")
         for s in m.recoverable:
             add(f"**`0x{s.va:08x}`** — viva, "
                 + (", ".join(f"`{h}`" for h in s.handlers) or "sem handler")
@@ -1535,6 +1536,13 @@ def render_md(m: Measurement) -> str:
     # --------------------------------------------------------- correções ---
     add("## Onde o plano envelheceu\n")
     add("Tudo abaixo é contagem do script contra texto já escrito.\n")
+    add("A coluna **Diz** cita o texto como ele estava quando esta página foi "
+        "medida. A\n[CORR-WTE-009](../../docs/tasks/CORR-WTE-009.md) já "
+        "levou a última linha à §8.8 e à\nlista de pendências do "
+        "`progresso.md`, então aquela citação é registro do que "
+        "foi\ncorrigido, não do que se lê lá hoje. As duas primeiras seguem "
+        "de pé — o `70`\ncontra `13` é da WTE-TASK-09, que tem a "
+        "reconciliação no critério.\n")
     add("| Onde | Diz | Medido |")
     add("|---|---|---|")
     add(f"| §1.5 e §8.8 do plano, e a WTE-TASK-05 | \"**70 strings** terminam "
