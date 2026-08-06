@@ -3,7 +3,7 @@ id: CORR-WTE-012
 title: "Correção: a §1 do plano diz 300 imports de rtl60/vcl60 (são 267) e chama o TBrowseURL de componente de terceiro, que a §5 do mesmo arquivo já desmente"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -122,22 +122,52 @@ independentes desmentem.
 
 ## Verificação
 
-- [ ] `grep -n "componente de terceiro" docs/PLAN-WTE-LAZARUS.md` não devolve
-      mais a linha 251, e as duas passagens do `TBrowseURL` concordam
-- [ ] O quadro da WTE-TASK-09 tem a linha dos imports, apontando para
+- [x] `grep -n "componente de terceiro" docs/PLAN-WTE-LAZARUS.md` não devolve
+      mais a linha 251, e as duas passagens do `TBrowseURL` concordam — as três
+      ocorrências restantes (252, 523, 552) são todas a forma negada
+- [x] O quadro da WTE-TASK-09 tem a linha dos imports, apontando para
       `dump_units.py`
-- [ ] O valor a reconciliar bate com o `unidades-vcl.md`: 322 no total, 267 dos
+- [x] O valor a reconciliar bate com o `unidades-vcl.md`: 322 no total, 267 dos
       dois `.bpl`
-- [ ] `python3 wte/tools/dump_units.py --check` verde (nenhum gerado tocado)
-- [ ] Links de markdown conforme `.claude/rules/links.md`
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] `python3 wte/tools/dump_units.py --check` verde (nenhum gerado tocado)
+- [x] Links de markdown conforme `.claude/rules/links.md`
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+A §1.6 parou de contradizer a §5 do mesmo arquivo: `TBrowseURL` passou de
+"componente de terceiro" para "ação padrão da própria VCL (unidade
+`Extactns`)", com a marca de onde isso foi medido. A substituição proposta não
+muda — `TLabel` + `OpenURL()` de `LCLIntf` continua certa nos dois lugares —,
+muda a justificativa, e ela importa: "componente de terceiro" manda alguém
+procurar na WTE-TASK-10 um `.bpl` externo que não existe.
+
+O número dos imports **não foi corrigido no plano**, de propósito, e sim ganhou
+dono: a linha `| 322 imports, sendo 300 de rtl60.bpl/vcl60.bpl (§1.2) |
+dump_units.py |` entrou no quadro de recontagem da WTE-TASK-09. É ela quem
+reconcilia a §1, e corrigir aqui duplicaria a edição — o que não podia é o
+número ficar sem nenhum dos dois. A ferramenta já mede e já publica o valor
+certo (`unidades-vcl.md`: 322 no total, 267 dos dois `.bpl`).
+
 **Problemas encontrados:**
 
+A varredura pegou o efeito colateral da linha nova: o critério de conclusão da
+WTE-TASK-09 dizia "os **cinco** números do plano remedidos". Passaram a ser
+seis. Corrigido na mesma invocação — critério que conta errado é critério que
+se cumpre sem cumprir.
+
+A mesma afirmação aparece em `docs/tasks/progresso.md:391`, na tabela "Estado
+medido na criação destas tasks". Deixada como está, e não por omissão: aquela
+seção abre dizendo que os números vêm de script descartável e que "a WTE-TASK-09
+os remede com ferramenta versionada". Já tem dono, e é o mesmo.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md` — §1.6
+- `docs/tasks/09-fechamento-fase-1.md` — quadro de recontagem e o critério que
+  contava cinco
+- `docs/tasks/correcoes-progresso.md`

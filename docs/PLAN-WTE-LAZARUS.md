@@ -248,7 +248,8 @@ Censo de componentes nos 18 formulários:
 | | | | `TTimer` | 1 |
 
 Vinte classes distintas. **Dezenove têm equivalente direto na LCL** — ver §5.
-`TBrowseURL` é componente de terceiro e é o único a substituir.
+`TBrowseURL` é a ação padrão da própria VCL (unidade `Extactns`), não
+componente de terceiro, e é o único a substituir — medido na WTE-TASK-07.
 
 Os `<bin N>` no dump (ícones, `Picture.Data` de 45 `TImage`, glyphs de 28
 `TSpeedButton`) são bitmaps embutidos; o decodificador da Fase 1 tem que

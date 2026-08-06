@@ -46,6 +46,7 @@ descartável. Remedir com as ferramentas versionadas e **reconciliar**:
 | 19 de 69 offsets | `dump_offsets.py` |
 | 70 strings com padding | `dump_strings.py` |
 | 13 unidades `Tep2002_*` | `objdump -x` |
+| 322 imports, sendo 300 de `rtl60.bpl`/`vcl60.bpl` (§1.2) | `dump_units.py` |
 
 Divergência entre o plano e a medição versionada se resolve **a favor da
 medição**, e o plano é corrigido.
@@ -65,7 +66,7 @@ medição**, e o plano é corrigido.
 ## Critério de conclusão
 
 - [ ] As quatro conferências cruzadas feitas, com o resultado escrito
-- [ ] Os cinco números do plano remedidos por ferramenta versionada
+- [ ] Os seis números do plano remedidos por ferramenta versionada
 - [ ] Divergência corrigida no plano, não escondida
 - [ ] Nenhum item da Fase 1 em aberto sem justificativa
 - [ ] Commit no formato conventional, em inglês
