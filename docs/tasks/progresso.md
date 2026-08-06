@@ -308,9 +308,12 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
-  a tradução PT-BR com 70 strings truncadas por padding. Recuperar o original
-  devolveria as mensagens inteiras; `.text` é idêntico, então nada da análise
-  muda. (§1.5)
+  a tradução PT-BR com 70 strings truncadas por padding. As três mensagens em
+  que isso importa já têm cópia legível **dentro do próprio `.exe`** — o bloco
+  de literais aparece três vezes na `.data`, e as duas cópias mortas
+  preservaram o texto original (WTE-TASK-05; marcadas `gemea_difere` no
+  `wte/re/strings.tsv`). O item continua desejável, só deixou de ser
+  necessário; `.text` é idêntico, então nada da análise muda. (§1.5)
 
 ---
 

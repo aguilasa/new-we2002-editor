@@ -906,8 +906,19 @@ foi exatamente o bug do slot 64 num array de 63 que o `newWe2002` documentou.
 70 strings estão com padding, e pelo menos uma perdeu conteúdo
 (`somente na Mastere`). Se a spec de um handler depender de ler a mensagem de
 erro para entender a regra de validação, a mensagem pode estar incompleta.
-Conseguir o binário original em espanhol resolveria isso — **mas não é
-bloqueante**, e não vale segurar o projeto por ele. Registrado em §1.5.
+
+**A recuperação não depende do binário espanhol.** A WTE-TASK-05 mediu que o
+bloco de literais do app aparece **três vezes** na `.data`, e as duas cópias
+altas não são referenciadas por ponteiro nenhum — são mortas, e por isso o
+tradutor não as sobrescreveu. Elas preservam o texto que a viva perdeu:
+`somente na Mastere`, referenciada de dentro de `jugador.BitBtn3Click`, tem
+gêmea legível com o parêntese fechado e `Master` inteiro. São **três** as
+mensagens nessa situação, e o `wte/re/strings.tsv` as marca com
+`gemea_difere` na coluna `suspeita_patch` — um `grep` no arquivo que já está
+no disco.
+
+O binário original em espanhol continua sendo bom ter e continua **não sendo
+bloqueante**; deixou de ser a única rota. Registrado em §1.5.
 
 ### 8.9 `TStaticText` no GTK2
 

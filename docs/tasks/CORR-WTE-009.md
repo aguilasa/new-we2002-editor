@@ -3,7 +3,7 @@ id: CORR-WTE-009
 title: "Correção: a §8.8 e a pendência do progresso.md ainda tratam o binário espanhol como única rota para as mensagens decepadas"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -118,20 +118,56 @@ WTE-TASK-09.
 
 ## Verificação
 
-- [ ] `grep -n "binário original em espanhol" docs/PLAN-WTE-LAZARUS.md
+- [x] `grep -n "binário original em espanhol" docs/PLAN-WTE-LAZARUS.md
       docs/tasks/progresso.md` mostra as duas passagens já com a rota interna
-- [ ] A §8.8 cita `gemea_difere` e o caminho do `strings.tsv`
-- [ ] O número "70" continua onde estava, para a WTE-TASK-09 reconciliar
-- [ ] `python3 wte/tools/dump_strings.py --check` verde (nenhum gerado tocado)
-- [ ] Links de markdown conforme `.claude/rules/links.md`
-- [ ] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
+- [x] A §8.8 cita `gemea_difere` e o caminho do `strings.tsv`
+- [x] O número "70" continua onde estava, para a WTE-TASK-09 reconciliar —
+      plano:906, `progresso.md`:311 e 396, e `09-fechamento-fase-1.md`:47
+- [~] `python3 wte/tools/dump_strings.py --check` verde (nenhum gerado tocado)
+      — verde, mas **um gerado foi tocado**: a varredura obrigou. Ver o Log
+- [x] Links de markdown conforme `.claude/rules/links.md`
+- [x] `roms/` intocada; `we-team-editor.exe` aberto só para leitura
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+A §8.8 manteve a armadilha — mensagem truncada continua sendo risco para spec —
+e trocou a saída: ganhou um parágrafo dizendo que o bloco de literais aparece
+três vezes na `.data`, que as duas cópias altas não são referenciadas (e por
+isso o tradutor não as sobrescreveu), que a mensagem que a própria §8.8 cita
+tem gêmea legível, e que são três as marcadas `gemea_difere` no
+`wte/re/strings.tsv`. O binário espanhol continua desejável e continua não
+bloqueante — deixou de ser a única rota.
+
+No `progresso.md`, só o texto da pendência externa. Nenhuma célula de tabela
+tocada: o `70` da linha "Strings com padding do tradutor" é da WTE-TASK-09, e
+segue onde estava, como os outros três lugares que o repetem.
+
 **Problemas encontrados:**
 
+A varredura achou o espelho do que a CORR-WTE-007 já tinha resolvido no outro
+gerador: o `wte/re/strings.md` cita a frase antiga da §8.8 em dois lugares — na
+seção das cópias mortas e na tabela "Onde o plano envelheceu". Consertar a §8.8
+sem tocar neles deixaria o repositório com um documento afirmando que o plano
+diz o que ele já não diz.
+
+Como o `.md` é **gerado**, a correção entrou no `dump_strings.py`: o verbo da
+seção passou para o pretérito e ganhou o ponteiro para esta CORR, e a tabela
+ganhou o mesmo enquadramento que a CORR-WTE-007 deu à do `published_methods.md`
+— a coluna **Diz** cita o texto como estava na medição, e diz qual das três
+linhas já foi propagada. As duas primeiras seguem de pé; o `70` contra `13` é
+da WTE-TASK-09.
+
+Por isso o critério "nenhum gerado tocado" ficou `[~]`: o `--check` está verde,
+mas o `strings.md` foi regerado. Tocar nele à mão é que seria erro.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md` — §8.8
+- `docs/tasks/progresso.md` — texto da pendência externa
+- `wte/tools/dump_strings.py` — as duas citações da §8.8 em `render_md()`
+- `wte/re/strings.md` — regerado
+- `docs/tasks/correcoes-progresso.md`
