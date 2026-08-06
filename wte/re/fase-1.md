@@ -105,6 +105,17 @@ mora nela. Os outros são exatamente os slots preenchidos, e o critério
 de limite do [`dump_offsets.py`](../tools/dump_offsets.py) já os contém
 pelos dois testes independentes que ele confronta.
 
+**Essa igualdade é asserção, não prosa.** O script aborta se
+`19 − 3` deixar de dar `16`. O corte entre os dois grupos é por
+**faixa de endereço** — `>= 0x00423000`, o início de `.data` —, e o
+resultado é confrontado a cada rodada com a coluna `nota` do
+[`offsets.tsv`](offsets.tsv), que o `dump_offsets.py` preenche lendo a
+seção de cada ocorrência no PE. Até a
+[CORR-WTE-017](../../docs/tasks/CORR-WTE-017.md) o corte era
+`"0x0042" not in va`, teste de faixa escrito como teste de substring:
+os últimos 4 KiB de `.text` casam o prefixo e `.data` passa de
+`0x0042ffff`, então ele errava nos dois sentidos — em silêncio.
+
 As 6 cópias são as duas tabelas repetidas três vezes
 cada em `.data` — o mesmo fenômeno do bloco de literais que o
 [`strings.md`](strings.md) mediu, e não offsets novos.

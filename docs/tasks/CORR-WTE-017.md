@@ -3,7 +3,7 @@ id: CORR-WTE-017
 title: "Correção: o `fase-1.md` separa offset em tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -166,12 +166,42 @@ asserção em vez de por coincidência.
 - [ ] `make -C wte check` verde de ponta a ponta
 - [ ] `roms/` intocada; `we-team-editor.exe` só para leitura
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+O corte virou `particionar_confirmados()`: faixa numérica contra
+`DATA_VA = 0x00423000` em vez de substring, mais a igualdade da §3 como
+`CheckError`. A §3 da saída passou a dizer qual é o critério e que ele aborta.
+Seis testes novos, com entrada plantada nos **dois** sentidos que a substring
+errava.
+
 **Problemas encontrados:**
 
+A CORR mandava preferir a faixa vinda do `dump_offsets.py` a redeclará-la —
+mas ele não expõe constante, e o `offsets.md` não publica a faixa das seções.
+O que existe é melhor: a coluna `nota` do `offsets.tsv`, que o `dump_offsets.py`
+preenche com o nome da seção de **cada ocorrência**, lida do PE. Então `DATA_VA`
+ficou declarada aqui e o corte por faixa é confrontado com a `nota` a cada
+rodada — a constante duplicada não fica sem guarda, que é o que o
+[`README.md`](../../wte/tools/README.md) do diretório pede.
+
+Prova de que os dois cortes discordam, com a entrada plantada `0x00422abc`
+somada aos 19 confirmados reais:
+
+```
+corte velho (substring): 3 -> perde o plantado, conta como slot de tabela
+corte novo  (faixa)    : 4 -> ['OFS_COST_NATIONAL', 'OFS_COST_NC',
+                              'OFS_LINK_ML', 'OFS_PLANTADO']
+```
+
+A §3 continua publicando 16 / 3, e o `--check` continua verde.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase1.py` — `DATA_VA`, `_em_data()`,
+  `particionar_confirmados()`, e a §3 da saída
+- `wte/tools/test_check_fase1.py` — `TesteCorteDeFaixa`, seis casos
+- `wte/re/fase-1.md` — regerado

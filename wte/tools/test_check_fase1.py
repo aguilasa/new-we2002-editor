@@ -67,6 +67,61 @@ class TesteCorteContexto(unittest.TestCase):
         self.assertEqual(sum(a for *_, a in mod.SITIOS), 19)
 
 
+class TesteCorteDeFaixa(unittest.TestCase):
+    """A §3 parte os confirmados por endereço; o corte tem de ser por faixa.
+
+    Até a CORR-WTE-017 ele era `"0x0042" not in va`. Cada teste daqui planta um
+    endereço que a substring classifica errado e a faixa classifica certo — sem
+    entrada plantada a guarda nova é guarda não exercitada.
+    """
+
+    def _linha(self, va: str, nota: str, nome: str = "OFS_PLANTADO"):
+        return {"nome": nome, "va": va, "nota": nota, "classe": "confirmado"}
+
+    def _substring(self, va: str) -> bool:
+        """O corte velho, para provar que os dois discordam."""
+        return "0x0042" not in va
+
+    def test_fim_de_text_casa_a_substring_e_nao_a_faixa(self):
+        # 0x00422abc e legitimo dentro de .text: .text vai ate 0x00423000.
+        va = "0x00422abc"
+        self.assertFalse(self._substring(va))   # velho: diria "mora na tabela"
+        self.assertFalse(mod._em_data(va))      # novo: imediato de .text
+
+    def test_data_alta_nao_casa_a_substring_e_casa_a_faixa(self):
+        # O outro sentido: .data vai ate 0x0043c000, entao passa de 0x0042ffff.
+        va = "0x00430010"
+        self.assertTrue(self._substring(va))    # velho: diria "so em .text"
+        self.assertTrue(mod._em_data(va))       # novo: mora em .data
+
+    def test_enderecos_reais_do_binario(self):
+        self.assertTrue(mod._em_data("0x004231bc|0x0042b76c"))
+        self.assertTrue(mod._em_data("0x004054b7|0x0042363c"))  # .data,.text
+        self.assertFalse(mod._em_data("0x0040448c|0x00404628"))
+        self.assertFalse(mod._em_data("0x004042fd"))  # contem "0042", e .text
+
+    def test_plantado_sai_como_imediato_e_nao_como_slot(self):
+        confirmados = [self._linha("0x004231bc", ".data", "OFS_NA_TABELA"),
+                       self._linha("0x00422abc", ".text")]
+        slots = [self._linha("0x004231bc", ".data", "OFS_NA_TABELA")]
+        fora = mod.particionar_confirmados(confirmados, slots)
+        self.assertEqual([r["nome"] for r in fora], ["OFS_PLANTADO"])
+
+    def test_nota_discordante_aborta(self):
+        # A constante DATA_VA e medida e duplicada aqui; quem a segura e a
+        # coluna `nota`, que vem do leitor de PE do dump_offsets.py.
+        confirmados = [self._linha("0x00422abc", ".data")]
+        with self.assertRaises(mod.CheckError) as ctx:
+            mod.particionar_confirmados(confirmados, [])
+        self.assertIn("discorda da secao", str(ctx.exception))
+
+    def test_particao_que_nao_bate_com_os_slots_aborta(self):
+        confirmados = [self._linha("0x004231bc", ".data")]
+        with self.assertRaises(mod.CheckError) as ctx:
+            mod.particionar_confirmados(confirmados, [])
+        self.assertIn("nao bate com os slots preenchidos", str(ctx.exception))
+
+
 class TestePerimetro(unittest.TestCase):
     """Quem entra na varredura, e ate que linha ela le."""
 

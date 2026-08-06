@@ -27,7 +27,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-014](/docs/tasks/CORR-WTE-014.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | O "197 bitmaps" (são 198) não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md) | [WTE-TASK-08](/docs/tasks/08-convencao-dos-assets.md) | Duas transcrições de evidência do `assets.md` não batem: o ano dos 195 `.bmp` e o endereço do `fread` | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | A varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` ainda diz que a §1 do plano registra 197 bitmaps | Baixa | [x] concluída | 2026-08-06 |
-| [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [ ] pendente | — |
+| [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [x] concluída | 2026-08-06 |
 
 ## Checklist
 
@@ -47,7 +47,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-014 — dar dono ao número de bitmaps e fechar o buraco do quadro da 09
 - [x] CORR-WTE-015 — colar da saída as duas evidências transcritas à mão
 - [x] CORR-WTE-016 — alargar o perímetro da varredura para `wte/` e fechar o sítio do `wte/README.md`
-- [ ] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
+- [x] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
 
 ## Detalhes por correção
 

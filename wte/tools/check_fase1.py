@@ -129,6 +129,52 @@ SITIOS = (
 
 LOG_HEADER = "## Log de Execução"
 
+# Inicio de `.data`; `.text` vai ate aqui. Medido no cabecalho de secao do
+# `.exe`. E constante medida duplicada -- o que o README.md deste diretorio
+# manda evitar --, entao ela nao fica sem guarda: `particionar_confirmados()`
+# confronta o corte por faixa contra a coluna `nota` do `offsets.tsv`, que o
+# `dump_offsets.py` preenche com o nome da secao de cada ocorrencia, lido do
+# proprio PE. Se um dos dois envelhecer, o script aborta dizendo qual.
+#
+# Ate a CORR-WTE-017 o corte era `"0x0042" not in va` -- teste de faixa escrito
+# como teste de substring. Acertava por coincidencia de digito: os ultimos 4 KiB
+# de `.text` (0x00422000..0x00422fff) casam o prefixo, e `.data` passa de
+# 0x0042ffff, entao os dois sentidos erravam em silencio.
+DATA_VA = 0x00423000
+
+
+def _em_data(va: str) -> bool:
+    """Algum dos enderecos da linha mora em `.data`."""
+    return any(int(a, 16) >= DATA_VA
+               for a in va.split("|") if a.startswith("0x"))
+
+
+def particionar_confirmados(
+        confirmados: list[dict[str, str]],
+        slots_com_nome: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Os confirmados que so aparecem como imediato de instrucao, em `.text`.
+
+    Confirmado que nao toca `.data` nao mora em nenhuma das duas tabelas. A
+    §3 afirma em prosa que os outros sao **exatamente** os slots preenchidos;
+    aqui isso vira assercao, senao a partida pode desandar com o `--check`
+    verde e a frase continua impressa.
+    """
+    fora = [r for r in confirmados
+            if r["classe"] == "confirmado" and not _em_data(r["va"])]
+    for r in confirmados:
+        secoes = [s for s in r["nota"].split(",") if s]
+        if secoes and _em_data(r["va"]) != (".data" in secoes):
+            raise CheckError(
+                f"{r['nome']}: o corte por DATA_VA ({DATA_VA:#010x}) discorda "
+                f"da secao que o dump_offsets.py mediu -- va={r['va']}, "
+                f"nota={r['nota']!r}")
+    if len(confirmados) - len(fora) != len(slots_com_nome):
+        raise CheckError(
+            f"a particao dos confirmados ({len(confirmados)} - {len(fora)}) "
+            f"nao bate com os slots preenchidos ({len(slots_com_nome)}) -- "
+            f"a §3 afirma que sao os mesmos")
+    return fora
+
 
 def _markdowns() -> list[Path]:
     achados: list[Path] = []
@@ -374,10 +420,7 @@ def gerar() -> dict[str, str]:
     copias = [r for r in ofs if r["registro"] == "tabela_copia"]
     candidatos = [r for r in ofs if r["registro"] == "candidato"]
     slots_com_nome = [r for r in slots if r["nome"]]
-    # Confirmado que aparece so em .text nao mora em nenhuma das duas tabelas.
-    fora_da_tabela = [r for r in confirmados
-                      if r["classe"] == "confirmado"
-                      and "0x0042" not in r["va"]]
+    fora_da_tabela = particionar_confirmados(confirmados, slots_com_nome)
 
     timage = [(f, nome) for f, lista in formularios.items()
               for _, nome, cls in lista if cls == "TImage"]
@@ -563,6 +606,18 @@ def montar(**d) -> str:
     w("mora nela. Os outros são exatamente os slots preenchidos, e o critério")
     w("de limite do [`dump_offsets.py`](../tools/dump_offsets.py) já os contém")
     w("pelos dois testes independentes que ele confronta.")
+    w("")
+    w("**Essa igualdade é asserção, não prosa.** O script aborta se")
+    w(f"`{len(d['confirmados'])} − {len(d['fora_da_tabela'])}` deixar de dar "
+      f"`{len(d['slots_com_nome'])}`. O corte entre os dois grupos é por")
+    w("**faixa de endereço** — `>= 0x00423000`, o início de `.data` —, e o")
+    w("resultado é confrontado a cada rodada com a coluna `nota` do")
+    w("[`offsets.tsv`](offsets.tsv), que o `dump_offsets.py` preenche lendo a")
+    w("seção de cada ocorrência no PE. Até a")
+    w("[CORR-WTE-017](../../docs/tasks/CORR-WTE-017.md) o corte era")
+    w("`\"0x0042\" not in va`, teste de faixa escrito como teste de substring:")
+    w("os últimos 4 KiB de `.text` casam o prefixo e `.data` passa de")
+    w("`0x0042ffff`, então ele errava nos dois sentidos — em silêncio.")
     w("")
     w(f"As {len(d['copias'])} cópias são as duas tabelas repetidas três vezes")
     w("cada em `.data` — o mesmo fenômeno do bloco de literais que o")
