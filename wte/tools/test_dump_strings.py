@@ -40,6 +40,8 @@ Isto NAO e um gerador: nao aceita `--check`, e o Makefile filtra
 
 from __future__ import annotations
 
+import difflib
+import inspect
 import re
 import shutil
 import subprocess
@@ -50,6 +52,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import dump_strings as d  # noqa: E402
+import dump_units as u  # noqa: E402
+
+# O `dump_units.py` carrega uma copia **verbatim** de `_fill`, `decode` e
+# `extent`. A duplicacao e deliberada -- cada gerador de `wte/tools/` roda
+# sozinho, decisao registrada no `wte/README.md`, e vale igual para o leitor de
+# PE. O preco e que as duas podem divergir em silencio, e a copia do
+# `dump_units.py` sustenta o unico veredito nao trivial da WTE-TASK-07: o corpo
+# dos 96 handlers e o que separa "chamada dentro de handler" de "chamada em
+# codigo de RTL".
+#
+# Dois testes pagam esse preco: a tabela de comprimento roda contra os dois
+# modulos, e `TestCopiaVerbatim` falha se o texto-fonte das tres funcoes
+# divergir. Isto **nao** reabre a decisao de duplicar -- poe uma guarda sobre
+# ela.
+DECODERS = (("dump_strings", d), ("dump_units", u))
 
 
 def b(*vals: int) -> bytes:
@@ -161,11 +178,16 @@ class TestComprimento(unittest.TestCase):
     """O mapa de opcodes, caso a caso. Nao abre o `.exe`."""
 
     def test_cada_caso(self):
-        for label, data, length, kind in LENGTH_CASES:
-            with self.subTest(label):
-                got_len, got_kind, _target = d.decode(data, 0, len(data))
-                self.assertEqual(got_len, length, f"comprimento de {label}")
-                self.assertEqual(got_kind, kind, f"classe de fluxo de {label}")
+        # Contra os **dois** módulos: a tabela é barata, e é o que pega uma
+        # correção aplicada só numa das cópias.
+        for modulo, mod in DECODERS:
+            for label, data, length, kind in LENGTH_CASES:
+                with self.subTest(modulo=modulo, caso=label):
+                    got_len, got_kind, _target = mod.decode(data, 0, len(data))
+                    self.assertEqual(got_len, length,
+                                     f"comprimento de {label} em {modulo}")
+                    self.assertEqual(got_kind, kind,
+                                     f"classe de fluxo de {label} em {modulo}")
 
     def test_decodifica_em_sequencia(self):
         # Um comprimento errado no meio desloca tudo depois dele -- que e o
@@ -193,6 +215,44 @@ class TestComprimento(unittest.TestCase):
             d.decode(b(0x0F, 0x84, 0x00, 0x01, 0x00, 0x00), 0, 6)[2], 262)
         # call nao tem alvo: `extent` nao segue chamada.
         self.assertIsNone(d.decode(b(0xE8, 0x00, 0x01, 0x00, 0x00), 0, 5)[2])
+
+
+class TestCopiaVerbatim(unittest.TestCase):
+    """As duas cópias do decodificador têm de andar juntas.
+
+    O Log da WTE-TASK-07 escreveu "os dois têm de andar juntos se um dia
+    mudarem". Comentário não segura ninguém: quem corrigir um comprimento no
+    módulo testado sairia com a bateria verde e a outra cópia errada.
+    """
+
+    FUNCOES = ("_fill", "decode", "extent")
+
+    def fonte(self, mod, nome: str) -> str:
+        return inspect.getsource(getattr(mod, nome))
+
+    def test_as_tres_funcoes_sao_identicas(self):
+        for nome in self.FUNCOES:
+            with self.subTest(nome):
+                a, b = self.fonte(d, nome), self.fonte(u, nome)
+                if a == b:
+                    continue
+                diff = "\n".join(difflib.unified_diff(
+                    a.splitlines(), b.splitlines(),
+                    fromfile=f"dump_strings.py:{nome}",
+                    tofile=f"dump_units.py:{nome}", lineterm=""))
+                self.fail(
+                    f"`{nome}` divergiu entre os dois geradores.\n"
+                    f"Uma das duas cópias mudou e a outra precisa da MESMA "
+                    f"mudança -- a do\n`dump_units.py` sustenta a fronteira "
+                    f"dos 96 corpos, que decide o veredito\ndo `Comobj` na "
+                    f"WTE-TASK-07.\n{diff}")
+
+    def test_as_tabelas_de_opcode_sao_identicas(self):
+        # `_fill` idêntico não basta: o mapa é montado por dezenas de chamadas
+        # fora de função, que `inspect.getsource` não alcança.
+        self.assertEqual(d._MAP1, u._MAP1)
+        self.assertEqual(d._MAP2, u._MAP2)
+        self.assertEqual(d.PREFIXES, u.PREFIXES)
 
 
 class TestAbortos(unittest.TestCase):

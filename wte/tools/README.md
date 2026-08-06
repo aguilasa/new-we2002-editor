@@ -30,7 +30,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | Teste | Cobre |
 |---|---|
 | `test_dfm_extract.py` ✅ | os 21 `TValueType`, as três flags de objeto e as rotas de aborto do `dfm_extract.py` |
-| `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 do `dump_strings.py`: mapa de opcodes caso a caso, os sete abortos, o `extent()`, e a conferência contra o `objdump` |
+| `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 — mapa de opcodes caso a caso, os sete abortos, o `extent()`, a conferência contra o `objdump`, e a identidade entre as **duas** cópias (`dump_strings.py` e `dump_units.py`) |
 | `test_dump_offsets.py` ✅ | o critério de limite da tabela em `.data`: os dois sentidos da discordância (um aborta, o outro avisa) e a faixa de plausibilidade herdada do `Offsets.hpp` |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
@@ -61,3 +61,20 @@ com a conferência do decodificador contra o `objdump`, a única medida
 independente que o projeto tem dele. Pular é o desfecho certo onde falta o
 insumo; **falhar** ali ensinaria a ignorar vermelho, e **jogar a conferência
 fora** devolveria o número à memória de quem o mediu uma vez.
+
+## Código duplicado entre geradores tem de ter guarda
+
+Cada gerador daqui roda sozinho — decisão do [`../README.md`](../README.md).
+O preço é duplicação real: o leitor de PE aparece em cinco arquivos, e o
+decodificador de comprimento x86-32 (`_fill`, `decode`, `extent`) vive **verbatim**
+no `dump_strings.py` e no `dump_units.py`.
+
+A decisão não está em discussão; o que ela exige é uma guarda. Cópia sem teste
+está livre para divergir em silêncio, e a do `dump_units.py` sustenta a
+fronteira dos 96 corpos, que decide o único veredito não trivial da
+WTE-TASK-07. `TestCopiaVerbatim`, no `test_dump_strings.py`, compara o
+texto-fonte das três funções mais os mapas de opcode montados, e a tabela de
+comprimento roda contra os dois módulos.
+
+**Ao duplicar de novo, duplique a guarda junto.** "Os dois têm de andar juntos"
+escrito em comentário não segurou ninguém — foi preciso um teste.

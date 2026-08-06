@@ -23,7 +23,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-010](/docs/tasks/CORR-WTE-010.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | A §8.7 do plano aponta o lado errado da tabela, e o ASCII citado não é o do binário | Alta | [x] concluída | 2026-08-06 |
 | [CORR-WTE-011](/docs/tasks/CORR-WTE-011.md) | [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) | O critério de limite do `dump_offsets.py` aborta num sentido só, e a janela de plausibilidade sai do nosso `Offsets.hpp` | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-012](/docs/tasks/CORR-WTE-012.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | A §1 do plano diz 300 imports de `rtl60`/`vcl60` (são 267) e chama o `TBrowseURL` de componente de terceiro | Alta | [x] concluída | 2026-08-06 |
-| [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [ ] pendente | — |
+| [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md) | [WTE-TASK-07](/docs/tasks/07-unidades-duvidosas.md) | O decodificador x86 do `dump_units.py` é cópia verbatim do `dump_strings.py` e nenhum teste o alcança | Baixa | [x] concluída | 2026-08-06 |
 
 ## Checklist
 
@@ -39,7 +39,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-010 — corrigir lado e ASCII na §8.7 do plano e no enunciado da 06
 - [x] CORR-WTE-011 — dizer a regra de aborto que existe, avisar no outro sentido, fixar em teste
 - [x] CORR-WTE-012 — corrigir a §1.6 e dar dono ao número de imports da §1.2
-- [ ] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
+- [x] CORR-WTE-013 — cobrir a segunda cópia do decodificador e fixar a identidade entre elas
 
 ## Detalhes por correção
 

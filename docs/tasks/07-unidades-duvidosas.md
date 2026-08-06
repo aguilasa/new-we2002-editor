@@ -149,4 +149,6 @@ item da fase onde o handler dono for implementado — não trabalho perdido aqui
   - O `dump_units.py` carrega uma cópia verbatim do decodificador x86-32 do
     `dump_strings.py`. A duplicação é a mesma escolha que já vale para o leitor
     de PE — cada gerador de `wte/tools/` roda sozinho —, mas os dois têm de
-    andar juntos se um dia mudarem.
+    andar juntos se um dia mudarem. *(Isto era só este parágrafo até a
+    [CORR-WTE-013](/docs/tasks/CORR-WTE-013.md), que pôs a identidade entre as
+    duas cópias sob teste.)*
