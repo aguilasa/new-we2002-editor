@@ -47,9 +47,31 @@ descartável. Remedir com as ferramentas versionadas e **reconciliar**:
 | 70 strings com padding | `dump_strings.py` |
 | 13 unidades `Tep2002_*` | `objdump -x` |
 | 322 imports, sendo 300 de `rtl60.bpl`/`vcl60.bpl` (§1.2) | `dump_units.py` |
+| 197 bitmaps + `dat.bin` (§1.2 e §1.8) | `find -iname '*.bmp'` — ver [`assets.md`](../../wte/re/assets.md) |
+
+A última linha não tem gerador: a WTE-TASK-08 decidiu rota inline para os
+assets, com o comando ao lado de cada número. A coluna "onde remedir" aponta o
+comando e o documento que o executa.
 
 Divergência entre o plano e a medição versionada se resolve **a favor da
 medição**, e o plano é corrigido.
+
+### Varrer os sítios, não só a §1
+
+Corrigir a §1 do plano não fecha um número errado — ele se espalha. O "197
+bitmaps" está em **nove** lugares, dois deles no plano e dois em tarefas da fase
+7 ainda por executar (a 38 vai pedir mensagem de erro sobre essa contagem, a 39
+uma regra de empacotamento). Para cada número reconciliado:
+
+```bash
+cd /home/ingmar/desenvolvimento/github/new-we2002-editor
+grep -rn "<o número velho>" docs/ wte/re/
+```
+
+O alvo é zerar a saída fora dos documentos que **narram** a correção
+(`correcoes-progresso.md`, os `CORR-WTE-*.md`, os Logs de Execução), onde o
+número velho é citação histórica e fica. Registrar em `wte/re/fase-1.md` o
+`grep -rn "197" docs/ | wc -l` de antes e de depois.
 
 ---
 
@@ -66,8 +88,10 @@ medição**, e o plano é corrigido.
 ## Critério de conclusão
 
 - [ ] As quatro conferências cruzadas feitas, com o resultado escrito
-- [ ] Os seis números do plano remedidos por ferramenta versionada
+- [ ] Os sete números do plano remedidos por ferramenta versionada
 - [ ] Divergência corrigida no plano, não escondida
+- [ ] Cada número reconciliado varrido com `grep -rn` em `docs/` e `wte/re/`, e
+      o `wc -l` de antes e de depois registrado em `wte/re/fase-1.md`
 - [ ] Nenhum item da Fase 1 em aberto sem justificativa
 - [ ] Commit no formato conventional, em inglês
 

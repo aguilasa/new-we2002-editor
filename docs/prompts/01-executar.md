@@ -331,6 +331,19 @@ Se concluída:
   - **Arquivos criados/modificados:** lista
   - **Problemas encontrados:** ou "Nenhum"
 
+> **Número da §1 do plano que a tarefa mediu e o quadro da WTE-TASK-09 não
+> lista: acrescente a linha ao quadro.** Registrar no Log "reconciliação é da
+> WTE-TASK-09" não basta — a 09 executa o quadro, e o que não está nele não é
+> remedido. Quadro em
+> [`/docs/tasks/09-fechamento-fase-1.md`](/docs/tasks/09-fechamento-fase-1.md),
+> seção "Recontagem obrigatória"; a linha nova diz a afirmação do plano e a
+> ferramenta (ou o comando, se não houver gerador) que a remede.
+>
+> Isso já falhou duas vezes: os imports de `rtl60`/`vcl60` da WTE-TASK-07
+> ([CORR-WTE-012](/docs/tasks/CORR-WTE-012.md)) e os bitmaps da WTE-TASK-08
+> ([CORR-WTE-014](/docs/tasks/CORR-WTE-014.md)) — os dois medidos, os dois
+> encaminhados para a 09, os dois ausentes do quadro que ela executa.
+
 > **Marcar `✅ Concluído` não é o passo final — o commit é.** `✅ Concluído`
 > descreve um estado que precisa **já existir commitado** quando você escrever
 > isso, não uma intenção. Só escreva depois de fechar o passo 5 com sucesso.

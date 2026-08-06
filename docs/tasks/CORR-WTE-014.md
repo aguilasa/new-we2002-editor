@@ -3,7 +3,7 @@ id: CORR-WTE-014
 title: "Correção: o 197 bitmaps ficou sem dono — não está no quadro de reconciliação da WTE-TASK-09 e sobrevive em nove lugares"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -134,10 +134,46 @@ que é a dona da reconciliação; esta correção só garante que ela saiba.
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-06
 
 **Resumo do que foi feito:**
 
+O quadro de reconciliação da WTE-TASK-09 ganhou a sétima linha — "197 bitmaps +
+`dat.bin` (§1.2 e §1.8)", remedida por `find -iname '*.bmp'` com o
+[`assets.md`](../../wte/re/assets.md) ao lado, já que a WTE-TASK-08 decidiu rota
+inline e não há gerador de assets. O critério de conclusão passou de "os seis
+números" para "os sete".
+
+A 09 também ganhou a seção "Varrer os sítios, não só a §1": corrigir a §1 do
+plano não fecha um número errado, ele se espalha. O comando é
+`grep -rn "<o número velho>" docs/ wte/re/`, e o alvo é zerar a saída **fora**
+dos documentos que narram a correção — `correcoes-progresso.md`, os
+`CORR-WTE-*.md` e os Logs de Execução citam o número velho por necessidade
+histórica. O `wc -l` de antes e de depois vai para o `wte/re/fase-1.md`.
+
+No `01-executar.md`, a regra que impede a terceira ocorrência entrou na seção
+"4) Atualizar progresso", com as duas anteriores nomeadas
+([CORR-WTE-012](/docs/tasks/CORR-WTE-012.md) e esta): medir número da §1 que o
+quadro não lista obriga a acrescentar a linha ao quadro, não só a registrar no
+Log. O padrão que falhou duas vezes é o mesmo — a tarefa que mede não tem
+mandato para corrigir a §1, encaminha para a 09, e a 09 executa um quadro que
+não sabe do número.
+
 **Problemas encontrados:**
 
+Nenhum que bloqueasse. Duas observações:
+
+- A linha 35 da própria 09 ("parte dos **197** pode ser irrelevante") é um dos
+  nove sítios, e continua errada de propósito: a seção "Fora de escopo" desta
+  correção reserva os nove para a WTE-TASK-09, que agora tem o comando para
+  achá-los. Corrigir um aqui só moveria o alvo do `grep` sem fechar nada.
+- O `grep -rn "197" docs/ | wc -l` devolve **42**, não nove: a maioria são as
+  citações dentro dos próprios `CORR-WTE-*.md` e do `correcoes-progresso.md`,
+  que ficam. Os nove sítios reais continuam sendo os que a seção "Problema
+  identificado" lista.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/09-fechamento-fase-1.md` — linha dos bitmaps no quadro, seção de
+  varredura, critério de conclusão
+- `docs/prompts/01-executar.md` — a regra que impede a terceira ocorrência
