@@ -16,6 +16,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-003](/docs/tasks/CORR-WTE-003.md) | [WTE-TASK-02](/docs/tasks/02-esqueleto-do-projeto.md) | A seção `wte/` do `.gitignore` ignora `lib/` e `backup/` no repositório inteiro | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-004](/docs/tasks/CORR-WTE-004.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | `--check` fica vermelho num clone limpo, porque `blobs/` é gitignored | Baixa | [x] concluída | 2026-08-05 |
 | [CORR-WTE-005](/docs/tasks/CORR-WTE-005.md) | [WTE-TASK-03](/docs/tasks/03-extrator-de-dfm.md) | Os streams sintéticos que sustentam "os 21 `TValueType` exercitados" não são versionados | Baixa | [x] concluída | 2026-08-06 |
+| [CORR-WTE-006](/docs/tasks/CORR-WTE-006.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | Os fatos medidos pela WTE-TASK-04 não chegaram aos seis documentos que serão executados | Alta | [ ] pendente | — |
+| [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md) | [WTE-TASK-04](/docs/tasks/04-mapa-de-handlers.md) | A tabela de envelhecimento do `published_methods.md` erra uma atribuição e omite três divergências | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -24,6 +26,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-003 — ancorar `lib/` e `backup/` no `wte/`, onde a seção diz que valem
 - [x] CORR-WTE-004 — blob ausente vira aviso; blob divergente continua falha
 - [x] CORR-WTE-005 — versionar os streams sintéticos do `dfm_extract.py`
+- [ ] CORR-WTE-006 — propagar dono e contagem medidos para as tasks 25, 28, 30, o plano §5.1 e o prompt de revisão
+- [ ] CORR-WTE-007 — corrigir a atribuição e completar a tabela de envelhecimento, no gerador
 
 ## Detalhes por correção
 
@@ -100,3 +104,41 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** `wte/tools/test_dfm_extract.py` em stdlib pura (ou `--selftest` no
   próprio gerador), cobrindo os 21 tipos, as três flags e cada rota de aborto
   com o offset absoluto conferido na mensagem
+
+### CORR-WTE-006
+
+- **Arquivo com problema:** `docs/tasks/25-handlers-de-carga.md`,
+  `docs/tasks/28-handlers-auxiliares.md`, `docs/tasks/30-preco-do-jogador.md`,
+  `docs/PLAN-WTE-LAZARUS.md` (§5.1), `docs/tasks/04-mapa-de-handlers.md`,
+  `docs/prompts/02-revisar.md`
+- **Sintoma:** a WTE-TASK-04 mediu e listou sete divergências, mas a lista mora
+  só em `wte/re/published_methods.md`. Os documentos que comandam a execução
+  continuam dizendo `FormCreate`/`FormShow` em 19 endereços (são 18),
+  `malla1MouseDown`/`malla2MouseDown` em `ficha_color`/`ficha_creditos_equipo`
+  (são de `estrategia`), `etiqprecioClick` em `ficha_creditos_equipo` (é de
+  `jugador`, em dois arquivos) e seis handlers de ocorrência única na lista de
+  "repetidos". O prompt de revisão pede `FormCreate` 17 vezes, e reprovaria uma
+  fase 2 correta
+- **Como foi detectado:** `cut -f2,3 wte/re/published_methods.tsv | sort |
+  uniq -c` confrontado com `grep` nos seis arquivos; e o cruzamento
+  independente pelo lado do DFM (219 ligações → 95 pares, todos no TSV)
+- **Fix:** trocar o texto pelo medido em cada arquivo. Os números do censo da
+  §1 ficam de fora — são da WTE-TASK-09
+
+### CORR-WTE-007
+
+- **Arquivo com problema:** `wte/tools/dump_published.py`, `render_md()`
+  (a saída `wte/re/published_methods.md` é gerada)
+- **Sintoma:** a tabela "Onde o plano e as tarefas envelheceram" atribui à §1.4
+  do plano a frase "`FormCreate` aparece 17 vezes", que o plano não contém — ela
+  está na task 04 e no `02-revisar.md`. E omite três divergências do mesmo tipo:
+  o dono errado repetido na task 30, `BitBtn1Click` 3× na task 28 (são 4) e
+  cinco handlers de ocorrência única listados como repetidos, dos quais o `.md`
+  registra só `botonClick`
+- **Como foi detectado:** `grep -rn "FormCreate" docs/PLAN-WTE-LAZARUS.md` não
+  devolve o "17"; `grep -rn "17 vezes" docs/` devolve os dois arquivos que o
+  têm. As contagens saem do TSV gerado, que a própria seção "Homônimos" do
+  `.md` já imprime certas
+- **Fix:** no gerador — corrigir a atribuição e derivar as linhas faltantes de
+  `count_by_name(m)`, abortando se um nome citado da task 28 não existir entre
+  os 96, como `EXCEPTIONS` e `FORMULA_OWNERS` já fazem
