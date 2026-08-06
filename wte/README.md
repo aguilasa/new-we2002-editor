@@ -115,6 +115,10 @@ tocado.
 houver gerador nenhum, o alvo **diz que nada foi medido** em vez de sair verde:
 alvo verde sem medição é pior do que alvo ausente.
 
+A exceção é `tools/test_*.py`: teste de ferramenta não é gerador e não aceita
+`--check`, então o `wildcard` o filtra. Esses rodam pelo alvo `test`, do qual
+`check` depende — o comando a decorar continua sendo um só.
+
 ### 3. O binário se chama `wte` — provisoriamente
 
 Nome definitivo é decisão da **WTE-TASK-38**, por causa da §2 do plano (o

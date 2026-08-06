@@ -84,7 +84,9 @@ dimensiona a Fase 2.
   decodifica os 18 streams `TPF0` de `RT_RCDATA`. Os 21 `TValueType` e as três
   flags de objeto (`ffInherited`, `ffChildPos`, `ffInline`) estão
   implementados; os que não ocorrem nestes 18 foram exercitados contra streams
-  sintéticos.
+  sintéticos. *(Esses streams eram código descartável quando esta linha foi
+  escrita — a [CORR-WTE-005](/docs/tasks/CORR-WTE-005.md) os transformou em
+  `wte/tools/test_dfm_extract.py`, que `make -C wte test` roda.)*
 
   Os 18 decodificam **até o último byte**: o parser exige `pos == len(stream)`
   ao fim de cada formulário e aborta se sobrar qualquer coisa. Saem 6.848
