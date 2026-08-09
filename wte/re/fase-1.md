@@ -199,15 +199,20 @@ aqui porque resíduo é falha, como o `FORBIDDEN` do `port_database.py`.
 
 | Número velho | Sítios antes | Sítios agora |
 |---|---:|---:|
-| 197 bitmaps | 9 | 0 |
-| ~430 componentes | 4 | 0 |
+| 197 bitmaps | 10 | 0 |
+| ~430 componentes | 5 | 0 |
 | 300 imports de rtl60/vcl60 | 2 | 0 |
-| 70 strings com enchimento | 4 | 0 |
+| 70 strings com enchimento | 5 | 0 |
 
-**19 → 0.** Os 19 de antes foram medidos com este
-mesmo perímetro em 2026-08-06, sobre a árvore anterior à correção
+**22 → 0.** Os 22 de antes foram medidos com o
+perímetro corrente, sobre a árvore anterior à correção
 (`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do
-script, porque não há como remedi-los sobre a árvore de hoje. Os sítios
+script, porque não há como remedi-los sobre a árvore de hoje. Cada vez
+que o perímetro cresce eles são **remedidos**, não ajustados: a
+[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) levou bitmaps de 8 para
+9 ao trazer `wte/README.md` para dentro, e a
+[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) somou os três sítios de
+`docs/prompts/`. Os sítios
 corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,
 a tabela de estado e três seções do `progresso.md`, os enunciados ainda
 **pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que iriam pedir mensagem
@@ -226,15 +231,31 @@ Fica fora do perímetro o documento que **narra** a correção: os
 e o [`strings.md`](strings.md) — que registram, cada um, a divergência
 que mediram —, o [`README.md`](../tools/README.md) de `wte/tools/`, que
 narra esta guarda e cita `430` para explicar o corte por contexto, o
-enunciado da própria WTE-TASK-09, o Log de Execução de qualquer tarefa,
-e `docs/prompts/`. Fica fora também o **enunciado de tarefa já
+enunciado da própria WTE-TASK-09 e o Log de Execução de qualquer
+tarefa. Fica fora também o **enunciado de tarefa já
 concluída**: é história, não instrução. Tarefa pendente continua dentro,
 e é o que fez a 38 e a 39 entrarem.
+
+**`docs/prompts/` esteve fora e voltou.** A exclusão valia para o
+*destino de link* — `/docs/tasks/CORR-WTE-XXX.md` e afins são
+placeholder e não dá para conferir —, mas destino de link não é o que
+esta guarda mede, e número de referência afirmado em prosa entrou de
+carona. O `02-revisar.md` citava três números aposentados como “o que já
+está no plano”, e quem revisasse leria o valor velho como gabarito. A
+[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) trouxe a pasta para
+dentro.
 
 O corte exige o número **e** uma palavra de contexto na mesma linha.
 Sem isso, `430` casaria o setor 430 do `PLAN-LINUX.md` e `300` casaria
 os 300 setores de ECC amostrados — outro projeto, outro assunto, mesmo
 dígito.
+
+**Número velho em forma de história não conta**, e isso é regra: uma
+linha que escreve `197 → 198` diz o que mudou, não afirma o valor. Antes
+da CORR-WTE-018 essa forma passava por acidente de quebra de linha — o
+bloco que a CORR-WTE-016 escreveu no `wte/README.md` tem o número numa
+linha e a palavra de contexto noutra, e reflowar o parágrafo deixaria o
+`--check` vermelho sem nada ter piorado.
 
 ## 7. O que fica em aberto ao sair da fase 1
 

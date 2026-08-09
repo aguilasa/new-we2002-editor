@@ -24,8 +24,10 @@ class TesteCorteContexto(unittest.TestCase):
     """O digito sozinho nao basta: dois projetos usam os mesmos numeros."""
 
     def _casa(self, chave: str, linha: str) -> bool:
-        num, ctx = next((n, c) for nome, n, c, _ in mod.SITIOS if nome == chave)
-        return bool(re.search(rf"\b{num}\b", linha) and re.search(ctx, linha))
+        num, ctx, cur = next(
+            (n, c, v) for nome, n, c, v, _ in mod.SITIOS if nome == chave)
+        return bool(re.search(rf"\b{num}\b", linha) and re.search(ctx, linha)
+                    and not mod._e_historia(linha, num, cur))
 
     def test_bitmaps_casa_afirmacao_viva(self):
         for linha in (
@@ -63,8 +65,56 @@ class TesteCorteContexto(unittest.TestCase):
     def test_antes_e_constante_com_perimetro_escrito(self):
         # A coluna "sitios antes" nao e remedivel depois da correcao. Se
         # alguem zerar as constantes, a tabela da saida passa a dizer 0 -> 0 e
-        # perde o unico registro que existe da varredura.
-        self.assertEqual(sum(a for *_, a in mod.SITIOS), 19)
+        # perde o unico registro que existe da varredura. Foi 19 ate a
+        # CORR-WTE-018 remedir com `docs/prompts/` dentro do perimetro, o que
+        # somou os tres sitios do `02-revisar.md`.
+        self.assertEqual(sum(a for *_, a in mod.SITIOS), 22)
+
+
+class TesteFormaDeHistoria(unittest.TestCase):
+    """`velho -> corrente` diz o que mudou; o numero sozinho afirma o valor.
+
+    Ate a CORR-WTE-018 a forma de historia so passava por acidente de quebra
+    de linha: o bloco do `wte/README.md` tem o numero numa linha e a palavra
+    de contexto noutra. Reflowar o paragrafo deixaria o `--check` vermelho sem
+    nada ter piorado.
+    """
+
+    def _casa(self, chave: str, linha: str) -> bool:
+        num, ctx, cur = next(
+            (n, c, v) for nome, n, c, v, _ in mod.SITIOS if nome == chave)
+        return bool(re.search(rf"\b{num}\b", linha) and re.search(ctx, linha)
+                    and not mod._e_historia(linha, num, cur))
+
+    def test_seta_para_o_corrente_e_historia(self):
+        for linha in (
+            "Exemplos do que já mudou uma vez: bitmaps (197 → 198).",
+            "bitmaps (197 -> 198)",
+            "o `.bmp`: `197` → `441`".replace("441", "198"),
+            "**197 → 198** bitmaps, reconciliado na WTE-TASK-09",
+        ):
+            self.assertFalse(self._casa("197 bitmaps", linha), linha)
+
+    def test_seta_para_outro_numero_nao_e_historia(self):
+        # `197 -> 200` nao e a reconciliacao desta guarda: e afirmacao nova,
+        # e tem de acusar. Senao qualquer seta viraria passe livre.
+        self.assertTrue(self._casa("197 bitmaps", "bitmaps: 197 → 200"))
+
+    def test_numero_velho_sozinho_continua_acusando(self):
+        for chave, linha in (
+            ("197 bitmaps", "a §1 do plano registra 197 bitmaps"),
+            ("~430 componentes", "| Componentes nos formulários | ~430 |"),
+            ("70 strings com enchimento", "70 strings com padding"),
+        ):
+            self.assertTrue(self._casa(chave, linha), linha)
+
+    def test_historia_das_outras_tres(self):
+        for chave, linha in (
+            ("~430 componentes", "componentes (`~430` → 441)"),
+            ("70 strings com enchimento", "strings com enchimento (70 → 13)"),
+            ("300 imports de rtl60/vcl60", "imports de rtl60 (300 → 267)"),
+        ):
+            self.assertFalse(self._casa(chave, linha), linha)
 
 
 class TesteCorteDeFaixa(unittest.TestCase):
@@ -153,11 +203,10 @@ class TestePerimetro(unittest.TestCase):
         self.assertFalse(mod._no_perimetro(feito))
         self.assertTrue(mod._no_perimetro(pendente))
 
-    def test_narracao_e_prompt_saem_do_perimetro(self):
+    def test_narracao_sai_do_perimetro(self):
         for rel in ("docs/tasks/correcoes-progresso.md",
                     "docs/tasks/CORR-WTE-014.md",
                     "docs/tasks/09-fechamento-fase-1.md",
-                    "docs/prompts/01-executar.md",
                     "wte/re/assets.md",
                     "wte/re/strings.md",
                     # narra a propria guarda, e cita 430 para explicar o corte
@@ -167,10 +216,28 @@ class TestePerimetro(unittest.TestCase):
 
     def test_plano_e_progresso_ficam_no_perimetro(self):
         # `wte/README.md` entrou com a CORR-WTE-016: era o sitio vivo que o
-        # perimetro antigo (`docs/` + `wte/re/`) nao alcancava.
+        # perimetro antigo (`docs/` + `wte/re/`) nao alcancava. Os prompts
+        # entraram com a CORR-WTE-018, pelo mesmo motivo -- a exclusao deles
+        # valia para destino de link, que nao e o que esta guarda mede.
         for rel in ("docs/PLAN-WTE-LAZARUS.md", "docs/tasks/progresso.md",
-                    "wte/re/offsets.md", "wte/README.md"):
+                    "wte/re/offsets.md", "wte/README.md",
+                    "docs/prompts/01-executar.md",
+                    "docs/prompts/02-revisar.md"):
             self.assertTrue(mod._no_perimetro(self._escreve(rel, "x\n")), rel)
+
+    def test_varrer_acha_residuo_em_prompt(self):
+        # O sitio real da CORR-WTE-018: um prompt citando o numero aposentado
+        # como "o que ja esta no plano".
+        p = self._escreve("docs/prompts/02-revisar.md",
+                          "Exemplos: ~430 componentes, 197 bitmaps.\n")
+        achados = dict(mod.varrer())
+        self.assertEqual(len(achados["197 bitmaps"]), 1)
+        self.assertEqual(len(achados["~430 componentes"]), 1)
+        p.write_text("Exemplos do que mudou: componentes (~430 → 441), "
+                     "bitmaps (197 → 198).\n", encoding="utf-8")
+        achados = dict(mod.varrer())
+        self.assertEqual(achados["197 bitmaps"], [])
+        self.assertEqual(achados["~430 componentes"], [])
 
     def test_log_de_execucao_nao_e_lido(self):
         p = self._escreve("docs/tasks/40-final.md", "\n".join([

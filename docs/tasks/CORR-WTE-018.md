@@ -3,7 +3,7 @@ id: CORR-WTE-018
 title: "Correção: o `02-revisar.md` cita ~430, 70 e 197 como “o que já está no plano”, e o plano não diz mais isso"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -121,12 +121,44 @@ escolhida, a coluna `antes` de `SITIOS` tem de ser remedida de novo, com
 - [ ] Se o perímetro mudou, a coluna `antes` de `SITIOS` foi **remedida**, não
       ajustada à mão
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** Rota **2** — `docs/prompts/` entrou no perímetro do
+`check_fase1.py`. A lista de contagens do `02-revisar.md` virou ponteiro para a
+§5 do `fase-1.md` (que é gerada) com os quatro pares `velho → corrente` como
+história. A coluna `antes` de `SITIOS` foi **remedida** com o perímetro novo
+sobre `git archive 65cc4be docs wte`: 10/5/2/5, total 22 (era 9/4/2/4 = 19), e
+os três sítios somados são exatamente os do `02-revisar.md`.
 
-**Problemas encontrados:**
+**Problemas encontrados:** Um, e ele obrigou a alargar a correção.
+
+A rota 2 e o texto que a própria CORR propõe são **incompatíveis** como
+estavam: `bitmaps (197 → 198)` tem o número velho e a palavra de contexto na
+mesma linha, então a guarda o acusaria. Descobri isso ao rodar o gerador — ele
+apontou a minha linha de exemplo, que dizia literalmente ``escrever `197
+bitmaps` dispara``.
+
+O jeito como o repositório escapava disso era **acidente de quebra de linha**:
+o bloco que a CORR-WTE-016 escreveu no `wte/README.md` tem o `197` numa linha e
+a palavra `bitmap` noutra, e bastaria reflowar o parágrafo para o `--check`
+ficar vermelho sem nada ter piorado. Sem resolver isso, a rota 2 tornaria
+impossível escrever história em prosa corrida.
+
+Então `_e_historia()` entrou no gerador: linha que escreve `velho → corrente`
+(seta ASCII ou Unicode, com marcação entre os dois) diz o que mudou e não
+conta; seta para **outro** número continua contando, senão qualquer seta seria
+passe livre. `SITIOS` ganhou uma coluna com o valor corrente para isso.
 
 **Arquivos criados/modificados:**
+
+- `docs/prompts/02-revisar.md` (a lista de contagens)
+- `wte/tools/check_fase1.py` (perímetro, `_e_historia`, `SITIOS`, docstring e
+  a prosa da §6 gerada)
+- `wte/tools/test_check_fase1.py` (nova classe `TesteFormaDeHistoria` com 4
+  testes, `docs/prompts/` movido para dentro nos testes de perímetro, e
+  `test_varrer_acha_residuo_em_prompt`; 24 testes no arquivo, 164 na bateria)
+- `wte/re/fase-1.md` (**regenerado**)
+- `docs/tasks/progresso.md` (descrição do perímetro — discrepância achada no
+  caminho: ela enumerava as exclusões e ficaria incompleta)

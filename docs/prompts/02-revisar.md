@@ -83,9 +83,18 @@ bash wte/tools/golden_check.sh
 ctest --preset debug
 ```
 
-**Contagens que a task afirma se remede, não se relê.** Exemplos do que já está
-no plano e pode ter mudado: 18 formulários, ~430 componentes, 96 handlers, 19 de
-69 offsets, 70 strings com padding, 13 unidades, 197 bitmaps.
+**Contagens que a task afirma se remede, não se relê.** Os valores correntes
+estão na §5 de [`wte/re/fase-1.md`](../../wte/re/fase-1.md), que é **gerada** —
+não os copie para cá, senão esta linha vira mais um sítio a reconciliar.
+Exemplos do que já mudou uma vez: componentes (`~430` → 441), strings com
+enchimento (70 → 13), bitmaps (197 → 198), imports de `rtl60`/`vcl60`
+(300 → 267).
+
+Este arquivo está **dentro** do perímetro do `check_fase1.py` desde a
+CORR-WTE-018: número velho afirmado aqui é gabarito para quem revisa, e reprova
+task correta. A forma `velho → corrente` acima é história e passa; o número
+aposentado sozinho, ao lado da palavra que dá o contexto, deixa o
+`make -C wte check` vermelho — e é para deixar.
 
 ### Etapa 3 — Verificações específicas por fase
 

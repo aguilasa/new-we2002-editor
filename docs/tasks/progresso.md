@@ -445,3 +445,8 @@ correção (os `CORR-*`, o `correcoes-progresso.md`, o `assets.md`, o
 tarefa já concluída** — este último porque enunciado executado é história;
 tarefa pendente continua dentro, e foi assim que a 38 e a 39 entraram na
 correção antes de serem executadas contra um número inexistente.
+`docs/prompts/` **está dentro** desde a
+[CORR-WTE-018](/docs/tasks/CORR-WTE-018.md): a exclusão que ele tinha valia
+para destino de link placeholder, não para número afirmado em prosa. E o número
+velho escrito na forma `velho → corrente` não derruba nada — é história, e a
+guarda sabe disso desde a mesma correção.

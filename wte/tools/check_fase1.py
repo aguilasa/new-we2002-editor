@@ -56,13 +56,28 @@ O que fica de fora do perimetro, e por que:
   epoca. Tarefa **pendente** continua no perimetro: ela ainda vai ser executada
   contra o numero que estiver escrito, e a WTE-TASK-38 e a 39 sao o caso real;
 - **Log de Execucao** -- tudo a partir do cabecalho, em qualquer task: o log
-  cita o numero velho para dizer que o corrigiu;
-- **`docs/prompts/`** -- gabarito, com destino de exemplo.
+  cita o numero velho para dizer que o corrigiu.
+
+`docs/prompts/` **esteve** fora e voltou para dentro com a CORR-WTE-018. A
+exclusao original valia para o **destino de link** (`/docs/tasks/CORR-WTE-XXX.md`,
+`XX-nome-do-arquivo.md`), que e placeholder e nao da para conferir -- so que
+destino de link nao e o que esta guarda mede, e numero de referencia afirmado
+em prosa entrou de carona. O `02-revisar.md` citava `~430`, `70` e `197` como
+"o que ja esta no plano" durante toda a fase 1, e quem revisasse leria o numero
+aposentado como gabarito, reprovando task correta.
 
 O corte por numero exige o numero **e** uma palavra de contexto na mesma linha.
 Sem isso `430` casaria o setor 430 do `PLAN-LINUX.md` e `300` casaria os 300
 setores amostrados de ECC -- dois projetos diferentes, dois assuntos
 diferentes, mesmo digito.
+
+**Numero velho em forma de historia nao conta**, e isso e regra, nao sorte:
+uma linha que escreve `197 -> 198` (ou `→`) esta dizendo o que mudou, nao
+afirmando o valor. Ate a CORR-WTE-018 essa forma so passava por acidente de
+quebra de linha -- o bloco do `wte/README.md` que a CORR-WTE-016 escreveu tem o
+`197` numa linha e a palavra `bitmap` noutra, e bastaria reflowar o paragrafo
+para o `--check` ficar vermelho sem nada ter piorado. Com a regra, escrever
+historia deixou de depender de onde a linha quebra.
 
 Uso:
 
@@ -113,18 +128,23 @@ NARRACAO = {
     f"wte/re/{MD_NAME}",
 }
 
-# Os quatro numeros que a fase 1 reconciliou. Cada um leva o regex do digito e
-# o regex de contexto; os dois tem de casar na mesma linha para a linha contar
-# como afirmacao viva. `antes` foi medido com este mesmo perimetro em
-# 2026-08-06, sobre a arvore anterior a correcao (`git archive 65cc4be docs
-# wte`) -- nao da para remedir sobre a arvore de hoje. O 9 de bitmaps era 8
-# quando o perimetro parava em `wte/re/`: o nono sitio e o `wte/README.md`, que
-# a CORR-WTE-016 trouxe para dentro.
+# Os quatro numeros que a fase 1 reconciliou. Cada um leva o regex do digito, o
+# regex de contexto e o valor **corrente**; os dois primeiros tem de casar na
+# mesma linha para a linha contar como afirmacao viva, e o terceiro e o que
+# permite reconhecer a forma de historia (`velho -> corrente`), que nao conta.
+#
+# `antes` foi medido sobre a arvore anterior a correcao (`git archive 65cc4be
+# docs wte`) rodando o `varrer()` do dia -- nao da para remedir sobre a arvore
+# de hoje. Foi remedido duas vezes, cada uma com o perimetro que a correcao
+# deixou: a CORR-WTE-016 levou bitmaps de 8 para 9 ao trazer `wte/README.md`
+# para dentro, e a CORR-WTE-018 somou os tres sitios de `docs/prompts/`
+# (`~430`, `70` e `197`, todos no `02-revisar.md`).
 SITIOS = (
-    ("197 bitmaps", r"197", r"(?i)bitmap|\.bmp|\bBMP\b|image/", 9),
-    ("~430 componentes", r"430", r"(?i)componente|controle", 4),
-    ("300 imports de rtl60/vcl60", r"300", r"(?i)rtl60|vcl60|import", 2),
-    ("70 strings com enchimento", r"70", r"(?i)string|padding|enchimento|truncad", 4),
+    ("197 bitmaps", r"197", r"(?i)bitmap|\.bmp|\bBMP\b|image/", "198", 10),
+    ("~430 componentes", r"430", r"(?i)componente|controle", "441", 5),
+    ("300 imports de rtl60/vcl60", r"300", r"(?i)rtl60|vcl60|import", "267", 2),
+    ("70 strings com enchimento", r"70",
+     r"(?i)string|padding|enchimento|truncad", "13", 5),
 )
 
 LOG_HEADER = "## Log de Execução"
@@ -189,8 +209,6 @@ def _no_perimetro(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
     if rel in NARRACAO:
         return False
-    if rel.startswith("docs/prompts/"):
-        return False
     if re.fullmatch(r"docs/tasks/CORR-WTE-\d+\.md", rel):
         return False
     if re.match(r"docs/tasks/\d\d-", rel):
@@ -209,17 +227,30 @@ def _linhas_vivas(path: Path) -> list[tuple[int, str]]:
     return list(enumerate(linhas[:limite], 1))
 
 
+def _e_historia(linha: str, velho: str, corrente: str) -> bool:
+    """A linha escreve `velho -> corrente`, entao diz o que mudou.
+
+    Forma deliberada, e a unica em que o numero aposentado continua util:
+    "bitmaps (197 -> 198)" ensina, "197 bitmaps" mente. Aceita a seta ASCII e
+    a Unicode, com ou sem espaco, e tolera marcacao entre os dois (crase,
+    asterisco) porque os documentos escrevem `` `~430` → 441 ``.
+    """
+    return re.search(rf"\b{velho}\b[`*\s]*(?:->|→|–>)[`*\s]*{corrente}\b",
+                     linha) is not None
+
+
 def varrer() -> list[tuple[str, list[str]]]:
     """Para cada numero velho, os sitios que ainda o afirmam."""
     alvos = [p for p in _markdowns() if _no_perimetro(p)]
     resultado: list[tuple[str, list[str]]] = []
-    for nome, num, ctx, _antes in SITIOS:
+    for nome, num, ctx, corrente, _antes in SITIOS:
         rn, rc = re.compile(rf"\b{num}\b"), re.compile(ctx)
         residuo = [
             f"{p.relative_to(ROOT).as_posix()}:{i}: {linha.strip()}"
             for p in alvos
             for i, linha in _linhas_vivas(p)
             if rn.search(linha) and rc.search(linha)
+            and not _e_historia(linha, num, corrente)
         ]
         resultado.append((nome, residuo))
     return resultado
@@ -707,14 +738,19 @@ def montar(**d) -> str:
     w("")
     w("| Número velho | Sítios antes | Sítios agora |")
     w("|---|---:|---:|")
-    for nome, _num, _ctx, antes in SITIOS:
+    for nome, _num, _ctx, _corrente, antes in SITIOS:
         w(f"| {nome} | {antes} | 0 |")
     w("")
-    total_antes = sum(a for _, _, _, a in SITIOS)
-    w(f"**{total_antes} → 0.** Os {total_antes} de antes foram medidos com este")
-    w("mesmo perímetro em 2026-08-06, sobre a árvore anterior à correção")
+    total_antes = sum(a for *_, a in SITIOS)
+    w(f"**{total_antes} → 0.** Os {total_antes} de antes foram medidos com o")
+    w("perímetro corrente, sobre a árvore anterior à correção")
     w("(`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do")
-    w("script, porque não há como remedi-los sobre a árvore de hoje. Os sítios")
+    w("script, porque não há como remedi-los sobre a árvore de hoje. Cada vez")
+    w("que o perímetro cresce eles são **remedidos**, não ajustados: a")
+    w("[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) levou bitmaps de 8 para")
+    w("9 ao trazer `wte/README.md` para dentro, e a")
+    w("[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) somou os três sítios de")
+    w("`docs/prompts/`. Os sítios")
     w("corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,")
     w("a tabela de estado e três seções do `progresso.md`, os enunciados ainda")
     w("**pendentes** da WTE-TASK-38 e da WTE-TASK-39 — que iriam pedir mensagem")
@@ -733,15 +769,31 @@ def montar(**d) -> str:
     w("e o [`strings.md`](strings.md) — que registram, cada um, a divergência")
     w("que mediram —, o [`README.md`](../tools/README.md) de `wte/tools/`, que")
     w("narra esta guarda e cita `430` para explicar o corte por contexto, o")
-    w("enunciado da própria WTE-TASK-09, o Log de Execução de qualquer tarefa,")
-    w("e `docs/prompts/`. Fica fora também o **enunciado de tarefa já")
+    w("enunciado da própria WTE-TASK-09 e o Log de Execução de qualquer")
+    w("tarefa. Fica fora também o **enunciado de tarefa já")
     w("concluída**: é história, não instrução. Tarefa pendente continua dentro,")
     w("e é o que fez a 38 e a 39 entrarem.")
+    w("")
+    w("**`docs/prompts/` esteve fora e voltou.** A exclusão valia para o")
+    w("*destino de link* — `/docs/tasks/CORR-WTE-XXX.md` e afins são")
+    w("placeholder e não dá para conferir —, mas destino de link não é o que")
+    w("esta guarda mede, e número de referência afirmado em prosa entrou de")
+    w("carona. O `02-revisar.md` citava três números aposentados como “o que já")
+    w("está no plano”, e quem revisasse leria o valor velho como gabarito. A")
+    w("[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) trouxe a pasta para")
+    w("dentro.")
     w("")
     w("O corte exige o número **e** uma palavra de contexto na mesma linha.")
     w("Sem isso, `430` casaria o setor 430 do `PLAN-LINUX.md` e `300` casaria")
     w("os 300 setores de ECC amostrados — outro projeto, outro assunto, mesmo")
     w("dígito.")
+    w("")
+    w("**Número velho em forma de história não conta**, e isso é regra: uma")
+    w("linha que escreve `197 → 198` diz o que mudou, não afirma o valor. Antes")
+    w("da CORR-WTE-018 essa forma passava por acidente de quebra de linha — o")
+    w("bloco que a CORR-WTE-016 escreveu no `wte/README.md` tem o número numa")
+    w("linha e a palavra de contexto noutra, e reflowar o parágrafo deixaria o")
+    w("`--check` vermelho sem nada ter piorado.")
     w("")
 
     # ------------------------------------------------------------- em aberto
