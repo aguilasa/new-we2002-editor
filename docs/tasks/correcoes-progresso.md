@@ -32,6 +32,9 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado | Alta | [ ] pendente | — |
 | [CORR-WTE-020](/docs/tasks/CORR-WTE-020.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A tabela `ACEITA`/`DESCARTA` diz ter sido medida na LCL 3.0 e nada remede; `LCL_VERSAO` é código morto | Alta | [ ] pendente | — |
 | [CORR-WTE-021](/docs/tasks/CORR-WTE-021.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | O critério "blobs visíveis na janela" foi adiado para a WTE-TASK-11, que não o tem | Baixa | [ ] pendente | — |
+| [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O comando publicado da ordem de auto-create devolve 17 das 18 classes, e perde justamente `TMainForm` | Alta | [ ] pendente | — |
+| [CORR-WTE-023](/docs/tasks/CORR-WTE-023.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O critério de build diz 2.482 linhas (são 2.562) e atribui os 2 hints ao Lazarus (são do `/etc/fpc.cfg`) | Alta | [ ] pendente | — |
+| [CORR-WTE-024](/docs/tasks/CORR-WTE-024.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O sufixo ` [Lazarus]` não chegou à WTE-TASK-35 e o `--show` não chegou à WTE-TASK-12 | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -56,6 +59,9 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [ ] CORR-WTE-019 — levar a exceção dos 118 blobs ao plano §2, ao `.gitignore` e ao `progresso.md`
 - [ ] CORR-WTE-020 — `check_lcl_props.py` remede a tabela contra a LCL instalada, e o `LCL_VERSAO` passa a pinar
 - [ ] CORR-WTE-021 — apontar o critério dos blobs para a WTE-TASK-12 e acrescentá-lo lá
+- [ ] CORR-WTE-022 — começar a faixa do `sed` em `401a22`, e dizer por que ela não é a da chamada
+- [ ] CORR-WTE-023 — colar da saída as três medidas do critério de build da WTE-TASK-11
+- [ ] CORR-WTE-024 — levar o sufixo ` [Lazarus]` à 35 e o `--show` à 12 e à 25
 
 ## Detalhes por correção
 
@@ -418,3 +424,58 @@ data do commit — o `/revisar` abre a correção, não a fecha.
   `.dfm` **e** contra `wte/re/dfm/blobs/*.bin`, zero divergentes
 - **Fix:** apontar o adiamento para a WTE-TASK-12 e acrescentar o critério
   herdado lá
+
+### CORR-WTE-022
+
+- **Arquivo com problema:** `wte/src/wtemain.pas` (cabeçalho, linhas 21-22) e
+  `docs/tasks/11-app-com-a-casca-completa.md` (Log, linhas 115-118) — o mesmo
+  comando nos dois
+- **Sintoma:** a receita publicada de "reproduzir a medida" da ordem de
+  auto-create devolve **17** classes, não 18, e a que falta é `TMainForm`. A
+  faixa do `sed` começa em `0x401a2e`, que é a **chamada** do primeiro
+  `CreateForm`; os dois `mov` que carregam os operandos daquele sítio estão em
+  `0x401a22`/`0x401a28`, antes dela. A ordem escrita em `CriaFormularios` está
+  certa — as 17 são exatamente os itens 2 a 18 —, o que não reproduz é a receita
+- **Como foi detectado:** rodando o comando do Log verbatim (17 pares de `edx`)
+  e resolvendo cada endereço pelo `vmtClassName` (`-44`); `ds:0x427d88`, o sítio
+  cortado, resolve para `TMainForm`. Com a faixa em `/401a22:/,/401bc6:/` saem
+  18. A contagem de chamadas que a prosa afirma confere: `grep -c 'call
+  0x4226c0'` na faixa original dá 18
+- **Fix:** faixa a partir de `401a22` nos dois arquivos, com a linha que explica
+  por que o endereço da faixa não é o da chamada
+
+### CORR-WTE-023
+
+- **Arquivo com problema:** `docs/tasks/11-app-com-a-casca-completa.md`,
+  critério de conclusão 1
+- **Sintoma:** "2.482 linhas, 0 warning, 2 hints (ambos do Lazarus sobre
+  diretório de pacote do sistema)". São **2.562** linhas; e os 2 hints que o
+  contador `(1022)` soma são do FPC — `11030`/`11031`, abrir e fechar
+  `/etc/fpc.cfg`. Os hints do Lazarus sobre diretório de pacote existem, mas são
+  **sete** e não entram nessa conta. "0 warning" está certo
+- **Como foi detectado:** `rm -rf wte/build && lazbuild wte/wte.lpi` e
+  `lazbuild -B` dão 2.562 nos dois modos; e compilar o **próprio commit
+  `af424c0`** num worktree separado dá 2.562 também, o que descarta deriva —
+  `git log af424c0..HEAD -- wte/src wte/wte.lpr wte/wte.lpi wte/forms` é vazio.
+  Os hints saem de `lazbuild -B 2>&1 | grep -E '^Hint'`
+- **Fix:** colar as três medidas da saída, dizendo qual contador é de quem
+
+### CORR-WTE-024
+
+- **Arquivo com problema:** `docs/tasks/35-divergencias-deliberadas.md`,
+  `docs/tasks/12-comparacao-visual.md` e `docs/tasks/25-handlers-de-carga.md`
+- **Sintoma:** a WTE-TASK-11 delegou duas coisas e nenhum destinatário foi
+  avisado. O sufixo ` [Lazarus]` no `Caption` dos 18 — mandado explicitamente
+  para a WTE-TASK-35 pelo Log e pelo comentário de `MarcaOsTitulos` — não está
+  entre as quatro candidatas da 35, e é a **única** divergência do projeto que já
+  está no código rodando. E o andaime `--show`, feito para a captura da
+  WTE-TASK-12, não é citado por ela: o método diz "mesmo formulário, mesma
+  captura" num app que não navega. Ninguém é dono de remover o andaime quando a
+  navegação chegar (WTE-TASK-25)
+- **Como foi detectado:** `grep -rn "Lazarus\]" docs/ --include='*.md'` e
+  `grep -rn -- "--show" docs/` só acham `11-app-com-a-casca-completa.md`. O
+  `--show all` foi exercitado no `:99` nesta revisão e funciona: 18 janelas
+  visíveis, zero depois do `kill`
+- **Fix:** entrada na 35 com os seis campos que a tabela dela exige; passo 2 do
+  método da 12 dizendo que se abre com `--show`; e uma linha na 25 dando dono à
+  remoção do andaime
