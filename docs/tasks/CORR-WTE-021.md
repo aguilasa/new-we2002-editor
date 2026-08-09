@@ -3,7 +3,7 @@ id: CORR-WTE-021
 title: "Correção: o critério \"blobs visíveis na janela\" foi adiado para a WTE-TASK-11, que não o tem"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,12 +120,26 @@ que a preservação já foi medida — se um bitmap sumir, o defeito é de exibi
 - [ ] nenhum arquivo gerado tocado: `python3 wte/tools/dfm2lfm.py --check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** O critério dos blobs da WTE-TASK-10 passou a
+apontar para a WTE-TASK-12, que é quem tem a conferência visual no escopo, e
+diz o que já está provado. Do outro lado, a 12 ganhou o critério herdado e a
+linha "bitmap não aparece" da tabela de achados deixou de atribuir o defeito à
+conversão — a preservação está medida, então o suspeito é exibição.
 
-**Problemas encontrados:**
+**Problemas encontrados:** A metade "preservados" não era reproduzível na
+árvore como ela estava: `wte/re/dfm/blobs/` é gitignored e estava vazio, então
+o `--check` do `dfm_extract.py` passava sem ler blob nenhum (é o aviso que a
+CORR-WTE-004 introduziu). Regerei os blobs e remedi: 118 arquivos, 816.880
+bytes, os dois `--check` verdes. O texto do critério passou a nomear os dois
+`--check` e a dizer que os `blobs/` precisam ser regerados — a redação
+original citava `wte/re/dfm/blobs/*.bin`, que além de não existir por padrão
+está errada como glob: os blobs ficam num subdiretório por formulário.
 
 **Arquivos criados/modificados:**
+
+- `docs/tasks/10-conversor-dfm-para-lfm.md` (critério dos blobs)
+- `docs/tasks/12-comparacao-visual.md` (tabela de achados + critério herdado)

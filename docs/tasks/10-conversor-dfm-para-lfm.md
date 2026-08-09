@@ -79,8 +79,15 @@ construção não reconhecida. Editar `.lfm` à mão tem de quebrar o `--check`.
       `WteMain.lfm` da WTE-TASK-02) passam pelo `LFMtoLRSstream`, que é o
       parser que o `lazbuild` usa, com zero recusa. Medido pelo thread
       principal em 2026-08-06
-- [ ] Blobs binários preservados e visíveis na janela — preservados e
-      conferidos byte a byte; "visíveis" só na WTE-TASK-11
+- [ ] Blobs binários preservados e visíveis na janela — **preservados**: os 118
+      (816.880 B) conferidos byte a byte pelos dois `--check`, o do
+      `dfm_extract.py` (`.dfm` + `wte/re/dfm/blobs/<form>/*.bin` contra o
+      `.exe`) e o do `dfm2lfm.py` (hex do `.lfm` contra o SHA-256 do `.dfm`),
+      zero divergentes — remedido em 2026-08-09, com os `blobs/` regerados,
+      já que eles são gitignored e só nascem no modo de escrita.
+      **Visíveis** é da [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md), que
+      já tem "bitmap não aparece" na tabela de achados — não da WTE-TASK-11,
+      que nunca teve o item
 - [x] `TBrowseURL` substituído com `TODO` visível
 - [x] Propriedade descartada vira comentário, nunca some — comentário no
       `.pas`, não no `.lfm`: **LFM não tem sintaxe de comentário** (ver o Log)

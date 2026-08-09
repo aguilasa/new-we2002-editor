@@ -45,7 +45,7 @@ tamanho aparece na carga dos dois lados. Dispensar o modal antes, ou capturar
 | controle faltando ou sobrando | bug do gerador — volta para a WTE-TASK-10 |
 | posição ou tamanho errado | bug do gerador |
 | cor de fundo diferente | provável `TStaticText` (§8.9) — 37 candidatos |
-| bitmap não aparece | blob perdido na conversão |
+| bitmap não aparece | **não é perda na conversão** — a preservação dos 118 blobs está medida (WTE-TASK-10). É defeito de exibição: LCL/GTK2 ou pai do componente |
 | rótulo cortado | **esperado**, registrar e seguir |
 
 ### As 37 instâncias de `TStaticText`
@@ -68,6 +68,9 @@ retrabalho.
 
 - [ ] Os 18 capturados dos dois lados
 - [ ] Um veredito escrito por formulário
+- [ ] Os 118 blobs aparecem na janela — critério herdado da
+      [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md), que provou a
+      preservação byte a byte e não podia provar a exibição
 - [ ] Nenhum controle faltando ou fora de lugar
 - [ ] Comportamento das 37 `TStaticText` decidido
 - [ ] Rótulos cortados listados, com a nota de que é esperado
