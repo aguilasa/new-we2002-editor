@@ -3,7 +3,7 @@ id: CORR-WTE-022
 title: "Correção: o comando publicado da ordem de auto-create devolve 17 das 18 classes, e a que ele perde é TMainForm"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -141,12 +141,25 @@ operando tem o mesmo defeito.
       e a correção não pode ter tocado em nada que seja
 - [ ] `we-team-editor.exe` e `roms/` intocados
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** A faixa do `sed` passou de `401a2e` para `401a22`
+nos dois sítios — cabeçalho do `wtemain.pas` e Log da WTE-TASK-11 —, cada um
+com a linha que explica por que o endereço da faixa não é o da chamada. Sem
+ela, o próximo leitor "corrige" de volta ao ver `0x401a2e` na prosa acima.
+Remedido: 18 pares de operandos, e as 18 classes resolvidas pelo `vmtClassName`
+(`-44`) batem **na ordem** com os 18 `Application.CreateForm` de
+`CriaFormularios`, item por item, `TMainForm` na cabeça.
 
-**Problemas encontrados:**
+**Problemas encontrados:** Nenhum. A varredura pelo mesmo padrão — faixa de
+`sed` escrita a partir de endereço de `call` e consumida por `grep` de operando
+— não achou outro sítio no repositório: `grep -rn "sed -n '/[0-9a-f]\{6\}:"`
+devolve só estas duas linhas. O `0x401a2e` que sobra nos dois arquivos é o das
+chamadas, que é onde ele está certo.
 
 **Arquivos criados/modificados:**
+
+- `wte/src/wtemain.pas` (cabeçalho)
+- `docs/tasks/11-app-com-a-casca-completa.md` (Log)

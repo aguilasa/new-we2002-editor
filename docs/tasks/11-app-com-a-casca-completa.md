@@ -114,8 +114,14 @@ por título vão pegar o lado errado a partir da WTE-TASK-22.
 
   ```sh
   objdump -d -M intel we-team-editor/we-team-editor.exe \
-    | sed -n '/401a2e:/,/401bc6:/p' | grep -E 'mov +(ecx|edx),DWORD PTR ds:'
+    | sed -n '/401a22:/,/401bc6:/p' | grep -E 'mov +(ecx|edx),DWORD PTR ds:'
   ```
+
+  A faixa começa em `0x401a22`, e não em `0x401a2e`, de propósito: as 18
+  **chamadas** vão de `0x401a2e` a `0x401bc6`, mas os dois `mov` que carregam
+  os operandos de cada sítio vêm **antes** da chamada dele. Começando na
+  chamada, o primeiro par fica de fora e a saída traz 17 classes, sem
+  `TMainForm`.
 
   O `trace.log` sai com **16** `FormCreate`, não 18, e está certo:
   `ficha_error` e `ficha_error2` não têm `OnCreate`. Bate com a WTE-TASK-04,

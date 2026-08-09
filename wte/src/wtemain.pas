@@ -19,7 +19,12 @@
   Reproduzir a medida:
 
     objdump -d -M intel we-team-editor/we-team-editor.exe \
-      | sed -n '/401a2e:/,/401bc6:/p' | grep -E 'mov +(ecx|edx),DWORD PTR ds:'
+      | sed -n '/401a22:/,/401bc6:/p' | grep -E 'mov +(ecx|edx),DWORD PTR ds:'
+
+  A faixa comeca em 0x401a22, nao em 0x401a2e: as 18 CHAMADAS de CreateForm
+  vao de 0x401a2e a 0x401bc6, mas os dois `mov` que carregam os operandos de
+  cada sitio vem ANTES da chamada dele. Comecando na chamada, o primeiro par
+  fica de fora e a saida traz 17 classes, sem TMainForm.
 
   O `edx` de cada sitio e o endereco que guarda o ponteiro de metaclasse; o
   `ecx` e a variavel global da instancia. }
