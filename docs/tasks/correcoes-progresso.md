@@ -29,6 +29,9 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | A varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` ainda diz que a §1 do plano registra 197 bitmaps | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-018](/docs/tasks/CORR-WTE-018.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `02-revisar.md` cita `~430`, `70` e `197` como "o que já está no plano", e o plano não diz mais isso | Baixa | [ ] pendente | — |
+| [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado | Alta | [ ] pendente | — |
+| [CORR-WTE-020](/docs/tasks/CORR-WTE-020.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A tabela `ACEITA`/`DESCARTA` diz ter sido medida na LCL 3.0 e nada remede; `LCL_VERSAO` é código morto | Alta | [ ] pendente | — |
+| [CORR-WTE-021](/docs/tasks/CORR-WTE-021.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | O critério "blobs visíveis na janela" foi adiado para a WTE-TASK-11, que não o tem | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -50,6 +53,9 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-016 — alargar o perímetro da varredura para `wte/` e fechar o sítio do `wte/README.md`
 - [x] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
 - [ ] CORR-WTE-018 — trocar os três números aposentados do `02-revisar.md` e decidir o perímetro de `docs/prompts/`
+- [ ] CORR-WTE-019 — levar a exceção dos 118 blobs ao plano §2, ao `.gitignore` e ao `progresso.md`
+- [ ] CORR-WTE-020 — `check_lcl_props.py` remede a tabela contra a LCL instalada, e o `LCL_VERSAO` passa a pinar
+- [ ] CORR-WTE-021 — apontar o critério dos blobs para a WTE-TASK-12 e acrescentá-lo lá
 
 ## Detalhes por correção
 
@@ -356,3 +362,59 @@ data do commit — o `/revisar` abre a correção, não a fecha.
   perímetro (a exclusão foi escrita para **destino de link** placeholder, não
   para número de referência). Se entrar, a coluna `antes` de `SITIOS` é remedida
   de novo
+
+### CORR-WTE-019
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md` §2, `.gitignore` (bloco
+  `wte/re/dfm/blobs/`) e `docs/tasks/progresso.md` ("Pendências externas")
+- **Sintoma:** os 118 blobs do Obocaman — 816.880 bytes — foram versionados em
+  hex inline nos 18 `wte/forms/*.lfm`, por **decisão do usuário registrada** em
+  `wte/re/dfm/README.md`. A decisão está certa e não muda. O que não aconteceu
+  foi o registro chegar aos três documentos que declaram a política: o plano
+  (fonte de verdade) continua dizendo "binário de terceiro sem fonte e sem
+  licença não entra no repositório", o `.gitignore` continua afirmando que "hex
+  inline seria a mesma coisa numa codificação diferente", e o `progresso.md`
+  continua listando os assets como não redistribuídos, sem ressalva. Nenhum dos
+  três aponta para o README que os reverte
+- **Como foi detectado:** `git ls-files wte/forms/*.lfm` (18 rastreados,
+  1.960.767 B, dos quais 1.818.756 B — 92,8% — são linhas de hex) confrontado
+  com `sed -n '339,343p' docs/PLAN-WTE-LAZARUS.md`, `sed -n '89,97p'
+  .gitignore` e `sed -n '305,306p' docs/tasks/progresso.md`
+- **Fix:** acrescentar a exceção com o número e o ponteiro nos três, sem mexer
+  em nenhum `.lfm`
+
+### CORR-WTE-020
+
+- **Arquivo com problema:** `wte/tools/dfm2lfm.py` (cabeçalho, `ACEITA`,
+  `DESCARTA`, `LCL_VERSAO` na linha 159)
+- **Sintoma:** o cabeçalho afirma que a tabela "não é palpite: saiu das fontes
+  da LCL 3.0 [...] varrendo as seções `published`". A varredura foi descartável:
+  nada em `make -C wte check` toca `/usr/lib/lazarus`, nenhum dos 64 testes
+  menciona a LCL, e `LCL_VERSAO = "3.0"` — o pino de versão — nunca é lido.
+  Entrada errada em `ACEITA` sai verbatim para o `.lfm`, o `--check` fica verde
+  (compara a saída consigo mesma), o `lazbuild` compila, e a janela explode ao
+  abrir
+- **Como foi detectado:** `grep -rn LCL_VERSAO wte/` devolve só a declaração;
+  a remedição desta revisão varreu as seções `published` da LCL 3.0 subindo a
+  cadeia de ancestrais e achou **zero** divergência além das oito `Left`/`Top`
+  que o cabeçalho já justifica — a tabela está certa, e essa certeza não é
+  reproduzível por comando versionado nenhum
+- **Fix:** `wte/tools/check_lcl_props.py`, com `--check`, na bateria do
+  `wte/Makefile`, exercitado com entrada plantada nos três sentidos (`ACEITA`
+  inventada, `DESCARTA` que existe, `LCL_VERSAO` divergindo do disco)
+
+### CORR-WTE-021
+
+- **Arquivo com problema:** `docs/tasks/10-conversor-dfm-para-lfm.md` (critério
+  dos blobs) e `docs/tasks/12-comparacao-visual.md`
+- **Sintoma:** o único critério aberto da WTE-TASK-10 adia "blobs visíveis na
+  janela" para a WTE-TASK-11, que está concluída e nunca teve o item — "blob",
+  "bitmap" e "visível" não ocorrem no arquivo dela. O dono real é a
+  WTE-TASK-12, que já tem "bitmap não aparece" na tabela de achados e não sabe
+  que herdou critério de fora
+- **Como foi detectado:** `grep -n -i "blob\|bitmap\|visív" docs/tasks/11-*.md`
+  sem saída, contra `grep -n "bitmap" docs/tasks/12-*.md:48`. A metade
+  "preservados" foi remedida e passa: 118 blobs conferidos contra o SHA-256 do
+  `.dfm` **e** contra `wte/re/dfm/blobs/*.bin`, zero divergentes
+- **Fix:** apontar o adiamento para a WTE-TASK-12 e acrescentar o critério
+  herdado lá
