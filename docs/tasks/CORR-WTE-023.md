@@ -3,7 +3,7 @@ id: CORR-WTE-023
 title: "Correção: o critério de build da WTE-TASK-11 diz 2.482 linhas e atribui os 2 hints ao Lazarus; são 2.562 e vêm do /etc/fpc.cfg"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -122,12 +122,36 @@ casca da fase 2, e quem o mudar diz por quê no seu próprio Log.
       do `check_fase1.py`
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** O critério 1 da WTE-TASK-11 passou a trazer as
+medidas coladas da saída, com o comando que as produz, e a dizer qual contador
+é de quem: `(1022) 2 hint(s) issued` é do FPC e conta `11030`/`11031`
+(`/etc/fpc.cfg`), enquanto os hints do Lazarus sobre diretório de pacote são
+outros seis e saem antes do compilador.
 
-**Problemas encontrados:**
+**Problemas encontrados:** Dois, os dois relevantes para quem reconferir.
+
+1. **O número escrito é 2.567, não 2.562.** A CORR-WTE-022, executada neste
+   mesmo lote e imediatamente antes desta, acrescentou 5 linhas ao cabeçalho de
+   `wtemain.pas` (`git show --numstat 55aec14` = +6 −1), e o FPC conta
+   comentário em `lines compiled`. É a armadilha do lote: a correção *k+1*
+   torna falso o número que a *k* mediu. O 2.562 do diagnóstico continua certo
+   como história e está registrado como tal.
+2. **A verificação `grep -ci warning` desta CORR é falso positivo.** Ela devolve
+   **2** numa saída sem warning nenhum, porque casa
+   `Compiling ./src/ep2002_warning.pas` e `ep2002_warning_2.pas`. O critério
+   passou a dizer o que vale: `(1023) N warning(s) issued` ausente, ou
+   `grep -cE '^Warning'` = 0 — medido, 0.
+
+Terceiro detalhe menor: os hints do Lazarus são **seis** a partir de árvore
+limpa (`rm -rf wte/build`), e sete quando a árvore já está construída, porque
+entra o `Build Project: nothing to do.`. O critério diz os dois casos.
 
 **Arquivos criados/modificados:**
+
+- `docs/tasks/11-app-com-a-casca-completa.md` (critério 1)
+- `docs/tasks/correcoes-progresso.md` (bloco de detalhe desta CORR — o
+  2.562 do diagnóstico ganhou a nota do deslocamento)

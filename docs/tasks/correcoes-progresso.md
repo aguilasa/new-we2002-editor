@@ -33,7 +33,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-020](/docs/tasks/CORR-WTE-020.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A tabela `ACEITA`/`DESCARTA` diz ter sido medida na LCL 3.0 e nada remede; `LCL_VERSAO` é código morto | Alta | [ ] pendente | — |
 | [CORR-WTE-021](/docs/tasks/CORR-WTE-021.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | O critério "blobs visíveis na janela" foi adiado para a WTE-TASK-11, que não o tem | Baixa | [x] concluída | 2026-08-09 |
 | [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O comando publicado da ordem de auto-create devolve 17 das 18 classes, e perde justamente `TMainForm` | Alta | [x] concluída | 2026-08-09 |
-| [CORR-WTE-023](/docs/tasks/CORR-WTE-023.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O critério de build diz 2.482 linhas (são 2.562) e atribui os 2 hints ao Lazarus (são do `/etc/fpc.cfg`) | Alta | [ ] pendente | — |
+| [CORR-WTE-023](/docs/tasks/CORR-WTE-023.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O critério de build diz 2.482 linhas (são 2.562) e atribui os 2 hints ao Lazarus (são do `/etc/fpc.cfg`) | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-024](/docs/tasks/CORR-WTE-024.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O sufixo ` [Lazarus]` não chegou à WTE-TASK-35 e o `--show` não chegou à WTE-TASK-12 | Baixa | [x] concluída | 2026-08-09 |
 
 ## Checklist
@@ -60,7 +60,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [ ] CORR-WTE-020 — `check_lcl_props.py` remede a tabela contra a LCL instalada, e o `LCL_VERSAO` passa a pinar
 - [x] CORR-WTE-021 — apontar o critério dos blobs para a WTE-TASK-12 e acrescentá-lo lá
 - [x] CORR-WTE-022 — começar a faixa do `sed` em `401a22`, e dizer por que ela não é a da chamada
-- [ ] CORR-WTE-023 — colar da saída as três medidas do critério de build da WTE-TASK-11
+- [x] CORR-WTE-023 — colar da saída as três medidas do critério de build da WTE-TASK-11
 - [x] CORR-WTE-024 — levar o sufixo ` [Lazarus]` à 35 e o `--show` à 12 e à 25
 
 ## Detalhes por correção
@@ -459,6 +459,10 @@ data do commit — o `/revisar` abre a correção, não a fecha.
   `git log af424c0..HEAD -- wte/src wte/wte.lpr wte/wte.lpi wte/forms` é vazio.
   Os hints saem de `lazbuild -B 2>&1 | grep -E '^Hint'`
 - **Fix:** colar as três medidas da saída, dizendo qual contador é de quem
+- **Escrito no critério: 2.567.** As 2.562 acima valiam quando esta correção
+  foi aberta; a [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md), executada no mesmo
+  lote e antes desta, acrescentou 5 linhas ao cabeçalho de `wtemain.pas` —
+  comentário conta em `lines compiled`
 
 ### CORR-WTE-024
 

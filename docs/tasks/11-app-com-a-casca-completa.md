@@ -78,8 +78,23 @@ por título vão pegar o lado errado a partir da WTE-TASK-22.
 
 ## Critério de conclusão
 
-- [x] `lazbuild` compila sem warning novo — 2.482 linhas, 0 warning, 2 hints
-      (ambos do Lazarus sobre diretório de pacote do sistema, não do código)
+- [x] `lazbuild` compila sem warning novo — `rm -rf wte/build && lazbuild -B
+      wte/wte.lpi` dá `(1008) 2567 lines compiled` e `(1022) 2 hint(s) issued`,
+      com **0 warning**. Os 2 hints que o contador do FPC soma são
+      `11030`/`11031`, abrir e fechar `/etc/fpc.cfg` — nada do código. Os hints
+      do Lazarus sobre diretório de pacote do sistema não writable são outros
+      seis, saem **antes** do compilador e não entram nessa conta (viram sete
+      quando a árvore já está construída, com o `Build Project: nothing to
+      do.`). Medido em 2026-08-09.
+
+      Dois cuidados ao reconferir. **`grep -ci warning` não serve**: casa
+      `Compiling ./src/ep2002_warning.pas` e devolve 2 numa saída sem warning
+      nenhum. O que vale é `(1023) N warning(s) issued` ausente, ou
+      `grep -cE '^Warning'` = 0. E **o número de linhas se move com
+      comentário**: eram 2.562 até a
+      [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md) acrescentar 5 linhas ao
+      cabeçalho de `wtemain.pas`. Quem o mudar diz por quê no seu Log — a
+      partir da fase 3 ele sobe porque entram unidades novas.
 - [x] Os 18 formulários abrem e fecham no `:99` — `--show all` mapeia 18
       janelas; depois do `kill`, zero
 - [x] Os 96 stubs logam em `trace.log`, formato estável — carimbo **relativo**
