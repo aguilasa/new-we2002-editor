@@ -11,6 +11,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `dump_units.py` ✅ | 07 | imports → veredito sobre as quatro unidades VCL duvidosas |
 | `check_fase1.py` ✅ | 09 | os produtos da fase 1 → as quatro conferências cruzadas e a reconciliação |
 | `dfm2lfm.py` ✅ | 10 | DFM → `.lfm` + esqueleto das unidades |
+| `check_lcl_props.py` ✅ | CORR-020 | **não gera nada** — remede a tabela `PROPRIEDADES` do `dfm2lfm.py` contra as seções `published` da LCL instalada |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |
 | `golden_check.sh` | 22 | o gate: `wte.exe` contra o app Lazarus |
@@ -21,6 +22,12 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 **Todo gerador daqui aceita `--check`**, e `make -C wte check` roda todos. Sem
 o `--check` não há como provar que ninguém editou a saída à mão — que é a regra
 da §4.4 do plano.
+
+Nem todo item da tabela é gerador. O `check_lcl_props.py` não escreve arquivo
+nenhum: ele confere uma **tabela dentro de outro script** contra a realidade do
+disco. Entra pela mesma porta porque cumpre o mesmo contrato — `--check`, sai 2
+quando diverge — e existe porque `--check` de gerador compara a saída consigo
+mesma, o que não diz nada sobre a tabela que produziu a saída.
 
 O `check` do Makefile enumera `tools/*.py` por `wildcard`: script novo entra na
 bateria sozinho, sem editar o Makefile. O preço é que um script que **não**
@@ -34,7 +41,8 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | `test_dump_strings.py` ✅ | o decodificador de comprimento x86-32 — mapa de opcodes caso a caso, os sete abortos, o `extent()`, a conferência contra o `objdump`, e a identidade entre as **duas** cópias (`dump_strings.py` e `dump_units.py`) |
 | `test_dump_offsets.py` ✅ | o critério de limite da tabela em `.data`: os dois sentidos da discordância (um aborta, o outro avisa) e a faixa de plausibilidade herdada do `Offsets.hpp` |
 | `test_dfm2lfm.py` ✅ | o mapeamento VCL→LCL do `dfm2lfm.py`: as assinaturas por par (classe, evento), as propriedades sem par na LCL, a rota de blob ausente e os abortos |
-| `test_check_fase1.py` ✅ | o perímetro da varredura de sítios do `check_fase1.py`: quem entra, onde a leitura para (o Log de Execução), e o corte por contexto que separa os `430` componentes do setor 430 do outro projeto |
+| `test_check_fase1.py` ✅ | o perímetro da varredura de sítios do `check_fase1.py`: quem entra, onde a leitura para (o Log de Execução), o corte por contexto que separa os `430` componentes do setor 430 do outro projeto, e a forma de história (`velho → corrente`), que não conta |
+| `test_check_lcl_props.py` ✅ | as três guardas do `check_lcl_props.py`, com entrada plantada nos três sentidos — `ACEITA` inventada, `DESCARTA` que a LCL tem, `LCL_VERSAO` divergindo do disco —, sobre uma LCL sintética montada em diretório temporário |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
 o prefixo `test_`. (Teste do lado **Pascal** é outra coisa e mora em

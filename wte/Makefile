@@ -21,6 +21,11 @@ ASSETS_SRC ?= $(ROOT)/we-team-editor
 # tem de aceitar --check; o alvo `check` roda todos e falha no primeiro que
 # divergir do commitado.
 #
+# Nem todo item da lista e gerador: o `check_lcl_props.py` (CORR-WTE-020) nao
+# escreve nada, confere a tabela `PROPRIEDADES` do `dfm2lfm.py` contra as
+# secoes `published` da LCL instalada. Entra pela mesma porta porque cumpre o
+# mesmo contrato -- `--check`, e sai 2 quando diverge.
+#
 # `tools/test_*.py` sao testes de ferramenta, nao geradores: nao aceitam
 # --check, e sem o filter-out o wildcard os arrastaria para a bateria e
 # quebraria o alvo. Eles rodam pelo alvo `test`, do qual `check` depende.

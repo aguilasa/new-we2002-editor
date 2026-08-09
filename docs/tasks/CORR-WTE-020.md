@@ -3,7 +3,7 @@ id: CORR-WTE-020
 title: "Correção: a tabela de propriedades do dfm2lfm.py diz ter sido medida na LCL 3.0, e nada remede — LCL_VERSAO é código morto"
 type: correção
 category: ui
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -145,12 +145,56 @@ conta, e no comentário de `LCL_VERSAO` dizer quem o lê.
 - [ ] `lazbuild -B wte/wte.lpi` compila sem warning novo
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** O varredor descartável virou ferramenta.
+`check_lcl_props.py` lê `ACEITA`, `DESCARTA`, `IDENTIFICADORES`,
+`ELEMENTOS_DE_CONJUNTO` e `LCL_VERSAO` **importando** o `dfm2lfm.py` — a tabela
+continua com um dono só —, indexa as 1.976 classes da LCL instalada com
+ancestral e seções `published`, e confere os três sentidos. Contra a LCL 3.0 do
+disco: 289 propriedades de `ACEITA` e 12 de `DESCARTA` conferidas, zero
+divergência, o que reproduz o que a revisão tinha medido à mão. O pino de
+versão passou a pinar: ele compara `LCL_VERSAO` com o `laz_major`/`laz_minor`
+de `components/lazutils/lazversion.pas` e aborta **antes** de varrer.
 
-**Problemas encontrados:**
+As três guardas foram exercitadas com entrada plantada no `dfm2lfm.py` de
+verdade, e as três saem 2 nomeando o que quebrou:
+
+```
+ACEITA inventada (TLabel.NaoExiste):   TLabel.NaoExiste: em ACEITA e sem published correspondente na LCL
+DESCARTA que existe (TLabel.Caption):  TLabel.Caption: em DESCARTA e a LCL **tem** -- descartar propriedade existente perde dado do formulario
+LCL_VERSAO = "4.2":                    LCL nao encontrada em /usr/lib/lazarus/4.2/lcl -- LCL_VERSAO do dfm2lfm.py diz '4.2'
+```
+
+Mais 19 testes hermes em `test_check_lcl_props.py`, sobre uma LCL sintética em
+diretório temporário, para que os três sentidos sejam exercitados sem depender
+do que está instalado na máquina.
+
+**Problemas encontrados:** Três, todos no caminho.
+
+1. **A primeira planta de `DESCARTA` foi inócua e passou.** Plantei `Caption`
+   em `DESCARTA["TComboBox"]` e o script saiu 0 — corretamente: o `TComboBox`
+   da LCL **não** publica `Caption` (publica `Text`). A guarda estava certa e
+   a planta é que era ruim. Refeita em `TLabel`, que publica, e aí acusa.
+   Vale como lembrete de que planta que não reproduz o defeito testa nada.
+2. **O `__pycache__` mascarou a restauração.** `LCL_VERSAO = "3.0"` e `"4.2"`
+   têm o **mesmo tamanho em bytes**, e a escrita caiu no mesmo segundo — o
+   Python invalida `.pyc` por (mtime, tamanho), então reusou o compilado da
+   planta depois de eu já ter restaurado o arquivo. O laço de plantas passou a
+   apagar o `__pycache__` a cada volta.
+3. **O `wte/Makefile` não precisou de linha nova**, ao contrário do que a
+   correção previa: o `GENERATORS` já é um `wildcard` sobre `tools/*.py`, então
+   o conferidor entrou na bateria sozinho. O que entrou foi comentário, nos
+   dois lugares que catalogam as ferramentas — o item não é gerador, e quem
+   ler a lista precisa saber disso.
 
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_lcl_props.py` (**criado**)
+- `wte/tools/test_check_lcl_props.py` (**criado** — 19 testes)
+- `wte/tools/dfm2lfm.py` (cabeçalho e o comentário de `LCL_VERSAO`)
+- `wte/Makefile` (comentário do `GENERATORS`)
+- `wte/tools/README.md` (as duas tabelas de catálogo — discrepância achada no
+  caminho: elas enumeram toda ferramenta e não conheciam as duas novas)

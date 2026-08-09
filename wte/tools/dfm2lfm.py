@@ -100,12 +100,24 @@ A tabela de mapeamento
 ----------------------
 
 `PROPRIEDADES` diz, para cada classe da LCL, quais propriedades sao aceitas e
-quais sao descartadas. Ela **nao e palpite**: saiu das fontes da LCL 3.0
-instaladas em `/usr/lib/lazarus/3.0/lcl`, varrendo as secoes `published` de
-cada classe e de todos os ancestrais dela, cruzado com as propriedades que
-ocorrem de fato nos 18 DFM. Propriedade que nao esteja em nenhuma das duas
-listas **aborta**: e o caso "nao sei em que balde isto cai", diferente de "a
-LCL nao tem", que e o balde `DESCARTA`.
+quais sao descartadas. Ela **nao e palpite**, e isso e **conferido por
+comando**, nao afirmado aqui:
+
+    python3 wte/tools/check_lcl_props.py --check     # roda no `make -C wte check`
+
+O `check_lcl_props.py` varre as secoes `published` de cada classe e de todos os
+ancestrais dela nas fontes da LCL instaladas, e confere os tres sentidos: toda
+entrada de `ACEITA` tem `published` correspondente (fora as oito `Left`/`Top`
+nomeadas abaixo), nenhuma de `DESCARTA` tem, e todo `IDENTIFICADORES` /
+`ELEMENTOS_DE_CONJUNTO` ocorre nas fontes. Ele le a tabela importando este
+modulo -- ela continua tendo um dono so. Ate a CORR-WTE-020 a varredura tinha
+sido feita uma vez, a mao, e o resultado transcrito: `ACEITA` errada nao
+abortava, o `--check` daqui ficava verde (compara a saida consigo mesma), o
+`lazbuild` compilava, e a janela explodia ao abrir.
+
+Propriedade que nao esteja em nenhuma das duas listas **aborta**: e o caso "nao
+sei em que balde isto cai", diferente de "a LCL nao tem", que e o balde
+`DESCARTA`.
 
 `Left` e `Top` em componente nao visual (`TTimer`, `TActionList`, os dialogos)
 nao aparecem em nenhuma secao `published`, e ainda assim sao validos: o
@@ -156,6 +168,11 @@ RELATORIO = "conversao.md"
 
 # Versao da LCL de onde a tabela de propriedades foi medida. Trocar de versao
 # pede remedir -- nao e para editar a tabela a mao.
+#
+# Quem le isto: `check_lcl_props.py`, que compara com o `laz_major`/`laz_minor`
+# de `components/lazutils/lazversion.pas` da arvore instalada e **aborta antes
+# de varrer** se divergirem. Ate a CORR-WTE-020 ninguem lia -- era um pino de
+# versao que nao pinava nada.
 LCL_VERSAO = "3.0"
 
 
