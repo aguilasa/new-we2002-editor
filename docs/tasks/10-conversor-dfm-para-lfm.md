@@ -170,3 +170,10 @@ construção não reconhecida. Editar `.lfm` à mão tem de quebrar o `--check`.
      —, e sem o hex a janela não mostra bitmap nenhum. Ficou como a tarefa
      pede; **é decisão do usuário confirmar antes do commit**, e reverter é
      mexer num ponto só do gerador.
+
+     *Resolvido:* o usuário confirmou versionar em 2026-08-06, e a exceção
+     entrou nos três documentos que declaram a política — §2 do
+     [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md), o bloco
+     `wte/re/dfm/blobs/` do `.gitignore` e as "Pendências externas" do
+     [`progresso.md`](/docs/tasks/progresso.md) — pela
+     [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md). A §2 deixa de tensionar.

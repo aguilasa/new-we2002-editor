@@ -3,7 +3,7 @@ id: CORR-WTE-019
 title: "Correção: a reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -157,12 +157,25 @@ fora e o que entrou:
 - [ ] nenhum `.lfm` mudou: `python3 wte/tools/dfm2lfm.py --check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** A exceção dos 118 blobs (816.880 B versionados como
+hex inline nos 18 `wte/forms/*.lfm`) entrou nos três documentos que declaram a
+política — §2 do plano, o bloco `wte/re/dfm/blobs/` do `.gitignore` e as
+"Pendências externas" do `progresso.md` —, os três com o número e o ponteiro
+para `wte/re/dfm/README.md`. A decisão não mudou e nenhum `.lfm` foi tocado.
 
-**Problemas encontrados:**
+**Problemas encontrados:** A varredura puxou um quarto sítio que a CORR não
+previa: o problema 5 do Log da WTE-TASK-10 diz "isso tensiona a §2 do plano",
+e a §2 deixou de tensionar no mesmo commit em que a exceção entrou. Ganhou uma
+linha *Resolvido:* apontando para os três documentos e para esta correção.
 
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md` (§2 — parágrafo da exceção)
+- `.gitignore` (bloco `wte/re/dfm/blobs/`)
+- `docs/tasks/progresso.md` ("Pendências externas")
+- `docs/tasks/10-conversor-dfm-para-lfm.md` (Log, problema 5 — discrepância
+  achada no caminho)

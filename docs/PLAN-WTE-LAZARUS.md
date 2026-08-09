@@ -342,6 +342,16 @@ igual ao código herdado do Moriero e do thyddralisk que o
 justamente por isso: binário de terceiro sem fonte e sem licença não entra no
 repositório.
 
+**Uma exceção, decidida em 2026-08-06.** Os 118 blobs de formulário
+(`Icon.Data`, `Picture.Data`, `Glyph.Data` — 816.880 bytes) **estão**
+versionados, como hex inline nos 18 `wte/forms/*.lfm`. O `.lfm` não é
+documentação, é o formulário: sem o hex a janela abre sem ícone e sem glifo, e a
+WTE-TASK-12 — o gate da fase 2 — compararia contra uma tela que não é a do port.
+O registro completo da decisão está em
+[`../wte/re/dfm/README.md`](../wte/re/dfm/README.md). O restante da arte (os 198
+`.bmp` e o `dat.bin`) continua fora, e os blobs soltos de `wte/re/dfm/blobs/`
+também.
+
 Distinção que importa e que orienta o método deste plano:
 
 | Atividade | Postura |

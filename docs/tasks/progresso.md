@@ -302,8 +302,12 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Publicação depende do usuário.** O binário do Obocaman é sem licença, como
   todo o código herdado que o [`../../NOTICE.md`](../../NOTICE.md) registra. A
   WTE-TASK-38 prepara a linhagem; **publicar não é decisão do executor.**
-- **Assets não redistribuídos.** Os 198 BMP e o `dat.bin` ficam com o usuário,
-  como `roms/`. O app precisa falhar com mensagem clara sem eles.
+- **Assets não redistribuídos, com uma exceção.** Os 198 BMP e o `dat.bin` ficam
+  com o usuário, como `roms/`. O app precisa falhar com mensagem clara sem eles.
+  A exceção são os 118 blobs de formulário (816.880 B), que **estão** versionados
+  em hex nos `wte/forms/*.lfm` — decisão de 2026-08-06, registrada em
+  [`../../wte/re/dfm/README.md`](../../wte/re/dfm/README.md) e no §2 do
+  [`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md).
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.

@@ -29,7 +29,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | A varredura de sítios para em `docs/` e `wte/re/`, e o `wte/README.md` ainda diz que a §1 do plano registra 197 bitmaps | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-017](/docs/tasks/CORR-WTE-017.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `fase-1.md` separa offset de tabela de offset em `.text` por substring do endereço, e a igualdade que a prosa afirma não é conferida | Baixa | [x] concluída | 2026-08-06 |
 | [CORR-WTE-018](/docs/tasks/CORR-WTE-018.md) | [WTE-TASK-09](/docs/tasks/09-fechamento-fase-1.md) | O `02-revisar.md` cita `~430`, `70` e `197` como "o que já está no plano", e o plano não diz mais isso | Baixa | [ ] pendente | — |
-| [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado | Alta | [ ] pendente | — |
+| [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A reversão que versionou 816.880 bytes de arte do Obocaman só está registrada num README derivado | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-020](/docs/tasks/CORR-WTE-020.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | A tabela `ACEITA`/`DESCARTA` diz ter sido medida na LCL 3.0 e nada remede; `LCL_VERSAO` é código morto | Alta | [ ] pendente | — |
 | [CORR-WTE-021](/docs/tasks/CORR-WTE-021.md) | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | O critério "blobs visíveis na janela" foi adiado para a WTE-TASK-11, que não o tem | Baixa | [ ] pendente | — |
 | [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O comando publicado da ordem de auto-create devolve 17 das 18 classes, e perde justamente `TMainForm` | Alta | [ ] pendente | — |
@@ -56,7 +56,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-016 — alargar o perímetro da varredura para `wte/` e fechar o sítio do `wte/README.md`
 - [x] CORR-WTE-017 — cortar por faixa de endereço, e fazer a igualdade da §3 abortar
 - [ ] CORR-WTE-018 — trocar os três números aposentados do `02-revisar.md` e decidir o perímetro de `docs/prompts/`
-- [ ] CORR-WTE-019 — levar a exceção dos 118 blobs ao plano §2, ao `.gitignore` e ao `progresso.md`
+- [x] CORR-WTE-019 — levar a exceção dos 118 blobs ao plano §2, ao `.gitignore` e ao `progresso.md`
 - [ ] CORR-WTE-020 — `check_lcl_props.py` remede a tabela contra a LCL instalada, e o `LCL_VERSAO` passa a pinar
 - [ ] CORR-WTE-021 — apontar o critério dos blobs para a WTE-TASK-12 e acrescentá-lo lá
 - [ ] CORR-WTE-022 — começar a faixa do `sed` em `401a22`, e dizer por que ela não é a da chamada

@@ -90,7 +90,14 @@ wte/backup/
 # referencia -- `Icon.Data`, `Picture.Data`, `Glyph.Data` -- nao: sao 798 KiB
 # de arte do Obocaman, da mesma natureza dos 198 `.bmp` de `we-team-editor/`,
 # que este arquivo ignora por serem binario de terceiro sem licenca. Hex inline
-# no `.dfm` seria a mesma coisa numa codificacao diferente.
+# no `.dfm` seria a mesma coisa numa codificacao diferente -- e por isso o
+# `.dfm` nao o tem.
+#
+# Os `wte/forms/*.lfm` TEM o hex dos mesmos 118 blobs (816.880 B), por decisao
+# de 2026-08-06 registrada em `wte/re/dfm/README.md` e no §2 do
+# `docs/PLAN-WTE-LAZARUS.md`: ali o hex nao e documentacao, e o formulario --
+# sem ele a janela abre sem icone e sem glifo. A regra deste bloco vale para
+# `wte/re/`, nao para `wte/forms/`.
 #
 # Nada se perde: `dfm_extract.py` os regera do `.exe`, e o SHA-256 de cada um
 # esta no `.dfm` versionado -- e o que permite ao `--check` conferir os 798 KiB
