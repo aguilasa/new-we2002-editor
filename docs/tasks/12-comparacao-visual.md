@@ -31,7 +31,10 @@ só de fonte — não de posição, tamanho, cor, ordem ou controle faltando.
 ### Método
 
 1. `make wte` no `:99`, navegar até cada formulário, `import -window <id>`.
-2. O app Lazarus no `:99`, mesmo formulário, mesma captura.
+2. O app Lazarus no `:99`. **Ele não navega** — na fase 2 os handlers são stub
+   ([WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md), problema 3). O
+   andaime é `--show`: `./wte/build/wte --show all` abre os 18 de uma vez,
+   `--show <nome>` abre um só, `--list` dá os nomes. Mesma captura.
 3. Lado a lado em `wte/re/visual/<formulario>/`.
 
 **`import -window` falha com janela obscurecida por modal** — o aviso de
@@ -71,6 +74,10 @@ retrabalho.
 - [ ] Os 118 blobs aparecem na janela — critério herdado da
       [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md), que provou a
       preservação byte a byte e não podia provar a exibição
+- [ ] O sufixo ` [Lazarus]` no `Caption` **não** foi contado como achado — é
+      divergência deliberada da WTE-TASK-11, registrada na
+      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md). No `:99` não há
+      window manager e a captura nem chega a mostrá-lo
 - [ ] Nenhum controle faltando ou fora de lugar
 - [ ] Comportamento das 37 `TStaticText` decidido
 - [ ] Rótulos cortados listados, com a nota de que é esperado

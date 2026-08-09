@@ -51,6 +51,21 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
 
 ### Candidatas já conhecidas antes de a task rodar
 
+- **Sufixo ` [Lazarus]` no `Caption` dos 18**
+  ([WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md)) — **já está no
+  código**, diferente das outras quatro, que são hipóteses.
+  *Natureza:* escolha. *Decisão:* manter.
+  *Razão:* o `Caption` vem do DFM, e o do `MainForm` é literalmente
+  `' W11 Team Editor PT by chagas_michel!'`; a partir da WTE-TASK-22 os dois
+  editores rodam no mesmo `:99` e o harness acha janela por título e por
+  tamanho — título igual faria ele dirigir o lado errado (armadilha 6 do
+  [`progresso.md`](/docs/tasks/progresso.md)).
+  *Evidência:* posto em tempo de execução por `MarcaOsTitulos`, em
+  `wte/src/wtemain.pas`, não no `.lfm`, que é gerado.
+  *Onde o teste sabe:* no `:99` não há window manager, nenhuma barra de título
+  é desenhada, e a captura da
+  [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) não enxerga o sufixo —
+  num desktop de verdade enxerga, e deve.
 - **Tolerância de cor do render 2D** (WTE-TASK-32), se a igualdade exata não
   sair.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.

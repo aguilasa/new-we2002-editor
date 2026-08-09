@@ -76,6 +76,16 @@ O item 3 é barato e pega a classe de bug mais cara desta fase.
 | `wte/re/spec/<handler>.md` | criar (um por handler do grupo) |
 | `wte/src/ep2002_*.pas` | modificar (corpo dos stubs) |
 | `wte/re/spec/INDICE.md` | regenerar |
+| `wte/src/wtemain.pas` | modificar — **remover o andaime `--show`** |
+
+**O `--show` sai com esta task.** Ele existe porque na fase 2 nada navega: os
+handlers são stub, e sem ele a
+[WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) não conseguiria abrir
+formulário para capturar
+([WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md), problema 3). Quando
+a navegação de verdade entrar — que é aqui —, o andaime perde a razão de
+existir; sem dono nomeado, ele fica para sempre. `--list` pode ficar, é barato
+e não simula comportamento.
 
 ---
 
@@ -86,6 +96,7 @@ O item 3 é barato e pega a classe de bug mais cara desta fase.
 - [ ] Tela conferida contra o original para pelo menos 3 times distintos
 - [ ] Provado que o grupo não escreve na imagem (`cmp` = zero)
 - [ ] Comportamento de `OnChange` na carga decidido e testado
+- [ ] Andaime `--show` removido de `wtemain.pas`, com a navegação real no lugar
 - [ ] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*

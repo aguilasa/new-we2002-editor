@@ -3,7 +3,7 @@ id: CORR-WTE-024
 title: "Correção: as duas coisas que a WTE-TASK-11 delegou — o sufixo [Lazarus] e o --show — não chegaram a quem recebe"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -145,12 +145,24 @@ Uma linha dizendo que, quando a navegação de verdade entrar, o `--show` de
       `docs/tasks/`
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** As duas entregas da WTE-TASK-11 chegaram a quem
+recebe. O sufixo ` [Lazarus]` entrou na lista de candidatas da WTE-TASK-35 com
+os seis campos que a tabela dela exige, marcado como o único item que já está
+no código. O `--show` entrou no passo 2 do método da WTE-TASK-12, com `--show
+all` / `--show <nome>` / `--list`, e a 12 ganhou o critério de que o sufixo não
+conta como achado. A WTE-TASK-25 ganhou dono da remoção do andaime, na tabela
+de arquivos e no critério de conclusão.
 
-**Problemas encontrados:**
+**Problemas encontrados:** Nenhum. O `--list` ficou de fora da remoção
+proposta para a 25 — ele não simula navegação e não custa nada; só o `--show`
+sai.
 
 **Arquivos criados/modificados:**
+
+- `docs/tasks/35-divergencias-deliberadas.md` (candidatas)
+- `docs/tasks/12-comparacao-visual.md` (método passo 2 + critério)
+- `docs/tasks/25-handlers-de-carga.md` (arquivos + critério)
