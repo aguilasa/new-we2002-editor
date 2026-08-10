@@ -3,7 +3,7 @@ id: CORR-WTE-032
 title: "Correção: a \"regra zero\" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,20 +109,39 @@ Separar as duas ideias, alinhando a regra zero ao resumo da linha 216:
 
 ## Verificação
 
-- [ ] A regra zero e o resumo do fim do arquivo listam o **mesmo** conjunto de
+- [x] A regra zero e o resumo do fim do arquivo listam o **mesmo** conjunto de
       proibidos
-- [ ] `LongInt` não aparece mais como proibido em nenhum ponto do arquivo
-- [ ] A exceção de `SizeInt` está escrita onde ela é enunciada, não só na
+- [x] `LongInt` não aparece mais como proibido em nenhum ponto do arquivo
+- [x] A exceção de `SizeInt` está escrita onde ela é enunciada, não só na
       célula da tabela
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A regra zero passou a separar as duas ideias que estavam grudadas. "Não são
+equivalentes entre si" continua valendo para os sete nomes; a lista de
+**proibidos** ficou com cinco — `Integer`, `Cardinal`, `PtrInt`, `PtrUInt` e
+`NativeInt`. `SizeInt` tem proibição com a **exceção escrita na própria regra**
+(contagem de bytes na fronteira do `CdImage`, onde é o retorno de
+`TStream.Read`/`Write`, nunca gravado nem campo de registro), e não mais só na
+célula da tabela. `LongInt` saiu da lista, com o motivo dito ali: 32 bits com
+sinal em todas as plataformas suportadas, e é o mapeamento de `int` — inclusive
+nos 30 atributos de `Player`, que são campos de registro que atravessam a
+imagem.
+
 **Problemas encontrados:**
 
+O resumo da WTE-TASK-17, no fim do arquivo, listava **três** proibidos
+(`Integer`/`Cardinal`/`PtrInt`) — era a redação certa quanto a `LongInt`, mas
+não batia com os cinco da regra zero nem mencionava a exceção de `SizeInt`.
+Alinhado na mesma passada; o critério de verificação pede exatamente o mesmo
+conjunto nas duas pontas.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/tipos.md`

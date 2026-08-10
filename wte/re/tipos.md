@@ -21,9 +21,22 @@ explícito. O mesmo risco atravessa para Pascal com outra roupa — ver a §8.11
 ## Regra zero: nada de tipo cujo tamanho dependa da plataforma
 
 `Integer`, `Cardinal`, `PtrInt`, `PtrUInt`, `NativeInt`, `SizeInt` e `LongInt`
-**não são equivalentes** em FPC. `Integer` é 16 bits em `{$mode tp}`;
-`PtrInt`/`NativeInt` seguem o ponteiro; `SizeInt` idem. Nenhum deles entra em
-campo de registro nem em variável que toque a imagem.
+**não são equivalentes** entre si em FPC — mas "não equivalentes" não quer
+dizer "proibidos", e a lista de proibidos é menor:
+
+- **Proibidos** em campo de registro e em variável que toque a imagem:
+  `Integer`, `Cardinal`, `PtrInt`, `PtrUInt` e `NativeInt`. `Integer` é 16 bits
+  em `{$mode tp}`; `Cardinal` acompanha `Integer`; `PtrInt`/`NativeInt` seguem o
+  ponteiro.
+- **`SizeInt` também segue o ponteiro** e vale a mesma proibição, **com uma
+  exceção escrita**: contagem de bytes na fronteira do `CdImage`, onde ele é o
+  tipo de retorno de `TStream.Read`/`Write`. Ali ele nunca é gravado na imagem
+  nem vira campo de registro — é o valor que o `Read` devolve e que o chamador
+  compara. Fora dessa fronteira, proibido como os outros.
+- **`LongInt` não está nessa lista.** Em FPC ele é 32 bits com sinal em todas as
+  plataformas suportadas nos modos que o projeto usa, e é o mapeamento de `int`
+  — inclusive nos 30 atributos de `Player`, que são campos de registro lidos e
+  gravados da imagem.
 
 Os tipos usados abaixo são todos de largura fixa por definição do FPC:
 `Byte` (8), `ShortInt` (8, com sinal), `Word` (16), `LongWord` (32),
@@ -216,8 +229,11 @@ porque o `TextRec` insere buffer e tradução.
 
 ## Resumo para a WTE-TASK-17
 
-1. Largura fixa em tudo que toca a imagem; `Integer`/`Cardinal`/`PtrInt`
-   proibidos por regra, não por gosto.
+1. Largura fixa em tudo que toca a imagem;
+   `Integer`/`Cardinal`/`PtrInt`/`PtrUInt`/`NativeInt` proibidos por regra, não
+   por gosto, e `SizeInt` proibido com a exceção escrita da fronteira do
+   `CdImage` (regra zero). `LongInt` **não** é proibido: é 32 bits com sinal e
+   é o mapeamento de `int`.
 2. `packed` só no `SquadNumbers`.
 3. Cópia de string com semântica de C, sem checagem, e `raw_formation` com 31.
 4. Números de camisa por máscara e deslocamento, com os dois testes.
