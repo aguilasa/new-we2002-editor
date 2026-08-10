@@ -258,9 +258,77 @@ europeia.** O `wte.exe` é o **oráculo comportamental** do projeto (§4.2
 do plano), e a
 [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) monta o gate golden
 em cima dele; com `roms/japanese-shift-jis.bin` ele passa da troca de
-time, então o gate tem em que se apoiar e o que está bloqueado aqui é
-remedível refazendo a corrida com a outra imagem. Quem refizer, refaça
-**as duas** — a comparação entre elas é o que sustenta o diagnóstico.
+time, então o gate tem em que se apoiar. A seção seguinte é a medição
+que isso destravou.
+
+---
+
+## As seis áreas, com um time carregado
+
+Medido com o roteiro
+[`09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt) sobre
+cópia de `roms/japanese-shift-jis.bin`. **A imagem não é escolha de gosto:** com a
+europeia o `wte.exe` morre na troca de time, e o roteiro mediria o
+travamento em vez das áreas ([`crash-causa.md`](crash-causa.md)).
+
+O `ARRANQUE` desta sessão é o **diff de controle desta imagem** — abrir
+sem tocar em nada —, e ele vem antes de toda ação medida abaixo, como
+manda o método da task.
+
+| ação | área da task | leituras | escritas | bytes escritos |
+|---|---|---:|---:|---:|
+| `ARRANQUE` | — | 5 | 9 | 14339 |
+| `SELECIONA_TIME` | carga do time — o pre-requisito de todas as outras | 17 | 0 | 0 |
+| `GRAVA_BARRAS` | barras de atributo do time (`boton_barras2iso`) | 0 | 0 | 0 |
+| `IGUALA_NOMES` | nomes, sem gravar (`iguala_nombres`) | 0 | 0 | 0 |
+| `GRAVA_NOMES` | nomes do time (`boton_nombres2iso`) | 0 | 8 | 57 |
+| `PINTAR` | bandeira e cor de radar (`colorear` → `ficha_color`) | 0 | 11 | 385 |
+| `TIME_TITULAR` | lado titular e o contador de blocos de ML livres | 0 | 0 | 0 |
+| `CALCULA_PRECO` | preço derivado dos atributos (`etiqprecio`) | 3 | 2 | 24 |
+| `ABRE_JOGADOR` | ficha do jogador — cabelo, barba, `careto` | 4 | 1 | 1 |
+| `FIM` | — | 0 | 0 | 0 |
+
+Depois do arranque, as ações tocaram **46 faixas** —
+22 de escrita. Os `OFS_*` do `newWe2002` alcançados por
+esta sessão são **33**.
+
+**4 ação(ões) não tocou(aram) a imagem**: `GRAVA_BARRAS`, `IGUALA_NOMES`, `TIME_TITULAR`, `FIM`. Isso é resultado, não
+falha de clique — o roteiro é dirigido por janela, e cada uma delas
+foi resolvida pelo nome antes do clique.
+
+**27 faixas desta sessão nenhum `OFS_*` explica**, e
+2 delas ficam acima do maior offset que o
+`newWe2002` conhece. São elas que a fase 4 precisa nomear.
+
+| ação | op | início | fim | tamanho | setor |
+|---|:---:|---:|---:|---:|---:|
+| `ARRANQUE` | R | 0 | 22 | 23 | 0 |
+| `ARRANQUE` | R | 11796 | 12307 | 512 | 5 |
+| `ARRANQUE` | R | 2736694 | 2737205 | 512 | 1163 |
+| `ARRANQUE` | W | 11784 | 13831 | 2048 | 5 |
+| `ARRANQUE` | W | 14136 | 16183 | 2048 | 6 |
+| `ARRANQUE` | W | 16488 | 18535 | 2048 | 7 |
+| `ARRANQUE` | W | 18840 | 20887 | 2048 | 8 |
+| `ARRANQUE` | W | 21192 | 23239 | 2048 | 9 |
+| `ARRANQUE` | W | 23544 | 25591 | 2048 | 10 |
+| `ARRANQUE` | W | 25896 | 27943 | 2048 | 11 |
+| `ARRANQUE` | W | 1921862 | 1921862 | 1 | 817 |
+| `ARRANQUE` | W | 2012984 | 2012985 | 2 | 855 |
+| `SELECIONA_TIME` | R | 12543596 | 12544779 | 1184 | 5333 |
+| `SELECIONA_TIME` | R | 14368636 | 14369147 | 512 | 6109 |
+| `GRAVA_NOMES` | W | 1013936 | 1013943 | 8 | 431 |
+| `GRAVA_NOMES` | W | 1882896 | 1882907 | 12 | 800 |
+| `GRAVA_NOMES` | W | 2004988 | 2004995 | 8 | 852 |
+| `GRAVA_NOMES` | W | 2005372 | 2005375 | 4 | 852 |
+| `GRAVA_NOMES` | W | 2830940 | 2830947 | 8 | 1203 |
+| `GRAVA_NOMES` | W | 4234860 | 4234863 | 4 | 1800 |
+| `GRAVA_NOMES` | W | 5652644 | 5652651 | 8 | 2403 |
+| `PINTAR` | W | 2667290 | 2667319 | 30 | 1134 |
+| `PINTAR` | W | 5651444 | 5651447 | 4 | 2402 |
+| `PINTAR` | W | 12543596 | 12543851 | 256 | 5333 |
+| `PINTAR` | W | 12544268 | 12544297 | 30 | 5333 |
+| `CALCULA_PRECO` | W | 14368636 | 14368637 | 2 | 6109 |
+| `ABRE_JOGADOR` | W | 3067426 | 3067426 | 1 | 1304 |
 
 ---
 

@@ -16,7 +16,9 @@ Tres grupos:
 
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 import analisar_io as A
 
@@ -122,6 +124,64 @@ class TestParser(unittest.TestCase):
     def test_unir_separa_leitura_de_escrita(self) -> None:
         evs = [("R", 0, 10), ("W", 0, 10)]
         self.assertEqual(A.unir(evs, "W"), [(0, 10)])
+
+    def test_unir_faixas_junta_encostadas(self) -> None:
+        """`(a,b)` e `(b+1,c)` sao uma faixa so.
+
+        E o caso real: o `wte.exe` grava nome byte a byte, e a marca do
+        roteiro corta a sequencia no meio.
+        """
+        self.assertEqual(A.unir_faixas([(3067404, 3067425), (3067426, 3067426)]),
+                         [(3067404, 3067426)])
+        self.assertEqual(A.unir_faixas([]), [])
+        self.assertEqual(A.unir_faixas([(100, 110), (5, 7), (10, 20), (21, 25)]),
+                         [(5, 7), (10, 25), (100, 110)])
+
+    def test_unir_faixas_nao_junta_com_buraco(self) -> None:
+        """Um byte de intervalo ainda separa -- senao a conferencia perdoaria
+        escrita que o trace realmente nao viu."""
+        self.assertEqual(A.unir_faixas([(10, 20), (22, 25)]),
+                         [(10, 20), (22, 25)])
+
+
+class TestConferirReguas(unittest.TestCase):
+    """A conferencia das duas reguas, com faixa plantada.
+
+    Ela e o que autoriza qualquer numero desta task: se o `cmp` mostra byte
+    mudado que o trace nao viu escrever, o trace perdeu syscall e a atribuicao
+    por acao nao vale nada.
+    """
+
+    def escreve(self, tmp, nome: str, cab: str, linhas: list[str]):
+        p = tmp / nome
+        p.write_text("\n".join([cab, *linhas]) + "\n", encoding="utf-8")
+        return p
+
+    def roda(self, escritas: list[str], mudou: list[str]) -> int:
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            io = self.escreve(tmp, "io.tsv",
+                              "imagem\tacao\top\tinicio\tfim\ttamanho", escritas)
+            cmp_ = self.escreve(tmp, "cmp.tsv",
+                                "inicio\tfim\ttamanho", mudou)
+            return A.conferir_reguas(io, cmp_)
+
+    def test_faixa_do_cmp_partida_em_duas_acoes_fecha(self) -> None:
+        """O caso que produziu o falso alarme na medicao das seis areas."""
+        self.assertEqual(
+            self.roda(["i\tCALCULA_PRECO\tW\t3067404\t3067425\t22",
+                       "i\tABRE_JOGADOR\tW\t3067426\t3067426\t1"],
+                      ["3067404\t3067426\t23"]), 0)
+
+    def test_faixa_do_cmp_sem_escrita_no_trace_reprova(self) -> None:
+        self.assertEqual(
+            self.roda(["i\tA\tW\t100\t199\t100"], ["500\t509\t10"]), 3)
+
+    def test_buraco_no_meio_reprova(self) -> None:
+        """Duas escritas com um byte de intervalo nao cobrem a faixa inteira."""
+        self.assertEqual(
+            self.roda(["i\tA\tW\t100\t109\t10", "i\tB\tW\t111\t120\t10"],
+                      ["100\t120\t21"]), 3)
 
 
 class TestEvidencia(unittest.TestCase):

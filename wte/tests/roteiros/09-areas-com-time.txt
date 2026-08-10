@@ -1,0 +1,115 @@
+# 09 -- as seis areas da WTE-TASK-19, COM um time carregado.
+#
+# Insumo da WTE-TASK-19, rodado por wte/tools/diff_dirigido.sh. Irmao do 06 e
+# o que o substitui como medida das areas: o 06 clica tudo ANTES de trocar de
+# time, porque na epoca trocar de time matava o wte.exe. A CORR-WTE-044 mediu
+# a causa e o contorno, e este roteiro e a consequencia -- ele troca de time
+# PRIMEIRO, e so entao exercita cada area.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/09-areas-com-time.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# **A imagem japonesa nao e escolha de gosto.** Com a europeia o app morre na
+# troca de time -- 49.749 violacoes de acesso contra 0 -- porque a carga do
+# time sobrescreve um ponteiro global (wte/re/crash-causa.md). Rodar este
+# roteiro contra a europeia mede o travamento, nao as areas.
+alvo: original
+estado: ok
+
+# Coordenadas: relativas a janela resolvida pelo `>` anterior, tiradas do
+# wte/re/dfm/<form>.dfm -- Left/Top do controle mais o do pai, e o DFM bate
+# 1:1 com o cliente da janela no :99.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------- primeiro: um time ----
+#
+# Pelo TECLADO. A lista suspensa do TComboBox fica MAPEADA depois do clique no
+# item e segura o ponteiro -- todo clique seguinte morre nela.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- as areas ----
+#
+# grupo_barras (8,72) + boton_barras2iso (8,112) = (16,184), 73x25.
+# Com time, este botao GRAVA e avisa "Barras inseridas no jogo!!!".
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+= GRAVA_BARRAS
+
+# grupo_nombre (336,48) + iguala_nombres (8,136) = (344,184). Nao abre nada.
+! clique 380 196
+~ 3
+= IGUALA_NOMES
+
+# grupo_nombre (336,48) + boton_nombres2iso (96,136) = (432,184).
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+= GRAVA_NOMES
+
+# GroupBox4 (216,8) + colorear (8,176) = (224,184). Abre o ficha_color
+# ("Cor", 542x225), que e a bandeira e a cor de radar -- novidade da v0.99.
+# O OK e o BitBtn3 (456,192), 73x25: centro (492,204).
+! clique 272 196
+~ 4
+> ^Cor
+! clique 492 204
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= PINTAR
+
+# GroupBox1 (8,320) + base_team (8,16) = (16,336). Recarrega o lado titular e
+# atualiza o contador SPC de blocos de ML livres.
+! clique 64 347
+~ 3
+= TIME_TITULAR
+
+# GroupBox1 (8,320) + mostrar_jugador_1 (8,72) = (16,392). Ele NAO abre a
+# ficha direto: pergunta antes "Desejar calcular o preco dos jogadores???"
+# (janela "Calcular precos", 285x124; o Sim fica em (182,86)). E a area do
+# preco derivado dos atributos, que a tabela da task lista separada.
+! clique 28 402
+~ 4
+> Calcular precos
+! clique 182 86
+~ 8
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+= CALCULA_PRECO
+
+# O segundo clique, agora sem a pergunta, abre a ficha do jogador -- onde
+# moram cabelo, barba e `careto` (WTE-TASK-08).
+! clique 28 402
+~ 5
+= ABRE_JOGADOR

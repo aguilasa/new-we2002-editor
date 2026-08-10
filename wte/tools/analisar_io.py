@@ -233,6 +233,25 @@ def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
     return 0
 
 
+def unir_faixas(faixas: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Funde faixas [inicio, fim] sobrepostas ou ENCOSTADAS numa lista minima.
+
+    Encostadas conta: `(10,20)` e `(21,25)` viram `(10,25)`. Sao dois `write`
+    consecutivos de um byte cada, que e como o `wte.exe` grava nome -- tratar
+    as duas como separadas foi o que produziu um falso alarme de "syscall
+    perdida" na medicao das areas.
+    """
+    if not faixas:
+        return []
+    saida: list[tuple[int, int]] = []
+    for a, b in sorted(faixas):
+        if saida and a <= saida[-1][1] + 1:
+            saida[-1] = (saida[-1][0], max(saida[-1][1], b))
+        else:
+            saida.append((a, b))
+    return saida
+
+
 def conferir_reguas(io_tsv: Path, cmp_tsv: Path) -> int:
     """As duas reguas tem de fechar: o que MUDOU esta no que foi ESCRITO.
 
@@ -243,6 +262,15 @@ def conferir_reguas(io_tsv: Path, cmp_tsv: Path) -> int:
     Faixa do `cmp` que sobra significa que o trace PERDEU syscall, e ai nenhum
     numero desta task vale nada. Ja aconteceu: o corte por numero de linha
     ficava atras do buffer do `strace` e atribuia escrita a acao errada.
+
+    **A conferencia e contra a UNIAO das faixas de escrita, nao contra uma
+    faixa de cada vez.** Exigir que a faixa do `cmp` caiba numa faixa unica
+    acusa syscall perdida onde nao houve nenhuma: o `wte.exe` grava nome
+    **byte a byte**, e uma sequencia dessas atravessa a fronteira de duas
+    marcas do roteiro -- o `=` corta o log no relogio, entao os 23 bytes de
+    `3067404` sairam 22 numa acao e 1 na seguinte. As duas faixas sao
+    contiguas e cobrem a mudanca; a soma e que responde, e a atribuicao por
+    acao continua sendo informacao separada.
     """
     def ler(p: Path) -> list[dict[str, str]]:
         linhas = p.read_text(encoding="utf-8").splitlines()
@@ -252,8 +280,9 @@ def conferir_reguas(io_tsv: Path, cmp_tsv: Path) -> int:
     escritas = [(int(r["inicio"]), int(r["fim"]))
                 for r in ler(io_tsv) if r.get("op") == "W" and r.get("inicio")]
     mudou = [(int(r["inicio"]), int(r["fim"])) for r in ler(cmp_tsv)]
+    uniao = unir_faixas(escritas)
     orfas = [(a, b) for a, b in mudou
-             if not any(x <= a and b <= y for x, y in escritas)]
+             if not any(x <= a and b <= y for x, y in uniao)]
     if orfas:
         print(f"analisar_io: ATENCAO -- {len(orfas)} de {len(mudou)} faixa(s) "
               f"que MUDARAM nao aparecem como escrita no trace:", file=sys.stderr)
@@ -351,6 +380,94 @@ def sem_dono(faixas: list[dict], conhecidos: dict[str, int]) -> list[dict]:
         if not any(a - FOLGA_INICIO <= v <= b for v in valores):
             fora.append(f)
     return fora
+
+
+AREAS = "japanese-shift-jis.bin"
+
+# Rotulo -> a linha da tabela "Campos a cobrir" da WTE-TASK-19 que a acao do
+# roteiro 09 exercita. Sem este mapa a secao seria uma lista de marcas; com
+# ele, ela responde o criterio da task, que fala de AREAS e nao de cliques.
+AREA_DE = {
+    "SELECIONA_TIME": "carga do time — o pre-requisito de todas as outras",
+    "GRAVA_BARRAS": "barras de atributo do time (`boton_barras2iso`)",
+    "IGUALA_NOMES": "nomes, sem gravar (`iguala_nombres`)",
+    "GRAVA_NOMES": "nomes do time (`boton_nombres2iso`)",
+    "PINTAR": "bandeira e cor de radar (`colorear` → `ficha_color`)",
+    "TIME_TITULAR": "lado titular e o contador de blocos de ML livres",
+    "CALCULA_PRECO": "preço derivado dos atributos (`etiqprecio`)",
+    "ABRE_JOGADOR": "ficha do jogador — cabelo, barba, `careto`",
+}
+
+
+def secao_areas(w, todas_sessoes, conhecidos) -> None:
+    """As seis areas da task, medidas com um time carregado.
+
+    Ela existe separada da secao principal por uma razao de honestidade: a
+    medicao das areas so foi possivel com a imagem japonesa, e misturar as
+    duas numa tabela so faria parecer que a europeia tambem as cobriu.
+    """
+    linhas = [r for r in todas_sessoes if r["imagem"] == AREAS]
+    if not linhas:
+        return
+    w("## As seis áreas, com um time carregado")
+    w("")
+    w("Medido com o roteiro")
+    w("[`09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt) sobre")
+    w(f"cópia de `roms/{AREAS}`. **A imagem não é escolha de gosto:** com a")
+    w("europeia o `wte.exe` morre na troca de time, e o roteiro mediria o")
+    w("travamento em vez das áreas ([`crash-causa.md`](crash-causa.md)).")
+    w("")
+    w("O `ARRANQUE` desta sessão é o **diff de controle desta imagem** — abrir")
+    w("sem tocar em nada —, e ele vem antes de toda ação medida abaixo, como")
+    w("manda o método da task.")
+    w("")
+    w("| ação | área da task | leituras | escritas | bytes escritos |")
+    w("|---|---|---:|---:|---:|")
+    ordem: list[str] = []
+    for r in linhas:
+        if r["acao"] not in ordem:
+            ordem.append(r["acao"])
+    for acao in ordem:
+        do_acao = [r for r in linhas if r["acao"] == acao]
+        le = [r for r in do_acao if r["op"] == "R"]
+        esc = [r for r in do_acao if r["op"] == "W"]
+        bytes_esc = sum(int(r["tamanho"]) for r in esc)
+        area = AREA_DE.get(acao, "—")
+        w(f"| `{acao}` | {area} | {len(le)} | {len(esc)} | {bytes_esc} |")
+    w("")
+
+    faixas = [r for r in linhas if r["op"] in ("R", "W")]
+    tocado = casar(faixas, conhecidos)
+    depois = [r for r in faixas if r["acao"] != "ARRANQUE"]
+    escritas = [r for r in depois if r["op"] == "W"]
+    silenciosas = [a for a in ordem
+                   if not any(r["acao"] == a and r["op"] in ("R", "W")
+                              for r in linhas)]
+    w(f"Depois do arranque, as ações tocaram **{len(depois)} faixas** —")
+    w(f"{len(escritas)} de escrita. Os `OFS_*` do `newWe2002` alcançados por")
+    w(f"esta sessão são **{len(tocado)}**.")
+    w("")
+    if silenciosas:
+        w(f"**{len(silenciosas)} ação(ões) não tocou(aram) a imagem**: "
+          + ", ".join(f"`{s}`" for s in silenciosas) + ". Isso é resultado, não")
+        w("falha de clique — o roteiro é dirigido por janela, e cada uma delas")
+        w("foi resolvida pelo nome antes do clique.")
+        w("")
+    orfas = sem_dono(faixas, conhecidos)
+    fora_da_janela = [f for f in orfas if int(f["inicio"]) > max(conhecidos.values())]
+    w(f"**{len(orfas)} faixas desta sessão nenhum `OFS_*` explica**, e")
+    w(f"{len(fora_da_janela)} delas ficam acima do maior offset que o")
+    w("`newWe2002` conhece. São elas que a fase 4 precisa nomear.")
+    w("")
+    if orfas:
+        w("| ação | op | início | fim | tamanho | setor |")
+        w("|---|:---:|---:|---:|---:|---:|")
+        for f in orfas:
+            w(f"| `{f['acao']}` | {f['op']} | {f['inicio']} | {f['fim']} "
+              f"| {f['tamanho']} | {f['setor']} |")
+        w("")
+    w("---")
+    w("")
 
 
 def gerar() -> str:
@@ -650,12 +767,12 @@ def gerar() -> str:
     w("do plano), e a")
     w("[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) monta o gate golden")
     w("em cima dele; com `roms/japanese-shift-jis.bin` ele passa da troca de")
-    w("time, então o gate tem em que se apoiar e o que está bloqueado aqui é")
-    w("remedível refazendo a corrida com a outra imagem. Quem refizer, refaça")
-    w("**as duas** — a comparação entre elas é o que sustenta o diagnóstico.")
+    w("time, então o gate tem em que se apoiar. A seção seguinte é a medição")
+    w("que isso destravou.")
     w("")
     w("---")
     w("")
+    secao_areas(w, todas_sessoes, conhecidos)
     w("## Geometria de setor, conferida")
     w("")
     dentro = sum(1 for f in faixas

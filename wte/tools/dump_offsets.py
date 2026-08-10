@@ -1206,10 +1206,17 @@ def render_md(m: Measurement) -> str:
         add(f"**{len(atingidos)} dos {n_missing}** já saíram de hipótese: o "
             f"`wte.exe` endereçou o ponto em\nexecução. Os demais continuam "
             f"sem evidência dinâmica — e isso **não** quer dizer\nque ele não "
-            f"os alcance: quer dizer que a sessão medida não chegou na tela "
-            f"que os\ntoca. Ela não chegou porque o `wte.exe` **cai** ao "
-            f"carregar um time com as ROMs\ndeste repositório; a medida e a "
-            f"consequência estão no `offsets-novos.md`.\n")
+            f"os alcance: quer dizer que **nenhuma das telas medidas até aqui "
+            f"toca**\nesses pontos.\n")
+        add("Até 2026-08-10 a razão era outra e mais dura: o `wte.exe` caía ao "
+            "carregar um\ntime, e a sessão não passava da tela de carga. Isso "
+            "acabou — com\n`roms/japanese-shift-jis.bin` ele passa, e o "
+            "roteiro\n[`../tests/roteiros/09-areas-com-time.txt`]"
+            "(../tests/roteiros/09-areas-com-time.txt)\nexercita as seis áreas "
+            "da task com um time carregado. O que falta agora é\n**mais tela**, "
+            "não mais imagem: cada `OFS_*` sem veredito espera um controle que\n"
+            "ninguém clicou ainda. Medida e consequência em "
+            "[`offsets-novos.md`](offsets-novos.md).\n")
     else:
         add("A coluna **medido** está vazia: `wte/re/io-medido.tsv` não "
             "existe. Rode\n`bash wte/tools/diff_dirigido.sh "

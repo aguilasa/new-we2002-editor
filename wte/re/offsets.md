@@ -290,11 +290,18 @@ ela já rodou: a coluna **medido** traz o veredito da WTE-TASK-19, que pôs o
 `wte.exe` sob `strace` e olhou que faixa da imagem cada ação endereça. Detalhe em
 [`offsets-novos.md`](offsets-novos.md).
 
-**14 dos 50** já saíram de hipótese: o `wte.exe` endereçou o ponto em
+**15 dos 50** já saíram de hipótese: o `wte.exe` endereçou o ponto em
 execução. Os demais continuam sem evidência dinâmica — e isso **não** quer dizer
-que ele não os alcance: quer dizer que a sessão medida não chegou na tela que os
-toca. Ela não chegou porque o `wte.exe` **cai** ao carregar um time com as ROMs
-deste repositório; a medida e a consequência estão no `offsets-novos.md`.
+que ele não os alcance: quer dizer que **nenhuma das telas medidas até aqui toca**
+esses pontos.
+
+Até 2026-08-10 a razão era outra e mais dura: o `wte.exe` caía ao carregar um
+time, e a sessão não passava da tela de carga. Isso acabou — com
+`roms/japanese-shift-jis.bin` ele passa, e o roteiro
+[`../tests/roteiros/09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt)
+exercita as seis áreas da task com um time carregado. O que falta agora é
+**mais tela**, não mais imagem: cada `OFS_*` sem veredito espera um controle que
+ninguém clicou ainda. Medida e consequência em [`offsets-novos.md`](offsets-novos.md).
 
 A regra de classificação é busca em largura a partir das bases que o Obocaman
 comprovadamente tem:
@@ -342,7 +349,7 @@ família inteira de passo de setor entrar a partir de uma única âncora.
 | `OFS_ML_PLAYER_NAME` | 2006288 | H1 | — | 2005412 (`OFS_FLAG_SHAPE_COPY_2`) | mesmo setor | 876 | 1 |
 | `OFS_ML_PLAYER_NAME_2` | 2008632 | H2 | — | 1999224 *(candidato)* | +4 setores | 9408 | 1 |
 | `OFS_ML_PLAYER_NAME_3` | 2010984 | H1 | — | 2012680 (`OFS_LINK_ML`) | mesmo setor | -1696 | 1 |
-| `OFS_PLAYER_ATTR` | 2179492 | H2 | — | 2180328 (`OFS_PLAYER_ATTR_1`) | mesmo setor | -836 | 3 |
+| `OFS_PLAYER_ATTR` | 2179492 | H2 | R em `CALCULA_PRECO` | 2180328 (`OFS_PLAYER_ATTR_1`) | mesmo setor | -836 | 3 |
 | `OFS_PLAYER_ATTR_1` | 2180328 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -11 setores | -25872 | 2 |
 | `OFS_PLAYER_ATTR_2` | 2182680 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -10 setores | -23520 | 2 |
 | `OFS_PLAYER_ATTR_3` | 2185032 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -9 setores | -21168 | 2 |

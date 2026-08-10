@@ -26,9 +26,9 @@ a origem, que muda a cada execução. O carimbo de tempo fica fora do `@` de
 propósito: ele existe para ler intervalo, e a informação está na **ordem** das
 linhas (ver o cabeçalho de [`../../src/retrace.pas`](../../src/retrace.pas)).
 
-## Os roteiros 06, 07 e 08 falam outro dialeto
+## Os roteiros 06, 07, 08 e 09 falam outro dialeto
 
-Os três são da WTE-TASK-19 e quem os executa é
+Os quatro são da WTE-TASK-19 e quem os executa é
 [`../../tools/diff_dirigido.sh`](../../tools/diff_dirigido.sh), não a mão. Eles
 acrescentam duas diretivas e trocam a linha de `xdotool` crua por verbos:
 
@@ -63,7 +63,38 @@ time pelo teclado. Medido com `WINEDEBUG=+seh,+loaddll`: **0 violações de
 acesso no 07, 309 no 08** — uma variável de diferença.
 
 O 06 também trava, e por isso **não** serve de par: ele clica as oito áreas
-antes de trocar de time, o que são oito variáveis a mais. Editar um dos dois
+antes de trocar de time, o que são oito variáveis a mais.
+
+### O 09 é o que o 06 deixou de poder ser
+
+O [`09-areas-com-time.txt`](09-areas-com-time.txt) troca de time **primeiro** e
+só então exercita cada área — que é a ordem natural, e era impossível enquanto
+trocar de time matasse o app. A CORR-WTE-044 mediu a causa e o contorno: com
+`roms/japanese-shift-jis.bin` o `wte.exe` passa da troca de time com **zero**
+violação de acesso, contra 49.749 com a europeia.
+
+**Ele só vale com a imagem japonesa.** Rodá-lo contra a europeia mede o
+travamento, não as áreas. O `--imagem` não tem padrão que sirva aqui:
+
+```sh
+bash wte/tools/diff_dirigido.sh wte/tests/roteiros/09-areas-com-time.txt \
+     --imagem roms/japanese-shift-jis.bin
+```
+
+Duas coisas que ele ensina sobre dirigir este app, e que custaram três
+sessões exploratórias:
+
+- **botão de área abre diálogo, e o diálogo é modal.** `boton_barras2iso` e
+  `boton_nombres2iso` abrem a caixa `W11 TE PT!` (282×113, `Ok` em (142,80));
+  `colorear` abre o `ficha_color` (`Cor`, 542×225, `OK` em (492,204));
+  `mostrar_jugador_1` pergunta antes (`Calcular precos`, 285×124, `Sim` em
+  (182,86)). Deixar qualquer um aberto **engole todos os cliques seguintes**, e
+  o roteiro parece ter parado de funcionar;
+- **`xdotool windowkill` num diálogo mata o processo inteiro.** Fechar é
+  clicando no botão. Foi assim que uma sessão exploratória morreu no primeiro
+  passo.
+
+Editar um dos dois
 sem o outro quebra a afirmação; o
 [`../../tools/test_analisar_crash.py`](../../tools/test_analisar_crash.py)
 compara os dois cabeçalhos e falha se divergirem. O veredito de onde a falha

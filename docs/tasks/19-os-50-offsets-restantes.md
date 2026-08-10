@@ -81,31 +81,104 @@ arquivo gerado.
 ## Critério de conclusão
 
 - [x] Diff de controle (gravar sem editar) medido e registrado **antes** do resto
+      — duas vezes: na europeia (1ª passagem) e na japonesa, onde o `ARRANQUE`
+      do roteiro 09 é o controle e vem antes de toda ação medida
 - [ ] Os 50 resolvidos ou declarados irrelevantes, um a um
-      — **14 dos 50** resolvidos por execução; os 36 restantes esperam a
-      release de 474.431.328 bytes (ver o Log)
-- [ ] As seis áreas da tabela cobertas
-      — **nenhuma.** O `wte.exe` cai ao carregar um time com as ROMs deste
-      repositório, e os botões de gravação por área não escrevem byte nenhum
-      sem time selecionado. As duas coisas medidas
+      — **15 dos 50** resolvidos por execução (era 14; a 4ª passagem
+      acrescentou `OFS_PLAYER_ATTR`, lido em `CALCULA_PRECO`). Os 35 restantes
+      **não esperam mais imagem nenhuma**: esperam tela que ninguém clicou
+- [x] As seis áreas da tabela cobertas
+      — as seis exercitadas com um time carregado, na 4ª passagem. Quatro
+      delas **não tocam a imagem**, e isso é medida, não falha de clique
 - [x] Offsets novos documentados com a região que endereçam
 - [x] Nenhuma medição feita sobre `roms/` diretamente
 - [x] Commit no formato conventional, em inglês
 
-**A task não fecha.** Dois dos seis critérios dependem de dirigir o `wte.exe`
-além da tela de carga, e isso está bloqueado por falta da imagem certa.
+**A task ainda não fecha, e o que falta mudou de natureza.** Até 2026-08-10 os
+dois critérios abertos dependiam de dirigir o `wte.exe` além da tela de carga, e
+isso estava bloqueado. O bloqueio caiu com a
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) — e não era "a imagem certa" no
+sentido que a 3ª passagem supunha: com `roms/japanese-shift-jis.bin`, que já
+estava no repositório, o editor passa da troca de time com zero violação de
+acesso contra 49.749 na europeia. A causa é ponteiro sobrescrito pela carga do
+time, não release faltando.
 
-**O bloqueio caiu em 2026-08-10, e não era "a imagem certa" no sentido acima**
-— [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md). O `wte.exe` passa da troca de
-time com `roms/japanese-shift-jis.bin`, que já está no repositório: zero
-violação de acesso contra 49.749 com a europeia, no mesmo roteiro. A causa é
-ponteiro sobrescrito pela carga do time, não release faltando, e a região em
-`14368636` é lida pelas duas imagens. Quem retomar esta task refaz os dois
-critérios abertos com a imagem japonesa; a correção **não** os mediu — ela
-diagnosticou, e diagnóstico não fecha critério. Medição em
-[`../../wte/re/crash-causa.md`](../../wte/re/crash-causa.md).
+Sobrou **um** critério, e ele agora é trabalho comum: 35 `OFS_*` sem veredito
+dinâmico, cada um esperando um controle que nenhum roteiro clicou. Não há
+bloqueio; há tela.
 
 ## Log de Execução
+
+### 4ª passagem — 2026-08-10, o bloqueio caiu e as seis áreas foram medidas
+
+- **Executado em:** 2026-08-10 — **ainda parcial**, mas por outro motivo
+
+- **Resumo do que foi feito:**
+
+  A [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) tinha diagnosticado o
+  travamento e achado o contorno; esta passagem **usa** o contorno. Roteiro
+  novo, [`09-areas-com-time.txt`](../../wte/tests/roteiros/09-areas-com-time.txt),
+  que troca de time **primeiro** e só então exercita cada área — a ordem que o
+  06 não podia ter. Sobre cópia de `roms/japanese-shift-jis.bin`: **60 faixas**,
+  as seis áreas cobertas, e as duas réguas fechando (19 faixas do `cmp` contidas
+  na união de 31 faixas de escrita do trace).
+
+  Ganho de offset: **um**. `OFS_PLAYER_ATTR`, lido em `CALCULA_PRECO` — de 14
+  para 15 dos 50. O resto das áreas endereça região que o `Offsets.hpp` não
+  nomeia: **27 faixas sem dono** nesta sessão, duas delas acima do maior offset
+  que o `newWe2002` conhece.
+
+  **Quatro das ações não tocam a imagem**, e isso é resultado medido:
+  `GRAVA_BARRAS`, `IGUALA_NOMES`, `TIME_TITULAR` e `FIM`. O `boton_barras2iso`
+  chega a anunciar "Barras inseridas no jogo!!!" e não emite uma syscall sobre
+  o arquivo — as 11 linhas que caem na janela dele são a cauda da carga do time
+  (8 ms depois da marca, todas `_llseek` sem `read`/`write`). A leitura mais
+  provável, e que a fase 4 vai confirmar ou derrubar: ele só grava o que foi
+  alterado, e nada foi.
+
+- **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/tests/roteiros/09-areas-com-time.txt` | criado — time primeiro, as seis áreas depois |
+  | `wte/tools/analisar_io.py` | `unir_faixas()` nova; a conferência das réguas passou a ser contra a **união**; seção nova no `offsets-novos.md` |
+  | `wte/tools/test_analisar_io.py` | +5 testes: a união e a conferência com faixa plantada |
+  | `wte/tools/dump_offsets.py` | a prosa da coluna **medido** dizia que a sessão não passava da tela de carga |
+  | `wte/re/io-medido.tsv` | +64 linhas, imagem `japanese-shift-jis.bin` |
+  | `wte/re/offsets-novos.md`, `wte/re/offsets.md` | regerados |
+  | `wte/tests/roteiros/README.md` | o 09, e as duas armadilhas de dirigir diálogo |
+
+- **Problemas encontrados:**
+
+  **Um defeito do instrumento, e ele deu falso alarme.** A conferência das duas
+  réguas exigia que cada faixa do `cmp` coubesse **numa** faixa de escrita do
+  trace. O `wte.exe` grava nome **byte a byte**, e a marca do roteiro corta a
+  sequência no meio: os 23 bytes de `3067404` saíram 22 em `CALCULA_PRECO` e 1
+  em `ABRE_JOGADOR`. Duas faixas contíguas, cobertura completa — e o script
+  acusou "o trace perdeu syscall; a atribuição por ação não vale", que é a
+  mensagem que manda parar tudo. Agora a conferência é contra a **união**, com
+  teste dos dois sentidos: faixa encostada junta, faixa com um byte de buraco
+  não junta.
+
+  É o **terceiro** defeito deste mesmo instrumento (os outros dois estão na 3ª
+  passagem), e os três têm a mesma assinatura: número que muda em silêncio, ou
+  alarme que soa sem causa. A lição é a mesma — a conferência entre as duas
+  réguas é o que os pega, e ela precisa estar certa antes de qualquer número.
+
+  **Dirigir diálogo modal custou três sessões exploratórias.** Cada botão de
+  área abre uma janela diferente, e deixar qualquer uma aberta engole todos os
+  cliques seguintes. Pior: `xdotool windowkill` numa delas **mata o processo
+  inteiro** — a VCL não sobrevive à destruição da janela por fora. Fechar é
+  clicando no botão, e as coordenadas de cada um estão no `README.md` dos
+  roteiros.
+
+  **O que ficou pendente:** os 35 `OFS_*` sem veredito dinâmico. Eles não
+  esperam mais imagem — esperam controle clicado. Os candidatos naturais são as
+  telas que este roteiro só abriu (a ficha do jogador, com cabelo/barba/
+  `careto`) e as que ele não abriu (`ficha_movertodos`, `estrategia`, a
+  gravação de camisa e de `.mcr`, que abrem diálogo de arquivo).
+
+### 3ª passagem e anteriores — 2026-08-10
 
 - **Executado em:** 2026-08-10 — **parcial, e o bloqueio continua**
   (três passagens no mesmo dia: a primeira mediu; a segunda refutou a hipótese

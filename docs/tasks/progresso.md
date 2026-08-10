@@ -31,7 +31,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ❌ Bloqueado | — | — |
+| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | 🔄 Em andamento | — | — |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
@@ -66,22 +66,27 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 **Revisão sem discrepância também preenche a coluna.** É resultado legítimo, e
 sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
-**A WTE-TASK-19 está `❌ Bloqueado`, e não `🔄 Em andamento`.** Ela entregou 4
-dos 6 critérios; os outros dois exigem dirigir o `wte.exe` além da tela de
-carga, e isso não depende de esforço — depende do oráculo funcionar. Três
-passagens já foram gastas nela, e as duas últimas só produziram diagnóstico
-melhor. `🔄` faria o `/executar` voltar para ela em toda invocação, pela regra
-3 do [prompt](/docs/prompts/01-executar.md); `❌` diz a verdade e solta a fila.
-O que a destrava está na [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) e nas
-Pendências externas, no fim deste arquivo.
+**A WTE-TASK-19 saiu de `❌ Bloqueado` para `🔄 Em andamento` em 2026-08-10, e
+a troca é de natureza, não de humor.** Ela ficou `❌` enquanto os dois critérios
+abertos não dependessem de esforço — dependiam do oráculo funcionar, e três
+passagens seguidas só produziram diagnóstico melhor. A
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez isso, e a 4ª passagem cobriu
+**as seis áreas** com um time carregado. Sobrou **um** critério: 35 dos 50
+`OFS_*` sem veredito dinâmico, e eles esperam **tela clicada**, não imagem —
+trabalho comum, que é o que `🔄` quer dizer.
+
+Consequência prevista e aceita: pela regra 3 do
+[prompt](/docs/prompts/01-executar.md) o `/executar` volta para a 19 em toda
+invocação até ela fechar. É o certo agora, e era o errado antes.
 
 **A WTE-TASK-20 segue mesmo assim**, e isso é decisão, não descuido. O
 `depends_on` dela lista a 19, mas o que ela verifica é contra o **oráculo B**
 (o `we2002_core`): dump Pascal × dump C++, o codec de texto, round-trip de
 gravação. Nenhum dos seis critérios pede janela. E a parte da 19 de que ela
-precisaria — offsets novos — já veio: são 28 confirmados. Os 36 que faltam são
-exatamente os que o `we2002_core` **não tem**, então não poderiam aparecer numa
-comparação Pascal × C++ nem se estivessem medidos.
+precisaria — offsets novos — já veio: são 28 confirmados. Os que faltam (36 na
+época, **35** depois da 4ª passagem) são exatamente os que o `we2002_core`
+**não tem**, então não poderiam aparecer numa comparação Pascal × C++ nem se
+estivessem medidos.
 
 ---
 
@@ -330,9 +335,11 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
-- **O `wte.exe` não passa da tela de carga, e isso é pré-requisito da fase 4.**
-  Medido na WTE-TASK-19: o editor **morre** ao trocar de time, com as duas ROMs
-  deste repositório. A atribuição é medida, não lida da tela — os roteiros
+- **~~O `wte.exe` não passa da tela de carga~~ — resolvido em 2026-08-10, com a
+  ROM japonesa.** Fica registrado porque a história explica três passagens da
+  WTE-TASK-19 e o desenho do gate da 22. Medido na WTE-TASK-19: o editor
+  **morre** ao trocar de time, com a ROM europeia deste repositório — a
+  japonesa nunca tinha sido medida neste caminho, e passa. A atribuição é medida, não lida da tela — os roteiros
   [07](../../wte/tests/roteiros/07-controle-sem-time.txt) e
   [08](../../wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a
   linha até `= ARRANQUE` e o 08 só acrescenta a troca de time: **0 violações de
