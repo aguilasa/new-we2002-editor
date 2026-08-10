@@ -147,7 +147,7 @@ arquivo é regenerado:
 | `wte/re/dfm/*.dfm` | `wte/tools/dfm_extract.py` |
 | `wte/forms/*.lfm`, esqueleto das units | `wte/tools/dfm2lfm.py` |
 | `wte/src/we2002_offsets.pas`, `we2002_tables.pas` | `wte/tools/gen_tables_pas.py` |
-| `wte/src/we2002_{database,player,cdimage,textcodec,types}.pas` | `wte/tools/port_database_pas.py` |
+| `wte/src/we2002_{database,player,team,cdimage,textcodec,types}.pas` | `wte/tools/port_database_pas.py` |
 | `wte/re/spec/INDICE.md` | `wte/tools/spec_index.py` |
 
 **Editar a saída à mão não é correção — é a discrepância que a revisão deveria

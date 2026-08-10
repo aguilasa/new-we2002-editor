@@ -82,7 +82,9 @@ $ grep -n 'char url\|char name' src/core/include/we2002/Player.hpp
 63:    char name[11]{};
 ```
 
-`Team.hpp` fora do `UNITS` do transpilador já commitado:
+`Team.hpp` fora do `UNITS` do transpilador já commitado — **estado de
+2026-08-09, em `8ae9170`; corrigido em 2026-08-10, ver a nota na seção
+"Correção"**:
 
 ```console
 $ sed -n '71,77p' wte/tools/port_database_pas.py
@@ -143,6 +145,21 @@ Decidir e registrar o destino de `Team.hpp`: entrar no `UNITS` (em
 ser recusa explícita com razão escrita. Hoje ele simplesmente não é lido, e nada
 acusa.
 
+> **✅ Esta metade já foi feita** — 2026-08-10, na varredura de concorrência da
+> leva WTE-TASK-16/17/24. `Team.hpp` e `Team.cpp` entraram como unidade
+> **`we2002_team`** própria, e o "nada acusa" virou gate: entrou a lista fechada
+> `FORA_DO_TRANSPILADOR`, com motivo escrito por arquivo, mais o
+> `test_nenhuma_entrada_do_core_fica_de_fora`, que cruza `src/core/` com o
+> `UNITS` **nos dois sentidos** — reprova arquivo órfão e também motivo escrito
+> para arquivo que não existe mais.
+>
+> Entrada remedida: **2.504 linhas** em 6 unidades. Recusas: 498 (eram 493).
+>
+> **O que sobra desta correção é o `tipos.md`** — o parágrafo "Entrada real
+> medida" e as três grafias que não ocorrem na entrada. A §4.5 e a Fase 3 do
+> [`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md) repetem o mesmo "~2.150" e
+> entram junto.
+
 ## Arquivos a criar ou modificar
 
 | Arquivo | Ação |
@@ -156,8 +173,8 @@ acusa.
       linhas remedida por `wc -l`
 - [ ] Nenhuma linha da tabela lidera com grafia que
       `grep -rnoE '\b(std::)?u?int(8|16|32|64)_t\b' src/core` não mostra
-- [ ] `Team`, `MlTeam` e `Formation` têm destino escrito — unidade gerada ou
-      recusa em `wte/re/recusas.md`
+- [x] `Team`, `MlTeam` e `Formation` têm destino escrito — unidade
+      `we2002_team`, com guarda que reprova header órfão (2026-08-10)
 - [ ] `python3 wte/tools/port_database_pas.py --check` continua verde
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada

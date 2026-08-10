@@ -17,6 +17,7 @@ Tres grupos:
 
 from __future__ import annotations
 
+import re
 import unittest
 
 import port_database_pas as P
@@ -241,14 +242,70 @@ class TestSubs(unittest.TestCase):
 class TestEntradaReal(unittest.TestCase):
     """Contra o we2002_core de verdade -- sem compilar nada."""
 
-    def test_as_cinco_unidades_estao_mapeadas(self) -> None:
+    def test_as_unidades_estao_mapeadas(self) -> None:
         nomes = [u for u, _ in P.UNITS]
-        self.assertEqual(len(nomes), 5)
-        # Sofifa fica de fora, e a razao esta no comentario de UNITS.
+        self.assertEqual(len(nomes), len(set(nomes)), "unidade repetida")
         self.assertNotIn("we2002_sofifa", nomes)
         for _, arquivos in P.UNITS:
             for rel in arquivos:
                 self.assertTrue((P.CORE / rel).exists(), rel)
+
+    def test_nenhuma_entrada_do_core_fica_de_fora(self) -> None:
+        """Todo `.hpp`/`.cpp` de `src/core/` esta num UNITS ou tem motivo escrito.
+
+        ESTE e o teste que faltava. A primeira versao do `UNITS` esquecia
+        `Team.hpp` e `Team.cpp` -- os tres registros que `Database.hpp` usa como
+        campo -- e **nada** no `--check` acusou: o gerador rodava, recusava por
+        outros motivos e ninguem via o buraco. Quem apanhou foi revisao humana
+        (CORR-WTE-034).
+
+        Arquivo esquecido em silencio e o pior modo de falha deste projeto: a
+        camada de dados sairia incompleta com todos os gates verdes.
+        """
+        mapeados = {rel for _, arquivos in P.UNITS for rel in arquivos}
+        no_disco = set()
+        for p in list(P.CORE.glob("*.cpp")) + list(
+                (P.CORE / "include/we2002").glob("*.hpp")):
+            no_disco.add(str(p.relative_to(P.CORE)))
+
+        orfaos = sorted(no_disco - mapeados - set(P.FORA_DO_TRANSPILADOR))
+        self.assertEqual(
+            orfaos, [],
+            "arquivo(s) de src/core/ que nem entram no transpilador nem estao "
+            "em FORA_DO_TRANSPILADOR com motivo: " + ", ".join(orfaos))
+
+        # E o inverso: motivo escrito para arquivo que nao existe mais e lixo
+        # que engana a proxima leitura.
+        fantasmas = sorted(set(P.FORA_DO_TRANSPILADOR) - no_disco)
+        self.assertEqual(fantasmas, [],
+                         "FORA_DO_TRANSPILADOR cita arquivo inexistente: "
+                         + ", ".join(fantasmas))
+
+    def test_os_tres_registros_de_team_entram(self) -> None:
+        # Regressao direta da CORR-WTE-034: `Database.hpp` declara `teams[]`,
+        # `ml_teams[]` e `preset_formations[]`, e os tipos vem do `Team.hpp`.
+        mapeados = {rel for _, arquivos in P.UNITS for rel in arquivos}
+        self.assertIn("include/we2002/Team.hpp", mapeados)
+        self.assertIn("Team.cpp", mapeados)
+
+    def test_todos_os_strcpy_do_database_sao_cobertos(self) -> None:
+        """Os 40 `strcpy` viram `CStrCopy`, inclusive os 2 com `std::`.
+
+        Numero medido, nao suposto -- e ele importa: o `tipos.md` afirma 38
+        porque contou so a grafia sem `std::` (CORR-WTE-030). Se a regra de
+        `std::strcpy` sumisse ou trocasse de ordem, dois `strcpy` chegariam
+        intactos ao Pascal, e `strcpy` nao existe em FPC.
+        """
+        fonte = (P.CORE / "Database.cpp").read_text(encoding="utf-8")
+        antes = len(re.findall(r"\bstrcpy\b", fonte))
+        antes_std = len(re.findall(r"\bstd::strcpy\b", fonte))
+        self.assertEqual(antes, 40)
+        self.assertEqual(antes_std, 2)
+
+        saida, _ = P.aplicar_subs(fonte)
+        self.assertEqual(len(re.findall(r"\bCStrCopy\b", saida)), antes)
+        self.assertNotIn("strcpy", saida)
+        self.assertNotIn("strcat", saida)
 
     def test_a_direcao_dos_seeks_do_core_se_preserva(self) -> None:
         for unit, arquivos in P.UNITS:

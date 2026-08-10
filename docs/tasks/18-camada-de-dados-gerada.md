@@ -13,7 +13,8 @@ status: pendente
 ## Contexto
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` Fase 3 item 3.
-- Executar o transpilador da WTE-TASK-17 sobre as ~2.150 linhas e resolver o que
+- Executar o transpilador da WTE-TASK-17 sobre as 2.504 linhas (medidas — ver o
+  `wte/re/transpilador.md`; o "~2.150" do `tipos.md` omite cabeçalho) e resolver o que
   o `FORBIDDEN` recusar.
 
 > **Escopo ampliado pela WTE-TASK-17 — o passe estrutural é desta task.**
@@ -24,14 +25,14 @@ status: pendente
 > têm forma comum, e nenhuma regex os alcança sem casamento de chave.
 >
 > A WTE-TASK-17 entregou a camada de **statement e expressão** — 41 regras, os
-> dois guards, 35 testes — e pôs a estrutura no `FORBIDDEN` em vez de deixá-la
+> dois guards, 38 testes — e pôs a estrutura no `FORBIDDEN` em vez de deixá-la
 > passar. Emitir `.pas` com corpo em C++ produziria um artefato que parece
 > camada de dados, não compila, e convida a "só ajustar à mão" o que a §4.4
 > proíbe.
 >
-> Das **493 recusas** que o `wte/re/transpilador.md` lista, **447 são o passe
-> estrutural** e 46 são construção C++ sem tradução decidida. Construir o passe
-> é a primeira parte desta task; as outras 46 são as três rotas de sempre.
+> Das **498 recusas** que o `wte/re/transpilador.md` lista, **454 são o passe
+> estrutural** e 44 são construção C++ sem tradução decidida. Construir o passe
+> é a primeira parte desta task; as outras 44 são as três rotas de sempre.
 >
 > O que o passe precisa cobrir, medido na entrada: `{ }` → `begin`/`end`;
 > `for (i = 0; i < N; i++)` → `for i := 0 to N-1 do`, e passo ≠ 1 → `while`;
@@ -67,6 +68,7 @@ Unidades Pascal geradas, compilando, com o registro do que foi recusado.
 | `CdImage.cpp` + `.hpp` | `we2002_cdimage.pas` |
 | `TextCodec.cpp` + `.hpp` | `we2002_textcodec.pas` |
 | `Types.hpp` | `we2002_types.pas` |
+| `Team.hpp` + `.cpp` | `we2002_team.pas` — `Team`, `MlTeam`, `Formation` |
 
 **`Sofifa.cpp` fica de fora.** O import do SoFIFA está desligado no `newWe2002`
 desde 2026-08-05, o editor do Obocaman não tem nada equivalente, e trazer 805
@@ -90,7 +92,7 @@ Vindas do `newWe2002`, todas com custo pago:
 
 | Arquivo | Ação |
 |---|---|
-| `wte/src/we2002_*.pas` | criar (5, gerado) |
+| `wte/src/we2002_*.pas` | criar (6, gerado) |
 | `wte/re/recusas.md` | criar — cada recusa, a rota escolhida, a razão |
 | `src/core/*` | modificar **só** se a rota 2 for escolhida, e com golden rodado |
 
@@ -99,7 +101,7 @@ Vindas do `newWe2002`, todas com custo pago:
 ## Critério de conclusão
 
 - [ ] Passe estrutural implementado no `port_database_pas.py`, com teste
-- [ ] As cinco unidades geradas e compilando
+- [ ] As seis unidades geradas e compilando
 - [ ] Toda recusa do `FORBIDDEN` com rota escolhida e razão escrita
 - [ ] Se houve rota 2: `ctest` e o golden do `newWe2002` verdes depois
 - [ ] Trechos de porte manual marcados no código gerado

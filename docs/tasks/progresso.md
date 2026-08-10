@@ -344,6 +344,7 @@ new-we2002-editor/
 │   │   ├── we2002_cdimage.pas        ← WTE-TASK-18 (gerado)
 │   │   ├── we2002_textcodec.pas      ← WTE-TASK-18 (gerado)
 │   │   ├── we2002_types.pas          ← WTE-TASK-18 (gerado)
+│   │   ├── we2002_team.pas           ← WTE-TASK-18 (gerado)
 │   │   ├── we2002_preco.pas          ← WTE-TASK-30
 │   │   ├── we2002_mcr.pas            ← WTE-TASK-31
 │   │   ├── we2002_render.pas         ← WTE-TASK-32

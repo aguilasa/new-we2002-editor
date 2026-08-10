@@ -21,15 +21,33 @@ unitário e **grava bytes errados**.
 | Unidade Pascal | Origem em `src/core/` | Linhas |
 |---|---|---|
 | `we2002_types.pas` | `include/we2002/Types.hpp` | 147 |
+| `we2002_team.pas` | `include/we2002/Team.hpp`, `Team.cpp` | 107 |
 | `we2002_cdimage.pas` | `include/we2002/CdImage.hpp`, `CdImage.cpp` | 166 |
 | `we2002_textcodec.pas` | `include/we2002/TextCodec.hpp`, `TextCodec.cpp` | 95 |
 | `we2002_player.pas` | `include/we2002/Player.hpp`, `Player.cpp` | 225 |
 | `we2002_database.pas` | `include/we2002/Database.hpp`, `Database.cpp` | 1764 |
-| **Total** | | **2397** |
+| **Total** | | **2504** |
 
-`Sofifa.cpp` fica **fora**: o import do SoFIFA está desligado no `newWe2002` desde
-2026-08-05, o editor do Obocaman não tem nada equivalente, e as linhas não teriam
-consumidor.
+### O que fica de fora, e por quê
+
+Lista fechada: o `test_nenhuma_entrada_do_core_fica_de_fora` cruza-a com o que
+existe em `src/core/` e **reprova** se sobrar arquivo que ninguém reivindicou —
+nos dois sentidos, então motivo escrito para arquivo que sumiu também reprova.
+
+| Arquivo | Motivo |
+|---|---|
+| `Sofifa.cpp` | o import do SoFIFA esta desligado no newWe2002 desde 2026-08-05, o editor do Obocaman nao tem nada equivalente, e as linhas nao teriam consumidor. Decisao registrada na WTE-TASK-18. |
+| `Tables.cpp` | e do gen_tables_pas.py (WTE-TASK-16), nao deste gerador |
+| `include/we2002/Offsets.hpp` | idem Tables.cpp |
+| `include/we2002/Sofifa.hpp` | idem Sofifa.cpp |
+| `include/we2002/Tables.hpp` | idem Tables.cpp |
+
+A guarda existe porque a ausência **já aconteceu**: a primeira versão do
+`UNITS` esqueceu `Team.hpp` e `Team.cpp` — que declaram `Team`, `MlTeam` e
+`Formation`, os três registros que `Database.hpp:45-48` usa como campo — e nada
+no `--check` acusou. Quem apanhou foi revisão humana ([CORR-WTE-034](../../docs/tasks/CORR-WTE-034.md)).
+Arquivo esquecido em silêncio é o pior modo de falha aqui: a camada de dados
+sairia incompleta com todos os gates verdes.
 
 ---
 
@@ -162,12 +180,12 @@ Estado medido nesta execução:
 
 ## Recusas em aberto — o worklist da WTE-TASK-18
 
-**493** recusa(s), em 13 motivo(s). Enquanto houver qualquer uma,
+**498** recusa(s), em 13 motivo(s). Enquanto houver qualquer uma,
 **nada é emitido** — o transpilador não produz unidade parcial.
 
 | Ocorrências | Onde | Motivo |
 |---|---|---|
-| 283 | `Types.hpp:76`, `Types.hpp:115`, `Types.hpp:116`, `Types.hpp:144`, `Types.hpp:145` (+278) | bloco `{ }`: o passe estrutural (begin/end) nao esta implementado -- WTE-TASK-18 |
+| 288 | `Types.hpp:76`, `Types.hpp:115`, `Types.hpp:116`, `Types.hpp:144`, `Types.hpp:145` (+283) | bloco `{ }`: o passe estrutural (begin/end) nao esta implementado -- WTE-TASK-18 |
 | 160 | `TextCodec.cpp:13`, `TextCodec.cpp:49`, `TextCodec.cpp:70`, `Database.cpp:96`, `Database.cpp:120` (+155) | cabecalho de `for` no estilo C: vira `for .. to .. do` (passo 1) ou `while` (passo != 1), e isso e passe estrutural -- WTE-TASK-18 |
 | 33 | `CdImage.cpp:7`, `CdImage.cpp:9`, `CdImage.cpp:17`, `CdImage.cpp:20`, `CdImage.cpp:40` (+28) | 'std::' sobrou: alguma regra de SUBS nao casou |
 | 4 | `Player.cpp:17`, `Player.cpp:51`, `Database.cpp:103`, `Database.cpp:801` | assinatura de funcao: vira `procedure`/`function` com `var` hoisted -- WTE-TASK-18 |

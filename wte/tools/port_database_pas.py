@@ -64,16 +64,37 @@ ROOT = Path(__file__).resolve().parents[2]
 CORE = ROOT / "src" / "core"
 OUT_DIR = ROOT / "wte" / "src"
 
-# Entrada -> unidade. `Sofifa.cpp` fica FORA: o import do SoFIFA esta desligado
-# no newWe2002 desde 2026-08-05, o editor do Obocaman nao tem nada equivalente,
-# e as 805 linhas nao teriam consumidor. Ver WTE-TASK-18.
+# Entrada -> unidade, em ordem de dependencia.
 UNITS: list[tuple[str, list[str]]] = [
     ("we2002_types", ["include/we2002/Types.hpp"]),
+    ("we2002_team", ["include/we2002/Team.hpp", "Team.cpp"]),
     ("we2002_cdimage", ["include/we2002/CdImage.hpp", "CdImage.cpp"]),
     ("we2002_textcodec", ["include/we2002/TextCodec.hpp", "TextCodec.cpp"]),
     ("we2002_player", ["include/we2002/Player.hpp", "Player.cpp"]),
     ("we2002_database", ["include/we2002/Database.hpp", "Database.cpp"]),
 ]
+
+# O que fica DE FORA do transpilador, cada um com o motivo. Nao e comentario
+# solto: o `test_nenhuma_entrada_do_core_fica_de_fora` cruza esta lista com o
+# que existe em `src/core/`, e reprova se sobrar arquivo que ninguem reivindicou.
+#
+# A guarda existe porque a ausencia ja aconteceu: a primeira versao do UNITS
+# esquecia `Team.hpp` e `Team.cpp` -- que declaram `Team`, `MlTeam` e
+# `Formation`, os tres registros que `Database.hpp:45-48` usa como campo -- e
+# NADA no `--check` acusou. Quem apanhou foi a revisao humana da WTE-TASK-15
+# (CORR-WTE-034). Arquivo esquecido em silencio e pior que recusa alta: a
+# camada de dados sairia incompleta com todos os gates verdes.
+FORA_DO_TRANSPILADOR: dict[str, str] = {
+    "Sofifa.cpp": (
+        "o import do SoFIFA esta desligado no newWe2002 desde 2026-08-05, o "
+        "editor do Obocaman nao tem nada equivalente, e as linhas nao teriam "
+        "consumidor. Decisao registrada na WTE-TASK-18."
+    ),
+    "include/we2002/Sofifa.hpp": "idem Sofifa.cpp",
+    "Tables.cpp": "e do gen_tables_pas.py (WTE-TASK-16), nao deste gerador",
+    "include/we2002/Tables.hpp": "idem Tables.cpp",
+    "include/we2002/Offsets.hpp": "idem Tables.cpp",
+}
 
 
 class Refusal(RuntimeError):
@@ -269,10 +290,23 @@ SUBS: list[tuple[str, str, str]] = [
     (r"(?<=[(,])\s*&(?=\w)", "", "& de argumento (Pascal passa por var)"),
 
     # --- tipo, conforme wte/re/tipos.md ------------------------------------
-    # Largura FIXA em tudo que toca a imagem. Integer, Cardinal, PtrInt,
-    # NativeInt e SizeInt sao proibidos por regra, nao por gosto: `DWORD` virou
-    # 64-bit no Linux LP64 e embaralhou todos os numeros de camisa do
-    # newWe2002. A regra zero de tipos.md existe por causa desse bug.
+    # Largura FIXA em tudo que toca a imagem, e a regra existe por um bug real:
+    # `DWORD` virou 64-bit no Linux LP64 e embaralhou todos os numeros de
+    # camisa do newWe2002.
+    #
+    # Proibidos por serem de largura VARIAVEL em FPC: `Integer` (16 bits em
+    # {$mode tp}), `Cardinal`, `PtrInt`, `PtrUInt` e `NativeInt` (seguem o
+    # ponteiro). `LongInt` e `LongWord` NAO estao nessa lista -- sao 32 bits
+    # por definicao do FPC, e e por isso que a tabela abaixo os emite.
+    #
+    # `SizeInt` e o unico caso com ressalva: ele segue o ponteiro, entao so
+    # aparece na FRONTEIRA do CdImage (contagem de bytes lidos), nunca em campo
+    # de registro. A regra 8 abaixo e a que o coloca la, e so la.
+    #
+    # A "regra zero" do tipos.md enuncia isso listando `SizeInt` e `LongInt`
+    # entre os proibidos e usando os dois na tabela logo abaixo -- contradicao
+    # que a CORR-WTE-032 registra. Este comentario diz a versao que o codigo
+    # aqui de fato aplica; quem reconcilia o tipos.md e aquela correcao.
     #
     # Estas rodam DEPOIS de `->` e ANTES da atribuicao, e cada uma tem `\b` nas
     # duas pontas para nao comer prefixo (`unsigned char` antes de `char`).
@@ -463,11 +497,30 @@ def emitir_doc(notas: list[Nota]) -> str:
           + f" | {n} |")
     w(f"| **Total** | | **{total}** |")
     w()
-    w("`Sofifa.cpp` fica **fora**: o import do SoFIFA está desligado no "
-      "`newWe2002` desde")
-    w("2026-08-05, o editor do Obocaman não tem nada equivalente, e as linhas "
-      "não teriam")
-    w("consumidor.")
+    w("### O que fica de fora, e por quê")
+    w()
+    w("Lista fechada: o `test_nenhuma_entrada_do_core_fica_de_fora` cruza-a com "
+      "o que")
+    w("existe em `src/core/` e **reprova** se sobrar arquivo que ninguém "
+      "reivindicou —")
+    w("nos dois sentidos, então motivo escrito para arquivo que sumiu também "
+      "reprova.")
+    w()
+    w("| Arquivo | Motivo |")
+    w("|---|---|")
+    for nome, motivo in sorted(FORA_DO_TRANSPILADOR.items()):
+        w(f"| `{nome}` | {motivo} |")
+    w()
+    w("A guarda existe porque a ausência **já aconteceu**: a primeira versão do")
+    w("`UNITS` esqueceu `Team.hpp` e `Team.cpp` — que declaram `Team`, "
+      "`MlTeam` e")
+    w("`Formation`, os três registros que `Database.hpp:45-48` usa como campo — "
+      "e nada")
+    w("no `--check` acusou. Quem apanhou foi revisão humana "
+      "([CORR-WTE-034](../../docs/tasks/CORR-WTE-034.md)).")
+    w("Arquivo esquecido em silêncio é o pior modo de falha aqui: a camada de "
+      "dados")
+    w("sairia incompleta com todos os gates verdes.")
     w()
     w("---")
     w()
