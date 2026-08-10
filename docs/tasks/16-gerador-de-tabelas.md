@@ -5,7 +5,7 @@ type: ferramenta
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-15"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-16: Gerador de tabelas
@@ -60,22 +60,78 @@ errado só aparece quando a gravação corromper a imagem.
 | `wte/tools/gen_tables_pas.py` | criar |
 | `wte/src/we2002_offsets.pas` | criar (gerado) |
 | `wte/src/we2002_tables.pas` | criar (gerado) |
-| `wte/tests/test_offsets.pas` | criar |
+| `wte/tests/test_offsets.pas` | criar (gerado — ver o Log) |
+| `wte/tests/test_offsets.cpp` | criar (gerado — o irmão C++ da conferência) |
+| `wte/tools/test_gen_tables_pas.py` | criar — recusa com entrada plantada |
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Os 69 offsets e as 16 tabelas emitidos
-- [ ] Nomes idênticos aos do `newWe2002`
-- [ ] Comentários `was OFS_*` preservados
-- [ ] Teste comparando os 69 valores contra o `Offsets.hpp`, verde
-- [ ] `--check` implementado e verde
-- [ ] Commit no formato conventional, em inglês
+- [x] Os 69 offsets e as 16 tabelas emitidos
+- [x] Nomes idênticos aos do `newWe2002`
+- [x] Comentários `was OFS_*` preservados
+- [x] Teste comparando os 69 valores contra o `Offsets.hpp`, verde
+- [x] `--check` implementado e verde
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-09
+
 - **Resumo do que foi feito:**
+
+  `gen_tables_pas.py` lê `Offsets.hpp`, `Tables.hpp` e `Tables.cpp` e emite
+  quatro arquivos: as duas unidades Pascal e os **dois dumpers** da conferência
+  obrigatória. Saem 69 `OFS_*` + as 3 constantes de setor + `N_ROLES` e
+  `START_LINK_COUNT`, e as 16 tabelas, com os tipos de `wte/re/tipos.md`
+  (`ShortInt` para `char` numérico, `AnsiChar` para `char` de texto, `LongInt`
+  para `int`, constante sem tipo para os offsets).
+
+  **O que se aprendeu, e é o item que vale para as tasks 17 e 18:** a task pedia
+  "um teste comparando os 69 valores contra o `Offsets.hpp`", e o caminho óbvio
+  — o próprio parser do gerador conferindo a saída do gerador — **não prova
+  nada**: erro de leitura de literal apareceria idêntico dos dois lados. A
+  conferência foi montada como dois dumpers que emitem as mesmas linhas, um
+  compilado pelo `fpc` a partir do Pascal gerado, o outro pelo `g++` a partir do
+  C++ original. Nenhuma regex no circuito: cada valor vem de um compilador.
+  Resultado medido: **1383 linhas idênticas** (74 constantes, 1048 elementos
+  numéricos, 261 de texto). Os dois dumpers são gerados justamente para que
+  tabela nova entre nos dois lados sozinha.
+
+  Confirmado de passagem que o FPC aceita literal de string mais curto que o
+  `array[0..N] of AnsiChar` e enche com `#0` — os `TXT` do dump saem em hex, e
+  batem byte a byte com o C++.
+
 - **Arquivos criados/modificados:**
+
+  - `wte/tools/gen_tables_pas.py` — criado
+  - `wte/tools/test_gen_tables_pas.py` — criado (19 testes)
+  - `wte/src/we2002_offsets.pas`, `wte/src/we2002_tables.pas` — criados, gerados
+  - `wte/tests/test_offsets.pas`, `wte/tests/test_offsets.cpp` — criados, gerados
+  - `wte/tools/check_fase2.py`, `wte/re/fase-2.md` — reconciliação, em commit
+    próprio (ver abaixo)
+
 - **Problemas encontrados:**
+
+  1. **`Tables.cpp` tem 17 arrays, não 16.** `Tables.cpp:332` define
+     `char nomi_squadre[120][20]` — cópia não-`const`, com o nome italiano, de
+     `TEAM_NAMES`, que o `extract_legacy_data.py` deixou para trás; não está em
+     `Tables.hpp` e ninguém a referencia. Um gerador que varresse o `.cpp`
+     emitiria uma tabela fantasma com nome italiano. O gerador passou a **casar
+     pelo `.hpp`** e a **abortar** em definição não declarada, salvo entrada na
+     lista `UNDECLARED_OK` com motivo escrito — assim tabela nova não some em
+     silêncio. A sobra em si é do `newWe2002` e ficou onde está: mexer nela
+     obriga a rodar o `ctest` e o golden daquele projeto, e não é escopo desta
+     task.
+
+  2. **A tabela de gerado da fase 2 quebrou.** O `check_fase2.py` varria
+     `wte/src/*.pas` inteiro; as duas unidades novas caíram na coluna "escrito à
+     mão" — porque a marca no cabeçalho delas é a do gerador *delas* — e os
+     96.2% da §4.4 viravam 89.4%. O censo passou a excluir `we2002_*.pas`, com a
+     razão escrita no próprio `fase-2.md`. Reconciliação em commit separado, com
+     esta task nomeada no corpo.
+
+  3. O gerador chamava `Path.relative_to(ROOT)` na mensagem de recusa, o que
+     estourava `ValueError` para os arquivos plantados em `/tmp` — trocava a
+     mensagem que o teste mede por um traceback. Virou a função `rel()`.

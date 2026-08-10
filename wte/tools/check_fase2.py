@@ -56,6 +56,9 @@ MD_NAME = "fase-2.md"
 # E o que separa gerado de escrito a mao sem depender de lista fixa: unidade
 # nova entra na conta sozinha, do lado certo.
 MARCA_GERADO = "NAO EDITAR A MAO"
+# A camada de dados da fase 3 mora no mesmo diretorio e NAO e casca.
+# Convencao de nome fixada na "Estrutura de pastas" do progresso.md.
+PREFIXO_DADOS = "we2002_"
 
 
 class CheckError(Exception):
@@ -104,9 +107,20 @@ def lfm_particionado(path: Path) -> tuple[int, int]:
 # ---------------------------------------------------------------- medidas --
 
 def inventario() -> dict:
-    """Linhas de Pascal, separadas por origem."""
-    gerados, mao = [], []
+    """Linhas de Pascal da CASCA, separadas por origem.
+
+    A fase 3 povoa `wte/src/` com a camada de dados (`we2002_*.pas`), que nao e
+    casca e nao entra nesta conta. Sem a exclusao a medida deixa de ser o
+    fechamento da fase 2 e passa a flutuar a cada unidade nova -- e pior, os
+    `we2002_*.pas` caem na coluna "escrito a mao", porque o cabecalho deles traz
+    a marca do gerador *deles*, nao a do `dfm2lfm.py`. Foi o que a WTE-TASK-16
+    mostrou: 96.2% viraria 89.4%, com dois arquivos gerados contados como mao.
+    """
+    gerados, mao, fora = [], [], []
     for pas in sorted(SRC.glob("*.pas")):
+        if pas.name.startswith(PREFIXO_DADOS):
+            fora.append(f"src/{pas.name}")
+            continue
         texto = pas.read_text(encoding="utf-8", errors="replace")
         alvo = gerados if MARCA_GERADO in texto else mao
         alvo.append((f"src/{pas.name}", len(texto.splitlines())))
@@ -127,6 +141,7 @@ def inventario() -> dict:
     return {
         "pas_gerados": gerados,
         "pas_mao": sorted(mao),
+        "fora_da_casca": fora,
         "n_lfm": len(lfms),
         "lfm_estrutura": lfm_estrutura,
         "lfm_hex": lfm_hex,
@@ -314,6 +329,17 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
     w("")
     w(f"**{frac:.1f}% do Pascal da casca é saída de gerador.**")
     w("")
+    if inv["fora_da_casca"]:
+        w("Fora desta conta, por não serem casca: "
+          + ", ".join(f"`{n}`" for n in inv["fora_da_casca"]) + ".")
+        w("São a camada de dados da fase 3, e cada uma tem gerador e `--check` "
+          "próprios.")
+        w("Contá-las aqui faria o número da §4.4 flutuar a cada unidade nova, "
+          "e — pior —")
+        w("as jogaria na coluna \"escrito à mão\", porque a marca no cabeçalho "
+          "delas é a do")
+        w("gerador **delas**, não a do `dfm2lfm.py`.")
+        w("")
     w("Escrito à mão, linha por linha:")
     w("")
     w("| Arquivo | Linhas | O que é |")
