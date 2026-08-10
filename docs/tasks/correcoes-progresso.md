@@ -39,6 +39,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-026](/docs/tasks/CORR-WTE-026.md) | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | A tabela do achado 2 se anuncia medida, e a coluna VCL não foi medida | Baixa | [ ] pendente | — |
 | [CORR-WTE-027](/docs/tasks/CORR-WTE-027.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | O `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra | Baixa | [ ] pendente | — |
 | [CORR-WTE-028](/docs/tasks/CORR-WTE-028.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | `conferir_vereditos()` guarda a coluna `Original`, não o veredito | Baixa | [ ] pendente | — |
+| [CORR-WTE-029](/docs/tasks/CORR-WTE-029.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O Log diz que a reconciliação do `fase-2.md` saiu em commit próprio, e ela saiu no mesmo | Baixa | [ ] pendente | — |
+| [CORR-WTE-031](/docs/tasks/CORR-WTE-031.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O `wte/tests/README.md` diz que a pasta está vazia e é só Pascal; tem dois arquivos, um em C++ | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -70,6 +72,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [ ] CORR-WTE-026 — dizer, por coluna, o que foi medido no achado 2 e dar rota à divergência de `ComboBox.Text`
 - [ ] CORR-WTE-027 — trocar os seis `/docs/` do `montar()` por `../../docs/`, como o `fase-1.md` já faz
 - [ ] CORR-WTE-028 — guardar o grupo 3 (veredito) e transformar a coluna `Original` em contagem medida
+- [ ] CORR-WTE-029 — dizer no Log que a reconciliação entrou no mesmo commit, e por quê
+- [ ] CORR-WTE-031 — reescrever o `wte/tests/README.md` para a pasta que existe hoje
 
 ## Detalhes por correção
 
@@ -563,3 +567,36 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** guardar o grupo 3, manter a coluna `Original` como contagem
   (`capturado / só DFM`) publicada no `fase-2.md` — vira número medido o item 3
   de "O que a fase 2 não prova" —, e um assert sobre o valor no teste
+
+### CORR-WTE-029
+
+- **Arquivo com problema:** `docs/tasks/16-gerador-de-tabelas.md`, o Log de
+  Execução (Arquivos criados/modificados e o item 2 de Problemas encontrados)
+- **Sintoma:** o Log afirma duas vezes que a mudança do `check_fase2.py` e do
+  `wte/re/fase-2.md` saiu «em commit próprio (ver abaixo)». Não há esse commit:
+  os dois arquivos entraram no `6dab6bb`, o commit da própria task, e o corpo
+  dele diz explicitamente o contrário — separá-los deixaria um commit com
+  `make -C wte check` vermelho. O «(ver abaixo)» também não tem destino
+- **Como foi detectado:**
+  `git log --oneline -- wte/tools/check_fase2.py wte/re/fase-2.md` devolve só
+  `6dab6bb` e o `6848208` da WTE-TASK-14; `git show --stat 6dab6bb` lista os
+  dois arquivos entre os dez do commit
+- **Fix:** reescrever as duas afirmações para o que o commit registra,
+  preservando a razão da escolha, e remover o «(ver abaixo)». Nenhum código
+  muda — a decisão está certa, o desatualizado é o Log
+
+### CORR-WTE-031
+
+- **Arquivo com problema:** `wte/tests/README.md`
+- **Sintoma:** o README continua com o texto da fase 0 — «Vazio na fase 0. O
+  primeiro conteúdo real é da WTE-TASK-20» e «Esta pasta é só Pascal» —, e a
+  WTE-TASK-16 pôs ali `test_offsets.pas` e `test_offsets.cpp`, este último em
+  C++ por necessidade: a conferência só vale se cada lado vier de um compilador
+  diferente. Falta ainda dizer que os dois são gerados e quem os compila
+- **Como foi detectado:** `ls wte/tests` contra o `head -4` do próprio README;
+  `head -1 wte/tests/test_offsets.cpp` traz a marca `GERADO por
+  wte/tools/gen_tables_pas.py`
+- **Fix:** reescrever a abertura para o inventário corrente (os dois dumpers
+  gerados e o `roteiros/` da WTE-TASK-13), trocar «só Pascal» pela razão de a
+  pasta ser bilíngue, nomear `make -C wte test` como quem constrói e compara, e
+  manter a WTE-TASK-20 como o que ainda vai chegar
