@@ -46,26 +46,44 @@ o encontro com a biblioteca padrão de outra linguagem.
 
 ## 2. Entrada × saída
 
-As 11 unidades de `src/core/` que o `UNITS` do transpilador reivindica:
+**A razão é por gerador.** Os oito `.pas` saem de *dois*, e dividir a
+soma dos dois pela entrada de um só creditava ao transpilador linhas que
+o `gen_tables_pas.py` emitiu
+([CORR-WTE-050](../../docs/tasks/CORR-WTE-050.md)).
 
-| entrada | linhas |
-|---|---:|
-| `src/core/include/we2002/Types.hpp` | 147 |
-| `src/core/include/we2002/Team.hpp` | 91 |
-| `src/core/Team.cpp` | 16 |
-| `src/core/include/we2002/CdImage.hpp` | 77 |
-| `src/core/CdImage.cpp` | 89 |
-| `src/core/include/we2002/TextCodec.hpp` | 18 |
-| `src/core/TextCodec.cpp` | 77 |
-| `src/core/include/we2002/Player.hpp` | 95 |
-| `src/core/Player.cpp` | 130 |
-| `src/core/include/we2002/Database.hpp` | 60 |
-| `src/core/Database.cpp` | 1704 |
-| **total** | **2504** |
+| entrada | gerador | linhas |
+|---|---|---:|
+| `src/core/Tables.cpp` | `gen_tables_pas.py` | 704 |
+| `src/core/include/we2002/Tables.hpp` | `gen_tables_pas.py` | 53 |
+| `src/core/include/we2002/Offsets.hpp` | `gen_tables_pas.py` | 95 |
+| `src/core/include/we2002/Types.hpp` | `port_database_pas.py` | 147 |
+| `src/core/include/we2002/Team.hpp` | `port_database_pas.py` | 91 |
+| `src/core/Team.cpp` | `port_database_pas.py` | 16 |
+| `src/core/include/we2002/CdImage.hpp` | `port_database_pas.py` | 77 |
+| `src/core/CdImage.cpp` | `port_database_pas.py` | 89 |
+| `src/core/include/we2002/TextCodec.hpp` | `port_database_pas.py` | 18 |
+| `src/core/TextCodec.cpp` | `port_database_pas.py` | 77 |
+| `src/core/include/we2002/Player.hpp` | `port_database_pas.py` | 95 |
+| `src/core/Player.cpp` | `port_database_pas.py` | 130 |
+| `src/core/include/we2002/Database.hpp` | `port_database_pas.py` | 60 |
+| `src/core/Database.cpp` | `port_database_pas.py` | 1704 |
 
-2504 linhas de C++ viraram 3692 de Pascal —
-razão 1.47. As duas contagens saem de ferramenta: a entrada é o
-`UNITS` do próprio gerador, e o `test_nenhuma_entrada_do_core_fica_de_fora`
+| gerador | entrada | saída | razão |
+|---|---:|---:|---:|
+| `gen_tables_pas.py` | 852 | 708 | 0.83 |
+| `port_database_pas.py` | 2504 | 2984 | 1.19 |
+| **total** | **3356** | **3692** | **1.10** |
+
+O transpilador **infla** (1.19): Pascal quer `begin` e `end`
+onde o C++ tem chave, e declaração de variável no topo do corpo. O
+gerador de tabelas **encolhe** (0.83): a mesma tabela cabe em
+menos linha de Pascal do que de inicializador C++. Uma razão só, sobre
+a soma, esconderia os dois efeitos e não descreveria nenhum dos dois
+geradores.
+
+As duas contagens saem de ferramenta: a entrada do transpilador é o
+`UNITS` dele, a do outro são as três constantes do
+`gen_tables_pas.py`, e o `test_nenhuma_entrada_do_core_fica_de_fora`
 reprova arquivo de `src/core/` que ninguém reivindicou.
 
 ---

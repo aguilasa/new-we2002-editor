@@ -105,6 +105,42 @@ class TestArvoreReal(unittest.TestCase):
         self.assertEqual(len(entrada), 11)
         self.assertGreater(total, 2000)
 
+    def test_todo_gerador_da_saida_tem_entrada_no_denominador(self) -> None:
+        """A razao so diz alguma coisa entre populacoes que se correspondem.
+
+        A versao publicada dividia a saida dos DOIS geradores (3692) pela
+        entrada de um so (2504, o `UNITS`), creditando ao transpilador as 708
+        linhas do `gen_tables_pas.py` (CORR-WTE-050). Aqui se prende o
+        pareamento: gerador que aparece em `DA_CAMADA` tem de ter entrada.
+        """
+        entrada = C.entrada_por_gerador()
+        self.assertEqual(set(entrada), set(C.DA_CAMADA.values()))
+        C.conferir_entradas(entrada)          # nao levanta
+
+    def test_gerador_sem_entrada_aborta(self) -> None:
+        """Plantado: um terceiro gerador na saida e nada no denominador."""
+        entrada = C.entrada_por_gerador()
+        original = dict(C.DA_CAMADA)
+        try:
+            C.DA_CAMADA["we2002_inventado.pas"] = "gerador_novo.py"
+            with self.assertRaises(C.CheckError) as ctx:
+                C.conferir_entradas(entrada)
+        finally:
+            C.DA_CAMADA.clear()
+            C.DA_CAMADA.update(original)
+        self.assertIn("gerador_novo.py", str(ctx.exception))
+
+    def test_a_entrada_de_tabelas_e_lida_do_proprio_gerador(self) -> None:
+        """Nao e lista copiada: sao as constantes do `gen_tables_pas.py`.
+
+        Copiar os tres caminhos para ca criaria a segunda copia que envelhece
+        sozinha -- o defeito que o `blocos_manuais()` ja evita lendo o
+        `port_database_pas`.
+        """
+        import gen_tables_pas as G
+        self.assertEqual(C.entrada_de_tabelas(),
+                         [G.TABLES_CPP, G.TABLES_HPP, G.OFFSETS_HPP])
+
     def test_so_teste_consome_a_camada(self) -> None:
         """A resposta a "o app ja le o jogo?", e ela e medida, nao opinada.
 

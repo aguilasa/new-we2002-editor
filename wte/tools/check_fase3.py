@@ -51,6 +51,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import gen_tables_pas as G  # noqa: E402  (a fonte das entradas de tabela)
 import port_database_pas as P  # noqa: E402  (o gerador e a fonte dos manuais)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -179,14 +180,61 @@ def fracao_gerada() -> dict:
 
 # ------------------------------------------------------ 2. entrada x saida --
 
-def entrada_do_transpilador() -> tuple[list[tuple[str, int]], int]:
-    fora = []
+def entrada_de_tabelas() -> list[Path]:
+    """As entradas do `gen_tables_pas.py`, lidas DELE.
+
+    Nao ha lista equivalente ao `UNITS` naquele gerador, mas ha as tres
+    constantes -- e le-las e o que impede a segunda copia que envelhece
+    sozinha, pelo mesmo motivo que `blocos_manuais()` le o `port_database_pas`
+    em vez de transcrever os blocos.
+    """
+    return [G.TABLES_CPP, G.TABLES_HPP, G.OFFSETS_HPP]
+
+
+def entrada_por_gerador() -> dict[str, list[tuple[str, int]]]:
+    """Gerador -> [(arquivo de entrada, linhas)].
+
+    Existe separado porque a razao entrada x saida so diz alguma coisa quando
+    os dois lados sao do MESMO gerador. A versao anterior dividia a saida dos
+    dois (3692) pela entrada de um so (2504, o `UNITS` do transpilador), o que
+    creditava ao transpilador 708 linhas que o `gen_tables_pas.py` emitiu
+    (CORR-WTE-050).
+    """
+    fora: dict[str, list[tuple[str, int]]] = {}
     for _, arquivos in P.UNITS:
         for rel in arquivos:
             caminho = P.CORE / rel
             if not caminho.exists():
                 raise CheckError(f"o UNITS reivindica {rel}, que nao existe")
-            fora.append((rel, linhas(caminho.read_text(encoding="utf-8"))))
+            fora.setdefault("port_database_pas.py", []).append(
+                (rel, linhas(caminho.read_text(encoding="utf-8"))))
+    for caminho in entrada_de_tabelas():
+        if not caminho.exists():
+            raise CheckError(f"o gen_tables_pas reivindica {caminho}, que nao "
+                             f"existe")
+        fora.setdefault("gen_tables_pas.py", []).append(
+            (str(caminho.relative_to(P.CORE)),
+             linhas(caminho.read_text(encoding="utf-8"))))
+    return fora
+
+
+def conferir_entradas(entrada: dict[str, list[tuple[str, int]]]) -> None:
+    """Todo gerador que aparece em `DA_CAMADA` tem entrada no denominador.
+
+    Sem isto, acrescentar um terceiro gerador a `DA_CAMADA` voltaria a inflar
+    a razao em silencio -- que e exatamente o que aconteceu quando o
+    `gen_tables_pas.py` entrou.
+    """
+    faltando = sorted(set(DA_CAMADA.values()) - set(entrada))
+    if faltando:
+        raise CheckError(
+            f"a saida conta {', '.join(faltando)}, e a entrada desse(s) "
+            f"gerador(es) nao esta no denominador -- a razao compararia "
+            f"populacoes diferentes")
+
+
+def entrada_do_transpilador() -> tuple[list[tuple[str, int]], int]:
+    fora = entrada_por_gerador()["port_database_pas.py"]
     return fora, sum(n for _, n in fora)
 
 
@@ -240,7 +288,11 @@ def ghidra_na_fase_3() -> list[tuple[str, int, str]]:
 
 def gerar() -> str:
     frac = fracao_gerada()
-    entrada, total_entrada = entrada_do_transpilador()
+    entrada_ger = entrada_por_gerador()
+    conferir_entradas(entrada_ger)
+    saida_ger: dict[str, int] = {}
+    for nome, gerador, n, _ in frac["por_arquivo"]:
+        saida_ger[gerador] = saida_ger.get(gerador, 0) + n
     casca, teste = consumidores()
     ghidra = ghidra_na_fase_3()
 
@@ -292,18 +344,41 @@ def gerar() -> str:
     w("")
     w("## 2. Entrada × saída")
     w("")
-    w("As 11 unidades de `src/core/` que o `UNITS` do transpilador reivindica:")
+    w("**A razão é por gerador.** Os oito `.pas` saem de *dois*, e dividir a")
+    w("soma dos dois pela entrada de um só creditava ao transpilador linhas que")
+    w("o `gen_tables_pas.py` emitiu")
+    w("([CORR-WTE-050](../../docs/tasks/CORR-WTE-050.md)).")
     w("")
-    w("| entrada | linhas |")
-    w("|---|---:|")
-    for rel, n in entrada:
-        w(f"| `src/core/{rel}` | {n} |")
-    w(f"| **total** | **{total_entrada}** |")
+    w("| entrada | gerador | linhas |")
+    w("|---|---|---:|")
+    for gerador in sorted(entrada_ger):
+        for rel, n in entrada_ger[gerador]:
+            w(f"| `src/core/{rel}` | `{gerador}` | {n} |")
     w("")
-    razao = frac["total"] / total_entrada
-    w(f"{total_entrada} linhas de C++ viraram {frac['total']} de Pascal —")
-    w(f"razão {razao:.2f}. As duas contagens saem de ferramenta: a entrada é o")
-    w("`UNITS` do próprio gerador, e o `test_nenhuma_entrada_do_core_fica_de_fora`")
+    w("| gerador | entrada | saída | razão |")
+    w("|---|---:|---:|---:|")
+    for gerador in sorted(entrada_ger):
+        ent = sum(n for _, n in entrada_ger[gerador])
+        sai = saida_ger[gerador]
+        w(f"| `{gerador}` | {ent} | {sai} | {sai / ent:.2f} |")
+    tot_ent = sum(n for lista in entrada_ger.values() for _, n in lista)
+    w(f"| **total** | **{tot_ent}** | **{frac['total']}** "
+      f"| **{frac['total'] / tot_ent:.2f}** |")
+    w("")
+    r_transp = (saida_ger["port_database_pas.py"]
+                / sum(n for _, n in entrada_ger["port_database_pas.py"]))
+    r_tab = (saida_ger["gen_tables_pas.py"]
+             / sum(n for _, n in entrada_ger["gen_tables_pas.py"]))
+    w(f"O transpilador **infla** ({r_transp:.2f}): Pascal quer `begin` e `end`")
+    w("onde o C++ tem chave, e declaração de variável no topo do corpo. O")
+    w(f"gerador de tabelas **encolhe** ({r_tab:.2f}): a mesma tabela cabe em")
+    w("menos linha de Pascal do que de inicializador C++. Uma razão só, sobre")
+    w("a soma, esconderia os dois efeitos e não descreveria nenhum dos dois")
+    w("geradores.")
+    w("")
+    w("As duas contagens saem de ferramenta: a entrada do transpilador é o")
+    w("`UNITS` dele, a do outro são as três constantes do")
+    w("`gen_tables_pas.py`, e o `test_nenhuma_entrada_do_core_fica_de_fora`")
     w("reprova arquivo de `src/core/` que ninguém reivindicou.")
     w("")
     w("---")

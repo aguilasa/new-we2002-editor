@@ -588,7 +588,9 @@ mapeamento de tipo (§8.6) e escrever a tabela de substituição.
 
 **Medido no fechamento da fase 3 (WTE-TASK-21): 92,5% da camada de dados é
 transpilação por regra** — 3.415 linhas contra 277 escritas à mão, sobre 3.692
-emitidas a partir das 2.504 de entrada. Os oito `.pas` são saída de gerador sem
+emitidas. A razão entrada × saída é **por gerador**, e não sobre a soma: o
+transpilador infla (2.504 → 2.984, 1,19) e o `gen_tables_pas.py` encolhe
+(852 → 708, 0,83). Os oito `.pas` são saída de gerador sem
 exceção; as 277 não são porte de lógica do editor, e sim as quatro peças que o
 [`../wte/re/tipos.md`](../wte/re/tipos.md) já tinha decidido que **não**
 transpilam — `CdImage` (`std::fstream`), `SquadNumbers` (bitfield), o sidecar

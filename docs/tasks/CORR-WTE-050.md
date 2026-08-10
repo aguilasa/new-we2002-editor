@@ -3,7 +3,7 @@ id: CORR-WTE-050
 title: "Correção: a razão entrada × saída divide 3.692 linhas de Pascal por uma entrada que só explica 2.984 delas"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -131,22 +131,68 @@ fração de 92,5% não muda — ela não usa a entrada.
 
 ## Verificação
 
-- [ ] toda linha de saída contada tem a entrada do seu gerador no denominador —
-      teste que reprove se um `.pas` de `DA_CAMADA` vier de gerador cuja entrada
-      não foi somada
-- [ ] o `fase-3-fechamento.md` e a §4.5 dizem a mesma razão, e ela fecha na
-      calculadora
-- [ ] `python3 wte/tools/check_fase3.py --check` verde, duas vezes com o mesmo
-      resultado
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] toda linha de saída contada tem a entrada do seu gerador no denominador —
+      `conferir_entradas()` aborta, e o teste planta um terceiro gerador em
+      `DA_CAMADA` para provar que aborta
+- [x] o `fase-3-fechamento.md` e a §4.5 dizem a mesma razão, e ela fecha na
+      calculadora — `2984/2504 = 1.19`, `708/852 = 0.83`, `3692/3356 = 1.10`
+- [x] `python3 wte/tools/check_fase3.py --check` verde, duas vezes com o mesmo
+      md5 (`06611754…`)
+- [x] `make -C wte check` verde — 397 testes, `rc=0`
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+Adotada a **rota 2** da seção Correção — separar por gerador —, que é a que
+diz mais. A seção 2 do `fase-3-fechamento.md` passou a trazer a entrada
+etiquetada com o gerador que a consome e uma linha de razão por gerador:
+
+| gerador | entrada | saída | razão |
+|---|---:|---:|---:|
+| `gen_tables_pas.py` | 852 | 708 | 0,83 |
+| `port_database_pas.py` | 2504 | 2984 | 1,19 |
+| **total** | **3356** | **3692** | **1,10** |
+
+O que a razão única escondia fica dito: o transpilador **infla** (Pascal quer
+`begin`/`end` onde o C++ tem chave, e declaração no topo do corpo) e o gerador
+de tabelas **encolhe** (a tabela cabe em menos linha de Pascal do que de
+inicializador C++). São efeitos de sinal oposto — somá-los não descrevia
+nenhum dos dois.
+
+As três entradas do `gen_tables_pas.py` **não** foram transcritas: são lidas
+das constantes dele (`G.TABLES_CPP`, `G.TABLES_HPP`, `G.OFFSETS_HPP`), pelo
+mesmo motivo que `blocos_manuais()` lê o `port_database_pas` em vez de copiar
+os blocos — lista copiada envelhece calada.
+
+`conferir_entradas()` é a guarda: gerador que aparece em `DA_CAMADA` e não tem
+entrada no denominador aborta a geração. É o que impede a repetição — o
+defeito nasceu quando o `gen_tables_pas.py` entrou na saída e ninguém somou a
+entrada dele.
+
+Três testes novos: o pareamento sobre a árvore real, a guarda plantando um
+terceiro gerador, e a identidade entre `entrada_de_tabelas()` e as constantes
+do `gen_tables_pas`.
+
+A §4.5 do plano perdeu a relação de origem *"3.692 emitidas a partir das 2.504
+de entrada"* e ganhou as duas razões. A fração de 92,5% ficou como estava —
+ela não usa a entrada, e é assunto da
+[CORR-WTE-051](/docs/tasks/CORR-WTE-051.md).
+
 **Problemas encontrados:**
 
+A tabela desta CORR dá **0.84** para a razão do `gen_tables_pas`; a medida é
+`708 / 852 = 0,8309`, que arredonda para **0,83**. Diferença de
+arredondamento, sem efeito no argumento — o número publicado é o que o gerador
+calcula, não o transcrito aqui.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase3.py` — `entrada_de_tabelas()`, `entrada_por_gerador()`,
+  `conferir_entradas()`, a seção 2 do markdown
+- `wte/tools/test_check_fase3.py` — três testes
+- `wte/re/fase-3-fechamento.md` — regerado
+- `docs/PLAN-WTE-LAZARUS.md` — §4.5
