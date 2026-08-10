@@ -136,10 +136,21 @@ def blocos_manuais() -> dict[str, list[tuple[str, str]]]:
 def confere_bloco(alvo: Path, texto: str, rotulo: str) -> int:
     """Linhas do bloco, depois de provar que ele esta MESMO na saida.
 
-    Casa linha a linha, ignorando indentacao, porque o gerador reindenta o que
-    poe dentro de `implementation`. Uma linha do bloco que sumiu da saida
-    significa que o bloco deixou de ser emitido -- e a fracao publicada estaria
-    contando codigo que nao existe.
+    **Casa por linha util e CONTA todas.** As duas reguas sao de proposito, e
+    a separacao delas e a CORR-WTE-051:
+
+    - o casamento ignora linha em branco porque ela casaria com qualquer
+      coisa, e ignora indentacao porque o gerador reindenta o que poe dentro
+      de `implementation`;
+    - a contagem inclui a linha em branco porque ela **e** parte do bloco
+      escrito a mao, foi emitida junto, e o total do arquivo (`linhas()`)
+      tambem a conta. Devolver o numero do casamento como se fosse contagem
+      subtraia 277 linhas uteis de um total de 3692 com brancos, e as 26
+      linhas em branco dos blocos manuais eram creditadas a coluna
+      **por regra** -- transpilacao de linha vazia que veio de constante.
+
+    Uma linha do bloco que sumiu da saida significa que o bloco deixou de ser
+    emitido -- e a fracao publicada estaria contando codigo que nao existe.
     """
     saida = {l.strip() for l in alvo.read_text(encoding="utf-8").splitlines()}
     uteis = [l.strip() for l in texto.splitlines() if l.strip()]
@@ -150,7 +161,7 @@ def confere_bloco(alvo: Path, texto: str, rotulo: str) -> int:
             f"({len(faltando)} de {len(uteis)} linhas ausentes; a primeira e "
             f"{faltando[0]!r}) -- o gerador mudou de forma e a fracao ficaria "
             f"errada")
-    return len(uteis)
+    return linhas(texto)
 
 
 def fracao_gerada() -> dict:
@@ -320,6 +331,14 @@ def gerar() -> str:
     w("junto. A coluna **à mão** conta essas linhas, e cada bloco é conferido")
     w("dentro da própria saída antes de entrar na conta.")
     w("")
+    w("**A régua é a mesma nas três colunas: linha física, branco incluído.**")
+    w("Dizer isso importa porque as duas primeiras já foram contadas por réguas")
+    w("diferentes — total com branco menos manual sem branco —, e as 26 linhas")
+    w("em branco dos blocos manuais acabavam creditadas a *por regra*")
+    w("([CORR-WTE-051](../../docs/tasks/CORR-WTE-051.md)). O casamento de cada")
+    w("bloco contra a saída continua ignorando branco e indentação, que é outra")
+    w("pergunta: *este bloco ainda é emitido?*")
+    w("")
     w("| arquivo | gerador | linhas | à mão | por regra |")
     w("|---|---|---:|---:|---:|")
     for nome, gerador, n, m in frac["por_arquivo"]:
@@ -329,7 +348,8 @@ def gerar() -> str:
     w("")
     pct = 100.0 * frac["regra"] / frac["total"]
     w(f"**{pct:.1f}% da camada de dados é transpilação por regra** — "
-      f"{frac['regra']} linhas contra {frac['mao']} escritas à mão, e as")
+      f"{frac['regra']} linhas")
+    w(f"contra {frac['mao']} escritas à mão, e as")
     w("escritas à mão são as quatro peças que o")
     w("[`tipos.md`](tipos.md) já tinha decidido que **não são** transpiláveis:")
     w("`CdImage` (`std::fstream`), `SquadNumbers` (bitfield), o sidecar")

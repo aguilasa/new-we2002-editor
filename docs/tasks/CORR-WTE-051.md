@@ -3,7 +3,7 @@ id: CORR-WTE-051
 title: "Correção: a fração de 92,5% subtrai linhas úteis de um total que conta linhas em branco"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -112,20 +112,65 @@ junto com a regeração.
 
 ## Verificação
 
-- [ ] a coluna **por regra** é a subtração de duas contagens da mesma régua, e a
-      régua está escrita no documento
-- [ ] recontar por fora com a régua declarada dá o número publicado
-- [ ] `python3 wte/tools/check_fase3.py --check` verde, duas vezes com o mesmo
-      resultado
-- [ ] `make -C wte check` verde
-- [ ] a §4.5 do plano e o `fase-3-fechamento.md` dizem a mesma fração
+- [x] a coluna **por regra** é a subtração de duas contagens da mesma régua, e a
+      régua está escrita no documento — *"A régua é a mesma nas três colunas:
+      linha física, branco incluído"*
+- [x] recontar por fora com a régua declarada dá o número publicado —
+      `total=3692 mao=303 regra=3389 pct=91.8%`
+- [x] `python3 wte/tools/check_fase3.py --check` verde, duas vezes com o mesmo
+      md5 (`b53ed5b4…`)
+- [x] `make -C wte check` verde — 399 testes, `rc=0`
+- [x] a §4.5 do plano e o `fase-3-fechamento.md` dizem a mesma fração (91,8%),
+      e o `progresso.md` e a WTE-TASK-21 também
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+`confere_bloco()` ficou com as duas responsabilidades **separadas e ditas**:
+continua casando por linha útil — linha vazia casaria com qualquer coisa, e a
+pergunta do casamento é *este bloco ainda é emitido?* — e passou a **contar**
+linha física, que é a régua do total.
+
+Das duas opções da seção Correção escolhi contar tudo dos dois lados (91,8%),
+e não linha útil dos dois (92,2%), por duas razões: linha em branco dentro de
+um bloco manual **foi escrita à mão** e sai emitida junto, então creditá-la ao
+gerador é o próprio defeito; e assim o documento inteiro passa a usar **uma
+régua só** — o total da seção 1 (3692) é o mesmo número que a seção 2 usa como
+saída, o que não aconteceria com 3537.
+
+| | antes | agora |
+|---|---:|---:|
+| total | 3692 (com branco) | 3692 (com branco) |
+| à mão | 277 (sem branco) | 303 (com branco) |
+| por regra | 3415 | 3389 |
+| fração | 92,5% | **91,8%** |
+
+A tabela ganhou o parágrafo que declara a régua, e a diferença de 26 linhas
+está nomeada ali.
+
+Dois testes novos e um reescrito: a recontagem por fora da coluna **à mão** com
+a régua do total; a régua da contagem presa com bloco plantado (3 linhas
+físicas, 2 úteis, tem de devolver 3); e o
+`test_bloco_presente_conta_as_linhas_uteis`, que prendia a régua antiga,
+virou `test_bloco_presente_casa_por_linha_util_e_conta_todas`.
+
 **Problemas encontrados:**
 
+A varredura de discrepância puxou quatro sítios além dos previstos na CORR — a
+fração e as 277 linhas viviam também no `progresso.md`, na tabela de critérios
+da WTE-TASK-21 e duas vezes no Log dela. Todos foram reconciliados dizendo a
+régua; o parágrafo do Log que narra o dedupe (320 → 277, 91,3% → 92,5%) ficou
+como está, porque é história daquele momento, com uma nota dizendo que aqueles
+três números são de linha útil e que a régua publicada mudou depois.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase3.py` — `confere_bloco()` e o texto da seção 1
+- `wte/tools/test_check_fase3.py` — dois testes novos, um reescrito
+- `wte/re/fase-3-fechamento.md` — regerado
+- `docs/PLAN-WTE-LAZARUS.md` — §4.5
+- `docs/tasks/progresso.md` — o resumo da WTE-TASK-21 *(reconciliação)*
+- `docs/tasks/21-fechamento-fase-3.md` — critério e Log *(reconciliação)*

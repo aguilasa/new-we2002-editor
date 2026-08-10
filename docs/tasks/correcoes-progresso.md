@@ -70,7 +70,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-048](/docs/tasks/CORR-WTE-048.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O `fase-3.md` gerado ainda diz que o `wte.exe` não passa da tela de carga — o sweep da CORR-WTE-044 varreu quatro arquivos e não este | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-049](/docs/tasks/CORR-WTE-049.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O parágrafo de dependência da WTE-TASK-20 diz que os 36 restantes são "os que o `we2002_core` não tem", e os 50 `ausente` são todos do `Offsets.hpp`; e cita a 19 como bloqueada | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-050](/docs/tasks/CORR-WTE-050.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A razão entrada × saída divide as 3.692 linhas dos dois geradores pelas 2.504 de entrada de um só; as 852 do `gen_tables_pas` ficam fora do denominador | Alta | [x] concluída | 2026-08-10 |
-| [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A fração de 92,5% subtrai 277 linhas úteis de um total de 3.692 que conta linha em branco — 26 linhas em branco de bloco manual entram como "por regra" | Baixa | [ ] pendente | — |
+| [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A fração de 92,5% subtrai 277 linhas úteis de um total de 3.692 que conta linha em branco — 26 linhas em branco de bloco manual entram como "por regra" | Baixa | [x] concluída | 2026-08-10 |
 
 ## Checklist
 
@@ -123,7 +123,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-048 — trocar a justificativa aposentada no `compare_dumps.py` (oráculo de comportamento × de formato) e regerar
 - [x] CORR-WTE-049 — separar as duas populações de offset no enunciado da 20 e parar de afirmar status da 19
 - [x] CORR-WTE-050 — parear entrada e saída por gerador na razão do fechamento da fase 3, e corrigir a §4.5
-- [ ] CORR-WTE-051 — contar a fração com a mesma régua nos dois lados da subtração, e dizer qual é
+- [x] CORR-WTE-051 — contar a fração com a mesma régua nos dois lados da subtração, e dizer qual é
 
 ## Detalhes por correção
 

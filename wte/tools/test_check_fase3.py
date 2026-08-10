@@ -30,11 +30,18 @@ class TestConfereBloco(unittest.TestCase):
         p.write_text(texto, encoding="utf-8")
         return p
 
-    def test_bloco_presente_conta_as_linhas_uteis(self) -> None:
+    def test_bloco_presente_casa_por_linha_util_e_conta_todas(self) -> None:
+        """As duas reguas de `confere_bloco()`, separadas pela CORR-WTE-051.
+
+        O bloco tem 3 linhas fisicas e 2 uteis. O casamento usa as 2 -- linha
+        vazia casaria com qualquer coisa --, e a contagem devolve as 3, porque
+        a linha em branco foi escrita a mao, sai emitida junto, e o total do
+        arquivo tambem a conta. Devolver 2 aqui era o que creditava branco de
+        bloco manual a coluna *por regra*.
+        """
         with tempfile.TemporaryDirectory() as d:
             alvo = self.arquivo(Path(d), "unit x;\n  begin\n  Foo;\n  end;\n")
-            # A linha em branco do bloco nao conta -- ela nao e codigo.
-            self.assertEqual(C.confere_bloco(alvo, "begin\n\nFoo;\n", "b"), 2)
+            self.assertEqual(C.confere_bloco(alvo, "begin\n\nFoo;\n", "b"), 3)
 
     def test_indentacao_diferente_ainda_casa(self) -> None:
         """O gerador reindenta o que poe dentro de `implementation`."""
@@ -99,6 +106,33 @@ class TestArvoreReal(unittest.TestCase):
         self.assertGreater(self.frac["regra"], self.frac["total"] / 2)
         self.assertGreater(self.frac["mao"], 0,
                            "zero linha a mao significa que a rota 3 sumiu")
+
+    def test_as_tres_colunas_usam_a_mesma_regua(self) -> None:
+        """A subtracao so vale entre contagens comensuraveis.
+
+        A versao publicada fazia `total com branco - manual sem branco`, e as
+        26 linhas em branco dos blocos manuais viravam *por regra*
+        (CORR-WTE-051). Aqui se reconta a coluna **a mao** por fora, com a
+        regua do total, e se exige o mesmo numero.
+        """
+        manuais = C.blocos_manuais()
+        mao = sum(len(texto.splitlines())
+                  for lista in manuais.values() for _, texto in lista)
+        self.assertEqual(self.frac["mao"], mao)
+        self.assertEqual(self.frac["regra"],
+                         self.frac["total"] - self.frac["mao"])
+
+    def test_a_contagem_do_bloco_inclui_a_linha_em_branco(self) -> None:
+        """A regua da contagem, presa em teste, com bloco plantado.
+
+        Se `confere_bloco()` voltar a devolver o numero do casamento, este
+        teste reprova: o bloco tem 3 linhas fisicas e 2 uteis.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            alvo = Path(d) / "u.pas"
+            alvo.write_text("begin\n\n  x := 1;\nend;\n", encoding="utf-8")
+            n = C.confere_bloco(alvo, "begin\n\n  x := 1;", "plantado")
+        self.assertEqual(n, 3)
 
     def test_a_entrada_do_transpilador_e_a_do_plano(self) -> None:
         entrada, total = C.entrada_do_transpilador()

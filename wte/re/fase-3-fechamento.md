@@ -19,19 +19,28 @@ nas constantes `MANUAIS` e `TRECHOS_MANUAIS` do gerador, e sai emitido
 junto. A coluna **à mão** conta essas linhas, e cada bloco é conferido
 dentro da própria saída antes de entrar na conta.
 
+**A régua é a mesma nas três colunas: linha física, branco incluído.**
+Dizer isso importa porque as duas primeiras já foram contadas por réguas
+diferentes — total com branco menos manual sem branco —, e as 26 linhas
+em branco dos blocos manuais acabavam creditadas a *por regra*
+([CORR-WTE-051](../../docs/tasks/CORR-WTE-051.md)). O casamento de cada
+bloco contra a saída continua ignorando branco e indentação, que é outra
+pergunta: *este bloco ainda é emitido?*
+
 | arquivo | gerador | linhas | à mão | por regra |
 |---|---|---:|---:|---:|
-| `wte/src/we2002_types.pas` | `port_database_pas.py` | 151 | 87 | 64 |
+| `wte/src/we2002_types.pas` | `port_database_pas.py` | 151 | 94 | 57 |
 | `wte/src/we2002_team.pas` | `port_database_pas.py` | 147 | 0 | 147 |
-| `wte/src/we2002_cdimage.pas` | `port_database_pas.py` | 182 | 130 | 52 |
+| `wte/src/we2002_cdimage.pas` | `port_database_pas.py` | 182 | 145 | 37 |
 | `wte/src/we2002_textcodec.pas` | `port_database_pas.py` | 163 | 0 | 163 |
 | `wte/src/we2002_player.pas` | `port_database_pas.py` | 194 | 0 | 194 |
-| `wte/src/we2002_database.pas` | `port_database_pas.py` | 2147 | 60 | 2087 |
+| `wte/src/we2002_database.pas` | `port_database_pas.py` | 2147 | 64 | 2083 |
 | `wte/src/we2002_offsets.pas` | `gen_tables_pas.py` | 106 | 0 | 106 |
 | `wte/src/we2002_tables.pas` | `gen_tables_pas.py` | 602 | 0 | 602 |
-| **total** | | **3692** | **277** | **3415** |
+| **total** | | **3692** | **303** | **3389** |
 
-**92.5% da camada de dados é transpilação por regra** — 3415 linhas contra 277 escritas à mão, e as
+**91.8% da camada de dados é transpilação por regra** — 3389 linhas
+contra 303 escritas à mão, e as
 escritas à mão são as quatro peças que o
 [`tipos.md`](tipos.md) já tinha decidido que **não são** transpiláveis:
 `CdImage` (`std::fstream`), `SquadNumbers` (bitfield), o sidecar

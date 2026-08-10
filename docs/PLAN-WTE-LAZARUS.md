@@ -586,12 +586,14 @@ com a mesma cara, e o mesmo erro é igualmente silencioso.
 execução de gerador mais conferência. O que sobra de manual nela é decidir o
 mapeamento de tipo (§8.6) e escrever a tabela de substituição.
 
-**Medido no fechamento da fase 3 (WTE-TASK-21): 92,5% da camada de dados é
-transpilação por regra** — 3.415 linhas contra 277 escritas à mão, sobre 3.692
-emitidas. A razão entrada × saída é **por gerador**, e não sobre a soma: o
+**Medido no fechamento da fase 3 (WTE-TASK-21): 91,8% da camada de dados é
+transpilação por regra** — 3.389 linhas contra 303 escritas à mão, sobre 3.692
+emitidas, contando linha física dos dois lados (a fração já foi 92,5%, quando o
+total contava branco e o manual não). A razão entrada × saída é **por
+gerador**, e não sobre a soma: o
 transpilador infla (2.504 → 2.984, 1,19) e o `gen_tables_pas.py` encolhe
 (852 → 708, 0,83). Os oito `.pas` são saída de gerador sem
-exceção; as 277 não são porte de lógica do editor, e sim as quatro peças que o
+exceção; as 303 não são porte de lógica do editor, e sim as quatro peças que o
 [`../wte/re/tipos.md`](../wte/re/tipos.md) já tinha decidido que **não**
 transpilam — `CdImage` (`std::fstream`), `SquadNumbers` (bitfield), o sidecar
 `_url.txt` e o `Reporter` (`std::function`) —, e elas moram nas constantes do
