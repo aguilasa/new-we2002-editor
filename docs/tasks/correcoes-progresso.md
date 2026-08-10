@@ -40,7 +40,11 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-027](/docs/tasks/CORR-WTE-027.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | O `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra | Baixa | [ ] pendente | — |
 | [CORR-WTE-028](/docs/tasks/CORR-WTE-028.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | `conferir_vereditos()` guarda a coluna `Original`, não o veredito | Baixa | [ ] pendente | — |
 | [CORR-WTE-029](/docs/tasks/CORR-WTE-029.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O Log diz que a reconciliação do `fase-2.md` saiu em commit próprio, e ela saiu no mesmo | Baixa | [ ] pendente | — |
+| [CORR-WTE-030](/docs/tasks/CORR-WTE-030.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | O `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy` | Alta | [ ] pendente | — |
 | [CORR-WTE-031](/docs/tasks/CORR-WTE-031.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O `wte/tests/README.md` diz que a pasta está vazia e é só Pascal; tem dois arquivos, um em C++ | Baixa | [ ] pendente | — |
+| [CORR-WTE-032](/docs/tasks/CORR-WTE-032.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "regra zero" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois | Alta | [ ] pendente | — |
+| [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [ ] pendente | — |
+| [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A decisão 5 do `tipos.md` não tem o "teste que prova", e o critério que o exige está marcado | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -73,7 +77,11 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [ ] CORR-WTE-027 — trocar os seis `/docs/` do `montar()` por `../../docs/`, como o `fase-1.md` já faz
 - [ ] CORR-WTE-028 — guardar o grupo 3 (veredito) e transformar a coluna `Original` em contagem medida
 - [ ] CORR-WTE-029 — dizer no Log que a reconciliação entrou no mesmo commit, e por quê
+- [ ] CORR-WTE-030 — contar 40 `strcpy` no `Database.cpp` e mandar a regra de cópia casar `std::strcpy`
 - [ ] CORR-WTE-031 — reescrever o `wte/tests/README.md` para a pasta que existe hoje
+- [ ] CORR-WTE-032 — tirar `LongInt` da lista de proibidos e escrever a exceção de `SizeInt` onde ela é enunciada
+- [ ] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
+- [ ] CORR-WTE-035 — nomear o teste da decisão 5, em bytes: 1.911 `#10`, sem `#13` e sem BOM
 
 ## Detalhes por correção
 
@@ -600,3 +608,64 @@ data do commit — o `/revisar` abre a correção, não a fecha.
   gerados e o `roteiros/` da WTE-TASK-13), trocar «só Pascal» pela razão de a
   pasta ser bilíngue, nomear `make -C wte test` como quem constrói e compara, e
   manter a WTE-TASK-20 como o que ainda vai chegar
+
+### CORR-WTE-030
+
+- **Arquivo com problema:** `wte/re/tipos.md`
+- **Sintoma:** a decisão 1 afirma "38 `strcpy` e 10 `strcat` em `Database.cpp`";
+  o arquivo tem 40 `strcpy`. Os dois que faltam estão escritos `std::strcpy`,
+  nas linhas 98 e 100, dentro de `CopyAllStarNames()` — que o `Load()` chama na
+  linha 778. 38 é a contagem de dentro do corpo do `Load()`, não a do arquivo
+- **Como foi detectado:** `grep -c strcpy src/core/Database.cpp` dá 40 contra
+  `grep -o '[^:]strcpy' … | wc -l` = 38; a diferença é exatamente
+  `grep -c 'std::strcpy'` = 2
+- **Fix:** afirmar 40, dizer as duas grafias e onde cada grupo mora, e estender
+  a exigência do gerador à grafia qualificada — uma substituição ancorada em
+  `strcpy(` atravessa as duas de `CopyAllStarNames` sem tocá-las
+
+### CORR-WTE-032
+
+- **Arquivo com problema:** `wte/re/tipos.md`
+- **Sintoma:** a "regra zero" (linha 23) lista `Integer`, `Cardinal`, `PtrInt`,
+  `PtrUInt`, `NativeInt`, `SizeInt` **e `LongInt`** e conclui "Nenhum deles
+  entra em campo de registro nem em variável que toque a imagem"; a tabela
+  mapeia `int` → `LongInt` para os 30 atributos de `Player` (campos de registro
+  gravados na imagem) e `std::size_t` → `SizeInt` na fronteira do `CdImage`. O
+  resumo do fim do arquivo (linha 216) já lista só três proibidos
+- **Como foi detectado:** `grep -n 'LongInt\|SizeInt' wte/re/tipos.md` põe as
+  linhas 23, 30, 41, 46 e 216 lado a lado; a 25 proíbe o que a 41 prescreve
+- **Fix:** separar "não são equivalentes" de "são proibidos" — deixar
+  `Integer`/`Cardinal`/`PtrInt`/`PtrUInt`/`NativeInt` como proibidos, escrever a
+  exceção de `SizeInt` na própria regra, e tirar `LongInt` da lista
+
+### CORR-WTE-034
+
+- **Arquivo com problema:** `wte/re/tipos.md`, e o `UNITS` do
+  `wte/tools/port_database_pas.py`
+- **Sintoma:** o parágrafo "Entrada real medida" lista cinco arquivos (2.147
+  linhas, número que confere), mas a tabela mapeia campos declarados em
+  `Player.hpp`, `Team.hpp`, `CdImage.hpp` e `Database.hpp`, nenhum na lista.
+  O transpilador já commitado reincorporou cinco cabeçalhos por conta própria e
+  deixou o `Team.hpp` de fora — justamente o que declara `Team`, `MlTeam` e
+  `Formation`, usados como campo em `Database.hpp:44-48`. Junto: três linhas da
+  tabela lideram com grafias (`std::uint8_t`, `std::uint16_t`, `std::int32_t`)
+  que não ocorrem em nenhum ponto de `src/core/`
+- **Como foi detectado:** `wc -l` dos cinco contra os cabeçalhos;
+  `grep -n 'raw_formation\|flag_colours\|link\[46\]' Team.hpp`;
+  `grep -rnoE '\b(std::)?u?int(8|16|32|64)_t\b' src/core` só devolve `uint32_t`
+  (31×) e `int64_t` (1×)
+- **Fix:** reescrever o inventário separando implementação de declaração,
+  nomear `Team.hpp`, e dar a ele destino escrito no `UNITS` ou recusa em
+  `wte/re/recusas.md`; nas três linhas, deixar a grafia que ocorre
+
+### CORR-WTE-035
+
+- **Arquivo com problema:** `wte/re/tipos.md`
+- **Sintoma:** cinco decisões, quatro blocos "Teste que prova" — a decisão 5 (o
+  sidecar `_url.txt` por `TFileStream` com `#10`) não tem o seu, e o critério
+  "Cada decisão com o teste que a prova nomeado" está marcado como cumprido
+- **Como foi detectado:** `grep -c '^## Decisão' wte/re/tipos.md` = 5 contra
+  `grep -c 'Teste que prova'` = 4
+- **Fix:** acrescentar o bloco à decisão 5, em bytes e não em linhas — 1.911
+  `#10`, nenhum `#13`, nenhum BOM, e `cmp` contra o sidecar que o
+  `we2002_core` grava para a mesma base

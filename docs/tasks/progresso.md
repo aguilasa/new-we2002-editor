@@ -27,7 +27,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
-| [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
+| [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ⬜ Pendente | — | — |
