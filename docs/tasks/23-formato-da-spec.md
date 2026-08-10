@@ -5,7 +5,7 @@ type: decisão
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-09"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-23: Formato da spec
@@ -75,22 +75,87 @@ Um arquivo que lista os 96 com veredito corrente, gerado do
 | Arquivo | Ação |
 |---|---|
 | `wte/re/spec/GABARITO.md` | criar |
-| `wte/tools/spec_index.py` | criar — gera o índice a partir dos `.md` |
+| `wte/tools/spec_index.py` | criar — gera o índice **e valida cada spec** |
+| `wte/tools/test_spec_index.py` | criar — as onze rotas de recusa |
 | `wte/re/spec/INDICE.md` | criar (gerado) |
+| `wte/re/spec/README.md` | modificar — deixou de dizer "vazio até a 23" |
+| `wte/tools/README.md` | modificar — as duas tabelas |
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Gabarito com os seis campos, e a exigência de evidência por campo
-- [ ] Vocabulário de veredito fechado
-- [ ] A proibição de colar decompilado escrita no gabarito
-- [ ] Gerador de índice funcionando sobre um `.md` de exemplo
-- [ ] Commit no formato conventional, em inglês
+- [x] Gabarito com os seis campos, e a exigência de evidência por campo
+- [x] Vocabulário de veredito fechado — cinco, sem acento e sem variante
+- [x] A proibição de colar decompilado escrita no gabarito — **e verificada
+      pelo gerador**, não só escrita
+- [x] Gerador de índice funcionando sobre um `.md` de exemplo — exemplo
+      sintético, no `test_spec_index.py`; ver o Log
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-09
+
 - **Resumo do que foi feito:**
-- **Arquivos criados/modificados:**
+
+  Gabarito, vocabulário fechado, gerador de índice e os 96 indexados como
+  `aberto`. O gabarito tem as seis seções obrigatórias na ordem, cada uma com
+  a própria linha `**Evidência:**` escolhida entre quatro valores — `diff
+  medido`, `disassembly lido`, `observação de tela`, `não medido` —, e o
+  vocabulário de veredito ficou em cinco, **sem acento e sem espaço
+  alternativo**, para não existirem duas grafias do mesmo veredito.
+
+  **A decisão que mudou a natureza da task: a proibição da §2 virou código.**
+  O enunciado pedia a proibição *escrita no gabarito*. Escrita, ela vale o que
+  vale a memória de quem escreve a spec às duas da manhã na fase 4. O
+  `spec_index.py` **recusa** o arquivo que tenha bloco marcado `c`/`cpp`, os
+  nomes que o Ghidra inventa (`undefined4`, `uVar1`, `local_1c`, `param_1`,
+  `DAT_…`, `FUN_…`) ou `__fastcall` — e aceita pseudocódigo em bloco `text`,
+  que é a rota certa. É o irmão do `FORBIDDEN` do `port_database.py`, no
+  mesmo espírito da §8.10.
+
+  Duas outras regras do gabarito que são mecânicas e por isso moram no
+  gerador, em vez de no texto:
+
+  - `nao portado` exige seção `## Justificativa` não vazia — o critério de
+    pronto da fase 4 depende disso, e a WTE-TASK-29 confere pelo índice;
+  - `implementado` com **toda** a evidência em `observação de tela` / `não
+    medido` é recusado: isso é hipótese, não spec, exatamente como o enunciado
+    diz.
+
+  Mais três guardas que só apareceram ao escrever: frontmatter que discorda do
+  `published_methods.tsv` (endereço, dono), spec órfã (nome que não casa com
+  handler nenhum — um nome errado sumiria do índice em silêncio) e seção
+  faltando.
+
+  Nome de arquivo: **`<formulario>.<handler>.md`**. O par é único nos 96, o
+  nome solto não — há 16 `FormCreate`, 2 `FormShow` e quatro famílias de
+  `BitBtnNClick` em formulários diferentes.
+
+  **O "`.md` de exemplo" do critério é sintético, e de propósito.** Uma spec de
+  verdade é trabalho da WTE-TASK-25 em diante; commitar uma spec inventada só
+  para o gerador ter o que ler poria hipótese em `re/spec/` com cara de fato —
+  que é o oposto do que o campo de evidência existe para impedir. O exemplo
+  vive no `test_spec_index.py`, em diretório temporário, e são 19 testes.
+
 - **Problemas encontrados:**
+
+  1. **A coluna `evento` do TSV quebra tabela markdown.** Ela guarda um evento
+     por controle atendido, separados por `|` — `ficha_color.barraChange` sai
+     como `OnChange|OnChange|OnChange`, porque serve três barras. O `|` cru
+     partia a linha da tabela em oito células. Vira `OnChange x3`, e há teste.
+  2. Um dos 96, `MainForm.Button2Click`, tem a coluna `evento` **vazia**: é
+     publicado e não está ligado a evento nenhum em DFM algum (a WTE-TASK-04 já
+     o marcava "sem referencia em DFM"). Sai como `—` no índice.
+
+- **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/re/spec/GABARITO.md` | criar |
+  | `wte/tools/spec_index.py` | criar |
+  | `wte/tools/test_spec_index.py` | criar (19 testes) |
+  | `wte/re/spec/INDICE.md` | criar (gerado) |
+  | `wte/re/spec/README.md` | modificar |
+  | `wte/tools/README.md` | modificar |
