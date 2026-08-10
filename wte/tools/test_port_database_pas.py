@@ -1,24 +1,32 @@
 #!/usr/bin/env python3
-"""Testes do port_database_pas.py -- WTE-TASK-17.
+"""Testes do port_database_pas.py -- WTE-TASK-17 e 18.
 
-O criterio da task e explicito: **"recusa testada com entrada plantada, nao so
+O criterio da 17 e explicito: **"recusa testada com entrada plantada, nao so
 com a entrada boa"**. Um guard que nunca foi visto recusar e um guard que se
-supoe funcionar.
+supoe funcionar. A 18 acrescenta o passe estrutural, e com ele o unico gate que
+mede de verdade: **o fpc compila as seis unidades**, e um programa Pascal prova
+as cinco decisoes de `wte/re/tipos.md` contra a camada gerada.
 
-Tres grupos:
+Grupos:
 
-1. `FORBIDDEN` -- cada construcao sem traducao decidida recusa, e a recusa traz
-   a linha certa.
+1. `FORBIDDEN` -- cada construcao sem traducao decidida recusa, com a linha
+   certa.
 2. `check_seeks()` -- uma regra de `SUBS` que troca a direcao de um seek e
-   pega, mesmo produzindo Pascal que compilaria. Este e o guard que existe por
-   causa de um bug real, e o teste reproduz o bug.
+   pega, mesmo produzindo Pascal que compilaria. Este guard existe por causa de
+   um bug real, e o teste reproduz o bug.
 3. O que **nao** pode recusar: comentario e literal nao sao codigo.
+4. O passe estrutural -- bloco, `for`, `switch`, `[[fallthrough]]`, hoisting.
+5. As seis unidades compilando, e as decisoes de tipo provadas em execucao.
 """
 
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 
 import port_database_pas as P
 
@@ -81,37 +89,184 @@ class TestForbidden(unittest.TestCase):
         self.assertEqual(self.conferir(fonte), [])
 
 
-class TestEstruturaAindaRecusa(unittest.TestCase):
-    """O passe estrutural nao existe, e o tool nao pode fingir que existe.
+class TestPasseEstrutural(unittest.TestCase):
+    """O passe da WTE-TASK-18: bloco, laco, `switch`, hoisting.
 
-    Achado da WTE-TASK-17: o `tools/port_database.py` pode ser substituicao
-    textual pura porque fonte e alvo sao a MESMA linguagem. C++ -> Pascal nao
-    pode. Enquanto o passe estrutural nao existir, emitir um `.pas` com corpo em
-    C++ seria produzir um artefato que parece camada de dados, nao compila, e
-    convida alguem a "so ajustar a mao" o que a §4.4 proibe.
+    Achado da WTE-TASK-17 que redimensionou a 18: o `tools/port_database.py`
+    pode ser substituicao textual pura porque fonte e alvo sao a MESMA
+    linguagem. C++ -> Pascal nao pode -- bloco, cabecalho de laco, assinatura e
+    declaracao de variavel nao tem forma comum.
     """
 
-    def conferir(self, fonte: str):
-        traduzido, _ = P.aplicar_subs(fonte)
-        return P.conferir(P.FORBIDDEN, traduzido, "plantado.cpp")
+    def traduzir(self, corpo: str, funcao: str = "F", ret: str = "void"):
+        tp = P.Transpilador("u", [("x.cpp", "")])
+        tp.campos = {}
+        c = P.Corpo(tp, P.normalizar(corpo), funcao, ret)
+        linhas, _ = c.statements(0, 0)
+        return "\n".join(linhas), c.vars, tp.notas
 
-    def test_bloco(self) -> None:
-        self.assertIn("passe estrutural", motivos(self.conferir("{\n}\n")))
+    def test_bloco_vira_begin_end(self) -> None:
+        pas, _, notas = self.traduzir("{\n\tf(1);\n}\n")
+        self.assertIn("begin", pas)
+        self.assertIn("end;", pas)
+        self.assertEqual(notas, [])
 
-    def test_cabecalho_de_for(self) -> None:
-        notas = self.conferir("for (i = 0; i < 63; i++)\n")
-        self.assertIn("`for` no estilo C", motivos(notas))
+    def test_for_de_passo_um_vira_for_to_do(self) -> None:
+        pas, _, _ = self.traduzir("for(i = 0;i < 32;i ++)\n{\n\tf(i);\n}\n")
+        self.assertIn("for i := 0 to 31 do", pas)
 
-    def test_struct(self) -> None:
-        self.assertIn("struct", motivos(self.conferir("struct SquadNumbers {\n")))
+    def test_o_limite_nao_literal_sai_menos_um(self) -> None:
+        pas, _, _ = self.traduzir("for(i=0;i<PLAYERS_NC;i++)\n\tf(i);\n")
+        self.assertIn("for i := 0 to PLAYERS_NC - 1 do", pas)
 
-    def test_nenhuma_unidade_e_emitida_enquanto_houver_recusa(self) -> None:
+    def test_for_vira_while_quando_o_corpo_atribui_a_variavel(self) -> None:
+        # Database.cpp:762 faz `i = 1750;` dentro do laco. Em Pascal atribuir a
+        # variavel de controle de um `for` e PROIBIDO -- e o `for..to..do`
+        # ignoraria o salto, lendo 46 custos que o original pula.
+        pas, _, _ = self.traduzir(
+            "for(i=0;i<10;i++)\n{\n\tif(i == 3)\n\t{\n\t\ti = 7;\n\t}\n"
+            "\tf(i);\n}\n")
+        self.assertIn("while i < 10 do", pas)
+        self.assertIn("Inc(i);", pas)
+        self.assertNotIn("for i :=", pas)
+
+    def test_for_vira_while_quando_a_variavel_e_lida_depois(self) -> None:
+        # TextCodec.cpp:42 le `i` DEPOIS do laco. Em Pascal o valor da variavel
+        # de controle depois de um `for` e indefinido pela linguagem.
+        pas, _, _ = self.traduzir(
+            "for(i = 0;i < l;i++)\n{\n\tf(i);\n}\nkj[i] = 0;\n")
+        self.assertIn("while i < l do", pas)
+
+    def test_for_seguinte_reinicializando_nao_conta_como_leitura(self) -> None:
+        # A condicao `i < 63` do proximo `for` LE `i`, mas o init reinicializa
+        # antes. Sem esta distincao metade dos lacos do Load viraria `while`.
+        pas, _, _ = self.traduzir(
+            "for(i = 0;i < 32;i++)\n\tf(i);\nfor(i = 0;i < 63;i++)\n\tg(i);\n")
+        self.assertNotIn("while", pas)
+        self.assertEqual(pas.count("for i :="), 2)
+
+    def test_passo_diferente_de_um_vira_while(self) -> None:
+        pas, _, _ = self.traduzir("for (i = 0; i < l; i += 2)\n\tf(i);\n")
+        self.assertIn("while i < l do", pas)
+        self.assertIn("Inc(i, 2);", pas)
+
+    def test_declaracao_vira_bloco_var(self) -> None:
+        _, variaveis, _ = self.traduzir(
+            "int i,j;\nunsigned short colour_buf[16];\n",
+            funcao="Database::Load")
+        self.assertIn("i: LongInt;", variaveis)
+        self.assertIn("j: LongInt;", variaveis)
+        self.assertIn("colour_buf: array[0..15] of Word;", variaveis)
+
+    def test_char_local_sem_classificacao_recusa(self) -> None:
+        # A decisao 4 de tipos.md separa `char` de TEXTO de `char` NUMERICO, e
+        # heuristica erra em silencio: o erro so apareceria na tela do usuario.
+        _, _, notas = self.traduzir("char scratch[8];\n", funcao="Naoexiste")
+        self.assertIn("CHAR_LOCAL", " ".join(n.motivo for n in notas))
+
+    def test_switch_vira_case(self) -> None:
+        pas, _, _ = self.traduzir(
+            "switch(i)\n{\n\tcase 1:\n\t\tf();\n\t\tbreak;\n"
+            "\tdefault:\n\t\tg();\n}\n")
+        self.assertIn("case i of", pas)
+        self.assertIn("1:", pas)
+        self.assertIn("else", pas)
+        self.assertNotIn("Break;", pas)   # `break;` de switch nao e Break
+
+    def test_fallthrough_duplica_o_ramo_seguinte(self) -> None:
+        # O `case` do Pascal NAO cai para o proximo ramo. Traduzir literalmente
+        # mudaria em silencio QUANTOS bytes se le da imagem.
+        pas, _, _ = self.traduzir(
+            "switch(i)\n{\n\tcase 1:\n\t\tSeekCurrent(32);\n"
+            "\t[[fallthrough]];\n\tdefault:\n\t\tRead(x, 32);\n}\n")
+        self.assertNotIn("fallthrough]];", pas)
+        self.assertEqual(pas.count("Read(x, 32);"), 2, pas)
+        self.assertIn("PORTE A MAO (rota 1)", pas)
+
+    def test_atribuicao_encadeada_e_decomposta(self) -> None:
+        pas, _, _ = self.traduzir("buf[0] = buf[1] = 0;\n")
+        self.assertIn("buf[1] := 0;", pas)
+        self.assertIn("buf[0] := buf[1];", pas)
+
+    def test_return_vira_result_e_exit(self) -> None:
+        pas, _, _ = self.traduzir("return false;\n", ret="bool")
+        self.assertIn("Result := false;", pas)
+        self.assertIn("Exit;", pas)
+
+
+class TestSaidaReal(unittest.TestCase):
+    """As seis unidades saem, sem recusa, e com a forma que o Pascal exige."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.saida = {}
+        cls.notas = {}
+        cls.duplicados = {}
         for unit, arquivos in P.UNITS:
-            pascal, notas = P.transpilar_unidade(unit, arquivos)
-            self.assertTrue(notas, f"{unit}: sem recusa, mas o passe "
-                                   f"estrutural nao existe -- guard furado")
-            self.assertFalse((P.OUT_DIR / f"{unit}.pas").exists(),
-                             f"{unit}.pas nao pode existir ainda")
+            pas, notas = P.transpilar_unidade(unit, arquivos)
+            cls.saida[unit] = pas
+            cls.notas[unit] = notas
+            cls.duplicados[unit] = list(P.ULTIMO_TRANSPILADOR.duplicados)
+
+    def test_nenhuma_recusa_em_aberto(self) -> None:
+        for unit, notas in self.notas.items():
+            self.assertEqual([str(n) for n in notas], [], unit)
+
+    def test_as_seis_unidades_existem_no_disco(self) -> None:
+        for unit, _ in P.UNITS:
+            self.assertTrue((P.OUT_DIR / f"{unit}.pas").exists(), unit)
+
+    def test_nada_de_c_sobrou(self) -> None:
+        for unit, pas in self.saida.items():
+            for proibido in ("std::", "->", "&&", "0x", "static_cast"):
+                self.assertNotIn(proibido, P.mascarar(pas, pascal=True), unit)
+
+    def test_a_contagem_de_io_bate_com_a_entrada(self) -> None:
+        """`Read`/`Write`/`strcpy` nao podem sumir nem se multiplicar.
+
+        O `check_seeks()` ja cuida dos seeks. Estes tres sao o resto do que
+        toca a imagem: um `Read` a menos e um campo que nunca se carrega, e um
+        a mais desalinha TODO o resto do fluxo -- os offsets sao relativos.
+        """
+        fonte = (P.CORE / "Database.cpp").read_text(encoding="utf-8")
+        pas = self.saida["we2002_database"]
+        extra = "\n".join(self.duplicados["we2002_database"])
+        self.assertTrue(extra, "nenhum ramo duplicado: o [[fallthrough]] sumiu")
+        for c, p in ((r"\.Read\(", r"\.Read\("),
+                     (r"\.Write\(", r"\.Write\("),
+                     (r"\bstrcpy\b", r"\bCStrCopy\b"),
+                     (r"\bstrcat\b", r"\bCStrCat\b")):
+            # O `[[fallthrough]]` DUPLICA o ramo seguinte de proposito -- e a
+            # rota 1 da WTE-TASK-18. A diferenca tem de ser exatamente essa.
+            self.assertEqual(len(re.findall(c, fonte)) + len(re.findall(p, extra)),
+                             len(re.findall(p, pas)), f"{c} nao bate")
+
+    def test_o_literal_de_erro_atravessa_intacto(self) -> None:
+        """A regra `!` -> `not` NAO pode entrar em literal.
+
+        Achado da WTE-TASK-18: sem `_proteger()`, a mensagem
+        `"Error ! Impossible to open CD image !"` saia como
+        `'Error not Impossible to open CD image !'` -- texto que o usuario le,
+        corrompido por uma regra de operador.
+        """
+        pas = self.saida["we2002_database"]
+        self.assertIn("'Error ! Impossible to open CD image !'", pas)
+        self.assertNotIn("Error not Impossible", pas)
+
+    def test_o_trecho_portado_a_mao_virou_chamada(self) -> None:
+        pas = self.saida["we2002_database"]
+        self.assertIn("WriteUrlSidecar(image);", pas)
+        # Mascarado: o comentario do porte a mao CITA o std::ofstream que ele
+        # substitui, e citacao nao e codigo.
+        self.assertNotIn("ofstream", P.mascarar(pas, pascal=True))
+
+    def test_o_parametro_reservado_foi_renomeado(self) -> None:
+        # `as` e operador de type-cast no Object Pascal. Sem renomear, o corpo
+        # inteiro do AsciiToKanji deixa de compilar com erro que nao menciona o
+        # nome.
+        pas = self.saida["we2002_textcodec"]
+        self.assertIn("as_: PByte", pas)
+        self.assertNotIn("as[i]", pas)
 
 
 class TestCheckSeeks(unittest.TestCase):
@@ -315,12 +470,94 @@ class TestEntradaReal(unittest.TestCase):
                                  f"{nome}: check_seeks reprovou")
 
     def test_o_relatorio_de_recusa_nomeia_arquivo_e_linha(self) -> None:
-        _, notas = P.transpilar_unidade(*P.UNITS[-1])
-        self.assertTrue(notas, "a WTE-TASK-18 existe porque ha recusas; "
-                               "zero aqui significa que o guard parou de olhar")
+        """Com entrada plantada -- a real nao tem mais recusa desde a 18.
+
+        Um guard que nunca foi visto recusar e um guard que se supoe
+        funcionar. O que se mede aqui e a FORMA da recusa: arquivo e linha,
+        para que a proxima leitura saiba onde ir.
+        """
+        fonte = "int f()\n{\n\tint x;\n\tgoto fim;\n\treturn 0;\n}\n"
+        notas = P.conferir(P.FORBIDDEN_ENTRADA, fonte, "src/core/plantado.cpp")
+        self.assertTrue(notas, "o guard parou de olhar")
         for n in notas:
             self.assertTrue(n.arquivo.startswith("src/core/"))
-            self.assertGreater(n.linha, 0)
+            self.assertEqual(n.linha, 4)
+
+    def test_trecho_portado_a_mao_que_sumiu_recusa(self) -> None:
+        """Porte a mao que apodrece calado e pior que porte a mao nenhum."""
+        _, faltando = P.aplicar_trechos("src/core/Database.cpp",
+                                        "// sem o bloco do ofstream\n")
+        self.assertEqual(faltando, ["Database.cpp"])
+
+    def test_item_de_topo_nao_reivindicado_recusa(self) -> None:
+        """A ausencia silenciosa e o pior modo de falha deste gerador.
+
+        Regressao da CORR-WTE-034 no nivel de ITEM: uma funcao nova em
+        `src/core/` que o passe estrutural nao reconheca nao pode simplesmente
+        nao sair na unidade.
+        """
+        tp = P.Transpilador("we2002_types", [("src/core/x.hpp", "")])
+        tp.campos = {}
+        it = P.classificar(P.Item("?", "", 7, "struct Novo { int a; };"))
+        consts: list[str] = []
+        tipos: list[str] = []
+        P._item(tp, it, P.Manual(itens={}), consts, tipos, [], [])
+        self.assertTrue(any("REGISTROS" in n.motivo for n in tp.notas),
+                        [str(n) for n in tp.notas])
+
+
+class TestUnidadesCompilam(unittest.TestCase):
+    """O gate da WTE-TASK-18, e o unico que mede de verdade.
+
+    Grupo 1: o `fpc` compila as seis unidades. Grupo 2: um programa Pascal
+    (`wte/tests/test_camada_dados.pas`) exercita a camada gerada e prova as
+    cinco decisoes de `wte/re/tipos.md` -- layout de bit, sinal de `char`,
+    semantica da copia, leitura curta e o terminador do sidecar.
+
+    Sem `fpc` os dois **pulam** e dizem que nada foi medido, como o
+    `test_gen_tables_pas.py` faz.
+    """
+
+    PROGRAMA = P.ROOT / "wte" / "tests" / "test_camada_dados.pas"
+
+    def _fpc(self) -> str:
+        fpc = shutil.which("fpc")
+        if not fpc:
+            self.skipTest("sem fpc -- as seis unidades NAO foram compiladas "
+                          "nesta execucao")
+        return fpc
+
+    def test_as_seis_unidades_compilam(self) -> None:
+        fpc = self._fpc()
+        with tempfile.TemporaryDirectory() as td:
+            r = subprocess.run(
+                [fpc, f"-Fu{P.OUT_DIR}", f"-FU{td}",
+                 str(P.OUT_DIR / "we2002_database.pas")],
+                capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            # Aviso conta: "Comment level 2" ja apareceu quando um comentario
+            # gerado tinha `{}` dentro, e o proximo pode ser um de verdade.
+            self.assertNotIn("Warning:", r.stdout, r.stdout)
+            produzidas = {f.stem for f in Path(td).glob("*.ppu")}
+            for unit, _ in P.UNITS:
+                self.assertIn(unit, produzidas)
+
+    def test_as_decisoes_de_tipo_valem_em_execucao(self) -> None:
+        fpc = self._fpc()
+        with tempfile.TemporaryDirectory() as td:
+            binario = Path(td) / "test_camada_dados"
+            r = subprocess.run(
+                [fpc, f"-Fu{P.OUT_DIR}", f"-FU{td}", f"-o{binario}",
+                 str(self.PROGRAMA)], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            r = subprocess.run([str(binario)], capture_output=True, text=True)
+        linhas = [ln for ln in r.stdout.splitlines() if ln.strip()]
+        falhas = [ln for ln in linhas if ln.startswith("FALHA")]
+        self.assertEqual(falhas, [], r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout)
+        # Numero medido, e nao suposto: um caso que some do programa Pascal
+        # some em silencio, e o teste continuaria verde sem medir nada.
+        self.assertEqual(len(linhas), 23, r.stdout)
 
 
 if __name__ == "__main__":

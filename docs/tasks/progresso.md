@@ -30,7 +30,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
-| [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ⬜ Pendente | — | — |
+| [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ⬜ Pendente | — | — |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
@@ -194,8 +194,8 @@ conferível.
 - [x] Offsets e tabelas gerados, com os valores conferidos por **dois
       compiladores** — não pelo parser do próprio gerador
 - [x] `FORBIDDEN` e `check_seeks()` no transpilador, testados com entrada plantada
-- [ ] As cinco unidades de dados geradas e compilando
-- [ ] Toda recusa do `FORBIDDEN` com rota escolhida e razão
+- [x] As seis unidades de dados geradas e compilando
+- [x] Toda recusa do `FORBIDDEN` com rota escolhida e razão
 - [ ] Diff de controle (gravar sem editar) medido antes de qualquer offset novo
 - [ ] Dumps Pascal e C++ idênticos nas duas ROMs
 - [ ] Bitfield de `SquadNumbers` conferido contra imagem real

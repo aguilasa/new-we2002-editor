@@ -5,7 +5,7 @@ type: implementação
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-17"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-18: Camada de dados gerada
@@ -101,17 +101,88 @@ Vindas do `newWe2002`, todas com custo pago:
 
 ## Critério de conclusão
 
-- [ ] Passe estrutural implementado no `port_database_pas.py`, com teste
-- [ ] As seis unidades geradas e compilando
-- [ ] Toda recusa do `FORBIDDEN` com rota escolhida e razão escrita
-- [ ] Se houve rota 2: `ctest` e o golden do `newWe2002` verdes depois
-- [ ] Trechos de porte manual marcados no código gerado
-- [ ] `Sofifa.cpp` fora, e a razão registrada
-- [ ] Commit no formato conventional, em inglês
+- [x] Passe estrutural implementado no `port_database_pas.py`, com teste
+- [x] As seis unidades geradas e compilando
+- [x] Toda recusa do `FORBIDDEN` com rota escolhida e razão escrita
+- [x] Se houve rota 2: `ctest` e o golden do `newWe2002` verdes depois
+      — **não houve rota 2**; `src/core/` não foi tocado
+- [x] Trechos de porte manual marcados no código gerado
+- [x] `Sofifa.cpp` fora, e a razão registrada
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-10
+
 - **Resumo do que foi feito:**
+
+  As **498 recusas** viraram **zero**, e nenhuma precisou da rota 2 — `src/core/`
+  não foi tocado. 454 delas eram o passe estrutural (bloco, `for`, assinatura),
+  que é um problema só; o resto se dividiu entre rota 1 (fallthrough,
+  `static_assert`, `sizeof`) e rota 3 (`CdImage`, `SquadNumbers`, `Reporter`,
+  sidecar — os quatro já desenhados no `tipos.md`). O veredito por recusa está em
+  [`wte/re/recusas.md`](../../wte/re/recusas.md).
+
+  **O que a task ensinou, e não estava previsto:** o passe estrutural não é a
+  parte perigosa. As decisões que mudam comportamento em silêncio estão nos
+  **detalhes de precedência e de escopo**, e nenhuma delas deixava token para o
+  `FORBIDDEN` pegar. Sete defeitos da tabela da WTE-TASK-17 saíram daí, e quatro
+  produziriam Pascal que compila e faz outra coisa:
+
+  1. as SUBS rodavam **dentro de literal** — `"Error ! Impossible to open CD
+     image !"` saía como `'Error not Impossible …'`, com a regra `!` → `not`
+     comendo o texto que o usuário lê;
+  2. o `&` era apagado em toda posição de argumento, então
+     `ResolveMlLink(&link[i*2])` passava um **Byte** onde a rotina espera
+     ponteiro;
+  3. `a == 1 && b > 2` virava `a = 1 and b > 2`, que o FPC lê como
+     `a = (1 and b) > 2` — em C `==` liga mais forte que `&&`, em Pascal `and`
+     liga mais forte que `=`;
+  4. `x |= defence-12` virava `(x or defence) - 12`, porque em Pascal `or` e `-`
+     têm a mesma precedência.
+
+  E duas armadilhas de linguagem que só o `fpc` mostra: `as` (parâmetro de
+  `AsciiToKanji`) é o operador de type-cast do Pascal, e `Report(report, …)` não
+  compila porque o Pascal **não distingue caixa** — o parâmetro esconde a rotina.
+  A rotina portada à mão virou `Reportar`.
+
+  A tradução de `for` também não é de estilo: em Pascal o valor da variável de
+  controle **depois** do laço é indefinido e atribuir a ela **dentro** é
+  proibido, e a entrada faz as duas coisas (`TextCodec.cpp:42` lê `i` depois;
+  `Database.cpp:762` faz `i = 1750` para pular 46 slots de custo). Esses viram
+  `while`; os demais viram `for..to..do`.
+
 - **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/tools/port_database_pas.py` | passe estrutural, 3 passes novos de expressão, tabela de manuais, terceiro guard |
+  | `wte/tools/test_port_database_pas.py` | 58 testes (eram 33) |
+  | `wte/src/we2002_{types,team,cdimage,textcodec,player,database}.pas` | criados, **gerados** |
+  | `wte/re/transpilador.md` | regerado |
+  | `wte/re/recusas.md` | criado |
+  | `wte/tests/test_camada_dados.pas` | criado — 23 casos que provam as decisões de tipo |
+  | `wte/tests/README.md`, `wte/re/fase-2.md` | atualizados (o segundo, pelo próprio `check_fase2.py`) |
+
 - **Problemas encontrados:**
+
+  Um item da task estava desatualizado e foi corrigido: o enunciado prevê
+  `wte/re/recusas.md` "cada recusa, a rota escolhida, a razão", e a tabela de
+  recusas da WTE-TASK-17 contava `[[fallthrough]]` duas vezes (entrada e saída
+  do mesmo par de linhas). O `recusas.md` registra as duas contagens como o par
+  que são, em vez de repetir o número.
+
+  Duas divergências entre doc e ferramenta, as duas corrigidas: o checklist da
+  fase 3 no `progresso.md` dizia "as **cinco** unidades de dados geradas", e o
+  escopo desta task lista **seis** desde a [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md),
+  que acrescentou `we2002_team.pas`; e o `emitir_doc` do transpilador ainda
+  escrevia "as cinco unidades" na linha de "nenhuma recusa".
+
+  O `check_fase2.py` reprovou depois desta task, e **corretamente**: a frase que
+  ele gera lista os `.pas` fora da conta da casca, e passaram de 2 para 8. Foi
+  regerado; a fração de 96,2% não mudou, porque a exclusão é por prefixo.
+
+  Nada ficou pendente. O que esta task **não** mede, e é da WTE-TASK-20: que a
+  camada Pascal leia e grave os mesmos bytes que o `we2002_core` nas duas ROMs.
+  Compilar e provar as decisões de tipo é condição necessária, não suficiente —
+  o `Load` inteiro ainda não rodou contra imagem nenhuma.
