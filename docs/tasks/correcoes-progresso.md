@@ -56,6 +56,8 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-039](/docs/tasks/CORR-WTE-039.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz que o gerador recusa `(int)*(int *)`, e ele aceita | Alta | [ ] pendente | — |
 | [CORR-WTE-040](/docs/tasks/CORR-WTE-040.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz quatro famílias de `BitBtnNClick`, e o TSV tem três nomes | Alta | [ ] pendente | — |
 | [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Quatro das 15 rotas de recusa do `spec_index.py` não têm teste, e o README chama as onze testadas de "as" rotas | Baixa | [ ] pendente | — |
+| [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [ ] pendente | — |
+| [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -99,6 +101,8 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [ ] CORR-WTE-039 — implementar a marca de cast do Ghidra no `spec_index.py`, com teste de falso positivo
 - [ ] CORR-WTE-040 — medir as famílias de `BitBtnNClick` no `published_methods.tsv` e reescrever a frase
 - [ ] CORR-WTE-041 — testar as quatro rotas de recusa sem cobertura e contar `raise SpecError` no README
+- [ ] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
+- [ ] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
 
 ## Detalhes por correção
 
@@ -777,3 +781,34 @@ aqui para que a lacuna não seja lida como arquivo sumido.
   de teste, não bug
 - **Fix:** testes para as rotas que faltam e, no README, o número atrelado ao
   `grep -c` para a próxima revisão poder remedir
+
+### CORR-WTE-042
+
+- **Arquivo com problema:** `docs/tasks/18-camada-de-dados-gerada.md` (Log de
+  Execução, tabela de arquivos)
+- **Sintoma:** "58 testes (eram 33)"; eram **38** no commit anterior à task
+  (`d8af56a`) e 35 no commit que fechou a WTE-TASK-17. O próprio enunciado da 18
+  diz 38 na linha 29, então o arquivo se contradiz
+- **Como foi detectado:** `git show <commit>:wte/tools/test_port_database_pas.py
+  | grep -cE '^[[:space:]]+def test_'` nos três commits; 58 no HEAD confere
+- **Fix:** 38 no lugar de 33, com o comando de remedição ao lado. Irmão da
+  CORR-WTE-038, que é o mesmo defeito no Log da WTE-TASK-17
+
+### CORR-WTE-043
+
+- **Arquivo com problema:** `wte/tools/port_database_pas.py` (tabela
+  `CHAR_LOCAL` e a conversão que ela governa), saída em
+  `wte/src/we2002_database.pas:962`
+- **Sintoma:** `players[i].cost = buf1[0]` do C++ estende sinal (`0xC8` → -56,
+  `char` do x86 com `int` de destino); o Pascal gerado emite `Ord(buf1[0])` e
+  entrega 200. É a decisão 4 do `tipos.md` não aplicada à conversão
+  local→campo largo
+- **Como foi detectado:** varredura dos `:= Ord(` do `we2002_database.pas`
+  cruzada com o tipo do campo de destino — 34 vão para `ShortInt`/`Byte` e
+  coincidem, um vai para `LongInt` e diverge. As duas ROMs foram lidas
+  (só leitura): 0 byte ≥ 128 nos 462 custos NC, máximo 36, então a divergência
+  é **latente**
+- **Fix:** conversão com sinal quando o destino é inteiro largo, `Ord` quando é
+  `Byte`, teste nos dois sentidos e um caso em `test_camada_dados.pas`. O
+  round-trip da WTE-TASK-20 não pegaria isto: o `Save` grava só o byte baixo e a
+  imagem sai idêntica
