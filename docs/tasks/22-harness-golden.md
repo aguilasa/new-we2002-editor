@@ -97,9 +97,14 @@ reprodução em [`../../wte/re/visual.md`](../../wte/re/visual.md), achado 1.
 
 Aceitar o aviso de tamanho — o caminho normal, porque as imagens deste
 repositório têm 474.784.128 bytes e o editor espera 474.431.328 — grava
-**11.952 bytes** na imagem, faixa `11797..26528`, **setores 5 a 11**, antes de
-qualquer edição. Medido passo a passo: o diálogo de arquivo não grava, o "Sim"
-do aviso grava, e nem o splash nem a seleção de time acrescentam byte.
+**11.952 bytes** na imagem, faixa `11796..26527` — **offsets 0-based,
+inclusivos** —, **setores 5 a 11**, antes de qualquer edição. Medido passo a
+passo: o diálogo de arquivo não grava, o "Sim" do aviso grava, e nem o splash
+nem a seleção de time acrescentam byte.
+
+**Não copie os extremos do `cmp -l`:** ele numera bytes a partir de 1 e imprime
+`11797..26528` para a mesma faixa. O comando que mede na base certa está em
+[`../../wte/re/visual.md`](../../wte/re/visual.md), achado 2.
 
 *Original contra original* continua dando zero — os dois lados gravam os mesmos
 bytes. Mas o port terá de **reproduzir** essa gravação, ou o harness terá de
@@ -142,7 +147,10 @@ Ou o harness dirige o port só por mouse, ou o `:99` ganha um window manager
       **atenção:** não confundir com "imagem intocada", que diverge em 11.952
       bytes já na abertura (medida 2)
 - [ ] Decidido se o port reproduz a gravação do aviso de tamanho ou se a faixa
-      `11797..26528` vira exceção declarada
+      `11796..26527` vira exceção declarada. Os limites são **offsets 0-based,
+      inclusivos**, como `KNOWN_START`/`KNOWN_END` do
+      [`tools/golden_check.sh`](../../tools/golden_check.sh) do `newWe2002` —
+      **não** as posições 1-based que o `cmp -l` imprime (`11797..26528`)
 - [ ] Positivo: byte plantado é detectado, e o script reporta o offset
 - [ ] Roteiro de edição parametrizável, um por operação
 - [ ] `roms/` nunca tocada; temporário limpo no fim

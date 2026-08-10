@@ -95,9 +95,26 @@ tamanho e **nenhuma edição**:
 | fechar o splash | sem mudança nova |
 | selecionar um time | sem mudança nova |
 
-Faixa `11797..26528`, **setores 5 a 11** — região de metadado ISO9660, não de
-dado do jogo. Determinístico: a contagem e a faixa se repetem exatamente entre
-sessões.
+Faixa `11796..26527` (offsets 0-based, inclusivos; o `cmp -l` imprime
+`11797..26528`, porque numera bytes a partir de 1), **setores 5 a 11** — região
+de metadado ISO9660, não de dado do jogo. Determinístico: a contagem e a faixa
+se repetem exatamente entre sessões.
+
+A base importa porque é como a faixa vai ser consumida: a exceção declarada do
+`newWe2002` (`tools/golden_check.sh`, `KNOWN_START`/`KNOWN_END`) é offset
+0-based. Para medir na base certa, não use os extremos do `cmp -l` — use:
+
+```sh
+python3 - roms/golden-european-deluxe.bin work/wte-golden-european-deluxe.bin <<'PY'
+import sys
+a = open(sys.argv[1], 'rb').read()
+b = open(sys.argv[2], 'rb').read()
+d = [i for i in range(min(len(a), len(b))) if a[i] != b[i]]
+print('n:', len(d), 'offsets 0-based:', d[0], '..', d[-1],
+      'setores:', d[0] // 2352, 'a', d[-1] // 2352)
+PY
+# n: 11952 offsets 0-based: 11796 .. 26527 setores: 5 a 11
+```
 
 O aviso dispara **sempre** com as imagens deste repositório: elas têm
 474.784.128 bytes e o editor espera 474.431.328. Ou seja, o caminho que grava é

@@ -148,7 +148,9 @@ resolver; o crash em si é bloqueio da
      é um build TkG experimental. **Bloqueio entregue à WTE-TASK-22.**
 
   2. **Aceitar o aviso de tamanho grava 11.952 bytes na imagem**, faixa
-     `11797..26528`, setores 5 a 11, antes de qualquer edição. Isolado passo a
+     `11796..26527` (offsets 0-based, inclusivos — o `cmp -l` imprime
+     `11797..26528` porque numera a partir de 1), setores 5 a 11, antes de
+     qualquer edição. Isolado passo a
      passo: escolher o arquivo não grava, o "Sim" do aviso grava, splash e
      seleção de time não acrescentam nada. E o aviso dispara **sempre** com as
      imagens deste repositório. Muda o desenho do golden test, e foi para a

@@ -3,7 +3,7 @@ id: CORR-WTE-025
 title: "Correção: a faixa `11797..26528` é numeração 1-based do `cmp`, e vai virar exceção declarada como se fosse offset"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -114,19 +114,51 @@ explicitamente que os limites são **offsets 0-based, inclusivos**, como
 
 ## Verificação
 
-- [ ] `grep -rn '11797\|26528' --include='*.md' .` não devolve mais nenhuma
+- [x] `grep -rn '11797\|26528' --include='*.md' .` não devolve mais nenhuma
       afirmação viva da faixa como offset (a menção à saída do `cmp`, se
       mantida, tem de estar rotulada como tal)
-- [ ] A faixa `11796..26527` aparece nos três arquivos, com a base declarada
-- [ ] `make -C wte check` continua verde
-- [ ] `roms/` intocada
+- [x] A faixa `11796..26527` aparece nos três arquivos, com a base declarada
+- [x] `make -C wte check` continua verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-09
 
 **Resumo do que foi feito:**
 
+Faixa trocada para `11796..26527` nos três sítios, sempre com a base dita
+(**offsets 0-based, inclusivos**) e com a posição do `cmp -l` mantida ao lado,
+rotulada como tal — quem chegar pelo `cmp` reconhece o número que viu e sabe
+por que ele não serve.
+
+No `visual.md` foi acrescentado o comando que mede na base certa, colado com a
+saída (`n: 11952 offsets 0-based: 11796 .. 26527 setores: 5 a 11`): a medida
+passa a ser reproduzível na mesma base em que será consumida, que era o buraco
+que abriu esta correção. O critério da linha 145 da WTE-TASK-22 agora aponta o
+`KNOWN_START`/`KNOWN_END` do `tools/golden_check.sh` do `newWe2002` como a
+convenção a seguir, e diz explicitamente que os `11797..26528` do `cmp -l` não
+são ela.
+
 **Problemas encontrados:**
 
+Nenhum. A reprodução do `:99` **não** foi refeita — a contagem (11.952) e os
+setores (5 a 11) não estavam em disputa, e o que a correção afirma é a base, que
+a semântica do `cmp -l` decide sozinha: `cmp -l` sobre dois arquivos de 3 bytes
+que diferem no offset 0-based `1` imprime `2`. Refazer a rodada custaria uma
+cópia de ~474 MB e uma sessão de GUI no display serializado sem mudar o veredito.
+
+Os setores foram reconferidos nos dois extremos, porque a correção afirma que
+eles não mudam: `11796 // 2352 = 5`, `26527 // 2352 = 11`, e `26528 // 2352 = 11`
+também — o deslocamento de um byte não atravessa fronteira de setor, que é
+exatamente por que o erro sobreviveu a três arquivos.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/re/visual.md` | modificado — faixa, base e o comando de medida colado |
+| `docs/tasks/12-comparacao-visual.md` | modificado — faixa e base no Log |
+| `docs/tasks/22-harness-golden.md` | modificado — faixa e base na medida 2 e no critério |
+| `docs/tasks/correcoes-progresso.md` | modificado — `[x]`, data e status |
+| `docs/tasks/CORR-WTE-025.md` | modificado — `status:`, verificação e este Log |
