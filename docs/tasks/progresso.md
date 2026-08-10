@@ -31,7 +31,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | 🔄 Em andamento | — | — |
+| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
@@ -66,27 +66,35 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 **Revisão sem discrepância também preenche a coluna.** É resultado legítimo, e
 sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
-**A WTE-TASK-19 saiu de `❌ Bloqueado` para `🔄 Em andamento` em 2026-08-10, e
-a troca é de natureza, não de humor.** Ela ficou `❌` enquanto os dois critérios
+**A WTE-TASK-19 percorreu `❌ Bloqueado` → `🔄 Em andamento` → `✅ Concluído` em
+2026-08-10, e cada troca foi de natureza.** Ela ficou `❌` enquanto os critérios
 abertos não dependessem de esforço — dependiam do oráculo funcionar, e três
 passagens seguidas só produziram diagnóstico melhor. A
-[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez isso, e a 4ª passagem cobriu
-**as seis áreas** com um time carregado. Sobrou **um** critério: 35 dos 50
-`OFS_*` sem veredito dinâmico, e eles esperam **tela clicada**, não imagem —
-trabalho comum, que é o que `🔄` quer dizer.
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez isso; a 4ª passagem cobriu as
+seis áreas com um time carregado, e a 5ª fechou o critério dos 50.
 
-Consequência prevista e aceita: pela regra 3 do
-[prompt](/docs/prompts/01-executar.md) o `/executar` volta para a 19 em toda
-invocação até ela fechar. É o certo agora, e era o errado antes.
+**E o fecho veio de duas réguas, não de uma.** A 5ª passagem clicou o que
+faltava (roteiro 10) e desceu na lista de times (roteiro 11), levando os
+endereçados por execução de 15 para **33**. Os **17** restantes não estavam
+esperando clique: o `Database.cpp` do `newWe2002` mostra que eles não são
+endereço de campo — 14 são ponto de retomada em fronteira de setor e 3 são base
+de varredura, e cada um é endereçado por **um** registro só. A ausência deles
+num trace é a previsão do papel que têm, e um teste
+(`test_todo_offset_ausente_tem_veredito`) reprova se algum dos 50 voltar a ficar
+sem veredito.
 
-**A WTE-TASK-20 segue mesmo assim**, e isso é decisão, não descuido. O
-`depends_on` dela lista a 19, mas o que ela verifica é contra o **oráculo B**
-(o `we2002_core`): dump Pascal × dump C++, o codec de texto, round-trip de
-gravação. Nenhum dos seis critérios pede janela. E a parte da 19 de que ela
-precisaria — offsets novos — já veio: são 28 confirmados. Os que faltam (36 na
-época, **35** depois da 4ª passagem) são exatamente os que o `we2002_core`
-**não tem**, então não poderiam aparecer numa comparação Pascal × C++ nem se
-estivessem medidos.
+Achado que sai da fase 3 e vale para a 5: extrair a camisa lê **16 setores
+contíguos em `21168024`..`21203815`**, 8 MB acima do maior offset do
+`Offsets.hpp`. É a maior região nova desta task, e é a entrada da
+[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+
+**A WTE-TASK-20 foi executada antes de a 19 fechar**, e isso foi decisão, não
+descuido. O `depends_on` dela lista a 19, mas o que ela verifica é contra o
+**oráculo B** (o `we2002_core`): dump Pascal × dump C++, o codec de texto,
+round-trip de gravação. Nenhum dos seis critérios pede janela, e a parte da 19
+de que ela precisaria — offsets novos — já tinha vindo. O que a 19 ainda devia
+era **veredito** sobre offsets que o `we2002_core` já declara, e veredito não
+muda dump nenhum: os dois lados leem a mesma tabela.
 
 ---
 

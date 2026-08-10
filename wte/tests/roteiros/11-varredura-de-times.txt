@@ -1,0 +1,109 @@
+# 11 -- varredura de times, para alcancar os blocos com passo de setor.
+#
+# Insumo da WTE-TASK-19 (5a passagem), rodado por wte/tools/diff_dirigido.sh.
+# Irmao do 10: la o que faltava era TELA, aqui o que falta e INDICE. Os
+# `OFS_PLAYER_NAME_5..8`, os `OFS_PLAYER_ATTR_1..9` e os `OFS_ML_*` sao blocos
+# separados por um setor cada; o time do topo da lista endereca sempre o
+# primeiro bloco, e nenhuma tela nova muda isso. O que muda e descer na lista.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/11-varredura-de-times.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# **A imagem japonesa nao e escolha de gosto** -- com a europeia o app morre na
+# troca de time (wte/re/crash-causa.md).
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------ time 60 da lista ----
+#
+# Sempre pelo teclado: a lista suspensa do TComboBox fica mapeada depois do
+# clique no item e engole todo clique seguinte.
+! clique 50 46
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 10
+= TIME_60
+
+! clique 28 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_60
+
+# ----------------------------------------------------- time 120 da lista ----
+! clique 50 46
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 10
+= TIME_120
+
+! clique 28 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_120
+
+# ----------------------------------------------------- time 180 da lista ----
+! clique 50 46
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 10
+= TIME_180
+
+! clique 28 370
+~ 5
+>~ 529x498
+! clique 472 241
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= ESTRATEGIA_180
+
+! clique 28 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_180
+
+# --------------------------------------------- o outro lado, la no fundo ----
+#
+# lista_equipos_2 (368,360). O lado direito e o destino das transferencias, e
+# e por ele que os blocos de Master League aparecem.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 10
+= TIME_2_FUNDO
+
+! clique 492 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_2_FUNDO

@@ -184,6 +184,60 @@ class TestConferirReguas(unittest.TestCase):
                       ["100\t120\t21"]), 3)
 
 
+class TestPapelNoLegado(unittest.TestCase):
+    """O classificador que responde por um `OFS_*` sem evidencia dinamica.
+
+    Ele le o `Database.cpp` do `newWe2002` e diz se o offset e endereco de
+    campo ou artefato do jeito de LER do Moriero. E a segunda regua da
+    WTE-TASK-19, e a unica que nao depende de tela.
+    """
+
+    def papel(self, fonte: str):
+        return A.papel_no_legado(fonte)
+
+    def test_seek_dentro_de_case_e_retomada(self) -> None:
+        p = self.papel("\n".join([
+            "    switch(i)", "    {", "      case 44+PLAYERS_NC :",
+            "        image_file.Read(buf1, 4);",
+            "        image_file.Seek(OFS_PLAYER_ATTR_1);"]))
+        self.assertEqual(p["OFS_PLAYER_ATTR_1"], ("retomada", "44+PLAYERS_NC"))
+
+    def test_seek_dentro_de_if_tambem_e_retomada(self) -> None:
+        """O legado usa as duas formas para a mesma coisa."""
+        p = self.papel("\n".join([
+            "    if(i == 57)", "    {",
+            "      image_file.Seek(OFS_TEAM_NAME_5_A);"]))
+        self.assertEqual(p["OFS_TEAM_NAME_5_A"], ("retomada", "57"))
+
+    def test_seek_seguido_de_for_e_varredura(self) -> None:
+        p = self.papel("\n".join([
+            "  image_file.Seek(OFS_TEAM_NAME_5);",
+            "  for(i = 0;i < 32;i ++)", "  {"]))
+        self.assertEqual(p["OFS_TEAM_NAME_5"][0], "varredura")
+
+    def test_seek_solto_nao_vira_nem_um_nem_outro(self) -> None:
+        """Sem `case` atras nem `for` na frente, o veredito e `direto`.
+
+        Importa que exista: `direto` e o unico papel que NAO explica ausencia
+        no trace, e e ele que mantem a linha "sem veredito" possivel.
+        """
+        p = self.papel("  image_file.Seek(OFS_LINK_ML);\n  x = 1;")
+        self.assertEqual(p["OFS_LINK_ML"][0], "direto")
+
+    def test_case_longe_demais_nao_conta(self) -> None:
+        """A janela e curta de proposito, para nao atravessar o `case` anterior."""
+        fonte = ["      case 9 :"] + ["        x();"] * 12 + [
+            "        image_file.Seek(OFS_X);"]
+        self.assertEqual(A.papel_no_legado("\n".join(fonte))["OFS_X"][0],
+                         "direto")
+
+    def test_o_legado_de_verdade_classifica_todo_offset_que_ele_le(self) -> None:
+        p = A.papel_no_legado()
+        self.assertGreater(len(p), 60, "o Database.cpp deixou de ser lido")
+        self.assertEqual(p["OFS_PLAYER_ATTR_9"][0], "retomada")
+        self.assertEqual(p["OFS_ML_PLAYER_ATTR"][0], "varredura")
+
+
 class TestEvidencia(unittest.TestCase):
     """Contra o `io-medido.tsv` commitado."""
 
@@ -277,6 +331,53 @@ class TestEvidencia(unittest.TestCase):
         teto = max(conhecidos.values())
         self.assertTrue([f for f in self.faixas if int(f["inicio"]) > teto])
 
+
+    def test_toda_linha_diz_de_que_sessao_veio(self) -> None:
+        """A imagem nao basta como chave, e ja nao bastava.
+
+        `06-diff-dirigido` e `06-truncada` rodam o mesmo roteiro com uma
+        variavel trocada, e as sessoes 10 e 11 rodam sobre a MESMA imagem da
+        09. Sem a coluna, as tres viram uma tabela so e a secao das areas passa
+        a somar clique que ela nao mediu.
+        """
+        for r in self.medido:
+            self.assertTrue(r.get("sessao"), f"linha sem sessao: {r}")
+        sessoes = {r["sessao"] for r in self.medido}
+        self.assertIn(A.AREAS, sessoes)
+        for s in A.PASSAGEM_5:
+            self.assertIn(s, sessoes)
+
+    def test_todo_offset_ausente_tem_veredito(self) -> None:
+        """O critério da WTE-TASK-19, preso em teste.
+
+        Os 50 `ausente` da WTE-TASK-06 têm de estar todos resolvidos: ou o
+        `wte.exe` os endereçou, ou o `Database.cpp` explica que eles não são
+        endereço de campo. Um `OFS_*` que não caia em nenhum dos dois reabre a
+        task — e é assim que se percebe, em vez de descobrir lendo o markdown.
+        """
+        conhecidos = A.ler_offsets_hpp()
+        tocado = A.casar(self.faixas, conhecidos)
+        papeis = A.papel_no_legado()
+        ausentes = [r["nome"] for r in A.ler_offsets_tsv()
+                    if r["registro"] == "ausente"]
+        self.assertEqual(len(ausentes), 50)
+        sem = [n for n in ausentes
+               if n not in tocado
+               and papeis.get(n, ("direto", ""))[0] == "direto"]
+        self.assertEqual(sem, [], f"sem veredito: {sem}")
+
+    def test_a_regiao_do_uniforme_foi_medida(self) -> None:
+        """O achado maior da 5ª passagem, e o insumo da WTE-TASK-32.
+
+        Extrair a camisa lê 16 setores contíguos a 8 MB acima do maior offset
+        que o `Offsets.hpp` conhece. Se isto sumir, ou a sessão 10 saiu da
+        evidência, ou alguém nomeou a região sem reconferir o limite das duas
+        tabelas — que é o aviso escrito no `offsets.md`.
+        """
+        teto = max(A.ler_offsets_hpp().values())
+        uni = [f for f in self.faixas
+               if f["acao"] == "EXTRAI_UNI" and int(f["inicio"]) > teto]
+        self.assertGreaterEqual(len(uni), 16)
 
     def test_a_faixa_do_travamento_esta_vazia_nesta_release(self) -> None:
         """A pista que sobrou depois de a hipótese do tamanho cair.

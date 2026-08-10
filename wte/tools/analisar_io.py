@@ -45,6 +45,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OFFSETS_HPP = ROOT / "src" / "core" / "include" / "we2002" / "Offsets.hpp"
+DATABASE_CPP = ROOT / "src" / "core" / "Database.cpp"
 OFFSETS_TSV = ROOT / "wte" / "re" / "offsets.tsv"
 MEDIDO_TSV = ROOT / "wte" / "re" / "io-medido.tsv"
 OUT_MD = ROOT / "wte" / "re" / "offsets-novos.md"
@@ -193,7 +194,7 @@ def unir(evs, op: str) -> list[tuple[int, int]]:
 
 
 def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
-          imagem: str = "?") -> int:
+          imagem: str = "?", sessao: str = "?") -> int:
     """Fatia o trace por RELOGIO, e nao por numero de linha.
 
     O `strace` bufferiza o arquivo de log: `wc -l` no instante da marca fica
@@ -210,7 +211,7 @@ def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
         h, m, resto = quando.split(":")
         s, frac = resto.split(".")
         cortes.append((_segundos(h, m, s, frac), nome.strip()))
-    fora = ["imagem\tacao\top\tinicio\tfim\ttamanho\tsetor\tbyte_no_setor"]
+    fora = ["imagem\tsessao\tacao\top\tinicio\tfim\ttamanho\tsetor\tbyte_no_setor"]
     datados = list(eventos_datados(linhas, alvo))
     total = 0
     for i, (fim, nome) in enumerate(cortes):
@@ -220,14 +221,14 @@ def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
         antes = total
         for op in ("R", "W"):
             for a, b in unir(evs, op):
-                fora.append(f"{imagem}\t{nome}\t{op}\t{a}\t{b - 1}\t{b - a}"
-                            f"\t{a // SETOR}\t{a % SETOR}")
+                fora.append(f"{imagem}\t{sessao}\t{nome}\t{op}\t{a}\t{b - 1}"
+                            f"\t{b - a}\t{a // SETOR}\t{a % SETOR}")
                 total += 1
         if total == antes:
             # Acao exercitada que NAO tocou a imagem. Fica registrada: "nao
             # gravou" e resultado, e sem a linha ela seria indistinguivel de
             # "nao foi exercitada".
-            fora.append(f"{imagem}\t{nome}\t.\t\t\t0\t\t")
+            fora.append(f"{imagem}\t{sessao}\t{nome}\t.\t\t\t0\t\t")
     tsv.write_text("\n".join(fora) + "\n")
     print(f"analisar_io: {total} faixa(s) -> {tsv}")
     return 0
@@ -382,7 +383,68 @@ def sem_dono(faixas: list[dict], conhecidos: dict[str, int]) -> list[dict]:
     return fora
 
 
-AREAS = "japanese-shift-jis.bin"
+RE_SEEK = re.compile(r"image_file\.Seek\((OFS_\w+)")
+RE_CASO = re.compile(r"\bcase\s+([0-9A-Za-z_+ ]+?)\s*:")
+RE_SE = re.compile(r"\bif\s*\(\s*[a-z]\s*==\s*([0-9A-Za-z_+ ]+?)\s*\)")
+RE_LACO = re.compile(r"\bfor\s*\(")
+
+# Quantas linhas para tras um `case`/`if` ainda conta como o bloco que contem o
+# `Seek`. Medido no `Database.cpp`: o maior desses blocos, do `case` ao `Seek`,
+# tem 3 linhas; 10 e folga com margem, e curto o bastante para nao atravessar o
+# `case` anterior.
+JANELA_BLOCO = 10
+
+
+def papel_no_legado(fonte: str | None = None) -> dict[str, tuple[str, str]]:
+    """`OFS_*` -> (papel, gatilho), lido do `Database.cpp` do `newWe2002`.
+
+    Responde por que um `OFS_*` pode nunca aparecer numa medicao do `wte.exe`
+    sem que isso seja falha de cobertura. O Moriero le a imagem **varrendo**:
+    um `Seek` na base e um `for` que desfila os registros. Nessa forma de ler,
+    boa parte dos `OFS_*` nao e endereco de campo nenhum -- e:
+
+    - **`retomada`** -- o registro de indice N cai em cima da fronteira de
+      setor, e o codigo salta para o resto dele. Sai de dentro de um
+      `case N :` ou `if (i == N)`. So aquele registro endereca esse ponto;
+    - **`varredura`** -- a base de um lote, seguida do `for`. So o primeiro
+      registro do lote a endereca.
+
+    O `wte.exe` nao varre: ele salta direto para o registro escolhido na tela.
+    Entao um `OFS_*` `retomada` so apareceria no trace se o usuario escolhesse
+    exatamente aquele jogador ou aquele time -- e a ausencia dele numa sessao
+    e a previsao, nao a surpresa.
+
+    O papel e do **legado**, nao do `wte.exe`: e afirmacao sobre como o nosso
+    `Offsets.hpp` nomeia a imagem, e e por isso que ela e derivavel de fonte em
+    vez de medida na tela.
+    """
+    linhas = (fonte if fonte is not None
+              else DATABASE_CPP.read_text(encoding="utf-8")).splitlines()
+    fora: dict[str, tuple[str, str]] = {}
+    for i, linha in enumerate(linhas):
+        m = RE_SEEK.search(linha)
+        if not m:
+            continue
+        nome = m.group(1)
+        gatilho = ""
+        for j in range(i, max(-1, i - JANELA_BLOCO) - 1, -1):
+            c = RE_CASO.search(linhas[j]) or RE_SE.search(linhas[j])
+            if c:
+                gatilho = c.group(1).strip()
+                break
+        if gatilho:
+            fora.setdefault(nome, ("retomada", gatilho))
+            continue
+        if any(RE_LACO.search(linhas[j])
+               for j in range(i + 1, min(len(linhas), i + 3))):
+            fora.setdefault(nome, ("varredura", ""))
+            continue
+        fora.setdefault(nome, ("direto", ""))
+    return fora
+
+
+AREAS = "09-areas-com-time"
+PASSAGEM_5 = ("10-telas-que-faltavam", "11-varredura-de-times")
 
 # Rotulo -> a linha da tabela "Campos a cobrir" da WTE-TASK-19 que a acao do
 # roteiro 09 exercita. Sem este mapa a secao seria uma lista de marcas; com
@@ -406,7 +468,7 @@ def secao_areas(w, todas_sessoes, conhecidos) -> None:
     medicao das areas so foi possivel com a imagem japonesa, e misturar as
     duas numa tabela so faria parecer que a europeia tambem as cobriu.
     """
-    linhas = [r for r in todas_sessoes if r["imagem"] == AREAS]
+    linhas = [r for r in todas_sessoes if r["sessao"] == AREAS]
     if not linhas:
         return
     w("## As seis áreas, com um time carregado")
@@ -470,18 +532,198 @@ def secao_areas(w, todas_sessoes, conhecidos) -> None:
     w("")
 
 
+ACAO_DA_5A = {
+    "ESTRATEGIA": "formação e posições em campo (`mostrar_estrategia_1`)",
+    "FICHA_JOGADOR": "ficha do jogador (`mostrar_jugador_1`)",
+    "DORSAL": "número da camisa (`dorsal1` → `ficha_dorsal`)",
+    "TIME_FUNDO": "time 30 da lista",
+    "JOGADOR_FUNDO": "jogador 15 da lista",
+    "FICHA_FUNDO": "ficha desse jogador",
+    "TIME_2": "o time do lado direito (`lista_equipos_2`)",
+    "FICHA_2": "ficha de um jogador desse time",
+    "EXTRAI_UNI": "extrair o uniforme para arquivo (`grabar_camiseta`)",
+    "ABRE_TEX": "abrir o diálogo de textura (`boton_dialogo_tex`)",
+    "TIME_60": "time 60 da lista",
+    "FICHA_60": "ficha de um jogador dele",
+    "TIME_120": "time 120",
+    "FICHA_120": "ficha de um jogador dele",
+    "TIME_180": "time 180",
+    "ESTRATEGIA_180": "formação desse time",
+    "FICHA_180": "ficha de um jogador dele",
+    "TIME_2_FUNDO": "time 60 do lado direito",
+    "FICHA_2_FUNDO": "ficha de um jogador dele",
+}
+
+
+def secao_passagem_5(w, todas_sessoes, conhecidos, candidatos) -> None:
+    """As duas sessoes da 5a passagem: mais tela (10) e mais indice (11)."""
+    linhas = [r for r in todas_sessoes if r["sessao"] in PASSAGEM_5]
+    if not linhas:
+        return
+    faixas = [r for r in linhas if r["op"] in ("R", "W")]
+    tocado = casar(faixas, conhecidos)
+    w("## A 5ª passagem: o que faltava era tela, e o que faltava era índice")
+    w("")
+    w("Depois da 4ª passagem sobravam 35 dos 50 `OFS_*` sem veredito dinâmico,")
+    w("e eles não faltavam pelo mesmo motivo. Daí duas sessões, não uma:")
+    w("")
+    w("- [`10-telas-que-faltavam.txt`]"
+      "(../tests/roteiros/10-telas-que-faltavam.txt) — a estratégia, a ficha")
+    w("  do jogador, o dorsal, o outro lado da janela, a extração do uniforme")
+    w("  e o diálogo de textura, que nenhum roteiro tinha aberto;")
+    w("- [`11-varredura-de-times.txt`]"
+      "(../tests/roteiros/11-varredura-de-times.txt) — os times 60, 120 e 180")
+    w("  da lista. `OFS_PLAYER_NAME_5..8` e os `OFS_ML_*` são blocos com passo")
+    w("  de setor: tela nova nenhuma os alcança, e descer na lista alcança.")
+    w("")
+    w("As duas sobre cópia de `roms/japanese-shift-jis.bin`, pela mesma razão")
+    w("da 4ª passagem, e as duas com o `ARRANQUE` — o diff de controle — antes")
+    w("de qualquer ação medida.")
+    w("")
+    w("| sessão | ação | o que foi exercitado | leituras | escritas | bytes lidos |")
+    w("|---|---|---|---:|---:|---:|")
+    for sessao in PASSAGEM_5:
+        ordem: list[str] = []
+        for r in linhas:
+            if r["sessao"] == sessao and r["acao"] not in ordem:
+                ordem.append(r["acao"])
+        for acao in ordem:
+            do = [r for r in linhas
+                  if r["sessao"] == sessao and r["acao"] == acao]
+            le = [r for r in do if r["op"] == "R"]
+            esc = [r for r in do if r["op"] == "W"]
+            w(f"| `{sessao[:2]}` | `{acao}` | {ACAO_DA_5A.get(acao, '—')} "
+              f"| {len(le)} | {len(esc)} | {sum(int(r['tamanho']) for r in le)} |")
+    w("")
+    novos = sorted((n for n in tocado
+                    if not casar([r for r in todas_sessoes
+                                  if r["sessao"] not in PASSAGEM_5
+                                  and r["op"] in ("R", "W")], {n: conhecidos[n]})),
+                   key=lambda n: conhecidos[n])
+    w(f"**{len(novos)} `OFS_*` saíram de hipótese nesta passagem** — nenhuma")
+    w("sessão anterior os tinha endereçado:")
+    w("")
+    w("| `Offsets.hpp` | valor | sessão | ação | op |")
+    w("|---|---:|---|---|:---:|")
+    for nome in novos:
+        f = tocado[nome][0]
+        w(f"| `{nome}` | {conhecidos[nome]} | `{f['sessao'][:2]}` "
+          f"| `{f['acao']}` | {f['op']} |")
+    w("")
+    # A regiao do uniforme: contigua, enorme, e muito acima do teto conhecido.
+    teto = max(conhecidos.values())
+    uni = sorted((int(f["inicio"]), int(f["fim"])) for f in faixas
+                 if f["acao"] == "EXTRAI_UNI" and int(f["inicio"]) > teto)
+    if uni:
+        w("### O achado grande: a região do uniforme")
+        w("")
+        w(f"Extrair a camisa para arquivo lê **{len(uni)} faixas contíguas**,")
+        w(f"de `{uni[0][0]}` a `{uni[-1][1]}` — "
+          f"{uni[-1][1] - uni[0][0] + 1} bytes, "
+          f"setores {uni[0][0] // SETOR} a {uni[-1][1] // SETOR}.")
+        w(f"O maior offset que o `Offsets.hpp` conhece é `{teto}`: esta região")
+        w(f"está **{(uni[0][0] - teto) // 1024 // 1024} MB acima** dele, e o")
+        w("`newWe2002` nunca precisou nomeá-la porque não desenha uniforme.")
+        w("")
+        w("É a entrada da [WTE-TASK-32]"
+          "(../../docs/tasks/32-camisa-e-bandeira-2d.md), e é a maior região")
+        w("nova que esta task achou.")
+        w("")
+    w("---")
+    w("")
+
+
+def secao_veredito_dos_50(w, todas_sessoes, conhecidos, ausentes_06) -> None:
+    """Os 50 `ausente` da WTE-TASK-06, um a um -- o criterio da task."""
+    faixas = [r for r in todas_sessoes if r["op"] in ("R", "W")]
+    tocado = casar(faixas, conhecidos)
+    papeis = papel_no_legado()
+    w("## Os 50, um a um — o veredito de cada")
+    w("")
+    w("O critério da WTE-TASK-19 é *resolver ou declarar irrelevante* cada um")
+    w("dos 50 `OFS_*` que a WTE-TASK-06 marcou `ausente`. São três vereditos, e")
+    w("dois deles vêm de régua diferente:")
+    w("")
+    w("- **endereçado** — o `wte.exe` foi ali, medido por `strace`;")
+    w("- **retomada de fronteira** — o offset não é endereço de campo: é o")
+    w("  ponto onde o `Database.cpp` do `newWe2002` retoma a leitura de um")
+    w("  registro que cai em cima da fronteira de setor, dentro de um")
+    w("  `case N :`. Só o registro N o endereça, e o `wte.exe` só o")
+    w("  endereçaria se o usuário escolhesse exatamente aquele jogador;")
+    w("- **base de varredura** — o offset é a base de um lote que o legado")
+    w("  desfila com um `for`. Só o primeiro registro do lote a endereça.")
+    w("")
+    w("Os dois últimos saem do **fonte**, não da tela, e é isso que os torna")
+    w("resposta: a ausência deles num trace é a previsão do papel que eles têm,")
+    w("não buraco de cobertura. Quem varre é o Moriero; o Obocaman salta direto")
+    w("para o registro que a tela mostra.")
+    w("")
+    contagem = {"endereçado": 0, "retomada de fronteira": 0,
+                "base de varredura": 0, "sem veredito": 0}
+    corpo: list[str] = []
+    for nome in sorted(ausentes_06, key=lambda n: conhecidos[n]):
+        papel, gatilho = papeis.get(nome, ("direto", ""))
+        if nome in tocado:
+            f = tocado[nome][0]
+            vered = "endereçado"
+            prova = f"`{f['sessao'][:2]}`/`{f['acao']}` {f['op']}"
+        elif papel == "retomada":
+            vered = "retomada de fronteira"
+            prova = f"`case {gatilho}` no `Database.cpp`"
+        elif papel == "varredura":
+            vered = "base de varredura"
+            prova = "`Seek` + `for` no `Database.cpp`"
+        else:
+            vered = "sem veredito"
+            prova = "—"
+        contagem[vered] += 1
+        corpo.append(f"| `{nome}` | {conhecidos[nome]} | {vered} | {prova} |")
+    w("| `Offsets.hpp` | valor | veredito | prova |")
+    w("|---|---:|---|---|")
+    for l in corpo:
+        w(l)
+    w("")
+    w("| veredito | quantos |")
+    w("|---|---:|")
+    for k, v in contagem.items():
+        if v:
+            w(f"| {k} | {v} |")
+    w("")
+    if contagem["sem veredito"]:
+        w(f"**{contagem['sem veredito']} ainda sem veredito.** A task não fecha")
+        w("enquanto houver linha nesse estado.")
+    else:
+        estruturais = (contagem["retomada de fronteira"]
+                       + contagem["base de varredura"])
+        w("**Nenhum sem veredito.** O critério da task está fechado — o que não")
+        w(f"quer dizer que os {estruturais} não endereçados sejam")
+        w("inalcançáveis: quer dizer que alcançá-los exige escolher na tela")
+        w("exatamente o registro que cai na fronteira, e que a ausência deles é")
+        w("previsão do fonte, não buraco de cobertura.")
+    w("")
+    w("---")
+    w("")
+
+
 def gerar() -> str:
     conhecidos = ler_offsets_hpp()
     tsv = ler_offsets_tsv()
     todas_sessoes = ler_medido()
     conteudo = ler_conteudo()
 
+    # A chave e a SESSAO, e nao a imagem: o mesmo roteiro ja rodou duas vezes
+    # com uma variavel trocada (`06-diff-dirigido` contra `06-truncada`), e
+    # duas sessoes sobre a mesma imagem viraram tres depois da 5a passagem.
+    sessoes = []
+    for r in todas_sessoes:
+        if r["sessao"] not in sessoes:
+            sessoes.append(r["sessao"])
+    principal = sessoes[0]
+    medido = [r for r in todas_sessoes if r["sessao"] == principal]
     imagens = []
     for r in todas_sessoes:
         if r["imagem"] not in imagens:
             imagens.append(r["imagem"])
-    principal = imagens[0]
-    medido = [r for r in todas_sessoes if r["imagem"] == principal]
 
     confirmados_06 = {r["nome"] for r in tsv if r["registro"] == "confirmado"}
     ausentes_06 = {r["nome"]: r for r in tsv if r["registro"] == "ausente"}
@@ -683,9 +925,11 @@ def gerar() -> str:
     w("")
     w("## O limite duro desta medição: o `wte.exe` morre ao carregar um time")
     w("")
-    w("Medido, e é o que impede esta task de fechar. Com as duas ROMs que este")
-    w("repositório tem, o `wte.exe` **encerra com falha de segmentação logo")
-    w("depois** de ler os dados do primeiro time selecionado:")
+    w("Medido, e por três passagens foi o que impedia esta task de andar — a")
+    w("CORR-WTE-044 desfez o bloqueio e as sessões seguintes mediram por cima")
+    w("dele. Fica escrito porque explica o desenho de tudo o que veio depois.")
+    w("Com a ROM **europeia**, o `wte.exe` **encerra com falha de segmentação")
+    w("logo depois** de ler os dados do primeiro time selecionado:")
     w("")
     w("```")
     w("--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---")
@@ -773,6 +1017,8 @@ def gerar() -> str:
     w("---")
     w("")
     secao_areas(w, todas_sessoes, conhecidos)
+    secao_passagem_5(w, todas_sessoes, conhecidos, candidatos)
+    secao_veredito_dos_50(w, todas_sessoes, conhecidos, list(ausentes_06))
     w("## Geometria de setor, conferida")
     w("")
     dentro = sum(1 for f in faixas
@@ -807,6 +1053,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--alvo", default="dd-run.bin")
     ap.add_argument("--tsv", type=Path)
     ap.add_argument("--imagem", default="?")
+    ap.add_argument("--sessao", default="?",
+                    help="rotulo da corrida -- o diretorio de saida do "
+                         "diff_dirigido.sh, nao o roteiro")
     ap.add_argument("--amostrar", type=Path, metavar="COPIA",
                     help="amostra o conteudo das faixas lidas, numa COPIA")
     ap.add_argument("--conferir", nargs=2, type=Path,
@@ -825,7 +1074,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.log:
         if not (args.marcas and args.tsv):
             ap.error("--log exige --marcas e --tsv")
-        return medir(args.log, args.marcas, args.alvo, args.tsv, args.imagem)
+        return medir(args.log, args.marcas, args.alvo, args.tsv, args.imagem,
+                     args.sessao)
 
     texto = gerar()
     rel = OUT_MD.relative_to(ROOT)

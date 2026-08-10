@@ -26,17 +26,29 @@ a origem, que muda a cada execução. O carimbo de tempo fica fora do `@` de
 propósito: ele existe para ler intervalo, e a informação está na **ordem** das
 linhas (ver o cabeçalho de [`../../src/retrace.pas`](../../src/retrace.pas)).
 
-## Os roteiros 06, 07, 08 e 09 falam outro dialeto
+## Os roteiros 06 a 11 falam outro dialeto
 
-Os quatro são da WTE-TASK-19 e quem os executa é
+Os seis são da WTE-TASK-19 e quem os executa é
 [`../../tools/diff_dirigido.sh`](../../tools/diff_dirigido.sh), não a mão. Eles
-acrescentam duas diretivas e trocam a linha de `xdotool` crua por verbos:
+acrescentam três diretivas e trocam a linha de `xdotool` crua por verbos:
 
 | Prefixo | Significado |
 |---|---|
 | `>` | espera a janela com esse nome e passa a ser a origem das coordenadas |
+| `>~` | idem, mas pelo **tamanho** (`529x498`) — ver abaixo |
 | `=` | corta o log de I/O; tudo até a próxima marca é a conta daquela ação |
 | `!` | `clique X Y`, `duplo X Y`, `tecla <k>`, `texto <t>` |
+
+O `>~` existe porque **três formulários trocam o próprio `Caption` pelo nome do
+time em tempo de execução** — `estrategia`, `jugador` e `ficha_dorsal`. Com a
+ROM japonesa isso é Shift-JIS, e o que o `xdotool` vê é uma corrida de `?`: não
+há regex estável. O tamanho há, e sai do `ClientWidth`/`ClientHeight` do próprio
+DFM.
+
+**Uma exceção medida:** o `ficha_dorsal` aparece como **135x153** e o DFM diz
+129x121. Sem window manager o Wine desenha a moldura dentro da própria janela X,
+e são 3 px de borda mais 29 de título. Só ele, entre os três — os outros dois
+batem 1:1.
 
 O motivo dos verbos é a coordenada: sem window manager no `:99` a origem da
 janela muda a cada corrida, e escrever `xdotool` cru obrigaria cada linha a
@@ -64,6 +76,11 @@ acesso no 07, 309 no 08** — uma variável de diferença.
 
 O 06 também trava, e por isso **não** serve de par: ele clica as oito áreas
 antes de trocar de time, o que são oito variáveis a mais.
+
+Editar um dos dois sem o outro quebra a afirmação; o
+[`../../tools/test_analisar_crash.py`](../../tools/test_analisar_crash.py)
+compara os dois cabeçalhos e falha se divergirem. O veredito de onde a falha
+cai está em [`../../re/crash.md`](../../re/crash.md).
 
 ### O 09 é o que o 06 deixou de poder ser
 
@@ -94,11 +111,26 @@ sessões exploratórias:
   clicando no botão. Foi assim que uma sessão exploratória morreu no primeiro
   passo.
 
-Editar um dos dois
-sem o outro quebra a afirmação; o
-[`../../tools/test_analisar_crash.py`](../../tools/test_analisar_crash.py)
-compara os dois cabeçalhos e falha se divergirem. O veredito de onde a falha
-cai está em [`../../re/crash.md`](../../re/crash.md).
+### O 10 e o 11 são a 5ª passagem, e dividem o trabalho por natureza
+
+Depois do 09 sobravam 35 dos 50 `OFS_*` sem veredito dinâmico, e eles não
+faltavam pelo mesmo motivo:
+
+- [`10-telas-que-faltavam.txt`](10-telas-que-faltavam.txt) — o que faltava era
+  **tela**: a estratégia, a ficha do jogador, o dorsal, o outro lado da janela,
+  a extração do uniforme, o diálogo de textura;
+- [`11-varredura-de-times.txt`](11-varredura-de-times.txt) — o que faltava era
+  **índice**: `OFS_PLAYER_NAME_5..8`, `OFS_PLAYER_ATTR_1..9` e os `OFS_ML_*` são
+  blocos com passo de setor, e o time do topo da lista endereça sempre o
+  primeiro. Nenhuma tela nova resolve isso; descer na lista resolve.
+
+Os dois só valem com a imagem japonesa, pela mesma razão do 09.
+
+**Arquivo que o roteiro manda gravar tem de não existir antes.** O 10 extrai o
+uniforme para `E:\u.bmp`; com o arquivo no lugar, o `TSaveDialog` abre a
+confirmação de sobrescrita, que roteiro fixo nenhum espera — e a corrida morre
+esperando a janela seguinte. Quem apaga é o `diff_dirigido.sh`, antes de copiar
+a imagem.
 
 ## Replicar
 

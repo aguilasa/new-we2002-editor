@@ -1204,19 +1204,28 @@ def render_md(m: Measurement) -> str:
     if medidos:
         atingidos = [i for i in m.missing if i.name in medidos]
         add(f"**{len(atingidos)} dos {n_missing}** já saíram de hipótese: o "
-            f"`wte.exe` endereçou o ponto em\nexecução. Os demais continuam "
-            f"sem evidência dinâmica — e isso **não** quer dizer\nque ele não "
-            f"os alcance: quer dizer que **nenhuma das telas medidas até aqui "
-            f"toca**\nesses pontos.\n")
+            f"`wte.exe` endereçou o ponto em\nexecução, em cinco sessões sob "
+            f"`strace`.\n")
+        add("**Os que sobram não estão esperando mais tela**, e é o "
+            "`Database.cpp` do\n`newWe2002` que diz por quê: eles não são "
+            "endereço de campo. Ou são **ponto de\nretomada em fronteira de "
+            "setor** — o `case N :` para onde o legado salta quando o\n"
+            "registro N cai em cima do cabeçalho —, ou são **base de "
+            "varredura**, o `Seek`\nseguido do `for` que desfila um lote "
+            "inteiro. Nos dois casos há **um** registro\nque os endereça, e o "
+            "`wte.exe` não varre: ele salta direto para o que a tela\nmostra. "
+            "O veredito de cada um dos 50, com a prova, está em "
+            "[`offsets-novos.md`](offsets-novos.md).\n")
         add("Até 2026-08-10 a razão era outra e mais dura: o `wte.exe` caía ao "
             "carregar um\ntime, e a sessão não passava da tela de carga. Isso "
-            "acabou — com\n`roms/japanese-shift-jis.bin` ele passa, e o "
-            "roteiro\n[`../tests/roteiros/09-areas-com-time.txt`]"
-            "(../tests/roteiros/09-areas-com-time.txt)\nexercita as seis áreas "
-            "da task com um time carregado. O que falta agora é\n**mais tela**, "
-            "não mais imagem: cada `OFS_*` sem veredito espera um controle que\n"
-            "ninguém clicou ainda. Medida e consequência em "
-            "[`offsets-novos.md`](offsets-novos.md).\n")
+            "acabou — com\n`roms/japanese-shift-jis.bin` ele passa, e os "
+            "roteiros\n[`../tests/roteiros/09-areas-com-time.txt`]"
+            "(../tests/roteiros/09-areas-com-time.txt),\n"
+            "[`10-telas-que-faltavam.txt`]"
+            "(../tests/roteiros/10-telas-que-faltavam.txt) e\n"
+            "[`11-varredura-de-times.txt`]"
+            "(../tests/roteiros/11-varredura-de-times.txt) exercitam as áreas, "
+            "as telas\nque faltavam e os times do fundo da lista.\n")
     else:
         add("A coluna **medido** está vazia: `wte/re/io-medido.tsv` não "
             "existe. Rode\n`bash wte/tools/diff_dirigido.sh "

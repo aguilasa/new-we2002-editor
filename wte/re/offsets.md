@@ -290,18 +290,24 @@ ela já rodou: a coluna **medido** traz o veredito da WTE-TASK-19, que pôs o
 `wte.exe` sob `strace` e olhou que faixa da imagem cada ação endereça. Detalhe em
 [`offsets-novos.md`](offsets-novos.md).
 
-**15 dos 50** já saíram de hipótese: o `wte.exe` endereçou o ponto em
-execução. Os demais continuam sem evidência dinâmica — e isso **não** quer dizer
-que ele não os alcance: quer dizer que **nenhuma das telas medidas até aqui toca**
-esses pontos.
+**33 dos 50** já saíram de hipótese: o `wte.exe` endereçou o ponto em
+execução, em cinco sessões sob `strace`.
+
+**Os que sobram não estão esperando mais tela**, e é o `Database.cpp` do
+`newWe2002` que diz por quê: eles não são endereço de campo. Ou são **ponto de
+retomada em fronteira de setor** — o `case N :` para onde o legado salta quando o
+registro N cai em cima do cabeçalho —, ou são **base de varredura**, o `Seek`
+seguido do `for` que desfila um lote inteiro. Nos dois casos há **um** registro
+que os endereça, e o `wte.exe` não varre: ele salta direto para o que a tela
+mostra. O veredito de cada um dos 50, com a prova, está em [`offsets-novos.md`](offsets-novos.md).
 
 Até 2026-08-10 a razão era outra e mais dura: o `wte.exe` caía ao carregar um
 time, e a sessão não passava da tela de carga. Isso acabou — com
-`roms/japanese-shift-jis.bin` ele passa, e o roteiro
-[`../tests/roteiros/09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt)
-exercita as seis áreas da task com um time carregado. O que falta agora é
-**mais tela**, não mais imagem: cada `OFS_*` sem veredito espera um controle que
-ninguém clicou ainda. Medida e consequência em [`offsets-novos.md`](offsets-novos.md).
+`roms/japanese-shift-jis.bin` ele passa, e os roteiros
+[`../tests/roteiros/09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt),
+[`10-telas-que-faltavam.txt`](../tests/roteiros/10-telas-que-faltavam.txt) e
+[`11-varredura-de-times.txt`](../tests/roteiros/11-varredura-de-times.txt) exercitam as áreas, as telas
+que faltavam e os times do fundo da lista.
 
 A regra de classificação é busca em largura a partir das bases que o Obocaman
 comprovadamente tem:
@@ -337,18 +343,18 @@ família inteira de passo de setor entrar a partir de uma única âncora.
 | `OFS_ML_TEAM_NAME_8_A` | 2476680 | H2 | — | 2469624 *(candidato)* | +3 setores | 7056 | 1 |
 | `OFS_TEAM_BARS` | 2328184 | H1 | R em `SELECIONA_TIME` | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 124 | 1 |
 | `OFS_TEAM_BARS_A` | 2328504 | H1 | R em `SELECIONA_TIME` | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 444 | 1 |
-| `OFS_KICKER` | 2329056 | H1 | — | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 996 | 1 |
+| `OFS_KICKER` | 2329056 | H1 | R em `ESTRATEGIA` | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 996 | 1 |
 | `OFS_PLAYER_NAME` | 387792 | H2 | R em `SELECIONA_TIME` | 389920 *(candidato)* | mesmo setor | -2128 | 1 |
-| `OFS_PLAYER_NAME_2` | 390456 | H2 | — | 389920 *(candidato)* | mesmo setor | 536 | 1 |
-| `OFS_PLAYER_NAME_3` | 392808 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +1 setor | 2352 | 2 |
-| `OFS_PLAYER_NAME_4` | 395160 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +2 setores | 4704 | 2 |
-| `OFS_PLAYER_NAME_5` | 397512 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +3 setores | 7056 | 2 |
-| `OFS_PLAYER_NAME_6` | 399864 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +4 setores | 9408 | 2 |
-| `OFS_PLAYER_NAME_7` | 402216 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +5 setores | 11760 | 2 |
-| `OFS_PLAYER_NAME_8` | 404568 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +6 setores | 14112 | 2 |
-| `OFS_ML_PLAYER_NAME` | 2006288 | H1 | — | 2005412 (`OFS_FLAG_SHAPE_COPY_2`) | mesmo setor | 876 | 1 |
-| `OFS_ML_PLAYER_NAME_2` | 2008632 | H2 | — | 1999224 *(candidato)* | +4 setores | 9408 | 1 |
-| `OFS_ML_PLAYER_NAME_3` | 2010984 | H1 | — | 2012680 (`OFS_LINK_ML`) | mesmo setor | -1696 | 1 |
+| `OFS_PLAYER_NAME_2` | 390456 | H2 | R em `TIME_FUNDO` | 389920 *(candidato)* | mesmo setor | 536 | 1 |
+| `OFS_PLAYER_NAME_3` | 392808 | H2 | R em `TIME_FUNDO` | 390456 (`OFS_PLAYER_NAME_2`) | +1 setor | 2352 | 2 |
+| `OFS_PLAYER_NAME_4` | 395160 | H2 | R em `TIME_FUNDO` | 390456 (`OFS_PLAYER_NAME_2`) | +2 setores | 4704 | 2 |
+| `OFS_PLAYER_NAME_5` | 397512 | H2 | R em `FICHA_60` | 390456 (`OFS_PLAYER_NAME_2`) | +3 setores | 7056 | 2 |
+| `OFS_PLAYER_NAME_6` | 399864 | H2 | R em `FICHA_60` | 390456 (`OFS_PLAYER_NAME_2`) | +4 setores | 9408 | 2 |
+| `OFS_PLAYER_NAME_7` | 402216 | H2 | R em `FICHA_60` | 390456 (`OFS_PLAYER_NAME_2`) | +5 setores | 11760 | 2 |
+| `OFS_PLAYER_NAME_8` | 404568 | H2 | R em `TIME_120` | 390456 (`OFS_PLAYER_NAME_2`) | +6 setores | 14112 | 2 |
+| `OFS_ML_PLAYER_NAME` | 2006288 | H1 | R em `TIME_120` | 2005412 (`OFS_FLAG_SHAPE_COPY_2`) | mesmo setor | 876 | 1 |
+| `OFS_ML_PLAYER_NAME_2` | 2008632 | H2 | R em `TIME_120` | 1999224 *(candidato)* | +4 setores | 9408 | 1 |
+| `OFS_ML_PLAYER_NAME_3` | 2010984 | H1 | R em `TIME_120` | 2012680 (`OFS_LINK_ML`) | mesmo setor | -1696 | 1 |
 | `OFS_PLAYER_ATTR` | 2179492 | H2 | R em `CALCULA_PRECO` | 2180328 (`OFS_PLAYER_ATTR_1`) | mesmo setor | -836 | 3 |
 | `OFS_PLAYER_ATTR_1` | 2180328 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -11 setores | -25872 | 2 |
 | `OFS_PLAYER_ATTR_2` | 2182680 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -10 setores | -23520 | 2 |
@@ -363,19 +369,19 @@ família inteira de passo de setor entrar a partir de uma única âncora.
 | `OFS_ML_PLAYER_ATTR_1` | 2206200 | H2 | — | 2204904 *(candidato)* | mesmo setor | 1296 | 1 |
 | `OFS_ML_PLAYER_ATTR_2` | 2208552 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | +1 setor | 2352 | 2 |
 | `OFS_FLAG_COLOURS` | 12549518 | H3 | R em `SELECIONA_TIME` | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6837878 | — |
-| `OFS_FLAG_COLOURS_A` | 12550296 | H3 | — | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6838656 | — |
-| `OFS_FLAG_COLOURS_B` | 12552648 | H3 | — | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6841008 | — |
-| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | H2 | — | 12544268 *(candidato)* | mesmo setor | 1490 | 1 |
+| `OFS_FLAG_COLOURS_A` | 12550296 | H3 | R em `TIME_FUNDO` | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6838656 | — |
+| `OFS_FLAG_COLOURS_B` | 12552648 | H3 | R em `TIME_120` | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6841008 | — |
+| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | H2 | R em `FICHA_60` | 12544268 *(candidato)* | mesmo setor | 1490 | 1 |
 | `OFS_SQUAD_NUMBERS_ML` | 2014504 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 1824 | 1 |
 | `OFS_SQUAD_NUMBERS_NATIONAL` | 404716 | H2 | R em `SELECIONA_TIME` | 404568 (`OFS_PLAYER_NAME_8`) | mesmo setor | 148 | 3 |
-| `OFS_FORMATIONS` | 2303700 | H1 | — | 2304984 (`OFS_FORMATIONS_A`) | mesmo setor | -1284 | 3 |
+| `OFS_FORMATIONS` | 2303700 | H1 | R em `ESTRATEGIA` | 2304984 (`OFS_FORMATIONS_A`) | mesmo setor | -1284 | 3 |
 | `OFS_FORMATIONS_A` | 2304984 | H1 | — | 2328504 (`OFS_TEAM_BARS_A`) | -10 setores | -23520 | 2 |
 | `OFS_LINK_ML1` | 2012728 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 48 | 1 |
 | `OFS_LINK_ML2` | 2013336 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 656 | 1 |
 | `OFS_KIT_PREVIEW` | 2667256 | H3 | R em `SELECIONA_TIME` | 2830160 (`OFS_TEAM_NAME_4`) | - | -162904 | — |
-| `OFS_KIT_PREVIEW_A` | 2669544 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -160616 | — |
-| `OFS_KIT_PREVIEW_B` | 2671896 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -158264 | — |
-| `OFS_KIT_PREVIEW_C` | 2674248 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -155912 | — |
+| `OFS_KIT_PREVIEW_A` | 2669544 | H3 | R em `TIME_FUNDO` | 2830160 (`OFS_TEAM_NAME_4`) | - | -160616 | — |
+| `OFS_KIT_PREVIEW_B` | 2671896 | H3 | R em `TIME_120` | 2830160 (`OFS_TEAM_NAME_4`) | - | -158264 | — |
+| `OFS_KIT_PREVIEW_C` | 2674248 | H3 | R em `TIME_120` | 2830160 (`OFS_TEAM_NAME_4`) | - | -155912 | — |
 
 ### Os alvos que valem primeiro
 

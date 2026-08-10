@@ -93,6 +93,12 @@ command -v strace >/dev/null || { echo "ERRO: strace ausente" >&2; exit 1; }
 xdpyinfo >/dev/null 2>&1 || { echo "ERRO: sem :99" >&2; exit 1; }
 
 mkdir -p "$SAIDA" "$WORK"
+# Arquivo que um roteiro manda o `wte.exe` GRAVAR dentro de work/ (que e a
+# unidade E: do prefix). Tem de sair antes da corrida: com ele no lugar, o
+# TSaveDialog abre a confirmacao de sobrescrita, que nenhum roteiro fixo espera
+# -- e a corrida morre esperando a janela seguinte. Custou uma sessao inteira
+# na 5a passagem da WTE-TASK-19.
+rm -f "$WORK/u.bmp"
 echo ">> copiando $(basename "$IMAGEM") -- roms/ nunca e alvo"
 cp -f "$IMAGEM" "$LIMPA"
 cp -f "$LIMPA" "$RODA"
@@ -141,6 +147,34 @@ espera_janela() {
   return 1
 }
 
+janela_geo() {
+  # A janela alvo, pelo TAMANHO -- `<W>x<H>`. Existe porque tres formularios
+  # deste app trocam o proprio `Caption` em tempo de execucao pelo nome do
+  # time, e com a ROM japonesa isso e Shift-JIS: o `xdotool` ve uma corrida de
+  # `?`, que nao da regex estavel. O tamanho da, e vem do proprio DFM
+  # (`ClientWidth`/`ClientHeight`) -- medido, bate 1:1 no :99.
+  #
+  # Se mais de uma janela tiver o tamanho pedido, vence a ULTIMA -- o dialogo
+  # recem-aberto tem o maior id.
+  local w="${1%%x*}" h="${1##*x}" id achou=""
+  for id in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
+    eval "$(xdotool getwindowgeometry --shell "$id" 2>/dev/null)" || continue
+    [ "$WIDTH" = "$w" ] && [ "$HEIGHT" = "$h" ] && achou="$id $X $Y"
+  done
+  [ -n "$achou" ] || return 1
+  echo "$achou"
+}
+
+espera_geo() {
+  local geo="$1" limite="${2:-30}" i=0 r
+  while [ $i -lt "$limite" ]; do
+    if r="$(janela_geo "$geo")"; then echo "$r"; return 0; fi
+    sleep 1; i=$((i+1))
+  done
+  echo "ERRO: janela $geo nao apareceu em ${limite}s" >&2
+  return 1
+}
+
 # ------------------------------------------------------------- o roteiro ----
 #
 # Formato irmao do de wte/tests/roteiros/ (WTE-TASK-13), com verbos em vez de
@@ -149,6 +183,8 @@ espera_janela() {
 # window manager no :99.
 #
 #   > <nome>     espera a janela e passa a ser o alvo das coordenadas
+#   >~ <W>x<H>   idem, mas pelo TAMANHO -- para o formulario que troca o
+#                proprio Caption pelo nome do time (Shift-JIS vira `?????`)
 #   = <marca>    corta o log; tudo ate a proxima marca e daquela acao
 #   ~ <seg>      espera
 #   ! clique X Y     clique simples em (X,Y) relativo ao alvo
@@ -164,7 +200,14 @@ while IFS= read -r linha || [ -n "$linha" ]; do
     '> '*)
       nome="${linha#> }"
       read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_janela "$nome")"
+      [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela '$nome'" >&2; exit 1; }
       echo ">> janela '$nome' = $ALVO_ID em $ALVO_X,$ALVO_Y"
+      ;;
+    '>~ '*)
+      geo="${linha#>~ }"
+      read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_geo "$geo")"
+      [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela $geo" >&2; exit 1; }
+      echo ">> janela $geo = $ALVO_ID em $ALVO_X,$ALVO_Y"
       ;;
     '= '*) marca "${linha#= }" ;;
     '~ '*) sleep "${linha#~ }" ;;
@@ -190,9 +233,14 @@ env WINEPREFIX="$PREFIX" "$WINE_BIN/wineserver" -k >/dev/null 2>&1 || true
 sleep 2
 
 echo ">> analisando"
+# A sessao e o nome do diretorio de saida, e nao o do roteiro: o mesmo roteiro
+# roda mais de uma vez com uma variavel trocada (foi assim que a hipotese do
+# tamanho caiu -- `06-diff-dirigido` contra `06-truncada`), e as duas corridas
+# precisam ficar distinguiveis no `io-medido.tsv`. Sem isso, a imagem seria a
+# unica chave, e duas sessoes sobre a MESMA imagem virariam uma tabela so.
 python3 "$AQUI/analisar_io.py" --log "$SAIDA/io.log" --marcas "$SAIDA/marcas.txt" \
         --alvo dd-run.bin --tsv "$SAIDA/io.tsv" \
-        --imagem "$(basename "$IMAGEM")"
+        --imagem "$(basename "$IMAGEM")" --sessao "$(basename "$SAIDA")"
 python3 - "$LIMPA" "$RODA" "$SAIDA/cmp.tsv" <<'PY'
 import sys
 limpa, roda, saida = sys.argv[1:4]

@@ -5,7 +5,7 @@ type: extração
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-06", "WTE-TASK-18"]
-status: em andamento
+status: concluído
 ---
 
 # WTE-TASK-19: Os offsets restantes
@@ -83,10 +83,14 @@ arquivo gerado.
 - [x] Diff de controle (gravar sem editar) medido e registrado **antes** do resto
       — duas vezes: na europeia (1ª passagem) e na japonesa, onde o `ARRANQUE`
       do roteiro 09 é o controle e vem antes de toda ação medida
-- [ ] Os 50 resolvidos ou declarados irrelevantes, um a um
-      — **15 dos 50** resolvidos por execução (era 14; a 4ª passagem
-      acrescentou `OFS_PLAYER_ATTR`, lido em `CALCULA_PRECO`). Os 35 restantes
-      **não esperam mais imagem nenhuma**: esperam tela que ninguém clicou
+- [x] Os 50 resolvidos ou declarados irrelevantes, um a um
+      — **33 endereçados** por execução (era 15; a 5ª passagem somou 18) e os
+      **17 restantes com veredito estrutural**, tirado do `Database.cpp`: 14
+      são ponto de retomada em fronteira de setor e 3 são base de varredura.
+      Tabela linha a linha em
+      [`wte/re/offsets-novos.md`](../../wte/re/offsets-novos.md), e o
+      `test_todo_offset_ausente_tem_veredito` reprova se algum voltar a ficar
+      sem
 - [x] As seis áreas da tabela cobertas
       — as seis exercitadas com um time carregado, na 4ª passagem. Quatro
       delas **não tocam a imagem**, e isso é medida, não falha de clique
@@ -94,20 +98,93 @@ arquivo gerado.
 - [x] Nenhuma medição feita sobre `roms/` diretamente
 - [x] Commit no formato conventional, em inglês
 
-**A task ainda não fecha, e o que falta mudou de natureza.** Até 2026-08-10 os
-dois critérios abertos dependiam de dirigir o `wte.exe` além da tela de carga, e
-isso estava bloqueado. O bloqueio caiu com a
-[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) — e não era "a imagem certa" no
-sentido que a 3ª passagem supunha: com `roms/japanese-shift-jis.bin`, que já
-estava no repositório, o editor passa da troca de time com zero violação de
-acesso contra 49.749 na europeia. A causa é ponteiro sobrescrito pela carga do
-time, não release faltando.
+**A task fecha na 5ª passagem, e a chave não foi mais tela.** As três primeiras
+passagens dependiam de dirigir o `wte.exe` além da tela de carga, e isso estava
+bloqueado; o bloqueio caiu com a [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) —
+com `roms/japanese-shift-jis.bin`, que já estava no repositório, o editor passa
+da troca de time com zero violação de acesso contra 49.749 na europeia. A 4ª
+mediu as seis áreas; a 5ª clicou o que faltava e desceu na lista de times, e
+levou os endereçados de 15 para 33.
 
-Sobrou **um** critério, e ele agora é trabalho comum: 35 `OFS_*` sem veredito
-dinâmico, cada um esperando um controle que nenhum roteiro clicou. Não há
-bloqueio; há tela.
+**Os 17 que sobraram não estão esperando clique**, e quem responde por eles é o
+`Database.cpp` do `newWe2002`, não a tela: eles não são endereço de campo. Ou
+são **ponto de retomada em fronteira de setor** — o `case N :` para onde o
+legado salta quando o registro N cai em cima do cabeçalho —, ou são **base de
+varredura**, o `Seek` seguido do `for` que desfila um lote. Nos dois casos há
+**um** registro que os endereça, e o `wte.exe` não varre: ele salta direto para
+o que a tela mostra. A ausência deles num trace é a previsão do papel que têm.
 
 ## Log de Execução
+
+### 5ª passagem — 2026-08-10, a task fecha, e a última régua não é a tela
+
+- **Executado em:** 2026-08-10 — **concluída**
+
+- **Resumo do que foi feito:**
+
+  Dois roteiros, porque os 35 pendentes não faltavam pelo mesmo motivo. O
+  [`10-telas-que-faltavam.txt`](../../wte/tests/roteiros/10-telas-que-faltavam.txt)
+  abriu o que ninguém tinha aberto — estratégia, ficha do jogador, dorsal, o
+  lado direito da janela, a extração do uniforme, o diálogo de textura. O
+  [`11-varredura-de-times.txt`](../../wte/tests/roteiros/11-varredura-de-times.txt)
+  desceu na lista: times 60, 120 e 180. **18 `OFS_*` saíram de hipótese** —
+  de 15 para 33 endereçados.
+
+  **O achado grande não é um offset, é uma região.** Extrair a camisa lê 16
+  setores contíguos, `21168024`..`21203815`, **8 MB acima** do maior offset que
+  o `Offsets.hpp` conhece. O `newWe2002` nunca precisou daquilo porque não
+  desenha uniforme; é a entrada da
+  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+
+  **E o critério fechou com a outra régua.** Os 17 restantes foram
+  classificados pelo `Database.cpp` do `newWe2002`: 14 são ponto de retomada em
+  fronteira de setor (`case 44+PLAYERS_NC :` e irmãos), 3 são base de varredura
+  (`Seek` + `for`). Nenhum é endereço de campo, e cada um é endereçado por
+  **um** registro só — o que explica a ausência no trace sem apelar para
+  "faltou clicar". O classificador é código, não prosa
+  (`analisar_io.papel_no_legado`), e o
+  `test_todo_offset_ausente_tem_veredito` reprova se algum dos 50 voltar a
+  ficar sem veredito.
+
+- **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/tests/roteiros/10-telas-que-faltavam.txt` | criado — as telas que o 09 não abriu |
+  | `wte/tests/roteiros/11-varredura-de-times.txt` | criado — times 60, 120, 180 |
+  | `wte/tools/diff_dirigido.sh` | verbo `>~` (janela por tamanho), `--sessao`, e apaga o `work/u.bmp` antes da corrida |
+  | `wte/tools/analisar_io.py` | coluna `sessao`; `papel_no_legado()`; seções da 5ª passagem e do veredito dos 50 |
+  | `wte/tools/test_analisar_io.py` | +9 testes: o classificador com fonte plantado, a coluna `sessao`, a região do uniforme, e o critério da task |
+  | `wte/tools/dump_offsets.py` | a prosa dos 50 dizia "falta mais tela"; agora diz o que os restantes são |
+  | `wte/re/io-medido.tsv` | coluna `sessao` nas 140 linhas antigas + 227 linhas novas |
+  | `wte/re/offsets-novos.md`, `wte/re/offsets.md` | regerados |
+  | `wte/tests/roteiros/README.md`, `wte/tools/README.md` | o `>~`, os roteiros 10 e 11, a armadilha do arquivo que já existe |
+
+- **Problemas encontrados:**
+
+  **Três formulários trocam o próprio `Caption` pelo nome do time**, e com a
+  ROM japonesa isso é Shift-JIS: o `xdotool` vê uma corrida de `?`, e não há
+  regex estável. Daí o verbo `>~`, que resolve a janela pelo **tamanho** —
+  número que sai do `ClientWidth`/`ClientHeight` do DFM. Exceção medida: o
+  `ficha_dorsal` aparece 135×153 contra os 129×121 do DFM, porque sem window
+  manager o Wine desenha a moldura dentro da própria janela X.
+
+  **Arquivo que o roteiro manda gravar tem de não existir antes.** A primeira
+  corrida do 10 morreu esperando a caixa de confirmação: o `E:\u.bmp` de uma
+  sessão exploratória ainda estava lá, o `TSaveDialog` perguntou se era para
+  sobrescrever, e roteiro fixo não responde pergunta que ele não previu. Quem
+  apaga agora é o `diff_dirigido.sh`.
+
+  **A chave do `io-medido.tsv` era a imagem, e isso deixou de bastar.** As
+  sessões 09, 10 e 11 rodam sobre a **mesma** imagem; sem a coluna `sessao` as
+  três viravam uma tabela só e a seção das seis áreas passaria a somar clique
+  que ela não mediu. A coluna é o nome do diretório de saída, não o do roteiro
+  — o mesmo roteiro já rodou duas vezes com uma variável trocada
+  (`06-diff-dirigido` contra `06-truncada`).
+
+  **O que ficou para a fase 4:** as faixas sem dono continuam sem dono. São 47
+  em cada uma das duas sessões novas, e a maior delas é a região do uniforme.
+  Nomeá-las é trabalho de spec, não de `strace`.
 
 ### 4ª passagem — 2026-08-10, o bloqueio caiu e as seis áreas foram medidas
 

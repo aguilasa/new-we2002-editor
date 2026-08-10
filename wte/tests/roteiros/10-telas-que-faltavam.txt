@@ -1,0 +1,179 @@
+# 10 -- as telas que o roteiro 09 NAO clicou, com um time carregado.
+#
+# Insumo da WTE-TASK-19 (5a passagem), rodado por wte/tools/diff_dirigido.sh.
+# O 09 cobriu as seis AREAS da tabela da task; sobraram 35 dos 50 `OFS_*` sem
+# veredito dinamico, e o Log da 4a passagem nomeia os candidatos: a ficha do
+# jogador, a estrategia, o dorsal, o outro lado da tela (`lista_equipos_2`) e
+# a extracao de uniforme. Sao esses os cliques daqui.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/10-telas-que-faltavam.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# **A imagem japonesa nao e escolha de gosto** -- mesma razao do 09: com a
+# europeia o app morre na troca de time (wte/re/crash-causa.md).
+alvo: original
+estado: ok
+
+# Coordenadas: relativas a janela resolvida pelo `>` (ou `>~`) anterior,
+# tiradas do wte/re/dfm/<form>.dfm -- Left/Top do controle mais o do pai.
+#
+# Tres dos formularios daqui trocam o proprio Caption pelo nome do time em
+# tempo de execucao, e com esta ROM isso e Shift-JIS: o titulo vira uma
+# corrida de `?`. Por isso eles sao resolvidos por TAMANHO (`>~`), que sai do
+# ClientWidth/ClientHeight do DFM.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------- primeiro: um time ----
+#
+# Pelo TECLADO -- a lista suspensa do TComboBox fica MAPEADA depois do clique
+# no item e engole todo clique seguinte.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ---------------------------------------------------------- estrategia ----
+#
+# GroupBox1 (8,320) + mostrar_estrategia_1 (8,40) = (16,360). Abre o
+# formulario `estrategia` (529x498) -- as 11 posicoes em campo e a lista de
+# formacoes. Fecha no `Cancela` (BitBtn2, 432,229 + 81x25), que e o botao que
+# nao aplica: o que se quer medir aqui e a LEITURA da formacao.
+! clique 28 370
+~ 5
+>~ 529x498
+! clique 472 241
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= ESTRATEGIA
+
+# ------------------------------------------------- ficha do jogador ----
+#
+# GroupBox1 (8,320) + mostrar_jugador_1 (8,72) = (16,392). Abre o formulario
+# `jugador` (707x273) -- os 16 atributos, cabelo, barba, `careto`, preco.
+# Fecha no `Cancela` (BitBtn2, 544,240 + 73x25).
+#
+# O 09 viu aqui a pergunta "Calcular precos"; nesta ordem ela nao aparece --
+# medido em tres sessoes exploratorias. Quem a provoca e o `base_team`, que
+# este roteiro nao clica.
+! clique 28 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_JOGADOR
+
+# --------------------------------------------------------------- dorsal ----
+#
+# dorsal1 (16,432), 17x17. Abre o `ficha_dorsal` -- e a janela cuja geometria
+# NAO bate com o ClientWidth do DFM: 135x153 contra 129x121, porque sem window
+# manager o Wine desenha a moldura dentro da propria janela X. O `Ok`
+# (BitBtn1, 48,80 + 65x25) sai do DFM mais a moldura: (3,29).
+! clique 24 440
+~ 3
+>~ 135x153
+! clique 83 121
+~ 2
+> W11 Team Editor PT by chagas_michel!
+= DORSAL
+
+# ------------------------------------------------ um time la no fundo ----
+#
+# 30 vezes Down na lista de times. O ponto e sair da vizinhanca do primeiro
+# time: os `OFS_PLAYER_NAME_2..8` e os `OFS_PLAYER_ATTR_1..9` sao blocos com
+# passo de setor, e so um time de outra faixa os endereca.
+! clique 50 46
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 9
+= TIME_FUNDO
+
+# ------------------------------------------- um jogador la no fundo ----
+#
+# lista_jugadores_1 (48,392) + 15 vezes Down, e a ficha dele depois.
+! clique 112 402
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 5
+= JOGADOR_FUNDO
+
+! clique 28 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_FUNDO
+
+# --------------------------------------------------------- o outro lado ----
+#
+# lista_equipos_2 (368,360) e o time da direita -- o lado para onde os
+# jogadores sao movidos. mostrar_jugador_2 (480,392) abre a ficha dele.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down
+~ 6
+= TIME_2
+
+! clique 492 402
+~ 5
+>~ 707x273
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= FICHA_2
+
+# ------------------------------------------------- extrair o uniforme ----
+#
+# GroupBox3 (392,224) + grabar_camiseta (8,56) = (400,280). Abre um TSaveDialog
+# ("Extrair Uni do jogo"), e a gravacao vai para ARQUIVO -- E:\u.bmp, dentro de
+# work/. A imagem nao e alvo de escrita aqui; o que se mede e a LEITURA da
+# regiao do uniforme.
+#
+# Limpar o campo com End/shift+Home/BackSpace, nunca com ctrl+a: `Ctrl+A` nao
+# seleciona tudo num edit do Win32.
+! clique 412 292
+~ 4
+> Extrair Uni do jogo
+! tecla End shift+Home BackSpace
+! texto E:\u.bmp
+! tecla Return
+~ 4
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+= EXTRAI_UNI
+
+# ------------------------------------------------ o dialogo de textura ----
+#
+# GroupBox4 (472,224) + boton_dialogo_tex (8,24) = (480,248). So abre o
+# TOpenDialog; sai por Escape, sem escolher arquivo. Serve para medir se o
+# app le a imagem ao montar o dialogo.
+! clique 492 260
+~ 4
+> Abre
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= ABRE_TEX

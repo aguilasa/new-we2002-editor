@@ -1,141 +1,368 @@
-imagem	acao	op	inicio	fim	tamanho	setor	byte_no_setor
-golden-european-deluxe.bin	ARRANQUE	R	0	22	23	0	0
-golden-european-deluxe.bin	ARRANQUE	R	11796	12307	512	5	36
-golden-european-deluxe.bin	ARRANQUE	R	2002316	2004047	1732	851	764
-golden-european-deluxe.bin	ARRANQUE	R	2012680	2014871	2192	855	1720
-golden-european-deluxe.bin	ARRANQUE	R	2736694	2737205	512	1163	1318
-golden-european-deluxe.bin	ARRANQUE	W	11784	13831	2048	5	24
-golden-european-deluxe.bin	ARRANQUE	W	14136	16183	2048	6	24
-golden-european-deluxe.bin	ARRANQUE	W	16488	18535	2048	7	24
-golden-european-deluxe.bin	ARRANQUE	W	18840	20887	2048	8	24
-golden-european-deluxe.bin	ARRANQUE	W	21192	23239	2048	9	24
-golden-european-deluxe.bin	ARRANQUE	W	23544	25591	2048	10	24
-golden-european-deluxe.bin	ARRANQUE	W	25896	27943	2048	11	24
-golden-european-deluxe.bin	ARRANQUE	W	1921862	1921862	1	817	278
-golden-european-deluxe.bin	GRAVA_BARRAS	.			0		
-golden-european-deluxe.bin	IGUALA_NOMES	.			0		
-golden-european-deluxe.bin	GRAVA_NOMES	.			0		
-golden-european-deluxe.bin	PINTAR	.			0		
-golden-european-deluxe.bin	GRAVA_CAMISETA	.			0		
-golden-european-deluxe.bin	GRAVA_MEMORY	.			0		
-golden-european-deluxe.bin	ABRE_JOGADOR	.			0		
-golden-european-deluxe.bin	TIME_TITULAR	.			0		
-golden-european-deluxe.bin	SELECIONA_TIME	R	387792	388827	1036	164	2064
-golden-european-deluxe.bin	SELECIONA_TIME	R	404716	405227	512	172	172
-golden-european-deluxe.bin	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
-golden-european-deluxe.bin	SELECIONA_TIME	R	1013736	1014447	712	431	24
-golden-european-deluxe.bin	SELECIONA_TIME	R	1881969	1883407	1439	800	369
-golden-european-deluxe.bin	SELECIONA_TIME	R	2002317	2005883	3567	851	765
-golden-european-deluxe.bin	SELECIONA_TIME	R	2028268	2029535	1268	862	844
-golden-european-deluxe.bin	SELECIONA_TIME	R	2328060	2328695	636	989	1932
-golden-european-deluxe.bin	SELECIONA_TIME	R	2667258	2667801	544	1134	90
-golden-european-deluxe.bin	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
-golden-european-deluxe.bin	SELECIONA_TIME	R	4234485	4235371	887	1800	885
-golden-european-deluxe.bin	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
-golden-european-deluxe.bin	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
-golden-european-deluxe.bin	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
-golden-european-deluxe.bin	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
-golden-european-deluxe.bin	SELECIONA_TIME	R	14368636	14369147	512	6109	268
-golden-european-deluxe.bin	FIM	.			0		
-truncada-474431328.bin	ARRANQUE	R	0	22	23	0	0
-truncada-474431328.bin	ARRANQUE	R	11796	12307	512	5	36
-truncada-474431328.bin	ARRANQUE	R	2002316	2004047	1732	851	764
-truncada-474431328.bin	ARRANQUE	R	2012680	2014871	2192	855	1720
-truncada-474431328.bin	ARRANQUE	R	2736694	2737205	512	1163	1318
-truncada-474431328.bin	ARRANQUE	W	11784	13831	2048	5	24
-truncada-474431328.bin	ARRANQUE	W	14136	16183	2048	6	24
-truncada-474431328.bin	ARRANQUE	W	16488	18535	2048	7	24
-truncada-474431328.bin	ARRANQUE	W	18840	20887	2048	8	24
-truncada-474431328.bin	ARRANQUE	W	21192	23239	2048	9	24
-truncada-474431328.bin	ARRANQUE	W	23544	25591	2048	10	24
-truncada-474431328.bin	ARRANQUE	W	25896	27943	2048	11	24
-truncada-474431328.bin	ARRANQUE	W	1921862	1921862	1	817	278
-truncada-474431328.bin	GRAVA_BARRAS	.			0		
-truncada-474431328.bin	IGUALA_NOMES	.			0		
-truncada-474431328.bin	GRAVA_NOMES	.			0		
-truncada-474431328.bin	PINTAR	.			0		
-truncada-474431328.bin	GRAVA_CAMISETA	.			0		
-truncada-474431328.bin	GRAVA_MEMORY	.			0		
-truncada-474431328.bin	ABRE_JOGADOR	.			0		
-truncada-474431328.bin	TIME_TITULAR	.			0		
-truncada-474431328.bin	SELECIONA_TIME	R	387792	388827	1036	164	2064
-truncada-474431328.bin	SELECIONA_TIME	R	404716	405227	512	172	172
-truncada-474431328.bin	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
-truncada-474431328.bin	SELECIONA_TIME	R	1013736	1014447	712	431	24
-truncada-474431328.bin	SELECIONA_TIME	R	1881969	1883407	1439	800	369
-truncada-474431328.bin	SELECIONA_TIME	R	2002317	2005883	3567	851	765
-truncada-474431328.bin	SELECIONA_TIME	R	2028268	2029535	1268	862	844
-truncada-474431328.bin	SELECIONA_TIME	R	2328060	2328695	636	989	1932
-truncada-474431328.bin	SELECIONA_TIME	R	2667258	2667801	544	1134	90
-truncada-474431328.bin	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
-truncada-474431328.bin	SELECIONA_TIME	R	4234485	4235371	887	1800	885
-truncada-474431328.bin	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
-truncada-474431328.bin	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
-truncada-474431328.bin	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
-truncada-474431328.bin	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
-truncada-474431328.bin	SELECIONA_TIME	R	14368636	14369147	512	6109	268
-truncada-474431328.bin	FIM	.			0		
-japanese-shift-jis.bin	ARRANQUE	R	0	22	23	0	0
-japanese-shift-jis.bin	ARRANQUE	R	11796	12307	512	5	36
-japanese-shift-jis.bin	ARRANQUE	R	2002316	2004491	2176	851	764
-japanese-shift-jis.bin	ARRANQUE	R	2012680	2014871	2192	855	1720
-japanese-shift-jis.bin	ARRANQUE	R	2736694	2737205	512	1163	1318
-japanese-shift-jis.bin	ARRANQUE	W	11784	13831	2048	5	24
-japanese-shift-jis.bin	ARRANQUE	W	14136	16183	2048	6	24
-japanese-shift-jis.bin	ARRANQUE	W	16488	18535	2048	7	24
-japanese-shift-jis.bin	ARRANQUE	W	18840	20887	2048	8	24
-japanese-shift-jis.bin	ARRANQUE	W	21192	23239	2048	9	24
-japanese-shift-jis.bin	ARRANQUE	W	23544	25591	2048	10	24
-japanese-shift-jis.bin	ARRANQUE	W	25896	27943	2048	11	24
-japanese-shift-jis.bin	ARRANQUE	W	1921862	1921862	1	817	278
-japanese-shift-jis.bin	ARRANQUE	W	2012984	2012985	2	855	2024
-japanese-shift-jis.bin	SELECIONA_TIME	R	387792	388827	1036	164	2064
-japanese-shift-jis.bin	SELECIONA_TIME	R	404716	405227	512	172	172
-japanese-shift-jis.bin	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
-japanese-shift-jis.bin	SELECIONA_TIME	R	1013736	1014447	712	431	24
-japanese-shift-jis.bin	SELECIONA_TIME	R	1881969	1883407	1439	800	369
-japanese-shift-jis.bin	SELECIONA_TIME	R	2002317	2003852	1536	851	765
-japanese-shift-jis.bin	SELECIONA_TIME	R	2003928	2005883	1956	852	24
-japanese-shift-jis.bin	SELECIONA_TIME	R	2028268	2029535	1268	862	844
-japanese-shift-jis.bin	SELECIONA_TIME	R	2328060	2328695	636	989	1932
-japanese-shift-jis.bin	SELECIONA_TIME	R	2667258	2667801	544	1134	90
-japanese-shift-jis.bin	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
-japanese-shift-jis.bin	SELECIONA_TIME	R	4234485	4235371	887	1800	885
-japanese-shift-jis.bin	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
-japanese-shift-jis.bin	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
-japanese-shift-jis.bin	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
-japanese-shift-jis.bin	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
-japanese-shift-jis.bin	SELECIONA_TIME	R	14368636	14369147	512	6109	268
-japanese-shift-jis.bin	GRAVA_BARRAS	.			0		
-japanese-shift-jis.bin	IGUALA_NOMES	.			0		
-japanese-shift-jis.bin	GRAVA_NOMES	W	1013936	1013943	8	431	224
-japanese-shift-jis.bin	GRAVA_NOMES	W	1882896	1882907	12	800	1296
-japanese-shift-jis.bin	GRAVA_NOMES	W	2004988	2004995	8	852	1084
-japanese-shift-jis.bin	GRAVA_NOMES	W	2005372	2005375	4	852	1468
-japanese-shift-jis.bin	GRAVA_NOMES	W	2328184	2328188	5	989	2056
-japanese-shift-jis.bin	GRAVA_NOMES	W	2830940	2830947	8	1203	1484
-japanese-shift-jis.bin	GRAVA_NOMES	W	4234860	4234863	4	1800	1260
-japanese-shift-jis.bin	GRAVA_NOMES	W	5652644	5652651	8	2403	788
-japanese-shift-jis.bin	PINTAR	W	1929004	1929004	1	820	364
-japanese-shift-jis.bin	PINTAR	W	2005412	2005412	1	852	1508
-japanese-shift-jis.bin	PINTAR	W	2328060	2328060	1	989	1932
-japanese-shift-jis.bin	PINTAR	W	2667258	2667287	30	1134	90
-japanese-shift-jis.bin	PINTAR	W	2667290	2667319	30	1134	122
-japanese-shift-jis.bin	PINTAR	W	4904664	4904664	1	2085	744
-japanese-shift-jis.bin	PINTAR	W	5651444	5651447	4	2402	1940
-japanese-shift-jis.bin	PINTAR	W	5711640	5711640	1	2428	984
-japanese-shift-jis.bin	PINTAR	W	12543596	12543851	256	5333	380
-japanese-shift-jis.bin	PINTAR	W	12544268	12544297	30	5333	1052
-japanese-shift-jis.bin	PINTAR	W	12549518	12549547	30	5335	1598
-japanese-shift-jis.bin	TIME_TITULAR	.			0		
-japanese-shift-jis.bin	CALCULA_PRECO	R	387792	388827	1036	164	2064
-japanese-shift-jis.bin	CALCULA_PRECO	R	2179492	2180267	776	926	1540
-japanese-shift-jis.bin	CALCULA_PRECO	R	3067404	3067937	534	1304	396
-japanese-shift-jis.bin	CALCULA_PRECO	W	3067404	3067425	22	1304	396
-japanese-shift-jis.bin	CALCULA_PRECO	W	14368636	14368637	2	6109	268
-japanese-shift-jis.bin	ABRE_JOGADOR	R	387792	388615	824	164	2064
-japanese-shift-jis.bin	ABRE_JOGADOR	R	404716	405227	512	172	172
-japanese-shift-jis.bin	ABRE_JOGADOR	R	2179492	2180003	512	926	1540
-japanese-shift-jis.bin	ABRE_JOGADOR	R	3067404	3067915	512	1304	396
-japanese-shift-jis.bin	ABRE_JOGADOR	W	3067426	3067426	1	1304	418
-japanese-shift-jis.bin	FIM	.			0		
+imagem	sessao	acao	op	inicio	fim	tamanho	setor	byte_no_setor
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	R	0	22	23	0	0
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	R	11796	12307	512	5	36
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	R	2002316	2004047	1732	851	764
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	R	2012680	2014871	2192	855	1720
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	R	2736694	2737205	512	1163	1318
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	11784	13831	2048	5	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	14136	16183	2048	6	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	16488	18535	2048	7	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	18840	20887	2048	8	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	21192	23239	2048	9	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	23544	25591	2048	10	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	25896	27943	2048	11	24
+golden-european-deluxe.bin	06-diff-dirigido	ARRANQUE	W	1921862	1921862	1	817	278
+golden-european-deluxe.bin	06-diff-dirigido	GRAVA_BARRAS	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	IGUALA_NOMES	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	GRAVA_NOMES	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	PINTAR	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	GRAVA_CAMISETA	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	GRAVA_MEMORY	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	ABRE_JOGADOR	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	TIME_TITULAR	.			0		
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	387792	388827	1036	164	2064
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	404716	405227	512	172	172
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	1013736	1014447	712	431	24
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	2002317	2005883	3567	851	765
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	2328060	2328695	636	989	1932
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	2667258	2667801	544	1134	90
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
+golden-european-deluxe.bin	06-diff-dirigido	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+golden-european-deluxe.bin	06-diff-dirigido	FIM	.			0		
+truncada-474431328.bin	06-truncada	ARRANQUE	R	0	22	23	0	0
+truncada-474431328.bin	06-truncada	ARRANQUE	R	11796	12307	512	5	36
+truncada-474431328.bin	06-truncada	ARRANQUE	R	2002316	2004047	1732	851	764
+truncada-474431328.bin	06-truncada	ARRANQUE	R	2012680	2014871	2192	855	1720
+truncada-474431328.bin	06-truncada	ARRANQUE	R	2736694	2737205	512	1163	1318
+truncada-474431328.bin	06-truncada	ARRANQUE	W	11784	13831	2048	5	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	14136	16183	2048	6	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	16488	18535	2048	7	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	18840	20887	2048	8	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	21192	23239	2048	9	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	23544	25591	2048	10	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	25896	27943	2048	11	24
+truncada-474431328.bin	06-truncada	ARRANQUE	W	1921862	1921862	1	817	278
+truncada-474431328.bin	06-truncada	GRAVA_BARRAS	.			0		
+truncada-474431328.bin	06-truncada	IGUALA_NOMES	.			0		
+truncada-474431328.bin	06-truncada	GRAVA_NOMES	.			0		
+truncada-474431328.bin	06-truncada	PINTAR	.			0		
+truncada-474431328.bin	06-truncada	GRAVA_CAMISETA	.			0		
+truncada-474431328.bin	06-truncada	GRAVA_MEMORY	.			0		
+truncada-474431328.bin	06-truncada	ABRE_JOGADOR	.			0		
+truncada-474431328.bin	06-truncada	TIME_TITULAR	.			0		
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	387792	388827	1036	164	2064
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	404716	405227	512	172	172
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	1013736	1014447	712	431	24
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	2002317	2005883	3567	851	765
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	2328060	2328695	636	989	1932
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	2667258	2667801	544	1134	90
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
+truncada-474431328.bin	06-truncada	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+truncada-474431328.bin	06-truncada	FIM	.			0		
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	R	0	22	23	0	0
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	R	11796	12307	512	5	36
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	R	2002316	2004491	2176	851	764
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	R	2012680	2014871	2192	855	1720
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	R	2736694	2737205	512	1163	1318
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	11784	13831	2048	5	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	14136	16183	2048	6	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	16488	18535	2048	7	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	18840	20887	2048	8	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	21192	23239	2048	9	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	23544	25591	2048	10	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	25896	27943	2048	11	24
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	1921862	1921862	1	817	278
+japanese-shift-jis.bin	09-areas-com-time	ARRANQUE	W	2012984	2012985	2	855	2024
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	387792	388827	1036	164	2064
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	404716	405227	512	172	172
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	1013736	1014447	712	431	24
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2002317	2003852	1536	851	765
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2003928	2005883	1956	852	24
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2328060	2328695	636	989	1932
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2667258	2667801	544	1134	90
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
+japanese-shift-jis.bin	09-areas-com-time	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_BARRAS	.			0		
+japanese-shift-jis.bin	09-areas-com-time	IGUALA_NOMES	.			0		
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	1013936	1013943	8	431	224
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	1882896	1882907	12	800	1296
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	2004988	2004995	8	852	1084
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	2005372	2005375	4	852	1468
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	2328184	2328188	5	989	2056
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	2830940	2830947	8	1203	1484
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	4234860	4234863	4	1800	1260
+japanese-shift-jis.bin	09-areas-com-time	GRAVA_NOMES	W	5652644	5652651	8	2403	788
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	1929004	1929004	1	820	364
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	2005412	2005412	1	852	1508
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	2328060	2328060	1	989	1932
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	2667258	2667287	30	1134	90
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	2667290	2667319	30	1134	122
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	4904664	4904664	1	2085	744
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	5651444	5651447	4	2402	1940
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	5711640	5711640	1	2428	984
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	12543596	12543851	256	5333	380
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	12544268	12544297	30	5333	1052
+japanese-shift-jis.bin	09-areas-com-time	PINTAR	W	12549518	12549547	30	5335	1598
+japanese-shift-jis.bin	09-areas-com-time	TIME_TITULAR	.			0		
+japanese-shift-jis.bin	09-areas-com-time	CALCULA_PRECO	R	387792	388827	1036	164	2064
+japanese-shift-jis.bin	09-areas-com-time	CALCULA_PRECO	R	2179492	2180267	776	926	1540
+japanese-shift-jis.bin	09-areas-com-time	CALCULA_PRECO	R	3067404	3067937	534	1304	396
+japanese-shift-jis.bin	09-areas-com-time	CALCULA_PRECO	W	3067404	3067425	22	1304	396
+japanese-shift-jis.bin	09-areas-com-time	CALCULA_PRECO	W	14368636	14368637	2	6109	268
+japanese-shift-jis.bin	09-areas-com-time	ABRE_JOGADOR	R	387792	388615	824	164	2064
+japanese-shift-jis.bin	09-areas-com-time	ABRE_JOGADOR	R	404716	405227	512	172	172
+japanese-shift-jis.bin	09-areas-com-time	ABRE_JOGADOR	R	2179492	2180003	512	926	1540
+japanese-shift-jis.bin	09-areas-com-time	ABRE_JOGADOR	R	3067404	3067915	512	1304	396
+japanese-shift-jis.bin	09-areas-com-time	ABRE_JOGADOR	W	3067426	3067426	1	1304	418
+japanese-shift-jis.bin	09-areas-com-time	FIM	.			0		
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	R	0	22	23	0	0
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	R	11796	12307	512	5	36
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	R	2002316	2004491	2176	851	764
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	R	2012680	2014871	2192	855	1720
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	R	2736694	2737205	512	1163	1318
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	11784	13831	2048	5	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	14136	16183	2048	6	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	16488	18535	2048	7	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	18840	20887	2048	8	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	21192	23239	2048	9	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	23544	25591	2048	10	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	25896	27943	2048	11	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	1921862	1921862	1	817	278
+japanese-shift-jis.bin	10-telas-que-faltavam	ARRANQUE	W	2012984	2012985	2	855	2024
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	387792	388827	1036	164	2064
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	404716	405227	512	172	172
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	1013736	1014447	712	431	24
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2002317	2003852	1536	851	765
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2003928	2005883	1956	852	24
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2328060	2328695	636	989	1932
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2667258	2667801	544	1134	90
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
+japanese-shift-jis.bin	10-telas-que-faltavam	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	10-telas-que-faltavam	ESTRATEGIA	R	2296908	2297675	768	976	1356
+japanese-shift-jis.bin	10-telas-que-faltavam	ESTRATEGIA	R	2302800	2303311	512	979	192
+japanese-shift-jis.bin	10-telas-que-faltavam	ESTRATEGIA	R	2303700	2304231	532	979	1092
+japanese-shift-jis.bin	10-telas-que-faltavam	ESTRATEGIA	R	2329056	2329567	512	990	576
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_JOGADOR	R	387792	388615	824	164	2064
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_JOGADOR	R	404716	405227	512	172	172
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_JOGADOR	R	2179492	2180003	512	926	1540
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_JOGADOR	R	3067404	3067915	512	1304	396
+japanese-shift-jis.bin	10-telas-que-faltavam	DORSAL	R	404716	405227	512	172	172
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	388326	396179	7854	165	246
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	404732	405675	944	172	188
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	1012641	1014435	1795	430	1281
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	1881969	1883395	1427	800	369
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	2002317	2005879	3563	851	765
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	2028268	2029531	1264	862	844
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	2328061	2329139	1079	989	1933
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	2667322	2669593	2272	1134	154
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	2830161	2831443	1283	1203	705
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	4234485	4235367	883	1800	885
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	4598597	4599915	1319	1955	437
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	5651069	5653147	2079	2402	1565
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	12549582	12551261	1680	5335	1662
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_FUNDO	W	404716	404731	16	172	172
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	395678	396639	962	168	542
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	405180	405707	528	172	636
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	1012641	1013879	1239	430	1281
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	1881969	1883143	1175	800	369
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2002317	2003815	1499	851	765
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2003997	2005767	1771	852	93
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2028268	2029291	1024	862	844
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2328089	2328601	513	989	1961
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2328633	2329149	517	990	153
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2669114	2670055	942	1134	1946
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	2830161	2831219	1059	1203	705
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	4234485	4235255	771	1800	885
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	4598597	4599699	1103	1955	437
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	5651069	5652875	1807	2402	1565
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	12550782	12551325	544	5336	510
+japanese-shift-jis.bin	10-telas-que-faltavam	JOGADOR_FUNDO	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_FUNDO	R	396058	396569	512	168	922
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_FUNDO	R	405196	405707	512	172	652
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_FUNDO	R	2189168	2189679	512	930	1808
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_FUNDO	R	3068109	3068620	512	1304	1101
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_2	R	387792	389747	1956	164	2064
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_2	R	2328060	2328575	516	989	1932
+japanese-shift-jis.bin	10-telas-que-faltavam	TIME_2	R	12549518	12550189	672	5335	1598
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_2	R	389016	389527	512	165	936
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_2	R	404780	405291	512	172	236
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_2	R	2180900	2181411	512	927	596
+japanese-shift-jis.bin	10-telas-que-faltavam	FICHA_2	R	3067496	3068007	512	1304	488
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21168024	21170071	2048	9000	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21170376	21172423	2048	9001	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21172728	21174775	2048	9002	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21175080	21177127	2048	9003	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21177432	21179479	2048	9004	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21179784	21181831	2048	9005	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21182136	21184183	2048	9006	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21184488	21186535	2048	9007	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21186840	21188887	2048	9008	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21189192	21191239	2048	9009	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21191544	21193591	2048	9010	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21193896	21195943	2048	9011	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21196248	21198295	2048	9012	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21198600	21200647	2048	9013	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21200952	21202999	2048	9014	24
+japanese-shift-jis.bin	10-telas-que-faltavam	EXTRAI_UNI	R	21203304	21203815	512	9015	24
+japanese-shift-jis.bin	10-telas-que-faltavam	ABRE_TEX	.			0		
+japanese-shift-jis.bin	10-telas-que-faltavam	FIM	.			0		
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	R	0	22	23	0	0
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	R	11796	12307	512	5	36
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	R	2002316	2004491	2176	851	764
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	R	2012680	2014871	2192	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	R	2736694	2737205	512	1163	1318
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	11784	13831	2048	5	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	14136	16183	2048	6	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	16488	18535	2048	7	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	18840	20887	2048	8	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	21192	23239	2048	9	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	23544	25591	2048	10	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	25896	27943	2048	11	24
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	1921862	1921862	1	817	278
+japanese-shift-jis.bin	11-varredura-de-times	ARRANQUE	W	2012984	2012985	2	855	2024
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	387792	396909	9118	164	2064
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	404716	405723	1008	172	172
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	1012641	1014447	1807	430	1281
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	1881969	1883407	1439	800	369
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	2002317	2005883	3567	851	765
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	2028268	2029535	1268	862	844
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	2328060	2329159	1100	989	1932
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	2667258	2670153	2896	1134	90
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	2830161	2831451	1291	1203	705
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	4234485	4235371	887	1800	885
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	4598597	4599927	1331	1955	437
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	5651069	5653155	2087	2402	1565
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	12549518	12551389	1872	5335	1598
+japanese-shift-jis.bin	11-varredura-de-times	TIME_60	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	396408	404221	7814	168	1272
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	405228	406171	944	172	684
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	1012641	1013847	1207	430	1281
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	1881969	1883107	1139	800	369
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2002317	2003763	1447	851	765
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2003997	2005751	1755	852	93
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2028268	2029251	984	862	844
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2194871	2195646	776	933	455
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2198208	2198719	512	934	1440
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2328093	2328630	538	989	1965
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2328653	2329294	642	990	173
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2669674	2671881	2208	1135	154
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	2830161	2831187	1027	1203	705
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	3068763	3069274	512	1304	1755
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	4234485	4235239	755	1800	885
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	4598597	4599667	1071	1955	437
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	5651069	5652839	1771	2402	1565
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	12545758	12546269	512	5334	190
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	12549646	12550381	736	5335	1726
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	12550910	12552093	1184	5336	638
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	12553198	12553741	544	5337	574
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_60	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	387792	392931	5140	164	2064
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	393294	397689	4396	167	510
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	397792	400907	3116	169	304
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	401886	402727	842	170	2046
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	403720	405215	1496	171	1528
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	405676	406219	544	172	1132
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	1012640	1013527	888	430	1280
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	1881968	1882835	868	800	368
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2002316	2003343	1028	851	764
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2003996	2004883	888	852	92
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2004996	2005643	648	852	1092
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2006288	2012017	5730	853	32
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2012680	2015774	3095	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2028267	2029067	801	862	843
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2328120	2328665	546	989	1992
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2328788	2329469	682	990	308
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2671402	2674759	3358	1135	1882
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	2830160	2830963	804	1203	704
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	4234484	4235131	648	1800	884
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	4598596	4599419	824	1955	436
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	5651068	5652567	1500	2402	1564
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	12549934	12550445	512	5335	2014
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	12550974	12553933	2960	5336	702
+japanese-shift-jis.bin	11-varredura-de-times	TIME_120	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	387562	388293	732	164	1834
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	2010072	2010583	512	854	1464
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	2012680	2013191	512	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	2014504	2015015	512	856	1192
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	2208896	2209407	512	939	368
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_120	R	3069860	3070371	512	1305	500
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	1012640	1013152	513	430	1280
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	1881968	1882480	513	800	368
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2002316	2002828	513	851	764
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2003996	2004508	513	852	92
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2004996	2005508	513	852	1092
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2006318	2007789	1472	853	62
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2007948	2008469	522	853	1692
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2008682	2009193	512	854	74
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2009332	2010993	1662	854	724
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2011226	2011737	512	855	266
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2012680	2013235	556	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2014504	2015037	534	856	1192
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2028267	2028779	513	862	843
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	2830160	2830672	513	1203	704
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	4234484	4234996	513	1800	884
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	4598596	4599108	513	1955	436
+japanese-shift-jis.bin	11-varredura-de-times	TIME_180	R	5651068	5651960	893	2402	1564
+japanese-shift-jis.bin	11-varredura-de-times	ESTRATEGIA_180	R	2303275	2303786	512	979	667
+japanese-shift-jis.bin	11-varredura-de-times	ESTRATEGIA_180	R	2306856	2307387	532	980	1896
+japanese-shift-jis.bin	11-varredura-de-times	ESTRATEGIA_180	R	2329628	2330139	512	990	1148
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	387562	388293	732	164	1834
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	2010072	2010583	512	854	1464
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	2012680	2013191	512	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	2014504	2015015	512	856	1192
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	2208896	2209407	512	939	368
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_180	R	3069860	3070371	512	1305	500
+japanese-shift-jis.bin	11-varredura-de-times	TIME_2_FUNDO	R	387792	404221	16430	164	2064
+japanese-shift-jis.bin	11-varredura-de-times	TIME_2_FUNDO	R	2328060	2328630	571	989	1932
+japanese-shift-jis.bin	11-varredura-de-times	TIME_2_FUNDO	R	12545758	12546269	512	5334	190
+japanese-shift-jis.bin	11-varredura-de-times	TIME_2_FUNDO	R	12549518	12552093	2576	5335	1598
+japanese-shift-jis.bin	11-varredura-de-times	TIME_2_FUNDO	R	12553198	12553741	544	5337	574
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	403490	404001	512	171	1298
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	405660	406171	512	172	1116
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2006318	2007789	1472	853	62
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2007948	2008469	522	853	1692
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2008682	2009193	512	854	74
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2009332	2010993	1662	854	724
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2011226	2011737	512	855	266
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2012680	2013235	556	855	1720
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	2198208	2198719	512	934	1440
+japanese-shift-jis.bin	11-varredura-de-times	FICHA_2_FUNDO	R	3068763	3069274	512	1304	1755
+japanese-shift-jis.bin	11-varredura-de-times	FIM	.			0		

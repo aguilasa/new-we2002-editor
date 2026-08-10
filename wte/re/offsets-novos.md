@@ -182,9 +182,11 @@ tabelas.
 
 ## O limite duro desta medição: o `wte.exe` morre ao carregar um time
 
-Medido, e é o que impede esta task de fechar. Com as duas ROMs que este
-repositório tem, o `wte.exe` **encerra com falha de segmentação logo
-depois** de ler os dados do primeiro time selecionado:
+Medido, e por três passagens foi o que impedia esta task de andar — a
+CORR-WTE-044 desfez o bloqueio e as sessões seguintes mediram por cima
+dele. Fica escrito porque explica o desenho de tudo o que veio depois.
+Com a ROM **europeia**, o `wte.exe` **encerra com falha de segmentação
+logo depois** de ler os dados do primeiro time selecionado:
 
 ```
 --- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
@@ -267,7 +269,7 @@ que isso destravou.
 
 Medido com o roteiro
 [`09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt) sobre
-cópia de `roms/japanese-shift-jis.bin`. **A imagem não é escolha de gosto:** com a
+cópia de `roms/09-areas-com-time`. **A imagem não é escolha de gosto:** com a
 europeia o `wte.exe` morre na troca de time, e o roteiro mediria o
 travamento em vez das áreas ([`crash-causa.md`](crash-causa.md)).
 
@@ -329,6 +331,173 @@ foi resolvida pelo nome antes do clique.
 | `PINTAR` | W | 12544268 | 12544297 | 30 | 5333 |
 | `CALCULA_PRECO` | W | 14368636 | 14368637 | 2 | 6109 |
 | `ABRE_JOGADOR` | W | 3067426 | 3067426 | 1 | 1304 |
+
+---
+
+## A 5ª passagem: o que faltava era tela, e o que faltava era índice
+
+Depois da 4ª passagem sobravam 35 dos 50 `OFS_*` sem veredito dinâmico,
+e eles não faltavam pelo mesmo motivo. Daí duas sessões, não uma:
+
+- [`10-telas-que-faltavam.txt`](../tests/roteiros/10-telas-que-faltavam.txt) — a estratégia, a ficha
+  do jogador, o dorsal, o outro lado da janela, a extração do uniforme
+  e o diálogo de textura, que nenhum roteiro tinha aberto;
+- [`11-varredura-de-times.txt`](../tests/roteiros/11-varredura-de-times.txt) — os times 60, 120 e 180
+  da lista. `OFS_PLAYER_NAME_5..8` e os `OFS_ML_*` são blocos com passo
+  de setor: tela nova nenhuma os alcança, e descer na lista alcança.
+
+As duas sobre cópia de `roms/japanese-shift-jis.bin`, pela mesma razão
+da 4ª passagem, e as duas com o `ARRANQUE` — o diff de controle — antes
+de qualquer ação medida.
+
+| sessão | ação | o que foi exercitado | leituras | escritas | bytes lidos |
+|---|---|---|---:|---:|---:|
+| `10` | `ARRANQUE` | — | 5 | 9 | 5415 |
+| `10` | `SELECIONA_TIME` | — | 17 | 0 | 18467 |
+| `10` | `ESTRATEGIA` | formação e posições em campo (`mostrar_estrategia_1`) | 4 | 0 | 2324 |
+| `10` | `FICHA_JOGADOR` | ficha do jogador (`mostrar_jugador_1`) | 4 | 0 | 2360 |
+| `10` | `DORSAL` | número da camisa (`dorsal1` → `ficha_dorsal`) | 1 | 0 | 512 |
+| `10` | `TIME_FUNDO` | time 30 da lista | 15 | 1 | 29138 |
+| `10` | `JOGADOR_FUNDO` | jogador 15 da lista | 17 | 0 | 17150 |
+| `10` | `FICHA_FUNDO` | ficha desse jogador | 4 | 0 | 2048 |
+| `10` | `TIME_2` | o time do lado direito (`lista_equipos_2`) | 3 | 0 | 3144 |
+| `10` | `FICHA_2` | ficha de um jogador desse time | 4 | 0 | 2048 |
+| `10` | `EXTRAI_UNI` | extrair o uniforme para arquivo (`grabar_camiseta`) | 16 | 0 | 31232 |
+| `10` | `ABRE_TEX` | abrir o diálogo de textura (`boton_dialogo_tex`) | 0 | 0 | 0 |
+| `10` | `FIM` | — | 0 | 0 | 0 |
+| `11` | `ARRANQUE` | — | 5 | 9 | 5415 |
+| `11` | `TIME_60` | time 60 da lista | 15 | 0 | 31367 |
+| `11` | `FICHA_60` | ficha de um jogador dele | 23 | 0 | 29774 |
+| `11` | `TIME_120` | time 120 | 25 | 0 | 43010 |
+| `11` | `FICHA_120` | ficha de um jogador dele | 6 | 0 | 3292 |
+| `11` | `TIME_180` | time 180 | 17 | 0 | 11280 |
+| `11` | `ESTRATEGIA_180` | formação desse time | 3 | 0 | 1556 |
+| `11` | `FICHA_180` | ficha de um jogador dele | 6 | 0 | 3292 |
+| `11` | `TIME_2_FUNDO` | time 60 do lado direito | 5 | 0 | 20633 |
+| `11` | `FICHA_2_FUNDO` | ficha de um jogador dele | 10 | 0 | 7284 |
+| `11` | `FIM` | — | 0 | 0 | 0 |
+
+**18 `OFS_*` saíram de hipótese nesta passagem** — nenhuma
+sessão anterior os tinha endereçado:
+
+| `Offsets.hpp` | valor | sessão | ação | op |
+|---|---:|---|---|:---:|
+| `OFS_PLAYER_NAME_2` | 390456 | `10` | `TIME_FUNDO` | R |
+| `OFS_PLAYER_NAME_3` | 392808 | `10` | `TIME_FUNDO` | R |
+| `OFS_PLAYER_NAME_4` | 395160 | `10` | `TIME_FUNDO` | R |
+| `OFS_PLAYER_NAME_5` | 397512 | `11` | `FICHA_60` | R |
+| `OFS_PLAYER_NAME_6` | 399864 | `11` | `FICHA_60` | R |
+| `OFS_PLAYER_NAME_7` | 402216 | `11` | `FICHA_60` | R |
+| `OFS_PLAYER_NAME_8` | 404568 | `11` | `TIME_120` | R |
+| `OFS_ML_PLAYER_NAME` | 2006288 | `11` | `TIME_120` | R |
+| `OFS_ML_PLAYER_NAME_2` | 2008632 | `11` | `TIME_120` | R |
+| `OFS_ML_PLAYER_NAME_3` | 2010984 | `11` | `TIME_120` | R |
+| `OFS_FORMATIONS` | 2303700 | `10` | `ESTRATEGIA` | R |
+| `OFS_KICKER` | 2329056 | `10` | `ESTRATEGIA` | R |
+| `OFS_KIT_PREVIEW_A` | 2669544 | `10` | `TIME_FUNDO` | R |
+| `OFS_KIT_PREVIEW_B` | 2671896 | `11` | `TIME_120` | R |
+| `OFS_KIT_PREVIEW_C` | 2674248 | `11` | `TIME_120` | R |
+| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | `11` | `FICHA_60` | R |
+| `OFS_FLAG_COLOURS_A` | 12550296 | `10` | `TIME_FUNDO` | R |
+| `OFS_FLAG_COLOURS_B` | 12552648 | `11` | `TIME_120` | R |
+
+### O achado grande: a região do uniforme
+
+Extrair a camisa para arquivo lê **16 faixas contíguas**,
+de `21168024` a `21203815` — 35792 bytes, setores 9000 a 9015.
+O maior offset que o `Offsets.hpp` conhece é `12552648`: esta região
+está **8 MB acima** dele, e o
+`newWe2002` nunca precisou nomeá-la porque não desenha uniforme.
+
+É a entrada da [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md), e é a maior região
+nova que esta task achou.
+
+---
+
+## Os 50, um a um — o veredito de cada
+
+O critério da WTE-TASK-19 é *resolver ou declarar irrelevante* cada um
+dos 50 `OFS_*` que a WTE-TASK-06 marcou `ausente`. São três vereditos, e
+dois deles vêm de régua diferente:
+
+- **endereçado** — o `wte.exe` foi ali, medido por `strace`;
+- **retomada de fronteira** — o offset não é endereço de campo: é o
+  ponto onde o `Database.cpp` do `newWe2002` retoma a leitura de um
+  registro que cai em cima da fronteira de setor, dentro de um
+  `case N :`. Só o registro N o endereça, e o `wte.exe` só o
+  endereçaria se o usuário escolhesse exatamente aquele jogador;
+- **base de varredura** — o offset é a base de um lote que o legado
+  desfila com um `for`. Só o primeiro registro do lote a endereça.
+
+Os dois últimos saem do **fonte**, não da tela, e é isso que os torna
+resposta: a ausência deles num trace é a previsão do papel que eles têm,
+não buraco de cobertura. Quem varre é o Moriero; o Obocaman salta direto
+para o registro que a tela mostra.
+
+| `Offsets.hpp` | valor | veredito | prova |
+|---|---:|---|---|
+| `OFS_PLAYER_NAME` | 387792 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_PLAYER_NAME_2` | 390456 | endereçado | `10`/`TIME_FUNDO` R |
+| `OFS_PLAYER_NAME_3` | 392808 | endereçado | `10`/`TIME_FUNDO` R |
+| `OFS_PLAYER_NAME_4` | 395160 | endereçado | `10`/`TIME_FUNDO` R |
+| `OFS_PLAYER_NAME_5` | 397512 | endereçado | `11`/`FICHA_60` R |
+| `OFS_PLAYER_NAME_6` | 399864 | endereçado | `11`/`FICHA_60` R |
+| `OFS_PLAYER_NAME_7` | 402216 | endereçado | `11`/`FICHA_60` R |
+| `OFS_PLAYER_NAME_8` | 404568 | endereçado | `11`/`TIME_120` R |
+| `OFS_SQUAD_NUMBERS_NATIONAL` | 404716 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_TEAM_NAME_1_END` | 1013431 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_TEAM_NAME_1_A` | 1013736 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_TEAM_NAME_KANJI_A` | 2003928 | endereçado | `06`/`ARRANQUE` R |
+| `OFS_ML_PLAYER_NAME` | 2006288 | endereçado | `11`/`TIME_120` R |
+| `OFS_ML_PLAYER_NAME_2` | 2008632 | endereçado | `11`/`TIME_120` R |
+| `OFS_ML_PLAYER_NAME_3` | 2010984 | endereçado | `11`/`TIME_120` R |
+| `OFS_LINK_ML1` | 2012728 | endereçado | `06`/`ARRANQUE` R |
+| `OFS_LINK_ML2` | 2013336 | endereçado | `06`/`ARRANQUE` R |
+| `OFS_SQUAD_NUMBERS_ML` | 2014504 | endereçado | `06`/`ARRANQUE` R |
+| `OFS_PLAYER_ATTR` | 2179492 | endereçado | `09`/`CALCULA_PRECO` R |
+| `OFS_PLAYER_ATTR_1` | 2180328 | retomada de fronteira | `case 44+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_2` | 2182680 | retomada de fronteira | `case 215+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_3` | 2185032 | retomada de fronteira | `case 385+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_4` | 2187384 | retomada de fronteira | `case 556+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_5` | 2189736 | retomada de fronteira | `case 727+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_6` | 2192088 | retomada de fronteira | `case 897+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_7` | 2194440 | retomada de fronteira | `case 1068+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_8` | 2196792 | retomada de fronteira | `case 1239+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_9` | 2199144 | retomada de fronteira | `case 1409+PLAYERS_NC` no `Database.cpp` |
+| `OFS_ML_PLAYER_ATTR` | 2204112 | base de varredura | `Seek` + `for` no `Database.cpp` |
+| `OFS_ML_PLAYER_ATTR_1` | 2206200 | retomada de fronteira | `case 148` no `Database.cpp` |
+| `OFS_ML_PLAYER_ATTR_2` | 2208552 | retomada de fronteira | `case 319` no `Database.cpp` |
+| `OFS_FORMATIONS` | 2303700 | endereçado | `10`/`ESTRATEGIA` R |
+| `OFS_FORMATIONS_A` | 2304984 | retomada de fronteira | `case 32` no `Database.cpp` |
+| `OFS_TEAM_BARS` | 2328184 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_TEAM_BARS_A` | 2328504 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_KICKER` | 2329056 | endereçado | `10`/`ESTRATEGIA` R |
+| `OFS_ML_TEAM_NAME_8` | 2476048 | base de varredura | `Seek` + `for` no `Database.cpp` |
+| `OFS_ML_TEAM_NAME_8_A` | 2476680 | retomada de fronteira | `case 30` no `Database.cpp` |
+| `OFS_KIT_PREVIEW` | 2667256 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_KIT_PREVIEW_A` | 2669544 | endereçado | `10`/`TIME_FUNDO` R |
+| `OFS_KIT_PREVIEW_B` | 2671896 | endereçado | `11`/`TIME_120` R |
+| `OFS_KIT_PREVIEW_C` | 2674248 | endereçado | `11`/`TIME_120` R |
+| `OFS_TEAM_NAME_5` | 4822908 | base de varredura | `Seek` + `for` no `Database.cpp` |
+| `OFS_TEAM_NAME_5_A` | 4823976 | retomada de fronteira | `case 57` no `Database.cpp` |
+| `OFS_TEAM_NAME_6_A` | 5651880 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_TEAM_NAME_6_B` | 5652364 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | endereçado | `11`/`FICHA_60` R |
+| `OFS_FLAG_COLOURS` | 12549518 | endereçado | `06`/`SELECIONA_TIME` R |
+| `OFS_FLAG_COLOURS_A` | 12550296 | endereçado | `10`/`TIME_FUNDO` R |
+| `OFS_FLAG_COLOURS_B` | 12552648 | endereçado | `11`/`TIME_120` R |
+
+| veredito | quantos |
+|---|---:|
+| endereçado | 33 |
+| retomada de fronteira | 14 |
+| base de varredura | 3 |
+
+**Nenhum sem veredito.** O critério da task está fechado — o que não
+quer dizer que os 17 não endereçados sejam
+inalcançáveis: quer dizer que alcançá-los exige escolher na tela
+exatamente o registro que cai na fronteira, e que a ausência deles é
+previsão do fonte, não buraco de cobertura.
 
 ---
 

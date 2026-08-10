@@ -311,6 +311,15 @@ constante) ou nomeia regiões que o Moriero não nomeou. Descobrir esses 50 é
 trabalho da Fase 3 — mas partindo de 19 confirmados e de um formato **já
 documentado e testado byte a byte** contra o `ed.exe`.
 
+> **Medido depois, e corrige o parágrafo acima:** há um terceiro motivo, e ele
+> responde por 17 dos 50. Esses não são endereço de campo nenhum — são artefato
+> do jeito de **ler** do Moriero: ponto de retomada quando um registro cai em
+> cima da fronteira de setor (14) e base de varredura sequencial (3). O
+> Obocaman não varre; salta direto para o registro que a tela mostra, e por
+> isso nunca passa por eles. Os outros 33 foram endereçados sob `strace`.
+> Veredito linha a linha em [`../wte/re/offsets-novos.md`](../wte/re/offsets-novos.md)
+> (WTE-TASK-19).
+
 Nenhum projeto de RE começa sabendo o formato do arquivo-alvo. Este começa.
 
 ### 1.8 Ativos externos: nada a reverter
