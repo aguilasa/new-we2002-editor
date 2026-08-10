@@ -16,6 +16,30 @@ status: pendente
 - Executar o transpilador da WTE-TASK-17 sobre as ~2.150 linhas e resolver o que
   o `FORBIDDEN` recusar.
 
+> **Escopo ampliado pela WTE-TASK-17 — o passe estrutural é desta task.**
+>
+> O `tools/port_database.py`, o precedente, pôde ser substituição textual pura
+> porque a fonte e o alvo dele são a **mesma linguagem**. C++ → Pascal não pode:
+> bloco, cabeçalho de laço, assinatura de função e declaração de variável não
+> têm forma comum, e nenhuma regex os alcança sem casamento de chave.
+>
+> A WTE-TASK-17 entregou a camada de **statement e expressão** — 41 regras, os
+> dois guards, 35 testes — e pôs a estrutura no `FORBIDDEN` em vez de deixá-la
+> passar. Emitir `.pas` com corpo em C++ produziria um artefato que parece
+> camada de dados, não compila, e convida a "só ajustar à mão" o que a §4.4
+> proíbe.
+>
+> Das **493 recusas** que o `wte/re/transpilador.md` lista, **447 são o passe
+> estrutural** e 46 são construção C++ sem tradução decidida. Construir o passe
+> é a primeira parte desta task; as outras 46 são as três rotas de sempre.
+>
+> O que o passe precisa cobrir, medido na entrada: `{ }` → `begin`/`end`;
+> `for (i = 0; i < N; i++)` → `for i := 0 to N-1 do`, e passo ≠ 1 → `while`;
+> assinatura de função → `procedure`/`function` com as locais **hoisted** para
+> um bloco `var`; `struct` → `record`, com `packed` só onde a decisão 2 do
+> `tipos.md` manda; `switch` → `case`, e **fallthrough não traduz** (há dois,
+> em `Database.cpp:450` e `:1256`, e os dois decidem quantos bytes ler).
+
 **O que o `FORBIDDEN` recusa não é falha do gerador — é trabalho identificado.**
 Cada recusa tem três saídas, e a decisão vai escrita:
 
@@ -74,6 +98,7 @@ Vindas do `newWe2002`, todas com custo pago:
 
 ## Critério de conclusão
 
+- [ ] Passe estrutural implementado no `port_database_pas.py`, com teste
 - [ ] As cinco unidades geradas e compilando
 - [ ] Toda recusa do `FORBIDDEN` com rota escolhida e razão escrita
 - [ ] Se houve rota 2: `ctest` e o golden do `newWe2002` verdes depois
