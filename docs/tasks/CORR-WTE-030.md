@@ -3,7 +3,7 @@ id: CORR-WTE-030
 title: "Correção: o `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy`"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -89,21 +89,42 @@ e estender a exigência do gerador a ambas:
 | Arquivo | Ação |
 |---|---|
 | `wte/re/tipos.md` | modificar |
+| `docs/tasks/15-mapeamento-de-tipo.md` | modificar (achado na varredura) |
 
 ## Verificação
 
-- [ ] `grep -c strcpy src/core/Database.cpp` dá 40, e o `tipos.md` afirma 40
-- [ ] O `tipos.md` nomeia `CopyAllStarNames` e a grafia `std::strcpy`
-- [ ] `python3 wte/tools/port_database_pas.py --check` continua verde
+- [x] `grep -c strcpy src/core/Database.cpp` dá 40, e o `tipos.md` afirma 40
+- [x] O `tipos.md` nomeia `CopyAllStarNames` e a grafia `std::strcpy`
+- [x] `python3 wte/tools/port_database_pas.py --check` continua verde
 - [ ] A saída do transpilador não deixa `std::strcpy` cru — `grep -n 'std::strcpy' wte/src/*.pas` vazio quando a WTE-TASK-18 tiver rodado
-- [ ] `roms/` intocada
+      *(a WTE-TASK-18 não rodou: `wte/src/` só tem os esqueletos `ep2002_*` e as
+      tabelas geradas, nenhuma unidade `we2002_database`. `grep -rn 'std::strcpy'
+      wte/src/` dá 0 hoje porque não existe saída, não porque ela esteja limpa —
+      o item fica aberto de propósito, para ser conferido lá)*
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A decisão 1 do `tipos.md` passou a afirmar **40 `strcpy` e 10 `strcat`**, com a
+repartição escrita: 38 `strcpy` e os 10 `strcat` no corpo do `Load()`, mais duas
+`std::strcpy` em `CopyAllStarNames()` (linhas 98 e 100), que o `Load()` chama na
+linha 778. Junto foi a instrução que o número existe para sustentar: **a regra
+de cópia do gerador tem de casar as duas grafias**, porque uma substituição
+ancorada em `strcpy(` atravessa as duas qualificadas sem tocá-las.
+
 **Problemas encontrados:**
 
+A varredura achou um segundo sítio que a CORR não listava:
+`docs/tasks/15-mapeamento-de-tipo.md:120` repete "38 `strcpy` e 10 `strcat`" na
+seção de precisões — e é o texto que o executor da WTE-TASK-17/18 lê antes de
+escrever a regra de cópia, o pior lugar para o número velho sobreviver.
+Corrigido na mesma invocação, com ponteiro para a decisão 1.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/tipos.md`
+- `docs/tasks/15-mapeamento-de-tipo.md`

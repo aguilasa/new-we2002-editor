@@ -73,8 +73,11 @@ truncamento em vez de reproduzi-lo.
 declarado no C++ — `Player.name` é `array[0..10]`, `Player.url` é
 `array[0..499]`, `Team.raw_formation` é `array[0..30]`.
 
-Isso não basta sozinho, porque a entrada tem **38 `strcpy` e 10 `strcat`** em
-`Database.cpp`. Um `Move` não os substitui: eles copiam *até o NUL inclusive*, e
+Isso não basta sozinho, porque a entrada tem **40 `strcpy` e 10 `strcat`** em
+`Database.cpp` — 38 `strcpy` e os 10 `strcat` no corpo do `Load()`, mais duas
+`std::strcpy` em `CopyAllStarNames()` (linhas 98 e 100), que o `Load()` chama na
+linha 778. **A regra de cópia tem de casar as duas grafias**, qualificada e nua:
+uma substituição ancorada em `strcpy(` atravessa as duas últimas sem tocá-las. Um `Move` não os substitui: eles copiam *até o NUL inclusive*, e
 o comprimento não está escrito em lugar nenhum. **Decisão: o gerador emite duas
 rotinas de cópia com semântica de C — copiar byte a byte até o `#0` inclusive,
 sem checar limite** — e nunca `StrPCopy`/`StrLCopy`, que truncam de outro jeito.

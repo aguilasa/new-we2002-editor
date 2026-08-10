@@ -117,8 +117,10 @@ Como o gerador implementa. Aqui se decide **o quê**, a WTE-TASK-17 faz o **como
 
   Duas precisões nas previstas:
 
-  - **`char[N]` não basta ser array.** A entrada tem **38 `strcpy` e 10
-     `strcat`**, que copiam *até o `#0` inclusive* sem comprimento escrito em
+  - **`char[N]` não basta ser array.** A entrada tem **40 `strcpy` e 10
+     `strcat`** (38 `strcpy` e os 10 `strcat` no `Load()`, mais duas
+     `std::strcpy` em `CopyAllStarNames()` — ver a decisão 1 do `tipos.md`),
+     que copiam *até o `#0` inclusive* sem comprimento escrito em
      lugar nenhum. O gerador tem de emitir cópia com semântica de C, sem
      checagem — e **não** `StrPCopy`/`StrLCopy`, que truncam de outro jeito. O
      `raw_formation` de 31 bytes vem junto, herdado da correção que o
