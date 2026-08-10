@@ -1,0 +1,99 @@
+# 06 -- diff dirigido: que regioes da imagem o wte.exe toca, area por area.
+#
+# Insumo da WTE-TASK-19, rodado por wte/tools/diff_dirigido.sh. Cada `=` corta
+# o trace de I/O; tudo entre duas marcas e a conta daquela acao.
+alvo: original
+estado: ok
+
+# Coordenadas: relativas a janela resolvida pelo `>` anterior, e tiradas do
+# wte/re/dfm/MainForm.dfm -- Left/Top do controle mais o do GroupBox pai. O
+# DFM bate 1:1 com o cliente da janela no :99 (medido: ClientWidth 522 x
+# ClientHeight 475 e o que o xdotool devolve).
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+# O dialogo abre ja no E:, que o Makefile mapeia para work/. Digitar CURTO:
+# `xdotool type` embaralha string longa.
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+# O aviso de tamanho e o mesmo do ed.exe e igualmente inofensivo -- a imagem
+# nao tem os 474.431.328 bytes exatos que o editor espera.
+> Cuidado
+! clique 222 148
+~ 3
+
+# O splash. Ele aparece ANTES do MainForm: o caminho de carga inteiro pendura
+# em MainForm.FormCreate (wte/re/eventos.md, achado 3).
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------ as areas ANTES de trocar de time --
+#
+# A ordem nao e de conveniencia: **selecionar um time mata o `wte.exe`** com
+# estas ROMs (SIGSEGV/SEGV_MAPERR em NULL, medido -- ver offsets-novos.md).
+# Tudo que puder ser exercitado sem time selecionado vem primeiro; a troca de
+# time fica por ultimo, porque depois dela nao ha sessao.
+
+# grupo_barras (8,72) + boton_barras2iso (8,112) = (16,184), 73x25.
+! clique 52 196
+~ 3
+= GRAVA_BARRAS
+
+# grupo_nombre (336,48) + iguala_nombres (8,136) = (344,184).
+! clique 380 196
+~ 2
+= IGUALA_NOMES
+
+# grupo_nombre (336,48) + boton_nombres2iso (96,136) = (432,184).
+! clique 468 196
+~ 3
+= GRAVA_NOMES
+
+# GroupBox4 (216,8) + colorear (8,176) = (224,184). Bandeira e cor de radar,
+# novidade da v0.99.
+! clique 272 196
+~ 3
+= PINTAR
+
+# grupo_memorycard (8,224) + grabar_camiseta (392,56) = (400,280), 25x25.
+! clique 412 292
+~ 3
+= GRAVA_CAMISETA
+
+# grupo_memorycard (8,224) + grabar_memory (88,56) = (96,280), 25x25.
+! clique 108 292
+~ 3
+= GRAVA_MEMORY
+
+# GroupBox1 (8,320) + mostrar_jugador_1 (8,72) = (16,392). A ficha do jogador
+# e onde moram cabelo, barba e `careto` (WTE-TASK-08).
+! clique 28 402
+~ 3
+= ABRE_JOGADOR
+
+# GroupBox1 (8,320) + base_team (8,16) = (16,336). Recarrega o lado titular e
+# atualiza o contador SPC de blocos de ML livres.
+! clique 64 347
+~ 3
+= TIME_TITULAR
+
+# ------------------------------------------- por ultimo: selecionar um time --
+#
+# Pelo TECLADO, e nao pela lista suspensa. Medido: no :99, sem window manager,
+# a lista suspensa do combo fica MAPEADA depois do clique no item e segura o
+# ponteiro -- todo clique seguinte morre nela, inclusive num botao do outro
+# lado da janela. Com Down o combo troca de item sem abrir lista.
+! clique 50 46
+~ 1
+! tecla Down
+~ 4
+= SELECIONA_TIME

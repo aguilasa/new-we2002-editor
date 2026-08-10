@@ -26,6 +26,35 @@ a origem, que muda a cada execução. O carimbo de tempo fica fora do `@` de
 propósito: ele existe para ler intervalo, e a informação está na **ordem** das
 linhas (ver o cabeçalho de [`../../src/retrace.pas`](../../src/retrace.pas)).
 
+## O roteiro 06 fala outro dialeto
+
+[`06-diff-dirigido.txt`](06-diff-dirigido.txt) é da WTE-TASK-19 e quem o
+executa é [`../../tools/diff_dirigido.sh`](../../tools/diff_dirigido.sh), não a
+mão. Ele acrescenta duas diretivas e troca a linha de `xdotool` crua por
+verbos:
+
+| Prefixo | Significado |
+|---|---|
+| `>` | espera a janela com esse nome e passa a ser a origem das coordenadas |
+| `=` | corta o log de I/O; tudo até a próxima marca é a conta daquela ação |
+| `!` | `clique X Y`, `duplo X Y`, `tecla <k>`, `texto <t>` |
+
+O motivo dos verbos é a coordenada: sem window manager no `:99` a origem da
+janela muda a cada corrida, e escrever `xdotool` cru obrigaria cada linha a
+saber somar. As coordenadas saem do
+[`../../re/dfm/MainForm.dfm`](../../re/dfm/MainForm.dfm) — `Left`/`Top` do
+controle mais o do `GroupBox` pai —, e o DFM bate **1:1** com o cliente da
+janela: medido, `ClientWidth` 522 × `ClientHeight` 475 é exatamente o que o
+`xdotool getwindowgeometry` devolve.
+
+**Uma armadilha que custou dois diagnósticos:** a lista suspensa de um
+`TComboBox` fica **mapeada** depois do clique no item e segura o ponteiro —
+todo clique seguinte morre nela, inclusive num botão do outro lado da janela.
+Trocar de item pelo teclado (`Down`) evita a lista. E o sintoma "o clique
+parou de funcionar" tem um segundo culpado, que é pior: o `wte.exe` **cai** ao
+carregar um time com as ROMs deste repositório, e a janela sobrevive ao
+processo. Confira `ps -o stat` procurando `Z`, e não a tela.
+
 ## Replicar
 
 Lado port, com o trace num arquivo próprio:

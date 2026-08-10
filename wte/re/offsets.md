@@ -285,8 +285,19 @@ varreduras diferentes, e é por isso que este script faz as duas.
 
 ### Os 50 restantes, classificados
 
-A classificação é **hipótese priorizada, não prova** — resolver é da WTE-TASK-19.
-A regra é busca em largura a partir das bases que o Obocaman comprovadamente tem:
+A classificação é **hipótese priorizada, não prova**. Quem prova é a execução, e
+ela já rodou: a coluna **medido** traz o veredito da WTE-TASK-19, que pôs o
+`wte.exe` sob `strace` e olhou que faixa da imagem cada ação endereça. Detalhe em
+[`offsets-novos.md`](offsets-novos.md).
+
+**14 dos 50** já saíram de hipótese: o `wte.exe` endereçou o ponto em
+execução. Os demais continuam sem evidência dinâmica — e isso **não** quer dizer
+que ele não os alcance: quer dizer que a sessão medida não chegou na tela que os
+toca. Ela não chegou porque o `wte.exe` **cai** ao carregar um time com as ROMs
+deste repositório; a medida e a consequência estão no `offsets-novos.md`.
+
+A regra de classificação é busca em largura a partir das bases que o Obocaman
+comprovadamente tem:
 
 - **H1** — deriva de um offset **confirmado**, por deslocamento dentro do mesmo
   setor (`|Δ| < 2352`) ou por um número inteiro de setores (`|k| <= 32`);
@@ -306,58 +317,58 @@ família inteira de passo de setor entrar a partir de uma única âncora.
 | H3 — sem base derivável | 9 |
 | **total** | **50** |
 
-| `Offsets.hpp` | valor | classe | base | relação | Δ | prof. |
-|---|---:|---|---:|---|---:|---:|
-| `OFS_TEAM_NAME_1_END` | 1013431 | H1 | 1012640 (`OFS_TEAM_NAME_1`) | mesmo setor | 791 | 1 |
-| `OFS_TEAM_NAME_1_A` | 1013736 | H1 | 1012640 (`OFS_TEAM_NAME_1`) | mesmo setor | 1096 | 1 |
-| `OFS_TEAM_NAME_5` | 4822908 | H3 | 4904664 (`OFS_FLAG_SHAPE_COPY_4`) | - | -81756 | — |
-| `OFS_TEAM_NAME_5_A` | 4823976 | H3 | 4904664 (`OFS_FLAG_SHAPE_COPY_4`) | - | -80688 | — |
-| `OFS_TEAM_NAME_6_A` | 5651880 | H1 | 5651448 (`OFS_TEAM_NAME_6`) | mesmo setor | 432 | 1 |
-| `OFS_TEAM_NAME_6_B` | 5652364 | H1 | 5651448 (`OFS_TEAM_NAME_6`) | mesmo setor | 916 | 1 |
-| `OFS_TEAM_NAME_KANJI_A` | 2003928 | H1 | 2003996 (`OFS_TEAM_NAME_3`) | mesmo setor | -68 | 1 |
-| `OFS_ML_TEAM_NAME_8` | 2476048 | H2 | 2476680 (`OFS_ML_TEAM_NAME_8_A`) | mesmo setor | -632 | 2 |
-| `OFS_ML_TEAM_NAME_8_A` | 2476680 | H2 | 2469624 *(candidato)* | +3 setores | 7056 | 1 |
-| `OFS_TEAM_BARS` | 2328184 | H1 | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 124 | 1 |
-| `OFS_TEAM_BARS_A` | 2328504 | H1 | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 444 | 1 |
-| `OFS_KICKER` | 2329056 | H1 | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 996 | 1 |
-| `OFS_PLAYER_NAME` | 387792 | H2 | 389920 *(candidato)* | mesmo setor | -2128 | 1 |
-| `OFS_PLAYER_NAME_2` | 390456 | H2 | 389920 *(candidato)* | mesmo setor | 536 | 1 |
-| `OFS_PLAYER_NAME_3` | 392808 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +1 setor | 2352 | 2 |
-| `OFS_PLAYER_NAME_4` | 395160 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +2 setores | 4704 | 2 |
-| `OFS_PLAYER_NAME_5` | 397512 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +3 setores | 7056 | 2 |
-| `OFS_PLAYER_NAME_6` | 399864 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +4 setores | 9408 | 2 |
-| `OFS_PLAYER_NAME_7` | 402216 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +5 setores | 11760 | 2 |
-| `OFS_PLAYER_NAME_8` | 404568 | H2 | 390456 (`OFS_PLAYER_NAME_2`) | +6 setores | 14112 | 2 |
-| `OFS_ML_PLAYER_NAME` | 2006288 | H1 | 2005412 (`OFS_FLAG_SHAPE_COPY_2`) | mesmo setor | 876 | 1 |
-| `OFS_ML_PLAYER_NAME_2` | 2008632 | H2 | 1999224 *(candidato)* | +4 setores | 9408 | 1 |
-| `OFS_ML_PLAYER_NAME_3` | 2010984 | H1 | 2012680 (`OFS_LINK_ML`) | mesmo setor | -1696 | 1 |
-| `OFS_PLAYER_ATTR` | 2179492 | H2 | 2180328 (`OFS_PLAYER_ATTR_1`) | mesmo setor | -836 | 3 |
-| `OFS_PLAYER_ATTR_1` | 2180328 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -11 setores | -25872 | 2 |
-| `OFS_PLAYER_ATTR_2` | 2182680 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -10 setores | -23520 | 2 |
-| `OFS_PLAYER_ATTR_3` | 2185032 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -9 setores | -21168 | 2 |
-| `OFS_PLAYER_ATTR_4` | 2187384 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -8 setores | -18816 | 2 |
-| `OFS_PLAYER_ATTR_5` | 2189736 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -7 setores | -16464 | 2 |
-| `OFS_PLAYER_ATTR_6` | 2192088 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -6 setores | -14112 | 2 |
-| `OFS_PLAYER_ATTR_7` | 2194440 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -5 setores | -11760 | 2 |
-| `OFS_PLAYER_ATTR_8` | 2196792 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -4 setores | -9408 | 2 |
-| `OFS_PLAYER_ATTR_9` | 2199144 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -3 setores | -7056 | 2 |
-| `OFS_ML_PLAYER_ATTR` | 2204112 | H2 | 2204904 *(candidato)* | mesmo setor | -792 | 1 |
-| `OFS_ML_PLAYER_ATTR_1` | 2206200 | H2 | 2204904 *(candidato)* | mesmo setor | 1296 | 1 |
-| `OFS_ML_PLAYER_ATTR_2` | 2208552 | H2 | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | +1 setor | 2352 | 2 |
-| `OFS_FLAG_COLOURS` | 12549518 | H3 | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6837878 | — |
-| `OFS_FLAG_COLOURS_A` | 12550296 | H3 | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6838656 | — |
-| `OFS_FLAG_COLOURS_B` | 12552648 | H3 | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6841008 | — |
-| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | H2 | 12544268 *(candidato)* | mesmo setor | 1490 | 1 |
-| `OFS_SQUAD_NUMBERS_ML` | 2014504 | H1 | 2012680 (`OFS_LINK_ML`) | mesmo setor | 1824 | 1 |
-| `OFS_SQUAD_NUMBERS_NATIONAL` | 404716 | H2 | 404568 (`OFS_PLAYER_NAME_8`) | mesmo setor | 148 | 3 |
-| `OFS_FORMATIONS` | 2303700 | H1 | 2304984 (`OFS_FORMATIONS_A`) | mesmo setor | -1284 | 3 |
-| `OFS_FORMATIONS_A` | 2304984 | H1 | 2328504 (`OFS_TEAM_BARS_A`) | -10 setores | -23520 | 2 |
-| `OFS_LINK_ML1` | 2012728 | H1 | 2012680 (`OFS_LINK_ML`) | mesmo setor | 48 | 1 |
-| `OFS_LINK_ML2` | 2013336 | H1 | 2012680 (`OFS_LINK_ML`) | mesmo setor | 656 | 1 |
-| `OFS_KIT_PREVIEW` | 2667256 | H3 | 2830160 (`OFS_TEAM_NAME_4`) | - | -162904 | — |
-| `OFS_KIT_PREVIEW_A` | 2669544 | H3 | 2830160 (`OFS_TEAM_NAME_4`) | - | -160616 | — |
-| `OFS_KIT_PREVIEW_B` | 2671896 | H3 | 2830160 (`OFS_TEAM_NAME_4`) | - | -158264 | — |
-| `OFS_KIT_PREVIEW_C` | 2674248 | H3 | 2830160 (`OFS_TEAM_NAME_4`) | - | -155912 | — |
+| `Offsets.hpp` | valor | classe | medido | base | relação | Δ | prof. |
+|---|---:|---|---|---:|---|---:|---:|
+| `OFS_TEAM_NAME_1_END` | 1013431 | H1 | R em `SELECIONA_TIME` | 1012640 (`OFS_TEAM_NAME_1`) | mesmo setor | 791 | 1 |
+| `OFS_TEAM_NAME_1_A` | 1013736 | H1 | R em `SELECIONA_TIME` | 1012640 (`OFS_TEAM_NAME_1`) | mesmo setor | 1096 | 1 |
+| `OFS_TEAM_NAME_5` | 4822908 | H3 | — | 4904664 (`OFS_FLAG_SHAPE_COPY_4`) | - | -81756 | — |
+| `OFS_TEAM_NAME_5_A` | 4823976 | H3 | — | 4904664 (`OFS_FLAG_SHAPE_COPY_4`) | - | -80688 | — |
+| `OFS_TEAM_NAME_6_A` | 5651880 | H1 | R em `SELECIONA_TIME` | 5651448 (`OFS_TEAM_NAME_6`) | mesmo setor | 432 | 1 |
+| `OFS_TEAM_NAME_6_B` | 5652364 | H1 | R em `SELECIONA_TIME` | 5651448 (`OFS_TEAM_NAME_6`) | mesmo setor | 916 | 1 |
+| `OFS_TEAM_NAME_KANJI_A` | 2003928 | H1 | R em `ARRANQUE` | 2003996 (`OFS_TEAM_NAME_3`) | mesmo setor | -68 | 1 |
+| `OFS_ML_TEAM_NAME_8` | 2476048 | H2 | — | 2476680 (`OFS_ML_TEAM_NAME_8_A`) | mesmo setor | -632 | 2 |
+| `OFS_ML_TEAM_NAME_8_A` | 2476680 | H2 | — | 2469624 *(candidato)* | +3 setores | 7056 | 1 |
+| `OFS_TEAM_BARS` | 2328184 | H1 | R em `SELECIONA_TIME` | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 124 | 1 |
+| `OFS_TEAM_BARS_A` | 2328504 | H1 | R em `SELECIONA_TIME` | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 444 | 1 |
+| `OFS_KICKER` | 2329056 | H1 | — | 2328060 (`OFS_FLAG_SHAPE_COPY_3`) | mesmo setor | 996 | 1 |
+| `OFS_PLAYER_NAME` | 387792 | H2 | R em `SELECIONA_TIME` | 389920 *(candidato)* | mesmo setor | -2128 | 1 |
+| `OFS_PLAYER_NAME_2` | 390456 | H2 | — | 389920 *(candidato)* | mesmo setor | 536 | 1 |
+| `OFS_PLAYER_NAME_3` | 392808 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +1 setor | 2352 | 2 |
+| `OFS_PLAYER_NAME_4` | 395160 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +2 setores | 4704 | 2 |
+| `OFS_PLAYER_NAME_5` | 397512 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +3 setores | 7056 | 2 |
+| `OFS_PLAYER_NAME_6` | 399864 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +4 setores | 9408 | 2 |
+| `OFS_PLAYER_NAME_7` | 402216 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +5 setores | 11760 | 2 |
+| `OFS_PLAYER_NAME_8` | 404568 | H2 | — | 390456 (`OFS_PLAYER_NAME_2`) | +6 setores | 14112 | 2 |
+| `OFS_ML_PLAYER_NAME` | 2006288 | H1 | — | 2005412 (`OFS_FLAG_SHAPE_COPY_2`) | mesmo setor | 876 | 1 |
+| `OFS_ML_PLAYER_NAME_2` | 2008632 | H2 | — | 1999224 *(candidato)* | +4 setores | 9408 | 1 |
+| `OFS_ML_PLAYER_NAME_3` | 2010984 | H1 | — | 2012680 (`OFS_LINK_ML`) | mesmo setor | -1696 | 1 |
+| `OFS_PLAYER_ATTR` | 2179492 | H2 | — | 2180328 (`OFS_PLAYER_ATTR_1`) | mesmo setor | -836 | 3 |
+| `OFS_PLAYER_ATTR_1` | 2180328 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -11 setores | -25872 | 2 |
+| `OFS_PLAYER_ATTR_2` | 2182680 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -10 setores | -23520 | 2 |
+| `OFS_PLAYER_ATTR_3` | 2185032 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -9 setores | -21168 | 2 |
+| `OFS_PLAYER_ATTR_4` | 2187384 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -8 setores | -18816 | 2 |
+| `OFS_PLAYER_ATTR_5` | 2189736 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -7 setores | -16464 | 2 |
+| `OFS_PLAYER_ATTR_6` | 2192088 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -6 setores | -14112 | 2 |
+| `OFS_PLAYER_ATTR_7` | 2194440 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -5 setores | -11760 | 2 |
+| `OFS_PLAYER_ATTR_8` | 2196792 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -4 setores | -9408 | 2 |
+| `OFS_PLAYER_ATTR_9` | 2199144 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | -3 setores | -7056 | 2 |
+| `OFS_ML_PLAYER_ATTR` | 2204112 | H2 | — | 2204904 *(candidato)* | mesmo setor | -792 | 1 |
+| `OFS_ML_PLAYER_ATTR_1` | 2206200 | H2 | — | 2204904 *(candidato)* | mesmo setor | 1296 | 1 |
+| `OFS_ML_PLAYER_ATTR_2` | 2208552 | H2 | — | 2206200 (`OFS_ML_PLAYER_ATTR_1`) | +1 setor | 2352 | 2 |
+| `OFS_FLAG_COLOURS` | 12549518 | H3 | R em `SELECIONA_TIME` | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6837878 | — |
+| `OFS_FLAG_COLOURS_A` | 12550296 | H3 | — | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6838656 | — |
+| `OFS_FLAG_COLOURS_B` | 12552648 | H3 | — | 5711640 (`OFS_FLAG_SHAPE_COPY_5`) | - | 6841008 | — |
+| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | H2 | — | 12544268 *(candidato)* | mesmo setor | 1490 | 1 |
+| `OFS_SQUAD_NUMBERS_ML` | 2014504 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 1824 | 1 |
+| `OFS_SQUAD_NUMBERS_NATIONAL` | 404716 | H2 | R em `SELECIONA_TIME` | 404568 (`OFS_PLAYER_NAME_8`) | mesmo setor | 148 | 3 |
+| `OFS_FORMATIONS` | 2303700 | H1 | — | 2304984 (`OFS_FORMATIONS_A`) | mesmo setor | -1284 | 3 |
+| `OFS_FORMATIONS_A` | 2304984 | H1 | — | 2328504 (`OFS_TEAM_BARS_A`) | -10 setores | -23520 | 2 |
+| `OFS_LINK_ML1` | 2012728 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 48 | 1 |
+| `OFS_LINK_ML2` | 2013336 | H1 | R em `ARRANQUE` | 2012680 (`OFS_LINK_ML`) | mesmo setor | 656 | 1 |
+| `OFS_KIT_PREVIEW` | 2667256 | H3 | R em `SELECIONA_TIME` | 2830160 (`OFS_TEAM_NAME_4`) | - | -162904 | — |
+| `OFS_KIT_PREVIEW_A` | 2669544 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -160616 | — |
+| `OFS_KIT_PREVIEW_B` | 2671896 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -158264 | — |
+| `OFS_KIT_PREVIEW_C` | 2674248 | H3 | — | 2830160 (`OFS_TEAM_NAME_4`) | - | -155912 | — |
 
 ### Os alvos que valem primeiro
 

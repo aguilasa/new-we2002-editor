@@ -31,7 +31,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ⬜ Pendente | — | — |
+| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | 🔄 Em andamento | — | — |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
@@ -196,7 +196,7 @@ conferível.
 - [x] `FORBIDDEN` e `check_seeks()` no transpilador, testados com entrada plantada
 - [x] As seis unidades de dados geradas e compilando
 - [x] Toda recusa do `FORBIDDEN` com rota escolhida e razão
-- [ ] Diff de controle (gravar sem editar) medido antes de qualquer offset novo
+- [x] Diff de controle (gravar sem editar) medido antes de qualquer offset novo
 - [ ] Dumps Pascal e C++ idênticos nas duas ROMs
 - [ ] Bitfield de `SquadNumbers` conferido contra imagem real
 - [ ] Registrado se o Ghidra foi necessário na fase 3
@@ -313,6 +313,16 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
+- **A release de 474.431.328 bytes virou pré-requisito da fase 4.** Medido na
+  WTE-TASK-19: o `wte.exe` **morre** (`SIGSEGV`/`SEGV_MAPERR` em `NULL`) logo
+  depois de carregar o primeiro time, com as duas ROMs deste repositório. Ele
+  avisa na abertura que o tamanho não corresponde — espera exatamente
+  474.431.328 bytes, e as nossas têm 474.784.128 (European Deluxe) e
+  307.187.664 (japonesa). Consequência: o **oráculo comportamental** do projeto
+  (§4.2) não passa da tela de carga, e o gate golden da
+  [WTE-TASK-22](/docs/tasks/22-harness-golden.md) não tem em que se apoiar. A
+  medida e o que ela custa estão em
+  [`../../wte/re/offsets-novos.md`](../../wte/re/offsets-novos.md).
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
   literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em

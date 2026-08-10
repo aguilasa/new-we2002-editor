@@ -13,6 +13,8 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `dfm2lfm.py` ✅ | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `check_lcl_props.py` ✅ | CORR-020 | **não gera nada** — remede a tabela `PROPRIEDADES` do `dfm2lfm.py` contra as seções `published` da LCL instalada |
 | `check_fase2.py` ✅ | 14 | os produtos da fase 2 → `re/fase-2.md`: os 96 stubs cruzados com o TSV, os 18 formulários, os 18 vereditos e a fração de código gerado |
+| `analisar_io.py` ✅ | 19 | trace de `strace` do `wte.exe` → `re/offsets-novos.md`: que faixa da imagem cada ação endereça |
+| `diff_dirigido.sh` ✅ | 19 | copia a ROM, dirige o `wte.exe` sob `strace` por roteiro, `cmp` contra a cópia limpa. **Não é gerador** — é `.sh` de propósito, para ficar fora do `--check` |
 | `spec_index.py` ✅ | 23 | os 96 handlers + as specs → `re/spec/INDICE.md`, **e valida cada spec** |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |
@@ -45,6 +47,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | `test_dfm2lfm.py` ✅ | o mapeamento VCL→LCL do `dfm2lfm.py`: as assinaturas por par (classe, evento), as propriedades sem par na LCL, a rota de blob ausente e os abortos |
 | `test_check_fase1.py` ✅ | o perímetro da varredura de sítios do `check_fase1.py`: quem entra, onde a leitura para (o Log de Execução), o corte por contexto que separa os `430` componentes do setor 430 do outro projeto, e a forma de história (`velho → corrente`), que não conta |
 | `test_check_fase2.py` ✅ | as dez rotas de aborto do `check_fase2.py` sobre uma árvore de fase 2 sintética: stub que sumiu, stub duplicado, stub na unidade que não declara a classe, formulário sem `.lfm`, `.lfm` sem `.dfm`, formulário sem veredito visual, `eventos.md` sem achado — mais a partição do hex de blob, que é o que mantém a fração honesta |
+| `test_analisar_io.py` ✅ | o parser do trace com linha plantada — `_llseek`+`read` sequencial, `pread64`, leitura curta, fd de outro arquivo, syscall que falhou — e a evidência commitada cruzada com o `Offsets.hpp` e com a geometria de setor |
 | `test_check_lcl_props.py` ✅ | as três guardas do `check_lcl_props.py`, com entrada plantada nos três sentidos — `ACEITA` inventada, `DESCARTA` que a LCL tem, `LCL_VERSAO` divergindo do disco —, sobre uma LCL sintética montada em diretório temporário |
 | `test_spec_index.py` ✅ | **as 15 rotas de recusa** do `spec_index.py` sobre specs sintéticas — 15 é `grep -c "raise SpecError" spec_index.py`, e é assim que se remede: TSV ausente, TSV só com cabeçalho, spec sem frontmatter, frontmatter não fechado, linha de frontmatter sem `:`, chave obrigatória ausente, decompilado colado nas sete formas de nome inventado mais o cast do Ghidra (`(int)*(int *)`, com o caso negativo em prosa), frontmatter discordando do TSV, veredito e evidência fora do vocabulário, seção faltando, seção sem evidência, `nao portado` sem justificativa, `implementado` só com observação de tela, spec órfã. **É a única coisa que mede essas regras** — `--check` verde sobre 96 `aberto` não exercita nenhuma |
 

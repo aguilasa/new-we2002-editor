@@ -93,6 +93,7 @@ so sao escritos depois que tudo foi medido.
 
 from __future__ import annotations
 
+import pathlib
 import re
 import struct
 import sys
@@ -826,6 +827,39 @@ def render_tsv(m: Measurement) -> str:
 # -------------------------------------------------------------- markdown ---
 
 
+def ler_medidos() -> dict[str, str]:
+    """`OFS_*` -> acao que o enderecou, medida pela WTE-TASK-19.
+
+    Le a evidencia que o `wte/tools/diff_dirigido.sh` produziu. Ausente o
+    arquivo, devolve vazio e o markdown diz isso em vez de fingir coluna.
+
+    A folga de 16 bytes na ponta de baixo e a mesma do `analisar_io.py`: o
+    `wte.exe` procura o inicio do NOME e nao o do REGISTRO, entao quase toda
+    leitura comeca em `OFS_* + 1`.
+    """
+    caminho = pathlib.Path(__file__).resolve().parents[2] / "wte/re/io-medido.tsv"
+    if not caminho.exists():
+        return {}
+    linhas = caminho.read_text(encoding="utf-8").splitlines()
+    if not linhas:
+        return {}
+    cab = linhas[0].split("\t")
+    faixas = []
+    for l in linhas[1:]:
+        r = dict(zip(cab, l.split("\t")))
+        if r.get("op") in ("R", "W") and r.get("inicio"):
+            faixas.append((int(r["inicio"]), int(r["fim"]), r["acao"], r["op"]))
+    fora: dict[str, str] = {}
+    for nome, valor in read_offsets_hpp(
+            (pathlib.Path(__file__).resolve().parents[2]
+             / "src/core/include/we2002/Offsets.hpp").read_text(encoding="utf-8")):
+        for a, b, acao, op in faixas:
+            if a - 16 <= valor <= b:
+                fora[nome] = f"{op} em `{acao}`"
+                break
+    return fora
+
+
 def plural(n: int, one: str, many: str) -> str:
     return one if n == 1 else many
 
@@ -1160,10 +1194,28 @@ def render_md(m: Measurement) -> str:
         + ". As duas formas precisam de\nvarreduras diferentes, e é por isso "
         "que este script faz as duas.\n")
 
+    medidos = ler_medidos()
     add(f"### Os {n_missing} restantes, classificados\n")
-    add("A classificação é **hipótese priorizada, não prova** — resolver é da "
-        "WTE-TASK-19.\nA regra é busca em largura a partir das bases que o "
-        "Obocaman comprovadamente tem:\n")
+    add("A classificação é **hipótese priorizada, não prova**. Quem prova é a "
+        "execução, e\nela já rodou: a coluna **medido** traz o veredito da "
+        "WTE-TASK-19, que pôs o\n`wte.exe` sob `strace` e olhou que faixa da "
+        "imagem cada ação endereça. Detalhe em\n"
+        "[`offsets-novos.md`](offsets-novos.md).\n")
+    if medidos:
+        atingidos = [i for i in m.missing if i.name in medidos]
+        add(f"**{len(atingidos)} dos {n_missing}** já saíram de hipótese: o "
+            f"`wte.exe` endereçou o ponto em\nexecução. Os demais continuam "
+            f"sem evidência dinâmica — e isso **não** quer dizer\nque ele não "
+            f"os alcance: quer dizer que a sessão medida não chegou na tela "
+            f"que os\ntoca. Ela não chegou porque o `wte.exe` **cai** ao "
+            f"carregar um time com as ROMs\ndeste repositório; a medida e a "
+            f"consequência estão no `offsets-novos.md`.\n")
+    else:
+        add("A coluna **medido** está vazia: `wte/re/io-medido.tsv` não "
+            "existe. Rode\n`bash wte/tools/diff_dirigido.sh "
+            "wte/tests/roteiros/06-diff-dirigido.txt`.\n")
+    add("A regra de classificação é busca em largura a partir das bases que o "
+        "Obocaman\ncomprovadamente tem:\n")
     add(f"- **H1** — deriva de um offset **confirmado**, por deslocamento "
         f"dentro do mesmo\n  setor (`|Δ| < {SECTOR_SIZE}`) ou por um número "
         f"inteiro de setores (`|k| <= {MAX_SECTOR_STEPS}`);\n"
@@ -1183,15 +1235,16 @@ def render_md(m: Measurement) -> str:
     add(f"| H3 — sem base derivável | {len(h3)} |")
     add(f"| **total** | **{n_missing}** |")
     add("")
-    add("| `Offsets.hpp` | valor | classe | base | relação | Δ | prof. |")
-    add("|---|---:|---|---:|---|---:|---:|")
+    add("| `Offsets.hpp` | valor | classe | medido | base | relação | Δ | prof. |")
+    add("|---|---:|---|---|---:|---|---:|---:|")
     for item in m.missing:
         base = "—" if item.base is None else str(item.base)
         if item.base_name:
             base += f" (`{item.base_name}`)"
         elif item.base is not None and item.cls != "H3":
             base += " *(candidato)*"
-        add(f"| `{item.name}` | {item.value} | {item.cls} | {base} | "
+        add(f"| `{item.name}` | {item.value} | {item.cls} "
+            f"| {medidos.get(item.name, '—')} | {base} | "
             f"{item.relation or '—'} | {item.delta} | "
             f"{item.depth or '—'} |")
     add("")

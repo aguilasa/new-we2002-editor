@@ -1,0 +1,39 @@
+imagem	acao	op	inicio	fim	tamanho	setor	byte_no_setor
+golden-european-deluxe.bin	ARRANQUE	R	0	22	23	0	0
+golden-european-deluxe.bin	ARRANQUE	R	11796	12307	512	5	36
+golden-european-deluxe.bin	ARRANQUE	R	2002316	2004047	1732	851	764
+golden-european-deluxe.bin	ARRANQUE	R	2012680	2014871	2192	855	1720
+golden-european-deluxe.bin	ARRANQUE	R	2736694	2737205	512	1163	1318
+golden-european-deluxe.bin	ARRANQUE	W	11784	13831	2048	5	24
+golden-european-deluxe.bin	ARRANQUE	W	14136	16183	2048	6	24
+golden-european-deluxe.bin	ARRANQUE	W	16488	18535	2048	7	24
+golden-european-deluxe.bin	ARRANQUE	W	18840	20887	2048	8	24
+golden-european-deluxe.bin	ARRANQUE	W	21192	23239	2048	9	24
+golden-european-deluxe.bin	ARRANQUE	W	23544	25591	2048	10	24
+golden-european-deluxe.bin	ARRANQUE	W	25896	27943	2048	11	24
+golden-european-deluxe.bin	ARRANQUE	W	1921862	1921862	1	817	278
+golden-european-deluxe.bin	GRAVA_BARRAS	.			0		
+golden-european-deluxe.bin	IGUALA_NOMES	.			0		
+golden-european-deluxe.bin	GRAVA_NOMES	.			0		
+golden-european-deluxe.bin	PINTAR	.			0		
+golden-european-deluxe.bin	GRAVA_CAMISETA	.			0		
+golden-european-deluxe.bin	GRAVA_MEMORY	.			0		
+golden-european-deluxe.bin	ABRE_JOGADOR	.			0		
+golden-european-deluxe.bin	TIME_TITULAR	.			0		
+golden-european-deluxe.bin	SELECIONA_TIME	R	387792	388827	1036	164	2064
+golden-european-deluxe.bin	SELECIONA_TIME	R	404716	405227	512	172	172
+golden-european-deluxe.bin	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+golden-european-deluxe.bin	SELECIONA_TIME	R	1013736	1014447	712	431	24
+golden-european-deluxe.bin	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+golden-european-deluxe.bin	SELECIONA_TIME	R	2002317	2005883	3567	851	765
+golden-european-deluxe.bin	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+golden-european-deluxe.bin	SELECIONA_TIME	R	2328060	2328695	636	989	1932
+golden-european-deluxe.bin	SELECIONA_TIME	R	2667258	2667801	544	1134	90
+golden-european-deluxe.bin	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+golden-european-deluxe.bin	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+golden-european-deluxe.bin	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+golden-european-deluxe.bin	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+golden-european-deluxe.bin	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+golden-european-deluxe.bin	SELECIONA_TIME	R	12549518	12550029	512	5335	1598
+golden-european-deluxe.bin	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+golden-european-deluxe.bin	FIM	.			0		
