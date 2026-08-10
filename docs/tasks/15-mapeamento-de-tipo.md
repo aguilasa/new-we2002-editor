@@ -81,7 +81,9 @@ Como o gerador implementa. Aqui se decide **o quê**, a WTE-TASK-17 faz o **como
 - [x] As três linhas difíceis decididas por escrito, não deixadas para o
       gerador — e saíram **cinco**: as três previstas mais o `char` numérico e
       o sidecar `_url.txt`
-- [x] Cada decisão com o teste que a prova nomeado
+- [x] Cada decisão com o teste que a prova nomeado *(a decisão 5 ficou sem o
+      dela na execução; escrito em 2026-08-10 pela
+      [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md))*
 - [x] Nenhum tipo de tamanho dependente de plataforma na tabela
 - [x] Commit no formato conventional, em inglês
 

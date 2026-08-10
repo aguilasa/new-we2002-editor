@@ -3,7 +3,7 @@ id: CORR-WTE-035
 title: "Correção: a decisão 5 do `tipos.md` não tem o \"teste que prova\", e o critério que o exige está marcado"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -86,21 +86,40 @@ Acrescentar ao fim da decisão 5 o bloco no mesmo formato das outras quatro:
 | Arquivo | Ação |
 |---|---|
 | `wte/re/tipos.md` | modificar |
+| `docs/tasks/15-mapeamento-de-tipo.md` | modificar (o critério que estava marcado) |
 
 ## Verificação
 
-- [ ] `grep -c 'Teste que prova' wte/re/tipos.md` dá 5, contra 5 decisões
-- [ ] O teste da decisão 5 diz o que contar: `#10`, ausência de `#13`, ausência
+- [x] `grep -c 'Teste que prova' wte/re/tipos.md` dá 5, contra 5 decisões
+- [x] O teste da decisão 5 diz o que contar: `#10`, ausência de `#13`, ausência
       de BOM, e o `cmp` contra o lado C++
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A decisão 5 ganhou o bloco "Teste que prova" no mesmo formato das outras quatro,
+em bytes: 1.911 ocorrências de `#10` (`PLAYERS_TOTAL`, `Types.hpp:12`), nenhum
+`#13`, nenhum BOM nos três primeiros bytes, término em `#10`, e `cmp` contra o
+sidecar que o `we2002_core` grava para a mesma base. Foi escrito por que o teste
+é em byte e não em linha: `TStringList` com `LineEnding` de Windows ou com
+`WriteBOM` ligado produz as mesmas 1.911 linhas e passa num teste de contagem —
+reescrevendo arquivo do usuário sem nada denunciar na tela.
+
+`grep -c 'Teste que prova'` agora dá 5, contra 5 `## Decisão`.
+
 **Problemas encontrados:**
 
+Nenhum. O critério "Cada decisão com o teste que a prova nomeado" da WTE-TASK-15
+continuava `[x]` afirmando algo que só agora é verdade; ficou com a ressalva
+datada e o ponteiro para esta correção, em vez de ser desmarcado — o estado que
+o `[x]` descreve existe a partir deste commit.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/tipos.md`
+- `docs/tasks/15-mapeamento-de-tipo.md`

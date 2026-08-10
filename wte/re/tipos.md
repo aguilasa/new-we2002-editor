@@ -234,6 +234,18 @@ usa `LineEnding` da plataforma e, pior, tem `WriteBOM`; nenhuma das duas coisas
 deve depender de configuração. `Rewrite`/`WriteLn` de `TextFile` também não,
 porque o `TextRec` insere buffer e tradução.
 
+> **Teste que prova:** gerar o sidecar de uma base com URL conhecida e conferir
+> **em bytes**, não em linhas — o arquivo tem **1.911** ocorrências de `#10`
+> (`PLAYERS_TOTAL`, `Types.hpp:12`), **nenhum `#13`**, **nenhum BOM** nos três
+> primeiros bytes, e **termina em `#10`**. Depois, `cmp` contra o arquivo que o
+> `we2002_core` grava para a mesma base: têm de ser byte a byte iguais.
+>
+> Contar linha não serve, e é por isso que o teste é em byte: `TStringList` com
+> `LineEnding` de Windows produz 1.911 linhas com CRLF, e um `WriteBOM` ligado
+> produz 1.911 linhas com três bytes a mais no começo. Os dois passariam num
+> teste de contagem de linha e reescreveriam **arquivo do usuário**, sem nada na
+> tela do editor denunciar.
+
 ---
 
 ## O que **não** entra na camada de dados
