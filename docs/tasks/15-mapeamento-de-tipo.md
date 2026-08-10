@@ -94,9 +94,11 @@ Como o gerador implementa. Aqui se decide **o quê**, a WTE-TASK-17 faz o **como
   [`../../wte/re/tipos.md`](../../wte/re/tipos.md) fechado, e a tabela da
   Fase 3 item 2 do plano ganhou as duas linhas que faltavam mais o ponteiro
   para ele. A tabela não saiu do enunciado: saiu do **inventário do que a
-  entrada real usa** — `Database.cpp`, `Player.cpp`, `CdImage.cpp`,
-  `TextCodec.cpp` e `Types.hpp`, que são as ~2.150 linhas que o transpilador
-  digere.
+  entrada real usa** — os cinco `.cpp` (`Database`, `Player`, `CdImage`,
+  `TextCodec`, `Team`) e os seis cabeçalhos que declaram o que eles manipulam,
+  **2.504 linhas** medidas. *(Escrito na execução como "~2.150 linhas", que era a
+  soma de cinco arquivos e omitia os cabeçalhos onde os registros são
+  declarados; corrigido pela [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md).)*
 
   As três decisões previstas fecharam como a §8.11 recomendava, e apareceram
   **duas que o enunciado não previa**:

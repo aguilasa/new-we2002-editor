@@ -12,9 +12,28 @@ explícito. O mesmo risco atravessa para Pascal com outra roupa — ver a §8.11
 **Escopo:** o que a camada de dados gerada usa. *Como* o gerador implementa é da
 [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md).
 
-**Entrada real medida** — os tipos que de fato aparecem em
-`src/core/Database.cpp`, `Player.cpp`, `CdImage.cpp`, `TextCodec.cpp` e
-`Types.hpp`, que são as ~2.150 linhas que o transpilador digere.
+**Entrada real medida** — os tipos que de fato aparecem na entrada do
+transpilador, que são **2.504 linhas** em 11 arquivos, separando implementação
+de declaração:
+
+| Papel | Arquivos | Linhas |
+|---|---|---|
+| implementação | `Database.cpp` (1.704), `Player.cpp` (130), `CdImage.cpp` (89), `TextCodec.cpp` (77), `Team.cpp` (16) | **2.016** |
+| declaração | `Types.hpp` (147), `Player.hpp` (95), `Team.hpp` (91), `CdImage.hpp` (77), `Database.hpp` (60), `TextCodec.hpp` (18) | **488** |
+
+Os cabeçalhos não são apêndice: **é neles que moram os campos que esta tabela
+mapeia**. `Player.name`, `Player.url` e os 30 atributos estão em `Player.hpp`;
+`raw_formation`, as 48 cores, `flag_shape` e `link[46]` estão em `Team.hpp`;
+`Offset` está em `CdImage.hpp`; o `Reporter` está em `Database.hpp`. **`Team.hpp`
+é o que declara `Team`, `MlTeam` e `Formation`** — os três registros que
+`Database.hpp:44-48` usa como campo. Sem ele não há registro para os campos das
+decisões 1 e 4.
+
+As linhas conferem por `wc -l` e batem com o `UNITS` do
+`wte/tools/port_database_pas.py`, que é quem lê os 11 (unidades `we2002_types`,
+`we2002_team`, `we2002_cdimage`, `we2002_textcodec`, `we2002_player` e
+`we2002_database`). O "~2.150" que este parágrafo dizia era a soma de cinco
+arquivos — 2.147 —, e omitia justamente os cabeçalhos.
 
 ---
 
@@ -48,10 +67,10 @@ Os tipos usados abaixo são todos de largura fixa por definição do FPC:
 
 | C++ (`we2002_core`) | Pascal (FPC) | Motivo |
 |---|---|---|
-| `std::uint8_t`, `unsigned char` | `Byte` | 8 bits sem sinal dos dois lados |
-| `std::uint16_t`, `unsigned short` | `Word` | as 48 cores de bandeira/uniforme por time |
+| `unsigned char` | `Byte` | 8 bits sem sinal dos dois lados. `std::uint8_t` **não ocorre na entrada** |
+| `unsigned short` | `Word` | as 48 cores de bandeira/uniforme por time. `std::uint16_t` **não ocorre na entrada** |
 | `std::uint32_t` | `LongWord` | **nunca** `Cardinal` sem conferir, nunca tipo de plataforma |
-| `std::int32_t`, `int` | `LongInt` | os 30 atributos de `Player` |
+| `int` | `LongInt` | os 30 atributos de `Player`. `std::int32_t` **não ocorre na entrada** |
 | `unsigned int` | `LongWord` | 3 usos, todos contadores locais |
 | `bool` | `Boolean` | |
 | `double` | `Double` | só em `ComputePlayerCost`; `std::ceil` → `Ceil` de `Math` |

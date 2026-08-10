@@ -48,7 +48,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-030](/docs/tasks/CORR-WTE-030.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | O `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy` | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-031](/docs/tasks/CORR-WTE-031.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O `wte/tests/README.md` diz que a pasta está vazia e é só Pascal; tem dois arquivos, um em C++ | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-032](/docs/tasks/CORR-WTE-032.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "regra zero" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois | Alta | [x] concluída | 2026-08-10 |
-| [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [ ] pendente | — |
+| [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A decisão 5 do `tipos.md` não tem o "teste que prova", e o critério que o exige está marcado | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -85,7 +85,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-030 — contar 40 `strcpy` no `Database.cpp` e mandar a regra de cópia casar `std::strcpy`
 - [x] CORR-WTE-031 — reescrever o `wte/tests/README.md` para a pasta que existe hoje
 - [x] CORR-WTE-032 — tirar `LongInt` da lista de proibidos e escrever a exceção de `SizeInt` onde ela é enunciada
-- [ ] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
+- [x] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
 - [ ] CORR-WTE-035 — nomear o teste da decisão 5, em bytes: 1.911 `#10`, sem `#13` e sem BOM
 
 ## Detalhes por correção

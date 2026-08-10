@@ -14,7 +14,8 @@ status: pendente
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` Fase 3 item 3.
 - Executar o transpilador da WTE-TASK-17 sobre as 2.504 linhas (medidas — ver o
-  `wte/re/transpilador.md`; o "~2.150" do `tipos.md` omite cabeçalho) e resolver o que
+  `wte/re/transpilador.md`; o `tipos.md` e a §4.5 do plano dizem o mesmo número
+  desde a [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md)) e resolver o que
   o `FORBIDDEN` recusar.
 
 > **Escopo ampliado pela WTE-TASK-17 — o passe estrutural é desta task.**

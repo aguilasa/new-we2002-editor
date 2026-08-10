@@ -517,14 +517,28 @@ O `Load`/`Save` do app Lazarus **não precisa sair do binário do Obocaman**.
 Sai daqui:
 
 ```
-src/core/Database.cpp    1704
-src/core/Player.cpp       130
-src/core/CdImage.cpp       89
-src/core/TextCodec.cpp     77
-src/core/include/we2002/Types.hpp   147
-                        ------
-                        ~2150 linhas
+src/core/Database.cpp                1704
+src/core/Player.cpp                   130
+src/core/CdImage.cpp                   89
+src/core/TextCodec.cpp                 77
+src/core/Team.cpp                      16
+src/core/include/we2002/Types.hpp     147
+src/core/include/we2002/Player.hpp     95
+src/core/include/we2002/Team.hpp       91
+src/core/include/we2002/CdImage.hpp    77
+src/core/include/we2002/Database.hpp   60
+src/core/include/we2002/TextCodec.hpp  18
+                                     ----
+                                     2504 linhas
 ```
+
+**Os cabeçalhos entram, e o número já foi menor por causa disso.** A primeira
+versão desta lista tinha só os cinco arquivos de cima até `Types.hpp` — "~2.150
+linhas" — e deixava de fora justamente onde os registros são declarados. Sem
+`Team.hpp` não há `Team`, `MlTeam` nem `Formation`, que `Database.hpp:44-48`
+usa como campo. O `UNITS` do `wte/tools/port_database_pas.py` lê os 11, e o
+`test_nenhuma_entrada_do_core_fica_de_fora` reprova arquivo de `src/core/` que
+ninguém reivindicou.
 
 Código deste repositório, já verificado byte a byte contra o `ed.exe` nas duas
 ROMs, e escrito num subconjunto estreitíssimo de C++: laço de contagem fixa,
@@ -790,8 +804,9 @@ conferência — não porte manual.
    cada uma, em [`../wte/re/tipos.md`](../wte/re/tipos.md). A tabela acima é o
    resumo; o `tipos.md` é a fonte para os geradores.
 
-3. **Gerar** o equivalente Pascal de `Database`, `Player`, `CdImage`,
-   `TextCodec` e `Types` — ~2.150 linhas de entrada. `Tables.cpp` (704 linhas) e
+3. **Gerar** o equivalente Pascal de `Database`, `Player`, `Team`, `CdImage`,
+   `TextCodec` e `Types` — **2.504 linhas** de entrada, medidas, contando os
+   cabeçalhos que declaram os registros (ver a §4.5). `Tables.cpp` (704 linhas) e
    os 69 `OFS_*` saem por gerador separado, mais simples, por serem dado puro.
 4. **Descobrir os 50 offsets restantes** por diff dirigido: mudar um campo na
    janela do Wine, gravar, `cmp`. Cada campo custa dois minutos. Os que

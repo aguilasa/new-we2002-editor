@@ -3,7 +3,7 @@ id: CORR-WTE-034
 title: "Correção: a \"entrada real medida\" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -165,26 +165,65 @@ acusa.
 | Arquivo | Ação |
 |---|---|
 | `wte/re/tipos.md` | modificar |
-| `wte/tools/port_database_pas.py` | modificar |
+| `wte/tools/port_database_pas.py` | modificar *(feito antes, em 2026-08-10 — ver a nota acima)* |
+| `docs/PLAN-WTE-LAZARUS.md` | modificar (§4.5 e Fase 3 item 3, achado na varredura) |
+| `docs/tasks/15-mapeamento-de-tipo.md` | modificar (varredura) |
+| `docs/tasks/17-transpilador-da-camada-de-dados.md` | modificar (varredura) |
+| `docs/tasks/18-camada-de-dados-gerada.md` | modificar (varredura) |
 
 ## Verificação
 
-- [ ] O `tipos.md` lista `Team.hpp` e os demais cabeçalhos, com a contagem de
+- [x] O `tipos.md` lista `Team.hpp` e os demais cabeçalhos, com a contagem de
       linhas remedida por `wc -l`
-- [ ] Nenhuma linha da tabela lidera com grafia que
+- [x] Nenhuma linha da tabela lidera com grafia que
       `grep -rnoE '\b(std::)?u?int(8|16|32|64)_t\b' src/core` não mostra
 - [x] `Team`, `MlTeam` e `Formation` têm destino escrito — unidade
       `we2002_team`, com guarda que reprova header órfão (2026-08-10)
-- [ ] `python3 wte/tools/port_database_pas.py --check` continua verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `python3 wte/tools/port_database_pas.py --check` continua verde
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+O parágrafo "Entrada real medida" do `tipos.md` virou tabela de duas linhas —
+**2.016** de implementação (os cinco `.cpp`, `Team.cpp` incluído) e **488** de
+declaração (os seis `.hpp`), **2.504** no total, batendo com o `UNITS` do
+`port_database_pas.py` e com o que a WTE-TASK-17 mediu na execução. Junto foi o
+que faltava dizer: os cabeçalhos não são apêndice, é neles que moram os campos
+que a tabela mapeia, e `Team.hpp` é o que declara `Team`, `MlTeam` e
+`Formation`, usados como campo em `Database.hpp:44-48`.
+
+Nas três linhas da tabela, a grafia que ocorre passou a liderar e a ausente
+ficou marcada como **não ocorre na entrada**: `unsigned char` (e não
+`std::uint8_t`), `unsigned short` (e não `std::uint16_t`), `int` (e não
+`std::int32_t`). A remedição por
+`grep -rnoE '\b(std::)?u?int(8|16|32|64)_t\b' src/core` devolve só
+`std::uint32_t` (30), `uint32_t` (1) e `std::int64_t` (1) — as duas linhas que
+citam essas continuam certas.
+
+A metade do `port_database_pas.py` já estava feita desde 2026-08-10 (unidade
+`we2002_team` mais a lista `FORA_DO_TRANSPILADOR` e o
+`test_nenhuma_entrada_do_core_fica_de_fora`); esta execução só conferiu que o
+`--check` continua verde.
+
 **Problemas encontrados:**
 
+O "~2.150" tinha mais sítios do que a CORR previa. Além do `tipos.md` e da §4.5
+do plano, a **Fase 3 item 3** do mesmo plano repetia o número (e omitia `Team`
+da lista de unidades a gerar), o Log da WTE-TASK-15 o repetia como se fosse a
+medida do inventário, o contexto da WTE-TASK-18 explicava a divergência como
+pendência aberta, e o Log da WTE-TASK-17 apontava esta CORR como quem ainda ia
+reconciliar. Os cinco entraram nesta invocação; o bloco de código da §4.5 passou
+a listar os 11 arquivos, com a razão de os cabeçalhos entrarem escrita ao lado.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/tipos.md`
+- `docs/PLAN-WTE-LAZARUS.md`
+- `docs/tasks/15-mapeamento-de-tipo.md`
+- `docs/tasks/17-transpilador-da-camada-de-dados.md`
+- `docs/tasks/18-camada-de-dados-gerada.md`

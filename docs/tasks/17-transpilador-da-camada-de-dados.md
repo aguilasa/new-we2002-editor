@@ -181,5 +181,6 @@ Escrever esse limite no cabeçalho do próprio script, não só aqui.
      escrito para arquivo que não existe mais. Era exatamente essa classe de
      erro que passava em silêncio.
 
-     A entrada real são **2.504 linhas**, não ~2.150. Reconciliar o `tipos.md` e
-     a §4.5 do plano continua sendo da CORR-WTE-034.
+     A entrada real são **2.504 linhas**, não ~2.150. O `tipos.md` e a §4.5 do
+     plano foram reconciliados em 2026-08-10 pela
+     [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md).
