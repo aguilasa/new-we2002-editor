@@ -1,0 +1,30 @@
+# 01 -- arranque sem interacao nenhuma.
+# Mede a ordem de criacao dos formularios e quantos aparecem sozinhos.
+alvo: ambos
+estado: ok
+
+~ 4
+
+# Os 16 FormCreate, na ordem dos 18 sitios de Application->CreateForm que a
+# WTE-TASK-11 mediu em 0x401a22..0x401bc6. Faltam ficha_error e ficha_error2
+# de proposito: os dois nao tem OnCreate (WTE-TASK-04).
+@ MainForm.FormCreate
+@ estrategia.FormCreate
+@ jugador.FormCreate
+@ ficha_dorsal.FormCreate
+@ ficha_enlaza.FormCreate
+@ ficha_color.FormCreate
+@ ficha_info.FormCreate
+@ ficha_warning.FormCreate
+@ ficha_info2.FormCreate
+@ ficha_about.FormCreate
+@ ficha_salida.FormCreate
+@ ficha_info4.FormCreate
+@ ficha_info3.FormCreate
+@ ficha_movertodos.FormCreate
+@ ficha_creditos_equipo.FormCreate
+@ ficha_warning_2.FormCreate
+
+# Um unico FormShow: o principal. No original aparecem tres janelas ANTES
+# desta, e nenhuma delas e um FormShow -- ver re/eventos.md, secao "arranque".
+@ MainForm.FormShow

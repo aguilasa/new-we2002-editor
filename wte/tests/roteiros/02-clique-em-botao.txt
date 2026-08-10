@@ -1,0 +1,18 @@
+# 02 -- dois cliques de botao no MainForm.
+# O par mais barato que prova que o estimulo chega e que o stub registra.
+# SpeedButton1 = "Sobre...", SpeedButton2 = "Sair" (DFM: 136,14 e 136,40).
+alvo: ambos
+estado: ok
+
+~ 4
+! mousemove @janela+160,+30 click 1
+~ 1
+! mousemove @janela+160,+55 click 1
+~ 1
+
+@ MainForm.SpeedButton1Click
+@ MainForm.SpeedButton2Click
+
+# No original os dois abrem janela: "Sobre..." mostra ficha_about, "Sair"
+# deveria mostrar ficha_salida. Medido na WTE-TASK-12: nenhum dos dois abriu
+# nada com a ROM carregada -- por que, e da WTE-TASK-25.

@@ -1,0 +1,25 @@
+# 03 -- digitar num campo de nome.
+# ROTEIRO BLOQUEADO DO LADO PORT. Fica versionado porque o bloqueio e o
+# resultado, e porque ele volta a valer no dia em que o :99 tiver um window
+# manager (ou o harness rodar num display que tenha).
+alvo: ambos
+estado: bloqueado: sem window manager no :99, o GTK2 nao entrega tecla nenhuma
+
+# edit_nombre1 do MainForm: grupo_nombre em (336,48) + (56,16), 113x21,
+# centro no cliente em (448,74).
+~ 4
+! mousemove @janela+459,+84 click 1
+~ 1
+! type --delay 150 AB
+~ 1
+! key Return
+~ 1
+
+# Esperado se a tecla chegasse -- um KeyPress POR TECLA, e nada ao sair do
+# campo: nao existe OnExit em nenhum dos 96 handlers.
+@ MainForm.edit_nombre1KeyPress
+@ MainForm.edit_nombre1KeyPress
+@ MainForm.edit_nombre1KeyPress
+
+# Medido: zero linha de trace e zero diferenca de pixel no campo, tanto com
+# `windowfocus` + `key` quanto com `key --window` (XSendEvent).

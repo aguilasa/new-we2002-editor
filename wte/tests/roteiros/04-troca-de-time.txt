@@ -1,0 +1,18 @@
+# 04 -- selecionar um time no combo lista_equipos.
+# E a carga em cascata: no original enche as barras de atributo, desenha a
+# camisa 2D e atualiza o contador de blocos livres de ML.
+alvo: original
+estado: bloqueado do lado port: a casca da fase 2 nao le imagem de CD, entao
+        o combo esta vazio e nao ha item para selecionar
+
+# lista_equipos: cliente (16,36), 105x21; a seta fica na ponta direita.
+~ 4
+! mousemove @janela+112,+46 click 1
+~ 2
+! mousemove @janela+50,+70 click 1
+~ 4
+
+@ MainForm.lista_equiposChange
+
+# O port passa a poder rodar este roteiro a partir da WTE-TASK-18, quando a
+# camada de dados existir e o combo tiver itens.

@@ -1,0 +1,13 @@
+# 05 -- abrir e fechar ficha_color, para ver a ordem de FormShow/FormCreate.
+# ROTEIRO SEM COORDENADA, e isso e o achado: nao se sabe o que abre o
+# ficha_color. A WTE-TASK-12 tentou os candidatos obvios com a ROM carregada
+# (o botao "Pintar", os icones do grupo de atributos, os botoes da escalacao)
+# e nenhum abriu janela.
+alvo: ambos
+estado: bloqueado: o gatilho e desconhecido ate a WTE-TASK-25
+
+# Quando o gatilho for conhecido, o esperado do lado port e NENHUMA linha
+# nova. O ficha_color.FormCreate ja disparou no arranque -- os 18 sao criados
+# de uma vez -- e o formulario nao tem OnShow: dos 18, so ficha_enlaza e
+# MainForm tem. Abrir formulario e invisivel para o trace em 16 dos 18, e quem
+# marca a fronteira e o REMark ('== ') de quem dirige a sessao.

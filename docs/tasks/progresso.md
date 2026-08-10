@@ -25,7 +25,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md) | `dfm2lfm.py` — os `.lfm` e os esqueletos | 2 | 03, 04, 07 | ✅ Concluído | 2026-08-06 | 2026-08-09 |
 | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ✅ Concluído | 2026-08-06 | 2026-08-09 |
 | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ⬜ Pendente | — | — |
-| [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ⬜ Pendente | — | — |
+| [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ⬜ Pendente | — | — |
 | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ⬜ Pendente | — | — |
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ⬜ Pendente | — | — |
@@ -184,7 +184,7 @@ conferível.
 - [x] Os 18 `.lfm` gerados e aceitos pelo `lazbuild`
 - [x] Os 96 stubs na unidade certa, logando
 - [ ] Comparação visual dos 18, com veredito escrito
-- [ ] Diferenças de ordem de evento LCL × VCL registradas
+- [x] Diferenças de ordem de evento LCL × VCL registradas
 - [ ] Fração de código gerado medida contra a tese da §4.4
 - [ ] Nenhum arquivo gerado editado à mão (provado por `--check`)
 
