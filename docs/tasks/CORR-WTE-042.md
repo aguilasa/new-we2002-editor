@@ -3,7 +3,7 @@ id: CORR-WTE-042
 title: "Correção: o Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -85,12 +85,36 @@ casos Pascal) foram remedidos nesta revisão e batem; só o 33 muda.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+`(eram 33)` virou `(eram **38**)` na tabela de arquivos do Log da WTE-TASK-18,
+com a rota de remedição ao lado. A rota vale para os **dois** números da célula,
+não só para o de partida:
+
+```console
+$ git show d8af56a:wte/tools/test_port_database_pas.py | grep -cE '^[[:space:]]+def test_'
+38
+$ git show 7b642f7:wte/tools/test_port_database_pas.py | grep -cE '^[[:space:]]+def test_'
+58
+```
+
 **Problemas encontrados:**
 
+A verificação desta correção pedia que o `grep -c` sobre o arquivo no `HEAD`
+batesse com o número corrente do Log. Não bate mais, e não deveria: a
+[CORR-WTE-036](/docs/tasks/CORR-WTE-036.md), executada neste mesmo lote e antes
+desta, acrescentou dois testes — o `HEAD` está em 60. Os dois números da célula
+são desta task, e por isso a rota escrita fixa o commit em vez de olhar o
+`HEAD`. Mesmo desenho da [CORR-WTE-038](/docs/tasks/CORR-WTE-038.md), que é o
+mesmo defeito no Log da WTE-TASK-17.
+
+O "41 regras" do enunciado da 18 (linha 28) foi corrigido para 47 no commit da
+CORR-WTE-038, pela varredura de lá.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/18-camada-de-dados-gerada.md`

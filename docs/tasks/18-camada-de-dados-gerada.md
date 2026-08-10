@@ -157,7 +157,7 @@ Vindas do `newWe2002`, todas com custo pago:
   | Arquivo | Ação |
   |---|---|
   | `wte/tools/port_database_pas.py` | passe estrutural, 3 passes novos de expressão, tabela de manuais, terceiro guard |
-  | `wte/tools/test_port_database_pas.py` | 58 testes (eram 33) |
+  | `wte/tools/test_port_database_pas.py` | 58 testes (eram **38**). Os dois números são desta task e se remedem com `git show <commit>:wte/tools/test_port_database_pas.py \| grep -cE '^[[:space:]]+def test_'` — `d8af56a` dá 38, `7b642f7` dá 58; no `HEAD` já são outros |
   | `wte/src/we2002_{types,team,cdimage,textcodec,player,database}.pas` | criados, **gerados** |
   | `wte/re/transpilador.md` | regerado |
   | `wte/re/recusas.md` | criado |
