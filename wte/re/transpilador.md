@@ -76,7 +76,7 @@ Antes das regras rodam três passes que nenhuma regex faz sozinha:
 | 4 | >= (protegido de >) | `>=` |
 | 5 | && -> and | `&&` |
 | 6 | || -> or | `\\|\\|` |
-| 7 | ! -> not | `!\s*(?=\w\|\()` |
+| 7 | ! -> not | `!(?=[^\S\n]*[\w(])` |
 | 8 | << -> shl | `<<` |
 | 9 | >> -> shr | `>>` |
 | 10 | % -> mod | `(?<=\w)\s*%\s*(?=\w)` |

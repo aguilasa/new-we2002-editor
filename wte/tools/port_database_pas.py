@@ -436,7 +436,14 @@ SUBS: list[tuple[str, str, str]] = [
     # --- booleano ---------------------------------------------------------
     (r"&&", " and ", "&& -> and"),
     (r"\|\|", " or ", "|| -> or"),
-    (r"!\s*(?=\w|\()", "not ", "! -> not"),
+    # `[^\S\n]*` -- espaco horizontal, nunca a quebra. Com `\s*` a regra
+    # atravessava o `\n`: onde um `!` termina a linha ela engolia o statement
+    # de baixo. Nos seis sitios do Database.cpp que tem essa forma o `!` esta
+    # dentro de comentario (`//kit preview !!!!`, `// i 9!!`), e `_proteger()`
+    # mascara comentario ANTES do SUBS -- por isso a saida nunca saiu errada, e
+    # ancorar a regra nao muda um byte do Pascal. O que se conserta e a regra:
+    # ela dependia de um mascaramento a montante para nao apagar codigo.
+    (r"!(?=[^\S\n]*[\w(])", "not ", "! -> not"),
 
     # --- deslocamento -----------------------------------------------------
     # Sem lookbehind: a versao da WTE-TASK-17 exigia que o caractere anterior

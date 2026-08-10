@@ -50,7 +50,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-032](/docs/tasks/CORR-WTE-032.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "regra zero" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A decisão 5 do `tipos.md` não tem o "teste que prova", e o critério que o exige está marcado | Baixa | [x] concluída | 2026-08-10 |
-| [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário | Alta | [ ] pendente | — |
+| [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-037](/docs/tasks/CORR-WTE-037.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada | Alta | [ ] pendente | — |
 | [CORR-WTE-038](/docs/tasks/CORR-WTE-038.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | O Log da WTE-TASK-17 diz 41 regras de substituição, e o gerador tem 47 | Alta | [ ] pendente | — |
 | [CORR-WTE-039](/docs/tasks/CORR-WTE-039.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz que o gerador recusa `(int)*(int *)`, e ele aceita | Alta | [ ] pendente | — |
@@ -95,7 +95,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-032 — tirar `LongInt` da lista de proibidos e escrever a exceção de `SizeInt` onde ela é enunciada
 - [x] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
 - [x] CORR-WTE-035 — nomear o teste da decisão 5, em bytes: 1.911 `#10`, sem `#13` e sem BOM
-- [ ] CORR-WTE-036 — ancorar a regra `!` → `not` na linha, e fazer o guard de quebra valer para `\s`, `[\s\S]` e `.`
+- [x] CORR-WTE-036 — ancorar a regra `!` → `not` na linha, e fazer o guard de quebra valer para `\s`, `[\s\S]` e `.`
 - [ ] CORR-WTE-037 — invariante de numeração em `aplicar_subs`, e dizer em cada recusa se ela veio da entrada ou da saída
 - [ ] CORR-WTE-038 — trocar 41 por 47 no Log da 17 e desfazer a contradição sobre a CORR-WTE-034
 - [ ] CORR-WTE-039 — implementar a marca de cast do Ghidra no `spec_index.py`, com teste de falso positivo

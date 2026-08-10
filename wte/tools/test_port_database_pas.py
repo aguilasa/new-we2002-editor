@@ -339,16 +339,61 @@ class TestMascara(unittest.TestCase):
 class TestSubs(unittest.TestCase):
     """Forma das regras, e as armadilhas que o precedente pagou."""
 
-    def test_nenhuma_regra_usa_classe_negada_sem_excluir_a_quebra(self) -> None:
+    def test_nenhuma_regra_usa_construcao_que_atravessa_a_quebra(self) -> None:
         # `[^x]` casa `\n`. Foi assim que um Seek(begin) virou SeekCurrent no
         # port_database.py: compilava, passava nos testes, passava no ASan, e
         # so o ed.exe mostrou. A regra vale para toda regra nova.
-        maus = [(p, r) for p, _, r in P.SUBS
-                if "[^" in p and "\\n" not in p]
+        #
+        # `[\s\S]` e `.` sob DOTALL sao a mesma armadilha escrita de outro
+        # jeito, e nenhuma regra deste gerador tem razao para usa-las: a
+        # traducao e linha a linha. `\s` sozinho NAO entra nesta lista --
+        # 20 regras o usam para adjacencia de token (`unsigned\s+char`,
+        # `Report\s*\(`), onde bani-lo seria alarme falso. O que importa nele
+        # e se a regra CONSOME a quebra na entrada real, e isso e medido por
+        # `test_nenhuma_regra_reduz_a_contagem_de_linhas`.
+        maus: list[tuple[str, str]] = []
+        for padrao, _, razao in P.SUBS:
+            if re.search(r"\[\^[^\]]*\]", padrao) and "\\n" not in padrao:
+                maus.append((razao, "[^...] sem \\n"))
+            if "[\\s\\S]" in padrao:
+                maus.append((razao, "[\\s\\S]"))
+            if re.search(r"\(\?s\)", padrao):
+                maus.append((razao, "(?s) -- DOTALL"))
         self.assertEqual(
             maus, [],
-            "regra com classe negada que atravessa quebra de linha: " +
-            "; ".join(r for _, r in maus))
+            "regra com construcao que atravessa quebra de linha: " +
+            "; ".join(f"{r} ({c})" for r, c in maus))
+
+    def test_nenhuma_regra_reduz_a_contagem_de_linhas(self) -> None:
+        # O invariante que vale para valer: aplicada em ordem sobre as seis
+        # unidades reais **cruas**, nenhuma regra pode mudar quantas linhas o
+        # arquivo tem. Cruas de proposito: `aplicar_subs` roda `_proteger()`
+        # antes, e o mascaramento de comentario escondia o defeito. A regra 7
+        # (`! -> not`) reduzia Database.cpp de 1704 para 1698 assim medida,
+        # engolindo seis statements -- dois deles
+        # `image_file.Seek(OFS_KIT_PREVIEW)` -- para dentro do comentario que
+        # termina em `!`. O Pascal gerado nunca saiu errado; a regra e que nao
+        # podia depender do mascaramento a montante para nao apagar codigo.
+        maus: list[str] = []
+        for _unit, rels in P.UNITS:
+            for rel in rels:
+                texto = (P.CORE / rel).read_text(encoding="utf-8")
+                atual = texto
+                for padrao, repl, razao in P.SUBS:
+                    novo = re.sub(padrao, repl, atual, flags=re.M)
+                    antes = len(atual.splitlines())
+                    depois = len(novo.splitlines())
+                    if antes != depois:
+                        maus.append(f"{rel}: {razao} ({antes} -> {depois})")
+                    atual = novo
+        self.assertEqual(maus, [], "regra que consome a quebra: " + "; ".join(maus))
+
+    def test_o_statement_nao_entra_no_comentario_que_termina_em_bang(self) -> None:
+        saida, _ = P.aplicar_subs("\t//kit preview !!!!\n\timage_file.Seek(1);\n")
+        linhas = saida.splitlines()
+        self.assertEqual(len(linhas), 2, saida)
+        self.assertNotIn("Seek", linhas[0])
+        self.assertIn("Seek", linhas[1])
 
     def test_comparacao_antes_de_atribuicao(self) -> None:
         razoes = [r for _, _, r in P.SUBS]

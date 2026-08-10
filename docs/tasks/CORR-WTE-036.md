@@ -3,7 +3,7 @@ id: CORR-WTE-036
 title: "Correção: a regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -134,12 +134,56 @@ consumindo o `\n`.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A regra 7 do `SUBS` passou de `!\s*(?=\w|\()` para `!(?=[^\S\n]*[\w(])` —
+espaço horizontal, nunca a quebra. Três testes:
+
+1. `test_nenhuma_regra_usa_classe_negada_sem_excluir_a_quebra` virou
+   `test_nenhuma_regra_usa_construcao_que_atravessa_a_quebra` e passou a
+   reprovar também `[\s\S]` e `(?s)`;
+2. `test_nenhuma_regra_reduz_a_contagem_de_linhas` — invariante sobre as seis
+   unidades reais, regra a regra, nomeando a que quebrar;
+3. `test_o_statement_nao_entra_no_comentario_que_termina_em_bang` — entrada
+   plantada `//kit preview !!!!\n\timage_file.Seek(1);`.
+
+Bateria do `wte/tools/`: 296 → 298 testes, verde. `port_database_pas.py --check`
+verde, duas execuções com bytes iguais. `make -C wte check` rc=0.
+
 **Problemas encontrados:**
 
+**A evidência desta correção media o `SUBS` cru, e o pipeline não roda o `SUBS`
+cru.** `aplicar_subs` chama `_proteger()` antes de qualquer regra, e o
+mascaramento troca todo comentário por preenchimento — de modo que o `!` dos
+seis sítios (`//kit preview !!!!`, `// i 9!!`) já não existe quando a regra 7
+roda. Medido nos dois sentidos:
+
+```
+aplicar_subs (regra corrigida): 1704 -> 1704
+aplicar_subs (regra antiga)  : 1704 -> 1704
+saidas iguais: True
+```
+
+Consequência: **nenhum `Seek` jamais sumiu do Pascal**, e a correção não muda um
+byte de `wte/src/*.pas` — o único arquivo gerado que muda é o
+`wte/re/transpilador.md`, que publica o padrão da regra. O defeito consertado é
+real e continua valendo a pena: a regra dependia de um mascaramento a montante
+para não apagar código, e o teste 2 é o que passa a provar que não depende mais.
+As duas afirmações da seção "Problema identificado" que atribuem sumiço de
+statement à saída ficam como estão, com esta ressalva — a medida delas está
+certa, o alcance é que foi superestimado.
+
+Não `\s` na lista estática do teste 1: 20 das 53 regras usam `\s` para
+adjacência de token (`unsigned\s+char`, `Report\s*\(`), onde bani-lo seria
+alarme falso. O que importa nelas é se consomem a quebra na entrada real, e é o
+teste 2 que mede isso.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/port_database_pas.py`
+- `wte/tools/test_port_database_pas.py`
+- `wte/re/transpilador.md` (regerado)
