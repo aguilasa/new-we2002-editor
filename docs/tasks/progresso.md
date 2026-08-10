@@ -31,7 +31,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ✅ Concluído | 2026-08-09 | 2026-08-09 |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | 🔄 Em andamento | — | — |
+| [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ❌ Bloqueado | — | — |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
@@ -65,6 +65,23 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 
 **Revisão sem discrepância também preenche a coluna.** É resultado legítimo, e
 sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
+
+**A WTE-TASK-19 está `❌ Bloqueado`, e não `🔄 Em andamento`.** Ela entregou 4
+dos 6 critérios; os outros dois exigem dirigir o `wte.exe` além da tela de
+carga, e isso não depende de esforço — depende do oráculo funcionar. Três
+passagens já foram gastas nela, e as duas últimas só produziram diagnóstico
+melhor. `🔄` faria o `/executar` voltar para ela em toda invocação, pela regra
+3 do [prompt](/docs/prompts/01-executar.md); `❌` diz a verdade e solta a fila.
+O que a destrava está na [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) e nas
+Pendências externas, no fim deste arquivo.
+
+**A WTE-TASK-20 segue mesmo assim**, e isso é decisão, não descuido. O
+`depends_on` dela lista a 19, mas o que ela verifica é contra o **oráculo B**
+(o `we2002_core`): dump Pascal × dump C++, codec japonês, round-trip de
+gravação. Nenhum dos seis critérios pede janela. E a parte da 19 de que ela
+precisaria — offsets novos — já veio: são 28 confirmados. Os 36 que faltam são
+exatamente os que o `we2002_core` **não tem**, então não poderiam aparecer numa
+comparação Pascal × C++ nem se estivessem medidos.
 
 ---
 
@@ -343,6 +360,12 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   `14368636` seja populada, **ou** descobrir por que o controle não existe, que
   é pergunta da fase 4 sobre `lista_equiposChange`, um handler que já tem nome,
   endereço e formulário.
+
+  O segundo caminho esbarra numa **circularidade**: o gate da WTE-TASK-22
+  precisa do oráculo vivo, entendê-lo é a WTE-TASK-25, e a 25 depende da 22. A
+  [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) existe para quebrar isso por
+  diagnóstico estático — que não grava byte nenhum e por isso não precisa de
+  gate. Os dois desfechos dela são legítimos, e o negativo muda a WTE-TASK-22.
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
   literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em

@@ -20,6 +20,23 @@ status: pendente
 O oráculo aqui não é o `wte.exe` — é o `we2002_core`, cujo `Load`/`Save` já é
 byte-idêntico ao `ed.exe`. Comparação campo a campo, não por olho.
 
+### A dependência da WTE-TASK-19 é a parte que já veio
+
+A [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) está
+`❌ Bloqueado` — o `wte.exe` morre ao trocar de time, e dois dos seis critérios
+dela dependem disso. **Esta task segue mesmo assim**, e a razão é o parágrafo
+acima: nenhum dos seis critérios daqui toca o oráculo A.
+
+O que a 20 precisaria da 19 são os offsets novos, e esses vieram: **28
+confirmados por execução**, 14 deles antes classificados como `ausente`. Os 36
+restantes são exatamente os que o `we2002_core` **não tem** — não podem
+aparecer num diff de dump Pascal × dump C++ nem se estivessem medidos, porque
+não há lado C++ para eles.
+
+Consequência prática: os 36 continuam pendentes, e voltam pela 19 ou pela
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md). O que **não** pode acontecer é
+esta task afirmar cobertura sobre eles.
+
 ---
 
 ## Objetivo

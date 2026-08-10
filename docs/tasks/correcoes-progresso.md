@@ -63,6 +63,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Quatro das 15 rotas de recusa do `spec_index.py` não têm teste, e o README chama as onze testadas de "as" rotas | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [x] concluída | 2026-08-10 |
+| [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | O oráculo comportamental está morto e a fase 4 é circular: o gate 22 precisa do `wte.exe` vivo, e entendê-lo é a WTE-TASK-25, que depende do 22 | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -108,6 +109,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-041 — testar as quatro rotas de recusa sem cobertura e contar `raise SpecError` no README
 - [x] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
 - [x] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
+- [ ] CORR-WTE-044 — diagnosticar estaticamente por que o controle não existe, e declarar o desfecho para o gate da 22
 
 ## Detalhes por correção
 
@@ -817,3 +819,23 @@ dizer "fechada e fora do backlog", não "corrigida".
   `Byte`, teste nos dois sentidos e um caso em `test_camada_dados.pas`. O
   round-trip da WTE-TASK-20 não pegaria isto: o `Save` grava só o byte baixo e a
   imagem sai idêntica
+
+### CORR-WTE-044
+
+- **Arquivo com problema:** nenhum arquivo, e é isso que a torna diferente das
+  43 anteriores — o defeito é de **ordem entre fases**, no
+  `docs/PLAN-WTE-LAZARUS.md` §4.2 e no grafo de dependências da fase 4
+- **Sintoma:** o `wte.exe` morre ao trocar de time com as duas ROMs daqui, e a
+  cadeia para destravá-lo se fecha sobre si mesma: o gate da WTE-TASK-22 precisa
+  do oráculo vivo, entender o oráculo é a WTE-TASK-25, e a 25 depende da 22
+- **Como foi detectado:** WTE-TASK-19, terceira passagem. `WINEDEBUG=+seh,+loaddll`
+  põe a violação de acesso em `Graphics::TFont::SetSize` + 8 do `vcl60.bpl`
+  (realocado para `0x005f0000`), com `this` nulo, chamada de `0x0040b1ac` dentro
+  de uma rotina que faz `FindComponent("dorsal" + N)`. Os roteiros 07 e 08 são
+  iguais até `= ARRANQUE` e dão 0 contra 309 violações — a atribuição é medida.
+  Duas hipóteses anteriores caíram antes desta: tamanho da imagem e região vazia
+  em `14368636`
+- **Fix:** diagnóstico estático, sem implementar nada. Quatro perguntas em ordem
+  de custo (o que é `+0x68` nesta VCL, de onde vem o `N`, quem escreve no global
+  `0x004335e4`, existe contorno), com o ferramental da WTE-TASK-24 que já está
+  concluída. Os dois desfechos são legítimos, e o negativo **muda a WTE-TASK-22**
