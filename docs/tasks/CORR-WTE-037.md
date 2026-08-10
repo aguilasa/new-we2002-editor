@@ -3,7 +3,7 @@ id: CORR-WTE-037
 title: "Correção: a linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada"
 type: correção
 category: verificação
-status: pendente
+status: envelhecida
 depends_on: []
 ---
 
@@ -130,12 +130,48 @@ construção deixem de parecer dois trabalhos.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Envelhecida em:** 2026-08-10 (reprodução da evidência do lote `/corrigir-tudo`
+de 036–043 — **não corrigida**, porque o sintoma não existe mais)
 
-**Resumo do que foi feito:**
+O commit `7b642f7` (WTE-TASK-18) reescreveu o relatório de recusa e a
+divergência sumiu com ele. Três medidas:
 
-**Problemas encontrados:**
+1. **Não há mais recusa publicando `arquivo:linha` do fonte.** A varredura da
+   saída passou a rodar sobre o Pascal e a reportar as coordenadas **dele**:
 
-**Arquivos criados/modificados:**
+   ```python
+   notas += conferir(FORBIDDEN, pascal, f"{unit}.pas", pascal=True)
+   ```
+
+   `pascal` é exatamente o texto que vai para o disco, então a linha publicada
+   é a linha do `.pas`. A varredura da entrada continua sobre o texto original
+   e soma o deslocamento do item (`tp.recusar(it.linha + nota.linha - 1, …)`),
+   que é a linha do fonte. O rótulo entrada/saída que esta correção pedia ficou
+   implícito no **nome do arquivo** de cada recusa.
+
+2. **Não há recusa nenhuma.** As 498 foram fechadas:
+
+   ```
+   $ python3 wte/tools/port_database_pas.py --check
+   port_database_pas: wte/re/transpilador.md: ok
+   … (as seis unidades) …
+   $ grep -c 'Database.cpp:' wte/re/transpilador.md
+   0
+   ```
+
+   A seção "Recusas em aberto" do `transpilador.md` diz **"Nenhuma."**, e as
+   duas linhas de `fallthrough` que a evidência confronta (`1256` contra `1258`)
+   não são mais publicadas.
+
+3. **O invariante de numeração que esta correção pedia foi entregue pela
+   [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md)**, no mesmo lote:
+   `test_nenhuma_regra_reduz_a_contagem_de_linhas` roda o `SUBS` regra a regra
+   sobre as seis unidades e reprova qualquer uma que mude a contagem de linhas.
+   Medido depois dela: `aplicar_subs(Database.cpp)` sai com 1.704 linhas, as
+   mesmas da entrada.
+
+Corrigir o que já não está quebrado é como se introduz regressão; esta fica
+registrada e fechada sem commit de código.
+

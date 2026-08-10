@@ -12,6 +12,11 @@ da WTE-TASK-15 (commit `f50d263`) abriu 030, 032, 034 e 035, e nenhuma 033 foi
 escrita. Não há correção perdida; o número simplesmente não existe. Registrado
 aqui para que a lacuna não seja lida como arquivo sumido.
 
+**Correção envelhecida:** a **CORR-WTE-037** aparece `[x] envelhecida`. Não
+houve conserto de código — o sintoma deixou de existir entre a abertura e a
+execução, e o Log dela traz as três medidas que mostram isso. `[x]` ali quer
+dizer "fechada e fora do backlog", não "corrigida".
+
 ## Resumo executivo
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
@@ -51,7 +56,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A decisão 5 do `tipos.md` não tem o "teste que prova", e o critério que o exige está marcado | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário | Alta | [x] concluída | 2026-08-10 |
-| [CORR-WTE-037](/docs/tasks/CORR-WTE-037.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada | Alta | [ ] pendente | — |
+| [CORR-WTE-037](/docs/tasks/CORR-WTE-037.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada | Alta | [x] envelhecida | 2026-08-10 |
 | [CORR-WTE-038](/docs/tasks/CORR-WTE-038.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | O Log da WTE-TASK-17 diz 41 regras de substituição, e o gerador tem 47 | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-039](/docs/tasks/CORR-WTE-039.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz que o gerador recusa `(int)*(int *)`, e ele aceita | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-040](/docs/tasks/CORR-WTE-040.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz quatro famílias de `BitBtnNClick`, e o TSV tem três nomes | Alta | [x] concluída | 2026-08-10 |
@@ -96,7 +101,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
 - [x] CORR-WTE-035 — nomear o teste da decisão 5, em bytes: 1.911 `#10`, sem `#13` e sem BOM
 - [x] CORR-WTE-036 — ancorar a regra `!` → `not` na linha, e fazer o guard de quebra valer para `\s`, `[\s\S]` e `.`
-- [ ] CORR-WTE-037 — invariante de numeração em `aplicar_subs`, e dizer em cada recusa se ela veio da entrada ou da saída
+- [x] CORR-WTE-037 — **envelhecida**: o `7b642f7` fechou as 498 recusas e mudou a varredura da saída para reportar coordenadas do `.pas`; o invariante de numeração veio pela CORR-WTE-036
 - [x] CORR-WTE-038 — trocar 41 por 47 no Log da 17 e desfazer a contradição sobre a CORR-WTE-034
 - [x] CORR-WTE-039 — implementar a marca de cast do Ghidra no `spec_index.py`, com teste de falso positivo
 - [x] CORR-WTE-040 — medir as famílias de `BitBtnNClick` no `published_methods.tsv` e reescrever a frase
