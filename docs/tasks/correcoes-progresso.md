@@ -43,7 +43,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-025](/docs/tasks/CORR-WTE-025.md) | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | A faixa `11797..26528` é posição do `cmp -l`, e a WTE-TASK-22 vai declará-la como offset | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-026](/docs/tasks/CORR-WTE-026.md) | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | A tabela do achado 2 se anuncia medida, e a coluna VCL não foi medida | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-027](/docs/tasks/CORR-WTE-027.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | O `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra | Baixa | [x] concluída | 2026-08-10 |
-| [CORR-WTE-028](/docs/tasks/CORR-WTE-028.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | `conferir_vereditos()` guarda a coluna `Original`, não o veredito | Baixa | [ ] pendente | — |
+| [CORR-WTE-028](/docs/tasks/CORR-WTE-028.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | `conferir_vereditos()` guarda a coluna `Original`, não o veredito | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-029](/docs/tasks/CORR-WTE-029.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O Log diz que a reconciliação do `fase-2.md` saiu em commit próprio, e ela saiu no mesmo | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-030](/docs/tasks/CORR-WTE-030.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | O `tipos.md` conta 38 `strcpy`, e o `Database.cpp` tem 40 — os dois que faltam são `std::strcpy` | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-031](/docs/tasks/CORR-WTE-031.md) | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | O `wte/tests/README.md` diz que a pasta está vazia e é só Pascal; tem dois arquivos, um em C++ | Baixa | [x] concluída | 2026-08-10 |
@@ -80,7 +80,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-025 — corrigir a faixa para `11796..26527` nos três sítios, dizendo a base
 - [x] CORR-WTE-026 — dizer, por coluna, o que foi medido no achado 2 e dar rota à divergência de `ComboBox.Text`
 - [x] CORR-WTE-027 — trocar os seis `/docs/` do `montar()` por `../../docs/`, como o `fase-1.md` já faz
-- [ ] CORR-WTE-028 — guardar o grupo 3 (veredito) e transformar a coluna `Original` em contagem medida
+- [x] CORR-WTE-028 — guardar o grupo 3 (veredito) e transformar a coluna `Original` em contagem medida
 - [x] CORR-WTE-029 — dizer no Log que a reconciliação entrou no mesmo commit, e por quê
 - [x] CORR-WTE-030 — contar 40 `strcpy` no `Database.cpp` e mandar a regra de cópia casar `std::strcpy`
 - [x] CORR-WTE-031 — reescrever o `wte/tests/README.md` para a pasta que existe hoje

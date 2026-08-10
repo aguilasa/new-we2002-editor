@@ -3,7 +3,7 @@ id: CORR-WTE-028
 title: "Correção: `conferir_vereditos()` guarda a coluna `Original`, não o veredito"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -86,18 +86,45 @@ devolver o texto `sem ressalva`, e não `sim`.
 
 ## Verificação
 
-- [ ] `python3 -m unittest discover -s wte/tools -p 'test_*.py'` verde, com o
-      assert novo sobre o valor do veredito
-- [ ] `python3 wte/tools/check_fase2.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `python3 -m unittest discover -s wte/tools -p 'test_*.py'` verde, com o
+      assert novo sobre o valor do veredito — **276 testes, OK**
+- [x] `python3 wte/tools/check_fase2.py --check` verde
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+`conferir_vereditos()` passou a devolver o par `(origem, veredito)` por
+formulário — o grupo 3 da regex, que é o veredito, deixou de ser descartado, e
+o grupo 2 deixou de ser chamado pelo nome errado. A docstring explica a troca e
+por que ela não era falso-verde ainda.
+
+A coluna `Original` virou número publicado em vez de dado morto: o `fase-2.md`
+ganhou a linha `…confrontados com captura do original / só com o DFM` —
+medida **4 / 14** —, e o item 3 de "O que a fase 2 não prova" passou a
+interpolar os dois números em vez de trazê-los escritos, com a origem dita.
+Antes eram `18` e `4` datilografados na prosa; agora saem de contar a tabela.
+
+Guarda nova: valor fora de `sim`/`DFM` na coluna `Original` **aborta**. Sem
+ela, um terceiro valor cairia calado no lado "só DFM" e o par publicado
+deixaria de ser medida. `**sim**` e `sim` são normalizados para o mesmo valor —
+a tabela real do `visual.md` escreve o `ficha_salida` em negrito.
+
+Três testes novos: o assert sobre o **valor** do veredito (`sem ressalva`, não
+`sim`), a contagem com negrito e com `DFM` nos dois sentidos, e o aborto do
+valor estranho.
+
 **Problemas encontrados:**
 
+Nenhum. O `fase-2.md` foi regerado (143 linhas, 5.945 bytes) e duas execuções
+seguidas dão bytes iguais (`md5sum` idêntico).
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase2.py`
+- `wte/tools/test_check_fase2.py`
+- `wte/re/fase-2.md` (regerado)

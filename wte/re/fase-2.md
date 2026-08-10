@@ -22,6 +22,7 @@ e a fração de código gerado, que é o número com que a §4.4 do plano se com
 | Handlers do `published_methods.tsv` com stub próprio | **96** |
 | Stub na unidade que declara a classe | **todos** |
 | Formulários com veredito visual escrito | **18** |
+| …confrontados com captura do original / só com o DFM | **4** / **14** |
 | Achados registrados em `eventos.md` | **4** |
 
 Qualquer uma dessas falhando **aborta** este script — não há tabela de resíduo.
@@ -117,11 +118,13 @@ Escrito de propósito, para o vocabulário não inflar.
    handlers, e nesta fase eles são stub. O que existe é `--show`, andaime
    explícito para a captura da WTE-TASK-12. Navegação de verdade chega com a
    WTE-TASK-25.
-3. **A comparação visual cobriu os 18 do port e 4 do original.** Os outros 14
-   não foram capturados porque o oráculo quebra ao selecionar um time — ver
-   `re/visual.md`, achado 1. Geometria e presença de controle estão provadas
-   contra o DFM, que é evidência mais forte que screenshot; **cor e render**
-   dos 14 continuam sem confronto.
+3. **A comparação visual cobriu os 18 do port e 4 do original.** Os
+   outros 14 não foram capturados porque o oráculo quebra ao selecionar um
+   time — ver `re/visual.md`, achado 1. Geometria e presença de controle estão
+   provadas contra o DFM, que é evidência mais forte que screenshot; **cor e
+   render** dos 14 continuam sem confronto. *(Os dois números saem da coluna
+   `Original` da tabela do `re/visual.md`, contada por este script — não de
+   soma à mão.)*
 4. **Nenhum evento foi comparado com o original em execução.** O que a
    WTE-TASK-13 mediu do lado da LCL saiu do fonte da LCL e do trace do port;
    do lado do original saiu do DFM e da observação do arranque.

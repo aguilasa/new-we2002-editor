@@ -110,8 +110,8 @@ class Base(unittest.TestCase):
             UNIDADE.format(unidade=unidade, form=form, corpo=corpo),
             encoding="utf-8")
 
-    def escreve_visual(self, forms):
-        linhas = "\n".join(f"| `{f}` | sim | sem ressalva |" for f in forms)
+    def escreve_visual(self, forms, origem="sim", veredito="sem ressalva"):
+        linhas = "\n".join(f"| `{f}` | {origem} | {veredito} |" for f in forms)
         check_fase2.VISUAL.write_text(VISUAL.format(linhas=linhas),
                                       encoding="utf-8")
 
@@ -130,6 +130,37 @@ class TestArvoreBoa(Base):
         self.assertIn("| Formulários com `.lfm` e `.dfm` pareados | **2** |",
                       md)
         self.assertIn("| Formulários com veredito visual escrito | **2** |", md)
+        self.assertIn("| …confrontados com captura do original / só com o DFM "
+                      "| **2** / **0** |", md)
+
+    def test_guarda_o_veredito_e_nao_a_coluna_original(self):
+        """O grupo 3 da regex e o veredito; o grupo 2 e a origem.
+
+        Ate a CORR-WTE-028 esta funcao guardava o grupo 2 e chamava o resultado
+        de veredito. So `len()` era lido, entao nada ficava vermelho -- e por
+        isso o assert aqui e sobre o VALOR, nao sobre a contagem.
+        """
+        forms = check_fase2.conferir_formularios()
+        vereditos = check_fase2.conferir_vereditos(forms)
+        for form in forms:
+            origem, veredito = vereditos[form]
+            self.assertEqual(veredito, "sem ressalva")
+            self.assertEqual(origem, "sim")
+        self.assertEqual(check_fase2.contar_origens(vereditos),
+                         (len(forms), 0))
+
+    def test_conta_origem_com_negrito_e_com_dfm(self):
+        # A tabela real escreve `**sim**` numa das linhas; negrito e o mesmo
+        # valor. E `DFM` cai do outro lado da conta.
+        forms = check_fase2.conferir_formularios()
+        self.escreve_visual(forms, origem="**sim**")
+        self.assertEqual(
+            check_fase2.contar_origens(
+                check_fase2.conferir_vereditos(forms)), (len(forms), 0))
+        self.escreve_visual(forms, origem="DFM")
+        self.assertEqual(
+            check_fase2.contar_origens(
+                check_fase2.conferir_vereditos(forms)), (0, len(forms)))
 
     def test_separa_gerado_de_escrito_a_mao(self):
         # Uma unidade sem a marca do gerador conta como escrita a mao.
@@ -169,6 +200,13 @@ class TestArvoreBoa(Base):
 
 
 class TestAborta(Base):
+    def test_origem_fora_de_sim_ou_dfm(self):
+        # Valor novo na coluna `Original` nao pode cair calado no lado "so
+        # DFM": o par publicado no fase-2.md deixaria de ser medida.
+        self.escreve_visual(check_fase2.conferir_formularios(),
+                            origem="talvez")
+        self.assertIn("coluna `Original` fora de sim/DFM", self.erro())
+
     def test_stub_faltando(self):
         self.escreve_unidade("ep2002_mainform", "MainForm", [])
         self.assertIn("0 ocorrencia", self.erro())

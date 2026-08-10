@@ -213,8 +213,17 @@ def conferir_formularios() -> list[str]:
     return sorted(raizes)
 
 
-def conferir_vereditos(formularios: list[str]) -> dict[str, str]:
-    """Um veredito escrito por formulario, na tabela do `re/visual.md`."""
+def conferir_vereditos(formularios: list[str]) -> dict[str, tuple[str, str]]:
+    """Por formulario, o par (origem, veredito) da tabela do `re/visual.md`.
+
+    A tabela e `| Formulario | Original | Veredito |`, entao o **grupo 3** da
+    regex e o veredito e o grupo 2 e a origem da comparacao (`sim` = confrontado
+    com captura do original, `DFM` = so com o DFM). Guardar so o grupo 2 e
+    chama-lo de veredito -- como esta funcao fazia ate a CORR-WTE-028 -- nao
+    dava falso-verde enquanto ninguem lia o valor, mas viraria no dia em que
+    alguem passasse a olhar o texto: mediria `sim`/`DFM` e nao reclamaria de
+    nada. Os dois sao guardados, e a origem vira numero publicado.
+    """
     if not VISUAL.exists():
         raise CheckError(f"{VISUAL} nao existe -- WTE-TASK-12 nao rodou")
     texto = VISUAL.read_text(encoding="utf-8")
@@ -225,20 +234,42 @@ def conferir_vereditos(formularios: list[str]) -> dict[str, str]:
     except StopIteration:
         raise CheckError(f"{VISUAL.name}: sem secao 'Veredito por formulario'")
 
-    achados: dict[str, str] = {}
+    achados: dict[str, tuple[str, str]] = {}
     for linha in linhas[i:]:
         if linha.startswith("## ") and not linha.startswith("## Veredito"):
             break
         m = re.match(r"^\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|\s*(.+?)\s*\|\s*$",
                      linha)
         if m and m.group(1) in formularios:
-            achados[m.group(1)] = m.group(2).strip()
+            achados[m.group(1)] = (m.group(2).strip(), m.group(3).strip())
     faltando = sorted(set(formularios) - set(achados))
     if faltando:
         raise CheckError(
             f"{VISUAL.name}: sem veredito para {len(faltando)} formulario(s): "
             + ", ".join(faltando))
+
+    # A coluna `Original` so tem dois valores legitimos, e a tabela escreve um
+    # deles em negrito (`**sim**`). Terceiro valor nao pode cair calado no lado
+    # "so DFM": o numero publicado abaixo deixaria de ser medida.
+    estranhos = sorted(f for f, (orig, _) in achados.items()
+                       if origem_normalizada(orig) not in ("sim", "dfm"))
+    if estranhos:
+        raise CheckError(
+            f"{VISUAL.name}: coluna `Original` fora de sim/DFM em "
+            + ", ".join(f"{f} ({achados[f][0]!r})" for f in estranhos))
     return achados
+
+
+def origem_normalizada(valor: str) -> str:
+    """`**sim**` e `sim` sao o mesmo valor; a tabela usa as duas grafias."""
+    return valor.strip().strip("*").strip().lower()
+
+
+def contar_origens(vereditos: dict[str, tuple[str, str]]) -> tuple[int, int]:
+    """(confrontados com captura do original, confrontados so com o DFM)."""
+    capturado = sum(1 for orig, _ in vereditos.values()
+                    if origem_normalizada(orig) == "sim")
+    return capturado, len(vereditos) - capturado
 
 
 def conferir_eventos() -> int:
@@ -298,6 +329,9 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
       f"**{n_handlers}** |")
     w("| Stub na unidade que declara a classe | **todos** |")
     w(f"| Formulários com veredito visual escrito | **{len(vereditos)}** |")
+    cap, so_dfm = contar_origens(vereditos)
+    w(f"| …confrontados com captura do original / só com o DFM | "
+      f"**{cap}** / **{so_dfm}** |")
     w(f"| Achados registrados em `eventos.md` | **{n_achados}** |")
     w("")
     w("Qualquer uma dessas falhando **aborta** este script — não há tabela de "
@@ -407,15 +441,19 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
     w("   explícito para a captura da WTE-TASK-12. Navegação de verdade chega "
       "com a")
     w("   WTE-TASK-25.")
-    w("3. **A comparação visual cobriu os 18 do port e 4 do original.** Os "
-      "outros 14")
-    w("   não foram capturados porque o oráculo quebra ao selecionar um time — "
-      "ver")
-    w("   `re/visual.md`, achado 1. Geometria e presença de controle estão "
-      "provadas")
-    w("   contra o DFM, que é evidência mais forte que screenshot; **cor e "
-      "render**")
-    w("   dos 14 continuam sem confronto.")
+    w(f"3. **A comparação visual cobriu os {len(formularios)} do port e {cap} "
+      f"do original.** Os")
+    w(f"   outros {so_dfm} não foram capturados porque o oráculo quebra ao "
+      "selecionar um")
+    w("   time — ver `re/visual.md`, achado 1. Geometria e presença de "
+      "controle estão")
+    w("   provadas contra o DFM, que é evidência mais forte que screenshot; "
+      "**cor e")
+    w(f"   render** dos {so_dfm} continuam sem confronto. *(Os dois números "
+      "saem da coluna")
+    w("   `Original` da tabela do `re/visual.md`, contada por este script — "
+      "não de")
+    w("   soma à mão.)*")
     w("4. **Nenhum evento foi comparado com o original em execução.** O que a")
     w("   WTE-TASK-13 mediu do lado da LCL saiu do fonte da LCL e do trace do "
       "port;")
