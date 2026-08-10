@@ -3,7 +3,7 @@ id: CORR-WTE-049
 title: "Correção: o parágrafo de dependência da WTE-TASK-20 troca as duas populações de offset, e cita a 19 como bloqueada"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -113,20 +113,52 @@ sobre eles"* — continua valendo, e passa a valer sobre a população certa.
 
 ## Verificação
 
-- [ ] o enunciado não afirma status de outra tarefa que o `progresso.md`
-      contradiga (`grep -n "Bloqueado" docs/tasks/20-round-trip-headless.md`
-      vazio, ou só em prosa histórica marcada como tal)
-- [ ] a frase sobre "não há lado C++ para eles" só se refere às faixas sem dono
-- [ ] `python3 wte/tools/check_fase1.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] nenhuma célula do `progresso.md` alterada
+- [x] o enunciado não afirma status de outra tarefa que o `progresso.md`
+      contradiga — `grep -n "Bloqueado" docs/tasks/20-round-trip-headless.md`
+      sai vazio (`rc=1`)
+- [x] a frase sobre "não há lado C++ para eles" só se refere às faixas sem dono
+- [x] `python3 wte/tools/check_fase1.py --check` verde — *0 sitio com numero
+      velho*
+- [x] `make -C wte check` verde — 383 testes, `rc=0`
+- [x] nenhuma célula do `progresso.md` alterada — `git status --short
+      docs/tasks/progresso.md` vazio
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A seção foi reescrita mantendo o argumento — a WTE-TASK-20 rodou antes de a 19
+fechar porque nenhum dos seis critérios dela toca o oráculo A — e trocando as
+três coisas erradas:
+
+1. **Status.** Em vez de repetir o estado da 19 (que já estava vencido pela
+   segunda vez), o texto aponta para a nota do `progresso.md`, *"A WTE-TASK-20
+   foi executada antes de a 19 fechar"*, que é onde a decisão está registrada.
+   Repetir status de outra tarefa é o que faz o parágrafo envelhecer sozinho.
+2. **As duas populações, separadas por nome.** Os **50 `OFS_*` `ausente`** são
+   todos nomes do `src/core/include/we2002/Offsets.hpp` — têm lado C++ e
+   **entram** no dump desta task; `ausente` quer dizer *não casa com a tabela
+   em `.data` do `wte.exe`*. As **faixas sem dono** são a população sobre a
+   qual a task não pode afirmar cobertura, e é a elas que a frase "não há lado
+   C++ para eles" se aplica. A região da camisa (`21168024..21203815`) entrou
+   como o exemplo concreto.
+3. **Números correntes:** 33 endereçados e 17 com veredito estrutural (14
+   `retomada de fronteira` + 3 `base de varredura`), medidos na tabela do
+   `offsets-novos.md`, no lugar de 28 / 36.
+
 **Problemas encontrados:**
 
+A primeira redação fechava dizendo que as faixas sem dono *"voltam pela
+CORR-WTE-044 ou pela WTE-TASK-32"* — herdando o "voltam pela 19 ou pela
+CORR-WTE-044" do texto velho. A CORR-WTE-044 está **concluída** desde
+2026-08-10: apontar uma correção fechada como rota de trabalho futuro é
+exatamente o defeito que esta CORR existe para consertar, só que com outro
+alvo. Ficou só a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md), que o
+`progresso.md` já declara dona da região da camisa.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/20-round-trip-headless.md` — a seção "A dependência da
+  WTE-TASK-19 é a parte que já veio"

@@ -22,20 +22,30 @@ byte-idêntico ao `ed.exe`. Comparação campo a campo, não por olho.
 
 ### A dependência da WTE-TASK-19 é a parte que já veio
 
-A [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) está
-`❌ Bloqueado` — o `wte.exe` morre ao trocar de time, e dois dos seis critérios
-dela dependem disso. **Esta task segue mesmo assim**, e a razão é o parágrafo
-acima: nenhum dos seis critérios daqui toca o oráculo A.
+Esta task rodou com a
+[WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) ainda em aberto, e
+isso foi **ordem, não resultado**: nenhum dos seis critérios daqui toca o
+oráculo A. O registro dessa decisão mora no
+[`progresso.md`](/docs/tasks/progresso.md), na nota *"A WTE-TASK-20 foi
+executada antes de a 19 fechar"* — é lá que o estado das duas se lê, em vez de
+repetido aqui.
 
-O que a 20 precisaria da 19 são os offsets novos, e esses vieram: **28
-confirmados por execução**, 14 deles antes classificados como `ausente`. Os 36
-restantes são exatamente os que o `we2002_core` **não tem** — não podem
-aparecer num diff de dump Pascal × dump C++ nem se estivessem medidos, porque
-não há lado C++ para eles.
+O que a 20 precisaria da 19 são os offsets novos, e esses vieram: dos 50
+`OFS_*` que a WTE-TASK-06 marcou `ausente`, **33 estão endereçados** por
+execução e os **17** restantes — 14 `retomada de fronteira` e 3 `base de
+varredura` — têm veredito estrutural tirado do `Database.cpp`. E **os 50
+entram no dump desta task**: são todos nomes do nosso
+`src/core/include/we2002/Offsets.hpp`, portanto todos têm lado C++. `ausente`
+ali quer dizer *não casa com a tabela em `.data` do `wte.exe`*, não *falta no
+`we2002_core`*.
 
-Consequência prática: os 36 continuam pendentes, e voltam pela 19 ou pela
-[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md). O que **não** pode acontecer é
-esta task afirmar cobertura sobre eles.
+Quem o `we2002_core` de fato não tem são as **faixas sem dono** — regiões que o
+`wte.exe` endereça e nenhum `OFS_*` explica, como os 16 setores contíguos da
+camisa em `21168024`..`21203815`. Essas não podem aparecer num diff de dump
+Pascal × dump C++ nem se estivessem medidas, porque não há lado C++ para elas.
+Continuam pendentes, e a região da camisa tem dono declarado: a
+[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). O que **não** pode
+acontecer é esta task afirmar cobertura sobre elas.
 
 ---
 
