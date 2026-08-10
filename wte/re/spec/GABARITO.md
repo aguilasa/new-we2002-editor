@@ -10,8 +10,11 @@ Sem formato definido, "escrever a spec" vira nota livre, e a fronteira entre
 spec e transcrição some — que é exatamente o que a §2 existe para impedir.
 
 - **Um arquivo por handler**, nomeado `<formulario>.<handler>.md`. Os 96 pares
-  são únicos, mas os nomes soltos não: há 16 `FormCreate`, 2 `FormShow` e
-  quatro famílias de `BitBtnNClick` espalhadas por formulários diferentes.
+  são únicos, mas os nomes soltos não: há 16 `FormCreate`, 2 `FormShow`, três
+  nomes `BitBtnNClick` (`BitBtn1Click` em quatro formulários, `BitBtn3Click` em
+  três, `BitBtn2Click` em dois) e `SpeedButton1Click` em três. Medido com
+  `collections.Counter` sobre a coluna `handler` do
+  [`../published_methods.tsv`](../published_methods.tsv).
 - **O índice é gerado**, não escrito: `python3 wte/tools/spec_index.py`. Ele
   também **valida** cada arquivo, e `make -C wte check` o roda.
 

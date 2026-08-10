@@ -3,7 +3,7 @@ id: CORR-WTE-040
 title: "Correção: o GABARITO diz quatro famílias de `BitBtnNClick`, e são três"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -89,12 +89,41 @@ perímetro do `check_fase1.py`: não mexer lá.
 - [ ] `make -C wte check` verde (o `check_fase1.py` varre este arquivo)
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A frase do `GABARITO.md` passou a ser a medida, nomeando as três famílias e o
+quarto nome de botão repetido que estava fora da família `BitBtn`:
+
+> há 16 `FormCreate`, 2 `FormShow`, três nomes `BitBtnNClick` (`BitBtn1Click`
+> em quatro formulários, `BitBtn3Click` em três, `BitBtn2Click` em dois) e
+> `SpeedButton1Click` em três.
+
+Com a rota de remedição ao lado — `collections.Counter` sobre a coluna
+`handler` do `published_methods.tsv` —, que é o que faltava para o número ter
+dono. Remedido agora:
+
+```
+FormCreate: 16   FormShow: 2
+BitBtn*: {'BitBtn1Click': 4, 'BitBtn2Click': 2, 'BitBtn3Click': 3}
+repetidos: BitBtn1Click 4, FormCreate 16, FormShow 2, BitBtn2Click 2,
+           BitBtn3Click 3, SpeedButton1Click 3
+```
+
 **Problemas encontrados:**
 
+Nenhum. A varredura achou o mesmo número em
+`docs/tasks/23-formato-da-spec.md:133`, **dentro do Log de Execução** (o Log
+começa na linha 96) — história de tarefa executada, que esta correção manda
+explicitamente não tocar. `wte/re/spec/README.md` traz a forma curta ("há 16
+`FormCreate`") e já estava certo.
+
+`spec_index.py --check` verde (96 handlers, 0 com spec, 96 abertos);
+`make -C wte check` rc=0, com o `check_fase1.py` varrendo este arquivo.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/spec/GABARITO.md`
