@@ -67,6 +67,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-045](/docs/tasks/CORR-WTE-045.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | A seção das seis áreas do `offsets-novos.md` diz `roms/09-areas-com-time`, que é o nome da sessão — a imagem é `japanese-shift-jis.bin` | Baixa | [ ] pendente | — |
 | [CORR-WTE-046](/docs/tasks/CORR-WTE-046.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Três dos 14 vereditos `retomada de fronteira` provam com `case N`, e o `Database.cpp` tem `if(i == N)` — num deles o `case N` existe em outro bloco | Baixa | [ ] pendente | — |
 | [CORR-WTE-047](/docs/tasks/CORR-WTE-047.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | As sessões 10 e 11, que deram 18 dos 33 endereçados, não têm o resultado da segunda régua (`cmp`) registrado em lugar nenhum | Baixa | [ ] pendente | — |
+| [CORR-WTE-048](/docs/tasks/CORR-WTE-048.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O `fase-3.md` gerado ainda diz que o `wte.exe` não passa da tela de carga — o sweep da CORR-WTE-044 varreu quatro arquivos e não este | Baixa | [ ] pendente | — |
+| [CORR-WTE-049](/docs/tasks/CORR-WTE-049.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O parágrafo de dependência da WTE-TASK-20 diz que os 36 restantes são "os que o `we2002_core` não tem", e os 50 `ausente` são todos do `Offsets.hpp`; e cita a 19 como bloqueada | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -116,6 +118,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [ ] CORR-WTE-045 — tirar o nome da imagem da evidência em vez da constante da sessão, e regerar
 - [ ] CORR-WTE-046 — devolver a construção que casou (`case` ou `if`) junto do gatilho, e imprimir a que casou
 - [ ] CORR-WTE-047 — versionar o resultado do `cmp` por sessão e gerar o veredito das duas réguas no `offsets-novos.md`
+- [ ] CORR-WTE-048 — trocar a justificativa aposentada no `compare_dumps.py` (oráculo de comportamento × de formato) e regerar
+- [ ] CORR-WTE-049 — separar as duas populações de offset no enunciado da 20 e parar de afirmar status da 19
 
 ## Detalhes por correção
 
@@ -902,3 +906,34 @@ dizer "fechada e fora do backlog", não "corrigida".
   sessão que escreveu. Não há suspeita de que a conferência não rodou — o
   script tem `set -euo pipefail` e a função devolve 3 quando falha; o que falta
   é o rastro
+
+### CORR-WTE-048
+
+- **Arquivo com problema:** `wte/tools/compare_dumps.py:278`, e o
+  `wte/re/fase-3.md` que sai dele
+- **Sintoma:** a seção do oráculo abre com "Não é o `wte.exe` — esse **não
+  passa da tela de carga**", e linka a CORR-WTE-044 ao lado, que é a correção
+  que desfez essa frase. O `dd2f2a9` aposentou a afirmação em quatro arquivos e
+  não neste
+- **Como foi detectado:** `grep -n "tela de carga" wte/re/fase-3.md` contra o
+  `git show --stat dd2f2a9`, que não lista o arquivo — a ordem explica: o
+  `e12a999` (WTE-TASK-20) é anterior ao sweep
+- **Fix:** trocar a justificativa por uma que sobreviva à CORR-WTE-044 — o
+  `wte.exe` é oráculo de **comportamento**, e a pergunta desta task é de
+  **formato** —, e regerar
+
+### CORR-WTE-049
+
+- **Arquivo com problema:** `docs/tasks/20-round-trip-headless.md:25-38`
+- **Sintoma:** duas populações trocadas. Os "36 restantes" saem dos 50 `OFS_*`
+  que a WTE-TASK-06 marcou `ausente`, e esses 50 são **todos** do
+  `Offsets.hpp` — há lado C++ para todos, e o texto diz que são "os que o
+  `we2002_core` não tem". Quem o core não tem são as faixas sem dono. Além
+  disso o parágrafo dá a WTE-TASK-19 como `❌ Bloqueado` (está ✅ desde
+  2026-08-10) e repete 28 / 36, que hoje são 33 / 17
+- **Como foi detectado:** a tabela de vereditos do `offsets-novos.md` tem
+  `Offsets.hpp` como primeira coluna, e `grep` pelos nomes no header confirma;
+  o status, contra a linha da 19 no `progresso.md`
+- **Fix:** reescrever a seção mantendo o argumento (nenhum critério da 20 toca o
+  oráculo A), nomeando as duas populações separadamente e apontando para a nota
+  do `progresso.md` em vez de repetir status de outra tarefa
