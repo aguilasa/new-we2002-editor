@@ -24,8 +24,8 @@ IMG = "dd-run.bin"
 CAM = f"16</home/x/work/{IMG}>"
 
 
-def linha(s: str) -> str:
-    return "1234 " + s
+def linha(s: str, pid: str = "1234", hora: str = "10:00:00.000001") -> str:
+    return f"{pid} {hora} {s}"
 
 
 class TestParser(unittest.TestCase):
@@ -73,6 +73,48 @@ class TestParser(unittest.TestCase):
                        f'read({CAM}, ""..., 512) = -1 EAGAIN')
         self.assertEqual(evs, [])
 
+    def test_syscall_partida_em_duas_linhas(self) -> None:
+        """`<unfinished ...>` + `<... resumed>`, que e a MAIORIA delas.
+
+        O `strace -f` corta toda syscall que bloqueia. Sobre a imagem isso
+        aconteceu com 1.529 syscalls numa sessao so; ignorar o par perdia
+        escrita inteira em silencio, e quem mostrou foi o confronto com o
+        `cmp` -- duas faixas mudavam no arquivo sem aparecer no trace.
+        """
+        evs = self.evs(
+            f'_llseek({CAM}, 16488, [16488], SEEK_SET) = 0',
+            f'write({CAM}, "\\377"... <unfinished ...>',
+            '<... write resumed>) = 2048')
+        self.assertEqual(evs, [("W", 16488, 2048)])
+
+    def test_o_par_e_por_pid(self) -> None:
+        # Duas threads com syscall aberta ao mesmo tempo e o caso normal; casar
+        # o `resumed` errado poria a faixa noutra posicao.
+        evs = list(A.eventos([
+            linha(f'_llseek({CAM}, 100, [100], SEEK_SET) = 0', pid="11"),
+            linha(f'read({CAM}, "x"... <unfinished ...>', pid="11"),
+            linha('read(9<pipe:[1]>,  <unfinished ...>', pid="22"),
+            linha('<... read resumed>"y", 64) = 64', pid="22"),
+            linha('<... read resumed>"x"..., 512) = 512', pid="11"),
+        ], IMG))
+        self.assertEqual(evs, [("R", 100, 512)])
+
+    def test_pread64_partido_traz_o_offset_na_retomada(self) -> None:
+        evs = self.evs(f'pread64({CAM},  <unfinished ...>',
+                       '<... pread64 resumed>"MZ"..., 96, 0) = 96')
+        self.assertEqual(evs, [("R", 0, 96)])
+
+    def test_seek_relativo_nao_vira_offset_absoluto(self) -> None:
+        """`SEEK_CUR` tem argumento RELATIVO; o `[N]` e a posicao resultante.
+
+        Ler o argumento como absoluto punha a faixa no offset 0 -- e offset 0
+        e o cabecalho do setor 0, que passaria pelo corte de geometria como se
+        fosse sondagem de formato.
+        """
+        evs = self.evs(f'_llseek({CAM}, 0, [405228], SEEK_CUR) = 0',
+                       f'read({CAM}, "z"..., 8) = 8')
+        self.assertEqual(evs, [("R", 405228, 8)])
+
     def test_faixas_vizinhas_se_unem(self) -> None:
         evs = [("R", 0, 10), ("R", 10, 10), ("R", 100, 5)]
         self.assertEqual(A.unir(evs, "R"), [(0, 20), (100, 105)])
@@ -89,6 +131,7 @@ class TestEvidencia(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.medido = A.ler_medido()
         cls.faixas = [f for f in cls.medido if f["op"] in ("R", "W")]
+        cls.conteudo = A.ler_conteudo()
 
     def test_tem_evidencia(self) -> None:
         self.assertTrue(self.faixas, "io-medido.tsv sem faixa nenhuma")
@@ -144,6 +187,25 @@ class TestEvidencia(unittest.TestCase):
         self.assertIn("OFS_TEAM_NAME_1", tocado)
         self.assertIn("OFS_TEAM_NAME_KANJI", tocado)
 
+    def test_o_corte_de_150_setores_nao_muda_o_mapa(self) -> None:
+        """A refutação da hipótese do tamanho, presa em teste.
+
+        Truncar a cópia para os 474.431.328 bytes exatos que o editor pede faz
+        o aviso sumir e **não** muda uma faixa sequer. Se um dia mudar, ou a
+        medição foi refeita com outro roteiro, ou a hipótese volta a estar em
+        aberto -- e o `offsets-novos.md` afirma o contrário.
+        """
+        imagens = []
+        for r in self.medido:
+            if r["imagem"] not in imagens:
+                imagens.append(r["imagem"])
+        if len(imagens) < 2:
+            self.skipTest("só uma sessão no io-medido.tsv")
+        def mapa(img):
+            return [tuple(r[c] for c in ("acao", "op", "inicio", "fim"))
+                    for r in self.medido if r["imagem"] == img]
+        self.assertEqual(mapa(imagens[0]), mapa(imagens[1]))
+
     def test_ha_faixa_fora_do_que_o_newWe2002_conhece(self) -> None:
         """O achado que a task existe para produzir.
 
@@ -154,6 +216,23 @@ class TestEvidencia(unittest.TestCase):
         conhecidos = A.ler_offsets_hpp()
         teto = max(conhecidos.values())
         self.assertTrue([f for f in self.faixas if int(f["inicio"]) > teto])
+
+
+    def test_a_faixa_do_travamento_esta_vazia_nesta_release(self) -> None:
+        """O achado que substituiu a hipótese do tamanho.
+
+        A última leitura antes do `SIGSEGV` é em 14368636, e ali a imagem está
+        praticamente zerada — enquanto toda outra faixa lida tem dado. Se isto
+        parar de valer, o pedido de release que o `offsets-novos.md` faz deixa
+        de ter fundamento.
+        """
+        if not self.conteudo:
+            self.skipTest("io-conteudo.tsv ausente")
+        alvo = self.conteudo.get(14368636)
+        self.assertIsNotNone(alvo, "a faixa do travamento sumiu da amostra")
+        outras = [int(c["nao_zero"]) for o, c in self.conteudo.items()
+                  if o != 14368636 and int(c["bytes_amostrados"]) >= 64]
+        self.assertLess(int(alvo["nao_zero"]), min(outras))
 
 
 if __name__ == "__main__":

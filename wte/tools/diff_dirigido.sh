@@ -9,9 +9,18 @@
 #      responde tambem para LEITURA -- coisa que `cmp` nenhum alcanca.
 #   2. **cmp contra a copia limpa** -- o que efetivamente MUDOU no arquivo.
 #
-# As duas se conferem: toda faixa do `cmp` tem de estar contida numa faixa de
-# escrita do trace. Divergencia ali significa que o trace perdeu syscall, e o
-# script avisa.
+# As duas se conferem, e a conferencia e feita de verdade no fim da corrida
+# (`analisar_io.py --conferir`): toda faixa do `cmp` tem de estar contida numa
+# faixa de escrita do trace. Divergencia ali significa que o trace perdeu
+# syscall -- e ja significou duas vezes:
+#
+#   - a marca era numero de linha, e o `strace` bufferiza o log: `wc -l` no
+#     instante da marca fica ATRAS das syscalls que ja aconteceram. Virou
+#     relogio (`-tt`);
+#   - o parser ignorava syscall partida em `<unfinished ...>` + `<... resumed>`,
+#     que sobre a imagem e a MAIORIA delas -- 1.529 numa sessao so.
+#
+# Os dois passavam despercebidos: o TSV saia com menos faixa e ninguem via.
 #
 # ## Por que trace, e nao so `cmp`
 #
@@ -97,14 +106,21 @@ echo ">> lancando o wte.exe sob strace (ptrace_scope=1 exige lancar, nao anexar)
   cd "$RAIZ/we-team-editor"
   env DISPLAY=:99 WINEPREFIX="$PREFIX" WINEARCH=win32 WINEDEBUG="$WINEDEBUG" \
       ${XAUTHORITY:+XAUTHORITY="$XAUTHORITY"} \
-    setsid strace -f -qq -y \
+    setsid strace -f -qq -y -tt \
       -e trace=read,pread64,write,pwrite64,lseek,_llseek \
       -o "$SAIDA/io.log" \
       "$WINE_BIN/wine" we-team-editor.exe
 ) >"$SAIDA/wine.log" 2>&1 &
 
 : > "$SAIDA/marcas.txt"
-marca() { echo "$(wc -l < "$SAIDA/io.log" 2>/dev/null || echo 0)	$1" >> "$SAIDA/marcas.txt"; }
+# A marca e RELOGIO, e nao numero de linha. O `strace` bufferiza o arquivo de
+# log, entao `wc -l` no instante da marca fica ATRAS das syscalls que ja
+# aconteceram -- e a atribuicao "esta faixa e daquela acao" sai errada em
+# silencio. Foi assim que sete escritas do arranque viraram duas no TSV
+# enquanto o `cmp` continuava mostrando as sete. Com `-tt` cada linha carrega o
+# proprio instante, e o corte deixa de depender de quando o buffer foi ao
+# disco.
+marca() { echo "$(date +%H:%M:%S.%6N)	$1" >> "$SAIDA/marcas.txt"; }
 
 janela() {
   # A janela alvo, pelo nome; devolve "ID X Y". Vazio enquanto nao existir.
@@ -203,4 +219,5 @@ with open(saida, 'w') as f:
         f.write(f"{i}\t{j}\t{j-i+1}\t{i//2352}\t{i%2352}\n")
 print(f"cmp: {len(faixas)} faixa(s) mudaram -> {saida}")
 PY
+python3 "$AQUI/analisar_io.py" --conferir "$SAIDA/io.tsv" "$SAIDA/cmp.tsv"
 echo ">> pronto: $SAIDA"

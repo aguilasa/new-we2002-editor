@@ -313,15 +313,19 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
-- **A release de 474.431.328 bytes virou pré-requisito da fase 4.** Medido na
-  WTE-TASK-19: o `wte.exe` **morre** (`SIGSEGV`/`SEGV_MAPERR` em `NULL`) logo
-  depois de carregar o primeiro time, com as duas ROMs deste repositório. Ele
-  avisa na abertura que o tamanho não corresponde — espera exatamente
-  474.431.328 bytes, e as nossas têm 474.784.128 (European Deluxe) e
-  307.187.664 (japonesa). Consequência: o **oráculo comportamental** do projeto
+- **Falta uma release em que o `wte.exe` passe da tela de carga, e isso virou
+  pré-requisito da fase 4.** Medido na WTE-TASK-19: o editor **morre**
+  (`SIGSEGV`/`SEGV_MAPERR` em `NULL`) logo depois de carregar o primeiro time,
+  com as duas ROMs deste repositório. **Não é o tamanho** — essa hipótese foi
+  testada e refutada: truncar a European Deluxe para os 474.431.328 bytes
+  exatos que o editor pede (150 setores a menos, todos na cauda) faz o aviso
+  sumir e **não muda uma faixa** do mapa de I/O; o app cai igual. O que sobra
+  como pista é conteúdo: a última leitura antes do `SIGSEGV` é em `14368636`,
+  e ali esta release tem 4 bytes não-zero em 64 amostrados, contra 32 a 64 em
+  toda outra faixa lida. Consequência: o **oráculo comportamental** do projeto
   (§4.2) não passa da tela de carga, e o gate golden da
   [WTE-TASK-22](/docs/tasks/22-harness-golden.md) não tem em que se apoiar. A
-  medida e o que ela custa estão em
+  medida está em
   [`../../wte/re/offsets-novos.md`](../../wte/re/offsets-novos.md).
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80

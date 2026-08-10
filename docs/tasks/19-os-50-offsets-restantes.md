@@ -98,6 +98,8 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
 ## Log de Execução
 
 - **Executado em:** 2026-08-10 — **parcial, e o bloqueio é externo**
+  (retomada no mesmo dia: a hipótese do tamanho foi testada e refutada, e o
+  instrumento ganhou dois consertos que mudavam número)
 
 - **Resumo do que foi feito:**
 
@@ -137,24 +139,51 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
   | `wte/re/io-medido.tsv` | criado — a evidência |
   | `wte/re/offsets-novos.md` | criado, **gerado** |
   | `wte/re/offsets.md`, `wte/tools/dump_offsets.py` | coluna **medido** na tabela dos 50 |
+  | `wte/re/io-conteudo.tsv` | criado — amostra do conteúdo de cada faixa lida |
   | `wte/tools/README.md`, `wte/tests/roteiros/README.md` | atualizados |
 
 - **Problemas encontrados:**
 
   **O bloqueio, e ele não é desta task só: o `wte.exe` morre ao carregar um
   time.** `SIGSEGV`/`SEGV_MAPERR` em `NULL`, logo depois de ler os dados do
-  primeiro time selecionado, com as duas ROMs deste repositório. O próprio
-  editor avisa na abertura que o tamanho não corresponde — ele espera
-  **474.431.328** bytes exatos, e as nossas têm 474.784.128 e 307.187.664. A
-  leitura em 14.368.636, muito acima do que o `newWe2002` mapeia, devolve nesta
-  imagem o que estiver lá; o editor usa e cai.
+  primeiro time selecionado, com as duas ROMs deste repositório — e com
+  qualquer time, não só o primeiro.
+
+  **A primeira hipótese estava errada, e a correção é o achado da retomada.**
+  O editor avisa na abertura que o tamanho não corresponde — quer 474.431.328
+  bytes exatos, e a European Deluxe tem 474.784.128. A diferença é
+  **352.800 = exatamente 150 setores** de 2352, toda ela na cauda, muito depois
+  do maior offset conhecido. Truncar a cópia para o tamanho exato e repetir o
+  roteiro: **o aviso some, e mais nada muda** — o mapa de I/O sai idêntico
+  faixa a faixa, e o app cai no mesmo ponto. Tamanho não era a causa; o que a
+  hipótese explicava era o aviso, e o aviso nunca foi o problema.
+
+  O que sobra como pista é **conteúdo**: a última leitura antes do `SIGSEGV`
+  são 512 bytes em `14368636`, e amostrando 64 bytes ali esta release tem
+  **4 não-zero** — contra 32 a 64 em toda outra faixa que o editor lê. Não
+  prova a causa; prova que nesta release **não há o que ler** onde ele foi ler.
+  O pedido deixou de ser "a release de 474.431.328 bytes" e passou a ser
+  "uma release cuja região em 14368636 seja populada".
 
   O custo maior não é aqui. O `wte.exe` é o **oráculo comportamental** do
   projeto (§4.2 do plano), e a WTE-TASK-22 monta o gate golden em cima dele.
-  Um oráculo que não passa da tela de carga não sustenta gate nenhum:
-  **achar a release de 474.431.328 bytes deixou de ser desejável e virou
-  pré-requisito da fase 4.** Ficou registrado nas Pendências externas do
-  `progresso.md`.
+  Um oráculo que não passa da tela de carga não sustenta gate nenhum. Ficou
+  registrado nas Pendências externas do `progresso.md`.
+
+  **Dois defeitos do próprio instrumento, que mudavam número em silêncio.** Os
+  dois só apareceram porque a segunda régua passou a ser conferida de verdade
+  (`analisar_io.py --conferir`), e o script prometia essa conferência desde o
+  primeiro commit sem executá-la:
+
+  1. **a marca era número de linha**, e o `strace` bufferiza o log — `wc -l` no
+     instante da marca fica atrás das syscalls que já aconteceram, e a faixa ia
+     para a ação errada. Virou relógio (`strace -tt`);
+  2. **o parser ignorava syscall partida** em `<unfinished ...>` +
+     `<... resumed>`, que sobre a imagem é a **maioria** delas — 1.529 numa
+     sessão só. Duas faixas mudavam no arquivo sem aparecer no trace.
+
+  Com os dois consertados, as duas réguas fecham: as 7 faixas do `cmp` cabem
+  nas 8 faixas de escrita do trace, nas duas sessões.
 
   **Três diagnósticos custaram tempo e viraram nota escrita**, porque os três
   se disfarçam de "o clique parou de funcionar":

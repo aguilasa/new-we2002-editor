@@ -62,44 +62,123 @@ FOLGA_INICIO = 16
 
 # =========================================================== 1. a medicao ===
 
-def _regex(alvo: str) -> tuple[re.Pattern, re.Pattern, re.Pattern]:
+def _regex(alvo: str) -> dict[str, re.Pattern]:
     a = re.escape(alvo)
-    return (
-        re.compile(r"_?ll?seek\((\d+)<[^>]*" + a + r">,\s*(\d+),"),
-        re.compile(r"\b(read|write)\((\d+)<[^>]*" + a
-                   + r">,.*?,\s*(\d+)\)\s*=\s*(-?\d+)"),
-        re.compile(r"\bp(read|write)64\((\d+)<[^>]*" + a
-                   + r">,.*?,\s*(\d+),\s*(\d+)\)\s*=\s*(-?\d+)"),
-    )
+    return {
+        # `_llseek(fd, off, [ABS], WHENCE)` -- o que interessa e o `[ABS]`, a
+        # posicao ABSOLUTA resultante, e nao o argumento `off`: com SEEK_CUR o
+        # argumento e relativo, e le-lo como absoluto poe a faixa no offset 0.
+        "seek": re.compile(r"_llseek\((\d+)<[^>]*" + a + r">,\s*-?\d+,\s*\[(\d+)\]"),
+        "seek64": re.compile(r"\blseek\((\d+)<[^>]*" + a
+                             + r">,\s*-?\d+,\s*\w+\)\s*=\s*(\d+)"),
+        "rw": re.compile(r"\b(read|write)\((\d+)<[^>]*" + a
+                         + r">,.*?,\s*(\d+)\)\s*=\s*(-?\d+)"),
+        "p": re.compile(r"\bp(read|write)64\((\d+)<[^>]*" + a
+                        + r">,.*?,\s*(\d+),\s*(\d+)\)\s*=\s*(-?\d+)"),
+        # Syscall partida em duas linhas. O `strace -f` corta toda syscall que
+        # bloqueia, e sobre a imagem isso e a MAIORIA delas -- ignorar o par
+        # perdia escrita inteira em silencio, e so o confronto com o `cmp`
+        # mostrou.
+        "abre": re.compile(r"^(\d+)\s+\S+\s+(pread64|pwrite64|read|write|_llseek)"
+                           r"\((\d+)<[^>]*" + a + r">,\s*(-?\d+)?.*<unfinished"),
+        "retoma": re.compile(r"^(\d+)\s+\S+\s+<\.\.\. "
+                             r"(pread64|pwrite64|read|write|_llseek) resumed>"
+                             r"(.*)$"),
+    }
 
 
-def eventos(linhas, alvo: str):
-    """(op, offset, tamanho) de cada syscall que tocou a imagem.
+RE_HORA = re.compile(r"^\s*(\d+)\s+(\d\d):(\d\d):(\d\d)\.(\d+)")
+
+
+def _segundos(h: str, m: str, s: str, frac: str) -> float:
+    return int(h) * 3600 + int(m) * 60 + int(s) + float("0." + frac)
+
+
+def hora_da_linha(ln: str) -> float | None:
+    m = RE_HORA.match(ln)
+    return _segundos(*m.groups()[1:]) if m else None
+
+
+def eventos_datados(linhas, alvo: str):
+    """(hora, op, offset, tamanho) de cada syscall que tocou a imagem.
 
     O `strace -y` carimba o caminho ao lado do fd, entao a filtragem e por
     nome de arquivo e nao por numero -- fd se recicla, nome nao.
+
+    A varredura e sobre o log INTEIRO, de proposito: a posicao do arquivo vem
+    de um `_llseek` que pode estar do outro lado de uma marca, e fatiar o log
+    antes de reconstruir a posicao perderia essa continuidade.
     """
-    re_seek, re_rw, re_p = _regex(alvo)
+    R = _regex(alvo)
     pos: dict[str, int] = {}
+    pendente: dict[str, tuple[str, str, float | None]] = {}
+
+    def registra(op: str, fd: str, got: int, quando):
+        p = pos.get(fd, 0)
+        pos[fd] = p + got
+        return (quando, "R" if op == "read" else "W", p, got)
+
     for ln in linhas:
-        m = re_p.search(ln)
+        quando = hora_da_linha(ln)
+
+        m = R["p"].search(ln)
         if m:
             op, _fd, _n, off, got = m.groups()
             if int(got) > 0:
-                yield ("R" if op == "read" else "W", int(off), int(got))
+                yield (quando, "R" if op == "read" else "W", int(off), int(got))
             continue
-        m = re_seek.search(ln)
+
+        m = R["retoma"].match(ln)
+        if m:
+            pid, op, resto = m.groups()
+            alvo_pend = pendente.pop(pid, None)
+            if alvo_pend is None or alvo_pend[0] != op:
+                continue
+            _op, fd, _q = alvo_pend
+            if op == "_llseek":
+                mm = re.search(r"\[(\d+)\]", resto)
+                if mm:
+                    pos[fd] = int(mm.group(1))
+                continue
+            if op.startswith("p"):
+                # `<... pread64 resumed>"...", COUNT, OFFSET) = GOT` -- o
+                # offset e argumento, e nao a posicao do arquivo.
+                mm = re.search(r",\s*(\d+),\s*(\d+)\)\s*=\s*(-?\d+)", resto)
+                if mm and int(mm.group(3)) > 0:
+                    yield (quando, "R" if op == "pread64" else "W",
+                           int(mm.group(2)), int(mm.group(3)))
+                continue
+            mm = re.search(r"=\s*(-?\d+)", resto)
+            if mm and int(mm.group(1)) > 0:
+                yield registra(op, fd, int(mm.group(1)), quando)
+            continue
+
+        m = R["abre"].match(ln)
+        if m:
+            pid, op, fd, _off = m.groups()
+            pendente[pid] = (op, fd, quando)
+            continue
+
+        m = R["seek"].search(ln)
         if m:
             pos[m.group(1)] = int(m.group(2))
             continue
-        m = re_rw.search(ln)
+        m = R["seek64"].search(ln)
+        if m:
+            pos[m.group(1)] = int(m.group(2))
+            continue
+
+        m = R["rw"].search(ln)
         if m:
             op, fd, _n, got = m.groups()
-            got = int(got)
-            if got > 0:
-                p = pos.get(fd, 0)
-                yield ("R" if op == "read" else "W", p, got)
-                pos[fd] = p + got
+            if int(got) > 0:
+                yield registra(op, fd, int(got), quando)
+
+
+def eventos(linhas, alvo: str):
+    """(op, offset, tamanho), sem a hora. E a forma que os testes exercitam."""
+    for _quando, op, off, n in eventos_datados(linhas, alvo):
+        yield (op, off, n)
 
 
 def unir(evs, op: str) -> list[tuple[int, int]]:
@@ -115,14 +194,29 @@ def unir(evs, op: str) -> list[tuple[int, int]]:
 
 def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
           imagem: str = "?") -> int:
+    """Fatia o trace por RELOGIO, e nao por numero de linha.
+
+    O `strace` bufferiza o arquivo de log: `wc -l` no instante da marca fica
+    atras das syscalls que ja aconteceram, e a atribuicao "esta faixa e daquela
+    acao" sai errada em silencio. Foi medido -- sete escritas do arranque
+    viraram duas no TSV enquanto o `cmp` continuava mostrando as sete.
+    """
     linhas = log.read_text(errors="replace").splitlines()
-    cortes = [(int(l.split("\t")[0]), l.split("\t")[1].strip())
-              for l in marcas.read_text().splitlines() if l.strip()]
+    cortes = []
+    for l in marcas.read_text().splitlines():
+        if not l.strip():
+            continue
+        quando, nome = l.split("\t")
+        h, m, resto = quando.split(":")
+        s, frac = resto.split(".")
+        cortes.append((_segundos(h, m, s, frac), nome.strip()))
     fora = ["imagem\tacao\top\tinicio\tfim\ttamanho\tsetor\tbyte_no_setor"]
+    datados = list(eventos_datados(linhas, alvo))
     total = 0
     for i, (fim, nome) in enumerate(cortes):
-        ini = cortes[i - 1][0] if i else 0
-        evs = list(eventos(linhas[ini:fim], alvo))
+        ini = cortes[i - 1][0] if i else 0.0
+        evs = [(op, o, n) for q, op, o, n in datados
+               if q is not None and ini <= q < fim]
         antes = total
         for op in ("R", "W"):
             for a, b in unir(evs, op):
@@ -137,6 +231,82 @@ def medir(log: Path, marcas: Path, alvo: str, tsv: Path,
     tsv.write_text("\n".join(fora) + "\n")
     print(f"analisar_io: {total} faixa(s) -> {tsv}")
     return 0
+
+
+def conferir_reguas(io_tsv: Path, cmp_tsv: Path) -> int:
+    """As duas reguas tem de fechar: o que MUDOU esta no que foi ESCRITO.
+
+    O trace ve escrita de qualquer valor; o `cmp` so ve escrita de valor
+    diferente. Logo toda faixa do `cmp` tem de caber dentro de alguma faixa de
+    escrita do trace -- o contrario nao vale, e nao e erro.
+
+    Faixa do `cmp` que sobra significa que o trace PERDEU syscall, e ai nenhum
+    numero desta task vale nada. Ja aconteceu: o corte por numero de linha
+    ficava atras do buffer do `strace` e atribuia escrita a acao errada.
+    """
+    def ler(p: Path) -> list[dict[str, str]]:
+        linhas = p.read_text(encoding="utf-8").splitlines()
+        cab = linhas[0].split("\t")
+        return [dict(zip(cab, l.split("\t"))) for l in linhas[1:] if l.strip()]
+
+    escritas = [(int(r["inicio"]), int(r["fim"]))
+                for r in ler(io_tsv) if r.get("op") == "W" and r.get("inicio")]
+    mudou = [(int(r["inicio"]), int(r["fim"])) for r in ler(cmp_tsv)]
+    orfas = [(a, b) for a, b in mudou
+             if not any(x <= a and b <= y for x, y in escritas)]
+    if orfas:
+        print(f"analisar_io: ATENCAO -- {len(orfas)} de {len(mudou)} faixa(s) "
+              f"que MUDARAM nao aparecem como escrita no trace:", file=sys.stderr)
+        for a, b in orfas:
+            print(f"  {a}..{b} ({b - a + 1} B)", file=sys.stderr)
+        print("  o trace perdeu syscall; a atribuicao por acao nao vale",
+              file=sys.stderr)
+        return 3
+    print(f"analisar_io: as duas reguas fecham -- {len(mudou)} faixa(s) do cmp "
+          f"contidas em {len(escritas)} faixa(s) de escrita do trace")
+    return 0
+
+
+AMOSTRA = 64
+OUT_CONTEUDO = ROOT / "wte" / "re" / "io-conteudo.tsv"
+
+
+def amostrar(imagem: Path) -> int:
+    """Que conteudo a imagem tem nas faixas que o `wte.exe` leu.
+
+    A pergunta que isto responde e a do travamento: o editor cai logo depois de
+    ler uma faixa, e saber se aquela faixa tem DADO ou esta zerada e a
+    diferenca entre "ele leu e nao gostou" e "nao ha o que ler nesta release".
+
+    Le uma **copia**, nunca `roms/` -- o chamador passa o caminho, e o
+    `diff_dirigido.sh` passa a copia de `work/`.
+    """
+    faixas = [f for f in ler_medido() if f["op"] == "R" and f["inicio"]]
+    vistos: dict[int, dict] = {}
+    for f in faixas:
+        vistos.setdefault(int(f["inicio"]), f)
+    fora = ["inicio\ttamanho\tbytes_amostrados\tnao_zero\tamostra_hex"]
+    with imagem.open("rb") as fh:
+        for inicio in sorted(vistos):
+            f = vistos[inicio]
+            n = min(AMOSTRA, int(f["tamanho"]))
+            fh.seek(inicio)
+            b = fh.read(n)
+            fora.append(f"{inicio}\t{f['tamanho']}\t{len(b)}"
+                        f"\t{sum(1 for c in b if c)}\t{b.hex()}")
+    OUT_CONTEUDO.write_text("\n".join(fora) + "\n")
+    print(f"analisar_io: {len(vistos)} faixa(s) amostrada(s) -> "
+          f"{OUT_CONTEUDO.relative_to(ROOT)}")
+    return 0
+
+
+def ler_conteudo() -> dict[int, dict[str, str]]:
+    if not OUT_CONTEUDO.exists():
+        return {}
+    linhas = OUT_CONTEUDO.read_text(encoding="utf-8").splitlines()
+    cab = linhas[0].split("\t")
+    return {int(r["inicio"]): r for r in
+            (dict(zip(cab, l.split("\t"))) for l in linhas[1:] if l.strip())}
 
 
 # ========================================================== 2. a geracao ====
@@ -186,7 +356,15 @@ def sem_dono(faixas: list[dict], conhecidos: dict[str, int]) -> list[dict]:
 def gerar() -> str:
     conhecidos = ler_offsets_hpp()
     tsv = ler_offsets_tsv()
-    medido = ler_medido()
+    todas_sessoes = ler_medido()
+    conteudo = ler_conteudo()
+
+    imagens = []
+    for r in todas_sessoes:
+        if r["imagem"] not in imagens:
+            imagens.append(r["imagem"])
+    principal = imagens[0]
+    medido = [r for r in todas_sessoes if r["imagem"] == principal]
 
     confirmados_06 = {r["nome"] for r in tsv if r["registro"] == "confirmado"}
     ausentes_06 = {r["nome"]: r for r in tsv if r["registro"] == "ausente"}
@@ -401,12 +579,50 @@ def gerar() -> str:
     w("Foram gastos dois diagnósticos até separar as duas coisas; quem repetir")
     w("a medição confira `ps -o stat` procurando `Z`, e não a tela.")
     w("")
-    w("**A causa provável é a versão da imagem.** O próprio editor avisa na")
-    w("abertura que o tamanho não corresponde: ele espera **474.431.328**")
-    w("bytes exatos, e as duas ROMs daqui têm 474.784.128 (European Deluxe) e")
-    w("307.187.664 (japonesa). A leitura em `14368636` — 1,8 MB **acima** do")
-    w("maior offset que o `newWe2002` conhece — devolve, nesta imagem, o que")
-    w("estiver lá; o editor a usa e cai.")
+    w("### A hipótese do tamanho foi testada, e está **refutada**")
+    w("")
+    w("O editor avisa na abertura que o tamanho não corresponde: ele quer")
+    w("**474.431.328** bytes exatos, e as ROMs daqui têm 474.784.128 (European")
+    w("Deluxe) e 307.187.664 (japonesa). A diferença da primeira é")
+    w("**352.800 bytes = exatamente 150 setores** de 2352, e toda ela está na")
+    w("cauda, muito depois do maior offset conhecido.")
+    w("")
+    if len(imagens) > 1:
+        outra = imagens[1]
+        w(f"Então a cópia foi truncada para o tamanho exato (`{outra}`) e a")
+        w("sessão rodou de novo, mesmo roteiro, uma variável trocada. Resultado:")
+        w("")
+        w("- o aviso de tamanho **some** — o corte é o que ele queria;")
+        w("- o mapa de I/O sai **idêntico faixa a faixa**, leitura e escrita;")
+        w("- **o `wte.exe` cai igual**, no mesmo ponto.")
+        w("")
+        w("Tamanho não é a causa. O que a hipótese explicava era o aviso, e o")
+        w("aviso nunca foi o problema.")
+        w("")
+    w("### O que sobra como pista: a região está vazia nesta release")
+    w("")
+    ultima = conteudo.get(14368636)
+    if ultima:
+        w(f"A última leitura antes do `SIGSEGV` são {ultima['tamanho']} bytes em")
+        w(f"`14368636` — 1,8 MB **acima** do maior offset que o `newWe2002`")
+        w(f"conhece. Amostrando os primeiros {ultima['bytes_amostrados']} bytes")
+        w(f"dessa faixa na imagem: **{ultima['nao_zero']} não são zero**.")
+        w("")
+        outros = [c for o, c in sorted(conteudo.items())
+                  if o != 14368636 and int(c["bytes_amostrados"]) >= 64]
+        if outros:
+            menor = min(int(c["nao_zero"]) for c in outros)
+            w(f"Para comparar: das outras {len(outros)} faixas lidas, a mais")
+            w(f"vazia tem {menor} bytes não-zero na mesma amostra. A região que")
+            w("o editor lê por último, e logo antes de morrer, é a única")
+            w("praticamente zerada.")
+            w("")
+        w("Isso não prova a causa — prova que **nesta release não há o que ler**")
+        w("onde o editor foi ler. Medida em [`io-conteudo.tsv`](io-conteudo.tsv).")
+        w("")
+    w("**O pedido, então, deixou de ser \"a release de 474.431.328 bytes\" e")
+    w("passou a ser: uma release cuja região em `14368636` seja populada.**")
+    w("Truncar a que temos não serve; é preciso outro dump.")
     w("")
     w("### O que isso custa, e a quem")
     w("")
@@ -459,9 +675,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--alvo", default="dd-run.bin")
     ap.add_argument("--tsv", type=Path)
     ap.add_argument("--imagem", default="?")
+    ap.add_argument("--amostrar", type=Path, metavar="COPIA",
+                    help="amostra o conteudo das faixas lidas, numa COPIA")
+    ap.add_argument("--conferir", nargs=2, type=Path,
+                    metavar=("IO_TSV", "CMP_TSV"),
+                    help="confere que o cmp cabe nas escritas do trace")
     ap.add_argument("--check", action="store_true",
                     help="nao escreve; sai 2 se a saida divergir do commitado")
     args = ap.parse_args(argv)
+
+    if args.amostrar:
+        return amostrar(args.amostrar)
+
+    if args.conferir:
+        return conferir_reguas(*args.conferir)
 
     if args.log:
         if not (args.marcas and args.tsv):

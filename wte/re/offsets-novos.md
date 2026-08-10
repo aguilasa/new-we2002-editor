@@ -195,12 +195,42 @@ por isso que o sintoma se disfarça de *clique parou de funcionar*.
 Foram gastos dois diagnósticos até separar as duas coisas; quem repetir
 a medição confira `ps -o stat` procurando `Z`, e não a tela.
 
-**A causa provável é a versão da imagem.** O próprio editor avisa na
-abertura que o tamanho não corresponde: ele espera **474.431.328**
-bytes exatos, e as duas ROMs daqui têm 474.784.128 (European Deluxe) e
-307.187.664 (japonesa). A leitura em `14368636` — 1,8 MB **acima** do
-maior offset que o `newWe2002` conhece — devolve, nesta imagem, o que
-estiver lá; o editor a usa e cai.
+### A hipótese do tamanho foi testada, e está **refutada**
+
+O editor avisa na abertura que o tamanho não corresponde: ele quer
+**474.431.328** bytes exatos, e as ROMs daqui têm 474.784.128 (European
+Deluxe) e 307.187.664 (japonesa). A diferença da primeira é
+**352.800 bytes = exatamente 150 setores** de 2352, e toda ela está na
+cauda, muito depois do maior offset conhecido.
+
+Então a cópia foi truncada para o tamanho exato (`truncada-474431328.bin`) e a
+sessão rodou de novo, mesmo roteiro, uma variável trocada. Resultado:
+
+- o aviso de tamanho **some** — o corte é o que ele queria;
+- o mapa de I/O sai **idêntico faixa a faixa**, leitura e escrita;
+- **o `wte.exe` cai igual**, no mesmo ponto.
+
+Tamanho não é a causa. O que a hipótese explicava era o aviso, e o
+aviso nunca foi o problema.
+
+### O que sobra como pista: a região está vazia nesta release
+
+A última leitura antes do `SIGSEGV` são 512 bytes em
+`14368636` — 1,8 MB **acima** do maior offset que o `newWe2002`
+conhece. Amostrando os primeiros 64 bytes
+dessa faixa na imagem: **4 não são zero**.
+
+Para comparar: das outras 19 faixas lidas, a mais
+vazia tem 32 bytes não-zero na mesma amostra. A região que
+o editor lê por último, e logo antes de morrer, é a única
+praticamente zerada.
+
+Isso não prova a causa — prova que **nesta release não há o que ler**
+onde o editor foi ler. Medida em [`io-conteudo.tsv`](io-conteudo.tsv).
+
+**O pedido, então, deixou de ser "a release de 474.431.328 bytes" e
+passou a ser: uma release cuja região em `14368636` seja populada.**
+Truncar a que temos não serve; é preciso outro dump.
 
 ### O que isso custa, e a quem
 
