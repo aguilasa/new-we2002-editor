@@ -495,6 +495,16 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
+**Medido no fechamento da fase 2 (WTE-TASK-14): 96,2% do Pascal da casca é
+saída de gerador** — 8.982 linhas geradas contra 353 escritas à mão, e as 353
+são andaime de projeto (`wte.lpr`, `retrace.pas`, `wtemain.pas`), não lógica do
+editor. O número sai do
+[`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
+[`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712
+linhas de hex dos blobs ficam fora dela. **A fração da §4.3 — "a UI é 60% do
+volume" — continua sem verificação**, e só fecha depois das fases 3 e 4: hoje a
+UI é a única camada que existe.
+
 **Disciplina de código gerado — a mesma do resto do repositório.** Nada de
 editar `.lfm` ou unidade gerada à mão; mexe-se no gerador e reexecuta. Cada
 gerador tem `--check` que compara com o commitado, e o `--check` entra na
@@ -729,8 +739,16 @@ Sem decompilador ainda. Tudo que sai de `objdump`, `strings` e Python.
 4. **Trace de eventos** — clicar as mesmas coisas nos dois e comparar a ordem
    de disparo. Isso alimenta a Fase 4.
 
-> **Pronto quando:** o app abre, os 18 formulários são navegáveis, os 96 stubs
+> **Pronto quando:** o app abre, os 18 formulários **aparecem**, os 96 stubs
 > logam, e a comparação visual foi conferida formulário a formulário.
+
+> **"Navegáveis" era impossível, e a WTE-TASK-14 corrigiu o critério.** Quem
+> abre formulário são os handlers, e nesta fase eles são stub por definição —
+> pedir navegação aqui é pedir a fase 4. O que existe é `--show`, andaime
+> explícito da WTE-TASK-11, e foi com ele que os 18 foram capturados. Navegação
+> de verdade chega com a WTE-TASK-25. Medido no fechamento: 18 de 18 abrem no
+> `:99`, 96 de 96 stubs logam, 16 `FormCreate` no arranque (os dois `ficha_error`
+> não têm `OnCreate`). Ver [`../wte/re/fase-2.md`](../wte/re/fase-2.md).
 
 Nesta fase o app não toca a imagem de CD. Zero risco.
 
@@ -1044,7 +1062,8 @@ Se o objetivo for ver resultado cedo em vez de seguir as fases em bloco:
 1. **Fase 0** inteira. Sem ferramenta não há projeto.
 2. **Fase 1, itens 1 e 2** — os DFM e os 96 métodos. Meio dia, e destrava a
    Fase 2 inteira.
-3. **Fase 2 inteira.** O app abre e é navegável. Marco visível.
+3. **Fase 2 inteira.** O app abre e mostra os 18. Marco visível. (Navegar
+   entre eles é da fase 4 — ver o critério de pronto da fase 2.)
 4. **Fase 3** até o round-trip headless. Agora o app *lê* o jogo.
 5. **Fase 5.1** (preço) fora de ordem, porque é a feature mais desejada, é
    isolada e não depende de gravação.

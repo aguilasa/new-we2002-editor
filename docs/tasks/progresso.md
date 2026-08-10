@@ -26,7 +26,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | App com os 18 formulários e 96 stubs | 2 | 10 | ✅ Concluído | 2026-08-06 | 2026-08-09 |
 | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | Comparação visual dos 18 formulários | 2 | 11 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | Trace de eventos contra o original | 2 | 11 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
-| [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ⬜ Pendente | — | — |
+| [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | Fechamento da fase 2 | 2 | 12, 13 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | Decidir o mapeamento de tipo C++ → Pascal | 3 | 02 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-16](/docs/tasks/16-gerador-de-tabelas.md) | `gen_tables_pas.py` — offsets e tabelas | 3 | 15 | ⬜ Pendente | — | — |
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ⬜ Pendente | — | — |
@@ -79,7 +79,7 @@ objetivo completo e o modelo de verificação.
 | --- | --- | --- |
 | 0 — Infra | 01 a 02 | ferramental instalado e provado; `wte/` compilando vazio |
 | 1 — Extração estática | 03 a 09 | os 18 DFM, os 96 handlers, strings, offsets, assets — **sem decompilador** |
-| 2 — Casca | 10 a 14 | a UI inteira gerada, navegável, com os 96 stubs logando |
+| 2 — Casca | 10 a 14 | a UI inteira gerada, os 18 abrindo por `--show`, com os 96 stubs logando |
 | 3 — Dados | 15 a 21 | camada de dados **gerada** do `we2002_core`, lendo as duas ROMs |
 | 4 — Comportamento | 22 a 29 | o gate golden, e os 96 handlers com veredito |
 | 5 — Features | 30 a 33 | preço, `.mcr`, camisa/bandeira 2D, slots de ML |
@@ -185,8 +185,8 @@ conferível.
 - [x] Os 96 stubs na unidade certa, logando
 - [x] Comparação visual dos 18, com veredito escrito
 - [x] Diferenças de ordem de evento LCL × VCL registradas
-- [ ] Fração de código gerado medida contra a tese da §4.4
-- [ ] Nenhum arquivo gerado editado à mão (provado por `--check`)
+- [x] Fração de código gerado medida contra a tese da §4.4
+- [x] Nenhum arquivo gerado editado à mão (provado por `--check`)
 
 ### Fase 3 — Dados
 

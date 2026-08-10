@@ -12,6 +12,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `check_fase1.py` ✅ | 09 | os produtos da fase 1 → as quatro conferências cruzadas e a reconciliação |
 | `dfm2lfm.py` ✅ | 10 | DFM → `.lfm` + esqueleto das unidades |
 | `check_lcl_props.py` ✅ | CORR-020 | **não gera nada** — remede a tabela `PROPRIEDADES` do `dfm2lfm.py` contra as seções `published` da LCL instalada |
+| `check_fase2.py` ✅ | 14 | os produtos da fase 2 → `re/fase-2.md`: os 96 stubs cruzados com o TSV, os 18 formulários, os 18 vereditos e a fração de código gerado |
 | `spec_index.py` ✅ | 23 | os 96 handlers + as specs → `re/spec/INDICE.md`, **e valida cada spec** |
 | `gen_tables_pas.py` | 16 | `Tables.cpp` + `Offsets.hpp` → constantes Pascal |
 | `port_database_pas.py` | 17 | `we2002_core` → camada de dados |
@@ -43,6 +44,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | `test_dump_offsets.py` ✅ | o critério de limite da tabela em `.data`: os dois sentidos da discordância (um aborta, o outro avisa) e a faixa de plausibilidade herdada do `Offsets.hpp` |
 | `test_dfm2lfm.py` ✅ | o mapeamento VCL→LCL do `dfm2lfm.py`: as assinaturas por par (classe, evento), as propriedades sem par na LCL, a rota de blob ausente e os abortos |
 | `test_check_fase1.py` ✅ | o perímetro da varredura de sítios do `check_fase1.py`: quem entra, onde a leitura para (o Log de Execução), o corte por contexto que separa os `430` componentes do setor 430 do outro projeto, e a forma de história (`velho → corrente`), que não conta |
+| `test_check_fase2.py` ✅ | as dez rotas de aborto do `check_fase2.py` sobre uma árvore de fase 2 sintética: stub que sumiu, stub duplicado, stub na unidade que não declara a classe, formulário sem `.lfm`, `.lfm` sem `.dfm`, formulário sem veredito visual, `eventos.md` sem achado — mais a partição do hex de blob, que é o que mantém a fração honesta |
 | `test_check_lcl_props.py` ✅ | as três guardas do `check_lcl_props.py`, com entrada plantada nos três sentidos — `ACEITA` inventada, `DESCARTA` que a LCL tem, `LCL_VERSAO` divergindo do disco —, sobre uma LCL sintética montada em diretório temporário |
 | `test_spec_index.py` ✅ | as onze rotas de recusa do `spec_index.py` sobre specs sintéticas: decompilado colado nas sete formas, veredito e evidência fora do vocabulário, seção faltando, `nao portado` sem justificativa, `implementado` só com observação de tela, spec órfã, frontmatter discordando do TSV. **É a única coisa que mede essas regras** — `--check` verde sobre 96 `aberto` não exercita nenhuma |
 
