@@ -3,7 +3,7 @@ id: CORR-WTE-026
 title: "Correção: a coluna VCL da tabela do achado 2 não foi medida, e a tabela se anuncia inteira como medida"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -98,20 +98,44 @@ qualificador — **um lado medido, o outro não**.
 
 ## Verificação
 
-- [ ] A tabela do achado 2 diz, por coluna, o que foi medido e o que não foi
-- [ ] A divergência de `ComboBox.Text` tem rota de confirmação escrita, com dono
+- [x] A tabela do achado 2 diz, por coluna, o que foi medido e o que não foi
+- [x] A divergência de `ComboBox.Text` tem rota de confirmação escrita, com dono
       (fase 4)
-- [ ] O item 2 de "O que a fase 4 leva daqui" não afirma o lado VCL como fato
+- [x] O item 2 de "O que a fase 4 leva daqui" não afirma o lado VCL como fato
       fechado
-- [ ] `make -C wte check` continua verde
-- [ ] `roms/` intocada
+- [x] `make -C wte check` continua verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A abertura do achado 2 deixou de cobrir a tabela inteira: agora ela nomeia a
+coluna medida (`LCL/GTK2 3.0`) e diz que a `VCL/Win32 (2002)` não foi. A coluna
+VCL ganhou marca de nota de rodapé, e a nota diz de onde a afirmação vem
+(semântica documentada de `WM_SETTEXT` → `EN_CHANGE`/`CBN_EDITCHANGE`, mais o
+comentário *"to be delphi compatible"* da própria LCL, que descreve a VCL) e o
+que ninguém fez: **nada no repositório abre o `vcl60.bpl`**. Como a coluna
+`Diverge?` é a comparação das duas, ela vale o que a coluna VCL valer — está
+escrito.
+
+A seção "A divergência que sobra" passou a separar as duas metades e ganhou rota
+de confirmação com dono na fase 4, em duas vias: (1) disassembly dos 12
+handlers de `OnChange` — se nenhum escreve `Text` em combo, a divergência é
+vazia e morre sem medir a VCL; (2) observação do `wte.exe` sob Wine no `:99`,
+que é VCL de 2002 rodando. O item 2 de "O que a fase 4 leva daqui" e o item 1
+do Log da WTE-TASK-13 receberam o mesmo qualificador.
+
 **Problemas encontrados:**
 
+Nenhum. A varredura por `Medido no fonte da LCL`, `dispara na VCL` e `vcl60` em
+`docs`, `wte/re`, `.claude` e `CLAUDE.md` não achou terceiro sítio afirmando o
+lado Win32 como medido — as demais ocorrências de `vcl60.bpl` são sobre imports
+e VMT, alheias a esta correção.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/eventos.md`
+- `docs/tasks/13-trace-de-eventos.md`

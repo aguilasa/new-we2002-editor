@@ -126,9 +126,13 @@ dependia de não disparar, a carga de time precisa de bloqueio de sinal — o
      `QSignalBlocker`, **não transfere** — copiá-lo teria produzido a trava
      certa pelo motivo errado.
 
-     Sobra uma divergência real: `ComboBox.Text := s` dispara na VCL e **não**
-     dispara na LCL (`TGtk2WSCustomComboBox.SetText` tranca). Atinge 9 dos 11
-     combos, e vira pergunta na spec dos 12 handlers de `OnChange`.
+     Sobra uma divergência, **com um lado medido e o outro não**: `ComboBox.Text
+     := s` não dispara na LCL — isto é medido, `TGtk2WSCustomComboBox.SetText`
+     tranca. Que dispare na VCL vem da semântica documentada do Win32, não de
+     leitura do `vcl60.bpl`, que nada no repositório abre. Atinge 9 dos 11
+     combos, vira pergunta na spec dos 12 handlers de `OnChange`, e fecha por
+     disassembly do handler ou por observação do `wte.exe` (ver "A divergência
+     que sobra" no `eventos.md`).
 
   2. **Não existe `OnExit` nem `OnKillFocus` em nenhum dos 96.** A interação 3
      do enunciado ("`OnKeyPress` × `OnExit`") não tem os dois lados: o editor

@@ -84,9 +84,10 @@ Um roteiro que digita e clica fora, como o do `newWe2002`, mede nada aqui.
 Esta é a pergunta que a task manda decidir ("se a carga de time precisa de
 bloqueio de sinal"), e o enunciado dela partia da premissa oposta.
 
-Medido no fonte da LCL 3.0 instalada:
+A coluna `LCL/GTK2 3.0` foi medida no fonte da LCL 3.0 instalada. **A coluna
+`VCL/Win32 (2002)` não foi medida** — ver a nota abaixo da tabela.
 
-| Ação por código | VCL/Win32 (2002) | LCL/GTK2 3.0 | Diverge? |
+| Ação por código | VCL/Win32 (2002)¹ | LCL/GTK2 3.0 | Diverge? |
 |---|---|---|---|
 | `ComboBox.ItemIndex := k` | não dispara | **não dispara** | não |
 | `ListBox.ItemIndex := k` | não dispara | **não dispara** | não |
@@ -95,7 +96,16 @@ Medido no fonte da LCL 3.0 instalada:
 | `Edit.Text := s` | **dispara** | **dispara** | não |
 | `ComboBox.Text := s` (`csDropDown`) | **dispara** | **não dispara** | **sim** |
 
-Onde cada linha foi lida:
+> ¹ **A coluna VCL não é medida.** Ela vem da semântica documentada do Win32
+> (`WM_SETTEXT` → `EN_CHANGE` → `CBN_EDITCHANGE`, e o comentário da própria LCL
+> — *"to be delphi compatible"* — que descreve o que a VCL faz) e do que os
+> componentes VCL de 2002 fazem por convenção. **Nada no repositório lê o
+> `vcl60.bpl`**: ele está na pasta do editor e nenhuma ferramenta o abre. Como a
+> coluna `Diverge?` é a comparação das duas, ela vale exatamente o que a coluna
+> VCL valer — e a única linha marcada `sim` tem rota de confirmação escrita
+> abaixo, em "A divergência que sobra".
+
+Onde cada linha da coluna LCL foi lida:
 
 - `interfaces/gtk2/gtk2wsstdctrls.pp`, `TGtk2WSCustomComboBox.SetItemIndex`:
   incrementa `WidgetInfo^.ChangeLock` em volta do
@@ -131,14 +141,26 @@ errado. Framework diferente, resposta diferente — medir, não lembrar.
 
 ### A divergência que sobra, e onde ela morde
 
-`ComboBox.Text := s` dispara `OnChange` na VCL e não dispara na LCL. Atinge
-**9 dos 11** combos (os `csDropDown`; os outros dois são `csOwnerDrawFixed`),
-entre eles o `lista_equipos`.
+`ComboBox.Text := s` **não** dispara `OnChange` na LCL — isto é medido
+(`TGtk2WSCustomComboBox.SetText` tranca). Que a VCL dispare é a metade **não
+medida**: vem da semântica documentada do Win32, não de leitura do `vcl60.bpl`.
+Atinge **9 dos 11** combos (os `csDropDown`; os outros dois são
+`csOwnerDrawFixed`), entre eles o `lista_equipos`.
 
-Ela só morde se algum handler do original escrever `Text` num combo **contando
-com** o reentrar do `OnChange`. Não há como saber antes de ler os handlers:
-fica registrado aqui e volta como pergunta na spec de cada um dos 12 handlers
-de `OnChange` (WTE-TASK-25 em diante).
+**Rota de confirmação, com dono.** A divergência se fecha na fase 4, por
+qualquer das duas vias, e ambas são baratas quando os handlers estiverem sobre a
+mesa:
+
+1. **Disassembly** — se nenhum dos 12 handlers de `OnChange` escrever `Text` num
+   combo, a divergência é vazia e morre sem precisar do lado VCL. Só se algum
+   escrever é que a pergunta vale, e aí ela vira a via 2.
+2. **Observação do `wte.exe`** — é VCL de 2002 rodando de verdade, sob Wine no
+   `:99` (`make wte-99`). Escrever `Text` no combo e ver se o `OnChange` reentra
+   mede o lado que a tabela supõe.
+
+Enquanto nenhuma das duas rodar, a linha continua **um lado medido e outro
+suposto**, e fica registrada aqui e como pergunta na spec de cada um dos 12
+handlers de `OnChange` (WTE-TASK-25 em diante).
 
 ---
 
@@ -245,7 +267,10 @@ entrega é justamente o que precisava estar decidido *antes* dela.
 1. Nada de bloqueio de sinal na carga — a LCL/GTK2 já se comporta como a VCL
    (achado 2).
 2. Ao escrever `Text` num combo, lembrar que o `OnChange` **não** reentra na
-   LCL e reentrava na VCL. Perguntar isso na spec dos 12 handlers de `OnChange`.
+   LCL — medido — e que **se supõe** que reentrava na VCL, sem o lado Win32 ter
+   sido medido. Perguntar isso na spec dos 12 handlers de `OnChange`, e fechar a
+   suposição por uma das duas vias do achado 2 (disassembly do handler, ou o
+   `wte.exe` rodando).
 3. Campo de texto confirma **por tecla**; não existe caminho de "saiu do
    campo". Seis handlers.
 4. `MainForm.FormCreate` carrega o mundo inteiro: diálogo de arquivo, validação
