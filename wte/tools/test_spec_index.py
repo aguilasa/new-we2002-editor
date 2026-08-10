@@ -184,6 +184,33 @@ class TestRecusa(Base):
                                 extra=f"\n## Notas\n\n{trecho}\n")
                 self.assertIn("decompilado colado", msg)
 
+    def test_recusa_o_cast_do_ghidra(self):
+        # A marca que sobrevive a quem renomeia `uVar1`/`param_1` antes de
+        # colar: cast para tipo C do deref de ponteiro para tipo C.
+        for trecho in ("(int)*(int *)(param + 8)",
+                       "(int)*(int *)(this + 8)",
+                       "(int) * (int *) (this + 8)",
+                       "(uint)*(ushort *)(p + 2)",
+                       "(byte)*(undefined1 *)(p + 1)"):
+            with self.subTest(trecho=trecho):
+                msg = self.erro(formulario="MainForm",
+                                handler="lista_equiposChange",
+                                endereco="0x004120a4",
+                                extra=f"\n## Notas\n\n{trecho}\n")
+                self.assertIn("decompilado colado", msg)
+
+    def test_o_cast_do_ghidra_nao_pega_prosa(self):
+        # Falso positivo aqui torna o gabarito impossivel de cumprir: uma spec
+        # legitima fala de tipo C e usa parenteses o tempo todo.
+        prosa = ("O campo `cost` e `(int)` no C++ e `LongInt` no Pascal. "
+                 "O time (int) e o jogador (char) sao lidos juntos, e a barra "
+                 "(5) * (o peso do time) entra no preco. A lista (int) * 2 "
+                 "posicoes fica no fim.")
+        self.escreve_spec("MainForm", "lista_equiposChange", "0x004120a4",
+                          extra=f"\n## Notas\n\n{prosa}\n")
+        _, contagem = spec_index.monta()
+        self.assertEqual(contagem["com spec"], 1)
+
     def test_aceita_pseudocodigo_em_bloco_text(self):
         self.escreve_spec("MainForm", "lista_equiposChange", "0x004120a4",
                           extra="\n## Notas\n\n```text\npara cada slot: "

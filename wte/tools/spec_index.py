@@ -59,6 +59,10 @@ EVIDENCIAS = ("diff medido", "disassembly lido", "observacao de tela",
 # nao tem simbolo, mais a marca da convencao da Borland. Ver PLAN-WTE-LAZARUS
 # secao 2 e 8.10 -- transcrever decompilado faz obra derivada, e a saida de
 # C++Builder importa a estrutura de 2002 junto.
+# Tipo C como o Ghidra o escreve, para a marca de cast logo abaixo.
+_TIPO_C = (r"(?:(?:un)?signed +)?"
+           r"(?:int|uint|short|ushort|byte|char|long|ulong|undefined[0-9]?)")
+
 MARCAS_DE_DECOMPILADO = (
     re.compile(r"^```\s*(c|cpp|c\+\+)\s*$", re.M | re.I),
     re.compile(r"\bundefined[0-9]?\b"),
@@ -67,6 +71,12 @@ MARCAS_DE_DECOMPILADO = (
     re.compile(r"\bparam_[0-9]+\b"),
     re.compile(r"\b(DAT|FUN|LAB|PTR)_[0-9a-f]{6,}\b"),
     re.compile(r"__fastcall\b"),
+    # O cast do Ghidra: converter para tipo C o deref de um ponteiro para tipo
+    # C -- `(int)*(int *)(this + 8)`. E a marca mais resistente do decompilado
+    # de C++Builder, porque sobrevive a quem renomeia `uVar1`/`param_1` antes
+    # de colar. Exige as DUAS metades adjacentes: um `(int)` sozinho em prosa
+    # ("o campo e `(int)` no C++, `LongInt` no Pascal") nao casa.
+    re.compile(rf"\({_TIPO_C}\)\s*\*\s*\(\s*{_TIPO_C}\s*\*\s*\)"),
 )
 
 

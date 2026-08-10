@@ -3,7 +3,7 @@ id: CORR-WTE-039
 title: "Correção: o GABARITO diz que o gerador recusa `(int)*(int *)`, e ele aceita"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -115,12 +115,50 @@ quem revisa. Uma das duas coisas, não as duas.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+Rota preferida — implementar, não apagar. `MARCAS_DE_DECOMPILADO` ganhou o
+oitavo padrão, com o tipo C do Ghidra extraído para `_TIPO_C` e reusado nas duas
+metades:
+
+```python
+re.compile(rf"\({_TIPO_C}\)\s*\*\s*\(\s*{_TIPO_C}\s*\*\s*\)"),
+```
+
+Exige as **duas** metades adjacentes — cast para tipo C seguido do deref de um
+ponteiro para tipo C. É o que separa a marca da prosa: um `(int)` sozinho não
+casa.
+
+Dois testes: `test_recusa_o_cast_do_ghidra` (cinco formas em `subTest`, com
+espaçamento variável e as larguras `uint`/`ushort`/`byte`/`undefined1`) e
+`test_o_cast_do_ghidra_nao_pega_prosa`, que planta numa spec legítima
+"O campo `cost` é `(int)` no C++ e `LongInt` no Pascal. O time (int) e o jogador
+(char) são lidos juntos, e a barra (5) * (o peso do time) entra no preço. A
+lista (int) * 2 posições fica no fim." — e exige que ela seja **aceita**.
+
+O `GABARITO.md` não muda: a linha 133 passa a descrever o que o gerador faz.
+
+Bateria do `wte/tools/`: 298 → 300 testes, verde. `spec_index.py --check` verde
+(96 handlers, 0 com spec, 96 abertos). `make -C wte check` rc=0.
+
 **Problemas encontrados:**
 
+O padrão sugerido no corpo desta correção tem um `|` em nível de topo
+(`\((?:un)?signed |\((?:int|…)\)…`), que faria a primeira alternativa casar
+**sozinha** — qualquer `(unsigned char)` em prosa viraria recusa. Não foi
+copiado; o padrão escrito é o que os dois testes provam, como a própria seção
+"Correção" manda.
+
+A varredura de discrepância pegou `wte/tools/README.md:49`, que descrevia o
+teste como "decompilado colado nas sete formas" — número que esta correção
+aposentou. Ajustado na mesma passada.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/spec_index.py`
+- `wte/tools/test_spec_index.py`
+- `wte/tools/README.md` (sítio achado na varredura)
