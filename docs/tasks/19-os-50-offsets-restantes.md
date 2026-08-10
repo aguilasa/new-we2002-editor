@@ -108,8 +108,9 @@ levou os endereçados de 15 para 33.
 
 **Os 17 que sobraram não estão esperando clique**, e quem responde por eles é o
 `Database.cpp` do `newWe2002`, não a tela: eles não são endereço de campo. Ou
-são **ponto de retomada em fronteira de setor** — o `case N :` para onde o
-legado salta quando o registro N cai em cima do cabeçalho —, ou são **base de
+são **ponto de retomada em fronteira de setor** — o `case N :` (ou
+`if(i == N)`, que o legado usa para a mesma coisa) para onde ele salta quando o
+registro N cai em cima do cabeçalho —, ou são **base de
 varredura**, o `Seek` seguido do `for` que desfila um lote. Nos dois casos há
 **um** registro que os endereça, e o `wte.exe` não varre: ele salta direto para
 o que a tela mostra. A ausência deles num trace é a previsão do papel que têm.

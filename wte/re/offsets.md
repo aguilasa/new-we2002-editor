@@ -295,7 +295,8 @@ execução, em cinco sessões sob `strace`.
 
 **Os que sobram não estão esperando mais tela**, e é o `Database.cpp` do
 `newWe2002` que diz por quê: eles não são endereço de campo. Ou são **ponto de
-retomada em fronteira de setor** — o `case N :` para onde o legado salta quando o
+retomada em fronteira de setor** — o `case N :` (ou `if(i == N)`, que o legado usa
+para a mesma coisa) para onde ele salta quando o
 registro N cai em cima do cabeçalho —, ou são **base de varredura**, o `Seek`
 seguido do `for` que desfila um lote inteiro. Nos dois casos há **um** registro
 que os endereça, e o `wte.exe` não varre: ele salta direto para o que a tela
