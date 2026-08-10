@@ -50,6 +50,9 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-032](/docs/tasks/CORR-WTE-032.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "regra zero" do `tipos.md` proíbe `LongInt` e `SizeInt` em campo de registro, e a tabela usa os dois | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A "entrada real medida" do `tipos.md` omite os cabeçalhos que declaram os campos que a tabela mapeia | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-035](/docs/tasks/CORR-WTE-035.md) | [WTE-TASK-15](/docs/tasks/15-mapeamento-de-tipo.md) | A decisão 5 do `tipos.md` não tem o "teste que prova", e o critério que o exige está marcado | Baixa | [x] concluída | 2026-08-10 |
+| [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário | Alta | [ ] pendente | — |
+| [CORR-WTE-037](/docs/tasks/CORR-WTE-037.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada | Alta | [ ] pendente | — |
+| [CORR-WTE-038](/docs/tasks/CORR-WTE-038.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | O Log da WTE-TASK-17 diz 41 regras de substituição, e o gerador tem 47 | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -87,6 +90,9 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-032 — tirar `LongInt` da lista de proibidos e escrever a exceção de `SizeInt` onde ela é enunciada
 - [x] CORR-WTE-034 — remedir a entrada do transpilador com os cabeçalhos, e dar destino ao `Team.hpp`
 - [x] CORR-WTE-035 — nomear o teste da decisão 5, em bytes: 1.911 `#10`, sem `#13` e sem BOM
+- [ ] CORR-WTE-036 — ancorar a regra `!` → `not` na linha, e fazer o guard de quebra valer para `\s`, `[\s\S]` e `.`
+- [ ] CORR-WTE-037 — invariante de numeração em `aplicar_subs`, e dizer em cada recusa se ela veio da entrada ou da saída
+- [ ] CORR-WTE-038 — trocar 41 por 47 no Log da 17 e desfazer a contradição sobre a CORR-WTE-034
 
 ## Detalhes por correção
 
@@ -674,3 +680,54 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - **Fix:** acrescentar o bloco à decisão 5, em bytes e não em linhas — 1.911
   `#10`, nenhum `#13`, nenhum BOM, e `cmp` contra o sidecar que o
   `we2002_core` grava para a mesma base
+
+### CORR-WTE-036
+
+- **Arquivo com problema:** `wte/tools/port_database_pas.py`, regra 7 do `SUBS`
+- **Sintoma:** `!\s*(?=\w|\()` → `not ` atravessa a quebra de linha. Nos seis
+  sítios do `Database.cpp` a linha que termina em `!` é comentário `//`, e o
+  statement de baixo entra dentro dele — inclusive dois
+  `image_file.Seek(OFS_KIT_PREVIEW)`, que em Pascal desapareceriam. O
+  `check_seeks()` não vê (o texto continua tendo `Seek`, só que comentado) e o
+  guard de quebra de linha só reconhece a forma `[^x]`
+- **Como foi detectado:** aplicar o `SUBS` em ordem sobre `Database.cpp` — a
+  regra 7 leva o arquivo de 1.704 para 1.698 linhas; os seis sítios e o que cada
+  um engole saem do `re.finditer` do padrão com `\n` no casamento
+- **Fix:** ancorar na linha (`!(?=[^\S\n]*[\w(])`), alargar o teste de quebra
+  para `\s`, `[\s\S]` e `.` sob `DOTALL`, e fixar o invariante de contagem de
+  linhas sobre as seis unidades reais
+
+### CORR-WTE-037
+
+- **Arquivo com problema:** `wte/tools/port_database_pas.py` (o relatório de
+  recusa) e a saída dele, `wte/re/transpilador.md`
+- **Sintoma:** 493 das 498 recusas vêm da varredura do texto **traduzido** e
+  publicam a linha dele como se fosse a do fonte. `Database.cpp` sai da tradução
+  com 6 linhas a menos, então a tabela publica `Database.cpp:1256` para o
+  `[[fallthrough]]` que está em `1258` — a linha 1256 do fonte é `case 52:`. As
+  duas varreduras também listam o mesmo sítio como dois itens, sem dizer que uma
+  é da entrada e a outra da saída
+- **Como foi detectado:** `len(aplicar_subs(Database.cpp).splitlines())` = 1.698
+  contra 1.704 da entrada, confrontado com as duas linhas de `fallthrough` da
+  tabela do `--check`; e `test_a_linha_reportada_e_a_real`, que exercita só o
+  caminho da entrada
+- **Fix:** invariante de numeração em `aplicar_subs` (ou mapa de volta para a
+  linha do fonte), rótulo de entrada/saída por recusa, e o teste da linha real
+  cobrindo o caminho da saída
+
+### CORR-WTE-038
+
+- **Arquivo com problema:** `docs/tasks/17-transpilador-da-camada-de-dados.md`
+  (Log de Execução e a nota do enunciado)
+- **Sintoma:** o Log diz "tabela de substituição (**41** regras)" na mesma frase
+  em que afirma "nenhum número digitado à mão"; são **47**, e o
+  `transpilador.md` gerado já dizia 47 no mesmo commit (`8ae9170`). E a nota do
+  enunciado encaminha a reconciliação do `tipos.md` como trabalho da
+  CORR-WTE-034, enquanto o item 4 dos "Problemas encontrados" do mesmo arquivo
+  registra que ela foi feita em 2026-08-10
+- **Como foi detectado:** `len(SUBS)` = 47 por leitura do AST, contra
+  `grep 'regras, aplicadas'` nos dois arquivos; `git show 8ae9170` mostra que a
+  divergência nasceu com eles. Os demais números do Log (38 testes, 498 recusas
+  em 13 motivos, 2.504 linhas) foram remedidos e batem
+- **Fix:** 47 no Log, com a rota de remedição ao lado, e a nota do enunciado
+  reescrita para o estado corrente
