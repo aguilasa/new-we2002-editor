@@ -26,12 +26,11 @@ a origem, que muda a cada execução. O carimbo de tempo fica fora do `@` de
 propósito: ele existe para ler intervalo, e a informação está na **ordem** das
 linhas (ver o cabeçalho de [`../../src/retrace.pas`](../../src/retrace.pas)).
 
-## O roteiro 06 fala outro dialeto
+## Os roteiros 06, 07 e 08 falam outro dialeto
 
-[`06-diff-dirigido.txt`](06-diff-dirigido.txt) é da WTE-TASK-19 e quem o
-executa é [`../../tools/diff_dirigido.sh`](../../tools/diff_dirigido.sh), não a
-mão. Ele acrescenta duas diretivas e troca a linha de `xdotool` crua por
-verbos:
+Os três são da WTE-TASK-19 e quem os executa é
+[`../../tools/diff_dirigido.sh`](../../tools/diff_dirigido.sh), não a mão. Eles
+acrescentam duas diretivas e trocam a linha de `xdotool` crua por verbos:
 
 | Prefixo | Significado |
 |---|---|
@@ -54,6 +53,21 @@ Trocar de item pelo teclado (`Down`) evita a lista. E o sintoma "o clique
 parou de funcionar" tem um segundo culpado, que é pior: o `wte.exe` **cai** ao
 carregar um time com as ROMs deste repositório, e a janela sobrevive ao
 processo. Confira `ps -o stat` procurando `Z`, e não a tela.
+
+### O 07 e o 08 são um par, e é isso que os torna medida
+
+[`07-controle-sem-time.txt`](07-controle-sem-time.txt) e
+[`08-so-troca-de-time.txt`](08-so-troca-de-time.txt) são **iguais linha a
+linha até a marca `= ARRANQUE`**; o 08 tem duas linhas a mais, que trocam o
+time pelo teclado. Medido com `WINEDEBUG=+seh,+loaddll`: **0 violações de
+acesso no 07, 309 no 08** — uma variável de diferença.
+
+O 06 também trava, e por isso **não** serve de par: ele clica as oito áreas
+antes de trocar de time, o que são oito variáveis a mais. Editar um dos dois
+sem o outro quebra a afirmação; o
+[`../../tools/test_analisar_crash.py`](../../tools/test_analisar_crash.py)
+compara os dois cabeçalhos e falha se divergirem. O veredito de onde a falha
+cai está em [`../../re/crash.md`](../../re/crash.md).
 
 ## Replicar
 

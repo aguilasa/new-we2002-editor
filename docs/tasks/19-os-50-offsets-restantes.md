@@ -97,9 +97,10 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
 
 ## Log de Execução
 
-- **Executado em:** 2026-08-10 — **parcial, e o bloqueio é externo**
-  (retomada no mesmo dia: a hipótese do tamanho foi testada e refutada, e o
-  instrumento ganhou dois consertos que mudavam número)
+- **Executado em:** 2026-08-10 — **parcial, e o bloqueio continua**
+  (três passagens no mesmo dia: a primeira mediu; a segunda refutou a hipótese
+  do tamanho e consertou dois defeitos do instrumento; a terceira perguntou ao
+  Wine **onde** o travamento cai, e a resposta mudou a natureza do bloqueio)
 
 - **Resumo do que foi feito:**
 
@@ -140,6 +141,11 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
   | `wte/re/offsets-novos.md` | criado, **gerado** |
   | `wte/re/offsets.md`, `wte/tools/dump_offsets.py` | coluna **medido** na tabela dos 50 |
   | `wte/re/io-conteudo.tsv` | criado — amostra do conteúdo de cada faixa lida |
+  | `wte/tools/analisar_crash.py` | criado — log de exceção do Wine → `re/crash.md`; resolve o endereço de falha contra a tabela de exportação do módulo e acha os sítios de chamada no `.exe` |
+  | `wte/tools/test_analisar_crash.py` | criado — 14 testes: parser com linha plantada, e o par de roteiros |
+  | `wte/re/crash.md` | criado, **gerado** |
+  | `wte/re/crash-sessoes.tsv`, `crash-seh.tsv`, `crash-modulos.tsv` | criados — a evidência |
+  | `wte/tests/roteiros/07-controle-sem-time.txt`, `08-so-troca-de-time.txt` | criados — o par que torna a atribuição uma medida |
   | `wte/tools/README.md`, `wte/tests/roteiros/README.md` | atualizados |
 
 - **Problemas encontrados:**
@@ -158,12 +164,44 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
   faixa a faixa, e o app cai no mesmo ponto. Tamanho não era a causa; o que a
   hipótese explicava era o aviso, e o aviso nunca foi o problema.
 
-  O que sobra como pista é **conteúdo**: a última leitura antes do `SIGSEGV`
-  são 512 bytes em `14368636`, e amostrando 64 bytes ali esta release tem
-  **4 não-zero** — contra 32 a 64 em toda outra faixa que o editor lê. Não
-  prova a causa; prova que nesta release **não há o que ler** onde ele foi ler.
-  O pedido deixou de ser "a release de 474.431.328 bytes" e passou a ser
-  "uma release cuja região em 14368636 seja populada".
+  O que sobrou como pista foi **conteúdo**: a última leitura antes do
+  `SIGSEGV` são 512 bytes em `14368636`, e amostrando 64 bytes ali esta release
+  tem **4 não-zero** — contra 32 a 64 em toda outra faixa que o editor lê. Isso
+  parecia diagnóstico e não era: **leitura vizinha de uma falha é
+  correlação**, e o `analisar_io.py` não tem como distinguir as duas coisas
+  porque só enxerga I/O.
+
+  **A causa foi medida na terceira passagem, e não é a imagem.** Basta rodar a
+  mesma corrida com `WINEDEBUG=+seh,+loaddll`: o Wine diz qual instrução
+  faltou e onde cada módulo foi carregado. Resultado, em
+  [`crash.md`](../../wte/re/crash.md):
+
+  - a violação de acesso cai em `0x005f5ea0`, que é o `vcl60.bpl`
+    **realocado** para `0x005f0000` — sem a linha do `+loaddll` o endereço não
+    cai em módulo nenhum e a pista morre ali;
+  - RVA `0x5ea0` = `Graphics::TFont::SetSize` + 8, com `eax` zero e o endereço
+    que faltou em `0x1c`: o `this` chegou **nulo**;
+  - o sítio de chamada é `0x0040b1ac` — identificado pelo argumento, porque o
+    C++Builder passa o primeiro parâmetro em `EDX` (§8.1) e ali `EDX` valia 8,
+    o imediato que só um dos dois sítios carrega;
+  - os dois sítios estão numa rotina privada em `0x0040b188` que procura um
+    controle por `FindComponent("dorsal" + N)` e mexe na fonte dele. Quem a
+    chama: `lista_equiposChange`, `lista_jugadores_1Change`, `dorsalClick` e
+    `dorsalMouseDown`, todos do `MainForm`.
+
+  **A falha é de estado de interface, não de leitura da imagem.** Falta o
+  objeto, não o byte.
+
+  A atribuição "quem mata é a troca de time" também deixou de ser leitura de
+  tela: os roteiros **07** e **08** são iguais linha a linha até `= ARRANQUE` e
+  o 08 tem duas linhas a mais, que trocam o time. Medido: **0 violações de
+  acesso no 07, 309 no 08**. O roteiro 06 não serve de par — ele clica as oito
+  áreas antes, o que são oito variáveis a mais.
+
+  O pedido, então, deixou de ser "a release de 474.431.328 bytes" e passou a
+  ter **dois caminhos**: uma release cuja região em `14368636` seja populada,
+  ou descobrir por que o controle não existe — e este segundo é pergunta da
+  fase 4 sobre um handler que já tem nome, endereço e formulário.
 
   O custo maior não é aqui. O `wte.exe` é o **oráculo comportamental** do
   projeto (§4.2 do plano), e a WTE-TASK-22 monta o gate golden em cima dele.
@@ -205,7 +243,14 @@ além da tela de carga, e isso está bloqueado por falta da imagem certa.
   selecionado. Isso não é "o clique não chegou": o mesmo roteiro reabre o
   splash `Sobre...` por clique, com a janela mapeando.
 
-  **O que ficou pendente**, e volta quando houver a imagem certa: as seis áreas
-  da tabela, os 36 `OFS_*` restantes, e o diff dirigido *stricto sensu* —
-  editar um campo e gravar. A ferramenta e o roteiro já estão prontos para
-  isso; falta o oráculo funcionar.
+  **O que ficou pendente**, e volta quando o oráculo passar da tela de carga
+  por qualquer dos dois caminhos: as seis áreas da tabela, os 36 `OFS_*`
+  restantes, e o diff dirigido *stricto sensu* — editar um campo e gravar. A
+  ferramenta e o roteiro já estão prontos para isso.
+
+  **Lição que vale para o resto do projeto:** hipótese barata deve ser testada
+  antes de virar bloqueio publicado. Foram duas seguidas — o tamanho da imagem
+  e a região vazia —, as duas escritas como causa no `progresso.md`, as duas
+  derrubadas por um experimento de minutos. A terceira só apareceu porque a
+  pergunta mudou de "que dado falta" para "que instrução faltou", e essa o Wine
+  responde de graça.

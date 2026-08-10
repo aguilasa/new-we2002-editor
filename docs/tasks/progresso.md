@@ -313,20 +313,36 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
 - **Nada disso roda em CI.** O golden test precisa de Wine, do `:99` e de ~1 GB
   de temporário por rodada. O CI do repositório, aliás, está com `push` e
   `pull_request` desligados por decisão, e religar é para o fim do projeto.
-- **Falta uma release em que o `wte.exe` passe da tela de carga, e isso virou
-  pré-requisito da fase 4.** Medido na WTE-TASK-19: o editor **morre**
-  (`SIGSEGV`/`SEGV_MAPERR` em `NULL`) logo depois de carregar o primeiro time,
-  com as duas ROMs deste repositório. **Não é o tamanho** — essa hipótese foi
-  testada e refutada: truncar a European Deluxe para os 474.431.328 bytes
-  exatos que o editor pede (150 setores a menos, todos na cauda) faz o aviso
-  sumir e **não muda uma faixa** do mapa de I/O; o app cai igual. O que sobra
-  como pista é conteúdo: a última leitura antes do `SIGSEGV` é em `14368636`,
-  e ali esta release tem 4 bytes não-zero em 64 amostrados, contra 32 a 64 em
-  toda outra faixa lida. Consequência: o **oráculo comportamental** do projeto
-  (§4.2) não passa da tela de carga, e o gate golden da
-  [WTE-TASK-22](/docs/tasks/22-harness-golden.md) não tem em que se apoiar. A
-  medida está em
-  [`../../wte/re/offsets-novos.md`](../../wte/re/offsets-novos.md).
+- **O `wte.exe` não passa da tela de carga, e isso é pré-requisito da fase 4.**
+  Medido na WTE-TASK-19: o editor **morre** ao trocar de time, com as duas ROMs
+  deste repositório. A atribuição é medida, não lida da tela — os roteiros
+  [07](../../wte/tests/roteiros/07-controle-sem-time.txt) e
+  [08](../../wte/tests/roteiros/08-so-troca-de-time.txt) são iguais linha a
+  linha até `= ARRANQUE` e o 08 só acrescenta a troca de time: **0 violações de
+  acesso no 07, 309 no 08**.
+
+  **Duas hipóteses de causa já caíram, as duas por experimento.** *Não é o
+  tamanho*: truncar a European Deluxe para os 474.431.328 bytes exatos que o
+  editor pede (150 setores a menos, todos na cauda) faz o aviso sumir e não
+  muda uma faixa do mapa de I/O. *E não é a região vazia em `14368636`* — a
+  última leitura antes da falha, com 4 bytes não-zero em 64 amostrados contra
+  32 a 64 em toda outra faixa: isso é correlação, e o `analisar_io.py` só
+  enxerga I/O, então não tinha como distinguir.
+
+  **A causa medida é outra:** com `WINEDEBUG=+seh,+loaddll`, a violação de
+  acesso cai dentro do `vcl60.bpl`, em `Graphics::TFont::SetSize`, com o `this`
+  **nulo** — chamada de uma rotina do `.exe` que procura um controle por
+  `FindComponent("dorsal" + N)`. **É estado de interface, não leitura da
+  imagem:** falta o objeto, não o byte. Detalhe, com endereços e chamadores, em
+  [`../../wte/re/crash.md`](../../wte/re/crash.md).
+
+  Consequência inalterada: o **oráculo comportamental** do projeto (§4.2) não
+  passa da tela de carga, e o gate golden da
+  [WTE-TASK-22](/docs/tasks/22-harness-golden.md) não tem em que se apoiar. O
+  que mudou é o pedido — agora há **dois caminhos**: uma release cuja região em
+  `14368636` seja populada, **ou** descobrir por que o controle não existe, que
+  é pergunta da fase 4 sobre `lista_equiposChange`, um handler que já tem nome,
+  endereço e formulário.
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
   literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em

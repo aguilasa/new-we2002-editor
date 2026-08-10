@@ -219,12 +219,14 @@ class TestEvidencia(unittest.TestCase):
 
 
     def test_a_faixa_do_travamento_esta_vazia_nesta_release(self) -> None:
-        """O achado que substituiu a hipótese do tamanho.
+        """A pista que sobrou depois de a hipótese do tamanho cair.
 
         A última leitura antes do `SIGSEGV` é em 14368636, e ali a imagem está
-        praticamente zerada — enquanto toda outra faixa lida tem dado. Se isto
-        parar de valer, o pedido de release que o `offsets-novos.md` faz deixa
-        de ter fundamento.
+        praticamente zerada — enquanto toda outra faixa lida tem dado. **Não é
+        a causa**: essa foi medida no `analisar_crash.py` e é um `TFont` nulo
+        dentro do `vcl60.bpl`. É pista da causa da causa, e é nessa condição
+        que o `offsets-novos.md` a apresenta; se ela parar de valer, aquele
+        texto perde o fundamento.
         """
         if not self.conteudo:
             self.skipTest("io-conteudo.tsv ausente")

@@ -1,0 +1,7 @@
+sessao	modulo	base	tipo
+sem-time	we-team-editor.exe	0x00400000	native
+sem-time	rtl60.bpl	0x40000000	native
+sem-time	vcl60.bpl	0x005f0000	native
+so-troca-de-time	we-team-editor.exe	0x00400000	native
+so-troca-de-time	rtl60.bpl	0x40000000	native
+so-troca-de-time	vcl60.bpl	0x005f0000	native

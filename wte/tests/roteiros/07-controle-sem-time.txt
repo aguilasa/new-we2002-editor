@@ -1,0 +1,43 @@
+# 07 -- controle do travamento: a MESMA abertura do 06, sem selecionar time.
+#
+# Insumo da WTE-TASK-19, executado por wte/tools/diff_dirigido.sh e medido por
+# wte/tools/analisar_crash.py. Existe por uma razao so: sem ele, dizer "quem
+# mata o wte.exe e a troca de time" seria leitura de tela.
+#
+# Rode os dois com WINEDEBUG=+seh,+loaddll e compare a contagem de excecoes:
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/07-controle-sem-time.txt
+#   python3 wte/tools/analisar_crash.py --log <saida>/wine.log \
+#       --sessao sem-time --roteiro 07-controle-sem-time.txt \
+#       --seleciona-time nao
+#
+# Medido: 0 violacoes de acesso aqui, 309 no 06. Uma variavel de diferenca.
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+# Identico ao 06 ate a marca ARRANQUE -- se divergir daqui, o controle deixa
+# de controlar o que o 06 mede.
+> Abre
+~ 2
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# A janela fica viva o tempo que o 06 gasta clicando as areas e trocando de
+# time. O ponto e provar que ela NAO cai sozinha nesse intervalo.
+~ 8
+= PAUSA

@@ -1,0 +1,47 @@
+# 08 -- a abertura do 07 mais UMA acao: trocar de time.
+#
+# Insumo da WTE-TASK-19, par do 07-controle-sem-time.txt. Os dois sao byte a
+# byte iguais ate a marca ARRANQUE; daqui para baixo o 08 tem duas linhas que
+# o 07 nao tem, e e so isso que os separa. E o que autoriza a frase "quem mata
+# o wte.exe e a troca de time" a ser medida em vez de impressao.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/08-so-troca-de-time.txt
+#   python3 wte/tools/analisar_crash.py --log <saida>/wine.log \
+#       --sessao so-troca-de-time --roteiro 08-so-troca-de-time.txt \
+#       --seleciona-time sim
+#
+# O 06 tambem trava, e trava depois de clicar as oito areas; por isso ele NAO
+# serve de par -- oito variaveis a mais.
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\dd-run.bin
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------- a unica acao a mais ----
+#
+# Pelo TECLADO. Medido no :99, sem window manager: a lista suspensa do
+# TComboBox fica MAPEADA depois do clique no item e segura o ponteiro. Com
+# Down o combo troca de item sem abrir lista.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME

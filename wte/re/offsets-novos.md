@@ -213,7 +213,14 @@ sessão rodou de novo, mesmo roteiro, uma variável trocada. Resultado:
 Tamanho não é a causa. O que a hipótese explicava era o aviso, e o
 aviso nunca foi o problema.
 
-### O que sobra como pista: a região está vazia nesta release
+### E a região vazia é pista, não causa
+
+A causa foi medida depois, e está em [`crash.md`](crash.md): a
+violação de acesso cai dentro do `vcl60.bpl`, em
+`Graphics::TFont::SetSize`, com o `this` **nulo** — chamada por uma
+rotina do `.exe` que procura um controle pelo nome. **A falha é de
+estado de interface, não de leitura da imagem.** O que esta seção mede
+continua valendo como pista da *causa da causa*, e não como a causa.
 
 A última leitura antes do `SIGSEGV` são 512 bytes em
 `14368636` — 1,8 MB **acima** do maior offset que o `newWe2002`
@@ -228,9 +235,12 @@ praticamente zerada.
 Isso não prova a causa — prova que **nesta release não há o que ler**
 onde o editor foi ler. Medida em [`io-conteudo.tsv`](io-conteudo.tsv).
 
-**O pedido, então, deixou de ser "a release de 474.431.328 bytes" e
-passou a ser: uma release cuja região em `14368636` seja populada.**
-Truncar a que temos não serve; é preciso outro dump.
+**O pedido, então, deixou de ser "a release de 474.431.328 bytes":**
+truncar a que temos não serve. Sobraram dois caminhos, e a
+[`crash.md`](crash.md) mudou qual deles é o curto — uma release cuja
+região em `14368636` seja populada, **ou** descobrir por que o
+controle que a rotina procura não existe, que é pergunta para a fase 4
+sobre um manipulador que já tem nome e endereço.
 
 ### O que isso custa, e a quem
 
@@ -244,8 +254,9 @@ E o custo maior não é desta task: o `wte.exe` é o **oráculo
 comportamental** do projeto (§4.2 do plano), e a
 [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) monta o gate golden
 em cima dele. Um oráculo que não passa da tela de carga não sustenta
-gate nenhum. **Achar a release de 474.431.328 bytes deixou de ser
-desejável e passou a ser pré-requisito da fase 4.**
+gate nenhum. **Fazer o `wte.exe` passar da tela de carga deixou de ser
+desejável e passou a ser pré-requisito da fase 4** — por qualquer dos
+dois caminhos acima.
 
 ---
 
