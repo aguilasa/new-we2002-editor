@@ -67,10 +67,18 @@ log anuncia como versão de teste — não há Wine de sistema nem outro runner
 instalado. **Se o crash é do app ou do Wine, esta máquina não tem como
 distinguir.** Instalar outro runner é decisão do usuário.
 
-**Consequência, e é grave:** quase toda operação do editor começa por escolher
-um time. Enquanto isto não se resolver, o oráculo A não executa nem os 14
-formulários desta task nem a maior parte da bateria golden. Entregue à
+**Consequência, e era grave:** quase toda operação do editor começa por
+escolher um time. Enquanto isto não se resolveu, o oráculo A não executou nem
+os 14 formulários desta task nem a maior parte da bateria golden. Entregue à
 [WTE-TASK-22](../../docs/tasks/22-harness-golden.md).
+
+**Resolvido em 2026-08-10 pela CORR-WTE-044, e o que resolveu foi a imagem:**
+com `roms/japanese-shift-jis.bin` o mesmo roteiro de troca de time dá **zero**
+violação de acesso, contra 49.749 com a europeia. A causa medida — ponteiro
+global sobrescrito pela carga do time, não controle faltando — está em
+[`crash-causa.md`](crash-causa.md). O confundidor do runner acima **não** foi
+eliminado, e deixou de importar para esta decisão: o mesmo Wine roda os dois
+casos.
 
 ### O que o original alcança sem time, e foi o que rendeu as 4 capturas
 

@@ -95,6 +95,16 @@ arquivo gerado.
 **A task não fecha.** Dois dos seis critérios dependem de dirigir o `wte.exe`
 além da tela de carga, e isso está bloqueado por falta da imagem certa.
 
+**O bloqueio caiu em 2026-08-10, e não era "a imagem certa" no sentido acima**
+— [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md). O `wte.exe` passa da troca de
+time com `roms/japanese-shift-jis.bin`, que já está no repositório: zero
+violação de acesso contra 49.749 com a europeia, no mesmo roteiro. A causa é
+ponteiro sobrescrito pela carga do time, não release faltando, e a região em
+`14368636` é lida pelas duas imagens. Quem retomar esta task refaz os dois
+critérios abertos com a imagem japonesa; a correção **não** os mediu — ela
+diagnosticou, e diagnóstico não fecha critério. Medição em
+[`../../wte/re/crash-causa.md`](../../wte/re/crash-causa.md).
+
 ## Log de Execução
 
 - **Executado em:** 2026-08-10 — **parcial, e o bloqueio continua**

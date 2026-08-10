@@ -74,7 +74,7 @@ porque são duas imagens de ~474 MB. Não roda em CI, e o plano já registra iss
 
 ## Três medidas da WTE-TASK-12 e da 13 que esta task herda
 
-### 1. **Bloqueante:** o oráculo A quebra ao selecionar um time
+### 1. ~~**Bloqueante:**~~ o oráculo A quebra ao selecionar um time — **com a imagem europeia**
 
 Medido na WTE-TASK-12, com cópia byte-idêntica a `roms/`: escolher um time no
 combo do `MainForm` dispara **310 `EXCEPTION_ACCESS_VIOLATION`** e o processo
@@ -89,9 +89,32 @@ Wine. Confundidor que esta máquina não consegue eliminar: o único runner é
 `wine-experimental.bleeding.edge…(TkG Plain)`, que o log anuncia como versão de
 teste, e não há Wine de sistema.
 
-**Quase toda operação do editor começa por escolher um time.** Enquanto isto
-não se resolver, o oráculo A não executa a bateria. Diagnóstico e comando de
+**Quase toda operação do editor começa por escolher um time**, então isto foi
+bloqueante do dia da WTE-TASK-12 até a
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md). Diagnóstico e comando de
 reprodução em [`../../wte/re/visual.md`](../../wte/re/visual.md), achado 1.
+
+**Deixou de ser bloqueante em 2026-08-10, e o que resolveu foi a imagem.** A
+CORR-WTE-044 mediu a causa: o ponteiro global `0x004335e4`, que a rotina de
+realce dos `dorsalN` usa, é sobrescrito pela carga do time com dado de uma
+tabela vizinha, e o valor (`0x00010001`) passa no teste de nulo que a rotina
+faz. Não é controle faltando — os 23 `dorsalN` estão vivos e com `Font`. Mesmo
+roteiro, mesmas marcas, só a imagem muda:
+
+| imagem | violações de acesso ao trocar de time |
+|---|---:|
+| `roms/golden-european-deluxe.bin` | 49.749 |
+| `roms/japanese-shift-jis.bin` | **0** |
+
+**Consequência dura para esta task: o harness fixa `roms/japanese-shift-jis.bin`
+do lado do oráculo, e escreve no script por quê.** Trocar por hábito para a
+imagem golden do `newWe2002` devolve dezenas de milhares de violações de acesso
+e parece defeito do harness. E o gate deve tratar `code=c0000005` no
+`wine.log` como **falha do lado do oráculo**, nunca silenciá-la: está provado
+que este caminho é imune com a japonesa, não que a imagem inteira seja.
+
+As três ressalvas e o que ficou sem resposta estão em
+[`../../wte/re/crash-causa.md`](../../wte/re/crash-causa.md).
 
 ### 2. O controle **não** é "imagem intocada"
 

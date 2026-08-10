@@ -236,11 +236,14 @@ Isso não prova a causa — prova que **nesta release não há o que ler**
 onde o editor foi ler. Medida em [`io-conteudo.tsv`](io-conteudo.tsv).
 
 **O pedido, então, deixou de ser "a release de 474.431.328 bytes":**
-truncar a que temos não serve. Sobraram dois caminhos, e a
-[`crash.md`](crash.md) mudou qual deles é o curto — uma release cuja
-região em `14368636` seja populada, **ou** descobrir por que o
-controle que a rotina procura não existe, que é pergunta para a fase 4
-sobre um manipulador que já tem nome e endereço.
+truncar a que temos não serve.
+
+**E deixou de ser pedido.** A CORR-WTE-044 mediu a causa e ela não é
+esta: o ponteiro que a rotina de realce usa é sobrescrito pela carga do
+time, o controle procurado **existe**, e a mesma faixa em `14368636` é
+lida pelas **duas** imagens do repositório — só uma trava. Com
+`roms/japanese-shift-jis.bin` o `wte.exe` passa da troca de time com
+zero violação de acesso. Ver [`crash-causa.md`](crash-causa.md).
 
 ### O que isso custa, e a quem
 
@@ -250,13 +253,14 @@ sobre um manipulador que já tem nome e endereço.
 | seleção de time (uma vez) | qualquer gravação por área |
 | o diff de controle | o diff dirigido *stricto sensu* — editar um campo e gravar |
 
-E o custo maior não é desta task: o `wte.exe` é o **oráculo
-comportamental** do projeto (§4.2 do plano), e a
+**A coluna `Bloqueado` vale para a imagem que esta medição usou, a
+europeia.** O `wte.exe` é o **oráculo comportamental** do projeto (§4.2
+do plano), e a
 [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) monta o gate golden
-em cima dele. Um oráculo que não passa da tela de carga não sustenta
-gate nenhum. **Fazer o `wte.exe` passar da tela de carga deixou de ser
-desejável e passou a ser pré-requisito da fase 4** — por qualquer dos
-dois caminhos acima.
+em cima dele; com `roms/japanese-shift-jis.bin` ele passa da troca de
+time, então o gate tem em que se apoiar e o que está bloqueado aqui é
+remedível refazendo a corrida com a outra imagem. Quem refizer, refaça
+**as duas** — a comparação entre elas é o que sustenta o diagnóstico.
 
 ---
 
