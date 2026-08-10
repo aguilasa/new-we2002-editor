@@ -64,6 +64,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | O oráculo comportamental está morto e a fase 4 é circular: o gate 22 precisa do `wte.exe` vivo, e entendê-lo é a WTE-TASK-25, que depende do 22 | Alta | [x] concluída | 2026-08-10 |
+| [CORR-WTE-045](/docs/tasks/CORR-WTE-045.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | A seção das seis áreas do `offsets-novos.md` diz `roms/09-areas-com-time`, que é o nome da sessão — a imagem é `japanese-shift-jis.bin` | Baixa | [ ] pendente | — |
+| [CORR-WTE-046](/docs/tasks/CORR-WTE-046.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Três dos 14 vereditos `retomada de fronteira` provam com `case N`, e o `Database.cpp` tem `if(i == N)` — num deles o `case N` existe em outro bloco | Baixa | [ ] pendente | — |
+| [CORR-WTE-047](/docs/tasks/CORR-WTE-047.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | As sessões 10 e 11, que deram 18 dos 33 endereçados, não têm o resultado da segunda régua (`cmp`) registrado em lugar nenhum | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -110,6 +113,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
 - [x] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
 - [x] CORR-WTE-044 — o controle **existe**; o ponteiro global é que é sobrescrito pela carga do time. Desfecho: condição de contorno — a ROM japonesa passa da troca de time com 0 violação de acesso
+- [ ] CORR-WTE-045 — tirar o nome da imagem da evidência em vez da constante da sessão, e regerar
+- [ ] CORR-WTE-046 — devolver a construção que casou (`case` ou `if`) junto do gatilho, e imprimir a que casou
+- [ ] CORR-WTE-047 — versionar o resultado do `cmp` por sessão e gerar o veredito das duas réguas no `offsets-novos.md`
 
 ## Detalhes por correção
 
@@ -850,3 +856,49 @@ dizer "fechada e fora do backlog", não "corrigida".
   A frase não estava errada por descuido de quem mediu: a WTE-TASK-19 mediu a
   europeia e generalizou. Fica como lembrete de que "as duas ROMs" é afirmação
   que custa uma corrida a mais para virar medida
+
+### CORR-WTE-045
+
+- **Arquivo com problema:** `wte/tools/analisar_io.py:478`, e o
+  `wte/re/offsets-novos.md` que sai dele
+- **Sintoma:** a seção das seis áreas diz ter medido sobre "cópia de
+  `roms/09-areas-com-time`" — nome da **sessão**, não da imagem. Esse caminho
+  não existe; a imagem é `japanese-shift-jis.bin`, como as 64 linhas dessa
+  sessão registram no `io-medido.tsv`. E a frase seguinte, sobre a europeia
+  travar, só faz sentido com a japonesa
+- **Como foi detectado:** `ls roms/` contra o texto gerado, e a contagem por
+  `sessao`/`imagem` do `io-medido.tsv`
+- **Fix:** derivar o nome da imagem das linhas da própria sessão em vez de
+  interpolar a constante `AREAS`, e regerar
+
+### CORR-WTE-046
+
+- **Arquivo com problema:** `wte/tools/analisar_io.py` — `papel_no_legado()`
+  (linhas 430-437) e a montagem da prova (linha 672)
+- **Sintoma:** 3 dos 14 vereditos `retomada de fronteira` provam com
+  `` `case N` no `Database.cpp` `` onde o fonte tem `if(i == N)`:
+  `OFS_FORMATIONS_A` (32), `OFS_TEAM_NAME_5_A` (57) e `OFS_ML_TEAM_NAME_8_A`
+  (30). Nos dois primeiros o `case N :` não existe no arquivo; no terceiro
+  existe, e em bloco sem relação — a citação leva ao sítio errado
+- **Como foi detectado:** cruzando o gatilho devolvido por `papel_no_legado()`
+  contra `re.search(r"\bcase\s+N\s*:")` no `src/core/Database.cpp`
+- **Fix:** o classificador casa `RE_CASO` **ou** `RE_SE` e descarta qual das
+  duas foi; devolver a construção junto do gatilho e imprimir a que casou. O
+  veredito e as contagens 33/14/3 não mudam — é rótulo
+
+### CORR-WTE-047
+
+- **Arquivo com problema:** nenhum arquivo tem o dado — é o que falta.
+  `wte/tools/diff_dirigido.sh:270` roda a conferência e o resultado morre no
+  diretório da sessão
+- **Sintoma:** as sessões `10-telas-que-faltavam` e `11-varredura-de-times`,
+  que levaram os endereçados de 15 para 33, não têm em lugar nenhum o número da
+  segunda régua — o `cmp.tsv` não é versionado, o Log da 5ª passagem não o traz
+  (o da 4ª traz) e o `offsets-novos.md` só cita o `cmp` como método
+- **Como foi detectado:** `git ls-files wte/re | grep cmp` vazio, e `grep` por
+  "réguas" no `offsets-novos.md` sem resultado de sessão
+- **Fix:** versionar o resultado do `cmp` por sessão e gerar o veredito das
+  duas réguas no `offsets-novos.md`, com teste exigindo a linha para toda
+  sessão que escreveu. Não há suspeita de que a conferência não rodou — o
+  script tem `set -euo pipefail` e a função devolve 3 quando falha; o que falta
+  é o rastro
