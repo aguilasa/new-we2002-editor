@@ -132,6 +132,32 @@ confirmação de sobrescrita, que roteiro fixo nenhum espera — e a corrida mor
 esperando a janela seguinte. Quem apaga é o `diff_dirigido.sh`, antes de copiar
 a imagem.
 
+### Os `golden-*` sao do gate, e falam o mesmo dialeto
+
+[`golden-01-arranque.txt`](golden-01-arranque.txt) e o roteiro do gate da
+[WTE-TASK-22](../../../docs/tasks/22-harness-golden.md), rodado pelo
+[`../../tools/golden_check.sh`](../../tools/golden_check.sh). Duas diferencas
+em relacao aos da WTE-TASK-19, e as duas existem porque o gate roda o **mesmo**
+roteiro em **dois** lados:
+
+- **`@IMAGEM@` no lugar do nome do arquivo.** Cada lado abre a sua copia, e
+  copia tem nome proprio; nome fixo obrigaria dois roteiros, e dois roteiros
+  deixam de ser a mesma entrada — que e a condicao de a comparacao valer;
+- **`conhecida: <inicio>..<fim>` no cabecalho.** A faixa em que os dois lados
+  podem divergir, declarada junto da operacao que a produz e nao numa lista
+  central. Sao offsets **0-based e inclusivos**, como o `KNOWN_START`/`KNOWN_END`
+  do `newWe2002` — e **nao** as posicoes 1-based do `cmp -l`, confusao que ja
+  custou uma correcao (CORR-WTE-025).
+
+**Declaracao que nao aparece reprova o gate** (codigo 3). Um gate que so
+subtrai excecao passa verde quando o roteiro para de exercitar o que dizia
+exercitar.
+
+O par [`golden-01-arranque.port.txt`](golden-01-arranque.port.txt) e a
+assimetria temporaria: o port ainda nao abre imagem (os 96 handlers sao stubs
+ate a WTE-TASK-25) e nao recebe teclado no `:99`. Quando a 25 entrar, o arquivo
+some e o gate roda um roteiro so.
+
 ## Replicar
 
 Lado port, com o trace num arquivo próprio:

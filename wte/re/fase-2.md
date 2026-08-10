@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2214 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **8982** |
-| Escrito à mão | 3 | 353 |
-| **Total** | | **9335** |
+| Escrito à mão | 3 | 386 |
+| **Total** | | **9368** |
 
-**96.2% do Pascal da casca é saída de gerador.**
+**95.9% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -60,14 +60,14 @@ Escrito à mão, linha por linha:
 | Arquivo | Linhas | O que é |
 |---|---|---|
 | `src/retrace.pas` | 125 | o registrador de disparo (WTE-TASK-11) |
-| `src/wtemain.pas` | 197 | auto-create, `--show` e a marca de título (WTE-TASK-11) |
+| `src/wtemain.pas` | 230 | auto-create, `--show` e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 31 | programa principal (WTE-TASK-02) |
 
 ### O hex dos blobs fica fora da conta, e por quê
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 99.0% — e passa a medir bitmap, não geração de código.
+fração sobe para 98.9% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda

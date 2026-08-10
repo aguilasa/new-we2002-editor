@@ -5,7 +5,7 @@ type: ferramenta
 category: verificação
 phase: 4
 depends_on: ["WTE-TASK-11", "WTE-TASK-21"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-22: Harness golden
@@ -156,32 +156,113 @@ Ou o harness dirige o port só por mouse, ou o `:99` ganha um window manager
 | `wte/tools/golden_check.sh` | criar |
 | `wte/tools/golden_run_wte.sh` | criar — lado do original |
 | `wte/tools/golden_run_laz.sh` | criar — lado do port |
-| `wte/tools/roteiros/*.sh` | criar |
+| `wte/tools/roteiro.sh` | criar — o driver, extraído do `diff_dirigido.sh` |
+| `wte/tools/golden_veredito.py` | criar — o veredito, e o que os testes alcançam |
+| `wte/tests/roteiros/golden-*.txt` | criar — **e não `wte/tools/roteiros/*.sh`** |
+
+**Correção ao enunciado, registrada na execução:** os roteiros ficam em
+`wte/tests/roteiros/`, com os da WTE-TASK-13 e da 19, e são **arquivos de
+roteiro** no dialeto já existente — não `.sh`. Roteiro em shell seria um
+segundo dialeto para a mesma coisa, e o gate precisa executar o **mesmo**
+arquivo nos dois lados.
 
 ---
 
 ## Critério de conclusão
 
-- [ ] As quatro guardas da tabela implementadas
-- [ ] **O crash do oráculo ao selecionar time resolvido, ou o gate declarado
-      inviável por escrito** — ver a medida 1 acima; sem isso nada abaixo
-      significa alguma coisa
-- [ ] Controle verde: original contra original dá zero divergência —
-      **atenção:** não confundir com "imagem intocada", que diverge em 11.952
-      bytes já na abertura (medida 2)
-- [ ] Decidido se o port reproduz a gravação do aviso de tamanho ou se a faixa
-      `11796..26527` vira exceção declarada. Os limites são **offsets 0-based,
-      inclusivos**, como `KNOWN_START`/`KNOWN_END` do
-      [`tools/golden_check.sh`](../../tools/golden_check.sh) do `newWe2002` —
-      **não** as posições 1-based que o `cmp -l` imprime (`11797..26528`)
-- [ ] Positivo: byte plantado é detectado, e o script reporta o offset
-- [ ] Roteiro de edição parametrizável, um por operação
-- [ ] `roms/` nunca tocada; temporário limpo no fim
-- [ ] Commit no formato conventional, em inglês
+- [x] As quatro guardas da tabela implementadas
+      — `DISPLAY=:99` fixado no `roteiro.sh`; recusa de janela ≥ 400×300 já
+      aberta; filtro por `_NET_WM_PID` do processo lançado; `roms/` só como
+      origem de cópia, e as duas cópias apagadas por `trap`
+- [x] **O crash do oráculo ao selecionar time resolvido** — pela
+      [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md): o harness fixa
+      `roms/japanese-shift-jis.bin` e o lado oráculo **reprova com código 4**
+      se achar `c0000005` no log do Wine
+- [x] Controle verde: **PASSOU, byte-idêntico** — oráculo contra oráculo, mesmo
+      roteiro, zero divergência
+- [x] Decidido: a faixa vira **exceção declarada**, e no roteiro, não no script
+      — nove linhas `conhecida:` no
+      [`golden-01-arranque.txt`](../../wte/tests/roteiros/golden-01-arranque.txt),
+      offsets 0-based e inclusivos. **E a declaração que some reprova** (código
+      3): gate que só subtrai exceção passa verde quando o roteiro para de
+      exercitar o que dizia
+- [x] Positivo: byte plantado detectado — `405228..405228 1 byte(s) data
+      OFS_SQUAD_NUMBERS_NATIONAL+512`
+- [x] Roteiro de edição parametrizável, um por operação
+      — `@IMAGEM@` no lugar do nome do arquivo, e um roteiro por operação em
+      `wte/tests/roteiros/golden-*.txt`
+- [x] `roms/` nunca tocada; temporário limpo no fim
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-10
+
 - **Resumo do que foi feito:**
+
+  O gate existe e os **três modos** fecharam na mesma tarde:
+
+  | modo | lado A | lado B | resultado medido |
+  |---|---|---|---|
+  | `controle` | oráculo | oráculo | **PASSOU, byte-idêntico** |
+  | `positivo` | oráculo | oráculo + 1 byte plantado | **detectado**, com offset e região |
+  | `golden` | oráculo | app Lazarus | **PASSOU**, só as 9 faixas declaradas |
+
+  Verde e vermelho não significam nada sem os dois primeiros, e é por isso que
+  eles são modo do script e não experimento avulso: zero divergência no
+  `golden` tanto pode ser paridade quanto os dois lados não terem gravado nada.
+
+  **O driver de roteiro virou biblioteca.** O `diff_dirigido.sh` da
+  WTE-TASK-19 já tinha o dialeto, a busca de janela por nome e por tamanho e a
+  fixação do `:99`; duplicar aquilo no gate seria duas cópias divergindo em
+  silêncio, com o sintoma de sempre — diff de bytes com cara de bug do port.
+  Extraí para [`roteiro.sh`](../../wte/tools/roteiro.sh), e o `diff_dirigido`
+  passou a usá-lo. Regressão medida: roteiro 07 refeito, mesmas 9 faixas, as
+  duas réguas fechando.
+
+  **O veredito é Python, e o gate é shell.** A parte que decide — faixa
+  declarada contra faixa medida — mora no
+  [`golden_veredito.py`](../../wte/tools/golden_veredito.py), com 15 testes;
+  shell não é testável e esta é a peça que não pode errar.
+
 - **Arquivos criados/modificados:**
+
+  | Arquivo | Ação |
+  |---|---|
+  | `wte/tools/roteiro.sh` | criado — o driver, extraído do `diff_dirigido.sh` |
+  | `wte/tools/golden_run_wte.sh` | criado — lado oráculo, com o `c0000005` como falha |
+  | `wte/tools/golden_run_laz.sh` | criado — lado port, com a recusa de roteiro com teclado |
+  | `wte/tools/golden_veredito.py` | criado — o veredito, três códigos de saída |
+  | `wte/tools/test_golden_veredito.py` | criado — 15 testes |
+  | `wte/tools/golden_check.sh` | criado — o gate, três modos, quatro guardas |
+  | `wte/tests/roteiros/golden-01-arranque.txt` | criado — e o par `.port.txt` |
+  | `wte/tools/diff_dirigido.sh` | passou a usar a biblioteca |
+  | `wte/src/wtemain.pas` | aceita o caminho da imagem como argumento posicional — **guarda e registra, não lê** |
+  | `wte/re/fase-2.md` | regerado: a fração da casca caiu de 96,2% para 95,9% |
+  | `docs/PLAN-WTE-LAZARUS.md` | §4.4 com a fração nova e o porquê |
+
 - **Problemas encontrados:**
+
+  **O app morria antes de abrir janela quando recebia o caminho da imagem.**
+  O `TrataLinhaDeComando` levantava exceção em qualquer argumento que não
+  fosse `--show`/`--list`/`--help`, e o gate precisa passar a cópia para o lado
+  port — os dois lados têm de receber a **mesma** entrada. Agora um argumento
+  posicional é aceito, guardado e registrado no trace; ler continua sendo
+  trabalho de handler, que tem gate próprio. Opção desconhecida começando por
+  `-` continua sendo erro: engolir `--sho` em silêncio faria a captura da
+  WTE-TASK-12 sair do formulário errado.
+
+  **Corrida que falha no meio deixava processo vivo**, e a corrida seguinte
+  batia na guarda 2 — que é o comportamento certo da guarda, e uma rodada
+  perdida. Os dois lados ganharam `trap` de encerramento.
+
+  **A fração da fase 2 se moveu, e isso é o sistema funcionando.** As 33 linhas
+  novas do `wtemain.pas` levaram a casca de 96,2% para 95,9%; o
+  `check_fase2.py --check` reprovou até o `fase-2.md` ser regerado, e a §4.4 do
+  plano foi corrigida junto. Número medido em doc é para se mover quando a
+  medida muda.
+
+  **O que ficou fora, por escrito:** o roteiro do lado port ainda é um arquivo
+  separado (`golden-01-arranque.port.txt`), porque o port não abre imagem nem
+  recebe teclado no `:99`. Os dois convergem na WTE-TASK-25, e o arquivo diz
+  isso no cabeçalho.

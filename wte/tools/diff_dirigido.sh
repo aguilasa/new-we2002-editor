@@ -83,17 +83,18 @@ WORK="$RAIZ/work"
 LIMPA="$WORK/dd-clean.bin"
 RODA="$WORK/dd-run.bin"
 
-export DISPLAY=:99
-xauth_file="$(ps -o args= -C Xvfb 2>/dev/null \
-  | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)"
-[ -n "$xauth_file" ] && export XAUTHORITY="$xauth_file"
+# O driver de roteiro e o mesmo do gate golden (WTE-TASK-22): dialeto, busca de
+# janela e a fixacao do `:99` moram em `roteiro.sh`. Duas copias divergiriam em
+# silencio, e o sintoma seria diff de bytes com cara de bug do port.
+# shellcheck source=roteiro.sh
+. "$AQUI/roteiro.sh"
+roteiro_display
 
 for f in "$ROTEIRO" "$IMAGEM" "$RAIZ/we-team-editor/we-team-editor.exe"; do
   [ -e "$f" ] || { echo "ERRO: falta $f" >&2; exit 1; }
 done
 [ -x "$WINE_BIN/wine" ] || { echo "ERRO: loader Wine 32-bit em $WINE_BIN" >&2; exit 1; }
 command -v strace >/dev/null || { echo "ERRO: strace ausente" >&2; exit 1; }
-xdpyinfo >/dev/null 2>&1 || { echo "ERRO: sem :99" >&2; exit 1; }
 
 mkdir -p "$SAIDA" "$WORK"
 # Arquivo que um roteiro manda o `wte.exe` GRAVAR dentro de work/ (que e a
@@ -131,104 +132,12 @@ echo ">> lancando o wte.exe sob strace (ptrace_scope=1 exige lancar, nao anexar)
 # disco.
 marca() { echo "$(date +%H:%M:%S.%6N)	$1" >> "$SAIDA/marcas.txt"; }
 
-janela() {
-  # A janela alvo, pelo nome; devolve "ID X Y". Vazio enquanto nao existir.
-  local nome="$1" id
-  id="$(xdotool search --onlyvisible --name "$nome" 2>/dev/null | head -1)" || true
-  [ -n "$id" ] || return 1
-  eval "$(xdotool getwindowgeometry --shell "$id" 2>/dev/null)"
-  echo "$id $X $Y"
-}
-
-espera_janela() {
-  local nome="$1" limite="${2:-30}" i=0 r
-  while [ $i -lt "$limite" ]; do
-    if r="$(janela "$nome")"; then echo "$r"; return 0; fi
-    sleep 1; i=$((i+1))
-  done
-  echo "ERRO: janela '$nome' nao apareceu em ${limite}s" >&2
-  return 1
-}
-
-janela_geo() {
-  # A janela alvo, pelo TAMANHO -- `<W>x<H>`. Existe porque tres formularios
-  # deste app trocam o proprio `Caption` em tempo de execucao pelo nome do
-  # time, e com a ROM japonesa isso e Shift-JIS: o `xdotool` ve uma corrida de
-  # `?`, que nao da regex estavel. O tamanho da, e vem do proprio DFM
-  # (`ClientWidth`/`ClientHeight`) -- medido, bate 1:1 no :99.
-  #
-  # Se mais de uma janela tiver o tamanho pedido, vence a ULTIMA -- o dialogo
-  # recem-aberto tem o maior id.
-  local w="${1%%x*}" h="${1##*x}" id achou=""
-  for id in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
-    eval "$(xdotool getwindowgeometry --shell "$id" 2>/dev/null)" || continue
-    [ "$WIDTH" = "$w" ] && [ "$HEIGHT" = "$h" ] && achou="$id $X $Y"
-  done
-  [ -n "$achou" ] || return 1
-  echo "$achou"
-}
-
-espera_geo() {
-  local geo="$1" limite="${2:-30}" i=0 r
-  while [ $i -lt "$limite" ]; do
-    if r="$(janela_geo "$geo")"; then echo "$r"; return 0; fi
-    sleep 1; i=$((i+1))
-  done
-  echo "ERRO: janela $geo nao apareceu em ${limite}s" >&2
-  return 1
-}
-
 # ------------------------------------------------------------- o roteiro ----
 #
-# Formato irmao do de wte/tests/roteiros/ (WTE-TASK-13), com verbos em vez de
-# linha de `xdotool` crua. O motivo e a coordenada: aqui ela e SEMPRE relativa
-# a janela resolvida pelo `>`, e a origem muda a cada corrida porque nao ha
-# window manager no :99.
-#
-#   > <nome>     espera a janela e passa a ser o alvo das coordenadas
-#   >~ <W>x<H>   idem, mas pelo TAMANHO -- para o formulario que troca o
-#                proprio Caption pelo nome do time (Shift-JIS vira `?????`)
-#   = <marca>    corta o log; tudo ate a proxima marca e daquela acao
-#   ~ <seg>      espera
-#   ! clique X Y     clique simples em (X,Y) relativo ao alvo
-#   ! duplo  X Y     duplo clique
-#   ! tecla  <k>     xdotool key
-#   ! texto  <t>     xdotool type -- CURTO. `xdotool type` embaralha string
-#                    longa (usa XSendEvent); e por isso que a unidade E: existe
-ALVO_ID=""; ALVO_X=0; ALVO_Y=0
-while IFS= read -r linha || [ -n "$linha" ]; do
-  linha="${linha%%$'\r'}"
-  case "$linha" in
-    ''|'#'*|alvo:*|estado:*) continue ;;
-    '> '*)
-      nome="${linha#> }"
-      read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_janela "$nome")"
-      [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela '$nome'" >&2; exit 1; }
-      echo ">> janela '$nome' = $ALVO_ID em $ALVO_X,$ALVO_Y"
-      ;;
-    '>~ '*)
-      geo="${linha#>~ }"
-      read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_geo "$geo")"
-      [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela $geo" >&2; exit 1; }
-      echo ">> janela $geo = $ALVO_ID em $ALVO_X,$ALVO_Y"
-      ;;
-    '= '*) marca "${linha#= }" ;;
-    '~ '*) sleep "${linha#~ }" ;;
-    '! '*)
-      set -- ${linha#! }
-      verbo="$1"; shift
-      case "$verbo" in
-        clique) xdotool mousemove $((ALVO_X+$1)) $((ALVO_Y+$2)) click 1 ;;
-        duplo)  xdotool mousemove $((ALVO_X+$1)) $((ALVO_Y+$2)) \
-                  click --repeat 2 --delay 120 1 ;;
-        tecla)  xdotool key --clearmodifiers "$@" ;;
-        texto)  xdotool type --delay 60 "$*" ;;
-        *) echo "AVISO: verbo desconhecido: $verbo" >&2 ;;
-      esac
-      ;;
-    *) echo "AVISO: linha ignorada: $linha" >&2 ;;
-  esac
-done < "$ROTEIRO"
+# O dialeto e o driver estao em `roteiro.sh`. Aqui so se liga a marca de corte:
+# `= <marca>` tem de cortar o log de I/O, e o gancho existe para isto.
+roteiro_marca() { marca "$1"; }
+roteiro_executa "$ROTEIRO"
 marca FIM
 
 sleep 2

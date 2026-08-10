@@ -504,10 +504,13 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido no fechamento da fase 2 (WTE-TASK-14): 96,2% do Pascal da casca é
-saída de gerador** — 8.982 linhas geradas contra 353 escritas à mão, e as 353
+**Medido no fechamento da fase 2 (WTE-TASK-14): 95,9% do Pascal da casca é
+saída de gerador** — 8.982 linhas geradas contra 386 escritas à mão, e as 386
 são andaime de projeto (`wte.lpr`, `retrace.pas`, `wtemain.pas`), não lógica do
-editor. O número sai do
+editor. (Eram 353 e 96,2% até a WTE-TASK-22, que acrescentou ao `wtemain.pas` o
+argumento posicional de imagem — o app **guarda e registra** o caminho, e não o
+lê: ler é handler, e handler tem gate. A fração é medida, então ela se move
+quando o andaime cresce.) O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712
 linhas de hex dos blobs ficam fora dela. **A fração da §4.3 — "a UI é 60% do

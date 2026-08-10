@@ -1,0 +1,27 @@
+# golden-01-arranque, lado PORT -- e a assimetria e temporaria, com prazo.
+#
+# O par deste arquivo e golden-01-arranque.txt. Eles deveriam ser o MESMO
+# roteiro, e serao: roteiro que diverge entre os lados deixa de ser a mesma
+# entrada, que e a condicao de qualquer comparacao valer. Hoje nao dao, por
+# duas medidas:
+#
+# 1. **o port nao abre imagem.** Ate a WTE-TASK-25 os 96 handlers sao stubs que
+#    logam; medido no fechamento da fase 3 (WTE-TASK-21): zero unidade da casca
+#    da `uses we2002_database`. Nao ha dialogo de abrir para dirigir;
+# 2. **o port nao recebe teclado no `:99`.** Sem window manager o GTK2 nunca
+#    considera a janela ativa (WTE-TASK-13), entao `! texto` e `! tecla` nao
+#    chegariam -- e o `golden_run_laz.sh` REPROVA um roteiro que os use, em vez
+#    de rodar e produzir silencio.
+#
+# Enquanto isso valer, o lado port so abre a janela e espera, e as nove faixas
+# que o oraculo grava ficam declaradas como `conhecida:` no roteiro do oraculo.
+# Quando a 25 entrar, este arquivo some e o gate passa a rodar um roteiro so.
+alvo: port
+estado: ok
+operacao: arranque
+
+# O titulo tem o sufixo ` [Lazarus]`, posto em tempo de execucao pelo
+# `wtemain.pas`. E divergencia deliberada e obrigatoria: os dois lados rodam no
+# MESMO :99, e com titulo igual o harness dirigiria o lado errado.
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3

@@ -1,0 +1,61 @@
+# golden-01-arranque -- o roteiro do GATE, lado oraculo.
+#
+# Insumo da WTE-TASK-22, rodado por wte/tools/golden_check.sh. E a operacao
+# mais barata que existe -- abrir a imagem, aceitar o aviso de tamanho, dispensar
+# o splash -- e e de proposito: o gate tem de ter um roteiro cujo CONTROLE
+# (oraculo contra oraculo) feche em segundos, para se poder confiar nos caros.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-01-arranque.txt \
+#        --modo controle
+#
+# O nome do arquivo NAO aparece aqui: `@IMAGEM@` e trocado pelo basename da
+# copia que cada lado abre. O gate roda o MESMO roteiro sobre DUAS copias, e
+# duas copias tem nomes diferentes; roteiro com nome fixo obrigaria dois
+# roteiros, e dois roteiros deixam de ser a mesma entrada.
+alvo: original
+estado: ok
+operacao: arranque
+
+# ---------------------------------------------------------------- faixas ----
+#
+# O que o ORACULO grava so por abrir a imagem, antes de qualquer edicao --
+# medido com o `diff_dirigido.sh` sobre roms/japanese-shift-jis.bin. Sao
+# offsets 0-BASED e INCLUSIVOS, como o KNOWN_START/KNOWN_END do newWe2002, e
+# **nao** as posicoes 1-based que o `cmp -l` imprime.
+#
+# Elas valem para o modo `golden` (oraculo contra port) e nao para o
+# `controle`, onde os dois lados gravam o mesmo. Enquanto o port nao tiver
+# handler de carga (WTE-TASK-25) ele nao grava nada, e estas nove linhas sao a
+# distancia exata que falta -- por isso ficam declaradas em vez de subtraidas
+# em silencio: o gate reprova se uma delas parar de aparecer.
+conhecida: 11796..13831
+conhecida: 14136..16183
+conhecida: 16488..18535
+conhecida: 18840..20887
+conhecida: 21192..23239
+conhecida: 23544..25591
+conhecida: 25896..26527
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+# O aviso de tamanho. Ele e so aviso -- o editor carrega assim mesmo --, mas o
+# "Sim" e quem GRAVA as sete faixas de setor acima. Medido passo a passo na
+# WTE-TASK-12: o dialogo de arquivo nao grava, o Sim grava, o splash nao.
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2

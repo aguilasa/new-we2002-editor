@@ -34,7 +34,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
+| [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
 | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ⬜ Pendente | — | — |
@@ -235,7 +235,10 @@ conferível.
 
 ### Fase 4 — Comportamento
 
-- [ ] Harness golden com as quatro guardas, controle verde e positivo detectado
+- [x] Harness golden com as quatro guardas, controle verde e positivo detectado
+      — os três modos medidos em 2026-08-10: controle byte-idêntico, byte
+      plantado detectado com offset, e `golden` passando só com as nove
+      faixas declaradas no roteiro
 - [x] Gabarito de spec com o campo **evidência**, e a proibição de colar decompilado
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
@@ -453,7 +456,11 @@ new-we2002-editor/
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
 │   │   ├── check_fase3.py            ← WTE-TASK-21
+│   │   ├── roteiro.sh                ← WTE-TASK-19, 22 (biblioteca)
 │   │   ├── golden_check.sh           ← WTE-TASK-22
+│   │   ├── golden_run_wte.sh         ← WTE-TASK-22 (lado oraculo)
+│   │   ├── golden_run_laz.sh         ← WTE-TASK-22 (lado port)
+│   │   ├── golden_veredito.py        ← WTE-TASK-22
 │   │   ├── golden_suite.sh           ← WTE-TASK-34
 │   │   ├── ghidra/                   ← WTE-TASK-24
 │   │   └── make_icon.py              ← WTE-TASK-39

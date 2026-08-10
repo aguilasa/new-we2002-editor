@@ -46,6 +46,18 @@ procedure CriaFormularios;
 // `Application.Run`, False se ja fez o que tinha de fazer (`--help`).
 function TrataLinhaDeComando: Boolean;
 
+// Caminho da imagem passado na linha de comando, ou '' se nao veio nenhum.
+//
+// O app AINDA NAO LE a imagem -- os 96 handlers sao stubs ate a WTE-TASK-25, e
+// o fechamento da fase 3 mediu isso: zero unidade da casca da `uses
+// we2002_database`. O caminho e guardado e registrado no trace, e nada mais.
+//
+// Existe por causa do gate golden (WTE-TASK-22): os dois lados recebem a MESMA
+// entrada, cada um sobre a sua copia. Sem isto o `golden_run_laz.sh` teria de
+// omitir o argumento hoje e ganha-lo depois -- e harness que muda de forma
+// entre uma fase e a seguinte deixa de comparar a mesma coisa.
+function ImagemDaLinhaDeComando: string;
+
 implementation
 
 uses
@@ -124,6 +136,14 @@ begin
       Exit(Screen.Forms[i]);
 end;
 
+var
+  ImagemPedida: string = '';
+
+function ImagemDaLinhaDeComando: string;
+begin
+  Result := ImagemPedida;
+end;
+
 procedure Ajuda;
 var
   i: Integer;
@@ -135,6 +155,8 @@ begin
   WriteLn('  wte --show all        abre os 18 de uma vez (captura da WTE-TASK-12)');
   WriteLn('  wte --list            lista os nomes e sai');
   WriteLn('  wte --help            isto');
+  WriteLn('  wte <imagem.bin>      guarda o caminho e registra no trace;');
+  WriteLn('                        NAO le a imagem -- ver a WTE-TASK-25');
   WriteLn;
   WriteLn('O trace vai para wte/re/trace.log, ou para $WTE_TRACE_FILE.');
   WriteLn;
@@ -187,9 +209,20 @@ begin
         F.Show;
       end;
     end
-    else
+    else if Copy(ParamStr(i), 1, 1) = '-' then
       raise Exception.CreateFmt('argumento desconhecido: %s (veja --help)',
-        [ParamStr(i)]);
+        [ParamStr(i)])
+    else
+    begin
+      // Argumento POSICIONAL: o caminho da imagem. So se guarda e se registra
+      // -- ler e trabalho de handler, e handler tem gate proprio. Opcao
+      // desconhecida (comecando por `-`) continua sendo erro: engolir `--sho`
+      // em silencio faria a captura da WTE-TASK-12 sair do formulario errado.
+      if ImagemPedida <> '' then
+        raise Exception.Create('so uma imagem por vez');
+      ImagemPedida := ParamStr(i);
+      REMark('imagem: ' + ImagemPedida);
+    end;
     Inc(i);
   end;
 end;
