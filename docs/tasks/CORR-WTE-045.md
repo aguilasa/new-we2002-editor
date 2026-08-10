@@ -3,7 +3,7 @@ id: CORR-WTE-045
 title: "Correção: a seção das seis áreas cita `roms/09-areas-com-time`, que é o nome da sessão e não o da imagem"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -111,19 +111,52 @@ Regerar (`python3 wte/tools/analisar_io.py`, sem `--check`).
 
 ## Verificação
 
-- [ ] `grep -n 'roms/' wte/re/offsets-novos.md` só devolve nome de arquivo que
-      existe em `roms/`
-- [ ] teste novo reprova quando o nome da sessão volta ao lugar do nome da imagem
-- [ ] `python3 wte/tools/analisar_io.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n 'roms/' wte/re/offsets-novos.md` só devolve nome de arquivo que
+      existe em `roms/` — as 4 citações viraram `roms/japanese-shift-jis.bin`
+- [x] teste novo reprova quando o nome da sessão volta ao lugar do nome da imagem
+- [x] `python3 wte/tools/analisar_io.py --check` verde
+- [x] `make -C wte check` verde — 375 testes, 16 geradores, `rc=0`
+- [x] `roms/` intocada — a correção é de texto gerado, nenhuma corrida nova
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+`secao_areas()` passou a derivar o nome da imagem do conjunto
+`{r["imagem"]}` das linhas da própria sessão, em vez de interpolar a constante
+`AREAS` — que é o rótulo do diretório de saída do `diff_dirigido.sh`. A frase
+gerada saiu de `roms/09-areas-com-time` (caminho inexistente) para
+`roms/japanese-shift-jis.bin`, que é o que o `io-medido.tsv` registra nas 64
+linhas da sessão, e o que a frase seguinte (a europeia travar) pressupõe.
+
+Dois testes novos:
+
+- `TestSecaoAreas.test_o_nome_vem_da_evidencia_e_nao_da_constante` — chama
+  `secao_areas()` com linhas plantadas de imagem `plantada.bin` e exige que o
+  texto traga `roms/plantada.bin` e **não** `roms/<sessão>`. Reprova assim que
+  a constante voltar ao lugar do dado;
+- `TestEvidencia.test_toda_rom_citada_no_gerado_e_uma_imagem_medida` — varre
+  todo `` `roms/X` `` do `offsets-novos.md` e exige que `X` seja um valor da
+  coluna `imagem` do `io-medido.tsv`. A conferência é contra o TSV versionado,
+  não contra o disco, porque `roms/` é gitignored; quando a pasta existe, o
+  arquivo também é conferido (menos `truncada-474431328.bin`, que é derivada e
+  mora em `work/`).
+
+O teste da evidência reprovou contra o `.md` velho antes da regeneração —
+`'09-areas-com-time' not found in {...}` —, que é a demonstração de que ele
+alcança o defeito.
+
 **Problemas encontrados:**
 
+A primeira versão do conserto emendava o nome e a frase seguinte na mesma
+chamada de `w()`, e a linha gerada saía com 82 colunas contra as ~76 do resto
+do arquivo. Quebrado em duas chamadas; o markdown renderiza igual.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/analisar_io.py` — `secao_areas()`
+- `wte/tools/test_analisar_io.py` — `TestSecaoAreas` (nova) e um teste em
+  `TestEvidencia`
+- `wte/re/offsets-novos.md` — regerado

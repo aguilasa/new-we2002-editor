@@ -64,7 +64,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | O oráculo comportamental está morto e a fase 4 é circular: o gate 22 precisa do `wte.exe` vivo, e entendê-lo é a WTE-TASK-25, que depende do 22 | Alta | [x] concluída | 2026-08-10 |
-| [CORR-WTE-045](/docs/tasks/CORR-WTE-045.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | A seção das seis áreas do `offsets-novos.md` diz `roms/09-areas-com-time`, que é o nome da sessão — a imagem é `japanese-shift-jis.bin` | Baixa | [ ] pendente | — |
+| [CORR-WTE-045](/docs/tasks/CORR-WTE-045.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | A seção das seis áreas do `offsets-novos.md` diz `roms/09-areas-com-time`, que é o nome da sessão — a imagem é `japanese-shift-jis.bin` | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-046](/docs/tasks/CORR-WTE-046.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Três dos 14 vereditos `retomada de fronteira` provam com `case N`, e o `Database.cpp` tem `if(i == N)` — num deles o `case N` existe em outro bloco | Baixa | [ ] pendente | — |
 | [CORR-WTE-047](/docs/tasks/CORR-WTE-047.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | As sessões 10 e 11, que deram 18 dos 33 endereçados, não têm o resultado da segunda régua (`cmp`) registrado em lugar nenhum | Baixa | [ ] pendente | — |
 | [CORR-WTE-048](/docs/tasks/CORR-WTE-048.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O `fase-3.md` gerado ainda diz que o `wte.exe` não passa da tela de carga — o sweep da CORR-WTE-044 varreu quatro arquivos e não este | Baixa | [ ] pendente | — |
@@ -115,7 +115,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
 - [x] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
 - [x] CORR-WTE-044 — o controle **existe**; o ponteiro global é que é sobrescrito pela carga do time. Desfecho: condição de contorno — a ROM japonesa passa da troca de time com 0 violação de acesso
-- [ ] CORR-WTE-045 — tirar o nome da imagem da evidência em vez da constante da sessão, e regerar
+- [x] CORR-WTE-045 — tirar o nome da imagem da evidência em vez da constante da sessão, e regerar
 - [ ] CORR-WTE-046 — devolver a construção que casou (`case` ou `if`) junto do gatilho, e imprimir a que casou
 - [ ] CORR-WTE-047 — versionar o resultado do `cmp` por sessão e gerar o veredito das duas réguas no `offsets-novos.md`
 - [ ] CORR-WTE-048 — trocar a justificativa aposentada no `compare_dumps.py` (oráculo de comportamento × de formato) e regerar

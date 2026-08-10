@@ -471,11 +471,18 @@ def secao_areas(w, todas_sessoes, conhecidos) -> None:
     linhas = [r for r in todas_sessoes if r["sessao"] == AREAS]
     if not linhas:
         return
+    # O nome da imagem sai das PROPRIAS linhas da sessao, nunca da constante
+    # AREAS -- essa e o rotulo do diretorio de saida do diff_dirigido.sh, e
+    # interpolar ela aqui produzia `roms/09-areas-com-time`, caminho que nao
+    # existe (CORR-WTE-045). Uma sessao tem uma imagem so; o join cobre o caso
+    # degenerado sem inventar prosa.
+    imagens = sorted({r["imagem"] for r in linhas})
     w("## As seis áreas, com um time carregado")
     w("")
     w("Medido com o roteiro")
     w("[`09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt) sobre")
-    w(f"cópia de `roms/{AREAS}`. **A imagem não é escolha de gosto:** com a")
+    w(f"cópia de `roms/{'`, `roms/'.join(imagens)}`.")
+    w("**A imagem não é escolha de gosto:** com a")
     w("europeia o `wte.exe` morre na troca de time, e o roteiro mediria o")
     w("travamento em vez das áreas ([`crash-causa.md`](crash-causa.md)).")
     w("")

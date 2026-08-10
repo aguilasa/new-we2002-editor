@@ -16,6 +16,7 @@ Tres grupos:
 
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -238,6 +239,35 @@ class TestPapelNoLegado(unittest.TestCase):
         self.assertEqual(p["OFS_ML_PLAYER_ATTR"][0], "varredura")
 
 
+class TestSecaoAreas(unittest.TestCase):
+    """A secao das seis areas nomeia a IMAGEM, nunca o rotulo da sessao.
+
+    `09-areas-com-time` e o diretorio de saida do `diff_dirigido.sh`; a imagem
+    e `japanese-shift-jis.bin`. Interpolar a constante produzia
+    `roms/09-areas-com-time`, caminho que nao existe (CORR-WTE-045) -- e o
+    paragrafo seguinte, que fala da europeia travar, so fecha com a japonesa.
+    """
+
+    def linhas(self, imagem: str) -> list[dict[str, str]]:
+        def r(acao, op, ini, tam):
+            return {"imagem": imagem, "sessao": A.AREAS, "acao": acao,
+                    "op": op, "inicio": str(ini), "fim": str(ini + tam - 1),
+                    "tamanho": str(tam), "setor": str(ini // A.SETOR),
+                    "byte_no_setor": str(ini % A.SETOR)}
+        return [r("ARRANQUE", "R", 11796, 512),
+                r("SELECIONA_TIME", "W", 1012641, 64)]
+
+    def render(self, imagem: str) -> str:
+        fora: list[str] = []
+        A.secao_areas(fora.append, self.linhas(imagem), A.ler_offsets_hpp())
+        return "\n".join(fora)
+
+    def test_o_nome_vem_da_evidencia_e_nao_da_constante(self) -> None:
+        texto = self.render("plantada.bin")
+        self.assertIn("`roms/plantada.bin`", texto)
+        self.assertNotIn(f"roms/{A.AREAS}", texto)
+
+
 class TestEvidencia(unittest.TestCase):
     """Contra o `io-medido.tsv` commitado."""
 
@@ -346,6 +376,24 @@ class TestEvidencia(unittest.TestCase):
         self.assertIn(A.AREAS, sessoes)
         for s in A.PASSAGEM_5:
             self.assertIn(s, sessoes)
+
+    def test_toda_rom_citada_no_gerado_e_uma_imagem_medida(self) -> None:
+        """Nome de ROM no `offsets-novos.md` tem de ser arquivo, nao rotulo.
+
+        A conferencia e contra a coluna `imagem` do TSV, que e versionada --
+        `roms/` e gitignored e pode nao estar no disco de quem roda a bateria.
+        Quando ela esta, o arquivo tambem e conferido.
+        """
+        citadas = set(re.findall(r"`roms/([^`]+)`",
+                                 A.OUT_MD.read_text(encoding="utf-8")))
+        self.assertTrue(citadas, "o gerado deixou de citar imagem nenhuma")
+        medidas = {r["imagem"] for r in self.medido}
+        for nome in sorted(citadas):
+            self.assertIn(nome, medidas,
+                          f"`roms/{nome}` nao e imagem de sessao nenhuma")
+            alvo = A.ROOT / "roms" / nome
+            if (A.ROOT / "roms").is_dir() and not nome.startswith("truncada"):
+                self.assertTrue(alvo.exists(), f"{alvo} nao existe")
 
     def test_todo_offset_ausente_tem_veredito(self) -> None:
         """O critério da WTE-TASK-19, preso em teste.

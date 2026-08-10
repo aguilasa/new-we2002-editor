@@ -269,7 +269,8 @@ que isso destravou.
 
 Medido com o roteiro
 [`09-areas-com-time.txt`](../tests/roteiros/09-areas-com-time.txt) sobre
-cópia de `roms/09-areas-com-time`. **A imagem não é escolha de gosto:** com a
+cópia de `roms/japanese-shift-jis.bin`.
+**A imagem não é escolha de gosto:** com a
 europeia o `wte.exe` morre na troca de time, e o roteiro mediria o
 travamento em vez das áreas ([`crash-causa.md`](crash-causa.md)).
 
