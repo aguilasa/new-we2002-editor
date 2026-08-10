@@ -53,6 +53,9 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-036](/docs/tasks/CORR-WTE-036.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A regra `!` → `not` do `SUBS` atravessa a quebra de linha e engole seis statements para dentro de comentário | Alta | [ ] pendente | — |
 | [CORR-WTE-037](/docs/tasks/CORR-WTE-037.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | A linha das recusas medidas na saída está deslocada, e o worklist da WTE-TASK-18 aponta para a linha errada | Alta | [ ] pendente | — |
 | [CORR-WTE-038](/docs/tasks/CORR-WTE-038.md) | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | O Log da WTE-TASK-17 diz 41 regras de substituição, e o gerador tem 47 | Alta | [ ] pendente | — |
+| [CORR-WTE-039](/docs/tasks/CORR-WTE-039.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz que o gerador recusa `(int)*(int *)`, e ele aceita | Alta | [ ] pendente | — |
+| [CORR-WTE-040](/docs/tasks/CORR-WTE-040.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz quatro famílias de `BitBtnNClick`, e o TSV tem três nomes | Alta | [ ] pendente | — |
+| [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Quatro das 15 rotas de recusa do `spec_index.py` não têm teste, e o README chama as onze testadas de "as" rotas | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -93,6 +96,9 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [ ] CORR-WTE-036 — ancorar a regra `!` → `not` na linha, e fazer o guard de quebra valer para `\s`, `[\s\S]` e `.`
 - [ ] CORR-WTE-037 — invariante de numeração em `aplicar_subs`, e dizer em cada recusa se ela veio da entrada ou da saída
 - [ ] CORR-WTE-038 — trocar 41 por 47 no Log da 17 e desfazer a contradição sobre a CORR-WTE-034
+- [ ] CORR-WTE-039 — implementar a marca de cast do Ghidra no `spec_index.py`, com teste de falso positivo
+- [ ] CORR-WTE-040 — medir as famílias de `BitBtnNClick` no `published_methods.tsv` e reescrever a frase
+- [ ] CORR-WTE-041 — testar as quatro rotas de recusa sem cobertura e contar `raise SpecError` no README
 
 ## Detalhes por correção
 
@@ -731,3 +737,43 @@ aqui para que a lacuna não seja lida como arquivo sumido.
   em 13 motivos, 2.504 linhas) foram remedidos e batem
 - **Fix:** 47 no Log, com a rota de remedição ao lado, e a nota do enunciado
   reescrita para o estado corrente
+
+### CORR-WTE-039
+
+- **Arquivo com problema:** `wte/re/spec/GABARITO.md` (linha 133) e
+  `wte/tools/spec_index.py` (`MARCAS_DE_DECOMPILADO`)
+- **Sintoma:** o gabarito lista nove marcas de decompilado que o gerador
+  "recusa"; a tupla do gerador tem sete padrões e não cobre `(int)*(int *)`, a
+  marca que sobrevive a quem renomeia `uVar1` antes de colar
+- **Como foi detectado:** as nove marcas plantadas contra
+  `MARCAS_DE_DECOMPILADO`; sete recusadas, o cast aceito nas duas formas
+  (`(param + 8)` e `(this + 8)`)
+- **Fix:** implementar o padrão no gerador, com teste da recusa **e** teste de
+  falso positivo em prosa portuguesa — ou tirar a marca do gabarito, uma coisa
+  ou outra
+
+### CORR-WTE-040
+
+- **Arquivo com problema:** `wte/re/spec/GABARITO.md` (linhas 12-14)
+- **Sintoma:** "quatro famílias de `BitBtnNClick`" na frase que justifica o
+  nome `<formulario>.<handler>.md`; o TSV tem três nomes (`BitBtn1Click` ×4,
+  `BitBtn3Click` ×3, `BitBtn2Click` ×2) e nenhum `BitBtn4Click`. Os outros dois
+  números da mesma frase (16 `FormCreate`, 2 `FormShow`) batem
+- **Como foi detectado:** `collections.Counter` sobre a coluna `handler` do
+  `wte/re/published_methods.tsv`
+- **Fix:** frase medida, nomeando as três famílias — e `SpeedButton1Click` ×3,
+  se a intenção era contar botão repetido em geral
+
+### CORR-WTE-041
+
+- **Arquivo com problema:** `wte/tools/test_spec_index.py` e
+  `wte/tools/README.md` (linha 49)
+- **Sintoma:** "as onze rotas de recusa" são onze testes, mas o gerador tem 15
+  sítios de `raise SpecError`; ficam sem regressão o TSV ausente, o TSV vazio,
+  o frontmatter não fechado, a linha sem `:` e a chave obrigatória ausente — a
+  última é a que a primeira spec de verdade vai encontrar
+- **Como foi detectado:** `grep -c "raise SpecError"` = 15 contra os onze
+  `test_recusa_*`; as rotas foram exercitadas à mão e funcionam, então é falta
+  de teste, não bug
+- **Fix:** testes para as rotas que faltam e, no README, o número atrelado ao
+  `grep -c` para a próxima revisão poder remedir
