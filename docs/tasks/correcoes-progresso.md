@@ -37,6 +37,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-024](/docs/tasks/CORR-WTE-024.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O sufixo ` [Lazarus]` não chegou à WTE-TASK-35 e o `--show` não chegou à WTE-TASK-12 | Baixa | [x] concluída | 2026-08-09 |
 | [CORR-WTE-025](/docs/tasks/CORR-WTE-025.md) | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | A faixa `11797..26528` é posição do `cmp -l`, e a WTE-TASK-22 vai declará-la como offset | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-026](/docs/tasks/CORR-WTE-026.md) | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | A tabela do achado 2 se anuncia medida, e a coluna VCL não foi medida | Baixa | [ ] pendente | — |
+| [CORR-WTE-027](/docs/tasks/CORR-WTE-027.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | O `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra | Baixa | [ ] pendente | — |
+| [CORR-WTE-028](/docs/tasks/CORR-WTE-028.md) | [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md) | `conferir_vereditos()` guarda a coluna `Original`, não o veredito | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -66,6 +68,8 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-024 — levar o sufixo ` [Lazarus]` à 35 e o `--show` à 12 e à 25
 - [x] CORR-WTE-025 — corrigir a faixa para `11796..26527` nos três sítios, dizendo a base
 - [ ] CORR-WTE-026 — dizer, por coluna, o que foi medido no achado 2 e dar rota à divergência de `ComboBox.Text`
+- [ ] CORR-WTE-027 — trocar os seis `/docs/` do `montar()` por `../../docs/`, como o `fase-1.md` já faz
+- [ ] CORR-WTE-028 — guardar o grupo 3 (veredito) e transformar a coluna `Original` em contagem medida
 
 ## Detalhes por correção
 
@@ -527,3 +531,35 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** rotular a coluna VCL como não medida, com a origem da afirmação, e
   dar rota de confirmação à divergência de `ComboBox.Text` (disassembly de um
   dos 12 handlers, ou observação do `wte.exe`, que é VCL rodando)
+
+### CORR-WTE-027
+
+- **Arquivo com problema:** `wte/tools/check_fase2.py`, o `montar()` (linha 274
+  e a tabela de pendências, 430-440), e a saída dele, `wte/re/fase-2.md`
+- **Sintoma:** seis links para `docs/` na forma `/docs/tasks/...`, que
+  `.claude/rules/links.md` reserva a markdown **dentro** de `docs/`. O vizinho
+  que o `fase-2.md` toma por modelo, o `fase-1.md`, usa `../../docs/`. O mesmo
+  erro já foi cometido e corrigido no gerador irmão — ver o Log da
+  [CORR-WTE-007](/docs/tasks/CORR-WTE-007.md)
+- **Como foi detectado:** `grep -rnoE '\]\((/docs/[^)]*|[^)]*docs/[^)]*)\)'
+  wte/re/*.md` — `fase-1.md:3` sai `../../docs/tasks/09-…`, `fase-2.md:3` sai
+  `/docs/tasks/14-…`
+- **Fix:** `../../docs/` nos seis links do `montar()` e regerar. `eventos.md`
+  (186, 214) e `tipos.md` (10), escritos à mão, têm o mesmo defeito e cabem na
+  mesma passada
+
+### CORR-WTE-028
+
+- **Arquivo com problema:** `wte/tools/check_fase2.py:216-241`,
+  `conferir_vereditos()`
+- **Sintoma:** o dicionário anunciado como veredito por formulário guarda
+  `m.group(2)` — a coluna `Original` do `visual.md`, que vale `sim` ou `DFM` —,
+  e descarta o veredito, que é o grupo 3. Não é falso-verde hoje, porque só
+  `len()` é lido e a regex de três colunas já exige veredito não vazio; é dado
+  morto errado, que vira falso-verde no dia em que alguém olhar o texto
+- **Como foi detectado:** leitura da regex contra o cabeçalho real da tabela
+  (`| Formulário | Original | Veredito |`); o teste que cobre a rota
+  (`test_check_fase2.py:113-116`) só assere contagem, nunca o valor
+- **Fix:** guardar o grupo 3, manter a coluna `Original` como contagem
+  (`capturado / só DFM`) publicada no `fase-2.md` — vira número medido o item 3
+  de "O que a fase 2 não prova" —, e um assert sobre o valor no teste
