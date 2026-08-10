@@ -72,6 +72,55 @@ porque são duas imagens de ~474 MB. Não roda em CI, e o plano já registra iss
 
 ---
 
+## Três medidas da WTE-TASK-12 e da 13 que esta task herda
+
+### 1. **Bloqueante:** o oráculo A quebra ao selecionar um time
+
+Medido na WTE-TASK-12, com cópia byte-idêntica a `roms/`: escolher um time no
+combo do `MainForm` dispara **310 `EXCEPTION_ACCESS_VIOLATION`** e o processo
+morre. A primeira é leitura em ponteiro nulo + `0x1c` em `ip=0x005f5ea0`; as
+seguintes são chamada para o endereço 0, até `stack overflow`. Determinístico.
+As janelas X sobrevivem órfãs sob o `wineserver`, então **o app parece vivo numa
+captura** — não confie na tela para decidir se ele está de pé.
+
+Descartados como causa: cópia corrompida, os cliques em `TSpeedButton` (sem
+time, `Sobre...` e `Sair` abrem seus formulários normalmente) e estado sujo do
+Wine. Confundidor que esta máquina não consegue eliminar: o único runner é
+`wine-experimental.bleeding.edge…(TkG Plain)`, que o log anuncia como versão de
+teste, e não há Wine de sistema.
+
+**Quase toda operação do editor começa por escolher um time.** Enquanto isto
+não se resolver, o oráculo A não executa a bateria. Diagnóstico e comando de
+reprodução em [`../../wte/re/visual.md`](../../wte/re/visual.md), achado 1.
+
+### 2. O controle **não** é "imagem intocada"
+
+Aceitar o aviso de tamanho — o caminho normal, porque as imagens deste
+repositório têm 474.784.128 bytes e o editor espera 474.431.328 — grava
+**11.952 bytes** na imagem, faixa `11797..26528`, **setores 5 a 11**, antes de
+qualquer edição. Medido passo a passo: o diálogo de arquivo não grava, o "Sim"
+do aviso grava, e nem o splash nem a seleção de time acrescentam byte.
+
+*Original contra original* continua dando zero — os dois lados gravam os mesmos
+bytes. Mas o port terá de **reproduzir** essa gravação, ou o harness terá de
+declarar a faixa como exceção conhecida, no mesmo espírito dos 16 bytes do slot
+64 do `newWe2002`. Decidir qual, e escrever a razão.
+
+### 3. O lado port não recebe teclado no `:99`
+
+Da WTE-TASK-13: sem window manager o GTK2 nunca considera a janela ativa, e
+**nenhuma tecla chega** — nem `xdotool key` depois de `windowfocus`, nem
+`key --window`. O mouse funciona. O `wte.exe` não sofre disso, porque o Wine
+implementa o próprio foco.
+
+Some com o outro achado da 13 — **o original confirma texto por tecla, não ao
+sair do campo; não existe `OnExit` em nenhum dos 96** — e a conta fecha assim:
+sem teclado do lado port, a operação "editar nome" não tem como ser comparada.
+Ou o harness dirige o port só por mouse, ou o `:99` ganha um window manager
+(nenhum instalado; instalar é decisão do usuário).
+
+---
+
 ## Arquivos a criar ou modificar
 
 | Arquivo | Ação |
@@ -86,7 +135,14 @@ porque são duas imagens de ~474 MB. Não roda em CI, e o plano já registra iss
 ## Critério de conclusão
 
 - [ ] As quatro guardas da tabela implementadas
-- [ ] Controle verde: original contra original dá zero divergência
+- [ ] **O crash do oráculo ao selecionar time resolvido, ou o gate declarado
+      inviável por escrito** — ver a medida 1 acima; sem isso nada abaixo
+      significa alguma coisa
+- [ ] Controle verde: original contra original dá zero divergência —
+      **atenção:** não confundir com "imagem intocada", que diverge em 11.952
+      bytes já na abertura (medida 2)
+- [ ] Decidido se o port reproduz a gravação do aviso de tamanho ou se a faixa
+      `11797..26528` vira exceção declarada
 - [ ] Positivo: byte plantado é detectado, e o script reporta o offset
 - [ ] Roteiro de edição parametrizável, um por operação
 - [ ] `roms/` nunca tocada; temporário limpo no fim

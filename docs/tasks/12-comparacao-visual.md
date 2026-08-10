@@ -5,7 +5,7 @@ type: verificação
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-11"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-12: Comparação visual
@@ -63,7 +63,7 @@ retrabalho.
 | Arquivo | Ação |
 |---|---|
 | `wte/re/visual/lazarus/*.png` | criar (18 capturas) |
-| `wte/re/visual/original/*.png` | criar (3 capturas — ver a ressalva abaixo) |
+| `wte/re/visual/original/*.png` | criar (4 capturas — ver o resultado abaixo) |
 | `wte/re/visual.md` | criar — um veredito por formulário |
 | `wte/tools/capture_forms.sh` | criar — reproduz o lado port |
 
@@ -77,28 +77,36 @@ bateria.
 
 ---
 
-## Ressalva medida: o original só alcança 3 dos 18 na fase 2
+## Resultado medido: o original só mostra 4 dos 18, porque **quebra**
 
-Quem abre formulário são os handlers. No port eles são stub, e o `--show` da
-WTE-TASK-11 contorna isso; **no original não há contorno** — descobrir o que
-dispara cada janela é a WTE-TASK-25 em diante. Com a ROM carregada e um time
-selecionado, nenhum clique nos candidatos óbvios abre janela, e tecla de
-função não chega (o `xdotool key` depende de foco, e o `:99` não tem window
-manager). Tentado duas vezes, a segunda com sessão limpa do Wine.
+Não é falta de saber o gatilho — o gatilho de cada janela está no DFM, e o mapa
+de coordenadas foi levantado dali. **Selecionar um time derruba o original**:
+310 `EXCEPTION_ACCESS_VIOLATION`, começando por leitura em ponteiro nulo + `0x1c`
+em `ip=0x005f5ea0` e terminando em `stack overflow`. Determinístico, com cópia
+byte-idêntica a `roms/`. Diagnóstico completo, o que foi descartado como causa e
+o comando de reprodução em [`../../wte/re/visual.md`](../../wte/re/visual.md),
+achado 1.
 
-Os 3 alcançáveis são os do caminho de arranque: `ficha_warning`,
-`ficha_about`, `MainForm`. As 15 capturas restantes do original passam para a
-[WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), que é a task com a lógica
-ligada dos dois lados. Geometria, presença e ordem de controle não ficam sem
-resposta: são conferidas contra o DFM, com o `dfm2lfm.py --check` provando que
-nenhum `.lfm` foi tocado à mão.
+Sem time, o original só habilita `Sobre...` e `Sair` — e ambos funcionam, o que
+prova que o clique chega. Daí as 4: `MainForm`, `ficha_warning` e `ficha_about`
+pelo caminho de carga, e `ficha_salida` pelo `Sair`.
+
+**Resultado negativo é resultado legítimo.** O que esta task existe para
+responder — controle faltando, posição, tamanho, cor, blob, `TStaticText`,
+rótulo cortado — está respondido nos 18, porque geometria e presença se
+conferem contra o DFM com o `dfm2lfm.py --check`, que é evidência mais forte que
+screenshot. As 14 capturas do original vão para a
+[WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), **se** o crash se
+resolver; o crash em si é bloqueio da
+[WTE-TASK-22](/docs/tasks/22-harness-golden.md), onde está registrado.
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Os 18 capturados dos dois lados — **18 do port, 3 do original**; ver a
-      ressalva acima
+- [x] Os 18 capturados dos dois lados — **18 do port, 4 do original.** Os 14
+      restantes são inalcançáveis por defeito do oráculo, não por método; ver
+      acima
 - [x] Um veredito escrito por formulário
 - [x] Os 118 blobs aparecem na janela — critério herdado da
       [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md), que provou a
@@ -120,60 +128,68 @@ nenhum `.lfm` foi tocado à mão.
 
 - **Resumo do que foi feito:**
 
-  Os 18 formulários do port capturados e inspecionados um a um; o veredito de
-  cada um, os três achados e as duas armadilhas de captura estão em
-  [`../../wte/re/visual.md`](../../wte/re/visual.md). **A task ficou parcial**:
-  o lado original entregou 3 capturas de 18, pelo motivo medido na ressalva
-  acima.
+  Os 18 formulários do port capturados e inspecionados um a um, 4 do original,
+  e cinco achados em [`../../wte/re/visual.md`](../../wte/re/visual.md).
 
-  O que se aprendeu, em ordem de valor:
+  O que decidiu a task foi parar de clicar às cegas e **levantar o gatilho do
+  DFM**: cada controle tem `Left`/`Top` e `OnClick` no DFM extraído, então dá
+  para clicar no centro exato de `colorear`, `mostrar_jugador_1`,
+  `mostrar_estrategia_1` e `dorsal1..23`. Foi isso que revelou o problema real.
 
-  1. **Cinco formulários recebem a cor de fundo em tempo de execução.** O
-     original pinta o `MainForm` de azul e o `ficha_warning` de vermelho; os
-     dois DFM dizem `Color = clBtnFace`, e o `clBtnFace` do Wine é o cinza do
-     diálogo *Abre* do próprio app. Some com o rótulo branco sobre cinza que a
-     casca mostra em `estrategia`, `ficha_color`, `ficha_warning`,
-     `ficha_warning_2` e `MainForm`. Não é defeito do gerador, e a aparência
-     desses cinco **não é julgável na fase 2**. Os cinco endereços de
-     `FormCreate` estão no `visual.md`, para a WTE-TASK-25.
+  1. **O original quebra ao selecionar um time, e por isso 14 formulários são
+     inalcançáveis.** 310 `EXCEPTION_ACCESS_VIOLATION`: a primeira é leitura em
+     ponteiro nulo + `0x1c` em `ip=0x005f5ea0`, as seguintes são chamada para o
+     endereço 0, até `stack overflow`. O processo fica `<defunct>` e as janelas
+     X sobrevivem órfãs sob o `wineserver` — o app **parece vivo numa captura**,
+     que foi o que despistou a primeira rodada desta task. Descartados como
+     causa: cópia corrompida (repetido com cópia recém-tirada de `roms/`, mesmas
+     310), meus cliques (sem time, `Sobre...` e `Sair` abrem normalmente) e
+     estado sujo do Wine. Confundidor que a máquina não elimina: o único runner
+     é um build TkG experimental. **Bloqueio entregue à WTE-TASK-22.**
 
-  2. **A §8.9 fecha sem custo: nenhum dos 37 `TStaticText` usa
-     `Transparent`.** O risco que ela descreve é sobre transparência no GTK2, e
-     não tem instância aqui — 27 declaram cor própria com
-     `ParentColor = False` (a LCL aplica; dá para ver nas faixas opacas do
-     `MainForm`) e 10 herdam a do pai. Decisão: nenhuma ação, e nenhum item
-     para a fase 6. De quebra, 25 dos 37 têm `OnClick`: no original o
-     `TStaticText` é widget clicável, não rótulo.
+  2. **Aceitar o aviso de tamanho grava 11.952 bytes na imagem**, faixa
+     `11797..26528`, setores 5 a 11, antes de qualquer edição. Isolado passo a
+     passo: escolher o arquivo não grava, o "Sim" do aviso grava, splash e
+     seleção de time não acrescentam nada. E o aviso dispara **sempre** com as
+     imagens deste repositório. Muda o desenho do golden test, e foi para a
+     WTE-TASK-22 com o critério novo.
 
-  3. **Os 100 blobs desenháveis aparecem** — o desenho do Obocaman, o retrato
-     do `jugador`, o campo tático, o logo e os 24 glifos do `MainForm`. Os 18
-     `Icon.Data` não são julgáveis sem window manager, dos dois lados.
+  3. **A cor de fundo em runtime é mais larga do que a primeira heurística
+     dizia.** O `ficha_salida` sai **amarelo** no original e não tem rótulo
+     branco nenhum — a heurística "clBtnFace + rótulo `clWhite`", que dava cinco
+     candidatos, é piso e não teto.
 
-  4. `jugador` é o formulário sem ressalva nenhuma: `clNavy` vem do DFM, a LCL
-     aplica, e os 59 rótulos brancos ficam legíveis. É a contraprova de que o
-     caminho de cor funciona e de que o problema do achado 1 é de execução.
+  4. §8.9 fecha sem custo: **nenhum dos 37 `TStaticText` usa `Transparent`**.
+     Nenhuma ação, nenhum item para a fase 6. De quebra, 25 dos 37 têm
+     `OnClick` — no original é widget clicável, não rótulo.
+
+  5. Os **100 blobs desenháveis** aparecem; os 18 `Icon.Data` não são julgáveis
+     sem window manager, dos dois lados.
 
 - **Problemas encontrados:**
 
   1. **`import -window <id>` devolve PNG preto sem erro nenhum.** Sem window
-     manager no `:99` não há empilhamento garantido, e quase todo formulário
-     nasce dentro da área do `MainForm`; o X entrega o conteúdo indefinido da
-     região obscurecida. As 18 primeiras capturas saíram pretas e pareciam bug
-     de renderização da LCL. A saída é `windowraise` + recorte de
-     `-window root`, e está no `capture_forms.sh`.
-  2. **Mapear as janelas do original por fora não funciona.** As 18 janelas X
-     existem desde o arranque (a VCL cria o handle em `CreateForm`), todas
-     `IsUnMapped`. `xdotool windowmap` deixa a janela `IsViewable` e a captura
-     passa — e sai preta, porque a VCL não considera o formulário exibido e
-     nunca pinta. Não é atalho.
-  3. **O `:99` desta máquina subiu sem `-auth`.** O `CLAUDE.md` descreve o
-     Xvfb de `xvfb-run`, com cookie próprio; o processo atual é
-     `Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp`, sem cookie. O
-     `make -C wte run-99` erra falso nesse estado ("nao ha Xvfb :99 rodando"),
-     porque conclui pela ausência do `-auth`. O `capture_forms.sh` trata os
-     dois casos: só exporta `XAUTHORITY` quando o `-auth` existe.
-  4. A navegação do original não cedeu (ver a ressalva). Descartada corrupção
-     de estado: repetido com `wineserver -k` e sessão nova, mesmo resultado.
+     manager não há empilhamento garantido, e quase todo formulário nasce
+     dentro da área do `MainForm`. As 18 primeiras capturas saíram pretas e
+     pareciam bug de renderização da LCL. Saída: `windowraise` + recorte de
+     `-window root`, no `capture_forms.sh`.
+  2. **Mapear as janelas do original por fora não funciona, nem com expose
+     forçado.** `xdotool windowmap` deixa a janela `IsViewable` e a captura
+     sai preta; repetido com `xrefresh`, o que aparece é o `MainForm` por trás,
+     repintado. A VCL não pinta o que não considera exibido. Medido duas vezes.
+  3. **`Enabled` no DFM é estado de projeto, não de runtime.** Quase todo
+     controle do `MainForm` nasce `Enabled = False` e o app habilita ao carregar
+     um time — por isso a primeira rodada de cliques "não fazia nada". Os
+     `dorsal1..23` são a exceção no DFM e, ainda assim, não abrem nada sem time.
+  4. **O `:99` desta máquina subiu sem `-auth`.** O `CLAUDE.md` descreve o Xvfb
+     de `xvfb-run`, com cookie próprio; o processo atual não tem. O
+     `make -C wte run-99` erra falso nesse estado. O `capture_forms.sh` trata os
+     dois casos.
+  5. **Um hardlink meu em `work/` deslocou a listagem do diálogo de abrir** e
+     uma sessão abriu a cópia errada. As cópias de `work/` são descartáveis e
+     foram restauradas de `roms/`; `roms/` nunca foi tocada. Lição para o
+     harness: não criar arquivo em `work/` entre rodadas — o diálogo é dirigido
+     por coordenada, e a coordenada depende da listagem.
 
 - **Arquivos criados/modificados:**
 
@@ -182,5 +198,6 @@ nenhum `.lfm` foi tocado à mão.
   | `wte/tools/capture_forms.sh` | criar |
   | `wte/re/visual.md` | criar |
   | `wte/re/visual/lazarus/*.png` | criar (18) |
-  | `wte/re/visual/original/*.png` | criar (3) |
-  | `docs/tasks/12-comparacao-visual.md` | modificar — ressalva e Log |
+  | `wte/re/visual/original/*.png` | criar (4) |
+  | `docs/tasks/22-harness-golden.md` | modificar — os três hand-offs e o critério |
+  | `docs/tasks/12-comparacao-visual.md` | modificar — resultado e Log |
