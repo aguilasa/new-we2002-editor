@@ -3,7 +3,7 @@ id: CORR-WTE-043
 title: "Correção: `players[i].cost := Ord(buf1[0])` perde o sinal que o C++ tem"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -134,12 +134,78 @@ classe já estão registrados.
 - [ ] `src/core/` intocado (rota 2 continua não usada)
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+Rota 1 — a regra geral, não a tabela por par. `ajustar_atribuicao()` passou a
+separar destino **largo** de destino de um byte:
+
+```python
+if ta.base in UM_BYTE:          # {"Byte", "ShortInt"}
+    return f"Ord({valor})"
+return f"ShortInt({valor})"
+```
+
+`UM_BYTE` é novo, ao lado de `INTEIROS`, com a razão escrita: recebendo de
+`AnsiChar`, num destino de um byte os bits são os mesmos com ou sem sinal.
+
+Saída: **um** site mudou nas seis unidades, exatamente o que a correção nomeia.
+
+```diff
+-    players[i].cost := Ord(buf1[0]);
++    players[i].cost := ShortInt(buf1[0]);
+```
+
+Os outros 34 `:= Ord(` continuam como estavam — todos com destino `Byte`, entre
+eles `ml_teams[i].link[j]`.
+
+Testes, nos dois sentidos:
+
+- `TestCharParaInteiro.test_destino_largo_estende_o_sinal` (`LongInt`,
+  `SmallInt`, `Int64`) e `test_destino_de_um_byte_continua_com_ord` (`Byte`,
+  `ShortInt`), sobre `ajustar_atribuicao` direto;
+- `test_a_saida_real_estende_o_sinal_so_no_custo`, que fixa na saída commitada
+  que o `ShortInt(buf` é **um** e que o `link[j]` continua `Ord`;
+- `wte/tests/test_camada_dados.pas`, procedimento `CustoNcEntraComSinal`: monta
+  uma imagem esparsa de 3.069.514 bytes com `0xC8` no custo do jogador 0 e
+  `0x24` no do 1, roda o `TDatabase.Load` **gerado** e exige `-56` e `36`.
+
+Controle negativo rodado: com o `Ord(buf1[0])` de volta no `.pas`, o caso sai
+`FALHA	custo_nc/sinal	200`. O teste morde.
+
+O programa Pascal foi de 23 para 26 casos, e a asserção de contagem de
+`test_as_decisoes_de_tipo_valem_em_execucao` acompanhou — ela existe justamente
+para que caso sumido não passe em silêncio.
+
+Gates: `port_database_pas.py --check` verde, duas execuções com bytes iguais;
+bateria do `wte/tools/` 305 → 308, verde, com `test_as_seis_unidades_compilam`
+e `test_as_decisoes_de_tipo_valem_em_execucao` **rodando** (sem `skip`);
+`make -C wte check` rc=0; `src/core/` e `roms/` intocados.
+
 **Problemas encontrados:**
 
+O `we2002_offsets` faltava no `uses` do `test_camada_dados.pas` — o programa não
+precisava de `OFS_*` até agora. Acrescentado.
+
+A varredura pegou dois sítios do "23 casos": o de `wte/re/recusas.md` §"O que
+ficou medido", que é afirmação viva e virou 26 com a origem dos 3 novos; e o de
+`docs/tasks/18-camada-de-dados-gerada.md:164`, que está **dentro do Log de
+Execução** (linha 113) — história de tarefa executada, deixada como está, pelo
+mesmo critério da [CORR-WTE-040](/docs/tasks/CORR-WTE-040.md).
+
+A linha nova de `recusas.md` levava link `/docs/...`; corrigida para
+`../../docs/...`, que é o que a [CORR-WTE-027](/docs/tasks/CORR-WTE-027.md)
+fixou para markdown de dentro de `wte/re/`. A prosa da seção diz "sete
+defeitos" e continua verdadeira: ganhou a linha que explica que a última da
+tabela não é da WTE-TASK-18, e sim da revisão dela.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/port_database_pas.py`
+- `wte/tools/test_port_database_pas.py`
+- `wte/tests/test_camada_dados.pas`
+- `wte/src/we2002_database.pas` (regerado)
+- `wte/re/recusas.md`

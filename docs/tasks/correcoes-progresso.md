@@ -57,7 +57,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 | [CORR-WTE-040](/docs/tasks/CORR-WTE-040.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | O `GABARITO.md` diz quatro famílias de `BitBtnNClick`, e o TSV tem três nomes | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Quatro das 15 rotas de recusa do `spec_index.py` não têm teste, e o README chama as onze testadas de "as" rotas | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [x] concluída | 2026-08-10 |
-| [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [ ] pendente | — |
+| [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [x] concluída | 2026-08-10 |
 
 ## Checklist
 
@@ -102,7 +102,7 @@ aqui para que a lacuna não seja lida como arquivo sumido.
 - [x] CORR-WTE-040 — medir as famílias de `BitBtnNClick` no `published_methods.tsv` e reescrever a frase
 - [x] CORR-WTE-041 — testar as quatro rotas de recusa sem cobertura e contar `raise SpecError` no README
 - [x] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
-- [ ] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
+- [x] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
 
 ## Detalhes por correção
 

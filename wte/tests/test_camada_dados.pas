@@ -19,7 +19,7 @@ program test_camada_dados;
 uses
   Classes, SysUtils,
   we2002_types, we2002_team, we2002_player, we2002_cdimage, we2002_textcodec,
-  we2002_database;
+  we2002_database, we2002_offsets;
 
 var
   falhas: LongInt = 0;
@@ -124,6 +124,51 @@ begin
   Checa('char_numerico/sinal', t.flag_shape = -56,
         Format('%d', [t.flag_shape]));
   Checa('char_numerico/tamanho', SizeOf(t.flag_shape) = 1);
+end;
+
+{ ---- decisao 4, um nivel acima: a CONVERSAO local->campo (CORR-WTE-043) --- }
+procedure CustoNcEntraComSinal;
+var
+  caminho: string;
+  f: TFileStream;
+  zeros: array[0..65535] of Byte;
+  b: Byte;
+  restam: Int64;
+  bloco: LongInt;
+begin
+  { Imagem esparsa: zeros ate OFS_COST_NC, depois 0xC8 no custo do jogador 0
+    e 0x24 no do jogador 1. O resto do Load le curto, que a decisao 3 diz nao
+    ser erro. }
+  caminho := GetTempFileName;
+  f := TFileStream.Create(caminho, fmCreate);
+  try
+    FillChar(zeros, SizeOf(zeros), 0);
+    restam := OFS_COST_NC;
+    while restam > 0 do
+    begin
+      bloco := SizeOf(zeros);
+      if restam < bloco then
+        bloco := restam;
+      f.WriteBuffer(zeros, bloco);
+      Dec(restam, bloco);
+    end;
+    b := $C8;                      { 200 sem sinal, -56 com }
+    f.WriteBuffer(b, 1);
+    b := $24;                      { 36: o maximo que as duas ROMs tem }
+    f.WriteBuffer(b, 1);
+  finally
+    f.Free;
+  end;
+
+  Checa('custo_nc/carrega', db.Load(caminho, nil));
+  { `players[i].cost = buf1[0]` do C++ estende sinal -- `char` do x86 com
+    destino `int`. `Ord` entregaria 200, e o erro seria mudo: o Save grava so
+    o byte baixo, entao o round-trip devolve a imagem identica. }
+  Checa('custo_nc/sinal', db.players[0].cost = -56,
+        Format('%d', [db.players[0].cost]));
+  Checa('custo_nc/positivo_intacto', db.players[1].cost = 36,
+        Format('%d', [db.players[1].cost]));
+  DeleteFile(caminho);
 end;
 
 function TamanhoDe(const caminho: string): Int64;
@@ -255,6 +300,7 @@ begin
   NumerosDeCamisa;
   CopiaComSemanticaDeC;
   CharNumericoTemSinal;
+  CustoNcEntraComSinal;
   LeituraCurtaNaoEErro;
   CodecDeKanji;
   SidecarDeUrl;

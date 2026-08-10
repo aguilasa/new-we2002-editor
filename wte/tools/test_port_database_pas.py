@@ -439,6 +439,45 @@ class TestSubs(unittest.TestCase):
         self.assertEqual(P.aplicar_subs(fonte), P.aplicar_subs(fonte))
 
 
+class TestCharParaInteiro(unittest.TestCase):
+    """Decisao 4 do tipos.md na conversao local->campo (CORR-WTE-043).
+
+    O `char` do x86 tem sinal: `int c = buf[0]` com `buf[0] == 0xC8` da -56.
+    `Ord` daria 200, e a divergencia e silenciosa -- o `Save` grava so o byte
+    baixo, entao um round-trip devolve a imagem identica de qualquer jeito.
+    """
+
+    def conversao(self, tipo_destino: str) -> str:
+        tp = P.Transpilador.__new__(P.Transpilador)
+        tp.escopo = {"buf1": P.TipoPas("AnsiChar", ["50"]),
+                     "alvo": P.TipoPas(tipo_destino)}
+        tp.campos = {}
+        tp.classe_atual = ""
+        tp.constantes = {}
+        return tp.ajustar_atribuicao("alvo", "buf1[0]")
+
+    def test_destino_largo_estende_o_sinal(self) -> None:
+        for tipo in ("LongInt", "SmallInt", "Int64"):
+            with self.subTest(tipo=tipo):
+                self.assertEqual(self.conversao(tipo), "ShortInt(buf1[0])")
+
+    def test_destino_de_um_byte_continua_com_ord(self) -> None:
+        # `ml_teams[...].link[j]` tem destino Byte: os bits sao os mesmos e um
+        # `ShortInt` ali seria sinal que o C++ nao tem.
+        for tipo in ("Byte", "ShortInt"):
+            with self.subTest(tipo=tipo):
+                self.assertEqual(self.conversao(tipo), "Ord(buf1[0])")
+
+    def test_a_saida_real_estende_o_sinal_so_no_custo(self) -> None:
+        pas = (P.ROOT / "wte" / "src" / "we2002_database.pas").read_text(
+            encoding="utf-8")
+        self.assertIn("players[i].cost := ShortInt(buf1[0]);", pas)
+        self.assertNotIn("players[i].cost := Ord(", pas)
+        # Os demais continuam `Ord`: destino de um byte.
+        self.assertIn("ml_teams[i].link[j] := Ord(buf[j]);", pas)
+        self.assertEqual(pas.count("ShortInt(buf"), 1)
+
+
 class TestEntradaReal(unittest.TestCase):
     """Contra o we2002_core de verdade -- sem compilar nada."""
 
@@ -602,7 +641,7 @@ class TestUnidadesCompilam(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout)
         # Numero medido, e nao suposto: um caso que some do programa Pascal
         # some em silencio, e o teste continuaria verde sem medir nada.
-        self.assertEqual(len(linhas), 23, r.stdout)
+        self.assertEqual(len(linhas), 26, r.stdout)
 
 
 if __name__ == "__main__":

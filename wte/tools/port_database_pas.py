@@ -758,6 +758,11 @@ class TipoPas:
 INTEIROS = {"Byte", "ShortInt", "Word", "SmallInt", "LongInt", "LongWord",
             "Int64", "SizeInt", "TOffset"}
 
+# Inteiros de um byte. Recebendo de `AnsiChar`, os bits sao os mesmos com ou
+# sem sinal, e `Ord` basta. Todo o resto de `INTEIROS` e "largo": ali a
+# diferenca aparece, e a conversao tem de estender sinal como o C++ estende.
+UM_BYTE = {"Byte", "ShortInt"}
+
 
 # ======================================== 7. o passe estrutural (TASK-18) ====
 
@@ -934,7 +939,15 @@ class Transpilador:
         if ta.base == "AnsiChar" and (tv is None or tv.base != "AnsiChar"):
             return f"AnsiChar({valor})"
         if ta.base in INTEIROS and tv is not None and tv.base == "AnsiChar":
-            return f"Ord({valor})"
+            # Decisao 4 do tipos.md, aplicada tambem a conversao local->campo:
+            # onde o C++ estende sinal, o Pascal estende sinal. O `char` do
+            # x86 TEM sinal, entao `int c = buf[0]` com `buf[0] == 0xC8` da
+            # -56 -- e `Ord` daria 200. Para destino de UM byte os bits sao os
+            # mesmos nas duas formas e `Ord` continua certo (e e o que o
+            # `link[j]`, de destino `Byte`, precisa).
+            if ta.base in UM_BYTE:
+                return f"Ord({valor})"
+            return f"ShortInt({valor})"
         return valor
 
     # ---------------------------------------------------------- expressao ----

@@ -235,6 +235,10 @@ Sete defeitos da tabela da WTE-TASK-17 que nenhum guard pegava, porque nenhum
 deixava token para trás. Os quatro primeiros produziriam Pascal que compila e
 faz outra coisa — a categoria que este projeto inteiro existe para evitar.
 
+A **última linha da tabela é de depois**: não veio da WTE-TASK-18, veio da
+revisão dela, e é da mesma classe — Pascal que compila, roda e entrega outro
+número. Fica aqui porque é aqui que os defeitos desta classe são registrados.
+
 | Defeito | O que saía | Correção |
 |---|---|---|
 | SUBS aplicadas **dentro de literal** | `"Error ! Impossible to open CD image !"` virava `'Error not Impossible to open CD image !'` — a regra `!` → `not` comendo dentro do texto que o usuário lê | `_proteger()` guarda comentário e literal antes das regras |
@@ -244,6 +248,7 @@ faz outra coisa — a categoria que este projeto inteiro existe para evitar.
 | `<<` com lookbehind `(?<![\w\s])` | `hair_style<<4` (`Player.cpp:65`) atravessava intacto | regra simples, sem lookbehind |
 | `static_cast<unsigned int>` depois das regras de tipo | virava `static_cast<LongWord>`, que a regra do cast não casa mais | os casts rodam **antes** das regras de tipo |
 | `as` como nome de parâmetro | `as` é o operador de type-cast do Pascal; o corpo de `AsciiToKanji` não compilava | tabela `RESERVADAS`/`RENOMEIA`; identificador reservado sem mapeamento recusa |
+| `AnsiChar` para campo inteiro **largo** com `Ord` ([CORR-WTE-043](../../docs/tasks/CORR-WTE-043.md)) | `players[i].cost := Ord(buf1[0])`: o `char` do x86 tem sinal, então `0xC8` chega como **200** onde o C++ entrega **-56** | `ajustar_atribuicao()` emite `ShortInt(...)` quando o destino é largo e mantém `Ord` quando é de um byte (`UM_BYTE`) |
 
 Faltavam também três regras que a entrada exige e a tabela não tinha: literal
 hexadecimal (`0x07` → `$07`), `&`/`|` bit-a-bit e as compostas `&=`/`|=`/`^=`.
@@ -262,7 +267,7 @@ parênteses viraria `(x or defence) - 12`.
 | Linhas C++ de entrada | 2.504 | `transpilador.md` |
 | `Read`/`Write`/`Seek`/`strcpy` | idênticos à entrada, mais a duplicação do `[[fallthrough]]` | `test_a_contagem_de_io_bate_com_a_entrada` |
 | Compilação | `fpc` limpo, **zero aviso** | `test_as_seis_unidades_compilam` |
-| Decisões do `tipos.md` | 23 casos, todos verdes | `wte/tests/test_camada_dados.pas` |
+| Decisões do `tipos.md` | **26** casos, todos verdes (23 na WTE-TASK-18; 3 vieram com a [CORR-WTE-043](../../docs/tasks/CORR-WTE-043.md)) | `wte/tests/test_camada_dados.pas` |
 
 O que **não** está medido aqui, e é da
 [WTE-TASK-20](../../docs/tasks/20-round-trip-headless.md): que a camada Pascal

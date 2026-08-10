@@ -959,7 +959,7 @@ begin
   for i := 0 to PLAYERS_NC - 1 do
   begin
     image_file.Read(buf1, 1);
-    players[i].cost := Ord(buf1[0]);
+    players[i].cost := ShortInt(buf1[0]);
   end;
   // all-star name links
   image_file.Seek(2328964, soBeginning);
