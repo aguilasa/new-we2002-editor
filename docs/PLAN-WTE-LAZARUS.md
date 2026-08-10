@@ -534,9 +534,8 @@ regra.**
 
 Precedente direto, no mesmo repositório: `tools/port_database.py` já faz
 transpilação de C++ MFC para C++ portável, extraindo `carica_dabin` e
-`OnWriteCD` verbatim do legado e aplicando substituições listadas. Um
-`port_database_pas.py` é o mesmo programa com outra tabela de saída, e herda
-**os dois guards sem alteração**:
+`OnWriteCD` verbatim do legado e aplicando substituições listadas. O
+`port_database_pas.py` herda dele **os dois guards sem alteração**:
 
 - **`FORBIDDEN`** — recusa emitir se sobrar construção que a tabela não
   reconhece, em vez de produzir código quebrado. Pegou dois erros na Fase 2 do
@@ -545,6 +544,16 @@ transpilação de C++ MFC para C++ portável, extraindo `carica_dabin` e
   e recusa se não baterem. Existe porque uma regex com `[^,]` atravessou uma
   quebra de linha e **trocou** um `Seek(begin)` por um `SeekCurrent`; compilava,
   passava nos testes e passava no ASan, e só o confronto com o `ed.exe` mostrou.
+
+> **Onde o decalque para, e isso foi medido na WTE-TASK-17.** O que ele **não**
+> herda é a técnica: o `port_database.py` pode ser substituição textual pura
+> porque a fonte e o alvo dele são a **mesma linguagem**. C++ → Pascal não pode.
+> Statement e expressão transpilam por regra, como esta seção diz; **estrutura
+> não** — bloco, cabeçalho de laço, assinatura de função e declaração de
+> variável não têm forma comum, e nenhuma regex os alcança sem casamento de
+> chave. O `port_database_pas.py` entrega a camada de statement e põe a
+> estrutura no `FORBIDDEN`; o passe estrutural é da WTE-TASK-18. Ver
+> [`../wte/re/transpilador.md`](../wte/re/transpilador.md).
 
 O segundo guard fica **mais** valioso na travessia para Pascal, não menos: o
 `TFileStream` do FPC tem `Seek(offset, soBeginning)` e `Seek(offset, soCurrent)`
@@ -761,7 +770,9 @@ conferência — não porte manual.
 
 1. **Escrever `tools/port_database_pas.py`**, decalcado do `port_database.py`
    existente: mesma extração verbatim da entrada, outra tabela de substituição,
-   **os dois guards intactos** (`FORBIDDEN` e `check_seeks()`).
+   **os dois guards intactos** (`FORBIDDEN` e `check_seeks()`). O decalque
+   cobre statement e expressão; o **passe estrutural** (bloco, laço, assinatura,
+   `record`) é trabalho próprio, e é da WTE-TASK-18 — ver a ressalva na §4.5.
 2. **Definir o mapeamento de tipo antes de rodar qualquer coisa.** É a única
    decisão de projeto real desta fase, e é onde mora a mordida da §8.6:
 
