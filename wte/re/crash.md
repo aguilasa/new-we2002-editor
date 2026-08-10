@@ -97,16 +97,22 @@ para texto no arquivo):
 **A falha é de estado de interface, não de leitura da imagem.** A
 cadeia medida vai do manipulador de troca de time até uma rotina que
 procura um controle pelo nome e mexe na fonte dele; o que falta é o
-objeto, não o byte. A região vazia em `14368636`, que o
-[`offsets-novos.md`](offsets-novos.md) mede, continua sendo um fato —
-mas deixou de ser a explicação, e passou a ser candidata a *causa da
-causa*: um índice derivado de dado ausente pode muito bem ser o que
-leva a rotina a procurar um controle que não existe.
+objeto, não o byte.
 
-Isso **não desbloqueia** a WTE-TASK-19: continua sem haver como levar
-o oráculo comportamental além da tela de carga com as ROMs deste
-repositório. O que muda é o pedido e o próximo passo — a pergunta
-deixou de ser *que imagem tem esta região preenchida* e passou a ser
-*por que este controle não existe*, e essa segunda é respondível com o
-ferramental da fase 4 sobre um manipulador que já tem nome, endereço e
-`depends_on` declarado.
+**A causa foi medida depois, e está em [`crash-causa.md`](crash-causa.md)** (CORR-WTE-044). O resumo, porque ele aposenta duas
+frases que este documento carregou até 2026-08-10:
+
+- **o controle existe.** Os 23 `dorsalN` estão vivos no `MainForm`,
+  todos `TStaticText`, todos com `Font` não nula. Quem não presta é o
+  ponteiro guardado em `0x004335e4`, que a carga do time sobrescreve
+  com dado de uma tabela vizinha (`0x00010001`) — valor que passa no
+  `if (obj != nil)` da rotina e cujo `+0x68` lê zero;
+- **a região vazia em `14368636` não é a causa, nem a causa da
+  causa.** As duas imagens leem essa mesma faixa ao trocar de time, e
+  só uma delas trava. O [`offsets-novos.md`](offsets-novos.md)
+  continua medindo um fato; ele só não explica este.
+
+E **desbloqueia** a WTE-TASK-19, com ressalva: o oráculo é dirigível
+com `roms/japanese-shift-jis.bin` — mesmo roteiro, zero violações de
+acesso —, e não com a `golden-european-deluxe.bin`. As três ressalvas
+que acompanham o contorno estão no `crash-causa.md`.

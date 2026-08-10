@@ -3,7 +3,7 @@ id: CORR-WTE-044
 title: "Correção: o oráculo comportamental está morto e a fase 4 é circular"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: ["WTE-TASK-24"]
 ---
 
@@ -124,23 +124,95 @@ chamadores.
 
 ## Verificação
 
-- [ ] As quatro perguntas com resposta escrita, ou com "não respondida" e a
+- [x] As quatro perguntas com resposta escrita, ou com "não respondida" e a
       razão
-- [ ] Todo endereço do `crash-causa.md` rastreável a saída de ferramenta —
+      — as quatro respondidas; **uma sub-pergunta ficou aberta** e está
+      declarada: *qual instrução* escreve `0x004335e4`
+- [x] Todo endereço do `crash-causa.md` rastreável a saída de ferramenta —
       nenhum lido do Ghidra e transcrito à mão sem o comando ao lado
-- [ ] Nenhum trecho de decompilado colado (`spec_index.py` recusa as oito
+      — `objdump` para o código, `wte/tools/sonda_dorsal.py` para o processo
+      vivo; o Ghidra não foi usado
+- [x] Nenhum trecho de decompilado colado (`spec_index.py` recusa as oito
       marcas; aqui a regra vale por disciplina, já que o arquivo não é spec)
-- [ ] `we-team-editor/` intocada — `git status` e `sha256sum` do `.exe` antes e
+      — o único bloco citado é listagem de `objdump`, seis linhas
+- [x] `we-team-editor/` intocada — `git status` e `sha256sum` do `.exe` antes e
       depois
-- [ ] `roms/` intocada; medição só sobre cópia em `work/`
-- [ ] `make -C wte check` verde
-- [ ] Desfecho declarado: condição de contorno **ou** veredito de oráculo
+      — `9cebce645b8e320c77b82db5b4683613c8ccde5123e6b0b08a59f0f1b8697fff`,
+      igual nos dois momentos
+- [x] `roms/` intocada; medição só sobre cópia em `work/`
+      — o `diff_dirigido.sh` copia; `roms/` só foi lida
+- [x] `make -C wte check` verde
+      — 359 testes, `OK (skipped=1)`, saída 0, já com o `sonda_dorsal.py --check`
+        na bateria
+- [x] Desfecho declarado: condição de contorno **ou** veredito de oráculo
       inutilizável, com a consequência para a WTE-TASK-22 escrita
-- [ ] Commit no formato conventional, em inglês
+      — **condição de contorno**: a ROM japonesa
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-10
+
 - **Resumo do que foi feito:**
+
+  Diagnóstico, sem uma linha de implementação. As quatro perguntas foram
+  respondidas por medição, e o desfecho é o **positivo**: existe condição de
+  contorno, e ela é a imagem. Mesmo roteiro 08, mesmas marcas, só a imagem
+  muda — **49.749 violações de acesso com `roms/golden-european-deluxe.bin`,
+  0 com `roms/japanese-shift-jis.bin`**, refeito duas vezes. Com a japonesa o
+  ponteiro global recebe o `dorsal1` certo (`classe=TStaticText`) e o realce
+  segue sem exceção.
+
+  A causa: `+0x68` **é** `TControl.FFont` (conferido no `vcl60.bpl`, em
+  `TControl::SetFont`); o `N` de `"dorsal" + N` **não** vem da imagem (o
+  chamador que trava empurra a constante 1); e o controle **existe** — os 23
+  `dorsalN` estão vivos no `MainForm`, todos `TStaticText`, todos com `Font`
+  não nula, lidos da memória do processo. O que não presta é o ponteiro em
+  `0x004335e4`: a carga do time preenche uma tabela de pares de 16 bits em
+  `0x00433580..0x004335bf` e, com a imagem europeia, escreve além do fim dela,
+  deixando `0x00010001` no global. Esse valor passa no `if (obj != nil)` da
+  rotina, e `[0x00010001+0x68]` lê zero. Das duas leituras que a correção pôs
+  lado a lado, a de `FindComponent` devolvendo não-`TControl` está refutada e a
+  de estouro em vizinho está medida.
+
+  A ferramenta que mede isso ficou versionada (`wte/tools/sonda_dorsal.py`),
+  com `--check` que remede os cinco deslocamentos de campo contra os `.bpl` —
+  senão os números do documento não teriam rota de volta, que é a lição da
+  CORR-WTE-002.
+
 - **Arquivos criados/modificados:**
+
+  - `wte/re/crash-causa.md` — criado, a resposta escrita
+  - `wte/tools/sonda_dorsal.py` — criado; lê o processo vivo, e `--check`
+    confere o layout nos `.bpl`
+  - `wte/tools/analisar_crash.py` + `wte/re/crash.md` — a seção "O que isto
+    muda" afirmava que o controle não existe e que a WTE-TASK-19 seguia
+    bloqueada; as duas coisas ficaram falsas com esta medição
+  - `docs/tasks/progresso.md` — a pendência externa ganhou veredito
+  - `docs/tasks/CORR-WTE-044.md`, `docs/tasks/correcoes-progresso.md`
+
+  Em commit próprio, a reconciliação que a correção obrigou e a CORR não
+  listava: `docs/tasks/22-harness-golden.md` (o achado 1 dizia "Bloqueante"),
+  `docs/tasks/19-os-50-offsets-restantes.md` ("bloqueado por falta da imagem
+  certa"), `wte/re/visual.md` e `wte/tools/analisar_io.py` +
+  `wte/re/offsets-novos.md`.
+
 - **Problemas encontrados:**
+
+  1. **A contagem de violações de acesso não é propriedade do defeito.** O
+     `crash.md` registra 309 na sessão medida; as corridas desta correção deram
+     49.749 com o mesmo roteiro e a mesma imagem. Não há contradição: só a
+     primeira exceção localiza, o manipulador do próprio app reentra em laço
+     depois dela, e o número mede quanto tempo o processo ficou vivo. O que
+     separa as sessões é zero contra não-zero, e o `sonda_dorsal.py` passou a
+     dizer isso ao terminar.
+  2. **`ptrace_scope=1`** nesta máquina só deixa ler `/proc/<pid>/mem` de
+     descendente, então a sonda **lança** o `diff_dirigido.sh` em vez de se
+     anexar a um processo já rodando — a mesma restrição que faz o
+     `diff_dirigido.sh` lançar o `strace`.
+  3. **Ficou sem resposta qual instrução escreve `0x004335e4`.** Pede
+     watchpoint de hardware, e a mesma restrição de `ptrace` obriga o `gdb` a
+     lançar o Wine — só que o endereço só existe depois do PE mapeado, quando
+     já não dá para pôr o watchpoint pela linha de comando. Não foi tentado
+     porque o desfecho não depende disso. Registrado no `crash-causa.md` como o
+     próximo passo natural, para quem implementar a WTE-TASK-25.

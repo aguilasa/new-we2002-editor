@@ -353,19 +353,24 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
   imagem:** falta o objeto, não o byte. Detalhe, com endereços e chamadores, em
   [`../../wte/re/crash.md`](../../wte/re/crash.md).
 
-  Consequência inalterada: o **oráculo comportamental** do projeto (§4.2) não
-  passa da tela de carga, e o gate golden da
-  [WTE-TASK-22](/docs/tasks/22-harness-golden.md) não tem em que se apoiar. O
-  que mudou é o pedido — agora há **dois caminhos**: uma release cuja região em
-  `14368636` seja populada, **ou** descobrir por que o controle não existe, que
-  é pergunta da fase 4 sobre `lista_equiposChange`, um handler que já tem nome,
-  endereço e formulário.
+  **Veredito (CORR-WTE-044, 2026-08-10): resolvida — o oráculo é dirigível com
+  a ROM japonesa.** O controle **existe** (os 23 `dorsalN` estão vivos no
+  `MainForm`, `TStaticText`, com `Font` não nula); o que não presta é o
+  ponteiro em `0x004335e4`, que a carga do time sobrescreve com dado de uma
+  tabela vizinha. Mesmo roteiro 08, mesmas marcas, só a imagem muda:
+  **49.749 violações de acesso com `roms/golden-european-deluxe.bin`, 0 com
+  `roms/japanese-shift-jis.bin`** — e nesta o ponteiro recebe o `dorsal1` certo.
+  Refeito duas vezes. A frase acima sobre a região em `14368636` fica de pé por
+  outra razão ainda: as duas imagens leem **essa mesma faixa** ao trocar de
+  time, e só uma trava.
 
-  O segundo caminho esbarra numa **circularidade**: o gate da WTE-TASK-22
-  precisa do oráculo vivo, entendê-lo é a WTE-TASK-25, e a 25 depende da 22. A
-  [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) existe para quebrar isso por
-  diagnóstico estático — que não grava byte nenhum e por isso não precisa de
-  gate. Os dois desfechos dela são legítimos, e o negativo muda a WTE-TASK-22.
+  Consequência: o gate golden da
+  [WTE-TASK-22](/docs/tasks/22-harness-golden.md) **tem em que se apoiar**,
+  desde que fixe a imagem japonesa e diga por quê. A circularidade que a
+  [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) existia para quebrar — 22 precisa
+  do oráculo vivo, entendê-lo seria a WTE-TASK-25, e a 25 depende da 22 — está
+  desfeita sem implementar handler nenhum. Medição, ressalvas e o que ficou sem
+  resposta em [`../../wte/re/crash-causa.md`](../../wte/re/crash-causa.md).
 - **Binário original em espanhol seria bom ter, e não é bloqueante.** O `.exe` é
   a tradução PT-BR com 13 strings de `.data` truncadas por padding — mais 80
   literais nos DFM, que são outra população (WTE-TASK-09). As três mensagens em

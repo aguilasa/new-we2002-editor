@@ -63,7 +63,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md) | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Quatro das 15 rotas de recusa do `spec_index.py` não têm teste, e o README chama as onze testadas de "as" rotas | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-042](/docs/tasks/CORR-WTE-042.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | O Log da WTE-TASK-18 diz que os testes do transpilador eram 33, e eram 38 | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-043](/docs/tasks/CORR-WTE-043.md) | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | `players[i].cost := Ord(buf1[0])` perde o sinal que o `char` do C++ tem | Baixa | [x] concluída | 2026-08-10 |
-| [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | O oráculo comportamental está morto e a fase 4 é circular: o gate 22 precisa do `wte.exe` vivo, e entendê-lo é a WTE-TASK-25, que depende do 22 | Alta | [ ] pendente | — |
+| [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | O oráculo comportamental está morto e a fase 4 é circular: o gate 22 precisa do `wte.exe` vivo, e entendê-lo é a WTE-TASK-25, que depende do 22 | Alta | [x] concluída | 2026-08-10 |
 
 ## Checklist
 
@@ -109,7 +109,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-041 — testar as quatro rotas de recusa sem cobertura e contar `raise SpecError` no README
 - [x] CORR-WTE-042 — trocar 33 por 38 no Log da 18, com o `git show` que remede
 - [x] CORR-WTE-043 — estender o sinal ao converter `AnsiChar` para campo inteiro largo, e testar os dois sentidos
-- [ ] CORR-WTE-044 — diagnosticar estaticamente por que o controle não existe, e declarar o desfecho para o gate da 22
+- [x] CORR-WTE-044 — o controle **existe**; o ponteiro global é que é sobrescrito pela carga do time. Desfecho: condição de contorno — a ROM japonesa passa da troca de time com 0 violação de acesso
 
 ## Detalhes por correção
 
@@ -839,3 +839,14 @@ dizer "fechada e fora do backlog", não "corrigida".
   de custo (o que é `+0x68` nesta VCL, de onde vem o `N`, quem escreve no global
   `0x004335e4`, existe contorno), com o ferramental da WTE-TASK-24 que já está
   concluída. Os dois desfechos são legítimos, e o negativo **muda a WTE-TASK-22**
+- **Desfecho: o positivo — condição de contorno, e é a imagem.** Com
+  `roms/japanese-shift-jis.bin` o `wte.exe` passa da troca de time com **0**
+  violação de acesso, contra 49.749 com a europeia no mesmo roteiro. O controle
+  procurado **existe**; o ponteiro global é que é sobrescrito pela carga do
+  time. Medição em [`../../wte/re/crash-causa.md`](../../wte/re/crash-causa.md)
+- **O "com as duas ROMs daqui" do Sintoma acima era extrapolação.** A japonesa
+  nunca tinha sido medida neste caminho — `grep` por `japonesa` na WTE-TASK-19,
+  no `offsets-novos.md` e no `crash.md` não devolvia nada antes desta correção.
+  A frase não estava errada por descuido de quem mediu: a WTE-TASK-19 mediu a
+  europeia e generalizou. Fica como lembrete de que "as duas ROMs" é afirmação
+  que custa uma corrida a mais para virar medida
