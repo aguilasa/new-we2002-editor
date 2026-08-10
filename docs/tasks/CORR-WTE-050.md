@@ -180,7 +180,9 @@ do `gen_tables_pas`.
 A §4.5 do plano perdeu a relação de origem *"3.692 emitidas a partir das 2.504
 de entrada"* e ganhou as duas razões. A fração de 92,5% ficou como estava —
 ela não usa a entrada, e é assunto da
-[CORR-WTE-051](/docs/tasks/CORR-WTE-051.md).
+[CORR-WTE-051](/docs/tasks/CORR-WTE-051.md), executada em seguida no mesmo
+lote: ela pôs a mesma régua nos dois lados da subtração e a fração passou a
+**91,8%**. Quem ler este Log depois disso lê o estado intermediário.
 
 **Problemas encontrados:**
 
