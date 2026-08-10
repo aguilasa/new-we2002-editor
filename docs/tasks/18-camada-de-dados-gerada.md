@@ -25,7 +25,7 @@ status: concluído
 > bloco, cabeçalho de laço, assinatura de função e declaração de variável não
 > têm forma comum, e nenhuma regex os alcança sem casamento de chave.
 >
-> A WTE-TASK-17 entregou a camada de **statement e expressão** — 41 regras, os
+> A WTE-TASK-17 entregou a camada de **statement e expressão** — 47 regras, os
 > dois guards, 38 testes — e pôs a estrutura no `FORBIDDEN` em vez de deixá-la
 > passar. Emitir `.pas` com corpo em C++ produziria um artefato que parece
 > camada de dados, não compila, e convida a "só ajustar à mão" o que a §4.4

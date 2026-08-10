@@ -29,9 +29,10 @@ src/core/include/we2002/Types.hpp   147
 > **Medido na execução: são 2.504 linhas, não ~2.150.** A lista acima veio do
 > `tipos.md` e omite os cabeçalhos que declaram os registros — em especial o
 > `Team.hpp`, com `Team`, `MlTeam` e `Formation`. O inventário real e a razão de
-> cada exclusão estão em [`../../wte/re/transpilador.md`](../../wte/re/transpilador.md);
-> a reconciliação do `tipos.md` e do plano é da
-> [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md).
+> cada exclusão estão em [`../../wte/re/transpilador.md`](../../wte/re/transpilador.md).
+> O `tipos.md` e a §4.5 do plano **já foram reconciliados**, em 2026-08-10, pela
+> [CORR-WTE-034](/docs/tasks/CORR-WTE-034.md) — não há trabalho pendente aqui; o
+> "~2.150" e a lista de cinco arquivos ficam como texto original da task.
 
 Subconjunto estreitíssimo de C++: laço de contagem fixa, `Seek`, `Read`,
 `Write`, array, aritmética inteira. Sem template, sem STL além de array, sem
@@ -108,10 +109,12 @@ Escrever esse limite no cabeçalho do próprio script, não só aqui.
 
 - **Resumo do que foi feito:**
 
-  `port_database_pas.py` com os dois guards, a tabela de substituição (41
-  regras, aplicadas em ordem) e `wte/re/transpilador.md` **gerado pelo próprio
-  script** — a tabela, o que ela recusa, a contagem de seeks por arquivo e o
-  worklist da WTE-TASK-18, nenhum número digitado à mão. 38 testes.
+  `port_database_pas.py` com os dois guards, a tabela de substituição (**47**
+  regras, aplicadas em ordem — `git show 8ae9170:wte/re/transpilador.md | grep
+  'regras, aplicadas'`, que é o número desta task; no `HEAD` já são outras,
+  porque a WTE-TASK-18 acrescentou regra) e `wte/re/transpilador.md` **gerado
+  pelo próprio script** — a tabela, o que ela recusa, a contagem de seeks por
+  arquivo e o worklist da WTE-TASK-18, nenhum número digitado à mão. 38 testes.
 
   **O achado que re-dimensiona a WTE-TASK-18, e é o que vale levar adiante:**
 

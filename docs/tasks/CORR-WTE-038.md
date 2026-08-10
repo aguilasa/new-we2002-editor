@@ -3,7 +3,7 @@ id: CORR-WTE-038
 title: "Correção: o Log da WTE-TASK-17 diz 41 regras de substituição, e o gerador tem 47"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -115,12 +115,36 @@ a saída não tem número escrito à mão.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+O Log da WTE-TASK-17 diz **47** regras, com a rota de remedição ao lado. A rota
+escrita **não** é `len(SUBS)`: a WTE-TASK-18 acrescentou regra e o `HEAD` já
+está em 53. O número desta task é histórico, e a rota que o devolve é
+`git show 8ae9170:wte/re/transpilador.md | grep 'regras, aplicadas'`.
+
+A nota do enunciado foi reescrita: a reconciliação do `tipos.md` e da §4.5 do
+plano **foi feita** em 2026-08-10 pela CORR-WTE-034, e o "~2.150" com a lista de
+cinco arquivos fica identificado como texto original da task. As duas passagens
+contam agora a mesma história.
+
 **Problemas encontrados:**
 
+A varredura de discrepância puxou um sítio que a CORR não previa:
+`docs/tasks/18-camada-de-dados-gerada.md:28` repetia "41 regras" ao resumir o
+que a WTE-TASK-17 entregou. Corrigido na mesma passada — `grep -rn '41 regras'
+docs wte` agora só devolve os arquivos de correção, onde o número aposentado é
+o assunto.
+
+A verificação desta CORR pedia que o número casasse com `len(SUBS)`; isso
+envelheceu entre a abertura e a execução, pelo mesmo commit que fechou as 498
+recusas (`7b642f7`). Cumprido contra a linha 54 do `transpilador.md` **do commit
+da task**, que é o que a frase descreve.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/17-transpilador-da-camada-de-dados.md`
+- `docs/tasks/18-camada-de-dados-gerada.md` (sítio achado na varredura)
