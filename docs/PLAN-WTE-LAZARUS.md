@@ -753,7 +753,13 @@ conferência — não porte manual.
    | `std::uint32_t` | `LongWord` | **nunca** `Cardinal` sem checar, nunca tipo dependente de plataforma |
    | bitfield de `SquadNumbers` | registro empacotado + acessor | FPC tem bitpacked record, mas a ordem de bit difere entre compiladores — gerar acessor explícito e testar |
    | `char[N]` | `array[0..N-1] of AnsiChar` | **não** `string`; o truncamento é load-bearing (§6, nível unitário) |
-   | `CdImage` | wrapper sobre `TFileStream` | ponteiro único, leitura curta não é erro, **nunca** recalcular EDC/ECC |
+   | `char` numérico | `ShortInt` | **com sinal**, como o `char` do x86: a UI o alarga com `static_cast<int>`, e `Byte` mostraria 200 onde a referência mostra −56 |
+   | `CdImage` | wrapper sobre `TFileStream` | ponteiro único, leitura curta não é erro (`Read`, **nunca** `ReadBuffer`), **nunca** recalcular EDC/ECC |
+
+   **Fechado pela WTE-TASK-15**, com a tabela completa — os 16 tipos que a
+   entrada real usa —, as cinco decisões difíceis escritas e o teste que prova
+   cada uma, em [`../wte/re/tipos.md`](../wte/re/tipos.md). A tabela acima é o
+   resumo; o `tipos.md` é a fonte para os geradores.
 
 3. **Gerar** o equivalente Pascal de `Database`, `Player`, `CdImage`,
    `TextCodec` e `Types` — ~2.150 linhas de entrada. `Tables.cpp` (704 linhas) e
