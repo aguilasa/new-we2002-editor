@@ -32,7 +32,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md) | `port_database_pas.py` — o transpilador | 3 | 15, 16 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
 | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ❌ Bloqueado | — | — |
-| [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ⬜ Pendente | — | — |
+| [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
 | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
@@ -77,7 +77,7 @@ Pendências externas, no fim deste arquivo.
 
 **A WTE-TASK-20 segue mesmo assim**, e isso é decisão, não descuido. O
 `depends_on` dela lista a 19, mas o que ela verifica é contra o **oráculo B**
-(o `we2002_core`): dump Pascal × dump C++, codec japonês, round-trip de
+(o `we2002_core`): dump Pascal × dump C++, o codec de texto, round-trip de
 gravação. Nenhum dos seis critérios pede janela. E a parte da 19 de que ela
 precisaria — offsets novos — já veio: são 28 confirmados. Os 36 que faltam são
 exatamente os que o `we2002_core` **não tem**, então não poderiam aparecer numa
@@ -214,8 +214,8 @@ conferível.
 - [x] As seis unidades de dados geradas e compilando
 - [x] Toda recusa do `FORBIDDEN` com rota escolhida e razão
 - [x] Diff de controle (gravar sem editar) medido antes de qualquer offset novo
-- [ ] Dumps Pascal e C++ idênticos nas duas ROMs
-- [ ] Bitfield de `SquadNumbers` conferido contra imagem real
+- [x] Dumps Pascal e C++ idênticos nas duas ROMs
+- [x] Bitfield de `SquadNumbers` conferido contra imagem real
 - [ ] Registrado se o Ghidra foi necessário na fase 3
 
 ### Fase 4 — Comportamento
@@ -506,3 +506,21 @@ correção antes de serem executadas contra um número inexistente.
 para destino de link placeholder, não para número afirmado em prosa. E o número
 velho escrito na forma `velho → corrente` não derruba nada — é história, e a
 guarda sabe disso desde a mesma correção.
+
+**WTE-TASK-20 — a premissa do codec estava invertida, e o enunciado foi
+corrigido.** A task dizia que a ROM japonesa é *o único teste real* do
+`KanjiToAscii`. Medido: o codec só conhece os bytes de chefe 130 (`0x82`,
+latino de largura dupla) e 129 (`0x81`, o ponto), então quem exercita os ramos
+de mapeamento é a **European Deluxe** (95 de 95 campos decodificados) e a
+japonesa exercita o **ramo padrão** (0 de 95 — katakana vira espaço). As duas
+continuam necessárias, por motivos trocados. Vale como aviso geral: *"sem esta
+entrada o código X não é exercitado"* é afirmação sobre cobertura, e cobertura
+se mede — [`../../wte/re/fase-3.md`](../../wte/re/fase-3.md).
+
+**E zero contra zero não prova nada.** O critério da 20 é que as duas gravações
+saiam byte a byte iguais; se o `Save` parasse de gravar, elas continuariam
+iguais e o critério passaria verde. Por isso a evidência mede também o
+round-trip **contra o original** (270 B em 4 faixas na europeia, 1.249 B em 15
+na japonesa) e há teste exigindo que esse número seja maior que zero. Todo
+critério da forma "os dois lados concordam" precisa do par: concordam, **e**
+fizeram alguma coisa.

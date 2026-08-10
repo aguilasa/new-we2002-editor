@@ -7,7 +7,9 @@ O que existe hoje:
 | `test_offsets.pas` | WTE-TASK-16, **gerado** | despeja as constantes lidas do Pascal |
 | `test_offsets.cpp` | WTE-TASK-16, **gerado** | despeja as mesmas, lidas do C++ |
 | `test_camada_dados.pas` | WTE-TASK-18, escrito à mão | prova as cinco decisões de `tipos.md` contra a camada gerada |
-| `roteiros/` | WTE-TASK-13 | os roteiros de trace de evento |
+| `dump_estado.pas` | WTE-TASK-20, escrito à mão | despeja todo o estado carregado, e `--roundtrip` faz Load+Save |
+| `dump_estado.cpp` | WTE-TASK-20, escrito à mão | o irmão do lado `we2002_core`, mesmo formato e mesmo verbo |
+| `roteiros/` | WTE-TASK-13 e 19 | os roteiros de trace de evento e o par 07/08 do travamento |
 
 Os dois `test_offsets.*` saem de `wte/tools/gen_tables_pas.py` e **não se edita à
 mão** — correção entra no gerador e o arquivo é regerado, e o `--check` reprova
@@ -39,10 +41,23 @@ compila, roda e compara é `wte/tools/test_gen_tables_pas.py`, alcançado por
 `make -C wte test` — de que `check` depende. Sem `fpc` ou sem `g++` o teste
 **pula** e diz o que deixou de medir, em vez de passar em silêncio.
 
-## O que ainda vai chegar
+## `dump_estado.*` — o aceite da fase 3
 
-A **WTE-TASK-20** traz o round-trip headless contra o `we2002_core` nas duas
-ROMs — o dumper de estado em Pascal e o comparador.
+O par escreve o **mesmo formato** (`chave = valor`, vetor de bytes em
+`<n>:<hex>` cortado no último byte não-zero) e quem compila, roda e compara é
+[`../tools/compare_dumps.py`](../tools/compare_dumps.py). Duas metades:
+leitura, onde o critério é `diff` **vazio**, e gravação (`--roundtrip`), onde
+as duas imagens têm de sair byte a byte iguais.
+
+O `--roundtrip` mora **dentro** do dumper, e não num binário à parte, porque
+tem de ser exatamente o mesmo `Database` que o dump usa — dois executáveis
+divergiriam no dia em que um fosse recompilado e o outro não.
+
+O resultado medido está em [`../re/fase-3.md`](../re/fase-3.md). Um achado da
+execução: o enunciado da task supunha a ROM japonesa como o único teste real do
+codec de texto, e é o contrário — quem exercita os ramos de mapeamento do
+`KanjiToAscii` é a **europeia**; a japonesa guarda katakana (`0x83`), que o
+codec não conhece e transforma em espaço.
 
 ## O que **não** mora aqui
 
