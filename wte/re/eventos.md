@@ -205,7 +205,7 @@ usuário, não no `FormShow`. É o mesmo desenho do `ed.exe`, que abre um
 
 Isso não é divergência de LCL: é o corpo de um handler, e vira a primeira
 pergunta da spec de `MainForm.FormCreate` na
-[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md).
+[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md).
 
 ---
 
@@ -233,7 +233,7 @@ O `wte.exe` **não** sofre disso — o Wine implementa o próprio foco, e o
 `golden_run.sh` do `newWe2002` já digita caminho de arquivo no `:99` há tempos.
 A assimetria é entre GTK2 e Wine, não entre os dois apps.
 
-**Consequência para a [WTE-TASK-22](/docs/tasks/22-harness-golden.md):** ou o
+**Consequência para a [WTE-TASK-22](../../docs/tasks/22-harness-golden.md):** ou o
 harness dirige o port **só por mouse**, ou o `:99` ganha um window manager.
 Nenhum WM está instalado nesta máquina — `twm`, `openbox`, `metacity`,
 `mutter`, `xfwm4`, `i3`, `fluxbox`, `icewm`, `jwm`, `matchbox`, `marco`,

@@ -7,10 +7,10 @@ unitário e **grava bytes errados**.
 Precedente medido no `newWe2002`: `DWORD` virou 64-bit no Linux LP64 e
 embaralhou todos os números de camisa. A correção foi `std::uint32_t`
 explícito. O mesmo risco atravessa para Pascal com outra roupa — ver a §8.11 do
-[`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md).
+[`PLAN-WTE-LAZARUS.md`](../../docs/PLAN-WTE-LAZARUS.md).
 
 **Escopo:** o que a camada de dados gerada usa. *Como* o gerador implementa é da
-[WTE-TASK-17](/docs/tasks/17-transpilador-da-camada-de-dados.md).
+[WTE-TASK-17](../../docs/tasks/17-transpilador-da-camada-de-dados.md).
 
 **Entrada real medida** — os tipos que de fato aparecem na entrada do
 transpilador, que são **2.504 linhas** em 11 arquivos, separando implementação
@@ -109,8 +109,9 @@ Isso não basta sozinho, porque a entrada tem **40 `strcpy` e 10 `strcat`** em
 `Database.cpp` — 38 `strcpy` e os 10 `strcat` no corpo do `Load()`, mais duas
 `std::strcpy` em `CopyAllStarNames()` (linhas 98 e 100), que o `Load()` chama na
 linha 778. **A regra de cópia tem de casar as duas grafias**, qualificada e nua:
-uma substituição ancorada em `strcpy(` atravessa as duas últimas sem tocá-las. Um `Move` não os substitui: eles copiam *até o NUL inclusive*, e
-o comprimento não está escrito em lugar nenhum. **Decisão: o gerador emite duas
+uma substituição ancorada em `strcpy(` atravessa as duas últimas sem tocá-las.
+Um `Move` não os substitui: eles copiam *até o NUL inclusive*, e o comprimento
+não está escrito em lugar nenhum. **Decisão: o gerador emite duas
 rotinas de cópia com semântica de C — copiar byte a byte até o `#0` inclusive,
 sem checar limite** — e nunca `StrPCopy`/`StrLCopy`, que truncam de outro jeito.
 

@@ -3,7 +3,7 @@ id: CORR-WTE-027
 title: "Correção: o `fase-2.md` emite link `/docs/...` de dentro de `wte/re/`, fora do perímetro da regra"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -86,24 +86,63 @@ Opcional, na mesma passada: `wte/re/eventos.md` (linhas 186 e 214) e
 |---|---|
 | `wte/tools/check_fase2.py` | modificar |
 | `wte/re/fase-2.md` | modificar (regerado) |
-| `wte/re/eventos.md` | modificar (opcional, mesma passada) |
-| `wte/re/tipos.md` | modificar (opcional, mesma passada) |
+| `wte/re/eventos.md` | modificar (mesma passada) |
+| `wte/re/tipos.md` | modificar (mesma passada) |
+| `wte/re/visual.md` | modificar (achado na varredura — 11 links) |
+| `wte/tools/spec_index.py` + `wte/re/spec/INDICE.md` | modificar (gerador, regerado) |
+| `wte/re/spec/README.md`, `wte/re/spec/GABARITO.md` | modificar (varredura) |
+| `wte/tests/roteiros/README.md` | modificar (varredura) |
 
 ## Verificação
 
-- [ ] `grep -rnoE '\]\(/docs/' wte/re/*.md` sai vazio
-- [ ] `python3 wte/tools/check_fase2.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] a conferência de forma e de destino de link de `.claude/rules/links.md`
+- [x] `grep -rnoE '\]\(/docs/' wte/re/*.md` sai vazio — e `grep -rn '](/docs/'
+      wte/` inteiro também
+- [x] `python3 wte/tools/check_fase2.py --check` verde
+- [x] `make -C wte check` verde
+- [x] a conferência de forma e de destino de link de `.claude/rules/links.md`
       continua vazia para `docs/`
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+Os seis links de `montar()` no `check_fase2.py` passaram de `/docs/` para
+`../../docs/`, e o `wte/re/fase-2.md` foi regerado (140 linhas, 5.736 bytes),
+com `--check` verde.
+
+A passada de mão que a CORR previa (`eventos.md` 2, `tipos.md` 2) foi junto, e
+a varredura mostrou que o defeito era maior do que a lista: `visual.md` tinha
+**11**, o `wte/re/spec/` tinha 4 — um deles emitido pelo `spec_index.py`, outro
+gerador —, e o `wte/tests/roteiros/README.md` tinha 2.
+
 **Problemas encontrados:**
 
+Dois, e o segundo quase passou:
+
+1. **O `grep` da CORR parava em `wte/re/*.md`**, sem descer para `wte/re/spec/`
+   nem sair de `wte/re/`. É a mesma classe de erro que a
+   [CORR-WTE-016](/docs/tasks/CORR-WTE-016.md) já corrigiu no `check_fase1.py`:
+   perímetro de varredura escrito para o enunciado de uma task, e não para onde
+   o defeito pode estar. A varredura desta execução foi `grep -rn '](/docs/'
+   wte/` inteiro, que fecha em zero.
+2. **A profundidade do `../` não é constante.** `wte/re/*.md` quer
+   `../../docs/`, mas `wte/re/spec/*.md` e `wte/tests/roteiros/*.md` estão um
+   nível mais fundo e querem `../../../docs/`. O `spec_index.py` recebeu
+   `../../../docs/` porque o que conta é onde a **saída** mora, não onde o
+   gerador mora. Conferido por resolução de destino: todo link
+   `../../docs/`/`../../../docs/` dos markdowns de `wte/` aponta para arquivo que
+   existe.
+
+De quebra, uma linha longa que a [CORR-WTE-030](/docs/tasks/CORR-WTE-030.md)
+deixou na decisão 1 do `tipos.md` foi requebrada — só formatação.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase2.py`, `wte/re/fase-2.md` (regerado)
+- `wte/tools/spec_index.py`, `wte/re/spec/INDICE.md` (regerado)
+- `wte/re/eventos.md`, `wte/re/tipos.md`, `wte/re/visual.md`
+- `wte/re/spec/README.md`, `wte/re/spec/GABARITO.md`
+- `wte/tests/roteiros/README.md`

@@ -1,7 +1,7 @@
 # `tests/roteiros/` — os roteiros de interação, fixos e versionados
 
-Insumo da [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) e, depois, do
-harness golden da [WTE-TASK-22](/docs/tasks/22-harness-golden.md).
+Insumo da [WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md) e, depois, do
+harness golden da [WTE-TASK-22](../../../docs/tasks/22-harness-golden.md).
 
 **Roteiro é fixo, nunca reativo.** Um driver que olha a tela e decide o próximo
 passo muda o estímulo quando um lado diverge — e aí os dois param de receber a

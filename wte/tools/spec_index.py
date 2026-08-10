@@ -265,7 +265,7 @@ def monta() -> tuple[str, dict]:
         "(WTE-TASK-04) mais os `<formulario>.<handler>.md` desta pasta. O",
         "gabarito e o vocabulário de veredito estão em",
         "[`GABARITO.md`](GABARITO.md); é a",
-        "[WTE-TASK-29](/docs/tasks/29-fechamento-fase-4.md) que exige nenhum",
+        "[WTE-TASK-29](../../../docs/tasks/29-fechamento-fase-4.md) que exige nenhum",
         "`aberto`.",
         "",
         "## Contagem",

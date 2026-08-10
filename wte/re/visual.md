@@ -1,7 +1,7 @@
 # Comparação visual dos 18 formulários — WTE-TASK-12
 
 Inspeção humana, um veredito por formulário, como manda a §6 do
-[`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md): **sem tolerância de pixel**.
+[`PLAN-WTE-LAZARUS.md`](../../docs/PLAN-WTE-LAZARUS.md): **sem tolerância de pixel**.
 `MS Sans Serif` não está instalada no host, o GTK2 e o Wine substituem por
 fontes diferentes, e diferença de pixel é garantida sem informar nada.
 
@@ -70,7 +70,7 @@ distinguir.** Instalar outro runner é decisão do usuário.
 **Consequência, e é grave:** quase toda operação do editor começa por escolher
 um time. Enquanto isto não se resolver, o oráculo A não executa nem os 14
 formulários desta task nem a maior parte da bateria golden. Entregue à
-[WTE-TASK-22](/docs/tasks/22-harness-golden.md).
+[WTE-TASK-22](../../docs/tasks/22-harness-golden.md).
 
 ### O que o original alcança sem time, e foi o que rendeu as 4 capturas
 
@@ -121,7 +121,7 @@ O aviso dispara **sempre** com as imagens deste repositório: elas têm
 o caminho normal.
 
 **Isto muda o desenho do golden test**, e vai para a
-[WTE-TASK-22](/docs/tasks/22-harness-golden.md): *original contra original*
+[WTE-TASK-22](../../docs/tasks/22-harness-golden.md): *original contra original*
 continua dando zero (os dois lados gravam os mesmos 11.952 bytes), mas
 *original contra imagem intocada* **não** dá — e o port terá de reproduzir
 esses bytes ou o harness terá de declarar a faixa, como o `newWe2002` faz com
@@ -161,7 +161,7 @@ WTE-TASK-04:
 a tabela estática. Que seja o `FormCreate` a escrever `Color` é a hipótese mais
 econômica — é o único handler que roda antes de a janela aparecer —, **não** um
 fato medido. O disassembly desses endereços é da
-[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md).
+[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md).
 
 Os quatro que declaram cor no próprio DFM — `jugador`, `ficha_error` e
 `ficha_error2` em `clNavy`, `ficha_info` em `clSilver` — renderizam certo na
@@ -201,7 +201,7 @@ No original o `TStaticText` é usado como widget clicável, não como rótulo.
 
 ## Achado 5 — os 118 blobs aparecem
 
-Critério herdado da [WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md),
+Critério herdado da [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md),
 que provou a preservação byte a byte e não podia provar a exibição.
 
 Os 118 se dividem em 18 `Icon.Data`, 59 `Glyph.Data` e 41 `Picture.Data`, e os
@@ -323,9 +323,9 @@ voltar como "achado" na fase 6.
 
 | Achado | Para quem |
 |---|---|
-| 1 — o oráculo quebra ao selecionar time | [WTE-TASK-22](/docs/tasks/22-harness-golden.md), **bloqueante** |
-| 2 — aceitar o aviso grava 11.952 bytes | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) e [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) |
-| 3 — cor de fundo em runtime | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) |
+| 1 — o oráculo quebra ao selecionar time | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md), **bloqueante** |
+| 2 — aceitar o aviso grava 11.952 bytes | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) e [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
+| 3 — cor de fundo em runtime | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
 | 4 — 25 dos 37 `TStaticText` são clicáveis | fase 4 |
-| 5 — contagem fina de blob sobrepostos | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) |
-| as 14 capturas do original | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), **se** o achado 1 se resolver |
+| 5 — contagem fina de blob sobrepostos | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) |
+| as 14 capturas do original | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md), **se** o achado 1 se resolver |

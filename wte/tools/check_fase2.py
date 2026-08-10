@@ -271,7 +271,7 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
     w = L.append
     w(f"# `re/{MD_NAME}` — fechamento da fase 2")
     w("")
-    w("Produto da [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md). "
+    w("Produto da [WTE-TASK-14](../../docs/tasks/14-fechamento-fase-2.md). "
       "**Gerado** por")
     w("[`../tools/check_fase2.py`](../tools/check_fase2.py) — não editar à "
       "mão; correção")
@@ -428,16 +428,16 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
     w("| Pendência | Para quem |")
     w("|---|---|")
     w("| O oráculo quebra ao selecionar um time (310 `EXCEPTION_ACCESS_"
-      "VIOLATION`) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md), "
+      "VIOLATION`) | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md), "
       "**bloqueante** |")
     w("| Aceitar o aviso de tamanho grava 11.952 bytes na imagem | "
-      "[WTE-TASK-22](/docs/tasks/22-harness-golden.md) |")
+      "[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) |")
     w("| Teclado não chega ao app LCL no `:99` | "
-      "[WTE-TASK-22](/docs/tasks/22-harness-golden.md) |")
+      "[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) |")
     w("| Cor de fundo posta em tempo de execução | "
-      "[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) |")
+      "[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |")
     w("| As 14 capturas do original | "
-      "[WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) |")
+      "[WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) |")
     w("")
     return "\n".join(L) + "\n"
 

@@ -1,8 +1,8 @@
 # Gabarito de `re/spec/<formulario>.<handler>.md`
 
-Produto da [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md). É o gabarito que
+Produto da [WTE-TASK-23](../../../docs/tasks/23-formato-da-spec.md). É o gabarito que
 torna executável o método da §2 do
-[`PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md): **recuperação de
+[`PLAN-WTE-LAZARUS.md`](../../../docs/PLAN-WTE-LAZARUS.md): **recuperação de
 especificação, não transcrição.** O decompilador responde *perguntas*; a
 resposta vem para um destes arquivos; o Pascal é escrito **a partir daqui**.
 
@@ -98,7 +98,7 @@ de *fórmula*.
 |---|---|
 | `implementado` | spec escrita, Pascal escrito, golden verde |
 | `trivial` | só habilita/desabilita controle; **não toca a imagem** |
-| `divergencia deliberada` | o port faz diferente, de propósito, e está registrado na [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) |
+| `divergencia deliberada` | o port faz diferente, de propósito, e está registrado na [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) |
 | `nao portado` | fora de escopo, **com justificativa escrita** |
 | `aberto` | ainda não estudado |
 

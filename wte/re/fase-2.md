@@ -1,6 +1,6 @@
 # `re/fase-2.md` — fechamento da fase 2
 
-Produto da [WTE-TASK-14](/docs/tasks/14-fechamento-fase-2.md). **Gerado** por
+Produto da [WTE-TASK-14](../../docs/tasks/14-fechamento-fase-2.md). **Gerado** por
 [`../tools/check_fase2.py`](../tools/check_fase2.py) — não editar à mão; correção
 entra no script e o arquivo é regerado:
 
@@ -132,9 +132,9 @@ Escrito de propósito, para o vocabulário não inflar.
 
 | Pendência | Para quem |
 |---|---|
-| O oráculo quebra ao selecionar um time (310 `EXCEPTION_ACCESS_VIOLATION`) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md), **bloqueante** |
-| Aceitar o aviso de tamanho grava 11.952 bytes na imagem | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) |
-| Teclado não chega ao app LCL no `:99` | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) |
-| Cor de fundo posta em tempo de execução | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) |
-| As 14 capturas do original | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) |
+| O oráculo quebra ao selecionar um time (310 `EXCEPTION_ACCESS_VIOLATION`) | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md), **bloqueante** |
+| Aceitar o aviso de tamanho grava 11.952 bytes na imagem | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) |
+| Teclado não chega ao app LCL no `:99` | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) |
+| Cor de fundo posta em tempo de execução | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
+| As 14 capturas do original | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) |
 
