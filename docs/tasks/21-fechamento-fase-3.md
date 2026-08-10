@@ -66,8 +66,11 @@ headless. A gravação dirigida pela tela é a WTE-TASK-22 em diante.
 ## Critério de conclusão
 
 - [x] Fração gerada medida e comparada com a tese da §4.5
-      — **92,5%** por regra (3.415 de 3.692 linhas), medido pelo
-      `check_fase3.py`; as 277 à mão são as quatro peças da rota 3
+      — **91,8%** por regra (3.389 de 3.692 linhas), medido pelo
+      `check_fase3.py`; as 303 à mão são as quatro peças da rota 3.
+      Publicado como 92,5% / 3.415 / 277 até a
+      [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md), que pôs a mesma régua
+      (linha física) nos dois lados da subtração
 - [x] `--check` dos três geradores verde sobre a árvore commitada
       — `gen_tables_pas`, `port_database_pas` e `compare_dumps`, mais o
       `check_fase3` novo; 394 testes, `make -C wte check` inteiro
@@ -101,9 +104,9 @@ headless. A gravação dirigida pela tela é a WTE-TASK-22 em diante.
   linkando um para o outro: um mede se **os valores batem**, o outro **quem
   escreveu o código que os produz**.
 
-  **A fração é 92,5% por regra, e a ressalva é o que ela ensina.** Todos os
+  **A fração é 91,8% por regra, e a ressalva é o que ela ensina.** Todos os
   oito `.pas` da camada são saída de gerador — nenhum editado à mão, e o
-  `--check` prova. Mas arquivo gerado não é conteúdo transpilado: as 277 linhas
+  `--check` prova. Mas arquivo gerado não é conteúdo transpilado: as 303 linhas
   da rota 3 são Pascal escrito à mão que mora nas constantes `MANUAIS` /
   `TRECHOS_MANUAIS` do gerador. Dizer "100% gerado" seria verdade de arquivo e
   mentira de conteúdo, e a tese da §4.5 fala de conteúdo.
@@ -134,6 +137,11 @@ headless. A gravação dirigida pela tela é a WTE-TASK-22 em diante.
   `MANUAL_TYPES.interface`, o mesmo objeto alcançado por dois caminhos —, e
   somar os dois contava o mesmo Pascal duas vezes. São 277, e a fração ia de
   91,3% para 92,5%. O teste que prende isso compara os textos por unidade.
+  *(Os três números são de linha **útil**, que era a régua da contagem naquele
+  momento; a [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) trocou a régua
+  publicada para linha física, e os mesmos blocos passaram a somar 303 —
+  fração 91,8%. O achado do dedupe não muda: a constante continua alcançada
+  por dois caminhos.)*
 
   **Uma afirmação errada sobrevivendo num gerador.** A CORR-WTE-049 corrigiu,
   no `progresso.md`, a frase que trocava duas populações de offset — "os

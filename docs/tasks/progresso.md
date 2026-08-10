@@ -516,13 +516,16 @@ recontagem dos `.dfm` discordar do censo.
 Execução" de cada arquivo de task, resumido aqui quando houver algo relevante
 para o conjunto)*
 
-**WTE-TASK-21 — a fase 3 fecha com 92,5%, e o que sobra tem nome.** A camada de
+**WTE-TASK-21 — a fase 3 fecha com 91,8%, e o que sobra tem nome.** A camada de
 dados é saída de gerador nos oito arquivos, mas nem toda linha emitida é
-transpilação: 277 delas são Pascal escrito à mão que mora nas constantes do
+transpilação: 303 delas são Pascal escrito à mão que mora nas constantes do
 próprio gerador — as quatro peças que o `tipos.md` já decidira que não
 transpilam. "100% gerado" seria verdade de arquivo e mentira de conteúdo, e a
 §4.5 fala de conteúdo. A medida sai do
-[`check_fase3.py`](../../wte/tools/check_fase3.py).
+[`check_fase3.py`](../../wte/tools/check_fase3.py), e conta **linha física dos
+dois lados** — a fração foi publicada como 92,5% até a
+[CORR-WTE-051](/docs/tasks/CORR-WTE-051.md), quando o total contava linha em
+branco e o manual não.
 
 **E o app ainda não lê o jogo — medido, não opinado.** Zero unidade da casca dá
 `uses we2002_database`; quem consome são dois programas de console de
