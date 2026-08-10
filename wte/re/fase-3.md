@@ -7,6 +7,12 @@ Produto da [WTE-TASK-20](../../docs/tasks/20-round-trip-headless.md). É
 o primeiro momento em que o projeto afirma algo **verificado** sobre
 dados, e não sobre forma.
 
+O irmão é [`fase-3-fechamento.md`](fase-3-fechamento.md), da
+WTE-TASK-21: aqui se mede se **os valores batem**; lá, **quem escreveu**
+**o código que os produz** e **quem o consome**. Dois arquivos porque
+são dois geradores — o mesmo arquivo escrito por dois seria duplicação
+sem guarda.
+
 ## O oráculo aqui é o de formato
 
 Não é o `wte.exe` — ele é o oráculo de **comportamento**, e a pergunta
@@ -123,13 +129,15 @@ lados apareceria aqui.
 
 ## O que isto não mede
 
-- **Os 36 `OFS_*` que faltam.** São exatamente os que o `we2002_core`
-  não tem, então não há lado C++ para eles — nenhum diff Pascal × C++
-  poderia mostrá-los. Continuam com a
-  [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md).
+- **As faixas que nenhum `OFS_*` explica.** Não são os `OFS_*` da
+  [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) — esses
+  moram todos no `Offsets.hpp`, têm lado C++ e estão dentro deste diff.
+  São as regiões que o `wte.exe` endereça e que este repositório nunca
+  nomeou, a maior delas a do uniforme. Sem lado C++, nenhum diff
+  Pascal × C++ as alcança; nomeá-las é fase 4 e 5.
 - **Comportamento.** Isto é a camada de dados, não os 96 handlers. O
-  gate deles é a WTE-TASK-22, e ele depende de um oráculo que hoje não
-  sobe.
+  gate deles é a WTE-TASK-22, e o oráculo em que ele se apoia é
+  dirigível desde a CORR-WTE-044, com a ROM japonesa.
 - **O `Load` do sidecar.** Nenhum dos dois lados lê `_url.txt` no
   `Load` — isso é do app —, então `players[].url` sai zerado dos dois e
   o dump concorda por vacuidade nesse campo.

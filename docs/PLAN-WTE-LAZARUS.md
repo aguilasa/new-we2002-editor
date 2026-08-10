@@ -586,6 +586,17 @@ com a mesma cara, e o mesmo erro é igualmente silencioso.
 execução de gerador mais conferência. O que sobra de manual nela é decidir o
 mapeamento de tipo (§8.6) e escrever a tabela de substituição.
 
+**Medido no fechamento da fase 3 (WTE-TASK-21): 92,5% da camada de dados é
+transpilação por regra** — 3.415 linhas contra 277 escritas à mão, sobre 3.692
+emitidas a partir das 2.504 de entrada. Os oito `.pas` são saída de gerador sem
+exceção; as 277 não são porte de lógica do editor, e sim as quatro peças que o
+[`../wte/re/tipos.md`](../wte/re/tipos.md) já tinha decidido que **não**
+transpilam — `CdImage` (`std::fstream`), `SquadNumbers` (bitfield), o sidecar
+`_url.txt` e o `Reporter` (`std::function`) —, e elas moram nas constantes do
+próprio gerador, nunca no arquivo de saída. O número sai do
+[`check_fase3.py`](../wte/tools/check_fase3.py) e a conta inteira está em
+[`../wte/re/fase-3-fechamento.md`](../wte/re/fase-3-fechamento.md).
+
 **Limite, e é duro:** o transpilador digere **código nosso**, estável e testado.
 Não estender para engolir saída de decompilador. Ali a entrada vira arbitrária,
 o `FORBIDDEN` deixa de segurar, e o gerador passa a emitir Pascal quebrado com

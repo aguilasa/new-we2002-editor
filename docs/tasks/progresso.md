@@ -33,7 +33,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-18](/docs/tasks/18-camada-de-dados-gerada.md) | Gerar a camada de dados | 3 | 17 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
 | [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) | Os offsets que o Obocaman tem e nós não | 3 | 06, 18 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
 | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | Round-trip headless contra o `we2002_core` | 3 | 18, 19 | ✅ Concluído | 2026-08-10 | 2026-08-10 |
-| [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ⬜ Pendente | — | — |
+| [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | Fechamento da fase 3 | 3 | 20 | ✅ Concluído | 2026-08-10 | ⬜ pendente |
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ⬜ Pendente | — | — |
 | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | ⬜ pendente |
@@ -229,7 +229,9 @@ conferível.
 - [x] Diff de controle (gravar sem editar) medido antes de qualquer offset novo
 - [x] Dumps Pascal e C++ idênticos nas duas ROMs
 - [x] Bitfield de `SquadNumbers` conferido contra imagem real
-- [ ] Registrado se o Ghidra foi necessário na fase 3
+- [x] Registrado se o Ghidra foi necessário na fase 3 — **não foi**, e a
+      medida está na seção 4 do
+      [`fase-3-fechamento.md`](../../wte/re/fase-3-fechamento.md)
 
 ### Fase 4 — Comportamento
 
@@ -437,6 +439,8 @@ new-we2002-editor/
 │   │   ├── eventos.md                ← WTE-TASK-13
 │   │   ├── tipos.md                  ← WTE-TASK-15
 │   │   ├── recusas.md                ← WTE-TASK-18
+│   │   ├── fase-3.md                 ← WTE-TASK-20 (os valores batem?)
+│   │   ├── fase-3-fechamento.md      ← WTE-TASK-21 (quem escreveu o código?)
 │   │   ├── vmt.md                    ← WTE-TASK-24
 │   │   ├── spec/                     ← WTE-TASK-23 a 33
 │   │   ├── golden.md                 ← WTE-TASK-34
@@ -448,6 +452,7 @@ new-we2002-editor/
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
+│   │   ├── check_fase3.py            ← WTE-TASK-21
 │   │   ├── golden_check.sh           ← WTE-TASK-22
 │   │   ├── golden_suite.sh           ← WTE-TASK-34
 │   │   ├── ghidra/                   ← WTE-TASK-24
@@ -510,6 +515,27 @@ recontagem dos `.dfm` discordar do censo.
 *(preenchido conforme as tasks forem executadas — mesmo formato do "Log de
 Execução" de cada arquivo de task, resumido aqui quando houver algo relevante
 para o conjunto)*
+
+**WTE-TASK-21 — a fase 3 fecha com 92,5%, e o que sobra tem nome.** A camada de
+dados é saída de gerador nos oito arquivos, mas nem toda linha emitida é
+transpilação: 277 delas são Pascal escrito à mão que mora nas constantes do
+próprio gerador — as quatro peças que o `tipos.md` já decidira que não
+transpilam. "100% gerado" seria verdade de arquivo e mentira de conteúdo, e a
+§4.5 fala de conteúdo. A medida sai do
+[`check_fase3.py`](../../wte/tools/check_fase3.py).
+
+**E o app ainda não lê o jogo — medido, não opinado.** Zero unidade da casca dá
+`uses we2002_database`; quem consome são dois programas de console de
+`wte/tests/`. A integração mínima (abrir a imagem pelo `TOpenDialog`, popular o
+combo de times) fica para a [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md),
+**depois** do gate da [22](/docs/tasks/22-harness-golden.md): fazê-la no
+fechamento seria implementar dois handlers sem o gate que os julga.
+
+**A lição que atravessa fase:** corrigir prosa de documento não alcança a cópia
+que mora dentro de um gerador. A CORR-WTE-049 consertou no `progresso.md` a
+frase que trocava duas populações de offset; a mesma frase continuou no
+`compare_dumps.py`, e de lá saía para o `fase-3.md` a cada regeração. A varredura
+de sítios da WTE-TASK-09 varre markdown — esta cópia era Python.
 
 **WTE-TASK-09 — número velho agora é falha de build, não achado de revisão.**
 O `check_fase1.py` varre os markdowns de `docs/` e `wte/re/` atrás de afirmação
