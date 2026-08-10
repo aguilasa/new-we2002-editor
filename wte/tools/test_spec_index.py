@@ -167,6 +167,42 @@ class TestRecusa(Base):
             spec_index.monta()
         return str(ctx.exception)
 
+    def test_recusa_tsv_ausente(self):
+        self.tsv.unlink()
+        with self.assertRaises(spec_index.SpecError) as ctx:
+            spec_index.monta()
+        self.assertIn("nao existe", str(ctx.exception))
+        self.assertIn("WTE-TASK-04", str(ctx.exception))
+
+    def test_recusa_tsv_so_com_cabecalho(self):
+        self.tsv.write_text(CABECALHO + "\n", encoding="utf-8")
+        with self.assertRaises(spec_index.SpecError) as ctx:
+            spec_index.monta()
+        self.assertIn("nao tem nenhum handler", str(ctx.exception))
+
+    def test_recusa_frontmatter_nao_fechado(self):
+        molde = SPEC_BOA.replace("veredito: {veredito}\n---\n",
+                                 "veredito: {veredito}\n", 1)
+        msg = self.erro(formulario="MainForm", handler="lista_equiposChange",
+                        endereco="0x004120a4", molde=molde)
+        self.assertIn("frontmatter nao fechado", msg)
+
+    def test_recusa_linha_de_frontmatter_sem_dois_pontos(self):
+        molde = SPEC_BOA.replace("veredito: {veredito}\n",
+                                 "veredito: {veredito}\nlixo sem dois pontos\n",
+                                 1)
+        msg = self.erro(formulario="MainForm", handler="lista_equiposChange",
+                        endereco="0x004120a4", molde=molde)
+        self.assertIn("sem ':'", msg)
+
+    def test_recusa_chave_obrigatoria_ausente(self):
+        # A rota que a primeira spec de verdade vai encontrar: esquecer o
+        # `veredito`. Tem de sair com a mensagem propria, nao com KeyError.
+        molde = SPEC_BOA.replace("veredito: {veredito}\n", "", 1)
+        msg = self.erro(formulario="MainForm", handler="lista_equiposChange",
+                        endereco="0x004120a4", molde=molde)
+        self.assertIn("falta 'veredito' no frontmatter", msg)
+
     def test_recusa_bloco_de_codigo_c(self):
         msg = self.erro(formulario="MainForm", handler="lista_equiposChange",
                         endereco="0x004120a4",

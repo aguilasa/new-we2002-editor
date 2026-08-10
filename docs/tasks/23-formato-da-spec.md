@@ -76,7 +76,7 @@ Um arquivo que lista os 96 com veredito corrente, gerado do
 |---|---|
 | `wte/re/spec/GABARITO.md` | criar |
 | `wte/tools/spec_index.py` | criar — gera o índice **e valida cada spec** |
-| `wte/tools/test_spec_index.py` | criar — as onze rotas de recusa |
+| `wte/tools/test_spec_index.py` | criar — as rotas de recusa (eram onze na execução; as 15 do `grep -c "raise SpecError"` foram fechadas pela [CORR-WTE-041](/docs/tasks/CORR-WTE-041.md)) |
 | `wte/re/spec/INDICE.md` | criar (gerado) |
 | `wte/re/spec/README.md` | modificar — deixou de dizer "vazio até a 23" |
 | `wte/tools/README.md` | modificar — as duas tabelas |

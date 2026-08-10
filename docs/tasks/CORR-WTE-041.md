@@ -3,7 +3,7 @@ id: CORR-WTE-041
 title: "Correção: o `spec_index.py` tem 15 rotas de recusa, e o README chama as onze testadas de \"as\" rotas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -103,12 +103,49 @@ revisão poder remedir com `grep -c` em vez de recontar teste.
 - [ ] `make -C wte check` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+Cinco testes novos em `test_spec_index.py`, um por rota descoberta:
+`test_recusa_tsv_ausente`, `test_recusa_tsv_so_com_cabecalho`,
+`test_recusa_frontmatter_nao_fechado`,
+`test_recusa_linha_de_frontmatter_sem_dois_pontos` e
+`test_recusa_chave_obrigatoria_ausente` — esta última é a que a primeira spec
+de verdade vai encontrar, e o teste exige a mensagem própria
+(`falta 'veredito' no frontmatter`), não um `KeyError`.
+
+Com isso as **15** rotas ficam cobertas. Conferência de cobertura sítio a
+sítio, pelos números de linha do `spec_index.py`: 94 ✓, 103 ✓, 109 ✓, 112 ✓,
+118 ✓, 150 ✓, 158 ✓, 161 ✓, 167 ✓, 174 ✓, 180 ✓, 184 ✓, 193 ✓, 199 ✓, 239 ✓.
+
+O `wte/tools/README.md` deixou de dizer "as onze rotas" e passou a dizer as 15,
+**atrelando o número ao `grep -c "raise SpecError" spec_index.py`** e
+enumerando cada rota — que é o que faltava para a próxima revisão remedir em vez
+de recontar teste.
+
+`test_spec_index`: 21 → 26 testes. Bateria do `wte/tools/`: 300 → 305, verde.
+`make -C wte check` rc=0.
+
 **Problemas encontrados:**
 
+O título desta correção diz "quatro rotas sem teste" e o corpo nomeia **cinco**
+(TSV ausente, TSV vazio, frontmatter não fechado, linha sem `:`, chave
+obrigatória ausente). São cinco mesmo: 15 sítios contra 11 testes dá quatro de
+diferença, mas a conta não é 1:1 — o sítio 150 (decompilado) é exercitado por
+três testes. Foram escritos os cinco.
+
+`test_recusa_*` agora são 17 para 15 sítios, pela mesma razão. O número honesto
+para o README é o dos sítios, não o dos testes, e é o que ficou escrito.
+
+A varredura pegou `docs/tasks/23-formato-da-spec.md:79` — a tabela "Arquivos a
+criar" da task, fora do Log, dizendo "as onze rotas de recusa". Ficou com o
+número da execução e o ponteiro para esta correção.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/test_spec_index.py`
+- `wte/tools/README.md`
+- `docs/tasks/23-formato-da-spec.md` (sítio achado na varredura)
