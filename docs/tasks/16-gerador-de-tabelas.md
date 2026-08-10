@@ -109,8 +109,11 @@ errado só aparece quando a gravação corromper a imagem.
   - `wte/tools/test_gen_tables_pas.py` — criado (19 testes)
   - `wte/src/we2002_offsets.pas`, `wte/src/we2002_tables.pas` — criados, gerados
   - `wte/tests/test_offsets.pas`, `wte/tests/test_offsets.cpp` — criados, gerados
-  - `wte/tools/check_fase2.py`, `wte/re/fase-2.md` — reconciliação, em commit
-    próprio (ver abaixo)
+  - `wte/tools/check_fase2.py`, `wte/re/fase-2.md` — reconciliação, **no mesmo
+    commit** desta task: separá-la deixaria um commit com `make -C wte check`
+    vermelho, porque o `fase-2.md` só volta a bater depois de as duas unidades
+    novas existirem
+  - `wte/tests/README.md` — a pasta deixou de estar vazia e de ser só Pascal
 
 - **Problemas encontrados:**
 
@@ -129,8 +132,10 @@ errado só aparece quando a gravação corromper a imagem.
      `wte/src/*.pas` inteiro; as duas unidades novas caíram na coluna "escrito à
      mão" — porque a marca no cabeçalho delas é a do gerador *delas* — e os
      96.2% da §4.4 viravam 89.4%. O censo passou a excluir `we2002_*.pas`, com a
-     razão escrita no próprio `fase-2.md`. Reconciliação em commit separado, com
-     esta task nomeada no corpo.
+     razão escrita no próprio `fase-2.md`. Foi para o **mesmo commit** desta task,
+     e não para um à parte: o `fase-2.md` só volta a bater depois de as duas
+     unidades novas existirem, então separar deixaria um commit com
+     `make -C wte check` vermelho.
 
   3. O gerador chamava `Path.relative_to(ROOT)` na mensagem de recusa, o que
      estourava `ValueError` para os arquivos plantados em `/tmp` — trocava a

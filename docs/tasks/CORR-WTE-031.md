@@ -3,7 +3,7 @@ id: CORR-WTE-031
 title: "Correção: o `wte/tests/README.md` diz que a pasta está vazia e é só Pascal, e a WTE-TASK-16 pôs dois arquivos lá, um deles C++"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -100,12 +100,25 @@ gerador que testa:
 - [ ] `make -C wte check` continua verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+`wte/tests/README.md` reescrito para a pasta que existe: inventário dos três
+itens (`test_offsets.pas`, `test_offsets.cpp`, `roteiros/`), a regra real — a
+pasta guarda programas de teste **compilados**, e o par de dumpers é
+deliberadamente bilíngue porque a conferência só vale com um compilador de
+cada lado —, quem os constrói (`wte/tools/test_gen_tables_pas.py`, via
+`make -C wte test`, sem alvo isolado), e a WTE-TASK-20 como o que ainda vem.
+As duas decisões que o texto antigo guardava foram preservadas.
 
-**Arquivos criados/modificados:**
+Executada fora do `/corrigir`: o defeito foi **criado pela própria leva** que
+escreveu a WTE-TASK-16, e apareceu na varredura de concorrência pedida logo
+depois. Corrigir na hora custa menos que deixar aberto e arriscar que alguém
+"conserte" um arquivo já certo.
+
+**Problemas encontrados:** Nenhum.
+
+**Arquivos criados/modificados:** `wte/tests/README.md`

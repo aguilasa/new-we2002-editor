@@ -3,7 +3,7 @@ id: CORR-WTE-029
 title: "Correção: o Log da WTE-TASK-16 diz que a reconciliação do `fase-2.md` saiu em commit próprio, e ela saiu no mesmo commit"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -98,12 +98,24 @@ casca está documentada dentro do próprio `fase-2.md`.
 - [ ] `make -C wte check` continua verde (nenhum arquivo gerado é tocado)
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+Trocadas as duas afirmações do Log da WTE-TASK-16 pela que o commit
+`6dab6bb` registra: a reconciliação do `check_fase2.py` e do `fase-2.md`
+entrou **no mesmo commit** da task, e a razão vai junto — separá-la deixaria
+um commit com `make -C wte check` vermelho, porque o `fase-2.md` só volta a
+bater depois de as duas unidades novas existirem. O `(ver abaixo)` sem destino
+saiu.
 
-**Arquivos criados/modificados:**
+Executada fora do `/corrigir`: o defeito foi **criado pela própria leva** que
+escreveu a WTE-TASK-16, e apareceu na varredura de concorrência pedida logo
+depois. Corrigir na hora custa menos que deixar aberto e arriscar que alguém
+"conserte" um arquivo já certo.
+
+**Problemas encontrados:** Nenhum.
+
+**Arquivos criados/modificados:** `docs/tasks/16-gerador-de-tabelas.md`
