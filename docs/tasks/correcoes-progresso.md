@@ -35,6 +35,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-022](/docs/tasks/CORR-WTE-022.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O comando publicado da ordem de auto-create devolve 17 das 18 classes, e perde justamente `TMainForm` | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-023](/docs/tasks/CORR-WTE-023.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O critério de build diz 2.482 linhas (são 2.562) e atribui os 2 hints ao Lazarus (são do `/etc/fpc.cfg`) | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-024](/docs/tasks/CORR-WTE-024.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O sufixo ` [Lazarus]` não chegou à WTE-TASK-35 e o `--show` não chegou à WTE-TASK-12 | Baixa | [x] concluída | 2026-08-09 |
+| [CORR-WTE-025](/docs/tasks/CORR-WTE-025.md) | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | A faixa `11797..26528` é posição do `cmp -l`, e a WTE-TASK-22 vai declará-la como offset | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -62,6 +63,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-022 — começar a faixa do `sed` em `401a22`, e dizer por que ela não é a da chamada
 - [x] CORR-WTE-023 — colar da saída as três medidas do critério de build da WTE-TASK-11
 - [x] CORR-WTE-024 — levar o sufixo ` [Lazarus]` à 35 e o `--show` à 12 e à 25
+- [ ] CORR-WTE-025 — corrigir a faixa para `11796..26527` nos três sítios, dizendo a base
 
 ## Detalhes por correção
 
@@ -483,3 +485,23 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** entrada na 35 com os seis campos que a tabela dela exige; passo 2 do
   método da 12 dizendo que se abre com `--show`; e uma linha na 25 dando dono à
   remoção do andaime
+
+### CORR-WTE-025
+
+- **Arquivo com problema:** `wte/re/visual.md:98`,
+  `docs/tasks/12-comparacao-visual.md:151` e
+  `docs/tasks/22-harness-golden.md:100,145`
+- **Sintoma:** o achado 2 da WTE-TASK-12 registra a gravação do aviso de tamanho
+  na faixa `11797..26528`. Esses são os índices **1-based do `cmp -l`**, não
+  offsets; os offsets são `11796..26527`. A contagem (11.952) e os setores (5 a
+  11) estão certos. O critério da linha 145 da WTE-TASK-22 manda essa faixa
+  **virar exceção declarada** no gate golden, e a convenção do repositório é
+  offset 0-based (`tools/golden_check.sh:84-85`, `405724` =
+  `OFS_SQUAD_NUMBERS_NATIONAL + 1008`). Implementada como está, a exceção
+  mascara um byte que não diverge e acusa um que diverge
+- **Como foi detectado:** reproduzido no `:99` sobre cópia recém-tirada de
+  `roms/`: `cmp -l | wc -l` dá 11952 e primeiro/último `11797`/`26528`; a mesma
+  comparação por índice 0-based dá `11796..26527`, mesmos setores
+- **Fix:** faixa `11796..26527` nos três arquivos, **com a base dita** (offset
+  0-based, inclusivo), e o critério da 22 apontando a convenção do
+  `golden_check.sh` do `newWe2002`
