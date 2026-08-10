@@ -36,6 +36,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 | [CORR-WTE-023](/docs/tasks/CORR-WTE-023.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O critério de build diz 2.482 linhas (são 2.562) e atribui os 2 hints ao Lazarus (são do `/etc/fpc.cfg`) | Alta | [x] concluída | 2026-08-09 |
 | [CORR-WTE-024](/docs/tasks/CORR-WTE-024.md) | [WTE-TASK-11](/docs/tasks/11-app-com-a-casca-completa.md) | O sufixo ` [Lazarus]` não chegou à WTE-TASK-35 e o `--show` não chegou à WTE-TASK-12 | Baixa | [x] concluída | 2026-08-09 |
 | [CORR-WTE-025](/docs/tasks/CORR-WTE-025.md) | [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) | A faixa `11797..26528` é posição do `cmp -l`, e a WTE-TASK-22 vai declará-la como offset | Alta | [x] concluída | 2026-08-09 |
+| [CORR-WTE-026](/docs/tasks/CORR-WTE-026.md) | [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md) | A tabela do achado 2 se anuncia medida, e a coluna VCL não foi medida | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -64,6 +65,7 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - [x] CORR-WTE-023 — colar da saída as três medidas do critério de build da WTE-TASK-11
 - [x] CORR-WTE-024 — levar o sufixo ` [Lazarus]` à 35 e o `--show` à 12 e à 25
 - [x] CORR-WTE-025 — corrigir a faixa para `11796..26527` nos três sítios, dizendo a base
+- [ ] CORR-WTE-026 — dizer, por coluna, o que foi medido no achado 2 e dar rota à divergência de `ComboBox.Text`
 
 ## Detalhes por correção
 
@@ -505,3 +507,23 @@ data do commit — o `/revisar` abre a correção, não a fecha.
 - **Fix:** faixa `11796..26527` nos três arquivos, **com a base dita** (offset
   0-based, inclusivo), e o critério da 22 apontando a convenção do
   `golden_check.sh` do `newWe2002`
+
+### CORR-WTE-026
+
+- **Arquivo com problema:** `wte/re/eventos.md`, achado 2 (tabela nas linhas
+  89-96 e o item 2 de "O que a fase 4 leva daqui"), e o Log da
+  `docs/tasks/13-trace-de-eventos.md`
+- **Sintoma:** a tabela abre com "Medido no fonte da LCL 3.0 instalada" e tem
+  três colunas. A coluna `LCL/GTK2 3.0` tem arquivo e rotina por linha, e a
+  revisão reconferiu todas no disco; a coluna `VCL/Win32 (2002)` **não tem
+  fonte nenhuma**, e a coluna `Diverge?` é a comparação das duas. A única
+  divergência declarada (`ComboBox.Text := s`) vira instrução para os 12
+  handlers de `OnChange` da fase 4, apoiada no lado não medido — o mesmo terreno
+  em que a premissa original da task já se mostrou invertida
+- **Como foi detectado:** as seis linhas do lado LCL foram remedidas
+  (`ChangeLock` em `SetItemIndex`/`SetText`/`SetPosition`, `change-value` no
+  `TScrollBar`, `TCustomEdit.TextChanged`); do lado VCL não há o que citar no
+  repositório — o `vcl60.bpl` não é lido por nada
+- **Fix:** rotular a coluna VCL como não medida, com a origem da afirmação, e
+  dar rota de confirmação à divergência de `ComboBox.Text` (disassembly de um
+  dos 12 handlers, ou observação do `wte.exe`, que é VCL rodando)
