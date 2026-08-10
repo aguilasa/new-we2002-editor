@@ -42,6 +42,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 ROOT = Path(__file__).resolve().parents[2]
 OFFSETS_HPP = ROOT / "src" / "core" / "include" / "we2002" / "Offsets.hpp"
@@ -395,8 +396,31 @@ RE_LACO = re.compile(r"\bfor\s*\(")
 JANELA_BLOCO = 10
 
 
-def papel_no_legado(fonte: str | None = None) -> dict[str, tuple[str, str]]:
-    """`OFS_*` -> (papel, gatilho), lido do `Database.cpp` do `newWe2002`.
+class Papel(NamedTuple):
+    """O veredito estrutural de um `OFS_*`, com o que o torna conferivel.
+
+    E tupla nomeada, e nao tupla crua, por causa da CORR-WTE-046: a prova
+    impressa na tabela dos 50 dizia `case N` para os dois gatilhos, e em 3 das
+    14 linhas o `Database.cpp` tem `if(i == N)`. Num deles -- o
+    `OFS_ML_TEAM_NAME_8_A`, gatilho 30 -- existe um `case 30 :` de verdade, em
+    outro bloco: a citacao levava ao sitio errado, que e pior do que citacao
+    ausente porque parece conferida.
+
+    `forma` guarda qual das duas construcoes casou; `constr` guarda o **texto
+    literal** que casou no fonte, para que a prova impressa seja greppavel
+    verbatim (o legado escreve `if(i == 57)`, sem espaco depois do `if`);
+    `linha` e a linha do `Seek`, 1-based, que e o que faz a citacao resistir a
+    gatilho repetido.
+    """
+    papel: str
+    gatilho: str = ""
+    forma: str = ""
+    linha: int = 0
+    constr: str = ""
+
+
+def papel_no_legado(fonte: str | None = None) -> dict[str, Papel]:
+    """`OFS_*` -> `Papel`, lido do `Database.cpp` do `newWe2002`.
 
     Responde por que um `OFS_*` pode nunca aparecer numa medicao do `wte.exe`
     sem que isso seja falha de cobertura. O Moriero le a imagem **varrendo**:
@@ -420,26 +444,36 @@ def papel_no_legado(fonte: str | None = None) -> dict[str, tuple[str, str]]:
     """
     linhas = (fonte if fonte is not None
               else DATABASE_CPP.read_text(encoding="utf-8")).splitlines()
-    fora: dict[str, tuple[str, str]] = {}
+    fora: dict[str, Papel] = {}
     for i, linha in enumerate(linhas):
         m = RE_SEEK.search(linha)
         if not m:
             continue
         nome = m.group(1)
-        gatilho = ""
+        gatilho = forma = constr = ""
         for j in range(i, max(-1, i - JANELA_BLOCO) - 1, -1):
-            c = RE_CASO.search(linhas[j]) or RE_SE.search(linhas[j])
+            # As duas construcoes sao procuradas separadamente, e nao com um
+            # `or` que joga fora qual casou -- e esse descarte que produzia a
+            # prova errada (CORR-WTE-046).
+            c = RE_CASO.search(linhas[j])
             if c:
-                gatilho = c.group(1).strip()
+                gatilho, forma = c.group(1).strip(), "case"
+                constr = c.group(0).strip()
+                break
+            c = RE_SE.search(linhas[j])
+            if c:
+                gatilho, forma = c.group(1).strip(), "if"
+                constr = c.group(0).strip()
                 break
         if gatilho:
-            fora.setdefault(nome, ("retomada", gatilho))
+            fora.setdefault(nome,
+                            Papel("retomada", gatilho, forma, i + 1, constr))
             continue
         if any(RE_LACO.search(linhas[j])
                for j in range(i + 1, min(len(linhas), i + 3))):
-            fora.setdefault(nome, ("varredura", ""))
+            fora.setdefault(nome, Papel("varredura", "", "", i + 1))
             continue
-        fora.setdefault(nome, ("direto", ""))
+        fora.setdefault(nome, Papel("direto", "", "", i + 1))
     return fora
 
 
@@ -655,7 +689,9 @@ def secao_veredito_dos_50(w, todas_sessoes, conhecidos, ausentes_06) -> None:
     w("- **retomada de fronteira** — o offset não é endereço de campo: é o")
     w("  ponto onde o `Database.cpp` do `newWe2002` retoma a leitura de um")
     w("  registro que cai em cima da fronteira de setor, dentro de um")
-    w("  `case N :`. Só o registro N o endereça, e o `wte.exe` só o")
+    w("  `case N :` ou de um `if (i == N)` — o legado usa as duas formas para a")
+    w("  mesma coisa, e a coluna **prova** diz qual delas casou, com a linha.")
+    w("  Só o registro N o endereça, e o `wte.exe` só o")
     w("  endereçaria se o usuário escolhesse exatamente aquele jogador;")
     w("- **base de varredura** — o offset é a base de um lote que o legado")
     w("  desfila com um `for`. Só o primeiro registro do lote a endereça.")
@@ -669,14 +705,18 @@ def secao_veredito_dos_50(w, todas_sessoes, conhecidos, ausentes_06) -> None:
                 "base de varredura": 0, "sem veredito": 0}
     corpo: list[str] = []
     for nome in sorted(ausentes_06, key=lambda n: conhecidos[n]):
-        papel, gatilho = papeis.get(nome, ("direto", ""))
+        p = papeis.get(nome, Papel("direto"))
+        papel, gatilho = p.papel, p.gatilho
         if nome in tocado:
             f = tocado[nome][0]
             vered = "endereçado"
             prova = f"`{f['sessao'][:2]}`/`{f['acao']}` {f['op']}"
         elif papel == "retomada":
             vered = "retomada de fronteira"
-            prova = f"`case {gatilho}` no `Database.cpp`"
+            # A construcao que casou -- verbatim, para grepar -- e a linha do
+            # `Seek`. Sem a linha, o gatilho repetido no arquivo leva ao bloco
+            # errado; foi o caso do `OFS_ML_TEAM_NAME_8_A` (CORR-WTE-046).
+            prova = f"`{p.constr}` no `Database.cpp`, `Seek` em :{p.linha}"
         elif papel == "varredura":
             vered = "base de varredura"
             prova = "`Seek` + `for` no `Database.cpp`"

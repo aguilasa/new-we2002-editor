@@ -201,14 +201,42 @@ class TestPapelNoLegado(unittest.TestCase):
             "    switch(i)", "    {", "      case 44+PLAYERS_NC :",
             "        image_file.Read(buf1, 4);",
             "        image_file.Seek(OFS_PLAYER_ATTR_1);"]))
-        self.assertEqual(p["OFS_PLAYER_ATTR_1"], ("retomada", "44+PLAYERS_NC"))
+        self.assertEqual(p["OFS_PLAYER_ATTR_1"],
+                         A.Papel("retomada", "44+PLAYERS_NC", "case", 5,
+                                 "case 44+PLAYERS_NC :"))
 
     def test_seek_dentro_de_if_tambem_e_retomada(self) -> None:
         """O legado usa as duas formas para a mesma coisa."""
         p = self.papel("\n".join([
             "    if(i == 57)", "    {",
             "      image_file.Seek(OFS_TEAM_NAME_5_A);"]))
-        self.assertEqual(p["OFS_TEAM_NAME_5_A"], ("retomada", "57"))
+        self.assertEqual(p["OFS_TEAM_NAME_5_A"],
+                         A.Papel("retomada", "57", "if", 3, "if(i == 57)"))
+
+    def test_a_construcao_que_casou_nao_e_descartada(self) -> None:
+        """CORR-WTE-046: a prova dizia `case N` para os dois gatilhos.
+
+        Com o mesmo gatilho nas duas formas, a unica coisa que distingue as
+        duas linhas e o campo `forma`. Se ele voltar a ser jogado fora, os dois
+        vereditos ficam identicos e este teste reprova.
+        """
+        com_case = self.papel("\n".join([
+            "      case 30 :", "        image_file.Seek(OFS_A);"]))
+        com_if = self.papel("\n".join([
+            "      if(i == 30)", "        image_file.Seek(OFS_A);"]))
+        self.assertEqual(com_case["OFS_A"].forma, "case")
+        self.assertEqual(com_if["OFS_A"].forma, "if")
+        self.assertEqual(com_case["OFS_A"].gatilho, com_if["OFS_A"].gatilho)
+        self.assertNotEqual(com_case["OFS_A"], com_if["OFS_A"])
+
+    def test_a_linha_do_seek_e_1_based(self) -> None:
+        """A linha e o que torna a citacao conferivel por `grep` quando o
+        gatilho se repete no arquivo -- `case 30 :` existe em dois blocos sem
+        relacao com o `if(i == 30)` que a prova quer citar."""
+        p = self.papel("\n".join([
+            "// a", "// b", "      if(i == 30)",
+            "        image_file.Seek(OFS_A);"]))
+        self.assertEqual(p["OFS_A"].linha, 4)
 
     def test_seek_seguido_de_for_e_varredura(self) -> None:
         p = self.papel("\n".join([
@@ -395,6 +423,31 @@ class TestEvidencia(unittest.TestCase):
             if (A.ROOT / "roms").is_dir() and not nome.startswith("truncada"):
                 self.assertTrue(alvo.exists(), f"{alvo} nao existe")
 
+    def test_toda_prova_de_retomada_casa_no_Database_cpp(self) -> None:
+        """A coluna **prova** dos 50 tem de levar ao sitio certo.
+
+        Ela dizia `case N` para os dois gatilhos, e em 3 das 14 linhas o fonte
+        tem `if(i == N)`; num deles existia um `case 30 :` de verdade, noutro
+        bloco (CORR-WTE-046). Aqui se confere o que o markdown afirma contra o
+        fonte: a construcao citada esta na linha que ele diz, e o `Seek` do
+        `OFS_*` esta na linha que ele diz.
+        """
+        fonte = A.DATABASE_CPP.read_text(encoding="utf-8").splitlines()
+        linhas_md = A.OUT_MD.read_text(encoding="utf-8").splitlines()
+        alvo = re.compile(
+            r"^\| `(OFS_\w+)` \| \d+ \| retomada de fronteira "
+            r"\| `([^`]+)` no `Database\.cpp`, `Seek` em :(\d+) \|")
+        achados = [m for m in (alvo.match(l) for l in linhas_md) if m]
+        self.assertEqual(len(achados), 14, "as 14 retomadas sumiram da tabela")
+        for m in achados:
+            nome, constr, n = m.group(1), m.group(2), int(m.group(3))
+            self.assertIn(f"Seek({nome})", fonte[n - 1],
+                          f"{nome}: a linha :{n} nao tem o Seek citado")
+            janela = fonte[max(0, n - 1 - A.JANELA_BLOCO):n]
+            self.assertTrue(any(constr in l for l in janela),
+                            f"{nome}: `{constr}` nao esta nas {A.JANELA_BLOCO} "
+                            f"linhas acima de :{n}")
+
     def test_todo_offset_ausente_tem_veredito(self) -> None:
         """O critério da WTE-TASK-19, preso em teste.
 
@@ -411,7 +464,7 @@ class TestEvidencia(unittest.TestCase):
         self.assertEqual(len(ausentes), 50)
         sem = [n for n in ausentes
                if n not in tocado
-               and papeis.get(n, ("direto", ""))[0] == "direto"]
+               and papeis.get(n, A.Papel("direto")).papel == "direto"]
         self.assertEqual(sem, [], f"sem veredito: {sem}")
 
     def test_a_regiao_do_uniforme_foi_medida(self) -> None:

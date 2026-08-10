@@ -425,7 +425,9 @@ dois deles vêm de régua diferente:
 - **retomada de fronteira** — o offset não é endereço de campo: é o
   ponto onde o `Database.cpp` do `newWe2002` retoma a leitura de um
   registro que cai em cima da fronteira de setor, dentro de um
-  `case N :`. Só o registro N o endereça, e o `wte.exe` só o
+  `case N :` ou de um `if (i == N)` — o legado usa as duas formas para a
+  mesma coisa, e a coluna **prova** diz qual delas casou, com a linha.
+  Só o registro N o endereça, e o `wte.exe` só o
   endereçaria se o usuário escolhesse exatamente aquele jogador;
 - **base de varredura** — o offset é a base de um lote que o legado
   desfila com um `for`. Só o primeiro registro do lote a endereça.
@@ -456,31 +458,31 @@ para o registro que a tela mostra.
 | `OFS_LINK_ML2` | 2013336 | endereçado | `06`/`ARRANQUE` R |
 | `OFS_SQUAD_NUMBERS_ML` | 2014504 | endereçado | `06`/`ARRANQUE` R |
 | `OFS_PLAYER_ATTR` | 2179492 | endereçado | `09`/`CALCULA_PRECO` R |
-| `OFS_PLAYER_ATTR_1` | 2180328 | retomada de fronteira | `case 44+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_2` | 2182680 | retomada de fronteira | `case 215+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_3` | 2185032 | retomada de fronteira | `case 385+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_4` | 2187384 | retomada de fronteira | `case 556+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_5` | 2189736 | retomada de fronteira | `case 727+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_6` | 2192088 | retomada de fronteira | `case 897+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_7` | 2194440 | retomada de fronteira | `case 1068+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_8` | 2196792 | retomada de fronteira | `case 1239+PLAYERS_NC` no `Database.cpp` |
-| `OFS_PLAYER_ATTR_9` | 2199144 | retomada de fronteira | `case 1409+PLAYERS_NC` no `Database.cpp` |
+| `OFS_PLAYER_ATTR_1` | 2180328 | retomada de fronteira | `case 44+PLAYERS_NC :` no `Database.cpp`, `Seek` em :639 |
+| `OFS_PLAYER_ATTR_2` | 2182680 | retomada de fronteira | `case 215+PLAYERS_NC :` no `Database.cpp`, `Seek` em :645 |
+| `OFS_PLAYER_ATTR_3` | 2185032 | retomada de fronteira | `case 385+PLAYERS_NC :` no `Database.cpp`, `Seek` em :650 |
+| `OFS_PLAYER_ATTR_4` | 2187384 | retomada de fronteira | `case 556+PLAYERS_NC :` no `Database.cpp`, `Seek` em :657 |
+| `OFS_PLAYER_ATTR_5` | 2189736 | retomada de fronteira | `case 727+PLAYERS_NC :` no `Database.cpp`, `Seek` em :663 |
+| `OFS_PLAYER_ATTR_6` | 2192088 | retomada de fronteira | `case 897+PLAYERS_NC :` no `Database.cpp`, `Seek` em :668 |
+| `OFS_PLAYER_ATTR_7` | 2194440 | retomada de fronteira | `case 1068+PLAYERS_NC :` no `Database.cpp`, `Seek` em :675 |
+| `OFS_PLAYER_ATTR_8` | 2196792 | retomada de fronteira | `case 1239+PLAYERS_NC :` no `Database.cpp`, `Seek` em :681 |
+| `OFS_PLAYER_ATTR_9` | 2199144 | retomada de fronteira | `case 1409+PLAYERS_NC :` no `Database.cpp`, `Seek` em :686 |
 | `OFS_ML_PLAYER_ATTR` | 2204112 | base de varredura | `Seek` + `for` no `Database.cpp` |
-| `OFS_ML_PLAYER_ATTR_1` | 2206200 | retomada de fronteira | `case 148` no `Database.cpp` |
-| `OFS_ML_PLAYER_ATTR_2` | 2208552 | retomada de fronteira | `case 319` no `Database.cpp` |
+| `OFS_ML_PLAYER_ATTR_1` | 2206200 | retomada de fronteira | `case 148 :` no `Database.cpp`, `Seek` em :707 |
+| `OFS_ML_PLAYER_ATTR_2` | 2208552 | retomada de fronteira | `case 319 :` no `Database.cpp`, `Seek` em :714 |
 | `OFS_FORMATIONS` | 2303700 | endereçado | `10`/`ESTRATEGIA` R |
-| `OFS_FORMATIONS_A` | 2304984 | retomada de fronteira | `case 32` no `Database.cpp` |
+| `OFS_FORMATIONS_A` | 2304984 | retomada de fronteira | `if(i == 32)` no `Database.cpp`, `Seek` em :381 |
 | `OFS_TEAM_BARS` | 2328184 | endereçado | `06`/`SELECIONA_TIME` R |
 | `OFS_TEAM_BARS_A` | 2328504 | endereçado | `06`/`SELECIONA_TIME` R |
 | `OFS_KICKER` | 2329056 | endereçado | `10`/`ESTRATEGIA` R |
 | `OFS_ML_TEAM_NAME_8` | 2476048 | base de varredura | `Seek` + `for` no `Database.cpp` |
-| `OFS_ML_TEAM_NAME_8_A` | 2476680 | retomada de fronteira | `case 30` no `Database.cpp` |
+| `OFS_ML_TEAM_NAME_8_A` | 2476680 | retomada de fronteira | `if(i == 30)` no `Database.cpp`, `Seek` em :301 |
 | `OFS_KIT_PREVIEW` | 2667256 | endereçado | `06`/`SELECIONA_TIME` R |
 | `OFS_KIT_PREVIEW_A` | 2669544 | endereçado | `10`/`TIME_FUNDO` R |
 | `OFS_KIT_PREVIEW_B` | 2671896 | endereçado | `11`/`TIME_120` R |
 | `OFS_KIT_PREVIEW_C` | 2674248 | endereçado | `11`/`TIME_120` R |
 | `OFS_TEAM_NAME_5` | 4822908 | base de varredura | `Seek` + `for` no `Database.cpp` |
-| `OFS_TEAM_NAME_5_A` | 4823976 | retomada de fronteira | `case 57` no `Database.cpp` |
+| `OFS_TEAM_NAME_5_A` | 4823976 | retomada de fronteira | `if(i == 57)` no `Database.cpp`, `Seek` em :209 |
 | `OFS_TEAM_NAME_6_A` | 5651880 | endereçado | `06`/`SELECIONA_TIME` R |
 | `OFS_TEAM_NAME_6_B` | 5652364 | endereçado | `06`/`SELECIONA_TIME` R |
 | `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | endereçado | `11`/`FICHA_60` R |

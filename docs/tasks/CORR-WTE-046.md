@@ -3,7 +3,7 @@ id: CORR-WTE-046
 title: "Correção: três vereditos citam `case N` onde o `Database.cpp` tem `if(i == N)`"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -136,21 +136,70 @@ Regerar (`python3 wte/tools/analisar_io.py`, sem `--check`).
 
 ## Verificação
 
-- [ ] cada prova da coluna casa por `grep` no `src/core/Database.cpp` — a de
-      `if` acha `if(i == N)`, a de `case` acha `case N :`
-- [ ] teste com fonte plantado nas duas formas reprova se a prova voltar a ser
+- [x] cada prova da coluna casa por `grep` no `src/core/Database.cpp` — a de
+      `if` acha `if(i == N)`, a de `case` acha `case N :`. Conferido nas 14:
+      `14 ok`, zero falha
+- [x] teste com fonte plantado nas duas formas reprova se a prova voltar a ser
       sempre `case`
-- [ ] a contagem 33 / 14 / 3 não muda (a correção é de rótulo, não de veredito)
-- [ ] `python3 wte/tools/analisar_io.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] a contagem 33 / 14 / 3 não muda (a correção é de rótulo, não de veredito)
+- [x] `python3 wte/tools/analisar_io.py --check` verde; gerar duas vezes dá o
+      mesmo md5 (`61995638008e...`)
+- [x] `make -C wte check` verde — 378 testes, `rc=0`
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+`papel_no_legado()` passou a devolver uma `NamedTuple` `Papel` em vez de tupla
+crua de dois campos. O laço que procura o gatilho deixou de usar
+`RE_CASO.search(...) or RE_SE.search(...)` — que é onde a informação se perdia
+— e passa pelas duas separadamente, guardando:
+
+| campo | o que é |
+|---|---|
+| `papel` | `retomada` / `varredura` / `direto`, como antes |
+| `gatilho` | o `N`, como antes |
+| `forma` | `case` ou `if` — qual construção casou |
+| `linha` | a linha do `Seek`, 1-based |
+| `constr` | o **texto literal** que casou no fonte |
+
+O `constr` existe porque a prova precisa ser greppável **verbatim**: o legado
+escreve `if(i == 57)`, sem espaço depois do `if`, e uma prova sintetizada como
+`if (i == 57)` não seria achada por quem for conferir. A prova impressa passou
+a ser `` `if(i == 32)` no `Database.cpp`, `Seek` em :381 ``.
+
+A linha do `Seek` resolve o terceiro caso, que era o pior: `OFS_ML_TEAM_NAME_8_A`
+tem gatilho 30, e existe um `case 30 :` de verdade em `503` e `1077`, sem
+relação nenhuma. Com `:301` na prova, a citação não tem para onde escorregar.
+
+Três testes novos e um de evidência:
+
+- `test_a_construcao_que_casou_nao_e_descartada` — mesmo gatilho (30) nas duas
+  formas; exige `forma` distinta e os dois `Papel` diferentes entre si;
+- `test_a_linha_do_seek_e_1_based`;
+- os dois testes de tupla existentes passaram a comparar a `Papel` inteira, o
+  que fixa `forma` e `constr` junto;
+- `TestEvidencia.test_toda_prova_de_retomada_casa_no_Database_cpp` — lê as 14
+  linhas `retomada de fronteira` do `offsets-novos.md` gerado e confere contra
+  o fonte: o `Seek` do `OFS_*` está na linha citada, e a construção citada está
+  nas `JANELA_BLOCO` linhas acima dela.
+
 **Problemas encontrados:**
 
+O `grep` transcrito na seção Evidência desta CORR dá `298` para o `Seek` de
+`OFS_ML_TEAM_NAME_8_A`; a linha é **301**. Não muda nada do diagnóstico — os
+três casos e a causa raiz reproduzem —, e o número que entrou no markdown é
+derivado pelo gerador, não copiado da CORR. Fica registrado porque é
+exatamente o tipo de transcrição à mão que a [CORR-WTE-015](/docs/tasks/CORR-WTE-015.md)
+mandou parar de fazer.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/analisar_io.py` — `Papel` (nova), `papel_no_legado()`,
+  `secao_veredito_dos_50()` e o texto do veredito
+- `wte/tools/test_analisar_io.py` — dois testes novos em `TestPapelNoLegado`,
+  um em `TestEvidencia`, dois atualizados
+- `wte/re/offsets-novos.md` — regerado
