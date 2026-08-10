@@ -3,7 +3,7 @@ id: CORR-WTE-047
 title: "Correção: a segunda régua (`cmp`) das sessões 10 e 11 não ficou registrada em lugar nenhum"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,19 +109,79 @@ roteiros são fixos, e é para isso que eles existem.
 
 ## Verificação
 
-- [ ] toda sessão do `io-medido.tsv` com pelo menos uma faixa `W` tem veredito
-      das duas réguas no `offsets-novos.md`
-- [ ] teste reprova quando uma sessão com escrita não tem esse veredito
-- [ ] `python3 wte/tools/analisar_io.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] nenhuma corrida nova aponta para `roms/` — só cópia em `work/`
+- [x] toda sessão do `io-medido.tsv` com pelo menos uma faixa `W` tem veredito
+      das duas réguas no `offsets-novos.md` — as cinco, e as cinco fecham
+- [x] teste reprova quando uma sessão com escrita não tem esse veredito —
+      plantado tirando as 9 linhas da `11-varredura-de-times`:
+      `11-varredura-de-times escreveu e não tem cmp versionado`
+- [x] `python3 wte/tools/analisar_io.py --check` verde; duas gerações dão o
+      mesmo md5 (`2e22a36e...`)
+- [x] `make -C wte check` verde — 383 testes, `rc=0`
+- [x] nenhuma corrida nova aponta para `roms/` — o `diff_dirigido.sh` copia
+      para `work/`, e o `mtime` de `roms/` continua 2026-08-03
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A segunda régua passou a ter arquivo. Três peças:
+
+1. **`wte/re/cmp-medido.tsv`** — as 51 faixas do `cmp` das cinco sessões, com
+   `imagem` e `sessao` como chave, no mesmo molde do `io-medido.tsv`. É dado
+   de medição: não se regenera sem Wine, e por isso é versionado.
+2. **`analisar_io.py --fundir-cmp`** — a porta por onde o `cmp.tsv` da corrida
+   entra, chamada pelo `diff_dirigido.sh` logo depois do `--conferir`. Ela
+   **substitui** as linhas daquela sessão e preserva as demais, para que
+   repetir uma corrida não duplique faixa.
+3. **A seção "As duas réguas, sessão a sessão"** no `offsets-novos.md`, com
+   uma linha por sessão que escreveu: quantas faixas o `cmp` viu, quantas
+   delas cabem na união das faixas de escrita do trace, e quantas escritas o
+   trace registrou. Derivada do TSV, como o resto do arquivo — a afirmação
+   deixa de morar em prosa no Log de uma passagem.
+
+| sessão | `cmp` | contidas | escritas |
+|---|---:|---:|---:|
+| `06-diff-dirigido` | 7 | 7 | 8 |
+| `06-truncada` | 7 | 7 | 8 |
+| `09-areas-com-time` | 19 | 19 | 31 |
+| `10-telas-que-faltavam` | 9 | 9 | 10 |
+| `11-varredura-de-times` | 9 | 9 | 9 |
+
+Cinco testes novos: quatro sobre a fusão e o cálculo do veredito (sessão que
+não escreveu não entra; sessão que escreveu e não tem `cmp` fica marcada;
+faixa do `cmp` fora das escritas é contada; refundir a mesma sessão não
+duplica), e um de evidência que exige, para **toda** sessão com escrita no
+`io-medido.tsv`, que exista `cmp` versionado, que ele feche, e que a linha
+esteja no markdown gerado.
+
 **Problemas encontrados:**
 
+O `cmp.tsv` de quatro das cinco sessões ainda estava em
+`/tmp/diff-dirigido/`; o da `09-areas-com-time` não. Foi preciso **refazer a
+corrida 09** sob Wine no `:99`, sobre cópia de `roms/japanese-shift-jis.bin`,
+como a seção Correção previa. O resultado é confirmação independente e vale
+registrar:
+
+- o trace novo é **idêntico** ao versionado — as 64 linhas da sessão 09 no
+  `io-medido.tsv` conferem uma a uma com o `io.tsv` da corrida nova, então o
+  `cmp` recuperado pertence de fato àquele trace;
+- o `--conferir` da corrida nova imprimiu *"as duas reguas fecham -- 19
+  faixa(s) do cmp contidas em 31 faixa(s) de escrita do trace"*, que é
+  exatamente o número que o Log da 4ª passagem trazia em prosa. A afirmação
+  que não tinha rastro reproduziu ao pé da letra.
+
+Um detalhe de implementação: `fundir_cmp()` imprimia o alvo com
+`relative_to(ROOT)`, que estoura quando o teste aponta o TSV para um
+diretório temporário. Passou a cair para o caminho absoluto fora da árvore.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/cmp-medido.tsv` — criado (51 faixas, 5 sessões)
+- `wte/tools/analisar_io.py` — `ler_cmp_medido()`, `fundir_cmp()`,
+  `veredito_das_reguas()`, `--fundir-cmp` e a seção gerada
+- `wte/tools/diff_dirigido.sh` — chama a fusão depois da conferência
+- `wte/tools/test_analisar_io.py` — `TestSegundaRegua` (nova) e um teste em
+  `TestEvidencia`
+- `wte/re/offsets-novos.md` — regerado

@@ -24,6 +24,34 @@ Então a régua é `strace` sobre o processo Wine, e o `cmp` fica como
 segunda régua independente: toda faixa que mudou no arquivo tem de estar
 contida numa faixa de escrita do trace.
 
+### As duas réguas, sessão a sessão
+
+A conferência roda no fim de cada corrida (`analisar_io.py --conferir`),
+e é ela que pegou os três defeitos de instrumento das passagens
+anteriores. O resultado dela morria no diretório da sessão, em `/tmp`:
+das cinco primeiras corridas, uma só teve o número registrado, em prosa
+([CORR-WTE-047](../../docs/tasks/CORR-WTE-047.md)). Agora o `cmp.tsv` de
+cada sessão é fundido em [`cmp-medido.tsv`](cmp-medido.tsv), e a linha
+abaixo é derivada dele — como o resto deste arquivo.
+
+| sessão | faixas do `cmp` | contidas nas escritas do trace | faixas de escrita |
+|---|---:|---:|---:|
+| `06-diff-dirigido` | 7 | 7 | 8 |
+| `06-truncada` | 7 | 7 | 8 |
+| `09-areas-com-time` | 19 | 19 | 31 |
+| `10-telas-que-faltavam` | 9 | 9 | 10 |
+| `11-varredura-de-times` | 9 | 9 | 9 |
+
+**As duas réguas fecham nas 5 sessões que escreveram.**
+Faixa do `cmp` que sobrasse significaria syscall perdida pelo
+trace, e nenhum número desta task valeria nada — é literalmente o
+que já aconteceu duas vezes, e as duas foram descobertas aqui.
+
+O contrário — faixa de escrita do trace sem par no `cmp` — **não é
+erro**: é o editor gravando de volta exatamente o que leu, que é o
+comportamento que motivou trocar o `cmp` pelo `strace` como régua
+principal.
+
 ### Um terceiro caminho que foi tentado e **derruba o app**
 
 Encher a cópia com um padrão (`0xA5`) depois do Load e ver o que

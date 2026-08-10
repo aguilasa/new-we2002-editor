@@ -185,6 +185,55 @@ class TestConferirReguas(unittest.TestCase):
                       ["100\t120\t21"]), 3)
 
 
+class TestSegundaRegua(unittest.TestCase):
+    """A segunda regua tem de deixar rastro versionado, nao so passar na tela.
+
+    O `--conferir` roda no fim de cada corrida e imprime o veredito no
+    terminal; o `cmp.tsv` fica em `/tmp` e some. Das cinco primeiras sessoes,
+    uma so teve o numero registrado -- em prosa, no Log de uma passagem
+    (CORR-WTE-047). Aqui se mede a fusao e o veredito derivado dela.
+    """
+
+    def test_fundir_substitui_a_sessao_e_preserva_as_outras(self) -> None:
+        """Rodar a mesma corrida duas vezes nao pode duplicar faixa."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            alvo = tmp / "cmp-medido.tsv"
+            origem = tmp / "cmp.tsv"
+            antigo = A.CMP_MEDIDO_TSV
+            try:
+                A.CMP_MEDIDO_TSV = alvo
+                origem.write_text(
+                    "inicio\tfim\ttamanho\tsetor\tbyte_no_setor\n"
+                    "100\t120\t21\t0\t100\n", encoding="utf-8")
+                A.fundir_cmp(origem, "a.bin", "S1")
+                A.fundir_cmp(origem, "b.bin", "S2")
+                A.fundir_cmp(origem, "a.bin", "S1")   # de novo
+                linhas = A.ler_cmp_medido()
+            finally:
+                A.CMP_MEDIDO_TSV = antigo
+        self.assertEqual([r["sessao"] for r in linhas], ["S2", "S1"])
+        self.assertEqual(linhas[1]["imagem"], "a.bin")
+
+    def test_veredito_ignora_sessao_que_nao_escreveu(self) -> None:
+        io = [{"sessao": "S", "op": "R", "inicio": "10", "fim": "20"}]
+        self.assertEqual(A.veredito_das_reguas(io, []), [])
+
+    def test_veredito_marca_sessao_sem_cmp_versionado(self) -> None:
+        """O caso que a CORR-WTE-047 achou: escreveu, e a regua sumiu."""
+        io = [{"sessao": "S", "op": "W", "inicio": "10", "fim": "20"}]
+        v = A.veredito_das_reguas(io, [])[0]
+        self.assertFalse(v["tem_cmp"])
+        self.assertEqual((v["cmp"], v["dentro"], v["escritas"]), (0, 0, 1))
+
+    def test_veredito_conta_faixa_do_cmp_fora_das_escritas(self) -> None:
+        io = [{"sessao": "S", "op": "W", "inicio": "10", "fim": "20"}]
+        cmp_ = [{"sessao": "S", "inicio": "12", "fim": "15"},
+                {"sessao": "S", "inicio": "500", "fim": "509"}]
+        v = A.veredito_das_reguas(io, cmp_)[0]
+        self.assertEqual((v["cmp"], v["dentro"]), (2, 1))
+
+
 class TestPapelNoLegado(unittest.TestCase):
     """O classificador que responde por um `OFS_*` sem evidencia dinamica.
 
@@ -422,6 +471,28 @@ class TestEvidencia(unittest.TestCase):
             alvo = A.ROOT / "roms" / nome
             if (A.ROOT / "roms").is_dir() and not nome.startswith("truncada"):
                 self.assertTrue(alvo.exists(), f"{alvo} nao existe")
+
+    def test_toda_sessao_que_escreveu_tem_a_segunda_regua(self) -> None:
+        """Escrita medida sem `cmp` versionado é evidência pela metade.
+
+        A conferência das duas réguas é o que denunciou, três vezes, defeito
+        silencioso do instrumento. Sem o TSV, um terceiro não a reconfere — e
+        foi assim que as sessões 10 e 11, que levaram os endereçados de 15
+        para 33, ficaram sem o número (CORR-WTE-047).
+        """
+        cmp_medido = A.ler_cmp_medido()
+        self.assertTrue(cmp_medido, "cmp-medido.tsv vazio ou ausente")
+        gerado = A.OUT_MD.read_text(encoding="utf-8")
+        for v in A.veredito_das_reguas(self.medido, cmp_medido):
+            self.assertTrue(v["tem_cmp"],
+                            f"{v['sessao']} escreveu e não tem `cmp` "
+                            f"versionado")
+            self.assertEqual(v["dentro"], v["cmp"],
+                             f"{v['sessao']}: {v['cmp'] - v['dentro']} faixa(s) "
+                             f"do cmp fora das escritas do trace")
+            self.assertIn(f"| `{v['sessao']}` | {v['cmp']} |", gerado,
+                          f"{v['sessao']} não tem linha das duas réguas no "
+                          f"markdown gerado")
 
     def test_toda_prova_de_retomada_casa_no_Database_cpp(self) -> None:
         """A coluna **prova** dos 50 tem de levar ao sitio certo.

@@ -298,6 +298,73 @@ def conferir_reguas(io_tsv: Path, cmp_tsv: Path) -> int:
     return 0
 
 
+CMP_MEDIDO_TSV = ROOT / "wte" / "re" / "cmp-medido.tsv"
+CMP_CABECALHO = ("imagem", "sessao", "inicio", "fim", "tamanho", "setor",
+                 "byte_no_setor")
+
+
+def ler_cmp_medido() -> list[dict[str, str]]:
+    if not CMP_MEDIDO_TSV.exists():
+        return []
+    linhas = CMP_MEDIDO_TSV.read_text(encoding="utf-8").splitlines()
+    cab = linhas[0].split("\t")
+    return [dict(zip(cab, l.split("\t"))) for l in linhas[1:] if l.strip()]
+
+
+def fundir_cmp(cmp_tsv: Path, imagem: str, sessao: str) -> int:
+    """Leva o `cmp.tsv` da sessao para `wte/re/cmp-medido.tsv`, versionado.
+
+    A segunda regua morria no diretorio da sessao (CORR-WTE-047): o `cmp.tsv`
+    fica em `/tmp`, e das cinco sessoes so uma teve o numero registrado -- no
+    Log de uma passagem, em prosa. Nao se regenera sem Wine, exatamente como o
+    `io-medido.tsv`, e por isso entra no repositorio pela mesma porta.
+
+    Reescreve as linhas DAQUELA sessao e preserva as outras, para que rodar a
+    mesma corrida duas vezes nao duplique faixa.
+    """
+    linhas = [l for l in cmp_tsv.read_text(encoding="utf-8").splitlines()[1:]
+              if l.strip()]
+    antigas = [r for r in ler_cmp_medido() if r["sessao"] != sessao]
+    fora = ["\t".join(CMP_CABECALHO)]
+    for r in antigas:
+        fora.append("\t".join(r.get(c, "") for c in CMP_CABECALHO))
+    for l in linhas:
+        ini, fim, tam, setor, byte = l.split("\t")
+        fora.append("\t".join([imagem, sessao, ini, fim, tam, setor, byte]))
+    CMP_MEDIDO_TSV.write_text("\n".join(fora) + "\n", encoding="utf-8")
+    # `is_relative_to` porque o teste aponta o alvo para um diretorio
+    # temporario; fora dele, o caminho relativo e o que se quer ler.
+    rel = (CMP_MEDIDO_TSV.relative_to(ROOT)
+           if CMP_MEDIDO_TSV.is_relative_to(ROOT) else CMP_MEDIDO_TSV)
+    print(f"analisar_io: {len(linhas)} faixa(s) de `{sessao}` -> {rel}")
+    return 0
+
+
+def veredito_das_reguas(todas_sessoes, cmp_medido) -> list[dict]:
+    """Por sessao: quantas faixas do `cmp` cabem nas escritas do trace.
+
+    E o mesmo calculo do `--conferir`, so que sobre o dado versionado e para
+    TODAS as sessoes de uma vez -- o `--conferir` responde uma corrida e some
+    com o terminal.
+    """
+    fora = []
+    for s in dict.fromkeys(r["sessao"] for r in todas_sessoes):
+        escritas = [(int(r["inicio"]), int(r["fim"]))
+                    for r in todas_sessoes
+                    if r["sessao"] == s and r["op"] == "W" and r["inicio"]]
+        if not escritas:
+            continue
+        mudou = [(int(r["inicio"]), int(r["fim"]))
+                 for r in cmp_medido if r["sessao"] == s]
+        uniao = unir_faixas(escritas)
+        dentro = [f for f in mudou
+                  if any(x <= f[0] and f[1] <= y for x, y in uniao)]
+        fora.append({"sessao": s, "escritas": len(escritas),
+                     "cmp": len(mudou), "dentro": len(dentro),
+                     "tem_cmp": bool(mudou)})
+    return fora
+
+
 AMOSTRA = 64
 OUT_CONTEUDO = ROOT / "wte" / "re" / "io-conteudo.tsv"
 
@@ -776,6 +843,8 @@ def gerar() -> str:
     ausentes_06 = {r["nome"]: r for r in tsv if r["registro"] == "ausente"}
     candidatos = {int(r["valor"]): r for r in tsv if r["registro"] == "candidato"}
 
+    vereditos = veredito_das_reguas(todas_sessoes, ler_cmp_medido())
+
     faixas = [f for f in medido if f["op"] in ("R", "W")]
     # Acao exercitada que nao tocou a imagem. "Nao gravou" e resultado, e sem
     # a linha ele seria indistinguivel de "nao foi exercitada".
@@ -818,6 +887,40 @@ def gerar() -> str:
     w("Então a régua é `strace` sobre o processo Wine, e o `cmp` fica como")
     w("segunda régua independente: toda faixa que mudou no arquivo tem de estar")
     w("contida numa faixa de escrita do trace.")
+    w("")
+    w("### As duas réguas, sessão a sessão")
+    w("")
+    w("A conferência roda no fim de cada corrida (`analisar_io.py --conferir`),")
+    w("e é ela que pegou os três defeitos de instrumento das passagens")
+    w("anteriores. O resultado dela morria no diretório da sessão, em `/tmp`:")
+    w("das cinco primeiras corridas, uma só teve o número registrado, em prosa")
+    w("([CORR-WTE-047](../../docs/tasks/CORR-WTE-047.md)). Agora o `cmp.tsv` de")
+    w("cada sessão é fundido em [`cmp-medido.tsv`](cmp-medido.tsv), e a linha")
+    w("abaixo é derivada dele — como o resto deste arquivo.")
+    w("")
+    w("| sessão | faixas do `cmp` | contidas nas escritas do trace | faixas de escrita |")
+    w("|---|---:|---:|---:|")
+    for v in vereditos:
+        cabem = (f"{v['dentro']}" if v["tem_cmp"]
+                 else "— **sem `cmp` versionado**")
+        w(f"| `{v['sessao']}` | {v['cmp']} | {cabem} | {v['escritas']} |")
+    w("")
+    fechadas = [v for v in vereditos if v["tem_cmp"] and v["dentro"] == v["cmp"]]
+    if len(fechadas) == len(vereditos):
+        w(f"**As duas réguas fecham nas {len(vereditos)} sessões que "
+          "escreveram.**")
+        w("Faixa do `cmp` que sobrasse significaria syscall perdida pelo")
+        w("trace, e nenhum número desta task valeria nada — é literalmente o")
+        w("que já aconteceu duas vezes, e as duas foram descobertas aqui.")
+    else:
+        w(f"**{len(vereditos) - len(fechadas)} sessão(ões) não fecha(m).** Ou o")
+        w("trace perdeu syscall, ou falta o `cmp` versionado daquela corrida.")
+        w("Enquanto estiver assim, a atribuição por ação não vale.")
+    w("")
+    w("O contrário — faixa de escrita do trace sem par no `cmp` — **não é")
+    w("erro**: é o editor gravando de volta exatamente o que leu, que é o")
+    w("comportamento que motivou trocar o `cmp` pelo `strace` como régua")
+    w("principal.")
     w("")
     w("### Um terceiro caminho que foi tentado e **derruba o app**")
     w("")
@@ -1108,6 +1211,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--conferir", nargs=2, type=Path,
                     metavar=("IO_TSV", "CMP_TSV"),
                     help="confere que o cmp cabe nas escritas do trace")
+    ap.add_argument("--fundir-cmp", type=Path, metavar="CMP_TSV",
+                    help="leva o cmp.tsv da sessao para wte/re/cmp-medido.tsv "
+                         "(exige --imagem e --sessao)")
     ap.add_argument("--check", action="store_true",
                     help="nao escreve; sai 2 se a saida divergir do commitado")
     args = ap.parse_args(argv)
@@ -1117,6 +1223,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.conferir:
         return conferir_reguas(*args.conferir)
+
+    if args.fundir_cmp:
+        if args.imagem == "?" or args.sessao == "?":
+            ap.error("--fundir-cmp exige --imagem e --sessao")
+        return fundir_cmp(args.fundir_cmp, args.imagem, args.sessao)
 
     if args.log:
         if not (args.marcas and args.tsv):

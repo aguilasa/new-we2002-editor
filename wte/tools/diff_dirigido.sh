@@ -54,6 +54,9 @@
 #   io.log     trace cru, grande, NAO versionado
 #   io.tsv     acao / op / offset / tamanho -- a evidencia
 #   cmp.tsv    faixas que mudaram de fato
+#
+# O `cmp.tsv` e fundido em wte/re/cmp-medido.tsv, que E versionado -- ele nao
+# se regenera sem Wine, como o io-medido.tsv (CORR-WTE-047).
 set -euo pipefail
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -268,4 +271,11 @@ with open(saida, 'w') as f:
 print(f"cmp: {len(faixas)} faixa(s) mudaram -> {saida}")
 PY
 python3 "$AQUI/analisar_io.py" --conferir "$SAIDA/io.tsv" "$SAIDA/cmp.tsv"
+# A segunda regua tem de deixar rastro versionado, e nao so passar na tela: o
+# `cmp.tsv` mora em /tmp e some, e das cinco primeiras sessoes so uma teve o
+# numero registrado -- em prosa, no Log de uma passagem (CORR-WTE-047). A
+# fusao e pela mesma porta por onde o trace entra no `io-medido.tsv`.
+python3 "$AQUI/analisar_io.py" --fundir-cmp "$SAIDA/cmp.tsv" \
+        --imagem "$(basename "$IMAGEM")" --sessao "$(basename "$SAIDA")"
 echo ">> pronto: $SAIDA"
+echo ">> lembre de commitar wte/re/cmp-medido.tsv -- ele nao se regenera sem Wine"
