@@ -9,11 +9,17 @@ dados, e não sobre forma.
 
 ## O oráculo aqui é o de formato
 
-Não é o `wte.exe` — esse não passa da tela de carga
-([`crash.md`](crash.md), [CORR-WTE-044](../../docs/tasks/CORR-WTE-044.md)).
-É o **`we2002_core`** deste repositório, cujo `Load`/`Save` já é
-byte-idêntico ao `ed.exe` nas duas ROMs. A pergunta que ele responde é
-*o que significam estes bytes*, e é exatamente a desta task.
+Não é o `wte.exe` — ele é o oráculo de **comportamento**, e a pergunta
+desta task é de **formato**. Ele é dirigível desde a
+[CORR-WTE-044](../../docs/tasks/CORR-WTE-044.md), com
+`roms/japanese-shift-jis.bin`, e mesmo assim não sabe dizer o que os
+bytes significam: mostra o que o editor **faz**, não o que o campo **é**
+([`crash-causa.md`](crash-causa.md) explica por que a ROM é essa).
+
+O oráculo daqui é o **`we2002_core`** deste repositório, cujo
+`Load`/`Save` já é byte-idêntico ao `ed.exe` nas duas ROMs. A pergunta
+que ele responde é *o que significam estes bytes*, e é exatamente a
+desta task.
 
 **O par é bilíngue de propósito:** o `fpc` lê o Pascal gerado, o `g++`
 lê o C++ original. Dois dumpers na mesma linguagem esconderiam erro de

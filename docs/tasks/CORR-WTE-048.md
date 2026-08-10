@@ -3,7 +3,7 @@ id: CORR-WTE-048
 title: "Correção: o `fase-3.md` ainda diz que o `wte.exe` não passa da tela de carga"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -102,19 +102,48 @@ Regerar (`python3 wte/tools/compare_dumps.py`, sem `--check`).
 
 ## Verificação
 
-- [ ] `grep -rn "tela de carga" wte/ docs/` só devolve documento que **narra** a
-      história (os `CORR-*`, o `crash.md`, o `crash-causa.md`), nunca afirmação
-      viva
-- [ ] `python3 wte/tools/compare_dumps.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "tela de carga" wte/ docs/` só devolve documento que **narra** a
+      história, nunca afirmação viva. Os sítios que sobraram, conferidos um a
+      um: `wte/re/offsets.md:306` (*"Isso acabou"*), `wte/re/crash-causa.md:160`
+      (o desfecho — a 19 *"volta a poder levar o editor além da tela de
+      carga"*), `docs/tasks/19-…:369,407` (Log da 3ª e da 4ª passagens),
+      `docs/tasks/progresso.md:346` (riscado, com a data da resolução) e os
+      `CORR-*`
+- [x] `python3 wte/tools/compare_dumps.py --check` verde; duas gerações dão o
+      mesmo md5 (`872a5645…`)
+- [x] `make -C wte check` verde — 383 testes, `rc=0`
+- [x] `roms/` intocada — a correção é de texto gerado
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-10
 
 **Resumo do que foi feito:**
 
+A abertura da seção "O oráculo aqui é o de formato" trocou de justificativa.
+Antes ela dizia que o `wte.exe` não serve *porque não passa da tela de carga*
+— afirmação que a CORR-WTE-044 aposentou, e com um link para essa mesma
+correção ao lado. Agora ela diz o que continua verdadeiro depois dela: o
+`wte.exe` é o oráculo de **comportamento**, e a pergunta desta task é de
+**formato**. Ele é dirigível, com `roms/japanese-shift-jis.bin`, e mesmo assim
+não sabe dizer o que os bytes significam — mostra o que o editor *faz*, não o
+que o campo *é*.
+
+O ponteiro para o `crash.md` deu lugar ao `crash-causa.md`, que é onde está a
+razão de a ROM ser a japonesa. O parágrafo do `we2002_core` como oráculo desta
+task ficou como estava, em bloco próprio.
+
+Isso importa para a [WTE-TASK-22](/docs/tasks/22-harness-golden.md): o gate
+dela depende de o `wte.exe` ser dirigível, e quem lesse esta seção antes sairia
+com a conclusão oposta.
+
 **Problemas encontrados:**
 
+Nenhum. A varredura por `"tela de carga"` devolveu mais cinco sítios além
+deste; todos narram a história com a resolução ao lado, e nenhum afirma o
+estado atual — estão listados na Verificação.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/compare_dumps.py` — o texto da seção do oráculo
+- `wte/re/fase-3.md` — regerado
