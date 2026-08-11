@@ -3,7 +3,7 @@ id: CORR-WTE-054
 title: "Correção: o `vmt.md` diz que todo número saiu do `vmt_probe.java`, e os votos da âncora não saíram"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -111,12 +111,57 @@ texto); o que não pode é continuar afirmado como medido sem medidor.
 - [ ] `make -C wte check` verde
 - [ ] nenhum trecho decompilado colado no `vmt.md` (§2, §8.10)
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-11
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+**Rota 1** — a votação foi para dentro do `vmt_probe.java`. Com a raiz do
+repositório no segundo argumento, o script lê o `published_methods.tsv` (dono de
+cada handler) e o `.dfm` do formulário (posição do componente na ordem plana do
+texto, que é a premissa sob teste), calcula `base = campo − 4·(posição−1)` para
+cada referência de campo **dentro da corrida medida**, e imprime o ranking. Sem
+o segundo argumento ele avisa que a votação não rodou, em vez de calar.
+
+Medido, rodando o probe sobre o projeto que o `run_headless.sh` monta:
+
+```
+vmt_probe: ANCORA: 115 componente(s) no MainForm.dfm, 37 handler(s) com dono no TSV
+vmt_probe: ANCORA: 108 referencia(s) de campo dentro da corrida votaram (9 sem posicao no DFM)
+vmt_probe: ANCORA: 69 candidato(s) a base; os cinco mais votados:
+  base +0x260  4 voto(s)
+  base +0x264  4 voto(s)
+  base +0x290  4 voto(s)
+  base +0x268  3 voto(s)
+  base +0x26c  3 voto(s)
+vmt_probe: ANCORA: 1o e 2o colocados a 4 byte(s) um do outro
+```
+
+**A conclusão não mudou; um número mudou.** "4 votos" e "1º e 2º a 4 bytes"
+reproduzem; o `~150` era estimativa e a medida dá **108** — o script conta
+referência distinta por handler e só dentro de `+0x2f0..+0x4b0`. O `vmt.md`
+publica os 108, os 69 candidatos e os "9 sem posição no DFM" (dono que é o
+próprio formulário, como `FormCreate`), e o Log da WTE-TASK-24 foi corrigido no
+mesmo passo, com a nota de que o `~150` era conta de fora.
+
+**Terceira causa achada ao escrever o script:** o `MainForm.dfm` tem 117 linhas
+`object` para 115 componentes nomeados — uma é o formulário e outra é um
+`object TStaticText` **sem `Name`** (linha 330). Componente anônimo não ganha
+campo publicado, então posição contada por linha de `object` erra em 1 dali para
+a frente. Está no `vmt.md` junto das outras duas.
+
+Os números já conferidos não se moveram: 217 chamadas, 189 com campo, corrida de
+113 slots, dez slots de VMT.
+
+**Problemas encontrados:** Nenhum.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/tools/ghidra/vmt_probe.java` | modificado — a votação da âncora, e o cabeçalho que diz por que ela mora ali |
+| `wte/re/vmt.md` | modificado — a saída da votação, a terceira causa, a frase de proveniência e o "Como refazer" |
+| `docs/tasks/24-ghidra-convencao-borland.md` | modificado — o `~150` do Log virou 108 medido |
+| `docs/tasks/CORR-WTE-054.md` | `status: concluído` e este Log |
+| `docs/tasks/correcoes-progresso.md` | `[x]` na tabela e no checklist |

@@ -4,9 +4,11 @@ Produto da [WTE-TASK-24](../../docs/tasks/24-ghidra-convencao-borland.md).
 Referência: `PLAN-WTE-LAZARUS.md` §8.1, §8.2, §8.3.
 
 Todo número deste arquivo saiu de `wte/tools/ghidra/vmt_probe.java` e de
-`decompile_one.java`, rodando sobre o projeto que o `run_headless.sh` monta.
-Nenhum veio de leitura de decompilado, e **nenhum trecho decompilado foi colado
-aqui** — recuperação de especificação, não transcrição (§2, §8.10).
+`decompile_one.java`, rodando sobre o projeto que o `run_headless.sh` monta —
+**inclusive os votos da âncora**, que até a
+[CORR-WTE-054](../../docs/tasks/CORR-WTE-054.md) eram os dois únicos calculados
+fora. Nenhum veio de leitura de decompilado, e **nenhum trecho decompilado foi
+colado aqui** — recuperação de especificação, não transcrição (§2, §8.10).
 
 ---
 
@@ -116,11 +118,27 @@ O que falta é a **âncora**: o deslocamento do primeiro campo.
 
 Tentou-se ancorar pelo dono de cada handler — o `published_methods.tsv` diz de
 que componente cada handler é, o DFM dá a posição daquele componente, e
-`base = campo − 4·(posição−1)` deveria convergir. **Não convergiu:** o candidato
-mais votado teve **4 votos** entre ~150 referências, e os dois primeiros
-colocados ficaram a 4 bytes um do outro.
+`base = campo − 4·(posição−1)` deveria convergir. **Não convergiu**, e quem
+mede isso é o próprio `vmt_probe.java`, com a raiz do repositório no segundo
+argumento:
 
-Duas causas, as duas visíveis nos dados:
+```
+vmt_probe: ANCORA: 115 componente(s) no MainForm.dfm, 37 handler(s) com dono no TSV
+vmt_probe: ANCORA: 108 referencia(s) de campo dentro da corrida votaram (9 sem posicao no DFM)
+vmt_probe: ANCORA: 69 candidato(s) a base; os cinco mais votados:
+  base +0x260  4 voto(s)
+  base +0x264  4 voto(s)
+  base +0x290  4 voto(s)
+  base +0x268  3 voto(s)
+  base +0x26c  3 voto(s)
+vmt_probe: ANCORA: 1o e 2o colocados a 4 byte(s) um do outro
+```
+
+**69 candidatos para 108 votos, e o mais votado tem 4.** Uma âncora que fechasse
+teria um candidato com dezenas. Os "9 sem posição no DFM" são handlers cujo dono
+não é componente filho — `FormCreate` e `FormShow` são do próprio formulário.
+
+Três causas, as três visíveis nos dados:
 
 - **Handler não toca necessariamente o próprio componente.** `colorearClick` é o
   `OnClick` de `colorear`, e não lê `colorear`: lê os quatro campos que ele vai
@@ -129,6 +147,11 @@ Duas causas, as duas visíveis nos dados:
   declaração dos campos quando há `TGroupBox` com filhos, e o `MainForm` tem 10
   group boxes. O empate a 4 bytes entre os dois primeiros candidatos tem
   exatamente essa cara.
+- **Componente sem `Name`.** O `MainForm.dfm` tem 117 linhas `object` e **115**
+  componentes nomeados: uma é o formulário e outra é um `object TStaticText`
+  sem nome (linha 330). Componente anônimo entra na contagem de componentes e
+  **não** ganha campo publicado, então qualquer posição contada por linha de
+  `object` erra em 1 dali para a frente. O script conta os nomeados, por isso.
 
 Sinal de que a corrida é real, apesar disso: `paderecha`, `paderechaeizquierda`
 e `paizquierda` são componentes **vizinhos** no DFM, e os campos que os
@@ -172,6 +195,17 @@ bash wte/tools/ghidra/run_headless.sh                        # importa e nomeia
 bash wte/tools/ghidra/run_headless.sh --decompile colorearClick
 ```
 
-O `vmt_probe.java` roda pelo `analyzeHeadless` com `-postScript vmt_probe.java
-<Formulario>`; ele imprime a tabela de campos, a de slots e, no fim, os campos
-por handler — que é a entrada da tentativa de âncora.
+O `vmt_probe.java` roda pelo `analyzeHeadless`; ele imprime a tabela de campos,
+a de slots, os campos por handler — a entrada da tentativa de âncora — e, com a
+raiz do repositório no **segundo argumento**, a votação da âncora em si:
+
+```sh
+GHIDRA=$HOME/.local/opt/ghidra_12.1.2_PUBLIC
+"$GHIDRA/support/analyzeHeadless" work/ghidra wte \
+  -process we-team-editor.exe -noanalysis \
+  -scriptPath "$PWD/wte/tools/ghidra" \
+  -postScript vmt_probe.java MainForm "$PWD" \
+  -readOnly
+```
+
+Sem o segundo argumento ele avisa que a votação não rodou, em vez de calar.

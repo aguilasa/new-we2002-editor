@@ -147,7 +147,10 @@ resolve as cinco.
   campos publicados formam corrida contígua na ordem do DFM, e a corrida existe
   (`+0x2f0` a `+0x4b0` = 113 slots de 4 bytes contra 115 componentes filhos),
   mas a **âncora** não. Tentou-se ancorar pelo dono de cada handler; o candidato
-  mais votado teve 4 votos entre ~150 referências, porque handler não toca
+  mais votado teve 4 votos entre 108 referências, e são 69 candidatos — número
+  que a CORR-WTE-054 devolveu ao `vmt_probe.java`, que agora vota sozinho
+  (o `~150` desta linha era estimativa de conta feita fora) —, porque handler
+  não toca
   necessariamente o próprio componente (`colorearClick` não lê `colorear`) e
   porque o aninhamento em `TGroupBox` desloca a ordem. Rota escolhida mesmo
   assim: **2**, porque a rota 1 resolveria a classe e não é a classe que falta —
