@@ -91,8 +91,11 @@ Faz importação, análise e aplicação dos nomes num passo. O que ele fixa, e 
    detecta `windows` sozinho e ficaria em `__cdecl`.
 4. Analisar com os padrões.
 5. **Window → Script Manager**, adicionar `wte/tools/ghidra/` ao *Script
-   Directories*, e rodar `apply_names.py` com a raiz do repositório como
-   argumento.
+   Directories*, e rodar `apply_names.java` com a raiz do repositório como
+   argumento. **Ser `.java` não pede nada a mais:** o Ghidra compila
+   GhidraScript em Java sozinho, com o JDK do `launch.properties` — é o mesmo
+   motivo de a troca de `.py` por `.java` não ter trazido dependência nova (o
+   Ghidra 12 largou o Jython, e `.py` passaria a exigir `pyghidra` + JPype).
 
 ### Se o projeto já existe com o cspec errado
 
@@ -104,7 +107,7 @@ inferência antiga. **Reimporte.** É por isso que o banco não é versionado e 
 
 ## A guarda que impede o erro silencioso
 
-O `apply_names.py` **aborta** se o cspec não for `borlandcpp`:
+O `apply_names.java` **aborta** se o cspec não for `borlandcpp`:
 
 ```
 apply_names: ABORTADO: cspec e 'windows', nao 'borlandcpp'.

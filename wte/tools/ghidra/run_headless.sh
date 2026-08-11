@@ -4,7 +4,7 @@
 # O banco do Ghidra NAO e versionado: fica em `work/ghidra/`, que o .gitignore
 # cobre. Isso e decisao, nao descuido -- e um banco binario de centenas de MB
 # que muda a cada analise. O que fica versionado e ESTE script mais o
-# `apply_names.py`, que juntos reconstroem o projeto inteiro em um comando.
+# `apply_names.java`, que juntos reconstroem o projeto inteiro em um comando.
 #
 #   bash wte/tools/ghidra/run_headless.sh              # importa e analisa
 #   bash wte/tools/ghidra/run_headless.sh --decompile <simbolo>

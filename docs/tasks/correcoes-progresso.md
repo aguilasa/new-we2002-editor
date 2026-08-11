@@ -75,7 +75,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-053](/docs/tasks/CORR-WTE-053.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | A seção 2 descreve o controle como uma faixa de 11.952 bytes; o gate declara nove faixas e 11.955, e nenhum dos dois textos diz de qual imagem fala | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-054](/docs/tasks/CORR-WTE-054.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `vmt.md` diz que todo número saiu do `vmt_probe.java`, e os votos da âncora (4 entre ~150) não têm ferramenta que os produza | Alta | [x] concluída | 2026-08-11 |
 | [CORR-WTE-055](/docs/tasks/CORR-WTE-055.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | A seção 4 do enunciado chama de 322 os imports de `rtl60`/`vcl60`; são 267, e o Log da própria task diz 267 | Baixa | [x] concluída | 2026-08-11 |
-| [CORR-WTE-056](/docs/tasks/CORR-WTE-056.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `borland_cc.md` e o `run_headless.sh` mandam rodar `apply_names.py`, e o script é `.java` | Baixa | [ ] pendente | — |
+| [CORR-WTE-056](/docs/tasks/CORR-WTE-056.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `borland_cc.md` e o `run_headless.sh` mandam rodar `apply_names.py`, e o script é `.java` | Baixa | [x] concluída | 2026-08-11 |
 
 ## Checklist
 
@@ -133,7 +133,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-053 — reescrever a seção 2 da 22 com as nove faixas, os 11.955 bytes e a imagem de cada medida
 - [x] CORR-WTE-054 — pôr a votação da âncora no `vmt_probe.java`, ou dizer no `vmt.md` de onde os votos vieram
 - [x] CORR-WTE-055 — trocar 322 por 267 na seção 4 da 24, dizendo que 322 é o total
-- [ ] CORR-WTE-056 — trocar `apply_names.py` por `.java` nos três sítios do procedimento do Ghidra
+- [x] CORR-WTE-056 — trocar `apply_names.py` por `.java` nos três sítios do procedimento do Ghidra
 
 ## Detalhes por correção
 
