@@ -23,7 +23,17 @@ Entao a divisao e esta, e ela e deliberada:
 | O que | Como |
 |---|---|
 | as cinco barras de forca | **medido**, em pixels, e reprova se divergir |
-| os campos de texto | montagem lado a lado, para olho humano |
+| o estado de habilitacao | **medido**, por mudanca de aparencia (`--habilitacao`) |
+| os campos de texto, os 23 dorsais, a lista de jogadores | montagem lado a lado, para olho humano |
+
+## O criterio enumera cinco grupos, e o recorte medido cobre dois
+
+A [CORR-WTE-057](../../docs/tasks/CORR-WTE-057.md) achou o buraco: o recorte de
+520x240 termina em y 240, e a `lista_jugadores_1` esta em y 392 e os
+`dorsal1..23` em y 432. Tres passagens marcaram o criterio `[x]` sem que os dois
+grupos tivessem sido olhados uma vez. A montagem passou a sair da janela
+**inteira**, e `confere_cobertura` reprova a montagem que nao os alcance --
+recorte curto volta a ser erro dito, nao grupo silenciosamente ausente.
 
 A barra e o alvo certo para a parte medida: a largura e `11*v + 9` com `v`
 vindo do dado, entao ela e **numero do jogo virado pixel**. Se o port pegou o
@@ -82,6 +92,99 @@ TOLERANCIA_PX = 4
 
 BARRAS = 5
 NOMES_DAS_BARRAS = ("ataque", "defesa", "equipe", "velocidade", "tecnica")
+
+# --------------------------------------------------------- estado de controle --
+#
+# As coordenadas sao de CLIENTE do `MainForm`, somadas pela cadeia de pais do
+# `wte/re/dfm/MainForm.dfm` -- `GroupBox4` em (216, 8), `grupo_barras` em
+# (8, 72), `GroupBox1` em (8, 320). O `Left`/`Top` do proprio formulario
+# (132, 72) NAO entra: e posicao de tela, nao deslocamento de filho. Somar o do
+# formulario foi o primeiro erro desta medicao, e ele passa despercebido porque
+# o resultado continua parecendo coordenada.
+#
+# `ANCORA` calibra a captura: `barra0` esta em (92, 90) no DFM, e a primeira
+# banda laranja detectada da a mesma coisa na imagem. A diferenca e o
+# deslocamento do cliente dentro da janela capturada -- medido em 2026-08-11:
+# (0, 0) no oraculo e (6, 6) no port, que e a borda que o gtk2 desenha e o Wine
+# nao. Sem calibrar, todo retangulo do port sai 6 px torto.
+ANCORA = (92, 90)
+
+# **A deriva, e por que a faixa medida termina em 240.** O deslocamento do port
+# NAO e constante: o gtk2 desenha cada linha um pouco mais alta que o Win32, e
+# o erro se acumula para baixo. Medido na mesma captura de 2026-08-11, pelos
+# topos das cinco barras e pela faixa dos dorsais:
+#
+#     barra0  y  90 -> deriva  6      barra3  y 138 -> deriva  8
+#     barra1  y 106 -> deriva  6      barra4  y 154 -> deriva  8
+#     barra2  y 122 -> deriva  7      dorsais y 432 -> deriva 21
+#
+# Ate y 240 a deriva cabe em 3 px sobre controle de 16 a 25 px de altura, e o
+# retangulo do DFM ainda nomeia o controle certo. Depois dela nao: 21 px de
+# deriva sobre um botao de 25 mede a vizinhanca. Por isso o que esta abaixo e
+# declarado `fora_da_faixa` e vai para o olho humano na montagem -- e nao
+# medido com regua que ali nao vale.
+FAIXA_CALIBRADA_Y = 240
+
+# A altura do recorte `topo` que o `compara_tela.sh` corta, e a janela em que a
+# ancora e procurada. Tem de casar com o `REC_H` de la.
+REC_ALTURA_MEDIDA = 240
+
+# Grupos:
+#   segue_nacional  o handler faz `.Enabled := nacional` -- tem de MUDAR de
+#                   aparencia entre um time nacional e o time-modelo
+#   sempre_ligado   `.Enabled := True` incondicional -- NAO pode mudar. Os
+#                   `etiq_nombreN` sao a assimetria medida do original: o campo
+#                   segue `nacional`, o rotulo ao lado nao
+#   pendente_32     `.Visible := nacional`, mas quem DESENHA e a WTE-TASK-32.
+#                   Medido e relatado, nunca reprova
+#   conteudo        o texto muda junto com o time, entao mudanca de pixel nao
+#                   distingue habilitacao de conteudo. Olho humano, na montagem
+#   fora_da_faixa   abaixo de `FAIXA_CALIBRADA_Y`, onde a deriva do port passa
+#                   de 20 px. Olho humano, pelo motivo dito ali em cima
+CONTROLES = {
+    "sel_barra0":           (16,  88,  73, 16, "segue_nacional"),
+    "sel_barra1":           (16, 104,  73, 16, "segue_nacional"),
+    "sel_barra2":           (16, 120,  73, 16, "segue_nacional"),
+    "sel_barra3":           (16, 136,  73, 16, "segue_nacional"),
+    "sel_barra4":           (16, 152,  73, 16, "segue_nacional"),
+    "track_barra":          (96, 184, 105, 25, "segue_nacional"),
+    "boton_barras2iso":     (16, 184,  73, 25, "segue_nacional"),
+    "iguala_nombres":      (344, 184,  73, 25, "segue_nacional"),
+    "boton_nombres2iso":   (432, 184,  73, 25, "segue_nacional"),
+    "colorear":            (224, 184,  97, 25, "segue_nacional"),
+    "etiq_nombre1":        (344,  64,  41, 17, "sempre_ligado"),
+    "etiq_nombre2":        (344, 104,  41, 17, "sempre_ligado"),
+    "etiq_nombre3":        (344, 144,  41, 17, "sempre_ligado"),
+    "boton_mcr":            (16, 248,  25, 25, "fora_da_faixa"),
+    "boton_dialogo_tex":   (480, 248,  25, 25, "fora_da_faixa"),
+    "grabar_memory":        (96, 280,  25, 25, "fora_da_faixa"),
+    "grabar_camiseta":     (400, 280,  25, 25, "fora_da_faixa"),
+    "parriba":             (160, 336,  33, 49, "fora_da_faixa"),
+    "mostrar_estrategia_1": (16, 360,  25, 21, "fora_da_faixa"),
+    "mostrar_jugador_1":    (16, 392,  25, 21, "fora_da_faixa"),
+    "bandera":             (232,  36,  80, 48, "pendente_32"),
+    "home1":               (232, 104,  80, 42, "pendente_32"),
+    "home2":               (232, 146,  80, 22, "pendente_32"),
+    "banderita1":          (122, 339,  30, 12, "fora_da_faixa"),
+    "edit_nombre1":        (392,  64, 113, 21, "conteudo"),
+    "edit_nombre2":        (392, 104, 113, 21, "conteudo"),
+    "edit_nombre3":        (392, 144,  33, 21, "conteudo"),
+    "base_team":            (16, 336,  98, 23, "conteudo"),
+    "lista_jugadores_1":    (48, 392, 129, 21, "conteudo"),
+}
+
+# O `punto` (TShape de 2x2 em (312, 125)) fica de fora: dois pixels nao
+# sobrevivem a calibracao de 1 px, e ele e da mesma WTE-TASK-32 dos outros.
+
+# Quantos pixels precisam diferir para a regiao contar como mudada. Zero seria
+# certo em teoria -- a mesma janela, o mesmo lado, renderizacao determinista --
+# e 4 e a folga contra 1 px de calibracao numa borda.
+LIMIAR_MUDANCA = 4
+
+# O ultimo pixel que a montagem TEM de conter, em coordenadas de cliente: a base
+# dos `dorsal1..23` (y 432 + 17). Abaixo disso o criterio da WTE-TASK-25 fica
+# com dois grupos por olhar, que foi o defeito da CORR-WTE-057.
+COBERTURA_MINIMA_Y = 449
 
 
 class TelaError(Exception):
@@ -244,6 +347,163 @@ def montagem(oraculo, port, destino: Path) -> None:
     alvo.save(destino)
 
 
+# ------------------------------------------------ calibracao e cobertura --
+def calibra(img, rotulo: str) -> tuple[int, int]:
+    """`(dx, dy)` do cliente dentro da janela capturada, pela ancora `barra0`.
+
+    O oraculo da (0, 0) e o port da (6, 6): o gtk2 desenha uma borda que o Wine
+    nao desenha. Sem isso, comparar um retangulo de DFM no port compara a
+    vizinhanca dele.
+    """
+    topo = img.crop((0, 0, min(FAIXA_X[1] + 20, img.width),
+                     min(REC_ALTURA_MEDIDA, img.height)))
+    achadas = bandas(topo)
+    if not achadas:
+        raise TelaError(
+            f"{rotulo}: nenhuma banda de barra no canto superior -- sem a "
+            f"ancora `barra0` nao ha como calibrar o recorte")
+    y0 = achadas[0][0]
+    linha = min(y0 + 3, topo.height - 1)
+    xs = [x for x in range(FAIXA_X[0], min(FAIXA_X[1], topo.width))
+          if e_preenchimento(topo.getpixel((x, linha)))]
+    if not xs:
+        raise TelaError(f"{rotulo}: a banda da ancora nao tem pixel na linha "
+                        f"{linha} -- calibracao impossivel")
+    return min(xs) - ANCORA[0], y0 - ANCORA[1]
+
+
+def confere_cobertura(img, rotulo: str, off: tuple[int, int]) -> None:
+    """A montagem tem de alcancar os `dorsal1..23`, ou nao ha o que olhar.
+
+    O criterio da WTE-TASK-25 enumera cinco grupos; o recorte de 520x240 cobria
+    dois deles e ninguem notou por tres passagens. Aqui recorte curto vira erro
+    dito.
+    """
+    preciso = COBERTURA_MINIMA_Y + off[1]
+    if img.height < preciso:
+        raise TelaError(
+            f"{rotulo}: a captura tem {img.height} px de altura e a base dos "
+            f"`dorsal1..23` esta em {preciso} -- os 23 numeros de camisa e a "
+            f"`lista_jugadores_1` ficariam de fora da montagem")
+
+
+# --------------------------------------------- o estado de habilitacao --
+def regiao(img, rect, off: tuple[int, int], rotulo: str):
+    x, y, w, h = rect[0] + off[0], rect[1] + off[1], rect[2], rect[3]
+    if x < 0 or y < 0 or x + w > img.width or y + h > img.height:
+        raise TelaError(
+            f"{rotulo}: o retangulo ({x}, {y}, {w}, {h}) cai fora da captura "
+            f"de {img.width}x{img.height}")
+    return img.crop((x, y, x + w, y + h))
+
+
+def difere(a, b, rect, off_a, off_b, rotulo: str) -> int:
+    """Pixels diferentes na MESMA regiao de duas capturas do MESMO lado."""
+    ra = regiao(a, rect, off_a, rotulo + "/a")
+    rb = regiao(b, rect, off_b, rotulo + "/b")
+    return sum(1 for pa, pb in zip(ra.getdata(), rb.getdata()) if pa != pb)
+
+
+def confere_faixa() -> None:
+    """Nenhum controle medido pode cair abaixo de `FAIXA_CALIBRADA_Y`.
+
+    Guarda contra o modo de falha mais provavel desta tabela: alguem acrescenta
+    um controle de y grande, a regua nao vale la, e o veredito sai com cara de
+    medida.
+    """
+    fora = [n for n, r in CONTROLES.items()
+            if r[4] in ("segue_nacional", "sempre_ligado", "pendente_32")
+            and r[1] + r[3] > FAIXA_CALIBRADA_Y]
+    if fora:
+        raise TelaError(
+            f"{', '.join(sorted(fora))}: medidos, mas abaixo de y "
+            f"{FAIXA_CALIBRADA_Y}, onde a deriva do port passa de 20 px. "
+            f"Ou o grupo vira `fora_da_faixa`, ou a calibracao passa a ter "
+            f"duas ancoras")
+
+
+def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
+    """Que controles mudam de aparencia quando `nacional` vira falso.
+
+    A regua nao e a cor do cinza -- gtk2 e Win32 nao desenham o mesmo cinza, e
+    exigir isso seria reprovar o port por ser gtk2. A regua e **mudou ou nao
+    mudou**, dentro de cada lado, entre um time nacional (indice 2) e o
+    time-modelo (indice 95, `95 Master L. `). O conjunto que muda de um lado tem
+    de ser o conjunto que muda do outro.
+
+    Isso responde a unica pergunta que a secao **Saida** da spec deixou aberta:
+    `TControl::SetEnabled` nao tem uma `call rel32` sequer na `.text`, entao os
+    ~27 `.Enabled :=` do Pascal nunca foram confirmados no disassembly.
+    """
+    offs = {
+        "nac_orac": calibra(nac_orac, "oraculo/nacional"),
+        "nac_port": calibra(nac_port, "port/nacional"),
+        "mod_orac": calibra(mod_orac, "oraculo/modelo"),
+        "mod_port": calibra(mod_port, "port/modelo"),
+    }
+    confere_faixa()
+    linhas, erros = [], []
+    for nome, rect in CONTROLES.items():
+        grupo = rect[4]
+        if grupo in ("conteudo", "fora_da_faixa"):
+            linhas.append({
+                "nome": nome, "grupo": grupo, "oraculo": None, "port": None,
+                "veredito": ("olho humano" if grupo == "conteudo"
+                             else "olho humano (deriva do port)")})
+            continue
+        n_orac = difere(nac_orac, mod_orac, rect, offs["nac_orac"],
+                        offs["mod_orac"], nome)
+        n_port = difere(nac_port, mod_port, rect, offs["nac_port"],
+                        offs["mod_port"], nome)
+        m_orac = n_orac > LIMIAR_MUDANCA
+        m_port = n_port > LIMIAR_MUDANCA
+        esperado = grupo != "sempre_ligado"
+        if m_orac != m_port and grupo != "pendente_32":
+            veredito = "DIVERGE"
+            erros.append(
+                f"{nome}: oraculo {'muda' if m_orac else 'nao muda'} "
+                f"({n_orac} px), port {'muda' if m_port else 'nao muda'} "
+                f"({n_port} px)")
+        elif m_orac != m_port:
+            veredito = "pendente da WTE-TASK-32"
+        elif m_orac != esperado and grupo == "segue_nacional":
+            veredito = "CONTRARIA A SPEC"
+            erros.append(
+                f"{nome}: a spec diz `.Enabled := nacional`, e nenhum dos dois "
+                f"lados muda ({n_orac} px / {n_port} px)")
+        elif m_orac != esperado and grupo == "sempre_ligado":
+            veredito = "CONTRARIA A SPEC"
+            erros.append(
+                f"{nome}: a spec diz `.Enabled := True` incondicional, e os "
+                f"dois lados mudam ({n_orac} px / {n_port} px)")
+        else:
+            veredito = "bate"
+        linhas.append({"nome": nome, "grupo": grupo, "oraculo": n_orac,
+                       "port": n_port, "veredito": veredito})
+    return {"linhas": linhas, "erros": erros}
+
+
+def relata_habilitacao(r: dict) -> int:
+    print("compara_tela --habilitacao: time nacional x time-modelo, "
+          "pixels que mudam por controle")
+    for l in r["linhas"]:
+        if l["oraculo"] is None:
+            print(f"  {l['nome']:22s} {l['grupo']:14s} "
+                  f"{'-':>7s} {'-':>7s}  {l['veredito']}")
+        else:
+            print(f"  {l['nome']:22s} {l['grupo']:14s} "
+                  f"{l['oraculo']:7d} {l['port']:7d}  {l['veredito']}")
+    if r["erros"]:
+        print("DIVERGE:", file=sys.stderr)
+        for e in r["erros"]:
+            print("  " + e, file=sys.stderr)
+        return 1
+    medidos = sum(1 for l in r["linhas"] if l["oraculo"] is not None)
+    print(f"  PASSOU: {medidos} controles medidos, o conjunto que muda e o "
+          f"mesmo nos dois lados")
+    return 0
+
+
 def relata(m: dict) -> int:
     print(f"compara_tela: time {m['indice']}")
     print(f"  barras oraculo: {m['oraculo']}")
@@ -316,6 +576,8 @@ def autoteste() -> int:
 def main(argv: list[str]) -> int:
     if argv == ["--check"]:
         return autoteste()
+    if argv[:1] == ["--habilitacao"]:
+        return main_habilitacao(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("oraculo", type=Path)
     ap.add_argument("port", type=Path)
@@ -324,6 +586,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--dump", type=Path,
                     help="saida do dump_estado.pas, para confrontar a largura "
                          "invertida com o que a camada de dados carregou")
+    ap.add_argument("--cheia-oraculo", type=Path,
+                    help="captura da janela INTEIRA do oraculo; e dela que sai "
+                         "a montagem, porque o recorte medido para em y 240 e "
+                         "os dorsais estao em y 432")
+    ap.add_argument("--cheia-port", type=Path)
     args = ap.parse_args(argv)
     try:
         o = carrega(args.oraculo)
@@ -332,14 +599,48 @@ def main(argv: list[str]) -> int:
         if args.saida:
             args.saida.mkdir(parents=True, exist_ok=True)
             destino = args.saida / f"time-{args.indice}-lado-a-lado.png"
-            montagem(o, p, destino)
-            print(f"  montagem: {destino}")
+            if args.cheia_oraculo and args.cheia_port:
+                oc, pc = carrega(args.cheia_oraculo), carrega(args.cheia_port)
+                confere_cobertura(oc, "oraculo", calibra(oc, "oraculo"))
+                confere_cobertura(pc, "port", calibra(pc, "port"))
+                montagem(oc, pc, destino)
+                print(f"  montagem: {destino} (janela inteira -- com os 23 "
+                      f"dorsais e a lista de jogadores)")
+            else:
+                montagem(o, p, destino)
+                print(f"  montagem: {destino} (SO o recorte medido -- sem os "
+                      f"dorsais nem a lista de jogadores)")
         if args.dump:
             m["dump"] = confere_contra_dump(m, args.dump)
     except TelaError as exc:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2
     return relata(m)
+
+
+def main_habilitacao(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(
+        prog="compara_tela.py --habilitacao",
+        description="Compara o estado de habilitacao entre um time nacional e "
+                    "o time-modelo, nos dois lados.")
+    ap.add_argument("nacional_oraculo", type=Path)
+    ap.add_argument("nacional_port", type=Path)
+    ap.add_argument("modelo_oraculo", type=Path)
+    ap.add_argument("modelo_port", type=Path)
+    ap.add_argument("--saida", type=Path)
+    args = ap.parse_args(argv)
+    try:
+        no, np_ = carrega(args.nacional_oraculo), carrega(args.nacional_port)
+        mo, mp = carrega(args.modelo_oraculo), carrega(args.modelo_port)
+        r = compara_habilitacao(no, np_, mo, mp)
+        if args.saida:
+            args.saida.mkdir(parents=True, exist_ok=True)
+            montagem(mo, mp, args.saida / "modelo-lado-a-lado.png")
+            print(f"  montagem: {args.saida / 'modelo-lado-a-lado.png'}")
+    except TelaError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return relata_habilitacao(r)
 
 
 if __name__ == "__main__":

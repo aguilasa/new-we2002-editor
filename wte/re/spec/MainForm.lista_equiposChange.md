@@ -62,11 +62,16 @@ Com `ItemIndex > 62` — as seleções clássicas e os clubes de ML — o `home1
 reposicionado: `Left := 7`, `Width := 100`, e o `punto` some. Abaixo disso,
 `Left := 16`, `Width := 80`, `punto` visível.
 
-**Evidência:** nao medido
+**Evidência:** observacao de tela
 
-> **Rebaixada de `disassembly lido` para `nao medido` em 2026-08-11.** Os
-> `.Enabled :=` deste bloco não se sustentam: `TControl::SetEnabled` tem **zero**
-> chamadas na `.text` inteira. Ver a seção Notas.
+> **Rebaixada de `disassembly lido` para `nao medido` em 2026-08-11**, porque
+> `TControl::SetEnabled` tem **zero** chamadas na `.text` inteira, e **subida
+> para `observacao de tela` no mesmo dia** pela
+> [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md): o caminho pelo qual o
+> original habilita controle continua sem aparecer nos bytes, mas o **efeito**
+> passou a ser medido na tela do próprio oráculo, controle a controle — treze
+> deles, na seção "O estado de habilitação" abaixo. Os que ficaram fora estão
+> nomeados lá, com o motivo. Ver também a seção Notas.
 
 ## Bytes tocados
 
@@ -154,19 +159,38 @@ A seção **Saída** desta spec lista uma dúzia de `.Enabled := verdadeiro` com
 evidência `disassembly lido`. Com zero chamadas a `SetEnabled`, ou o original
 liga esses controles por outro caminho — RTTI (`Typinfo` **é** importado), o
 `Parent`, ou o `TWinControl` —, ou aquela leitura foi inferida da tela e
-rotulada como disassembly. **Enquanto não se souber qual, a seção Saída não é
-medida**, e o Pascal já escrito herda a dúvida: ele reproduz exatamente esses
-`.Enabled :=`.
+rotulada como disassembly. **Qual dos dois, continua sem resposta nos bytes.**
+
+O que mudou com a [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) é que o
+**efeito** deixou de ser suposição: comparando a tela do oráculo entre um time
+nacional e o time-modelo, treze controles têm veredito medido, e a seção Saída
+subiu de `nao medido` para `observacao de tela`. O caminho pelo qual o original
+liga o controle segue desconhecido; o que ele liga e desliga, não mais.
 
 É o custo de ainda não ter conferido contra a tela, e a razão de o veredito
 continuar `aberto`.
 
-## A conferência de tela — três times, e os dois erros que ela achou
+## A conferência de tela — os cinco grupos, e os quatro erros que ela achou
 
 Dirigida por [`../../tools/compara_tela.sh`](../../tools/compara_tela.sh), que
 leva os dois lados ao mesmo índice e **confirma o do port pelo número de
 disparos no `trace.log`** antes de comparar; a medição é do
 [`compara_tela.py`](../../tools/compara_tela.py). ROM japonesa.
+
+O critério da [WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md) enumera
+cinco grupos de campo. Por três passagens a conferência cobriu **três** — o
+recorte comparado tinha 240 px de altura, e a `lista_jugadores_1` está em y 392
+e os `dorsal1..23` em y 432. A
+[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) abriu os outros dois, e cada
+um trouxe um erro do port que nada mais pegaria:
+
+| Grupo do critério | Régua | Veredito |
+|---|---|---|
+| nome do time nos três campos | montagem, olho humano | bate (com a divergência de filtro do `Nome1`, já registrada) |
+| as cinco barras de força | pixel, nos três times | **bate**, 15 larguras idênticas |
+| os 23 números de camisa | montagem, olho humano | **DIVERGE — o port mostra o byte cru, o original mostra byte + 1** |
+| a lista de jogadores | montagem, olho humano | bate |
+| o estado de habilitação | pixel, 13 controles | **DIVERGE em um: `iguala_nombres`** |
 
 | Time | Barras (px), oráculo e port | |
 |---|---|---|
@@ -194,6 +218,72 @@ E a comparação achou **dois erros que nenhum teste pegaria**:
    `AGN` na tela do original. **Testar uma família só de time não teria pego.**
 
 Os dois compilavam, não quebravam teste nenhum, e estavam errados.
+
+### Os 23 números de camisa — o port mostra um a menos
+
+Time 63 (Manchester), a faixa dos `dorsal1..23` lida das duas capturas:
+
+```text
+oráculo  1  5  6  3  2 11  4 16  7 18 10 24 22 27 14 12  8 25 15 19  9 20 17
+port     0  4  5  2  1 10  3 15  6 17  9 23 21 26 13 11  7 24 14 18  8 19 16
+```
+
+**Cada número do port é o do oráculo menos um**, e o mesmo desconto aparece na
+legenda realçada de `MarcaCamisa(1)` (oráculo `1`, port `0`) e no contador
+`SPC/Livre` do canto (oráculo `1`, port `0`).
+
+O byte guardado é 0-based, e quem soma é a tela. O outro editor do mesmo jogo
+faz igual, e ali está escrito: `legacy/mfc/edDlg.cpp:2877` monta a legenda com
+`_itoa(squad_ml[id-64].str_numeri[0]+1, …)`. O `PreencheCamisas` do port
+(`../../src/impl/ep2002_mainform.aux.inc`) chama
+`IntToStr(NumeroDaCamisa(indice, slot))` sem o `+ 1`.
+
+**Não corrigido aqui**: é defeito de comportamento do Pascal, e esta correção é
+do instrumento. Precisa de correção própria, com o gate de tela refeito depois.
+
+### O estado de habilitação — 13 controles medidos, 1 diverge
+
+A régua não é a cor do cinza: gtk2 e Win32 não desenham o mesmo cinza, e exigir
+isso reprovaria o port por ser gtk2. A régua é **mudou ou não mudou**, dentro de
+cada lado, entre o time 2 (nacional) e o time **95** (`95 Master L. `, o
+time-modelo). O par é esse porque `nacional := ItemIndex < 95` — os três times
+da conferência de barras, 2, 9 e 63, são **todos** nacionais, e a metade
+desabilitada da tela nunca tinha aparecido em medição nenhuma.
+
+`bash wte/tools/compara_tela.sh --habilitacao`, pixels que mudam por controle:
+
+| Controle | O que a Saída diz | Oráculo | Port | |
+|---|---|---|---|---|
+| `sel_barra0..4` | `.Enabled := nacional` | 219, 214, 226, 322, 219 | 364, 382, 351, 469, 383 | mudam nos dois |
+| `track_barra` | `.Enabled := nacional` | 202 | 1633 | mudam nos dois |
+| `boton_barras2iso` | `.Enabled := nacional` | 611 | 368 | mudam nos dois |
+| `boton_nombres2iso` | `.Enabled := nacional` | 561 | 211 | mudam nos dois |
+| `colorear` | `.Enabled := nacional` | 187 | 50 | mudam nos dois |
+| `iguala_nombres` | `.Enabled := nacional` | 518 | **0** | **DIVERGE** |
+| `etiq_nombre1..3` | `.Enabled := True` sempre | 0 | 0 | **não** mudam nos dois |
+| `bandera` | `.Visible := nacional` | 3840 | 0 | pendente da WTE-TASK-32 |
+| `home1`, `home2` | `.Visible := nacional` | 2328, 1012 | 2303, 1032 | mudam nos dois |
+
+Três coisas saem daqui:
+
+1. **A assimetria dos rótulos é real.** `edit_nombreN` segue `nacional` e
+   `etiq_nombreN` não — o que a Saída afirma e o que ninguém tinha confrontado.
+   Os três medem 0 px de mudança nos dois lados.
+2. **O port não desabilita o `iguala_nombres`.** Zero pixel de diferença, com o
+   oráculo mudando 518. O `.inc` tem a linha
+   (`iguala_nombres.Enabled := nacional`), o `.lfm` tem o controle nascendo
+   `Enabled = False` como o DFM, e o vizinho `boton_nombres2iso` — mesmo
+   `TSpeedButton`, mesmo `Flat = True`, mesmo grupo — acinzenta certo nos dois
+   lados. A causa não foi achada, e **não foi corrigida aqui**, pela mesma razão
+   dos dorsais: é defeito de comportamento, e pede correção própria.
+3. **Sete controles ficaram fora da régua**, e estão nomeados no
+   `compara_tela.py` como `fora_da_faixa`: `boton_mcr`, `boton_dialogo_tex`,
+   `grabar_memory`, `grabar_camiseta`, `parriba`, `mostrar_estrategia_1`,
+   `mostrar_jugador_1` (mais o `banderita1`). Abaixo de y 240 o port **deriva**
+   — o gtk2 desenha cada linha um pouco mais alta, e o erro acumulado chega a
+   21 px na faixa dos dorsais —, então o retângulo do DFM deixa de nomear o
+   controle certo. Medir ali daria número com cara de veredito. Eles seguem por
+   olho humano, na montagem da janela inteira.
 
 O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
 (`0x00405270` e `0x004056c8`) são da

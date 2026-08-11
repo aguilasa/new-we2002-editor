@@ -106,7 +106,10 @@ listas como argumento e por isso tem dois chamadores.
 **Veredito `aberto` até a conferência de tela alcançar o lado reserva.** O
 [`compara_tela.sh`](../../tools/compara_tela.sh) dirige hoje só o combo
 titular; para julgar este handler ele precisa dirigir também o
-`lista_equipos_2` e recortar a metade de baixo da janela. Enquanto isso não
-existir, o corpo está escrito a partir de spec medida e **não** verificado
+`lista_equipos_2`. O recorte já não é obstáculo: desde a
+[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) a montagem sai da janela
+inteira, e a metade de baixo — a `lista_jugadores_1` e os 23 dorsais — está
+nela. Falta a navegação. Enquanto ela não existir, o corpo está escrito a
+partir de spec medida e **não** verificado
 contra o original — e foi justamente a conferência de tela que achou os dois
 erros de mapeamento do handler irmão.

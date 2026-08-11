@@ -165,7 +165,19 @@ e não simula comportamento.
       campos que o grupo de carga possui — bandeira e uniforme são pendência
       nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
       Times 2, 9 e 63 (clube de ML), ROM japonesa, por
-      `wte/tools/compara_tela.sh`: as 15 larguras de barra batem em pixel
+      `wte/tools/compara_tela.sh`: as 15 larguras de barra batem em pixel.
+      **Os cinco grupos, desde a [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md):**
+      a montagem passou a sair da janela inteira (o recorte de 520×240 deixava
+      os 23 dorsais, em y 432, e a `lista_jugadores_1`, em y 392, fora), e o
+      estado de habilitação virou medida própria — `compara_tela.sh
+      --habilitacao`, time 2 contra o time-modelo 95, 13 controles. Ela achou
+      **dois defeitos do port**, os dois em grupo que estava fora do recorte
+      antigo: os `dorsal1..23` mostram o byte cru onde o original mostra
+      byte + 1, e o `iguala_nombres` não é desabilitado no time-modelo. Os dois
+      estão medidos em
+      [`wte/re/spec/MainForm.lista_equiposChange.md`](../../wte/re/spec/MainForm.lista_equiposChange.md)
+      e **pedem correção própria** — não são deste critério, que é de
+      conferência
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
       isso — 7 faixas, 11.952 B, as mesmas do oráculo
 - [x] Comportamento de `OnChange` na carga decidido e testado — a LCL/gtk2

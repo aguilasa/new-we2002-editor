@@ -102,6 +102,120 @@ class TestCompara(unittest.TestCase):
         self.assertEqual(C.autoteste(), 0)
 
 
+def janela(mudam=(), off=(0, 0), altura=475, largura=522):
+    """Uma janela de mentira, com a ancora `barra0` no lugar certo.
+
+    `mudam` sao nomes de `CONTROLES` cujo retangulo sai pintado de outra cor --
+    e assim que se planta "este controle mudou de aparencia".
+    """
+    img = Image.new("RGB", (largura + off[0], altura + off[1]), (200, 200, 200))
+    ax, ay = C.ANCORA[0] + off[0], C.ANCORA[1] + off[1]
+    for y in range(ay, ay + 13):                    # a ancora: barra0, 64 px
+        for x in range(ax, ax + 64):
+            img.putpixel((x, y), (255, 160, 0))
+    for nome in mudam:
+        x, y, w, h, _g = C.CONTROLES[nome]
+        for yy in range(y + off[1], y + off[1] + h):
+            for xx in range(x + off[0], x + off[0] + w):
+                img.putpixel((xx, yy), (10, 10, 10))
+    return img
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestCalibracao(unittest.TestCase):
+    def test_oraculo_sem_deslocamento(self):
+        self.assertEqual(C.calibra(janela(), "x"), (0, 0))
+
+    def test_port_deslocado_de_seis(self):
+        """O caso real: o gtk2 desenha uma borda que o Wine nao desenha."""
+        self.assertEqual(C.calibra(janela(off=(6, 6)), "x"), (6, 6))
+
+    def test_sem_ancora_aborta(self):
+        img = Image.new("RGB", (522, 475), (200, 200, 200))
+        with self.assertRaises(C.TelaError) as e:
+            C.calibra(img, "port")
+        self.assertIn("ancora", str(e.exception))
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestCobertura(unittest.TestCase):
+    def test_janela_inteira_cobre_os_dorsais(self):
+        C.confere_cobertura(janela(), "x", (0, 0))      # nao levanta
+
+    def test_recorte_de_240_reprova(self):
+        """O defeito da CORR-WTE-057: dois dos cinco grupos fora do recorte."""
+        with self.assertRaises(C.TelaError) as e:
+            C.confere_cobertura(janela(altura=240), "oraculo", (0, 0))
+        self.assertIn("dorsal1..23", str(e.exception))
+
+    def test_o_deslocamento_do_port_entra_na_conta(self):
+        """452 px de altura bastam sem deslocamento e nao bastam com ele."""
+        C.confere_cobertura(janela(altura=452), "oraculo", (0, 0))
+        with self.assertRaises(C.TelaError):
+            C.confere_cobertura(janela(altura=446, off=(6, 6)), "port", (6, 6))
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestHabilitacao(unittest.TestCase):
+    SEGUE = [n for n, r in C.CONTROLES.items() if r[4] == "segue_nacional"]
+    P32 = [n for n, r in C.CONTROLES.items() if r[4] == "pendente_32"]
+
+    def r(self, muda_orac, muda_port, off_port=(6, 6)):
+        return C.compara_habilitacao(
+            janela(), janela(off=off_port),
+            janela(mudam=muda_orac), janela(mudam=muda_port, off=off_port))
+
+    def test_os_dois_lados_mudando_o_mesmo_conjunto_passam(self):
+        r = self.r(self.SEGUE + self.P32, self.SEGUE + self.P32)
+        self.assertEqual(r["erros"], [])
+        self.assertEqual(C.relata_habilitacao(r), 0)
+
+    def test_port_que_esquece_um_controle_reprova(self):
+        r = self.r(self.SEGUE + self.P32,
+                   [n for n in self.SEGUE if n != "colorear"] + self.P32)
+        self.assertEqual(len(r["erros"]), 1)
+        self.assertIn("colorear", r["erros"][0])
+
+    def test_rotulo_que_segue_o_campo_reprova(self):
+        """`etiq_nombre1..3` ficam ligados SEMPRE -- assimetria medida."""
+        r = self.r(self.SEGUE + self.P32 + ["etiq_nombre1"],
+                   self.SEGUE + self.P32 + ["etiq_nombre1"])
+        self.assertEqual(len(r["erros"]), 1)
+        self.assertIn("etiq_nombre1", r["erros"][0])
+        self.assertIn("incondicional", r["erros"][0])
+
+    def test_bandeira_so_de_um_lado_nao_reprova(self):
+        """Desenhar a bandeira e da WTE-TASK-32, e ela ainda nao chegou."""
+        r = self.r(self.SEGUE + self.P32, self.SEGUE)
+        self.assertEqual(r["erros"], [])
+        v = {l["nome"]: l["veredito"] for l in r["linhas"]}
+        self.assertEqual(v["bandera"], "pendente da WTE-TASK-32")
+
+    def test_campo_de_texto_nao_e_medido(self):
+        r = self.r(self.SEGUE + self.P32, self.SEGUE + self.P32)
+        v = {l["nome"]: l["veredito"] for l in r["linhas"]}
+        self.assertEqual(v["edit_nombre1"], "olho humano")
+
+    def test_controle_abaixo_da_faixa_nao_e_medido(self):
+        """A deriva do port chega a 21 px em y 432 -- ali a regua nao vale."""
+        r = self.r(self.SEGUE + self.P32, self.SEGUE + self.P32)
+        v = {l["nome"]: l["veredito"] for l in r["linhas"]}
+        self.assertEqual(v["mostrar_jugador_1"], "olho humano (deriva do port)")
+
+    def test_medir_abaixo_da_faixa_aborta(self):
+        rect = C.CONTROLES["parriba"]
+        C.CONTROLES["parriba"] = rect[:4] + ("sempre_ligado",)
+        self.addCleanup(C.CONTROLES.__setitem__, "parriba", rect)
+        with self.assertRaises(C.TelaError) as e:
+            C.confere_faixa()
+        self.assertIn("parriba", str(e.exception))
+
+    def test_nenhum_lado_mudando_reprova_contra_a_spec(self):
+        r = self.r(self.P32, self.P32)
+        self.assertEqual(len(r["erros"]), len(self.SEGUE))
+        self.assertIn("a spec diz", r["erros"][0])
+
+
 if __name__ == "__main__":
     unittest.main()
 

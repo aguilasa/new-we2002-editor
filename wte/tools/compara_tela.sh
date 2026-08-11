@@ -2,6 +2,7 @@
 # compara_tela.sh -- dirige os dois lados ate o MESMO time e compara a tela.
 #
 #   bash wte/tools/compara_tela.sh <indice> [<indice> ...]
+#   bash wte/tools/compara_tela.sh --habilitacao
 #
 #     WTE_TELA_IMAGEM=<rom>   padrao: roms/japanese-shift-jis.bin
 #     WTE_TELA_SAIDA=<dir>    onde ficam as capturas (padrao: work/tela)
@@ -47,14 +48,41 @@ WORK="$RAIZ/work"
 BIN="$WTE/build/wte"
 TRACE="$WTE/re/trace.log"
 
-# O recorte comparado: o canto superior esquerdo da janela, que e onde moram o
-# combo de time, as cinco barras e os tres campos de nome. Nao e a janela
-# inteira de proposito -- bandeira e uniforme 2D sao da WTE-TASK-32 e
-# divergiriam por decisao, nao por defeito.
+# ## Os dois recortes, e por que sao dois
+#
+# **`topo`** -- 520x240 do canto superior esquerdo. E o recorte MEDIDO: e onde
+# moram as cinco barras, cuja largura e `11*v + 9` e portanto numero do jogo
+# virado pixel. Ele nao cresce, e isso e deliberado: `banderita1` (y 339) e
+# laranja e entraria na deteccao de banda, que ja achou barra a mais duas vezes.
+#
+# **`cheia`** -- a janela inteira. E o recorte da MONTAGEM, para o olho humano,
+# e e o que o criterio da WTE-TASK-25 pede alem das barras: os 23 numeros de
+# camisa (`dorsal1..23`, y 432) e a `lista_jugadores_1` (y 392) caem fora dos
+# 240 px de altura do `topo`, e ficaram tres passagens sem ser olhados. Ele
+# tambem e a entrada do modo `--habilitacao`.
+#
+# Bandeira e uniforme 2D (x 232..312, y 36..168) estao dentro dos dois e
+# divergem por decisao, nao por defeito: sao da WTE-TASK-32. Quem os exclui e o
+# `compara_tela.py`, por nome de controle, e nao o corte por altura -- foi o
+# corte por altura que escondeu os dorsais.
 REC_W=520
 REC_H=240
 
-[ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...]" >&2; exit 1; }
+# O time nacional de prova e o time-modelo, para o modo `--habilitacao`. O
+# `nacional` do handler e `indice < 95`, entao 2, 9 e 63 sao TODOS nacionais:
+# a metade desabilitada da tela nunca aparecia nas tres medidas de barra.
+IDX_NACIONAL=2
+IDX_MODELO=95
+
+[ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" >&2
+                  exit 1; }
+MODO=barras
+if [ "$1" = "--habilitacao" ]; then
+  [ $# -eq 1 ] || { echo "ERRO: --habilitacao nao aceita indice -- o par e" \
+                         "$IDX_NACIONAL e $IDX_MODELO, fixados aqui" >&2; exit 1; }
+  MODO=habilitacao
+  set -- "$IDX_NACIONAL" "$IDX_MODELO"
+fi
 [ -f "$IMAGEM" ] || { echo "ERRO: $IMAGEM nao existe" >&2; exit 1; }
 [ -x "$BIN" ] || { echo "ERRO: $BIN -- rode lazbuild antes" >&2; exit 1; }
 [ -x "$WINE_BIN/wine" ] || { echo "ERRO: loader Wine 32-bit ausente" >&2; exit 1; }
@@ -97,7 +125,19 @@ limpa() {
 }
 trap limpa EXIT
 
-geometria() { xdotool getwindowgeometry --shell "$1" | grep -E '^(X|Y)=' ; }
+geometria() {
+  xdotool getwindowgeometry --shell "$1" | grep -E '^(X|Y|WIDTH|HEIGHT)='
+}
+
+# recorta <origem.png> <destino.png> <x> <y> <w> <h>
+recorta() {
+  python3 - "$@" <<'FIM'
+import sys
+from PIL import Image
+src, dst, x, y, w, h = sys.argv[1], sys.argv[2], *map(int, sys.argv[3:7])
+Image.open(src).convert("RGB").crop((x, y, x + w, y + h)).save(dst)
+FIM
+}
 
 descidas() {          # $1 = janela, $2 = quantas
   local i
@@ -134,12 +174,9 @@ captura_oraculo() {
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 3
   import -window root "$SAIDA/raw-oraculo.png"
-  python3 - "$SAIDA/raw-oraculo.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H" <<'FIM'
-import sys
-from PIL import Image
-src, dst, x, y, w, h = sys.argv[1], sys.argv[2], *map(int, sys.argv[3:7])
-Image.open(src).convert("RGB").crop((x, y, x + w, y + h)).save(dst)
-FIM
+  recorta "$SAIDA/raw-oraculo.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
+  recorta "$SAIDA/raw-oraculo.png" "${destino%.png}-cheia.png" \
+          "$X" "$Y" "$WIDTH" "$HEIGHT"
   limpa
 }
 
@@ -161,12 +198,9 @@ captura_port() {
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 2
   import -window root "$SAIDA/raw-port.png"
-  python3 - "$SAIDA/raw-port.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H" <<'FIM'
-import sys
-from PIL import Image
-src, dst, x, y, w, h = sys.argv[1], sys.argv[2], *map(int, sys.argv[3:7])
-Image.open(src).convert("RGB").crop((x, y, x + w, y + h)).save(dst)
-FIM
+  recorta "$SAIDA/raw-port.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
+  recorta "$SAIDA/raw-port.png" "${destino%.png}-cheia.png" \
+          "$X" "$Y" "$WIDTH" "$HEIGHT"
   # A confirmacao que faltava: quantas vezes o handler disparou de verdade.
   local disparos
   disparos=$(grep -c 'MainForm.lista_equiposChange' "$TRACE" 2>/dev/null || echo 0)
@@ -185,10 +219,25 @@ for indice in "$@"; do
   echo ">> time $indice"
   captura_oraculo "$indice" "$SAIDA/time-$indice-oraculo.png"
   captura_port    "$indice" "$SAIDA/time-$indice-port.png"
+  [ "$MODO" = habilitacao ] && continue
   extra=()
   [ -n "${DUMP:-}" ] && extra=(--dump "$DUMP")
   python3 "$AQUI/compara_tela.py" \
       "$SAIDA/time-$indice-oraculo.png" "$SAIDA/time-$indice-port.png" \
-      --indice "$indice" --saida "$SAIDA" "${extra[@]}" || rc=1
+      --indice "$indice" --saida "$SAIDA" "${extra[@]}" \
+      --cheia-oraculo "$SAIDA/time-$indice-oraculo-cheia.png" \
+      --cheia-port    "$SAIDA/time-$indice-port-cheia.png" || rc=1
 done
+
+# No modo habilitacao a comparacao e entre os DOIS times, nao entre os dois
+# lados de um: o que se mede e qual controle muda de aparencia quando o
+# `nacional` vira falso, e se os dois lados mudam o mesmo conjunto.
+if [ "$MODO" = habilitacao ]; then
+  python3 "$AQUI/compara_tela.py" --habilitacao \
+      "$SAIDA/time-$IDX_NACIONAL-oraculo-cheia.png" \
+      "$SAIDA/time-$IDX_NACIONAL-port-cheia.png" \
+      "$SAIDA/time-$IDX_MODELO-oraculo-cheia.png" \
+      "$SAIDA/time-$IDX_MODELO-port-cheia.png" \
+      --saida "$SAIDA" || rc=1
+fi
 exit $rc
