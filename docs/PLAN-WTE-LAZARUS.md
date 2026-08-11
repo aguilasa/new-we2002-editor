@@ -82,7 +82,8 @@ ___CPPdebugHook
 __GetExceptDLLinfo
 ```
 
-E o *name mangling* dos 322 imports é o do C++ da Borland, não o do Delphi:
+E o *name mangling* dos 267 imports das duas BPLs — dos 322 do binário, os
+outros 55 são das DLLs do Windows — é o do C++ da Borland, não o do Delphi:
 
 ```
 @System@RegisterModule$qqrp17System@TLibModule
@@ -988,8 +989,10 @@ Começar por (2), que resolve a maioria, e só investir em (1) se travar.
 ### 8.3 Chamada direta à VCL **já vem nomeada**
 
 O contrário da anterior, e é vantagem: import por nome mangled significa que
-`call ds:[@Controls@TWinControl@CreateHandle$qqrv]` se lê direto. Os 322 imports
-são 322 pontos de referência gratuitos. Aproveitar.
+`call ds:[@Controls@TWinControl@CreateHandle$qqrv]` se lê direto. Os **267**
+imports de `rtl60.bpl`/`vcl60.bpl` são 267 pontos de referência gratuitos —
+322 é o total do binário, e os outros 55 são das DLLs do Windows, sem mangling
+da VCL (§1.2). Aproveitar.
 
 ### 8.4 O app grava in-place — cópia, sempre
 

@@ -13,7 +13,8 @@ status: concluído
 ## Contexto
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` §5 e Fase 1 item 5.
-- O binário importa 322 símbolos de `rtl60.bpl`/`vcl60.bpl`. Quatro unidades
+- O binário importa 267 símbolos de `rtl60.bpl`/`vcl60.bpl` (322 no total, os
+  outros 55 das DLLs do Windows). Quatro unidades
   entre eles não têm par óbvio na LCL e podem ser dependência transitiva sem
   uso real — **ou** funcionalidade que o port precisa reproduzir.
 

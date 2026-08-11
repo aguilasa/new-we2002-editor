@@ -63,11 +63,22 @@ da §1.7 aplicado dentro da ferramenta.
 
 ### 4. Os imports já vêm nomeados — aproveitar
 
-**Vantagem que compensa a §8.2:** os 322 imports de `rtl60.bpl`/`vcl60.bpl`
+**Vantagem que compensa a §8.2:** os **267** imports de `rtl60.bpl`/`vcl60.bpl`
 chegam com nome mangled, então
-`call ds:[@Controls@TWinControl@CreateHandle$qqrv]` se lê direto. São 322 pontos
+`call ds:[@Controls@TWinControl@CreateHandle$qqrv]` se lê direto. São 267 pontos
 de referência gratuitos. Conferir que o Ghidra os resolveu, e não deixou como
 endereço cru.
+
+**322 é o total, não o das duas BPLs** — a distinção é da WTE-TASK-09
+(`progresso.md`), e perdê-la aqui inflaria a vantagem em 21%. Os outros 55 são
+das DLLs do Windows, que não trazem nome mangled da VCL:
+
+```
+$ objdump -x we-team-editor/we-team-editor.exe   # imports por DLL
+rtl60.bpl 103 + vcl60.bpl 164 = 267
+KERNEL32.DLL 51 + USER32.DLL 3 + OLEAUT32.DLL 1 = 55
+                                          total = 322
+```
 
 ### 5. Chamada virtual (§8.2) — decidir a rota
 
