@@ -650,24 +650,31 @@ e não simula comportamento.
   zero, e o teste que existia prevendo a própria falha já tinha sido invertido
   na primeira passagem.
 
-- **O obstáculo novo, medido:**
+- **Dois achados da tentativa de conferir, e o primeiro é uma correção minha:**
 
-  **O combo do port não abre por clique no `:99`.** Sem window manager o GTK2
-  nunca considera a janela ativa; medido em 2026-08-11, clicar no
-  `lista_equipos` e no botão de seta não abre a lista. É a **mesma causa** da
-  ausência de teclado que a [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md)
-  mediu, e ela alcança o mouse também — o que não era sabido. Do lado do
-  oráculo não acontece: o Wine dá foco, e os roteiros 07/08/11 trocam de time
-  normalmente.
+  **~~O combo do port não abre por falta de window manager.~~ Errado.** Foi a
+  primeira leitura, e ela chegou a entrar em spec e em mensagem de commit antes
+  de cair: `xdotool windowfocus` funciona e a lista continua sem abrir. A causa
+  está no DFM — **`lista_equipos` nasce `Enabled = False`** (`MainForm.dfm`
+  linha 715, e portanto no `.lfm`). Controle desabilitado ignora clique, com ou
+  sem gerenciador de janela. O que falta é o port habilitá-lo depois de
+  carregar a imagem. Lição: *"não dá para dirigir"* é conclusão sobre o
+  ambiente, e eu a tirei sem antes olhar o estado do próprio controle.
 
-  Consequência direta: o critério de tela **não é dirigível hoje** do lado do
-  port, e nem o dump de estado depois de carga por tela. Nenhum window manager
-  está instalado nesta máquina (`openbox`, `metacity`, `xfwm4`, `i3`, `marco`,
-  `mutter`, `fluxbox`, `jwm`, `twm` — nenhum). As saídas possíveis são instalar
-  um e subi-lo no `:99` — o que muda o ambiente de que o `golden_check.sh`
-  depende, porque decoração desloca coordenada — ou dar ao `wtemain` um
-  argumento de seleção inicial, como já tem para a imagem. **É decisão do
-  usuário**, e por isso a passagem parou aqui em vez de escolher.
+  **`TControl::SetEnabled` nunca é chamado — e isso põe em dúvida a spec.** O
+  símbolo é importado do `vcl60.bpl` e tem thunk em `0x00422884`; a `.text`
+  inteira tem **zero** `call rel32` para ele, e a única referência ao slot
+  `0x0043ec1c` do IAT é o próprio thunk. No mesmo bloco de thunks, para
+  comparar: `SetText` 78, `GetText` 24, `SetVisible` 14.
+
+  A seção Saída da spec do `lista_equiposChange` lista uma dúzia de
+  `.Enabled := verdadeiro` com evidência `disassembly lido` — escrita na
+  terceira passagem. Com zero chamadas a `SetEnabled`, ou o original liga esses
+  controles por outro caminho (RTTI — `Typinfo` **é** importado —, o `Parent`,
+  ou o `TWinControl`), ou aquela leitura foi inferida da tela e rotulada como
+  disassembly. A evidência da seção foi **rebaixada para `nao medido`**, e o
+  Pascal escrito nesta passagem herda a dúvida: ele reproduz exatamente esses
+  `.Enabled :=`.
 
 - **Arquivos criados/modificados:**
   - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — o handler
@@ -686,8 +693,10 @@ e não simula comportamento.
      `pkill -9` com o caminho completo resolveu. Segunda vez na mesma sessão.
 
 - **O que falta para esta task fechar** *(revisado)***:**
-  - **decidir como dirigir o port no `:99`** — sem isso, dois critérios não
-    são exercitáveis;
+  - **descobrir como o original habilita controle**, e daí quem habilita o
+    `lista_equipos` — sem isso o combo do port não é clicável e dois critérios
+    não são exercitáveis, e a seção Saída da spec do `lista_equiposChange`
+    continua `nao medido`;
   - `lista_equipos_2Change` em Pascal (mesmos auxiliares, já escritos);
   - os 6 handlers de carga sem spec;
   - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;

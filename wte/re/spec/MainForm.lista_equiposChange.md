@@ -62,7 +62,11 @@ Com `ItemIndex > 62` — as seleções clássicas e os clubes de ML — o `home1
 reposicionado: `Left := 7`, `Width := 100`, e o `punto` some. Abaixo disso,
 `Left := 16`, `Width := 80`, `punto` visível.
 
-**Evidência:** disassembly lido
+**Evidência:** nao medido
+
+> **Rebaixada de `disassembly lido` para `nao medido` em 2026-08-11.** Os
+> `.Enabled :=` deste bloco não se sustentam: `TControl::SetEnabled` tem **zero**
+> chamadas na `.text` inteira. Ver a seção Notas.
 
 ## Bytes tocados
 
@@ -124,14 +128,35 @@ Isso é o método da §4.2 rendendo o que promete pela terceira vez nesta task:
 **`0x00404374` (881 B) e `0x00403f00` (328 B) não precisaram ser lidos.** O que
 eles fazem é achar bytes cujo endereço já conhecemos por outro caminho.
 
-**Veredito ainda `aberto`, e agora por verificação, não por medição.** O corpo
-não foi conferido contra a tela do original, e a razão é nova: **o combo do
-port não abre por clique no `:99`**. Sem window manager o GTK2 nunca considera
-a janela ativa; medido em 2026-08-11, o clique no `lista_equipos` e no botão de
-seta não abre a lista. É a mesma causa da ausência de teclado que a
-[WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md) mediu, e ela alcança o
-mouse também. Do lado do oráculo não acontece: o Wine dá foco, e os roteiros
-07/08/11 trocam de time normalmente.
+**Veredito ainda `aberto`, e a seção Saída acima está sob suspeita.**
+
+A tentativa de conferir contra a tela produziu dois achados, um deles contra
+esta própria spec.
+
+**1. O combo do port não abre por clique — e não é falta de window manager.**
+A primeira leitura foi essa, e estava errada: `xdotool windowfocus` funciona e
+a lista continua sem abrir. A causa está no DFM — `lista_equipos` nasce
+**`Enabled = False`**, no original ([`../dfm/MainForm.dfm`](../dfm/MainForm.dfm)
+linha 715) e portanto no `.lfm`. Controle desabilitado ignora clique, com ou sem
+gerenciador de janela. O que falta é o port habilitá-lo depois de carregar a
+imagem.
+
+**2. E aí vem o problema: `TControl::SetEnabled` nunca é chamado.** O símbolo é
+importado do `vcl60.bpl` e tem thunk em `0x00422884`; a `.text` inteira tem
+**zero** `call rel32` para ele, e a única referência ao slot `0x0043ec1c` do IAT
+é o próprio thunk. No mesmo bloco, para comparar: `SetText` 78 chamadas,
+`GetText` 24, `SetVisible` 14.
+
+A seção **Saída** desta spec lista uma dúzia de `.Enabled := verdadeiro` com
+evidência `disassembly lido`. Com zero chamadas a `SetEnabled`, ou o original
+liga esses controles por outro caminho — RTTI (`Typinfo` **é** importado), o
+`Parent`, ou o `TWinControl` —, ou aquela leitura foi inferida da tela e
+rotulada como disassembly. **Enquanto não se souber qual, a seção Saída não é
+medida**, e o Pascal já escrito herda a dúvida: ele reproduz exatamente esses
+`.Enabled :=`.
+
+É o custo de ainda não ter conferido contra a tela, e a razão de o veredito
+continuar `aberto`.
 
 O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
 (`0x00405270` e `0x004056c8`) são da
