@@ -61,7 +61,8 @@ carga.
 1. **Estado interno** — depois de carregar o time N, o dump da WTE-TASK-20 do
    app tem de bater com o do `we2002_core`.
 2. **Tela** — captura dos dois lados, mesmo time selecionado, comparação humana
-   dos campos preenchidos (não de pixel).
+   dos campos preenchidos (não de pixel). **Restrita aos campos que o grupo de
+   carga possui** — ver o ciclo abaixo.
 3. ~~**Sem gravação** — provar que nenhum destes escreve na imagem: rodar
    todos, fechar sem salvar, e `cmp` contra a cópia limpa tem de dar zero.~~
 
@@ -74,6 +75,60 @@ ROM japonesa, e são exatamente as sete primeiras `conhecida:` que a
 
 O item vira o seu contrário e continua barato: **o grupo grava, e grava só
 isso** — nenhuma faixa além das que o oráculo grava pelo mesmo motivo.
+
+### O item 2 tinha um ciclo dentro, e ele foi cortado
+
+*(decisão de 2026-08-11, quarta passagem)*
+
+O critério de tela pedia comparação da janela carregada, e a janela carregada
+tem bandeira e uniforme 2D — que são
+[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). Mas a 32 depende da 27,
+que depende da 26, que depende **desta**:
+
+```text
+25 ──► 26 ──► 27 ──► 32 ──┐
+ ▲                        │
+ └────────────────────────┘   pelo criterio de tela da 25
+```
+
+Nenhuma passagem quebra isso; é a mesma forma de circularidade que a
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez para a
+[WTE-TASK-22](/docs/tasks/22-harness-golden.md), e ela se desfez por decisão,
+não por mais uma passagem.
+
+**A conferência de tela cobre o que o grupo de carga produz:** nome do time nos
+três campos, as cinco barras de força, os 23 números de camisa, a lista de
+jogadores, e o estado de habilitação dos controles que o `nacional` governa.
+**Bandeira e uniforme ficam fora, como pendência nomeada da WTE-TASK-32** — e é
+lá que a comparação deles tem de aparecer, senão a exclusão daqui vira buraco.
+
+O que a 25 continua devendo, e que **não** foi afrouxado: as três rotinas 2D
+(`0x00405270`, `0x004056c8`, `0x00405468`) ficam com veredito `aberto` nas
+specs dos handlers que as chamam, com o dono escrito. Handler cujo corpo depende
+delas não vira `implementado` aqui.
+
+### Onde mora auxiliar que não é handler
+
+*(decisão de 2026-08-11, quarta passagem)*
+
+`wte/src/impl/` guarda `<unidade>.<handler>.inc`, um por handler, e o
+`dfm2lfm.py` aborta em `.inc` órfão. Rotina interna compartilhada — a
+`0x0040b188` é chamada por dois handlers — não cabe nesse formato, e foi o que
+segurou o Pascal do `lista_jugadores_1Change` mesmo com a spec medida.
+
+**Decisão: `wte/src/impl/<unidade>.aux.inc`**, um por unidade, incluído uma vez
+na seção de implementação **antes** dos handlers daquela unidade. Consequências
+que a próxima passagem executa:
+
+- o `dfm2lfm.py` passa a reconhecer o sufixo `.aux` e a emitir o `{$I}` dele;
+  `.aux.inc` órfão continua abortando, pela mesma razão dos outros;
+- o `check_fase2.py` conta as linhas do `.aux.inc` como escritas à mão, junto
+  com os demais `.inc` — senão a fração da §4.4 volta a **subir** a cada
+  auxiliar escrito, que é a [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) pela
+  terceira vez.
+
+Alternativa descartada: unidade `we2002_*` nova. Esse prefixo é a camada de
+dados gerada, e um auxiliar que mexe em controle de formulário não é dado.
 
 ---
 
@@ -103,7 +158,9 @@ e não simula comportamento.
       (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá, mais os três
       handlers de lista
 - [ ] Estado interno batendo com o `we2002_core` após carga
-- [ ] Tela conferida contra o original para pelo menos 3 times distintos
+- [ ] Tela conferida contra o original para pelo menos 3 times distintos, nos
+      campos que o grupo de carga possui — bandeira e uniforme são pendência
+      nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md)
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
       isso — 7 faixas, 11.952 B, as mesmas do oráculo
 - [ ] Comportamento de `OnChange` na carga decidido e testado
@@ -443,10 +500,21 @@ e não simula comportamento.
      `0xe8`. `mov eax,0x40b2e8` tem um `0xe8` no operando, e a varredura de
      byte inventaria uma chamada com alvo lido do lugar errado. Virou teste.
 
+- **Depois da passagem, duas decisões do usuário** *(2026-08-11)***:**
+
+  O balanço da passagem mostrou que a task não fechava por passagem nenhuma: o
+  critério de tela dela dependia da WTE-TASK-32, que depende da 27, que depende
+  da 26, que depende desta. As duas decisões estão escritas no enunciado, nas
+  seções "O item 2 tinha um ciclo dentro" e "Onde mora auxiliar que não é
+  handler", e a metade excluída do critério de tela virou linha de critério da
+  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) — exclusão sem dono
+  nomeado é buraco.
+
 - **O que falta para esta task fechar** *(revisado)***:**
   - `0x00404374` e `0x00403f00` medidos, e daí o Pascal dos três handlers de
     lista;
-  - a casa dos auxiliares compartilhados, com a WTE-TASK-26;
+  - o `.aux.inc` no `dfm2lfm.py` e no `check_fase2.py`, e daí o Pascal do
+    `lista_jugadores_1Change`, cuja spec já basta;
   - os 6 handlers de carga sem spec: `mostrar_jugadorClick`,
     `mostrar_estrategiaClick`, `lista_formacionesClick`, `ComboBoxDrawItem`,
     `boton_dialogo_texClick`, `boton_mcrClick`;

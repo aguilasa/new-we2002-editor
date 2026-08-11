@@ -97,7 +97,27 @@ tolerância. Render é tela; gravação é dado. Não confundir os dois critéri
 - [ ] `TLazIntfImage` usado; render em tempo real sem travar a janela
 - [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa nomeada
 - [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
+- [ ] **Bandeira e uniforme conferidos na tela contra o original, para os mesmos
+      3 times da [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md)** — herdado
+      dela em 2026-08-11, ver abaixo
 - [ ] Commit no formato conventional, em inglês
+
+### O critério de tela que veio da WTE-TASK-25
+
+*(2026-08-11)*
+
+A 25 pedia comparar a janela carregada contra o original para 3 times. A janela
+carregada tem bandeira e uniforme, que são desta task — e esta task depende da
+27, que depende da 26, que depende da 25. Ciclo. A 25 cortou o nó restringindo
+a conferência dela aos campos que o grupo de carga produz (nomes, barras,
+números de camisa, lista de jogadores, habilitação), e **a metade excluída caiu
+aqui**.
+
+Sem esta linha a exclusão de lá viraria buraco: os dois lados diriam "é da
+outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
+(bandeira do titular), `0x00405468` (bandeira do reserva) e `0x004056c8`
+(uniforme); as duas primeiras estão inventariadas em
+[`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução *(preenchido após execução)*
 
