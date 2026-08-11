@@ -3,7 +3,7 @@ id: CORR-WTE-059
 title: "Correção: a spec do `lista_equiposChange` dá para o veredito `aberto` uma razão que a seção seguinte desmente"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -88,19 +88,44 @@ dia, e não as duas.
 
 ## Verificação
 
-- [ ] O arquivo não afirma em nenhum ponto que a conferência de tela está por
-      fazer
-- [ ] A razão escrita do `aberto` é a mesma que a seção Saída sustenta
-- [ ] `python3 wte/tools/spec_index.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] O arquivo não afirma em nenhum ponto que a conferência de tela está por
+      fazer — a única ocorrência da frase antiga é a citação dela dentro do
+      bloco que a aposenta
+- [x] A razão escrita do `aberto` é a mesma que a seção Saída sustenta
+- [x] `python3 wte/tools/spec_index.py --check` verde
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-11
 
 **Resumo do que foi feito:**
 
+A [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) foi executada antes desta, no
+mesmo lote, e mudou o terreno: a seção **Saída** subiu de `nao medido` para
+`observacao de tela`. Então a razão escrita não é nenhuma das duas que esta
+correção previa — nem "falta conferir a tela" (falso desde a 8ª passagem) nem
+"a Saída está `nao medido`" (falso desde a 057). A que valia no dia, e que
+ficou escrita:
+
+- o **efeito** foi visto e o **mecanismo** não: `observacao de tela` diz que a
+  tela mostrou o que liga e o que desliga, não por onde o original liga, e o
+  Pascal reproduz 27 `.Enabled :=` apoiado nisso;
+- e a conferência achou dois defeitos de comportamento — os `dorsal1..23` um a
+  menos e o `iguala_nombres` que o port não desabilita — que continuam sem
+  conserto.
+
+O parágrafo ganhou junto o registro de que **já esteve errado uma vez**, com o
+ponteiro para esta correção. Frase de fecho é lida como veredito, e essa é a
+segunda vez que a seção seguinte muda debaixo dela.
+
 **Problemas encontrados:**
 
+Nenhum. A ordem do lote resolveu o único risco que a correção nomeava: se ela
+tivesse rodado antes da 057, a razão escrita teria envelhecido em uma hora.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/spec/MainForm.lista_equiposChange.md` — o parágrafo de fecho do bloco
+  do veredito

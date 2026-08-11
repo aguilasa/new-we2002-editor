@@ -167,8 +167,19 @@ nacional e o time-modelo, treze controles têm veredito medido, e a seção Saí
 subiu de `nao medido` para `observacao de tela`. O caminho pelo qual o original
 liga o controle segue desconhecido; o que ele liga e desliga, não mais.
 
-É o custo de ainda não ter conferido contra a tela, e a razão de o veredito
-continuar `aberto`.
+**A razão de o veredito continuar `aberto` é essa, e não falta de conferência
+de tela** — a conferência está logo abaixo, e não é pequena. O que falta é
+saber, nos bytes, por onde o original liga controle: `observacao de tela` diz
+que o efeito foi visto, não que o mecanismo foi lido, e o Pascal reproduz 27
+`.Enabled :=` apoiado no efeito. Somam-se a isso os dois defeitos que a própria
+conferência achou — os `dorsal1..23` um a menos e o `iguala_nombres` que o port
+não desabilita —, que são de comportamento e ainda não têm conserto.
+
+> Esta frase já esteve errada uma vez, e a [CORR-WTE-059](../../../docs/tasks/CORR-WTE-059.md)
+> é a correção: ela dizia "é o custo de ainda não ter conferido contra a tela",
+> escrita na 6ª passagem, e a 8ª pôs logo abaixo a seção que a desmentia. O
+> parágrafo de fecho é lido como veredito; quando a seção seguinte muda, ele
+> muda junto.
 
 ## A conferência de tela — os cinco grupos, e os quatro erros que ela achou
 
