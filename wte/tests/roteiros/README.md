@@ -154,8 +154,9 @@ subtrai excecao passa verde quando o roteiro para de exercitar o que dizia
 exercitar.
 
 O par [`golden-01-arranque.port.txt`](golden-01-arranque.port.txt) e a
-assimetria temporaria: o port ainda nao abre imagem (os 96 handlers sao stubs
-ate a WTE-TASK-25) e nao recebe teclado no `:99`. Quando a 25 entrar, o arquivo
+assimetria temporaria: o port nao recebe teclado no `:99`, entao nao dirige o
+dialogo de abrir -- ele carrega pela linha de comando desde a WTE-TASK-25.
+Quando o teclado chegar (ou um window manager), o arquivo
 some e o gate roda um roteiro so.
 
 ## Replicar

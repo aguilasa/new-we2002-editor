@@ -15,11 +15,11 @@
 #    gravou", que e a conclusao errada com a cara da certa.
 #    O `wte.exe` nao sofre disso: o Wine implementa o proprio foco.
 #
-# 2. **O app ainda nao abre imagem.** Ate a WTE-TASK-25 os 96 handlers sao
-#    stubs que logam, e nenhum le a imagem -- medido no fechamento da fase 3:
-#    zero unidade da casca da `uses we2002_database`. Este script ja passa o
-#    caminho da copia na linha de comando, e o app o ignora enquanto nao houver
-#    handler. E de proposito: o dia em que houver, o harness nao muda.
+# 2. **O app abre a imagem pela linha de comando, e nao pelo dialogo.** Este
+#    script sempre passou o caminho da copia como argumento; ate a
+#    WTE-TASK-25 o app o ignorava, e desde ela o `MainForm.FormShow` carrega
+#    dali. O harness nao mudou de forma nenhuma quando isso aconteceu, que era
+#    exatamente o ponto. Pelo dialogo nao da: ver o item 1.
 #
 # ## Por que o titulo tem de ser diferente
 #

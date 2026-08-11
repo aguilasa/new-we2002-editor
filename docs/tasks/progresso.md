@@ -538,12 +538,18 @@ dois lados** — a fração foi publicada como 92,5% até a
 [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md), quando o total contava linha em
 branco e o manual não.
 
-**E o app ainda não lê o jogo — medido, não opinado.** Zero unidade da casca dá
-`uses we2002_database`; quem consome são dois programas de console de
-`wte/tests/`. A integração mínima (abrir a imagem pelo `TOpenDialog`, popular o
-combo de times) fica para a [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md),
-**depois** do gate da [22](/docs/tasks/22-harness-golden.md): fazê-la no
-fechamento seria implementar dois handlers sem o gate que os julga.
+**E o app ainda não lia o jogo no fechamento da fase 3 — medido, não opinado.**
+Zero unidade da casca dava `uses we2002_database`; quem consumia eram dois
+programas de console de `wte/tests/`. A integração mínima ficou para a
+[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md), **depois** do gate da
+[22](/docs/tasks/22-harness-golden.md): fazê-la no fechamento seria implementar
+dois handlers sem o gate que os julga.
+
+**Entrou em 2026-08-11, e a régua acompanhou.** `src/we2002_estado.pas` abre a
+imagem e carrega o banco; o `test_so_teste_consome_a_camada` — que existia
+prevendo a própria falha — teve a asserção invertida, e o
+`fase-3-fechamento.md` foi regerado pelo ramo que o gerador já tinha escrito.
+Popular o combo de times continua aberto.
 
 **A lição que atravessa fase:** corrigir prosa de documento não alcança a cópia
 que mora dentro de um gerador. A CORR-WTE-049 consertou no `progresso.md` a
