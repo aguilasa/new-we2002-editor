@@ -99,8 +99,9 @@ e não simula comportamento.
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec no gabarito da WTE-TASK-23 — **19 dos 28**
-      (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá
+- [ ] Todo handler do grupo com spec no gabarito da WTE-TASK-23 — **22 dos 28**
+      (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá, mais os três
+      handlers de lista
 - [ ] Estado interno batendo com o `we2002_core` após carga
 - [ ] Tela conferida contra o original para pelo menos 3 times distintos
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
@@ -269,4 +270,87 @@ e não simula comportamento.
   - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
   - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
   - a remoção do `--show`, que só sai depois da navegação real;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
+
+---
+
+- **Executado em:** 2026-08-11 — **terceira passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  Especificação do handler central — `MainForm.lista_equiposChange`, 1.536
+  bytes, o segundo maior do formulário — mais os dois irmãos de lista. O grupo
+  vai de 19 para **22 de 28** com spec.
+
+  **O resultado que vale é a equivalência dos dois oráculos, e ela é barata.**
+  Ao trocar de time o original não usa offset: usa uma conta, com endereço
+  lógico convertido para físico setor a setor, `2352 * (t div 2048) + (t mod
+  2048) + 0x1e8178`, com `t = 0x45ff0 + 5*índice`. Essa conta leva o time 0
+  para **2328184**, que é exatamente a `OFS_TEAM_BARS` que o `we2002_core` já
+  conhece. Conferido byte a byte contra o `dump_estado.pas` sobre uma cópia da
+  ROM japonesa: os índices 0, 1 e 62 batem com `teams[i].bar_*`, e 63 e 94 com
+  `ml_teams[i-63].bar_*`. Ou seja **os 95 itens da lista são os 63 `teams`
+  seguidos dos 32 `ml_teams`**, contíguos na imagem, e o port pode ler a camada
+  de dados em vez de reabrir o arquivo. É o método da §4.2 funcionando: o diff
+  diz *onde*, o core diz *o que aquilo significa*.
+
+  Isso virou guarda de build, não nota de rodapé: o
+  [`check_barras.py`](../../wte/tools/check_barras.py) decodifica as constantes
+  do **próprio corpo do handler** e reprova se a conta deixar de cair na
+  `OFS_TEAM_BARS`. Ele não abre imagem — a parte que depende de `roms/` fica na
+  spec, com o comando; a parte que dá para conferir a cada build fica no
+  `make check`.
+
+  **Dois números que a leitura apressada erraria.** O `95` do handler não é o
+  número de times: é o índice do item `95 Master L. ` do combo, o modelo que a
+  Master League usa ao criar clube — e é por isso que ele desliga barra,
+  bandeira, uniforme e nome. E a largura da barra é `11*v + 9`, aritmética
+  literal do disassembly, não proporção sobre um máximo; `v = 0` dá 9 px, que é
+  a barra vazia do DFM.
+
+  **E o combo não é populado em tempo de execução:** os 96 itens estão no DFM e
+  o `.lfm` os carrega verbatim. Era a suspeita natural — "quem enche a lista de
+  times?" — e a resposta é "ninguém, ela já vem cheia".
+
+- **Por que o Pascal não foi escrito:**
+
+  O corpo chama quatro auxiliares que não são dele: `0x0040b2d8` (preenche a
+  lista de jogadores, com decodificador de nome próprio), `0x00405270` e
+  `0x004056c8` (bandeira e uniforme 2D, que são da
+  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md)), e `0x0040b0b4` /
+  `0x0040b188`. Escrever metade do corpo faria o `check_fase2.py` contar o
+  handler como "com corpo escrito", e o índice afirmaria pronto o que está pela
+  metade — que é exatamente a mentira de índice que este projeto já pagou duas
+  vezes. Spec medida com veredito `aberto` diz a verdade; `.inc` pela metade
+  não diria.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/check_barras.py` — a guarda da aritmética, sem escrever arquivo
+    (mesmo contrato do `check_lcl_props.py`)
+  - `wte/re/spec/MainForm.lista_equiposChange.md` — a spec grande
+  - `wte/re/spec/MainForm.lista_equipos_2Change.md`,
+    `MainForm.lista_jugadores_1Change.md`
+  - `wte/re/spec/INDICE.md` — regerado
+  - `docs/tasks/progresso.md`, este arquivo
+
+- **Problemas encontrados:**
+  1. O padrão `add esi,imm32` casava **duas** vezes no corpo — a âncora e o
+     `add esi,0x7ff` do arredondamento de sinal. A guarda exige casamento
+     único, então ela reprovou em vez de ler a constante errada; o padrão
+     passou a incluir o `lea esi,[eax+eax*4]` que vem antes.
+  2. A primeira conta à mão da aritmética deu 2327672, 512 bytes abaixo da
+     `OFS_TEAM_BARS`, e por um instante pareceu que as duas tabelas eram
+     diferentes. Era erro de divisão na conta à mão. O script acertou de
+     primeira — mais uma para "todo número vem de ferramenta".
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - `0x0040b2d8`, `0x0040b0b4` e `0x0040b188` medidos, e daí o Pascal dos três
+    handlers de lista;
+  - os 6 handlers de carga sem spec: `mostrar_jugadorClick`,
+    `mostrar_estrategiaClick`, `lista_formacionesClick`, `ComboBoxDrawItem`,
+    `boton_dialogo_texClick`, `boton_mcrClick`;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, medidos e `aberto`;
+  - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
+  - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
+  - a remoção do `--show`;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).

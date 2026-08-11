@@ -1,0 +1,84 @@
+---
+handler: lista_equipos_2Change
+formulario: MainForm
+endereco: 0x0040e1a8
+veredito: aberto
+---
+
+# MainForm.lista_equipos_2Change
+
+O irmão de [`lista_equiposChange`](MainForm.lista_equiposChange.md) para a
+**segunda** lista de times — o time reserva, de onde saem os jogadores que a
+tela move para o titular. 348 bytes contra 1.536: ele faz bem menos.
+
+## Entrada
+
+- `lista_equipos_2.ItemIndex`, e `lista_equipos.ItemIndex` para comparar os
+  dois;
+- a imagem, através da rotina de preenchimento de lista em `0x0040b2d8`, a
+  mesma que o `lista_equiposChange` usa.
+
+**Evidência:** disassembly lido
+
+## Saída
+
+```text
+se lista_equipos_2.ItemIndex = -1: sai
+<controle>.Enabled := verdadeiro          ' o primeiro do corpo
+0x0040b2d8(...)                            ' preenche a lista de jogadores reserva
+<lista>.Enabled := verdadeiro ; ItemIndex := 0
+se lista_equipos.ItemIndex >= 0:
+    os cinco botões de troca (paderecha, paderecha2, paizquierda,
+    paizquierda2, paderechaeizquierda) .Enabled := verdadeiro
+se lista_equipos_2.ItemIndex < 95:
+    se lista_equipos_2.ItemIndex <> lista_equipos.ItemIndex:
+        0x00405468(...)                    ' desenha a bandeira do reserva
+    senão:
+        banderita2.Picture := bandera.Picture
+    banderita2.Visible := verdadeiro
+senão:
+    banderita2.Visible := falso
+```
+
+O `<>` entre as duas listas é o detalhe que vale registrar: quando os dois
+lados são o **mesmo** time, o original não redesenha — copia a bandeira já
+pronta do `bandera`. É otimização, não comportamento diferente, e o port pode
+fazer os dois caminhos iguais sem divergir na tela.
+
+O `95` tem o mesmo significado do handler irmão: é o índice do modelo de Master
+League, não o número de times.
+
+**Evidência:** disassembly lido
+
+## Bytes tocados
+
+**Nenhum** neste corpo. A leitura da imagem acontece dentro de `0x0040b2d8`,
+que é rotina compartilhada e ainda não foi medida.
+
+**Evidência:** nao medido
+
+## Pré-condições
+
+`ItemIndex = -1` sai imediatamente. Os cinco botões de troca só são habilitados
+se a **outra** lista também tiver seleção — é o par simétrico do teste que o
+`lista_equiposChange` faz sobre esta.
+
+**Evidência:** disassembly lido
+
+## Comportamento de erro
+
+Não trata.
+
+**Evidência:** disassembly lido
+
+## Notas
+
+**Veredito `aberto` pela mesma razão do irmão:** o corpo depende de
+`0x0040b2d8` (preencher lista de jogadores) e de `0x00405468` (desenhar
+bandeira, que é da
+[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md)).
+
+Os campos citados sem nome no pseudocódigo acima são os que o corpo alcança por
+deslocamento e que ainda não foram cruzados um a um com o
+[`../campos.tsv`](../campos.tsv) — a estrutura está medida, a etiqueta de cada
+controle é trabalho da próxima passagem.

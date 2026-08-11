@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+"""A tabela de barras do original é a nossa `OFS_TEAM_BARS`. Prova disso.
+
+Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), spec de
+`MainForm.lista_equiposChange`.
+
+**Não escreve arquivo nenhum** — confere, e sai 2 quando diverge. Mesmo
+contrato do `check_lcl_props.py` (CORR-WTE-020), pela mesma razão: o que ele
+mede não tem forma de documento, tem forma de asserção.
+
+## O que se mede, e por que isso importa
+
+Ao trocar de time, o original lê **cinco bytes** e transforma cada um na
+largura de uma barra. Ele não usa um offset: usa uma *conta*, com o endereço
+lógico convertido para físico setor a setor —
+
+```text
+t     = ANCORA + PASSO * indice
+setor = t div SETOR_DADOS
+resto = t mod SETOR_DADOS
+fisico = SETOR_BRUTO * setor + resto + BASE
+```
+
+— e é essa conta que decide se o port pode ler os mesmos valores da camada de
+dados em vez de reabrir a imagem. **Se `fisico(0)` for a `OFS_TEAM_BARS` que o
+`we2002_core` já conhece, os dois oráculos estão falando do mesmo lugar** e a
+`Team.bar_*` serve; se não for, o port estaria mostrando outra coisa com a cara
+da certa.
+
+As constantes saem do **corpo do handler**, decodificadas daqui, e não de um
+literal escrito à mão neste arquivo: constante que muda no binário tem de
+derrubar a conferência, não passar despercebida. `SETOR_DADOS` e `SETOR_BRUTO`
+são os dois valores fixos do formato MODE2/2352, e mesmo eles têm o `sar
+esi,0xb` e o `shl eax,4` conferidos por padrão — se o binário parar de dividir
+por 2048, a conferência cai.
+
+## O que ele NÃO faz
+
+Não abre imagem. A igualdade byte a byte entre o que a conta lê e o que
+`Team.bar_*` devolve foi medida uma vez, com uma cópia em `work/`, e está
+registrada na spec — aqui fica a parte que dá para conferir a cada build, sem
+depender de `roms/`, que é do usuário e não é versionado.
+
+Uso:
+
+    python3 wte/tools/check_barras.py            # confere
+    python3 wte/tools/check_barras.py --check    # idem, o que `make -C wte check` roda
+"""
+
+from __future__ import annotations
+
+import re
+import struct
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+EXE = ROOT / "we-team-editor" / "we-team-editor.exe"
+PUB = ROOT / "wte" / "re" / "published_methods.tsv"
+OFFSETS = ROOT / "wte" / "src" / "we2002_offsets.pas"
+
+REL_EXE = "we-team-editor/we-team-editor.exe"
+REL_PUB = "wte/re/published_methods.tsv"
+REL_OFFSETS = "wte/src/we2002_offsets.pas"
+GENERATOR = "wte/tools/check_barras.py"
+
+HANDLER = ("MainForm", "lista_equiposChange")
+
+# Quantos times a lista endereça. 63 seleções e clássicos + 32 clubes de Master
+# League; o item 95 do combo é o modelo de ML, que não tem barra -- e é por isso
+# que o handler compara com 95 antes de ler.
+TIMES = 95
+
+# Os padrões que carregam cada constante, dentro do corpo do handler. Cada um
+# tem de casar EXATAMENTE uma vez: duas ocorrências significaria que a conta
+# aparece em dois lugares e que medir uma delas não basta.
+PADROES = {
+    # lea esi,[eax+eax*4] seguido de add esi,imm32 -- o passo (cinco bytes por
+    # time, que é a forma do `lea`) e a âncora, o endereço lógico do time 0.
+    # Os dois juntos num padrão só de propósito: sozinho, `add esi,imm32` casa
+    # também o `add esi,0x7ff` do arredondamento de sinal logo abaixo.
+    "ancora": (rb"\x8d\x34\x80\x81\xc6(....)", "<I"),
+    # sar esi,0xb -- 2^11 bytes de dados por setor
+    "shift": (rb"\xc1\xfe\x0b", None),
+    # shl eax,4 sobre 147*setor -- 147*16 = 2352, o setor bruto MODE2
+    "shl": (rb"\xc1\xe0\x04", None),
+    # add eax,imm32 -- a base física
+    "base": (rb"\x05(....)\x50", "<I"),
+    # cmp eax,0x800 -- o contador que dispara o salto de setor
+    "limite": (rb"\x3d\x00\x08\x00\x00", None),
+    # push 0x130 -- 2352 - 2048, o salto sobre EDC/ECC mais o cabeçalho
+    "salto": (rb"\x68\x30\x01\x00\x00", None),
+}
+
+SETOR_DADOS = 2048
+SETOR_BRUTO = 2352
+
+
+class CheckError(Exception):
+    """Erro de medicao, sempre com contexto suficiente para agir."""
+
+
+class PE:
+    """Leitor de PE em stdlib pura -- cada gerador de `wte/tools/` roda sozinho."""
+
+    def __init__(self, data: bytes, rotulo: str) -> None:
+        self.data = data
+        self.rotulo = rotulo
+        if data[:2] != b"MZ":
+            raise CheckError(f"{rotulo}: nao comeca com MZ")
+        pe = struct.unpack_from("<I", data, 0x3C)[0]
+        if data[pe:pe + 4] != b"PE\0\0":
+            raise CheckError(f"{rotulo}: assinatura PE ausente em {pe:#x}")
+        nsec = struct.unpack_from("<H", data, pe + 6)[0]
+        szopt = struct.unpack_from("<H", data, pe + 20)[0]
+        opt = pe + 24
+        self.base = struct.unpack_from("<I", data, opt + 28)[0]
+        self.sections = []
+        for i in range(nsec):
+            o = pe + 24 + szopt + i * 40
+            self.sections.append((
+                struct.unpack_from("<I", data, o + 12)[0],
+                struct.unpack_from("<I", data, o + 8)[0],
+                struct.unpack_from("<I", data, o + 20)[0],
+                struct.unpack_from("<I", data, o + 16)[0]))
+
+    def off(self, va: int) -> int | None:
+        rva = va - self.base
+        for vaddr, vsize, raddr, rsize in self.sections:
+            if vaddr <= rva < vaddr + max(vsize, rsize) and rva - vaddr < rsize:
+                return raddr + (rva - vaddr)
+        return None
+
+
+def endereco_do_handler() -> tuple[int, int]:
+    """(inicio, fim) do corpo, pelo TSV da WTE-TASK-04.
+
+    O fim e o proximo handler publicado. Aqui isso basta e nao precisa do
+    decodificador de instrucao do `dump_arranque.py`: o proximo handler comeca
+    588 bytes depois do fim real, e os padroes procurados nao existem no meio.
+    """
+    linhas = PUB.read_text(encoding="utf-8").splitlines()
+    cab = linhas[0].split("\t")
+    enderecos = []
+    alvo = None
+    for linha in linhas[1:]:
+        c = dict(zip(cab, linha.split("\t")))
+        ender = int(c["endereco"], 16)
+        enderecos.append(ender)
+        if (c["formulario"], c["handler"]) == HANDLER:
+            alvo = ender
+    if alvo is None:
+        raise CheckError(f"{REL_PUB}: sem {HANDLER[0]}.{HANDLER[1]}")
+    seguinte = min((e for e in enderecos if e > alvo), default=alvo + 0x800)
+    return alvo, seguinte
+
+
+def constantes(pe: PE, ini: int, fim: int) -> dict[str, int]:
+    o = pe.off(ini)
+    if o is None:
+        raise CheckError(f"{REL_EXE}: {ini:#x} fora das secoes")
+    corpo = pe.data[o:o + (fim - ini)]
+    saida: dict[str, int] = {}
+    for nome, (padrao, forma) in PADROES.items():
+        achados = re.findall(padrao, corpo)
+        if len(achados) != 1:
+            raise CheckError(
+                f"{HANDLER[0]}.{HANDLER[1]}: o padrao de '{nome}' casou "
+                f"{len(achados)} vez(es), esperava 1. A conta das barras mudou "
+                f"de forma no binario, e ler a constante velha daria endereco "
+                f"errado com cara de certo.")
+        saida[nome] = struct.unpack(forma, achados[0])[0] if forma else 0
+    return saida
+
+
+def ofs_team_bars() -> int:
+    texto = OFFSETS.read_text(encoding="utf-8")
+    m = re.search(r"^\s*OFS_TEAM_BARS\s*=\s*(\d+);", texto, re.M)
+    if not m:
+        raise CheckError(f"{REL_OFFSETS}: sem OFS_TEAM_BARS")
+    return int(m.group(1))
+
+
+def fisico(t: int, base: int) -> int:
+    return SETOR_BRUTO * (t // SETOR_DADOS) + (t % SETOR_DADOS) + base
+
+
+def main(argv: list[str]) -> int:
+    for arg in argv:
+        if arg != "--check":
+            print(f"uso: {GENERATOR} [--check]", file=sys.stderr)
+            return 2
+    try:
+        if not EXE.exists():
+            raise CheckError(f"{REL_EXE}: ausente")
+        pe = PE(EXE.read_bytes(), REL_EXE)
+        ini, fim = endereco_do_handler()
+        c = constantes(pe, ini, fim)
+        esperado = ofs_team_bars()
+
+        primeiro = fisico(c["ancora"], c["base"])
+        if primeiro != esperado:
+            raise CheckError(
+                f"a conta do original leva o time 0 para {primeiro}, e a "
+                f"OFS_TEAM_BARS do {REL_OFFSETS} diz {esperado}. Os dois "
+                f"oraculos deixaram de falar do mesmo lugar -- a camada de "
+                f"dados NAO pode servir as barras enquanto isto valer.")
+
+        # Cinco bytes por time, 95 times, sem sobreposicao nem buraco: a
+        # ultima leitura tem de acabar exatamente 5*95 bytes logicos adiante.
+        ultimo = fisico(c["ancora"] + 5 * (TIMES - 1), c["base"])
+        fim_logico = c["ancora"] + 5 * TIMES
+        if fisico(fim_logico - 1, c["base"]) < ultimo:
+            raise CheckError("a faixa das barras anda para tras -- conta errada")
+
+        print(f"check_barras: passo 5, ancora {c['ancora']:#x}, base "
+              f"{c['base']:#x}")
+        print(f"check_barras: time 0 em {primeiro} = OFS_TEAM_BARS: ok")
+        print(f"check_barras: {TIMES} times, ultimo em {ultimo}: ok")
+    except CheckError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

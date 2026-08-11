@@ -243,8 +243,8 @@ conferível.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **19 de 96 têm arquivo**
-      (2026-08-11): 14 `trivial`, 1 `implementado`, 4 ainda `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **22 de 96 têm arquivo**
+      (2026-08-11): 14 `trivial`, 1 `implementado`, 7 ainda `aberto`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -460,6 +460,7 @@ new-we2002-editor/
 │   │   ├── check_fase1.py            ← WTE-TASK-09
 │   │   ├── dump_campos.py            ← WTE-TASK-25
 │   │   ├── dump_arranque.py          ← WTE-TASK-25
+│   │   ├── check_barras.py           ← WTE-TASK-25
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
@@ -617,3 +618,23 @@ diante cai de novo a cada corpo escrito, que é o sinal certo. É a
 achou foi revisão. Agora há guarda: o `check_fase2.py` **reprova** se a frase da
 §4.4 do plano não trouxer a fração medida no dia — número em documento de fonte
 de verdade passou a ser falha de build, como os quatro da WTE-TASK-09.
+
+**WTE-TASK-25 — os dois oráculos falam do mesmo lugar, e provar isso custou
+minutos.** O original não guarda offset para as barras de força: ele calcula,
+`2352 * (t div 2048) + (t mod 2048) + 0x1e8178`, com `t = 0x45ff0 + 5*índice`.
+A conta leva o time 0 para **2328184** — a `OFS_TEAM_BARS` que o `we2002_core`
+já conhece — e a conferência byte a byte contra o `dump_estado.pas` mostra que
+os 95 itens da lista são os **63 `teams` seguidos dos 32 `ml_teams`**. O port
+pode ler a camada de dados em vez de reabrir a imagem, e isso não é suposição.
+É o método da §4.2 rendendo o que promete: o diff diz *onde*, o core diz *o
+que*. Virou guarda de build no
+[`check_barras.py`](../../wte/tools/check_barras.py), que decodifica as
+constantes do próprio corpo do handler — constante que mude no binário derruba
+a conferência em vez de passar.
+
+**E spec medida com veredito `aberto` vale mais que meio corpo escrito.** O
+`lista_equiposChange` chama quatro auxiliares que não são dele, dois deles de
+outra task. Escrever a metade que dá faria o `check_fase2.py` contar o handler
+como "com corpo escrito" — índice afirmando pronto o que está pela metade, que
+é o defeito que a CORR-WTE-049 e a CORR-WTE-051 já pagaram. O `.inc` só entra
+quando o corpo inteiro entrar.

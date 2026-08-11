@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 81 |
 | **total** | **96** |
 
-19 de 96 têm arquivo de spec.
+22 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -98,7 +98,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040c9d0` | `MainForm` | sel_barraClick | OnClick x5 | edicao | aberto |
 | `0x0040ca10` | `MainForm` | track_barraChange | OnChange | edicao | aberto |
 | `0x0040cab8` | `MainForm` | boton_barras2isoClick | OnClick | gravacao | aberto |
-| `0x0040cd6c` | `MainForm` | lista_equiposChange | OnChange | carga | aberto |
+| `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | aberto |
 | `0x0040d36c` | `MainForm` | edit_nombre1KeyPress | OnKeyPress | edicao | aberto |
 | `0x0040d3c4` | `MainForm` | edit_nombre2KeyPress | OnKeyPress | edicao | aberto |
 | `0x0040d41c` | `MainForm` | edit_nombre3KeyPress | OnKeyPress | edicao | aberto |
@@ -106,7 +106,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d534` | `MainForm` | boton_nombres2isoClick | OnClick | gravacao | aberto |
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
 | `0x0040dfe8` | `MainForm` | boton_dialogo_texClick | OnClick | carga | aberto |
-| `0x0040e1a8` | `MainForm` | lista_equipos_2Change | OnChange | carga | aberto |
+| `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |
 | `0x0040e304` | `MainForm` | paderechaeizquierdaClick | OnClick | edicao | aberto |
 | `0x0040e4b0` | `MainForm` | paizquierdaClick | OnClick | edicao | aberto |
 | `0x0040e5e8` | `MainForm` | paderechaClick | OnClick | edicao | aberto |
@@ -116,7 +116,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040ecc0` | `MainForm` | pabajoClick | OnClick | edicao | aberto |
 | `0x0040ee80` | `MainForm` | grabar_camisetaClick | OnClick | gravacao | aberto |
 | `0x0040f69c` | `MainForm` | grabar_memoryClick | OnClick | gravacao | aberto |
-| `0x0040f8b8` | `MainForm` | lista_jugadores_1Change | OnChange | carga | aberto |
+| `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
 | `0x0040f8d4` | `MainForm` | mostrar_jugadorClick | OnClick x2 | carga | aberto |
 | `0x00410220` | `MainForm` | mostrar_estrategiaClick | OnClick x2 | carga | aberto |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
