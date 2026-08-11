@@ -3,7 +3,7 @@ id: CORR-WTE-053
 title: "Correção: a seção 2 da WTE-TASK-22 descreve o controle como uma faixa só, e o gate declara nove"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -138,12 +138,61 @@ reproduzi-la — não muda; ela já está implementada no roteiro e verificada.
 - [ ] `bash wte/tools/golden_check.sh … --modo golden` continua `PASSOU` com as
       nove
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-11
 
 **Resumo do que foi feito:**
 
+A seção 2 da WTE-TASK-22 foi reescrita com a imagem de cada medida numa tabela
+(europeia 474.784.128 B, japonesa 307.187.664 B), as sete faixas de setor
+somando os 11.952 herdados da WTE-TASK-12 e as duas que só a japonesa tem — 3
+bytes, 11.955 no total —, mais a explicação do recorte: os saltos entre as sete
+são os 304 bytes de cabeçalho e EDC/ECC de setor, que o editor não toca. É a
+mesma escrita da europeia, vista com a régua do setor.
+
+**A contagem de faixas declaradas saiu do texto e virou ponteiro.** O aviso da
+própria CORR se cumpriu: quando esta correção foi executada, a WTE-TASK-25 já
+tinha baixado a declaração de nove para **duas**, ao fazer o port injetar os
+sete setores a partir do `dat.bin`. Escrever "nove" na prosa teria trocado um
+número vencido por outro, então a seção passou a apontar para o
+`golden-01-arranque.txt`, que é o arquivo que o veredito consulta, e a citar as
+nove só como o estado em que o roteiro nasceu.
+
+Números remedidos nesta execução, não copiados da CORR:
+
+```
+$ cmp -l work/dd-clean.bin work/dd-run.bin | awk '{p=$1-1;
+    if (NR==1) {ini=p; prev=p; n=1; next}
+    if (p>prev+304) {print ini".."prev": "n" B"; ini=p; n=0}
+    prev=p; n++} END {print ini".."prev": "n" B"}'
+11796..13831: 1443 B     18840..20887: 1917 B     25896..26527:  626 B
+14136..16183: 2048 B     21192..23239: 1906 B     1921862..1921862:   1 B
+16488..18535: 2035 B     23544..25591: 1977 B     2012984..2012985:   2 B
+# 1443+2048+2035+1917+1906+1977+626 = 11952; com as duas de baixo, 11955
+
+$ bash wte/tools/golden_check.sh wte/tests/roteiros/golden-01-arranque.txt \
+       --roteiro-port wte/tests/roteiros/golden-01-arranque.port.txt --modo golden
+PASSOU: so as faixas declaradas divergem — 1921862..1921862, 2012984..2012985
+```
+
+**Discrepância consertada junto:** o `wte/re/visual.md`, para onde a seção 2
+aponta, dizia *"as imagens deste repositório: elas têm 474.784.128 bytes"* — só
+a europeia tem. Corrigido para dizer os dois tamanhos e para registrar que o
+achado 2 inteiro é da europeia, com ponteiro para a conta por faixa da japonesa.
+
 **Problemas encontrados:**
 
+O `cmp -l` foi rodado sobre o par `work/dd-clean.bin` / `work/dd-run.bin` que já
+estava no disco, de uma corrida anterior do `diff_dirigido.sh` — leitura pura,
+sem tirar cópia nova de 307 MB só para recontar. O gate `golden` foi rodado de
+verdade, e é dele que sai o `PASSOU` acima.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/22-harness-golden.md` | modificado — seção 2 reescrita |
+| `wte/re/visual.md` | modificado — o tamanho por imagem, e o achado 2 rotulado como europeu |
+| `docs/tasks/CORR-WTE-053.md` | `status: concluído` e este Log |
+| `docs/tasks/correcoes-progresso.md` | `[x]` na tabela e no checklist |

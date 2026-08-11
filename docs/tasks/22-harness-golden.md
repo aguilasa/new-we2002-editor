@@ -118,21 +118,65 @@ As três ressalvas e o que ficou sem resposta estão em
 
 ### 2. O controle **não** é "imagem intocada"
 
-Aceitar o aviso de tamanho — o caminho normal, porque as imagens deste
-repositório têm 474.784.128 bytes e o editor espera 474.431.328 — grava
-**11.952 bytes** na imagem, faixa `11796..26527` — **offsets 0-based,
-inclusivos** —, **setores 5 a 11**, antes de qualquer edição. Medido passo a
-passo: o diálogo de arquivo não grava, o "Sim" do aviso grava, e nem o splash
-nem a seleção de time acrescentam byte.
+Aceitar o aviso de tamanho — o caminho normal, porque o editor espera
+474.431.328 bytes e nenhuma das duas imagens tem esse tamanho — grava na imagem
+antes de qualquer edição. Medido passo a passo: o diálogo de arquivo não grava,
+o "Sim" do aviso grava, e nem o splash nem a seleção de time acrescentam byte.
+
+**Toda medida abaixo diz de qual imagem fala**, porque as duas não gravam a
+mesma coisa e este harness não usa a mesma imagem da task que originou o
+número:
+
+| imagem | tamanho | de onde vem a medida |
+|---|---:|---|
+| `roms/golden-european-deluxe.bin` | 474.784.128 B | WTE-TASK-12, achado 2 |
+| `roms/japanese-shift-jis.bin` | 307.187.664 B | esta task — é a que o gate fixa (seção 1) |
+
+**Na europeia** a WTE-TASK-12 mediu **11.952 bytes**, dentro de
+`11796..26527` — **offsets 0-based, inclusivos** —, **setores 5 a 11**.
+
+**Na japonesa** os mesmos 11.952 bytes aparecem, distribuídos nos mesmos sete
+setores, **mais 3 que a europeia não tem** — 11.955 no total:
+
+```
+$ cmp -l work/dd-clean.bin work/dd-run.bin | awk '{p=$1-1;
+    if (NR==1) {ini=p; prev=p; n=1; next}
+    if (p>prev+304) {print ini".."prev": "n" B"; ini=p; n=0}
+    prev=p; n++} END {print ini".."prev": "n" B"}'
+11796..13831: 1443 B      ┐
+14136..16183: 2048 B      │
+16488..18535: 2035 B      │
+18840..20887: 1917 B      ├ os sete setores: 11.952 B, os mesmos da europeia
+21192..23239: 1906 B      │
+23544..25591: 1977 B      │
+25896..26527:  626 B      ┘
+1921862..1921862:   1 B   ┐ só na japonesa
+2012984..2012985:   2 B   ┘
+```
+
+Os saltos de 304 bytes entre os sete são os cabeçalhos e o EDC/ECC de setor,
+que o editor não toca — por isso a **faixa** da europeia é uma e a **medição**
+da japonesa são sete: é a mesma escrita, recortada pelos limites de setor
+(`CLAUDE.md`, "Formato da imagem"). As duas de baixo estão em região de dados
+(`OFS_TEAM_NAME_2` e `OFS_LINK_ML1`) e continuam sem explicação medida; a
+WTE-TASK-19 já tinha visto `1921862` como escrita do arranque que **não** muda
+byte na europeia — daí ela não aparecer lá.
 
 **Não copie os extremos do `cmp -l`:** ele numera bytes a partir de 1 e imprime
-`11797..26528` para a mesma faixa. O comando que mede na base certa está em
-[`../../wte/re/visual.md`](../../wte/re/visual.md), achado 2.
+`11797..26528` para a faixa da europeia. O comando que mede na base certa está
+em [`../../wte/re/visual.md`](../../wte/re/visual.md), achado 2.
 
 *Original contra original* continua dando zero — os dois lados gravam os mesmos
 bytes. Mas o port terá de **reproduzir** essa gravação, ou o harness terá de
 declarar a faixa como exceção conhecida, no mesmo espírito dos 16 bytes do slot
 64 do `newWe2002`. Decidir qual, e escrever a razão.
+
+**Decidido: declarar.** O roteiro do gate nasceu com as **nove** faixas acima
+como `conhecida:`. Quantas estão declaradas **hoje** não se lê aqui — se lê no
+[`golden-01-arranque.txt`](../../wte/tests/roteiros/golden-01-arranque.txt),
+que é o arquivo que o veredito consulta; a WTE-TASK-25 já baixou para **duas**
+ao fazer o port injetar os sete setores a partir do `dat.bin`. Número de faixa
+copiado para prosa envelhece com o primeiro handler que fecha uma delas.
 
 ### 3. O lado port não recebe teclado no `:99`
 

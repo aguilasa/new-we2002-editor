@@ -124,9 +124,15 @@ PY
 # n: 11952 offsets 0-based: 11796 .. 26527 setores: 5 a 11
 ```
 
-O aviso dispara **sempre** com as imagens deste repositório: elas têm
-474.784.128 bytes e o editor espera 474.431.328. Ou seja, o caminho que grava é
-o caminho normal.
+O aviso dispara **sempre** com as imagens deste repositório: o editor espera
+474.431.328 bytes e nenhuma das duas tem esse tamanho — a europeia medida aqui
+tem 474.784.128 e a japonesa, 307.187.664. Ou seja, o caminho que grava é o
+caminho normal.
+
+**Tudo acima é a europeia.** Na japonesa — a que a
+[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) fixa no gate — os mesmos
+11.952 bytes aparecem, recortados pelos limites de setor em sete faixas, mais
+3 bytes que a europeia não tem. A conta por faixa está na seção 2 daquela task.
 
 **Isto muda o desenho do golden test**, e vai para a
 [WTE-TASK-22](../../docs/tasks/22-harness-golden.md): *original contra original*
