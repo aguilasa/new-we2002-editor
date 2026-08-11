@@ -76,6 +76,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-054](/docs/tasks/CORR-WTE-054.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `vmt.md` diz que todo número saiu do `vmt_probe.java`, e os votos da âncora (4 entre ~150) não têm ferramenta que os produza | Alta | [x] concluída | 2026-08-11 |
 | [CORR-WTE-055](/docs/tasks/CORR-WTE-055.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | A seção 4 do enunciado chama de 322 os imports de `rtl60`/`vcl60`; são 267, e o Log da própria task diz 267 | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-056](/docs/tasks/CORR-WTE-056.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `borland_cc.md` e o `run_headless.sh` mandam rodar `apply_names.py`, e o script é `.java` | Baixa | [x] concluída | 2026-08-11 |
+| [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A conferência de tela mede 3 dos 5 grupos de campo que o critério enumera: o recorte de 520×240 exclui os 23 números de camisa e a lista de jogadores, e o estado de habilitação nunca foi confrontado | Alta | [ ] pendente | — |
+| [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [ ] pendente | — |
+| [CORR-WTE-059](/docs/tasks/CORR-WTE-059.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A spec do `lista_equiposChange` justifica o `aberto` com "ainda não conferido contra a tela", e a seção seguinte é a conferência de tela | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -134,6 +137,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-054 — pôr a votação da âncora no `vmt_probe.java`, ou dizer no `vmt.md` de onde os votos vieram
 - [x] CORR-WTE-055 — trocar 322 por 267 na seção 4 da 24, dizendo que 322 é o total
 - [x] CORR-WTE-056 — trocar `apply_names.py` por `.java` nos três sítios do procedimento do Ghidra
+- [ ] CORR-WTE-057 — levar o recorte da conferência de tela aos 23 dorsais, à lista de jogadores e ao estado de habilitação
+- [ ] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
+- [ ] CORR-WTE-059 — trocar a razão escrita do veredito `aberto` pela que sobrou
 
 ## Detalhes por correção
 
@@ -1051,3 +1057,55 @@ dizer "fechada e fora do backlog", não "corrigida".
   abortou com a mensagem certa
 - **Fix:** trocar por `.java` nos três sítios, e dizer no passo da GUI que o
   `analyzeHeadless` compila GhidraScript em Java sozinho
+
+### CORR-WTE-057
+
+- **Arquivo com problema:** `wte/tools/compara_tela.sh` (`REC_W=520`,
+  `REC_H=240`) e o critério de tela da WTE-TASK-25
+- **Sintoma:** o critério reduzido enumera cinco grupos de campo — nome nos três
+  campos, as cinco barras, **os 23 números de camisa**, **a lista de jogadores**
+  e **o estado de habilitação que o `nacional` governa**. O recorte comparado
+  cobre os dois primeiros; `lista_jugadores_1` está em y ≈ 392 e os `dorsalN` em
+  y ≈ 432, fora dos 240 px de altura. O estado de habilitação nunca foi
+  confrontado com o do original — e é exatamente a seção **Saída** da spec, que
+  está `nao medido` desde a sexta passagem
+- **Como foi detectado:** posições absolutas somadas pela cadeia de pais do
+  `MainForm.dfm`; `bash wte/tools/compara_tela.sh 2 9 63` refeito nesta revisão
+  (15 larguras batem, 14 exatas contra o dump) e a montagem
+  `work/tela/time-63-lado-a-lado.png` termina acima das duas faixas
+- **Fix:** estender o recorte (ou usar dois, excluindo por coordenada a caixa
+  x 232..312 / y 36..168 da bandeira e do uniforme, que são da WTE-TASK-32) e
+  escrever o veredito dos três grupos que faltam, um a um
+
+### CORR-WTE-058
+
+- **Arquivo com problema:** `wte/re/visual.md` (linhas 12, 19 e 293) e a árvore
+  de pastas do `docs/tasks/progresso.md`
+- **Sintoma:** o `visual.md` traz `bash wte/tools/capture_forms.sh` como o modo
+  de reproduzir o lado port, e a WTE-TASK-25 deletou o script junto com o
+  `--show` de que ele dependia. A árvore do `progresso.md` lista quatro
+  ferramentas da 25 e não lista `src/impl/`, `src/we2002_estado.pas`,
+  `compara_tela.py`/`.sh` nem `check_lcl_combo.py` — e ainda diz que os corpos
+  das 25-28 moram nos `ep2002_*.pas`, que é o oposto da decisão da 1ª passagem
+- **Como foi detectado:** `ls wte/tools/capture_forms.sh` (não existe) contra
+  `grep -n 'capture_forms' wte/re/visual.md`; o `make -C wte check` fica verde
+  porque o `visual.md` é **entrada** do `check_fase2.py`, não saída
+- **Fix:** reescrever os três sítios no passado, nomeando a task que retirou o
+  andaime e preservando as duas armadilhas de captura, que sobrevivem à
+  ferramenta; completar a árvore do `progresso.md`
+
+### CORR-WTE-059
+
+- **Arquivo com problema:** `wte/re/spec/MainForm.lista_equiposChange.md`,
+  linhas 160-163
+- **Sintoma:** "É o custo de ainda não ter conferido contra a tela, e a razão de
+  o veredito continuar `aberto`" vem imediatamente antes de
+  "## A conferência de tela — três times, e os dois erros que ela achou". A
+  frase é da 6ª passagem, a seção é da 8ª. O veredito está certo; a razão
+  escrita é que envelheceu, e ela esconde a razão real — a seção **Saída** em
+  `nao medido`, por `TControl::SetEnabled` não ter uma única `call rel32`
+- **Como foi detectado:** leitura do arquivo em ordem, com
+  `bash wte/tools/compara_tela.sh 2 9 63` confirmando que a conferência existe e
+  passa
+- **Fix:** trocar a frase de fecho pela razão que sobrou, e reescrevê-la de novo
+  se a CORR-WTE-057 subir a seção Saída para `observação de tela`
