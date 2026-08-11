@@ -4,3 +4,6 @@ SysUtils        # ExtractFileName
 we2002_estado   # AbreImagem, CaminhoDatBin, Jogo
 wtemain         # ImagemDaLinhaDeComando
 retrace        # REMark
+we2002_database  # ResolveMlLink
+we2002_types     # SquadNumberAt
+StdCtrls         # TComboBox nos auxiliares

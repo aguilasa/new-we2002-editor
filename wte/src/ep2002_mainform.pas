@@ -29,7 +29,8 @@ interface
 
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
-  ActnList, retrace, SysUtils, we2002_estado, wtemain;
+  ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
+  we2002_types;
 
 type
   TMainForm = class(TForm)
@@ -302,12 +303,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_equiposChange(Sender: TObject);
-begin
-  REStub('MainForm.lista_equiposChange');
-end;
-{$POP}
+{$I impl/ep2002_mainform.lista_equiposChange.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre1KeyPress(Sender: TObject; var Key: char);

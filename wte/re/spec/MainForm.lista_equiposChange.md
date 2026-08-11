@@ -109,30 +109,42 @@ com `dorsal` + N, e no mesmo handler de carga de time. Aqui os dez existem.
 
 ## Notas
 
-**Veredito `aberto`: a spec está medida, o Pascal não está escrito.** Faltam
-auxiliares que este handler chama e que não são dele.
+**O Pascal está escrito**, em
+[`../../src/impl/ep2002_mainform.lista_equiposChange.inc`](../../src/impl/ep2002_mainform.lista_equiposChange.inc),
+e ele **não lê a imagem** — decisão medida, não atalho. As contas do original
+caem nos mesmos bytes que a camada de dados já carregou:
 
-**A tabela que estava aqui listava cinco endereços, e estava curta.** Ela era
-escrita à mão; medido pelo
+| O que o original calcula | Onde a camada de dados já tem |
+|---|---|
+| as cinco barras, por `2352 * (t div 2048) + …` | `OFS_TEAM_BARS`, conferida byte a byte |
+| os nomes, pela tabela em `0x004231a0` | a mesma tabela que virou os `OFS_*` |
+| os 23 nomes de jogador e os 23 números | o mesmo elenco, `players[]` e `squad_numbers` |
+
+Isso é o método da §4.2 rendendo o que promete pela terceira vez nesta task:
+**`0x00404374` (881 B) e `0x00403f00` (328 B) não precisaram ser lidos.** O que
+eles fazem é achar bytes cujo endereço já conhecemos por outro caminho.
+
+**Veredito ainda `aberto`, e agora por verificação, não por medição.** O corpo
+não foi conferido contra a tela do original, e a razão é nova: **o combo do
+port não abre por clique no `:99`**. Sem window manager o GTK2 nunca considera
+a janela ativa; medido em 2026-08-11, o clique no `lista_equipos` e no botão de
+seta não abre a lista. É a mesma causa da ausência de teclado que a
+[WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md) mediu, e ela alcança o
+mouse também. Do lado do oráculo não acontece: o Wine dá foco, e os roteiros
+07/08/11 trocam de time normalmente.
+
+O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
+(`0x00405270` e `0x004056c8`) são da
+[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md). Ele deixa os
+controles com a visibilidade certa; quem os desenha é a 32.
+
+**A tabela de auxiliares que estava aqui listava cinco endereços, e estava
+curta.** Ela era escrita à mão; medido pelo
 [`dump_auxiliares.py`](../../tools/dump_auxiliares.py), este handler chama
 **treze** rotinas internas. Parte da diferença é rotina de biblioteca, que a
 tabela à mão descartaria de propósito — mas `0x004050d0` e `0x0040cbc8`
 carregam dado do jogo, e essas não estavam sendo descartadas: não estavam sendo
-vistas. A lista viva está em [`../auxiliares.md`](../auxiliares.md), com o
-papel de cada uma e o que falta ler.
-
-O que ainda trava o corpo:
-
-| Endereço | Situação |
-|---|---|
-| `0x0040b2d8` | forma medida — ver abaixo; a aritmética do nome passa por `0x00404374`, não lida |
-| `0x0040b0b4` | medida, mas depende de `0x00403f00` (número de camisa), não lida |
-| `0x00405270`, `0x004056c8` | bandeira e uniforme 2D — [WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md) |
-| `0x0040cbc8` | percorre a tabela de offsets; chama `0x00403c0c`, não lida |
-
-Escrever metade do corpo agora deixaria o `check_fase2.py` contando o handler
-como "com corpo escrito" — o índice afirmaria pronto o que está pela metade, e
-é justamente esse tipo de mentira de índice que o projeto já pagou duas vezes.
+vistas. A lista viva está em [`../auxiliares.md`](../auxiliares.md).
 
 **A lista de jogadores não é traduzida, é filtrada.** `0x0040b2d8` recebe a
 lista de times e a lista de jogadores, esvazia a segunda e a preenche com 23

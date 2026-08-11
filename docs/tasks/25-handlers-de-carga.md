@@ -618,3 +618,80 @@ e não simula comportamento.
   - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
   - a remoção do `--show`;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
+
+---
+
+- **Executado em:** 2026-08-11 — **sexta passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  O handler central em Pascal — e **sem ler os 1,2 KB de disassembly que
+  pareciam bloqueá-lo**.
+
+  A observação que mudou o custo: `0x00404374` (881 B) faz aritmética para
+  achar o nome do jogador e `0x00403f00` (328 B) o número de camisa, e **nós já
+  temos os dois**. É o método da §4.2 pela terceira vez nesta task, depois das
+  barras e da fronteira de setor: o original calcula endereços que caem em
+  bytes cujo lugar já conhecemos por outro caminho — `OFS_TEAM_BARS` para as
+  barras, a tabela em `0x004231a0` para os nomes de time (a mesma da
+  [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md)), e o mesmo elenco para nome
+  e número de jogador. O port lê `Jogo`, e as duas rotinas não precisaram ser
+  lidas.
+
+  Entraram, no `.aux.inc` do `MainForm`: `BarraDoTime`, `NomeDoTime`,
+  `IndiceDoJogador` (com `ResolveMlLink` para clube de ML), `NomeDoJogador`,
+  `NumeroDaCamisa`, `PreencheCamisas` (o `0x0040b0b4`) e `PreencheJogadores`
+  (o `0x0040b2d8`). E o `lista_equiposChange` inteiro: os três blocos do
+  original, na ordem dele.
+
+  **A casca passou a consumir a camada de dados de verdade.** O
+  `check_fase3.py` mede isso e o número virou **2** unidades — o
+  `we2002_estado.pas` e agora o `ep2002_mainform.pas`. Antes da WTE-TASK-25 era
+  zero, e o teste que existia prevendo a própria falha já tinha sido invertido
+  na primeira passagem.
+
+- **O obstáculo novo, medido:**
+
+  **O combo do port não abre por clique no `:99`.** Sem window manager o GTK2
+  nunca considera a janela ativa; medido em 2026-08-11, clicar no
+  `lista_equipos` e no botão de seta não abre a lista. É a **mesma causa** da
+  ausência de teclado que a [WTE-TASK-13](/docs/tasks/13-trace-de-eventos.md)
+  mediu, e ela alcança o mouse também — o que não era sabido. Do lado do
+  oráculo não acontece: o Wine dá foco, e os roteiros 07/08/11 trocam de time
+  normalmente.
+
+  Consequência direta: o critério de tela **não é dirigível hoje** do lado do
+  port, e nem o dump de estado depois de carga por tela. Nenhum window manager
+  está instalado nesta máquina (`openbox`, `metacity`, `xfwm4`, `i3`, `marco`,
+  `mutter`, `fluxbox`, `jwm`, `twm` — nenhum). As saídas possíveis são instalar
+  um e subi-lo no `:99` — o que muda o ambiente de que o `golden_check.sh`
+  depende, porque decoração desloca coordenada — ou dar ao `wtemain` um
+  argumento de seleção inicial, como já tem para a imagem. **É decisão do
+  usuário**, e por isso a passagem parou aqui em vez de escolher.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — o handler
+  - `wte/src/impl/ep2002_mainform.aux.inc` — os sete auxiliares novos
+  - `wte/src/impl/ep2002_mainform.uses` — `we2002_database`, `we2002_types`,
+    `StdCtrls`
+  - `wte/re/spec/MainForm.lista_equiposChange.md` — o Pascal, o obstáculo
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 92,1% → **89,7%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `fase-3-fechamento.md`, `INDICE.md`
+
+- **Problemas encontrados:**
+  1. A fração da §4.4 caiu duas vezes na mesma sessão (92,1% e 89,7%), e as
+     duas vezes o `check_fase2.py` reprovou até o plano trazer o número. O
+     guard escrito na quinta passagem já pagou o próprio custo.
+  2. Um `wte` esquecido no `:99` sobreviveu a `kill %1` e a `pkill -f`; só
+     `pkill -9` com o caminho completo resolveu. Segunda vez na mesma sessão.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **decidir como dirigir o port no `:99`** — sem isso, dois critérios não
+    são exercitáveis;
+  - `lista_equipos_2Change` em Pascal (mesmos auxiliares, já escritos);
+  - os 6 handlers de carga sem spec;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
+  - a conferência de tela para 3 times e o dump de estado;
+  - a remoção do `--show`;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
+
