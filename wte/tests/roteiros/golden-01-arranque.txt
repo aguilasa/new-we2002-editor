@@ -24,17 +24,15 @@ operacao: arranque
 # **nao** as posicoes 1-based que o `cmp -l` imprime.
 #
 # Elas valem para o modo `golden` (oraculo contra port) e nao para o
-# `controle`, onde os dois lados gravam o mesmo. Enquanto o port nao tiver
-# handler de carga (WTE-TASK-25) ele nao grava nada, e estas nove linhas sao a
-# distancia exata que falta -- por isso ficam declaradas em vez de subtraidas
-# em silencio: o gate reprova se uma delas parar de aparecer.
-conhecida: 11796..13831
-conhecida: 14136..16183
-conhecida: 16488..18535
-conhecida: 18840..20887
-conhecida: 21192..23239
-conhecida: 23544..25591
-conhecida: 25896..26527
+# `controle`, onde os dois lados gravam o mesmo. Ficam declaradas em vez de
+# subtraidas em silencio: o gate reprova se uma delas parar de aparecer.
+#
+# **Eram nove ate a WTE-TASK-25, e sao duas.** As sete que sairam sao os sete
+# setores que abrir a imagem injeta a partir de `dat.bin[0x20000..]`
+# (`wte/re/assets.md` secao 8.2): o port passou a injeta-los tambem, entao
+# deixaram de ser divergencia. Sao 11.952 bytes dos dois lados, nas mesmas
+# extensoes. As duas que sobraram continuam sem explicacao medida -- um byte
+# no setor 817 e dois no 855 --, e sobram para o resto da WTE-TASK-25.
 conhecida: 1921862..1921862
 conhecida: 2012984..2012985
 

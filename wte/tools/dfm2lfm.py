@@ -10,6 +10,8 @@ Entradas, todas somente-leitura:
     wte/re/dfm/*.dfm              estrutura dos 18 formularios (WTE-TASK-03)
     wte/re/dfm/blobs/**/*.bin     os 118 blobs binarios (gitignored, regeravel)
     wte/re/published_methods.tsv  os 96 handlers com dono (WTE-TASK-04)
+    wte/src/impl/*.inc            corpos escritos a mao (WTE-TASK-25 em diante)
+    wte/src/impl/*.uses           o `uses` que cada corpo pede
 
 Saidas, todas geradas -- **nao editar a mao**:
 
@@ -162,6 +164,7 @@ SRC_OUT = ROOT / "wte" / "src"
 REL_DFM = "wte/re/dfm"
 REL_FORMS = "wte/forms"
 REL_SRC = "wte/src"
+REL_IMPL = "wte/src/impl"
 GENERATOR = "wte/tools/dfm2lfm.py"
 EXTRACTOR = "wte/tools/dfm_extract.py"
 RELATORIO = "conversao.md"
@@ -910,10 +913,13 @@ CABECALHO_UNIT = """\
   `python3 {gerador} --check` compara com o commitado e e o que
   `make -C wte check` roda.
 
-  Os corpos dos handlers sao stub que registra o proprio nome (secao 4.3 do
-  plano): a fase 2 monta a casca inteira e a fase 4 e que preenche. `REStub`
-  vem de `{restub}.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar
-  `restub`, porque o nome colidiria com o da rotina.
+  Cada handler sai de uma de duas formas. Sem corpo escrito, sai como stub que
+  registra o proprio nome (secao 4.3 do plano); `REStub` vem de
+  `{restub}.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
+  porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
+  assinatura mais `{{$I impl/<unidade>.<handler>.inc}}`: o corpo e da fase 4,
+  vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+  Ver `{rel_impl}/README.md`.
 }}
 unit {unidade};
 
@@ -928,15 +934,79 @@ type
 """
 
 
+def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]]]:
+    """Le `wte/src/impl/`: os corpos escritos a mao e o `uses` que eles pedem.
+
+    Devolve `({(unidade, handler): nome-do-.inc}, {unidade: [unidades extras]})`.
+
+    **Este e o unico conteudo escrito a mao que entra nas 18 unidades.** A
+    partir da fase 4 os corpos deixam de ser stub, e corpo de handler nao e
+    coisa que gerador saiba escrever -- ele sai da spec de `wte/re/spec/`, uma
+    a uma. Editar o `.pas` gerado para po-los ali seria quebrar a regra que o
+    proprio cabecalho do arquivo anuncia; entao o corpo mora fora, num `.inc`
+    que o gerador nao escreve e nao le o conteudo, so referencia:
+
+        wte/src/impl/<unidade>.<handler>.inc   corpo, de `var`/`begin` a `end;`
+        wte/src/impl/<unidade>.uses            uma unidade por linha, `#` comenta
+
+    O `.inc` comeca no `var` (ou direto no `begin`) e termina no `end;`, porque
+    `{$I}` dentro de um `begin..end` nao poderia declarar local. Quem nao tem
+    `.inc` continua saindo como stub `REStub`, e e assim que o indice de
+    `re/spec/` e este gerador contam a mesma coisa por caminhos diferentes.
+
+    Arquivo orfao **aborta**: nome errado viraria stub silencioso, e o sintoma
+    seria "o handler nao faz nada" -- diagnostico que manda procurar no lugar
+    errado.
+    """
+    corpos: dict[tuple[str, str], str] = {}
+    uses: dict[str, list[str]] = {}
+    # Derivado de `SRC_OUT` em tempo de chamada, e nao um global de import: os
+    # testes trocam `SRC_OUT` por uma arvore temporaria, e um global apontaria
+    # para a arvore de verdade, onde os `.inc` nao correspondem aos poucos
+    # formularios do fixture.
+    impl_dir = SRC_OUT / "impl"
+    if not impl_dir.is_dir():
+        return corpos, uses
+    for caminho in sorted(impl_dir.iterdir()):
+        if caminho.name.startswith("."):
+            continue
+        if caminho.suffix == ".inc":
+            miolo = caminho.name[:-4]
+            if "." not in miolo:
+                raise Dfm2LfmError(
+                    f"{REL_IMPL}/{caminho.name}: o nome tem de ser "
+                    "<unidade>.<handler>.inc")
+            unidade, handler = miolo.split(".", 1)
+            corpos[(unidade, handler)] = caminho.name
+        elif caminho.suffix == ".uses":
+            linhas = []
+            for linha in caminho.read_text(encoding="utf-8").splitlines():
+                linha = linha.split("#", 1)[0].strip()
+                if linha:
+                    linhas.append(linha)
+            uses[caminho.stem] = linhas
+        elif caminho.suffix != ".md":
+            raise Dfm2LfmError(
+                f"{REL_IMPL}/{caminho.name}: extensao nao reconhecida "
+                "(esperado .inc, .uses ou .md)")
+    return corpos, uses
+
+
 def emite_unit(formulario: str, unidade: str, raiz: Obj,
                handlers: list[tuple[str, str, str]],
                descartes: list[Descarte],
-               urls: list[tuple[str, str]]) -> str:
+               urls: list[tuple[str, str]],
+               corpos: dict[str, str] | None = None,
+               uses_extra: list[str] | None = None) -> str:
     """Monta o texto do `.pas`.
 
     `handlers` e [(nome, forma, comentario)] ja resolvido; `descartes` sao os
-    desta unidade; `urls` sao os `TBrowseURL` substituidos.
+    desta unidade; `urls` sao os `TBrowseURL` substituidos. `corpos` mapeia
+    handler para o `.inc` de `wte/src/impl/` que traz o corpo escrito a mao
+    (ver `le_impl`); quem nao esta ali sai como stub.
     """
+    corpos = corpos or {}
+    uses_extra = uses_extra or []
     classe = raiz.cls
 
     # Campos dos componentes, em ordem de DFM. O componente sem nome (ha um,
@@ -974,9 +1044,16 @@ def emite_unit(formulario: str, unidade: str, raiz: Obj,
             f"{formulario}: unidade(s) {sorted(faltando)} fora de ORDEM_USES "
             f"em {GENERATOR}")
     # `ficha_error2` nao tem handler nenhum, e ali o `uses` do REStub sairia
-    # como hint 5023 ("unit not used").
-    if handlers:
+    # como hint 5023 ("unit not used"). Unidade com TODO handler implementado
+    # tambem nao usa mais o REStub -- deixa-lo ali devolveria o mesmo hint.
+    if handlers and any(nome not in corpos for nome, _f, _c in handlers):
         lista_uses.append(UNIDADE_RESTUB)
+    # O que os corpos de `wte/src/impl/` pedem. Vem por ultimo de proposito: a
+    # ordem das unidades da LCL e a de ORDEM_USES, e um `uses` de corpo nao
+    # deve poder reordenar o que o gerador ja decidiu.
+    for u in uses_extra:
+        if u not in lista_uses:
+            lista_uses.append(u)
 
     linhas_uses = []
     atual = " "
@@ -992,7 +1069,7 @@ def emite_unit(formulario: str, unidade: str, raiz: Obj,
         unidade=unidade, gerador=GENERATOR, formulario=formulario,
         classe=classe, rel_dfm=REL_DFM, n_comp=len(campos) + _sem_nome(raiz),
         n_handlers=len(handlers), uses="\n".join(linhas_uses),
-        restub=UNIDADE_RESTUB)]
+        restub=UNIDADE_RESTUB, rel_impl=REL_IMPL)]
 
     out.append(f"  {classe} = class(TForm)\n")
 
@@ -1045,19 +1122,26 @@ def emite_unit(formulario: str, unidade: str, raiz: Obj,
     # ser explicito. Armadilha ja paga na WTE-TASK-02; ver wte/README.md.
     out.append(f"{{$R ../forms/{unidade}.lfm}}\n\n")
 
-    if handlers:
+    for nome, forma, _c in handlers:
+        params, _dep = ASSINATURAS[forma]
+        inc = corpos.get(nome)
+        if inc:
+            # Corpo escrito a mao, da fase 4. So a assinatura e gerada -- ela e
+            # mecanica, vem da tabela ASSINATURAS e do DFM. O `{$I}` resolve
+            # relativo ao diretorio do `.pas`, que e `wte/src/`.
+            out.append(_assinatura(f"procedure {classe}.{nome}", params, ""))
+            out.append(f"{{$I impl/{inc}}}\n\n")
+            continue
         # 5024 e o hint "Parameter <x> not used". Stub que so registra o nome
         # ignora os parametros por definicao, e sem isto os 96 rendem mais de
-        # 200 hints que afogam os de verdade. O escopo e so o bloco de stubs
-        # gerado -- quando a fase 4 escrever os corpos, o {$PUSH}/{$POP} sai
-        # junto com eles.
-        out.append("{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros\n\n")
-        for nome, forma, _c in handlers:
-            params, _dep = ASSINATURAS[forma]
-            out.append(_assinatura(f"procedure {classe}.{nome}", params, ""))
-            out.append("begin\n")
-            out.append(f"  REStub('{raiz.nome}.{nome}');\n")
-            out.append("end;\n\n")
+        # 200 hints que afogam os de verdade. O escopo e um stub de cada vez, e
+        # nao o bloco inteiro: com o bloco, o primeiro corpo de verdade
+        # escrito ao lado herdaria o silencio e um parametro esquecido passaria.
+        out.append("{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros\n")
+        out.append(_assinatura(f"procedure {classe}.{nome}", params, ""))
+        out.append("begin\n")
+        out.append(f"  REStub('{raiz.nome}.{nome}');\n")
+        out.append("end;\n")
         out.append("{$POP}\n\n")
 
     out.append("end.\n")
@@ -1313,6 +1397,9 @@ def converte() -> tuple[dict[str, str], list[dict]]:
                 f"mais -- veja UNIDADES_MEDIDAS em {GENERATOR}.")
 
     handlers_tsv = le_handlers()
+    corpos, uses_impl = le_impl()
+    vistos_impl: set[tuple[str, str]] = set()
+    vistos_uses: set[str] = set()
 
     arvores: list[tuple[str, Obj]] = []
     for caminho in dfms:
@@ -1403,8 +1490,20 @@ def converte() -> tuple[dict[str, str], list[dict]]:
                     if prop.nome == "URL":
                         urls.append((obj.nome, prop.valor))
 
+        corpos_da_unidade = {h: inc for (u, h), inc in corpos.items()
+                             if u == unidade}
+        vistos_impl.update((unidade, h) for h in corpos_da_unidade)
+        nomes = {nome for nome, _f, _c in resolvidos}
+        orfaos = sorted(set(corpos_da_unidade) - nomes)
+        if orfaos:
+            raise Dfm2LfmError(
+                f"{REL_IMPL}: {unidade} nao publica {', '.join(orfaos)} -- "
+                f"confira o nome contra {REL_SRC}/{unidade}.pas. Corpo com "
+                "nome errado viraria stub em silencio.")
         texto_pas = emite_unit(formulario, unidade, raiz, resolvidos,
-                               descartes, urls)
+                               descartes, urls, corpos_da_unidade,
+                               uses_impl.get(unidade, []))
+        vistos_uses.add(unidade)
 
         arquivos[f"{REL_FORMS}/{unidade}.lfm"] = texto_lfm
         arquivos[f"{REL_SRC}/{unidade}.pas"] = texto_pas
@@ -1432,6 +1531,18 @@ def converte() -> tuple[dict[str, str], list[dict]]:
             "staticos": staticos,
             "n_handlers": len(resolvidos),
         })
+
+    # Orfao de unidade inexistente: o laco acima so viu as 18 que ha.
+    sobrando = sorted(set(corpos) - vistos_impl)
+    if sobrando:
+        raise Dfm2LfmError(
+            f"{REL_IMPL}: nenhuma das 18 unidades se chama "
+            f"{', '.join(sorted({u for u, _h in sobrando}))}")
+    sobrando_uses = sorted(set(uses_impl) - vistos_uses)
+    if sobrando_uses:
+        raise Dfm2LfmError(
+            f"{REL_IMPL}: {', '.join(sobrando_uses)}.uses nao corresponde a "
+            "nenhuma das 18 unidades")
 
     arquivos[f"{REL_FORMS}/{RELATORIO}"] = emite_relatorio(formularios)
     return arquivos, formularios

@@ -619,6 +619,81 @@ end
         # Nenhum stub caiu numa unidade vizinha.
         self.assertNotIn("FormCreate", arquivos["wte/src/ep2002_v0.pas"])
 
+    # ---------------------------------------------------- corpos a mao ----
+    #
+    # WTE-TASK-25. A fase 4 escreve corpo de handler, e corpo de handler nao e
+    # coisa que gerador saiba escrever -- ele sai da spec. O corpo mora em
+    # `wte/src/impl/<unidade>.<handler>.inc` e o gerador so o referencia.
+
+    def _com_impl(self, arquivos_impl: dict[str, str]):
+        """A arvore padrao de um formulario com um handler, mais `src/impl/`."""
+        dfms, tsv = dezoito(
+            "object ficha_x: Tficha_x\n  Left = 0\n"
+            "  OnCreate = FormCreate\nend\n",
+            "0x1\tFormCreate\tficha_x\tficha_x\tOnCreate\tcarga\tR2\t\n")
+        arv = Arvore(dfms, tsv)
+        impl = g.SRC_OUT / "impl"
+        impl.mkdir(parents=True)
+        for nome, texto in arquivos_impl.items():
+            (impl / nome).write_text(texto, encoding="utf-8")
+        return arv
+
+    def test_corpo_a_mao_substitui_o_stub_e_some_o_restub(self):
+        arv = self._com_impl({
+            "ep2002_x.FormCreate.inc": "begin\n  Left := 1;\nend;\n"})
+        with arv:
+            arquivos, _f = g.converte()
+        pas = arquivos["wte/src/ep2002_x.pas"]
+        self.assertIn("procedure Tficha_x.FormCreate(Sender: TObject);\n"
+                      "{$I impl/ep2002_x.FormCreate.inc}\n", pas)
+        # O corpo NAO e copiado para dentro do .pas -- so referenciado.
+        self.assertNotIn("Left := 1", pas)
+        self.assertNotIn("REStub('ficha_x.FormCreate')", pas)
+        # Unidade sem stub nenhum nao usa mais o registrador, e mante-lo no
+        # `uses` renderia o hint 5023 que a WTE-TASK-11 pede que nao exista.
+        self.assertNotIn("retrace", pas.split("type")[0].split("uses")[1])
+        # E o silencio do hint 5024 vai junto: ele existe para stub, e um
+        # parametro esquecido num corpo de verdade tem de aparecer.
+        self.assertNotIn("{$WARN 5024 OFF}", pas)
+
+    def test_uses_do_corpo_entra_por_ultimo(self):
+        arv = self._com_impl({
+            "ep2002_x.FormCreate.inc": "begin\nend;\n",
+            "ep2002_x.uses": "# comentario\nwe2002_estado   # e um comentario\n"
+                             "\nSysUtils\n"})
+        with arv:
+            arquivos, _f = g.converte()
+        cabeca = arquivos["wte/src/ep2002_x.pas"].split("type")[0]
+        self.assertIn("we2002_estado", cabeca)
+        self.assertIn("SysUtils", cabeca)
+        # As unidades da LCL vem antes: um `uses` de corpo nao reordena o que o
+        # gerador ja decidiu.
+        self.assertLess(cabeca.index("Forms"), cabeca.index("we2002_estado"))
+
+    def test_inc_de_handler_que_a_unidade_nao_publica_aborta(self):
+        arv = self._com_impl({"ep2002_x.NaoExiste.inc": "begin\nend;\n"})
+        with arv, self.assertRaises(g.Dfm2LfmError) as e:
+            g.converte()
+        self.assertIn("nao publica NaoExiste", str(e.exception))
+
+    def test_inc_de_unidade_inexistente_aborta(self):
+        arv = self._com_impl({"ep2002_zzz.FormCreate.inc": "begin\nend;\n"})
+        with arv, self.assertRaises(g.Dfm2LfmError) as e:
+            g.converte()
+        self.assertIn("nenhuma das 18 unidades", str(e.exception))
+
+    def test_inc_sem_nome_de_handler_aborta(self):
+        arv = self._com_impl({"ep2002_x.inc": "begin\nend;\n"})
+        with arv, self.assertRaises(g.Dfm2LfmError) as e:
+            g.converte()
+        self.assertIn("<unidade>.<handler>.inc", str(e.exception))
+
+    def test_extensao_desconhecida_em_impl_aborta(self):
+        arv = self._com_impl({"ep2002_x.FormCreate.pas": "begin\nend;\n"})
+        with arv, self.assertRaises(g.Dfm2LfmError) as e:
+            g.converte()
+        self.assertIn("extensao nao reconhecida", str(e.exception))
+
     def test_formcreate_homonimo_nao_colide(self):
         # 16 dos 96 handlers se chamam FormCreate. O escopo de classe resolve.
         base = ("object ficha_x: Tficha_x\n  Left = 0\n"

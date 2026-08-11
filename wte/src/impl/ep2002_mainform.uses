@@ -1,0 +1,6 @@
+# Unidades que os corpos de `impl/ep2002_mainform.*.inc` pedem, alem das que o
+# gerador ja deduz dos componentes e das assinaturas.
+SysUtils        # ExtractFileName
+we2002_estado   # AbreImagem, CaminhoDatBin, Jogo
+wtemain         # ImagemDaLinhaDeComando
+retrace        # REMark

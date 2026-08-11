@@ -403,7 +403,8 @@ def gerar() -> str:
     w("")
     w("---")
     w("")
-    w("## 3. O app ainda não lê o jogo")
+    w("## 3. O app já lê o jogo?" if casca
+      else "## 3. O app ainda não lê o jogo")
     w("")
     w("A pergunta que a task manda responder, medida por `uses`:")
     w("")

@@ -148,22 +148,46 @@ def inventario() -> dict:
     }
 
 
-def conferir_stubs(handlers: list[dict]) -> dict[str, int]:
-    """Cada linha do TSV tem um `REStub` seu, na unidade que declara a classe.
+def conferir_stubs(handlers: list[dict]) -> tuple[dict[str, int], list[str]]:
+    """Cada handler tem stub OU corpo escrito, na unidade que declara a classe.
 
-    Aborta na primeira falha. Stub que sumiu e casca errada, e casca errada faz
-    a fase 4 inteira ser implementada contra o alvo errado.
+    Aborta na primeira falha. Stub que sumiu **sem corpo no lugar** e casca
+    errada, e casca errada faz a fase 4 inteira ser implementada contra o alvo
+    errado.
+
+    Da WTE-TASK-25 em diante um handler pode legitimamente nao ter mais stub:
+    o corpo mora em `wte/src/impl/<unidade>.<handler>.inc` e o gerador emite
+    `{$I}` no lugar do `REStub`. A conferencia continua sendo de soma -- cada
+    handler aparece exatamente uma vez, de uma das duas formas -- e e por isso
+    que ela nao afrouxou: some um, e a conta nao fecha.
     """
     fontes = {}
     for pas in sorted(SRC.glob("*.pas")):
         fontes[pas.name] = pas.read_text(encoding="utf-8", errors="replace")
+    implementados = {p.name[:-4] for p in (SRC / "impl").glob("*.inc")}
 
     por_unidade: dict[str, int] = {}
+    com_corpo: list[str] = []
     problemas: list[str] = []
     for h in handlers:
         chave = f"{h['formulario']}.{h['handler']}"
         marca = f"REStub('{chave}')"
         donos = [nome for nome, txt in fontes.items() if marca in txt]
+        if not donos:
+            # Corpo escrito a mao. O `.inc` e nomeado pela UNIDADE, nao pelo
+            # formulario, entao a busca e pelo sufixo do handler entre os
+            # `.inc` que existem -- e o gerador ja abortou se o nome nao
+            # correspondesse a handler publicado nenhum.
+            candidatos = [i for i in implementados
+                          if i.split(".", 1)[1] == h["handler"]
+                          and f"{{$I impl/{i}.inc}}" in "".join(
+                              txt for nome, txt in fontes.items()
+                              if re.search(
+                                  rf"\bT{re.escape(h['formulario'])}\s*=\s*class\(",
+                                  txt, re.I))]
+            if len(candidatos) == 1:
+                com_corpo.append(chave)
+                continue
         if len(donos) != 1:
             problemas.append(
                 f"{chave}: {len(donos)} ocorrencia(s) de {marca} "
@@ -184,10 +208,12 @@ def conferir_stubs(handlers: list[dict]) -> dict[str, int]:
             "stubs fora do lugar (" + str(len(problemas)) + "):\n  " +
             "\n  ".join(problemas))
 
-    total = sum(por_unidade.values())
+    total = sum(por_unidade.values()) + len(com_corpo)
     if total != len(handlers):
-        raise CheckError(f"{total} stubs para {len(handlers)} handlers")
-    return por_unidade
+        raise CheckError(
+            f"{sum(por_unidade.values())} stubs + {len(com_corpo)} corpos "
+            f"para {len(handlers)} handlers")
+    return por_unidade, sorted(com_corpo)
 
 
 def conferir_formularios() -> list[str]:
@@ -286,7 +312,8 @@ def conferir_eventos() -> int:
 
 # ----------------------------------------------------------------- saida --
 
-def montar(inv: dict, por_unidade: dict, formularios: list[str],
+def montar(inv: dict, por_unidade: dict, com_corpo: list[str],
+           formularios: list[str],
            vereditos: dict, n_achados: int, n_handlers: int) -> str:
     pas_ger = sum(n for _, n in inv["pas_gerados"])
     pas_mao = sum(n for _, n in inv["pas_mao"])
@@ -421,8 +448,20 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
     w("|---|---|")
     for unidade in sorted(por_unidade, key=lambda u: (-por_unidade[u], u)):
         w(f"| `src/{unidade}` | {por_unidade[unidade]} |")
+    if com_corpo:
+        w(f"| _com corpo escrito_ | {len(com_corpo)} |")
     w(f"| **total** | **{n_handlers}** |")
     w("")
+    if com_corpo:
+        w("Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 "
+          "chegando.")
+        w("A conta continua fechando por soma: cada handler aparece uma vez, "
+          "de uma")
+        w("das duas formas.")
+        w("")
+        for chave in com_corpo:
+            w(f"- `{chave}`")
+        w("")
     w("---")
     w("")
     w("## O que a fase 2 **não** prova")
@@ -483,12 +522,12 @@ def montar(inv: dict, por_unidade: dict, formularios: list[str],
 def gerar() -> dict[str, str]:
     handlers = ler_tsv()
     inv = inventario()
-    por_unidade = conferir_stubs(handlers)
+    por_unidade, com_corpo = conferir_stubs(handlers)
     formularios = conferir_formularios()
     vereditos = conferir_vereditos(formularios)
     n_achados = conferir_eventos()
-    return {MD_NAME: montar(inv, por_unidade, formularios, vereditos,
-                            n_achados, len(handlers))}
+    return {MD_NAME: montar(inv, por_unidade, com_corpo, formularios,
+                            vereditos, n_achados, len(handlers))}
 
 
 def do_check(files: dict[str, str]) -> int:

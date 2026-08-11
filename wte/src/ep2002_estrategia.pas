@@ -8,10 +8,13 @@
   `python3 wte/tools/dfm2lfm.py --check` compara com o commitado e e o que
   `make -C wte check` roda.
 
-  Os corpos dos handlers sao stub que registra o proprio nome (secao 4.3 do
-  plano): a fase 2 monta a casca inteira e a fase 4 e que preenche. `REStub`
-  vem de `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar
-  `restub`, porque o nome colidiria com o da rotina.
+  Cada handler sai de uma de duas formas. Sem corpo escrito, sai como stub que
+  registra o proprio nome (secao 4.3 do plano); `REStub` vem de
+  `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
+  porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
+  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+  Ver `wte/src/impl/README.md`.
 }
 unit ep2002_estrategia;
 
@@ -166,85 +169,109 @@ implementation
 {$R ../forms/ep2002_estrategia.lfm}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
-
 procedure Testrategia.bolaMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 begin
   REStub('estrategia.bolaMouseMove');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.bolaMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   REStub('estrategia.bolaMouseDown');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.campoMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 begin
   REStub('estrategia.campoMouseMove');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.FormCreate(Sender: TObject);
 begin
   REStub('estrategia.FormCreate');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.rectanguloDragOver(Sender, Source: TObject;
   X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
   REStub('estrategia.rectanguloDragOver');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.rectanguloDragDrop(Sender, Source: TObject;
   X, Y: Integer);
 begin
   REStub('estrategia.rectanguloDragDrop');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.bolaEndDrag(Sender, Target: TObject; X, Y: Integer);
 begin
   REStub('estrategia.bolaEndDrag');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.lista_formacionesClick(Sender: TObject);
 begin
   REStub('estrategia.lista_formacionesClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.relojTimer(Sender: TObject);
 begin
   REStub('estrategia.relojTimer');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.malla1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   REStub('estrategia.malla1MouseDown');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.malla2MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   REStub('estrategia.malla2MouseDown');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.BitBtn1Click(Sender: TObject);
 begin
   REStub('estrategia.BitBtn1Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.BitBtn3Click(Sender: TObject);
 begin
   REStub('estrategia.BitBtn3Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.ComboBoxDrawItem(Control: TWinControl; Index: Integer;
   ARect: TRect; State: TOwnerDrawState);
 begin
   REStub('estrategia.ComboBoxDrawItem');
 end;
-
 {$POP}
 
 end.

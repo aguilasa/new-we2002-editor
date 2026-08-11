@@ -8,10 +8,13 @@
   `python3 wte/tools/dfm2lfm.py --check` compara com o commitado e e o que
   `make -C wte check` roda.
 
-  Os corpos dos handlers sao stub que registra o proprio nome (secao 4.3 do
-  plano): a fase 2 monta a casca inteira e a fase 4 e que preenche. `REStub`
-  vem de `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar
-  `restub`, porque o nome colidiria com o da rotina.
+  Cada handler sai de uma de duas formas. Sem corpo escrito, sai como stub que
+  registra o proprio nome (secao 4.3 do plano); `REStub` vem de
+  `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
+  porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
+  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+  Ver `wte/src/impl/README.md`.
 }
 unit ep2002_mainform;
 
@@ -21,7 +24,7 @@ interface
 
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
-  ActnList, retrace;
+  ActnList, retrace, SysUtils, we2002_estado, wtemain;
 
 type
   TMainForm = class(TForm)
@@ -245,194 +248,256 @@ implementation
 
 {$R ../forms/ep2002_mainform.lfm}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
-
 procedure TMainForm.boton_dialogo_weClick(Sender: TObject);
-begin
-  REStub('MainForm.boton_dialogo_weClick');
-end;
+{$I impl/ep2002_mainform.boton_dialogo_weClick.inc}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_mcrClick(Sender: TObject);
 begin
   REStub('MainForm.boton_mcrClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_mcr2isoClick(Sender: TObject);
 begin
   REStub('MainForm.boton_mcr2isoClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.Button2Click(Sender: TObject);
 begin
   REStub('MainForm.Button2Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.sel_barraClick(Sender: TObject);
 begin
   REStub('MainForm.sel_barraClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.track_barraChange(Sender: TObject);
 begin
   REStub('MainForm.track_barraChange');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_barras2isoClick(Sender: TObject);
 begin
   REStub('MainForm.boton_barras2isoClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_equiposChange(Sender: TObject);
 begin
   REStub('MainForm.lista_equiposChange');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre1KeyPress(Sender: TObject; var Key: char);
 begin
   REStub('MainForm.edit_nombre1KeyPress');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre2KeyPress(Sender: TObject; var Key: char);
 begin
   REStub('MainForm.edit_nombre2KeyPress');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre3KeyPress(Sender: TObject; var Key: char);
 begin
   REStub('MainForm.edit_nombre3KeyPress');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.iguala_nombresClick(Sender: TObject);
 begin
   REStub('MainForm.iguala_nombresClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_nombres2isoClick(Sender: TObject);
 begin
   REStub('MainForm.boton_nombres2isoClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_tex2isoClick(Sender: TObject);
 begin
   REStub('MainForm.boton_tex2isoClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_dialogo_texClick(Sender: TObject);
 begin
   REStub('MainForm.boton_dialogo_texClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_equipos_2Change(Sender: TObject);
 begin
   REStub('MainForm.lista_equipos_2Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paderechaeizquierdaClick(Sender: TObject);
 begin
   REStub('MainForm.paderechaeizquierdaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paizquierdaClick(Sender: TObject);
 begin
   REStub('MainForm.paizquierdaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paderechaClick(Sender: TObject);
 begin
   REStub('MainForm.paderechaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paderecha2Click(Sender: TObject);
 begin
   REStub('MainForm.paderecha2Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paizquierda2Click(Sender: TObject);
 begin
   REStub('MainForm.paizquierda2Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.parribaClick(Sender: TObject);
 begin
   REStub('MainForm.parribaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.pabajoClick(Sender: TObject);
 begin
   REStub('MainForm.pabajoClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.grabar_camisetaClick(Sender: TObject);
 begin
   REStub('MainForm.grabar_camisetaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.grabar_memoryClick(Sender: TObject);
 begin
   REStub('MainForm.grabar_memoryClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_jugadores_1Change(Sender: TObject);
 begin
   REStub('MainForm.lista_jugadores_1Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.mostrar_jugadorClick(Sender: TObject);
 begin
   REStub('MainForm.mostrar_jugadorClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.mostrar_estrategiaClick(Sender: TObject);
 begin
   REStub('MainForm.mostrar_estrategiaClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   REStub('MainForm.FormCreate');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.dorsalClick(Sender: TObject);
 begin
   REStub('MainForm.dorsalClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.dorsalMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   REStub('MainForm.dorsalMouseDown');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.colorearClick(Sender: TObject);
 begin
   REStub('MainForm.colorearClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.SpeedButton2Click(Sender: TObject);
 begin
   REStub('MainForm.SpeedButton2Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.SpeedButton1Click(Sender: TObject);
 begin
   REStub('MainForm.SpeedButton1Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.Image3Click(Sender: TObject);
 begin
   REStub('MainForm.Image3Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.base_teamClick(Sender: TObject);
 begin
   REStub('MainForm.base_teamClick');
 end;
+{$POP}
 
 procedure TMainForm.FormShow(Sender: TObject);
-begin
-  REStub('MainForm.FormShow');
-end;
-
-{$POP}
+{$I impl/ep2002_mainform.FormShow.inc}
 
 end.

@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 96 |
 | **total** | **96** |
 
-0 de 96 têm arquivo de spec.
+2 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -91,7 +91,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040a660` | `estrategia` | BitBtn3Click | OnClick | auxiliar | aberto |
 | `0x0040adec` | `estrategia` | ComboBoxDrawItem | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | FormCreate | OnCreate | carga | aberto |
-| `0x0040bd60` | `MainForm` | boton_dialogo_weClick | OnClick | carga | aberto |
+| `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |
 | `0x0040c2c8` | `MainForm` | boton_mcrClick | OnClick | carga | aberto |
 | `0x0040c46c` | `MainForm` | boton_mcr2isoClick | OnClick | gravacao | aberto |
 | `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
@@ -127,6 +127,6 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00410fc0` | `MainForm` | SpeedButton1Click | OnClick | auxiliar | aberto |
 | `0x00410fd0` | `MainForm` | Image3Click | OnClick | auxiliar | aberto |
 | `0x00410ff4` | `MainForm` | base_teamClick | OnClick x2 | auxiliar | aberto |
-| `0x004111d8` | `MainForm` | FormShow | OnShow | carga | aberto |
+| `0x004111d8` | `MainForm` | [FormShow](MainForm.FormShow.md) | OnShow | carga | aberto |
 | `0x00420e84` | `ficha_info2` | FormCreate | OnCreate | carga | aberto |
 | `0x00420f08` | `ficha_error` | SpeedButton1Click | OnClick | auxiliar | aberto |

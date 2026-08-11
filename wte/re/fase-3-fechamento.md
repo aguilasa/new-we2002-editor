@@ -97,22 +97,15 @@ reprova arquivo de `src/core/` que ninguém reivindicou.
 
 ---
 
-## 3. O app ainda não lê o jogo
+## 3. O app já lê o jogo?
 
 A pergunta que a task manda responder, medida por `uses`:
 
-- **0** unidade(s) da casca (`wte/src`, `wte.lpr`) importam a camada de dados;
+- **1** unidade(s) da casca (`wte/src`, `wte.lpr`) importam a camada de dados: `src/we2002_estado.pas`
 - **2** de teste importam: `tests/dump_estado.pas`, `tests/test_camada_dados.pas`.
 
-Ou seja: a camada compila, é exercitada por dois programas de
-console e **nenhum formulário a consome**. Abrir a imagem pelo
-`TOpenDialog` do `MainForm` e popular o combo de times é trabalho
-de **handler**, e handler tem gate próprio — a
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) antes da
-[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md). Fazer a
-integração aqui seria implementar `boton_dialogo_weClick` e
-`lista_equiposChange` sem o gate que os julga, que é exatamente o
-que o `progresso.md` chama de *cada implementação é opinião*.
+A integração mínima **já existe** — e este documento precisa ser
+relido, porque ele foi escrito quando ela não existia.
 
 ---
 

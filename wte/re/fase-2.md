@@ -41,15 +41,15 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2214 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2384 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **8982** |
+| **Gerado, subtotal** | | **9152** |
 | Escrito à mão | 3 | 386 |
-| **Total** | | **9368** |
+| **Total** | | **9538** |
 
-**95.9% do Pascal da casca é saída de gerador.**
+**96.0% do Pascal da casca é saída de gerador.**
 
-Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
+Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
 Contá-las aqui faria o número da §4.4 flutuar a cada unidade nova, e — pior —
 as jogaria na coluna "escrito à mão", porque a marca no cabeçalho delas é a do
@@ -86,7 +86,7 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_mainform.pas` | 37 |
+| `src/ep2002_mainform.pas` | 35 |
 | `src/ep2002_color.pas` | 17 |
 | `src/ep2002_estrategia.pas` | 14 |
 | `src/ep2002_jugador.pas` | 11 |
@@ -103,7 +103,15 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 | `src/ep2002_salida.pas` | 1 |
 | `src/ep2002_warning.pas` | 1 |
 | `src/ep2002_warning_2.pas` | 1 |
+| _com corpo escrito_ | 2 |
 | **total** | **96** |
+
+Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
+A conta continua fechando por soma: cada handler aparece uma vez, de uma
+das duas formas.
+
+- `MainForm.FormShow`
+- `MainForm.boton_dialogo_weClick`
 
 ---
 

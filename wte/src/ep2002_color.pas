@@ -8,10 +8,13 @@
   `python3 wte/tools/dfm2lfm.py --check` compara com o commitado e e o que
   `make -C wte check` roda.
 
-  Os corpos dos handlers sao stub que registra o proprio nome (secao 4.3 do
-  plano): a fase 2 monta a casca inteira e a fase 4 e que preenche. `REStub`
-  vem de `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar
-  `restub`, porque o nome colidiria com o da rotina.
+  Cada handler sai de uma de duas formas. Sem corpo escrito, sai como stub que
+  registra o proprio nome (secao 4.3 do plano); `REStub` vem de
+  `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
+  porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
+  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+  Ver `wte/src/impl/README.md`.
 }
 unit ep2002_color;
 
@@ -130,93 +133,123 @@ implementation
 {$R ../forms/ep2002_color.lfm}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
-
 procedure Tficha_color.FormCreate(Sender: TObject);
 begin
   REStub('ficha_color.FormCreate');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barraChange(Sender: TObject);
 begin
   REStub('ficha_color.barraChange');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.botonClick(Sender: TObject);
 begin
   REStub('ficha_color.botonClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barra1Change(Sender: TObject);
 begin
   REStub('ficha_color.barra1Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barra2Change(Sender: TObject);
 begin
   REStub('ficha_color.barra2Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.gradienteClick(Sender: TObject);
 begin
   REStub('ficha_color.gradienteClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.oscurecerClick(Sender: TObject);
 begin
   REStub('ficha_color.oscurecerClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.aclararClick(Sender: TObject);
 begin
   REStub('ficha_color.aclararClick');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col0Change(Sender: TObject);
 begin
   REStub('ficha_color.lista_col0Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col1change(Sender: TObject);
 begin
   REStub('ficha_color.lista_col1change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col2Change(Sender: TObject);
 begin
   REStub('ficha_color.lista_col2Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col3Change(Sender: TObject);
 begin
   REStub('ficha_color.lista_col3Change');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn1Click(Sender: TObject);
 begin
   REStub('ficha_color.BitBtn1Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn2Click(Sender: TObject);
 begin
   REStub('ficha_color.BitBtn2Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn3Click(Sender: TObject);
 begin
   REStub('ficha_color.BitBtn3Click');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.colorMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
   REStub('ficha_color.colorMouseDown');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.SpeedButton1Click(Sender: TObject);
 begin
   REStub('ficha_color.SpeedButton1Click');
 end;
-
 {$POP}
 
 end.

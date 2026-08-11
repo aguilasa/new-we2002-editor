@@ -8,10 +8,13 @@
   `python3 wte/tools/dfm2lfm.py --check` compara com o commitado e e o que
   `make -C wte check` roda.
 
-  Os corpos dos handlers sao stub que registra o proprio nome (secao 4.3 do
-  plano): a fase 2 monta a casca inteira e a fase 4 e que preenche. `REStub`
-  vem de `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar
-  `restub`, porque o nome colidiria com o da rotina.
+  Cada handler sai de uma de duas formas. Sem corpo escrito, sai como stub que
+  registra o proprio nome (secao 4.3 do plano); `REStub` vem de
+  `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
+  porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
+  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+  Ver `wte/src/impl/README.md`.
 }
 unit ep2002_about;
 
@@ -81,17 +84,17 @@ implementation
 {$R ../forms/ep2002_about.lfm}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
-
 procedure Tficha_about.FormCreate(Sender: TObject);
 begin
   REStub('ficha_about.FormCreate');
 end;
+{$POP}
 
+{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_about.imagen_urlClick(Sender: TObject);
 begin
   REStub('ficha_about.imagen_urlClick');
 end;
-
 {$POP}
 
 end.

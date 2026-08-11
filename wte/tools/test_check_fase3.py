@@ -178,12 +178,17 @@ class TestArvoreReal(unittest.TestCase):
     def test_so_teste_consome_a_camada(self) -> None:
         """A resposta a "o app ja le o jogo?", e ela e medida, nao opinada.
 
-        Quando a integracao minima entrar (WTE-TASK-25), este teste passa a
-        falhar -- e e o comportamento certo: o `fase-3-fechamento.md` afirma o
-        contrario, e teria de ser regerado junto.
+        Ate a WTE-TASK-25 a resposta era NAO, e este teste exigia `casca == []`.
+        A integracao minima entrou -- `src/we2002_estado.pas` abre a imagem e
+        carrega o banco --, e a assercao virou de lado. O `fase-3-fechamento.md`
+        acompanha: o gerador tem os dois ramos e o `--check` regeraria o texto
+        certo de qualquer jeito.
+
+        Continua sendo um teste, e nao um comentario: se a casca deixar de
+        consumir a camada, alguem desligou a integracao sem dizer.
         """
         casca, teste = C.consumidores()
-        self.assertEqual(casca, [])
+        self.assertIn("src/we2002_estado.pas", casca)
         self.assertTrue(teste)
 
     def test_os_artefatos_de_medida_da_fase_3_nao_citam_ghidra(self) -> None:
