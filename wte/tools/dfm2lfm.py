@@ -919,6 +919,11 @@ CABECALHO_UNIT = """\
   porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
   assinatura mais um $I para `impl/<unidade>.<handler>.inc`: o corpo e da fase 4,
   vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+
+  Rotina interna compartilhada -- a que o original chama de mais de um handler
+  -- nao e handler e nao cabe nesse formato. Ela mora em
+  `impl/<unidade>.aux.inc`, um por unidade, e o $I dela sai UMA vez, antes de
+  todos os handlers, para que eles possam chama-la.
   Ver `{rel_impl}/README.md`.
 }}
 unit {unidade};
@@ -934,10 +939,12 @@ type
 """
 
 
-def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]]]:
+def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]],
+                       dict[str, str]]:
     """Le `wte/src/impl/`: os corpos escritos a mao e o `uses` que eles pedem.
 
-    Devolve `({(unidade, handler): nome-do-.inc}, {unidade: [unidades extras]})`.
+    Devolve `({(unidade, handler): nome-do-.inc}, {unidade: [unidades extras]},
+    {unidade: nome-do-.aux.inc})`.
 
     **Este e o unico conteudo escrito a mao que entra nas 18 unidades.** A
     partir da fase 4 os corpos deixam de ser stub, e corpo de handler nao e
@@ -947,7 +954,14 @@ def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]]]:
     que o gerador nao escreve e nao le o conteudo, so referencia:
 
         wte/src/impl/<unidade>.<handler>.inc   corpo, de `var`/`begin` a `end;`
+        wte/src/impl/<unidade>.aux.inc         rotinas internas compartilhadas
         wte/src/impl/<unidade>.uses            uma unidade por linha, `#` comenta
+
+    O `.aux.inc` e a excecao de forma, e ela tem razao medida: o original chama
+    rotinas internas que NAO sao handler publicado -- a `0x0040b188`, que marca
+    a camisa, e chamada por dois -- e um `.inc` por handler nao tem onde
+    guardar isso. Ele traz procedimento inteiro, com assinatura propria, e sai
+    UMA vez por unidade, antes dos handlers, para que eles possam chama-lo.
 
     O `.inc` comeca no `var` (ou direto no `begin`) e termina no `end;`, porque
     `{$I}` dentro de um `begin..end` nao poderia declarar local. Quem nao tem
@@ -960,17 +974,20 @@ def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]]]:
     """
     corpos: dict[tuple[str, str], str] = {}
     uses: dict[str, list[str]] = {}
+    aux: dict[str, str] = {}
     # Derivado de `SRC_OUT` em tempo de chamada, e nao um global de import: os
     # testes trocam `SRC_OUT` por uma arvore temporaria, e um global apontaria
     # para a arvore de verdade, onde os `.inc` nao correspondem aos poucos
     # formularios do fixture.
     impl_dir = SRC_OUT / "impl"
     if not impl_dir.is_dir():
-        return corpos, uses
+        return corpos, uses, aux
     for caminho in sorted(impl_dir.iterdir()):
         if caminho.name.startswith("."):
             continue
-        if caminho.suffix == ".inc":
+        if caminho.name.endswith(".aux.inc"):
+            aux[caminho.name[:-len(".aux.inc")]] = caminho.name
+        elif caminho.suffix == ".inc":
             miolo = caminho.name[:-4]
             if "." not in miolo:
                 raise Dfm2LfmError(
@@ -989,7 +1006,7 @@ def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]]]:
             raise Dfm2LfmError(
                 f"{REL_IMPL}/{caminho.name}: extensao nao reconhecida "
                 "(esperado .inc, .uses ou .md)")
-    return corpos, uses
+    return corpos, uses, aux
 
 
 def emite_unit(formulario: str, unidade: str, raiz: Obj,
@@ -997,7 +1014,8 @@ def emite_unit(formulario: str, unidade: str, raiz: Obj,
                descartes: list[Descarte],
                urls: list[tuple[str, str]],
                corpos: dict[str, str] | None = None,
-               uses_extra: list[str] | None = None) -> str:
+               uses_extra: list[str] | None = None,
+               aux_inc: str | None = None) -> str:
     """Monta o texto do `.pas`.
 
     `handlers` e [(nome, forma, comentario)] ja resolvido; `descartes` sao os
@@ -1121,6 +1139,15 @@ def emite_unit(formulario: str, unidade: str, raiz: Obj,
     # include path resolve. Com `src/` e `forms/` separados, o caminho tem de
     # ser explicito. Armadilha ja paga na WTE-TASK-02; ver wte/README.md.
     out.append(f"{{$R ../forms/{unidade}.lfm}}\n\n")
+
+    if aux_inc:
+        # Rotinas internas compartilhadas, antes dos handlers de proposito: em
+        # Pascal a ordem de declaracao e o que autoriza a chamada, e um handler
+        # nao alcanca o que vem depois dele sem forward.
+        out.append("{ Rotinas internas que o original chama de mais de um "
+                   "handler -- nao sao\n  metodo publicado, e por isso nao "
+                   f"estao na classe. Ver {REL_IMPL}/README.md. }}\n")
+        out.append(f"{{$I impl/{aux_inc}}}\n\n")
 
     for nome, forma, _c in handlers:
         params, _dep = ASSINATURAS[forma]
@@ -1397,9 +1424,10 @@ def converte() -> tuple[dict[str, str], list[dict]]:
                 f"mais -- veja UNIDADES_MEDIDAS em {GENERATOR}.")
 
     handlers_tsv = le_handlers()
-    corpos, uses_impl = le_impl()
+    corpos, uses_impl, aux_impl = le_impl()
     vistos_impl: set[tuple[str, str]] = set()
     vistos_uses: set[str] = set()
+    vistos_aux: set[str] = set()
 
     arvores: list[tuple[str, Obj]] = []
     for caminho in dfms:
@@ -1502,8 +1530,10 @@ def converte() -> tuple[dict[str, str], list[dict]]:
                 "nome errado viraria stub em silencio.")
         texto_pas = emite_unit(formulario, unidade, raiz, resolvidos,
                                descartes, urls, corpos_da_unidade,
-                               uses_impl.get(unidade, []))
+                               uses_impl.get(unidade, []),
+                               aux_impl.get(unidade))
         vistos_uses.add(unidade)
+        vistos_aux.add(unidade)
 
         arquivos[f"{REL_FORMS}/{unidade}.lfm"] = texto_lfm
         arquivos[f"{REL_SRC}/{unidade}.pas"] = texto_pas
@@ -1543,6 +1573,13 @@ def converte() -> tuple[dict[str, str], list[dict]]:
         raise Dfm2LfmError(
             f"{REL_IMPL}: {', '.join(sobrando_uses)}.uses nao corresponde a "
             "nenhuma das 18 unidades")
+    sobrando_aux = sorted(set(aux_impl) - vistos_aux)
+    if sobrando_aux:
+        raise Dfm2LfmError(
+            f"{REL_IMPL}: {', '.join(sobrando_aux)}.aux.inc nao corresponde a "
+            "nenhuma das 18 unidades -- arquivo orfao nao seria incluido por "
+            "ninguem, e o sintoma seria a rotina nao existir na hora de "
+            "compilar")
 
     arquivos[f"{REL_FORMS}/{RELATORIO}"] = emite_relatorio(formularios)
     return arquivos, formularios

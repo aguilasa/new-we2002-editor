@@ -83,9 +83,37 @@ guardado sem conferência, e com a ROM europeia a carga de time o sobrescreve
 com dado de tabela vizinha. Aqui está o outro lado da mesma história — a rotina
 que grava esse ponteiro.
 
-**Veredito ainda `aberto`, e por decisão de destino, não de medição.** A spec
-basta para escrever o Pascal; o que falta é decidir **onde mora** um auxiliar
-que não é handler: `wte/src/impl/` guarda um `.inc` por handler, e essa rotina
-é chamada por dois. Escolher errado agora custa mais do que esperar a
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md), que traz outros
-auxiliares compartilhados e decide a casa dos dois juntos.
+**O Pascal está escrito**, em
+[`../../src/impl/ep2002_mainform.lista_jugadores_1Change.inc`](../../src/impl/ep2002_mainform.lista_jugadores_1Change.inc),
+e a rotina em
+[`ep2002_mainform.aux.inc`](../../src/impl/ep2002_mainform.aux.inc) — a casa
+dos auxiliares que não são handler, decidida na quinta passagem da
+[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md).
+
+**E não há bloqueio de sinal, porque a LCL não precisa.** A pergunta era real:
+o Win32 não dispara `CBN_SELCHANGE` em `SetCurSel`, o Qt **dispara**
+`currentIndexChanged` em `setCurrentIndex` — e o `newWe2002` precisou de
+`QSignalBlocker` nas cargas de time por causa disso. Medido em 2026-08-11 com
+[`../../tests/test_lcl_combo.pas`](../../tests/test_lcl_combo.pas), gtk2: a LCL
+**não dispara** `OnChange` em `ItemIndex :=`, nem no `Items.Clear` com item
+selecionado, nem ao reatribuir o mesmo índice. Como o Win32, ao contrário do
+Qt. A medição é remedida a cada `make -C wte check` pelo
+[`check_lcl_combo.py`](../../tools/check_lcl_combo.py), porque a resposta é
+propriedade do widgetset instalado e pode virar num upgrade sem que uma linha
+deste repositório mude.
+
+**Veredito ainda `aberto`, e agora por um motivo só: nada exercita o corpo.**
+O combo nasce `Enabled = False` e sem itens, e quem o povoa é o
+`lista_equiposChange` — que continua preso em `0x00404374`, não lido. O golden
+test não cobre isto e não deveria: ele compara bytes da imagem, e este handler
+não grava nada. Enquanto não houver como dispará-lo, `implementado` afirmaria
+uma verificação que não aconteceu.
+
+Uma tentativa de exercitá-lo por programa de console **falhou por outra
+razão**, e ela vale como achado: `Tficha_about.Create(nil)` — qualquer um dos
+18, não só o `MainForm` — **bloqueia em `poll` na conexão X** quando o programa
+é compilado direto com `fpc`, mesmo com as mesmas unidades da LCL e no mesmo
+`:99` onde o `wte` construído por `lazbuild` cria os 18 sem travar. Não é
+`cthreads` e não é `RequireDerivedFormResource`; um formulário montado em
+código, sem `.lfm`, não trava. Fica registrado: testar corpo de handler fora do
+binário do projeto exige resolver isso antes.

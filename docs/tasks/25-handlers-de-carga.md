@@ -163,7 +163,9 @@ e não simula comportamento.
       nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md)
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
       isso — 7 faixas, 11.952 B, as mesmas do oráculo
-- [ ] Comportamento de `OnChange` na carga decidido e testado
+- [x] Comportamento de `OnChange` na carga decidido e testado — a LCL/gtk2
+      **não** dispara `OnChange` por atribuição, como o Win32 e ao contrário do
+      Qt; remedido a cada build pelo `check_lcl_combo.py`
 - [ ] Andaime `--show` removido de `wtemain.pas`, com a navegação real no lugar
 - [x] Commit no formato conventional, em inglês
 
@@ -521,5 +523,98 @@ e não simula comportamento.
   - `ficha_color.FormCreate` e `estrategia.FormCreate`, medidos e `aberto`;
   - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
   - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
+  - a remoção do `--show`;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
+
+---
+
+- **Executado em:** 2026-08-11 — **quinta passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  As duas decisões da quarta passagem, executadas — e a primeira rotina
+  compartilhada em Pascal.
+
+  **`wte/src/impl/<unidade>.aux.inc`.** O `dfm2lfm.py` passou a reconhecer o
+  sufixo e a emitir o `{$I}` dele **uma vez por unidade, antes dos handlers** —
+  em Pascal a ordem de declaração é o que autoriza a chamada. `.aux.inc` órfão
+  aborta, como os outros. O `check_fase2.py` já contava `impl/*.inc` por
+  wildcard, então as linhas entraram sozinhas na conta de escrito à mão: a
+  fração da §4.4 caiu de 93,0% para **92,1%**, e o guard do próprio
+  `check_fase2.py` reprovou até o plano trazer o número novo — funcionou como
+  desenhado.
+
+  **A pergunta do `OnChange` era real e a resposta é a melhor possível.** O
+  Win32 não dispara `CBN_SELCHANGE` em `SetCurSel`; o Qt **dispara**
+  `currentIndexChanged` em `setCurrentIndex`, e o `newWe2002` precisou de
+  `QSignalBlocker` nas cargas de time por causa disso. Medido em gtk2 com o
+  [`test_lcl_combo.pas`](../../wte/tests/test_lcl_combo.pas): **nenhum dos
+  cinco casos dispara** — nem `ItemIndex :=`, nem reatribuir o mesmo índice,
+  nem `Items.Clear` com item selecionado. A LCL se comporta como o original, e
+  os corpos da fase 4 ficam iguais ao que a spec descreve, sem bloqueio de
+  sinal. Virou guarda: a resposta é propriedade do widgetset instalado e pode
+  virar num upgrade sem que uma linha deste repositório mude.
+
+  **`MarcaCamisa` — o `0x0040b188` — em Pascal.** Nomes de propriedade vindos
+  dos símbolos importados do `vcl60.bpl`, não de inferência. Uma preocupação
+  levantada e derrubada por medição: os 23 `dorsalN` declaram `Color = clGray`
+  e a LCL tem `Transparent = True` por padrão no `TStaticText` — e a marcação é
+  feita de cor de fundo, então seria o caso de falhar sem sintoma. Capturado no
+  `:99`, o pixel dentro de um `dorsalN` é (128, 128, 128): a cor aparece, não há
+  o que compensar.
+
+- **O que ficou por fazer, e por quê:**
+
+  O corpo escrito **ainda não é exercitado por nada**, e isso está dito na
+  spec em vez de disfarçado. O combo nasce `Enabled = False` e sem itens; quem
+  o povoa é o `lista_equiposChange`, preso em `0x00404374` (881 B, não lido). O
+  golden não cobre e não deveria — ele compara bytes da imagem, e o handler não
+  grava nada.
+
+  A tentativa de exercitá-lo por programa de console **esbarrou noutra coisa, e
+  ela é achado**: criar qualquer um dos 18 formulários (`Tficha_about.Create`,
+  não só o `MainForm`) **bloqueia em `poll` na conexão X** quando o programa é
+  compilado direto com `fpc`, no mesmo `:99` em que o `wte` construído por
+  `lazbuild` cria os 18 sem travar. Descartados por experimento: `cthreads`,
+  `RequireDerivedFormResource` e a hipótese de servidor X travado (um
+  formulário montado em código, sem `.lfm`, roda). O programa-sonda **não foi
+  commitado** — subir um teste que trava é pior que não ter teste.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dfm2lfm.py` — o `.aux.inc` (`le_impl`, o `{$I}` único, o aborto
+    de órfão) e o cabeçalho que descreve as duas formas
+  - `wte/tools/test_dfm2lfm.py` — 4 testes do mecanismo (74 no total)
+  - `wte/tools/check_lcl_combo.py` + `wte/tests/test_lcl_combo.pas` — a
+    medição do `OnChange`, como guarda de build (448 testes no total)
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `MarcaCamisa`
+  - `wte/src/impl/ep2002_mainform.lista_jugadores_1Change.inc`
+  - `wte/src/impl/README.md` — a seção do `.aux.inc`
+  - `wte/re/spec/MainForm.lista_jugadores_1Change.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 93,0% → 92,1%
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Problemas encontrados:**
+  1. O primeiro teste do `.aux.inc` passava pelo motivo errado: procurava a
+     cadeia `.aux.inc` no `.pas` gerado, e o **cabeçalho** de toda unidade
+     descreve o mecanismo e a cita. Passou a procurar o `{$I}`.
+  2. O `Xvfb` da máquina subiu **sem `-auth`** nesta sessão, e o
+     `check_lcl_combo.py` exigia o cookie — pulava dizendo que não havia
+     `:99`, que é diagnóstico mandando procurar no lugar errado. O cookie
+     virou opcional, com as duas formas registradas.
+  3. Um `wte` esquecido no `:99` de uma captura de tela ficou vivo depois de
+     `kill %1` (o shell não interativo não tem controle de job). É a armadilha
+     6 do `progresso.md` chegando por uma porta nova: o processo sobrou de uma
+     medição minha, não de um teste.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - exercitar o corpo do `lista_jugadores_1Change` — depende do
+    `lista_equiposChange` ou de resolver o travamento do programa de console;
+  - `0x00404374` (881 B) e `0x00403f00` (328 B) medidos, e daí o Pascal dos
+    três handlers de lista;
+  - os 6 handlers de carga sem spec: `mostrar_jugadorClick`,
+    `mostrar_estrategiaClick`, `lista_formacionesClick`, `ComboBoxDrawItem`,
+    `boton_dialogo_texClick`, `boton_mcrClick`;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, medidos e `aberto`;
+  - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
   - a remoção do `--show`;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).

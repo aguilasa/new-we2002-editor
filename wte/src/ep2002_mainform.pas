@@ -14,6 +14,11 @@
   porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
   assinatura mais um $I para `impl/<unidade>.<handler>.inc`: o corpo e da fase 4,
   vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
+
+  Rotina interna compartilhada -- a que o original chama de mais de um handler
+  -- nao e handler e nao cabe nesse formato. Ela mora em
+  `impl/<unidade>.aux.inc`, um por unidade, e o $I dela sai UMA vez, antes de
+  todos os handlers, para que eles possam chama-la.
   Ver `wte/src/impl/README.md`.
 }
 unit ep2002_mainform;
@@ -248,6 +253,10 @@ implementation
 
 {$R ../forms/ep2002_mainform.lfm}
 
+{ Rotinas internas que o original chama de mais de um handler -- nao sao
+  metodo publicado, e por isso nao estao na classe. Ver wte/src/impl/README.md. }
+{$I impl/ep2002_mainform.aux.inc}
+
 procedure TMainForm.boton_dialogo_weClick(Sender: TObject);
 {$I impl/ep2002_mainform.boton_dialogo_weClick.inc}
 
@@ -419,12 +428,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_jugadores_1Change(Sender: TObject);
-begin
-  REStub('MainForm.lista_jugadores_1Change');
-end;
-{$POP}
+{$I impl/ep2002_mainform.lista_jugadores_1Change.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.mostrar_jugadorClick(Sender: TObject);

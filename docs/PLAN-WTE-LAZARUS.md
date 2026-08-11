@@ -505,11 +505,14 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 93,0% do Pascal da casca é saída de gerador** —
-9.093 linhas geradas contra 689 escritas à mão. Dessas 689, 386 são andaime de
-projeto (`wte.lpr`, `retrace.pas`, `wtemain.pas`) e **303 são corpo de handler
-em `src/impl/*.inc`**, que é exatamente a última linha da tabela acima: a parte
-que tem de ser manual. (Eram 353 e 96,2% no fechamento da fase 2; a WTE-TASK-22
+**Medido com a fase 4 em curso: 92,1% do Pascal da casca é saída de gerador** —
+9.183 linhas geradas contra 787 escritas à mão. Dessas 787, 386 são andaime de
+projeto (`wte.lpr`, `retrace.pas`, `wtemain.pas`) e o resto é corpo escrito à
+mão em `src/impl/`, que é exatamente a última linha da tabela acima: a parte que
+tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
+handler, e `<unidade>.aux.inc`, as rotinas internas que o original chama de mais
+de um handler e que por isso não são método publicado. (Eram 353 e 96,2% no
+fechamento da fase 2; a WTE-TASK-22
 acrescentou ao `wtemain.pas` o argumento posicional de imagem e levou a 95,9%.
 A fração é medida, então ela se move — e daqui em diante ela **cai** a cada
 handler implementado, que é o sinal certo: o denominador da §4.4 é o Pascal da

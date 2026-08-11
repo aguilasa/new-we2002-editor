@@ -688,6 +688,58 @@ end
             g.converte()
         self.assertIn("<unidade>.<handler>.inc", str(e.exception))
 
+    # --- `.aux.inc`: rotina interna compartilhada (WTE-TASK-25) ------------
+    #
+    # O original chama rotinas que NAO sao metodo publicado, e algumas de mais
+    # de um handler -- a `0x0040b188`, que marca a camisa, e chamada por dois.
+    # Um `.inc` por handler nao tem onde guardar isso.
+
+    def test_aux_sai_uma_vez_e_antes_dos_handlers(self):
+        """A ordem e o ponto: em Pascal so se chama o que ja foi declarado."""
+        arv = self._com_impl({
+            "ep2002_x.aux.inc": "procedure Ajuda;\nbegin\nend;\n",
+            "ep2002_x.FormCreate.inc": "begin\n  Ajuda;\nend;\n"})
+        with arv:
+            arquivos, _f = g.converte()
+        pas = arquivos["wte/src/ep2002_x.pas"]
+        self.assertEqual(pas.count("{$I impl/ep2002_x.aux.inc}"), 1)
+        self.assertLess(pas.index("{$I impl/ep2002_x.aux.inc}"),
+                        pas.index("procedure Tficha_x.FormCreate"))
+        # Nao e copiado para dentro do .pas, como nenhum outro corpo.
+        self.assertNotIn("procedure Ajuda", pas)
+
+    def test_unidade_sem_aux_nao_ganha_include(self):
+        arv = self._com_impl({"ep2002_x.FormCreate.inc": "begin\nend;\n"})
+        with arv:
+            arquivos, _f = g.converte()
+        # A busca e pelo `{$I}`, e nao pela cadeia solta: o cabecalho gerado
+        # DESCREVE o mecanismo e cita `.aux.inc` em toda unidade.
+        self.assertNotIn("{$I impl/ep2002_x.aux.inc}",
+                         arquivos["wte/src/ep2002_x.pas"])
+
+    def test_aux_de_unidade_inexistente_aborta(self):
+        """Orfao nao seria incluido por ninguem, e o sintoma seria a rotina
+        nao existir na hora de compilar -- longe da causa."""
+        arv = self._com_impl({"ep2002_zzz.aux.inc": "begin\nend;\n"})
+        with arv, self.assertRaises(g.Dfm2LfmError) as e:
+            g.converte()
+        self.assertIn("nao corresponde a nenhuma das 18 unidades",
+                      str(e.exception))
+
+    def test_aux_nao_e_confundido_com_handler_chamado_aux(self):
+        """`ep2002_x.aux.inc` nao pode entrar pela rota de `<handler>.inc`.
+
+        Pela regra geral de nome, o miolo seria `ep2002_x.aux` e o handler
+        `aux` -- que nenhuma unidade publica, entao o gerador abortaria
+        dizendo "nao publica aux". Mensagem de erro correta pelo motivo
+        errado e o pior tipo de guarda.
+        """
+        arv = self._com_impl({"ep2002_x.aux.inc": "begin\nend;\n"})
+        with arv:
+            arquivos, _f = g.converte()
+        self.assertIn("{$I impl/ep2002_x.aux.inc}",
+                      arquivos["wte/src/ep2002_x.pas"])
+
     def test_extensao_desconhecida_em_impl_aborta(self):
         arv = self._com_impl({"ep2002_x.FormCreate.pas": "begin\nend;\n"})
         with arv, self.assertRaises(g.Dfm2LfmError) as e:

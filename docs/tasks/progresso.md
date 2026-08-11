@@ -665,3 +665,27 @@ repetir o número.
 rotina copia letra, dígito, `.` e espaço, troca byte acima de `z` por `?` e
 descarta o resto — enquanto o `we2002_core` devolve espaço para byte
 desconhecido. Divergência de tela, não de gravação.
+
+**WTE-TASK-25, quinta passagem — a LCL não é o Qt, e isso se mede.** O Win32
+não dispara `CBN_SELCHANGE` em `SetCurSel`; o Qt **dispara**
+`currentIndexChanged` em `setCurrentIndex`, e o `newWe2002` precisou de
+`QSignalBlocker` nas cargas de time. Medido em gtk2 pelo
+[`test_lcl_combo.pas`](../../wte/tests/test_lcl_combo.pas): **nenhum** dos cinco
+casos dispara — nem `ItemIndex :=`, nem reatribuir o mesmo índice, nem
+`Items.Clear` com item selecionado. A LCL se comporta como o original, e os
+corpos da fase 4 dispensam bloqueio de sinal. Virou guarda de build
+([`check_lcl_combo.py`](../../wte/tools/check_lcl_combo.py)) porque a resposta é
+propriedade do **widgetset instalado**, e pode virar num upgrade sem que uma
+linha deste repositório mude.
+
+**E entrou a casa dos auxiliares:** `wte/src/impl/<unidade>.aux.inc`, um por
+unidade, incluído antes dos handlers — em Pascal a ordem de declaração é o que
+autoriza a chamada. As linhas dele já entram na conta de escrito à mão do
+`check_fase2.py` por wildcard, e a fração da §4.4 caiu de 93,0% para **92,1%**,
+com o guard do próprio `check_fase2.py` reprovando até o plano trazer o número
+novo.
+
+**Armadilha 6 por uma porta nova.** Um `wte` esquecido no `:99` sobrou de uma
+**captura de tela minha**, não de teste manual: `kill %1` não funciona em shell
+não interativo. A guarda do `golden_check.sh` pega janela grande antes de
+começar; processo solto de medição de apoio não passa por ela.
