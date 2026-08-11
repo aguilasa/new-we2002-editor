@@ -161,34 +161,39 @@ medida**, e o Pascal já escrito herda a dúvida: ele reproduz exatamente esses
 É o custo de ainda não ter conferido contra a tela, e a razão de o veredito
 continuar `aberto`.
 
-## A primeira conferência de tela, e o que ela corrigiu
+## A conferência de tela — três times, e os dois erros que ela achou
 
-Time **2 (Gales)**, ROM japonesa, oráculo e port lado a lado no `:99`:
+Dirigida por [`../../tools/compara_tela.sh`](../../tools/compara_tela.sh), que
+leva os dois lados ao mesmo índice e **confirma o do port pelo número de
+disparos no `trace.log`** antes de comparar; a medição é do
+[`compara_tela.py`](../../tools/compara_tela.py). ROM japonesa.
 
-| Campo | Oráculo | Port | |
-|---|---|---|---|
-| as cinco barras, em px | `64, 53, 75, 75, 75` | `64, 53, 75, 75, 75` | **idêntico** |
-| Nome2 | `WALES` | `WALES` | idêntico |
-| Nome3 | `WAL` | `WAL` | idêntico |
-| Nome1 | `?????` | bytes crus | divergência de filtro, já registrada |
+| Time | Barras (px), oráculo e port | |
+|---|---|---|
+| 2 (Gales) | `64, 53, 75, 75, 75` | idêntico |
+| 9 | `75, 64, 75, 75, 75` | idêntico |
+| 63 (Manchester, clube de ML) | `104, 75, 97, 97, 97` | idêntico |
 
-As larguras batem nos cinco, medidas por contagem de pixel laranja em cada
-faixa. **É a prova que faltava:** o port calcula a barra a partir de
-`Team.bar_*` da camada de dados e o original a partir de cinco bytes que ele
-mesmo lê da imagem, e os dois desenham o mesmo pixel.
+**As quinze larguras batem em pixel.** É a prova que faltava: o port calcula a
+barra a partir de `Team.bar_*` da camada de dados e o original a partir de
+cinco bytes que ele lê da imagem, e os dois desenham o mesmo pixel — nas duas
+famílias, seleção e clube de ML.
 
-**E a comparação corrigiu um erro que nenhum teste pegaria.** O port mostrava
-`WALES` em Nome1 e lixo em Nome2 — a ordem dos campos **não** é `names[0..2]`.
-O primeiro campo recebe `names[1]`, o segundo `names[0]`. Compilava, não
-quebrava nada, e estava trocado.
+**Os textos, na montagem lado a lado:** `Nome2` e `Nome3` idênticos nos três;
+`Nome1` mostra `?????` no oráculo e os bytes crus no port, que é a divergência
+de filtro já registrada acima.
 
-**Dois times a mais foram tentados e não valem.** Os dois lados receberam
-número diferente de `Down` — o port chegou a `78 Ajax` e a `95 Master L. `
-enquanto o oráculo estava noutro índice —, então a comparação foi descartada em
-vez de reportada. Uma medida de tela só vale com o **índice conferido nos dois
-lados**, e o roteiro ainda não faz isso. Fica registrado que o port em
-`95 Master L. ` mostrou as cinco barras com 9 px, que é o que a seção Saída
-descreve para o ramo não-nacional.
+E a comparação achou **dois erros que nenhum teste pegaria**:
+
+1. **A ordem dos campos de nome não é `names[0..2]`.** O port mostrava `WALES`
+   em Nome1 e lixo em Nome2. O certo é `names[1]` no primeiro e `names[0]` no
+   segundo.
+2. **`Nome3` é `abbreviations[0]`, não `names[2]`.** Este só apareceu no clube
+   de ML: para Gales os dois caminhos dão `WAL` e o erro passa; para o
+   Manchester `names[2]` é `ARAGON` — cortado em `ARA` pelo campo — contra
+   `AGN` na tela do original. **Testar uma família só de time não teria pego.**
+
+Os dois compilavam, não quebravam teste nenhum, e estavam errados.
 
 O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
 (`0x00405270` e `0x004056c8`) são da

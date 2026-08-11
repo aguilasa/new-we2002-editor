@@ -139,6 +139,23 @@ begin
     Result := Cadeia(Jogo.ml_default.names[slot]);
 end;
 
+{ A abreviatura de tres letras do time -- o terceiro campo de nome da tela.
+
+  NAO e `names[2]` truncado, e a diferenca so aparece em clube de Master
+  League: para Gales os dois caminhos dao `WAL` e o erro passa despercebido,
+  para o Manchester `names[2]` e `ARAGON` (que o campo corta em `ARA`) enquanto
+  a tela do original mostra `AGN`, que e `abbreviations[0]`. Medido na oitava
+  passagem da WTE-TASK-25, comparando tela com tela. }
+function AbreviaturaDoTime(indice: Integer): string;
+begin
+  if indice < TIMES_NACIONAIS then
+    Result := Cadeia(Jogo.teams[indice].abbreviations[0])
+  else if indice < IDX_MODELO_ML then
+    Result := Cadeia(Jogo.ml_teams[indice - TIMES_NACIONAIS].abbreviations[0])
+  else
+    Result := Cadeia(Jogo.ml_default.abbreviations[0]);
+end;
+
 { Indice do jogador `slot` do time `indice` dentro de `Jogo.players`.
 
   Selecao: o elenco e contiguo depois dos sem-contrato. Clube de ML: o elenco e

@@ -62,14 +62,21 @@ begin
   banderita1.Visible := nacional;
   colorear.Enabled := nacional;
 
-  { A ordem NAO e names[0..2]. Conferido contra a tela do oraculo em
-    2026-08-11, ROM japonesa, time 2 (Gales): ele mostra `?????`, `WALES`,
-    `WAL`, e o port com names[0..2] mostrava `WALES`, lixo, `WAL`. O primeiro
-    campo recebe o slot 1 -- o que guarda bytes fora de `A-Za-z0-9. `, que o
-    filtro do original vira `?????` e nos mostramos crus. }
+  { Os tres campos NAO sao names[0..2], e as duas correcoes vieram de comparar
+    tela com tela, nao de leitura:
+
+      Nome1  names[1]           o slot com bytes fora de `A-Za-z0-9. `, que o
+                                filtro do original mostra como `?????`
+      Nome2  names[0]           o nome legivel
+      Nome3  abbreviations[0]   a sigla de tres letras
+
+    A do Nome3 so apareceu no clube de Master League: para Gales `names[2]`
+    truncado e a abreviatura dao os dois `WAL`, e para o Manchester `names[2]`
+    e `ARAGON` (cortado em `ARA` pelo campo) contra `AGN` na tela do original.
+    Time de uma familia so nao teria pego. }
   edit_nombre1.Text := NomeDoTime(indice, 1);
   edit_nombre2.Text := NomeDoTime(indice, 0);
-  edit_nombre3.Text := NomeDoTime(indice, 2);
+  edit_nombre3.Text := AbreviaturaDoTime(indice);
 
   { --- 2. as cinco barras ---------------------------------------------- }
   { A largura e `11*v + 9`, aritmetica literal do disassembly e nao proporcao

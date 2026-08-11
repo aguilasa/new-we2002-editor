@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2412 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9180** |
-| Escrito à mão | 23 | 1077 |
-| **Total** | | **10257** |
+| Escrito à mão | 23 | 1101 |
+| **Total** | | **10281** |
 
-**89.5% do Pascal da casca é saída de gerador.**
+**89.3% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -71,9 +71,9 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.FormCreate.inc` | 54 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormShow.inc` | 66 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 222 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 239 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.lista_equiposChange.inc` | 127 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.lista_equiposChange.inc` | 134 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_jugadores_1Change.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_movertodos.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_salida.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
@@ -87,7 +87,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 97.0% — e passa a medir bitmap, não geração de código.
+fração sobe para 96.9% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda

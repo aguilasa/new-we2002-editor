@@ -158,9 +158,11 @@ e não simula comportamento.
       (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá, mais os três
       handlers de lista
 - [ ] Estado interno batendo com o `we2002_core` após carga
-- [ ] Tela conferida contra o original para pelo menos 3 times distintos, nos
+- [x] Tela conferida contra o original para pelo menos 3 times distintos, nos
       campos que o grupo de carga possui — bandeira e uniforme são pendência
-      nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md)
+      nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+      Times 2, 9 e 63 (clube de ML), ROM japonesa, por
+      `wte/tools/compara_tela.sh`: as 15 larguras de barra batem em pixel
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
       isso — 7 faixas, 11.952 B, as mesmas do oráculo
 - [x] Comportamento de `OnChange` na carga decidido e testado — a LCL/gtk2
@@ -782,5 +784,74 @@ e não simula comportamento.
   - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
   - o dump de estado contra o `we2002_core` depois de carga;
   - a remoção do `--show`;
+  - como o original habilita controle, e as duas faixas de arranque sem causa.
+
+---
+
+- **Executado em:** 2026-08-11 — **oitava passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  O aparato de conferência de tela, e com ele o critério dos 3 times fechado.
+
+  `compara_tela.sh` leva os dois lados ao mesmo índice e `compara_tela.py`
+  mede. A divisão é deliberada: **as cinco barras são medidas em pixel e
+  reprovam se divergirem**; os campos de texto saem numa montagem lado a lado,
+  para olho humano, porque os dois lados usam fontes diferentes e comparar
+  texto por pixel seria exigir o que nem deveria bater — o próprio enunciado
+  desta task pede comparação humana ali.
+
+  A barra é o alvo certo da parte medida: a largura é `11*v + 9` com `v` vindo
+  do dado, então é **número do jogo virado pixel**. Time errado, vetor errado
+  ou campo errado mudam a largura.
+
+  **O índice deixou de ser suposto.** Foi o que invalidou duas das três
+  medições da sétima passagem. Agora cada time é uma execução nova dos dois
+  lados, o `Down` vai um a um, e do lado do port o número de disparos do
+  `lista_equiposChange` sai do `trace.log` e **tem de bater** com o pedido —
+  senão o script reprova antes de comparar.
+
+  **Times 2, 9 e 63 (clube de ML): as 15 larguras batem em pixel.** Nas duas
+  famílias, seleção e Master League.
+
+- **Os dois erros que a conferência achou:**
+
+  1. **A ordem dos campos de nome não era `names[0..2]`** — o certo é
+     `names[1]` no primeiro campo e `names[0]` no segundo.
+  2. **`Nome3` é `abbreviations[0]`, não `names[2]`.** Este só apareceu no
+     clube de ML: para Gales os dois caminhos dão `WAL` e o erro passa
+     despercebido; para o Manchester `names[2]` é `ARAGON`, que o campo corta
+     em `ARA`, contra `AGN` na tela do original. **Testar uma família só de
+     time não teria pego** — é o argumento para o terceiro time ser de outra
+     família, e não o terceiro índice qualquer.
+
+  Os dois compilavam e não quebravam teste nenhum.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/compara_tela.py` + `test_compara_tela.py` — a medição e 10
+    testes com imagem sintética (458 no total)
+  - `wte/tools/compara_tela.sh` — o roteiro dos dois lados, com a guarda de
+    **processo** vivo que o `golden_check.sh` não tem
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `AbreviaturaDoTime`
+  - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — os três campos
+  - `wte/re/spec/MainForm.lista_equiposChange.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 89,5% → **89,3%**
+
+- **Problemas encontrados:**
+  1. O ícone laranja do botão `Sobre...` cai na faixa X das barras e entrou
+     como sexta banda na primeira medição, desalinhando os cinco valores. A
+     largura mínima de 9 px — que é a barra vazia, `11*0 + 9` — separa os dois.
+  2. O time 63 mede 104 px, que dariam `v = 8,64`, e barra do jogo é inteira.
+     **Os dois lados medem o mesmo 104**, então não é defeito do port; o
+     comparador passou a devolver `?` em vez de imprimir `8,63636` como "valor
+     do jogo".
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - `lista_equipos_2Change` em Pascal — os auxiliares já existem, e agora há
+    como conferir na tela;
+  - os 6 handlers de carga sem spec, com os `mostrar_*` escopados em navegação;
+  - a remoção do `--show`, depois deles;
+  - o dump de estado contra o `we2002_core` depois de carga por tela;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
   - como o original habilita controle, e as duas faixas de arranque sem causa.
 
