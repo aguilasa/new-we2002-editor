@@ -71,6 +71,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-049](/docs/tasks/CORR-WTE-049.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O parágrafo de dependência da WTE-TASK-20 diz que os 36 restantes são "os que o `we2002_core` não tem", e os 50 `ausente` são todos do `Offsets.hpp`; e cita a 19 como bloqueada | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-050](/docs/tasks/CORR-WTE-050.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A razão entrada × saída divide as 3.692 linhas dos dois geradores pelas 2.504 de entrada de um só; as 852 do `gen_tables_pas` ficam fora do denominador | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A fração de 92,5% subtrai 277 linhas úteis de um total de 3.692 que conta linha em branco — 26 linhas em branco de bloco manual entram como "por regra" | Baixa | [x] concluída | 2026-08-10 |
+| [CORR-WTE-052](/docs/tasks/CORR-WTE-052.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | O Log da WTE-TASK-22 diz 15 testes no `golden_veredito.py`, em dois sítios, e são 18 | Alta | [ ] pendente | — |
+| [CORR-WTE-053](/docs/tasks/CORR-WTE-053.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | A seção 2 descreve o controle como uma faixa de 11.952 bytes; o gate declara nove faixas e 11.955, e nenhum dos dois textos diz de qual imagem fala | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -124,6 +126,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-049 — separar as duas populações de offset no enunciado da 20 e parar de afirmar status da 19
 - [x] CORR-WTE-050 — parear entrada e saída por gerador na razão do fechamento da fase 3, e corrigir a §4.5
 - [x] CORR-WTE-051 — contar a fração com a mesma régua nos dois lados da subtração, e dizer qual é
+- [ ] CORR-WTE-052 — trocar 15 por 18 nos dois sítios do Log da 22, com o `grep -c` que remede
+- [ ] CORR-WTE-053 — reescrever a seção 2 da 22 com as nove faixas, os 11.955 bytes e a imagem de cada medida
 
 ## Detalhes por correção
 
@@ -972,3 +976,32 @@ dizer "fechada e fora do backlog", não "corrigida".
   `check_fase3`, medindo os blocos manuais nas duas réguas — 277 contra 303
 - **Fix:** contar os dois lados da subtração com a mesma régua, dizer qual é no
   cabeçalho da tabela, e prender isso em teste
+
+### CORR-WTE-052
+
+- **Arquivo com problema:** `docs/tasks/22-harness-golden.md`, linhas 225 e 236
+- **Sintoma:** o Log diz **15 testes** no `golden_veredito.py`, em dois sítios, e
+  são **18** — o arquivo nasceu com os 18 no próprio commit da task (`e139f46`).
+  A frase existe para justificar por que o veredito é Python e não shell, e o
+  tamanho da bateria é a evidência do argumento
+- **Como foi detectado:** `grep -c "    def test_"` e
+  `python3 -m unittest test_golden_veredito` — `Ran 18 tests`
+- **Fix:** trocar 15 por 18 nos dois sítios, com o comando que remede ao lado.
+  Terceiro caso da mesma família, depois da CORR-WTE-038 (41→47) e da
+  CORR-WTE-042 (33→38)
+
+### CORR-WTE-053
+
+- **Arquivo com problema:** `docs/tasks/22-harness-golden.md`, seção 2
+- **Sintoma:** a seção que define o que o gate tem de tolerar descreve **uma**
+  faixa de 11.952 bytes (`11796..26527`); o roteiro do gate declara **nove**, e
+  as duas últimas — `1921862..1921862` e `2012984..2012985` — ficam fora daquele
+  intervalo. Medido no modo `golden`: 9 faixas, 11.955 bytes, com as sete de
+  setor somando exatamente os 11.952 herdados. Nenhum dos dois textos diz de
+  qual imagem fala: a seção veio da WTE-TASK-12 (europeia, 474.784.128 B) e o
+  gate fixa a japonesa (307.187.664 B)
+- **Como foi detectado:** corrida do gate nesta revisão com `--manter`, e soma
+  por faixa do `diff.json`
+- **Fix:** reescrever a seção com as nove faixas, os 11.955 bytes, a imagem de
+  cada medida e a razão de as duas últimas só aparecerem na japonesa. A decisão
+  de declarar em vez de reproduzir não muda
