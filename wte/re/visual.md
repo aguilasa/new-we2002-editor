@@ -6,11 +6,20 @@ Inspeção humana, um veredito por formulário, como manda a §6 do
 fontes diferentes, e diferença de pixel é garantida sem informar nada.
 
 Capturas em [`visual/lazarus/`](visual/lazarus) (18) e
-[`visual/original/`](visual/original) (4). Reproduzir o lado port:
+[`visual/original/`](visual/original) (4). **As 22 estão commitadas e continuam
+válidas; o que não existe mais é a maneira de refazer as 18 de uma vez.** Elas
+saíram do `wte/tools/capture_forms.sh`, que dependia do andaime `--show` do
+`wtemain.pas`, e a
+[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) removeu os dois ao pôr
+navegação de verdade no lugar do andaime — o `--show` tinha dono e prazo desde
+que nasceu.
 
-```sh
-bash wte/tools/capture_forms.sh
-```
+Quem dirige o app hoje é o
+[`compara_tela.sh`](../tools/compara_tela.sh), que leva os dois lados ao
+mesmo time e captura a janela inteira; ele alcança o `MainForm`, não os 18. Os
+outros formulários voltam a ser capturáveis quando a navegação chegar a eles,
+que é a [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) — a
+reconferência da UI com a lógica ligada.
 
 ---
 
@@ -18,7 +27,7 @@ bash wte/tools/capture_forms.sh
 
 | Lado | Capturado |
 |---|---|
-| App Lazarus | **18 de 18**, por `--show`, o andaime da WTE-TASK-11 |
+| App Lazarus | **18 de 18**, capturadas por `--show`, o andaime da WTE-TASK-11 — que a WTE-TASK-25 removeu depois; as capturas ficaram, o andaime não |
 | `we-team-editor.exe` | **4 de 18**: `MainForm`, `ficha_warning`, `ficha_about`, `ficha_salida` |
 
 Os 14 restantes **não são inalcançáveis por falta de saber o gatilho** — o
@@ -290,8 +299,10 @@ cabeçalhos), e `dfm2lfm.py --check` prova que nenhum foi editado à mão.
 área do `MainForm` (544×495 a partir de 132,72). O X entrega o conteúdo
 indefinido da região obscurecida e o PNG sai todo preto — sem mensagem nenhuma.
 É o mesmo sintoma que o [`CLAUDE.md`](../../CLAUDE.md) registra para o modal do
-`ed.exe`, com outra causa. A saída, e o que o `capture_forms.sh` faz:
-`xdotool windowraise` e recorte de `-window root`.
+`ed.exe`, com outra causa. A saída, e o que o `capture_forms.sh` fazia:
+`xdotool windowraise` e recorte de `-window root`. **A ferramenta saiu na
+WTE-TASK-25; a armadilha ficou** — o [`compara_tela.sh`](../tools/compara_tela.sh)
+captura `-window root` e recorta pela geometria da janela pela mesma razão.
 
 **2. Mapear janela do Wine por fora não faz a VCL pintar — nem com expose
 forçado.** As 18 janelas X do original existem desde o arranque (a VCL cria o

@@ -3,7 +3,7 @@ id: CORR-WTE-058
 title: "Correção: o `visual.md` manda rodar o `capture_forms.sh`, que a WTE-TASK-25 removeu"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -118,20 +118,50 @@ Acrescentar à árvore, com a task de origem ao lado, como as demais linhas:
 
 ## Verificação
 
-- [ ] `grep -rn 'capture_forms' wte/ docs/` só devolve `docs/tasks/` (história de
-      task já concluída) e a linha do `visual.md` que **narra** a remoção
-- [ ] Todo comando em bloco de shell do `visual.md` existe e roda
-- [ ] Cada arquivo da árvore do `progresso.md` existe no disco, e cada produto da
-      WTE-TASK-25 aparece nela
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn 'capture_forms' wte/ docs/` só devolve `docs/tasks/` (história de
+      task já concluída) e a linha do `visual.md` que **narra** a remoção — em
+      `wte/` sobraram as duas linhas de narração, nas linhas 11 e 302
+- [x] Todo comando em bloco de shell do `visual.md` existe e roda — sobraram
+      dois blocos, o `wine we-team-editor.exe` e um Python inline; nenhum
+      script da árvore é invocado
+- [x] Cada arquivo da árvore do `progresso.md` existe no disco, e cada produto da
+      WTE-TASK-25 aparece nela — os cinco acrescentados existem; o resto da
+      árvore é **estado final esperado** e tem entrada de task não executada,
+      por construção
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-11
 
 **Resumo do que foi feito:**
 
+Os três sítios do `visual.md` foram reescritos no passado, nomeando a
+WTE-TASK-25 como quem retirou o andaime, e **sem apagar a história**: as 22
+capturas continuam commitadas e válidas, e o que sumiu foi a maneira de refazer
+as 18. O destino ficou escrito — quem dirige o app hoje é o `compara_tela.sh`,
+que alcança o `MainForm`; os outros 17 voltam com a WTE-TASK-37.
+
+A nota das duas armadilhas de captura foi para o passado quanto à ferramenta e
+ficou no presente quanto ao conhecimento: `-window root` mais recorte por
+geometria é exatamente o que o `compara_tela.sh` faz, pela mesma razão.
+
+Na árvore do `progresso.md`, cinco linhas novas e uma corrigida. A corrigida é a
+que mais importa: `ep2002_*.pas` era `WTE-TASK-10 (gerado) + 25-28 (corpos)`, o
+oposto da decisão da 1ª passagem — o `.pas` é gerado e diz NÃO EDITAR À MÃO, e o
+corpo entra por `{$I impl/<unidade>.<handler>.inc}`.
+
 **Problemas encontrados:**
 
+Nenhum. O `make -C wte check` fica verde antes e depois, e é o ponto da
+correção: o `visual.md` é **entrada** do `check_fase2.py`, não saída, então
+nenhum gate olhava para dentro dele.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/visual.md` — as três linhas, mais o destino (WTE-TASK-37) e o
+  ponteiro para o `compara_tela.sh`
+- `docs/tasks/progresso.md` — `src/impl/`, `src/we2002_estado.pas`,
+  `tools/check_lcl_combo.py`, `tools/compara_tela.py`/`.sh` na árvore, e a
+  linha dos `ep2002_*.pas` corrigida

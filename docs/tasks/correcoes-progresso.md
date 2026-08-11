@@ -77,7 +77,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-055](/docs/tasks/CORR-WTE-055.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | A seção 4 do enunciado chama de 322 os imports de `rtl60`/`vcl60`; são 267, e o Log da própria task diz 267 | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-056](/docs/tasks/CORR-WTE-056.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `borland_cc.md` e o `run_headless.sh` mandam rodar `apply_names.py`, e o script é `.java` | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A conferência de tela mede 3 dos 5 grupos de campo que o critério enumera: o recorte de 520×240 exclui os 23 números de camisa e a lista de jogadores, e o estado de habilitação nunca foi confrontado | Alta | [x] concluída | 2026-08-11 |
-| [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [ ] pendente | — |
+| [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-059](/docs/tasks/CORR-WTE-059.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A spec do `lista_equiposChange` justifica o `aberto` com "ainda não conferido contra a tela", e a seção seguinte é a conferência de tela | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -138,7 +138,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-055 — trocar 322 por 267 na seção 4 da 24, dizendo que 322 é o total
 - [x] CORR-WTE-056 — trocar `apply_names.py` por `.java` nos três sítios do procedimento do Ghidra
 - [x] CORR-WTE-057 — levar o recorte da conferência de tela aos 23 dorsais, à lista de jogadores e ao estado de habilitação
-- [ ] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
+- [x] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
 - [ ] CORR-WTE-059 — trocar a razão escrita do veredito `aberto` pela que sobrou
 
 ## Detalhes por correção

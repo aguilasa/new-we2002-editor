@@ -419,7 +419,10 @@ new-we2002-editor/
 ├── wte/
 │   ├── wte.lpi, wte.lpr              ← WTE-TASK-02
 │   ├── src/
-│   │   ├── ep2002_*.pas              ← WTE-TASK-10 (gerado) + 25-28 (corpos)
+│   │   ├── ep2002_*.pas              ← WTE-TASK-10 (gerado; diz NÃO EDITAR)
+│   │   ├── impl/*.inc, *.aux.inc     ← WTE-TASK-25 a 28 (os corpos, incluídos
+│   │   │                               nos ep2002_*.pas por {$I impl/...})
+│   │   ├── we2002_estado.pas         ← WTE-TASK-25 (o estado global do app)
 │   │   ├── we2002_offsets.pas        ← WTE-TASK-16 (gerado)
 │   │   ├── we2002_tables.pas         ← WTE-TASK-16 (gerado)
 │   │   ├── we2002_database.pas       ← WTE-TASK-18 (gerado)
@@ -464,6 +467,8 @@ new-we2002-editor/
 │   │   ├── dump_arranque.py          ← WTE-TASK-25
 │   │   ├── dump_auxiliares.py        ← WTE-TASK-25
 │   │   ├── check_barras.py           ← WTE-TASK-25
+│   │   ├── check_lcl_combo.py        ← WTE-TASK-25
+│   │   ├── compara_tela.py, .sh      ← WTE-TASK-25, CORR-WTE-057
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
