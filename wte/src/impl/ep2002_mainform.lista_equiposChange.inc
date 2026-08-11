@@ -62,8 +62,13 @@ begin
   banderita1.Visible := nacional;
   colorear.Enabled := nacional;
 
-  edit_nombre1.Text := NomeDoTime(indice, 0);
-  edit_nombre2.Text := NomeDoTime(indice, 1);
+  { A ordem NAO e names[0..2]. Conferido contra a tela do oraculo em
+    2026-08-11, ROM japonesa, time 2 (Gales): ele mostra `?????`, `WALES`,
+    `WAL`, e o port com names[0..2] mostrava `WALES`, lixo, `WAL`. O primeiro
+    campo recebe o slot 1 -- o que guarda bytes fora de `A-Za-z0-9. `, que o
+    filtro do original vira `?????` e nos mostramos crus. }
+  edit_nombre1.Text := NomeDoTime(indice, 1);
+  edit_nombre2.Text := NomeDoTime(indice, 0);
   edit_nombre3.Text := NomeDoTime(indice, 2);
 
   { --- 2. as cinco barras ---------------------------------------------- }

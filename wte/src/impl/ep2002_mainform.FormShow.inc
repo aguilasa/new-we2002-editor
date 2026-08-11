@@ -43,7 +43,24 @@ begin
   if imagem = '' then
     Exit;
   if AbreImagem(imagem) then
-    texto_dialogo_we.Caption := ExtractFileName(imagem)
+  begin
+    texto_dialogo_we.Caption := ExtractFileName(imagem);
+    { Os tres combos de time nascem `Enabled = False` no DFM, e depois de
+      carregar a imagem o original os aceita: clicar e teclar Down troca de
+      time (medido no `:99` em 2026-08-11, ROM japonesa, indo para `2 Gales`).
+      Sem esta linha o combo do port ignora clique e nao ha como dirigir a
+      tela.
+
+      COMO o original os habilita ainda nao se sabe, e a busca ja excluiu os
+      dois caminhos obvios: `TControl::SetEnabled` tem ZERO `call rel32` na
+      `.text` inteira, e nao ha uma unica escrita direta em `FEnabled` (offset
+      0x58 do `TControl`, lido do `vcl60.bpl`). Por isso a evidencia aqui e
+      `observacao de tela`, e esta anotada como tal na spec do
+      `lista_equiposChange`. }
+    lista_equipos.Enabled := True;
+    lista_equipos_1.Enabled := True;
+    lista_equipos_2.Enabled := True;
+  end
   else
     texto_dialogo_we.Caption := 'nao foi possivel abrir ' + ExtractFileName(imagem);
 end;

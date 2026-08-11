@@ -704,3 +704,83 @@ e não simula comportamento.
   - a remoção do `--show`;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
 
+---
+
+- **Executado em:** 2026-08-11 — **sétima passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  **O port ficou dirigível, e a primeira conferência de tela aconteceu.**
+
+  O que destravou não foi window manager nenhum: `lista_equipos` nasce
+  `Enabled = False` no DFM, e o `FormShow` do port passou a habilitar os três
+  combos de time depois de carregar a imagem. Com isso, `xdotool windowfocus`
+  seguido de clique e `Down` troca de time — a dropdown não abre de nenhum dos
+  dois lados (**no oráculo também não**), e não precisa: `Down` sobre o combo
+  focado muda a seleção e dispara o handler, que é como os roteiros 07/08/11
+  sempre funcionaram.
+
+  **Time 2 (Gales), ROM japonesa, os dois lados:**
+
+  | Campo | Oráculo | Port | |
+  |---|---|---|---|
+  | as cinco barras, em px | `64, 53, 75, 75, 75` | `64, 53, 75, 75, 75` | **idêntico** |
+  | Nome2 | `WALES` | `WALES` | idêntico |
+  | Nome3 | `WAL` | `WAL` | idêntico |
+  | Nome1 | `?????` | bytes crus | o filtro, já registrado |
+
+  As larguras batem nas cinco. É a prova que faltava: o port calcula a barra a
+  partir de `Team.bar_*` e o original a partir dos cinco bytes que ele lê da
+  imagem, e os dois desenham o mesmo pixel. O `?????` do oráculo é o filtro de
+  nome medido na quarta passagem aparecendo na tela — byte acima de `z` vira
+  `?`.
+
+  **E a comparação achou um erro que nenhum teste pegaria:** a ordem dos campos
+  de nome **não** é `names[0..2]`. O port mostrava `WALES` em Nome1 e lixo em
+  Nome2; o certo é `names[1]` no primeiro campo e `names[0]` no segundo.
+  Compilava, não quebrava nada, e estava trocado.
+
+- **O que não vale, e por quê:**
+
+  Dois times a mais foram tentados e **descartados**: os dois lados receberam
+  número diferente de `Down` — o port chegou a `78 Ajax` e depois a
+  `95 Master L. ` enquanto o oráculo estava noutro índice. Medida de tela só
+  vale com o índice conferido nos dois lados, e o roteiro ainda não faz isso.
+  Reportar aquilo como divergência do port teria sido pior que não medir.
+
+  Fica um resultado de graça: o port em `95 Master L. ` mostrou as cinco barras
+  com 9 px, que é o que a spec descreve para o ramo não-nacional.
+
+- **O que continua sem resposta:**
+
+  **Como o original habilita controle.** `TControl::SetEnabled` tem zero
+  `call rel32` na `.text`, e não há uma única escrita direta em `FEnabled`
+  (offset `0x58` do `TControl`, lido do `vcl60.bpl` pelo mesmo caminho do
+  `sonda_dorsal.py`). O port habilita por **observação de tela** — o oráculo
+  aceita o combo depois da carga, e sem isso não há como dirigir. Está anotado
+  no `.inc` e na spec, e mantém a seção Saída como `nao medido`.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.FormShow.inc` — habilita os três combos
+  - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — a ordem dos nomes
+  - `wte/re/spec/MainForm.lista_equiposChange.md` — a conferência de tela
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 89,7% → **89,5%**
+  - regerados: os 18 `.pas`, `fase-2.md`
+
+- **Problemas encontrados:**
+  1. Comparar tela sem confirmar o índice nos dois lados produz divergência
+     falsa. Dois dos três times mediram lixo por isso.
+  2. O `wineserver -k` não derrubou o `we-team-editor.exe`; foi preciso
+     `kill -9` no processo. Terceira vez na sessão que um processo de medição
+     sobra no `:99`.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - conferência de tela para mais 2 times, com o índice confirmado dos dois
+    lados — é o roteiro que precisa de ajuste, não o port;
+  - `lista_equipos_2Change` em Pascal (auxiliares já escritos);
+  - os 6 handlers de carga sem spec;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
+  - o dump de estado contra o `we2002_core` depois de carga;
+  - a remoção do `--show`;
+  - como o original habilita controle, e as duas faixas de arranque sem causa.
+

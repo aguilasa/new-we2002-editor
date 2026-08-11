@@ -134,12 +134,15 @@ A tentativa de conferir contra a tela produziu dois achados, um deles contra
 esta própria spec.
 
 **1. O combo do port não abre por clique — e não é falta de window manager.**
-A primeira leitura foi essa, e estava errada: `xdotool windowfocus` funciona e
-a lista continua sem abrir. A causa está no DFM — `lista_equipos` nasce
-**`Enabled = False`**, no original ([`../dfm/MainForm.dfm`](../dfm/MainForm.dfm)
-linha 715) e portanto no `.lfm`. Controle desabilitado ignora clique, com ou sem
-gerenciador de janela. O que falta é o port habilitá-lo depois de carregar a
-imagem.
+A primeira leitura foi essa, e estava errada. A causa está no DFM —
+`lista_equipos` nasce **`Enabled = False`**, no original
+([`../dfm/MainForm.dfm`](../dfm/MainForm.dfm) linha 715) e portanto no `.lfm`.
+Controle desabilitado ignora clique. O `FormShow` do port passou a habilitar os
+três combos de time depois de carregar a imagem, e com isso **o port é
+dirigível**: `xdotool windowfocus` seguido de clique e `Down` troca de time.
+A dropdown continua sem abrir dos **dois** lados — no oráculo também não abre —,
+e não precisa: o `Down` sobre o combo focado muda a seleção e dispara o
+handler, que é como os roteiros 07/08/11 sempre funcionaram.
 
 **2. E aí vem o problema: `TControl::SetEnabled` nunca é chamado.** O símbolo é
 importado do `vcl60.bpl` e tem thunk em `0x00422884`; a `.text` inteira tem
@@ -157,6 +160,35 @@ medida**, e o Pascal já escrito herda a dúvida: ele reproduz exatamente esses
 
 É o custo de ainda não ter conferido contra a tela, e a razão de o veredito
 continuar `aberto`.
+
+## A primeira conferência de tela, e o que ela corrigiu
+
+Time **2 (Gales)**, ROM japonesa, oráculo e port lado a lado no `:99`:
+
+| Campo | Oráculo | Port | |
+|---|---|---|---|
+| as cinco barras, em px | `64, 53, 75, 75, 75` | `64, 53, 75, 75, 75` | **idêntico** |
+| Nome2 | `WALES` | `WALES` | idêntico |
+| Nome3 | `WAL` | `WAL` | idêntico |
+| Nome1 | `?????` | bytes crus | divergência de filtro, já registrada |
+
+As larguras batem nos cinco, medidas por contagem de pixel laranja em cada
+faixa. **É a prova que faltava:** o port calcula a barra a partir de
+`Team.bar_*` da camada de dados e o original a partir de cinco bytes que ele
+mesmo lê da imagem, e os dois desenham o mesmo pixel.
+
+**E a comparação corrigiu um erro que nenhum teste pegaria.** O port mostrava
+`WALES` em Nome1 e lixo em Nome2 — a ordem dos campos **não** é `names[0..2]`.
+O primeiro campo recebe `names[1]`, o segundo `names[0]`. Compilava, não
+quebrava nada, e estava trocado.
+
+**Dois times a mais foram tentados e não valem.** Os dois lados receberam
+número diferente de `Down` — o port chegou a `78 Ajax` e a `95 Master L. `
+enquanto o oráculo estava noutro índice —, então a comparação foi descartada em
+vez de reportada. Uma medida de tela só vale com o **índice conferido nos dois
+lados**, e o roteiro ainda não faz isso. Fica registrado que o port em
+`95 Master L. ` mostrou as cinco barras com 9 px, que é o que a seção Saída
+descreve para o ramo não-nacional.
 
 O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
 (`0x00405270` e `0x004056c8`) são da
