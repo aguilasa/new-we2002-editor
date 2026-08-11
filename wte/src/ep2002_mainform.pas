@@ -30,7 +30,7 @@ interface
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
-  we2002_types;
+  we2002_types, ep2002_jugador, ep2002_estrategia;
 
 type
   TMainForm = class(TForm)
@@ -424,19 +424,11 @@ end;
 procedure TMainForm.lista_jugadores_1Change(Sender: TObject);
 {$I impl/ep2002_mainform.lista_jugadores_1Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.mostrar_jugadorClick(Sender: TObject);
-begin
-  REStub('MainForm.mostrar_jugadorClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.mostrar_jugadorClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.mostrar_estrategiaClick(Sender: TObject);
-begin
-  REStub('MainForm.mostrar_estrategiaClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.mostrar_estrategiaClick.inc}
 
 procedure TMainForm.FormCreate(Sender: TObject);
 {$I impl/ep2002_mainform.FormCreate.inc}

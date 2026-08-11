@@ -237,3 +237,28 @@ begin
     lista.Items.EndUpdate;
   end;
 end;
+
+{ O time e o jogador que a ficha vai editar -- as globais `0x004335cc` e
+  `0x004335dc` do original.
+
+  Quem as enche e a navegacao (`mostrar_jugadorClick`,
+  `mostrar_estrategiaClick`); quem as consome e o formulario aberto, que e da
+  WTE-TASK-26. Por isso elas existem aqui e ninguem mais as le ainda. }
+var
+  TimeEmEdicao: Integer = -1;
+  JogadorEmEdicao: Integer = -1;
+
+{ Qual lado da tela disparou -- titular ou reserva.
+
+  O original NAO compara o ponteiro do `Sender` com o do botao: ele le o campo
+  `Name` do componente e o compara com a cadeia do botao titular
+  (`'mostrar_jugador_1'` em 0x00424f57, `'mostrar_estrategia_1'` em
+  0x00425001). Reproduzido como esta: comparar ponteiro daria o mesmo
+  resultado hoje e deixaria de dar no dia em que alguem religar o evento a
+  outro controle com o mesmo nome, que e exatamente o que o original tolera. }
+function LadoTitular(Sender: TObject; const nome_titular: string): Boolean;
+begin
+  Result := (Sender is TComponent)
+            and (TComponent(Sender).Name = nome_titular);
+end;
+

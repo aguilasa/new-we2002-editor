@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2408 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2400 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9176** |
-| Escrito à mão | 24 | 1157 |
-| **Total** | | **10333** |
+| **Gerado, subtotal** | | **9168** |
+| Escrito à mão | 26 | 1196 |
+| **Total** | | **10364** |
 
-**88.8% do Pascal da casca é saída de gerador.**
+**88.5% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -71,24 +71,26 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.FormCreate.inc` | 54 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormShow.inc` | 66 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 239 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 264 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_equiposChange.inc` | 134 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_equipos_2Change.inc` | 56 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_jugadores_1Change.inc` | 22 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.mostrar_estrategiaClick.inc` | 17 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.mostrar_jugadorClick.inc` | 31 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_movertodos.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_salida.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_warning.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_warning_2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/retrace.pas` | 125 | o registrador de disparo (WTE-TASK-11) |
-| `src/wtemain.pas` | 230 | auto-create, `--show` e a marca de título (WTE-TASK-11) |
+| `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 31 | programa principal (WTE-TASK-02) |
 
 ### O hex dos blobs fica fora da conta, e por quê
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 96.8% — e passa a medir bitmap, não geração de código.
+fração sobe para 96.7% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -107,14 +109,14 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_mainform.pas` | 31 |
+| `src/ep2002_mainform.pas` | 29 |
 | `src/ep2002_color.pas` | 17 |
 | `src/ep2002_estrategia.pas` | 14 |
 | `src/ep2002_jugador.pas` | 10 |
 | `src/ep2002_dorsal.pas` | 2 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 20 |
+| _com corpo escrito_ | 22 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -127,6 +129,8 @@ das duas formas.
 - `MainForm.lista_equiposChange`
 - `MainForm.lista_equipos_2Change`
 - `MainForm.lista_jugadores_1Change`
+- `MainForm.mostrar_estrategiaClick`
+- `MainForm.mostrar_jugadorClick`
 - `ficha_about.FormCreate`
 - `ficha_creditos_equipo.FormCreate`
 - `ficha_dorsal.FormCreate`
@@ -150,11 +154,12 @@ Escrito de propósito, para o vocabulário não inflar.
 
 1. **A casca não toca a imagem de CD.** Nada aqui diz que o app *funciona* —
    só que ele *parece* e *reage*. Toda gravação é da fase 3 em diante.
-2. **Os 18 formulários não são navegáveis, e não podiam ser.** O critério de
-   pronto da fase 2 no plano pede navegação; quem abre formulário são os
-   handlers, e nesta fase eles são stub. O que existe é `--show`, andaime
-   explícito para a captura da WTE-TASK-12. Navegação de verdade chega com a
-   WTE-TASK-25.
+2. **Os 18 formulários não eram navegáveis no fechamento da fase 2, e não
+   podiam ser.** O critério de pronto da fase 2 no plano pede navegação; quem
+   abre formulário são os handlers, e naquela fase eles eram stub. O que houve
+   até a WTE-TASK-25 foi o `--show`, andaime explícito para a captura da
+   WTE-TASK-12; ele **saiu** quando `mostrar_jugadorClick` e
+   `mostrar_estrategiaClick` passaram a abrir `jugador` e `estrategia`.
 3. **A comparação visual cobriu os 18 do port e 4 do original.** Os
    outros 14 não foram capturados porque o oráculo quebra ao selecionar um
    time — ver `re/visual.md`, achado 1. Geometria e presença de controle estão

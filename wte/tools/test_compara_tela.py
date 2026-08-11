@@ -104,3 +104,67 @@ class TestCompara(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestContraODump(unittest.TestCase):
+    """A terceira ponta: tela -> valor -> camada de dados."""
+
+    def dump(self, valores, indice=2, tmp=None):
+        import tempfile, os
+        prefixo = ("teams[%d]." % indice if indice < C.TIMES_NACIONAIS
+                   else "ml_teams[%d]." % (indice - C.TIMES_NACIONAIS))
+        linhas = [f"{prefixo}{c} = {v}"
+                  for c, v in zip(C.CHAVES_DA_BARRA, valores)]
+        fd, caminho = tempfile.mkstemp(suffix=".txt")
+        os.write(fd, ("\n".join(linhas) + "\n").encode())
+        os.close(fd)
+        self.addCleanup(os.unlink, caminho)
+        from pathlib import Path as P
+        return P(caminho)
+
+    def test_bate_com_o_dado(self):
+        larg = [11 * v + 9 for v in (5, 4, 6, 6, 6)]
+        m = C.compara(tela(larg), tela(larg), 2)
+        r = C.confere_contra_dump(m, self.dump([5, 4, 6, 6, 6]))
+        self.assertEqual(r, {"erros": [], "curtas": []})
+
+    def test_dado_diferente_reprova(self):
+        larg = [11 * v + 9 for v in (5, 4, 6, 6, 6)]
+        m = C.compara(tela(larg), tela(larg), 2)
+        r = C.confere_contra_dump(m, self.dump([5, 4, 6, 6, 7]))
+        self.assertEqual(r["curtas"], [])
+        self.assertEqual(len(r["erros"]), 1)
+        self.assertIn("tecnica", r["erros"][0])
+
+    def test_curta_dentro_da_folga_nao_e_erro(self):
+        """O caso real do time 63: dado 9 previa 108 px, os dois medem 104.
+
+        E a cauda do degrade fora do teste de cor, nao o port errando -- e
+        reprovar seria acusar o port de um limite que o original tem igual.
+        """
+        larg = [104, 75, 97, 97, 97]
+        m = C.compara(tela(larg), tela(larg), 63)
+        r = C.confere_contra_dump(m, self.dump([9, 6, 8, 8, 8], indice=63))
+        self.assertEqual(r["erros"], [])
+        self.assertEqual(len(r["curtas"]), 1)
+        self.assertIn("cauda do degrade", r["curtas"][0])
+
+    def test_menor_que_o_previsto_mas_diferente_entre_os_lados_e_erro(self):
+        """A folga so vale quando os dois lados medem o MESMO menor."""
+        m = C.compara(tela([104, 75, 97, 97, 97]),
+                      tela([97, 75, 97, 97, 97]), 63)
+        r = C.confere_contra_dump(m, self.dump([9, 6, 8, 8, 8], indice=63))
+        self.assertEqual(len(r["erros"]), 1)
+        self.assertEqual(r["curtas"], [])
+
+    def test_indice_de_ml_le_o_vetor_certo(self):
+        caminho = self.dump([9, 6, 8, 8, 8], indice=63)
+        self.assertEqual(C.le_dump(caminho, 63), [9, 6, 8, 8, 8])
+
+    def test_dump_sem_a_chave_aborta(self):
+        caminho = self.dump([5, 4, 6, 6, 6], indice=2)
+        with self.assertRaises(C.TelaError) as e:
+            C.le_dump(caminho, 7)
+        self.assertIn("nao traz", str(e.exception))
+

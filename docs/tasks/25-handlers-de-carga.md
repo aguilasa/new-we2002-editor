@@ -5,7 +5,7 @@ type: implementação
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-22", "WTE-TASK-23", "WTE-TASK-24"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-25: Handlers de carga
@@ -154,10 +154,13 @@ e não simula comportamento.
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec no gabarito da WTE-TASK-23 — **22 dos 28**
-      (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá, mais os três
-      handlers de lista
-- [ ] Estado interno batendo com o `we2002_core` após carga
+- [x] Todo handler do grupo com spec no gabarito da WTE-TASK-23 — **28 de 28**
+      (2026-08-11), conferido pelo `spec_index.py` contra a coluna `grupo` do
+      `published_methods.tsv`
+- [x] Estado interno batendo com o `we2002_core` após carga — o
+      `compara_tela.py --dump` inverte a largura de cada barra e a confronta
+      com o `dump_estado.pas` da mesma imagem; 14 das 15 batem exatas e a 15ª
+      fica 4 px curta **nos dois lados**, pela cauda do degradê
 - [x] Tela conferida contra o original para pelo menos 3 times distintos, nos
       campos que o grupo de carga possui — bandeira e uniforme são pendência
       nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
@@ -168,7 +171,10 @@ e não simula comportamento.
 - [x] Comportamento de `OnChange` na carga decidido e testado — a LCL/gtk2
       **não** dispara `OnChange` por atribuição, como o Win32 e ao contrário do
       Qt; remedido a cada build pelo `check_lcl_combo.py`
-- [ ] Andaime `--show` removido de `wtemain.pas`, com a navegação real no lugar
+- [x] Andaime `--show` removido de `wtemain.pas`, com a navegação real no
+      lugar — `mostrar_jugadorClick` e `mostrar_estrategiaClick` abrem
+      `jugador` e `estrategia`; saíram junto o `AchaFormulario`, que só o
+      servia, e o `capture_forms.sh`, que dependia dele
 - [x] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
@@ -913,4 +919,90 @@ e não simula comportamento.
   - o dump de estado contra o `we2002_core` depois de carga por tela;
   - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
   - como o original habilita controle, e as duas faixas de arranque sem causa.
+
+---
+
+- **Executado em:** 2026-08-11 — **décima passagem: a task fecha.**
+
+- **Resumo do que foi feito:**
+
+  Os **quatro critérios que faltavam**, fechados.
+
+  **As 6 specs que faltavam** — `boton_dialogo_texClick`, `boton_mcrClick`,
+  `ComboBoxDrawItem`, `lista_formacionesClick`, `mostrar_jugadorClick` e
+  `mostrar_estrategiaClick`. O grupo vai a **28 de 28**. Cinco delas fecham com
+  veredito `aberto` **e dono nomeado fora desta task**: `.tex` e `.mcr` são a
+  32 e a 31, o desenho do combo é a 37, e encher ficha e tática é a 26.
+
+  **Os dois `mostrar_*` em Pascal, escopados em navegação.** O achado que
+  organizou os dois: o original **não compara o ponteiro do `Sender`** com o do
+  botão — lê o campo `Name` do componente e o compara com a cadeia
+  `'mostrar_jugador_1'` (`0x00424f57`) ou `'mostrar_estrategia_1'`
+  (`0x00425001`). Um corpo serve dois botões, e é a cadeia que decide o lado.
+  Reproduzido como está.
+
+  **O `--show` saiu**, com o `AchaFormulario` que só o servia e o
+  `capture_forms.sh`, que dependia dele. O andaime tinha dono e prazo desde que
+  nasceu: existia porque na fase 2 nada navegava. O `capture_forms.sh` serviu a
+  WTE-TASK-12, cuja saída está commitada em `wte/re/visual/`, e a
+  WTE-TASK-37 dirige o app de verdade — nenhum dos dois precisa dele.
+
+  **E o estado interno virou medida.** O `compara_tela.py --dump` inverte a
+  largura de cada barra (`11*v + 9`) e confronta com o `dump_estado.pas` da
+  mesma imagem. É a terceira ponta: sem ela, os dois lados poderiam estar
+  desenhando o mesmo pixel do **time errado**. 14 das 15 batem exatas.
+
+- **A 15ª, e por que ela não é defeito:**
+
+  O time 63 tem `bar_attack = 9`, que por `11*v + 9` daria 108 px, e os dois
+  lados medem **104**. A barra é um `TImage` com um degradê laranja de 117 px e
+  o que se conta é o pixel que passa no teste de cor; na ponta escura ele não
+  passa. A folga é de 4 px, **só para menos e só quando os dois lados medem o
+  mesmo** — comparar medida com medida continua exato, porque os dois desenham
+  o mesmo degradê.
+
+  A primeira redação chamava isso de "recorte pelo container" e aceitava
+  **qualquer** medida menor. Um teste que eu tinha escrito para reprovar dado
+  divergente passou a ser classificado como recorte, e foi ele que mostrou que
+  a regra estava lassa. Guarda frouxa reprovada pelo próprio teste é o melhor
+  caso possível.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/` — 6 specs novas; `INDICE.md` regerado
+  - `wte/src/impl/ep2002_mainform.mostrar_jugadorClick.inc`,
+    `.mostrar_estrategiaClick.inc`, `.aux.inc` (`LadoTitular`, `TimeEmEdicao`,
+    `JogadorEmEdicao`), `.uses`
+  - `wte/src/wtemain.pas` — o `--show` e o `AchaFormulario` fora
+  - `wte/tools/capture_forms.sh` — **removido**
+  - `wte/tools/compara_tela.py` + `.sh` + testes — a conferência contra o dump
+    (16 testes no comparador)
+  - `wte/tools/check_fase2.py` — a prosa que dizia que a casca não navega
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 88,8% → **88,5%**, e o andaime de
+    projeto recontado de 386 para 352 linhas
+
+- **Problemas encontrados:**
+  1. A folga da conferência contra o dump nasceu lassa; ver acima.
+  2. Remover o `--show` quebrou o `capture_forms.sh` em silêncio — nada
+     apontava a dependência. Achado por `grep`, não por teste. Ferramenta que
+     depende de opção de linha de comando de outro programa não tem quem a
+     avise quando a opção sai.
+
+- **O que fica para outras tasks, com dono escrito:**
+  - encher a ficha de jogador e a tela de tática (`0x00404820`, `0x0040756c`,
+    `0x0040a0b4`) — [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md);
+  - `ficha_color.FormCreate` e `estrategia.FormCreate` — 26/32;
+  - bandeira e uniforme 2D — [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md),
+    que herdou a linha de critério de tela;
+  - o `.mcr` — [WTE-TASK-31](/docs/tasks/31-import-de-mcr.md);
+  - o desenho do combo de tática — [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md).
+
+- **O que fica em aberto sem dono, e é dívida registrada:**
+  - **como o original habilita controle.** `TControl::SetEnabled` tem zero
+    `call rel32` na `.text` e não há uma escrita direta em `FEnabled`. O port
+    habilita por observação de tela, e a seção Saída da spec do
+    `lista_equiposChange` segue `nao medido`. Não bloqueia critério nenhum;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`), que
+    são do gate da [WTE-TASK-22](/docs/tasks/22-harness-golden.md);
+  - `lista_equipos_2Change` tem Pascal e **não** foi conferido na tela: o
+    `compara_tela.sh` dirige só o combo titular.
 

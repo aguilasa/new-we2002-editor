@@ -118,23 +118,16 @@ begin
   MarcaOsTitulos;
 end;
 
-// A casca ainda nao tem navegacao de verdade: quem abre formulario sao os
-// handlers, e na fase 2 eles sao stub que so registra o nome. Ligar
-// botao->formulario exige saber o que cada handler faz, que e a WTE-TASK-25
-// em diante.
+// O `--show` FOI REMOVIDO na WTE-TASK-25, e ele tinha dono e prazo desde que
+// nasceu: existia porque na fase 2 nada navegava -- os handlers eram stub, e
+// sem ele a WTE-TASK-12 nao teria como abrir formulario para capturar. Com a
+// navegacao de verdade no lugar (`mostrar_jugadorClick` e
+// `mostrar_estrategiaClick` abrem `jugador` e `estrategia`), o andaime perdeu
+// a razao de existir, e andaime sem dono nomeado fica para sempre. Saiu com
+// ele o `AchaFormulario`, que so o servia.
 //
-// O que existe aqui e o suficiente para a WTE-TASK-12 capturar os 18 sem
-// navegar: `--show`. E andaime, nao comportamento do original, e some
-// quando a navegacao de verdade chegar.
-function AchaFormulario(const Nome: string): TForm;
-var
-  i: Integer;
-begin
-  Result := nil;
-  for i := 0 to Screen.FormCount - 1 do
-    if SameText(Screen.Forms[i].Name, Nome) then
-      Exit(Screen.Forms[i]);
-end;
+// O `--list` ficou: e barato, nao simula comportamento nenhum e continua util
+// para conferir que os 18 formularios foram criados.
 
 var
   ImagemPedida: string = '';
@@ -151,8 +144,6 @@ begin
   WriteLn('wte -- a casca da fase 2 (WTE-TASK-11). Nenhum acesso a imagem de CD.');
   WriteLn;
   WriteLn('  wte                   abre o MainForm');
-  WriteLn('  wte --show <nome>     abre so o formulario <nome>');
-  WriteLn('  wte --show all        abre os 18 de uma vez (captura da WTE-TASK-12)');
   WriteLn('  wte --list            lista os nomes e sai');
   WriteLn('  wte --help            isto');
   WriteLn('  wte <imagem.bin>      guarda o caminho e registra no trace;');
@@ -168,8 +159,6 @@ end;
 function TrataLinhaDeComando: Boolean;
 var
   i, k: Integer;
-  Alvo: string;
-  F: TForm;
 begin
   Result := True;
   i := 1;
@@ -185,29 +174,6 @@ begin
       for k := 0 to Screen.FormCount - 1 do
         WriteLn(Screen.Forms[k].Name);
       Exit(False);
-    end
-    else if ParamStr(i) = '--show' then
-    begin
-      Inc(i);
-      Alvo := ParamStr(i);
-      if Alvo = '' then
-        raise Exception.Create('--show exige o nome de um formulario (veja --list)');
-      REMark('--show ' + Alvo);
-      if SameText(Alvo, 'all') then
-      begin
-        for k := 0 to Screen.FormCount - 1 do
-          Screen.Forms[k].Show;
-      end
-      else
-      begin
-        F := AchaFormulario(Alvo);
-        if F = nil then
-          raise Exception.CreateFmt(
-            'formulario "%s" nao existe; rode --list', [Alvo]);
-        // O MainForm continua sendo o principal para a LCL; mostrar outro
-        // por cima e o que a captura precisa.
-        F.Show;
-      end;
     end
     else if Copy(ParamStr(i), 1, 1) = '-' then
       raise Exception.CreateFmt('argumento desconhecido: %s (veja --help)',

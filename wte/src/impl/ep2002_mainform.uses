@@ -7,3 +7,5 @@ retrace        # REMark
 we2002_database  # ResolveMlLink
 we2002_types     # SquadNumberAt
 StdCtrls         # TComboBox nos auxiliares
+ep2002_jugador   # jugador.ShowModal
+ep2002_estrategia # estrategia.ShowModal

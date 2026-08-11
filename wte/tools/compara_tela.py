@@ -73,6 +73,13 @@ ALTURA_MINIMA = 4
 # que fez a sexta banda aparecer na primeira medicao.
 LARGURA_MINIMA = 9
 
+# Folga, so para MENOS, ao confrontar a largura medida com o valor da camada de
+# dados. A barra e um degrade e a ponta escura nao passa no teste de cor, entao
+# a medida encurta nas barras mais largas -- 4 px no unico caso visto ate aqui
+# (time 63, `bar_attack = 9`, previsto 108, medido 104 nos dois lados). NAO se
+# aplica a comparacao entre os dois lados, que continua exata.
+TOLERANCIA_PX = 4
+
 BARRAS = 5
 NOMES_DAS_BARRAS = ("ataque", "defesa", "equipe", "velocidade", "tecnica")
 
@@ -142,6 +149,79 @@ def valor_da_barra(largura: int) -> float | None:
     return v if resto == 0 else None
 
 
+# Onde o `dump_estado.pas` guarda cada barra, e como o indice do combo vira
+# indice de vetor. Os 0..62 sao `teams`; de 63 em diante sao `ml_teams`, e a
+# contiguidade foi conferida byte a byte na terceira passagem da WTE-TASK-25.
+TIMES_NACIONAIS = 63
+CHAVES_DA_BARRA = ("bar_attack", "bar_defence", "bar_power", "bar_speed",
+                   "bar_technique")
+
+
+def le_dump(caminho: Path, indice: int) -> list[int]:
+    """As cinco barras do time `indice`, lidas do dump da camada de dados.
+
+    O formato e o do `dump_estado.pas`: `chave = valor`, uma por linha.
+    """
+    if indice < TIMES_NACIONAIS:
+        prefixo = f"teams[{indice}]."
+    else:
+        prefixo = f"ml_teams[{indice - TIMES_NACIONAIS}]."
+    valores: dict[str, int] = {}
+    for linha in caminho.read_text(encoding="utf-8", errors="replace").splitlines():
+        chave, _, valor = linha.partition(" = ")
+        if chave.startswith(prefixo):
+            valores[chave[len(prefixo):]] = valor.strip()
+    faltando = [c for c in CHAVES_DA_BARRA if c not in valores]
+    if faltando:
+        raise TelaError(
+            f"{caminho}: o dump nao traz {', '.join(faltando)} de {prefixo} "
+            f"-- ou o indice esta fora, ou o dump e de outra versao")
+    return [int(valores[c]) for c in CHAVES_DA_BARRA]
+
+
+def confere_contra_dump(m: dict, caminho: Path) -> dict:
+    """A terceira ponta: tela -> valor -> camada de dados.
+
+    O `compara_tela` ja mostra que os dois lados desenham o mesmo pixel. Isso
+    provaria paridade entre eles mesmo se AMBOS estivessem lendo o time
+    errado. Confrontar a largura com o que o `we2002_core` carregou fecha o
+    triangulo: a tela do port vem do dado, e o dado e o do jogo.
+
+    Devolve `{"erros": [...], "curtas": [...]}`.
+
+    **A medida e proxy, e a folga tem tamanho medido.** A barra e um `TImage`
+    com um degrade laranja de 117 px, e o que se conta e o pixel que passa no
+    teste de cor. Na ponta escura do degrade o pixel nao passa, entao a medida
+    fica um pouco CURTA nas barras mais largas: o time 63 tem
+    `bar_attack = 9`, que por `11*v + 9` daria 108 px, e os dois lados medem
+    104. Todos os outros valores conferidos ate aqui batem exatos.
+
+    Por isso a folga e de `{TOLERANCIA_PX}` px, so para MENOS, e so quando os
+    dois lados medem o mesmo. Comparar medida com medida continua exato -- os
+    dois desenham o mesmo degrade --; e comparar medida com dado que precisa da
+    folga. Diferenca maior que isso e erro, e foi assim que o teste
+    `test_dado_diferente_reprova` ficou de pe.
+    """
+    do_dump = le_dump(caminho, m["indice"])
+    erros, curtas = [], []
+    for i, nome in enumerate(NOMES_DAS_BARRAS):
+        previsto = 11 * do_dump[i] + 9
+        medido = m["oraculo"][i]
+        if medido == previsto:
+            continue
+        if (0 < previsto - medido <= TOLERANCIA_PX
+                and m["oraculo"][i] == m["port"][i]):
+            curtas.append(
+                f"{nome}: dado {do_dump[i]} previa {previsto} px e os dois "
+                f"lados medem {medido} -- {previsto - medido} px de cauda do "
+                f"degrade fora do teste de cor")
+        else:
+            erros.append(
+                f"{nome}: dado {do_dump[i]} previa {previsto} px, oraculo "
+                f"{medido}, port {m['port'][i]}")
+    return {"erros": erros, "curtas": curtas}
+
+
 def compara(oraculo, port, indice: int) -> dict:
     a = larguras(oraculo, "oraculo")
     b = larguras(port, "port")
@@ -171,6 +251,18 @@ def relata(m: dict) -> int:
     print("  valores do jogo: "
           + ", ".join(f"{n}=" + ("?" if v is None else f"{v:g}")
                       for n, v in zip(NOMES_DAS_BARRAS, m["valores"])))
+    if "dump" in m:
+        for r in m["dump"]["curtas"]:
+            print("  curta: " + r)
+        if m["dump"]["erros"]:
+            print("DIVERGE da camada de dados:", file=sys.stderr)
+            for d in m["dump"]["erros"]:
+                print("  " + d, file=sys.stderr)
+            return 1
+        n = BARRAS - len(m["dump"]["curtas"])
+        print(f"  a tela bate com o we2002_core em {n} de {BARRAS} barras"
+              + (" (o resto curto pelo degrade, igual nos dois lados)"
+                 if m["dump"]["curtas"] else ""))
     if m["diferencas"]:
         print("DIVERGE:", file=sys.stderr)
         for d in m["diferencas"]:
@@ -229,6 +321,9 @@ def main(argv: list[str]) -> int:
     ap.add_argument("port", type=Path)
     ap.add_argument("--indice", type=int, required=True)
     ap.add_argument("--saida", type=Path)
+    ap.add_argument("--dump", type=Path,
+                    help="saida do dump_estado.pas, para confrontar a largura "
+                         "invertida com o que a camada de dados carregou")
     args = ap.parse_args(argv)
     try:
         o = carrega(args.oraculo)
@@ -239,6 +334,8 @@ def main(argv: list[str]) -> int:
             destino = args.saida / f"time-{args.indice}-lado-a-lado.png"
             montagem(o, p, destino)
             print(f"  montagem: {destino}")
+        if args.dump:
+            m["dump"] = confere_contra_dump(m, args.dump)
     except TelaError as exc:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2

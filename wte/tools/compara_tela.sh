@@ -6,6 +6,10 @@
 #     WTE_TELA_IMAGEM=<rom>   padrao: roms/japanese-shift-jis.bin
 #     WTE_TELA_SAIDA=<dir>    onde ficam as capturas (padrao: work/tela)
 #
+# O dump da camada de dados e gerado uma vez, da mesma imagem, e confrontado
+# com a largura invertida de cada barra. E a terceira ponta da conferencia: sem
+# ela, os dois lados poderiam estar desenhando o mesmo pixel do time errado.
+#
 # Da WTE-TASK-25, criterio "tela conferida contra o original para pelo menos 3
 # times distintos". Quem MEDE e o `compara_tela.py` ao lado; este script leva
 # os dois lados ao mesmo estado, que e a parte que erra.
@@ -69,6 +73,22 @@ if sobra_processo; then
 fi
 
 mkdir -p "$SAIDA"
+
+# O dump da camada de dados, uma vez por rodada. Sem `fpc` ele nao existe e a
+# conferencia contra o dado e PULADA, dizendo isso -- nunca em silencio.
+DUMP=""
+if command -v fpc >/dev/null; then
+  cp "$IMAGEM" "$WORK/tela-dump.bin"
+  mkdir -p "$WORK/tela-dump-units"
+  if fpc -MObjFPC -Sh -Fu"$WTE/src" -FE"$WORK/tela-dump-units" \
+         -FU"$WORK/tela-dump-units" "$WTE/tests/dump_estado.pas" \
+         >/dev/null 2>&1; then
+    "$WORK/tela-dump-units/dump_estado" "$WORK/tela-dump.bin" \
+        > "$SAIDA/estado.txt" 2>/dev/null && DUMP="$SAIDA/estado.txt"
+  fi
+fi
+[ -n "$DUMP" ] || echo ">> AVISO: sem dump da camada de dados -- a tela sera" \
+                       "comparada so contra o oraculo"
 limpa() {
   pkill -9 -f "$WTE/build/wte" 2>/dev/null || true
   pkill -9 -f "we-team-editor.exe" 2>/dev/null || true
@@ -165,8 +185,10 @@ for indice in "$@"; do
   echo ">> time $indice"
   captura_oraculo "$indice" "$SAIDA/time-$indice-oraculo.png"
   captura_port    "$indice" "$SAIDA/time-$indice-port.png"
+  extra=()
+  [ -n "${DUMP:-}" ] && extra=(--dump "$DUMP")
   python3 "$AQUI/compara_tela.py" \
       "$SAIDA/time-$indice-oraculo.png" "$SAIDA/time-$indice-port.png" \
-      --indice "$indice" --saida "$SAIDA" || rc=1
+      --indice "$indice" --saida "$SAIDA" "${extra[@]}" || rc=1
 done
 exit $rc

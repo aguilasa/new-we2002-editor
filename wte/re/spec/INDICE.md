@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 81 |
 | **total** | **96** |
 
-22 de 96 têm arquivo de spec.
+28 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -83,16 +83,16 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409644` | `estrategia` | rectanguloDragOver | OnDragOver | edicao | aberto |
 | `0x00409780` | `estrategia` | rectanguloDragDrop | OnDragDrop | edicao | aberto |
 | `0x004097a4` | `estrategia` | bolaEndDrag | OnEndDrag x10 | edicao | aberto |
-| `0x00409aa0` | `estrategia` | lista_formacionesClick | OnClick | carga | aberto |
+| `0x00409aa0` | `estrategia` | [lista_formacionesClick](estrategia.lista_formacionesClick.md) | OnClick | carga | aberto |
 | `0x00409ba4` | `estrategia` | relojTimer | OnTimer | edicao | aberto |
 | `0x00409f4c` | `estrategia` | malla1MouseDown | OnMouseDown | edicao | aberto |
 | `0x0040a000` | `estrategia` | malla2MouseDown | OnMouseDown | edicao | aberto |
 | `0x0040a658` | `estrategia` | BitBtn1Click | OnClick | auxiliar | aberto |
 | `0x0040a660` | `estrategia` | BitBtn3Click | OnClick | auxiliar | aberto |
-| `0x0040adec` | `estrategia` | ComboBoxDrawItem | OnDrawItem x2 | carga | aberto |
+| `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |
-| `0x0040c2c8` | `MainForm` | boton_mcrClick | OnClick | carga | aberto |
+| `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | aberto |
 | `0x0040c46c` | `MainForm` | boton_mcr2isoClick | OnClick | gravacao | aberto |
 | `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
 | `0x0040c9d0` | `MainForm` | sel_barraClick | OnClick x5 | edicao | aberto |
@@ -105,7 +105,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d43c` | `MainForm` | iguala_nombresClick | OnClick | edicao | aberto |
 | `0x0040d534` | `MainForm` | boton_nombres2isoClick | OnClick | gravacao | aberto |
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
-| `0x0040dfe8` | `MainForm` | boton_dialogo_texClick | OnClick | carga | aberto |
+| `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
 | `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |
 | `0x0040e304` | `MainForm` | paderechaeizquierdaClick | OnClick | edicao | aberto |
 | `0x0040e4b0` | `MainForm` | paizquierdaClick | OnClick | edicao | aberto |
@@ -117,8 +117,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040ee80` | `MainForm` | grabar_camisetaClick | OnClick | gravacao | aberto |
 | `0x0040f69c` | `MainForm` | grabar_memoryClick | OnClick | gravacao | aberto |
 | `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
-| `0x0040f8d4` | `MainForm` | mostrar_jugadorClick | OnClick x2 | carga | aberto |
-| `0x00410220` | `MainForm` | mostrar_estrategiaClick | OnClick x2 | carga | aberto |
+| `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
+| `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | aberto |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00410a74` | `MainForm` | dorsalClick | OnClick x23 | edicao | aberto |
 | `0x00410ddc` | `MainForm` | dorsalMouseDown | OnMouseDown x23 | edicao | aberto |

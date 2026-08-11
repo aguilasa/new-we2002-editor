@@ -37,7 +37,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | `golden_check.sh` — **o gate** | 4 | 11, 21 | ✅ Concluído | 2026-08-10 | 2026-08-11 |
 | [WTE-TASK-23](/docs/tasks/23-formato-da-spec.md) | Formato de `re/spec/` e vocabulário de veredito | 4 | 09 | ✅ Concluído | 2026-08-09 | 2026-08-10 |
 | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | 2026-08-11 |
-| [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | 🔄 Em andamento | — | — |
+| [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | ⬜ pendente |
 | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ⬜ Pendente | — | — |
 | [WTE-TASK-28](/docs/tasks/28-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
@@ -109,7 +109,7 @@ objetivo completo e o modelo de verificação.
 | --- | --- | --- |
 | 0 — Infra | 01 a 02 | ferramental instalado e provado; `wte/` compilando vazio |
 | 1 — Extração estática | 03 a 09 | os 18 DFM, os 96 handlers, strings, offsets, assets — **sem decompilador** |
-| 2 — Casca | 10 a 14 | a UI inteira gerada, os 18 abrindo por `--show`, com os 96 stubs logando |
+| 2 — Casca | 10 a 14 | a UI inteira gerada, os 18 abrindo por `--show` (andaime, retirado na 25), com os 96 stubs logando |
 | 3 — Dados | 15 a 21 | camada de dados **gerada** do `we2002_core`, lendo as duas ROMs |
 | 4 — Comportamento | 22 a 29 | o gate golden, e os 96 handlers com veredito |
 | 5 — Features | 30 a 33 | preço, `.mcr`, camisa/bandeira 2D, slots de ML |
@@ -243,8 +243,9 @@ conferível.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **22 de 96 têm arquivo**
-      (2026-08-11): 14 `trivial`, 1 `implementado`, 7 ainda `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **28 de 96 têm arquivo**
+      (2026-08-11), e são exatamente os 28 do grupo de carga: 14 `trivial`,
+      1 `implementado`, 13 `aberto`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -689,3 +690,25 @@ novo.
 **captura de tela minha**, não de teste manual: `kill %1` não funciona em shell
 não interativo. A guarda do `golden_check.sh` pega janela grande antes de
 começar; processo solto de medição de apoio não passa por ela.
+
+**WTE-TASK-25 — fechou em dez passagens, e o que a fechou foi a conferência de
+tela.** Ela achou dois erros que nenhum teste pegaria: a ordem dos três campos
+de nome (`names[1]`, `names[0]`, `abbreviations[0]`, e não `names[0..2]`), e o
+terceiro campo ser a **abreviatura** — este só apareceu num clube de Master
+League, porque para uma seleção os dois caminhos dão a mesma cadeia. **Testar
+uma família só de time não teria pego**, e é o argumento para o terceiro caso
+ser de outra família, não o terceiro índice qualquer.
+
+**A conferência tem três pontas, e a terceira é a que importa.** Comparar o
+port com o oráculo mostra que os dois desenham o mesmo pixel — e isso passaria
+igual se **ambos** estivessem lendo o time errado. O `compara_tela.py --dump`
+inverte a largura da barra (`11*v + 9`) e a confronta com o que o `we2002_core`
+carregou. Vale como regra: *"os dois lados concordam"* nunca é conferência
+completa; falta amarrar num terceiro que não é nenhum dos dois.
+
+**E o método da §4.2 pagou três vezes nesta task.** As barras caem na
+`OFS_TEAM_BARS`; a fronteira de setor de `0x00403388` é a mesma geometria dos
+`OFS_*`; a tabela que `0x0040cbc8` varre é a que a WTE-TASK-06 registrou. Com
+isso, `0x00404374` (881 B) e `0x00403f00` (328 B) **nunca precisaram ser
+lidos** — o original calcula endereços de bytes cujo lugar já se conhecia por
+outro caminho.

@@ -421,8 +421,8 @@ def montar(inv: dict, por_unidade: dict, com_corpo: list[str],
     razao = {
         "wte.lpr": "programa principal (WTE-TASK-02)",
         "src/retrace.pas": "o registrador de disparo (WTE-TASK-11)",
-        "src/wtemain.pas": "auto-create, `--show` e a marca de título "
-                           "(WTE-TASK-11)",
+        "src/wtemain.pas": "auto-create, linha de comando e a marca de "
+                           "título (WTE-TASK-11)",
     }
     for nome, n in inv["pas_mao"]:
         motivo = razao.get(nome)
@@ -487,15 +487,17 @@ def montar(inv: dict, por_unidade: dict, com_corpo: list[str],
     w("1. **A casca não toca a imagem de CD.** Nada aqui diz que o app "
       "*funciona* —")
     w("   só que ele *parece* e *reage*. Toda gravação é da fase 3 em diante.")
-    w("2. **Os 18 formulários não são navegáveis, e não podiam ser.** O "
-      "critério de")
-    w("   pronto da fase 2 no plano pede navegação; quem abre formulário são "
-      "os")
-    w("   handlers, e nesta fase eles são stub. O que existe é `--show`, "
-      "andaime")
-    w("   explícito para a captura da WTE-TASK-12. Navegação de verdade chega "
-      "com a")
-    w("   WTE-TASK-25.")
+    w("2. **Os 18 formulários não eram navegáveis no fechamento da fase 2, e "
+      "não")
+    w("   podiam ser.** O critério de pronto da fase 2 no plano pede "
+      "navegação; quem")
+    w("   abre formulário são os handlers, e naquela fase eles eram stub. O "
+      "que houve")
+    w("   até a WTE-TASK-25 foi o `--show`, andaime explícito para a captura "
+      "da")
+    w("   WTE-TASK-12; ele **saiu** quando `mostrar_jugadorClick` e")
+    w("   `mostrar_estrategiaClick` passaram a abrir `jugador` e "
+      "`estrategia`.")
     w(f"3. **A comparação visual cobriu os {len(formularios)} do port e {cap} "
       f"do original.** Os")
     w(f"   outros {so_dfm} não foram capturados porque o oráculo quebra ao "
