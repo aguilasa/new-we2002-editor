@@ -71,7 +71,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-049](/docs/tasks/CORR-WTE-049.md) | [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) | O parágrafo de dependência da WTE-TASK-20 diz que os 36 restantes são "os que o `we2002_core` não tem", e os 50 `ausente` são todos do `Offsets.hpp`; e cita a 19 como bloqueada | Baixa | [x] concluída | 2026-08-10 |
 | [CORR-WTE-050](/docs/tasks/CORR-WTE-050.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A razão entrada × saída divide as 3.692 linhas dos dois geradores pelas 2.504 de entrada de um só; as 852 do `gen_tables_pas` ficam fora do denominador | Alta | [x] concluída | 2026-08-10 |
 | [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) | [WTE-TASK-21](/docs/tasks/21-fechamento-fase-3.md) | A fração de 92,5% subtrai 277 linhas úteis de um total de 3.692 que conta linha em branco — 26 linhas em branco de bloco manual entram como "por regra" | Baixa | [x] concluída | 2026-08-10 |
-| [CORR-WTE-052](/docs/tasks/CORR-WTE-052.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | O Log da WTE-TASK-22 diz 15 testes no `golden_veredito.py`, em dois sítios, e são 18 | Alta | [ ] pendente | — |
+| [CORR-WTE-052](/docs/tasks/CORR-WTE-052.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | O Log da WTE-TASK-22 diz 15 testes no `golden_veredito.py`, em dois sítios, e são 18 | Alta | [x] concluída | 2026-08-11 |
 | [CORR-WTE-053](/docs/tasks/CORR-WTE-053.md) | [WTE-TASK-22](/docs/tasks/22-harness-golden.md) | A seção 2 descreve o controle como uma faixa de 11.952 bytes; o gate declara nove faixas e 11.955, e nenhum dos dois textos diz de qual imagem fala | Baixa | [ ] pendente | — |
 | [CORR-WTE-054](/docs/tasks/CORR-WTE-054.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | O `vmt.md` diz que todo número saiu do `vmt_probe.java`, e os votos da âncora (4 entre ~150) não têm ferramenta que os produza | Alta | [ ] pendente | — |
 | [CORR-WTE-055](/docs/tasks/CORR-WTE-055.md) | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | A seção 4 do enunciado chama de 322 os imports de `rtl60`/`vcl60`; são 267, e o Log da própria task diz 267 | Baixa | [ ] pendente | — |
@@ -129,7 +129,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-049 — separar as duas populações de offset no enunciado da 20 e parar de afirmar status da 19
 - [x] CORR-WTE-050 — parear entrada e saída por gerador na razão do fechamento da fase 3, e corrigir a §4.5
 - [x] CORR-WTE-051 — contar a fração com a mesma régua nos dois lados da subtração, e dizer qual é
-- [ ] CORR-WTE-052 — trocar 15 por 18 nos dois sítios do Log da 22, com o `grep -c` que remede
+- [x] CORR-WTE-052 — trocar 15 por 18 nos dois sítios do Log da 22, com o `grep -c` que remede
 - [ ] CORR-WTE-053 — reescrever a seção 2 da 22 com as nove faixas, os 11.955 bytes e a imagem de cada medida
 - [ ] CORR-WTE-054 — pôr a votação da âncora no `vmt_probe.java`, ou dizer no `vmt.md` de onde os votos vieram
 - [ ] CORR-WTE-055 — trocar 322 por 267 na seção 4 da 24, dizendo que 322 é o total

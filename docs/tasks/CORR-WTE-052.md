@@ -3,7 +3,7 @@ id: CORR-WTE-052
 title: "Correção: o Log da WTE-TASK-22 diz 15 testes no `golden_veredito`, e são 18"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -84,12 +84,28 @@ $ grep -c "    def test_" wte/tools/test_golden_veredito.py
 - [ ] `make -C wte check` verde
 - [ ] nenhuma célula do `progresso.md` alterada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-11
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+Trocado 15 por 18 nos dois sítios do Log da WTE-TASK-22 (resumo e tabela de
+arquivos), com o `grep -c "    def test_"` colado ao lado do primeiro e citado
+na célula do segundo — a forma que a CORR-WTE-042 usou, para o número ter rota
+de volta e não só valor novo.
+
+Varredura de `15 testes` em `docs`, `wte`, `.claude` e `CLAUDE.md`: a única
+ocorrência viva fora deste arquivo é o Log da
+[WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md), e é de outro arquivo
+(`test_analisar_io.py`) — remedida, 15 é o número certo lá.
+
+**Problemas encontrados:** Nenhum.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/22-harness-golden.md` | modificado — 18 nos dois sítios, com o comando |
+| `docs/tasks/CORR-WTE-052.md` | `status: concluído` e este Log |
+| `docs/tasks/correcoes-progresso.md` | `[x]` na tabela e no checklist |

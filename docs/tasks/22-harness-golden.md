@@ -222,8 +222,13 @@ arquivo nos dois lados.
 
   **O veredito é Python, e o gate é shell.** A parte que decide — faixa
   declarada contra faixa medida — mora no
-  [`golden_veredito.py`](../../wte/tools/golden_veredito.py), com 15 testes;
+  [`golden_veredito.py`](../../wte/tools/golden_veredito.py), com 18 testes;
   shell não é testável e esta é a peça que não pode errar.
+
+  ```
+  $ grep -c "    def test_" wte/tools/test_golden_veredito.py
+  18
+  ```
 
 - **Arquivos criados/modificados:**
 
@@ -233,7 +238,7 @@ arquivo nos dois lados.
   | `wte/tools/golden_run_wte.sh` | criado — lado oráculo, com o `c0000005` como falha |
   | `wte/tools/golden_run_laz.sh` | criado — lado port, com a recusa de roteiro com teclado |
   | `wte/tools/golden_veredito.py` | criado — o veredito, três códigos de saída |
-  | `wte/tools/test_golden_veredito.py` | criado — 15 testes |
+  | `wte/tools/test_golden_veredito.py` | criado — 18 testes (`grep -c "    def test_"`) |
   | `wte/tools/golden_check.sh` | criado — o gate, três modos, quatro guardas |
   | `wte/tests/roteiros/golden-01-arranque.txt` | criado — e o par `.port.txt` |
   | `wte/tools/diff_dirigido.sh` | passou a usar a biblioteca |
