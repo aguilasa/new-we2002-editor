@@ -451,6 +451,7 @@ new-we2002-editor/
 │   │   ├── vmt.md                    ← WTE-TASK-24
 │   │   ├── campos.tsv, campos.md     ← WTE-TASK-25 (nome → deslocamento)
 │   │   ├── arranque.tsv, arranque.md ← WTE-TASK-25 (os 18 FormCreate/FormShow)
+│   │   ├── auxiliares.tsv, .md       ← WTE-TASK-25 (as rotinas nao publicadas)
 │   │   ├── spec/                     ← WTE-TASK-23 a 33
 │   │   ├── golden.md                 ← WTE-TASK-34
 │   │   ├── divergencias.md           ← WTE-TASK-35
@@ -460,6 +461,7 @@ new-we2002-editor/
 │   │   ├── check_fase1.py            ← WTE-TASK-09
 │   │   ├── dump_campos.py            ← WTE-TASK-25
 │   │   ├── dump_arranque.py          ← WTE-TASK-25
+│   │   ├── dump_auxiliares.py        ← WTE-TASK-25
 │   │   ├── check_barras.py           ← WTE-TASK-25
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
@@ -633,8 +635,33 @@ constantes do próprio corpo do handler — constante que mude no binário derru
 a conferência em vez de passar.
 
 **E spec medida com veredito `aberto` vale mais que meio corpo escrito.** O
-`lista_equiposChange` chama quatro auxiliares que não são dele, dois deles de
-outra task. Escrever a metade que dá faria o `check_fase2.py` contar o handler
-como "com corpo escrito" — índice afirmando pronto o que está pela metade, que
-é o defeito que a CORR-WTE-049 e a CORR-WTE-051 já pagaram. O `.inc` só entra
+`lista_equiposChange` chama auxiliares que não são dele, parte deles de outra
+task. Escrever a metade que dá faria o `check_fase2.py` contar o handler como
+"com corpo escrito" — índice afirmando pronto o que está pela metade, que é o
+defeito que a CORR-WTE-049 e a CORR-WTE-051 já pagaram. O `.inc` só entra
 quando o corpo inteiro entrar.
+
+**WTE-TASK-25, quarta passagem — a lista desses auxiliares era escrita à mão, e
+por isso estava curta.** A spec listava cinco endereços; medido pelo
+[`dump_auxiliares.py`](../../wte/tools/dump_auxiliares.py), o handler chama
+**treze** rotinas internas. Parte é biblioteca, que uma lista à mão descartaria
+de propósito — mas `0x004050d0` e `0x0040cbc8` carregam dado do jogo, e essas
+não estavam sendo descartadas: não estavam sendo vistas. É a armadilha 11 numa
+população nova: enquanto a fase 4 tiver handler `aberto`, cada um carrega uma
+lista dessas, e lista à mão erra da forma que não aparece.
+
+**Dois encontros novos entre os oráculos, os dois virados guarda.**
+`0x00403388` não recebe offset: pergunta ao `ftell` onde está e, se `posição
+mod 2352 = 2072`, avança 304 — a mesma geometria de setor que o `we2002_core`
+tem pré-somada nos `OFS_*`, só que resolvida em tempo de execução. E
+`0x0040cbc8` varre a tabela de offsets a partir de `0x004231a0`, exatamente
+onde a [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) a registrou por outro
+caminho. As duas afirmações são decodificadas do corpo das próprias rotinas a
+cada `make -C wte check`, e a segunda confronta o `offsets.tsv` em vez de
+repetir o número.
+
+**Achado que vai para a WTE-TASK-35:** o que parecia decodificador de nome é
+**filtro**. As duas tabelas que `0x0040b2d8` indexa são identidade, então a
+rotina copia letra, dígito, `.` e espaço, troca byte acima de `z` por `?` e
+descarta o resto — enquanto o `we2002_core` devolve espaço para byte
+desconhecido. Divergência de tela, não de gravação.

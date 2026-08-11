@@ -354,3 +354,104 @@ e não simula comportamento.
   - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
   - a remoção do `--show`;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).
+
+---
+
+- **Executado em:** 2026-08-11 — **quarta passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  As rotinas internas que travavam as três specs de lista, medidas — e a
+  medição virou ferramenta, não anotação.
+
+  **A tabela de auxiliares escrita à mão estava curta, e essa é a lição da
+  passagem.** A spec do `lista_equiposChange` listava cinco endereços. Medido
+  pelo [`dump_auxiliares.py`](../../wte/tools/dump_auxiliares.py), que percorre
+  o corpo instrução a instrução e separa chamada interna de importada pelo
+  `jmp DWORD PTR ds:<IAT>`, o handler chama **treze**. Parte da diferença é
+  rotina de biblioteca que uma lista à mão descartaria de propósito — mas
+  `0x004050d0` e `0x0040cbc8` carregam dado do jogo, e essas não estavam sendo
+  descartadas: **não estavam sendo vistas**. Tabela de auxiliar à mão erra da
+  forma que não aparece: o que falta na lista não é procurado, e a spec fica
+  parecendo completa. Vale para toda a fase 4, onde cada handler aberto tem uma
+  lista dessas.
+
+  **Os dois oráculos se encontraram mais duas vezes, e as duas viraram guarda
+  de build.** `0x00403388` não recebe offset: pergunta ao `ftell` onde está e,
+  se `posição mod 2352 = 2072`, avança 304 — 24 de cabeçalho mais 2048 de
+  dados, 280 de EDC/ECC mais os 24 do cabeçalho seguinte. É a **mesma
+  geometria** que o `we2002_core` tem pré-somada nos `OFS_*`; o original a
+  calcula em tempo de execução. E `0x0040cbc8` varre a tabela de offsets a
+  partir de `0x004231a0`, que é exatamente onde a
+  [WTE-TASK-06](/docs/tasks/06-mapa-de-offsets.md) a registrou — duas medições
+  independentes, o mesmo endereço. As duas afirmações são decodificadas do
+  corpo das próprias rotinas a cada `make -C wte check`, como o
+  `check_barras.py` da passagem anterior, e a segunda confronta o `offsets.tsv`
+  em vez de repetir o número.
+
+  **E o "decodificador de nome" não decodifica.** `0x0040b2d8` indexa duas
+  tabelas em `.data` pelo byte lido, e a leitura barata seria "tabelas de
+  tradução, como o `KanjiToAscii`". Medido, as duas são **identidade**: a
+  rotina copia letra, dígito, `.` e espaço, troca qualquer byte acima de `z`
+  por `?` e descarta o resto. Contra o `we2002_core`, que devolve espaço para
+  byte desconhecido, é divergência de **tela**, não de gravação — entrada para
+  a [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md). A conferência
+  aborta se as tabelas deixarem de ser identidade, porque nesse dia a palavra
+  "filtro" fica errada.
+
+  `0x0040b188` ficou inteira: apaga a camisa marcada, acha a nova por
+  `FindComponent('dorsal' + N)` e a destaca, com os nomes de propriedade vindos
+  dos símbolos importados do `vcl60.bpl` em vez de inferência. É a outra
+  metade da história da [`crash-causa.md`](../../wte/re/crash-causa.md) — a
+  rotina que grava o ponteiro `0x004335e4` sem conferir.
+
+- **Por que o Pascal continua não escrito:**
+
+  Não é mais falta de medição no caso do `lista_jugadores_1Change` — a spec
+  dele basta para escrever o corpo. O que falta é **onde mora um auxiliar que
+  não é handler**: `wte/src/impl/` guarda um `.inc` por handler, e
+  `0x0040b188` é chamada por dois. Inventar uma casa agora, para uma rotina só,
+  é decidir por toda a fase 4 com uma amostra; a
+  [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) traz mais auxiliares
+  compartilhados e decide os dois juntos. Os outros dois handlers de lista
+  continuam presos em medição mesmo: `0x00404374` (881 B, a aritmética do nome)
+  e `0x00403f00` (328 B, o número de camisa) não foram lidos.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_auxiliares.py` — o descobridor e as três conferências
+  - `wte/tools/test_dump_auxiliares.py` — 19 testes, com PE sintético (444 no
+    total, verdes)
+  - `wte/re/auxiliares.md`, `wte/re/auxiliares.tsv` — 91 rotinas, 47 chamadas
+    diretamente pelos 28 handlers do grupo
+  - `wte/re/spec/MainForm.lista_equiposChange.md`,
+    `MainForm.lista_equipos_2Change.md`,
+    `MainForm.lista_jugadores_1Change.md` — a medição, e duas seções que saíram
+    de `nao medido` para `disassembly lido`
+  - `docs/tasks/progresso.md`, este arquivo
+
+- **Problemas encontrados:**
+  1. Os testes de guarda passavam pelo motivo errado. O PE sintético tinha uma
+     `.text` de uma página, e `0x00403388` e `0x0040cbc8` caem fora dela: as
+     três conferências abortavam com "fora das secoes" em vez da divergência
+     plantada, e `assertRaises` não vê diferença. Guarda testada contra o erro
+     errado é guarda não testada.
+  2. A primeira redação do doc comparava "5 à mão contra 13 medidos" como se
+     fossem a mesma população. Não são — parte dos 13 é biblioteca. O texto
+     passou a dizer qual é a diferença que importa: as duas que carregam dado
+     do jogo.
+  3. A descoberta precisa percorrer instrução a instrução, não varrer o byte
+     `0xe8`. `mov eax,0x40b2e8` tem um `0xe8` no operando, e a varredura de
+     byte inventaria uma chamada com alvo lido do lugar errado. Virou teste.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - `0x00404374` e `0x00403f00` medidos, e daí o Pascal dos três handlers de
+    lista;
+  - a casa dos auxiliares compartilhados, com a WTE-TASK-26;
+  - os 6 handlers de carga sem spec: `mostrar_jugadorClick`,
+    `mostrar_estrategiaClick`, `lista_formacionesClick`, `ComboBoxDrawItem`,
+    `boton_dialogo_texClick`, `boton_mcrClick`;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, medidos e `aberto`;
+  - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
+  - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
+  - a remoção do `--show`;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).

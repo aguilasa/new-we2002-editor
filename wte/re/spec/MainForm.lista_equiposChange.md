@@ -109,18 +109,49 @@ com `dorsal` + N, e no mesmo handler de carga de time. Aqui os dez existem.
 
 ## Notas
 
-**Veredito `aberto`: a spec está medida, o Pascal não está escrito.** Falta
-resolver três auxiliares que este handler chama e que não são dele:
+**Veredito `aberto`: a spec está medida, o Pascal não está escrito.** Faltam
+auxiliares que este handler chama e que não são dele.
 
-| Endereço | O que faz | De quem é |
-|---|---|---|
-| `0x0040b2d8` | preenche `lista_jugadores_1` com os 23 nomes | próxima passagem da WTE-TASK-25 |
-| `0x00405270`, `0x004056c8` | desenham bandeira e uniforme 2D | [WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md) |
-| `0x0040b0b4`, `0x0040b188` | ainda sem leitura | próxima passagem |
+**A tabela que estava aqui listava cinco endereços, e estava curta.** Ela era
+escrita à mão; medido pelo
+[`dump_auxiliares.py`](../../tools/dump_auxiliares.py), este handler chama
+**treze** rotinas internas. Parte da diferença é rotina de biblioteca, que a
+tabela à mão descartaria de propósito — mas `0x004050d0` e `0x0040cbc8`
+carregam dado do jogo, e essas não estavam sendo descartadas: não estavam sendo
+vistas. A lista viva está em [`../auxiliares.md`](../auxiliares.md), com o
+papel de cada uma e o que falta ler.
+
+O que ainda trava o corpo:
+
+| Endereço | Situação |
+|---|---|
+| `0x0040b2d8` | forma medida — ver abaixo; a aritmética do nome passa por `0x00404374`, não lida |
+| `0x0040b0b4` | medida, mas depende de `0x00403f00` (número de camisa), não lida |
+| `0x00405270`, `0x004056c8` | bandeira e uniforme 2D — [WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md) |
+| `0x0040cbc8` | percorre a tabela de offsets; chama `0x00403c0c`, não lida |
 
 Escrever metade do corpo agora deixaria o `check_fase2.py` contando o handler
 como "com corpo escrito" — o índice afirmaria pronto o que está pela metade, e
 é justamente esse tipo de mentira de índice que o projeto já pagou duas vezes.
+
+**A lista de jogadores não é traduzida, é filtrada.** `0x0040b2d8` recebe a
+lista de times e a lista de jogadores, esvazia a segunda e a preenche com 23
+nomes lidos da imagem. Ele indexa duas tabelas em `.data` pelo próprio byte
+lido, e a leitura barata seria "são tabelas de tradução, como o `KanjiToAscii`
+do `we2002_core`". Medido, as duas são **identidade**: a rotina copia letra,
+dígito, `.` e espaço, troca **qualquer byte acima de `z` por `?`** e descarta o
+resto. Contra o `we2002_core`, que devolve espaço para byte desconhecido, isso
+é divergência de tela — não de gravação. Conferido a cada build pelo
+`dump_auxiliares.py`, que aborta se as tabelas deixarem de ser identidade.
+
+**E a fronteira de setor é calculada, não tabelada.** A leitura de nome passa
+por `0x00403388`, que não recebe offset: pergunta ao `ftell` onde está e, se
+`posição mod 2352 = 2072`, avança 304. É a mesma geometria que o `we2002_core`
+tem pré-somada nos `OFS_*` — o original a resolve em tempo de execução. Terceira
+vez que os dois oráculos se encontram no mesmo lugar por caminhos diferentes,
+depois da `OFS_TEAM_BARS` acima e da tabela de offsets que `0x0040cbc8` varre a
+partir de `0x004231a0`, exatamente onde a
+[WTE-TASK-06](../../../docs/tasks/06-mapa-de-offsets.md) a registrou.
 
 **O `95` não é o número de times, é o índice do modelo de Master League.** O
 item 95 do combo é `95 Master L. `, o time-modelo que a ML usa ao criar clube;

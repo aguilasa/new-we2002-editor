@@ -52,10 +52,14 @@ League, não o número de times.
 
 ## Bytes tocados
 
-**Nenhum** neste corpo. A leitura da imagem acontece dentro de `0x0040b2d8`,
-que é rotina compartilhada e ainda não foi medida.
+**Nenhum** neste corpo, e nenhuma **escrita** em `0x0040b2d8` — a rotina
+compartilhada só lê. A forma dela está medida em
+[`../auxiliares.md`](../auxiliares.md): recebe a lista de times e a lista de
+jogadores, esvazia a segunda e a preenche com 23 nomes lidos da imagem,
+atravessando fronteira de setor por `0x00403388`. A aritmética que localiza
+cada nome passa por `0x00404374`, 881 bytes, ainda não lida.
 
-**Evidência:** nao medido
+**Evidência:** disassembly lido
 
 ## Pré-condições
 
@@ -77,6 +81,11 @@ Não trata.
 `0x0040b2d8` (preencher lista de jogadores) e de `0x00405468` (desenhar
 bandeira, que é da
 [WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md)).
+
+**Os dois argumentos de `0x0040b2d8` são combos, e é isso que explica os dois
+chamadores.** O primeiro é a lista de times de onde sai o índice, o segundo é a
+lista de jogadores que ele esvazia e enche — este handler passa o par reserva,
+o `lista_equiposChange` passa o par titular. Uma rotina, duas metades da tela.
 
 Os campos citados sem nome no pseudocódigo acima são os que o corpo alcança por
 deslocamento e que ainda não foram cruzados um a um com o
