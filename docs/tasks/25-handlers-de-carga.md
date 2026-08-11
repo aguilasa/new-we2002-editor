@@ -99,7 +99,8 @@ e não simula comportamento.
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec no gabarito da WTE-TASK-23
+- [ ] Todo handler do grupo com spec no gabarito da WTE-TASK-23 — **19 dos 28**
+      (2026-08-11); os 18 `FormCreate`/`FormShow` estão todos lá
 - [ ] Estado interno batendo com o `we2002_core` após carga
 - [ ] Tela conferida contra o original para pelo menos 3 times distintos
 - [x] Medido **o que** o grupo escreve na imagem, e que não escreve mais que
@@ -175,3 +176,97 @@ e não simula comportamento.
     senão os 17 formulários deixam de ser alcançáveis;
   - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`);
   - quais controles recebem `$00ffb676` no `FormShow`.
+
+---
+
+- **Executado em:** 2026-08-11 — **segunda passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  Fechou a linha "`FormCreate` / `FormShow` — 18 endereços" da tabela de alvos.
+  Os 18 têm spec, 15 têm Pascal, e o que sobrou aberto sobrou com a razão
+  escrita.
+
+  **A ferramenta que faltava era o mapa de campos, e ele quase saiu errado.**
+  Todo handler do `.exe` referencia controle por deslocamento
+  (`mov eax,[ebx+0x33c]`), e a derivação barata seria a ordem dos `object` no
+  `.dfm`. Medido: essa regra acerta **73 de 440** campos — no `MainForm`,
+  **zero de 116**. A ordem do `.dfm` é a de criação, a dos campos é a da
+  declaração no `.h`, e o C++Builder não as mantém em sincronia. O mapa certo
+  vem da *published field table* que o VMT aponta em **-56**, irmã da published
+  method table da WTE-TASK-04 e viva pelo mesmo motivo: sem ela o formulário
+  não carrega. Está em [`dump_campos.py`](../../wte/tools/dump_campos.py) →
+  `wte/re/campos.tsv`, e é o que torna legível todo o resto da fase 4.
+
+  **Os 18 não são todos triviais, e a medição é que diz.**
+  [`dump_arranque.py`](../../wte/tools/dump_arranque.py) casa o corpo de cada um
+  contra um padrão de bytes e os separa em quatro formas: **11** são uma
+  chamada só a `TControl::SetColor` sobre a própria instância, **1** é um `ret`
+  vazio (`ficha_about`), **1** é `BitBtn2.SetFocus` (`ficha_enlaza.FormShow`,
+  que foca o botão *Não* — a fase 6 pede isso, e aqui já vem do original), e
+  **5** são compostos. Padrão que deixe de casar vira `composto` sozinho, nunca
+  classificação errada em silêncio.
+
+  Com isso o **achado 3 da WTE-TASK-12 fechou**: a hipótese "é o `FormCreate`
+  que pinta" estava certa, e a heurística de 6 formulários era piso — são
+  **13**. O `MainForm` é a exceção: quem o pinta é o `FormShow`, e os três
+  alvos de `$00ffb676` estavam na lista de pendências desta task — são o
+  próprio `MainForm`, o `cuadro_dialogo_we` e o `grupo_barras`. Medidos e
+  implementados; a janela do port deixou de ser cinza.
+
+  `MainForm.FormCreate` monta as seis pastas de asset, e bate com o que a
+  WTE-TASK-08 já tinha medido pelo lado do consumo.
+
+  **A fração da §4.4 estava sendo medida com uma população só.** O mecanismo de
+  `src/impl/*.inc` da primeira passagem tirava o corpo do `.pas` gerado (que
+  encolhe) e o punha num `.inc` que o `check_fase2.py` não contava — então a
+  fração **subia** a cada handler implementado. Com os 303 na conta ela cai de
+  95,9% para **93,0%**, que é o número honesto, e daqui em diante cai de novo a
+  cada corpo escrito. É o erro da [CORR-WTE-051](/docs/tasks/CORR-WTE-051.md)
+  outra vez, e por isso agora há guarda: o `check_fase2.py` **reprova** se a
+  frase da §4.4 do plano não trouxer a fração medida no dia.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_campos.py` + `wte/re/campos.tsv`, `wte/re/campos.md` — o
+    mapa de campos, com três conferências que abortam
+  - `wte/tools/dump_arranque.py` + `wte/re/arranque.tsv`, `wte/re/arranque.md`
+    — a classificação dos 18, com o decodificador x86 do `dump_units.py`
+    copiado (o `MainForm.FormShow` só tem outro handler 64 KB adiante)
+  - `wte/re/spec/` — 17 specs novas: 14 `trivial`, 1 `implementado`, 2
+    `aberto`; `MainForm.FormShow.md` atualizada
+  - `wte/src/impl/` — 15 `.inc` novos e 13 `.uses`
+  - `wte/src/we2002_estado.pas` — `RaizDosAssets`, `ResolveDiretorios` e as
+    seis pastas de asset
+  - `wte/tools/check_fase2.py` + `test_check_fase2.py` — os `.inc` na conta,
+    a guarda da §4.4, 2 testes novos (19 no total)
+  - `wte/tools/dfm2lfm.py` — o `{$I}` no comentário de cabeçalho virava
+    `Warning: (2005) Comment level 2` nas 18 unidades
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/visual.md` achado 3
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Problemas encontrados:**
+  1. A ordem do `.dfm` **não** é a ordem dos campos. Descoberto porque o
+     `MainForm.FormCreate` sairia guardando `dorsal4`, `dorsal22` e `dorsal23`
+     em global — leitura que parece plausível e é falsa. O certo é `bandera`,
+     `home1`, `home2`, e a diferença só apareceu ao ler a field table.
+  2. O `extent` por "até o próximo handler publicado" mede 64.684 bytes para o
+     `MainForm.FormShow`. Sem o decodificador de instrução, o inventário dele
+     traria código de outra função.
+  3. A guarda do `spec_index.py` pegou um `__fastcall` que eu tinha escrito em
+     prosa, na spec do `ficha_about`. Ela está certa: a proibição é de token,
+     não de intenção.
+  4. `conferir_plano` rodava antes das outras conferências e sequestrava a
+     mensagem de erro dos testes de árvore quebrada — passou para o fim.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - os 9 handlers de carga que sobram: `lista_equiposChange`,
+    `lista_equipos_2Change`, `lista_jugadores_1Change`, `mostrar_jugadorClick`,
+    `mostrar_estrategiaClick`, `lista_formacionesClick`, `ComboBoxDrawItem`,
+    `boton_dialogo_texClick`, `boton_mcrClick` — 19 dos 28 do grupo têm spec;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate` estão medidos e
+    `aberto`: o corpo depende de onde mora o estado do editor 2D, que é decisão
+    da WTE-TASK-26 e da 32, não desta;
+  - a conferência de tela para 3 times e o dump de estado contra o `we2002_core`;
+  - a decisão medida sobre `OnChange` disparar em `ItemIndex` na LCL;
+  - a remoção do `--show`, que só sai depois da navegação real;
+  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`).

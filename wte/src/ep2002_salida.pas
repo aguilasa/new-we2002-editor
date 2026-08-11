@@ -12,7 +12,7 @@
   registra o proprio nome (secao 4.3 do plano); `REStub` vem de
   `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
   porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
-  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  assinatura mais um $I para `impl/<unidade>.<handler>.inc`: o corpo e da fase 4,
   vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
   Ver `wte/src/impl/README.md`.
 }
@@ -53,11 +53,7 @@ implementation
 
 {$R ../forms/ep2002_salida.lfm}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_salida.FormCreate(Sender: TObject);
-begin
-  REStub('ficha_salida.FormCreate');
-end;
-{$POP}
+{$I impl/ep2002_salida.FormCreate.inc}
 
 end.

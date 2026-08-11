@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2384 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2325 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9152** |
-| Escrito à mão | 3 | 386 |
-| **Total** | | **9538** |
+| **Gerado, subtotal** | | **9093** |
+| Escrito à mão | 20 | 689 |
+| **Total** | | **9782** |
 
-**96.0% do Pascal da casca é saída de gerador.**
+**93.0% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -59,6 +59,23 @@ Escrito à mão, linha por linha:
 
 | Arquivo | Linhas | O que é |
 |---|---|---|
+| `src/impl/ep2002_about.FormCreate.inc` | 13 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_creditos_equipo.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_dorsal.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_enlaza.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_enlaza.FormShow.inc` | 14 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_info.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_info2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_info3.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_info4.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_jugador.FormCreate.inc` | 54 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.FormShow.inc` | 49 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_movertodos.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_salida.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_warning.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_warning_2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/retrace.pas` | 125 | o registrador de disparo (WTE-TASK-11) |
 | `src/wtemain.pas` | 230 | auto-create, `--show` e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 31 | programa principal (WTE-TASK-02) |
@@ -67,7 +84,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 98.9% — e passa a medir bitmap, não geração de código.
+fração sobe para 98.1% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -86,32 +103,37 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_mainform.pas` | 35 |
+| `src/ep2002_mainform.pas` | 34 |
 | `src/ep2002_color.pas` | 17 |
 | `src/ep2002_estrategia.pas` | 14 |
-| `src/ep2002_jugador.pas` | 11 |
-| `src/ep2002_dorsal.pas` | 3 |
-| `src/ep2002_about.pas` | 2 |
-| `src/ep2002_enlaza.pas` | 2 |
-| `src/ep2002_creditos_equipo.pas` | 1 |
+| `src/ep2002_jugador.pas` | 10 |
+| `src/ep2002_dorsal.pas` | 2 |
+| `src/ep2002_about.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| `src/ep2002_info.pas` | 1 |
-| `src/ep2002_info2.pas` | 1 |
-| `src/ep2002_info3.pas` | 1 |
-| `src/ep2002_info4.pas` | 1 |
-| `src/ep2002_movertodos.pas` | 1 |
-| `src/ep2002_salida.pas` | 1 |
-| `src/ep2002_warning.pas` | 1 |
-| `src/ep2002_warning_2.pas` | 1 |
-| _com corpo escrito_ | 2 |
+| _com corpo escrito_ | 17 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
 A conta continua fechando por soma: cada handler aparece uma vez, de uma
 das duas formas.
 
+- `MainForm.FormCreate`
 - `MainForm.FormShow`
 - `MainForm.boton_dialogo_weClick`
+- `ficha_about.FormCreate`
+- `ficha_creditos_equipo.FormCreate`
+- `ficha_dorsal.FormCreate`
+- `ficha_enlaza.FormCreate`
+- `ficha_enlaza.FormShow`
+- `ficha_info.FormCreate`
+- `ficha_info2.FormCreate`
+- `ficha_info3.FormCreate`
+- `ficha_info4.FormCreate`
+- `ficha_movertodos.FormCreate`
+- `ficha_salida.FormCreate`
+- `ficha_warning.FormCreate`
+- `ficha_warning_2.FormCreate`
+- `jugador.FormCreate`
 
 ---
 

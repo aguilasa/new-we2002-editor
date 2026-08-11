@@ -44,14 +44,46 @@ var
   Jogo: TDatabase;
   ImagemAberta: string = '';
 
-{ Caminho do `data/dat.bin`. Vazio quando nao se acha nenhum.
+  { As seis pastas de asset, montadas pelo `MainForm.FormCreate` (0x004107c8).
 
-  O original resolve por `GetCurrentDir()` e por isso exige ser clicado de
-  dentro da propria pasta -- e dai vem a mensagem `The file "dat.bin" must be
-  in the "data" directory`. Reproduzir a dependencia do diretorio corrente
-  seria reproduzir um defeito de empacotamento; aqui se procura, na ordem,
-  `$WTE_ASSETS_DIR`, a pasta ao lado do executavel, e a arvore de fonte.
-  A resolucao definitiva (prefixo instalado) e da WTE-TASK-39. }
+    No original sao seis globais de AnsiString, medidos na WTE-TASK-08
+    (`wte/re/assets.md` secao 2) e reconfirmados pelo `wte/re/arranque.md`:
+
+      0x00432e6c  <cwd>\image              base das quatro pastas de imagem
+      0x00432e70  <cwd>\image\barba
+      0x00432e74  <cwd>\image\pelo
+      0x00432e78  <cwd>\image\banderas
+      0x00432e7c  <cwd>\image\uniformes2d
+      0x00432e80  <cwd>\data               o `dat.bin`
+
+    Vazias enquanto o `MainForm.FormCreate` nao rodou. Quem le asset e a fase
+    5 (WTE-TASK-31, 32); aqui elas so existem e sao montadas na mesma ordem. }
+  DirImage: string = '';
+  DirBarba: string = '';
+  DirPelo: string = '';
+  DirBanderas: string = '';
+  DirUniformes2d: string = '';
+  DirData: string = '';
+
+{ Monta as seis pastas acima. Idempotente.
+
+  DIVERGENCIA DELIBERADA, para a WTE-TASK-35: o original monta os seis a
+  partir de `GetCurrentDir()`, e por isso exige ser clicado de dentro da
+  propria pasta -- e dai vem a mensagem `The file "dat.bin" must be in the
+  "data" directory`. Reproduzir a dependencia do diretorio corrente seria
+  reproduzir um defeito de empacotamento. Aqui a raiz sai de `RaizDosAssets`;
+  os seis nomes, a ordem e o encadeamento (os quatro de imagem penduram em
+  `image`, e `data` pendura na raiz) sao os do original. }
+procedure ResolveDiretorios;
+
+{ Raiz que contem `image/` e `data/`. Vazia quando nao se acha nenhuma.
+
+  Procura, na ordem, `$WTE_ASSETS_DIR`, a pasta ao lado do executavel, e a
+  arvore de fonte. A resolucao definitiva (prefixo instalado) e da
+  WTE-TASK-39. }
+function RaizDosAssets: string;
+
+{ Caminho do `data/dat.bin`. Vazio quando nao se acha nenhum. }
 function CaminhoDatBin: string;
 
 { Injeta os sete setores, se ainda nao estiverem la. Devolve o numero de
@@ -71,7 +103,7 @@ implementation
 uses
   Classes;
 
-function CaminhoDatBin: string;
+function RaizDosAssets: string;
 var
   candidatos: array[0..2] of string;
   i: Integer;
@@ -86,12 +118,41 @@ begin
   begin
     if candidatos[i] = '' then
       Continue;
-    Result := IncludeTrailingPathDelimiter(candidatos[i])
-              + 'data' + DirectorySeparator + 'dat.bin';
-    if FileExists(Result) then
+    Result := IncludeTrailingPathDelimiter(candidatos[i]);
+    if FileExists(Result + 'data' + DirectorySeparator + 'dat.bin') then
       Exit;
   end;
   Result := '';
+end;
+
+procedure ResolveDiretorios;
+var
+  raiz: string;
+begin
+  raiz := RaizDosAssets;
+  if raiz = '' then
+    Exit;
+  { A ordem e o encadeamento sao os do original: `image` sai da raiz, os quatro
+    seguintes saem de `image`, e `data` sai da raiz de novo. }
+  DirImage       := raiz + 'image';
+  DirBarba       := DirImage + DirectorySeparator + 'barba';
+  DirPelo        := DirImage + DirectorySeparator + 'pelo';
+  DirBanderas    := DirImage + DirectorySeparator + 'banderas';
+  DirUniformes2d := DirImage + DirectorySeparator + 'uniformes2d';
+  DirData        := raiz + 'data';
+end;
+
+function CaminhoDatBin: string;
+begin
+  { Chamavel antes do `FormCreate` -- o `InjetaPatchDeArranque` a usa, e o
+    `wte/tests/` a usa sem formulario nenhum. }
+  if DirData = '' then
+    ResolveDiretorios;
+  if DirData = '' then
+    Exit('');
+  Result := DirData + DirectorySeparator + 'dat.bin';
+  if not FileExists(Result) then
+    Result := '';
 end;
 
 function InjetaPatchDeArranque(const imagem: string): Integer;

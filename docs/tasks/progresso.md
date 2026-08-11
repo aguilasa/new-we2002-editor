@@ -243,8 +243,8 @@ conferível.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **2 de 96 têm arquivo**
-      (2026-08-11), as duas ainda com veredito `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **19 de 96 têm arquivo**
+      (2026-08-11): 14 `trivial`, 1 `implementado`, 4 ainda `aberto`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -449,6 +449,8 @@ new-we2002-editor/
 │   │   ├── fase-3.md                 ← WTE-TASK-20 (os valores batem?)
 │   │   ├── fase-3-fechamento.md      ← WTE-TASK-21 (quem escreveu o código?)
 │   │   ├── vmt.md                    ← WTE-TASK-24
+│   │   ├── campos.tsv, campos.md     ← WTE-TASK-25 (nome → deslocamento)
+│   │   ├── arranque.tsv, arranque.md ← WTE-TASK-25 (os 18 FormCreate/FormShow)
 │   │   ├── spec/                     ← WTE-TASK-23 a 33
 │   │   ├── golden.md                 ← WTE-TASK-34
 │   │   ├── divergencias.md           ← WTE-TASK-35
@@ -456,6 +458,8 @@ new-we2002-editor/
 │   ├── tools/
 │   │   ├── dfm_extract.py            ← WTE-TASK-03
 │   │   ├── check_fase1.py            ← WTE-TASK-09
+│   │   ├── dump_campos.py            ← WTE-TASK-25
+│   │   ├── dump_arranque.py          ← WTE-TASK-25
 │   │   ├── dfm2lfm.py                ← WTE-TASK-10
 │   │   ├── gen_tables_pas.py         ← WTE-TASK-16
 │   │   ├── port_database_pas.py      ← WTE-TASK-17
@@ -590,3 +594,26 @@ round-trip **contra o original** (270 B em 4 faixas na europeia, 1.249 B em 15
 na japonesa) e há teste exigindo que esse número seja maior que zero. Todo
 critério da forma "os dois lados concordam" precisa do par: concordam, **e**
 fizeram alguma coisa.
+
+**WTE-TASK-25 — a ordem do `.dfm` não é a ordem dos campos, e derivar dali é o
+erro que parece certo.** Todo handler do `.exe` referencia controle por
+deslocamento, e a derivação barata seria "primeiro `object` do `.dfm` no
+primeiro campo". Medido pelo
+[`dump_campos.py`](../../wte/tools/dump_campos.py): essa regra acerta **73 de
+440**, e no `MainForm` **zero de 116**. A ordem do `.dfm` é a de criação, a dos
+campos é a da declaração no `.h`. O mapa certo sai da *published field table*
+que o VMT aponta em **-56** — irmã da published method table da WTE-TASK-04, e
+viva pelo mesmo motivo: sem ela o formulário não carrega. É a armadilha 1 por
+outro caminho, e sem a field table o `MainForm.FormCreate` teria sido lido
+guardando `dorsal4`, `dorsal22` e `dorsal23` em global, quando o que ele guarda
+é `bandera`, `home1` e `home2`.
+
+**E a fração da §4.4 estava medindo duas populações diferentes.** O mecanismo de
+`wte/src/impl/*.inc` tira o corpo do `.pas` gerado — que encolhe — e o põe num
+`.inc` que o `check_fase2.py` não contava: a fração **subia** a cada handler
+implementado. Com os 303 na conta ela cai de 95,9% para **93,0%**, e daqui em
+diante cai de novo a cada corpo escrito, que é o sinal certo. É a
+[CORR-WTE-051](/docs/tasks/CORR-WTE-051.md) de novo, e das duas vezes quem
+achou foi revisão. Agora há guarda: o `check_fase2.py` **reprova** se a frase da
+§4.4 do plano não trouxer a fração medida no dia — número em documento de fonte
+de verdade passou a ser falha de build, como os quatro da WTE-TASK-09.

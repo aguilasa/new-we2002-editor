@@ -12,7 +12,7 @@
   registra o proprio nome (secao 4.3 do plano); `REStub` vem de
   `retrace.pas`, da WTE-TASK-11 -- a unidade nao pode se chamar `restub`,
   porque o nome colidiria com o da rotina. Com corpo escrito, sai como a
-  assinatura mais `{$I impl/<unidade>.<handler>.inc}`: o corpo e da fase 4,
+  assinatura mais um $I para `impl/<unidade>.<handler>.inc`: o corpo e da fase 4,
   vem da spec de `wte/re/spec/`, e por isso mora fora deste arquivo gerado.
   Ver `wte/src/impl/README.md`.
 }
@@ -23,7 +23,8 @@ unit ep2002_jugador;
 interface
 
 uses
-  Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace;
+  Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
+  Graphics;
 
 type
   Tjugador = class(TForm)
@@ -349,12 +350,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.FormCreate(Sender: TObject);
-begin
-  REStub('jugador.FormCreate');
-end;
-{$POP}
+{$I impl/ep2002_jugador.FormCreate.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.flechasapaClick(Sender: TObject; Button: TUDBtnType);

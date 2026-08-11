@@ -24,9 +24,16 @@ Abre o `dat.bin` e guarda o `FILE*` num global (`0x00432e68`), aberto pela
 sessão inteira. Passa pelo mesmo trecho de injeção de setores do
 `boton_dialogo_weClick` — o `.exe` tem os dois trechos duplicados.
 
-Escreve três vezes a cor `$00ffb676` (literais em `0x004250f6`, `0x00425100`,
-`0x0042510a`). É a "cor de fundo posta em tempo de execução" que a fase 2
-deixou pendente; **quais controles a recebem ainda não foi medido.**
+Escreve três vezes a cor `$00ffb676` — RGB(118, 182, 255). É a "cor de fundo
+posta em tempo de execução" que a fase 2 deixou pendente, e **os três alvos
+estão medidos**: o próprio `MainForm` (`ds:0x434360`, em `0x00411738`), o campo
+`0x2f4` = `cuadro_dialogo_we` (`0x00411771`) e o campo `0x30c` = `grupo_barras`
+(`0x004117ab`), pelo [`../campos.tsv`](../campos.tsv).
+
+O original chega ao valor por texto: monta a cadeia `$00ffb676`, passa pelo
+`Graphics::StringToColor` e só então chama `SetColor`. Era a forma de o
+C++Builder escrever literal de cor, não comportamento — o port atribui o valor
+direto.
 
 **Evidência:** disassembly lido
 
@@ -65,5 +72,7 @@ diretório corrente, e reproduzir isso seria reproduzir um defeito de
 empacotamento. O port procura `$WTE_ASSETS_DIR`, depois ao lado do executável.
 A resolução definitiva é da [WTE-TASK-39](../../../docs/tasks/39-empacotamento.md).
 
-**Veredito ainda `aberto`**: falta medir quais controles recebem `$00ffb676`, e
-falta a carga da tela.
+**Veredito ainda `aberto`**: os três alvos de `$00ffb676` já estão medidos e
+implementados, mas falta a carga da tela — popular `lista_equipos` e o resto do
+`MainForm` a partir do banco, que é o que sobra da
+[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md).

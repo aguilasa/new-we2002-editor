@@ -14,6 +14,7 @@ o numero com que a §4.4 do plano se compromete.
 | os 18 formularios | os `.lfm` de `wte/forms/` contra os `.dfm` de `wte/re/dfm/` |
 | os 18 vereditos visuais | a tabela de veredito do `re/visual.md` (WTE-TASK-12) |
 | a fracao gerada | contagem de linha por arquivo, separando gerado de escrito a mao |
+| a fracao **citada no plano** | a frase da §4.4 tem de trazer o numero medido hoje |
 
 **Nao** confere se algum arquivo gerado foi editado a mao: quem faz isso e o
 `dfm2lfm.py --check`, que roda na mesma bateria. Duplicar aqui criaria uma
@@ -47,6 +48,8 @@ PUB = ROOT / "wte" / "re" / "published_methods.tsv"
 VISUAL = ROOT / "wte" / "re" / "visual.md"
 EVENTOS = ROOT / "wte" / "re" / "eventos.md"
 LPR = ROOT / "wte" / "wte.lpr"
+PLANO = ROOT / "docs" / "PLAN-WTE-LAZARUS.md"
+REL_PLANO = "docs/PLAN-WTE-LAZARUS.md"
 OUT = ROOT / "wte" / "re"
 
 GENERATOR = "wte/tools/check_fase2.py"
@@ -130,6 +133,16 @@ def inventario() -> dict:
     if not LPR.exists():
         raise CheckError(f"{LPR} nao existe")
     mao.append(("wte.lpr", linhas_de(LPR)))
+
+    # Os corpos de handler de `src/impl/*.inc` sao Pascal DA CASCA e sao
+    # escritos a mao -- entram aqui, um por um. Deixa-los de fora era o defeito
+    # que a WTE-TASK-25 introduziu junto com o mecanismo: o corpo saia do `.pas`
+    # gerado (que encolhia) e reaparecia num `.inc` que ninguem contava, entao a
+    # fracao SUBIA a cada handler implementado. E o mesmo erro da CORR-WTE-051,
+    # que ja tinha custado uma publicacao errada -- fracao so vale se os dois
+    # lados contarem a mesma populacao.
+    for inc in sorted((SRC / "impl").glob("*.inc")):
+        mao.append((f"src/impl/{inc.name}", linhas_de(inc)))
 
     lfm_estrutura = lfm_hex = 0
     lfms = sorted(FORMS.glob("*.lfm"))
@@ -412,7 +425,10 @@ def montar(inv: dict, por_unidade: dict, com_corpo: list[str],
                            "(WTE-TASK-11)",
     }
     for nome, n in inv["pas_mao"]:
-        w(f"| `{nome}` | {n} | {razao.get(nome, '—')} |")
+        motivo = razao.get(nome)
+        if motivo is None and nome.startswith("src/impl/"):
+            motivo = "corpo de handler, da spec (fase 4)"
+        w(f"| `{nome}` | {n} | {motivo or '—'} |")
     w("")
     w("### O hex dos blobs fica fora da conta, e por quê")
     w("")
@@ -519,6 +535,47 @@ def montar(inv: dict, por_unidade: dict, com_corpo: list[str],
     return "\n".join(L) + "\n"
 
 
+def conferir_plano(inv: dict) -> None:
+    """A fracao da secao 4.4 do plano tem de bater com a medida de hoje.
+
+    Sem esta guarda o numero do plano apodrece em silencio, e apodrece a CADA
+    handler implementado: a fracao se move sozinha, porque o corpo sai do `.pas`
+    gerado e entra num `.inc` escrito a mao. Numero errado em documento de
+    fonte de verdade e o defeito que a CORR-WTE-049 e a CORR-WTE-051 ja
+    pagaram duas vezes -- e as duas vezes ele foi achado por revisao, nao por
+    build.
+
+    A conferencia e de PRESENCA da frase montada aqui, e nao de regex frouxa:
+    frouxa passaria com o numero velho escrito noutro lugar da mesma linha.
+    """
+    if not PLANO.exists():
+        raise CheckError(f"{PLANO} nao existe")
+    esperado = frase_da_fracao(inv)
+    # O plano quebra linha no meio da frase; comparar sobre o texto com os
+    # brancos colapsados evita exigir que ele quebre num lugar especifico.
+    plano = " ".join(PLANO.read_text(encoding="utf-8").split())
+    if " ".join(esperado.split()) not in plano:
+        raise CheckError(
+            f"a §4.4 de {REL_PLANO} nao traz a fracao medida hoje. "
+            f"Esperado, literal:\n       {esperado}")
+
+
+def frase_da_fracao(inv: dict) -> str:
+    """A frase da §4.4, montada a partir da medida -- em pt-BR, como o plano."""
+    pas_ger = sum(n for _, n in inv["pas_gerados"])
+    pas_mao = sum(n for _, n in inv["pas_mao"])
+    ger = pas_ger + inv["lfm_estrutura"]
+    total = ger + pas_mao
+    # pt-BR: vírgula decimal, ponto de milhar -- a mesma grafia do plano.
+    frac = f"{100.0 * ger / total:.1f}".replace(".", ",")
+
+    def mil(n: int) -> str:
+        return f"{n:,}".replace(",", ".")
+
+    return (f"{frac}% do Pascal da casca é saída de gerador** — "
+            f"{mil(ger)} linhas geradas contra {mil(pas_mao)} escritas à mão")
+
+
 def gerar() -> dict[str, str]:
     handlers = ler_tsv()
     inv = inventario()
@@ -526,6 +583,9 @@ def gerar() -> dict[str, str]:
     formularios = conferir_formularios()
     vereditos = conferir_vereditos(formularios)
     n_achados = conferir_eventos()
+    # Por ultimo de proposito: uma arvore quebrada tem de reprovar pela quebra,
+    # e nao pela fracao que a quebra move junto.
+    conferir_plano(inv)
     return {MD_NAME: montar(inv, por_unidade, com_corpo, formularios,
                             vereditos, n_achados, len(handlers))}
 

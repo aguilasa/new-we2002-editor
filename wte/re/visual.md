@@ -171,6 +171,20 @@ econômica — é o único handler que roda antes de a janela aparecer —, **n�
 fato medido. O disassembly desses endereços é da
 [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md).
 
+> **Resolvido em 2026-08-11 pela WTE-TASK-25, e a hipótese estava certa nos dois
+> sentidos — inclusive no de ser piso.** O
+> [`dump_arranque.py`](../tools/dump_arranque.py) leu os 18 `FormCreate` /
+> `FormShow`: **11** deles têm por corpo inteiro uma chamada a
+> `TControl::SetColor` sobre a própria instância, e mais 3 pintam junto com
+> outras coisas. São 13 formulários recolorados, não os 6 da heurística — a
+> tabela por formulário está em [`arranque.md`](arranque.md), com o valor de
+> cada cor. A do `MainForm` não vem do `FormCreate`, e sim do `FormShow`, que
+> pinta a si, ao `cuadro_dialogo_we` e ao `grupo_barras` de `$00ffb676`.
+>
+> O único dos 18 que **não** pinta nada é o `ficha_about`, cujo `FormCreate` é
+> um `ret` — e é por isso que ele é o único formulário que fica com o
+> `clBtnFace` do projeto na tela, nos dois lados.
+
 Os quatro que declaram cor no próprio DFM — `jugador`, `ficha_error` e
 `ficha_error2` em `clNavy`, `ficha_info` em `clSilver` — renderizam certo na
 LCL, o que é a contraprova de que o caminho de cor funciona.

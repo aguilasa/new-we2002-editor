@@ -18,6 +18,18 @@ var
   imagem: string;
 begin
   REMark('MainForm.FormShow');
+  { As tres cores de tempo de execucao. O original monta a cadeia `$00ffb676`,
+    passa pelo `Graphics::StringToColor` e chama `SetColor` tres vezes -- em
+    0x00411738 sobre a propria instancia (`ds:0x434360`), em 0x00411771 sobre o
+    campo 0x2f4 e em 0x004117ab sobre o campo 0x30c, que o `wte/re/campos.tsv`
+    resolve em `cuadro_dialogo_we` e `grupo_barras`. Era o "quais controles
+    recebem $00ffb676" que a primeira passagem da WTE-TASK-25 deixou em aberto.
+
+    Aqui a cadeia nao existe: passar por texto era a forma de o C++Builder
+    escrever literal de cor, nao comportamento. O valor e o mesmo. }
+  Color := $00FFB676;
+  cuadro_dialogo_we.Color := $00FFB676;
+  grupo_barras.Color := $00FFB676;
   if CaminhoDatBin = '' then
   begin
     { O original encerra. Aqui so se avisa: encerrar no `OnShow` levaria a

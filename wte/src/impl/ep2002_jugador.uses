@@ -1,0 +1,6 @@
+# Unidades que os corpos de `impl/ep2002_jugador.*.inc` pedem, alem das que o
+# gerador ja deduz dos componentes e das assinaturas.
+SysUtils       # IntToStr
+Classes        # TComponent
+Graphics       # TColor
+retrace        # REMark

@@ -68,7 +68,7 @@ class Base(unittest.TestCase):
 
         self._antigo = {k: getattr(check_fase2, k) for k in
                         ("ROOT", "SRC", "FORMS", "DFM", "PUB", "VISUAL",
-                         "EVENTOS", "LPR", "OUT")}
+                         "EVENTOS", "LPR", "OUT", "PLANO")}
         check_fase2.ROOT = raiz
         check_fase2.SRC = self.src
         check_fase2.FORMS = self.forms
@@ -78,6 +78,8 @@ class Base(unittest.TestCase):
         check_fase2.EVENTOS = self.re_ / "eventos.md"
         check_fase2.LPR = raiz / "wte" / "wte.lpr"
         check_fase2.OUT = self.re_
+        check_fase2.PLANO = raiz / "docs" / "PLAN-WTE-LAZARUS.md"
+        check_fase2.PLANO.parent.mkdir(parents=True, exist_ok=True)
 
         self.arvore_boa()
 
@@ -85,6 +87,18 @@ class Base(unittest.TestCase):
         for k, v in self._antigo.items():
             setattr(check_fase2, k, v)
         self._tmp.cleanup()
+
+    def escreve_plano(self):
+        """O plano com a frase da §4.4 que a medida da arvore corrente produz.
+
+        A frase sai do proprio `frase_da_fracao`, e nao de um literal: a arvore
+        do fixture nao tem as linhas da arvore real, e fixar o numero aqui
+        obrigaria a mexer no teste a cada componente novo do fixture.
+        """
+        check_fase2.PLANO.write_text(
+            "# plano\n\n**Medido: "
+            + check_fase2.frase_da_fracao(check_fase2.inventario())
+            + ".**\n", encoding="utf-8")
 
     def arvore_boa(self):
         check_fase2.PUB.write_text(TSV, encoding="utf-8")
@@ -103,6 +117,7 @@ class Base(unittest.TestCase):
             LFM.format(form="MainForm"), encoding="utf-8")
         self.escreve_visual(["ficha_dorsal", "MainForm"])
         check_fase2.EVENTOS.write_text(EVENTOS, encoding="utf-8")
+        self.escreve_plano()
 
     def escreve_unidade(self, unidade, form, chaves):
         corpo = "\n".join(f"  REStub('{c}');" for c in chaves)
@@ -200,6 +215,20 @@ class TestArvoreBoa(Base):
 
 
 class TestAborta(Base):
+    def test_plano_com_fracao_velha(self):
+        # A guarda que existe para o numero da §4.4 nao apodrecer em silencio.
+        # Ela apodreceria a CADA handler implementado: o corpo sai do `.pas`
+        # gerado e entra num `.inc` escrito a mao, e a fracao se move sozinha.
+        check_fase2.PLANO.write_text(
+            "# plano\n\n**Medido: 99,9% do Pascal da casca é saída de "
+            "gerador** — 1 linhas geradas contra 1 escritas à mão.**\n",
+            encoding="utf-8")
+        self.assertIn("nao traz a fracao medida hoje", self.erro())
+
+    def test_plano_ausente(self):
+        check_fase2.PLANO.unlink()
+        self.assertIn("nao existe", self.erro())
+
     def test_origem_fora_de_sim_ou_dfm(self):
         # Valor novo na coluna `Original` nao pode cair calado no lado "so
         # DFM": o par publicado no fase-2.md deixaria de ser medida.

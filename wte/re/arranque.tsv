@@ -1,0 +1,19 @@
+endereco	formulario	handler	forma	bytes	resumo
+0x00402bc0	ficha_dorsal	FormCreate	cor	15	Color := $00E68F41
+0x00402c44	ficha_enlaza	FormShow	campo	15	BitBtn2.SetFocus
+0x00402c54	ficha_enlaza	FormCreate	cor	15	Color := $003CDCDC
+0x00402cdc	ficha_warning	FormCreate	cor	15	Color := $003C3CDC
+0x00402d60	ficha_info3	FormCreate	cor	15	Color := $00DCDC3C
+0x00402de4	ficha_about	FormCreate	vazio	1	—
+0x00402e84	ficha_movertodos	FormCreate	cor	15	Color := $003CDCDC
+0x00402f08	ficha_salida	FormCreate	cor	15	Color := $003CDCDC
+0x00402f8c	ficha_info	FormCreate	cor	15	Color := $00DCDC3C
+0x0040422c	ficha_info4	FormCreate	cor	15	Color := $00DCDC3C
+0x00405dcc	ficha_color	FormCreate	composto	116	4 campo(s), 0 cor(es)
+0x00407ce0	jugador	FormCreate	composto	936	3 campo(s), 2 cor(es)
+0x00408d88	ficha_warning_2	FormCreate	cor	15	Color := $003C3CDC
+0x004090fc	estrategia	FormCreate	composto	1351	3 campo(s), 2 cor(es)
+0x0040b034	ficha_creditos_equipo	FormCreate	cor	15	Color := $003CDCDC
+0x004107c8	MainForm	FormCreate	composto	683	3 campo(s), 0 cor(es)
+0x004111d8	MainForm	FormShow	composto	1605	7 campo(s), 0 cor(es)
+0x00420e84	ficha_info2	FormCreate	cor	15	Color := $00DCDC3C
