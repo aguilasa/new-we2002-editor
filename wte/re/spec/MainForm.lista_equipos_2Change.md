@@ -24,14 +24,15 @@ tela move para o titular. 348 bytes contra 1.536: ele faz bem menos.
 
 ```text
 se lista_equipos_2.ItemIndex = -1: sai
-<controle>.Enabled := verdadeiro          ' o primeiro do corpo
-0x0040b2d8(...)                            ' preenche a lista de jogadores reserva
-<lista>.Enabled := verdadeiro ; ItemIndex := 0
-se lista_equipos.ItemIndex >= 0:
+help_team.Enabled := verdadeiro
+0x0040b2d8(lista_equipos_2, lista_jugadores_2)   ' enche a lista do reserva
+lista_jugadores_2.Enabled := verdadeiro ; ItemIndex := 0
+mostrar_jugador_2, mostrar_estrategia_2, pabajo  .Enabled := verdadeiro
+se lista_equipos_1.ItemIndex >= 0:
     os cinco botões de troca (paderecha, paderecha2, paizquierda,
     paizquierda2, paderechaeizquierda) .Enabled := verdadeiro
 se lista_equipos_2.ItemIndex < 95:
-    se lista_equipos_2.ItemIndex <> lista_equipos.ItemIndex:
+    se lista_equipos_2.ItemIndex <> lista_equipos_1.ItemIndex:
         0x00405468(...)                    ' desenha a bandeira do reserva
     senão:
         banderita2.Picture := bandera.Picture
@@ -39,6 +40,15 @@ se lista_equipos_2.ItemIndex < 95:
 senão:
     banderita2.Visible := falso
 ```
+
+**Os controles sem nome foram resolvidos na oitava passagem**, cruzando os
+deslocamentos do corpo com o [`../campos.tsv`](../campos.tsv): `help_team`,
+`lista_jugadores_2`, `mostrar_jugador_2`, `mostrar_estrategia_2` e `pabajo`.
+
+**E uma correção veio junto:** o teste é contra **`lista_equipos_1`**, não
+contra `lista_equipos`. Os dois andam juntos — o `lista_equiposChange` espelha
+a seleção de um no outro —, então o efeito é o mesmo, mas quem o corpo lê é o
+`_1`. A redação anterior era leitura de intenção, não de campo.
 
 O `<>` entre as duas listas é o detalhe que vale registrar: quando os dois
 lados são o **mesmo** time, o original não redesenha — copia a bandeira já
@@ -87,7 +97,16 @@ chamadores.** O primeiro é a lista de times de onde sai o índice, o segundo é
 lista de jogadores que ele esvazia e enche — este handler passa o par reserva,
 o `lista_equiposChange` passa o par titular. Uma rotina, duas metades da tela.
 
-Os campos citados sem nome no pseudocódigo acima são os que o corpo alcança por
-deslocamento e que ainda não foram cruzados um a um com o
-[`../campos.tsv`](../campos.tsv) — a estrutura está medida, a etiqueta de cada
-controle é trabalho da próxima passagem.
+**O Pascal está escrito**, em
+[`../../src/impl/ep2002_mainform.lista_equipos_2Change.inc`](../../src/impl/ep2002_mainform.lista_equipos_2Change.inc),
+e reusa os auxiliares do lado titular — é a mesma `PreencheJogadores`, com a
+outra lista, exatamente como no original, onde `0x0040b2d8` recebe as duas
+listas como argumento e por isso tem dois chamadores.
+
+**Veredito `aberto` até a conferência de tela alcançar o lado reserva.** O
+[`compara_tela.sh`](../../tools/compara_tela.sh) dirige hoje só o combo
+titular; para julgar este handler ele precisa dirigir também o
+`lista_equipos_2` e recortar a metade de baixo da janela. Enquanto isso não
+existir, o corpo está escrito a partir de spec medida e **não** verificado
+contra o original — e foi justamente a conferência de tela que achou os dois
+erros de mapeamento do handler irmão.

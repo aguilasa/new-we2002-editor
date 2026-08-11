@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2412 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2408 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9180** |
-| Escrito à mão | 23 | 1101 |
-| **Total** | | **10281** |
+| **Gerado, subtotal** | | **9176** |
+| Escrito à mão | 24 | 1157 |
+| **Total** | | **10333** |
 
-**89.3% do Pascal da casca é saída de gerador.**
+**88.8% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -74,6 +74,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.aux.inc` | 239 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_equiposChange.inc` | 134 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.lista_equipos_2Change.inc` | 56 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_jugadores_1Change.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_movertodos.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_salida.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
@@ -87,7 +88,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 96.9% — e passa a medir bitmap, não geração de código.
+fração sobe para 96.8% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -106,14 +107,14 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_mainform.pas` | 32 |
+| `src/ep2002_mainform.pas` | 31 |
 | `src/ep2002_color.pas` | 17 |
 | `src/ep2002_estrategia.pas` | 14 |
 | `src/ep2002_jugador.pas` | 10 |
 | `src/ep2002_dorsal.pas` | 2 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 19 |
+| _com corpo escrito_ | 20 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -124,6 +125,7 @@ das duas formas.
 - `MainForm.FormShow`
 - `MainForm.boton_dialogo_weClick`
 - `MainForm.lista_equiposChange`
+- `MainForm.lista_equipos_2Change`
 - `MainForm.lista_jugadores_1Change`
 - `ficha_about.FormCreate`
 - `ficha_creditos_equipo.FormCreate`

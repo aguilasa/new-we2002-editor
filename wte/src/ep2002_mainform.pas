@@ -355,12 +355,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.lista_equipos_2Change(Sender: TObject);
-begin
-  REStub('MainForm.lista_equipos_2Change');
-end;
-{$POP}
+{$I impl/ep2002_mainform.lista_equipos_2Change.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paderechaeizquierdaClick(Sender: TObject);

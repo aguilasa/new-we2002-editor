@@ -855,3 +855,62 @@ e não simula comportamento.
   - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
   - como o original habilita controle, e as duas faixas de arranque sem causa.
 
+---
+
+- **Executado em:** 2026-08-11 — **nona passagem, ainda parcial.**
+
+- **Resumo do que foi feito:**
+
+  `lista_equipos_2Change` em Pascal, e os controles que a spec dele citava sem
+  nome, resolvidos.
+
+  A spec da terceira passagem trazia `<controle>` e `<lista>` no pseudocódigo,
+  porque os deslocamentos não tinham sido cruzados com o
+  [`campos.tsv`](../../wte/re/campos.tsv). Cruzados agora: `help_team`,
+  `lista_jugadores_2`, `mostrar_jugador_2`, `mostrar_estrategia_2` e `pabajo`.
+
+  **E veio uma correção junto:** o teste dos cinco botões de troca é contra
+  **`lista_equipos_1`**, não contra `lista_equipos`. Os dois andam juntos — o
+  handler irmão espelha a seleção de um no outro —, então o efeito é o mesmo,
+  mas quem o corpo lê é o `_1`. A redação anterior era leitura de intenção, não
+  de campo.
+
+  O corpo reusa `PreencheJogadores` do `.aux.inc`, que é o que o original faz:
+  `0x0040b2d8` recebe as duas listas como argumento, e é por isso que ela tem
+  dois chamadores.
+
+- **O que NÃO foi verificado, e como verificar:**
+
+  O veredito fica `aberto` porque o
+  [`compara_tela.sh`](../../wte/tools/compara_tela.sh) dirige hoje só o combo
+  titular. Para julgar este handler ele precisa dirigir também o
+  `lista_equipos_2` e recortar a metade de baixo da janela. Enquanto isso não
+  existir, o corpo está escrito a partir de spec medida e **não conferido
+  contra o original** — e foi exatamente a conferência de tela que achou os
+  dois erros de mapeamento do handler irmão, então isto não é formalidade.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.lista_equipos_2Change.inc`
+  - `wte/re/spec/MainForm.lista_equipos_2Change.md` — os nomes resolvidos e a
+    correção do `lista_equipos_1`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 89,3% → **88,8%**
+
+- **Problemas encontrados:**
+  1. **O Xvfb do `:99` morreu no meio da passagem**, e o `golden_check.sh`
+     falhou com saída vazia e código 1 — sem mensagem, porque o `set -e` o
+     derrubou no primeiro `xdotool`. Não achei a causa; o servidor não é
+     alcançado por nenhum dos `pkill` dos scripts. Restaurado como estava
+     (`Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp`, sem `-auth`, conferido
+     com `xdpyinfo`) e os três gates repassaram. **Fica o achado de
+     ferramenta:** falha do `:99` chega como erro mudo, e um script que depende
+     dele devia dizer "não há `:99`" antes de tentar dirigir janela.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - estender o `compara_tela.sh` ao combo reserva, e daí conferir o
+    `lista_equipos_2Change`;
+  - os 6 handlers de carga sem spec, com os `mostrar_*` escopados em navegação;
+  - a remoção do `--show`, depois deles;
+  - o dump de estado contra o `we2002_core` depois de carga por tela;
+  - `ficha_color.FormCreate` e `estrategia.FormCreate`, dono na 26/32;
+  - como o original habilita controle, e as duas faixas de arranque sem causa.
+
