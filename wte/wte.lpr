@@ -17,7 +17,18 @@ uses
 
 begin
   RequireDerivedFormResource := True;
-  Application.Scaled := True;
+  // NAO religar `Application.Scaled`. A linha veio do gabarito de projeto do
+  // Lazarus e nunca foi argumentada; medida na decima terceira passagem da
+  // WTE-TASK-26, ela fazia a janela sair 1,0421 vez a do projeto -- 544x495
+  // contra os 522x475 do `.lfm` -- e essa razao depende do DPI de fonte da
+  // maquina, entao o tamanho da janela do port nao era nem estavel entre
+  // maquinas.
+  //
+  // O alvo e um Win32 de 2002 sem escala nenhuma, e a fidelidade de geometria
+  // e criterio deste projeto: com a escala ligada, toda regua de pixel media
+  // o DPI junto. Sem ela as coordenadas do `.lfm` valem nos DOIS lados, que e
+  // o que o `compara_tela.sh` precisa.
+  //
   // O TITULO TEM DE SER DIFERENTE DO ORIGINAL. O wte.exe se chama
   // "W11 Team Editor PT by chagas_michel!"; a partir da WTE-TASK-22 os dois
   // rodam no mesmo :99, e os scripts acham janela por titulo e por tamanho.

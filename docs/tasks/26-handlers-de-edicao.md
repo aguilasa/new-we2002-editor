@@ -1492,3 +1492,74 @@ do `--edicao`; e o `iguala_nombres`.
      **qualquer** handler, não só do procurado.
   2. `roms/` continuou intocada: a sondagem rodou sobre cópia em `work/`,
      apagada ao final.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima quarta passagem: a escala saiu, e a
+  ficha abriu na primeira tentativa.**
+
+- **`Application.Scaled := True` foi removido do `wte.lpr`, e a hipótese
+  fechou.** Medida a janela no `:99` depois: **522×475**, que é exatamente o
+  que o `.lfm` declara. Antes eram 544×495. Não sobrou deriva para explicar.
+
+- **A decisão custou menos do que a passagem anterior escreveu, e isso é uma
+  correção minha.** O log da décima terceira dizia que desligar a escala
+  "muda a janela do port para todo mundo, inclusive para o `golden_gui`".
+  **Errado, e conferido antes de mexer:** o `golden_gui.sh` mora em
+  [`tools/`](../../tools/golden_gui.sh), na raiz do repositório, e é do
+  `newWe2002` — o port Qt. O harness de tela deste projeto é o
+  `wte/tools/compara_tela.sh` e o `golden_run_laz.sh`. O alcance da mudança é o
+  `wte` e só.
+
+  E a linha **nunca tinha sido argumentada**: aparecia uma vez no `wte.lpr`, sem
+  task, doc ou comentário que a defendesse. Era gabarito de projeto do Lazarus.
+  Saiu com um comentário no lugar dizendo por que não deve voltar — a razão de
+  fundo é fidelidade: o alvo é um Win32 de 2002 sem escala, e com ela ligada o
+  tamanho da janela do port dependia do DPI de fonte da máquina, o que tornava
+  qualquer régua de pixel dependente de onde rodou.
+
+- **O gate exigido antes de qualquer coisa nova: `compara_tela.sh --edicao`,
+  verde**, e com os mesmos números da segunda passagem — barras
+  `64, 75, 75, 75, 75` nos dois lados, `defesa` de 4 para 6, 4 de 4 ancoradas no
+  dump. A régua que já existia não se mexeu.
+
+- **E aí a sondagem que tinha falhado 21 vezes acertou na primeira.** Clique em
+  `(20, 402)` — que é `GroupBox1(8, 320)` mais `(8, 72)` do `.lfm`, sem
+  correção nenhuma — e o `mostrar_jugadorClick` disparou. A janela
+  `Player characteristics` abriu em 707×273, também o tamanho de projeto.
+
+- **Primeira conferência visual do `PreencheFicha`, e ela passa nos dois pontos
+  que dava para julgar a olho:**
+
+  - os 16 valores de habilidade aparecem (12, 16, 17, 13, 15, 15, 13, 15, 13,
+    13, 17, 13, 13, 12, 14, 18);
+  - **a regra do amarelo está certa**: os três `17, 17, 18` saem amarelos e o
+    `16` sai branco. `17` é cru 5 e `16` é cru 4, que é exatamente o `>= 5` do
+    `0x00406fb4`. Um erro de fronteira ali (`> 5` em vez de `>= 5`) teria
+    passado despercebido em qualquer teste que não olhasse a cor.
+  - Altura `183` e Ano `32`, os dois campos numéricos.
+
+- **Um achado que a captura entregou de graça, e que muda o que "deixei vazio"
+  significa.** Os rótulos dos campos enumerados **não aparecem em branco**:
+  mostram `Gl`, `A`, `A1`, `Dire.`, `NO`. São as legendas de projeto do `.lfm`,
+  que continuam lá porque o `PreencheFicha` não toca nesses controles.
+
+  Ou seja, a decisão da passagem 12 — "não inventar cadeia" — produz na tela
+  algo **pior** do que branco: um texto plausível e estático, igual para todo
+  jogador. Um leitor da tela não tem como saber que aquilo não é o dado. Isso
+  precisa virar decisão explícita quando as legendas forem medidas
+  (`0x00401db6`); enquanto isso, está registrado aqui e na spec.
+
+- **Arquivos criados/modificados:**
+  - `wte/wte.lpr` — a linha fora, e o comentário que diz por que
+  - `docs/tasks/26-handlers-de-edicao.md` — este log e a correção da passagem 13
+
+- **Gates medidos:** `lazbuild wte/wte.lpi` rc 0; `make -C wte check` rc 0;
+  `compara_tela.sh --edicao` **PASSOU**, mesmos números da segunda passagem;
+  janela do port 522×475 = `.lfm`.
+
+- **O que a próxima passagem herda, agora sem obstáculo de coordenada:** o
+  `--ficha` propriamente dito — abrir a ficha nos dois lados e medir as 16
+  larguras de `imghab` (`7*v + 8`) contra o dump, do mesmo jeito que o modo das
+  barras mede as cinco. As coordenadas do `.lfm` valem direto nos dois lados,
+  que era o que faltava.
