@@ -1563,3 +1563,59 @@ do `--edicao`; e o `iguala_nombres`.
   larguras de `imghab` (`7*v + 8`) contra o dump, do mesmo jeito que o modo das
   barras mede as cinco. As coordenadas do `.lfm` valem direto nos dois lados,
   que era o que faltava.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima quinta passagem: a régua de tela da
+  ficha não existe, e o que existe no lugar é melhor.**
+
+- **O `--ficha` por pixel morreu na medição, e o motivo é do widgetset.** O
+  plano era medir as 16 larguras de `imghab` (`7*v + 8`) como o modo das barras
+  mede as cinco. Medido no `:99`, varrendo a coluna pixel a pixel: **só a
+  primeira das dezesseis é visível.**
+
+  O `imghab<n>` fica em `Top = 8 + 16n` com 8 px de altura e o `barrhab<n>` em
+  `Top = 12 + 16n` com 12 — de projeto, sobra uma faixa de 4 px do `imghab`
+  acima do scrollbar. O `TScrollBar` do gtk2 desenha **mais alto** que os 12 px
+  declarados e come essa faixa. A primeira linha escapa porque não há nada
+  acima dela.
+
+  E ela mede certo: **8 px**, para um `attack` de 12, que é cru 0, que é
+  `7*0 + 8`. Uma linha confirma a fórmula e não julga uma ordem.
+
+- **O risco que sobrava era exatamente o que a tela não pega**: campo trocado de
+  lugar entre os 28: número plausível no rótulo errado. Ele fecha **sem tela**,
+  e é a segunda conferência do
+  [`check_bitfields.py`](../../wte/tools/check_bitfields.py):
+
+  1. para cada descritor, gera a expressão canônica e acha a linha do
+     `TPlayer.Decode` que a contém — **casamento único exigido**, porque dois
+     descritores com a mesma expressão tornariam a atribuição ambígua, e
+     ambiguidade aqui é troca silenciosa;
+  2. dali sai o membro do `TPlayer` que aquele descritor descreve;
+  3. exige que a chamada `n` do `PreencheFicha` use esse membro.
+
+  Testada contra erro plantado antes de entrar: trocando `p.jump` e
+  `p.heading` entre as posições 10 e 11, ela nomeia as duas e diz qual era
+  esperado em cada.
+
+- **Por que isto vale mais que a régua de pixel que substitui**, e não é
+  conformismo: a régua de tela mediria a largura de uma barrinha, que é função
+  do valor; esta mede a **identidade do campo**, que é o que a ordem das
+  tabelas afirma. Duas habilidades no mesmo balde de largura passariam pela
+  primeira e não passam por esta. E ela roda no `make check`, sem `:99`, sem
+  Wine e sem coordenada.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/check_bitfields.py` — `campo_por_descritor` e `conferir_ficha`
+  - `docs/tasks/26-handlers-de-edicao.md` — este log
+
+- **Gates medidos:** `make -C wte check` rc 0; `python3 -m unittest` em
+  `tools/`: 478 testes, OK; guarda nova reprovando o erro plantado.
+
+- **O que fica dito e não resolvido:** a ficha continua **sem régua de tela**.
+  O que existe é a conferência estática acima mais a inspeção visual da
+  passagem 14 (os 16 valores aparecem, e o amarelo do `>= 5` está certo). Se
+  alguém quiser gate de pixel ali, o caminho medido é a **assinatura de cor**
+  dos 16 `valorhab` — quais saem amarelos —, que é robusta a fonte e a
+  widgetset; a largura de `imghab` não é caminho.

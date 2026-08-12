@@ -57,6 +57,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 EXE = ROOT / "we-team-editor" / "we-team-editor.exe"
 PLAYER = ROOT / "wte" / "src" / "we2002_player.pas"
+FICHA = ROOT / "wte" / "src" / "impl" / "ep2002_mainform.aux.inc"
 SAIDA_MD = ROOT / "wte" / "re" / "bitfields.md"
 SAIDA_TSV = ROOT / "wte" / "re" / "bitfields.tsv"
 
@@ -160,6 +161,82 @@ def conferir(linhas) -> list[str]:
     return faltando
 
 
+def campo_por_descritor(linhas) -> list[tuple[str, int, str]]:
+    """Para cada descritor, o membro do `TPlayer` que o `Decode` produz.
+
+    O casamento e pelo TEXTO da extracao, nao por posicao: gera a expressao
+    canonica do descritor e procura a linha do `Decode` que a contem. Exige
+    casamento UNICO -- dois descritores que gerassem a mesma expressao
+    tornariam a atribuicao ambigua, e ambiguidade aqui viraria uma troca de
+    campo silenciosa.
+    """
+    corpo = corpo_do_decode()
+    achados = []
+    for nome, i, _end, b, s_, w in linhas:
+        alvos = expressoes(b, s_, w)
+        casam = [ln.strip() for ln in corpo.splitlines()
+                 if ":=" in ln and all(e in ln for e in alvos)]
+        if len(casam) != 1:
+            raise ChecagemError(
+                f"{nome}[{i}] (byte {b}, bit {s_}, {w} bits): "
+                f"{len(casam)} linha(s) do Decode casam a extracao -- "
+                "esperava exatamente uma")
+        membro = casam[0].split(":=")[0].strip()
+        achados.append((nome, i, membro))
+    return achados
+
+
+# Como cada laco do `PreencheFicha` chama o campo, e qual tabela ele consome.
+CHAMADAS = (
+    ("habilidades", re.compile(r"^\s*Habilidade\(\s*(\d+)\s*,\s*p\.(\w+)\s*\)")),
+    ("aparencia", re.compile(r"^\s*Aparencia\(\s*(\d+)\s*,\s*p\.(\w+)\b")),
+)
+
+
+def conferir_ficha(linhas) -> list[str]:
+    """A ordem de preenchimento do port bate com a ordem das tabelas?
+
+    Esta e a conferencia que o pixel nao consegue fazer. A regua de tela media
+    a largura das dezesseis barrinhas `imghab` (`7*v + 8`), e ela nao serve:
+    medido no `:99`, o `TScrollBar` do gtk2 desenha mais alto que os 12 px que
+    o `.lfm` declara e cobre a faixa exposta de **quinze das dezesseis**. So a
+    primeira linha e mensuravel, e uma linha nao julga uma ordem.
+
+    O risco que sobra e exatamente o que uma troca de indice produz: um numero
+    plausivel no rotulo errado. Aqui ele fecha sem tela -- a chamada `n` do
+    `PreencheFicha` tem de usar o membro que o descritor `n-1` daquela tabela
+    descreve.
+    """
+    if not FICHA.exists():
+        raise ChecagemError(f"{FICHA} nao existe")
+    texto = FICHA.read_text(encoding="utf-8")
+    esperado = {}
+    for nome, i, membro in campo_por_descritor(linhas):
+        esperado[(nome, i + 1)] = membro
+
+    visto = {}
+    for tabela, padrao in CHAMADAS:
+        for ln in texto.splitlines():
+            m = padrao.match(ln)
+            if m:
+                visto[(tabela, int(m.group(1)))] = m.group(2)
+
+    problemas = []
+    for chave, membro in sorted(esperado.items()):
+        tabela, n = chave
+        if chave not in visto:
+            problemas.append(f"{tabela}[{n}]: o PreencheFicha nao tem chamada "
+                             f"para esta posicao (esperava `p.{membro}`)")
+        elif visto[chave] != membro:
+            problemas.append(
+                f"{tabela}[{n}]: o PreencheFicha usa `p.{visto[chave]}` e o "
+                f"descritor descreve `{membro}` -- campo trocado de lugar")
+    sobrando = sorted(set(visto) - set(esperado))
+    for tabela, n in sobrando:
+        problemas.append(f"{tabela}[{n}]: chamada sem descritor correspondente")
+    return problemas
+
+
 def render(linhas, faltando) -> tuple[str, str]:
     tsv = ["tabela\tindice\tendereco\tbyte\tbit_inicial\tlargura\textracao"]
     for nome, i, end, b, s, w in linhas:
@@ -240,6 +317,7 @@ def main() -> int:
     try:
         linhas = ler_tabelas()
         faltando = conferir(linhas)
+        trocados = conferir_ficha(linhas)
     except ChecagemError as e:
         print(f"check_bitfields: {e}", file=sys.stderr)
         return 2
@@ -252,6 +330,17 @@ def main() -> int:
         print("  Enquanto isto valer, a ficha do jogador pode mostrar um "
               "atributo no campo de outro -- e um numero plausivel no lugar "
               "errado nao tem sintoma.", file=sys.stderr)
+        return 2
+
+    if trocados:
+        print("check_bitfields: a ORDEM do PreencheFicha nao bate com a das "
+              "tabelas:", file=sys.stderr)
+        for t in trocados:
+            print(f"  {t}", file=sys.stderr)
+        print("  Campo trocado de lugar poe um numero plausivel no rotulo "
+              "errado, e nenhuma regua de tela pega isso: medido no `:99`, o "
+              "scrollbar do gtk2 cobre quinze das dezesseis barrinhas.",
+              file=sys.stderr)
         return 2
 
     md, tsv = render(linhas, faltando)
@@ -268,7 +357,7 @@ def main() -> int:
                 print(f"check_bitfields: {rel}: ok")
         if rc == 0:
             print(f"check_bitfields: {len(linhas)} registros conferidos contra "
-                  "TPlayer.Decode")
+                  "TPlayer.Decode e contra a ordem do PreencheFicha")
         return rc
 
     SAIDA_MD.write_text(md, encoding="utf-8")
