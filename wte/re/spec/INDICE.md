@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 3 |
+| `implementado` | 6 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 79 |
+| `aberto` | 76 |
 | **total** | **96** |
 
-30 de 96 têm arquivo de spec.
+35 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -35,7 +35,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | Endereço | Formulário | Handler | Evento | Grupo | Veredito |
 |---|---|---|---|---|---|
 | `0x00402b40` | `ficha_dorsal` | BitBtn1Click | OnClick | auxiliar | aberto |
-| `0x00402b58` | `ficha_dorsal` | scroll_dorsalChange | OnChange | edicao | aberto |
+| `0x00402b58` | `ficha_dorsal` | [scroll_dorsalChange](ficha_dorsal.scroll_dorsalChange.md) | OnChange | edicao | implementado |
 | `0x00402bc0` | `ficha_dorsal` | [FormCreate](ficha_dorsal.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402c44` | `ficha_enlaza` | [FormShow](ficha_enlaza.FormShow.md) | OnShow | carga | trivial |
 | `0x00402c54` | `ficha_enlaza` | [FormCreate](ficha_enlaza.FormCreate.md) | OnCreate | carga | trivial |
@@ -71,8 +71,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408088` | `jugador` | flechasapaClick | OnClick x12 | edicao | aberto |
 | `0x00408548` | `jugador` | BitBtn3Click | OnClick | auxiliar | aberto |
-| `0x00408af8` | `jugador` | casilla_nombreKeyPress | OnKeyPress | edicao | aberto |
-| `0x00408b50` | `jugador` | casilla_dorsalKeyPress | OnKeyPress | edicao | aberto |
+| `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
+| `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
 | `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |
 | `0x00408bb8` | `jugador` | etiqprecioClick | OnClick | edicao | aberto |
 | `0x00408d88` | `ficha_warning_2` | [FormCreate](ficha_warning_2.FormCreate.md) | OnCreate | carga | trivial |
@@ -120,8 +120,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
 | `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | aberto |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
-| `0x00410a74` | `MainForm` | dorsalClick | OnClick x23 | edicao | aberto |
-| `0x00410ddc` | `MainForm` | dorsalMouseDown | OnMouseDown x23 | edicao | aberto |
+| `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | aberto |
+| `0x00410ddc` | `MainForm` | [dorsalMouseDown](MainForm.dorsalMouseDown.md) | OnMouseDown x23 | edicao | implementado |
 | `0x00410ea8` | `MainForm` | colorearClick | OnClick | edicao | aberto |
 | `0x00410fa4` | `MainForm` | SpeedButton2Click | OnClick | auxiliar | aberto |
 | `0x00410fc0` | `MainForm` | SpeedButton1Click | OnClick | auxiliar | aberto |

@@ -28,7 +28,7 @@ unit ep2002_dorsal;
 interface
 
 uses
-  Forms, StdCtrls, ExtCtrls, Buttons, retrace;
+  Forms, StdCtrls, ExtCtrls, Buttons, retrace, SysUtils;
 
 type
   Tficha_dorsal = class(TForm)
@@ -68,12 +68,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_dorsal.scroll_dorsalChange(Sender: TObject);
-begin
-  REStub('ficha_dorsal.scroll_dorsalChange');
-end;
-{$POP}
+{$I impl/ep2002_dorsal.scroll_dorsalChange.inc}
 
 procedure Tficha_dorsal.FormCreate(Sender: TObject);
 {$I impl/ep2002_dorsal.FormCreate.inc}

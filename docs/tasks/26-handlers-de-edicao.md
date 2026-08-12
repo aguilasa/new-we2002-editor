@@ -454,3 +454,96 @@ separadas (primeiro parágrafo do Contexto).
   de edição do número em `.data`, se houver (as barras têm um, e a simetria
   sugere que sim); e estender o `--edicao` para medir os 23 rótulos — hoje eles
   só saem na montagem, para olho humano.
+
+---
+
+- **Executado em:** 2026-08-12 — **quarta passagem, ainda parcial.** O lote de
+  número, mais um handler do lote de nome que veio de graça.
+
+- **Resumo do que foi feito:**
+
+  Cinco handlers com spec e Pascal: `dorsalClick`, `dorsalMouseDown`,
+  `scroll_dorsalChange`, `casilla_dorsalKeyPress` e — porque estava no mesmo
+  bloco de disassembly — `casilla_nombreKeyPress`. O grupo vai de **2 para 7 de
+  28**; o índice de specs vai a **6 `implementado`** de 96.
+
+  **A resposta à pergunta "onde está o buffer de edição do número" é: não há
+  um.** As barras têm `0x00434592` porque a gravação delas é um botão separado.
+  O número não: o `dorsalClick` **grava na hora**, quando o modal fecha.
+
+  **E essa é a descoberta que muda a classificação do handler.** `0x00404048` é
+  a irmã escritora da rotina de leitura `0x00403f00` — mesmos três ramos, mesma
+  aritmética de endereço —, recebe número, time, slot e o arquivo aberto, faz
+  `add al,0xff` (o `- 1` da base zero, confirmando de novo a regra da terceira
+  passagem) e escreve **aquele trecho**, sem nada parecido com um `Save` do
+  banco inteiro.
+
+  É o primeiro handler que o `published_methods.tsv` classifica como `edicao` e
+  que grava na imagem. A classificação não está errada — o que ele faz é
+  edição, e a gravação é uma chamada no fim —, mas **o par atravessa task**,
+  como o das barras. O Pascal escrito faz tudo menos a gravação, e a metade que
+  falta está no critério de conclusão da
+  [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md). Escrevê-la aqui
+  também exigiria a primeira escrita **pontual** do port: o
+  `we2002_database.pas` gerado sabe `Save` do banco inteiro, não "escreve estes
+  dois bytes aqui".
+
+  **A regra de validação que o enunciado desta task pedia não é um `if`.** É o
+  `Max` da barra de rolagem da janelinha: 99 para clube de Master League
+  (índice > 62), 32 para seleção. O usuário não digita número inválido porque
+  **não há onde digitar** — a escolha é uma barra com faixa fixada na abertura.
+  Casa com a mensagem que a WTE-TASK-05 mapeou e com o teto de 32 do
+  `newWe2002`.
+
+- **O erro que cometi e que só a semântica cruzada desmentiu:**
+
+  Os deslocamentos de campo do `TScrollBar` saíram errados na primeira leitura.
+  Varri os prólogos de `SetMin`/`SetMax`/`SetPosition` atrás de
+  `mov reg,[this+disp]` e concluí `FMin = 0x20c`, `FMax = 0x210`,
+  `FPosition = 0x214` pela interseção de quais campos cada uma toca. **Com
+  esses valores a conta do `scroll_dorsalChange` vira `Position - Min + 1`,
+  que com `Min = 1` é a identidade — plausível, e a spec teria fechado assim.**
+
+  O que desmentiu foi o handler vizinho: o `dorsalClick` faz
+  `Position := [0x214] - numero + 1`, e só sob `[0x214] = FMax` as duas contas
+  se cancelam e o rótulo mostra o número escolhido. Refeita a leitura pelo
+  caminho certo — as três não escrevem campo nenhum, são invocações finas do
+  mesmo `SetParams(Position, Min, Max)`, e a ordem dos argumentos identifica os
+  três: **`FPosition = 0x20c`, `FMin = 0x210`, `FMax = 0x214`**.
+
+  É a armadilha 1 do projeto por outra porta. Interseção de campos tocados é
+  heurística, e heurística que "fecha" num caso particular (`Min = 1`) é a que
+  passa. Quem decide é a semântica cruzada de dois handlers, não a leitura
+  isolada de um.
+
+- **Outros três números que a leitura apressada erraria:**
+  1. O índice da camisa sai do **nome** do componente (`Copy(Name, 7, 2)` sobre
+     `'dorsalNN'`), não do `Tag` nem do ponteiro.
+  2. `dorsalMouseDown` só reage a `mbRight`, e chama o `mostrar_jugadorClick`
+     passando **`mostrar_jugador_1`** como `Sender` — é a cadeia do nome que faz
+     aquele handler escolher o lado titular, então passar outro botão abriria a
+     ficha do time errado.
+  3. O título da janelinha é `' ' + nome`: a cadeia em `0x00425077` tem **um**
+     caractere. O `Caption = 'Number'` do DFM é de projeto e some no primeiro
+     clique.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/` — 5 specs novas (`MainForm.dorsalClick`,
+    `MainForm.dorsalMouseDown`, `ficha_dorsal.scroll_dorsalChange`,
+    `jugador.casilla_dorsalKeyPress`, `jugador.casilla_nombreKeyPress`)
+  - `wte/src/impl/` — os 5 `.inc`, mais `ep2002_mainform.uses` e
+    `ep2002_dorsal.uses`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 87,6% → **86,0%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` compila.
+
+- **O que fica aberto neste lote, com a razão:**
+  - `dorsalClick` — `aberto`: falta a gravação, que é da 27;
+  - `casilla_dorsalKeyPress` — `aberto`: o `SetFocus` dele é condicionado a
+    `DWORD[0x00433614 + 44*global] <> 0`, e o que essa tabela guarda não foi
+    medido. O port foca **sempre**, o que é divergência declarada. Medir sai
+    barato quando a ficha do jogador estiver sendo preenchida;
+  - os dois `KeyPress` da ficha ainda **não são exercitáveis de verdade**: a
+    ficha abre, mas vazia — preenchê-la (`0x00404820`, `0x0040756c`) é o
+    obstáculo que os lotes de atributo e de tática também têm pela frente.

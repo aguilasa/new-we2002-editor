@@ -1,3 +1,4 @@
 # Unidades que os corpos de `impl/ep2002_dorsal.*.inc` pedem, alem das que o
 # gerador ja deduz dos componentes e das assinaturas.
 retrace        # REMark
+SysUtils        # IntToStr, no scroll_dorsalChange

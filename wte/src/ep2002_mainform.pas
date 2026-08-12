@@ -30,7 +30,7 @@ interface
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
-  we2002_types, ep2002_jugador, ep2002_estrategia;
+  we2002_types, ep2002_jugador, ep2002_estrategia, ep2002_dorsal;
 
 type
   TMainForm = class(TForm)
@@ -425,20 +425,12 @@ procedure TMainForm.mostrar_estrategiaClick(Sender: TObject);
 procedure TMainForm.FormCreate(Sender: TObject);
 {$I impl/ep2002_mainform.FormCreate.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.dorsalClick(Sender: TObject);
-begin
-  REStub('MainForm.dorsalClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.dorsalClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.dorsalMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
-  REStub('MainForm.dorsalMouseDown');
-end;
-{$POP}
+{$I impl/ep2002_mainform.dorsalMouseDown.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.colorearClick(Sender: TObject);

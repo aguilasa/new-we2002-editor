@@ -372,19 +372,11 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.casilla_nombreKeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('jugador.casilla_nombreKeyPress');
-end;
-{$POP}
+{$I impl/ep2002_jugador.casilla_nombreKeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.casilla_dorsalKeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('jugador.casilla_dorsalKeyPress');
-end;
-{$POP}
+{$I impl/ep2002_jugador.casilla_dorsalKeyPress.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.casilla_precioKeyPress(Sender: TObject; var Key: char);
