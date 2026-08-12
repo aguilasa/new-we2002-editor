@@ -229,7 +229,7 @@ um trouxe um erro do port que nada mais pegaria:
 |---|---|---|
 | nome do time nos três campos | montagem, olho humano | bate (com a divergência de filtro do `Nome1`, já registrada) |
 | as cinco barras de força | pixel, nos três times | **bate**, 15 larguras idênticas |
-| os 23 números de camisa | montagem, olho humano | **DIVERGE — o port mostra o byte cru, o original mostra byte + 1** |
+| os 23 números de camisa | montagem, olho humano | ~~**DIVERGE — o port mostra o byte cru, o original mostra byte + 1**~~ **corrigido em 2026-08-12**, ver abaixo |
 | a lista de jogadores | montagem, olho humano | bate |
 | o estado de habilitação | pixel, 13 controles | **DIVERGE em um: `iguala_nombres`** |
 
@@ -279,8 +279,32 @@ faz igual, e ali está escrito: `legacy/mfc/edDlg.cpp:2877` monta a legenda com
 (`../../src/impl/ep2002_mainform.aux.inc`) chama
 `IntToStr(NumeroDaCamisa(indice, slot))` sem o `+ 1`.
 
-**Não corrigido aqui**: é defeito de comportamento do Pascal, e esta correção é
-do instrumento. Precisa de correção própria, com o gate de tela refeito depois.
+~~**Não corrigido aqui**: é defeito de comportamento do Pascal, e esta correção
+é do instrumento. Precisa de correção própria, com o gate de tela refeito
+depois.~~
+
+**Corrigido em 2026-08-12, pela WTE-TASK-26**, que é a dona do grupo de número.
+O `+ 1` entrou no `NumeroDaCamisa`, e antes disso a regra foi conferida nos
+**dois oráculos**, por caminhos independentes:
+
+- **`wte.exe`** — a rotina do número de camisa (`0x00403f00`) termina em
+  `inc eax` nos **três** ramos: `0x00403f65` (o time 48, que tem caminho
+  próprio), `0x00403fae` (clube de ML) e `0x0040403f` (seleção). Não é o efeito
+  de um ramo só.
+- **`newWe2002`**, que é byte-idêntico ao `ed.exe`: soma 1 ao exibir
+  (`src/app/TeamView.cpp:195`) e **subtrai 1 ao gravar** (`:468`), nas três
+  famílias — seleção com os cinco bits, `ml_teams` e `ml_default`.
+
+E a correção foi conferida contra o número que esta seção já tinha medido na
+tela do oráculo, sem abrir janela: os `raw_numbers` do `ml_teams[0]` que o
+`dump_estado.pas` carrega da ROM japonesa, mais 1, dão **exatamente** a linha
+`oráculo` acima, nos 23. É a terceira ponta de novo — dado, tela do original, e
+agora o Pascal.
+
+**A consequência que sai daqui e vale para o resto do grupo:** o que a imagem
+guarda é base zero e o que a tela mostra é base um, então
+`dorsalClick`/`scroll_dorsalChange`, ao **gravar**, têm de desfazer a soma.
+Está anotado no próprio `NumeroDaCamisa`.
 
 ### O estado de habilitação — 13 controles medidos, 1 diverge
 

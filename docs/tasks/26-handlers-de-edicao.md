@@ -383,3 +383,74 @@ separadas (primeiro parágrafo do Contexto).
   - o comportamento de truncamento por campo (WTE-TASK-36);
   - estender o `--edicao` aos grupos que vierem — cada um precisa da sua
     sequência de cliques medida, como esta precisou.
+
+---
+
+- **Executado em:** 2026-08-12 — **terceira passagem, ainda parcial.** Abertura
+  do lote de **número**, pelo defeito que já estava medido e sem dono.
+
+- **Resumo do que foi feito:**
+
+  **O off-by-one dos 23 `dorsalN` acabou.** A
+  [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) tinha medido, na tela, que o port
+  mostra o byte cru onde o original mostra byte + 1, e deixou o conserto sem
+  dono — "é defeito de comportamento, pede correção própria". O dono é este
+  lote, e a regra foi conferida nos **dois oráculos** antes de uma linha ser
+  escrita:
+
+  - **`wte.exe`:** a rotina do número (`0x00403f00`) termina em `inc eax` nos
+    **três** ramos — `0x00403f65` (o time 48, que tem caminho próprio),
+    `0x00403fae` (clube de ML), `0x0040403f` (seleção). Não é efeito de um ramo
+    só, que é o que uma leitura apressada concluiria olhando um deles;
+  - **`newWe2002`**, byte-idêntico ao `ed.exe`: `+ 1` ao exibir
+    (`src/app/TeamView.cpp:195`), `- 1` ao gravar (`:468`), nas três famílias.
+
+  E a correção foi verificada **sem abrir janela**: os `raw_numbers` do
+  `ml_teams[0]` que o `dump_estado.pas` carrega da ROM japonesa, mais 1, dão
+  exatamente os 23 números que a CORR-WTE-057 tinha lido da tela do oráculo.
+  Terceira ponta outra vez — dado, tela do original, Pascal.
+
+  **A consequência vale para o resto do lote e está anotada no código:** a
+  imagem guarda base zero, a tela mostra base um, então quem **gravar** número
+  desfaz a soma.
+
+- **O modelo do lote, medido (specs ainda por escrever):**
+
+  - **`dorsalClick`** (`0x00410a74`) não edita nada: sai se
+    `lista_equipos.ItemIndex < 0`; extrai o índice do **nome** do componente
+    (`Copy(Name, 7, 2)` sobre `'dorsalNN'`, não do `Tag` nem do ponteiro);
+    seleciona o jogador em `lista_jugadores_1`; chama a rotina de realce
+    (`0x0040b188`, o `MarcaCamisa` que já está em Pascal); posiciona o
+    `ficha_dorsal` ao lado do rótulo clicado; e copia o número atual para lá.
+  - **A regra de validação que o enunciado desta task pedia é imposta pelo
+    widget, não por `if`:** `dorsalClick` chama
+    `TScrollBar::SetMax` no `scroll_dorsal` com **99** quando o índice do time é
+    > 62 (clube de ML) e com **32** caso contrário. Casa com a mensagem de erro
+    que a WTE-TASK-05 mapeou (`[33 ... 99] somente na Master`) e com o clamp em
+    32 do `newWe2002`.
+  - **`scroll_dorsalChange`** (`0x00402b58`) é uma linha:
+    `etiq_dorsal.Caption := scroll_dorsal.Position - Min + 1`. Os
+    deslocamentos saíram do `vcl60.bpl` pelo método do `sonda_dorsal.py` —
+    `TScrollBar.FMin = 0x20c`, `FMax = 0x210`, `FPosition = 0x214`, deduzidos de
+    quais campos `SetMin`, `SetMax` e `SetPosition` tocam. Com `Min = 1` a conta
+    é a identidade; o autor escreveu a forma geral.
+  - **E a gravação do número não é desta task:** quem leva o valor de volta é o
+    `BitBtn1Click` do `ficha_dorsal` (`0x00402b40`), que o
+    `published_methods.tsv` põe no grupo `auxiliar` — a
+    [WTE-TASK-28](/docs/tasks/28-handlers-auxiliares.md). Mais um par que
+    atravessa task, como o das barras com a 27.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.aux.inc` — o `+ 1` em `NumeroDaCamisa`, com
+    a evidência dos dois oráculos e o aviso para quem for gravar
+  - `wte/re/spec/MainForm.lista_equiposChange.md` — o defeito fechado, com a
+    conferência
+
+- **Gates medidos:** `lazbuild` compila; os 23 números do port batem com a
+  linha `oráculo` da CORR-WTE-057, conferidos contra o `dump_estado.pas`.
+
+- **O que falta neste lote:** specs e Pascal de `dorsalClick`,
+  `dorsalMouseDown`, `scroll_dorsalChange` e `casilla_dorsalKeyPress`; o buffer
+  de edição do número em `.data`, se houver (as barras têm um, e a simetria
+  sugere que sim); e estender o `--edicao` para medir os 23 rótulos — hoje eles
+  só saem na montagem, para olho humano.

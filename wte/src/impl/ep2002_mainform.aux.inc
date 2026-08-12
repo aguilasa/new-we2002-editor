@@ -199,8 +199,23 @@ begin
     Result := Cadeia(Jogo.players[k].name);
 end;
 
-{ Numero de camisa do slot. A selecao guarda os 23 empacotados em cinco bits
-  cada (`TSquadNumbers`); o clube de ML guarda um byte por slot. }
+{ Numero de camisa do slot, COMO A TELA O MOSTRA. A selecao guarda os 23
+  empacotados em cinco bits cada (`TSquadNumbers`); o clube de ML guarda um byte
+  por slot.
+
+  O `+ 1` NAO e enfeite: o formato guarda o numero base zero e a tela mostra
+  base um. Os dois oraculos dizem o mesmo, por caminhos independentes --
+  `0x00403f00` do `wte.exe` termina em `inc eax` nos **tres** ramos
+  (`0x00403f65` para o time 48, `0x00403fae` para clube de ML, `0x0040403f`
+  para selecao), e o `newWe2002`, que e byte-identico ao `ed.exe`, soma 1 ao
+  exibir (`src/app/TeamView.cpp:195`) e subtrai 1 ao gravar (`:468`).
+
+  **Quem for gravar numero -- `dorsalClick` e `scroll_dorsalChange`, desta mesma
+  task -- tem de subtrair 1 aqui de volta.** O que vai para a imagem e o base
+  zero; a soma existe so entre o dado e o olho.
+
+  Este `+ 1` faltava ate 2026-08-12, e a conferencia de tela da
+  [CORR-WTE-057] tinha medido a diferenca sem que ela tivesse dono. }
 function NumeroDaCamisa(indice, slot: Integer): LongInt;
 begin
   if indice < TIMES_NACIONAIS then
@@ -209,6 +224,7 @@ begin
     Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].raw_numbers[slot]
   else
     Result := Jogo.ml_default.raw_numbers[slot];
+  Result := Result + 1;
 end;
 
 { Preenche as 23 legendas `dorsalN` -- o `0x0040b0b4`, 210 bytes.
