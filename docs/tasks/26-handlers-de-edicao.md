@@ -771,3 +771,89 @@ separadas (primeiro parágrafo do Contexto).
 - **`casilla_dorsalKeyPress` continua `aberto`**, por motivo menor e nomeado: o
   port não tem o buffer de 44 bytes, então move o foco sempre. O buffer entra
   com o lote de mover, e a spec fecha junto.
+
+---
+
+- **Executado em:** 2026-08-12 — **oitava passagem.** `0x00404820`, o nó de
+  1.459 bytes, lido o bastante para responder o que travava dois lotes.
+
+- **Ela GRAVA um jogador, e a suspeita da passagem anterior estava certa.**
+
+  ```text
+  0x00404820(eax = buffer de origem, edx = time destino, ecx = slot destino, arquivo)
+
+    0x00404374(time, slot, buffer 0)          ' offsets do DESTINO, no buffer 0
+    se buffer[origem].identidade = buffer[0].identidade
+       e BYTE[0x00423168] = 0:  devolve -2
+    ...
+    grava 10 B de nome        em DWORD[buffer0 + 0x1c]
+    grava 12 B de atributos   em DWORD[buffer0 + 0x20]
+    se DWORD[buffer0 + 0x28] <> 0:
+        grava 1 B do campo condicional
+  ```
+
+  **O layout de 44 bytes fecha com o que a sétima passagem derivou pelo outro
+  lado**, e isso é a conferência que dá confiança nos dois:
+
+  | campo | do lado da leitura (`0x004046e8`) | do lado da escrita (`0x00404820`) |
+  |---|---|---|
+  | nome, 10 B | `0x004335ec + 44*i` | `+0x00` |
+  | atributos, 12 B | `0x004335f6 + 44*i` | `+0x0a` |
+  | identidade | — | `+0x16`, `+0x17` |
+  | condicional, 1 B | `0x00433604 + 44*i` | `+0x18` |
+  | tipo | — | `+0x19` |
+  | offset do nome | `0x00433608 + 44*i` | `+0x1c` |
+  | offset dos atributos | `0x0043360c + 44*i` | `+0x20` |
+  | offset do condicional | `0x00433614 + 44*i` | `+0x28` |
+
+  As duas leituras foram feitas separadas, uma de cada rotina, e **os oito
+  deslocamentos batem**.
+
+- **E a regra de validação do lote de mover apareceu inteira, com as mensagens
+  do usuário.** `0x00403e20` recebe o código de retorno, soma 2 e indexa uma
+  tabela de salto de cinco entradas:
+
+  | código | mensagem |
+  |---|---|
+  | `-2` | **"It's the same player in both teams..."** |
+  | `-1` | **"You need at least 1 memory block free to do that"** |
+  | `0`, `1`, `2` | nada |
+
+  O `-2` é a comparação de identidade acima — mover um jogador para um time que
+  já o tem é recusado, **a não ser que `BYTE[0x00423168]` seja diferente de
+  zero**, uma chave que desliga a checagem. O `-1` é o contador de blocos
+  livres de Master League, que é a
+  [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) aparecendo aqui pela
+  segunda vez.
+
+  É o que o enunciado desta task pede na seção "Validação": *a mensagem é o
+  atalho para a regra*. Aqui as duas mensagens **e** a regra estão medidas.
+
+- **Duas linhas de spec corrigidas.** A
+  [spec do `mostrar_jugadorClick`](../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+  dizia `0x004046e8` "não lida" e `0x00404820` "enche a ficha" — escritas na
+  décima passagem da WTE-TASK-25 a partir do que o handler *parecia* precisar.
+  As duas estão trocadas pelo que foi medido. **O que aquele handler faz com
+  uma rotina de gravação continua sem resposta** e está escrito como pergunta,
+  não como descrição plausível: responder exige seguir o fluxo, não só saber o
+  que a rotina faz.
+
+- **A guarda do `dump_auxiliares.py` recusou um papel meu, e estava certa.**
+  Tentei registrar `0x00403e20` no `PAPEIS`; ela reprovou com *"PAPEIS descreve
+  rotina que o grupo de carga nao chama"*. É verdade — aquela rotina é do lote
+  de mover, e o gerador cobre o grupo de carga. O papel ficou em comentário, no
+  lugar certo, e a medição está aqui.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_auxiliares.py` — `0x00404820` no `PAPEIS`, e o porquê de
+    `0x00403e20` ficar de fora; `auxiliares.md`/`.tsv` regerados
+  - `wte/re/spec/MainForm.mostrar_jugadorClick.md` — as duas linhas corrigidas
+  - este arquivo
+
+- **Gates medidos:** `make -C wte check` rc 0.
+
+- **O que isso destrava:** os 8 handlers de mover deixam de depender de leitura
+  para depender de **escrita de código** — as duas rotinas centrais têm papel,
+  layout e regra de erro medidos. Sobram delas `0x00407338` (561 B),
+  `0x00407110` (552 B) e `0x00406fe0` (301 B), que são do `flechasapaClick` e
+  do `parribaClick`, não da família de quatro botões.

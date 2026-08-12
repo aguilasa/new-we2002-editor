@@ -81,7 +81,7 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x004042d4` | 1 | 159 | `MainForm.boton_dialogo_weClick`, `MainForm.FormShow` | — |
 | `0x00404374` | 2 | 881 | `0x004046e8`, `0x00404820`, `0x0040b2d8` | — |
 | `0x004046e8` | 1 | 164 | `MainForm.mostrar_jugadorClick` | carrega um jogador para o buffer de 44 bytes em `0x004335ec` — 10 B de nome, 12 B de atributos, e 1 B que so existe se a terceira coluna da tabela de offsets nao for zero (senao vai 50) |
-| `0x00404820` | 1 | 1459 | `MainForm.mostrar_jugadorClick` | — |
+| `0x00404820` | 1 | 1459 | `MainForm.mostrar_jugadorClick` | **grava** um jogador do buffer no destino — 10 B de nome, 12 B de atributos, e o byte condicional; recusa com `-2` se a identidade (`+0x16`, `+0x17`) do buffer bater com a do destino |
 | `0x00404dd4` | 2 | 154 | `0x00405270`, `0x00405468`, `0x004056c8` | — |
 | `0x00404e70` | 2 | 285 | `0x004050d0` | — |
 | `0x00404f90` | 2 | 318 | `0x004050d0` | — |
@@ -274,6 +274,15 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 - **Importados:** nenhum
 - **Literais:** nenhum
 - **Globais da `.data`:** nenhuma
+
+### `0x00404820` — 1459 bytes
+
+- **Papel:** **grava** um jogador do buffer no destino — 10 B de nome, 12 B de atributos, e o byte condicional; recusa com `-2` se a identidade (`+0x16`, `+0x17`) do buffer bater com a do destino
+- **Chamada por:** `MainForm.mostrar_jugadorClick`
+- **Chama internas:** `0x00415718`, `0x00404374`, `0x0040423c`, `0x00403f00`, `0x00403400`, `0x00417810`, `0x00416fc8`, `0x00404048`, `0x0040427c`, `0x0041978c`, `0x00421870`, `0x0042120c`, `0x004213f8`, `0x004213b4`
+- **Importados:** `@Sysutils@CurrToStr$qqr15System@Currency`, `@Controls@TControl@SetText$qqrx17System@AnsiString`
+- **Literais:** `in another `, ` different place(s) in the game`
+- **Globais da `.data`:** `0x00432e58`, `0x00433db8` (`_ficha_info4`)
 
 ### `0x004050d0` — 209 bytes
 

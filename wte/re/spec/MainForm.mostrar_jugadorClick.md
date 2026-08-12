@@ -32,15 +32,34 @@ titular e o do reserva.
 ```text
 titular := Sender.Name = 'mostrar_jugador_1'
 guarda o time e o jogador escolhidos em globais (0x004335dc e vizinhas)
-0x00403f00(...)   ' 328 B -- o numero de camisa
-0x004046e8(...)   ' 164 B -- nao lida
-0x00404820(...)   ' 1.459 B -- enche a ficha
-0x0040756c(...)   ' 1.275 B -- enche a ficha
+0x00403f00(...)   ' 328 B -- le o numero de camisa, base UM
+0x004046e8(...)   ' 164 B -- carrega o jogador para o buffer de 44 B
+0x00404820(...)   ' 1.459 B -- GRAVA um jogador (nao "enche a ficha")
+0x0040756c(...)   ' 1.275 B -- nao lida
 jugador.ShowModal
 ```
 
 O `ficha_enlaza` também é alcançado — é o diálogo de confirmação de vínculo,
 que aparece quando o jogador escolhido é de clube de Master League.
+
+> **Duas linhas desta lista estavam erradas, e a
+> [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) as corrigiu ao
+> ler as rotinas.** Elas diziam "não lida" e "enche a ficha", escritas na
+> décima passagem da WTE-TASK-25 a partir do que o handler *parecia* precisar.
+> Medido:
+>
+> - **`0x004046e8`** carrega um jogador da imagem para um buffer de **44
+>   bytes** em `0x004335ec` — 10 B de nome, 12 B de atributos, e um byte que só
+>   é lido se a terceira coluna de offsets não for zero (senão vai `50`);
+> - **`0x00404820` grava.** Ela chama a escritora de bytes `0x00403400` três
+>   vezes e a escritora de número de camisa `0x00404048`, e devolve código de
+>   erro — `-2` quando a identidade do jogador de origem bate com a do destino.
+>
+> **Que este handler chame uma rotina de gravação é o que a leitura antiga
+> escondia**, e o que isso significa para o `mostrar_jugadorClick` — abrir a
+> ficha grava? só grava ao fechar? — **continua sem medir**: exigiria seguir o
+> fluxo dos 1.459 bytes a partir daqui, e não só saber o que a rotina faz. Fica
+> como pergunta escrita, não como descrição plausível.
 
 **Evidência:** disassembly lido
 

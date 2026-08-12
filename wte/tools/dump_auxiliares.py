@@ -133,6 +133,14 @@ PAPEIS: dict[int, str] = {
                 "— 10 B de nome, 12 B de atributos, e 1 B que so existe se a "
                 "terceira coluna da tabela de offsets nao for zero (senao vai "
                 "50)",
+    # `0x00403e20` -- o mostrador de mensagem dos codigos `-2`/`-1` -- FICA DE
+    # FORA: o grupo de carga nao a chama, e a guarda abaixo recusa papel para
+    # rotina que a descoberta nao alcanca. Ela e do lote de mover, e o lugar
+    # dela e a spec daqueles handlers. Medida na setima passagem da
+    # WTE-TASK-26, registrada no Log daquela task.
+    0x00404820: "**grava** um jogador do buffer no destino — 10 B de nome, "
+                "12 B de atributos, e o byte condicional; recusa com `-2` se a "
+                "identidade (`+0x16`, `+0x17`) do buffer bater com a do destino",
     0x004050D0: "carrega os campos de nome do time selecionado para as globais",
     0x0040CBC8: "percorre a tabela de offsets em `.data`, seis colunas por linha",
     0x00405270: "desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)",
