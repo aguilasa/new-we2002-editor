@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2356 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 18 | 2341 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9124** |
-| Escrito à mão | 37 | 1589 |
-| **Total** | | **10713** |
+| **Gerado, subtotal** | | **9109** |
+| Escrito à mão | 41 | 1980 |
+| **Total** | | **11089** |
 
-**85.2% do Pascal da casca é saída de gerador.**
+**82.1% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -74,7 +74,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.casilla_nombreKeyPress.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormShow.inc` | 66 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 303 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 632 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 91 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalMouseDown.inc` | 40 | corpo de handler, da spec (fase 4) |
@@ -87,6 +87,10 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.lista_jugadores_1Change.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.mostrar_estrategiaClick.inc` | 17 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.mostrar_jugadorClick.inc` | 31 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.paderecha2Click.inc` | 20 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.paderechaClick.inc` | 16 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.paizquierda2Click.inc` | 11 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.paizquierdaClick.inc` | 15 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.sel_barraClick.inc` | 28 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.track_barraChange.inc` | 29 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_movertodos.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
@@ -101,7 +105,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 95.6% — e passa a medir bitmap, não geração de código.
+fração sobe para 94.6% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -120,14 +124,14 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_mainform.pas` | 21 |
 | `src/ep2002_color.pas` | 17 |
+| `src/ep2002_mainform.pas` | 17 |
 | `src/ep2002_estrategia.pas` | 14 |
 | `src/ep2002_jugador.pas` | 8 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_dorsal.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 33 |
+| _com corpo escrito_ | 37 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -148,6 +152,10 @@ das duas formas.
 - `MainForm.lista_jugadores_1Change`
 - `MainForm.mostrar_estrategiaClick`
 - `MainForm.mostrar_jugadorClick`
+- `MainForm.paderecha2Click`
+- `MainForm.paderechaClick`
+- `MainForm.paizquierda2Click`
+- `MainForm.paizquierdaClick`
 - `MainForm.sel_barraClick`
 - `MainForm.track_barraChange`
 - `ficha_about.FormCreate`

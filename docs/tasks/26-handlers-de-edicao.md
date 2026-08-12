@@ -35,7 +35,11 @@ Implementar o grupo de edição, com spec por handler.
 | tática | `bolaMouseDown`, `bolaMouseMove`, `bolaEndDrag`, `campoMouseMove`, `rectanguloDragOver`, `rectanguloDragDrop`, `relojTimer` | `0x00408f00` … `0x00409ba4` |
 
 `paderechaeizquierdaClick` é a novidade da v0.98 — "mover todos os jogadores de
-cada time com um clique". `ficha_movertodos` é a tela dela.
+cada time com um clique". ~~`ficha_movertodos` é a tela dela.~~ **Errado, e
+medido em 2026-08-12 (nona passagem):** o `ficha_movertodos` é a confirmação dos
+botões `paderecha2Click`/`paizquierda2Click`, os que copiam um elenco inteiro de
+um lado para o outro. O `paderechaeizquierdaClick` (`0x0040e304`) não toca o
+global `0x00432e48` (`_ficha_movertodos`, exportado pelo próprio `.exe`).
 
 **São 28 handlers, e a tabela acima está completa** — conferido em 2026-08-12
 contra a coluna `grupo` do
@@ -124,9 +128,9 @@ separadas (primeiro parágrafo do Contexto).
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec, incluindo regra de validação — **11 de
-      28** (2026-08-12): barras 2, número 4, nomes 5. Faltam os 8 de mover, os
-      7 de tática e os 2 de atributo
+- [ ] Todo handler do grupo com spec, incluindo regra de validação — **15 de
+      28** (2026-08-12): barras 2, número 4, nomes 5, mover 4. Faltam os 4 de
+      mover que sobram, os 7 de tática e os 2 de atributo
 - [ ] Comportamento de truncamento documentado por campo
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
@@ -168,7 +172,7 @@ e não que fiquem sem spec.
 
 | # | o que fecha | custo por ler | destrava |
 |---|---|---|---|
-| 9 | mover, a família de 4 (`paderecha`, `paizquierda`, `paderecha2`, `paizquierda2`) | **0 B** | `casilla_dorsalKeyPress` |
+| ~~9~~ | ~~mover, a família de 4~~ — **feita em 2026-08-12** | 881 B (a `0x00404374`, que o plano dava por medida e não estava) | `casilla_dorsalKeyPress` |
 | 10 | mover, os outros 4 (`parriba`, `pabajo`, `paderechaeizquierda`, `flechasapa`) | 1.738 B | — |
 | 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
 | 12 | atributos (`barrhabScroll`, `barrhab_bisScroll`) | 0 B | — |
@@ -942,3 +946,135 @@ do `--edicao`; e o `iguala_nombres`.
   layout e regra de erro medidos. Sobram delas `0x00407338` (561 B),
   `0x00407110` (552 B) e `0x00406fe0` (301 B), que são do `flechasapaClick` e
   do `parribaClick`, não da família de quatro botões.
+
+---
+
+- **Executado em:** 2026-08-12 — **nona passagem, ainda parcial.** A família de
+  quatro botões de mover jogador, com spec e Pascal. O grupo vai de **11 para
+  15 de 28**.
+
+- **Resumo do que foi feito:**
+
+  Os quatro — `paderechaClick`, `paizquierdaClick`, `paderecha2Click`,
+  `paizquierda2Click` — mais o buffer de 44 bytes, a `CarregaJogador`
+  (`0x004046e8`), a `PreparaBuffer` (`0x00404374`) e a `MostraCodigo`
+  (`0x00403e20`) com as duas mensagens.
+
+  **E a passagem começou custando 881 bytes que o plano dizia custar zero.** O
+  quadro das seis passagens afirmava "**0 B**, e não depende de mais nenhuma
+  leitura: as duas rotinas centrais foram medidas na sétima e na oitava
+  passagens". Não foi o que aconteceu: a sétima mediu a `0x004046e8` e a oitava
+  a `0x00404820`, mas as duas **chamam** a `0x00404374`, que nenhuma das duas
+  leu — ela é quem calcula a identidade, o tipo e as três colunas de offset.
+  Sem ela, "a comparação de identidade (`+0x16`, `+0x17`)" que o plano mandava
+  escrever seria comparar dois campos sem saber o que os enche.
+
+  É o mesmo erro de forma da sexta passagem, uma camada acima: **rotina que já
+  apareceu na lista de auxiliares não é rotina já lida**, e um plano escrito a
+  partir de "as centrais estão medidas" não olha a lista de chamadas delas.
+
+- **A identidade é um par de bytes, e o que ele significa muda com o time.**
+  Lido da `0x00404374`:
+
+  - seleção (índice `< 63`): identidade é literalmente `(time, slot)`;
+  - clube de ML: identidade é o **par de vínculo** que a imagem guarda para
+    aquele slot, lido do arquivo byte a byte — o mesmo par que o
+    `ResolveMlLink` do `we2002_core` consome, com o mesmo `>= 23` separando
+    vínculo de bloco próprio.
+
+  Daí sai a regra do `-2` inteira: dois clubes de ML que apontem para o mesmo
+  jogador de seleção têm a mesma identidade, e mover um para o outro é
+  recusado. Comparar índice resolvido daria o mesmo resultado hoje; o original
+  compara o par, e é o par que está reproduzido.
+
+- **O achado que vale para outra task: os dois oráculos concordam na REGRA do
+  campo condicional e discordam do ENDEREÇO.**
+
+  A `0x00404374` zera a coluna `+0x28` — "este jogador não tem o campo na
+  imagem", e aí a `0x004046e8` escreve o literal `50` — quando o índice do time
+  cai entre `0x35` e `0x38` exclusive, isto é, **54 ou 55**. O
+  `we2002_database.pas` gerado pula, ao carregar `cost`, exatamente os
+  jogadores **1704..1749** — que é `462 + 54*23` até `462 + 56*23 - 1`, os
+  mesmos dois times. Duas leituras independentes, mesma resposta sobre *quem*
+  não tem o campo.
+
+  Sobre *onde* ele está, elas divergem. O `wte.exe` calcula
+  `0x2ece0c + 23*time + slot + 2*(time div 56)`; o `we2002_core` lê a partir de
+  `OFS_COST_NATIONAL = 3067404 = 0x2ecc0c`, e põe o furo depois do time 53, não
+  depois do 55. Medido sobre a cópia em `work/` da ROM europeia, os 64 bytes em
+  cada um dos dois endereços são **diferentes**. Um dos dois está errado sobre
+  o formato, e o `we2002_core` é o que já é byte-idêntico ao `ed.exe`.
+
+  Encaminhado para a [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md), escrito
+  como pergunta na spec do `paderechaClick`. Nesta task nada lê o valor.
+
+- **Uma correção ao enunciado desta task, medida:** o `ficha_movertodos` **não
+  é a tela do `paderechaeizquierdaClick`**. Ele é a confirmação dos dois botões
+  de lote (`paderecha2Click`, `paizquierda2Click`) — o global `0x00432e48` que
+  os dois carregam é o `_ficha_movertodos` exportado pelo próprio `.exe`, e o
+  `paderechaeizquierdaClick` (`0x0040e304`) não toca nesse endereço. O
+  enunciado foi corrigido no lugar, com a medição.
+
+- **Os dois botões de lote não são o de um só num laço**, e as três diferenças
+  são medidas: eles perguntam antes (`ShowModal` = `6` = `mrYes`, o mesmo `6`
+  que o `.dfm` põe no `BitBtn1`), **descartam os 23 códigos de retorno** — mover
+  um elenco para um time que já tenha um daqueles jogadores não produz mensagem
+  nenhuma — e repovoam a lista de destino **incondicionalmente**.
+
+- **Três slots de VMT, medidos e não inferidos.** O corpo chama
+  `[vmt+0xc8]`, `[vmt+0xcc]` e `[vmt+0x88]` sobre os combos. Resolvidos no
+  `vcl60.bpl` pelo método que o `sonda_dorsal.py` já usava para o
+  `SetEnabled` — achar o VMT da classe e ler o slot: `TComboBox +0xc8` é
+  `TCustomCombo::GetItemIndex`, `+0xcc` é `SetItemIndex`, `+0x88` é
+  `TWinControl::Update`. E `TForm +0xe8` é `TCustomForm::ShowModal`, que
+  confirma de outro lado o `+0xe8` que o `dorsalClick` já usava.
+
+- **O que ficou de fora, com dono escrito:** a metade de gravação da
+  `0x00404820` — os 10 B de nome, os 12 de atributos, o byte condicional, o
+  número de camisa do slot 48, e a alocação de bloco de ML de onde sai o `-1`.
+  É a opção A da decisão de 2026-08-12: os quatro fecham esta passagem com
+  veredito `aberto` e a [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md)
+  os promove. Sem a gravação, a lista de destino não muda, e por isso o
+  `compara_tela.sh --edicao` não foi estendido a este lote — não haveria o que
+  medir.
+
+- **Uma lacuna declarada, e ela aparece na tela:** o `casilla_xmlibres` mostra
+  zero, porque o contador de blocos livres de ML é da
+  [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md). A linha do handler
+  que o exibe está escrita, com a variável existindo e o dono nomeado — omitir
+  a linha esconderia que o handler atualiza o rótulo.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/` — 4 specs novas (`MainForm.paderechaClick`,
+    `paizquierdaClick`, `paderecha2Click`, `paizquierda2Click`)
+  - `wte/re/spec/MainForm.mostrar_jugadorClick.md` — a única escrita do `.text`
+    em `BYTE[0x00423168]` está dentro daquele corpo (`0x0040fd7a`), junto com o
+    `+0x19 := 3` de `0x0040fd72`; registrado como medição, não como intenção
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `TBufferJogador`, `PreparaBuffer`,
+    `CarregaJogador`, `MostraCodigo`, `GravaJogador` (metade de validação),
+    `MoveUmJogador`, `MoveTodosOsJogadores`
+  - `wte/src/impl/` — os 4 `.inc`, mais `ep2002_mainform.uses`
+  - `wte/tools/dump_auxiliares.py` — papel da `0x00404374`; `auxiliares.md` e
+    `.tsv` regerados
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 85,2% → **82,1%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild wte/wte.lpi` rc 0;
+  `python3 -m unittest test_dump_auxiliares` 19 testes OK.
+
+- **Problemas encontrados:**
+  1. O custo de leitura anunciado pelo plano (**0 B**) estava errado por 881
+     bytes — ver o resumo. O quadro das seis passagens foi corrigido no lugar.
+  2. A primeira leitura do `paderechaClick` (sexta passagem) tratava o `1`/`2`
+     como modo; a sétima já corrigira para índice de buffer. Esta passagem
+     acrescenta o que faltava: o índice acompanha o **lado da tela**, não o
+     papel na operação — `paderecha` carrega o buffer 1 e recarrega o 2,
+     `paizquierda` faz o inverso. Ler como "origem/destino" fecharia igual nos
+     dois handlers e quebraria no `paderecha2`.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **13 dos 28 handlers**, sem spec: os 4 de mover que sobram (`parriba`,
+    `pabajo`, `paderechaeizquierda`, `flechasapa`), os 2 de atributo e os 7 de
+    tática — passagens 10 a 13 do plano de fechamento;
+  - o comportamento de truncamento por campo (WTE-TASK-36);
+  - estender o `--edicao` aos grupos que puderem ser medidos por tela.

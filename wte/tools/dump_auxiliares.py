@@ -129,6 +129,13 @@ PAPEIS: dict[int, str] = {
     0x00403F00: "le o numero de camisa e devolve **base um** (`inc eax` nos "
                 "tres ramos: time 48, clube de ML, selecao)",
     0x00404048: "grava o numero de camisa, desfazendo a base um (`add al,0xff`)",
+    0x00404374: "prepara um buffer de jogador: identidade (`+0x16`, `+0x17`), "
+                "tipo (`+0x19`) e as tres colunas de offset na imagem. A "
+                "identidade e `(time, slot)` para selecao e o PAR DE VINCULO "
+                "lido do arquivo para clube de ML; a coluna `+0x28` sai ZERO "
+                "para os times 54 e 55, que e o mesmo furo que o "
+                "`we2002_database.pas` pula ao carregar `cost` (jogadores "
+                "1704..1749)",
     0x004046E8: "carrega um jogador para o buffer de 44 bytes em `0x004335ec` "
                 "— 10 B de nome, 12 B de atributos, e 1 B que so existe se a "
                 "terceira coluna da tabela de offsets nao for zero (senao vai "

@@ -60,6 +60,14 @@ que aparece quando o jogador escolhido é de clube de Master League.
 > ficha grava? só grava ao fechar? — **continua sem medir**: exigiria seguir o
 > fluxo dos 1.459 bytes a partir daqui, e não só saber o que a rotina faz. Fica
 > como pergunta escrita, não como descrição plausível.
+>
+> **Mais um dado sobre o mesmo ponto, medido na nona passagem da WTE-TASK-26 e
+> igualmente sem conclusão:** dentro deste corpo, em `0x0040fd7a`, está a
+> **única** escrita do `.text` inteiro em `BYTE[0x00423168]` — a chave que
+> **desliga** a recusa de jogador repetido da `0x00404820`. Logo acima, em
+> `0x0040fd72`, ele marca um buffer com `+0x19 := 3`, o "slot vazio". Os dois
+> gestos juntos têm cara de preparar uma gravação que não deve ser recusada,
+> mas isso é leitura de intenção; o que está medido são as duas escritas.
 
 **Evidência:** disassembly lido
 

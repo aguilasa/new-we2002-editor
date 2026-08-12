@@ -287,6 +287,335 @@ var
   TimeEmEdicao: Integer = -1;
   JogadorEmEdicao: Integer = -1;
 
+{ ------------------------------------------------------------------------ }
+{ O BUFFER DE JOGADOR -- `0x004335ec`, registros de 44 bytes (WTE-TASK-26).
+
+  Nao e cache, pela mesma razao que o `BarrasEmEdicao` nao e: e o modelo em
+  memoria que os oito handlers de mover jogador leem e escrevem. O original
+  guarda tres em uso -- 0 e o DESTINO, 1 e o lado esquerdo da tela
+  (`lista_equipos_1`/`lista_jugadores_1`) e 2 e o direito. O indice NAO
+  distingue origem de destino: ele distingue LADO. `paderechaClick` carrega o
+  1 e grava a partir dele; `paizquierdaClick` carrega o 2 e grava a partir
+  dele; os dois terminam recarregando o buffer do lado que mudou.
+
+  O layout saiu de duas leituras independentes que fecharam nos oito
+  deslocamentos -- a leitora `0x004046e8` (setima passagem) e a escritora
+  `0x00404820` (oitava):
+
+    +0x00  10 B  nome
+    +0x0a  12 B  atributos
+    +0x16   1 B  identidade, primeiro byte
+    +0x17   1 B  identidade, segundo byte
+    +0x18   1 B  o campo condicional
+    +0x19   1 B  tipo
+    +0x1c   4 B  offset do nome na imagem
+    +0x20   4 B  offset dos atributos
+    +0x28   4 B  offset do condicional, ou ZERO se o campo nao existe
+
+  As tres colunas de offset (`+0x1c`, `+0x20`, `+0x28`) NAO sao portadas: sao
+  aritmetica sector-aware sobre a imagem, e o port le a camada de dados, que
+  ja e byte-identica ao `ed.exe`. O que se porta e o que elas SIGNIFICAM --
+  em particular `+0x28 = 0`, que quer dizer "este jogador nao tem o campo
+  condicional na imagem". }
+type
+  TBufferJogador = record
+    nome: array[0..10] of AnsiChar;       { +0x00, 10 B + terminador }
+    atributos: array[0..11] of ShortInt;  { +0x0a }
+    condicional: ShortInt;                { +0x18 }
+    ident_time: Byte;                     { +0x16 }
+    ident_slot: Byte;                     { +0x17 }
+    tipo: Byte;                           { +0x19 }
+    tem_condicional: Boolean;             { +0x28 <> 0 }
+  end;
+
+const
+  { Os tres buffers em uso. O original tem espaco para mais -- o corpo de
+    `0x00404374` trata `indice > 2` como "slot vazio" (`+0x16 := 0xff`,
+    `+0x19 := 3`) --, e quem usa isso e o preenchimento da ficha do jogador,
+    fora desta task. }
+  BUF_DESTINO  = 0;
+  BUF_ESQUERDA = 1;
+  BUF_DIREITA  = 2;
+
+  { O `+0x19`. Lido do `0x00404374`. }
+  TIPO_NACIONAL   = 0;  { selecao ou all-star: identidade = (time, slot)      }
+  TIPO_ML_VINCULO = 1;  { clube de ML apontando para um jogador de selecao    }
+  TIPO_ML_BLOCO   = 2;  { clube de ML com bloco proprio                       }
+
+  { Os codigos que `0x00404820` devolve e que `0x00403e20` traduz em mensagem. }
+  COD_MESMO_JOGADOR  = -2;
+  COD_SEM_BLOCO_ML   = -1;
+  COD_GRAVOU         =  1;
+
+  { O `0x32` que a `0x004046e8` escreve quando o campo condicional nao existe
+    na imagem para aquele jogador. }
+  CONDICIONAL_AUSENTE = 50;
+
+  { Os dois times cujos jogadores NAO tem o campo condicional.
+
+    Medido nos dois oraculos, por caminhos independentes, e eles concordam:
+    o `0x00404374` zera o offset quando o indice do time cai entre 0x35 e
+    0x38 exclusive -- isto e, 54 ou 55 --, e o `we2002_database.pas` pula os
+    46 jogadores 1704..1749 ao carregar `cost`, que e exatamente
+    `462 + 54*23` ate `462 + 56*23 - 1`. Os dois primeiros times all-star. }
+  TIMES_SEM_CONDICIONAL = [54, 55];
+
+var
+  BufferJogador: array[BUF_DESTINO..BUF_DIREITA] of TBufferJogador;
+
+  { O `BYTE[0x00423168]`: desliga a recusa de jogador repetido.
+
+    Nasce zero no arquivo e ha UMA escrita no `.text` inteiro -- `mov BYTE
+    ds:0x423168,1` em `0x0040fd7a`, dentro do corpo do `mostrar_jugadorClick`
+    (`0x0040f8d4`..`0x00410220`), na mesma vizinhanca em que ele marca um
+    buffer como vazio. Nenhum outro `mov` alcanca o endereco.
+
+    Aqui ele so existe e continua False: quem o ligaria e o preenchimento da
+    ficha do jogador, que ainda nao foi lido. Enquanto isso, a recusa `-2`
+    vale sempre -- como vale no original ate alguem abrir a ficha. }
+  IgnoraJogadorRepetido: Boolean = False;
+
+  { O contador de blocos de Master League livres -- o `WORD[0x004335c0]`.
+
+    QUEM O CALCULA E A [WTE-TASK-33]. Aqui ele existe porque os oito handlers
+    de mover o exibem no `casilla_xmlibres` ao terminar, e porque a recusa
+    `-1` o consulta. Enquanto a 33 nao rodar, ele vale zero e o rotulo mostra
+    zero -- lacuna declarada, com dono escrito, em vez de uma linha de
+    handler omitida em silencio. }
+  BlocosLivresDeMl: Word = 0;
+
+{ PreparaBuffer -- 0x00404374, 881 bytes.
+
+  Calcula, para o par (time, slot), a IDENTIDADE do jogador, o tipo e se o
+  campo condicional existe. NAO le nome nem atributos: quem faz isso e a
+  `CarregaJogador`, e a distincao importa -- a `0x00404820` chama esta aqui
+  para o buffer de destino e nunca le o conteudo dele.
+
+  A identidade e um par de bytes, e o que ele significa depende do time:
+
+  - selecao (indice < 63): e literalmente `(time, slot)`;
+  - clube de ML: e o PAR DE VINCULO que a imagem guarda para aquele slot. O
+    original le os dois bytes do arquivo; aqui eles vem de `link[slot*2]`, que
+    e o mesmo par que o `ResolveMlLink` do `we2002_core` consome.
+
+  E dai sai a regra de recusa do lote de mover: dois clubes de ML que apontem
+  para o mesmo jogador de selecao tem a MESMA identidade, e mover um para o
+  outro e recusado. Comparar indice resolvido daria o mesmo resultado; o
+  original compara o par, e e o par que esta reproduzido.
+
+  O segundo byte >= 23 e o que separa vinculo de bloco proprio -- o mesmo
+  `slot > 22` do `ResolveMlLink`. }
+procedure PreparaBuffer(indice, slot, buffer: Integer);
+var
+  vinculo: PByte;
+begin
+  if (buffer < BUF_DESTINO) or (buffer > BUF_DIREITA) then
+    Exit;
+  if indice < TIMES_NACIONAIS then
+  begin
+    BufferJogador[buffer].ident_time := Byte(indice);
+    BufferJogador[buffer].ident_slot := Byte(slot);
+    BufferJogador[buffer].tipo := TIPO_NACIONAL;
+  end
+  else
+  begin
+    if indice < IDX_MODELO_ML then
+      vinculo := @Jogo.ml_teams[indice - TIMES_NACIONAIS].link[slot * 2]
+    else
+      vinculo := @Jogo.ml_default.link[slot * 2];
+    BufferJogador[buffer].ident_time := vinculo[0];
+    BufferJogador[buffer].ident_slot := vinculo[1];
+    if vinculo[1] >= JOGADORES_POR_TIME then
+      BufferJogador[buffer].tipo := TIPO_ML_BLOCO
+    else
+      BufferJogador[buffer].tipo := TIPO_ML_VINCULO;
+  end;
+  BufferJogador[buffer].tem_condicional :=
+    (BufferJogador[buffer].tipo = TIPO_ML_BLOCO)
+    or not (BufferJogador[buffer].ident_time in TIMES_SEM_CONDICIONAL);
+end;
+
+{ CarregaJogador -- 0x004046e8, 164 bytes.
+
+  Enche um dos buffers com o jogador do par (time, slot): 10 bytes de nome,
+  12 de atributos e o byte condicional -- ou o literal 50 quando o campo nao
+  existe na imagem para aquele jogador.
+
+  O original le da imagem pelos offsets que a `PreparaBuffer` acabou de
+  calcular; aqui o dado vem da camada de dados, pelo mesmo motivo das barras e
+  do numero de camisa: e o mesmo byte, ja carregado (§4.2, §4.5 do plano).
+
+  O CAMPO CONDICIONAL TEM UMA DIVERGENCIA MEDIDA E AINDA SEM RESPOSTA, e ela
+  esta escrita na spec do `paderechaClick`: o `wte.exe` calcula o offset dele
+  em `0x2ece0c + 23*time + slot + 2*(time div 56)` e o `we2002_core` le a
+  mesma coisa a partir de `OFS_COST_NATIONAL = 3067404 = 0x2ecc0c`, com o furo
+  em outro lugar. Os dois discordam do ENDERECO e concordam na REGRA (quais
+  jogadores nao tem o campo). Aqui ele sai do `cost` do modelo, que e o campo
+  de mesmo papel, mesma largura e mesma ausencia; qual dos dois offsets esta
+  certo e pergunta da [WTE-TASK-30], e nada nesta task le o valor. }
+procedure CarregaJogador(indice, slot, buffer: Integer);
+var
+  k: LongInt;
+  b: Integer;
+begin
+  if (buffer < BUF_DESTINO) or (buffer > BUF_DIREITA) then
+    Exit;
+  PreparaBuffer(indice, slot, buffer);
+  k := IndiceDoJogador(indice, slot);
+  if (k < 0) or (k >= Length(Jogo.players)) then
+    Exit;
+  for b := 0 to 9 do
+    BufferJogador[buffer].nome[b] := Jogo.players[k].name[b];
+  BufferJogador[buffer].nome[10] := #0;
+  for b := 0 to 11 do
+    BufferJogador[buffer].atributos[b] := Jogo.players[k].raw_attributes[b];
+  if BufferJogador[buffer].tem_condicional then
+    BufferJogador[buffer].condicional := ShortInt(Jogo.players[k].cost)
+  else
+    BufferJogador[buffer].condicional := CONDICIONAL_AUSENTE;
+end;
+
+{ MostraCodigo -- 0x00403e20, 224 bytes.
+
+  Traduz o codigo que a rotina de gravacao devolveu em uma das duas mensagens
+  do usuario, no `ficha_error`. O original soma 2 ao codigo e indexa uma
+  tabela de salto de cinco entradas em `0x00403e46`; as tres ultimas (0, 1, 2)
+  apontam para a saida, e codigo fora de -2..2 nao entra na tabela -- a
+  comparacao e sem sinal, entao -3 vira um numero enorme e cai fora.
+
+  As duas cadeias sao as do binario, em `0x00424767` e `0x0042478d`, copiadas
+  caractere a caractere. }
+procedure MostraCodigo(codigo: Integer);
+begin
+  case codigo of
+    COD_MESMO_JOGADOR:
+      begin
+        ficha_error.etiq1.Caption := 'It''s the same player in both teams...';
+        ficha_error.ShowModal;
+      end;
+    COD_SEM_BLOCO_ML:
+      begin
+        ficha_error.etiq1.Caption :=
+          'You need at least 1 memory block free to do that';
+        ficha_error.ShowModal;
+      end;
+  end;
+end;
+
+{ GravaJogador -- 0x00404820, 1459 bytes. METADE ESCRITA, METADE DA WTE-TASK-27.
+
+  O que esta aqui e a metade que decide: prepara o buffer 0 com a identidade
+  do DESTINO e recusa com -2 quando ela bate com a do buffer de origem. A
+  regra tem uma valvula, e ela e do original: `IgnoraJogadorRepetido`.
+
+  O QUE NAO ESTA AQUI, e o dono esta nomeado: a gravacao. A rotina do original
+  escreve os 10 bytes de nome, os 12 de atributos e o byte condicional no
+  destino, direto no arquivo (`0x00403400`), mais o numero de camisa quando o
+  slot e o 48 (`0x00404048`); e, quando o destino e um clube de ML sem bloco
+  proprio, aloca um bloco livre, atualiza a tabela de vinculos e decrementa o
+  contador -- e dai sai o outro codigo de recusa, `-1`, quando nao ha bloco.
+  Isso e escrita na imagem, e a WTE-TASK-27 e a unica com gate por byte;
+  escrever aqui devolveria duas causas possiveis a cada golden vermelho, que e
+  o que a separacao entre a 26 e a 27 existe para evitar.
+
+  Consequencia, aceita e registrada (opcao A da decisao de 2026-08-12): os
+  handlers de mover ficam com veredito `aberto` ate a 27, como o
+  `dorsalClick`. }
+function GravaJogador(origem, indice, slot: Integer): Integer;
+begin
+  Result := COD_GRAVOU;
+  if (origem < BUF_DESTINO) or (origem > BUF_DIREITA) then
+    Exit;
+  PreparaBuffer(indice, slot, BUF_DESTINO);
+  if (BufferJogador[origem].ident_time = BufferJogador[BUF_DESTINO].ident_time)
+     and (BufferJogador[origem].ident_slot
+          = BufferJogador[BUF_DESTINO].ident_slot)
+     and not IgnoraJogadorRepetido then
+  begin
+    Result := COD_MESMO_JOGADOR;
+    Exit;
+  end;
+  { A GRAVACAO E DA WTE-TASK-27 -- ver o cabecalho. Ate la o retorno e o do
+    caminho feliz, e nenhum byte da imagem muda. }
+end;
+
+{ Os quatro botoes de mover jogador tem um so par de corpos, e as duas formas
+  abaixo sao esse par. O que muda entre `paderecha` e `paizquierda` e apenas
+  qual lado e a origem -- os buffers acompanham o LADO, nao o papel.
+
+  A GUARDA E LIDA ANTES DE QUALQUER COISA: o `ItemIndex` da lista de DESTINO,
+  que o repovoamento seguinte perderia. O original a restaura depois de
+  repovoar, e so entao recarrega o buffer daquele lado.
+
+  DIVERGENCIA DELIBERADA (WTE-TASK-35), de robustez: o original nao confere
+  `ItemIndex >= 0` em lugar nenhum, e com lista vazia calcularia offset a
+  partir de -1. Aqui os quatro saem sem fazer nada. Nao e alcancavel pela tela
+  com imagem carregada.
+
+  `ItemIndex :=` num `TComboBox` da LCL NAO dispara `OnChange` -- medido pelo
+  [`check_lcl_combo.py`](../../tools/check_lcl_combo.py), e e o mesmo que o
+  `SetItemIndex` da VCL fazia. Se disparasse, a restauracao da guarda
+  reentraria na carga de jogador. }
+procedure MoveUmJogador(equipos_org, jugadores_org,
+                        equipos_dst, jugadores_dst: TComboBox;
+                        buf_org, buf_dst: Integer);
+var
+  guarda, codigo: Integer;
+begin
+  guarda := jugadores_dst.ItemIndex;
+  if (equipos_org.ItemIndex < 0) or (jugadores_org.ItemIndex < 0)
+     or (equipos_dst.ItemIndex < 0) or (guarda < 0) then
+    Exit;
+  CarregaJogador(equipos_org.ItemIndex, jugadores_org.ItemIndex, buf_org);
+  codigo := GravaJogador(buf_org, equipos_dst.ItemIndex, guarda);
+  if codigo >= 0 then
+  begin
+    PreencheJogadores(jugadores_dst, equipos_dst.ItemIndex);
+    jugadores_dst.Update;
+    jugadores_dst.ItemIndex := guarda;
+    CarregaJogador(equipos_dst.ItemIndex, jugadores_dst.ItemIndex, buf_dst);
+  end;
+  MainForm.casilla_xmlibres.Caption := IntToStr(BlocosLivresDeMl);
+  MostraCodigo(codigo);
+end;
+
+{ A forma de LOTE -- os dois botoes `paderecha2`/`paizquierda2`.
+
+  TRES DIFERENCAS PARA A FORMA DE UM SO, e as tres sao medidas:
+
+  1. **Ela pergunta.** `ficha_movertodos` sobe como modal e o laco so roda se
+     o resultado for `mrYes` (o `6` que o `.dfm` poe no `BitBtn1`, e o mesmo
+     `cmp eax,0x6` do binario). Esta e a tela do lote de 23 -- NAO e a do
+     `paderechaeizquierdaClick`, que o enunciado da task atribuia a ela e que,
+     medido, nao a abre.
+  2. **Ela ignora o codigo de retorno.** As 23 gravacoes nao sao conferidas e
+     `MostraCodigo` nao e chamada: mover um elenco inteiro para um time que ja
+     tenha um daqueles jogadores nao produz mensagem nenhuma.
+  3. **Ela repovoa sempre**, sem depender de o lote ter dado certo. }
+procedure MoveTodosOsJogadores(equipos_org, equipos_dst,
+                               jugadores_dst: TComboBox;
+                               buf_org, buf_dst: Integer);
+var
+  guarda, slot: Integer;
+begin
+  guarda := jugadores_dst.ItemIndex;
+  if (equipos_org.ItemIndex < 0) or (equipos_dst.ItemIndex < 0)
+     or (guarda < 0) then
+    Exit;
+  if ficha_movertodos.ShowModal <> mrYes then
+    Exit;
+  for slot := 0 to JOGADORES_POR_TIME - 1 do
+  begin
+    CarregaJogador(equipos_org.ItemIndex, slot, buf_org);
+    GravaJogador(buf_org, equipos_dst.ItemIndex, slot);
+  end;
+  PreencheJogadores(jugadores_dst, equipos_dst.ItemIndex);
+  jugadores_dst.Update;
+  jugadores_dst.ItemIndex := guarda;
+  CarregaJogador(equipos_dst.ItemIndex, jugadores_dst.ItemIndex, buf_dst);
+  MainForm.casilla_xmlibres.Caption := IntToStr(BlocosLivresDeMl);
+end;
+
 { Qual lado da tela disparou -- titular ou reserva.
 
   O original NAO compara o ponteiro do `Sender` com o do botao: ele le o campo

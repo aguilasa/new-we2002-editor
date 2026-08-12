@@ -10,3 +10,6 @@ StdCtrls         # TComboBox nos auxiliares
 ep2002_jugador   # jugador.ShowModal
 ep2002_estrategia # estrategia.ShowModal
 ep2002_dorsal   # ficha_dorsal.ShowModal, no dorsalClick
+ep2002_error    # ficha_error.etiq1, no MostraCodigo
+ep2002_movertodos # ficha_movertodos.ShowModal, nos dois botoes de lote
+Controls        # mrYes

@@ -79,7 +79,7 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x0040423c` | 2 | 64 | `0x004042d4`, `0x00404820` | — |
 | `0x0040427c` | 2 | 87 | `0x00404820` | — |
 | `0x004042d4` | 1 | 159 | `MainForm.boton_dialogo_weClick`, `MainForm.FormShow` | — |
-| `0x00404374` | 2 | 881 | `0x004046e8`, `0x00404820`, `0x0040b2d8` | — |
+| `0x00404374` | 2 | 881 | `0x004046e8`, `0x00404820`, `0x0040b2d8` | prepara um buffer de jogador: identidade (`+0x16`, `+0x17`), tipo (`+0x19`) e as tres colunas de offset na imagem. A identidade e `(time, slot)` para selecao e o PAR DE VINCULO lido do arquivo para clube de ML; a coluna `+0x28` sai ZERO para os times 54 e 55, que e o mesmo furo que o `we2002_database.pas` pula ao carregar `cost` (jogadores 1704..1749) |
 | `0x004046e8` | 1 | 164 | `MainForm.mostrar_jugadorClick` | carrega um jogador para o buffer de 44 bytes em `0x004335ec` — 10 B de nome, 12 B de atributos, e 1 B que so existe se a terceira coluna da tabela de offsets nao for zero (senao vai 50) |
 | `0x00404820` | 1 | 1459 | `MainForm.mostrar_jugadorClick` | **grava** um jogador do buffer no destino — 10 B de nome, 12 B de atributos, e o byte condicional; recusa com `-2` se a identidade (`+0x16`, `+0x17`) do buffer bater com a do destino |
 | `0x00404dd4` | 2 | 154 | `0x00405270`, `0x00405468`, `0x004056c8` | — |
@@ -261,6 +261,15 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 - **Papel:** grava o numero de camisa, desfazendo a base um (`add al,0xff`)
 - **Chamada por:** `0x00404820`
+- **Chama internas:** nenhuma
+- **Importados:** nenhum
+- **Literais:** nenhum
+- **Globais da `.data`:** nenhuma
+
+### `0x00404374` — 881 bytes
+
+- **Papel:** prepara um buffer de jogador: identidade (`+0x16`, `+0x17`), tipo (`+0x19`) e as tres colunas de offset na imagem. A identidade e `(time, slot)` para selecao e o PAR DE VINCULO lido do arquivo para clube de ML; a coluna `+0x28` sai ZERO para os times 54 e 55, que e o mesmo furo que o `we2002_database.pas` pula ao carregar `cost` (jogadores 1704..1749)
+- **Chamada por:** `0x004046e8`, `0x00404820`, `0x0040b2d8`
 - **Chama internas:** nenhuma
 - **Importados:** nenhum
 - **Literais:** nenhum
