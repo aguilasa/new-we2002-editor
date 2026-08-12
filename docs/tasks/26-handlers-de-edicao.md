@@ -138,6 +138,91 @@ separadas (primeiro parágrafo do Contexto).
 - [ ] Nenhuma medição sobre `roms/` diretamente
 - [ ] Commit no formato conventional, em inglês
 
+## Plano de fechamento
+
+*(escrito em 2026-08-12, com 11 de 28 feitos. Os custos são medidos —
+`dump_auxiliares.py` e o tamanho de corpo do `published_methods.tsv` —, não
+estimados.)*
+
+### A decisão que o plano precisou primeiro: **opção A**, do usuário, 2026-08-12
+
+`0x00404820` **grava** (oitava passagem). Logo, os 8 handlers de mover são como
+o [`dorsalClick`](../../wte/re/spec/MainForm.dorsalClick.md): editam e escrevem
+no fim, e pela decisão (b) a metade de escrita é da
+[WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md).
+
+**Consequência: 9 dos 28 handlers — o `dorsalClick` e os 8 de mover — não
+chegam a `implementado` antes da 27.** Um terço da task.
+
+| opção | efeito | |
+|---|---|---|
+| **A** | manter a decisão (b): a 26 fecha com **9 `aberto` de dono nomeado**, e a 27 os promove | **escolhida** |
+| B | inverter 26 ↔ 27 e fechar tudo `implementado` aqui | descartada: refaz o grafo de dependências por causa de um lote |
+| C | abrir exceção e escrever a chamada de gravação só para esses 9 | descartada: reintroduz duas causas possíveis por golden vermelho, que é o que a (b) existe para evitar |
+
+**O critério "todo handler do grupo com spec" continua valendo integralmente**
+— o que a opção A admite é que 9 deles fechem esta task com veredito `aberto`,
+e não que fiquem sem spec.
+
+### As seis passagens
+
+| # | o que fecha | custo por ler | destrava |
+|---|---|---|---|
+| 9 | mover, a família de 4 (`paderecha`, `paizquierda`, `paderecha2`, `paizquierda2`) | **0 B** | `casilla_dorsalKeyPress` |
+| 10 | mover, os outros 4 (`parriba`, `pabajo`, `paderechaeizquierda`, `flechasapa`) | 1.738 B | — |
+| 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
+| 12 | atributos (`barrhabScroll`, `barrhab_bisScroll`) | 0 B | — |
+| 13 | tática (`0x0040a0b4` + os 7) | por medir | — |
+| 14 | os três critérios que sobram | — | fecha a task |
+
+**Passagem 9 — mover, a família de 4.** 312 a 314 bytes cada, e **não depende
+de mais nenhuma leitura**: as duas rotinas centrais foram medidas na sétima e
+na oitava passagens. O que ela precisa escrever no port:
+
+- `BufferJogador`, o registro de 44 bytes em três cópias (0 = destino, 1 e 2 =
+  os dois lados), com o layout que as duas leituras independentes confirmaram;
+- `CarregaJogador` — a `0x004046e8`;
+- a comparação de identidade (`+0x16`, `+0x17`) e o `MostraCodigo` da
+  `0x00403e20`, com as duas mensagens medidas.
+
+Fecha de tabela o [`casilla_dorsalKeyPress`](../../wte/re/spec/jugador.casilla_dorsalKeyPress.md):
+o buffer é exatamente o que faltava para ele avaliar a condição do `SetFocus`.
+
+**Passagem 10.** `parriba` 807 B, `flechasapa` 981 B, `paderechaeizquierda`
+425 B, `pabajo` 447 B. Por ler: `0x00407338` (561 B), `0x00407110` (552 B),
+`0x00406fe0` (301 B), `0x0040b934` (181 B), `0x00408460` (143 B).
+
+**Passagem 11.** `0x0040756c` não é handler — é pré-requisito: sem a ficha
+preenchida os dois handlers de atributo não são exercitáveis. Sai dela o valor
+de `DWORD[0x00433b48]`, que fecha o `iguala_nombresClick`, e o `50` do campo
+condicional, que é da [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
+
+**Passagem 12.** Mesma forma que as barras de força: devem escrever nos 12 bytes
+de atributo do buffer. Gate por `compara_tela.sh --edicao` sobre a ficha.
+
+**Passagem 13.** O risco real do plano — ver abaixo.
+
+**Passagem 14.** Truncamento por campo (já com uma divergência achada: o port
+não põe `MaxLength` em `edit_nombre1/2`); consolidação das sequências de clique
+do `--edicao`; e o `iguala_nombres`.
+
+### Riscos, e o que cada um custa se acontecer
+
+1. **Drag-and-drop LCL × VCL** (passagem 13). `OnDragOver`/`OnDragDrop` não têm
+   a mesma ordem de evento nos dois frameworks, e é o único ponto do plano onde
+   a régua de pixel pode não valer. **A WTE-TASK-13 mediu ordem de evento —
+   usar aquela medição, não supor.** Se divergir, o lote de tática vira
+   divergência deliberada registrada em vez de paridade.
+2. **`iguala_nombres` pode não fechar.** Três hipóteses já caíram. A próxima
+   linha é comparar o que a LCL desenha para `TSpeedButton` desabilitado **com
+   e sem** `ParentFont = False` — a única diferença que sobrou entre ele e o
+   vizinho que acinzenta certo. Se não fechar, vira entrada da
+   [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md), com dono escrito.
+3. **Cada lote novo custa uma varredura de coordenada** para o `--edicao`. A
+   das barras precisou varrer `y` para achar a trilha, porque a janela do port
+   deriva ~6 px descendo (o `calibra()` já media isso). Não é acidente: é o
+   preço fixo de estender a régua a um grupo novo.
+
 ## Log de Execução *(preenchido após execução)*
 
 - **Executado em:** 2026-08-12 — **primeira passagem, parcial.** A tarefa
