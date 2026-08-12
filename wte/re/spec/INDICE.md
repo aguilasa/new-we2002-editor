@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 9 |
+| `implementado` | 11 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 73 |
+| `aberto` | 71 |
 | **total** | **96** |
 
-46 de 96 têm arquivo de spec.
+48 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -66,8 +66,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00406f34` | `ficha_color` | SpeedButton1Click | OnClick | auxiliar | aberto |
 | `0x00407a68` | `jugador` | BitBtn2Click | OnClick | auxiliar | aberto |
 | `0x00407a80` | `jugador` | BitBtn1Click | OnClick | auxiliar | aberto |
-| `0x00407a88` | `jugador` | barrhabScroll | OnScroll x9 | edicao | aberto |
-| `0x00407bb4` | `jugador` | barrhab_bisScroll | OnScroll x7 | edicao | aberto |
+| `0x00407a88` | `jugador` | [barrhabScroll](jugador.barrhabScroll.md) | OnScroll x9 | edicao | implementado |
+| `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408088` | `jugador` | flechasapaClick | OnClick x12 | edicao | aberto |
 | `0x00408548` | `jugador` | BitBtn3Click | OnClick | auxiliar | aberto |

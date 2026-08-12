@@ -1619,3 +1619,77 @@ do `--edicao`; e o `iguala_nombres`.
   alguém quiser gate de pixel ali, o caminho medido é a **assinatura de cor**
   dos 16 `valorhab` — quais saem amarelos —, que é robusta a fonte e a
   widgetset; a largura de `imghab` não é caminho.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima sexta passagem: os dois handlers de
+  atributo, e eles são os primeiros do lote que fecham `implementado`.** O
+  grupo vai de **18 para 20 de 28**; o índice a **11 `implementado`** de 96.
+
+- **As duas conferências prometidas vieram antes do Pascal, e as duas
+  mudaram o que seria escrito.**
+
+  **1. Eles não gravam.** O inventário de chamadas dos 300 bytes de cada um
+  alcança `FindComponent`, `IntToStr`, `Copy`, `TControl::SetText`,
+  `TControl::SetWidth` e a rotina de cor `0x00406fb4` — e **nenhuma** escritora
+  de imagem. É o único lote desta task que fecha sem depender da
+  [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), e por isso os dois
+  saem `implementado` em vez de `aberto` como todos os anteriores.
+
+  **2. `TScrollBar.Position :=` DISPARA `OnChange` na LCL.** Medido, não
+  suposto, estendendo o `check_lcl_combo.py` de cinco casos para oito: o
+  `TScrollBar` dispara (e só quando o valor muda de verdade) e o `TUpDown`
+  **não** dispara o `OnClick`. É a resposta oposta à do `TComboBox` e a mesma
+  do `TTrackBar` da segunda passagem.
+
+  Consequência escrita no código: o `PreencheFicha` **reentra** nos dezesseis
+  `barrhabScroll` ao encher a ficha, cada reentrada reescrevendo rótulo,
+  largura e cor com o mesmo valor. A tela não muda; a contagem de disparos no
+  trace muda, e é isso que um gate de trace sobre a ficha teria de esperar. As
+  duas escritas continuam necessárias — quando o valor já é o que estava lá, o
+  `OnChange` não dispara e só a do preenchimento acontece.
+
+- **O achado do lote: `barrhab_bisScroll` não é outra família de controles.**
+
+  Os dois corpos têm 300 bytes e o **mesmo** conjunto de chamadas, símbolo por
+  símbolo. A única diferença é o comprimento do `Copy` sobre o nome do
+  componente: `Copy(Sender.Name, 8, 1)` no primeiro e `Copy(..., 8, 2)` no
+  segundo. `barrhab` tem sete caracteres, então a posição 8 é o primeiro
+  dígito — um serve `barrhab1..9` e o outro `barrhab10..16`.
+
+  **É a largura do número.** O `.lfm` tem exatamente 16 `barrhab`, de 1 a 16, e
+  nenhum `barrhab_bis`. Ler o par como "as barras normais e as outras" mandaria
+  procurar um segundo grupo de controles que não existe — e o nome do handler é
+  o único lugar onde essa leitura errada é convidada.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/jugador.barrhabScroll.md`, `jugador.barrhab_bisScroll.md`
+  - `wte/src/impl/ep2002_jugador.aux.inc` — `AtualizaHabilidade`, o corpo comum
+  - `wte/src/impl/ep2002_jugador.barrhabScroll.inc`, `.barrhab_bisScroll.inc`
+  - `wte/src/impl/ep2002_jugador.uses`
+  - `wte/tests/test_lcl_combo.pas` — os três casos novos
+  - `wte/tools/check_lcl_combo.py` — os vereditos medidos, e a mensagem de
+    sucesso deixou de dizer "nenhum dispara", que passou a ser falso
+  - `wte/src/impl/ep2002_mainform.aux.inc` — a reentrância anotada no
+    `PreencheFicha`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 79,1% → **78,5%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 478 testes, OK; `check_lcl_combo` com oito
+  casos verdes.
+
+- **Problemas encontrados:** a mensagem de sucesso do `check_lcl_combo.py`
+  afirmava "nenhum dispara `OnChange` por atribuição". Com o `TScrollBar` medido
+  ela virou mentira **enquanto os vereditos passavam** — guarda verde dizendo o
+  contrário do que mediu. Trocada.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **8 dos 28 handlers**: o `flechasapaClick` (981 B mais a `0x00408460`, 143 B
+    — as outras três auxiliares dele já foram lidas na passagem 11) e os 7 de
+    tática, atrás do `0x0040a0b4` (1.443 B);
+  - as legendas dos campos enumerados da ficha (`0x00401db6`), que hoje mostram
+    o texto de projeto do `.lfm`;
+  - o truncamento por campo (WTE-TASK-36);
+  - a régua de tela da ficha, se alguém a quiser: pela assinatura de cor dos 16
+    `valorhab`, não pela largura de `imghab`.

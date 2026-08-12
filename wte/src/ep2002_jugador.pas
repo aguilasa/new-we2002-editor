@@ -29,7 +29,7 @@ interface
 
 uses
   Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
-  Graphics, we2002_estado;
+  Controls, Graphics, we2002_estado;
 
 type
   Tjugador = class(TForm)
@@ -325,6 +325,10 @@ implementation
 
 {$R ../forms/ep2002_jugador.lfm}
 
+{ Rotinas internas que o original chama de mais de um handler -- nao sao
+  metodo publicado, e por isso nao estao na classe. Ver wte/src/impl/README.md. }
+{$I impl/ep2002_jugador.aux.inc}
+
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn2Click(Sender: TObject);
 begin
@@ -339,21 +343,13 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.barrhabScroll(Sender: TObject; ScrollCode: TScrollCode;
   var ScrollPos: Integer);
-begin
-  REStub('jugador.barrhabScroll');
-end;
-{$POP}
+{$I impl/ep2002_jugador.barrhabScroll.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.barrhab_bisScroll(Sender: TObject; ScrollCode: TScrollCode;
   var ScrollPos: Integer);
-begin
-  REStub('jugador.barrhab_bisScroll');
-end;
-{$POP}
+{$I impl/ep2002_jugador.barrhab_bisScroll.inc}
 
 procedure Tjugador.FormCreate(Sender: TObject);
 {$I impl/ep2002_jugador.FormCreate.inc}

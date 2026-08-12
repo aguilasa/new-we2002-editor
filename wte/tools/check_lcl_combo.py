@@ -70,6 +70,18 @@ ESPERADO = {
     "Items-Clear-com-selecao": "nao-disparou",
     "ItemIndex-apos-reencher": "nao-disparou",
     "ItemIndex-menos-um": "nao-disparou",
+    # Medido na decima sexta passagem da WTE-TASK-26, e a resposta e OPOSTA a
+    # do combo: `TScrollBar.Position :=` DISPARA `OnChange`, e so quando o
+    # valor muda de verdade. Consequencia direta: o `PreencheFicha` reentra nos
+    # dezesseis `barrhabScroll` ao encher a ficha, e cada reentrada reescreve
+    # o rotulo, a largura e a cor que o preenchimento acabou de escrever --
+    # com o mesmo valor, entao a tela nao muda, mas uma contagem de trace muda.
+    # E a mesma resposta que o `TTrackBar` deu na segunda passagem.
+    "ScrollBar-Position-atribuida": "disparou",
+    "ScrollBar-Position-igual-a-atual": "nao-disparou",
+    # O `TUpDown` NAO dispara o `OnClick` por atribuicao, entao os doze
+    # `flechasapa` do segundo laco nao reentram.
+    "UpDown-Position-atribuida": "nao-disparou",
 }
 
 WIDGETSET = "gtk2"
@@ -203,7 +215,8 @@ def main(argv: list[str]) -> int:
               "revisao antes de isto virar verde de novo", file=sys.stderr)
         return 2
     print(f"check_lcl_combo: {len(ESPERADO)} casos, LCL {dfm2lfm.LCL_VERSAO}/"
-          f"{WIDGETSET}: nenhum dispara `OnChange` por atribuicao")
+          f"{WIDGETSET}: `TComboBox` e `TUpDown` nao disparam por "
+          "atribuicao; `TScrollBar.Position :=` DISPARA")
     return 0
 
 

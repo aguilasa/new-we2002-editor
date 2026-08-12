@@ -1,7 +1,8 @@
 # Unidades que os corpos de `impl/ep2002_jugador.*.inc` pedem, alem das que o
 # gerador ja deduz dos componentes e das assinaturas.
-SysUtils       # IntToStr
+SysUtils       # IntToStr, Copy
 Classes        # TComponent
+Controls       # TControl.Width
 Graphics       # TColor
 retrace        # REMark
 we2002_estado  # TimeEmEdicao, JogadorEmEdicao, JogadorTemCampoCondicional

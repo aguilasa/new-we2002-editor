@@ -753,7 +753,17 @@ const
     valorapa<n>   TLabel      Caption  := ver abaixo
 
   O `12 +` e o `>= 5` sao do original; o `7*v + 8` e a largura da barrinha, da
-  mesma familia do `11*v + 9` das barras de forca do time. }
+  mesma familia do `11*v + 9` das barras de forca do time.
+
+  ELE REENTRA NOS DEZESSEIS `barrhabScroll`, e isso e medido, nao suposto:
+  `TScrollBar.Position :=` DISPARA `OnChange` na LCL -- e so quando o valor
+  muda de verdade --, enquanto `TUpDown.Position :=` nao dispara o `OnClick`
+  (`wte/tools/check_lcl_combo.py`). Cada reentrada reescreve rotulo, largura e
+  cor com o MESMO valor, entao a tela nao muda; o que muda e a contagem de
+  disparos, e e isso que um gate de trace sobre a ficha tem de esperar.
+
+  As duas escritas continuam necessarias: quando o valor ja e o que estava la,
+  o `OnChange` nao dispara e so a daqui acontece. }
 procedure PreencheFicha(const p: TPlayer; indice, slot: Integer);
 
   function Controle(const prefixo: string; n: Integer): TComponent;

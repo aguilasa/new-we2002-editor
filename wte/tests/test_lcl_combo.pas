@@ -25,13 +25,14 @@ program test_lcl_combo;
 {$mode objfpc}{$H+}
 
 uses
-  Interfaces, Forms, StdCtrls, Classes, SysUtils;
+  Interfaces, Forms, StdCtrls, ComCtrls, Classes, SysUtils;
 
 type
   TSonda = class
   public
     Disparos: Integer;
     procedure AoMudar(Sender: TObject);
+    procedure AoClicarSeta(Sender: TObject; Button: TUDBtnType);
   end;
 
 procedure TSonda.AoMudar(Sender: TObject);
@@ -39,9 +40,18 @@ begin
   Inc(Disparos);
 end;
 
+{ O `OnClick` do `TUpDown` tem assinatura propria -- e o evento que os doze
+  `flechasapa` do formulario `jugador` usam. }
+procedure TSonda.AoClicarSeta(Sender: TObject; Button: TUDBtnType);
+begin
+  Inc(Disparos);
+end;
+
 var
   Form: TForm;
   Combo: TComboBox;
+  Barra: TScrollBar;
+  Seta: TUpDown;
   Sonda: TSonda;
 
 procedure Relata(const Caso: string; Antes: Integer);
@@ -94,6 +104,34 @@ begin
   Marca := Sonda.Disparos;
   Combo.ItemIndex := -1;
   Relata('ItemIndex-menos-um', Marca);
+
+  { 6 e 7. Os dois controles que o `PreencheFicha` da WTE-TASK-26 escreve, e a
+    pergunta e a mesma do combo com outra consequencia: se `Position :=`
+    dispara, encher a ficha REENTRA nos dezesseis `barrhabScroll` e nos doze
+    `flechasapaClick`, e cada um deles reescreve o rotulo que o preenchimento
+    acabou de escrever. O `TTrackBar` ja respondeu "dispara" na segunda
+    passagem daquela task; nao da para supor que estes tres concordem. }
+  Barra := TScrollBar.Create(Form);
+  Barra.Parent := Form;
+  Barra.Min := 0;
+  Barra.Max := 7;
+  Barra.OnChange := @Sonda.AoMudar;
+  Marca := Sonda.Disparos;
+  Barra.Position := 5;
+  Relata('ScrollBar-Position-atribuida', Marca);
+
+  Marca := Sonda.Disparos;
+  Barra.Position := 5;
+  Relata('ScrollBar-Position-igual-a-atual', Marca);
+
+  Seta := TUpDown.Create(Form);
+  Seta.Parent := Form;
+  Seta.Min := 0;
+  Seta.Max := 7;
+  Seta.OnClick := @Sonda.AoClicarSeta;
+  Marca := Sonda.Disparos;
+  Seta.Position := 3;
+  Relata('UpDown-Position-atribuida', Marca);
 
   Sonda.Free;
   Form.Free;
