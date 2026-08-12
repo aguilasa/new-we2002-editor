@@ -202,10 +202,23 @@ estava errada, e medido em 2026-08-12:** dos três handlers do `MainForm`
 corpo, e portanto está bloqueado no mesmo preenchimento de ficha que os lotes de
 atributo e de tática.
 
+**Ressalva acrescentada na décima primeira passagem:** dizer "são do
+`flechasapaClick`" sugeria exclusividade, e três delas não são exclusivas —
+`0x00406fe0`, `0x00407110` e `0x00407338` são chamadas **também** pelo
+`0x0040756c`, o preenchimento da ficha. Só a `0x00408460` (143 B) é só dele. Lê-las
+serve aos dois, e por isso elas entram na passagem 11 e não custam duas vezes.
+
 **Passagem 11.** `0x0040756c` não é handler — é pré-requisito: sem a ficha
 preenchida os dois handlers de atributo não são exercitáveis. Sai dela o valor
 de `DWORD[0x00433b48]`, que fecha o `iguala_nombresClick`, e o `50` do campo
 condicional, que é da [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
+
+**Custo real, medido em 2026-08-12: 3.003 B, não 1.275.** O corpo chama cinco
+rotinas internas — `0x00403278` (270), `0x00406fb4` (44), `0x00406fe0` (301),
+`0x00407110` (552) e `0x00407338` (561) —, e o número do plano contava só o
+corpo. Mesma forma do erro da passagem 9. **Mas a leitura mudou de tamanho para
+melhor**: ver o Log da décima primeira passagem — o mapeamento de bit é tabela
+de dados, não código, e ele já bate com o port.
 
 **Passagem 12.** Mesma forma que as barras de força: devem escrever nos 12 bytes
 de atributo do buffer. Gate por `compara_tela.sh --edicao` sobre a ficha.
@@ -1197,3 +1210,96 @@ do `--edicao`; e o `iguala_nombres`.
   - estender o `--edicao` à lista de descarte, que é o único gate de tela que o
     lote de mover pode ter antes da 27 — o `parribaClick` é o único handler dele
     que não grava.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima primeira passagem: abertura do
+  preenchimento da ficha.** Nenhum handler novo; o produto é uma conferência
+  que apaga a maior parte do trabalho previsto para as passagens 11 e 12.
+
+- **O custo era 1.275 B e é 3.003 B — e não importa, porque a leitura mudou de
+  natureza.**
+
+  O plano cobrava o corpo do `0x0040756c`. Ele chama cinco rotinas internas, e
+  desta vez a lista saiu de ferramenta antes de qualquer leitura, como
+  combinado depois da nona passagem:
+
+  | rotina | bytes | o que é |
+  |---|---|---|
+  | `0x00403278` | 270 | extrai `n` bits a partir do bit `w` do par de bytes `(b1, b2)` |
+  | `0x00406fb4` | 44 | cor da fonte de um rótulo: amarelo se o valor ≥ 5, branco se não |
+  | `0x00406fe0` | 301 | carrega um `.bmp` de `<cwd>\image` |
+  | `0x00407110` | 552 | idem, de `<cwd>\image\pelo` |
+  | `0x00407338` | 561 | idem, de `<cwd>\image\barba` |
+
+- **O achado: o mapeamento de bit não está no código, está em duas tabelas.**
+
+  O `0x0040756c` não traz deslocamento de bit nenhum. Ele percorre dois vetores
+  de registros de 12 bytes em `.data` — `{byte, bit inicial, largura}` — e passa
+  cada registro ao extrator:
+
+  | tabela | endereço | registros | o que descreve |
+  |---|---|---|---|
+  | habilidades | `0x00423648` | 16 | os atributos de 3 bits |
+  | aparência | `0x00423708` | 12 | posição, cabelo, barba, altura, idade, pé… |
+
+  Ler uma tabela é um `struct.unpack_from` num laço. Era isso, e não 1.275 bytes
+  de disassembly, o que estava atrás da passagem 11.
+
+- **E os 28 registros batem com o `TPlayer.Decode` do port, um a um.**
+
+  As duas descrições do formato são **independentes**: uma é tabela de dados do
+  `wte.exe` do Obocaman, a outra são expressões `shr`/`and` herdadas do `ed.exe`
+  pelo `we2002_core`. Elas concordam nos 28 — inclusive nos sete campos que
+  atravessam fronteira de byte, onde a máscara se parte em duas.
+
+  **Consequência prática: o port não precisa de lógica de bit nova para a
+  ficha.** A camada de dados já a tem, e agora isso é medido em vez de suposto —
+  que é a diferença entre "provavelmente dá para reusar" e um gate de build.
+
+  Virou o [`check_bitfields.py`](../../wte/tools/check_bitfields.py), que lê as
+  duas tabelas do `.exe`, gera a expressão canônica de cada registro e exige que
+  ela esteja no `we2002_player.pas`. `make -C wte check` o roda. Testado contra
+  três erros plantados antes de entrar: endereço de tabela deslocado em 4 bytes
+  (recusa por largura impossível), deslocado em 8 (idem), e máscara errada na
+  fórmula (recusa por divergência, nomeando os campos).
+
+  O único campo do `TPlayer` sem registro é o `number` — o número de camisa tem
+  tela própria (`ficha_dorsal`) e a ficha do jogador não o mostra.
+
+- **Um buraco de escopo, sem dono:** as três rotinas de bitmap carregam
+  `image\pelo` e `image\barba` para a ficha do jogador. A
+  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) cobre `uniformes2d` e
+  `banderas` — cabelo e barba não estão no escopo dela, nem no de nenhuma outra
+  task. **Não inventei um dono**: fica registrado aqui como achado, e a decisão
+  de onde pôr é do usuário. O preenchimento da ficha funciona sem eles (são dois
+  `TImage`), então isto não bloqueia a passagem 12.
+
+- **Uma correção à décima passagem:** dizer que `0x00406fe0`, `0x00407110` e
+  `0x00407338` "são do `flechasapaClick`" sugeria exclusividade. Elas são
+  chamadas **também** pelo `0x0040756c`; só a `0x00408460` (143 B) é exclusiva
+  daquele handler. Corrigido no quadro.
+
+- **O que ficou sem medir, e está dito assim:** o terceiro endereço que o corpo
+  carrega, `0x00423798`, lido com o mesmo layout de 12 bytes sai **todo zero** —
+  o layout não vale ali. Não virou uma terceira tabela inventada; virou uma
+  linha no `bitfields.md` dizendo que continua por medir.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/check_bitfields.py` — novo, com `--check`
+  - `wte/re/bitfields.md`, `wte/re/bitfields.tsv` — gerados
+  - `docs/tasks/26-handlers-de-edicao.md` — o custo real da passagem 11, a
+    ressalva da 10, este log
+
+- **Gates medidos:** `make -C wte check` rc 0 (o alvo já pega o gerador novo
+  pelo wildcard); `python3 -m unittest` em `tools/`: 478 testes, OK.
+
+- **O que a passagem 12 herda:** o que falta do `0x0040756c` é **casar cada
+  registro com o controle da tela que o recebe** — a ordem dos registros é a
+  ordem de consumo, e os controles saem das chamadas de `SetText`/`SetItemIndex`
+  do corpo. Isso é leitura de código, mas de um corpo cuja aritmética já está
+  resolvida. Junto vem o bloco final, que já está lido: quando
+  `DWORD[0x00433614 + 4*global]` é zero, o campo condicional recebe um literal e
+  o controle é **desabilitado** (`call [ecx+0x64]`, o `SetEnabled` virtual) — é a
+  mesma condição do `casilla_dorsalKeyPress` e o `50` da
+  [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
