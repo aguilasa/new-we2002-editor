@@ -380,9 +380,27 @@ def montagem(oraculo, port, destino: Path) -> None:
 def calibra(img, rotulo: str) -> tuple[int, int]:
     """`(dx, dy)` do cliente dentro da janela capturada, pela ancora `barra0`.
 
-    O oraculo da (0, 0) e o port da (6, 6): o gtk2 desenha uma borda que o Wine
-    nao desenha. Sem isso, comparar um retangulo de DFM no port compara a
-    vizinhanca dele.
+    O oraculo da (0, 0) e o port da (6, 6) mais ou menos, e o "mais ou menos" e
+    o problema: ISTO NAO E UM DESLOCAMENTO, E UMA ESCALA.
+
+    A explicacao antiga -- "o gtk2 desenha uma borda que o Wine nao desenha" --
+    foi escrita na segunda passagem da WTE-TASK-26 a partir de uma amostra perto
+    do topo da janela, e ela nao sobrevive a medicao da decima terceira: o
+    `wte.lpr` faz `Application.Scaled := True`, e a janela do port sai
+    **1,0421 vez** a do projeto. Medido no `:99`: 544x495 contra os 522x475 que
+    o `.lfm` declara, e os dois quocientes batem na quarta casa.
+
+    E isso explica o que a borda nao explicava. A propria segunda passagem
+    registrou que "a diferenca cresce descendo a janela" e escolheu `y = 200`
+    como intersecao para a `track_barra`; o controle esta em `y = 192` no
+    projeto, e `192 * 0,0421 = 8,1` -- exatamente a deriva observada. Borda e
+    constante; escala nao.
+
+    Enquanto o alvo for um controle so, perto do topo, o deslocamento constante
+    passa. Para um recorte grande -- a ficha do jogador, com 16 barrinhas cuja
+    LARGURA e o que se mede -- ele deixa de passar: uma largura de `7*v + 8`
+    chega ao port multiplicada por 1,0421, e a comparacao acusaria divergencia
+    onde ha so escala.
     """
     topo = img.crop((0, 0, min(FAIXA_X[1] + 20, img.width),
                      min(REC_ALTURA_MEDIDA, img.height)))

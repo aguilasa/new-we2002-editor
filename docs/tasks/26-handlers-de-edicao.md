@@ -1413,3 +1413,82 @@ do `--edicao`; e o `iguala_nombres`.
   - o comportamento de truncamento por campo (WTE-TASK-36);
   - a régua de tela: o `--edicao` não alcança nem a lista de descarte nem a
     ficha.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima terceira passagem: a régua de tela
+  para a ficha, e por que ela não pode ser escrita como as outras.** Nenhum
+  handler novo; o produto é uma medição que corrige uma explicação errada já
+  no código.
+
+- **A tentativa:** estender o `compara_tela.sh --edicao` à ficha do jogador. O
+  motivo era o saldo — o `PreencheFicha` da passagem anterior enche 44
+  controles a partir de duas tabelas lidas do disassembly, e **nada tinha
+  medido isso**. Índice trocado ali dá número plausível no rótulo errado, que é
+  o defeito sem sintoma.
+
+- **A sondagem falhou, e o modo como ela falhou é o achado.** Cliquei em 21
+  posições em volta de onde o `.lfm` põe o `mostrar_jugador_1` — `GroupBox1`
+  em `(8, 320)` mais `(8, 72)`, ou seja `(16, 392)` no cliente. Nenhuma
+  disparou o handler; a última abriu o **`estrategia`**, que é o
+  `mostrar_estrategia_1`, o botão 32 px ACIMA. O alvo estava sistematicamente
+  mais abaixo do que a conta dizia.
+
+- **A causa: `Application.Scaled := True`, no `wte.lpr`.**
+
+  A janela do port sai **1,0421 vez** a do projeto. Medido no `:99`: **544×495**
+  contra os **522×475** que o `.lfm` declara — e os dois quocientes batem na
+  quarta casa decimal. Não é borda, não é decoração (não há gerenciador de
+  janela no `:99`): é a LCL reescalando o formulário inteiro.
+
+- **E isso desmente uma explicação que já estava escrita no código.** O
+  `calibra()` do [`compara_tela.py`](../../wte/tools/compara_tela.py) dizia,
+  desde a segunda passagem: *"o oráculo dá (0, 0) e o port dá (6, 6): o gtk2
+  desenha uma borda que o Wine não desenha"*. A borda não existe.
+
+  O que a torna insustentável é uma medição que a **própria segunda passagem
+  registrou** e não cruzou: *"a diferença cresce descendo a janela"*, e ela
+  escolheu `y = 200` como interseção para clicar na `track_barra`. O controle
+  está em `y = 192` no projeto, e `192 × 0,0421 = 8,1` — exatamente a deriva
+  observada. **Borda é constante; escala não.** A evidência estava na árvore há
+  duas passagens, do mesmo jeito que a recusa de teclado da primeira passagem
+  estava.
+
+- **Por que isso bloqueia a régua da ficha e não bloqueou a das barras.**
+  Enquanto o alvo é um controle só, perto do topo, um deslocamento constante
+  serve de aproximação e o clique cai dentro. A ficha é outra coisa: o que se
+  mede lá é **largura** — as 16 barrinhas `imghab`, cada uma com
+  `Width := 7*v + 8` —, e largura entra multiplicada por 1,0421 no port. A
+  comparação acusaria divergência onde há só escala, e pior: acusaria de forma
+  *plausível*, porque 1,0421 sobre uma largura de 8 a 57 px dá diferença de 0 a
+  2 px, do tamanho de um erro de arredondamento.
+
+- **Não escolhi a saída**, e é decisão do usuário porque as três custam coisas
+  diferentes:
+
+  | saída | o que custa |
+  |---|---|
+  | desligar `Application.Scaled` | muda a janela do port para todo mundo, inclusive para o `golden_gui`; é a única que faz as coordenadas voltarem a ser as do `.lfm` |
+  | dividir por 1,0421 no comparador | mantém a janela e põe um número medido no `compara_tela.py`; arredondamento vira ruído de 1 px |
+  | medir em unidades de projeto | o mais correto e o mais caro: o comparador passaria a converter cada retângulo |
+
+- **O que fica registrado como medido:** a escala (1,0421 = 544/522 = 495/475),
+  a causa (`Application.Scaled := True` no `wte.lpr`), e a correção da
+  explicação antiga no `calibra()`. O `--ficha` não foi escrito.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/compara_tela.py` — o `calibra()` deixou de afirmar que existe
+    uma borda de 6 px e passou a dizer o que foi medido
+  - `docs/tasks/26-handlers-de-edicao.md` — este log
+
+- **Gates medidos:** `make -C wte check` rc 0; `python3 -m unittest` em
+  `tools/`: 478 testes, OK.
+
+- **Problemas encontrados:**
+  1. A sondagem abriu um modal (`estrategia`) no meio da varredura, e a partir
+     dali todo clique foi para ele — o trace mostra **um** disparo e as 20
+     tentativas seguintes desaparecem sem erro. Varredura de coordenada em
+     formulário que tem botão de modal precisa parar no primeiro disparo de
+     **qualquer** handler, não só do procurado.
+  2. `roms/` continuou intocada: a sondagem rodou sobre cópia em `work/`,
+     apagada ao final.
