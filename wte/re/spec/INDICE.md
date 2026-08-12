@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 1 |
+| `implementado` | 3 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 81 |
+| `aberto` | 79 |
 | **total** | **96** |
 
 30 de 96 têm arquivo de spec.
@@ -95,8 +95,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | aberto |
 | `0x0040c46c` | `MainForm` | boton_mcr2isoClick | OnClick | gravacao | aberto |
 | `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
-| `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | aberto |
-| `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | aberto |
+| `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | implementado |
+| `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | implementado |
 | `0x0040cab8` | `MainForm` | boton_barras2isoClick | OnClick | gravacao | aberto |
 | `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | aberto |
 | `0x0040d36c` | `MainForm` | edit_nombre1KeyPress | OnKeyPress | edicao | aberto |

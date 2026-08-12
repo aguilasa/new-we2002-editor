@@ -64,6 +64,41 @@ de cada clube de ML). Sem esse controle, toda medição vem contaminada.
 operação. Divergência que sobreviver à análise vira **divergência deliberada**
 com registro (WTE-TASK-35) — nunca "aceita e esquecida".
 
+### A metade da WTE-TASK-26 que esta task herdou
+
+*(decisão do usuário, 2026-08-12)*
+
+A [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) edita **em memória** e não
+grava; o critério dela dizia "editar pela tela nos dois lados, então gravar nos
+dois, e o golden compara". O segundo verbo é desta task — as barras editadas lá
+só chegam à imagem pelo `boton_barras2isoClick`, os nomes pelo
+`boton_nombres2isoClick` —, e a 27 `depends_on` a 26. Circularidade da mesma
+forma que a [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez para o gate.
+
+**A 26 passou a fechar por conferência de tela e esta task herdou o byte.** Na
+prática: cada uma das seis gravações roda o golden **duas** vezes —
+
+1. **gravar sem editar** (o diff de controle da seção acima);
+2. **editar pela tela, com um handler do grupo da 26, e então gravar.**
+
+A segunda é a que julga a edição e a gravação juntas. Sem ela, a edição fica
+verificada só por pixel, e pixel igual dos dois lados não prova que os dois
+escreveram o **mesmo byte do modelo** — os dois poderiam desenhar a mesma
+largura a partir de campos diferentes. É a lição da terceira ponta da
+[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md).
+
+Par mínimo por gravação, quando existir handler de edição correspondente:
+
+| gravação | edição que a exercita (WTE-TASK-26) |
+|---|---|
+| `boton_barras2isoClick` | `sel_barraClick` + `track_barraChange` |
+| `boton_nombres2isoClick` | `edit_nombre1/2/3KeyPress`, `iguala_nombresClick` |
+| `grabar_memoryClick` | os de número (`dorsalClick`, `scroll_dorsalChange`) |
+
+`boton_tex2isoClick`, `boton_mcr2isoClick` e `grabar_camisetaClick` não têm par
+na 26 — a origem dos bytes deles é das tasks 31 e 32, como já diz a seção de
+alvos.
+
 ---
 
 ## Arquivos a criar ou modificar
@@ -80,6 +115,9 @@ com registro (WTE-TASK-35) — nunca "aceita e esquecida".
 
 - [ ] Diff de controle medido e registrado antes de qualquer edição
 - [ ] As seis com spec e com golden verde nas duas ROMs
+- [ ] **Cada gravação que tem par na WTE-TASK-26 rodada também com uma edição
+      de tela antes** — herdado da 26 em 2026-08-12; ver a seção acima. É o
+      único critério do projeto que julga edição e gravação juntas
 - [ ] EDC/ECC preservados — provado, não presumido
 - [ ] Nenhuma divergência sem veredito escrito
 - [ ] `roms/` intocada em todas as rodadas

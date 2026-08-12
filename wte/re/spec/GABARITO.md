@@ -99,7 +99,7 @@ de *fórmula*.
 
 | Veredito | Significa |
 |---|---|
-| `implementado` | spec escrita, Pascal escrito, golden verde |
+| `implementado` | spec escrita, Pascal escrito, **a régua da task do handler verde** |
 | `trivial` | só habilita/desabilita controle; **não toca a imagem** |
 | `divergencia deliberada` | o port faz diferente, de propósito, e está registrado na [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) |
 | `nao portado` | fora de escopo, **com justificativa escrita** |
@@ -107,6 +107,29 @@ de *fórmula*.
 
 Sem acento e sem espaço no frontmatter (`divergencia deliberada` se escreve
 assim mesmo) para não haver duas grafias do mesmo veredito.
+
+### Qual régua é "a régua da task"
+
+`implementado` dizia **golden verde**, e isso estava certo enquanto todo grupo
+tivesse como gravar. O grupo de edição não tem: ele muda estado em memória, e
+quem leva esse estado ao disco é a
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), que
+`depends_on` a 26. Com a definição antiga, **nenhum handler de edição poderia
+ser `implementado`** — nem os já conferidos —, e o veredito passaria a medir a
+ordem das tasks em vez do estado do handler.
+
+Decisão do usuário, 2026-08-12 (ver o enunciado das duas tasks):
+
+| grupo | régua que fecha o handler | ferramenta |
+|---|---|---|
+| carga ([25](../../../docs/tasks/25-handlers-de-carga.md)) | tela + estado interno contra o `we2002_core` | `compara_tela.sh` |
+| **edição ([26](../../../docs/tasks/26-handlers-de-edicao.md))** | **tela, depois de editar** | `compara_tela.sh --edicao` |
+| gravação ([27](../../../docs/tasks/27-handlers-de-gravacao.md)) | **byte** — e é lá que a edição volta a ser julgada, com uma edição de tela antes de cada gravação | `golden_check.sh` |
+
+**Isso não afrouxa o critério, muda de dono.** A metade por byte não sumiu: é
+linha de critério de conclusão da 27. O que não pode acontecer é ela sumir sem
+dono nomeado — foi o que a WTE-TASK-25 quase fez com bandeira e uniforme, e a
+correção foi a mesma: escrever a exclusão como critério de quem herdou.
 
 **`nao portado` sem justificativa não é veredito.** O critério de pronto da
 fase 4 depende disso, então a regra é mecânica: veredito `nao portado` exige a

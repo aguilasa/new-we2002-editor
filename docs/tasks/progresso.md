@@ -245,7 +245,8 @@ conferível.
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **30 de 96 têm arquivo**
       (2026-08-12): os 28 do grupo de carga (14 `trivial`, 1 `implementado`,
-      13 `aberto`) mais os 2 primeiros do grupo de edição, os dois `aberto`
+      13 `aberto`) mais os 2 primeiros do grupo de edição, os dois
+      `implementado` pela régua de tela
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -752,3 +753,27 @@ que ninguém tinha lido juntos. Remedido pelo próprio harness — 3 `! tecla Do
 dão 3 disparos de `lista_equiposChange` no trace do port —, e o foco ficou
 atrás de `ROTEIRO_FOCO`, ligado só no lado port para não invalidar o controle.
 Sem isso, metade da WTE-TASK-26 não teria gate nenhum.
+
+**WTE-TASK-26 — decisão do usuário, 2026-08-12: a 26 fecha por pixel, a 27
+herda o byte.** O critério da 26 pedia "editar pela tela nos dois lados, então
+gravar nos dois, e o golden compara", e o segundo verbo é da
+[WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), que `depends_on` a 26 —
+a mesma forma de circularidade que a
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez para o gate e que a decisão
+de 2026-08-11 desfez para o critério de tela da 25. **A metade excluída virou
+critério de conclusão da 27**, com o par gravação × edição escrito; exclusão
+sem dono nomeado é buraco, e este projeto já pagou por isso.
+
+A decisão alcançou o **vocabulário de veredito**, e tinha de alcançar:
+`implementado` dizia "golden verde", o que tornaria impossível fechar qualquer
+handler de edição — o veredito mediria a ordem das tasks, não o estado do
+handler. Passou a dizer "a régua da task do handler verde", com a tabela por
+grupo no [`GABARITO.md`](../../wte/re/spec/GABARITO.md).
+
+**E a régua existe e fechou verde:** `compara_tela.sh --edicao` edita a barra
+`defesa` do time 2 nos dois lados e mede — 4 → 6 nos dois, com as outras quatro
+ainda ancoradas no `we2002_core`, o que mostra que a edição não respingou. Duas
+lições de ferramenta saíram junto: **`Position :=` dispara `OnChange` na LCL**
+(oposto do `TComboBox`, que o `check_lcl_combo.py` mediu), e **coordenada de
+clique não é comum aos dois lados no rodapé do formulário** — o gtk2 desenha
+6 px de borda que o Wine não desenha, e a diferença cresce descendo a janela.

@@ -74,7 +74,50 @@ REC_H=240
 IDX_NACIONAL=2
 IDX_MODELO=95
 
-[ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" >&2
+# ## O modo `--edicao`, da WTE-TASK-26
+#
+# Os dois modos acima carregam e comparam. Este **edita** e compara: e a regua
+# de PIXEL do grupo de edicao, e a unica que essa task tem -- a de byte depende
+# das gravacoes da WTE-TASK-27, e a divisao esta escrita no enunciado das duas.
+#
+# A barra e o alvo certo outra vez, e agora por um motivo a mais: a largura e
+# `11*v + 9` na carga E na edicao (a mesma sequencia de bytes nos dois lugares
+# do binario, conferido pelo `check_barras.py`), entao uma barra editada para
+# `v` fica exatamente do tamanho de uma barra carregada com `v`. O que se mede
+# depois do clique e o valor do jogo, nao um efeito visual.
+#
+# ### As coordenadas, e por que estas
+#
+# Medidas no `:99`, nos dois lados, em 2026-08-12:
+#
+# | controle | coordenada | como se sabe |
+# |---|---|---|
+# | `sel_barra1` ("Defesa") | (30, 112) | dispara `sel_barraClick` uma vez no trace do port |
+# | trilha da `track_barra` | (190, 200) | dispara `track_barraChange` nos dois; a barra muda de 53 para 75 px |
+#
+# O `y = 200` nao e chute: a `track_barra` do oraculo aceita clique em
+# y 190..200 e a do port em y 199..207 -- o gtk2 desenha uma borda de 6 px que
+# o Wine nao desenha (e o mesmo `(6, 6)` que o `calibra()` do
+# `compara_tela.py` mede), e a diferenca cresce ate a base da janela. **200 e a
+# interseccao**, e foi verificada nos dois.
+#
+# ### O passo do clique bate nos dois widgetsets, e isso precisava ser medido
+#
+# Clique na trilha nao arrasta o cursor: pagina. O `PageSize` do comctl32 sob
+# Wine e o do `TTrackBar` da LCL sobre gtk2 sao codigo diferente, e a faixa
+# aqui e curta (`Max = 9`): um passo de 2 de um lado e 1 do outro produziria
+# divergencia de tela que NAO e do handler. Medido antes de escrever este modo:
+# **os dois andam +2 por clique** (4 para 6 para 8, largura 53, 75, 97).
+IDX_EDICAO=2
+SEL_BARRA1_X=30 ; SEL_BARRA1_Y=112
+TRILHA_X=190    ; TRILHA_Y=200
+# Quantos cliques na trilha. Com o time 2, `bar_defence` vale 4 e cada clique
+# soma 2: um clique leva a 6, longe do teto de 9, e portanto longe de medir
+# saturacao em vez de passo.
+TRILHA_CLIQUES=1
+
+[ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" \
+                       "| $0 --edicao" >&2
                   exit 1; }
 MODO=barras
 if [ "$1" = "--habilitacao" ]; then
@@ -82,6 +125,11 @@ if [ "$1" = "--habilitacao" ]; then
                          "$IDX_NACIONAL e $IDX_MODELO, fixados aqui" >&2; exit 1; }
   MODO=habilitacao
   set -- "$IDX_NACIONAL" "$IDX_MODELO"
+elif [ "$1" = "--edicao" ]; then
+  [ $# -eq 1 ] || { echo "ERRO: --edicao nao aceita indice -- o time e o" \
+                         "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
+  MODO=edicao
+  set -- "$IDX_EDICAO"
 fi
 [ -f "$IMAGEM" ] || { echo "ERRO: $IMAGEM nao existe" >&2; exit 1; }
 [ -x "$BIN" ] || { echo "ERRO: $BIN -- rode lazbuild antes" >&2; exit 1; }
@@ -146,6 +194,21 @@ descidas() {          # $1 = janela, $2 = quantas
   done
 }
 
+# edita_barra -- a MESMA sequencia de cliques nos dois lados, e e por isso que
+# ela mora aqui e nao dentro de cada `captura_*`. Duas entradas diferentes
+# deixariam de ser a mesma entrada, que e a condicao de a comparacao valer.
+# Espera `X` e `Y` ja carregados com a origem da janela alvo.
+edita_barra() {
+  local i
+  xdotool mousemove $((X + SEL_BARRA1_X)) $((Y + SEL_BARRA1_Y)) click 1
+  sleep 1
+  for ((i = 0; i < TRILHA_CLIQUES; i++)); do
+    xdotool mousemove $((X + TRILHA_X)) $((Y + TRILHA_Y)) click 1
+    sleep 1
+  done
+  sleep 1
+}
+
 # ------------------------------------------------------------------ oraculo --
 captura_oraculo() {
   local indice="$1" destino="$2"
@@ -173,6 +236,7 @@ captura_oraculo() {
   eval "$(geometria "$w")"
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 3
+  [ "$MODO" = edicao ] && edita_barra
   import -window root "$SAIDA/raw-oraculo.png"
   recorta "$SAIDA/raw-oraculo.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-oraculo.png" "${destino%.png}-cheia.png" \
@@ -197,18 +261,40 @@ captura_port() {
   xdotool windowfocus "$w"; sleep 1
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 2
+  [ "$MODO" = edicao ] && edita_barra
   import -window root "$SAIDA/raw-port.png"
   recorta "$SAIDA/raw-port.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-port.png" "${destino%.png}-cheia.png" \
           "$X" "$Y" "$WIDTH" "$HEIGHT"
   # A confirmacao que faltava: quantas vezes o handler disparou de verdade.
-  local disparos
+  local disparos sel track
   disparos=$(grep -c 'MainForm.lista_equiposChange' "$TRACE" 2>/dev/null || echo 0)
+  sel=$(grep -c 'MainForm.sel_barraClick' "$TRACE" 2>/dev/null || echo 0)
+  track=$(grep -c 'MainForm.track_barraChange' "$TRACE" 2>/dev/null || echo 0)
   limpa
   if [ "$disparos" -ne $((indice + 1)) ]; then
     echo "ERRO: o port disparou lista_equiposChange $disparos vez(es) e o" >&2
     echo "      roteiro pediu $((indice + 1)). O indice dos dois lados nao e o" >&2
     echo "      mesmo, e comparar assim produz divergencia falsa." >&2
+    return 5
+  fi
+  [ "$MODO" = edicao ] || return 0
+  # Do lado do port da para exigir que os DOIS handlers de edicao tenham
+  # disparado -- e sem isto uma tela que nao mudou nada seria lida como
+  # "os dois lados concordam". E o par da WTE-TASK-20: concordam, E fizeram
+  # alguma coisa.
+  if [ "$sel" -ne 1 ]; then
+    echo "ERRO: sel_barraClick disparou $sel vez(es), esperava 1 -- o clique" >&2
+    echo "      em $SEL_BARRA1_X,$SEL_BARRA1_Y nao chegou no radio." >&2
+    return 5
+  fi
+  # A carga tambem dispara `track_barraChange`, porque `Position :=` dispara
+  # `OnChange` na LCL -- medido, e por isso a conta e "uma por troca de time,
+  # uma pelo sel_barra, mais os cliques na trilha".
+  if [ "$track" -lt $((indice + 2 + TRILHA_CLIQUES)) ]; then
+    echo "ERRO: track_barraChange disparou $track vez(es), esperava ao menos" >&2
+    echo "      $((indice + 2 + TRILHA_CLIQUES)) -- o clique em $TRILHA_X,$TRILHA_Y nao chegou" >&2
+    echo "      na trilha, e a barra nao foi editada em lado nenhum." >&2
     return 5
   fi
 }
@@ -222,6 +308,18 @@ for indice in "$@"; do
   [ "$MODO" = habilitacao ] && continue
   extra=()
   [ -n "${DUMP:-}" ] && extra=(--dump "$DUMP")
+  if [ "$MODO" = edicao ]; then
+    # O valor esperado NAO e literal: sai do dump da camada de dados mais o
+    # passo medido do clique. Assim o unico numero escrito a mao aqui e o
+    # PASSO, que e o que se mediu -- trocar o time de prova nao exige reescrever
+    # nada, e um dump que mude derruba a conferencia em vez de passar.
+    [ -n "${DUMP:-}" ] || { echo "ERRO: --edicao precisa do dump (sem fpc" \
+                                 "nao ha o que somar ao passo)" >&2; exit 1; }
+    base=$(sed -n "s/^teams\[$indice\]\.bar_defence = //p" "$DUMP")
+    [ -n "$base" ] || { echo "ERRO: sem bar_defence do time $indice no dump" >&2
+                        exit 1; }
+    extra+=(--editada "1=$((base + 2 * TRILHA_CLIQUES))")
+  fi
   python3 "$AQUI/compara_tela.py" \
       "$SAIDA/time-$indice-oraculo.png" "$SAIDA/time-$indice-port.png" \
       --indice "$indice" --saida "$SAIDA" "${extra[@]}" \

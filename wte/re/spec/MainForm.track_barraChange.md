@@ -2,7 +2,7 @@
 handler: track_barraChange
 formulario: MainForm
 endereco: 0x0040ca10
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.track_barraChange
@@ -83,19 +83,34 @@ camada de dados, em
 O buffer só é enchido com `nacional`: em `0x0040cefa` o original compara o
 índice com 95 e pula o laço de leitura inteiro. O port reproduz.
 
-**Veredito `aberto`, e o que falta é gravação, não medição.** A spec basta
-para o corpo, e o corpo está escrito
-([`../../src/impl/ep2002_mainform.track_barraChange.inc`](../../src/impl/ep2002_mainform.track_barraChange.inc)).
-O que não existe ainda é como julgar:
+**Veredito `implementado`: a régua desta task fechou verde.**
+`compara_tela.sh --edicao` leva os dois lados ao time 2, marca `sel_barra1`
+("Defesa") e clica na trilha da `track_barra`. Medido em 2026-08-12, ROM
+japonesa:
 
-- **por byte** — precisa do `boton_barras2isoClick`, que é da WTE-TASK-27. O
-  enunciado da [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) pede
-  "editar pela tela nos dois lados, então gravar nos dois"; o segundo verbo
-  não tem dono nesta task;
-- **por pixel** — o [`compara_tela.sh`](../../tools/compara_tela.sh) leva os
-  dois lados ao mesmo time e mede as cinco larguras, mas não edita barra
-  nenhuma. Estender é barato e está nomeado no Log da task.
+| | oráculo | port |
+|---|---|---|
+| as cinco larguras, em px | `64, 75, 75, 75, 75` | `64, 75, 75, 75, 75` |
+| defesa, valor do jogo | 4 → **6** | 4 → **6** |
+| as outras quatro contra o `we2002_core` | 4 de 4 exatas | 4 de 4 exatas |
 
-Enquanto os dois não existirem, o corpo está escrito a partir de spec medida e
-**não conferido** — que é o mesmo estado em que o `lista_equipos_2Change`
-fechou a WTE-TASK-25, e pela mesma honestidade.
+As quatro não editadas continuarem ancoradas no dump é metade do resultado: ela
+mostra que a edição **não respingou**. A outra metade é a barra editada ter
+mudado — sem isso, "os dois lados concordam" passaria com a tela intacta, que
+é o par que a [WTE-TASK-20](../../../docs/tasks/20-round-trip-headless.md)
+ensinou a exigir: concordam, **e** fizeram alguma coisa. Do lado do port o
+`compara_tela.sh` ainda exige do trace 1 `sel_barraClick` e o número previsto
+de `track_barraChange`.
+
+**Um número que precisou ser medido antes de o roteiro existir: o passo do
+clique.** Clique na trilha não arrasta o cursor, pagina — e o `PageSize` do
+comctl32 sob Wine e o do `TTrackBar` da LCL sobre gtk2 são código diferente,
+com a faixa curta (`Max = 9`). Um passo de 2 de um lado e 1 do outro daria
+divergência de tela que não é do handler. **Os dois andam +2 por clique**
+(4 → 6 → 8; larguras 53, 75, 97).
+
+**O que esta régua NÃO julga, e quem julga:** que os bytes editados cheguem à
+imagem certa. Isso é `boton_barras2isoClick`, da
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) — e é critério de
+conclusão **dela**, não exclusão silenciosa daqui. Pixel igual dos dois lados
+não prova que os dois escreveram o mesmo byte do modelo.

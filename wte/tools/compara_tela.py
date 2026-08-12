@@ -282,7 +282,30 @@ def le_dump(caminho: Path, indice: int) -> list[int]:
     return [int(valores[c]) for c in CHAVES_DA_BARRA]
 
 
-def confere_contra_dump(m: dict, caminho: Path) -> dict:
+def confere_editada(m: dict, barra: int, valor: int) -> list[str]:
+    """A barra que o roteiro editou tem de ler `valor` nos DOIS lados.
+
+    Da WTE-TASK-26, modo `--edicao` do `compara_tela.sh`. Sem esta conferencia
+    o modo passaria com a barra intacta: `compara()` so exige que os dois lados
+    desenhem a mesma largura, e uma edicao que nao aconteceu em lado nenhum
+    desenha a mesma largura muito bem. E o par da WTE-TASK-20 -- concordam, **e**
+    fizeram alguma coisa.
+
+    A previsao usa `11*v + 9`, a mesma aritmetica da carga; que ela seja mesmo
+    a mesma no binario e o `check_barras.py` quem prova.
+    """
+    previsto = 11 * valor + 9
+    erros = []
+    for lado in ("oraculo", "port"):
+        medido = m[lado][barra]
+        if medido != previsto:
+            erros.append(
+                f"{NOMES_DAS_BARRAS[barra]} no {lado}: a edicao previa "
+                f"{valor} ({previsto} px) e a tela mede {medido} px")
+    return erros
+
+
+def confere_contra_dump(m: dict, caminho: Path, editada: int | None = None) -> dict:
     """A terceira ponta: tela -> valor -> camada de dados.
 
     O `compara_tela` ja mostra que os dois lados desenham o mesmo pixel. Isso
@@ -308,6 +331,12 @@ def confere_contra_dump(m: dict, caminho: Path) -> dict:
     do_dump = le_dump(caminho, m["indice"])
     erros, curtas = [], []
     for i, nome in enumerate(NOMES_DAS_BARRAS):
+        if i == editada:
+            # A barra editada DEVE divergir do dump: o dump e do estado
+            # carregado, e a edicao aconteceu depois. Quem a julga e o
+            # `confere_editada`. As outras quatro continuam ancoradas -- e sao
+            # elas que provam que a edicao nao respingou.
+            continue
         previsto = 11 * do_dump[i] + 9
         medido = m["oraculo"][i]
         if medido == previsto:
@@ -511,6 +540,15 @@ def relata(m: dict) -> int:
     print("  valores do jogo: "
           + ", ".join(f"{n}=" + ("?" if v is None else f"{v:g}")
                       for n, v in zip(NOMES_DAS_BARRAS, m["valores"])))
+    if "editada" in m:
+        e = m["editada"]
+        if e["erros"]:
+            print("DIVERGE da edicao pedida:", file=sys.stderr)
+            for d in e["erros"]:
+                print("  " + d, file=sys.stderr)
+            return 1
+        print(f"  a edicao chegou: {NOMES_DAS_BARRAS[e['barra']]} = "
+              f"{e['valor']} ({11 * e['valor'] + 9} px) nos dois lados")
     if "dump" in m:
         for r in m["dump"]["curtas"]:
             print("  curta: " + r)
@@ -519,8 +557,9 @@ def relata(m: dict) -> int:
             for d in m["dump"]["erros"]:
                 print("  " + d, file=sys.stderr)
             return 1
-        n = BARRAS - len(m["dump"]["curtas"])
-        print(f"  a tela bate com o we2002_core em {n} de {BARRAS} barras"
+        total = BARRAS - (1 if "editada" in m else 0)
+        n = total - len(m["dump"]["curtas"])
+        print(f"  a tela bate com o we2002_core em {n} de {total} barras"
               + (" (o resto curto pelo degrade, igual nos dois lados)"
                  if m["dump"]["curtas"] else ""))
     if m["diferencas"]:
@@ -591,7 +630,16 @@ def main(argv: list[str]) -> int:
                          "a montagem, porque o recorte medido para em y 240 e "
                          "os dorsais estao em y 432")
     ap.add_argument("--cheia-port", type=Path)
+    ap.add_argument("--editada", metavar="N=V",
+                    help="modo --edicao do compara_tela.sh: a barra N (0..4) "
+                         "foi editada para o valor V. Ela sai da conferencia "
+                         "contra o dump, que e do estado CARREGADO, e ganha "
+                         "conferencia propria")
     args = ap.parse_args(argv)
+    editada = None
+    if args.editada:
+        n, _, v = args.editada.partition("=")
+        editada = (int(n), int(v))
     try:
         o = carrega(args.oraculo)
         p = carrega(args.port)
@@ -610,8 +658,12 @@ def main(argv: list[str]) -> int:
                 montagem(o, p, destino)
                 print(f"  montagem: {destino} (SO o recorte medido -- sem os "
                       f"dorsais nem a lista de jogadores)")
+        if editada:
+            m["editada"] = {"barra": editada[0], "valor": editada[1],
+                            "erros": confere_editada(m, *editada)}
         if args.dump:
-            m["dump"] = confere_contra_dump(m, args.dump)
+            m["dump"] = confere_contra_dump(
+                m, args.dump, editada[0] if editada else None)
     except TelaError as exc:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2
