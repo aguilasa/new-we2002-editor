@@ -47,6 +47,18 @@
 ROTEIRO_PID=""          # 0 = sem filtro
 ALVO_ID=""; ALVO_X=0; ALVO_Y=0
 
+# `ROTEIRO_FOCO=1` faz o driver dar `xdotool windowfocus` na janela alvo assim
+# que ela e resolvida. Vale para o lado PORT e so para ele -- ver
+# `golden_run_laz.sh`. Sem gerenciador de janela no `:99` o GTK2 nunca
+# considera a janela ativa sozinho, e sem foco nenhuma tecla e entregue; o
+# `windowfocus` (que e `XSetInputFocus`) resolve, e o `windowactivate`, que
+# precisa de gerenciador, nao.
+#
+# Fica atras de variavel em vez de ligado sempre porque o lado ORACULO nao
+# precisa -- o Wine implementa o proprio foco -- e mexer nele invalidaria o
+# controle (original contra original) sem ganho nenhum.
+ROTEIRO_FOCO="${ROTEIRO_FOCO:-0}"
+
 # Nome do arquivo que o roteiro manda digitar no dialogo de abrir. O roteiro
 # escreve `E:\@IMAGEM@` e nao o nome literal, porque o gate golden roda o MESMO
 # roteiro sobre DUAS copias -- uma por lado -- e cada uma tem nome proprio.
@@ -67,6 +79,16 @@ roteiro_display() {
 }
 
 roteiro_pid_alvo() { ROTEIRO_PID="${1:-}"; }
+
+# Da foco a janela alvo, se `ROTEIRO_FOCO=1`. Falha de foco NAO derruba o
+# roteiro: um roteiro so de mouse funciona sem foco nenhum, e derrubar por isso
+# trocaria um roteiro que roda por um erro que nao importa.
+roteiro_foca() {
+  [ "$ROTEIRO_FOCO" = 1 ] || return 0
+  [ -n "$ALVO_ID" ] || return 0
+  xdotool windowfocus "$ALVO_ID" 2>/dev/null || true
+  sleep 1
+}
 
 _do_pid() {
   # 0 quando a janela pertence ao processo alvo (ou quando nao ha filtro).
@@ -136,12 +158,14 @@ roteiro_executa() {
         nome="${linha#> }"
         read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_janela "$nome")"
         [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela '$nome'" >&2; return 1; }
+        roteiro_foca
         echo ">> janela '$nome' = $ALVO_ID em $ALVO_X,$ALVO_Y"
         ;;
       '>~ '*)
         geo="${linha#>~ }"
         read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_geo "$geo")"
         [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela $geo" >&2; return 1; }
+        roteiro_foca
         echo ">> janela $geo = $ALVO_ID em $ALVO_X,$ALVO_Y"
         ;;
       '= '*) roteiro_marca "${linha#= }" ;;
@@ -164,11 +188,17 @@ roteiro_executa() {
   done < "$arquivo"
 }
 
-roteiro_usa_teclado() {
-  # 0 quando o roteiro tem `! tecla` ou `! texto`. O lado PORT nao recebe
-  # tecla no `:99` -- sem window manager o GTK2 nunca considera a janela ativa,
-  # e nem `xdotool key --window` chega (medido na WTE-TASK-13). Um roteiro de
-  # teclado dirigido no port produz silencio, e o silencio vira "o port nao
-  # gravou", que e a conclusao errada com a cara da certa.
-  grep -qE '^! *(tecla|texto)\b' "$1"
-}
+# REMOVIDA na WTE-TASK-26: `roteiro_usa_teclado`.
+#
+# Ela devolvia 0 para roteiro com `! tecla`/`! texto`, e o `golden_run_laz.sh`
+# a usava para REPROVAR esse roteiro do lado port -- porque a WTE-TASK-13 tinha
+# medido que nenhuma tecla chegava ao GTK2 sem gerenciador de janela.
+#
+# O que faltava naquela medicao era `xdotool windowfocus` antes: ele e
+# `XSetInputFocus`, nao precisa de gerenciador, e com ele a tecla chega.
+# Remedido na WTE-TASK-26 -- 3 `Down` sobre a janela focada dao 3 disparos de
+# `lista_equiposChange` no trace do port. Quem faz isso agora e `ROTEIRO_FOCO`,
+# la em cima.
+#
+# Fica o registro em vez do silencio: a recusa era a resposta certa para o que
+# se sabia, e o que mudou nao foi o port, foi a pergunta ter sido refeita.

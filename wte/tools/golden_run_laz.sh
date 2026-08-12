@@ -4,16 +4,29 @@
 #
 #   bash wte/tools/golden_run_laz.sh <roteiro> <copia.bin> [dir-de-saida]
 #
-# ## Duas coisas que este lado nao pode, e as duas sao medidas
+# ## Uma coisa que este lado nao pode, e uma que ele PASSOU a poder
 #
-# 1. **Teclado nao chega.** Sem window manager no `:99` o GTK2 nunca considera
-#    a janela ativa, e nenhuma tecla e entregue -- nem `xdotool key` depois de
-#    `windowfocus`, nem `key --window` (que usa `XSendEvent`, e o GTK2
-#    descarta). Medido na WTE-TASK-13: zero pixel de diferenca e zero linha no
-#    trace. O mouse funciona. Entao um roteiro com `! tecla` **reprova aqui**,
-#    em vez de rodar e produzir silencio -- silencio viraria "o port nao
-#    gravou", que e a conclusao errada com a cara da certa.
-#    O `wte.exe` nao sofre disso: o Wine implementa o proprio foco.
+# 1. **Teclado chega, desde que se peca foco** -- e ate a WTE-TASK-26 este
+#    script afirmava o contrario. A WTE-TASK-13 mediu que nenhuma tecla era
+#    entregue e concluiu "o port nao recebe teclado no `:99`"; a conclusao valia
+#    para o que ela testou (`xdotool key` sem foco, e `key --window`, que usa
+#    `XSendEvent` e o GTK2 descarta) e nao para o caso que faltava. Sem
+#    gerenciador de janela o GTK2 nunca se considera ativo **sozinho**, mas
+#    `xdotool windowfocus` -- que e `XSetInputFocus` e nao precisa de
+#    gerenciador -- resolve, e foi assim que o `compara_tela.sh` passou a
+#    trocar de time com `Down` na WTE-TASK-25.
+#
+#    Remedido na WTE-TASK-26 por este caminho: 3 `Down` sobre a janela focada
+#    produzem 3 disparos de `lista_equiposChange` no `port-trace.log`. O driver
+#    ganhou `ROTEIRO_FOCO`, ligado aqui e so aqui -- o lado oraculo nao precisa,
+#    porque o Wine implementa o proprio foco, e mexer nele invalidaria o
+#    controle sem ganho.
+#
+#    A recusa que existia -- roteiro com `! tecla` reprovava com codigo 5 --
+#    saiu. Ela era a resposta certa para "o teclado nao chega": silencio viraria
+#    "o port nao gravou", que e a conclusao errada com cara de certa. Com o
+#    teclado chegando, ela passou a **bloquear a WTE-TASK-26 inteira**, cujos
+#    handlers de nome e numero so existem por tecla.
 #
 # 2. **O app abre a imagem pela linha de comando, e nao pelo dialogo.** Este
 #    script sempre passou o caminho da copia como argumento; ate a
@@ -39,6 +52,7 @@ APP="${WTE_APP:-$WTE/build/wte}"
 LOG="$SAIDA/port.log"
 
 # shellcheck source=roteiro.sh
+ROTEIRO_FOCO=1          # ver o item 1 do cabecalho -- so o lado port
 . "$AQUI/roteiro.sh"
 roteiro_display
 
@@ -49,13 +63,6 @@ roteiro_display
 case "$COPIA" in
   "$RAIZ/roms/"*) echo "ERRO: $COPIA esta em roms/" >&2; exit 1 ;;
 esac
-
-if roteiro_usa_teclado "$ROTEIRO"; then
-  echo "ERRO: $ROTEIRO usa '! tecla'/'! texto', e o lado port nao recebe" >&2
-  echo "      teclado no :99 (WTE-TASK-13). Dirija por mouse, ou instale um" >&2
-  echo "      window manager -- e decisao do usuario." >&2
-  exit 5
-fi
 
 mkdir -p "$SAIDA"
 # O app tem de morrer aconteca o que acontecer. Sem isto, uma corrida que falha

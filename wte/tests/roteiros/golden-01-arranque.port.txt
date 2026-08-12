@@ -5,17 +5,23 @@
 # entrada, que e a condicao de qualquer comparacao valer. Hoje nao dao, por
 # duas medidas:
 #
-# 1. **o port nao abre imagem.** Ate a WTE-TASK-25 os 96 handlers sao stubs que
-#    logam; medido no fechamento da fase 3 (WTE-TASK-21): zero unidade da casca
-#    da `uses we2002_database`. Nao ha dialogo de abrir para dirigir;
-# 2. **o port nao recebe teclado no `:99`.** Sem window manager o GTK2 nunca
-#    considera a janela ativa (WTE-TASK-13), entao `! texto` e `! tecla` nao
-#    chegariam -- e o `golden_run_laz.sh` REPROVA um roteiro que os use, em vez
-#    de rodar e produzir silencio.
+# 1. ~~**o port nao abre imagem.**~~ **Resolvido na WTE-TASK-25**: o
+#    `MainForm.FormShow` carrega a imagem que o `golden_run_laz.sh` sempre
+#    passou como argumento. O que sobra e outra assimetria, menor: o oraculo
+#    recebe o caminho pelo dialogo `Abre` e o port pela linha de comando, entao
+#    o bloco de abertura do roteiro do oraculo nao tem par aqui;
+# 2. ~~**o port nao recebe teclado no `:99`.**~~ **Falso desde a
+#    WTE-TASK-26**, e a recusa que o `golden_run_laz.sh` fazia por causa disso
+#    saiu. A WTE-TASK-13 mediu que a tecla nao chegava; o que faltava era
+#    `xdotool windowfocus` antes -- `XSetInputFocus`, que nao precisa de
+#    gerenciador de janela. Com `ROTEIRO_FOCO=1`, 3 `! tecla Down` produzem 3
+#    disparos de `lista_equiposChange` no trace do port.
 #
-# Enquanto isso valer, o lado port so abre a janela e espera, e as nove faixas
+# Enquanto o item 1 valer, o lado port so abre a janela e espera, e as faixas
 # que o oraculo grava ficam declaradas como `conhecida:` no roteiro do oraculo.
-# Quando a 25 entrar, este arquivo some e o gate passa a rodar um roteiro so.
+# Unificar os dois e trabalho da WTE-TASK-27 ou de quem primeiro precisar de um
+# roteiro que edite pelos dois lados -- que e o formato que a
+# WTE-TASK-26 pede para julgar edicao.
 alvo: port
 estado: ok
 operacao: arranque

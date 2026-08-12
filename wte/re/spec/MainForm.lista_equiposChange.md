@@ -62,16 +62,24 @@ Com `ItemIndex > 62` — as seleções clássicas e os clubes de ML — o `home1
 reposicionado: `Left := 7`, `Width := 100`, e o `punto` some. Abaixo disso,
 `Left := 16`, `Width := 80`, `punto` visível.
 
-**Evidência:** observacao de tela
+**Evidência:** disassembly lido
 
-> **Rebaixada de `disassembly lido` para `nao medido` em 2026-08-11**, porque
-> `TControl::SetEnabled` tem **zero** chamadas na `.text` inteira, e **subida
-> para `observacao de tela` no mesmo dia** pela
-> [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md): o caminho pelo qual o
-> original habilita controle continua sem aparecer nos bytes, mas o **efeito**
-> passou a ser medido na tela do próprio oráculo, controle a controle — treze
-> deles, na seção "O estado de habilitação" abaixo. Os que ficaram fora estão
-> nomeados lá, com o motivo. Ver também a seção Notas.
+> **Percorreu `disassembly lido` → `nao medido` → `observacao de tela` → de
+> volta a `disassembly lido`**, e cada troca foi de natureza. Caiu em
+> 2026-08-11 porque `TControl::SetEnabled` tem **zero** `call rel32` na `.text`
+> inteira, e a dúzia de `.Enabled :=` desta seção não tinha, aparentemente, de
+> onde ter sido lida; subiu para `observacao de tela` no mesmo dia pela
+> [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md), que mediu o **efeito**
+> na tela do próprio oráculo, controle a controle.
+>
+> **A WTE-TASK-26 achou o mecanismo, e ele estava nos bytes o tempo todo:
+> `SetEnabled` é virtual.** O original chama `call DWORD PTR [reg+0x64]` depois
+> de carregar o VMT em `[obj]` — três vezes dentro deste handler, em
+> `0x0040ce9b`, `0x0040cee9` e `0x0040d05c`. Chamada virtual não produz `call
+> rel32` para o símbolo, e é exatamente por isso que a contagem dava zero. O
+> slot é conferido a cada build pelo
+> [`sonda_dorsal.py --check`](../../tools/sonda_dorsal.py), contra o
+> `vcl60.bpl`. Ver a seção Notas.
 
 ## Bytes tocados
 
@@ -149,37 +157,59 @@ A dropdown continua sem abrir dos **dois** lados — no oráculo também não ab
 e não precisa: o `Down` sobre o combo focado muda a seleção e dispara o
 handler, que é como os roteiros 07/08/11 sempre funcionaram.
 
-**2. E aí vem o problema: `TControl::SetEnabled` nunca é chamado.** O símbolo é
-importado do `vcl60.bpl` e tem thunk em `0x00422884`; a `.text` inteira tem
-**zero** `call rel32` para ele, e a única referência ao slot `0x0043ec1c` do IAT
-é o próprio thunk. No mesmo bloco, para comparar: `SetText` 78 chamadas,
-`GetText` 24, `SetVisible` 14.
+**2. `TControl::SetEnabled` nunca é chamado — e a explicação é que ele é
+virtual.** O símbolo é importado do `vcl60.bpl` e tem thunk em `0x00422884`; a
+`.text` inteira tem **zero** `call rel32` para ele, e a única referência ao
+slot `0x0043ec1c` do IAT é o próprio thunk. No mesmo bloco, para comparar:
+`SetText` 78 chamadas, `GetText` 24, `SetVisible` 14.
 
-A seção **Saída** desta spec lista uma dúzia de `.Enabled := verdadeiro` com
-evidência `disassembly lido`. Com zero chamadas a `SetEnabled`, ou o original
-liga esses controles por outro caminho — RTTI (`Typinfo` **é** importado), o
-`Parent`, ou o `TWinControl` —, ou aquela leitura foi inferida da tela e
-rotulada como disassembly. **Qual dos dois, continua sem resposta nos bytes.**
+Isso pôs em dúvida, por três passagens, a dúzia de `.Enabled := verdadeiro` da
+seção **Saída**: com zero chamadas, ou o original ligava o controle por outro
+caminho — RTTI (`Typinfo` **é** importado), o `Parent`, o `TWinControl` —, ou
+aquela leitura tinha sido inferida da tela e rotulada como disassembly.
 
-O que mudou com a [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) é que o
-**efeito** deixou de ser suposição: comparando a tela do oráculo entre um time
-nacional e o time-modelo, treze controles têm veredito medido, e a seção Saída
-subiu de `nao medido` para `observacao de tela`. O caminho pelo qual o original
-liga o controle segue desconhecido; o que ele liga e desliga, não mais.
+**A resposta é a primeira, e ela estava nos bytes deste handler.** O original
+carrega o VMT do controle em `[obj]` e chama o slot `0x64`:
 
-**A razão de o veredito continuar `aberto` é essa, e não falta de conferência
-de tela** — a conferência está logo abaixo, e não é pequena. O que falta é
-saber, nos bytes, por onde o original liga controle: `observacao de tela` diz
-que o efeito foi visto, não que o mecanismo foi lido, e o Pascal reproduz 27
-`.Enabled :=` apoiado no efeito. Somam-se a isso os dois defeitos que a própria
-conferência achou — os `dorsal1..23` um a menos e o `iguala_nombres` que o port
-não desabilita —, que são de comportamento e ainda não têm conserto.
+```text
+eax := form.campo_do_controle
+ecx := [eax]              ' o VMT
+dl  := 1                  ' o valor de Enabled
+call [ecx + 0x64]         ' TControl.SetEnabled, virtual
+```
 
-> Esta frase já esteve errada uma vez, e a [CORR-WTE-059](../../../docs/tasks/CORR-WTE-059.md)
-> é a correção: ela dizia "é o custo de ainda não ter conferido contra a tela",
-> escrita na 6ª passagem, e a 8ª pôs logo abaixo a seção que a desmentia. O
-> parágrafo de fecho é lido como veredito; quando a seção seguinte muda, ele
-> muda junto.
+Três vezes só aqui — `0x0040ce9b` (`edi+0x47c`), `0x0040cee9` (`edi+0x448`) e
+`0x0040d05c`, este último sobre o `sel_barra<i>` que o `FindComponent` acabou
+de devolver dentro do laço das barras. **Chamada virtual não deixa `call
+rel32`**, e é por isso, e só por isso, que a contagem dava zero. A busca
+anterior procurava a forma errada.
+
+O slot é medido, não afirmado: o valor exportado de
+`@Controls@TControl@SetEnabled$qqro` aparece a `0x64` bytes do início do VMT em
+**108 classes** do `vcl60.bpl` — entre elas `TRadioButton`, `TComboBox`,
+`TStaticText` e `TImage`, que são as que o `MainForm` instancia —, e o nome de
+cada uma sai de `[vmt - 0x2c]`, o mesmo `vmtClassName` que a
+[`sonda_dorsal.py`](../../tools/sonda_dorsal.py) já usava. A conferência roda a
+cada `make -C wte check` e reprova em qualquer outro slot.
+
+Com isso a seção Saída volta a `disassembly lido`, e a medição de tela da
+[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) deixa de ser a única
+sustentação dos 27 `.Enabled :=` do Pascal — passa a ser a segunda, que é onde
+ela vale mais.
+
+**O veredito continua `aberto` pelo que sobrou**, e sobrou comportamento, não
+leitura: os dois defeitos que a conferência de tela achou — os `dorsal1..23` um
+a menos e o `iguala_nombres` que o port não desabilita — não têm conserto até
+agora.
+
+> Esta frase já esteve errada duas vezes. A
+> [CORR-WTE-059](../../../docs/tasks/CORR-WTE-059.md) corrigiu a primeira
+> ("é o custo de ainda não ter conferido contra a tela", escrita na 6ª
+> passagem, desmentida pela seção que a 8ª pôs logo abaixo); a segunda foi
+> dizer que o mecanismo de habilitação "continua sem resposta nos bytes", o que
+> deixou de valer quando alguém procurou `call [reg+0x64]` em vez de `call
+> rel32`. O parágrafo de fecho é lido como veredito: quando a seção acima muda,
+> ele muda junto.
 
 ## A conferência de tela — os cinco grupos, e os quatro erros que ela achou
 

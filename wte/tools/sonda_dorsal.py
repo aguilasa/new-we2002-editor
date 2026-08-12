@@ -65,6 +65,35 @@ OFF_TLIST_ITEMS = 0x04  # TList.FList             -- rtl60 TList::Get
 OFF_TLIST_COUNT = 0x08  # TList.FCount            -- rtl60 TComponent::GetComponentCount
 OFF_VMT_NOME = 0x2C     # vmtClassName, em vmt - 0x2c
 
+# `TControl.SetEnabled` e VIRTUAL, e mora neste slot do VMT.
+#
+# Isto responde a divida que a WTE-TASK-25 fechou em aberto: "como o original
+# habilita controle". A `.text` do `.exe` tem **zero** `call rel32` para o
+# thunk de `@Controls@TControl@SetEnabled`, e nao ha uma escrita direta em
+# `FEnabled` -- dai a suspeita de que a secao Saida da spec do
+# `lista_equiposChange` tivesse sido inferida da tela e rotulada como
+# disassembly.
+#
+# Nao tinha. O original chama `call DWORD PTR [reg+0x64]` depois de carregar o
+# VMT em `[obj]` -- por exemplo em `0x0040ce9b`, `0x0040cee9` e `0x0040d05c`,
+# os tres dentro do `lista_equiposChange`. Chamada virtual nao deixa `call
+# rel32` para o simbolo, e e por isso que a contagem dava zero.
+#
+# Conferido por --check: o valor exportado de `SetEnabled` aparece a
+# `SLOT_SETENABLED` bytes do inicio do VMT em dezenas de classes do
+# `vcl60.bpl`, e o nome de cada uma sai de `[vmt - 0x2c]`.
+SLOT_SETENABLED = 0x64
+
+# Quantas classes do vcl60 precisam concordar para o slot ser considerado
+# medido. Sao 108 no binario de 2002; o piso e folgado de proposito, porque o
+# que se afirma e "este e o slot", nao "sao exatamente 108 classes".
+MIN_CLASSES_SETENABLED = 20
+
+# Amostra nomeada: classes de controle que o `MainForm` realmente usa, e que
+# portanto tem de estar entre as que casam. Sem elas, o slot poderia estar
+# certo para uma hierarquia que o editor nao instancia.
+CLASSES_SETENABLED = ("TRadioButton", "TComboBox", "TStaticText", "TImage")
+
 
 class SondaError(Exception):
     pass
@@ -109,6 +138,73 @@ def _desloc_mod_rm_8(codigo: bytes, opcode: int) -> list[int]:
             continue
         i += 1
     return saida
+
+
+def _classe_do_vmt(caminho: Path, pe, dados: bytes, vmt_rva: int) -> str | None:
+    """O nome da classe cujo VMT comeca em `vmt_rva`, lido de `[vmt - 0x2c]`."""
+    o = pe.rva_para_offset(vmt_rva - OFF_VMT_NOME)
+    if o is None or o + 4 > len(dados):
+        return None
+    ponteiro = struct.unpack_from("<I", dados, o)[0]
+    q = pe.rva_para_offset(ponteiro - pe.base)
+    if q is None or q >= len(dados):
+        return None
+    n = dados[q]
+    if not 1 <= n <= 63 or q + 1 + n > len(dados):
+        return None
+    nome = dados[q + 1:q + 1 + n]
+    if not nome.replace(b"_", b"").isalnum():
+        return None
+    return nome.decode("latin1")
+
+
+def conferir_setenabled() -> int:
+    """`TControl.SetEnabled` esta no slot `SLOT_SETENABLED` do VMT?
+
+    A medicao inteira: o valor exportado de `SetEnabled` e procurado como
+    DWORD no proprio `vcl60.bpl`; cada ocorrencia e tratada como um slot de
+    VMT, e o nome da classe correspondente sai de `[vmt - 0x2c]`. Se o slot
+    fosse outro, nenhum dos candidatos teria nome de classe legivel.
+    """
+    if not VCL.exists():
+        print(f"sonda_dorsal: {VCL.name} ausente -- slot de SetEnabled nao "
+              "conferido")
+        return 0
+    pe = _pe(VCL)
+    dados = VCL.read_bytes()
+    rva = _exportacao(pe, "@Controls@TControl@SetEnabled$")
+    alvo = struct.pack("<I", pe.base + rva)
+
+    classes = []
+    i = dados.find(alvo)
+    while i >= 0:
+        r = _rva_do_offset(pe, i)
+        if r is not None:
+            nome = _classe_do_vmt(VCL, pe, dados, r - SLOT_SETENABLED)
+            if nome:
+                classes.append(nome)
+        i = dados.find(alvo, i + 1)
+
+    faltam = [c for c in CLASSES_SETENABLED if c not in classes]
+    if len(classes) < MIN_CLASSES_SETENABLED or faltam:
+        print(f"sonda_dorsal: TControl.SetEnabled no slot "
+              f"{SLOT_SETENABLED:#04x}: DIVERGE -- {len(classes)} classe(s) "
+              f"casaram (minimo {MIN_CLASSES_SETENABLED}), faltando "
+              f"{faltam or 'nenhuma'}. Enquanto isto valer, as linhas "
+              f"`.Enabled :=` das specs nao tem de onde ter sido lidas.",
+              file=sys.stderr)
+        return 2
+    print(f"sonda_dorsal: TControl.SetEnabled = VMT[{SLOT_SETENABLED:#04x}]: "
+          f"ok ({len(classes)} classes do {VCL.name}, entre elas "
+          f"{', '.join(CLASSES_SETENABLED)})")
+    return 0
+
+
+def _rva_do_offset(pe, off: int) -> int | None:
+    for _, va, _vs, ra, rs in pe.secoes:
+        if ra <= off < ra + rs:
+            return va + (off - ra)
+    return None
 
 
 def conferir_layout() -> int:
@@ -319,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.check or args.roteiro is None:
-            return conferir_layout()
+            return conferir_layout() or conferir_setenabled()
         args.saida.mkdir(parents=True, exist_ok=True)
         return medir(args.roteiro, args.saida, args.imagem, args.vizinhanca)
     except SondaError as e:

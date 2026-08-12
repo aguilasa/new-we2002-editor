@@ -282,19 +282,11 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.sel_barraClick(Sender: TObject);
-begin
-  REStub('MainForm.sel_barraClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.sel_barraClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.track_barraChange(Sender: TObject);
-begin
-  REStub('MainForm.track_barraChange');
-end;
-{$POP}
+{$I impl/ep2002_mainform.track_barraChange.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_barras2isoClick(Sender: TObject);

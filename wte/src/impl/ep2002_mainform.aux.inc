@@ -92,6 +92,22 @@ end;
 var
   BarraMarcada: Integer = 0;
 
+{ As cinco barras do time carregado agora -- o `0x00434592` do original.
+
+  NAO e cache da camada de dados, e a distincao decide a fase 4 inteira: e o
+  modelo em memoria que a EDICAO altera. O original enche estes cinco bytes ao
+  trocar de time (le da imagem, um a um, com salto de setor), o
+  `track_barraChange` grava neles o valor novo, e o `boton_barras2isoClick`
+  (`0x0040cab8`, WTE-TASK-27) le DAQUI para gravar na imagem -- os tres tocam o
+  mesmo `0x00434592`, e e por isso que ele tem de existir separado de
+  `Jogo.teams[].bar_*`. Sem ele, editar uma barra mudaria a largura na tela e a
+  gravacao escreveria o valor velho.
+
+  Cinco bytes, e so com `nacional`: o original pula o laco de leitura inteiro
+  quando o indice e >= 95 (`cmp eax,0x5f` / `jge` em 0x0040cefa). }
+var
+  BarrasEmEdicao: array[0..4] of Byte;
+
 { Cadeia a partir de um vetor de AnsiChar terminado em NUL, que e como a
   camada de dados guarda todo nome. }
 function Cadeia(const bruto): string;

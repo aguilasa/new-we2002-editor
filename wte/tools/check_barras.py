@@ -2,7 +2,10 @@
 """A tabela de barras do original é a nossa `OFS_TEAM_BARS`. Prova disso.
 
 Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), spec de
-`MainForm.lista_equiposChange`.
+`MainForm.lista_equiposChange`. Estendido pela
+[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md) para o lado da
+edição: além de *de onde vêm* os cinco bytes, agora se confere **onde eles
+moram enquanto são editados** — ver "O buffer de edição", abaixo.
 
 **Não escreve arquivo nenhum** — confere, e sai 2 quando diverge. Mesmo
 contrato do `check_lcl_props.py` (CORR-WTE-020), pela mesma razão: o que ele
@@ -34,6 +37,31 @@ são os dois valores fixos do formato MODE2/2352, e mesmo eles têm o `sar
 esi,0xb` e o `shl eax,4` conferidos por padrão — se o binário parar de dividir
 por 2048, a conferência cai.
 
+## O buffer de edição, e por que ele não é cache
+
+Os cinco bytes lidos não vão direto para a tela: vão para um buffer de `.data`,
+e é **do buffer** que sai a largura. Três handlers o tocam, e a conferência
+exige que os três falem do mesmo endereço:
+
+| handler | o que faz com o buffer | onde |
+|---|---|---|
+| `lista_equiposChange` | enche, um byte por barra | `0x0040cf79` |
+| `track_barraChange` | grava o valor editado | `0x0040caa1` |
+| `boton_barras2isoClick` | **lê para gravar na imagem** | `0x0040cb3d` |
+
+A terceira linha é o argumento inteiro: se o port desenhasse a barra a partir
+de `Jogo.teams[].bar_*`, editar mudaria o pixel e a gravação escreveria o valor
+velho — e o golden acusaria a **gravação** por um defeito que é da edição. Por
+isso o port tem `BarrasEmEdicao` separado da camada de dados, e por isso os
+três endereços são conferidos juntos: o dia em que deixarem de coincidir, a
+separação perdeu a razão de ser e o `.inc` está errado.
+
+Confere-se também que a aritmética `11*v + 9` é **a mesma sequência de bytes**
+na carga e na edição. Se as duas divergirem no binário, uma barra carregada e
+uma editada com o mesmo valor deixam de ter a mesma largura, e a comparação de
+tela — que é o único juiz deste grupo enquanto a WTE-TASK-27 não existir —
+passa a medir a coisa errada.
+
 ## O que ele NÃO faz
 
 Não abre imagem. A igualdade byte a byte entre o que a conta lê e o que
@@ -58,13 +86,27 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 EXE = ROOT / "we-team-editor" / "we-team-editor.exe"
 PUB = ROOT / "wte" / "re" / "published_methods.tsv"
 OFFSETS = ROOT / "wte" / "src" / "we2002_offsets.pas"
+CAMPOS = ROOT / "wte" / "re" / "campos.tsv"
 
 REL_EXE = "we-team-editor/we-team-editor.exe"
 REL_PUB = "wte/re/published_methods.tsv"
 REL_OFFSETS = "wte/src/we2002_offsets.pas"
+REL_CAMPOS = "wte/re/campos.tsv"
 GENERATOR = "wte/tools/check_barras.py"
 
 HANDLER = ("MainForm", "lista_equiposChange")
+
+# Os handlers do lado da edicao, e o da gravacao que fecha o argumento. O
+# terceiro e da WTE-TASK-27 e ainda nao tem corpo em Pascal -- esta aqui
+# porque o que se mede e o ENDERECO que ele le, e ele ja o le hoje.
+HANDLER_SEL = ("MainForm", "sel_barraClick")
+HANDLER_TRACK = ("MainForm", "track_barraChange")
+HANDLER_GRAVA = ("MainForm", "boton_barras2isoClick")
+
+# `sel_barra0` -- o campo do formulario que ancora a aritmetica de indice de
+# componente do `sel_barraClick`. Conferido contra o campos.tsv da WTE-TASK-25
+# em vez de repetido aqui.
+CAMPO_ANCORA = ("MainForm", "sel_barra0")
 
 # Quantos times a lista endereça. 63 seleções e clássicos + 32 clubes de Master
 # League; o item 95 do combo é o modelo de ML, que não tem barra -- e é por isso
@@ -90,6 +132,24 @@ PADROES = {
     "limite": (rb"\x3d\x00\x08\x00\x00", None),
     # push 0x130 -- 2352 - 2048, o salto sobre EDC/ECC mais o cabeçalho
     "salto": (rb"\x68\x30\x01\x00\x00", None),
+}
+
+# A largura da barra: `lea edx,[ecx+edx*4]` (5v), `lea edx,[ecx+edx*2]` (11v),
+# `add edx,0x9`. E a mesma sequencia de bytes na carga e na edicao, e a
+# conferencia exige que continue sendo -- ver o cabecalho.
+LARGURA = rb"\x8d\x14\x91\x8d\x14\x51\x83\xc2\x09"
+
+# Onde cada handler nomeia o buffer de cinco bytes. Formas diferentes de
+# enderecar o MESMO endereco, e e a coincidencia que se mede.
+PADROES_BUFFER = {
+    # mov DWORD PTR [ebp-0x4c],imm32 -- o ponteiro de escrita do laco de carga
+    HANDLER: (rb"\xc7\x45\xb4(....)", "<I"),
+    # movzx edx,BYTE PTR [edx+imm32] -- a leitura indexada pelo global
+    HANDLER_SEL: (rb"\x0f\xb6\x92(....)", "<I"),
+    # mov BYTE PTR [eax+imm32],cl -- a escrita indexada pelo global
+    HANDLER_TRACK: (rb"\x88\x88(....)", "<I"),
+    # mov ebx,imm32 -- a base que a gravacao percorre
+    HANDLER_GRAVA: (rb"\xbb(....)", "<I"),
 }
 
 SETOR_DADOS = 2048
@@ -132,7 +192,7 @@ class PE:
         return None
 
 
-def endereco_do_handler() -> tuple[int, int]:
+def endereco_do_handler(qual: tuple[str, str] = HANDLER) -> tuple[int, int]:
     """(inicio, fim) do corpo, pelo TSV da WTE-TASK-04.
 
     O fim e o proximo handler publicado. Aqui isso basta e nao precisa do
@@ -147,12 +207,64 @@ def endereco_do_handler() -> tuple[int, int]:
         c = dict(zip(cab, linha.split("\t")))
         ender = int(c["endereco"], 16)
         enderecos.append(ender)
-        if (c["formulario"], c["handler"]) == HANDLER:
+        if (c["formulario"], c["handler"]) == qual:
             alvo = ender
     if alvo is None:
-        raise CheckError(f"{REL_PUB}: sem {HANDLER[0]}.{HANDLER[1]}")
+        raise CheckError(f"{REL_PUB}: sem {qual[0]}.{qual[1]}")
     seguinte = min((e for e in enderecos if e > alvo), default=alvo + 0x800)
     return alvo, seguinte
+
+
+def corpo(pe: PE, qual: tuple[str, str]) -> bytes:
+    ini, fim = endereco_do_handler(qual)
+    o = pe.off(ini)
+    if o is None:
+        raise CheckError(f"{REL_EXE}: {ini:#x} fora das secoes")
+    return pe.data[o:o + (fim - ini)]
+
+
+def uma_vez(bruto: bytes, padrao: bytes, onde: str, o_que: str) -> bytes:
+    achados = re.findall(padrao, bruto)
+    if len(achados) != 1:
+        raise CheckError(
+            f"{onde}: o padrao de '{o_que}' casou {len(achados)} vez(es), "
+            f"esperava 1. A forma mudou no binario, e ler a constante velha "
+            f"daria endereco errado com cara de certo.")
+    return achados[0]
+
+
+def buffer_de_edicao(pe: PE) -> int:
+    """O endereco que os TRES handlers das barras nomeiam, se for um so.
+
+    Cada um o enderaca de uma forma -- ponteiro de escrita, leitura indexada,
+    escrita indexada, base de varredura -- e e a coincidencia dos quatro que
+    justifica o `BarrasEmEdicao` do port existir separado da camada de dados.
+    """
+    vistos: dict[tuple[str, str], int] = {}
+    for qual, (padrao, forma) in PADROES_BUFFER.items():
+        bruto = corpo(pe, qual)
+        cru = uma_vez(bruto, padrao, f"{qual[0]}.{qual[1]}", "buffer")
+        vistos[qual] = struct.unpack(forma, cru)[0]
+    distintos = set(vistos.values())
+    if len(distintos) != 1:
+        detalhe = ", ".join(f"{k[1]}={v:#x}" for k, v in vistos.items())
+        raise CheckError(
+            f"os handlers das barras deixaram de falar do mesmo buffer "
+            f"({detalhe}). Enquanto isso valer, o `BarrasEmEdicao` do port "
+            f"nao e o que a gravacao le, e editar uma barra gravaria o valor "
+            f"velho -- com o golden acusando a gravacao.")
+    return distintos.pop()
+
+
+def campo_do_formulario(qual: tuple[str, str]) -> int:
+    """O deslocamento de um campo, pelo campos.tsv da WTE-TASK-25."""
+    linhas = CAMPOS.read_text(encoding="utf-8").splitlines()
+    cab = linhas[0].split("\t")
+    for linha in linhas[1:]:
+        c = dict(zip(cab, linha.split("\t")))
+        if (c["formulario"], c["campo"]) == qual:
+            return int(c["offset"], 16)
+    raise CheckError(f"{REL_CAMPOS}: sem {qual[0]}.{qual[1]}")
 
 
 def constantes(pe: PE, ini: int, fim: int) -> dict[str, int]:
@@ -217,6 +329,36 @@ def main(argv: list[str]) -> int:
               f"{c['base']:#x}")
         print(f"check_barras: time 0 em {primeiro} = OFS_TEAM_BARS: ok")
         print(f"check_barras: {TIMES} times, ultimo em {ultimo}: ok")
+
+        # --- o lado da edicao, da WTE-TASK-26 -------------------------------
+        buffer = buffer_de_edicao(pe)
+        print(f"check_barras: buffer de edicao {buffer:#x}, o mesmo nos "
+              f"{len(PADROES_BUFFER)} handlers (carga, sel, track, gravacao): "
+              f"ok")
+
+        # A largura tem de ser a MESMA sequencia de bytes nos dois lados: e o
+        # que faz uma barra editada e uma carregada com o mesmo valor darem o
+        # mesmo pixel, e portanto o que torna a tela capaz de julgar a edicao.
+        for qual in (HANDLER, HANDLER_TRACK):
+            uma_vez(corpo(pe, qual), LARGURA, f"{qual[0]}.{qual[1]}",
+                    "largura 11*v+9")
+        print("check_barras: `11*v + 9` identico na carga e na edicao: ok")
+
+        # A ancora da aritmetica de indice de componente do sel_barraClick.
+        ancora = campo_do_formulario(CAMPO_ANCORA)
+        # `mov eax,[ebx+imm32]` sozinho casa duas vezes -- a ancora e a
+        # `track_barra` logo abaixo. O que separa e a SUBTRACAO: so a ancora
+        # tem o `sub esi,eax` do indice depois da chamada.
+        alvo = uma_vez(corpo(pe, HANDLER_SEL), rb"\x8b\x83(....)\xe8....\x2b\xf0",
+                       f"{HANDLER_SEL[0]}.{HANDLER_SEL[1]}", "campo ancora")
+        lido = struct.unpack("<I", alvo)[0]
+        if lido != ancora:
+            raise CheckError(
+                f"o {HANDLER_SEL[1]} ancora a subtracao no campo {lido:#x} e "
+                f"o {REL_CAMPOS} diz que {CAMPO_ANCORA[1]} mora em "
+                f"{ancora:#x}. O indice 0..4 sairia deslocado.")
+        print(f"check_barras: sel_barraClick ancora em {CAMPO_ANCORA[1]} "
+              f"({ancora:#x}): ok")
     except CheckError as exc:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2

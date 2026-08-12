@@ -243,9 +243,9 @@ conferível.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **28 de 96 têm arquivo**
-      (2026-08-11), e são exatamente os 28 do grupo de carga: 14 `trivial`,
-      1 `implementado`, 13 `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **30 de 96 têm arquivo**
+      (2026-08-12): os 28 do grupo de carga (14 `trivial`, 1 `implementado`,
+      13 `aberto`) mais os 2 primeiros do grupo de edição, os dois `aberto`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -717,3 +717,38 @@ completa; falta amarrar num terceiro que não é nenhum dos dois.
 isso, `0x00404374` (881 B) e `0x00403f00` (328 B) **nunca precisaram ser
 lidos** — o original calcula endereços de bytes cujo lugar já se conhecia por
 outro caminho.
+
+**WTE-TASK-26 — o símbolo que "nunca é chamado" era virtual, e a busca é que
+estava errada.** A WTE-TASK-25 fechou registrando como dívida sem dono: a
+`.text` inteira tem **zero** `call rel32` para `TControl::SetEnabled`, e por
+isso a seção Saída da spec do `lista_equiposChange` não podia dizer
+`disassembly lido`. O original chama `call DWORD PTR [reg+0x64]` depois de
+carregar o VMT — três vezes dentro daquele mesmo handler. **Chamada virtual não
+deixa `call rel32`.** O slot é medido, não afirmado: o valor exportado de
+`SetEnabled` aparece a `0x64` bytes do início do VMT em **108 classes** do
+`vcl60.bpl`, com o nome de cada uma lido de `[vmt - 0x2c]`, e a conferência
+roda a cada `make -C wte check`. Vale como aviso geral: *"o símbolo não é
+chamado"* é afirmação sobre a **forma** da chamada procurada, não sobre o
+programa.
+
+**E existe um buffer de edição, que não é cache.** As cinco barras de força não
+vão da imagem para a tela: vão para `0x00434592`, e é dali que sai a largura. A
+carga enche, o `track_barraChange` grava, o `boton_barras2isoClick` lê para
+gravar na imagem — os três tocam o mesmo endereço, conferido por
+[`check_barras.py`](../../wte/tools/check_barras.py). Se o port desenhasse a
+barra a partir de `Jogo.teams[].bar_*`, editar mudaria o pixel e a gravação
+escreveria o valor velho, **com o golden acusando a gravação** por um defeito da
+edição. É a forma que todo grupo de edição da fase 4 deve ter, e vale procurar
+o buffer antes de escrever o corpo.
+
+**E o teclado chega ao port — a recusa do gate estava apoiada em medição
+superada.** O `golden_run_laz.sh` reprovava roteiro com `! tecla`/`! texto`
+desde a WTE-TASK-22, citando a WTE-TASK-13; aquela medição valia para `xdotool
+key` **sem foco** e para `key --window` (que usa `XSendEvent`), e não para
+`xdotool windowfocus` — `XSetInputFocus`, que dispensa gerenciador de janela. O
+`compara_tela.sh` da WTE-TASK-25 já trocava de time com `Down` por esse
+caminho: **a contradição estava na árvore havia uma semana**, em dois arquivos
+que ninguém tinha lido juntos. Remedido pelo próprio harness — 3 `! tecla Down`
+dão 3 disparos de `lista_equiposChange` no trace do port —, e o foco ficou
+atrás de `ROTEIRO_FOCO`, ligado só no lado port para não invalidar o controle.
+Sem isso, metade da WTE-TASK-26 não teria gate nenhum.

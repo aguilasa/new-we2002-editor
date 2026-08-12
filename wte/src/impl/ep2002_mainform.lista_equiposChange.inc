@@ -85,9 +85,16 @@ begin
   begin
     barra := FindComponent('barra' + IntToStr(i));
     radio := FindComponent('sel_barra' + IntToStr(i));
+    { Os cinco bytes vao para `BarrasEmEdicao` ANTES de virarem largura, e e
+      dali que a largura sai. O original faz o mesmo -- le da imagem para
+      `0x00434592` e desenha a partir do buffer --, e a diferenca so aparece
+      depois: quem edita e grava e o buffer, nao `Jogo.teams[].bar_*`.
+      Sem `nacional` o original nem chega no laco de leitura. }
+    if nacional then
+      BarrasEmEdicao[i] := Byte(BarraDoTime(indice, i));
     if barra is TControl then
       if nacional then
-        TControl(barra).Width := 11 * BarraDoTime(indice, i) + 9
+        TControl(barra).Width := 11 * BarrasEmEdicao[i] + 9
       else
         TControl(barra).Width := 9;
     if radio is TControl then
@@ -95,7 +102,7 @@ begin
   end;
   track_barra.Enabled := nacional;
   if nacional then
-    track_barra.Position := BarraDoTime(indice, BarraMarcada);
+    track_barra.Position := BarrasEmEdicao[BarraMarcada];
   boton_barras2iso.Enabled := nacional;
 
   { --- 3. o resto da tela ---------------------------------------------- }
