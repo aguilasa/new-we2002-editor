@@ -298,33 +298,17 @@ end;
 procedure TMainForm.lista_equiposChange(Sender: TObject);
 {$I impl/ep2002_mainform.lista_equiposChange.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre1KeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('MainForm.edit_nombre1KeyPress');
-end;
-{$POP}
+{$I impl/ep2002_mainform.edit_nombre1KeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre2KeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('MainForm.edit_nombre2KeyPress');
-end;
-{$POP}
+{$I impl/ep2002_mainform.edit_nombre2KeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.edit_nombre3KeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('MainForm.edit_nombre3KeyPress');
-end;
-{$POP}
+{$I impl/ep2002_mainform.edit_nombre3KeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.iguala_nombresClick(Sender: TObject);
-begin
-  REStub('MainForm.iguala_nombresClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.iguala_nombresClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_nombres2isoClick(Sender: TObject);

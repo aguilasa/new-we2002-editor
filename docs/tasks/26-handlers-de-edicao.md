@@ -547,3 +547,71 @@ separadas (primeiro parágrafo do Contexto).
   - os dois `KeyPress` da ficha ainda **não são exercitáveis de verdade**: a
     ficha abre, mas vazia — preenchê-la (`0x00404820`, `0x0040756c`) é o
     obstáculo que os lotes de atributo e de tática também têm pela frente.
+
+---
+
+- **Executado em:** 2026-08-12 — **quinta passagem, ainda parcial.** O lote de
+  **nome**: os três `edit_nombreNKeyPress` e o `iguala_nombresClick`. O grupo
+  vai de **7 para 11 de 28**; o índice a **9 `implementado`** de 96.
+
+- **Resumo do que foi feito:**
+
+  **Os três campos de nome não são três cópias do mesmo handler**, e a
+  diferença estava no tamanho: 88, 88 e **32** bytes. O terceiro é outro
+  bicho —
+
+  | | `nombre1` | `nombre2` | `nombre3` |
+  |---|---|---|---|
+  | aceita | letra, dígito, `.`, espaço | idem | **só alfanumérico** |
+  | `Return` | foca `nombre2` | foca `nombre3` | **não faz nada** |
+  | teste | faixa a faixa, à mão | idem | `isalnum` da RTL |
+
+  As duas diferenças fazem sentido no dado, e é uma **confirmação
+  independente** de um achado da WTE-TASK-25: o terceiro campo é a
+  **abreviatura** (`abbreviations[0]`, `MaxLength = 3` no DFM), não `names[2]`.
+  A 25 descobriu isso comparando telas de um clube de ML; aqui o mesmo fato
+  vem do código, por outro caminho.
+
+  **`iguala_nombresClick`** copia `Nome1` nos outros dois, truncando cada um ao
+  que cabe: `Copy(..., 1, global - 1)` no segundo e `Copy(..., 1, 3)` no
+  terceiro.
+
+- **Dois achados que valem mais que os handlers:**
+
+  1. **O port não põe `MaxLength` em `edit_nombre1` nem em `edit_nombre2`.** O
+     original põe, ao carregar a imagem: `edit_nombre1.MaxLength :=
+     DWORD[0x00433a10] div 2` e `edit_nombre2.MaxLength := DWORD[0x00433b48] -
+     1` (`0x0040cc38` e `0x0040cc48`). No port os dois aceitam texto de
+     qualquer tamanho. **Nenhum teste atual pega isso** — é comportamento, não
+     pixel —, e o `edit_nombre3` escapa por acaso, porque o `MaxLength = 3`
+     dele está no DFM e o `.lfm` herda. É divergência aberta e entrada da
+     [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md).
+  2. **A global `0x00433b48` não é escrita por `mov` nenhum.** Varri o `.text`
+     inteiro atrás de `mov ds:0x433b48,reg` e de `mov DWORD PTR
+     ds:0x433b48,imm`: **zero**. Ela é preenchida por outro caminho — ponteiro,
+     ou estrutura carregada em bloco. O valor em execução continua por medir, e
+     o port usa **19**, tirado do tamanho do campo na camada de dados (`names`
+     é `array[0..19] of AnsiChar`). É o método da §4.2 outra vez, mas **sem
+     confirmação cruzada** desta vez, e está dito assim na spec.
+
+- **O `iguala_nombres` continua com o defeito da CORR-WTE-057, e agora com mais
+  uma hipótese derrubada.** O port não o desabilita no time-modelo (518 px de
+  mudança no oráculo, **0** no port). Comparei o `.lfm` dele com o do vizinho
+  `boton_nombres2iso`, que acinzenta certo: mesmo `TSpeedButton`, mesmo
+  `Flat = True`, mesmo `Enabled = False` de nascença, os dois com `Glyph`. A
+  **única** diferença é `ParentFont = False` mais as propriedades de fonte, o
+  que não explica glifo que não acinzenta. Continua sem causa medida, e está
+  registrado na spec do `iguala_nombresClick`.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/` — 4 specs novas (`edit_nombre1/2/3KeyPress`,
+    `iguala_nombresClick`)
+  - `wte/src/impl/` — os 4 `.inc`; `TAMANHO_DO_NOME` no `.aux.inc`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 86,0% → **85,2%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` compila.
+
+- **Aberto neste lote:** `iguala_nombresClick`, pelo limite não medido e pelo
+  defeito de habilitação. Os três `KeyPress` fecham `implementado` — são
+  filtros puros, sem estado e sem gravação.

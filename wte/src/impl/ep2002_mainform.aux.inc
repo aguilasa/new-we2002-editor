@@ -20,6 +20,13 @@ const
   { Jogadores sem contrato, antes dos elencos. `PLAYERS_NC` do we2002_core. }
   JOGADORES_SEM_CONTRATO = 462;
   JOGADORES_POR_TIME = 23;
+  { Bytes de um campo de nome de time, terminador incluido -- o `names` do
+    `we2002_team.pas` e `array[0..19] of AnsiChar`. O original guarda o mesmo
+    numero na global `0x00433b48`, que ele usa para o `MaxLength` de
+    `edit_nombre2` e para o truncamento do `iguala_nombresClick`. Que os dois
+    sejam o MESMO numero e inferencia, nao medicao -- ver a spec do
+    `iguala_nombresClick`. }
+  TAMANHO_DO_NOME = 20;
 
 var
   { O `0x004335e4` do original: qual `dorsalN` esta marcado agora.

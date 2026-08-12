@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 6 |
+| `implementado` | 9 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 76 |
+| `aberto` | 73 |
 | **total** | **96** |
 
-35 de 96 têm arquivo de spec.
+39 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -99,10 +99,10 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | implementado |
 | `0x0040cab8` | `MainForm` | boton_barras2isoClick | OnClick | gravacao | aberto |
 | `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | aberto |
-| `0x0040d36c` | `MainForm` | edit_nombre1KeyPress | OnKeyPress | edicao | aberto |
-| `0x0040d3c4` | `MainForm` | edit_nombre2KeyPress | OnKeyPress | edicao | aberto |
-| `0x0040d41c` | `MainForm` | edit_nombre3KeyPress | OnKeyPress | edicao | aberto |
-| `0x0040d43c` | `MainForm` | iguala_nombresClick | OnClick | edicao | aberto |
+| `0x0040d36c` | `MainForm` | [edit_nombre1KeyPress](MainForm.edit_nombre1KeyPress.md) | OnKeyPress | edicao | implementado |
+| `0x0040d3c4` | `MainForm` | [edit_nombre2KeyPress](MainForm.edit_nombre2KeyPress.md) | OnKeyPress | edicao | implementado |
+| `0x0040d41c` | `MainForm` | [edit_nombre3KeyPress](MainForm.edit_nombre3KeyPress.md) | OnKeyPress | edicao | implementado |
+| `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | aberto |
 | `0x0040d534` | `MainForm` | boton_nombres2isoClick | OnClick | gravacao | aberto |
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
