@@ -35,7 +35,7 @@ guarda o time e o jogador escolhidos em globais (0x004335dc e vizinhas)
 0x00403f00(...)   ' 328 B -- le o numero de camisa, base UM
 0x004046e8(...)   ' 164 B -- carrega o jogador para o buffer de 44 B
 0x00404820(...)   ' 1.459 B -- GRAVA um jogador (nao "enche a ficha")
-0x0040756c(...)   ' 1.275 B -- nao lida
+0x0040756c(...)   ' 1.275 B -- ENCHE a ficha (lida na 12a passagem)
 jugador.ShowModal
 ```
 
@@ -60,6 +60,13 @@ que aparece quando o jogador escolhido é de clube de Master League.
 > ficha grava? só grava ao fechar? — **continua sem medir**: exigiria seguir o
 > fluxo dos 1.459 bytes a partir daqui, e não só saber o que a rotina faz. Fica
 > como pergunta escrita, não como descrição plausível.
+>
+> **A outra metade fechou na décima segunda passagem:** o `0x0040756c` —
+> "preenche a ficha" — está lido e portado. Ele percorre duas tabelas de
+> descritores de bit em `.data` e enche os 16 `barrhab`/`valorhab`/`imghab` e
+> os 12 `flechasapa`/`valorapa` do formulário `jugador`, achando cada controle
+> por nome. A ficha deixou de abrir vazia. O que continua sem resposta é só a
+> `0x00404820`, a que grava.
 >
 > **Mais um dado sobre o mesmo ponto, medido na nona passagem da WTE-TASK-26 e
 > igualmente sem conclusão:** dentro deste corpo, em `0x0040fd7a`, está a
@@ -109,4 +116,5 @@ disassembly de outra fase.
 **Veredito `aberto` porque metade tem dono fora.** O Pascal da navegação está
 escrito em
 [`../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc`](../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc);
-a ficha abre com o estado que a 26 vai preencher.
+a ficha **deixou de abrir vazia** na décima segunda passagem da 26, que portou
+o `0x0040756c`. O que mantém o veredito é a `0x00404820`.

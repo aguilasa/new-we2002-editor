@@ -10,14 +10,20 @@
   encadeamento, depois o filtro --, e ela importa: invertida, o `Return`
   chegaria zerado no teste do `#13` e o foco nunca andaria.
 
-  A condicao que guarda o encadeamento NAO foi medida: o original so move o
-  foco se `DWORD[0x00433614 + 44*0x004335c4] <> 0`, uma tabela de 44 bytes por
-  entrada indexada por uma global que esta task nao identificou. Ate saber o
-  que ela guarda, o port move o foco sempre -- e isso e divergencia declarada,
-  nao descuido. Ver a secao Notas da spec. }
+  A CONDICAO QUE GUARDA O ENCADEAMENTO ESTA MEDIDA desde a decima segunda
+  passagem da WTE-TASK-26, e o port deixou de mover o foco sempre. O original
+  so encadeia se `DWORD[0x00433614 + 44*0x004335c4] <> 0` -- a terceira coluna
+  de offsets do buffer de jogador, indexada pelo buffer em edicao. Ela vale
+  zero quando o jogador NAO TEM o campo condicional na imagem, e nesse caso a
+  ficha mostra o literal 50 num campo desabilitado: o `Return` nao leva o
+  cursor para um campo que nao existe no formato.
+
+  Aqui a mesma pergunta e feita a `JogadorTemCampoCondicional`, do
+  `we2002_estado`. }
 begin
   REMark('jugador.casilla_dorsalKeyPress');
-  if Key = #13 then
+  if (Key = #13)
+     and JogadorTemCampoCondicional(TimeEmEdicao, JogadorEmEdicao) then
     casilla_precio.SetFocus;
   if (Key <> #8) and not (Key in ['0'..'9']) then
     Key := #0;

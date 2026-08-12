@@ -1303,3 +1303,113 @@ do `--edicao`; e o `iguala_nombres`.
   o controle é **desabilitado** (`call [ecx+0x64]`, o `SetEnabled` virtual) — é a
   mesma condição do `casilla_dorsalKeyPress` e o `50` da
   [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
+
+---
+
+- **Executado em:** 2026-08-12 — **décima segunda passagem: a ficha do jogador
+  deixou de abrir vazia.** O `0x0040756c` portado, e uma divergência de três
+  passagens fechada.
+
+- **Resumo do que foi feito:**
+
+  `PreencheFicha` — os dois laços do `0x0040756c` —, o bloco final do campo
+  condicional, e o `casilla_dorsalKeyPress` deixando de mover o foco sempre.
+
+- **Os controles saem por NOME, e a ordem das tabelas é a ordem da tela.** Cada
+  volta do laço monta `'<prefixo>' + IntToStr(n)` e chama `FindComponent`. Os
+  cinco prefixos e o que recebem:
+
+  | controle | classe | o que recebe |
+  |---|---|---|
+  | `barrhab1..16` | `TScrollBar` | `Position := valor cru` |
+  | `valorhab1..16` | `TLabel` | `Caption := cru + 12`; fonte **amarela** se cru ≥ 5 |
+  | `imghab1..16` | `TImage` | `Width := 7*cru + 8` |
+  | `flechasapa1..12` | `TUpDown` | `Position := valor cru` |
+  | `valorapa1..12` | `TLabel` | legenda |
+
+  As classes não são chute: saem dos símbolos importados que o corpo chama —
+  `TScrollBar::SetPosition`, `TCustomUpDown::SetPosition`, `TControl::SetWidth`,
+  `TFont::SetColor` —, e batem com o `.lfm`, que tem exatamente 16 `TScrollBar`,
+  16 `TImage`, 12 `TUpDown` e os `TLabel`.
+
+  O `7*cru + 8` é largura de barrinha, da mesma família do `11*v + 9` das barras
+  de força do time.
+
+- **Nenhuma aritmética de bit foi escrita**, e é o que a passagem 11 pagou para
+  saber: os 28 valores vêm da camada de dados já desempacotados, na ordem das
+  tabelas, com o `check_bitfields.py` provando a cada build que as duas
+  descrições do formato concordam.
+
+- **A divergência do `casilla_dorsalKeyPress` fechou, e não pelo caminho
+  previsto.** A quarta passagem deixou o port movendo o foco **sempre**, porque
+  a condição dependia do buffer de 44 bytes. A spec previa que ela fechasse
+  junto com o lote de mover.
+
+  Fechou por outro lado: a pergunta é sobre o **dado**, não sobre o buffer — o
+  campo condicional só falta nos times 54 e 55 —, e virou
+  `JogadorTemCampoCondicional` no `we2002_estado`. Mesmo resultado, e sem
+  obrigar a ficha a conhecer o buffer de um handler de outro formulário.
+
+- **E isso foi obrigatório, não preferência: o `uses` gerado sai na
+  INTERFACE.** `ep2002_mainform` já usa `ep2002_jugador`, então
+  `ep2002_jugador` não pode usar `ep2002_mainform` — referência circular, e o
+  compilador recusa. Duas consequências:
+
+  1. `TimeEmEdicao` e `JogadorEmEdicao` mudaram do `.aux.inc` do `MainForm`
+     para o `we2002_estado`, que é onde o cabeçalho daquela unidade já dizia
+     que mora estado compartilhado por mais de um formulário;
+  2. o `PreencheFicha` ficou no `.aux.inc` do `MainForm` e **não** num do
+     `jugador` — o que, medido, é como o original faz: o `0x0040756c` não é
+     método do formulário da ficha, é rotina solta que alcança os controles
+     pelo ponteiro global `0x00433e38` (`_jugador`), a mesma forma da
+     `MarcaCamisa` com o `0x00434360`.
+
+  A primeira tentativa foi escrever um `ep2002_jugador.aux.inc`; ela não
+  compila, e o erro (`Identifier not found "PreencheFicha"`) diz o porquê a
+  três frames de distância do motivo real.
+
+- **O que ficou de fora, medido e nomeado:** as legendas dos campos
+  **enumerados** do segundo laço — posição, cabelo, barba, porte, chuteira, pé,
+  fora de posição. O original as tira de `0x00423798`, que agora se sabe o que
+  é: um vetor de `AnsiString` de passo `0x20`, com o finalizador da RTL
+  (`0x004029b5`) recebendo contagem `0x60` = 96 = **12 × 8** — doze campos, até
+  oito opções cada. Ele **nasce zerado no arquivo** e é preenchido em tempo de
+  execução (`0x00401db6`), e esse preenchimento não foi lido.
+
+  Os rótulos ficam vazios em vez de receberem cadeia inventada. Os dois campos
+  **numéricos** — altura e idade, os únicos que o original monta com `IntToStr`
+  — estão preenchidos.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/we2002_estado.pas` — `TimeEmEdicao`, `JogadorEmEdicao`,
+    `TIMES_SEM_CONDICIONAL`, `JogadorTemCampoCondicional`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `PreencheFicha`; o bloco movido
+  - `wte/src/impl/ep2002_mainform.mostrar_jugadorClick.inc` — a chamada
+  - `wte/src/impl/ep2002_jugador.casilla_dorsalKeyPress.inc` — a condição real
+  - `wte/src/impl/*.uses` — as duas listas
+  - `wte/tools/check_bitfields.py` — o que `0x00423798` é
+  - `wte/re/spec/MainForm.mostrar_jugadorClick.md`,
+    `jugador.casilla_dorsalKeyPress.md` — as linhas que caducaram
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 80,2% → **79,2%**
+  - regerados: `bitfields.md`, os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild wte/wte.lpi` rc 0.
+
+- **Problemas encontrados:**
+  1. A referência circular acima. Custou duas recompilações e a lição está
+     escrita no `.aux.inc`: **rotina que precisa dos dois formulários só cabe
+     no do `MainForm`**, e isso coincide com a estrutura do original.
+  2. `CONDICIONAL_AUSENTE` ficou declarado duas vezes ao mover o bloco. O
+     compilador pegou; vale registrar que mover código entre `.inc` do mesmo
+     `{$I}` não é livre — eles compartilham um escopo só.
+  3. Um `{` dentro de comentário Pascal (`{byte, bit inicial, largura}`) abre
+     comentário aninhado e o FPC avisa. Trocado por parênteses.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **10 dos 28 handlers**, sem spec. Os 2 de atributo e o `flechasapaClick`
+    **deixaram de estar bloqueados** — a ficha enche —, e são a próxima
+    passagem; os 7 de tática continuam atrás do `0x0040a0b4` (1.443 B);
+  - as legendas dos campos enumerados da ficha (`0x00401db6`);
+  - o comportamento de truncamento por campo (WTE-TASK-36);
+  - a régua de tela: o `--edicao` não alcança nem a lista de descarte nem a
+    ficha.

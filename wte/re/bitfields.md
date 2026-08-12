@@ -9,7 +9,7 @@ Produto da WTE-TASK-26, decima primeira passagem. O `0x0040756c` — a rotina qu
 | `habilidades` | `0x00423648` | 16 | 12 B |
 | `aparencia` | `0x00423708` | 12 | 12 B |
 
-O terceiro endereco que a rotina carrega — `0x00423798`, no segundo laco — **nao** entra aqui: lido com este mesmo layout de 12 bytes ele sai todo zero, o que quer dizer que o layout nao vale ali. O que ele e continua por medir.
+O terceiro endereco que a rotina carrega — `0x00423798`, no segundo laco — **nao** entra aqui: o passo dele e `0x20` e ele e um vetor de `AnsiString`. O finalizador da RTL em `0x004029b5` recebe contagem `0x60` = 96 = 12 x 8, o que da 12 registros de oito cadeias — as legendas dos campos enumerados da ficha. Ele nasce zerado no arquivo e e preenchido em tempo de execucao (`0x00401db6`), e esse preenchimento continua por ler.
 
 ## A conferencia
 

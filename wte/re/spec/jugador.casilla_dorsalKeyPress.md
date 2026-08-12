@@ -93,10 +93,19 @@ original não deixa o cursor chegar lá.
 A global `0x004335c4` que indexa a tabela é, portanto, **qual buffer de jogador
 está em edição** — 1 e 2 são os dois lados que os handlers de mover usam.
 
-**Veredito `aberto` ainda assim**, e agora por um motivo menor e nomeado: o
-port não tem o buffer de 44 bytes, então não tem como avaliar a condição, e
-**move o foco sempre**. O buffer entra com o lote de mover jogador — é a
-`0x004046e8` que o preenche —, e esta spec fecha junto com ele.
+**A divergência do `SetFocus` fechou na décima segunda passagem da
+WTE-TASK-26.** Durante três passagens o port moveu o foco **sempre**, porque
+não tinha como avaliar a condição. Agora tem, e não foi pelo caminho que esta
+spec previa: em vez de consultar o buffer de 44 bytes, ele faz a mesma
+pergunta ao dado — `JogadorTemCampoCondicional`, no
+[`we2002_estado`](../../src/we2002_estado.pas), decide pela regra que os dois
+oráculos confirmaram, a de que só os times **54 e 55** não têm o campo. O
+resultado é o mesmo byte a byte e não obriga a ficha a conhecer o buffer de um
+handler de outro formulário, que seria referência circular de unidade.
+
+**Veredito `aberto` ainda assim**, e agora por um motivo só: a régua de tela do
+grupo de edição (`compara_tela.sh --edicao`) não alcança a ficha do jogador.
+Não é divergência pendente — é gate que não rodou.
 
 O `50` do ramo sem campo é entrada da
 [WTE-TASK-30](../../../docs/tasks/30-preco-do-jogador.md): é o valor que a

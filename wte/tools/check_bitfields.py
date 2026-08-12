@@ -64,9 +64,12 @@ SAIDA_TSV = ROOT / "wte" / "re" / "bitfields.tsv"
 # `add esi,0xc` a cada volta, e o `cmp edi,<n>` fecha o laco.
 #
 # O terceiro endereco que a rotina carrega -- `0x00423798`, no segundo laco --
-# NAO entra: lido com este mesmo layout de 12 bytes ele sai todo zero, o que
-# quer dizer que o layout nao vale ali. O que ele e continua por medir, e esta
-# escrito assim no `.md` em vez de virar uma terceira tabela inventada.
+# NAO entra, e agora se sabe por que: o passo dele e 0x20, nao 0xc, e ele e um
+# vetor de `AnsiString`. O finalizador da RTL em `0x004029b5` e chamado com
+# contagem 0x60 = 96 = 12 x 8, o que da 12 registros de 8 cadeias -- as
+# legendas dos campos enumerados da ficha, ate oito opcoes cada. Ele nasce
+# ZERADO no arquivo e e preenchido em tempo de execucao (`0x00401db6`), e esse
+# preenchimento nao foi lido. Sem ele nao ha o que conferir aqui.
 TABELAS = (
     ("habilidades", 0x00423648, 16),
     ("aparencia", 0x00423708, 12),
@@ -181,9 +184,12 @@ def render(linhas, faltando) -> tuple[str, str]:
         a.append(f"| `{nome}` | `{base:#010x}` | {n} | {REGISTRO} B |")
     a.append("")
     a.append("O terceiro endereco que a rotina carrega — `0x00423798`, no "
-             "segundo laco — **nao** entra aqui: lido com este mesmo layout de "
-             "12 bytes ele sai todo zero, o que quer dizer que o layout nao "
-             "vale ali. O que ele e continua por medir.")
+             "segundo laco — **nao** entra aqui: o passo dele e `0x20` e ele e "
+             "um vetor de `AnsiString`. O finalizador da RTL em `0x004029b5` "
+             "recebe contagem `0x60` = 96 = 12 x 8, o que da 12 registros de "
+             "oito cadeias — as legendas dos campos enumerados da ficha. Ele "
+             "nasce zerado no arquivo e e preenchido em tempo de execucao "
+             "(`0x00401db6`), e esse preenchimento continua por ler.")
     a.append("")
     a.append("## A conferencia")
     a.append("")

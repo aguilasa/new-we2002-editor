@@ -4,3 +4,4 @@ SysUtils       # IntToStr
 Classes        # TComponent
 Graphics       # TColor
 retrace        # REMark
+we2002_estado  # TimeEmEdicao, JogadorEmEdicao, JogadorTemCampoCondicional

@@ -98,6 +98,44 @@ function InjetaPatchDeArranque(const imagem: string): Integer;
   abrir o arquivo. }
 function AbreImagem(const caminho: string): Boolean;
 
+{ ------------------------------------------------------------------------ }
+{ O time e o jogador que a ficha esta editando -- as globais `0x004335cc` e
+  `0x004335dc` do original.
+
+  MORAVAM no `.aux.inc` do `MainForm` ate a decima segunda passagem da
+  WTE-TASK-26, e mudaram de casa porque deixaram de ser estado de um
+  formulario so: quem as enche e a navegacao do `MainForm`, quem as consome
+  passou a ser o `jugador`. O `uses` que os 18 `ep2002_*` recebem sai na
+  INTERFACE, entao `ep2002_jugador` nao pode usar `ep2002_mainform` -- seria
+  referencia circular. Estado compartilhado por dois formularios mora aqui,
+  que e o que o cabecalho desta unidade diz. }
+var
+  TimeEmEdicao: Integer = -1;
+  JogadorEmEdicao: Integer = -1;
+
+const
+  { Os dois times cujos jogadores NAO tem o campo condicional na imagem.
+
+    Medido nos dois oraculos, por caminhos independentes, e eles concordam: o
+    `0x00404374` do `wte.exe` zera a coluna de offset quando o indice do time
+    cai entre 0x35 e 0x38 exclusive -- 54 ou 55 --, e o `we2002_database.pas`
+    pula os 46 jogadores 1704..1749 ao carregar `cost`, que e exatamente
+    `462 + 54*23` ate `462 + 56*23 - 1`. Os dois primeiros times all-star. }
+  TIMES_SEM_CONDICIONAL = [54, 55];
+
+{ O jogador do slot tem o campo condicional na imagem?
+
+  E a condicao `DWORD[0x00433614 + 44*buffer] <> 0` do original, que a setima
+  passagem da WTE-TASK-26 identificou como a terceira coluna de offsets do
+  buffer de jogador. Quando ela e zero, a ficha mostra o literal 50 no campo e
+  o controle nasce desabilitado, e o `casilla_dorsalKeyPress` nao move o foco
+  para la.
+
+  Para clube de Master League o indice que decide e o do time RESOLVIDO pelo
+  par de vinculo, nao o do clube -- por isso o parametro e o par (time, slot)
+  e nao so o time. }
+function JogadorTemCampoCondicional(indice, slot: Integer): Boolean;
+
 implementation
 
 uses
@@ -201,6 +239,33 @@ begin
   finally
     img.Close;
   end;
+end;
+
+function JogadorTemCampoCondicional(indice, slot: Integer): Boolean;
+var
+  vinculo: PByte;
+  resolvido: Byte;
+begin
+  Result := False;
+  if (indice < 0) or (slot < 0) or (slot > 22) then
+    Exit;
+  if indice < 63 then
+    resolvido := Byte(indice)
+  else
+  begin
+    if indice < 95 then
+      vinculo := @Jogo.ml_teams[indice - 63].link[slot * 2]
+    else
+      vinculo := @Jogo.ml_default.link[slot * 2];
+    { Segundo byte >= 23 e bloco proprio do clube: o campo existe sempre. }
+    if vinculo[1] >= 23 then
+    begin
+      Result := True;
+      Exit;
+    end;
+    resolvido := vinculo[0];
+  end;
+  Result := not (resolvido in TIMES_SEM_CONDICIONAL);
 end;
 
 function AbreImagem(const caminho: string): Boolean;

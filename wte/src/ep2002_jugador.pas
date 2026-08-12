@@ -29,7 +29,7 @@ interface
 
 uses
   Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
-  Graphics;
+  Graphics, we2002_estado;
 
 type
   Tjugador = class(TForm)

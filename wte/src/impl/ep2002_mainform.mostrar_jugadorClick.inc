@@ -11,6 +11,7 @@
   ponteiro -- ver `LadoTitular` no `.aux.inc`. }
 var
   titular: Boolean;
+  k: LongInt;
 begin
   REMark('MainForm.mostrar_jugadorClick');
   titular := LadoTitular(Sender, 'mostrar_jugador_1');
@@ -24,8 +25,13 @@ begin
     TimeEmEdicao := lista_equipos_2.ItemIndex;
     JogadorEmEdicao := lista_jugadores_2.ItemIndex;
   end;
-  { A ficha abre com o estado que a WTE-TASK-26 vai preencher. Abrir vazio e
-    o comportamento honesto do escopo desta task -- o alternativo seria nao
-    abrir, e ai o `--show` nao poderia sair. }
+  { A ficha deixou de abrir vazia na decima segunda passagem da WTE-TASK-26: o
+    `PreencheFicha` e o `0x0040756c` do original, que este handler chama antes
+    de mostrar o formulario. O indice do jogador dentro de `Jogo.players` sai
+    do mesmo `IndiceDoJogador` que a lista usou para escrever o nome. }
+  k := IndiceDoJogador(TimeEmEdicao, JogadorEmEdicao);
+  if (TimeEmEdicao >= 0) and (JogadorEmEdicao >= 0)
+     and (k >= 0) and (k < Length(Jogo.players)) then
+    PreencheFicha(Jogo.players[k], TimeEmEdicao, JogadorEmEdicao);
   jugador.ShowModal;
 end;

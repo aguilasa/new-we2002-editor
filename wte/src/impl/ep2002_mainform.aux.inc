@@ -277,15 +277,10 @@ begin
   end;
 end;
 
-{ O time e o jogador que a ficha vai editar -- as globais `0x004335cc` e
-  `0x004335dc` do original.
-
-  Quem as enche e a navegacao (`mostrar_jugadorClick`,
-  `mostrar_estrategiaClick`); quem as consome e o formulario aberto, que e da
-  WTE-TASK-26. Por isso elas existem aqui e ninguem mais as le ainda. }
-var
-  TimeEmEdicao: Integer = -1;
-  JogadorEmEdicao: Integer = -1;
+{ `TimeEmEdicao` e `JogadorEmEdicao` moraram aqui ate a decima segunda passagem
+  da WTE-TASK-26. Estao no `we2002_estado`, com o porque: o `jugador` passou a
+  le-las, e o `uses` gerado sai na interface -- `ep2002_jugador` usando
+  `ep2002_mainform` seria referencia circular. }
 
 { ------------------------------------------------------------------------ }
 { O BUFFER DE JOGADOR -- `0x004335ec`, registros de 44 bytes (WTE-TASK-26).
@@ -365,14 +360,8 @@ const
     na imagem para aquele jogador. }
   CONDICIONAL_AUSENTE = 50;
 
-  { Os dois times cujos jogadores NAO tem o campo condicional.
-
-    Medido nos dois oraculos, por caminhos independentes, e eles concordam:
-    o `0x00404374` zera o offset quando o indice do time cai entre 0x35 e
-    0x38 exclusive -- isto e, 54 ou 55 --, e o `we2002_database.pas` pula os
-    46 jogadores 1704..1749 ao carregar `cost`, que e exatamente
-    `462 + 54*23` ate `462 + 56*23 - 1`. Os dois primeiros times all-star. }
-  TIMES_SEM_CONDICIONAL = [54, 55];
+  { `TIMES_SEM_CONDICIONAL` mudou para o `we2002_estado` junto com
+    `TimeEmEdicao` -- a ficha precisa da mesma regra. }
 
 var
   BufferJogador: array[BUF_DESTINO..BUF_ULTIMO] of TBufferJogador;
@@ -719,6 +708,150 @@ begin
   jugadores_dst.ItemIndex := guarda;
   CarregaJogador(equipos_dst.ItemIndex, jugadores_dst.ItemIndex, buf_dst);
   MainForm.casilla_xmlibres.Caption := IntToStr(BlocosLivresDeMl);
+end;
+
+{ ------------------------------------------------------------------------ }
+{ O preenchimento da ficha do jogador -- WTE-TASK-26, decima segunda passagem.
+
+  MORA NO AUX DO `MainForm`, e nao no do `jugador`, porque e assim no original:
+  o `0x0040756c` nao e metodo do formulario da ficha. E rotina solta que o
+  handler do `MainForm` chama, e ela alcanca os controles pelo ponteiro global
+  `0x00433e38` (`_jugador`) -- a mesma forma da `MarcaCamisa`, que alcanca o
+  `MainForm` por `0x00434360`.
+
+  E ha uma razao de Pascal que aponta para o mesmo lugar: o `uses` que o
+  gerador emite sai na INTERFACE, entao `ep2002_jugador` nao pode usar
+  `ep2002_mainform`. Rotina que precisa dos dois lados so cabe aqui. }
+
+const
+  { Os dois lacos do `0x0040756c`, e quantas voltas cada um da. }
+  CAMPOS_HABILIDADE = 16;   { `cmp edi,0x10` do primeiro laco  }
+  CAMPOS_APARENCIA  = 12;   { `cmp edi,0xc`  do segundo        }
+
+{ PreencheFicha -- 0x0040756c, 1275 bytes.
+
+  Enche a ficha do jogador. O corpo do original NAO tem deslocamento de bit
+  nenhum: ele percorre duas tabelas de registros de 12 bytes em `.data`
+  (`0x00423648`, 16 registros; `0x00423708`, 12) no formato
+  `(byte, bit inicial, largura)` e chama o extrator `0x00403278` com cada uma.
+
+  OS 28 REGISTROS BATEM COM O `TPlayer.Decode`, um a um -- conferido a cada
+  build pelo `wte/tools/check_bitfields.py`, que le as tabelas do `.exe` e
+  exige a expressao correspondente no `we2002_player.pas`. E por isso que aqui
+  nao ha aritmetica de bit: os valores vem da camada de dados, ja
+  desempacotados, na ORDEM DAS TABELAS -- que e a ordem em que o original os
+  consome, e portanto a ordem dos controles na tela.
+
+  Os controles sao achados POR NOME, como no original (`FindComponent` sobre
+  `'<prefixo>' + IntToStr(n)`, com n de 1 a 16 ou 1 a 12), nao por campo do
+  formulario:
+
+    barrhab<n>    TScrollBar  Position := valor cru (0..7)
+    valorhab<n>   TLabel      Caption  := valor + 12; fonte AMARELA se cru >= 5
+    imghab<n>     TImage      Width    := 7 * cru + 8
+    flechasapa<n> TUpDown     Position := valor cru
+    valorapa<n>   TLabel      Caption  := ver abaixo
+
+  O `12 +` e o `>= 5` sao do original; o `7*v + 8` e a largura da barrinha, da
+  mesma familia do `11*v + 9` das barras de forca do time. }
+procedure PreencheFicha(const p: TPlayer; indice, slot: Integer);
+
+  function Controle(const prefixo: string; n: Integer): TComponent;
+  begin
+    Result := jugador.FindComponent(prefixo + IntToStr(n));
+  end;
+
+  { Uma volta do primeiro laco. `valor` e o valor JA somado de 12, como o
+    `TPlayer.Decode` o entrega; o cru e `valor - 12`. }
+  procedure Habilidade(n, valor: Integer);
+  var
+    cru: Integer;
+    c: TComponent;
+  begin
+    cru := valor - 12;
+    if cru < 0 then
+      cru := 0;
+    c := Controle('barrhab', n);
+    if c is TScrollBar then
+      TScrollBar(c).Position := cru;
+    c := Controle('imghab', n);
+    if c is TControl then
+      TControl(c).Width := 7 * cru + 8;
+    c := Controle('valorhab', n);
+    if not (c is TLabel) then
+      Exit;
+    TLabel(c).Caption := IntToStr(valor);
+    { O `0x00406fb4`, 44 bytes: amarelo a partir de 5, branco abaixo. }
+    if cru >= 5 then
+      TLabel(c).Font.Color := $0000FFFF
+    else
+      TLabel(c).Font.Color := $00FFFFFF;
+  end;
+
+  { Uma volta do segundo laco. `cru` e o valor de bit; `legenda` e o que vai
+    para o rotulo, ou vazio quando o original o tira de uma tabela que ainda
+    nao foi medida (ver as notas da spec). }
+  procedure Aparencia(n, cru: Integer; const legenda: string);
+  var
+    c: TComponent;
+  begin
+    c := Controle('flechasapa', n);
+    if c is TUpDown then
+      TUpDown(c).Position := cru;
+    if legenda = '' then
+      Exit;
+    c := Controle('valorapa', n);
+    if c is TLabel then
+      TLabel(c).Caption := legenda;
+  end;
+
+begin
+  { Primeiro laco -- a ordem e a da tabela `0x00423648`, e ela e a mesma do
+    `bitfields.md`. }
+  Habilidade(1, p.attack);
+  Habilidade(2, p.defence);
+  Habilidade(3, p.strength);
+  Habilidade(4, p.stamina);
+  Habilidade(5, p.speed);
+  Habilidade(6, p.acceleration);
+  Habilidade(7, p.passing);
+  Habilidade(8, p.shot_power);
+  Habilidade(9, p.shot_accuracy);
+  Habilidade(10, p.jump);
+  Habilidade(11, p.heading);
+  Habilidade(12, p.technique);
+  Habilidade(13, p.dribbling);
+  Habilidade(14, p.swerve);
+  Habilidade(15, p.aggression);
+  Habilidade(16, p.reflexes);
+
+  { Segundo laco -- tabela `0x00423708`. As legendas dos campos ENUMERADOS
+    ficam vazias de proposito: o original as tira de um vetor de 12x8
+    `AnsiString` em `0x00423798`, que nasce zerado no arquivo e e preenchido em
+    tempo de execucao por codigo que ainda nao foi lido. Inventar as cadeias
+    seria escrever ficcao no lugar de medicao. Os dois campos NUMERICOS -- os
+    unicos que o original monta com `IntToStr` -- estao aqui. }
+  Aparencia(1, p.position, '');
+  Aparencia(2, p.skin_colour, '');
+  Aparencia(3, p.hair_style, '');
+  Aparencia(4, p.hair_colour, '');
+  Aparencia(5, p.beard_style, '');
+  Aparencia(6, p.beard_colour, '');
+  Aparencia(7, p.height - 148, IntToStr(p.height));
+  Aparencia(8, p.build, '');
+  Aparencia(9, p.age - 15, IntToStr(p.age));
+  Aparencia(10, p.boots, '');
+  Aparencia(11, p.foot, '');
+  Aparencia(12, p.out_of_position, '');
+
+  { O bloco final: quando o jogador nao tem o campo condicional na imagem, o
+    original escreve o literal e DESABILITA o controle -- `call [ecx+0x64]`, o
+    `TControl::SetEnabled` virtual que a WTE-TASK-25 identificou. }
+  jugador.casilla_precio.Enabled := JogadorTemCampoCondicional(indice, slot);
+  if jugador.casilla_precio.Enabled then
+    jugador.casilla_precio.Text := IntToStr(p.cost)
+  else
+    jugador.casilla_precio.Text := IntToStr(CONDICIONAL_AUSENTE);
 end;
 
 { Qual lado da tela disparou -- titular ou reserva.
