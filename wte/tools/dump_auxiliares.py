@@ -145,6 +145,19 @@ PAPEIS: dict[int, str] = {
     # rotina que a descoberta nao alcanca. Ela e do lote de mover, e o lugar
     # dela e a spec daqueles handlers. Medida na setima passagem da
     # WTE-TASK-26, registrada no Log daquela task.
+    #
+    # `0x0040b934` (181 B) fica de fora pela mesma razao: so o
+    # `paderechaeizquierdaClick` a chama. Ela repovoa os DOIS combos de jogador
+    # preservando a selecao de cada um, e repovoa o direito apenas se
+    # `lista_jugadores_2.Enabled` -- teste feito pela chamada virtual
+    # `[vmt+0x50]`, que o `vcl60.bpl` diz ser `TControl::GetEnabled`. Medida na
+    # decima passagem da WTE-TASK-26; a spec e a daquele handler.
+    #
+    # `0x0041978c` (o `__llmul` da RTL) e `0x00422402` (o thunk de
+    # `SysUtils::CurrToStr`) tambem ficam de fora, e a segunda por outro
+    # motivo: e importada, e esta tabela e de rotina interna. As duas juntas
+    # sao o que faz o numero da lista de descarte no `parribaClick` -- o
+    # `* 10000` e a escala do tipo `Currency`, nao um preco.
     0x00404820: "**grava** um jogador do buffer no destino — 10 B de nome, "
                 "12 B de atributos, e o byte condicional; recusa com `-2` se a "
                 "identidade (`+0x16`, `+0x17`) do buffer bater com a do destino",

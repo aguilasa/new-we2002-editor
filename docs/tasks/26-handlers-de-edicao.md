@@ -128,9 +128,9 @@ separadas (primeiro parágrafo do Contexto).
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec, incluindo regra de validação — **15 de
-      28** (2026-08-12): barras 2, número 4, nomes 5, mover 4. Faltam os 4 de
-      mover que sobram, os 7 de tática e os 2 de atributo
+- [ ] Todo handler do grupo com spec, incluindo regra de validação — **18 de
+      28** (2026-08-12): barras 2, número 4, nomes 5, mover 7. Faltam o
+      `flechasapaClick`, os 7 de tática e os 2 de atributo
 - [ ] Comportamento de truncamento documentado por campo
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
@@ -173,7 +173,7 @@ e não que fiquem sem spec.
 | # | o que fecha | custo por ler | destrava |
 |---|---|---|---|
 | ~~9~~ | ~~mover, a família de 4~~ — **feita em 2026-08-12** | 881 B (a `0x00404374`, que o plano dava por medida e não estava) | `casilla_dorsalKeyPress` |
-| 10 | mover, os outros 4 (`parriba`, `pabajo`, `paderechaeizquierda`, `flechasapa`) | 1.738 B | — |
+| ~~10~~ | ~~mover, os outros 4~~ — **feita em 2026-08-12**, menos o `flechasapaClick`, que não é do `MainForm` e está bloqueado com os lotes de atributo e tática | 181 B (a `0x0040b934`); as outras quatro da lista abaixo **não são chamadas** por estes handlers | — |
 | 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
 | 12 | atributos (`barrhabScroll`, `barrhab_bisScroll`) | 0 B | — |
 | 13 | tática (`0x0040a0b4` + os 7) | por medir | — |
@@ -193,8 +193,14 @@ Fecha de tabela o [`casilla_dorsalKeyPress`](../../wte/re/spec/jugador.casilla_d
 o buffer é exatamente o que faltava para ele avaliar a condição do `SetFocus`.
 
 **Passagem 10.** `parriba` 807 B, `flechasapa` 981 B, `paderechaeizquierda`
-425 B, `pabajo` 447 B. Por ler: `0x00407338` (561 B), `0x00407110` (552 B),
-`0x00406fe0` (301 B), `0x0040b934` (181 B), `0x00408460` (143 B).
+425 B, `pabajo` 447 B. ~~Por ler: `0x00407338` (561 B), `0x00407110` (552 B),
+`0x00406fe0` (301 B), `0x0040b934` (181 B), `0x00408460` (143 B).~~ **A lista
+estava errada, e medido em 2026-08-12:** dos três handlers do `MainForm`
+(`parriba`, `pabajo`, `paderechaeizquierda`) a única auxiliar nova é a
+`0x0040b934`. As outras quatro são do `flechasapaClick`, que **não é do
+`MainForm`** — é do formulário `jugador`, com doze botões ligados ao mesmo
+corpo, e portanto está bloqueado no mesmo preenchimento de ficha que os lotes de
+atributo e de tática.
 
 **Passagem 11.** `0x0040756c` não é handler — é pré-requisito: sem a ficha
 preenchida os dois handlers de atributo não são exercitáveis. Sai dela o valor
@@ -1078,3 +1084,116 @@ do `--edicao`; e o `iguala_nombres`.
     tática — passagens 10 a 13 do plano de fechamento;
   - o comportamento de truncamento por campo (WTE-TASK-36);
   - estender o `--edicao` aos grupos que puderem ser medidos por tela.
+
+---
+
+- **Executado em:** 2026-08-12 — **décima passagem, ainda parcial.** Três dos
+  quatro handlers de mover que faltavam. O grupo vai de **15 para 18 de 28**.
+
+- **Resumo do que foi feito:**
+
+  `paderechaeizquierdaClick` (a troca), `parribaClick` e `pabajoClick` (a lista
+  de descarte), com spec e Pascal. Mais a `RepovoaAsDuasListas` (`0x0040b934`),
+  os 23 buffers de descarte, e as duas chaves de `.data` que o lote usa.
+
+- **O quarto handler não é do `MainForm`, e por isso não entrou.** O
+  `flechasapaClick` (`0x00408088`) é do formulário `jugador`, com **doze**
+  botões `flechasapa1..12` ligados ao mesmo corpo. O plano o agrupava com os
+  outros três por serem todos "mover", e as quatro rotinas que ele listava como
+  custo de leitura desta passagem — `0x00407338`, `0x00407110`, `0x00406fe0`,
+  `0x00408460` — são **dele**, não dos três do `MainForm`. Ele está bloqueado no
+  mesmo preenchimento de ficha que os lotes de atributo e de tática, e foi para
+  lá. Custo real desta passagem: 181 bytes, a `0x0040b934`.
+
+- **O achado que quase virou um preço: `* 10000` é a escala do `Currency`.**
+
+  O `parribaClick` multiplica `linha + 1` por 10.000 e converte o resultado. Lido
+  como aritmética inteira, isso é um número de cinco dígitos, e num editor que
+  tem preço de jogador como funcionalidade
+  ([WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md)) a leitura "é o preço da
+  transferência" teria passado.
+
+  Não é. As duas rotinas foram identificadas: `0x0041978c` é o `__llmul` da RTL
+  (o miolo são quatro `mul` de 32 bits — multiplicação, não divisão) e
+  `0x00422402` é o thunk de `SysUtils::CurrToStr`, lido pelo nome importado.
+  **10.000 é exatamente a escala do tipo `Currency` da Borland**, então a conta
+  produz `'1'`, não `10000`.
+
+  Quem confirma por fora é o próprio `.dfm`: `lista_descarte` nasce com as 23
+  linhas `'  1 ...'` a `'23 ...'`, que é o que as duas larguras de legenda do
+  corpo produzem. Terceira ponta — código, tipo da RTL, formulário.
+
+- **A lista de descarte tem 23 buffers, e isso fecha o ramo `> 2` da
+  `0x00404374`.** O `parribaClick` carrega para `lista_descarte.ItemIndex + 3` e
+  o `pabajoClick` grava a partir do mesmo. A oitava passagem tinha visto aquele
+  ramo — `+0x16 := 0xff`, `+0x19 := 3`, aplicados **depois** de tudo — sem saber
+  de quem era. `0xff` não é índice de time válido, então jogador vindo do
+  descarte **nunca** bate identidade com o destino: a recusa `-2` não alcança
+  esse caminho, e isso é projeto, não acaso.
+
+- **Duas chaves vizinhas em `.data`, e elas não são a mesma:**
+
+  | endereço | quem escreve | quem lê |
+  |---|---|---|
+  | `0x00423168` | `0x0040fd7a`, dentro do `mostrar_jugadorClick` | `0x00404871` — desliga a recusa `-2` |
+  | `0x00423169` | o `paderechaeizquierdaClick`, `1` antes e `0` depois das duas gravações | `0x00404bc4`, uma vez |
+
+  Confundir as duas seria trocar "não recuse jogador repetido" por "estou no
+  meio de uma troca". O que a segunda faz é da metade de gravação, e portanto da
+  [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md); aqui ela só é ligada e
+  desligada na hora certa.
+
+- **Três detalhes do original que pareceriam descuido e estão reproduzidos:**
+  1. no caminho de erro da troca, o corpo **força `-2`** em vez de repassar o
+     código — uma recusa por falta de bloco na primeira metade é anunciada como
+     "It's the same player in both teams...";
+  2. o `pabajoClick` repovoa o lado **esquerdo** também, mas só quando os dois
+     combos mostram o mesmo time — sem isso a lista da esquerda continuaria com
+     o nome antigo;
+  3. o `pabajoClick` não limpa a linha da lista de descarte nem recarrega
+     buffer: dar a seta para baixo duas vezes copia o mesmo jogador duas vezes.
+
+- **E dois formulários de erro, não um.** O `pabajoClick` usa o `ficha_error2`
+  (`0x00432e54`) para "Selecione um jogador para mover!!!", enquanto a
+  `MostraCodigo` usa o `ficha_error` (`0x00432dd8` → `_ficha_error`). Usar um
+  pelo outro mudaria a janela que o usuário vê.
+
+- **Mais um slot de VMT medido:** `+0x50` é `TControl::GetEnabled`, resolvido no
+  `vcl60.bpl` pelo mesmo caminho do `SetEnabled` em `+0x64`. É o teste que faz a
+  `0x0040b934` repovoar o lado direito só quando ele está habilitado.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/` — 3 specs novas (`MainForm.paderechaeizquierdaClick`,
+    `parribaClick`, `pabajoClick`)
+  - `wte/src/impl/ep2002_mainform.aux.inc` — os 23 buffers de descarte, o ramo
+    `> 2` da `PreparaBuffer`, `DescarteOcupado`, `TrocaEmCurso`,
+    `RepovoaAsDuasListas`, `NomeDoItemSelecionado`, `LegendaDoDescarte`
+  - `wte/src/impl/` — os 3 `.inc`, mais `ep2002_mainform.uses`
+  - `wte/tools/dump_auxiliares.py` — por que `0x0040b934`, `0x0041978c` e
+    `0x00422402` ficam fora do `PAPEIS`, com o que foi medido de cada uma
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 82,1% → **80,2%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild wte/wte.lpi` rc 0.
+
+- **Problemas encontrados:**
+  1. O quadro das seis passagens agrupava o `flechasapaClick` com os três do
+     `MainForm` e somava o custo de leitura dos quatro. Ele é de outro
+     formulário e de outro bloqueio — corrigido no lugar. **Agrupar handler por
+     nome de gesto ("mover") em vez de por formulário e por dependência foi o
+     que produziu tanto esse erro quanto a atribuição errada do
+     `ficha_movertodos` na nona passagem.**
+  2. O `parribaClick` foi marcado `implementado` na primeira escrita da spec e
+     rebaixado antes do commit: ele é o único do lote que **não grava**, então
+     nada dele depende da WTE-TASK-27 — mas o `compara_tela.sh --edicao` não foi
+     estendido à lista de descarte, e `implementado` diz "a régua da task
+     verde". Sem a régua o veredito passaria a medir quanta leitura foi feita.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **10 dos 28 handlers**, sem spec: o `flechasapaClick`, os 2 de atributo e os
+    7 de tática — todos bloqueados no preenchimento da ficha (`0x00404820`,
+    `0x0040756c`) e do `estrategia` (`0x0040a0b4`), que são as passagens 11 a 13;
+  - o comportamento de truncamento por campo (WTE-TASK-36);
+  - estender o `--edicao` à lista de descarte, que é o único gate de tela que o
+    lote de mover pode ter antes da 27 — o `parribaClick` é o único handler dele
+    que não grava.

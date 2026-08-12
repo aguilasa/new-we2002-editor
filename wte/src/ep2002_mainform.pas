@@ -31,7 +31,7 @@ uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
   we2002_types, ep2002_jugador, ep2002_estrategia, ep2002_dorsal,
-  ep2002_error, ep2002_movertodos;
+  ep2002_error, ep2002_error2, ep2002_movertodos;
 
 type
   TMainForm = class(TForm)
@@ -335,12 +335,8 @@ end;
 procedure TMainForm.lista_equipos_2Change(Sender: TObject);
 {$I impl/ep2002_mainform.lista_equipos_2Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.paderechaeizquierdaClick(Sender: TObject);
-begin
-  REStub('MainForm.paderechaeizquierdaClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.paderechaeizquierdaClick.inc}
 
 procedure TMainForm.paizquierdaClick(Sender: TObject);
 {$I impl/ep2002_mainform.paizquierdaClick.inc}
@@ -354,19 +350,11 @@ procedure TMainForm.paderecha2Click(Sender: TObject);
 procedure TMainForm.paizquierda2Click(Sender: TObject);
 {$I impl/ep2002_mainform.paizquierda2Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.parribaClick(Sender: TObject);
-begin
-  REStub('MainForm.parribaClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.parribaClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.pabajoClick(Sender: TObject);
-begin
-  REStub('MainForm.pabajoClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.pabajoClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.grabar_camisetaClick(Sender: TObject);

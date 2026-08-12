@@ -329,18 +329,32 @@ type
   end;
 
 const
-  { Os tres buffers em uso. O original tem espaco para mais -- o corpo de
-    `0x00404374` trata `indice > 2` como "slot vazio" (`+0x16 := 0xff`,
-    `+0x19 := 3`) --, e quem usa isso e o preenchimento da ficha do jogador,
-    fora desta task. }
-  BUF_DESTINO  = 0;
-  BUF_ESQUERDA = 1;
-  BUF_DIREITA  = 2;
+  { Os buffers, e eles nao sao tres.
+
+    0, 1 e 2 sao o destino e os dois lados da tela. Do 3 em diante comeca a
+    LISTA DE DESCARTE: o `parribaClick` carrega para o buffer
+    `lista_descarte.ItemIndex + 3` e o `pabajoClick` grava a partir do mesmo,
+    o que da 23 buffers a mais, um por linha da lista.
+
+    E dai sai o ramo `indice > 2` do `0x00404374`, que a oitava passagem viu
+    sem saber de quem era: para esses buffers ele sobrescreve a identidade com
+    `+0x16 := 0xff` e o tipo com `+0x19 := 3` depois de calcular tudo. `0xff`
+    nao e indice de time valido, entao um jogador vindo do descarte NUNCA bate
+    identidade com o destino -- a recusa `-2` nao alcanca esse caminho. }
+  BUF_DESTINO       = 0;
+  BUF_ESQUERDA      = 1;
+  BUF_DIREITA       = 2;
+  BUF_DESCARTE_BASE = 3;
+  BUF_ULTIMO        = BUF_DESCARTE_BASE + JOGADORES_POR_TIME - 1;  { 25 }
 
   { O `+0x19`. Lido do `0x00404374`. }
   TIPO_NACIONAL   = 0;  { selecao ou all-star: identidade = (time, slot)      }
   TIPO_ML_VINCULO = 1;  { clube de ML apontando para um jogador de selecao    }
   TIPO_ML_BLOCO   = 2;  { clube de ML com bloco proprio                       }
+  TIPO_SOLTO      = 3;  { buffer de descarte, ou slot marcado como vazio      }
+
+  { O `0xff` que o ramo `indice > 2` poe na identidade. }
+  IDENT_NENHUMA = $FF;
 
   { Os codigos que `0x00404820` devolve e que `0x00403e20` traduz em mensagem. }
   COD_MESMO_JOGADOR  = -2;
@@ -361,7 +375,23 @@ const
   TIMES_SEM_CONDICIONAL = [54, 55];
 
 var
-  BufferJogador: array[BUF_DESTINO..BUF_DIREITA] of TBufferJogador;
+  BufferJogador: array[BUF_DESTINO..BUF_ULTIMO] of TBufferJogador;
+
+  { O `BYTE[0x00434640 + i]`: a linha `i` da lista de descarte tem jogador.
+
+    O `parribaClick` a marca ao encher a linha; o `pabajoClick` recusa com
+    "Selecione um jogador para mover!!!" quando ela esta zerada. Nasce toda
+    zero, como a `.bss` do original. }
+  DescarteOcupado: array[0..JOGADORES_POR_TIME - 1] of Boolean;
+
+  { O `BYTE[0x00423169]`, e ele NAO e o `0x00423168` do vizinho acima.
+
+    O `paderechaeizquierdaClick` o liga antes das duas gravacoes da troca e o
+    desliga depois; quem o le e a rotina de gravacao, uma vez, em
+    `0x00404bc4` -- dentro da metade que e da [WTE-TASK-27]. Aqui ele so e
+    ligado e desligado na hora certa, para que aquela metade o encontre como
+    encontraria no original. }
+  TrocaEmCurso: Boolean = False;
 
   { O `BYTE[0x00423168]`: desliga a recusa de jogador repetido.
 
@@ -409,7 +439,7 @@ procedure PreparaBuffer(indice, slot, buffer: Integer);
 var
   vinculo: PByte;
 begin
-  if (buffer < BUF_DESTINO) or (buffer > BUF_DIREITA) then
+  if (buffer < BUF_DESTINO) or (buffer > BUF_ULTIMO) then
     Exit;
   if indice < TIMES_NACIONAIS then
   begin
@@ -433,6 +463,13 @@ begin
   BufferJogador[buffer].tem_condicional :=
     (BufferJogador[buffer].tipo = TIPO_ML_BLOCO)
     or not (BufferJogador[buffer].ident_time in TIMES_SEM_CONDICIONAL);
+  { O ramo `indice > 2`, e ele vem DEPOIS de tudo, sobrescrevendo. Buffer de
+    descarte nao tem identidade que valha: `0xff` nao e indice de time. }
+  if buffer > BUF_DIREITA then
+  begin
+    BufferJogador[buffer].ident_time := IDENT_NENHUMA;
+    BufferJogador[buffer].tipo := TIPO_SOLTO;
+  end;
 end;
 
 { CarregaJogador -- 0x004046e8, 164 bytes.
@@ -458,7 +495,7 @@ var
   k: LongInt;
   b: Integer;
 begin
-  if (buffer < BUF_DESTINO) or (buffer > BUF_DIREITA) then
+  if (buffer < BUF_DESTINO) or (buffer > BUF_ULTIMO) then
     Exit;
   PreparaBuffer(indice, slot, buffer);
   k := IndiceDoJogador(indice, slot);
@@ -524,7 +561,7 @@ end;
 function GravaJogador(origem, indice, slot: Integer): Integer;
 begin
   Result := COD_GRAVOU;
-  if (origem < BUF_DESTINO) or (origem > BUF_DIREITA) then
+  if (origem < BUF_DESTINO) or (origem > BUF_ULTIMO) then
     Exit;
   PreparaBuffer(indice, slot, BUF_DESTINO);
   if (BufferJogador[origem].ident_time = BufferJogador[BUF_DESTINO].ident_time)
@@ -537,6 +574,74 @@ begin
   end;
   { A GRAVACAO E DA WTE-TASK-27 -- ver o cabecalho. Ate la o retorno e o do
     caminho feliz, e nenhum byte da imagem muda. }
+end;
+
+{ RepovoaAsDuasListas -- 0x0040b934, 181 bytes.
+
+  Repovoa os dois combos de jogador preservando a selecao de cada um, e e o
+  que o `paderechaeizquierdaClick` usa no lugar do repovoamento inline que os
+  outros handlers de mover fazem.
+
+  A ASSIMETRIA E DO ORIGINAL: o lado esquerdo e repovoado sempre, o direito so
+  se `lista_jugadores_2.Enabled`. O teste e uma chamada virtual ao slot
+  `+0x50` do VMT, que o `vcl60.bpl` diz ser `TControl::GetEnabled` -- medido
+  pelo mesmo caminho que deu o `SetEnabled` em `+0x64`.
+
+  Ela pega o formulario pelo ponteiro global `0x00434360` (`_MainForm`), nao
+  por `this`: nao e metodo, e um procedimento solto. }
+procedure RepovoaAsDuasListas;
+var
+  sel1, sel2: Integer;
+begin
+  sel1 := MainForm.lista_jugadores_1.ItemIndex;
+  sel2 := MainForm.lista_jugadores_2.ItemIndex;
+  PreencheJogadores(MainForm.lista_jugadores_1,
+                    MainForm.lista_equipos_1.ItemIndex);
+  MainForm.lista_jugadores_1.Update;
+  MainForm.lista_jugadores_1.ItemIndex := sel1;
+  if not MainForm.lista_jugadores_2.Enabled then
+    Exit;
+  PreencheJogadores(MainForm.lista_jugadores_2,
+                    MainForm.lista_equipos_2.ItemIndex);
+  MainForm.lista_jugadores_2.Update;
+  MainForm.lista_jugadores_2.ItemIndex := sel2;
+end;
+
+{ O nome do jogador recortado do item de um combo.
+
+  Os itens tem a forma `<n>. <NOME>`, e o original comeca no caractere 4 ou 5
+  conforme o indice tenha um ou dois digitos -- aritmetica de largura de
+  numero, nao de conteudo. O `dorsalClick` faz a mesma conta inline, como o
+  original faz nos dois lugares. }
+function NomeDoItemSelecionado(lista: TComboBox): string;
+var
+  origem: Integer;
+begin
+  Result := '';
+  if (lista.ItemIndex < 0) or (lista.ItemIndex >= lista.Items.Count) then
+    Exit;
+  origem := 4;
+  if lista.ItemIndex < 9 then
+    Inc(origem);
+  Result := Copy(lista.Items[lista.ItemIndex], origem, 10);
+end;
+
+{ A legenda de uma linha da lista de descarte: `'  1 NOME'` ate `'23 NOME'`.
+
+  O NUMERO PASSA POR UM `Currency`, e essa e a armadilha do corpo do
+  `parribaClick`. Ele multiplica `slot + 1` por 10.000 com o `__llmul` da RTL
+  e converte com `SysUtils::CurrToStr` -- e 10.000 e exatamente a escala do
+  tipo `Currency` da Borland, entao a conta nao produz 10.000: produz `'1'`.
+  Lido como inteiro, o `* 10000` pareceria preco.
+
+  As duas larguras batem com o que o proprio `.dfm` traz de fabrica (`'  1
+  ...'` ate `'23 ...'`): ate 9 sao duas casas de recuo, dai em diante uma. }
+function LegendaDoDescarte(slot: Integer; const nome: string): string;
+begin
+  if slot < 9 then
+    Result := '  ' + IntToStr(slot + 1) + ' ' + nome
+  else
+    Result := IntToStr(slot + 1) + ' ' + nome;
 end;
 
 { Os quatro botoes de mover jogador tem um so par de corpos, e as duas formas

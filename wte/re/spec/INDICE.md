@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 73 |
 | **total** | **96** |
 
-43 de 96 têm arquivo de spec.
+46 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -107,13 +107,13 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
 | `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |
-| `0x0040e304` | `MainForm` | paderechaeizquierdaClick | OnClick | edicao | aberto |
+| `0x0040e304` | `MainForm` | [paderechaeizquierdaClick](MainForm.paderechaeizquierdaClick.md) | OnClick | edicao | aberto |
 | `0x0040e4b0` | `MainForm` | [paizquierdaClick](MainForm.paizquierdaClick.md) | OnClick | edicao | aberto |
 | `0x0040e5e8` | `MainForm` | [paderechaClick](MainForm.paderechaClick.md) | OnClick | edicao | aberto |
 | `0x0040e720` | `MainForm` | [paderecha2Click](MainForm.paderecha2Click.md) | OnClick | edicao | aberto |
 | `0x0040e85c` | `MainForm` | [paizquierda2Click](MainForm.paizquierda2Click.md) | OnClick | edicao | aberto |
-| `0x0040e998` | `MainForm` | parribaClick | OnClick | edicao | aberto |
-| `0x0040ecc0` | `MainForm` | pabajoClick | OnClick | edicao | aberto |
+| `0x0040e998` | `MainForm` | [parribaClick](MainForm.parribaClick.md) | OnClick | edicao | aberto |
+| `0x0040ecc0` | `MainForm` | [pabajoClick](MainForm.pabajoClick.md) | OnClick | edicao | aberto |
 | `0x0040ee80` | `MainForm` | grabar_camisetaClick | OnClick | gravacao | aberto |
 | `0x0040f69c` | `MainForm` | grabar_memoryClick | OnClick | gravacao | aberto |
 | `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
