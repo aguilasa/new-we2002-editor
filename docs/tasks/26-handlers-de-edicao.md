@@ -615,3 +615,88 @@ separadas (primeiro parágrafo do Contexto).
 - **Aberto neste lote:** `iguala_nombresClick`, pelo limite não medido e pelo
   defeito de habilitação. Os três `KeyPress` fecham `implementado` — são
   filtros puros, sem estado e sem gravação.
+
+---
+
+- **Executado em:** 2026-08-12 — **sexta passagem: medição do lote de mover, e
+  parada consciente.** Nada implementado nesta; o produto é o tamanho do
+  problema, medido.
+
+- **Por que parar aqui em vez de emendar o lote:**
+
+  Os 8 handlers de mover jogador parecem pequenos — 312 a 981 bytes — e não
+  são. Medido pelo [`dump_auxiliares.py`](../../wte/tools/dump_auxiliares.py),
+  eles alcançam **24 rotinas internas**, e **8 delas somam 3.585 bytes sem
+  papel lido**:
+
+  | rotina | bytes | chamadores no lote |
+  |---|---|---|
+  | `0x00404820` | 1.459 | 6 |
+  | `0x00407338` | 561 | 1 |
+  | `0x00407110` | 552 | 1 |
+  | `0x00406fe0` | 301 | 1 |
+  | `0x00403e20` | 224 | 4 |
+  | `0x0040b934` | 181 | 1 |
+  | `0x004046e8` | 164 | 6 |
+  | `0x00408460` | 143 | 1 |
+
+  Escrever os 8 corpos sem ler essas oito seria inventar. É a lição da quarta
+  passagem da WTE-TASK-25 — *lista de auxiliar escrita à mão erra da forma que
+  não aparece* — aplicada antes de errar, e não depois.
+
+- **O que já foi lido do lote, e vale para quem continuar:**
+
+  `paderechaClick` (`0x0040e5e8`, 312 B) é o representante da família. A forma:
+
+  ```text
+  guarda := lista_jugadores_2.ItemIndex
+  0x004046e8(time1, slot1, modo := 1, arquivo)
+  esi := 0x00404820(1, time2, slot2, arquivo)
+  se esi >= 0:
+      0x0040b2d8(lista_equipos_2, lista_jugadores_2)   ' repovoa a lista destino
+      lista_jugadores_2.<vmt+0x88>()
+      lista_jugadores_2.ItemIndex := guarda            ' restaura a selecao
+      0x004046e8(time2, slot2, modo := 2, arquivo)
+  contador_ml.Text := IntToStr(WORD[0x004335c0])
+  0x00403e20(esi)
+  ```
+
+  Três coisas que já dá para afirmar:
+
+  1. **`0x004046e8` tem um argumento de MODO** (`1` na leitura, `2` na
+     escrita), e é o par ler/gravar de um jogador inteiro. Os 164 bytes dela
+     são o alvo mais barato do lote.
+  2. **`0x00404820` devolve valor e o valor governa o fluxo** (`< 0` pula o
+     bloco). A [spec do `mostrar_jugadorClick`](../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+     a descrevia como "enche a ficha", herdado da WTE-TASK-25; ela faz mais que
+     isso, e chama a escritora de número de camisa `0x00404048` que a quarta
+     passagem mediu. **A descrição herdada está incompleta**, e isso está
+     anotado aqui em vez de corrigido na spec — corrigir exige ler os 1.459
+     bytes.
+  3. **O contador de slots livres de ML é atualizado aqui**, de
+     `WORD[0x004335c0]` — a mesma global que o `sonda_dorsal.py` já conhecia. É
+     a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) aparecendo por
+     dentro do lote de mover.
+
+- **E os dois lotes que faltam depois deste têm o mesmo obstáculo, maior:** os
+  2 de atributo (no `jugador`) e os 7 de tática (no `estrategia`) só são
+  exercitáveis com o formulário **preenchido**, e preencher é `0x00404820`
+  (1.459 B), `0x0040756c` (1.275 B) e `0x0040a0b4` — que a WTE-TASK-25 já tinha
+  nomeado como dívida desta task.
+
+- **Balanço honesto do estado da WTE-TASK-26:**
+
+  | lote | handlers | estado |
+  |---|---|---|
+  | barras | 2 | **fechado**, conferido por pixel |
+  | número | 4 | spec e Pascal; 2 `aberto` com dono nomeado |
+  | nomes | 5 | spec e Pascal; 1 `aberto` |
+  | mover | 8 | **medido, não implementado** — 3.585 B por ler |
+  | atributos | 2 | bloqueado no preenchimento da ficha |
+  | tática | 7 | bloqueado no preenchimento do `estrategia` |
+
+  **11 de 28 com spec e Pascal.** O que falta não é mais do mesmo: são ~6,3 KB
+  de disassembly de rotina interna, que é trabalho de outra ordem que os
+  filtros de tecla desta passagem.
+
+- **Arquivos criados/modificados:** só documentação — este arquivo.
