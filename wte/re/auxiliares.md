@@ -71,16 +71,16 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x00403278` | 2 | 270 | `0x00403f00`, `0x0040756c`, `0x0040a0b4` | — |
 | `0x00403388` | 2 | 50 | `0x004033bc`, `0x004042d4`, `0x0040b2d8` | pula a fronteira de setor: se `ftell % 2352 == 2072`, avanca 304 |
 | `0x004033bc` | 1 | 67 | `MainForm.mostrar_estrategiaClick`, `0x00403f00`, `0x004046e8`, `0x004050d0`, `0x00405468` | le `ecx` bytes da imagem a partir do offset em `edx` para o destino empilhado |
-| `0x00403400` | 2 | 72 | `0x00404820` | — |
+| `0x00403400` | 2 | 72 | `0x00404820` | grava `ecx` bytes na imagem a partir do offset em `edx` — a irma escritora da `0x004033bc` |
 | `0x00403598` | 2 | 1201 | `0x0040bb84`, `0x0040cbc8` | — |
 | `0x00403c0c` | 2 | 447 | `0x0040bb84`, `0x0040cbc8` | — |
-| `0x00403f00` | 1 | 328 | `MainForm.mostrar_jugadorClick`, `0x00404820`, `0x0040b0b4` | — |
-| `0x00404048` | 2 | 365 | `0x00404820` | — |
+| `0x00403f00` | 1 | 328 | `MainForm.mostrar_jugadorClick`, `0x00404820`, `0x0040b0b4` | le o numero de camisa e devolve **base um** (`inc eax` nos tres ramos: time 48, clube de ML, selecao) |
+| `0x00404048` | 2 | 365 | `0x00404820` | grava o numero de camisa, desfazendo a base um (`add al,0xff`) |
 | `0x0040423c` | 2 | 64 | `0x004042d4`, `0x00404820` | — |
 | `0x0040427c` | 2 | 87 | `0x00404820` | — |
 | `0x004042d4` | 1 | 159 | `MainForm.boton_dialogo_weClick`, `MainForm.FormShow` | — |
 | `0x00404374` | 2 | 881 | `0x004046e8`, `0x00404820`, `0x0040b2d8` | — |
-| `0x004046e8` | 1 | 164 | `MainForm.mostrar_jugadorClick` | — |
+| `0x004046e8` | 1 | 164 | `MainForm.mostrar_jugadorClick` | carrega um jogador para o buffer de 44 bytes em `0x004335ec` — 10 B de nome, 12 B de atributos, e 1 B que so existe se a terceira coluna da tabela de offsets nao for zero (senao vai 50) |
 | `0x00404820` | 1 | 1459 | `MainForm.mostrar_jugadorClick` | — |
 | `0x00404dd4` | 2 | 154 | `0x00405270`, `0x00405468`, `0x004056c8` | — |
 | `0x00404e70` | 2 | 285 | `0x004050d0` | — |
@@ -235,6 +235,42 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 - **Papel:** le `ecx` bytes da imagem a partir do offset em `edx` para o destino empilhado
 - **Chamada por:** `MainForm.mostrar_estrategiaClick`, `0x00403f00`, `0x004046e8`, `0x004050d0`, `0x00405468`
 - **Chama internas:** `0x00417810`, `0x00418f70`, `0x00403388`
+- **Importados:** nenhum
+- **Literais:** nenhum
+- **Globais da `.data`:** nenhuma
+
+### `0x00403400` — 72 bytes
+
+- **Papel:** grava `ecx` bytes na imagem a partir do offset em `edx` — a irma escritora da `0x004033bc`
+- **Chamada por:** `0x00404820`
+- **Chama internas:** nenhuma
+- **Importados:** nenhum
+- **Literais:** nenhum
+- **Globais da `.data`:** nenhuma
+
+### `0x00403f00` — 328 bytes
+
+- **Papel:** le o numero de camisa e devolve **base um** (`inc eax` nos tres ramos: time 48, clube de ML, selecao)
+- **Chamada por:** `MainForm.mostrar_jugadorClick`, `0x00404820`, `0x0040b0b4`
+- **Chama internas:** `0x004033bc`, `0x00403278`, `0x00417810`, `0x00418f70`
+- **Importados:** nenhum
+- **Literais:** nenhum
+- **Globais da `.data`:** nenhuma
+
+### `0x00404048` — 365 bytes
+
+- **Papel:** grava o numero de camisa, desfazendo a base um (`add al,0xff`)
+- **Chamada por:** `0x00404820`
+- **Chama internas:** nenhuma
+- **Importados:** nenhum
+- **Literais:** nenhum
+- **Globais da `.data`:** nenhuma
+
+### `0x004046e8` — 164 bytes
+
+- **Papel:** carrega um jogador para o buffer de 44 bytes em `0x004335ec` — 10 B de nome, 12 B de atributos, e 1 B que so existe se a terceira coluna da tabela de offsets nao for zero (senao vai 50)
+- **Chamada por:** `MainForm.mostrar_jugadorClick`
+- **Chama internas:** `0x00404374`, `0x004033bc`
 - **Importados:** nenhum
 - **Literais:** nenhum
 - **Globais da `.data`:** nenhuma

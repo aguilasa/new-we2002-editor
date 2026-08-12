@@ -124,6 +124,15 @@ PAPEIS: dict[int, str] = {
     0x00403388: "pula a fronteira de setor: se `ftell % 2352 == 2072`, avanca 304",
     0x004033BC: "le `ecx` bytes da imagem a partir do offset em `edx` para o "
                 "destino empilhado",
+    0x00403400: "grava `ecx` bytes na imagem a partir do offset em `edx` — a "
+                "irma escritora da `0x004033bc`",
+    0x00403F00: "le o numero de camisa e devolve **base um** (`inc eax` nos "
+                "tres ramos: time 48, clube de ML, selecao)",
+    0x00404048: "grava o numero de camisa, desfazendo a base um (`add al,0xff`)",
+    0x004046E8: "carrega um jogador para o buffer de 44 bytes em `0x004335ec` "
+                "— 10 B de nome, 12 B de atributos, e 1 B que so existe se a "
+                "terceira coluna da tabela de offsets nao for zero (senao vai "
+                "50)",
     0x004050D0: "carrega os campos de nome do time selecionado para as globais",
     0x0040CBC8: "percorre a tabela de offsets em `.data`, seis colunas por linha",
     0x00405270: "desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)",

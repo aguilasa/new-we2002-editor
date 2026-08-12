@@ -124,8 +124,9 @@ separadas (primeiro parágrafo do Contexto).
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec, incluindo regra de validação — **2 de 28**
-      (2026-08-12)
+- [ ] Todo handler do grupo com spec, incluindo regra de validação — **11 de
+      28** (2026-08-12): barras 2, número 4, nomes 5. Faltam os 8 de mover, os
+      7 de tática e os 2 de atributo
 - [ ] Comportamento de truncamento documentado por campo
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
@@ -663,9 +664,11 @@ separadas (primeiro parágrafo do Contexto).
 
   Três coisas que já dá para afirmar:
 
-  1. **`0x004046e8` tem um argumento de MODO** (`1` na leitura, `2` na
-     escrita), e é o par ler/gravar de um jogador inteiro. Os 164 bytes dela
-     são o alvo mais barato do lote.
+  1. ~~**`0x004046e8` tem um argumento de MODO** (`1` na leitura, `2` na
+     escrita), e é o par ler/gravar de um jogador inteiro.~~ **Errado, e a
+     sétima passagem corrigiu:** o `1`/`2` é **índice de buffer**, não modo, e
+     as duas chamadas são **leituras**. Ver abaixo. Os 164 bytes dela continuam
+     sendo o alvo mais barato do lote, e foram lidos.
   2. **`0x00404820` devolve valor e o valor governa o fluxo** (`< 0` pula o
      bloco). A [spec do `mostrar_jugadorClick`](../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
      a descrevia como "enche a ficha", herdado da WTE-TASK-25; ela faz mais que
@@ -700,3 +703,71 @@ separadas (primeiro parágrafo do Contexto).
   filtros de tecla desta passagem.
 
 - **Arquivos criados/modificados:** só documentação — este arquivo.
+
+---
+
+- **Executado em:** 2026-08-12 — **sétima passagem.** A rotina mais barata do
+  lote de mover, lida — e ela fechou uma pergunta de outro lote e derrubou uma
+  afirmação minha da passagem anterior.
+
+- **`0x004046e8`, 164 bytes: carrega um jogador para um buffer de 44 bytes.**
+
+  ```text
+  0x00404374(indice, arquivo)                 ' calcula os offsets deste slot
+  le 10 B de DWORD[0x00433608 + 44*i] para 0x004335ec + 44*i   ' nome
+  le 12 B de DWORD[0x0043360c + 44*i] para 0x004335f6 + 44*i   ' atributos
+  se DWORD[0x00433614 + 44*i] <> 0:
+      le  1 B daquele offset      para 0x00433604 + 44*i
+  senao:
+      BYTE[0x00433604 + 44*i] := 50
+  ```
+
+- **A afirmação da sexta passagem estava errada, e o erro é instrutivo.** Eu
+  tinha lido o `1` e o `2` das duas chamadas do `paderechaClick` como **modo**
+  — ler e gravar —, porque a sequência "chama com 1, faz alguma coisa, chama
+  com 2" tem exatamente essa cara. Não é: `1` e `2` indexam um vetor de passo
+  44, e **as duas chamadas são leituras** — a de origem e a de destino, cada
+  uma para o seu buffer. Quem grava é a `0x00404820`, e é ela que sobrou por
+  ler.
+
+  O que desmentiu foi a aritmética, não a leitura de mais código: `lea` +
+  `lea` + `shl 2` dá `44*ebx`, e passo 44 sobre um argumento que vale 1 ou 2 é
+  índice, não modo. **Argumento pequeno com dois valores distintos parece
+  enumeração de modo, e essa é a leitura barata que erra.**
+
+- **E o passo 44 fechou a pergunta em aberto do `casilla_dorsalKeyPress`.** A
+  quarta passagem tinha deixado `DWORD[0x00433614 + 44*global] <> 0` como
+  tabela não identificada. É a **terceira coluna de offsets deste mesmo
+  buffer**: se o offset for zero, o campo **não existe na imagem** para aquele
+  jogador — a `0x004046e8` escreve `50` no lugar de ler, e o handler não move o
+  foco para o `casilla_precio`. Ou seja, o `Return` só avança para o preço
+  quando o jogador **tem** o byte; para os demais o valor é sintético e o
+  original não deixa o cursor chegar lá.
+
+  Sai daqui um número para a [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md):
+  **50 é o preço que a ficha mostra quando o jogador não tem o campo.**
+
+  E sai a identidade da global `0x004335c4`: é **qual buffer de jogador está em
+  edição**, com `1` e `2` sendo os dois lados que os handlers de mover usam.
+
+- **Uma descrição herdada que ficou sob suspeita:** a
+  [spec do `mostrar_jugadorClick`](../../wte/re/spec/MainForm.mostrar_jugadorClick.md)
+  descreve `0x00404820` como "enche a ficha", herdado da WTE-TASK-25. Ela
+  devolve valor que governa fluxo, chama a escritora de número de camisa
+  (`0x00404048`) e a escritora de bytes (`0x00403400`) — comportamento de quem
+  **grava** um jogador, não de quem preenche tela. **Não corrigi a spec**:
+  corrigir exige ler os 1.459 bytes, e afirmar o contrário sem ler seria trocar
+  um palpite por outro. Fica anotado como suspeita, com a evidência.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_auxiliares.py` — `PAPEIS` ganhou 5 rotinas medidas nesta
+    sessão (`0x00403400`, `0x00403f00`, `0x00404048`, `0x004046e8`,
+    e o papel corrigido das vizinhas); `auxiliares.md`/`.tsv` regerados
+  - `wte/re/spec/jugador.casilla_dorsalKeyPress.md` — a condição identificada
+  - este arquivo — a correção da sexta passagem
+
+- **Gates medidos:** `make -C wte check` rc 0.
+
+- **`casilla_dorsalKeyPress` continua `aberto`**, por motivo menor e nomeado: o
+  port não tem o buffer de 44 bytes, então move o foco sempre. O buffer entra
+  com o lote de mover, e a spec fecha junto.

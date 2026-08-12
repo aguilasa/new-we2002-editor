@@ -69,12 +69,38 @@ a janelinha recusa, isso é comportamento do original e entra na
 [WTE-TASK-36](../../../docs/tasks/36-buffers-e-truncamento.md) como borda a
 medir, não como defeito a consertar.
 
-**Veredito `aberto`, e é a condição do `SetFocus` que o segura.** A tabela em
-`0x00433614` tem passo de 44 bytes e é indexada pela global `0x004335c4`; o que
-ela guarda **não foi medido**. O port move o foco **sempre**, o que é
-divergência declarada: na pior das hipóteses ele foca um campo que o original
-teria deixado quieto. Medir isso é barato quando a ficha do jogador estiver
-sendo preenchida — a mesma global deve aparecer lá — e é o que fecha esta spec.
+**A condição do `SetFocus` está medida, e ela não é sobre foco — é sobre o dado
+existir.**
+
+A tabela em `0x00433614` tem passo de 44 bytes, e o passo é o que a identifica:
+é a **terceira coluna de offsets do buffer de jogador**, o registro de 44 bytes
+que a rotina `0x004046e8` preenche a partir da imagem
+([`../auxiliares.md`](../auxiliares.md)). O buffer tem três campos:
+
+| deslocamento | tamanho | offset de origem | o que é |
+|---|---|---|---|
+| `0x004335ec + 44*i` | 10 B | `DWORD[0x00433608 + 44*i]` | nome |
+| `0x004335f6 + 44*i` | 12 B | `DWORD[0x0043360c + 44*i]` | atributos |
+| `0x00433604 + 44*i` | 1 B | `DWORD[0x00433614 + 44*i]` | o campo condicional |
+
+E a condição é a mesma nos dois lugares: **se o offset da terceira coluna for
+zero, o campo não existe na imagem** — a `0x004046e8` então escreve `50` no
+buffer em vez de ler, e este handler não move o foco para o
+`casilla_precio`. Ou seja, o `Return` só avança para o preço quando aquele
+jogador **tem** o byte; para os outros o campo é um valor sintético e o
+original não deixa o cursor chegar lá.
+
+A global `0x004335c4` que indexa a tabela é, portanto, **qual buffer de jogador
+está em edição** — 1 e 2 são os dois lados que os handlers de mover usam.
+
+**Veredito `aberto` ainda assim**, e agora por um motivo menor e nomeado: o
+port não tem o buffer de 44 bytes, então não tem como avaliar a condição, e
+**move o foco sempre**. O buffer entra com o lote de mover jogador — é a
+`0x004046e8` que o preenche —, e esta spec fecha junto com ele.
+
+O `50` do ramo sem campo é entrada da
+[WTE-TASK-30](../../../docs/tasks/30-preco-do-jogador.md): é o valor que a
+ficha mostra quando o jogador não tem o byte, e preço é o assunto dela.
 
 Pascal em
 [`../../src/impl/ep2002_jugador.casilla_dorsalKeyPress.inc`](../../src/impl/ep2002_jugador.casilla_dorsalKeyPress.inc).
