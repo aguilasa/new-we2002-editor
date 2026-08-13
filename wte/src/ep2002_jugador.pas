@@ -29,7 +29,7 @@ interface
 
 uses
   Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
-  Controls, Graphics, we2002_estado;
+  Controls, wte_legendas, Graphics, we2002_estado;
 
 type
   Tjugador = class(TForm)
@@ -354,12 +354,8 @@ procedure Tjugador.barrhab_bisScroll(Sender: TObject; ScrollCode: TScrollCode;
 procedure Tjugador.FormCreate(Sender: TObject);
 {$I impl/ep2002_jugador.FormCreate.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.flechasapaClick(Sender: TObject; Button: TUDBtnType);
-begin
-  REStub('jugador.flechasapaClick');
-end;
-{$POP}
+{$I impl/ep2002_jugador.flechasapaClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn3Click(Sender: TObject);

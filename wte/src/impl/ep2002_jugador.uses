@@ -3,6 +3,9 @@
 SysUtils       # IntToStr, Copy
 Classes        # TComponent
 Controls       # TControl.Width
+ComCtrls       # TUpDown.Position
+StdCtrls       # TLabel.Caption
+wte_legendas   # Legenda, LegendaDoCabelo -- gerado por tools/dump_legendas.py
 Graphics       # TColor
 retrace        # REMark
 we2002_estado  # TimeEmEdicao, JogadorEmEdicao, JogadorTemCampoCondicional

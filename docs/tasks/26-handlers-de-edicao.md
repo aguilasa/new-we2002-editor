@@ -175,7 +175,7 @@ e não que fiquem sem spec.
 | ~~9~~ | ~~mover, a família de 4~~ — **feita em 2026-08-12** | 881 B (a `0x00404374`, que o plano dava por medida e não estava) | `casilla_dorsalKeyPress` |
 | ~~10~~ | ~~mover, os outros 4~~ — **feita em 2026-08-12**, menos o `flechasapaClick`, que não é do `MainForm` e está bloqueado com os lotes de atributo e tática | 181 B (a `0x0040b934`); as outras quatro da lista abaixo **não são chamadas** por estes handlers | — |
 | 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
-| 12 | atributos (`barrhabScroll`, `barrhab_bisScroll`) | 0 B | — |
+| ~~12~~ | ~~atributos (`barrhabScroll`, `barrhab_bisScroll`)~~ — **feita em 2026-08-12**, e o `flechasapaClick` **feito em 2026-08-13** | 0 B nos dois de `barrhab`; 1.124 B no `flechasapaClick`, mais o inicializador das legendas (`0x00401da8`, 2.998 B, lido por ferramenta e não à mão) | as legendas enumeradas da ficha, que estavam abertas desde a passagem 12 |
 | 13 | tática (`0x0040a0b4` + os 7) | por medir | — |
 | 14 | os três critérios que sobram | — | fecha a task |
 
@@ -1690,6 +1690,117 @@ do `--edicao`; e o `iguala_nombres`.
     tática, atrás do `0x0040a0b4` (1.443 B);
   - as legendas dos campos enumerados da ficha (`0x00401db6`), que hoje mostram
     o texto de projeto do `.lfm`;
+  - o truncamento por campo (WTE-TASK-36);
+  - a régua de tela da ficha, se alguém a quiser: pela assinatura de cor dos 16
+    `valorhab`, não pela largura de `imghab`.
+
+---
+
+- **Executado em:** 2026-08-13 — **décima sétima passagem: o `flechasapaClick`,
+  e as legendas da ficha deixaram de ser as do `.lfm`.** O grupo vai de **20
+  para 21 de 28**. Fecha o lote de atributo inteiro e paga uma dívida que estava
+  aberta desde a passagem 12.
+
+- **A conferência prometida veio antes do Pascal, e mudou o que seria escrito.**
+  O inventário de chamadas dos 1.124 bytes (`0x00408088` mais a `0x00408460`)
+  **não alcança nenhuma das duas escritoras de imagem** — nem a `0x00403400`
+  nem a `0x00404048`. Como os dois de `barrhab`, este handler não depende da
+  [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md).
+
+  **Mas ele escreve em disco assim mesmo**, e é a diferença que o inventário
+  sozinho esconderia: as três carregadoras de bitmap abrem o `.bmp` em `"r+b"`
+  e **regravam a paleta dentro do arquivo de asset**. Mexer numa seta de cabelo
+  altera o arquivo que todos os jogadores compartilham. Já estava medido na §6
+  da [`assets.md`](../../wte/re/assets.md); aparece aqui porque é este handler
+  que fecha o ciclo, e porque "não grava" dito sem essa ressalva seria falso.
+
+- **São dois despachantes em fila, e a leitura apressada veria um.** O primeiro
+  escreve o rótulo, o segundo redesenha os bitmaps, e **todo caminho do
+  primeiro cai no segundo**. Os dois comparam o mesmo sufixo contra literais
+  diferentes, e ler os `'3'` das duas listas como um só faria o segundo parecer
+  código morto.
+
+  Um só corte de nome serve os doze — `Copy(Sender.Name, 11, 2)` —, ao
+  contrário dos `barrhab*Scroll`, que precisaram de dois corpos. O que muda é
+  que aqui o despacho compara **cadeia** e lá comparava número.
+
+- **A dívida das legendas foi paga, e por ferramenta.** Nove dos doze controles
+  não mostram número: mostram palavra, buscada num `AnsiString[12][8]` em
+  `0x00423798` — **zero no disco**, montado em tempo de execução. É o que a
+  passagem 12 registrou como "não inventar cadeia" e o que a 14 viu na tela: as
+  legendas de projeto do `.lfm` (`Gl`, `A`, `A1`, `Dire.`, `NO`) iguais para
+  todo jogador, que é pior do que branco porque parece dado.
+
+  O novo [`dump_legendas.py`](../../wte/tools/dump_legendas.py) percorre o
+  inicializador (`0x00401da8`..`0x0040295e`, 150 chamadas ao construtor de
+  `AnsiString`) e emite o par (slot, cadeia) que **o binário monta**. As
+  cadeias sairiam num `strings`; o que só está na ordem das chamadas é **qual
+  vai em qual slot** — transcrever à mão acertaria o conteúdo e erraria a
+  posição sem nada reclamar.
+
+- **A conferência que sustenta a atribuição, e por que ela precisava existir.**
+  Nada no binário diz que a linha `n` é o `flechasapa n+1`: isso sai da ordem
+  de construção. A segunda medida vem de outra fonte — o `Max` de cada seta no
+  `.dfm` — e as doze casam: cada linha tem exatamente `Max + 1` células com
+  texto, e as **três** linhas vazias são exatamente os três controles de faixa
+  maior que as 8 colunas (`flechasapa3` cabelo, `7` altura, `9` idade). O
+  gerador **aborta** se isso deixar de valer, e um teste prova que ele aborta.
+
+  A tabela do cabelo, contígua em `0x00423918`, tem 32 nomes — os mesmos 32 de
+  `image/pelo/pelo_<n>.bmp` contados na §5 da `assets.md`, por um caminho
+  independente.
+
+- **Visto na tela, não só no gerador.** Com a ficha aberta no `:99`, cinco dos
+  dez rótulos enumerados deixaram de mostrar o texto de projeto: `Cab.` foi de
+  `A1` para `I1`, `Peso` de `A` para `E`, `Chut.` de `A` para `B`,
+  `3D(Trivela)` de `NO` para `YES`. E o handler responde: três cliques na seta
+  de `Posicao` levam de `Gl` a `Vl`, que é `LEGENDAS[0][3]`, com três disparos
+  no `trace.log`.
+
+- **Veredito `aberto`, e não pela régua de bytes.** É a **metade dos bitmaps**:
+  o segundo despachante está portado como estrutura, mas as três carregadoras
+  (`0x00406fe0`, `0x00407110`, `0x00407338`, 1.414 B somados) **não têm dono** —
+  a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) cobre uniforme e
+  bandeira do `MainForm`, não cara/cabelo/barba da ficha. Até alguém adotá-las,
+  a seta muda o rótulo e não muda o desenho.
+
+- **Uma armadilha de Pascal que custou um build:** o parâmetro `legenda` do
+  `Aparencia` **escondia** a função `Legenda` da tabela — Pascal não distingue
+  caixa. O erro sai como `Syntax error, ";" expected but "(" found`, que não
+  menciona sombra nenhuma. Renomeado para `pronta`, com o motivo escrito ao
+  lado.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_legendas.py` — o gerador, com as cinco conferências que
+    abortam
+  - `wte/tools/test_dump_legendas.py` — 13 testes, 10 sobre PE sintético e 3
+    contra o `.exe` sob `skipUnless`
+  - `wte/re/legendas.md`, `wte/re/legendas.tsv`, `wte/src/wte_legendas.pas` —
+    gerados
+  - `wte/re/spec/jugador.flechasapaClick.md`
+  - `wte/src/impl/ep2002_jugador.flechasapaClick.inc`, `.uses`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — o `Aparencia` do `PreencheFicha`
+    passou a buscar as legendas medidas; `ep2002_mainform.uses`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 78,5% → **78,1%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 491 testes, OK; `check_lcl_combo` com oito
+  casos verdes no `:99`; `compara_tela.sh --edicao` **PASSOU**, mesmos números
+  das passagens 2 e 14 — barras `[64, 75, 75, 75, 75]` nos dois lados, 4 de 4
+  contra o `we2002_core`.
+
+- **Problemas encontrados:** o Xvfb `:99` não estava no ar nesta sessão. Subido
+  em 1280x1024 sem `-auth`, que é a forma que esta máquina usa; **não** houve
+  queda para o `:1`.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **7 dos 28 handlers**, todos de tática, atrás do `0x0040a0b4` (1.443 B); as
+    auxiliares `0x004097d4` e `0x004099bc` estão inventariadas e a `0x00403278`
+    já foi lida;
+  - as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
+    `0x00407338`) **continuam sem dono** — decisão de escopo, não trabalho
+    pendente desta task;
   - o truncamento por campo (WTE-TASK-36);
   - a régua de tela da ficha, se alguém a quiser: pela assinatura de cor dos 16
     `valorhab`, não pela largura de `imghab`.

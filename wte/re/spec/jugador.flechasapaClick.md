@@ -1,0 +1,133 @@
+---
+handler: flechasapaClick
+formulario: jugador
+endereco: 0x00408088
+veredito: aberto
+---
+
+# jugador.flechasapaClick
+
+O despachante das doze setas de **aparência** da ficha do jogador — posição,
+tom de pele, cabelo, barba, altura, idade, pé, e mais quatro. **981 bytes**,
+mais a `0x00408460` (143 B), que é a única auxiliar dele ainda não lida antes
+desta passagem; as outras três são as carregadoras de bitmap da
+[§5 de `assets.md`](../assets.md).
+
+Ligado aos doze `flechasapa1..12`, todos `TUpDown`, todos por `OnClick`.
+
+## Entrada
+
+- **`Sender.Name`**, cortado em `SubString(11, 2)` — `flechasapa` tem dez
+  letras, então a posição 11 é o primeiro dígito e o corte de dois pega tanto
+  `1`..`9` quanto `10`..`12`. É o mesmo desenho dos dois `barrhab*Scroll`,
+  onde o corte é de um dígito num e de dois no outro; aqui um só corte serve
+  os doze porque o despacho compara **cadeia**, não número.
+- **`Sender.Position`**, e nos três casos especiais o campo do formulário
+  (`jugador+0x434`, `+0x43c`, `+0x424`) em vez do `Sender` — o mesmo objeto.
+
+**Evidência:** disassembly lido
+
+## Saída
+
+**São dois despachantes em fila, não um.** O primeiro escreve o rótulo, o
+segundo redesenha os bitmaps, e todo caminho do primeiro cai no segundo.
+
+```text
+sufixo := SubString(Sender.Name, 11, 2)
+
+' --- primeiro: o rotulo ---
+se sufixo = '7'  entao valorapa7.Caption := IntToStr(flechasapa7.Position + 148)
+senao se '9'     entao valorapa9.Caption := IntToStr(flechasapa9.Position + 15)
+senao se '3'     entao valorapa3.Caption := TABELA_CABELO[flechasapa3.Position]
+senao
+    alvo := FindComponent('valorapa' + sufixo)
+    linha := Variant(sufixo) - 1                 ' a 0x00408460
+    alvo.Caption := TABELA_FICHA[linha][Sender.Position]
+
+' --- segundo: os bitmaps ---
+se sufixo = '2' entao 0x406fe0 ; 0x407110 ; 0x407338   ' careto, pelo, barba
+se sufixo = '3' ou '4' entao 0x407110                  ' pelo
+se sufixo = '5' ou '6' entao 0x407338                  ' barba
+```
+
+**`0x00408460` é a conversão do sufixo em índice de linha.** Ela monta dois
+`Variant` — um da cadeia, um do literal `1` —, subtrai e devolve; o chamador
+extrai o inteiro e multiplica por `0x20`, que é o passo da tabela. Escrito
+assim, e não como um `StrToInt`, porque o C++Builder resolve
+`Variant("10") - 1` sem o autor precisar decidir o tipo.
+
+**Evidência:** disassembly lido
+
+## Bytes tocados
+
+**Nenhum na imagem de CD.** O inventário de chamadas dos 1.124 bytes não
+alcança nenhuma das duas escritoras (`0x00403400`, a de bytes, e
+`0x00404048`, a de número de camisa). O que a seta muda fica no formulário
+até alguém gravar.
+
+**Mas ele escreve em disco assim mesmo, e isso não é detalhe.** As três
+carregadoras de bitmap abrem o `.bmp` em `"r+b"` e **regravam a paleta dentro
+do arquivo de asset** antes de recarregá-lo — `image/careto_base.bmp`,
+`image/pelo/pelo_<n>.bmp`, `image/barba/barba_<n>.bmp`. Mexer numa seta de
+cabelo altera o arquivo compartilhado por todos os jogadores. Medido na
+[§6 de `assets.md`](../assets.md), com a marca de `mtime` da pasta do usuário
+como prova.
+
+**Evidência:** disassembly lido
+
+## Pré-condições
+
+Nenhuma. Não confere se há jogador carregado.
+
+**Evidência:** disassembly lido
+
+## Comportamento de erro
+
+Não trata. Sufixo que não case com nenhum literal cai no ramo genérico, e um
+`FindComponent` que devolva `nil` estouraria ali — não acontece porque os doze
+`valorapa` existem no formulário.
+
+**Evidência:** disassembly lido
+
+## Notas
+
+### As duas tabelas de legenda, e por que elas precisaram de ferramenta
+
+Nove dos doze controles não mostram número: mostram palavra, buscada em
+`0x00423798` — um `AnsiString[12][8]` indexado por `[sufixo − 1][Position]`.
+**Essa tabela é zero no disco**, montada em tempo de execução pelo
+inicializador da unidade. `flechasapa3` tem faixa de 32 e não cabe numa linha
+de 8, então tem tabela própria logo depois, em `0x00423918`.
+
+As duas saem do
+[`dump_legendas.py`](../../tools/dump_legendas.py) → [`legendas.md`](../legendas.md).
+O que a ferramenta acrescenta sobre transcrever à mão é a **posição**: as
+cadeias apareceriam num `strings`, mas qual vai em qual slot só está na ordem
+das chamadas ao construtor.
+
+**A atribuição "linha `n` = `flechasapa n+1`" não está escrita no binário** —
+sai dessa ordem. O que a sustenta é uma segunda medida, de outra fonte: para
+cada uma das doze linhas, a contagem de células com texto bate exatamente com
+`Max + 1` do controle no `.dfm`, e as três linhas vazias são exatamente os três
+controles de faixa maior que 8. O gerador **aborta** se isso deixar de valer.
+
+### Por que o veredito é `aberto`
+
+Não é a régua de bytes — este handler não grava na imagem, e a
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) não o alcança.
+É a **metade dos bitmaps**: o segundo despachante está portado como estrutura,
+mas as três carregadoras (`0x00406fe0`, `0x00407110`, `0x00407338`, 1.414 B
+somados) não têm dono. A
+[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md) cobre uniforme e
+bandeira do `MainForm`, não cara/cabelo/barba da ficha. Enquanto isso, as
+setas de aparência mudam o rótulo e **não** mudam o desenho.
+
+### A saturação em `7` que a WTE-TASK-32 vai herdar
+
+`beard_style` e `beard_colour` guardam 3 bits no disco (0..7), o `Max` dos
+controles é 6 e só existem `barba_0..6`. O `TUpDown` do original satura em
+`Max`, então um 7 vindo do disco vira 6 na tela — e, gravando de volta, vira 6
+no disco. Já registrado na §5.1 da [`assets.md`](../assets.md); aparece aqui
+porque é este handler que fecha o ciclo.
+
+**Evidência:** disassembly lido

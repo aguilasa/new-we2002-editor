@@ -798,21 +798,34 @@ procedure PreencheFicha(const p: TPlayer; indice, slot: Integer);
       TLabel(c).Font.Color := $00FFFFFF;
   end;
 
-  { Uma volta do segundo laco. `cru` e o valor de bit; `legenda` e o que vai
-    para o rotulo, ou vazio quando o original o tira de uma tabela que ainda
-    nao foi medida (ver as notas da spec). }
-  procedure Aparencia(n, cru: Integer; const legenda: string);
+  { Uma volta do segundo laco. `cru` e o valor de bit; `legenda` chega
+    preenchida so nos dois campos NUMERICOS -- altura e idade --, que sao os
+    unicos que o original monta com `IntToStr`.
+
+    Nos outros dez o rotulo e PALAVRA, buscada nas tabelas de `wte_legendas`.
+    O despacho de tres ramos aqui e o mesmo do `jugador.flechasapaClick`, e
+    nao por acaso: os dois escrevem o mesmo rotulo, um na carga e o outro ao
+    mexer na seta. Se um dia divergirem, a ficha muda de texto so por ser
+    tocada. }
+  procedure Aparencia(n, cru: Integer; const pronta: string);
   var
     c: TComponent;
+    texto: string;
   begin
     c := Controle('flechasapa', n);
     if c is TUpDown then
       TUpDown(c).Position := cru;
-    if legenda = '' then
-      Exit;
+    { `pronta`, e nao `legenda`: Pascal nao distingue caixa, e um parametro
+      chamado `legenda` esconderia a funcao `Legenda` da tabela. }
+    if pronta <> '' then
+      texto := pronta
+    else if n = 3 then
+      texto := LegendaDoCabelo(cru)     { faixa de 32, tabela propria }
+    else
+      texto := Legenda(n, cru);
     c := Controle('valorapa', n);
     if c is TLabel then
-      TLabel(c).Caption := legenda;
+      TLabel(c).Caption := texto;
   end;
 
 begin
@@ -835,12 +848,16 @@ begin
   Habilidade(15, p.aggression);
   Habilidade(16, p.reflexes);
 
-  { Segundo laco -- tabela `0x00423708`. As legendas dos campos ENUMERADOS
-    ficam vazias de proposito: o original as tira de um vetor de 12x8
-    `AnsiString` em `0x00423798`, que nasce zerado no arquivo e e preenchido em
-    tempo de execucao por codigo que ainda nao foi lido. Inventar as cadeias
-    seria escrever ficcao no lugar de medicao. Os dois campos NUMERICOS -- os
-    unicos que o original monta com `IntToStr` -- estao aqui. }
+  { Segundo laco -- tabela `0x00423708`. A cadeia vazia nos dez campos
+    ENUMERADOS nao quer dizer "sem rotulo": quer dizer "o rotulo sai da tabela
+    de legendas", e o `Aparencia` a busca. Os dois campos NUMERICOS, altura e
+    idade, sao os unicos que o original monta com `IntToStr`, e por isso sao os
+    unicos que trazem a legenda pronta.
+
+    Ate a decima setima passagem essa distincao nao existia: os dez saiam sem
+    rotulo nenhum, e a ficha mostrava as legendas de PROJETO do `.lfm` (`Gl`,
+    `A`, `A1`, `Dire.`, `NO`) iguais para todo jogador -- pior do que branco,
+    porque parecia dado. As tabelas foram medidas pelo `dump_legendas.py`. }
   Aparencia(1, p.position, '');
   Aparencia(2, p.skin_colour, '');
   Aparencia(3, p.hair_style, '');

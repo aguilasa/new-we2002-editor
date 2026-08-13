@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 71 |
 | **total** | **96** |
 
-48 de 96 têm arquivo de spec.
+49 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -69,7 +69,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00407a88` | `jugador` | [barrhabScroll](jugador.barrhabScroll.md) | OnScroll x9 | edicao | implementado |
 | `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00408088` | `jugador` | flechasapaClick | OnClick x12 | edicao | aberto |
+| `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | aberto |
 | `0x00408548` | `jugador` | BitBtn3Click | OnClick | auxiliar | aberto |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
