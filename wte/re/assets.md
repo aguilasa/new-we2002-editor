@@ -478,9 +478,17 @@ grep -n 'skin_colour\|hair_style\|hair_colour\|beard_style\|beard_colour' \
 guarda 3 bits (0..7), o `Max` do controle é 6, e só existem `barba_0..6`. O valor
 **7 é representável no disco e não tem arquivo**. O original não quebra por
 acidente de plataforma: `TUpDown::Position` satura em `Max`, então um 7 vindo do
-disco vira 6 na tela — e, gravando de volta, **vira 6 no disco também**. A
-WTE-TASK-32 precisa saturar do mesmo jeito, ou tratar o 7 explicitamente e
-registrar a divergência.
+disco vira 6 na tela — e, gravando de volta, **vira 6 no disco também**. Quem
+precisa saturar do mesmo jeito, ou tratar o 7 explicitamente e registrar a
+divergência, é a **WTE-TASK-27** — não a 32.
+
+> Esta linha dizia WTE-TASK-32 até 2026-08-18. A
+> [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) tirou cara, cabelo e barba do
+> escopo daquela task — as três carregadoras viraram exclusão deliberada da
+> [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) —, mas a
+> saturação **sobrevive à decisão**: ela mora no `TUpDown`, que o port já tem, e
+> o 6 chega ao disco pela gravação. Não desenhar a barba não faz o 7 parar de
+> virar 6.
 
 ---
 
@@ -558,11 +566,17 @@ Três, todas para quem for escrever o lado Lazarus:
    paleta é rascunho.
 3. **Duas instâncias não podem desenhar ao mesmo tempo.** Não há bloqueio.
 
-> **Divergência recomendada para a WTE-TASK-32:** recolorir **em memória**
-> (`TBitmap` + `Palette`/`ScanLine`), lendo o `.bmp` uma vez. Vira item do §7.3
-> do plano — o registro de divergência deliberada. O motivo não é gosto: o
+> **Divergência recomendada:** recolorir **em memória** (`TBitmap` +
+> `Palette`/`ScanLine`), lendo o `.bmp` uma vez. O motivo não é gosto: o
 > original só grava no arquivo porque a VCL de 2002 carregava paleta por
 > `LoadFromFile`, e reproduzir isso torna o porte read-write numa pasta de dados.
+>
+> Vale para os **dois renderizadores do `MainForm`**, que são os da WTE-TASK-32.
+> Para os **três da ficha do jogador** a recomendação caducou em 2026-08-18: a
+> [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) decidiu **não implementá-los**,
+> e a entrada está na
+> [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md). Recolorir em
+> memória é trabalho, e trabalho que ninguém pediu para cara, cabelo e barba.
 
 ---
 

@@ -98,6 +98,76 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   `make -C wte check`. O `compara_tela.py` precisa da mesma exceção nomeada
   quando os cinco forem exercitados — hoje só o `iguala_nombres` cai na faixa
   medida, e ele aparece lá como `DIVERGE`.
+- **Cara, cabelo e barba da ficha não redesenham** — decidido pela
+  [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) em 2026-08-18, e, como as duas
+  entradas acima, **não é hipótese**: é o que o port faz hoje.
+  *O que diverge:* cinco das doze setas de aparência do formulário `jugador` —
+  `flechasapa2` (tom de pele), `3` e `4` (forma e cor do cabelo), `5` e `6`
+  (forma e cor da barba) — mudam o rótulo e **não** mudam o desenho. No
+  original elas repintam `imagen_base`, `imagen_pelo` e `imagen_barba` por três
+  carregadoras de bitmap — `0x00406fe0` (`image/careto_base.bmp`, 301 B),
+  `0x00407110` (`image/pelo/pelo_<n>.bmp`, 552 B) e `0x00407338`
+  (`image/barba/barba_<n>.bmp`, 561 B), **1.414 B somados** —, chamadas pelo
+  segundo despachante do `jugador.flechasapaClick`. Nenhum byte da imagem de CD
+  entra na conta: o handler não alcança nenhuma das duas escritoras.
+  *Natureza:* escolha de escopo. Não é bug do original nem limitação de
+  widgetset — as três rotinas estão lidas e medidas, e a LCL desenharia o
+  resultado sem novidade.
+  *Decisão:* não implementar.
+  *Razão:* as três abrem o `.bmp` em `"r+b"` (a cadeia de modo em
+  `0x004249cd`), dão `fseek` para a entrada 10 da paleta (`0x5e` = 54 + 10 × 4)
+  e **regravam a paleta dentro do próprio arquivo de asset** antes de
+  recarregá-lo por `LoadFromFile`. Como `pelo_<n>.bmp` e `barba_<n>.bmp` são
+  compartilhados por todos os jogadores e o `make -C wte assets` liga a pasta
+  de assets em `we-team-editor/`, do usuário, mexer numa seta de cabelo
+  reescreveria o arquivo que todos usam, na pasta do Obocaman. As saídas seriam
+  duas — reproduzir a gravação in-place, tornando o porte read-write sobre dado
+  do usuário, ou escrever um segundo caminho de recolorir em memória, que é
+  trabalho que nenhuma task pediu — e **nenhuma das duas tem dono**: a
+  [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) é dona de handler e
+  excluiu as três; a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) é
+  dona de asset, mas dos dois do `MainForm` — uniforme e bandeira —, e não cita
+  cara, cabelo nem barba. Caíam entre as duas definições, e é a própria 26 que
+  escreve a regra: *"Exclusão sem dono nomeado é buraco, e este projeto já
+  pagou por isso na 25."* Esta entrada é o dono.
+  *Evidência:* o efeito visível está escrito na spec do handler
+  ([`jugador.flechasapaClick`](../../wte/re/spec/jugador.flechasapaClick.md)) —
+  rótulo muda, desenho não. As medições vêm da §5, da §5.1 e da §6 do
+  [`assets.md`](../../wte/re/assets.md): as três tabelas de cor em `.data` —
+  pele `0x00423998` (0x40 bytes, 16 entradas a partir da 10, passo 64, 4 tons),
+  cabelo `0x00423a98` (0x14 bytes, 5 entradas, passo 20, 8 cores) e barba
+  `0x00423b38` (0x0c bytes, 3 entradas, passo 12) —, o `careto_base.bmp` único
+  (não há `careto_<n>`: o rosto é um só e o tom de pele é troca de 16 entradas
+  de paleta), e as contagens de arquivo que fecham com o `Max` do DFM — 32
+  `pelo_` contra `Max` 31 do `flechasapa3`, 7 `barba_` contra `Max` 6 do
+  `flechasapa5`. Que a gravação acontece de verdade não precisou de teste
+  destrutivo: a §6.1 lê o `mtime` dos 198 `.bmp` — 176 de 2002, 19 de 2006 — e
+  acha **três** reescritos no mesmo segundo de 2026-08-05, a primeira sessão de
+  `make wte` nesta máquina, com o tamanho intacto. Os três são os do `MainForm`
+  (`bandera37`, `camiseta2`, `pantalon0`), porque a ficha do jogador não foi
+  aberta naquela sessão; o mecanismo é o mesmo nas seis rotinas.
+  **O que esta exclusão não cobre:** a saturação em `7` do `beard_style`. O
+  disco guarda 3 bits (0..7), o `Max` do controle é 6 e só existem `barba_0..6`;
+  o `TUpDown` do original satura em `Max`, então um 7 vindo do disco vira 6 na
+  tela e **vira 6 no disco** ao gravar (§5.1). Isso é comportamento de gravação,
+  é da [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), e não deixa de
+  valer por o desenho não sair.
+  *Onde o teste sabe:* **nenhuma régua alcança o formulário `jugador`**, e por
+  isso esta entrada não pede exceção nomeada em lugar nenhum. A bateria de bytes
+  não passa por aqui — o handler não grava na imagem. A de pixel também não: o
+  [`compara_tela.py`](../../wte/tools/compara_tela.py) mede a janela do
+  `MainForm` (as cinco barras de força, e a mudança de aparência no
+  `--habilitacao`), e os três modos do
+  [`compara_tela.sh`](../../wte/tools/compara_tela.sh) — `--edicao`, `--nomes`,
+  `--habilitacao` — partem todos dali; o
+  [`check_edicao.py`](../../wte/tools/check_edicao.py) já registra, para os
+  handlers da ficha, *"sub-dialogo que nenhuma regua de tela alcanca"*. O
+  instrumento nomeado do `flechasapaClick` naquela tabela é o
+  [`check_bitfields.py`](../../wte/tools/check_bitfields.py), que prende a
+  **identidade** dos campos de aparência — os 12 registros de `0x00423708`
+  contra o `Player.Decode` do `we2002_core` — e não diz nada sobre desenho.
+  Se alguma passagem futura criar régua para o `jugador`, ela nasce com as três
+  imagens divergindo, e é esta entrada que explica por quê.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.
 - **Rótulos cortados por fonte substituta** — acontece nos dois lados, e talvez
   não conte como divergência; decidir.

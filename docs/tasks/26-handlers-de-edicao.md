@@ -2367,6 +2367,13 @@ do `--edicao`; e o `iguala_nombres`.
     campo, aberta como [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md);
   - o vetor bola→zona e as tabelas da animação, que o
     `estrategia.lista_formacionesClick` preenche;
-  - as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
+  - ~~as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
     `0x00407338`) — **decisão de escopo, sem dono**: a WTE-TASK-32 cobre
-    uniforme e bandeira do `MainForm`, não cara/cabelo/barba.
+    uniforme e bandeira do `MainForm`, não cara/cabelo/barba~~ — **decidido em
+    2026-08-18** pela [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md): não serão
+    portadas. As três regravam a paleta dentro do `.bmp` compartilhado, na
+    pasta de dados do usuário; viraram exclusão deliberada da
+    [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md). A saturação em
+    `7` do `beard_style` **não** vai junto: ela é do `TUpDown` e chega ao disco
+    pela gravação, logo é da
+    [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md).
