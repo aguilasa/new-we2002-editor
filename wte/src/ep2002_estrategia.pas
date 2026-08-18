@@ -28,7 +28,8 @@ unit ep2002_estrategia;
 interface
 
 uses
-  Classes, Types, Forms, Controls, StdCtrls, ExtCtrls, Buttons, retrace;
+  Classes, Types, Forms, Controls, StdCtrls, ExtCtrls, Buttons, retrace,
+  SysUtils, Graphics, wte_zonas;
 
 type
   Testrategia = class(TForm)
@@ -173,29 +174,21 @@ implementation
 
 {$R ../forms/ep2002_estrategia.lfm}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
+{ Rotinas internas que o original chama de mais de um handler -- nao sao
+  metodo publicado, e por isso nao estao na classe. Ver wte/src/impl/README.md. }
+{$I impl/ep2002_estrategia.aux.inc}
+
 procedure Testrategia.bolaMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
-begin
-  REStub('estrategia.bolaMouseMove');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.bolaMouseMove.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.bolaMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
-  REStub('estrategia.bolaMouseDown');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.bolaMouseDown.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.campoMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
-begin
-  REStub('estrategia.campoMouseMove');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.campoMouseMove.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.FormCreate(Sender: TObject);
@@ -204,28 +197,16 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.rectanguloDragOver(Sender, Source: TObject;
   X, Y: Integer; State: TDragState; var Accept: Boolean);
-begin
-  REStub('estrategia.rectanguloDragOver');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.rectanguloDragOver.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.rectanguloDragDrop(Sender, Source: TObject;
   X, Y: Integer);
-begin
-  REStub('estrategia.rectanguloDragDrop');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.rectanguloDragDrop.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.bolaEndDrag(Sender, Target: TObject; X, Y: Integer);
-begin
-  REStub('estrategia.bolaEndDrag');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.bolaEndDrag.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.lista_formacionesClick(Sender: TObject);

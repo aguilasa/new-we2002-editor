@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 11 |
+| `implementado` | 16 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 71 |
+| `aberto` | 66 |
 | **total** | **96** |
 
-49 de 96 têm arquivo de spec.
+55 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -76,13 +76,13 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |
 | `0x00408bb8` | `jugador` | etiqprecioClick | OnClick | edicao | aberto |
 | `0x00408d88` | `ficha_warning_2` | [FormCreate](ficha_warning_2.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00408e0c` | `estrategia` | bolaMouseMove | OnMouseMove x10 | edicao | aberto |
-| `0x00408f00` | `estrategia` | bolaMouseDown | OnMouseDown x10 | edicao | aberto |
-| `0x004090c8` | `estrategia` | campoMouseMove | OnMouseMove | edicao | aberto |
+| `0x00408e0c` | `estrategia` | [bolaMouseMove](estrategia.bolaMouseMove.md) | OnMouseMove x10 | edicao | implementado |
+| `0x00408f00` | `estrategia` | [bolaMouseDown](estrategia.bolaMouseDown.md) | OnMouseDown x10 | edicao | aberto |
+| `0x004090c8` | `estrategia` | [campoMouseMove](estrategia.campoMouseMove.md) | OnMouseMove | edicao | implementado |
 | `0x004090fc` | `estrategia` | [FormCreate](estrategia.FormCreate.md) | OnCreate | carga | aberto |
-| `0x00409644` | `estrategia` | rectanguloDragOver | OnDragOver | edicao | aberto |
-| `0x00409780` | `estrategia` | rectanguloDragDrop | OnDragDrop | edicao | aberto |
-| `0x004097a4` | `estrategia` | bolaEndDrag | OnEndDrag x10 | edicao | aberto |
+| `0x00409644` | `estrategia` | [rectanguloDragOver](estrategia.rectanguloDragOver.md) | OnDragOver | edicao | implementado |
+| `0x00409780` | `estrategia` | [rectanguloDragDrop](estrategia.rectanguloDragDrop.md) | OnDragDrop | edicao | implementado |
+| `0x004097a4` | `estrategia` | [bolaEndDrag](estrategia.bolaEndDrag.md) | OnEndDrag x10 | edicao | implementado |
 | `0x00409aa0` | `estrategia` | [lista_formacionesClick](estrategia.lista_formacionesClick.md) | OnClick | carga | aberto |
 | `0x00409ba4` | `estrategia` | relojTimer | OnTimer | edicao | aberto |
 | `0x00409f4c` | `estrategia` | malla1MouseDown | OnMouseDown | edicao | aberto |

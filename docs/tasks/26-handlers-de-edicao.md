@@ -128,9 +128,9 @@ separadas (primeiro parágrafo do Contexto).
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec, incluindo regra de validação — **18 de
-      28** (2026-08-12): barras 2, número 4, nomes 5, mover 7. Faltam o
-      `flechasapaClick`, os 7 de tática e os 2 de atributo
+- [ ] Todo handler do grupo com spec, incluindo regra de validação — **27 de
+      28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
+      tática 6. Falta só o `estrategia.relojTimer`
 - [ ] Comportamento de truncamento documentado por campo
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
@@ -176,7 +176,7 @@ e não que fiquem sem spec.
 | ~~10~~ | ~~mover, os outros 4~~ — **feita em 2026-08-12**, menos o `flechasapaClick`, que não é do `MainForm` e está bloqueado com os lotes de atributo e tática | 181 B (a `0x0040b934`); as outras quatro da lista abaixo **não são chamadas** por estes handlers | — |
 | 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
 | ~~12~~ | ~~atributos (`barrhabScroll`, `barrhab_bisScroll`)~~ — **feita em 2026-08-12**, e o `flechasapaClick` **feito em 2026-08-13** | 0 B nos dois de `barrhab`; 1.124 B no `flechasapaClick`, mais o inicializador das legendas (`0x00401da8`, 2.998 B, lido por ferramenta e não à mão) | as legendas enumeradas da ficha, que estavam abertas desde a passagem 12 |
-| 13 | tática (`0x0040a0b4` + os 7) | por medir | — |
+| ~~13~~ | ~~tática (`0x0040a0b4` + os 7)~~ — **seis feitos em 2026-08-13**; falta o `relojTimer` | **o `0x0040a0b4` não é deste lote** — quem o chama é o `MainForm.mostrar_estrategiaClick`, do grupo de carga. Medido: os 7 somam 2.088 B e **não chamam auxiliar interna nenhuma**; os seis de arrastar são 1.152 B | as zonas do campinho, que o `estrategia.FormCreate` monta e ninguém tinha lido |
 | 14 | os três critérios que sobram | — | fecha a task |
 
 **Passagem 9 — mover, a família de 4.** 312 a 314 bytes cada, e **não depende
@@ -1696,6 +1696,127 @@ do `--edicao`; e o `iguala_nombres`.
 
 ---
 
+- **Executado em:** 2026-08-13 — **décima oitava passagem: os seis handlers de
+  arrastar bola no campinho.** O grupo vai de **21 para 27 de 28**; falta um
+  handler para esta task fechar.
+
+- **O custo do lote estava errado por três vezes, e nas três na mesma direção.**
+  O plano dizia "os 7 de tática, atrás do `0x0040a0b4` (1.443 B)". Medido antes
+  de ler, como manda a disciplina das últimas passagens:
+
+  1. **`0x0040a0b4` não é deste lote.** Quem o chama é o
+     `MainForm.mostrar_estrategiaClick`, do grupo de carga — está na coluna de
+     chamadores da [`auxiliares.tsv`](../../wte/re/auxiliares.tsv) desde a
+     WTE-TASK-25. Os 7 handlers **não chamam auxiliar interna nenhuma**: todas
+     as chamadas dos 2.088 bytes vão para a VCL.
+  2. **`campoMouseMove` tem 52 bytes, não 1.404.** A conta de 1.404 é a
+     distância até o próximo handler *publicado*, e entre um e outro mora o
+     `estrategia.FormCreate` (1.352 B). Medir corpo por subtração de vizinhos
+     **superestima em silêncio** sempre que houver rotina não listada no meio.
+  3. **`relojTimer` tem 936 B, não 348** — aqui para menos, pelo motivo
+     inverso: o corte que eu tinha usado era arbitrário.
+
+  O erro (1) e o (2) juntos faziam o lote parecer caro demais para uma passagem.
+  Erro de custo não é ruído: é o que decide o recorte, e recorte errado deixa
+  trabalho barato parado.
+
+- **O achado que o lote entregou: as zonas do campinho.** Arrastar um jogador
+  **não é livre**. O `bolaMouseDown` desenha o `rectangulo` em volta da área
+  permitida daquela bola, e o `rectanguloDragOver` prende o movimento a uma
+  grade dentro dela. A geometria sai de uma tabela em `0x00433e5c` — 11
+  registros de 16 bytes, `(x1, y1, x2, y2)`.
+
+  **Essa tabela não existe no arquivo**, como as legendas da passagem anterior:
+  é `.bss`, montada em tempo de execução. Quem a monta é o
+  `estrategia.FormCreate`, escrevendo 44 imediatos um a um, em ordem
+  embaralhada — o compilador intercala `lea` de ponteiro com `mov` de
+  deslocamento, e o primeiro campo de cada registro sai por um registrador
+  diferente dos outros três. Transcrever a olho trocaria um `x2` por um `y1` e
+  produziria um retângulo plausível.
+
+  O novo [`dump_zonas.py`](../../wte/tools/dump_zonas.py) decodifica e confere
+  contra o `.lfm`, que é outra fonte: **nenhum retângulo pode sair do `campo`**
+  (395×246) e a contagem tem de bater com os `bolaN` do formulário.
+
+- **E a spec do `estrategia.FormCreate` não dizia nada disso.** Escrita na
+  WTE-TASK-25, ela descreve as cores da zebra e chama os blocos de `0x00409168`
+  em diante de "quatro laços curtos de 11 iterações". O **produto principal** da
+  rotina é a tabela de zonas. Corrigida nesta passagem, com a lição escrita
+  dentro: spec de `FormCreate` escrita a partir da pergunta *"o que ele pinta?"*
+  responde só isso, e a ausência não se anuncia.
+
+- **Três detalhes que a leitura apressada erraria, e os três estão no Pascal:**
+
+  **A grade do eixo X tem fase.** Não é "múltiplo de 8": é múltiplo de 8 **mais
+  5** — os pontos válidos são 5, 13, 21… Arredondar para o múltiplo de 8 mais
+  próximo daria posições três pixels fora em todo o campo, e nenhum teste de "a
+  bola se move" pegaria. O eixo Y é grade de 5 sem fase.
+
+  **`X`/`Y` do `rectanguloDragOver` são relativos ao `rectangulo`, não ao
+  `campo`.** O alvo do arrasto é o retângulo. Tratá-los como se já fossem do
+  campo desloca a bola pela posição da zona — erro que cresce com a zona e
+  **desaparece na zona 0**, que é justamente onde um teste apressado olharia.
+
+  **Um global, dois papéis.** `0x00434340` é "bola destacada" no
+  `bolaMouseMove` e "bola sendo arrastada" no `bolaMouseDown`; não há um segundo
+  ponteiro. O original pode reusá-lo porque para apertar o botão sobre a bola o
+  ponteiro necessariamente passou por ela.
+
+- **Um teste meu reprovou, e a tabela estava certa.** Escrevi que os `x1`
+  distintos seriam três — defesa, meio e ataque. São **quatro**: além de 10, 122
+  e 274 há uma coluna em 170, um meio-campo adiantado mais estreito. Corrigido
+  para o valor medido, com o motivo dentro do teste. Palpite bonito escrito como
+  asserção é asserção errada.
+
+- **Visto na tela, no `:99`, e não só no gerador.** Com a `estrategia` aberta:
+  passar o mouse acende a bola de verde vivo e o rótulo de branco enquanto apaga
+  a anterior; apertar o botão faz aparecer o retângulo preto de borda vinho na
+  zona 0, com os 120×120 que a tabela prevê, e some o rótulo da bola arrastada;
+  arrastar move bola e rótulo juntos; soltar recoloca tudo. O `trace.log` mostra
+  a ordem completa — `bolaMouseDown` → `rectanguloDragOver` (várias) →
+  `rectanguloDragDrop` → `bolaEndDrag`.
+
+- **Um aviso de compilação ficou de propósito.** `Variable "ZonaDaBola" read but
+  nowhere assigned` — o vetor bola→zona é preenchido pelo
+  `estrategia.lista_formacionesClick`, que não é desta passagem. Enquanto ele
+  não existir, toda bola cai na zona 0. Calar o aviso esconderia exatamente a
+  lacuna que ele anuncia; é o que mantém o `bolaMouseDown` em `aberto` enquanto
+  os outros cinco fecham `implementado`.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_zonas.py`, `wte/tools/test_dump_zonas.py` (10 testes)
+  - `wte/re/zonas.md`, `wte/re/zonas.tsv`, `wte/src/wte_zonas.pas` — gerados
+  - `wte/re/spec/estrategia.bolaMouseMove.md`, `.bolaMouseDown.md`,
+    `.campoMouseMove.md`, `.rectanguloDragOver.md`, `.rectanguloDragDrop.md`,
+    `.bolaEndDrag.md`
+  - `wte/re/spec/estrategia.FormCreate.md` — a correção
+  - `wte/src/impl/ep2002_estrategia.aux.inc`, `.uses` e os seis `.inc`
+  - `wte/tools/README.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 78,1% → **76,4%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 501 testes, OK;
+  `compara_tela.sh --edicao` **PASSOU**, barras `[64, 75, 75, 75, 75]` nos dois
+  lados, 4 de 4 contra o `we2002_core`.
+
+- **Problemas encontrados:** o Xvfb `:99` caiu no meio da sessão e foi subido de
+  novo em 1280x1024; **não** houve queda para o `:1`.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **1 dos 28 handlers**: o `estrategia.relojTimer` (`0x00409ba4`, 936 B) — uma
+    máquina de estados sobre `0x0043428c` que move as 11 bolas por tabelas de
+    coordenadas diferentes a cada fase. É ele que semeia os dois globais que os
+    handlers de arrastar leem, e por isso o port precisa hoje de uma guarda de
+    `nil` que o original não tem;
+  - o vetor bola→zona (`estrategia.lista_formacionesClick`), que promove o
+    `bolaMouseDown` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**;
+  - o truncamento por campo (WTE-TASK-36);
+  - a régua de tela da ficha, se alguém a quiser.
+
+---
+
 - **Executado em:** 2026-08-13 — **décima sétima passagem: o `flechasapaClick`,
   e as legendas da ficha deixaram de ser as do `.lfm`.** O grupo vai de **20
   para 21 de 28**. Fecha o lote de atributo inteiro e paga uma dívida que estava
@@ -1804,3 +1925,124 @@ do `--edicao`; e o `iguala_nombres`.
   - o truncamento por campo (WTE-TASK-36);
   - a régua de tela da ficha, se alguém a quiser: pela assinatura de cor dos 16
     `valorhab`, não pela largura de `imghab`.
+
+---
+
+- **Executado em:** 2026-08-13 — **décima oitava passagem: os seis handlers de
+  arrastar bola no campinho.** O grupo vai de **21 para 27 de 28**; falta um
+  handler para esta task fechar.
+
+- **O custo do lote estava errado por três vezes, e nas três na mesma direção.**
+  O plano dizia "os 7 de tática, atrás do `0x0040a0b4` (1.443 B)". Medido antes
+  de ler, como manda a disciplina das últimas passagens:
+
+  1. **`0x0040a0b4` não é deste lote.** Quem o chama é o
+     `MainForm.mostrar_estrategiaClick`, do grupo de carga — está na coluna de
+     chamadores da [`auxiliares.tsv`](../../wte/re/auxiliares.tsv) desde a
+     WTE-TASK-25. Os 7 handlers **não chamam auxiliar interna nenhuma**: todas
+     as chamadas dos 2.088 bytes vão para a VCL.
+  2. **`campoMouseMove` tem 52 bytes, não 1.404.** A conta de 1.404 é a
+     distância até o próximo handler *publicado*, e entre um e outro mora o
+     `estrategia.FormCreate` (1.352 B). Medir corpo por subtração de vizinhos
+     **superestima em silêncio** sempre que houver rotina não listada no meio.
+  3. **`relojTimer` tem 936 B, não 348** — aqui para menos, pelo motivo
+     inverso: o corte que eu tinha usado era arbitrário.
+
+  O erro (1) e o (2) juntos faziam o lote parecer caro demais para uma passagem.
+  Erro de custo não é ruído: é o que decide o recorte, e recorte errado deixa
+  trabalho barato parado.
+
+- **O achado que o lote entregou: as zonas do campinho.** Arrastar um jogador
+  **não é livre**. O `bolaMouseDown` desenha o `rectangulo` em volta da área
+  permitida daquela bola, e o `rectanguloDragOver` prende o movimento a uma
+  grade dentro dela. A geometria sai de uma tabela em `0x00433e5c` — 11
+  registros de 16 bytes, `(x1, y1, x2, y2)`.
+
+  **Essa tabela não existe no arquivo**, como as legendas da passagem anterior:
+  é `.bss`, montada em tempo de execução. Quem a monta é o
+  `estrategia.FormCreate`, escrevendo 44 imediatos um a um, em ordem
+  embaralhada — o compilador intercala `lea` de ponteiro com `mov` de
+  deslocamento, e o primeiro campo de cada registro sai por um registrador
+  diferente dos outros três. Transcrever a olho trocaria um `x2` por um `y1` e
+  produziria um retângulo plausível.
+
+  O novo [`dump_zonas.py`](../../wte/tools/dump_zonas.py) decodifica e confere
+  contra o `.lfm`, que é outra fonte: **nenhum retângulo pode sair do `campo`**
+  (395×246) e a contagem tem de bater com os `bolaN` do formulário.
+
+- **E a spec do `estrategia.FormCreate` não dizia nada disso.** Escrita na
+  WTE-TASK-25, ela descreve as cores da zebra e chama os blocos de `0x00409168`
+  em diante de "quatro laços curtos de 11 iterações". O **produto principal** da
+  rotina é a tabela de zonas. Corrigida nesta passagem, com a lição escrita
+  dentro: spec de `FormCreate` escrita a partir da pergunta *"o que ele pinta?"*
+  responde só isso, e a ausência não se anuncia.
+
+- **Três detalhes que a leitura apressada erraria, e os três estão no Pascal:**
+
+  **A grade do eixo X tem fase.** Não é "múltiplo de 8": é múltiplo de 8 **mais
+  5** — os pontos válidos são 5, 13, 21… Arredondar para o múltiplo de 8 mais
+  próximo daria posições três pixels fora em todo o campo, e nenhum teste de "a
+  bola se move" pegaria. O eixo Y é grade de 5 sem fase.
+
+  **`X`/`Y` do `rectanguloDragOver` são relativos ao `rectangulo`, não ao
+  `campo`.** O alvo do arrasto é o retângulo. Tratá-los como se já fossem do
+  campo desloca a bola pela posição da zona — erro que cresce com a zona e
+  **desaparece na zona 0**, que é justamente onde um teste apressado olharia.
+
+  **Um global, dois papéis.** `0x00434340` é "bola destacada" no
+  `bolaMouseMove` e "bola sendo arrastada" no `bolaMouseDown`; não há um segundo
+  ponteiro. O original pode reusá-lo porque para apertar o botão sobre a bola o
+  ponteiro necessariamente passou por ela.
+
+- **Um teste meu reprovou, e a tabela estava certa.** Escrevi que os `x1`
+  distintos seriam três — defesa, meio e ataque. São **quatro**: além de 10, 122
+  e 274 há uma coluna em 170, um meio-campo adiantado mais estreito. Corrigido
+  para o valor medido, com o motivo dentro do teste. Palpite bonito escrito como
+  asserção é asserção errada.
+
+- **Visto na tela, no `:99`, e não só no gerador.** Com a `estrategia` aberta:
+  passar o mouse acende a bola de verde vivo e o rótulo de branco enquanto apaga
+  a anterior; apertar o botão faz aparecer o retângulo preto de borda vinho na
+  zona 0, com os 120×120 que a tabela prevê, e some o rótulo da bola arrastada;
+  arrastar move bola e rótulo juntos; soltar recoloca tudo. O `trace.log` mostra
+  a ordem completa — `bolaMouseDown` → `rectanguloDragOver` (várias) →
+  `rectanguloDragDrop` → `bolaEndDrag`.
+
+- **Um aviso de compilação ficou de propósito.** `Variable "ZonaDaBola" read but
+  nowhere assigned` — o vetor bola→zona é preenchido pelo
+  `estrategia.lista_formacionesClick`, que não é desta passagem. Enquanto ele
+  não existir, toda bola cai na zona 0. Calar o aviso esconderia exatamente a
+  lacuna que ele anuncia; é o que mantém o `bolaMouseDown` em `aberto` enquanto
+  os outros cinco fecham `implementado`.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_zonas.py`, `wte/tools/test_dump_zonas.py` (10 testes)
+  - `wte/re/zonas.md`, `wte/re/zonas.tsv`, `wte/src/wte_zonas.pas` — gerados
+  - `wte/re/spec/estrategia.bolaMouseMove.md`, `.bolaMouseDown.md`,
+    `.campoMouseMove.md`, `.rectanguloDragOver.md`, `.rectanguloDragDrop.md`,
+    `.bolaEndDrag.md`
+  - `wte/re/spec/estrategia.FormCreate.md` — a correção
+  - `wte/src/impl/ep2002_estrategia.aux.inc`, `.uses` e os seis `.inc`
+  - `wte/tools/README.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 78,1% → **76,4%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 501 testes, OK;
+  `compara_tela.sh --edicao` **PASSOU**, barras `[64, 75, 75, 75, 75]` nos dois
+  lados, 4 de 4 contra o `we2002_core`.
+
+- **Problemas encontrados:** o Xvfb `:99` caiu no meio da sessão e foi subido de
+  novo em 1280x1024; **não** houve queda para o `:1`.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **1 dos 28 handlers**: o `estrategia.relojTimer` (`0x00409ba4`, 936 B) — uma
+    máquina de estados sobre `0x0043428c` que move as 11 bolas por tabelas de
+    coordenadas diferentes a cada fase. É ele que semeia os dois globais que os
+    handlers de arrastar leem, e por isso o port precisa hoje de uma guarda de
+    `nil` que o original não tem;
+  - o vetor bola→zona (`estrategia.lista_formacionesClick`), que promove o
+    `bolaMouseDown` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**;
+  - o truncamento por campo (WTE-TASK-36);
+  - a régua de tela da ficha, se alguém a quiser.

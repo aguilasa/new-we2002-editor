@@ -1,0 +1,11 @@
+# Unidades que os corpos de `impl/ep2002_estrategia.*.inc` pedem, alem das que
+# o gerador ja deduz dos componentes e das assinaturas.
+SysUtils     # StrToIntDef, Copy
+Classes      # TComponent
+Controls     # TControl, TDragState
+ExtCtrls     # TShape, TImage
+StdCtrls     # TLabel
+Graphics     # TColor
+Types        # TPoint
+retrace      # REMark
+wte_zonas    # ZONAS -- gerado por tools/dump_zonas.py

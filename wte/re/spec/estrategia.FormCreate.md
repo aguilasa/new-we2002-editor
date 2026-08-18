@@ -22,6 +22,14 @@ Forma `composto` do [`../arranque.md`](../arranque.md), 1351 bytes — o maior
 dos 18. O que está medido:
 
 - `Color := $00E68F41` (`0x00409361`);
+- **a tabela de zonas do campinho**, em `0x00409168`…`0x0040930b`: 11 registros
+  de 16 bytes escritos como imediatos, `(x1, y1, x2, y2)` em coordenada do
+  `campo`. É o retângulo em que cada bola pode ser solta, e o
+  [`bolaMouseDown`](estrategia.bolaMouseDown.md) o lê para dimensionar o
+  `rectangulo`. Extraída em [`../zonas.md`](../zonas.md);
+- quatro cópias de 51 dwords cada (`rep movs`) de `0x00423be4`, `0x00423cb0`,
+  `0x00423d7c` e `0x00423e48` para a **pilha** — não para a tabela de zonas.
+  Quem as lê não foi medido;
 - quatro laços curtos de 11 iterações (`cmp ecx,0xb`) **antes** da zebra, em
   `0x004092fe`…`0x00409344`;
 - uma zebra sobre `etiqestr<i>`, `jugador<i>` e `etiqpos<i>` com o mesmo teste
@@ -31,6 +39,16 @@ dos 18. O que está medido:
   `lista_formaciones`, pelo [`../campos.tsv`](../campos.tsv).
 
 **Evidência:** disassembly lido
+
+> **Esta lista estava incompleta, e a WTE-TASK-26 a corrigiu.** Escrita na
+> WTE-TASK-25, ela descrevia as cores da zebra e chamava os blocos de
+> `0x00409168` em diante de "quatro laços curtos" — que é o que se enxerga
+> quando se procura pintura. O **produto principal** da rotina é a tabela de
+> zonas: sem ela o `bolaMouseDown` desenha um retângulo de tamanho zero, e o
+> sintoma não é "o retângulo está errado", é "o retângulo não apareceu".
+>
+> A lição não é sobre esta rotina. É que spec de `FormCreate` escrita a partir
+> da pergunta *"o que ele pinta?"* responde só isso, e a ausência não se anuncia.
 
 ## Bytes tocados
 
