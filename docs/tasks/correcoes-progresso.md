@@ -79,6 +79,10 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A conferência de tela mede 3 dos 5 grupos de campo que o critério enumera: o recorte de 520×240 exclui os 23 números de camisa e a lista de jogadores, e o estado de habilitação nunca foi confrontado | Alta | [x] concluída | 2026-08-11 |
 | [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-059](/docs/tasks/CORR-WTE-059.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A spec do `lista_equiposChange` justifica o `aberto` com "ainda não conferido contra a tela", e a seção seguinte é a conferência de tela | Baixa | [x] concluída | 2026-08-11 |
+| [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `iguala_nombres` não acinzenta no port — 0 px de mudança contra 518 do oráculo —, e o defeito atravessou duas tasks sendo encaminhado para uma correção que ninguém abriu | Alta | [ ] pendente | — |
+| [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `MaxLength` de `edit_nombre1` é o literal 5, lido da tela; qual campo do formato tem 10 bytes continua sem medir | Baixa | [ ] pendente | — |
+| [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `lista_formacionesClick` é do grupo `carga`, foi encaminhado para a 26 pelo efeito, e continua `REStub` com as duas tasks concluídas | Alta | [ ] pendente | — |
+| [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | As três carregadoras de bitmap da ficha não têm dono em nenhuma das 40 tasks, e a 32 não menciona cara, cabelo nem barba | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -140,8 +144,72 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-057 — levar o recorte da conferência de tela aos 23 dorsais, à lista de jogadores e ao estado de habilitação
 - [x] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
 - [x] CORR-WTE-059 — trocar a razão escrita do veredito `aberto` pela que sobrou
+- [ ] CORR-WTE-060 — medir por que o `iguala_nombres` não acinzenta, uma variável por vez
+- [ ] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
+- [ ] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
+- [ ] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 32 ou registrar na 35
 
 ## Detalhes por correção
+
+### CORR-WTE-060
+
+- **Arquivo com problema:** `wte/src/impl/ep2002_mainform.lista_equiposChange.inc`
+  (linha 49) e/ou `wte/forms/ep2002_mainform.lfm`
+- **Sintoma:** no time-modelo o `nacional` vira falso e o original acinzenta o
+  `iguala_nombres`; o port não muda um pixel. A linha `Enabled := nacional`
+  existe, e o vizinho `boton_nombres2iso` — mesmo `TSpeedButton`, mesmo `Flat`,
+  mesmo `Glyph`, seis linhas abaixo — acinzenta certo
+- **Como foi detectado:** medido pela CORR-WTE-057 (0 px contra 518), que
+  escreveu no Log que o defeito pede correção própria. Nenhuma foi aberta; a
+  WTE-TASK-26 fechou apontando de novo para ela
+- **Fix:** reproduzir isolado no `:99`, trocar **uma** variável por vez
+  (`ParentFont`, depois a cor de canto do glifo), e corrigir onde a medição
+  apontar — no `dfm2lfm.py` se for conversão, nunca no `.lfm` gerado. Se a causa
+  for da LCL, vira divergência deliberada com a medição escrita
+
+### CORR-WTE-061
+
+- **Arquivo com problema:** `wte/src/impl/ep2002_mainform.FormShow.inc` e
+  `wte/tools/dump_truncamento.py`
+- **Sintoma:** duas linhas vizinhas com lastro diferente — `edit_nombre2` sai de
+  `SizeOf` do campo de destino e é conferida a cada `make check`;
+  `edit_nombre1` é o literal 5, apoiado só numa leitura de tela
+- **Como foi detectado:** o `compara_tela.sh --nomes`, na primeira corrida,
+  achou o port aceitando 7 caracteres contra 5 do oráculo. A conferência do
+  gerador havia aprovado 20 porque `40 div 2` fecha — ela compara a aritmética
+  contra um destino escrito à mão
+- **Fix:** ler o `0x0040cbc8`, que preenche a tabela de `0x00433a10` a partir de
+  `0x004231a0`, e descobrir o que é a coluna 0. Com o destino nomeado, devolver
+  a entrada a `DESTINOS` e **conferir que dá 5** — não escolher o campo que dê 5
+
+### CORR-WTE-062
+
+- **Arquivo com problema:** `wte/src/ep2002_estrategia.pas` (o `REStub` da linha
+  214) e `wte/re/spec/estrategia.lista_formacionesClick.md`
+- **Sintoma:** a spec da WTE-TASK-25 encaminha o handler para a WTE-TASK-26; a
+  26 não o tem na lista, porque o grupo dele é `carga`. As duas tasks estão
+  concluídas e o corpo é stub. Dois handlers da 26 ficaram `aberto` por
+  dependerem dele: o `bolaMouseDown` desenha sempre a zona 0 e o `relojTimer`
+  nunca roda
+- **Como foi detectado:** ao escrever o `check_edicao.py`, conferindo quem
+  preenche o vetor bola→zona
+- **Fix:** portar o handler com as duas auxiliares (`0x004097d4`, 474 B e
+  `0x004099bc`, 227 B), e **rever os três vereditos na mesma passagem** —
+  `lista_formacionesClick`, `bolaMouseDown` e `relojTimer`
+
+### CORR-WTE-063
+
+- **Arquivo com problema:** `docs/tasks/32-camisa-e-bandeira-2d.md` ou
+  `docs/tasks/35-divergencias-deliberadas.md`, conforme a decisão
+- **Sintoma:** as três carregadoras de bitmap da ficha (`0x00406fe0`,
+  `0x00407110`, `0x00407338`) foram excluídas pela WTE-TASK-26 como "sem dono", e
+  a WTE-TASK-32 não menciona cara, cabelo nem barba. No port as setas de
+  aparência mudam o rótulo e não mudam o desenho
+- **Como foi detectado:** `grep -rl` dos três endereços em `docs/tasks/` devolve
+  só a task que os excluiu
+- **Fix:** decisão do usuário — estender a 32 (as três tabelas de cor já estão
+  localizadas) ou registrar a exclusão na 35 com o efeito escrito. O que não
+  fecha é o estado de hoje
 
 ### CORR-WTE-001
 
