@@ -740,10 +740,10 @@ encerra. O `FILE*` fica num global (`0x00432e68`) aberto pela sessão inteira.
 |---|---|
 | `bandera<n>.bmp` é estêncil; índice = byte lido da imagem; tabela padrão em `0x004231e8`; combo indexa a tabela | **32** (camisa e bandeira 2D) |
 | `camiseta`/`pantalon`: tabela `0x004232a6`, 95 × 4, dois jogos por time; corte 0..49 / 50..98 | **32** |
-| `pelo`/`barba`/`careto_base`: índice = `Player::hair_style` / `beard_style`; cor por `skin_colour`, `hair_colour`, `beard_colour` | **32** (e a Fase 4, pelos handlers de `jugador`) |
-| `beard_style` cabe 0..7 no disco mas só há `barba_0..6`; o original satura em 6 | **32** |
-| Tabelas de paleta `0x00423998` (pele), `0x00423a98` (cabelo), `0x00423b38` (barba) | **32** |
-| O app grava paleta **dentro** do `.bmp` — divergência recomendada: recolorir em memória | **32**, registro em §7.3 |
+| `pelo`/`barba`/`careto_base`: índice = `Player::hair_style` / `beard_style`; cor por `skin_colour`, `hair_colour`, `beard_colour` | **35** — exclusão deliberada (CORR-WTE-063). O índice e o rótulo são da Fase 4, pelos handlers de `jugador`; o **desenho** não será portado |
+| `beard_style` cabe 0..7 no disco mas só há `barba_0..6`; o original satura em 6 | **27** — a saturação é do `TUpDown` e chega ao disco pela gravação; sobrevive à exclusão do desenho |
+| Tabelas de paleta `0x00423998` (pele), `0x00423a98` (cabelo), `0x00423b38` (barba) | **35** — só as três rotinas da ficha as leem, e elas não serão portadas |
+| O app grava paleta **dentro** do `.bmp` — divergência recomendada: recolorir em memória | **32** para os dois do `MainForm`; para os três da ficha a recomendação caducou e virou **35** |
 | `dat.bin[0 .. 0x1FFFF]` = molde de memory card, copiado por `grabar_memoryClick` | **31** (`.mcr`) |
 | `dat.bin[0x20000 ..]` = 7 setores injetados na imagem em `0x2e08`, sentinela `0xfc` em `0x2e14` | **31** e quem fizer a abertura de imagem |
 | Resolução de caminho por `GetCurrentDir()`, seis globais `<cwd>\...` | **39** (empacotamento) |
