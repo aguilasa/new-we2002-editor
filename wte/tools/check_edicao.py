@@ -91,8 +91,10 @@ INSTRUMENTO = {
         "idem, e o filtro dele e mais estrito -- recusa espaco e ponto"),
     "iguala_nombresClick": (
         "nomes", OUTRA, "WTE-TASK-35",
-        "o clique copia e trunca, mas o botao NAO acinzenta no port -- "
-        "defeito medido pela CORR-WTE-057 e ainda sem causa"),
+        "o clique copia e trunca; o botao nao acinzenta no port porque o "
+        "glifo e invariante sob o `gdeDisabled` da LCL, que e grayscale -- "
+        "causa medida pela CORR-WTE-060, divergencia deliberada, travada pelo "
+        "`check_glifos_disabled.py`"),
     "casilla_nombreKeyPress": (
         "nomes", ESTATICO, "dump_truncamento.py",
         "o campo mora na ficha, que nao e mensuravel em pixel; o limite e o "
