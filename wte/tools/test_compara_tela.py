@@ -159,6 +159,7 @@ class TestCobertura(unittest.TestCase):
 class TestHabilitacao(unittest.TestCase):
     SEGUE = [n for n, r in C.CONTROLES.items() if r[4] == "segue_nacional"]
     P32 = [n for n, r in C.CONTROLES.items() if r[4] == "pendente_32"]
+    CINZA = [n for n, r in C.CONTROLES.items() if r[4] == "glifo_cinza"]
 
     def r(self, muda_orac, muda_port, off_port=(6, 6)):
         return C.compara_habilitacao(
@@ -183,6 +184,28 @@ class TestHabilitacao(unittest.TestCase):
         self.assertEqual(len(r["erros"]), 1)
         self.assertIn("etiq_nombre1", r["erros"][0])
         self.assertIn("incondicional", r["erros"][0])
+
+    def test_glifo_invariante_muda_so_no_oraculo_e_nao_reprova(self):
+        """CORR-WTE-060: a LCL nao consegue acinzentar glifo preto-e-branco.
+
+        O `.Enabled := nacional` roda dos dois lados; o que nao aparece e o
+        desenho, porque `gdeDisabled` e grayscale e pixel com R=G=B e ponto
+        fixo dela. Divergencia deliberada da WTE-TASK-35, e por isso a regua
+        relata sem reprovar -- como ja fazia com a bandeira.
+        """
+        r = self.r(self.SEGUE + self.P32 + self.CINZA, self.SEGUE + self.P32)
+        self.assertEqual(r["erros"], [])
+        v = {l["nome"]: l["veredito"] for l in r["linhas"]}
+        self.assertEqual(v["iguala_nombres"],
+                         "divergencia deliberada (WTE-TASK-35)")
+
+    def test_glifo_invariante_mudando_dos_dois_lados_tambem_passa(self):
+        """Se um dia a LCL passar a acinzentar, o relato vira `bate`."""
+        r = self.r(self.SEGUE + self.P32 + self.CINZA,
+                   self.SEGUE + self.P32 + self.CINZA)
+        self.assertEqual(r["erros"], [])
+        v = {l["nome"]: l["veredito"] for l in r["linhas"]}
+        self.assertEqual(v["iguala_nombres"], "bate")
 
     def test_bandeira_so_de_um_lado_nao_reprova(self):
         """Desenhar a bandeira e da WTE-TASK-32, e ela ainda nao chegou."""

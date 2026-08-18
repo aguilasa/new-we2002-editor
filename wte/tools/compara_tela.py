@@ -139,6 +139,14 @@ REC_ALTURA_MEDIDA = 240
 #                   segue `nacional`, o rotulo ao lado nao
 #   pendente_32     `.Visible := nacional`, mas quem DESENHA e a WTE-TASK-32.
 #                   Medido e relatado, nunca reprova
+#   glifo_cinza     `.Enabled := nacional` roda nos dois, mas o glifo e
+#                   INVARIANTE sob o `gdeDisabled` da LCL -- desenhado so com
+#                   preto e branco puros sobre a cor transparente, e grayscale
+#                   nao mexe em pixel com R=G=B. O estado logico esta certo dos
+#                   dois lados; o que nao aparece e o desenho. Divergencia
+#                   deliberada da WTE-TASK-35, medida pela CORR-WTE-060 e
+#                   travada pelo `check_glifos_disabled.py`. Medido e relatado,
+#                   nunca reprova
 #   conteudo        o texto muda junto com o time, entao mudanca de pixel nao
 #                   distingue habilitacao de conteudo. Olho humano, na montagem
 #   fora_da_faixa   abaixo de `FAIXA_CALIBRADA_Y`, onde a deriva do port passa
@@ -151,7 +159,7 @@ CONTROLES = {
     "sel_barra4":           (16, 152,  73, 16, "segue_nacional"),
     "track_barra":          (96, 184, 105, 25, "segue_nacional"),
     "boton_barras2iso":     (16, 184,  73, 25, "segue_nacional"),
-    "iguala_nombres":      (344, 184,  73, 25, "segue_nacional"),
+    "iguala_nombres":      (344, 184,  73, 25, "glifo_cinza"),
     "boton_nombres2iso":   (432, 184,  73, 25, "segue_nacional"),
     "colorear":            (224, 184,  97, 25, "segue_nacional"),
     "etiq_nombre1":        (344,  64,  41, 17, "sempre_ligado"),
@@ -663,12 +671,14 @@ def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
         m_orac = n_orac > LIMIAR_MUDANCA
         m_port = n_port > LIMIAR_MUDANCA
         esperado = grupo != "sempre_ligado"
-        if m_orac != m_port and grupo != "pendente_32":
+        if m_orac != m_port and grupo not in ("pendente_32", "glifo_cinza"):
             veredito = "DIVERGE"
             erros.append(
                 f"{nome}: oraculo {'muda' if m_orac else 'nao muda'} "
                 f"({n_orac} px), port {'muda' if m_port else 'nao muda'} "
                 f"({n_port} px)")
+        elif m_orac != m_port and grupo == "glifo_cinza":
+            veredito = "divergencia deliberada (WTE-TASK-35)"
         elif m_orac != m_port:
             veredito = "pendente da WTE-TASK-32"
         elif m_orac != esperado and grupo == "segue_nacional":

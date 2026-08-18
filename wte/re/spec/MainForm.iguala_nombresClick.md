@@ -2,7 +2,7 @@
 handler: iguala_nombresClick
 formulario: MainForm
 endereco: 0x0040d43c
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.iguala_nombresClick
@@ -78,27 +78,50 @@ texto de qualquer tamanho. Agora o `MainForm.FormShow` os põe, e por `SizeOf` d
 campo de destino em vez de literal — `raw_kanji_name` dividido por dois (o nome
 kanji guarda dois bytes por caractere) e `mixed_case_name` menos um.
 
-**O que MANTÉM o veredito `aberto` é outra coisa, e ela é um defeito do port
-sem causa medida.** A
-[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) mediu que o port **não
-desabilita** o `iguala_nombres` no time-modelo: 518 px de mudança no oráculo,
-**0** no port. O `.inc` do `lista_equiposChange` tem a linha
-(`iguala_nombres.Enabled := nacional`), o `.lfm` traz o controle nascendo
-`Enabled = False`, e o vizinho `boton_nombres2iso` — mesmo `TSpeedButton`,
-mesmo `Flat = True`, mesmo grupo — acinzenta certo nos dois lados. A única
-diferença entre os dois no `.lfm` é `ParentFont = False` mais as propriedades
-de fonte, o que não explica glifo. **Continua sem causa medida.**
+**O que mantinha o veredito `aberto` era outra coisa, e ela foi medida em
+2026-08-18 pela [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md): não é
+defeito do port.** A
+[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) tinha medido que o port
+**não desabilita** o `iguala_nombres` no time-modelo — 518 px de mudança no
+oráculo, **0** no port — com a linha presente no `.inc` do
+`lista_equiposChange` e o vizinho `boton_nombres2iso` acinzentando certo.
 
-Duas hipóteses foram levantadas em 2026-08-18 e **nenhuma foi testada**, então
-nenhuma entra aqui como explicação: a cor transparente do glifo (o
-`iguala_nombres` começa em `FFB676`, o fundo do formulário, e o vizinho em
-`C0C0C0`) e o `ParentFont = False`. Registrar hipótese não medida como causa é
-o modo de a spec virar ficção.
+A causa é o **widgetset**, não o código:
 
-A [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) já escreveu que este
-defeito **pede correção própria** e que o escopo dela era o instrumento, não o
-defeito. Essa correção **ainda não foi aberta**, e é o que falta para este
-handler chegar a `implementado`.
+- a LCL desenha o glifo desabilitado aplicando `gdeDisabled`, que é uma
+  **conversão para tons de cinza**. Pixel com `R = G = B` é ponto fixo dela;
+- o glifo do `iguala_nombres` tem **três cores** — `#000000` (275 px),
+  `#FFFFFF` (306 px) e `#76B6FF`, que é a cor transparente. Todo pixel
+  desenhado é preto ou branco puro, logo já é cinza, logo a conversão não muda
+  nada. **0 px, e é o resultado correto da regra da LCL**;
+- o Win32 não faz grayscale: o `comctl32` monta o glifo desabilitado de uma
+  máscara monocromática. Medido no recorte do oráculo — preto vira `#A6A6A6`
+  (275 px) e 123 px brancos viram fundo, o que dá exatamente os 518.
+
+As **duas hipóteses** que a CORR-WTE-057 tinha levantado estão **refutadas**,
+cada uma por uma medição isolada num harness LCL de 90×40 px:
+
+| variável trocada | mudança ao desabilitar |
+|---|---|
+| nada (como está hoje) | 0 px |
+| `ParentFont := True` | 0 px — a fonte não é a causa; o botão não tem `Caption` |
+| glifo recolorido para fundo `C0C0C0` | 257 px — muda porque isso torna os 394 px de `#76B6FF` **opacos**, não porque a cor transparente importe |
+| vizinho recolorido para fundo `FFB676` | 513 px — continua acinzentando, o que sozinho derruba a hipótese da cor |
+
+**A prova de que a regra é o grayscale, e não outra coisa:** o
+`boton_nombres2iso` tem **280 pixels não-cinza** no glifo, e muda **280 px** no
+`compara_tela.sh --habilitacao` do app rodando. O mesmo número dos dois lados.
+
+O conjunto é fechado e tem conferidor:
+[`check_glifos_disabled.py`](../../tools/check_glifos_disabled.py) varre os 59
+botões com glifo dos 18 formulários e acha **5** invariantes — `iguala_nombres`,
+`parriba` e `pabajo` no `MainForm`, `oscurecer` e `aclarar` no `color`. Entrar
+ou sair desse conjunto derruba o `make -C wte check`.
+
+Registrado como **divergência deliberada** na
+[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md): é limitação
+de plataforma, atinge cinco botões, e o estado lógico está certo nos dois lados
+— o que difere é só o desenho.
 
 Pascal em
 [`../../src/impl/ep2002_mainform.iguala_nombresClick.inc`](../../src/impl/ep2002_mainform.iguala_nombresClick.inc).

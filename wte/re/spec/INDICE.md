@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 16 |
+| `implementado` | 17 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 66 |
+| `aberto` | 65 |
 | **total** | **96** |
 
 56 de 96 têm arquivo de spec.
@@ -102,7 +102,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d36c` | `MainForm` | [edit_nombre1KeyPress](MainForm.edit_nombre1KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d3c4` | `MainForm` | [edit_nombre2KeyPress](MainForm.edit_nombre2KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d41c` | `MainForm` | [edit_nombre3KeyPress](MainForm.edit_nombre3KeyPress.md) | OnKeyPress | edicao | implementado |
-| `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | aberto |
+| `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | implementado |
 | `0x0040d534` | `MainForm` | boton_nombres2isoClick | OnClick | gravacao | aberto |
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |

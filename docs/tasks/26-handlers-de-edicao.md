@@ -2351,8 +2351,12 @@ do `--edicao`; e o `iguala_nombres`.
     e o `paderechaeizquierdaClick`: a metade de gravação é da
     [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md). Era o previsto desde
     2026-08-12;
-  - o `iguala_nombres` que **não acinzenta** no port — defeito medido pela
-    CORR-WTE-057, sem causa, e **precisa de CORR própria**;
+  - ~~o `iguala_nombres` que **não acinzenta** no port — defeito medido pela
+    CORR-WTE-057, sem causa, e **precisa de CORR própria**~~ — **fechado em
+    2026-08-18** pela [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md): não era
+    defeito. O glifo é invariante sob o `gdeDisabled` da LCL, que é grayscale;
+    virou divergência deliberada da
+    [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md);
   - o destino de `[0x00433a10]` — **não medido**, e nomeado como tal no
     `truncamento.md`;
   - o vetor bola→zona e as tabelas da animação, que o

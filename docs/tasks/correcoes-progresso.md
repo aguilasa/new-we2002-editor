@@ -79,7 +79,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A conferência de tela mede 3 dos 5 grupos de campo que o critério enumera: o recorte de 520×240 exclui os 23 números de camisa e a lista de jogadores, e o estado de habilitação nunca foi confrontado | Alta | [x] concluída | 2026-08-11 |
 | [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-059](/docs/tasks/CORR-WTE-059.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A spec do `lista_equiposChange` justifica o `aberto` com "ainda não conferido contra a tela", e a seção seguinte é a conferência de tela | Baixa | [x] concluída | 2026-08-11 |
-| [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `iguala_nombres` não acinzenta no port — 0 px de mudança contra 518 do oráculo —, e o defeito atravessou duas tasks sendo encaminhado para uma correção que ninguém abriu | Alta | [ ] pendente | — |
+| [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `iguala_nombres` não acinzenta no port — 0 px de mudança contra 518 do oráculo —, e o defeito atravessou duas tasks sendo encaminhado para uma correção que ninguém abriu | Alta | [x] concluída | 2026-08-18 |
 | [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `MaxLength` de `edit_nombre1` é o literal 5, lido da tela; qual campo do formato tem 10 bytes continua sem medir | Baixa | [ ] pendente | — |
 | [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `lista_formacionesClick` é do grupo `carga`, foi encaminhado para a 26 pelo efeito, e continua `REStub` com as duas tasks concluídas | Alta | [ ] pendente | — |
 | [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | As três carregadoras de bitmap da ficha não têm dono em nenhuma das 40 tasks, e a 32 não menciona cara, cabelo nem barba | Alta | [ ] pendente | — |
@@ -144,7 +144,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-057 — levar o recorte da conferência de tela aos 23 dorsais, à lista de jogadores e ao estado de habilitação
 - [x] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
 - [x] CORR-WTE-059 — trocar a razão escrita do veredito `aberto` pela que sobrou
-- [ ] CORR-WTE-060 — medir por que o `iguala_nombres` não acinzenta, uma variável por vez
+- [x] CORR-WTE-060 — medir por que o `iguala_nombres` não acinzenta, uma variável por vez
 - [ ] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
 - [ ] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
 - [ ] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 32 ou registrar na 35

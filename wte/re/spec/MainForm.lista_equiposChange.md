@@ -198,9 +198,11 @@ sustentação dos 27 `.Enabled :=` do Pascal — passa a ser a segunda, que é o
 ela vale mais.
 
 **O veredito continua `aberto` pelo que sobrou**, e sobrou comportamento, não
-leitura: os dois defeitos que a conferência de tela achou — os `dorsal1..23` um
-a menos e o `iguala_nombres` que o port não desabilita — não têm conserto até
-agora.
+leitura: dos dois defeitos que a conferência de tela achou, os `dorsal1..23` um
+a menos foi corrigido em 2026-08-12, e o `iguala_nombres` que o port não
+desabilita deixou de ser defeito em 2026-08-18 — a
+[CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md) mediu a causa no widgetset,
+não no código, e ela virou divergência deliberada.
 
 > Esta frase já esteve errada duas vezes. A
 > [CORR-WTE-059](../../../docs/tasks/CORR-WTE-059.md) corrigiu a primeira
@@ -231,7 +233,7 @@ um trouxe um erro do port que nada mais pegaria:
 | as cinco barras de força | pixel, nos três times | **bate**, 15 larguras idênticas |
 | os 23 números de camisa | montagem, olho humano | ~~**DIVERGE — o port mostra o byte cru, o original mostra byte + 1**~~ **corrigido em 2026-08-12**, ver abaixo |
 | a lista de jogadores | montagem, olho humano | bate |
-| o estado de habilitação | pixel, 13 controles | **DIVERGE em um: `iguala_nombres`** |
+| o estado de habilitação | pixel, 13 controles | **bate**; o `iguala_nombres` é divergência deliberada de widgetset (CORR-WTE-060) |
 
 | Time | Barras (px), oráculo e port | |
 |---|---|---|
@@ -324,7 +326,7 @@ desabilitada da tela nunca tinha aparecido em medição nenhuma.
 | `boton_barras2iso` | `.Enabled := nacional` | 611 | 368 | mudam nos dois |
 | `boton_nombres2iso` | `.Enabled := nacional` | 561 | 211 | mudam nos dois |
 | `colorear` | `.Enabled := nacional` | 187 | 50 | mudam nos dois |
-| `iguala_nombres` | `.Enabled := nacional` | 518 | **0** | **DIVERGE** |
+| `iguala_nombres` | `.Enabled := nacional` | 518 | **0** | glifo invariante sob `gdeDisabled` — divergência deliberada |
 | `etiq_nombre1..3` | `.Enabled := True` sempre | 0 | 0 | **não** mudam nos dois |
 | `bandera` | `.Visible := nacional` | 3840 | 0 | pendente da WTE-TASK-32 |
 | `home1`, `home2` | `.Visible := nacional` | 2328, 1012 | 2303, 1032 | mudam nos dois |
@@ -334,13 +336,20 @@ Três coisas saem daqui:
 1. **A assimetria dos rótulos é real.** `edit_nombreN` segue `nacional` e
    `etiq_nombreN` não — o que a Saída afirma e o que ninguém tinha confrontado.
    Os três medem 0 px de mudança nos dois lados.
-2. **O port não desabilita o `iguala_nombres`.** Zero pixel de diferença, com o
-   oráculo mudando 518. O `.inc` tem a linha
-   (`iguala_nombres.Enabled := nacional`), o `.lfm` tem o controle nascendo
-   `Enabled = False` como o DFM, e o vizinho `boton_nombres2iso` — mesmo
-   `TSpeedButton`, mesmo `Flat = True`, mesmo grupo — acinzenta certo nos dois
-   lados. A causa não foi achada, e **não foi corrigida aqui**, pela mesma razão
-   dos dorsais: é defeito de comportamento, e pede correção própria.
+2. **O `iguala_nombres` muda 0 px no port contra 518 no oráculo, e a causa é o
+   widgetset.** Medida pela
+   [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md) em 2026-08-18: a LCL
+   desenha glifo desabilitado aplicando `gdeDisabled`, que é conversão para
+   tons de cinza, e pixel com `R = G = B` é ponto fixo dela. O glifo do
+   `iguala_nombres` tem três cores — `#000000`, `#FFFFFF` e a transparente —,
+   logo todo pixel desenhado já é cinza e a conversão não muda nada. O vizinho
+   `boton_nombres2iso` acinzenta porque tem **280 pixels não-cinza**, que é
+   exatamente o número que ele muda. O `.Enabled := nacional` **roda dos dois
+   lados**: o que não aparece é o desenho. Registrado como divergência
+   deliberada na
+   [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), com o
+   conjunto dos cinco glifos invariantes travado pelo
+   [`check_glifos_disabled.py`](../../tools/check_glifos_disabled.py).
 3. **Sete controles ficaram fora da régua**, e estão nomeados no
    `compara_tela.py` como `fora_da_faixa`: `boton_mcr`, `boton_dialogo_tex`,
    `grabar_memory`, `grabar_camiseta`, `parriba`, `mostrar_estrategia_1`,

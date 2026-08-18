@@ -68,6 +68,36 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   num desktop de verdade enxerga, e deve.
 - **Tolerância de cor do render 2D** (WTE-TASK-32), se a igualdade exata não
   sair.
+- **Cinco glifos que não acinzentam** — medido pela
+  [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) em 2026-08-18, e **já está no
+  código**, como o sufixo acima: não é hipótese, é comportamento em produção.
+  *Natureza:* limitação de plataforma (widgetset), não bug do original nem do
+  port. *Decisão:* não reproduzir.
+  *Razão:* a LCL desenha o glifo de um botão desabilitado aplicando
+  `gdeDisabled`, que é **conversão para tons de cinza**; pixel com `R = G = B`
+  é ponto fixo dela. Glifo desenhado só com preto e branco puros sobre a cor
+  transparente é portanto **invariante**, e o botão apaga logicamente sem mudar
+  um pixel. O `comctl32` do Win32 não faz grayscale — monta o glifo
+  desabilitado de uma máscara monocromática, em que preto vira sombra
+  (`#A6A6A6`) e branco vira transparente. Igualar exigiria desenhar à mão um
+  segundo glifo (`NumGlyphs = 2`) que **não existe no recurso do original**, ou
+  reescrever o `TButtonGlyph` da LCL.
+  *Evidência:* `iguala_nombres` muda **518 px** no oráculo sob Wine e **0** no
+  port (`compara_tela.sh --habilitacao`, recorte `(344,184,73,25)`). As duas
+  hipóteses anteriores — cor transparente e `ParentFont` — foram **refutadas**
+  num harness LCL isolado: `ParentFont := True` continua dando 0 px, e recolorir
+  o glifo do vizinho para a mesma cor de fundo dá 513 px, não 0. A regra é o
+  grayscale, e o número fecha dos dois lados: `boton_nombres2iso` tem **280
+  pixels não-cinza** no glifo e muda **280 px** no app rodando. Detalhe em
+  [`MainForm.iguala_nombresClick`](../../wte/re/spec/MainForm.iguala_nombresClick.md).
+  *Onde o teste sabe:*
+  [`check_glifos_disabled.py`](../../wte/tools/check_glifos_disabled.py) varre
+  os **59** botões com glifo dos 18 formulários e declara os **5** invariantes —
+  `iguala_nombres`, `parriba`, `pabajo` (`MainForm`), `oscurecer` e `aclarar`
+  (`color`). Glifo que entre ou saia desse conjunto derruba o
+  `make -C wte check`. O `compara_tela.py` precisa da mesma exceção nomeada
+  quando os cinco forem exercitados — hoje só o `iguala_nombres` cai na faixa
+  medida, e ele aparece lá como `DIVERGE`.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.
 - **Rótulos cortados por fonte substituta** — acontece nos dois lados, e talvez
   não conte como divergência; decidir.
