@@ -1,0 +1,131 @@
+# golden-02-gravacao -- o roteiro de GRAVACAO, lado oraculo. WTE-TASK-27.
+#
+# Irmao do golden-01-arranque: mesmo dialeto, mesma imagem, mesmo gate. O que
+# muda e o que ele exercita -- aqui o app **grava na imagem**, que e a operacao
+# que a fase 4 inteira existe para medir.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-02-gravacao.txt \
+#        --modo controle
+#
+# ## Ele NAO edita nada, e isso e o ponto
+#
+# E o diff de controle que o enunciado da WTE-TASK-27 pede antes de qualquer
+# medicao: carregar um time e mandar gravar **sem tocar em campo nenhum**, para
+# saber o que muda de graca. Sem essa linha de base, toda divergencia medida
+# depois vem contaminada -- o `Save` do formato reconstroi coisa a partir de
+# link, e o `Load`+`Save` do editor original nao e idempotente.
+#
+# O roteiro que edita antes de gravar e outro arquivo, e vem depois: e o que
+# julga edicao e gravacao juntas (criterio herdado da WTE-TASK-26).
+#
+# ## A TROCA DE TIME DEPOIS DE CADA GRAVACAO NAO E ENFEITE
+#
+# O `wte.exe` grava pela saida BUFFERIZADA do runtime C. Clicar o botao **nao**
+# produz syscall: os bytes ficam no buffer, e so vao ao arquivo quando algo
+# depois procura noutro ponto do mesmo arquivo -- `fseek` esvazia a saida
+# pendente antes de mover. Medido nesta task, em tres corridas:
+#
+#   1. so barras, e o processo morto ao fim   -> ZERO byte no arquivo;
+#   2. barras e depois nomes                  -> os 5 bytes das barras aparecem
+#                                                na janela dos NOMES;
+#   3. barras e depois uma troca de time      -> os 5 bytes aparecem, na janela
+#                                                da troca.
+#
+# Consequencia dupla, e as duas doem:
+#
+# - **roteiro que termina numa gravacao mede um oraculo truncado.** O harness
+#   encerra com `wineserver -k`, e o que estiver no buffer se perde. Se o port
+#   gravar direto, o diff acusaria o PORT por bytes que o oraculo nunca chegou
+#   a escrever;
+# - **a marca de corte tem de vir DEPOIS da descarga**, senao a faixa e
+#   creditada a acao seguinte -- foi o que aconteceu na primeira medicao, e os
+#   5 bytes das barras apareceram como se fossem dos nomes.
+#
+# Por isso cada bloco aqui termina com uma troca de time, e so entao a marca.
+#
+# ## Duas gravacoes, nao seis
+#
+# Das seis do grupo, so `boton_barras2iso` e `boton_nombres2iso` gravam na
+# imagem sem pedir mais nada ao usuario. As outras quatro precisam de dialogo
+# de arquivo ou de origem de bytes que ainda nao existe (WTE-TASK-31 e 32), e
+# cada uma tera o seu roteiro.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# As duas do arranque, herdadas do golden-01: o que o oraculo grava so por
+# abrir a imagem e que ainda nao tem explicacao medida. Offsets 0-BASED e
+# INCLUSIVOS -- nao as posicoes 1-based do `cmp -l`.
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------ um time carregado ----
+#
+# Pelo TECLADO. A lista suspensa do TComboBox fica MAPEADA depois do clique no
+# item e segura o ponteiro -- todo clique seguinte morre nela.
+#
+# O combo nasce sem selecao (`ItemIndex` = -1), entao este primeiro `Down`
+# seleciona o item **0** -- e e o time 0 que a gravacao seguinte endereca.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- as barras ----
+#
+# grupo_barras (8,72) + boton_barras2iso (8,112) = (16,184), 73x25.
+# Abre a caixa "W11 TE PT!" (282x113), Ok em (142,80). Deixa-la aberta engole
+# todo clique seguinte, e o roteiro parece ter parado de funcionar.
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- ver o cabecalho. Sem ela os 5 bytes ficam no buffer.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_BARRAS
+
+# -------------------------------------------------------------- os nomes ----
+#
+# grupo_nombre (336,48) + boton_nombres2iso (96,136) = (432,184). Agora com o
+# time 1 selecionado, pela descarga do bloco anterior.
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_NOMES

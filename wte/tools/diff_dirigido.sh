@@ -186,5 +186,11 @@ python3 "$AQUI/analisar_io.py" --conferir "$SAIDA/io.tsv" "$SAIDA/cmp.tsv"
 # fusao e pela mesma porta por onde o trace entra no `io-medido.tsv`.
 python3 "$AQUI/analisar_io.py" --fundir-cmp "$SAIDA/cmp.tsv" \
         --imagem "$(basename "$IMAGEM")" --sessao "$(basename "$SAIDA")"
+# E a PRIMEIRA regua tinha a mesma doenca, sem ninguem ter notado: o `io.tsv`
+# tambem mora em /tmp, e chegava ao `io-medido.tsv` a mao. Medido na
+# WTE-TASK-27 -- 39 faixas de uma sessao que nao entrariam sozinhas.
+python3 "$AQUI/analisar_io.py" --fundir-io "$SAIDA/io.tsv" \
+        --sessao "$(basename "$SAIDA")"
 echo ">> pronto: $SAIDA"
-echo ">> lembre de commitar wte/re/cmp-medido.tsv -- ele nao se regenera sem Wine"
+echo ">> lembre de commitar wte/re/cmp-medido.tsv e wte/re/io-medido.tsv --"
+echo ">> eles nao se regeneram sem Wine"

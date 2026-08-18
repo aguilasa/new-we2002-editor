@@ -340,6 +340,41 @@ def fundir_cmp(cmp_tsv: Path, imagem: str, sessao: str) -> int:
     return 0
 
 
+IO_CABECALHO = ("imagem", "sessao", "acao", "op", "inicio", "fim", "tamanho",
+                "setor", "byte_no_setor")
+
+
+def fundir_io(io_tsv: Path, sessao: str) -> int:
+    """Leva o `io.tsv` da sessao para `wte/re/io-medido.tsv`, versionado.
+
+    Irmao do `fundir_cmp`, e existe pelo mesmo motivo -- so que a primeira
+    regua ficou sem ele. A CORR-WTE-047 consertou o `cmp`, que morria em
+    `/tmp`; o trace tinha a MESMA doenca e chegava ao repositorio a mao, o que
+    e indistinguivel de nao chegar quando alguem esquece. Medido na
+    WTE-TASK-27: a sessao do diff de controle da gravacao produziu 39 faixas, e
+    nenhuma delas entraria pelo caminho automatico.
+
+    A linha da acao que NAO tocou a imagem (`op` = `.`) vem junto de proposito:
+    "o `boton_barras2iso` nao gravou nada" e resultado, e some se a fusao
+    filtrar faixa vazia.
+
+    Reescreve as linhas DAQUELA sessao e preserva as outras, para que rodar a
+    mesma corrida duas vezes nao duplique faixa.
+    """
+    linhas = [l for l in io_tsv.read_text(encoding="utf-8").splitlines()[1:]
+              if l.strip()]
+    antigas = [r for r in ler_medido() if r["sessao"] != sessao]
+    fora = ["\t".join(IO_CABECALHO)]
+    for r in antigas:
+        fora.append("\t".join(r.get(c, "") for c in IO_CABECALHO))
+    fora.extend(linhas)
+    MEDIDO_TSV.write_text("\n".join(fora) + "\n", encoding="utf-8")
+    rel = (MEDIDO_TSV.relative_to(ROOT)
+           if MEDIDO_TSV.is_relative_to(ROOT) else MEDIDO_TSV)
+    print(f"analisar_io: {len(linhas)} faixa(s) de `{sessao}` -> {rel}")
+    return 0
+
+
 def veredito_das_reguas(todas_sessoes, cmp_medido) -> list[dict]:
     """Por sessao: quantas faixas do `cmp` cabem nas escritas do trace.
 
@@ -1214,6 +1249,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fundir-cmp", type=Path, metavar="CMP_TSV",
                     help="leva o cmp.tsv da sessao para wte/re/cmp-medido.tsv "
                          "(exige --imagem e --sessao)")
+    ap.add_argument("--fundir-io", type=Path, metavar="IO_TSV",
+                    help="leva o io.tsv da sessao para wte/re/io-medido.tsv "
+                         "(exige --sessao)")
     ap.add_argument("--check", action="store_true",
                     help="nao escreve; sai 2 se a saida divergir do commitado")
     args = ap.parse_args(argv)
@@ -1228,6 +1266,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.imagem == "?" or args.sessao == "?":
             ap.error("--fundir-cmp exige --imagem e --sessao")
         return fundir_cmp(args.fundir_cmp, args.imagem, args.sessao)
+
+    if args.fundir_io:
+        if args.sessao == "?":
+            ap.error("--fundir-io exige --sessao")
+        return fundir_io(args.fundir_io, args.sessao)
 
     if args.log:
         if not (args.marcas and args.tsv):

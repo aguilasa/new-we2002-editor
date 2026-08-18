@@ -41,8 +41,11 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `09-areas-com-time` | 19 | 19 | 31 |
 | `10-telas-que-faltavam` | 9 | 9 | 10 |
 | `11-varredura-de-times` | 9 | 9 | 9 |
+| `27-gravacao-controle` | 12 | 12 | 18 |
+| `27-descarga-sem` | 9 | 9 | 9 |
+| `27-descarga-com` | 9 | 9 | 10 |
 
-**As duas réguas fecham nas 5 sessões que escreveram.**
+**As duas réguas fecham nas 8 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.

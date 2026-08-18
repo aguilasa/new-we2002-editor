@@ -159,6 +159,36 @@ dialogo de abrir -- ele carrega pela linha de comando desde a WTE-TASK-25.
 Quando o teclado chegar (ou um window manager), o arquivo
 some e o gate roda um roteiro so.
 
+### Os `27-*` sao da gravacao, e o par de sondas mede o buffer
+
+[`golden-02-gravacao.txt`](golden-02-gravacao.txt) e o roteiro do **diff de
+controle** da [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md):
+carrega um time e manda gravar sem tocar em campo nenhum.
+
+Ele tem uma coisa que nenhum roteiro anterior precisava, e que nao e enfeite:
+**cada bloco termina com uma troca de time, e so entao a marca de corte.** O
+`wte.exe` grava pela saida bufferizada do runtime C, entao clicar o botao nao
+produz syscall -- os bytes ficam no buffer e so vao ao arquivo quando algo
+depois procura noutro ponto do mesmo arquivo (`fseek` esvazia a saida pendente
+antes de mover).
+
+O par [`27-descarga-sem.txt`](27-descarga-sem.txt) /
+[`27-descarga-com.txt`](27-descarga-com.txt) mede exatamente isso, com **uma**
+variavel de diferenca -- iguais linha a linha, e o `-com` troca de time depois
+do clique. Medido: **zero** escrita no `-sem`, os 5 bytes em 2328184 no `-com`.
+Editar um sem o outro quebra a afirmacao; o
+[`../../tools/test_gravacao_controle.py`](../../tools/test_gravacao_controle.py)
+compara os dois corpos e exige que o resultado medido continue oposto -- mesma
+guarda que o par 07/08 tem.
+
+Duas consequencias que valem para todo roteiro de gravacao que vier depois:
+
+- **roteiro que termina numa gravacao mede um oraculo truncado**, porque o
+  harness encerra com `wineserver -k` e o buffer se perde;
+- **marca de corte antes da descarga credita a faixa a acao seguinte.** Foi o
+  que aconteceu na primeira medicao: os 5 bytes das barras apareceram como se
+  fossem dos nomes, num TSV que parecia medido.
+
 ## Replicar
 
 Lado port, com o trace num arquivo próprio:

@@ -1,0 +1,81 @@
+# 27-descarga-com -- a SONDA que prova que a troca de time descarrega.
+#
+# Par de [`27-descarga-sem.txt`](27-descarga-sem.txt), e os dois so valem
+# juntos: sao iguais linha a linha ate a marca, e o `-com` tem quatro linhas a
+# mais, que trocam de time. Uma variavel de diferenca.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-descarga-sem.txt \
+#        --imagem roms/japanese-shift-jis.bin --saida /tmp/dd/descarga-sem
+#
+# Medido na WTE-TASK-27: aqui o `boton_barras2iso` e clicado, a caixa de
+# confirmacao aparece, e o arquivo **nao recebe byte nenhum** -- nem no fim,
+# porque o harness encerra com `wineserver -k` e o buffer do runtime C se
+# perde. O `-com` recebe os 5 bytes em 2328184.
+#
+# A consequencia esta no cabecalho do golden-02-gravacao.txt: roteiro que
+# termina numa gravacao mede um oraculo truncado.
+#
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# As duas do arranque, herdadas do golden-01: o que o oraculo grava so por
+# abrir a imagem e que ainda nao tem explicacao medida. Offsets 0-BASED e
+# INCLUSIVOS -- nao as posicoes 1-based do `cmp -l`.
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------ um time carregado ----
+#
+# Pelo TECLADO. A lista suspensa do TComboBox fica MAPEADA depois do clique no
+# item e segura o ponteiro -- todo clique seguinte morre nela.
+#
+# O combo nasce sem selecao (`ItemIndex` = -1), entao este primeiro `Down`
+# seleciona o item **0** -- e e o time 0 que a gravacao seguinte endereca.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- as barras ----
+#
+# grupo_barras (8,72) + boton_barras2iso (8,112) = (16,184), 73x25.
+# Abre a caixa "W11 TE PT!" (282x113), Ok em (142,80). Deixa-la aberta engole
+# todo clique seguinte, e o roteiro parece ter parado de funcionar.
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+
+# A unica diferenca para o `-sem`: trocar de time faz o app procurar noutro
+# ponto do MESMO arquivo, e `fseek` esvazia a saida pendente antes de mover.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_BARRAS

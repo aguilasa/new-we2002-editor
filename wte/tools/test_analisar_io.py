@@ -215,6 +215,65 @@ class TestSegundaRegua(unittest.TestCase):
         self.assertEqual([r["sessao"] for r in linhas], ["S2", "S1"])
         self.assertEqual(linhas[1]["imagem"], "a.bin")
 
+    def test_fundir_io_substitui_a_sessao_e_preserva_as_outras(self) -> None:
+        """A PRIMEIRA regua tinha a mesma doenca, e ficou sem conserto.
+
+        A CORR-WTE-047 deu porta automatica ao `cmp`; o trace continuou
+        entrando a mao, o que e indistinguivel de nao entrar quando alguem
+        esquece. Medido na WTE-TASK-27.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            alvo = tmp / "io-medido.tsv"
+            origem = tmp / "io.tsv"
+            antigo = A.MEDIDO_TSV
+            try:
+                A.MEDIDO_TSV = alvo
+                alvo.write_text("\t".join(A.IO_CABECALHO) + "\n",
+                                encoding="utf-8")
+                origem.write_text(
+                    "\t".join(A.IO_CABECALHO) + "\n"
+                    "a.bin\tS1\tGRAVA\tW\t100\t120\t21\t0\t100\n",
+                    encoding="utf-8")
+                A.fundir_io(origem, "S1")
+                origem.write_text(
+                    "\t".join(A.IO_CABECALHO) + "\n"
+                    "b.bin\tS2\tGRAVA\tW\t200\t220\t21\t0\t200\n",
+                    encoding="utf-8")
+                A.fundir_io(origem, "S2")
+                origem.write_text(
+                    "\t".join(A.IO_CABECALHO) + "\n"
+                    "a.bin\tS1\tGRAVA\tW\t100\t120\t21\t0\t100\n",
+                    encoding="utf-8")
+                A.fundir_io(origem, "S1")          # de novo
+                linhas = A.ler_medido()
+            finally:
+                A.MEDIDO_TSV = antigo
+        self.assertEqual([r["sessao"] for r in linhas], ["S2", "S1"])
+
+    def test_fundir_io_preserva_a_acao_que_nao_gravou(self) -> None:
+        """`op` = `.` e resultado: distingue "nao gravou" de "nao rodou"."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            alvo = tmp / "io-medido.tsv"
+            origem = tmp / "io.tsv"
+            antigo = A.MEDIDO_TSV
+            try:
+                A.MEDIDO_TSV = alvo
+                alvo.write_text("\t".join(A.IO_CABECALHO) + "\n",
+                                encoding="utf-8")
+                origem.write_text(
+                    "\t".join(A.IO_CABECALHO) + "\n"
+                    "a.bin\tS1\tGRAVA_BARRAS\t.\t\t\t0\t\t\n",
+                    encoding="utf-8")
+                A.fundir_io(origem, "S1")
+                linhas = A.ler_medido()
+            finally:
+                A.MEDIDO_TSV = antigo
+        self.assertEqual(len(linhas), 1)
+        self.assertEqual(linhas[0]["acao"], "GRAVA_BARRAS")
+        self.assertEqual(linhas[0]["op"], ".")
+
     def test_veredito_ignora_sessao_que_nao_escreveu(self) -> None:
         io = [{"sessao": "S", "op": "R", "inicio": "10", "fim": "20"}]
         self.assertEqual(A.veredito_das_reguas(io, []), [])

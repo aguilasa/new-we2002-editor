@@ -251,7 +251,11 @@ conferível.
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
-- [ ] Toda gravação byte-idêntica nas duas ROMs
+- [ ] Toda gravação byte-idêntica nas duas ROMs — **medido em 2026-08-18
+      que a europeia não hospeda este grupo**: o `wte.exe` morre na troca de
+      time (49.749 violações de acesso) e a gravação nunca acontece, então o
+      oráculo não existe daquele lado. O critério vale como está para a
+      japonesa; ver [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md)
 - [ ] Cinco `trivial` reamostrados e reconferidos
 
 ### Fase 5 — Features
