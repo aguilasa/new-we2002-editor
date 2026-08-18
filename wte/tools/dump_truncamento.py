@@ -74,33 +74,82 @@ SETMAXLENGTH = "@Stdctrls@TCustomEdit@SetMaxLength$qqri"
 # operandos. Medido: o maior sitio ocupa 27 bytes.
 JANELA = 64
 
-# As larguras que a camada de dados declara, e o campo de cada uma. Os nomes
-# sao lidos do Pascal gerado -- nao ha numero digitado aqui.
-# O campo da camada de dados por tras de cada limite. `None` quer dizer
-# **destino nao medido** -- e a distincao custou uma divergencia:
+# A tabela de LOTES do original, e o array de medidas que ela alimenta.
 #
-# A primeira versao mapeava `edit_nombre1` para `raw_kanji_name` (40 bytes), o
-# que dava `40 div 2 = 20`, e a conferencia passou. Ela passou porque confere a
-# ARITMETICA contra o destino que esta tabela declara, e a tabela e escrita a
-# mao. O `compara_tela.sh --nomes` mediu na tela do oraculo: `edit_nombre1`
-# corta em **5** caracteres, nao 20 -- logo `[0x00433a10]` vale 10, e o destino
-# nao e o `raw_kanji_name`.
+# `lista_equiposChange` (0x0040cbc8) percorre `0x004231a0` -- 3 linhas de 6
+# colunas de DWORD, 24 bytes por linha -- e, para cada entrada nao-zero, chama
+# `0x00403c0c`, que ANDA pelo arquivo ate o registro do time selecionado e
+# grava tres campos por lote em `0x00433a0c`:
 #
-# Um `None` aqui nao e desistencia: e a recusa de emitir numero que ninguem
-# mediu.
+#     +0  o offset do registro no arquivo (`ftell` - 1)
+#     +4  a LARGURA do registro em bytes  (run nao-zero + run zero)
+#     +8  os proprios bytes do registro
+#
+# O passo e 312 bytes por linha e 52 por coluna, lidos do
+# `lea ecx,[eax*8+0x433a0c]` com `eax = linha*39` e do `edx = coluna*13`
+# multiplicado por 4 no `mov [ecx+edx*4],eax`.
+#
+# Logo `0x00433a10` e o campo `+4` da linha 0 coluna 0, e `0x00433b48` e o `+4`
+# da linha 1 coluna 0, 312 bytes adiante. **Nao sao constantes**: sao medidas
+# refeitas a cada troca de time, e a travessia pula o rodape de cada setor
+# MODE2/2352 (`0x00403388`: se `ftell % 2352 == 2072`, avanca 304).
+TABELA_DE_LOTES = 0x004231A0
+LOTE_LINHAS, LOTE_COLUNAS = 3, 6
+BASE_DAS_MEDIDAS = 0x00433A0C
+PASSO_LINHA, PASSO_COLUNA, CAMPO_LARGURA = 312, 52, 4
+
+OFFSETS_PAS = ROOT / "wte" / "src" / "we2002_offsets.pas"
+TABELAS_PAS = ROOT / "wte" / "src" / "we2002_tables.pas"
+
+# O destino de cada limite.
+#
+# Para os dois que vem do codigo o destino **nao e um campo de struct**: e uma
+# tabela de comprimento POR TIME. Foi esse o erro que custou duas divergencias
+# seguidas -- a primeira versao declarou `raw_kanji_name` (40 bytes, div 2 =
+# 20) e a segunda desistiu e pos o literal 5 lido da tela. As duas partiam do
+# mesmo modelo errado, o de que existe UM numero.
+#
+# Entrada dos dois de codigo: (`OFS_*` esperado, tabela de comprimento). O
+# `OFS_*` nao e decorativo: o gerador **decodifica** o endereco do operando ate
+# a entrada de `0x004231a0`, le o offset que esta la e aborta se ele nao for o
+# `OFS_*` declarado. E isso que prova o mapeamento, e e o que faltava -- a
+# conferencia antiga so batia a aritmetica contra uma largura escrita a mao, e
+# por isso passou com o campo errado.
+#
+# Entrada dos que vem do `.dfm`: (arquivo Pascal, campo), como antes.
 DESTINOS = {
-    "edit_nombre1": None,
-    "edit_nombre2": ("wte/src/we2002_team.pas", "mixed_case_name"),
+    "edit_nombre1": ("OFS_TEAM_NAME_KANJI", "TEAM_NAME_KANJI_LEN"),
+    "edit_nombre2": ("OFS_TEAM_NAME_3", "TEAM_NAME_LEN_3"),
     "edit_nombre3": ("wte/src/we2002_team.pas", "abbreviations"),
     "casilla_nombre": ("wte/src/we2002_player.pas", "name"),
 }
 
-# O que a regua de tela mediu para os campos sem destino declarado. Vem de
-# `compara_tela.sh --nomes` (2026-08-18): digitando `AB-C.D E` nos dois lados, o
-# oraculo mostra `ABC.D` no `edit_nombre1` e `ABC.D E` no `edit_nombre2`.
-MEDIDO_NA_TELA = {
-    "edit_nombre1": (5, "compara_tela.sh --nomes, 2026-08-18"),
+# Os dois campos cujo limite e por time. Separados porque o resto da ferramenta
+# trata largura de struct, e misturar os dois modelos foi o defeito.
+POR_TIME = {"edit_nombre1", "edit_nombre2"}
+
+# O campo em que a DERIVACAO e a TELA discordam, e por quanto.
+#
+# `edit_nombre1`: o lote esta provado (`OFS_TEAM_NAME_KANJI`) e a travessia
+# emulada da largura 12 para o time 2, logo `div 2` = 6. **O oraculo corta em
+# 5.** Medido em 2026-08-18 com `A B-C.DEFG`, texto cujo sexto caractere e um
+# `D` visivel: o oraculo mostra `A BC.` e o port, com 6, mostrava `A BC.D`.
+#
+# Quem vence e a tela -- ela E o oraculo. O valor emitido e o medido, e a
+# derivacao fica registrada como o que e: uma conta que ainda nao fecha, de
+# exatamente um. Ver a CORR-WTE-064.
+#
+# A guarda tem os dois lados: se a derivacao deixar de dar o valor previsto
+# aqui, o gerador aborta -- porque ou o modelo mudou, ou a excecao deixou de
+# ser necessaria, e as duas coisas exigem outra medicao de tela.
+CONTRADIZ_A_TELA = {
+    "edit_nombre1": (5, "compara_tela.sh --nomes, 2026-08-18", 6),
 }
+
+# O time de referencia das colunas numericas -- o mesmo que o
+# `compara_tela.sh --nomes` dirige (`IDX_EDICAO`), para o numero do documento e
+# o numero da tela serem o mesmo numero.
+TIME_DE_REFERENCIA = 2
 
 # Campo cujo `MaxLength` NAO governa o truncamento, e por que. Sem esta lista o
 # documento afirmaria que o numero de camisa corta em 10 caracteres.
@@ -308,6 +357,60 @@ class Linha:
         self.nota = nota
 
 
+def offsets_do_core() -> dict[int, str]:
+    """valor -> nome do `OFS_*`, lido do Pascal gerado do `we2002_core`."""
+    fora: dict[int, str] = {}
+    for m in re.finditer(r"^\s*(OFS_\w+)\s*=\s*(\d+);",
+                         OFFSETS_PAS.read_text(encoding="utf-8"), re.M):
+        fora.setdefault(int(m.group(2)), m.group(1))
+    if not fora:
+        raise DumpError(f"{OFFSETS_PAS}: nenhum OFS_* lido")
+    return fora
+
+
+def tabela_de_comprimento(nome: str) -> list[int]:
+    """A tabela `<nome>: array[0..N] of ShortInt` do `we2002_tables.pas`."""
+    texto = TABELAS_PAS.read_text(encoding="utf-8")
+    m = re.search(rf"^\s*{nome}:\s*array\[0\.\.(\d+)\] of ShortInt\s*=\s*"
+                  r"\((.*?)\);", texto, re.S | re.M)
+    if not m:
+        raise DumpError(f"{TABELAS_PAS}: tabela `{nome}` nao encontrada")
+    valores = [int(x) for x in re.findall(r"-?\d+", m.group(2))]
+    if len(valores) != int(m.group(1)) + 1:
+        raise DumpError(
+            f"{TABELAS_PAS}: `{nome}` declara {int(m.group(1)) + 1} entradas e "
+            f"tem {len(valores)}")
+    return valores
+
+
+def lote_do_operando(pe: PE, endereco: int) -> tuple[int, int, int]:
+    """(`linha`, `coluna`, offset do lote) do campo `+4` que o operando aponta.
+
+    Aborta se o endereco nao cair EXATAMENTE num campo `+4`: um operando que
+    caia no meio de uma entrada significa que o modelo da tabela esta errado, e
+    seguir daria um lote plausivel e falso.
+    """
+    d = endereco - (BASE_DAS_MEDIDAS + CAMPO_LARGURA)
+    if d < 0:
+        raise DumpError(
+            f"{REL_EXE}: operando {endereco:#010x} antes de "
+            f"{BASE_DAS_MEDIDAS + CAMPO_LARGURA:#010x}, a primeira largura")
+    linha, resto = divmod(d, PASSO_LINHA)
+    coluna, sobra = divmod(resto, PASSO_COLUNA)
+    if sobra or linha >= LOTE_LINHAS or coluna >= LOTE_COLUNAS:
+        raise DumpError(
+            f"{REL_EXE}: operando {endereco:#010x} nao e o campo `+4` de uma "
+            f"entrada de {BASE_DAS_MEDIDAS:#010x} "
+            f"(linha {linha}, coluna {coluna}, sobra {sobra})")
+    offset = pe.dword(TABELA_DE_LOTES + (linha * LOTE_COLUNAS + coluna) * 4)
+    if offset == 0:
+        raise DumpError(
+            f"{REL_EXE}: a entrada [{linha}][{coluna}] de "
+            f"{TABELA_DE_LOTES:#010x} e zero -- o operando {endereco:#010x} "
+            f"aponta para um buraco da tabela")
+    return linha, coluna, offset
+
+
 def monta() -> list[Linha]:
     pe = PE(EXE.read_bytes(), REL_EXE)
     mapa = campos()
@@ -329,7 +432,7 @@ def monta() -> list[Linha]:
         if campo not in DESTINOS:
             raise DumpError(
                 f"{GERADOR}: `{campo}` recebe SetMaxLength e nao aparece em "
-                f"DESTINOS -- declare o destino, ou `None` se nao foi medido")
+                f"DESTINOS -- declare o destino")
         declarado = DESTINOS[campo]
 
         if forma == "metade":
@@ -340,24 +443,62 @@ def monta() -> list[Linha]:
             texto = str(operando)
 
         nota = ""
-        if declarado is None:
-            nome_do_campo, largura = "", 0
-            if campo in MEDIDO_NA_TELA:
-                valor, de_onde = MEDIDO_NA_TELA[campo]
-                nota = (f"valor medido na tela ({de_onde}); o destino no "
-                        f"formato continua **nao medido**")
+        if campo in POR_TIME:
+            # O caminho POR TIME. Duas conferencias, e a primeira e a que
+            # faltava: o operando e decodificado ate a entrada de
+            # `0x004231a0`, e o offset que esta la tem de ser o `OFS_*`
+            # declarado. Isso PROVA o lote; a aritmetica sozinha nunca provou.
+            ofs_esperado, nome_da_tabela = declarado
+            linha, coluna, offset = lote_do_operando(pe, operando)
+            ofs_lido = offsets_do_core().get(offset)
+            if ofs_lido != ofs_esperado:
+                raise DumpError(
+                    f"{REL_EXE}: `{campo}` le [{operando:#010x}] = a largura do "
+                    f"lote [{linha}][{coluna}] de {TABELA_DE_LOTES:#010x}, que "
+                    f"vale {offset} ({ofs_lido or 'nenhum OFS_* do core'}); "
+                    f"DESTINOS declara {ofs_esperado}")
+            tab = tabela_de_comprimento(nome_da_tabela)
+            # A segunda conferencia: a forma da expressao tem de casar com o
+            # que a tabela conta. `div 2` so faz sentido num lote de dois bytes
+            # por caractere -- e e o kanji que tem `*2` no `Load` do core.
+            dois_bytes = "KANJI" in nome_da_tabela
+            if (forma == "metade") != dois_bytes:
+                raise DumpError(
+                    f"{REL_EXE}: `{campo}` usa a forma `{forma}` sobre "
+                    f"`{nome_da_tabela}`; `metade` so vale para lote de dois "
+                    f"bytes por caractere")
+            derivado = (tab[TIME_DE_REFERENCIA] if forma == "metade"
+                        else tab[TIME_DE_REFERENCIA] - 1)
+            nome_do_campo, largura = nome_da_tabela, len(tab)
+            faixa_min = min(tab) if forma == "metade" else min(tab) - 1
+            faixa_max = max(tab) if forma == "metade" else max(tab) - 1
+            if campo in CONTRADIZ_A_TELA:
+                valor, de_onde, previsto = CONTRADIZ_A_TELA[campo]
+                if derivado != previsto:
+                    raise DumpError(
+                        f"{GERADOR}: `{campo}` esta em CONTRADIZ_A_TELA "
+                        f"esperando derivacao {previsto}, e ela agora da "
+                        f"{derivado}. Ou o modelo do lote mudou, ou a excecao "
+                        f"deixou de valer -- as duas exigem outra medicao de "
+                        f"tela antes de mexer aqui")
+                nota = (f"**medido na tela** ({de_onde}): {valor}. O lote esta "
+                        f"provado -- {ofs_esperado}, "
+                        f"`{TABELA_DE_LOTES:#010x}`[{linha}][{coluna}] -- e a "
+                        f"travessia emulada da {previsto}, **um a mais**. A "
+                        f"conta nao fecha e a tela vence; ver a CORR-WTE-064")
             else:
-                valor = 0
-                nota = "destino e valor **nao medidos**"
+                valor = derivado
+                nota = (f"**por time** -- a largura e remedida a cada troca de "
+                        f"time, do lote {ofs_esperado} "
+                        f"(`{TABELA_DE_LOTES:#010x}`[{linha}][{coluna}]); "
+                        f"{faixa_min}..{faixa_max} nos 95, e {valor} no time "
+                        f"{TIME_DE_REFERENCIA}, que e o do `compara_tela.sh "
+                        f"--nomes`")
         else:
             rel, nome_do_campo = declarado
             largura = largura_do_destino(rel, nome_do_campo)
             valor = (largura // 2 if forma == "metade"
                      else largura - 1 if forma == "menos_um" else operando)
-            # A conferencia: a expressao lida do `.exe` tem de casar com a
-            # largura que a camada de dados declara. Ela confere a ARITMETICA
-            # contra o destino que a tabela DESTINOS declara -- e nao prova que
-            # o destino esteja certo. Ver o comentario daquela tabela.
             if forma == "literal" and valor != largura - 1:
                 raise DumpError(
                     f"{REL_EXE}: `{campo}` recebe o literal {valor} e o destino "
@@ -417,7 +558,8 @@ def md(linhas: list[Linha]) -> str:
         "anuncia** que há outra.",
         "",
         "Dos que vêm do código, **nenhum é literal puro**: dois são expressão",
-        "sobre a largura do campo de destino, e a expressão tem motivo.",
+        "sobre uma largura **medida em tempo de execução**, e a expressão tem",
+        "motivo.",
         "",
         "| Formulário | Campo | `MaxLength` | Fonte | Expressão | Destino | Largura |",
         "|---|---|--:|---|---|---|--:|",
@@ -431,29 +573,50 @@ def md(linhas: list[Linha]) -> str:
         "",
         "## A conferência, e por que ela vale",
         "",
-        "A coluna **Largura** não sai do `.exe`: sai de",
-        "[`../src/we2002_team.pas`](../src/we2002_team.pas) e",
-        "[`../src/we2002_player.pas`](../src/we2002_player.pas) — a camada de",
-        "dados, que é byte-idêntica ao `ed.exe`. É o **outro lado da conta**, e",
-        "o gerador aborta se os dois não casarem:",
+        "As duas linhas de código **não medem a mesma coisa** que as do `.dfm`,",
+        "e tratá-las como se medissem custou duas divergências seguidas.",
+        "",
+        "`lista_equiposChange` percorre uma tabela de **lotes** em",
+        "`0x004231a0` — 3 linhas × 6 colunas de offset, e 11 das 18 entradas",
+        "são não-zero. Para cada uma ela **anda pelo arquivo** até o registro do",
+        "time selecionado, pulando o rodapé de cada setor MODE2/2352, e grava",
+        "três campos em `0x00433a0c`: o offset do registro, a **largura** dele",
+        "em bytes, e os próprios bytes. O passo é 312 por linha e 52 por",
+        "coluna.",
+        "",
+        "Logo `[0x00433a10]` é a largura da linha 0 coluna 0 e `[0x00433b48]` a",
+        "da linha 1 coluna 0. **Não são constantes** — são remedidas a cada",
+        "troca de time, e é por isso que nenhum número fixo estava certo:",
         "",
         "```text",
-        "mixed_case_name   20 bytes  -> menos 1 -> 19   o byte do terminador",
-        "abbreviations[0]   4 bytes  -> literal  3      idem",
+        "0x004231a0[0][0] = 2002316 = OFS_TEAM_NAME_KANJI -> TEAM_NAME_KANJI_LEN",
+        "0x004231a0[1][0] = 2003996 = OFS_TEAM_NAME_3     -> TEAM_NAME_LEN_3",
         "```",
         "",
-        "**Ela confere a aritmética, não o mapeamento — e a diferença custou uma",
-        "divergência.** A primeira versão desta ferramenta declarava",
-        "`raw_kanji_name` (40 bytes) como destino do `edit_nombre1`, o que dava",
-        "`40 div 2 = 20`, e a conferência **passou**: a conta fecha. O",
-        "`compara_tela.sh --nomes` então mediu na tela do oráculo — digitando",
-        "`AB-C.D E`, o campo mostra `ABC.D`, **cinco** caracteres. Logo",
-        "`[0x00433a10]` vale 10 e o destino é outro campo, que **não foi",
-        "medido**.",
+        "**O gerador prova esse mapeamento, e é isso que faltava.** Ele",
+        "decodifica o endereço do operando até a entrada de `0x004231a0`, lê o",
+        "offset que está lá, e aborta se ele não for o `OFS_*` que a tabela",
+        "`DESTINOS` declara. Também confere a forma: `div 2` só vale para lote",
+        "de dois bytes por caractere, que é o kanji — o `Load` do",
+        "`we2002_core` lê `TEAM_NAME_KANJI_LEN[t]*2` bytes ali, e",
+        "`TEAM_NAME_LEN_3[t]` no outro.",
         "",
-        "A tabela `DESTINOS` do gerador é escrita à mão, e é por isso que ela",
-        "aceita `None`: emitir `nao medido` é o único jeito de a conferência não",
-        "passar pelo motivo errado outra vez.",
+        "**A conferência antiga batia a aritmética contra uma largura escrita à",
+        "mão, e por isso passou com o campo errado — duas vezes.** A primeira",
+        "versão declarou `raw_kanji_name` (40 bytes, `div 2` = 20) e a conta",
+        "fechou. O `compara_tela.sh --nomes` então mostrou o oráculo cortando",
+        "em cinco caracteres, e a segunda versão trocou 20 por um literal 5 —",
+        "que também estava errado, e por um motivo que só a tela produz: com",
+        "`AB-C.D E` o campo corta em **seis**, e o sexto caractere é um",
+        "**espaço**. Régua que não distingue `ABC.D ` de `ABC.D` não mede",
+        "truncamento; mede tinta.",
+        "",
+        "Emulada a travessia do original sobre as duas imagens, a largura",
+        "medida bate com a tabela do `we2002_core` em **95/95** times para os",
+        "dois lotes na imagem japonesa. Na European Deluxe o lote kanji bate em",
+        "46/95 — nomes latinos foram escritos em slot de kanji e deixaram lixo",
+        "depois do terminador, então a distância ao próximo registro encurta.",
+        "É comportamento do original com aquela imagem, não defeito do port.",
         "",
         "## Onde as duas fontes se sobrepõem",
         "",

@@ -2357,8 +2357,14 @@ do `--edicao`; e o `iguala_nombres`.
     defeito. O glifo é invariante sob o `gdeDisabled` da LCL, que é grayscale;
     virou divergência deliberada da
     [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md);
-  - o destino de `[0x00433a10]` — **não medido**, e nomeado como tal no
-    `truncamento.md`;
+  - ~~o destino de `[0x00433a10]` — **não medido**, e nomeado como tal no
+    `truncamento.md`~~ — **medido em 2026-08-18** pela
+    [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md): é a largura, por time, do
+    registro no lote `OFS_TEAM_NAME_KANJI` (`0x004231a0`[0][0]). A mesma
+    leitura achou que o vizinho `[0x00433b48]` **não** era `mixed_case_name` —
+    é `OFS_TEAM_NAME_3`, e o limite do `edit_nombre2` é 7 no time 2, não 19.
+    Sobrou uma discordância de exatamente 1 entre a conta e a tela no primeiro
+    campo, aberta como [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md);
   - o vetor bola→zona e as tabelas da animação, que o
     `estrategia.lista_formacionesClick` preenche;
   - as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,

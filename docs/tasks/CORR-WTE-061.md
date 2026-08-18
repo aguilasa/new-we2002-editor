@@ -3,7 +3,7 @@ id: CORR-WTE-061
 title: "Correção: o `MaxLength` de `edit_nombre1` é o literal 5, lido da tela, sem lastro no formato"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -85,3 +85,98 @@ mas com a razão escrita. **Também fecha.**
 - [`wte/tools/dump_truncamento.py`](../../wte/tools/dump_truncamento.py) — a
   tabela `DESTINOS` e o `MEDIDO_NA_TELA`
 - [`wte/src/impl/ep2002_mainform.FormShow.inc`](../../wte/src/impl/ep2002_mainform.FormShow.inc)
+
+---
+
+## Log de Execução *(preenchido após execução)*
+
+**Executado em:** 2026-08-18
+
+**Resumo do que foi feito:**
+
+A pergunta da correção — *o que é a coluna 0* — está respondida, e a resposta
+mudou mais do que o campo que a motivou.
+
+**A "coluna 0" não é o número que o port usa.** `lista_equiposChange` chama
+`0x0040cbc8`, que percorre a tabela de lotes de `0x004231a0` (3×6 offsets, 11
+não-zero, e **as 11 são `OFS_*` que o `we2002_core` já conhecia**) e, para cada
+lote, **anda pelo arquivo** até o registro do time selecionado, pulando o
+rodapé de cada setor MODE2/2352. Grava três campos por lote em `0x00433a0c`:
+
+```text
++0  o offset do registro          <- a "coluna 0" da correção
++4  a LARGURA dele, em bytes      <- o que o port lê
++8  os bytes
+```
+
+Passo 312 por linha e 52 por coluna, lidos do `lea ecx,[eax*8+0x433a0c]` com
+`eax = linha*39`. Logo `[0x00433a10]` é a largura de `[0][0]` e `[0x00433b48]`
+a de `[1][0]`, 312 bytes adiante. **Nenhuma das duas é constante.**
+
+**O achado maior não era o campo da correção, era o vizinho.**
+`DESTINOS["edit_nombre2"]` declarava `mixed_case_name` (20 → 19). O lote
+`[1][0]` é `OFS_TEAM_NAME_3`, que o `Load` do core lê em `names[2]` com
+`TEAM_NAME_LEN_3`; para o time 2 dá 8, logo **7**, não 19. O `mixed_case_name`
+é `[0][1]`, outro lote. Emulada a travessia sobre a imagem japonesa, a largura
+bate com a tabela do core em **95/95** times.
+
+Isso foi **confirmado na tela**, e é a parte que fecha: com `A B-C.DEFG` os dois
+lados mostram `A BC.DE`, sete caracteres. Antes o port mostrava nove.
+
+**O primeiro campo não fechou, e por um.** Mesmo modelo, mesmo gerador: o lote
+está provado (`OFS_TEAM_NAME_KANJI`) e a travessia dá largura 12 para o time 2,
+logo `div 2` = 6 — e o oráculo corta em **5**. Segui a instrução da correção ao
+pé da letra (*conferir que o resultado é 5, não escolher o campo que dê 5*): a
+conferência **falhou**, então o literal fica, agora com o lote nomeado e a
+discordância medida. Está aberta como
+[CORR-WTE-064](/docs/tasks/CORR-WTE-064.md), com cinco hipóteses já
+descartadas.
+
+**A régua de tela media tinta, não truncamento — e foi ela que produziu o 5.**
+O texto era `AB-C.D E`, e o corte do `edit_nombre1` caía exatamente num
+**espaço**: `ABC.D ` e `ABC.D` são o mesmo desenho. Trocado por `A B-C.DEFG`,
+cujos três cortes caem em glifo visível e em posições diferentes. A conta de
+disparos, que era o literal `10/10/9`, passou a sair de `${#NOMES_TEXTO}` —
+quando o texto mudou, os literais derrubaram a corrida por um motivo que não
+tinha nada a ver com o que estava sendo medido.
+
+**Problemas encontrados:**
+
+Três guardas do repositório dispararam depois das edições de Pascal, e as três
+estavam certas:
+
+1. **`dfm2lfm.py --check`** — eu tinha acrescentado `we2002_tables` ao `uses` de
+   `ep2002_mainform.pas`, que é **gerado**. A entrada certa é
+   `wte/src/impl/ep2002_mainform.uses`, e o `.pas` foi revertido e regerado.
+   A regra pegou exatamente o que ela existe para pegar;
+2. **`check_fase2.py`** — a fração de Pascal gerado da §4.4 do plano mudou
+   (75,4% → **74,9%**, 9.188 geradas contra 3.072 à mão). Número de ferramenta,
+   não somado à mão;
+3. **`check_edicao.py`** — o `edicao-cobertura.md` saiu de dia. Regerado.
+
+**Arquivos criados/modificados:**
+
+- `wte/tools/dump_truncamento.py` — o modelo trocou: `DESTINOS` deixa de ser
+  largura de struct e passa a ser (`OFS_*` do lote, tabela de comprimento), e o
+  gerador **decodifica** o operando até a entrada de `0x004231a0` para provar o
+  mapeamento. Mais `POR_TIME`, `TIME_DE_REFERENCIA` e `CONTRADIZ_A_TELA`
+- `wte/tools/test_dump_truncamento.py` — 5 testes novos (19 no total): o lote
+  provado, lote declarado errado, operando fora de um `+4`, operando num buraco
+  da tabela, forma incompatível com o lote, e a exceção de tela sobrevivendo ao
+  motivo dela
+- `wte/tools/compara_tela.sh` — `NOMES_TEXTO`, e a conta de disparos derivada
+- `wte/src/impl/ep2002_mainform.aux.inc` — `TAMANHO_DO_NOME` (que era 20 e
+  estava errado) sai; entram `IndiceNaTabela`, `LimiteDoNome1`, `LimiteDoNome2`
+- `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — os dois `MaxLength`
+  passam a ser postos aqui, que é onde o original os põe
+- `wte/src/impl/ep2002_mainform.FormShow.inc` — as duas linhas saem
+- `wte/src/impl/ep2002_mainform.iguala_nombresClick.inc` — o truncamento passa
+  a usar `LimiteDoNome2`
+- `wte/src/impl/ep2002_mainform.uses`, `wte/src/ep2002_mainform.pas` (regerado)
+- `wte/re/truncamento.{md,tsv}`, `wte/re/fase-2.md`, `wte/re/edicao-cobertura.md`,
+  `wte/re/edicao-tela.tsv{,.nomes}` — regerados
+- `wte/re/spec/MainForm.iguala_nombresClick.md` — o limite medido no lugar da
+  inferência
+- `docs/PLAN-WTE-LAZARUS.md` §4.4 — a fração remedida
+- `docs/tasks/26-handlers-de-edicao.md` — a pendência encaminhada, fechada
+- `docs/tasks/CORR-WTE-064.md` — **nova**

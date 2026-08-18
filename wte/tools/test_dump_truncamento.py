@@ -114,23 +114,80 @@ class TestReal(unittest.TestCase):
         self.assertEqual(sorted(l.campo for l in do_codigo),
                          ["edit_nombre1", "edit_nombre2", "edit_nombre3"])
 
-    def test_o_primeiro_campo_nao_inventa_destino(self):
-        """`edit_nombre1` sai com destino vazio e o valor medido na tela.
+    def test_os_dois_de_nome_saem_do_lote_provado_pelo_binario(self):
+        """`edit_nombre1/2` tem limite POR TIME, e o lote e decodificado.
 
-        Este teste comecou afirmando o contrario -- que o destino era
-        `raw_kanji_name`, 40 bytes, e o limite 20 -- e passava, porque
-        `40 div 2` fecha. O `compara_tela.sh --nomes` mediu o oraculo cortando
-        em CINCO. O que o teste segura agora nao e o numero: e a RECUSA de
-        emitir destino que ninguem mediu.
+        Este teste ja afirmou duas coisas erradas, e passou nas duas. Primeiro
+        que o destino era `raw_kanji_name` (40 bytes, `div 2` = 20), porque a
+        conta fecha. Depois que o limite era o literal 5, lido da tela -- e a
+        tela lia 5 porque o sexto caractere de `ABC.D ` e um espaco.
+
+        O que ele segura agora nao e numero escrito a mao: e que o gerador
+        DECODIFICA o operando ate a entrada de `0x004231a0` e emite o valor da
+        tabela de comprimento daquele lote.
         """
-        l = self.por_campo["edit_nombre1"]
-        self.assertEqual(l.destino, "")
-        self.assertEqual(l.largura, 0)
-        self.assertEqual(l.maxlength, 5)
-        self.assertIn("nao medido", l.nota)
+        # O primeiro tem o lote provado E o valor medido na tela, que
+        # discordam de um. Quem sai e o da tela; ver a CORR-WTE-064.
+        um = self.por_campo["edit_nombre1"]
+        self.assertEqual(um.destino, "TEAM_NAME_KANJI_LEN")
+        self.assertIn("OFS_TEAM_NAME_KANJI", um.nota)
+        self.assertIn("medido na tela", um.nota)
+        medido, _de_onde, previsto = T.CONTRADIZ_A_TELA["edit_nombre1"]
+        self.assertEqual(um.maxlength, medido)
+        self.assertEqual(
+            T.tabela_de_comprimento("TEAM_NAME_KANJI_LEN")
+            [T.TIME_DE_REFERENCIA], previsto,
+            "a derivacao mudou -- remeça a tela antes de mexer na excecao")
+
+        dois = self.por_campo["edit_nombre2"]
+        self.assertEqual(dois.destino, "TEAM_NAME_LEN_3")
+        self.assertEqual(dois.maxlength,
+                         T.tabela_de_comprimento("TEAM_NAME_LEN_3")
+                         [T.TIME_DE_REFERENCIA] - 1)
+        self.assertIn("OFS_TEAM_NAME_3", dois.nota)
+
+    def test_excecao_de_tela_com_derivacao_diferente_derruba(self):
+        """A excecao nao pode sobreviver ao motivo dela (CORR-WTE-064)."""
+        original = dict(T.CONTRADIZ_A_TELA)
+        T.CONTRADIZ_A_TELA["edit_nombre1"] = (5, "teste", 99)
+        self.addCleanup(T.CONTRADIZ_A_TELA.update, original)
+        with self.assertRaises(T.DumpError) as e:
+            T.monta()
+        self.assertIn("CONTRADIZ_A_TELA", str(e.exception))
+
+    def test_lote_declarado_errado_derruba(self):
+        """A guarda que faltava: trocar o `OFS_*` esperado tem de abortar."""
+        original = dict(T.DESTINOS)
+        T.DESTINOS["edit_nombre1"] = ("OFS_TEAM_NAME_1", "TEAM_NAME_LEN_1")
+        self.addCleanup(T.DESTINOS.update, original)
+        with self.assertRaises(T.DumpError) as e:
+            T.monta()
+        self.assertIn("DESTINOS declara OFS_TEAM_NAME_1", str(e.exception))
+
+    def test_operando_fora_de_um_campo_mais_quatro_aborta(self):
+        pe = T.PE(T.EXE.read_bytes(), T.REL_EXE)
+        with self.assertRaises(T.DumpError):
+            T.lote_do_operando(pe, T.BASE_DAS_MEDIDAS + T.CAMPO_LARGURA + 1)
+
+    def test_operando_num_buraco_da_tabela_aborta(self):
+        """A linha 0 so tem duas colunas; a terceira e zero."""
+        pe = T.PE(T.EXE.read_bytes(), T.REL_EXE)
+        with self.assertRaises(T.DumpError) as e:
+            T.lote_do_operando(pe, T.BASE_DAS_MEDIDAS + T.CAMPO_LARGURA
+                               + 2 * T.PASSO_COLUNA)
+        self.assertIn("buraco", str(e.exception))
+
+    def test_forma_incompativel_com_o_lote_aborta(self):
+        """`div 2` so vale para lote de dois bytes por caractere."""
+        original = dict(T.DESTINOS)
+        T.DESTINOS["edit_nombre1"] = ("OFS_TEAM_NAME_KANJI", "TEAM_NAME_LEN_3")
+        self.addCleanup(T.DESTINOS.update, original)
+        with self.assertRaises(T.DumpError) as e:
+            T.monta()
+        self.assertIn("dois bytes por caractere", str(e.exception))
 
     def test_os_de_texto_cortam_um_byte_antes_do_destino(self):
-        for campo in ("edit_nombre2", "edit_nombre3", "casilla_nombre"):
+        for campo in ("edit_nombre3", "casilla_nombre"):
             l = self.por_campo[campo]
             self.assertEqual(l.maxlength, l.largura - 1, campo)
 

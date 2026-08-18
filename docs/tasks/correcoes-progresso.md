@@ -80,9 +80,10 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-058](/docs/tasks/CORR-WTE-058.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `visual.md` manda rodar o `capture_forms.sh`, removido nesta task, e a árvore do `progresso.md` não tem `src/impl/` nem as ferramentas novas | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-059](/docs/tasks/CORR-WTE-059.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | A spec do `lista_equiposChange` justifica o `aberto` com "ainda não conferido contra a tela", e a seção seguinte é a conferência de tela | Baixa | [x] concluída | 2026-08-11 |
 | [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `iguala_nombres` não acinzenta no port — 0 px de mudança contra 518 do oráculo —, e o defeito atravessou duas tasks sendo encaminhado para uma correção que ninguém abriu | Alta | [x] concluída | 2026-08-18 |
-| [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `MaxLength` de `edit_nombre1` é o literal 5, lido da tela; qual campo do formato tem 10 bytes continua sem medir | Baixa | [ ] pendente | — |
+| [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `MaxLength` de `edit_nombre1` é o literal 5, lido da tela; qual campo do formato tem 10 bytes continua sem medir | Baixa | [x] concluída | 2026-08-18 |
 | [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `lista_formacionesClick` é do grupo `carga`, foi encaminhado para a 26 pelo efeito, e continua `REStub` com as duas tasks concluídas | Alta | [ ] pendente | — |
 | [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | As três carregadoras de bitmap da ficha não têm dono em nenhuma das 40 tasks, e a 32 não menciona cara, cabelo nem barba | Alta | [ ] pendente | — |
+| [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O lote do `edit_nombre1` está provado e a travessia emulada dá 6 onde o oráculo corta em 5 | Média | [ ] pendente | — |
 
 ## Checklist
 
@@ -145,9 +146,10 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-058 — tirar do `visual.md` o comando que não existe mais, e pôr na árvore do `progresso.md` o que a 25 criou
 - [x] CORR-WTE-059 — trocar a razão escrita do veredito `aberto` pela que sobrou
 - [x] CORR-WTE-060 — medir por que o `iguala_nombres` não acinzenta, uma variável por vez
-- [ ] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
+- [x] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
 - [ ] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
 - [ ] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 32 ou registrar na 35
+- [ ] CORR-WTE-064 — fechar a conta do `[0x00433a10]`, que dá um a mais que a tela
 
 ## Detalhes por correção
 
@@ -210,6 +212,22 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** decisão do usuário — estender a 32 (as três tabelas de cor já estão
   localizadas) ou registrar a exclusão na 35 com o efeito escrito. O que não
   fecha é o estado de hoje
+
+### CORR-WTE-064
+
+- **Arquivo com problema:** `wte/tools/dump_truncamento.py` (`CONTRADIZ_A_TELA`)
+  e `wte/src/impl/ep2002_mainform.aux.inc` (`LimiteDoNome1`)
+- **Sintoma:** o lote do `edit_nombre1` está provado — `OFS_TEAM_NAME_KANJI`,
+  `0x004231a0`[0][0] — e a travessia do original emulada byte a byte dá largura
+  12 para o time 2, logo `div 2` = 6. **O oráculo corta em 5.** O `edit_nombre2`,
+  pelo mesmo modelo, fecha exato (7, conferido na tela)
+- **Como foi detectado:** `compara_tela.sh --nomes` com o texto novo
+  `A B-C.DEFG`, cujo sexto caractere é um `D` visível: o oráculo mostra `A BC.`
+  e o port, posto em 6, mostrava `A BC.D`
+- **Fix:** reler `0x00403c0c` instrução a instrução, com atenção a onde `esi` é
+  incrementado em relação ao `getc`; se não fechar, medir a tela em três times
+  de larguras diferentes e ver se a diferença é constante. Cinco hipóteses já
+  estão descartadas no arquivo da correção
 
 ### CORR-WTE-001
 

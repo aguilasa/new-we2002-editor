@@ -11,9 +11,9 @@ nomes	ficha_salida.FormCreate	1
 nomes	ficha_warning_2.FormCreate	1
 nomes	ficha_warning.FormCreate	1
 nomes	jugador.FormCreate	1
-nomes	MainForm.edit_nombre1KeyPress	10
-nomes	MainForm.edit_nombre2KeyPress	10
-nomes	MainForm.edit_nombre3KeyPress	9
+nomes	MainForm.edit_nombre1KeyPress	12
+nomes	MainForm.edit_nombre2KeyPress	12
+nomes	MainForm.edit_nombre3KeyPress	11
 nomes	MainForm.FormCreate	1
 nomes	MainForm.FormShow	1
 nomes	MainForm.lista_equiposChange	3

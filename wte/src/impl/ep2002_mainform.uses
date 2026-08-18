@@ -16,3 +16,4 @@ ep2002_error2   # ficha_error2.etiq1, no pabajoClick
 ep2002_movertodos # ficha_movertodos.ShowModal, nos dois botoes de lote
 Controls        # mrYes
 wte_legendas   # Legenda, LegendaDoCabelo -- gerado por tools/dump_legendas.py
+we2002_tables    # TEAM_NAME_LEN_3, no LimiteDoNome2 (CORR-WTE-061)

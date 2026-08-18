@@ -52,7 +52,7 @@ estático não passar no próprio `--check`.
 | `edit_nombre1KeyPress` | tela | `compara_tela.sh --nomes` | o filtro decide quantos caracteres sobram, e a tinta mede isso |
 | `edit_nombre2KeyPress` | tela | `compara_tela.sh --nomes` | idem |
 | `edit_nombre3KeyPress` | tela | `compara_tela.sh --nomes` | idem, e o filtro dele e mais estrito -- recusa espaco e ponto |
-| `iguala_nombresClick` | outra_task | `WTE-TASK-35` | o clique copia e trunca; o botao nao acinzenta no port porque o glifo e invariante sob o `gdeDisabled` da LCL -- causa medida pela CORR-WTE-060, divergencia deliberada, travada pelo `check_glifos_disabled.py` |
+| `iguala_nombresClick` | outra_task | `WTE-TASK-35` | o clique copia e trunca, mas o botao NAO acinzenta no port -- defeito medido pela CORR-WTE-057 e ainda sem causa |
 
 ### numeros
 

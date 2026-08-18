@@ -31,7 +31,8 @@ uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, Dialogs,
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
   we2002_types, we2002_player, ep2002_jugador, ep2002_estrategia,
-  ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas;
+  ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
+  we2002_tables;
 
 type
   TMainForm = class(TForm)

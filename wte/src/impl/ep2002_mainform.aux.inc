@@ -20,13 +20,10 @@ const
   { Jogadores sem contrato, antes dos elencos. `PLAYERS_NC` do we2002_core. }
   JOGADORES_SEM_CONTRATO = 462;
   JOGADORES_POR_TIME = 23;
-  { Bytes de um campo de nome de time, terminador incluido -- o `names` do
-    `we2002_team.pas` e `array[0..19] of AnsiChar`. O original guarda o mesmo
-    numero na global `0x00433b48`, que ele usa para o `MaxLength` de
-    `edit_nombre2` e para o truncamento do `iguala_nombresClick`. Que os dois
-    sejam o MESMO numero e inferencia, nao medicao -- ver a spec do
-    `iguala_nombresClick`. }
-  TAMANHO_DO_NOME = 20;
+  { O ultimo indice das tabelas de comprimento por time (`0..94`). O item 95
+    do combo e o time-modelo, que nao tem linha propria: o original mede o
+    registro 0 para ele, que e o do time 94. Ver `IndiceNaTabela`. }
+  ULTIMO_TIME_COM_TABELA = 94;
 
 var
   { O `0x004335e4` do original: qual `dorsalN` esta marcado agora.
@@ -149,6 +146,68 @@ begin
       3: Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].bar_speed;
       4: Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].bar_technique;
     end;
+end;
+
+{ Os dois limites de campo de nome, que sao POR TIME -- e sao a coisa que este
+  projeto errou duas vezes seguidas por supor que fosse constante.
+
+  O original nao guarda numero nenhum: `lista_equiposChange` percorre a tabela
+  de lotes de `0x004231a0` e, para cada lote, ANDA pelo arquivo ate o registro
+  do time selecionado, medindo a largura dele (`0x00403c0c`). O resultado vai
+  para `0x00433a0c + linha*312 + coluna*52 + 4`, e e de la que saem as duas
+  globais que o disassembly mostra:
+
+    [0x00433a10]  linha 0 coluna 0  = OFS_TEAM_NAME_KANJI  -> TEAM_NAME_KANJI_LEN
+    [0x00433b48]  linha 1 coluna 0  = OFS_TEAM_NAME_3      -> TEAM_NAME_LEN_3
+
+  Emulada a travessia sobre a imagem japonesa, a largura medida bate com a
+  tabela do `we2002_core` em 95/95 times nos dois lotes -- a do kanji vale o
+  DOBRO da tabela, que e o `*2` do proprio `Load`, e e por isso que o original
+  faz `div 2` num e `- 1` no outro. O `dump_truncamento.py` reconfere o
+  mapeamento a cada `make check`, decodificando o operando ate a entrada de
+  `0x004231a0` em vez de aceitar um destino escrito a mao.
+
+  As duas versoes anteriores: `SizeOf(raw_kanji_name) div 2` = 20, que fechava
+  a aritmetica com o campo errado, e o literal 5 lido da tela do oraculo -- que
+  lia 5 porque o sexto caractere de `ABC.D ` e um espaco. }
+function IndiceNaTabela(indice: Integer): Integer;
+begin
+  { O item 95 (time-modelo) nao tem linha. O original pede `94 - 95 = -1`
+    registros de salto, o laco nao roda, e ele mede o registro 0 -- que e o do
+    time 94. Reproduzido, nao arredondado. }
+  if indice > ULTIMO_TIME_COM_TABELA then
+    Result := ULTIMO_TIME_COM_TABELA
+  else if indice < 0 then
+    Result := 0
+  else
+    Result := indice;
+end;
+
+{ O limite do PRIMEIRO campo continua o valor MEDIDO NA TELA, e nao a
+  derivacao -- porque os dois discordam, de exatamente um.
+
+  O lote esta provado (`OFS_TEAM_NAME_KANJI`) e a travessia emulada da largura
+  12 para o time 2, logo `div 2` = 6. **O oraculo corta em 5.** Medido em
+  2026-08-18 com `A B-C.DEFG`, texto cujo sexto caractere e um `D` visivel: o
+  oraculo mostra `A BC.` e o port, posto em 6, mostrava `A BC.D`.
+
+  Quem vence e a tela: ela E o oraculo. A conta que nao fecha esta na
+  CORR-WTE-064, com tudo o que ja foi medido. Enquanto ela nao fechar este
+  numero e literal, e o `dump_truncamento.py` aborta se a derivacao deixar de
+  dar 6 -- que e o jeito de a excecao nao sobreviver ao motivo dela.
+
+  `indice` fica no parametro de proposito: o dia em que a conta fechar, so o
+  corpo muda. }
+{$PUSH}{$WARN 5024 OFF}  { `indice` fica no lugar de proposito -- ver acima }
+function LimiteDoNome1(indice: Integer): Integer;
+begin
+  Result := 5;
+end;
+{$POP}
+
+function LimiteDoNome2(indice: Integer): Integer;
+begin
+  Result := TEAM_NAME_LEN_3[IndiceNaTabela(indice)] - 1;
 end;
 
 { Um dos seis nomes em caixa alta do time `indice`. }

@@ -52,31 +52,41 @@ Não trata. Com `edit_nombre1` vazio, os outros dois ficam vazios.
 
 ## Notas
 
-**O limite do segundo campo era o motivo do veredito, e deixou de ser em
-2026-08-18.** O original usa `DWORD[0x00433b48] - 1`, uma global de BSS que
-**nenhum `mov` direto escreve** — a busca por `mov ds:0x433b48,reg` e por
-`mov DWORD PTR ds:0x433b48,imm` no `.text` inteiro não achou nada, então ela é
-preenchida por outro caminho.
+**O limite do segundo campo era o motivo do veredito, e o que a Fase anterior
+escreveu aqui estava errado — medido e corrigido em 2026-08-18 pela
+[CORR-WTE-061](../../../docs/tasks/CORR-WTE-061.md).** O original usa
+`DWORD[0x00433b48] - 1`, e essa global **não é constante**.
 
-O mesmo número aparece uma segunda vez: em `0x0040cc48` o original faz
-`edit_nombre2.MaxLength := DWORD[0x00433b48] - 1`. Os dois limites são o mesmo
-valor, o que confirma a *leitura* sem revelar o *valor*.
+`lista_equiposChange` chama `0x0040cbc8`, que percorre uma tabela de **lotes**
+em `0x004231a0` — 3 linhas × 6 colunas de offset, 11 das 18 entradas não-zero,
+e as 11 são `OFS_*` que o `we2002_core` já conhecia. Para cada lote ela **anda
+pelo arquivo** até o registro do time selecionado (`0x00403c0c`, pulando o
+rodapé de cada setor MODE2/2352) e grava três campos em `0x00433a0c`: o offset
+do registro, a **largura** dele, e os bytes. Passo 312 por linha e 52 por
+coluna, logo:
 
-**O valor saiu, e por confirmação cruzada.** O
-[`dump_truncamento.py`](../../tools/dump_truncamento.py) mede as três chamadas a
-`SetMaxLength` e cruza cada expressão com a largura do campo de destino na
-camada de dados — que é o `we2002_core`, byte-idêntico ao `ed.exe`.
-`mixed_case_name` tem 20 bytes, logo `[0x00433b48] = 20` e o limite é **19**,
-que é o que o port já usava. O gerador **aborta** se os dois lados discordarem,
-então isto deixou de ser "o mesmo número por outro caminho, sem confirmação" e
-passou a ser conferência que roda a cada `make check`. Ver
-[`../truncamento.md`](../truncamento.md).
+```text
+[0x00433a10]  linha 0 coluna 0  = OFS_TEAM_NAME_KANJI  ->  edit_nombre1
+[0x00433b48]  linha 1 coluna 0  = OFS_TEAM_NAME_3      ->  edit_nombre2, e este handler
+```
 
-**O achado que saía daqui foi corrigido na mesma passagem: o port não punha
-`MaxLength` em `edit_nombre1` nem em `edit_nombre2`.** Os dois campos aceitavam
-texto de qualquer tamanho. Agora o `MainForm.FormShow` os põe, e por `SizeOf` do
-campo de destino em vez de literal — `raw_kanji_name` dividido por dois (o nome
-kanji guarda dois bytes por caractere) e `mixed_case_name` menos um.
+**Não é `mixed_case_name`, e não é 19.** O `mixed_case_name` é a linha 0 coluna
+1 (`0x00433a44`), outro lote. Emulada a travessia sobre a imagem japonesa, a
+largura do lote `OFS_TEAM_NAME_3` bate com `TEAM_NAME_LEN_3` em **95/95**
+times, e para o time 2 dá 8 — logo o limite é **7**, não 19.
+
+Confirmado na tela do oráculo no mesmo dia, com `A B-C.DEFG`: os dois lados
+mostram `A BC.DE`, sete caracteres. O port mostrava nove antes.
+
+O truncamento daqui usa a mesma fonte que o `MaxLength`, agora de verdade:
+`LimiteDoNome2`, no `.aux.inc`, que lê `TEAM_NAME_LEN_3` do time selecionado.
+
+**O primeiro campo continua com número literal, e o motivo mudou de "não
+medido" para "a conta dá um a mais".** O lote dele está provado
+(`OFS_TEAM_NAME_KANJI`) e a travessia dá largura 12 para o time 2, logo `div 2`
+= 6 — e o oráculo corta em 5. Está na
+[CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md), com as cinco hipóteses já
+descartadas.
 
 **O que mantinha o veredito `aberto` era outra coisa, e ela foi medida em
 2026-08-18 pela [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md): não é

@@ -124,17 +124,30 @@ TRILHA_CLIQUES=1
 #
 # ### Por que este texto, e nao outro
 #
-# `AB-C.D E`. Os tres filtros nao sao iguais, e o texto foi escolhido para que
-# a diferenca APARECA na tela:
+# `A B-C.DEFG`. Os tres filtros nao sao iguais, e o texto foi escolhido para
+# que a diferenca APARECA na tela:
 #
-# | campo | aceita | do texto sobra |
-# |---|---|---|
-# | `edit_nombre1`, `edit_nombre2` | ` `, `.`, #8, `0-9`, `A-Z`, `a-z` | `ABC.D E` |
-# | `edit_nombre3` | #8 e alfanumerico -- **nem espaco nem ponto** | `ABCDE` |
+# | campo | aceita | do texto sobra | e o campo corta em |
+# |---|---|---|---|
+# | `edit_nombre1` | ` `, `.`, #8, `0-9`, `A-Z`, `a-z` | `A BC.DEFG` | `A BC.D` (6) |
+# | `edit_nombre2` | idem | `A BC.DEFG` | `A BC.DE` (7) |
+# | `edit_nombre3` | #8 e alfanumerico -- **nem espaco nem ponto** | `ABCDEFG` | `ABC` (3) |
 #
 # Um texto so de letras passaria identico pelos tres e a regua nao mediria
 # filtro nenhum: mediria digitacao. O `-` e recusado pelos tres, o `.` e o
 # espaco separam o terceiro dos outros dois.
+#
+# ### O texto anterior media tinta, nao truncamento (CORR-WTE-061)
+#
+# Ate 2026-08-18 este texto era `AB-C.D E`, e o corte do `edit_nombre1` caia
+# EXATAMENTE num espaco: `ABC.D ` e `ABC.D` sao o mesmo desenho. A regua leu
+# **cinco** onde o limite e **seis**, e esse 5 virou literal no port e numero
+# em tres documentos. O texto de agora poe glifo visivel nos tres cortes -- e
+# eles caem em posicoes diferentes, entao um campo com o limite do outro
+# tambem aparece.
+#
+# O limite dos dois primeiros e POR TIME, medido do lote de `0x004231a0`; os
+# valores acima sao os do `IDX_EDICAO`. Ver `wte/re/truncamento.md`.
 #
 # ### O `Return` faz parte do teste
 #
@@ -142,7 +155,7 @@ TRILHA_CLIQUES=1
 # seguinte quando a tecla e #13; o terceiro nao encadeia. A sequencia digita nos
 # tres SEM clicar entre eles: se o encadeamento nao funcionar, os campos 2 e 3
 # ficam vazios e a comparacao acusa.
-NOMES_TEXTO='AB-C.D E'
+NOMES_TEXTO='A B-C.DEFG'
 # Coordenadas absolutas, derivadas do `.lfm` somando `Left`/`Top` pela cadeia de
 # pais -- o formulario raiz fora, porque o `Left`/`Top` dele e posicao de tela.
 # Os dois lados usam as MESMAS: desde que a WTE-TASK-26 tirou o
@@ -363,15 +376,24 @@ captura_port() {
     return 5
   fi
   if [ "$MODO" = nomes ]; then
-    # Os numeros sao MEDIDOS, nao deduzidos: na LCL o `#8` do `BackSpace` e o
-    # `#13` do `Return` chegam ao `OnKeyPress`, entao cada campo conta
-    # 1 (BackSpace) + 8 (o texto) + 1 (Return), e o terceiro nao leva Return.
-    # Se um widgetset deixar de entregar uma dessas duas, a conta muda e a
-    # guarda avisa -- que e o ponto: essa entrega e diferenca de plataforma, e
-    # diferenca de plataforma calada e o que este projeto mais paga.
-    if [ "$n1" -ne 10 ] || [ "$n2" -ne 10 ] || [ "$n3" -ne 9 ]; then
-      echo "ERRO: os filtros de nome dispararam $n1/$n2/$n3, esperava 10/10/9." >&2
-      echo "      Se o primeiro estiver certo e os outros zerados, o `Return`" >&2
+    # A conta e MEDIDA e sai do texto, nao de literal: na LCL o `#8` do
+    # `BackSpace` e o `#13` do `Return` chegam ao `OnKeyPress`, entao cada
+    # campo conta 1 (BackSpace) + ${#NOMES_TEXTO} + 1 (Return), e o terceiro
+    # nao leva Return. Se um widgetset deixar de entregar uma dessas duas, a
+    # conta muda e a guarda avisa -- que e o ponto: essa entrega e diferenca de
+    # plataforma, e diferenca de plataforma calada e o que este projeto mais
+    # paga.
+    #
+    # Derivar em vez de fixar tem motivo proprio: quando a CORR-WTE-061 trocou
+    # o texto (o corte do campo 1 caia num espaco e a regua lia um caractere a
+    # menos), os literais 10/10/9 derrubaram a corrida por uma razao que nao
+    # tinha nada a ver com o que estava sendo medido.
+    esperado=$(( 1 + ${#NOMES_TEXTO} + 1 ))
+    if [ "$n1" -ne "$esperado" ] || [ "$n2" -ne "$esperado" ] \
+       || [ "$n3" -ne $(( esperado - 1 )) ]; then
+      echo "ERRO: os filtros de nome dispararam $n1/$n2/$n3, esperava" \
+           "$esperado/$esperado/$(( esperado - 1 ))." >&2
+      echo '      Se o primeiro estiver certo e os outros zerados, o Return' >&2
       echo "      nao encadeou o foco e so o campo 1 foi digitado." >&2
       return 5
     fi

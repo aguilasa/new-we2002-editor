@@ -77,17 +77,8 @@ begin
         original (`[0x00433b48] - 1`) e a largura do campo menos o terminador,
         e o `dump_truncamento.py` confere isso contra a camada de dados a cada
         `make check`.
-      - `edit_nombre1` e **5, medido na tela do oraculo**. A primeira versao
-        desta linha usava `SizeOf(raw_kanji_name) div 2` = 20, escolhido porque
-        fechava a conta de `[0x00433a10] div 2` -- e o `compara_tela.sh --nomes`
-        mostrou o oraculo cortando em CINCO. Logo `[0x00433a10]` vale 10 e o
-        destino nao e aquele campo. Qual e, nao foi medido; escolher outro que
-        tambem feche a conta seria repetir o erro.
-
       `edit_nombre3` nao aparece aqui: o `MaxLength = 3` dele esta no proprio
       DFM, e o `.lfm` o herda. }
-    edit_nombre1.MaxLength := 5;
-    edit_nombre2.MaxLength := SizeOf(Jogo.teams[0].mixed_case_name) - 1;
   end
   else
     texto_dialogo_we.Caption := 'nao foi possivel abrir ' + ExtractFileName(imagem);

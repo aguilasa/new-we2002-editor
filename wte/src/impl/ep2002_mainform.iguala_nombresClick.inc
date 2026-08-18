@@ -11,23 +11,23 @@
   O `3` e literal no original e casa com o `MaxLength = 3` que o proprio DFM
   poe no campo -- e a abreviatura.
 
-  O OUTRO LIMITE VEM DE UMA GLOBAL QUE NAO FOI MEDIDA. O original usa
-  `DWORD[0x00433b48] - 1`, uma global de BSS que ninguem escreve por `mov`
-  direto e cujo valor em execucao esta por medir. O mesmo numero aparece uma
-  segunda vez, no `MaxLength` que o original poe em `edit_nombre2` ao carregar
-  a imagem -- os dois sao `global - 1`.
+  O OUTRO LIMITE E POR TIME, E ISSO FOI MEDIDO. O original usa
+  `DWORD[0x00433b48] - 1`, e essa global nao e constante: e a largura do
+  registro do time selecionado no lote `OFS_TEAM_NAME_3`, remedida a cada
+  `lista_equiposChange`. O mesmo numero aparece no `MaxLength` que ele poe em
+  `edit_nombre2`, e agora os dois saem do mesmo lugar aqui tambem --
+  `LimiteDoNome2`, no `.aux.inc`, que le `TEAM_NAME_LEN_3`.
 
-  Aqui ele sai do TAMANHO DO CAMPO na camada de dados: `names` e
-  `array[0..19] of AnsiChar`, entao cabem 19 caracteres mais o terminador. E o
-  metodo da secao 4.2 do plano -- o mesmo numero por outro caminho --, mas
-  DESTA VEZ SEM CONFIRMACAO CRUZADA: se a global valer outra coisa, o
-  truncamento diverge. Esta na spec como pendencia nomeada, e e entrada da
-  WTE-TASK-36.
+  A versao anterior usava `TAMANHO_DO_NOME - 1` = 19, tirado de `names` ser
+  `array[0..19] of AnsiChar`. Fechava a aritmetica e estava errada: para o time
+  2 o limite e 7, nao 19. O `dump_truncamento.py` agora prova o lote em vez de
+  aceitar um destino escrito a mao.
 
   NAO GRAVA. Mexe so nos dois `TEdit`; quem leva nome para a imagem e o
   `boton_nombres2isoClick`, da WTE-TASK-27. }
 begin
   REMark('MainForm.iguala_nombresClick');
-  edit_nombre2.Text := Copy(edit_nombre1.Text, 1, TAMANHO_DO_NOME - 1);
+  edit_nombre2.Text := Copy(edit_nombre1.Text, 1,
+                           LimiteDoNome2(lista_equipos.ItemIndex));
   edit_nombre3.Text := Copy(edit_nombre1.Text, 1, 3);
 end;

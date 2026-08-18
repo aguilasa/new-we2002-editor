@@ -78,6 +78,25 @@ begin
   edit_nombre2.Text := NomeDoTime(indice, 0);
   edit_nombre3.Text := AbreviaturaDoTime(indice);
 
+  { Os dois limites sao postos AQUI, e nao no `FormShow` -- `0x0040cc43` e
+    `0x0040cc5b`, logo depois do laco que mede os lotes, dentro do
+    `0x0040cbc8` que este handler chama. O port os punha uma vez so, na carga
+    da imagem, com numero fixo; o do `edit_nombre2` estava errado por isso.
+
+    O do `edit_nombre2` e POR TIME e esta medido nas duas pontas: derivado do
+    lote `OFS_TEAM_NAME_3` e conferido na tela do oraculo (7 para o time 2,
+    contra os 19 que o port usava). O do `edit_nombre1` continua literal, e o
+    porque esta no `LimiteDoNome1`.
+
+    O lote de onde sai cada limite NAO e o lote de onde sai o texto do campo:
+    `edit_nombre1` mostra `names[1]` e recebe o limite do lote kanji, e
+    `edit_nombre2` mostra `names[0]` e recebe o do lote `OFS_TEAM_NAME_3`. As
+    duas pontas estao medidas -- o texto por comparacao de tela na WTE-TASK-25,
+    o limite pelo disassembly aqui -- e a assimetria e do original. Quem grava
+    e o `boton_nombres2isoClick`, da WTE-TASK-27, e e la que ela importa. }
+  edit_nombre1.MaxLength := LimiteDoNome1(indice);
+  edit_nombre2.MaxLength := LimiteDoNome2(indice);
+
   { --- 2. as cinco barras ---------------------------------------------- }
   { A largura e `11*v + 9`, aritmetica literal do disassembly e nao proporcao
     sobre um maximo: `v = 0` da 9 px, que e a barra vazia desenhada no DFM. }

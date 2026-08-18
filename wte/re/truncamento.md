@@ -13,12 +13,13 @@ do `.dfm` e 3 o recebem em tempo de execução, por
 anuncia** que há outra.
 
 Dos que vêm do código, **nenhum é literal puro**: dois são expressão
-sobre a largura do campo de destino, e a expressão tem motivo.
+sobre uma largura **medida em tempo de execução**, e a expressão tem
+motivo.
 
 | Formulário | Campo | `MaxLength` | Fonte | Expressão | Destino | Largura |
 |---|---|--:|---|---|---|--:|
-| `MainForm` | `edit_nombre1` | 5 | código, `0x0040cc43` | `[0x00433a10] div 2` | — | — |
-| `MainForm` | `edit_nombre2` | 19 | código, `0x0040cc5b` | `[0x00433b48] - 1` | `mixed_case_name` | 20 |
+| `MainForm` | `edit_nombre1` | 5 | código, `0x0040cc43` | `[0x00433a10] div 2` | `TEAM_NAME_KANJI_LEN` | 95 |
+| `MainForm` | `edit_nombre2` | 7 | código, `0x0040cc5b` | `[0x00433b48] - 1` | `TEAM_NAME_LEN_3` | 95 |
 | `MainForm` | `edit_nombre3` | 3 | código, `0x0040cc71` | `3` | `abbreviations` | 4 |
 | `jugador` | `casilla_dorsal` | 10 | dfm | `10` | — | — |
 | `jugador` | `casilla_nombre` | 10 | dfm | `10` | `name` | 11 |
@@ -26,33 +27,55 @@ sobre a largura do campo de destino, e a expressão tem motivo.
 
 ## A conferência, e por que ela vale
 
-A coluna **Largura** não sai do `.exe`: sai de
-[`../src/we2002_team.pas`](../src/we2002_team.pas) e
-[`../src/we2002_player.pas`](../src/we2002_player.pas) — a camada de
-dados, que é byte-idêntica ao `ed.exe`. É o **outro lado da conta**, e
-o gerador aborta se os dois não casarem:
+As duas linhas de código **não medem a mesma coisa** que as do `.dfm`,
+e tratá-las como se medissem custou duas divergências seguidas.
+
+`lista_equiposChange` percorre uma tabela de **lotes** em
+`0x004231a0` — 3 linhas × 6 colunas de offset, e 11 das 18 entradas
+são não-zero. Para cada uma ela **anda pelo arquivo** até o registro do
+time selecionado, pulando o rodapé de cada setor MODE2/2352, e grava
+três campos em `0x00433a0c`: o offset do registro, a **largura** dele
+em bytes, e os próprios bytes. O passo é 312 por linha e 52 por
+coluna.
+
+Logo `[0x00433a10]` é a largura da linha 0 coluna 0 e `[0x00433b48]` a
+da linha 1 coluna 0. **Não são constantes** — são remedidas a cada
+troca de time, e é por isso que nenhum número fixo estava certo:
 
 ```text
-mixed_case_name   20 bytes  -> menos 1 -> 19   o byte do terminador
-abbreviations[0]   4 bytes  -> literal  3      idem
+0x004231a0[0][0] = 2002316 = OFS_TEAM_NAME_KANJI -> TEAM_NAME_KANJI_LEN
+0x004231a0[1][0] = 2003996 = OFS_TEAM_NAME_3     -> TEAM_NAME_LEN_3
 ```
 
-**Ela confere a aritmética, não o mapeamento — e a diferença custou uma
-divergência.** A primeira versão desta ferramenta declarava
-`raw_kanji_name` (40 bytes) como destino do `edit_nombre1`, o que dava
-`40 div 2 = 20`, e a conferência **passou**: a conta fecha. O
-`compara_tela.sh --nomes` então mediu na tela do oráculo — digitando
-`AB-C.D E`, o campo mostra `ABC.D`, **cinco** caracteres. Logo
-`[0x00433a10]` vale 10 e o destino é outro campo, que **não foi
-medido**.
+**O gerador prova esse mapeamento, e é isso que faltava.** Ele
+decodifica o endereço do operando até a entrada de `0x004231a0`, lê o
+offset que está lá, e aborta se ele não for o `OFS_*` que a tabela
+`DESTINOS` declara. Também confere a forma: `div 2` só vale para lote
+de dois bytes por caractere, que é o kanji — o `Load` do
+`we2002_core` lê `TEAM_NAME_KANJI_LEN[t]*2` bytes ali, e
+`TEAM_NAME_LEN_3[t]` no outro.
 
-A tabela `DESTINOS` do gerador é escrita à mão, e é por isso que ela
-aceita `None`: emitir `nao medido` é o único jeito de a conferência não
-passar pelo motivo errado outra vez.
+**A conferência antiga batia a aritmética contra uma largura escrita à
+mão, e por isso passou com o campo errado — duas vezes.** A primeira
+versão declarou `raw_kanji_name` (40 bytes, `div 2` = 20) e a conta
+fechou. O `compara_tela.sh --nomes` então mostrou o oráculo cortando
+em cinco caracteres, e a segunda versão trocou 20 por um literal 5 —
+que também estava errado, e por um motivo que só a tela produz: com
+`AB-C.D E` o campo corta em **seis**, e o sexto caractere é um
+**espaço**. Régua que não distingue `ABC.D ` de `ABC.D` não mede
+truncamento; mede tinta.
+
+Emulada a travessia do original sobre as duas imagens, a largura
+medida bate com a tabela do `we2002_core` em **95/95** times para os
+dois lotes na imagem japonesa. Na European Deluxe o lote kanji bate em
+46/95 — nomes latinos foram escritos em slot de kanji e deixaram lixo
+depois do terminador, então a distância ao próximo registro encurta.
+É comportamento do original com aquela imagem, não defeito do port.
 
 ## Onde as duas fontes se sobrepõem
 
-- **`MainForm.edit_nombre1`** — valor medido na tela (compara_tela.sh --nomes, 2026-08-18); o destino no formato continua **nao medido**.
+- **`MainForm.edit_nombre1`** — **medido na tela** (compara_tela.sh --nomes, 2026-08-18): 5. O lote esta provado -- OFS_TEAM_NAME_KANJI, `0x004231a0`[0][0] -- e a travessia emulada da 6, **um a mais**. A conta nao fecha e a tela vence; ver a CORR-WTE-064.
+- **`MainForm.edit_nombre2`** — **por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_3 (`0x004231a0`[1][0]); 7..19 nos 95, e 7 no time 2, que e o do `compara_tela.sh --nomes`.
 - **`MainForm.edit_nombre3`** — o `.dfm` declara 3 e o código reafirma o mesmo em tempo de execução.
 
 Concordam, e é por isso que aparece um só. Se um dia discordarem, o
