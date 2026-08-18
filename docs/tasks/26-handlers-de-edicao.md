@@ -5,7 +5,7 @@ type: implementação
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-25"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-26: Handlers de edição
@@ -132,12 +132,17 @@ separadas (primeiro parágrafo do Contexto).
       28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
       tática 7. Nove fecham `aberto` com dono nomeado, como a opção A previu
 - [x] Comportamento de truncamento documentado por campo — [`wte/re/truncamento.md`](../../wte/re/truncamento.md) (2026-08-13), gerado pelo [`dump_truncamento.py`](../../wte/tools/dump_truncamento.py)
-- [ ] ~~Golden verde para cada edição, uma por rodada~~ ~~conferência de tela
+- [x] ~~Golden verde para cada edição, uma por rodada~~ ~~conferência de tela
       verde para cada edição, uma por rodada~~ **Reescrito duas vezes, ambas por
       decisão do usuário** (2026-08-12 e 2026-08-18 — ver "As duas reescritas do
       critério de tela" abaixo): **conferência verde para cada grupo de edição,
       uma por rodada — de tela onde o alvo é mensurável em pixel, estática onde
-      já se mediu que não é.** O golden por byte da mesma edição é critério da
+      já se mediu que não é.** Mecanizado pelo
+      [`check_edicao.py`](../../wte/tools/check_edicao.py) →
+      [`wte/re/edicao-cobertura.md`](../../wte/re/edicao-cobertura.md): os 28
+      handlers com instrumento nomeado, os estáticos rodando `--check`, e os de
+      tela conferidos contra a **evidência de trace da própria corrida**. O
+      golden por byte da mesma edição é critério da
       [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), porque só ela tem
       como levar a edição ao disco
 - [x] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a` —
@@ -2287,3 +2292,71 @@ do `--edicao`; e o `iguala_nombres`.
   - o `iguala_nombres` que não acinzenta — **precisa de CORR própria**;
   - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
   - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
+- **Executado em:** 2026-08-18 — **vigésima terceira passagem: a task fecha.**
+  Os seis critérios marcados.
+
+- **O último critério era prosa, e prosa não reprova.** O log dizia qual régua
+  cobria o quê; handler novo entraria sem instrumento, script mudaria de nome,
+  conferência passaria a ser pulada — e o texto continuaria afirmando cobertura.
+
+  O novo [`check_edicao.py`](../../wte/tools/check_edicao.py) mecaniza a frase.
+  Ele **não mede tela nem byte**: confere que cada um dos 28 handlers tem
+  instrumento nomeado, que o instrumento existe, que o estático passa no próprio
+  `--check`, e — a parte que faltava — que o de tela **aparece na evidência de
+  trace da corrida que diz cobri-lo**. Produto:
+  [`wte/re/edicao-cobertura.md`](../../wte/re/edicao-cobertura.md).
+
+- **O grupo `mover` não pode ter régua de tela, e isso foi MEDIDO.** Antes de
+  escrever uma, li o Pascal: o `GravaJogador` do port devolve o código do
+  caminho feliz e **não escreve byte nenhum** — a gravação é da WTE-TASK-27.
+  Logo o `PreencheJogadores` seguinte repovoa com dado igual e **a tela do port
+  não muda**. Régua ali seria teste que tem de falhar até a 27 existir. É a
+  opção A vista do outro lado, e agora está escrita como classe `outra_task`,
+  não como omissão.
+
+- **A tabela tinha uma mentira, e a primeira versão da ferramenta não pegava.**
+  Eu havia atribuído o `dorsalMouseDown` ao `compara_tela.sh --edicao` — que não
+  clica camisa nenhuma. O script conferia que o *modo* existe, não que o modo
+  *exercita* o handler, e a atribuição atravessou a escrita inteira.
+
+  O conserto é a evidência de trace: o `compara_tela.sh` passou a gravar, por
+  modo, quais handlers dispararam de fato
+  ([`wte/re/edicao-tela.tsv`](../../wte/re/edicao-tela.tsv), versionada), e o
+  `check_edicao.py` exige que todo handler de classe `tela` esteja lá. Rodado, o
+  `dorsalMouseDown` reprovou na hora. Ele é `estatico`: dispara com o botão
+  **direito** e termina abrindo a ficha do jogador, sub-diálogo que nenhuma
+  régua de tela alcança.
+
+  **Dizer que um modo cobre um handler não faz o handler disparar** — e essa
+  frase agora tem um teste.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/check_edicao.py`, `wte/tools/test_check_edicao.py` (10 testes)
+  - `wte/re/edicao-cobertura.md` — gerado
+  - `wte/re/edicao-tela.tsv` + os parciais por modo — a evidência de trace
+  - `wte/tools/compara_tela.sh` — grava a evidência
+  - `wte/tools/README.md`
+  - `docs/tasks/progresso.md`, e o frontmatter desta task
+
+- **Gates medidos:** `make -C wte check` rc 0 (com o `check_edicao.py --check`
+  dentro); `lazbuild` rc 0; `python3 -m unittest` em `tools/`: **533 testes**,
+  OK; `compara_tela.sh --edicao` e `--nomes` rodados nesta passagem, os dois
+  **PASSOU**, e é a evidência deles que o `check_edicao.py` lê.
+
+- **O que esta task NÃO fechou, e tem dono escrito:**
+  - **nove handlers em `aberto` pela opção A** — os 7 de mover, o `dorsalClick`
+    e o `paderechaeizquierdaClick`: a metade de gravação é da
+    [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md). Era o previsto desde
+    2026-08-12;
+  - o `iguala_nombres` que **não acinzenta** no port — defeito medido pela
+    CORR-WTE-057, sem causa, e **precisa de CORR própria**;
+  - o destino de `[0x00433a10]` — **não medido**, e nomeado como tal no
+    `truncamento.md`;
+  - o vetor bola→zona e as tabelas da animação, que o
+    `estrategia.lista_formacionesClick` preenche;
+  - as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
+    `0x00407338`) — **decisão de escopo, sem dono**: a WTE-TASK-32 cobre
+    uniforme e bandeira do `MainForm`, não cara/cabelo/barba.

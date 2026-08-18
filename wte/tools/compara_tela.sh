@@ -337,6 +337,20 @@ captura_port() {
   disparos=$(grep -c 'MainForm.lista_equiposChange' "$TRACE" 2>/dev/null || echo 0)
   sel=$(grep -c 'MainForm.sel_barraClick' "$TRACE" 2>/dev/null || echo 0)
   track=$(grep -c 'MainForm.track_barraChange' "$TRACE" 2>/dev/null || echo 0)
+  # A evidencia de que o modo exercitou o que a tabela do `check_edicao.py`
+  # diz que ele exercita. Sem isto a tabela e palavra: dizer que um modo cobre
+  # um handler nao faz o handler disparar, e foi assim que o `dorsalMouseDown`
+  # entrou atribuido a um modo que nao clica camisa nenhuma.
+  if [ "$MODO" = edicao ] || [ "$MODO" = nomes ]; then
+    local ev="$WTE/re/edicao-tela.tsv"
+    grep -oE '== [A-Za-z_0-9]+\.[A-Za-z_0-9]+' "$TRACE" 2>/dev/null \
+      | sed 's/^== //' | sort | uniq -c \
+      | awk -v m="$MODO" '{print m"\t"$2"\t"$1}' > "$ev.$MODO"
+    cat "$WTE"/re/edicao-tela.tsv.* 2>/dev/null \
+      | sort -u > "$ev.novo" && mv "$ev.novo" "$ev"
+    # Os parciais por modo ficam em `.tsv.<modo>` e SAO versionados junto: sem
+    # eles, rodar um modo so apagaria a evidencia do outro.
+  fi
   local n1 n2 n3
   n1=$(grep -c 'MainForm.edit_nombre1KeyPress' "$TRACE" 2>/dev/null || echo 0)
   n2=$(grep -c 'MainForm.edit_nombre2KeyPress' "$TRACE" 2>/dev/null || echo 0)
