@@ -183,27 +183,38 @@ begin
     Result := indice;
 end;
 
-{ O limite do PRIMEIRO campo continua o valor MEDIDO NA TELA, e nao a
-  derivacao -- porque os dois discordam, de exatamente um.
+{ O limite do PRIMEIRO campo, e o `- 1` dele nao e chute: e um `dec` do
+  original que so vale para o lote kanji.
 
-  O lote esta provado (`OFS_TEAM_NAME_KANJI`) e a travessia emulada da largura
-  12 para o time 2, logo `div 2` = 6. **O oraculo corta em 5.** Medido em
-  2026-08-18 com `A B-C.DEFG`, texto cujo sexto caractere e um `D` visivel: o
-  oraculo mostra `A BC.` e o port, posto em 6, mostrava `A BC.D`.
+  `0x00403c0c` termina com um caso especial testado em `0x00403d59` --
+  `test edi,edi` (linha 0) e `cmp [ebp-4],0` (coluna 0):
 
-  Quem vence e a tela: ela E o oraculo. A conta que nao fecha esta na
-  CORR-WTE-064, com tudo o que ja foi medido. Enquanto ela nao fechar este
-  numero e literal, e o `dump_truncamento.py` aborta se a derivacao deixar de
-  dar 6 -- que e o jeito de a excecao nao sobreviver ao motivo dela.
+      dec  [0x00433a10 + linha*312 + coluna*52]
+      mov  [0x00433a14 + ...], 1
 
-  `indice` fica no parametro de proposito: o dia em que a conta fechar, so o
-  corpo muda. }
-{$PUSH}{$WARN 5024 OFF}  { `indice` fica no lugar de proposito -- ver acima }
+  O lote kanji guarda a largura MENOS UM, e o campo `+8` recebe 1 em vez do 2
+  que todos os outros recebem -- e o modo do decodificador de texto
+  (`0x00403598` compara com `0x82`, o byte-lider Shift-JIS): 1 = dois bytes por
+  caractere, 2 = um byte.
+
+  Como a largura do registro e `TEAM_NAME_KANJI_LEN*2`, o `div 2` do valor
+  decrementado da exatamente `TEAM_NAME_KANJI_LEN - 1`.
+
+  Medido na tela do oraculo em TRES times de larguras diferentes, digitando
+  `ABCDEFGHIJKLMNOP` (CORR-WTE-064, 2026-08-18):
+
+      time  2  (LEN  6)  ->  ABCDE          =  5
+      time  0  (LEN  8)  ->  ABCDEFG        =  7
+      time 56  (LEN 14)  ->  ABCDEFGHIJKLM  = 13
+
+  A diferenca contra a derivacao ingenua era CONSTANTE em 1, nao proporcional
+  -- foi isso que apontou um decremento em vez de erro de escala. Antes desta
+  medicao esta funcao devolvia o literal 5, que so valia para os 59 times de
+  LEN 6. }
 function LimiteDoNome1(indice: Integer): Integer;
 begin
-  Result := 5;
+  Result := TEAM_NAME_KANJI_LEN[IndiceNaTabela(indice)] - 1;
 end;
-{$POP}
 
 function LimiteDoNome2(indice: Integer): Integer;
 begin

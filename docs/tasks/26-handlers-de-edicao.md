@@ -2364,7 +2364,9 @@ do `--edicao`; e o `iguala_nombres`.
     leitura achou que o vizinho `[0x00433b48]` **não** era `mixed_case_name` —
     é `OFS_TEAM_NAME_3`, e o limite do `edit_nombre2` é 7 no time 2, não 19.
     Sobrou uma discordância de exatamente 1 entre a conta e a tela no primeiro
-    campo, aberta como [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md);
+    campo, que a [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) fechou no mesmo
+    dia: era um `dec` que o original aplica **só** ao lote kanji, e o limite é
+    `TEAM_NAME_KANJI_LEN − 1`;
   - ~~o vetor bola→zona e as tabelas da animação, que o
     `estrategia.lista_formacionesClick` preenche~~ — **portado em 2026-08-18**
     pela [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md), com as duas auxiliares.

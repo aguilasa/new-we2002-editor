@@ -83,7 +83,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O `MaxLength` de `edit_nombre1` é o literal 5, lido da tela; qual campo do formato tem 10 bytes continua sem medir | Baixa | [x] concluída | 2026-08-18 |
 | [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `lista_formacionesClick` é do grupo `carga`, foi encaminhado para a 26 pelo efeito, e continua `REStub` com as duas tasks concluídas | Alta | [x] concluída | 2026-08-18 |
 | [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | As três carregadoras de bitmap da ficha não têm dono em nenhuma das 40 tasks, e a 32 não menciona cara, cabelo nem barba | Alta | [x] concluída | 2026-08-18 |
-| [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O lote do `edit_nombre1` está provado e a travessia emulada dá 6 onde o oráculo corta em 5 | Média | [ ] pendente | — |
+| [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O lote do `edit_nombre1` está provado e a travessia emulada dá 6 onde o oráculo corta em 5 | Média | [x] concluída | 2026-08-18 |
 
 ## Checklist
 
@@ -149,7 +149,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
 - [x] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
 - [x] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 32 ou registrar na 35
-- [ ] CORR-WTE-064 — fechar a conta do `[0x00433a10]`, que dá um a mais que a tela
+- [x] CORR-WTE-064 — fechar a conta do `[0x00433a10]`, que dá um a mais que a tela
 
 ## Detalhes por correção
 

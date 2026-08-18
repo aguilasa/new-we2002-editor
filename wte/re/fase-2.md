@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2559 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9327** |
-| Escrito à mão | 57 | 3258 |
-| **Total** | | **12585** |
+| Escrito à mão | 57 | 3269 |
+| **Total** | | **12596** |
 
-**74.1% do Pascal da casca é saída de gerador.**
+**74.0% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -87,7 +87,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.flechasapaClick.inc` | 67 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormShow.inc` | 85 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 956 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 967 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 91 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalMouseDown.inc` | 40 | corpo de handler, da spec (fase 4) |

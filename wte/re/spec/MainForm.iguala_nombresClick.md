@@ -81,12 +81,26 @@ mostram `A BC.DE`, sete caracteres. O port mostrava nove antes.
 O truncamento daqui usa a mesma fonte que o `MaxLength`, agora de verdade:
 `LimiteDoNome2`, no `.aux.inc`, que lê `TEAM_NAME_LEN_3` do time selecionado.
 
-**O primeiro campo continua com número literal, e o motivo mudou de "não
-medido" para "a conta dá um a mais".** O lote dele está provado
-(`OFS_TEAM_NAME_KANJI`) e a travessia dá largura 12 para o time 2, logo `div 2`
-= 6 — e o oráculo corta em 5. Está na
-[CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md), com as cinco hipóteses já
-descartadas.
+**O primeiro campo também fechou, e o que faltava era um `dec`.**
+`0x00403c0c` termina com um caso especial testado em `0x00403d59` — linha 0 e
+coluna 0, que é exatamente o lote kanji:
+
+```text
+dec  [0x00433a10 + linha*312 + coluna*52]
+mov  [0x00433a14 + ...], 1
+```
+
+**O lote kanji guarda a largura menos um**, e o campo `+8` recebe `1` em vez do
+`2` dos outros — é o modo do decodificador de texto (`0x00403598` compara com
+`0x82`, o byte-líder Shift-JIS): 1 = dois bytes por caractere, 2 = um byte.
+Como a largura é `TEAM_NAME_KANJI_LEN × 2`, o `div 2` do valor decrementado dá
+`TEAM_NAME_KANJI_LEN − 1`.
+
+Medido pela [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md) em três times
+de larguras diferentes: `LEN` 6 → 5, 8 → 7, 14 → 13, com oráculo e port
+mostrando o mesmo em todos. A diferença contra a derivação ingênua era
+**constante em 1**, não proporcional — foi isso que apontou um decremento em
+vez de erro de escala.
 
 **O que mantinha o veredito `aberto` era outra coisa, e ela foi medida em
 2026-08-18 pela [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md): não é

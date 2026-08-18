@@ -128,23 +128,35 @@ DESTINOS = {
 # trata largura de struct, e misturar os dois modelos foi o defeito.
 POR_TIME = {"edit_nombre1", "edit_nombre2"}
 
-# O campo em que a DERIVACAO e a TELA discordam, e por quanto.
+# O lote que o original DECREMENTA antes de guardar, e o porque.
 #
-# `edit_nombre1`: o lote esta provado (`OFS_TEAM_NAME_KANJI`) e a travessia
-# emulada da largura 12 para o time 2, logo `div 2` = 6. **O oraculo corta em
-# 5.** Medido em 2026-08-18 com `A B-C.DEFG`, texto cujo sexto caractere e um
-# `D` visivel: o oraculo mostra `A BC.` e o port, com 6, mostrava `A BC.D`.
+# `0x00403c0c` termina com um caso especial que so vale para a linha 0 coluna 0
+# (`0x00403d59`: `test edi,edi` / `cmp [ebp-0x4],0`):
 #
-# Quem vence e a tela -- ela E o oraculo. O valor emitido e o medido, e a
-# derivacao fica registrada como o que e: uma conta que ainda nao fecha, de
-# exatamente um. Ver a CORR-WTE-064.
+#     dec DWORD PTR [0x00433a10 + linha*312 + coluna*52]
+#     mov DWORD PTR [0x00433a14 + linha*312 + coluna*52], 1
 #
-# A guarda tem os dois lados: se a derivacao deixar de dar o valor previsto
-# aqui, o gerador aborta -- porque ou o modelo mudou, ou a excecao deixou de
-# ser necessaria, e as duas coisas exigem outra medicao de tela.
-CONTRADIZ_A_TELA = {
-    "edit_nombre1": (5, "compara_tela.sh --nomes, 2026-08-18", 6),
-}
+# Ou seja: **o lote kanji guarda a largura MENOS UM**, e o campo `+8` recebe 1
+# em vez do 2 que todos os outros recebem. Esse `+8` e o modo do decodificador
+# de texto (`0x00403598` compara com `0x82`, o byte-lider Shift-JIS): 1 = dois
+# bytes por caractere, 2 = um byte.
+#
+# Sem esse `dec`, `div 2` da um a mais. Foi ele que sustentou duas versoes
+# erradas seguidas desta ferramenta -- `raw_kanji_name` (40 div 2 = 20) e
+# depois o literal 5 lido da tela --, porque a conta parecia nao fechar com
+# nenhum campo do formato.
+#
+# Medido em 2026-08-18 (CORR-WTE-064) dirigindo o oraculo em **tres** times de
+# larguras diferentes, digitando `ABCDEFGHIJKLMNOP` no `edit_nombre1`:
+#
+#     time  2  (LEN  6)  ->  ABCDE          =  5
+#     time  0  (LEN  8)  ->  ABCDEFG        =  7
+#     time 56  (LEN 14)  ->  ABCDEFGHIJKLM  = 13
+#
+# A diferenca e **constante em 1**, nao proporcional, e `(largura - 1) div 2`
+# fecha nos tres. Sobre a imagem japonesa isso e `TEAM_NAME_KANJI_LEN - 1` em
+# **95/95** times.
+LOTE_COM_DECREMENTO = ("OFS_TEAM_NAME_KANJI",)
 
 # O time de referencia das colunas numericas -- o mesmo que o
 # `compara_tela.sh --nomes` dirige (`IDX_EDICAO`), para o numero do documento e
@@ -467,33 +479,33 @@ def monta() -> list[Linha]:
                     f"{REL_EXE}: `{campo}` usa a forma `{forma}` sobre "
                     f"`{nome_da_tabela}`; `metade` so vale para lote de dois "
                     f"bytes por caractere")
-            derivado = (tab[TIME_DE_REFERENCIA] if forma == "metade"
-                        else tab[TIME_DE_REFERENCIA] - 1)
+            # O lote kanji guarda a largura MENOS UM -- ver
+            # LOTE_COM_DECREMENTO. Como a largura e `LEN*2`, `div 2` do valor
+            # decrementado da `LEN - 1`.
+            decrementa = ofs_esperado in LOTE_COM_DECREMENTO
+            def limite(n: int) -> int:
+                if forma == "metade":
+                    return n - 1 if decrementa else n
+                return n - 1
+            if decrementa and forma != "metade":
+                raise DumpError(
+                    f"{GERADOR}: `{campo}` le o lote {ofs_esperado}, que o "
+                    f"original decrementa, mas a expressao e `{forma}` e nao "
+                    f"`metade` -- o decremento so foi medido no caminho do "
+                    f"`div 2`")
+            valor = limite(tab[TIME_DE_REFERENCIA])
             nome_do_campo, largura = nome_da_tabela, len(tab)
-            faixa_min = min(tab) if forma == "metade" else min(tab) - 1
-            faixa_max = max(tab) if forma == "metade" else max(tab) - 1
-            if campo in CONTRADIZ_A_TELA:
-                valor, de_onde, previsto = CONTRADIZ_A_TELA[campo]
-                if derivado != previsto:
-                    raise DumpError(
-                        f"{GERADOR}: `{campo}` esta em CONTRADIZ_A_TELA "
-                        f"esperando derivacao {previsto}, e ela agora da "
-                        f"{derivado}. Ou o modelo do lote mudou, ou a excecao "
-                        f"deixou de valer -- as duas exigem outra medicao de "
-                        f"tela antes de mexer aqui")
-                nota = (f"**medido na tela** ({de_onde}): {valor}. O lote esta "
-                        f"provado -- {ofs_esperado}, "
-                        f"`{TABELA_DE_LOTES:#010x}`[{linha}][{coluna}] -- e a "
-                        f"travessia emulada da {previsto}, **um a mais**. A "
-                        f"conta nao fecha e a tela vence; ver a CORR-WTE-064")
-            else:
-                valor = derivado
-                nota = (f"**por time** -- a largura e remedida a cada troca de "
-                        f"time, do lote {ofs_esperado} "
-                        f"(`{TABELA_DE_LOTES:#010x}`[{linha}][{coluna}]); "
-                        f"{faixa_min}..{faixa_max} nos 95, e {valor} no time "
-                        f"{TIME_DE_REFERENCIA}, que e o do `compara_tela.sh "
-                        f"--nomes`")
+            faixa_min, faixa_max = limite(min(tab)), limite(max(tab))
+            extra = (" A largura desse lote e guardada **menos um** "
+                     f"(`dec` em `0x00403d95`, so para "
+                     f"`{TABELA_DE_LOTES:#010x}`[0][0]), logo o limite e "
+                     f"`{nome_da_tabela} - 1`." if decrementa else "")
+            nota = (f"**por time** -- a largura e remedida a cada troca de "
+                    f"time, do lote {ofs_esperado} "
+                    f"(`{TABELA_DE_LOTES:#010x}`[{linha}][{coluna}]); "
+                    f"{faixa_min}..{faixa_max} nos 95, e {valor} no time "
+                    f"{TIME_DE_REFERENCIA}, que e o do `compara_tela.sh "
+                    f"--nomes`.{extra}")
         else:
             rel, nome_do_campo = declarado
             largura = largura_do_destino(rel, nome_do_campo)
@@ -606,10 +618,42 @@ def md(linhas: list[Linha]) -> str:
         "versão declarou `raw_kanji_name` (40 bytes, `div 2` = 20) e a conta",
         "fechou. O `compara_tela.sh --nomes` então mostrou o oráculo cortando",
         "em cinco caracteres, e a segunda versão trocou 20 por um literal 5 —",
-        "que também estava errado, e por um motivo que só a tela produz: com",
-        "`AB-C.D E` o campo corta em **seis**, e o sexto caractere é um",
-        "**espaço**. Régua que não distingue `ABC.D ` de `ABC.D` não mede",
-        "truncamento; mede tinta.",
+        "que também estava errado, porque o limite é **por time**.",
+        "",
+        "## O `dec` que faltava, e ele explica as duas versões erradas",
+        "",
+        "`0x00403c0c` termina com um caso especial que vale **só** para a linha",
+        "0 coluna 0 — o lote kanji:",
+        "",
+        "```text",
+        "0x00403d59  test edi,edi        ' linha == 0 ?",
+        "0x00403d6e  cmp [ebp-4],0       ' coluna == 0 ?",
+        "0x00403d95  dec  [0x00433a10 + linha*312 + coluna*52]",
+        "0x00403d98  mov  [0x00433a14 + ...], 1",
+        "```",
+        "",
+        "**O lote kanji guarda a largura menos um**, e o campo `+8` recebe `1`",
+        "em vez do `2` que todos os outros recebem — esse `+8` é o modo do",
+        "decodificador de texto (`0x00403598` compara com `0x82`, o byte-líder",
+        "Shift-JIS): 1 = dois bytes por caractere, 2 = um byte.",
+        "",
+        "Sem esse `dec`, `div 2` dá **um a mais**, e foi ele que sustentou as",
+        "duas versões erradas: a conta não fechava com nenhum campo do formato",
+        "porque a largura guardada não era a largura medida.",
+        "",
+        "Medido em 2026-08-18 dirigindo o oráculo em **três** times de larguras",
+        "diferentes, digitando `ABCDEFGHIJKLMNOP` no `edit_nombre1`:",
+        "",
+        "| time | `TEAM_NAME_KANJI_LEN` | o oráculo mostra | |",
+        "|--:|--:|---|--:|",
+        "| 2 | 6 | `ABCDE` | 5 |",
+        "| 0 | 8 | `ABCDEFG` | 7 |",
+        "| 56 | 14 | `ABCDEFGHIJKLM` | 13 |",
+        "",
+        "A diferença é **constante em 1**, não proporcional — o que descarta",
+        "erro de escala e aponta um decremento. `(largura − 1) div 2` fecha nos",
+        "três, e sobre a imagem japonesa isso é `TEAM_NAME_KANJI_LEN − 1` em",
+        "**95/95** times.",
         "",
         "Emulada a travessia do original sobre as duas imagens, a largura",
         "medida bate com a tabela do `we2002_core` em **95/95** times para os",

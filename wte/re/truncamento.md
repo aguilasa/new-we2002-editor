@@ -60,10 +60,42 @@ mão, e por isso passou com o campo errado — duas vezes.** A primeira
 versão declarou `raw_kanji_name` (40 bytes, `div 2` = 20) e a conta
 fechou. O `compara_tela.sh --nomes` então mostrou o oráculo cortando
 em cinco caracteres, e a segunda versão trocou 20 por um literal 5 —
-que também estava errado, e por um motivo que só a tela produz: com
-`AB-C.D E` o campo corta em **seis**, e o sexto caractere é um
-**espaço**. Régua que não distingue `ABC.D ` de `ABC.D` não mede
-truncamento; mede tinta.
+que também estava errado, porque o limite é **por time**.
+
+## O `dec` que faltava, e ele explica as duas versões erradas
+
+`0x00403c0c` termina com um caso especial que vale **só** para a linha
+0 coluna 0 — o lote kanji:
+
+```text
+0x00403d59  test edi,edi        ' linha == 0 ?
+0x00403d6e  cmp [ebp-4],0       ' coluna == 0 ?
+0x00403d95  dec  [0x00433a10 + linha*312 + coluna*52]
+0x00403d98  mov  [0x00433a14 + ...], 1
+```
+
+**O lote kanji guarda a largura menos um**, e o campo `+8` recebe `1`
+em vez do `2` que todos os outros recebem — esse `+8` é o modo do
+decodificador de texto (`0x00403598` compara com `0x82`, o byte-líder
+Shift-JIS): 1 = dois bytes por caractere, 2 = um byte.
+
+Sem esse `dec`, `div 2` dá **um a mais**, e foi ele que sustentou as
+duas versões erradas: a conta não fechava com nenhum campo do formato
+porque a largura guardada não era a largura medida.
+
+Medido em 2026-08-18 dirigindo o oráculo em **três** times de larguras
+diferentes, digitando `ABCDEFGHIJKLMNOP` no `edit_nombre1`:
+
+| time | `TEAM_NAME_KANJI_LEN` | o oráculo mostra | |
+|--:|--:|---|--:|
+| 2 | 6 | `ABCDE` | 5 |
+| 0 | 8 | `ABCDEFG` | 7 |
+| 56 | 14 | `ABCDEFGHIJKLM` | 13 |
+
+A diferença é **constante em 1**, não proporcional — o que descarta
+erro de escala e aponta um decremento. `(largura − 1) div 2` fecha nos
+três, e sobre a imagem japonesa isso é `TEAM_NAME_KANJI_LEN − 1` em
+**95/95** times.
 
 Emulada a travessia do original sobre as duas imagens, a largura
 medida bate com a tabela do `we2002_core` em **95/95** times para os
@@ -74,8 +106,8 @@ depois do terminador, então a distância ao próximo registro encurta.
 
 ## Onde as duas fontes se sobrepõem
 
-- **`MainForm.edit_nombre1`** — **medido na tela** (compara_tela.sh --nomes, 2026-08-18): 5. O lote esta provado -- OFS_TEAM_NAME_KANJI, `0x004231a0`[0][0] -- e a travessia emulada da 6, **um a mais**. A conta nao fecha e a tela vence; ver a CORR-WTE-064.
-- **`MainForm.edit_nombre2`** — **por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_3 (`0x004231a0`[1][0]); 7..19 nos 95, e 7 no time 2, que e o do `compara_tela.sh --nomes`.
+- **`MainForm.edit_nombre1`** — **por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_KANJI (`0x004231a0`[0][0]); 5..13 nos 95, e 5 no time 2, que e o do `compara_tela.sh --nomes`. A largura desse lote e guardada **menos um** (`dec` em `0x00403d95`, so para `0x004231a0`[0][0]), logo o limite e `TEAM_NAME_KANJI_LEN - 1`..
+- **`MainForm.edit_nombre2`** — **por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_3 (`0x004231a0`[1][0]); 7..19 nos 95, e 7 no time 2, que e o do `compara_tela.sh --nomes`..
 - **`MainForm.edit_nombre3`** — o `.dfm` declara 3 e o código reafirma o mesmo em tempo de execução.
 
 Concordam, e é por isso que aparece um só. Se um dia discordarem, o

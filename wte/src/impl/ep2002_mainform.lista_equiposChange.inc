@@ -83,10 +83,10 @@ begin
     `0x0040cbc8` que este handler chama. O port os punha uma vez so, na carga
     da imagem, com numero fixo; o do `edit_nombre2` estava errado por isso.
 
-    O do `edit_nombre2` e POR TIME e esta medido nas duas pontas: derivado do
-    lote `OFS_TEAM_NAME_3` e conferido na tela do oraculo (7 para o time 2,
-    contra os 19 que o port usava). O do `edit_nombre1` continua literal, e o
-    porque esta no `LimiteDoNome1`.
+    Os DOIS sao por time e estao medidos nas duas pontas -- derivados dos
+    lotes de `0x004231a0` e conferidos na tela do oraculo. O do `edit_nombre1`
+    leva um `- 1` que nao e chute: e um `dec` que o original aplica so ao lote
+    kanji (`0x00403d95`), e esta no `LimiteDoNome1`.
 
     O lote de onde sai cada limite NAO e o lote de onde sai o texto do campo:
     `edit_nombre1` mostra `names[1]` e recebe o limite do lote kanji, e

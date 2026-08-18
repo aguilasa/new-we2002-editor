@@ -168,6 +168,34 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   contra o `Player.Decode` do `we2002_core` — e não diz nada sobre desenho.
   Se alguma passagem futura criar régua para o `jugador`, ela nasce com as três
   imagens divergindo, e é esta entrada que explica por quê.
+- **O limite do `edit_nombre1` na European Deluxe** — medido pela
+  [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) em 2026-08-18, e **já está no
+  código**.
+  *O que diverge:* o `MaxLength` do primeiro campo de nome, em **49 dos 95**
+  times, e **só na imagem European Deluxe**. Na japonesa os dois lados
+  concordam nos 95.
+  *Natureza:* consequência de uma decisão já registrada, não bug.
+  *Decisão:* manter.
+  *Razão:* o original **anda pelo arquivo** a cada troca de time, medindo a
+  largura do registro como "bytes não-zero até o próximo não-zero". O port não
+  reabre a imagem — decisão medida, escrita no cabeçalho do
+  [`lista_equiposChange.inc`](../../wte/src/impl/ep2002_mainform.lista_equiposChange.inc)
+  — e tira o número de `TEAM_NAME_KANJI_LEN`, do `we2002_core`. Os dois
+  caminhos dão o mesmo resultado quando o slot de kanji contém kanji. Na
+  European Deluxe nomes latinos foram escritos em slot de kanji e deixaram
+  lixo depois do terminador, então a distância ao próximo registro encurta e a
+  medição em tempo de execução não bate mais com a tabela. Reproduzir exigiria
+  o port reabrir a imagem a cada troca de time, que é a decisão contrária.
+  *Evidência:* emulada a travessia do original sobre as duas imagens,
+  `(largura − 1) div 2 == TEAM_NAME_KANJI_LEN − 1` em **95/95** times na
+  japonesa e **46/95** na European Deluxe. O lote `OFS_TEAM_NAME_3`, que o
+  `edit_nombre2` usa, bate **95/95 nas duas** — o problema é do slot de kanji,
+  não do método.
+  *Onde o teste sabe:* o `compara_tela.sh --nomes` roda sobre a imagem
+  japonesa (`WTE_TELA_IMAGEM` tem esse padrão), onde não há divergência. Rodar
+  o mesmo modo apontando para a European Deluxe acusaria — e **acusaria
+  corretamente**, então não há exceção a nomear, e sim uma imagem a escolher de
+  propósito.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.
 - **Rótulos cortados por fonte substituta** — acontece nos dois lados, e talvez
   não conte como divergência; decidir.

@@ -81,6 +81,30 @@ reposicionado: `Left := 7`, `Width := 100`, e o `punto` some. Abaixo disso,
 > [`sonda_dorsal.py --check`](../../tools/sonda_dorsal.py), contra o
 > `vcl60.bpl`. Ver a seção Notas.
 
+### Os dois `MaxLength`, que são deste handler e não do `FormShow`
+
+Ele chama `0x0040cbc8` (em `0x0040d1c3`), que percorre a tabela de lotes de
+`0x004231a0`, **anda pelo arquivo** até o registro do time selecionado — pulando
+o rodapé de cada setor MODE2/2352 — e guarda offset, largura e bytes de cada
+lote em `0x00433a0c`. Só então, na mesma rotina:
+
+```text
+edit_nombre1.MaxLength := [0x00433a10] div 2      ' linha 0 coluna 0 = kanji
+edit_nombre2.MaxLength := [0x00433b48] - 1        ' linha 1 coluna 0 = NAME_3
+edit_nombre3.MaxLength := 3                       ' literal
+```
+
+**Os dois primeiros são por time**, e o port os punha uma vez só no `FormShow`,
+com número fixo. Corrigido pelas [CORR-WTE-061](../../../docs/tasks/CORR-WTE-061.md)
+e [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md).
+
+O lote kanji tem um `dec` que nenhum outro tem (`0x00403d95`, só para linha 0
+coluna 0): ele guarda a largura **menos um**, e o campo `+8` recebe `1` em vez
+do `2` dos demais — o modo do decodificador de texto. É por isso que o limite é
+`TEAM_NAME_KANJI_LEN − 1` e não `TEAM_NAME_KANJI_LEN`.
+
+**Evidência:** disassembly lido
+
 ## Bytes tocados
 
 **Nenhum. Só lê.** Cinco bytes por seleção, em

@@ -124,20 +124,16 @@ class TestReal(unittest.TestCase):
 
         O que ele segura agora nao e numero escrito a mao: e que o gerador
         DECODIFICA o operando ate a entrada de `0x004231a0` e emite o valor da
-        tabela de comprimento daquele lote.
+        tabela de comprimento daquele lote, com o `- 1` do lote kanji.
         """
-        # O primeiro tem o lote provado E o valor medido na tela, que
-        # discordam de um. Quem sai e o da tela; ver a CORR-WTE-064.
         um = self.por_campo["edit_nombre1"]
         self.assertEqual(um.destino, "TEAM_NAME_KANJI_LEN")
         self.assertIn("OFS_TEAM_NAME_KANJI", um.nota)
-        self.assertIn("medido na tela", um.nota)
-        medido, _de_onde, previsto = T.CONTRADIZ_A_TELA["edit_nombre1"]
-        self.assertEqual(um.maxlength, medido)
-        self.assertEqual(
-            T.tabela_de_comprimento("TEAM_NAME_KANJI_LEN")
-            [T.TIME_DE_REFERENCIA], previsto,
-            "a derivacao mudou -- remeça a tela antes de mexer na excecao")
+        # O `- 1` e o `dec` de 0x00403d95, que so vale para a linha 0 coluna 0.
+        self.assertEqual(um.maxlength,
+                         T.tabela_de_comprimento("TEAM_NAME_KANJI_LEN")
+                         [T.TIME_DE_REFERENCIA] - 1)
+        self.assertIn("menos um", um.nota)
 
         dois = self.por_campo["edit_nombre2"]
         self.assertEqual(dois.destino, "TEAM_NAME_LEN_3")
@@ -146,14 +142,24 @@ class TestReal(unittest.TestCase):
                          [T.TIME_DE_REFERENCIA] - 1)
         self.assertIn("OFS_TEAM_NAME_3", dois.nota)
 
-    def test_excecao_de_tela_com_derivacao_diferente_derruba(self):
-        """A excecao nao pode sobreviver ao motivo dela (CORR-WTE-064)."""
-        original = dict(T.CONTRADIZ_A_TELA)
-        T.CONTRADIZ_A_TELA["edit_nombre1"] = (5, "teste", 99)
-        self.addCleanup(T.CONTRADIZ_A_TELA.update, original)
+    def test_so_o_lote_kanji_leva_o_decremento(self):
+        """O `dec` de 0x00403d95 e da linha 0 coluna 0, e de mais nenhuma.
+
+        Se ele valesse para todos, o `edit_nombre2` cairia de 7 para 6 -- e 7 e
+        o que o oraculo mostra na tela.
+        """
+        self.assertEqual(T.LOTE_COM_DECREMENTO, ("OFS_TEAM_NAME_KANJI",))
+        dois = self.por_campo["edit_nombre2"]
+        self.assertNotIn("menos um", dois.nota)
+
+    def test_decremento_num_lote_de_um_byte_derruba(self):
+        """O `dec` so foi medido no caminho do `div 2`."""
+        original = T.LOTE_COM_DECREMENTO
+        T.LOTE_COM_DECREMENTO = ("OFS_TEAM_NAME_KANJI", "OFS_TEAM_NAME_3")
+        self.addCleanup(setattr, T, "LOTE_COM_DECREMENTO", original)
         with self.assertRaises(T.DumpError) as e:
             T.monta()
-        self.assertIn("CONTRADIZ_A_TELA", str(e.exception))
+        self.assertIn("so foi medido no caminho do `div 2`", str(e.exception))
 
     def test_lote_declarado_errado_derruba(self):
         """A guarda que faltava: trocar o `OFS_*` esperado tem de abortar."""

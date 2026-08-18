@@ -1,6 +1,6 @@
 formulario	campo	maxlength	fonte	expressao	destino	largura_do_destino	nota
-MainForm	edit_nombre1	5	código, `0x0040cc43`	[0x00433a10] div 2	TEAM_NAME_KANJI_LEN	95	**medido na tela** (compara_tela.sh --nomes, 2026-08-18): 5. O lote esta provado -- OFS_TEAM_NAME_KANJI, `0x004231a0`[0][0] -- e a travessia emulada da 6, **um a mais**. A conta nao fecha e a tela vence; ver a CORR-WTE-064
-MainForm	edit_nombre2	7	código, `0x0040cc5b`	[0x00433b48] - 1	TEAM_NAME_LEN_3	95	**por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_3 (`0x004231a0`[1][0]); 7..19 nos 95, e 7 no time 2, que e o do `compara_tela.sh --nomes`
+MainForm	edit_nombre1	5	código, `0x0040cc43`	[0x00433a10] div 2	TEAM_NAME_KANJI_LEN	95	**por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_KANJI (`0x004231a0`[0][0]); 5..13 nos 95, e 5 no time 2, que e o do `compara_tela.sh --nomes`. A largura desse lote e guardada **menos um** (`dec` em `0x00403d95`, so para `0x004231a0`[0][0]), logo o limite e `TEAM_NAME_KANJI_LEN - 1`.
+MainForm	edit_nombre2	7	código, `0x0040cc5b`	[0x00433b48] - 1	TEAM_NAME_LEN_3	95	**por time** -- a largura e remedida a cada troca de time, do lote OFS_TEAM_NAME_3 (`0x004231a0`[1][0]); 7..19 nos 95, e 7 no time 2, que e o do `compara_tela.sh --nomes`.
 MainForm	edit_nombre3	3	código, `0x0040cc71`	3	abbreviations	4	o `.dfm` declara 3 e o código reafirma o mesmo em tempo de execução
 jugador	casilla_dorsal	10	dfm	10			número de camisa, no máximo três dígitos. Quem recusa tecla é o `casilla_dorsalKeyPress`; o `MaxLength` de 10 nunca chega a valer
 jugador	casilla_nombre	10	dfm	10	name	11	
