@@ -1,0 +1,7 @@
+formulario	campo	maxlength	fonte	expressao	destino	largura_do_destino	nota
+MainForm	edit_nombre1	20	código, `0x0040cc43`	[0x00433a10] div 2	raw_kanji_name	40	
+MainForm	edit_nombre2	19	código, `0x0040cc5b`	[0x00433b48] - 1	mixed_case_name	20	
+MainForm	edit_nombre3	3	código, `0x0040cc71`	3	abbreviations	4	o `.dfm` declara 3 e o código reafirma o mesmo em tempo de execução
+jugador	casilla_dorsal	10	dfm	10			número de camisa, no máximo três dígitos. Quem recusa tecla é o `casilla_dorsalKeyPress`; o `MaxLength` de 10 nunca chega a valer
+jugador	casilla_nombre	10	dfm	10	name	11	
+jugador	casilla_precio	3	dfm	3			campo numérico de preço. O `MaxLength` de 3 limita dígito, não texto — ver a WTE-TASK-30

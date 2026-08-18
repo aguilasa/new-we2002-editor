@@ -131,16 +131,18 @@ separadas (primeiro parágrafo do Contexto).
 - [x] Todo handler do grupo com spec, incluindo regra de validação — **28 de
       28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
       tática 7. Nove fecham `aberto` com dono nomeado, como a opção A previu
-- [ ] Comportamento de truncamento documentado por campo
+- [x] Comportamento de truncamento documentado por campo — [`wte/re/truncamento.md`](../../wte/re/truncamento.md) (2026-08-13), gerado pelo [`dump_truncamento.py`](../../wte/tools/dump_truncamento.py)
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
       para cada edição, uma por rodada**, pelo `compara_tela.sh`. O golden por
       byte da mesma edição é critério da
       [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), porque só ela tem
       como levar a edição ao disco
-- [ ] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a`
-- [ ] Nenhuma medição sobre `roms/` diretamente
-- [ ] Commit no formato conventional, em inglês
+- [ ] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a` —
+      **nenhum roteiro digita texto ainda**, então a regra vale sem ter sido
+      exercitada. Ela entra junto com a régua de tela dos campos de nome
+- [x] Nenhuma medição sobre `roms/` diretamente — todas as passagens usaram cópia em `work/` ou no scratchpad
+- [x] Commit no formato conventional, em inglês — as 20 passagens
 
 ## Plano de fechamento
 
@@ -1887,6 +1889,74 @@ do `--edicao`; e o `iguala_nombres`.
     destino na camada de dados;
   - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`), que
     promovem `bolaMouseDown` e `relojTimer` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
+- **Executado em:** 2026-08-13 — **vigésima passagem: o truncamento por campo,
+  medido.** Sobra **um** critério, e ele é grande: estender o `--edicao` aos
+  outros grupos.
+
+- **O limite de um campo não está num lugar só, e essa é a razão de existir a
+  ferramenta.** São seis campos com limite: três o trazem do `.dfm` e três o
+  recebem em tempo de execução, por `TCustomEdit::SetMaxLength`. Ler só o
+  `.dfm` acha três e **não anuncia** que há outros três; ler só o código acha
+  três e perde os outros.
+
+  E dos que vêm do código, **nenhum é literal puro**: dois são expressão sobre a
+  largura do campo de destino.
+
+- **O achado é o `div 2`.** O `edit_nombre1` recebe `[0x00433a10] div 2`. Sem
+  olhar o destino isso é um número mágico; olhando, fecha: o campo é
+  `raw_kanji_name`, **40 bytes, dois por caractere** — 20 caracteres. Os outros
+  dois cortam um byte antes do destino, que é o do terminador:
+  `mixed_case_name` 20 → 19, `abbreviations[0]` 4 → 3.
+
+  **Essa é a conferência que o gerador roda**, e ela vale porque as duas medidas
+  vêm de fontes que não se falam: a expressão sai do `.text` do `.exe`, a
+  largura sai da camada de dados (o `we2002_core`, byte-idêntico ao `ed.exe`).
+  O gerador aborta se discordarem.
+
+- **Um `MaxLength` verdadeiro e irrelevante.** `jugador.casilla_dorsal` declara
+  10 e recebe **número de camisa**, que tem no máximo três dígitos. O limite
+  útil vem do `casilla_dorsalKeyPress`, que recusa tecla. Quem portasse "o campo
+  corta em 10" teria copiado uma medição correta para o lugar errado — está
+  registrado como tal.
+
+- **O que derrubou a primeira versão do decodificador:** o terceiro sítio
+  carrega o ponteiro do formulário em `edx` (`mov edx,ds:_MainForm`), indexa o
+  controle e só então põe o literal em `edx`. Tratar a primeira carga como
+  comprimento daria `MaxLength := endereço do formulário` — um número enorme, e
+  nenhum erro. Há teste para isso.
+
+  E `abbreviations` é `array[0..2] of array[0..3]`: a largura é a dimensão
+  **interna**, 4. Pegar a externa daria 3, que **por acaso é o `MaxLength`
+  certo** — a conferência passaria pelo motivo errado, para sempre. Também tem
+  teste.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_truncamento.py`, `wte/tools/test_dump_truncamento.py`
+    (15 testes)
+  - `wte/re/truncamento.md`, `wte/re/truncamento.tsv` — gerados
+  - `wte/tools/README.md`
+  - `docs/tasks/26-handlers-de-edicao.md` — três critérios marcados
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 516 testes, OK.
+
+- **Problemas encontrados:** Nenhum além dos dois modos de erro acima, que
+  viraram teste.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **um critério, e é o caro:** *conferência de tela verde para cada edição,
+    uma por rodada*. O `compara_tela.sh --edicao` hoje exercita **um** par —
+    `sel_barraClick` e `track_barraChange` —, e cada grupo restante precisa da
+    sua sequência de cliques medida nos dois lados, como aquele precisou. É o
+    que a nona passagem já anotava como "estender o `--edicao` aos grupos que
+    vierem";
+  - com ele vem a limpeza de campo por `End`/`shift+Home`/`BackSpace`, que
+    nenhum roteiro exercita ainda porque nenhum digita texto;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
   - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
 
 ---
