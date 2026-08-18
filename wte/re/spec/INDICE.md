@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 18 |
+| `implementado` | 19 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 64 |
+| `aberto` | 63 |
 | **total** | **96** |
 
-56 de 96 têm arquivo de spec.
+57 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -97,7 +97,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
 | `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | implementado |
 | `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | implementado |
-| `0x0040cab8` | `MainForm` | boton_barras2isoClick | OnClick | gravacao | aberto |
+| `0x0040cab8` | `MainForm` | [boton_barras2isoClick](MainForm.boton_barras2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | aberto |
 | `0x0040d36c` | `MainForm` | [edit_nombre1KeyPress](MainForm.edit_nombre1KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d3c4` | `MainForm` | [edit_nombre2KeyPress](MainForm.edit_nombre2KeyPress.md) | OnKeyPress | edicao | implementado |

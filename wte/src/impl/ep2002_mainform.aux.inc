@@ -112,6 +112,49 @@ var
 var
   BarrasEmEdicao: array[0..4] of Byte;
 
+const
+  { A aritmetica de endereco das barras, do `boton_barras2isoClick`
+    (`0x0040cab8`). O original nao usa `OFS_TEAM_BARS`: ele calcula
+    `0x45FF0 + 5*idx` como indice de byte no fluxo de DADOS a partir do setor
+    850, e converte para offset absoluto na hora.
+
+    Os tres numeros sao do disassembly. `850 * 2352 + 24 = 1999224 = 0x1E8178`
+    e a base que ele soma; `0x45FF0` poe o time 0 em 2328184, que e o
+    `OFS_TEAM_BARS` do `we2002_core` -- as duas fontes concordam, e a spec traz
+    a conferencia na fronteira de setor, que e onde elas poderiam divergir. }
+  BARRAS_SETOR_BASE  = 850;
+  BARRAS_LOGICO_BASE = $45FF0;
+  BARRAS_POR_TIME    = 5;
+
+{ Leva as cinco barras do buffer de edicao para o modelo em memoria.
+
+  NAO tem correspondente no original, e nao precisa ter: o `wte.exe` rele a
+  imagem a cada troca de time, entao o disco e a fonte dele. O port carrega uma
+  vez. Ver a spec do `boton_barras2isoClick`. }
+procedure GuardaBarrasNoModelo(indice: Integer);
+begin
+  if (indice < 0) or (indice >= IDX_MODELO_ML) then
+    Exit;
+  if indice < TIMES_NACIONAIS then
+    with Jogo.teams[indice] do
+    begin
+      bar_attack    := ShortInt(BarrasEmEdicao[0]);
+      bar_defence   := ShortInt(BarrasEmEdicao[1]);
+      bar_power     := ShortInt(BarrasEmEdicao[2]);
+      bar_speed     := ShortInt(BarrasEmEdicao[3]);
+      bar_technique := ShortInt(BarrasEmEdicao[4]);
+    end
+  else
+    with Jogo.ml_teams[indice - TIMES_NACIONAIS] do
+    begin
+      bar_attack    := ShortInt(BarrasEmEdicao[0]);
+      bar_defence   := ShortInt(BarrasEmEdicao[1]);
+      bar_power     := ShortInt(BarrasEmEdicao[2]);
+      bar_speed     := ShortInt(BarrasEmEdicao[3]);
+      bar_technique := ShortInt(BarrasEmEdicao[4]);
+    end;
+end;
+
 { Cadeia a partir de um vetor de AnsiChar terminado em NUL, que e como a
   camada de dados guarda todo nome. }
 function Cadeia(const bruto): string;

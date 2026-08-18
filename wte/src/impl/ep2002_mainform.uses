@@ -17,3 +17,5 @@ ep2002_movertodos # ficha_movertodos.ShowModal, nos dois botoes de lote
 Controls        # mrYes
 wte_legendas   # Legenda, LegendaDoCabelo -- gerado por tools/dump_legendas.py
 we2002_tables    # TEAM_NAME_LEN_3, no LimiteDoNome2 (CORR-WTE-061)
+ep2002_info3    # ficha_info3.etiq1 + ShowModal, no boton_barras2isoClick
+we2002_offsets  # TOffset, no endereco de gravacao

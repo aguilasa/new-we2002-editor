@@ -1,0 +1,87 @@
+# golden-04-barras-editada -- lado oraculo.
+#
+# WTE-TASK-27, e e o roteiro que JULGA. O `golden-03-barras` grava sem editar:
+# os dois lados escrevem os bytes que ja estavam la, e um port que nao gravasse
+# nada passaria igual. Aqui uma barra e editada PELA TELA antes da gravacao,
+# entao o byte gravado e diferente do que estava no arquivo -- e o gate passa a
+# distinguir "gravou certo" de "nao gravou".
+#
+# E o criterio que a WTE-TASK-26 passou para ca em 2026-08-12: edicao e
+# gravacao julgadas juntas. Pixel igual dos dois lados nao prova que os dois
+# escreveram o mesmo byte do modelo.
+#
+# ## O estimulo e o do `compara_tela.sh --edicao`, e nao um novo
+#
+# As tres coordenadas ja foram medidas nos dois lados em 2026-08-12:
+#
+#   time 2            3 `Down` (o combo nasce com ItemIndex = -1)
+#   sel_barra1        (30, 112)  -- dispara `sel_barraClick` uma vez
+#   trilha            (190, 200) -- interseccao das duas faixas aceitas: a do
+#                                   oraculo e y 190..200, a do port 199..207,
+#                                   porque o gtk2 desenha 6 px de borda que o
+#                                   Wine nao desenha
+#
+# Clique na trilha PAGINA, e os dois andam +2: `bar_defence` do time 2 vale 4 e
+# vira 6. Inventar coordenada nova aqui seria refazer essa medicao de graca.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# As duas do arranque, herdadas do golden-01. Os 5 bytes das barras NAO entram:
+# eles tem de sair iguais dos dois lados, e e isso que este roteiro mede.
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ editar a defesa ----
+! clique 30 112
+~ 2
+! clique 190 200
+~ 2
+= EDITA_BARRA
+
+# ------------------------------------------------------------- gravar ----
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- o `wte.exe` grava pela saida bufferizada do runtime C, e sem
+# isto os 5 bytes nao chegam ao arquivo. Ver `wte/re/gravacao-controle.md`.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_BARRAS

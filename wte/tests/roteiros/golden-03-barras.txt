@@ -1,0 +1,78 @@
+# golden-03-barras -- o golden do `boton_barras2isoClick`, lado oraculo.
+#
+# WTE-TASK-27. Irmao do golden-02-gravacao.txt, e a divisao tem razao: o
+# golden-02 e o roteiro do **controle**, que exercita as duas gravacoes de uma
+# vez para medir o que muda de graca; este exercita UMA, porque o gate compara
+# com o port e o port implementa uma de cada vez.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-03-barras.txt \
+#        --roteiro-port wte/tests/roteiros/golden-03-barras.port.txt
+#
+# O bloco termina com uma troca de time, e nao e enfeite: o `wte.exe` grava
+# pela saida bufferizada do runtime C, e sem essa descarga os 5 bytes NAO
+# chegam ao arquivo -- o harness encerra com `wineserver -k` e o buffer se
+# perde. Medido pelo par 27-descarga-sem/-com; ver
+# `wte/re/gravacao-controle.md`.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# As duas do arranque, herdadas do golden-01. A gravacao em si NAO entra aqui:
+# os cinco bytes das barras tem de sair IGUAIS dos dois lados, e e exatamente
+# isso que este roteiro existe para medir. Offsets 0-BASED e INCLUSIVOS.
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------ um time carregado ----
+#
+# Pelo TECLADO. A lista suspensa do TComboBox fica MAPEADA depois do clique no
+# item e segura o ponteiro -- todo clique seguinte morre nela.
+#
+# O combo nasce sem selecao (`ItemIndex` = -1), entao este primeiro `Down`
+# seleciona o item **0** -- e e o time 0 que a gravacao seguinte endereca.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- as barras ----
+#
+# grupo_barras (8,72) + boton_barras2iso (8,112) = (16,184), 73x25.
+# Abre a caixa "W11 TE PT!" (282x113), Ok em (142,80). Deixa-la aberta engole
+# todo clique seguinte, e o roteiro parece ter parado de funcionar.
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 2
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- ver o cabecalho. Sem ela os 5 bytes ficam no buffer.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_BARRAS

@@ -19,7 +19,7 @@ unit we2002_estado;
 interface
 
 uses
-  SysUtils, we2002_database, we2002_cdimage;
+  SysUtils, we2002_database, we2002_cdimage, we2002_offsets;
 
 const
   { O patch de arranque, medido na WTE-TASK-08 (`wte/re/assets.md` secao 8.2) e
@@ -38,6 +38,13 @@ const
   PATCH_SETORES       = 7;
   PATCH_BYTES         = 2048;     { dados de usuario de um setor MODE2/2352  }
   PATCH_SALTO         = $130;     { 2352 - 2048                             }
+
+  { A geometria MODE2/2352, escrita uma vez. O `PATCH_SALTO` acima e
+    `SETOR_BYTES - SETOR_DADOS`, e continua com o proprio nome porque e o
+    salto que o patch de arranque da entre um setor e o seguinte. }
+  SETOR_BYTES         = 2352;
+  SETOR_DADOS_INICIO  = 24;
+  SETOR_DADOS         = 2048;
 
 var
   { A imagem carregada. Vazio enquanto nenhuma foi aberta. }
@@ -97,6 +104,38 @@ function InjetaPatchDeArranque(const imagem: string): Integer;
 { Abre a imagem: injeta o patch e carrega o banco. False quando nao da para
   abrir o arquivo. }
 function AbreImagem(const caminho: string): Boolean;
+
+{ ------------------------------------------------------------------------ }
+{ A GRAVACAO -- WTE-TASK-27.
+
+  O original mantem um `FILE*` aberto o tempo todo (`0x00432e58`) e grava por
+  ele. O port abre, grava e fecha a cada operacao, e a diferenca NAO aparece
+  no gate: o que o `golden_check.sh` compara e o arquivo, e o arquivo recebe
+  os mesmos bytes no mesmo offset.
+
+  A diferenca que aparece e a oposta, e favorece o port: a saida do runtime C
+  e bufferizada, entao o clique no original nao produz syscall nenhuma -- os
+  bytes ficam no buffer ate algo depois procurar noutro ponto do mesmo
+  arquivo. Medido em `wte/re/gravacao-controle.md` com um par de sondas. Aqui
+  o `Close` esvazia na hora, e por isso todo roteiro de gravacao do lado
+  ORACULO tem de terminar com uma acao que force a descarga -- senao o gate
+  compara um oraculo truncado com um port inteiro. }
+
+{ Endereco absoluto de um indice de byte no fluxo de DADOS DE USUARIO, contado
+  a partir do primeiro byte de dados do setor `setor_base`.
+
+  E a aritmetica MODE2/2352 que o `wte.exe` escreve a mao em cada gravacao:
+  2352 = 24 de cabecalho + 2048 de dados + 280 de EDC/ECC, e o indice logico
+  ignora os 304 que nao sao dados. Escrita uma vez aqui em vez de repetida em
+  cada handler; o original a repete. }
+function EnderecoDeDados(setor_base, indice_logico: TOffset): TOffset;
+
+{ Grava `count` bytes em `offset` na imagem aberta. False quando nao ha imagem
+  aberta ou nao da para abrir o arquivo.
+
+  NAO recalcula EDC/ECC -- preservar e o comportamento do original, e do
+  `we2002_core`. }
+function GravaNaImagem(offset: TOffset; const buffer; count: SizeInt): Boolean;
 
 { ------------------------------------------------------------------------ }
 { O time e o jogador que a ficha esta editando -- as globais `0x004335cc` e
@@ -266,6 +305,32 @@ begin
     resolvido := vinculo[0];
   end;
   Result := not (resolvido in TIMES_SEM_CONDICIONAL);
+end;
+
+function EnderecoDeDados(setor_base, indice_logico: TOffset): TOffset;
+begin
+  Result := setor_base * SETOR_BYTES + SETOR_DADOS_INICIO
+          + (indice_logico div SETOR_DADOS) * SETOR_BYTES
+          + (indice_logico mod SETOR_DADOS);
+end;
+
+function GravaNaImagem(offset: TOffset; const buffer; count: SizeInt): Boolean;
+var
+  img: TCdImage;
+begin
+  Result := False;
+  if (ImagemAberta = '') or (count <= 0) then
+    Exit;
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    img.Seek(offset, soBeginning);
+    img.Write(buffer, count);
+    Result := True;
+  finally
+    img.Close;
+  end;
 end;
 
 function AbreImagem(const caminho: string): Boolean;

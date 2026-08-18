@@ -228,3 +228,100 @@ alvos.
   dias num TSV versionado porque nada exercia a descarga. Foi preciso desmontar
   a atribuição do próprio instrumento antes de confiar em qualquer número desta
   task.
+
+---
+
+- **Executado em:** 2026-08-18 — **segunda passagem, ainda parcial.** A
+  primeira das seis gravações fechou: `boton_barras2isoClick`, com spec, Pascal
+  e golden verde. Cinco continuam abertas.
+
+- **Resumo do que foi feito:**
+
+  **`boton_barras2isoClick` está `implementado`.** É o menor do grupo — 272
+  bytes, do `0x0040cab8` ao `0x0040cbc7` — e coube inteiro numa leitura. Ele
+  grava cinco bytes do **buffer de edição** (`0x00434592`), não do modelo, o
+  que é exatamente a distinção que a WTE-TASK-26 mediu e guardou como
+  `BarrasEmEdicao`; sem ela a gravação levaria o valor velho e o gate acusaria
+  a gravação por um defeito da edição.
+
+  **O endereço não sai de um `OFS_*` mais um passo — sai da aritmética do
+  original, e as duas fontes foram confrontadas.** O Obocaman calcula
+  `0x45FF0 + 5·idx` como índice de byte no fluxo de dados a partir do setor
+  850 e converte para offset absoluto na hora. O `we2002_core` chega aos
+  mesmos endereços por outro caminho: lê em sequência e **salta** na fronteira
+  de setor, com `OFS_TEAM_BARS_A` para o time 3. As duas concordam onde
+  poderiam divergir — 2328199 para `idx = 3`, 2328508 para `idx = 4`. É a
+  conferência que a §4.2 do plano manda fazer antes de acreditar em fórmula.
+
+  **O gate agora julga edição e gravação juntas, e precisou de DOIS roteiros
+  para isso.** O `golden-03-barras` grava sem editar e passa — mas passaria
+  igual com um port que não gravasse nada, porque sem edição os dois lados
+  escrevem os bytes que já estavam lá. O `golden-04-barras-editada` edita
+  `bar_defence` do time 2 pela tela antes de mandar gravar: medido no lado
+  oráculo, `0x04` vira `0x06` em 2328195, e o port produziu o mesmo arquivo. É
+  o critério que a WTE-TASK-26 passou para cá em 2026-08-12, e é a primeira vez
+  que ele roda.
+
+  O estímulo do `golden-04` não é novo: as três coordenadas (3 `Down`,
+  `sel_barra1` em (30,112), trilha em (190,200)) são as que o
+  `compara_tela.sh` mediu nos dois lados em 2026-08-12, inclusive o passo de
+  `+2` por clique na trilha, que é código diferente nos dois widgetsets.
+
+  **EDC/ECC preservados deixou de ser presumido, para esta gravação.** O
+  `cmp` da corrida editada muda **um** byte, em 2328195; os 280 bytes de
+  EDC/ECC do setor 989 (2328200..2328479) saem idênticos. Medido, não
+  presumido — mas vale para a gravação medida, não para o grupo, então o
+  critério continua aberto.
+
+- **A assimetria de coordenada entre os lados tem causa medida.** O `Ok` do
+  `ficha_info3` fica em (142,80) no oráculo e em (140,56) no port: sob Wine sem
+  gerenciador de janela a moldura é desenhada **dentro** da janela X (3 px de
+  borda, 29 de título), e a janela mede 282×113; sob gtk2 a janela **é** o
+  cliente, e mede os 276×81 do DFM. Por isso cada `golden-0*` tem `.port.txt`
+  próprio.
+
+- **Uma divergência de arquitetura, e ela não aparece no gate.** O port também
+  atualiza `Jogo.teams[].bar_*` ao gravar. O `wte.exe` relê a imagem a cada
+  troca de time, então o disco é a fonte dele; o port carrega uma vez e desenha
+  a partir de `Jogo`. Gravar só no disco faria a tela do próprio port discordar
+  do próprio arquivo na volta ao time. Mesmo byte, mesmo offset — está escrito
+  na spec.
+
+- **Um número do plano mudou, e o `check_fase2.py` não deixou passar.** Escrever
+  Pascal à mão move a fração de código gerado: 74,0% → **73,6%** (9.323 geradas
+  contra 3.345 à mão). A §4.4 do `PLAN-WTE-LAZARUS.md` afirma esse número
+  literalmente e o `--check` reprovou até ela ser corrigida. Isso vai se repetir
+  a cada handler desta fase.
+
+- **O que esta passagem NÃO fez:**
+  - `boton_nombres2iso`, `boton_tex2iso`, `boton_mcr2iso`, `grabar_camiseta` e
+    `grabar_memory` continuam sem spec e sem Pascal;
+  - EDC/ECC preservados continua critério aberto — provado para uma gravação,
+    não para as seis;
+  - os nove handlers que a WTE-TASK-26 deixou em `aberto` pela opção A
+    continuam lá: só o par das barras (`sel_barraClick` + `track_barraChange`)
+    ganhou julgamento por byte nesta passagem.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/MainForm.boton_barras2isoClick.md` — veredito `implementado`
+  - `wte/src/impl/ep2002_mainform.boton_barras2isoClick.inc`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — a aritmética de endereço e o
+    `GuardaBarrasNoModelo`
+  - `wte/src/we2002_estado.pas` — `EnderecoDeDados` e `GravaNaImagem`, a porta
+    de escrita do port
+  - `wte/tests/roteiros/golden-03-barras{,.port}.txt`,
+    `golden-04-barras-editada{,.port}.txt`
+  - `wte/re/spec/INDICE.md`, `wte/re/fase-2.md`, `wte/re/offsets-novos.md`,
+    `wte/re/io-medido.tsv`, `wte/re/cmp-medido.tsv` — gerados/evidência
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — a fração remedida
+  - `wte/tests/roteiros/README.md`, e esta task
+
+- **Gates medidos:** `golden_check.sh` sobre `golden-03-barras` **PASSOU** e
+  sobre `golden-04-barras-editada` **PASSOU** (nos dois, só as duas faixas
+  declaradas do arranque divergem); `make -C wte check` rc 0 com **590 testes**
+  OK; `lazbuild` rc 0; `spec_index.py` 19 `implementado`. `roms/` intocada.
+
+- **Problemas encontrados:** nenhum que tenha sobrado. Um `pkill -f 'build/wte'`
+  numa medição exploratória casou com a própria linha de comando do shell e o
+  matou junto — sem consequência para o repositório, e a lição é a de sempre
+  neste projeto: filtro por nome alcança quem está segurando o nome.

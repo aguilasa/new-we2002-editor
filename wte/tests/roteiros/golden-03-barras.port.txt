@@ -1,0 +1,55 @@
+# golden-03-barras, lado PORT. Par de golden-03-barras.txt.
+#
+# A assimetria com o lado oraculo e a mesma do golden-01: o oraculo recebe o
+# caminho da imagem pelo dialogo `Abre` e o port pela linha de comando, entao o
+# bloco de abertura nao tem par aqui. O resto e a MESMA sequencia.
+#
+# ## As coordenadas do modal nao sao as do oraculo, e o motivo e medido
+#
+# O `ficha_info3` tem 276x81 de cliente no DFM. Sob Wine, sem gerenciador de
+# janela, a moldura e desenhada DENTRO da janela X -- 3 px de borda e 29 de
+# titulo --, entao a janela tem 282x113 e o `Ok` (cliente 104,44, 73x25) cai em
+# ~(142,80). Sob gtk2 a janela E o cliente: medido no `:99` em 2026-08-18,
+# `276x81`, e o centro do `Ok` fica em (140,56).
+#
+# Coordenada de janela principal nao muda: os dois desenham 522x475, e o
+# `compara_tela.sh` ja media que a diferenca de borda do gtk2 (6 px) cabe
+# dentro dos botoes.
+#
+# ## A troca de time no fim nao e necessaria AQUI, e fica assim mesmo
+#
+# O port abre, grava e fecha a cada operacao -- nao ha buffer a descarregar. A
+# linha existe porque os dois lados tem de receber a MESMA entrada; roteiro que
+# diverge entre os lados deixa de ser a mesma entrada, e e a condicao de a
+# comparacao valer.
+alvo: port
+estado: ok
+operacao: gravacao
+
+# O titulo tem o sufixo ` [Lazarus]`, posto em tempo de execucao pelo
+# `wtemain.pas`. E divergencia deliberada e obrigatoria: os dois lados rodam no
+# MESMO :99, e com titulo igual o harness dirigiria o lado errado.
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# ------------------------------------------------------ um time carregado ----
+! clique 50 46
+~ 1
+! tecla Down
+~ 4
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- as barras ----
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 140 56
+~ 2
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 4
+= GRAVA_BARRAS

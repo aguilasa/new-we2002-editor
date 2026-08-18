@@ -181,6 +181,27 @@ Editar um sem o outro quebra a afirmacao; o
 compara os dois corpos e exige que o resultado medido continue oposto -- mesma
 guarda que o par 07/08 tem.
 
+Os `golden-03` e `golden-04` sao o gate de UMA gravacao, a das barras, e
+existem em par porque so o segundo julga:
+
+| roteiro | o que mede |
+|---|---|
+| [`golden-03-barras.txt`](golden-03-barras.txt) | gravar **sem editar** |
+| [`golden-04-barras-editada.txt`](golden-04-barras-editada.txt) | editar pela tela e **entao** gravar |
+
+Sem edicao os dois lados escrevem os bytes que ja estavam la, e **um port que
+nao gravasse nada passaria igual**. O `golden-04` muda `bar_defence` do time 2
+de 4 para 6 antes de mandar gravar, e ai o gate distingue as duas coisas. O
+estimulo dele nao e novo: as tres coordenadas (3 `Down`, `sel_barra1` em
+(30,112), trilha em (190,200)) sao as que o
+[`../../tools/compara_tela.sh`](../../tools/compara_tela.sh) mediu nos dois
+lados em 2026-08-12.
+
+Cada um tem `.port.txt` proprio, e a assimetria e uma so: o `Ok` do
+`ficha_info3` fica em (142,80) no oraculo e em (140,56) no port. Sob Wine sem
+gerenciador de janela a moldura e desenhada DENTRO da janela X (3 px de borda,
+29 de titulo); sob gtk2 a janela E o cliente.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o
