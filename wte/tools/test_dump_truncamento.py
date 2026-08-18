@@ -114,14 +114,20 @@ class TestReal(unittest.TestCase):
         self.assertEqual(sorted(l.campo for l in do_codigo),
                          ["edit_nombre1", "edit_nombre2", "edit_nombre3"])
 
-    def test_o_nome_kanji_corta_na_metade_dos_bytes(self):
-        """40 bytes de kanji, dois por caractere, 20 caracteres.
+    def test_o_primeiro_campo_nao_inventa_destino(self):
+        """`edit_nombre1` sai com destino vazio e o valor medido na tela.
 
-        E o achado do documento: sem olhar o destino, `div 2` nao tem
-        explicacao e o 20 vira numero magico.
+        Este teste comecou afirmando o contrario -- que o destino era
+        `raw_kanji_name`, 40 bytes, e o limite 20 -- e passava, porque
+        `40 div 2` fecha. O `compara_tela.sh --nomes` mediu o oraculo cortando
+        em CINCO. O que o teste segura agora nao e o numero: e a RECUSA de
+        emitir destino que ninguem mediu.
         """
         l = self.por_campo["edit_nombre1"]
-        self.assertEqual((l.largura, l.maxlength), (40, 20))
+        self.assertEqual(l.destino, "")
+        self.assertEqual(l.largura, 0)
+        self.assertEqual(l.maxlength, 5)
+        self.assertIn("nao medido", l.nota)
 
     def test_os_de_texto_cortam_um_byte_antes_do_destino(self):
         for campo in ("edit_nombre2", "edit_nombre3", "casilla_nombre"):

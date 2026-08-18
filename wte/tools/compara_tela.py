@@ -57,6 +57,8 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+import re
+from collections import Counter
 
 GENERATOR = "wte/tools/compara_tela.py"
 
@@ -376,6 +378,162 @@ def montagem(oraculo, port, destino: Path) -> None:
     alvo.save(destino)
 
 
+
+# --------------------------------------------- os tres campos de nome --
+
+LFM_MAINFORM = Path(__file__).resolve().parents[1] / "forms/ep2002_mainform.lfm"
+
+# Quanto se descarta da borda do `TEdit` antes de procurar glifo. **A primeira
+# versao nao descartava nada e o veredito saiu verde medindo a BORDA:** os tres
+# campos deram largura de tinta igual a largura deles, e a coincidencia passou
+# por "os dois lados concordam". Tres pixels tiram a moldura dos dois
+# widgetsets sem comer a primeira coluna de glifo.
+BORDA = 3
+
+# Quanto um pixel precisa se afastar do fundo do campo para contar como tinta.
+# Frouxo de proposito: o que se mede e ONDE ha glifo, nao a cor dele.
+LIMIAR_TINTA = 60
+
+CAMPOS_DE_NOME = ("edit_nombre1", "edit_nombre2", "edit_nombre3")
+
+# Quanto os dois lados podem diferir na largura da tinta de um campo.
+#
+# Nao e folga escolhida por conveniencia: e **meio glifo**. O que se mede aqui e
+# quantos caracteres o filtro deixou passar, e um caractere a mais ou a menos
+# vale 7 a 8 px nesta fonte -- entao 4 px pega qualquer divergencia de contagem
+# e nao pega o tremor de renderizacao entre gtk2 e Win32. Medido em 2026-08-18:
+# com os dois lados de acordo a diferenca foi de 0 a 1 px; com um caractere de
+# diferenca, 10 px.
+TOLERANCIA_PX = 4
+
+
+def retangulos_do_lfm(nomes) -> dict:
+    """Os retangulos dos controles, somados pela cadeia de pais do `.lfm`.
+
+    **Lidos, nao digitados.** A primeira versao trazia os quatro numeros de cada
+    campo escritos a mao e um deles estava errado -- o `edit_nombre3` tem 33 px
+    de largura, nao 113 --, o que fez a regua medir a moldura de um campo que
+    nem existia daquele tamanho. O formulario raiz fica de fora da soma: o
+    `Left`/`Top` dele e posicao de tela.
+    """
+    pilha, fora = [], {}
+    for linha in LFM_MAINFORM.read_text(encoding="utf-8",
+                                        errors="replace").splitlines():
+        ind = len(linha) - len(linha.lstrip())
+        corte = linha.strip()
+        m = re.match(r"object (\w+): (\w+)", corte)
+        if m:
+            while pilha and pilha[-1][0] >= ind:
+                pilha.pop()
+            pilha.append([ind, m.group(1), 0, 0, 0, 0])
+        elif corte == "end":
+            while pilha and pilha[-1][0] >= ind:
+                pilha.pop()
+        elif pilha:
+            m2 = re.match(r"(Left|Top|Width|Height) = (-?\d+)", corte)
+            if m2:
+                pilha[-1][{"Left": 2, "Top": 3,
+                           "Width": 4, "Height": 5}[m2.group(1)]] = \
+                    int(m2.group(2))
+            if pilha[-1][1] in nomes and corte.startswith("Height"):
+                fora[pilha[-1][1]] = (sum(e[2] for e in pilha[1:]),
+                                      sum(e[3] for e in pilha[1:]),
+                                      pilha[-1][4], pilha[-1][5])
+    faltando = set(nomes) - set(fora)
+    if faltando:
+        raise TelaError(f"{LFM_MAINFORM.name}: nao achei {sorted(faltando)}")
+    return fora
+
+
+def tinta(img, rect, off: tuple[int, int], rotulo: str) -> tuple[int, int]:
+    """(largura da tinta, largura util do campo) dentro de um `TEdit`.
+
+    **Nao se compara o texto pixel a pixel entre os dois lados, e nao e
+    desleixo:** gtk2 e Win32 nao desenham a mesma fonte, o `MS Sans Serif` do
+    original nem esta instalado, e um diff estrito acusaria divergencia em
+    qualquer campo com letra dentro. O que sobrevive a troca de widgetset e a
+    PROPRIEDADE que o filtro impoe -- quantos caracteres passaram --, e a
+    largura da tinta e o proxy dela que se le do pixel.
+
+    O fundo sai da propria regiao, pela cor mais frequente: campo de `TEdit` e
+    quase todo fundo, e assim a medida nao depende de saber qual creme cada
+    lado pinta.
+    """
+    x, y, w, h = rect
+    dentro = (x + BORDA, y + BORDA, w - 2 * BORDA, h - 2 * BORDA)
+    r = regiao(img, dentro, off, rotulo)
+    px = list(r.getdata())
+    fundo, quantos = Counter(px).most_common(1)[0]
+    # Se a cor mais frequente nao for maioria, ela pode nao ser o fundo -- e ai
+    # a medida se INVERTE em silencio, medindo o buraco entre os glifos. Num
+    # `TEdit` de 11 px o texto nunca chega perto de metade; se chegar, a regiao
+    # nao e um campo de texto e a leitura nao vale.
+    if quantos * 2 <= len(px):
+        raise TelaError(
+            f"{rotulo}: a cor mais frequente ocupa {quantos} de {len(px)} "
+            f"pixels e nao da para trata-la como fundo")
+    colunas = [cx for cx in range(r.width)
+               if any(sum(abs(a - b)
+                          for a, b in zip(px[cy * r.width + cx], fundo))
+                      > LIMIAR_TINTA for cy in range(r.height))]
+    largura = 0 if not colunas else colunas[-1] - colunas[0] + 1
+    return largura, r.width
+
+
+def compara_nomes(oraculo, port) -> dict:
+    """As larguras de tinta dos tres campos, nos dois lados."""
+    rects = retangulos_do_lfm(CAMPOS_DE_NOME)
+    medida = {}
+    for lado, img in (("oraculo", oraculo), ("port", port)):
+        off = calibra(img, lado)
+        medida[lado] = {n: tinta(img, rects[n], off, f"{lado}/{n}")
+                        for n in CAMPOS_DE_NOME}
+    erros = []
+    for lado, m in medida.items():
+        for nome, (largura, util) in m.items():
+            if largura == 0:
+                erros.append(f"{lado}: {nome} sem texto -- a digitacao nao "
+                             f"chegou, ou o filtro comeu tudo")
+            elif largura >= util:
+                # A guarda que faltava na primeira versao. Tinta ocupando o
+                # campo inteiro nao distingue "texto transbordou" de "a moldura
+                # entrou na conta", e as duas leituras dao verde.
+                erros.append(f"{lado}: {nome} tem tinta em toda a largura util "
+                             f"({largura} de {util} px) -- ou o texto "
+                             f"transbordou, ou a borda entrou na medida")
+    # A comparacao que importa e ORACULO CONTRA PORT, campo a campo.
+    #
+    # A primeira versao tinha, alem desta, duas regras sobre a forma da tela --
+    # "nombre1 e nombre2 tem o mesmo filtro, logo a mesma tinta" e "nombre3 tem
+    # de sair mais curto". A segunda vale; **a primeira estava errada**: os dois
+    # campos tem o mesmo filtro e `MaxLength` DIFERENTES (5 e 19), e a regra
+    # reprovava o oraculo por se comportar como ele e. Regra estrutural
+    # inventada sobre o app reprova o app; a comparacao entre os lados nao
+    # inventa nada.
+    if not erros:
+        for nome in CAMPOS_DE_NOME:
+            o, pt = medida["oraculo"][nome][0], medida["port"][nome][0]
+            if abs(o - pt) > TOLERANCIA_PX:
+                erros.append(
+                    f"{nome}: {o} px de tinta no oraculo contra {pt} no port "
+                    f"-- diferenca de {abs(o - pt)} px, mais que um glifo")
+    return {"medida": medida, "erros": erros}
+
+
+def relata_nomes(r: dict) -> int:
+    for lado in ("oraculo", "port"):
+        m = r["medida"][lado]
+        print(f"  tinta {lado:8} " + "  ".join(
+            f"{n[-1]}={m[n][0]}/{m[n][1]}px" for n in CAMPOS_DE_NOME))
+    if r["erros"]:
+        print("REPROVOU:")
+        for e in r["erros"]:
+            print("  " + e)
+        return 1
+    print("  PASSOU: os tres filtros de nome se comportam igual nos dois lados")
+    return 0
+
+
 # ------------------------------------------------ calibracao e cobertura --
 def calibra(img, rotulo: str) -> tuple[int, int]:
     """`(dx, dy)` do cliente dentro da janela capturada, pela ancora `barra0`.
@@ -635,6 +793,8 @@ def main(argv: list[str]) -> int:
         return autoteste()
     if argv[:1] == ["--habilitacao"]:
         return main_habilitacao(argv[1:])
+    if argv[:1] == ["--nomes"]:
+        return main_nomes(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("oraculo", type=Path)
     ap.add_argument("port", type=Path)
@@ -711,6 +871,22 @@ def main_habilitacao(argv: list[str]) -> int:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2
     return relata_habilitacao(r)
+
+
+def main_nomes(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(
+        prog="compara_tela.py --nomes",
+        description="Compara os tres campos de nome depois de os dois lados "
+                    "receberem o MESMO texto pelo teclado.")
+    ap.add_argument("oraculo", type=Path)
+    ap.add_argument("port", type=Path)
+    args = ap.parse_args(argv)
+    try:
+        r = compara_nomes(carrega(args.oraculo), carrega(args.port))
+    except TelaError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return relata_nomes(r)
 
 
 if __name__ == "__main__":

@@ -70,15 +70,23 @@ begin
       time, com o mesmo valor sempre. Aqui e uma vez so, porque os dois numeros
       sao do FORMATO e nao do time.
 
-      E sao `SizeOf` do campo de destino, nao literal: as expressoes do original
-      (`[0x00433a10] div 2` e `[0x00433b48] - 1`) sao a largura do campo, e
-      escrever 20 e 19 a mao romperia o vinculo no dia em que o campo mudasse.
-      O `div 2` e porque o nome kanji guarda dois bytes por caractere; o `- 1` e
-      o byte do terminador. Medido em wte/re/truncamento.md.
+      Os dois numeros NAO vem do mesmo lugar, e a diferenca custou uma
+      divergencia:
+
+      - `edit_nombre2` sai de `SizeOf` do campo de destino. A expressao do
+        original (`[0x00433b48] - 1`) e a largura do campo menos o terminador,
+        e o `dump_truncamento.py` confere isso contra a camada de dados a cada
+        `make check`.
+      - `edit_nombre1` e **5, medido na tela do oraculo**. A primeira versao
+        desta linha usava `SizeOf(raw_kanji_name) div 2` = 20, escolhido porque
+        fechava a conta de `[0x00433a10] div 2` -- e o `compara_tela.sh --nomes`
+        mostrou o oraculo cortando em CINCO. Logo `[0x00433a10]` vale 10 e o
+        destino nao e aquele campo. Qual e, nao foi medido; escolher outro que
+        tambem feche a conta seria repetir o erro.
 
       `edit_nombre3` nao aparece aqui: o `MaxLength = 3` dele esta no proprio
       DFM, e o `.lfm` o herda. }
-    edit_nombre1.MaxLength := SizeOf(Jogo.teams[0].raw_kanji_name) div 2;
+    edit_nombre1.MaxLength := 5;
     edit_nombre2.MaxLength := SizeOf(Jogo.teams[0].mixed_case_name) - 1;
   end
   else

@@ -282,3 +282,83 @@ class TestContraODump(unittest.TestCase):
             C.le_dump(caminho, 7)
         self.assertIn("nao traz", str(e.exception))
 
+
+def com_nomes(larguras, off=(0, 0)):
+    """Uma janela de mentira com tinta de largura dada em cada campo de nome.
+
+    A tinta e desenhada DENTRO da borda, no mesmo recuo que a medicao aplica --
+    caso contrario o teste passaria medindo a moldura, que foi exatamente o
+    defeito da primeira versao da regua.
+    """
+    img = janela(off=off)
+    rects = C.retangulos_do_lfm(C.CAMPOS_DE_NOME)
+    for nome, w in zip(C.CAMPOS_DE_NOME, larguras):
+        x, y, cw, ch = rects[nome]
+        x += off[0] + C.BORDA
+        y += off[1] + C.BORDA
+        for yy in range(y, y + ch - 2 * C.BORDA):      # o fundo do campo
+            for xx in range(x, x + cw - 2 * C.BORDA):
+                img.putpixel((xx, yy), (255, 253, 240))
+        # A tinta e desenhada esparsa, como glifo de verdade: uma coluna a
+        # cada tres. Bloco solido faria o preto ser a cor mais frequente do
+        # campo estreito e a medida se inverteria -- que e o modo de falha que
+        # o `tinta()` agora recusa.
+        for yy in range(y + 2, y + 12):
+            for xx in range(x, x + w):
+                if xx in (x, x + w - 1) or (xx - x) % 3 == 0:
+                    img.putpixel((xx, yy), (0, 0, 0))
+    return img
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestNomes(unittest.TestCase):
+    def test_os_retangulos_saem_do_lfm(self):
+        """Lidos, nao digitados -- e o `edit_nombre3` prova por que.
+
+        Ele tem 33 px de largura contra os 113 dos outros dois. A primeira
+        versao trazia os quatro numeros de cada campo escritos a mao, com 113
+        nos tres, e a regua media a moldura de um campo que nao existia daquele
+        tamanho.
+        """
+        r = C.retangulos_do_lfm(C.CAMPOS_DE_NOME)
+        self.assertEqual(r["edit_nombre1"][2], 113)
+        self.assertEqual(r["edit_nombre3"][2], 33)
+
+    def test_mede_a_tinta_e_nao_a_moldura(self):
+        m = C.compara_nomes(com_nomes((31, 41, 22)), com_nomes((31, 41, 22)))
+        larg = [m["medida"]["port"][n][0] for n in C.CAMPOS_DE_NOME]
+        self.assertEqual(larg, [31, 41, 22])
+        self.assertEqual(m["erros"], [])
+
+    def test_diferenca_de_um_glifo_reprova(self):
+        """10 px e um caractere a mais: foi a divergencia real de 2026-08-18."""
+        m = C.compara_nomes(com_nomes((31, 41, 22)), com_nomes((41, 41, 22)))
+        self.assertTrue(any("edit_nombre1" in e for e in m["erros"]), m["erros"])
+
+    def test_tremor_de_renderizacao_passa(self):
+        """1 px de diferenca e fonte, nao filtro -- foi o que os dois lados
+        deram quando concordavam."""
+        m = C.compara_nomes(com_nomes((31, 41, 22)), com_nomes((32, 41, 22)))
+        self.assertEqual(m["erros"], [])
+
+    def test_campo_vazio_reprova(self):
+        m = C.compara_nomes(com_nomes((0, 41, 22)), com_nomes((0, 41, 22)))
+        self.assertTrue(any("sem texto" in e for e in m["erros"]), m["erros"])
+
+    def test_tinta_em_toda_a_largura_reprova(self):
+        """A guarda que faltava: moldura contada como tinta da largura cheia.
+
+        Sem ela os tres campos saiam com largura igual a do proprio campo, nos
+        dois lados, e o veredito lia isso como concordancia.
+        """
+        r = C.retangulos_do_lfm(C.CAMPOS_DE_NOME)
+        cheio = r["edit_nombre1"][2] - 2 * C.BORDA
+        m = C.compara_nomes(com_nomes((cheio, 41, 22)), com_nomes((cheio, 41, 22)))
+        self.assertTrue(any("largura util" in e for e in m["erros"]), m["erros"])
+
+    def test_a_calibracao_e_aplicada(self):
+        """Com o port deslocado, a medida tem de ser a mesma."""
+        m = C.compara_nomes(com_nomes((31, 41, 22)),
+                            com_nomes((31, 41, 22), off=(6, 6)))
+        self.assertEqual(m["erros"], [])
+

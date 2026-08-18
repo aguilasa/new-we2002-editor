@@ -76,11 +76,30 @@ JANELA = 64
 
 # As larguras que a camada de dados declara, e o campo de cada uma. Os nomes
 # sao lidos do Pascal gerado -- nao ha numero digitado aqui.
+# O campo da camada de dados por tras de cada limite. `None` quer dizer
+# **destino nao medido** -- e a distincao custou uma divergencia:
+#
+# A primeira versao mapeava `edit_nombre1` para `raw_kanji_name` (40 bytes), o
+# que dava `40 div 2 = 20`, e a conferencia passou. Ela passou porque confere a
+# ARITMETICA contra o destino que esta tabela declara, e a tabela e escrita a
+# mao. O `compara_tela.sh --nomes` mediu na tela do oraculo: `edit_nombre1`
+# corta em **5** caracteres, nao 20 -- logo `[0x00433a10]` vale 10, e o destino
+# nao e o `raw_kanji_name`.
+#
+# Um `None` aqui nao e desistencia: e a recusa de emitir numero que ninguem
+# mediu.
 DESTINOS = {
-    "edit_nombre1": ("wte/src/we2002_team.pas", "raw_kanji_name"),
+    "edit_nombre1": None,
     "edit_nombre2": ("wte/src/we2002_team.pas", "mixed_case_name"),
     "edit_nombre3": ("wte/src/we2002_team.pas", "abbreviations"),
     "casilla_nombre": ("wte/src/we2002_player.pas", "name"),
+}
+
+# O que a regua de tela mediu para os campos sem destino declarado. Vem de
+# `compara_tela.sh --nomes` (2026-08-18): digitando `AB-C.D E` nos dois lados, o
+# oraculo mostra `ABC.D` no `edit_nombre1` e `ABC.D E` no `edit_nombre2`.
+MEDIDO_NA_TELA = {
+    "edit_nombre1": (5, "compara_tela.sh --nomes, 2026-08-18"),
 }
 
 # Campo cujo `MaxLength` NAO governa o truncamento, e por que. Sem esta lista o
@@ -309,31 +328,46 @@ def monta() -> list[Linha]:
 
         if campo not in DESTINOS:
             raise DumpError(
-                f"{GERADOR}: `{campo}` recebe SetMaxLength e nao tem destino "
-                f"declarado em DESTINOS")
-        rel, nome_do_campo = DESTINOS[campo]
-        largura = largura_do_destino(rel, nome_do_campo)
+                f"{GERADOR}: `{campo}` recebe SetMaxLength e nao aparece em "
+                f"DESTINOS -- declare o destino, ou `None` se nao foi medido")
+        declarado = DESTINOS[campo]
 
         if forma == "metade":
-            valor, texto = largura // 2, f"[{operando:#010x}] div 2"
+            texto = f"[{operando:#010x}] div 2"
         elif forma == "menos_um":
-            valor, texto = largura - 1, f"[{operando:#010x}] - 1"
+            texto = f"[{operando:#010x}] - 1"
         else:
-            valor, texto = operando, str(operando)
-
-        # A conferencia: a expressao lida do `.exe` tem de casar com a largura
-        # que a camada de dados declara. Nao e redundancia -- sao dois lados da
-        # mesma conta, medidos por caminhos que nao se falam.
-        if forma == "literal" and valor != largura - 1:
-            raise DumpError(
-                f"{REL_EXE}: `{campo}` recebe o literal {valor} e o destino "
-                f"`{nome_do_campo}` tem {largura} bytes; esperava "
-                f"{largura - 1}")
+            texto = str(operando)
 
         nota = ""
+        if declarado is None:
+            nome_do_campo, largura = "", 0
+            if campo in MEDIDO_NA_TELA:
+                valor, de_onde = MEDIDO_NA_TELA[campo]
+                nota = (f"valor medido na tela ({de_onde}); o destino no "
+                        f"formato continua **nao medido**")
+            else:
+                valor = 0
+                nota = "destino e valor **nao medidos**"
+        else:
+            rel, nome_do_campo = declarado
+            largura = largura_do_destino(rel, nome_do_campo)
+            valor = (largura // 2 if forma == "metade"
+                     else largura - 1 if forma == "menos_um" else operando)
+            # A conferencia: a expressao lida do `.exe` tem de casar com a
+            # largura que a camada de dados declara. Ela confere a ARITMETICA
+            # contra o destino que a tabela DESTINOS declara -- e nao prova que
+            # o destino esteja certo. Ver o comentario daquela tabela.
+            if forma == "literal" and valor != largura - 1:
+                raise DumpError(
+                    f"{REL_EXE}: `{campo}` recebe o literal {valor} e o destino "
+                    f"`{nome_do_campo}` tem {largura} bytes; esperava "
+                    f"{largura - 1}")
+
         if (formulario, campo) in dfm:
-            nota = (f"o `.dfm` declara {dfm[(formulario, campo)]} e o código "
-                    f"reafirma o mesmo em tempo de execução")
+            aviso = (f"o `.dfm` declara {dfm[(formulario, campo)]} e o código "
+                     f"reafirma o mesmo em tempo de execução")
+            nota = f"{nota}; {aviso}" if nota else aviso
         linhas.append(Linha(formulario, campo, valor,
                             f"código, `{va_call:#010x}`",
                             texto, nome_do_campo, largura, nota))
@@ -404,16 +438,22 @@ def md(linhas: list[Linha]) -> str:
         "o gerador aborta se os dois não casarem:",
         "",
         "```text",
-        "raw_kanji_name    40 bytes  -> div 2   -> 20   dois bytes por caractere",
         "mixed_case_name   20 bytes  -> menos 1 -> 19   o byte do terminador",
         "abbreviations[0]   4 bytes  -> literal  3      idem",
         "```",
         "",
-        "**O `div 2` é o achado.** `edit_nombre1` mostra o nome em kanji, e o",
-        "campo no disco guarda dois bytes por caractere: metade dos 40 bytes é",
-        "20 caracteres. Quem lesse a expressão como \"metade do limite\" sem",
-        "olhar o destino escreveria 20 e não saberia por quê — e erraria no dia",
-        "em que o campo mudasse de largura.",
+        "**Ela confere a aritmética, não o mapeamento — e a diferença custou uma",
+        "divergência.** A primeira versão desta ferramenta declarava",
+        "`raw_kanji_name` (40 bytes) como destino do `edit_nombre1`, o que dava",
+        "`40 div 2 = 20`, e a conferência **passou**: a conta fecha. O",
+        "`compara_tela.sh --nomes` então mediu na tela do oráculo — digitando",
+        "`AB-C.D E`, o campo mostra `ABC.D`, **cinco** caracteres. Logo",
+        "`[0x00433a10]` vale 10 e o destino é outro campo, que **não foi",
+        "medido**.",
+        "",
+        "A tabela `DESTINOS` do gerador é escrita à mão, e é por isso que ela",
+        "aceita `None`: emitir `nao medido` é o único jeito de a conferência não",
+        "passar pelo motivo errado outra vez.",
         "",
         "## Onde as duas fontes se sobrepõem",
         "",

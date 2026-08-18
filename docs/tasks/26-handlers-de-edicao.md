@@ -140,11 +140,12 @@ separadas (primeiro parágrafo do Contexto).
       já se mediu que não é.** O golden por byte da mesma edição é critério da
       [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), porque só ela tem
       como levar a edição ao disco
-- [ ] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a` —
-      **nenhum roteiro digita texto ainda**, então a regra vale sem ter sido
-      exercitada. Ela entra junto com a régua de tela dos campos de nome
+- [x] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a` —
+      o `edita_nomes` do `compara_tela.sh --nomes` (2026-08-18) limpa os três
+      campos assim, nos dois lados, e é o primeiro roteiro deste projeto a
+      digitar texto
 - [x] Nenhuma medição sobre `roms/` diretamente — todas as passagens usaram cópia em `work/` ou no scratchpad
-- [x] Commit no formato conventional, em inglês — as 20 passagens
+- [x] Commit no formato conventional, em inglês — as 22 passagens
 
 ### As duas reescritas do critério de tela
 
@@ -2185,6 +2186,104 @@ do `--edicao`; e o `iguala_nombres`.
   - **atributos** e **tática** fecham por conferência estática — o
     `check_bitfields.py` e o `dump_zonas.py` já são ela; falta escrever o
     veredito;
+  - o `iguala_nombres` que não acinzenta — **precisa de CORR própria**;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
+- **Executado em:** 2026-08-18 — **vigésima segunda passagem: a régua de tela do
+  grupo de nomes, e ela achou uma divergência na primeira corrida.**
+
+- **`compara_tela.sh --nomes`.** Digita o MESMO texto nos dois lados —
+  `AB-C.D E` — nos três campos de nome, encadeando pelo `Return`, e compara.
+
+  **O texto não é qualquer um.** Os três filtros não são iguais: `nombre1` e
+  `nombre2` aceitam espaço e ponto, `nombre3` só alfanumérico. Um texto só de
+  letras passaria idêntico pelos três e a régua mediria digitação, não filtro.
+  O `-` é recusado pelos três; o `.` e o espaço separam o terceiro dos outros.
+
+  **O `Return` faz parte do teste**: os dois primeiros handlers movem o foco
+  para o campo seguinte, o terceiro não. A sequência digita nos três **sem
+  clicar entre eles** — se o encadeamento falhar, os campos 2 e 3 ficam vazios.
+
+- **A régua não compara pixel com pixel, e não é desleixo.** gtk2 e Win32 não
+  desenham a mesma fonte, e o `MS Sans Serif` do original nem está instalado: um
+  diff estrito acusaria divergência em qualquer campo com letra dentro. O que
+  sobrevive à troca de widgetset é a **propriedade que o filtro impõe** —
+  quantos caracteres passaram —, e a largura da tinta é o proxy dela.
+
+  A tolerância é **meio glifo (4 px)**, e não folga escolhida por conveniência:
+  um caractere vale 7 a 8 px nesta fonte. Medido: com os dois lados de acordo a
+  diferença foi de 0 a 1 px; com um caractere de diferença, 10 px.
+
+- **Na primeira corrida ela ficou verde medindo a MOLDURA.** Os três campos
+  deram largura de tinta igual à largura deles — 112, 112, 33 — e a
+  coincidência passou por "os dois lados concordam". Duas causas somadas: a
+  medição não descontava a borda do `TEdit`, e eu havia **digitado** os
+  retângulos à mão com 113 px nos três, quando o `edit_nombre3` tem 33.
+
+  Os dois consertos são do mesmo tipo — parar de digitar o que dá para ler: os
+  retângulos saem agora do `.lfm` somando a cadeia de pais, e a medição desconta
+  3 px de borda. Mais a guarda que faltava: **tinta ocupando a largura útil
+  inteira reprova**, porque não distingue "texto transbordou" de "a moldura
+  entrou na conta".
+
+- **E aí ela achou o que existe para achar.** Oráculo `edit_nombre1` mostra
+  `ABC.D` — **cinco** caracteres. O port mostrava `ABC.D E` — sete.
+
+  A divergência era **minha, da passagem anterior**. Eu havia posto
+  `edit_nombre1.MaxLength := SizeOf(raw_kanji_name) div 2` = 20, e a conferência
+  do `dump_truncamento.py` aprovou. **Ela aprovou pelo motivo errado:** aquela
+  conferência confere a *aritmética* contra o destino que a tabela `DESTINOS`
+  declara — e a tabela é escrita à mão. `40 div 2` fecha em 20; a tela diz 5;
+  logo `[0x00433a10]` vale **10** e o destino não é o `raw_kanji_name`.
+
+  Corrigido nos três lugares: o port usa 5 com a medição citada, o gerador
+  aceita `None` em `DESTINOS` e emite **`não medido`** para o destino, e o
+  markdown perdeu a história do kanji, que era invenção plausível.
+
+  **Qual é o campo de 10 bytes continua sem medir**, e escolher outro que
+  também feche a conta seria repetir o erro.
+
+- **Uma regra minha estava errada e reprovava o oráculo por ele ser como é.**
+  A primeira versão do veredito exigia `nombre1 == nombre2` "porque têm o mesmo
+  filtro". Têm — e `MaxLength` **diferentes**, 5 e 19. Regra estrutural
+  inventada sobre o app reprova o app. Ficou a comparação entre os lados, campo
+  a campo, que não inventa nada.
+
+- **Uma fragilidade real virou guarda.** A cor de fundo do campo sai da cor mais
+  frequente da região. Se a tinta for maioria, a medida **se inverte em
+  silêncio** e passa a medir o buraco entre os glifos. Num `TEdit` de 11 px isso
+  não acontece — mas o teste sintético o produziu, e a lição é que o modo de
+  falha existe. O `tinta()` agora recusa região cuja cor mais frequente não seja
+  maioria.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/compara_tela.sh` — o modo `--nomes` e o `edita_nomes`
+  - `wte/tools/compara_tela.py` — `retangulos_do_lfm`, `tinta`, `compara_nomes`,
+    `relata_nomes`, `main_nomes`
+  - `wte/tools/test_compara_tela.py` — 7 testes do modo novo
+  - `wte/tools/dump_truncamento.py` + `test_dump_truncamento.py` — o `None` em
+    `DESTINOS`, o `MEDIDO_NA_TELA`, e o teste que afirmava a história errada
+  - `wte/re/truncamento.md`, `.tsv` — regerados
+  - `wte/src/impl/ep2002_mainform.FormShow.inc` — `MaxLength` de 20 para **5**
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 75,4% (9.187 contra 3.003)
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: **523 testes**, OK; `compara_tela.sh
+  --nomes` **PASSOU** — tinta 31/41/22 no oráculo contra 32/41/22 no port.
+
+  **O controle negativo é a própria corrida anterior**, e está acima: com o port
+  em 20 a régua reprovou com 31 contra 41 px. Ela morde.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **uma sequência de tela**: **mover** + `dorsalClick`/`dorsalMouseDown` — só
+    cliques, MainForm, sem sub-diálogo;
+  - escrever o veredito de **atributos**, **tática** e da metade `ficha_dorsal`
+    dos números como conferência **estática** — o `check_bitfields.py` e o
+    `dump_zonas.py` já são ela;
+  - o destino de `[0x00433a10]` — **não medido**, e agora nomeado como tal;
   - o `iguala_nombres` que não acinzenta — **precisa de CORR própria**;
   - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
   - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.

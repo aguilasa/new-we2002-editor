@@ -116,8 +116,42 @@ TRILHA_X=190    ; TRILHA_Y=200
 # saturacao em vez de passo.
 TRILHA_CLIQUES=1
 
+# ## O modo `--nomes`, da WTE-TASK-26
+#
+# O segundo grupo de edicao a ganhar regua de tela. Ele exercita os TRES
+# filtros de tecla dos campos de nome e o encadeamento de foco entre eles, e
+# faz isso com uma sequencia so.
+#
+# ### Por que este texto, e nao outro
+#
+# `AB-C.D E`. Os tres filtros nao sao iguais, e o texto foi escolhido para que
+# a diferenca APARECA na tela:
+#
+# | campo | aceita | do texto sobra |
+# |---|---|---|
+# | `edit_nombre1`, `edit_nombre2` | ` `, `.`, #8, `0-9`, `A-Z`, `a-z` | `ABC.D E` |
+# | `edit_nombre3` | #8 e alfanumerico -- **nem espaco nem ponto** | `ABCDE` |
+#
+# Um texto so de letras passaria identico pelos tres e a regua nao mediria
+# filtro nenhum: mediria digitacao. O `-` e recusado pelos tres, o `.` e o
+# espaco separam o terceiro dos outros dois.
+#
+# ### O `Return` faz parte do teste
+#
+# `edit_nombre1KeyPress` e `edit_nombre2KeyPress` movem o foco para o campo
+# seguinte quando a tecla e #13; o terceiro nao encadeia. A sequencia digita nos
+# tres SEM clicar entre eles: se o encadeamento nao funcionar, os campos 2 e 3
+# ficam vazios e a comparacao acusa.
+NOMES_TEXTO='AB-C.D E'
+# Coordenadas absolutas, derivadas do `.lfm` somando `Left`/`Top` pela cadeia de
+# pais -- o formulario raiz fora, porque o `Left`/`Top` dele e posicao de tela.
+# Os dois lados usam as MESMAS: desde que a WTE-TASK-26 tirou o
+# `Application.Scaled`, a janela do port tem o tamanho de projeto, igual a do
+# oraculo sob Wine.
+NOMBRE1_X=422  ; NOMBRE1_Y=74
+
 [ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" \
-                       "| $0 --edicao" >&2
+                       "| $0 --edicao | $0 --nomes" >&2
                   exit 1; }
 MODO=barras
 if [ "$1" = "--habilitacao" ]; then
@@ -129,6 +163,11 @@ elif [ "$1" = "--edicao" ]; then
   [ $# -eq 1 ] || { echo "ERRO: --edicao nao aceita indice -- o time e o" \
                          "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
   MODO=edicao
+  set -- "$IDX_EDICAO"
+elif [ "$1" = "--nomes" ]; then
+  [ $# -eq 1 ] || { echo "ERRO: --nomes nao aceita indice -- o time e o" \
+                         "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
+  MODO=nomes
   set -- "$IDX_EDICAO"
 fi
 [ -f "$IMAGEM" ] || { echo "ERRO: $IMAGEM nao existe" >&2; exit 1; }
@@ -209,6 +248,31 @@ edita_barra() {
   sleep 1
 }
 
+# edita_nomes -- a MESMA sequencia nos dois lados, pelo mesmo motivo do
+# `edita_barra`. Espera `X` e `Y` ja carregados com a origem da janela alvo.
+#
+# Limpa com `End`/`shift+Home`/`BackSpace` e NUNCA com `ctrl+a`: num `TEdit` do
+# Win32 o `ctrl+a` nao seleciona tudo, e os dois lados receberiam textos
+# diferentes -- o diff sairia divergencia do port sem ser.
+edita_nomes() {
+  xdotool mousemove $((X + NOMBRE1_X)) $((Y + NOMBRE1_Y)) click 1
+  sleep 1
+  local i
+  for ((i = 0; i < 3; i++)); do
+    xdotool key --clearmodifiers End;       sleep 0.3
+    xdotool key --clearmodifiers shift+Home; sleep 0.3
+    xdotool key --clearmodifiers BackSpace;  sleep 0.3
+    xdotool type --delay 60 "$NOMES_TEXTO";  sleep 1
+    # O `Return` encadeia o foco para o campo seguinte. Depois do terceiro nao
+    # ha para onde ir, e manda-lo assim mesmo nao faria mal -- mas mandaria uma
+    # tecla a mais para a contagem de disparos, e a contagem e guarda.
+    if [ $i -lt 2 ]; then
+      xdotool key --clearmodifiers Return; sleep 1
+    fi
+  done
+  sleep 1
+}
+
 # ------------------------------------------------------------------ oraculo --
 captura_oraculo() {
   local indice="$1" destino="$2"
@@ -237,6 +301,7 @@ captura_oraculo() {
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 3
   [ "$MODO" = edicao ] && edita_barra
+  [ "$MODO" = nomes ] && edita_nomes
   import -window root "$SAIDA/raw-oraculo.png"
   recorta "$SAIDA/raw-oraculo.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-oraculo.png" "${destino%.png}-cheia.png" \
@@ -262,6 +327,7 @@ captura_port() {
   xdotool mousemove $((X + 50)) $((Y + 46)) click 1; sleep 1
   descidas "$w" $((indice + 1)); sleep 2
   [ "$MODO" = edicao ] && edita_barra
+  [ "$MODO" = nomes ] && edita_nomes
   import -window root "$SAIDA/raw-port.png"
   recorta "$SAIDA/raw-port.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-port.png" "${destino%.png}-cheia.png" \
@@ -271,12 +337,31 @@ captura_port() {
   disparos=$(grep -c 'MainForm.lista_equiposChange' "$TRACE" 2>/dev/null || echo 0)
   sel=$(grep -c 'MainForm.sel_barraClick' "$TRACE" 2>/dev/null || echo 0)
   track=$(grep -c 'MainForm.track_barraChange' "$TRACE" 2>/dev/null || echo 0)
+  local n1 n2 n3
+  n1=$(grep -c 'MainForm.edit_nombre1KeyPress' "$TRACE" 2>/dev/null || echo 0)
+  n2=$(grep -c 'MainForm.edit_nombre2KeyPress' "$TRACE" 2>/dev/null || echo 0)
+  n3=$(grep -c 'MainForm.edit_nombre3KeyPress' "$TRACE" 2>/dev/null || echo 0)
   limpa
   if [ "$disparos" -ne $((indice + 1)) ]; then
     echo "ERRO: o port disparou lista_equiposChange $disparos vez(es) e o" >&2
     echo "      roteiro pediu $((indice + 1)). O indice dos dois lados nao e o" >&2
     echo "      mesmo, e comparar assim produz divergencia falsa." >&2
     return 5
+  fi
+  if [ "$MODO" = nomes ]; then
+    # Os numeros sao MEDIDOS, nao deduzidos: na LCL o `#8` do `BackSpace` e o
+    # `#13` do `Return` chegam ao `OnKeyPress`, entao cada campo conta
+    # 1 (BackSpace) + 8 (o texto) + 1 (Return), e o terceiro nao leva Return.
+    # Se um widgetset deixar de entregar uma dessas duas, a conta muda e a
+    # guarda avisa -- que e o ponto: essa entrega e diferenca de plataforma, e
+    # diferenca de plataforma calada e o que este projeto mais paga.
+    if [ "$n1" -ne 10 ] || [ "$n2" -ne 10 ] || [ "$n3" -ne 9 ]; then
+      echo "ERRO: os filtros de nome dispararam $n1/$n2/$n3, esperava 10/10/9." >&2
+      echo "      Se o primeiro estiver certo e os outros zerados, o `Return`" >&2
+      echo "      nao encadeou o foco e so o campo 1 foi digitado." >&2
+      return 5
+    fi
+    return 0
   fi
   [ "$MODO" = edicao ] || return 0
   # Do lado do port da para exigir que os DOIS handlers de edicao tenham
@@ -319,6 +404,15 @@ for indice in "$@"; do
     [ -n "$base" ] || { echo "ERRO: sem bar_defence do time $indice no dump" >&2
                         exit 1; }
     extra+=(--editada "1=$((base + 2 * TRILHA_CLIQUES))")
+  fi
+  if [ "$MODO" = nomes ]; then
+    # O veredito dos nomes NAO passa pelas barras: o que se mede aqui e o
+    # efeito dos tres filtros de tecla, e ele mora nos campos de nome. Rodar o
+    # relato das barras aqui daria verde sem olhar para o que a sequencia fez.
+    python3 "$AQUI/compara_tela.py" --nomes \
+        "$SAIDA/time-$indice-oraculo-cheia.png" \
+        "$SAIDA/time-$indice-port-cheia.png" || rc=1
+    continue
   fi
   python3 "$AQUI/compara_tela.py" \
       "$SAIDA/time-$indice-oraculo.png" "$SAIDA/time-$indice-port.png" \

@@ -44,8 +44,8 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 20 | 2419 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9187** |
-| Escrito à mão | 56 | 2995 |
-| **Total** | | **12182** |
+| Escrito à mão | 56 | 3003 |
+| **Total** | | **12190** |
 
 **75.4% do Pascal da casca é saída de gerador.**
 
@@ -85,7 +85,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.casilla_nombreKeyPress.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_jugador.flechasapaClick.inc` | 67 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.FormShow.inc` | 86 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.FormShow.inc` | 94 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.aux.inc` | 897 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 91 | corpo de handler, da spec (fase 4) |

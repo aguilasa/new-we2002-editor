@@ -17,7 +17,7 @@ sobre a largura do campo de destino, e a expressão tem motivo.
 
 | Formulário | Campo | `MaxLength` | Fonte | Expressão | Destino | Largura |
 |---|---|--:|---|---|---|--:|
-| `MainForm` | `edit_nombre1` | 20 | código, `0x0040cc43` | `[0x00433a10] div 2` | `raw_kanji_name` | 40 |
+| `MainForm` | `edit_nombre1` | 5 | código, `0x0040cc43` | `[0x00433a10] div 2` | — | — |
 | `MainForm` | `edit_nombre2` | 19 | código, `0x0040cc5b` | `[0x00433b48] - 1` | `mixed_case_name` | 20 |
 | `MainForm` | `edit_nombre3` | 3 | código, `0x0040cc71` | `3` | `abbreviations` | 4 |
 | `jugador` | `casilla_dorsal` | 10 | dfm | `10` | — | — |
@@ -33,19 +33,26 @@ dados, que é byte-idêntica ao `ed.exe`. É o **outro lado da conta**, e
 o gerador aborta se os dois não casarem:
 
 ```text
-raw_kanji_name    40 bytes  -> div 2   -> 20   dois bytes por caractere
 mixed_case_name   20 bytes  -> menos 1 -> 19   o byte do terminador
 abbreviations[0]   4 bytes  -> literal  3      idem
 ```
 
-**O `div 2` é o achado.** `edit_nombre1` mostra o nome em kanji, e o
-campo no disco guarda dois bytes por caractere: metade dos 40 bytes é
-20 caracteres. Quem lesse a expressão como "metade do limite" sem
-olhar o destino escreveria 20 e não saberia por quê — e erraria no dia
-em que o campo mudasse de largura.
+**Ela confere a aritmética, não o mapeamento — e a diferença custou uma
+divergência.** A primeira versão desta ferramenta declarava
+`raw_kanji_name` (40 bytes) como destino do `edit_nombre1`, o que dava
+`40 div 2 = 20`, e a conferência **passou**: a conta fecha. O
+`compara_tela.sh --nomes` então mediu na tela do oráculo — digitando
+`AB-C.D E`, o campo mostra `ABC.D`, **cinco** caracteres. Logo
+`[0x00433a10]` vale 10 e o destino é outro campo, que **não foi
+medido**.
+
+A tabela `DESTINOS` do gerador é escrita à mão, e é por isso que ela
+aceita `None`: emitir `nao medido` é o único jeito de a conferência não
+passar pelo motivo errado outra vez.
 
 ## Onde as duas fontes se sobrepõem
 
+- **`MainForm.edit_nombre1`** — valor medido na tela (compara_tela.sh --nomes, 2026-08-18); o destino no formato continua **nao medido**.
 - **`MainForm.edit_nombre3`** — o `.dfm` declara 3 e o código reafirma o mesmo em tempo de execução.
 
 Concordam, e é por isso que aparece um só. Se um dia discordarem, o
