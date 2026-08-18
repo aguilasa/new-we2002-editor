@@ -128,9 +128,9 @@ separadas (primeiro parágrafo do Contexto).
 
 ## Critério de conclusão
 
-- [ ] Todo handler do grupo com spec, incluindo regra de validação — **27 de
+- [x] Todo handler do grupo com spec, incluindo regra de validação — **28 de
       28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
-      tática 6. Falta só o `estrategia.relojTimer`
+      tática 7. Nove fecham `aberto` com dono nomeado, como a opção A previu
 - [ ] Comportamento de truncamento documentado por campo
 - [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
       2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
@@ -176,7 +176,7 @@ e não que fiquem sem spec.
 | ~~10~~ | ~~mover, os outros 4~~ — **feita em 2026-08-12**, menos o `flechasapaClick`, que não é do `MainForm` e está bloqueado com os lotes de atributo e tática | 181 B (a `0x0040b934`); as outras quatro da lista abaixo **não são chamadas** por estes handlers | — |
 | 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
 | ~~12~~ | ~~atributos (`barrhabScroll`, `barrhab_bisScroll`)~~ — **feita em 2026-08-12**, e o `flechasapaClick` **feito em 2026-08-13** | 0 B nos dois de `barrhab`; 1.124 B no `flechasapaClick`, mais o inicializador das legendas (`0x00401da8`, 2.998 B, lido por ferramenta e não à mão) | as legendas enumeradas da ficha, que estavam abertas desde a passagem 12 |
-| ~~13~~ | ~~tática (`0x0040a0b4` + os 7)~~ — **seis feitos em 2026-08-13**; falta o `relojTimer` | **o `0x0040a0b4` não é deste lote** — quem o chama é o `MainForm.mostrar_estrategiaClick`, do grupo de carga. Medido: os 7 somam 2.088 B e **não chamam auxiliar interna nenhuma**; os seis de arrastar são 1.152 B | as zonas do campinho, que o `estrategia.FormCreate` monta e ninguém tinha lido |
+| ~~13~~ | ~~tática (`0x0040a0b4` + os 7)~~ — **feita em 2026-08-13**, em duas passagens | **o `0x0040a0b4` não é deste lote** — quem o chama é o `MainForm.mostrar_estrategiaClick`, do grupo de carga. Medido: os 7 somam 2.088 B e **não chamam auxiliar interna nenhuma**; os seis de arrastar são 1.152 B | as zonas do campinho, que o `estrategia.FormCreate` monta e ninguém tinha lido |
 | 14 | os três critérios que sobram | — | fecha a task |
 
 **Passagem 9 — mover, a família de 4.** 312 a 314 bytes cada, e **não depende
@@ -1817,6 +1817,80 @@ do `--edicao`; e o `iguala_nombres`.
 
 ---
 
+- **Executado em:** 2026-08-13 — **décima nona passagem: o `relojTimer`, e com
+  ele os 28 handlers têm spec.** Fica **um** critério aberto: o truncamento por
+  campo.
+
+- **O achado: trocar de formação não teleporta os jogadores, desliza.** O
+  `reloj` tem `Interval = 1` e `Enabled = False` no `.lfm`; o
+  `lista_formacionesClick` calcula um delta por bola e o liga, e este handler
+  desenha **quatro quadros**.
+
+  **São dois ramos, e o teste está na primeira instrução.** Se o contador chegou
+  a 4, este disparo é o do **encaixe final** — escreve a coordenada inteira que
+  a formação pediu, zera o contador e desliga o timer. Senão, soma o delta e
+  desenha o truncado.
+
+  O ramo do encaixe não é enfeite: depois de quatro somas em ponto flutuante a
+  posição acumulada não é o destino, e sem ele a formação ficaria um pixel fora
+  **sempre no mesmo sentido**. Ler só o segundo ramo daria uma animação que
+  nunca para e nunca chega ao inteiro.
+
+- **A contiguidade das seis tabelas é o que confirma o tamanho delas.** Elas são
+  `.bss` — `0x00434238`, `0x00434264`, `0x00434294`, `0x004342c0`, `0x004342ec`,
+  `0x00434318` — com `0x2c` (11 entradas) entre bases sucessivas, e logo depois
+  da última vem o `0x00434340`, a bola em foco que os handlers de arrastar usam.
+  O laço percorre 1..10: a entrada extra é da `bola0`, o goleiro, que não anda.
+  São `Single`, não `Double` — o original lê com `fld DWORD PTR`.
+
+- **Dois detalhes que a leitura apressada funde:**
+
+  **`Trunc`, não `Round`.** O original chama o auxiliar da RTL que põe a FPU em
+  arredondar-para-zero (`fstcw` / `or 0xc01`). Meio pixel por quadro, sempre
+  para o mesmo lado.
+
+  **Dois ponteiros de rótulo, não um.** `0x00434348` é o `etiqjug` que a
+  animação move; `0x00434344` é o que o mouse destaca. Os dois andam ao mesmo
+  tempo, e fundi-los faria o destaque saltar para a última bola animada.
+
+- **`CurrToStr` de novo.** O nome da bola sai de `CurrToStr(n * 10000)`:
+  `Currency` na Borland é inteiro de 64 bits escalado por 10.000, então o
+  produto desfaz a escala e o texto sai `'1'`. Mesmo idioma do
+  `iguala_nombresClick`. O port usa `IntToStr`.
+
+- **Veredito `aberto`, e não pela régua de bytes.** Quem enche as seis tabelas é
+  o `estrategia.lista_formacionesClick`, que não foi portado: enquanto ele não
+  existir o `reloj` nunca é habilitado e este corpo nunca roda. Está escrito e
+  correto, e **não há como exercitá-lo na tela** — dizer o contrário seria
+  chamar de verificado o que só foi compilado.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/estrategia.relojTimer.md`
+  - `wte/src/impl/ep2002_estrategia.relojTimer.inc`
+  - `wte/src/impl/ep2002_estrategia.aux.inc` — o estado da animação e as duas
+    buscas por nome
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 76,4% → **75,5%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 501 testes, OK.
+
+- **Problemas encontrados:** Nenhum novo.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **o truncamento por campo** — é o último critério, e é desta task, não da
+    36. O que já está medido: quatro `MaxLength` nos DFM (`casilla_dorsal` 3,
+    `casilla_nombre` 10, mais dois) e **três atribuições em tempo de execução**
+    em `0x0040cc43`…`0x0040cc71`, que dão a `edit_nombre1` metade de
+    `[0x00433a10]`, a `edit_nombre2` o `[0x00433b48] − 1` e a `edit_nombre3` o
+    literal 3. Falta a ferramenta que cruze isso com a largura do campo de
+    destino na camada de dados;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`), que
+    promovem `bolaMouseDown` e `relojTimer` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
 - **Executado em:** 2026-08-13 — **décima sétima passagem: o `flechasapaClick`,
   e as legendas da ficha deixaram de ser as do `.lfm`.** O grupo vai de **20
   para 21 de 28**. Fecha o lote de atributo inteiro e paga uma dívida que estava
@@ -2046,3 +2120,77 @@ do `--edicao`; e o `iguala_nombres`.
   - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**;
   - o truncamento por campo (WTE-TASK-36);
   - a régua de tela da ficha, se alguém a quiser.
+
+---
+
+- **Executado em:** 2026-08-13 — **décima nona passagem: o `relojTimer`, e com
+  ele os 28 handlers têm spec.** Fica **um** critério aberto: o truncamento por
+  campo.
+
+- **O achado: trocar de formação não teleporta os jogadores, desliza.** O
+  `reloj` tem `Interval = 1` e `Enabled = False` no `.lfm`; o
+  `lista_formacionesClick` calcula um delta por bola e o liga, e este handler
+  desenha **quatro quadros**.
+
+  **São dois ramos, e o teste está na primeira instrução.** Se o contador chegou
+  a 4, este disparo é o do **encaixe final** — escreve a coordenada inteira que
+  a formação pediu, zera o contador e desliga o timer. Senão, soma o delta e
+  desenha o truncado.
+
+  O ramo do encaixe não é enfeite: depois de quatro somas em ponto flutuante a
+  posição acumulada não é o destino, e sem ele a formação ficaria um pixel fora
+  **sempre no mesmo sentido**. Ler só o segundo ramo daria uma animação que
+  nunca para e nunca chega ao inteiro.
+
+- **A contiguidade das seis tabelas é o que confirma o tamanho delas.** Elas são
+  `.bss` — `0x00434238`, `0x00434264`, `0x00434294`, `0x004342c0`, `0x004342ec`,
+  `0x00434318` — com `0x2c` (11 entradas) entre bases sucessivas, e logo depois
+  da última vem o `0x00434340`, a bola em foco que os handlers de arrastar usam.
+  O laço percorre 1..10: a entrada extra é da `bola0`, o goleiro, que não anda.
+  São `Single`, não `Double` — o original lê com `fld DWORD PTR`.
+
+- **Dois detalhes que a leitura apressada funde:**
+
+  **`Trunc`, não `Round`.** O original chama o auxiliar da RTL que põe a FPU em
+  arredondar-para-zero (`fstcw` / `or 0xc01`). Meio pixel por quadro, sempre
+  para o mesmo lado.
+
+  **Dois ponteiros de rótulo, não um.** `0x00434348` é o `etiqjug` que a
+  animação move; `0x00434344` é o que o mouse destaca. Os dois andam ao mesmo
+  tempo, e fundi-los faria o destaque saltar para a última bola animada.
+
+- **`CurrToStr` de novo.** O nome da bola sai de `CurrToStr(n * 10000)`:
+  `Currency` na Borland é inteiro de 64 bits escalado por 10.000, então o
+  produto desfaz a escala e o texto sai `'1'`. Mesmo idioma do
+  `iguala_nombresClick`. O port usa `IntToStr`.
+
+- **Veredito `aberto`, e não pela régua de bytes.** Quem enche as seis tabelas é
+  o `estrategia.lista_formacionesClick`, que não foi portado: enquanto ele não
+  existir o `reloj` nunca é habilitado e este corpo nunca roda. Está escrito e
+  correto, e **não há como exercitá-lo na tela** — dizer o contrário seria
+  chamar de verificado o que só foi compilado.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/estrategia.relojTimer.md`
+  - `wte/src/impl/ep2002_estrategia.relojTimer.inc`
+  - `wte/src/impl/ep2002_estrategia.aux.inc` — o estado da animação e as duas
+    buscas por nome
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 76,4% → **75,5%**
+  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 501 testes, OK.
+
+- **Problemas encontrados:** Nenhum novo.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **o truncamento por campo** — é o último critério, e é desta task, não da
+    36. O que já está medido: quatro `MaxLength` nos DFM (`casilla_dorsal` 3,
+    `casilla_nombre` 10, mais dois) e **três atribuições em tempo de execução**
+    em `0x0040cc43`…`0x0040cc71`, que dão a `edit_nombre1` metade de
+    `[0x00433a10]`, a `edit_nombre2` o `[0x00433b48] − 1` e a `edit_nombre3` o
+    literal 3. Falta a ferramenta que cruze isso com a largura do campo de
+    destino na camada de dados;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`), que
+    promovem `bolaMouseDown` e `relojTimer` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.

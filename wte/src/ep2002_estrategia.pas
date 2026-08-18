@@ -215,12 +215,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.relojTimer(Sender: TObject);
-begin
-  REStub('estrategia.relojTimer');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.relojTimer.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.malla1MouseDown(Sender: TObject; Button: TMouseButton;

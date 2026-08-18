@@ -112,3 +112,70 @@ begin
   else
     Result := v - resto;
 end;
+
+{ --------------------------------------------------------------------------
+  O estado da animacao de formacao -- WTE-TASK-26, decima nona passagem.
+
+  Trocar de formacao nao teleporta os jogadores: o `lista_formacionesClick`
+  calcula um delta por bola, liga o `reloj` (Interval = 1 ms) e o
+  `relojTimer` desenha QUATRO quadros. No quinto ele encaixa cada bola na
+  coordenada final inteira e se desliga.
+
+  As seis tabelas sao contiguas em `.bss`, e a contiguidade e o que confirma o
+  tamanho de cada uma: 0x00434238, 0x00434264, 0x00434294, 0x004342c0,
+  0x004342ec, 0x00434318 -- 0x2c (11 entradas) entre bases sucessivas, e logo
+  depois da ultima vem o `0x00434340`, a bola em foco. O laco usa 1..10; a
+  entrada extra e da `bola0`, o goleiro, que nao anda. }
+const
+  { Quantos quadros a animacao tem. O `relojTimer` compara com este numero e,
+    ao chegar nele, encaixa e desliga o timer. }
+  QUADROS_DA_ANIMACAO = 4;
+  { A primeira e a ultima bola que a animacao move. `bola0` fica de fora. }
+  BOLA_PRIMEIRA = 1;
+  BOLA_ULTIMA = 10;
+
+var
+  { 0x0043428c -- o contador de quadros. }
+  PassoDaAnimacao: Integer = 0;
+  { 0x00434238 / 0x00434264 -- o destino final, ja inteiro. }
+  DestinoX: array[0..10] of Integer;
+  DestinoY: array[0..10] of Integer;
+  { 0x00434294 / 0x004342c0 -- a posicao corrente, em ponto flutuante. E
+    `Single`, nao `Double`: o original usa `fld DWORD PTR`, quatro bytes. }
+  AtualX: array[0..10] of Single;
+  AtualY: array[0..10] of Single;
+  { 0x004342ec / 0x00434318 -- o passo somado a cada quadro. }
+  DeltaX: array[0..10] of Single;
+  DeltaY: array[0..10] of Single;
+  { 0x00434348 -- o `etiqjugN` da bola que a animacao esta movendo agora.
+    E OUTRO ponteiro, nao o `EtiquetaEmFoco`: o destaque do mouse e a animacao
+    andam ao mesmo tempo e escrevem em rotulos diferentes. }
+  EtiquetaEmMovimento: TLabel = nil;
+
+{ A bola `n` e o rotulo dela, achados por nome como o original os acha.
+
+  O original monta o nome com `CurrToStr(n * 10000)`: `Currency` na Borland e
+  inteiro de 64 bits escalado por 10.000, entao a multiplicacao desfaz a escala
+  e o resultado sai `'1'`, nao `'10000'`. `IntToStr` da o mesmo texto sem o
+  rodeio. }
+function BolaDeNumero(n: Integer): TShape;
+var
+  c: TComponent;
+begin
+  c := estrategia.FindComponent('bola' + IntToStr(n));
+  if c is TShape then
+    Result := TShape(c)
+  else
+    Result := nil;
+end;
+
+function EtiquetaDeNumero(n: Integer): TLabel;
+var
+  c: TComponent;
+begin
+  c := estrategia.FindComponent('etiqjug' + IntToStr(n));
+  if c is TLabel then
+    Result := TLabel(c)
+  else
+    Result := nil;
+end;

@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 66 |
 | **total** | **96** |
 
-55 de 96 têm arquivo de spec.
+56 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -84,7 +84,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409780` | `estrategia` | [rectanguloDragDrop](estrategia.rectanguloDragDrop.md) | OnDragDrop | edicao | implementado |
 | `0x004097a4` | `estrategia` | [bolaEndDrag](estrategia.bolaEndDrag.md) | OnEndDrag x10 | edicao | implementado |
 | `0x00409aa0` | `estrategia` | [lista_formacionesClick](estrategia.lista_formacionesClick.md) | OnClick | carga | aberto |
-| `0x00409ba4` | `estrategia` | relojTimer | OnTimer | edicao | aberto |
+| `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | aberto |
 | `0x00409f4c` | `estrategia` | malla1MouseDown | OnMouseDown | edicao | aberto |
 | `0x0040a000` | `estrategia` | malla2MouseDown | OnMouseDown | edicao | aberto |
 | `0x0040a658` | `estrategia` | BitBtn1Click | OnClick | auxiliar | aberto |
