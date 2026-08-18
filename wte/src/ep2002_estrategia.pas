@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, Types, Forms, Controls, StdCtrls, ExtCtrls, Buttons, retrace,
-  SysUtils, Graphics, wte_zonas;
+  SysUtils, Graphics, wte_zonas, wte_formacoes;
 
 type
   Testrategia = class(TForm)
@@ -208,12 +208,8 @@ procedure Testrategia.rectanguloDragDrop(Sender, Source: TObject;
 procedure Testrategia.bolaEndDrag(Sender, Target: TObject; X, Y: Integer);
 {$I impl/ep2002_estrategia.bolaEndDrag.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.lista_formacionesClick(Sender: TObject);
-begin
-  REStub('estrategia.lista_formacionesClick');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.lista_formacionesClick.inc}
 
 procedure Testrategia.relojTimer(Sender: TObject);
 {$I impl/ep2002_estrategia.relojTimer.inc}

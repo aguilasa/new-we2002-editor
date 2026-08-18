@@ -53,11 +53,15 @@ var
   GradeX: Integer = 0;
   GradeY: Integer = 0;
 
-  { O vetor bola -> zona que o `0x00434230` do original aponta. Quem o preenche
-    e o `estrategia.lista_formacionesClick`, que NAO e desta passagem: ate ele
-    existir toda bola cai na zona 0. O retangulo aparece com a geometria certa
-    de UMA zona, o que e visivelmente diferente de nao aparecer. }
-  ZonaDaBola: array[0..10] of Byte;
+  { O `0x00434230` do original e um PONTEIRO, nao um vetor: ele aponta para os
+    11 bytes de zona do registro da formacao escolhida. Aqui o ponteiro vira
+    indice, que e a mesma coisa sem ponteiro solto.
+
+    `-1` = nenhuma formacao aplicada ainda. No original isso nao acontece,
+    porque `0x0040a0b4` aponta os quatro ponteiros ao ABRIR o formulario; essa
+    rotina nao esta portada, e enquanto nao estiver o port abre com toda bola
+    na zona 0. Ver `ZonaDaBola`. }
+  FormacaoAplicada: Integer = -1;
 
 { O indice de uma bola ou de um rotulo a partir do nome do componente.
 
@@ -134,6 +138,32 @@ const
   BOLA_PRIMEIRA = 1;
   BOLA_ULTIMA = 10;
 
+  { O `ItemIndex` de `lista_formaciones` que NAO indexa a tabela: `DEFAULT` le
+    o buffer da formacao viva do time (`0x00432e88`), preenchido por
+    `0x0040a0b4`, que nao esta portado. Ver `AplicaFormacao`. }
+  FORMACAO_DEFAULT = 1;
+
+  { Os `etiqposN` comecam em 1 e o goleiro e o `etiqpos1`, entao o jogador `i`
+    da tabela cai no rotulo `i + 1`. }
+  ETIQPOS_DESLOCAMENTO = 1;
+
+  { As tres cores do `0x004099bc`, em $00BBGGRR -- o mesmo formato da VCL e da
+    LCL, entao passam sem conversao. O criterio nao e o que o nome sugere:
+
+        papel = 4 ou papel > 16  ->  vermelho
+        papel < 9                ->  ciano
+        senao (9..16)            ->  verde
+
+    O `papel = 4` e `Zl`, um zagueiro, e ele cai no ramo dos atacantes. E
+    excentricidade do original -- `cmp al,4 / je` e a PRIMEIRA instrucao do
+    teste, antes de qualquer comparacao de faixa --, nao erro de leitura. }
+  COR_ATAQUE = $000000FF;
+  COR_DEFESA = $00FFFF00;
+  COR_MEIO   = $0000FF00;
+  PAPEL_EXCECAO_VERMELHA = 4;
+  PAPEL_ULTIMO_DEFENSOR = 8;
+  PAPEL_ULTIMO_MEIO = 16;
+
 var
   { 0x0043428c -- o contador de quadros. }
   PassoDaAnimacao: Integer = 0;
@@ -151,6 +181,27 @@ var
     E OUTRO ponteiro, nao o `EtiquetaEmFoco`: o destaque do mouse e a animacao
     andam ao mesmo tempo e escrevem em rotulos diferentes. }
   EtiquetaEmMovimento: TLabel = nil;
+
+{ A zona da bola `i`, para o `bolaMouseDown` dimensionar o `rectangulo`.
+
+  No original isto e `[0x00434230]^[i]` -- um ponteiro para os 11 bytes de zona
+  do registro da formacao escolhida. Aqui e um indice na `FORMACOES` do
+  `wte_formacoes.pas`, que e a MESMA tabela: a de `0x00433f0c`, montada pelo
+  `estrategia.FormCreate` a partir de quatro blobs de `.data`, extraida pelo
+  `dump_formacoes.py`.
+
+  Zona 0 enquanto nao houver formacao aplicada. Isso e DIVERGENCIA, e ela tem
+  dono: no original quem aponta os quatro ponteiros ao abrir o formulario e o
+  `0x0040a0b4`, que nao esta portado -- ver a spec do `lista_formacionesClick`. }
+function ZonaDaBola(i: Integer): Integer;
+begin
+  Result := 0;
+  if (FormacaoAplicada < 0) or (FormacaoAplicada >= FORMACOES_TOTAL) then
+    Exit;
+  if (i < 0) or (i >= FORMACAO_JOGADORES) then
+    Exit;
+  Result := FORMACOES[FormacaoAplicada].zona[i];
+end;
 
 { A bola `n` e o rotulo dela, achados por nome como o original os acha.
 
@@ -178,4 +229,89 @@ begin
     Result := TLabel(c)
   else
     Result := nil;
+end;
+
+{ 0x004097d4, 474 bytes -- prepara a animacao e liga o `reloj`.
+
+  Tres lacos de `1..10` (o goleiro nao anda), e as seis tabelas que o
+  `relojTimer` consome saem daqui:
+
+      DestinoX[i] := x[i]*8 - 2
+      DestinoY[i] := ((y[i] - 3) div 2)*5 - 7
+      AtualX[i]   := bola_i.Left - campo.Left
+      DeltaX[i]   := (DestinoX[i] - AtualX[i]) * PASSO_DA_ANIMACAO
+
+  O `PASSO_DA_ANIMACAO` e 0.2, decodificado de um `long double` de 80 bits em
+  `0x004099b0` -- dentro da `.text`, logo depois do corpo. Com os quatro
+  quadros do `relojTimer` isso cobre 80% do trajeto, e o ramo de encaixe da o
+  ultimo quinto de uma vez: NAO e correcao de arredondamento de um pixel.
+
+  A divisao do Y trunca para ZERO, como o `idiv` do original -- e nao para
+  -infinito, como o `div` do Pascal faria com negativo. So o registro 0
+  (goleiro, `y = 0`) cai nesse caso, e ele nao entra no laco; a diferenca esta
+  aqui porque o dia em que entrar, entra certo.
+
+  Efeito colateral do original, reproduzido: ele semeia `BolaEmFoco`
+  (`0x00434340`) a cada iteracao, terminando na `bola10`. E o que dispensaria a
+  guarda de `nil` dos handlers de arrastar -- que fica, porque no port o
+  formulario ainda pode abrir sem nenhuma formacao aplicada. }
+procedure PreparaAnimacao(formacao: Integer);
+var
+  i: Integer;
+  bola: TShape;
+  dy: Integer;
+begin
+  for i := BOLA_PRIMEIRA to BOLA_ULTIMA do
+  begin
+    DestinoX[i - 1] := FORMACOES[formacao].x[i] * 8 - 2;
+    dy := FORMACOES[formacao].y[i] - 3;
+    if dy < 0 then
+      DestinoY[i - 1] := -((-dy) div 2) * 5 - 7
+    else
+      DestinoY[i - 1] := (dy div 2) * 5 - 7;
+
+    bola := BolaDeNumero(i);
+    if bola = nil then
+      Continue;
+    BolaEmFoco := bola;
+    AtualX[i - 1] := bola.Left - estrategia.campo.Left;
+    AtualY[i - 1] := bola.Top - estrategia.campo.Top;
+    DeltaX[i - 1] := (DestinoX[i - 1] - AtualX[i - 1]) * PASSO_DA_ANIMACAO;
+    DeltaY[i - 1] := (DestinoY[i - 1] - AtualY[i - 1]) * PASSO_DA_ANIMACAO;
+  end;
+  PassoDaAnimacao := 0;
+  estrategia.reloj.Enabled := True;
+end;
+
+{ 0x004099bc, 227 bytes -- pinta os onze `etiqposN`.
+
+  Recebe o vetor de papeis (o `[0x00434224]` do original) e, para cada jogador
+  `1..10`, poe o texto e a cor no rotulo `etiqpos<i+1>`. O deslocamento existe
+  porque `etiqpos1` e o goleiro.
+
+  O criterio de cor esta nas constantes do topo, e o `papel = 4` no ramo
+  vermelho e do original. }
+procedure PintaPosicoes(formacao: Integer);
+var
+  i, papel: Integer;
+  c: TComponent;
+  rotulo: TLabel;
+begin
+  for i := BOLA_PRIMEIRA to BOLA_ULTIMA do
+  begin
+    c := estrategia.FindComponent(
+      'etiqpos' + IntToStr(i + ETIQPOS_DESLOCAMENTO));
+    if not (c is TLabel) then
+      Continue;
+    rotulo := TLabel(c);
+    papel := FORMACOES[formacao].papel[i];
+    if (papel = PAPEL_EXCECAO_VERMELHA) or (papel > PAPEL_ULTIMO_MEIO) then
+      rotulo.Font.Color := COR_ATAQUE
+    else if papel <= PAPEL_ULTIMO_DEFENSOR then
+      rotulo.Font.Color := COR_DEFESA
+    else
+      rotulo.Font.Color := COR_MEIO;
+    if (papel >= 0) and (papel < POSICOES_TOTAL) then
+      rotulo.Caption := POSICOES[papel];
+  end;
 end;

@@ -22,10 +22,11 @@ begin
 
   if PassoDaAnimacao = QUADROS_DA_ANIMACAO then
   begin
-    { O encaixe. Depois de quatro somas em ponto flutuante a posicao acumulada
-      nao e exatamente o destino; este ramo escreve o inteiro que a formacao
-      pediu, zera o contador e para o timer. Sem ele a formacao ficaria um
-      pixel fora, sempre no mesmo sentido. }
+    { O encaixe, e ele NAO e correcao de arredondamento: o passo e 0.2 e os
+      quadros sao quatro, entao a interpolacao cobre 80% do trajeto e este ramo
+      da o ultimo QUINTO de uma vez. Escreve o inteiro que a formacao pediu,
+      zera o contador e para o timer. Medido pela CORR-WTE-062, do `long
+      double` de 0x004099b0; esta linha dizia "um pixel fora". }
     for i := BOLA_PRIMEIRA to BOLA_ULTIMA do
     begin
       bola := BolaDeNumero(i);

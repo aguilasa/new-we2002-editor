@@ -2365,8 +2365,13 @@ do `--edicao`; e o `iguala_nombres`.
     é `OFS_TEAM_NAME_3`, e o limite do `edit_nombre2` é 7 no time 2, não 19.
     Sobrou uma discordância de exatamente 1 entre a conta e a tela no primeiro
     campo, aberta como [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md);
-  - o vetor bola→zona e as tabelas da animação, que o
-    `estrategia.lista_formacionesClick` preenche;
+  - ~~o vetor bola→zona e as tabelas da animação, que o
+    `estrategia.lista_formacionesClick` preenche~~ — **portado em 2026-08-18**
+    pela [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md), com as duas auxiliares.
+    O `0x00434230` era **ponteiro**, não vetor: aponta para a tabela de 18 × 44
+    de `0x00433f0c`, extraída pelo `dump_formacoes.py`. Sobra outra coisa, com
+    dono nomeado — quem aponta os quatro ponteiros **ao abrir** o formulário é
+    `0x0040a0b4`, do grupo de carga, e ela não está portada;
   - ~~as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
     `0x00407338`) — **decisão de escopo, sem dono**: a WTE-TASK-32 cobre
     uniforme e bandeira do `MainForm`, não cara/cabelo/barba~~ — **decidido em

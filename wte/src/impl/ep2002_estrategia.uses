@@ -9,3 +9,4 @@ Graphics     # TColor
 Types        # TPoint
 retrace      # REMark
 wte_zonas    # ZONAS -- gerado por tools/dump_zonas.py
+wte_formacoes  # FORMACOES, POSICOES, PASSO_DA_ANIMACAO (CORR-WTE-062)

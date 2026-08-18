@@ -88,13 +88,24 @@ no arquivo: é `.bss`, montada pelo `estrategia.FormCreate`. Está extraída em
 [`dump_zonas.py`](../../tools/dump_zonas.py) e portada em
 [`../../src/wte_zonas.pas`](../../src/wte_zonas.pas).
 
-**O vetor bola→zona** (`0x00434230`) é preenchido pelo
-[`estrategia.lista_formacionesClick`](estrategia.lista_formacionesClick.md), e
-é o que faz a mesma bola ter zona diferente conforme a formação escolhida.
-**Ele ainda não foi portado**, e é o que mantém este handler `aberto`: no port
-toda bola cai na zona 0. O retângulo aparece, com a geometria correta de *uma*
-zona — que é visivelmente diferente de não aparecer, e por isso a falha não
-passa por "não implementado".
+**O `0x00434230` não é um vetor: é um ponteiro**, e a CORR-WTE-062 corrigiu
+isto em 2026-08-18. Ele aponta para os 11 bytes de zona do registro da
+formação escolhida, dentro da tabela de 18 × 44 de `0x00433f0c` — extraída em
+[`../formacoes.md`](../formacoes.md). É o que faz a mesma bola ter zona
+diferente conforme a formação.
+
+Quem o aponta é o
+[`lista_formacionesClick`](estrategia.lista_formacionesClick.md), **portado
+desde 2026-08-18**, e no port a zona sai de `ZonaDaBola(i)`, que lê a formação
+aplicada.
+
+**O que sobra é outra coisa, e o dono é outro.** No original quem aponta os
+quatro ponteiros ao **abrir** o formulário é `0x0040a0b4`, a rotina que enche a
+tela de tática — chamada pelo `MainForm.mostrar_estrategiaClick`, do grupo de
+carga, e não portada. Enquanto ela não existir, o port abre a tela com toda
+bola na zona 0 e só acerta depois de um clique na lista. O retângulo aparece,
+com a geometria correta de *uma* zona — que é visivelmente diferente de não
+aparecer, e por isso a falha não passa por "não implementado".
 
 ### O que ele guarda e ninguém lê ainda
 

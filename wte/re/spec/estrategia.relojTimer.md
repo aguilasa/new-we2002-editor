@@ -116,14 +116,38 @@ escala e o texto sai `'1'`, não `'10000'` — o mesmo idioma já visto no
 escrevem em rótulos diferentes; fundi-los faria o destaque saltar para a última
 bola animada.
 
-### Por que o veredito é `aberto`
+### De onde saem as seis tabelas, e quem liga o timer
 
-Não é a régua de bytes — este handler não grava. É que **quem enche as seis
-tabelas é o
-[`lista_formacionesClick`](estrategia.lista_formacionesClick.md)**, que ainda
-não foi portado. Enquanto ele não existir o `reloj` nunca é habilitado, e este
-corpo nunca roda: está escrito e correto, e não há como exercitá-lo na tela.
+**Da auxiliar `0x004097d4`**, não do handler que a chama — a CORR-WTE-062 mediu
+isto em 2026-08-18. As fórmulas:
 
-É também ele que **semeia `0x00434340`** — a bola em foco — antes de qualquer
-movimento de mouse. Enquanto isso não acontecer, o port precisa da guarda de
-`nil` que os handlers de arrastar carregam e o original não tem.
+```text
+DestinoX[i] := x[i]*8 - 2
+DestinoY[i] := ((y[i] - 3) div 2)*5 - 7
+DeltaX[i]   := (DestinoX[i] - AtualX[i]) * 0.2
+```
+
+O `x` e o `y` vêm da tabela de formações de `0x00433f0c`
+([`../formacoes.md`](../formacoes.md)); o `0.2` é um `long double` de 80 bits
+em `0x004099b0`, decodificado e não escrito à mão.
+
+**O `0.2` muda a leitura do ramo de encaixe.** Quatro quadros a 0.2 cobrem
+**80%** do trajeto, e o encaixe dá o último quinto de uma vez. Esta spec dizia
+que ele corrigia "um pixel fora, sempre no mesmo sentido"; é um quinto do
+caminho, não um pixel. O texto do `.inc` foi corrigido junto.
+
+`0x004097d4` também é quem faz `reloj.Enabled := True` e quem **semeia
+`0x00434340`**, a bola em foco, antes de qualquer movimento de mouse.
+
+### Por que o veredito continua `aberto`
+
+Não é a régua de bytes — este handler não grava. E não é mais o
+`lista_formacionesClick`, que está portado. É que `0x004097d4` é chamada
+**também** por `0x0040a0b4`, a rotina que enche a tela de tática ao abrir o
+formulário: no original a animação roda **na abertura**, deslizando as bolas
+das posições de projeto até a formação do time. `0x0040a0b4` não está portada —
+é do grupo de carga, pelo `MainForm.mostrar_estrategiaClick` —, então no port
+este corpo só roda depois de um clique em `lista_formaciones`.
+
+Isso é exercitável na tela, ao contrário do que esta spec afirmava: basta abrir
+a tática e clicar num item. O que não é exercitável é o caminho de abertura.

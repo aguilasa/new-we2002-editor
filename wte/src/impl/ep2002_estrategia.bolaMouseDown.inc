@@ -27,10 +27,9 @@ begin
   CentroDaBolaNaTela := ClientToScreen(Point(BolaEmFoco.Left + RAIO_DA_BOLA,
                                              BolaEmFoco.Top + RAIO_DA_BOLA));
 
-  { O retangulo da zona. `ZonaDaBola` ainda nasce zerado -- ver o `.aux.inc`. }
-  zona := 0;
-  if (indice >= Low(ZonaDaBola)) and (indice <= High(ZonaDaBola)) then
-    zona := ZonaDaBola[indice];
+  { O retangulo da zona. `ZonaDaBola` le a formacao aplicada; sem nenhuma
+    aplicada ela devolve 0 -- ver o `.aux.inc`. }
+  zona := ZonaDaBola(indice);
   if (zona >= 0) and (zona < ZONAS_TOTAL) then
   begin
     rectangulo.Left := campo.Left + ZONAS[zona].x1;
