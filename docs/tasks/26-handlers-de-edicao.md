@@ -132,10 +132,12 @@ separadas (primeiro parágrafo do Contexto).
       28** (2026-08-13): barras 2, número 4, nomes 5, mover 8, atributos 2,
       tática 7. Nove fecham `aberto` com dono nomeado, como a opção A previu
 - [x] Comportamento de truncamento documentado por campo — [`wte/re/truncamento.md`](../../wte/re/truncamento.md) (2026-08-13), gerado pelo [`dump_truncamento.py`](../../wte/tools/dump_truncamento.py)
-- [ ] ~~Golden verde para cada edição, uma por rodada~~ **Reescrito em
-      2026-08-12** (ver "Decisão do usuário" acima): **conferência de tela verde
-      para cada edição, uma por rodada**, pelo `compara_tela.sh`. O golden por
-      byte da mesma edição é critério da
+- [ ] ~~Golden verde para cada edição, uma por rodada~~ ~~conferência de tela
+      verde para cada edição, uma por rodada~~ **Reescrito duas vezes, ambas por
+      decisão do usuário** (2026-08-12 e 2026-08-18 — ver "As duas reescritas do
+      critério de tela" abaixo): **conferência verde para cada grupo de edição,
+      uma por rodada — de tela onde o alvo é mensurável em pixel, estática onde
+      já se mediu que não é.** O golden por byte da mesma edição é critério da
       [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md), porque só ela tem
       como levar a edição ao disco
 - [ ] Limpeza de campo usando `End`/`shift+Home`/`BackSpace`, nunca `ctrl+a` —
@@ -143,6 +145,44 @@ separadas (primeiro parágrafo do Contexto).
       exercitada. Ela entra junto com a régua de tela dos campos de nome
 - [x] Nenhuma medição sobre `roms/` diretamente — todas as passagens usaram cópia em `work/` ou no scratchpad
 - [x] Commit no formato conventional, em inglês — as 20 passagens
+
+### As duas reescritas do critério de tela
+
+Ambas do usuário, e as duas pela mesma razão: **o critério pedia um instrumento
+que não existe para parte do alvo**, e critério assim não fica mais rigoroso —
+fica só impossível de fechar honestamente.
+
+**2026-08-12 — de golden para tela.** O golden por byte exige levar a edição ao
+disco, e gravar é da [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md). O
+critério passou a pedir conferência de **tela**.
+
+**2026-08-18 — de "cada edição" para "cada grupo, no instrumento que alcança".**
+Três medições, todas já no log desta task, mostram que a régua de pixel não
+alcança tudo:
+
+- **a ficha do jogador não é mensurável em pixel** (décima quinta passagem): o
+  `TScrollBar` do gtk2 desenha mais alto que os 12 px declarados e cobre a faixa
+  das linhas 2 a 16 — de 16 `imghab`, só o primeiro dá medida. Isso atinge os
+  grupos **atributos** e metade do de **números**;
+- o substituto **já existe e já foi aceito**: o
+  [`check_bitfields.py`](../../wte/tools/check_bitfields.py) confere a ordem de
+  preenchimento da ficha contra os descritores de bit em `.data`. Ele mede
+  **identidade de campo**, que é mais forte do que largura de pixel, e roda sem
+  `:99` e sem Wine;
+- o mesmo vale para o campinho da **tática**: a passagem 18 conferiu o arrasto
+  na tela por inspeção dirigida, e o que sustenta a geometria é o
+  [`dump_zonas.py`](../../wte/tools/dump_zonas.py), que confere cada retângulo
+  contra o tamanho do `campo` no `.lfm`.
+
+**O que a reescrita não afrouxa.** A régua de **byte** desses handlers continua
+sendo da WTE-TASK-27, intocada. E "conferência estática" aqui não quer dizer
+"nenhuma medição": quer dizer medição que não passa por pixel, com ferramenta
+versionada e `--check`, como as duas acima.
+
+**Alternativa descartada:** construir a régua de pixel da ficha pela assinatura
+de cor dos 16 `valorhab` — o caminho que a décima quinta passagem identificou
+como o único viável. É projeto de ferramenta por si, para cobrir o que duas
+conferências estáticas já cobrem por outro caminho.
 
 ## Plano de fechamento
 
@@ -1698,269 +1738,6 @@ do `--edicao`; e o `iguala_nombres`.
 
 ---
 
-- **Executado em:** 2026-08-13 — **décima oitava passagem: os seis handlers de
-  arrastar bola no campinho.** O grupo vai de **21 para 27 de 28**; falta um
-  handler para esta task fechar.
-
-- **O custo do lote estava errado por três vezes, e nas três na mesma direção.**
-  O plano dizia "os 7 de tática, atrás do `0x0040a0b4` (1.443 B)". Medido antes
-  de ler, como manda a disciplina das últimas passagens:
-
-  1. **`0x0040a0b4` não é deste lote.** Quem o chama é o
-     `MainForm.mostrar_estrategiaClick`, do grupo de carga — está na coluna de
-     chamadores da [`auxiliares.tsv`](../../wte/re/auxiliares.tsv) desde a
-     WTE-TASK-25. Os 7 handlers **não chamam auxiliar interna nenhuma**: todas
-     as chamadas dos 2.088 bytes vão para a VCL.
-  2. **`campoMouseMove` tem 52 bytes, não 1.404.** A conta de 1.404 é a
-     distância até o próximo handler *publicado*, e entre um e outro mora o
-     `estrategia.FormCreate` (1.352 B). Medir corpo por subtração de vizinhos
-     **superestima em silêncio** sempre que houver rotina não listada no meio.
-  3. **`relojTimer` tem 936 B, não 348** — aqui para menos, pelo motivo
-     inverso: o corte que eu tinha usado era arbitrário.
-
-  O erro (1) e o (2) juntos faziam o lote parecer caro demais para uma passagem.
-  Erro de custo não é ruído: é o que decide o recorte, e recorte errado deixa
-  trabalho barato parado.
-
-- **O achado que o lote entregou: as zonas do campinho.** Arrastar um jogador
-  **não é livre**. O `bolaMouseDown` desenha o `rectangulo` em volta da área
-  permitida daquela bola, e o `rectanguloDragOver` prende o movimento a uma
-  grade dentro dela. A geometria sai de uma tabela em `0x00433e5c` — 11
-  registros de 16 bytes, `(x1, y1, x2, y2)`.
-
-  **Essa tabela não existe no arquivo**, como as legendas da passagem anterior:
-  é `.bss`, montada em tempo de execução. Quem a monta é o
-  `estrategia.FormCreate`, escrevendo 44 imediatos um a um, em ordem
-  embaralhada — o compilador intercala `lea` de ponteiro com `mov` de
-  deslocamento, e o primeiro campo de cada registro sai por um registrador
-  diferente dos outros três. Transcrever a olho trocaria um `x2` por um `y1` e
-  produziria um retângulo plausível.
-
-  O novo [`dump_zonas.py`](../../wte/tools/dump_zonas.py) decodifica e confere
-  contra o `.lfm`, que é outra fonte: **nenhum retângulo pode sair do `campo`**
-  (395×246) e a contagem tem de bater com os `bolaN` do formulário.
-
-- **E a spec do `estrategia.FormCreate` não dizia nada disso.** Escrita na
-  WTE-TASK-25, ela descreve as cores da zebra e chama os blocos de `0x00409168`
-  em diante de "quatro laços curtos de 11 iterações". O **produto principal** da
-  rotina é a tabela de zonas. Corrigida nesta passagem, com a lição escrita
-  dentro: spec de `FormCreate` escrita a partir da pergunta *"o que ele pinta?"*
-  responde só isso, e a ausência não se anuncia.
-
-- **Três detalhes que a leitura apressada erraria, e os três estão no Pascal:**
-
-  **A grade do eixo X tem fase.** Não é "múltiplo de 8": é múltiplo de 8 **mais
-  5** — os pontos válidos são 5, 13, 21… Arredondar para o múltiplo de 8 mais
-  próximo daria posições três pixels fora em todo o campo, e nenhum teste de "a
-  bola se move" pegaria. O eixo Y é grade de 5 sem fase.
-
-  **`X`/`Y` do `rectanguloDragOver` são relativos ao `rectangulo`, não ao
-  `campo`.** O alvo do arrasto é o retângulo. Tratá-los como se já fossem do
-  campo desloca a bola pela posição da zona — erro que cresce com a zona e
-  **desaparece na zona 0**, que é justamente onde um teste apressado olharia.
-
-  **Um global, dois papéis.** `0x00434340` é "bola destacada" no
-  `bolaMouseMove` e "bola sendo arrastada" no `bolaMouseDown`; não há um segundo
-  ponteiro. O original pode reusá-lo porque para apertar o botão sobre a bola o
-  ponteiro necessariamente passou por ela.
-
-- **Um teste meu reprovou, e a tabela estava certa.** Escrevi que os `x1`
-  distintos seriam três — defesa, meio e ataque. São **quatro**: além de 10, 122
-  e 274 há uma coluna em 170, um meio-campo adiantado mais estreito. Corrigido
-  para o valor medido, com o motivo dentro do teste. Palpite bonito escrito como
-  asserção é asserção errada.
-
-- **Visto na tela, no `:99`, e não só no gerador.** Com a `estrategia` aberta:
-  passar o mouse acende a bola de verde vivo e o rótulo de branco enquanto apaga
-  a anterior; apertar o botão faz aparecer o retângulo preto de borda vinho na
-  zona 0, com os 120×120 que a tabela prevê, e some o rótulo da bola arrastada;
-  arrastar move bola e rótulo juntos; soltar recoloca tudo. O `trace.log` mostra
-  a ordem completa — `bolaMouseDown` → `rectanguloDragOver` (várias) →
-  `rectanguloDragDrop` → `bolaEndDrag`.
-
-- **Um aviso de compilação ficou de propósito.** `Variable "ZonaDaBola" read but
-  nowhere assigned` — o vetor bola→zona é preenchido pelo
-  `estrategia.lista_formacionesClick`, que não é desta passagem. Enquanto ele
-  não existir, toda bola cai na zona 0. Calar o aviso esconderia exatamente a
-  lacuna que ele anuncia; é o que mantém o `bolaMouseDown` em `aberto` enquanto
-  os outros cinco fecham `implementado`.
-
-- **Arquivos criados/modificados:**
-  - `wte/tools/dump_zonas.py`, `wte/tools/test_dump_zonas.py` (10 testes)
-  - `wte/re/zonas.md`, `wte/re/zonas.tsv`, `wte/src/wte_zonas.pas` — gerados
-  - `wte/re/spec/estrategia.bolaMouseMove.md`, `.bolaMouseDown.md`,
-    `.campoMouseMove.md`, `.rectanguloDragOver.md`, `.rectanguloDragDrop.md`,
-    `.bolaEndDrag.md`
-  - `wte/re/spec/estrategia.FormCreate.md` — a correção
-  - `wte/src/impl/ep2002_estrategia.aux.inc`, `.uses` e os seis `.inc`
-  - `wte/tools/README.md`
-  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 78,1% → **76,4%**
-  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
-
-- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
-  `python3 -m unittest` em `tools/`: 501 testes, OK;
-  `compara_tela.sh --edicao` **PASSOU**, barras `[64, 75, 75, 75, 75]` nos dois
-  lados, 4 de 4 contra o `we2002_core`.
-
-- **Problemas encontrados:** o Xvfb `:99` caiu no meio da sessão e foi subido de
-  novo em 1280x1024; **não** houve queda para o `:1`.
-
-- **O que falta para esta task fechar** *(revisado)***:**
-  - **1 dos 28 handlers**: o `estrategia.relojTimer` (`0x00409ba4`, 936 B) — uma
-    máquina de estados sobre `0x0043428c` que move as 11 bolas por tabelas de
-    coordenadas diferentes a cada fase. É ele que semeia os dois globais que os
-    handlers de arrastar leem, e por isso o port precisa hoje de uma guarda de
-    `nil` que o original não tem;
-  - o vetor bola→zona (`estrategia.lista_formacionesClick`), que promove o
-    `bolaMouseDown` de `aberto` a `implementado`;
-  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**;
-  - o truncamento por campo (WTE-TASK-36);
-  - a régua de tela da ficha, se alguém a quiser.
-
----
-
-- **Executado em:** 2026-08-13 — **décima nona passagem: o `relojTimer`, e com
-  ele os 28 handlers têm spec.** Fica **um** critério aberto: o truncamento por
-  campo.
-
-- **O achado: trocar de formação não teleporta os jogadores, desliza.** O
-  `reloj` tem `Interval = 1` e `Enabled = False` no `.lfm`; o
-  `lista_formacionesClick` calcula um delta por bola e o liga, e este handler
-  desenha **quatro quadros**.
-
-  **São dois ramos, e o teste está na primeira instrução.** Se o contador chegou
-  a 4, este disparo é o do **encaixe final** — escreve a coordenada inteira que
-  a formação pediu, zera o contador e desliga o timer. Senão, soma o delta e
-  desenha o truncado.
-
-  O ramo do encaixe não é enfeite: depois de quatro somas em ponto flutuante a
-  posição acumulada não é o destino, e sem ele a formação ficaria um pixel fora
-  **sempre no mesmo sentido**. Ler só o segundo ramo daria uma animação que
-  nunca para e nunca chega ao inteiro.
-
-- **A contiguidade das seis tabelas é o que confirma o tamanho delas.** Elas são
-  `.bss` — `0x00434238`, `0x00434264`, `0x00434294`, `0x004342c0`, `0x004342ec`,
-  `0x00434318` — com `0x2c` (11 entradas) entre bases sucessivas, e logo depois
-  da última vem o `0x00434340`, a bola em foco que os handlers de arrastar usam.
-  O laço percorre 1..10: a entrada extra é da `bola0`, o goleiro, que não anda.
-  São `Single`, não `Double` — o original lê com `fld DWORD PTR`.
-
-- **Dois detalhes que a leitura apressada funde:**
-
-  **`Trunc`, não `Round`.** O original chama o auxiliar da RTL que põe a FPU em
-  arredondar-para-zero (`fstcw` / `or 0xc01`). Meio pixel por quadro, sempre
-  para o mesmo lado.
-
-  **Dois ponteiros de rótulo, não um.** `0x00434348` é o `etiqjug` que a
-  animação move; `0x00434344` é o que o mouse destaca. Os dois andam ao mesmo
-  tempo, e fundi-los faria o destaque saltar para a última bola animada.
-
-- **`CurrToStr` de novo.** O nome da bola sai de `CurrToStr(n * 10000)`:
-  `Currency` na Borland é inteiro de 64 bits escalado por 10.000, então o
-  produto desfaz a escala e o texto sai `'1'`. Mesmo idioma do
-  `iguala_nombresClick`. O port usa `IntToStr`.
-
-- **Veredito `aberto`, e não pela régua de bytes.** Quem enche as seis tabelas é
-  o `estrategia.lista_formacionesClick`, que não foi portado: enquanto ele não
-  existir o `reloj` nunca é habilitado e este corpo nunca roda. Está escrito e
-  correto, e **não há como exercitá-lo na tela** — dizer o contrário seria
-  chamar de verificado o que só foi compilado.
-
-- **Arquivos criados/modificados:**
-  - `wte/re/spec/estrategia.relojTimer.md`
-  - `wte/src/impl/ep2002_estrategia.relojTimer.inc`
-  - `wte/src/impl/ep2002_estrategia.aux.inc` — o estado da animação e as duas
-    buscas por nome
-  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 76,4% → **75,5%**
-  - regerados: os 18 `.pas`, `fase-2.md`, `INDICE.md`
-
-- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
-  `python3 -m unittest` em `tools/`: 501 testes, OK.
-
-- **Problemas encontrados:** Nenhum novo.
-
-- **O que falta para esta task fechar** *(revisado)***:**
-  - **o truncamento por campo** — é o último critério, e é desta task, não da
-    36. O que já está medido: quatro `MaxLength` nos DFM (`casilla_dorsal` 3,
-    `casilla_nombre` 10, mais dois) e **três atribuições em tempo de execução**
-    em `0x0040cc43`…`0x0040cc71`, que dão a `edit_nombre1` metade de
-    `[0x00433a10]`, a `edit_nombre2` o `[0x00433b48] − 1` e a `edit_nombre3` o
-    literal 3. Falta a ferramenta que cruze isso com a largura do campo de
-    destino na camada de dados;
-  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`), que
-    promovem `bolaMouseDown` e `relojTimer` de `aberto` a `implementado`;
-  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
-
----
-
-- **Executado em:** 2026-08-13 — **vigésima passagem: o truncamento por campo,
-  medido.** Sobra **um** critério, e ele é grande: estender o `--edicao` aos
-  outros grupos.
-
-- **O limite de um campo não está num lugar só, e essa é a razão de existir a
-  ferramenta.** São seis campos com limite: três o trazem do `.dfm` e três o
-  recebem em tempo de execução, por `TCustomEdit::SetMaxLength`. Ler só o
-  `.dfm` acha três e **não anuncia** que há outros três; ler só o código acha
-  três e perde os outros.
-
-  E dos que vêm do código, **nenhum é literal puro**: dois são expressão sobre a
-  largura do campo de destino.
-
-- **O achado é o `div 2`.** O `edit_nombre1` recebe `[0x00433a10] div 2`. Sem
-  olhar o destino isso é um número mágico; olhando, fecha: o campo é
-  `raw_kanji_name`, **40 bytes, dois por caractere** — 20 caracteres. Os outros
-  dois cortam um byte antes do destino, que é o do terminador:
-  `mixed_case_name` 20 → 19, `abbreviations[0]` 4 → 3.
-
-  **Essa é a conferência que o gerador roda**, e ela vale porque as duas medidas
-  vêm de fontes que não se falam: a expressão sai do `.text` do `.exe`, a
-  largura sai da camada de dados (o `we2002_core`, byte-idêntico ao `ed.exe`).
-  O gerador aborta se discordarem.
-
-- **Um `MaxLength` verdadeiro e irrelevante.** `jugador.casilla_dorsal` declara
-  10 e recebe **número de camisa**, que tem no máximo três dígitos. O limite
-  útil vem do `casilla_dorsalKeyPress`, que recusa tecla. Quem portasse "o campo
-  corta em 10" teria copiado uma medição correta para o lugar errado — está
-  registrado como tal.
-
-- **O que derrubou a primeira versão do decodificador:** o terceiro sítio
-  carrega o ponteiro do formulário em `edx` (`mov edx,ds:_MainForm`), indexa o
-  controle e só então põe o literal em `edx`. Tratar a primeira carga como
-  comprimento daria `MaxLength := endereço do formulário` — um número enorme, e
-  nenhum erro. Há teste para isso.
-
-  E `abbreviations` é `array[0..2] of array[0..3]`: a largura é a dimensão
-  **interna**, 4. Pegar a externa daria 3, que **por acaso é o `MaxLength`
-  certo** — a conferência passaria pelo motivo errado, para sempre. Também tem
-  teste.
-
-- **Arquivos criados/modificados:**
-  - `wte/tools/dump_truncamento.py`, `wte/tools/test_dump_truncamento.py`
-    (15 testes)
-  - `wte/re/truncamento.md`, `wte/re/truncamento.tsv` — gerados
-  - `wte/tools/README.md`
-  - `docs/tasks/26-handlers-de-edicao.md` — três critérios marcados
-
-- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
-  `python3 -m unittest` em `tools/`: 516 testes, OK.
-
-- **Problemas encontrados:** Nenhum além dos dois modos de erro acima, que
-  viraram teste.
-
-- **O que falta para esta task fechar** *(revisado)***:**
-  - **um critério, e é o caro:** *conferência de tela verde para cada edição,
-    uma por rodada*. O `compara_tela.sh --edicao` hoje exercita **um** par —
-    `sel_barraClick` e `track_barraChange` —, e cada grupo restante precisa da
-    sua sequência de cliques medida nos dois lados, como aquele precisou. É o
-    que a nona passagem já anotava como "estender o `--edicao` aos grupos que
-    vierem";
-  - com ele vem a limpeza de campo por `End`/`shift+Home`/`BackSpace`, que
-    nenhum roteiro exercita ainda porque nenhum digita texto;
-  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
-  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
-
----
-
 - **Executado em:** 2026-08-13 — **décima sétima passagem: o `flechasapaClick`,
   e as legendas da ficha deixaram de ser as do `.lfm`.** O grupo vai de **20
   para 21 de 28**. Fecha o lote de atributo inteiro e paga uma dívida que estava
@@ -2072,7 +1849,7 @@ do `--edicao`; e o `iguala_nombres`.
 
 ---
 
-- **Executado em:** 2026-08-13 — **décima oitava passagem: os seis handlers de
+- **Executado em:** 2026-08-18 — **décima oitava passagem: os seis handlers de
   arrastar bola no campinho.** O grupo vai de **21 para 27 de 28**; falta um
   handler para esta task fechar.
 
@@ -2193,7 +1970,7 @@ do `--edicao`; e o `iguala_nombres`.
 
 ---
 
-- **Executado em:** 2026-08-13 — **décima nona passagem: o `relojTimer`, e com
+- **Executado em:** 2026-08-18 — **décima nona passagem: o `relojTimer`, e com
   ele os 28 handlers têm spec.** Fica **um** critério aberto: o truncamento por
   campo.
 
@@ -2263,4 +2040,151 @@ do `--edicao`; e o `iguala_nombres`.
     destino na camada de dados;
   - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`), que
     promovem `bolaMouseDown` e `relojTimer` de `aberto` a `implementado`;
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
+- **Executado em:** 2026-08-18 — **vigésima passagem: o truncamento por campo,
+  medido.** Sobra **um** critério, e ele é grande: estender o `--edicao` aos
+  outros grupos.
+
+- **O limite de um campo não está num lugar só, e essa é a razão de existir a
+  ferramenta.** São seis campos com limite: três o trazem do `.dfm` e três o
+  recebem em tempo de execução, por `TCustomEdit::SetMaxLength`. Ler só o
+  `.dfm` acha três e **não anuncia** que há outros três; ler só o código acha
+  três e perde os outros.
+
+  E dos que vêm do código, **nenhum é literal puro**: dois são expressão sobre a
+  largura do campo de destino.
+
+- **O achado é o `div 2`.** O `edit_nombre1` recebe `[0x00433a10] div 2`. Sem
+  olhar o destino isso é um número mágico; olhando, fecha: o campo é
+  `raw_kanji_name`, **40 bytes, dois por caractere** — 20 caracteres. Os outros
+  dois cortam um byte antes do destino, que é o do terminador:
+  `mixed_case_name` 20 → 19, `abbreviations[0]` 4 → 3.
+
+  **Essa é a conferência que o gerador roda**, e ela vale porque as duas medidas
+  vêm de fontes que não se falam: a expressão sai do `.text` do `.exe`, a
+  largura sai da camada de dados (o `we2002_core`, byte-idêntico ao `ed.exe`).
+  O gerador aborta se discordarem.
+
+- **Um `MaxLength` verdadeiro e irrelevante.** `jugador.casilla_dorsal` declara
+  10 e recebe **número de camisa**, que tem no máximo três dígitos. O limite
+  útil vem do `casilla_dorsalKeyPress`, que recusa tecla. Quem portasse "o campo
+  corta em 10" teria copiado uma medição correta para o lugar errado — está
+  registrado como tal.
+
+- **O que derrubou a primeira versão do decodificador:** o terceiro sítio
+  carrega o ponteiro do formulário em `edx` (`mov edx,ds:_MainForm`), indexa o
+  controle e só então põe o literal em `edx`. Tratar a primeira carga como
+  comprimento daria `MaxLength := endereço do formulário` — um número enorme, e
+  nenhum erro. Há teste para isso.
+
+  E `abbreviations` é `array[0..2] of array[0..3]`: a largura é a dimensão
+  **interna**, 4. Pegar a externa daria 3, que **por acaso é o `MaxLength`
+  certo** — a conferência passaria pelo motivo errado, para sempre. Também tem
+  teste.
+
+- **Arquivos criados/modificados:**
+  - `wte/tools/dump_truncamento.py`, `wte/tools/test_dump_truncamento.py`
+    (15 testes)
+  - `wte/re/truncamento.md`, `wte/re/truncamento.tsv` — gerados
+  - `wte/tools/README.md`
+  - `docs/tasks/26-handlers-de-edicao.md` — três critérios marcados
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 516 testes, OK.
+
+- **Problemas encontrados:** Nenhum além dos dois modos de erro acima, que
+  viraram teste.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **um critério, e é o caro:** *conferência de tela verde para cada edição,
+    uma por rodada*. O `compara_tela.sh --edicao` hoje exercita **um** par —
+    `sel_barraClick` e `track_barraChange` —, e cada grupo restante precisa da
+    sua sequência de cliques medida nos dois lados, como aquele precisou. É o
+    que a nona passagem já anotava como "estender o `--edicao` aos grupos que
+    vierem";
+  - com ele vem a limpeza de campo por `End`/`shift+Home`/`BackSpace`, que
+    nenhum roteiro exercita ainda porque nenhum digita texto;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
+  - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.
+
+---
+
+- **Executado em:** 2026-08-18 — **vigésima primeira passagem: o critério de
+  tela estreitado por decisão do usuário, e os dois `MaxLength` que o port não
+  punha.**
+
+- **A decisão, e ela é a segunda sobre o mesmo critério.** Registrada em "As
+  duas reescritas do critério de tela", acima. Em resumo: conferência verde para
+  cada **grupo** de edição — de tela onde o alvo é mensurável em pixel,
+  **estática** onde já se mediu que não é. O que a sustenta são três medições
+  que já estavam neste log: a ficha não é mensurável em pixel (passagem 15), o
+  substituto estático já existe e foi aceito (`check_bitfields.py`), e a
+  geometria da tática é sustentada pelo `dump_zonas.py`. A régua de **byte**
+  continua com a WTE-TASK-27, intocada.
+
+- **O port não punha `MaxLength` em `edit_nombre1` nem em `edit_nombre2`, e a
+  divergência era muda.** Os dois campos aceitavam texto de qualquer tamanho; só
+  o truncamento na gravação apararia, tarde. Corrigido no `MainForm.FormShow`, e
+  **por `SizeOf` do campo de destino, não por literal** — as expressões do
+  original são a largura do campo, e escrever 20 e 19 à mão romperia o vínculo
+  no dia em que o campo mudasse.
+
+  Conferido na tela, no `:99`: 30 caracteres digitados em `Nome1` param no **T**
+  (20º) e em `Nome2` param no **S** (19º). A limpeza foi por
+  `End`/`shift+Home`/`BackSpace`, que é o que o critério manda — e foi a
+  primeira vez que este projeto digitou texto no port sob o harness.
+
+- **Um erro meu, e ele é do tipo que a spec existe para impedir.** Eu havia
+  anunciado o `iguala_nombresClick` como promovível. **Não é.** A spec dele traz
+  **dois** motivos para `aberto` e eu só tinha lido o primeiro:
+
+  1. o valor de `[0x00433b48]` não medido — **este fechou**, e por confirmação
+     cruzada: o `dump_truncamento.py` cruza a expressão do `.exe` com a largura
+     do campo na camada de dados e aborta se discordarem;
+  2. **o botão não acinzenta no port** — a CORR-WTE-057 mediu 518 px de mudança
+     no oráculo e **0** no port, com o Pascal pondo `Enabled := nacional` na
+     linha 49 e o vizinho `boton_nombres2iso` acinzentando certo na linha 55.
+     **Sem causa medida.**
+
+  Levantei duas hipóteses — a cor transparente do glifo e o `ParentFont = False`
+  — e **não testei nenhuma**, então nenhuma entrou na spec. A CORR-WTE-057 já
+  escreveu que este defeito pede correção própria; ela **ainda não foi aberta**.
+
+- **O log desta task estava corrompido, por minha causa.** As passagens 18 e 19
+  apareciam **duas vezes** e fora de ordem: uma `str.replace` sem `count=1`
+  casou um âncora que existia em dois lugares. Ordem refeita (17 → 20), nada
+  perdido — só linhas em branco a mais —, e as datas das passagens 18, 19 e 20
+  corrigidas de 2026-08-13 para **2026-08-18**, que é a dos commits. A guarda
+  que faltava (`assert` de ocorrência única antes de substituir) foi usada nesta
+  passagem e **reprovou de novo**, no mesmo âncora — o texto foi anexado no fim
+  do arquivo em vez de por marca.
+
+- **Arquivos criados/modificados:**
+  - `docs/tasks/26-handlers-de-edicao.md` — o critério reescrito, a seção da
+    decisão, a ordem do log e as datas
+  - `wte/src/impl/ep2002_mainform.FormShow.inc` — os dois `MaxLength`
+  - `wte/re/spec/MainForm.iguala_nombresClick.md` — um motivo fechado, o outro
+    nomeado
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4 — 75,5% → **75,4%**
+  - regerados: `fase-2.md`
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `python3 -m unittest` em `tools/`: 516 testes, OK. Mais a conferência de tela
+  dos dois `MaxLength`, acima.
+
+- **O que falta para esta task fechar** *(revisado)***:**
+  - **duas sequências de tela**, pelo critério novo: **nomes** e **mover** — os
+    dois no `MainForm`, sem sub-diálogo, alvo mensurável em pixel. Com elas vem
+    a limpeza de campo em roteiro;
+  - **números**: a metade do `MainForm` (`dorsalClick`, `dorsalMouseDown`) entra
+    na sequência de mover; a metade do `ficha_dorsal` fecha por conferência
+    estática;
+  - **atributos** e **tática** fecham por conferência estática — o
+    `check_bitfields.py` e o `dump_zonas.py` já são ela; falta escrever o
+    veredito;
+  - o `iguala_nombres` que não acinzenta — **precisa de CORR própria**;
+  - o vetor bola→zona e as tabelas da animação (`lista_formacionesClick`);
   - as três carregadoras de bitmap da ficha — **decisão de escopo, sem dono**.

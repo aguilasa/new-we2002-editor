@@ -60,6 +60,26 @@ begin
     lista_equipos.Enabled := True;
     lista_equipos_1.Enabled := True;
     lista_equipos_2.Enabled := True;
+
+    { Os dois limites que o port nao punha, e a divergencia era muda: os campos
+      aceitavam texto de qualquer tamanho e so o truncamento na gravacao
+      apararia, tarde.
+
+      O original faz isto dentro do `0x0040cbc8`, a rotina que varre a tabela
+      de offsets e que o `lista_equiposChange` chama -- ou seja, a cada troca de
+      time, com o mesmo valor sempre. Aqui e uma vez so, porque os dois numeros
+      sao do FORMATO e nao do time.
+
+      E sao `SizeOf` do campo de destino, nao literal: as expressoes do original
+      (`[0x00433a10] div 2` e `[0x00433b48] - 1`) sao a largura do campo, e
+      escrever 20 e 19 a mao romperia o vinculo no dia em que o campo mudasse.
+      O `div 2` e porque o nome kanji guarda dois bytes por caractere; o `- 1` e
+      o byte do terminador. Medido em wte/re/truncamento.md.
+
+      `edit_nombre3` nao aparece aqui: o `MaxLength = 3` dele esta no proprio
+      DFM, e o `.lfm` o herda. }
+    edit_nombre1.MaxLength := SizeOf(Jogo.teams[0].raw_kanji_name) div 2;
+    edit_nombre2.MaxLength := SizeOf(Jogo.teams[0].mixed_case_name) - 1;
   end
   else
     texto_dialogo_we.Caption := 'nao foi possivel abrir ' + ExtractFileName(imagem);
