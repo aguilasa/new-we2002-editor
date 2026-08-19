@@ -137,6 +137,27 @@ function EnderecoDeDados(setor_base, indice_logico: TOffset): TOffset;
   `we2002_core`. }
 function GravaNaImagem(offset: TOffset; const buffer; count: SizeInt): Boolean;
 
+{ O FLUXO DE DADOS -- a leitura e a gravacao sequenciais do original.
+
+  O `wte.exe` trata a imagem como um fluxo continuo de dados de usuario e
+  mantem o salto de setor a mao: depois de CADA byte, se a posicao chegou ao
+  fim da regiao de dados (byte 2072 do setor), ele pula 304 -- os 280 de
+  EDC/ECC mais os 24 de cabecalho do setor seguinte. E a rotina `0x00403388`,
+  chamada por todo laco de leitura e de gravacao dele.
+
+  Sem isso, um nome que atravessa fronteira de setor sairia gravado por cima do
+  EDC/ECC. Com isso, o formato MODE2/2352 fica invisivel para quem chama. }
+procedure SaltaFronteiraDeSetor(var img: TCdImage);
+
+{ Um byte do fluxo, com o salto aplicado depois. False no fim do arquivo. }
+function LeDoFluxo(var img: TCdImage; out b: Byte): Boolean;
+
+{ Grava `count` bytes pelo FLUXO, a partir de `offset`. Mesma semantica do
+  `0x00403400` do original: `Seek` absoluto e um byte de cada vez, com o salto
+  entre eles. }
+function GravaNoFluxo(var img: TCdImage; offset: TOffset;
+                      const buffer; count: SizeInt): Boolean;
+
 { ------------------------------------------------------------------------ }
 { O time e o jogador que a ficha esta editando -- as globais `0x004335cc` e
   `0x004335dc` do original.
@@ -331,6 +352,39 @@ begin
   finally
     img.Close;
   end;
+end;
+
+procedure SaltaFronteiraDeSetor(var img: TCdImage);
+begin
+  if (img.Tell mod SETOR_BYTES) = (SETOR_DADOS_INICIO + SETOR_DADOS) then
+    img.Seek(SETOR_BYTES - SETOR_DADOS, soCurrent);
+end;
+
+function LeDoFluxo(var img: TCdImage; out b: Byte): Boolean;
+begin
+  b := 0;
+  Result := img.Read(b, 1) = 1;
+  if Result then
+    SaltaFronteiraDeSetor(img);
+end;
+
+function GravaNoFluxo(var img: TCdImage; offset: TOffset;
+                      const buffer; count: SizeInt): Boolean;
+var
+  bytes: PByte;
+  i: SizeInt;
+begin
+  Result := False;
+  if count <= 0 then
+    Exit;
+  bytes := @buffer;
+  img.Seek(offset, soBeginning);
+  for i := 0 to count - 1 do
+  begin
+    img.Write(bytes[i], 1);
+    SaltaFronteiraDeSetor(img);
+  end;
+  Result := True;
 end;
 
 function AbreImagem(const caminho: string): Boolean;

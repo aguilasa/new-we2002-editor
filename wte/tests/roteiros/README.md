@@ -211,6 +211,12 @@ mesma faixa. Digitar um texto distinto nos tres campos antes de gravar faz o
 do handler foram medidos. O texto e o time sao os do `compara_tela.sh --nomes`,
 ja medidos nos dois lados.
 
+O [`golden-05-nomes.txt`](golden-05-nomes.txt) e a mesma sequencia da sonda,
+virada gate: ele grava os dez blocos de nome do time 2. Rodou nos DOIS modos --
+`controle` byte-identico antes do `golden`, e isso nao e formalidade aqui:
+roteiro que DIGITA tem uma fonte de nao-determinismo que roteiro de clique nao
+tem, e o controle e o unico lugar onde ela apareceria.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

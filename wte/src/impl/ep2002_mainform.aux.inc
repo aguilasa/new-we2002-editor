@@ -155,6 +155,172 @@ begin
     end;
 end;
 
+{ ------------------------------------------------------------------------ }
+{ OS BLOCOS DE NOME -- a tabela `0x004231a0` e a varredura que a acompanha.
+
+  Insumo do `boton_nombres2isoClick` (`0x0040d534`, WTE-TASK-27). Spec:
+  `wte/re/spec/MainForm.boton_nombres2isoClick.md`.
+
+  Tres linhas (um campo de nome cada) por seis colunas (os blocos em que aquele
+  campo e gravado). Zero quer dizer "este campo nao tem esse bloco". Os valores
+  sao os 18 `DWORD` de `0x004231a0`, extraidos pela WTE-TASK-06 para
+  `wte/re/offsets.tsv` e ja casados com os `OFS_*` do `we2002_core` -- por isso
+  aqui eles aparecem por NOME e nao por numero. }
+const
+  NOME_BLOCOS: array[0..2, 0..5] of TOffset = (
+    (OFS_TEAM_NAME_KANJI, OFS_TEAM_MIXED_CASE_NAME, 0, 0, 0, 0),
+    (OFS_TEAM_NAME_3, OFS_TEAM_NAME_1, OFS_TEAM_NAME_4,
+     OFS_ML_TEAM_NAME_7, OFS_TEAM_NAME_2, OFS_TEAM_NAME_6),
+    (OFS_TEAM_ABBREV_1, OFS_TEAM_ABBREV_3, OFS_TEAM_ABBREV_2, 0, 0, 0));
+
+  { Os blocos guardam os times em ordem INVERSA: o offset da tabela e o slot do
+    time 94, e a varredura anda `94 - indice` registros para frente. O
+    `we2002_core` conhece a mesma inversao pelo outro lado -- o `Save` dele
+    grava `ml_teams[31-i]`. }
+  ULTIMO_TIME_DOS_BLOCOS = 94;
+
+  { O bloco 3 do campo 2 so existe para clube de Master League: e o
+    `OFS_ML_TEAM_NAME_7`. Para selecao o original pula. }
+  BLOCO_SO_DE_ML_CAMPO = 1;
+  BLOCO_SO_DE_ML_INDICE = 3;
+
+  { Modo de codificacao do registro. So o par (campo 0, bloco 0) --
+    `OFS_TEAM_NAME_KANJI` -- usa dois bytes por caractere. }
+  MODO_DOIS_BYTES = 1;
+  MODO_UM_BYTE    = 2;
+
+  NOME_BUFFER_MAX = 64;
+
+type
+  TBlocoDeNome = record
+    offset: TOffset;
+    comprimento: LongInt;
+    modo: Integer;
+  end;
+
+{ Acha o slot do time `indice` no bloco `(campo, bloco)`, andando pelo fluxo
+  como o `0x00403c0c` do original anda.
+
+  A varredura e a unica fonte: o original nao tem tabela de offset por time
+  nem de comprimento -- ele parte do offset do bloco, pula `94 - indice`
+  registros terminados em NUL (com o enchimento que vier depois) e mede o slot
+  que sobrou. Reproduzir a varredura evita decidir de fora qual `OFS_*` casa
+  com qual time, que e onde um port erraria calado.
+
+  O comprimento devolvido e a LARGURA DO SLOT -- nome mais enchimento --, e e
+  ela que limita a gravacao. Para o bloco de dois bytes o original ainda
+  desconta um. }
+function LocalizaBlocoDeNome(var img: TCdImage; campo, bloco, indice: Integer;
+                             out achado: TBlocoDeNome): Boolean;
+var
+  base: TOffset;
+  restantes, i: Integer;
+  b: Byte;
+  n: LongInt;
+begin
+  Result := False;
+  achado.offset := 0;
+  achado.comprimento := 0;
+  achado.modo := MODO_UM_BYTE;
+  if (campo < 0) or (campo > 2) or (bloco < 0) or (bloco > 5) then
+    Exit;
+  base := NOME_BLOCOS[campo, bloco];
+  if base = 0 then
+    Exit;
+  restantes := ULTIMO_TIME_DOS_BLOCOS - indice;
+  if restantes < 0 then
+    Exit;
+
+  img.Seek(base + 1, soBeginning);
+  for i := 1 to restantes do
+  begin
+    { ate o fim do nome corrente... }
+    repeat
+      if not LeDoFluxo(img, b) then Exit;
+    until b = 0;
+    { ...e pelo enchimento, ate o primeiro byte do nome seguinte. }
+    repeat
+      if not LeDoFluxo(img, b) then Exit;
+    until b <> 0;
+  end;
+
+  { O ultimo byte lido e o primeiro caractere do slot procurado. }
+  achado.offset := img.Tell - 1;
+  n := 1;
+  repeat
+    if not LeDoFluxo(img, b) then Exit;
+    if b <> 0 then Inc(n);
+  until b = 0;
+  repeat
+    if not LeDoFluxo(img, b) then Exit;
+    if b = 0 then Inc(n);
+  until b <> 0;
+  achado.comprimento := n + 1;
+
+  if (campo = 0) and (bloco = 0) then
+  begin
+    Dec(achado.comprimento);
+    achado.modo := MODO_DOIS_BYTES;
+  end;
+  Result := achado.comprimento > 0;
+end;
+
+{ Codifica `texto` no buffer, ate `comprimento` bytes, no modo do bloco.
+
+  DIVERGE do `AsciiToKanji` do `we2002_core` num ponto, e o ponto e o espaco: o
+  `ed.exe` escreve o par `0x82 0x80` e o `wte.exe` escreve **um** `0x20`. Foi
+  medido no proprio byte gravado (`27-nomes-editados`), e como este projeto
+  porta o editor do Obocaman, a regra que vale e a dele.
+
+  O original nao trata caractere fora de `[A-Za-z0-9 .]` no modo de dois bytes:
+  ele deixa o segundo byte com o valor do caractere ANTERIOR. Nao ha como
+  chegar la pela tela -- os tres filtros de tecla do `KeyPress` so deixam passar
+  esse conjunto --, entao aqui o caractere desconhecido vira espaco em vez de
+  copiar lixo. Divergencia inalcancavel, registrada na spec. }
+procedure CodificaNomeDoBloco(const texto: string; comprimento: LongInt;
+                              modo: Integer; out buffer: array of Byte);
+var
+  origem, destino: LongInt;
+  c: AnsiChar;
+begin
+  for destino := 0 to High(buffer) do
+    buffer[destino] := 0;
+  origem := 1;
+  destino := 0;
+  while destino < comprimento do
+  begin
+    if origem > Length(texto) then
+    begin
+      { Passou do texto: o resto do slot vai a zero. }
+      Inc(destino);
+      Inc(origem);
+      Continue;
+    end;
+    c := AnsiChar(texto[origem]);
+    if modo = MODO_UM_BYTE then
+      buffer[destino] := Byte(c)
+    else if c = ' ' then
+      buffer[destino] := $20
+    else
+    begin
+      case c of
+        '.':      begin buffer[destino] := $81; c := AnsiChar($44); end;
+        '0'..'9': begin buffer[destino] := $82; c := AnsiChar(Byte(c) + $1F); end;
+        'A'..'Z': begin buffer[destino] := $82; c := AnsiChar(Byte(c) + $1F); end;
+        'a'..'z': begin buffer[destino] := $82; c := AnsiChar(Byte(c) + $20); end;
+      else
+        begin buffer[destino] := $82; c := AnsiChar($80); end;
+      end;
+      Inc(destino);
+      if destino >= comprimento then
+        Break;
+      buffer[destino] := Byte(c);
+    end;
+    Inc(destino);
+    Inc(origem);
+  end;
+end;
+
 { Cadeia a partir de um vetor de AnsiChar terminado em NUL, que e como a
   camada de dados guarda todo nome. }
 function Cadeia(const bruto): string;

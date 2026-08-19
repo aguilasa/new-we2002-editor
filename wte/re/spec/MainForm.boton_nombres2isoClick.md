@@ -2,7 +2,7 @@
 handler: boton_nombres2isoClick
 formulario: MainForm
 endereco: 0x0040d534
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.boton_nombres2isoClick
@@ -11,8 +11,8 @@ Grava os três nomes do time selecionado nos blocos de nome da imagem. 2.268
 bytes, do `0x0040d534` ao `0x0040de15` — o maior handler do grupo, e o único
 que depende de duas tabelas e de duas rotinas internas.
 
-**Ainda não portado.** Esta spec é recuperação de especificação; o Pascal vem
-na passagem seguinte da [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+Portado na [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), com
+golden verde.
 
 ## Entrada
 
@@ -104,8 +104,11 @@ validação de entrada:
 2. **`edit_nombre1` começando com `?`** (`0x00424e1d`) pula **todos** os blocos
    daquele campo. O `?` é o que a carga mostra quando não soube decodificar o
    nome; regravá-lo destruiria o original;
-3. **`edit_nombre2`, bloco 3, com `ItemIndex >= 63`** — clube de Master League
-   não tem esse bloco.
+3. **`edit_nombre2`, bloco 3, com `ItemIndex < 63`** — o bloco é o
+   `OFS_ML_TEAM_NAME_7`, e só clube de Master League o tem. O salto é
+   `cmp eax,0x3f` / `jl`: pula quando o índice é **menor** que 63. A primeira
+   leitura desta spec inverteu o sentido, e a medição desmentiu — a tabela
+   promete onze blocos e o `cmp` vê dez, com o time 2.
 
 **Evidência:** disassembly lido
 
@@ -144,10 +147,77 @@ Nos dois, o que sobra do comprimento é preenchido com `0x00`, e o laço para no
 comprimento do registro — nunca no fim do texto. É truncamento por campo, o
 mesmo que o [`truncamento.md`](../truncamento.md) mapeou para a tela.
 
-### O que falta para escrever o Pascal
+### A regra que enche os 18 registros — `0x00403c0c`
 
-A spec responde *o que* é gravado e *onde*, para o time medido. Falta a regra
-geral que a carga usa para preencher os 18 registros — offset e comprimento por
-time —, e é ela que o port precisa reproduzir ou derivar do `we2002_core`. Como
-manda o gabarito: **se a spec não basta para escrever o código, a spec está
-incompleta**, e é essa a informação que esta seção existe para dar.
+É a peça que faltava, e ela não usa tabela de offset por time nem de
+comprimento: **varre a imagem**.
+
+```text
+restantes := 94 - indice
+seek(tabela[campo][bloco] + 1)
+repetir `restantes` vezes:
+    anda ate o fim do nome corrente        (ate o byte 0)
+    anda pelo enchimento                   (bytes 0) ate o proximo nao-zero
+offset      := posicao - 1
+comprimento := quantos bytes o slot tem, nome mais enchimento
+le o slot para o buffer do registro e marca o fim com 0xFF
+se (campo, bloco) = (0, 0):  comprimento := comprimento - 1;  modo := 1
+senao:                       modo := 2
+```
+
+Duas coisas que isso revela e que nenhuma tabela diria:
+
+- **os blocos guardam os times em ordem inversa.** O offset da tabela é o slot
+  do time **94**, e a varredura anda `94 - índice` registros para frente. O
+  `we2002_core` conhece a mesma inversão pelo outro lado — o `Save` dele grava
+  `ml_teams[31-i]`;
+- **o comprimento é a largura do slot medida na imagem**, não uma constante. É
+  por isso que o mesmo campo grava 7 bytes num bloco e 3 noutro.
+
+Há um caso especial morto no original: `(campo 0, bloco 5, 32º registro)` faz
+um `seek` fixo para `0x563f8d`. O bloco 5 da linha 0 é buraco na tabela, então
+o laço nunca chega lá. Não foi portado, e a razão está aqui.
+
+### O salto de setor é do fluxo, não do endereço — `0x00403388`
+
+Depois de **cada** byte lido ou gravado, o original testa
+`posicao mod 2352 = 2072` e, se bate, pula 304. É o que torna o formato
+MODE2/2352 invisível para o resto do código: nome que atravessa fronteira de
+setor não escreve por cima do EDC/ECC.
+
+No port isso é `SaltaFronteiraDeSetor` / `LeDoFluxo` / `GravaNoFluxo`, no
+`we2002_estado`.
+
+### O espaço é codificado diferente do `ed.exe`, e isso é medição
+
+No modo de dois bytes o `wte.exe` escreve **um** `0x20` para o espaço; o
+`AsciiToKanji` do `we2002_core`, que veio do `ed.exe`, escreve o par
+`0x82 0x80`. Medido no byte gravado: `A BC.` sai
+`82 60 20 82 61 82 62 81 44`, nove bytes e não dez.
+
+Como este projeto porta o editor do Obocaman, a regra que vale é a dele — e é
+por isso que o port **não** reusa o codec do core aqui.
+
+O original também não trata caractere fora de `[A-Za-z0-9 .]` nesse modo:
+deixa o segundo byte com o valor do caractere anterior. Não há como chegar lá
+pela tela — os três filtros de `KeyPress` só deixam passar esse conjunto —, e o
+port escreve espaço. Divergência inalcançável, registrada aqui.
+
+### O que a régua desta task mediu
+
+`golden_check.sh` sobre `golden-05-nomes` / `.port`: **passou**, só as duas
+faixas do arranque divergem, e o **controle** (oráculo contra oráculo) fechou
+byte-idêntico antes — o roteiro digita, e roteiro que digita precisa provar que
+é determinístico.
+
+E a passagem não é vazia: rodado o lado port sozinho contra a ROM limpa, ele
+grava **os dez blocos**, nos mesmos offsets e com os mesmos tamanhos que a
+sonda `27-nomes-editados` mediu no oráculo.
+
+### O que faltava para escrever o Pascal
+
+~~Falta a regra geral que a carga usa para preencher os 18 registros.~~
+**Recuperada em 2026-08-19** e escrita acima — é a varredura do `0x00403c0c`.
+Com ela a spec bastou: o Pascal saiu daqui, e está em
+[`../../src/impl/ep2002_mainform.boton_nombres2isoClick.inc`](../../src/impl/ep2002_mainform.boton_nombres2isoClick.inc),
+com as auxiliares no `.aux.inc` da mesma unidade.

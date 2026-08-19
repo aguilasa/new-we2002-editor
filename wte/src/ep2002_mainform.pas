@@ -32,7 +32,7 @@ uses
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
   we2002_types, we2002_player, ep2002_jugador, ep2002_estrategia,
   ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
-  we2002_tables, ep2002_info3, we2002_offsets;
+  we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage;
 
 type
   TMainForm = class(TForm)
@@ -308,12 +308,8 @@ procedure TMainForm.edit_nombre3KeyPress(Sender: TObject; var Key: char);
 procedure TMainForm.iguala_nombresClick(Sender: TObject);
 {$I impl/ep2002_mainform.iguala_nombresClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_nombres2isoClick(Sender: TObject);
-begin
-  REStub('MainForm.boton_nombres2isoClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.boton_nombres2isoClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_tex2isoClick(Sender: TObject);

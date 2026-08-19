@@ -1,0 +1,103 @@
+# golden-05-nomes -- o golden do `boton_nombres2isoClick`, lado oraculo.
+#
+# WTE-TASK-27. Mesma sequencia da sonda `27-nomes-editados.txt`, que mediu ONDE
+# cada campo grava; aqui ela vira gate. Editar antes de gravar e obrigatorio
+# pelo mesmo motivo do `golden-04`: sem edicao os dois lados escreveriam os
+# bytes que ja estavam la, e um port que nao gravasse nada passaria igual.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-05-nomes.txt \
+#        --roteiro-port wte/tests/roteiros/golden-05-nomes.port.txt
+#
+# Dez blocos sao gravados com o time 2: 2 do `edit_nombre1`, 5 do
+# `edit_nombre2` e 3 do `edit_nombre3`. O 11o -- bloco 3 do campo 2 --  e
+# `OFS_ML_TEAM_NAME_7` e so existe para clube de Master League.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# As duas do arranque, herdadas do golden-01. Os dez blocos de nome NAO entram:
+# eles tem de sair iguais dos dois lados, e e isso que este roteiro mede.
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- os tres nomes ----
+#
+# grupo_nombre (336,48) + edit_nombre1 (86,26) = (422,74). O `Return` encadeia
+# o foco para o campo seguinte; depois do terceiro nao ha para onde ir.
+! clique 422 74
+~ 2
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+= EDITA_NOMES
+
+# ------------------------------------------------------------- gravar ----
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- sem ela os bytes ficam no buffer do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_NOMES

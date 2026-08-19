@@ -402,3 +402,77 @@ alvos.
   inalterado mediria a passagem anterior. `roms/` intocada.
 
 - **Problemas encontrados:** nenhum.
+
+---
+
+- **Executado em:** 2026-08-19 — **quarta passagem.** `boton_nombres2isoClick`
+  está `implementado`, com golden verde e controle fechando antes. **Duas das
+  seis** gravações prontas; a task continua `⬜ Pendente`.
+
+- **Resumo do que foi feito:**
+
+  **A peça que faltava era `0x00403c0c`, e ela não é tabela — é varredura.** A
+  terceira passagem parou dizendo que faltava "a regra geral que enche os 18
+  registros, offset e comprimento por time". A regra é: partir do offset do
+  bloco, andar `94 − índice` registros terminados em NUL (com o enchimento que
+  vier depois) e medir o slot que sobrou. Sem tabela de offset por time e sem
+  tabela de comprimento.
+
+  Duas coisas caem de graça daí, e nenhuma tabela as diria: **os blocos guardam
+  os times em ordem inversa** — o offset da tabela é o slot do time 94, e o
+  `we2002_core` conhece a mesma inversão pelo outro lado (`ml_teams[31-i]` no
+  `Save`) — e **o comprimento é a largura do slot medida na imagem**, não uma
+  constante, que é por que o mesmo campo grava 7 bytes num bloco e 3 noutro.
+
+  **O salto de setor é do fluxo, não do endereço.** `0x00403388` testa
+  `posição mod 2352 = 2072` depois de **cada** byte e pula 304. É o que torna o
+  MODE2/2352 invisível para o resto do código do original — e é obrigatório no
+  port: sem ele, nome que atravessa fronteira de setor escreveria por cima do
+  EDC/ECC. Entrou como `SaltaFronteiraDeSetor` / `LeDoFluxo` / `GravaNoFluxo`
+  no `we2002_estado`.
+
+  **O espaço é codificado diferente do `ed.exe`, e isso mudou uma decisão de
+  reuso.** No modo de dois bytes o `wte.exe` escreve **um** `0x20` para o
+  espaço; o `AsciiToKanji` do `we2002_core` escreve o par `0x82 0x80`. Medido
+  no byte gravado: `A BC.` sai com nove bytes, não dez. Como o alvo deste
+  projeto é o editor do Obocaman, o port **não** reusa o codec do core aqui —
+  reusar teria dado um golden vermelho com cara de bug de offset.
+
+  **Um erro da passagem anterior foi corrigido pela medição.** A spec dizia que
+  o bloco 3 do campo 2 é pulado para `ItemIndex >= 63`; é o contrário —
+  `cmp eax,0x3f` / `jl` pula quando o índice é **menor** que 63, porque o bloco
+  é `OFS_ML_TEAM_NAME_7` e só clube de Master League o tem. A tabela promete
+  onze blocos e o `cmp` viu dez com o time 2, que é o que denunciou.
+
+- **A passagem do golden não é vazia, e isso foi medido separado.** Verde entre
+  dois lados poderia significar "nenhum dos dois gravou". Rodado o lado port
+  sozinho contra a ROM limpa, ele grava **os dez blocos**, nos mesmos offsets e
+  tamanhos que a sonda `27-nomes-editados` mediu no oráculo.
+
+- **O `:99` caiu no meio da passagem, e o sintoma é o da memória do projeto:
+  saída vazia e código 1, sem uma linha de erro.** O `roteiro_display` resolve
+  o `XAUTHORITY` do `ps` e, com o servidor morto, o `set -e` derruba o script
+  antes de qualquer mensagem. Foi religado com a geometria documentada no
+  `CLAUDE.md` (`Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp`) — não houve
+  queda para o `:1`.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.boton_nombres2isoClick.inc`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — a tabela `NOME_BLOCOS`, a
+    varredura `LocalizaBlocoDeNome` e o codificador `CodificaNomeDoBloco`
+  - `wte/src/we2002_estado.pas` — o fluxo com salto de setor
+  - `wte/tests/roteiros/golden-05-nomes{,.port}.txt`
+  - `wte/re/spec/MainForm.boton_nombres2isoClick.md` — veredito `implementado`,
+    mais a regra recuperada e a correção do sentido da exclusão
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`, `wte/re/spec/INDICE.md`
+  - `wte/tests/roteiros/README.md`, e esta task
+
+- **Gates medidos:** `golden_check.sh --modo controle` sobre `golden-05-nomes`
+  **PASSOU: byte-idêntico** — e num roteiro que digita isso não é formalidade,
+  é a única régua onde o não-determinismo do teclado apareceria; o `golden`
+  contra o port **PASSOU**, só as duas faixas do arranque. `make -C wte check`
+  rc 0; `lazbuild` rc 0; `spec_index.py` **20 `implementado`**. A fração de
+  código gerado caiu de 73,6% para **72,0%** e o `check_fase2.py` reprovou até
+  a §4.4 do plano ser corrigida — de novo. `roms/` intocada.
+
+- **Problemas encontrados:** o `:99` morto, acima. Nada mais.

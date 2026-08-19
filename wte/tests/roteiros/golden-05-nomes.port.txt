@@ -1,0 +1,66 @@
+# golden-05-nomes, lado PORT. Par de golden-05-nomes.txt.
+#
+# As duas assimetrias de sempre: o port recebe a imagem pela linha de comando,
+# e o `Ok` do `ficha_info3` fica em (140,56) aqui contra (142,80) no oraculo --
+# sob Wine a moldura e desenhada dentro da janela X, sob gtk2 a janela E o
+# cliente.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 422 74
+~ 2
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+= EDITA_NOMES
+
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 4
+= GRAVA_NOMES
