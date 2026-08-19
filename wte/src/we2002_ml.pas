@@ -126,7 +126,10 @@ begin
         Continue;
       { `b0 >= 120` nao e modelado: ali o original soma alem do fim da tabela
         e o resultado depende do que a `.data` guarda depois dela. Nenhuma das
-        duas ROMs chega la -- o maior `b0` medido e 43. }
+        duas ROMs chega la, e o numero e MEDIDO, nao afirmado: o maior `b0`
+        e 116 na japonesa e 111 na europeia -- 4 de folga ate 120. Sai da
+        coluna `max_b0` de `wte/re/ml-slots-medido.tsv`, que o
+        `conta_ml.py --medir` escreve; se mudar, muda la primeiro. }
       if b0 > High(ML_NC_POR_TIME) then
         Continue;
       indice := MlPrefixoDoTime(b0) + b1 - ML_SLOT_MIN;

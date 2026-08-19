@@ -1,4 +1,4 @@
-imagem	bytes	proprios	distintos	livres	fora_do_vetor	tela_oraculo	tela_port
-ml-jp.bin	307187664	461	460	2	0	-	2
-ml-jp-pos-oraculo.bin	307187664	461	461	1	0	1	1
-ml-eu.bin	474784128	453	449	13	8	13	13
+imagem	bytes	proprios	distintos	livres	fora_do_vetor	tela_oraculo	tela_port	max_b0
+ml-jp.bin	307187664	461	460	2	0	-	2	116
+ml-jp-pos-oraculo.bin	307187664	461	461	1	0	1	1	116
+ml-eu.bin	474784128	453	449	13	8	13	13	111

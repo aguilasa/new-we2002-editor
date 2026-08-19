@@ -66,6 +66,7 @@ from __future__ import annotations
 import re
 import struct
 import sys
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -181,9 +182,11 @@ def indice_do_bloco(pref: list[int], b0: int, b1: int) -> int:
 
     `b0 >= 120` NAO e modelado. O original soma `[0x423424 + 4*t]` para todo
     `t < b0`, lendo alem do fim da tabela de 120 -- lixo, e a soma depende do
-    que a `.data` guarda depois dela. Nenhuma das duas ROMs chega la (o maior
-    `b0` medido e 43), e inventar uma regra aqui produziria numero plausivel
-    sem nada que o sustente. Quem chama trata o `None`.
+    que a `.data` guarda depois dela. Nenhuma das duas ROMs chega la -- o
+    maior `b0` de cada imagem esta MEDIDO na coluna `max_b0` de
+    `wte/re/ml-slots-medido.tsv`, e nao afirmado aqui --, e inventar uma regra
+    produziria numero plausivel sem nada que o sustente. Quem chama trata o
+    `None`.
     """
     if b0 >= len(pref):
         return None
@@ -203,6 +206,10 @@ def conta(dados: bytes, pref: list[int]) -> dict:
     proprios = 0
     fora: dict[int, list[tuple[int, int, int]]] = {}
     nao_modelado: list[tuple[int, int, int]] = []
+    # O maior `b0` entre os pares que CHEGAM a formula -- os que o filler e o
+    # `b1 < 23` descartam nunca a alcancam, e um `b0` alto num deles nao diria
+    # nada sobre o ramo nao modelado. `-1` quando nenhum par chega la.
+    max_b0 = -1
     for par in range(PARES):
         if pos % SETOR == DADOS_INICIO + DADOS:
             pos += SETOR - DADOS
@@ -211,6 +218,7 @@ def conta(dados: bytes, pref: list[int]) -> dict:
         if par == PAR_FILLER or b1 < SLOT_MIN:
             continue
         proprios += 1
+        max_b0 = max(max_b0, b0)
         i = indice_do_bloco(pref, b0, b1)
         if i is None:
             nao_modelado.append((par, b0, b1))
@@ -222,7 +230,7 @@ def conta(dados: bytes, pref: list[int]) -> dict:
         ocupacao[i] = ocupacao.get(i, 0) + 1
     return {"livres": livres, "proprios": proprios,
             "distintos": len(ocupacao), "fora": fora,
-            "nao_modelado": nao_modelado}
+            "nao_modelado": nao_modelado, "max_b0": max_b0}
 
 
 class ArquivoFatiavel:
@@ -241,11 +249,22 @@ class ArquivoFatiavel:
 
 # ------------------------------------------------------------------- saidas --
 
+COLUNAS_MEDIDO = 9   # ... tela_port, max_b0
+
+
 def linhas_medidas() -> list[list[str]]:
     if not MEDIDO.is_file():
         return []
     linhas = MEDIDO.read_text(encoding="utf-8").splitlines()
-    return [ln.split("\t") for ln in linhas[1:] if ln.strip()]
+    saida = [ln.split("\t") for ln in linhas[1:] if ln.strip()]
+    curtas = [r[0] for r in saida if len(r) < COLUNAS_MEDIDO]
+    if curtas:
+        raise ContaError(
+            f"{MEDIDO.relative_to(ROOT)}: {curtas[:4]} sem as "
+            f"{COLUNAS_MEDIDO} colunas -- e medicao velha, de antes da coluna "
+            "`max_b0`. Refaca com --medir, com as MESMAS copias e as MESMAS "
+            "leituras de tela; nao complete a mao.")
+    return saida
 
 
 def gera_tsv(contagem: list[int], pref: list[int], core: list[int]) -> str:
@@ -398,18 +417,39 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
     if med:
         w("## Medido\n")
         w("| imagem | proprios | distintos | livres | fora do vetor | "
-          "tela do oraculo | tela do port |\n"
-          "|---|---:|---:|---:|---:|:-:|:-:|\n")
+          "maior `b0` | tela do oraculo | tela do port |\n"
+          "|---|---:|---:|---:|---:|---:|:-:|:-:|\n")
         for r in med:
             w(f"| `{r[0]}` | {r[2]} | {r[3]} | **{r[4]}** | {r[5]} | "
-              f"{r[6]} | {r[7]} |\n")
-        w("As quatro primeiras colunas saem de\n"
+              f"{r[8]} | {r[6]} | {r[7]} |\n")
+        w("As colunas de numero, ate `maior b0`, saem de\n"
           "`python3 wte/tools/conta_ml.py --medir <copia>`, que escreve\n"
           "[`ml-slots-medido.tsv`](ml-slots-medido.tsv). **Copia** -- `roms/`\n"
           "nao e alvo de ferramenta nenhuma.\n")
         w("As duas ultimas sao o que o rotulo `casilla_xmlibres` mostrou no\n"
           "`:99`, lido da captura: evidencia de **observacao de tela**, e a\n"
           "unica que fecha o circuito entre a conta e o que o usuario ve.\n")
+        vistos = [(r[0], int(r[8])) for r in med if int(r[8]) >= 0]
+        if vistos:
+            maior = max(v for _, v in vistos)
+            lista = ", ".join(f"{v} em `{n}`" for n, v in sorted(
+                vistos, key=lambda x: -x[1]))
+            w(f"### O ramo `b0 >= {TIMES}`, que nenhuma das duas alcanca\n")
+            w(textwrap.fill(
+                f"A `0x0040423c` soma `[{VA_CONTAGEM:#010x} + 4*t]` para todo "
+                f"`t < b0`. Com `b0 >= {TIMES}` ela le alem do fim da tabela "
+                f"de {TIMES}, e a soma passa a depender do que a `.data` "
+                "guarda depois dela -- lixo. **O port nao modela esse ramo**, "
+                "e a justificativa e medida, nao afirmada: o maior `b0` visto "
+                f"e **{maior}** ({lista}), o que deixa {TIMES - maior} de "
+                f"folga ate o teto de {TIMES}.", width=72,
+                break_on_hyphens=False, break_long_words=False) + "\n")
+            w("O numero sai da coluna `maior b0` da tabela acima, escrita pelo\n"
+              "`--medir` sobre as mesmas copias -- entra no perimetro do\n"
+              "`--check` e nao pode envelhecer sozinho. Ele conta so os pares\n"
+              f"que CHEGAM a formula: o enchimento e os de `b1 < {SLOT_MIN}`\n"
+              "sao descartados antes, e `b0` alto num deles nao diria nada\n"
+              "sobre este ramo.\n")
         w("### O `-` da japonesa limpa, e o que ele revelou\n")
         w("**O oraculo altera a imagem ao abri-la**, e a alteracao muda a\n"
           "propria conta. Duas corridas com copia nova da japonesa deixaram o\n"
@@ -497,7 +537,7 @@ def do_medir(caminhos: list[str]) -> int:
     contagem = le_dwords(blob, VA_CONTAGEM, TIMES)
     pref = prefixos(contagem)
     linhas = ["imagem\tbytes\tproprios\tdistintos\tlivres\tfora_do_vetor\t"
-              "tela_oraculo\ttela_port"]
+              "tela_oraculo\ttela_port\tmax_b0"]
     for c in caminhos:
         # `<copia>[=<tela_oraculo>/<tela_port>]` -- o que o rotulo
         # `casilla_xmlibres` mostrou de cada lado com ESTE conteudo. E
@@ -524,9 +564,10 @@ def do_medir(caminhos: list[str]) -> int:
             dados.close()
         linhas.append(f"{p.name}\t{p.stat().st_size}\t{r['proprios']}\t"
                       f"{r['distintos']}\t{r['livres']}\t{len(r['fora'])}\t"
-                      f"{tela_o}\t{tela_p}")
+                      f"{tela_o}\t{tela_p}\t{r['max_b0']}")
         print(f"  {p.name}: livres={r['livres']} proprios={r['proprios']} "
-              f"distintos={r['distintos']} fora={len(r['fora'])}")
+              f"distintos={r['distintos']} fora={len(r['fora'])} "
+              f"max b0={r['max_b0']}")
         for i in sorted(r["fora"]):
             print(f"      fora: indice {i} -> {VA_OCUPACAO + 2 * i:#010x} "
                   f"pares {r['fora'][i]}")

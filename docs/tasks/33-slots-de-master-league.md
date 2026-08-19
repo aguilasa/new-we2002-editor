@@ -176,8 +176,15 @@ que esta task calcula e o mesmo que o rótulo mostra.
     `[^x]` casa `\n` em regex.
   - **`b0 >= 120` não é modelado, e ficou escrito assim.** Ali o original soma
     além do fim da tabela e o resultado depende do que a `.data` guarda depois
-    dela. Nenhuma das duas ROMs chega lá — o maior `b0` medido é 43 —, e
-    inventar uma regra produziria número plausível sem nada que o sustente.
+    dela. Nenhuma das duas ROMs chega lá, e inventar uma regra produziria
+    número plausível sem nada que o sustente. **A margem é medida, não
+    afirmada:** o maior `b0` é **116** na japonesa e **111** na europeia — 4 de
+    folga até 120 —, e sai da coluna `max_b0` de
+    [`ml-slots-medido.tsv`](../../wte/re/ml-slots-medido.tsv), escrita pelo
+    `conta_ml.py --medir`. Enquanto a margem foi lida da lista de pares **fora
+    do vetor**, este texto disse `43`, que é o maior `b0` daquele recorte e não
+    do conjunto — número de recorte lido como máximo global
+    ([CORR-WTE-065](/docs/tasks/CORR-WTE-065.md)).
   - **A conferência de tela quase virou "bug do port".** Oráculo `1`, port `2`,
     mesma ROM de origem: parecia erro de contagem. Era o oráculo escrevendo na
     própria cópia ao abrir. O que desfez foi dar ao port o **arquivo que o

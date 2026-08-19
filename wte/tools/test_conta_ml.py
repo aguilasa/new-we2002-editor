@@ -159,6 +159,22 @@ class TestConta(unittest.TestCase):
         self.assertEqual(len(r["nao_modelado"]), 1)
         self.assertEqual(r["livres"], C.TOTAL)
 
+    def test_o_maior_b0_e_medido_e_nao_afirmado(self) -> None:
+        # A coluna `max_b0` do ml-slots-medido.tsv, que e o que justifica nao
+        # modelar `b0 >= 120`. Ficou tres meses como `43` em comentario --
+        # numero tirado da lista de pares FORA DO VETOR, que e um recorte.
+        pares = [(0, 0)] * C.PARES
+        pares[0] = (0, 23)
+        pares[1] = (7, 30)                 # o maior que CHEGA a formula
+        pares[2] = (99, 5)                 # b1 < 23: descartado antes
+        r = C.conta(imagem_sintetica(pares), self.pref)
+        self.assertEqual(r["max_b0"], 7,
+                         "b0 de par descartado nao pode entrar no maximo")
+
+    def test_sem_par_proprio_o_maior_b0_e_menos_um(self) -> None:
+        r = C.conta(imagem_sintetica([]), self.pref)
+        self.assertEqual(r["max_b0"], -1)
+
     def test_a_fronteira_de_setor_cai_entre_pares(self) -> None:
         # 352 bytes de OFS_LINK_ML ate o fim do payload: 176 pares exatos. Se
         # fosse impar, o segundo byte de um par viria do EDC/ECC.

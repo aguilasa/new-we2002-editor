@@ -84,7 +84,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-062](/docs/tasks/CORR-WTE-062.md) | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | O `lista_formacionesClick` é do grupo `carga`, foi encaminhado para a 26 pelo efeito, e continua `REStub` com as duas tasks concluídas | Alta | [x] concluída | 2026-08-18 |
 | [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | As três carregadoras de bitmap da ficha não têm dono em nenhuma das 40 tasks, e a 32 não menciona cara, cabelo nem barba | Alta | [x] concluída | 2026-08-18 |
 | [CORR-WTE-064](/docs/tasks/CORR-WTE-064.md) | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | O lote do `edit_nombre1` está provado e a travessia emulada dá 6 onde o oráculo corta em 5 | Média | [x] concluída | 2026-08-18 |
-| [CORR-WTE-065](/docs/tasks/CORR-WTE-065.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | "o maior `b0` medido é 43" está em três sítios e a varredura das duas ROMs dá 111 e 116 | Alta | [ ] pendente | — |
+| [CORR-WTE-065](/docs/tasks/CORR-WTE-065.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | "o maior `b0` medido é 43" está em três sítios e a varredura das duas ROMs dá 111 e 116 | Alta | [x] concluída | 2026-08-19 |
 | [CORR-WTE-066](/docs/tasks/CORR-WTE-066.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | A tabela de endereços atropelados lista o 462, que nunca é alcançado, e omite o `0x004335f4`, que é | Alta | [ ] pendente | — |
 | [CORR-WTE-067](/docs/tasks/CORR-WTE-067.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | A nota nova da WTE-TASK-27 põe a `AtualizaBlocosLivresDeMl` no `we2002_ml` e promete um mapa de ocupação que a unidade não expõe | Baixa | [ ] pendente | — |
 
@@ -153,7 +153,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
 - [x] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 29 ou registrar na 35
 - [x] CORR-WTE-064 — fechar a conta do `[0x00433a10]`, que dá um a mais que a tela
-- [ ] CORR-WTE-065 — medir o maior `b0` em vez de afirmá-lo, e pôr o número dentro do `--check`
+- [x] CORR-WTE-065 — medir o maior `b0` em vez de afirmá-lo, e pôr o número dentro do `--check`
 - [ ] CORR-WTE-066 — gerar a tabela de endereços atropelados do medido, e nomear o quarto DWORD
 - [ ] CORR-WTE-067 — reescrever a nota de desbloqueio da 27 com a API que ficou
 

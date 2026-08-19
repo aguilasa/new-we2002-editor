@@ -101,18 +101,31 @@ A mesma medicao traz a confirmacao numerica de graca: ela leu
 mostra. Um numero lido da memoria do processo em 2026-08-11, sem saber
 de quem era, batendo com a conta escrita aqui.
 ## Medido
-| imagem | proprios | distintos | livres | fora do vetor | tela do oraculo | tela do port |
-|---|---:|---:|---:|---:|:-:|:-:|
-| `ml-jp.bin` | 461 | 460 | **2** | 0 | - | 2 |
-| `ml-jp-pos-oraculo.bin` | 461 | 461 | **1** | 0 | 1 | 1 |
-| `ml-eu.bin` | 453 | 449 | **13** | 8 | 13 | 13 |
-As quatro primeiras colunas saem de
+| imagem | proprios | distintos | livres | fora do vetor | maior `b0` | tela do oraculo | tela do port |
+|---|---:|---:|---:|---:|---:|:-:|:-:|
+| `ml-jp.bin` | 461 | 460 | **2** | 0 | 116 | - | 2 |
+| `ml-jp-pos-oraculo.bin` | 461 | 461 | **1** | 0 | 116 | 1 | 1 |
+| `ml-eu.bin` | 453 | 449 | **13** | 8 | 111 | 13 | 13 |
+As colunas de numero, ate `maior b0`, saem de
 `python3 wte/tools/conta_ml.py --medir <copia>`, que escreve
 [`ml-slots-medido.tsv`](ml-slots-medido.tsv). **Copia** -- `roms/`
 nao e alvo de ferramenta nenhuma.
 As duas ultimas sao o que o rotulo `casilla_xmlibres` mostrou no
 `:99`, lido da captura: evidencia de **observacao de tela**, e a
 unica que fecha o circuito entre a conta e o que o usuario ve.
+### O ramo `b0 >= 120`, que nenhuma das duas alcanca
+A `0x0040423c` soma `[0x00423424 + 4*t]` para todo `t < b0`. Com `b0 >=
+120` ela le alem do fim da tabela de 120, e a soma passa a depender do
+que a `.data` guarda depois dela -- lixo. **O port nao modela esse
+ramo**, e a justificativa e medida, nao afirmada: o maior `b0` visto e
+**116** (116 em `ml-jp.bin`, 116 em `ml-jp-pos-oraculo.bin`, 111 em
+`ml-eu.bin`), o que deixa 4 de folga ate o teto de 120.
+O numero sai da coluna `maior b0` da tabela acima, escrita pelo
+`--medir` sobre as mesmas copias -- entra no perimetro do
+`--check` e nao pode envelhecer sozinho. Ele conta so os pares
+que CHEGAM a formula: o enchimento e os de `b1 < 23`
+sao descartados antes, e `b0` alto num deles nao diria nada
+sobre este ramo.
 ### O `-` da japonesa limpa, e o que ele revelou
 **O oraculo altera a imagem ao abri-la**, e a alteracao muda a
 propria conta. Duas corridas com copia nova da japonesa deixaram o

@@ -3,7 +3,7 @@ id: CORR-WTE-065
 title: "Correção: \"o maior b0 medido é 43\" — é 111 na europeia e 116 na japonesa"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -98,21 +98,50 @@ Caso novo: `conta()` sobre imagem sintética com `b0` conhecido devolve esse
 
 ## Verificação
 
-- [ ] `python3 wte/tools/conta_ml.py --medir work/ml-eu.bin work/ml-jp.bin`
+- [x] `python3 wte/tools/conta_ml.py --medir work/ml-eu.bin work/ml-jp.bin`
       imprime `max b0` 111 e 116
-- [ ] `grep -rn 'maior .b0. medido' wte docs` não devolve mais `43`
-- [ ] `python3 wte/tools/conta_ml.py --check` verde
-- [ ] `cd wte/tools && python3 -m unittest test_conta_ml` verde
-- [ ] `lazbuild wte/wte.lpi` compila
-- [ ] `make -C wte check` rc 0
-- [ ] `roms/` intocada
+- [x] `grep -rn 'maior .b0. medido' wte docs` não devolve mais `43`
+- [x] `python3 wte/tools/conta_ml.py --check` verde
+- [x] `cd wte/tools && python3 -m unittest test_conta_ml` verde
+- [x] `lazbuild wte/wte.lpi` compila
+- [x] `make -C wte check` rc 0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-19
 
 **Resumo do que foi feito:**
 
+O `conta()` passou a medir o maior `b0` **entre os pares que chegam à
+fórmula** — os que o enchimento e o `b1 < 23` descartam nunca a alcançam — e a
+devolvê-lo como `max_b0`. O `--medir` grava o número na coluna nova `max_b0` do
+`ml-slots-medido.tsv` e o imprime; o `gera_md()` compõe dali a seção "O ramo
+`b0 >= 120`, que nenhuma das duas alcança", com os valores por imagem e a folga
+real. Assim o número entra no perímetro do `--check` e não pode envelhecer
+sozinho: medido **116** na japonesa, **111** na europeia, 4 de folga até 120 —
+não 43, que era o maior `b0` da lista de pares *fora do vetor*, um recorte.
+
+O comentário do `indice_do_bloco` deixou de afirmar número e passou a apontar
+para a coluna. O `we2002_ml.pas` e a WTE-TASK-33, que não são gerados, ficaram
+com os dois valores medidos e a origem deles.
+
 **Problemas encontrados:**
 
+O `textwrap.fill` quebrou `` `ml-eu.bin` `` no hífen e partiu o code span em
+duas linhas — `break_on_hyphens=False` e `break_long_words=False`. Nome de
+arquivo dentro de crase é o caso em que o wrap default estraga markdown.
+
+O `linhas_medidas()` leria `r[8]` de um TSV medido antes desta coluna e
+estouraria com `IndexError` a três frames de distância; ganhou guarda que
+recusa com a mensagem certa e manda refazer o `--medir` em vez de completar a
+mão — as duas últimas colunas são leitura de tela e não se inventam.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/conta_ml.py`
+- `wte/tools/test_conta_ml.py`
+- `wte/re/ml-slots-medido.tsv` (via `--medir`)
+- `wte/re/ml-slots.md` (via gerador)
+- `wte/src/we2002_ml.pas`
+- `docs/tasks/33-slots-de-master-league.md`
