@@ -45,7 +45,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ⬜ Pendente | — | — |
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ⬜ Pendente | — | — |
+| [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | ⬜ pendente |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
@@ -287,7 +287,7 @@ alimenta e passou a **carregar** essa gravação.
 
 - [ ] Fórmula de preço por tabela de verdade **e** conferida no disassembly
 - [ ] Saturação, arredondamento e termo cruzado testados
-- [ ] Slots de ML batendo com a tela do original nas duas ROMs
+- [x] Slots de ML batendo com a tela do original nas duas ROMs — europeia `13` nos dois lados; japonesa `1` nos dois com o mesmo conteúdo de arquivo (o oráculo altera a imagem ao abrir, ver a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md))
 
 ### Fase 6 — Paridade
 

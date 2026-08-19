@@ -18,4 +18,10 @@ begin
   else
     texto_dialogo_we.Caption :=
       'nao foi possivel abrir ' + ExtractFileName(dialogo_we.FileName);
+
+  { A segunda das duas chamadas a `0x004042d4` -- a outra e o `FormShow`. O
+    original conta em `0x0040c241` e mostra na instrucao seguinte, tenha a
+    carga dado certo ou nao: com imagem que nao abriu, o `fgetc` devolve -1,
+    o `-1 < 23` cai no ramo do vinculo, e o rotulo mostra o total. }
+  AtualizaBlocosLivresDeMl;
 end;

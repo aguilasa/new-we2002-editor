@@ -61,6 +61,12 @@ begin
     lista_equipos_1.Enabled := True;
     lista_equipos_2.Enabled := True;
 
+    { Os blocos livres de Master League. O original conta em `0x004116df`,
+      dentro deste mesmo handler, e mostra o resultado no `casilla_xmlibres`
+      na instrucao seguinte -- ver `AtualizaBlocosLivresDeMl` no `.aux.inc` e
+      a medicao em `wte/re/ml-slots.md`. }
+    AtualizaBlocosLivresDeMl;
+
     { Os dois limites que o port nao punha, e a divergencia era muda: os campos
       aceitavam texto de qualquer tamanho e so o truncamento na gravacao
       apararia, tarde.

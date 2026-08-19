@@ -21,3 +21,4 @@ ep2002_info3    # ficha_info3.etiq1 + ShowModal, no boton_barras2isoClick
 we2002_offsets  # TOffset, no endereco de gravacao
 we2002_cdimage  # TCdImage, na varredura dos blocos de nome
 Classes         # TFileStream, na copia da textura
+we2002_ml       # ContaBlocosLivresDeMl -- a 0x004042d4 (WTE-TASK-33)

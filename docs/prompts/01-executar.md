@@ -95,13 +95,26 @@ divergência é achado a registrar.
 2. Verificar se todas as tarefas em `depends_on` estão concluídas — se não,
    **não executar**, e informar o bloqueio
 3. Se existir tarefa `🔄 Em andamento`, priorizar concluí-la
-4. **Antecipação única e prevista:** a WTE-TASK-32 (preço) pode ser escolhida
-   antes da vez — plano §10 passo 5 — se a 24 e a 25 estiverem concluídas **e**
-   o usuário pedir explicitamente. É isolada, não depende de gravação, e valida
-   o ferramental de decompilação num alvo pequeno. Até a renumeração de
-   2026-08-19 isso se chamava "fora de ordem", e era: preço era a 30 e o
-   fechamento da fase 4 era a 29. Hoje ela **está** em ordem — antecipar é só
-   escolher quando, não furar fila
+4. **Antecipação, e as duas que já se justificaram.** Tarefa fora da vez só
+   entra com **pedido explícito do usuário**. Duas cabem no critério, e o
+   critério é o mesmo: `depends_on` inteiramente concluído, e razão escrita.
+
+   - **WTE-TASK-32 (preço)** — plano §10 passo 5, se a 24 e a 25 estiverem
+     concluídas. É isolada, não depende de gravação, e valida o ferramental de
+     decompilação num alvo pequeno. Até a renumeração de 2026-08-19 isso se
+     chamava "fora de ordem", e era: preço era a 30 e o fechamento da fase 4
+     era a 29. Hoje ela **está** em ordem — antecipar é só escolher quando.
+   - **WTE-TASK-33 (slots de ML)** — antecipada em 2026-08-19, a pedido. É
+     fase 5, e a razão é que a fase 4 dependia dela: a
+     [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) tinha o ramo de
+     destino de Master League da `0x00404820` parado esperando o contador
+     `0x004335c0`, que é a 33 quem calcula. Não era ciclo — a 33 depende só da
+     20 —, era inversão de ordem entre fases, e a regra de seleção (fase antes
+     de número) faria a 27 ser escolhida para sempre sem nunca fechar.
+
+   O padrão a reconhecer: **tarefa de fase adiante que uma tarefa da fase
+   corrente precisa**. Renumerar resolveria, mas mover uma task arrasta as
+   vizinhas; antecipar com pedido explícito custa uma linha aqui
 5. Dentro de uma fase, várias tarefas podem estar prontas ao mesmo tempo (as
    03-07, por exemplo, só dependem da 02). **Execute só uma** — a de menor ID
 

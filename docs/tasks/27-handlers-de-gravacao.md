@@ -174,7 +174,14 @@ um campo de tela.
       atualizar a tabela de vínculos e decrementar o contador `0x004335c0`, que
       é a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) quem calcula.
       Enquanto isso a rotina sai sem tocar em byte nenhum quando o destino não é
-      seleção — lacuna declarada, não silenciosa
+      seleção — lacuna declarada, não silenciosa.
+      **A 33 fechou em 2026-08-19**, antecipada exatamente por isto: o contador
+      existe (`AtualizaBlocosLivresDeMl`, do `we2002_ml`), e com ele vem o mapa
+      de ocupação que diz **qual** bloco está livre. Não há mais bloqueio; falta
+      escrever o ramo. Ver [`../../wte/re/ml-slots.md`](../../wte/re/ml-slots.md),
+      e em especial a `0x0040427c`, que é o inverso do índice linear — dado o
+      bloco escolhido, ela devolve o par `(time, slot)` que vai para a tabela de
+      vínculos
 - [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-19,
       **114 faixas conferidas em 8 sessões**, nenhuma tocando byte de EDC/ECC
       nem de cabeçalho de setor. A conta é do

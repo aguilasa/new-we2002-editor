@@ -35,6 +35,11 @@ O original chega ao valor por texto: monta a cadeia `$00ffb676`, passa pelo
 C++Builder escrever literal de cor, não comportamento — o port atribui o valor
 direto.
 
+Conta os **blocos livres de Master League** e mostra o número no
+`casilla_xmlibres`: `call 0x004042d4` em `0x004116df`, e na instrução seguinte
+`IntToStr(WORD[0x004335c0])` para o campo `+0x434`. A conta está medida em
+[`../ml-slots.md`](../ml-slots.md); no port é a `AtualizaBlocosLivresDeMl`.
+
 **Evidência:** disassembly lido
 
 ## Bytes tocados

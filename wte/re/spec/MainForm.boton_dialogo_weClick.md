@@ -57,6 +57,20 @@ byte, setor 817) e `2012984..2012985` (dois bytes, setor 855). O oráculo as
 grava, o port não, e elas seguem declaradas como `conhecida:` no roteiro do
 gate.
 
+A segunda ganhou **significado** na WTE-TASK-33, ainda sem ganhar autor: são os
+dois bytes de um **par de vínculo** — clube de ML 5, slot 13 —, e o oráculo os
+troca de `(102, 23)` para `(0, 27)` ao abrir a japonesa. O time 102 não tem
+jogador *non-contract* nenhum, então `(102, 23)` é referência pendurada; a
+troca a aponta para um bloco já ocupado, e o contador de blocos livres cai de
+**2 para 1**. É por isso que o rótulo `casilla_xmlibres` do oráculo mostra `1`
+onde o do port mostra `2` com a mesma ROM de origem — a divergência é desta
+escrita, não da contagem, e dando ao port o arquivo que o oráculo produziu os
+dois mostram `1`. Medição em [`../ml-slots.md`](../ml-slots.md).
+
+Quem escreve continua sem nome: a única referência absoluta a `OFS_LINK_ML` em
+toda a `.text` é o `push 0x1eb608` de `0x004042fc`, que só lê. Na europeia a
+mesma sequência não toca a faixa.
+
 **Evidência:** diff medido
 
 ## Pré-condições

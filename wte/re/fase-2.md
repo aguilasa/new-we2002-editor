@@ -44,12 +44,12 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2543 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9311** |
-| Escrito à mão | 61 | 4270 |
-| **Total** | | **13581** |
+| Escrito à mão | 61 | 4300 |
+| **Total** | | **13611** |
 
-**68.6% do Pascal da casca é saída de gerador.**
+**68.4% do Pascal da casca é saída de gerador.**
 
-Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
+Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
 Contá-las aqui faria o número da §4.4 flutuar a cada unidade nova, e — pior —
 as jogaria na coluna "escrito à mão", porque a marca no cabeçalho delas é a do
@@ -86,10 +86,10 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.casilla_nombreKeyPress.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_jugador.flechasapaClick.inc` | 67 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.FormShow.inc` | 106 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 1666 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.FormShow.inc` | 112 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 1684 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_barras2isoClick.inc` | 33 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 21 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 27 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_tex2isoClick.inc` | 79 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 97 | corpo de handler, da spec (fase 4) |

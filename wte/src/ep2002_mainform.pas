@@ -32,7 +32,7 @@ uses
   ActnList, retrace, SysUtils, we2002_estado, wtemain, we2002_database,
   we2002_types, we2002_player, ep2002_jugador, ep2002_estrategia,
   ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
-  we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage;
+  we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage, we2002_ml;
 
 type
   TMainForm = class(TForm)

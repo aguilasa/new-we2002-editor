@@ -810,12 +810,30 @@ var
 
   { O contador de blocos de Master League livres -- o `WORD[0x004335c0]`.
 
-    QUEM O CALCULA E A [WTE-TASK-33]. Aqui ele existe porque os oito handlers
-    de mover o exibem no `casilla_xmlibres` ao terminar, e porque a recusa
-    `-1` o consulta. Enquanto a 33 nao rodar, ele vale zero e o rotulo mostra
-    zero -- lacuna declarada, com dono escrito, em vez de uma linha de
-    handler omitida em silencio. }
+    QUEM O ENCHE e a `AtualizaBlocosLivresDeMl` logo abaixo, com a conta do
+    `we2002_ml` -- a [WTE-TASK-33] fechou em 2026-08-19. Os oito handlers de
+    mover o exibem no `casilla_xmlibres` ao terminar, e a recusa `-1` o
+    consulta.
+
+    Continua nascendo zero porque antes de abrir imagem nao ha o que contar; o
+    original tambem so o preenche no `FormShow` e no botao de abrir. }
   BlocosLivresDeMl: Word = 0;
+
+{ AtualizaBlocosLivresDeMl -- a `0x004042d4` mais a linha que a segue.
+
+  O original chama a rotina de contagem em DOIS lugares, e nos dois a proxima
+  instrucao e a mesma: `casilla_xmlibres.Caption := IntToStr(WORD[0x4335c0])`,
+  sobre o campo `+0x434` do `MainForm` (`wte/re/campos.tsv`). Os dois lugares
+  sao `MainForm.FormShow` (`0x004116df`) e `MainForm.boton_dialogo_weClick`
+  (`0x0040c241`) -- ou seja, toda vez que uma imagem passa a estar aberta.
+
+  A conta em si mora no `we2002_ml`, com a medicao em `wte/re/ml-slots.md`.
+  Aqui so o par contar-e-mostrar, que e o que o original faz. }
+procedure AtualizaBlocosLivresDeMl;
+begin
+  BlocosLivresDeMl := ContaBlocosLivresDeMl(ImagemAberta);
+  MainForm.casilla_xmlibres.Caption := IntToStr(BlocosLivresDeMl);
+end;
 
 { PreparaBuffer -- 0x00404374, 881 bytes.
 
