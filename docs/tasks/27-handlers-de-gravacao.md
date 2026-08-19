@@ -116,7 +116,9 @@ alvos.
 - [x] Diff de controle medido e registrado antes de qualquer edição
       — 2026-08-18, em [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md),
       gerado. Gravar sem editar **muda** 22 bytes: katakana virando ASCII
-- [ ] As seis com spec e com golden verde nas duas ROMs
+- [ ] As seis com spec e com golden verde nas duas ROMs — **quatro** em
+      2026-08-19 (`boton_barras2iso`, `boton_nombres2iso`, `boton_tex2iso`,
+      `grabar_memory`), e só na ROM japonesa: a europeia não hospeda este grupo
 - [ ] **Cada gravação que tem par na WTE-TASK-26 rodada também com uma edição
       de tela antes** — herdado da 26 em 2026-08-12; ver a seção acima. É o
       único critério do projeto que julga edição e gravação juntas
@@ -550,3 +552,123 @@ alvos.
   instrutivo: o gate falhou dizendo "a janela `W11 TE PT` não apareceu", que
   parece problema de roteiro. O que respondeu foi o `port-trace.log`, onde o
   handler simplesmente não constava.
+
+---
+
+- **Executado em:** 2026-08-19 — **sexta passagem.** `grabar_memoryClick` está
+  `implementado`, com controle e golden verdes — e o gate precisou de uma régua
+  que não existia. **Quatro das seis** gravações prontas; a task continua
+  `⬜ Pendente`.
+
+- **Resumo do que foi feito:**
+
+  **Este handler não grava na imagem, e é a primeira vez que isso importa.** Ele
+  emite um `.mcr` de 128 KiB — um memory card PSX com o time dentro. A ROM sai
+  intacta, e está medido: as seis faixas de `GRAVA_MCR` no trace são todas de
+  **leitura**, e o `cmp` da sonda acusa só os sete setores do arranque.
+
+  Isso quebra o gate como ele estava. `golden_check.sh` compara duas imagens;
+  aqui as duas sairiam iguais mesmo com um port que não fizesse absolutamente
+  nada. Entrou `--artefato <nome>`: o script apaga `work/<nome>` antes de cada
+  lado, guarda o que aquele lado produziu, compara os dois — e **continua**
+  comparando as imagens, que passou a ser como se prova que a gravação não
+  vazou para dentro da ROM. Não-vacuidade sai de graça no desenho: o arquivo é
+  criado pelo handler, então port inerte não produz nada e o script para antes
+  de comparar.
+
+  **O molde vem do `dat.bin`, e a segunda metade dele já era conhecida.** A
+  primeira metade (`0x20000`, o tamanho exato de um memory card) é um cartão
+  formatado com o slot do WE2002 pronto; o handler a copia inteira e só então
+  escreve o time por cima. A `wte/re/assets.md` já tinha dado esse veredito na
+  WTE-TASK-08 — o que faltava era o consumidor.
+
+  **Três regiões de origem, e a do meio não tem nome no `we2002_core`.**
+
+  | lógico | passo | time 0 | `we2002_core` |
+  |---|---|---|---|
+  | `0x40C2C` | 30 | 2303700 | `OFS_FORMATIONS` |
+  | `0x408A8` | 5 | 2302800 | **sem nome** |
+  | `0x46228` | 6 | 2329056 | `OFS_KICKER` |
+
+  A do meio é a **tática**, e quem a nomeia é o próprio `wte.exe`: o mesmo
+  `0x408A8` aparece em `mostrar_estrategiaClick`, em `estrategia.BitBtn3Click` e
+  em `boton_mcr2isoClick`, e nos três enche o mesmo rascunho de 4 bytes em
+  `0x00432eaf`. O `ed.exe` não lê essa região, e é por isso que ela não tem
+  `OFS_*`.
+
+  O `+2` quando `índice div 95` é 1 não é enfeite: é o mesmo par de bytes que o
+  `Load` do `we2002_core` pula entre os 32 clubes de ML e o time-modelo.
+
+  **Os números de camisa vêm da TELA, e esse é o ponto do handler.** Ele monta
+  `'dorsal' + IntToStr(j+1)`, chama `FindComponent`, lê o `Caption`, tira 1 e
+  limita a 31 — e só então empacota 5 bits por jogador, 6 por `DWORD`, 16 bytes.
+  É o único campo que não sai da imagem nem do molde, e é assim que um número
+  editado pela WTE-TASK-26 chega ao cartão.
+
+  **O botão nasce desabilitado, e desta vez a busca foi barata.** Igual ao
+  `boton_tex2iso` — mas aqui quem liga é o `lista_equiposChange`, em
+  `0x0040d31a`, com o `grabar_camiseta` na linha seguinte. Escolher time já
+  habilita os dois. O port não fazia isso; passou a fazer.
+
+- **Uma medição que expôs a cegueira da própria régua.** O `.mcr` produzido
+  difere do molde em **489 bytes, 51 faixas** — e a tabela do handler promete
+  52. A que falta é `0x6479`, o nibble alto do byte 1 da tática: para o time 2
+  ele vale zero, que é o que o molde já tinha. Gravação de valor igual nenhum
+  `cmp` enxerga, que é a mesma distinção que o
+  [`gravacao_controle.py`](../../wte/tools/gravacao_controle.py) faz entre
+  `escreveu` e `mudou`. A conferência que fecha isso não é o `cmp`: é ler os
+  quatro bytes de tática da imagem e comparar com os seis destinos.
+
+- **Divergência deliberada, a mesma do `boton_barras2isoClick`.** O original
+  relê nome e atributos **da imagem** para o buffer 23; o port chama a
+  `CarregaJogador`, que lê a camada de dados. Mesmo byte, mesma posição, outra
+  fonte. O buffer continua sendo o 23 — que cai **dentro** da lista de descarte
+  (`BUF_DESCARTE_BASE + 20`), então emitir um cartão embaralha a linha 20 do
+  descarte no original e aqui.
+
+- **O que esta passagem NÃO fez:**
+  - o critério herdado da WTE-TASK-26 **não fechou para este handler**. Ele tem
+    par (`dorsalClick`, `scroll_dorsalChange`) e o `27-mcr` grava sem editar
+    número nenhum. Falta o que o `golden-04` teve antes de existir: uma medição
+    do `compara_tela.sh` do **passo do `scroll_dorsal` nos dois widgetsets**. A
+    barra é `Min=1 Max=99` e o passo por clique é código diferente no Wine e no
+    gtk2 — foi exatamente a armadilha que a trilha do `track_barra` teve, e lá
+    o `+2` só foi confiável depois de medido nos dois lados;
+  - `boton_mcr2iso` e `grabar_camiseta` continuam sem spec e sem Pascal, e as
+    duas dependem de outra task (31 e 32);
+  - EDC/ECC preservados continua critério aberto. Esta gravação não o toca de
+    forma nenhuma — não escreve na imagem —, então ela nem soma evidência.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.grabar_memoryClick.inc`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — as constantes do cartão, o
+    `GravaCartaoDeMemoria`, o `TextoDoDorsal` e o `SETOR_BASE_DADOS` (o `850`
+    deixou de ser "das barras" e virou o que sempre foi)
+  - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — os dois `Enabled`
+  - `wte/src/impl/ep2002_mainform.FormShow.inc`, `wte/src/we2002_estado.pas` —
+    `CartaoDestino` e o `LeDoFluxoEm`, o simétrico do `GravaNoFluxo`
+  - `wte/tools/golden_check.sh` — `--artefato`; `wte/tools/golden_run_laz.sh` —
+    repassa `WTE_MCR`
+  - `wte/tests/roteiros/27-mcr.txt` — a sonda
+  - `wte/tests/roteiros/golden-07-mcr{,.port}.txt` — o gate
+  - `wte/re/spec/MainForm.grabar_memoryClick.md` — veredito `implementado`
+  - `wte/re/io-medido.tsv`, `wte/re/cmp-medido.tsv`, `wte/re/offsets-novos.md`,
+    `wte/re/spec/INDICE.md`, `wte/re/fase-2.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, os dois `README.md`, e esta task
+
+- **Gates medidos:** `golden_check.sh --modo controle --artefato saida.mcr`
+  **PASSOU: byte-idêntico** nas duas réguas — o `.mcr` é determinístico e a
+  imagem sai igual; o `golden` contra o port **PASSOU**, `saida.mcr`
+  byte-idêntico nos dois lados e só as duas faixas do arranque na imagem. As
+  duas réguas do `diff_dirigido.sh` fecham na sessão nova (9/9). `make -C wte
+  check` rc 0; `lazbuild` rc 0; `spec_index.py` **22 `implementado`**. A fração
+  de código gerado caiu de 71,4% para **69,9%** e o `check_fase2.py` reprovou
+  até a §4.4 do plano ser corrigida — pela quarta vez seguida. `roms/`
+  intocada.
+
+- **Problemas encontrados:** um, e de método: a primeira corrida do
+  `diff_dirigido.sh` foi com `--saida /tmp/dd/mcr`, e o nome da sessão sai do
+  **basename da saída** — as faixas entraram nos TSV versionados como `mcr` em
+  vez de `27-mcr`, fora da convenção das outras quatro. Desfeito com `git
+  checkout` dos dois TSV e refeito sem a opção, que é o que usa o nome do
+  roteiro.

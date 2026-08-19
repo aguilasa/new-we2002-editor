@@ -99,4 +99,8 @@ begin
       gravar. Aqui a fonte vem por `WTE_TEXTURA`, entao e aqui que ele liga. }
     boton_tex2iso.Enabled := True;
   end;
+
+  { O destino do `.mcr`, pela mesma porta. Ver `CartaoDestino` no
+    `we2002_estado`: aqui nao ha arquivo a conferir, o caminho e de SAIDA. }
+  CartaoDestino := GetEnvironmentVariable('WTE_MCR');
 end;

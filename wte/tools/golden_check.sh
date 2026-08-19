@@ -7,6 +7,8 @@
 #     --roteiro-port <arquivo>          roteiro do lado port, se diferir
 #     --imagem <rom>                    padrao: roms/japanese-shift-jis.bin
 #     --plantar <offset>                so no modo positivo (padrao: 405228)
+#     --artefato <nome>                 arquivo em work/ que os dois lados
+#                                       produzem, comparado alem da imagem
 #     --manter                          nao apaga o temporario
 #
 # Nenhum handler da fase 4 entra sem este script verde. Ele vem ANTES dos
@@ -39,6 +41,18 @@
 # reprova com codigo 4 se achar `c0000005` no log -- oraculo que morreu no meio
 # grava menos, e o diff sairia menor.
 #
+# ## `--artefato`: quando a imagem nao e o produto
+#
+# Cinco dos seis handlers de gravacao da WTE-TASK-27 escrevem NA imagem, e a
+# comparar duas imagens este script ja sabe. O sexto nao: o `grabar_memoryClick`
+# emite um `.mcr` de 128 KiB e a imagem sai intacta. Comparar so a imagem
+# aprovaria um port que nao fizesse nada.
+#
+# Com `--artefato saida.mcr` o script apaga `work/saida.mcr` antes de cada lado,
+# guarda o que aquele lado produziu, e no fim compara os DOIS -- alem de
+# continuar comparando as imagens, que e como se prova que a gravacao nao
+# vazou para dentro da ROM. Lado que nao produziu o arquivo reprova.
+#
 # ## Custo
 #
 # Duas copias da imagem por rodada. Com a japonesa sao ~586 MB de temporario;
@@ -56,6 +70,7 @@ MODO=golden
 ROTEIRO_PORT=""
 IMAGEM="$RAIZ/roms/japanese-shift-jis.bin"
 PLANTAR=405228          # dentro da regiao de dados do setor 172, longe do arranque
+ARTEFATO=""             # ver --artefato
 MANTER=0
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -63,6 +78,7 @@ while [ $# -gt 0 ]; do
     --roteiro-port) ROTEIRO_PORT="$2"; shift 2 ;;
     --imagem)       IMAGEM="$2"; shift 2 ;;
     --plantar)      PLANTAR="$2"; shift 2 ;;
+    --artefato)     ARTEFATO="$2"; shift 2 ;;
     --manter)       MANTER=1; shift ;;
     *) echo "opcao desconhecida: $1" >&2; exit 2 ;;
   esac
@@ -109,6 +125,17 @@ limpar() {
   [ "$MANTER" = 1 ] && { echo ">> temporario mantido: $SAIDA"; return; }
   rm -f "$A" "$B"; rm -rf "$SAIDA"
 }
+# O artefato mora em work/ porque e la que aponta a unidade E: do prefix -- o
+# roteiro do oraculo digita `E:\<nome>` e o port recebe o caminho por variavel.
+recolhe_artefato() {   # $1 = lado (a|b)
+  [ -n "$ARTEFATO" ] || return 0
+  if [ ! -f "$WORK/$ARTEFATO" ]; then
+    echo "ERRO: o lado $1 nao produziu work/$ARTEFATO" >&2
+    exit 1
+  fi
+  mv -f "$WORK/$ARTEFATO" "$SAIDA/artefato-$1"
+  echo ">> artefato do lado $1: $(stat -c%s "$SAIDA/artefato-$1") bytes"
+}
 trap limpar EXIT
 
 echo ">> modo $MODO, roteiro $(basename "$ROTEIRO"), imagem $(basename "$IMAGEM")"
@@ -117,7 +144,10 @@ cp -f "$IMAGEM" "$A"
 cp -f "$A" "$B"
 
 echo ">> lado A: oraculo"
+[ -n "$ARTEFATO" ] && rm -f "$WORK/$ARTEFATO"
 bash "$AQUI/golden_run_wte.sh" "$ROTEIRO" "$A" "$SAIDA"
+recolhe_artefato a
+[ -n "$ARTEFATO" ] && rm -f "$WORK/$ARTEFATO"
 
 case "$MODO" in
   controle|positivo)
@@ -126,9 +156,13 @@ case "$MODO" in
     ;;
   golden)
     echo ">> lado B: app Lazarus"
+    if [ -n "$ARTEFATO" ]; then
+      export WTE_MCR="$WORK/$ARTEFATO"
+    fi
     bash "$AQUI/golden_run_laz.sh" "$ROTEIRO_PORT" "$B" "$SAIDA"
     ;;
 esac
+recolhe_artefato b
 
 if [ "$MODO" = positivo ]; then
   # O positivo planta UM byte depois das duas corridas, e nao antes: plantado
@@ -145,6 +179,18 @@ with open(caminho, "r+b") as fh:
     fh.write(bytes([b[0] ^ 0xFF]))
 print(f"   {pos}: {b[0]:#04x} -> {b[0] ^ 0xFF:#04x}")
 PY
+fi
+
+if [ -n "$ARTEFATO" ]; then
+  echo ">> comparando o artefato"
+  if cmp -s "$SAIDA/artefato-a" "$SAIDA/artefato-b"; then
+    echo "   $ARTEFATO: byte-identico nos dois lados"
+  else
+    echo "FALHOU: os dois lados produziram $ARTEFATO diferentes." >&2
+    cmp -l "$SAIDA/artefato-a" "$SAIDA/artefato-b" | head -40 >&2
+    echo "   ($(cmp -l "$SAIDA/artefato-a" "$SAIDA/artefato-b" | wc -l) bytes diferentes)" >&2
+    exit 1
+  fi
 fi
 
 echo ">> comparando"

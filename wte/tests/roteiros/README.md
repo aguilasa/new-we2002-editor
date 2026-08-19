@@ -229,6 +229,24 @@ E o unico tambem em que o lado port recebe algo por VARIAVEL DE AMBIENTE: o
 janela, entao o oraculo escolhe pelo dialogo e o port recebe `WTE_TEXTURA`. Os
 dois terminam com o MESMO arquivo, que e a condicao de a comparacao valer.
 
+O par [`27-mcr.txt`](27-mcr.txt) / [`golden-07-mcr.txt`](golden-07-mcr.txt) e o
+unico do grupo cuja gravacao NAO acontece na imagem: o `grabar_memory` emite um
+`.mcr` de 128 KiB e a ROM sai intacta. Medido: o `cmp` da sonda acusa so os sete
+setores do arranque e os dois bytes de arranque, e as seis faixas de `GRAVA_MCR`
+no trace sao todas de LEITURA.
+
+Isso obrigou uma regua nova no gate -- `golden_check.sh --artefato saida.mcr`.
+Comparar so as duas imagens aprovaria um port que nao fizesse nada, porque as
+duas sairiam iguais de qualquer jeito. O `--artefato` apaga `work/saida.mcr`
+antes de cada lado, guarda o que aquele lado produziu e compara os dois; a
+comparacao das imagens continua valendo pelo motivo inverso, que e provar que a
+gravacao nao vazou para dentro da ROM.
+
+O lado port recebe o destino por `WTE_MCR`, e aqui a variavel e mais necessaria
+do que no `golden-06`: o `TSaveDialog` do gtk2 exige um nome DIGITADO, e sem
+gerenciador de janela o `:99` nao entrega tecla a ele. O `golden_check.sh`
+semeia a variavel com o mesmo `work/saida.mcr` que o oraculo digita.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

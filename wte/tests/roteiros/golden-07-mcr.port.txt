@@ -1,0 +1,32 @@
+# golden-07-mcr, lado PORT. Par de golden-07-mcr.txt.
+#
+# Tres assimetrias, todas ja conhecidas: a imagem vem da linha de comando, o
+# `Ok` do `ficha_info3` fica em (140,56) e nao (142,80), e o DESTINO do `.mcr`
+# vem de `WTE_MCR` em vez do `TSaveDialog`. A terceira e a mais necessaria das
+# tres: o dialogo do gtk2 exige um nome digitado, e sem gerenciador de janela o
+# `:99` nao entrega tecla a ele. O `golden_check.sh` semeia a variavel com o
+# mesmo `work/saida.mcr` que o oraculo digita.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 108 292
+~ 4
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= GRAVA_MCR

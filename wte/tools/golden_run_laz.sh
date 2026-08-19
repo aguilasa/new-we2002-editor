@@ -78,14 +78,16 @@ matar_port() {
 }
 trap matar_port EXIT
 
-# `WTE_TEXTURA` atravessa quando o chamador a define. E a mesma afordancia do
-# argumento de imagem, pela mesma razao: o `TOpenDialog` do gtk2 nao se dirige
-# por coordenada fixa sem gerenciador de janela, entao o roteiro do lado port
-# nao tem como escolher arquivo. O oraculo escolhe pelo dialogo; os dois
-# terminam com o MESMO arquivo, que e o que a comparacao exige.
+# `WTE_TEXTURA` e `WTE_MCR` atravessam quando o chamador as define. E a mesma
+# afordancia do argumento de imagem, pela mesma razao: os dialogos de arquivo do
+# gtk2 nao se dirigem por coordenada fixa sem gerenciador de janela, entao o
+# roteiro do lado port nao tem como escolher nem digitar caminho. O oraculo
+# escolhe pelo dialogo; os dois terminam com o MESMO arquivo, que e o que a
+# comparacao exige. `WTE_TEXTURA` e entrada, `WTE_MCR` e saida.
 echo ">> port: lancando $APP"
 env WTE_TRACE_FILE="$SAIDA/port-trace.log" \
   ${WTE_TEXTURA:+WTE_TEXTURA="$WTE_TEXTURA"} \
+  ${WTE_MCR:+WTE_MCR="$WTE_MCR"} \
   setsid "$APP" "$COPIA" >"$LOG" 2>&1 &
 sleep 3
 PID_ALVO="$(pgrep -n -f "^$APP" || true)"

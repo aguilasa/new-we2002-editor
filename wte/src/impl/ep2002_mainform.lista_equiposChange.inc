@@ -55,6 +55,11 @@ begin
   boton_nombres2iso.Enabled := nacional;
   boton_mcr.Enabled := True;
   boton_dialogo_tex.Enabled := True;
+  { Os dois de emitir arquivo nascem `Enabled = False` no DFM e e AQUI que o
+    original os liga -- `0x0040d31a` e `0x0040d327`. Sem time escolhido nao
+    ha o que emitir. }
+  grabar_memory.Enabled := True;
+  grabar_camiseta.Enabled := True;
   bandera.Visible := nacional;
   home1.Visible := nacional;
   home2.Visible := nacional;

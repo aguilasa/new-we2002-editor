@@ -352,12 +352,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.grabar_memoryClick(Sender: TObject);
-begin
-  REStub('MainForm.grabar_memoryClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.grabar_memoryClick.inc}
 
 procedure TMainForm.lista_jugadores_1Change(Sender: TObject);
 {$I impl/ep2002_mainform.lista_jugadores_1Change.inc}

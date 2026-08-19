@@ -122,7 +122,13 @@ const
     e a base que ele soma; `0x45FF0` poe o time 0 em 2328184, que e o
     `OFS_TEAM_BARS` do `we2002_core` -- as duas fontes concordam, e a spec traz
     a conferencia na fronteira de setor, que e onde elas poderiam divergir. }
-  BARRAS_SETOR_BASE  = 850;
+  { O setor de onde o original conta TODO endereco logico deste grupo. Ele
+    nao e das barras: o `boton_nombres2iso`, o `grabar_memory` e o
+    `mostrar_estrategia` somam o mesmo `0x1E8178`. Fica com nome proprio, e
+    o das barras passa a ser um apelido dele. }
+  SETOR_BASE_DADOS   = 850;
+
+  BARRAS_SETOR_BASE  = SETOR_BASE_DADOS;
   BARRAS_LOGICO_BASE = $45FF0;
   BARRAS_POR_TIME    = 5;
 
@@ -198,6 +204,77 @@ const
   TEXTURA_BASE            = 19756824;
   TEXTURA_SETORES         = 20;
   TEXTURA_BYTES_POR_TIME  = 47040;
+
+{ ------------------------------------------------------------------------ }
+{ O CARTAO DE MEMORIA -- insumo do `grabar_memoryClick` (`0x0040f69c`) e da
+  rotina que ele chama, o `0x0040f150`. Spec:
+  `wte/re/spec/MainForm.grabar_memoryClick.md`.
+
+  Este e o unico dos seis handlers de gravacao da WTE-TASK-27 que NAO escreve
+  na imagem de CD: ele emite um arquivo `.mcr` de 128 KiB. A imagem so e lida.
+
+  As tres regioes de origem sao enderecos LOGICOS no fluxo de dados a partir do
+  setor 850 -- a mesma base das barras, `850 * 2352 + 24 = 0x1E8178`. Duas
+  delas casam com um `OFS_*` do `we2002_core` e uma nao:
+
+  | logico | passo | time 0 | `we2002_core` |
+  |---|---|---|---|
+  | `0x40C2C` | 30 | 2303700 | `OFS_FORMATIONS` |
+  | `0x408A8` |  5 | 2302800 | **sem nome** -- ver `wte/re/offsets-novos.md` |
+  | `0x46228` |  6 | 2329056 | `OFS_KICKER` |
+
+  O `+2` quando `indice div 95` e 1 nao e enfeite: e o mesmo par de bytes que o
+  `we2002_core` pula entre os 32 clubes de ML e o time-modelo (`Read(buf,2)`
+  no `Load`). Ele so tem efeito no item 95 do combo. }
+const
+  { O molde: a PRIMEIRA metade do `dat.bin` e um cartao PSX formatado, com o
+    slot do WE2002 pronto. `0x20000` = 131.072 = o tamanho exato de um memory
+    card. A segunda metade e outra coisa -- os 7 setores que o arranque injeta
+    na imagem, ja portados no `we2002_estado`. }
+  CARTAO_BYTES = $20000;
+
+  FORMACAO_LOGICO_BASE = $40C2C;   { = OFS_FORMATIONS no time 0 }
+  FORMACAO_POR_TIME    = 30;
+  TATICA_LOGICO_BASE   = $408A8;   { sem nome no we2002_core }
+  TATICA_POR_TIME      = 5;
+  COBRADOR_LOGICO_BASE = $46228;   { = OFS_KICKER no time 0 }
+  COBRADOR_POR_TIME    = 6;
+
+  { Os destinos dentro do cartao. Todos medidos: a sonda `27-mcr.txt` produz um
+    `.mcr` pelo oraculo e o compara com o molde do `dat.bin`. }
+  MCR_NUMEROS       = $5404;   { 16 B: os 23 dorsais, 5 bits cada       }
+  MCR_JOGADORES     = $5904;   { 23 registros, 22 B uteis em 32 de passo }
+  MCR_JOGADOR_PASSO = 32;
+  MCR_FORMACAO_1    = $63D5;   { os 10 primeiros bytes da formacao      }
+  MCR_FORMACAO_2    = $62A8;   { os 20 restantes                        }
+  MCR_TATICA_CRUA   = $64E2;   { tatica[0], como esta na imagem         }
+  MCR_TATICA_MAIS50 = $6102;   { tatica[0] + 50, o mesmo byte de novo   }
+  MCR_TATICA_1_BAIXO = $6488;
+  MCR_TATICA_1_ALTO  = $6479;
+  MCR_TATICA_2_BAIXO = $6497;
+  MCR_TATICA_2_ALTO  = $64A6;
+  MCR_CAPITAO        = $6500;  { o sexto byte do bloco de cobradores    }
+
+  { O buffer de jogador que o original usa como rascunho: o 23. Ele cai DENTRO
+    da lista de descarte (`BUF_DESCARTE_BASE + 20`), e isso nao e engano de
+    leitura -- o `0x0040f150` passa `ecx = 0x17` para a `0x004046e8`, e a
+    `0x00404374` indexa o array de 44 bytes por esse valor. Emitir um cartao
+    embaralha a linha 20 do descarte no original, e aqui tambem. }
+  BUF_CARTAO = 23;
+
+  { Os cinco destinos dos cobradores, na ORDEM em que o original os grava --
+    a tabela de cinco `DWORD` em `0x00423F84`. Ela nao e crescente, e por isso
+    e tabela e nao aritmetica. }
+  MCR_COBRADORES: array[0..4] of LongInt = ($614F, $6140, $6122, $6113, $6131);
+
+  { Os 23 numeros de camisa, 5 bits cada, em grupos de SEIS por `DWORD`: o
+    original calcula `32 * (j div 6) + 5 * (j mod 6)` como posicao de bit. Sao
+    30 bits usados por grupo e 2 perdidos, quatro grupos, 16 bytes -- a mesma
+    forma do `SquadNumbers` do `we2002_core`. }
+  NUMERO_BITS       = 5;
+  NUMERO_POR_GRUPO  = 6;
+  NUMERO_BITS_GRUPO = 32;
+  NUMERO_MAXIMO     = 31;      { o `cmp ..,0x1f` / `jbe` do original }
 
 type
   TBlocoDeNome = record
@@ -537,6 +614,22 @@ begin
     if alvo is TStaticText then
       TStaticText(alvo).Caption := IntToStr(NumeroDaCamisa(indice, slot));
   end;
+end;
+
+{ O texto que a legenda `dorsalN` mostra AGORA -- `N` em base um.
+
+  O `0x0040f150` le a tela, nao o modelo: ele monta `'dorsal' + IntToStr(j+1)`,
+  chama `FindComponent` e pede o `Caption`. Quem escreveu ali foi a
+  `PreencheCamisas` ou uma edicao de numero da WTE-TASK-26, e essa e justamente
+  a razao de o original ir a tela -- o numero editado e o que ele grava. }
+function TextoDoDorsal(numero: Integer): string;
+var
+  alvo: TComponent;
+begin
+  Result := '';
+  alvo := MainForm.FindComponent('dorsal' + IntToStr(numero));
+  if alvo is TStaticText then
+    Result := TStaticText(alvo).Caption;
 end;
 
 { Preenche uma lista de jogadores -- o `0x0040b2d8`, 1.548 bytes.
@@ -1182,3 +1275,139 @@ begin
             and (TComponent(Sender).Name = nome_titular);
 end;
 
+
+{ ------------------------------------------------------------------------ }
+{ GravaCartaoDeMemoria -- 0x0040f150, 1.356 bytes.
+
+  A metade do `grabar_memoryClick` que sabe de bytes. O handler escolhe o
+  arquivo; esta rotina copia o molde e escreve o time por cima.
+
+  A ordem e a do original, e ela importa em um ponto so: o molde vai INTEIRO
+  primeiro, e so depois os campos. Escrever campo antes do molde os apagaria.
+
+  O que NAO se reproduz e a origem dos bytes de jogador. O original chama a
+  `0x004046e8`, que rele nome e atributos DA IMAGEM para o buffer 23; o port
+  chama a `CarregaJogador`, que le a camada de dados -- ja byte-identica ao
+  `ed.exe`. E a mesma divergencia declarada do `boton_barras2isoClick`: mesmo
+  byte, mesma posicao, outra fonte. O buffer continua sendo o 23, com o efeito
+  colateral que ele tem no original (ver `BUF_CARTAO`). }
+function GravaCartaoDeMemoria(const destino: string; indice: Integer): Boolean;
+var
+  img: TCdImage;
+  cartao: TFileStream;
+  molde: TFileStream;
+  bloco: array[0..CARTAO_BYTES - 1] of Byte;
+  formacao: array[0..FORMACAO_POR_TIME - 1] of Byte;
+  tatica: array[0..3] of Byte;
+  cobrador: array[0..COBRADOR_POR_TIME - 1] of Byte;
+  numeros: array[0..15] of Byte;
+  salto, j, k, bit, valor: Integer;
+  registro: array[0..21] of Byte;
+
+  procedure Poe(posicao: LongInt; b: Byte);
+  begin
+    cartao.Position := posicao;
+    cartao.Write(b, 1);
+  end;
+
+begin
+  Result := False;
+  if (ImagemAberta = '') or (indice < 0) or (CaminhoDatBin = '') then
+    Exit;
+  { O `idx div 95` do original: o par de bytes que separa os clubes de ML do
+    time-modelo. So o item 95 do combo o sente. }
+  salto := 2 * (indice div IDX_MODELO_ML);
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    LeDoFluxoEm(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                  FORMACAO_LOGICO_BASE + FORMACAO_POR_TIME * indice + salto),
+                formacao, FORMACAO_POR_TIME);
+    LeDoFluxoEm(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                  TATICA_LOGICO_BASE + TATICA_POR_TIME * indice),
+                tatica, SizeOf(tatica));
+    LeDoFluxoEm(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                  COBRADOR_LOGICO_BASE + COBRADOR_POR_TIME * indice + salto),
+                cobrador, COBRADOR_POR_TIME);
+  finally
+    img.Close;
+  end;
+
+  { Os 23 numeros de camisa saem da TELA, nao da imagem: o original le o
+    `Caption` de cada `dorsalN`, tira 1 e limita a 31. Um rotulo ilegivel vira
+    zero no `StrToIntDef` e, menos 1, estoura para 255 -- que o limite corta em
+    31, como o `jbe` do original corta. }
+  FillChar(numeros, SizeOf(numeros), 0);
+  for j := 0 to JOGADORES_POR_TIME - 1 do
+  begin
+    valor := (StrToIntDef(TextoDoDorsal(j + 1), 0) - 1) and $FF;
+    if valor > NUMERO_MAXIMO then
+      valor := NUMERO_MAXIMO;
+    bit := NUMERO_BITS_GRUPO * (j div NUMERO_POR_GRUPO)
+         + NUMERO_BITS * (j mod NUMERO_POR_GRUPO);
+    for k := 0 to NUMERO_BITS - 1 do
+      if (valor and (1 shl k)) <> 0 then
+        numeros[(bit + k) div 8] :=
+          numeros[(bit + k) div 8] or (1 shl ((bit + k) mod 8));
+  end;
+
+  molde := nil;
+  cartao := nil;
+  try
+    try
+      molde := TFileStream.Create(CaminhoDatBin, fmOpenRead or fmShareDenyNone);
+      if molde.Read(bloco, CARTAO_BYTES) <> CARTAO_BYTES then
+        Exit;
+      cartao := TFileStream.Create(destino, fmCreate);
+      cartao.Write(bloco, CARTAO_BYTES);
+    except
+      Exit;
+    end;
+
+    { A formacao, partida em 10 + 20. Os dois trechos sao contiguos na imagem e
+      NAO no cartao. }
+    cartao.Position := MCR_FORMACAO_1;
+    cartao.Write(formacao[0], 10);
+    cartao.Position := MCR_FORMACAO_2;
+    cartao.Write(formacao[10], FORMACAO_POR_TIME - 10);
+
+    { A tatica: o byte 0 duas vezes -- cru e mais 50 --, e os quatro nibbles
+      dos bytes 1 e 2. O byte 3 e lido e nao e usado: o extrator do original
+      recebe o par (baixo, alto) e nunca pede mais de 4 bits a partir do bit 4,
+      entao o byte alto nunca entra na conta. }
+    Poe(MCR_TATICA_CRUA, tatica[0]);
+    Poe(MCR_TATICA_MAIS50, (tatica[0] + 50) and $FF);
+    Poe(MCR_TATICA_1_BAIXO, tatica[1] and $0F);
+    Poe(MCR_TATICA_1_ALTO, (tatica[1] shr 4) and $0F);
+    Poe(MCR_TATICA_2_BAIXO, tatica[2] and $0F);
+    Poe(MCR_TATICA_2_ALTO, (tatica[2] shr 4) and $0F);
+
+    { Os cinco cobradores, cada um no seu destino, e o capitao a parte. }
+    for j := 0 to 4 do
+      Poe(MCR_COBRADORES[j], cobrador[j]);
+    Poe(MCR_CAPITAO, cobrador[5]);
+
+    { Os 23 jogadores: 12 bytes de atributo, 10 de nome, 10 sem uso. O original
+      grava nessa ordem -- atributo ANTES do nome --, embora no buffer o nome
+      venha primeiro. }
+    for j := 0 to JOGADORES_POR_TIME - 1 do
+    begin
+      CarregaJogador(indice, j, BUF_CARTAO);
+      for k := 0 to 11 do
+        registro[k] := Byte(BufferJogador[BUF_CARTAO].atributos[k]);
+      for k := 0 to 9 do
+        registro[12 + k] := Byte(BufferJogador[BUF_CARTAO].nome[k]);
+      cartao.Position := MCR_JOGADORES + MCR_JOGADOR_PASSO * j;
+      cartao.Write(registro, SizeOf(registro));
+    end;
+
+    cartao.Position := MCR_NUMEROS;
+    cartao.Write(numeros, SizeOf(numeros));
+    Result := True;
+  finally
+    cartao.Free;
+    molde.Free;
+  end;
+end;

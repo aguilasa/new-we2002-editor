@@ -30,7 +30,7 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `golden_run_wte.sh` ✅ | 22 | o lado **oraculo** do gate: dirige o `wte.exe` sob Wine por um roteiro. Reprova com codigo 4 se achar `c0000005` no log — oraculo que morreu no meio grava menos, e o diff sairia menor |
 | `golden_run_laz.sh` ✅ | 22 | o lado **port**: dirige o app Lazarus. Reprova roteiro com `! tecla`/`! texto`, porque o `:99` sem window manager nao entrega tecla ao GTK2 |
 | `golden_veredito.py` ✅ | 22 | as divergencias medidas contra as **declaradas** no roteiro (`conhecida: a..b`). Tres codigos: 0 passou, 1 divergencia nao declarada, **3 faixa declarada que sumiu**. Nao gera arquivo — como o `check_lcl_props.py`, o `--check` dele confere outra coisa: que as declaracoes dos roteiros do gate sao legiveis, antes de uma corrida de dez minutos descobrir que nao |
-| `golden_check.sh` ✅ | 22 | **o gate**, em tres modos: `controle` (oraculo × oraculo), `positivo` (byte plantado tem de ser detectado) e `golden` (oraculo × port). As quatro guardas do harness do `newWe2002`, e o comparador reusado de `tools/golden_compare.py` |
+| `golden_check.sh` ✅ | 22 | **o gate**, em tres modos: `controle` (oraculo × oraculo), `positivo` (byte plantado tem de ser detectado) e `golden` (oraculo × port). As quatro guardas do harness do `newWe2002`, e o comparador reusado de `tools/golden_compare.py`. `--artefato <nome>` chegou na 27, para o `grabar_memory`: ele nao escreve na imagem, emite um `.mcr` -- comparar so as imagens aprovaria um port inerte, entao o script compara tambem o arquivo que cada lado produziu em `work/` |
 | `golden_suite.sh` | 34 | a bateria completa |
 | `ghidra/` | 24 | scripts de nomeação e convenção Borland |
 | `make_icon.py` | 39 | ícone |

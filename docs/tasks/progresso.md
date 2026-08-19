@@ -243,11 +243,12 @@ conferível.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **56 de 96 têm arquivo**
-      (2026-08-18, do `spec_index.py`): 16 `implementado`, 14 `trivial`, 66
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **60 de 96 têm arquivo**
+      (2026-08-19, do `spec_index.py`): 22 `implementado`, 14 `trivial`, 60
       `aberto`. Os 28 do grupo de carga mais os 28 do de edição, que a
-      WTE-TASK-26 fechou. Dos `aberto` do grupo de edição, **nove têm dono
-      nomeado na WTE-TASK-27** pela opção A
+      WTE-TASK-26 fechou, mais quatro das seis gravações da WTE-TASK-27. Dos
+      `aberto` do grupo de edição, **nove têm dono nomeado na WTE-TASK-27**
+      pela opção A
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
@@ -255,7 +256,10 @@ conferível.
       que a europeia não hospeda este grupo**: o `wte.exe` morre na troca de
       time (49.749 violações de acesso) e a gravação nunca acontece, então o
       oráculo não existe daquele lado. O critério vale como está para a
-      japonesa; ver [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md)
+      japonesa; ver [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md).
+      **E "gravação" nem sempre quer dizer a imagem:** o `grabar_memory` emite
+      um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
+      2026-08-19 — comparar só as duas imagens aprovaria um port inerte
 - [ ] Cinco `trivial` reamostrados e reconferidos
 
 ### Fase 5 — Features

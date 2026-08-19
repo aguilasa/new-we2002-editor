@@ -47,8 +47,9 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-barras-editada` | 10 | 10 | 10 |
 | `27-nomes-editados` | 19 | 19 | 19 |
 | `27-textura` | 36 | 36 | 29 |
+| `27-mcr` | 9 | 9 | 9 |
 
-**As duas réguas fecham nas 11 sessões que escreveram.**
+**As duas réguas fecham nas 12 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.
@@ -412,7 +413,7 @@ de qualquer ação medida.
 | `11` | `FICHA_2_FUNDO` | ficha de um jogador dele | 10 | 0 | 7284 |
 | `11` | `FIM` | — | 0 | 0 | 0 |
 
-**18 `OFS_*` saíram de hipótese nesta passagem** — nenhuma
+**17 `OFS_*` saíram de hipótese nesta passagem** — nenhuma
 sessão anterior os tinha endereçado:
 
 | `Offsets.hpp` | valor | sessão | ação | op |
@@ -428,7 +429,6 @@ sessão anterior os tinha endereçado:
 | `OFS_ML_PLAYER_NAME_2` | 2008632 | `11` | `TIME_120` | R |
 | `OFS_ML_PLAYER_NAME_3` | 2010984 | `11` | `TIME_120` | R |
 | `OFS_FORMATIONS` | 2303700 | `10` | `ESTRATEGIA` | R |
-| `OFS_KICKER` | 2329056 | `10` | `ESTRATEGIA` | R |
 | `OFS_KIT_PREVIEW_A` | 2669544 | `10` | `TIME_FUNDO` | R |
 | `OFS_KIT_PREVIEW_B` | 2671896 | `11` | `TIME_120` | R |
 | `OFS_KIT_PREVIEW_C` | 2674248 | `11` | `TIME_120` | R |

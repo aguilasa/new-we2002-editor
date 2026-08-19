@@ -63,6 +63,15 @@ var
   TexturaEscolhida: string = '';
   TexturaTamanho: Int64 = 0;
 
+  { O caminho do `.mcr` que o `grabar_memoryClick` vai emitir.
+
+    Mesma afordancia, mesmo motivo -- e aqui ela e ainda mais necessaria: o
+    `TSaveDialog` do gtk2 tem de receber um nome DIGITADO, e o `:99` nao entrega
+    tecla ao GTK2 sem gerenciador de janela. `WTE_MCR` semeia o destino no
+    `FormShow`; com ele preenchido o handler pula o `Execute` e vai direto ao
+    arquivo, que e o mesmo que o oraculo recebe pelo dialogo. }
+  CartaoDestino: string = '';
+
   { As seis pastas de asset, montadas pelo `MainForm.FormCreate` (0x004107c8).
 
     No original sao seis globais de AnsiString, medidos na WTE-TASK-08
@@ -169,6 +178,12 @@ function LeDoFluxo(var img: TCdImage; out b: Byte): Boolean;
   entre eles. }
 function GravaNoFluxo(var img: TCdImage; offset: TOffset;
                       const buffer; count: SizeInt): Boolean;
+
+{ Le `count` bytes pelo FLUXO, a partir de `offset`. O simetrico do
+  `GravaNoFluxo`, e a forma do `0x004033bc` do original. False quando o arquivo
+  acaba antes -- e ai o que ja se leu fica no buffer, como no original. }
+function LeDoFluxoEm(var img: TCdImage; offset: TOffset;
+                     out buffer; count: SizeInt): Boolean;
 
 { Tamanho de um arquivo, ou 0 quando nao da para abrir. }
 function TamanhoDoArquivo(const caminho: string): Int64;
@@ -399,6 +414,24 @@ begin
     img.Write(bytes[i], 1);
     SaltaFronteiraDeSetor(img);
   end;
+  Result := True;
+end;
+
+function LeDoFluxoEm(var img: TCdImage; offset: TOffset;
+                     out buffer; count: SizeInt): Boolean;
+var
+  bytes: PByte;
+  i: SizeInt;
+begin
+  Result := False;
+  if count <= 0 then
+    Exit;
+  bytes := @buffer;
+  FillChar(buffer, count, 0);
+  img.Seek(offset, soBeginning);
+  for i := 0 to count - 1 do
+    if not LeDoFluxo(img, bytes[i]) then
+      Exit;
   Result := True;
 end;
 

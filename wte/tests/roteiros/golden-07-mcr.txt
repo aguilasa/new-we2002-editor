@@ -1,0 +1,78 @@
+# golden-07-mcr -- o golden do `grabar_memoryClick`, lado oraculo.
+#
+# WTE-TASK-27. Mesma sequencia da sonda `27-mcr.txt`, virada gate.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-07-mcr.txt \
+#        --roteiro-port wte/tests/roteiros/golden-07-mcr.port.txt \
+#        --artefato saida.mcr
+#
+# **Este e o unico gate da fase 4 que precisa do `--artefato`.** O handler nao
+# escreve na imagem de CD: ele emite um `.mcr` de 128 KiB. Comparar so as duas
+# imagens aprovaria um port que nao fizesse absolutamente nada -- as duas
+# sairiam iguais porque nenhum dos dois lados as tocou. O `--artefato` compara
+# os dois `.mcr` produzidos, e a comparacao das imagens continua valendo pelo
+# motivo inverso: e assim que se prova que a gravacao NAO vazou para dentro da
+# ROM.
+#
+# O `golden_check.sh` apaga `work/saida.mcr` antes de cada lado. O
+# `dialogo_grabar_memory` tem `ofOverwritePrompt`, e um arquivo no lugar
+# acrescentaria uma caixa de confirmacao que o roteiro nao preve.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+#
+# Trocar de time e o que HABILITA o botao: `lista_equiposChange` chama
+# SetEnabled(True) sobre `grabar_memory` (`0x0040d31a`). No DFM ele nasce
+# `Enabled = False`.
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- gravar ----
+#
+# grupo_memorycard (8,224) + grabar_memory (88,56) = (96,280), 25x25.
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\saida.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR
