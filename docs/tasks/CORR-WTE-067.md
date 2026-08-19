@@ -3,7 +3,7 @@ id: CORR-WTE-067
 title: "Correção: a nota nova da WTE-TASK-27 põe a AtualizaBlocosLivresDeMl na unidade errada e promete um mapa que não existe"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -89,20 +89,40 @@ A referência à `0x0040427c` (o inverso do índice linear) está correta e fica
 
 ## Verificação
 
-- [ ] A nota da 27 nomeia `ContaBlocosLivresDeMl` como a função do `we2002_ml`
+- [x] A nota da 27 nomeia `ContaBlocosLivresDeMl` como a função do `we2002_ml`
       e `AtualizaBlocosLivresDeMl` como do `ep2002_mainform.aux.inc`
-- [ ] A nota diz explicitamente que o mapa de ocupação não é exposto hoje, e
+- [x] A nota diz explicitamente que o mapa de ocupação não é exposto hoje, e
       qual é o caminho para obtê-lo
-- [ ] `grep -n 'AtualizaBlocosLivresDeMl' wte/src/we2002_ml.pas` continua sem
+- [x] `grep -n 'AtualizaBlocosLivresDeMl' wte/src/we2002_ml.pas` continua sem
       resultado — a correção é no texto, não na unidade
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-19
 
 **Resumo do que foi feito:**
 
+A nota de desbloqueio da 27 foi reescrita contra a API que ficou: o contador é
+a `ContaBlocosLivresDeMl`, do `we2002_ml`; a `AtualizaBlocosLivresDeMl` é o par
+contar-e-mostrar e mora no `ep2002_mainform.aux.inc`, não na unidade. A nota
+passou a dizer que **o mapa de ocupação não é exposto hoje** — a função devolve
+quantos blocos estão livres, não quais, e o vetor `ocupacao` morre com ela — e
+qual é o caminho: uma função irmã no `we2002_ml` que devolva o primeiro índice
+livre, reaproveitando a varredura que já existe, em vez de o chamador reler a
+imagem inteira uma segunda vez. A referência à `0x0040427c` estava certa e
+ficou.
+
+Correção de texto: a unidade não foi tocada, e a verificação exige justamente
+isso.
+
 **Problemas encontrados:**
 
+Nenhum. A varredura por `AtualizaBlocosLivresDeMl` fora do `impl/` achou um
+segundo sítio, `wte/re/spec/MainForm.FormShow.md:41` — mas ali a frase é
+verdadeira: o `FormShow` do port chama mesmo o procedimento auxiliar, e o texto
+não o atribui ao `we2002_ml`. Nada a reconciliar.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/27-handlers-de-gravacao.md`

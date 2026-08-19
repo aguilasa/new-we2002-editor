@@ -176,9 +176,16 @@ um campo de tela.
       Enquanto isso a rotina sai sem tocar em byte nenhum quando o destino não é
       seleção — lacuna declarada, não silenciosa.
       **A 33 fechou em 2026-08-19**, antecipada exatamente por isto: o contador
-      existe (`AtualizaBlocosLivresDeMl`, do `we2002_ml`), e com ele vem o mapa
-      de ocupação que diz **qual** bloco está livre. Não há mais bloqueio; falta
-      escrever o ramo. Ver [`../../wte/re/ml-slots.md`](../../wte/re/ml-slots.md),
+      existe, e é a `ContaBlocosLivresDeMl`, do `we2002_ml`. A
+      `AtualizaBlocosLivresDeMl` é o par contar-e-mostrar, e mora no
+      `ep2002_mainform.aux.inc`, não na unidade. **O mapa de ocupação não é
+      exposto hoje**: a `ContaBlocosLivresDeMl` devolve quantos blocos estão
+      livres, não quais, e o vetor `ocupacao` é local da função. Para o ramo de
+      destino de ML o caminho recomendado é uma função irmã no `we2002_ml` que
+      devolva o primeiro índice livre — ou o próprio vetor de ocupação —,
+      reaproveitando a varredura que já existe; refazer a varredura no chamador
+      releria a imagem inteira uma segunda vez. Falta escrever o ramo. Ver
+      [`../../wte/re/ml-slots.md`](../../wte/re/ml-slots.md),
       e em especial a `0x0040427c`, que é o inverso do índice linear — dado o
       bloco escolhido, ela devolve o par `(time, slot)` que vai para a tabela de
       vínculos
