@@ -476,3 +476,77 @@ alvos.
   a §4.4 do plano ser corrigida — de novo. `roms/` intocada.
 
 - **Problemas encontrados:** o `:99` morto, acima. Nada mais.
+
+---
+
+- **Executado em:** 2026-08-19 — **quinta passagem.** `boton_tex2isoClick`
+  está `implementado`, com controle e golden verdes. **Três das seis**
+  gravações prontas; a task continua `⬜ Pendente`.
+
+- **Resumo do que foi feito:**
+
+  **A textura é aritmética pura — nem varredura, nem tabela.**
+
+  ```
+  offset = 19756824 + 47040 * (indice + 9 * (indice div 95))
+  ```
+
+  `19756824` = `8400 * 2352 + 24` e `47040` = `20 * 2352`: **vinte setores por
+  time**, contíguos. Medido com o time 2 e uma fonte de 5000 bytes — setores
+  8440..8459, a partir de 19850904, que é exatamente `19756824 + 47040 * 2`.
+
+  **São sempre os vinte, e é aí que um port erraria.** O original copia
+  enquanto a fonte durar; quando ela acaba no meio de um bloco ele enche o resto
+  com zero, e um **segundo** laço escreve de zero os blocos que sobraram. Uma
+  textura menor que a anterior não deixa rabo. Um port que gravasse só o que
+  leu passaria com uma fonte de 40960 bytes e falharia com qualquer outra — por
+  isso a sonda usa 5000, que não é múltiplo de 2048.
+
+  **O botão não estava habilitado, e achar quem o habilita foi metade da
+  passagem.** O primeiro golden falhou com o port sem mostrar o modal, e o
+  trace não tinha o handler: `boton_tex2iso` nasce `Enabled = False` no DFM.
+  Quem o liga no original é o `boton_dialogo_texClick`, em `0x0040e17d` —
+  `SetEnabled(True)` pela VMT[0x64] sobre o campo `0x0474`, que o
+  `wte/re/campos.tsv` resolve nesse botão. Faz sentido: sem fonte escolhida não
+  há o que gravar.
+
+  **A textura entra no port por `WTE_TEXTURA`, e isso é afordância de harness.**
+  O lado port do gate não consegue escolher arquivo — o `TOpenDialog` do gtk2
+  não se dirige por coordenada fixa sem gerenciador de janela. A variável semeia
+  `TexturaEscolhida` no `FormShow` e liga o botão, exatamente como o argumento
+  posicional semeia a imagem desde a WTE-TASK-25. Não muda byte nenhum: muda por
+  onde o caminho entra, e os dois lados terminam com o mesmo arquivo.
+
+- **O `boton_dialogo_texClick` continua `aberto`, de propósito.** Portá-lo pela
+  metade — só o `Execute` e o caminho — daria um veredito que afirma mais do que
+  se fez, e o formato `.tex` é da
+  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). Na janela do port o
+  botão de diálogo segue inerte, e está escrito na spec dele e na do
+  `boton_tex2iso`.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.boton_tex2isoClick.inc`
+  - `wte/src/impl/ep2002_mainform.aux.inc` — as três constantes da região
+  - `wte/src/impl/ep2002_mainform.FormShow.inc` — a semeadura e o `Enabled`
+  - `wte/src/we2002_estado.pas` — `TexturaEscolhida`, `TexturaTamanho`,
+    `TamanhoDoArquivo`
+  - `wte/tools/golden_run_laz.sh` — repassa `WTE_TEXTURA`
+  - `wte/tests/roteiros/27-textura.txt` — a sonda
+  - `wte/tests/roteiros/golden-06-textura{,.port}.txt` — o gate
+  - `wte/re/spec/MainForm.boton_tex2isoClick.md` — veredito `implementado`
+  - `wte/re/io-medido.tsv`, `wte/re/cmp-medido.tsv`, `wte/re/offsets-novos.md`,
+    `wte/re/spec/INDICE.md`, `wte/re/fase-2.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/tests/roteiros/README.md`, e esta task
+
+- **Gates medidos:** `golden_check.sh --modo controle` **PASSOU: byte-idêntico**
+  e o `golden` contra o port **PASSOU**, só as duas faixas do arranque.
+  Verificado à parte que a passagem não é vazia: o port sozinho contra a ROM
+  limpa grava os **vinte** setores, a partir do mesmo 19850904. `make -C wte
+  check` rc 0; `lazbuild` rc 0; `spec_index.py` **21 `implementado`**. A fração
+  de código gerado caiu para **71,4%** e a §4.4 do plano foi corrigida de novo.
+  `roms/` intocada.
+
+- **Problemas encontrados:** o botão desabilitado, acima — e o sintoma dele é
+  instrutivo: o gate falhou dizendo "a janela `W11 TE PT` não apareceu", que
+  parece problema de roteiro. O que respondeu foi o `port-trace.log`, onde o
+  handler simplesmente não constava.

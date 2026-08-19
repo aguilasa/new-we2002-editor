@@ -51,6 +51,18 @@ var
   Jogo: TDatabase;
   ImagemAberta: string = '';
 
+  { O arquivo de textura escolhido pelo `boton_dialogo_texClick`, e o tamanho
+    dele -- os globais `0x00432e60` (o `FILE*`) e `0x00434598` (o tamanho) do
+    original. Aqui e caminho e nao descritor: o port abre e fecha por operacao,
+    e quem grava e o `boton_tex2isoClick`.
+
+    AFORDANCIA DE HARNESS, e da mesma familia do argumento de imagem: o lado
+    port do gate nao consegue digitar num `TOpenDialog` do gtk2 por coordenada
+    fixa, entao `WTE_TEXTURA` semeia este par no `FormShow`. Nao muda byte
+    nenhum -- muda por onde o caminho entra. }
+  TexturaEscolhida: string = '';
+  TexturaTamanho: Int64 = 0;
+
   { As seis pastas de asset, montadas pelo `MainForm.FormCreate` (0x004107c8).
 
     No original sao seis globais de AnsiString, medidos na WTE-TASK-08
@@ -157,6 +169,9 @@ function LeDoFluxo(var img: TCdImage; out b: Byte): Boolean;
   entre eles. }
 function GravaNoFluxo(var img: TCdImage; offset: TOffset;
                       const buffer; count: SizeInt): Boolean;
+
+{ Tamanho de um arquivo, ou 0 quando nao da para abrir. }
+function TamanhoDoArquivo(const caminho: string): Int64;
 
 { ------------------------------------------------------------------------ }
 { O time e o jogador que a ficha esta editando -- as globais `0x004335cc` e
@@ -385,6 +400,25 @@ begin
     SaltaFronteiraDeSetor(img);
   end;
   Result := True;
+end;
+
+function TamanhoDoArquivo(const caminho: string): Int64;
+var
+  f: TFileStream;
+begin
+  Result := 0;
+  if not FileExists(caminho) then
+    Exit;
+  try
+    f := TFileStream.Create(caminho, fmOpenRead or fmShareDenyNone);
+    try
+      Result := f.Size;
+    finally
+      f.Free;
+    end;
+  except
+    Result := 0;
+  end;
 end;
 
 function AbreImagem(const caminho: string): Boolean;

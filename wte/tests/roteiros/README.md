@@ -217,6 +217,18 @@ virada gate: ele grava os dez blocos de nome do time 2. Rodou nos DOIS modos --
 roteiro que DIGITA tem uma fonte de nao-determinismo que roteiro de clique nao
 tem, e o controle e o unico lugar onde ela apareceria.
 
+O [`golden-06-textura.txt`](golden-06-textura.txt) e o unico roteiro do gate
+que precisa de um arquivo EXTERNO, e ele nao esta versionado -- `work/` e
+gitignored. O cabecalho traz o comando de uma linha que o recria, e os **5000
+bytes** dele sao escolha, nao acaso: nao sendo multiplo de 2048, exercitam o
+bloco parcial e o enchimento com zero. Com uma fonte de 40960 bytes um port que
+gravasse so o que leu passaria, e falharia com qualquer outra.
+
+E o unico tambem em que o lado port recebe algo por VARIAVEL DE AMBIENTE: o
+`TOpenDialog` do gtk2 nao se dirige por coordenada fixa sem gerenciador de
+janela, entao o oraculo escolhe pelo dialogo e o port recebe `WTE_TEXTURA`. Os
+dois terminam com o MESMO arquivo, que e a condicao de a comparacao valer.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

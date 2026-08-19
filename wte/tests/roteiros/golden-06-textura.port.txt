@@ -1,0 +1,36 @@
+# golden-06-textura, lado PORT. Par de golden-06-textura.txt.
+#
+# Tres assimetrias, todas ja conhecidas: a imagem vem da linha de comando, o
+# `Ok` do `ficha_info3` fica em (140,56) e nao (142,80), e a TEXTURA vem de
+# `WTE_TEXTURA` em vez do `TOpenDialog` -- o do gtk2 nao se dirige por
+# coordenada fixa sem gerenciador de janela. Os dois lados terminam com o mesmo
+# arquivo, que e o que a comparacao exige.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+= ABRE_TEXTURA
+
+! clique 468 292
+~ 4
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 4
+= GRAVA_TEXTURA

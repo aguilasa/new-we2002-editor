@@ -191,6 +191,14 @@ const
 
   NOME_BUFFER_MAX = 64;
 
+  { A regiao de textura, do `boton_tex2isoClick` (`0x0040de18`). Vinte setores
+    por time, contíguos, a partir do setor 8400 -- `8400 * 2352 + 24` e
+    `20 * 2352` sao os dois literais do disassembly. Medido: com o time 2 o
+    original grava os setores 8440..8459, 2048 bytes de dados em cada. }
+  TEXTURA_BASE            = 19756824;
+  TEXTURA_SETORES         = 20;
+  TEXTURA_BYTES_POR_TIME  = 47040;
+
 type
   TBlocoDeNome = record
     offset: TOffset;

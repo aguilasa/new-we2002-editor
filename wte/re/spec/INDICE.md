@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 20 |
+| `implementado` | 21 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 62 |
+| `aberto` | 61 |
 | **total** | **96** |
 
-58 de 96 têm arquivo de spec.
+59 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -104,7 +104,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d41c` | `MainForm` | [edit_nombre3KeyPress](MainForm.edit_nombre3KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | implementado |
 | `0x0040d534` | `MainForm` | [boton_nombres2isoClick](MainForm.boton_nombres2isoClick.md) | OnClick | gravacao | implementado |
-| `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
+| `0x0040de18` | `MainForm` | [boton_tex2isoClick](MainForm.boton_tex2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
 | `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |
 | `0x0040e304` | `MainForm` | [paderechaeizquierdaClick](MainForm.paderechaeizquierdaClick.md) | OnClick | edicao | aberto |

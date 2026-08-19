@@ -1,0 +1,83 @@
+# golden-06-textura -- o golden do `boton_tex2isoClick`, lado oraculo.
+#
+# WTE-TASK-27. Mesma sequencia da sonda `27-textura.txt`, virada gate.
+#
+#   python3 -c "open('work/t.bin','wb').write(bytes((i*7+3)%251 for i in range(5000)))"
+#   WTE_TEXTURA=$PWD/work/t.bin \
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-06-textura.txt \
+#        --roteiro-port wte/tests/roteiros/golden-06-textura.port.txt
+#
+# **A fonte tem de existir em `work/t.bin` antes**, e tem de ser a MESMA para os
+# dois lados: o oraculo a escolhe pelo dialogo e o port a recebe por
+# `WTE_TEXTURA`. Dois arquivos diferentes deixariam de ser a mesma entrada.
+#
+# Os 5000 bytes nao sao arredondados de proposito: nao sendo multiplo de 2048,
+# eles exercitam o bloco parcial e o enchimento com zero que vem depois dele --
+# o original grava os VINTE setores sempre, com ou sem fonte.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------- escolher a textura ----
+#
+# grupo_memorycard (8,224) + boton_dialogo_tex (472,24) = (480,248), 25x25.
+# O TOpenDialog dele tambem se chama `Abre`.
+! clique 492 260
+~ 3
+> Abre
+! clique 315 304
+! texto E:\t.bin
+! tecla Return
+~ 3
+> W11 Team Editor PT by chagas_michel!
+= ABRE_TEXTURA
+
+# ------------------------------------------------------------- gravar ----
+#
+# grupo_memorycard (8,224) + boton_tex2iso (424,56) = (432,280), 73x25.
+! clique 468 292
+~ 4
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- sem ela os bytes ficam no buffer do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_TEXTURA

@@ -15,7 +15,7 @@
   nenhum. O argumento posicional existe no `wtemain.pas` desde a WTE-TASK-11
   exatamente para isto. }
 var
-  imagem: string;
+  imagem, textura: string;
 begin
   REMark('MainForm.FormShow');
   { As tres cores de tempo de execucao. O original monta a cadeia `$00ffb676`,
@@ -82,4 +82,21 @@ begin
   end
   else
     texto_dialogo_we.Caption := 'nao foi possivel abrir ' + ExtractFileName(imagem);
+
+  { A textura pela mesma porta que a imagem, e pelo mesmo motivo: o
+    `TOpenDialog` do gtk2 nao se dirige por coordenada fixa no `:99`. Ver
+    `TexturaEscolhida` no `we2002_estado`. }
+  textura := GetEnvironmentVariable('WTE_TEXTURA');
+  if (textura <> '') and FileExists(textura) then
+  begin
+    TexturaEscolhida := textura;
+    TexturaTamanho := TamanhoDoArquivo(textura);
+    texto_dialogo_tex.Caption := ExtractFileName(textura);
+    { Quem habilita o `boton_tex2iso` no original e o `boton_dialogo_texClick`,
+      em `0x0040e17d` -- `SetEnabled(True)` pela VMT[0x64] sobre o campo
+      `0x0474`, que o `wte/re/campos.tsv` resolve nesse botao. O botao nasce
+      `Enabled = False` no DFM, e faz sentido: sem fonte escolhida nao ha o que
+      gravar. Aqui a fonte vem por `WTE_TEXTURA`, entao e aqui que ele liga. }
+    boton_tex2iso.Enabled := True;
+  end;
 end;
