@@ -26,7 +26,7 @@ gabarito e o vocabulário de veredito estão em
 | `aberto` | 63 |
 | **total** | **96** |
 
-57 de 96 têm arquivo de spec.
+58 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -103,7 +103,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d3c4` | `MainForm` | [edit_nombre2KeyPress](MainForm.edit_nombre2KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d41c` | `MainForm` | [edit_nombre3KeyPress](MainForm.edit_nombre3KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | implementado |
-| `0x0040d534` | `MainForm` | boton_nombres2isoClick | OnClick | gravacao | aberto |
+| `0x0040d534` | `MainForm` | [boton_nombres2isoClick](MainForm.boton_nombres2isoClick.md) | OnClick | gravacao | aberto |
 | `0x0040de18` | `MainForm` | boton_tex2isoClick | OnClick | gravacao | aberto |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
 | `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |

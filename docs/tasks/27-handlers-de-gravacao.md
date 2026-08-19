@@ -325,3 +325,80 @@ alvos.
   numa medição exploratória casou com a própria linha de comando do shell e o
   matou junto — sem consequência para o repositório, e a lição é a de sempre
   neste projeto: filtro por nome alcança quem está segurando o nome.
+
+---
+
+- **Executado em:** 2026-08-19 — **terceira passagem, ainda parcial.** Abertura
+  do `boton_nombres2isoClick`: a spec está escrita e o mapa de bytes medido, e
+  o Pascal **não**. O veredito ficou `aberto` de propósito.
+
+- **Resumo do que foi feito:**
+
+  **A estrutura do maior handler do grupo está recuperada.** 2.268 bytes, e ele
+  não grava sozinho: apoia-se em duas tabelas e três rotinas internas.
+
+  | endereço | papel |
+  |---|---|
+  | `0x004231a0` | 3 linhas × 6 `DWORD` — quais blocos cada campo tem; zero quer dizer "não tem" |
+  | `0x00433a0c` | 3 × 6 registros de 52 B, preenchidos por time: `{offset, comprimento, modo, buffer 40 B}` |
+  | `0x00403a68` | codifica o texto da tela no buffer, em **duas** codificações |
+  | `0x00403dcc` | resolve o registro `(campo, bloco)` |
+  | `0x00403400` | `fseek` + `fputc` byte a byte — não conhece nome nenhum |
+
+  O `+4` da tabela de registros é o `0x00433a10` que a
+  [CORR-WTE-061](/docs/tasks/CORR-WTE-061.md) já tinha medido como largura por
+  time; agora ele tem vizinhos com nome.
+
+  **O trace não separa bloco de bloco, e isso obrigou uma régua nova.** As oito
+  faixas que o `27-gravacao-controle` registrou são fronteiras de **descarga**
+  do buffer do runtime C, não gravações lógicas: duas gravações vizinhas caem
+  na mesma faixa. A sonda
+  [`27-nomes-editados.txt`](../../wte/tests/roteiros/27-nomes-editados.txt)
+  digita texto distinto nos três campos antes de gravar, e aí o `cmp` atribui
+  cada bloco ao seu campo. Resultado: **dez** blocos, com offset, tamanho e
+  conteúdo — 2 de `edit_nombre1`, 5 de `edit_nombre2` e 3 de `edit_nombre3`.
+
+  O estímulo não é novo: texto `A B-C.DEFG` e time 2, os mesmos do
+  `compara_tela.sh --nomes`, já medidos nos dois lados em 2026-08-12.
+
+  **Duas codificações, e o campo `modo` do registro escolhe.** Modo 1 é dois
+  bytes por caractere (`0x00403448` devolve o par em `0x00432eb4`/`0x00432eb8`;
+  caractere não reconhecido vira um espaço simples) — é o
+  `OFS_TEAM_NAME_KANJI_A`, onde `A BC.` ocupa 10 bytes. Modo 2 é um byte por
+  caractere. Nos dois o resto do comprimento vai a `0x00`, e o laço para no
+  comprimento do **registro**, nunca no fim do texto.
+
+  **Três exclusões dentro do laço, e nenhuma é validação de entrada.** Bloco
+  ausente na tabela; `edit_nombre1` começando com `?` pula **todos** os blocos
+  daquele campo (o `?` é o que a carga mostra quando não soube decodificar, e
+  regravá-lo destruiria o nome); e `edit_nombre2` bloco 3 com `ItemIndex >= 63`,
+  que é clube de Master League. É por isso que a tabela promete onze blocos e
+  a medição vê dez.
+
+  **Ele também mexe na tela, e não só na imagem:** remonta o rótulo do combo
+  (`IntToStr(idx)` alinhado à direita em três colunas, mais o texto de
+  `edit_nombre1`) e o escreve em `Items[idx]` de `lista_equipos_1` e
+  `lista_equipos_2`, guardando e repondo o `ItemIndex` — porque atribuir a
+  `Items[]` zera a seleção.
+
+- **O que esta passagem NÃO fez, e por quê:** o Pascal. A spec responde *o que*
+  e *onde* para o time medido; falta a regra geral que a carga usa para
+  preencher os 18 registros — offset e comprimento **por time** —, e o port
+  precisa reproduzi-la ou derivá-la do `we2002_core`. Isso está escrito na
+  própria spec, na seção "O que falta para escrever o Pascal": pelo gabarito,
+  spec que não basta para escrever o código está incompleta, e dizer isso é a
+  informação que ela existe para dar.
+
+- **Arquivos criados/modificados:**
+  - `wte/re/spec/MainForm.boton_nombres2isoClick.md` — veredito `aberto`
+  - `wte/tests/roteiros/27-nomes-editados.txt` — a sonda de atribuição
+  - `wte/re/io-medido.tsv`, `wte/re/cmp-medido.tsv` — a evidência da sessão
+  - `wte/re/offsets-novos.md`, `wte/re/spec/INDICE.md` — gerados
+  - `wte/tests/roteiros/README.md`, e esta task
+
+- **Gates medidos:** `make -C wte check` rc 0; `lazbuild` rc 0;
+  `spec_index.py` 58 com spec, 19 `implementado`. Nenhuma corrida de golden
+  nesta passagem — não há Pascal novo para julgar, e rodar o gate sobre código
+  inalterado mediria a passagem anterior. `roms/` intocada.
+
+- **Problemas encontrados:** nenhum.

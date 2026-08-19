@@ -45,8 +45,9 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-descarga-sem` | 9 | 9 | 9 |
 | `27-descarga-com` | 9 | 9 | 10 |
 | `27-barras-editada` | 10 | 10 | 10 |
+| `27-nomes-editados` | 19 | 19 | 19 |
 
-**As duas réguas fecham nas 9 sessões que escreveram.**
+**As duas réguas fecham nas 10 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.

@@ -202,6 +202,15 @@ Cada um tem `.port.txt` proprio, e a assimetria e uma so: o `Ok` do
 gerenciador de janela a moldura e desenhada DENTRO da janela X (3 px de borda,
 29 de titulo); sob gtk2 a janela E o cliente.
 
+O [`27-nomes-editados.txt`](27-nomes-editados.txt) e sonda de outra natureza:
+ele nao mede o buffer, mede ONDE cada campo grava. O
+`boton_nombres2iso` enche 18 registros (3 campos x 6 blocos) e manda gravar, e
+o trace so mostra fronteira de DESCARGA -- duas gravacoes vizinhas caem na
+mesma faixa. Digitar um texto distinto nos tres campos antes de gravar faz o
+`cmp` atribuir cada bloco ao seu campo, e foi assim que os dez blocos da spec
+do handler foram medidos. O texto e o time sao os do `compara_tela.sh --nomes`,
+ja medidos nos dois lados.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

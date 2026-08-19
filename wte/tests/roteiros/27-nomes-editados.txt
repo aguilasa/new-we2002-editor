@@ -1,0 +1,98 @@
+# 27-nomes-editados -- a SONDA que mede ONDE o `boton_nombres2iso` grava.
+#
+# WTE-TASK-27. Nao e roteiro de gate: e medicao. O handler enche 18 registros
+# (3 campos x 6 blocos) com offset e comprimento por time e manda gravar; o
+# trace so mostra a granularidade da DESCARGA do buffer, entao a unica regua
+# que separa bloco de bloco e o `cmp` depois de digitar um texto distinto em
+# cada um dos tres campos.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-nomes-editados.txt \
+#        --imagem roms/japanese-shift-jis.bin --saida /tmp/dd/nomes
+#
+# O texto e o `A B-C.DEFG` do `compara_tela.sh --nomes`, e o time e o 2, pela
+# mesma razao: os dois ja foram medidos nos dois lados em 2026-08-12, e inventar
+# estimulo novo refaria essa medicao de graca. Limpar com End/shift+Home/
+# BackSpace, NUNCA com ctrl+a -- num TEdit do Win32 o ctrl+a nao seleciona tudo.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- os tres nomes ----
+#
+# grupo_nombre (336,48) + edit_nombre1 (86,26) = (422,74). O `Return` encadeia
+# o foco para o campo seguinte; depois do terceiro nao ha para onde ir.
+! clique 422 74
+~ 2
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+= EDITA_NOMES
+
+# ------------------------------------------------------------- gravar ----
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+
+# A descarga -- sem ela os bytes ficam no buffer do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= GRAVA_NOMES
