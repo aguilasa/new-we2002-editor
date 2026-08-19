@@ -59,7 +59,7 @@ decrementam junto.
 | Arquivo | Ação |
 |---|---|
 | `wte/re/ml-slots.md` | criar — **gerado** |
-| `wte/re/ml-slots.tsv`, `wte/re/ml-slots-medido.tsv` | criar — gerado / medido |
+| `wte/re/ml-slots.tsv`, `wte/re/ml-slots-medido.tsv`, `wte/re/ml-slots-fora.tsv` | criar — gerado / medido / medido |
 | `wte/tools/conta_ml.py`, `wte/tools/test_conta_ml.py` | criar |
 | `wte/src/we2002_ml.pas` | criar |
 | `wte/src/we2002_ml_tabela.inc` | criar — **gerado** |
@@ -126,10 +126,18 @@ O [`crash-causa.md`](../../wte/re/crash-causa.md) mediu `0x004335e4`,
 não com a japonesa, e encerrou dizendo que nomear a instrução exigiria um
 watchpoint de hardware que esta máquina não permite. **A instrução é o
 `inc WORD PTR [eax*2+0x433224]` de `0x0040435d`**, desta rotina, e a condição é
-vínculo apontando para time sem NC nenhum: os índices 480, 512 e 514 caem
-exatamente naqueles três endereços. A mesma medição traz a confirmação
+vínculo apontando para time sem NC nenhum. A mesma medição traz a confirmação
 numérica de graça — ela leu o contador em `0x0000000d`, que é **13**, o mesmo
 que esta task calcula e o mesmo que o rótulo mostra.
+
+**Os índices alcançados são oito, e o modelo prevê um DWORD a mais do que o
+dump registrou.** A europeia alcança 480, 481, 488, 489 e 512..515 — quatro
+DWORDs, `0x004335e4`, `0x004335f4`, `0x00433624` e `0x00433628` —, e o dump ao
+vivo traz três: falta o `0x004335f4`. Fica como pergunta com nome no
+[`crash-causa.md`](../../wte/re/crash-causa.md), e a lista sai medida de
+[`ml-slots-fora.tsv`](../../wte/re/ml-slots-fora.tsv), não escrita à mão
+([CORR-WTE-066](/docs/tasks/CORR-WTE-066.md)). O índice 462, o do próprio
+contador, é alcançável em tese e **não** é alcançado por nenhuma das duas.
 
 ## Log de Execução
 
@@ -157,7 +165,8 @@ que esta task calcula e o mesmo que o rótulo mostra.
   - criados: `wte/tools/conta_ml.py`, `wte/tools/test_conta_ml.py`,
     `wte/src/we2002_ml.pas`, `wte/src/we2002_ml_tabela.inc` (gerado),
     `wte/tests/test_ml.pas`, `wte/re/ml-slots.md` (gerado),
-    `wte/re/ml-slots.tsv` (gerado), `wte/re/ml-slots-medido.tsv` (medido)
+    `wte/re/ml-slots.tsv` (gerado), `wte/re/ml-slots-medido.tsv` (medido),
+    `wte/re/ml-slots-fora.tsv` (medido, pela CORR-WTE-066)
   - modificados: `wte/src/impl/ep2002_mainform.aux.inc`,
     `ep2002_mainform.FormShow.inc`, `ep2002_mainform.boton_dialogo_weClick.inc`,
     `ep2002_mainform.uses`, `wte/src/ep2002_mainform.pas` (regerado),

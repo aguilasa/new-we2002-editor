@@ -3,7 +3,7 @@ id: CORR-WTE-066
 title: "Correção: a tabela de endereços atropelados lista um que nunca é alcançado e esconde o quarto"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -110,19 +110,58 @@ endereço a olhar.
 
 ## Verificação
 
-- [ ] `wte/re/ml-slots.md` lista os oito índices medidos, `0x004335f4`
+- [x] `wte/re/ml-slots.md` lista os oito índices medidos, `0x004335f4`
       inclusive, e não lista 462 como alcançado
-- [ ] `python3 wte/tools/conta_ml.py --check` verde
-- [ ] `cd wte/tools && python3 -m unittest test_conta_ml` verde
-- [ ] `make -C wte check` rc 0
-- [ ] `roms/` intocada
+- [x] `python3 wte/tools/conta_ml.py --check` verde
+- [x] `cd wte/tools && python3 -m unittest test_conta_ml` verde
+- [x] `make -C wte check` rc 0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-19
 
 **Resumo do que foi feito:**
 
+O `--medir` passou a escrever uma segunda medição, `wte/re/ml-slots-fora.tsv`,
+com uma linha por índice alcançado fora do vetor — imagem, índice, endereço, o
+par que o produziu, `b0` e `b1`. A tabela de endereços atropelados do
+`ml-slots.md` sai dela, e não mais literal do `gera_md()`: são os oito índices
+da europeia, `0x004335f4` inclusive. O índice 462 saiu da tabela e virou frase
+à parte — é o primeiro endereço depois do vetor e o alvo mais óbvio, e
+justamente por isso importa dizer que é **alcançável e não alcançado**.
+
+A divergência entre modelo e medição ao vivo ficou registrada nos dois lados: o
+gerador confronta os DWORDs medidos com a constante `CRASH_DWORDS` (os três que
+o `crash-causa.md` viu) e emite a seção "Pergunta aberta: `0x004335f4`"
+sozinho; o `crash-causa.md` ganhou o item correspondente em "O que não foi
+respondido", com os pares 267 e 269 que produzem o endereço, para quem refizer
+o dump saber onde olhar.
+
 **Problemas encontrados:**
 
+A medição de `work/ml-eu.bin` só vale para a pergunta se a cópia for fiel: o
+oráculo altera a imagem ao abri-la, e foi assim que a japonesa perdeu um bloco
+livre. Conferido por leitura pura — a região de vínculo (`OFS_LINK_ML`, 760
+pares mais folga de setor) é byte a byte igual à de `roms/golden-european-deluxe.bin`.
+Sem isso a divergência de quatro contra três poderia ser artefato da cópia.
+
+Não há dump de `.data` guardado em disco daquela sessão, então responder qual
+das duas hipóteses vale exigiria refazer a corrida sob Wine no `:99` — trabalho
+de outra invocação. Ficou como pergunta nomeada, que é o que a correção pedia.
+
+A varredura puxou dois sítios que a lista da CORR não previa: a
+`wte/tools/README.md`, que descrevia as saídas do `--medir`, e a WTE-TASK-33,
+que afirmava "os índices 480, 512 e 514 caem exatamente naqueles três
+endereços" — a mesma omissão do `0x004335f4`, em outro arquivo.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/conta_ml.py`
+- `wte/re/ml-slots-fora.tsv` (criado, via `--medir`; o
+  `ml-slots-medido.tsv` foi reescrito pela mesma corrida e saiu
+  byte a byte igual)
+- `wte/re/ml-slots.md` (via gerador)
+- `wte/re/crash-causa.md`
+- `wte/tools/README.md`
+- `docs/tasks/33-slots-de-master-league.md`

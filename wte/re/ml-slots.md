@@ -83,18 +83,45 @@ documenta no `ed.exe` (o slot 64 de um vetor de 63), e a que a
 WTE-TASK-33 mandou medir em vez de estimar.
 ## Escrita fora do vetor, e a causa do travamento da ROM europeia
 Quando `prefixo[b0] + b1 - 23` passa de 461, o `inc` escreve depois do
-fim da tabela. Os enderecos alcancados sao dados vivos:
-| indice | endereco | o que mora la |
-|---|---|---|
-| 462 | `0x004335c0` | o proprio contador |
-| 480 | `0x004335e4` | o ponteiro de time da rotina de realce |
-| 512, 514 | `0x00433624`, `0x00433628` | vizinhos do mesmo bloco |
-[`crash-causa.md`](crash-causa.md) mediu **exatamente** esses tres
-enderecos mudando de `0x0` para `0x00010001` com a ROM europeia, e nao
-mudando com a japonesa, e encerrou dizendo que nomear a instrucao
-exigiria um watchpoint de hardware. **A instrucao e o
+fim da tabela, em dados vivos. **A tabela abaixo e MEDIDA**, uma linha
+por indice que as imagens de fato alcancam -- sai de
+[`ml-slots-fora.tsv`](ml-slots-fora.tsv), que o `--medir` escreve junto
+com a contagem.
+| indice | endereco | par (time, slot) | imagem | o que mora la |
+|---:|---|---|---|---|
+| 480 | `0x004335e4` | 20, 189 | `ml-eu.bin` | o ponteiro de time da rotina de realce |
+| 481 | `0x004335e6` | 21, 190 | `ml-eu.bin` | a metade alta do mesmo DWORD |
+| 488 | `0x004335f4` | 43, 121 | `ml-eu.bin` | nao identificado |
+| 489 | `0x004335f6` | 43, 122 | `ml-eu.bin` | nao identificado |
+| 512 | `0x00433624` | 21, 221 | `ml-eu.bin` | vizinho do mesmo bloco |
+| 513 | `0x00433626` | 21, 222 | `ml-eu.bin` | vizinho do mesmo bloco |
+| 514 | `0x00433628` | 21, 223 | `ml-eu.bin` | vizinho do mesmo bloco |
+| 515 | `0x0043362a` | 21, 224 | `ml-eu.bin` | vizinho do mesmo bloco |
+Sao 4 DWORDs, que e a granularidade em que o
+[`crash-causa.md`](crash-causa.md) le a `.data`: `0x004335e4`,
+`0x004335f4`, `0x00433624`, `0x00433628`.
+O indice 462 -- `0x004335c0`, o proprio contador -- e o
+primeiro endereco depois do vetor, e por isso o alvo mais obvio. **Ele
+nao aparece acima**: e alcancavel em tese, e nao alcancado por nenhuma
+das duas imagens. A diferenca importa, porque atropelar o contador
+falsearia o proprio numero na tela, e nao e o que acontece.
+[`crash-causa.md`](crash-causa.md) mediu, ao vivo e com a ROM europeia,
+`0x004335e4`, `0x00433624`, `0x00433628` mudando de `0x0` para
+`0x00010001`, e nao mudando com a japonesa, e encerrou dizendo que
+nomear a instrucao exigiria um watchpoint de hardware. **A instrucao e o
 `inc WORD PTR [eax*2+0x433224]` de `0x0040435d`**, aqui, e a condicao e
 vinculo apontando para time sem NC nenhum.
+### Pergunta aberta: `0x004335f4`
+O modelo preve 4 DWORDs atropelados e a medicao ao vivo registrou 3.
+Falta `0x004335f4`, que esta na tabela acima com par e imagem, e nao
+aparece no dump daquela sessao.
+Duas hipoteses, nenhuma medida: o dump foi recortado ao ser
+transcrito -- ele ja elide 16 palavras contiguas --, ou o endereco
+nao chega a ser escrito ao vivo. **Refazendo o dump, e este o
+endereco a olhar.** Fica como pergunta com nome, e nao como
+silencio: a alternativa era a tabela de tres linhas que este
+gerador escrevia a mao, que nao fechava com o `fora do vetor` da
+medicao ao lado.
 A mesma medicao traz a confirmacao numerica de graca: ela leu
 `0x004335c0` indo a `0x0000000d` com a ROM europeia, e `0x0d` e
 **13** -- o mesmo que esta ferramenta calcula e o mesmo que o rotulo

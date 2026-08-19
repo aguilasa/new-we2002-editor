@@ -9,6 +9,12 @@ Gera `wte/re/ml-slots.md`, `wte/re/ml-slots.tsv` e o include Pascal
     python3 wte/tools/conta_ml.py --check          # o que `make -C wte check` roda
     python3 wte/tools/conta_ml.py --medir <copia>  # conta numa imagem
 
+O `--medir` escreve DUAS medicoes: `wte/re/ml-slots-medido.tsv`, uma linha por
+imagem, e `wte/re/ml-slots-fora.tsv`, uma linha por indice alcancado fora do
+vetor. A tabela de enderecos atropelados do markdown sai da segunda -- ja foi
+literal no gerador, e listava um endereco que nenhuma imagem alcanca enquanto
+escondia um que a europeia alcanca.
+
 ## O que e um bloco livre
 
 O proprio original responde, no `Hint` do controle que mostra o numero
@@ -81,6 +87,7 @@ OUT_MD = ROOT / "wte" / "re" / "ml-slots.md"
 OUT_TSV = ROOT / "wte" / "re" / "ml-slots.tsv"
 OUT_INC = ROOT / "wte" / "src" / "we2002_ml_tabela.inc"
 MEDIDO = ROOT / "wte" / "re" / "ml-slots-medido.tsv"
+FORA = ROOT / "wte" / "re" / "ml-slots-fora.tsv"
 
 # --- o que o disassembly diz, e onde ---------------------------------------
 VA_CONTAGEM = 0x00423424   # 120 DWORDs: NC por time
@@ -93,6 +100,25 @@ PAR_FILLER = 23            # o `cmp ebx,0x17 / je` de 0x0040432f
 SLOT_MIN = 23              # o `cmp esi,0x16 / jle` de 0x00404334
 MEMSET_BYTES = 462         # o `push 0x1ce` de 0x004042dd
 OFS_LINK_ML = 2012680
+
+# Os DWORDs que o `crash-causa.md` viu indo de `0x0` para `0x00010001` ao vivo,
+# com a ROM europeia, em 2026-08-11. Ficam aqui para o gerador CONFRONTAR o
+# modelo com a medicao de processo, em vez de o markdown afirmar que os dois
+# concordam -- eles nao concordam, e a diferenca e o `0x004335f4`.
+CRASH_DWORDS = (0x004335E4, 0x00433624, 0x00433628)
+
+# O que se sabe morar em cada endereco atropelado. So o que TEM fonte: o
+# `0x004335e4` e o global da rotina de realce (`crash-causa.md`, pergunta 3);
+# os dois do bloco de `0x0043362x` sao vizinhos dele na mesma faixa de `.data`.
+# O resto sai "nao identificado" em vez de ganhar rotulo inventado.
+MORA = {
+    0x004335E4: "o ponteiro de time da rotina de realce",
+    0x004335E6: "a metade alta do mesmo DWORD",
+    0x00433624: "vizinho do mesmo bloco",
+    0x00433626: "vizinho do mesmo bloco",
+    0x00433628: "vizinho do mesmo bloco",
+    0x0043362A: "vizinho do mesmo bloco",
+}
 
 SETOR = 2352
 DADOS_INICIO = 24
@@ -267,6 +293,20 @@ def linhas_medidas() -> list[list[str]]:
     return saida
 
 
+def enche(texto: str) -> str:
+    """Paragrafo com quebra em 72, sem partir `nome-com-hifen` em crase."""
+    return textwrap.fill(texto, width=72, break_on_hyphens=False,
+                         break_long_words=False)
+
+
+def linhas_fora() -> list[list[str]]:
+    """Um indice alcancado por linha, como o `--medir` os escreveu."""
+    if not FORA.is_file():
+        return []
+    linhas = FORA.read_text(encoding="utf-8").splitlines()
+    return [ln.split("\t") for ln in linhas[1:] if ln.strip()]
+
+
 def gera_tsv(contagem: list[int], pref: list[int], core: list[int]) -> str:
     saida = ["time\tnc\tprefixo_wte\tstart_link_core\tconcorda"]
     for t in range(TIMES):
@@ -304,6 +344,7 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
     palavras = (VA_CONTADOR - VA_OCUPACAO) // 2
     limpas = MEMSET_BYTES // 2
     med = linhas_medidas()
+    fora_med = linhas_fora()
 
     out: list[str] = []
     w = out.append
@@ -396,17 +437,54 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
 
     w("## Escrita fora do vetor, e a causa do travamento da ROM europeia\n")
     w("Quando `prefixo[b0] + b1 - 23` passa de 461, o `inc` escreve depois do\n"
-      "fim da tabela. Os enderecos alcancados sao dados vivos:\n")
-    w("| indice | endereco | o que mora la |\n|---|---|---|\n"
-      f"| {palavras} | `{VA_CONTADOR:#010x}` | o proprio contador |\n"
-      "| 480 | `0x004335e4` | o ponteiro de time da rotina de realce |\n"
-      "| 512, 514 | `0x00433624`, `0x00433628` | vizinhos do mesmo bloco |\n")
-    w("[`crash-causa.md`](crash-causa.md) mediu **exatamente** esses tres\n"
-      "enderecos mudando de `0x0` para `0x00010001` com a ROM europeia, e nao\n"
-      "mudando com a japonesa, e encerrou dizendo que nomear a instrucao\n"
-      "exigiria um watchpoint de hardware. **A instrucao e o\n"
-      "`inc WORD PTR [eax*2+0x433224]` de `0x0040435d`**, aqui, e a condicao e\n"
-      "vinculo apontando para time sem NC nenhum.\n")
+      "fim da tabela, em dados vivos. **A tabela abaixo e MEDIDA**, uma linha\n"
+      "por indice que as imagens de fato alcancam -- sai de\n"
+      "[`ml-slots-fora.tsv`](ml-slots-fora.tsv), que o `--medir` escreve junto\n"
+      "com a contagem.\n")
+    if fora_med:
+        w("| indice | endereco | par (time, slot) | imagem | o que mora la |\n"
+          "|---:|---|---|---|---|\n")
+        for r in sorted(fora_med, key=lambda x: (int(x[1]), x[0])):
+            mora = MORA.get(int(r[2], 16), "nao identificado")
+            w(f"| {r[1]} | `{r[2]}` | {r[4]}, {r[5]} | `{r[0]}` | {mora} |\n")
+        dwords = sorted({int(r[2], 16) & ~3 for r in fora_med})
+        ausentes = [d for d in dwords if d not in CRASH_DWORDS]
+        w(enche(
+            f"Sao {len(dwords)} DWORDs, que e a granularidade em que o "
+            "[`crash-causa.md`](crash-causa.md) le a `.data`: "
+            + ", ".join(f"`{d:#010x}`" for d in dwords) + ".") + "\n")
+    else:
+        w("**Sem medicao**: rode `--medir` sobre copias das duas imagens.\n")
+    w(f"O indice {palavras} -- `{VA_CONTADOR:#010x}`, o proprio contador -- e o\n"
+      "primeiro endereco depois do vetor, e por isso o alvo mais obvio. **Ele\n"
+      "nao aparece acima**: e alcancavel em tese, e nao alcancado por nenhuma\n"
+      "das duas imagens. A diferenca importa, porque atropelar o contador\n"
+      "falsearia o proprio numero na tela, e nao e o que acontece.\n")
+    w(enche(
+        "[`crash-causa.md`](crash-causa.md) mediu, ao vivo e com a ROM "
+        "europeia, " + ", ".join(f"`{d:#010x}`" for d in CRASH_DWORDS)
+        + " mudando de `0x0` para `0x00010001`, e nao mudando com a japonesa, "
+        "e encerrou dizendo que nomear a instrucao exigiria um watchpoint de "
+        "hardware. **A instrucao e o `inc WORD PTR [eax*2+0x433224]` de "
+        "`0x0040435d`**, aqui, e a condicao e vinculo apontando para time sem "
+        "NC nenhum.") + "\n")
+    if fora_med and ausentes:
+        w("### Pergunta aberta: "
+          + ", ".join(f"`{d:#010x}`" for d in ausentes)
+          + "\n")
+        w(enche(
+            f"O modelo preve {len(dwords)} DWORDs atropelados e a medicao ao "
+            f"vivo registrou {len(CRASH_DWORDS)}. Falta "
+            + ", ".join(f"`{d:#010x}`" for d in ausentes)
+            + ", que esta na tabela acima com par e imagem, e nao aparece no "
+            "dump daquela sessao.") + "\n")
+        w("Duas hipoteses, nenhuma medida: o dump foi recortado ao ser\n"
+          "transcrito -- ele ja elide 16 palavras contiguas --, ou o endereco\n"
+          "nao chega a ser escrito ao vivo. **Refazendo o dump, e este o\n"
+          "endereco a olhar.** Fica como pergunta com nome, e nao como\n"
+          "silencio: a alternativa era a tabela de tres linhas que este\n"
+          "gerador escrevia a mao, que nao fechava com o `fora do vetor` da\n"
+          "medicao ao lado.\n")
     w("A mesma medicao traz a confirmacao numerica de graca: ela leu\n"
       f"`{VA_CONTADOR:#010x}` indo a `0x0000000d` com a ROM europeia, e "
       "`0x0d` e\n"
@@ -435,15 +513,14 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
             lista = ", ".join(f"{v} em `{n}`" for n, v in sorted(
                 vistos, key=lambda x: -x[1]))
             w(f"### O ramo `b0 >= {TIMES}`, que nenhuma das duas alcanca\n")
-            w(textwrap.fill(
+            w(enche(
                 f"A `0x0040423c` soma `[{VA_CONTAGEM:#010x} + 4*t]` para todo "
                 f"`t < b0`. Com `b0 >= {TIMES}` ela le alem do fim da tabela "
                 f"de {TIMES}, e a soma passa a depender do que a `.data` "
                 "guarda depois dela -- lixo. **O port nao modela esse ramo**, "
                 "e a justificativa e medida, nao afirmada: o maior `b0` visto "
                 f"e **{maior}** ({lista}), o que deixa {TIMES - maior} de "
-                f"folga ate o teto de {TIMES}.", width=72,
-                break_on_hyphens=False, break_long_words=False) + "\n")
+                f"folga ate o teto de {TIMES}.") + "\n")
             w("O numero sai da coluna `maior b0` da tabela acima, escrita pelo\n"
               "`--medir` sobre as mesmas copias -- entra no perimetro do\n"
               "`--check` e nao pode envelhecer sozinho. Ele conta so os pares\n"
@@ -538,6 +615,10 @@ def do_medir(caminhos: list[str]) -> int:
     pref = prefixos(contagem)
     linhas = ["imagem\tbytes\tproprios\tdistintos\tlivres\tfora_do_vetor\t"
               "tela_oraculo\ttela_port\tmax_b0"]
+    # Um indice por linha, e nao uma coluna com lista dentro: quem alcanca o
+    # que fora do vetor e a tabela que o markdown desenha, e lista espremida
+    # numa celula de TSV volta a ser texto para parsear.
+    fora_linhas = ["imagem\tindice\tendereco\tpar\tb0\tb1"]
     for c in caminhos:
         # `<copia>[=<tela_oraculo>/<tela_port>]` -- o que o rotulo
         # `casilla_xmlibres` mostrou de cada lado com ESTE conteudo. E
@@ -571,12 +652,19 @@ def do_medir(caminhos: list[str]) -> int:
         for i in sorted(r["fora"]):
             print(f"      fora: indice {i} -> {VA_OCUPACAO + 2 * i:#010x} "
                   f"pares {r['fora'][i]}")
+            for par, b0, b1 in r["fora"][i]:
+                fora_linhas.append(
+                    f"{p.name}\t{i}\t{VA_OCUPACAO + 2 * i:#010x}\t{par}\t"
+                    f"{b0}\t{b1}")
         if r["nao_modelado"]:
             print(f"      AVISO: {len(r['nao_modelado'])} pares com b0 >= "
                   f"{TIMES} -- fora do que a tabela define, nao contados: "
                   f"{r['nao_modelado'][:4]}")
     MEDIDO.write_text("\n".join(linhas) + "\n", encoding="utf-8", newline="\n")
     print(f"  {MEDIDO.relative_to(ROOT)}: {len(linhas) - 1} imagens")
+    FORA.write_text("\n".join(fora_linhas) + "\n", encoding="utf-8",
+                    newline="\n")
+    print(f"  {FORA.relative_to(ROOT)}: {len(fora_linhas) - 1} indices")
     return 0
 
 

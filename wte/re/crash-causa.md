@@ -188,6 +188,18 @@ carga do time (WTE-TASK-25): a tabela de `0x00433580` e o contador de
 `0x004335c0` são estrutura de dados do handler, e o port não deve reproduzir o
 estouro.
 
+**Se `0x004335f4` é escrito ao vivo.** A WTE-TASK-33 modelou a rotina que faz o
+estouro — a `0x004042d4`, com o `inc WORD PTR [eax*2+0x433224]` de
+`0x0040435d` — e mediu, sobre cópia da mesma ROM europeia, **quatro** DWORDs
+alcançados: `0x004335e4`, `0x004335f4`, `0x00433624` e `0x00433628`
+([`ml-slots.md`](ml-slots.md), a tabela sai de
+[`ml-slots-fora.tsv`](ml-slots-fora.tsv)). O dump acima traz **três** — o
+`0x004335f4` não aparece. As duas hipóteses, nenhuma medida: o dump foi
+recortado ao ser transcrito (ele já elide 16 palavras contíguas), ou o endereço
+não chega a ser escrito ao vivo. **Refazendo esta sessão, é esse o endereço a
+olhar**; os pares que o produzem são o 267 e o 269 da região de vínculo, time
+43, slots 121 e 122. Aberta pela CORR-WTE-066.
+
 ## Uma nota sobre a contagem de violações
 
 O [`crash.md`](crash.md) registra **309** violações na sessão
