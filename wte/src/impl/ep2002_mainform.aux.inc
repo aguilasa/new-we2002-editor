@@ -294,6 +294,22 @@ const
   { Offset ABSOLUTO, nao logico -- o ramo de ML nao passa pelo fluxo. }
   NUMERO_ML_BASE = $1EB797;
 
+  { As tres colunas de offset do registro de jogador -- `0x00404374`, ramo de
+    selecao. Insumo do `GravaJogador`; ver `OffsetsDoJogador`.
+
+    Os dois primeiros sao LOGICOS, o terceiro e ABSOLUTO. `NOME_JOGADOR_LOGICO`
+    no time 0 slot 0 da `OFS_PLAYER_NAME` = 387792, e `ATRIBUTO_LOGICO` da
+    `OFS_PLAYER_ATTR` = 2179492 -- os dois nomes do `we2002_core`. }
+  NOME_JOGADOR_SETOR  = 24;
+  NOME_JOGADOR_LOGICO = $467F8;
+  ATRIBUTO_LOGICO     = $265EC;
+  CONDICIONAL_BASE    = 3067404;
+
+  { O que o original grava no lugar do condicional, para os times 54 e 55: o
+    nome numa segunda regiao e o par de identidade. Os dois absolutos. }
+  NOME_JOGADOR_2_BASE = 390432;
+  VINCULO_BASE        = 2326480;
+
 type
   TBlocoDeNome = record
     offset: TOffset;
@@ -926,26 +942,86 @@ begin
   end;
 end;
 
-{ GravaJogador -- 0x00404820, 1459 bytes. METADE ESCRITA, METADE DA WTE-TASK-27.
+{ O `GravaJogador` chama a gravacao pontual do numero, que mora mais abaixo --
+  o time 48 guarda o numero dentro do registro de atributos. }
+procedure GravaNumeroDaCamisa(numero, indice, slot: Integer); forward;
+
+{ Leva o jogador gravado para o modelo em memoria.
+
+  Mesma divergencia declarada das barras e do numero: o `wte.exe` rele a imagem
+  a cada troca de time, o port carrega uma vez. }
+procedure GuardaJogadorNoModelo(origem, indice, slot: Integer);
+var
+  k, b: LongInt;
+begin
+  k := IndiceDoJogador(indice, slot);
+  if (k < 0) or (k >= Length(Jogo.players)) then
+    Exit;
+  for b := 0 to 9 do
+    Jogo.players[k].name[b] := BufferJogador[origem].nome[b];
+  for b := 0 to 11 do
+    Jogo.players[k].raw_attributes[b] := BufferJogador[origem].atributos[b];
+  if not (indice in TIMES_SEM_CONDICIONAL) then
+    Jogo.players[k].cost := BufferJogador[origem].condicional;
+end;
+
+{ GravaJogador -- 0x00404820, 1459 bytes. DESTINO DE SELECAO PORTADO.
 
   O que esta aqui e a metade que decide: prepara o buffer 0 com a identidade
   do DESTINO e recusa com -2 quando ela bate com a do buffer de origem. A
   regra tem uma valvula, e ela e do original: `IgnoraJogadorRepetido`.
 
-  O QUE NAO ESTA AQUI, e o dono esta nomeado: a gravacao. A rotina do original
-  escreve os 10 bytes de nome, os 12 de atributos e o byte condicional no
-  destino, direto no arquivo (`0x00403400`), mais o numero de camisa quando o
-  slot e o 48 (`0x00404048`); e, quando o destino e um clube de ML sem bloco
-  proprio, aloca um bloco livre, atualiza a tabela de vinculos e decrementa o
-  contador -- e dai sai o outro codigo de recusa, `-1`, quando nao ha bloco.
-  Isso e escrita na imagem, e a WTE-TASK-27 e a unica com gate por byte;
-  escrever aqui devolveria duas causas possiveis a cada golden vermelho, que e
-  o que a separacao entre a 26 e a 27 existe para evitar.
+  A GRAVACAO chegou na WTE-TASK-27 (2026-08-19), para destino de SELECAO: 10
+  bytes de nome, 12 de atributos e o byte condicional, todos pelo fluxo
+  (`0x00403400`). Duas particularidades, e as duas so aparecem lendo o
+  disassembly:
 
-  Consequencia, aceita e registrada (opcao A da decisao de 2026-08-12): os
-  handlers de mover ficam com veredito `aberto` ate a 27, como o
-  `dorsalClick`. }
+  1. **O time 48 le o numero de camisa ANTES e o regrava DEPOIS.** Ele guarda o
+     numero dentro do registro de atributos, e a gravacao dos 12 bytes passaria
+     por cima. A ordem do original nao e estilo -- e correcao.
+  2. **Times 54 e 55 nao tem campo condicional**, e no lugar dele o original
+     grava outras duas coisas: o nome de novo, numa segunda regiao, e o par de
+     identidade `(time, slot)`. O par vai por `fseek`/`fputc` crus, sem fluxo.
+
+  O QUE AINDA NAO ESTA AQUI, e e lacuna DECLARADA: **destino de Master
+  League**. O ramo do original aloca um bloco livre, atualiza a tabela de
+  vinculos e decrementa o contador `0x004335c0` -- que e a
+  [WTE-TASK-33] quem calcula --, e dai sai o outro codigo de recusa, `-1`.
+  Gravar meio bloco seria pior do que nao gravar: aqui a rotina sai sem tocar
+  em byte nenhum quando o destino nao e selecao. }
+{ As TRES colunas de offset do registro de buffer -- `+0x1c`, `+0x20`, `+0x28`
+  do `0x00404374`, para destino de SELECAO.
+
+  A WTE-TASK-25 as deixou de fora de proposito: naquele momento so a leitura
+  importava, e a leitura vem da camada de dados. A gravacao precisa delas, e
+  elas nao sao derivaveis do `Jogo` -- sao aritmetica sobre a imagem.
+
+  Duas sao logicas (passam por `EnderecoDeDados`) e a terceira e ABSOLUTA. O
+  `condicional` sai ZERO para os times 54 e 55, que e o mesmo furo que o
+  `we2002_database.pas` pula ao carregar `cost` -- e ai o original grava noutro
+  lugar, ver `GravaJogador`.
+
+  Conferencia: para o time 2, slot 0, o condicional da **3067450**, que e
+  exatamente a sexta leitura que o `0x0040f150` faz ao montar o cartao. }
+procedure OffsetsDoJogador(indice, slot: Integer;
+                           out nome, atributos, condicional: TOffset);
+begin
+  nome := EnderecoDeDados(NOME_JOGADOR_SETOR,
+            NOME_JOGADOR_LOGICO + 230 * indice + 10 * slot);
+  atributos := EnderecoDeDados(SETOR_BASE_DADOS,
+            ATRIBUTO_LOGICO + 276 * indice + 12 * slot);
+  if indice in TIMES_SEM_CONDICIONAL then
+    condicional := 0
+  else
+    condicional := CONDICIONAL_BASE + 23 * indice + 2 * (indice div 56) + slot;
+end;
+
 function GravaJogador(origem, indice, slot: Integer): Integer;
+var
+  img: TCdImage;
+  off_nome, off_attr, off_cond: TOffset;
+  numero: Integer;
+  b: Byte;
 begin
   Result := COD_GRAVOU;
   if (origem < BUF_DESTINO) or (origem > BUF_ULTIMO) then
@@ -959,8 +1035,56 @@ begin
     Result := COD_MESMO_JOGADOR;
     Exit;
   end;
-  { A GRAVACAO E DA WTE-TASK-27 -- ver o cabecalho. Ate la o retorno e o do
-    caminho feliz, e nenhum byte da imagem muda. }
+
+  { DESTINO DE MASTER LEAGUE AINDA NAO GRAVA -- ver o cabecalho. O ramo do
+    original aloca bloco livre, mexe na tabela de vinculos e decrementa o
+    contador `0x004335c0`, que e a WTE-TASK-33 quem calcula. Sair aqui e a
+    lacuna DECLARADA; o que nao se pode e gravar meio bloco. }
+  if BufferJogador[BUF_DESTINO].tipo <> TIPO_NACIONAL then
+    Exit;
+
+  if (ImagemAberta = '') or (indice < 0) or (slot < 0) then
+    Exit;
+  OffsetsDoJogador(indice, slot, off_nome, off_attr, off_cond);
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    { O time 48 guarda o numero de camisa DENTRO do registro de atributos, e a
+      gravacao abaixo passa por cima dele. O original le o numero ANTES e o
+      regrava DEPOIS -- ordem que so faz sentido sabendo disso. }
+    numero := 0;
+    if indice = NUMERO_TIME_ALL_STAR then
+      numero := NumeroDaCamisa(indice, slot);
+
+    GravaNoFluxo(img, off_nome, BufferJogador[origem].nome[0], 10);
+    GravaNoFluxo(img, off_attr, BufferJogador[origem].atributos[0], 12);
+
+    if off_cond <> 0 then
+      GravaNoFluxo(img, off_cond, BufferJogador[origem].condicional, 1)
+    else
+    begin
+      { Times 54 e 55: sem campo condicional, e o original grava OUTRAS duas
+        coisas no lugar -- o nome de novo, numa segunda regiao, e o par de
+        identidade `(time, slot)`. O par vai por `fseek`/`fputc` crus, sem
+        fluxo, como o ramo de ML do numero de camisa. }
+      GravaNoFluxo(img, NOME_JOGADOR_2_BASE + 230 * indice + 10 * slot,
+                   BufferJogador[origem].nome[0], 10);
+      img.Seek(VINCULO_BASE + 46 * indice + 2 * slot, soBeginning);
+      b := Byte(indice);
+      img.Write(b, 1);
+      b := Byte(slot);
+      img.Write(b, 1);
+    end;
+  finally
+    img.Close;
+  end;
+
+  if indice = NUMERO_TIME_ALL_STAR then
+    GravaNumeroDaCamisa(numero, indice, slot);
+
+  GuardaJogadorNoModelo(origem, indice, slot);
 end;
 
 { RepovoaAsDuasListas -- 0x0040b934, 181 bytes.

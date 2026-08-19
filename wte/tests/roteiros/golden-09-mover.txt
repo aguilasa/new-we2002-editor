@@ -1,0 +1,99 @@
+# golden-09-mover -- o gate do `paderechaClick`, e com ele o da metade de
+# escrita que os oito handlers de mover compartilham.
+#
+# WTE-TASK-27, lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-09-mover.txt \
+#        --roteiro-port wte/tests/roteiros/golden-09-mover.port.txt
+#
+# O `paderecha` e um dos quatro botoes de mover um jogador so, e os quatro
+# compartilham o mesmo corpo (`MoveUmJogador`) e a mesma rotina de gravacao
+# (`0x00404820`). Exercitar um exercita a rotina; o que muda entre eles e qual
+# lado e a origem.
+#
+# QUATRO COMBOS PRECISAM ESTAR PREENCHIDOS antes de o botao fazer alguma coisa
+# -- time e jogador dos DOIS lados --, e a guarda le o `ItemIndex` do jogador
+# de DESTINO antes de qualquer outra coisa. Por isso o roteiro escolhe a
+# direita primeiro.
+#
+# Medido: o destino desta sequencia e o time 1, slot 1. O oraculo grava 10
+# bytes de nome em 388336 e 12 de atributos em 2179780 -- exatamente onde as
+# duas formulas do `0x00404374` preveem. O `cmp` ve menos (4 e 10), porque o
+# resto ja era igual.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------- o time da esquerda ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# -------------------------------------------------------- o lado direito ----
+#
+# lista_equipos_2 (368,360) -> (420,370); lista_jugadores_2 fica dentro do
+# GroupBox1 (8,320), em (336,72) -> absoluto (344,392) -> (400,402).
+! clique 420 370
+~ 1
+! tecla Down
+! tecla Down
+~ 5
+= TIME_DIREITA
+
+! clique 400 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+# ------------------------------------------------------- o lado esquerdo ----
+#
+# lista_jugadores_1 (40,72) + GroupBox1 = (48,392) -> (100,402).
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+# ------------------------------------------------------------- mover ----
+#
+# paderecha (208,72) + GroupBox1 = (216,392), 25x21 -> centro (228,402).
+! clique 228 402
+~ 4
+= MOVE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

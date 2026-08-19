@@ -1,0 +1,86 @@
+# 27-mover -- a SONDA do `paderechaClick`, e com ele da metade de escrita que
+# os oito handlers de mover compartilham (`0x00404820`).
+#
+# WTE-TASK-27.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-mover.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# Medido: o destino desta sequencia e o time 1, slot 1 -- 10 bytes de nome em
+# 388336 e 12 de atributos em 2179780, exatamente onde as duas formulas do
+# `0x00404374` preveem. O `cmp` ve menos (4 e 10), porque o resto ja era igual;
+# e a mesma cegueira que o `gravacao_controle.py` descreve entre `escreveu` e
+# `mudou`.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------- o time da esquerda ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# -------------------------------------------------------- o lado direito ----
+#
+# lista_equipos_2 (368,360) -> (420,370); lista_jugadores_2 fica dentro do
+# GroupBox1 (8,320), em (336,72) -> absoluto (344,392) -> (400,402).
+! clique 420 370
+~ 1
+! tecla Down
+! tecla Down
+~ 5
+= TIME_DIREITA
+
+! clique 400 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+# ------------------------------------------------------- o lado esquerdo ----
+#
+# lista_jugadores_1 (40,72) + GroupBox1 = (48,392) -> (100,402).
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+# ------------------------------------------------------------- mover ----
+#
+# paderecha (208,72) + GroupBox1 = (216,392), 25x21 -> centro (228,402).
+! clique 228 402
+~ 4
+= MOVE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

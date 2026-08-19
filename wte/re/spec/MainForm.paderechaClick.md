@@ -173,11 +173,19 @@ quem levar isso à imagem tem de responder antes.
 
 O Pascal está escrito
 ([`../../src/impl/ep2002_mainform.paderechaClick.inc`](../../src/impl/ep2002_mainform.paderechaClick.inc))
-e faz tudo **menos a gravação**, que é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) — opção A da
-decisão de 2026-08-12, registrada no enunciado da 26. Sem ela o handler não
-muda a lista de destino, então a régua de tela (`compara_tela.sh --edicao`) não
-tem o que medir aqui; ela volta a valer quando a 27 fechar o par.
+e a gravação chegou na
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) em 2026-08-19 —
+**para destino de seleção**, com golden verde
+([`golden-09-mover`](../../tests/roteiros/golden-09-mover.txt)). A opção A da
+decisão de 2026-08-12 fechou por metade.
+
+**O que falta é o ramo de destino de Master League da `0x00404820`**, e a
+lacuna é declarada, não silenciosa: a rotina sai sem tocar em byte nenhum
+quando o destino não é seleção. O ramo do original aloca um bloco livre,
+atualiza a tabela de vínculos e decrementa o contador `0x004335c0` — que é a
+[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) quem calcula —,
+e é dele que sai o outro código de recusa, `-1`. Gravar meio bloco seria pior
+do que não gravar.
 
 **Divergências deliberadas do port**
 ([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):

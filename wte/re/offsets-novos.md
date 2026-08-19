@@ -49,8 +49,9 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-textura` | 36 | 36 | 29 |
 | `27-mcr` | 9 | 9 | 9 |
 | `27-dorsal-editado` | 10 | 10 | 10 |
+| `27-mover` | 11 | 11 | 12 |
 
-**As duas réguas fecham nas 13 sessões que escreveram.**
+**As duas réguas fecham nas 14 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.

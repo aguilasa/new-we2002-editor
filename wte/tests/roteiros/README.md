@@ -268,6 +268,18 @@ busca por tamanho sao exatamente os que trocam o Caption por nome de jogador ou
 de time, o `janela_geo` passou a enumerar por `--pid` quando ha filtro de
 processo, caindo no nome so quando nao ha.
 
+O par [`27-mover.txt`](27-mover.txt) / [`golden-09-mover.txt`](golden-09-mover.txt)
+mede a metade de escrita que os OITO handlers de mover compartilham
+(`0x00404820`). Os quatro botoes de mover um jogador so tem o mesmo corpo e a
+mesma rotina de gravacao -- exercitar um exercita a rotina; o que muda entre eles
+e qual lado e a origem.
+
+Ele e o unico roteiro do gate que precisa de **quatro combos preenchidos**: o
+`paderecha` nao faz nada sem time e jogador dos dois lados, e a guarda le o
+`ItemIndex` do jogador de DESTINO antes de qualquer outra coisa -- por isso a
+direita vem primeiro. Medido: o destino da sequencia e o time 1, slot 1, com 10
+bytes de nome em 388336 e 12 de atributos em 2179780.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

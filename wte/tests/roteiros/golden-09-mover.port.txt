@@ -1,0 +1,50 @@
+# golden-09-mover, lado PORT. Par de golden-09-mover.txt.
+#
+# Uma assimetria so: a imagem vem da linha de comando. Nao ha dialogo nem modal
+# nesta sequencia, entao as coordenadas do MainForm sao as mesmas dos dois
+# lados.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 420 370
+~ 1
+! tecla Down
+! tecla Down
+~ 4
+= TIME_DIREITA
+
+! clique 400 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+! clique 228 402
+~ 4
+= MOVE
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

@@ -167,8 +167,14 @@ um campo de tela.
       número na imagem e o `.mcr`, que lê os 23 `dorsalN` da tela. O número é o
       único campo do cartão que não vem do disco nem do molde
 - [ ] **Os oito handlers de mover promovidos** — a outra metade da opção A da
-      WTE-TASK-26. A metade de escrita deles é a `0x00404820`, e enquanto ela
-      não existir os oito ficam `aberto` com dono nomeado aqui
+      WTE-TASK-26. A metade de escrita deles é a `0x00404820`, e ela fechou
+      **para destino de seleção** em 2026-08-19, com golden verde
+      ([`golden-09-mover`](../../wte/tests/roteiros/golden-09-mover.txt)).
+      Falta o ramo de **destino de Master League**: alocar bloco livre,
+      atualizar a tabela de vínculos e decrementar o contador `0x004335c0`, que
+      é a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) quem calcula.
+      Enquanto isso a rotina sai sem tocar em byte nenhum quando o destino não é
+      seleção — lacuna declarada, não silenciosa
 - [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-19,
       **114 faixas conferidas em 8 sessões**, nenhuma tocando byte de EDC/ECC
       nem de cabeçalho de setor. A conta é do
@@ -840,3 +846,93 @@ um campo de tela.
 - **Problemas encontrados:** os dois do driver, acima. Mais um de higiene: uma
   sonda manual deixou o port aberto no `:99` e a guarda 2 do `golden_check.sh`
   recusou começar — que é exatamente para isso que ela existe.
+
+---
+
+- **Executado em:** 2026-08-19 — **oitava passagem.** A metade de escrita dos
+  oito handlers de mover fechou **para destino de seleção**, com golden verde. A
+  task continua `⬜ Pendente` por um ramo: destino de Master League.
+
+- **Resumo do que foi feito:**
+
+  **A `0x00404820` tem três destinos, e só um deles cabia nesta passagem.** O
+  ramo de seleção está portado e medido; o de Master League aloca bloco livre,
+  mexe na tabela de vínculos e decrementa o contador `0x004335c0` — que é a
+  WTE-TASK-33 quem calcula. Gravar meio bloco seria pior do que não gravar,
+  então a rotina **sai sem tocar em byte nenhum** quando o destino não é
+  seleção. Lacuna declarada, com dono, e não silêncio.
+
+  **As três colunas de offset do registro de buffer voltaram do exílio.** A
+  WTE-TASK-25 as deixou de fora de propósito — naquele momento só a leitura
+  importava, e leitura vem da camada de dados. A gravação precisa delas, e elas
+  não são deriváveis do `Jogo`:
+
+  | coluna | fórmula | tipo |
+  |---|---|---|
+  | nome | `EnderecoDeDados(24, $467F8 + 230·time + 10·slot)` | lógico |
+  | atributos | `EnderecoDeDados(850, $265EC + 276·time + 12·slot)` | lógico |
+  | condicional | `3067404 + 23·time + 2·(time div 56) + slot` | **absoluto** |
+
+  As duas primeiras dão `OFS_PLAYER_NAME` e `OFS_PLAYER_ATTR` no time 0 slot 0.
+  A terceira se confere de outro jeito, e é a conferência mais bonita desta
+  passagem: para o time 2 slot 0 ela dá **3067450**, que é exatamente a sexta
+  leitura que o `0x0040f150` faz ao montar o cartão — medida três passagens
+  atrás sem se saber de quem era.
+
+  **Duas particularidades que só aparecem lendo o disassembly, e as duas são
+  correção e não estilo:**
+
+  1. **O time 48 lê o número de camisa ANTES e o regrava DEPOIS.** Ele guarda o
+     número dentro do registro de atributos, e a gravação dos 12 bytes passaria
+     por cima. A ordem do original existe por isso.
+  2. **Os times 54 e 55 não têm campo condicional**, e no lugar dele o original
+     grava outras duas coisas: o nome de novo, numa segunda região (390432), e
+     o par de identidade `(time, slot)` em 2326480 — este por `fseek`/`fputc`
+     crus, sem fluxo, como o ramo de ML do número de camisa.
+
+  **O gate precisou de quatro combos preenchidos.** O `paderecha` não faz nada
+  sem time e jogador dos **dois** lados, e a guarda lê o `ItemIndex` do jogador
+  de destino antes de qualquer outra coisa — por isso o roteiro escolhe a
+  direita primeiro. Medido: o destino da sequência é o **time 1, slot 1**, e o
+  oráculo grava 10 bytes de nome em 388336 e 12 de atributos em 2179780, onde as
+  duas fórmulas prevêem. O `cmp` vê menos — 4 e 10 —, porque o resto já era
+  igual; a mesma cegueira que o `gravacao_controle.py` descreve.
+
+  Os quatro botões de mover um jogador só compartilham corpo (`MoveUmJogador`) e
+  rotina de gravação. Exercitar um exercita a rotina; o que muda entre eles é
+  qual lado é a origem.
+
+  **A conta de EDC/ECC absorveu a sonda nova sozinha**, que era o ponto de
+  enumerar as sessões pelo prefixo `27-` em vez de listá-las: passou de 114
+  faixas em 8 sessões para **125 em 9**, sem tocar no gerador.
+
+- **O que esta passagem NÃO fez:**
+  - o ramo de destino de Master League da `0x00404820`. É o último item aberto
+    desta task, e o único que depende de outra (a 33, pelo contador);
+  - os oito continuam `aberto`. O corpo deles está completo e gated para destino
+    de seleção; promover com um ramo faltando seria afirmar mais do que se fez.
+    A spec do `paderechaClick` traz o veredito estreitado; as outras sete
+    continuam apontando para cá, o que segue verdadeiro.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `OffsetsDoJogador`,
+    `GuardaJogadorNoModelo`, o corpo de gravação do `GravaJogador` e as seis
+    constantes das três colunas
+  - `wte/tests/roteiros/27-mover.txt`, `golden-09-mover{,.port}.txt`
+  - `wte/re/spec/MainForm.paderechaClick.md` — veredito estreitado
+  - `wte/re/gravacao-controle.md`, `wte/re/offsets-novos.md`,
+    `wte/re/cmp-medido.tsv`, `wte/re/io-medido.tsv`, `wte/re/fase-2.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, e esta task
+
+- **Gates medidos:** `golden_check.sh --modo controle` sobre `golden-09-mover`
+  **PASSOU: byte-idêntico**; o `golden` contra o port **PASSOU**, só as duas
+  faixas do arranque. Conferido à parte que a passagem não é vazia: o port
+  sozinho contra a ROM limpa grava as **mesmas duas faixas** que o oráculo,
+  388336..388339 e 2179782..2179791, e os bytes batem um a um. As duas réguas do
+  `diff_dirigido.sh` fecham na sessão nova (11/11). `make -C wte check` rc 0;
+  `lazbuild` rc 0. A fração de código gerado caiu para **68,6%**. `roms/`
+  intocada.
+
+- **Problemas encontrados:** um, de linguagem: `GravaNumeroDaCamisa` mora depois
+  do `GravaJogador` no mesmo `.inc`, e o Pascal exige `forward` para a chamada
+  para frente. O compilador disse exatamente isso, e o conserto é uma linha.
