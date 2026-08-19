@@ -1,0 +1,45 @@
+# golden-08-dorsal-mcr, lado PORT. Par de golden-08-dorsal-mcr.txt.
+#
+# Quatro assimetrias, todas conhecidas: a imagem vem da linha de comando, o
+# `ficha_dorsal` mede os 129x121 do DFM em vez dos 135x153 do Wine (sem
+# moldura desenhada dentro), o `Ok` do `ficha_info3` fica em (140,56), e o
+# destino do `.mcr` vem de `WTE_MCR`.
+#
+# As coordenadas do `ficha_dorsal` saem da diferenca de moldura: onde o oraculo
+# pede (28,90) e (83,121), o port pede (25,60) e (80,92) -- os mesmos controles
+# menos os 3 px de borda e 29 de titulo.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 24 440
+~ 3
+>~ 129x121
+! clique 25 60
+~ 2
+! clique 80 92
+~ 2
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= EDITA_DORSAL
+
+! clique 108 292
+~ 4
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= GRAVA_MCR

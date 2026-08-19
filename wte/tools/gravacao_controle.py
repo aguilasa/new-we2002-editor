@@ -96,6 +96,44 @@ def faixas_da_sessao() -> tuple[list[dict], list[dict]]:
     return io, cmp_
 
 
+PAYLOAD_INICIO = 24
+PAYLOAD_FIM = 24 + 2048 - 1          # 2071 -- o SETOR ja mora acima
+
+
+def sessoes_da_task() -> list[str]:
+    """As sessoes do `cmp-medido.tsv` que sao desta task.
+
+    O prefixo `27-` e a convencao de nome das sondas e do controle. Deduzir
+    dali em vez de listar a mao e o que faz uma sonda nova entrar sozinha na
+    conferencia -- listar a mao seria a forma conhecida de a conta envelhecer
+    calada."""
+    vistas = [r["sessao"] for r in ler_tsv(CMP_TSV) if r["sessao"].startswith("27-")]
+    return sorted(set(vistas))
+
+
+def fora_do_payload() -> list[tuple[str, int, int]]:
+    """Faixas medidas que tocam byte de EDC/ECC ou de cabecalho de setor.
+
+    Setor MODE2/2352 = 24 de cabecalho + 2048 de dados + 280 de EDC/ECC. O
+    editor original NAO recalcula EDC/ECC, entao preservar e o comportamento
+    correto -- e preservar acontece de graca enquanto toda escrita cair dentro
+    dos 2048. Esta e a conta que transforma "presumido" em "medido", e ela nao
+    precisa de corrida nova: sai do TSV que as corridas ja versionaram.
+
+    Devolve (sessao, inicio, fim) de cada faixa que sai do payload."""
+    ruim: list[tuple[str, int, int]] = []
+    alvo = set(sessoes_da_task())
+    for r in ler_tsv(CMP_TSV):
+        if r["sessao"] not in alvo:
+            continue
+        ini, fim = int(r["inicio"]), int(r["fim"])
+        for pos in (ini, fim):
+            if not (PAYLOAD_INICIO <= pos % SETOR <= PAYLOAD_FIM):
+                ruim.append((r["sessao"], ini, fim))
+                break
+    return ruim
+
+
 def gerar() -> str:
     io, cmp_ = faixas_da_sessao()
     conhecidos = ler_offsets()
@@ -245,6 +283,45 @@ def gerar() -> str:
     w("O critério \"nas duas ROMs\" da task herda esse limite. Ele não é")
     w("omissão desta passagem — é a mesma restrição que já vale para o gate")
     w("desde a WTE-TASK-22.")
+    w("")
+    w("## EDC/ECC preservado, e a conta que prova isso")
+    w("")
+    w("Setor MODE2/2352 são 24 bytes de cabeçalho, 2048 de dados e 280 de")
+    w("EDC/ECC. O editor original **não recalcula** EDC/ECC, então preservar")
+    w("é o comportamento correto — e preservar sai de graça enquanto toda")
+    w("escrita cair dentro dos 2048. O que transforma isso de presumido em")
+    w("medido não é corrida nova: é uma conta sobre as faixas que as corridas")
+    w("já versionaram.")
+    w("")
+    sess = sessoes_da_task()
+    ruim = fora_do_payload()
+    total = sum(1 for r in ler_tsv(CMP_TSV) if r["sessao"] in set(sess))
+    w(f"Conferidas **{total}** faixas do `cmp`, em {len(sess)} sessões desta")
+    w("task:")
+    w("")
+    for nome in sess:
+        n_faixas = sum(1 for r in ler_tsv(CMP_TSV) if r["sessao"] == nome)
+        w(f"- `{nome}` — {n_faixas} faixa(s)")
+    w("")
+    if ruim:
+        w("**Faixa fora do payload — EDC/ECC ALCANÇADO:**")
+        w("")
+        for nome, ini, fim in ruim:
+            w(f"- `{nome}`: {ini}..{fim}")
+    else:
+        w(f"**Nenhuma toca byte de EDC/ECC nem de cabeçalho.** Cada extremo cai")
+        w(f"entre {PAYLOAD_INICIO} e {PAYLOAD_FIM} do próprio setor, que é a")
+        w("região de dados de usuário. Os 280 bytes de correção saem intactos")
+        w("das quatro gravações desta task.")
+    w("")
+    w("A conta enumera as sessões pelo prefixo `27-` em vez de listá-las: sonda")
+    w("nova entra sozinha, e listar à mão seria a forma conhecida de o número")
+    w("envelhecer calado.")
+    w("")
+    w("**O que ela não alcança:** gravação que escreva **setor inteiro**. Não")
+    w("existe nenhuma nesta task — a única do projeto é o `boton_mcr2isoClick`,")
+    w("da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md), e é lá que")
+    w("preservar EDC/ECC deixa de ser consequência e vira decisão.")
     return "\n".join(L) + "\n"
 
 

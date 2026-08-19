@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 22 |
+| `implementado` | 23 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 60 |
+| `aberto` | 59 |
 | **total** | **96** |
 
 60 de 96 têm arquivo de spec.
@@ -120,7 +120,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
 | `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | aberto |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
-| `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | aberto |
+| `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | implementado |
 | `0x00410ddc` | `MainForm` | [dorsalMouseDown](MainForm.dorsalMouseDown.md) | OnMouseDown x23 | edicao | implementado |
 | `0x00410ea8` | `MainForm` | colorearClick | OnClick | edicao | aberto |
 | `0x00410fa4` | `MainForm` | SpeedButton2Click | OnClick | auxiliar | aberto |

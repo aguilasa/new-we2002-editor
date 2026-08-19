@@ -126,3 +126,38 @@ e o diff sairia menor.
 O critério "nas duas ROMs" da task herda esse limite. Ele não é
 omissão desta passagem — é a mesma restrição que já vale para o gate
 desde a WTE-TASK-22.
+
+## EDC/ECC preservado, e a conta que prova isso
+
+Setor MODE2/2352 são 24 bytes de cabeçalho, 2048 de dados e 280 de
+EDC/ECC. O editor original **não recalcula** EDC/ECC, então preservar
+é o comportamento correto — e preservar sai de graça enquanto toda
+escrita cair dentro dos 2048. O que transforma isso de presumido em
+medido não é corrida nova: é uma conta sobre as faixas que as corridas
+já versionaram.
+
+Conferidas **114** faixas do `cmp`, em 8 sessões desta
+task:
+
+- `27-barras-editada` — 10 faixa(s)
+- `27-descarga-com` — 9 faixa(s)
+- `27-descarga-sem` — 9 faixa(s)
+- `27-dorsal-editado` — 10 faixa(s)
+- `27-gravacao-controle` — 12 faixa(s)
+- `27-mcr` — 9 faixa(s)
+- `27-nomes-editados` — 19 faixa(s)
+- `27-textura` — 36 faixa(s)
+
+**Nenhuma toca byte de EDC/ECC nem de cabeçalho.** Cada extremo cai
+entre 24 e 2071 do próprio setor, que é a
+região de dados de usuário. Os 280 bytes de correção saem intactos
+das quatro gravações desta task.
+
+A conta enumera as sessões pelo prefixo `27-` em vez de listá-las: sonda
+nova entra sozinha, e listar à mão seria a forma conhecida de o número
+envelhecer calado.
+
+**O que ela não alcança:** gravação que escreva **setor inteiro**. Não
+existe nenhuma nesta task — a única do projeto é o `boton_mcr2isoClick`,
+da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md), e é lá que
+preservar EDC/ECC deixa de ser consequência e vira decisão.

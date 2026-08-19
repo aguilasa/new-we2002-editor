@@ -255,11 +255,11 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **60 de 96 têm arquivo**
-      (2026-08-19, do `spec_index.py`): 22 `implementado`, 14 `trivial`, 60
+      (2026-08-19, do `spec_index.py`): 23 `implementado`, 14 `trivial`, 59
       `aberto`. Os 28 do grupo de carga mais os 28 do de edição, que a
-      WTE-TASK-26 fechou, mais as quatro gravações da WTE-TASK-27. Dos
-      `aberto` do grupo de edição, **nove têm dono nomeado na WTE-TASK-27**
-      pela opção A
+      WTE-TASK-26 fechou, mais as quatro gravações da WTE-TASK-27. Dos nove
+      `aberto` do grupo de edição que têm **dono nomeado na WTE-TASK-27** pela
+      opção A, o `dorsalClick` já foi promovido; faltam os oito de mover
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão

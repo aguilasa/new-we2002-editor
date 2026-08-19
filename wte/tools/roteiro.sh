@@ -113,8 +113,24 @@ janela() {
 janela_geo() {
   # "ID X Y" da janela com esse tamanho `<W>x<H>`. Vence a ULTIMA: o dialogo
   # recem-aberto tem o maior id.
-  local w="${1%%x*}" h="${1##*x}" id achou=""
-  for id in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
+  #
+  # A ENUMERACAO NAO PODE PASSAR POR NOME. O `--name '.'` parecia inofensivo --
+  # "qualquer janela com nome" --, mas o `xdotool` casa a regex contra o nome
+  # ja decodificado, e janela cujo `WM_NAME` e Shift-JIS cru simplesmente nao
+  # entra na lista. E exatamente o caso dos tres formularios que trocam o
+  # proprio Caption pelo nome do jogador ou do time, que sao os UNICOS que
+  # precisam de busca por tamanho. No `:99` o `ficha_dorsal` do port ficava
+  # invisivel para o `>~` enquanto o do oraculo aparecia -- sob Wine o nome
+  # decodifica, sob gtk2 nao.
+  #
+  # Com filtro de processo ativo, enumerar por `--pid` resolve e ainda e mais
+  # estrito. Sem ele, cai no nome, que e o que sempre foi.
+  local w="${1%%x*}" h="${1##*x}" id achou="" lista=""
+  if [ -n "$ROTEIRO_PID" ]; then
+    lista="$(xdotool search --onlyvisible --pid "$ROTEIRO_PID" 2>/dev/null)"
+  fi
+  [ -n "$lista" ] || lista="$(xdotool search --onlyvisible --name '.' 2>/dev/null)"
+  for id in $lista; do
     _do_pid "$id" || continue
     eval "$(xdotool getwindowgeometry --shell "$id" 2>/dev/null)" || continue
     [ "$WIDTH" = "$w" ] && [ "$HEIGHT" = "$h" ] && achou="$id $X $Y"

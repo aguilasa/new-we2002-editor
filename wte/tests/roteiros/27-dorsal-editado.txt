@@ -1,0 +1,72 @@
+# 27-dorsal-editado -- a SONDA do `dorsalClick`, a quinta gravacao da task.
+#
+# WTE-TASK-27. O `dorsalClick` nao e um botao de gravar: e um handler de EDICAO
+# da WTE-TASK-26 que, ao fechar o modal, escreve o numero na imagem
+# (`0x00404048`, escrita pontual). A 26 fechou com ele `aberto` e dono nomeado
+# aqui -- a opcao A.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-dorsal-editado.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# O PASSO DA BARRA FOI MEDIDO ANTES DE ESTE ROTEIRO EXISTIR, e nos dois
+# widgetsets, como a trilha do `track_barra` exigiu na WTE-TASK-26. Clicar no
+# meio da trilha pagina por `LargeChange = 4`, e os dois andam igual: o time 2
+# comeca com `dorsal1 = 1` e termina com 5. O byte 404748 vai de `0x80` a
+# `0x84` nos dois lados.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------- editar o numero ----
+#
+# dorsal1 (16,432) 17x17 -> centro (24,440). O `ficha_dorsal` abre com moldura
+# DENTRO da janela X sob Wine: 135x153 contra os 129x121 do DFM, 3 px de borda
+# e 29 de titulo. Por isso o `>~` e por tamanho -- o Caption dele e o nome do
+# jogador em Shift-JIS, e nao ha regex estavel.
+! clique 24 440
+~ 3
+>~ 135x153
+# scroll_dorsal (17,8)+(3,29) = (20,37), 16x105. Meio da trilha: (28,90).
+! clique 28 90
+~ 2
+# BitBtn1 (48,80)+(3,29) = (51,109), 65x25 -> centro (83,121).
+! clique 83 121
+~ 2
+> W11 Team Editor PT by chagas_michel!
+~ 2
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= EDITA_DORSAL

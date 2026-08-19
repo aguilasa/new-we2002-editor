@@ -16,17 +16,16 @@
 
   ---
 
-  O QUE ESTE CORPO NAO FAZ, E O DONO ESTA NOMEADO: **o original GRAVA na
-  imagem** quando o modal fecha. Ele chama `0x00404048` -- a irma escritora da
-  rotina de leitura `0x00403f00`, com os mesmos tres ramos -- passando numero,
-  indice do time, slot do jogador e o arquivo aberto; e la que o `- 1` da base
-  zero acontece (`add al,0xff`), e e uma escrita PONTUAL, nao um `Save` do
-  banco inteiro.
+  ELE GRAVA NA IMAGEM quando o modal fecha, e a gravacao chegou na WTE-TASK-27
+  (2026-08-19). E a `0x00404048` -- a irma escritora da rotina de leitura
+  `0x00403f00`, com os mesmos tres ramos --, que recebe numero, indice do time,
+  slot do jogador e o arquivo aberto. Escrita PONTUAL, nao um `Save` do banco
+  inteiro, e e la que o `- 1` da base zero acontece (`add al,0xff`).
 
-  Escrever isso aqui seria antecipar a WTE-TASK-27: ela e a dona de gravacao,
-  e e ela que tem o gate por byte. Ate entao este handler edita a tela e para
-  antes da escrita -- o que ele deixa pronto e o numero escolhido, ja no
-  rotulo. Registrado no criterio de conclusao da 27. }
+  Ate essa data este corpo parava antes da escrita, com o dono nomeado: era a
+  opcao A da WTE-TASK-26, que fechou nove handlers `aberto` para nao misturar
+  duas causas possiveis num golden vermelho. Este e o primeiro dos nove a ser
+  promovido. }
 var
   numero, escolhido: Integer;
   nome_do_jogador: string;
@@ -83,9 +82,16 @@ begin
 
   ficha_dorsal.ShowModal;
 
-  { De volta do modal: o numero escolhido vai para o rotulo. A GRAVACAO que o
-    original faz aqui e da WTE-TASK-27 -- ver o cabecalho. }
+  { De volta do modal: o numero escolhido vai para o rotulo E para a imagem.
+    A gravacao e a `0x00404048`, pontual, com os tres ramos -- ver
+    `GravaNumeroDaCamisa` no `.aux.inc`. }
   escolhido := StrToIntDef(ficha_dorsal.etiq_dorsal.Caption, 0);
   if escolhido > 0 then
+  begin
     CamisaMarcada.Caption := IntToStr(escolhido);
+    GravaNumeroDaCamisa(escolhido, lista_equipos.ItemIndex,
+                        lista_jugadores_1.ItemIndex);
+    GuardaNumeroNoModelo(escolhido, lista_equipos.ItemIndex,
+                         lista_jugadores_1.ItemIndex);
+  end;
 end;

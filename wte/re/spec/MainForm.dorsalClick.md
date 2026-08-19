@@ -2,7 +2,7 @@
 handler: dorsalClick
 formulario: MainForm
 endereco: 0x00410a74
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.dorsalClick
@@ -65,10 +65,31 @@ aberto; faz `add al,0xff` — o `- 1` que devolve o número à base zero —, es
 o valor no lugar certo e **grava aquele trecho no arquivo** (`0x00403400`),
 sem passar por nada parecido com um `Save` do banco inteiro.
 
-Que offset exatamente, por ramo, **não foi medido aqui** — é o que a
-WTE-TASK-27 vai precisar, e é lá que o gate por byte existe.
+Os três ramos, agora com endereço — recuperados na sexta passagem da
+WTE-TASK-27 e **conferidos contra o `we2002_core`**, que é a conferência que a
+§4.2 do plano manda fazer antes de acreditar em fórmula:
 
-**Evidência:** disassembly lido
+| ramo | condição | endereço | forma |
+|---|---|---|---|
+| all-star | `índice = 48` | setor 850, lógico `$299AF + 12·slot` | 2 B lidos, 5 bits a partir do bit 2, 2 B gravados |
+| Master League | `índice > 62` | **absoluto** `$1EB797 + 23·i − 760·(i div 95) + slot` | 1 B cru |
+| seleção | `índice ≤ 62` | setor 24, lógico `$4A094 + 16·índice` | 16 B lidos, 5 bits em `32·(slot div 6) + 5·(slot mod 6)`, 16 B gravados |
+
+As duas fontes concordam onde poderiam divergir. `EnderecoDeDados(24, $4A094)`
+dá **404716**, o `OFS_SQUAD_NUMBERS_NATIONAL`; a fórmula de ML no time 95 dá
+**2014504**, o `OFS_SQUAD_NUMBERS_ML`. E o `+1` entre o time-modelo e o
+primeiro clube também bate: o `Load` do `we2002_core` lê 23 bytes, **pula um**,
+e só então os 32 clubes — e a fórmula põe o time 63 em 2014528, que é
+`2014504 + 23 + 1`.
+
+**O ramo de Master League é o único que não passa pelo fluxo.** Ele usa
+`fseek`/`fputc` crus, sem o salto de fronteira de setor que os outros dois
+fazem por `0x004033bc`/`0x00403400`. É um byte só, e o original não pula.
+
+Medido: com o time 2 da ROM japonesa, mudar `dorsal1` de 1 para 5 troca **um**
+byte, em 404748 — setor 172, byte 204, dentro do payload de 2048 B.
+
+**Evidência:** diff medido
 
 ## Pré-condições
 
@@ -97,13 +118,26 @@ barra.** Clube de Master League (índice `> 62`) aceita até **99**; seleção, 
 consegue digitar um número inválido porque **não há onde digitar**: a escolha é
 uma barra de rolagem com faixa fixada na abertura.
 
-**Veredito `aberto`, e o que falta tem dono nomeado.** O Pascal está escrito
+**Veredito `implementado` desde 2026-08-19.** O Pascal
 ([`../../src/impl/ep2002_mainform.dorsalClick.inc`](../../src/impl/ep2002_mainform.dorsalClick.inc))
-e faz tudo **menos a gravação**. Escrever a gravação aqui seria antecipar a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), que é a dona de
-gravação e a única com gate por byte; e seria a primeira escrita pontual do
-port — o `we2002_database.pas` gerado sabe `Save` do banco inteiro, não
-"escreve estes dois bytes aqui".
+faz a edição e a gravação, e a gravação é a `GravaNumeroDaCamisa` do
+`.aux.inc`. Ele fechou `aberto` na WTE-TASK-26 pela **opção A** — não misturar
+duas causas possíveis num golden vermelho —, e é **o primeiro dos nove** que a
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) promove.
+
+É também a primeira escrita **pontual** do port: o `we2002_database.pas` gerado
+sabe `Save` do banco inteiro, não "escreve estes dois bytes aqui". O que
+tornou isso barato foi o `LeDoFluxoEm`/`GravaNoFluxo` que o
+`boton_nombres2isoClick` já tinha posto no `we2002_estado`.
+
+**Divergência deliberada, a mesma das barras:** o port também atualiza
+`Jogo` ao gravar (`GuardaNumeroNoModelo`). O `wte.exe` relê a imagem a cada
+troca de time; o port carrega uma vez, e sem isso a tela dele discordaria do
+próprio arquivo na volta ao time. Mesmo byte, mesma posição.
+
+**Gate:** [`golden-08-dorsal-mcr`](../../tests/roteiros/golden-08-dorsal-mcr.txt),
+com controle byte-idêntico antes. Ele julga esta gravação **e** o `.mcr` na
+mesma corrida, porque o número é o único campo do cartão que vem da tela.
 
 **Isso torna o `dorsalClick` o primeiro caso de handler que o
 `published_methods.tsv` classifica como `edicao` e que grava na imagem.** A

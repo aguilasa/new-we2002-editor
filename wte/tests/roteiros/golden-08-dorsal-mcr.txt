@@ -1,0 +1,94 @@
+# golden-08-dorsal-mcr -- o gate que fecha o par edicao+gravacao do NUMERO.
+#
+# WTE-TASK-27, lado oraculo. Ele julga DUAS gravacoes numa corrida so, e as
+# duas com uma edicao de tela antes:
+#
+#   1. `dorsalClick` -- escrita pontual do numero na imagem (`0x00404048`);
+#   2. `grabar_memoryClick` -- o `.mcr`, que le os 23 `dorsalN` DA TELA.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-08-dorsal-mcr.txt \
+#        --roteiro-port wte/tests/roteiros/golden-08-dorsal-mcr.port.txt \
+#        --artefato saida.mcr
+#
+# Por que os dois juntos: o numero e o UNICO campo do cartao que nao sai do
+# disco nem do molde -- vem do `Caption` de `dorsalN`. Gravar o cartao sem
+# editar numero nenhum verifica esses 16 bytes contra um valor que ninguem
+# tocou. Editando antes, a mesma corrida julga a escrita pontual na imagem e o
+# empacotamento de 5 bits no cartao, e eles tem de concordar.
+#
+# O passo da barra foi medido nos dois widgetsets antes deste roteiro existir:
+# clique no meio da trilha pagina por `LargeChange = 4`, o time 2 vai de
+# `dorsal1 = 1` para 5, e o byte 404748 vai de `0x80` a `0x84` nos dois lados.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- editar o numero ----
+#
+# dorsal1 (16,432) 17x17 -> centro (24,440). O `ficha_dorsal` abre com moldura
+# DENTRO da janela X sob Wine: 135x153 contra os 129x121 do DFM. O `>~` e por
+# tamanho porque o Caption dele e o nome do jogador em Shift-JIS.
+! clique 24 440
+~ 3
+>~ 135x153
+# scroll_dorsal (17,8)+(3,29) = (20,37), 16x105. Meio da trilha: (28,90).
+! clique 28 90
+~ 2
+# BitBtn1 (48,80)+(3,29) = (51,109), 65x25 -> centro (83,121).
+! clique 83 121
+~ 2
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= EDITA_DORSAL
+
+# --------------------------------------------------------- emitir o .mcr ----
+#
+# grupo_memorycard (8,224) + grabar_memory (88,56) = (96,280), 25x25.
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\saida.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR

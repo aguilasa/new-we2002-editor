@@ -276,6 +276,24 @@ const
   NUMERO_BITS_GRUPO = 32;
   NUMERO_MAXIMO     = 31;      { o `cmp ..,0x1f` / `jbe` do original }
 
+  { A gravacao pontual do numero -- `0x00404048`, o irmao escritor da
+    `NumeroDaCamisa`. Tres regioes, uma por ramo; ver `GravaNumeroDaCamisa`.
+
+    Os dois enderecos que tem nome no `we2002_core` foram conferidos contra ele:
+    `EnderecoDeDados(24, $4A094)` = 404716 = `OFS_SQUAD_NUMBERS_NATIONAL`, e a
+    formula de ML no time 95 = 2014504 = `OFS_SQUAD_NUMBERS_ML`. }
+  NUMERO_NACIONAL_SETOR  = 24;
+  NUMERO_NACIONAL_LOGICO = $4A094;
+
+  { O time 48 e o unico com ramo proprio, e o numero dele mora dentro do
+    registro de atributos do jogador: `$265EC + 276*48 + 12*slot + 3`. }
+  NUMERO_TIME_ALL_STAR   = 48;
+  NUMERO_ALL_STAR_LOGICO = $299AF;
+  NUMERO_ALL_STAR_BIT    = 2;
+
+  { Offset ABSOLUTO, nao logico -- o ramo de ML nao passa pelo fluxo. }
+  NUMERO_ML_BASE = $1EB797;
+
 type
   TBlocoDeNome = record
     offset: TOffset;
@@ -1410,4 +1428,115 @@ begin
     cartao.Free;
     molde.Free;
   end;
+end;
+
+{ ------------------------------------------------------------------------ }
+{ GravaNumeroDaCamisa -- 0x00404048, 365 bytes.
+
+  A metade de GRAVACAO do `dorsalClick`, e a irma escritora da `0x00403f00` que
+  a `NumeroDaCamisa` ja reproduz na leitura. Dona: WTE-TASK-27. Ate 2026-08-19 o
+  `dorsalClick` do port parava antes desta chamada, com o dono nomeado no
+  proprio comentario.
+
+  E uma escrita PONTUAL -- nao um `Save` do banco inteiro --, e tem TRES ramos,
+  testados nesta ordem:
+
+  | ramo | condicao | onde | como |
+  |---|---|---|---|
+  | all-star | `indice = 48` | setor 850, logico `$299AF + 12*slot` | 2 B, 5 bits no bit 2 |
+  | ML | `indice > 62` | offset ABSOLUTO `$1EB797 + 23*i - 760*(i div 95) + slot` | 1 B cru |
+  | nacional | `indice <= 62` | setor 24, logico `$4A094 + 16*indice` | 16 B, 5 bits em `32*(slot div 6) + 5*(slot mod 6)` |
+
+  As duas fontes concordam onde poderiam divergir, que e a conferencia que a
+  §4.2 do plano manda fazer: `EnderecoDeDados(24, $4A094)` da **404716**, o
+  `OFS_SQUAD_NUMBERS_NATIONAL` do `we2002_core`, e a formula de ML no time 95
+  da **2014504**, o `OFS_SQUAD_NUMBERS_ML`. O `+1` entre o time-modelo e o
+  primeiro clube tambem bate: o `Load` do core le 23 bytes, **pula um**, e so
+  entao os 32 clubes -- e a formula poe o time 63 em 2014528, que e
+  `2014504 + 23 + 1`.
+
+  O ramo de ML e o unico que NAO passa pelo fluxo: ele usa `fseek`/`fputc`
+  crus, sem o salto de fronteira de setor. Nao e descuido reproduzido por
+  reproduzir -- e um byte so, e o original nao pula. Passar pelo fluxo aqui
+  daria o mesmo byte hoje e outro no dia em que o slot caisse na fronteira.
+
+  O numero chega em BASE UM e vai ao disco em base zero: o `add al,0xff` do
+  original, que e `-1` num byte. }
+procedure GravaNumeroDaCamisa(numero, indice, slot: Integer);
+var
+  img: TCdImage;
+  buffer: array[0..15] of Byte;
+  offset: TOffset;
+  valor, bit, k, largura: Integer;
+begin
+  if (ImagemAberta = '') or (numero <= 0) then
+    Exit;
+  if (slot < 0) or (slot >= JOGADORES_POR_TIME) then
+    Exit;
+  valor := (numero - 1) and $FF;
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    if indice = NUMERO_TIME_ALL_STAR then
+    begin
+      { O numero deste time mora DENTRO do registro de atributos do jogador --
+        `$265EC + 276*48 + 12*slot + 3` e exatamente o `$299AF + 12*slot` do
+        disassembly. Cinco bits a partir do bit 2 do par lido. }
+      offset := EnderecoDeDados(SETOR_BASE_DADOS,
+                  NUMERO_ALL_STAR_LOGICO + 12 * slot);
+      largura := 2;
+      bit := NUMERO_ALL_STAR_BIT;
+    end
+    else if indice >= TIMES_NACIONAIS then
+    begin
+      { Um byte cru, em offset absoluto, sem fluxo. }
+      img.Seek(NUMERO_ML_BASE + 23 * indice
+               - 760 * (indice div IDX_MODELO_ML) + slot, soBeginning);
+      img.Write(valor, 1);
+      Exit;
+    end
+    else
+    begin
+      offset := EnderecoDeDados(NUMERO_NACIONAL_SETOR,
+                  NUMERO_NACIONAL_LOGICO + 16 * indice);
+      largura := 16;
+      bit := NUMERO_BITS_GRUPO * (slot div NUMERO_POR_GRUPO)
+           + NUMERO_BITS * (slot mod NUMERO_POR_GRUPO);
+    end;
+
+    { Ler, trocar os cinco bits, gravar de volta -- o original faz os tres
+      passos com o mesmo comprimento, e nao so o byte que mudou. }
+    if not LeDoFluxoEm(img, offset, buffer, largura) then
+      Exit;
+    for k := 0 to NUMERO_BITS - 1 do
+      if (valor and (1 shl k)) <> 0 then
+        buffer[(bit + k) div 8] :=
+          buffer[(bit + k) div 8] or (1 shl ((bit + k) mod 8))
+      else
+        buffer[(bit + k) div 8] :=
+          buffer[(bit + k) div 8] and not (1 shl ((bit + k) mod 8));
+    GravaNoFluxo(img, offset, buffer, largura);
+  finally
+    img.Close;
+  end;
+end;
+
+{ Leva o numero para o modelo em memoria.
+
+  Mesma divergencia declarada das barras: o `wte.exe` rele a imagem a cada troca
+  de time, o port carrega uma vez. Sem isto a tela do proprio port discordaria
+  do proprio arquivo na volta ao time. }
+procedure GuardaNumeroNoModelo(numero, indice, slot: Integer);
+begin
+  if (slot < 0) or (slot >= JOGADORES_POR_TIME) or (numero <= 0) then
+    Exit;
+  if indice >= IDX_MODELO_ML then
+    Jogo.ml_default.raw_numbers[slot] := ShortInt(numero - 1)
+  else if indice >= TIMES_NACIONAIS then
+    Jogo.ml_teams[indice - TIMES_NACIONAIS].raw_numbers[slot] :=
+      ShortInt(numero - 1)
+  else
+    SetSquadNumberAt(Jogo.teams[indice].squad_numbers, slot, numero - 1);
 end;

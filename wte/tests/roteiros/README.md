@@ -247,6 +247,27 @@ do que no `golden-06`: o `TSaveDialog` do gtk2 exige um nome DIGITADO, e sem
 gerenciador de janela o `:99` nao entrega tecla a ele. O `golden_check.sh`
 semeia a variavel com o mesmo `work/saida.mcr` que o oraculo digita.
 
+O par [`27-dorsal-editado.txt`](27-dorsal-editado.txt) /
+[`golden-08-dorsal-mcr.txt`](golden-08-dorsal-mcr.txt) fecha o criterio herdado
+da WTE-TASK-26 -- o unico do projeto que julga edicao e gravacao juntas. Ele
+exercita DUAS gravacoes numa corrida so: a escrita pontual do numero na imagem
+(`dorsalClick`, `0x00404048`) e o `.mcr`, que le os 23 `dorsalN` DA TELA. Editar
+o numero antes e o que tira os 16 bytes de `0x5404` do cartao da situacao de
+serem conferidos contra um valor que ninguem tocou.
+
+**O passo da barra foi medido nos dois widgetsets antes de o roteiro existir**,
+como a trilha do `track_barra` exigiu na WTE-TASK-26: clique no meio da trilha
+pagina por `LargeChange = 4`, os dois andam igual, e o time 2 vai de
+`dorsal1 = 1` para 5 -- um byte, em 404748.
+
+Aqui apareceu uma limitacao do proprio driver, e ela e do `>~`: o
+`xdotool search --name '.'` **nao enxerga** janela cujo `WM_NAME` e Shift-JIS
+cru, porque a regex casa contra o nome ja decodificado. Sob Wine o
+`ficha_dorsal` aparece; sob gtk2 nao. Como os tres formularios que precisam de
+busca por tamanho sao exatamente os que trocam o Caption por nome de jogador ou
+de time, o `janela_geo` passou a enumerar por `--pid` quando ha filtro de
+processo, caindo no nome so quando nao ha.
+
 Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 
 - **roteiro que termina numa gravacao mede um oraculo truncado**, porque o

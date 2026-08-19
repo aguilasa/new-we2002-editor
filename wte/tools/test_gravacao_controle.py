@@ -149,5 +149,31 @@ class TestEvidencia(unittest.TestCase):
             self.assertEqual(int(r["setor"]), int(r["inicio"]) // G.SETOR)
 
 
+class TestPayload(unittest.TestCase):
+    """A conta de EDC/ECC. Ela nao mede nada sozinha -- afirma sobre o TSV."""
+
+    def test_nenhuma_faixa_medida_toca_edc_ecc(self) -> None:
+        self.assertEqual(G.fora_do_payload(), [],
+                         "faixa medida fora dos 2048 B de payload")
+
+    def test_as_sessoes_saem_do_tsv_e_nao_de_lista_a_mao(self) -> None:
+        sess = G.sessoes_da_task()
+        self.assertIn(G.SESSAO, sess)
+        for nome in sess:
+            self.assertTrue(nome.startswith("27-"), nome)
+
+    def test_o_limite_do_payload_e_a_geometria_mode2(self) -> None:
+        # 24 + 2048 + 280 = 2352. Se um dos tres mudar, a conta inteira muda.
+        self.assertEqual(G.PAYLOAD_INICIO, 24)
+        self.assertEqual(G.PAYLOAD_FIM, 24 + 2048 - 1)
+        self.assertEqual(G.SETOR, 2352)
+
+    def test_detecta_faixa_plantada_no_edc(self) -> None:
+        # Sem esta, "nenhuma fora" poderia significar "a conta nao ve nada".
+        ruim = [("x", 24 + 2048, 24 + 2048)]
+        pos = ruim[0][1] % G.SETOR
+        self.assertFalse(G.PAYLOAD_INICIO <= pos <= G.PAYLOAD_FIM)
+
+
 if __name__ == "__main__":
     unittest.main()

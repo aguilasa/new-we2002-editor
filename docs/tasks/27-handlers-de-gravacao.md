@@ -35,6 +35,23 @@ verde antes de passar para a seguinte.
 | `boton_tex2isoClick` | `0x0040de18` | textura |
 | `grabar_memoryClick` | `0x0040f69c` | escreve `.mcr` (saída, não a imagem) |
 
+### A quinta gravação não é um botão
+
+*(medido em 2026-08-19)*
+
+| Handler | Endereço | O que grava |
+|---|---|---|
+| `MainForm.dorsalClick` | `0x00410a74` → `0x00404048` | o número de camisa, escrita **pontual** |
+
+O `dorsalClick` é handler de **edição** — é da tabela da
+[WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) —, mas ao fechar o modal
+ele escreve o número na imagem. A 26 fechou com ele e mais oito `aberto`, de
+dono nomeado aqui, pela **opção A**: implementar a gravação lá misturaria duas
+causas possíveis num golden vermelho.
+
+**São nove ao todo, e esta task os promove:** o `dorsalClick` e os oito de
+mover jogador, cuja metade de escrita é a `0x00404820`. O primeiro fechou.
+
 ### As outras duas gravações não moram aqui, e a razão é o ciclo
 
 *(decisão do usuário, 2026-08-19)*
@@ -136,16 +153,39 @@ um campo de tela.
       `grabar_memory`). **Só na ROM japonesa**, e o limite é medido, não
       omissão: com a europeia o `wte.exe` morre na troca de time e a gravação
       nunca acontece, então não existe oráculo daquele lado
-- [ ] **Cada gravação que tem par na WTE-TASK-26 rodada também com uma edição
-      de tela antes** — herdado da 26 em 2026-08-12; ver a seção acima. É o
-      único critério do projeto que julga edição e gravação juntas
-- [ ] EDC/ECC preservados **nas quatro desta task** — nenhuma escreve fora do
-      payload de 2048 B do setor, e isso é conta sobre TSV já versionado, não
-      medição nova. A forma forte do critério migrou inteira para a
+- [x] **Cada gravação que tem par na WTE-TASK-26 rodada também com uma edição
+      de tela antes** — herdado da 26 em 2026-08-12. É o único critério do
+      projeto que julga edição e gravação juntas, e os três pares fecharam:
+
+      | gravação | edição antes | gate |
+      |---|---|---|
+      | `boton_barras2iso` | `sel_barraClick` + `track_barraChange` | `golden-04-barras-editada` |
+      | `boton_nombres2iso` | os três `edit_nombreNKeyPress` | `golden-05-nomes` |
+      | `grabar_memory` + `dorsalClick` | `dorsalClick` + `scroll_dorsalChange` | `golden-08-dorsal-mcr` |
+
+      O terceiro julga **duas** gravações numa corrida: a escrita pontual do
+      número na imagem e o `.mcr`, que lê os 23 `dorsalN` da tela. O número é o
+      único campo do cartão que não vem do disco nem do molde
+- [ ] **Os oito handlers de mover promovidos** — a outra metade da opção A da
+      WTE-TASK-26. A metade de escrita deles é a `0x00404820`, e enquanto ela
+      não existir os oito ficam `aberto` com dono nomeado aqui
+- [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-19,
+      **114 faixas conferidas em 8 sessões**, nenhuma tocando byte de EDC/ECC
+      nem de cabeçalho de setor. A conta é do
+      [`gravacao_controle.py`](../../wte/tools/gravacao_controle.py), sobre o
+      `cmp-medido.tsv` que as corridas já versionaram — não precisou de medição
+      nova. A forma forte do critério migrou inteira para a
       [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md), onde a pergunta é real:
       o `boton_mcr2iso` é a única gravação do projeto que escreve setor
       completo, e ali preservar EDC/ECC é decisão, não consequência
-- [ ] Nenhuma divergência sem veredito escrito
+- [x] Nenhuma divergência sem veredito escrito — são **três**, todas da mesma
+      família e todas na spec do handler que as tem: o port também atualiza
+      `Jogo` ao gravar (barras, número), e lê nome e atributos da camada de
+      dados em vez de reler a imagem (cartão). O `wte.exe` relê a imagem a cada
+      troca de time; o port carrega uma vez, e sem isso a tela dele discordaria
+      do próprio arquivo. Mesmo byte, mesma posição, outra fonte — nenhuma
+      aparece no gate. Vão para o registro central na
+      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
 - [x] `roms/` intocada em todas as rodadas — vale por passagem, e a de
       2026-08-18 rodou toda sobre cópia em `work/`
 - [ ] Commit no formato conventional, em inglês
@@ -694,3 +734,109 @@ um campo de tela.
   vez de `27-mcr`, fora da convenção das outras quatro. Desfeito com `git
   checkout` dos dois TSV e refeito sem a opção, que é o que usa o nome do
   roteiro.
+
+---
+
+- **Executado em:** 2026-08-19 — **sétima passagem.** Fecharam **três** dos
+  critérios abertos: o par edição+gravação, o EDC/ECC e o registro de
+  divergências. A task continua `⬜ Pendente` por **um** item, e ele é grande:
+  os oito handlers de mover ainda esperam a metade de escrita.
+
+- **Resumo do que foi feito:**
+
+  **Havia uma quinta gravação, e ela não é um botão.** O `dorsalClick` é
+  handler de *edição* — está na tabela da WTE-TASK-26 —, mas ao fechar o modal
+  ele escreve o número na imagem, pela `0x00404048`. A 26 fechou com ele e mais
+  oito `aberto` de dono nomeado aqui, pela **opção A**; esta passagem promoveu
+  o primeiro dos nove. O comentário do próprio `.inc` do port já dizia isso
+  desde a WTE-TASK-25 — a tabela de alvos desta task é que nunca o listou.
+
+  **Três ramos, e os dois que têm nome batem com o `we2002_core`.**
+
+  | ramo | condição | endereço |
+  |---|---|---|
+  | all-star | `índice = 48` | setor 850, lógico `$299AF + 12·slot`, 5 bits no bit 2 |
+  | Master League | `índice > 62` | **absoluto** `$1EB797 + 23·i − 760·(i div 95) + slot`, 1 B cru |
+  | seleção | `índice ≤ 62` | setor 24, lógico `$4A094 + 16·índice`, 16 B com 5 bits por slot |
+
+  `EnderecoDeDados(24, $4A094)` dá **404716** = `OFS_SQUAD_NUMBERS_NATIONAL`, e
+  a fórmula de ML no time 95 dá **2014504** = `OFS_SQUAD_NUMBERS_ML`. O `+1`
+  entre o time-modelo e o primeiro clube também bate: o `Load` do core lê 23
+  bytes, **pula um**, e só então os 32 clubes — e a fórmula põe o time 63 em
+  2014528, que é `2014504 + 23 + 1`. É a conferência que a §4.2 do plano manda
+  fazer antes de acreditar em fórmula, e as duas fontes concordam nos três
+  pontos onde poderiam divergir.
+
+  **O ramo de ML é o único que não passa pelo fluxo** — `fseek`/`fputc` crus,
+  sem o salto de fronteira de setor que os outros dois fazem. É um byte só, e o
+  original não pula.
+
+  **O passo da barra foi medido nos dois widgetsets antes de o roteiro
+  existir**, como a trilha do `track_barra` exigiu na WTE-TASK-26: clique no
+  meio da trilha pagina por `LargeChange = 4`, os dois andam igual, e o time 2
+  vai de `dorsal1 = 1` para 5 — **um** byte, em 404748. Sem medir isso primeiro,
+  um passo de 4 de um lado e 1 do outro daria divergência de tela que não é do
+  handler.
+
+  **O gate novo julga duas gravações numa corrida.** O
+  [`golden-08-dorsal-mcr`](../../wte/tests/roteiros/golden-08-dorsal-mcr.txt)
+  edita o número, grava na imagem pelo `dorsalClick` e emite o `.mcr` pelo
+  `grabar_memory`. Os dois juntos porque o número é o **único** campo do cartão
+  que não vem do disco nem do molde: gravar o cartão sem editar número nenhum
+  verifica os 16 bytes de `0x5404` contra um valor que ninguém tocou.
+
+  **EDC/ECC deixou de ser presumido, e não precisou de corrida nova.** A conta
+  entrou no `gravacao_controle.py`: **114 faixas em 8 sessões**, nenhuma tocando
+  byte de EDC/ECC nem de cabeçalho — cada extremo cai entre 24 e 2071 do próprio
+  setor. As sessões saem do TSV pelo prefixo `27-` em vez de lista à mão, então
+  sonda nova entra sozinha. Quatro testes cobrem a conta, inclusive um que
+  planta uma faixa no EDC para provar que ela **detecta**.
+
+- **Um defeito do próprio driver apareceu, e ele era invisível até agora.** O
+  `>~` (busca de janela por tamanho) enumerava com
+  `xdotool search --name '.'` — "qualquer janela com nome". Só que o `xdotool`
+  casa a regex contra o nome **já decodificado**, e janela cujo `WM_NAME` é
+  Shift-JIS cru simplesmente não entra na lista. Sob Wine o `ficha_dorsal`
+  aparecia; sob gtk2, não. E os três formulários que precisam de busca por
+  tamanho são exatamente os que trocam o `Caption` por nome de jogador ou de
+  time — ou seja, o `>~` falhava justamente no caso para o qual foi criado. O
+  `janela_geo` passou a enumerar por `--pid` quando há filtro de processo.
+
+  O conserto trouxe um segundo erro, de mão: `local ... lista` sob `set -u` fica
+  **não atribuída**, e o golden passou (lá o filtro de PID existe) enquanto o
+  `diff_dirigido.sh` quebrou (lá não existe). Duas rotas pelo mesmo código, e só
+  uma exercitada.
+
+- **O que esta passagem NÃO fez:**
+  - os **oito** handlers de mover continuam `aberto`. A metade de escrita deles
+    é a `0x00404820`, 1.459 bytes, e é o que falta para a opção A fechar por
+    inteiro. Virou critério explícito desta task, que antes só o tinha implícito
+    no log da 26;
+  - `boton_mcr2iso` e `grabar_camiseta` seguem nas tasks 28 e 29, por desenho.
+
+- **Arquivos criados/modificados:**
+  - `wte/src/impl/ep2002_mainform.aux.inc` — `GravaNumeroDaCamisa`,
+    `GuardaNumeroNoModelo` e as constantes dos três ramos
+  - `wte/src/impl/ep2002_mainform.dorsalClick.inc` — a chamada e o cabeçalho
+  - `wte/tools/roteiro.sh` — o `janela_geo` por `--pid`
+  - `wte/tools/gravacao_controle.py` + `test_gravacao_controle.py` — a conta de
+    EDC/ECC e os quatro testes dela
+  - `wte/tests/roteiros/27-dorsal-editado.txt`,
+    `golden-08-dorsal-mcr{,.port}.txt`, `README.md`
+  - `wte/re/spec/MainForm.dorsalClick.md` — veredito `implementado`
+  - `wte/re/gravacao-controle.md`, `wte/re/offsets-novos.md`,
+    `wte/re/cmp-medido.tsv`, `wte/re/io-medido.tsv`, `wte/re/spec/INDICE.md`,
+    `wte/re/fase-2.md`
+  - `docs/PLAN-WTE-LAZARUS.md` §4.4, `docs/tasks/progresso.md`, e esta task
+
+- **Gates medidos:** `golden_check.sh --modo controle --artefato saida.mcr`
+  sobre `golden-08-dorsal-mcr` **PASSOU: byte-idêntico** nas duas réguas; o
+  `golden` contra o port **PASSOU**, `saida.mcr` byte-idêntico e só as duas
+  faixas do arranque na imagem. As duas réguas do `diff_dirigido.sh` fecham na
+  sessão nova (10/10). `make -C wte check` rc 0; `lazbuild` rc 0;
+  `spec_index.py` **23 `implementado`**. A fração de código gerado caiu para
+  **69,2%**. `roms/` intocada.
+
+- **Problemas encontrados:** os dois do driver, acima. Mais um de higiene: uma
+  sonda manual deixou o port aberto no `:99` e a guarda 2 do `golden_check.sh`
+  recusou começar — que é exatamente para isso que ela existe.
