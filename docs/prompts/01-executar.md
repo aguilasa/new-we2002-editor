@@ -72,11 +72,11 @@ divergência é achado a registrar.
 | WTE-TASK-25 | 4 | `25-handlers-de-carga.md` |
 | WTE-TASK-26 | 4 | `26-handlers-de-edicao.md` |
 | WTE-TASK-27 | 4 | `27-handlers-de-gravacao.md` |
-| WTE-TASK-28 | 4 | `28-handlers-auxiliares.md` |
-| WTE-TASK-29 | 4 | `29-fechamento-fase-4.md` |
-| WTE-TASK-30 | 5 | `30-preco-do-jogador.md` |
-| WTE-TASK-31 | 5 | `31-import-de-mcr.md` |
-| WTE-TASK-32 | 5 | `32-camisa-e-bandeira-2d.md` |
+| WTE-TASK-28 | 4 | `28-import-de-mcr.md` |
+| WTE-TASK-29 | 4 | `29-camisa-e-bandeira-2d.md` |
+| WTE-TASK-30 | 4 | `30-handlers-auxiliares.md` |
+| WTE-TASK-31 | 4 | `31-fechamento-fase-4.md` |
+| WTE-TASK-32 | 5 | `32-preco-do-jogador.md` |
 | WTE-TASK-33 | 5 | `33-slots-de-master-league.md` |
 | WTE-TASK-34 | 6 | `34-bateria-golden-completa.md` |
 | WTE-TASK-35 | 6 | `35-divergencias-deliberadas.md` |
@@ -95,10 +95,13 @@ divergência é achado a registrar.
 2. Verificar se todas as tarefas em `depends_on` estão concluídas — se não,
    **não executar**, e informar o bloqueio
 3. Se existir tarefa `🔄 Em andamento`, priorizar concluí-la
-4. **Exceção única e prevista:** a WTE-TASK-30 (preço) pode ser escolhida fora
-   de ordem — plano §10 passo 5 — se a 24 e a 25 estiverem concluídas **e** o
-   usuário pedir explicitamente. É isolada, não depende de gravação, e valida o
-   ferramental de decompilação num alvo pequeno
+4. **Antecipação única e prevista:** a WTE-TASK-32 (preço) pode ser escolhida
+   antes da vez — plano §10 passo 5 — se a 24 e a 25 estiverem concluídas **e**
+   o usuário pedir explicitamente. É isolada, não depende de gravação, e valida
+   o ferramental de decompilação num alvo pequeno. Até a renumeração de
+   2026-08-19 isso se chamava "fora de ordem", e era: preço era a 30 e o
+   fechamento da fase 4 era a 29. Hoje ela **está** em ordem — antecipar é só
+   escolher quando, não furar fila
 5. Dentro de uma fase, várias tarefas podem estar prontas ao mesmo tempo (as
    03-07, por exemplo, só dependem da 02). **Execute só uma** — a de menor ID
 

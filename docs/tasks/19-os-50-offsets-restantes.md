@@ -135,7 +135,7 @@ o que a tela mostra. A ausência deles num trace é a previsão do papel que tê
   setores contíguos, `21168024`..`21203815`, **8 MB acima** do maior offset que
   o `Offsets.hpp` conhece. O `newWe2002` nunca precisou daquilo porque não
   desenha uniforme; é a entrada da
-  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+  [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md).
 
   **E o critério fechou com a outra régua.** Os 17 restantes foram
   classificados pelo `Database.cpp` do `newWe2002`: 14 são ponto de retomada em

@@ -208,11 +208,11 @@ class TestHabilitacao(unittest.TestCase):
         self.assertEqual(v["iguala_nombres"], "bate")
 
     def test_bandeira_so_de_um_lado_nao_reprova(self):
-        """Desenhar a bandeira e da WTE-TASK-32, e ela ainda nao chegou."""
+        """Desenhar a bandeira e da WTE-TASK-29, e ela ainda nao chegou."""
         r = self.r(self.SEGUE + self.P32, self.SEGUE)
         self.assertEqual(r["erros"], [])
         v = {l["nome"]: l["veredito"] for l in r["linhas"]}
-        self.assertEqual(v["bandera"], "pendente da WTE-TASK-32")
+        self.assertEqual(v["bandera"], "pendente da WTE-TASK-29")
 
     def test_campo_de_texto_nao_e_medido(self):
         r = self.r(self.SEGUE + self.P32, self.SEGUE + self.P32)

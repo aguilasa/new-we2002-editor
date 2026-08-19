@@ -82,7 +82,7 @@ resolvido pelo nome importado no thunk).
 de 64 bits dividido por 10.000 na apresentação. A conta não produz `10000`:
 produz `'1'`. Lida como aritmética inteira, ela pareceria um preço de
 transferência — e num editor que tem preço de jogador como funcionalidade
-([WTE-TASK-30](../../../docs/tasks/30-preco-do-jogador.md)) essa leitura errada
+([WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md)) essa leitura errada
 teria sobrevivido a uma revisão.
 
 O que confirma a leitura certa é o próprio `.dfm`: `lista_descarte` nasce com as

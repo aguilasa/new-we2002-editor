@@ -61,7 +61,7 @@ Não trata.
 cinco globais em `0x00433dc0`…`0x00433dd0` são o estado do editor de cor 2D, e
 quem os lê são os outros 16 handlers do `ficha_color` (edição, na
 [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md)) e o render da
-[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md). Escrever este
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md). Escrever este
 corpo antes deles significaria inventar onde esse estado mora, e a decisão é
 das duas tasks que o consomem — não desta.
 

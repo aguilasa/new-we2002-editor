@@ -85,7 +85,7 @@ var
       0x00432e80  <cwd>\data               o `dat.bin`
 
     Vazias enquanto o `MainForm.FormCreate` nao rodou. Quem le asset e a fase
-    5 (WTE-TASK-31, 32); aqui elas so existem e sao montadas na mesma ordem. }
+    5 (WTE-TASK-28, 32); aqui elas so existem e sao montadas na mesma ordem. }
   DirImage: string = '';
   DirBarba: string = '';
   DirPelo: string = '';

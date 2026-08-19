@@ -79,9 +79,9 @@ Duas fontes alimentam as regras, e as duas sao medidas do binario:
 - os nomes que a IDE gera sozinha (`BitBtn1Click`, `SpeedButton2Click`), que
   sao moldura de dialogo -- abrir, fechar, OK/Cancelar -- e dao a R7.
 
-`FORMULA_OWNERS` marca, na coluna `nota`, os 16 handlers que a WTE-TASK-28
+`FORMULA_OWNERS` marca, na coluna `nota`, os 16 handlers que a WTE-TASK-30
 expressamente **exclui** do seu escopo por serem formula e nao dialogo (preco
-na WTE-TASK-30, render 2D na WTE-TASK-32). Eles continuam com `grupo` entre os
+na WTE-TASK-32, render 2D na WTE-TASK-29). Eles continuam com `grupo` entre os
 quatro valores -- nao ha um quinto --, e a `nota` evita trabalho dobrado.
 
 
@@ -158,7 +158,7 @@ EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
         "dois."),
     ("MainForm", "base_teamClick"): (
         "auxiliar",
-        "a WTE-TASK-28 o lista entre os auxiliares; o nome não é genérico o "
+        "a WTE-TASK-30 o lista entre os auxiliares; o nome não é genérico o "
         "bastante para a R7 alcançá-lo."),
     ("estrategia", "ComboBoxDrawItem"): (
         "carga",
@@ -167,7 +167,7 @@ EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
         "trabalho."),
     ("ficha_color", "botonClick"): (
         "auxiliar",
-        "a WTE-TASK-28 o lista entre os auxiliares, ao lado dos BitBtn do "
+        "a WTE-TASK-30 o lista entre os auxiliares, ao lado dos BitBtn do "
         "mesmo formulário."),
     ("ficha_color", "lista_col0Change"): (
         "edicao",
@@ -188,40 +188,40 @@ EXCEPTIONS: dict[tuple[str, str], tuple[str, str]] = {
         "WTE-TASK-26 o lista nominalmente."),
 }
 
-# Os 16 handlers que a WTE-TASK-28 exclui do proprio escopo por serem formula,
+# Os 16 handlers que a WTE-TASK-30 exclui do proprio escopo por serem formula,
 # nao dialogo. Nao mudam o `grupo` -- so viram anotacao, para que a fase 4 nao
 # os implemente duas vezes. Transcrito da tabela "O que fica de fora, e por
 # que" daquela tarefa, com uma correcao medida: `malla1MouseDown` e
 # `malla2MouseDown` pertencem a `estrategia`, nao a `ficha_color`.
-# Os dez nomes que a WTE-TASK-28 lista como "handlers repetidos por varios
+# Os dez nomes que a WTE-TASK-30 lista como "handlers repetidos por varios
 # formularios". A lista e literal -- e citacao de outro documento --, mas o
 # veredito de cada nome sai de count_by_name(), e um nome que nao exista entre
 # os 96 aborta, como em EXCEPTIONS e FORMULA_OWNERS. A linha de envelhecimento
 # saia escrita a mao para um unico nome (`botonClick`) quando a mesma consulta
 # responde pelos dez.
-TASK28_REPEATED: tuple[str, ...] = (
+TASK30_REPEATED: tuple[str, ...] = (
     "BitBtn1Click", "BitBtn2Click", "BitBtn3Click", "SpeedButton1Click",
     "SpeedButton2Click", "Button2Click", "Image3Click", "botonClick",
     "base_teamClick", "imagen_urlClick",
 )
 
 FORMULA_OWNERS: dict[tuple[str, str], str] = {
-    ("jugador", "etiqprecioClick"): "WTE-TASK-30",
-    ("jugador", "casilla_precioKeyPress"): "WTE-TASK-30",
-    ("MainForm", "colorearClick"): "WTE-TASK-32",
-    ("ficha_color", "gradienteClick"): "WTE-TASK-32",
-    ("ficha_color", "oscurecerClick"): "WTE-TASK-32",
-    ("ficha_color", "aclararClick"): "WTE-TASK-32",
-    ("ficha_color", "lista_col0Change"): "WTE-TASK-32",
-    ("ficha_color", "lista_col1change"): "WTE-TASK-32",
-    ("ficha_color", "lista_col2Change"): "WTE-TASK-32",
-    ("ficha_color", "lista_col3Change"): "WTE-TASK-32",
-    ("ficha_color", "colorMouseDown"): "WTE-TASK-32",
-    ("ficha_color", "barraChange"): "WTE-TASK-32",
-    ("ficha_color", "barra1Change"): "WTE-TASK-32",
-    ("ficha_color", "barra2Change"): "WTE-TASK-32",
-    ("estrategia", "malla1MouseDown"): "WTE-TASK-32",
-    ("estrategia", "malla2MouseDown"): "WTE-TASK-32",
+    ("jugador", "etiqprecioClick"): "WTE-TASK-32",
+    ("jugador", "casilla_precioKeyPress"): "WTE-TASK-32",
+    ("MainForm", "colorearClick"): "WTE-TASK-29",
+    ("ficha_color", "gradienteClick"): "WTE-TASK-29",
+    ("ficha_color", "oscurecerClick"): "WTE-TASK-29",
+    ("ficha_color", "aclararClick"): "WTE-TASK-29",
+    ("ficha_color", "lista_col0Change"): "WTE-TASK-29",
+    ("ficha_color", "lista_col1change"): "WTE-TASK-29",
+    ("ficha_color", "lista_col2Change"): "WTE-TASK-29",
+    ("ficha_color", "lista_col3Change"): "WTE-TASK-29",
+    ("ficha_color", "colorMouseDown"): "WTE-TASK-29",
+    ("ficha_color", "barraChange"): "WTE-TASK-29",
+    ("ficha_color", "barra1Change"): "WTE-TASK-29",
+    ("ficha_color", "barra2Change"): "WTE-TASK-29",
+    ("estrategia", "malla1MouseDown"): "WTE-TASK-29",
+    ("estrategia", "malla2MouseDown"): "WTE-TASK-29",
 }
 
 GROUPS = ("carga", "edicao", "gravacao", "auxiliar")
@@ -237,7 +237,7 @@ GROUP_TASK = {
     "carga": ("WTE-TASK-25", "../../docs/tasks/25-handlers-de-carga.md"),
     "edicao": ("WTE-TASK-26", "../../docs/tasks/26-handlers-de-edicao.md"),
     "gravacao": ("WTE-TASK-27", "../../docs/tasks/27-handlers-de-gravacao.md"),
-    "auxiliar": ("WTE-TASK-28", "../../docs/tasks/28-handlers-auxiliares.md"),
+    "auxiliar": ("WTE-TASK-30", "../../docs/tasks/30-handlers-auxiliares.md"),
 }
 
 
@@ -515,7 +515,7 @@ def dialog_units(img: Image, forms: set[str]) -> list[str]:
     O C++Builder exporta `@@T<unidade>@Initialize` / `@Finalize` para cada
     unidade com codigo de inicializacao a emitir. As telas grandes nao tem, e
     por isso nao aparecem: e exatamente o corte que a secao 1.3 do plano
-    descreve, e o mesmo que a WTE-TASK-28 chama de "os 13 dialogos".
+    descreve, e o mesmo que a WTE-TASK-30 chama de "os 13 dialogos".
 
     A tabela de nomes deste binario **repete** entrada (79 nomes, 46
     distintos: `@@Tep2002_info@Initialize` aparece tres vezes). O que importa
@@ -836,14 +836,14 @@ class Measurement:
                 + ", ".join(f"{f}.{h}" for f, h in dead) + ".")
 
         medidos = {r.method.name for r in self.rows}
-        dead = sorted(set(TASK28_REPEATED) - medidos)
+        dead = sorted(set(TASK30_REPEATED) - medidos)
         if dead:
             raise DumpError(
-                "nome(s) citado(s) da WTE-TASK-28 que nao existem entre os "
+                "nome(s) citado(s) da WTE-TASK-30 que nao existem entre os "
                 f"{len(self.rows)} handlers medidos: " + ", ".join(dead)
                 + ".\n       A tabela de envelhecimento emitiria uma linha "
                   "sobre um handler que nao\n       existe. Corrija a citacao "
-                  "ou remova o nome de TASK28_REPEATED.")
+                  "ou remova o nome de TASK30_REPEATED.")
 
         self.distribution = {g: sum(1 for r in self.rows if r.group == g)
                              for g in GROUPS}
@@ -1104,12 +1104,12 @@ def render_md(m: Measurement) -> str:
         f"C++Builder exporta\n  `@@T<unidade>@Initialize` para cada unidade "
         f"com inicialização a emitir; as telas\n  grandes não têm e por isso "
         f"não aparecem. É o mesmo corte da §1.3 do plano, e é\n  exatamente o "
-        f"que a WTE-TASK-28 chama de \"os 13 diálogos\": "
+        f"que a WTE-TASK-30 chama de \"os 13 diálogos\": "
         + ", ".join(f"`{d}`" for d in m.dialogs) + ".\n"
         "- **R7** usa o nome que a IDE gera sozinha (`BitBtn1Click`, "
         "`SpeedButton2Click`,\n  `Image3Click`). Componente que o autor nunca "
         "renomeou é botão de moldura —\n  abrir, fechar, OK/Cancelar —, e é "
-        "assim que a WTE-TASK-28 já os enumera.\n")
+        "assim que a WTE-TASK-30 já os enumera.\n")
 
     add(f"### As {len(EXCEPTIONS)} exceções\n")
     add("| Formulário | Handler | Grupo | Por quê |")
@@ -1150,11 +1150,11 @@ def render_md(m: Measurement) -> str:
         "mudar é a tabela de exceções.\n"
         "- `etiqprecioClick` é **edição** por eliminação: ele calcula e "
         "mostra o preço, não\n  carrega nem grava, e não há um quinto grupo. "
-        "A coluna `nota` o marca como\n  `WTE-TASK-30`.\n")
+        "A coluna `nota` o marca como\n  `WTE-TASK-32`.\n")
 
-    add(f"### Os {len(FORMULA_OWNERS)} handlers que a WTE-TASK-28 devolve às "
-        f"tasks 30 e 32\n")
-    add("A WTE-TASK-28 exclui do próprio escopo os handlers de `ficha_color` "
+    add(f"### Os {len(FORMULA_OWNERS)} handlers que a WTE-TASK-30 devolve às "
+        f"tasks 29 e 32\n")
+    add("A WTE-TASK-30 exclui do próprio escopo os handlers de `ficha_color` "
         "e de `jugador`\nque são **fórmula**, não diálogo. Eles continuam com "
         "`grupo` entre os quatro — não\nexiste um quinto —, e a coluna `nota` "
         "diz quem os implementa, para que a fase 4 não\nfaça o trabalho duas "
@@ -1213,26 +1213,26 @@ def render_md(m: Measurement) -> str:
         f"**{form_create + form_show}** = {form_create} `FormCreate` + "
         f"{form_show} `FormShow` |")
     etiq = next(r for r in m.rows if r.method.name == "etiqprecioClick")
-    for onde in ("§5.1 do plano", "WTE-TASK-30"):
+    for onde in ("§5.1 do plano", "WTE-TASK-32"):
         add(f"| {onde} | `etiqprecioClick` e o formulário "
             f"`ficha_creditos_equipo` | o dono é **`{etiq.method.form}`**; "
             f"`ficha_creditos_equipo` só publica `FormCreate` |")
     malla = sorted({r.method.form for r in m.rows
                     if r.method.name.startswith("malla")})
-    add(f"| WTE-TASK-28 | `malla1MouseDown` / `malla2MouseDown` pertencem a "
+    add(f"| WTE-TASK-30 | `malla1MouseDown` / `malla2MouseDown` pertencem a "
         f"`ficha_color` e `ficha_creditos_equipo` | o dono é "
         + ", ".join(f"**`{f}`**" for f in malla) + " |")
     # Os dez nomes que a 28 chama de "repetidos", julgados pela contagem
     # medida em vez de um a um a mao.
-    unicos = [n for n in TASK28_REPEATED if len(counts[n]) == 1]
-    add(f"| WTE-TASK-28 | `{unicos[0]}` e mais "
+    unicos = [n for n in TASK30_REPEATED if len(counts[n]) == 1]
+    add(f"| WTE-TASK-30 | `{unicos[0]}` e mais "
         f"{len(unicos) - 1} entre os \"handlers repetidos por vários "
         f"formulários\" | aparecem **uma vez cada**: "
         + ", ".join(f"`{n}` (`{counts[n][0]}`)" for n in unicos) + " |")
-    add(f"| WTE-TASK-28 | `BitBtn1Click` (**3×**) na mesma lista | "
+    add(f"| WTE-TASK-30 | `BitBtn1Click` (**3×**) na mesma lista | "
         f"**{bitbtn1}×** |")
     ficha = sorted({v.form for v in m.vmts if v.form.startswith("ficha_")})
-    add(f"| WTE-TASK-28 | \"os **13** diálogos\", e o escopo lista **"
+    add(f"| WTE-TASK-30 | \"os **13** diálogos\", e o escopo lista **"
         f"{len(ficha)}** formulários `ficha_*` | os 13 são as **unidades "
         f"exportadas**; `ficha_color` e `ficha_error` são telas grandes e "
         f"ficam de fora deles |")

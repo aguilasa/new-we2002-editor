@@ -171,7 +171,7 @@ SEM_GOVERNO = {
         "`casilla_dorsalKeyPress`; o `MaxLength` de 10 nunca chega a valer"),
     "casilla_precio": (
         "campo numérico de preço. O `MaxLength` de 3 limita dígito, não texto "
-        "— ver a WTE-TASK-30"),
+        "— ver a WTE-TASK-32"),
 }
 
 

@@ -150,7 +150,7 @@ identificável, não reabrir um julgamento.
 | carga | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) | 28 |
 | edição | [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md) | 44 |
 | gravação | [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md) | 6 |
-| auxiliar | [WTE-TASK-28](../../docs/tasks/28-handlers-auxiliares.md) | 18 |
+| auxiliar | [WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) | 18 |
 | **total** | | **96** |
 
 ### As oito regras, na ordem em que são tentadas
@@ -174,19 +174,19 @@ Duas das regras não são adivinhação de nome, e sim medida do binário:
 - **R6** usa as **13 unidades exportadas**. O C++Builder exporta
   `@@T<unidade>@Initialize` para cada unidade com inicialização a emitir; as telas
   grandes não têm e por isso não aparecem. É o mesmo corte da §1.3 do plano, e é
-  exatamente o que a WTE-TASK-28 chama de "os 13 diálogos": `ficha_about`, `ficha_creditos_equipo`, `ficha_dorsal`, `ficha_enlaza`, `ficha_error2`, `ficha_info`, `ficha_info2`, `ficha_info3`, `ficha_info4`, `ficha_movertodos`, `ficha_salida`, `ficha_warning`, `ficha_warning_2`.
+  exatamente o que a WTE-TASK-30 chama de "os 13 diálogos": `ficha_about`, `ficha_creditos_equipo`, `ficha_dorsal`, `ficha_enlaza`, `ficha_error2`, `ficha_info`, `ficha_info2`, `ficha_info3`, `ficha_info4`, `ficha_movertodos`, `ficha_salida`, `ficha_warning`, `ficha_warning_2`.
 - **R7** usa o nome que a IDE gera sozinha (`BitBtn1Click`, `SpeedButton2Click`,
   `Image3Click`). Componente que o autor nunca renomeou é botão de moldura —
-  abrir, fechar, OK/Cancelar —, e é assim que a WTE-TASK-28 já os enumera.
+  abrir, fechar, OK/Cancelar —, e é assim que a WTE-TASK-30 já os enumera.
 
 ### As 9 exceções
 
 | Formulário | Handler | Grupo | Por quê |
 |---|---|---|---|
-| `MainForm` | `base_teamClick` | auxiliar | a WTE-TASK-28 o lista entre os auxiliares; o nome não é genérico o bastante para a R7 alcançá-lo. |
+| `MainForm` | `base_teamClick` | auxiliar | a WTE-TASK-30 o lista entre os auxiliares; o nome não é genérico o bastante para a R7 alcançá-lo. |
 | `MainForm` | `boton_mcrClick` | carga | abre o `.mcr` do memory card: lê, não grava. O par que grava é `boton_mcr2isoClick`, e o prefixo `boton_` sozinho não separa os dois. |
 | `estrategia` | `ComboBoxDrawItem` | carga | owner-draw do combo de formações — só pinta. A WTE-TASK-25 o reivindica junto com a lista que ele desenha, e é ela que ordena o trabalho. |
-| `ficha_color` | `botonClick` | auxiliar | a WTE-TASK-28 o lista entre os auxiliares, ao lado dos BitBtn do mesmo formulário. |
+| `ficha_color` | `botonClick` | auxiliar | a WTE-TASK-30 o lista entre os auxiliares, ao lado dos BitBtn do mesmo formulário. |
 | `ficha_color` | `lista_col0Change` | edição | lista de cor da paleta do editor 2D, não carga de dado do jogo — o prefixo `lista_` da R4 aponta para o lado errado aqui. |
 | `ficha_color` | `lista_col1change` | edição | idem `lista_col0Change`. O `c` minúsculo de `change` está no binário e é transcrito verbatim. |
 | `ficha_color` | `lista_col2Change` | edição | idem `lista_col0Change`. |
@@ -219,33 +219,33 @@ Duas ressalvas de leitura, não de medida:
   lugar de mudar é a tabela de exceções.
 - `etiqprecioClick` é **edição** por eliminação: ele calcula e mostra o preço, não
   carrega nem grava, e não há um quinto grupo. A coluna `nota` o marca como
-  `WTE-TASK-30`.
+  `WTE-TASK-32`.
 
-### Os 16 handlers que a WTE-TASK-28 devolve às tasks 30 e 32
+### Os 16 handlers que a WTE-TASK-30 devolve às tasks 29 e 32
 
-A WTE-TASK-28 exclui do próprio escopo os handlers de `ficha_color` e de `jugador`
+A WTE-TASK-30 exclui do próprio escopo os handlers de `ficha_color` e de `jugador`
 que são **fórmula**, não diálogo. Eles continuam com `grupo` entre os quatro — não
 existe um quinto —, e a coluna `nota` diz quem os implementa, para que a fase 4 não
 faça o trabalho duas vezes:
 
 | Endereço | Handler | Formulário | `grupo` | `nota` |
 |---|---|---|---|---|
-| `0x00405e40` | `barraChange` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x00406358` | `barra1Change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x00406384` | `barra2Change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x004063b0` | `gradienteClick` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x004065fc` | `oscurecerClick` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x00406744` | `aclararClick` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x0040688c` | `lista_col0Change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x004068b0` | `lista_col1change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x004068ec` | `lista_col2Change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x0040690c` | `lista_col3Change` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x00406a0c` | `colorMouseDown` | `ficha_color` | edição | WTE-TASK-32 |
-| `0x00408b9c` | `casilla_precioKeyPress` | `jugador` | edição | WTE-TASK-30 |
-| `0x00408bb8` | `etiqprecioClick` | `jugador` | edição | WTE-TASK-30 |
-| `0x00409f4c` | `malla1MouseDown` | `estrategia` | edição | WTE-TASK-32 |
-| `0x0040a000` | `malla2MouseDown` | `estrategia` | edição | WTE-TASK-32 |
-| `0x00410ea8` | `colorearClick` | `MainForm` | edição | WTE-TASK-32 |
+| `0x00405e40` | `barraChange` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x00406358` | `barra1Change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x00406384` | `barra2Change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x004063b0` | `gradienteClick` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x004065fc` | `oscurecerClick` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x00406744` | `aclararClick` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x0040688c` | `lista_col0Change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x004068b0` | `lista_col1change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x004068ec` | `lista_col2Change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x0040690c` | `lista_col3Change` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x00406a0c` | `colorMouseDown` | `ficha_color` | edição | WTE-TASK-29 |
+| `0x00408b9c` | `casilla_precioKeyPress` | `jugador` | edição | WTE-TASK-32 |
+| `0x00408bb8` | `etiqprecioClick` | `jugador` | edição | WTE-TASK-32 |
+| `0x00409f4c` | `malla1MouseDown` | `estrategia` | edição | WTE-TASK-29 |
+| `0x0040a000` | `malla2MouseDown` | `estrategia` | edição | WTE-TASK-29 |
+| `0x00410ea8` | `colorearClick` | `MainForm` | edição | WTE-TASK-29 |
 
 ## Os 96, por endereço
 
@@ -369,11 +369,11 @@ ao fechar a fase 1 é a WTE-TASK-09.
 | WTE-TASK-04 | `BitBtn1Click` **duas** | **4** — `estrategia`, `ficha_color`, `ficha_dorsal`, `jugador` |
 | WTE-TASK-25 | `FormCreate` / `FormShow` — **19 endereços** | **18** = 16 `FormCreate` + 2 `FormShow` |
 | §5.1 do plano | `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` só publica `FormCreate` |
-| WTE-TASK-30 | `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` só publica `FormCreate` |
-| WTE-TASK-28 | `malla1MouseDown` / `malla2MouseDown` pertencem a `ficha_color` e `ficha_creditos_equipo` | o dono é **`estrategia`** |
-| WTE-TASK-28 | `SpeedButton2Click` e mais 5 entre os "handlers repetidos por vários formulários" | aparecem **uma vez cada**: `SpeedButton2Click` (`MainForm`), `Button2Click` (`MainForm`), `Image3Click` (`MainForm`), `botonClick` (`ficha_color`), `base_teamClick` (`MainForm`), `imagen_urlClick` (`ficha_about`) |
-| WTE-TASK-28 | `BitBtn1Click` (**3×**) na mesma lista | **4×** |
-| WTE-TASK-28 | "os **13** diálogos", e o escopo lista **15** formulários `ficha_*` | os 13 são as **unidades exportadas**; `ficha_color` e `ficha_error` são telas grandes e ficam de fora deles |
+| WTE-TASK-32 | `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` só publica `FormCreate` |
+| WTE-TASK-30 | `malla1MouseDown` / `malla2MouseDown` pertencem a `ficha_color` e `ficha_creditos_equipo` | o dono é **`estrategia`** |
+| WTE-TASK-30 | `SpeedButton2Click` e mais 5 entre os "handlers repetidos por vários formulários" | aparecem **uma vez cada**: `SpeedButton2Click` (`MainForm`), `Button2Click` (`MainForm`), `Image3Click` (`MainForm`), `botonClick` (`ficha_color`), `base_teamClick` (`MainForm`), `imagen_urlClick` (`ficha_about`) |
+| WTE-TASK-30 | `BitBtn1Click` (**3×**) na mesma lista | **4×** |
+| WTE-TASK-30 | "os **13** diálogos", e o escopo lista **15** formulários `ficha_*` | os 13 são as **unidades exportadas**; `ficha_color` e `ficha_error` são telas grandes e ficam de fora deles |
 
 Duas observações que não são correção, e sim coisa que ninguém tinha contado:
 

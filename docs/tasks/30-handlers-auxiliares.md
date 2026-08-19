@@ -1,5 +1,5 @@
 ---
-id: WTE-TASK-28
+id: WTE-TASK-30
 title: "Handlers dos 13 diálogos auxiliares"
 type: implementação
 category: comportamento
@@ -8,7 +8,7 @@ depends_on: ["WTE-TASK-25"]
 status: pendente
 ---
 
-# WTE-TASK-28: Handlers auxiliares
+# WTE-TASK-30: Handlers auxiliares
 
 ## Contexto
 
@@ -46,17 +46,17 @@ ela, "implementar `BitBtn1Click`" é ambíguo entre quatro formulários.
 ### O que fica de fora, e por quê
 
 Estes pertencem a `ficha_color`, `jugador`, `MainForm` e `estrategia` mas são
-**fórmula**, não diálogo, e são das tasks 30 e 32:
+**fórmula**, não diálogo, e são das tasks 29 e 32:
 
 | Handler | Formulário | Dono |
 |---|---|---|
-| `etiqprecioClick`, `casilla_precioKeyPress` | `jugador` | WTE-TASK-30 (preço) |
-| `colorearClick` | `MainForm` | WTE-TASK-32 (render 2D) |
-| `gradienteClick`, `oscurecerClick`, `aclararClick`, `lista_col0..3Change`, `colorMouseDown`, `barraChange`, `barra1Change`, `barra2Change` | `ficha_color` | WTE-TASK-32 (render 2D) |
-| `malla1MouseDown`, `malla2MouseDown` | `estrategia` | WTE-TASK-32 (render 2D) |
+| `etiqprecioClick`, `casilla_precioKeyPress` | `jugador` | WTE-TASK-32 (preço) |
+| `colorearClick` | `MainForm` | WTE-TASK-29 (render 2D) |
+| `gradienteClick`, `oscurecerClick`, `aclararClick`, `lista_col0..3Change`, `colorMouseDown`, `barraChange`, `barra1Change`, `barra2Change` | `ficha_color` | WTE-TASK-29 (render 2D) |
+| `malla1MouseDown`, `malla2MouseDown` | `estrategia` | WTE-TASK-29 (render 2D) |
 
 Aqui se implementa **a moldura** desses formulários — abrir, fechar, OK/Cancelar
-— e as tasks 30 e 32 preenchem o miolo.
+— e as tasks 29 e 32 preenchem o miolo.
 
 ### `ficha_enlaza` merece atenção
 
@@ -84,7 +84,7 @@ o que o `Save` usa para reconstruir as all-star. Um diálogo que edita link **n�
 - [ ] Todo handler restante com veredito escrito
 - [ ] Handlers de nome repetido resolvidos pelo formulário dono
 - [ ] `ficha_enlaza` e `ficha_movertodos` analisados, não presumidos triviais
-- [ ] A moldura dos formulários das tasks 30 e 32 pronta
+- [ ] A moldura dos formulários das tasks 29 e 32 pronta
 - [ ] Nenhum `trivial` atribuído sem ter olhado o código
 - [ ] Commit no formato conventional, em inglês
 

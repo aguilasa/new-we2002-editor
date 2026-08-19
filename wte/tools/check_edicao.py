@@ -60,12 +60,12 @@ REL_OUT = "wte/re/edicao-cobertura.md"
 # A lista sai do enunciado da WTE-TASK-26, e o script confere que a soma fecha:
 # 44 no TSV, 16 aqui, 28 na tabela de instrumentos.
 FORA = {
-    "ficha_color": "WTE-TASK-32",          # os 11 do dialogo de cor
-    "colorearClick": "WTE-TASK-32",
-    "malla1MouseDown": "WTE-TASK-32",
-    "malla2MouseDown": "WTE-TASK-32",
-    "casilla_precioKeyPress": "WTE-TASK-30",
-    "etiqprecioClick": "WTE-TASK-30",
+    "ficha_color": "WTE-TASK-29",          # os 11 do dialogo de cor
+    "colorearClick": "WTE-TASK-29",
+    "malla1MouseDown": "WTE-TASK-29",
+    "malla2MouseDown": "WTE-TASK-29",
+    "casilla_precioKeyPress": "WTE-TASK-32",
+    "etiqprecioClick": "WTE-TASK-32",
 }
 
 TELA = "tela"

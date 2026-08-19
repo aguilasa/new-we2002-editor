@@ -11,8 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 Se `$ARGUMENTS` estiver preenchido, trate como pedido de tarefa específica
-(ex.: `WTE-TASK-30`) e confira contra as regras de seleção do prompt antes de
-executar — a exceção da WTE-TASK-30 (preço, fora de ordem) exige pedido
+(ex.: `WTE-TASK-32`) e confira contra as regras de seleção do prompt antes de
+executar — a antecipação da WTE-TASK-32 (preço) exige pedido
 explícito do usuário. Argumento vazio significa "a próxima pendente na ordem".
 
 ## O que este comando garante

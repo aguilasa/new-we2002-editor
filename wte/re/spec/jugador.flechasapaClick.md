@@ -120,7 +120,7 @@ mas as três carregadoras (`0x00406fe0`, 301 B; `0x00407110`, 552 B;
 `0x00407338`, 561 B — 1.414 somados) ficaram fora da
 [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md), que é dona de
 handler, e fora da
-[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md), que é dona de
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md), que é dona de
 asset mas dos dois do `MainForm` — uniforme e bandeira.
 
 **Elas têm dono desde 2026-08-18, e o dono é uma decisão, não uma
@@ -152,9 +152,9 @@ controles é 6 e só existem `barba_0..6`. O `TUpDown` do original satura em
 no disco. Já registrado na §5.1 da [`assets.md`](../assets.md); aparece aqui
 porque é este handler que fecha o ciclo.
 
-**Não é da WTE-TASK-32, e deixou de poder ser.** A
+**Não é da WTE-TASK-29, e deixou de poder ser.** A
 [CORR-WTE-063](../../../docs/tasks/CORR-WTE-063.md) tirou cara, cabelo e barba
-do escopo dela — a 32 continua sendo dona de uniforme e bandeira do `MainForm`
+do escopo dela — a 29 continua sendo dona de uniforme e bandeira do `MainForm`
 e não ganha nada da ficha. A saturação, porém, **não morre com o desenho**: ela
 acontece no `TUpDown`, que o port já tem, e o 7 que vira 6 chega ao disco pela
 gravação. O dono é a

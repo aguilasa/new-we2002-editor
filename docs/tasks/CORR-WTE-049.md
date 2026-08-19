@@ -151,11 +151,11 @@ três coisas erradas:
 **Problemas encontrados:**
 
 A primeira redação fechava dizendo que as faixas sem dono *"voltam pela
-CORR-WTE-044 ou pela WTE-TASK-32"* — herdando o "voltam pela 19 ou pela
+CORR-WTE-044 ou pela WTE-TASK-29"* — herdando o "voltam pela 19 ou pela
 CORR-WTE-044" do texto velho. A CORR-WTE-044 está **concluída** desde
 2026-08-10: apontar uma correção fechada como rota de trabalho futuro é
 exatamente o defeito que esta CORR existe para consertar, só que com outro
-alvo. Ficou só a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md), que o
+alvo. Ficou só a [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md), que o
 `progresso.md` já declara dona da região da camisa.
 
 **Arquivos criados/modificados:**

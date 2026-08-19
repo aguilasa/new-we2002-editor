@@ -26,8 +26,8 @@ Medido, esse handler chama **13** rotinas internas —
 sem:
 
 - `0x004050d0` — carrega os campos de nome do time selecionado para as globais
-- `0x00405270` — desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)
-- `0x004056c8` — desenha o uniforme 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)
+- `0x00405270` — desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
+- `0x004056c8` — desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 - `0x0040b0b4` — preenche as 23 legendas `dorsalN` com os numeros de camisa
 - `0x0040b188` — marca a camisa N: apaga a marcada, acha a nova por `FindComponent`, destaca
 - `0x0040b2d8` — preenche `lista_jugadores_1` com os 23 nomes, filtrados
@@ -86,9 +86,9 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x00404e70` | 2 | 285 | `0x004050d0` | — |
 | `0x00404f90` | 2 | 318 | `0x004050d0` | — |
 | `0x004050d0` | 1 | 209 | `MainForm.lista_equiposChange` | carrega os campos de nome do time selecionado para as globais |
-| `0x00405270` | 1 | 502 | `MainForm.lista_equiposChange` | desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md) |
+| `0x00405270` | 1 | 502 | `MainForm.lista_equiposChange` | desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
 | `0x00405468` | 1 | 606 | `MainForm.lista_equipos_2Change` | — |
-| `0x004056c8` | 1 | 1034 | `MainForm.lista_equiposChange` | desenha o uniforme 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md) |
+| `0x004056c8` | 1 | 1034 | `MainForm.lista_equiposChange` | desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
 | `0x00406fb4` | 2 | 44 | `0x0040756c` | — |
 | `0x00406fe0` | 2 | 301 | `0x0040756c` | — |
 | `0x00407110` | 2 | 552 | `0x0040756c` | — |
@@ -304,7 +304,7 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 ### `0x00405270` — 502 bytes
 
-- **Papel:** desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)
+- **Papel:** desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 - **Chamada por:** `MainForm.lista_equiposChange`
 - **Chama internas:** `0x00415718`, `0x0041978c`, `0x0042120c`, `0x004213f8`, `0x004213b4`, `0x00417530`, `0x00417810`, `0x00404dd4`, `0x00418f98`, `0x00417170`
 - **Importados:** `@Sysutils@CurrToStr$qqr15System@Currency`, `@Graphics@TPicture@LoadFromFile$qqrx17System@AnsiString`
@@ -313,7 +313,7 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 ### `0x004056c8` — 1034 bytes
 
-- **Papel:** desenha o uniforme 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)
+- **Papel:** desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 - **Chamada por:** `MainForm.lista_equiposChange`
 - **Chama internas:** `0x00415718`, `0x0041978c`, `0x0042120c`, `0x004213f8`, `0x004213e4`, `0x004213b4`, `0x00417530`, `0x00417810`, `0x00404dd4`, `0x00418f98`, `0x00417170`
 - **Importados:** `@Sysutils@CurrToStr$qqr15System@Currency`, `@Graphics@TPicture@LoadFromFile$qqrx17System@AnsiString`

@@ -82,11 +82,11 @@ isso** — nenhuma faixa além das que o oráculo grava pelo mesmo motivo.
 
 O critério de tela pedia comparação da janela carregada, e a janela carregada
 tem bandeira e uniforme 2D — que são
-[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). Mas a 32 depende da 27,
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md). Mas a 29 dependia da 27,
 que depende da 26, que depende **desta**:
 
 ```text
-25 ──► 26 ──► 27 ──► 32 ──┐
+25 ──► 26 ──► 27 ──► 29 ──┐
  ▲                        │
  └────────────────────────┘   pelo criterio de tela da 25
 ```
@@ -96,10 +96,16 @@ Nenhuma passagem quebra isso; é a mesma forma de circularidade que a
 [WTE-TASK-22](/docs/tasks/22-harness-golden.md), e ela se desfez por decisão,
 não por mais uma passagem.
 
+*(Os números acima são os de hoje. Na renumeração de 2026-08-19 a task de camisa
+2D passou de 32 para 29 e subiu para a fase 4, levando consigo o
+`grabar_camisetaClick`; a última seta do diagrama deixou de existir, porque a 29
+não espera mais a gravação da 27. O corte que esta task fez continua valendo —
+ele resolveu o critério de tela, não a ordem.)*
+
 **A conferência de tela cobre o que o grupo de carga produz:** nome do time nos
 três campos, as cinco barras de força, os 23 números de camisa, a lista de
 jogadores, e o estado de habilitação dos controles que o `nacional` governa.
-**Bandeira e uniforme ficam fora, como pendência nomeada da WTE-TASK-32** — e é
+**Bandeira e uniforme ficam fora, como pendência nomeada da WTE-TASK-29** — e é
 lá que a comparação deles tem de aparecer, senão a exclusão daqui vira buraco.
 
 O que a 25 continua devendo, e que **não** foi afrouxado: as três rotinas 2D
@@ -163,7 +169,7 @@ e não simula comportamento.
       fica 4 px curta **nos dois lados**, pela cauda do degradê
 - [x] Tela conferida contra o original para pelo menos 3 times distintos, nos
       campos que o grupo de carga possui — bandeira e uniforme são pendência
-      nomeada da [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+      nomeada da [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md).
       Times 2, 9 e 63 (clube de ML), ROM japonesa, por
       `wte/tools/compara_tela.sh`: as 15 larguras de barra batem em pixel.
       **Os cinco grupos, desde a [CORR-WTE-057](/docs/tasks/CORR-WTE-057.md):**
@@ -396,7 +402,7 @@ e não simula comportamento.
   O corpo chama quatro auxiliares que não são dele: `0x0040b2d8` (preenche a
   lista de jogadores, com decodificador de nome próprio), `0x00405270` e
   `0x004056c8` (bandeira e uniforme 2D, que são da
-  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md)), e `0x0040b0b4` /
+  [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md)), e `0x0040b0b4` /
   `0x0040b188`. Escrever metade do corpo faria o `check_fase2.py` contar o
   handler como "com corpo escrito", e o índice afirmaria pronto o que está pela
   metade — que é exatamente a mentira de índice que este projeto já pagou duas
@@ -525,11 +531,11 @@ e não simula comportamento.
 - **Depois da passagem, duas decisões do usuário** *(2026-08-11)***:**
 
   O balanço da passagem mostrou que a task não fechava por passagem nenhuma: o
-  critério de tela dela dependia da WTE-TASK-32, que depende da 27, que depende
+  critério de tela dela dependia da WTE-TASK-29, que depende da 27, que depende
   da 26, que depende desta. As duas decisões estão escritas no enunciado, nas
   seções "O item 2 tinha um ciclo dentro" e "Onde mora auxiliar que não é
   handler", e a metade excluída do critério de tela virou linha de critério da
-  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) — exclusão sem dono
+  [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) — exclusão sem dono
   nomeado é buraco.
 
 - **O que falta para esta task fechar** *(revisado)***:**
@@ -944,7 +950,7 @@ e não simula comportamento.
   `ComboBoxDrawItem`, `lista_formacionesClick`, `mostrar_jugadorClick` e
   `mostrar_estrategiaClick`. O grupo vai a **28 de 28**. Cinco delas fecham com
   veredito `aberto` **e dono nomeado fora desta task**: `.tex` e `.mcr` são a
-  32 e a 31, o desenho do combo é a 37, e encher ficha e tática é a 26.
+  29 e a 28, o desenho do combo é a 37, e encher ficha e tática é a 26.
 
   **Os dois `mostrar_*` em Pascal, escopados em navegação.** O achado que
   organizou os dois: o original **não compara o ponteiro do `Sender`** com o do
@@ -1003,9 +1009,9 @@ e não simula comportamento.
   - encher a ficha de jogador e a tela de tática (`0x00404820`, `0x0040756c`,
     `0x0040a0b4`) — [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md);
   - `ficha_color.FormCreate` e `estrategia.FormCreate` — 26/32;
-  - bandeira e uniforme 2D — [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md),
+  - bandeira e uniforme 2D — [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md),
     que herdou a linha de critério de tela;
-  - o `.mcr` — [WTE-TASK-31](/docs/tasks/31-import-de-mcr.md);
+  - o `.mcr` — [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md);
   - o desenho do combo de tática — [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md).
 
 - **O que fica em aberto sem dono, e é dívida registrada:**

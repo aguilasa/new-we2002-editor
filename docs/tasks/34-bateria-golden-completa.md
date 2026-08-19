@@ -4,7 +4,7 @@ title: "Bateria golden completa — toda gravação, nas duas ROMs"
 type: verificação
 category: verificação
 phase: 6
-depends_on: ["WTE-TASK-29", "WTE-TASK-30", "WTE-TASK-31", "WTE-TASK-32", "WTE-TASK-33"]
+depends_on: ["WTE-TASK-31", "WTE-TASK-32", "WTE-TASK-33"]
 status: pendente
 ---
 
@@ -31,9 +31,9 @@ Uma bateria versionada, reproduzível, com resultado registrado.
 
 | Categoria | Origem |
 |---|---|
-| as seis gravações | WTE-TASK-27 |
-| import de `.mcr` para a imagem | WTE-TASK-31 |
-| gravação de camisa e bandeira | WTE-TASK-32 |
+| as quatro gravações sem fórmula | WTE-TASK-27 |
+| import de `.mcr` para a imagem | WTE-TASK-28 |
+| gravação de camisa e bandeira | WTE-TASK-29 |
 | edição + gravação combinadas | novo |
 | gravar duas vezes seguidas | novo |
 

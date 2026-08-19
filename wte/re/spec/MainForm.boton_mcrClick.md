@@ -50,6 +50,6 @@ Não trata no corpo do handler.
 ## Notas
 
 **Veredito `aberto`, com dono nomeado:** o formato `.mcr` é a
-[WTE-TASK-31](../../../docs/tasks/31-import-de-mcr.md), que trata de import e
+[WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md), que trata de import e
 export de memory card. Este handler é a porta de entrada dela, e implementá-lo
-sem a 31 seria abrir um diálogo que não leva a lugar nenhum.
+sem a 28 seria abrir um diálogo que não leva a lugar nenhum.

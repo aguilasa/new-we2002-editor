@@ -163,8 +163,8 @@ PAPEIS: dict[int, str] = {
                 "identidade (`+0x16`, `+0x17`) do buffer bater com a do destino",
     0x004050D0: "carrega os campos de nome do time selecionado para as globais",
     0x0040CBC8: "percorre a tabela de offsets em `.data`, seis colunas por linha",
-    0x00405270: "desenha a bandeira 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)",
-    0x004056C8: "desenha o uniforme 2D — [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md)",
+    0x00405270: "desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",
+    0x004056C8: "desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",
     0x0040B0B4: "preenche as 23 legendas `dorsalN` com os numeros de camisa",
     0x0040B188: "marca a camisa N: apaga a marcada, acha a nova por "
                 "`FindComponent`, destaca",

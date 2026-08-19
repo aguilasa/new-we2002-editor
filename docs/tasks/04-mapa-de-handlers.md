@@ -53,7 +53,7 @@ ligado em runtime, e vale saber qual.
 | `evento` | DFM (`OnClick`, `OnChange`, `OnMouseDown`, …) |
 | `grupo` | classificação manual: carga / edição / gravação / auxiliar |
 
-A coluna `grupo` é o que ordena as tasks 25 a 28.
+A coluna `grupo` é o que ordena as tasks 25 a 27 e a 30.
 
 ---
 
@@ -137,11 +137,11 @@ A coluna `grupo` é o que ordena as tasks 25 a 28.
   4. A §5.1 do plano dá `etiqprecioClick` ao formulário
      `ficha_creditos_equipo` — o dono é **`jugador`**, e
      `ficha_creditos_equipo` publica só `FormCreate`.
-  5. A WTE-TASK-28 dá `malla1MouseDown`/`malla2MouseDown` a `ficha_color` e
+  5. A WTE-TASK-30 dá `malla1MouseDown`/`malla2MouseDown` a `ficha_color` e
      `ficha_creditos_equipo` — o dono é **`estrategia`**.
-  6. A WTE-TASK-28 lista `botonClick` entre os "handlers repetidos por vários
+  6. A WTE-TASK-30 lista `botonClick` entre os "handlers repetidos por vários
      formulários" — ele aparece **uma vez**, em `ficha_color`.
-  7. A WTE-TASK-28 se chama "os 13 diálogos" mas enumera **15** formulários
+  7. A WTE-TASK-30 se chama "os 13 diálogos" mas enumera **15** formulários
      `ficha_*`. Os 13 são as unidades exportadas (§1.3); `ficha_color` e
      `ficha_error` são telas grandes e ficam de fora delas. A regra R6 da
      classificação usa os 13, medidos da `.edata`.

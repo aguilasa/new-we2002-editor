@@ -53,7 +53,7 @@ begin
     O original redesenha aqui `image/careto_base.bmp`, `image/pelo/pelo_<n>.bmp`
     e `image/barba/barba_<n>.bmp` -- `'2'` chama os tres, `'3'` e `'4'` o
     cabelo, `'5'` e `'6'` a barba. As tres carregadoras (0x00406fe0, 0x00407110,
-    0x00407338, 1.414 B somados) NAO TEM DONO: a WTE-TASK-32 cobre uniforme e
+    0x00407338, 1.414 B somados) NAO TEM DONO: a WTE-TASK-29 cobre uniforme e
     bandeira do MainForm, nao cara/cabelo/barba da ficha.
 
     E nao e so carregar. Cada uma abre o `.bmp` em "r+b" e REGRAVA A PALETA

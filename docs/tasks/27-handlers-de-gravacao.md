@@ -23,8 +23,8 @@ Vêm por último de propósito: dependem de carga e edição estarem certas.
 
 ## Objetivo
 
-Implementar as seis gravações, cada uma com golden verde antes de passar para a
-seguinte.
+Implementar as quatro gravações que não dependem de fórmula, cada uma com golden
+verde antes de passar para a seguinte.
 
 ### Alvos
 
@@ -33,15 +33,31 @@ seguinte.
 | `boton_nombres2isoClick` | `0x0040d534` | nomes na imagem |
 | `boton_barras2isoClick` | `0x0040cab8` | barras/atributos |
 | `boton_tex2isoClick` | `0x0040de18` | textura |
-| `boton_mcr2isoClick` | `0x0040c46c` | dados vindos de `.mcr` — **ver WTE-TASK-31** |
-| `grabar_camisetaClick` | `0x0040ee80` | camisa — **ver WTE-TASK-32** |
 | `grabar_memoryClick` | `0x0040f69c` | escreve `.mcr` (saída, não a imagem) |
 
-Dois deles são **compartilhados com a Fase 5**: `boton_mcr2isoClick` depende do
-parser de `.mcr` e `grabar_camisetaClick` do render 2D. Aqui se implementa a
-**gravação** — onde e como os bytes vão para a imagem; a *origem* dos bytes é
-das tasks 31 e 32. Se a ordem incomodar, inverta: nada impede fazer a 31/32
-antes, desde que o golden desta task rode depois.
+### As outras duas gravações não moram aqui, e a razão é o ciclo
+
+*(decisão do usuário, 2026-08-19)*
+
+`boton_mcr2isoClick` (`0x0040c46c`) e `grabar_camisetaClick` (`0x0040ee80`)
+também gravam na imagem, e até 2026-08-19 esta task era dona deles. Não é mais:
+o primeiro é da [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) e o segundo da
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md).
+
+O motivo é que a divisão anterior — gravação aqui, origem dos bytes lá — criava
+um **ciclo**: esta task não fechava sem o parser de `.mcr` e o render 2D, e as
+duas tasks que os entregam declaravam `depends_on` esta. A regra de seleção põe
+fase antes de número, então a 27 pendente seria escolhida para sempre. Cada uma
+das duas passou a **carregar** a gravação que ela viabiliza, e as duas subiram
+para a fase 4 — a mesma forma como a
+[CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez o ciclo do gate e como a
+[WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) entregou o critério de byte
+para cá.
+
+O que foi junto: as regras da próxima seção, o diff de controle, e a armadilha
+da descarga bufferizada. Nenhuma delas é sobre o handler — são sobre gravar
+nesta imagem —, e sem repeti-las lá o golden daquelas tasks nasceria com o
+defeito que a primeira passagem daqui levou oito dias para achar.
 
 ### Regras que não podem ser violadas
 
@@ -76,7 +92,7 @@ só chegam à imagem pelo `boton_barras2isoClick`, os nomes pelo
 forma que a [CORR-WTE-044](/docs/tasks/CORR-WTE-044.md) desfez para o gate.
 
 **A 26 passou a fechar por conferência de tela e esta task herdou o byte.** Na
-prática: cada uma das seis gravações roda o golden **duas** vezes —
+prática: cada uma das quatro gravações roda o golden **duas** vezes —
 
 1. **gravar sem editar** (o diff de controle da seção acima);
 2. **editar pela tela, com um handler do grupo da 26, e então gravar.**
@@ -95,9 +111,8 @@ Par mínimo por gravação, quando existir handler de edição correspondente:
 | `boton_nombres2isoClick` | `edit_nombre1/2/3KeyPress`, `iguala_nombresClick` |
 | `grabar_memoryClick` | os de número (`dorsalClick`, `scroll_dorsalChange`) |
 
-`boton_tex2isoClick`, `boton_mcr2isoClick` e `grabar_camisetaClick` não têm par
-na 26 — a origem dos bytes deles é das tasks 31 e 32, como já diz a seção de
-alvos.
+`boton_tex2isoClick` não tem par na 26: a fonte dele é um arquivo externo, não
+um campo de tela.
 
 ---
 
@@ -105,9 +120,9 @@ alvos.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/spec/<handler>.md` | criar (6) |
+| `wte/re/spec/<handler>.md` | criar (4) |
 | `wte/src/ep2002_*.pas` | modificar |
-| `wte/tools/roteiros/gravacao-*.sh` | criar (6) |
+| `wte/tools/roteiros/gravacao-*.sh` | criar (4) |
 
 ---
 
@@ -116,13 +131,20 @@ alvos.
 - [x] Diff de controle medido e registrado antes de qualquer edição
       — 2026-08-18, em [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md),
       gerado. Gravar sem editar **muda** 22 bytes: katakana virando ASCII
-- [ ] As seis com spec e com golden verde nas duas ROMs — **quatro** em
-      2026-08-19 (`boton_barras2iso`, `boton_nombres2iso`, `boton_tex2iso`,
-      `grabar_memory`), e só na ROM japonesa: a europeia não hospeda este grupo
+- [x] As quatro com spec e com golden verde — 2026-08-19
+      (`boton_barras2iso`, `boton_nombres2iso`, `boton_tex2iso`,
+      `grabar_memory`). **Só na ROM japonesa**, e o limite é medido, não
+      omissão: com a europeia o `wte.exe` morre na troca de time e a gravação
+      nunca acontece, então não existe oráculo daquele lado
 - [ ] **Cada gravação que tem par na WTE-TASK-26 rodada também com uma edição
       de tela antes** — herdado da 26 em 2026-08-12; ver a seção acima. É o
       único critério do projeto que julga edição e gravação juntas
-- [ ] EDC/ECC preservados — provado, não presumido
+- [ ] EDC/ECC preservados **nas quatro desta task** — nenhuma escreve fora do
+      payload de 2048 B do setor, e isso é conta sobre TSV já versionado, não
+      medição nova. A forma forte do critério migrou inteira para a
+      [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md), onde a pergunta é real:
+      o `boton_mcr2iso` é a única gravação do projeto que escreve setor
+      completo, e ali preservar EDC/ECC é decisão, não consequência
 - [ ] Nenhuma divergência sem veredito escrito
 - [x] `roms/` intocada em todas as rodadas — vale por passagem, e a de
       2026-08-18 rodou toda sobre cópia em `work/`
@@ -522,7 +544,7 @@ alvos.
 - **O `boton_dialogo_texClick` continua `aberto`, de propósito.** Portá-lo pela
   metade — só o `Execute` e o caminho — daria um veredito que afirma mais do que
   se fez, e o formato `.tex` é da
-  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). Na janela do port o
+  [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md). Na janela do port o
   botão de diálogo segue inerte, e está escrito na spec dele e na do
   `boton_tex2iso`.
 

@@ -44,7 +44,7 @@ mesmo se o valor divergir. O round-trip da
 [WTE-TASK-20](/docs/tasks/20-round-trip-headless.md) **não pega isto** — ele
 compara bytes de imagem, e os bytes são os mesmos. Quem veria a diferença é a
 tela: o custo do jogador é uma das quatro features da fase 5
-([WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md)).
+([WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md)).
 
 Vizinhos que **não** têm o problema, e que ajudam a delimitar o alvo:
 

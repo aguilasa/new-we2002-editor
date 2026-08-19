@@ -32,7 +32,7 @@ prosa, e o `--check` estaria guardando a prosa, não a medida.
 
 O que **é** enumerável aqui — as três tabelas de 95 entradas — não vira arquivo
 nesta task: a task 08 declara `wte/re/assets.md` como único arquivo a criar, e
-quem precisa da tabela linha a linha é a **WTE-TASK-32**. O comando que a extrai
+quem precisa da tabela linha a linha é a **WTE-TASK-29**. O comando que a extrai
 está na §3.2 e na §4.1; que ela vire TSV é decisão de lá.
 
 ### 0.1 Os dois utilitários usados em todo comando
@@ -482,7 +482,7 @@ disco vira 6 na tela — e, gravando de volta, **vira 6 no disco também**. Quem
 precisa saturar do mesmo jeito, ou tratar o 7 explicitamente e registrar a
 divergência, é a **WTE-TASK-27** — não a 32.
 
-> Esta linha dizia WTE-TASK-32 até 2026-08-18. A
+> Esta linha dizia WTE-TASK-29 até 2026-08-18. A
 > [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) tirou cara, cabelo e barba do
 > escopo daquela task — as três carregadoras viraram exclusão deliberada da
 > [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) —, mas a
@@ -551,7 +551,7 @@ código diz.
 O trio também é coerente com um único time selecionado: `camiseta2` + `pantalon0`
 é o uniforme *Primeiro* do time 1 (Scotland) na tabela da §4.1. A bandeira, não:
 `table[1] = 2`, e o arquivo tocado foi o **37**. É o esperado, e vale como aviso
-para a WTE-TASK-32 — **a forma da bandeira em vigor é o byte da imagem de CD, não
+para a WTE-TASK-29 — **a forma da bandeira em vigor é o byte da imagem de CD, não
 a entrada da tabela**; a tabela só alimenta o combo (§3.3).
 
 ### 6.2 Consequências
@@ -571,7 +571,7 @@ Três, todas para quem for escrever o lado Lazarus:
 > original só grava no arquivo porque a VCL de 2002 carregava paleta por
 > `LoadFromFile`, e reproduzir isso torna o porte read-write numa pasta de dados.
 >
-> Vale para os **dois renderizadores do `MainForm`**, que são os da WTE-TASK-32.
+> Vale para os **dois renderizadores do `MainForm`**, que são os da WTE-TASK-29.
 > Para os **três da ficha do jogador** a recomendação caducou em 2026-08-18: a
 > [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) decidiu **não implementá-los**,
 > e a entrada está na
@@ -724,9 +724,9 @@ diálogo ou já na carga passa pelo mesmo caminho.
 mostra `The file "dat.bin" must be in the "data" directory` (`0x004250bd`) e
 encerra. O `FILE*` fica num global (`0x00432e68`) aberto pela sessão inteira.
 
-> **Para a WTE-TASK-31.** A hipótese do enunciado — "`MC` liga isto ao import de
+> **Para a WTE-TASK-28.** A hipótese do enunciado — "`MC` liga isto ao import de
 > `.mcr`" — está **meio certa**. A primeira metade é mesmo o molde de cartão, e é
-> insumo da 31, mas do lado da **exportação** (`grabar_memoryClick`), não da
+> insumo da 28, mas do lado da **exportação** (`grabar_memoryClick`), não da
 > importação. A importação (`boton_mcrClick`, `0x0040c2c8`) lê o `.mcr` do
 > usuário e não toca em `dat.bin`. A segunda metade não tem nada a ver com
 > memory card: é payload de patch da imagem de CD, e é insumo de quem for

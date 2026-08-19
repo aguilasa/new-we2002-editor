@@ -29,7 +29,7 @@ Provar as três, e escrever o que o projeto **pode** e **não pode** afirmar.
 
 ### Condição 1 — os 96
 
-Já conferida na WTE-TASK-29. Reconferir que nada regrediu: o índice de
+Já conferida na WTE-TASK-31. Reconferir que nada regrediu: o índice de
 `re/spec/` continua com 96, sem `aberto`, e todo `não portado` com justificativa.
 
 ### Condição 2 — byte-idêntico

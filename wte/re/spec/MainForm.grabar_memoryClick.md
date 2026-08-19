@@ -268,4 +268,4 @@ efeito colateral acima.
 
 `boton_mcr2isoClick` (`0x0040c46c`) é o caminho inverso — lê um `.mcr` e grava
 **na imagem**. Ele é da mesma task, mas o parser é da
-[WTE-TASK-31](../../../docs/tasks/31-import-de-mcr.md).
+[WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md).

@@ -20,7 +20,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 1. **N tarefas por invocação, um commit por tarefa.** É a única regra do
    `/executar` que este comando relaxa. Todas as outras valem palavra por
    palavra — em dúvida, `docs/prompts/01-executar.md` é a fonte. Ordem de fase,
-   `depends_on`, e a exceção da WTE-TASK-30 (preço, fora de ordem, só com
+   `depends_on`, e a antecipação da WTE-TASK-32 (preço, só com
    pedido explícito do usuário) continuam de pé.
 
 2. **Não existe "executar tudo".** O padrão é 2 e o usuário pode pedir outro

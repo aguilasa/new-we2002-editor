@@ -768,8 +768,8 @@ def secao_passagem_5(w, todas_sessoes, conhecidos, candidatos) -> None:
         w(f"está **{(uni[0][0] - teto) // 1024 // 1024} MB acima** dele, e o")
         w("`newWe2002` nunca precisou nomeá-la porque não desenha uniforme.")
         w("")
-        w("É a entrada da [WTE-TASK-32]"
-          "(../../docs/tasks/32-camisa-e-bandeira-2d.md), e é a maior região")
+        w("É a entrada da [WTE-TASK-29]"
+          "(../../docs/tasks/29-camisa-e-bandeira-2d.md), e é a maior região")
         w("nova que esta task achou.")
         w("")
     w("---")

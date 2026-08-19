@@ -37,9 +37,9 @@ que entraram:
 
 | Onde | Diz | Medido |
 |---|---|---|
-| `docs/tasks/30-preco-do-jogador.md:37` | `formulário ficha_creditos_equipo` na tabela de entrada da tarefa | o dono de `etiqprecioClick` é **`jugador`** — a mesma correção que a linha da §5.1 já faz, no outro arquivo que a repete |
-| `docs/tasks/28-handlers-auxiliares.md:35` | `BitBtn1Click` (**3×**) | **4×** — a mesma contagem que a tabela de homônimos do próprio `.md` já traz |
-| `docs/tasks/28-handlers-auxiliares.md:36-38` | `SpeedButton2Click`, `Button2Click`, `Image3Click`, `base_teamClick`, `imagen_urlClick` entre os "repetidos por vários formulários" | **uma vez cada** — o `.md` registra só o sexto da mesma lista, `botonClick` |
+| `docs/tasks/32-preco-do-jogador.md:37` | `formulário ficha_creditos_equipo` na tabela de entrada da tarefa | o dono de `etiqprecioClick` é **`jugador`** — a mesma correção que a linha da §5.1 já faz, no outro arquivo que a repete |
+| `docs/tasks/30-handlers-auxiliares.md:35` | `BitBtn1Click` (**3×**) | **4×** — a mesma contagem que a tabela de homônimos do próprio `.md` já traz |
+| `docs/tasks/30-handlers-auxiliares.md:36-38` | `SpeedButton2Click`, `Button2Click`, `Image3Click`, `base_teamClick`, `imagen_urlClick` entre os "repetidos por vários formulários" | **uma vez cada** — o `.md` registra só o sexto da mesma lista, `botonClick` |
 
 A terceira é a que mostra o padrão: a linha de `botonClick` foi escrita à mão
 para um caso, quando a mesma consulta responde pelos seis.
@@ -88,16 +88,16 @@ Em `render_md()`, na tabela "Onde o plano e as tarefas envelheceram"
 1. Trocar a atribuição da primeira linha: de `§1.4 do plano e WTE-TASK-04` para
    `WTE-TASK-04 e docs/prompts/02-revisar.md`, que são os arquivos onde o "17"
    está escrito.
-2. Acrescentar a linha de `docs/tasks/30-preco-do-jogador.md`, ao lado da que
+2. Acrescentar a linha de `docs/tasks/32-preco-do-jogador.md`, ao lado da que
    já existe para a §5.1 — o dono sai de `m.rows`, como a da §5.1 já faz.
 3. Generalizar a linha de `botonClick`: em vez de um nome fixo, varrer a lista
-   que a WTE-TASK-28 chama de "repetidos" e emitir uma linha com **todos** os
+   que a WTE-TASK-30 chama de "repetidos" e emitir uma linha com **todos** os
    que a contagem medida dá 1, mais `BitBtn1Click` com a contagem real. A lista
-   da 28 é literal escrita à mão (é citação de outro documento), mas o veredito
+   da 30 é literal escrita à mão (é citação de outro documento), mas o veredito
    de cada nome vem de `count_by_name(m)`.
 
 O padrão a seguir é o de `EXCEPTIONS` e `FORMULA_OWNERS`, que já abortam quando
-uma chave escrita à mão não casa com handler medido: se um nome citado da 28
+uma chave escrita à mão não casa com handler medido: se um nome citado da 30
 deixar de existir no binário, o script deve **falhar**, não emitir uma linha
 sobre um handler que não existe.
 
@@ -129,7 +129,7 @@ inteira vira histórico ao fechar a fase 1.
       consertado, e a seção passou a dizer isso em vez de fingir que a citação
       ainda se lê lá. A atribuição, que era o defeito de verdade, aponta agora
       para os arquivos que **carregavam** a frase
-- [x] Nome citado da WTE-TASK-28 que não exista entre os 96 faz o script
+- [x] Nome citado da WTE-TASK-30 que não exista entre os 96 faz o script
       **abortar**, testado com uma entrada plantada
 - [x] A tabela lista os seis handlers de contagem 1 e o `BitBtn1Click` com 4
 - [x] `make -C wte check` verde
@@ -146,10 +146,10 @@ Três mudanças em `render_md()`, nenhuma no `.md` à mão:
 1. A atribuição da primeira linha saiu de `§1.4 do plano e WTE-TASK-04` para
    `WTE-TASK-04 e docs/prompts/02-revisar.md` — os dois arquivos que de fato
    carregavam o "17". O plano não contém a frase.
-2. A linha da `WTE-TASK-30` entrou ao lado da da §5.1: os dois documentos
+2. A linha da `WTE-TASK-32` entrou ao lado da da §5.1: os dois documentos
    repetem o mesmo erro de dono, e o valor sai de `m.rows` nas duas.
 3. A linha escrita à mão para `botonClick` virou uma varredura sobre
-   `TASK28_REPEATED`, os dez nomes que a WTE-TASK-28 chama de "repetidos". A
+   `TASK30_REPEATED`, os dez nomes que a WTE-TASK-30 chama de "repetidos". A
    lista é literal (é citação de outro documento), mas o veredito de cada nome
    vem de `count_by_name()`: seis dão 1 e saem numa linha só, com o formulário
    de cada um, e o `BitBtn1Click` ganhou linha própria com a contagem real.
@@ -184,7 +184,7 @@ e `wte/re/published_methods.md` está fora — os vizinhos dele usam
 
 **Arquivos criados/modificados:**
 
-- `wte/tools/dump_published.py` — `TASK28_REPEATED`, a guarda de nome morto e a
+- `wte/tools/dump_published.py` — `TASK30_REPEATED`, a guarda de nome morto e a
   tabela de envelhecimento em `render_md()`
 - `wte/re/published_methods.md` — regerado
 - `docs/tasks/04-mapa-de-handlers.md` — a mesma má-atribuição no Log

@@ -44,7 +44,7 @@ Quem o `we2002_core` de fato não tem são as **faixas sem dono** — regiões q
 camisa em `21168024`..`21203815`. Essas não podem aparecer num diff de dump
 Pascal × dump C++ nem se estivessem medidas, porque não há lado C++ para elas.
 Continuam pendentes, e a região da camisa tem dono declarado: a
-[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md). O que **não** pode
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md). O que **não** pode
 acontecer é esta task afirmar cobertura sobre elas.
 
 ---

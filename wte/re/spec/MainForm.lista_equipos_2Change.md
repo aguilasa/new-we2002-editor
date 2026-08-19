@@ -90,7 +90,7 @@ Não trata.
 **Veredito `aberto` pela mesma razão do irmão:** o corpo depende de
 `0x0040b2d8` (preencher lista de jogadores) e de `0x00405468` (desenhar
 bandeira, que é da
-[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md)).
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md)).
 
 **Os dois argumentos de `0x0040b2d8` são combos, e é isso que explica os dois
 chamadores.** O primeiro é a lista de times de onde sai o índice, o segundo é a

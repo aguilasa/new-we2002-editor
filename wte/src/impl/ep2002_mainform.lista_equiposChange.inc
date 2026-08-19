@@ -19,7 +19,7 @@
 
   NAO ESTA AQUI, e o dono esta nomeado: a bandeira e o uniforme 2D
   (`0x00405270` e `0x004056c8`) sao da
-  WTE-TASK-32 (wte/re/spec/MainForm.lista_equiposChange.md, secao Notas). O
+  WTE-TASK-29 (wte/re/spec/MainForm.lista_equiposChange.md, secao Notas). O
   handler deixa os controles com a visibilidade certa; quem os desenha e a 32. }
 var
   indice: Integer;

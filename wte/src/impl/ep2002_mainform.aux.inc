@@ -858,7 +858,7 @@ end;
   em outro lugar. Os dois discordam do ENDERECO e concordam na REGRA (quais
   jogadores nao tem o campo). Aqui ele sai do `cost` do modelo, que e o campo
   de mesmo papel, mesma largura e mesma ausencia; qual dos dois offsets esta
-  certo e pergunta da [WTE-TASK-30], e nada nesta task le o valor. }
+  certo e pergunta da [WTE-TASK-32], e nada nesta task le o valor. }
 procedure CarregaJogador(indice, slot, buffer: Integer);
 var
   k: LongInt;

@@ -164,7 +164,7 @@ depois do 55. Medido na cópia da ROM europeia, os 64 bytes em `0x2ecc0c` e em
 `0x2ece0c` são **diferentes**. Um dos dois está errado sobre o formato, e o
 `we2002_core` é o que já é byte-idêntico ao `ed.exe`.
 
-Isso é pergunta da [WTE-TASK-30](../../../docs/tasks/30-preco-do-jogador.md), e
+Isso é pergunta da [WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md), e
 está anotado como pergunta. Nesta task nada lê o valor: o port enche o campo a
 partir do `cost` do modelo — mesmo papel, mesma largura, mesma ausência — e
 quem levar isso à imagem tem de responder antes.

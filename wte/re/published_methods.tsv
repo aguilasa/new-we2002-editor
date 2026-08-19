@@ -13,21 +13,21 @@ endereco	handler	formulario	componente	evento	grupo	regra	nota
 0x00402f8c	FormCreate	ficha_info	ficha_info	OnCreate	carga	R2	
 0x0040422c	FormCreate	ficha_info4	ficha_info4	OnCreate	carga	R2	
 0x00405dcc	FormCreate	ficha_color	ficha_color	OnCreate	carga	R2	
-0x00405e40	barraChange	ficha_color	barra_rojo|barra_verde|barra_azul	OnChange|OnChange|OnChange	edicao	R8	WTE-TASK-32
+0x00405e40	barraChange	ficha_color	barra_rojo|barra_verde|barra_azul	OnChange|OnChange|OnChange	edicao	R8	WTE-TASK-29
 0x00406078	botonClick	ficha_color	boton2|boton1|boton0|boton3	OnClick|OnClick|OnClick|OnClick	auxiliar	EX	
-0x00406358	barra1Change	ficha_color	barra1	OnChange	edicao	R8	WTE-TASK-32
-0x00406384	barra2Change	ficha_color	barra2	OnChange	edicao	R8	WTE-TASK-32
-0x004063b0	gradienteClick	ficha_color	gradiente	OnClick	edicao	R8	WTE-TASK-32
-0x004065fc	oscurecerClick	ficha_color	oscurecer	OnClick	edicao	R8	WTE-TASK-32
-0x00406744	aclararClick	ficha_color	aclarar	OnClick	edicao	R8	WTE-TASK-32
-0x0040688c	lista_col0Change	ficha_color	lista_col0	OnChange	edicao	EX	WTE-TASK-32
-0x004068b0	lista_col1change	ficha_color	lista_col1	OnChange	edicao	EX	WTE-TASK-32
-0x004068ec	lista_col2Change	ficha_color	lista_col2	OnChange	edicao	EX	WTE-TASK-32
-0x0040690c	lista_col3Change	ficha_color	lista_col3	OnChange	edicao	EX	WTE-TASK-32
+0x00406358	barra1Change	ficha_color	barra1	OnChange	edicao	R8	WTE-TASK-29
+0x00406384	barra2Change	ficha_color	barra2	OnChange	edicao	R8	WTE-TASK-29
+0x004063b0	gradienteClick	ficha_color	gradiente	OnClick	edicao	R8	WTE-TASK-29
+0x004065fc	oscurecerClick	ficha_color	oscurecer	OnClick	edicao	R8	WTE-TASK-29
+0x00406744	aclararClick	ficha_color	aclarar	OnClick	edicao	R8	WTE-TASK-29
+0x0040688c	lista_col0Change	ficha_color	lista_col0	OnChange	edicao	EX	WTE-TASK-29
+0x004068b0	lista_col1change	ficha_color	lista_col1	OnChange	edicao	EX	WTE-TASK-29
+0x004068ec	lista_col2Change	ficha_color	lista_col2	OnChange	edicao	EX	WTE-TASK-29
+0x0040690c	lista_col3Change	ficha_color	lista_col3	OnChange	edicao	EX	WTE-TASK-29
 0x00406968	BitBtn1Click	ficha_color	BitBtn1	OnClick	auxiliar	R7	
 0x004069c8	BitBtn2Click	ficha_color	BitBtn2	OnClick	auxiliar	R7	
 0x004069e8	BitBtn3Click	ficha_color	BitBtn3	OnClick	auxiliar	R7	
-0x00406a0c	colorMouseDown	ficha_color	color1|color2|color3|color4|color5|color6|color7|color8|color9|color10|color11|color12|color13|color14|color15|color16	OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown	edicao	R8	WTE-TASK-32
+0x00406a0c	colorMouseDown	ficha_color	color1|color2|color3|color4|color5|color6|color7|color8|color9|color10|color11|color12|color13|color14|color15|color16	OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown	edicao	R8	WTE-TASK-29
 0x00406f34	SpeedButton1Click	ficha_color	SpeedButton1	OnClick	auxiliar	R7	
 0x00407a68	BitBtn2Click	jugador	BitBtn2	OnClick	auxiliar	R7	
 0x00407a80	BitBtn1Click	jugador	BitBtn1	OnClick	auxiliar	R7	
@@ -38,8 +38,8 @@ endereco	handler	formulario	componente	evento	grupo	regra	nota
 0x00408548	BitBtn3Click	jugador	BitBtn3	OnClick	auxiliar	R7	
 0x00408af8	casilla_nombreKeyPress	jugador	casilla_nombre	OnKeyPress	edicao	R8	
 0x00408b50	casilla_dorsalKeyPress	jugador	casilla_dorsal	OnKeyPress	edicao	R8	
-0x00408b9c	casilla_precioKeyPress	jugador	casilla_precio	OnKeyPress	edicao	R8	WTE-TASK-30
-0x00408bb8	etiqprecioClick	jugador	etiqprecio	OnClick	edicao	R8	WTE-TASK-30
+0x00408b9c	casilla_precioKeyPress	jugador	casilla_precio	OnKeyPress	edicao	R8	WTE-TASK-32
+0x00408bb8	etiqprecioClick	jugador	etiqprecio	OnClick	edicao	R8	WTE-TASK-32
 0x00408d88	FormCreate	ficha_warning_2	ficha_warning_2	OnCreate	carga	R2	
 0x00408e0c	bolaMouseMove	estrategia	bola1|bola2|bola4|bola3|bola6|bola7|bola5|bola9|bola8|bola10	OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove|OnMouseMove	edicao	R8	
 0x00408f00	bolaMouseDown	estrategia	bola1|bola2|bola4|bola3|bola6|bola7|bola5|bola9|bola8|bola10	OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown	edicao	R8	
@@ -50,8 +50,8 @@ endereco	handler	formulario	componente	evento	grupo	regra	nota
 0x004097a4	bolaEndDrag	estrategia	bola1|bola2|bola4|bola3|bola6|bola7|bola5|bola9|bola8|bola10	OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag|OnEndDrag	edicao	R8	
 0x00409aa0	lista_formacionesClick	estrategia	lista_formaciones	OnClick	carga	R4	
 0x00409ba4	relojTimer	estrategia	reloj	OnTimer	edicao	R8	
-0x00409f4c	malla1MouseDown	estrategia	malla1	OnMouseDown	edicao	R8	WTE-TASK-32
-0x0040a000	malla2MouseDown	estrategia	malla2	OnMouseDown	edicao	R8	WTE-TASK-32
+0x00409f4c	malla1MouseDown	estrategia	malla1	OnMouseDown	edicao	R8	WTE-TASK-29
+0x0040a000	malla2MouseDown	estrategia	malla2	OnMouseDown	edicao	R8	WTE-TASK-29
 0x0040a658	BitBtn1Click	estrategia	BitBtn1	OnClick	auxiliar	R7	
 0x0040a660	BitBtn3Click	estrategia	BitBtn6	OnClick	auxiliar	R7	
 0x0040adec	ComboBoxDrawItem	estrategia	ComboBox1|ComboBox2	OnDrawItem|OnDrawItem	carga	EX	
@@ -87,7 +87,7 @@ endereco	handler	formulario	componente	evento	grupo	regra	nota
 0x004107c8	FormCreate	MainForm	MainForm	OnCreate	carga	R2	
 0x00410a74	dorsalClick	MainForm	dorsal1|dorsal2|dorsal3|dorsal4|dorsal5|dorsal6|dorsal7|dorsal8|dorsal9|dorsal10|dorsal11|dorsal12|dorsal13|dorsal14|dorsal15|dorsal16|dorsal17|dorsal18|dorsal19|dorsal20|dorsal21|dorsal22|dorsal23	OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick|OnClick	edicao	R8	
 0x00410ddc	dorsalMouseDown	MainForm	dorsal1|dorsal2|dorsal3|dorsal4|dorsal5|dorsal6|dorsal7|dorsal8|dorsal9|dorsal10|dorsal11|dorsal12|dorsal13|dorsal14|dorsal15|dorsal16|dorsal17|dorsal18|dorsal19|dorsal20|dorsal21|dorsal22|dorsal23	OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown|OnMouseDown	edicao	R8	
-0x00410ea8	colorearClick	MainForm	colorear	OnClick	edicao	R8	WTE-TASK-32
+0x00410ea8	colorearClick	MainForm	colorear	OnClick	edicao	R8	WTE-TASK-29
 0x00410fa4	SpeedButton2Click	MainForm	SpeedButton2	OnClick	auxiliar	R7	
 0x00410fc0	SpeedButton1Click	MainForm	SpeedButton1	OnClick	auxiliar	R7	
 0x00410fd0	Image3Click	MainForm	Image3	OnClick	auxiliar	R7	

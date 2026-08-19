@@ -108,7 +108,7 @@ grupo de edição (`compara_tela.sh --edicao`) não alcança a ficha do jogador.
 Não é divergência pendente — é gate que não rodou.
 
 O `50` do ramo sem campo é entrada da
-[WTE-TASK-30](../../../docs/tasks/30-preco-do-jogador.md): é o valor que a
+[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md): é o valor que a
 ficha mostra quando o jogador não tem o byte, e preço é o assunto dela.
 
 Pascal em

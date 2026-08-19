@@ -352,7 +352,7 @@ desabilitada da tela nunca tinha aparecido em medição nenhuma.
 | `colorear` | `.Enabled := nacional` | 187 | 50 | mudam nos dois |
 | `iguala_nombres` | `.Enabled := nacional` | 518 | **0** | glifo invariante sob `gdeDisabled` — divergência deliberada |
 | `etiq_nombre1..3` | `.Enabled := True` sempre | 0 | 0 | **não** mudam nos dois |
-| `bandera` | `.Visible := nacional` | 3840 | 0 | pendente da WTE-TASK-32 |
+| `bandera` | `.Visible := nacional` | 3840 | 0 | pendente da WTE-TASK-29 |
 | `home1`, `home2` | `.Visible := nacional` | 2328, 1012 | 2303, 1032 | mudam nos dois |
 
 Três coisas saem daqui:
@@ -385,8 +385,8 @@ Três coisas saem daqui:
 
 O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
 (`0x00405270` e `0x004056c8`) são da
-[WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md). Ele deixa os
-controles com a visibilidade certa; quem os desenha é a 32.
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md). Ele deixa os
+controles com a visibilidade certa; quem os desenha é a 29.
 
 **A tabela de auxiliares que estava aqui listava cinco endereços, e estava
 curta.** Ela era escrita à mão; medido pelo

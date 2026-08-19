@@ -42,7 +42,7 @@ a mesma ROM, selecionar o mesmo time, o mesmo jogador.
 | rótulo cortado por dado real | decisão: aceitar ou alargar |
 | controle habilitado/desabilitado errado | spec do handler (Fase 4) |
 | ordem de itens em combo | carga (WTE-TASK-25) |
-| imagem não desenhada ou desenhada errada | render (WTE-TASK-32) |
+| imagem não desenhada ou desenhada errada | render (WTE-TASK-29) |
 | foco inicial e ordem de tabulação | DFM (`TabOrder`) — o gerador preservou? |
 
 ### `TabOrder` e o botão default

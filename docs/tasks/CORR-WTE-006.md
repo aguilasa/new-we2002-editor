@@ -27,17 +27,17 @@ Seis lugares, todos conferidos contra `wte/re/published_methods.tsv`:
 | Arquivo | Linha | Diz | Medido |
 |---|---:|---|---|
 | `docs/tasks/25-handlers-de-carga.md` | 42, 44 | `FormCreate`/`FormShow` — **19 endereços**, "um por formulário" | **18** = 16 + 2, e **não** é um por formulário: `ficha_error` e `ficha_error2` não têm |
-| `docs/tasks/28-handlers-auxiliares.md` | 45 | `malla1MouseDown`/`malla2MouseDown` pertencem a `ficha_color` e `ficha_creditos_equipo` | os dois são de **`estrategia`** |
-| `docs/tasks/28-handlers-auxiliares.md` | 35-38 | `BitBtn1Click` (3×); `SpeedButton2Click`, `Button2Click`, `Image3Click`, `botonClick`, `base_teamClick`, `imagen_urlClick` entre os "repetidos por vários formulários" | `BitBtn1Click` **4×**; os outros seis aparecem **uma vez cada** |
+| `docs/tasks/30-handlers-auxiliares.md` | 45 | `malla1MouseDown`/`malla2MouseDown` pertencem a `ficha_color` e `ficha_creditos_equipo` | os dois são de **`estrategia`** |
+| `docs/tasks/30-handlers-auxiliares.md` | 35-38 | `BitBtn1Click` (3×); `SpeedButton2Click`, `Button2Click`, `Image3Click`, `botonClick`, `base_teamClick`, `imagen_urlClick` entre os "repetidos por vários formulários" | `BitBtn1Click` **4×**; os outros seis aparecem **uma vez cada** |
 | `docs/PLAN-WTE-LAZARUS.md` | 769-770 | §5.1: `etiqprecioClick` e o formulário `ficha_creditos_equipo` | o dono é **`jugador`**; `ficha_creditos_equipo` publica só `FormCreate` |
-| `docs/tasks/30-preco-do-jogador.md` | 37 | `formulário ficha_creditos_equipo` na tabela de entrada | idem — **`jugador`** |
+| `docs/tasks/32-preco-do-jogador.md` | 37 | `formulário ficha_creditos_equipo` na tabela de entrada | idem — **`jugador`** |
 | `docs/tasks/04-mapa-de-handlers.md` | 32 | `FormCreate` 17 vezes, `BitBtn1Click` duas | **16** e **4** |
 | `docs/prompts/02-revisar.md` | 113 | "`FormCreate` aparece 17 vezes", como conferência da fase 2 | **16** — o próprio gate de revisão carrega o número velho |
 
-O caso da 28 é o mais caro: a tabela "O que fica de fora, e por quê" existe para
+O caso da 30 é o mais caro: a tabela "O que fica de fora, e por quê" existe para
 o executor **não** implementar duas vezes o mesmo handler. Com o dono errado,
 ela manda procurar `malla1MouseDown` num formulário que não o publica, e o
-executor da 32 vai procurá-lo em `estrategia` sem saber que a 28 já o cedeu.
+executor da 29 vai procurá-lo em `estrategia` sem saber que a 30 já o cedeu.
 
 ## Evidência
 
@@ -100,7 +100,7 @@ Linha 42: `19 endereços` → `18 endereços`. Linha 44: trocar "são um por
 formulário" por "são 16 `FormCreate` mais 2 `FormShow`; `ficha_error` e
 `ficha_error2` não publicam nenhum dos dois".
 
-### Arquivo: `docs/tasks/28-handlers-auxiliares.md`
+### Arquivo: `docs/tasks/30-handlers-auxiliares.md`
 
 - Linha 45: o parágrafo "Estes pertencem a `ficha_color` e
   `ficha_creditos_equipo`" passa a nomear os donos reais — `ficha_color`,
@@ -118,7 +118,7 @@ formulário" por "são 16 `FormCreate` mais 2 `FormShow`; `ficha_error` e
 esses são da WTE-TASK-09, que já tem a reconciliação da §1 no critério. Esta
 correção toca só a §5.1, que a 09 não cobre.
 
-### Arquivo: `docs/tasks/30-preco-do-jogador.md`
+### Arquivo: `docs/tasks/32-preco-do-jogador.md`
 
 Linha 37: `formulário ficha_creditos_equipo` → `formulário jugador`.
 
@@ -137,9 +137,9 @@ com 17 ele reprova um `dfm2lfm.py` correto.
 | Arquivo | Ação |
 |---|---|
 | `docs/tasks/25-handlers-de-carga.md` | modificar |
-| `docs/tasks/28-handlers-auxiliares.md` | modificar |
+| `docs/tasks/30-handlers-auxiliares.md` | modificar |
 | `docs/PLAN-WTE-LAZARUS.md` | modificar |
-| `docs/tasks/30-preco-do-jogador.md` | modificar |
+| `docs/tasks/32-preco-do-jogador.md` | modificar |
 | `docs/tasks/04-mapa-de-handlers.md` | modificar |
 | `docs/prompts/02-revisar.md` | modificar |
 
@@ -147,7 +147,7 @@ com 17 ele reprova um `dfm2lfm.py` correto.
 
 - [x] `grep -rn "19 endereços\|ficha_creditos_equipo" docs/tasks/25-*.md
       docs/tasks/30-*.md` não devolve mais a afirmação errada
-- [x] `grep -n "malla" docs/tasks/28-handlers-auxiliares.md` diz `estrategia`
+- [x] `grep -n "malla" docs/tasks/30-handlers-auxiliares.md` diz `estrategia`
 - [x] `grep -n "17 vezes" docs/` não devolve nada — **fora** dos registros de
       correção (`CORR-WTE-006.md`, `CORR-WTE-007.md`,
       `correcoes-progresso.md`), que citam o sintoma e têm de continuar citando
@@ -178,7 +178,7 @@ sem saber qual linha pertence a qual. Agora cada linha carrega o dono, e a de
 **Problemas encontrados:**
 
 A varredura achou um sétimo lugar, que a lista da CORR não previa e que a
-própria correção tornou incoerente: `28-handlers-auxiliares.md:44` dizia que
+própria correção tornou incoerente: `30-handlers-auxiliares.md:44` dizia que
 sem a coluna `formulario` o `BitBtn1Click` é "ambíguo entre **três**
 formulários". São quatro — o mesmo número que a linha acima acabara de ganhar.
 Corrigido na mesma invocação.
@@ -191,10 +191,10 @@ o registro do que foi consertado. Nenhuma afirmação viva sobrou.
 **Arquivos criados/modificados:**
 
 - `docs/tasks/25-handlers-de-carga.md` — 19 → 18, e o "um por formulário"
-- `docs/tasks/28-handlers-auxiliares.md` — contagens, donos por linha, e o
+- `docs/tasks/30-handlers-auxiliares.md` — contagens, donos por linha, e o
   "três formulários" que a correção revelou
 - `docs/PLAN-WTE-LAZARUS.md` — §5.1: `ficha_creditos_equipo` → `jugador`
-- `docs/tasks/30-preco-do-jogador.md` — idem, na tabela de entrada
+- `docs/tasks/32-preco-do-jogador.md` — idem, na tabela de entrada
 - `docs/tasks/04-mapa-de-handlers.md` — 17 → 16, duas → quatro
 - `docs/prompts/02-revisar.md` — o gate da fase 2 pedia 17
 - `docs/tasks/correcoes-progresso.md`

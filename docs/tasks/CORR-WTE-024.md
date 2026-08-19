@@ -62,7 +62,7 @@ $ grep -rn "Lazarus\]" docs/ --include='*.md' | grep -v 11-app
 (nenhuma saída)
 
 $ grep -n "Candidatas já conhecidas" -A6 docs/tasks/35-divergencias-deliberadas.md
-- **Tolerância de cor do render 2D** (WTE-TASK-32) [...]
+- **Tolerância de cor do render 2D** (WTE-TASK-29) [...]
 - **`TStaticText` no GTK2** (§8.9) [...]
 - **Rótulos cortados por fonte substituta** [...]
 - **Comportamento de truncamento de campo** (WTE-TASK-36) [...]

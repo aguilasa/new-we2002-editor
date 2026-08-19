@@ -117,7 +117,7 @@ construído e sobrescreve o que o `.dfm` pediu.
 ## O campo cujo `MaxLength` não governa nada
 
 - **`jugador.casilla_dorsal`** — número de camisa, no máximo três dígitos. Quem recusa tecla é o `casilla_dorsalKeyPress`; o `MaxLength` de 10 nunca chega a valer.
-- **`jugador.casilla_precio`** — campo numérico de preço. O `MaxLength` de 3 limita dígito, não texto — ver a WTE-TASK-30.
+- **`jugador.casilla_precio`** — campo numérico de preço. O `MaxLength` de 3 limita dígito, não texto — ver a WTE-TASK-32.
 
 Registrado porque o número é **verdadeiro e irrelevante**: portar "o
 campo corta em 10" copiaria uma medição correta para o lugar errado.

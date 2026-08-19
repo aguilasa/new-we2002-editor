@@ -47,9 +47,9 @@ contra a coluna `grupo` do
 tem 44 linhas lá; as 16 de diferença carregam na coluna `nota` o dono fora
 desta task: **11 do `ficha_color`** mais `colorearClick` e os dois
 `mallaNMouseDown` são da
-[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md), e
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md), e
 `casilla_precioKeyPress` com `etiqprecioClick` são da
-[WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md). Os 28 restantes são
+[WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md). Os 28 restantes são
 exatamente os seis grupos acima (5 + 4 + 2 + 2 + 8 + 7).
 
 ### O que a spec tem de capturar aqui, e que a de carga não tinha
@@ -222,7 +222,7 @@ e não que fiquem sem spec.
 |---|---|---|---|
 | ~~9~~ | ~~mover, a família de 4~~ — **feita em 2026-08-12** | 881 B (a `0x00404374`, que o plano dava por medida e não estava) | `casilla_dorsalKeyPress` |
 | ~~10~~ | ~~mover, os outros 4~~ — **feita em 2026-08-12**, menos o `flechasapaClick`, que não é do `MainForm` e está bloqueado com os lotes de atributo e tática | 181 B (a `0x0040b934`); as outras quatro da lista abaixo **não são chamadas** por estes handlers | — |
-| 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-30 |
+| 11 | preencher a ficha do jogador (`0x0040756c`) | 1.275 B | `iguala_nombresClick`, e o `50` da WTE-TASK-32 |
 | ~~12~~ | ~~atributos (`barrhabScroll`, `barrhab_bisScroll`)~~ — **feita em 2026-08-12**, e o `flechasapaClick` **feito em 2026-08-13** | 0 B nos dois de `barrhab`; 1.124 B no `flechasapaClick`, mais o inicializador das legendas (`0x00401da8`, 2.998 B, lido por ferramenta e não à mão) | as legendas enumeradas da ficha, que estavam abertas desde a passagem 12 |
 | ~~13~~ | ~~tática (`0x0040a0b4` + os 7)~~ — **feita em 2026-08-13**, em duas passagens | **o `0x0040a0b4` não é deste lote** — quem o chama é o `MainForm.mostrar_estrategiaClick`, do grupo de carga. Medido: os 7 somam 2.088 B e **não chamam auxiliar interna nenhuma**; os seis de arrastar são 1.152 B | as zonas do campinho, que o `estrategia.FormCreate` monta e ninguém tinha lido |
 | 14 | os três critérios que sobram | — | fecha a task |
@@ -259,7 +259,7 @@ serve aos dois, e por isso elas entram na passagem 11 e não custam duas vezes.
 **Passagem 11.** `0x0040756c` não é handler — é pré-requisito: sem a ficha
 preenchida os dois handlers de atributo não são exercitáveis. Sai dela o valor
 de `DWORD[0x00433b48]`, que fecha o `iguala_nombresClick`, e o `50` do campo
-condicional, que é da [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
+condicional, que é da [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md).
 
 **Custo real, medido em 2026-08-12: 3.003 B, não 1.275.** O corpo chama cinco
 rotinas internas — `0x00403278` (270), `0x00406fb4` (44), `0x00406fe0` (301),
@@ -366,7 +366,7 @@ do `--edicao`; e o `iguala_nombres`.
 
 - **Escopo conferido, e ele bate:** os 28 handlers desta task são as 44 linhas
   `grupo = edicao` do `published_methods.tsv` menos as 16 que já trazem dono na
-  coluna `nota` (14 da WTE-TASK-32, 2 da WTE-TASK-30). A tabela de alvos do
+  coluna `nota` (14 da WTE-TASK-29, 2 da WTE-TASK-32). A tabela de alvos do
   enunciado não divergia — só não dizia isso.
 
 - **Arquivos criados/modificados:**
@@ -594,7 +594,7 @@ do `--edicao`; e o `iguala_nombres`.
   - **E a gravação do número não é desta task:** quem leva o valor de volta é o
     `BitBtn1Click` do `ficha_dorsal` (`0x00402b40`), que o
     `published_methods.tsv` põe no grupo `auxiliar` — a
-    [WTE-TASK-28](/docs/tasks/28-handlers-auxiliares.md). Mais um par que
+    [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md). Mais um par que
     atravessa task, como o das barras com a 27.
 
 - **Arquivos criados/modificados:**
@@ -900,7 +900,7 @@ do `--edicao`; e o `iguala_nombres`.
   quando o jogador **tem** o byte; para os demais o valor é sintético e o
   original não deixa o cursor chegar lá.
 
-  Sai daqui um número para a [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md):
+  Sai daqui um número para a [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md):
   **50 é o preço que a ficha mostra quando o jogador não tem o campo.**
 
   E sai a identidade da global `0x004335c4`: é **qual buffer de jogador está em
@@ -1072,7 +1072,7 @@ do `--edicao`; e o `iguala_nombres`.
   cada um dos dois endereços são **diferentes**. Um dos dois está errado sobre
   o formato, e o `we2002_core` é o que já é byte-idêntico ao `ed.exe`.
 
-  Encaminhado para a [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md), escrito
+  Encaminhado para a [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md), escrito
   como pergunta na spec do `paderechaClick`. Nesta task nada lê o valor.
 
 - **Uma correção ao enunciado desta task, medida:** o `ficha_movertodos` **não
@@ -1171,7 +1171,7 @@ do `--edicao`; e o `iguala_nombres`.
   O `parribaClick` multiplica `linha + 1` por 10.000 e converte o resultado. Lido
   como aritmética inteira, isso é um número de cinco dígitos, e num editor que
   tem preço de jogador como funcionalidade
-  ([WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md)) a leitura "é o preço da
+  ([WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md)) a leitura "é o preço da
   transferência" teria passado.
 
   Não é. As duas rotinas foram identificadas: `0x0041978c` é o `__llmul` da RTL
@@ -1317,7 +1317,7 @@ do `--edicao`; e o `iguala_nombres`.
 
 - **Um buraco de escopo, sem dono:** as três rotinas de bitmap carregam
   `image\pelo` e `image\barba` para a ficha do jogador. A
-  [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) cobre `uniformes2d` e
+  [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) cobre `uniformes2d` e
   `banderas` — cabelo e barba não estão no escopo dela, nem no de nenhuma outra
   task. **Não inventei um dono**: fica registrado aqui como achado, e a decisão
   de onde pôr é do usuário. O preenchimento da ficha funciona sem eles (são dois
@@ -1350,7 +1350,7 @@ do `--edicao`; e o `iguala_nombres`.
   `DWORD[0x00433614 + 4*global]` é zero, o campo condicional recebe um literal e
   o controle é **desabilitado** (`call [ecx+0x64]`, o `SetEnabled` virtual) — é a
   mesma condição do `casilla_dorsalKeyPress` e o `50` da
-  [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md).
+  [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md).
 
 ---
 
@@ -1808,7 +1808,7 @@ do `--edicao`; e o `iguala_nombres`.
 - **Veredito `aberto`, e não pela régua de bytes.** É a **metade dos bitmaps**:
   o segundo despachante está portado como estrutura, mas as três carregadoras
   (`0x00406fe0`, `0x00407110`, `0x00407338`, 1.414 B somados) **não têm dono** —
-  a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) cobre uniforme e
+  a [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) cobre uniforme e
   bandeira do `MainForm`, não cara/cabelo/barba da ficha. Até alguém adotá-las,
   a seta muda o rótulo e não muda o desenho.
 
@@ -2375,7 +2375,7 @@ do `--edicao`; e o `iguala_nombres`.
     dono nomeado — quem aponta os quatro ponteiros **ao abrir** o formulário é
     `0x0040a0b4`, do grupo de carga, e ela não está portada;
   - ~~as três carregadoras de bitmap da ficha (`0x00406fe0`, `0x00407110`,
-    `0x00407338`) — **decisão de escopo, sem dono**: a WTE-TASK-32 cobre
+    `0x00407338`) — **decisão de escopo, sem dono**: a WTE-TASK-29 cobre
     uniforme e bandeira do `MainForm`, não cara/cabelo/barba~~ — **decidido em
     2026-08-18** pela [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md): não serão
     portadas. As três regravam a paleta dentro do `.bmp` compartilhado, na

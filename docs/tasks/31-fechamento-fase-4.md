@@ -1,14 +1,14 @@
 ---
-id: WTE-TASK-29
+id: WTE-TASK-31
 title: "Fechamento da fase 4 — os 96 têm veredito?"
 type: fechamento
 category: comportamento
 phase: 4
-depends_on: ["WTE-TASK-25", "WTE-TASK-26", "WTE-TASK-27", "WTE-TASK-28"]
+depends_on: ["WTE-TASK-25", "WTE-TASK-26", "WTE-TASK-27", "WTE-TASK-28", "WTE-TASK-29", "WTE-TASK-30"]
 status: pendente
 ---
 
-# WTE-TASK-29: Fechamento da fase 4
+# WTE-TASK-31: Fechamento da fase 4
 
 ## Contexto
 
@@ -42,7 +42,7 @@ Distribuição dos vereditos: quantos `implementado`, `trivial`, `divergência
 deliberada`, `não portado`. E a comparação com o que a Fase 4 previa.
 
 Se `trivial` for a maioria esmagadora, provavelmente foi atribuído sem olhar —
-a WTE-TASK-28 avisa disso. Amostrar cinco `trivial` ao acaso e reconferir.
+a WTE-TASK-30 avisa disso. Amostrar cinco `trivial` ao acaso e reconferir.
 
 ### O que ainda não foi provado
 

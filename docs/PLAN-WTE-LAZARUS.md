@@ -881,15 +881,41 @@ Fica em `re/spec/` o registro de cada handler com o veredito: *implementado*,
 *trivial* (só habilita/desabilita controle), *divergência deliberada*, ou
 *não portado*.
 
+**Duas gravações fecham fora do grupo de gravação.** `boton_mcr2isoClick` e
+`grabar_camisetaClick` dependem de fórmula — o parser de `.mcr` e o render 2D —,
+e por isso fecham nas tasks que produzem essa fórmula (§5.2 e §5.3), junto com a
+origem dos bytes. Cada uma leva consigo as regras de gravar nesta imagem: nunca
+recalcular EDC/ECC, o salto de fronteira de setor, cópia sempre, o diff de
+controle já medido, e a descarga bufferizada que faz o `fseek` seguinte ser quem
+grava.
+
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
 ---
 
-### Fase 5 — As quatro features que motivaram tudo
+### Fase 5 — As features que motivaram tudo (duas executam na Fase 4)
 
 Estas quatro são as únicas que exigem **fórmula**, não só posição de byte, e
 são a única parte onde o decompilador é insubstituível.
+
+**Duas delas executam dentro da Fase 4**, e isso não é desvio de rota. O `.mcr`
+(§5.2) e a camisa 2D (§5.3) são a *origem dos bytes* de duas das seis gravações
+do editor, e enquanto a gravação morava numa task e a origem noutra havia
+**ciclo**: a task de gravação não fechava sem elas, e elas declaravam
+`depends_on` a task de gravação. Cada uma passou a carregar a gravação que
+viabiliza, e por isso subiu de fase. As quatro continuam sendo o motivo do
+projeto; muda só quando duas delas acontecem.
+
+A numeração `§5.x` abaixo é **endereço de seção, não fase de execução** — as
+tasks citam essas sub-seções pelo número, e ela fica estável:
+
+| § | task | fase de execução |
+|---|---|---|
+| 5.1 preço | WTE-TASK-32 | 5 |
+| 5.2 `.mcr` | WTE-TASK-28 | **4** |
+| 5.3 camisa 2D | WTE-TASK-29 | **4** |
+| 5.4 slots de ML | WTE-TASK-33 | 5 |
 
 **5.1 Preço derivado dos atributos.** `etiqprecioClick` (`0x00408bb8`) e o
 formulário `jugador`. É aritmética pura sobre os atributos já
@@ -919,7 +945,8 @@ original.
 e conta vagos. Depende só da Fase 3.
 
 > **Pronto quando:** cada uma das quatro tem teste próprio verde — tabela de
-> preço, round-trip de `.mcr`, diff de bitmap, contagem conferida.
+> preço, round-trip de `.mcr`, diff de bitmap, contagem conferida. Duas delas
+> são gateadas dentro da Fase 4, junto com a gravação que carregam.
 
 ---
 
@@ -1127,13 +1154,16 @@ Se o objetivo for ver resultado cedo em vez de seguir as fases em bloco:
 3. **Fase 2 inteira.** O app abre e mostra os 18. Marco visível. (Navegar
    entre eles é da fase 4 — ver o critério de pronto da fase 2.)
 4. **Fase 3** até o round-trip headless. Agora o app *lê* o jogo.
-5. **Fase 5.1** (preço) fora de ordem, porque é a feature mais desejada, é
+5. **§5.1** (preço, WTE-TASK-32) antecipada, porque é a feature mais desejada, é
    isolada e não depende de gravação.
-6. **Fase 4** no ritmo, handler a handler.
-7. **Fase 5.2–5.4**, **6**, **7**.
+6. **Fase 4** no ritmo, handler a handler — **incluindo §5.2 e §5.3**, que
+   fecham as duas gravações que dependem de fórmula.
+7. **§5.4**, **6**, **7**.
 
-O passo 5 é deliberadamente fora de ordem: entrega valor antes de a Fase 4
-terminar, e valida o ferramental de decompilação num alvo pequeno e conferível.
+O passo 5 é antecipação deliberada: entrega valor antes de a Fase 4 terminar, e
+valida o ferramental de decompilação num alvo pequeno e conferível. Até a
+renumeração de 2026-08-19 ele era também *fora de ordem*, o que deixou de ser
+verdade — preço virou a 32 e o fechamento da Fase 4 virou a 31.
 
 ---
 

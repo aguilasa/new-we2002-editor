@@ -444,7 +444,7 @@ O maior offset que o `Offsets.hpp` conhece é `12552648`: esta região
 está **8 MB acima** dele, e o
 `newWe2002` nunca precisou nomeá-la porque não desenha uniforme.
 
-É a entrada da [WTE-TASK-32](../../docs/tasks/32-camisa-e-bandeira-2d.md), e é a maior região
+É a entrada da [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md), e é a maior região
 nova que esta task achou.
 
 ---

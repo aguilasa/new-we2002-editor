@@ -23,7 +23,7 @@ Este prompt é o irmão em lote do [`/docs/prompts/01-executar.md`](/docs/prompt
 nenhuma outra.** Tudo o mais continua valendo palavra por palavra:
 
 - ordem de fases, ordem numérica dentro da fase, `depends_on` conferido;
-- a exceção da WTE-TASK-30 (preço, fora de ordem) só com pedido **explícito** do
+- a antecipação da WTE-TASK-32 (preço) só com pedido **explícito** do
   usuário;
 - escopo da tarefa não se alarga nem antecipa fase seguinte;
 - tarefa que produz arquivo gerado produz **o gerador, o `--check` e a saída**;
@@ -144,7 +144,7 @@ Duas tarefas só rodam em paralelo se **todas** as condições valerem:
 
 **A serialização do `:99` é a mais restritiva deste projeto.** Na prática,
 **toda tarefa que exercita o oráculo, roda o golden ou tira captura é
-sequencial**: as 12, 13, 22, 25 a 28, 34 e 37, entre outras.
+sequencial**: as 12, 13, 22, 25 a 27, 30, 34 e 37, entre outras.
 
 O caso exemplar é o par **12 e 13**: o grafo do `progresso.md` diz "em paralelo"
 — e diz certo, porque nenhuma depende da outra. A matriz diz **sequencial**,

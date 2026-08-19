@@ -47,7 +47,7 @@
 #
 # Das seis do grupo, so `boton_barras2iso` e `boton_nombres2iso` gravam na
 # imagem sem pedir mais nada ao usuario. As outras quatro precisam de dialogo
-# de arquivo ou de origem de bytes que ainda nao existe (WTE-TASK-31 e 32), e
+# de arquivo ou de origem de bytes que ainda nao existe (WTE-TASK-28 e 32), e
 # cada uma tera o seu roteiro.
 alvo: original
 estado: ok

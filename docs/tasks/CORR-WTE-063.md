@@ -18,7 +18,7 @@ aparência — `image/careto_base.bmp`, `image/pelo/pelo_<n>.bmp` e
 
 A [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) as deixou de fora e
 escreveu que elas **"não têm dono"**. A
-[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) cobre **uniforme e
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) cobre **uniforme e
 bandeira do `MainForm`** — e não menciona cara, cabelo nem barba em nenhuma
 linha.
 
@@ -34,7 +34,7 @@ Nenhuma task além da que as excluiu menciona os três endereços:
 $ grep -rl "0x00406fe0\|0x00407110\|0x00407338" docs/tasks/*.md
 docs/tasks/26-handlers-de-edicao.md
 
-$ grep -ciE "careto|pelo|barba" docs/tasks/32-camisa-e-bandeira-2d.md
+$ grep -ciE "careto|pelo|barba" docs/tasks/29-camisa-e-bandeira-2d.md
 0
 ```
 
@@ -58,7 +58,7 @@ definições, e nenhuma das duas errou ao não os pegar.
 **A decisão é do usuário, e esta correção existe para pedi-la** — não para
 tomá-la. Duas saídas, e as duas fecham:
 
-1. **Estender a WTE-TASK-32** para incluir os três renderizadores da ficha. O
+1. **Estender a WTE-TASK-29** para incluir os três renderizadores da ficha. O
    trabalho é do mesmo tipo que ela já prevê (escrever paleta em `.bmp` e
    recarregar), as tabelas de cor já estão localizadas — pele em `0x00423998`,
    cabelo em `0x00423a98`, barba em `0x00423b38` — e a saturação em `7` do
@@ -73,7 +73,7 @@ dentro do log de uma task concluída.
 
 ### Arquivos
 
-- [`docs/tasks/32-camisa-e-bandeira-2d.md`](/docs/tasks/32-camisa-e-bandeira-2d.md)
+- [`docs/tasks/29-camisa-e-bandeira-2d.md`](/docs/tasks/29-camisa-e-bandeira-2d.md)
   ou [`docs/tasks/35-divergencias-deliberadas.md`](/docs/tasks/35-divergencias-deliberadas.md),
   conforme a decisão
 - [`wte/re/spec/jugador.flechasapaClick.md`](../../wte/re/spec/jugador.flechasapaClick.md)
@@ -90,7 +90,7 @@ dentro do log de uma task concluída.
 **A decisão foi pedida ao usuário, como esta correção manda, e ele escolheu
 registrar a exclusão na
 [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)** — não estender a
-WTE-TASK-32. Nenhuma das duas saídas foi tomada por conta própria.
+WTE-TASK-29. Nenhuma das duas saídas foi tomada por conta própria.
 
 A entrada nova traz os seis campos que a task exige. O que ela acrescenta ao
 que a correção já dizia é a **razão medida**, e ela é mais forte do que "não
@@ -114,15 +114,15 @@ handlers da ficha, *"sub-dialogo que nenhuma regua de tela alcanca"*. Inventar
 ferramenta aqui seria pior do que dizer que não há.
 
 **Duas coisas que a decisão tornou falsas foram consertadas na mesma
-passagem**, e as duas atribuíam à WTE-TASK-32 trabalho que ela não vai mais
+passagem**, e as duas atribuíam à WTE-TASK-29 trabalho que ela não vai mais
 ter:
 
-- o título da seção da spec (*"A saturação em `7` que a WTE-TASK-32 vai
+- o título da seção da spec (*"A saturação em `7` que a WTE-TASK-29 vai
   herdar"*) e a §5.1 do `assets.md`. **A saturação sobrevive à decisão** e
   muda de dono, não some: ela mora no `TUpDown`, que o port já tem, e o 7 que
   vira 6 chega ao disco pela gravação — logo é da **WTE-TASK-27**. Não
   desenhar a barba não faz o 7 parar de virar 6;
-- a §6.2 recomendava recolorir em memória "para a WTE-TASK-32". A
+- a §6.2 recomendava recolorir em memória "para a WTE-TASK-29". A
   recomendação continua valendo para os **dois** renderizadores do `MainForm`
   e caducou para os **três** da ficha, que não serão implementados.
 

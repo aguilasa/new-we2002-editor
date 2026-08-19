@@ -66,7 +66,7 @@ isso no gabarito, para não depender de memória.
 ### Índice
 
 Um arquivo que lista os 96 com veredito corrente, gerado do
-`published_methods.tsv` mais os `.md`. É o que a WTE-TASK-29 confere.
+`published_methods.tsv` mais os `.md`. É o que a WTE-TASK-31 confere.
 
 ---
 
@@ -119,7 +119,7 @@ Um arquivo que lista os 96 com veredito corrente, gerado do
   gerador, em vez de no texto:
 
   - `nao portado` exige seção `## Justificativa` não vazia — o critério de
-    pronto da fase 4 depende disso, e a WTE-TASK-29 confere pelo índice;
+    pronto da fase 4 depende disso, e a WTE-TASK-31 confere pelo índice;
   - `implementado` com **toda** a evidência em `observação de tela` / `não
     medido` é recusado: isso é hipótese, não spec, exatamente como o enunciado
     diz.

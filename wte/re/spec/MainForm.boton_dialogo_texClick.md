@@ -60,5 +60,5 @@ corpo do handler.
 **Veredito `aberto`: é do grupo de carga por afinidade, não por dependência.**
 Ele não participa de carregar time — carrega *outro* arquivo. O port não
 precisa dele para a navegação que a WTE-TASK-25 deve entregar, e o formato
-`.tex` é assunto da [WTE-TASK-32](../../../docs/tasks/32-camisa-e-bandeira-2d.md),
+`.tex` é assunto da [WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md),
 que trata do uniforme. Fica especificado e sem corpo, com o dono nomeado.

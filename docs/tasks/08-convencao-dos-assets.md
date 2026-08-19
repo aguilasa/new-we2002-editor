@@ -46,7 +46,7 @@ confirmados.
 ### 2. Uniformes 2D
 
 105 arquivos para quantos times? Descobrir se o índice é por time, por modelo de
-camisa, ou por combinação. É a base da WTE-TASK-32.
+camisa, ou por combinação. É a base da WTE-TASK-29.
 
 ### 3. Cabelo, barba e `careto_base`
 
@@ -56,7 +56,7 @@ Aparência de jogador. `careto` é "cara" em espanhol coloquial. Conferir se o
 ### 4. `dat.bin`
 
 Começa com `MC` — cabeçalho de memory card do PSX. Confirmar se é memory card
-de exemplo (e então é fixture da WTE-TASK-31) ou banco de dados próprio do
+de exemplo (e então é fixture da WTE-TASK-28) ou banco de dados próprio do
 editor. 145.408 bytes contra os 131.072 de um memory card padrão: os 14.336 de
 diferença precisam de explicação.
 
@@ -95,7 +95,7 @@ teste destrutivo barato — em cópia da pasta, nunca na original.
   inline, sem gerador** — o produto são ~15 medidas e um texto que as amarra, não
   uma enumeração; cada número traz o comando que o reproduz, como a CORR-WTE-002
   exigiu do `ambiente.md`. As três tabelas de 95 entradas, que *são* enumeráveis,
-  ficam com o comando de extração no `.md` para a WTE-TASK-32 decidir se viram
+  ficam com o comando de extração no `.md` para a WTE-TASK-29 decidir se viram
   TSV.
 
   Achados principais:
@@ -148,4 +148,4 @@ teste destrutivo barato — em cópia da pasta, nunca na original.
     alvo foram amarrados por dimensão (as alturas 42 e 22 de `home1`/`home2`
     batem exatamente com `camiseta`/`pantalon`) e por vizinhança de campo.
   - `beard_style` cabe 0..7 no disco e só existem `barba_0..6`; o original
-    satura em 6 via `TUpDown::Position`. Anotado para a WTE-TASK-32.
+    satura em 6 via `TUpDown::Position`. Anotado para a WTE-TASK-29.

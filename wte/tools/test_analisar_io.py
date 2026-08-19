@@ -598,7 +598,7 @@ class TestEvidencia(unittest.TestCase):
         self.assertEqual(sem, [], f"sem veredito: {sem}")
 
     def test_a_regiao_do_uniforme_foi_medida(self) -> None:
-        """O achado maior da 5ª passagem, e o insumo da WTE-TASK-32.
+        """O achado maior da 5ª passagem, e o insumo da WTE-TASK-29.
 
         Extrair a camisa lê 16 setores contíguos a 8 MB acima do maior offset
         que o `Offsets.hpp` conhece. Se isto sumir, ou a sessão 10 saiu da

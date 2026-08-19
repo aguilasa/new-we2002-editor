@@ -62,7 +62,7 @@ TRACE="$WTE/re/trace.log"
 # tambem e a entrada do modo `--habilitacao`.
 #
 # Bandeira e uniforme 2D (x 232..312, y 36..168) estao dentro dos dois e
-# divergem por decisao, nao por defeito: sao da WTE-TASK-32. Quem os exclui e o
+# divergem por decisao, nao por defeito: sao da WTE-TASK-29. Quem os exclui e o
 # `compara_tela.py`, por nome de controle, e nao o corte por altura -- foi o
 # corte por altura que escondeu os dorsais.
 REC_W=520

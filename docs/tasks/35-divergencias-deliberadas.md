@@ -66,7 +66,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   é desenhada, e a captura da
   [WTE-TASK-12](/docs/tasks/12-comparacao-visual.md) não enxerga o sufixo —
   num desktop de verdade enxerga, e deve.
-- **Tolerância de cor do render 2D** (WTE-TASK-32), se a igualdade exata não
+- **Tolerância de cor do render 2D** (WTE-TASK-29), se a igualdade exata não
   sair.
 - **Cinco glifos que não acinzentam** — medido pela
   [CORR-WTE-060](/docs/tasks/CORR-WTE-060.md) em 2026-08-18, e **já está no
@@ -125,7 +125,7 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   do usuário, ou escrever um segundo caminho de recolorir em memória, que é
   trabalho que nenhuma task pediu — e **nenhuma das duas tem dono**: a
   [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) é dona de handler e
-  excluiu as três; a [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) é
+  excluiu as três; a [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) é
   dona de asset, mas dos dois do `MainForm` — uniforme e bandeira —, e não cita
   cara, cabelo nem barba. Caíam entre as duas definições, e é a própria 26 que
   escreve a regra: *"Exclusão sem dono nomeado é buraco, e este projeto já

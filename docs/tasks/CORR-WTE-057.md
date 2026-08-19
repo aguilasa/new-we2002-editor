@@ -19,7 +19,7 @@ redação que ficou **enumera cinco grupos de campo**:
 > três campos, as cinco barras de força, **os 23 números de camisa**, **a lista
 > de jogadores**, e **o estado de habilitação dos controles que o `nacional`
 > governa**. Bandeira e uniforme ficam fora, como pendência nomeada da
-> WTE-TASK-32.
+> WTE-TASK-29.
 
 O aparato entregue —
 [`compara_tela.sh`](../../wte/tools/compara_tela.sh) +
@@ -106,7 +106,7 @@ Estender o recorte, ou acrescentar um segundo, que alcance a faixa dos
 `dorsal1..23` (y ≈ 432) e a `lista_jugadores_1` (y ≈ 392). A janela tem 544×495,
 então a altura cheia cabe.
 
-O que a altura cheia **arrasta junto** é o que a WTE-TASK-32 possui — medido no
+O que a altura cheia **arrasta junto** é o que a WTE-TASK-29 possui — medido no
 mesmo `MainForm.dfm`, `bandera` ocupa x 232..312 / y 36..84 e `home1`+`home2`
 ocupam x 232..312 / y 104..168, e a montagem desta revisão mostra que os dois
 lados já divergem ali. Ou o recorte vira **dois**, ou a caixa

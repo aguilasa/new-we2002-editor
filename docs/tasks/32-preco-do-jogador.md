@@ -1,5 +1,5 @@
 ---
-id: WTE-TASK-30
+id: WTE-TASK-32
 title: "Preço derivado dos atributos — jogador e time inteiro"
 type: implementação
 category: features
@@ -8,7 +8,7 @@ depends_on: ["WTE-TASK-24", "WTE-TASK-25"]
 status: pendente
 ---
 
-# WTE-TASK-30: Preço do jogador
+# WTE-TASK-32: Preço do jogador
 
 ## Contexto
 

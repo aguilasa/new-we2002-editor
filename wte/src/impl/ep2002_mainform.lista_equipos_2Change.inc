@@ -11,7 +11,7 @@
   por isso que ela tem dois chamadores.
 
   NAO ESTA AQUI, com dono nomeado: desenhar a bandeira do reserva
-  (`0x00405468`) e da WTE-TASK-32. O handler deixa a visibilidade certa. }
+  (`0x00405468`) e da WTE-TASK-29. O handler deixa a visibilidade certa. }
 var
   indice: Integer;
 begin
@@ -46,7 +46,7 @@ begin
     { Quando os dois lados sao o MESMO time, o original nao redesenha: copia a
       bandeira ja pronta do titular. E otimizacao, nao comportamento diferente,
       e o port pode fazer os dois caminhos iguais sem divergir na tela -- o que
-      falta dos dois lados e o desenho, que e da WTE-TASK-32. }
+      falta dos dois lados e o desenho, que e da WTE-TASK-29. }
     if indice = lista_equipos_1.ItemIndex then
       banderita2.Picture := bandera.Picture;
     banderita2.Visible := True;

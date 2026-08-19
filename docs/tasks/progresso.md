@@ -40,13 +40,13 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | 2026-08-11 |
 | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ✅ Concluído | 2026-08-18 | 2026-08-18 |
 | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ⬜ Pendente | — | — |
-| [WTE-TASK-28](/docs/tasks/28-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-29](/docs/tasks/29-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-28 | ⬜ Pendente | — | — |
-| [WTE-TASK-30](/docs/tasks/30-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
-| [WTE-TASK-31](/docs/tasks/31-import-de-mcr.md) | Import e export de `.mcr` | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
-| [WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 5 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ⬜ Pendente | — | — |
+| [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ⬜ Pendente | — | — |
-| [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 29-33 | ⬜ Pendente | — | — |
+| [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
@@ -86,7 +86,7 @@ sem veredito.
 Achado que sai da fase 3 e vale para a 5: extrair a camisa lê **16 setores
 contíguos em `21168024`..`21203815`**, 8 MB acima do maior offset do
 `Offsets.hpp`. É a maior região nova desta task, e é a entrada da
-[WTE-TASK-32](/docs/tasks/32-camisa-e-bandeira-2d.md).
+[WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md).
 
 **A WTE-TASK-20 foi executada antes de a 19 fechar**, e isso foi decisão, não
 descuido. O `depends_on` dela lista a 19, mas o que ela verifica é contra o
@@ -111,13 +111,18 @@ objetivo completo e o modelo de verificação.
 | 1 — Extração estática | 03 a 09 | os 18 DFM, os 96 handlers, strings, offsets, assets — **sem decompilador** |
 | 2 — Casca | 10 a 14 | a UI inteira gerada, os 18 abrindo por `--show` (andaime, retirado na 25), com os 96 stubs logando |
 | 3 — Dados | 15 a 21 | camada de dados **gerada** do `we2002_core`, lendo as duas ROMs |
-| 4 — Comportamento | 22 a 29 | o gate golden, e os 96 handlers com veredito |
-| 5 — Features | 30 a 33 | preço, `.mcr`, camisa/bandeira 2D, slots de ML |
+| 4 — Comportamento | 22 a 31 | o gate golden, os 96 handlers com veredito, e as duas features que alimentam gravação |
+| 5 — Features | 32 a 33 | preço derivado dos atributos, slots de ML |
 | 6 — Paridade | 34 a 37 | bateria completa, divergências registradas, bordas de buffer |
 | 7 — Acabamento | 38 a 40 | nome, linhagem, empacotamento, verificação final |
 
-**A fase 5 é o motivo do projeto.** As quatro features são o que o `ed.exe` não
-tem; o resto do trabalho existe para chegar até elas com verificação.
+**As quatro features são o motivo do projeto** — são o que o `ed.exe` não tem, e
+o resto do trabalho existe para chegar até elas com verificação. **Duas delas
+executam na fase 4**, e isso não é desvio de rota: o `.mcr` e a camisa 2D são a
+*origem dos bytes* de duas das seis gravações, e ficar na mesma task que a
+gravação é o que desfaz o ciclo que a numeração antiga carregava (a 27 dependia
+delas e elas dependiam da 27). Ver a tabela-âncora `§ → task → fase` na Fase 5
+de [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md).
 
 **O que não pode ser pulado:** a fase 1 antes da 2 (sem os DFM não há gerador),
 a 3 antes da 4 (handler sem camada de dados não tem o que manipular), e a
@@ -147,14 +152,14 @@ Fase 4                                                            │
    11 ─────────────────────────────────────────────────► 22 ◄────┘
    09 ──► 23 ──┐         04,06 ──► 24 ──┐
                └────────────┬───────────┴──► 25 ──┬──► 26 ──► 27
-                            22 ─────────┘         └──► 28
-                                                  25-28 ──► 29
+                            22 ─────────┘         └──► 30
+                                          08,24,27 ──► 28
+                                          08,24,27 ──► 29
+                                             25-30 ──► 31
 Fase 5
-   24,25 ──► 30
-   08,24,27 ──► 31
-   08,24,27 ──► 32
+   24,25 ──► 32
    20 ──────► 33
-                29,30,31,32,33 ──► 34
+                   31,32,33 ──► 34
 Fase 6                              ├──► 35 ──► 38 ──► 39 ──┐
                                     ├──► 36 ─────────────────┼──► 40
                                     └──► 37 ─────────────────┘
@@ -171,19 +176,25 @@ Fase 6                              ├──► 35 ──► 38 ──► 39 �
 6.  15 (decisao), 16, 17, 18 — em serie, o gerador depende do tipo
 7.  19, 20, 21
 8.  22 (o gate) e 24 (Ghidra) em paralelo; 23 pode vir desde a 09
-9.  25, depois 26 e 28 em paralelo, depois 27
-10. 30 pode entrar aqui, fora de ordem — ver abaixo
-11. 29 (fechamento da fase 4)
-12. 31, 32, 33 em paralelo
+9.  25, depois 26 e 30 em paralelo, depois 27
+10. 28 e 29 — as duas features que fecham as gravacoes restantes da 27
+11. 31 (fechamento da fase 4)
+12. 32 e 33 em paralelo; a 32 pode ser antecipada — ver abaixo
 13. 34, depois 35, 36 e 37 em paralelo
 14. 38, 39
 15. 40 (aceite final)
 ```
 
-**A 30 (preço) entra fora de ordem de propósito** — plano §10 passo 5. É
+**A 32 (preço) é antecipável por dependência** — plano §10 passo 5. Ela depende
+só da 24 e da 25, as duas concluídas, então nada a prende ao fim da fase 4: é
 isolada, não depende de gravação, entrega a feature mais desejada antes de a
 fase 4 fechar, e valida o ferramental de decompilação num alvo pequeno e
 conferível.
+
+Até 2026-08-19 isso se chamava "entra **fora de ordem**", e era verdade: preço
+era a 30 e o fechamento da fase 4 era a 29. Com a renumeração o fechamento virou
+a 31 e o preço a 32 — a antecipação deixou de contrariar a ordem e passou a ser
+só uma escolha de quando.
 
 ---
 
@@ -246,7 +257,7 @@ conferível.
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **60 de 96 têm arquivo**
       (2026-08-19, do `spec_index.py`): 22 `implementado`, 14 `trivial`, 60
       `aberto`. Os 28 do grupo de carga mais os 28 do de edição, que a
-      WTE-TASK-26 fechou, mais quatro das seis gravações da WTE-TASK-27. Dos
+      WTE-TASK-26 fechou, mais as quatro gravações da WTE-TASK-27. Dos
       `aberto` do grupo de edição, **nove têm dono nomeado na WTE-TASK-27**
       pela opção A
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
@@ -261,15 +272,21 @@ conferível.
       um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
       2026-08-19 — comparar só as duas imagens aprovaria um port inerte
 - [ ] Cinco `trivial` reamostrados e reconferidos
+- [ ] `.mcr`: contêiner por documentação pública, conteúdo revertido
+- [ ] Os três casos especiais do readme do original cobertos
+- [ ] `boton_mcr2isoClick` byte-idêntico, e o EDC/ECC preservado **provado** —
+      é a única gravação do projeto que escreve setor inteiro
+- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida**
+- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
+
+Os cinco bullets acima vinham da Fase 5 até 2026-08-19. Eles desceram junto com
+as tasks: cada uma das duas features fechou de vir depois da gravação que ela
+alimenta e passou a **carregar** essa gravação.
 
 ### Fase 5 — Features
 
 - [ ] Fórmula de preço por tabela de verdade **e** conferida no disassembly
 - [ ] Saturação, arredondamento e termo cruzado testados
-- [ ] `.mcr`: contêiner por documentação pública, conteúdo revertido
-- [ ] Os três casos especiais do readme do original cobertos
-- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida**
-- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
 - [ ] Slots de ML batendo com a tela do original nas duas ROMs
 
 ### Fase 6 — Paridade
@@ -430,7 +447,7 @@ new-we2002-editor/
 │   ├── wte.lpi, wte.lpr              ← WTE-TASK-02
 │   ├── src/
 │   │   ├── ep2002_*.pas              ← WTE-TASK-10 (gerado; diz NÃO EDITAR)
-│   │   ├── impl/*.inc, *.aux.inc     ← WTE-TASK-25 a 28 (os corpos, incluídos
+│   │   ├── impl/*.inc, *.aux.inc     ← WTE-TASK-25 a 30 (os corpos, incluídos
 │   │   │                               nos ep2002_*.pas por {$I impl/...})
 │   │   ├── we2002_estado.pas         ← WTE-TASK-25 (o estado global do app)
 │   │   ├── we2002_offsets.pas        ← WTE-TASK-16 (gerado)
@@ -441,9 +458,9 @@ new-we2002-editor/
 │   │   ├── we2002_textcodec.pas      ← WTE-TASK-18 (gerado)
 │   │   ├── we2002_types.pas          ← WTE-TASK-18 (gerado)
 │   │   ├── we2002_team.pas           ← WTE-TASK-18 (gerado)
-│   │   ├── we2002_preco.pas          ← WTE-TASK-30
-│   │   ├── we2002_mcr.pas            ← WTE-TASK-31
-│   │   ├── we2002_render.pas         ← WTE-TASK-32
+│   │   ├── we2002_preco.pas          ← WTE-TASK-32
+│   │   ├── we2002_mcr.pas            ← WTE-TASK-28
+│   │   ├── we2002_render.pas         ← WTE-TASK-29
 │   │   ├── we2002_ml.pas             ← WTE-TASK-33
 │   │   └── datafiles.pas             ← WTE-TASK-39
 │   ├── forms/*.lfm                   ← WTE-TASK-10 (gerado)

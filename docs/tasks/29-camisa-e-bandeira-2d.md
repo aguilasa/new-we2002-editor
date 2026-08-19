@@ -1,14 +1,14 @@
 ---
-id: WTE-TASK-32
+id: WTE-TASK-29
 title: "Camisa e bandeira 2D em tempo real, com colar-cores"
 type: implementação
 category: features
-phase: 5
+phase: 4
 depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
 status: pendente
 ---
 
-# WTE-TASK-32: Render 2D
+# WTE-TASK-29: Render 2D
 
 ## Contexto
 
@@ -72,10 +72,33 @@ a pixel.
 isso. O que não é aceitável é tolerância não medida: se houver diferença, ela
 tem de ter máximo conhecido e causa nomeada.
 
-### A gravação é outra coisa
+### A gravação é outra coisa, e desde 2026-08-19 ela mora aqui
 
-`grabar_camisetaClick` grava na imagem, e aí o critério é byte-idêntico, sem
-tolerância. Render é tela; gravação é dado. Não confundir os dois critérios.
+`grabar_camisetaClick` (`0x0040ee80`) grava na imagem, e aí o critério é
+byte-idêntico, sem tolerância. Render é tela; gravação é dado. Não confundir os
+dois critérios.
+
+*(decisão do usuário, 2026-08-19)* Até essa data o handler era da
+[WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) — a gravação lá, o render
+aqui. A divisão criava **ciclo**: a 27 não fechava sem esta task, e esta
+declarava `depends_on` a 27. Agora a task que produz os pixels é a mesma que os
+grava, e por isso esta subiu para a fase 4.
+
+Com a gravação vieram as regras, e nenhuma delas é sobre o handler — são sobre
+gravar **nesta imagem**:
+
+- **Nunca recalcular EDC/ECC.** O original não recalcula; preservar é o correto.
+- **Fronteira de setor.** `2352 = 24 + 2048 + 280`, com os saltos à mão.
+- **Cópia, sempre**; `roms/` nunca é alvo.
+- **O diff de controle** já medido em
+  [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md) vale aqui
+  igual: gravar sem editar **muda** 22 bytes nesta ROM.
+- **O clique não grava; quem grava é o `fseek` seguinte.** Saída bufferizada do
+  runtime C — roteiro que termina numa gravação mede um oráculo truncado, porque
+  o harness encerra com `wineserver -k`. Todo roteiro de gravação termina com
+  uma troca de time e só então a marca de corte. Medido com o par
+  [`27-descarga-sem.txt`](../../wte/tests/roteiros/27-descarga-sem.txt) /
+  [`27-descarga-com.txt`](../../wte/tests/roteiros/27-descarga-com.txt).
 
 ---
 
@@ -96,7 +119,14 @@ tolerância. Render é tela; gravação é dado. Não confundir os dois critéri
 - [ ] Espaço de cor de escurecer/clarear identificado
 - [ ] `TLazIntfImage` usado; render em tempo real sem travar a janela
 - [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa nomeada
-- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
+- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância, com spec em
+      `wte/re/spec/MainForm.grabar_camisetaClick.md` e golden verde
+- [ ] **Determinado se `grabar_camisetaClick` escreve setor inteiro ou só
+      payload.** A camisa lê 16 setores contíguos em `21168024`..`21203815`
+      (achado da fase 3), e a resposta muda o critério: se for setor completo,
+      herda o EDC/ECC provado da
+      [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md); se for payload, não se
+      aplica. Barato de responder agora, caro de descobrir tarde
 - [ ] **Bandeira e uniforme conferidos na tela contra o original, para os mesmos
       3 times da [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md)** — herdado
       dela em 2026-08-11, ver abaixo
@@ -112,6 +142,11 @@ carregada tem bandeira e uniforme, que são desta task — e esta task depende d
 a conferência dela aos campos que o grupo de carga produz (nomes, barras,
 números de camisa, lista de jogadores, habilitação), e **a metade excluída caiu
 aqui**.
+
+O ciclo que restava — esta task esperando a gravação da 27, e a 27 esperando o
+render daqui — morreu em 2026-08-19, quando `grabar_camisetaClick` passou a ser
+desta task. `depends_on` continua `[08, 24, 27]`, e agora todos apontam para
+número **menor**: a ordem numérica virou a ordem de execução.
 
 Sem esta linha a exclusão de lá viraria buraco: os dois lados diriam "é da
 outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`

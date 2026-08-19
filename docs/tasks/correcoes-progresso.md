@@ -148,7 +148,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-060 — medir por que o `iguala_nombres` não acinzenta, uma variável por vez
 - [x] CORR-WTE-061 — descobrir o que é a coluna 0 da tabela de `0x00433a10` e tirar o literal do port
 - [x] CORR-WTE-062 — portar o `lista_formacionesClick` e rever os três vereditos que dependem dele
-- [x] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 32 ou registrar na 35
+- [x] CORR-WTE-063 — dar dono a cara, cabelo e barba: estender a 29 ou registrar na 35
 - [x] CORR-WTE-064 — fechar a conta do `[0x00433a10]`, que dá um a mais que a tela
 
 ## Detalhes por correção
@@ -201,15 +201,15 @@ dizer "fechada e fora do backlog", não "corrigida".
 
 ### CORR-WTE-063
 
-- **Arquivo com problema:** `docs/tasks/32-camisa-e-bandeira-2d.md` ou
+- **Arquivo com problema:** `docs/tasks/29-camisa-e-bandeira-2d.md` ou
   `docs/tasks/35-divergencias-deliberadas.md`, conforme a decisão
 - **Sintoma:** as três carregadoras de bitmap da ficha (`0x00406fe0`,
   `0x00407110`, `0x00407338`) foram excluídas pela WTE-TASK-26 como "sem dono", e
-  a WTE-TASK-32 não menciona cara, cabelo nem barba. No port as setas de
+  a WTE-TASK-29 não menciona cara, cabelo nem barba. No port as setas de
   aparência mudam o rótulo e não mudam o desenho
 - **Como foi detectado:** `grep -rl` dos três endereços em `docs/tasks/` devolve
   só a task que os excluiu
-- **Fix:** decisão do usuário — estender a 32 (as três tabelas de cor já estão
+- **Fix:** decisão do usuário — estender a 29 (as três tabelas de cor já estão
   localizadas) ou registrar a exclusão na 35 com o efeito escrito. O que não
   fecha é o estado de hoje
 
@@ -306,7 +306,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 ### CORR-WTE-006
 
 - **Arquivo com problema:** `docs/tasks/25-handlers-de-carga.md`,
-  `docs/tasks/28-handlers-auxiliares.md`, `docs/tasks/30-preco-do-jogador.md`,
+  `docs/tasks/30-handlers-auxiliares.md`, `docs/tasks/32-preco-do-jogador.md`,
   `docs/PLAN-WTE-LAZARUS.md` (§5.1), `docs/tasks/04-mapa-de-handlers.md`,
   `docs/prompts/02-revisar.md`
 - **Sintoma:** a WTE-TASK-04 mediu e listou sete divergências, mas a lista mora
@@ -330,7 +330,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Sintoma:** a tabela "Onde o plano e as tarefas envelheceram" atribui à §1.4
   do plano a frase "`FormCreate` aparece 17 vezes", que o plano não contém — ela
   está na task 04 e no `02-revisar.md`. E omite três divergências do mesmo tipo:
-  o dono errado repetido na task 30, `BitBtn1Click` 3× na task 28 (são 4) e
+  o dono errado repetido na task 32, `BitBtn1Click` 3× na task 30 (são 4) e
   cinco handlers de ocorrência única listados como repetidos, dos quais o `.md`
   registra só `botonClick`
 - **Como foi detectado:** `grep -rn "FormCreate" docs/PLAN-WTE-LAZARUS.md` não
@@ -338,7 +338,7 @@ dizer "fechada e fora do backlog", não "corrigida".
   têm. As contagens saem do TSV gerado, que a própria seção "Homônimos" do
   `.md` já imprime certas
 - **Fix:** no gerador — corrigir a atribuição e derivar as linhas faltantes de
-  `count_by_name(m)`, abortando se um nome citado da task 28 não existir entre
+  `count_by_name(m)`, abortando se um nome citado da task 30 não existir entre
   os 96, como `EXCEPTIONS` e `FORMULA_OWNERS` já fazem
 
 ### CORR-WTE-008
@@ -1160,7 +1160,7 @@ dizer "fechada e fora do backlog", não "corrigida".
   (15 larguras batem, 14 exatas contra o dump) e a montagem
   `work/tela/time-63-lado-a-lado.png` termina acima das duas faixas
 - **Fix:** estender o recorte (ou usar dois, excluindo por coordenada a caixa
-  x 232..312 / y 36..168 da bandeira e do uniforme, que são da WTE-TASK-32) e
+  x 232..312 / y 36..168 da bandeira e do uniforme, que são da WTE-TASK-29) e
   escrever o veredito dos três grupos que faltam, um a um
 - **Ela achou dois defeitos do port, e nenhum foi corrigido nela.** Os
   `dorsal1..23` mostram o byte cru onde o original mostra byte + 1, e o

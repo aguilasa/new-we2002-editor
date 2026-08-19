@@ -137,7 +137,7 @@ REC_ALTURA_MEDIDA = 240
 #   sempre_ligado   `.Enabled := True` incondicional -- NAO pode mudar. Os
 #                   `etiq_nombreN` sao a assimetria medida do original: o campo
 #                   segue `nacional`, o rotulo ao lado nao
-#   pendente_32     `.Visible := nacional`, mas quem DESENHA e a WTE-TASK-32.
+#   pendente_32     `.Visible := nacional`, mas quem DESENHA e a WTE-TASK-29.
 #                   Medido e relatado, nunca reprova
 #   glifo_cinza     `.Enabled := nacional` roda nos dois, mas o glifo e
 #                   INVARIANTE sob o `gdeDisabled` da LCL -- desenhado so com
@@ -184,7 +184,7 @@ CONTROLES = {
 }
 
 # O `punto` (TShape de 2x2 em (312, 125)) fica de fora: dois pixels nao
-# sobrevivem a calibracao de 1 px, e ele e da mesma WTE-TASK-32 dos outros.
+# sobrevivem a calibracao de 1 px, e ele e da mesma WTE-TASK-29 dos outros.
 
 # Quantos pixels precisam diferir para a regiao contar como mudada. Zero seria
 # certo em teoria -- a mesma janela, o mesmo lado, renderizacao determinista --
@@ -680,7 +680,7 @@ def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
         elif m_orac != m_port and grupo == "glifo_cinza":
             veredito = "divergencia deliberada (WTE-TASK-35)"
         elif m_orac != m_port:
-            veredito = "pendente da WTE-TASK-32"
+            veredito = "pendente da WTE-TASK-29"
         elif m_orac != esperado and grupo == "segue_nacional":
             veredito = "CONTRARIA A SPEC"
             erros.append(
