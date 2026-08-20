@@ -90,6 +90,11 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-068](/docs/tasks/CORR-WTE-068.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Três specs de gravação ainda dizem que o gate passa "só as duas faixas do arranque"; medido hoje, os três dão byte-idêntico | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-069](/docs/tasks/CORR-WTE-069.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | As três funções novas do `we2002_ml` (`IndiceDoBlocoMl`, `ParDoIndiceLinearMl`, `PrimeiroBlocoLivreMl`) entraram no caminho de gravação sem um teste sequer | Baixa | [x] concluída | 2026-08-20 |
 | [CORR-WTE-070](/docs/tasks/CORR-WTE-070.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | A tabela "Arquivos a criar ou modificar" da 27 aponta para `wte/tools/roteiros/gravacao-*.sh`, que não existe | Baixa | [x] concluída | 2026-08-20 |
+| [CORR-WTE-071](/docs/tasks/CORR-WTE-071.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O mapa do `.mcr` afirma 16 destinos em cinco lugares; o `LAYOUT` do gerador tem 17, e o título gerado o diz logo acima da tabela com as 17 linhas | Alta | [ ] pendente | — |
+| [CORR-WTE-072](/docs/tasks/CORR-WTE-072.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `gravacao-controle.md` fecha dizendo que o `boton_mcr2isoClick` escreve setor inteiro — premissa que a WTE-TASK-28 mediu e refutou, e que o próprio doc já desmente 30 linhas acima | Alta | [ ] pendente | — |
+| [CORR-WTE-073](/docs/tasks/CORR-WTE-073.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `check_lcl_combo.py` ficou preso no `:99` em código vivo depois da mudança para o `:98`: pula em silêncio numa máquina só com o `:98` | Alta | [ ] pendente | — |
+| [CORR-WTE-074](/docs/tasks/CORR-WTE-074.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | A confrontação Pascal × Python do leitor de `.mcr` aponta para `work/saida.mcr`, que o `golden_check.sh` apaga a cada corrida; a fixture estável tem outro nome | Baixa | [ ] pendente | — |
+| [CORR-WTE-075](/docs/tasks/CORR-WTE-075.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | `do_roundtrip()` grava num destino fixo versionado, e o teste sobrescreve a medição de `wte/re/mcr-roundtrip.tsv` e a repõe num `finally` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -162,6 +167,11 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-068 — reescrever a régua das três specs com o resultado de hoje
 - [x] CORR-WTE-069 — cobrir o inverso do índice linear e o alocador com teste próprio
 - [x] CORR-WTE-070 — reconciliar a tabela de arquivos da 27 com a árvore
+- [ ] CORR-WTE-071 — contar o `LAYOUT` em vez de afirmar 16 destinos
+- [ ] CORR-WTE-072 — reescrever o fecho do `gravacao-controle.md` com o que a 28 mediu
+- [ ] CORR-WTE-073 — dar `WTE_DISPLAY` ao `check_lcl_combo.py`, com `:98` de default
+- [ ] CORR-WTE-074 — resolver a fixture do `.mcr` por ordem, com a estável na frente
+- [ ] CORR-WTE-075 — parametrizar o destino do `--roundtrip` e tirar o teste de cima do versionado
 
 ## Detalhes por correção
 
@@ -1298,3 +1308,69 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Como foi detectado:** `ls wte/tools/roteiros/` contra `ls wte/tests/roteiros/`
 - **Fix:** reescrever a tabela com o que existe e anotar a mudança de formato
   com data e motivo, como a WTE-TASK-33 fez com o destino do `ml-slots.md`
+
+### CORR-WTE-071
+
+- **Arquivo com problema:** `wte/tools/dump_mcr.py` (linhas 30 e 528),
+  `wte/re/mcr.md`, `wte/src/we2002_mcr.pas`, `docs/tasks/28-import-de-mcr.md`
+- **Sintoma:** cinco lugares dizem "14 dos **16** destinos"; o `LAYOUT` tem
+  **17** (3 no bloco 2, 14 no bloco 3), e o título gerado fica logo acima da
+  tabela que lista as 17 linhas
+- **Como foi detectado:** `python3 -c "import dump_mcr as m; print(len(m.LAYOUT))"`
+  contra o título de `wte/re/mcr.md`; `git show` mostra que o `LAYOUT` nasceu
+  com 17 no mesmo commit que escreveu o 16
+- **Fix:** computar o número no gerador, como o `min(...)` vizinho já faz, e um
+  caso de teste que fixe `len(LAYOUT)`
+
+### CORR-WTE-072
+
+- **Arquivo com problema:** `wte/tools/gravacao_controle.py` (linhas 321-324) e
+  o `wte/re/gravacao-controle.md` que ele gera
+- **Sintoma:** o parágrafo final diz que a única gravação de setor inteiro do
+  projeto é o `boton_mcr2isoClick` e que "é lá que preservar EDC/ECC vira
+  decisão". A WTE-TASK-28 mediu o contrário e fechou o critério por refutação;
+  o mesmo documento já conta a sessão `27-mcr2iso` entre as 164 faixas limpas
+- **Como foi detectado:** leitura do `wte/re/cmp-medido.tsv` — as sete faixas do
+  handler vão de 1 a 276 bytes, todas entre 24 e 2071 do setor
+- **Fix:** trocar a previsão pelo resultado, com os números computados do
+  `cmp-medido.tsv`
+
+### CORR-WTE-073
+
+- **Arquivo com problema:** `wte/tools/check_lcl_combo.py`, linhas 113-144
+- **Sintoma:** único resto de `:99` em código executável depois de `601943f`.
+  Numa máquina só com o `:98` o gate PULA em silêncio; com um `:99` alheio de
+  pé, ele dirige GUI lá — os dois contra a regra do `CLAUDE.md`
+- **Como foi detectado:** `make -C wte check` desta revisão imprimiu
+  "PULADO (sem Xvfb :99)"; `grep -rn 'WTE_DISPLAY' wte/tools/` mostra que todo
+  o resto já migrou
+- **Fix:** `ALVO = os.environ.get("WTE_DISPLAY", ":98")` e as três menções em
+  código passam a usá-lo
+
+### CORR-WTE-074
+
+- **Arquivo com problema:** `wte/tools/test_dump_mcr.py`,
+  `TestPascalConcorda.CARTAO`
+- **Sintoma:** a única prova de que os leitores Pascal e Python enxergam o
+  mesmo cartão de verdade procura `work/saida.mcr`, que o `golden_check.sh`
+  apaga antes de cada lado das corridas com `--artefato saida.mcr`. A fixture
+  estável é `work/entrada.mcr`, que fica ao lado
+- **Como foi detectado:** `python3 -m unittest test_dump_mcr` reporta
+  `OK (skipped=2)`, e `ls work/*.mcr` mostra `entrada.mcr` e `volta.mcr`, sem
+  `saida.mcr`
+- **Fix:** resolver a fixture por ordem — `WTE_MCR_FIXTURE`, depois
+  `work/entrada.mcr`, depois `work/saida.mcr`
+
+### CORR-WTE-075
+
+- **Arquivo com problema:** `wte/tools/dump_mcr.py` (`do_roundtrip`),
+  `wte/tools/test_dump_mcr.py` (`test_a_medicao_e_escrita`)
+- **Sintoma:** o destino é fixo e versionado, então o teste escreve por cima de
+  `wte/re/mcr-roundtrip.tsv` com dado sintético e o repõe num `finally`;
+  interrupção que pule o `finally` deixa fixture de teste no lugar da medição.
+  O `print` da rotina também vaza para o relatório do `unittest`
+- **Como foi detectado:** a saída de `make -C wte check` traz
+  "arquivo inteiro: 1 bytes diferentes" depois do `OK`, e a leitura do teste
+  mostra o `try/finally`
+- **Fix:** `do_roundtrip(antes, depois, destino=IDA_E_VOLTA)`, e o teste
+  apontando para o `tempfile` que já cria
