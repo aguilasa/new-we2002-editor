@@ -15,7 +15,8 @@
 #   IMAGE=<caminho.bin>               imagem de CD de origem
 #   WORK=<dir>                        onde ficam as copias de trabalho (work/)
 #   JOBS=<n>                          paralelismo do build           (nproc)
-#   DISPLAY=:99                       display X para a GUI    (herda do shell)
+#   DISPLAY=:98                       display X para a GUI    (herda do shell)
+#   XVFB=:98                          o Xvfb dos alvos -98        (default :98)
 #   ARGS='...'                        argumentos extras para o binario
 #
 # Ex.: make run PRESET=release IMAGE=roms/japanese-shift-jis.bin
@@ -48,7 +49,7 @@ TESTS := $(BUILD)/tests/we2002_tests
 COPY := $(WORK)/$(notdir $(IMAGE))
 
 .DEFAULT_GOAL := help
-.PHONY: help configure build run run-jp run-99 copy fresh test test-release \
+.PHONY: help configure build run run-jp run-98 copy fresh test test-release \
         golden golden-gui install uipreview gen gen-check clean distclean
 
 # ------------------------------------------------------------------ help ----
@@ -58,11 +59,11 @@ help:
 	@echo '  build         compila o preset $$(PRESET) (atual: $(PRESET))'
 	@echo '  run           compila e abre o editor sobre uma copia de $$(IMAGE)'
 	@echo '  run-jp        idem, com roms/japanese-shift-jis.bin'
-	@echo '  run-99        run forcando DISPLAY=:99 (validacao visual)'
+	@echo '  run-98        run forcando DISPLAY=$(XVFB) (validacao visual)'
 	@echo '  oracle        abre o ed.exe original sob Wine (runner do Bottles)'
-	@echo '  oracle-99     oracle forcando DISPLAY=:99'
+	@echo '  oracle-98     oracle forcando DISPLAY=$(XVFB)'
 	@echo '  wte           abre o WE Team Editor do Obocaman na tela ATUAL'
-	@echo '  wte-99        idem, forcando DISPLAY=:99'
+	@echo '  wte-98        idem, forcando DISPLAY=$(XVFB)'
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -117,15 +118,25 @@ run: build $(COPY)
 run-jp:
 	@$(MAKE) --no-print-directory run IMAGE=roms/japanese-shift-jis.bin
 
-# Validacao visual: sempre no Xvfb :99, nunca na sessao real do usuario.
-# O :99 desta maquina sobe via xvfb-run, com cookie proprio; sem apontar o
+# Validacao visual: sempre no Xvfb, nunca na sessao real do usuario.
+#
+# O ALVO E O :98 DESDE 2026-08-20, e antes era o :99. A troca foi a pedido do
+# usuario: outro projeto desta maquina (World-Of-Football) mantem uma janela de
+# 1024x768 no :99, e a guarda de janela grande do golden test -- que existe
+# justamente para nao dirigir a janela errada -- recusava comecar. O numero
+# mora em UMA variavel; mover de novo e trocar ela e o nome dos tres alvos.
+#
+# Servidor levantado por xvfb-run tem cookie proprio; sem apontar o
 # XAUTHORITY para ele o Qt morre com "Invalid MIT-MAGIC-COOKIE-1 key".
-# Variavel recursiva: o `ps` so roda quando run-99 e chamado.
-XAUTH_99 = $(shell ps -o args= -C Xvfb 2>/dev/null \
-             | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)
+# Variavel recursiva: o `ps` so roda quando run-98 e chamado. Vazio quando o
+# servidor subiu sem `-auth`, que e o caso do :98 deste projeto -- e ai vazio e
+# o certo, nao um erro.
+XVFB ?= :98
+XAUTH_XVFB = $(shell ps -o args= -C Xvfb 2>/dev/null \
+             | sed -n 's/.*Xvfb $(XVFB) .*-auth \([^ ]*\).*/\1/p' | head -1)
 
-run-99:
-	@$(MAKE) --no-print-directory run DISPLAY=:99 XAUTH='$(XAUTH_99)'
+run-98:
+	@$(MAKE) --no-print-directory run DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ---------------------------------------------------------------- oraculo ---
 
@@ -147,7 +158,7 @@ ORACLE_PREFIX ?= $(abspath $(WORK))/wineprefix
 ORACLE_DIR    := $(WORK)/oracle-$(basename $(notdir $(IMAGE)))
 ORACLE_COPY   := $(ORACLE_DIR)/we2002.bin
 
-.PHONY: oracle oracle-99
+.PHONY: oracle oracle-98
 
 $(ORACLE_COPY): $(IMAGE)
 	@test -s '$(IMAGE)' || { echo 'ERRO: imagem ausente: $(IMAGE)'; exit 1; }
@@ -184,8 +195,8 @@ oracle: $(ORACLE_COPY)
 	  $(if $(XAUTH),XAUTHORITY='$(XAUTH)') '$(WINE_BIN)/wine64' ed.exe; \
 	  env WINEPREFIX='$(ORACLE_PREFIX)' '$(WINE_BIN)/wineserver' -k >/dev/null 2>&1 || true
 
-oracle-99:
-	@$(MAKE) --no-print-directory oracle DISPLAY=:99 XAUTH='$(XAUTH_99)'
+oracle-98:
+	@$(MAKE) --no-print-directory oracle DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ------------------------------------------------------- WE Team Editor -----
 #
@@ -197,8 +208,8 @@ oracle-99:
 #   - prefix proprio, WINEARCH=win32   ($(WTE_PREFIX))
 #   - o loader e $(WINE_BIN)/wine, nao o wine64
 #
-# Ao contrario do oracle/run-99, este alvo roda no DISPLAY que estiver no
-# ambiente -- e o alvo "na tela atual". Use `make wte-99` para o Xvfb.
+# Ao contrario do oracle/run-98, este alvo roda no DISPLAY que estiver no
+# ambiente -- e o alvo "na tela atual". Use `make wte-98` para o Xvfb.
 #
 # O dialogo de abrir nao aceita caminho longo digitado por xdotool, e de todo
 # jeito e chato de digitar: o alvo mapeia a unidade E: para $(WORK)/, entao
@@ -208,7 +219,7 @@ WTE_DIR    := we-team-editor
 WTE_PREFIX ?= $(abspath $(WORK))/wineprefix-wte
 WTE_COPY   := $(WORK)/wte-$(notdir $(IMAGE))
 
-.PHONY: wte wte-99
+.PHONY: wte wte-98
 
 $(WTE_COPY): $(IMAGE) | $(WORK)
 	@test -s '$(IMAGE)' || { echo 'ERRO: imagem ausente: $(IMAGE)'; exit 1; }
@@ -247,8 +258,8 @@ wte: $(WTE_COPY)
 	  '$(WINE_BIN)/wine' we-team-editor.exe; \
 	  env WINEPREFIX='$(WTE_PREFIX)' '$(WINE_BIN)/wineserver' -k >/dev/null 2>&1 || true
 
-wte-99:
-	@$(MAKE) --no-print-directory wte DISPLAY=:99 XAUTH='$(XAUTH_99)'
+wte-98:
+	@$(MAKE) --no-print-directory wte DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ----------------------------------------------------------------- testes ---
 
@@ -258,8 +269,8 @@ test: build
 test-release:
 	@$(MAKE) --no-print-directory test PRESET=release
 
-# Golden tests: precisam de Debug/ed.exe, Wine e do display :99.
-# Feche qualquer editor aberto no :99 antes de rodar.
+# Golden tests: precisam de Debug/ed.exe, Wine e do Xvfb ($(XVFB)).
+# Feche qualquer editor aberto nele antes de rodar.
 golden: build
 	WE2002_GOLDEN_IMAGE='$(abspath $(IMAGE))' \
 	  ctest --preset $(PRESET) -R '^golden$$'
@@ -295,7 +306,7 @@ install:
 uipreview:
 	cmake -B build-uipreview -S tools/uipreview
 	cmake --build build-uipreview -j $(JOBS)
-	DISPLAY=:99 ./build-uipreview/preview_MainDialog /tmp/main.png
+	DISPLAY=$(XVFB) ./build-uipreview/preview_MainDialog /tmp/main.png
 	@echo '>> /tmp/main.png'
 
 clean:

@@ -48,7 +48,7 @@ controle fechando antes. **Rode a ferramenta.**
 - `docs/PLAN-WTE-LAZARUS.md` — a seção referenciada pela task, mais §2 (método:
   spec, não transcrição), §4.4 e §4.5 (o que é gerado), §6 (testes) e §8
   (armadilhas)
-- `CLAUDE.md` — em especial a regra do `:99` e a seção do `make wte`
+- `CLAUDE.md` — em especial a regra do `:98` e a seção do `make wte`
 - Os docs de `wte/re/` que a task cita
 
 ### Etapa 1 — Ler o escopo da tarefa
@@ -76,7 +76,7 @@ python3 wte/tools/port_database_pas.py --check
 # o app compila
 lazbuild wte/wte.lpi
 
-# o gate de comportamento (a partir da WTE-TASK-22) -- feche janela no :99 antes
+# o gate de comportamento (a partir da WTE-TASK-22) -- feche janela no :98 antes
 bash wte/tools/golden_check.sh
 
 # o projeto irmao nao regrediu, se a task tocou em src/core/

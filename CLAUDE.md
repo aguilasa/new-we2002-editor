@@ -2,48 +2,64 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Regra obrigatória: validação visual no display `:99`
+## Regra obrigatória: validação visual no display `:98`
 
 **Toda execução com GUI — rodar o editor, tirar screenshot, dirigir a janela com
-`xdotool` — deve acontecer no `DISPLAY=:99`.** O `:1` é a sessão real do usuário;
+`xdotool` — deve acontecer no `DISPLAY=:98`.** O `:1` é a sessão real do usuário;
 abrir janelas nele atrapalha o uso da máquina.
 
-Já existe um Xvfb rodando. **Ele sobe via `xvfb-run`, então tem cookie
-próprio** — não basta exportar `DISPLAY`:
+**Era o `:99` até 2026-08-20**, e a troca foi a pedido do usuário. O motivo é
+concreto e vale saber: outro projeto desta máquina
+(`~/desenvolvimento/github/World-Of-Football`) mantém uma janela de 1024×768
+no `:99`, e a guarda de janela grande do `golden_check.sh` — que existe
+justamente para não dirigir a janela errada — passou a recusar toda corrida.
+A guarda está certa; quem muda de lugar é o nosso servidor. Registro
+histórico (`CORR-*`, logs de execução, "medido no `:99` em 2026-08-11")
+**continua dizendo `:99`**, porque é o que aconteceu.
 
-```
-Xvfb :99 -screen 0 1280x1024x24 -nolisten tcp -auth /tmp/xvfb-run.XXXXXX/Xauthority
-```
-
-Sem apontar o `XAUTHORITY` para esse arquivo, o Qt morre antes de abrir janela
-com `Invalid MIT-MAGIC-COOKIE-1 key` seguido de
-`qt.qpa.xcb: could not connect to display :99`. O caminho do cookie muda a cada
-reinício do Xvfb; descubra pelo `ps`:
+O servidor sobe assim, e **sem `-auth`**:
 
 ```sh
-export DISPLAY=:99
-export XAUTHORITY=$(ps -o args= -C Xvfb \
-  | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)
+Xvfb :98 -screen 0 1280x1024x24 -nolisten tcp &
 ```
 
-O `make run-99` faz isso sozinho (ver a seção do Makefile).
+Sem `-auth` não há cookie, e **`XAUTHORITY` vazio é o certo** — não herde o do
+desktop (`/run/user/1000/gdm/Xauthority`), que o shell traz e só confunde quem
+depurar depois. Se algum dia o servidor subir por `xvfb-run`, aí ele **tem**
+cookie próprio, e sem apontar o `XAUTHORITY` para ele o Qt morre antes de abrir
+janela com `Invalid MIT-MAGIC-COOKIE-1 key` seguido de
+`qt.qpa.xcb: could not connect to display :98`. As ferramentas já tratam os dois
+casos: procuram o `-auth` no `ps` e limpam a variável quando não acham.
 
-Se por qualquer motivo não for possível usar o `:99` — servidor caído, resolução
+```sh
+export DISPLAY=:98
+export XAUTHORITY=$(ps -o args= -C Xvfb \
+  | sed -n 's/.*Xvfb :98 .*-auth \([^ ]*\).*/\1/p' | head -1)
+```
+
+O `make run-98` faz isso sozinho (ver a seção do Makefile), e o
+`roteiro.sh` — que todo gate do `wte/` carrega — também.
+
+**O número mora em um lugar por ferramenta**, para a próxima mudança custar uma
+linha: `XVFB` nos dois `Makefile`, `WTE_DISPLAY` nos scripts de `wte/tools/`, e
+`GOLDEN_DISPLAY` nos de `tools/`. Todos com `:98` de default.
+
+Se por qualquer motivo não for possível usar o `:98` — servidor caído, resolução
 insuficiente, app que exige compositor Wayland, ferramenta que não respeita
 `DISPLAY` — **pergunte ao usuário antes de cair para o `:1`**. Nunca faça esse
 fallback silenciosamente.
 
 O diálogo principal `IDD_ED_DIALOG` tem 718×337 DLU ≈ **1077×548 px** e **cabe
-inteiro** nos 1280×1024 atuais. (Isso já foi limitação: o `:99` era 960×672 e
-cortava a borda direita. Se o Xvfb voltar a subir numa resolução menor que 1077
+inteiro** nos 1280×1024 atuais. (Isso já foi limitação: o Xvfb era 960×672 e
+cortava a borda direita. Se ele voltar a subir numa resolução menor que 1077
 de largura, validar a janela inteira exige reiniciá-lo — **pergunte antes**.)
 
 Screenshot de uma janela específica:
 
 ```sh
-DISPLAY=:99 xdotool search --pid <PID> | while read i; do \
-  echo "$i :: $(DISPLAY=:99 xdotool getwindowname $i)"; done
-DISPLAY=:99 import -window <WINDOW_ID> out.png
+DISPLAY=:98 xdotool search --pid <PID> | while read i; do \
+  echo "$i :: $(DISPLAY=:98 xdotool getwindowname $i)"; done
+DISPLAY=:98 import -window <WINDOW_ID> out.png
 ```
 
 `import -window <id>` falha com `unable to read X window image: Resource
@@ -54,7 +70,7 @@ port abre um aviso modal já na carga. Dispense o aviso primeiro, ou capture
 Disponível no host: `Xvfb`, `xvfb-run`, `xdotool`, `import` (ImageMagick),
 `ffmpeg`. **Não** instalados: `wmctrl`, `scrot`, `x11vnc`.
 
-**Não há window manager no `:99`.** Duas consequências ao dirigir janela:
+**Não há window manager no `:98`.** Duas consequências ao dirigir janela:
 
 - `xdotool windowactivate` falha com `XGetInputFocus returned the focused
   window of 1`. Não há foco para transferir. Dirija por coordenada absoluta —
@@ -117,9 +133,9 @@ que a linha de comando crua não resolve:
 |---|---|
 | `make run` | compila, **copia** `roms/golden-european-deluxe.bin` para `work/` e abre o editor sobre a cópia |
 | `make run-jp` | idem com `roms/japanese-shift-jis.bin` |
-| `make run-99` | `run` no `:99`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
-| `make oracle` / `oracle-99` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
-| `make wte` / `wte-99` | abre o editor de terceiro do Obocaman (C++Builder 6, PE32), em prefix `win32` próprio |
+| `make run-98` | `run` no `:98`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
+| `make oracle` / `oracle-98` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
+| `make wte` / `wte-98` | abre o editor de terceiro do Obocaman (C++Builder 6, PE32), em prefix `win32` próprio |
 | `make fresh` | descarta as cópias de trabalho e refaz do original |
 | `make test` / `test-release` | `ctest` sem os golden |
 | `make golden` / `golden-gui` | exportam `WE2002_GOLDEN_IMAGE` absoluto |
@@ -204,7 +220,7 @@ WE2002_GOLDEN_IMAGE=/caminho/imagem.bin ctest --test-dir build -R golden
 ```
 
 São dois: `golden` compara o core headless com o `ed.exe`, `golden_gui` põe a
-janela Qt no lugar do core. Os dois usam Wine e o `:99`.
+janela Qt no lugar do core. Os dois usam Wine e o `:98`.
 
 ### O golden test
 
@@ -225,15 +241,15 @@ aparecer outra, é bug do port. Detalhe na Fase 3 do
 [PLAN-LINUX.md](docs/PLAN-LINUX.md).
 
 O script não toca na imagem de origem, mas usa ~950 MB de temporário. Precisa
-do `Debug/ed.exe`, de Wine e do `:99`; por isso não roda em CI.
+do `Debug/ed.exe`, de Wine e do `:98`; por isso não roda em CI.
 
-**Feche qualquer editor aberto no `:99` antes de rodar.** Os dois lados acham o
+**Feche qualquer editor aberto no `:98` antes de rodar.** Os dois lados acham o
 diálogo principal **pelo tamanho** — ele não tem título —, então uma janela
 esquecida de um teste manual é dirigida em vez da que está sob teste, e o
 resultado é um diff de bytes que parece bug do port. Duas guardas: o
-`golden_check.sh` se recusa a começar se houver janela ≥ 900×450 no `:99`, e o
+`golden_check.sh` se recusa a começar se houver janela ≥ 900×450 no `:98`, e o
 `golden_gui.sh` restringe os candidatos ao `_NET_WM_PID` do processo que ele
-mesmo lançou. O `golden_check.sh` fixa `DISPLAY=:99` por conta própria: o
+mesmo lançou. O `golden_check.sh` fixa `DISPLAY=:98` por conta própria: o
 `ctest` repassa o `DISPLAY` do shell (`:1` aqui), e as janelas normais da sessão
 real derrubariam a guarda.
 
@@ -293,7 +309,7 @@ Para mexer na interface à mão, o binário pré-compilado `Debug/ed.exe` (PE32+
 x86-64, MFC estático) roda sob o runner Wine do Bottles:
 
 ```sh
-export DISPLAY=:99
+export DISPLAY=:98
 export WINEPREFIX=<prefix dedicado>
 export WINEDEBUG=-all
 WINE=/home/ingmar/.var/app/com.usebottles.bottles/data/bottles/runners/soda-9.0-1/bin
@@ -318,7 +334,7 @@ Notas:
   imagem não tem 474.431.328 bytes. O aviso é só aviso — ele carrega assim
   mesmo. O diálogo principal **não tem título**, então só dá para achá-lo pelo
   tamanho; é o que o `wait_for_main` faz.
-- O diálogo principal tem 1077 px de largura e o `:99` tem 960: o Wine corta a
+- O diálogo principal tem 1077 px de largura e o Xvfb já teve 960: o Wine cortava a
   borda direita. O `CMB_WRITE` fica em x≈315, dentro da parte visível, então o
   golden test funciona mesmo cortado.
 
@@ -341,7 +357,7 @@ inteiro), import de jogador de `.mcr`, contador de slots de ML livres na tela.
 
 ```sh
 make wte      # DISPLAY do shell -- o ponto do alvo é olhar
-make wte-99   # no Xvfb
+make wte-98   # no Xvfb
 ```
 
 O que ele não compartilha com o `make oracle`, e não pode:
@@ -362,7 +378,7 @@ O que ele não compartilha com o `make oracle`, e não pode:
   `Initialization of L"winex11.drv" failed` no log do Wine. O alvo confere e
   imprime a linha do `apt`.
 
-O diálogo de abrir não engole caminho longo digitado (ver a nota do `:99`
+O diálogo de abrir não engole caminho longo digitado (ver a nota do `:98`
 acima), então o alvo mapeia `E:` para `work/` e imprime o caminho curto para
 colar. O aviso de tamanho é o mesmo do `ed.exe` e é igualmente inofensivo.
 
@@ -380,8 +396,8 @@ nossos 69 `OFS_*` batendo numa tabela em `.data` do próprio `.exe`.
 ## Rodar o port
 
 ```sh
-make run-99                 # cuida da cópia e do XAUTHORITY
-# ou, à mão (exige DISPLAY e XAUTHORITY já exportados — ver a regra do :99):
+make run-98                 # cuida da cópia e do XAUTHORITY
+# ou, à mão (exige DISPLAY e XAUTHORITY já exportados — ver a regra do :98):
 ./build/src/app/newWe2002 /caminho/copia.bin
 ```
 
@@ -574,11 +590,11 @@ Para conferir visualmente:
 ```sh
 cmake -B build-uipreview -S tools/uipreview
 cmake --build build-uipreview -j
-DISPLAY=:99 ./build-uipreview/preview_MainDialog /tmp/main.png
+DISPLAY=:98 ./build-uipreview/preview_MainDialog /tmp/main.png
 ```
 
 `QWidget::grab()` pinta fora da tela, então o diálogo de 1077 px sai inteiro
-mesmo com o `:99` em 960 — a captura do `ed.exe` não consegue isso. O
+mesmo com o Xvfb em 960 — a captura do `ed.exe` não consegue isso. O
 `uipreview` usa Qt6 se existir e cai para Qt5.
 
 ### Nomenclatura

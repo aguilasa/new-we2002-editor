@@ -29,7 +29,8 @@
 #
 # ## As quatro guardas herdadas do `tools/golden_check.sh` do newWe2002
 #
-# 1. `DISPLAY=:99` fixado aqui dentro, nunca herdado do shell;
+# 1. `DISPLAY` fixado aqui dentro (`:98`, ou `$WTE_DISPLAY`), nunca herdado
+#    do shell -- o `:1` e a sessao real do usuario;
 # 2. recusa comecar com janela grande ja aberta no `:99`;
 # 3. so dirige janela do processo lancado (`_NET_WM_PID`, no `roteiro.sh`);
 # 4. `roms/` nunca e alvo -- copia, sempre, e as copias sao apagadas no fim.

@@ -180,10 +180,10 @@ bash wte/tools/golden_check.sh            # o gate de comportamento
 ctest --preset debug                      # o newWe2002 nao regrediu
 ```
 
-### A regra do `:99`
+### A regra do `:98`
 
-Toda execução com GUI acontece no `DISPLAY=:99`, com o `XAUTHORITY` resolvido
-pelo `ps` (ver `CLAUDE.md`). **Feche qualquer janela grande no `:99` antes de
+Toda execução com GUI acontece no `DISPLAY=:98`, com o `XAUTHORITY` resolvido
+pelo `ps` (ver `CLAUDE.md`). **Feche qualquer janela grande no `:98` antes de
 rodar o golden** — os dois lados acham a janela por heurística, e uma sobra de
 teste manual é dirigida em vez da que está sob teste.
 

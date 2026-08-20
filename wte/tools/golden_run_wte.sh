@@ -84,7 +84,7 @@ sleep 1
 echo ">> oraculo: lancando o wte.exe"
 (
   cd "$RAIZ/we-team-editor"
-  env DISPLAY=:99 WINEPREFIX="$PREFIX" WINEARCH=win32 \
+  env DISPLAY="$DISPLAY" WINEPREFIX="$PREFIX" WINEARCH=win32 \
       WINEDEBUG="${WINEDEBUG:-+seh}" \
       ${XAUTHORITY:+XAUTHORITY="$XAUTHORITY"} \
     setsid "$WINE_BIN/wine" we-team-editor.exe

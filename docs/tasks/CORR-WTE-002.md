@@ -113,7 +113,7 @@ No **Achado 2**, trocar a frase que aponta para o scratchpad pelo comando que
 gera a lista, e apagar a referência ao caminho volátil:
 
 ```markdown
-Reproduzir (com o `make wte-99` no ar, `DISPLAY`/`XAUTHORITY` como manda o
+Reproduzir (com o `make wte-98` no ar, `DISPLAY`/`XAUTHORITY` como manda o
 `CLAUDE.md`):
 
     xdotool search --name '.' 2>/dev/null | while read i; do
@@ -159,7 +159,7 @@ novo**: registre no Log desta CORR em vez de ajustar a tabela em silêncio.
 Rodados os dois comandos antes de escrevê-los. O `analyzeHeadless` com o
 `ShowInfo.java` devolveu `blocks=9`, `symbols=509`, `compiler=borlandcpp`,
 `imagebase=00400000` — idênticos aos publicados. O censo de janelas com o
-`make wte-99` no ar devolveu 24 linhas, e as 18 geometrias batem uma a uma com
+`make wte-98` no ar devolveu 24 linhas, e as 18 geometrias batem uma a uma com
 a tabela do Achado 2. Nenhum valor mudou; os dois blocos ganharam a rota de
 volta inline, e a referência ao `wte-windows.tsv` do scratchpad saiu.
 
@@ -171,7 +171,7 @@ escritas junto, porque sem elas o número não se reproduz:
 - **`-noanalysis` é load-bearing.** Com análise o Ghidra cria símbolos e
   `symbols=509` deixa de valer. Estava no comando original, mas sem explicação.
 - **Encerrar o Wine depois do censo.** O `:99` é recurso serializado e não tem
-  window manager; janela de `make wte-99` esquecida ali é dirigida pelo teste
+  window manager; janela de `make wte-98` esquecida ali é dirigida pelo teste
   seguinte, e o diff resultante parece bug do port.
 
 Sobrou uma menção a caminho de trabalho no arquivo, `$SCRATCH/lclsmoke` no item

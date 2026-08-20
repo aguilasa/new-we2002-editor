@@ -185,7 +185,7 @@ resolver; o crash em si é bloqueio da
      `dorsal1..23` são a exceção no DFM e, ainda assim, não abrem nada sem time.
   4. **O `:99` desta máquina subiu sem `-auth`.** O `CLAUDE.md` descreve o Xvfb
      de `xvfb-run`, com cookie próprio; o processo atual não tem. O
-     `make -C wte run-99` erra falso nesse estado. O `capture_forms.sh` trata os
+     `make -C wte run-98` erra falso nesse estado. O `capture_forms.sh` trata os
      dois casos.
   5. **Um hardlink meu em `work/` deslocou a listagem do diálogo de abrir** e
      uma sessão abriu a cópia errada. As cópias de `work/` são descartáveis e

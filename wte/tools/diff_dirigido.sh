@@ -37,7 +37,7 @@
 #
 # ## Regra do :99 (CLAUDE.md)
 #
-# Toda GUI roda no `:99`. O script fixa `DISPLAY=:99` por conta propria em vez
+# Toda GUI roda no `:98`. O script fixa `DISPLAY` por conta propria em vez
 # de herdar do shell -- herdar foi o que derrubou o golden_check.sh do
 # newWe2002 quando o ctest repassava o `:1`.
 #
@@ -114,7 +114,7 @@ sleep 1
 echo ">> lancando o wte.exe sob strace (ptrace_scope=1 exige lancar, nao anexar)"
 (
   cd "$RAIZ/we-team-editor"
-  env DISPLAY=:99 WINEPREFIX="$PREFIX" WINEARCH=win32 WINEDEBUG="$WINEDEBUG" \
+  env DISPLAY="$DISPLAY" WINEPREFIX="$PREFIX" WINEARCH=win32 WINEDEBUG="$WINEDEBUG" \
       ${XAUTHORITY:+XAUTHORITY="$XAUTHORITY"} \
     setsid strace -f -qq -y -tt \
       -e trace=read,pread64,write,pwrite64,lseek,_llseek \

@@ -129,7 +129,7 @@ Ghidra pega, sem nada mudar no `apt`. Versão de compilador muda layout de
   Ghidra 12.1.2 em `~/.local/opt/`. Os quatro critérios foram **medidos**, não
   supostos: um projeto LCL de smoke test linkou contra `libgtk-x11-2.0.so.0`
   (widgetset provado pelo binário, não pela flag) e abriu no `:99`; o
-  `make wte-99` subiu o oráculo A inteiro; o Ghidra importou o `.exe` headless e
+  `make wte-98` subiu o oráculo A inteiro; o Ghidra importou o `.exe` headless e
   abriu a GUI no `:99`.
 
   Os dois achados que mudam trabalho futuro: o Ghidra classifica o binário como

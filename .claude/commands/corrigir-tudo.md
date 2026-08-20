@@ -26,10 +26,10 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 3. **Evidência do lote inteiro primeiro, em paralelo.** Reprodução é leitura
    pura. CORR cujo sintoma sumiu sai do lote e é reportada — corrigir o que já
    não está quebrado é como se introduz regressão. Ela não bloqueia as outras.
-   **Exceção:** reprodução que precisa abrir o oráculo no `:99` **não** é
+   **Exceção:** reprodução que precisa abrir o oráculo no `:98` **não** é
    paralelizável; ocupa o display e vai em série.
 
-4. **O `:99` é o recurso mais serializado deste projeto.** Não há window
+4. **O `:98` é o recurso mais serializado deste projeto.** Não há window
    manager, e os dois lados do golden acham a janela por heurística: duas
    sessões de GUI simultâneas dirigem a janela uma da outra, e o diff parece
    bug do port. Na prática, **toda CORR que abre o oráculo, roda o golden ou
@@ -45,7 +45,7 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 
 6. **Subagente edita; o thread principal commita.** Subagente não roda `git`,
    nem `lazbuild`, nem `golden_check.sh`, nem gerador em modo de escrita, e não
-   abre janela no `:99`. Correção que precisa de um desses é sequencial por
+   abre janela no `:98`. Correção que precisa de um desses é sequencial por
    definição.
 
 7. **Varredura de discrepância a cada CORR, não uma no fim.** Num lote a
@@ -59,7 +59,7 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 9. **Falha isolada não aborta o lote** — siga para quem não depende dela. Gate
    global quebrado **para o lote**: `lazbuild` não compila, `ctest` do
    `newWe2002` vermelho, ou — o caso mais provável aqui — o **controle do
-   golden** não fechando, que indica problema do harness ou do `:99` e torna
+   golden** não fechando, que indica problema do harness ou do `:98` e torna
    sem sentido qualquer resultado seguinte.
 
 10. **Nunca execute `WTE-TASK-XX` por aqui** — isso é do `/executar`. E nunca

@@ -80,7 +80,7 @@ São duas coisas diferentes, e confundi-las torna este prompt inútil na fase 4.
 - **Paralelo** é quantas rodam ao mesmo tempo: o que a matriz de conflito
   deixar, que às vezes é **uma**.
 
-Um lote de 2 em que as duas serializam no `:99` roda em sequência, e está
+Um lote de 2 em que as duas serializam no `:98` roda em sequência, e está
 correto. A economia ali não é de tempo de máquina — é de rito: um plano, um
 inventário, uma varredura de discrepância no fim.
 
@@ -131,7 +131,7 @@ Duas tarefas só rodam em paralelo se **todas** as condições valerem:
 
 | Recurso | Por que serializa |
 | --- | --- |
-| **o `DISPLAY=:99`** | não há window manager, e os dois lados do golden acham a janela por heurística. Duas sessões de GUI simultâneas dirigem a janela uma da outra, e o diff resultante parece bug do port |
+| **o `DISPLAY=:98`** | não há window manager, e os dois lados do golden acham a janela por heurística. Duas sessões de GUI simultâneas dirigem a janela uma da outra, e o diff resultante parece bug do port |
 | `golden_check.sh` / `work/` | duas cópias de ~474 MB por rodada, num diretório de trabalho único. Duas rodadas simultâneas leem a cópia da outra |
 | Wine / `work/wineprefix*` | prefix único por editor; `wineserver` compartilhado |
 | qualquer gerador em modo de escrita | regenera a árvore inteira — duas execuções simultâneas leem a saída da outra |
@@ -142,13 +142,13 @@ Duas tarefas só rodam em paralelo se **todas** as condições valerem:
 | `wte/Makefile` | a bateria de `--check` mora ali (decisão da WTE-TASK-01, ver `wte/README.md`). **Toda tarefa de fase 1 que cria gerador acrescenta um alvo** — as 03, 04, 05 e 06 querem a mesma mão no mesmo arquivo |
 | `docs/PLAN-WTE-LAZARUS.md` | fonte de verdade; tarefa que reconcilia número do plano colide com irmã |
 
-**A serialização do `:99` é a mais restritiva deste projeto.** Na prática,
+**A serialização do `:98` é a mais restritiva deste projeto.** Na prática,
 **toda tarefa que exercita o oráculo, roda o golden ou tira captura é
 sequencial**: as 12, 13, 22, 25 a 27, 30, 34 e 37, entre outras.
 
 O caso exemplar é o par **12 e 13**: o grafo do `progresso.md` diz "em paralelo"
 — e diz certo, porque nenhuma depende da outra. A matriz diz **sequencial**,
-porque as duas dirigem janela no `:99`. Quando o grafo e a matriz divergem,
+porque as duas dirigem janela no `:98`. Quando o grafo e a matriz divergem,
 **a matriz manda**: o grafo fala de dependência lógica, a matriz fala de
 recurso físico.
 
@@ -170,7 +170,7 @@ um número que ninguém remede.
 `grep`, `cmp`, `git show`, `--check`, e ler plano/task/docs de `wte/re/`. É o
 que torna a fase 1 o lote canônico.
 
-**Ressalva:** leitura que exige **abrir o oráculo no `:99`** não é leitura pura
+**Ressalva:** leitura que exige **abrir o oráculo no `:98`** não é leitura pura
 para efeito de paralelismo — ela ocupa o display. Essas vão em série.
 
 ---
@@ -210,7 +210,7 @@ Para cada onda, na ordem:
    dela.
 2. **Os subagentes editam; quem commita é o thread principal.** Subagente não
    roda `git`, não roda `lazbuild`, não roda `golden_check.sh`, não roda gerador
-   em modo de escrita, não abre janela no `:99`, e **não escreve no
+   em modo de escrita, não abre janela no `:98`, e **não escreve no
    `progresso.md` nem no `wte/Makefile`**. Tarefa que precisa de um desses é
    sequencial por definição — está na tabela de recursos serializados.
 3. As edições de `wte/Makefile` da onda inteira são aplicadas pelo thread
@@ -229,7 +229,7 @@ Os mesmos do `01-executar.md`:
 
 | Fase | Gate obrigatório |
 | --- | --- |
-| 0 | `lazbuild` compila e abre janela no `:99`; `make wte` ainda abre o original |
+| 0 | `lazbuild` compila e abre janela no `:98`; `make wte` ainda abre o original |
 | 1 | ferramenta determinística, `--check` verde, saída byte-estável; nenhum número vindo de contagem à mão |
 | 2 | `--check` do `dfm2lfm.py` verde; os 18 formulários abrem; nenhum arquivo gerado editado à mão |
 | 3 | `FORBIDDEN` e `check_seeks()` ativos; dumps Pascal e C++ idênticos nas **duas** ROMs |
@@ -284,7 +284,7 @@ lote, a tarefa *k+1* costuma tornar falso um doc que a *k* acabou de escrever.
   disso é dívida que ninguém acha depois.
 
 O caso mais provável de gate global quebrado aqui é o **controle do golden**: se
-original contra original não fecha, o problema é do harness ou do `:99`, não das
+original contra original não fecha, o problema é do harness ou do `:98`, não das
 tarefas — e nenhum resultado do lote significa nada até isso voltar.
 
 ---
@@ -335,7 +335,7 @@ Não me entregue um plano e pare — a menos que `$ARGUMENTS` diga `--plano`.
 Execute exatamente `N` tarefas (2 por padrão), um commit por tarefa,
 `✅ Concluído` só depois do commit.
 Paralelize só o que a matriz de conflito autoriza; **na dúvida, sequencial** — e
-o `:99` é sempre sequencial.
+o `:98` é sempre sequencial.
 Nada de `CORR-WTE`, nada de decompilado colado, nada de editar à mão o que um
 gerador produz, nada de escrever no `.exe` ou em `roms/`.
 `push` só se o usuário pedir.

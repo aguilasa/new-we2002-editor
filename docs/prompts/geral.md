@@ -35,7 +35,7 @@ uma regra do singular — "uma por invocação" — e nenhuma outra:
 | `01-executar.md` — uma task | `05-executar-lote.md` | **2** por padrão, ou o número pedido. Nunca "tudo" |
 | `03-corrigir.md` — uma CORR | `04-corrigir-tudo.md` | todas as pendentes |
 
-Os dois lotes paralelizam só o que a matriz de conflito autoriza, e o `:99` é
+Os dois lotes paralelizam só o que a matriz de conflito autoriza, e o `:98` é
 sempre sequencial. As demais regras do singular valem palavra por palavra nos
 dois.
 

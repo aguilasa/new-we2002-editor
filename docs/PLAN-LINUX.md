@@ -153,7 +153,7 @@ Zorin OS 18.1, base Ubuntu noble.
 | libcurl | ✅ 8.5.0 | import do SoFIFA |
 | Python 3 | ✅ | os geradores em `tools/` |
 | Wine (runner soda do Bottles) | ✅ | rodar o `ed.exe`, oráculo dos golden tests |
-| Xvfb no `:99`, `xdotool`, `import` | ✅ | validação visual |
+| Xvfb no `:98`, `xdotool`, `import` | ✅ | validação visual |
 | Qt 5.15.13 | ✅ | fallback do `tools/uipreview` da Fase 4 |
 | Qt6 6.4.2 | ✅ instalado na Fase 5 | a aplicação |
 
@@ -578,7 +578,7 @@ Três peças novas:
 | Arquivo | Papel |
 |---|---|
 | `tests/golden_tool.cpp` | metade headless — `roundtrip` e `digest` sobre o core |
-| `tools/golden_run.sh` | metade oráculo — dirige o `ed.exe` com `xdotool` no `:99` |
+| `tools/golden_run.sh` | metade oráculo — dirige o `ed.exe` com `xdotool` no `:98` |
 | `tools/golden_compare.py` | diff que agrupa em faixas e anota `OFS_*`, setor e se caiu em dados ou em EDC/ECC |
 | `tools/golden_check.sh` | junta os três e decide passa/falha; é o teste `golden` do ctest |
 
@@ -814,7 +814,7 @@ renderiza o diálogo com `QWidget::grab()` e grava um PNG:
 ```sh
 cmake -B build-uipreview -S tools/uipreview
 cmake --build build-uipreview -j
-DISPLAY=:99 ./build-uipreview/preview_MainDialog /tmp/main.png
+DISPLAY=:98 ./build-uipreview/preview_MainDialog /tmp/main.png
 ```
 
 `grab()` pinta fora da tela, então o diálogo principal de 1077 px sai inteiro
@@ -931,7 +931,7 @@ Três diferenças de sinal precisaram de decisão explícita:
 
 `tools/golden_gui.sh` é a contraparte de `golden_run.sh` da Fase 3: dirige a
 janela Qt pelo mesmo ciclo abrir → *Write into CD image*, com `xdotool` no
-`:99`. O `golden_check.sh` aceita `WE2002_GOLDEN_MODE=gui` para pôr a janela no
+`:98`. O `golden_check.sh` aceita `WE2002_GOLDEN_MODE=gui` para pôr a janela no
 lugar do `we2002_golden_tool`, e o `ctest` ganhou o alvo `golden_gui`.
 
 Isso é o que a Fase 3 não cobria: ela provou que o **core** grava o que o
@@ -1103,7 +1103,7 @@ Renomeação não pode mudar byte de saída, e não mudou:
   `controls.json`, só `object`/`id` e as chaves de diálogo. Geometria, estilo e
   ordem intactos.
 - Os cinco testes verdes, incluindo `golden` e `golden_gui` na European Deluxe.
-- Os cinco sub-diálogos abertos e exercitados no `:99` — a busca por nome é em
+- Os cinco sub-diálogos abertos e exercitados no `:98` — a busca por nome é em
   runtime, então compilar não prova nada aqui.
 
 ### Fase 6 — Acabamento Linux ✅ concluída
@@ -1304,7 +1304,7 @@ Nenhum dos três muda byte de saída — os golden tests provam.
 > `port(GCC) == ed.exe`, a paridade com o original de 2002 sai por
 > transitividade — e foi confirmada de novo diretamente, contra o
 > `Debug\ed.exe` rodando **nativo**, sem Wine: só a faixa `405724..405739`, a
-> mesma de sempre. Isso encerra a dúvida sobre o corte da janela no `:99`: o
+> mesma de sempre. Isso encerra a dúvida sobre o corte da janela no `:98`: o
 > corte nunca importou.
 >
 > A janela Qt, rodando do zip portátil e com a imagem num caminho acentuado,

@@ -155,7 +155,7 @@ mesa:
    combo, a divergência é vazia e morre sem precisar do lado VCL. Só se algum
    escrever é que a pergunta vale, e aí ela vira a via 2.
 2. **Observação do `wte.exe`** — é VCL de 2002 rodando de verdade, sob Wine no
-   `:99` (`make wte-99`). Escrever `Text` no combo e ver se o `OnChange` reentra
+   `:99` (`make wte-98`). Escrever `Text` no combo e ver se o `OnChange` reentra
    mede o lado que a tabela supõe.
 
 Enquanto nenhuma das duas rodar, a linha continua **um lado medido e outro

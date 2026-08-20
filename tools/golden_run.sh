@@ -8,7 +8,7 @@
 #
 # The image is edited IN PLACE. Always pass a copy -- each one is ~474 MB.
 #
-# Everything happens on DISPLAY=:99 (see CLAUDE.md). Never :1; that is the
+# Everything happens on DISPLAY=:98 (see CLAUDE.md). Never :1; that is the
 # user's real session.
 #
 # There is no scripting interface: ed.exe is an MFC dialog, so the sequence is
@@ -20,7 +20,7 @@ set -euo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ED_DIR="$REPO/Debug"
 WINE_BIN="${WINE_BIN:-/home/ingmar/.var/app/com.usebottles.bottles/data/bottles/runners/soda-9.0-1/bin}"
-export DISPLAY="${GOLDEN_DISPLAY:-:99}"
+export DISPLAY="${GOLDEN_DISPLAY:-:98}"
 export WINEDEBUG=-all
 
 if [ $# -ne 1 ]; then

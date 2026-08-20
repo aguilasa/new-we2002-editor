@@ -26,7 +26,7 @@ byte a byte contra o binário original.
 ```sh
 make -C wte build     # lazbuild wte.lpi -> wte/build/wte
 make -C wte assets    # symlink para a pasta do Obocaman (uma vez)
-make -C wte run-99    # roda no Xvfb :99
+make -C wte run-98    # roda no Xvfb :98
 make -C wte check     # --check de todos os geradores de tools/
 make -C wte           # lista os alvos
 ```
@@ -43,8 +43,8 @@ lazbuild wte/wte.lpi
 > projeto é `make -C wte <alvo>`. Nomes parecidos, coisas opostas: um é o
 > original que estamos medindo, o outro é o que estamos escrevendo.
 
-**Toda execução com GUI acontece no `DISPLAY=:99`** — o `:1` é a sessão real do
-usuário. O `run-99` resolve o `XAUTHORITY` do Xvfb sozinho; à mão é preciso
+**Toda execução com GUI acontece no `DISPLAY=:98`** — o `:1` é a sessão real do
+usuário. O `run-98` resolve o `XAUTHORITY` do Xvfb sozinho; à mão é preciso
 fazer o que o [`../CLAUDE.md`](../CLAUDE.md) descreve, ou o GTK morre com
 `Invalid MIT-MAGIC-COOKIE-1 key`.
 
@@ -151,6 +151,6 @@ mesmo com `forms/` em `IncludeFiles`. A saída é o caminho explícito:
 ## Estado
 
 Fase 0. O que existe é esqueleto: um formulário vazio que prova que o build
-fecha e que a janela abre no `:99`. Os 18 formulários do original chegam na
+fecha e que a janela abre no `:98`. Os 18 formulários do original chegam na
 fase 2, gerados — [`src/WteMain.pas`](src/WteMain.pas) sai ou vira a casca do
 `Tep2002_princ`. Não invista nele.

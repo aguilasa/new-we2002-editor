@@ -13,13 +13,13 @@
 # Database::Save. It is the reason the port takes an image path on the command
 # line at all.
 #
-# Everything happens on DISPLAY=:99 (see CLAUDE.md). Never :1; that is the
+# Everything happens on DISPLAY=:98 (see CLAUDE.md). Never :1; that is the
 # user's real session.
 
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export DISPLAY="${GOLDEN_DISPLAY:-:99}"
+export DISPLAY="${GOLDEN_DISPLAY:-:98}"
 
 if [ $# -lt 1 ]; then
     echo "uso: $0 <imagem.bin> [binario]   (copia! o arquivo e editado no lugar)" >&2

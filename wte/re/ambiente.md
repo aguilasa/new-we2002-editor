@@ -128,7 +128,7 @@ Os quatro critérios da WTE-TASK-01, com o resultado medido:
 2. **A janela abre no `:99`.** Capturada por `import -window`, 417x208, com o
    rótulo legível. `DISPLAY=:99` + `XAUTHORITY` resolvido pelo `ps`, como manda
    o `CLAUDE.md`.
-3. **`make wte-99` ainda abre o original.** O stack X i386 continua de pé — o
+3. **`make wte-98` ainda abre o original.** O stack X i386 continua de pé — o
    oráculo A sobrevive. Ver o achado sobre os 18 formulários abaixo.
 4. **Ghidra importa o `.exe`.** Headless (`analyzeHeadless -import`) e GUI
    (`ghidraRun` no `:99`, "Ghidra startup complete").
@@ -180,7 +180,7 @@ pasta `we-team-editor/`, sem os quais as chamadas à VCL ficariam anônimas.
 
 ### Achado 2 — o original instancia os 18 formulários no startup
 
-Ao subir o `make wte-99`, antes de qualquer arquivo ser aberto, o `:99` já tem
+Ao subir o `make wte-98`, antes de qualquer arquivo ser aberto, o `:99` já tem
 **24 janelas X com título**. Descontando três `Default IME`, um `Input`, o
 `TOpenDialog` "Abre" e a janela oculta de 1x1 da `TApplication`, sobram
 **exatamente 18** — o mesmo número de DFM que a §1 do plano registra:
@@ -198,7 +198,7 @@ Warning                                340x172     Number                 135x15
 ```
 
 A contagem saiu de `xdotool`, não de contar na tela. Reproduzir (com o
-`make wte-99` no ar, `DISPLAY`/`XAUTHORITY` como manda o `CLAUDE.md`):
+`make wte-98` no ar, `DISPLAY`/`XAUTHORITY` como manda o `CLAUDE.md`):
 
     xdotool search --name '.' 2>/dev/null | while read i; do
       n=$(xdotool getwindowname "$i" 2>/dev/null) || continue

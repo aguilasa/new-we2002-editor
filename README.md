@@ -56,11 +56,11 @@ equivalent. `make` with no target prints the list.
 | `make build` | configure if needed, then build |
 | `make run` | build, copy the image to `work/`, open the editor on the **copy** |
 | `make run-jp` | the same with the Japanese image |
-| `make run-99` | `run` on the local `Xvfb :99`, sorting out that server's `XAUTHORITY` |
+| `make run-98` | `run` on the local `Xvfb :98`, sorting out that server's `XAUTHORITY` |
 | `make oracle` | open the **original Windows `ed.exe`** under Wine (Bottles runner) |
-| `make oracle-99` | the same on `:99` |
+| `make oracle-98` | the same on `:98` |
 | `make wte` | open **Obocaman's WE2002 Team Editor** under Wine, on the current display |
-| `make wte-99` | the same on `:99` |
+| `make wte-98` | the same on `:98` |
 | `make fresh` | throw the working copies away and re-copy from the original |
 | `make test` | unit checks (`ctest` without the byte-comparison tests) |
 | `make test-release` | the same in Release, where `_FORTIFY_SOURCE` is active |
@@ -86,7 +86,7 @@ screen. It is the same binary the byte-comparison tests measure against.
 
 ```sh
 make oracle                                    # inherits DISPLAY
-make oracle-99                                 # on the Xvfb :99
+make oracle-98                                 # on the Xvfb :98
 make oracle IMAGE=roms/japanese-shift-jis.bin  # any image
 ```
 
@@ -106,8 +106,8 @@ Three things the target handles that a bare `wine ed.exe` does not:
   named exactly that, and the target symlinks it into `Debug/`, which is where
   the dialog opens. So the image is in the first screen, already selectable.
 
-`make run-99` is the equivalent for the port: it runs the Qt editor on the local
-`Xvfb :99` used for visual checks, resolving that server's `XAUTHORITY` on its
+`make run-98` is the equivalent for the port: it runs the Qt editor on the local
+`Xvfb :98` used for visual checks, resolving that server's `XAUTHORITY` on its
 own.
 
 #### Looking at a rival editor: `make wte`
@@ -123,7 +123,7 @@ Master-League-slot counter kept on screen.
 
 ```sh
 make wte                                    # the current display
-make wte-99                                 # the Xvfb :99
+make wte-98                                 # the Xvfb :98
 make wte IMAGE=roms/japanese-shift-jis.bin  # any image
 ```
 

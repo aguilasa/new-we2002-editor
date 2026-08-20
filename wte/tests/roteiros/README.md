@@ -50,7 +50,7 @@ DFM.
 e são 3 px de borda mais 29 de título. Só ele, entre os três — os outros dois
 batem 1:1.
 
-O motivo dos verbos é a coordenada: sem window manager no `:99` a origem da
+O motivo dos verbos é a coordenada: sem window manager no `:98` a origem da
 janela muda a cada corrida, e escrever `xdotool` cru obrigaria cada linha a
 saber somar. As coordenadas saem do
 [`../../re/dfm/MainForm.dfm`](../../re/dfm/MainForm.dfm) — `Left`/`Top` do
@@ -186,11 +186,11 @@ clique nela:
 O sintoma engana: o botao nunca e clicado, o trace nao acusa I/O nenhum na
 marca, e parece **botao desabilitado** ou handler que nao faz nada.
 
-## Janela orfa no `:99` quebra a espera por nome, e `pkill` nao a limpa
+## Janela orfa no `:98` quebra a espera por nome, e `pkill` nao a limpa
 
 O README ja avisa que **o processo morre e a janela sobrevive**; o caso espelho
 custou tres corridas em 2026-08-20. Uma sonda abortada deixou as janelas do
-`wte.exe` mapeadas no `:99`, e a corrida seguinte parou em
+`wte.exe` mapeadas no `:98`, e a corrida seguinte parou em
 `ERRO: janela 'Cuidado' nao apareceu em 30s` -- com a janela `Cuidado`
 **visivel na tela**. A espera por nome filtra pelo `_NET_WM_PID` do processo
 que o proprio script lancou, entao a janela velha nao serve, e a nova nunca
@@ -206,21 +206,21 @@ env WINEPREFIX="$PWD/work/wineprefix-wte" "$WINE_BIN/wineserver" -k
 Confira antes de acusar o roteiro:
 
 ```sh
-DISPLAY=:99 xdotool search --name '.' | while read i; do \
-  echo "$i :: $(DISPLAY=:99 xdotool getwindowname $i)"; done
+DISPLAY=:98 xdotool search --name '.' | while read i; do \
+  echo "$i :: $(DISPLAY=:98 xdotool getwindowname $i)"; done
 ```
 
 ## As tres afordancias de arquivo do lado port
 
 `WTE_TEXTURA`, `WTE_MCR_ENTRADA` (entradas) e `WTE_MCR` (saida) existem pela
 mesma razao, e ela nao e conveniencia: **o `TOpenDialog`/`TSaveDialog` do gtk2
-nao se dirige por coordenada fixa no `:99`**. O oraculo digita o caminho no
+nao se dirige por coordenada fixa no `:98`**. O oraculo digita o caminho no
 dialogo; o port o recebe por ambiente, e o `golden_run_laz.sh` as repassa
 quando o chamador as define. O arquivo e o MESMO dos dois lados -- e o que faz
 a comparacao valer.
 
 O par [`golden-01-arranque.port.txt`](golden-01-arranque.port.txt) e a
-assimetria temporaria: o port nao recebe teclado no `:99`, entao nao dirige o
+assimetria temporaria: o port nao recebe teclado no `:98`, entao nao dirige o
 dialogo de abrir -- ele carrega pela linha de comando desde a WTE-TASK-25.
 Quando o teclado chegar (ou um window manager), o arquivo
 some e o gate roda um roteiro so.
@@ -310,7 +310,7 @@ gravacao nao vazou para dentro da ROM.
 
 O lado port recebe o destino por `WTE_MCR`, e aqui a variavel e mais necessaria
 do que no `golden-06`: o `TSaveDialog` do gtk2 exige um nome DIGITADO, e sem
-gerenciador de janela o `:99` nao entrega tecla a ele. O `golden_check.sh`
+gerenciador de janela o `:98` nao entrega tecla a ele. O `golden_check.sh`
 semeia a variavel com o mesmo `work/saida.mcr` que o oraculo digita.
 
 O par [`27-dorsal-editado.txt`](27-dorsal-editado.txt) /
@@ -363,24 +363,24 @@ WTE_TRACE_FILE=/tmp/t.log ./wte/build/wte &
 # some a origem da janela em cada linha '!' e execute
 ```
 
-Lado original: `make wte-99`, mesma sequência, **sem** trace — o `wte.exe` não
+Lado original: `make wte-98`, mesma sequência, **sem** trace — o `wte.exe` não
 loga nada, e a leitura é por efeito de tela. Ver
 [`../../re/eventos.md`](../../re/eventos.md).
 
-## Limite medido, e é duro: **teclado não chega no app LCL no `:99`**
+## Limite medido, e é duro: **teclado não chega no app LCL no `:98`**
 
-Nenhum roteiro do lado port usa tecla. Não é escolha: no `:99` não há window
+Nenhum roteiro do lado port usa tecla. Não é escolha: no `:98` não há window
 manager, o GTK2 nunca considera a janela ativa, e **nenhuma tecla é entregue** —
 nem por `xdotool key` depois de `windowfocus`, nem por `xdotool key --window`
 (que usa `XSendEvent`, e o GTK2 descarta). Medido: zero diferença de pixel no
 campo e zero linha no trace. O mouse funciona normalmente.
 
 O `wte.exe` **não** tem esse problema: o Wine implementa o próprio foco e
-recebe tecla no `:99` desde sempre — é o que o `golden_run.sh` do `newWe2002`
+recebe tecla no `:98` desde sempre — é o que o `golden_run.sh` do `newWe2002`
 já explora para digitar o caminho da imagem.
 
 Consequência para a WTE-TASK-22: ou o harness dirige o port **só por mouse**,
-ou o `:99` ganha um window manager. Nenhum está instalado nesta máquina
+ou o `:98` ganha um window manager. Nenhum está instalado nesta máquina
 (`twm`, `openbox`, `metacity`, `mutter`, `xfwm4`, `i3`, `fluxbox`, `icewm`,
 `jwm`, `matchbox`, `marco`, `herbstluftwm`, `dwm`, `awesome` — nenhum
 encontrado). **Instalar pacote é decisão do usuário.**

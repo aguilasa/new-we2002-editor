@@ -32,13 +32,13 @@ ASSETS_SRC ?= $(ROOT)/we-team-editor
 GENERATORS := $(filter-out $(CURDIR)/tools/test_%.py,$(wildcard $(CURDIR)/tools/*.py))
 TESTS      := $(wildcard $(CURDIR)/tools/test_*.py)
 
-.PHONY: help build run run-99 assets check test clean distclean
+.PHONY: help build run run-98 assets check test clean distclean
 
 help:
 	@echo 'Alvos:'
 	@echo '  build      lazbuild wte.lpi -> build/wte'
 	@echo '  run        roda o binario no DISPLAY do shell'
-	@echo '  run-99     roda no Xvfb :99, resolvendo o XAUTHORITY sozinho'
+	@echo '  run-98     roda no Xvfb $(XVFB), resolvendo o XAUTHORITY sozinho'
 	@echo '  assets     cria o symlink assets/ -> $(ASSETS_SRC)'
 	@echo '  test       unittest de tools/test_*.py (nao precisa do .exe)'
 	@echo '  check      test + --check de todos os geradores de tools/'
@@ -59,17 +59,23 @@ $(BIN): build
 run: build
 	$(BIN)
 
-# A regra do :99 e obrigatoria neste repositorio -- ver CLAUDE.md. O Xvfb sobe
+# A regra do Xvfb e obrigatoria neste repositorio -- ver CLAUDE.md. O alvo e o
+# :98 desde 2026-08-20 (antes era o :99, que outro projeto desta maquina
+# ocupa); `XVFB=:97 make run-98` move sem editar nada. Servidor que sobe
 # via xvfb-run e tem cookie proprio; sem apontar o XAUTHORITY para ele, o GTK
 # morre com "Invalid MIT-MAGIC-COOKIE-1 key".
-run-99: build
-	@xauth_file=$$(ps -o args= -C Xvfb \
-	  | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1); \
-	if [ -z "$$xauth_file" ]; then \
-	  echo 'ERRO: nao ha Xvfb :99 rodando.'; exit 1; \
+XVFB ?= :98
+
+run-98: build
+	@if ! env DISPLAY=$(XVFB) xdpyinfo >/dev/null 2>&1; then \
+	  echo 'ERRO: nao ha Xvfb $(XVFB) rodando. Suba com:'; \
+	  echo '  Xvfb $(XVFB) -screen 0 1280x1024x24 -nolisten tcp &'; \
+	  exit 1; \
 	fi; \
-	echo ">> DISPLAY=:99 XAUTHORITY=$$xauth_file"; \
-	env DISPLAY=:99 XAUTHORITY="$$xauth_file" $(BIN)
+	xauth_file=$$(ps -o args= -C Xvfb \
+	  | sed -n 's/.*Xvfb $(XVFB) .*-auth \([^ ]*\).*/\1/p' | head -1); \
+	echo ">> DISPLAY=$(XVFB) XAUTHORITY=$${xauth_file:-<vazio>}"; \
+	env DISPLAY=$(XVFB) XAUTHORITY="$$xauth_file" $(BIN)
 
 # ---------------------------------------------------------------- assets ----
 

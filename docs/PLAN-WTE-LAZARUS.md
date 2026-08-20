@@ -394,7 +394,7 @@ não publique sem confirmar.**
 | `objdump -d -M intel` | disassembly i386 (binutils) |
 | `strings`, `xxd`, Python 3.13 | extração e scripts |
 | Wine 32-bit via runner do Bottles | rodar o `.exe` (`make wte` já faz) |
-| Xvfb `:99`, `xdotool`, `import` | dirigir e capturar a janela |
+| Xvfb `:98`, `xdotool`, `import` | dirigir e capturar a janela |
 | `we2002_core` + `Offsets.hpp` | oráculo de formato |
 | `roms/golden-european-deluxe.bin`, `roms/japanese-shift-jis.bin` | imagens de teste |
 
@@ -451,7 +451,7 @@ O `newWe2002` tinha um oráculo (`ed.exe`). Aqui há dois, e o segundo é
 incomum de se ter:
 
 **Oráculo A — comportamental.** `we-team-editor.exe` sob Wine, dirigido por
-`xdotool` no `:99`. Responde "que bytes esta operação grava?". É o mesmo padrão
+`xdotool` no `:98`. Responde "que bytes esta operação grava?". É o mesmo padrão
 do `tools/golden_check.sh` já existente, e o `make wte` já resolveu prefix,
 arquitetura e mapeamento de unidade.
 
@@ -687,8 +687,8 @@ copia_B.bin ──▶ app Lazarus (nativo, :99, xdotool) ───────�
 **Herdar as guardas, sem exceção.** O `golden_check.sh` acumulou proteções que
 custaram bugs para descobrir, e todas se aplicam:
 
-- Fixar `DISPLAY=:99` dentro do script; não confiar no que o `ctest` repassa.
-- Recusar-se a começar se houver janela grande já aberta no `:99` — dirigir a
+- Fixar `DISPLAY=:98` dentro do script; não confiar no que o `ctest` repassa.
+- Recusar-se a começar se houver janela grande já aberta no `:98` — dirigir a
   janela errada produz diff que parece bug do app.
 - Restringir os candidatos de janela ao `_NET_WM_PID` do processo lançado.
 - Nunca apontar para `roms/` diretamente. Cópia, sempre.
@@ -704,8 +704,8 @@ título **diferente** do original, senão os dois lados se confundem.
 |---|---|---|
 | Unitário (FPCUnit) | codificação de atributo, fórmula de preço, parser de `.mcr` | nada |
 | Round-trip headless | abrir + gravar sem editar reproduz o que o original reproduz | 1 ROM |
-| Golden por operação | uma operação de tela por vez, byte a byte | Wine + `:99` |
-| Visual | screenshot do formulário Lazarus vs do original | Wine + `:99` |
+| Golden por operação | uma operação de tela por vez, byte a byte | Wine + `:98` |
+| Visual | screenshot do formulário Lazarus vs do original | Wine + `:98` |
 
 O visual não deve ser automatizado com tolerância de pixel — fonte diferente
 garante divergência. É inspeção humana, uma vez por formulário, na Fase 2.
@@ -747,7 +747,7 @@ hoje para `src/core/Database.cpp` e `src/app/ui/` no `newWe2002`.
 `wte/re/` é **documentação**, versionável. `wte/assets/` aponta para
 `we-team-editor/`, que é gitignored.
 
-> **Pronto quando:** `lazbuild` compila um projeto vazio e abre janela no `:99`.
+> **Pronto quando:** `lazbuild` compila um projeto vazio e abre janela no `:98`.
 
 ---
 
@@ -804,7 +804,7 @@ Sem decompilador ainda. Tudo que sai de `objdump`, `strings` e Python.
 > pedir navegação aqui é pedir a fase 4. O que existe é `--show`, andaime
 > explícito da WTE-TASK-11, e foi com ele que os 18 foram capturados. Navegação
 > de verdade chega com a WTE-TASK-25. Medido no fechamento: 18 de 18 abrem no
-> `:99`, 96 de 96 stubs logam, 16 `FormCreate` no arranque (os dois `ficha_error`
+> `:98`, 96 de 96 stubs logam, 16 `FormCreate` no arranque (os dois `ficha_error`
 > não têm `OnCreate`). Ver [`../wte/re/fase-2.md`](../wte/re/fase-2.md).
 
 Nesta fase o app não toca a imagem de CD. Zero risco.
@@ -1030,9 +1030,9 @@ Os **três** editores (`ed.exe`, `wte.exe`, o app novo) gravam direto na imagem
 de 474 MB. O `make wte` já mantém cópia própria em `work/`. Todo script de
 teste faz cópia. Nunca apontar nada para `roms/`.
 
-### 8.5 O `:99` e as regras já escritas
+### 8.5 O `:98` e as regras já escritas
 
-Vale integralmente a seção do topo do [CLAUDE.md](../CLAUDE.md): `DISPLAY=:99`,
+Vale integralmente a seção do topo do [CLAUDE.md](../CLAUDE.md): `DISPLAY=:98`,
 `XAUTHORITY` resolvido pelo `ps`, sem window manager, `xdotool windowactivate`
 não funciona, `xdotool type --window` embaralha string longa. E:
 

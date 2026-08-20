@@ -39,7 +39,7 @@ AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WTE="$(dirname "$AQUI")"
 RAIZ="$(dirname "$WTE")"
 
-export DISPLAY=:99          # fixado aqui dentro, nunca herdado -- regra do repo
+export DISPLAY="${WTE_DISPLAY:-:98}"   # fixado aqui, nunca herdado -- regra do repo
 IMAGEM="${WTE_TELA_IMAGEM:-$RAIZ/roms/japanese-shift-jis.bin}"
 SAIDA="${WTE_TELA_SAIDA:-$RAIZ/work/tela}"
 WINE_BIN="${WINE_BIN:-/home/ingmar/.var/app/com.usebottles.bottles/data/bottles/runners/soda-9.0-1/bin}"

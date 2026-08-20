@@ -106,7 +106,7 @@ wte/
 - **Arquivos criados/modificados:**
   - `wte/wte.lpi`, `wte/wte.lpr` — projeto e programa
   - `wte/src/WteMain.pas`, `wte/forms/WteMain.lfm` — formulário provisório
-  - `wte/Makefile` — `build`, `run`, `run-99`, `assets`, `check`, `clean`,
+  - `wte/Makefile` — `build`, `run`, `run-98`, `assets`, `check`, `clean`,
     `distclean`
   - `wte/README.md` — as três decisões, a armadilha do `.lfm`, o aviso de
     projeto separado

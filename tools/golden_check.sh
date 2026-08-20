@@ -21,7 +21,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # thing: the stray-window check below inspects a display, and ctest passes
 # whatever DISPLAY the developer's shell had -- :1, the real session, whose
 # ordinary windows are big enough to trip the check. Never :1 (see CLAUDE.md).
-export DISPLAY="${GOLDEN_DISPLAY:-:99}"
+export DISPLAY="${GOLDEN_DISPLAY:-:98}"
 
 IMAGE="${1:-${WE2002_GOLDEN_IMAGE:-}}"
 TOOL="${2:-${WE2002_GOLDEN_TOOL:-$REPO/build/tests/we2002_golden_tool}}"

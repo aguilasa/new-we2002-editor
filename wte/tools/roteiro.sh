@@ -70,12 +70,34 @@ roteiro_display() {
   # `DISPLAY` fixo, e nao herdado: o runner de teste repassa o do shell (`:1`
   # aqui), e as janelas da sessao real derrubam a deteccao. Vale para os dois
   # lados do gate.
-  export DISPLAY=:99
-  local xauth
+  #
+  # O ALVO E O `:98` DESDE 2026-08-20, e antes era o `:99`. A troca foi a
+  # pedido do usuario: outro projeto da mesma maquina (`World-Of-Football`)
+  # mantem uma janela de 1024x768 no `:99`, e a guarda de janela grande do
+  # `golden_check.sh` -- que existe justamente para nao dirigir a janela errada
+  # -- recusava comecar. `WTE_DISPLAY` move de novo sem editar script nenhum.
+  export DISPLAY="${WTE_DISPLAY:-:98}"
+  # O cookie, quando houver. O `:98` deste projeto sobe SEM `-auth` e portanto
+  # sem cookie -- `XAUTHORITY` vazio e o certo ali. A busca continua porque um
+  # servidor levantado por `xvfb-run` tem cookie proprio, e sem apontar para ele
+  # o Qt e o Wine morrem com `Invalid MIT-MAGIC-COOKIE-1 key`.
+  local xauth alvo
+  alvo="${DISPLAY#:}"
   xauth="$(ps -o args= -C Xvfb 2>/dev/null \
-    | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)"
-  [ -n "$xauth" ] && export XAUTHORITY="$xauth"
-  xdpyinfo >/dev/null 2>&1 || { echo "ERRO: sem :99" >&2; return 1; }
+    | sed -n "s/.*Xvfb :$alvo .*-auth \\([^ ]*\\).*/\\1/p" | head -1)"
+  if [ -n "$xauth" ]; then
+    export XAUTHORITY="$xauth"
+  else
+    # Servidor sem `-auth` nao usa cookie, e herdar o do desktop (o
+    # `/run/user/1000/gdm/Xauthority` que o shell traz) so serve para confundir
+    # quem depurar depois. Vazio e o certo aqui.
+    unset XAUTHORITY
+  fi
+  xdpyinfo >/dev/null 2>&1 || {
+    echo "ERRO: sem $DISPLAY. Suba com:" >&2
+    echo "  Xvfb $DISPLAY -screen 0 1280x1024x24 -nolisten tcp &" >&2
+    return 1
+  }
 }
 
 roteiro_pid_alvo() { ROTEIRO_PID="${1:-}"; }

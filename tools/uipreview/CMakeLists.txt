@@ -7,7 +7,7 @@ project(we2002_uipreview LANGUAGES CXX)
 #
 #   cmake -B build-uipreview -S tools/uipreview
 #   cmake --build build-uipreview -j
-#   DISPLAY=:99 ./build-uipreview/preview_MainDialog out.png
+#   DISPLAY=:98 ./build-uipreview/preview_MainDialog out.png
 #
 # One executable per form, because uic output is a header that has to be
 # included, and the class name differs per form.

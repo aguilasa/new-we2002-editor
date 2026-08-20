@@ -182,14 +182,14 @@ Cada uma custou tempo real, aqui ou no `newWe2002`.
    já muda bytes: o `Save` reconstrói as all-star, e o original troca os dois
    primeiros cobradores de cada clube de ML. Sem o controle, toda medição vem
    contaminada.
-5. **Janela esquecida no `:99` derruba o golden test.** Os dois lados acham a
+5. **Janela esquecida no `:98` derruba o golden test.** Os dois lados acham a
    janela por heurística; uma sobra de teste manual é dirigida em vez da que
    está sob teste, e o diff parece bug do port. Feche tudo antes.
 6. **`Ctrl+A` não seleciona tudo num `TEdit`.** Limpar campo com `End`,
    `shift+Home`, `BackSpace` — senão os dois lados recebem textos diferentes.
 7. **`xdotool type --window` embaralha string longa** (usa `XSendEvent`).
    Digitar curto; mapear unidade para encurtar caminho, como o `make wte` faz.
-8. **`xdotool windowactivate` falha no `:99`** — não há window manager. Dirigir
+8. **`xdotool windowactivate` falha no Xvfb** — não há window manager. Dirigir
    por coordenada absoluta.
 9. **Tipo de tamanho dependente de plataforma embaralha número de camisa.**
    `DWORD` virou 64-bit no Linux LP64 e custou o bug inteiro. Em FPC o risco
@@ -218,7 +218,7 @@ ferramenta que escreva no binário e nem deve haver.
 ### Os dois oráculos
 
 - **Oráculo A, comportamental:** `wte.exe` sob Wine 32-bit, dirigido por
-  `xdotool` no `:99`. Responde *que bytes esta operação grava?*
+  `xdotool` no `:98`. Responde *que bytes esta operação grava?*
 - **Oráculo B, de formato:** o `we2002_core`, já byte-idêntico ao `ed.exe`.
   Responde *o que significam estes bytes?*
 
@@ -246,8 +246,8 @@ new-we2002-editor/
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
 
 make wte            # abre o editor do Obocaman (oraculo A) no DISPLAY do shell
-make wte-99         # idem, no Xvfb :99
-make run-99         # abre o newWe2002 (o port Qt) no :99
+make wte-98         # idem, no Xvfb :98
+make run-98         # abre o newWe2002 (o port Qt) no :98
 make test           # ctest do newWe2002, sem os golden
 
 lazbuild wte/wte.lpi                      # a partir da WTE-TASK-02
@@ -255,22 +255,34 @@ python3 wte/tools/<gerador>.py --check    # conforme forem existindo
 bash wte/tools/golden_check.sh            # a partir da WTE-TASK-22
 ```
 
-### A regra do `:99` — obrigatória
+### A regra do Xvfb — obrigatória
 
-Toda execução com GUI acontece no `DISPLAY=:99`. O `:1` é a sessão real do
-usuário. O Xvfb sobe via `xvfb-run` e tem cookie próprio:
+Toda execução com GUI acontece no `DISPLAY=:98`. O `:1` é a sessão real do
+usuário. **Era o `:99` até 2026-08-20**; a troca foi a pedido do usuário,
+porque outro projeto desta máquina (`World-Of-Football`) mantém uma janela de
+1024×768 no `:99` e a guarda de janela grande do gate — que existe justamente
+para não dirigir a janela errada — passou a recusar toda corrida.
+
+O servidor sobe **sem `-auth`**, então `XAUTHORITY` vazio é o certo:
 
 ```sh
-export DISPLAY=:99
+export DISPLAY=:98
 export XAUTHORITY=$(ps -o args= -C Xvfb \
-  | sed -n 's/.*Xvfb :99 .*-auth \([^ ]*\).*/\1/p' | head -1)
+  | sed -n 's/.*Xvfb :98 .*-auth \([^ ]*\).*/\1/p' | head -1)
 ```
 
-Sem o `XAUTHORITY` o Qt e o Wine morrem com `Invalid MIT-MAGIC-COOKIE-1 key`.
-Se por qualquer motivo não der para usar o `:99`, **pergunte antes** de cair
+Servidor levantado por `xvfb-run` **tem** cookie próprio, e sem apontar o
+`XAUTHORITY` para ele o Qt e o Wine morrem com
+`Invalid MIT-MAGIC-COOKIE-1 key`. As ferramentas tratam os dois casos sozinhas
+(`roteiro.sh`, `make run-98`), e o número mora numa variável por ferramenta:
+`XVFB`, `WTE_DISPLAY`, `GOLDEN_DISPLAY`.
+
+Se por qualquer motivo não der para usar o `:98`, **pergunte antes** de cair
 para o `:1`. Ver a seção do topo do `CLAUDE.md`.
 
----
+**Registro histórico continua dizendo `:99`** — `CORR-*`, logs de execução e
+prosa de medição descrevem o que aconteceu, e reescrevê-los falsificaria o
+registro.
 
 ## Como executar
 
@@ -301,7 +313,7 @@ Checklist geral por fase:
 
 | Fase | Gate obrigatório |
 | --- | --- |
-| 0 | `lazbuild` compila e abre janela no `:99`; `make wte` ainda abre o original |
+| 0 | `lazbuild` compila e abre janela no `:98`; `make wte` ainda abre o original |
 | 1 | ferramenta determinística, `--check` verde, saída byte-estável; nenhum número vindo de contagem à mão |
 | 2 | `--check` do `dfm2lfm.py` verde; os 18 formulários abrem; nenhum arquivo gerado editado à mão |
 | 3 | `FORBIDDEN` e `check_seeks()` ativos; dumps Pascal e C++ idênticos nas **duas** ROMs |

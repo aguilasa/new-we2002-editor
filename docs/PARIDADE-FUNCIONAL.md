@@ -38,10 +38,10 @@ Comandos:
 ctest --preset debug                       # core, ui_forms, glossary
 WE2002_GOLDEN_IMAGE=roms/golden-european-deluxe.bin ctest --test-dir build -R golden
 WE2002_GOLDEN_MODE=gui WE2002_GOLDEN_IMAGE=... ctest --test-dir build -R golden_gui
-DISPLAY=:99 ./build/src/app/newWe2002 /tmp/copia.bin
+DISPLAY=:98 ./build/src/app/newWe2002 /tmp/copia.bin
 ```
 
-Sempre sobre **cópia** da imagem. Sempre no `DISPLAY=:99`.
+Sempre sobre **cópia** da imagem. Sempre no `DISPLAY=:98`.
 
 ### 1.1 O SoFIFA está desligado
 
@@ -77,7 +77,7 @@ campos vazios e a gravação seguinte truncaria o arquivo do usuário para 1.911
 linhas em branco. Conferido em 2026-08-05: sidecar de teste com 1.911 URLs,
 gravação pela janela com o SoFIFA desligado, arquivo sai com o **mesmo md5**.
 
-Conferido na tela em 2026-08-05 (`:99`): os quatro botões, as 23 caixas de URL e
+Conferido na tela em 2026-08-05 (`:98`): os quatro botões, as 23 caixas de URL e
 o "Import from URL" aparecem em cinza; o resto do diálogo carrega normalmente.
 
 ---
@@ -497,11 +497,11 @@ disco no fluxo dos golden tests, a última porque só afeta o arquivo lateral.
 ## 8. Roteiro de validação manual
 
 O que os golden tests não alcançam. Cada bloco é independente; marque conforme
-for fazendo. **Sempre sobre cópia**, sempre no `:99`.
+for fazendo. **Sempre sobre cópia**, sempre no `:98`.
 
 ```sh
 cp roms/golden-european-deluxe.bin /tmp/claude-*/scratchpad/v.bin
-DISPLAY=:99 ./build/src/app/newWe2002 /tmp/.../v.bin
+DISPLAY=:98 ./build/src/app/newWe2002 /tmp/.../v.bin
 ```
 
 Para cada bloco, o critério de aprovação é o mesmo: **fazer a mesma coisa no

@@ -34,12 +34,12 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 
 4. **"Em lote" não é "em paralelo".** Lote é quantas a invocação fecha;
    paralelo é quantas rodam ao mesmo tempo, que às vezes é uma. Um lote de 2
-   que serializa no `:99` roda em sequência e está correto — a economia ali é
+   que serializa no `:98` roda em sequência e está correto — a economia ali é
    de rito, não de tempo de máquina. O paralelismo paga na **fase 1** (03 a
    07): extração estática, leitura pura sobre o `.exe`, cada uma escrevendo seu
    arquivo em `wte/re/`.
 
-5. **O `:99` é o recurso mais serializado deste projeto.** Não há window
+5. **O `:98` é o recurso mais serializado deste projeto.** Não há window
    manager, e os dois lados do golden acham a janela por heurística: duas
    sessões de GUI simultâneas dirigem a janela uma da outra. **Toda tarefa que
    abre o oráculo, roda o golden ou tira captura é sequencial.** Serializam
@@ -50,7 +50,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 
 6. **Grafo e matriz divergem, e a matriz manda.** O `progresso.md` diz que 12 e
    13 vão em paralelo, e diz certo: nenhuma depende da outra. Mas as duas
-   dirigem janela no `:99`, então vão em série. O grafo fala de dependência
+   dirigem janela no `:98`, então vão em série. O grafo fala de dependência
    lógica; a matriz, de recurso físico.
 
 7. **Tarefa de fechamento (09, 14, 21, 29, 34, 40) não divide lote com
@@ -60,7 +60,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 
 8. **Subagente edita; o thread principal commita.** Subagente não roda `git`,
    nem `lazbuild`, nem `golden_check.sh`, nem gerador em modo de escrita, não
-   abre janela no `:99`, e não escreve no `progresso.md` nem no `wte/Makefile`.
+   abre janela no `:98`, e não escreve no `progresso.md` nem no `wte/Makefile`.
 
 9. **Varredura de discrepância a cada tarefa, não uma no fim.** Num lote a
    tarefa *k+1* torna falso o doc que a *k* acabou de escrever.
@@ -74,7 +74,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 11. **Falha isolada não aborta o lote** — siga para quem não depende dela. Gate
     global quebrado **para o lote**: `lazbuild` não compila, `ctest` do
     `newWe2002` vermelho, ou — o caso mais provável aqui — o **controle do
-    golden** não fechando, que indica problema do harness ou do `:99` e torna
+    golden** não fechando, que indica problema do harness ou do `:98` e torna
     sem sentido qualquer resultado seguinte.
 
 12. **Nunca execute `CORR-WTE-XXX` por aqui** — isso é do `/corrigir` e do

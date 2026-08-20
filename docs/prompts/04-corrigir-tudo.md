@@ -75,7 +75,7 @@ Duas correções só rodam em paralelo se **todas** as condições valerem:
 
 | Recurso | Por que serializa |
 | --- | --- |
-| **o `DISPLAY=:99`** | não há window manager, e os dois lados do golden acham a janela por heurística. Duas sessões de GUI simultâneas dirigem a janela uma da outra, e o diff resultante parece bug do port |
+| **o `DISPLAY=:98`** | não há window manager, e os dois lados do golden acham a janela por heurística. Duas sessões de GUI simultâneas dirigem a janela uma da outra, e o diff resultante parece bug do port |
 | `golden_check.sh` / `work/` | duas cópias de ~474 MB por rodada, num diretório de trabalho único. Duas rodadas simultâneas leem a cópia da outra |
 | Wine / `work/wineprefix*` | prefix único por editor; `wineserver` compartilhado |
 | qualquer gerador em modo de escrita | regenera a árvore inteira — duas execuções simultâneas leem a saída da outra |
@@ -84,7 +84,7 @@ Duas correções só rodam em paralelo se **todas** as condições valerem:
 | `git` (index, `HEAD`, commit) | **sempre no thread principal**, nunca dentro de subagente |
 | `correcoes-progresso.md` | toda CORR escreve nele; é o arquivo mais garantido de colidir |
 
-**A serialização do `:99` é a mais restritiva deste projeto**, e não tem
+**A serialização do `:98` é a mais restritiva deste projeto**, e não tem
 equivalente no `snes`. Na prática, **toda CORR que exercita o oráculo, roda o
 golden, ou tira captura é sequencial** — o que sobra para paralelizar é
 correção de doc, de gerador e de código que não precisa de tela.
@@ -115,7 +115,7 @@ manual e um número que ninguém remede.
 antes de editar qualquer coisa — é barato e é o que separa CORR viva de CORR
 envelhecida antes de o trabalho começar.
 
-**Ressalva:** reprodução que exige **abrir o oráculo no `:99`** não é leitura
+**Ressalva:** reprodução que exige **abrir o oráculo no `:98`** não é leitura
 pura para efeito de paralelismo — ela ocupa o display. Essas vão em série.
 
 ---
@@ -124,7 +124,7 @@ pura para efeito de paralelismo — ela ocupa o display. Essas vão em série.
 
 Para cada CORR do lote, rodar o comando da seção "Evidência" e comparar com o
 que ela descreve. Pode ser em paralelo, um subagente por CORR, **read-only** —
-menos as que precisam do `:99`.
+menos as que precisam do `:98`.
 
 Três desfechos, e o terceiro é o que este prompt acrescenta ao `03`:
 
@@ -149,7 +149,7 @@ Para cada onda, na ordem:
    conserto revelar.
 2. **Os subagentes editam; quem commita é o thread principal.** Subagente não
    roda `git`, não roda `lazbuild`, não roda `golden_check.sh`, não roda
-   gerador em modo de escrita, não abre janela no `:99`. Se uma CORR precisa de
+   gerador em modo de escrita, não abre janela no `:98`. Se uma CORR precisa de
    um desses, ela é sequencial por definição — está na tabela de recursos
    serializados.
 3. Rodar os gates aplicáveis (tabela abaixo), **uma CORR por vez**, mesmo que a
@@ -171,7 +171,7 @@ Para cada onda, na ordem:
 | --- | --- |
 | gerador ou saída de gerador | `--check` verde; rodar duas vezes dá bytes iguais |
 | Pascal | `lazbuild wte/wte.lpi` sem warning novo |
-| comportamento (handler, gravação) | `golden_check.sh` verde, com o controle (original contra original) fechando antes, e nenhuma janela grande no `:99` na largada |
+| comportamento (handler, gravação) | `golden_check.sh` verde, com o controle (original contra original) fechando antes, e nenhuma janela grande no `:98` na largada |
 | `src/core/` | `ctest --preset debug` e o golden do `newWe2002` verdes |
 | número em doc | o número novo veio de ferramenta, não de soma à mão |
 | qualquer coisa que rode o oráculo | trabalhou sobre cópia; `roms/` intocada; temporário limpo |
@@ -199,7 +199,7 @@ lote, a correção *k+1* costuma tornar falso um doc que a *k* acabou de escreve
   cima disso é dívida que ninguém acha depois.
 
 O caso mais provável de gate global quebrado aqui é o **controle do golden**:
-se original contra original não fecha, o problema é do harness ou do `:99`, não
+se original contra original não fecha, o problema é do harness ou do `:98`, não
 das correções — e nenhum resultado do lote significa nada até isso voltar.
 
 ---
@@ -238,7 +238,7 @@ das correções — e nenhum resultado do lote significa nada até isso voltar.
 Não me entregue um plano e pare — a menos que `$ARGUMENTS` diga `--plano`.
 Execute o lote inteiro, um commit por correção, `[x]` só depois do commit.
 Paralelize só o que a matriz de conflito autoriza; **na dúvida, sequencial** —
-e o `:99` é sempre sequencial.
+e o `:98` é sempre sequencial.
 Nada de `WTE-TASK`, nada de decompilado colado, nada de editar à mão o que um
 gerador produz, nada de escrever no `.exe` ou em `roms/`.
 `push` só se o usuário pedir.
