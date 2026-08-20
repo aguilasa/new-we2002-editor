@@ -50,8 +50,10 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-mcr` | 9 | 9 | 9 |
 | `27-dorsal-editado` | 10 | 10 | 10 |
 | `27-mover` | 11 | 11 | 12 |
+| `27-mover-ml` | 10 | 10 | 10 |
+| `27-descarte-ml` | 13 | 13 | 13 |
 
-**As duas réguas fecham nas 14 sessões que escreveram.**
+**As duas réguas fecham nas 16 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.
@@ -415,27 +417,17 @@ de qualquer ação medida.
 | `11` | `FICHA_2_FUNDO` | ficha de um jogador dele | 10 | 0 | 7284 |
 | `11` | `FIM` | — | 0 | 0 | 0 |
 
-**17 `OFS_*` saíram de hipótese nesta passagem** — nenhuma
+**7 `OFS_*` saíram de hipótese nesta passagem** — nenhuma
 sessão anterior os tinha endereçado:
 
 | `Offsets.hpp` | valor | sessão | ação | op |
 |---|---:|---|---|:---:|
-| `OFS_PLAYER_NAME_2` | 390456 | `10` | `TIME_FUNDO` | R |
-| `OFS_PLAYER_NAME_3` | 392808 | `10` | `TIME_FUNDO` | R |
-| `OFS_PLAYER_NAME_4` | 395160 | `10` | `TIME_FUNDO` | R |
-| `OFS_PLAYER_NAME_5` | 397512 | `11` | `FICHA_60` | R |
-| `OFS_PLAYER_NAME_6` | 399864 | `11` | `FICHA_60` | R |
-| `OFS_PLAYER_NAME_7` | 402216 | `11` | `FICHA_60` | R |
-| `OFS_PLAYER_NAME_8` | 404568 | `11` | `TIME_120` | R |
-| `OFS_ML_PLAYER_NAME` | 2006288 | `11` | `TIME_120` | R |
 | `OFS_ML_PLAYER_NAME_2` | 2008632 | `11` | `TIME_120` | R |
 | `OFS_ML_PLAYER_NAME_3` | 2010984 | `11` | `TIME_120` | R |
 | `OFS_FORMATIONS` | 2303700 | `10` | `ESTRATEGIA` | R |
 | `OFS_KIT_PREVIEW_A` | 2669544 | `10` | `TIME_FUNDO` | R |
 | `OFS_KIT_PREVIEW_B` | 2671896 | `11` | `TIME_120` | R |
 | `OFS_KIT_PREVIEW_C` | 2674248 | `11` | `TIME_120` | R |
-| `OFS_FLAG_COLOURS_SENEGAL` | 12545758 | `11` | `FICHA_60` | R |
-| `OFS_FLAG_COLOURS_A` | 12550296 | `10` | `TIME_FUNDO` | R |
 | `OFS_FLAG_COLOURS_B` | 12552648 | `11` | `TIME_120` | R |
 
 ### O achado grande: a região do uniforme

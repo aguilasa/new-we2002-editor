@@ -2,7 +2,7 @@
 handler: paderecha2Click
 formulario: MainForm
 endereco: 0x0040e720
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.paderecha2Click
@@ -98,9 +98,19 @@ inteiro são coisas diferentes, e é o segundo que pergunta antes.
 observável — nada mexe na lista enquanto o modal está aberto —, mas inverter a
 ordem seria escolher por gosto onde há medição.
 
-**Veredito `aberto`:** o Pascal
+**Veredito `implementado`:** o Pascal
 ([`../../src/impl/ep2002_mainform.paderecha2Click.inc`](../../src/impl/ep2002_mainform.paderecha2Click.inc))
-faz tudo menos a gravação, que é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md). O corpo
+faz tudo, gravação inclusive.
+
+Fechado em 2026-08-20 pela oitava passagem da
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+**destino de Master League** da `0x00404820` foi portado, com golden verde
+([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
+contador de blocos livres vindo da
+[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md). Com ele a
+recusa `-1` passou a ser alcançável e o `casilla_xmlibres` mostra o número de
+verdade.
+
+O corpo
 compartilhado com o `paizquierda2Click` é a `MoveTodosOsJogadores` do
 [`.aux.inc`](../../src/impl/ep2002_mainform.aux.inc).

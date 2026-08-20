@@ -22,3 +22,4 @@ we2002_offsets  # TOffset, no endereco de gravacao
 we2002_cdimage  # TCdImage, na varredura dos blocos de nome
 Classes         # TFileStream, na copia da textura
 we2002_ml       # ContaBlocosLivresDeMl -- a 0x004042d4 (WTE-TASK-33)
+ep2002_info4    # ficha_info4.etiq3, no aviso de bloco compartilhado

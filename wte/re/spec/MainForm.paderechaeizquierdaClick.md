@@ -2,7 +2,7 @@
 handler: paderechaeizquierdaClick
 formulario: MainForm
 endereco: 0x0040e304
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.paderechaeizquierdaClick
@@ -126,17 +126,26 @@ seleção dos dois combos, repovoa o esquerdo **sempre** e o direito **só se**
 `SetEnabled` em `+0x64`. Ela pega o formulário pelo ponteiro global
 `0x00434360` (`_MainForm`), não por `this`: não é método.
 
-### Veredito `aberto`
+### Veredito `implementado`
 
 O Pascal
 ([`../../src/impl/ep2002_mainform.paderechaeizquierdaClick.inc`](../../src/impl/ep2002_mainform.paderechaeizquierdaClick.inc))
-faz tudo menos as duas gravações, que são da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) — opção A da
-decisão de 2026-08-12.
+faz tudo, as duas gravações inclusive.
+
+Fechado em 2026-08-20 pela oitava passagem da
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+**destino de Master League** da `0x00404820` foi portado, com golden verde
+([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
+contador de blocos livres vindo da
+[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md).
+
+**Este handler é o único que precisa do `TrocaEmCurso`**, e agora se vê por
+quê: o ramo de Master League mostra um aviso modal (`ficha_info4`) quando o
+bloco que o destino larga ainda tem outros donos, e uma troca faria o aviso
+subir **duas** vezes — uma por gravação. O `BYTE[0x00423169]` que este corpo
+liga antes e desliga depois existe para calá-lo, e até esta passagem ele era um
+sinalizador sem leitor no port.
 
 **Divergências deliberadas do port**
 ([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)): sai sem
-fazer nada se qualquer `ItemIndex` for negativo; e o `casilla_xmlibres` mostra
-zero enquanto a
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) não calcular o
-contador.
+fazer nada se qualquer `ItemIndex` for negativo.

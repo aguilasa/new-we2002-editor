@@ -2,7 +2,7 @@
 handler: paderechaClick
 formulario: MainForm
 endereco: 0x0040e5e8
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.paderechaClick
@@ -169,28 +169,48 @@ está anotado como pergunta. Nesta task nada lê o valor: o port enche o campo a
 partir do `cost` do modelo — mesmo papel, mesma largura, mesma ausência — e
 quem levar isso à imagem tem de responder antes.
 
-### Veredito `aberto`, com dono nomeado
+### Veredito `implementado`
 
 O Pascal está escrito
 ([`../../src/impl/ep2002_mainform.paderechaClick.inc`](../../src/impl/ep2002_mainform.paderechaClick.inc))
-e a gravação chegou na
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) em 2026-08-19 —
-**para destino de seleção**, com golden verde
-([`golden-09-mover`](../../tests/roteiros/golden-09-mover.txt)). A opção A da
-decisão de 2026-08-12 fechou por metade.
+e a gravação fechou em duas metades. A primeira, **destino de seleção**, em
+2026-08-19, com golden verde
+([`golden-09-mover`](../../tests/roteiros/golden-09-mover.txt)). A segunda,
+**destino de Master League**, em 2026-08-20.
 
-**O que falta é o ramo de destino de Master League da `0x00404820`**, e a
-lacuna é declarada, não silenciosa: a rotina sai sem tocar em byte nenhum
-quando o destino não é seleção. O ramo do original aloca um bloco livre,
-atualiza a tabela de vínculos e decrementa o contador `0x004335c0` — que é a
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) quem calcula —,
-e é dele que sai o outro código de recusa, `-1`. Gravar meio bloco seria pior
-do que não gravar.
+Fechado em 2026-08-20 pela oitava passagem da
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+**destino de Master League** da `0x00404820` foi portado, com golden verde
+([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
+contador de blocos livres vindo da
+[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md). Com ele a
+recusa `-1` passou a ser alcançável e o `casilla_xmlibres` mostra o número de
+verdade.
+
+### O destino de Master League grava outra coisa, e é isso que o separa
+
+No destino de seleção o slot guarda um jogador, e a gravação põe 10 bytes de
+nome, 12 de atributos e o condicional em cima dele. No destino de Master League
+o slot guarda um **par de vínculo de dois bytes**, e o que se move é para onde
+ele aponta. Daí as três saídas onde a outra metade tem uma:
+
+| situação | o que faz | código |
+|---|---|---|
+| origem vazia, destino divide o bloco com outro | aloca bloco livre, grava o jogador nele, aponta o vínculo | `0` |
+| os dois lados com identidade | só reescreve o vínculo | `1` |
+| destino é dono único do bloco, origem vazia | grava o jogador direto no bloco, sem alocar | `1` |
+| destino é dono único, origem com identidade | reescreve o vínculo e **libera** o bloco | `2` |
+
+A última é o único lugar do programa que **devolve** bloco, e é o caminho que
+o `golden-10-mover-ml` exercita: medido, o oráculo escreve exatamente 2 bytes,
+em `2012734..2012735`.
 
 **Divergências deliberadas do port**
 ([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):
 
 1. sai sem fazer nada se qualquer um dos quatro `ItemIndex` for negativo;
-2. o `casilla_xmlibres` mostra zero enquanto a
-   [WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) não calcular
-   o contador — lacuna declarada, em vez de a linha ser omitida em silêncio.
+2. no caminho de `0x00404d73` o original decrementa
+   `ocupacao[bloco_do_destino]` sem ter calculado o índice quando o destino é
+   do tipo 3, e escreve onde calhar. Não é alcançável — o `0x00404374` só põe
+   tipo 3 nos buffers de descarte e o destino é sempre o buffer 0 —, e o port
+   guarda contra isso de vez.

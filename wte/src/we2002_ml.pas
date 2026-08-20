@@ -56,6 +56,39 @@ const
     `ContaBlocosLivresDeMl`. }
   ML_INDICE_MAX = ML_BLOCOS_TOTAL + 255 - ML_SLOT_MIN;
 
+{ O VETOR DE OCUPACAO -- o `WORD[0x00433224]` do original, 462 palavras.
+
+  Ele e global e VIVO: a contagem o enche, e a gravacao de mover jogador o
+  altera (aloca bloco, libera bloco). Nao da para torna-lo local da contagem,
+  porque a `0x00404820` o le e escreve entre uma contagem e a seguinte -- e no
+  original ele e exatamente isso, um vetor da `.data`.
+
+  Vai ate `ML_INDICE_MAX` e nao ate 461. O original para em 461 e depois
+  escreve alem do fim; aqui a folga existe para que o indice fora da faixa
+  seja contado sem atingir vizinho. Ver `wte/re/ml-slots.md`. }
+var
+  OcupacaoMl: array[0..ML_INDICE_MAX] of Word;
+
+{ `0x0040423c`: o indice linear do bloco de um par `(time, slot)` com
+  `slot >= 23`. Devolve -1 para `time` alem da tabela -- ver o comentario da
+  unidade. }
+function IndiceDoBlocoMl(time, slot: Integer): Integer;
+
+{ `0x0040427c`: o inverso. Dado o indice linear, devolve o par `(time, slot)`
+  que o endereca. `time` sai -1 quando o indice esta alem do ultimo bloco.
+
+  O original guarda o par em `BYTE[0x004335e8]`/`[0x004335e9]` e a gravacao o
+  le dali como buffer de dois bytes; aqui sai por parametro, e quem grava
+  monta os dois bytes. }
+procedure ParDoIndiceLinearMl(indice: Integer; out time, slot: Integer);
+
+{ O primeiro bloco com ocupacao zero, ou -1 se nao houver.
+
+  E a varredura de `0x00404a7a`, e ela nao tem limite superior no original: o
+  laco anda enquanto `ocupacao > 0`, confiando em que o contador ja garantiu
+  que existe vaga. Aqui o limite existe e o -1 e o que sobra. }
+function PrimeiroBlocoLivreMl: Integer;
+
 { Quantos blocos de Master League estao livres na imagem de `caminho`.
 
   Devolve `ML_BLOCOS_TOTAL` quando nao da para abrir o arquivo ou ele acaba
@@ -90,11 +123,52 @@ begin
     Inc(Result, ML_NC_POR_TIME[t]);
 end;
 
+function IndiceDoBlocoMl(time, slot: Integer): Integer;
+begin
+  if (time < 0) or (time > High(ML_NC_POR_TIME)) then
+    Result := -1
+  else
+    Result := MlPrefixoDoTime(time) + slot - ML_SLOT_MIN;
+end;
+
+procedure ParDoIndiceLinearMl(indice: Integer; out time, slot: Integer);
+var
+  t, corrido: Integer;
+begin
+  time := -1;
+  slot := -1;
+  if indice < 0 then
+    Exit;
+  corrido := 0;
+  for t := Low(ML_NC_POR_TIME) to High(ML_NC_POR_TIME) do
+  begin
+    if indice < corrido + Integer(ML_NC_POR_TIME[t]) then
+    begin
+      time := t;
+      slot := indice - corrido + ML_SLOT_MIN;
+      Exit;
+    end;
+    Inc(corrido, ML_NC_POR_TIME[t]);
+  end;
+end;
+
+function PrimeiroBlocoLivreMl: Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to ML_BLOCOS_TOTAL - 1 do
+    if OcupacaoMl[i] = 0 then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
 function ContaBlocosLivresDeMl(const caminho: string;
                                out fora_do_vetor: Integer): Word;
 var
   img: TCdImage;
-  ocupacao: array[0..ML_INDICE_MAX] of Word;
   livres, par, indice, i: Integer;
   b0, b1: Byte;
 begin
@@ -106,8 +180,8 @@ begin
   if not img.OpenRead(caminho) then
     Exit;
   try
-    for i := 0 to High(ocupacao) do
-      ocupacao[i] := 0;
+    for i := 0 to High(OcupacaoMl) do
+      OcupacaoMl[i] := 0;
     livres := ML_BLOCOS_TOTAL;
     img.Seek(OFS_LINK_ML, soBeginning);
     for par := 0 to ML_PARES - 1 do
@@ -130,18 +204,16 @@ begin
         e 116 na japonesa e 111 na europeia -- 4 de folga ate 120. Sai da
         coluna `max_b0` de `wte/re/ml-slots-medido.tsv`, que o
         `conta_ml.py --medir` escreve; se mudar, muda la primeiro. }
-      if b0 > High(ML_NC_POR_TIME) then
+      indice := IndiceDoBlocoMl(b0, b1);
+      if (indice < 0) or (indice > High(OcupacaoMl)) then
         Continue;
-      indice := MlPrefixoDoTime(b0) + b1 - ML_SLOT_MIN;
-      if (indice < 0) or (indice > High(ocupacao)) then
-        Continue;
-      if ocupacao[indice] = 0 then
+      if OcupacaoMl[indice] = 0 then
       begin
         Dec(livres);
         if indice >= ML_BLOCOS_TOTAL then
           Inc(fora_do_vetor);
       end;
-      Inc(ocupacao[indice]);
+      Inc(OcupacaoMl[indice]);
     end;
     if livres < 0 then
       livres := 0;

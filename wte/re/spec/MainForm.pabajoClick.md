@@ -96,7 +96,37 @@ continuaria exibindo o nome antigo do jogador que acabou de ser substituído.
 Nenhum outro handler do lote faz esse cuidado — os de um só e os de lote
 repovoam apenas o lado de destino.
 
-**Veredito `aberto`:** o Pascal
+### Veredito `aberto`, e é o único dos sete de mover que continua
+
+O Pascal
 ([`../../src/impl/ep2002_mainform.pabajoClick.inc`](../../src/impl/ep2002_mainform.pabajoClick.inc))
-faz tudo menos a gravação, que é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+está completo, gravação inclusive: o ramo de destino de Master League da
+`0x00404820` foi portado em 2026-08-20 pela oitava passagem da
+[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md). O que falta não
+é código — **é gate**, e a razão é medida.
+
+**Este handler é o único que alcança o ramo de ALOCAÇÃO.** Alocar exige origem
+do tipo 3, e o `0x00404374` só põe tipo 3 nos buffers de descarte, que são os
+do índice 3 em diante — os do `parriba`. Os outros seis de mover trabalham com
+os buffers 1 e 2 e nunca chegam lá; por isso o
+[`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt), que fecha
+para eles, não fecha para este.
+
+**E o gate desta não pode ser escrito hoje.** O alocador pega o **primeiro**
+bloco livre, e os dois lados não têm o mesmo conjunto de blocos livres: o
+oráculo, ao abrir a imagem, reescreve o par de vínculo em `2012984` de
+`(102, 23)` para `(0, 27)` — a faixa que esta task declara `conhecida:` e cujo
+autor continua sem nome. Esse par vale o bloco 4; com ele tomado, o primeiro
+livre passa de **4** para **350**.
+
+Medido, com a sonda
+[`27-descarte-ml.txt`](../../tests/roteiros/27-descarte-ml.txt) sobre a ROM
+japonesa: o oráculo gravou o vínculo em `2012730` e o bloco **350** — nome em
+`2010092`, atributos em `2208920`, custo em `3069862`. O port, partindo da
+tabela limpa, escolheria o bloco **4**. Não é divergência da rotina de
+alocação: é a mesma rotina sobre estados diferentes.
+
+**Quem destrava:** o autor da escrita de `2012984`, que é do caminho de carga
+(ver a spec do
+[`boton_dialogo_weClick`](MainForm.boton_dialogo_weClick.md)). Enquanto ela não
+for portada, qualquer golden que aloque bloco compara maçã com laranja.

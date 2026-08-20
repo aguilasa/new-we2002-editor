@@ -166,32 +166,45 @@ um campo de tela.
       O terceiro julga **duas** gravações numa corrida: a escrita pontual do
       número na imagem e o `.mcr`, que lê os 23 `dorsalN` da tela. O número é o
       único campo do cartão que não vem do disco nem do molde
-- [ ] **Os oito handlers de mover promovidos** — a outra metade da opção A da
-      WTE-TASK-26. A metade de escrita deles é a `0x00404820`, e ela fechou
-      **para destino de seleção** em 2026-08-19, com golden verde
-      ([`golden-09-mover`](../../wte/tests/roteiros/golden-09-mover.txt)).
-      Falta o ramo de **destino de Master League**: alocar bloco livre,
-      atualizar a tabela de vínculos e decrementar o contador `0x004335c0`, que
-      é a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) quem calcula.
-      Enquanto isso a rotina sai sem tocar em byte nenhum quando o destino não é
-      seleção — lacuna declarada, não silenciosa.
-      **A 33 fechou em 2026-08-19**, antecipada exatamente por isto: o contador
-      existe, e é a `ContaBlocosLivresDeMl`, do `we2002_ml`. A
-      `AtualizaBlocosLivresDeMl` é o par contar-e-mostrar, e mora no
-      `ep2002_mainform.aux.inc`, não na unidade. **O mapa de ocupação não é
-      exposto hoje**: a `ContaBlocosLivresDeMl` devolve quantos blocos estão
-      livres, não quais, e o vetor `ocupacao` é local da função. Para o ramo de
-      destino de ML o caminho recomendado é uma função irmã no `we2002_ml` que
-      devolva o primeiro índice livre — ou o próprio vetor de ocupação —,
-      reaproveitando a varredura que já existe; refazer a varredura no chamador
-      releria a imagem inteira uma segunda vez. Falta escrever o ramo. Ver
-      [`../../wte/re/ml-slots.md`](../../wte/re/ml-slots.md),
-      e em especial a `0x0040427c`, que é o inverso do índice linear — dado o
-      bloco escolhido, ela devolve o par `(time, slot)` que vai para a tabela de
-      vínculos
-- [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-19,
-      **114 faixas conferidas em 8 sessões**, nenhuma tocando byte de EDC/ECC
-      nem de cabeçalho de setor. A conta é do
+- [ ] **Os handlers de mover promovidos** — a outra metade da opção A da
+      WTE-TASK-26. **Cinco dos sete fecharam**; o enunciado dizia "oito" e o
+      índice de specs diz **sete** (`paderecha`, `paizquierda`, `paderecha2`,
+      `paizquierda2`, `paderechaeizquierda`, `parriba`, `pabajo`) — a contagem
+      antiga somava o `dorsalClick`, que é o nono da lista da WTE-TASK-26 e
+      fechou na sétima passagem.
+
+      A metade de escrita é a `0x00404820`, e ela fechou em duas etapas:
+      **destino de seleção** em 2026-08-19
+      ([`golden-09-mover`](../../wte/tests/roteiros/golden-09-mover.txt)) e
+      **destino de Master League** em 2026-08-20
+      ([`golden-10-mover-ml`](../../wte/tests/roteiros/golden-10-mover-ml.txt)),
+      os dois com controle byte-idêntico antes.
+
+      **Os dois que continuam `aberto`, e por motivos diferentes:**
+
+      - **`parriba`** — não grava. O que falta nele é régua de tela: o
+        `compara_tela.sh --edicao` não alcança a lista de descarte. Já estava
+        assim antes desta task e não é dela.
+      - **`pabajo`** — o código está completo, o **gate** é que não pode ser
+        escrito hoje. É o único que alcança o ramo de **alocação** (exige
+        origem do tipo 3, e só buffer de descarte tem isso), e o alocador pega
+        o *primeiro* bloco livre. Os dois lados não têm o mesmo conjunto de
+        livres: a escrita de arranque em `2012984`, que esta task declara
+        `conhecida:` e cujo autor continua sem nome, troca `(102, 23)` por
+        `(0, 27)` e com isso ocupa o bloco 4. Medido com
+        [`27-descarte-ml.txt`](../../wte/tests/roteiros/27-descarte-ml.txt): o
+        oráculo aloca o bloco **350** (vínculo em 2012730, nome em 2010092,
+        atributos em 2208920, custo em 3069862); o port, partindo da tabela
+        limpa, escolheria o **4**. Mesma rotina, estados diferentes.
+
+      **Quem destrava o último:** o autor da escrita de `2012984`, que é do
+      caminho de carga. A pergunta era decorativa até aqui — agora ela bloqueia
+      um gate
+- [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-20,
+      **148 faixas conferidas em 11 sessões**, nenhuma tocando byte de EDC/ECC
+      nem de cabeçalho de setor. As três sessões novas são as de Master League
+      da oitava passagem, e a conta as absorveu sozinha: ela enumera pelo
+      prefixo `27-`, então sonda nova entra sem ninguém somar nada. A conta é do
       [`gravacao_controle.py`](../../wte/tools/gravacao_controle.py), sobre o
       `cmp-medido.tsv` que as corridas já versionaram — não precisou de medição
       nova. A forma forte do critério migrou inteira para a
@@ -211,6 +224,101 @@ um campo de tela.
 - [ ] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
+
+- **Executado em:** 2026-08-20 — **oitava passagem.** O ramo de destino de
+  Master League da `0x00404820` foi portado e **um** dos seus dois caminhos
+  fechou com golden verde. Cinco dos sete handlers de mover foram promovidos; a
+  task continua `⬜ Pendente` por dois, e agora cada um tem motivo escrito e
+  medido.
+
+- **Resumo do que foi feito:**
+
+  **O destino de Master League grava outra coisa, e é isso que separa as duas
+  metades.** No destino de seleção o slot guarda um jogador e a gravação põe 10
+  bytes de nome, 12 de atributos e o condicional em cima dele. No destino de ML
+  o slot guarda um **par de vínculo de dois bytes** e o que se move é para onde
+  ele aponta — daí quatro saídas onde a outra metade tem uma, e daí a
+  necessidade do vetor de ocupação vivo, que é o mesmo que a
+  [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) enche.
+
+  **As três colunas de offset de um bloco de ML caem em offsets já nomeados.**
+  Para o bloco 0 o nome dá 2006288 = `OFS_ML_PLAYER_NAME`, os atributos dão
+  2204112 = `OFS_ML_PLAYER_ATTR` e a base do terceiro **é** `OFS_COST_NC`. A
+  última reenquadra o campo: para bloco de ML o `+0x28` do buffer não é
+  condição nenhuma — é o **custo** do jogador *non-contract*. O `OFS_COST_NC`
+  estava `confirmado` no `offsets.tsv` com a evidência
+  `0x004046b9|0x00404b66`, que são exatamente as duas instruções envolvidas; o
+  que faltava era saber de quem elas eram.
+
+  **A coluna do vínculo se confirma sozinha, sem gravar nada.** A fórmula
+  `46*time + 2*slot + 9086 - 1520*(time div 95)`, lógica sobre o setor 850, dá
+  2012728 para o time 63 slot 0 (= `OFS_LINK_ML1`) e 2012680 para o time 95
+  slot 0 (= `OFS_LINK_ML`). Dois offsets já versionados, dois acertos.
+
+  **O `TrocaEmCurso` ganhou leitor.** O `BYTE[0x00423169]` que o
+  `paderechaeizquierdaClick` liga e desliga era, no port, um sinalizador sem
+  ninguém que o lesse. Ele existe para calar o aviso modal (`ficha_info4`) que
+  o ramo de ML mostra quando o bloco largado ainda tem outros donos — e numa
+  troca o aviso subiria duas vezes, uma por gravação.
+
+- **O que fechou, medido:**
+  - `golden-10-mover-ml` controle: **PASSOU: byte-idêntico**;
+  - `golden-10-mover-ml` golden: **PASSOU**, só as duas faixas declaradas. O
+    caminho exercitado é o de `0x00404d73` — o único do programa que **devolve**
+    bloco —, e os dois lados escrevem os mesmos 2 bytes em 2012734..2012735;
+  - cinco specs promovidas a `implementado`: `paderecha`, `paizquierda`,
+    `paderecha2`, `paizquierda2`, `paderechaeizquierda`.
+
+- **O que NÃO fechou, e é achado, não pendência vaga:**
+
+  **O ramo de alocação não pode ser gated hoje, e a causa foi medida.** Ele é o
+  único que pede origem do tipo 3, e só buffer de descarte tem isso — ou seja,
+  só o `pabajo` chega lá. O alocador pega o **primeiro** bloco livre, e os dois
+  lados não têm o mesmo conjunto de livres: a escrita de arranque em `2012984`,
+  que esta task já declarava `conhecida:` e cujo autor continua sem nome, troca
+  `(102, 23)` por `(0, 27)` e com isso ocupa o bloco 4.
+
+  Medido com a sonda `27-descarte-ml.txt`: o oráculo alocou o bloco **350** —
+  vínculo em 2012730, nome em 2010092, atributos em 2208920, custo em 3069862.
+  O port, partindo da tabela limpa, escolheria o **4**. Não é divergência da
+  rotina: é a mesma rotina sobre estados diferentes.
+
+  Isso promove a pergunta de `2012984` de curiosidade a **bloqueio**. Ela já
+  tinha ganhado significado na WTE-TASK-33 (são dois bytes de um par de
+  vínculo); agora tem consequência.
+
+  O `parriba` continua `aberto` pelo motivo antigo e alheio a esta task: ele
+  não grava, e o que falta nele é o `compara_tela.sh --edicao` alcançar a lista
+  de descarte.
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/tests/roteiros/27-mover-ml.txt`,
+    `wte/tests/roteiros/27-descarte-ml.txt`,
+    `wte/tests/roteiros/golden-10-mover-ml{,.port}.txt`
+  - modificados: `wte/src/impl/ep2002_mainform.aux.inc` (o
+    `GravaJogadorEmMl`, o `GuardaVinculoNoModelo`, as duas famílias de offset e
+    as constantes), `ep2002_mainform.uses`, `wte/src/ep2002_mainform.pas`
+    (regerado), `wte/src/we2002_ml.pas` (vetor de ocupação vivo,
+    `IndiceDoBlocoMl`, `ParDoIndiceLinearMl`, `PrimeiroBlocoLivreMl`), seis
+    specs, `wte/re/spec/INDICE.md`, `wte/re/{cmp,io}-medido.tsv`,
+    `gravacao-controle.md`, `offsets-novos.md`, `fase-2.md` (todos regerados),
+    `docs/PLAN-WTE-LAZARUS.md` §4.4
+
+- **Problemas encontrados:**
+  - **A previsão do bloco alocado errou, e o erro foi o achado.** A conta dizia
+    bloco 4; o oráculo pegou 350. Refazer a conta *sobre a imagem que o oráculo
+    produziu* — e não sobre a ROM limpa — deu 350 na hora. A lição é a mesma da
+    WTE-TASK-33: comparar número, não procedência.
+  - **O enunciado dizia "oito handlers de mover" e são sete.** A contagem
+    antiga somava o `dorsalClick`, que é o nono da lista da WTE-TASK-26 e
+    fechou na sétima passagem. Corrigido no critério.
+  - O combo de time do lado direito precisa de **64** `Down` para alcançar o
+    primeiro clube de ML, e uma rajada sem espera perde evento: cada tecla
+    dispara o `lista_equipos_2Change`, que repovoa a lista de jogadores. Os
+    roteiros novos os dão em blocos de dez, com espera entre eles.
+
+---
+
 
 - **Executado em:** 2026-08-18 — **primeira passagem, parcial.** A tarefa
   continua `⬜ Pendente`: nenhuma das seis gravações foi implementada. O que

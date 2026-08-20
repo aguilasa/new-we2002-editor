@@ -1,0 +1,105 @@
+# golden-10-mover-ml -- o gate do ramo de destino de MASTER LEAGUE da
+# `0x00404820`, lado oraculo.
+#
+# WTE-TASK-27, oitava passagem.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-10-mover-ml.txt \
+#        --roteiro-port wte/tests/roteiros/golden-10-mover-ml.port.txt
+#
+# O par do `golden-09-mover`: mesmo botao, mesma rotina, DESTINO de outra
+# natureza. La o slot de destino guarda um jogador e a gravacao poe 10 bytes de
+# nome e 12 de atributos; aqui o slot guarda um PAR DE VINCULO de dois bytes, e
+# so ele muda.
+#
+# MEDIDO antes de escrever o gate (`27-mover-ml.txt` pelo `diff_dirigido.sh`):
+# o destino e o time 63, slot 3, cujo par vale `(0, 23)` -- bloco proprio com
+# UM dono. Isso leva ao caminho de `0x00404d73`, o unico do programa que
+# DEVOLVE bloco: reescreve o vinculo, larga o bloco e soma um ao contador de
+# blocos livres. O oraculo escreveu exatamente 2 bytes, em 2012734..2012735.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+conhecida: 1921862..1921862
+conhecida: 2012984..2012985
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------- o time da esquerda ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# -------------------------------------------------------- o lado direito ----
+#
+# 64 `Down` levam o `lista_equipos_2` ao indice 63, o primeiro clube de ML.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down
+~ 6
+= TIME_DIREITA
+
+# O slot 2 do time 63: o par la e `(6, 23)`, bloco proprio com UM dono. E o
+# caminho que LIBERA bloco -- o unico do programa que devolve vaga.
+! clique 400 402
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+# ------------------------------------------------------- o lado esquerdo ----
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+# ------------------------------------------------------------- mover ----
+! clique 228 402
+~ 4
+= MOVE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

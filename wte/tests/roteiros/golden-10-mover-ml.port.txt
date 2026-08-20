@@ -1,0 +1,72 @@
+# golden-10-mover-ml, lado PORT. Par de golden-10-mover-ml.txt.
+#
+# Uma assimetria so: a imagem vem da linha de comando. Nao ha dialogo nem modal
+# nesta sequencia, entao as coordenadas do MainForm sao as mesmas dos dois
+# lados.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# ------------------------------------------------------- o time da esquerda ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# -------------------------------------------------------- o lado direito ----
+#
+# 64 `Down` levam o `lista_equipos_2` ao indice 63, o primeiro clube de ML.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down
+~ 6
+= TIME_DIREITA
+
+# O slot 2 do time 63: o par la e `(6, 23)`, bloco proprio com UM dono. E o
+# caminho que LIBERA bloco -- o unico do programa que devolve vaga.
+! clique 400 402
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+# ------------------------------------------------------- o lado esquerdo ----
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+# ------------------------------------------------------------- mover ----
+! clique 228 402
+~ 4
+= MOVE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

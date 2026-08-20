@@ -1,0 +1,109 @@
+# 27-descarte-ml -- a SONDA do ramo de ALOCACAO da `0x00404820`.
+#
+# WTE-TASK-27, oitava passagem.
+#
+#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-descarte-ml.txt \
+#        --imagem roms/japanese-shift-jis.bin
+#
+# O `27-mover-ml.txt` exercita o caminho que LIBERA bloco; este exercita o que
+# ALOCA, e so o `pabajo` chega nele. O motivo e o tipo da origem: o ramo de
+# alocacao pede origem do tipo 3, e o `0x00404374` so poe tipo 3 nos buffers de
+# descarte -- os do indice 3 em diante, que e onde o `parriba` guarda.
+#
+# Previsto pela conta da WTE-TASK-33: os blocos livres desta imagem sao o 4 e o
+# 350, e o original pega o PRIMEIRO. Entao a gravacao deve ser o vinculo em
+# 2012730 mais o bloco 4 -- nome em 2006328, atributos em 2204160, custo em
+# 3069516.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------- o time da esquerda ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------ o jogador para o descarte ----
+! clique 100 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_ESQUERDA
+
+# parriba (152,16) + GroupBox1 (8,320) = (160,336), 33x49 -> centro (176,360).
+! clique 176 360
+~ 3
+= PARRIBA
+
+# lista_descarte (200,336), 121x49; a primeira linha fica no alto.
+! clique 260 343
+~ 2
+= LINHA_DESCARTE
+
+# -------------------------------------------------------- o lado direito ----
+#
+# 64 `Down` levam o `lista_equipos_2` ao indice 63, o primeiro clube de ML.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down Down Down Down Down Down Down
+~ 2
+! tecla Down Down Down Down
+~ 6
+= TIME_DIREITA
+
+# O slot 1 do time 63: o par la e `(14, 1)`, VINCULO. Com origem do tipo 3
+# isso leva ao ramo de alocacao.
+! clique 408 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR_DIREITA
+
+# ------------------------------------------------------------- pabajo ----
+#
+# pabajo (320,16) + GroupBox1 = (328,336), 33x49 -> centro (344,360).
+! clique 344 360
+~ 4
+= PABAJO
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

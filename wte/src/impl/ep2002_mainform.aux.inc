@@ -305,6 +305,38 @@ const
   ATRIBUTO_LOGICO     = $265EC;
   CONDICIONAL_BASE    = 3067404;
 
+  { AS MESMAS TRES COLUNAS, PARA UM BLOCO PROPRIO DE MASTER LEAGUE.
+
+    Lidas do ramo `0x00404635` do `0x00404374` e reescritas identicas no ramo
+    de alocacao do `0x00404820` (`0x00404abb`..`0x00404b6a`) -- o original
+    repete a conta nos dois lugares. O indice aqui NAO e `(time, slot)`: e o
+    indice LINEAR do bloco, o mesmo que a WTE-TASK-33 conta.
+
+    As tres batem com offsets que o port ja nomeia, e essa e a conferencia:
+    para o bloco 0, o nome da 2006288 = `OFS_ML_PLAYER_NAME`, os atributos dao
+    2204112 = `OFS_ML_PLAYER_ATTR`, e a base do condicional E `OFS_COST_NC`.
+
+    A ultima reenquadra o campo: para bloco de ML, o `+0x28` do buffer nao e
+    condicao nenhuma -- e o CUSTO do jogador non-contract. O `OFS_COST_NC`
+    estava `confirmado` no `offsets.tsv` com a evidencia
+    `0x004046b9|0x00404b66`, que sao exatamente estas duas instrucoes; o que
+    faltava era saber de quem elas eram. }
+  ML_BLOCO_NOME_LOGICO     = $1808;     { 6152                              }
+  ML_BLOCO_ATRIBUTO_LOGICO = $2B908;    { 178440                            }
+  ML_BLOCO_CUSTO_BASE      = $2ED648;   { 3069512 = OFS_COST_NC, ABSOLUTO   }
+
+  { A coluna do VINCULO, `+0x24`, do ramo `0x00404499`. So existe para time de
+    Master League: para selecao o original zera o campo (`0x00404439`).
+
+    `L = 46*time + 2*slot + 9086 - 1520*(time div 95)`, logico sobre o setor
+    850. O `- 1520` so dispara no time-modelo (95), e e ele que faz o modelo
+    cair ANTES dos clubes em vez de depois: para o time 63 slot 0 a conta da
+    2012728 = `OFS_LINK_ML1`, e para o 95 slot 0 da 2012680 = `OFS_LINK_ML`.
+    As duas batem com offsets ja versionados, e e assim que se sabe que a
+    formula esta certa sem gravar nada. }
+  ML_VINCULO_LOGICO = $237E;   { 9086                                       }
+  ML_VINCULO_AJUSTE = 1520;    { o desconto do time-modelo                  }
+
   { O que o original grava no lugar do condicional, para os times 54 e 55: o
     nome numa segunda regiao e o par de identidade. Os dois absolutos. }
   NOME_JOGADOR_2_BASE = 390432;
@@ -770,6 +802,13 @@ const
   COD_SEM_BLOCO_ML   = -1;
   COD_GRAVOU         =  1;
 
+  { Os outros dois que a `0x00404820` devolve, e que a tabela de salto do
+    `0x00403e20` manda para a saida sem mensagem -- como o 1. Existem para
+    quem le o codigo saber O QUE aconteceu, nao so que deu certo:
+    `0` = alocou bloco novo, `2` = o bloco do destino ficou livre. }
+  COD_ML_ALOCOU  = 0;
+  COD_ML_LIBEROU = 2;
+
   { O `0x32` que a `0x004046e8` escreve quando o campo condicional nao existe
     na imagem para aquele jogador. }
   CONDICIONAL_AUSENTE = 50;
@@ -1021,6 +1060,34 @@ end;
 
   Conferencia: para o time 2, slot 0, o condicional da **3067450**, que e
   exatamente a sexta leitura que o `0x0040f150` faz ao montar o cartao. }
+{ As tres colunas de um BLOCO PROPRIO de Master League, do indice linear.
+
+  Mesma forma da `OffsetsDoJogador`, outra tabela. O terceiro e absoluto ali e
+  aqui, e aqui ele e o custo do jogador non-contract -- ver
+  `ML_BLOCO_CUSTO_BASE`. }
+procedure OffsetsDoBlocoMl(bloco: Integer;
+                           out nome, atributos, custo: TOffset);
+begin
+  nome := EnderecoDeDados(SETOR_BASE_DADOS,
+            ML_BLOCO_NOME_LOGICO + 10 * bloco);
+  atributos := EnderecoDeDados(SETOR_BASE_DADOS,
+            ML_BLOCO_ATRIBUTO_LOGICO + 12 * bloco);
+  custo := ML_BLOCO_CUSTO_BASE + bloco;
+end;
+
+{ Onde na imagem mora o par de vinculo do slot `slot` do time `indice`.
+
+  So faz sentido para time de Master League (`indice >= TIMES_NACIONAIS`); o
+  original zera a coluna para selecao, e aqui isso vira zero tambem. }
+function OffsetDoVinculoMl(indice, slot: Integer): TOffset;
+begin
+  if indice < TIMES_NACIONAIS then
+    Exit(0);
+  Result := EnderecoDeDados(SETOR_BASE_DADOS,
+              46 * indice + 2 * slot + ML_VINCULO_LOGICO
+              - ML_VINCULO_AJUSTE * (indice div IDX_MODELO_ML));
+end;
+
 procedure OffsetsDoJogador(indice, slot: Integer;
                            out nome, atributos, condicional: TOffset);
 begin
@@ -1032,6 +1099,200 @@ begin
     condicional := 0
   else
     condicional := CONDICIONAL_BASE + 23 * indice + 2 * (indice div 56) + slot;
+end;
+
+{ Leva o par de vinculo gravado para o modelo em memoria.
+
+  Mesma divergencia declarada do `GuardaJogadorNoModelo`: o `wte.exe` rele a
+  imagem a cada troca de time, o port carrega uma vez. Sem isto o combo de
+  jogadores continuaria mostrando quem estava no slot antes da troca. }
+procedure GuardaVinculoNoModelo(indice, slot: Integer; b0, b1: Byte);
+var
+  vinculo: PByte;
+begin
+  if (indice < TIMES_NACIONAIS) or (slot < 0)
+     or (slot >= JOGADORES_POR_TIME) then
+    Exit;
+  if indice < IDX_MODELO_ML then
+    vinculo := @Jogo.ml_teams[indice - TIMES_NACIONAIS].link[slot * 2]
+  else if indice = IDX_MODELO_ML then
+    vinculo := @Jogo.ml_default.link[slot * 2]
+  else
+    Exit;
+  vinculo[0] := b0;
+  vinculo[1] := b1;
+end;
+
+{ A METADE DE MASTER LEAGUE da `0x00404820` -- de `0x00404a24` ao fim.
+
+  O ramo nacional acima grava jogador SOBRE jogador, num par (time, slot) que
+  a imagem sempre tem. Aqui o slot de destino nao guarda jogador: guarda um
+  PAR DE VINCULO de dois bytes, e o que se move e para onde ele aponta. Por
+  isso este ramo tem tres saidas onde o nacional tem uma, e por isso ele
+  precisa do vetor de ocupacao vivo -- a mesma tabela que a WTE-TASK-33 enche.
+
+  As tres, com o codigo que cada uma devolve:
+
+  | situacao | o que faz | codigo |
+  |---|---|---|
+  | origem VAZIA e o destino nao esta sozinho no bloco | aloca bloco livre, grava o jogador nele e aponta o vinculo para la | `0` |
+  | origem com identidade, destino idem | so reescreve o vinculo | `1` |
+  | destino e slot vazio, ou dono unico do bloco | grava o jogador DIRETO no bloco do destino, sem alocar | `1` |
+  | ... e a origem tem identidade | reescreve o vinculo e LIBERA o bloco do destino | `2` |
+
+  A RECUSA `-1` mora aqui, e so no primeiro caso: sem bloco livre nao ha onde
+  por o jogador. E a unica das duas recusas que depende de estado da imagem --
+  a `-2` e comparacao de identidade.
+
+  O QUE O ORIGINAL FAZ E O PORT NAO: no caminho de `0x00404d73` ele decrementa
+  `ocupacao[bloco_do_destino]` sem ter calculado o indice quando o destino e
+  do tipo 3, e escreve onde calhar. Nao e alcancavel na pratica -- o
+  `0x00404374` so poe tipo 3 nos buffers de descarte, e o destino e sempre o
+  buffer 0 --, e aqui a guarda `>= 0` o torna impossivel de vez. }
+function GravaJogadorEmMl(origem, indice, slot: Integer): Integer;
+var
+  img: TCdImage;
+  d_bloco, o_bloco, novo, t, sl, restantes: Integer;
+  off_vinc, off_nome, off_attr, off_custo: TOffset;
+  par: array[0..1] of Byte;
+  direto: Boolean;
+begin
+  Result := COD_GRAVOU;
+  if ImagemAberta = '' then
+    Exit;
+
+  { Os dois indices lineares, e cada um so existe se aquele lado tiver bloco
+    proprio. O original os calcula ANTES do desvio, em `0x0040488e` e
+    `0x004048a7`, e e por isso que eles aparecem aqui em cima. }
+  d_bloco := -1;
+  if BufferJogador[BUF_DESTINO].tipo = TIPO_ML_BLOCO then
+    d_bloco := IndiceDoBlocoMl(BufferJogador[BUF_DESTINO].ident_time,
+                               BufferJogador[BUF_DESTINO].ident_slot);
+  o_bloco := -1;
+  if BufferJogador[origem].tipo = TIPO_ML_BLOCO then
+    o_bloco := IndiceDoBlocoMl(BufferJogador[origem].ident_time,
+                               BufferJogador[origem].ident_slot);
+  if (d_bloco > High(OcupacaoMl)) or (o_bloco > High(OcupacaoMl)) then
+    Exit;
+
+  off_vinc := OffsetDoVinculoMl(indice, slot);
+  if off_vinc = 0 then
+    Exit;
+
+  { O desvio de `0x00404a24`. Destino do tipo 1 vai sempre pelo caminho de
+    alocacao; do tipo 2, so se houver OUTRO dono do mesmo bloco. }
+  direto := (BufferJogador[BUF_DESTINO].tipo <> TIPO_ML_VINCULO)
+            and ((BufferJogador[BUF_DESTINO].tipo <> TIPO_ML_BLOCO)
+                 or (d_bloco < 0) or (OcupacaoMl[d_bloco] <= 1));
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    if direto then
+    begin
+      { `0x00404cf5`. Origem vazia -- ou a recusa de repetido desligada -- e o
+        jogador vai direto para o bloco do destino, sem mexer em vinculo nem
+        em contador. }
+      if (BufferJogador[origem].tipo = TIPO_SOLTO)
+         or IgnoraJogadorRepetido then
+      begin
+        if d_bloco < 0 then
+          Exit;
+        OffsetsDoBlocoMl(d_bloco, off_nome, off_attr, off_custo);
+        GravaNoFluxo(img, off_nome, BufferJogador[origem].nome[0], 10);
+        GravaNoFluxo(img, off_attr, BufferJogador[origem].atributos[0], 12);
+        GravaNoFluxo(img, off_custo, BufferJogador[origem].condicional, 1);
+        GuardaJogadorNoModelo(origem, indice, slot);
+        Exit;
+      end;
+      { `0x00404d73`. O vinculo passa a apontar para a identidade da origem, e
+        o bloco que o destino tinha fica LIVRE -- e o unico lugar do programa
+        que devolve bloco. }
+      par[0] := BufferJogador[origem].ident_time;
+      par[1] := BufferJogador[origem].ident_slot;
+      GravaNoFluxo(img, off_vinc, par[0], 2);
+      GuardaVinculoNoModelo(indice, slot, par[0], par[1]);
+      if d_bloco >= 0 then
+        Dec(OcupacaoMl[d_bloco]);
+      if o_bloco >= 0 then
+        Inc(OcupacaoMl[o_bloco]);
+      Inc(BlocosLivresDeMl);
+      Result := COD_ML_LIBEROU;
+      Exit;
+    end;
+
+    if BufferJogador[origem].tipo = TIPO_SOLTO then
+    begin
+      { `0x00404a57`. A recusa: nao ha bloco onde por o jogador. }
+      if BlocosLivresDeMl = 0 then
+      begin
+        Result := COD_SEM_BLOCO_ML;
+        Exit;
+      end;
+      novo := PrimeiroBlocoLivreMl;
+      if novo < 0 then
+      begin
+        Result := COD_SEM_BLOCO_ML;
+        Exit;
+      end;
+      ParDoIndiceLinearMl(novo, t, sl);
+      if t < 0 then
+      begin
+        Result := COD_SEM_BLOCO_ML;
+        Exit;
+      end;
+      par[0] := Byte(t);
+      par[1] := Byte(sl);
+      GravaNoFluxo(img, off_vinc, par[0], 2);
+      GuardaVinculoNoModelo(indice, slot, par[0], par[1]);
+      Inc(OcupacaoMl[novo]);
+      Dec(BlocosLivresDeMl);
+      OffsetsDoBlocoMl(novo, off_nome, off_attr, off_custo);
+      GravaNoFluxo(img, off_nome, BufferJogador[origem].nome[0], 10);
+      GravaNoFluxo(img, off_attr, BufferJogador[origem].atributos[0], 12);
+      GravaNoFluxo(img, off_custo, BufferJogador[origem].condicional, 1);
+      if d_bloco >= 0 then
+        Dec(OcupacaoMl[d_bloco]);
+      GuardaJogadorNoModelo(origem, indice, slot);
+      Result := COD_ML_ALOCOU;
+      Exit;
+    end;
+
+    { `0x00404b91`. Os dois lados tem identidade: so o vinculo muda. }
+    par[0] := BufferJogador[origem].ident_time;
+    par[1] := BufferJogador[origem].ident_slot;
+    GravaNoFluxo(img, off_vinc, par[0], 2);
+    GuardaVinculoNoModelo(indice, slot, par[0], par[1]);
+  finally
+    img.Close;
+  end;
+
+  if d_bloco >= 0 then
+  begin
+    Dec(OcupacaoMl[d_bloco]);
+    { O aviso de `0x00404bd1`, e ele NAO sai durante uma troca: o
+      `paderechaeizquierdaClick` liga o `TrocaEmCurso` justamente para
+      cala-lo nas duas gravacoes que faz.
+
+      O NUMERO PASSA POR UM `Currency` no original -- `(ocupacao - 1)` vezes
+      10.000 pelo `__llmul` e depois `CurrToStr`. E a mesma armadilha do
+      `LegendaDoDescarte`: 10.000 e a escala do tipo, entao a conta nao
+      produz 10.000, produz o proprio numero. }
+    restantes := OcupacaoMl[d_bloco] - 1;
+    if not TrocaEmCurso then
+    begin
+      ficha_info4.etiq3.Caption := 'in another ' + IntToStr(restantes)
+                                 + ' different place(s) in the game';
+      ficha_info4.ShowModal;
+    end;
+  end;
+  if o_bloco >= 0 then
+  begin
+    Inc(OcupacaoMl[o_bloco]);
+    if OcupacaoMl[o_bloco] = 1 then
+      Dec(BlocosLivresDeMl);
+  end;
 end;
 
 function GravaJogador(origem, indice, slot: Integer): Integer;
@@ -1054,12 +1315,14 @@ begin
     Exit;
   end;
 
-  { DESTINO DE MASTER LEAGUE AINDA NAO GRAVA -- ver o cabecalho. O ramo do
-    original aloca bloco livre, mexe na tabela de vinculos e decrementa o
-    contador `0x004335c0`, que e a WTE-TASK-33 quem calcula. Sair aqui e a
-    lacuna DECLARADA; o que nao se pode e gravar meio bloco. }
+  { DESTINO DE MASTER LEAGUE: outra rotina, logo acima. O que muda nao e o
+    detalhe -- e o objeto: la se grava um PAR DE VINCULO e se administra o
+    vetor de blocos, aqui se grava o jogador em cima do jogador. }
   if BufferJogador[BUF_DESTINO].tipo <> TIPO_NACIONAL then
+  begin
+    Result := GravaJogadorEmMl(origem, indice, slot);
     Exit;
+  end;
 
   if (ImagemAberta = '') or (indice < 0) or (slot < 0) then
     Exit;
