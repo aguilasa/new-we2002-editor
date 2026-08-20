@@ -121,8 +121,17 @@ separadas (primeiro parágrafo do Contexto).
 | Arquivo | Ação |
 |---|---|
 | `wte/re/spec/<handler>.md` | criar |
-| `wte/src/ep2002_*.pas` | modificar |
-| `wte/tools/roteiros/edicao-*.sh` | criar |
+| `wte/src/impl/ep2002_*.inc`, `wte/src/ep2002_*.pas` | modificar |
+| `wte/tools/compara_tela.sh`, `wte/tools/check_edicao.py` | criar — a evidência de tela e a régua que a lê |
+| `wte/re/edicao-tela.tsv`, `wte/re/edicao-cobertura.md` | criar — medido / gerado |
+
+*(2026-08-20)* A terceira linha pedia `wte/tools/roteiros/edicao-*.sh`, que
+**nunca existiu**: a evidência desta task não é driver de shell por handler, é
+o par `compara_tela.sh` (grava os dois lados) + `check_edicao.py` (lê o
+gravado), com a medição em `edicao-tela.tsv`. Mesma troca que a WTE-TASK-27
+sofreu na tabela dela, e pelo mesmo motivo — driver que reage à tela muda o
+estímulo quando um lado diverge. Reconciliado junto com a
+[CORR-WTE-070](/docs/tasks/CORR-WTE-070.md).
 
 ---
 
