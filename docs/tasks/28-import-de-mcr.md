@@ -152,17 +152,33 @@ o cartão com o próprio original, pelo roteiro
       448 bytes no bloco 2 e 41 no bloco 3
 - [ ] Os três casos especiais do readme cobertos por teste
 - [ ] Round-trip export/import estável
-- [ ] Export do app byte-idêntico ao export do original
-- [ ] `boton_mcr2isoClick` com spec em
-      `wte/re/spec/MainForm.boton_mcr2isoClick.md` e golden verde na ROM
-      japonesa — gravação e origem dos bytes fecham na mesma task.
-      **A spec está feita** (2026-08-20), com a recusa e os três caminhos de
-      escrita mapeados; falta o Pascal e o golden
-- [ ] **EDC/ECC preservados na escrita de setor inteiro — provado, não
-      presumido.** É a única gravação do projeto que escreve setor completo, e a
-      única em que preservar EDC/ECC é decisão e não consequência: as quatro da
-      WTE-TASK-27 escrevem dentro do payload de 2048 B e não alcançam os 280
-      bytes de correção
+- [x] **Export do app byte-idêntico ao export do original** — é o
+      [`golden-07-mcr`](../../wte/tests/roteiros/golden-07-mcr.txt) com
+      `--artefato saida.mcr`, que compara o `.mcr` que cada lado emite além das
+      duas imagens. **PASSOU: byte-idêntico**, e voltou a passar em 2026-08-20
+      depois de o layout mudar de casa para o `we2002_mcr`
+- [x] **`boton_mcr2isoClick` com spec e golden verde na ROM japonesa** —
+      spec em `wte/re/spec/MainForm.boton_mcr2isoClick.md`, Pascal em
+      `ep2002_mainform.boton_mcr2isoClick.inc`, e o
+      [`golden-12-mcr2iso`](../../wte/tests/roteiros/golden-12-mcr2iso.txt)
+      **PASSOU: byte-idêntico**, com o controle fechando antes. Gravação e
+      origem dos bytes fecharam na mesma task, como a divisão de 2026-08-19
+      previa
+- [x] **EDC/ECC preservados — e a premissa do critério estava errada.** O
+      enunciado dizia que esta seria *"a única gravação do projeto que escreve
+      setor completo"*, e portanto a única em que preservar EDC/ECC seria
+      decisão e não consequência. **Medido, não é.** O `boton_mcr2iso` grava
+      sete faixas e **todas caem dentro do payload de 2048 B** — a maior tem
+      276 bytes. A conta é a mesma do
+      [`gravacao_controle.py`](../../wte/tools/gravacao_controle.py), que
+      absorveu a sonda nova sozinha: **164 faixas em 12 sessões**, nenhuma
+      tocando byte de EDC/ECC nem de cabeçalho de setor.
+
+      Onde a ideia de "setor completo" nasceu foi do outro lado do formato: o
+      `grabar_memoryClick` copia os 131.072 bytes do molde para o `.mcr`. Mas
+      isso é escrita **no cartão**, que não tem setor MODE2/2352 — o cartão é
+      plano. Na imagem, este handler é tão comportado quanto os quatro da
+      WTE-TASK-27
 - [ ] Commit no formato conventional, em inglês
 
 ## Log de Execução
@@ -271,7 +287,31 @@ prevê:** 223 B de nomes em `388786`, 14 de números em `404765`, 276 de
 atributos em `2180624`, 1 de tática em `2302816`, 27 de formação em `2303791`,
 5 de cobradores em `2329074` e 23 de condicional em `3067473`.
 
-### O gate ficou bloqueado pelo AMBIENTE, e não pelo código
+### O gate fechou, e destravar custou mudar de display
+
+*(2026-08-20, quarta passagem)* O `golden-12-mcr2iso` **PASSOU: byte-idêntico**,
+com o controle fechando antes. E com ele fecharam mais dois critérios: o export
+byte-idêntico (que já era o `golden-07-mcr` com `--artefato`) e o de EDC/ECC,
+este último **por refutação** — ver acima.
+
+O que estava no caminho não era o código, e vale registrado porque a solução
+mudou o repositório inteiro. A guarda de janela grande do `golden_check.sh`
+recusava começar por causa de uma janela de 1024×768 no `:99` que não é deste
+projeto — o `./wof` de `~/desenvolvimento/github/World-Of-Football`, lançado
+pelo `systemd --user`, que **reaparece depois de morto**. A guarda está certa:
+os dois lados acham a janela por nome e por tamanho, e com aquela na tela
+dirigiriam a errada.
+
+**A pedido do usuário, o projeto mudou para o `:98`.** O número passou a morar
+numa variável por ferramenta (`XVFB` nos dois `Makefile`, `WTE_DISPLAY` nos
+scripts de `wte/tools/`, `GOLDEN_DISPLAY` nos de `tools/`), os alvos `run-99`,
+`oracle-99` e `wte-99` viraram `-98`, e o registro histórico — `CORR-*`, logs
+de execução, prosa de medição — **continua dizendo `:99`**, porque é o que
+aconteceu.
+
+<!-- bloqueio resolvido; texto antigo abaixo mantido por ser a medição -->
+
+### O bloqueio de ambiente, como foi diagnosticado
 
 O `golden-12-mcr2iso` tem **controle byte-idêntico** (oráculo contra oráculo,
 2026-08-20) e a sonda mediu as sete faixas. O golden em si — oráculo contra
