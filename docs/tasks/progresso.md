@@ -40,7 +40,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | 2026-08-11 |
 | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ✅ Concluído | 2026-08-18 | 2026-08-18 |
 | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
-| [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
+| [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-20 | ⬜ pendente |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ⬜ Pendente | — | — |
@@ -277,10 +277,25 @@ só uma escolha de quando.
       um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
       2026-08-19 — comparar só as duas imagens aprovaria um port inerte
 - [ ] Cinco `trivial` reamostrados e reconferidos
-- [ ] `.mcr`: contêiner por documentação pública, conteúdo revertido
-- [ ] Os três casos especiais do readme do original cobertos
-- [ ] `boton_mcr2isoClick` byte-idêntico, e o EDC/ECC preservado **provado** —
-      é a única gravação do projeto que escreve setor inteiro
+- [x] `.mcr`: contêiner por documentação pública, conteúdo revertido — 16
+      destinos mapeados dos **dois** lados em
+      [`wte/re/mcr.md`](../../wte/re/mcr.md), com o contêiner lido do molde e
+      não suposto
+- [x] Os três casos especiais do readme do original cobertos, cada um pelo
+      instrumento que alcança onde ele mora: **capitão e cobradores** e
+      **espaços no nome** em `test_mcr.pas` sobre cartão sintético (com
+      mutação vista reprovando nos dois); **goleiro da Eire** pelo `--check` do
+      `dump_mcr.py`, que lê do `.text` o carimbo `+0x16 := 0xFF` da
+      `0x0040478c` e o compara com o Pascal, mais o `golden-13-roundtrip`, que
+      importa **no time 0** — o único onde o caso se manifesta
+- [x] `boton_mcr2isoClick` byte-idêntico — dois gates verdes, o
+      `golden-12-mcr2iso` (time 3) e o `golden-13-roundtrip` (time 0, com
+      exportação de volta e `--artefato`). **O EDC/ECC saiu por refutação:** a
+      premissa do critério estava errada, este handler **não** escreve setor
+      inteiro. As sete faixas que ele grava cabem todas no payload de 2048 B — a
+      maior tem 276 bytes —, e a conta é a do `gravacao_controle.py`: 164 faixas
+      em 12 sessões, nenhuma tocando byte de EDC/ECC nem cabeçalho de setor.
+      Escrita de cartão inteiro existe, mas é no `.mcr`, que é plano
 - [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida**
 - [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
 

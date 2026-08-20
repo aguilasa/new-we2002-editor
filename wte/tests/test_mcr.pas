@@ -10,6 +10,13 @@
   independentes do mesmo layout -- se concordarem, o erro tem de estar nas
   duas.
 
+  DOIS DOS TRES CASOS ESPECIAIS DO README moram aqui, sobre cartao sintetico
+  -- capitao e cobradores, e espaco no nome. O terceiro, o "goleiro da Eire",
+  nao e do leitor: ele vive no carimbo `+0x16 := 0xFF` que a `0x0040478c` poe
+  no buffer, e por isso e conferido pelo `--check` do `dump_mcr.py` (o `.text`
+  contra o Pascal) e medido pelo gate `golden-13-roundtrip`, que importa no
+  time 0. Ver a secao dos casos especiais em `wte/re/mcr.md`.
+
   Cada linha de saida e `OK<TAB>nome` ou `FALHA<TAB>nome<TAB>detalhe`.
   Rodado por: wte/tools/test_dump_mcr.py
 }
@@ -19,7 +26,7 @@ program test_mcr;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, we2002_mcr;
+  SysUtils, Classes, we2002_mcr;
 
 var
   falhas: LongInt = 0;
@@ -107,6 +114,167 @@ begin
         (NumeroDoCartao(c, -1) = 0) and (NumeroDoCartao(c, 23) = 0));
 end;
 
+{ Um cartao sintetico: `MC`, o resto zerado, e o que o caso plantar. }
+function CartaoSintetico(out caminho: string): TFileStream;
+begin
+  caminho := GetTempFileName('', 'wtemcr');
+  Result := TFileStream.Create(caminho, fmCreate);
+  Result.Size := CARTAO_BYTES;
+  Result.Position := 0;
+  Result.Write(PAnsiChar('MC')^, 2);
+end;
+
+procedure Planta(f: TFileStream; posicao: LongInt; valor: Byte);
+begin
+  f.Position := posicao;
+  f.Write(valor, 1);
+end;
+
+{ CASO 1 do readme -- *the captain and kickers when loading from .mcr files*.
+
+  A correcao mora em duas coisas que um port perde por simplificar: a tabela
+  `0x00423F84` NAO e crescente, e o capitao nao esta nela -- mora sozinho em
+  `MCR_CAPITAO`, quase um kilobyte adiante. Quem trocar a tabela por
+  aritmetica devolve os cinco na ordem do endereco (2, 3, 1, 0, 4) e um
+  capitao que e o vizinho do quinto. }
+procedure OCapitaoEOsCobradores;
+const
+  { OS ENDERECOS SAO LITERAIS DE PROPOSITO, e nao `MCR_COBRADORES`: plantar
+    pela mesma constante que se le seria tautologia -- qualquer ordem passaria.
+    Esta e a segunda copia da tabela `0x00423F84`, do mesmo jeito que o
+    `test_dump_mcr.py` tem a dele. Quem confere as duas contra o `.exe` e o
+    `--check` do `dump_mcr.py`. }
+  ENDERECOS: array[0 .. 4] of LongInt = ($614F, $6140, $6122, $6113, $6131);
+  ENDERECO_CAPITAO = $6500;
+var
+  f: TFileStream;
+  caminho: string;
+  c: TCartaoDeMemoria;
+  i: Integer;
+  ok: Boolean;
+begin
+  f := CartaoSintetico(caminho);
+  try
+    { Cada cobrador leva o proprio indice mais 100 -- valores distintos e
+      longe de zero, para ordem trocada nao passar por coincidencia. }
+    for i := 0 to High(ENDERECOS) do
+      Planta(f, ENDERECOS[i], 100 + i);
+    Planta(f, ENDERECO_CAPITAO, 200);
+  finally
+    f.Free;
+  end;
+  try
+    Checa('o cartao sintetico abre', LeCartaoDeMemoria(caminho, c));
+    ok := True;
+    for i := 0 to High(MCR_COBRADORES) do
+      if c.cobradores[i] <> 100 + i then
+        ok := False;
+    Checa('os cinco cobradores voltam na ordem da tabela', ok,
+          Format('%d,%d,%d,%d,%d', [c.cobradores[0], c.cobradores[1],
+                 c.cobradores[2], c.cobradores[3], c.cobradores[4]]));
+    Checa('o capitao vem de 0x6500, e nao do sexto vizinho',
+          c.cobradores[COBRADORES_BYTES - 1] = 200,
+          Format('%d', [c.cobradores[COBRADORES_BYTES - 1]]));
+    { E a razao de a tabela ser tabela: se os cinco fossem crescentes, ler por
+      aritmetica daria o mesmo resultado e o caso nao existiria. }
+    ok := False;
+    for i := 1 to High(MCR_COBRADORES) do
+      if MCR_COBRADORES[i] < MCR_COBRADORES[i - 1] then
+        ok := True;
+    Checa('a tabela de cobradores nao e monotona', ok);
+    Checa('o capitao nao e vizinho do bloco de cobradores',
+          Abs(MCR_CAPITAO - MCR_COBRADORES[0]) > 1);
+    Checa('e a unidade concorda com os enderecos plantados',
+          (MCR_CAPITAO = ENDERECO_CAPITAO)
+          and (MCR_COBRADORES[0] = ENDERECOS[0])
+          and (MCR_COBRADORES[4] = ENDERECOS[4]));
+  finally
+    DeleteFile(caminho);
+  end;
+end;
+
+{ CASO 3 do readme -- *the spaces in the players names*.
+
+  O campo de nome do cartao sao DEZ BYTES CRUS, e nao uma cadeia C: o original
+  os traz por `fread` de 10, e o `0x0040b2d8` tem um ramo proprio para `0x20`
+  ao montar a lista da tela. Um port que tratasse o campo como cadeia perderia
+  o fim do nome que enche os dez bytes e comeria o espaco.
+
+  Tres nomes plantados, e cada um quebra um jeito diferente de errar:
+  `'R. CARLOS '` (espacos no meio e no fim), `'ABCDEFGHIJ'` (dez bytes sem
+  terminador) e um com NUL no meio (`'AB'#0'CD'`), que so sobrevive a copia
+  por tamanho. }
+procedure EspacosNoNome;
+const
+  SLOT_ESPACO = 5;
+  SLOT_CHEIO  = 11;
+  SLOT_NUL    = 22;
+  COM_ESPACO: array[0 .. 9] of Byte = (Ord('R'), Ord('.'), Ord(' '), Ord('C'),
+    Ord('A'), Ord('R'), Ord('L'), Ord('O'), Ord('S'), Ord(' '));
+  CHEIO: array[0 .. 9] of Byte = (Ord('A'), Ord('B'), Ord('C'), Ord('D'),
+    Ord('E'), Ord('F'), Ord('G'), Ord('H'), Ord('I'), Ord('J'));
+  COM_NUL: array[0 .. 9] of Byte = (Ord('A'), Ord('B'), 0, Ord('C'), Ord('D'),
+    0, 0, 0, 0, 0);
+var
+  f: TFileStream;
+  caminho: string;
+  c: TCartaoDeMemoria;
+
+  { `$5910` e o literal do `.exe` (`push 0x5910` em `0x0040b9f9`), nao
+    `MCR_JOGADORES + MCR_ATRIBUTO_BYTES` -- ver a nota do caso acima. }
+  procedure PlantaNome(slot: Integer; const bytes: array of Byte);
+  var
+    i: Integer;
+  begin
+    for i := 0 to High(bytes) do
+      Planta(f, $5910 + 32 * slot + i, bytes[i]);
+  end;
+
+  function Confere(slot: Integer; const bytes: array of Byte): Boolean;
+  var
+    i: Integer;
+  begin
+    Result := True;
+    for i := 0 to High(bytes) do
+      if c.nomes[slot * MCR_NOME_BYTES + i] <> bytes[i] then
+        Result := False;
+  end;
+
+  function HexDoSlot(slot: Integer): string;
+  var
+    i: Integer;
+  begin
+    Result := '';
+    for i := 0 to MCR_NOME_BYTES - 1 do
+      Result := Result
+                + LowerCase(IntToHex(c.nomes[slot * MCR_NOME_BYTES + i], 2));
+  end;
+
+begin
+  f := CartaoSintetico(caminho);
+  try
+    PlantaNome(SLOT_ESPACO, COM_ESPACO);
+    PlantaNome(SLOT_CHEIO, CHEIO);
+    PlantaNome(SLOT_NUL, COM_NUL);
+  finally
+    f.Free;
+  end;
+  try
+    Checa('o cartao dos nomes abre', LeCartaoDeMemoria(caminho, c));
+    Checa('nome com espaco no meio e no fim volta inteiro',
+          Confere(SLOT_ESPACO, COM_ESPACO), HexDoSlot(SLOT_ESPACO));
+    Checa('nome que enche os dez bytes nao perde o ultimo',
+          Confere(SLOT_CHEIO, CHEIO), HexDoSlot(SLOT_CHEIO));
+    Checa('NUL no meio nao encurta o campo',
+          Confere(SLOT_NUL, COM_NUL), HexDoSlot(SLOT_NUL));
+    { O vizinho tem de continuar zerado: passo 32 lido como 22 encavalaria. }
+    Checa('o slot seguinte ao cheio continua zerado',
+          c.nomes[(SLOT_CHEIO + 1) * MCR_NOME_BYTES] = 0);
+  finally
+    DeleteFile(caminho);
+  end;
+end;
+
 procedure LeUmCartaoDeVerdade;
 var
   caminho, form_esperada, cob_esperados, dorsais_esperados, blocos_s: string;
@@ -149,6 +317,8 @@ begin
   OConteinerFecha;
   ArquivoQueNaoECartao;
   AAritmeticaDeCincoBits;
+  OCapitaoEOsCobradores;
+  EspacosNoNome;
   LeUmCartaoDeVerdade;
   WriteLn('CASOS'#9, casos);
   if falhas > 0 then

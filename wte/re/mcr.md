@@ -152,3 +152,41 @@ varre os 23 vínculos do time contando quantos precisariam de bloco novo,
 e se o contador de blocos livres for menor recusa com `Voce precisa de
 <n> mais blocos livres!!!` sem escrever byte nenhum. Para seleção não
 confere nada — não há bloco a alocar.
+
+## Os três casos especiais do readme, e onde cada um mora
+O readme da v0.98 do original registra três correções sobre `.mcr`, e
+cada uma é um caso que o **formato** tem. O que se reproduz é a
+correção, não o bug — e as três estão medidas no binário da v0.99,
+que já é o corrigido.
+
+| readme | onde a correção mora | como o port a perde |
+|---|---|---|
+| *the captain and kickers when loading from .mcr files* | a tabela `0x00423f84`, que **não é crescente**, mais o capitão sozinho em `0x6500` | trocar a tabela por aritmética: os cinco sairiam na ordem do endereço e o capitão viraria o sexto vizinho |
+| *the Eire's goalkeeper when loading a .mcr file* | o carimbo `+0x16 := 0xff` da `0x0040478c` | deixar a identidade zerada: `(0, 0)` é a identidade real do slot 0 do time 0, e a `0x00404820` recusa jogador repetido |
+| *the spaces in the players names* | o nome é **10 bytes crus**, lidos por `fread`, e o `0x0040b2d8` tem um ramo próprio para `0x20` ao montar a lista | tratar o campo como cadeia C: nome que enche os 10 bytes perderia o fim, e o espaço sumiria da tela |
+
+**O do meio é o que se enxerga menos, e o mais fácil de perder.** Ele só aparece num time e num slot — o 0 e o 0 —, porque só ali a identidade real coincide com o zero que um buffer não carimbado teria. *Ireland* é o item 0 da lista de times, e o slot 0 é o goleiro; daí o nome que o autor deu ao bug. O `--check` deste gerador lê os três carimbos do `.text` e os compara com as constantes do Pascal, e o gate [`golden-13-roundtrip`](../tests/roteiros/golden-13-roundtrip.txt) importa **no time 0** justamente por isso.
+
+## O round-trip: cartão → imagem → cartão
+Medido **no lado oráculo** do gate: o mesmo cartão entra pelo
+`boton_mcr2iso` e sai pelo `grabar_memory`, sem nada no meio. A
+pergunta é do formato, não do port — o que não voltar aqui não
+volta para o original tampouco.
+
+| campo | bytes | iguais | diferentes | nota |
+|---|---:|---:|---:|---|
+| `nomes` | 230 | 230 | 0 | - |
+| `atributos` | 276 | 276 | 0 | - |
+| `numeros` | 16 | 16 | 0 | - |
+| `formacao` | 30 | 30 | 0 | - |
+| `cobradores` | 6 | 6 | 0 | - |
+| `tatica` | 6 | 6 | 0 | - |
+| `arquivo inteiro` | 131072 | 131072 | 0 | entrada.mcr contra volta.mcr |
+
+**Zero divergência, e o arquivo inteiro junto** — a última
+linha não é campo, é o `cmp` cru dos 131.072 bytes. Nada do que
+o cartão guarda se perde na ida e volta, nem sequer a folga.
+A comparação é **campo a campo**, e não byte a byte no arquivo: os
+dois cartões herdam a mesma folga do molde, e comparar cru faria a
+folga responder pelo dado — precaução que esta medição não precisou
+cobrar, mas que a próxima pode.

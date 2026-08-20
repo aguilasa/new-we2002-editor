@@ -1,0 +1,136 @@
+# golden-13-roundtrip -- importa um cartao e o exporta de volta. Lado oraculo.
+#
+# WTE-TASK-28. Dois criterios num roteiro so, e nao por economia:
+#
+# 1. **o "goleiro da Eire"**. O destino e o time **0**, e essa e a escolha
+#    inteira. O readme da v0.98 diz ter consertado *"the problem with the
+#    Eire's goalkeeper when loading a .mcr file"*, e o conserto e o carimbo
+#    `+0x16 := 0xFF` que a `0x0040478c` poe na identidade do buffer. Sem ele o
+#    buffer chega com identidade `(0, 0)` -- que e exatamente a identidade real
+#    do slot 0 do time 0 --, a `0x00404820` o recusa por jogador repetido, e
+#    **so aquele slot daquele time** deixa de ser gravado. `Ireland` e o item 0
+#    da tabela de times do `we2002_core`, e o slot 0 e o goleiro. Importar em
+#    qualquer outro time nao alcanca o caso;
+# 2. **o round-trip**. Depois de importar, o mesmo time e exportado para
+#    `E:\saida.mcr` pelo `grabar_memory`. O `--artefato` compara os dois lados;
+#    o que o cartao de volta perde em relacao ao de ida e medido a parte, pelo
+#    `dump_mcr.py --roundtrip`, e a resposta e do FORMATO -- vale para o
+#    original tanto quanto para o port.
+#
+#   cp work/saida.mcr work/entrada.mcr     # a fixture, gerada por 27-mcr.txt
+#   WTE_MCR_ENTRADA=$PWD/work/entrada.mcr \
+#     bash wte/tools/golden_check.sh wte/tests/roteiros/golden-13-roundtrip.txt \
+#          --roteiro-port wte/tests/roteiros/golden-13-roundtrip.port.txt \
+#          --artefato saida.mcr
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Ver o README dos roteiros: desde que os dois remendos de arranque
+# foram portados, nenhum roteiro do gate declara faixa.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------------- o time ----
+#
+# UM `Down` so: o indice 0. Ver o item 1 do cabecalho -- e o unico time em que
+# o caso do goleiro se manifesta. Trocar de time tambem e o que HABILITA o
+# `grabar_memory` (`0x0040d31a`), que no DFM nasce `Enabled = False`.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- abrir o cartao ----
+#
+# `boton_mcr` (16,248) dentro do `grupo_memorycard`, 25x25 -> centro (28,260).
+# O dialogo dele tambem se chama `Abre` -- o mesmo `Title` do dialogo da
+# imagem, no proprio DFM.
+! clique 28 260
+~ 2
+
+> Abre
+~ 2
+! clique 315 304
+! texto E:\entrada.mcr
+! tecla Return
+~ 4
+= CARTAO_ABERTO
+
+# ------------------------------------------------- de volta a janela ----
+#
+# O `>` do roteiro nao espera janela: ele TROCA A ORIGEM das coordenadas. Sem
+# esta linha o clique seguinte cai fora da janela principal -- o defeito que
+# custou uma corrida no golden-12.
+> W11 Team Editor PT by chagas_michel!
+~ 2
+
+# --------------------------------------------------------- importar ----
+#
+# `boton_mcr2iso` (16,280) + grupo, 73x25 -> centro (52,292).
+! clique 52 292
+~ 5
+= IMPORTA
+
+# --------------------------------------------- o aviso de fim de import ----
+#
+# O ORIGINAL AVISA E O PORT NAO, e isto so apareceu aqui porque este e o
+# primeiro roteiro que precisa clicar DEPOIS do import: a `0x0040c974` poe
+# `MCR inserida no jogo!!!.` (cadeia `0x00424D3F`) num rotulo e chama o slot
+# `+0xe8` do formulario de aviso -- o mesmo `W11 TE PT` que o
+# `grabar_memoryClick` usa. O `golden-12` nao dismissou porque terminava logo
+# depois; aqui, sem dismissar, o clique de exportar nao alcanca a janela
+# principal. A divergencia e de TELA e esta registrada na spec do handler.
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+
+# ------------------------------------------------------- exportar ----
+#
+# grupo_memorycard (8,224) + grabar_memory (88,56) = (96,280), 25x25.
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\saida.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C, e
+# roteiro que TERMINA numa gravacao mede um oraculo truncado.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

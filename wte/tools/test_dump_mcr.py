@@ -13,6 +13,11 @@ Tres grupos:
 3. **O achado do bloco 3 e verdade, nao redacao.** Os destinos de escrita caem
    em blocos que o diretorio nao declara inteiros, e o teste mede isso em vez
    de confiar na prosa.
+4. **Os tres casos especiais do readme.** O do "goleiro da Eire" e o unico que
+   nao se enxerga no leitor: ele mora no carimbo `+0x16 := 0xFF` que a
+   `0x0040478c` poe no buffer, e o guard que o segura e lido do `.text` e
+   comparado com o Pascal do `.aux.inc`. Os outros dois sao do leitor e vivem
+   no `test_mcr.pas`.
 """
 
 from __future__ import annotations
@@ -134,6 +139,116 @@ class TestPascal(unittest.TestCase):
             self.assertIn(nome, achados)
 
 
+class TestCarregadorDeBuffer(unittest.TestCase):
+    """O caso do "goleiro da Eire": o `.text` contra o `.aux.inc`."""
+
+    def setUp(self) -> None:
+        if not M.EXE.is_file() or not M.AUX.is_file():
+            self.skipTest(f"sem {M.REL_EXE} ou {M.REL_AUX} -- o carregador NAO "
+                          "foi conferido")
+        self.blob = M.EXE.read_bytes()
+        self.original = M.AUX.read_text(encoding="utf-8")
+
+    def test_os_carimbos_saem_do_exe(self) -> None:
+        campos, marcas = M.carimbos_do_carregador(self.blob)
+        self.assertEqual(campos, M.CARTAO_CAMPOS_ESPERADOS)
+        self.assertEqual(marcas, M.CARTAO_MARCAS_ESPERADAS)
+
+    def test_a_identidade_carimbada_nao_e_indice_de_time(self) -> None:
+        """O nucleo do caso: `0xFF` esta fora dos 120 times.
+
+        Se fosse 0, o buffer vindo do cartao teria a identidade do slot 0 do
+        time 0 -- e a `0x00404820` recusaria justamente aquele jogador.
+        """
+        _, marcas = M.carimbos_do_carregador(self.blob)
+        self.assertEqual(marcas[0x16], 0xFF)
+        self.assertGreater(marcas[0x16], 119)
+
+    def test_o_time_zero_e_a_irlanda(self) -> None:
+        # O apelido do bug so faz sentido se o item 0 for mesmo a Irlanda.
+        self.assertEqual(M.primeiro_time(), "Ireland")
+
+    def test_o_pascal_bate_com_os_carimbos(self) -> None:
+        M.confere_carregador(*M.carimbos_do_carregador(self.blob))
+
+    def test_constante_plantada_recusa(self) -> None:
+        try:
+            M.AUX.write_text(
+                self.original.replace("  IDENT_NENHUMA = $FF;",
+                                      "  IDENT_NENHUMA = $00;"),
+                encoding="utf-8")
+            with self.assertRaises(M.McrError) as ctx:
+                M.confere_carregador(*M.carimbos_do_carregador(self.blob))
+            self.assertIn("IDENT_NENHUMA", str(ctx.exception))
+        finally:
+            M.AUX.write_text(self.original, encoding="utf-8")
+
+    def test_atribuicao_removida_recusa(self) -> None:
+        try:
+            M.AUX.write_text(
+                self.original.replace(
+                    "BufferJogador[buffer].ident_time := IDENT_NENHUMA;",
+                    "BufferJogador[buffer].ident_time := 0;"),
+                encoding="utf-8")
+            with self.assertRaises(M.McrError) as ctx:
+                M.confere_carregador(*M.carimbos_do_carregador(self.blob))
+            self.assertIn("ident_time", str(ctx.exception))
+        finally:
+            M.AUX.write_text(self.original, encoding="utf-8")
+
+
+class TestRoundTrip(unittest.TestCase):
+    """A comparacao de ida e volta e por campo, e nao por fatia crua."""
+
+    def cartao(self, **campos: bytes) -> bytes:
+        card = bytearray(b"MC" + bytes(M.CARTAO_BYTES - 2))
+        for off, dados in campos.items():
+            i = int(off[1:], 16)
+            card[i:i + len(dados)] = dados
+        return bytes(card)
+
+    def test_os_campos_saem_remontados(self) -> None:
+        card = self.cartao(x5910=b"ABCDEFGHIJ" + b"\xff" * 22 + b"KLMNOPQRST")
+        campos = M.campos_do_cartao(card)
+        # o passo e 32: o segundo nome comeca depois de 22 bytes de folga
+        self.assertEqual(campos["nomes"][:10], b"ABCDEFGHIJ")
+        self.assertEqual(campos["nomes"][10:20], b"KLMNOPQRST")
+        self.assertEqual(len(campos["nomes"]), 230)
+        self.assertEqual(len(campos["atributos"]), 276)
+        self.assertEqual(len(campos["formacao"]), 30)
+        self.assertEqual(len(campos["cobradores"]), 6)
+
+    def test_a_folga_do_molde_nao_entra_na_conta(self) -> None:
+        """Dois cartoes iguais no dado e diferentes SO na folga.
+
+        A folga sao os 10 bytes entre o fim do nome (`0x5910 + 10`) e os
+        atributos do registro seguinte (`0x5904 + 32`): o registro tem 32 de
+        passo e 22 uteis. Comparar fatia crua contaria esses 10.
+        """
+        a = self.cartao(x5910=b"ABCDEFGHIJ")
+        b = self.cartao(x5910=b"ABCDEFGHIJ" + b"\x77" * 10)
+        self.assertEqual(M.campos_do_cartao(a), M.campos_do_cartao(b))
+
+    def test_a_medicao_e_escrita(self) -> None:
+        antigo = (M.IDA_E_VOLTA.read_text(encoding="utf-8")
+                  if M.IDA_E_VOLTA.is_file() else None)
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                a, b = Path(td) / "a.mcr", Path(td) / "b.mcr"
+                a.write_bytes(self.cartao(x5404=b"\x01\x02"))
+                b.write_bytes(self.cartao(x5404=b"\x01\x03"))
+                self.assertEqual(M.do_roundtrip(str(a), str(b)), 0)
+            linhas = M.linhas_do_roundtrip()
+            por_campo = {ln[0]: ln for ln in linhas}
+            self.assertEqual(por_campo["numeros"][3], "1")
+            self.assertEqual(por_campo["nomes"][3], "0")
+        finally:
+            if antigo is None:
+                M.IDA_E_VOLTA.unlink(missing_ok=True)
+            else:
+                M.IDA_E_VOLTA.write_text(antigo, encoding="utf-8")
+
+
 class TestAchadoDoBloco3(unittest.TestCase):
     def setUp(self) -> None:
         if not M.DAT.is_file():
@@ -218,7 +333,7 @@ class TestPascalConcorda(unittest.TestCase):
         self.assertIn("PULADO\tleitura de cartao", saida)
         # Numero medido, e nao suposto: caso que some do programa Pascal
         # sumiria em silencio e o teste seguiria verde.
-        self.assertIn("CASOS\t10", saida)
+        self.assertIn("CASOS\t21", saida)
 
     def test_a_leitura_bate_com_a_do_python(self) -> None:
         if not self.CARTAO.is_file():

@@ -5,7 +5,7 @@ type: implementação
 category: features
 phase: 4
 depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-28: Import de `.mcr`
@@ -120,6 +120,8 @@ arquivo** — é o golden test desta feature.
 | `wte/tests/test_mcr.pas` | criar — feito |
 | `wte/tests/roteiros/27-mcr2iso.txt` | criar — a sonda, feito |
 | `wte/tests/roteiros/golden-12-mcr2iso{,.port}.txt` | criar — feito |
+| `wte/tests/roteiros/golden-13-roundtrip{,.port}.txt` | criar — o round-trip e o time 0, feito |
+| `wte/re/mcr-roundtrip.tsv` | criar — medição da ida e volta, feito |
 | `wte/src/impl/ep2002_mainform.boton_mcr{,2iso}Click.inc` | criar — feito |
 
 *(2026-08-20)* A fixture **não é versionada**, e a decisão está escrita no
@@ -150,8 +152,32 @@ o cartão com o próprio original, pelo roteiro
       faixas**, os mesmos números que a spec do `grabar_memoryClick` mediu, mais
       duas colunas novas — o diretório sai **intacto** e a escrita se reparte
       448 bytes no bloco 2 e 41 no bloco 3
-- [ ] Os três casos especiais do readme cobertos por teste
-- [ ] Round-trip export/import estável
+- [x] **Os três casos especiais do readme cobertos por teste**, e cada um por
+      um instrumento diferente, porque cada um mora num lugar diferente. O mapa
+      está na seção "Os três casos especiais" de
+      [`wte/re/mcr.md`](../../wte/re/mcr.md):
+      **capitão e cobradores** — a tabela `0x00423F84` não é crescente e o
+      capitão mora sozinho em `0x6500`; provado em `test_mcr.pas` sobre cartão
+      sintético, plantando pelos endereços **literais** (plantar pela mesma
+      constante que se lê seria tautologia). Duas mutações vistas reprovando:
+      tabela em ordem crescente e capitão movido para o vizinho;
+      **goleiro da Eire** — o carimbo `+0x16 := 0xFF` da `0x0040478c`. É o único
+      que não se enxerga no leitor: sem ele o buffer chega com identidade
+      `(0, 0)`, que é a identidade real do slot 0 do time 0, e a `0x00404820`
+      recusa como jogador repetido — **um slot, num time só**. Guardado pelo
+      `--check` do `dump_mcr.py`, que lê os três carimbos do `.text` e os
+      compara com o Pascal (as duas recusas foram vistas), e medido pelo
+      `golden-13-roundtrip`, que importa **no time 0**;
+      **espaços no nome** — o campo são 10 bytes crus, não cadeia C. Três nomes
+      plantados (`R. CARLOS ` com espaços, dez bytes sem terminador, e NUL no
+      meio); um leitor de cadeia foi escrito de propósito e reprovou
+- [x] **Round-trip export/import estável, e o resultado é forte:** cartão →
+      imagem → cartão sai **byte-idêntico**, os 131.072. Medido no lado oráculo
+      do [`golden-13-roundtrip`](../../wte/tests/roteiros/golden-13-roundtrip.txt)
+      e versionado em `wte/re/mcr-roundtrip.tsv` — seis campos, zero divergência
+      em cada um, e o arquivo inteiro junto. A comparação é campo a campo (e não
+      fatia crua) porque os dois cartões herdam a mesma folga do molde, que
+      responderia pelo dado
 - [x] **Export do app byte-idêntico ao export do original** — é o
       [`golden-07-mcr`](../../wte/tests/roteiros/golden-07-mcr.txt) com
       `--artefato saida.mcr`, que compara o `.mcr` que cada lado emite além das
@@ -179,9 +205,79 @@ o cartão com o próprio original, pelo roteiro
       isso é escrita **no cartão**, que não tem setor MODE2/2352 — o cartão é
       plano. Na imagem, este handler é tão comportado quanto os quatro da
       WTE-TASK-27
-- [ ] Commit no formato conventional, em inglês
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução
+
+### Quinta passagem, 2026-08-20 — **fechada**
+
+Fecharam os dois critérios que faltavam, e o segundo achou um bug de verdade.
+
+**O caso do "goleiro da Eire" tinha explicação mecânica, e ela é de uma linha.**
+A `0x0040478c` — a rotina que enche o buffer a partir do cartão — carimba três
+campos com literal depois dos dois `fread`: `+0x18 := 25` (o condicional que o
+cartão não guarda), `+0x19 := 3` (o tipo que leva a `0x00404820` ao ramo de
+alocação) e **`+0x16 := 0xFF`**, a identidade. Esse terceiro é o conserto que o
+readme da v0.98 anuncia: sem ele o buffer chegaria com identidade `(0, 0)`, e
+`(0, 0)` é a identidade **real** do slot 0 do time 0. A `0x00404820` compara
+identidade e recusa jogador repetido — recusaria exatamente um slot, num time
+só. `Ireland` é o item 0 da tabela de times do `we2002_core`, e o slot 0 é o
+goleiro. Daí o nome que o autor deu ao bug.
+
+O port já fazia certo desde a terceira passagem; o que faltava era **prova**. O
+`dump_mcr.py --check` passou a ler os três carimbos do `.text` e a compará-los
+com as constantes do `.aux.inc`, e a recusa foi vista nos dois sentidos —
+constante trocada e atribuição removida. E o `golden-13-roundtrip` importa **no
+time 0**, que é o único lugar onde o caso se manifesta.
+
+**O gate novo achou o que o antigo não podia achar.** Na primeira corrida o
+`golden-13` reprovou com 16 bytes de diferença no cartão exportado, em `0x5404`
+— o campo de números de camisa, inteiro. Causa: o `boton_mcr2isoClick` do
+original termina chamando a `0x0040b934` e a `0x0040b0b4` (repovoar as duas
+listas e as 23 legendas `dorsalN`), e o port não chamava nenhuma das duas. A
+segunda é **load-bearing**, e não enfeite: o `grabar_memoryClick` monta o `.mcr`
+lendo o `Caption` de cada `dorsalN`, não o modelo. Exportar logo depois de
+importar emitia os números do time que estava na tela antes.
+
+O `golden-12` não via isso porque terminava trocando de time, e a troca repovoa.
+**Foi preciso um roteiro que clicasse depois do import** para o buraco aparecer
+— e o mesmo roteiro revelou o aviso `MCR inserida no jogo!!!.` (cadeia
+`0x00424D3F`), que o original mostra ao terminar e o port não. Essa fica como
+divergência de tela, registrada na spec para a
+[WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) decidir.
+
+**O round-trip é estável, e mais do que o critério pedia:** cartão → imagem →
+cartão sai **byte-idêntico**, os 131.072 bytes. Nem os campos nem a folga mudam.
+A comparação por campo existe assim mesmo, porque comparar fatia crua deixaria a
+folga do molde responder pelo dado — precaução que esta medição não precisou
+cobrar e a próxima pode.
+
+**Medido nesta passagem:**
+
+| gate | resultado |
+|---|---|
+| `dump_mcr.py --check` | verde, com as duas recusas novas vistas |
+| `test_dump_mcr.py` | 31 testes, verde |
+| `test_mcr.pas` | 21 casos, verde; três mutações vistas reprovando |
+| `golden-13-roundtrip`, controle | **PASSOU: byte-idêntico**, imagem e `.mcr` |
+| `golden-13-roundtrip`, golden | reprovou na 1ª corrida (16 B em `0x5404`), **PASSOU** depois da correção |
+| `golden-12-mcr2iso`, golden | **PASSOU**, reconferido depois da mudança no handler |
+| `dump_mcr.py --roundtrip` | 0 divergência em 6 campos e no arquivo inteiro |
+
+**Arquivos desta passagem:**
+- criados: `wte/tests/roteiros/golden-13-roundtrip{,.port}.txt`,
+  `wte/re/mcr-roundtrip.tsv`
+- modificados: `wte/tools/dump_mcr.py` (o guard dos carimbos, o `--roundtrip`, e
+  duas seções novas no markdown), `wte/tools/test_dump_mcr.py`,
+  `wte/tests/test_mcr.pas`, `wte/re/mcr.md` (gerado),
+  `wte/src/impl/ep2002_mainform.boton_mcr2isoClick.inc` (o repovoamento),
+  `wte/re/spec/MainForm.boton_mcr2isoClick.md`, `wte/re/spec/INDICE.md`,
+  `wte/tools/README.md`, `wte/tests/README.md`
+
+**Problema encontrado:** o descrito acima — o port não repovoava a tela ao
+terminar o import, e a exportação seguinte lia a tela. Corrigido no handler, não
+no gerador (o `.inc` é escrito à mão).
+
 
 - **Executado em:** 2026-08-20 — **primeira passagem, parcial.** Fecharam os
   **três primeiros** critérios: contêiner, conteúdo e fixture. A task continua

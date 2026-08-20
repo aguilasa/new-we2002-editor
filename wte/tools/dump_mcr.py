@@ -56,8 +56,11 @@ REL_DAT = "we-team-editor/data/dat.bin"
 OUT_MD = ROOT / "wte" / "re" / "mcr.md"
 OUT_TSV = ROOT / "wte" / "re" / "mcr.tsv"
 MEDIDO = ROOT / "wte" / "re" / "mcr-medido.tsv"
+IDA_E_VOLTA = ROOT / "wte" / "re" / "mcr-roundtrip.tsv"
 PASCAL = ROOT / "wte" / "src" / "we2002_mcr.pas"
 REL_PASCAL = "wte/src/we2002_mcr.pas"
+AUX = ROOT / "wte" / "src" / "impl" / "ep2002_mainform.aux.inc"
+REL_AUX = "wte/src/impl/ep2002_mainform.aux.inc"
 
 # --- o conteiner, pela documentacao publica -------------------------------
 CARTAO_BYTES = 0x20000       # 131.072 = 16 blocos
@@ -110,6 +113,26 @@ VA_TABELA_BITS = 0x0042360C         # 6 DWORDs: o bit dentro do byte
 COBRADORES_ESPERADOS = (0x614F, 0x6140, 0x6122, 0x6113, 0x6131)
 BITS_ESPERADOS = (0, 5, 2, 7, 4, 1)
 
+# --- o carregador de buffer, e o que ele carimba -------------------------
+# `0x0040478c` enche um buffer de jogador a partir do `.mcr`. Alem dos dois
+# `fread` (nome e atributos), ele CARIMBA tres campos com literal, e um deles e
+# a correcao do "goleiro da Eire" do readme -- ver a secao dos casos especiais
+# no markdown. Estes enderecos sao lidos do `.exe`, nao supostos.
+VA_CARREGA_DO_CARTAO = 0x0040478C
+VA_CARREGA_FIM = 0x00404820          # onde a `GravaJogador` comeca
+VA_BUFFER_JOGADOR = 0x004335EC       # o vetor de buffers, +0 do registro 0
+BUFFER_PASSO = 44                    # `ebx*11*4` nas tres contas de indice
+
+# deslocamento no registro -> quantos bytes o `fread` traz
+CARTAO_CAMPOS_ESPERADOS = {0x00: 10, 0x0A: 12}
+# deslocamento no registro -> o literal carimbado (`mov BYTE PTR [..],imm8`)
+CARTAO_MARCAS_ESPERADAS = {0x16: 0xFF, 0x18: 0x19, 0x19: 0x03}
+# e o nome da constante Pascal que tem de valer o mesmo, no `.aux.inc`
+CARTAO_MARCAS_PASCAL = {0x16: "IDENT_NENHUMA", 0x18: "CARTAO_CONDICIONAL",
+                        0x19: "TIPO_SOLTO"}
+# as tres atribuicoes que `CarregaJogadorDoCartao` tem de fazer
+CARTAO_ATRIBUICOES = {0x16: "ident_time", 0x18: "condicional", 0x19: "tipo"}
+
 
 class McrError(Exception):
     pass
@@ -124,6 +147,57 @@ def secoes(blob: bytes):
         cab = base + 40 * i
         vsize, va, rsize, roff = struct.unpack_from("<IIII", blob, cab + 8)
         yield va, max(vsize, rsize), roff
+
+
+def le_bytes(blob: bytes, va: int, quantos: int) -> bytes:
+    for sec_va, tam, roff in secoes(blob):
+        ini = 0x00400000 + sec_va
+        if ini <= va and va + quantos <= ini + tam:
+            return blob[roff + (va - ini):roff + (va - ini) + quantos]
+    raise McrError(f"{REL_EXE}: VA {va:#x}+{quantos} fora de toda secao")
+
+
+def carimbos_do_carregador(blob: bytes) -> tuple[dict[int, int], dict[int, int]]:
+    """O que a `0x0040478c` escreve no buffer, lido do `.text`.
+
+    Devolve dois mapas, os dois indexados pelo DESLOCAMENTO no registro de
+    jogador de 44 bytes:
+
+    - os campos que vem do arquivo, com quantos bytes cada `fread` traz. O
+      destino sai de um `add reg,imm32` que cai dentro do registro
+      (`81 c1`/`81 c2`), e o tamanho do `push imm8` que o antecede;
+    - os campos CARIMBADOS com literal, de `mov BYTE PTR [eax*4+disp],imm8`
+      (`c6 04 85`), que e a forma que o compilador da Borland usou para
+      `buffer[b].campo = <constante>`.
+
+    Os carimbos sao o assunto: um deles (`+0x16 := 0xFF`) e o que faz o import
+    funcionar no time 0 slot 0 -- ver a secao dos casos especiais.
+    """
+    corpo = le_bytes(blob, VA_CARREGA_DO_CARTAO,
+                     VA_CARREGA_FIM - VA_CARREGA_DO_CARTAO)
+    campos: dict[int, int] = {}
+    marcas: dict[int, int] = {}
+    i = 0
+    ultimo_push = None
+    while i < len(corpo) - 5:
+        if corpo[i] == 0x6A:                       # push imm8
+            ultimo_push = corpo[i + 1]
+            i += 2
+            continue
+        if corpo[i] == 0x81 and corpo[i + 1] in (0xC1, 0xC2):   # add ecx/edx
+            disp = int.from_bytes(corpo[i + 2:i + 6], "little")
+            if VA_BUFFER_JOGADOR <= disp < VA_BUFFER_JOGADOR + BUFFER_PASSO:
+                campos[disp - VA_BUFFER_JOGADOR] = ultimo_push
+            i += 6
+            continue
+        if corpo[i:i + 3] == b"\xc6\x04\x85":      # mov BYTE [eax*4+d],imm8
+            disp = int.from_bytes(corpo[i + 3:i + 7], "little")
+            if VA_BUFFER_JOGADOR <= disp < VA_BUFFER_JOGADOR + BUFFER_PASSO:
+                marcas[disp - VA_BUFFER_JOGADOR] = corpo[i + 7]
+            i += 8
+            continue
+        i += 1
+    return campos, marcas
 
 
 def le_dwords(blob: bytes, va: int, quantos: int) -> tuple[int, ...]:
@@ -205,6 +279,106 @@ def confere_pascal(cob: tuple[int, ...]) -> None:
             + "\n     ".join(ruins))
 
 
+def primeiro_time() -> str:
+    """O nome do time de indice 0, do `we2002_core`.
+
+    Lido, e nao afirmado: o caso do "goleiro da Eire" so faz sentido se o item
+    0 do combo for mesmo a Irlanda, e a tabela do `newWe2002` -- que ja e
+    byte-identica ao `ed.exe` -- e quem diz.
+    """
+    tabelas = ROOT / "src" / "core" / "Tables.cpp"
+    if not tabelas.is_file():
+        raise McrError("src/core/Tables.cpp nao existe")
+    texto = tabelas.read_text(encoding="utf-8")
+    i = texto.find("const char TEAM_NAMES[120][20]")
+    if i < 0:
+        raise McrError("src/core/Tables.cpp: TEAM_NAMES nao encontrada")
+    m = re.search(r'"([^"]*)"', texto[i:])
+    if not m:
+        raise McrError("src/core/Tables.cpp: TEAM_NAMES sem primeira entrada")
+    return m.group(1)
+
+
+def corpo_do_carrega_jogador() -> str:
+    """O corpo de `CarregaJogadorDoCartao`, do `.aux.inc`.
+
+    Recorta da assinatura ate o `end;` da rotina. E texto, e de proposito: o
+    que se confere aqui e que as tres atribuicoes ESTAO LA, nao o que elas
+    calculam -- isso quem julga e o golden.
+    """
+    if not AUX.is_file():
+        raise McrError(f"{REL_AUX} nao existe")
+    texto = AUX.read_text(encoding="utf-8")
+    i = texto.find("procedure CarregaJogadorDoCartao")
+    if i < 0:
+        raise McrError(f"{REL_AUX}: CarregaJogadorDoCartao nao encontrada")
+    j = texto.find("\nend;", i)
+    if j < 0:
+        raise McrError(f"{REL_AUX}: CarregaJogadorDoCartao sem fim")
+    return texto[i:j]
+
+
+def constantes_do_aux() -> dict[str, int]:
+    if not AUX.is_file():
+        raise McrError(f"{REL_AUX} nao existe")
+    achados: dict[str, int] = {}
+    for linha in AUX.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*([A-Z][A-Z0-9_]*)\s*=\s*(\$[0-9A-Fa-f]+|\d+)\s*;",
+                     linha)
+        if m:
+            achados.setdefault(m.group(1),
+                               int(m.group(2)[1:], 16)
+                               if m.group(2).startswith("$")
+                               else int(m.group(2)))
+    return achados
+
+
+def confere_carregador(campos: dict[int, int], marcas: dict[int, int]) -> None:
+    """O `.exe` contra o Pascal, no ponto em que o "goleiro da Eire" mora.
+
+    Tres carimbos, e o do deslocamento `+0x16` e o que importa: sem ele o
+    buffer vindo do cartao chegaria com identidade `(0, 0)`, que e exatamente
+    a identidade do slot 0 do time 0. A `0x00404820` compara identidade e
+    recusa jogador repetido -- e recusaria SO aquele slot, so naquele time.
+    """
+    ruins = []
+    if campos != CARTAO_CAMPOS_ESPERADOS:
+        ruins.append(f"os `fread` de {VA_CARREGA_DO_CARTAO:#x} trazem "
+                     f"{ {hex(k): v for k, v in sorted(campos.items())} }, "
+                     f"esperado "
+                     f"{ {hex(k): v for k, v in CARTAO_CAMPOS_ESPERADOS.items()} }")
+    if marcas != CARTAO_MARCAS_ESPERADAS:
+        ruins.append(f"os carimbos de {VA_CARREGA_DO_CARTAO:#x} valem "
+                     f"{ {hex(k): hex(v) for k, v in sorted(marcas.items())} }, "
+                     f"esperado "
+                     f"{ {hex(k): hex(v) for k, v in CARTAO_MARCAS_ESPERADAS.items()} }")
+    do_pascal = constantes_do_pascal()
+    do_aux = constantes_do_aux()
+    for desl, valor in sorted(CARTAO_MARCAS_ESPERADAS.items()):
+        nome = CARTAO_MARCAS_PASCAL[desl]
+        if nome not in do_aux:
+            ruins.append(f"{nome}: ausente de {REL_AUX}")
+        elif do_aux[nome] != valor:
+            ruins.append(f"{nome}: Pascal diz {do_aux[nome]:#x}, o `.exe` "
+                         f"carimba {valor:#x} em +{desl:#04x}")
+    corpo = corpo_do_carrega_jogador()
+    for desl, campo in sorted(CARTAO_ATRIBUICOES.items()):
+        nome = CARTAO_MARCAS_PASCAL[desl]
+        if f"{campo} := {nome}" not in corpo:
+            ruins.append(f"CarregaJogadorDoCartao nao faz `{campo} := {nome}`")
+    for desl, quantos in sorted(CARTAO_CAMPOS_ESPERADOS.items()):
+        nome = "MCR_NOME_BYTES" if desl == 0 else "MCR_ATRIBUTO_BYTES"
+        if do_pascal.get(nome) != quantos:
+            ruins.append(f"{nome}: Pascal diz {do_pascal.get(nome)}, o "
+                         f"`fread` de +{desl:#04x} traz {quantos}")
+        if nome not in corpo:
+            ruins.append(f"CarregaJogadorDoCartao nao copia {nome} bytes")
+    if ruins:
+        raise McrError(
+            "o carregador de buffer do `.exe` e o Pascal divergem:\n     "
+            + "\n     ".join(ruins))
+
+
 def diretorio(card: bytes) -> list[dict]:
     saida = []
     for i in range(1, QUADROS_DE_DIRETORIO + 1):
@@ -248,6 +422,8 @@ def gera() -> dict[Path, str]:
             f"esperado {BITS_ESPERADOS}")
 
     confere_pascal(cob)
+    campos, marcas = carimbos_do_carregador(blob)
+    confere_carregador(campos, marcas)
 
     dir_ = diretorio(card)
     usados = blocos_do_save(dir_)
@@ -259,7 +435,7 @@ def gera() -> dict[Path, str]:
 
     return {OUT_TSV: gera_tsv(dir_, nao_zero),
             OUT_MD: gera_md(dat, card, dir_, usados, ocupados_por_dado, fora,
-                            nao_zero, cob, bits)}
+                            nao_zero, cob, bits, marcas)}
 
 
 def gera_tsv(dir_: list[dict], nao_zero: dict[int, int]) -> str:
@@ -278,7 +454,8 @@ def gera_tsv(dir_: list[dict], nao_zero: dict[int, int]) -> str:
     return "\n".join(out) + "\n"
 
 
-def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits) -> str:
+def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
+            marcas) -> str:
     o = []
     w = o.append
     w("# O `.mcr` do WE2002 — contêiner e conteúdo\n")
@@ -403,6 +580,57 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits) -> str
       "e se o contador de blocos livres for menor recusa com `Voce precisa de\n"
       "<n> mais blocos livres!!!` sem escrever byte nenhum. Para seleção não\n"
       "confere nada — não há bloco a alocar.\n")
+
+    w("## Os três casos especiais do readme, e onde cada um mora\n")
+    w("O readme da v0.98 do original registra três correções sobre `.mcr`, e\n"
+      "cada uma é um caso que o **formato** tem. O que se reproduz é a\n"
+      "correção, não o bug — e as três estão medidas no binário da v0.99,\n"
+      "que já é o corrigido.\n")
+    w("| readme | onde a correção mora | como o port a perde |\n"
+      "|---|---|---|\n")
+    w(f"| *the captain and kickers when loading from .mcr files* | a tabela "
+      f"`{VA_TABELA_COBRADORES:#010x}`, que **não é crescente**, mais o capitão "
+      f"sozinho em `{0x6500:#06x}` | trocar a tabela por aritmética: os cinco "
+      f"sairiam na ordem do endereço e o capitão viraria o sexto vizinho |\n")
+    w(f"| *the Eire's goalkeeper when loading a .mcr file* | o carimbo "
+      f"`+{0x16:#04x} := {marcas[0x16]:#04x}` da `{VA_CARREGA_DO_CARTAO:#010x}` "
+      f"| deixar a identidade zerada: `(0, 0)` é a identidade real do slot 0 do "
+      f"time 0, e a `0x00404820` recusa jogador repetido |\n")
+    w("| *the spaces in the players names* | o nome é **10 bytes crus**, lidos "
+      "por `fread`, e o `0x0040b2d8` tem um ramo próprio para `0x20` ao montar "
+      "a lista | tratar o campo como cadeia C: nome que enche os 10 bytes "
+      "perderia o fim, e o espaço sumiria da tela |\n")
+    w("**O do meio é o que se enxerga menos, e o mais fácil de perder.** Ele "
+      "só aparece num time e num slot — o 0 e o 0 —, porque só ali a "
+      "identidade real coincide com o zero que um buffer não carimbado teria. "
+      f"*{primeiro_time()}* é o item 0 da lista de times, e o slot 0 é o "
+      "goleiro; daí o nome que o autor deu ao bug. O `--check` deste gerador lê os três "
+      "carimbos do `.text` e os compara com as constantes do Pascal, e o gate "
+      f"[`golden-13-roundtrip`](../tests/roteiros/golden-13-roundtrip.txt) "
+      "importa **no time 0** justamente por isso.\n")
+
+    rt = linhas_do_roundtrip()
+    w("## O round-trip: cartão → imagem → cartão\n")
+    if not rt:
+        w("Sem medição. Rode\n"
+          "`python3 wte/tools/dump_mcr.py --roundtrip <antes> <depois>`.\n")
+    else:
+        w("Medido **no lado oráculo** do gate: o mesmo cartão entra pelo\n"
+          "`boton_mcr2iso` e sai pelo `grabar_memory`, sem nada no meio. A\n"
+          "pergunta é do formato, não do port — o que não voltar aqui não\n"
+          "volta para o original tampouco.\n")
+        w("| campo | bytes | iguais | diferentes | nota |\n"
+          "|---|---:|---:|---:|---|\n")
+        for ln in rt:
+            w(f"| `{ln[0]}` | {ln[1]} | {ln[2]} | {ln[3]} | {ln[4]} |\n")
+        if all(int(ln[3]) == 0 for ln in rt):
+            w("**Zero divergência, e o arquivo inteiro junto** — a última\n"
+              "linha não é campo, é o `cmp` cru dos 131.072 bytes. Nada do que\n"
+              "o cartão guarda se perde na ida e volta, nem sequer a folga.\n")
+        w("A comparação é **campo a campo**, e não byte a byte no arquivo: os\n"
+          "dois cartões herdam a mesma folga do molde, e comparar cru faria a\n"
+          "folga responder pelo dado — precaução que esta medição não precisou\n"
+          "cobrar, mas que a próxima pode.\n")
     return arruma("".join(s if s.endswith("\n") else s + "\n" for s in o))
 
 
@@ -479,6 +707,85 @@ def do_medir(caminho: str) -> int:
     return 0
 
 
+def campos_do_cartao(card: bytes) -> dict[str, bytes]:
+    """Os seis campos logicos de um cartao, ja remontados.
+
+    NAO E FATIA CONTIGUA em dois deles: nome e atributos moram em registros de
+    32 bytes com 10 de folga, e a formacao sai partida em 10 + 20. Comparar
+    fatia crua misturaria folga com dado, e a folga e a mesma nos dois lados
+    por vir do molde -- o que faria um round-trip quebrado parecer melhor do
+    que e.
+    """
+    nomes = b"".join(card[0x5910 + 32 * j:0x5910 + 32 * j + 10]
+                     for j in range(23))
+    atrib = b"".join(card[0x5904 + 32 * j:0x5904 + 32 * j + 12]
+                     for j in range(23))
+    cob = bytes(card[a] for a in COBRADORES_ESPERADOS) + bytes([card[0x6500]])
+    tat = bytes(card[a] for a in (0x64E2, 0x6102, 0x6488, 0x6479, 0x6497,
+                                  0x64A6))
+    return {
+        "nomes": nomes,
+        "atributos": atrib,
+        "numeros": card[0x5404:0x5404 + 16],
+        "formacao": card[0x63D5:0x63D5 + 10] + card[0x62A8:0x62A8 + 20],
+        "cobradores": cob,
+        "tatica": tat,
+    }
+
+
+def do_roundtrip(antes: str, depois: str) -> int:
+    """`.mcr` -> imagem -> `.mcr`: o que sobrevive a ida e volta.
+
+    A pergunta do criterio da WTE-TASK-28 e se exportar depois de importar
+    devolve o mesmo cartao. Nao e pergunta sobre o port: e sobre o FORMATO, e
+    a resposta vale para o original tanto quanto para nos -- por isso os dois
+    arquivos comparados aqui saem do lado ORACULO do gate.
+
+    Compara campo a campo, e nao byte a byte no arquivo inteiro: o cartao tem
+    folga que vem do molde nos dois lados, e ela mascararia divergencia.
+    """
+    caminhos = [Path(antes), Path(depois)]
+    cartoes = []
+    for c in caminhos:
+        if not c.is_file():
+            print(f"ERRO: {c} nao existe", file=sys.stderr)
+            return 2
+        dados = c.read_bytes()
+        if len(dados) != CARTAO_BYTES:
+            print(f"ERRO: {c} tem {len(dados)} bytes, e cartao tem "
+                  f"{CARTAO_BYTES}", file=sys.stderr)
+            return 2
+        cartoes.append(dados)
+    a, b = (campos_do_cartao(c) for c in cartoes)
+    linhas = ["campo\tbytes\tiguais\tdiferentes\tnota"]
+    for nome in ("nomes", "atributos", "numeros", "formacao", "cobradores",
+                 "tatica"):
+        x, y = a[nome], b[nome]
+        difs = [i for i in range(len(x)) if x[i] != y[i]]
+        nota = "-"
+        if difs:
+            nota = ("deslocamentos " + ",".join(str(i) for i in difs[:8])
+                    + ("..." if len(difs) > 8 else ""))
+        linhas.append(f"{nome}\t{len(x)}\t{len(x) - len(difs)}\t{len(difs)}\t"
+                      f"{nota}")
+        print(f"  {nome}: {len(x) - len(difs)}/{len(x)} iguais")
+    bruto = sum(1 for i in range(CARTAO_BYTES) if cartoes[0][i] != cartoes[1][i])
+    linhas.append(f"arquivo inteiro\t{CARTAO_BYTES}\t{CARTAO_BYTES - bruto}\t"
+                  f"{bruto}\t{caminhos[0].name} contra {caminhos[1].name}")
+    IDA_E_VOLTA.write_text("\n".join(linhas) + "\n", encoding="utf-8",
+                           newline="\n")
+    print(f"  arquivo inteiro: {bruto} bytes diferentes")
+    print(f"  {IDA_E_VOLTA.relative_to(ROOT)}")
+    return 0
+
+
+def linhas_do_roundtrip() -> list[list[str]]:
+    if not IDA_E_VOLTA.is_file():
+        return []
+    linhas = IDA_E_VOLTA.read_text(encoding="utf-8").splitlines()
+    return [ln.split("\t") for ln in linhas[1:] if ln.strip()]
+
+
 def do_check(files: dict[Path, str]) -> int:
     ruins = []
     for caminho, conteudo in sorted(files.items()):
@@ -507,6 +814,16 @@ def do_write(files: dict[Path, str]) -> int:
 
 
 def main(argv: list[str]) -> int:
+    if argv and argv[0] == "--roundtrip":
+        if len(argv) != 3:
+            print(f"uso: {GERADOR} --roundtrip <antes.mcr> <depois.mcr>",
+                  file=sys.stderr)
+            return 2
+        try:
+            return do_roundtrip(argv[1], argv[2])
+        except McrError as exc:
+            print(f"ERRO: {exc}", file=sys.stderr)
+            return 2
     if argv and argv[0] == "--medir":
         if len(argv) != 2:
             print(f"uso: {GERADOR} --medir <cartao.mcr>", file=sys.stderr)
@@ -521,7 +838,8 @@ def main(argv: list[str]) -> int:
         if arg == "--check":
             check = True
         else:
-            print(f"uso: {GERADOR} [--check] | {GERADOR} --medir <cartao.mcr>",
+            print(f"uso: {GERADOR} [--check] | {GERADOR} --medir "
+                  f"<cartao.mcr> | {GERADOR} --roundtrip <antes> <depois>",
                   file=sys.stderr)
             return 2
     try:

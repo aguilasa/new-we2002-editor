@@ -17,6 +17,19 @@ begin
   if lista_equipos.ItemIndex < 0 then
     Exit;
   MostraCodigo(ImportaCartaoParaImagem(lista_equipos.ItemIndex));
+  { A TELA TEM DE ACOMPANHAR, e nao e enfeite. O original chama a `0x0040b934`
+    e a `0x0040b0b4` -- repovoar as duas listas e as 23 legendas `dorsalN` --
+    antes de avisar que terminou, e a segunda e load-bearing: o
+    `grabar_memoryClick` monta o `.mcr` lendo o `Caption` de cada `dorsalN`,
+    nao o modelo. Sem esta linha, exportar logo depois de importar emite os
+    numeros de camisa do time que estava na tela antes.
+
+    Medido: e a divergencia que o `golden-13-roundtrip` acusou na primeira
+    corrida, 16 bytes em `0x5404`, exatamente o campo de numeros do cartao. O
+    `golden-12` nao a via porque trocava de time ao terminar, e a troca
+    repovoa. }
+  RepovoaAsDuasListas;
+  PreencheCamisas(lista_equipos.ItemIndex);
   { O contador de blocos livres mudou -- o import alocou. Os oito handlers de
     mover atualizam o rotulo do mesmo jeito ao terminar. }
   casilla_xmlibres.Caption := IntToStr(BlocosLivresDeMl);

@@ -1,0 +1,58 @@
+# golden-13-roundtrip, lado PORT. Par de golden-13-roundtrip.txt.
+#
+# Tres assimetrias, todas ja conhecidas e todas pela mesma razao -- dialogo de
+# arquivo do gtk2 nao se dirige por coordenada fixa no `:98`: a imagem vem da
+# linha de comando, o cartao de entrada vem de `WTE_MCR_ENTRADA` e o destino da
+# exportacao vem de `WTE_MCR`, que o proprio `golden_check.sh` semeia com o
+# mesmo `work/saida.mcr` que o oraculo digita. A quarta e menor: o `Ok` do
+# `ficha_info3` fica em (140,56) e nao (142,80).
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# --------------------------------------------------------------- o time ----
+#
+# UM `Down` so: o indice 0, a Irlanda. Ver o cabecalho do lado oraculo.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- o cartao ----
+#
+# Ja veio por `WTE_MCR_ENTRADA`, lido no `FormShow`.
+= CARTAO_ABERTO
+
+# --------------------------------------------------------- importar ----
+! clique 52 292
+~ 5
+= IMPORTA
+
+# --------------------------------------------- o aviso que nao existe aqui ----
+#
+# O original abre `W11 TE PT` com `MCR inserida no jogo!!!.` ao terminar o
+# import; o port nao -- o `MostraCodigo` so fala nas duas recusas. Divergencia
+# de tela, registrada na spec do `boton_mcr2isoClick`. Por isso o lado oraculo
+# tem um clique a mais aqui e este nao.
+
+# ------------------------------------------------------- exportar ----
+! clique 108 292
+~ 4
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= GRAVA_MCR
+
+# A descarga.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

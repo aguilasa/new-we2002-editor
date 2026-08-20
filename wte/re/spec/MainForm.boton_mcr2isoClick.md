@@ -2,7 +2,7 @@
 handler: boton_mcr2isoClick
 formulario: MainForm
 endereco: 0x0040c46c
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.boton_mcr2isoClick
@@ -61,7 +61,21 @@ para slot := 0 ate 22:
 grava 30 bytes de formacao em EnderecoDeDados(850, 0x40C2C + 30*time
                                               + 2*(time div 95))
 le a tatica do .mcr (0x64E2, 0x6488, ...) para o rascunho 0x00432eaf
+
+' --- e repovoa a tela ---
+0x0040b934()          ' as duas listas de jogador
+0x0040b0b4()          ' as 23 legendas `dorsalN`
+
+' --- e avisa ---
+ficha_?.etiq := 'MCR inserida no jogo!!!.'      ' cadeia 0x00424D3F
+ficha_?.<slot +0xe8>                            ' o mesmo `W11 TE PT` do
+                                                ' grabar_memoryClick
 ```
+
+**O aviso do fim ficou de fora da primeira leitura desta spec**, e so apareceu
+quando a [WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md) escreveu o
+primeiro roteiro que precisa clicar DEPOIS do import: sem dismissar a janela, o
+clique seguinte nao alcanca a principal.
 
 O buffer 23 é o mesmo que o `grabar_memoryClick` usa, e tem o mesmo efeito
 colateral: cai dentro da lista de descarte, embaralhando a linha 20.
@@ -132,11 +146,39 @@ Para destino de seleção não há conferência nenhuma: não há bloco a alocar
 
 ## Notas
 
-**Veredito `aberto`, e o que falta não é o mapa.** O formato está medido
-([`../mcr.md`](../mcr.md)) e as duas rotinas de gravação que ele reusa estão
-portadas e com golden verde desde a WTE-TASK-27. Falta o Pascal deste corpo, a
-unidade `we2002_mcr` que o alimenta, e o golden próprio — todos da
-[WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md).
+**Veredito `implementado`.** O formato está medido
+([`../mcr.md`](../mcr.md)), o Pascal está em
+[`../../src/impl/ep2002_mainform.boton_mcr2isoClick.inc`](../../src/impl/ep2002_mainform.boton_mcr2isoClick.inc)
+e há dois gates verdes:
+[`golden-12-mcr2iso`](../../tests/roteiros/golden-12-mcr2iso.txt), que importa
+no time 3, e
+[`golden-13-roundtrip`](../../tests/roteiros/golden-13-roundtrip.txt), que
+importa no time **0** e exporta de volta.
+
+**O time 0 do `golden-13` não é escolha arbitrária.** É o caso do *"goleiro da
+Eire"* do readme da v0.98: a `0x0040478c` carimba `+0x16 := 0xFF` na identidade
+do buffer, e sem esse carimbo o buffer chegaria com `(0, 0)` — a identidade
+real do slot 0 do time 0 —, que esta rotina recusaria como jogador repetido.
+Um só slot, num só time. O `--check` do `dump_mcr.py` lê o carimbo do `.text` e
+o compara com o Pascal; o gate mede o efeito.
+
+**As duas chamadas de repovoamento não são enfeite, e uma delas é
+load-bearing.** A `0x0040b0b4` reescreve as 23 legendas `dorsalN`, e o
+[`grabar_memoryClick`](MainForm.grabar_memoryClick.md) monta o `.mcr` lendo o
+`Caption` de cada uma — não o modelo. Exportar logo depois de importar, sem
+repovoar, emite os números de camisa do time que estava na tela antes. **Medido:**
+a primeira corrida do [`golden-13-roundtrip`](../../tests/roteiros/golden-13-roundtrip.txt)
+reprovou com 16 bytes de diferença em `0x5404` do cartão — o campo de números,
+exatamente. O `golden-12` não via porque trocava de time ao terminar, e a troca
+repovoa.
+
+**A terceira divergência deliberada é de tela: o port não avisa.** O original
+abre `W11 TE PT` com `MCR inserida no jogo!!!.` ao terminar; o `MostraCodigo`
+do port só fala nas duas recusas. Nenhum byte muda por causa disso — o
+[`golden-13-roundtrip`](../../tests/roteiros/golden-13-roundtrip.txt) sai
+byte-idêntico com o lado oráculo tendo um clique a mais para dismissar. Fica
+para a [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)
+decidir se o aviso entra.
 
 **Ele reusa, não reimplementa.** Vale escrever porque a tentação é a oposta:
 `0x00404820` e `0x00404048` já sabem tratar destino de seleção, vínculo de

@@ -44,8 +44,8 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2536 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9304** |
-| Escrito à mão | 63 | 4783 |
-| **Total** | | **14087** |
+| Escrito à mão | 63 | 4796 |
+| **Total** | | **14100** |
 
 **66.0% do Pascal da casca é saída de gerador.**
 
@@ -90,7 +90,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.aux.inc` | 2094 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_barras2isoClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 27 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.boton_mcr2isoClick.inc` | 23 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.boton_mcr2isoClick.inc` | 36 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_mcrClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_tex2isoClick.inc` | 79 | corpo de handler, da spec (fase 4) |
