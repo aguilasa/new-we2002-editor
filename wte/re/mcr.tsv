@@ -1,0 +1,49 @@
+secao	chave	valor	nota
+diretorio	bloco 1	0x51	em uso, primeiro bloco da cadeia; tamanho=16384; link=0x0001; nome=BISLPM-86600WEW-OPT
+diretorio	bloco 2	0x53	em uso, ultimo bloco da cadeia; tamanho=0; link=0xffff; nome=-
+diretorio	bloco 3	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 4	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 5	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 6	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 7	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 8	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 9	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 10	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 11	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 12	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 13	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 14	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+diretorio	bloco 15	0xa0	livre (formatado); tamanho=0; link=0xffff; nome=-
+molde	bloco 0	165	bytes nao-zero de 8192
+molde	bloco 1	5844	bytes nao-zero de 8192
+molde	bloco 2	6243	bytes nao-zero de 8192
+molde	bloco 3	0	bytes nao-zero de 8192
+molde	bloco 4	0	bytes nao-zero de 8192
+molde	bloco 5	0	bytes nao-zero de 8192
+molde	bloco 6	0	bytes nao-zero de 8192
+molde	bloco 7	0	bytes nao-zero de 8192
+molde	bloco 8	0	bytes nao-zero de 8192
+molde	bloco 9	0	bytes nao-zero de 8192
+molde	bloco 10	0	bytes nao-zero de 8192
+molde	bloco 11	0	bytes nao-zero de 8192
+molde	bloco 12	0	bytes nao-zero de 8192
+molde	bloco 13	0	bytes nao-zero de 8192
+molde	bloco 14	0	bytes nao-zero de 8192
+molde	bloco 15	0	bytes nao-zero de 8192
+layout	0x5404	16	numeros de camisa, 23 x 5 bits; bloco 2; escreve=0x0040f5c9; le=0x0040baa9
+layout	0x5904	276	jogador j: 12 B de atributo (passo 32); bloco 2; escreve=0x0040f2fe; le=0x0040ba55
+layout	0x5910	230	jogador j: 10 B de nome (passo 32); bloco 2; escreve=0x0040f2fe; le=0x0040ba01
+layout	0x6102	1	tatica byte 0, mais 50; bloco 3; escreve=0x0040f36d; le=-
+layout	0x6113	1	cobrador 3; bloco 3; escreve=0x0040f4a2; le=0x0040bb40
+layout	0x6122	1	cobrador 2; bloco 3; escreve=0x0040f4a2; le=0x0040bb40
+layout	0x6131	1	cobrador 4; bloco 3; escreve=0x0040f4a2; le=0x0040bb40
+layout	0x6140	1	cobrador 1; bloco 3; escreve=0x0040f4a2; le=0x0040bb40
+layout	0x614f	1	cobrador 0; bloco 3; escreve=0x0040f4a2; le=0x0040bb40
+layout	0x62a8	20	formacao, bytes 10..29; bloco 3; escreve=0x0040f21d; le=0x0040bb07
+layout	0x63d5	10	formacao, bytes 0..9; bloco 3; escreve=0x0040f21d; le=0x0040bad9
+layout	0x6479	1	tatica byte 1, nibble alto; bloco 3; escreve=0x0040f43a; le=-
+layout	0x6488	1	tatica byte 1, nibble baixo; bloco 3; escreve=0x0040f40a; le=-
+layout	0x6497	1	tatica byte 2, nibble baixo; bloco 3; escreve=0x0040f3d8; le=-
+layout	0x64a6	1	tatica byte 2, nibble alto; bloco 3; escreve=0x0040f3a6; le=-
+layout	0x64e2	1	tatica byte 0, cru; bloco 3; escreve=0x0040f33d; le=-
+layout	0x6500	1	cobrador 5 (o capitao); bloco 3; escreve=0x0040f4f8; le=0x0040bb68

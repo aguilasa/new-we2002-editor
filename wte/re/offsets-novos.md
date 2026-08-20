@@ -47,11 +47,11 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-barras-editada` | 10 | 10 | 10 |
 | `27-nomes-editados` | 19 | 19 | 19 |
 | `27-textura` | 36 | 36 | 29 |
-| `27-mcr` | 9 | 9 | 9 |
 | `27-dorsal-editado` | 10 | 10 | 10 |
 | `27-mover` | 11 | 11 | 12 |
 | `27-mover-ml` | 10 | 10 | 10 |
 | `27-descarte-ml` | 13 | 13 | 13 |
+| `27-mcr` | 9 | 9 | 9 |
 
 **As duas réguas fecham nas 16 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
