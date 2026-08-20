@@ -84,6 +84,142 @@ begin
         Format('%d', [ML_INDICE_MAX]));
 end;
 
+procedure IdaEVoltaDoIndiceLinear;
+var
+  t, slot, indice, vt, vs, primeiro_zero: Integer;
+  ok_todos, ok_zero: Boolean;
+  detalhe: string;
+begin
+  { A `0x0040427c` e o INVERSO da `0x0040423c`, e inverso conferido num ponto
+    so nao e inverso conferido. O golden-11-descarte-ml exercita um bloco --
+    o 350 --, entao a ida e volta de todos os 462 mora aqui. }
+  ok_todos := True;
+  detalhe := '';
+  for t := Low(ML_NC_POR_TIME) to High(ML_NC_POR_TIME) do
+    for slot := ML_SLOT_MIN to ML_SLOT_MIN + Integer(ML_NC_POR_TIME[t]) - 1 do
+    begin
+      indice := IndiceDoBlocoMl(t, slot);
+      ParDoIndiceLinearMl(indice, vt, vs);
+      if (vt <> t) or (vs <> slot) then
+      begin
+        if ok_todos then
+          detalhe := Format('(%d,%d) -> %d -> (%d,%d)',
+                            [t, slot, indice, vt, vs]);
+        ok_todos := False;
+      end;
+    end;
+  Checa('ida e volta fecha em todo bloco valido', ok_todos, detalhe);
+
+  { Fronteira: o primeiro slot de um time e o `ML_SLOT_MIN` cru, e o ultimo e
+    onde o prefixo do time seguinte comeca. Sao os dois pontos em que um erro
+    de um no `+ ML_SLOT_MIN` aparece. }
+  t := -1;
+  for slot := Low(ML_NC_POR_TIME) to High(ML_NC_POR_TIME) do
+    if ML_NC_POR_TIME[slot] > 1 then
+    begin
+      t := slot;
+      Break;
+    end;
+  if t < 0 then
+    Checa('achou time com mais de um NC', False)
+  else
+  begin
+    ParDoIndiceLinearMl(IndiceDoBlocoMl(t, ML_SLOT_MIN), vt, vs);
+    Checa('o primeiro slot de um time volta igual',
+          (vt = t) and (vs = ML_SLOT_MIN), Format('(%d,%d)', [vt, vs]));
+    slot := ML_SLOT_MIN + Integer(ML_NC_POR_TIME[t]) - 1;
+    ParDoIndiceLinearMl(IndiceDoBlocoMl(t, slot), vt, vs);
+    Checa('o ultimo slot de um time volta igual',
+          (vt = t) and (vs = slot), Format('(%d,%d) esperado (%d,%d)',
+                                           [vt, vs, t, slot]));
+  end;
+
+  { Time sem NC nenhum nao pode sair do inverso para indice algum: ele nao tem
+    bloco. E a condicao que faz o ORIGINAL escrever fora do vetor quando um
+    vinculo o endereca -- ver `wte/re/ml-slots.md`. }
+  primeiro_zero := -1;
+  for t := Low(ML_NC_POR_TIME) to High(ML_NC_POR_TIME) do
+    if ML_NC_POR_TIME[t] = 0 then
+    begin
+      primeiro_zero := t;
+      Break;
+    end;
+  ok_zero := True;
+  detalhe := 'nenhum time com zero NC na tabela';
+  if primeiro_zero >= 0 then
+  begin
+    detalhe := '';
+    for indice := 0 to ML_BLOCOS_TOTAL - 1 do
+    begin
+      ParDoIndiceLinearMl(indice, vt, vs);
+      if vt = primeiro_zero then
+      begin
+        if ok_zero then
+          detalhe := Format('indice %d devolveu o time %d, que tem 0 NC',
+                            [indice, primeiro_zero]);
+        ok_zero := False;
+      end;
+    end;
+  end;
+  Checa('time sem NC nao e devolvido por indice nenhum', ok_zero, detalhe);
+end;
+
+procedure ForaDaFaixaSaiMenosUm;
+var
+  vt, vs: Integer;
+begin
+  ParDoIndiceLinearMl(-1, vt, vs);
+  Checa('indice negativo sai (-1,-1)', (vt = -1) and (vs = -1),
+        Format('(%d,%d)', [vt, vs]));
+  ParDoIndiceLinearMl(ML_BLOCOS_TOTAL, vt, vs);
+  Checa('indice igual ao total sai (-1,-1)', (vt = -1) and (vs = -1),
+        Format('(%d,%d)', [vt, vs]));
+  Checa('IndiceDoBlocoMl recusa time alem da tabela',
+        IndiceDoBlocoMl(High(ML_NC_POR_TIME) + 1, ML_SLOT_MIN) = -1,
+        Format('%d', [IndiceDoBlocoMl(High(ML_NC_POR_TIME) + 1,
+                                      ML_SLOT_MIN)]));
+end;
+
+procedure AlocadorDeBloco;
+var
+  i: Integer;
+begin
+  { `PrimeiroBlocoLivreMl` le o `OcupacaoMl`, que e global e vivo. Aqui ele e
+    plantado a mao, porque o caminho que interessa -- vetor cheio -- nao
+    acontece com nenhuma das duas imagens. }
+  for i := Low(OcupacaoMl) to High(OcupacaoMl) do
+    OcupacaoMl[i] := 1;
+  Checa('vetor cheio nao tem bloco livre', PrimeiroBlocoLivreMl = -1,
+        Format('%d', [PrimeiroBlocoLivreMl]));
+
+  OcupacaoMl[350] := 0;
+  Checa('o furo e o primeiro bloco livre', PrimeiroBlocoLivreMl = 350,
+        Format('%d', [PrimeiroBlocoLivreMl]));
+
+  OcupacaoMl[0] := 0;
+  Checa('furo em 0 devolve 0', PrimeiroBlocoLivreMl = 0,
+        Format('%d', [PrimeiroBlocoLivreMl]));
+
+  { O ultimo bloco: fora dele o laco pararia em ML_BLOCOS_TOTAL-1 sem olhar. }
+  for i := Low(OcupacaoMl) to High(OcupacaoMl) do
+    OcupacaoMl[i] := 1;
+  OcupacaoMl[ML_BLOCOS_TOTAL - 1] := 0;
+  Checa('o ultimo bloco ainda e alcancado',
+        PrimeiroBlocoLivreMl = ML_BLOCOS_TOTAL - 1,
+        Format('%d', [PrimeiroBlocoLivreMl]));
+
+  { Bloco livre ALEM do total nao conta: a folga do vetor existe para o indice
+    fora da faixa ser contado sem atingir vizinho, nao para ser alocado. }
+  for i := Low(OcupacaoMl) to High(OcupacaoMl) do
+    OcupacaoMl[i] := 1;
+  OcupacaoMl[ML_BLOCOS_TOTAL] := 0;
+  Checa('bloco livre alem do total nao e alocado',
+        PrimeiroBlocoLivreMl = -1, Format('%d', [PrimeiroBlocoLivreMl]));
+
+  for i := Low(OcupacaoMl) to High(OcupacaoMl) do
+    OcupacaoMl[i] := 0;
+end;
+
 procedure ContaNaImagem;
 var
   imagem, esperado_s: string;
@@ -117,6 +253,9 @@ begin
   TabelaFecha;
   PrefixoEMonotono;
   TetoDoVetor;
+  IdaEVoltaDoIndiceLinear;
+  ForaDaFaixaSaiMenosUm;
+  AlocadorDeBloco;
   ImagemInexistenteNaoExplode;
   ContaNaImagem;
   WriteLn('CASOS'#9, casos);

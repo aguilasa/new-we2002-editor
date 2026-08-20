@@ -3,7 +3,7 @@ id: CORR-WTE-069
 title: "Correção: as três funções novas do we2002_ml entraram no caminho de gravação sem um teste sequer"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -115,22 +115,61 @@ escrito lá para confrontar com o Pascal, é o mesmo padrão do
 
 ## Verificação
 
-- [ ] `cd wte/tools && python3 -m unittest test_conta_ml` verde, com o `CASOS`
+- [x] `cd wte/tools && python3 -m unittest test_conta_ml` verde, com o `CASOS`
       novo
-- [ ] Um erro plantado no `+ ML_SLOT_MIN` da `ParDoIndiceLinearMl` reprova pelo
+- [x] Um erro plantado no `+ ML_SLOT_MIN` da `ParDoIndiceLinearMl` reprova pelo
       menos um caso novo — guard nunca exercitado é guard ausente
-- [ ] `lazbuild wte/wte.lpi` compila
-- [ ] `make -C wte check` rc 0
-- [ ] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-11-descarte-ml.txt
+- [x] `lazbuild wte/wte.lpi` compila
+- [x] `make -C wte check` rc 0
+- [x] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-11-descarte-ml.txt
       --modo golden --roteiro-port …` continua byte-idêntico
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+Doze casos novos no `test_ml.pas`, em três procedimentos:
+
+- **`IdaEVoltaDoIndiceLinear`** — `ParDoIndiceLinearMl(IndiceDoBlocoMl(t, s))`
+  devolve `(t, s)` para **todo** bloco válido dos 120 times, não para um; mais
+  o primeiro e o último slot de um time isolados, que são onde erro de um no
+  `+ ML_SLOT_MIN` aparece; mais a garantia de que time com zero NC não sai do
+  inverso para índice nenhum — que é justamente a condição que faz o
+  **original** escrever fora do vetor.
+- **`ForaDaFaixaSaiMenosUm`** — índice negativo, índice igual ao total, e
+  `IndiceDoBlocoMl` com time além da tabela.
+- **`AlocadorDeBloco`** — `OcupacaoMl` plantado à mão: vetor cheio devolve
+  `-1`, o furo devolve o furo, furo em 0 devolve 0, o **último** bloco ainda é
+  alcançado, e bloco livre **além** do total não é alocado (a folga do vetor
+  existe para contar índice fora da faixa sem atingir vizinho, não para
+  alocar). Nenhum desses estados acontece com as duas imagens, por isso o
+  golden nunca os veria.
+
+O `CASOS` sem imagem subiu de **7** para **19**, e a asserção do
+`test_invariantes_sem_imagem` subiu junto — é ela que impede caso de sumir
+calado.
+
 **Problemas encontrados:**
 
+O `Format` de um argumento só não compila (`Wrong number of parameters`): em
+FPC ele exige o array de const. Era string constante disfarçada de `Format`.
+
+O teste de mutação pedido pela verificação foi feito: com
+`slot := indice - corrido + ML_SLOT_MIN - 1` plantado na
+`ParDoIndiceLinearMl`, **três** casos novos reprovam —
+`ida e volta fecha em todo bloco valido` (`(0,23) -> 0 -> (0,22)`),
+`o primeiro slot de um time volta igual` e `o ultimo slot de um time volta
+igual`. A unidade foi restaurada; `git diff` de `we2002_ml.pas` vazio.
+
+O espelho em Python do inverso ficou de fora, e a CORR já o marcava opcional:
+o `conta_ml.py` leria a **mesma** tabela do `.exe` que o Pascal usa, então o
+confronto não seria de implementações independentes — a ida e volta em Pascal
+cobre o que importa.
+
 **Arquivos criados/modificados:**
+
+- `wte/tests/test_ml.pas`
+- `wte/tools/test_conta_ml.py`

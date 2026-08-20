@@ -221,8 +221,11 @@ class TestPascalConcorda(unittest.TestCase):
         saida = self._roda({"WTE_TEST_IMAGEM": "", "WTE_TEST_LIVRES": ""})
         self.assertIn("PULADO\tconta na imagem", saida)
         # Numero medido, e nao suposto: um caso que some do programa Pascal
-        # sumiria em silencio e o teste seguiria verde.
-        self.assertIn("CASOS\t7", saida)
+        # sumiria em silencio e o teste seguiria verde. Subiu de 7 para 19 na
+        # CORR-WTE-069, que cobriu `IndiceDoBlocoMl`, `ParDoIndiceLinearMl` e
+        # `PrimeiroBlocoLivreMl` -- ate ali as tres so eram exercitadas pelo
+        # golden-11-descarte-ml, e num bloco so.
+        self.assertIn("CASOS\t19", saida)
 
     def test_a_conta_bate_com_a_do_python(self) -> None:
         if not self.COPIA.is_file():
