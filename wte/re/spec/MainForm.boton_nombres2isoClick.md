@@ -205,10 +205,16 @@ port escreve espaço. Divergência inalcançável, registrada aqui.
 
 ### O que a régua desta task mediu
 
-`golden_check.sh` sobre `golden-05-nomes` / `.port`: **passou**, só as duas
-faixas do arranque divergem, e o **controle** (oráculo contra oráculo) fechou
+`golden_check.sh` sobre `golden-05-nomes` / `.port`: **passou,
+byte-idêntico** (2026-08-20), e o **controle** (oráculo contra oráculo) fechou
 byte-idêntico antes — o roteiro digita, e roteiro que digita precisa provar que
 é determinístico.
+
+Até 2026-08-20 esta linha dizia *"só as duas faixas do arranque"*: o
+oráculo gravava os dois remendos de arranque e o port não. A oitava
+passagem da WTE-TASK-27 portou os dois (`PatchDeVinculoDeArranque`,
+`PatchDeByteSoltoDeArranque`) e tirou as declarações `conhecida:` dos
+roteiros; desde então o gate não tem faixa nenhuma para declarar.
 
 E a passagem não é vazia: rodado o lado port sozinho contra a ROM limpa, ele
 grava **os dez blocos**, nos mesmos offsets e com os mesmos tamanhos que a

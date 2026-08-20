@@ -102,8 +102,15 @@ port o botão de diálogo segue inerte.
 
 ### A régua
 
-`golden_check.sh` sobre `golden-06-textura` / `.port`: **passou**, só as duas
-faixas do arranque divergem, com o **controle** fechando byte-idêntico antes.
+`golden_check.sh` sobre `golden-06-textura` / `.port`: **passou,
+byte-idêntico** (2026-08-20, com `WTE_TEXTURA=$PWD/work/t.bin` nos dois lados),
+com o **controle** fechando byte-idêntico antes.
+
+Até 2026-08-20 esta linha dizia *"só as duas faixas do arranque"*: o
+oráculo gravava os dois remendos de arranque e o port não. A oitava
+passagem da WTE-TASK-27 portou os dois (`PatchDeVinculoDeArranque`,
+`PatchDeByteSoltoDeArranque`) e tirou as declarações `conhecida:` dos
+roteiros; desde então o gate não tem faixa nenhuma para declarar.
 Rodado o lado port sozinho contra a ROM limpa, ele grava os **vinte** setores,
 a partir do mesmo 19850904 que a sonda `27-textura` mediu no oráculo.
 

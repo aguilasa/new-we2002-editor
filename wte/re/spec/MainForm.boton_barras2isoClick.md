@@ -116,8 +116,18 @@ corridas do `golden_check.sh`, com o par de roteiros de cada uma:
 
 | roteiro | o que mede | resultado |
 |---|---|---|
-| `golden-03-barras` | gravar **sem editar** | passou — só as duas faixas do arranque |
-| `golden-04-barras-editada` | editar pela tela e **então** gravar | passou — idem |
+| `golden-03-barras` | gravar **sem editar** | passou — **byte-idêntico** (2026-08-20) |
+| `golden-04-barras-editada` | editar pela tela e **então** gravar | passou — **byte-idêntico** (2026-08-20) |
+
+As duas corridas são de 2026-08-20, com o **controle** (oráculo contra oráculo,
+sobre a `golden-03`) fechando byte-idêntico antes — sem ele, zero divergência
+também seria o que se veria se nenhum dos dois lados gravasse.
+
+Até 2026-08-20 esta linha dizia *"só as duas faixas do arranque"*: o
+oráculo gravava os dois remendos de arranque e o port não. A oitava
+passagem da WTE-TASK-27 portou os dois (`PatchDeVinculoDeArranque`,
+`PatchDeByteSoltoDeArranque`) e tirou as declarações `conhecida:` dos
+roteiros; desde então o gate não tem faixa nenhuma para declarar.
 
 A segunda é a que julga. Sem ela o gate não distingue "gravou certo" de "não
 gravou": sem edição os dois lados escrevem os bytes que já estavam lá, e um

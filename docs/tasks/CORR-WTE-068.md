@@ -3,7 +3,7 @@ id: CORR-WTE-068
 title: "Correção: três specs de gravação ainda dizem que o gate passa \"só as duas faixas do arranque\", e hoje ele é byte-idêntico"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -100,21 +100,50 @@ Idem na seção "A régua", preservando a nota do `WTE_TEXTURA`.
 
 ## Verificação
 
-- [ ] `grep -rn 'faixas do arranque' wte/re/spec/` só devolve
+- [x] `grep -rn 'faixas do arranque' wte/re/spec/` só devolve
       `boton_dialogo_weClick.md` (histórico, já reescrito) e
       `grabar_memoryClick.md` (sonda, correto)
-- [ ] Cada uma das três specs cita a corrida que sustenta a frase nova, com data
-- [ ] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-03-barras.txt
+- [x] Cada uma das três specs cita a corrida que sustenta a frase nova, com data
+- [x] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-03-barras.txt
       --modo golden --roteiro-port …` continua **byte-idêntico**
-- [ ] `make -C wte check` rc 0 (o `spec_index.py` lê estes arquivos)
-- [ ] `roms/` intocada
+- [x] `make -C wte check` rc 0 (o `spec_index.py` lê estes arquivos)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+As três células de resultado passaram a dizer **byte-idêntico**, com a data da
+corrida que as sustenta, e cada spec ganhou a nota do que mudou: até 2026-08-20
+o oráculo gravava os dois remendos de arranque e o port não, e a oitava
+passagem da WTE-TASK-27 portou os dois. Não foi troca de palavra — os quatro
+gates foram rodados hoje, um por afirmação:
+
+| corrida | modo | resultado |
+|---|---|---|
+| `golden-03-barras` | controle | PASSOU: byte-idêntico |
+| `golden-03-barras` | golden | PASSOU: byte-idêntico |
+| `golden-04-barras-editada` | golden | PASSOU: byte-idêntico |
+| `golden-05-nomes` | golden | PASSOU: byte-idêntico |
+| `golden-06-textura` (`WTE_TEXTURA=$PWD/work/t.bin`) | golden | PASSOU: byte-idêntico |
+
+O controle é o que dá sentido aos outros quatro: zero divergência também é o
+que se veria se nenhum dos dois lados gravasse.
+
 **Problemas encontrados:**
 
+Nenhum. A varredura por `faixas do arranque` em `wte/re/spec/` devolve agora,
+além das três notas históricas que esta correção escreveu, só o
+`boton_dialogo_weClick.md` (que já narra o fechamento das duas faixas, em
+2026-08-20) e o `grabar_memoryClick.md`. Este último a CORR mandou não tocar, e
+está certo: ali a medição é a **sonda** contra a cópia limpa — um lado só —, e
+o oráculo grava os remendos que a cópia limpa não tem. A distinção gate (dois
+lados) × sonda (um lado) é o que separa as duas frases.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/spec/MainForm.boton_barras2isoClick.md`
+- `wte/re/spec/MainForm.boton_nombres2isoClick.md`
+- `wte/re/spec/MainForm.boton_tex2isoClick.md`
