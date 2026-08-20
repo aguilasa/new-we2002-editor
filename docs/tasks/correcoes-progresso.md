@@ -1234,6 +1234,11 @@ dizer "fechada e fora do backlog", não "corrigida".
   índices de `fora` convertidos em endereço por `0x00433224 + 2*i`
 - **Fix:** gerar a tabela do medido; registrar a divergência entre modelo
   (quatro DWORDs) e medição ao vivo (três) como pergunta nomeada
+- **Pendência resolvida em 2026-08-20:** a sessão foi refeita
+  (`sonda_dorsal.py … --vizinhanca`) e o `0x004335f4` muda de `0x0` para
+  `0x00010001` no mesmo instante dos outros três. Era falha de transcrição, não
+  de comportamento; `CRASH_DWORDS` passou a ter os quatro e o gerador emite a
+  concordância em vez da pergunta
 
 ### CORR-WTE-067
 

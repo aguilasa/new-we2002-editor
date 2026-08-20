@@ -102,10 +102,15 @@ MEMSET_BYTES = 462         # o `push 0x1ce` de 0x004042dd
 OFS_LINK_ML = 2012680
 
 # Os DWORDs que o `crash-causa.md` viu indo de `0x0` para `0x00010001` ao vivo,
-# com a ROM europeia, em 2026-08-11. Ficam aqui para o gerador CONFRONTAR o
-# modelo com a medicao de processo, em vez de o markdown afirmar que os dois
-# concordam -- eles nao concordam, e a diferenca e o `0x004335f4`.
-CRASH_DWORDS = (0x004335E4, 0x00433624, 0x00433628)
+# com a ROM europeia. Ficam aqui para o gerador CONFRONTAR o modelo com a
+# medicao de processo, em vez de o markdown afirmar que os dois concordam.
+#
+# A transcricao de 2026-08-11 trazia tres, e a lista medida daqui apontou o
+# quarto; a sessao refeita em 2026-08-20 (mesmo script, mesmo roteiro, copia
+# nova da mesma ROM) mostrou o `0x004335f4` mudando no MESMO instante dos
+# outros. Era falha de transcricao, nao de comportamento -- a janela do
+# `--vizinhanca` e `0x00433580 + 0xc0` e sempre cobriu o endereco.
+CRASH_DWORDS = (0x004335E4, 0x004335F4, 0x00433624, 0x00433628)
 
 # O que se sabe morar em cada endereco atropelado. So o que TEM fonte: o
 # `0x004335e4` e o global da rotina de realce (`crash-causa.md`, pergunta 3);
@@ -468,6 +473,16 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
         "hardware. **A instrucao e o `inc WORD PTR [eax*2+0x433224]` de "
         "`0x0040435d`**, aqui, e a condicao e vinculo apontando para time sem "
         "NC nenhum.") + "\n")
+    if fora_med and not ausentes:
+        w(enche(
+            f"**Os {len(dwords)} DWORDs previstos sao os {len(dwords)} "
+            "medidos ao vivo.** O confronto e feito por este gerador, entre a "
+            "lista de `ml-slots-fora.tsv` e a que o `crash-causa.md` registrou "
+            "-- e ja recusou concordar uma vez: a transcricao de 2026-08-11 "
+            "tinha tres linhas, esta ferramenta apontou a quarta, e a sessao "
+            "refeita em 2026-08-20 mostrou `0x004335f4` mudando no mesmo "
+            "instante que as outras. Modelo que enumera o conjunto acha a "
+            "linha que o olho perde no meio de vinte.") + "\n")
     if fora_med and ausentes:
         w("### Pergunta aberta: "
           + ", ".join(f"`{d:#010x}`" for d in ausentes)
@@ -485,12 +500,15 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
           "silencio: a alternativa era a tabela de tres linhas que este\n"
           "gerador escrevia a mao, que nao fechava com o `fora do vetor` da\n"
           "medicao ao lado.\n")
-    w("A mesma medicao traz a confirmacao numerica de graca: ela leu\n"
-      f"`{VA_CONTADOR:#010x}` indo a `0x0000000d` com a ROM europeia, e "
-      "`0x0d` e\n"
-      "**13** -- o mesmo que esta ferramenta calcula e o mesmo que o rotulo\n"
-      "mostra. Um numero lido da memoria do processo em 2026-08-11, sem saber\n"
-      "de quem era, batendo com a conta escrita aqui.\n")
+    w(enche(
+        "A mesma medicao traz a confirmacao numerica de graca: ela leu "
+        f"`{VA_CONTADOR:#010x}` indo a `0x0000000d` com a ROM europeia, e "
+        "`0x0d` e **13** -- o mesmo que esta ferramenta calcula e o mesmo que "
+        "o rotulo mostra. Um numero lido da memoria do processo em 2026-08-11, "
+        "sem saber de quem era, batendo com a conta escrita aqui; a sessao de "
+        "2026-08-20 leu o mesmo 13, de outro valor anterior (`0x154` contra "
+        "`0xf5`), que e o `memset` de meia tabela deixando lixo diferente a "
+        "cada corrida.") + "\n")
 
     if med:
         w("## Medido\n")

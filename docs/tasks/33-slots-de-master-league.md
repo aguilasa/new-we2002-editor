@@ -130,13 +130,14 @@ vínculo apontando para time sem NC nenhum. A mesma medição traz a confirmaç�
 numérica de graça — ela leu o contador em `0x0000000d`, que é **13**, o mesmo
 que esta task calcula e o mesmo que o rótulo mostra.
 
-**Os índices alcançados são oito, e o modelo prevê um DWORD a mais do que o
-dump registrou.** A europeia alcança 480, 481, 488, 489 e 512..515 — quatro
-DWORDs, `0x004335e4`, `0x004335f4`, `0x00433624` e `0x00433628` —, e o dump ao
-vivo traz três: falta o `0x004335f4`. Fica como pergunta com nome no
-[`crash-causa.md`](../../wte/re/crash-causa.md), e a lista sai medida de
+**Os índices alcançados são oito, e os quatro DWORDs previstos são os quatro
+medidos.** A europeia alcança 480, 481, 488, 489 e 512..515 — `0x004335e4`,
+`0x004335f4`, `0x00433624` e `0x00433628` —, e a lista sai medida de
 [`ml-slots-fora.tsv`](../../wte/re/ml-slots-fora.tsv), não escrita à mão
-([CORR-WTE-066](/docs/tasks/CORR-WTE-066.md)). O índice 462, o do próprio
+([CORR-WTE-066](/docs/tasks/CORR-WTE-066.md)). A transcrição do dump de
+2026-08-11 trazia três, e foi este modelo que apontou a quarta: refeita a
+sessão em **2026-08-20**, o `0x004335f4` muda no mesmo instante das outras
+([`crash-causa.md`](../../wte/re/crash-causa.md)). O índice 462, o do próprio
 contador, é alcançável em tese e **não** é alcançado por nenhuma das duas.
 
 ## Log de Execução

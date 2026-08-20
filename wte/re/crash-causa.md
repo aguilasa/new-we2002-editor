@@ -12,6 +12,15 @@ python3 wte/tools/sonda_dorsal.py wte/tests/roteiros/08-so-troca-de-time.txt \
         --vizinhanca                             # a corrida, sobre cópia
 ```
 
+**A corrida deixa rastro versionado.** Ela passa pelo `diff_dirigido.sh`, que
+grava as faixas medidas em [`io-medido.tsv`](io-medido.tsv) e
+[`cmp-medido.tsv`](cmp-medido.tsv) sob o nome do `--saida` como sessão. Rodar
+para diagnosticar acrescenta uma sessão que os markdowns gerados desses TSVs
+não conhecem, e o `make -C wte check` fica **vermelho** até que se regenere e
+se reconcilie o texto. Rodando só para conferir um endereço, aponte o `--saida`
+para fora da árvore e devolva os dois TSVs (`git checkout --`) — ou assuma a
+sessão como registro, com nome que signifique alguma coisa.
+
 ## A resposta
 
 O controle **existe**. O ponteiro é que não é ponteiro.
@@ -99,15 +108,26 @@ direto para `0x00010001`, sem nunca passar por um ponteiro válido — e no mesm
 instante uma faixa inteira de `.data` muda junto:
 
 ```text
-  18.14s  .data mudou:
+  22.89s  .data mudou:
     0x00433580  0x0 -> 0x00010001
-    ...                                (16 palavras contíguas)
-    0x004335bc  0x1 -> 0x00010001
-    0x004335c0  0xf5 -> 0x0000000d
+    ...                                (16 DWORDs contíguos)
+    0x004335bc  0x0 -> 0x00010001
+    0x004335c0  0x154 -> 0x0000000d
     0x004335e4  0x0 -> 0x00010001  <== o global
+    0x004335f4  0x0 -> 0x00010001
     0x00433624  0x0 -> 0x00010001
     0x00433628  0x0 -> 0x00010001
 ```
+
+**Este bloco foi remedido em 2026-08-20**, com o mesmo script e o mesmo
+roteiro, sobre cópia nova da mesma ROM. A transcrição de 2026-08-11 trazia
+**três** linhas fora da tabela e não a quarta, `0x004335f4` — falha de
+transcrição, não de comportamento: a janela do `--vizinhanca` é
+`0x00433580 + 0xc0`, que alcança até `0x0043363f` e sempre cobriu o endereço.
+São **quatro** DWORDs atropelados, exatamente os que o modelo da
+[`ml-slots.md`](ml-slots.md) prevê. Os tempos e o valor anterior do contador
+(`0x154` aqui, `0xf5` lá) mudam de corrida para corrida; o conjunto de
+endereços não.
 
 `0x00433580..0x004335bf` são 16 palavras de pares de 16 bits (`0x00010001`,
 `0x00010002`, `0x00020001` — valores 1 e 2), e `0x004335c0` é o contador que
@@ -173,32 +193,38 @@ Três ressalvas que vão junto, e nenhuma é pequena:
    violação de acesso no `wine.log` como falha do lado do oráculo, e não
    silenciá-la.
 
-## O que não foi respondido
+## O que ficou em aberto, e como fechou
 
-**Qual instrução escreve `0x004335e4`.** Sei *de onde* vem (a carga do time,
-por índice, junto com a tabela de `0x00433580`) e sei que **não** é a rotina de
-realce. Nomear a instrução pede um watchpoint de hardware, e o
-`ptrace_scope=1` desta máquina só deixa tracear descendente: o `gdb` teria de
-lançar o Wine, e o endereço só existe depois do PE mapeado, quando já não dá
-para pôr o watchpoint pela linha de comando. Não foi tentado porque o desfecho
-não depende disso — o contorno da pergunta 4 já destrava a fase 4.
+**Qual instrução escreve `0x004335e4`** ficou sem resposta aqui, em 2026-08-11.
+O que se sabia era *de onde* vem — a carga do time, por índice, junto com a
+tabela de `0x00433580` — e que **não** é a rotina de realce; nomeá-la parecia
+pedir um watchpoint de hardware, que o `ptrace_scope=1` desta máquina não
+concede a processo não-descendente.
 
-**Fica registrado como o próximo passo natural**, para quem for implementar a
-carga do time (WTE-TASK-25): a tabela de `0x00433580` e o contador de
-`0x004335c0` são estrutura de dados do handler, e o port não deve reproduzir o
-estouro.
+**Fechou sem watchpoint, pela WTE-TASK-33**, que modelou a rotina em vez de
+observá-la: é o `inc WORD PTR [eax*2+0x433224]` de `0x0040435d`, dentro da
+`0x004042d4`, que conta os blocos livres de Master League, e a condição é
+vínculo apontando para time sem NC nenhum. A tabela de `0x00433580` e o
+contador de `0x004335c0` são a estrutura de dados dessa rotina, e o índice
+passa de 461 porque o vetor tem 462 palavras e a fórmula não tem teto. Detalhe,
+com os pares de vínculo que produzem cada endereço, em
+[`ml-slots.md`](ml-slots.md). **O port não reproduz o estouro** — divergência
+deliberada, registrada na WTE-TASK-35.
 
-**Se `0x004335f4` é escrito ao vivo.** A WTE-TASK-33 modelou a rotina que faz o
-estouro — a `0x004042d4`, com o `inc WORD PTR [eax*2+0x433224]` de
-`0x0040435d` — e mediu, sobre cópia da mesma ROM europeia, **quatro** DWORDs
-alcançados: `0x004335e4`, `0x004335f4`, `0x00433624` e `0x00433628`
-([`ml-slots.md`](ml-slots.md), a tabela sai de
-[`ml-slots-fora.tsv`](ml-slots-fora.tsv)). O dump acima traz **três** — o
-`0x004335f4` não aparece. As duas hipóteses, nenhuma medida: o dump foi
-recortado ao ser transcrito (ele já elide 16 palavras contíguas), ou o endereço
-não chega a ser escrito ao vivo. **Refazendo esta sessão, é esse o endereço a
-olhar**; os pares que o produzem são o 267 e o 269 da região de vínculo, time
-43, slots 121 e 122. Aberta pela CORR-WTE-066.
+**Se `0x004335f4` é escrito ao vivo — respondido em 2026-08-20: é.** A
+WTE-TASK-33 modelou a rotina que faz o estouro — a `0x004042d4`, com o
+`inc WORD PTR [eax*2+0x433224]` de `0x0040435d` — e previu **quatro** DWORDs
+alcançados na europeia: `0x004335e4`, `0x004335f4`, `0x00433624` e
+`0x00433628` ([`ml-slots.md`](ml-slots.md), a tabela sai de
+[`ml-slots-fora.tsv`](ml-slots-fora.tsv)). A transcrição de 2026-08-11 trazia
+três, e a CORR-WTE-066 deixou registrado qual endereço olhar. Refeita a
+sessão, o `0x004335f4` aparece no **mesmo** instante dos outros três, indo de
+`0x0` para `0x00010001` — modelo e processo concordam nos quatro. Os pares que
+o produzem são o 267 e o 269 da região de vínculo, time 43, slots 121 e 122.
+
+O que sobra da pergunta original é só a transcrição: um dump lido a olho perde
+uma linha no meio de vinte, e foi o modelo — que enumera o conjunto inteiro —
+quem apontou a que faltava.
 
 ## Uma nota sobre a contagem de violações
 

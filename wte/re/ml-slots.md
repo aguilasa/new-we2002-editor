@@ -106,27 +106,25 @@ nao aparece acima**: e alcancavel em tese, e nao alcancado por nenhuma
 das duas imagens. A diferenca importa, porque atropelar o contador
 falsearia o proprio numero na tela, e nao e o que acontece.
 [`crash-causa.md`](crash-causa.md) mediu, ao vivo e com a ROM europeia,
-`0x004335e4`, `0x00433624`, `0x00433628` mudando de `0x0` para
-`0x00010001`, e nao mudando com a japonesa, e encerrou dizendo que
+`0x004335e4`, `0x004335f4`, `0x00433624`, `0x00433628` mudando de `0x0`
+para `0x00010001`, e nao mudando com a japonesa, e encerrou dizendo que
 nomear a instrucao exigiria um watchpoint de hardware. **A instrucao e o
 `inc WORD PTR [eax*2+0x433224]` de `0x0040435d`**, aqui, e a condicao e
 vinculo apontando para time sem NC nenhum.
-### Pergunta aberta: `0x004335f4`
-O modelo preve 4 DWORDs atropelados e a medicao ao vivo registrou 3.
-Falta `0x004335f4`, que esta na tabela acima com par e imagem, e nao
-aparece no dump daquela sessao.
-Duas hipoteses, nenhuma medida: o dump foi recortado ao ser
-transcrito -- ele ja elide 16 palavras contiguas --, ou o endereco
-nao chega a ser escrito ao vivo. **Refazendo o dump, e este o
-endereco a olhar.** Fica como pergunta com nome, e nao como
-silencio: a alternativa era a tabela de tres linhas que este
-gerador escrevia a mao, que nao fechava com o `fora do vetor` da
-medicao ao lado.
+**Os 4 DWORDs previstos sao os 4 medidos ao vivo.** O confronto e feito
+por este gerador, entre a lista de `ml-slots-fora.tsv` e a que o
+`crash-causa.md` registrou -- e ja recusou concordar uma vez: a
+transcricao de 2026-08-11 tinha tres linhas, esta ferramenta apontou a
+quarta, e a sessao refeita em 2026-08-20 mostrou `0x004335f4` mudando no
+mesmo instante que as outras. Modelo que enumera o conjunto acha a linha
+que o olho perde no meio de vinte.
 A mesma medicao traz a confirmacao numerica de graca: ela leu
-`0x004335c0` indo a `0x0000000d` com a ROM europeia, e `0x0d` e
-**13** -- o mesmo que esta ferramenta calcula e o mesmo que o rotulo
-mostra. Um numero lido da memoria do processo em 2026-08-11, sem saber
-de quem era, batendo com a conta escrita aqui.
+`0x004335c0` indo a `0x0000000d` com a ROM europeia, e `0x0d` e **13**
+-- o mesmo que esta ferramenta calcula e o mesmo que o rotulo mostra. Um
+numero lido da memoria do processo em 2026-08-11, sem saber de quem era,
+batendo com a conta escrita aqui; a sessao de 2026-08-20 leu o mesmo 13,
+de outro valor anterior (`0x154` contra `0xf5`), que e o `memset` de
+meia tabela deixando lixo diferente a cada corrida.
 ## Medido
 | imagem | proprios | distintos | livres | fora do vetor | maior `b0` | tela do oraculo | tela do port |
 |---|---:|---:|---:|---:|---:|:-:|:-:|

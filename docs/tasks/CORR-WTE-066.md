@@ -150,6 +150,15 @@ Não há dump de `.data` guardado em disco daquela sessão, então responder qua
 das duas hipóteses vale exigiria refazer a corrida sob Wine no `:99` — trabalho
 de outra invocação. Ficou como pergunta nomeada, que é o que a correção pedia.
 
+**Resolvida em 2026-08-20**, a pedido: a corrida foi refeita com
+`python3 wte/tools/sonda_dorsal.py wte/tests/roteiros/08-so-troca-de-time.txt
+--vizinhanca`, sobre cópia nova da europeia, e o dump traz
+`0x004335f4  0x0 -> 0x00010001` no **mesmo** bloco dos outros três. Vale a
+primeira hipótese: a transcrição de 2026-08-11 é que saiu com três linhas — a
+janela do `--vizinhanca` é `0x00433580 + 0xc0` e sempre alcançou o endereço.
+`CRASH_DWORDS` passou a ter os quatro, e o gerador troca a seção "pergunta
+aberta" por uma frase de concordância que ele mesmo confere.
+
 A varredura puxou dois sítios que a lista da CORR não previa: a
 `wte/tools/README.md`, que descrevia as saídas do `--medir`, e a WTE-TASK-33,
 que afirmava "os índices 480, 512 e 514 caem exatamente naqueles três
