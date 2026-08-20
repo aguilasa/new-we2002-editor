@@ -39,7 +39,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | 2026-08-11 |
 | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | 2026-08-11 |
 | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ✅ Concluído | 2026-08-18 | 2026-08-18 |
-| [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | ⬜ pendente |
+| [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
 | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |

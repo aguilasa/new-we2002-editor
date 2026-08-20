@@ -87,6 +87,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-065](/docs/tasks/CORR-WTE-065.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | "o maior `b0` medido é 43" está em três sítios e a varredura das duas ROMs dá 111 e 116 | Alta | [x] concluída | 2026-08-19 |
 | [CORR-WTE-066](/docs/tasks/CORR-WTE-066.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | A tabela de endereços atropelados lista o 462, que nunca é alcançado, e omite o `0x004335f4`, que é | Alta | [x] concluída | 2026-08-19 |
 | [CORR-WTE-067](/docs/tasks/CORR-WTE-067.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | A nota nova da WTE-TASK-27 põe a `AtualizaBlocosLivresDeMl` no `we2002_ml` e promete um mapa de ocupação que a unidade não expõe | Baixa | [x] concluída | 2026-08-19 |
+| [CORR-WTE-068](/docs/tasks/CORR-WTE-068.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Três specs de gravação ainda dizem que o gate passa "só as duas faixas do arranque"; medido hoje, os três dão byte-idêntico | Alta | [ ] pendente | — |
+| [CORR-WTE-069](/docs/tasks/CORR-WTE-069.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | As três funções novas do `we2002_ml` (`IndiceDoBlocoMl`, `ParDoIndiceLinearMl`, `PrimeiroBlocoLivreMl`) entraram no caminho de gravação sem um teste sequer | Baixa | [ ] pendente | — |
+| [CORR-WTE-070](/docs/tasks/CORR-WTE-070.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | A tabela "Arquivos a criar ou modificar" da 27 aponta para `wte/tools/roteiros/gravacao-*.sh`, que não existe | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -156,6 +159,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-065 — medir o maior `b0` em vez de afirmá-lo, e pôr o número dentro do `--check`
 - [x] CORR-WTE-066 — gerar a tabela de endereços atropelados do medido, e nomear o quarto DWORD
 - [x] CORR-WTE-067 — reescrever a nota de desbloqueio da 27 com a API que ficou
+- [ ] CORR-WTE-068 — reescrever a régua das três specs com o resultado de hoje
+- [ ] CORR-WTE-069 — cobrir o inverso do índice linear e o alocador com teste próprio
+- [ ] CORR-WTE-070 — reconciliar a tabela de arquivos da 27 com a árvore
 
 ## Detalhes por correção
 
@@ -1253,3 +1259,42 @@ dizer "fechada e fora do backlog", não "corrigida".
   `grep -rn AtualizaBlocosLivresDeMl wte/src`
 - **Fix:** reescrever a nota com a API entregue, e dizer qual é o caminho para
   obter o índice livre que a 27 vai precisar
+
+### CORR-WTE-068
+
+- **Arquivo com problema:** `wte/re/spec/MainForm.boton_barras2isoClick.md:119`,
+  `MainForm.boton_nombres2isoClick.md:208`, `MainForm.boton_tex2isoClick.md:105`
+- **Sintoma:** as seções "a régua desta task" dizem que o `golden_check.sh`
+  passa "só as duas faixas do arranque". Desde que a oitava passagem portou os
+  dois remendos, os gates são **byte-idênticos** e nenhum roteiro declara faixa
+- **Como foi detectado:** `golden_check.sh` sobre `golden-03-barras`,
+  `golden-05-nomes`, `golden-06-textura`, `golden-11-descarte-ml` e
+  `golden-01-arranque` — todos `PASSOU: byte-identico`; `golden_veredito.py
+  --check` diz `21 roteiro(s), 0 declaracao(oes)`
+- **Fix:** trocar o resultado nas três, com data, e deixar o histórico numa
+  linha. Não mexer no `grabar_memoryClick.md:191`, que fala da sonda contra a
+  cópia limpa e continua correto
+
+### CORR-WTE-069
+
+- **Arquivo com problema:** `wte/tests/test_ml.pas`, `wte/tools/test_conta_ml.py`
+- **Sintoma:** `IndiceDoBlocoMl`, `ParDoIndiceLinearMl` (o port da `0x0040427c`,
+  o inverso do índice linear) e `PrimeiroBlocoLivreMl` entraram na interface do
+  `we2002_ml` e só são exercitados pelo `golden-11-descarte-ml`, que aloca **um**
+  bloco — o 350. Fronteira nenhuma é tocada
+- **Como foi detectado:** `grep` das três na árvore de testes (zero
+  ocorrências); `test_ml.pas` reporta `CASOS 7` sem imagem e `CASOS 8` com
+- **Fix:** casos de ida e volta, de fronteira e de fora da faixa no
+  `test_ml.pas`, com o `CASOS` esperado subindo junto
+
+### CORR-WTE-070
+
+- **Arquivo com problema:** `docs/tasks/27-handlers-de-gravacao.md`, tabela
+  "Arquivos a criar ou modificar"
+- **Sintoma:** a tabela promete `wte/tools/roteiros/gravacao-*.sh` (4). O
+  diretório não existe; o que existe é `wte/tests/roteiros/`, com 21 roteiros de
+  gate e 9 sondas, todos `.txt` declarativos. A linha das specs também ficou
+  curta (diz 4; são as quatro gravações mais `dorsalClick` e os sete de mover)
+- **Como foi detectado:** `ls wte/tools/roteiros/` contra `ls wte/tests/roteiros/`
+- **Fix:** reescrever a tabela com o que existe e anotar a mudança de formato
+  com data e motivo, como a WTE-TASK-33 fez com o destino do `ml-slots.md`
