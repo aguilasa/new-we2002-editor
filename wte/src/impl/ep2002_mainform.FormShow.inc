@@ -44,6 +44,10 @@ begin
     Exit;
   if AbreImagem(imagem) then
   begin
+    { O zero em `1921862`, e SO o `FormShow` o grava -- o
+      `boton_dialogo_weClick` nao tem esta linha. Ver os dois remendos de
+      arranque no `we2002_estado`. }
+    PatchDeByteSoltoDeArranque(imagem);
     texto_dialogo_we.Caption := ExtractFileName(imagem);
     { Os tres combos de time nascem `Enabled = False` no DFM, e depois de
       carregar a imagem o original os aceita: clicar e teclar Down troca de

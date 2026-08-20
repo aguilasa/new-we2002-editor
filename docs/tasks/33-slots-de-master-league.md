@@ -115,9 +115,15 @@ o arquivo que o oráculo produziu, os dois mostram `1`.
 Essa escrita já estava registrada — a spec do `boton_dialogo_weClick` a lista
 desde a WTE-TASK-25 entre as *duas faixas do arranque sem explicação*
 (`1921862..1921862` e `2012984..2012985`), declaradas `conhecida:` no roteiro
-do gate. O que esta task acrescenta é o **significado** da segunda. Quem a
-escreve continua sem nome: a única referência absoluta a `OFS_LINK_ML` em toda
-a `.text` é o `push 0x1eb608` desta rotina, que só lê.
+do gate. O que esta task acrescentou foi o **significado** da segunda.
+
+*(2026-08-20)* **O autor apareceu na passagem seguinte**, e o significado é que
+o fez procurar no lugar certo. A [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md)
+o achou em `0x0040c19e` e `0x00411616`, com o endereço **imediato** no `.text`
+(`push 0x1eb738`) — e é exatamente por isso que a busca de cá, que procurava
+referência a `OFS_LINK_ML`, nunca o encontraria: a única que existe é o
+`push 0x1eb608` desta rotina, e essa só lê. Os dois remendos estão portados, e
+com eles **nenhum roteiro do gate declara faixa `conhecida:`**.
 
 ### E a causa do travamento da ROM europeia, que estava em aberto
 

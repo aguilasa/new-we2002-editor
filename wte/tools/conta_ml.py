@@ -567,11 +567,20 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
           "acrescenta e o SIGNIFICADO da segunda: sao os dois bytes de um par\n"
           "de vinculo, e trocar `(102, 23)` por `(0, 27)` custa um bloco\n"
           "livre.\n")
-        w("Continua sem dono a pergunta de QUEM escreve: a unica referencia\n"
-          "absoluta a `OFS_LINK_ML` em toda a `.text` e o `push 0x1eb608` de\n"
-          "`0x004042fc`, desta rotina, que so LE. O endereco sai calculado de\n"
-          "outro ponto do caminho de abertura, e na europeia a mesma sequencia\n"
-          "nao o toca.\n")
+        w("**Quem escreve fechou em 2026-08-20**, na oitava passagem da\n"
+          "[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md):\n"
+          "`0x0040c19e` no `boton_dialogo_weClick` e `0x00411616` no\n"
+          "`FormShow`, com o endereco IMEDIATO no `.text` (`push 0x1eb738`).\n"
+          "E por isso que procurar por `OFS_LINK_ML` nunca os achou -- a unica\n"
+          "referencia a esse offset em toda a `.text` e o `push 0x1eb608` de\n"
+          "`0x004042fc`, desta rotina, que so LE.\n")
+        w("O remendo e condicional (`(102, >22)` vira `(0, 27)`) e portanto\n"
+          "idempotente, e fica FORA da guarda da sentinela de injecao: o `je`\n"
+          "de `0x0041158e` salta justamente para onde ele comeca. Esta portado\n"
+          "no `we2002_estado` como `PatchDeVinculoDeArranque`, e com ele os\n"
+          "dois lados passaram a ter o MESMO conjunto de blocos livres -- que\n"
+          "e a condicao de o ramo de alocacao da `0x00404820` poder ser\n"
+          "medido.\n")
 
     w("## O port\n")
     w("[`we2002_ml.pas`](../src/we2002_ml.pas), com a tabela em\n"

@@ -5,7 +5,7 @@ type: implementação
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-26"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-27: Handlers de gravação
@@ -166,40 +166,29 @@ um campo de tela.
       O terceiro julga **duas** gravações numa corrida: a escrita pontual do
       número na imagem e o `.mcr`, que lê os 23 `dorsalN` da tela. O número é o
       único campo do cartão que não vem do disco nem do molde
-- [ ] **Os handlers de mover promovidos** — a outra metade da opção A da
-      WTE-TASK-26. **Cinco dos sete fecharam**; o enunciado dizia "oito" e o
-      índice de specs diz **sete** (`paderecha`, `paizquierda`, `paderecha2`,
-      `paizquierda2`, `paderechaeizquierda`, `parriba`, `pabajo`) — a contagem
-      antiga somava o `dorsalClick`, que é o nono da lista da WTE-TASK-26 e
-      fechou na sétima passagem.
+- [x] **Os handlers de mover promovidos** — a outra metade da opção A da
+      WTE-TASK-26. **Seis dos sete**, e o sétimo não depende desta task. O
+      enunciado dizia "oito" e o índice de specs diz **sete**
+      (`paderecha`, `paizquierda`, `paderecha2`, `paizquierda2`,
+      `paderechaeizquierda`, `parriba`, `pabajo`) — a contagem antiga somava o
+      `dorsalClick`, que é o nono da lista da WTE-TASK-26 e fechou na sétima
+      passagem.
 
-      A metade de escrita é a `0x00404820`, e ela fechou em duas etapas:
-      **destino de seleção** em 2026-08-19
-      ([`golden-09-mover`](../../wte/tests/roteiros/golden-09-mover.txt)) e
-      **destino de Master League** em 2026-08-20
-      ([`golden-10-mover-ml`](../../wte/tests/roteiros/golden-10-mover-ml.txt)),
-      os dois com controle byte-idêntico antes.
+      A metade de escrita é a `0x00404820`, e ela fechou em três etapas, cada
+      uma com controle byte-idêntico antes:
 
-      **Os dois que continuam `aberto`, e por motivos diferentes:**
+      | ramo | quando | gate |
+      |---|---|---|
+      | destino de seleção | 2026-08-19 | [`golden-09-mover`](../../wte/tests/roteiros/golden-09-mover.txt) |
+      | destino de ML, libera bloco | 2026-08-20 | [`golden-10-mover-ml`](../../wte/tests/roteiros/golden-10-mover-ml.txt) |
+      | destino de ML, aloca bloco | 2026-08-20 | [`golden-11-descarte-ml`](../../wte/tests/roteiros/golden-11-descarte-ml.txt) |
 
-      - **`parriba`** — não grava. O que falta nele é régua de tela: o
-        `compara_tela.sh --edicao` não alcança a lista de descarte. Já estava
-        assim antes desta task e não é dela.
-      - **`pabajo`** — o código está completo, o **gate** é que não pode ser
-        escrito hoje. É o único que alcança o ramo de **alocação** (exige
-        origem do tipo 3, e só buffer de descarte tem isso), e o alocador pega
-        o *primeiro* bloco livre. Os dois lados não têm o mesmo conjunto de
-        livres: a escrita de arranque em `2012984`, que esta task declara
-        `conhecida:` e cujo autor continua sem nome, troca `(102, 23)` por
-        `(0, 27)` e com isso ocupa o bloco 4. Medido com
-        [`27-descarte-ml.txt`](../../wte/tests/roteiros/27-descarte-ml.txt): o
-        oráculo aloca o bloco **350** (vínculo em 2012730, nome em 2010092,
-        atributos em 2208920, custo em 3069862); o port, partindo da tabela
-        limpa, escolheria o **4**. Mesma rotina, estados diferentes.
+      Os três **byte-idênticos, sem faixa declarada** — o que só passou a ser
+      possível quando os dois remendos de arranque foram portados.
 
-      **Quem destrava o último:** o autor da escrita de `2012984`, que é do
-      caminho de carga. A pergunta era decorativa até aqui — agora ela bloqueia
-      um gate
+      **O `parriba` continua `aberto`, e não é desta task:** ele não grava. O
+      que falta nele é régua de tela — o `compara_tela.sh --edicao` não alcança
+      a lista de descarte —, e já estava assim antes
 - [x] EDC/ECC preservados **nas gravações desta task** — 2026-08-20,
       **148 faixas conferidas em 11 sessões**, nenhuma tocando byte de EDC/ECC
       nem de cabeçalho de setor. As três sessões novas são as de Master League
@@ -221,11 +210,124 @@ um campo de tela.
       [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
 - [x] `roms/` intocada em todas as rodadas — vale por passagem, e a de
       2026-08-18 rodou toda sobre cópia em `work/`
-- [ ] Commit no formato conventional, em inglês
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
 
-- **Executado em:** 2026-08-20 — **oitava passagem.** O ramo de destino de
+- **Executado em:** 2026-08-20 — **oitava passagem, em duas metades.** A
+  segunda começou onde a primeira parou: o bloqueio do gate de alocação era a
+  escrita de arranque em `2012984`, sem autor desde a WTE-TASK-25. Ela tem
+  autor agora, e o remendo está portado.
+
+### A segunda metade: os dois remendos de arranque
+
+**Estavam escondidos à plena vista.** `0x0040c19e` no `boton_dialogo_weClick` e
+`0x00411616` no `FormShow`, com o endereço **imediato** no `.text`
+(`push 0x1eb738`, `push 0x1d5346`). Toda busca anterior partia do nome do
+offset — e a única referência a `OFS_LINK_ML` em toda a `.text` é o
+`push 0x1eb608` da rotina de contagem, que só lê. Procurar por nome nunca
+acharia um literal.
+
+Dois detalhes que só o disassembly dá:
+
+- **Ficam fora da guarda da sentinela.** O `je` de `0x0041158e`, que pula a
+  injeção de sete setores quando a imagem já foi injetada, salta justamente
+  para `0x00411616` — onde os remendos começam. Rodam em toda abertura.
+- **Não estão nos mesmos dois lugares.** O `FormShow` faz os dois; o
+  `boton_dialogo_weClick` faz só o do vínculo. O port reproduz isso: o do
+  vínculo no `AbreImagem`, que os dois caminhos usam; o do byte solto no corpo
+  do `FormShow`.
+
+O do vínculo é **conserto de dado**: o par `(102, 23)` do slot 13 do clube de
+ML 5 aponta para um bloco do time 102, e o time 102 não tem jogador
+*non-contract* nenhum. Mandá-lo para `(0, 27)` o aponta para o bloco 4. O do
+byte solto grava zero em `1921862` e **continua sem significado** — portá-lo
+assim é legítimo porque a especificação está completa (endereço fixo, sem
+condição, valor zero); o que não se pode é inventar-lhe um nome.
+
+**Duas quase-descobertas anteriores.** O `offsets.md` já listava `2012984`
+como candidato `imm32` com duas ocorrências — que são exatamente estes dois
+`push` —, e o log da WTE-TASK-19 já registrava `1921862` entre os candidatos
+extraídos do `.text`. As duas evidências estavam em tabelas geradas há meses;
+ninguém as tinha ligado à faixa que o gate declarava.
+
+**Consequência imediata: nenhum roteiro do gate declara faixa `conhecida:`
+mais.** As doze declarações saíram, pela própria regra que as sustentava — o
+`golden_veredito.py` reprova (código 3) declaração que não aparece. E o
+`golden-10-mover-ml` foi refeito nessa condição: **PASSOU: byte-idêntico**,
+sem exceção nenhuma.
+
+### O gate de alocação, e as duas ordens de clique que não serviam
+
+Com o remendo portado, os dois lados passaram a ter o **mesmo** conjunto de
+blocos livres — que era a condição de o ramo de alocação poder ser medido. O
+roteiro, porém, precisou de três tentativas, e as duas primeiras ensinaram
+coisas diferentes:
+
+1. **Linha do descarte clicada DEPOIS do `parriba`.** O handler lê o
+   `ItemIndex` da lista de descarte para escolher o buffer; com `-1` o original
+   carrega o buffer `-1 + 3 = 2` — o do lado direito — e grava a partir de um
+   buffer que ninguém preencheu. O port, que tem guarda, não grava nada. Um
+   lado gravando lixo e o outro nada não é gate. De quebra, isso **observou em
+   execução** a divergência deliberada que a spec do `parriba` declarava desde
+   a WTE-TASK-26 e que ninguém tinha visto acontecer.
+2. **Só o `lista_equipos_1`, sem o combo principal.** São dois combos e os dois
+   importam: o `lista_equipos` do alto é quem **carrega** o time (sem ele o
+   painel fica vazio e quase nada é lido do disco), e o `lista_equipos_1` é
+   quem o `parriba` **lê**. Com só o de baixo, nenhum dos dois lados grava.
+
+A ordem que serve está no cabeçalho de
+[`27-descarte-ml.txt`](../../wte/tests/roteiros/27-descarte-ml.txt), e o
+diagnóstico saiu do `port-trace.log`: o `pabajoClick` aparecia lá e a execução
+**parava** logo depois — sinal de `ShowModal`, não de `Exit`.
+
+Com a terceira ordem, os dois lados alocam o **bloco 350** — vínculo em
+`2012730`, nome em `2010092`, atributos em `2208920`, custo em `3069862` —, e o
+`golden-11-descarte-ml` fecha **byte-idêntico**.
+
+### O que esta metade fechou
+
+| gate | resultado |
+|---|---|
+| `golden-10-mover-ml` (refeito, sem faixa declarada) | **PASSOU: byte-idêntico** |
+| `golden-11-descarte-ml` controle | **PASSOU: byte-idêntico** |
+| `golden-11-descarte-ml` golden | **PASSOU: byte-idêntico** |
+| `golden-09-mover` (refeito, sem faixa declarada) | **PASSOU: byte-idêntico** |
+
+Com o `pabajo` promovido, **seis dos sete** handlers de mover estão
+`implementado`. O `parriba` fica, e o motivo não é desta task: ele não grava, e
+o que falta nele é o `compara_tela.sh --edicao` alcançar a lista de descarte.
+
+**A lição que vale para a próxima:** a busca por um endereço que o binário usa
+tem de cobrir o **literal**, não só o nome. As duas faixas ficaram três tasks
+sem autor porque toda tentativa partia de `OFS_LINK_ML`, e o `.text` nunca
+menciona `OFS_LINK_ML` ali — menciona `0x1eb738`. As duas evidências que
+bastavam já estavam em tabelas geradas (`offsets.md` listava `2012984` como
+`imm32` com duas ocorrências; o log da WTE-TASK-19 listava `1921862` entre os
+candidatos do `.text`) e ninguém as cruzou com a faixa que o gate declarava.
+
+- **Arquivos da segunda metade:**
+  - criados: `wte/tests/roteiros/golden-11-descarte-ml{,.port}.txt`
+  - modificados: `wte/src/we2002_estado.pas` (os dois remendos),
+    `ep2002_mainform.FormShow.inc`, os **doze** roteiros que declaravam faixa,
+    `wte/tests/roteiros/README.md`, `27-descarte-ml.txt`,
+    `wte/re/spec/MainForm.{boton_dialogo_weClick,pabajoClick,parribaClick}.md`,
+    `wte/re/spec/INDICE.md`, `wte/tools/conta_ml.py` (e as saídas),
+    `docs/tasks/25-handlers-de-carga.md`,
+    `docs/tasks/33-slots-de-master-league.md`, `docs/PLAN-WTE-LAZARUS.md` §4.4
+
+- **Problemas da segunda metade:**
+  - **Três ordens de clique até o roteiro medir a rotina** — ver acima. Vale
+    guardar o sintoma: handler que aparece no trace e **nada depois dele** é
+    `ShowModal`, não `Exit`; um `Exit` deixa o trace continuar.
+  - **Tirar as declarações é obrigatório, não opcional.** O
+    `golden_veredito.py` reprova (código 3) faixa declarada que não aparece —
+    então portar a escrita e deixar a declaração quebraria os doze roteiros de
+    uma vez. A regra estava escrita e serviu exatamente para o que foi feita.
+
+---
+
+- **Executado em (primeira metade):** 2026-08-20 — **oitava passagem.** O ramo de destino de
   Master League da `0x00404820` foi portado e **um** dos seus dois caminhos
   fechou com golden verde. Cinco dos sete handlers de mover foram promovidos; a
   task continua `⬜ Pendente` por dois, e agora cada um tem motivo escrito e

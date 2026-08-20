@@ -122,8 +122,51 @@ function CaminhoDatBin: string;
   (WTE-TASK-22) mostra o contrario. }
 function InjetaPatchDeArranque(const imagem: string): Integer;
 
-{ Abre a imagem: injeta o patch e carrega o banco. False quando nao da para
-  abrir o arquivo. }
+{ OS DOIS REMENDOS LITERAIS DO ARRANQUE, e eles NAO sao a injecao acima.
+
+  Ate 2026-08-20 as duas faixas que eles gravam eram as unicas do arranque
+  **sem explicacao**: `1921862..1921862` e `2012984..2012985` apareciam em todo
+  `cmp` do gate, o oraculo as gravava, o port nao, e os roteiros as declaravam
+  `conhecida:`. A WTE-TASK-33 deu significado a segunda; esta achou os autores,
+  e eles estavam escondidos a plena vista -- o endereco e IMEDIATO no `.text`,
+  entao procurar por `OFS_LINK_ML` nunca os encontraria.
+
+  Os dois ficam FORA da guarda da sentinela: o `je` de `0x0041158e`, que pula a
+  injecao quando a imagem ja foi injetada, salta para `0x00411616`, que e onde
+  eles comecam. Ou seja rodam em toda abertura, injetando ou nao.
+
+  `PATCH_VINCULO_POS` e um CONSERTO DE DADO, e da para ver o que ele conserta:
+  o par `(102, 23)` do slot 13 do clube de ML 5 aponta para um bloco do time
+  102, e o time 102 nao tem jogador non-contract nenhum -- e referencia
+  pendurada. O remendo a manda para `(0, 27)`, que e o bloco 4. A condicao
+  (`b0 = 102` e `b1 > 22`) o torna idempotente: depois de gravado `b0` vale 0 e
+  ele nao dispara de novo.
+
+  `PATCH_BYTE_SOLTO_POS` grava zero, sem condicao, e o que ele significa
+  **continua sem resposta** -- e um byte no setor 817, dentro do payload, sem
+  offset nomeado por perto (o mais proximo e o `OFS_FLAG_SHAPE_COPY_1`, 7142
+  bytes adiante). Portar sem saber o significado e legitimo porque a
+  especificacao esta completa: endereco fixo, sem condicao, valor zero. O que
+  nao se pode e inventar um nome para ele.
+
+  E ELES NAO ESTAO NO MESMO LUGAR. O `FormShow` (`0x00411616`) faz os dois; o
+  `boton_dialogo_weClick` (`0x0040c19e`) faz **so** o do vinculo. Por isso o do
+  vinculo mora no `AbreImagem`, que os dois caminhos usam, e o do byte solto e
+  chamado do corpo do `FormShow`. }
+const
+  PATCH_BYTE_SOLTO_POS = 1921862;   { `0x001d5346`, gravado com zero        }
+  PATCH_VINCULO_POS    = 2012984;   { `0x001eb738`, o par de vinculo        }
+  PATCH_VINCULO_DE_B0  = 102;       { so dispara se o par for (102, >22)    }
+  PATCH_VINCULO_DE_B1  = 22;        { estritamente maior                    }
+
+{ O remendo do par de vinculo. True quando gravou. }
+function PatchDeVinculoDeArranque(const imagem: string): Boolean;
+
+{ O zero em `1921862`. Sempre grava; o valor ja estar zero e o caso normal. }
+procedure PatchDeByteSoltoDeArranque(const imagem: string);
+
+{ Abre a imagem: injeta o patch, aplica o remendo do vinculo e carrega o banco.
+  False quando nao da para abrir o arquivo. }
 function AbreImagem(const caminho: string): Boolean;
 
 { ------------------------------------------------------------------------ }
@@ -331,6 +374,55 @@ begin
   end;
 end;
 
+function PatchDeVinculoDeArranque(const imagem: string): Boolean;
+var
+  img: TCdImage;
+  b0, b1: Byte;
+  par: array[0..1] of Byte;
+begin
+  Result := False;
+  img.Init;
+  if not img.OpenReadWrite(imagem) then
+    Exit;
+  try
+    img.Seek(PATCH_VINCULO_POS, soBeginning);
+    { O original le os dois bytes com `fgetc` cru, sem o salto de fronteira de
+      setor -- e pode, porque o par inteiro cabe no payload do setor 855. }
+    if img.Read(b0, 1) <> 1 then
+      Exit;
+    if b0 <> PATCH_VINCULO_DE_B0 then
+      Exit;
+    if img.Read(b1, 1) <> 1 then
+      Exit;
+    if b1 <= PATCH_VINCULO_DE_B1 then
+      Exit;
+    par[0] := 0;
+    par[1] := 27;
+    img.Seek(PATCH_VINCULO_POS, soBeginning);
+    img.Write(par[0], 2);
+    Result := True;
+  finally
+    img.Close;
+  end;
+end;
+
+procedure PatchDeByteSoltoDeArranque(const imagem: string);
+var
+  img: TCdImage;
+  zero: Byte;
+begin
+  img.Init;
+  if not img.OpenReadWrite(imagem) then
+    Exit;
+  try
+    img.Seek(PATCH_BYTE_SOLTO_POS, soBeginning);
+    zero := 0;
+    img.Write(zero, 1);
+  finally
+    img.Close;
+  end;
+end;
+
 function JogadorTemCampoCondicional(indice, slot: Integer): Boolean;
 var
   vinculo: PByte;
@@ -460,6 +552,10 @@ begin
   if not FileExists(caminho) then
     Exit;
   InjetaPatchDeArranque(caminho);
+  { ANTES do `Load`, e a ordem importa: o remendo muda um par de vinculo, e o
+    modelo em memoria tem de ver o par consertado. No original a questao nao
+    existe -- ele rele a imagem a cada troca de time. }
+  PatchDeVinculoDeArranque(caminho);
   Jogo.Init;
   Result := Jogo.Load(caminho, nil);
   if Result then

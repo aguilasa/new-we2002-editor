@@ -128,3 +128,12 @@ e o gate de tela fica para quando o `--edicao` alcançar este grupo — junto co
 ([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)): índice fora
 da faixa sai sem fazer nada, em vez de escrever em `Items[-1]` e carregar o
 buffer errado.
+
+*(2026-08-20)* **Ela deixou de ser hipotética.** A primeira versão do roteiro
+`27-descarte-ml.txt` clicava a linha da lista de descarte *depois* do
+`parriba`, e com isso o `ItemIndex` valia -1 na hora do clique. O original
+carregou o buffer `-1 + 3 = 2` — o do lado direito — e o `pabajo` seguinte
+gravou na imagem a partir de um buffer que ninguém tinha preenchido; o port,
+com a guarda, não gravou nada. Um lado gravando lixo e o outro nada não é gate,
+e foi assim que a divergência apareceu: como um golden vermelho cuja causa não
+era o handler sob teste.

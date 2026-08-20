@@ -173,11 +173,20 @@ porque o oraculo as grava e o port nao. O que esta medicao
 acrescenta e o SIGNIFICADO da segunda: sao os dois bytes de um par
 de vinculo, e trocar `(102, 23)` por `(0, 27)` custa um bloco
 livre.
-Continua sem dono a pergunta de QUEM escreve: a unica referencia
-absoluta a `OFS_LINK_ML` em toda a `.text` e o `push 0x1eb608` de
-`0x004042fc`, desta rotina, que so LE. O endereco sai calculado de
-outro ponto do caminho de abertura, e na europeia a mesma sequencia
-nao o toca.
+**Quem escreve fechou em 2026-08-20**, na oitava passagem da
+[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md):
+`0x0040c19e` no `boton_dialogo_weClick` e `0x00411616` no
+`FormShow`, com o endereco IMEDIATO no `.text` (`push 0x1eb738`).
+E por isso que procurar por `OFS_LINK_ML` nunca os achou -- a unica
+referencia a esse offset em toda a `.text` e o `push 0x1eb608` de
+`0x004042fc`, desta rotina, que so LE.
+O remendo e condicional (`(102, >22)` vira `(0, 27)`) e portanto
+idempotente, e fica FORA da guarda da sentinela de injecao: o `je`
+de `0x0041158e` salta justamente para onde ele comeca. Esta portado
+no `we2002_estado` como `PatchDeVinculoDeArranque`, e com ele os
+dois lados passaram a ter o MESMO conjunto de blocos livres -- que
+e a condicao de o ramo de alocacao da `0x00404820` poder ser
+medido.
 ## O port
 [`we2002_ml.pas`](../src/we2002_ml.pas), com a tabela em
 [`we2002_ml_tabela.inc`](../src/we2002_ml_tabela.inc), tambem gerado

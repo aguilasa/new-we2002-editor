@@ -18,6 +18,13 @@ operacao: arranque
 
 # ---------------------------------------------------------------- faixas ----
 #
+# NENHUMA. Ate 2026-08-20 este roteiro declarava `1921862..1921862` e
+# `2012984..2012985` -- as duas faixas do arranque que o oraculo gravava e o
+# port nao. A oitava passagem da WTE-TASK-27 achou os autores (`0x00411616` no
+# `FormShow` e `0x0040c19e` no `boton_dialogo_weClick`, os dois com o endereco
+# IMEDIATO no `.text`) e portou os dois remendos. Os dois lados gravam agora, e
+# declarar faixa que nao diverge mais REPROVA no `golden_veredito.py`.
+#
 # O que o ORACULO grava so por abrir a imagem, antes de qualquer edicao --
 # medido com o `diff_dirigido.sh` sobre roms/japanese-shift-jis.bin. Sao
 # offsets 0-BASED e INCLUSIVOS, como o KNOWN_START/KNOWN_END do newWe2002, e
@@ -33,8 +40,6 @@ operacao: arranque
 # deixaram de ser divergencia. Sao 11.952 bytes dos dois lados, nas mesmas
 # extensoes. As duas que sobraram continuam sem explicacao medida -- um byte
 # no setor 817 e dois no 855 --, e sobram para o resto da WTE-TASK-25.
-conhecida: 1921862..1921862
-conhecida: 2012984..2012985
 
 # ---------------------------------------------------------------- abrir ----
 > Abre

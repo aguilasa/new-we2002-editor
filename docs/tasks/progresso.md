@@ -39,7 +39,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-24](/docs/tasks/24-ghidra-convencao-borland.md) | Ghidra com a convenção Borland | 4 | 04, 06 | ✅ Concluído | 2026-08-09 | 2026-08-11 |
 | [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md) | Handlers de carga | 4 | 22, 23, 24 | ✅ Concluído | 2026-08-11 | 2026-08-11 |
 | [WTE-TASK-26](/docs/tasks/26-handlers-de-edicao.md) | Handlers de edição | 4 | 25 | ✅ Concluído | 2026-08-18 | 2026-08-18 |
-| [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ⬜ Pendente | — | — |
+| [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | ⬜ pendente |
 | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ⬜ Pendente | — | — |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
@@ -255,15 +255,20 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **60 de 96 têm arquivo**
-      (2026-08-19, do `spec_index.py`): 23 `implementado`, 14 `trivial`, 59
+      (2026-08-20, do `spec_index.py`): 29 `implementado`, 14 `trivial`, 53
       `aberto`. Os 28 do grupo de carga mais os 28 do de edição, que a
-      WTE-TASK-26 fechou, mais as quatro gravações da WTE-TASK-27. Dos nove
-      `aberto` do grupo de edição que têm **dono nomeado na WTE-TASK-27** pela
-      opção A, o `dorsalClick` já foi promovido; faltam os oito de mover
+      WTE-TASK-26 fechou, mais as gravações da WTE-TASK-27. Dos nove `aberto`
+      do grupo de edição com **dono nomeado na WTE-TASK-27** pela opção A,
+      **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
+      Sobra o `parriba`, que não grava: o que falta nele é o
+      `compara_tela.sh --edicao` alcançar a lista de descarte
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
-- [ ] Toda gravação byte-idêntica nas duas ROMs — **medido em 2026-08-18
+- [ ] Toda gravação byte-idêntica nas duas ROMs — **as da WTE-TASK-27 estão**,
+      e desde 2026-08-20 sem exceção nenhuma: os dois remendos literais de
+      arranque foram portados e **nenhum roteiro do gate declara faixa
+      `conhecida:`**. Falta o `.mcr` (28) e a camisa (29). **Medido em 2026-08-18
       que a europeia não hospeda este grupo**: o `wte.exe` morre na troca de
       time (49.749 violações de acesso) e a gravação nunca acontece, então o
       oráculo não existe daquele lado. O critério vale como está para a

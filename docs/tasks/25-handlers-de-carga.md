@@ -1019,8 +1019,15 @@ e não simula comportamento.
     `call rel32` na `.text` e não há uma escrita direta em `FEnabled`. O port
     habilita por observação de tela, e a seção Saída da spec do
     `lista_equiposChange` segue `nao medido`. Não bloqueia critério nenhum;
-  - as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`), que
-    são do gate da [WTE-TASK-22](/docs/tasks/22-harness-golden.md);
+  - ~~as duas faixas de arranque sem causa (`1921862`, `2012984..2012985`), que
+    são do gate da [WTE-TASK-22](/docs/tasks/22-harness-golden.md)~~ —
+    **fechado em 2026-08-20** pela oitava passagem da
+    [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md). São dois remendos
+    literais: `0x0040c19e` (no `boton_dialogo_weClick`) e `0x00411616` (no
+    `FormShow`), com o endereço **imediato** no `.text`. Ficaram invisíveis
+    porque toda busca partia do nome do offset — e a única referência a
+    `OFS_LINK_ML` em toda a `.text` só lê. Portados; nenhum roteiro do gate
+    declara faixa `conhecida:` mais;
   - `lista_equipos_2Change` tem Pascal e **não** foi conferido na tela: o
     `compara_tela.sh` dirige só o combo titular.
 

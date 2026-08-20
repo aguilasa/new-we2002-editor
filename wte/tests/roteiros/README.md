@@ -153,6 +153,16 @@ roteiro em **dois** lados:
 subtrai excecao passa verde quando o roteiro para de exercitar o que dizia
 exercitar.
 
+**Hoje nenhum roteiro declara faixa nenhuma, e isso e resultado, nao descuido.**
+As unicas duas que existiam -- `1921862..1921862` e `2012984..2012985` -- eram
+as faixas do arranque que o oraculo gravava e o port nao, e ficaram sem
+explicacao da WTE-TASK-25 ate 2026-08-20. Os autores estavam escondidos a plena
+vista: `0x00411616` no `FormShow` e `0x0040c19e` no `boton_dialogo_weClick`, os
+dois com o endereco **imediato** no `.text`, o que e exatamente o motivo de
+procurar por `OFS_LINK_ML` nunca os ter encontrado. A oitava passagem da
+WTE-TASK-27 portou os dois remendos, os dois lados passaram a gravar, e as
+declaracoes tiveram de sair -- pela propria regra do paragrafo acima.
+
 O par [`golden-01-arranque.port.txt`](golden-01-arranque.port.txt) e a
 assimetria temporaria: o port nao recebe teclado no `:99`, entao nao dirige o
 dialogo de abrir -- ele carrega pela linha de comando desde a WTE-TASK-25.

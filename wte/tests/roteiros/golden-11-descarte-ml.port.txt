@@ -1,44 +1,14 @@
-# 27-descarte-ml -- a SONDA do ramo de ALOCACAO da `0x00404820`.
+# golden-11-descarte-ml, lado PORT. Par de golden-11-descarte-ml.txt.
 #
-# WTE-TASK-27, oitava passagem.
-#
-#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-descarte-ml.txt \
-#        --imagem roms/japanese-shift-jis.bin
-#
-# O `27-mover-ml.txt` exercita o caminho que LIBERA bloco; este exercita o que
-# ALOCA, e so o `pabajo` chega nele. O motivo e o tipo da origem: o ramo de
-# alocacao pede origem do tipo 3, e o `0x00404374` so poe tipo 3 nos buffers de
-# descarte -- os do indice 3 em diante, que e onde o `parriba` guarda.
-#
-# A ORDEM DOS QUATRO PRIMEIROS CLIQUES E LOAD-BEARING, e a primeira versao
-# deste roteiro errava nela: `lista_equipos_1`, `lista_jugadores_1`, a LINHA da
-# lista de descarte, e so entao o `parriba`. Ele le o `ItemIndex` da lista de
-# descarte para escolher o buffer; com -1, sai sem guardar. O original nao tem
-# essa guarda e carrega o buffer 2 -- o do lado direito --, entao a sequencia
-# errada o fazia gravar buffer nao inicializado, e o port (que tem a guarda)
-# nao gravava nada. Um lado gravando lixo e o outro nada nao e gate.
-alvo: original
+# Uma assimetria so: a imagem vem da linha de comando. Nao ha dialogo nem modal
+# nesta sequencia, entao as coordenadas do MainForm sao as mesmas dos dois
+# lados.
+alvo: port
 estado: ok
 operacao: gravacao
 
-# ---------------------------------------------------------------- abrir ----
-> Abre
-~ 2
-! clique 315 304
-! texto E:\@IMAGEM@
-! tecla Return
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
 ~ 3
-
-> Cuidado
-! clique 222 148
-~ 3
-
-> Sobre...
-! clique 110 243
-~ 4
-
-> W11 Team Editor PT by chagas_michel!
-~ 2
 = ARRANQUE
 
 # ------------------------------------------------------- o time da esquerda ----

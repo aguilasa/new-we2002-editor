@@ -1,25 +1,32 @@
-# 27-descarte-ml -- a SONDA do ramo de ALOCACAO da `0x00404820`.
+# golden-11-descarte-ml -- o gate do ramo de ALOCACAO da `0x00404820`, lado
+# oraculo.
 #
 # WTE-TASK-27, oitava passagem.
 #
-#   bash wte/tools/diff_dirigido.sh wte/tests/roteiros/27-descarte-ml.txt \
-#        --imagem roms/japanese-shift-jis.bin
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-11-descarte-ml.txt \
+#        --roteiro-port wte/tests/roteiros/golden-11-descarte-ml.port.txt
 #
-# O `27-mover-ml.txt` exercita o caminho que LIBERA bloco; este exercita o que
-# ALOCA, e so o `pabajo` chega nele. O motivo e o tipo da origem: o ramo de
-# alocacao pede origem do tipo 3, e o `0x00404374` so poe tipo 3 nos buffers de
-# descarte -- os do indice 3 em diante, que e onde o `parriba` guarda.
+# O `golden-10-mover-ml` exercita o caminho que LIBERA bloco; este exercita o
+# que ALOCA, e so o `pabajo` chega nele: alocar pede origem do tipo 3, e o
+# `0x00404374` so poe tipo 3 nos buffers de descarte.
 #
-# A ORDEM DOS QUATRO PRIMEIROS CLIQUES E LOAD-BEARING, e a primeira versao
-# deste roteiro errava nela: `lista_equipos_1`, `lista_jugadores_1`, a LINHA da
-# lista de descarte, e so entao o `parriba`. Ele le o `ItemIndex` da lista de
-# descarte para escolher o buffer; com -1, sai sem guardar. O original nao tem
-# essa guarda e carrega o buffer 2 -- o do lado direito --, entao a sequencia
-# errada o fazia gravar buffer nao inicializado, e o port (que tem a guarda)
-# nao gravava nada. Um lado gravando lixo e o outro nada nao e gate.
+# ESTE GATE NAO EXISTIA ATE 2026-08-20, e a razao nao era o roteiro. O alocador
+# pega o PRIMEIRO bloco livre, e os dois lados nao tinham o mesmo conjunto de
+# livres: o remendo de arranque em `2012984` -- que o oraculo aplicava e o port
+# nao -- ocupa o bloco 4, e com ele tomado o primeiro livre passa de 4 para
+# 350. Portado o remendo, os conjuntos passaram a ser o mesmo e o gate passou a
+# medir a rotina em vez do estado.
+#
+# A ORDEM DOS QUATRO PRIMEIROS CLIQUES E LOAD-BEARING -- ver o cabecalho de
+# `27-descarte-ml.txt`, que e a sonda deste.
 alvo: original
 estado: ok
 operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Ver o README dos roteiros: desde que os dois remendos de arranque
+# foram portados, nenhum roteiro do gate declara faixa.
 
 # ---------------------------------------------------------------- abrir ----
 > Abre

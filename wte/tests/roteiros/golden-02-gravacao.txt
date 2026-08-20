@@ -55,11 +55,16 @@ operacao: gravacao
 
 # ---------------------------------------------------------------- faixas ----
 #
+# NENHUMA. Ate 2026-08-20 este roteiro declarava `1921862..1921862` e
+# `2012984..2012985` -- as duas faixas do arranque que o oraculo gravava e o
+# port nao. A oitava passagem da WTE-TASK-27 achou os autores (`0x00411616` no
+# `FormShow` e `0x0040c19e` no `boton_dialogo_weClick`, os dois com o endereco
+# IMEDIATO no `.text`) e portou os dois remendos. Os dois lados gravam agora, e
+# declarar faixa que nao diverge mais REPROVA no `golden_veredito.py`.
+#
 # As duas do arranque, herdadas do golden-01: o que o oraculo grava so por
 # abrir a imagem e que ainda nao tem explicacao medida. Offsets 0-BASED e
 # INCLUSIVOS -- nao as posicoes 1-based do `cmp -l`.
-conhecida: 1921862..1921862
-conhecida: 2012984..2012985
 
 # ---------------------------------------------------------------- abrir ----
 > Abre
