@@ -1,0 +1,46 @@
+# golden-12-mcr2iso, lado PORT. Par de golden-12-mcr2iso.txt.
+#
+# Duas assimetrias, as duas pela mesma razao -- dialogo de arquivo do gtk2 nao
+# se dirige por coordenada fixa no `:99`: a imagem vem da linha de comando e o
+# cartao vem de `WTE_MCR_ENTRADA`.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# --------------------------------------------------------------- o time ----
+#
+# O DESTINO E DE SELECAO, e isso e escolha: seleção nao aloca bloco de Master
+# League, entao o gate mede a IMPORTACAO e nao o alocador -- que ja tem gate
+# proprio no `golden-11-descarte-ml`. Quatro `Down` levam ao indice 3.
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- o cartao ----
+#
+# Ja veio por `WTE_MCR_ENTRADA`, lido no `FormShow`. Nada a clicar aqui -- e a
+# unica assimetria entre os dois lados deste par.
+= CARTAO_ABERTO
+
+# --------------------------------------------------------- importar ----
+#
+# `boton_mcr2iso` (16,280) + grupo, 73x25 -> centro (52,292).
+! clique 52 292
+~ 5
+= IMPORTA
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

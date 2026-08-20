@@ -249,6 +249,10 @@ const
     embaralha a linha 20 do descarte no original, e aqui tambem. }
   BUF_CARTAO = 23;
 
+  { O literal que a `0x0040478c` poe no campo condicional de um jogador vindo
+    de cartao (`mov BYTE PTR [..+0x18],0x19`). O `.mcr` nao guarda o campo. }
+  CARTAO_CONDICIONAL = 25;
+
   { Os 23 numeros de camisa, 5 bits cada, em grupos de SEIS por `DWORD`: o
     original calcula `32 * (j div 6) + 5 * (j mod 6)` como posicao de bit. Sao
     30 bits usados por grupo e 2 perdidos, quatro grupos, 16 bytes -- a mesma
@@ -984,6 +988,7 @@ end;
 { O `GravaJogador` chama a gravacao pontual do numero, que mora mais abaixo --
   o time 48 guarda o numero dentro do registro de atributos. }
 procedure GravaNumeroDaCamisa(numero, indice, slot: Integer); forward;
+procedure GuardaNumeroNoModelo(numero, indice, slot: Integer); forward;
 
 { Leva o jogador gravado para o modelo em memoria.
 
@@ -1682,6 +1687,166 @@ end;
 
 
 { ------------------------------------------------------------------------ }
+{ O CARTAO CARREGADO -- as globais que o `boton_mcrClick` enche e o
+  `boton_mcr2isoClick` consome.
+
+  No original sao cinco vetores da `.data` (`0x00434364` os nomes, `0x0043445a`
+  os atributos, `0x0043444a` os numeros, `0x0043456e` a formacao, `0x0043458c`
+  os cobradores). Aqui e um registro so, e o CAMINHO fica junto porque a tatica
+  nao passa por esses vetores -- o `boton_mcr2iso` a le direto do arquivo, e
+  sem o caminho guardado o port nao teria de onde. }
+var
+  CartaoCarregado: TCartaoDeMemoria;
+  CartaoCaminho: string = '';
+
+{ CarregaJogadorDoCartao -- 0x0040478c, 145 bytes.
+
+  Enche um buffer de jogador com o slot `slot` do cartao. Nao le da imagem:
+  le do `.mcr`, e por isso e outra rotina que a `CarregaJogador`.
+
+  AS TRES ATRIBUICOES DO FIM NAO SAO ENFEITE, e sao elas que fazem o import
+  funcionar em clube de Master League:
+
+  - `tipo := TIPO_SOLTO` poe o buffer no unico estado que leva a `0x00404820`
+    ao ramo de ALOCACAO. Jogador vindo de cartao nao tem bloco na imagem: tem
+    de ganhar um;
+  - `ident_time := 0xFF` garante que a recusa `-2` (mesmo jogador dos dois
+    lados) nunca alcance este caminho -- `0xFF` nao e indice de time;
+  - `condicional := 25` e literal do original (`mov BYTE [..+0x18],0x19`). O
+    cartao nao guarda o campo, e 25 e o que entra no lugar. }
+procedure CarregaJogadorDoCartao(slot, buffer: Integer);
+var
+  b: Integer;
+begin
+  if (buffer < BUF_DESTINO) or (buffer > BUF_ULTIMO) then
+    Exit;
+  if (slot < 0) or (slot >= JOGADORES_NO_CARTAO) then
+    Exit;
+  for b := 0 to MCR_NOME_BYTES - 1 do
+    BufferJogador[buffer].nome[b] :=
+      AnsiChar(CartaoCarregado.nomes[slot * MCR_NOME_BYTES + b]);
+  BufferJogador[buffer].nome[MCR_NOME_BYTES] := #0;
+  for b := 0 to MCR_ATRIBUTO_BYTES - 1 do
+    BufferJogador[buffer].atributos[b] :=
+      ShortInt(CartaoCarregado.atributos[slot * MCR_ATRIBUTO_BYTES + b]);
+  BufferJogador[buffer].condicional := CARTAO_CONDICIONAL;
+  BufferJogador[buffer].tipo := TIPO_SOLTO;
+  BufferJogador[buffer].ident_time := IDENT_NENHUMA;
+end;
+
+{ Quantos blocos de Master League o import PRECISARIA para o time `indice`.
+
+  O laco de `0x0040c4a1`..`0x0040c556`, e ele e aritmetica ANTES de gravar: le
+  os 23 pares de vinculo do time e conta os que teriam de ganhar bloco novo --
+  vinculo para jogador de selecao (`b1 < 23`), ou bloco proprio compartilhado
+  com outro slot (`ocupacao > 1`). Bloco de dono unico nao conta: ele e
+  reaproveitado.
+
+  Devolve 0 para time de selecao, e ai nao ha o que contar. }
+function BlocosQueOImportPrecisa(indice: Integer): Integer;
+var
+  img: TCdImage;
+  slot, bloco: Integer;
+  b0, b1: Byte;
+begin
+  Result := 0;
+  if (indice < TIMES_NACIONAIS) or (ImagemAberta = '') then
+    Exit;
+  img.Init;
+  if not img.OpenRead(ImagemAberta) then
+    Exit;
+  try
+    img.Seek(OffsetDoVinculoMl(indice, 0), soBeginning);
+    for slot := 0 to JOGADORES_POR_TIME - 1 do
+    begin
+      if img.Read(b0, 1) <> 1 then
+        Break;
+      if img.Read(b1, 1) <> 1 then
+        Break;
+      if b1 < JOGADORES_POR_TIME then
+        Inc(Result)
+      else
+      begin
+        bloco := IndiceDoBlocoMl(b0, b1);
+        if (bloco < 0) or (bloco > High(OcupacaoMl))
+           or (OcupacaoMl[bloco] > 1) then
+          Inc(Result);
+      end;
+      SaltaFronteiraDeSetor(img);
+    end;
+  finally
+    img.Close;
+  end;
+end;
+
+{ ImportaCartaoParaImagem -- o corpo do `boton_mcr2isoClick` (0x0040c46c).
+
+  Ele NAO e um gravador novo: e um laco em volta das duas rotinas que a
+  WTE-TASK-27 portou. Para cada slot enche o buffer 23 do cartao e chama a
+  `GravaJogador` -- a mesma dos handlers de mover --, depois a
+  `GravaNumeroDaCamisa`. So formacao, tatica e cobradores tem endereco proprio.
+
+  Devolve `COD_SEM_BLOCO_ML` quando a conta acima nao fecha, e ai NAO GRAVA
+  BYTE NENHUM. E a diferenca entre esta recusa e a da `0x00404820`: aquela
+  recusa um slot, esta recusa os 23 de uma vez. Sem ela, importar num clube
+  quase cheio gravaria metade do time e pararia no meio. }
+function ImportaCartaoParaImagem(indice: Integer): Integer;
+var
+  img: TCdImage;
+  slot, precisa: Integer;
+  tatica: TTaticaDoCartao;
+begin
+  Result := COD_GRAVOU;
+  if (ImagemAberta = '') or (CartaoCaminho = '') or (indice < 0) then
+    Exit;
+
+  precisa := BlocosQueOImportPrecisa(indice);
+  if (indice >= TIMES_NACIONAIS) and (BlocosLivresDeMl < precisa) then
+  begin
+    ficha_error.etiq1.Caption := 'Voce precisa de   ' + IntToStr(precisa)
+                               + ' mais blocos livres!!!.       ';
+    ficha_error.ShowModal;
+    Result := COD_SEM_BLOCO_ML;
+    Exit;
+  end;
+
+  for slot := 0 to JOGADORES_POR_TIME - 1 do
+  begin
+    CarregaJogadorDoCartao(slot, BUF_CARTAO);
+    GravaJogador(BUF_CARTAO, indice, slot);
+    GravaNumeroDaCamisa(NumeroDoCartao(CartaoCarregado, slot), indice, slot);
+    GuardaNumeroNoModelo(NumeroDoCartao(CartaoCarregado, slot), indice, slot);
+  end;
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    GravaNoFluxo(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                   FORMACAO_LOGICO_BASE + FORMACAO_POR_TIME * indice
+                   + 2 * (indice div IDX_MODELO_ML)),
+                 CartaoCarregado.formacao[0], FORMACAO_BYTES);
+    { A tatica vem do arquivo, e nao do registro: o leitor do cartao nao a
+      traz, e o original a le aqui mesmo. Sao TRES bytes gravados, embora o
+      rascunho do original tenha quatro. }
+    if LeTaticaDoCartao(CartaoCaminho, tatica) then
+      GravaNoFluxo(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                     TATICA_LOGICO_BASE + TATICA_POR_TIME * indice),
+                   tatica[0], 3);
+    GravaNoFluxo(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                   COBRADOR_LOGICO_BASE + COBRADOR_POR_TIME * indice),
+                 CartaoCarregado.cobradores[0], 5);
+    { O capitao sai cinco bytes adiante, e SO ele leva o `+2` do time-modelo --
+      `0x4622D` contra `0x46228`, mais `2 * (indice div 95)`. }
+    GravaNoFluxo(img, EnderecoDeDados(SETOR_BASE_DADOS,
+                   COBRADOR_LOGICO_BASE + 5 + COBRADOR_POR_TIME * indice
+                   + 2 * (indice div IDX_MODELO_ML)),
+                 CartaoCarregado.cobradores[COBRADORES_BYTES - 1], 1);
+  finally
+    img.Close;
+  end;
+end;
+
 { GravaCartaoDeMemoria -- 0x0040f150, 1.356 bytes.
 
   A metade do `grabar_memoryClick` que sabe de bytes. O handler escolhe o

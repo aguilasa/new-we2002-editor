@@ -15,7 +15,7 @@
   nenhum. O argumento posicional existe no `wtemain.pas` desde a WTE-TASK-11
   exatamente para isto. }
 var
-  imagem, textura: string;
+  imagem, textura, cartao: string;
 begin
   REMark('MainForm.FormShow');
   { As tres cores de tempo de execucao. O original monta a cadeia `$00ffb676`,
@@ -113,4 +113,17 @@ begin
   { O destino do `.mcr`, pela mesma porta. Ver `CartaoDestino` no
     `we2002_estado`: aqui nao ha arquivo a conferir, o caminho e de SAIDA. }
   CartaoDestino := GetEnvironmentVariable('WTE_MCR');
+
+  { E o cartao de ENTRADA, que e o par do de cima e serve ao
+    `boton_mcr2isoClick`. O `boton_mcrClick` o carregaria pelo `TOpenDialog`,
+    e o dialogo do gtk2 nao se dirige por coordenada fixa no `:99` -- entao o
+    lado port do gate nunca chegaria ao `Execute`. Faz aqui o que aquele
+    handler faria: le e habilita o botao. }
+  cartao := GetEnvironmentVariable('WTE_MCR_ENTRADA');
+  if (cartao <> '') and LeCartaoDeMemoria(cartao, CartaoCarregado) then
+  begin
+    CartaoCaminho := cartao;
+    texto_mcr.Caption := ExtractFileName(cartao);
+    boton_mcr2iso.Enabled := True;
+  end;
 end;

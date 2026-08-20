@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 29 |
+| `implementado` | 30 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 53 |
+| `aberto` | 52 |
 | **total** | **96** |
 
 61 de 96 têm arquivo de spec.
@@ -92,7 +92,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |
-| `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | aberto |
+| `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | implementado |
 | `0x0040c46c` | `MainForm` | [boton_mcr2isoClick](MainForm.boton_mcr2isoClick.md) | OnClick | gravacao | aberto |
 | `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
 | `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | implementado |

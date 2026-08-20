@@ -118,7 +118,9 @@ arquivo** — é o golden test desta feature.
 | `wte/tools/dump_mcr.py`, `wte/tools/test_dump_mcr.py` | criar — feito |
 | `wte/src/we2002_mcr.pas` | criar — feito (o leitor e o layout) |
 | `wte/tests/test_mcr.pas` | criar — feito |
-| `wte/tests/roteiros/golden-12-mcr2iso{,.port}.txt` | criar — **falta** |
+| `wte/tests/roteiros/27-mcr2iso.txt` | criar — a sonda, feito |
+| `wte/tests/roteiros/golden-12-mcr2iso{,.port}.txt` | criar — feito |
+| `wte/src/impl/ep2002_mainform.boton_mcr{,2iso}Click.inc` | criar — feito |
 
 *(2026-08-20)* A fixture **não é versionada**, e a decisão está escrita no
 [`mcr.md`](../../wte/re/mcr.md): 128 KiB de nomes e atributos tirados da ROM são
@@ -242,11 +244,58 @@ cada grupo começa no bit 1 do quarto byte e **não vaza** para o grupo seguinte
 — são os 2 bits perdidos por grupo que garantem isso, e é o tipo de erro que
 passa despercebido porque só o 6º, 12º, 18º de cada grupo sairiam errados.
 
+### A terceira metade: os dois handlers e o gate
+
+- **`boton_mcrClick`** promovido. Duas divergências deliberadas: arquivo que
+  não é cartão **para aqui** (o original chama a `0x0040b9ec` sobre o que vier,
+  e o lixo iria para a imagem no clique seguinte), e o cartão também entra por
+  `WTE_MCR_ENTRADA` — a terceira afordância de arquivo do lado port, pela mesma
+  razão das outras duas.
+- **`boton_mcr2isoClick`** implementado, e ele **reusa em vez de
+  reimplementar**: a `ImportaCartaoParaImagem` é um laço em volta da
+  `GravaJogador` e da `GravaNumeroDaCamisa`, as duas com golden verde desde a
+  WTE-TASK-27. Só formação, tática e cobradores têm endereço próprio.
+- **A recusa dele é de outra natureza que a da `0x00404820`:** aquela recusa um
+  slot por falta de bloco; esta conta **antes** quantos blocos os 23 slots
+  precisariam e recusa os 23 de uma vez. Sem ela, importar num clube quase
+  cheio gravaria metade do time e pararia no meio.
+- **`0x0040478c` explica o resto.** Ela põe `tipo := 3` no buffer — o único
+  estado que leva a `0x00404820` ao ramo de **alocação**, que é o certo:
+  jogador vindo de cartão não tem bloco na imagem. E põe `condicional := 25`,
+  literal, porque o `.mcr` não guarda o campo. É de lá que saem os 23 bytes em
+  `3067473..3067495` que a sonda mediu e que não estão na lista de destinos do
+  handler.
+
+**Medido, time 3 da ROM japonesa — sete faixas, cada uma onde a fórmula
+prevê:** 223 B de nomes em `388786`, 14 de números em `404765`, 276 de
+atributos em `2180624`, 1 de tática em `2302816`, 27 de formação em `2303791`,
+5 de cobradores em `2329074` e 23 de condicional em `3067473`.
+
+### O gate ficou bloqueado pelo AMBIENTE, e não pelo código
+
+O `golden-12-mcr2iso` tem **controle byte-idêntico** (oráculo contra oráculo,
+2026-08-20) e a sonda mediu as sete faixas. O golden em si — oráculo contra
+port — **não rodou**: a guarda 2 do `golden_check.sh` recusa começar enquanto
+houver janela ≥ 900×450 no `:99`, e há uma que não é deste projeto:
+
+```text
+0x200006 "World of Football": ("wof" "wof")  1024x768+128+128
+```
+
+É o `./wof` de `~/desenvolvimento/github/World-Of-Football/WOF2/deploy/bin`,
+outro projeto da mesma máquina, lançado pelo `systemd --user` — e por isso
+**reaparece depois de morto**. Matá-lo seria mexer em trabalho alheio a esta
+task, e o `systemd` o traria de volta no meio da corrida de qualquer jeito.
+
+**A guarda está certa e não deve ser afrouxada:** os dois lados acham a janela
+por nome e por tamanho, e com aquela na tela dirigiriam a errada — que é
+exatamente o defeito que a guarda existe para impedir. Fica para quando o `:99`
+estiver livre.
+
 - **O que ficou pendente, e é o grosso:**
-  - o Pascal do `boton_mcrClick` e do `boton_mcr2isoClick` — a unidade que os
-    alimenta já existe;
-  - o golden do `boton_mcr2iso` e a prova de EDC/ECC na escrita de setor
-    inteiro;
+  - o **golden** do `boton_mcr2iso` — o roteiro está escrito e o controle
+    fechou; falta o `:99` livre (ver acima);
+  - a prova de EDC/ECC na escrita de setor inteiro;
   - os três casos especiais do readme e o round-trip.
 
 - **Problemas encontrados:**

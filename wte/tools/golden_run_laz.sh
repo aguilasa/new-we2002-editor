@@ -83,11 +83,14 @@ trap matar_port EXIT
 # gtk2 nao se dirigem por coordenada fixa sem gerenciador de janela, entao o
 # roteiro do lado port nao tem como escolher nem digitar caminho. O oraculo
 # escolhe pelo dialogo; os dois terminam com o MESMO arquivo, que e o que a
-# comparacao exige. `WTE_TEXTURA` e entrada, `WTE_MCR` e saida.
+# comparacao exige. `WTE_TEXTURA` e `WTE_MCR_ENTRADA` sao entrada, `WTE_MCR` e
+# saida -- e as tres existem pela mesma razao: o dialogo de arquivo do gtk2 nao
+# se dirige por coordenada fixa no `:99`.
 echo ">> port: lancando $APP"
 env WTE_TRACE_FILE="$SAIDA/port-trace.log" \
   ${WTE_TEXTURA:+WTE_TEXTURA="$WTE_TEXTURA"} \
   ${WTE_MCR:+WTE_MCR="$WTE_MCR"} \
+  ${WTE_MCR_ENTRADA:+WTE_MCR_ENTRADA="$WTE_MCR_ENTRADA"} \
   setsid "$APP" "$COPIA" >"$LOG" 2>&1 &
 sleep 3
 PID_ALVO="$(pgrep -n -f "^$APP" || true)"

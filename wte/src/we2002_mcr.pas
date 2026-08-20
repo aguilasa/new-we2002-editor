@@ -68,6 +68,9 @@ type
     tatica e o leitor nao le nenhum deles. Quem le tatica de um `.mcr` e o
     `boton_mcr2isoClick`, direto do arquivo. Por isso este registro reproduz o
     que o LEITOR traz, e nao o que o cartao guarda. }
+  { Os tres bytes de tatica que a imagem guarda por time. }
+  TTaticaDoCartao = array[0 .. 2] of Byte;
+
   TCartaoDeMemoria = record
     nomes: array[0 .. JOGADORES_NO_CARTAO * MCR_NOME_BYTES - 1] of Byte;
     atributos: array[0 .. JOGADORES_NO_CARTAO * MCR_ATRIBUTO_BYTES - 1] of Byte;
@@ -92,6 +95,25 @@ function LeCartaoDeMemoria(const caminho: string;
   e 2 perdidos, quatro grupos, 16 bytes -- a mesma forma do `SquadNumbers` do
   `we2002_core`. O `+1` e do original: o cartao guarda o numero menos um. }
 function NumeroDoCartao(const cartao: TCartaoDeMemoria; j: Integer): Integer;
+
+{ Os TRES bytes de tatica, montados dos cinco campos do cartao.
+
+  NAO E O `LeCartaoDeMemoria` quem faz isto, e a separacao e do original: a
+  `0x0040b9ec`, que enche o registro acima, nao le tatica nenhuma. Quem le e o
+  `boton_mcr2isoClick`, direto do arquivo (`0x0040c759` em diante), montando um
+  rascunho de 4 bytes com quatro insercoes de nibble e gravando os TRES
+  primeiros na imagem. Esta funcao e esse trecho, e por isso mora fora do
+  registro.
+
+  A montagem e o inverso exato do que o escritor desmonta:
+
+      tatica[0] := byte cru de MCR_TATICA_CRUA
+      tatica[1] := MCR_TATICA_1_BAIXO  or  (MCR_TATICA_1_ALTO  shl 4)
+      tatica[2] := MCR_TATICA_2_BAIXO  or  (MCR_TATICA_2_ALTO  shl 4)
+
+  O `MCR_TATICA_MAIS50` nao entra: e o mesmo byte 0 mais 50, que o cartao
+  guarda duas vezes e o original nunca le de volta. }
+function LeTaticaDoCartao(const caminho: string; out tatica: TTaticaDoCartao): Boolean;
 
 { O cartao declara ocupar quantos blocos? Le o diretorio pelo formato publico.
 
@@ -183,6 +205,38 @@ begin
   if byte_ini + 1 <= High(cartao.numeros) then
     valor := valor or (cartao.numeros[byte_ini + 1] shl 8);
   Result := ((valor shr bit) and $1F) + 1;
+end;
+
+function LeTaticaDoCartao(const caminho: string;
+                          out tatica: TTaticaDoCartao): Boolean;
+var
+  f: TFileStream;
+  cru, b1_baixo, b1_alto, b2_baixo, b2_alto: Byte;
+begin
+  Result := False;
+  FillChar(tatica, SizeOf(tatica), 0);
+  if not FileExists(caminho) then
+    Exit;
+  try
+    f := TFileStream.Create(caminho, fmOpenRead or fmShareDenyNone);
+  except
+    Exit;
+  end;
+  try
+    if f.Size <> CARTAO_BYTES then
+      Exit;
+    if not LeBloco(f, MCR_TATICA_CRUA, cru, 1) then Exit;
+    if not LeBloco(f, MCR_TATICA_1_BAIXO, b1_baixo, 1) then Exit;
+    if not LeBloco(f, MCR_TATICA_1_ALTO, b1_alto, 1) then Exit;
+    if not LeBloco(f, MCR_TATICA_2_BAIXO, b2_baixo, 1) then Exit;
+    if not LeBloco(f, MCR_TATICA_2_ALTO, b2_alto, 1) then Exit;
+    tatica[0] := cru;
+    tatica[1] := (b1_baixo and $0F) or ((b1_alto and $0F) shl 4);
+    tatica[2] := (b2_baixo and $0F) or ((b2_alto and $0F) shl 4);
+    Result := True;
+  finally
+    f.Free;
+  end;
 end;
 
 function BlocosDeclarados(const caminho: string): Integer;

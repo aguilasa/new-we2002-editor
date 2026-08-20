@@ -76,13 +76,29 @@ colateral: cai dentro da lista de descarte, embaralhando a linha 20.
 |---|---|---|
 | 23 jogadores | `0x00404820` | [`golden-09`](../../tests/roteiros/golden-09-mover.txt), [`golden-10`](../../tests/roteiros/golden-10-mover-ml.txt), [`golden-11`](../../tests/roteiros/golden-11-descarte-ml.txt) |
 | 23 números de camisa | `0x00404048` | [`golden-08`](../../tests/roteiros/golden-08-dorsal-mcr.txt) |
-| 30 B de formação | `0x00403400` direto | **não medido** |
+| 30 B de formação, 3 de tática, 6 de cobrador | `0x00403400` direto | [`27-mcr2iso`](../../tests/roteiros/27-mcr2iso.txt) |
 
-O terceiro é o único endereço novo deste handler, e sai da mesma base lógica
-das barras: `EnderecoDeDados(850, 0x40C2C + 30·time + 2·(time div 95))`, que
+Os endereços novos deste handler saem da mesma base lógica das barras. Medido
+com o time 3 da ROM japonesa, sete faixas ao todo:
+
+| faixa | bytes | o quê |
+|---|---:|---|
+| `388786..389008` | 223 | os 23 nomes |
+| `404765..404778` | 14 | os 23 números de camisa |
+| `2180624..2180899` | 276 | os 23 × 12 atributos |
+| `2302816` | 1 | tática |
+| `2303791..2303817` | 27 | formação |
+| `2329074..2329078` | 5 | cobradores |
+| `3067473..3067495` | 23 | o campo condicional — o literal **25** que a `0x0040478c` põe |
+
+A formação é `EnderecoDeDados(850, 0x40C2C + 30·time + 2·(time div 95))`, que
 para o time 0 dá 2303700 = `OFS_FORMATIONS`. O par de bytes extra é o mesmo
 `Read(buf,2)` que o `Load` do `we2002_core` faz entre os clubes de ML e o
-time-modelo.
+time-modelo, e **só o capitão o leva** entre os campos de cobrador.
+
+Os 23 bytes de condicional não estão na lista de destinos do handler: chegam
+lá pela `0x00404820`, porque a `0x0040478c` põe **25** no campo de todo
+jogador vindo de cartão — o `.mcr` não guarda o campo.
 
 **Evidência:** disassembly lido
 

@@ -2,7 +2,7 @@
 handler: boton_mcrClick
 formulario: MainForm
 endereco: 0x0040c2c8
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.boton_mcrClick
@@ -69,7 +69,18 @@ Não trata no corpo do handler.
 export de memory card. Este handler é a porta de entrada dela, e implementá-lo
 sem a 28 seria abrir um diálogo que não leva a lugar nenhum.
 
-*(2026-08-20)* A 28 mapeou o formato — contêiner e conteúdo, em
-[`../mcr.md`](../mcr.md) —, e a seção *Bytes tocados* acima já traz o que o
-`0x0040b9ec` faz. **O que falta é o Pascal**, e ele depende da unidade
-`we2002_mcr` que a mesma task cria.
+*(2026-08-20)* **Fechado.** A 28 mapeou o formato — contêiner e conteúdo, em
+[`../mcr.md`](../mcr.md) —, criou a unidade `we2002_mcr` com o leitor, e o
+Pascal deste handler está em
+[`../../src/impl/ep2002_mainform.boton_mcrClick.inc`](../../src/impl/ep2002_mainform.boton_mcrClick.inc).
+
+**Duas divergências deliberadas**
+([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):
+
+1. **arquivo que não é cartão para aqui.** O original chama a `0x0040b9ec`
+   sobre o que vier e habilita o botão; o port confere magia e tamanho antes,
+   porque o lixo iria **para a imagem** no clique seguinte;
+2. **o cartão também entra por `WTE_MCR_ENTRADA`**, lido no `FormShow`. É a
+   mesma afordância da textura e do destino do `.mcr`, e existe pela mesma
+   razão: o `TOpenDialog` do gtk2 não se dirige por coordenada fixa no `:99`,
+   então sem ela o lado port do gate nunca chegaria ao `Execute`.

@@ -1,0 +1,97 @@
+# golden-12-mcr2iso -- o gate do `boton_mcr2isoClick`, lado oraculo.
+#
+# WTE-TASK-28.
+#
+#   cp work/saida.mcr work/entrada.mcr     # a fixture, gerada por 27-mcr.txt
+#   WTE_MCR_ENTRADA=$PWD/work/entrada.mcr \
+#     bash wte/tools/golden_check.sh wte/tests/roteiros/golden-12-mcr2iso.txt \
+#          --roteiro-port wte/tests/roteiros/golden-12-mcr2iso.port.txt
+#
+# O `WTE_MCR_ENTRADA` e a assimetria do lado port, e ela e a mesma da textura:
+# o `TOpenDialog` do gtk2 nao se dirige por coordenada fixa no `:99`, entao o
+# port nunca chegaria ao `Execute` do `boton_mcrClick`. O oraculo digita o
+# caminho no dialogo; o port o recebe por ambiente. Os DOIS leem o mesmo
+# arquivo, e ele so e lido.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Ver o README dos roteiros: desde que os dois remendos de arranque
+# foram portados, nenhum roteiro do gate declara faixa.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# --------------------------------------------------------------- o time ----
+#
+# O DESTINO E DE SELECAO, e isso e escolha: seleção nao aloca bloco de Master
+# League, entao o gate mede a IMPORTACAO e nao o alocador -- que ja tem gate
+# proprio no `golden-11-descarte-ml`. Quatro `Down` levam ao indice 3.
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- abrir o cartao ----
+#
+# `boton_mcr` (16,248) dentro do `grupo_memorycard`, 25x25 -> centro (28,260).
+# O dialogo dele tambem se chama `Abre` -- o mesmo `Title` do dialogo da
+# imagem, no proprio DFM.
+! clique 28 260
+~ 2
+
+> Abre
+~ 2
+! clique 315 304
+! texto E:\entrada.mcr
+! tecla Return
+~ 4
+= CARTAO_ABERTO
+
+# ------------------------------------------------- de volta a janela ----
+#
+# SEM ESTA LINHA O CLIQUE SEGUINTE ERRA O ALVO, e custou uma corrida: o `>` do
+# roteiro nao espera janela, ele TROCA A ORIGEM das coordenadas. Depois do
+# `> Abre` do cartao a origem e o dialogo, e um clique em (52,292) vai parar
+# em (361+52, 240+292) -- fora da janela principal. O `boton_mcr2iso` nunca foi
+# clicado, o trace nao acusou I/O nenhum na marca IMPORTA, e o sintoma parecia
+# botao desabilitado.
+> W11 Team Editor PT by chagas_michel!
+~ 2
+
+# --------------------------------------------------------- importar ----
+#
+# `boton_mcr2iso` (16,280) + grupo, 73x25 -> centro (52,292).
+! clique 52 292
+~ 5
+= IMPORTA
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

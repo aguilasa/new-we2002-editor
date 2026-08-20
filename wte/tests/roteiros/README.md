@@ -163,6 +163,62 @@ procurar por `OFS_LINK_ML` nunca os ter encontrado. A oitava passagem da
 WTE-TASK-27 portou os dois remendos, os dois lados passaram a gravar, e as
 declaracoes tiveram de sair -- pela propria regra do paragrafo acima.
 
+## O `>` TROCA A ORIGEM das coordenadas, e nao so espera
+
+Custou uma corrida em 2026-08-20. Depois de um `> Abre` para o dialogo do
+cartao, todo `! clique` seguinte e relativo AO DIALOGO -- e um clique pensado
+para a janela principal vai parar longe dela. Roteiro que abre um dialogo no
+meio tem de **voltar** com um `>` para a janela principal antes do proximo
+clique nela:
+
+```text
+> Abre
+! clique 315 304
+! texto E:\entrada.mcr
+! tecla Return
+~ 4
+
+> W11 Team Editor PT by chagas_michel!    <- sem isto o clique abaixo erra
+~ 2
+! clique 52 292
+```
+
+O sintoma engana: o botao nunca e clicado, o trace nao acusa I/O nenhum na
+marca, e parece **botao desabilitado** ou handler que nao faz nada.
+
+## Janela orfa no `:99` quebra a espera por nome, e `pkill` nao a limpa
+
+O README ja avisa que **o processo morre e a janela sobrevive**; o caso espelho
+custou tres corridas em 2026-08-20. Uma sonda abortada deixou as janelas do
+`wte.exe` mapeadas no `:99`, e a corrida seguinte parou em
+`ERRO: janela 'Cuidado' nao apareceu em 30s` -- com a janela `Cuidado`
+**visivel na tela**. A espera por nome filtra pelo `_NET_WM_PID` do processo
+que o proprio script lancou, entao a janela velha nao serve, e a nova nunca
+apareceu porque o `Abre` que o roteiro dirigiu foi o velho.
+
+`pkill -9 -f we-team-editor.exe` **nao basta**: as janelas sao do wineserver,
+nao do processo. O que limpa e
+
+```sh
+env WINEPREFIX="$PWD/work/wineprefix-wte" "$WINE_BIN/wineserver" -k
+```
+
+Confira antes de acusar o roteiro:
+
+```sh
+DISPLAY=:99 xdotool search --name '.' | while read i; do \
+  echo "$i :: $(DISPLAY=:99 xdotool getwindowname $i)"; done
+```
+
+## As tres afordancias de arquivo do lado port
+
+`WTE_TEXTURA`, `WTE_MCR_ENTRADA` (entradas) e `WTE_MCR` (saida) existem pela
+mesma razao, e ela nao e conveniencia: **o `TOpenDialog`/`TSaveDialog` do gtk2
+nao se dirige por coordenada fixa no `:99`**. O oraculo digita o caminho no
+dialogo; o port o recebe por ambiente, e o `golden_run_laz.sh` as repassa
+quando o chamador as define. O arquivo e o MESMO dos dois lados -- e o que faz
+a comparacao valer.
+
 O par [`golden-01-arranque.port.txt`](golden-01-arranque.port.txt) e a
 assimetria temporaria: o port nao recebe teclado no `:99`, entao nao dirige o
 dialogo de abrir -- ele carrega pela linha de comando desde a WTE-TASK-25.

@@ -1023,3 +1023,46 @@ japanese-shift-jis.bin	27-mcr	GRAVA_MCR	R	2303760	2304271	512	979	1152
 japanese-shift-jis.bin	27-mcr	GRAVA_MCR	R	2329068	2329584	517	990	588
 japanese-shift-jis.bin	27-mcr	GRAVA_MCR	R	3067450	3067983	534	1304	442
 japanese-shift-jis.bin	27-mcr	FIM	.			0		
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	R	0	22	23	0	0
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	R	11796	12307	512	5	36
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	R	2002316	2004491	2176	851	764
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	R	2012680	2014871	2192	855	1720
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	R	2736694	2737205	512	1163	1318
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	11784	13831	2048	5	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	14136	16183	2048	6	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	16488	18535	2048	7	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	18840	20887	2048	8	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	21192	23239	2048	9	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	23544	25591	2048	10	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	25896	27943	2048	11	24
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	1921862	1921862	1	817	278
+japanese-shift-jis.bin	27-mcr2iso	ARRANQUE	W	2012984	2012985	2	855	2024
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	387792	389517	1726	164	2064
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	404716	405275	560	172	172
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	1012641	1013664	1024	430	1281
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	1013736	1014447	712	431	24
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	1881969	1883407	1439	800	369
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2002317	2003852	1536	851	765
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2003928	2005883	1956	852	24
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2028268	2029535	1268	862	844
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2328060	2329015	956	989	1932
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2667258	2667993	736	1134	90
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	2830161	2831451	1291	1203	705
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	4234485	4235371	887	1800	885
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	4598597	4599927	1331	1955	437
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	5651069	5653155	2087	2402	1565
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	12543596	12544779	1184	5333	380
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	12549518	12550157	640	5335	1598
+japanese-shift-jis.bin	27-mcr2iso	SELECIONA_TIME	R	14368636	14369147	512	6109	268
+japanese-shift-jis.bin	27-mcr2iso	CARTAO_ABERTO	.			0		
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	R	388786	389517	732	165	706
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	R	404764	405275	512	172	220
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	388786	389015	230	165	706
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	404764	404779	16	172	220
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	2180624	2180899	276	927	320
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	2302815	2302817	3	979	207
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	2303790	2303819	30	979	1182
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	2329074	2329079	6	990	594
+japanese-shift-jis.bin	27-mcr2iso	IMPORTA	W	3067473	3067495	23	1304	465
+japanese-shift-jis.bin	27-mcr2iso	FIM	.			0		
+japanese-shift-jis.bin	27-mcr2iso	FIM	.			0		

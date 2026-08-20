@@ -136,7 +136,7 @@ escrita cair dentro dos 2048. O que transforma isso de presumido em
 medido não é corrida nova: é uma conta sobre as faixas que as corridas
 já versionaram.
 
-Conferidas **148** faixas do `cmp`, em 11 sessões desta
+Conferidas **164** faixas do `cmp`, em 12 sessões desta
 task:
 
 - `27-barras-editada` — 10 faixa(s)
@@ -146,6 +146,7 @@ task:
 - `27-dorsal-editado` — 10 faixa(s)
 - `27-gravacao-controle` — 12 faixa(s)
 - `27-mcr` — 9 faixa(s)
+- `27-mcr2iso` — 16 faixa(s)
 - `27-mover` — 11 faixa(s)
 - `27-mover-ml` — 10 faixa(s)
 - `27-nomes-editados` — 19 faixa(s)

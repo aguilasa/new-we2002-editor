@@ -264,19 +264,11 @@ implementation
 procedure TMainForm.boton_dialogo_weClick(Sender: TObject);
 {$I impl/ep2002_mainform.boton_dialogo_weClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_mcrClick(Sender: TObject);
-begin
-  REStub('MainForm.boton_mcrClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.boton_mcrClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_mcr2isoClick(Sender: TObject);
-begin
-  REStub('MainForm.boton_mcr2isoClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.boton_mcr2isoClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.Button2Click(Sender: TObject);

@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2544 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2536 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9312** |
-| Escrito à mão | 61 | 4549 |
-| **Total** | | **13861** |
+| **Gerado, subtotal** | | **9304** |
+| Escrito à mão | 63 | 4783 |
+| **Total** | | **14087** |
 
-**67.2% do Pascal da casca é saída de gerador.**
+**66.0% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -86,10 +86,12 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.casilla_nombreKeyPress.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_jugador.flechasapaClick.inc` | 67 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.FormShow.inc` | 116 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 1929 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.FormShow.inc` | 129 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 2094 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_barras2isoClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 27 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.boton_mcr2isoClick.inc` | 23 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.boton_mcrClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_tex2isoClick.inc` | 79 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 97 | corpo de handler, da spec (fase 4) |
@@ -125,7 +127,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 88.5% — e passa a medir bitmap, não geração de código.
+fração sobe para 88.0% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -145,13 +147,13 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 | Unidade | Stubs |
 |---|---|
 | `src/ep2002_color.pas` | 17 |
-| `src/ep2002_mainform.pas` | 10 |
+| `src/ep2002_mainform.pas` | 8 |
 | `src/ep2002_estrategia.pas` | 6 |
 | `src/ep2002_jugador.pas` | 5 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_dorsal.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 55 |
+| _com corpo escrito_ | 57 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -162,6 +164,8 @@ das duas formas.
 - `MainForm.FormShow`
 - `MainForm.boton_barras2isoClick`
 - `MainForm.boton_dialogo_weClick`
+- `MainForm.boton_mcr2isoClick`
+- `MainForm.boton_mcrClick`
 - `MainForm.boton_nombres2isoClick`
 - `MainForm.boton_tex2isoClick`
 - `MainForm.dorsalClick`

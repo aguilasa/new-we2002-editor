@@ -52,8 +52,9 @@ abaixo é derivada dele — como o resto deste arquivo.
 | `27-mover-ml` | 10 | 10 | 10 |
 | `27-descarte-ml` | 13 | 13 | 13 |
 | `27-mcr` | 9 | 9 | 9 |
+| `27-mcr2iso` | 16 | 16 | 16 |
 
-**As duas réguas fecham nas 16 sessões que escreveram.**
+**As duas réguas fecham nas 17 sessões que escreveram.**
 Faixa do `cmp` que sobrasse significaria syscall perdida pelo
 trace, e nenhum número desta task valeria nada — é literalmente o
 que já aconteceu duas vezes, e as duas foram descobertas aqui.
