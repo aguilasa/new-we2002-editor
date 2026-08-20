@@ -3,7 +3,7 @@ id: CORR-WTE-070
 title: "Correção: a tabela \"Arquivos a criar ou modificar\" da WTE-TASK-27 aponta para arquivos que não existem"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -87,18 +87,34 @@ dois lados deixam de receber a mesma entrada.
 
 ## Verificação
 
-- [ ] A tabela da 27 não cita mais `wte/tools/roteiros/`
-- [ ] Todo caminho citado na tabela existe:
+- [x] A tabela da 27 não cita mais `wte/tools/roteiros/`
+- [x] Todo caminho citado na tabela existe:
       `for p in <caminhos>; do ls $p >/dev/null || echo QUEBRADO $p; done`
-- [ ] A mudança de formato está anotada com data e motivo, como na WTE-TASK-33
-- [ ] `roms/` intocada
+- [x] A mudança de formato está anotada com data e motivo, como na WTE-TASK-33
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+A tabela de arquivos da WTE-TASK-27 foi reescrita contra a árvore: as specs
+criadas são doze (as quatro gravações, o `dorsalClick` e os sete de mover), os
+fontes modificados são os `.inc` do `ep2002_mainform` mais o `we2002_estado` e
+o `we2002_ml`, e o que a linha de `.sh` prometia são os 21 roteiros
+`golden-*.txt` e as 9 sondas `27-*.txt` de `wte/tests/roteiros/`. A nota datada
+segue a forma que a WTE-TASK-33 usou: diz o que a tabela dizia, o que existe, e
+por que o formato mudou — roteiro declarativo em vez de script, porque driver
+que reage à tela muda o estímulo quando um lado diverge, e aí os dois lados
+deixam de receber a mesma entrada.
+
 **Problemas encontrados:**
 
+Nenhum. Conferido depois da edição que todo caminho citado existe e que as
+contagens batem: 21 `golden-*`, 9 `27-*`, nenhum `.sh` em lugar nenhum da
+árvore de roteiros.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/27-handlers-de-gravacao.md`

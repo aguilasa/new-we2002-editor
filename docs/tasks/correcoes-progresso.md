@@ -89,7 +89,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-067](/docs/tasks/CORR-WTE-067.md) | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | A nota nova da WTE-TASK-27 põe a `AtualizaBlocosLivresDeMl` no `we2002_ml` e promete um mapa de ocupação que a unidade não expõe | Baixa | [x] concluída | 2026-08-19 |
 | [CORR-WTE-068](/docs/tasks/CORR-WTE-068.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Três specs de gravação ainda dizem que o gate passa "só as duas faixas do arranque"; medido hoje, os três dão byte-idêntico | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-069](/docs/tasks/CORR-WTE-069.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | As três funções novas do `we2002_ml` (`IndiceDoBlocoMl`, `ParDoIndiceLinearMl`, `PrimeiroBlocoLivreMl`) entraram no caminho de gravação sem um teste sequer | Baixa | [ ] pendente | — |
-| [CORR-WTE-070](/docs/tasks/CORR-WTE-070.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | A tabela "Arquivos a criar ou modificar" da 27 aponta para `wte/tools/roteiros/gravacao-*.sh`, que não existe | Baixa | [ ] pendente | — |
+| [CORR-WTE-070](/docs/tasks/CORR-WTE-070.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | A tabela "Arquivos a criar ou modificar" da 27 aponta para `wte/tools/roteiros/gravacao-*.sh`, que não existe | Baixa | [x] concluída | 2026-08-20 |
 
 ## Checklist
 
@@ -161,7 +161,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-067 — reescrever a nota de desbloqueio da 27 com a API que ficou
 - [x] CORR-WTE-068 — reescrever a régua das três specs com o resultado de hoje
 - [ ] CORR-WTE-069 — cobrir o inverso do índice linear e o alocador com teste próprio
-- [ ] CORR-WTE-070 — reconciliar a tabela de arquivos da 27 com a árvore
+- [x] CORR-WTE-070 — reconciliar a tabela de arquivos da 27 com a árvore
 
 ## Detalhes por correção
 

@@ -137,9 +137,15 @@ um campo de tela.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/spec/<handler>.md` | criar (4) |
-| `wte/src/ep2002_*.pas` | modificar |
-| `wte/tools/roteiros/gravacao-*.sh` | criar (4) |
+| `wte/re/spec/MainForm.*.md` | criar (12) — as quatro gravações, o `dorsalClick` e os sete de mover |
+| `wte/src/impl/ep2002_mainform.*.inc`, `wte/src/we2002_estado.pas`, `wte/src/we2002_ml.pas` | modificar |
+| `wte/tests/roteiros/golden-NN-*.txt` + `.port.txt` | criar (21) — o roteiro do gate, em arquivo fixo |
+| `wte/tests/roteiros/27-*.txt` | criar (9) — as sondas |
+
+*(2026-08-20)* A tabela era do enunciado de 2026-08-11 e citava
+`wte/tools/roteiros/gravacao-*.sh`. **O roteiro virou arquivo declarativo**, não
+script de shell: driver que reage à tela muda o estímulo quando um lado diverge,
+e aí os dois lados deixam de receber a mesma entrada.
 
 ---
 
