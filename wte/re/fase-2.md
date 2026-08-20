@@ -44,12 +44,12 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 21 | 2544 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9312** |
-| Escrito à mão | 61 | 4567 |
-| **Total** | | **13879** |
+| Escrito à mão | 61 | 4549 |
+| **Total** | | **13861** |
 
-**67.1% do Pascal da casca é saída de gerador.**
+**67.2% do Pascal da casca é saída de gerador.**
 
-Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
+Fora desta conta, por não serem casca: `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
 Contá-las aqui faria o número da §4.4 flutuar a cada unidade nova, e — pior —
 as jogaria na coluna "escrito à mão", porque a marca no cabeçalho delas é a do
@@ -87,7 +87,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_jugador.flechasapaClick.inc` | 67 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormCreate.inc` | 20 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.FormShow.inc` | 116 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 1947 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 1929 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_barras2isoClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_weClick.inc` | 27 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |

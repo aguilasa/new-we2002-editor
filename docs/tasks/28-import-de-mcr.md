@@ -116,8 +116,8 @@ arquivo** — é o golden test desta feature.
 | `wte/re/mcr.md`, `wte/re/mcr.tsv` | criar — **gerados**, feito |
 | `wte/re/mcr-medido.tsv` | criar — medição da fixture, feito |
 | `wte/tools/dump_mcr.py`, `wte/tools/test_dump_mcr.py` | criar — feito |
-| `wte/src/we2002_mcr.pas` | criar — **falta** |
-| `wte/tests/test_mcr.pas` | criar — **falta** |
+| `wte/src/we2002_mcr.pas` | criar — feito (o leitor e o layout) |
+| `wte/tests/test_mcr.pas` | criar — feito |
 | `wte/tests/roteiros/golden-12-mcr2iso{,.port}.txt` | criar — **falta** |
 
 *(2026-08-20)* A fixture **não é versionada**, e a decisão está escrita no
@@ -209,13 +209,42 @@ o cartão com o próprio original, pelo roteiro
   - criados: `wte/tools/dump_mcr.py`, `wte/tools/test_dump_mcr.py`,
     `wte/re/mcr.md` (gerado), `wte/re/mcr.tsv` (gerado),
     `wte/re/mcr-medido.tsv` (medido),
-    `wte/re/spec/MainForm.boton_mcr2isoClick.md`
+    `wte/re/spec/MainForm.boton_mcr2isoClick.md`,
+    `wte/src/we2002_mcr.pas`, `wte/tests/test_mcr.pas`
   - modificados: `wte/re/spec/MainForm.boton_mcrClick.md` (o mapa do leitor),
-    `wte/re/spec/INDICE.md`, `wte/tools/README.md`
+    `wte/re/spec/INDICE.md`, `wte/tools/README.md`, `wte/tests/README.md`,
+    `wte/src/impl/ep2002_mainform.aux.inc` (as constantes do cartão saíram),
+    `ep2002_mainform.uses`, `wte/src/ep2002_mainform.pas` (regerado)
+
+### A segunda metade da passagem: o Pascal do formato
+
+- **`wte/src/we2002_mcr.pas`**, com o layout e o **leitor** — a `0x0040b9ec`.
+  As constantes do cartão **mudaram de casa**: estavam no `.aux.inc` do
+  `MainForm`, escritas pela WTE-TASK-27 para o escritor, e agora moram na
+  unidade do formato. Leitor e escritor precisam dos mesmos endereços, e ter
+  duas cópias seria ter duas verdades.
+- **O `dump_mcr.py` passou a conferir o Pascal.** Ele não gera o
+  `we2002_mcr.pas` — a prosa dele veio da leitura do disassembly e gerador
+  nenhum a produziria —, mas lê as constantes do fonte e as compara com o
+  layout, do jeito que o `check_lcl_props.py` confere o que não gera. A recusa
+  foi **vista**: com `MCR_CAPITAO` plantado em `$6501` o guard reprova, e o
+  teste planta.
+- **`wte/tests/test_mcr.pas`**, e a terceira ponta. Além dos invariantes sem
+  cartão (contêiner, aritmética de 5 bits, índice fora da faixa), ele lê um
+  cartão de verdade e confronta com o que o Python leu do **mesmo** arquivo:
+  formação, cobradores e os 23 dorsais. E há um caso que não é do Pascal — a
+  fixture reproduz os números que a spec do `grabar_memoryClick` mediu quando
+  aquele handler foi portado, uma task atrás. Layout errado não os
+  reproduziria.
+
+**O que a aritmética de 5 bits precisava provar, e prova:** o sexto jogador de
+cada grupo começa no bit 1 do quarto byte e **não vaza** para o grupo seguinte
+— são os 2 bits perdidos por grupo que garantem isso, e é o tipo de erro que
+passa despercebido porque só o 6º, 12º, 18º de cada grupo sairiam errados.
 
 - **O que ficou pendente, e é o grosso:**
-  - `wte/src/we2002_mcr.pas` e `wte/tests/test_mcr.pas`;
-  - o Pascal do `boton_mcrClick` e do `boton_mcr2isoClick`;
+  - o Pascal do `boton_mcrClick` e do `boton_mcr2isoClick` — a unidade que os
+    alimenta já existe;
   - o golden do `boton_mcr2iso` e a prova de EDC/ECC na escrita de setor
     inteiro;
   - os três casos especiais do readme e o round-trip.

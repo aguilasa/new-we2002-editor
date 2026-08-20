@@ -40,6 +40,7 @@ veredito e da task.
 
 from __future__ import annotations
 
+import re
 import struct
 import sys
 from pathlib import Path
@@ -55,6 +56,8 @@ REL_DAT = "we-team-editor/data/dat.bin"
 OUT_MD = ROOT / "wte" / "re" / "mcr.md"
 OUT_TSV = ROOT / "wte" / "re" / "mcr.tsv"
 MEDIDO = ROOT / "wte" / "re" / "mcr-medido.tsv"
+PASCAL = ROOT / "wte" / "src" / "we2002_mcr.pas"
+REL_PASCAL = "wte/src/we2002_mcr.pas"
 
 # --- o conteiner, pela documentacao publica -------------------------------
 CARTAO_BYTES = 0x20000       # 131.072 = 16 blocos
@@ -131,6 +134,77 @@ def le_dwords(blob: bytes, va: int, quantos: int) -> tuple[int, ...]:
     raise McrError(f"{REL_EXE}: VA {va:#x} fora de toda secao")
 
 
+# Nome da constante Pascal -> endereco que o layout aqui diz. O `we2002_mcr`
+# e escrito a mao (com a prosa que a leitura do disassembly produziu), e esta
+# tabela e o que impede as duas verdades de se separarem: o `--check` le o
+# Pascal e compara. E o mesmo contrato do `check_lcl_props.py` -- confere o que
+# nao gera.
+CONSTANTES_PASCAL = {
+    "MCR_NUMEROS": 0x5404,
+    "MCR_JOGADORES": 0x5904,
+    "MCR_JOGADOR_PASSO": 32,
+    "MCR_FORMACAO_1": 0x63D5,
+    "MCR_FORMACAO_2": 0x62A8,
+    "MCR_TATICA_CRUA": 0x64E2,
+    "MCR_TATICA_MAIS50": 0x6102,
+    "MCR_TATICA_1_BAIXO": 0x6488,
+    "MCR_TATICA_1_ALTO": 0x6479,
+    "MCR_TATICA_2_BAIXO": 0x6497,
+    "MCR_TATICA_2_ALTO": 0x64A6,
+    "MCR_CAPITAO": 0x6500,
+    "CARTAO_BYTES": CARTAO_BYTES,
+    "CARTAO_BLOCO": BLOCO_BYTES,
+}
+
+
+def constantes_do_pascal() -> dict[str, int]:
+    """As constantes de `we2002_mcr.pas`, lidas do fonte.
+
+    So `NOME = $HEX;` ou `NOME = decimal;` na secao `const` -- e o bastante
+    para o que esta tabela cobre, e recusar o resto e melhor do que aceitar uma
+    expressao e avaliar errado.
+    """
+    if not PASCAL.is_file():
+        raise McrError(f"{REL_PASCAL} nao existe")
+    achados: dict[str, int] = {}
+    for linha in PASCAL.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*([A-Z][A-Z0-9_]*)\s*=\s*(\$[0-9A-Fa-f]+|\d+)\s*;",
+                     linha)
+        if m:
+            achados[m.group(1)] = (int(m.group(2)[1:], 16)
+                                   if m.group(2).startswith("$")
+                                   else int(m.group(2)))
+    return achados
+
+
+def cobradores_do_pascal() -> tuple[int, ...]:
+    m = re.search(r"MCR_COBRADORES:[^=]*=\s*\(([^)]*)\)",
+                  PASCAL.read_text(encoding="utf-8"))
+    if not m:
+        raise McrError(f"{REL_PASCAL}: MCR_COBRADORES nao encontrado")
+    return tuple(int(x.strip()[1:], 16) for x in m.group(1).split(","))
+
+
+def confere_pascal(cob: tuple[int, ...]) -> None:
+    achados = constantes_do_pascal()
+    ruins = []
+    for nome, esperado in CONSTANTES_PASCAL.items():
+        if nome not in achados:
+            ruins.append(f"{nome}: ausente")
+        elif achados[nome] != esperado:
+            ruins.append(f"{nome}: Pascal diz {achados[nome]:#x}, o layout diz "
+                         f"{esperado:#x}")
+    no_pascal = cobradores_do_pascal()
+    if no_pascal != cob:
+        ruins.append(f"MCR_COBRADORES: Pascal diz "
+                     f"{[hex(x) for x in no_pascal]}, o `.exe` diz "
+                     f"{[hex(x) for x in cob]}")
+    if ruins:
+        raise McrError(
+            f"{REL_PASCAL} e o layout deste gerador divergem:\n     "
+            + "\n     ".join(ruins))
+
+
 def diretorio(card: bytes) -> list[dict]:
     saida = []
     for i in range(1, QUADROS_DE_DIRETORIO + 1):
@@ -172,6 +246,8 @@ def gera() -> dict[Path, str]:
         raise McrError(
             f"{REL_EXE}: a tabela de bits em {VA_TABELA_BITS:#x} vale {bits}, "
             f"esperado {BITS_ESPERADOS}")
+
+    confere_pascal(cob)
 
     dir_ = diretorio(card)
     usados = blocos_do_save(dir_)
@@ -417,7 +493,8 @@ def do_check(files: dict[Path, str]) -> int:
             print("  " + r, file=sys.stderr)
         print(f"rode: python3 {GERADOR}", file=sys.stderr)
         return 2
-    print(f"{len(files)} arquivos em dia com {REL_DAT} + {REL_EXE}")
+    print(f"{len(files)} arquivos em dia com {REL_DAT} + {REL_EXE}; "
+          f"{REL_PASCAL} bate com o layout")
     return 0
 
 

@@ -227,12 +227,14 @@ const
   `we2002_core` pula entre os 32 clubes de ML e o time-modelo (`Read(buf,2)`
   no `Load`). Ele so tem efeito no item 95 do combo. }
 const
-  { O molde: a PRIMEIRA metade do `dat.bin` e um cartao PSX formatado, com o
-    slot do WE2002 pronto. `0x20000` = 131.072 = o tamanho exato de um memory
-    card. A segunda metade e outra coisa -- os 7 setores que o arranque injeta
-    na imagem, ja portados no `we2002_estado`. }
-  CARTAO_BYTES = $20000;
+  { O LAYOUT DO CARTAO MUDOU DE CASA na WTE-TASK-28: `CARTAO_BYTES`, os
+    `MCR_*` e a tabela `MCR_COBRADORES` moram agora no `we2002_mcr`, que e a
+    unidade do formato -- o leitor precisa dos mesmos enderecos que o escritor,
+    e ter duas copias seria ter duas verdades. O `dump_mcr.py` confere as
+    constantes de la contra o `.exe` a cada `make check`.
 
+    O que ficou AQUI e o que nao e do cartao: os enderecos LOGICOS na imagem,
+    de onde os dados saem. }
   FORMACAO_LOGICO_BASE = $40C2C;   { = OFS_FORMATIONS no time 0 }
   FORMACAO_POR_TIME    = 30;
   TATICA_LOGICO_BASE   = $408A8;   { sem nome no we2002_core }
@@ -240,32 +242,12 @@ const
   COBRADOR_LOGICO_BASE = $46228;   { = OFS_KICKER no time 0 }
   COBRADOR_POR_TIME    = 6;
 
-  { Os destinos dentro do cartao. Todos medidos: a sonda `27-mcr.txt` produz um
-    `.mcr` pelo oraculo e o compara com o molde do `dat.bin`. }
-  MCR_NUMEROS       = $5404;   { 16 B: os 23 dorsais, 5 bits cada       }
-  MCR_JOGADORES     = $5904;   { 23 registros, 22 B uteis em 32 de passo }
-  MCR_JOGADOR_PASSO = 32;
-  MCR_FORMACAO_1    = $63D5;   { os 10 primeiros bytes da formacao      }
-  MCR_FORMACAO_2    = $62A8;   { os 20 restantes                        }
-  MCR_TATICA_CRUA   = $64E2;   { tatica[0], como esta na imagem         }
-  MCR_TATICA_MAIS50 = $6102;   { tatica[0] + 50, o mesmo byte de novo   }
-  MCR_TATICA_1_BAIXO = $6488;
-  MCR_TATICA_1_ALTO  = $6479;
-  MCR_TATICA_2_BAIXO = $6497;
-  MCR_TATICA_2_ALTO  = $64A6;
-  MCR_CAPITAO        = $6500;  { o sexto byte do bloco de cobradores    }
-
   { O buffer de jogador que o original usa como rascunho: o 23. Ele cai DENTRO
     da lista de descarte (`BUF_DESCARTE_BASE + 20`), e isso nao e engano de
     leitura -- o `0x0040f150` passa `ecx = 0x17` para a `0x004046e8`, e a
     `0x00404374` indexa o array de 44 bytes por esse valor. Emitir um cartao
     embaralha a linha 20 do descarte no original, e aqui tambem. }
   BUF_CARTAO = 23;
-
-  { Os cinco destinos dos cobradores, na ORDEM em que o original os grava --
-    a tabela de cinco `DWORD` em `0x00423F84`. Ela nao e crescente, e por isso
-    e tabela e nao aritmetica. }
-  MCR_COBRADORES: array[0..4] of LongInt = ($614F, $6140, $6122, $6113, $6131);
 
   { Os 23 numeros de camisa, 5 bits cada, em grupos de SEIS por `DWORD`: o
     original calcula `32 * (j div 6) + 5 * (j mod 6)` como posicao de bit. Sao

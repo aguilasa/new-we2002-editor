@@ -10,6 +10,7 @@ O que existe hoje:
 | `dump_estado.pas` | WTE-TASK-20, escrito à mão | despeja todo o estado carregado, e `--roundtrip` faz Load+Save |
 | `dump_estado.cpp` | WTE-TASK-20, escrito à mão | o irmão do lado `we2002_core`, mesmo formato e mesmo verbo |
 | `test_ml.pas` | WTE-TASK-33, escrito à mão | prova a conta de blocos livres de Master League contra a do `conta_ml.py`, na mesma cópia |
+| `test_mcr.pas` | WTE-TASK-28, escrito à mão | prova o leitor de `.mcr` — o contêiner, a aritmética de 5 bits do dorsal, e a leitura de um cartão de verdade contra a do `dump_mcr.py` |
 | `roteiros/` | WTE-TASK-13 e 19 | os roteiros de trace de evento e o par 07/08 do travamento |
 
 Os dois `test_offsets.*` saem de `wte/tools/gen_tables_pas.py` e **não se edita à

@@ -505,8 +505,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 67,1% do Pascal da casca é saída de gerador** —
-9.312 linhas geradas contra 4.567 escritas à mão. Dessas 4.567, 352 são andaime de
+**Medido com a fase 4 em curso: 67,2% do Pascal da casca é saída de gerador** —
+9.312 linhas geradas contra 4.549 escritas à mão. Dessas 4.549, 352 são andaime de
 projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/`, que é exatamente a última linha da tabela acima: a parte que
 tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
