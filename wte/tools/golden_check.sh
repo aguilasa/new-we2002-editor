@@ -158,7 +158,13 @@ case "$MODO" in
   golden)
     echo ">> lado B: app Lazarus"
     if [ -n "$ARTEFATO" ]; then
+      # As DUAS afordancias de destino, sempre as duas. Cada handler le a sua
+      # (`grabar_memoryClick` le `WTE_MCR`, `grabar_camisetaClick` le
+      # `WTE_UNI`), e quem decide qual dispara e o roteiro -- a variavel que
+      # sobra e inerte. Semear so uma exigiria que este script soubesse qual
+      # botao o roteiro clica, que e informacao que ele nao tem.
       export WTE_MCR="$WORK/$ARTEFATO"
+      export WTE_UNI="$WORK/$ARTEFATO"
     fi
     bash "$AQUI/golden_run_laz.sh" "$ROTEIRO_PORT" "$B" "$SAIDA"
     ;;

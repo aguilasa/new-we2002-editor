@@ -114,6 +114,9 @@ begin
     `we2002_estado`: aqui nao ha arquivo a conferir, o caminho e de SAIDA. }
   CartaoDestino := GetEnvironmentVariable('WTE_MCR');
 
+  { E o destino do uniforme, terceiro da mesma familia. Ver `UniformeDestino`. }
+  UniformeDestino := GetEnvironmentVariable('WTE_UNI');
+
   { E o cartao de ENTRADA, que e o par do de cima e serve ao
     `boton_mcr2isoClick`. O `boton_mcrClick` o carregaria pelo `TOpenDialog`,
     e o dialogo do gtk2 nao se dirige por coordenada fixa no `:99` -- entao o

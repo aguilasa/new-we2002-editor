@@ -72,6 +72,13 @@ var
     arquivo, que e o mesmo que o oraculo recebe pelo dialogo. }
   CartaoDestino: string = '';
 
+  { O caminho do uniforme que o `grabar_camisetaClick` vai extrair.
+
+    Terceiro membro da mesma familia, e pela mesma razao que o `CartaoDestino`:
+    `TSaveDialog` do gtk2 quer nome DIGITADO. `WTE_UNI` semeia o destino no
+    `FormShow`. }
+  UniformeDestino: string = '';
+
   { As seis pastas de asset, montadas pelo `MainForm.FormCreate` (0x004107c8).
 
     No original sao seis globais de AnsiString, medidos na WTE-TASK-08

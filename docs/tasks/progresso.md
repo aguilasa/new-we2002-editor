@@ -306,10 +306,13 @@ só uma escolha de quando.
       `home1` e `home2` pixel a pixel contra o oráculo e dá 0 de 8.960 px
       (9.800 no clube de ML). Falta a grade de cores — variar a cor pelo
       `ficha_color` —, que precisa dos 15 handlers daquele formulário
-- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância — e **medido em
-      2026-08-20 que ele não grava na imagem**: lê dela e emite arquivo, com o
-      laço saltando cabeçalho e EDC/ECC de cada setor. O gate dele é
-      `--artefato`, e o critério de EDC/ECC não se aplica
+- [x] `grabar_camisetaClick` byte-idêntico, sem tolerância — **fechado em
+      2026-08-21** pelo [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt),
+      com controle antes: 30.956 bytes idênticos nos dois lados, e a imagem
+      intacta nos dois. Ele **não grava na imagem**: lê dela e emite arquivo,
+      com o laço saltando cabeçalho e EDC/ECC de cada setor, então o gate é
+      `--artefato` e o critério de EDC/ECC não se aplica. A recusa foi vista —
+      sem o `+ 32` do campo de tamanho o artefato sai com 30.924 bytes
 
 Os cinco bullets acima vinham da Fase 5 até 2026-08-19. Eles desceram junto com
 as tasks: cada uma das duas features fechou de vir depois da gravação que ela

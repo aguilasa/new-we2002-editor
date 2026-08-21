@@ -133,6 +133,8 @@ gravar **nesta imagem**:
 | `wte/src/wte_uniformes.pas` | criar — feito (gerado: as duas tabelas de `.data`) |
 | `wte/tests/test_render.pas`, `wte/tests/test_bmp.pas` | criar — feito |
 | `wte/tools/compara_tela.py` | estender — feito (a medida dos três `TImage`) |
+| `wte/src/impl/ep2002_mainform.grabar_camisetaClick.inc` | criar — feito |
+| `wte/tests/roteiros/golden-14-uniforme{,.port}.txt` | criar — feito |
 
 ---
 
@@ -169,12 +171,15 @@ gravar **nesta imagem**:
       `PRIMEIRA_UNIFORME = 0` o mesmo teste acusa 2.008 de 3.360 px no `home1`.
       Falta variar a cor pelo `ficha_color`, que é a "grade" do enunciado e
       depende dos 15 handlers daquele formulário
-- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância, com spec em
-      `wte/re/spec/MainForm.grabar_camisetaClick.md` e golden verde. **O
-      formato do gate já está decidido:** ele emite arquivo e deixa a ROM
-      intacta, então é `--artefato`, como o
-      [`golden-07-mcr`](../../wte/tests/roteiros/golden-07-mcr.txt) — comparar
-      só as imagens aprovaria um port inerte
+- [x] **`grabar_camisetaClick` byte-idêntico, sem tolerância** — spec em
+      [`MainForm.grabar_camisetaClick.md`](../../wte/re/spec/MainForm.grabar_camisetaClick.md),
+      golden [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt)
+      verde com o controle antes. **30.956 bytes idênticos nos dois lados, e a
+      imagem intacta nos dois.** O gate é `--artefato`, como o
+      [`golden-07-mcr`](../../wte/tests/roteiros/golden-07-mcr.txt): comparar
+      só as imagens aprovaria um port inerte, porque nenhum dos dois lados as
+      toca. A recusa foi **vista** — tirando o `+ 32` do campo de tamanho o
+      artefato sai com 30.924 bytes
 - [x] **Determinado se `grabar_camisetaClick` escreve setor inteiro ou só
       payload — e a pergunta tinha uma premissa errada embutida.** Ele não
       escreve na imagem de forma nenhuma: **lê** dela e escreve num arquivo. O
@@ -215,6 +220,80 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Quarta passagem, 2026-08-21 — **parcial**: a extração do uniforme
+
+A task **continua `⬜ Pendente`**. Fechou o `grabar_camisetaClick`; sobram os 15
+handlers do `ficha_color` e, com eles, a grade de cores do diff de bitmap.
+
+- **Resumo do que foi feito:**
+
+  **O handler é o inverso exato do `boton_tex2isoClick`, literal a literal.**
+  Os dois calculam o endereço com a mesma expressão — `19756824 + 47040 *
+  (indice + 9 * (indice div 95))` —, e o que muda é a direção. A terceira
+  passagem tinha lido `0x12d7718` como 19.755.288 e passou um bom tempo
+  procurando explicação para uma diferença de 1.536 bytes contra a região que a
+  WTE-TASK-27 já media. **A diferença não existia: era aritmética hexadecimal
+  feita de cabeça.** Vale a regra — converter imediato com ferramenta, não com
+  a cabeça, mesmo quando "dá para ver".
+
+  **O que não é aritmética é o tamanho, e é a única leitura de dado do
+  handler:** dois bytes em `offset + 44`, little-endian, **mais 32**. O `+ 32`
+  diz que o campo conta o corpo e não o cabeçalho de 32 bytes que o precede.
+  Medido no gate: 30.956 bytes para o time 2, que são 15 blocos de payload
+  inteiro mais 236 bytes soltos — os **dois** laços exercitados na mesma
+  corrida, o que não era garantido e vale registrar.
+
+  **Os dois laços não são estilo, são estrutura.** O primeiro copia payload
+  inteiro e salta os 304 bytes de cabeçalho e EDC/ECC de cada setor; o segundo
+  copia `tamanho mod 2048` byte a byte e **não tem salto nenhum** — não precisa,
+  porque o primeiro deixou o ponteiro no começo do payload seguinte e o resto
+  sempre cabe lá.
+
+  **A recusa do diálogo é contra o `dialogo_tex`, não contra o de gravação.**
+  Mesma forma do `grabar_memoryClick`, com o outro par: gravar por cima do
+  arquivo que o editor tem aberto para importar apagaria a fonte. O laço tem
+  duas portas de saída e só uma leva ao aviso — cancelar sai calado.
+
+  **E o `Xvfb` morreu no meio, sem dizer nada.** O `golden_check.sh` saiu com
+  rc 1 e **zero linhas** de saída, inclusive sob `bash -x`: sem servidor, o
+  `ps -o args= -C Xvfb` falha, o `set -o pipefail` propaga, e o `set -e` mata o
+  script na primeira linha da calibração. Diagnóstico de um comando
+  (`xdpyinfo`), mas só depois de procurar bug no lugar errado.
+
+- **A afordância nova, e ela é a terceira da mesma família:** `WTE_UNI` semeia
+  o destino do lado port, como `WTE_MCR` faz para o `.mcr`. O
+  `golden_check.sh` exporta as **duas** quando há `--artefato`, porque ele não
+  sabe qual botão o roteiro clica — a que sobra é inerte.
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/re/spec/MainForm.grabar_camisetaClick.md`,
+    `wte/src/impl/ep2002_mainform.grabar_camisetaClick.inc`,
+    `wte/tests/roteiros/golden-14-uniforme.txt` e `.port.txt`
+  - modificados: `wte/src/ep2002_mainform.pas` (gerado — o stub virou
+    `{$I}`), `wte/src/we2002_estado.pas`,
+    `wte/src/impl/ep2002_mainform.FormShow.inc`,
+    `wte/tools/golden_check.sh`, `wte/tools/golden_run_laz.sh`,
+    `wte/re/spec/INDICE.md` (gerado), `wte/re/fase-2.md` (gerado),
+    `wte/tests/README.md`, a §4.4 do plano e o `progresso.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `golden-14-uniforme` **controle** | byte-idêntico; artefato de 30.956 B igual nos dois lados |
+  | `golden-14-uniforme` **golden** | byte-idêntico; artefato igual; imagem intacta nos dois |
+  | mutação: `+ 32` removido | **recusa vista**: 30.956 contra 30.924 bytes |
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 681 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+
+- **O que ficou pendente:** os 15 handlers de `ficha_color`, com spec, e a
+  grade de cores do diff de bitmap — que é a metade que falta do critério de
+  tolerância e depende deles.
+
+- **Problemas encontrados:** os dois descritos acima — a conversão hexadecimal
+  errada e o `Xvfb` morto.
 
 ### Terceira passagem, 2026-08-21 — **parcial**: os assets chegam à tela
 

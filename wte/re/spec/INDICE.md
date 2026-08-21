@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 31 |
+| `implementado` | 32 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 0 |
 | `nao portado` | 0 |
-| `aberto` | 51 |
+| `aberto` | 50 |
 | **total** | **96** |
 
-61 de 96 têm arquivo de spec.
+62 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -114,7 +114,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040e85c` | `MainForm` | [paizquierda2Click](MainForm.paizquierda2Click.md) | OnClick | edicao | implementado |
 | `0x0040e998` | `MainForm` | [parribaClick](MainForm.parribaClick.md) | OnClick | edicao | aberto |
 | `0x0040ecc0` | `MainForm` | [pabajoClick](MainForm.pabajoClick.md) | OnClick | edicao | implementado |
-| `0x0040ee80` | `MainForm` | grabar_camisetaClick | OnClick | gravacao | aberto |
+| `0x0040ee80` | `MainForm` | [grabar_camisetaClick](MainForm.grabar_camisetaClick.md) | OnClick | gravacao | implementado |
 | `0x0040f69c` | `MainForm` | [grabar_memoryClick](MainForm.grabar_memoryClick.md) | OnClick | gravacao | implementado |
 | `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
 | `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |

@@ -338,12 +338,8 @@ procedure TMainForm.parribaClick(Sender: TObject);
 procedure TMainForm.pabajoClick(Sender: TObject);
 {$I impl/ep2002_mainform.pabajoClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.grabar_camisetaClick(Sender: TObject);
-begin
-  REStub('MainForm.grabar_camisetaClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.grabar_camisetaClick.inc}
 
 procedure TMainForm.grabar_memoryClick(Sender: TObject);
 {$I impl/ep2002_mainform.grabar_memoryClick.inc}

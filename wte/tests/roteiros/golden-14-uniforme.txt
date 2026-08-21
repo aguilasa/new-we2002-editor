@@ -1,0 +1,81 @@
+# golden-14-uniforme -- o golden do `grabar_camisetaClick`, lado oraculo.
+#
+# WTE-TASK-29. Mesma forma do `golden-07-mcr`, com o outro botao do mesmo
+# grupo:
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-14-uniforme.txt \
+#        --roteiro-port wte/tests/roteiros/golden-14-uniforme.port.txt \
+#        --artefato saida.bin
+#
+# **O `--artefato` nao e opcional aqui, e a razao e a mesma do irmao:** o
+# handler nao escreve na imagem de CD -- ele LE dela e emite um arquivo.
+# Comparar so as duas imagens aprovaria um port que nao fizesse absolutamente
+# nada, porque nenhum dos dois lados as toca. E a comparacao das imagens
+# continua valendo pelo motivo inverso: e assim que se prova que a extracao
+# NAO vazou para dentro da ROM.
+#
+# O tamanho do arquivo emitido nao e constante: sao dois bytes lidos em
+# `offset + 44` da regiao do time, mais 32. Por isso o gate compara byte a
+# byte em vez de conferir um tamanho conhecido -- um port que errasse o campo
+# emitiria um arquivo plausivel, e so o confronto o pega.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. A imagem tem de sair identica dos dois lados: este handler nao a
+# escreve.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+#
+# Trocar de time e o que HABILITA o botao: `lista_equiposChange` chama
+# SetEnabled(True) sobre `grabar_camiseta` (`0x0040d327`), e no DFM ele nasce
+# `Enabled = False`. O time 2 e o mesmo do `golden-07-mcr`, e o mesmo da
+# conferencia de tela da WTE-TASK-25.
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- extrair ----
+#
+# grupo_memorycard (8,224) + grabar_camiseta (392,56) = (400,280), 25x25.
+! clique 412 292
+~ 3
+> Extrair Uni do jogo
+~ 1
+! clique 315 304
+! texto E:\saida.bin
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= EXTRAI_UNI
