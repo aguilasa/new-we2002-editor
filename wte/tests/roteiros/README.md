@@ -412,20 +412,26 @@ Lado original: `make wte-98`, mesma sequência, **sem** trace — o `wte.exe` n�
 loga nada, e a leitura é por efeito de tela. Ver
 [`../../re/eventos.md`](../../re/eventos.md).
 
-## Limite medido, e é duro: **teclado não chega no app LCL no `:98`**
+## O teclado chega no app LCL, e a medição que dizia o contrário foi refeita
 
-Nenhum roteiro do lado port usa tecla. Não é escolha: no `:98` não há window
-manager, o GTK2 nunca considera a janela ativa, e **nenhuma tecla é entregue** —
-nem por `xdotool key` depois de `windowfocus`, nem por `xdotool key --window`
-(que usa `XSendEvent`, e o GTK2 descarta). Medido: zero diferença de pixel no
-campo e zero linha no trace. O mouse funciona normalmente.
+**Esta seção afirmava o oposto até 2026-08-21**, e vale manter o registro da
+volta: a WTE-TASK-13 mediu que nenhuma tecla chegava ao GTK2 no `:98` — sem
+window manager a janela nunca fica ativa —, o `golden_run_laz.sh` passou a
+**reprovar** roteiro de port com `! tecla`, e o README escreveu "nenhum roteiro
+do lado port usa tecla". Hoje **13 dos 14** `.port.txt` do gate usam, e passam.
 
-O `wte.exe` **não** tem esse problema: o Wine implementa o próprio foco e
-recebe tecla no `:98` desde sempre — é o que o `golden_run.sh` do `newWe2002`
-já explora para digitar o caminho da imagem.
+O que faltava era um `xdotool windowfocus` antes. Ele é `XSetInputFocus`, não
+precisa de gerenciador de janela, e com ele a tecla chega — remedido na
+WTE-TASK-26 com 3 `Down` sobre a janela focada dando 3 disparos de
+`lista_equiposChange` no trace do port. Quem faz isso é o `ROTEIRO_FOCO=1` do
+[`../../tools/roteiro.sh`](../../tools/roteiro.sh), ligado **só do lado port**:
+o oráculo não precisa, porque o Wine implementa o próprio foco, e mexer nele
+invalidaria o controle sem ganho nenhum.
 
-Consequência para a WTE-TASK-22: ou o harness dirige o port **só por mouse**,
-ou o `:98` ganha um window manager. Nenhum está instalado nesta máquina
-(`twm`, `openbox`, `metacity`, `mutter`, `xfwm4`, `i3`, `fluxbox`, `icewm`,
-`jwm`, `matchbox`, `marco`, `herbstluftwm`, `dwm`, `awesome` — nenhum
-encontrado). **Instalar pacote é decisão do usuário.**
+O que continua valendo é o resto do diagnóstico: `xdotool key --window` usa
+`XSendEvent` e o GTK2 **descarta**; `xdotool windowactivate` precisa de
+gerenciador e falha; e não há gerenciador instalado nesta máquina (`twm`,
+`openbox`, `metacity`, `mutter`, `xfwm4`, `i3`, `fluxbox`, `icewm`, `jwm`,
+`matchbox`, `marco`, `herbstluftwm`, `dwm`, `awesome` — nenhum encontrado).
+**Instalar pacote continua sendo decisão do usuário**; o que mudou é que
+deixou de ser necessário.
