@@ -3,7 +3,7 @@ id: CORR-WTE-079
 title: "Correção: o compara_tela.sh ficou com dois blocos de --malha colados no lugar errado"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -118,21 +118,46 @@ dando o mesmo veredito.
 
 ## Verificação
 
-- [ ] `bash -n wte/tools/compara_tela.sh` sem erro
-- [ ] `grep -c 'MODO" = malha' wte/tools/compara_tela.sh` cai de 4 para 2
-- [ ] `grep -c 'compara_tela.py --malha' wte/tools/compara_tela.sh` cai para 1
-- [ ] `bash wte/tools/compara_tela.sh --malha` continua imprimindo
+- [x] `bash -n wte/tools/compara_tela.sh` sem erro
+- [x] `grep -c 'MODO" = malha' wte/tools/compara_tela.sh` cai de **5** para
+      **3** — o enunciado desta correção contou 4, e eram 5 (496, 501, 544,
+      561, 696); os dois cortados são o 501 e o 561
+- [x] `grep -c 'compara_tela.py" --malha' wte/tools/compara_tela.sh` cai para 1
+- [x] `bash wte/tools/compara_tela.sh --malha` continua imprimindo
       `PASSOU: so a coluna clicada andou, e andou 80 px nos dois lados`
-- [ ] `bash wte/tools/compara_tela.sh --grade 2 9 63` continua verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `bash wte/tools/compara_tela.sh --grade 2 9 63` continua verde — 16/16
+      amostras nos dois lados, 5.168 px e 9.800 px com tolerância zero
+- [x] `make -C wte check` verde — 695 testes, `OK (skipped=1)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-21
 
 **Resumo do que foi feito:**
 
+Dois cortes, 20 linhas fora e 3 dentro:
+
+1. `captura_oraculo` — apagado o **segundo** bloco `malha`, inalcançável desde
+   o `return 0` do primeiro. Ficou o primeiro, que só abre o `estrategia` e
+   volta, com o comentário que faltava: do lado do oráculo não há trace, e a
+   confirmação de que o clique chegou vem do lado do port (que conta o
+   `malla1MouseDown`) e da comparação de delta entre os dois;
+2. `captura_port` — apagado o `if [ "$MODO" = malha ]` aninhado dentro do ramo
+   `cor|grade`, com a chamada ao `compara_tela.py --malha` e o `continue` solto
+   que ele embrulhava. O bloco `malha` legítimo já existe antes, no mesmo nível
+   do ramo.
+
+O `if [ "$MODO" = grade ]` que vinha logo depois estava indentado com 2 espaços
+— resto da mesma emenda — e foi para 4, o nível do corpo do ramo.
+
 **Problemas encontrados:**
 
+A contagem do enunciado está errada por um: `grep -c 'MODO" = malha'` dá **5**
+hoje, não 4, e cai para 3 e não para 2. As cinco ocorrências são as linhas 496,
+501, 544, 561 e 696; as duas cortadas são a 501 e a 561. O sintoma descrito
+está exato — o erro é só na régua do checklist.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/compara_tela.sh`

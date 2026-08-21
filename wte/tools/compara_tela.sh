@@ -493,21 +493,12 @@ captura_oraculo() {
   descidas "$w" $((indice + 1)); sleep 3
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
+  # Do lado do oraculo NAO ha trace: a confirmacao de que o clique chegou na
+  # malha vem do lado do port (que conta `malla1MouseDown`) e da comparacao
+  # de delta entre os dois. Aqui so se abre o `estrategia` e se volta.
   if [ "$MODO" = malha ]; then
     abre_estrategia "$destino" || { limpa; return 4; }
     limpa
-    return 0
-  fi
-  if [ "$MODO" = malha ]; then
-    abre_estrategia "$destino" || { limpa; return 4; }
-    local mal
-    mal=$(grep -c 'estrategia.malla1MouseDown' "$TRACE" 2>/dev/null || echo 0)
-    limpa
-    if [ "$mal" -ne 1 ]; then
-      echo "ERRO: malla1MouseDown disparou $mal vez(es), esperava 1 -- o" >&2
-      echo "      clique em $MALHA_X,$MALHA_Y nao chegou na malha." >&2
-      return 5
-    fi
     return 0
   fi
   if [ "$MODO" = cor ] || [ "$MODO" = grade ]; then
@@ -558,15 +549,7 @@ captura_port() {
     # O trace confirma que os cliques VIRARAM handler, e nao so pixel. Do lado
     # do oraculo nao ha trace, e por isso a guarda de mudanca de cor existe
     # tambem -- as duas medem coisas diferentes.
-    if [ "$MODO" = malha ]; then
-    python3 "$AQUI/compara_tela.py" --malha --indice "$indice" \
-        --antes-oraculo "$SAIDA/time-$indice-oraculo.png" \
-        --antes-port    "$SAIDA/time-$indice-port.png" \
-        --oraculo       "$SAIDA/time-$indice-oraculo-depois.png" \
-        --port          "$SAIDA/time-$indice-port-depois.png" || rc=1
-    continue
-  fi
-  if [ "$MODO" = grade ]; then
+    if [ "$MODO" = grade ]; then
       local esc cla gra
       esc=$(grep -c 'ficha_color.oscurecerClick' "$TRACE" 2>/dev/null || echo 0)
       cla=$(grep -c 'ficha_color.aclararClick' "$TRACE" 2>/dev/null || echo 0)
