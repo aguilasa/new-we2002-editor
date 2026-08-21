@@ -1,0 +1,30 @@
+secao	chave	valor	nota
+assinatura	0x00404dd4	c02203	shl BYTE PTR [edx],0x3 — a expansao de 5 para 8 bits e deslocamento, e NAO replicacao de bit alto
+assinatura	0x00404dd4	83fe05	cmp esi,0x5 — sao cinco bits por canal
+assinatura	0x00404dd4	833c2403	cmp DWORD PTR [esp],0x3 — sao tres canais
+assinatura	0x00419d80	814dfc010c0000	or DWORD PTR [ebp-0x4],0xc01 — os bits 10-11 do control word em 11, que e truncar para zero
+assinatura	0x004065fc	ff0b	dec DWORD PTR [ebx] — um passo para baixo no canal R (bits 0-4)
+assinatura	0x004065fc	832b20	sub DWORD PTR [ebx],0x20 — um passo no canal G (bits 5-9)
+assinatura	0x004065fc	812b00040000	sub DWORD PTR [ebx],0x400 — um passo no canal B (bits 10-14)
+assinatura	0x004065fc	807d0000	cmp BYTE PTR [ebp+0x0],0x0 — o piso e conferido no byte EXPANDIDO
+assinatura	0x00406744	ff03	inc DWORD PTR [ebx] — o espelho exato do escurecer, no canal R
+assinatura	0x00406744	830320	add DWORD PTR [ebx],0x20 — idem, canal G
+assinatura	0x00406744	810300040000	add DWORD PTR [ebx],0x400 — idem, canal B
+assinatura	0x00406744	807d00f8	cmp BYTE PTR [ebp+0x0],0xf8 — o teto e 0xF8, que e 31 << 3: a prova de que a expansao satura em 248, e nao em 255
+assinatura	0x004063b0	d91e	fstp DWORD PTR [esi] — o passo do gradiente e guardado em float de precisao simples
+assinatura	0x004063b0	c1e005	shl eax,0x5 — o canal G volta empacotado por deslocamento
+assinatura	0x004063b0	c1e00a	shl eax,0xa — e o B por dez
+assinatura	0x0040ee80	6800080000	push 0x800 duas vezes — le 2048 e escreve 2048, o payload do setor
+assinatura	0x0040ee80	6830010000	push 0x130 — e pula 304, que e cabecalho mais EDC/ECC
+bitmap	bandeiras	53	contado em we-team-editor/image
+bitmap	calcoes	6	contado em we-team-editor/image
+bitmap	camisas	99	contado em we-team-editor/image
+bitmap	fora	0	contado em we-team-editor/image
+bitmap	oito_bpp	198	contado em we-team-editor/image
+formato	cabecalho	54	bytes antes da paleta
+formato	entradas	256	de 4 bytes cada
+desenhista	0x00405270	16	bandeira do titular; arquivos=1
+desenhista	0x00405468	16	bandeira do reserva; arquivos=1
+desenhista	0x004056c8	15	camisa e calcao; arquivos=2
+setor	payload	2048	lido e escrito pelo exportador
+setor	resto	304	pulado: cabecalho + EDC/ECC

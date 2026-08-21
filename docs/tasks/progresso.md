@@ -296,8 +296,17 @@ só uma escolha de quando.
       maior tem 276 bytes —, e a conta é a do `gravacao_controle.py`: 164 faixas
       em 12 sessões, nenhuma tocando byte de EDC/ECC nem cabeçalho de setor.
       Escrita de cartão inteiro existe, mas é no `.mcr`, que é plano
-- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida**
-- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância
+- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida** — **a
+      primeira metade fechou em 2026-08-20**: é paleta (as três rotinas
+      reescrevem entradas em `0x36`, nenhuma toca pixel), a aritmética de
+      escurecer/clarear é na palavra BGR555 empacotada, e o gradiente acumula
+      em `Single` e **trunca para zero** — as duas causas do risco nomeado da
+      §9, medidas em [`wte/re/render2d.md`](../../wte/re/render2d.md). Falta a
+      tolerância, que precisa do Pascal
+- [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância — e **medido em
+      2026-08-20 que ele não grava na imagem**: lê dela e emite arquivo, com o
+      laço saltando cabeçalho e EDC/ECC de cada setor. O gate dele é
+      `--artefato`, e o critério de EDC/ECC não se aplica
 
 Os cinco bullets acima vinham da Fase 5 até 2026-08-19. Eles desceram junto com
 as tasks: cada uma das duas features fechou de vir depois da gravação que ela

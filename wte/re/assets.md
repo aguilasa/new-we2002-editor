@@ -503,12 +503,22 @@ arquivo de asset.
 | Renderizador | Seek | O que grava |
 |---|--:|---|
 | `sub_405270`, `sub_405468` (bandeira) | `0x36` | 16 entradas, uma a uma: `fputc` B, G, R + `fseek(+1)` sobre o byte reservado; cores convertidas de BGR555 por `sub_404dd4` a partir de `0x00432ef4` |
-| `sub_4056c8` (camisa e calção) | `0x36` | idem, 16 entradas, por arquivo |
+| `sub_4056c8` (camisa e calção) | `0x36` | idem, mas **15** entradas, e duas vezes — uma por arquivo. Ver a ressalva abaixo |
 | `sub_406fe0` (`careto_base`) | `0x5e` | 0x40 bytes (16 entradas, a partir da 10) da tabela de pele `0x00423998`, passo 64, 4 tons |
 | `sub_407110` (`pelo_`) | `0x5e` | os mesmos 0x40 de pele, e em seguida 0x14 bytes (5 entradas) da tabela de cabelo `0x00423a98`, passo 20, 8 cores |
 | `sub_407338` (`barba_`) | `0x5e` | os mesmos 0x40 de pele, e 0x0c bytes (3 entradas) da tabela de barba `0x00423b38`, passo 12 |
 
 `0x36` = 54 = primeira entrada da paleta. `0x5e` = 54 + 10 × 4 = entrada 10.
+
+> **A tabela dizia "16 entradas" para o uniforme até 2026-08-20, e são 15.** A
+> [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) remediu instrução a
+> instrução: o laço da bandeira para em `cmp esi,0x10` e o do uniforme em
+> `cmp esi,0xf`, e o do uniforme roda duas vezes, uma por arquivo. Foi
+> generalização — as três rotinas se parecem o bastante para alguém escrever
+> "idem" —, e é exatamente o erro que um laço único no port cometeria. O
+> número agora sai de ferramenta: [`dump_render2d.py`](../tools/dump_render2d.py)
+> **recusa** emitir se qualquer um dos dois limites mudar. Detalhe em
+> [`render2d.md`](render2d.md).
 
 ```sh
 objdump -d -M intel --start-address=0x40703a --stop-address=0x407098 \
