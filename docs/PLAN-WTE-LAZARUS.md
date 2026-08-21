@@ -934,7 +934,8 @@ o próprio original.
 
 **5.3 Camisa e bandeira 2D.** `colorearClick`, `grabar_camisetaClick`,
 `malla1/2MouseDown`, `gradienteClick`, `oscurecerClick`, `aclararClick`,
-`lista_col0..3Change`, e o formulário `ficha_color` (758 linhas de DFM).
+`lista_col0..3Change`, e o formulário `ficha_color` (866 linhas de DFM,
+medidas em `wte/re/dfm/ficha_color.dfm`).
 A renderização usa os 105 `uniformes2d/*.bmp` como base e aplica cor. Em Pascal
 isso é `TBitmap` + varredura de pixel; a LCL dá `TLazIntfImage` para acesso
 rápido. **Fidelidade de cor exige atenção**: paleta e arredondamento de

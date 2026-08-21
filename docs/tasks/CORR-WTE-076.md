@@ -3,7 +3,7 @@ id: CORR-WTE-076
 title: "Correção: o plano e a task dizem 758 linhas de DFM no ficha_color, e o extrator dá 866"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -81,17 +81,34 @@ A linha "Formulário `ficha_color`: 758 linhas de DFM" recebe o mesmo conserto.
 
 ## Verificação
 
-- [ ] `wc -l wte/re/dfm/ficha_color.dfm` e o número do plano são o mesmo
-- [ ] `grep -rn '758 linhas' docs/` não devolve nada
-- [ ] `make -C wte check` verde (o `check_fase1.py` varre o perímetro de docs)
-- [ ] `roms/` intocada
+- [x] `wc -l wte/re/dfm/ficha_color.dfm` e o número do plano são o mesmo — 866
+- [x] `grep -rn '758 linhas' docs/` só devolve esta correção e a linha dela no
+      `correcoes-progresso.md`, que são o registro do defeito
+- [x] `make -C wte check` verde — 695 testes, `OK (skipped=1)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-21
 
 **Resumo do que foi feito:**
 
+Os dois sítios foram para 866, e cada um leva junto de onde o número sai: a
+§5.3 do plano cita `wte/re/dfm/ficha_color.dfm`, e a linha da WTE-TASK-29 cita
+o `wc -l` sobre ele. A próxima leitura não precisa adivinhar a fonte, que é o
+que deixou o 758 sobreviver — número do protótipo de 2026-08-05, copiado do
+plano para a task sem remedição.
+
+Conferido que o arquivo nunca teve 758 linhas: `git show
+7f8fcb0:wte/re/dfm/ficha_color.dfm | wc -l` dá 866, e `7f8fcb0` é o commit que
+extraiu os 18 formulários.
+
 **Problemas encontrados:**
 
+Nenhum. Não há outro sítio com a contagem — a varredura só devolve esta
+correção e a linha dela no `correcoes-progresso.md`.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md`
+- `docs/tasks/29-camisa-e-bandeira-2d.md`

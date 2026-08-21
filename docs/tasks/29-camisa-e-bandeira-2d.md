@@ -40,7 +40,8 @@ Reproduzir o editor de cor com fidelidade medida.
 | `malla1MouseDown`, `malla2MouseDown` | `0x00409f4c`, `0x0040a000` |
 | `grabar_camisetaClick` | `0x0040ee80` |
 
-Formulário `ficha_color`: 758 linhas de DFM.
+Formulário `ficha_color`: 866 linhas de DFM (`wc -l
+wte/re/dfm/ficha_color.dfm`).
 
 ### A base
 
