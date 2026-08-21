@@ -164,7 +164,7 @@ NOMES_TEXTO='A B-C.DEFG'
 NOMBRE1_X=422  ; NOMBRE1_Y=74
 
 [ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" \
-                       "| $0 --edicao | $0 --nomes" >&2
+                       "| $0 --edicao | $0 --nomes | $0 --cor" >&2
                   exit 1; }
 MODO=barras
 if [ "$1" = "--habilitacao" ]; then
@@ -182,6 +182,13 @@ elif [ "$1" = "--nomes" ]; then
                          "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
   MODO=nomes
   set -- "$IDX_EDICAO"
+elif [ "$1" = "--cor" ]; then
+  # O `--cor` ACEITA indice, ao contrario dos tres de cima: a paleta e por
+  # time, e uma so nao provaria que a fonte esta certa -- provaria que ela e
+  # constante. Sem argumento vai nos mesmos tres da conferencia de tela.
+  MODO=cor
+  shift
+  [ $# -ge 1 ] || set -- 2 9 63
 fi
 [ -f "$IMAGEM" ] || { echo "ERRO: $IMAGEM nao existe" >&2; exit 1; }
 [ -x "$BIN" ] || { echo "ERRO: $BIN -- rode lazbuild antes" >&2; exit 1; }
@@ -286,6 +293,27 @@ edita_nomes() {
   sleep 1
 }
 
+# Abre o editor de cor e captura A JANELA DELE, nos dois lados.
+#
+# `X`/`Y` ja tem a origem da janela principal. O `colorear` fica em (224,184) no
+# `.lfm`, 97x25, entao o centro e (272,196).
+#
+# **A janela capturada e a do editor, e nao a principal.** Comparar a principal
+# aqui nao mediria nada: o que muda sao as 16 amostras, que estao no modal. O
+# titulo dos dois lados difere -- `Cor  ` no oraculo e `Cor   [Lazarus]` no port
+# --, e e de proposito: titulo igual faria o harness dirigir o lado errado, que
+# e a armadilha 6 do `progresso.md`.
+abre_editor_de_cor() {
+  local destino="$1" w
+  xdotool mousemove $((X + 272)) $((Y + 196)) click 1
+  sleep 4
+  w=$(xdotool search --name '^Cor' | tail -1)
+  [ -n "$w" ] || { echo "ERRO: o editor de cor nao apareceu" >&2; return 4; }
+  eval "$(geometria "$w")"
+  import -window root "$SAIDA/raw-cor.png"
+  recorta "$SAIDA/raw-cor.png" "$destino" "$X" "$Y" "$WIDTH" "$HEIGHT"
+}
+
 # ------------------------------------------------------------------ oraculo --
 captura_oraculo() {
   local indice="$1" destino="$2"
@@ -315,6 +343,11 @@ captura_oraculo() {
   descidas "$w" $((indice + 1)); sleep 3
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
+  if [ "$MODO" = cor ]; then
+    abre_editor_de_cor "$destino" || { limpa; return 4; }
+    limpa
+    return 0
+  fi
   import -window root "$SAIDA/raw-oraculo.png"
   recorta "$SAIDA/raw-oraculo.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-oraculo.png" "${destino%.png}-cheia.png" \
@@ -341,6 +374,11 @@ captura_port() {
   descidas "$w" $((indice + 1)); sleep 2
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
+  if [ "$MODO" = cor ]; then
+    abre_editor_de_cor "$destino" || { limpa; return 4; }
+    limpa
+    return 0
+  fi
   import -window root "$SAIDA/raw-port.png"
   recorta "$SAIDA/raw-port.png" "$destino" "$X" "$Y" "$REC_W" "$REC_H"
   recorta "$SAIDA/raw-port.png" "${destino%.png}-cheia.png" \
@@ -440,6 +478,15 @@ for indice in "$@"; do
     [ -n "$base" ] || { echo "ERRO: sem bar_defence do time $indice no dump" >&2
                         exit 1; }
     extra+=(--editada "1=$((base + 2 * TRILHA_CLIQUES))")
+  fi
+  if [ "$MODO" = cor ]; then
+    # O veredito da cor nao passa pelas barras nem pela montagem: o que se mede
+    # sao as 16 amostras do editor, e elas estao na janela do modal, que e a
+    # que a `abre_editor_de_cor` capturou.
+    python3 "$AQUI/compara_tela.py" --cor \
+        "$SAIDA/time-$indice-oraculo.png" \
+        "$SAIDA/time-$indice-port.png" --indice "$indice" || rc=1
+    continue
   fi
   if [ "$MODO" = nomes ]; then
     # O veredito dos nomes NAO passa pelas barras: o que se mede aqui e o

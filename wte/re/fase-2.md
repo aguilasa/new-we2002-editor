@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 22 | 2684 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 22 | 2673 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9452** |
-| Escrito à mão | 65 | 5216 |
-| **Total** | | **14668** |
+| **Gerado, subtotal** | | **9441** |
+| Escrito à mão | 69 | 5551 |
+| **Total** | | **14992** |
 
-**64.4% do Pascal da casca é saída de gerador.**
+**63.0% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -60,6 +60,8 @@ Escrito à mão, linha por linha:
 | Arquivo | Linhas | O que é |
 |---|---|---|
 | `src/impl/ep2002_about.FormCreate.inc` | 13 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_color.FormCreate.inc` | 33 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_color.botonClick.inc` | 25 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_creditos_equipo.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_dorsal.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_dorsal.scroll_dorsalChange.inc` | 22 | corpo de handler, da spec (fase 4) |
@@ -94,6 +96,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.boton_mcrClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_tex2isoClick.inc` | 79 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.colorearClick.inc` | 44 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 97 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalMouseDown.inc` | 40 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.edit_nombre1KeyPress.inc` | 19 | corpo de handler, da spec (fase 4) |
@@ -121,7 +124,8 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_warning.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_warning_2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/retrace.pas` | 125 | o registrador de disparo (WTE-TASK-11) |
-| `src/wte_render2d.pas` | 227 | — |
+| `src/wte_cor.pas` | 170 | — |
+| `src/wte_render2d.pas` | 290 | — |
 | `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 42 | programa principal (WTE-TASK-02) |
 
@@ -129,7 +133,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 87.1% — e passa a medir bitmap, não geração de código.
+fração sobe para 86.4% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -148,14 +152,14 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_color.pas` | 17 |
-| `src/ep2002_mainform.pas` | 7 |
+| `src/ep2002_color.pas` | 15 |
 | `src/ep2002_estrategia.pas` | 6 |
+| `src/ep2002_mainform.pas` | 6 |
 | `src/ep2002_jugador.pas` | 5 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_dorsal.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 58 |
+| _com corpo escrito_ | 61 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -170,6 +174,7 @@ das duas formas.
 - `MainForm.boton_mcrClick`
 - `MainForm.boton_nombres2isoClick`
 - `MainForm.boton_tex2isoClick`
+- `MainForm.colorearClick`
 - `MainForm.dorsalClick`
 - `MainForm.dorsalMouseDown`
 - `MainForm.edit_nombre1KeyPress`
@@ -201,6 +206,8 @@ das duas formas.
 - `estrategia.rectanguloDragOver`
 - `estrategia.relojTimer`
 - `ficha_about.FormCreate`
+- `ficha_color.FormCreate`
+- `ficha_color.botonClick`
 - `ficha_creditos_equipo.FormCreate`
 - `ficha_dorsal.FormCreate`
 - `ficha_dorsal.scroll_dorsalChange`

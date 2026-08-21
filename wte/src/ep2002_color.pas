@@ -28,7 +28,8 @@ unit ep2002_color;
 interface
 
 uses
-  Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace;
+  Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace,
+  Graphics, SysUtils, wte_cor, wte_render2d;
 
 type
   Tficha_color = class(TForm)
@@ -137,12 +138,8 @@ implementation
 
 {$R ../forms/ep2002_color.lfm}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.FormCreate(Sender: TObject);
-begin
-  REStub('ficha_color.FormCreate');
-end;
-{$POP}
+{$I impl/ep2002_color.FormCreate.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barraChange(Sender: TObject);
@@ -151,12 +148,8 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.botonClick(Sender: TObject);
-begin
-  REStub('ficha_color.botonClick');
-end;
-{$POP}
+{$I impl/ep2002_color.botonClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barra1Change(Sender: TObject);

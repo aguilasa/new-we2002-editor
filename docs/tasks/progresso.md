@@ -304,8 +304,9 @@ só uma escolha de quando.
       [`wte/re/render2d.md`](../../wte/re/render2d.md). **E a tolerância saiu
       em 2026-08-21, e é zero:** `compara_tela.sh 2 9 63` compara `bandera`,
       `home1` e `home2` pixel a pixel contra o oráculo e dá 0 de 8.960 px
-      (9.800 no clube de ML). Falta a grade de cores — variar a cor pelo
-      `ficha_color` —, que precisa dos 15 handlers daquele formulário
+      (9.800 no clube de ML), e `compara_tela.sh --cor` compara as **16
+      amostras** do editor e dá 0 de 5.168 px nos mesmos três times. Falta
+      variar a cor — os handlers de edição do `ficha_color`
 - [x] `grabar_camisetaClick` byte-idêntico, sem tolerância — **fechado em
       2026-08-21** pelo [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt),
       com controle antes: 30.956 bytes idênticos nos dois lados, e a imagem

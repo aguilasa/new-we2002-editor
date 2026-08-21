@@ -135,6 +135,8 @@ gravar **nesta imagem**:
 | `wte/tools/compara_tela.py` | estender — feito (a medida dos três `TImage`) |
 | `wte/src/impl/ep2002_mainform.grabar_camisetaClick.inc` | criar — feito |
 | `wte/tests/roteiros/golden-14-uniforme{,.port}.txt` | criar — feito |
+| `wte/src/wte_cor.pas` | criar — feito (o estado do editor de cor) |
+| `wte/src/impl/ep2002_color.*.inc`, `ep2002_mainform.colorearClick.inc` | criar — feito (3 dos 17) |
 
 ---
 
@@ -163,14 +165,16 @@ gravar **nesta imagem**:
       o original o relê a cada redesenho, porque para ele o arquivo *é* o
       estado
 - [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa
-      nomeada — **metade fechou, e a tolerância é zero.** O
-      `compara_tela.py` ganhou a medida: `bandera`, `home1` e `home2`
-      recortados pelo `.lfm` e comparados pixel a pixel, com a calibração que
-      já existia. Times 2, 9 e 63: **0 de 8.960 px** (9.800 no clube de ML),
-      maior desvio de canal 0. A refusa foi **vista** — com
-      `PRIMEIRA_UNIFORME = 0` o mesmo teste acusa 2.008 de 3.360 px no `home1`.
-      Falta variar a cor pelo `ficha_color`, que é a "grade" do enunciado e
-      depende dos 15 handlers daquele formulário
+      nomeada — **duas medidas de três fecharam, e as duas dão zero.** O
+      `compara_tela.py` ganhou as duas: `bandera`, `home1` e `home2` recortados
+      pelo `.lfm` e comparados pixel a pixel (times 2, 9 e 63: **0 de 8.960
+      px**, 9.800 no clube de ML), e `--cor`, que abre o editor dos dois lados
+      e compara as **16 amostras** (**0 de 5.168 px**, com 8 a 11 cores
+      distintas em cada time — a contagem existe para que "todas iguais" não
+      passe por verde). As duas recusas foram **vistas**: `PRIMEIRA_UNIFORME =
+      0` acusa 2.008 de 3.360 px no `home1`, e trocar R por B no `TColor` da
+      amostra acusa 8 das 16. Falta **variar** a cor, que é a grade do
+      enunciado e depende dos handlers de edição do `ficha_color`
 - [x] **`grabar_camisetaClick` byte-idêntico, sem tolerância** — spec em
       [`MainForm.grabar_camisetaClick.md`](../../wte/re/spec/MainForm.grabar_camisetaClick.md),
       golden [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt)
@@ -220,6 +224,103 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Quinta passagem, 2026-08-21 — **parcial**: o editor de cor abre
+
+A task **continua `⬜ Pendente`**. Três dos 17 handlers do `ficha_color`
+entraram, e com eles o estado que a spec do `FormCreate` tinha adiado *para
+esta task*. Falta variar a cor.
+
+- **Resumo do que foi feito:**
+
+  **A decisão que estava esperando há três tasks foi tomada.** A spec do
+  `ficha_color.FormCreate` dizia, com todas as letras, que escrever aquele
+  corpo antes de decidir onde os cinco globais do editor moram seria inventar,
+  e que a decisão era desta task. Eles moram em
+  [`wte_cor.pas`](../../wte/src/wte_cor.pas), e cada um tem nome: `familia`,
+  `conjunto`, `entrada`, `faixa_ini`, `faixa_fim`.
+
+  **E o alias que quase passou batido:** o vetor das 16 palavras fica em
+  `0x00433dd4`, e o pintor de amostra escreve em `[indice*4 + 0x00433dd0]` com
+  `indice` de **1** a 16 — ou seja o `faixa_fim` **é** o elemento zero do
+  vetor, e os dois só não colidem porque o pintor começa em 1. As bases
+  divergem por isso: `entrada` conta de zero e `faixa_*` contam de um. Um port
+  que uniformizasse as bases erraria a faixa do gradiente em um degrau.
+
+  **As quatro famílias foram medidas; duas foram portadas.** O `botonClick` não
+  olha o `Sender` como objeto: recorta o sexto caractere do `Name` (`"boton"`
+  tem cinco letras) e converte para inteiro — o dígito **é** a família. Duas
+  são bandeira e uniforme; as outras duas são chuteira (`0x00433096`) e uma
+  quarta paleta sem combo visível (`0x004331b6`), e nenhuma das duas é camisa
+  nem bandeira. Ficaram de fora com endereço escrito. O port **não pinta** nesse
+  caso; o original pinta, e desenha lixo — com a família fora de 0..3 ele cai
+  no laço com o ponteiro de fonte não inicializado, o que é comportamento
+  indefinido e não comportamento.
+
+  **O bug da passagem foi da LCL, não do formato:** as 16 amostras não
+  apareciam. O `TLabel` da LCL desenha **transparente por default** e ignora o
+  próprio `Color`; a VCL de 2002 não tinha a propriedade separada. Uma linha —
+  `Transparent := False` antes da cor — e as 16 apareceram. O diagnóstico
+  custou mais do que a correção: o `REMark` provou que o preenchimento tinha
+  rodado e devolvido `True`, o que descartou de uma vez a família, o time e o
+  `FindComponent`, e sobrou o widgetset.
+
+  **A régua nova é `compara_tela.sh --cor`**, e ela captura a janela do
+  **modal**, não a principal: o que muda são as amostras, e elas estão lá
+  dentro. Ela conta as cores distintas do lado do oráculo e **reprova** se
+  forem menos de duas — 16 amostras da mesma cor significa que o editor não
+  abriu ou que o recorte caiu fora dele, e sem essa guarda isso passaria por
+  verde.
+
+- **A divergência deliberada, e ela é de tela:** o `lista_col3` — o combo de
+  padrão de camisa, `NORMAL`/`ROMBOIDAL`/`EXTRA` — fica no default do
+  formulário. O original o escolhe por dois bytes que lê da imagem para
+  `0x004331d6`/`0x004331d7`, e esses dois bytes **não estão na camada de
+  dados**: nem `TTeam` nem `TMlTeam` têm campo de padrão de camisa, e o
+  `we2002_core` é o oráculo de formato deste projeto. Inventar de onde saem
+  seria pior do que deixar o default. Entrada para a
+  [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md).
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/src/wte_cor.pas`,
+    `wte/src/impl/ep2002_color.{FormCreate,botonClick}.inc`,
+    `wte/src/impl/ep2002_color.uses`,
+    `wte/src/impl/ep2002_mainform.colorearClick.inc`,
+    `wte/re/spec/MainForm.colorearClick.md`,
+    `wte/re/spec/ficha_color.botonClick.md`
+  - modificados: `wte/src/wte_render2d.pas` (o pintor de amostra),
+    `wte/src/{ep2002_color,ep2002_mainform}.pas` (gerados),
+    `wte/src/impl/ep2002_mainform.uses`,
+    `wte/tools/compara_tela.{sh,py}` (o modo `--cor`),
+    `wte/re/spec/ficha_color.FormCreate.md` (veredito e a decisão que ela
+    adiava), `wte/re/spec/INDICE.md` e `wte/re/fase-2.md` (gerados), a §4.4 do
+    plano e o `progresso.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `compara_tela.sh --cor` (2, 9, 63) | **0 de 5.168 px**, 11/9/8 cores distintas |
+  | mutação: R e B trocados no `TColor` | **recusa vista**: 8 das 16 amostras |
+  | `compara_tela.sh 2` | bandeira e uniforme seguem em 0 de 8.960 px |
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 681 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+
+  **O golden não rodou, e continua certo:** nenhum dos três handlers escreve
+  byte de imagem. O último estado medido é o do commit anterior, com
+  `golden-01`, `golden-03`, `golden-13` e `golden-14` verdes.
+
+- **O que ficou pendente:** os 14 handlers de edição do `ficha_color` — as três
+  barras, o gradiente, o escurecer/clarear, os quatro combos, o
+  `colorMouseDown` (que é o **colar-cores** do título da task, com
+  Ctrl+Shift) e os três `BitBtn`. Com eles vem a grade de cores.
+
+- **Problemas encontrados:** o `Transparent` da LCL, descrito acima. Mais um
+  susto que valeu a lição: `pkill -f "build/wte work/..."` **mata o próprio
+  shell** que roda o comando, porque a linha de comando dele contém o padrão. O
+  sintoma foi um comando saindo com 144 e nada acontecendo. `pkill -x wte`
+  resolve.
 
 ### Quarta passagem, 2026-08-21 — **parcial**: a extração do uniforme
 

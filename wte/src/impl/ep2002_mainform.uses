@@ -26,3 +26,5 @@ ep2002_info4    # ficha_info4.etiq3, no aviso de bloco compartilhado
 we2002_mcr      # o layout do .mcr e o leitor de cartao (WTE-TASK-28)
 we2002_render   # TCoresDoTime e as constantes de paleta (WTE-TASK-29)
 wte_render2d    # DesenhaBandeira, DesenhaUniforme -- o render 2D (WTE-TASK-29)
+wte_cor        # TimeEmCor, o time que o editor de cor edita (WTE-TASK-29)
+ep2002_color   # ficha_color.ShowModal, no colorearClick (WTE-TASK-29)

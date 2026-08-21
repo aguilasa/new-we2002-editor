@@ -390,6 +390,7 @@ def montagem(oraculo, port, destino: Path) -> None:
 # --------------------------------------------- os tres campos de nome --
 
 LFM_MAINFORM = Path(__file__).resolve().parents[1] / "forms/ep2002_mainform.lfm"
+LFM_COLOR = Path(__file__).resolve().parents[1] / "forms/ep2002_color.lfm"
 
 # Quanto se descarta da borda do `TEdit` antes de procurar glifo. **A primeira
 # versao nao descartava nada e o veredito saiu verde medindo a BORDA:** os tres
@@ -415,7 +416,7 @@ CAMPOS_DE_NOME = ("edit_nombre1", "edit_nombre2", "edit_nombre3")
 TOLERANCIA_PX = 4
 
 
-def retangulos_do_lfm(nomes) -> dict:
+def retangulos_do_lfm(nomes, lfm=None) -> dict:
     """Os retangulos dos controles, somados pela cadeia de pais do `.lfm`.
 
     **Lidos, nao digitados.** A primeira versao trazia os quatro numeros de cada
@@ -424,9 +425,11 @@ def retangulos_do_lfm(nomes) -> dict:
     nem existia daquele tamanho. O formulario raiz fica de fora da soma: o
     `Left`/`Top` dele e posicao de tela.
     """
+    if lfm is None:
+        lfm = LFM_MAINFORM
     pilha, fora = [], {}
-    for linha in LFM_MAINFORM.read_text(encoding="utf-8",
-                                        errors="replace").splitlines():
+    for linha in lfm.read_text(encoding="utf-8",
+                               errors="replace").splitlines():
         ind = len(linha) - len(linha.lstrip())
         corte = linha.strip()
         m = re.match(r"object (\w+): (\w+)", corte)
@@ -449,7 +452,7 @@ def retangulos_do_lfm(nomes) -> dict:
                                       pilha[-1][4], pilha[-1][5])
     faltando = set(nomes) - set(fora)
     if faltando:
-        raise TelaError(f"{LFM_MAINFORM.name}: nao achei {sorted(faltando)}")
+        raise TelaError(f"{lfm.name}: nao achei {sorted(faltando)}")
     return fora
 
 
@@ -862,6 +865,90 @@ def autoteste() -> int:
     return 0
 
 
+# ------------------------------------------------- as 16 amostras de cor --
+# Os `color1`..`color16` do `ficha_color`, a paleta que o editor mostra.
+#
+# Eles SE COMPARAM pixel a pixel, e pela mesma razao dos tres `TImage` do render:
+# nao ha fonte no meio. Cada amostra e um retangulo de cor chapada, e a cor sai
+# de `R or (G shl 8) or (B shl 16)` sobre a palavra BGR555 do time -- se o port
+# ler a fonte errada, a familia errada ou montar o `TColor` na outra ordem, o
+# retangulo muda inteiro.
+AMOSTRAS = tuple(f"color{i}" for i in range(1, 17))
+# A margem que NAO se mede: a borda de cada amostra. O `color1` do formulario e
+# maior que os outros quinze (49x41 contra 33x25) porque e o selecionado, e o
+# `recuadro2` desenha uma moldura por cima dele. Medir a moldura mediria a
+# ordem-z, que e outro assunto -- entao o recorte encolhe 6 px de cada lado.
+AMOSTRA_MARGEM = 6
+
+
+def compara_cor(oraculo, port) -> dict:
+    """As 16 amostras, uma a uma, com a janela do MODAL como origem.
+
+    Aqui nao ha calibracao por ancora: a captura ja e a janela do editor, e o
+    `.lfm` dele da as coordenadas relativas a ela. O que sobra de diferenca
+    entre os dois lados e a borda que cada widgetset desenha, e e ela que a
+    margem tira.
+    """
+    rects = retangulos_do_lfm(AMOSTRAS, LFM_COLOR)
+    saida = {}
+    for nome in AMOSTRAS:
+        x, y, w, h = rects[nome]
+        m = AMOSTRA_MARGEM
+        if w <= 2 * m or h <= 2 * m:
+            raise TelaError(f"{nome}: {w}x{h} nao sobrevive a margem de {m}")
+        rect = (x + m, y + m, w - 2 * m, h - 2 * m)
+        ra = regiao(oraculo, rect, (0, 0), f"oraculo/{nome}")
+        rb = regiao(port, rect, (0, 0), f"port/{nome}")
+        pa, pb = list(ra.get_flattened_data()), list(rb.get_flattened_data())
+        difs = [(u, v) for u, v in zip(pa, pb) if u != v]
+        pior = max((max(abs(c - d) for c, d in zip(u, v)) for u, v in difs),
+                   default=0)
+        saida[nome] = {"pixels": len(pa), "diferentes": len(difs),
+                       "pior_canal": pior,
+                       "oraculo": ra.getpixel((0, 0)),
+                       "port": rb.getpixel((0, 0))}
+    return saida
+
+
+def relata_cor(r: dict, indice: int) -> int:
+    print(f"compara_tela: time {indice} -- as 16 amostras do editor de cor")
+    ruins = [n for n, v in r.items() if v["diferentes"]]
+    for nome in AMOSTRAS:
+        v = r[nome]
+        if v["diferentes"]:
+            print(f"  {nome}: {v['diferentes']}/{v['pixels']} px diferentes, "
+                  f"maior desvio {v['pior_canal']} -- oraculo {v['oraculo']}, "
+                  f"port {v['port']}")
+    # A guarda contra o verde vazio: 16 amostras da MESMA cor significa que
+    # nenhum dos dois lados pintou nada, e a comparacao seria fundo com fundo.
+    distintas = {v["oraculo"] for v in r.values()}
+    if len(distintas) < 2:
+        print("REPROVOU: as 16 amostras do oraculo tem a mesma cor -- ou o "
+              "editor nao abriu, ou o recorte caiu fora dele", file=sys.stderr)
+        return 1
+    if ruins:
+        print("DIVERGE nas amostras: " + ", ".join(ruins), file=sys.stderr)
+        return 1
+    total = sum(v["pixels"] for v in r.values())
+    print(f"  PASSOU: as {len(AMOSTRAS)} amostras batem em pixel ({total} px, "
+          f"{len(distintas)} cores distintas, tolerancia zero)")
+    return 0
+
+
+def main_cor(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(description="as 16 amostras do ficha_color")
+    ap.add_argument("oraculo", type=Path)
+    ap.add_argument("port", type=Path)
+    ap.add_argument("--indice", type=int, required=True)
+    args = ap.parse_args(argv)
+    try:
+        r = compara_cor(carrega(args.oraculo), carrega(args.port))
+    except TelaError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return relata_cor(r, args.indice)
+
+
 def main(argv: list[str]) -> int:
     if argv == ["--check"]:
         return autoteste()
@@ -869,6 +956,8 @@ def main(argv: list[str]) -> int:
         return main_habilitacao(argv[1:])
     if argv[:1] == ["--nomes"]:
         return main_nomes(argv[1:])
+    if argv[:1] == ["--cor"]:
+        return main_cor(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("oraculo", type=Path)
     ap.add_argument("port", type=Path)

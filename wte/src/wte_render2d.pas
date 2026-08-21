@@ -38,7 +38,7 @@ unit wte_render2d;
 interface
 
 uses
-  ExtCtrls, we2002_render;
+  Classes, Controls, ExtCtrls, we2002_render;
 
 { Desenha `bandera<forma>.bmp` recolorido com as 16 palavras de `cores`.
 
@@ -71,6 +71,34 @@ function DesenhaUniforme(camisaImg, calcaoImg: TImage;
                          time, qual: Integer;
                          const cores: array of TCorBgr555): Boolean;
 
+{ Pinta as 16 amostras do editor de cor -- a `0x00405bc8` e a `0x00405d6c`.
+
+  `dono` e o formulario que tem os `TLabel` chamados `color1`..`color16`. O
+  original os acha por NOME (`FindComponent('color' + IntToStr(n))`, com a
+  string `color` literal em `0x00424838`) e nao por vetor de ponteiro, e aqui e
+  a mesma busca -- pela mesma razao que o `Bind<T>` do `newWe2002` existe: nome
+  que nao casa tem de falhar dizendo qual, em vez de virar ponteiro nulo tres
+  quadros adiante.
+
+  A COR DA AMOSTRA E `TColor`, e a conversao nao e livre: `R or (G shl 8) or
+  (B shl 16)`, que e o `$00BBGGRR` do Delphi. Montar na outra ordem daria
+  vermelho no lugar de azul em toda amostra, e e o unico erro desta rotina que
+  se ve.
+
+  A rotina recebe o formulario em vez de conhece-lo: assim ela nao depende da
+  unidade do `ficha_color`, e os dois chamadores -- o proprio formulario e o
+  `MainForm.colorearClick` -- a alcancam sem ciclo de `uses`. }
+procedure PintaAmostras(dono: TComponent; const cores: TCoresDoTime);
+
+{ Carrega a paleta do time pela familia corrente e pinta as 16.
+
+  Devolve False sem pintar nada quando a familia nao e portada (ver
+  `FamiliaPortada` na `wte_cor`) ou o indice nao e um time de verdade. O
+  original pinta de qualquer jeito: com a familia fora de 0..3 ele cai no laco
+  com o ponteiro de fonte NAO INICIALIZADO. Reproduzir isso seria reproduzir
+  comportamento indefinido, que nao e comportamento. }
+function PreencheAmostras(dono: TComponent; indice_do_time: Integer): Boolean;
+
 { Esquece os arquivos ja lidos. Existe para o caso de alguem trocar a pasta de
   assets com o app aberto -- o original enxergaria a troca, e sem isto o port
   nao enxergaria. }
@@ -79,8 +107,8 @@ procedure EsqueceOsBitmaps;
 implementation
 
 uses
-  SysUtils, Classes, Graphics, IntfGraphics, GraphType, FPImage,
-  we2002_bmp, we2002_estado, wte_uniformes;
+  SysUtils, Graphics, StdCtrls, IntfGraphics, GraphType, FPImage,
+  we2002_bmp, we2002_estado, wte_uniformes, wte_cor;
 
 var
   { Cache de arquivo lido, chaveado pelo caminho. Cresce ate 105 camisas + 6
@@ -215,6 +243,41 @@ begin
                     + IntToStr(jogoDeUniforme.calcao) + '.bmp',
                     cores, PRIMEIRA_UNIFORME, PALETA_UNIFORME);
   Result := okCamisa and okCalcao;
+end;
+
+procedure PintaAmostras(dono: TComponent; const cores: TCoresDoTime);
+var
+  i: Integer;
+  alvo: TComponent;
+  canais: TCanais;
+begin
+  if dono = nil then
+    Exit;
+  for i := 1 to COR_AMOSTRAS do
+  begin
+    alvo := dono.FindComponent('color' + IntToStr(i));
+    if not (alvo is TControl) then
+      Continue;
+    canais := DecodificaCor(cores[i - 1]);
+    { `Transparent := False` ANTES da cor, e nao e gosto: o `TLabel` da LCL
+      desenha transparente por default e o proprio `Color` nao aparece. Com ele
+      ligado as 16 amostras somem no fundo do formulario -- medido no `:98` na
+      quinta passagem da WTE-TASK-29, com a janela aberta e nenhuma amostra
+      visivel. A VCL de 2002 nao tinha a propriedade separada. }
+    if alvo is TLabel then
+      TLabel(alvo).Transparent := False;
+    TControl(alvo).Color := TColor(LongInt(canais[0])
+                                   or (LongInt(canais[1]) shl 8)
+                                   or (LongInt(canais[2]) shl 16));
+  end;
+end;
+
+function PreencheAmostras(dono: TComponent; indice_do_time: Integer): Boolean;
+begin
+  Result := CarregaPaleta(indice_do_time);
+  if not Result then
+    Exit;
+  PintaAmostras(dono, CorEmEdicao.cores);
 end;
 
 procedure EsqueceOsBitmaps;

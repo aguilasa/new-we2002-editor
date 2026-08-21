@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 32 |
+| `implementado` | 34 |
 | `trivial` | 14 |
-| `divergencia deliberada` | 0 |
+| `divergencia deliberada` | 1 |
 | `nao portado` | 0 |
-| `aberto` | 50 |
+| `aberto` | 47 |
 | **total** | **96** |
 
-62 de 96 têm arquivo de spec.
+64 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -47,9 +47,9 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00402f08` | `ficha_salida` | [FormCreate](ficha_salida.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402f8c` | `ficha_info` | [FormCreate](ficha_info.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040422c` | `ficha_info4` | [FormCreate](ficha_info4.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00405dcc` | `ficha_color` | [FormCreate](ficha_color.FormCreate.md) | OnCreate | carga | aberto |
+| `0x00405dcc` | `ficha_color` | [FormCreate](ficha_color.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00405e40` | `ficha_color` | barraChange | OnChange x3 | edicao | aberto |
-| `0x00406078` | `ficha_color` | botonClick | OnClick x4 | auxiliar | aberto |
+| `0x00406078` | `ficha_color` | [botonClick](ficha_color.botonClick.md) | OnClick x4 | auxiliar | implementado |
 | `0x00406358` | `ficha_color` | barra1Change | OnChange | edicao | aberto |
 | `0x00406384` | `ficha_color` | barra2Change | OnChange | edicao | aberto |
 | `0x004063b0` | `ficha_color` | gradienteClick | OnClick | edicao | aberto |
@@ -122,7 +122,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | implementado |
 | `0x00410ddc` | `MainForm` | [dorsalMouseDown](MainForm.dorsalMouseDown.md) | OnMouseDown x23 | edicao | implementado |
-| `0x00410ea8` | `MainForm` | colorearClick | OnClick | edicao | aberto |
+| `0x00410ea8` | `MainForm` | [colorearClick](MainForm.colorearClick.md) | OnClick | edicao | divergencia deliberada |
 | `0x00410fa4` | `MainForm` | SpeedButton2Click | OnClick | auxiliar | aberto |
 | `0x00410fc0` | `MainForm` | SpeedButton1Click | OnClick | auxiliar | aberto |
 | `0x00410fd0` | `MainForm` | Image3Click | OnClick | auxiliar | aberto |

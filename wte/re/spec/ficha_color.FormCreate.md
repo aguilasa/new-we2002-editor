@@ -2,7 +2,7 @@
 handler: FormCreate
 formulario: ficha_color
 endereco: 0x00405dcc
-veredito: aberto
+veredito: implementado
 ---
 
 # ficha_color.FormCreate
@@ -57,14 +57,28 @@ Não trata.
 
 ## Notas
 
-**Veredito `aberto` de propósito, e o que falta é o Pascal, não a medição.** Os
-cinco globais em `0x00433dc0`…`0x00433dd0` são o estado do editor de cor 2D, e
-quem os lê são os outros 16 handlers do `ficha_color` (edição, na
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md)) e o render da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md). Escrever este
-corpo antes deles significaria inventar onde esse estado mora, e a decisão é
-das duas tasks que o consomem — não desta.
+**A decisão que este parágrafo adiou foi tomada na quinta passagem da
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md), em 2026-08-21.**
+Até lá o veredito era `aberto` de propósito: os cinco globais em
+`0x00433dc0`…`0x00433dd0` são o estado do editor de cor 2D, e escrever este
+corpo antes de decidir onde esse estado mora significaria inventar.
 
-O que já dá para dizer sobre eles: dois são zerados antes das chamadas de
-z-order, e três recebem `0`, `1` e `16` no fim. O `16` é o tamanho das paletas
-do formulário — o DFM tem `color1`…`color16` e `colcop0`…`colcop16`.
+Ele mora em [`wte/src/wte_cor.pas`](../../src/wte_cor.pas), e cada um tem nome:
+
+| global | campo | base |
+|---|---|---|
+| `0x00433dc4` | `familia` — qual paleta se edita (0..3) | — |
+| `0x00433dc8` | `conjunto` — qual jogo dentro dela | — |
+| `0x00433dc0` | `entrada` — qual das 16 está selecionada | **zero** |
+| `0x00433dcc` | `faixa_ini` — começo da faixa do gradiente | **um** |
+| `0x00433dd0` | `faixa_fim` — fim dela, e vale 16 no arranque | **um** |
+
+**As bases não são as mesmas, e a razão é um alias.** O vetor das 16 palavras
+fica em `0x00433dd4`…`0x00433e10`, e o pintor de amostra escreve em
+`[indice*4 + 0x00433dd0]` com `indice` de 1 a 16 — ou seja **o `faixa_fim` é o
+elemento zero do vetor**, e os dois nunca colidem porque o pintor começa em 1.
+No port são campos separados, com nome; o alias fica no comentário, mas as
+bases têm de ser respeitadas.
+
+O `16` do fim é o tamanho das paletas do formulário — o DFM tem `color1`…
+`color16` e `colcop0`…`colcop16`.

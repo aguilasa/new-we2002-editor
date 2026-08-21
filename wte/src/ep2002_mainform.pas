@@ -33,7 +33,7 @@ uses
   we2002_types, we2002_player, ep2002_jugador, ep2002_estrategia,
   ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
   we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage, we2002_ml,
-  ep2002_info4, we2002_mcr, we2002_render, wte_render2d;
+  ep2002_info4, we2002_mcr, we2002_render, wte_render2d, wte_cor, ep2002_color;
 
 type
   TMainForm = class(TForm)
@@ -363,12 +363,8 @@ procedure TMainForm.dorsalMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 {$I impl/ep2002_mainform.dorsalMouseDown.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.colorearClick(Sender: TObject);
-begin
-  REStub('MainForm.colorearClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.colorearClick.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.SpeedButton2Click(Sender: TObject);
