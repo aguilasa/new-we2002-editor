@@ -52,6 +52,8 @@ REL_EXE = "we-team-editor/we-team-editor.exe"
 
 OUT_MD = ROOT / "wte" / "re" / "render2d.md"
 OUT_TSV = ROOT / "wte" / "re" / "render2d.tsv"
+PASCAL = ROOT / "wte" / "src" / "we2002_render.pas"
+REL_PASCAL = "wte/src/we2002_render.pas"
 
 # --- os enderecos, todos da tabela de alvos da WTE-TASK-29 ----------------
 VA_DECODIFICA = 0x00404DD4    # BGR555 -> 3 bytes, 154 B
@@ -186,6 +188,138 @@ def confere_assinaturas(blob: bytes) -> list[tuple[int, str, str]]:
     return saida
 
 
+def imediatos_do_exe(blob: bytes) -> dict[str, int]:
+    """Os numeros que a unidade Pascal usa, EXTRAIDOS do `.text`.
+
+    Nao e a mesma coisa que a tabela `ASSINATURAS`: aquela confere que um
+    padrao existe, esta **le o operando**. A diferenca importa -- um `shl` que
+    virasse `shl 4` continuaria casando com um padrao de tres bytes escrito
+    frouxo, e sairia daqui como 4.
+
+    Cada valor e localizado pelo opcode que o carrega, e o operando vem de
+    dentro da instrucao.
+    """
+    def imediato8(va: int, tam: int, prefixo: bytes, quem: str) -> int:
+        corpo = le_bytes(blob, va, tam)
+        i = corpo.find(prefixo)
+        if i < 0:
+            raise RenderError(f"{quem}: `{prefixo.hex()}` nao esta em "
+                              f"{va:#010x}")
+        return corpo[i + len(prefixo)]
+
+    def imediato32(va: int, tam: int, prefixo: bytes, quem: str) -> int:
+        corpo = le_bytes(blob, va, tam)
+        i = corpo.find(prefixo)
+        if i < 0:
+            raise RenderError(f"{quem}: `{prefixo.hex()}` nao esta em "
+                              f"{va:#010x}")
+        return int.from_bytes(corpo[i + len(prefixo):i + len(prefixo) + 4],
+                              "little")
+
+    achados = {
+        # `shl BYTE PTR [edx],<n>` -- de quanto e a expansao de 5 para 8 bits
+        "RENDER_EXPANSAO": imediato8(VA_DECODIFICA, 0x9A,
+                                     bytes.fromhex("c022"), "expansao"),
+        # `cmp esi,<n>` no laco de bits
+        "RENDER_BITS": imediato8(VA_DECODIFICA, 0x9A,
+                                 bytes.fromhex("83fe"), "bits por canal"),
+        # `cmp DWORD PTR [esp],<n>` no laco de canais
+        "RENDER_CANAIS": imediato8(VA_DECODIFICA, 0x9A,
+                                   bytes.fromhex("833c24"), "canais"),
+        # `cmp BYTE PTR [ebp+0x0],<n>` -- o teto do clarear
+        "RENDER_MAXIMO": imediato8(VA_CLAREAR, 0x45,
+                                   bytes.fromhex("807d00"), "teto"),
+        # `add DWORD PTR [ebx],<n>` -- o degrau do canal G
+        "RENDER_PASSO_G": imediato8(VA_CLAREAR, 0x45,
+                                    bytes.fromhex("8303"), "passo G"),
+        # ... e o do B, que nao cabe em oito bits
+        "RENDER_PASSO_B": imediato32(VA_CLAREAR, 0x45,
+                                     bytes.fromhex("8103"), "passo B"),
+    }
+    # O degrau do canal R e um `dec`, sem operando: o proprio opcode diz 1.
+    if bytes.fromhex("ff03") not in le_bytes(blob, VA_CLAREAR, 0x45):
+        raise RenderError("passo R: `inc DWORD PTR [ebx]` nao esta em "
+                          f"{VA_CLAREAR:#010x}")
+    achados["RENDER_PASSO_R"] = 1
+    # Quantas entradas cada desenhista reescreve, do `cmp esi,<n>` de cada um.
+    achados["PALETA_BANDEIRA"] = imediato8(VA_BANDEIRA_1, 0x200,
+                                           bytes.fromhex("83fe"), "bandeira")
+    achados["PALETA_UNIFORME"] = imediato8(VA_UNIFORME, 0x40A,
+                                           bytes.fromhex("83fe"), "uniforme")
+    return achados
+
+
+def confere_seek_da_paleta(blob: bytes, cabecalho: int) -> None:
+    """O `push <cabecalho>` das tres rotinas de desenho.
+
+    Este e o unico numero que NAO se extrai: um `push imm8` sozinho nao diz
+    para que serve, e a rotina tem varios. A conferencia vai na direcao
+    contraria -- o Pascal afirma 54, e o `.exe` tem de conter `push 54` dentro
+    de cada desenhista. Afirmacao que o binario nao sustenta reprova; numero
+    que o binario tem e o Pascal nao conhece, nao.
+    """
+    padrao = bytes([0x6A, cabecalho])
+    faltam = [f"{va:#010x} ({papel})"
+              for va, tam, papel, _, _ in DESENHISTAS
+              if padrao not in le_bytes(blob, va, tam)]
+    if faltam:
+        raise RenderError(
+            f"o seek de paleta `push {cabecalho:#04x}` nao esta em: "
+            + ", ".join(faltam))
+
+
+def constantes_do_pascal() -> dict[str, int]:
+    """As constantes de `we2002_render.pas`, lidas do fonte.
+
+    So `NOME = $HEX;` ou `NOME = decimal;`. Expressao fica de fora de
+    proposito: aceitar e avaliar seria reimplementar Pascal aqui, e avaliar
+    errado em silencio e pior do que nao conferir. A unidade escreve estes
+    valores como literal justamente para caber nesta leitura -- a derivacao
+    mora no comentario dela e e executada pelo `test_render.pas`.
+    """
+    import re
+    if not PASCAL.is_file():
+        raise RenderError(f"{REL_PASCAL} nao existe")
+    achados: dict[str, int] = {}
+    for linha in PASCAL.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*([A-Z][A-Z0-9_]*)\s*=\s*(\$[0-9A-Fa-f]+|\d+)\s*;",
+                     linha)
+        if m:
+            achados.setdefault(m.group(1),
+                               int(m.group(2)[1:], 16)
+                               if m.group(2).startswith("$")
+                               else int(m.group(2)))
+    return achados
+
+
+def confere_pascal(do_exe: dict[str, int]) -> None:
+    """O `.exe` contra o `we2002_render.pas`, numero a numero.
+
+    Mesmo contrato do `dump_mcr.py` sobre o `we2002_mcr.pas`: a unidade e
+    escrita a mao, e este e o guard que impede as duas verdades de se
+    separarem.
+    """
+    do_pascal = constantes_do_pascal()
+    ruins = []
+    for nome, valor in sorted(do_exe.items()):
+        if nome not in do_pascal:
+            ruins.append(f"{nome}: ausente de {REL_PASCAL}")
+        elif do_pascal[nome] != valor:
+            ruins.append(f"{nome}: Pascal diz {do_pascal[nome]:#x}, o `.exe` "
+                         f"diz {valor:#x}")
+    # E a rotina que a rampa NAO pode usar: `Round` no lugar de `Trunc` e o
+    # risco nomeado, e um grep e barato.
+    corpo = PASCAL.read_text(encoding="utf-8")
+    if "Trunc(acumulado[0])" not in corpo:
+        ruins.append("Rampa: nao trunca o acumulador -- ver a secao do "
+                     "gradiente no markdown")
+    if "Round(acumulado" in corpo:
+        ruins.append("Rampa: usa `Round`, e o original TRUNCA")
+    if ruins:
+        raise RenderError(
+            f"{REL_PASCAL} e o `.text` divergem:\n     " + "\n     ".join(ruins))
+
+
 def confere_desenhistas(blob: bytes) -> list[tuple[int, str, int, int]]:
     """As tres rotinas de desenho, e a assimetria entre elas.
 
@@ -255,6 +389,9 @@ def gera() -> dict[Path, str]:
     blob = EXE.read_bytes()
     provas = confere_assinaturas(blob)
     desenhistas = confere_desenhistas(blob)
+    do_exe = imediatos_do_exe(blob)
+    confere_pascal(do_exe)
+    confere_seek_da_paleta(blob, constantes_do_pascal()["BMP_CABECALHO"])
     contas = bitmaps()
     cores = le_bytes(blob, VA_CORES_BANDEIRA, 2 * CORES_BANDEIRA_N)
     return {OUT_TSV: gera_tsv(provas, contas),
@@ -427,7 +564,33 @@ def gera_md(provas, desenhistas, contas, cores: bytes) -> str:
     for va, padrao, prova in provas:
         w(f"| `{va:#010x}` | `{padrao}` | {prova} |\n")
 
-    w("## O que fica para o Pascal\n")
+    w("## O Pascal, e o que o segura no lugar\n")
+    w(f"A aritmética está em [`{REL_PASCAL}`](../src/we2002_render.pas),\n"
+      "**escrita à mão** — não há gerador possível para uma rotina. O que é\n"
+      "gerado é a *conferência*: o `--check` deste script extrai os operandos\n"
+      "das instruções acima e os compara com as constantes da unidade, um a\n"
+      "um.\n")
+    w("| constante do Pascal | de onde o `.exe` a entrega |\n|---|---|\n")
+    w("| `RENDER_EXPANSAO` | o operando do `shl BYTE PTR [edx],<n>` |\n")
+    w("| `RENDER_BITS` | o do `cmp esi,<n>` do laço de bits |\n")
+    w("| `RENDER_CANAIS` | o do `cmp DWORD PTR [esp],<n>` |\n")
+    w("| `RENDER_MAXIMO` | o do `cmp BYTE PTR [ebp+0x0],<n>` do clarear |\n")
+    w("| `RENDER_PASSO_G` | o do `add DWORD PTR [ebx],<n>` |\n")
+    w("| `RENDER_PASSO_B` | idem, em 32 bits |\n")
+    w("| `PALETA_BANDEIRA`, `PALETA_UNIFORME` | o `cmp esi,<n>` de cada "
+      "desenhista |\n")
+    w("**`BMP_CABECALHO` é o único que não se extrai**, e a conferência dele\n"
+      "vai na direção contrária: um `push imm8` sozinho não diz para que\n"
+      "serve, e a rotina tem vários. Então o Pascal afirma 54 e o script exige\n"
+      "que `push 54` esteja dentro das três rotinas de desenho.\n")
+    w("E há um guard que não é sobre número: a unidade **não pode** conter\n"
+      "`Round(acumulado` — o original trunca, e trocar isso é o risco da §9\n"
+      "acontecendo em silêncio. As constantes da unidade são escritas como\n"
+      "literal justamente para caber nesta leitura; a derivação\n"
+      "(`RENDER_MAXIMO = 31 shl 3`) mora no comentário e é **executada** pelo\n"
+      "[`test_render.pas`](../tests/test_render.pas).\n")
+
+    w("## O que fica para o resto da task\n")
     w("Duas decisões já tomadas noutro lugar, e que este documento não\n"
       "reabre:\n")
     w("- **recolorir em memória**, e não reescrevendo o `.bmp` do usuário. A\n"
@@ -500,7 +663,8 @@ def do_check(files: dict[Path, str]) -> int:
         print(f"rode: python3 {GERADOR}", file=sys.stderr)
         return 2
     print(f"{len(files)} arquivos em dia com {REL_EXE}; "
-          f"{len(ASSINATURAS)} assinaturas conferidas no `.text`")
+          f"{len(ASSINATURAS)} assinaturas conferidas no `.text`; "
+          f"{REL_PASCAL} bate com os imediatos")
     return 0
 
 

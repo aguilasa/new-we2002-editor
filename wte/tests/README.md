@@ -11,6 +11,7 @@ O que existe hoje:
 | `dump_estado.cpp` | WTE-TASK-20, escrito à mão | o irmão do lado `we2002_core`, mesmo formato e mesmo verbo |
 | `test_ml.pas` | WTE-TASK-33, escrito à mão | prova a conta de blocos livres de Master League contra a do `conta_ml.py`, na mesma cópia |
 | `test_mcr.pas` | WTE-TASK-28, escrito à mão | prova o leitor de `.mcr` — o contêiner, a aritmética de 5 bits do dorsal, **dois dos três casos especiais do readme** (capitão e cobradores, espaço no nome) sobre cartão sintético, e a leitura de um cartão de verdade contra a do `dump_mcr.py`. O terceiro caso, o do "goleiro da Eire", não é do leitor: mora no carimbo `+0x16 := 0xFF` da `0x0040478c` e é conferido pelo `--check` do `dump_mcr.py` e medido pelo `golden-13-roundtrip` |
+| `test_render.pas` | WTE-TASK-29, escrito à mão | prova a aritmética de cor do `we2002_render` — o mapeamento de cada canal para os seus cinco bits, a expansão que satura em **248** e não 255, o piso e o teto que impedem um campo de roubar do vizinho, e a rampa do gradiente: que ela preencha o **miolo** e não as pontas, e que truncar e arredondar deem resultados **diferentes** — o risco nomeado da §9 executado em vez de afirmado. A quinta ponta confronta a rampa com a que o `test_dump_render2d.py` calcula em Python, com `Single` emulado |
 | `roteiros/` | WTE-TASK-13 e 19 | os roteiros de trace de evento e o par 07/08 do travamento |
 
 Os dois `test_offsets.*` saem de `wte/tools/gen_tables_pas.py` e **não se edita à

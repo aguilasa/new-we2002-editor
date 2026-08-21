@@ -19,10 +19,49 @@ Tres grupos, e o do meio e a razao de o arquivo existir:
 from __future__ import annotations
 
 import math
+import os
+import shutil
+import struct
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
 import dump_render2d as R
+
+
+def f32(x: float) -> float:
+    """O mesmo valor, depois de passar por um `Single`.
+
+    O gradiente do original guarda passo e acumulador com `fstp DWORD PTR`, que
+    e precisao simples. O `float` do Python e duplo, entao emular exige o
+    ida-e-volta -- sem ele a referencia Python e o Pascal divergiriam por um
+    motivo que nao existe no binario.
+    """
+    return struct.unpack("<f", struct.pack("<f", x))[0]
+
+
+def rampa_referencia(inicio: int, fim: int, distancia: int) -> list[int]:
+    """A rampa do `gradienteClick`, em Python, para confrontar com o Pascal.
+
+    Duas implementacoes independentes da mesma conta. Se concordarem, o erro
+    tem de estar nas duas -- e a mesma politica do confronto de `.mcr` da
+    WTE-TASK-28.
+    """
+    def canais5(p: int) -> list[int]:
+        return [(p >> (5 * c)) & 0x1F for c in range(3)]
+
+    a, b = canais5(inicio), canais5(fim)
+    passo = [f32(f32(b[c] - a[c]) / f32(distancia)) for c in range(3)]
+    acumulado = [0.0, 0.0, 0.0]
+    saida = []
+    for _ in range(distancia - 1):
+        for c in range(3):
+            acumulado[c] = f32(acumulado[c] + passo[c])
+        saida.append((inicio + math.trunc(acumulado[0])
+                      + (math.trunc(acumulado[1]) << 5)
+                      + (math.trunc(acumulado[2]) << 10)) & 0xFFFF)
+    return saida
 
 
 class TestAssinaturas(unittest.TestCase):
@@ -228,6 +267,128 @@ class TestAritmetica(unittest.TestCase):
         n = 8
         rampa = self.rampa((0, 0, 0), (24, 0, 0), n, math.trunc)
         self.assertEqual(rampa[-1] & 0x1F, 24)
+
+
+class TestGuardDoPascal(unittest.TestCase):
+    """O `we2002_render.pas` e escrito a mao; este e o guard dele."""
+
+    def setUp(self) -> None:
+        if not R.EXE.is_file() or not R.PASCAL.is_file():
+            self.skipTest(f"sem {R.REL_EXE} ou {R.REL_PASCAL}")
+        self.blob = R.EXE.read_bytes()
+        self.original = R.PASCAL.read_text(encoding="utf-8")
+
+    def test_os_imediatos_saem_do_exe(self) -> None:
+        do_exe = R.imediatos_do_exe(self.blob)
+        self.assertEqual(do_exe["RENDER_EXPANSAO"], 3)
+        self.assertEqual(do_exe["RENDER_MAXIMO"], 0xF8)
+        self.assertEqual(do_exe["RENDER_PASSO_G"], 0x20)
+        self.assertEqual(do_exe["RENDER_PASSO_B"], 0x400)
+        self.assertEqual(do_exe["PALETA_BANDEIRA"], 16)
+        self.assertEqual(do_exe["PALETA_UNIFORME"], 15)
+
+    def test_o_pascal_bate(self) -> None:
+        R.confere_pascal(R.imediatos_do_exe(self.blob))
+        R.confere_seek_da_paleta(self.blob,
+                                 R.constantes_do_pascal()["BMP_CABECALHO"])
+
+    def test_constante_plantada_recusa(self) -> None:
+        try:
+            R.PASCAL.write_text(
+                self.original.replace("  RENDER_EXPANSAO = 3;",
+                                      "  RENDER_EXPANSAO = 4;"),
+                encoding="utf-8")
+            with self.assertRaises(R.RenderError) as ctx:
+                R.confere_pascal(R.imediatos_do_exe(self.blob))
+            self.assertIn("RENDER_EXPANSAO", str(ctx.exception))
+        finally:
+            R.PASCAL.write_text(self.original, encoding="utf-8")
+
+    def test_round_no_lugar_de_trunc_recusa(self) -> None:
+        """O risco nomeado, guardado por grep -- e barato."""
+        try:
+            R.PASCAL.write_text(
+                self.original.replace("Trunc(acumulado[0])",
+                                      "Round(acumulado[0])"),
+                encoding="utf-8")
+            with self.assertRaises(R.RenderError) as ctx:
+                R.confere_pascal(R.imediatos_do_exe(self.blob))
+            self.assertIn("TRUNCA", str(ctx.exception))
+        finally:
+            R.PASCAL.write_text(self.original, encoding="utf-8")
+
+    def test_seek_de_paleta_errado_recusa(self) -> None:
+        with self.assertRaises(R.RenderError) as ctx:
+            R.confere_seek_da_paleta(self.blob, 0x40)
+        self.assertIn("push", str(ctx.exception))
+
+
+class TestPascalConcorda(unittest.TestCase):
+    """O `we2002_render` compila, e a rampa dele bate com a do Python."""
+
+    PROGRAMA = R.ROOT / "wte" / "tests" / "test_render.pas"
+    FONTES = R.ROOT / "wte" / "src"
+
+    def _roda(self, ambiente: dict) -> str:
+        fpc = shutil.which("fpc")
+        if not fpc:
+            self.skipTest("sem fpc -- o we2002_render NAO foi compilado nesta "
+                          "execucao")
+        with tempfile.TemporaryDirectory() as td:
+            binario = Path(td) / "test_render"
+            r = subprocess.run(
+                [fpc, f"-Fu{self.FONTES}", f"-FU{td}", f"-o{binario}",
+                 str(self.PROGRAMA)], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            env = dict(os.environ)
+            env.update(ambiente)
+            r = subprocess.run([str(binario)], capture_output=True, text=True,
+                               env=env)
+        self.assertEqual([ln for ln in r.stdout.splitlines()
+                          if ln.startswith("FALHA")], [], r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        return r.stdout
+
+    def test_os_invariantes_sem_confronto(self) -> None:
+        saida = self._roda({"WTE_TEST_RENDER_RAMPA": ""})
+        self.assertIn("PULADO\trampa contra o Python", saida)
+        # Numero medido: caso que sumir do programa Pascal sumiria em silencio
+        # e o teste seguiria verde.
+        self.assertIn("CASOS\t31", saida)
+
+    def test_a_rampa_bate_com_a_do_python(self) -> None:
+        """A terceira ponta, e ela precisa de um caso onde truncar MORDE.
+
+        Uma rampa que divida certinho nao distingue `Trunc` de `Round`, e o
+        confronto passaria com o port errado.
+        """
+        inicio, fim, distancia = 0, 7, 5
+        esperado = rampa_referencia(inicio, fim, distancia)
+        arredondada = [(inicio + round(f32((i + 1) * f32(7 / 5)))) & 0xFFFF
+                       for i in range(distancia - 1)]
+        self.assertNotEqual(esperado, arredondada,
+                            "o caso escolhido nao distingue truncar de "
+                            "arredondar -- troque os numeros")
+        saida = self._roda({
+            "WTE_TEST_RENDER_INICIO": str(inicio),
+            "WTE_TEST_RENDER_FIM": str(fim),
+            "WTE_TEST_RENDER_DISTANCIA": str(distancia),
+            "WTE_TEST_RENDER_RAMPA": ",".join(str(v) for v in esperado),
+        })
+        self.assertIn("OK\ta rampa bate com a do dump_render2d.py", saida)
+
+    def test_a_rampa_de_um_canal_cheio_tambem_bate(self) -> None:
+        inicio = 0
+        fim = 31 << 10          # so o canal B
+        distancia = 9
+        esperado = rampa_referencia(inicio, fim, distancia)
+        saida = self._roda({
+            "WTE_TEST_RENDER_INICIO": str(inicio),
+            "WTE_TEST_RENDER_FIM": str(fim),
+            "WTE_TEST_RENDER_DISTANCIA": str(distancia),
+            "WTE_TEST_RENDER_RAMPA": ",".join(str(v) for v in esperado),
+        })
+        self.assertIn("OK\ta rampa bate com a do dump_render2d.py", saida)
 
 
 if __name__ == "__main__":

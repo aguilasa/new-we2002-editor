@@ -171,7 +171,35 @@ caducou.
 | `0x0040ee80` | `6800080000` | `push 0x800` duas vezes — le 2048 e escreve 2048, o payload do setor |
 | `0x0040ee80` | `6830010000` | `push 0x130` — e pula 304, que e cabecalho mais EDC/ECC |
 
-## O que fica para o Pascal
+## O Pascal, e o que o segura no lugar
+A aritmética está em [`wte/src/we2002_render.pas`](../src/we2002_render.pas),
+**escrita à mão** — não há gerador possível para uma rotina. O que é
+gerado é a *conferência*: o `--check` deste script extrai os operandos
+das instruções acima e os compara com as constantes da unidade, um a
+um.
+
+| constante do Pascal | de onde o `.exe` a entrega |
+|---|---|
+| `RENDER_EXPANSAO` | o operando do `shl BYTE PTR [edx],<n>` |
+| `RENDER_BITS` | o do `cmp esi,<n>` do laço de bits |
+| `RENDER_CANAIS` | o do `cmp DWORD PTR [esp],<n>` |
+| `RENDER_MAXIMO` | o do `cmp BYTE PTR [ebp+0x0],<n>` do clarear |
+| `RENDER_PASSO_G` | o do `add DWORD PTR [ebx],<n>` |
+| `RENDER_PASSO_B` | idem, em 32 bits |
+| `PALETA_BANDEIRA`, `PALETA_UNIFORME` | o `cmp esi,<n>` de cada desenhista |
+
+**`BMP_CABECALHO` é o único que não se extrai**, e a conferência dele
+vai na direção contrária: um `push imm8` sozinho não diz para que
+serve, e a rotina tem vários. Então o Pascal afirma 54 e o script exige
+que `push 54` esteja dentro das três rotinas de desenho.
+E há um guard que não é sobre número: a unidade **não pode** conter
+`Round(acumulado` — o original trunca, e trocar isso é o risco da §9
+acontecendo em silêncio. As constantes da unidade são escritas como
+literal justamente para caber nesta leitura; a derivação
+(`RENDER_MAXIMO = 31 shl 3`) mora no comentário e é **executada** pelo
+[`test_render.pas`](../tests/test_render.pas).
+
+## O que fica para o resto da task
 Duas decisões já tomadas noutro lugar, e que este documento não
 reabre:
 

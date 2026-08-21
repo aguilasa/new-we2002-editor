@@ -116,9 +116,10 @@ gravar **nesta imagem**:
 | Arquivo | Ação |
 |---|---|
 | `wte/re/spec/<handler>.md` | criar |
-| `wte/re/render2d.md` | criar — algoritmo, espaço de cor, tolerância medida |
-| `wte/src/we2002_render.pas` | criar |
-| `wte/tests/test_render.pas` | criar |
+| `wte/re/render2d.md` | criar — algoritmo e espaço de cor **feitos**; tolerância ainda não |
+| `wte/tools/dump_render2d.py`, `wte/tools/test_dump_render2d.py` | criar — feito |
+| `wte/src/we2002_render.pas` | criar — feito (a aritmética de cor) |
+| `wte/tests/test_render.pas` | criar — feito |
 
 ---
 
@@ -182,6 +183,80 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Segunda passagem, 2026-08-20 — **parcial**: o Pascal da aritmética
+
+A task **continua `⬜ Pendente`**. Nenhum critério fechou inteiro nesta
+passagem; o que ela entrega é a metade da cor que dá para provar sem janela.
+
+- **Resumo do que foi feito:**
+
+  **`we2002_render.pas`, e ele não desenha.** A unidade não usa LCL, não abre
+  arquivo e não sabe o que é um `TBitmap` — só decodifica, escurece, clareia e
+  interpola. A separação é a do `src/core/` do `newWe2002`, e a razão é
+  prática: teste de cor que precise de janela é teste que não roda no gate.
+
+  **O guard fecha o círculo, e ele extrai em vez de reafirmar.** O
+  `dump_render2d.py --check` já conferia que certos padrões de instrução
+  existem; agora ele **lê o operando** de cada um e o compara com a constante
+  correspondente da unidade. A diferença importa: um `shl` que virasse `shl 4`
+  continuaria casando com um padrão escrito frouxo e sairia como 4. Sete
+  constantes vêm assim; a oitava — `BMP_CABECALHO` — é a única que não se
+  extrai, porque um `push imm8` sozinho não diz para que serve, e a
+  conferência dela vai na direção contrária: o Pascal afirma 54 e o `.exe` tem
+  de conter `push 54` dentro das três rotinas de desenho.
+
+  **E um guard que não é sobre número:** a unidade não pode conter
+  `Round(acumulado`. É grep, é barato, e é exatamente o risco da §9 acontecendo
+  em silêncio.
+
+  **A `Rampa` tinha um off-by-one, e o disassembly o pegou antes do teste.** A
+  primeira versão preenchia `n` entradas com a última igual à ponta final; o
+  laço do original vai de `ini + 1` até `fim - 1` (`cmp ebx,[0x433dd0]` com
+  `jl`) e preenche só o **miolo**. Escrever `n` entradas apagaria a cor que o
+  usuário escolheu na ponta.
+
+  **O confronto Pascal × Python precisou de `Single` emulado.** O `float` do
+  Python é duplo, e a referência divergiria do Pascal por um motivo que não
+  existe no binário — então a referência passa cada operação por
+  `struct.pack("<f", …)`. E o caso de teste é escolhido para que truncar
+  **morda**: uma rampa que divida certinho não distingue `Trunc` de `Round`, e
+  o confronto passaria com o port errado. O próprio teste verifica isso antes
+  de confrontar.
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/src/we2002_render.pas`, `wte/tests/test_render.pas`
+  - modificados: `wte/tools/dump_render2d.py` (o guard do Pascal e a seção nova
+    do markdown), `wte/tools/test_dump_render2d.py`, `wte/re/render2d.md`
+    (gerado), `wte/re/fase-2.md` (gerado — a unidade nova entra na lista de
+    fora-da-casca), `wte/tools/README.md`, `wte/tests/README.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `dump_render2d.py --check` | verde; **três recusas vistas** (constante trocada, passo trocado, `Round` no lugar de `Trunc`) |
+  | `test_dump_render2d.py` | 25 testes, verde |
+  | `test_render.pas` | 31 casos, verde |
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 670 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+
+  **O golden continua sem rodar, e continua certo:** a unidade nova ainda não
+  tem chamador — nenhum handler mudou, e nenhum byte que o gate mede passa por
+  ela.
+
+- **O que ficou pendente:**
+  - ligar a unidade aos handlers de `ficha_color` e às três rotinas de desenho,
+    com `TLazIntfImage`;
+  - o diff de bitmap sobre grade de cores, com tolerância medida;
+  - as specs dos 15 handlers;
+  - o golden `--artefato` do `grabar_camisetaClick`;
+  - a conferência de tela dos 3 times herdada da WTE-TASK-25.
+
+- **Problemas encontrados:** o off-by-one da `Rampa`, descrito acima. Achado ao
+  reler o laço do original para escrever o cabeçalho da função — que é o
+  argumento para escrever o cabeçalho antes do corpo.
 
 ### Primeira passagem, 2026-08-20 — **parcial**: o algoritmo, medido
 
