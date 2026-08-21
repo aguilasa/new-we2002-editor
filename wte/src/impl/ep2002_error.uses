@@ -1,0 +1,4 @@
+# Unidades que os corpos de `impl/ep2002_error.*.inc` pedem, alem das que o
+# gerador ja deduz dos componentes e das assinaturas.
+retrace        # REMark
+ep2002_info2   # ficha_info2.ShowModal, no SpeedButton1Click (WTE-TASK-30)

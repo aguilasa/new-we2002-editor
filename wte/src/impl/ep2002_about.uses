@@ -1,3 +1,5 @@
 # Unidades que os corpos de `impl/ep2002_about.*.inc` pedem, alem das que o
 # gerador ja deduz dos componentes e das assinaturas.
 retrace        # REMark
+LCLIntf        # OpenURL, no imagen_urlClick (WTE-TASK-30)
+SysUtils       # Trim, na URL com espacos a direita

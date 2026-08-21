@@ -16,7 +16,7 @@ endereco	nivel	bytes	chamado_por	chama	papel
 0x00404dd4	2	154	0x00405270,0x00405468,0x004056c8		
 0x00404e70	2	285	0x004050d0		
 0x00404f90	2	318	0x004050d0		
-0x004050d0	1	209	MainForm.lista_equiposChange	0x00404e70,0x004033bc,0x00404f90	carrega os campos de nome do time selecionado para as globais
+0x004050d0	1	209	MainForm.lista_equiposChange	0x00404e70,0x004033bc,0x00404f90	carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1
 0x00405270	1	502	MainForm.lista_equiposChange	0x00415718,0x0041978c,0x0042120c,0x004213f8,0x004213b4,0x00417530,0x00417810,0x00404dd4,0x00418f98,0x00417170	desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 0x00405468	1	606	MainForm.lista_equipos_2Change	0x00415718,0x004033bc,0x0041978c,0x0042120c,0x004213f8,0x004213b4,0x00417530,0x00417810,0x00404dd4,0x00418f98,0x00417170	
 0x004056c8	1	1034	MainForm.lista_equiposChange	0x00415718,0x0041978c,0x0042120c,0x004213f8,0x004213e4,0x004213b4,0x00417530,0x00417810,0x00404dd4,0x00418f98,0x00417170	desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)

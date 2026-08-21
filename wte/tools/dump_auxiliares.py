@@ -161,7 +161,14 @@ PAPEIS: dict[int, str] = {
     0x00404820: "**grava** um jogador do buffer no destino — 10 B de nome, "
                 "12 B de atributos, e o byte condicional; recusa com `-2` se a "
                 "identidade (`+0x16`, `+0x17`) do buffer bater com a do destino",
-    0x004050D0: "carrega os campos de nome do time selecionado para as globais",
+    # Media na WTE-TASK-30: ela le o BLOCO DE COR, nao os nomes. A leitura
+    # anterior ("campos de nome") descrevia a `0x00404E70`, que e a
+    # primeira coisa que esta rotina chama. Os sete blocos que ela le sao
+    # os mesmos sete que a `0x004051A4` grava de volta, pelas mesmas
+    # globais de offset -- ver `spec/ficha_color.BitBtn3Click.md`.
+    0x004050D0: "carrega da imagem o bloco de cor do time — bandeira, os "
+                "dois uniformes, as oito chuteiras, a quarta paleta, a "
+                "forma e o padrão — para o slot 0, e o espelha no slot 1",
     0x0040CBC8: "percorre a tabela de offsets em `.data`, seis colunas por linha",
     0x00405270: "desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",
     0x004056C8: "desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",

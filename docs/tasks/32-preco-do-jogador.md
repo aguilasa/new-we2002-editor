@@ -19,8 +19,16 @@ status: pendente
   click").
 
 **Vem primeiro entre as quatro, e fora de ordem no plano geral** (§10, passo 5):
-entrega valor antes de a Fase 4 fechar, é isolada, não depende de gravação, e
-valida o ferramental de decompilação num alvo pequeno e conferível.
+entrega valor antes de a Fase 4 fechar, é isolada e valida o ferramental de
+decompilação num alvo pequeno e conferível.
+
+> **"Não depende de gravação" era metade verdade, e a
+> [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) mediu a outra metade em
+> 2026-08-21.** Vale para o `etiqprecioClick`, que só mostra o número na tela.
+> **Não vale** para o preço do time inteiro: o `base_teamClick` percorre os 23
+> slots e **grava um byte em cada**, no offset da terceira coluna da tabela de
+> offsets — a mesma coluna condicional que a `0x004046E8` usa. A régua desta
+> task é **dupla**: tela para a fórmula, byte para o time inteiro.
 
 ---
 
@@ -30,11 +38,23 @@ Recuperar a fórmula e implementá-la, com prova numérica.
 
 ### Alvos
 
-| Handler | Endereço |
-|---|---|
-| `etiqprecioClick` | `0x00408bb8` |
-| `casilla_precioKeyPress` | `0x00408b9c` |
-| formulário `jugador` | — |
+| Handler | Formulário | Endereço | O que falta |
+|---|---|---|---|
+| `etiqprecioClick` | `jugador` | `0x00408bb8` | a fórmula, e o número na tela |
+| `casilla_precioKeyPress` | `jugador` | `0x00408b9c` | o filtro de tecla do campo |
+| `base_teamClick` | `MainForm` | `0x00410ff4` | **o laço dos 23 e a gravação** |
+
+O `base_teamClick` chegou nesta lista pela WTE-TASK-30, que implementou a
+**moldura** dele — posicionar o `ficha_creditos_equipo`, mostrá-lo e desistir
+em `mrCancel` — e deixou o miolo aqui, com o veredito `aberto` e o dono
+nomeado. A spec medida está em
+[`wte/re/spec/MainForm.base_teamClick.md`](../../wte/re/spec/MainForm.base_teamClick.md)
+e já traz a faixa de endereços da fórmula (`0x004110E7`..`0x0041112A`), as
+constantes que aparecem nela (`0x2DC6C0`, `0x9C40`, `0x2BC`, `7`, `+5`) e a
+variante `× 5 div 3` de `0x00411142`.
+
+**Quem separa titular de reserva ali é o ponteiro do `Sender`**, comparado com
+o campo `base_team`, e não o nome — o `LadoTitular` do `.aux.inc` não serve.
 
 ### O método que **não** precisa de decompilador
 
@@ -93,6 +113,9 @@ original, jogador a jogador.
 - [ ] Fórmula conferida contra o disassembly, e as duas fontes concordando
 - [ ] Saturação, arredondamento e termo cruzado testados explicitamente
 - [ ] Cálculo do time inteiro conferido, não presumido soma
+- [ ] `base_teamClick` com golden verde — **byte, não tela** —, com o controle
+      fechando antes, e o veredito dele trocado de `aberto` no
+      `re/spec/INDICE.md`
 - [ ] 100% de acerto sobre amostra grande das duas ROMs
 - [ ] Commit no formato conventional, em inglês
 

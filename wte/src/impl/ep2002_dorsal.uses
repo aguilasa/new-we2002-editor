@@ -2,3 +2,4 @@
 # gerador ja deduz dos componentes e das assinaturas.
 retrace        # REMark
 SysUtils        # IntToStr, no scroll_dorsalChange
+Controls        # mrOk, no BitBtn1Click

@@ -42,7 +42,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Handlers de gravação | 4 | 26 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
 | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-21 | 2026-08-21 |
-| [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ✅ Concluído | 2026-08-21 | ⬜ pendente |
 | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ⬜ Pendente | — | — |
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
@@ -254,16 +254,26 @@ só uma escolha de quando.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **77 de 96 têm arquivo**
-      (2026-08-21, do `spec_index.py`): 46 `implementado`, 14 `trivial`, 2
-      `divergencia deliberada`, 34 `aberto`. Os 11 do `ficha_color` e os 2
-      `malla` do `estrategia` entraram na WTE-TASK-29, somando-se aos 28 do
-      grupo de carga, aos 28 do de edição que a WTE-TASK-26 fechou e às
-      gravações da WTE-TASK-27. Dos nove `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
+      (2026-08-21, do `spec_index.py`): 51 `implementado`, 19 `trivial`, 2
+      `divergencia deliberada`, 1 `nao portado`, 23 `aberto`. Os 11 do
+      `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
+      somando-se aos 28 do grupo de carga, aos 28 do de edição que a
+      WTE-TASK-26 fechou e às gravações da WTE-TASK-27; os 17 do grupo
+      `auxiliar` entraram na WTE-TASK-30, que fechou 11. Dos nove `aberto`
       do grupo de edição com **dono nomeado na WTE-TASK-27** pela opção A,
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
       `compara_tela.sh --edicao` alcançar a lista de descarte
+- [ ] **Três gravações sem dono, achado da WTE-TASK-30 (2026-08-21).** O grupo
+      `auxiliar` não era de "avisos e confirmações": o `OK` do `ficha_color`
+      (`0x004069e8`), o `Comple.` do `jugador` (`0x00408548`) e o ` Accept` do
+      `estrategia` (`0x0040a660`) **escrevem na imagem**, e nenhuma task os
+      carrega. São seis, não nove, as gravações que a WTE-TASK-27 contava —
+      medido, são nove. As três specs estão completas e dizem o que falta em
+      cada uma; a [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) é
+      fechamento e **não implementa**, então elas precisam de dono antes que
+      ela rode
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão

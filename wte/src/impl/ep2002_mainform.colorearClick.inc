@@ -28,6 +28,13 @@ begin
 
   { O global do editor, copiado UMA vez. Ver `TimeEmCor` na `wte_cor`. }
   TimeEmCor := indice;
+
+  { A FOTO DO SLOT 0, para o `Original` e o `Cancela` do editor terem o que
+    restaurar (WTE-TASK-30). No original o slot 0 e refeito a cada troca de
+    time, pela carga; aqui a foto sai aqui, e a diferenca so apareceria se o
+    time mudasse com o editor aberto -- e ele e modal. }
+  GuardaOriginal(indice);
+
   PreencheAmostras(ficha_color, indice);
 
   { O redesenho usa o jogo que o combo do EDITOR mostra, e nao 0 -- diferente

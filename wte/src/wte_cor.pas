@@ -178,6 +178,33 @@ function SalvaFormaDaBandeira(indice_do_time, forma: Integer): Boolean;
 { ... e a leitura dela. Devolve -1 se o indice nao for um time de verdade. }
 function FormaEmVigor(indice_do_time: Integer): Integer;
 
+{ O SLOT 0 -- a copia intocada que o `ficha_color.BitBtn1` restaura.
+
+  Chegou na WTE-TASK-30, e o cabecalho da `SalvaPaleta` acima ja tinha escrito
+  por que ele faltava: *"o slot 0 do original -- a copia intocada, que o
+  `BitBtn1` restaura -- nao tem equivalente aqui, e quem precisar dele e o
+  desfazer, que ainda nao foi portado"*. O desfazer sao os dois botoes de baixo
+  do editor de cor, e sao estes dois procedimentos.
+
+  O QUE ENTRA NA FOTO e o que a `0x00404F90` do original copia entre slots, na
+  parte que este port tem campo para guardar: as cores da bandeira, os dois
+  jogos de uniforme, a forma da bandeira e o par de bytes do padrao de camisa.
+  As duas familias nao portadas -- chuteira e quarta paleta -- ficam de fora
+  porque a camada de dados nao as tem, e nao ha o que restaurar no que ninguem
+  edita: a `SalvaPaleta` recusa familia nao portada.
+
+  ONDE A FOTO E TIRADA, e por que e equivalente sem ser igual. No original o
+  slot 0 e refeito a CADA TROCA DE TIME, pela carga (`0x004050F0` le da imagem,
+  `0x00405198` espelha no slot 1). Aqui ela sai no `MainForm.colorearClick`,
+  imediatamente antes do `ShowModal`. A diferenca so apareceria se o time
+  mudasse com o editor aberto, e ele e MODAL: nao muda.
+
+  A foto guarda o indice junto. `RestauraOriginal` devolve False -- sem mexer em
+  nada -- se for chamada para outro time ou sem foto: restaurar a cor de um time
+  em cima de outro e o unico estrago que esta dupla poderia fazer. }
+procedure GuardaOriginal(indice_do_time: Integer);
+function RestauraOriginal(indice_do_time: Integer): Boolean;
+
 implementation
 
 uses
@@ -315,6 +342,65 @@ begin
   else
     Jogo.ml_teams[indice_do_time - TEAMS_NATIONAL_ALLSTAR].flag_shape :=
       ShortInt(forma);
+  Result := True;
+end;
+
+type
+  TFotoDoTime = record
+    valida: Boolean;
+    indice: Integer;
+    bandeira: TCoresDoTime;
+    uniforme: array[0 .. 1] of TCoresDoTime;
+    forma: Integer;
+    padrao: array[0 .. 1] of Byte;
+  end;
+
+var
+  Foto: TFotoDoTime;
+
+procedure GuardaOriginal(indice_do_time: Integer);
+begin
+  Foto.valida := False;
+  if (indice_do_time < 0)
+     or (indice_do_time >= TEAMS_NATIONAL_ALLSTAR + TEAMS_ML) then
+    Exit;
+  Foto.indice := indice_do_time;
+  Foto.bandeira := CoresEmVigor(indice_do_time, COR_FAMILIA_BANDEIRA, 0);
+  Foto.uniforme[0] := CoresEmVigor(indice_do_time, COR_FAMILIA_UNIFORME, 0);
+  Foto.uniforme[1] := CoresEmVigor(indice_do_time, COR_FAMILIA_UNIFORME, 1);
+  Foto.forma := FormaEmVigor(indice_do_time);
+  Foto.padrao[0] := PadraoDaCamisa[0];
+  Foto.padrao[1] := PadraoDaCamisa[1];
+  Foto.valida := True;
+end;
+
+function RestauraOriginal(indice_do_time: Integer): Boolean;
+begin
+  Result := False;
+  if not Foto.valida then
+    Exit;
+  if Foto.indice <> indice_do_time then
+    Exit;
+  if indice_do_time < TEAMS_NATIONAL_ALLSTAR then
+  begin
+    Jogo.teams[indice_do_time].flag_colours := Foto.bandeira;
+    Jogo.teams[indice_do_time].home_kit := Foto.uniforme[0];
+    Jogo.teams[indice_do_time].away_kit := Foto.uniforme[1];
+    Jogo.teams[indice_do_time].flag_shape := ShortInt(Foto.forma);
+  end
+  else
+  begin
+    Jogo.ml_teams[indice_do_time - TEAMS_NATIONAL_ALLSTAR].flag_colours :=
+      Foto.bandeira;
+    Jogo.ml_teams[indice_do_time - TEAMS_NATIONAL_ALLSTAR].home_kit :=
+      Foto.uniforme[0];
+    Jogo.ml_teams[indice_do_time - TEAMS_NATIONAL_ALLSTAR].away_kit :=
+      Foto.uniforme[1];
+    Jogo.ml_teams[indice_do_time - TEAMS_NATIONAL_ALLSTAR].flag_shape :=
+      ShortInt(Foto.forma);
+  end;
+  PadraoDaCamisa[0] := Foto.padrao[0];
+  PadraoDaCamisa[1] := Foto.padrao[1];
   Result := True;
 end;
 

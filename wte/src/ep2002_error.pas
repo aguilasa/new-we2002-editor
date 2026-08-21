@@ -28,7 +28,7 @@ unit ep2002_error;
 interface
 
 uses
-  Forms, StdCtrls, Buttons, retrace;
+  Forms, StdCtrls, Buttons, retrace, ep2002_info2;
 
 type
   Tficha_error = class(TForm)
@@ -58,11 +58,7 @@ implementation
 
 {$R ../forms/ep2002_error.lfm}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_error.SpeedButton1Click(Sender: TObject);
-begin
-  REStub('ficha_error.SpeedButton1Click');
-end;
-{$POP}
+{$I impl/ep2002_error.SpeedButton1Click.inc}
 
 end.

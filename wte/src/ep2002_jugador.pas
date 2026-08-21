@@ -329,12 +329,8 @@ implementation
   metodo publicado, e por isso nao estao na classe. Ver wte/src/impl/README.md. }
 {$I impl/ep2002_jugador.aux.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn2Click(Sender: TObject);
-begin
-  REStub('jugador.BitBtn2Click');
-end;
-{$POP}
+{$I impl/ep2002_jugador.BitBtn2Click.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn1Click(Sender: TObject);

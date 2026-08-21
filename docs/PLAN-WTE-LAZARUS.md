@@ -505,8 +505,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 59,2% do Pascal da casca é saída de gerador** —
-9.416 linhas geradas contra 6.476 escritas à mão. Dessas 6.476, 352 são andaime de
+**Medido com a fase 4 em curso: 57,9% do Pascal da casca é saída de gerador** —
+9.374 linhas geradas contra 6.816 escritas à mão. Dessas 6.816, 352 são andaime de
 projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
@@ -516,7 +516,12 @@ fechamento da fase 2; a WTE-TASK-22
 acrescentou ao `wtemain.pas` o argumento posicional de imagem e levou a 95,9%.
 A fração é medida, então ela se move — e daqui em diante ela **cai** a cada
 handler implementado, que é o sinal certo: o denominador da §4.4 é o Pascal da
-casca, e o que sobra de manual é o que a §2 diz que não tem gerador possível.)
+casca, e o que sobra de manual é o que a §2 diz que não tem gerador possível.
+Ela cai pelas **duas** pontas, e a segunda surpreende: implementar um handler
+tira linhas do numerador também, porque o stub `REStub` que ele substitui era
+saída de gerador — cinco linhas com o `{$PUSH}`/`{$POP}` viram duas com o
+`{$I}`. Foi o que a WTE-TASK-30 mediu ao escrever doze corpos de uma vez: 9.416 →
+9.374 geradas, 6.476 → 6.816 à mão.)
 O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712

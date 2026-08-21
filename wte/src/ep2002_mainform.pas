@@ -33,7 +33,8 @@ uses
   we2002_types, we2002_player, ep2002_jugador, ep2002_estrategia,
   ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
   we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage, we2002_ml,
-  ep2002_info4, we2002_mcr, we2002_render, wte_render2d, wte_cor, ep2002_color;
+  ep2002_info4, we2002_mcr, we2002_render, wte_render2d, wte_cor,
+  ep2002_color, ep2002_about, ep2002_salida, LCLIntf, ep2002_creditos_equipo;
 
 type
   TMainForm = class(TForm)
@@ -366,33 +367,17 @@ procedure TMainForm.dorsalMouseDown(Sender: TObject; Button: TMouseButton;
 procedure TMainForm.colorearClick(Sender: TObject);
 {$I impl/ep2002_mainform.colorearClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.SpeedButton2Click(Sender: TObject);
-begin
-  REStub('MainForm.SpeedButton2Click');
-end;
-{$POP}
+{$I impl/ep2002_mainform.SpeedButton2Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.SpeedButton1Click(Sender: TObject);
-begin
-  REStub('MainForm.SpeedButton1Click');
-end;
-{$POP}
+{$I impl/ep2002_mainform.SpeedButton1Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.Image3Click(Sender: TObject);
-begin
-  REStub('MainForm.Image3Click');
-end;
-{$POP}
+{$I impl/ep2002_mainform.Image3Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.base_teamClick(Sender: TObject);
-begin
-  REStub('MainForm.base_teamClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.base_teamClick.inc}
 
 procedure TMainForm.FormShow(Sender: TObject);
 {$I impl/ep2002_mainform.FormShow.inc}

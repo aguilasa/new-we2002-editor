@@ -25,7 +25,7 @@ Medido, esse handler chama **13** rotinas internas —
 9 delas já com papel lido, 4 ainda
 sem:
 
-- `0x004050d0` — carrega os campos de nome do time selecionado para as globais
+- `0x004050d0` — carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1
 - `0x00405270` — desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 - `0x004056c8` — desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
 - `0x0040b0b4` — preenche as 23 legendas `dorsalN` com os numeros de camisa
@@ -85,7 +85,7 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x00404dd4` | 2 | 154 | `0x00405270`, `0x00405468`, `0x004056c8` | — |
 | `0x00404e70` | 2 | 285 | `0x004050d0` | — |
 | `0x00404f90` | 2 | 318 | `0x004050d0` | — |
-| `0x004050d0` | 1 | 209 | `MainForm.lista_equiposChange` | carrega os campos de nome do time selecionado para as globais |
+| `0x004050d0` | 1 | 209 | `MainForm.lista_equiposChange` | carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1 |
 | `0x00405270` | 1 | 502 | `MainForm.lista_equiposChange` | desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
 | `0x00405468` | 1 | 606 | `MainForm.lista_equipos_2Change` | — |
 | `0x004056c8` | 1 | 1034 | `MainForm.lista_equiposChange` | desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
@@ -295,7 +295,7 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 ### `0x004050d0` — 209 bytes
 
-- **Papel:** carrega os campos de nome do time selecionado para as globais
+- **Papel:** carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1
 - **Chamada por:** `MainForm.lista_equiposChange`
 - **Chama internas:** `0x00404e70`, `0x004033bc`, `0x00404f90`
 - **Importados:** nenhum

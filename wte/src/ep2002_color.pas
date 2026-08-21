@@ -29,7 +29,8 @@ interface
 
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace,
-  Graphics, SysUtils, we2002_render, wte_cor, wte_render2d, wte_uniformes;
+  Graphics, SysUtils, we2002_render, wte_cor, wte_render2d, wte_uniformes,
+  ep2002_info;
 
 type
   Tficha_color = class(TForm)
@@ -178,19 +179,11 @@ procedure Tficha_color.lista_col2Change(Sender: TObject);
 procedure Tficha_color.lista_col3Change(Sender: TObject);
 {$I impl/ep2002_color.lista_col3Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn1Click(Sender: TObject);
-begin
-  REStub('ficha_color.BitBtn1Click');
-end;
-{$POP}
+{$I impl/ep2002_color.BitBtn1Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn2Click(Sender: TObject);
-begin
-  REStub('ficha_color.BitBtn2Click');
-end;
-{$POP}
+{$I impl/ep2002_color.BitBtn2Click.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn3Click(Sender: TObject);
@@ -203,11 +196,7 @@ procedure Tficha_color.colorMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 {$I impl/ep2002_color.colorMouseDown.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.SpeedButton1Click(Sender: TObject);
-begin
-  REStub('ficha_color.SpeedButton1Click');
-end;
-{$POP}
+{$I impl/ep2002_color.SpeedButton1Click.inc}
 
 end.

@@ -28,7 +28,7 @@ unit ep2002_about;
 interface
 
 uses
-  Forms, StdCtrls, ExtCtrls, Buttons, ActnList, retrace;
+  Forms, StdCtrls, ExtCtrls, Buttons, ActnList, retrace, LCLIntf, SysUtils;
 
 type
   Tficha_about = class(TForm)
@@ -91,11 +91,7 @@ implementation
 procedure Tficha_about.FormCreate(Sender: TObject);
 {$I impl/ep2002_about.FormCreate.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_about.imagen_urlClick(Sender: TObject);
-begin
-  REStub('ficha_about.imagen_urlClick');
-end;
-{$POP}
+{$I impl/ep2002_about.imagen_urlClick.inc}
 
 end.

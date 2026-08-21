@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 46 |
-| `trivial` | 14 |
+| `implementado` | 51 |
+| `trivial` | 19 |
 | `divergencia deliberada` | 2 |
-| `nao portado` | 0 |
-| `aberto` | 34 |
+| `nao portado` | 1 |
+| `aberto` | 23 |
 | **total** | **96** |
 
-77 de 96 têm arquivo de spec.
+94 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -34,7 +34,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 
 | Endereço | Formulário | Handler | Evento | Grupo | Veredito |
 |---|---|---|---|---|---|
-| `0x00402b40` | `ficha_dorsal` | BitBtn1Click | OnClick | auxiliar | aberto |
+| `0x00402b40` | `ficha_dorsal` | [BitBtn1Click](ficha_dorsal.BitBtn1Click.md) | OnClick | auxiliar | trivial |
 | `0x00402b58` | `ficha_dorsal` | [scroll_dorsalChange](ficha_dorsal.scroll_dorsalChange.md) | OnChange | edicao | implementado |
 | `0x00402bc0` | `ficha_dorsal` | [FormCreate](ficha_dorsal.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402c44` | `ficha_enlaza` | [FormShow](ficha_enlaza.FormShow.md) | OnShow | carga | trivial |
@@ -42,7 +42,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00402cdc` | `ficha_warning` | [FormCreate](ficha_warning.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402d60` | `ficha_info3` | [FormCreate](ficha_info3.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402de4` | `ficha_about` | [FormCreate](ficha_about.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00402de8` | `ficha_about` | imagen_urlClick | OnClick | auxiliar | aberto |
+| `0x00402de8` | `ficha_about` | [imagen_urlClick](ficha_about.imagen_urlClick.md) | OnClick | auxiliar | implementado |
 | `0x00402e84` | `ficha_movertodos` | [FormCreate](ficha_movertodos.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402f08` | `ficha_salida` | [FormCreate](ficha_salida.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00402f8c` | `ficha_info` | [FormCreate](ficha_info.FormCreate.md) | OnCreate | carga | trivial |
@@ -59,18 +59,18 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x004068b0` | `ficha_color` | [lista_col1change](ficha_color.lista_col1change.md) | OnChange | edicao | implementado |
 | `0x004068ec` | `ficha_color` | [lista_col2Change](ficha_color.lista_col2Change.md) | OnChange | edicao | divergencia deliberada |
 | `0x0040690c` | `ficha_color` | [lista_col3Change](ficha_color.lista_col3Change.md) | OnChange | edicao | implementado |
-| `0x00406968` | `ficha_color` | BitBtn1Click | OnClick | auxiliar | aberto |
-| `0x004069c8` | `ficha_color` | BitBtn2Click | OnClick | auxiliar | aberto |
-| `0x004069e8` | `ficha_color` | BitBtn3Click | OnClick | auxiliar | aberto |
+| `0x00406968` | `ficha_color` | [BitBtn1Click](ficha_color.BitBtn1Click.md) | OnClick | auxiliar | implementado |
+| `0x004069c8` | `ficha_color` | [BitBtn2Click](ficha_color.BitBtn2Click.md) | OnClick | auxiliar | implementado |
+| `0x004069e8` | `ficha_color` | [BitBtn3Click](ficha_color.BitBtn3Click.md) | OnClick | auxiliar | aberto |
 | `0x00406a0c` | `ficha_color` | [colorMouseDown](ficha_color.colorMouseDown.md) | OnMouseDown x16 | edicao | implementado |
-| `0x00406f34` | `ficha_color` | SpeedButton1Click | OnClick | auxiliar | aberto |
-| `0x00407a68` | `jugador` | BitBtn2Click | OnClick | auxiliar | aberto |
-| `0x00407a80` | `jugador` | BitBtn1Click | OnClick | auxiliar | aberto |
+| `0x00406f34` | `ficha_color` | [SpeedButton1Click](ficha_color.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
+| `0x00407a68` | `jugador` | [BitBtn2Click](jugador.BitBtn2Click.md) | OnClick | auxiliar | trivial |
+| `0x00407a80` | `jugador` | [BitBtn1Click](jugador.BitBtn1Click.md) | OnClick | auxiliar | aberto |
 | `0x00407a88` | `jugador` | [barrhabScroll](jugador.barrhabScroll.md) | OnScroll x9 | edicao | implementado |
 | `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | aberto |
-| `0x00408548` | `jugador` | BitBtn3Click | OnClick | auxiliar | aberto |
+| `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | aberto |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
 | `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |
@@ -87,14 +87,14 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | aberto |
 | `0x00409f4c` | `estrategia` | [malla1MouseDown](estrategia.malla1MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
-| `0x0040a658` | `estrategia` | BitBtn1Click | OnClick | auxiliar | aberto |
-| `0x0040a660` | `estrategia` | BitBtn3Click | OnClick | auxiliar | aberto |
+| `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | aberto |
+| `0x0040a660` | `estrategia` | [BitBtn3Click](estrategia.BitBtn3Click.md) | OnClick | auxiliar | aberto |
 | `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |
 | `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | implementado |
 | `0x0040c46c` | `MainForm` | [boton_mcr2isoClick](MainForm.boton_mcr2isoClick.md) | OnClick | gravacao | implementado |
-| `0x0040c9c4` | `MainForm` | Button2Click | — | auxiliar | aberto |
+| `0x0040c9c4` | `MainForm` | [Button2Click](MainForm.Button2Click.md) | — | auxiliar | nao portado |
 | `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | implementado |
 | `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | implementado |
 | `0x0040cab8` | `MainForm` | [boton_barras2isoClick](MainForm.boton_barras2isoClick.md) | OnClick | gravacao | implementado |
@@ -123,10 +123,10 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | implementado |
 | `0x00410ddc` | `MainForm` | [dorsalMouseDown](MainForm.dorsalMouseDown.md) | OnMouseDown x23 | edicao | implementado |
 | `0x00410ea8` | `MainForm` | [colorearClick](MainForm.colorearClick.md) | OnClick | edicao | divergencia deliberada |
-| `0x00410fa4` | `MainForm` | SpeedButton2Click | OnClick | auxiliar | aberto |
-| `0x00410fc0` | `MainForm` | SpeedButton1Click | OnClick | auxiliar | aberto |
-| `0x00410fd0` | `MainForm` | Image3Click | OnClick | auxiliar | aberto |
-| `0x00410ff4` | `MainForm` | base_teamClick | OnClick x2 | auxiliar | aberto |
+| `0x00410fa4` | `MainForm` | [SpeedButton2Click](MainForm.SpeedButton2Click.md) | OnClick | auxiliar | implementado |
+| `0x00410fc0` | `MainForm` | [SpeedButton1Click](MainForm.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
+| `0x00410fd0` | `MainForm` | [Image3Click](MainForm.Image3Click.md) | OnClick | auxiliar | implementado |
+| `0x00410ff4` | `MainForm` | [base_teamClick](MainForm.base_teamClick.md) | OnClick x2 | auxiliar | aberto |
 | `0x004111d8` | `MainForm` | [FormShow](MainForm.FormShow.md) | OnShow | carga | aberto |
 | `0x00420e84` | `ficha_info2` | [FormCreate](ficha_info2.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00420f08` | `ficha_error` | SpeedButton1Click | OnClick | auxiliar | aberto |
+| `0x00420f08` | `ficha_error` | [SpeedButton1Click](ficha_error.SpeedButton1Click.md) | OnClick | auxiliar | trivial |

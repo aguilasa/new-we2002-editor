@@ -7,3 +7,4 @@ we2002_render   # a aritmetica de cor: Escurece, Clareia, Rampa, DecodificaCor
 wte_cor         # o estado do editor de cor 2D (WTE-TASK-29)
 wte_render2d    # PintaUmaAmostra, PreencheAmostras e os dois redesenhos
 wte_uniformes   # FORMA_PADRAO -- o combo `lista_col0` a INDEXA
+ep2002_info     # ficha_info.ShowModal, no SpeedButton1Click (WTE-TASK-30)
