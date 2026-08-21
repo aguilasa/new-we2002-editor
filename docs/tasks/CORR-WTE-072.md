@@ -3,7 +3,7 @@ id: CORR-WTE-072
 title: "Correção: gravacao-controle.md fecha com a premissa que a WTE-TASK-28 refutou"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,18 +109,39 @@ abre em outro gerador.
 
 ## Verificação
 
-- [ ] `python3 wte/tools/gravacao_controle.py --check` verde depois de regerar
-- [ ] `grep -n 'setor inteiro' wte/re/gravacao-controle.md` não afirma mais que
-      a WTE-TASK-28 é exceção
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `python3 wte/tools/gravacao_controle.py --check` verde depois de regerar
+- [x] `grep -n 'setor inteiro' wte/re/gravacao-controle.md` não afirma mais que
+      a WTE-TASK-28 é exceção — a única ocorrência é a citação da previsão que
+      o parágrafo refuta
+- [x] `make -C wte check` verde — 644 testes, `OK (skipped=3)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+O parágrafo final do gerador passou a dizer o que foi medido, e a dizê-lo com
+número computado do `cmp-medido.tsv`. Três funções novas:
+
+- `faixas_comuns()` — a interseção das faixas de todas as 12 sessões da task,
+  que é a injeção da abertura (9 faixas presentes em toda sessão);
+- `faixas_proprias(sessao)` — a sessão menos a injeção. Para `27-mcr2iso` dá
+  **7**, e a maior tem **276** bytes;
+- `payload_inteiro(sessao)` — as faixas de 2048 B começando no byte 24, que na
+  `27-mcr2iso` são **5**. Payload inteiro existe, mas é a injeção, e payload
+  inteiro ainda é payload: não toca os 280.
+
 **Problemas encontrados:**
 
+Os três testes de `TestCruzamento` apontam as fontes para um diretório
+temporário sintético, que não tem a sessão `27-mcr2iso` — o `max()` sobre lista
+vazia estourou. O gerador ganhou a guarda: sem a sessão no TSV lido, ele diz
+que a conta não foi feita nesta rodada em vez de afirmar assim mesmo, que é o
+defeito que esta correção fecha.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/gravacao_controle.py`
+- `wte/re/gravacao-controle.md` (regerado)

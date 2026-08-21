@@ -161,7 +161,15 @@ A conta enumera as sessões pelo prefixo `27-` em vez de listá-las: sonda
 nova entra sozinha, e listar à mão seria a forma conhecida de o número
 envelhecer calado.
 
-**O que ela não alcança:** gravação que escreva **setor inteiro**. Não
-existe nenhuma nesta task — a única do projeto é o `boton_mcr2isoClick`,
-da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md), e é lá que
-preservar EDC/ECC deixa de ser consequência e vira decisão.
+**A conta alcança o projeto inteiro, e isso foi medido depois.** O
+enunciado da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md)
+previa que o `boton_mcr2isoClick` escreveria **setor inteiro**, e que
+ali preservar EDC/ECC deixaria de ser consequência e viraria decisão.
+Medido, não é: a sessão `27-mcr2iso` já está entre as contadas
+acima, e as 7 faixas próprias do handler cabem no payload
+— a maior tem 276 bytes.
+
+Escrita de payload **inteiro** existe e já está contada, mas não é do
+handler: são as 5 faixas de 2048 bytes que a injeção da
+abertura deixa, de 24 a 2071, borda a borda.
+Elas também não tocam os 280 — o payload inteiro ainda é payload.

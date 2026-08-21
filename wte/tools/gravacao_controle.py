@@ -43,6 +43,7 @@ OUT_MD = ROOT / "wte" / "re" / "gravacao-controle.md"
 SESSAO = "27-gravacao-controle"
 SONDA_SEM = "27-descarga-sem"      # clica as barras e morre  -> zero byte
 SONDA_COM = "27-descarga-com"      # clica e troca de time    -> 5 bytes
+SESSAO_MCR2ISO = "27-mcr2iso"      # o import de .mcr da WTE-TASK-28
 SETOR = 2352
 
 # As acoes do roteiro que sao GRAVACAO. O arranque e a troca de time entram no
@@ -132,6 +133,38 @@ def fora_do_payload() -> list[tuple[str, int, int]]:
                 ruim.append((r["sessao"], ini, fim))
                 break
     return ruim
+
+
+def faixas_comuns() -> set[tuple[str, str]]:
+    """As faixas que aparecem em TODAS as sessoes da task.
+
+    Sao a injecao da abertura da imagem: sete setores que o app reescreve na
+    carga, mais dois bytes soltos. Elas nao pertencem a acao nenhuma do
+    roteiro, e por isso sao descontadas antes de se falar do que um handler
+    especifico grava."""
+    sess = sessoes_da_task()
+    linhas = ler_tsv(CMP_TSV)
+    por = {s: {(r["inicio"], r["fim"]) for r in linhas if r["sessao"] == s}
+           for s in sess}
+    return set.intersection(*por.values()) if por else set()
+
+
+def faixas_proprias(sessao: str) -> list[dict[str, str]]:
+    """As faixas de `sessao` descontada a injecao da abertura."""
+    comuns = faixas_comuns()
+    return [r for r in ler_tsv(CMP_TSV)
+            if r["sessao"] == sessao and (r["inicio"], r["fim"]) not in comuns]
+
+
+def payload_inteiro(sessao: str) -> list[dict[str, str]]:
+    """As faixas de `sessao` que sao o payload INTEIRO de um setor.
+
+    2048 bytes comecando no 24: de borda a borda da regiao de dados, sem tocar
+    os 24 de cabecalho nem os 280 de EDC/ECC."""
+    return [r for r in ler_tsv(CMP_TSV)
+            if r["sessao"] == sessao
+            and int(r["tamanho"]) == 2048
+            and int(r["byte_no_setor"]) == PAYLOAD_INICIO]
 
 
 def gerar() -> str:
@@ -318,10 +351,26 @@ def gerar() -> str:
     w("nova entra sozinha, e listar à mão seria a forma conhecida de o número")
     w("envelhecer calado.")
     w("")
-    w("**O que ela não alcança:** gravação que escreva **setor inteiro**. Não")
-    w("existe nenhuma nesta task — a única do projeto é o `boton_mcr2isoClick`,")
-    w("da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md), e é lá que")
-    w("preservar EDC/ECC deixa de ser consequência e vira decisão.")
+    mcr2iso = faixas_proprias(SESSAO_MCR2ISO)
+    inteiras = payload_inteiro(SESSAO_MCR2ISO)
+    if not mcr2iso:
+        # Sem a sessao no TSV nao ha o que contar, e afirmar assim mesmo e o
+        # defeito que a CORR-WTE-072 fechou.
+        w("**O alcance da conta fora desta task não foi medido nesta rodada:**")
+        w(f"a sessão `{SESSAO_MCR2ISO}` não está no `cmp-medido.tsv` lido aqui.")
+        return "\n".join(L) + "\n"
+    w("**A conta alcança o projeto inteiro, e isso foi medido depois.** O")
+    w("enunciado da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md)")
+    w("previa que o `boton_mcr2isoClick` escreveria **setor inteiro**, e que")
+    w("ali preservar EDC/ECC deixaria de ser consequência e viraria decisão.")
+    w(f"Medido, não é: a sessão `{SESSAO_MCR2ISO}` já está entre as contadas")
+    w(f"acima, e as {len(mcr2iso)} faixas próprias do handler cabem no payload")
+    w(f"— a maior tem {max(int(r['tamanho']) for r in mcr2iso)} bytes.")
+    w("")
+    w("Escrita de payload **inteiro** existe e já está contada, mas não é do")
+    w(f"handler: são as {len(inteiras)} faixas de 2048 bytes que a injeção da")
+    w(f"abertura deixa, de {PAYLOAD_INICIO} a {PAYLOAD_FIM}, borda a borda.")
+    w("Elas também não tocam os 280 — o payload inteiro ainda é payload.")
     return "\n".join(L) + "\n"
 
 
