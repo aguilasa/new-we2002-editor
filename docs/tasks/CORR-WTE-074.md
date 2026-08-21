@@ -3,7 +3,7 @@ id: CORR-WTE-074
 title: "Correção: a confrontação Pascal × Python do .mcr aponta para um arquivo transitório"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -110,20 +110,44 @@ spec do `grabar_memoryClick` — usa o mesmo resolvedor.
 
 ## Verificação
 
-- [ ] Com `work/entrada.mcr` no disco e sem `work/saida.mcr`,
-      `python3 -m unittest test_dump_mcr` roda a confrontação em vez de pular
-      (o `OK (skipped=2)` cai para `OK`)
-- [ ] `WTE_MCR_FIXTURE=/caminho/outro.mcr` é respeitado
-- [ ] Sem fixture nenhuma, o pulo continua e a mensagem cita os dois caminhos
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] Com `work/entrada.mcr` no disco e sem `work/saida.mcr`,
+      `python3 -m unittest test_dump_mcr` roda a confrontação em vez de pular —
+      32 testes, `OK (skipped=2)` virou `OK`
+- [x] `WTE_MCR_FIXTURE=/caminho/outro.mcr` é respeitado — os três casos da
+      `TestPascalConcorda` passam com a cópia fora de `work/`
+- [x] Sem fixture nenhuma, o pulo continua e a mensagem cita a variável e os
+      dois caminhos
+- [x] `make -C wte check` verde — 644 testes, `OK (skipped=1)`, rc=0 (eram 3
+      pulos)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+A fixture passou a ser resolvida por ordem — `$WTE_MCR_FIXTURE`,
+`work/entrada.mcr`, `work/saida.mcr` — num `classmethod cartao()` que os dois
+testes usam. A estável vem antes da transitória, e o docstring diz por quê: as
+corridas `golden-07-mcr`, `golden-12-mcr2iso` e `golden-13-roundtrip` usam
+`--artefato saida.mcr`, e o `golden_check.sh` apaga o artefato antes de cada
+lado.
+
+A mensagem do `skipTest` ficou única (`sem_fixture()`) e cita a variável e os
+dois caminhos, para quem lê o pulo saber onde pôr o arquivo. O segundo teste,
+que só dizia "sem a fixture", passou a dizer o mesmo.
+
+Efeito medido no gate: `make -C wte check` caiu de `OK (skipped=3)` para
+`OK (skipped=1)` — os dois pulos que sumiram são justamente a confrontação
+Pascal × Python e a conferência contra a spec do `grabar_memoryClick`.
+
 **Problemas encontrados:**
 
+`relative_to(M.ROOT)` na mensagem do pulo estourava com fixture fora da árvore,
+que é exatamente o caso do `WTE_MCR_FIXTURE`. Ganhou o mesmo `_curto()` que o
+`gravacao_controle.py` já usa pelo mesmo motivo.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/test_dump_mcr.py`

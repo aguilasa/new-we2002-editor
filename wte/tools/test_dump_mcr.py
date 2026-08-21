@@ -315,7 +315,37 @@ class TestPascalConcorda(unittest.TestCase):
     PROGRAMA = M.ROOT / "wte" / "tests" / "test_mcr.pas"
     FONTES = M.ROOT / "wte" / "src"
     # Fixture gerada pelo original, fora do git -- ver a decisao no `mcr.md`.
-    CARTAO = M.ROOT / "work" / "saida.mcr"
+    ENTRADA = M.ROOT / "work" / "entrada.mcr"
+    SAIDA = M.ROOT / "work" / "saida.mcr"
+
+    @classmethod
+    def cartao(cls) -> Path | None:
+        """A primeira fixture que existir, ou `None`.
+
+        `work/saida.mcr` e TRANSITORIO: o `golden_check.sh` o apaga antes de
+        cada lado das corridas que usam `--artefato saida.mcr`, que sao a
+        `golden-07-mcr`, a `golden-12-mcr2iso` e a `golden-13-roundtrip`. A
+        copia estavel e a `work/entrada.mcr`, que o cabecalho do
+        `golden-13-roundtrip` manda fazer -- por isso ela vem antes.
+        """
+        do_ambiente = os.environ.get("WTE_MCR_FIXTURE")
+        candidatos = ([Path(do_ambiente)] if do_ambiente else []) + [
+            cls.ENTRADA, cls.SAIDA]
+        return next((c for c in candidatos if c.is_file()), None)
+
+    @staticmethod
+    def _curto(caminho: Path) -> Path:
+        # Fora da arvore (o teste desta classe pode apontar para outro lugar)
+        # o caminho absoluto e o que se quer ler.
+        return (caminho.relative_to(M.ROOT)
+                if caminho.is_relative_to(M.ROOT) else caminho)
+
+    @classmethod
+    def sem_fixture(cls) -> str:
+        return ("sem fixture de cartao -- as duas leituras NAO foram "
+                "confrontadas. Procurado: $WTE_MCR_FIXTURE, "
+                f"{cls._curto(cls.ENTRADA)}, {cls._curto(cls.SAIDA)}. "
+                "Gere com o roteiro wte/tests/roteiros/27-mcr.txt")
 
     def _roda(self, ambiente: dict) -> str:
         fpc = shutil.which("fpc")
@@ -345,12 +375,10 @@ class TestPascalConcorda(unittest.TestCase):
         self.assertIn("CASOS\t21", saida)
 
     def test_a_leitura_bate_com_a_do_python(self) -> None:
-        if not self.CARTAO.is_file():
-            self.skipTest(
-                f"sem {self.CARTAO.relative_to(M.ROOT)} -- as duas leituras "
-                "NAO foram confrontadas. Gere a fixture com o roteiro "
-                "wte/tests/roteiros/27-mcr.txt")
-        mcr = self.CARTAO.read_bytes()
+        cartao = self.cartao()
+        if cartao is None:
+            self.skipTest(self.sem_fixture())
+        mcr = cartao.read_bytes()
         form = bytes(mcr[0x63D5:0x63D5 + 10]) + bytes(mcr[0x62A8:0x62A8 + 20])
         cob = bytes([mcr[a] for a in M.COBRADORES_ESPERADOS] + [mcr[0x6500]])
 
@@ -362,7 +390,7 @@ class TestPascalConcorda(unittest.TestCase):
             return ((v >> bit) & 0x1F) + 1
 
         saida = self._roda({
-            "WTE_TEST_MCR": str(self.CARTAO),
+            "WTE_TEST_MCR": str(cartao),
             "WTE_TEST_MCR_FORMACAO": form.hex(),
             "WTE_TEST_MCR_COBRADORES": cob.hex(),
             "WTE_TEST_MCR_DORSAIS": ",".join(str(numero(j)) for j in range(23)),
@@ -380,9 +408,10 @@ class TestPascalConcorda(unittest.TestCase):
         estao no markdown ha uma task. Se o layout deste leitor estivesse
         errado, ele nao os reproduziria.
         """
-        if not self.CARTAO.is_file():
-            self.skipTest("sem a fixture")
-        mcr = self.CARTAO.read_bytes()
+        cartao = self.cartao()
+        if cartao is None:
+            self.skipTest(self.sem_fixture())
+        mcr = cartao.read_bytes()
         cob = [mcr[a] for a in M.COBRADORES_ESPERADOS] + [mcr[0x6500]]
         self.assertEqual(cob, [7, 7, 8, 7, 7, 8])
         form = list(mcr[0x63D5:0x63D5 + 10])
