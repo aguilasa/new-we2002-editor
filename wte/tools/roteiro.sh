@@ -19,6 +19,12 @@
 #                  golden a ignora, e ignorar e o certo: um roteiro serve aos
 #                  dois
 #   ~ <seg>        espera
+#   espera: <seg>  sobe o limite da PROXIMA janela (o `>` ou `>~` seguinte).
+#                  O default e o `ROTEIRO_ESPERA_PADRAO` (30s), dimensionado
+#                  para maquina descarregada;
+#                  passo que vem logo depois de uma acao cara precisa de mais
+#                  (ver o `golden-14-uniforme.txt`). Vale so para a proxima:
+#                  espera longa em todo passo esconde app que nao subiu
 #   ! clique X Y   clique simples, coordenada RELATIVA a janela alvo
 #   ! duplo  X Y   duplo clique
 #   ! tecla  <k>   `xdotool key`
@@ -161,8 +167,12 @@ janela_geo() {
   echo "$achou"
 }
 
+# O default da espera. Variavel para o teste poder encurta-la: sem isso, medir
+# que o `espera:` vale SO para a proxima janela custaria 30s de bateria.
+ROTEIRO_ESPERA_PADRAO="${ROTEIRO_ESPERA_PADRAO:-30}"
+
 espera_janela() {
-  local nome="$1" limite="${2:-30}" i=0 r
+  local nome="$1" limite="${2:-$ROTEIRO_ESPERA_PADRAO}" i=0 r
   while [ $i -lt "$limite" ]; do
     if r="$(janela "$nome")"; then echo "$r"; return 0; fi
     sleep 1; i=$((i+1))
@@ -172,7 +182,7 @@ espera_janela() {
 }
 
 espera_geo() {
-  local geo="$1" limite="${2:-30}" i=0 r
+  local geo="$1" limite="${2:-$ROTEIRO_ESPERA_PADRAO}" i=0 r
   while [ $i -lt "$limite" ]; do
     if r="$(janela_geo "$geo")"; then echo "$r"; return 0; fi
     sleep 1; i=$((i+1))
@@ -185,24 +195,54 @@ espera_geo() {
 # de chamar `roteiro_executa`; o padrao nao faz nada, que e o que o gate quer.
 roteiro_marca() { :; }
 
+# Diagnostico de espera estourada. As duas falhas mandam procurar em lugares
+# diferentes, e ate a WTE-TASK-29 a mensagem era a mesma: se a PRIMEIRA janela
+# do roteiro nunca aparece, quem nao subiu foi o app (log do Wine, ou da LCL);
+# se uma janela ja tinha sido achada, o app esta vivo e o que nao veio foi o
+# dialogo daquele passo.
+roteiro_diagnostico() {
+  local nome="$1"
+  if [ "$ROTEIRO_ACHOU" -eq 0 ]; then
+    echo "ERRO: o app nao subiu -- a PRIMEIRA janela do roteiro ('$nome')" >&2
+    echo "      nunca apareceu. Procure no log do lado que falhou, e nao no" >&2
+    echo "      roteiro." >&2
+  else
+    echo "ERRO: sem janela '$nome' -- o app esta vivo (janela anterior" >&2
+    echo "      achada), mas o dialogo deste passo nao veio. Se ele vem" >&2
+    echo "      depois de uma acao cara, o caso e de 'espera:'." >&2
+  fi
+}
+
 roteiro_executa() {
   local arquivo="$1" linha nome geo verbo
   ALVO_ID=""; ALVO_X=0; ALVO_Y=0
+  ROTEIRO_ESPERA=""; ROTEIRO_ACHOU=0
   while IFS= read -r linha || [ -n "$linha" ]; do
     linha="${linha%%$'\r'}"
     case "$linha" in
       ''|'#'*|alvo:*|estado:*|operacao:*|conhecida:*) continue ;;
+      'espera: '*)
+        ROTEIRO_ESPERA="${linha#espera: }"
+        ;;
       '> '*)
         nome="${linha#> }"
-        read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_janela "$nome")"
-        [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela '$nome'" >&2; return 1; }
+        read -r ALVO_ID ALVO_X ALVO_Y \
+          <<<"$(espera_janela "$nome" \
+                  "${ROTEIRO_ESPERA:-$ROTEIRO_ESPERA_PADRAO}")"
+        ROTEIRO_ESPERA=""
+        [ -n "$ALVO_ID" ] || { roteiro_diagnostico "$nome"; return 1; }
+        ROTEIRO_ACHOU=1
         roteiro_foca
         echo ">> janela '$nome' = $ALVO_ID em $ALVO_X,$ALVO_Y"
         ;;
       '>~ '*)
         geo="${linha#>~ }"
-        read -r ALVO_ID ALVO_X ALVO_Y <<<"$(espera_geo "$geo")"
-        [ -n "$ALVO_ID" ] || { echo "ERRO: sem janela $geo" >&2; return 1; }
+        read -r ALVO_ID ALVO_X ALVO_Y \
+          <<<"$(espera_geo "$geo" \
+                  "${ROTEIRO_ESPERA:-$ROTEIRO_ESPERA_PADRAO}")"
+        ROTEIRO_ESPERA=""
+        [ -n "$ALVO_ID" ] || { roteiro_diagnostico "$geo"; return 1; }
+        ROTEIRO_ACHOU=1
         roteiro_foca
         echo ">> janela $geo = $ALVO_ID em $ALVO_X,$ALVO_Y"
         ;;

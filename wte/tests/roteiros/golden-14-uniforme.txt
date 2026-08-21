@@ -66,6 +66,11 @@ operacao: gravacao
 # grupo_memorycard (8,224) + grabar_camiseta (392,56) = (400,280), 25x25.
 ! clique 412 292
 ~ 3
+# A espera default (30s) e dimensionada para maquina descarregada, e este
+# passo vem logo depois da troca de time -- a acao mais cara do roteiro
+# (`~ 6`). Com a maquina ocupada o dialogo passava dos 30s, e a corrida
+# reprovava por tempo. Medido na CORR-WTE-080: 3 de 4 corridas de controle.
+espera: 90
 > Extrair Uni do jogo
 ~ 1
 ! clique 315 304

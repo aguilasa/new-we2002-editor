@@ -73,6 +73,14 @@ esac
 
 matar_oraculo() {
   env WINEPREFIX="$PREFIX" "$WINE_BIN/wineserver" -k >/dev/null 2>&1 || true
+  # O `-k` so PEDE; quem ESPERA e o `-w`, que volta quando o servidor daquele
+  # prefix realmente saiu. Sem ele o lado B era lancado sobre um prefix ainda
+  # em desmontagem, e o `Abre` do roteiro seguinte podia levar mais que os 30s
+  # da espera -- a falha intermitente que a CORR-WTE-080 mediu. O `timeout`
+  # existe para o gate nao pendurar se o servidor travar: 30s e muito mais do
+  # que ele leva, e passar direto e melhor que nao voltar nunca.
+  timeout 30 env WINEPREFIX="$PREFIX" "$WINE_BIN/wineserver" -w \
+    >/dev/null 2>&1 || true
 }
 # Mesma razao do lado port: corrida que falha no meio nao pode deixar janela
 # viva no `:99`. A guarda 2 do `golden_check.sh` recusaria a proxima corrida --

@@ -19,6 +19,7 @@ Arquivo de texto, uma diretiva por linha:
 | `estado:` | `ok` ou `bloqueado: <razão>` |
 | `!` | comando `xdotool`, literal, com as coordenadas **relativas à janela** |
 | `~` | espera, em segundos |
+| `espera:` | limite, em segundos, da **próxima** janela (`>` ou `>~`) |
 | `@` | linha de trace esperada, sem o carimbo de tempo |
 
 As coordenadas de `!` são relativas ao canto da janela alvo; quem replica soma
@@ -162,6 +163,25 @@ dois com o endereco **imediato** no `.text`, o que e exatamente o motivo de
 procurar por `OFS_LINK_ML` nunca os ter encontrado. A oitava passagem da
 WTE-TASK-27 portou os dois remendos, os dois lados passaram a gravar, e as
 declaracoes tiveram de sair -- pela propria regra do paragrafo acima.
+
+## `espera:` e para o passo que vem depois de acao cara
+
+O limite default de `>` e `>~` e 30s (`ROTEIRO_ESPERA_PADRAO` no
+[`../../tools/roteiro.sh`](../../tools/roteiro.sh)), dimensionado para maquina
+descarregada. Passo que vem logo depois da acao mais cara do roteiro estoura
+esse limite quando a maquina esta ocupada: o `golden-14-uniforme` reprovou por
+tempo em 3 de 4 corridas de controle, medido na
+[CORR-WTE-080](../../../docs/tasks/CORR-WTE-080.md), sempre no dialogo que vem
+logo apos a troca de time.
+
+`espera: <seg>` sobe o limite **so da proxima janela**, e volta ao default
+depois. Vale so para a proxima de proposito: espera longa em todo passo esconde
+o caso em que o app nao subiu, que e o outro lado da mesma mensagem.
+
+E as duas falhas dizem coisas diferentes desde a CORR-WTE-080 -- se a
+**primeira** janela do roteiro nunca aparece, quem nao subiu foi o app, e o log
+a olhar e o do Wine ou o da LCL; se ja havia janela achada, o app esta vivo e o
+que nao veio foi o dialogo daquele passo.
 
 ## O `>` TROCA A ORIGEM das coordenadas, e nao so espera
 

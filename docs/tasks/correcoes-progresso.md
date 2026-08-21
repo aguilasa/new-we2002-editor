@@ -99,7 +99,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-077](/docs/tasks/CORR-WTE-077.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | A §5.3 do plano ainda descreve o render 2D como `TBitmap` + varredura de pixel, algoritmo que a WTE-TASK-29 mediu e refutou — é reescrita de paleta | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O Log da sétima passagem conta 7 casos novos no `test_dump_zonas.py`; o commit acrescentou 9 | Baixa | [x] concluída | 2026-08-21 |
 | [CORR-WTE-079](/docs/tasks/CORR-WTE-079.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `compara_tela.sh` ficou com dois blocos de `--malha` mortos — um duplicado no `captura_oraculo` e um aninhado no ramo `cor|grade` do `captura_port`, com `continue` fora de laço | Baixa | [x] concluída | 2026-08-21 |
-| [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [ ] pendente | — |
+| [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [x] concluída | 2026-08-21 |
 
 ## Checklist
 
@@ -181,7 +181,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-077 — reescrever a §5.3 do plano com o algoritmo de paleta que foi medido
 - [x] CORR-WTE-078 — corrigir a contagem de casos novos do `test_dump_zonas.py`
 - [x] CORR-WTE-079 — apagar os dois blocos mortos de `--malha` do `compara_tela.sh`
-- [ ] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
+- [x] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
 
 ## Detalhes por correção
 

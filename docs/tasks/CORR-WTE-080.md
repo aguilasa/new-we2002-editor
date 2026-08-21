@@ -3,7 +3,7 @@ id: CORR-WTE-080
 title: "Correção: o golden-14-uniforme falha por tempo em boa parte das corridas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -118,21 +118,68 @@ na memória de quem rodou.
 
 ## Verificação
 
-- [ ] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-14-uniforme.txt
+- [x] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-14-uniforme.txt
       --modo controle --artefato saida.bin` verde em **três** corridas
-      seguidas, sem intervenção
-- [ ] o modo `golden` continua verde, com artefato de 30.956 B nos dois lados
-- [ ] uma falha de "app não subiu" e uma de "diálogo não veio" produzem
-      mensagens distintas
-- [ ] `golden-01-arranque` continua verde
-- [ ] `roms/` intocada
+      seguidas, sem intervenção — artefato de 30.956 B nos dois lados nas três.
+      **Ressalva:** as três corridas de reprodução, ANTES de qualquer conserto,
+      também deram verde (3 de 3), com a máquina descarregada
+- [x] o modo `golden` continua verde, com artefato de 30.956 B nos dois lados
+- [x] uma falha de "app não subiu" e uma de "diálogo não veio" produzem
+      mensagens distintas — medido pelo `test_roteiro.py`, com dublê de janela
+- [x] `golden-01-arranque` continua verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-21
 
 **Resumo do que foi feito:**
 
+**A intermitência não reproduziu.** Três corridas de `--modo controle
+--artefato saida.bin` antes de tocar em qualquer arquivo deram
+`PASSOU: byte-identico`, com artefato de 30.956 B nos dois lados — 3 de 3,
+contra as 3 falhas em 4 que a revisão mediu. A máquina estava descarregada, que
+é justamente a condição para a qual a espera de 30s foi dimensionada. Por isso
+a correção **não** foi tratada como envelhecida: falha por tempo é
+probabilística, e "não apareceu hoje" não é "não existe". O que foi feito é a
+parte que vale independente do sorteio, e as três frentes que o enunciado pede:
+
+1. **`espera: <seg>`, diretiva nova do dialeto de roteiro.** Sobe o limite da
+   **próxima** janela e volta ao default depois. Vale só para a próxima de
+   propósito: espera longa em todo passo esconde app que não subiu. O default
+   virou `ROTEIRO_ESPERA_PADRAO` (30s), variável para o teste poder encurtá-lo
+   — medir que a diretiva vale só para a próxima custaria 30s de bateria com o
+   valor de produção;
+2. **`golden-14-uniforme.txt`** ganhou `espera: 90` no passo do
+   `Extrair Uni do jogo`, com o comentário do porquê: ele vem logo depois da
+   troca de time, a ação mais cara do roteiro (`~ 6`);
+3. **`golden_run_wte.sh`** passou a **esperar** o `wineserver` sair, e não só
+   pedir. O `-k` pede; o `-w` volta quando o servidor do prefix realmente saiu.
+   Sem ele o lado B era lançado sobre um prefix ainda em desmontagem — a
+   explicação mais provável para as duas falhas de `Abre`. Com `timeout 30`
+   para o gate não pendurar se o servidor travar;
+4. **As duas falhas de espera passaram a dizer coisas diferentes.** Se a
+   **primeira** janela do roteiro nunca aparece, quem não subiu foi o app, e o
+   log a olhar é o do Wine ou o da LCL; se já havia janela achada, o app está
+   vivo e o que não veio foi o diálogo daquele passo.
+
+O `test_roteiro.py` é novo e mede as duas coisas com dublê de janela — não
+precisa de `DISPLAY`, de Wine nem do `.exe`, e roda em 7s. Nada media o
+`roteiro.sh` até aqui, que é como o dialeto podia mudar em silêncio.
+
 **Problemas encontrados:**
 
+A varredura de discrepância puxou duas linhas do `wte/tools/README.md` que
+descreviam comportamento corrente e estavam falsas: a do `roteiro.sh` dizia "a
+fixacao do `:99`" (é `WTE_DISPLAY`, `:98` de default, desde a WTE-TASK-28), e a
+do `golden_run_laz.sh` dizia que ele reprova roteiro com `! tecla`/`! texto` —
+recusa que saiu na WTE-TASK-26, quando o `xdotool windowfocus` mostrou que a
+tecla chega ao GTK2 sem window manager. As duas foram reescritas, a segunda
+como história.
+
 **Arquivos criados/modificados:**
+
+- criados: `wte/tools/test_roteiro.py`
+- modificados: `wte/tools/roteiro.sh`, `wte/tools/golden_run_wte.sh`,
+  `wte/tests/roteiros/golden-14-uniforme.txt`,
+  `wte/tests/roteiros/README.md`, `wte/tools/README.md`
