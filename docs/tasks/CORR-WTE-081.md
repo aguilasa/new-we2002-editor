@@ -151,8 +151,13 @@ Ao fim, trocar o veredito das três no frontmatter da spec e regerar o
 
 ## Verificação
 
-- [ ] `jugador.BitBtn3Click`: controle verde no roteiro novo, e golden
-      byte-idêntico com uma edição de tela antes da gravação
+- [x] `jugador.BitBtn3Click`: controle verde no roteiro novo, e golden
+      byte-idêntico. **A edição de tela não foi necessária, e a razão é
+      melhor do que a alternativa:** o `Comple.` é destrutivo sozinho — os dez
+      bytes de nome saem do campo, o campo mostra o nome já filtrado pelo
+      `0x0040b2d8`, e clicar sem tocar em nada grava `3f 3f 3f 3f` sobre
+      `ba b0 d7 dd`. Um port que não gravasse nada reprova, que é a objeção
+      que o `golden-03` teve de responder com um par editado
 - [ ] `ficha_color.BitBtn3Click`: idem, e as duas famílias **não portadas**
       saem intactas — provado por gravar sem editar e comparar os 288 bytes
       delas
@@ -166,12 +171,81 @@ Ao fim, trocar o veredito das três no frontmatter da spec e regerar o
       das três pode mexer no que já fechou
 - [ ] `roms/` intocada; toda corrida sobre cópia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**PARCIAL — 1 das 3.** O `jugador.BitBtn3Click` está fechado e commitado; o
+`ficha_color.BitBtn3Click` e o `estrategia.BitBtn3Click` continuam `aberto`. A
+correção segue **pendente**, e a ordem que ela mesma fixou continua valendo
+para o que falta.
+
+**Executado em:** 2026-08-21 (primeira passagem)
 
 **Resumo do que foi feito:**
 
+Implementado o `jugador.BitBtn3Click` (`0x00408548`), o `Comple.` da ficha —
+as duas validações, a cópia das 28 caixas de bit, dos dez bytes de nome e do
+byte condicional para o buffer, e as duas gravações. Fechado pelo par novo
+`golden-15-ficha`, nos três modos do `golden_check.sh`: `controle`
+byte-idêntico, `positivo` detectando o byte plantado em 405228, `golden`
+byte-idêntico contra o oráculo. Medido que a corrida **grava**: quatro bytes em
+`OFS_PLAYER_NAME+774` mudam nos dois lados, além dos 11.955 do patch de
+arranque.
+
+O ciclo de `uses` foi resolvido como a spec do `BitBtn1` mandava — criando a
+unidade neutra `wte/src/wte_ficha.pas` e descendo para ela o buffer de jogador
+inteiro (`BufferJogador`, `PreparaBuffer`, `CarregaJogador`, `GravaJogador`,
+`GravaJogadorEmMl`, `GravaNumeroDaCamisa` e o que elas alcançam). O corte foi
+mecânico e verificável: **nenhuma rotina que desceu chama rotina que ficou**, e
+o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
+`soBeginning` e o `NomeDoJogador`, corrigidas na hora.
+
 **Problemas encontrados:**
 
+1. **O gate reprovou por quatro bytes, e o culpado era um doc que se dizia
+   inofensivo.** O oráculo gravou `3f 3f 3f 3f` onde o port gravou zeros. A
+   leitura do disassembly dizia que o campo de nome nasce vazio — há uma única
+   escrita em `0x004335d4` no `.text`, dentro do próprio handler. A tela
+   mostrou o contrário: o campo trazia `????`. O `grep` de `0x4335d4` que
+   sustentava a conclusão tinha passado por `head -40` e escondido cinco
+   sítios, entre eles o `0x0040fa8c`, que enche a global com o nome recortado
+   do item da lista. **Screenshot resolveu em um minuto o que meia hora de
+   disassembly tinha decidido errado.**
+2. **Daí saiu a segunda:** o item da lista vem do filtro `0x0040b2d8`, e o port
+   mostrava o byte cru. Isso estava registrado como divergência deliberada da
+   WTE-TASK-35, com a justificativa *"ela é de TELA: nenhum dos dois grava"* —
+   que deixou de valer exatamente aqui. O filtro foi portado (`NomeFiltrado`) e
+   as três afirmações que diziam o contrário foram corrigidas, inclusive no
+   gerador que emite uma delas.
+3. **A pergunta `Calcular precos` não aparece nesta ordem**, e esperar por ela
+   custou a primeira corrida de controle. Já estava medido no cabeçalho do
+   `10-telas-que-faltavam.txt`: quem a provoca é o `base_team`.
+4. `docs/PLAN-WTE-LAZARUS.md` §4.4 mede a fração de Pascal gerado, e uma
+   unidade nova escrita à mão a move — 57,9% → 56,4%. O `check_fase2.py` pegou.
+
+**O que falta, e como continuar:**
+
+- **`ficha_color.BitBtn3Click`** — as sete regiões por time, os 30 bytes
+  gravados por bloco contra os 32 lidos, e a forma da bandeira nos cinco
+  offsets. Continua precisando carregar as duas famílias não portadas
+  (chuteira e quarta paleta) para devolvê-las intactas;
+- **`estrategia.BitBtn3Click`** — segue com o pré-requisito de fora: a
+  `0x0040A0B4`, que enche a tela de tática, não está portada.
+
 **Arquivos criados/modificados:**
+
+- criados: `wte/src/wte_ficha.pas`,
+  `wte/src/impl/ep2002_jugador.BitBtn3Click.inc`,
+  `wte/tests/roteiros/golden-15-ficha.txt` e `.port.txt`
+- modificados: `wte/src/impl/ep2002_mainform.aux.inc` (o corte, o
+  `NomeFiltrado` e os dois campos do `PreencheFicha`),
+  `wte/src/impl/ep2002_mainform.mostrar_jugadorClick.inc` (as três globais da
+  ficha, a carga do buffer e a válvula `IgnoraJogadorRepetido`),
+  `wte/src/impl/ep2002_mainform.uses`, `wte/src/impl/ep2002_jugador.uses`,
+  `wte/tools/dump_mcr.py` e `wte/tools/test_dump_mcr.py` (as constantes do
+  buffer mudaram de arquivo), `wte/re/spec/jugador.BitBtn3Click.md`,
+  `wte/re/spec/INDICE.md`, `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`,
+  `wte/re/fase-3-fechamento.md`
+- reconciliação de doc, em commit próprio: `wte/tools/dump_auxiliares.py` e
+  `wte/re/auxiliares.md`, `wte/re/spec/MainForm.lista_equiposChange.md`,
+  `wte/re/spec/jugador.BitBtn1Click.md`, `wte/tests/roteiros/README.md`,
+  `docs/tasks/progresso.md`

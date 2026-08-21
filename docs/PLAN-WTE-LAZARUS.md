@@ -505,8 +505,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 57,9% do Pascal da casca é saída de gerador** —
-9.374 linhas geradas contra 6.816 escritas à mão. Dessas 6.816, 352 são andaime de
+**Medido com a fase 4 em curso: 56,4% do Pascal da casca é saída de gerador** —
+9.372 linhas geradas contra 7.233 escritas à mão. Dessas 7.233, 352 são andaime de
 projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
@@ -521,7 +521,12 @@ Ela cai pelas **duas** pontas, e a segunda surpreende: implementar um handler
 tira linhas do numerador também, porque o stub `REStub` que ele substitui era
 saída de gerador — cinco linhas com o `{$PUSH}`/`{$POP}` viram duas com o
 `{$I}`. Foi o que a WTE-TASK-30 mediu ao escrever doze corpos de uma vez: 9.416 →
-9.374 geradas, 6.476 → 6.816 à mão.)
+9.374 geradas, 6.476 → 6.816 à mão. A CORR-WTE-081 mediu o mesmo movimento por
+outra causa: 6.816 → 7.233 à mão sem que um só corpo novo explicasse o salto,
+porque o que entrou foi uma **unidade** — o `wte_ficha.pas`, para onde desceu o
+buffer de jogador quando o `Comple.` da ficha passou a precisar dele de fora do
+`ep2002_mainform`. Mudança de estrutura conta no denominador como corpo conta,
+e é bom que conte: unidade escrita à mão é exatamente o que a §4.4 mede.)
 O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712

@@ -29,7 +29,8 @@ interface
 
 uses
   Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
-  Controls, wte_legendas, Graphics, we2002_estado;
+  Controls, wte_legendas, Graphics, we2002_estado, we2002_player, wte_ficha,
+  ep2002_error2;
 
 type
   Tjugador = class(TForm)
@@ -353,12 +354,8 @@ procedure Tjugador.FormCreate(Sender: TObject);
 procedure Tjugador.flechasapaClick(Sender: TObject; Button: TUDBtnType);
 {$I impl/ep2002_jugador.flechasapaClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn3Click(Sender: TObject);
-begin
-  REStub('jugador.BitBtn3Click');
-end;
-{$POP}
+{$I impl/ep2002_jugador.BitBtn3Click.inc}
 
 procedure Tjugador.casilla_nombreKeyPress(Sender: TObject; var Key: char);
 {$I impl/ep2002_jugador.casilla_nombreKeyPress.inc}

@@ -1,0 +1,43 @@
+# golden-15-ficha, lado PORT. Par de golden-15-ficha.txt.
+#
+# UMA assimetria so: a imagem vem da linha de comando. A ficha e um dos
+# formularios cuja janela sob Wine ja mede o ClientWidth/ClientHeight do DFM,
+# entao os 707x273 e o `Comple.` em (660,252) valem dos dois lados -- ao
+# contrario do `ficha_dorsal` do `golden-08`, que ganha moldura.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 100 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR
+
+! clique 28 402
+~ 5
+>~ 707x273
+~ 2
+! clique 660 252
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= COMPLE
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

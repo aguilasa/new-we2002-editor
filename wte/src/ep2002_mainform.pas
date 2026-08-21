@@ -34,7 +34,8 @@ uses
   ep2002_dorsal, ep2002_error, ep2002_error2, ep2002_movertodos, wte_legendas,
   we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage, we2002_ml,
   ep2002_info4, we2002_mcr, we2002_render, wte_render2d, wte_cor,
-  ep2002_color, ep2002_about, ep2002_salida, LCLIntf, ep2002_creditos_equipo;
+  ep2002_color, ep2002_about, ep2002_salida, LCLIntf, ep2002_creditos_equipo,
+  wte_ficha;
 
 type
   TMainForm = class(TForm)

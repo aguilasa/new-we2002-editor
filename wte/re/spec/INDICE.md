@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 51 |
+| `implementado` | 52 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 2 |
 | `nao portado` | 1 |
-| `aberto` | 23 |
+| `aberto` | 22 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -70,7 +70,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | aberto |
-| `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | aberto |
+| `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
 | `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |

@@ -145,11 +145,15 @@ class TestCarregadorDeBuffer(unittest.TestCase):
     """O caso do "goleiro da Eire": o `.text` contra o `.aux.inc`."""
 
     def setUp(self) -> None:
-        if not M.EXE.is_file() or not M.AUX.is_file():
-            self.skipTest(f"sem {M.REL_EXE} ou {M.REL_AUX} -- o carregador NAO "
-                          "foi conferido")
+        if not M.EXE.is_file() or not M.AUX.is_file() or not M.FICHA.is_file():
+            self.skipTest(f"sem {M.REL_EXE}, {M.REL_AUX} ou {M.REL_FICHA} -- o "
+                          "carregador NAO foi conferido")
         self.blob = M.EXE.read_bytes()
         self.original = M.AUX.read_text(encoding="utf-8")
+        # As constantes do buffer moraram no `.aux.inc` ate a CORR-WTE-081 e
+        # hoje moram no `wte_ficha`; o CORPO que as usa continua la. Por isso
+        # ha dois originais a restaurar, e a constante plantada vai no segundo.
+        self.original_ficha = M.FICHA.read_text(encoding="utf-8")
 
     def test_os_carimbos_saem_do_exe(self) -> None:
         campos, marcas = M.carimbos_do_carregador(self.blob)
@@ -175,15 +179,15 @@ class TestCarregadorDeBuffer(unittest.TestCase):
 
     def test_constante_plantada_recusa(self) -> None:
         try:
-            M.AUX.write_text(
-                self.original.replace("  IDENT_NENHUMA = $FF;",
-                                      "  IDENT_NENHUMA = $00;"),
+            M.FICHA.write_text(
+                self.original_ficha.replace("  IDENT_NENHUMA = $FF;",
+                                            "  IDENT_NENHUMA = $00;"),
                 encoding="utf-8")
             with self.assertRaises(M.McrError) as ctx:
                 M.confere_carregador(*M.carimbos_do_carregador(self.blob))
             self.assertIn("IDENT_NENHUMA", str(ctx.exception))
         finally:
-            M.AUX.write_text(self.original, encoding="utf-8")
+            M.FICHA.write_text(self.original_ficha, encoding="utf-8")
 
     def test_atribuicao_removida_recusa(self) -> None:
         try:

@@ -1,0 +1,105 @@
+# golden-15-ficha -- o gate do `jugador.BitBtn3Click`, o `Comple.` da ficha.
+#
+# CORR-WTE-081, primeira das tres gravacoes orfas. Lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-15-ficha.txt \
+#        --roteiro-port wte/tests/roteiros/golden-15-ficha.port.txt
+#
+# ELE NAO EDITA NADA NA FICHA, E MESMO ASSIM JULGA A GRAVACAO. Isso e possivel
+# porque o `Comple.` e destrutivo por si so: os dez bytes de nome saem do campo
+# `casilla_nombre`, o campo e enchido a partir da global `0x004335d4`, e ha uma
+# UNICA escrita nessa global no `.text` inteiro -- a do proprio `BitBtn3Click`,
+# em `0x004088da`. Numa sessao recem-aberta a global esta vazia, o campo abre em
+# branco, e o primeiro `Comple.` grava dez zeros por cima do nome do jogador.
+#
+# Por isso o roteiro nao precisa de arrastar barrinha nem de clicar seta: um
+# port que nao gravasse nada REPROVA, que e a objecao que o `golden-03` teve de
+# responder com um par editado. Aqui a propria ausencia de edicao e o estimulo.
+#
+# As tres regioes que a corrida toca, todas do time e slot escolhidos: 10 bytes
+# de nome, 12 de atributos (reescritos com o mesmo valor, porque nada na tela
+# mudou) e o byte condicional; mais o numero de camisa, pela `0x00404048`.
+#
+# A PERGUNTA `Calcular precos` NAO APARECE NESTA ORDEM, e vale dizer por que o
+# roteiro nao a espera: quem a provoca e o `base_team`, nao o
+# `mostrar_jugador_1`. Esta medido no cabecalho do
+# `10-telas-que-faltavam.txt`, em tres sessoes exploratorias.
+#
+# E a ficha e um dos formularios cuja janela X mede EXATAMENTE o
+# ClientWidth/ClientHeight do DFM sob Wine -- 707x273, sem os 6x32 de moldura
+# que o `ficha_dorsal` ganha. Por isso as coordenadas do `Comple.` sao as
+# mesmas dos dois lados.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ---------------------------------------------------------- o jogador 1 ----
+#
+# lista_jugadores_1 (40,72) + GroupBox1 (8,320) = (48,392) -> (100,402).
+! clique 100 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR
+
+# ------------------------------------------------------------ a ficha ----
+#
+# mostrar_jugador_1 (8,72) + GroupBox1 (8,320) = (16,392), 25x21 -> (28,402).
+! clique 28 402
+~ 5
+
+# A ficha. Busca por TAMANHO porque o Caption vira o nome do jogador em
+# Shift-JIS -- uma corrida de `?` que regex nenhum acha.
+>~ 707x273
+~ 2
+
+# BitBtn3 `Comple.` (624,240) 73x25 -> centro (660,252).
+! clique 660 252
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= COMPLE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C, e
+# so um `fseek` noutro ponto do mesmo arquivo a esvazia.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

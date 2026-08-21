@@ -61,6 +61,13 @@ PASCAL = ROOT / "wte" / "src" / "we2002_mcr.pas"
 REL_PASCAL = "wte/src/we2002_mcr.pas"
 AUX = ROOT / "wte" / "src" / "impl" / "ep2002_mainform.aux.inc"
 REL_AUX = "wte/src/impl/ep2002_mainform.aux.inc"
+# As constantes do buffer de jogador desceram para o `wte_ficha` na
+# CORR-WTE-081 -- o `jugador.BitBtn3Click` precisa delas e o `.aux.inc` e
+# includo na implementacao do `ep2002_mainform`, invisivel de fora. O corpo
+# de `CarregaJogadorDoCartao` continua no `.aux.inc`; so os `= valor;` e que
+# mudaram de arquivo, e por isso os dois sao lidos aqui.
+FICHA = ROOT / "wte" / "src" / "wte_ficha.pas"
+REL_FICHA = "wte/src/wte_ficha.pas"
 
 # --- o conteiner, pela documentacao publica -------------------------------
 CARTAO_BYTES = 0x20000       # 131.072 = 16 blocos
@@ -319,10 +326,14 @@ def corpo_do_carrega_jogador() -> str:
 
 
 def constantes_do_aux() -> dict[str, int]:
+    """As constantes do `.aux.inc` MAIS as do `wte_ficha`."""
     if not AUX.is_file():
         raise McrError(f"{REL_AUX} nao existe")
+    if not FICHA.is_file():
+        raise McrError(f"{REL_FICHA} nao existe")
     achados: dict[str, int] = {}
-    for linha in AUX.read_text(encoding="utf-8").splitlines():
+    for linha in (AUX.read_text(encoding="utf-8")
+                  + "\n" + FICHA.read_text(encoding="utf-8")).splitlines():
         m = re.match(r"\s*([A-Z][A-Z0-9_]*)\s*=\s*(\$[0-9A-Fa-f]+|\d+)\s*;",
                      linha)
         if m:
