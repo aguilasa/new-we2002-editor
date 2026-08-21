@@ -936,11 +936,18 @@ o próprio original.
 `malla1/2MouseDown`, `gradienteClick`, `oscurecerClick`, `aclararClick`,
 `lista_col0..3Change`, e o formulário `ficha_color` (866 linhas de DFM,
 medidas em `wte/re/dfm/ficha_color.dfm`).
-A renderização usa os 105 `uniformes2d/*.bmp` como base e aplica cor. Em Pascal
-isso é `TBitmap` + varredura de pixel; a LCL dá `TLazIntfImage` para acesso
-rápido. **Fidelidade de cor exige atenção**: paleta e arredondamento de
-gradiente têm que bater, e a verificação é diff de bitmap contra captura do
-original.
+A renderização usa os 105 `uniformes2d/*.bmp` como base e aplica cor **na
+paleta**: as três rotinas de desenho posicionam o arquivo em `0x36`, que é a
+primeira entrada, e reescrevem as primeiras — 16 na bandeira, 15 no uniforme, e
+o uniforme roda o bloco duas vezes, uma para `camiseta<n>.bmp` e outra para
+`pantalon<n>.bmp`. **Nenhuma varre pixel.** (Esta seção supunha `TBitmap` +
+varredura de pixel até 2026-08-20, quando a WTE-TASK-29 mediu; o disassembly
+está em [`wte/re/render2d.md`](../wte/re/render2d.md).) O `TLazIntfImage`
+continua sendo o certo no port, por outro motivo: ele precisa do **índice** de
+cada pixel, e o leitor de BMP da LCL entrega o bitmap já convertido para 32
+bpp, com a paleta consumida — daí a `wte/src/we2002_bmp.pas`.
+**Fidelidade de cor exige atenção**: paleta e arredondamento de gradiente têm
+que bater, e a verificação é diff de bitmap contra captura do original.
 
 **5.4 Slots livres de Master League.** O menor dos quatro: varre a região de ML
 e conta vagos. Depende só da Fase 3.

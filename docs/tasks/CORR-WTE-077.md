@@ -3,7 +3,7 @@ id: CORR-WTE-077
 title: "Correção: a §5.3 do plano ainda manda varrer pixel, e a WTE-TASK-29 mediu que é paleta"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -97,18 +97,37 @@ O aviso equivalente que já existe na WTE-TASK-29 pode então apontar para a
 
 ## Verificação
 
-- [ ] `grep -n 'varredura de pixel' docs/PLAN-WTE-LAZARUS.md` só devolve a
-      menção histórica, marcada como tal
-- [ ] A §5.3 e o `wte/re/render2d.md` dizem a mesma coisa sobre paleta
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n 'varredura de pixel' docs/PLAN-WTE-LAZARUS.md` devolve uma linha
+      só, e é a menção histórica marcada como tal (linha 944)
+- [x] A §5.3 e o `wte/re/render2d.md` dizem a mesma coisa sobre paleta — `0x36`
+      como primeira entrada, 16 na bandeira, 15 no uniforme, o uniforme duas
+      vezes, nenhuma varredura
+- [x] `make -C wte check` verde — 695 testes, `OK (skipped=1)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-21
 
 **Resumo do que foi feito:**
 
+A §5.3 passou a descrever o algoritmo medido: cor na paleta, arquivo
+posicionado em `0x36`, 16 entradas na bandeira e 15 no uniforme, o bloco do
+uniforme rodando duas vezes (`camiseta<n>.bmp` e `pantalon<n>.bmp`), e nenhuma
+varredura de pixel. A hipótese antiga ficou como história, entre parênteses e
+datada, que é a forma que este repositório já usa para previsão derrubada por
+medição — e aponta para o `wte/re/render2d.md`, onde está o disassembly.
+
+O `TLazIntfImage` continua recomendado, agora pelo motivo certo: o port precisa
+do **índice** de cada pixel, e o leitor de BMP da LCL entrega o bitmap
+convertido para 32 bpp com a paleta consumida. Daí a `we2002_bmp.pas`.
+
 **Problemas encontrados:**
 
+Nenhum. O aviso equivalente da WTE-TASK-29 não precisou de conserto: ele se
+refere ao parágrafo do próprio arquivo, logo acima dele, e não à §5.3 — não
+havia contradição a desfazer.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md`
