@@ -3,7 +3,7 @@ id: CORR-WTE-073
 title: "Correção: check_lcl_combo.py ficou preso no :99 depois da mudança para o :98"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -119,21 +119,36 @@ regra do `CLAUDE.md`.
 
 ## Verificação
 
-- [ ] Com `Xvfb :98` de pé, `python3 wte/tools/check_lcl_combo.py --check`
+- [x] Com `Xvfb :98` de pé, `python3 wte/tools/check_lcl_combo.py --check`
       mede (imprime "8 casos") em vez de pular
-- [ ] `WTE_DISPLAY=:97 python3 wte/tools/check_lcl_combo.py --check` pula
-      dizendo `:97` — a variável é lida
-- [ ] `grep -n ':99' wte/tools/check_lcl_combo.py` só devolve prosa histórica,
-      se sobrar alguma
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `WTE_DISPLAY=:97 python3 wte/tools/check_lcl_combo.py --check` pula
+      dizendo `PULADO (sem Xvfb :97)` — a variável é lida
+- [x] `grep -n ':99' wte/tools/check_lcl_combo.py` devolve uma linha só, e é o
+      comentário que registra de onde o projeto saiu
+- [x] `make -C wte check` verde — 644 testes, `OK (skipped=3)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+`ALVO = os.environ.get("WTE_DISPLAY", ":98")` ao lado do `WIDGETSET`, e as três
+menções em código vivo passam a usá-lo: o casamento na saída do `ps`
+(`f"Xvfb {ALVO} "`), o valor devolvido por `display()` e o `FileNotFoundError`
+do `medir()`. O docstring de `display()` acompanha — descreve o `ALVO` e a
+variável, e não mais o número.
+
 **Problemas encontrados:**
 
+O defeito estava acontecendo **durante esta execução**, e a medida o registra:
+com nenhum servidor de pé no começo do lote, o `make -C wte check` da CORR-071
+imprimiu "8 casos" em vez de pular. O `ps` mostrou por quê — um
+`Xvfb :99 -screen 0 1280x1024x24` alheio, do outro projeto desta máquina, que é
+exatamente o servidor de onde o repositório saiu. Depois da correção, com o
+`:98` subido e o `:99` alheio ainda de pé, o script mede no `:98`.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_lcl_combo.py`

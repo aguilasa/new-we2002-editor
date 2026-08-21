@@ -86,6 +86,11 @@ ESPERADO = {
 
 WIDGETSET = "gtk2"
 
+# O display onde a medicao roda. Uma variavel por ferramenta, com `:98` de
+# default, e a forma que o repositorio adotou quando saiu do `:99` -- a mesma
+# do `roteiro.sh` e do `compara_tela.sh`. O numero mora aqui, e so aqui.
+ALVO = os.environ.get("WTE_DISPLAY", ":98")
+
 
 class ComboError(Exception):
     """Divergencia medida, sempre com o caso nomeado."""
@@ -110,28 +115,30 @@ def caminhos_de_unidade(lcl: Path) -> list[str]:
 
 
 def display() -> tuple[str, str] | None:
-    """`(DISPLAY, XAUTHORITY)` do Xvfb `:99`, ou `None` se ele nao esta de pe.
+    """`(DISPLAY, XAUTHORITY)` do Xvfb `ALVO`, ou `None` se ele nao esta de pe.
 
-    A regra do repositorio e dura: toda execucao com GUI acontece no `:99`, e o
-    `:1` e a sessao real do usuario. Este script **nunca** cai para o
-    `DISPLAY` do shell -- sem `:99` ele pula.
+    A regra do repositorio e dura: toda execucao com GUI acontece no `ALVO`
+    (`:98` de default, `WTE_DISPLAY` para mover), e o `:1` e a sessao real do
+    usuario. Este script **nunca** cai para o `DISPLAY` do shell -- sem o
+    servidor ele pula.
 
     O `-auth` e OPCIONAL de proposito. Subido por `xvfb-run`, o servidor tem
     cookie proprio e sem apontar o `XAUTHORITY` para ele o gtk2 morre com
     `Invalid MIT-MAGIC-COOKIE-1 key`; subido a mao, nao ha cookie nenhum e
-    exigir um faria o script PULAR dizendo que nao ha `:99` -- diagnostico que
-    manda procurar no lugar errado. Devolve cadeia vazia quando nao ha.
+    exigir um faria o script PULAR dizendo que nao ha servidor -- diagnostico
+    que manda procurar no lugar errado. Devolve cadeia vazia quando nao ha.
     """
     try:
         saida = subprocess.run(["ps", "-o", "args=", "-C", "Xvfb"],
                                capture_output=True, text=True).stdout
     except OSError:
         return None
-    linha = next((l for l in saida.splitlines() if "Xvfb :99 " in l), None)
+    linha = next((l for l in saida.splitlines()
+                  if f"Xvfb {ALVO} " in l), None)
     if linha is None:
         return None
     m = re.search(r"-auth (\S+)", linha)
-    return ":99", (m.group(1) if m else "")
+    return ALVO, (m.group(1) if m else "")
 
 
 def medir() -> dict[str, str]:
@@ -141,7 +148,7 @@ def medir() -> dict[str, str]:
         raise FileNotFoundError("fpc")
     tela = display()
     if tela is None:
-        raise FileNotFoundError("Xvfb :99")
+        raise FileNotFoundError(f"Xvfb {ALVO}")
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(
             [fpc, "-MObjFPC", "-Sh", *caminhos_de_unidade(lcl),
