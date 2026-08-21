@@ -95,6 +95,11 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-073](/docs/tasks/CORR-WTE-073.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `check_lcl_combo.py` ficou preso no `:99` em código vivo depois da mudança para o `:98`: pula em silêncio numa máquina só com o `:98` | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-074](/docs/tasks/CORR-WTE-074.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | A confrontação Pascal × Python do leitor de `.mcr` aponta para `work/saida.mcr`, que o `golden_check.sh` apaga a cada corrida; a fixture estável tem outro nome | Baixa | [x] concluída | 2026-08-20 |
 | [CORR-WTE-075](/docs/tasks/CORR-WTE-075.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | `do_roundtrip()` grava num destino fixo versionado, e o teste sobrescreve a medição de `wte/re/mcr-roundtrip.tsv` e a repõe num `finally` | Baixa | [x] concluída | 2026-08-20 |
+| [CORR-WTE-076](/docs/tasks/CORR-WTE-076.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O plano e a task dizem que o `ficha_color` tem 758 linhas de DFM; o extrator versionado dá 866, e nunca deu 758 | Alta | [ ] pendente | — |
+| [CORR-WTE-077](/docs/tasks/CORR-WTE-077.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | A §5.3 do plano ainda descreve o render 2D como `TBitmap` + varredura de pixel, algoritmo que a WTE-TASK-29 mediu e refutou — é reescrita de paleta | Alta | [ ] pendente | — |
+| [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O Log da sétima passagem conta 7 casos novos no `test_dump_zonas.py`; o commit acrescentou 9 | Baixa | [ ] pendente | — |
+| [CORR-WTE-079](/docs/tasks/CORR-WTE-079.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `compara_tela.sh` ficou com dois blocos de `--malha` mortos — um duplicado no `captura_oraculo` e um aninhado no ramo `cor|grade` do `captura_port`, com `continue` fora de laço | Baixa | [ ] pendente | — |
+| [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -172,6 +177,11 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-073 — dar `WTE_DISPLAY` ao `check_lcl_combo.py`, com `:98` de default
 - [x] CORR-WTE-074 — resolver a fixture do `.mcr` por ordem, com a estável na frente
 - [x] CORR-WTE-075 — parametrizar o destino do `--roundtrip` e tirar o teste de cima do versionado
+- [ ] CORR-WTE-076 — remedir as linhas do `ficha_color.dfm` no plano e na task
+- [ ] CORR-WTE-077 — reescrever a §5.3 do plano com o algoritmo de paleta que foi medido
+- [ ] CORR-WTE-078 — corrigir a contagem de casos novos do `test_dump_zonas.py`
+- [ ] CORR-WTE-079 — apagar os dois blocos mortos de `--malha` do `compara_tela.sh`
+- [ ] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
 
 ## Detalhes por correção
 
@@ -1374,3 +1384,61 @@ dizer "fechada e fora do backlog", não "corrigida".
   mostra o `try/finally`
 - **Fix:** `do_roundtrip(antes, depois, destino=IDA_E_VOLTA)`, e o teste
   apontando para o `tempfile` que já cria
+
+### CORR-WTE-076
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md` §5.3,
+  `docs/tasks/29-camisa-e-bandeira-2d.md`
+- **Sintoma:** os dois dimensionam o `ficha_color` em **758 linhas de DFM**; o
+  artefato versionado tem **866**, e nasceu com 866 no commit que extraiu os 18
+- **Como foi detectado:** `wc -l wte/re/dfm/ficha_color.dfm` contra o texto, e
+  `git show "7f8fcb0:wte/re/dfm/ficha_color.dfm" | wc -l` para a história
+- **Fix:** 758 → 866 nos dois documentos, nomeando a fonte
+
+### CORR-WTE-077
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md` §5.3, linha 939
+- **Sintoma:** o plano manda `TBitmap` + varredura de pixel; a WTE-TASK-29
+  mediu que o original não varre pixel nenhum — as três rotinas posicionam o
+  `.bmp` em `0x36` e reescrevem entradas de paleta. A task registrou a correção
+  nela mesma, e o `progresso.md` manda resolver divergência a favor do plano
+- **Como foi detectado:** `wte/re/render2d.tsv` e a seção das três rotinas do
+  `wte/re/render2d.md`, os dois com `--check` verde
+- **Fix:** reescrever o trecho com o resultado medido, mantendo a hipótese
+  antiga como história
+
+### CORR-WTE-078
+
+- **Arquivo com problema:** `docs/tasks/29-camisa-e-bandeira-2d.md`, Log da
+  sétima passagem
+- **Sintoma:** "7 casos novos, cinco deles recusas". As recusas são cinco de
+  fato; os casos novos são **9**
+- **Como foi detectado:** `diff` dos `def test_` entre `671a1f9^` e `671a1f9`
+- **Fix:** 7 → 9, e anotar o comando que remede
+
+### CORR-WTE-079
+
+- **Arquivo com problema:** `wte/tools/compara_tela.sh`
+- **Sintoma:** o bloco `malha` do `captura_oraculo` aparece duas vezes, e o
+  primeiro `return 0` deixa o segundo inalcançável; no `captura_port` há um
+  `if [ "$MODO" = malha ]` aninhado dentro do ramo `cor|grade` — condição
+  impossível — embrulhando uma cópia da chamada ao `compara_tela.py --malha` e
+  um `continue` sem laço
+- **Como foi detectado:** leitura do script depois de rodar `--malha`, mais
+  `grep -n 'compara_tela.py'`, que mostra a chamada duas vezes
+- **Fix:** apagar os dois trechos mortos; o `--malha` legítimo já roda pelo
+  laço principal e foi reproduzido verde nesta revisão
+
+### CORR-WTE-080
+
+- **Arquivo com problema:** `wte/tests/roteiros/golden-14-uniforme.txt`,
+  `wte/tools/roteiro.sh`
+- **Sintoma:** quatro corridas de `--modo controle` na mesma árvore: três
+  falharam em `espera_janela` (uma no `Extrair Uni do jogo`, duas no `Abre`) e
+  uma passou byte-idêntica. Gate que precisa de repetição para ficar verde
+  deixa de separar "o port diverge" de "a janela demorou"
+- **Como foi detectado:** as quatro corridas desta revisão, com o
+  `golden-01-arranque` passando de primeira no meio da série
+- **Fix:** subir a espera do passo do diálogo, esperar o `wineserver` do
+  prefixo sumir entre os lados, e distinguir na mensagem "app não subiu" de
+  "diálogo não veio" — ou tornar a repetição explícita no log
