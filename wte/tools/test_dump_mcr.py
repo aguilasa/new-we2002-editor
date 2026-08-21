@@ -274,6 +274,15 @@ class TestAchadoDoBloco3(unittest.TestCase):
         for off, campo, *_ in M.LAYOUT:
             self.assertGreaterEqual(off, M.BLOCO_BYTES, campo)
 
+    def test_o_titulo_do_markdown_conta_o_layout(self) -> None:
+        # O numero do titulo ja foi literal e envelheceu calado (CORR-WTE-071):
+        # o `--check` prova que o `.md` bate com o `.py`, nao que a conta bate
+        # com o `LAYOUT`.
+        if not M.OUT_MD.is_file():
+            self.skipTest(f"sem {M.OUT_MD.relative_to(M.ROOT)}")
+        md = M.OUT_MD.read_text(encoding="utf-8")
+        self.assertIn(f"dos {len(M.LAYOUT)} destinos", md)
+
     def test_capitao_e_cobradores_ficam_no_bloco_de_fora(self) -> None:
         # E a coincidencia que o markdown registra contra o readme da v0.98.
         usados = set(M.blocos_do_save(self.dir))

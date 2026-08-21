@@ -27,8 +27,8 @@ abertura da imagem injeta, ja descritos na secao 8 do `assets.md`.
 
 ## O achado que este script existe para nao deixar passar
 
-**O editor grava 14 dos 16 destinos num bloco que o proprio diretorio do cartao
-declara LIVRE.** O save diz ocupar 16.384 bytes -- os blocos 1 e 2 --, e
+**O editor grava a maior parte dos destinos num bloco que o proprio diretorio do
+cartao declara LIVRE.** O save diz ocupar 16.384 bytes -- os blocos 1 e 2 --, e
 formacao, tatica e cobradores caem todos no bloco 3, que o molde entrega zerado
 e marcado `0xA0`. Jogadores e numeros de camisa, esses sim, caem no bloco 2.
 
@@ -525,7 +525,9 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
     w("O gerador **recusa** se qualquer uma das duas deixar de bater com o\n"
       "layout escrito aqui.\n")
 
-    w("## O achado: 14 dos 16 destinos caem num bloco que o diretório diz livre\n")
+    n_fora = sum(1 for o, *_ in LAYOUT if o // BLOCO_BYTES in fora)
+    w(f"## O achado: {n_fora} dos {len(LAYOUT)} destinos caem num bloco que o "
+      "diretório diz livre\n")
     w(f"O save declara ocupar os blocos {usados}. Os destinos de escrita caem\n"
       f"nos blocos {ocupados}, e **{fora} não está entre os declarados**.\n")
     w("| bloco | bytes não-zero no molde | declarado |\n|---:|---:|---|\n")

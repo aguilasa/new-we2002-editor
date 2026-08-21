@@ -142,7 +142,7 @@ o cartão com o próprio original, pelo roteiro
       spec*, seção "Memory Card Data Format". O `dump_mcr.py` **lê** o diretório
       do molde em vez de supô-lo: o save se chama `BISLPM-86600WEW-OPT`
       (`SLPM-86600` é a japonesa do gate) e declara 16.384 bytes nos blocos 1 e 2
-- [x] **Conteúdo do bloco do WE2002 mapeado** — 16 destinos, os dois lados
+- [x] **Conteúdo do bloco do WE2002 mapeado** — 17 destinos, os dois lados
       (`0x0040f150` escreve, `0x0040b9ec` lê), em
       [`wte/re/mcr.md`](../../wte/re/mcr.md). Duas tabelas do `.exe` entram como
       guard: a de cobradores (`0x00423F84`) e a de deslocamentos de bit
@@ -298,7 +298,7 @@ no gerador (o `.inc` é escrito à mão).
   abertura injeta na imagem, já descritos na seção 8 do `assets.md`. O
   enunciado mandava responder isso antes de usar o arquivo como fixture.
 
-  **O achado: 14 dos 16 destinos caem num bloco que o diretório declara
+  **O achado: 14 dos 17 destinos caem num bloco que o diretório declara
   LIVRE.** O save diz ocupar os blocos 1 e 2; jogadores e números de camisa vão
   para o 2, mas formação, tática e cobradores vão para o **3**, que o molde
   entrega zerado e marcado `0xA0`. E o escritor nunca toca o diretório — medido

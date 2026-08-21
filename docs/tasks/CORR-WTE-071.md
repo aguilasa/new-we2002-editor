@@ -3,7 +3,7 @@ id: CORR-WTE-071
 title: "Correção: o mapa do .mcr diz 16 destinos, e a tabela dele tem 17"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,20 +120,43 @@ Linhas 145 e 301: `16 destinos` → `17 destinos`.
 
 ## Verificação
 
-- [ ] `python3 -c "import dump_mcr as m; print(len(m.LAYOUT))"` e o número do
-      título de `wte/re/mcr.md` são o mesmo
-- [ ] `python3 wte/tools/dump_mcr.py --check` continua verde
-- [ ] `python3 -m unittest test_dump_mcr` verde, com o caso novo
-- [ ] `grep -rn '16 destinos' wte docs` não devolve nada
-- [ ] `lazbuild wte/wte.lpi` compila
-- [ ] `roms/` intocada
+- [x] `python3 -c "import dump_mcr as m; print(len(m.LAYOUT))"` e o número do
+      título de `wte/re/mcr.md` são o mesmo — 17 nos dois
+- [x] `python3 wte/tools/dump_mcr.py --check` continua verde
+- [x] `python3 -m unittest test_dump_mcr` verde, com o caso novo — 32 testes,
+      `OK (skipped=2)`
+- [x] `grep -rn '16 destinos' wte docs` não devolve nada
+- [x] `lazbuild wte/wte.lpi` compila — 4.147 linhas, 44 hints, 0 warning novo
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+O título do markdown gerado passou a contar: `n_fora` sai de `LAYOUT` e de
+`fora` (a lista de blocos não declarados), e o total é `len(LAYOUT)` — os dois
+na mesma f-string que já usava `min(off for off, *_ in LAYOUT)` duas linhas
+abaixo. Regerado, o título diz "14 dos 17 destinos". O docstring do módulo, que
+não tem como computar em tempo de import sem feiura, deixou de citar número:
+"a maior parte dos destinos". O comentário do `we2002_mcr.pas` e as duas linhas
+da WTE-TASK-28 foram para 17.
+
+O caso novo (`test_o_titulo_do_markdown_conta_o_layout`) confere o `.md`
+versionado contra `len(M.LAYOUT)`. Ele pega o que o `--check` não pega: o
+`--check` prova que o `.md` bate com o `.py`, e o defeito estava nos dois.
+
 **Problemas encontrados:**
 
+Nenhum. O `--check` acusou a saída fora de dia logo depois da edição, como
+esperado; regerado, verde, e duas execuções seguidas dão o mesmo md5
+(`4e5126df43c9f355c978add4e1e64b4e`).
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_mcr.py`
+- `wte/tools/test_dump_mcr.py`
+- `wte/re/mcr.md` (regerado)
+- `wte/src/we2002_mcr.pas`
+- `docs/tasks/28-import-de-mcr.md`

@@ -93,7 +93,7 @@ grupos, 16 bytes.
 O gerador **recusa** se qualquer uma das duas deixar de bater com o
 layout escrito aqui.
 
-## O achado: 14 dos 16 destinos caem num bloco que o diretório diz livre
+## O achado: 14 dos 17 destinos caem num bloco que o diretório diz livre
 O save declara ocupar os blocos [1, 2]. Os destinos de escrita caem
 nos blocos [2, 3], e **[3] não está entre os declarados**.
 

@@ -10,7 +10,7 @@
   8192 bytes, o bloco 0 sendo cabecalho `MC` mais 15 quadros de diretorio de
   128 bytes; o que o WE2002 guarda dentro do bloco dele e que nao e publico.
 
-  UM ACHADO QUE VALE SABER ANTES DE MEXER AQUI: dos 16 destinos, 14 caem no
+  UM ACHADO QUE VALE SABER ANTES DE MEXER AQUI: dos 17 destinos, 14 caem no
   bloco 3, que o diretorio do proprio cartao declara LIVRE -- o save diz ocupar
   os blocos 1 e 2. Jogadores e numeros de camisa vao para o 2; formacao, tatica
   e cobradores vao para o 3. Medido, com o diretorio saindo intacto; o veredito

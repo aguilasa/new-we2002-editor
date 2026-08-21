@@ -90,7 +90,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-068](/docs/tasks/CORR-WTE-068.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | Três specs de gravação ainda dizem que o gate passa "só as duas faixas do arranque"; medido hoje, os três dão byte-idêntico | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-069](/docs/tasks/CORR-WTE-069.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | As três funções novas do `we2002_ml` (`IndiceDoBlocoMl`, `ParDoIndiceLinearMl`, `PrimeiroBlocoLivreMl`) entraram no caminho de gravação sem um teste sequer | Baixa | [x] concluída | 2026-08-20 |
 | [CORR-WTE-070](/docs/tasks/CORR-WTE-070.md) | [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) | A tabela "Arquivos a criar ou modificar" da 27 aponta para `wte/tools/roteiros/gravacao-*.sh`, que não existe | Baixa | [x] concluída | 2026-08-20 |
-| [CORR-WTE-071](/docs/tasks/CORR-WTE-071.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O mapa do `.mcr` afirma 16 destinos em cinco lugares; o `LAYOUT` do gerador tem 17, e o título gerado o diz logo acima da tabela com as 17 linhas | Alta | [ ] pendente | — |
+| [CORR-WTE-071](/docs/tasks/CORR-WTE-071.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O mapa do `.mcr` afirma 16 destinos em cinco lugares; o `LAYOUT` do gerador tem 17, e o título gerado o diz logo acima da tabela com as 17 linhas | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-072](/docs/tasks/CORR-WTE-072.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `gravacao-controle.md` fecha dizendo que o `boton_mcr2isoClick` escreve setor inteiro — premissa que a WTE-TASK-28 mediu e refutou, e que o próprio doc já desmente 30 linhas acima | Alta | [ ] pendente | — |
 | [CORR-WTE-073](/docs/tasks/CORR-WTE-073.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `check_lcl_combo.py` ficou preso no `:99` em código vivo depois da mudança para o `:98`: pula em silêncio numa máquina só com o `:98` | Alta | [ ] pendente | — |
 | [CORR-WTE-074](/docs/tasks/CORR-WTE-074.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | A confrontação Pascal × Python do leitor de `.mcr` aponta para `work/saida.mcr`, que o `golden_check.sh` apaga a cada corrida; a fixture estável tem outro nome | Baixa | [ ] pendente | — |
@@ -167,7 +167,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-068 — reescrever a régua das três specs com o resultado de hoje
 - [x] CORR-WTE-069 — cobrir o inverso do índice linear e o alocador com teste próprio
 - [x] CORR-WTE-070 — reconciliar a tabela de arquivos da 27 com a árvore
-- [ ] CORR-WTE-071 — contar o `LAYOUT` em vez de afirmar 16 destinos
+- [x] CORR-WTE-071 — contar o `LAYOUT` em vez de afirmar 16 destinos
 - [ ] CORR-WTE-072 — reescrever o fecho do `gravacao-controle.md` com o que a 28 mediu
 - [ ] CORR-WTE-073 — dar `WTE_DISPLAY` ao `check_lcl_combo.py`, com `:98` de default
 - [ ] CORR-WTE-074 — resolver a fixture do `.mcr` por ordem, com a estável na frente
