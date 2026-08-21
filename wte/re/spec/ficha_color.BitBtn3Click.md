@@ -105,6 +105,10 @@ Implementar aqui sem o gate de gravação — golden com **controle** fechando
 antes, nas duas ROMs — seria opinião, que é o que a
 [WTE-TASK-22](../../../docs/tasks/22-harness-golden.md) existe para impedir.
 
+**Dono: [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md)**, aberta em 2026-08-21 para as três gravações órfãs. Ela
+manda implementar na ordem `jugador` → `ficha_color` → `estrategia`, uma por
+vez, com o controle fechando antes de cada golden.
+
 **O que já está pronto para quem herdar:** o vetor e o slot 1 são a
 [`wte_cor`](../../src/wte_cor.pas) (`CorEmEdicao`, `SalvaPaleta`, `Jogo`), o
 slot 0 chegou nesta task (`GuardaOriginal`/`RestauraOriginal`), e o par de

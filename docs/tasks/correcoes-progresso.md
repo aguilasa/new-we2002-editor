@@ -100,6 +100,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O Log da sétima passagem conta 7 casos novos no `test_dump_zonas.py`; o commit acrescentou 9 | Baixa | [x] concluída | 2026-08-21 |
 | [CORR-WTE-079](/docs/tasks/CORR-WTE-079.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `compara_tela.sh` ficou com dois blocos de `--malha` mortos — um duplicado no `captura_oraculo` e um aninhado no ramo `cor|grade` do `captura_port`, com `continue` fora de laço | Baixa | [x] concluída | 2026-08-21 |
 | [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [x] concluída | 2026-08-21 |
+| [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Três gravações na imagem sem dono — o `OK` do `ficha_color`, o `Comple.` do `jugador` e o ` Accept` do `estrategia`; a WTE-TASK-27 contava seis gravações e são nove | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -182,6 +183,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-078 — corrigir a contagem de casos novos do `test_dump_zonas.py`
 - [x] CORR-WTE-079 — apagar os dois blocos mortos de `--malha` do `compara_tela.sh`
 - [x] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
+- [ ] CORR-WTE-081 — implementar as três gravações órfãs, uma por vez, com o controle fechando antes de cada golden
 
 ## Detalhes por correção
 
@@ -1442,3 +1444,21 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** subir a espera do passo do diálogo, esperar o `wineserver` do
   prefixo sumir entre os lados, e distinguir na mensagem "app não subiu" de
   "diálogo não veio" — ou tornar a repetição explícita no log
+
+### CORR-WTE-081
+
+- **Arquivo com problema:** `wte/src/impl/` (os três `.inc` que não existem),
+  `wte/tests/roteiros/` (os três pares de roteiro que não existem)
+- **Sintoma:** `ficha_color.BitBtn3Click` (`0x004069e8`),
+  `jugador.BitBtn3Click` (`0x00408548`) e `estrategia.BitBtn3Click`
+  (`0x0040a660`) **escrevem na imagem de CD** e ficaram `aberto` sem task dona.
+  A WTE-TASK-27 contava seis gravações; medido, são nove. A WTE-TASK-31 exige
+  nenhum `aberto` e **não implementa** — ela é fechamento —, então a fase 4 não
+  fecha enquanto as três não tiverem dono
+- **Como foi detectado:** a leitura dos 17 handlers `auxiliar` na WTE-TASK-30,
+  e a varredura de chamadores de `0x004051A4` no `.text`, que devolve
+  `['0x4069f9']` — um chamador só, dentro do `BitBtn3Click` do `ficha_color`
+- **Fix:** implementar as três na ordem `jugador` → `ficha_color` →
+  `estrategia`, cada uma com roteiro golden dos dois lados e o **controle**
+  fechando antes. A terceira depende de portar a `0x0040A0B4` (encher a tela de
+  tática), que é dívida da WTE-TASK-26 e destrava mais dois `aberto`

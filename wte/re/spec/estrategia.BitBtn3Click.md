@@ -87,6 +87,9 @@ com pergunta. Fora isso, não trata.
 grava hoje. Ela precisa da mesma régua das outras: golden com controle, nas
 duas ROMs.
 
+**Dono: [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md)**, que a põe por **último** das três, justamente pelo
+pré-requisito abaixo.
+
 E precisa de mais uma coisa que não existe: **a tela de tática do port não é
 enchida** — a `0x0040A0B4` continua sem port, como a
 [`estrategia.BitBtn1Click`](estrategia.BitBtn1Click.md) registra. Gravar as

@@ -14,6 +14,13 @@ status: pendente
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` Fase 4, critério de pronto.
 
+> **Esta task não implementa, e por isso ela tem um pré-requisito nomeado.** O
+> primeiro critério é *"nenhuma `aberto`"*, e a
+> [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) mediu em 2026-08-21 que
+> três handlers do grupo `auxiliar` **gravam na imagem** e ficaram sem dono. Eles
+> estão na [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md), que precisa fechar
+> **antes** desta task — senão o único desfecho possível aqui é listar a falta.
+
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 

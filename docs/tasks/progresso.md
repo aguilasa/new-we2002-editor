@@ -265,15 +265,17 @@ só uma escolha de quando.
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
       `compara_tela.sh --edicao` alcançar a lista de descarte
-- [ ] **Três gravações sem dono, achado da WTE-TASK-30 (2026-08-21).** O grupo
-      `auxiliar` não era de "avisos e confirmações": o `OK` do `ficha_color`
-      (`0x004069e8`), o `Comple.` do `jugador` (`0x00408548`) e o ` Accept` do
-      `estrategia` (`0x0040a660`) **escrevem na imagem**, e nenhuma task os
-      carrega. São seis, não nove, as gravações que a WTE-TASK-27 contava —
-      medido, são nove. As três specs estão completas e dizem o que falta em
-      cada uma; a [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) é
-      fechamento e **não implementa**, então elas precisam de dono antes que
-      ela rode
+- [ ] **Três gravações órfãs, achado da WTE-TASK-30 (2026-08-21), hoje na
+      [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md).** O grupo `auxiliar` não era
+      de "avisos e confirmações": o `OK` do `ficha_color` (`0x004069e8`), o
+      `Comple.` do `jugador` (`0x00408548`) e o ` Accept` do `estrategia`
+      (`0x0040a660`) **escrevem na imagem**. A WTE-TASK-27 contava seis
+      gravações; medido, são **nove**. As três specs estão completas e dizem o
+      que falta em cada uma, e a correção fixa a ordem — `jugador`,
+      `ficha_color`, `estrategia` —, cada uma com o controle fechando antes do
+      golden. **Ela vem antes da
+      [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md)**, que é fechamento e
+      não implementa: sem isso a 31 só teria como listar a falta
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão

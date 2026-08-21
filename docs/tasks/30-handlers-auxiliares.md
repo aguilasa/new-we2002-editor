@@ -218,9 +218,14 @@ não faz nada além de devolver um resultado.
 - **Problemas encontrados:**
 
   **Três rotas de gravação sem dono.** É o único item aberto que esta task não
-  podia fechar sozinha, e ele bloqueia a WTE-TASK-31 — que exige nenhum
+  podia fechar sozinha, e ele bloqueava a WTE-TASK-31 — que exige nenhum
   `aberto` e não implementa nada. As três specs estão escritas e dizem
-  exatamente o que falta em cada uma; falta a decisão de quem as executa.
+  exatamente o que falta em cada uma. **Resolvido no mesmo dia, a pedido do
+  usuário:** virou a [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md), que as
+  carrega na ordem `jugador` → `ficha_color` → `estrategia`, cada uma com
+  roteiro golden dos dois lados e o controle fechando antes. A terceira leva
+  junto o pré-requisito herdado da WTE-TASK-26 — portar a `0x0040A0B4`, que
+  enche a tela de tática e destrava mais dois `aberto`.
 
   O `ficha_error.SpeedButton1Click` abre um `ficha_info2` cujo texto está em
   **inglês** enquanto o resto do app está em português — é a tradução PT-BR que

@@ -83,6 +83,10 @@ conferida.
 Isso é um roteiro novo de cada lado e duas corridas de Wine; não cabe numa task
 cujo escopo declarado é *"abrir, fechar, OK/Cancelar"*.
 
+**Dono: [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md)**, que a põe em **primeiro** lugar das três — é a mais
+barata, e o ciclo de `uses` que ela obriga a resolver destrava junto o
+[`BitBtn1`](jugador.BitBtn1Click.md).
+
 **A metade escritora já existe no port.** `GravaJogador` e
 `GravaNumeroDaCamisa`, no
 [`impl/ep2002_mainform.aux.inc`](../../src/impl/ep2002_mainform.aux.inc), são a
