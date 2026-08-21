@@ -22,6 +22,8 @@ Tres grupos:
 
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import shutil
 import subprocess
@@ -230,23 +232,31 @@ class TestRoundTrip(unittest.TestCase):
         self.assertEqual(M.campos_do_cartao(a), M.campos_do_cartao(b))
 
     def test_a_medicao_e_escrita(self) -> None:
-        antigo = (M.IDA_E_VOLTA.read_text(encoding="utf-8")
+        # O destino vai para o `tempfile`, e nao para o `wte/re/` versionado:
+        # bateria que escreve na medicao e a repoe num `finally` deixa dado
+        # sintetico no disco se o `finally` nao correr (CORR-WTE-075). O
+        # `redirect_stdout` e pelo mesmo motivo, no relatorio: a rotina imprime
+        # o resumo, e isso e para quem a chama da linha de comando.
+        with tempfile.TemporaryDirectory() as td:
+            a, b = Path(td) / "a.mcr", Path(td) / "b.mcr"
+            destino = Path(td) / "mcr-roundtrip.tsv"
+            a.write_bytes(self.cartao(x5404=b"\x01\x02"))
+            b.write_bytes(self.cartao(x5404=b"\x01\x03"))
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(M.do_roundtrip(str(a), str(b), destino), 0)
+            por_campo = {ln[0]: ln
+                         for ln in M.linhas_do_roundtrip(destino)}
+        self.assertEqual(por_campo["numeros"][3], "1")
+        self.assertEqual(por_campo["nomes"][3], "0")
+
+    def test_a_medicao_versionada_nao_e_tocada(self) -> None:
+        """A bateria nao pode mexer em `wte/re/mcr-roundtrip.tsv`."""
+        antes = (M.IDA_E_VOLTA.read_bytes()
+                 if M.IDA_E_VOLTA.is_file() else None)
+        self.test_a_medicao_e_escrita()
+        depois = (M.IDA_E_VOLTA.read_bytes()
                   if M.IDA_E_VOLTA.is_file() else None)
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                a, b = Path(td) / "a.mcr", Path(td) / "b.mcr"
-                a.write_bytes(self.cartao(x5404=b"\x01\x02"))
-                b.write_bytes(self.cartao(x5404=b"\x01\x03"))
-                self.assertEqual(M.do_roundtrip(str(a), str(b)), 0)
-            linhas = M.linhas_do_roundtrip()
-            por_campo = {ln[0]: ln for ln in linhas}
-            self.assertEqual(por_campo["numeros"][3], "1")
-            self.assertEqual(por_campo["nomes"][3], "0")
-        finally:
-            if antigo is None:
-                M.IDA_E_VOLTA.unlink(missing_ok=True)
-            else:
-                M.IDA_E_VOLTA.write_text(antigo, encoding="utf-8")
+        self.assertEqual(antes, depois)
 
 
 class TestAchadoDoBloco3(unittest.TestCase):

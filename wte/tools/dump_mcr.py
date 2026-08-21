@@ -735,7 +735,15 @@ def campos_do_cartao(card: bytes) -> dict[str, bytes]:
     }
 
 
-def do_roundtrip(antes: str, depois: str) -> int:
+def _curto(caminho: Path) -> Path:
+    # O destino pode estar fora da arvore (o teste aponta para um `tempfile`);
+    # ali o caminho absoluto e o que se quer ler.
+    return (caminho.relative_to(ROOT)
+            if caminho.is_relative_to(ROOT) else caminho)
+
+
+def do_roundtrip(antes: str, depois: str,
+                 destino: Path = IDA_E_VOLTA) -> int:
     """`.mcr` -> imagem -> `.mcr`: o que sobrevive a ida e volta.
 
     A pergunta do criterio da WTE-TASK-28 e se exportar depois de importar
@@ -745,6 +753,12 @@ def do_roundtrip(antes: str, depois: str) -> int:
 
     Compara campo a campo, e nao byte a byte no arquivo inteiro: o cartao tem
     folga que vem do molde nos dois lados, e ela mascararia divergencia.
+
+    `destino` existe para o teste NAO escrever por cima da medicao versionada:
+    ele aponta para o `tempfile` que ja cria. Sem isso a bateria reescrevia um
+    arquivo de `wte/re/` a cada corrida e o repunha num `finally` -- e
+    interrupcao que pulasse o `finally` deixava dado sintetico no lugar da
+    medicao.
     """
     caminhos = [Path(antes), Path(depois)]
     cartoes = []
@@ -774,17 +788,17 @@ def do_roundtrip(antes: str, depois: str) -> int:
     bruto = sum(1 for i in range(CARTAO_BYTES) if cartoes[0][i] != cartoes[1][i])
     linhas.append(f"arquivo inteiro\t{CARTAO_BYTES}\t{CARTAO_BYTES - bruto}\t"
                   f"{bruto}\t{caminhos[0].name} contra {caminhos[1].name}")
-    IDA_E_VOLTA.write_text("\n".join(linhas) + "\n", encoding="utf-8",
-                           newline="\n")
+    destino.write_text("\n".join(linhas) + "\n", encoding="utf-8",
+                       newline="\n")
     print(f"  arquivo inteiro: {bruto} bytes diferentes")
-    print(f"  {IDA_E_VOLTA.relative_to(ROOT)}")
+    print(f"  {_curto(destino)}")
     return 0
 
 
-def linhas_do_roundtrip() -> list[list[str]]:
-    if not IDA_E_VOLTA.is_file():
+def linhas_do_roundtrip(destino: Path = IDA_E_VOLTA) -> list[list[str]]:
+    if not destino.is_file():
         return []
-    linhas = IDA_E_VOLTA.read_text(encoding="utf-8").splitlines()
+    linhas = destino.read_text(encoding="utf-8").splitlines()
     return [ln.split("\t") for ln in linhas[1:] if ln.strip()]
 
 

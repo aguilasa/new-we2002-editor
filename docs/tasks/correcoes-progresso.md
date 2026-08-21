@@ -94,7 +94,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-072](/docs/tasks/CORR-WTE-072.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `gravacao-controle.md` fecha dizendo que o `boton_mcr2isoClick` escreve setor inteiro — premissa que a WTE-TASK-28 mediu e refutou, e que o próprio doc já desmente 30 linhas acima | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-073](/docs/tasks/CORR-WTE-073.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | O `check_lcl_combo.py` ficou preso no `:99` em código vivo depois da mudança para o `:98`: pula em silêncio numa máquina só com o `:98` | Alta | [x] concluída | 2026-08-20 |
 | [CORR-WTE-074](/docs/tasks/CORR-WTE-074.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | A confrontação Pascal × Python do leitor de `.mcr` aponta para `work/saida.mcr`, que o `golden_check.sh` apaga a cada corrida; a fixture estável tem outro nome | Baixa | [x] concluída | 2026-08-20 |
-| [CORR-WTE-075](/docs/tasks/CORR-WTE-075.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | `do_roundtrip()` grava num destino fixo versionado, e o teste sobrescreve a medição de `wte/re/mcr-roundtrip.tsv` e a repõe num `finally` | Baixa | [ ] pendente | — |
+| [CORR-WTE-075](/docs/tasks/CORR-WTE-075.md) | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | `do_roundtrip()` grava num destino fixo versionado, e o teste sobrescreve a medição de `wte/re/mcr-roundtrip.tsv` e a repõe num `finally` | Baixa | [x] concluída | 2026-08-20 |
 
 ## Checklist
 
@@ -171,7 +171,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-072 — reescrever o fecho do `gravacao-controle.md` com o que a 28 mediu
 - [x] CORR-WTE-073 — dar `WTE_DISPLAY` ao `check_lcl_combo.py`, com `:98` de default
 - [x] CORR-WTE-074 — resolver a fixture do `.mcr` por ordem, com a estável na frente
-- [ ] CORR-WTE-075 — parametrizar o destino do `--roundtrip` e tirar o teste de cima do versionado
+- [x] CORR-WTE-075 — parametrizar o destino do `--roundtrip` e tirar o teste de cima do versionado
 
 ## Detalhes por correção
 

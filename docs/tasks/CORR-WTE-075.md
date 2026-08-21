@@ -3,7 +3,7 @@ id: CORR-WTE-075
 title: "Correção: o teste do round-trip sobrescreve a medição versionada e a repõe na mão"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -127,21 +127,43 @@ def test_a_medicao_e_escrita(self) -> None:
 
 ## Verificação
 
-- [ ] `git status --porcelain wte/re/mcr-roundtrip.tsv` fica vazio durante a
-      bateria — comprovável rodando `python3 -m unittest test_dump_mcr` e
-      conferindo o `mtime` do arquivo antes e depois
-- [ ] `python3 -m unittest test_dump_mcr` verde, sem o `try/finally`
-- [ ] `python3 wte/tools/dump_mcr.py --roundtrip work/entrada.mcr work/volta.mcr`
-      continua escrevendo em `wte/re/mcr-roundtrip.tsv`
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `git status --porcelain wte/re/mcr-roundtrip.tsv` fica vazio durante a
+      bateria — `mtime` idêntico antes e depois
+      (`2026-08-20 22:08:23.917254716`, 207 bytes)
+- [x] `python3 -m unittest test_dump_mcr` verde, sem o `try/finally` — 33
+      testes, `OK`, e sem o resumo vazando no relatório
+- [x] `python3 wte/tools/dump_mcr.py --roundtrip work/entrada.mcr work/volta.mcr`
+      continua escrevendo em `wte/re/mcr-roundtrip.tsv` — reescreveu byte a
+      byte igual
+- [x] `make -C wte check` verde — 645 testes, `OK (skipped=1)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-20
 
 **Resumo do que foi feito:**
 
+`do_roundtrip(antes, depois, destino=IDA_E_VOLTA)` e
+`linhas_do_roundtrip(destino=IDA_E_VOLTA)`. O default mantém a linha de comando
+como estava; o teste passa a apontar para o `tempfile` que já cria, e o
+`try/finally` de reposição sumiu junto.
+
+O `print` da rotina fica — ele é para quem a chama da linha de comando —, e o
+teste o contém num `contextlib.redirect_stdout`. O relatório do `unittest`
+voltou a terminar no `OK`.
+
+Um caso novo (`test_a_medicao_versionada_nao_e_tocada`) roda o anterior entre
+duas leituras de `wte/re/mcr-roundtrip.tsv` e compara os bytes: se alguém
+reintroduzir o destino fixo, ele acusa.
+
 **Problemas encontrados:**
 
+Nenhum. O `_curto()` foi acrescentado ao `dump_mcr.py` pela mesma razão que já
+existe no `gravacao_controle.py`: o `relative_to(ROOT)` do `print` final
+estouraria com o destino em `/tmp`.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_mcr.py`
+- `wte/tools/test_dump_mcr.py`
