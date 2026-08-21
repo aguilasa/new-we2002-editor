@@ -296,13 +296,16 @@ só uma escolha de quando.
       maior tem 276 bytes —, e a conta é a do `gravacao_controle.py`: 164 faixas
       em 12 sessões, nenhuma tocando byte de EDC/ECC nem cabeçalho de setor.
       Escrita de cartão inteiro existe, mas é no `.mcr`, que é plano
-- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida** — **a
-      primeira metade fechou em 2026-08-20**: é paleta (as três rotinas
-      reescrevem entradas em `0x36`, nenhuma toca pixel), a aritmética de
-      escurecer/clarear é na palavra BGR555 empacotada, e o gradiente acumula
-      em `Single` e **trunca para zero** — as duas causas do risco nomeado da
-      §9, medidas em [`wte/re/render2d.md`](../../wte/re/render2d.md). Falta a
-      tolerância, que precisa do Pascal
+- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida** — **é
+      paleta** (as três rotinas reescrevem entradas em `0x36`, nenhuma toca
+      pixel), a aritmética de escurecer/clarear é na palavra BGR555 empacotada,
+      e o gradiente acumula em `Single` e **trunca para zero** — as duas causas
+      do risco nomeado da §9, medidas em
+      [`wte/re/render2d.md`](../../wte/re/render2d.md). **E a tolerância saiu
+      em 2026-08-21, e é zero:** `compara_tela.sh 2 9 63` compara `bandera`,
+      `home1` e `home2` pixel a pixel contra o oráculo e dá 0 de 8.960 px
+      (9.800 no clube de ML). Falta a grade de cores — variar a cor pelo
+      `ficha_color` —, que precisa dos 15 handlers daquele formulário
 - [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância — e **medido em
       2026-08-20 que ele não grava na imagem**: lê dela e emite arquivo, com o
       laço saltando cabeçalho e EDC/ECC de cada setor. O gate dele é
@@ -490,6 +493,9 @@ new-we2002-editor/
 │   │   ├── we2002_preco.pas          ← WTE-TASK-32
 │   │   ├── we2002_mcr.pas            ← WTE-TASK-28
 │   │   ├── we2002_render.pas         ← WTE-TASK-29
+│   │   ├── we2002_bmp.pas            ← WTE-TASK-29
+│   │   ├── wte_render2d.pas          ← WTE-TASK-29 (a unica que usa LCL)
+│   │   ├── wte_uniformes.pas         ← WTE-TASK-29 (gerado)
 │   │   ├── we2002_ml.pas             ← WTE-TASK-33
 │   │   └── datafiles.pas             ← WTE-TASK-39
 │   ├── forms/*.lfm                   ← WTE-TASK-10 (gerado)

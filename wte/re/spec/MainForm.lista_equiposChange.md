@@ -352,7 +352,7 @@ desabilitada da tela nunca tinha aparecido em medição nenhuma.
 | `colorear` | `.Enabled := nacional` | 187 | 50 | mudam nos dois |
 | `iguala_nombres` | `.Enabled := nacional` | 518 | **0** | glifo invariante sob `gdeDisabled` — divergência deliberada |
 | `etiq_nombre1..3` | `.Enabled := True` sempre | 0 | 0 | **não** mudam nos dois |
-| `bandera` | `.Visible := nacional` | 3840 | 0 | pendente da WTE-TASK-29 |
+| `bandera` | `.Visible := nacional` | 3840 | 3840 | desenhada desde a WTE-TASK-29 |
 | `home1`, `home2` | `.Visible := nacional` | 2328, 1012 | 2303, 1032 | mudam nos dois |
 
 Três coisas saem daqui:
@@ -383,10 +383,27 @@ Três coisas saem daqui:
    controle certo. Medir ali daria número com cara de veredito. Eles seguem por
    olho humano, na montagem da janela inteira.
 
-O que o corpo do port **não** faz, com dono nomeado: a bandeira e o uniforme 2D
-(`0x00405270` e `0x004056c8`) são da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md). Ele deixa os
-controles com a visibilidade certa; quem os desenha é a 29.
+**A bandeira e o uniforme 2D (`0x00405270` e `0x004056c8`) passaram a ser
+desenhados aqui na terceira passagem da
+[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md)**, em
+2026-08-20. Até então este parágrafo dizia que o corpo só acertava a
+visibilidade. São três chamadas, nesta ordem:
+
+```text
+0x0040d21d   copia a forma lida da imagem e chama 0x00405270   (bandera)
+0x0040d2ab   `xor edx,edx` e chama 0x004056c8                  (home1, home2)
+0x0040d2c2   TPicture::Assign de `bandera` para `banderita1`
+```
+
+O `xor edx,edx` é o achado que vale registrar: **ao trocar de time o original
+desenha sempre o Primeiro uniforme**, não o que estivesse escolhido no combo do
+`ficha_color`. E o `banderita1` não é desenhado — ele *copia* o `bandera` já
+pronto, o que poupa uma leitura de arquivo.
+
+A medida está fechada, e com tolerância zero: `compara_tela.sh 2 9 63` compara
+`bandera`, `home1` e `home2` pixel a pixel contra o oráculo e dá **0 de 8.960
+px** (9.800 no clube de ML, onde o `home1` é remanejado para 100 px de
+largura).
 
 **A tabela de auxiliares que estava aqui listava cinco endereços, e estava
 curta.** Ela era escrita à mão; medido pelo

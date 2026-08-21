@@ -170,6 +170,14 @@ caducou.
 | `0x004063b0` | `c1e00a` | `shl eax,0xa` — e o B por dez |
 | `0x0040ee80` | `6800080000` | `push 0x800` duas vezes — le 2048 e escreve 2048, o payload do setor |
 | `0x0040ee80` | `6830010000` | `push 0x130` — e pula 304, que e cabecalho mais EDC/ECC |
+| `0x00405270` | `bbf42e4300` | `mov ebx,0x432ef4` — a bandeira le as 16 palavras da GLOBAL do time selecionado, ja carregada |
+| `0x004056c8` | `8d1cc5562f4300` | `lea ebx,[eax*8+0x432f56]` **duas vezes, com a mesma base** — camisa e calcao recebem o MESMO jogo de cores, e nao um cada |
+| `0x004056c8` | `8d0c95a6324200` | `lea ecx,[edx*4+0x4232a6]` — o indice da camisa sai de tabela do `.exe`, e nao da imagem de CD |
+| `0x004056c8` | `8d048da7324200` | `lea eax,[ecx*4+0x4232a7]` — o do calcao e o byte seguinte da mesma tabela |
+| `0x004050f0` | `68162f4300` | `push 0x432f16` — o carregador enche o PRIMEIRO jogo do slot 0 com 0x20 bytes lidos do disco |
+| `0x004050f0` | `68362f4300` | `push 0x432f36` — e o segundo jogo, logo depois, com outros 0x20 |
+| `0x00404f90` | `8d04c5162f4300` | `lea eax,[eax*8+0x432f16]` — o slot tem 64 bytes (`eax` ja vem multiplicado por 8), e e por isso que o slot 1 comeca em `0x432f56` |
+| `0x00404f90` | `8d14d5162f4300` | `lea edx,[edx*8+0x432f16]` — a outra ponta da mesma copia: origem e destino sao slots do MESMO vetor |
 
 ## O Pascal, e o que o segura no lugar
 A aritmética está em [`wte/src/we2002_render.pas`](../src/we2002_render.pas),
@@ -199,6 +207,100 @@ literal justamente para caber nesta leitura; a derivação
 (`RENDER_MAXIMO = 31 shl 3`) mora no comentário e é **executada** pelo
 [`test_render.pas`](../tests/test_render.pas).
 
+## O recipiente: o que os 198 arquivos **são**
+A conferência do parágrafo acima é contra o `.text`. Esta é contra a
+pasta do usuário, e a direção importa: o
+[`we2002_bmp.pas`](../src/we2002_bmp.pas) **recusa** um `.bmp` que não
+case com a forma abaixo, e uma constante errada ali faria o port
+recusar a pasta inteira em silêncio — tela em branco, sem erro, que é o
+pior modo de falhar.
+
+| constante | valor | medido em |
+|---|---:|---|
+| `BMP_BITS` | 8 | os 198 bitmaps de 8 bpp |
+| `BMP_DADOS` | 1078 | os 198 bitmaps de 8 bpp |
+| `BMP_INFO_BYTES` | 40 | os 198 bitmaps de 8 bpp |
+| `BMP_PALETA_ENTRADAS` | 256 | os 198 bitmaps de 8 bpp |
+| `BMP_SEM_COMPRESSAO` | 0 | os 198 bitmaps de 8 bpp |
+
+Os 1078 são 54 + 256 × 4, e é o número
+que fecha o círculo com o `push 0x36`: a paleta só termina onde os
+pixels começam se ela tiver exatamente 256 entradas.
+**O `bfOffBits` é conferido, e o original não o consulta.** Ele assume
+`0x36`. Um arquivo com outro valor faria a troca de paleta acertar o
+lugar errado — nos dois lados —, e é por isso que o port prefere
+recusar o arquivo a desenhá-lo torto.
+
+## Que arquivo cada time usa: as duas tabelas de `.data`
+A cor vem da imagem de CD. A **forma** vem daqui, e as duas tabelas
+respondem perguntas diferentes:
+
+| tabela | tamanho | o que é | usada no desenho? |
+|---|---:|---|---|
+| `0x004231e8` | 95 bytes | forma de bandeira *padrão* por time, 53 distintas | **não** |
+| `0x004232a6` | 95 × 4 bytes | `(camisa, calção)` por time e por jogo | **sim** |
+
+A assimetria é o achado: **a forma da bandeira é lida da imagem de CD,
+e a da camisa não.** A tabela de bandeiras só alimenta o combo de forma
+do `ficha_color`, que a *indexa* em vez de digitar o número — e é por
+isso que os oito índices sem arquivo (44..51) nunca são pedidos. A de
+uniformes é a fonte real: nenhum byte do disco diz que padrão de tecido
+um time veste.
+As duas saem para [`wte_uniformes.pas`](../src/wte_uniformes.pas), e
+este gerador **recusa** se qualquer índice que elas nomeiam não tiver
+arquivo em disco. Não é conferência de forma, é de alcance: índice sem
+arquivo seria tela em branco no port e `LoadFromFile` falho no
+original.
+
+### E camisa e calção recebem o **mesmo** jogo de cores
+O desenhista do uniforme monta o endereço das cores com
+`lea ebx,[eax*8+0x00432f56]`, onde `eax` é o jogo × 4 — ou seja, passo de
+32 bytes, que são as 16 palavras de um jogo. **A mesma
+instrução, com a mesma base, aparece nos dois laços**: o de
+`camiseta<n>.bmp` e o de `pantalon<n>.bmp`.
+Não são dois conjuntos de cor, é um só aplicado a dois arquivos. Um
+port que guardasse cores de camisa e cores de calção em separado
+estaria inventando um grau de liberdade que o formato não tem — e a
+tela mostraria calção de cor errada assim que alguém editasse.
+
+### E o uniforme começa na palavra **1**, não na 0
+A assimetria contra a bandeira não é só de contagem — é de **início**, e
+essa metade não se vê olhando o laço. Os dois leem palavras de 16 bits
+em sequência; o que muda é onde a sequência começa dentro do bloco de
+16 palavras do time:
+
+| desenhista | primeira palavra | quantas |
+|---|---:|---:|
+| bandeira | 0 | 16 |
+| uniforme | **1** | 15 |
+
+**Foi medido de frente, e o original entregou a resposta de graça:** ele
+grava a paleta *dentro* do `.bmp` (seção 6 do [`assets.md`](assets.md)),
+então o arquivo que o oráculo deixou em disco **é** o resultado. Três
+pares (arquivo, time) independentes — `camiseta3`, `pantalon4`,
+`pantalon0` — casaram com `home_kit[1..15]` da camada de dados, e
+nenhum com `[0..14]`.
+O `.text` explica por quê, e a explicação é de layout:
+
+1. o carregador (`0x004050f0`) lê do disco `0x20` bytes para
+   `0x00432f16` e outros `0x20` para `0x00432f36` — os dois jogos do
+   **slot 0**;
+2. em seguida copia o slot inteiro, 64 bytes (`0x00404f90`, com
+   `lea eax,[eax*8+0x00432f16]`), para o **slot 1** — o rascunho que o
+   `ficha_color` edita;
+3. o desenhista lê de `0x00432f56`, que é exatamente
+   `0x00432f16 + 64`: o slot 1.
+
+E o dado fecha a conta: **nos 190 conjuntos de uniforme das duas ROMs a
+palavra 0 é zero.** Ela não é cor, é enchimento — o `.exe` simplesmente
+começa na primeira cor de verdade. Já `flag_colours[15]` é zero nas 95, e
+o desenhista da bandeira **escreve** esse zero: entrada preta.
+> **Este é o erro que a task previu, e o único que apareceu.** Um laço
+> compartilhado entre os três desenhistas erraria a contagem *e* o
+> início, e o resultado não é tela em branco — é uma camisa colorida com
+> as cores certas nos lugares errados, que passa por decisão de design
+> para quem não tiver o original ao lado.
+
 ## O que fica para o resto da task
 Duas decisões já tomadas noutro lugar, e que este documento não
 reabre:
@@ -206,8 +308,13 @@ reabre:
 - **recolorir em memória**, e não reescrevendo o `.bmp` do usuário. A
   recomendação é da seção 6.2 do [`assets.md`](assets.md); o original só
   grava no arquivo porque a VCL de 2002 carregava paleta por
-  `LoadFromFile`;
+  `LoadFromFile`. É o que a [`wte_render2d.pas`](../src/wte_render2d.pas)
+  faz;
 
-- **`TLazIntfImage`**, não `Canvas.Pixels`. Com um punhado de entradas
-  de paleta o custo é irrisório de qualquer jeito, mas a regra vale para
-  quando o desenho crescer.
+- **`TLazIntfImage`**, não `Canvas.Pixels`. É o que a
+  [`wte_render2d.pas`](../src/wte_render2d.pas) usa, e o custo de um
+  redesenho está medido: o maior bitmap que este render toca tem
+  51×42 = 2142 pixels, uma troca de time redesenha três
+  arquivos, e a troca de paleta em si são 45 bytes. O arquivo é lido do
+  disco uma vez e fica em memória — o original o relê a cada redesenho,
+  porque para ele o arquivo *é* o estado.

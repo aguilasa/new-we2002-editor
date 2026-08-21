@@ -10,8 +10,8 @@
   `0x0040b2d8` recebe a lista de times e a de jogadores como argumentos, e e
   por isso que ela tem dois chamadores.
 
-  NAO ESTA AQUI, com dono nomeado: desenhar a bandeira do reserva
-  (`0x00405468`) e da WTE-TASK-29. O handler deixa a visibilidade certa. }
+  A BANDEIRA DO RESERVA (`0x00405468`) e desenhada aqui desde a
+  WTE-TASK-29. }
 var
   indice: Integer;
 begin
@@ -48,7 +48,10 @@ begin
       e o port pode fazer os dois caminhos iguais sem divergir na tela -- o que
       falta dos dois lados e o desenho, que e da WTE-TASK-29. }
     if indice = lista_equipos_1.ItemIndex then
-      banderita2.Picture := bandera.Picture;
+      banderita2.Picture := bandera.Picture
+    else
+      DesenhaBandeira(banderita2, FormaDaBandeira(indice),
+                      CoresDaBandeira(indice));
     banderita2.Visible := True;
   end
   else

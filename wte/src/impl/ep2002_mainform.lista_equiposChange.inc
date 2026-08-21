@@ -17,10 +17,10 @@
   time-modelo que a Master League usa ao criar clube. E por isso que ele
   desliga barra, bandeira, uniforme e nome. Os times de verdade sao 0..94.
 
-  NAO ESTA AQUI, e o dono esta nomeado: a bandeira e o uniforme 2D
-  (`0x00405270` e `0x004056c8`) sao da
-  WTE-TASK-29 (wte/re/spec/MainForm.lista_equiposChange.md, secao Notas). O
-  handler deixa os controles com a visibilidade certa; quem os desenha e a 32. }
+  A BANDEIRA E O UNIFORME sao desenhados aqui desde a WTE-TASK-29 -- o
+  `0x00405270` e o `0x004056c8`, na secao 4. Ate ela este comentario dizia que
+  o desenho era de outra task; hoje ele so nao acontece quando o time nao tem
+  bandeira, que e o caso do modelo de ML. }
 var
   indice: Integer;
   nacional: Boolean;
@@ -66,6 +66,26 @@ begin
   punto.Visible := nacional;
   banderita1.Visible := nacional;
   colorear.Enabled := nacional;
+
+  { --- 4. a bandeira e o uniforme ---------------------------------------- }
+  { A ORDEM E A DO ORIGINAL, e as tres partes sao tres chamadas separadas:
+
+      0x0040d21d   copia a forma lida da imagem e chama 0x00405270  (bandeira)
+      0x0040d2ab   `xor edx,edx` e chama 0x004056c8                 (uniforme)
+      0x0040d2c2   TPicture::Assign de `bandera` para `banderita1`
+
+    O `xor edx,edx` nao e detalhe: ao TROCAR DE TIME o original desenha sempre
+    o Primeiro uniforme, e nao o que estivesse escolhido. Quem escolhe o
+    Segundo e o combo do `ficha_color`, que redesenha por conta propria.
+
+    `banderita1` nao e desenhada -- ela COPIA a bandeira ja pronta. Redesenhar
+    daria o mesmo pixel e leria o arquivo de novo. }
+  if nacional then
+  begin
+    DesenhaBandeira(bandera, FormaDaBandeira(indice), CoresDaBandeira(indice));
+    DesenhaUniforme(home1, home2, indice, 0, CoresDoUniforme(indice, 0));
+    banderita1.Picture.Assign(bandera.Picture);
+  end;
 
   { Os tres campos NAO sao names[0..2], e as duas correcoes vieram de comparar
     tela com tela, nao de leitura:

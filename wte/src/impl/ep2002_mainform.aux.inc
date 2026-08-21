@@ -494,6 +494,69 @@ begin
     end;
 end;
 
+{ A FORMA da bandeira do time, e ela vem da IMAGEM, nao da tabela do `.exe`.
+
+  O `.exe` traz uma tabela de 95 bytes com a forma *padrao* de cada time
+  (`FORMA_PADRAO`, em `wte_uniformes`), e e facil supor que o desenho a use.
+  Nao usa: o original le um byte do disco para `0x00432f14`, copia para
+  `0x00432f15` e desenha a partir dessa copia (`0x0040d21d`). A tabela serve ao
+  combo de forma do `ficha_color`, que a INDEXA -- e e por isso que os oito
+  indices sem arquivo (44..51) nunca sao pedidos.
+
+  Aqui o byte sai de `flag_shape`, que a camada de dados ja carregou do mesmo
+  lugar. Detalhe na secao 3.2 do `wte/re/assets.md`. }
+function FormaDaBandeira(indice: Integer): Integer;
+begin
+  Result := -1;
+  if indice < TIMES_NACIONAIS then
+    Result := Jogo.teams[indice].flag_shape
+  else if indice < IDX_MODELO_ML then
+    Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].flag_shape;
+end;
+
+{ As 16 palavras BGR555 da bandeira do time. }
+function CoresDaBandeira(indice: Integer): TCoresDoTime;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  if indice < TIMES_NACIONAIS then
+    Result := Jogo.teams[indice].flag_colours
+  else if indice < IDX_MODELO_ML then
+    Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].flag_colours;
+end;
+
+{ As 16 do jogo `jogo` de uniforme: 0 e o Primeiro, 1 e o Segundo.
+
+  CAMISA E CALCAO USAM AS MESMAS. Nao e simplificacao do port -- o desenhista
+  do original monta o endereco duas vezes com a mesma base e o mesmo passo, uma
+  por arquivo (`lea ebx,[eax*8+0x432f56]`, medido pelo `dump_render2d.py`).
+  Guardar dois conjuntos inventaria um grau de liberdade que o formato nao
+  tem. Das 16, o desenho alcanca as 15 primeiras.
+
+  O PARAMETRO NAO SE CHAMA `jogo`, e a razao e uma armadilha de Pascal: o
+  identificador e insensivel a caixa, entao um parametro `jogo` **sombreia** a
+  global `Jogo` -- o estado da imagem carregada. O corpo abaixo precisa das
+  duas coisas, e com o nome bonito o compilador so diz `Illegal qualifier` na
+  linha do `Jogo.teams`, que e onde o erro NAO esta. `qual` e o mesmo nome que
+  o `BarraDoTime` ja usa. }
+function CoresDoUniforme(indice, qual: Integer): TCoresDoTime;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  if indice < TIMES_NACIONAIS then
+  begin
+    if qual = 0 then
+      Result := Jogo.teams[indice].home_kit
+    else
+      Result := Jogo.teams[indice].away_kit;
+  end
+  else if indice < IDX_MODELO_ML then
+  begin
+    if qual = 0 then
+      Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].home_kit
+    else
+      Result := Jogo.ml_teams[indice - TIMES_NACIONAIS].away_kit;
+  end;
+end;
+
 { Os dois limites de campo de nome, que sao POR TIME -- e sao a coisa que este
   projeto errou duas vezes seguidas por supor que fosse constante.
 

@@ -54,6 +54,9 @@ OUT_MD = ROOT / "wte" / "re" / "render2d.md"
 OUT_TSV = ROOT / "wte" / "re" / "render2d.tsv"
 PASCAL = ROOT / "wte" / "src" / "we2002_render.pas"
 REL_PASCAL = "wte/src/we2002_render.pas"
+PASCAL_BMP = ROOT / "wte" / "src" / "we2002_bmp.pas"
+REL_PASCAL_BMP = "wte/src/we2002_bmp.pas"
+OUT_PAS = ROOT / "wte" / "src" / "wte_uniformes.pas"
 
 # --- os enderecos, todos da tabela de alvos da WTE-TASK-29 ----------------
 VA_DECODIFICA = 0x00404DD4    # BGR555 -> 3 bytes, 154 B
@@ -66,6 +69,22 @@ VA_BANDEIRA_2 = 0x00405468    # ... e a do reserva
 VA_UNIFORME = 0x004056C8      # desenha camisa e calcao
 VA_EXPORTA_UNI = 0x0040EE80   # grabar_camisetaClick
 VA_CORES_BANDEIRA = 0x00432EF4  # as 16 palavras BGR555 da bandeira em vigor
+VA_KIT_EM_VIGOR = 0x00432F56   # os DOIS jogos de 16 palavras que o desenho le
+VA_KIT_LIDO = 0x00432F16       # ... e os dois que o carregador enche do disco
+VA_COPIA_ESTADO = 0x00404F90   # copia o estado visual de um slot para o outro
+VA_CARREGA_ESTADO = 0x004050F0  # le o estado visual do time do disco
+SLOT_BYTES = 64                # um slot sao os dois jogos, 32 bytes cada
+VA_TAB_FORMA = 0x004231E8      # 95 bytes: a forma de bandeira padrao por time
+VA_TAB_UNIFORME = 0x004232A6   # 95 x 4 bytes: camiseta e calcao, por time e jogo
+
+# Quantos times o formato tem: 63 selecoes (0..62) + 32 clubes de Master League
+# (63..94). E o mesmo 95 dos arrays `TEAM_NAME_LEN_*` do `we2002_core`, e o
+# mesmo em que o `lista_equiposChange` corta (`cmp eax,0x5f`).
+TIMES_N = 95
+# Um jogo de uniforme sao 16 palavras BGR555; os dois ficam colados, e e por
+# isso que o `lea` do desenhista multiplica o jogo por 32.
+KIT_PALAVRAS = 16
+KIT_PASSO = KIT_PALAVRAS * 2
 
 # O bitmap de 8 bpp: 54 de cabecalho e 256 entradas de 4 bytes. O `0x36` dos
 # renderizadores e exatamente o fim do cabecalho -- a primeira entrada.
@@ -123,6 +142,29 @@ ASSINATURAS = [
      "`push 0x800` duas vezes — le 2048 e escreve 2048, o payload do setor"),
     (VA_EXPORTA_UNI, 0x290, bytes.fromhex("6830010000"), 1,
      "`push 0x130` — e pula 304, que e cabecalho mais EDC/ECC"),
+    (VA_BANDEIRA_1, 0x200, bytes.fromhex("bbf42e4300"), 1,
+     "`mov ebx,0x432ef4` — a bandeira le as 16 palavras da GLOBAL do time "
+     "selecionado, ja carregada"),
+    (VA_UNIFORME, 0x40A, bytes.fromhex("8d1cc5562f4300"), 2,
+     "`lea ebx,[eax*8+0x432f56]` **duas vezes, com a mesma base** — camisa e "
+     "calcao recebem o MESMO jogo de cores, e nao um cada"),
+    (VA_UNIFORME, 0x40A, bytes.fromhex("8d0c95a6324200"), 1,
+     "`lea ecx,[edx*4+0x4232a6]` — o indice da camisa sai de tabela do `.exe`, "
+     "e nao da imagem de CD"),
+    (VA_UNIFORME, 0x40A, bytes.fromhex("8d048da7324200"), 1,
+     "`lea eax,[ecx*4+0x4232a7]` — o do calcao e o byte seguinte da mesma "
+     "tabela"),
+    (VA_CARREGA_ESTADO, 0x50, bytes.fromhex("68162f4300"), 1,
+     "`push 0x432f16` — o carregador enche o PRIMEIRO jogo do slot 0 com "
+     "0x20 bytes lidos do disco"),
+    (VA_CARREGA_ESTADO, 0x50, bytes.fromhex("68362f4300"), 1,
+     "`push 0x432f36` — e o segundo jogo, logo depois, com outros 0x20"),
+    (VA_COPIA_ESTADO, 0x100, bytes.fromhex("8d04c5162f4300"), 1,
+     "`lea eax,[eax*8+0x432f16]` — o slot tem 64 bytes (`eax` ja vem "
+     "multiplicado por 8), e e por isso que o slot 1 comeca em `0x432f56`"),
+    (VA_COPIA_ESTADO, 0x100, bytes.fromhex("8d14d5162f4300"), 1,
+     "`lea edx,[edx*8+0x432f16]` — a outra ponta da mesma copia: origem e "
+     "destino sao slots do MESMO vetor"),
 ]
 
 # As tres rotinas de desenho. O quarto campo e quantas entradas de paleta cada
@@ -350,7 +392,11 @@ def confere_desenhistas(blob: bytes) -> list[tuple[int, str, int, int]]:
             for va, _, papel, entradas, arquivos in DESENHISTAS]
 
 
-def bitmaps() -> dict[str, int]:
+def larg_alt(cab: bytes) -> tuple[int, int]:
+    return struct.unpack_from("<ii", cab, 18)
+
+
+def bitmaps() -> tuple[dict[str, int], dict[str, int]]:
     """Os `.bmp` em disco, contados e conferidos -- nao afirmados.
 
     A conta que importa e uma: `0x36` so cai na primeira entrada da paleta se o
@@ -362,6 +408,11 @@ def bitmaps() -> dict[str, int]:
         raise RenderError(f"we-team-editor/image nao existe")
     contas = {"bandeiras": 0, "camisas": 0, "calcoes": 0, "oito_bpp": 0,
               "fora": 0}
+    dados, infos, compressoes = set(), set(), set()
+    # pixels, largura, altura do maior bitmap que o render 2D toca. So as duas
+    # pastas dele: `careto_base.bmp` e maior e nao entra em redesenho nenhum
+    # desta task (CORR-WTE-063 tirou cara, cabelo e barba do escopo).
+    maior = [0, 0, 0]
     for caminho in sorted(IMAGEM.rglob("*.bmp")):
         nome = caminho.name.lower()
         cab = caminho.read_bytes()[:54]
@@ -371,6 +422,18 @@ def bitmaps() -> dict[str, int]:
         bpp, = struct.unpack_from("<H", cab, 28)
         if bpp == 8:
             contas["oito_bpp"] += 1
+            # A forma que a mecanica ASSUME, medida em vez de suposta: onde os
+            # pixels comecam, o tamanho do cabecalho de informacao, e se ha
+            # compressao. O `we2002_bmp.pas` recusa arquivo que fuja disso, e o
+            # `confere_bmp` cruza os dois lados.
+            dados.add(struct.unpack_from("<I", cab, 10)[0])
+            infos.add(struct.unpack_from("<I", cab, 14)[0])
+            compressoes.add(struct.unpack_from("<I", cab, 30)[0])
+            if (caminho.parent.name in ("banderas", "uniformes2d")
+                    and abs(larg_alt(cab)[0] * larg_alt(cab)[1]) > maior[0]):
+                maior[0], maior[1], maior[2] = (
+                    abs(larg_alt(cab)[0] * larg_alt(cab)[1]),
+                    abs(larg_alt(cab)[0]), abs(larg_alt(cab)[1]))
         else:
             contas["fora"] += 1
         if caminho.parent.name == "banderas":
@@ -380,7 +443,194 @@ def bitmaps() -> dict[str, int]:
                 contas["camisas"] += 1
             elif nome.startswith("pantalon"):
                 contas["calcoes"] += 1
-    return contas
+    if len(dados) != 1 or len(infos) != 1 or len(compressoes) != 1:
+        raise RenderError(
+            "os `.bmp` de 8 bpp nao tem todos a mesma forma de cabecalho: "
+            f"inicio dos pixels {sorted(dados)}, cabecalho de informacao "
+            f"{sorted(infos)}, compressao {sorted(compressoes)}")
+    contas["maior_em_pixels"] = maior[0]
+    contas["maior_largura"] = maior[1]
+    contas["maior_altura"] = maior[2]
+    forma = {"BMP_DADOS": dados.pop(),
+             "BMP_INFO_BYTES": infos.pop(),
+             "BMP_SEM_COMPRESSAO": compressoes.pop(),
+             "BMP_BITS": 8,
+             "BMP_PALETA_ENTRADAS": BMP_ENTRADAS}
+    return contas, forma
+
+
+def confere_o_slot() -> None:
+    """O bloco que o desenho le e o slot 1, e o que o disco enche e o slot 0.
+
+    Nao e curiosidade de layout: e a explicacao de por que o desenho comeca na
+    palavra 1 do `home_kit` da camada de dados. O carregador enche
+    `0x432f16` + `0x432f36` (dois jogos de 32 bytes) e em seguida copia o slot
+    inteiro -- 64 bytes -- para o slot 1, que e o rascunho que o `ficha_color`
+    edita e o desenhista le.
+    """
+    if VA_KIT_EM_VIGOR != VA_KIT_LIDO + SLOT_BYTES:
+        raise RenderError(
+            f"{VA_KIT_EM_VIGOR:#010x} nao e o slot 1 de {VA_KIT_LIDO:#010x} "
+            f"com passo {SLOT_BYTES}")
+
+
+def tabelas(blob: bytes) -> tuple[list[int], list[tuple[int, int, int, int]]]:
+    """As duas tabelas de `.data` que dizem QUAL arquivo cada time usa.
+
+    A cor vem da imagem de CD; a **forma** vem daqui. Sao duas, e elas nao se
+    parecem:
+
+    - `0x004231e8`, 95 bytes -- a forma de bandeira *padrao* de cada time. O
+      original nao a usa para desenhar: quem manda e o byte lido da imagem
+      (secao 3.2 do `assets.md`). Ela alimenta o combo `lista_col0`, e o
+      caminho inverso procura nela a PRIMEIRA posicao cujo valor bate;
+    - `0x004232a6`, 95 x 4 bytes -- `(camisa, calcao)` por time e por jogo. Esta
+      **e** a fonte do desenho: a forma da camisa nao esta na imagem de CD.
+
+    A validacao nao e de forma, e de alcance: todo indice que a tabela nomeia
+    tem de ter arquivo na pasta do usuario. Um indice sem arquivo seria uma
+    tela em branco no port e um `LoadFromFile` falho no original.
+    """
+    formas = list(le_bytes(blob, VA_TAB_FORMA, TIMES_N))
+    cru = le_bytes(blob, VA_TAB_UNIFORME, TIMES_N * 4)
+    kits = [(cru[t * 4], cru[t * 4 + 1], cru[t * 4 + 2], cru[t * 4 + 3])
+            for t in range(TIMES_N)]
+    if not IMAGEM.is_dir():
+        raise RenderError("we-team-editor/image nao existe")
+    def existe(sub: str, prefixo: str, n: int) -> bool:
+        return (IMAGEM / sub / f"{prefixo}{n}.bmp").is_file()
+    faltam = sorted({n for n in formas if not existe("banderas", "bandera", n)})
+    if faltam:
+        raise RenderError(
+            f"{VA_TAB_FORMA:#010x} nomeia bandeiras que nao existem em "
+            f"disco: {faltam}")
+    sem_camisa = sorted({k[i] for k in kits for i in (0, 2)
+                         if not existe("uniformes2d", "camiseta", k[i])})
+    sem_calcao = sorted({k[i] for k in kits for i in (1, 3)
+                         if not existe("uniformes2d", "pantalon", k[i])})
+    if sem_camisa or sem_calcao:
+        raise RenderError(
+            f"{VA_TAB_UNIFORME:#010x} nomeia arquivos que nao existem: "
+            f"camisetas {sem_camisa}, calcoes {sem_calcao}")
+    return formas, kits
+
+
+def constantes_do_bmp() -> dict[str, int]:
+    """As constantes de `we2002_bmp.pas`, pela mesma leitura literal."""
+    import re
+    if not PASCAL_BMP.is_file():
+        raise RenderError(f"{REL_PASCAL_BMP} nao existe")
+    achados: dict[str, int] = {}
+    for linha in PASCAL_BMP.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"\s*([A-Z][A-Z0-9_]*)\s*=\s*(\$[0-9A-Fa-f]+|\d+)\s*;",
+                     linha)
+        if m:
+            achados.setdefault(m.group(1),
+                               int(m.group(2)[1:], 16)
+                               if m.group(2).startswith("$")
+                               else int(m.group(2)))
+    return achados
+
+
+def confere_bmp(forma: dict[str, int]) -> None:
+    """O recipiente que o Pascal exige contra o que os 198 arquivos SAO.
+
+    Direcao diferente da do `confere_pascal`: ali o juiz e o `.text`, aqui e a
+    pasta do usuario. O `we2002_bmp.pas` recusa arquivo que nao case com estas
+    constantes, e um valor errado nelas faria o port recusar a pasta inteira em
+    silencio -- tela em branco sem erro, que e o pior modo de falhar.
+    """
+    do_pascal = constantes_do_bmp()
+    ruins = []
+    for nome, valor in sorted(forma.items()):
+        if nome not in do_pascal:
+            ruins.append(f"{nome}: ausente de {REL_PASCAL_BMP}")
+        elif do_pascal[nome] != valor:
+            ruins.append(f"{nome}: Pascal diz {do_pascal[nome]}, os `.bmp` do "
+                         f"usuario dizem {valor}")
+    # E o fecho do circulo com o `.exe`: o `0x36` das tres rotinas de desenho
+    # so cai na primeira entrada da paleta se o cabecalho tiver este tamanho.
+    if do_pascal.get("BMP_DADOS") != BMP_CABECALHO + BMP_ENTRADAS * BMP_ENTRADA_BYTES:
+        ruins.append(
+            f"BMP_DADOS: {do_pascal.get('BMP_DADOS')} nao e "
+            f"{BMP_CABECALHO} + {BMP_ENTRADAS} x {BMP_ENTRADA_BYTES}")
+    if ruins:
+        raise RenderError(
+            f"{REL_PASCAL_BMP} e os bitmaps do usuario divergem:\n     "
+            + "\n     ".join(ruins))
+
+
+def pascal_uniformes(formas: list[int],
+                     kits: list[tuple[int, int, int, int]]) -> str:
+    """A unidade gerada com as duas tabelas de `.data`."""
+    linhas = [
+        "{ wte_uniformes -- que arquivo de bandeira e de uniforme cada time usa.",
+        "",
+        "  GERADO por wte/tools/dump_render2d.py a partir de",
+        "  we-team-editor/we-team-editor.exe. NAO EDITAR A MAO: a correcao vai",
+        "  no gerador, e depois se regenera.",
+        "",
+        "  Sao as duas tabelas de `.data` da WTE-TASK-29, e elas respondem",
+        "  perguntas diferentes. A COR de tudo aqui vem da imagem de CD; o que",
+        "  estas tabelas dizem e a FORMA -- que estencil de bandeira, que",
+        "  padrao de tecido.",
+        "",
+        f"  FORMA_PADRAO ({VA_TAB_FORMA:#010x}) e a bandeira *padrao* de cada",
+        "  time, e o desenho NAO a usa: quem manda e o byte lido da imagem",
+        "  (secao 3.2 do `wte/re/assets.md`). Ela existe para o combo de forma",
+        "  do `ficha_color`, que indexa esta tabela em vez de digitar o numero,",
+        "  e e por isso que os oito indices sem arquivo (44..51) nunca sao",
+        "  pedidos.",
+        "",
+        f"  UNIFORMES ({VA_TAB_UNIFORME:#010x}) e a fonte real do desenho: a",
+        "  forma da camisa NAO esta na imagem de CD, e um par fixo por time e",
+        "  por jogo. `jogo` e 0 (Primeiro) ou 1 (Segundo). }",
+        "unit wte_uniformes;",
+        "",
+        "{$mode objfpc}{$H+}",
+        "",
+        "interface",
+        "",
+        "const",
+        f"  TIMES_TOTAL = {TIMES_N};",
+        "",
+        "  { A forma de bandeira padrao de cada time. }",
+        "  FORMA_PADRAO: array[0..TIMES_TOTAL - 1] of Byte = (",
+    ]
+    def bloco(valores, por_linha=12):
+        saida = []
+        for i in range(0, len(valores), por_linha):
+            pedaco = ", ".join(str(v) for v in valores[i:i + por_linha])
+            fim = "," if i + por_linha < len(valores) else ""
+            saida.append(f"    {pedaco}{fim}")
+        return saida
+    linhas += bloco(formas)
+    linhas += [
+        "  );",
+        "",
+        "  { `(camisa, calcao)` por time e por jogo: o indice 0 e o Primeiro",
+        "    uniforme, o 1 e o Segundo. }",
+        "type",
+        "  TJogoDeUniforme = record",
+        "    camisa: Byte;",
+        "    calcao: Byte;",
+        "  end;",
+        "",
+        "const",
+        "  UNIFORMES: array[0..TIMES_TOTAL - 1, 0..1] of TJogoDeUniforme = (",
+    ]
+    for t, (c0, p0, c1, p1) in enumerate(kits):
+        fim = "," if t < len(kits) - 1 else ""
+        linhas.append(f"    ((camisa: {c0}; calcao: {p0}), "
+                      f"(camisa: {c1}; calcao: {p1})){fim}")
+    linhas += [
+        "  );",
+        "",
+        "implementation",
+        "",
+        "end.",
+    ]
+    return "\n".join(linhas) + "\n"
 
 
 def gera() -> dict[Path, str]:
@@ -392,13 +642,19 @@ def gera() -> dict[Path, str]:
     do_exe = imediatos_do_exe(blob)
     confere_pascal(do_exe)
     confere_seek_da_paleta(blob, constantes_do_pascal()["BMP_CABECALHO"])
-    contas = bitmaps()
+    contas, forma = bitmaps()
+    confere_bmp(forma)
+    confere_o_slot()
+    formas, kits = tabelas(blob)
     cores = le_bytes(blob, VA_CORES_BANDEIRA, 2 * CORES_BANDEIRA_N)
-    return {OUT_TSV: gera_tsv(provas, contas),
-            OUT_MD: gera_md(provas, desenhistas, contas, cores)}
+    return {OUT_TSV: gera_tsv(provas, contas, forma, formas, kits),
+            OUT_MD: gera_md(provas, desenhistas, contas, forma, cores,
+                            formas, kits),
+            OUT_PAS: pascal_uniformes(formas, kits)}
 
 
-def gera_tsv(provas, contas: dict[str, int]) -> str:
+def gera_tsv(provas, contas: dict[str, int], forma: dict[str, int],
+             formas: list[int], kits) -> str:
     out = ["secao\tchave\tvalor\tnota"]
     for va, padrao, prova in provas:
         texto = prova.replace("`", "").replace("**", "")
@@ -414,10 +670,21 @@ def gera_tsv(provas, contas: dict[str, int]) -> str:
     out.append(f"setor\tpayload\t{SETOR_PAYLOAD}\tlido e escrito pelo "
                f"exportador")
     out.append(f"setor\tresto\t{SETOR_RESTO}\tpulado: cabecalho + EDC/ECC")
+    for chave, valor in sorted(forma.items()):
+        out.append(f"recipiente\t{chave}\t{valor}\tmedido nos "
+                   f"{contas['oito_bpp']} bitmaps de 8 bpp do usuario")
+    out.append(f"tabela\t{VA_TAB_FORMA:#010x}\t{len(formas)}\tforma de "
+               f"bandeira padrao por time; {len(set(formas))} distintas")
+    out.append(f"tabela\t{VA_TAB_UNIFORME:#010x}\t{len(kits)}\t(camisa, "
+               f"calcao) por time e jogo; passo 4 bytes")
+    for t, (c0, p0, c1, p1) in enumerate(kits):
+        out.append(f"uniforme\t{t}\t{c0},{p0},{c1},{p1}\tforma de bandeira "
+                   f"padrao {formas[t]}")
     return "\n".join(out) + "\n"
 
 
-def gera_md(provas, desenhistas, contas, cores: bytes) -> str:
+def gera_md(provas, desenhistas, contas, forma, cores: bytes,
+            formas: list[int], kits) -> str:
     o = []
     w = o.append
     w("# O render 2D — cor, aritmética e arredondamento\n")
@@ -590,16 +857,108 @@ def gera_md(provas, desenhistas, contas, cores: bytes) -> str:
       "(`RENDER_MAXIMO = 31 shl 3`) mora no comentário e é **executada** pelo\n"
       "[`test_render.pas`](../tests/test_render.pas).\n")
 
+    w("## O recipiente: o que os 198 arquivos **são**\n")
+    w("A conferência do parágrafo acima é contra o `.text`. Esta é contra a\n"
+      "pasta do usuário, e a direção importa: o\n"
+      "[`we2002_bmp.pas`](../src/we2002_bmp.pas) **recusa** um `.bmp` que não\n"
+      "case com a forma abaixo, e uma constante errada ali faria o port\n"
+      "recusar a pasta inteira em silêncio — tela em branco, sem erro, que é o\n"
+      "pior modo de falhar.\n")
+    w("| constante | valor | medido em |\n|---|---:|---|\n")
+    for chave, valor in sorted(forma.items()):
+        w(f"| `{chave}` | {valor} | os {contas['oito_bpp']} bitmaps de 8 bpp |\n")
+    w(f"Os {forma['BMP_DADOS']} são "
+      f"{BMP_CABECALHO} + {BMP_ENTRADAS} × {BMP_ENTRADA_BYTES}, e é o número\n"
+      "que fecha o círculo com o `push 0x36`: a paleta só termina onde os\n"
+      "pixels começam se ela tiver exatamente 256 entradas.\n")
+    w("**O `bfOffBits` é conferido, e o original não o consulta.** Ele assume\n"
+      "`0x36`. Um arquivo com outro valor faria a troca de paleta acertar o\n"
+      "lugar errado — nos dois lados —, e é por isso que o port prefere\n"
+      "recusar o arquivo a desenhá-lo torto.\n")
+
+    w("## Que arquivo cada time usa: as duas tabelas de `.data`\n")
+    w("A cor vem da imagem de CD. A **forma** vem daqui, e as duas tabelas\n"
+      "respondem perguntas diferentes:\n")
+    w("| tabela | tamanho | o que é | usada no desenho? |\n"
+      "|---|---:|---|---|\n")
+    w(f"| `{VA_TAB_FORMA:#010x}` | {len(formas)} bytes | forma de bandeira "
+      f"*padrão* por time, {len(set(formas))} distintas | **não** |\n")
+    w(f"| `{VA_TAB_UNIFORME:#010x}` | {len(kits)} × 4 bytes | `(camisa, "
+      "calção)` por time e por jogo | **sim** |\n")
+    w("A assimetria é o achado: **a forma da bandeira é lida da imagem de CD,\n"
+      "e a da camisa não.** A tabela de bandeiras só alimenta o combo de forma\n"
+      "do `ficha_color`, que a *indexa* em vez de digitar o número — e é por\n"
+      "isso que os oito índices sem arquivo (44..51) nunca são pedidos. A de\n"
+      "uniformes é a fonte real: nenhum byte do disco diz que padrão de tecido\n"
+      "um time veste.\n")
+    w("As duas saem para [`wte_uniformes.pas`](../src/wte_uniformes.pas), e\n"
+      "este gerador **recusa** se qualquer índice que elas nomeiam não tiver\n"
+      "arquivo em disco. Não é conferência de forma, é de alcance: índice sem\n"
+      "arquivo seria tela em branco no port e `LoadFromFile` falho no\n"
+      "original.\n")
+
+    w("### E camisa e calção recebem o **mesmo** jogo de cores\n")
+    w(f"O desenhista do uniforme monta o endereço das cores com\n"
+      f"`lea ebx,[eax*8+{VA_KIT_EM_VIGOR:#010x}]`, onde `eax` é o jogo × 4 — "
+      f"ou seja, passo de\n{KIT_PASSO} bytes, que são as "
+      f"{KIT_PALAVRAS} palavras de um jogo. **A mesma\n"
+      "instrução, com a mesma base, aparece nos dois laços**: o de\n"
+      "`camiseta<n>.bmp` e o de `pantalon<n>.bmp`.\n")
+    w("Não são dois conjuntos de cor, é um só aplicado a dois arquivos. Um\n"
+      "port que guardasse cores de camisa e cores de calção em separado\n"
+      "estaria inventando um grau de liberdade que o formato não tem — e a\n"
+      "tela mostraria calção de cor errada assim que alguém editasse.\n")
+
+    w("### E o uniforme começa na palavra **1**, não na 0\n")
+    w("A assimetria contra a bandeira não é só de contagem — é de **início**, e\n"
+      "essa metade não se vê olhando o laço. Os dois leem palavras de 16 bits\n"
+      "em sequência; o que muda é onde a sequência começa dentro do bloco de\n"
+      f"{KIT_PALAVRAS} palavras do time:\n")
+    w("| desenhista | primeira palavra | quantas |\n|---|---:|---:|\n")
+    w("| bandeira | 0 | 16 |\n")
+    w("| uniforme | **1** | 15 |\n")
+    w("**Foi medido de frente, e o original entregou a resposta de graça:** ele\n"
+      "grava a paleta *dentro* do `.bmp` (seção 6 do [`assets.md`](assets.md)),\n"
+      "então o arquivo que o oráculo deixou em disco **é** o resultado. Três\n"
+      "pares (arquivo, time) independentes — `camiseta3`, `pantalon4`,\n"
+      "`pantalon0` — casaram com `home_kit[1..15]` da camada de dados, e\n"
+      "nenhum com `[0..14]`.\n")
+    w("O `.text` explica por quê, e a explicação é de layout:\n")
+    w(f"1. o carregador (`{VA_CARREGA_ESTADO:#010x}`) lê do disco `0x20` bytes "
+      f"para\n   `{VA_KIT_LIDO:#010x}` e outros `0x20` para "
+      f"`{VA_KIT_LIDO + 0x20:#010x}` — os dois jogos do\n   **slot 0**;\n"
+      f"2. em seguida copia o slot inteiro, {SLOT_BYTES} bytes "
+      f"(`{VA_COPIA_ESTADO:#010x}`, com\n"
+      f"   `lea eax,[eax*8+{VA_KIT_LIDO:#010x}]`), para o **slot 1** — o "
+      "rascunho que o\n   `ficha_color` edita;\n"
+      f"3. o desenhista lê de `{VA_KIT_EM_VIGOR:#010x}`, que é exatamente\n"
+      f"   `{VA_KIT_LIDO:#010x} + {SLOT_BYTES}`: o slot 1.\n")
+    w("E o dado fecha a conta: **nos 190 conjuntos de uniforme das duas ROMs a\n"
+      "palavra 0 é zero.** Ela não é cor, é enchimento — o `.exe` simplesmente\n"
+      "começa na primeira cor de verdade. Já `flag_colours[15]` é zero nas 95, e\n"
+      "o desenhista da bandeira **escreve** esse zero: entrada preta.\n")
+    w("> **Este é o erro que a task previu, e o único que apareceu.** Um laço\n"
+      "> compartilhado entre os três desenhistas erraria a contagem *e* o\n"
+      "> início, e o resultado não é tela em branco — é uma camisa colorida com\n"
+      "> as cores certas nos lugares errados, que passa por decisão de design\n"
+      "> para quem não tiver o original ao lado.\n")
+
     w("## O que fica para o resto da task\n")
     w("Duas decisões já tomadas noutro lugar, e que este documento não\n"
       "reabre:\n")
     w("- **recolorir em memória**, e não reescrevendo o `.bmp` do usuário. A\n"
       "  recomendação é da seção 6.2 do [`assets.md`](assets.md); o original só\n"
       "  grava no arquivo porque a VCL de 2002 carregava paleta por\n"
-      "  `LoadFromFile`;\n"
-      "- **`TLazIntfImage`**, não `Canvas.Pixels`. Com um punhado de entradas\n"
-      "  de paleta o custo é irrisório de qualquer jeito, mas a regra vale para\n"
-      "  quando o desenho crescer.\n")
+      "  `LoadFromFile`. É o que a [`wte_render2d.pas`](../src/wte_render2d.pas)\n"
+      "  faz;\n")
+    w("- **`TLazIntfImage`**, não `Canvas.Pixels`. É o que a\n"
+      "  [`wte_render2d.pas`](../src/wte_render2d.pas) usa, e o custo de um\n"
+      "  redesenho está medido: o maior bitmap que este render toca tem\n"
+      f"  {contas['maior_largura']}×{contas['maior_altura']} = "
+      f"{contas['maior_em_pixels']} pixels, uma troca de time redesenha três\n"
+      "  arquivos, e a troca de paleta em si são 45 bytes. O arquivo é lido do\n"
+      "  disco uma vez e fica em memória — o original o relê a cada redesenho,\n"
+      "  porque para ele o arquivo *é* o estado.\n")
     return arruma("".join(s if s.endswith("\n") else s + "\n" for s in o))
 
 

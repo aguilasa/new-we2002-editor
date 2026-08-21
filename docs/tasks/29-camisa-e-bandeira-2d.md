@@ -51,6 +51,15 @@ Em Pascal isso é `TBitmap` mais varredura de pixel; a LCL dá `TLazIntfImage`
 para acesso rápido — `Canvas.Pixels` num loop é ordens de grandeza mais lento e
 não serve para tempo real.
 
+> **Correção medida em 2026-08-20: não há varredura de pixel — a cor mora na
+> paleta.** O parágrafo acima supõe o algoritmo que a pergunta 2 de "Onde a
+> fidelidade some" manda descobrir *antes* de escrever código, e a resposta é a
+> outra. O `TLazIntfImage` continua sendo o certo, e por outro motivo: o port
+> precisa do **índice** de cada pixel, e o leitor de BMP da LCL entrega o
+> bitmap já convertido para 32 bpp, com a paleta consumida e jogada fora. Daí a
+> [`we2002_bmp.pas`](../../wte/src/we2002_bmp.pas), que decodifica o arquivo
+> ela mesma.
+
 ### Onde a fidelidade some
 
 1. **Arredondamento de gradiente.** Se o original faz aritmética inteira com
@@ -119,7 +128,11 @@ gravar **nesta imagem**:
 | `wte/re/render2d.md` | criar — algoritmo e espaço de cor **feitos**; tolerância ainda não |
 | `wte/tools/dump_render2d.py`, `wte/tools/test_dump_render2d.py` | criar — feito |
 | `wte/src/we2002_render.pas` | criar — feito (a aritmética de cor) |
-| `wte/tests/test_render.pas` | criar — feito |
+| `wte/src/we2002_bmp.pas` | criar — feito (o recipiente de 8 bpp) |
+| `wte/src/wte_render2d.pas` | criar — feito (o `TLazIntfImage` e o cache) |
+| `wte/src/wte_uniformes.pas` | criar — feito (gerado: as duas tabelas de `.data`) |
+| `wte/tests/test_render.pas`, `wte/tests/test_bmp.pas` | criar — feito |
+| `wte/tools/compara_tela.py` | estender — feito (a medida dos três `TImage`) |
 
 ---
 
@@ -138,8 +151,24 @@ gravar **nesta imagem**:
       limite é testado no byte já expandido, com piso `> 0` e teto `< 0xF8` — e
       `0xF8` é `31 << 3`, o que prova de quebra que a expansão de 5 para 8 bits
       é **deslocamento**, saturando em 248 e não em 255
-- [ ] `TLazIntfImage` usado; render em tempo real sem travar a janela
-- [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa nomeada
+- [x] **`TLazIntfImage` usado; render em tempo real sem travar a janela.** A
+      [`wte_render2d.pas`](../../wte/src/wte_render2d.pas) monta um
+      `TLazIntfImage` a partir do índice de paleta de cada pixel e o atribui ao
+      `TImage`. O custo está medido, não afirmado: o maior bitmap que este
+      render toca tem **51 × 42 = 2.142 px** (o `dump_render2d.py` mede a
+      pasta), uma troca de time redesenha três arquivos, e a troca de paleta em
+      si são 45 bytes. O `.bmp` é lido do disco **uma vez** e fica em memória —
+      o original o relê a cada redesenho, porque para ele o arquivo *é* o
+      estado
+- [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa
+      nomeada — **metade fechou, e a tolerância é zero.** O
+      `compara_tela.py` ganhou a medida: `bandera`, `home1` e `home2`
+      recortados pelo `.lfm` e comparados pixel a pixel, com a calibração que
+      já existia. Times 2, 9 e 63: **0 de 8.960 px** (9.800 no clube de ML),
+      maior desvio de canal 0. A refusa foi **vista** — com
+      `PRIMEIRA_UNIFORME = 0` o mesmo teste acusa 2.008 de 3.360 px no `home1`.
+      Falta variar a cor pelo `ficha_color`, que é a "grade" do enunciado e
+      depende dos 15 handlers daquele formulário
 - [ ] `grabar_camisetaClick` byte-idêntico, sem tolerância, com spec em
       `wte/re/spec/MainForm.grabar_camisetaClick.md` e golden verde. **O
       formato do gate já está decidido:** ele emite arquivo e deixa a ROM
@@ -155,9 +184,12 @@ gravar **nesta imagem**:
       mesmo tipo de refutação que fechou o critério irmão da
       [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md). Medido pelo
       `dump_render2d.py`, que recusa se os três `push` mudarem
-- [ ] **Bandeira e uniforme conferidos na tela contra o original, para os mesmos
-      3 times da [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md)** — herdado
-      dela em 2026-08-11, ver abaixo
+- [x] **Bandeira e uniforme conferidos na tela contra o original, para os
+      mesmos 3 times da [WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md)** —
+      times 2, 9 e 63, ROM japonesa, por `wte/tools/compara_tela.sh`, em
+      2026-08-21. E não por olho: os três `TImage` são **medidos**, porque ali
+      não há fonte no meio — é o mesmo bitmap com a mesma paleta dos dois lados.
+      Zero divergência nos três
 - [ ] Commit no formato conventional, em inglês
 
 ### O critério de tela que veio da WTE-TASK-25
@@ -183,6 +215,103 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Terceira passagem, 2026-08-21 — **parcial**: os assets chegam à tela
+
+A task **continua `⬜ Pendente`**. Fecharam três critérios; sobram o
+`grabar_camisetaClick`, a grade de cores do `ficha_color` e as specs dos 15
+handlers daquele formulário.
+
+- **Resumo do que foi feito:**
+
+  **A cor chegou na tela, e a medida contra o oráculo deu zero.** Três unidades
+  novas, com a mesma separação das duas passagens anteriores: a
+  `we2002_bmp` cuida do recipiente de 8 bpp (sem LCL, testável headless), a
+  `wte_render2d` é a única que precisa de janela, e a `wte_uniformes` é gerada.
+  Os handlers `lista_equiposChange` e `lista_equipos_2Change` deixaram de só
+  acertar a visibilidade.
+
+  **E apareceu um bug de verdade, do tipo que a task previu.** A primeira
+  versão desenhava a camisa com `home_kit[0..14]`; o oráculo usa
+  `[1..15]`. **A assimetria bandeira × uniforme não é só de contagem — é de
+  início**, e essa metade não se vê olhando o laço: os dois somam 2 ao ponteiro
+  a cada volta, e o que muda é onde ele começa. O resultado não era tela em
+  branco: era uma camisa colorida, com as cores certas nos lugares errados, que
+  passaria por decisão de design para quem não tivesse o original ao lado.
+
+  **A medição não precisou de decompilador, e o original entregou a resposta de
+  graça:** ele grava a paleta *dentro* do `.bmp`, então o arquivo que o oráculo
+  deixou em disco **é** o resultado. Três pares (arquivo, time) independentes
+  casaram com `home_kit[1..15]`; nenhum com `[0..14]`. O `.text` depois
+  explicou o porquê — o carregador enche o **slot 0** (`0x432f16` e
+  `0x432f36`), copia os 64 bytes para o **slot 1**, e o desenhista lê de
+  `0x432f56`, que é exatamente `0x432f16 + 64`. E o dado fecha a conta: nos 190
+  conjuntos de uniforme das duas ROMs a palavra 0 é zero — não é cor, é
+  enchimento.
+
+  **A régua virou ferramenta, e a recusa foi vista.** O `compara_tela.py`
+  ganhou a medida dos três `TImage`: retângulo lido do `.lfm`, calibração que
+  já existia, e comparação pixel a pixel. Ali não há fonte no meio — é o mesmo
+  bitmap com a mesma paleta dos dois lados —, então divergência é cor errada e
+  o veredito é tolerância zero. Com `PRIMEIRA_UNIFORME = 0` de volta, o mesmo
+  teste acusa 2.008 de 3.360 px no `home1`.
+
+  **E o golden vermelho era meu, não do port.** O `golden-13-roundtrip` falhou
+  com 443 bytes de diferença no `.mcr`, e a suspeita óbvia era regressão desta
+  passagem. Não era, e nem era falha pré-existente: o roteiro do lado port
+  espera o cartão de entrada em `WTE_MCR_ENTRADA`, que o `golden_check.sh` não
+  semeia — quem semeia é o invocador. Sem a variável o import não acontece, o
+  `port-trace.log` não traz `boton_mcr2isoClick`, e o port exporta o time como
+  estava. Com `WTE_MCR_ENTRADA=$PWD/work/entrada.mcr` passa byte-idêntico. O
+  trace foi o que resolveu em um minuto o que o diff de bytes não resolvia.
+
+- **A divergência deliberada, e ela é antiga:** o port **não** grava a paleta
+  no `.bmp` do usuário. Recolorir em memória é a recomendação da seção 6.2 do
+  `assets.md`, e a razão é concreta — a pasta de assets aqui é um symlink para
+  a pasta do Obocaman. A segunda, menor, é o cache: o original relê o arquivo a
+  cada redesenho porque para ele o arquivo *é* o estado; aqui ele é só a forma.
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/src/we2002_bmp.pas`, `wte/src/wte_render2d.pas`,
+    `wte/src/wte_uniformes.pas` (gerado), `wte/tests/test_bmp.pas`
+  - modificados: `wte/src/we2002_render.pas` (o tipo do bloco de cores e as
+    duas constantes de início), `wte/src/impl/ep2002_mainform.aux.inc` (os três
+    auxiliares de dado), os dois `.inc` de troca de time,
+    `wte/src/impl/ep2002_mainform.uses`, `wte/src/ep2002_mainform.pas`
+    (gerado), `wte/tools/dump_render2d.py`, `wte/tools/test_dump_render2d.py`,
+    `wte/tools/compara_tela.py`, `wte/re/render2d.{md,tsv}` (gerados), as duas
+    specs de troca de time, `wte/re/fase-2.md` (gerado), os dois `README.md`,
+    a §4.4 do plano e o `progresso.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 681 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+  | `test_bmp.pas` | 27 casos sintéticos, 31 com um `.bmp` real |
+  | `compara_tela.sh 2 9 63` | 0 de 8.960 px (9.800 no time 63), desvio de canal 0 |
+  | mutação `PRIMEIRA_UNIFORME = 0` | **recusa vista**: 2.008/3.360 px no `home1` |
+  | `golden-01-arranque` | controle e golden byte-idênticos |
+  | `golden-03-barras` | controle e golden byte-idênticos |
+  | `golden-13-roundtrip` | controle e golden byte-idênticos, artefato incluído |
+
+  Três roteiros, não os treze: esta passagem não toca byte de imagem, e os três
+  escolhidos cobrem arranque, gravação com troca de time e o par
+  import/export — todos passam pelos handlers que mudaram.
+
+- **O que ficou pendente:**
+  - os 15 handlers de `ficha_color`, com spec, e com eles a **grade de cores**
+    do diff de bitmap;
+  - o golden `--artefato` do `grabar_camisetaClick`.
+
+- **Problemas encontrados:** os dois descritos acima — o `home_kit[1..15]` e o
+  `WTE_MCR_ENTRADA`. Mais um terceiro, pequeno e caro: um parâmetro chamado
+  `jogo` **sombreia** a global `Jogo`, porque Pascal é insensível a caixa, e o
+  compilador reclama `Illegal qualifier` na linha do `Jogo.teams` — que é onde
+  o erro não está. O parâmetro passou a se chamar `qual`, como no
+  `BarraDoTime`.
 
 ### Segunda passagem, 2026-08-20 — **parcial**: o Pascal da aritmética
 

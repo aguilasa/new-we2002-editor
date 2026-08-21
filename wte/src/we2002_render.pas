@@ -65,6 +65,19 @@ const
     mais em toda camisa. }
   PALETA_BANDEIRA = 16;
   PALETA_UNIFORME = 15;
+  { E onde cada um COMECA no bloco de 16 palavras do time -- a outra metade da
+    assimetria, e a que nao se ve olhando o laco.
+
+    A bandeira le da palavra 0; o uniforme le da 1. Medido de frente: o
+    original grava a paleta dentro do `.bmp`, entao o arquivo que o oraculo
+    deixou em disco E a resposta. Tres pares (arquivo, time) independentes
+    casaram com `home_kit[1..15]`, nenhum com `[0..14]`.
+
+    E o dado sustenta: nos 190 conjuntos de uniforme das duas ROMs a palavra 0
+    e ZERO -- ela nao e cor, e enchimento. Ja `flag_colours[15]` e zero nas 95,
+    e o desenhista da bandeira a escreve assim mesmo: entrada preta. }
+  PRIMEIRA_BANDEIRA = 0;
+  PRIMEIRA_UNIFORME = 1;
   { E quantos arquivos cada um toca: o uniforme faz camiseta e calcao. }
   ARQUIVOS_BANDEIRA = 1;
   ARQUIVOS_UNIFORME = 2;
@@ -78,6 +91,13 @@ type
   { Os tres canais JA EXPANDIDOS para 8 bits, na ordem R, G, B. E o buffer de
     tres bytes que o `0x00404dd4` enche. }
   TCanais = array[0 .. RENDER_CANAIS - 1] of Byte;
+
+  { As palavras de cor que um time guarda -- as da bandeira, e as de cada um
+    dos dois jogos de uniforme. O tamanho NAO e escolhido aqui: e o do
+    `flag_colours` / `home_kit` / `away_kit` do `we2002_team`, que veio
+    transpilado do `we2002_core`. Sao 16 nos tres, e o desenho usa 16 na
+    bandeira e 15 no uniforme -- a assimetria e do desenho, nao do dado. }
+  TCoresDoTime = array[0 .. 15] of TCorBgr555;
 
   { Os tres bytes que o original escreve numa entrada de paleta, na ordem em
     que ele os escreve. O quarto byte da entrada -- o reservado -- ele NAO

@@ -166,7 +166,7 @@ class TestBitmaps(unittest.TestCase):
         if not R.IMAGEM.is_dir():
             self.skipTest("sem we-team-editor/image -- os bitmaps NAO foram "
                           "contados")
-        self.contas = R.bitmaps()
+        self.contas, self.forma = R.bitmaps()
 
     def test_nenhum_bitmap_foge_de_oito_bpp(self) -> None:
         # Um so de 24 bpp quebraria o `0x36` -- o cabecalho teria outro
@@ -389,6 +389,138 @@ class TestPascalConcorda(unittest.TestCase):
             "WTE_TEST_RENDER_RAMPA": ",".join(str(v) for v in esperado),
         })
         self.assertIn("OK\ta rampa bate com a do dump_render2d.py", saida)
+
+
+class TestTabelas(unittest.TestCase):
+    """As duas tabelas de `.data`: forma de bandeira e uniforme por time."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if not R.EXE.is_file() or not R.IMAGEM.is_dir():
+            raise unittest.SkipTest("sem we-team-editor/ nesta arvore")
+        cls.blob = R.EXE.read_bytes()
+        cls.formas, cls.kits = R.tabelas(cls.blob)
+
+    def test_uma_entrada_por_time(self) -> None:
+        self.assertEqual(len(self.formas), R.TIMES_N)
+        self.assertEqual(len(self.kits), R.TIMES_N)
+
+    def test_toda_forma_de_bandeira_tem_arquivo(self) -> None:
+        """O conjunto usado e o conjunto em disco -- nem mais, nem menos."""
+        emDisco = {int(p.stem.replace("bandera", ""))
+                   for p in (R.IMAGEM / "banderas").glob("bandera*.bmp")}
+        self.assertEqual(set(self.formas), emDisco)
+
+    def test_o_corte_entre_selecao_e_clube_aparece_na_tabela(self) -> None:
+        """As camisas 0..49 servem selecao; 50..98, clube de ML.
+
+        Nao e conveniencia: as duas familias tem LARGURA diferente (40 px
+        contra 51), e um port que misturasse as faixas desenharia camisa
+        cortada.
+        """
+        selecao = {k[i] for k in self.kits[:63] for i in (0, 2)}
+        clube = {k[i] for k in self.kits[63:] for i in (0, 2)}
+        self.assertTrue(max(selecao) < min(clube),
+                        f"as faixas se cruzam: {max(selecao)} >= {min(clube)}")
+
+    def test_indice_sem_arquivo_recusa(self) -> None:
+        """Um indice que a tabela nomeia e o disco nao tem para a geracao.
+
+        E o que aconteceria se alguem apagasse um `.bmp` da pasta, ou se o
+        endereco da tabela estivesse errado por um byte: o port desenharia
+        nada, sem dizer por que.
+        """
+        for chave, va, valor in (("camisetas", R.VA_TAB_UNIFORME, 250),
+                                 ("bandeiras", R.VA_TAB_FORMA, 250)):
+            with self.subTest(chave):
+                plantado = bytearray(self.blob)
+                plantado[self._offset(va)] = valor
+                with self.assertRaises(R.RenderError) as ctx:
+                    R.tabelas(bytes(plantado))
+                self.assertIn(str(valor), str(ctx.exception))
+
+    def _offset(self, va: int) -> int:
+        for sec_va, tam, roff in R.secoes(self.blob):
+            ini = 0x00400000 + sec_va
+            if ini <= va < ini + tam:
+                return roff + (va - ini)
+        raise AssertionError(f"{va:#x} fora de toda secao")
+
+    def test_a_unidade_gerada_tem_um_registro_por_time(self) -> None:
+        pas = R.pascal_uniformes(self.formas, self.kits)
+        self.assertIn(f"TIMES_TOTAL = {R.TIMES_N};", pas)
+        self.assertEqual(pas.count("(camisa:"), R.TIMES_N * 2)
+        self.assertIn("NAO EDITAR A MAO", pas)
+
+
+class TestRecipiente(unittest.TestCase):
+    """O `we2002_bmp.pas` contra o cabecalho REAL dos bitmaps do usuario."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        if not R.IMAGEM.is_dir():
+            raise unittest.SkipTest("sem we-team-editor/image nesta arvore")
+        _, cls.forma = R.bitmaps()
+
+    def test_os_bitmaps_tem_todos_a_mesma_forma(self) -> None:
+        self.assertEqual(self.forma["BMP_DADOS"],
+                         R.BMP_CABECALHO + R.BMP_ENTRADAS * R.BMP_ENTRADA_BYTES)
+        self.assertEqual(self.forma["BMP_INFO_BYTES"], 40)
+        self.assertEqual(self.forma["BMP_SEM_COMPRESSAO"], 0)
+
+    def test_o_pascal_bate(self) -> None:
+        R.confere_bmp(self.forma)
+
+    def test_constante_trocada_recusa(self) -> None:
+        with self.assertRaises(R.RenderError) as ctx:
+            R.confere_bmp(dict(self.forma, BMP_DADOS=1082))
+        self.assertIn("BMP_DADOS", str(ctx.exception))
+
+    def test_constante_ausente_recusa(self) -> None:
+        with self.assertRaises(R.RenderError) as ctx:
+            R.confere_bmp(dict(self.forma, BMP_NAO_EXISTE=1))
+        self.assertIn("BMP_NAO_EXISTE", str(ctx.exception))
+
+
+class TestRecipientePascal(unittest.TestCase):
+    """O `we2002_bmp` compila e recusa o que tem de recusar."""
+
+    PROGRAMA = R.ROOT / "wte" / "tests" / "test_bmp.pas"
+    FONTES = R.ROOT / "wte" / "src"
+
+    def _roda(self, ambiente: dict) -> str:
+        fpc = shutil.which("fpc")
+        if not fpc:
+            self.skipTest("sem fpc -- o we2002_bmp NAO foi compilado nesta "
+                          "execucao")
+        with tempfile.TemporaryDirectory() as td:
+            binario = Path(td) / "test_bmp"
+            r = subprocess.run(
+                [fpc, f"-Fu{self.FONTES}", f"-FU{td}", f"-o{binario}",
+                 str(self.PROGRAMA)], capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            env = dict(os.environ)
+            env.update(ambiente)
+            r = subprocess.run([str(binario)], capture_output=True, text=True,
+                               env=env)
+        self.assertEqual([ln for ln in r.stdout.splitlines()
+                          if ln.startswith("FALHA")], [], r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        return r.stdout
+
+    def test_o_sintetico_cobre_as_recusas(self) -> None:
+        saida = self._roda({"WTE_TEST_BMP": ""})
+        self.assertIn("PULADO\tarquivo real", saida)
+        self.assertIn("CASOS\t27", saida)
+
+    def test_um_bitmap_de_verdade_passa(self) -> None:
+        """A ponta que o sintetico nao cobre: um arquivo do Obocaman."""
+        alvo = R.IMAGEM / "banderas" / "bandera0.bmp"
+        if not alvo.is_file():
+            self.skipTest("sem we-team-editor/image nesta arvore")
+        saida = self._roda({"WTE_TEST_BMP": str(alvo)})
+        self.assertIn("OK\to arquivo real carrega", saida)
+        self.assertIn("CASOS\t31", saida)
 
 
 if __name__ == "__main__":

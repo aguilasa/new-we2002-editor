@@ -635,6 +635,68 @@ def confere_faixa() -> None:
             f"duas ancoras")
 
 
+# ------------------------------------------------- a bandeira e o uniforme --
+# Os tres `TImage` que a WTE-TASK-29 desenha. Ao contrario dos campos de texto,
+# estes SE COMPARAM pixel a pixel: nao ha fonte no meio, e o conteudo e um
+# bitmap de 8 bpp com a paleta trocada -- o mesmo arquivo dos dois lados, a
+# mesma paleta, o mesmo esticamento. Divergencia aqui e cor errada, ponto.
+RENDER = ("bandera", "home1", "home2")
+
+
+def retangulo_do_render(nome: str, rects: dict, indice: int):
+    """O retangulo de um dos tres, com o remanejo que o handler faz.
+
+    O `lista_equiposChange` move e alarga o `home1` para indice > 62 -- clube de
+    Master League e selecao classica usam camisa de 51 px, e o controle vai para
+    `Left = 7, Width = 100`. Ler so o `.lfm` mediria o lugar errado em um terco
+    dos times, e mediria BEM: o recorte pegaria fundo dos dois lados e passaria.
+    """
+    x, y, w, h = rects[nome]
+    if nome == "home1" and indice > 62:
+        # o `.lfm` diz Left = 16, Width = 80; o handler troca os dois
+        x, w = x - 16 + 7, 100
+    return x, y, w, h
+
+
+def compara_render(oraculo, port, indice: int) -> dict:
+    """Os tres bitmaps, pixel a pixel, cada lado na sua calibracao.
+
+    Devolve, por controle, quantos pixels diferem e o maior desvio de canal. O
+    desvio existe na saida porque "quantos pixels" nao distingue um degrade
+    deslocado de um vermelho virado azul, e a §9 do plano previu tolerancia --
+    se um dia houver, o numero tem de estar na mesa.
+    """
+    rects = retangulos_do_lfm(RENDER)
+    off_o = calibra(oraculo, "oraculo")
+    off_p = calibra(port, "port")
+    saida = {}
+    for nome in RENDER:
+        rect = retangulo_do_render(nome, rects, indice)
+        ra = regiao(oraculo, rect, off_o, f"oraculo/{nome}")
+        rb = regiao(port, rect, off_p, f"port/{nome}")
+        pa, pb = list(ra.get_flattened_data()), list(rb.get_flattened_data())
+        difs = [(x, y) for x, y in zip(pa, pb) if x != y]
+        pior = max((max(abs(c - d) for c, d in zip(x, y)) for x, y in difs),
+                   default=0)
+        saida[nome] = {"pixels": len(pa), "diferentes": len(difs),
+                       "pior_canal": pior, "rect": rect}
+    return saida
+
+
+def relata_render(r: dict) -> int:
+    ruins = [n for n, v in r.items() if v["diferentes"]]
+    for nome, v in r.items():
+        print(f"  {nome}: {v['diferentes']}/{v['pixels']} px diferentes, "
+              f"maior desvio de canal {v['pior_canal']}")
+    if ruins:
+        print("DIVERGE no render 2D: " + ", ".join(ruins), file=sys.stderr)
+        return 1
+    total = sum(v["pixels"] for v in r.values())
+    print(f"  PASSOU: bandeira e uniforme batem em pixel ({total} px, "
+          f"tolerancia zero)")
+    return 0
+
+
 def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
     """Que controles mudam de aparencia quando `nacional` vira falso.
 
@@ -755,6 +817,8 @@ def relata(m: dict) -> int:
                   f"port {d['port']} px", file=sys.stderr)
         return 1
     print(f"  PASSOU: as {BARRAS} barras batem em pixel")
+    if "render" in m and relata_render(m["render"]):
+        return 1
     return 0
 
 
@@ -842,6 +906,7 @@ def main(argv: list[str]) -> int:
                 montagem(oc, pc, destino)
                 print(f"  montagem: {destino} (janela inteira -- com os 23 "
                       f"dorsais e a lista de jogadores)")
+                m["render"] = compara_render(oc, pc, args.indice)
             else:
                 montagem(o, p, destino)
                 print(f"  montagem: {destino} (SO o recorte medido -- sem os "
