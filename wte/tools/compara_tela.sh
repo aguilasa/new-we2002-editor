@@ -164,7 +164,7 @@ NOMES_TEXTO='A B-C.DEFG'
 NOMBRE1_X=422  ; NOMBRE1_Y=74
 
 [ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" \
-                       "| $0 --edicao | $0 --nomes | $0 --cor" >&2
+                       "| $0 --edicao | $0 --nomes | $0 --cor | $0 --grade" >&2
                   exit 1; }
 MODO=barras
 if [ "$1" = "--habilitacao" ]; then
@@ -182,6 +182,33 @@ elif [ "$1" = "--nomes" ]; then
                          "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
   MODO=nomes
   set -- "$IDX_EDICAO"
+elif [ "$1" = "--grade" ]; then
+  # A GRADE DE CORES da WTE-TASK-29 -- o criterio que o `--cor` deixa aberto.
+  #
+  # O `--cor` mede a paleta COMO ELA VEIO DA IMAGEM: prova que os dois lados
+  # leem a mesma fonte, e nao prova nada sobre a aritmetica de cor, porque
+  # nenhuma cor foi calculada. Este modo edita antes de medir.
+  #
+  # ## Por que os TRES botoes, e nao as barras
+  #
+  # Clicar na trilha de um `TScrollBar` pagina por `LargeChange`, e o passo do
+  # comctl32 sob Wine nao e o do gtk2 -- o `--edicao` teve de MEDIR que os dois
+  # andavam +2 antes de poder comparar. Os tres botoes nao tem esse problema:
+  # cada clique e uma operacao inteira e deterministica, e as tres sao
+  # exatamente a aritmetica que a secao 9 do plano poe em risco.
+  #
+  # A sequencia percorre a faixa cheia (1..16, o default do `FormCreate`):
+  #
+  #   3x oscurecer  -- tres degraus para baixo em cada canal, com o piso
+  #                    mordendo em quem ja estava em zero
+  #   1x aclarar    -- um degrau de volta, com o teto de 0xF8 mordendo em quem
+  #                    estava saturado. Os dois limites sao assimetricos, e
+  #                    3 - 1 <> 2 em toda cor que encostou num deles
+  #   1x gradiente  -- interpola as 14 do miolo entre a 1 e a 16, que e onde o
+  #                    truncamento do acumulador `Single` aparece
+  MODO=grade
+  shift
+  [ $# -ge 1 ] || set -- 2 9 63
 elif [ "$1" = "--cor" ]; then
   # O `--cor` ACEITA indice, ao contrario dos tres de cima: a paleta e por
   # time, e uma so nao provaria que a fonte esta certa -- provaria que ela e
@@ -293,6 +320,31 @@ edita_nomes() {
   sleep 1
 }
 
+# Os tres botoes do `ficha_color`, no centro de cada um. As coordenadas saem do
+# `.lfm` (`Left`/`Top`/`Width`/`Height`) e sao relativas a janela do MODAL --
+# nao ha window manager no :98, entao a origem da janela e a origem do cliente.
+OSCURECER_X=308 ; OSCURECER_Y=164
+ACLARAR_X=404   ; ACLARAR_Y=164
+GRADIENTE_X=356 ; GRADIENTE_Y=164
+OSCURECER_N=3
+ACLARAR_N=1
+
+# edita_cor -- a MESMA sequencia de cliques nos dois lados, pelo mesmo motivo do
+# `edita_barra`. Espera `X` e `Y` ja carregados com a origem do MODAL.
+edita_cor() {
+  local i
+  for ((i = 0; i < OSCURECER_N; i++)); do
+    xdotool mousemove $((X + OSCURECER_X)) $((Y + OSCURECER_Y)) click 1
+    sleep 1
+  done
+  for ((i = 0; i < ACLARAR_N; i++)); do
+    xdotool mousemove $((X + ACLARAR_X)) $((Y + ACLARAR_Y)) click 1
+    sleep 1
+  done
+  xdotool mousemove $((X + GRADIENTE_X)) $((Y + GRADIENTE_Y)) click 1
+  sleep 2
+}
+
 # Abre o editor de cor e captura A JANELA DELE, nos dois lados.
 #
 # `X`/`Y` ja tem a origem da janela principal. O `colorear` fica em (224,184) no
@@ -305,6 +357,9 @@ edita_nomes() {
 # e a armadilha 6 do `progresso.md`.
 abre_editor_de_cor() {
   local destino="$1" w
+  # A janela principal, guardada ANTES de o modal cobrir a tela -- o modo
+  # `--grade` recorta os tres `TImage` dela, e o `X`/`Y` e sobrescrito abaixo.
+  MAIN_X=$X ; MAIN_Y=$Y ; MAIN_W=$WIDTH ; MAIN_H=$HEIGHT
   xdotool mousemove $((X + 272)) $((Y + 196)) click 1
   sleep 4
   w=$(xdotool search --name '^Cor' | tail -1)
@@ -312,6 +367,36 @@ abre_editor_de_cor() {
   eval "$(geometria "$w")"
   import -window root "$SAIDA/raw-cor.png"
   recorta "$SAIDA/raw-cor.png" "$destino" "$X" "$Y" "$WIDTH" "$HEIGHT"
+  [ "$MODO" = grade ] || return 0
+
+  # ## As duas capturas do `--grade`, e por que uma so nao serve
+  #
+  # A de cima e o ANTES. Ela nao entra no veredito de igualdade -- entra na
+  # guarda: se a cor depois do clique for igual a de antes, os cliques nao
+  # chegaram, e "os dois lados concordam" seria concordancia em nao fazer nada.
+  # E a mesma guarda que o `--edicao` faz contando disparos no trace, com a
+  # diferenca de que aqui ela vale para os DOIS lados, e do oraculo nao ha
+  # trace.
+  #
+  # A janela principal cabe na mesma captura de tela: o `ficha_color` esta em
+  # `Top = 281` no `.dfm` e tem 225 px de altura, e os tres `TImage` do render
+  # ficam entre y 36 e y 168 -- o modal nao os cobre. Isso e CONFERIDO abaixo,
+  # e nao suposto: se um dia as duas janelas se sobrepuserem, o recorte pegaria
+  # o modal no lugar da bandeira e passaria por verde.
+  recorta "$SAIDA/raw-cor.png" "${destino%.png}-cheia.png" \
+          "$MAIN_X" "$MAIN_Y" "$MAIN_W" "$MAIN_H"
+  if [ "$Y" -lt $((MAIN_Y + 200)) ]; then
+    echo "ERRO: o modal ($Y) sobe acima de y=$((MAIN_Y + 200)) e cobre o" >&2
+    echo "      render 2D da janela principal -- o recorte mediria o modal." >&2
+    return 4
+  fi
+
+  edita_cor
+  import -window root "$SAIDA/raw-cor.png"
+  recorta "$SAIDA/raw-cor.png" "${destino%.png}-depois.png" \
+          "$X" "$Y" "$WIDTH" "$HEIGHT"
+  recorta "$SAIDA/raw-cor.png" "${destino%.png}-depois-cheia.png" \
+          "$MAIN_X" "$MAIN_Y" "$MAIN_W" "$MAIN_H"
 }
 
 # ------------------------------------------------------------------ oraculo --
@@ -343,7 +428,7 @@ captura_oraculo() {
   descidas "$w" $((indice + 1)); sleep 3
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
-  if [ "$MODO" = cor ]; then
+  if [ "$MODO" = cor ] || [ "$MODO" = grade ]; then
     abre_editor_de_cor "$destino" || { limpa; return 4; }
     limpa
     return 0
@@ -374,8 +459,26 @@ captura_port() {
   descidas "$w" $((indice + 1)); sleep 2
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
-  if [ "$MODO" = cor ]; then
+  if [ "$MODO" = cor ] || [ "$MODO" = grade ]; then
     abre_editor_de_cor "$destino" || { limpa; return 4; }
+    # O trace confirma que os cliques VIRARAM handler, e nao so pixel. Do lado
+    # do oraculo nao ha trace, e por isso a guarda de mudanca de cor existe
+    # tambem -- as duas medem coisas diferentes.
+    if [ "$MODO" = grade ]; then
+      local esc cla gra
+      esc=$(grep -c 'ficha_color.oscurecerClick' "$TRACE" 2>/dev/null || echo 0)
+      cla=$(grep -c 'ficha_color.aclararClick' "$TRACE" 2>/dev/null || echo 0)
+      gra=$(grep -c 'ficha_color.gradienteClick' "$TRACE" 2>/dev/null || echo 0)
+      limpa
+      if [ "$esc" -ne "$OSCURECER_N" ] || [ "$cla" -ne "$ACLARAR_N" ] \
+         || [ "$gra" -ne 1 ]; then
+        echo "ERRO: o port disparou oscurecer/aclarar/gradiente" \
+             "$esc/$cla/$gra, esperava $OSCURECER_N/$ACLARAR_N/1 --" >&2
+        echo "      os cliques nao chegaram nos botoes." >&2
+        return 5
+      fi
+      return 0
+    fi
     limpa
     return 0
   fi
@@ -486,6 +589,17 @@ for indice in "$@"; do
     python3 "$AQUI/compara_tela.py" --cor \
         "$SAIDA/time-$indice-oraculo.png" \
         "$SAIDA/time-$indice-port.png" --indice "$indice" || rc=1
+    continue
+  fi
+  if [ "$MODO" = grade ]; then
+    python3 "$AQUI/compara_tela.py" --grade --indice "$indice" \
+        --antes-oraculo "$SAIDA/time-$indice-oraculo.png" \
+        --antes-port    "$SAIDA/time-$indice-port.png" \
+        --oraculo       "$SAIDA/time-$indice-oraculo-depois.png" \
+        --port          "$SAIDA/time-$indice-port-depois.png" \
+        --cheia-antes-oraculo "$SAIDA/time-$indice-oraculo-cheia.png" \
+        --cheia-oraculo "$SAIDA/time-$indice-oraculo-depois-cheia.png" \
+        --cheia-port    "$SAIDA/time-$indice-port-depois-cheia.png" || rc=1
     continue
   fi
   if [ "$MODO" = nomes ]; then

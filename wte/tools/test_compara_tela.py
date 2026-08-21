@@ -385,3 +385,87 @@ class TestNomes(unittest.TestCase):
                             com_nomes((31, 41, 22), off=(6, 6)))
         self.assertEqual(m["erros"], [])
 
+
+
+# ------------------------------------------------- a grade de cores (29) --
+# O modo `--grade` mede DEPOIS de editar, e por isso ele tem uma pre-condicao
+# que os outros modos nao tem: a cor precisa ter mudado. Estes testes exercitam
+# essa guarda -- que e a que separa "os dois lados concordam" de "os dois lados
+# ficaram parados e portanto concordam".
+
+def com_amostras(cores, off=(0, 0)):
+    """A janela do MODAL de mentira, com as 16 amostras pintadas de `cores`.
+
+    Ela nao passa pela `janela()` acima por dois motivos: o `ficha_color` tem
+    542x225 de cliente, mais largo que a janela principal de mentira, e a
+    comparacao de amostra NAO calibra por ancora -- a captura ja e a janela do
+    editor, e o `.lfm` dele da as coordenadas relativas a ela.
+
+    O recorte da medida encolhe `AMOSTRA_MARGEM` de cada lado, entao a tinta e
+    desenhada no retangulo inteiro: assim a margem tira moldura de verdade e
+    nao a propria cor.
+    """
+    img = Image.new("RGB", (560 + off[0], 240 + off[1]), (200, 200, 200))
+    rects = C.retangulos_do_lfm(C.AMOSTRAS, C.LFM_COLOR)
+    for nome, cor in zip(C.AMOSTRAS, cores):
+        x, y, w, h = rects[nome]
+        for yy in range(y + off[1], y + off[1] + h):
+            for xx in range(x + off[0], x + off[0] + w):
+                img.putpixel((xx, yy), cor)
+    return img
+
+
+def rampa(n=16, base=0):
+    """16 cores distintas, para a guarda de "todas iguais" nao disparar."""
+    return [(base + 8 * i, base + 8 * i, base + 8 * i) for i in range(n)]
+
+
+@unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
+class TestGrade(unittest.TestCase):
+    def test_mudou_acha_a_amostra_trocada(self):
+        rects = C.retangulos_do_lfm(C.AMOSTRAS, C.LFM_COLOR)
+        antes = com_amostras(rampa())
+        cores = rampa()
+        cores[4] = (1, 2, 3)
+        depois = com_amostras(cores)
+        self.assertEqual(
+            C.mudou(antes, depois, C.AMOSTRAS, rects, C.AMOSTRA_MARGEM),
+            ["color5"])
+
+    def test_mudou_nao_ve_a_moldura(self):
+        """A margem tem de tirar a borda: uma diferenca so nela nao e cor."""
+        rects = C.retangulos_do_lfm(C.AMOSTRAS, C.LFM_COLOR)
+        antes = com_amostras(rampa())
+        depois = com_amostras(rampa())
+        x, y, w, h = rects["color3"]
+        for xx in range(x, x + w):                     # a linha de cima inteira
+            depois.putpixel((xx, y), (255, 0, 0))
+        self.assertEqual(
+            C.mudou(antes, depois, C.AMOSTRAS, rects, C.AMOSTRA_MARGEM), [])
+
+    def test_tela_parada_nao_e_concordancia(self):
+        """A guarda central: sem edicao, os dois lados batem e o veredito e
+        REPROVOU, e nao PASSOU.
+
+        Este e o modo de falha que o `--cor` sozinho nao pega -- se os cliques
+        nao chegarem em botao nenhum, as duas capturas ficam identicas e a
+        comparacao pixel a pixel sai verde sem ter medido conta nenhuma.
+        """
+        rects = C.retangulos_do_lfm(C.AMOSTRAS, C.LFM_COLOR)
+        parada = com_amostras(rampa())
+        self.assertEqual(
+            len(C.mudou(parada, parada, C.AMOSTRAS, rects, C.AMOSTRA_MARGEM)),
+            0)
+        self.assertLess(0, C.GRADE_MINIMO,
+                        "o piso tem de ser maior que zero, senao a guarda "
+                        "aceita a tela parada")
+
+    def test_a_guarda_de_cores_distintas_continua_valendo(self):
+        """Heranca do `--cor`: 16 amostras da mesma cor reprovam."""
+        r = C.compara_cor(com_amostras([(9, 9, 9)] * 16),
+                          com_amostras([(9, 9, 9)] * 16))
+        self.assertEqual(C.relata_cor(r, 2), 1)
+
+    def test_amostras_distintas_e_iguais_dos_dois_lados_passa(self):
+        r = C.compara_cor(com_amostras(rampa()), com_amostras(rampa()))
+        self.assertEqual(C.relata_cor(r, 2), 0)

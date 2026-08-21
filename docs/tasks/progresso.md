@@ -254,10 +254,12 @@ só uma escolha de quando.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **60 de 96 têm arquivo**
-      (2026-08-20, do `spec_index.py`): 29 `implementado`, 14 `trivial`, 53
-      `aberto`. Os 28 do grupo de carga mais os 28 do de edição, que a
-      WTE-TASK-26 fechou, mais as gravações da WTE-TASK-27. Dos nove `aberto`
+- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **75 de 96 têm arquivo**
+      (2026-08-21, do `spec_index.py`): 44 `implementado`, 14 `trivial`, 2
+      `divergencia deliberada`, 36 `aberto`. Os 11 do `ficha_color` entraram na
+      sexta passagem da WTE-TASK-29, somando-se aos 28 do grupo de carga, aos 28
+      do de edição que a WTE-TASK-26 fechou e às gravações da
+      WTE-TASK-27. Dos nove `aberto`
       do grupo de edição com **dono nomeado na WTE-TASK-27** pela opção A,
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
@@ -296,17 +298,23 @@ só uma escolha de quando.
       maior tem 276 bytes —, e a conta é a do `gravacao_controle.py`: 164 faixas
       em 12 sessões, nenhuma tocando byte de EDC/ECC nem cabeçalho de setor.
       Escrita de cartão inteiro existe, mas é no `.mcr`, que é plano
-- [ ] Render 2D: paleta vs. pixel decidido, tolerância **medida** — **é
+- [x] Render 2D: paleta vs. pixel decidido, tolerância **medida** — **é
       paleta** (as três rotinas reescrevem entradas em `0x36`, nenhuma toca
       pixel), a aritmética de escurecer/clarear é na palavra BGR555 empacotada,
       e o gradiente acumula em `Single` e **trunca para zero** — as duas causas
       do risco nomeado da §9, medidas em
-      [`wte/re/render2d.md`](../../wte/re/render2d.md). **E a tolerância saiu
-      em 2026-08-21, e é zero:** `compara_tela.sh 2 9 63` compara `bandera`,
-      `home1` e `home2` pixel a pixel contra o oráculo e dá 0 de 8.960 px
-      (9.800 no clube de ML), e `compara_tela.sh --cor` compara as **16
-      amostras** do editor e dá 0 de 5.168 px nos mesmos três times. Falta
-      variar a cor — os handlers de edição do `ficha_color`
+      [`wte/re/render2d.md`](../../wte/re/render2d.md). **E a tolerância é
+      zero, medida em três réguas.** As duas primeiras mediam a paleta como ela
+      veio da imagem: `compara_tela.sh 2 9 63` compara `bandera`, `home1` e
+      `home2` pixel a pixel e dá 0 de 8.960 px (9.800 no clube de ML), e
+      `--cor` compara as **16 amostras** do editor e dá 0 de 5.168 px. A
+      terceira é a **grade** do enunciado, e ela mede depois de *calcular*:
+      `--grade` clica três vezes em escurecer, uma em clarear e uma no
+      gradiente, nos dois lados, e nos mesmos três times **16 de 16 amostras
+      mudam** e a divergência continua 0 nos dois recortes. Quatro recusas
+      vistas, entre elas a faixa aberta no escurecer (12 de 16 amostras, 3.792
+      de 3.840 px da bandeira) e o gradiente escrevendo a partir da ponta (15
+      de 16)
 - [x] `grabar_camisetaClick` byte-idêntico, sem tolerância — **fechado em
       2026-08-21** pelo [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt),
       com controle antes: 30.956 bytes idênticos nos dois lados, e a imagem

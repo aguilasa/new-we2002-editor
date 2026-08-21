@@ -90,6 +90,28 @@ function DesenhaUniforme(camisaImg, calcaoImg: TImage;
   `MainForm.colorearClick` -- a alcancam sem ciclo de `uses`. }
 procedure PintaAmostras(dono: TComponent; const cores: TCoresDoTime);
 
+{ Uma amostra so -- a `0x00405bc8`, chamada de cinco lugares.
+
+  Ela faz TRES coisas, e sao tres de proposito: guarda a palavra no vetor de
+  edicao, pinta a amostra `color<indice>`, e -- SE `indice` for a amostra
+  selecionada -- move as tres barras de R, G e B para os cinco bits de cada
+  canal. `indice` conta de UM, como no original.
+
+  A TERCEIRA E A QUE SURPREENDE, e ela tambem existe no original: escrever
+  `Position` num `TScrollBar` dispara `OnChange` nos DOIS widgetsets (a VCL
+  chama `Change` dentro do proprio `SetPosition`), entao pintar a amostra
+  selecionada faz o `barraChange` rodar tres vezes. As duas primeiras veem
+  canal novo com os outros dois velhos e gravam cor intermediaria; a terceira
+  fecha certo. O estado final e o mesmo com ou sem o disparo, e e por isso que
+  nenhum chamador depende dele.
+
+  O `indice` da amostra selecionada NAO e o parametro: e o sufixo do `Name` do
+  `TLabel`, relido com `Copy(Name, 6, 2)`, como o original faz. Os dois
+  coincidem sempre; ler o nome e o que mantem a rotina indiferente a quem
+  chamou. }
+procedure PintaUmaAmostra(dono: TComponent; indice: Integer;
+                          palavra: TCorBgr555);
+
 { Carrega a paleta do time pela familia corrente e pinta as 16.
 
   Devolve False sem pintar nada quando a familia nao e portada (ver
@@ -98,6 +120,33 @@ procedure PintaAmostras(dono: TComponent; const cores: TCoresDoTime);
   com o ponteiro de fonte NAO INICIALIZADO. Reproduzir isso seria reproduzir
   comportamento indefinido, que nao e comportamento. }
 function PreencheAmostras(dono: TComponent; indice_do_time: Integer): Boolean;
+
+{ Repinta as 16 a partir do VETOR de edicao, sem reler o time -- a
+  `0x00405d6c` quando ela e chamada depois de o vetor ja ter sido mexido.
+
+  Diferente da `PreencheAmostras`, que comeca recarregando do `Jogo`. }
+procedure RepintaAmostras(dono: TComponent);
+
+{ Os tres `TImage` do `MainForm` que o editor de cor redesenha, registrados
+  uma vez.
+
+  ELES NAO SAO PARAMETRO POR UM MOTIVO DE ESTRUTURA, e nao de gosto. As duas
+  rotinas de desenho do original (`0x00405270` e `0x004056c8`) sao globais que
+  leem globais: o `ficha_color` as chama sem saber que existe um `MainForm`.
+  Em Pascal a mesma chamada exigiria `ep2002_color` usar `ep2002_mainform`, que
+  ja usa `ep2002_color` -- ciclo de `uses` de interface, que nao compila.
+  Registrar os tres aqui poe a indirecao no mesmo lugar onde o original ja a
+  tinha. }
+procedure RegistraImagensDoEditor(bandeira, camisa, calcao: TImage);
+
+{ A `0x00405270`: redesenha a bandeira em vigor -- forma e cores do time que o
+  editor esta editando. Devolve False se nao houver imagem registrada ou time
+  em edicao. }
+function RedesenhaBandeiraEmVigor: Boolean;
+
+{ A `0x004056c8` chamada de dentro do editor: redesenha camisa e calcao do
+  jogo `qual`, com as cores que a `SalvaPaleta` acabou de gravar. }
+function RedesenhaUniformeEmVigor(qual: Integer): Boolean;
 
 { Esquece os arquivos ja lidos. Existe para o caso de alguem trocar a pasta de
   assets com o app aberto -- o original enxergaria a troca, e sem isto o port
@@ -115,6 +164,12 @@ var
     calcoes + 53 bandeiras; sao ~400 KB no pior caso, e na pratica o usuario
     passa por uma duzia. }
   cache: TStringList = nil;
+
+  { Os tres `TImage` do `MainForm`, registrados pelo `FormCreate` dele. Ver
+    `RegistraImagensDoEditor`. }
+  img_bandeira: TImage = nil;
+  img_camisa: TImage = nil;
+  img_calcao: TImage = nil;
 
 type
   TBmpGuardado = class
@@ -272,12 +327,101 @@ begin
   end;
 end;
 
+procedure PintaUmaAmostra(dono: TComponent; indice: Integer;
+                          palavra: TCorBgr555);
+var
+  alvo: TComponent;
+  canais: TCanais;
+  sufixo: Integer;
+
+  { As tres barras do editor, por nome. O original as alcanca por campo
+    (`[this+0x348]`, `+0x34c`, `+0x350`); aqui e `FindComponent`, pelo mesmo
+    motivo das amostras -- esta unidade nao conhece a classe do formulario. }
+  procedure Barra(const nome: string; valor: Integer);
+  var
+    c: TComponent;
+  begin
+    c := dono.FindComponent(nome);
+    if c is TScrollBar then
+      TScrollBar(c).Position := valor;
+  end;
+
+begin
+  if dono = nil then
+    Exit;
+  if (indice < 1) or (indice > COR_AMOSTRAS) then
+    Exit;
+  { O vetor de edicao recebe a palavra ANTES da tinta. E a ordem do original, e
+    ela importa: o disparo de `OnChange` das barras, la embaixo, le o vetor. }
+  CorEmEdicao.cores[indice - 1] := palavra;
+
+  alvo := dono.FindComponent('color' + IntToStr(indice));
+  if not (alvo is TControl) then
+    Exit;
+  canais := DecodificaCor(palavra);
+  { `Transparent := False` ANTES da cor -- ver a nota na `PintaAmostras`. }
+  if alvo is TLabel then
+    TLabel(alvo).Transparent := False;
+  TControl(alvo).Color := TColor(LongInt(canais[0])
+                                 or (LongInt(canais[1]) shl 8)
+                                 or (LongInt(canais[2]) shl 16));
+
+  { E so a amostra SELECIONADA move as barras. O original compara o sufixo do
+    `Name` com `entrada + 1`, e nao o parametro -- os dois sao iguais, e ler o
+    nome e o que mantem a rotina indiferente a quem chamou. }
+  sufixo := StrToIntDef(Copy(TComponent(alvo).Name, 6, 2), -1);
+  if sufixo <> CorEmEdicao.entrada + 1 then
+    Exit;
+  Barra('barra_rojo', canais[0] shr RENDER_EXPANSAO);
+  Barra('barra_verde', canais[1] shr RENDER_EXPANSAO);
+  Barra('barra_azul', canais[2] shr RENDER_EXPANSAO);
+end;
+
+procedure RepintaAmostras(dono: TComponent);
+var
+  i: Integer;
+begin
+  for i := 1 to COR_AMOSTRAS do
+    PintaUmaAmostra(dono, i, CorEmEdicao.cores[i - 1]);
+end;
+
 function PreencheAmostras(dono: TComponent; indice_do_time: Integer): Boolean;
 begin
   Result := CarregaPaleta(indice_do_time);
   if not Result then
     Exit;
-  PintaAmostras(dono, CorEmEdicao.cores);
+  RepintaAmostras(dono);
+end;
+
+procedure RegistraImagensDoEditor(bandeira, camisa, calcao: TImage);
+begin
+  img_bandeira := bandeira;
+  img_camisa := camisa;
+  img_calcao := calcao;
+end;
+
+function RedesenhaBandeiraEmVigor: Boolean;
+var
+  forma: Integer;
+begin
+  Result := False;
+  if (img_bandeira = nil) or (TimeEmCor < 0) then
+    Exit;
+  forma := FormaEmVigor(TimeEmCor);
+  if forma < 0 then
+    Exit;
+  Result := DesenhaBandeira(img_bandeira, forma, CoresEmVigor(TimeEmCor,
+                            COR_FAMILIA_BANDEIRA, 0));
+end;
+
+function RedesenhaUniformeEmVigor(qual: Integer): Boolean;
+begin
+  Result := False;
+  if (img_camisa = nil) or (img_calcao = nil) or (TimeEmCor < 0) then
+    Exit;
+  Result := DesenhaUniforme(img_camisa, img_calcao, TimeEmCor, qual,
+                            CoresEmVigor(TimeEmCor, COR_FAMILIA_UNIFORME,
+                                         qual));
 end;
 
 procedure EsqueceOsBitmaps;

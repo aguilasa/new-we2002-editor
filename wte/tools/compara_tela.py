@@ -949,6 +949,113 @@ def main_cor(argv: list[str]) -> int:
     return relata_cor(r, args.indice)
 
 
+# ------------------------------------------------------ a grade de cores --
+# O criterio que o `--cor` deixa aberto na WTE-TASK-29: "diff de bitmap sobre
+# grade de cores, com tolerancia medida e causa nomeada".
+#
+# O `--cor` mede a paleta COMO ELA VEIO DA IMAGEM. Isso prova que os dois lados
+# leem a mesma fonte, e nao prova nada sobre a aritmetica -- nenhuma cor foi
+# calculada. Este modo mede depois de CALCULAR: tres cliques em `oscurecer`, um
+# em `aclarar` e um em `gradiente`, que e a aritmetica inteira da
+# `we2002_render` exercitada pela tela.
+#
+# ## A guarda do antes, e por que ela nao e opcional
+#
+# Comparar so o depois aprovaria um port inerte: se os cliques nao chegassem em
+# nenhum dos dois lados, as duas telas seriam identicas e o veredito seria
+# verde. Entao o antes entra como PRE-CONDICAO -- a cor do oraculo tem de ter
+# mudado. Do lado do port a mesma coisa e conferida por outro caminho, contando
+# disparo no trace, e as duas medidas sao independentes de proposito.
+#
+# Quantas amostras precisam mudar: o `gradiente` reescreve as 14 do miolo, e o
+# `oscurecer`/`aclarar` mexem nas 16. Uma cor preta nao escurece e uma branca
+# nao clareia, entao exigir 16 seria exigir que nenhuma cor do time estivesse
+# num limite. `GRADE_MINIMO` e o piso, e ele e baixo de proposito: a guarda
+# existe contra "nada aconteceu", nao contra "aconteceu pouco".
+GRADE_MINIMO = 4
+
+
+def mudou(antes, depois, nomes, rects, margem=0, off=(0, 0)) -> list[str]:
+    """Quais retangulos de `nomes` diferem entre as duas capturas do MESMO lado.
+
+    E a metade da regua que nao compara os dois lados: compara o mesmo lado
+    consigo mesmo, antes e depois da edicao.
+    """
+    saida = []
+    for nome in nomes:
+        x, y, w, h = rects[nome]
+        rect = (x + margem, y + margem, w - 2 * margem, h - 2 * margem)
+        ra = regiao(antes, rect, off, f"antes/{nome}")
+        rb = regiao(depois, rect, off, f"depois/{nome}")
+        if list(ra.get_flattened_data()) != list(rb.get_flattened_data()):
+            saida.append(nome)
+    return saida
+
+
+def main_grade(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(description="a grade de cores do ficha_color")
+    ap.add_argument("--indice", type=int, required=True)
+    ap.add_argument("--antes-oraculo", type=Path, required=True)
+    ap.add_argument("--antes-port", type=Path, required=True)
+    ap.add_argument("--oraculo", type=Path, required=True)
+    ap.add_argument("--port", type=Path, required=True)
+    ap.add_argument("--cheia-antes-oraculo", type=Path, required=True)
+    ap.add_argument("--cheia-oraculo", type=Path, required=True)
+    ap.add_argument("--cheia-port", type=Path, required=True)
+    args = ap.parse_args(argv)
+    print(f"compara_tela: time {args.indice} -- a grade de cores "
+          f"(3x escurecer, 1x clarear, 1x gradiente)")
+    try:
+        antes_o = carrega(args.antes_oraculo)
+        antes_p = carrega(args.antes_port)
+        dep_o = carrega(args.oraculo)
+        dep_p = carrega(args.port)
+        rects = retangulos_do_lfm(AMOSTRAS, LFM_COLOR)
+
+        # 1. a pre-condicao: os cliques mudaram cor nos DOIS lados
+        m_o = mudou(antes_o, dep_o, AMOSTRAS, rects, AMOSTRA_MARGEM)
+        m_p = mudou(antes_p, dep_p, AMOSTRAS, rects, AMOSTRA_MARGEM)
+        print(f"  mudaram: {len(m_o)}/16 no oraculo, {len(m_p)}/16 no port")
+        if len(m_o) < GRADE_MINIMO or len(m_p) < GRADE_MINIMO:
+            print(f"REPROVOU: menos de {GRADE_MINIMO} amostras mudaram -- os "
+                  "cliques nao chegaram nos botoes, e comparar assim seria "
+                  "comparar duas telas paradas", file=sys.stderr)
+            return 1
+        if set(m_o) != set(m_p):
+            so_o = sorted(set(m_o) - set(m_p))
+            so_p = sorted(set(m_p) - set(m_o))
+            print("REPROVOU: os dois lados mudaram amostras DIFERENTES -- "
+                  f"so no oraculo: {so_o or '-'}; so no port: {so_p or '-'}",
+                  file=sys.stderr)
+            return 1
+
+        # 2. o veredito: as 16, pixel a pixel, depois da conta
+        r = compara_cor(dep_o, dep_p)
+        rc = relata_cor(r, args.indice)
+
+        # 3. e o bitmap, que e o que a task pede por escrito. A bandeira TEM de
+        #    ter mudado: `boton0` e o rádio marcado no `.dfm`, entao os tres
+        #    handlers redesenham a bandeira e nao o uniforme.
+        cheia_ao = carrega(args.cheia_antes_oraculo)
+        cheia_o = carrega(args.cheia_oraculo)
+        cheia_p = carrega(args.cheia_port)
+        rects_r = retangulos_do_lfm(RENDER)
+        off = calibra(cheia_o, "oraculo")
+        band = {"bandera": retangulo_do_render("bandera", rects_r,
+                                               args.indice)}
+        if not mudou(cheia_ao, cheia_o, ("bandera",), band, off=off):
+            print("REPROVOU: a bandeira do oraculo nao mudou -- a cor foi "
+                  "editada e o redesenho nao aconteceu, ou o recorte caiu "
+                  "fora dele", file=sys.stderr)
+            return 1
+        rr = compara_render(cheia_o, cheia_p, args.indice)
+        rc |= relata_render(rr)
+    except TelaError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return rc
+
+
 def main(argv: list[str]) -> int:
     if argv == ["--check"]:
         return autoteste()
@@ -958,6 +1065,8 @@ def main(argv: list[str]) -> int:
         return main_nomes(argv[1:])
     if argv[:1] == ["--cor"]:
         return main_cor(argv[1:])
+    if argv[:1] == ["--grade"]:
+        return main_grade(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("oraculo", type=Path)
     ap.add_argument("port", type=Path)

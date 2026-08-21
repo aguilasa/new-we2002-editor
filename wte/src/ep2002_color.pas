@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, Forms, Controls, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace,
-  Graphics, SysUtils, wte_cor, wte_render2d;
+  Graphics, SysUtils, we2002_render, wte_cor, wte_render2d, wte_uniformes;
 
 type
   Tficha_color = class(TForm)
@@ -138,81 +138,45 @@ implementation
 
 {$R ../forms/ep2002_color.lfm}
 
+{ Rotinas internas que o original chama de mais de um handler -- nao sao
+  metodo publicado, e por isso nao estao na classe. Ver wte/src/impl/README.md. }
+{$I impl/ep2002_color.aux.inc}
+
 procedure Tficha_color.FormCreate(Sender: TObject);
 {$I impl/ep2002_color.FormCreate.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barraChange(Sender: TObject);
-begin
-  REStub('ficha_color.barraChange');
-end;
-{$POP}
+{$I impl/ep2002_color.barraChange.inc}
 
 procedure Tficha_color.botonClick(Sender: TObject);
 {$I impl/ep2002_color.botonClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barra1Change(Sender: TObject);
-begin
-  REStub('ficha_color.barra1Change');
-end;
-{$POP}
+{$I impl/ep2002_color.barra1Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.barra2Change(Sender: TObject);
-begin
-  REStub('ficha_color.barra2Change');
-end;
-{$POP}
+{$I impl/ep2002_color.barra2Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.gradienteClick(Sender: TObject);
-begin
-  REStub('ficha_color.gradienteClick');
-end;
-{$POP}
+{$I impl/ep2002_color.gradienteClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.oscurecerClick(Sender: TObject);
-begin
-  REStub('ficha_color.oscurecerClick');
-end;
-{$POP}
+{$I impl/ep2002_color.oscurecerClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.aclararClick(Sender: TObject);
-begin
-  REStub('ficha_color.aclararClick');
-end;
-{$POP}
+{$I impl/ep2002_color.aclararClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col0Change(Sender: TObject);
-begin
-  REStub('ficha_color.lista_col0Change');
-end;
-{$POP}
+{$I impl/ep2002_color.lista_col0Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col1change(Sender: TObject);
-begin
-  REStub('ficha_color.lista_col1change');
-end;
-{$POP}
+{$I impl/ep2002_color.lista_col1change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col2Change(Sender: TObject);
-begin
-  REStub('ficha_color.lista_col2Change');
-end;
-{$POP}
+{$I impl/ep2002_color.lista_col2Change.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.lista_col3Change(Sender: TObject);
-begin
-  REStub('ficha_color.lista_col3Change');
-end;
-{$POP}
+{$I impl/ep2002_color.lista_col3Change.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn1Click(Sender: TObject);
@@ -235,13 +199,9 @@ begin
 end;
 {$POP}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.colorMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
-  REStub('ficha_color.colorMouseDown');
-end;
-{$POP}
+{$I impl/ep2002_color.colorMouseDown.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.SpeedButton1Click(Sender: TObject);

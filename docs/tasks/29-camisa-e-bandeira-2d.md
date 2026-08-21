@@ -125,7 +125,7 @@ gravar **nesta imagem**:
 | Arquivo | Ação |
 |---|---|
 | `wte/re/spec/<handler>.md` | criar |
-| `wte/re/render2d.md` | criar — algoritmo e espaço de cor **feitos**; tolerância ainda não |
+| `wte/re/render2d.md` | criar — feito (algoritmo e espaço de cor; a tolerância medida está no log da sexta passagem, porque ela é resultado de execução e não saída de gerador) |
 | `wte/tools/dump_render2d.py`, `wte/tools/test_dump_render2d.py` | criar — feito |
 | `wte/src/we2002_render.pas` | criar — feito (a aritmética de cor) |
 | `wte/src/we2002_bmp.pas` | criar — feito (o recipiente de 8 bpp) |
@@ -136,7 +136,8 @@ gravar **nesta imagem**:
 | `wte/src/impl/ep2002_mainform.grabar_camisetaClick.inc` | criar — feito |
 | `wte/tests/roteiros/golden-14-uniforme{,.port}.txt` | criar — feito |
 | `wte/src/wte_cor.pas` | criar — feito (o estado do editor de cor) |
-| `wte/src/impl/ep2002_color.*.inc`, `ep2002_mainform.colorearClick.inc` | criar — feito (3 dos 17) |
+| `wte/src/impl/ep2002_color.*.inc`, `ep2002_mainform.colorearClick.inc` | criar — feito (os 11 de edição, mais o `FormCreate`, o `botonClick` e o `aux.inc`; os 4 restantes do formulário são da [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md)) |
+| `wte/tools/compara_tela.{sh,py}` | estender — feito (o modo `--grade`, a régua da tolerância) |
 
 ---
 
@@ -164,17 +165,23 @@ gravar **nesta imagem**:
       si são 45 bytes. O `.bmp` é lido do disco **uma vez** e fica em memória —
       o original o relê a cada redesenho, porque para ele o arquivo *é* o
       estado
-- [ ] Diff de bitmap sobre grade de cores, com tolerância **medida** e causa
-      nomeada — **duas medidas de três fecharam, e as duas dão zero.** O
-      `compara_tela.py` ganhou as duas: `bandera`, `home1` e `home2` recortados
-      pelo `.lfm` e comparados pixel a pixel (times 2, 9 e 63: **0 de 8.960
-      px**, 9.800 no clube de ML), e `--cor`, que abre o editor dos dois lados
-      e compara as **16 amostras** (**0 de 5.168 px**, com 8 a 11 cores
-      distintas em cada time — a contagem existe para que "todas iguais" não
-      passe por verde). As duas recusas foram **vistas**: `PRIMEIRA_UNIFORME =
-      0` acusa 2.008 de 3.360 px no `home1`, e trocar R por B no `TColor` da
-      amostra acusa 8 das 16. Falta **variar** a cor, que é a grade do
-      enunciado e depende dos handlers de edição do `ficha_color`
+- [x] **Diff de bitmap sobre grade de cores, com tolerância medida e causa
+      nomeada — a tolerância é ZERO, e não há causa a nomear.** As três medidas
+      fecharam. As duas primeiras mediam a paleta *como ela veio da imagem*:
+      `bandera`, `home1` e `home2` recortados pelo `.lfm` (times 2, 9 e 63:
+      **0 de 8.960 px**, 9.800 no clube de ML) e `--cor`, as **16 amostras**
+      do editor (**0 de 5.168 px**). A terceira é a grade do enunciado, e ela
+      mede depois de **calcular**: `compara_tela.sh --grade` clica três vezes
+      em escurecer, uma em clarear e uma no gradiente, nos dois lados, e
+      compara as 16 amostras **e** os três `TImage`. Nos mesmos três times:
+      **16 de 16 amostras mudaram** dos dois lados, e a divergência é
+      **0 de 5.168 px** nas amostras e **0 de 8.960** (9.800 no de ML) no
+      bitmap. As recusas foram **vistas**, e são quatro ao todo:
+      `PRIMEIRA_UNIFORME = 0` acusa 2.008 de 3.360 px no `home1`; trocar R por
+      B no `TColor` da amostra acusa 8 das 16; o `oscurecer` com a faixa
+      **aberta** em vez de fechada acusa 12 das 16 amostras e 3.792 de 3.840 px
+      da bandeira; e o gradiente escrevendo a partir da ponta em vez do miolo
+      acusa 15 das 16
 - [x] **`grabar_camisetaClick` byte-idêntico, sem tolerância** — spec em
       [`MainForm.grabar_camisetaClick.md`](../../wte/re/spec/MainForm.grabar_camisetaClick.md),
       golden [`golden-14-uniforme`](../../wte/tests/roteiros/golden-14-uniforme.txt)
@@ -199,6 +206,19 @@ gravar **nesta imagem**:
       2026-08-21. E não por olho: os três `TImage` são **medidos**, porque ali
       não há fonte no meio — é o mesmo bitmap com a mesma paleta dos dois lados.
       Zero divergência nos três
+- [ ] **Os dois `malla` do `estrategia`, com veredito** — `malla1MouseDown`
+      (`0x00409f4c`) e `malla2MouseDown` (`0x0040a000`). Eles estão na tabela de
+      alvos desta task porque o `published_methods.tsv` os atribui a ela, e
+      **não são cor**: cada um acha `simbolo<Y div 24 + 1>` por nome e lhe dá
+      `Top := malla1.Top + (X div 16)*16 + 3`, que é geometria do campinho
+      tático. Medido na sexta passagem, não implementado — fechá-los pede régua
+      de tela para o `estrategia`, que é instrumento novo. **É o único item de
+      medida que falta**, e é o motivo de a task seguir `⬜ Pendente`
+- [x] **Os 11 handlers de edição do `ficha_color`, com spec cada** — entraram na
+      sexta passagem, com o `botonClick` completado de 2 para 5 movimentos. Os
+      outros quatro do formulário (`BitBtn1..3Click`, `SpeedButton1Click`) são
+      da [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) pela tabela "o que
+      fica de fora" dela, que nomeia exatamente estes 11 como desta task
 - [ ] Commit no formato conventional, em inglês
 
 ### O critério de tela que veio da WTE-TASK-25
@@ -224,6 +244,147 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Sexta passagem, 2026-08-21 — **parcial**: o editor de cor edita, e a grade fecha
+
+A task **continua `⬜ Pendente`**, e o que sobra agora é de outro formulário.
+Os 11 handlers de edição do `ficha_color` entraram, o `botonClick` foi
+completado, e com eles o último critério de medida da task fechou.
+
+- **Resumo do que foi feito:**
+
+  **A grade de cores do enunciado existe, e a tolerância dela é zero.** O
+  `compara_tela.sh` ganhou o modo `--grade`, e a diferença dele para o `--cor`
+  é a única que importa: o `--cor` mede a paleta **como ela veio da imagem** —
+  prova que os dois lados leem a mesma fonte e não prova nada sobre a
+  aritmética, porque nenhuma cor foi calculada. O `--grade` clica antes de
+  medir. Três em escurecer, um em clarear, um no gradiente: as três operações
+  da `we2002_render` exercitadas pela tela, com o piso, o teto e o truncamento
+  todos mordendo.
+
+  **A escolha dos botões em vez das barras foi medida, e não estética.** Clicar
+  na trilha de um `TScrollBar` pagina por `LargeChange`, e o passo do comctl32
+  sob Wine não é o do gtk2 — o `--edicao` teve de medir que os dois andavam +2
+  antes de poder comparar. Cada clique de botão é uma operação inteira e
+  determinística, e não depende de widgetset nenhum.
+
+  **A guarda que o modo precisava ter, e o `--cor` não precisava:** medir
+  depois de editar aprova um port inerte se os cliques não chegarem — as duas
+  capturas ficam iguais e a comparação sai verde sem ter medido conta nenhuma.
+  Então o **antes** entra como pré-condição: a cor do oráculo tem de ter mudado,
+  e a do port também, e os dois têm de ter mudado **as mesmas amostras**. Do
+  lado do port a mesma coisa é conferida por outro caminho, contando disparo no
+  trace, e as duas medidas são independentes de propósito.
+
+  **O `botonClick` tinha dois dos cinco movimentos, e o que faltava doía.** A
+  quinta passagem portou a família e o repinte; faltavam a gravação de volta na
+  fonte anterior (`0x00405b48`, que o original chama de **quatorze** lugares e
+  este port chamava de nenhum), o `conjunto` e a visibilidade dos combos. Sem a
+  primeira, editar a bandeira e clicar em "Unifo. 2D" **perdia a edição** — e o
+  sintoma só aparece quando o usuário volta, que é o pior tipo.
+
+  **E uma nota de spec que tinha caducado sem ninguém notar.** A spec do
+  `MainForm.FormCreate` classificava as três últimas instruções do original —
+  que guardam os ponteiros de `bandera`, `home1` e `home2` em globais — como
+  "detalhe de implementação em C++ sem efeito observável, porque em Pascal os
+  três se alcançam pelo campo do formulário". **Isso valia enquanto só o
+  `MainForm` desenhava.** Os handlers do `ficha_color` também redesenham, e dali
+  os campos não se alcançam: `ep2002_mainform` já usa `ep2002_color`, então a
+  volta fecharia ciclo de `uses` de interface. As globais do original são
+  exatamente a indireção que resolve isso, e o port passou a tê-las
+  (`RegistraImagensDoEditor`).
+
+- **Três leituras que quase saíram erradas, e as três se corrigiram com uma
+  segunda fonte:**
+
+  1. **`barra1` é o início e `barra2` é o fim**, e o `.dfm` os declara na ordem
+     inversa. Quem decide não é a ordem de declaração: é a *published field
+     table* (`re/campos.tsv`), e ela diz `0x360 = barra2`, `0x364 = barra1`.
+     Contar componentes na ordem do `.dfm` dava o mesmo resultado em três dos
+     alvos desta passagem e **o oposto** neste — e a faixa do gradiente sairia
+     invertida.
+  2. **O `lista_col3Change` parecia escrita morta.** Os dois bytes que ele
+     escreve (`0x004331d8`/`d9`) têm três referências cada no `.text`, e todas
+     as seis estão dentro do próprio handler. A conclusão fácil está errada: o
+     par é indexado em outro lugar com passo dois
+     (`mov dl,[eax*2+0x004331d6]`), ou seja `d6`/`d7` é o slot 0 e `d8`/`d9` é o
+     slot 1 — o mesmo par de slots que o resto do estado visual usa. O slot 0
+     é lido da imagem e devolvido a ela pela gravação do `BitBtn3`. **Busca por
+     endereço literal não prova ausência de leitura.**
+  3. **O `colorMouseDown` testa `boton0` duas vezes na cauda**, e no segundo
+     teste redesenha o *uniforme*. É defeito do original, está reproduzido, e a
+     spec diz por quê: o gate compara pixel, e "corrigir" produziria divergência
+     em vez de fidelidade.
+
+- **A divergência deliberada da passagem anterior fica, e agora com a metade
+  portada:** o `lista_col3` continua no default do formulário, porque o par de
+  bytes de padrão de camisa não tem campo na camada de dados. O que mudou é que
+  a **escrita** passou a existir — o port guarda os dois em
+  `wte_cor.PadraoDaCamisa`, e nada os lê ainda. O único consumidor no original
+  é a gravação do `BitBtn3`, que é da WTE-TASK-30. Guardá-los agora é o que faz
+  aquela gravação ser possível sem reabrir este handler.
+
+  A segunda divergência é a **família 2 (chuteira)**: o `lista_col2Change`
+  escreve o `conjunto` como o original, e o preenchimento devolve `False` sem
+  pintar em vez de cair no laço com o ponteiro de fonte não inicializado. Entrada
+  para a [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md), junto com a
+  primeira.
+
+- **Arquivos criados/modificados:**
+  - criados: os 11 `wte/src/impl/ep2002_color.<handler>.inc`,
+    `wte/src/impl/ep2002_color.aux.inc`, e as 11 specs
+    `wte/re/spec/ficha_color.*.md`
+  - modificados: `wte/src/wte_cor.pas` (`SalvaPaleta`, `CoresEmVigor`,
+    `FormaEmVigor`, `SalvaFormaDaBandeira`, o cola-cores e o padrão de camisa),
+    `wte/src/wte_render2d.pas` (`PintaUmaAmostra`, `RepintaAmostras`, o
+    registro dos três `TImage` e os dois redesenhos em vigor),
+    `wte/src/impl/ep2002_color.{botonClick.inc,uses}`,
+    `wte/src/impl/ep2002_mainform.FormCreate.inc`,
+    `wte/src/ep2002_{color,mainform}.pas` (gerados),
+    `wte/tools/compara_tela.{sh,py}` (o modo `--grade`),
+    `wte/tools/test_compara_tela.py` (5 casos novos),
+    `wte/re/spec/{ficha_color.botonClick.md,INDICE.md}`,
+    `wte/re/fase-2.md` (gerado), `wte/tools/README.md`, a §4.4 do plano e o
+    `progresso.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `compara_tela.sh --grade 2 9 63` | **0 de 5.168 px** nas amostras e 0 de 8.960 (9.800 no 63) no bitmap; 16/16 amostras mudaram dos dois lados |
+  | mutação: `oscurecer` com faixa aberta | **recusa vista**: 12 das 16 amostras, 3.792/3.840 px da bandeira |
+  | mutação: gradiente a partir da ponta | **recusa vista**: 15 das 16 amostras |
+  | `golden-01-arranque` | controle e golden byte-idênticos |
+  | `golden-03-barras` | golden byte-idêntico |
+  | `golden-13-roundtrip` | golden byte-idêntico, artefato de 131.072 B igual |
+  | `golden-14-uniforme` | controle e golden byte-idênticos, artefato de 30.956 B igual |
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 686 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+
+  As specs saíram de 60 para **75 de 96**; os `aberto` caíram de 47 para 36.
+
+- **O que ficou pendente, e é de outro formulário:** os dois `malla`
+  (`malla1MouseDown` em `0x00409f4c` e `malla2MouseDown` em `0x0040a000`), que
+  o `published_methods.tsv` atribui a esta task. Eles são do `estrategia`, não
+  do `ficha_color`, e **não são cor**: cada um acha `simbolo<Y div 24 + 1>` por
+  nome e lhe dá `Top := malla1.Top + (X div 16)*16 + 3` — geometria do campinho
+  tático. Fechá-los pede régua de tela para o `estrategia`, que é instrumento
+  novo.
+
+  Os quatro handlers restantes do `ficha_color` — `BitBtn1Click`,
+  `BitBtn2Click`, `BitBtn3Click` e `SpeedButton1Click` — **não são desta task**:
+  a tabela "o que fica de fora" da
+  [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) nomeia exatamente os 11
+  que entraram aqui e deixa a moldura do formulário para ela. O `BitBtn3` é
+  gravação de verdade (`0x004051a4` escreve na imagem) e vai precisar de roteiro
+  golden próprio.
+
+- **Problemas encontrados:** os três de leitura descritos acima. Mais um de
+  invocação, que custou uma corrida: o `golden_check.sh` **não deriva** o
+  `.port.txt` do nome do roteiro — sem `--roteiro-port` ele dirige o lado port
+  com o roteiro do oráculo, que procura o diálogo `Abre` e falha em 30 s com
+  "janela 'Abre' nao apareceu". O sintoma parece regressão do port e não é.
 
 ### Quinta passagem, 2026-08-21 — **parcial**: o editor de cor abre
 

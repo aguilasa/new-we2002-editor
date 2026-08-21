@@ -1,7 +1,9 @@
 # Unidades que os corpos de `impl/ep2002_color.*.inc` pedem, alem das que o
 # gerador ja deduz dos componentes e das assinaturas.
-retrace        # REMark
-Graphics       # TColor
-SysUtils       # StrToIntDef, Copy
-wte_cor        # o estado do editor de cor 2D (WTE-TASK-29)
-wte_render2d   # PreencheAmostras -- as 16 amostras (WTE-TASK-29)
+retrace         # REMark
+Graphics        # TColor
+SysUtils        # StrToIntDef, Copy, IntToStr
+we2002_render   # a aritmetica de cor: Escurece, Clareia, Rampa, DecodificaCor
+wte_cor         # o estado do editor de cor 2D (WTE-TASK-29)
+wte_render2d    # PintaUmaAmostra, PreencheAmostras e os dois redesenhos
+wte_uniformes   # FORMA_PADRAO -- o combo `lista_col0` a INDEXA

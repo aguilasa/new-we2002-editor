@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 34 |
+| `implementado` | 44 |
 | `trivial` | 14 |
-| `divergencia deliberada` | 1 |
+| `divergencia deliberada` | 2 |
 | `nao portado` | 0 |
-| `aberto` | 47 |
+| `aberto` | 36 |
 | **total** | **96** |
 
-64 de 96 têm arquivo de spec.
+75 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -48,21 +48,21 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00402f8c` | `ficha_info` | [FormCreate](ficha_info.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040422c` | `ficha_info4` | [FormCreate](ficha_info4.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00405dcc` | `ficha_color` | [FormCreate](ficha_color.FormCreate.md) | OnCreate | carga | implementado |
-| `0x00405e40` | `ficha_color` | barraChange | OnChange x3 | edicao | aberto |
+| `0x00405e40` | `ficha_color` | [barraChange](ficha_color.barraChange.md) | OnChange x3 | edicao | implementado |
 | `0x00406078` | `ficha_color` | [botonClick](ficha_color.botonClick.md) | OnClick x4 | auxiliar | implementado |
-| `0x00406358` | `ficha_color` | barra1Change | OnChange | edicao | aberto |
-| `0x00406384` | `ficha_color` | barra2Change | OnChange | edicao | aberto |
-| `0x004063b0` | `ficha_color` | gradienteClick | OnClick | edicao | aberto |
-| `0x004065fc` | `ficha_color` | oscurecerClick | OnClick | edicao | aberto |
-| `0x00406744` | `ficha_color` | aclararClick | OnClick | edicao | aberto |
-| `0x0040688c` | `ficha_color` | lista_col0Change | OnChange | edicao | aberto |
-| `0x004068b0` | `ficha_color` | lista_col1change | OnChange | edicao | aberto |
-| `0x004068ec` | `ficha_color` | lista_col2Change | OnChange | edicao | aberto |
-| `0x0040690c` | `ficha_color` | lista_col3Change | OnChange | edicao | aberto |
+| `0x00406358` | `ficha_color` | [barra1Change](ficha_color.barra1Change.md) | OnChange | edicao | implementado |
+| `0x00406384` | `ficha_color` | [barra2Change](ficha_color.barra2Change.md) | OnChange | edicao | implementado |
+| `0x004063b0` | `ficha_color` | [gradienteClick](ficha_color.gradienteClick.md) | OnClick | edicao | implementado |
+| `0x004065fc` | `ficha_color` | [oscurecerClick](ficha_color.oscurecerClick.md) | OnClick | edicao | implementado |
+| `0x00406744` | `ficha_color` | [aclararClick](ficha_color.aclararClick.md) | OnClick | edicao | implementado |
+| `0x0040688c` | `ficha_color` | [lista_col0Change](ficha_color.lista_col0Change.md) | OnChange | edicao | implementado |
+| `0x004068b0` | `ficha_color` | [lista_col1change](ficha_color.lista_col1change.md) | OnChange | edicao | implementado |
+| `0x004068ec` | `ficha_color` | [lista_col2Change](ficha_color.lista_col2Change.md) | OnChange | edicao | divergencia deliberada |
+| `0x0040690c` | `ficha_color` | [lista_col3Change](ficha_color.lista_col3Change.md) | OnChange | edicao | implementado |
 | `0x00406968` | `ficha_color` | BitBtn1Click | OnClick | auxiliar | aberto |
 | `0x004069c8` | `ficha_color` | BitBtn2Click | OnClick | auxiliar | aberto |
 | `0x004069e8` | `ficha_color` | BitBtn3Click | OnClick | auxiliar | aberto |
-| `0x00406a0c` | `ficha_color` | colorMouseDown | OnMouseDown x16 | edicao | aberto |
+| `0x00406a0c` | `ficha_color` | [colorMouseDown](ficha_color.colorMouseDown.md) | OnMouseDown x16 | edicao | implementado |
 | `0x00406f34` | `ficha_color` | SpeedButton1Click | OnClick | auxiliar | aberto |
 | `0x00407a68` | `jugador` | BitBtn2Click | OnClick | auxiliar | aberto |
 | `0x00407a80` | `jugador` | BitBtn1Click | OnClick | auxiliar | aberto |
