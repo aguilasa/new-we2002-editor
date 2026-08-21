@@ -374,6 +374,31 @@ Duas consequencias que valem para todo roteiro de gravacao que vier depois:
   que aconteceu na primeira medicao: os 5 bytes das barras apareceram como se
   fossem dos nomes, num TSV que parecia medido.
 
+### O `golden-15` julga uma gravacao SEM editar campo nenhum
+
+O par [`golden-15-ficha.txt`](golden-15-ficha.txt) /
+[`.port.txt`](golden-15-ficha.port.txt) e o gate do
+`jugador.BitBtn3Click` -- o `Comple.` da ficha --, aberto pela
+[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md). Ele parece violar a licao
+do `golden-03`: nao toca em barrinha, nem em seta, nem em caixa de texto, e
+mesmo assim distingue um port que grava de um que nao grava.
+
+O que o torna medida e que **o `Comple.` e destrutivo por si so**. Os dez bytes
+de nome saem do campo `casilla_nombre`, e o campo mostra o nome ja FILTRADO
+pelo `0x0040b2d8` -- com a ROM japonesa, uma corrida de `?`. Clicar `Comple.`
+sem editar nada grava `3f 3f 3f 3f` por cima de `ba b0 d7 dd`. Medido nos dois
+lados, em `OFS_PLAYER_NAME+774`.
+
+Duas coisas que ele ensina sobre dirigir a ficha:
+
+- **a janela `jugador` mede os 707x273 do DFM sob Wine**, sem os 6x32 de
+  moldura que o `ficha_dorsal` ganha. Os tres formularios que precisam de `>~`
+  nao se comportam igual, e supor a moldura erra o clique;
+- **a pergunta `Calcular precos` nao aparece nesta ordem.** Quem a provoca e o
+  `base_team`, nao o `mostrar_jugador_1` -- ja estava medido no cabecalho do
+  [`10-telas-que-faltavam.txt`](10-telas-que-faltavam.txt), e esperar por ela
+  custou uma corrida de controle.
+
 ## Replicar
 
 Lado port, com o trace num arquivo próprio:

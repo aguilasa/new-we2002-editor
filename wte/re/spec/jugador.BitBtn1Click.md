@@ -70,6 +70,16 @@ neutra, e mover 125 linhas de corpo já verificado é mudança de estrutura, nã
 de handler — abrir isso dentro de uma task de moldura de diálogo é o oposto de
 *"fechar um lote por inteiro"*.
 
+**A unidade neutra existe desde 2026-08-21, e o que falta aqui encolheu.** A
+[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md) criou a
+[`wte_ficha`](../../src/wte_ficha.pas) para o
+[`BitBtn3`](jugador.BitBtn3Click.md) e desceu para lá o buffer de jogador
+inteiro, com `GravaJogador` e `GravaNumeroDaCamisa`; o `ep2002_jugador` já a
+usa. Mover a `PreencheFicha` para o mesmo lugar fecha este handler, e é a única
+coisa que ainda falta — a `wte_ficha` pode usar o `ep2002_jugador` na
+implementação, que é exatamente o que a rotina precisa para alcançar os
+controles da ficha.
+
 Enquanto isso, o `Original ` fica stub. **Ele não grava nada**, então nenhum
 golden fica vermelho por causa dele: o que se perde é o desfazer da ficha.
 

@@ -210,9 +210,16 @@ tradução, como o `KanjiToAscii` do `we2002_core`". Medido, as duas são
 Ou seja, a rotina copia letra, dígito, `.` e espaço como estão, troca
 **qualquer byte acima de `z` por `?`** e descarta o resto. Isso é uma
 divergência de comportamento contra o `we2002_core`, que para byte
-desconhecido devolve espaço; ela vale para o que aparece na tela e não
-para o que se grava. A conferência aborta se as tabelas deixarem de ser
-identidade, porque nesse dia a palavra "filtro" fica errada.
+desconhecido devolve espaço. A conferência aborta se as tabelas
+deixarem de ser identidade, porque nesse dia a palavra "filtro" fica
+errada.
+
+**E ela não é só de tela, ao contrário do que este arquivo dizia até
+2026-08-21.** O `jugador.BitBtn3Click` — o `Comple.` da ficha — grava os
+dez bytes de nome a partir do CAMPO da ficha, e o campo mostra o texto
+já filtrado. Com a ROM japonesa isso são quatro `?` gravados sobre o
+nome; o port reproduz o filtro desde a CORR-WTE-081, e é o gate
+`golden-15-ficha` que mede os quatro bytes.
 
 ## As lidas, uma a uma
 

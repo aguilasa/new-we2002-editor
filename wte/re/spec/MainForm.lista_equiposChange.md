@@ -420,8 +420,13 @@ lido, e a leitura barata seria "são tabelas de tradução, como o `KanjiToAscii
 do `we2002_core`". Medido, as duas são **identidade**: a rotina copia letra,
 dígito, `.` e espaço, troca **qualquer byte acima de `z` por `?`** e descarta o
 resto. Contra o `we2002_core`, que devolve espaço para byte desconhecido, isso
-é divergência de tela — não de gravação. Conferido a cada build pelo
-`dump_auxiliares.py`, que aborta se as tabelas deixarem de ser identidade.
+diverge — e **não é só de tela**, embora esta linha dissesse isso até
+2026-08-21: o [`jugador.BitBtn3Click`](jugador.BitBtn3Click.md) grava os dez
+bytes de nome a partir do campo da ficha, e o campo mostra o texto da lista. O
+port reproduz o filtro desde a
+[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), no `NomeFiltrado` do
+`.aux.inc`. Conferido a cada build pelo `dump_auxiliares.py`, que aborta se as
+tabelas deixarem de ser identidade.
 
 **E a fronteira de setor é calculada, não tabelada.** A leitura de nome passa
 por `0x00403388`, que não recebe offset: pergunta ao `ftell` onde está e, se

@@ -255,8 +255,8 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-21, do `spec_index.py`): 51 `implementado`, 19 `trivial`, 2
-      `divergencia deliberada`, 1 `nao portado`, 23 `aberto`. Os 11 do
+      (2026-08-21, do `spec_index.py`): 52 `implementado`, 19 `trivial`, 2
+      `divergencia deliberada`, 1 `nao portado`, 22 `aberto`. Os 11 do
       `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
       somando-se aos 28 do grupo de carga, aos 28 do de edição que a
       WTE-TASK-26 fechou e às gravações da WTE-TASK-27; os 17 do grupo
@@ -275,7 +275,14 @@ só uma escolha de quando.
       `ficha_color`, `estrategia` —, cada uma com o controle fechando antes do
       golden. **Ela vem antes da
       [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md)**, que é fechamento e
-      não implementa: sem isso a 31 só teria como listar a falta
+      não implementa: sem isso a 31 só teria como listar a falta.
+      **A primeira das três fechou em 2026-08-21**: o `Comple.` do `jugador`
+      está `implementado`, com o par `golden-15-ficha` verde nos três modos.
+      Ela trouxe a unidade neutra `wte/src/wte_ficha.pas`, para onde desceu o
+      buffer de jogador — o que destrava o `jugador.BitBtn1Click` também — e
+      corrigiu o filtro de nome do `0x0040b2d8`, que era divergência de tela e
+      virou divergência de byte no dia em que a ficha ganhou botão que grava.
+      Faltam o `ficha_color` e o `estrategia`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
