@@ -314,8 +314,9 @@ que o `published_methods.tsv` atribui aqui e que não é cor: é geometria.
     `wte/re/spec/estrategia.malla{1,2}MouseDown.md`, `wte/re/malhas.tsv`
     (gerado)
   - modificados: `wte/tools/dump_zonas.py` (o decodificador de malha e as
-    quatro conferências), `wte/tools/test_dump_zonas.py` (7 casos novos, cinco
-    deles recusas), `wte/src/impl/ep2002_estrategia.aux.inc`
+    quatro conferências), `wte/tools/test_dump_zonas.py` (9 casos novos, cinco
+    deles recusas — `diff` dos `def test_` entre `671a1f9^` e `671a1f9`),
+    `wte/src/impl/ep2002_estrategia.aux.inc`
     (`MoveMarcadorDaMalha`), `wte/src/wte_zonas.pas` e `wte/re/zonas.md`
     (gerados), `wte/src/ep2002_estrategia.pas` (gerado),
     `wte/tools/compara_tela.{sh,py}` (o modo `--malha`),

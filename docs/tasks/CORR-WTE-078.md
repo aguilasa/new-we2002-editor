@@ -3,7 +3,7 @@ id: CORR-WTE-078
 title: "Correção: o Log da sétima passagem conta 7 casos novos no test_dump_zonas.py, e são 9"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -69,17 +69,29 @@ commit anterior.
 
 ## Verificação
 
-- [ ] O número do Log e o `diff` dos `def test` entre `671a1f9^` e `671a1f9`
-      são o mesmo
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] O número do Log e o `diff` dos `def test` entre `671a1f9^` e `671a1f9`
+      são o mesmo — 10 antes, 19 depois, 9 novos
+- [x] `make -C wte check` verde — 695 testes, `OK (skipped=1)`, rc=0
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-21
 
 **Resumo do que foi feito:**
 
+`7 casos novos` → `9 casos novos`, e ao lado a forma de remedir, porque é a
+mesma pergunta toda vez: o `diff` dos `def test_` entre `671a1f9^` e `671a1f9`.
+Medido agora, 10 antes e 19 depois. A conta de recusas fecha como estava —
+`passo_errado`, `folga_errada`, `prefixo_trocado`, `constantes_diferentes` e
+`folga_diferente` são cinco.
+
 **Problemas encontrados:**
 
+Nenhum. Aproveitei a mesma régua na outra contagem do arquivo — o
+`test_compara_tela.py` com "5 casos novos", da passagem do `a35d4df` — e ela
+está certa: 39 antes, 44 depois.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/29-camisa-e-bandeira-2d.md`
