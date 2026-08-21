@@ -164,7 +164,8 @@ NOMES_TEXTO='A B-C.DEFG'
 NOMBRE1_X=422  ; NOMBRE1_Y=74
 
 [ $# -ge 1 ] || { echo "uso: $0 <indice> [<indice> ...] | $0 --habilitacao" \
-                       "| $0 --edicao | $0 --nomes | $0 --cor | $0 --grade" >&2
+                       "| $0 --edicao | $0 --nomes | $0 --cor | $0 --grade" \
+                       "| $0 --malha" >&2
                   exit 1; }
 MODO=barras
 if [ "$1" = "--habilitacao" ]; then
@@ -182,6 +183,18 @@ elif [ "$1" = "--nomes" ]; then
                          "$IDX_EDICAO, fixado aqui" >&2; exit 1; }
   MODO=nomes
   set -- "$IDX_EDICAO"
+elif [ "$1" = "--malha" ]; then
+  # As duas malhas de marcador do `estrategia` -- WTE-TASK-29,
+  # `malla1MouseDown` e `malla2MouseDown`.
+  #
+  # O que se mede e o EFEITO DO CLIQUE, e nao o estado inicial: as posicoes de
+  # partida dos marcadores divergem de proposito, porque quem as carrega da
+  # imagem e a rotina interna `0x0040a0b4`, que nao foi portada. O handler nao
+  # le a posicao corrente -- ele a calcula a partir do `Top` da malha --, entao
+  # o delta e comparavel mesmo com pontos de partida diferentes.
+  MODO=malha
+  shift
+  [ $# -ge 1 ] || set -- "$IDX_EDICAO"
 elif [ "$1" = "--grade" ]; then
   # A GRADE DE CORES da WTE-TASK-29 -- o criterio que o `--cor` deixa aberto.
   #
@@ -345,6 +358,58 @@ edita_cor() {
   sleep 2
 }
 
+# ## O `estrategia`, e por que ele nao se acha por nome
+#
+# O botao `mostrar_estrategia_1` fica em (8,40) dentro do `GroupBox1`, que esta
+# em (8,320) -- absoluto (16,360), 25x21, centro (28,370).
+#
+# **A janela nao se acha pelo titulo.** O `.dfm` diz `Caption = 'Estrategia'`, e
+# o oraculo o REESCREVE no arranque: sob Wine o titulo dele sai
+# `'   ?????'` -- nome de time em Shift-JIS que o servidor de fontes nao tem. O
+# port mantem o do formulario. Achar por nome funcionaria de um lado so, que e
+# pior do que nao funcionar de nenhum. Aqui os dois lados sao achados pelo
+# TAMANHO, como o `roteiro.sh` ja faz com a janela principal.
+ESTRATEGIA_X=28  ; ESTRATEGIA_Y=370
+EST_W_MIN=500    ; EST_W_MAX=560
+EST_H_MIN=470    ; EST_H_MAX=520
+# O clique na `malla1`: ela esta em (144,312) e mede 96x176. O ponto e a coluna
+# 2 (x 24..47 dentro dela) na linha 5 (y 80..95) -- escolhido para que as duas
+# divisoes MORDAM: uma coluna que nao a primeira, e um y que nao seja multiplo
+# de 16, para o arredondamento ter o que arredondar.
+MALHA_X=$((144 + 30))
+MALHA_Y=$((312 + 88))
+
+# acha_estrategia -- a janela do campinho tatico, pelo tamanho. Escreve `X`/`Y`.
+acha_estrategia() {
+  local i e="" w h
+  for i in $(xdotool search --name . ); do
+    w=$(xdotool getwindowgeometry --shell "$i" | sed -n 's/^WIDTH=//p')
+    h=$(xdotool getwindowgeometry --shell "$i" | sed -n 's/^HEIGHT=//p')
+    [ -n "$w" ] && [ -n "$h" ] || continue
+    if [ "$w" -ge "$EST_W_MIN" ] && [ "$w" -le "$EST_W_MAX" ] \
+       && [ "$h" -ge "$EST_H_MIN" ] && [ "$h" -le "$EST_H_MAX" ]; then e="$i"; fi
+  done
+  [ -n "$e" ] || { echo "ERRO: a janela do estrategia nao apareceu" >&2
+                   return 4; }
+  eval "$(geometria "$e")"
+}
+
+# Abre o `estrategia`, captura antes e depois de um clique na `malla1`.
+# `X`/`Y` ja tem a origem da janela principal.
+abre_estrategia() {
+  local destino="$1"
+  xdotool mousemove $((X + ESTRATEGIA_X)) $((Y + ESTRATEGIA_Y)) click 1
+  sleep 5
+  acha_estrategia || return 4
+  import -window root "$SAIDA/raw-est.png"
+  recorta "$SAIDA/raw-est.png" "$destino" "$X" "$Y" "$WIDTH" "$HEIGHT"
+  xdotool mousemove $((X + MALHA_X)) $((Y + MALHA_Y)) click 1
+  sleep 2
+  import -window root "$SAIDA/raw-est.png"
+  recorta "$SAIDA/raw-est.png" "${destino%.png}-depois.png" \
+          "$X" "$Y" "$WIDTH" "$HEIGHT"
+}
+
 # Abre o editor de cor e captura A JANELA DELE, nos dois lados.
 #
 # `X`/`Y` ja tem a origem da janela principal. O `colorear` fica em (224,184) no
@@ -428,6 +493,23 @@ captura_oraculo() {
   descidas "$w" $((indice + 1)); sleep 3
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
+  if [ "$MODO" = malha ]; then
+    abre_estrategia "$destino" || { limpa; return 4; }
+    limpa
+    return 0
+  fi
+  if [ "$MODO" = malha ]; then
+    abre_estrategia "$destino" || { limpa; return 4; }
+    local mal
+    mal=$(grep -c 'estrategia.malla1MouseDown' "$TRACE" 2>/dev/null || echo 0)
+    limpa
+    if [ "$mal" -ne 1 ]; then
+      echo "ERRO: malla1MouseDown disparou $mal vez(es), esperava 1 -- o" >&2
+      echo "      clique em $MALHA_X,$MALHA_Y nao chegou na malha." >&2
+      return 5
+    fi
+    return 0
+  fi
   if [ "$MODO" = cor ] || [ "$MODO" = grade ]; then
     abre_editor_de_cor "$destino" || { limpa; return 4; }
     limpa
@@ -459,12 +541,32 @@ captura_port() {
   descidas "$w" $((indice + 1)); sleep 2
   [ "$MODO" = edicao ] && edita_barra
   [ "$MODO" = nomes ] && edita_nomes
+  if [ "$MODO" = malha ]; then
+    abre_estrategia "$destino" || { limpa; return 4; }
+    local mal
+    mal=$(grep -c 'estrategia.malla1MouseDown' "$TRACE" 2>/dev/null || echo 0)
+    limpa
+    if [ "$mal" -ne 1 ]; then
+      echo "ERRO: malla1MouseDown disparou $mal vez(es), esperava 1 -- o" >&2
+      echo "      clique em $MALHA_X,$MALHA_Y nao chegou na malha." >&2
+      return 5
+    fi
+    return 0
+  fi
   if [ "$MODO" = cor ] || [ "$MODO" = grade ]; then
     abre_editor_de_cor "$destino" || { limpa; return 4; }
     # O trace confirma que os cliques VIRARAM handler, e nao so pixel. Do lado
     # do oraculo nao ha trace, e por isso a guarda de mudanca de cor existe
     # tambem -- as duas medem coisas diferentes.
-    if [ "$MODO" = grade ]; then
+    if [ "$MODO" = malha ]; then
+    python3 "$AQUI/compara_tela.py" --malha --indice "$indice" \
+        --antes-oraculo "$SAIDA/time-$indice-oraculo.png" \
+        --antes-port    "$SAIDA/time-$indice-port.png" \
+        --oraculo       "$SAIDA/time-$indice-oraculo-depois.png" \
+        --port          "$SAIDA/time-$indice-port-depois.png" || rc=1
+    continue
+  fi
+  if [ "$MODO" = grade ]; then
       local esc cla gra
       esc=$(grep -c 'ficha_color.oscurecerClick' "$TRACE" 2>/dev/null || echo 0)
       cla=$(grep -c 'ficha_color.aclararClick' "$TRACE" 2>/dev/null || echo 0)
@@ -589,6 +691,14 @@ for indice in "$@"; do
     python3 "$AQUI/compara_tela.py" --cor \
         "$SAIDA/time-$indice-oraculo.png" \
         "$SAIDA/time-$indice-port.png" --indice "$indice" || rc=1
+    continue
+  fi
+  if [ "$MODO" = malha ]; then
+    python3 "$AQUI/compara_tela.py" --malha --indice "$indice" \
+        --antes-oraculo "$SAIDA/time-$indice-oraculo.png" \
+        --antes-port    "$SAIDA/time-$indice-port.png" \
+        --oraculo       "$SAIDA/time-$indice-oraculo-depois.png" \
+        --port          "$SAIDA/time-$indice-port-depois.png" || rc=1
     continue
   fi
   if [ "$MODO" = grade ]; then

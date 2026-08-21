@@ -47,6 +47,36 @@ cada escrita para um deslocamento absoluto a partir de `ebx`.
 4. **Uma zona por bola.** O formulario tem `bola0`..`bola10`; a contagem de
    registros tem de bater com a contagem de `TShape` chamados `bolaN`.
 
+## E as DUAS MALHAS, que chegaram na WTE-TASK-29
+
+O mesmo formulario tem duas grades de marcador: a `malla1`, com quatro colunas
+de `simbolo`, e a `malla2`, com seis de `tirador`. Clicar numa delas escolhe a
+coluna pelo X e move o marcador daquela coluna para a linha do Y.
+
+Elas moram aqui, e nao num gerador proprio, porque sao **geometria do mesmo
+formulario** e a conferencia usa as mesmas duas fontes: o `.text`, que da os
+tres numeros, e o `.lfm`, que da as coordenadas dos marcadores. Um gerador novo
+duplicaria a leitura do PE e a do formulario para decodificar tres imediatos.
+
+Os tres numeros de cada handler saem de padroes curtos:
+
+    mov ecx,IMM ; cdq ; idiv ecx        ' a largura da coluna
+    sar ecx,N   ; shl ecx,N             ' o passo da linha, 1 shl N
+    add edx,IMM                         ' a folga do marcador dentro da malha
+    mov eax,VA                          ' o prefixo do nome (`simbolo`/`tirador`)
+
+E a conferencia cruzada e o que da valor a eles -- **o `.lfm` tem de concordar
+nas quatro contas**:
+
+1. `malla.Width div largura_da_coluna` = quantos marcadores existem;
+2. `marcador1.Left` = `malla.Left + folga`;
+3. `marcador1.Top` = `malla.Top + folga`;
+4. o passo de `Left` entre marcadores vizinhos = a largura da coluna.
+
+Uma folga lida errada quebra as duas do meio; uma largura de coluna errada
+quebra a primeira e a quarta. E as duas fontes sao independentes: uma e o
+codigo de 2002, a outra e o formulario de 2002.
+
 Uso:
 
     python3 wte/tools/dump_zonas.py            # regenera
@@ -71,6 +101,7 @@ GERADOR = "wte/tools/dump_zonas.py"
 
 TSV_NAME = "zonas.tsv"
 MD_NAME = "zonas.md"
+MALHAS_TSV_NAME = "malhas.tsv"
 
 # `estrategia.FormCreate`, do published_methods.tsv. O fim e o inicio do
 # handler seguinte na mesma unidade (`rectanguloDragOver`).
@@ -82,6 +113,15 @@ CAMPOS = 4                 # x1, y1, x2, y2
 PASSO = CAMPOS * 4         # 16 bytes por registro
 
 LFM = "wte/forms/ep2002_estrategia.lfm"
+CAMPOS_TSV = "wte/re/campos.tsv"
+
+# As duas malhas: (handler, inicio, fim, campo do formulario, prefixo esperado).
+# O `fim` de cada uma e o inicio do corpo seguinte -- o da `malla2` e a rotina
+# interna `0x0040a0b4`, que nao e handler publicado e por isso nao esta no TSV.
+MALHAS = (
+    ("malla1MouseDown", 0x00409F4C, 0x0040A000, "malla1", "simbolo"),
+    ("malla2MouseDown", 0x0040A000, 0x0040A0B4, "malla2", "tirador"),
+)
 
 # Os tres registradores que o compilador usa como ponteiro auxiliar, e o byte
 # de ModRM de `mov DWORD PTR [reg],imm32` para cada um.
@@ -185,6 +225,187 @@ def campo() -> tuple[int, int]:
     return int(largura.group(1)), int(altura.group(1))
 
 
+# ------------------------------------------------------- as duas malhas ----
+
+def _shapes(prefixo: str) -> list[tuple[int, int, int]]:
+    """Os `TShape` chamados `<prefixo><n>`, como (n, Left, Top), ordenados.
+
+    O `.lfm` NAO os declara em ordem -- `simbolo3` vem antes do `simbolo1` --,
+    e ler na ordem do arquivo daria passo negativo na primeira conta.
+    """
+    texto = (ROOT / LFM).read_text(encoding="utf-8", errors="replace")
+    saida = []
+    for m in re.finditer(
+            rf"^  object {prefixo}(\d+): TShape$(.*?)^  (?:object|end)",
+            texto, re.MULTILINE | re.DOTALL):
+        esq = re.search(r"^\s*Left = (-?\d+)", m.group(2), re.MULTILINE)
+        topo = re.search(r"^\s*Top = (-?\d+)", m.group(2), re.MULTILINE)
+        if not esq or not topo:
+            raise DumpError(f"{LFM}: {prefixo}{m.group(1)} sem Left/Top")
+        saida.append((int(m.group(1)), int(esq.group(1)), int(topo.group(1))))
+    if not saida:
+        raise DumpError(f"{LFM}: nenhum `{prefixo}N: TShape`")
+    return sorted(saida)
+
+
+def _imagem(nome: str) -> tuple[int, int, int, int]:
+    """Left, Top, Width, Height do `TImage` de nome dado, do `.lfm`."""
+    texto = (ROOT / LFM).read_text(encoding="utf-8", errors="replace")
+    m = re.search(rf"^  object {nome}: TImage$(.*?)^  object ", texto,
+                  re.MULTILINE | re.DOTALL)
+    if not m:
+        raise DumpError(f"{LFM}: nao achei o objeto `{nome}`")
+    vals = []
+    for prop in ("Left", "Top", "Width", "Height"):
+        achado = re.search(rf"^\s*{prop} = (-?\d+)", m.group(1), re.MULTILINE)
+        if not achado:
+            raise DumpError(f"{LFM}: `{nome}` sem {prop}")
+        vals.append(int(achado.group(1)))
+    return tuple(vals)
+
+
+def _campo_por_offset(offset: int) -> str:
+    """O nome do campo do `estrategia` naquele deslocamento, do campos.tsv.
+
+    A terceira fonte: o `.text` diz `[esi+0x384]` e nao diz de quem, e contar
+    componentes na ordem do `.dfm` ja deu o resultado oposto ao certo noutro
+    formulario. A *published field table* e quem decide.
+    """
+    for linha in (ROOT / CAMPOS_TSV).read_text(encoding="utf-8").splitlines()[1:]:
+        form, desl, campo, _classe = linha.split("\t")
+        if form == "estrategia" and int(desl, 16) == offset:
+            return campo
+    raise DumpError(f"{CAMPOS_TSV}: estrategia nao tem campo em {offset:#06x}")
+
+
+def _acha(corpo: bytes, padrao: bytes, o_que: str, handler: str) -> int:
+    i = corpo.find(padrao)
+    if i < 0:
+        raise DumpError(f"{REL_EXE}: {handler} sem {o_que} "
+                        f"({padrao.hex()}) -- a afirmacao caducou")
+    if corpo.find(padrao, i + 1) >= 0:
+        raise DumpError(f"{REL_EXE}: {handler} tem {o_que} mais de uma vez; "
+                        f"o decodificador leria a errada")
+    return i
+
+
+def _cadeia_carregada(pe: PE, corpo: bytes, handler: str) -> tuple[int, str]:
+    """O unico `mov eax,imm32` do corpo cujo destino e uma cadeia imprimivel."""
+    achados = []
+    for i in range(len(corpo) - 5):
+        if corpo[i] != 0xB8:
+            continue
+        va = _u32(corpo, i + 1)
+        off = pe.off(va)
+        if off is None:
+            continue
+        bruto = pe.data[off:off + 33].split(b"\x00")[0]
+        if not 1 <= len(bruto) <= 32:
+            continue
+        if not all(0x20 <= c < 0x7F for c in bruto):
+            continue
+        achados.append((va, bruto.decode("latin-1")))
+    unicos = sorted(set(achados))
+    if len(unicos) != 1:
+        raise DumpError(
+            f"{REL_EXE}: {handler}: {len(unicos)} `mov eax,imm32` apontando "
+            f"para cadeia ({[c for _v, c in unicos]}) -- esperava exatamente um")
+    return unicos[0]
+
+
+def malha(pe: PE, handler: str, ini: int, fim: int, campo_esperado: str,
+          prefixo_esperado: str) -> dict:
+    """Os tres numeros e o prefixo de um dos dois `mallaNMouseDown`."""
+    a, b = pe.off(ini), pe.off(fim)
+    if a is None or b is None:
+        raise DumpError(f"{REL_EXE}: {ini:#010x}..{fim:#010x} fora de secao")
+    corpo = pe.data[a:b]
+
+    # `mov ecx,IMM32 ; cdq ; idiv ecx` -- a largura da coluna.
+    i = _acha(corpo, b"\x99\xf7\xf9", "o `cdq ; idiv ecx`", handler)
+    if i < 5 or corpo[i - 5] != 0xB9:
+        raise DumpError(f"{REL_EXE}: {handler}: o divisor nao vem de um "
+                        f"`mov ecx,imm32` imediatamente antes do `idiv`")
+    coluna = _u32(corpo, i - 4)
+
+    # `sar ecx,N` e `shl ecx,N` -- o passo da linha e `1 shl N`, e os dois
+    # deslocamentos tem de ser o MESMO: um snap que descesse e subisse por
+    # valores diferentes nao seria snap.
+    i = _acha(corpo, b"\xc1\xf9", "o `sar ecx,N`", handler)
+    j = _acha(corpo, b"\xc1\xe1", "o `shl ecx,N`", handler)
+    if corpo[i + 2] != corpo[j + 2]:
+        raise DumpError(f"{REL_EXE}: {handler}: `sar {corpo[i + 2]}` contra "
+                        f"`shl {corpo[j + 2]}` -- nao e arredondamento")
+    linha = 1 << corpo[i + 2]
+
+    # `add edx,IMM8` -- a folga do marcador dentro da malha.
+    i = _acha(corpo, b"\x83\xc2", "o `add edx,imm8` da folga", handler)
+    folga = _i8(corpo[i + 2])
+
+    # `mov eax,VA` -- o prefixo do nome, e ele fica no `.data`.
+    #
+    # O corpo tem DOIS `mov eax,imm32`: o primeiro carrega o registro de
+    # excecao que o prologo do C++Builder instala, e so o segundo e cadeia. O
+    # filtro nao e a ordem -- e o que esta no destino: um e zero, o outro e
+    # texto imprimivel terminado em NUL. Filtrar por ordem quebraria no dia em
+    # que o prologo mudasse; filtrar pelo conteudo diz o que se procura.
+    va, prefixo = _cadeia_carregada(pe, corpo, handler)
+    if prefixo != prefixo_esperado:
+        raise DumpError(f"{REL_EXE}: {handler}: prefixo `{prefixo}` em "
+                        f"{va:#010x}, esperava `{prefixo_esperado}`")
+
+    # `mov ecx,[esi+DISP32]` -- de qual `TImage` sai o `Top` de referencia.
+    i = _acha(corpo, b"\x8b\x8e", "o `mov ecx,[esi+disp32]` da malha", handler)
+    campo_nome = _campo_por_offset(_u32(corpo, i + 2))
+    if campo_nome != campo_esperado:
+        raise DumpError(f"{REL_EXE}: {handler}: le o Top de `{campo_nome}`, "
+                        f"esperava `{campo_esperado}`")
+
+    # `mov edx,[ecx+0x44]` -- e o campo lido e mesmo o `Top` do `TControl`.
+    _acha(corpo, b"\x8b\x51\x44", "o `mov edx,[ecx+0x44]` (TControl.FTop)",
+          handler)
+    # `inc edx ; call` -- a base UM do sufixo do nome.
+    _acha(corpo, b"\x42\xe8", "o `inc edx` da base um", handler)
+
+    return {"handler": handler, "endereco": ini, "bytes": fim - ini,
+            "campo": campo_nome, "prefixo": prefixo, "coluna": coluna,
+            "linha": linha, "folga": folga}
+
+
+def confere_malhas(malhas: list[dict]) -> list[dict]:
+    """As quatro contas contra o `.lfm` -- a segunda fonte."""
+    for m in malhas:
+        esq, topo, larg, alt = _imagem(m["campo"])
+        shapes = _shapes(m["prefixo"])
+        m["colunas"] = larg // m["coluna"]
+        m["linhas"] = alt // m["linha"]
+        if len(shapes) != m["colunas"]:
+            raise DumpError(
+                f"{m['handler']}: {larg} div {m['coluna']} = {m['colunas']} "
+                f"coluna(s), mas o {LFM} tem {len(shapes)} `{m['prefixo']}N`")
+        if [n for n, _e, _t in shapes] != list(range(1, len(shapes) + 1)):
+            raise DumpError(f"{LFM}: os `{m['prefixo']}N` nao sao 1..N")
+        if shapes[0][1] != esq + m["folga"]:
+            raise DumpError(
+                f"{m['handler']}: {m['prefixo']}1.Left = {shapes[0][1]}, mas "
+                f"{m['campo']}.Left + folga = {esq} + {m['folga']}")
+        if shapes[0][2] != topo + m["folga"]:
+            raise DumpError(
+                f"{m['handler']}: {m['prefixo']}1.Top = {shapes[0][2]}, mas "
+                f"{m['campo']}.Top + folga = {topo} + {m['folga']}")
+        passos = {b[1] - a[1] for a, b in zip(shapes, shapes[1:])}
+        if passos != {m["coluna"]}:
+            raise DumpError(
+                f"{m['handler']}: os `{m['prefixo']}N` andam {sorted(passos)} "
+                f"px em Left, e a coluna do `.text` mede {m['coluna']}")
+    passos = {(m["coluna"], m["linha"], m["folga"]) for m in malhas}
+    if len(passos) != 1:
+        raise DumpError(
+            "as duas malhas usam constantes diferentes "
+            f"{sorted(passos)} -- o Pascal as emite uma vez so")
+    return malhas
+
+
 def confere(escrito: dict[int, int]) -> list[tuple[int, int, int, int]]:
     if not escrito:
         raise DumpError(f"{REL_EXE}: nenhuma escrita na tabela de zonas")
@@ -225,7 +446,18 @@ def tsv(zonas) -> str:
     return "\n".join(linhas) + "\n"
 
 
-def pascal(zonas) -> str:
+def tsv_malhas(malhas) -> str:
+    linhas = ["handler\tendereco\tmalha\tprefixo\tcolunas\tlinhas"
+              "\tpasso_x\tpasso_y\tfolga"]
+    for m in malhas:
+        linhas.append(
+            f"{m['handler']}\t0x{m['endereco']:08x}\t{m['campo']}"
+            f"\t{m['prefixo']}\t{m['colunas']}\t{m['linhas']}"
+            f"\t{m['coluna']}\t{m['linha']}\t{m['folga']}")
+    return "\n".join(linhas) + "\n"
+
+
+def pascal(zonas, malhas) -> str:
     corpo = [
         "{ wte_zonas -- os retangulos em que cada bola do campinho pode ser",
         "  solta.",
@@ -241,7 +473,13 @@ def pascal(zonas) -> str:
         "",
         "  O indice NAO e o numero da bola: e a zona que a formacao escolhida",
         "  atribuiu aquela bola. O vetor bola->zona e outro, e quem o preenche e",
-        "  o `estrategia.lista_formacionesClick`. }",
+        "  o `estrategia.lista_formacionesClick`.",
+        "",
+        "  E as DUAS MALHAS do mesmo formulario, que sao geometria e nao",
+        "  tabela: quatro colunas de `simbolo` e seis de `tirador`. Cada",
+        "  numero foi conferido contra o `.lfm` -- a largura da malha dividida",
+        "  pelo passo tem de dar a contagem de marcadores, e o primeiro deles",
+        "  tem de estar na folga a partir do canto da malha. }",
         "unit wte_zonas;",
         "",
         "{$mode objfpc}{$H+}",
@@ -261,14 +499,106 @@ def pascal(zonas) -> str:
     for i, (x1, y1, x2, y2) in enumerate(zonas):
         virgula = "," if i < len(zonas) - 1 else ""
         corpo.append(f"    (x1: {x1}; y1: {y1}; x2: {x2}; y2: {y2}){virgula}")
+    corpo += ["  );", ""]
+
+    # As tres constantes sao as MESMAS nas duas malhas -- o `confere_malhas`
+    # aborta se deixarem de ser --, e por isso saem uma vez so.
+    ref = malhas[0]
     corpo += [
-        "  );",
+        "  { A grade dos marcadores. `MALHA_PASSO_X` e a largura de uma",
+        "    coluna; `MALHA_PASSO_Y` e a altura de uma linha, e ela sai do",
+        "    deslocamento do `sar`/`shl` e nao de um imediato; `MALHA_FOLGA` e",
+        "    o quanto o marcador recua do canto da malha. Os tres sao iguais",
+        "    nas duas malhas, e o gerador aborta se deixarem de ser. }",
+        f"  MALHA_PASSO_X = {ref['coluna']};",
+        f"  MALHA_PASSO_Y = {ref['linha']};",
+        f"  MALHA_FOLGA = {ref['folga']};",
         "",
+    ]
+    for m in malhas:
+        corpo += [
+            f"  {{ {m['handler']} -- {m['endereco']:#010x}, sobre a "
+            f"`{m['campo']}`. }}",
+            f"  {m['prefixo'].upper()}_PREFIXO = '{m['prefixo']}';",
+            f"  {m['prefixo'].upper()}_COLUNAS = {m['colunas']};",
+            "",
+        ]
+    corpo += [
         "implementation",
         "",
         "end.",
     ]
     return "\n".join(corpo) + "\n"
+
+
+def md_malhas(malhas) -> list[str]:
+    ref = malhas[0]
+    linhas = [
+        "",
+        "## As duas malhas de marcador — `malla1MouseDown` e `malla2MouseDown`",
+        "",
+        "*(WTE-TASK-29)* O mesmo formulário tem duas grades. Clicar numa delas",
+        "**escolhe a coluna pelo X e move o marcador daquela coluna para a",
+        "linha do Y** — o `Left` de cada marcador é fixo, quem anda é o `Top`.",
+        "",
+        f"O passo é `{ref['coluna']}` px na horizontal e `{ref['linha']}` na",
+        f"vertical, e a folga do marcador é `{ref['folga']}` px. **Os três são",
+        "os mesmos nas duas malhas**, e este gerador aborta se deixarem de ser.",
+        "",
+        "| handler | endereço | malha | prefixo | colunas | linhas |",
+        "|---|---|---|---|---:|---:|",
+    ]
+    for m in malhas:
+        linhas.append(
+            f"| `{m['handler']}` | `{m['endereco']:#010x}` | `{m['campo']}` | "
+            f"`{m['prefixo']}N` | {m['colunas']} | {m['linhas']} |")
+    linhas += [
+        "",
+        "### As quatro contas que o `.lfm` confere",
+        "",
+        "Os três números saem do `.text`; as coordenadas dos marcadores saem do",
+        "formulário. As duas fontes são independentes — uma é o código de 2002,",
+        "a outra é o formulário de 2002 — e têm de concordar em quatro pontos:",
+        "",
+    ]
+    for m in malhas:
+        esq, topo, larg, alt = _imagem(m["campo"])
+        shapes = _shapes(m["prefixo"])
+        linhas += [
+            f"**`{m['campo']}`** — {larg}×{alt} px em ({esq}, {topo}):",
+            "",
+            f"1. `{larg} div {m['coluna']}` = **{m['colunas']}**, e o `.lfm` "
+            f"declara {len(shapes)} `{m['prefixo']}N`;",
+            f"2. `{m['prefixo']}1.Left` = {shapes[0][1]} = "
+            f"`{esq} + {m['folga']}`;",
+            f"3. `{m['prefixo']}1.Top` = {shapes[0][2]} = "
+            f"`{topo} + {m['folga']}`;",
+            f"4. os marcadores andam {shapes[1][1] - shapes[0][1]} px em "
+            f"`Left`, que é o passo lido do `.text`.",
+            "",
+        ]
+    linhas += [
+        "Uma folga lida errada quebra as duas do meio; um passo errado quebra a",
+        "primeira e a quarta.",
+        "",
+        "### O que eles **não** fazem",
+        "",
+        "Nenhum dos dois toca a imagem de CD, e nenhum dos dois lê dado. São "
+        + " e ".join(str(m["bytes"]) for m in malhas)
+        + " bytes de geometria:",
+        "dividir, achar o marcador pelo nome, escrever `Top`.",
+        "Quem lê a posição de volta é o `estrategia.BitBtn3Click`",
+        "(`0x0040a660`), que é da",
+        "[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md); quem a",
+        "escreve a partir do dado é a rotina interna `0x0040a0b4`. **Este par é",
+        "só a metade de entrada do caminho.**",
+        "",
+        "E só o botão esquerdo faz alguma coisa: o original testa `cl` na",
+        "entrada e sai sem fazer nada — sem limpar estado — para qualquer outro,",
+        "como o `bolaMouseDown` faz.",
+        "",
+    ]
+    return linhas
 
 
 def md(zonas) -> str:
@@ -335,10 +665,12 @@ def gera() -> dict[Path, str]:
             f"repositorio -- ver o CLAUDE.md.")
     pe = PE(EXE.read_bytes(), REL_EXE)
     zonas = confere(varre(pe))
+    malhas = confere_malhas([malha(pe, *m) for m in MALHAS])
     return {
         OUT_RE / TSV_NAME: tsv(zonas),
-        OUT_RE / MD_NAME: md(zonas),
-        OUT_PAS: pascal(zonas),
+        OUT_RE / MALHAS_TSV_NAME: tsv_malhas(malhas),
+        OUT_RE / MD_NAME: md(zonas) + "\n".join(md_malhas(malhas)),
+        OUT_PAS: pascal(zonas, malhas),
     }
 
 

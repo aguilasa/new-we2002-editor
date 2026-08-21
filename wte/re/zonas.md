@@ -52,3 +52,55 @@ vetor bola→zona é o `estrategia.lista_formacionesClick`.
 
 A largura desenhada é `x2 - x1 + 1`, não `x2 - x1`. O `+ 1` é do
 original e está reproduzido.
+
+## As duas malhas de marcador — `malla1MouseDown` e `malla2MouseDown`
+
+*(WTE-TASK-29)* O mesmo formulário tem duas grades. Clicar numa delas
+**escolhe a coluna pelo X e move o marcador daquela coluna para a
+linha do Y** — o `Left` de cada marcador é fixo, quem anda é o `Top`.
+
+O passo é `24` px na horizontal e `16` na
+vertical, e a folga do marcador é `3` px. **Os três são
+os mesmos nas duas malhas**, e este gerador aborta se deixarem de ser.
+
+| handler | endereço | malha | prefixo | colunas | linhas |
+|---|---|---|---|---:|---:|
+| `malla1MouseDown` | `0x00409f4c` | `malla1` | `simboloN` | 4 | 11 |
+| `malla2MouseDown` | `0x0040a000` | `malla2` | `tiradorN` | 6 | 11 |
+
+### As quatro contas que o `.lfm` confere
+
+Os três números saem do `.text`; as coordenadas dos marcadores saem do
+formulário. As duas fontes são independentes — uma é o código de 2002,
+a outra é o formulário de 2002 — e têm de concordar em quatro pontos:
+
+**`malla1`** — 96×176 px em (144, 312):
+
+1. `96 div 24` = **4**, e o `.lfm` declara 4 `simboloN`;
+2. `simbolo1.Left` = 147 = `144 + 3`;
+3. `simbolo1.Top` = 315 = `312 + 3`;
+4. os marcadores andam 24 px em `Left`, que é o passo lido do `.text`.
+
+**`malla2`** — 144×176 px em (368, 312):
+
+1. `144 div 24` = **6**, e o `.lfm` declara 6 `tiradorN`;
+2. `tirador1.Left` = 371 = `368 + 3`;
+3. `tirador1.Top` = 315 = `312 + 3`;
+4. os marcadores andam 24 px em `Left`, que é o passo lido do `.text`.
+
+Uma folga lida errada quebra as duas do meio; um passo errado quebra a
+primeira e a quarta.
+
+### O que eles **não** fazem
+
+Nenhum dos dois toca a imagem de CD, e nenhum dos dois lê dado. São 180 e 180 bytes de geometria:
+dividir, achar o marcador pelo nome, escrever `Top`.
+Quem lê a posição de volta é o `estrategia.BitBtn3Click`
+(`0x0040a660`), que é da
+[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md); quem a
+escreve a partir do dado é a rotina interna `0x0040a0b4`. **Este par é
+só a metade de entrada do caminho.**
+
+E só o botão esquerdo faz alguma coisa: o original testa `cl` na
+entrada e sai sem fazer nada — sem limpar estado — para qualquer outro,
+como o `bolaMouseDown` faz.

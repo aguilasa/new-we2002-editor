@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 44 |
+| `implementado` | 46 |
 | `trivial` | 14 |
 | `divergencia deliberada` | 2 |
 | `nao portado` | 0 |
-| `aberto` | 36 |
+| `aberto` | 34 |
 | **total** | **96** |
 
-75 de 96 têm arquivo de spec.
+77 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -85,8 +85,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x004097a4` | `estrategia` | [bolaEndDrag](estrategia.bolaEndDrag.md) | OnEndDrag x10 | edicao | implementado |
 | `0x00409aa0` | `estrategia` | [lista_formacionesClick](estrategia.lista_formacionesClick.md) | OnClick | carga | implementado |
 | `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | aberto |
-| `0x00409f4c` | `estrategia` | malla1MouseDown | OnMouseDown | edicao | aberto |
-| `0x0040a000` | `estrategia` | malla2MouseDown | OnMouseDown | edicao | aberto |
+| `0x00409f4c` | `estrategia` | [malla1MouseDown](estrategia.malla1MouseDown.md) | OnMouseDown | edicao | implementado |
+| `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a658` | `estrategia` | BitBtn1Click | OnClick | auxiliar | aberto |
 | `0x0040a660` | `estrategia` | BitBtn3Click | OnClick | auxiliar | aberto |
 | `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |

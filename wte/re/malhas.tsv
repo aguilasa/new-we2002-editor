@@ -1,0 +1,3 @@
+handler	endereco	malha	prefixo	colunas	linhas	passo_x	passo_y	folga
+malla1MouseDown	0x00409f4c	malla1	simbolo	4	11	24	16	3
+malla2MouseDown	0x0040a000	malla2	tirador	6	11	24	16	3

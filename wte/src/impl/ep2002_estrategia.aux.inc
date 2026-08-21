@@ -315,3 +315,57 @@ begin
       rotulo.Caption := POSICOES[papel];
   end;
 end;
+
+{ MoveMarcadorDaMalha -- o corpo comum dos dois `mallaNMouseDown`
+  (`0x00409f4c` e `0x0040a000`), WTE-TASK-29.
+
+  O original NAO fatorou: os 180 bytes de cada handler sao a mesma sequencia de
+  instrucoes com dois imediatos diferentes -- o endereco da cadeia de prefixo e
+  o deslocamento do campo da `TImage`. Aqui os dois chamam esta rotina, e a
+  diferenca fica nos argumentos.
+
+  O QUE ELA FAZ: o X escolhe a COLUNA, o Y escolhe a LINHA.
+
+      indice := X div MALHA_PASSO_X + 1
+      <prefixo><indice>.Top := malha.Top
+                             + (Y div MALHA_PASSO_Y) * MALHA_PASSO_Y
+                             + MALHA_FOLGA
+
+  O `Left` do marcador nao e tocado: ele ja esta na coluna certa desde o `.dfm`,
+  e e por isso que o `indice` sai do X em vez de o marcador ser movido para ele.
+
+  QUAL DOS DOIS E O X CUSTOU UMA CONFERENCIA. Na convencao da Borland o
+  `Self`, o `Sender` e o `Button` vao em EAX, EDX e CL, e o `Shift`, o `X` e o
+  `Y` sobram na pilha -- com o `X` em `[ebp+0xc]` e o `Y` em `[ebp+0x8]`. Quem
+  decide isso nao e este handler: e o `bolaMouseDown`, que guarda os dois num
+  `TPoint` global (`0x0043434c`) e assim diz qual e qual. Trocados, o handler
+  compila, roda, e move o marcador errado para a altura errada.
+
+  A DIVISAO E TRUNCADA PARA ZERO nos dois casos, como a do original: o `idiv`
+  do X ja e assim, e o snap do Y e `sar`/`shl` com o `+ (passo - 1)` de fixup
+  antes do deslocamento -- que e o que o Pascal escreve com `div`. Com X e Y
+  sempre positivos dentro da imagem os dois ramos coincidem; o fixup existe no
+  binario e nao se ve na tela.
+
+  O GUARDA DE FAIXA NAO E DO ORIGINAL, e a diferenca e de comportamento
+  indefinido contra comportamento: o `FindComponent` do original devolveria nulo
+  para um indice fora de `1..colunas` e o `SetTop` seguinte cairia com `this`
+  nulo. Como o clique chega em coordenada de cliente da propria `TImage`, o
+  indice so sai da faixa se o widgetset entregar X fora dela -- e um port que
+  travasse ali estaria reproduzindo um modo de falha, nao um comportamento. }
+procedure MoveMarcadorDaMalha(const prefixo: string; colunas: Integer;
+                              malha: TImage; X, Y: Integer);
+var
+  indice: Integer;
+  c: TComponent;
+begin
+  indice := X div MALHA_PASSO_X + 1;
+  if (indice < 1) or (indice > colunas) then
+    Exit;
+  c := estrategia.FindComponent(prefixo + IntToStr(indice));
+  if not (c is TControl) then
+    Exit;
+  TControl(c).Top := malha.Top
+                     + (Y div MALHA_PASSO_Y) * MALHA_PASSO_Y
+                     + MALHA_FOLGA;
+end;

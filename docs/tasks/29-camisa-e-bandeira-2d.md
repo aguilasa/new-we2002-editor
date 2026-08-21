@@ -5,7 +5,7 @@ type: implementação
 category: features
 phase: 4
 depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-29: Render 2D
@@ -206,20 +206,23 @@ gravar **nesta imagem**:
       2026-08-21. E não por olho: os três `TImage` são **medidos**, porque ali
       não há fonte no meio — é o mesmo bitmap com a mesma paleta dos dois lados.
       Zero divergência nos três
-- [ ] **Os dois `malla` do `estrategia`, com veredito** — `malla1MouseDown`
-      (`0x00409f4c`) e `malla2MouseDown` (`0x0040a000`). Eles estão na tabela de
-      alvos desta task porque o `published_methods.tsv` os atribui a ela, e
-      **não são cor**: cada um acha `simbolo<Y div 24 + 1>` por nome e lhe dá
-      `Top := malla1.Top + (X div 16)*16 + 3`, que é geometria do campinho
-      tático. Medido na sexta passagem, não implementado — fechá-los pede régua
-      de tela para o `estrategia`, que é instrumento novo. **É o único item de
-      medida que falta**, e é o motivo de a task seguir `⬜ Pendente`
+- [x] **Os dois `malla` do `estrategia`, com veredito** — `malla1MouseDown`
+      (`0x00409f4c`) e `malla2MouseDown` (`0x0040a000`), os dois
+      `implementado`. Eles estão na tabela de alvos desta task porque o
+      `published_methods.tsv` os atribui a ela, e **não são cor**: o X escolhe a
+      coluna e o Y a linha, e o marcador daquela coluna desce para
+      `malla.Top + (Y div 16)*16 + 3`. Os três números saem do `.text` pelo
+      `dump_zonas.py`, que os confere contra o `.lfm` em quatro pontos por
+      malha; e o efeito do clique foi medido contra o oráculo pelo
+      `compara_tela.sh --malha`: **só a coluna clicada anda, e anda 80 px nos
+      dois lados**. Duas recusas vistas — X trocado por Y move o `simbolo4` em
+      16 px e deixa o `simbolo2` parado; sem o arredondamento o delta vira 88
 - [x] **Os 11 handlers de edição do `ficha_color`, com spec cada** — entraram na
       sexta passagem, com o `botonClick` completado de 2 para 5 movimentos. Os
       outros quatro do formulário (`BitBtn1..3Click`, `SpeedButton1Click`) são
       da [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) pela tabela "o que
       fica de fora" dela, que nomeia exatamente estes 11 como desta task
-- [ ] Commit no formato conventional, em inglês
+- [x] Commit no formato conventional, em inglês
 
 ### O critério de tela que veio da WTE-TASK-25
 
@@ -244,6 +247,107 @@ outra" e ninguém conferiria. As três rotinas envolvidas são `0x00405270`
 [`auxiliares.md`](../../wte/re/auxiliares.md), com tamanho e chamadores.
 
 ## Log de Execução
+
+### Sétima passagem, 2026-08-21 — **fecha**: as duas malhas do campinho
+
+A task passa a `✅ Concluído`. O que faltava era o par `malla` do `estrategia`,
+que o `published_methods.tsv` atribui aqui e que não é cor: é geometria.
+
+- **Resumo do que foi feito:**
+
+  **Os dois handlers são 180 bytes cada e a mesma sequência de instruções**, com
+  dois imediatos de diferença — a cadeia do prefixo (`"simbolo"` contra
+  `"tirador"`) e o campo da `TImage` (`[this+0x384]` contra `[this+0x398]`). O
+  original não fatorou; o port fatorou em `MoveMarcadorDaMalha`, e os dois
+  números que diferem entram por parâmetro.
+
+  **Os três números não foram digitados.** `24`, `16` e `3` saem do `.text` pelo
+  [`dump_zonas.py`](../../wte/tools/dump_zonas.py), que ganhou um decodificador
+  de malha, e vão para a `wte_zonas.pas` como `MALHA_PASSO_X`, `MALHA_PASSO_Y` e
+  `MALHA_FOLGA`. O que lhes dá valor não é a extração — é a **conferência contra
+  o `.lfm`**, que é outra fonte e tem de fechar em quatro pontos por malha:
+  `malla.Width div passo` = quantos marcadores existem, `marcador1.Left` =
+  `malla.Left + folga`, `marcador1.Top` = `malla.Top + folga`, e o passo de
+  `Left` entre marcadores vizinhos. Uma folga errada quebra as duas do meio; um
+  passo errado quebra a primeira e a quarta.
+
+  **E o `MALHA_PASSO_Y` não é um imediato:** ele sai do deslocamento do par
+  `sar ecx,N` / `shl ecx,N`, e o gerador exige que os dois `N` sejam iguais — um
+  arredondamento que descesse e subisse por valores diferentes não seria
+  arredondamento.
+
+  **A régua de tela virou modo versionado.** A primeira medição foi um script
+  descartável, e o número que ela produziu ia para documento — que é exatamente
+  a armadilha 11 do `progresso.md`. Virou `compara_tela.sh --malha`: leva os
+  dois lados ao mesmo time, abre o campinho, clica na coluna 2 linha 5 da
+  `malla1`, e compara o **delta** de cada um dos quatro marcadores.
+
+- **Duas coisas que a medição de tela ensinou, e nenhuma se via no
+  disassembly:**
+
+  1. **A janela do campinho não se acha pelo nome.** O `.dfm` diz
+     `Caption = 'Estrategia'`, e o oráculo o reescreve no arranque com o nome do
+     time em Shift-JIS — sob Wine o título sai `'   ?????'`. O port mantém o do
+     formulário. Achar por nome funcionaria de um lado só, que é pior do que não
+     funcionar de nenhum; os dois são achados pelo **tamanho**, como o
+     `roteiro.sh` já faz com a janela principal.
+  2. **As posições de partida divergem, e comparar posição mediria outra
+     task.** O oráculo carrega a posição de cada marcador da imagem (a rotina
+     interna `0x0040a0b4`, não portada) e o port deixa os quatro no default do
+     `.dfm` — no time 2 o oráculo mostra `316/380/460` e o `simbolo1` nem
+     aparece dentro da malha. **O handler não lê a posição corrente**, ele a
+     calcula a partir do `Top` da malha, então o delta é comparável mesmo com
+     pontos de partida diferentes. A régua compara delta, e só exige presença da
+     coluna clicada.
+
+- **A conferência que decidiu qual parâmetro é o X.** Na convenção da Borland o
+  `Self`, o `Sender` e o `Button` vão em EAX, EDX e CL, e o `Shift`, o `X` e o
+  `Y` sobram na pilha. Quem diz qual é qual não é este handler: é o
+  `bolaMouseDown`, que guarda os dois num `TPoint` global (`0x0043434c`) e assim
+  fixa `[ebp+0xc]` como X e `[ebp+0x8]` como Y. Trocados, o handler compila,
+  roda e move o marcador errado para a altura errada — e foi a primeira das duas
+  mutações.
+
+- **Arquivos criados/modificados:**
+  - criados: `wte/src/impl/ep2002_estrategia.malla{1,2}MouseDown.inc`,
+    `wte/re/spec/estrategia.malla{1,2}MouseDown.md`, `wte/re/malhas.tsv`
+    (gerado)
+  - modificados: `wte/tools/dump_zonas.py` (o decodificador de malha e as
+    quatro conferências), `wte/tools/test_dump_zonas.py` (7 casos novos, cinco
+    deles recusas), `wte/src/impl/ep2002_estrategia.aux.inc`
+    (`MoveMarcadorDaMalha`), `wte/src/wte_zonas.pas` e `wte/re/zonas.md`
+    (gerados), `wte/src/ep2002_estrategia.pas` (gerado),
+    `wte/tools/compara_tela.{sh,py}` (o modo `--malha`),
+    `wte/re/spec/INDICE.md` e `wte/re/fase-2.md` (gerados),
+    `wte/tools/README.md`, a §4.4 do plano e o `progresso.md`
+
+- **Gates medidos nesta passagem:**
+
+  | gate | resultado |
+  |---|---|
+  | `compara_tela.sh --malha` | **só a coluna clicada anda, 80 px nos dois lados** |
+  | mutação: X trocado por Y | **recusa vista**: `simbolo4` anda 16, `simbolo2` fica parado |
+  | mutação: sem o arredondamento do Y | **recusa vista**: 88 px em vez de 80 |
+  | `dump_zonas.py --check` | verde; **cinco recusas** cobertas por teste (passo, folga, prefixo, constantes divergentes, ordem das guardas) |
+  | `golden-01-arranque` | controle e golden byte-idênticos |
+  | `golden-03-barras` | golden byte-idêntico |
+  | `make -C wte check` | exit 0 |
+  | `make -C wte test` | 695 testes, OK |
+  | `lazbuild wte/wte.lpi` | compila |
+
+  As specs saíram de 75 para **77 de 96**; os `aberto` caíram de 36 para 34.
+
+- **O que fica para outra task, com dono nomeado:** a rotina interna
+  `0x0040a0b4`, que carrega a posição dos marcadores da imagem, e o
+  `estrategia.BitBtn3Click` (`0x0040a660`), que a lê de volta — as duas metades
+  do caminho de dado que este par alimenta. As duas são da
+  [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md).
+
+- **Problemas encontrados:** um autoinfligido e caro. `git checkout` num
+  `.inc` **não commitado** não desfaz a mutação: apaga o arquivo inteiro de
+  volta ao `HEAD`, e o `MoveMarcadorDaMalha` sumiu junto. O sintoma foi o gate
+  continuar acusando a mutação já revertida. Para desfazer edição de arquivo
+  novo, `cp` da cópia de segurança — nunca `git checkout`.
 
 ### Sexta passagem, 2026-08-21 — **parcial**: o editor de cor edita, e a grade fecha
 

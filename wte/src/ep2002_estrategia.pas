@@ -214,21 +214,13 @@ procedure Testrategia.lista_formacionesClick(Sender: TObject);
 procedure Testrategia.relojTimer(Sender: TObject);
 {$I impl/ep2002_estrategia.relojTimer.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.malla1MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
-  REStub('estrategia.malla1MouseDown');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.malla1MouseDown.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.malla2MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
-begin
-  REStub('estrategia.malla2MouseDown');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.malla2MouseDown.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.BitBtn1Click(Sender: TObject);

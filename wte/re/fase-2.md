@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 22 | 2633 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 22 | 2648 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9401** |
-| Escrito à mão | 81 | 6392 |
-| **Total** | | **15793** |
+| **Gerado, subtotal** | | **9416** |
+| Escrito à mão | 83 | 6476 |
+| **Total** | | **15892** |
 
-**59.5% do Pascal da casca é saída de gerador.**
+**59.2% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -79,12 +79,14 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_dorsal.scroll_dorsalChange.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_enlaza.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_enlaza.FormShow.inc` | 14 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_estrategia.aux.inc` | 317 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_estrategia.aux.inc` | 371 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.bolaEndDrag.inc` | 13 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.bolaMouseDown.inc` | 47 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.bolaMouseMove.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.campoMouseMove.inc` | 17 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.lista_formacionesClick.inc` | 50 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_estrategia.malla1MouseDown.inc` | 19 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_estrategia.malla2MouseDown.inc` | 11 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.rectanguloDragDrop.inc` | 16 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.rectanguloDragOver.inc` | 25 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.relojTimer.inc` | 75 | corpo de handler, da spec (fase 4) |
@@ -145,7 +147,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 84.6% — e passa a medir bitmap, não geração de código.
+fração sobe para 84.4% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -164,14 +166,14 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_estrategia.pas` | 6 |
 | `src/ep2002_mainform.pas` | 6 |
 | `src/ep2002_jugador.pas` | 5 |
 | `src/ep2002_color.pas` | 4 |
+| `src/ep2002_estrategia.pas` | 4 |
 | `src/ep2002_about.pas` | 1 |
 | `src/ep2002_dorsal.pas` | 1 |
 | `src/ep2002_error.pas` | 1 |
-| _com corpo escrito_ | 72 |
+| _com corpo escrito_ | 74 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -214,6 +216,8 @@ das duas formas.
 - `estrategia.bolaMouseMove`
 - `estrategia.campoMouseMove`
 - `estrategia.lista_formacionesClick`
+- `estrategia.malla1MouseDown`
+- `estrategia.malla2MouseDown`
 - `estrategia.rectanguloDragDrop`
 - `estrategia.rectanguloDragOver`
 - `estrategia.relojTimer`

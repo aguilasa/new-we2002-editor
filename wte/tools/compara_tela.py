@@ -1056,6 +1056,118 @@ def main_grade(argv: list[str]) -> int:
     return rc
 
 
+# ------------------------------------------------- as duas malhas (29) --
+# `estrategia.malla1MouseDown` e o irmao: clicar numa grade escolhe a coluna
+# pelo X e move o marcador daquela coluna para a linha do Y.
+#
+# ## O que se compara e o DELTA, e nao a posicao
+#
+# As posicoes de partida dos marcadores DIVERGEM entre os dois lados, e isso e
+# esperado: quem as carrega da imagem e a rotina interna `0x0040a0b4`, que nao
+# foi portada -- o port deixa os quatro no default do `.dfm`. O handler nao le a
+# posicao corrente (ele a calcula a partir do `Top` da malha), entao o efeito do
+# clique e comparavel mesmo com pontos de partida diferentes. Comparar a posicao
+# absoluta mediria o carregador, que e outra task.
+#
+# ## Como o marcador e achado
+#
+# Pela COR DO PINCEL, que o `.dfm` fixa e nenhum widgetset negocia: `clLime`,
+# `clFuchsia`, `clBlue`, `clRed`. Procurar o primeiro pixel diferente do fundo
+# nao serve -- a `malla1` e um bitmap com linhas de grade, e a primeira
+# diferenca e uma delas.
+MALHA_LFM = Path(__file__).resolve().parents[1] / "forms/ep2002_estrategia.lfm"
+# (Left, Top, Width, Height) da `malla1`, e as cores dos quatro `simboloN`.
+# Lidos do `.lfm`, nao digitados -- ver `retangulos_do_lfm`.
+MALHA_MARCADORES = ("simbolo1", "simbolo2", "simbolo3", "simbolo4")
+MALHA_CORES = {"simbolo1": (0, 255, 0), "simbolo2": (255, 0, 255),
+               "simbolo3": (0, 0, 255), "simbolo4": (255, 0, 0)}
+# A coluna que o clique do `.sh` escolhe, e quantos pixels o marcador dela tem
+# de descer. Os dois saem da mesma conta que o handler faz, com o ponto de
+# clique do `.sh`: coluna `30 div 24 + 1 = 2`, degrau `(88 div 16) * 16 = 80`.
+MALHA_COLUNA_CLICADA = "simbolo2"
+MALHA_DEGRAU = 80
+
+
+def _topo_do_marcador(img, rect, cor):
+    """A linha mais alta em que a cor do pincel aparece dentro do retangulo."""
+    x, y, w, h = rect
+    regiao_ = img.crop((x, y, x + w, y + h)).convert("RGB")
+    px = regiao_.load()
+    for yy in range(regiao_.height):
+        for xx in range(regiao_.width):
+            if px[xx, yy] == cor:
+                return y + yy
+    return None
+
+
+def compara_malha(antes, depois, rotulo: str) -> dict:
+    """Onde cada `simboloN` estava e onde ficou, em coordenada da janela."""
+    rects = retangulos_do_lfm(("malla1",) + MALHA_MARCADORES, MALHA_LFM)
+    x, y, w, h = rects["malla1"]
+    saida = {}
+    for nome in MALHA_MARCADORES:
+        cor = MALHA_CORES[nome]
+        saida[nome] = {
+            "antes": _topo_do_marcador(antes, (x, y, w, h), cor),
+            "depois": _topo_do_marcador(depois, (x, y, w, h), cor),
+            "cor": cor,
+        }
+    return saida
+
+
+def relata_malha(oraculo: dict, port: dict, indice: int) -> int:
+    print(f"compara_tela: time {indice} -- a malha de marcadores do "
+          f"estrategia (clique na coluna 2, linha 5)")
+    erros = []
+    print("  marcador    oraculo antes/depois   port antes/depois   delta")
+    for nome in MALHA_MARCADORES:
+        o, p = oraculo[nome], port[nome]
+        do = None if None in (o["antes"], o["depois"]) else \
+            o["depois"] - o["antes"]
+        dp = None if None in (p["antes"], p["depois"]) else \
+            p["depois"] - p["antes"]
+        print(f"  {nome:<10}  {str(o['antes']):>5}/{str(o['depois']):<6}"
+              f"        {str(p['antes']):>5}/{str(p['depois']):<6}"
+              f"      {do} / {dp}")
+        esperado = MALHA_DEGRAU if nome == MALHA_COLUNA_CLICADA else 0
+        for lado, d, v in (("oraculo", do, o), ("port", dp, p)):
+            if v["antes"] is None:
+                # O oraculo carrega a posicao da imagem e pode deixar um
+                # marcador fora da malha; so a coluna CLICADA e obrigatoria.
+                if nome == MALHA_COLUNA_CLICADA:
+                    erros.append(f"{lado}/{nome}: nao esta na malha")
+                continue
+            if d != esperado:
+                erros.append(f"{lado}/{nome}: andou {d} px, esperava "
+                             f"{esperado}")
+    if erros:
+        for e in erros:
+            print("  " + e, file=sys.stderr)
+        print("DIVERGE na malha: " + "; ".join(erros), file=sys.stderr)
+        return 1
+    print(f"  PASSOU: so a coluna clicada andou, e andou {MALHA_DEGRAU} px nos "
+          f"dois lados")
+    return 0
+
+
+def main_malha(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(description="a malha do estrategia")
+    ap.add_argument("--indice", type=int, required=True)
+    ap.add_argument("--antes-oraculo", type=Path, required=True)
+    ap.add_argument("--antes-port", type=Path, required=True)
+    ap.add_argument("--oraculo", type=Path, required=True)
+    ap.add_argument("--port", type=Path, required=True)
+    args = ap.parse_args(argv)
+    try:
+        o = compara_malha(carrega(args.antes_oraculo), carrega(args.oraculo),
+                          "oraculo")
+        p = compara_malha(carrega(args.antes_port), carrega(args.port), "port")
+    except TelaError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    return relata_malha(o, p, args.indice)
+
+
 def main(argv: list[str]) -> int:
     if argv == ["--check"]:
         return autoteste()
@@ -1067,6 +1179,8 @@ def main(argv: list[str]) -> int:
         return main_cor(argv[1:])
     if argv[:1] == ["--grade"]:
         return main_grade(argv[1:])
+    if argv[:1] == ["--malha"]:
+        return main_malha(argv[1:])
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("oraculo", type=Path)
     ap.add_argument("port", type=Path)

@@ -18,6 +18,7 @@ import struct
 import unittest
 
 import dump_zonas as Z
+from dump_auxiliares import PE, DumpError
 
 REAL = Z.EXE.is_file()
 
@@ -161,6 +162,95 @@ class TestReal(unittest.TestCase):
         for i, (x1, y1, x2, y2) in enumerate(self.zonas):
             self.assertGreater(x2 - x1, 50, f"zona {i} estreita demais")
             self.assertGreater(y2 - y1, 50, f"zona {i} baixa demais")
+
+
+# --------------------------------------------------- as duas malhas (29) --
+# O decodificador das malhas lê três números do `.text`; o que lhes dá valor é
+# a conferência contra o `.lfm`, que é outra fonte. Estes casos plantam número
+# errado e exigem que a conferência recuse — sem eles, "os quatro pontos
+# fecham" é afirmação sobre um código que nunca foi visto recusar nada.
+
+
+def malha_falsa(**troca):
+    base = {"handler": "malla1MouseDown", "endereco": 0x00409F4C, "bytes": 180,
+            "campo": "malla1", "prefixo": "simbolo",
+            "coluna": 24, "linha": 16, "folga": 3}
+    base.update(troca)
+    return base
+
+
+@unittest.skipUnless(REAL, "precisa do .lfm do estrategia")
+class TestMalhas(unittest.TestCase):
+    def test_as_duas_fecham_como_estao(self):
+        m = Z.confere_malhas([malha_falsa(),
+                              malha_falsa(handler="malla2MouseDown",
+                                          endereco=0x0040A000,
+                                          campo="malla2", prefixo="tirador")])
+        self.assertEqual([x["colunas"] for x in m], [4, 6])
+        self.assertEqual({x["linhas"] for x in m}, {11})
+
+    def test_passo_errado_muda_a_contagem_de_colunas(self):
+        """96 div 16 daria 6 marcadores, e o `.lfm` só declara 4."""
+        with self.assertRaises(DumpError) as e:
+            Z.confere_malhas([malha_falsa(coluna=16)])
+        self.assertIn("simboloN", str(e.exception))
+
+    def test_folga_errada_desloca_o_primeiro_marcador(self):
+        with self.assertRaises(DumpError) as e:
+            Z.confere_malhas([malha_falsa(folga=2)])
+        self.assertIn("simbolo1.Left", str(e.exception))
+
+    def test_prefixo_trocado_nao_acha_marcador(self):
+        with self.assertRaises(DumpError) as e:
+            Z.confere_malhas([malha_falsa(prefixo="tirador")])
+        # 96 div 24 = 4, mas ha SEIS tiradorN -- a contagem denuncia antes de
+        # qualquer coordenada.
+        self.assertIn("tiradorN", str(e.exception))
+
+    def test_constantes_diferentes_entre_as_malhas_reprovam(self):
+        """O Pascal emite `MALHA_PASSO_*` uma vez só, e isso é uma afirmação.
+
+        A divergência plantada é no passo **vertical**, e tinha de ser: a
+        folga e o passo horizontal já são presos pelo `.lfm` em cada malha
+        separadamente, então uma diferença neles reprova antes, na conferência
+        de coordenada. O `.lfm` não diz nada sobre linhas — não há um `TShape`
+        por linha —, e é por isso que só esta guarda alcança o passo vertical.
+        """
+        with self.assertRaises(DumpError) as e:
+            Z.confere_malhas([
+                malha_falsa(),
+                malha_falsa(handler="malla2MouseDown", endereco=0x0040A000,
+                            campo="malla2", prefixo="tirador", linha=8)])
+        self.assertIn("constantes diferentes", str(e.exception))
+
+    def test_folga_diferente_reprova_antes_pela_coordenada(self):
+        """A ordem das duas guardas, escrita: a de coordenada vem primeiro."""
+        with self.assertRaises(DumpError) as e:
+            Z.confere_malhas([
+                malha_falsa(),
+                malha_falsa(handler="malla2MouseDown", endereco=0x0040A000,
+                            campo="malla2", prefixo="tirador", folga=4)])
+        self.assertIn("tirador1.Left", str(e.exception))
+
+
+@unittest.skipUnless(REAL, "we-team-editor/we-team-editor.exe nao esta no disco")
+class TestMalhasReais(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        pe = PE(Z.EXE.read_bytes(), Z.REL_EXE)
+        cls.malhas = Z.confere_malhas([Z.malha(pe, *m) for m in Z.MALHAS])
+
+    def test_os_tres_numeros_saem_do_exe(self):
+        for m in self.malhas:
+            self.assertEqual((m["coluna"], m["linha"], m["folga"]), (24, 16, 3))
+
+    def test_cada_malha_le_a_propria_imagem(self):
+        self.assertEqual([m["campo"] for m in self.malhas],
+                         ["malla1", "malla2"])
+
+    def test_os_prefixos_sao_os_do_formulario(self):
+        self.assertEqual([m["prefixo"] for m in self.malhas],
+                         ["simbolo", "tirador"])
 
 
 if __name__ == "__main__":
