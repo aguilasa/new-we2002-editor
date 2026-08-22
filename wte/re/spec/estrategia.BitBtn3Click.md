@@ -2,7 +2,7 @@
 handler: BitBtn3Click
 formulario: estrategia
 endereco: 0x0040a660
-veredito: aberto
+veredito: implementado
 ---
 
 # estrategia.BitBtn3Click
@@ -113,29 +113,39 @@ com pergunta. Fora isso, não trata.
 
 **Evidência:** disassembly lido
 
-## Justificativa do veredito `aberto`
+## Como o veredito fechou
 
-**É a oitava rota de escrita na imagem**, e a que grava a tática — o dado que a
-[`wte_formacoes`](../../src/wte_formacoes.pas) e a
-[`wte_zonas`](../../src/wte_zonas.pas) descrevem e que nenhum handler do port
-grava hoje. Ela precisa da mesma régua das outras: golden com controle, nas
-duas ROMs.
+Fechou pela [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), terceira e
+última das três gravações órfãs, com o par
+[`golden-17-tatica`](../../tests/roteiros/golden-17-tatica.txt) nos três modos
+do [`golden_check.sh`](../../tools/golden_check.sh): `controle` byte-idêntico,
+`positivo` detectando o byte plantado em 405228, `golden` byte-idêntico.
 
-**Dono: [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md)**, que a põe por **último** das três, justamente pelo
-pré-requisito abaixo.
+**Ele dependia de uma correção inteira, e ela veio antes.** A tela de tática do
+port não era enchida — a `0x0040A0B4` não tinha port —, e ler a posição de
+componentes que ninguém posicionou gravaria as coordenadas de tempo de projeto
+do `.lfm`. A [CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) portou a
+leitora e mediu a metade de tática desta spec, que dizia `não medido`.
 
-E precisa de mais uma coisa que não existe: **a tela de tática do port não é
-enchida** — a `0x0040A0B4` continua sem port, como a
-[`estrategia.BitBtn1Click`](estrategia.BitBtn1Click.md) registra. Gravar as
-posições dos componentes de uma tela que ninguém posicionou gravaria as
-coordenadas de tempo de projeto do `.lfm`. A ordem certa é encher primeiro.
+**A edição do roteiro é o clique na `malla1` que o `compara_tela.sh --malha` já
+media**, e a escolha tem um motivo negativo: clicar na lista de formações — que
+seria a edição mais visível — não serve, porque a altura de linha do `TListBox`
+não bate entre os dois widgetsets (~11 px sob Wine contra ~13 px no gtk2), e o
+mesmo `y` cairia em itens diferentes.
 
-**O pré-requisito virou correção própria em 2026-08-21:** a
-[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md), aberta quando a
-CORR-WTE-081 chegou aqui e mediu os dois buracos. **O segundo já fechou** — a
-seção *Bytes tocados* acima traz as cinco regiões e os 45 bytes, medidos. Falta
-o primeiro, que é a leitora: 1.443 bytes, dois chamadores `aberto`, e sem ela
-este handler leria da tela as coordenadas de tempo de projeto do `.lfm`.
+**O round-trip da tela é LOSSY, e isso apareceu no gate como igualdade.** O `Y`
+vai para a tela por `DestinoY = ((y - 3) div 2) * 5 - 7` e volta por
+`y = ((Top - campo.Top + 7) div 5) * 2 + 3`; a divisão por dois joga fora o bit
+baixo, e um `Y` ímpar volta um a menos. Medido no time 2: `32 52 72 17 87 50 30
+62 42 62` na imagem viram `31 51 71 17 87 49 29 61 41 61` depois de um
+` Accept` que não editou nenhuma bola — **nos dois lados**. O `X` é
+sem perda (`x*8 - 2` contra `(Left + 2) div 8`).
+
+**Os dois últimos bytes de tática não vêm da tela.** O byte 3 sai zero e o byte
+4 é `cobrador[0]`: o buffer de tática do original tem quatro bytes na pilha
+(`[ebp-0x58]`) e o de cobrador começa logo depois (`[ebp-0x54]`), e a gravação
+pede cinco. Medido: `[1, 14, 148, 56, 82]` na imagem vira `[1, 94, 148, 0, 7]`
+nos dois lados. A carga nunca lê esses dois de volta — ela lê quatro.
 
 ## Notas
 

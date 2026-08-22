@@ -11,3 +11,6 @@ retrace      # REMark
 wte_zonas    # ZONAS -- gerado por tools/dump_zonas.py
 wte_formacoes  # FORMACOES, POSICOES, PASSO_DA_ANIMACAO (CORR-WTE-062)
 wte_tatica     # a tela de tatica: estado da animacao e a carga (CORR-WTE-082)
+ep2002_warning_2  # ficha_warning_2.ShowModal, no BitBtn3Click (CORR-WTE-081)
+ep2002_error2   # ficha_error2.etiq1, na recusa de cores iguais
+we2002_estado   # TimeEmEdicao

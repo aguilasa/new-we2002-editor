@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 55 |
+| `implementado` | 56 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 2 |
 | `nao portado` | 1 |
-| `aberto` | 19 |
+| `aberto` | 18 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -88,7 +88,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409f4c` | `estrategia` | [malla1MouseDown](estrategia.malla1MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | implementado |
-| `0x0040a660` | `estrategia` | [BitBtn3Click](estrategia.BitBtn3Click.md) | OnClick | auxiliar | aberto |
+| `0x0040a660` | `estrategia` | [BitBtn3Click](estrategia.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
 | `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |

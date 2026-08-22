@@ -89,6 +89,21 @@ const
   { Os seis cobradores, e o mesmo `passo * valor + folga` dos marcadores. }
   TATICA_COBRADORES = 6;
 
+  { As dez bolas que andam -- `bola1`..`bola10`. O goleiro (`bola0`) nao entra
+    nem aqui nem no laco da animacao. }
+  TATICA_JOGADORES_EM_CAMPO = 10;
+
+  { As duas conversoes de pixel para celula, e elas sao o INVERSO exato do que
+    a `PreparaAnimacao` faz na ida:
+
+        DestinoX := x * 8 - 2  ->  x := (Left - campo.Left + 2) div 8
+        DestinoY := ((y - 3) div 2) * 5 - 7
+                               ->  y := ((Top - campo.Top + 7) div 5) * 2 + 3 }
+  TATICA_X_PASSO = 8;
+  TATICA_X_FOLGA = 2;
+  TATICA_Y_PASSO = 5;
+  TATICA_Y_FOLGA = 7;
+
   { O item que o formulario seleciona ao abrir: `DEFAULT`. }
   TATICA_ITEM_DEFAULT = 1;
 
@@ -157,6 +172,30 @@ var
   FormacaoEmVigor: TFormacao;
   FormacaoEmVigorValida: Boolean = False;
 
+
+{ GRAVA A TATICA NA IMAGEM -- a metade de escrita do `estrategia.BitBtn3Click`
+  (`0x0040a660`), CORR-WTE-081.
+
+  Cinco regioes, 45 bytes por time, e as tres ultimas NAO passam pela
+  `0x00403400`: o original chama `fseek` e `fputc` da RTL direto, um byte por
+  vez, com o teste de fronteira de setor escrito no proprio laco. Aqui as
+  cinco vao pelo `GravaNoFluxo`, que faz o mesmo salto -- o arquivo recebe os
+  mesmos bytes nos mesmos offsets, que e o que o gate compara.
+
+  A FORMACAO SAO TRES BLOCOS DE DEZ no mesmo indice logico (`+0`, `+10`,
+  `+20`), e o primeiro deles e o vetor de PAPEIS -- que ninguem edita na tela e
+  que vem da tatica viva. Os outros dois sao os X e os Y lidos dos componentes.
+
+  False quando nao ha imagem aberta ou o indice nao e time. }
+function GravaTaticaNaImagem(indice_do_time: Integer;
+                             const papel, x, y, cobrador, tatica): Boolean;
+
+{ Grava UMA cor de radar -- `qual` e 0 (casa) ou 1 (visitante), `item` e o
+  indice do combo, que indexa a tabela de oito de `0x00423624`.
+
+  So faz sentido para selecao: o original pula o bloco inteiro quando o indice
+  chega a 95. }
+function GravaCorDeRadar(indice_do_time, qual, item: Integer): Boolean;
 
 { ENCHE A TELA DE TATICA -- a `0x0040A0B4`, 1.443 bytes.
 
@@ -436,6 +475,87 @@ begin
     e 0 ou 4. Aqui a conta e a mesma, escrita como deslocamento sobre o par. }
   par := b0 or (b1 shl 8);
   Result := (par shr bit) and ((1 shl TATICA_MARCADOR_BITS) - 1);
+end;
+
+function GravaCorDeRadar(indice_do_time, qual, item: Integer): Boolean;
+var
+  img: TCdImage;
+  logico: TOffset;
+  par: array[0 .. 1] of Byte;
+  base: TOffset;
+begin
+  Result := False;
+  if ImagemAberta = '' then
+    Exit;
+  if (indice_do_time < 0) or (indice_do_time >= TATICA_TIMES_COM_TABELA) then
+    Exit;
+  if (item < 0) or (item >= CORES_DE_RADAR_TOTAL) then
+    Exit;
+  if qual = 0 then
+    base := TATICA_RADAR1_LOGICO
+  else
+    base := TATICA_RADAR2_LOGICO;
+  { O ORIGINAL NAO GRAVA O INDICE DO COMBO: ele passa o ENDERECO da entrada da
+    tabela como origem dos dois bytes (`0x00423624 + 2 * item`). O que vai para
+    a imagem e a palavra BGR555, e e por isso que a carga faz a busca inversa. }
+  par[0] := Byte(CORES_DE_RADAR[item] and $FF);
+  par[1] := Byte(CORES_DE_RADAR[item] shr 8);
+  logico := base + TATICA_RADAR_BYTES * indice_do_time;
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE, logico),
+                 par[0], TATICA_RADAR_BYTES);
+  finally
+    img.Close;
+  end;
+  Result := True;
+end;
+
+function GravaTaticaNaImagem(indice_do_time: Integer;
+                             const papel, x, y, cobrador, tatica): Boolean;
+var
+  img: TCdImage;
+  logico: TOffset;
+begin
+  Result := False;
+  if ImagemAberta = '' then
+    Exit;
+  if (indice_do_time < 0) or (indice_do_time > TATICA_TIMES_COM_TABELA) then
+    Exit;
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    logico := TATICA_FORMACAO_LOGICO
+              + TATICA_FORMACAO_PASSO * indice_do_time
+              + 2 * (indice_do_time div TATICA_TIMES_COM_TABELA);
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE, logico),
+                 papel, TATICA_FORMACAO_LINHA);
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE,
+                                      logico + TATICA_FORMACAO_LINHA),
+                 x, TATICA_FORMACAO_LINHA);
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE,
+                                      logico + 2 * TATICA_FORMACAO_LINHA),
+                 y, TATICA_FORMACAO_LINHA);
+
+    logico := TATICA_COBRADOR_LOGICO
+              + TATICA_COBRADOR_PASSO * indice_do_time
+              + 2 * (indice_do_time div TATICA_TIMES_COM_TABELA);
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE, logico),
+                 cobrador, TATICA_COBRADOR_PASSO);
+
+    { CINCO bytes, e a carga le QUATRO. A assimetria e do original. }
+    logico := TATICA_TATICA_LOGICO + TATICA_TATICA_PASSO * indice_do_time;
+    GravaNoFluxo(img, EnderecoDeDados(TATICA_SETOR_BASE, logico),
+                 tatica, TATICA_TATICA_PASSO);
+  finally
+    img.Close;
+  end;
+  Result := True;
 end;
 
 function CarregaTaticaDaImagem(indice_do_time: Integer): Boolean;

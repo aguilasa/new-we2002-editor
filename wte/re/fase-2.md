@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2688 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2705 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9456** |
-| Escrito à mão | 99 | 8027 |
-| **Total** | | **17483** |
+| **Gerado, subtotal** | | **9473** |
+| Escrito à mão | 100 | 8291 |
+| **Total** | | **17764** |
 
-**54.1% do Pascal da casca é saída de gerador.**
+**53.3% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -87,6 +87,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_enlaza.FormShow.inc` | 14 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_error.SpeedButton1Click.inc` | 14 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.BitBtn1Click.inc` | 21 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_estrategia.BitBtn3Click.inc` | 144 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.aux.inc` | 159 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.bolaEndDrag.inc` | 13 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_estrategia.bolaMouseDown.inc` | 47 | corpo de handler, da spec (fase 4) |
@@ -155,7 +156,7 @@ Escrito à mão, linha por linha:
 | `src/wte_cor.pas` | 668 | — |
 | `src/wte_ficha.pas` | 973 | — |
 | `src/wte_render2d.pas` | 434 | — |
-| `src/wte_tatica.pas` | 642 | — |
+| `src/wte_tatica.pas` | 762 | — |
 | `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 42 | programa principal (WTE-TASK-02) |
 
@@ -163,7 +164,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 81.4% — e passa a medir bitmap, não geração de código.
+fração sobe para 80.9% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -182,10 +183,10 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 
 | Unidade | Stubs |
 |---|---|
-| `src/ep2002_estrategia.pas` | 3 |
 | `src/ep2002_jugador.pas` | 3 |
+| `src/ep2002_estrategia.pas` | 2 |
 | `src/ep2002_mainform.pas` | 2 |
-| _com corpo escrito_ | 88 |
+| _com corpo escrito_ | 89 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -228,6 +229,7 @@ das duas formas.
 - `MainForm.sel_barraClick`
 - `MainForm.track_barraChange`
 - `estrategia.BitBtn1Click`
+- `estrategia.BitBtn3Click`
 - `estrategia.bolaEndDrag`
 - `estrategia.bolaMouseDown`
 - `estrategia.bolaMouseMove`

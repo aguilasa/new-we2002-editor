@@ -1,0 +1,100 @@
+# golden-17-tatica -- o gate do `estrategia.BitBtn3Click`, o ` Accept` da tela
+# de tatica. E a OITAVA rota de escrita na imagem, e a ultima das tres
+# gravacoes orfas.
+#
+# CORR-WTE-081, terceira de tres. Lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-17-tatica.txt \
+#        --roteiro-port wte/tests/roteiros/golden-17-tatica.port.txt
+#
+# ELE SO PODE EXISTIR DEPOIS DA CORR-WTE-082. O handler le a POSICAO dos
+# componentes da tela e a converte em celula da malha; ate a `0x0040A0B4` ser
+# portada, o port leria as coordenadas de tempo de projeto do `.lfm` e gravaria
+# 45 bytes plausiveis e errados.
+#
+# A EDICAO E UM CLIQUE NA `malla1`, e ela nao foi escolhida por comodidade: e
+# exatamente o clique que o `compara_tela.sh --malha` ja media nos dois lados
+# antes deste roteiro existir -- coluna 2, linha 5, com o `simbolo2` andando
+# 80 px em ambos. Um estimulo ja medido vale mais do que um estimulo novo.
+#
+# POR QUE NAO CLICAR NA LISTA DE FORMACOES, que seria a edicao mais visivel:
+# a altura de linha do `TListBox` NAO bate entre os dois widgetsets. Medido nas
+# capturas do `compara_tela.sh`: ~11 px sob Wine contra ~13 px no gtk2, o que
+# poe o mesmo `y` em itens diferentes. Clique por coordenada em lista so vale
+# quando a linha mede o mesmo dos dois lados.
+#
+# O QUE A CORRIDA GRAVA, por time: 30 bytes de formacao (10 de papel, 10 de X,
+# 10 de Y), 6 de cobrador, 5 de tatica e 2 + 2 de cor de radar -- 45 no total.
+# So os quatro bits do `simbolo2` mudam de valor nesta sequencia; os outros 44
+# bytes sao devolvidos como a tela os recebeu, e devolver o que se leu e
+# metade do que este gate julga.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ a tela de tatica ----
+#
+# GroupBox1 (8,320) + mostrar_estrategia_1 (8,40) = (16,360) -> (28,370).
+! clique 28 370
+~ 5
+
+# A janela mede os 529x498 do DFM nos dois lados. Busca por TAMANHO porque o
+# Caption vira o nome do time em Shift-JIS.
+>~ 529x498
+~ 1
+
+# `malla1` esta em (144,312) e mede 96x176; o ponto e a coluna 2 na linha 5.
+! clique 174 400
+~ 2
+
+# BitBtn6 ` Accept` (432,261) 81x25 -> centro (472,273).
+! clique 472 273
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ACCEPT
+
+# A descarga -- o `0x00403400` e o `fputc` do laco escrevem pela saida
+# bufferizada do runtime C, e so um `fseek` noutro ponto do mesmo arquivo a
+# esvazia.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

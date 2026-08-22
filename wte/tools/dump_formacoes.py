@@ -99,6 +99,13 @@ OUT_PAS = ROOT / "wte" / "src" / "wte_formacoes.pas"
 # seleciona. Por isso o que importa aqui e a ORDEM, nao o valor.
 VA_CORES_RADAR = 0x00423624
 CORES_RADAR_N = 8
+
+# Os dez PARES DE ITEM que o ` Accept` avisa antes de aceitar -- `0x00423F14`,
+# vinte dwords que o handler copia para a pilha no prologo. Nao sao cores: sao
+# indices dos dois combos, e o par (casa, visitante) que casar com um deles
+# abre o `ficha_warning_2` (CORR-WTE-081).
+VA_PARES_RADAR = 0x00423F14
+PARES_RADAR_N = 10
 LFM = ROOT / "wte" / "forms" / "ep2002_estrategia.lfm"
 ZONAS_PAS = ROOT / "wte" / "src" / "wte_zonas.pas"
 LEGENDAS_TSV = ROOT / "wte" / "re" / "legendas.tsv"
@@ -437,7 +444,15 @@ def cores_de_radar(pe) -> list[int]:
             for i in range(CORES_RADAR_N)]
 
 
-def pas(formacoes, nomes, passo, radar) -> str:
+def pares_de_radar(pe) -> list[tuple[int, int]]:
+    """Os dez pares de `0x00423F14`, na ordem em que o handler os percorre."""
+    o = pe.off(VA_PARES_RADAR)
+    def dword(i):
+        return int.from_bytes(pe.data[o + 4 * i:o + 4 * i + 4], "little")
+    return [(dword(2 * i), dword(2 * i + 1)) for i in range(PARES_RADAR_N)]
+
+
+def pas(formacoes, nomes, passo, radar, pares) -> str:
     linhas = [
         "{ wte_formacoes -- as 18 formacoes predefinidas do campinho tatico.",
         "",
@@ -499,6 +514,22 @@ def pas(formacoes, nomes, passo, radar) -> str:
         "    " + ", ".join(f"${v:04X}" for v in radar),
         "  );",
         "",
+        "  { OS DEZ PARES QUE O ` Accept` AVISA de "
+        f"{VA_PARES_RADAR:#010x}. Nao sao cores: sao os",
+        "    indices dos dois combos. O `estrategia.BitBtn3Click` copia os",
+        "    vinte dwords para a pilha no prologo e, se o par escolhido casar",
+        "    com um deles, abre o `ficha_warning_2` e desiste se a resposta",
+        "    nao for `Sim`. Casar com um par NAO impede -- pergunta. }",
+        f"  PARES_DE_RADAR_TOTAL = {PARES_RADAR_N};",
+        "",
+        "  PARES_DE_RADAR: array[0..PARES_DE_RADAR_TOTAL - 1, 0..1] of Byte = (",
+    ] + [
+        "    (" + ", ".join(str(v) for v in par) + ")"
+        + ("," if i < PARES_RADAR_N - 1 else "")
+        for i, par in enumerate(pares)
+    ] + [
+        "  );",
+        "",
         "  FORMACOES: array[0..FORMACOES_TOTAL - 1] of TFormacao = (",
     ]
     for i, f in enumerate(formacoes):
@@ -535,7 +566,8 @@ def gera() -> dict[Path, str]:
     return {
         OUT_RE / TSV_NAME: tsv(formacoes, nomes),
         OUT_RE / MD_NAME: md(formacoes, nomes, passo),
-        OUT_PAS: pas(formacoes, nomes, passo, cores_de_radar(pe)),
+        OUT_PAS: pas(formacoes, nomes, passo, cores_de_radar(pe),
+                     pares_de_radar(pe)),
     }
 
 

@@ -1,0 +1,38 @@
+# golden-17-tatica, lado PORT. Par de golden-17-tatica.txt.
+#
+# UMA assimetria so: a imagem vem da linha de comando. A janela do `estrategia`
+# mede 529x498 nos dois lados, entao o clique na `malla1` e o do ` Accept` sao
+# os mesmos -- e sao os que o `compara_tela.sh --malha` ja media.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! clique 174 400
+~ 2
+! clique 472 273
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= ACCEPT
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

@@ -56,6 +56,26 @@ const
     $7FFF, $0421, $03E0, $03FF, $001F, $7C00, $7FE0, $7C1F
   );
 
+  { OS DEZ PARES QUE O ` Accept` AVISA de 0x00423f14. Nao sao cores: sao os
+    indices dos dois combos. O `estrategia.BitBtn3Click` copia os
+    vinte dwords para a pilha no prologo e, se o par escolhido casar
+    com um deles, abre o `ficha_warning_2` e desiste se a resposta
+    nao for `Sim`. Casar com um par NAO impede -- pergunta. }
+  PARES_DE_RADAR_TOTAL = 10;
+
+  PARES_DE_RADAR: array[0..PARES_DE_RADAR_TOTAL - 1, 0..1] of Byte = (
+    (0, 3),
+    (0, 6),
+    (1, 5),
+    (3, 6),
+    (4, 7),
+    (3, 0),
+    (6, 0),
+    (5, 1),
+    (6, 3),
+    (7, 4)
+  );
+
   FORMACOES: array[0..FORMACOES_TOTAL - 1] of TFormacao = (
     (nome: 'STOCK';
      papel: (0, 2, 6, 7, 8, 10, 12, 13, 15, 17, 19);

@@ -3,7 +3,7 @@ id: CORR-WTE-081
 title: "Correção: três gravações na imagem sem dono — o OK do ficha_color, o Comple. do jugador e o Accept do estrategia"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: ["CORR-WTE-082"]
 ---
 
@@ -167,10 +167,12 @@ Ao fim, trocar o veredito das três no frontmatter da spec e regerar o
       forma da bandeira nos **cinco** offsets. **E uma terceira assimetria que
       a spec não previa:** o uniforme começa em `cores[1]`, não em `cores[0]` —
       44 bytes de diferença em `OFS_KIT_PREVIEW+130` até a linha existir
-- [ ] `estrategia.BitBtn3Click`: a `0x0040A0B4` portada antes, e a tela de
-      tática conferida contra o original antes de qualquer gravação
-- [ ] os três com veredito trocado e `spec_index.py --check` verde — dois de
-      três (`jugador`, `ficha_color`); 21 `aberto` no índice
+- [x] `estrategia.BitBtn3Click`: a `0x0040A0B4` portada antes pela
+      [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md), e a tela conferida contra o
+      oráculo em três times pelo `compara_tela.sh --malha` antes de qualquer
+      gravação
+- [x] os três com veredito trocado e `spec_index.py --check` verde — **18**
+      `aberto` no índice, contra os 23 do dia em que esta correção abriu
 - [x] `make -C wte check` verde e `lazbuild wte/wte.lpi` verde
 - [x] `golden-03-barras` e `golden-08-dorsal-mcr` continuam verdes — nenhuma
       das três pode mexer no que já fechou. O `golden-15-ficha` também foi
@@ -179,10 +181,9 @@ Ao fim, trocar o veredito das três no frontmatter da spec e regerar o
 
 ## Log de Execução
 
-**PARCIAL — 2 das 3.** O `jugador.BitBtn3Click` e o
-`ficha_color.BitBtn3Click` estão fechados e commitados; o
-`estrategia.BitBtn3Click` continua `aberto`, com o pré-requisito que a própria
-correção declarou fora do escopo. A correção segue **pendente**.
+**CONCLUÍDA**, em três passagens — uma por gravação, na ordem que a própria
+correção fixou, e com um desvio no meio: a terceira exigiu abrir e executar a
+[CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) antes.
 
 **Executado em:** 2026-08-21 (primeira passagem)
 
@@ -228,7 +229,7 @@ o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
 4. `docs/PLAN-WTE-LAZARUS.md` §4.4 mede a fração de Pascal gerado, e uma
    unidade nova escrita à mão a move — 57,9% → 56,4%. O `check_fase2.py` pegou.
 
-**O que falta, e ele está BLOQUEADO:**
+**O que faltava, e como o bloqueio foi levantado:**
 
 - **`estrategia.BitBtn3Click`** — o pré-requisito que esta correção declarou
   fora do escopo virou correção própria, a
@@ -333,3 +334,52 @@ contra o `wte_uniformes`.
   `wte/re/auxiliares.md`, `wte/re/spec/MainForm.lista_equiposChange.md`,
   `wte/re/spec/jugador.BitBtn1Click.md`, `wte/tests/roteiros/README.md`,
   `docs/tasks/progresso.md`
+
+---
+
+**Executado em:** 2026-08-21 (terceira passagem — `estrategia.BitBtn3Click`)
+
+**Resumo do que foi feito:**
+
+Implementado o `estrategia.BitBtn3Click` (`0x0040a660`), o ` Accept` da tela de
+tática e a **oitava** rota de escrita na imagem: a validação das cores de
+radar, as duas cores gravadas, e a leitura da tela convertida de pixel para
+célula — 45 bytes por time em cinco regiões. Fechado pelo par novo
+`golden-17-tatica` nos três modos: `controle` byte-idêntico, `positivo`
+detectando o byte plantado em 405228, `golden` byte-idêntico **na primeira
+corrida**.
+
+Com ele as três gravações órfãs estão fechadas, e o índice foi de 23 `aberto`
+no dia em que esta correção abriu para **18**.
+
+**Problemas encontrados:**
+
+1. **Clicar na lista de formações não serve de edição para roteiro golden**, e
+   isso é limite do harness, não do port: a altura de linha do `TListBox` não
+   bate entre os dois widgetsets — ~11 px sob Wine contra ~13 px no gtk2 —,
+   então o mesmo `y` cai em itens diferentes. O roteiro usa o clique na
+   `malla1` que o `compara_tela.sh --malha` já media nos dois lados.
+2. **O round-trip da tela é lossy, e o gate mediu isso como igualdade.** O `Y`
+   perde o bit baixo na ida (`((y - 3) div 2) * 5 - 7`), e um ` Accept` que não
+   move bola nenhuma devolve `31 51 71 …` onde a imagem tinha `32 52 72 …` —
+   **nos dois lados**. Se a conversão de volta estivesse errada por um, o
+   golden teria acusado; ela está certa por reproduzir a perda.
+3. **Os dois últimos bytes de tática não vêm da tela.** O buffer de tática do
+   original tem quatro bytes na pilha e o de cobrador começa logo depois; a
+   gravação pede cinco. Medido: byte 3 sai zero e byte 4 é `cobrador[0]`,
+   idêntico nos dois lados. A carga lê quatro e nunca os relê.
+4. `docs/PLAN-WTE-LAZARUS.md` §4.4 moveu de novo — 8.027 → 8.291 à mão e 9.456
+   → 9.473 geradas, estas pelos dez pares de cor de radar que entraram no
+   `dump_formacoes.py`.
+
+**Arquivos criados/modificados (terceira passagem):**
+
+- criados: `wte/src/impl/ep2002_estrategia.BitBtn3Click.inc`,
+  `wte/tests/roteiros/golden-17-tatica.txt` e `.port.txt`
+- modificados: `wte/src/wte_tatica.pas` (o escritor e as constantes de
+  conversão), `wte/src/impl/ep2002_estrategia.uses`,
+  `wte/tools/dump_formacoes.py` (os dez pares) e `wte/src/wte_formacoes.pas`,
+  `wte/re/spec/estrategia.BitBtn3Click.md`, `wte/re/spec/INDICE.md`,
+  `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`
+- reconciliação de doc, em commit próprio: `wte/tools/dump_zonas.py` e
+  `wte/re/zonas.md`, `docs/tasks/progresso.md`
