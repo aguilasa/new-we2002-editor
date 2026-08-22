@@ -45,6 +45,17 @@ const
     '--', 'Gl', 'Za', 'Za', 'Zl', 'Lib', 'Za', 'Le', 'Ld', 'Vl', 'Vl', 'Vl', 'Ae', 'Ad', 'Me', 'Me', 'Me', 'At', 'At', 'At', 'Pe', 'Pd'
   );
 
+  { AS OITO CORES DE RADAR de 0x00423624, em BGR555 -- uma por item dos dois combos
+    do `estrategia`. O `0x0040A0B4` NAO as usa como paleta: ele
+    percorre a tabela procurando o par de bytes que a imagem trouxe, e
+    o indice que casar e o item que o combo seleciona. O que importa
+    aqui e a ORDEM. }
+  CORES_DE_RADAR_TOTAL = 8;
+
+  CORES_DE_RADAR: array[0..CORES_DE_RADAR_TOTAL - 1] of Word = (
+    $7FFF, $0421, $03E0, $03FF, $001F, $7C00, $7FE0, $7C1F
+  );
+
   FORMACOES: array[0..FORMACOES_TOTAL - 1] of TFormacao = (
     (nome: 'STOCK';
      papel: (0, 2, 6, 7, 8, 10, 12, 13, 15, 17, 19);

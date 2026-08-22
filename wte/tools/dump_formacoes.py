@@ -88,6 +88,17 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 EXE = ROOT / "we-team-editor" / "we-team-editor.exe"
 OUT_RE = ROOT / "wte" / "re"
 OUT_PAS = ROOT / "wte" / "src" / "wte_formacoes.pas"
+
+# As oito cores de radar de `0x00423624`, em BGR555 -- uma palavra por item do
+# `ComboBox1`/`ComboBox2` do `estrategia`. Elas entram aqui, e nao num gerador
+# proprio, porque sao da MESMA tela e do mesmo tipo de tabela de `.data` que as
+# formacoes: quem abre o formulario precisa das duas (CORR-WTE-082).
+#
+# O `0x0040A0B4` nao usa a tabela como paleta -- ele a PERCORRE procurando o par
+# de bytes que a imagem trouxe, e o indice que casar e o item que o combo
+# seleciona. Por isso o que importa aqui e a ORDEM, nao o valor.
+VA_CORES_RADAR = 0x00423624
+CORES_RADAR_N = 8
 LFM = ROOT / "wte" / "forms" / "ep2002_estrategia.lfm"
 ZONAS_PAS = ROOT / "wte" / "src" / "wte_zonas.pas"
 LEGENDAS_TSV = ROOT / "wte" / "re" / "legendas.tsv"
@@ -378,7 +389,8 @@ def md(formacoes, nomes, passo) -> str:
         "",
         "O item **1** (`DEFAULT`) é o outro ramo: em vez da tabela, ele lê o",
         "buffer da formação viva do time (`0x00432e88`), que é preenchido por",
-        "`0x0040a0b4` — rotina de abertura do formulário, **não portada**.",
+        "`0x0040a0b4` — rotina de abertura do formulário, portada como",
+        "`PreencheTelaDeTatica` na `wte_tatica.pas` (CORR-WTE-082).",
         "",
         "## As três conferências que abortam",
         "",
@@ -418,7 +430,14 @@ def md(formacoes, nomes, passo) -> str:
     return "\n".join(fora)
 
 
-def pas(formacoes, nomes, passo) -> str:
+def cores_de_radar(pe) -> list[int]:
+    """As oito palavras BGR555 de `0x00423624`, na ordem do combo."""
+    o = pe.off(VA_CORES_RADAR)
+    return [pe.data[o + 2 * i] | (pe.data[o + 2 * i + 1] << 8)
+            for i in range(CORES_RADAR_N)]
+
+
+def pas(formacoes, nomes, passo, radar) -> str:
     linhas = [
         "{ wte_formacoes -- as 18 formacoes predefinidas do campinho tatico.",
         "",
@@ -468,6 +487,18 @@ def pas(formacoes, nomes, passo) -> str:
         "    " + ", ".join(f"'{t}'" for t in abreviaturas()),
         "  );",
         "",
+        "  { AS OITO CORES DE RADAR de "
+        f"{VA_CORES_RADAR:#010x}, em BGR555 -- uma por item dos dois combos",
+        "    do `estrategia`. O `0x0040A0B4` NAO as usa como paleta: ele",
+        "    percorre a tabela procurando o par de bytes que a imagem trouxe, e",
+        "    o indice que casar e o item que o combo seleciona. O que importa",
+        "    aqui e a ORDEM. }",
+        f"  CORES_DE_RADAR_TOTAL = {CORES_RADAR_N};",
+        "",
+        "  CORES_DE_RADAR: array[0..CORES_DE_RADAR_TOTAL - 1] of Word = (",
+        "    " + ", ".join(f"${v:04X}" for v in radar),
+        "  );",
+        "",
         "  FORMACOES: array[0..FORMACOES_TOTAL - 1] of TFormacao = (",
     ]
     for i, f in enumerate(formacoes):
@@ -504,7 +535,7 @@ def gera() -> dict[Path, str]:
     return {
         OUT_RE / TSV_NAME: tsv(formacoes, nomes),
         OUT_RE / MD_NAME: md(formacoes, nomes, passo),
-        OUT_PAS: pas(formacoes, nomes, passo),
+        OUT_PAS: pas(formacoes, nomes, passo, cores_de_radar(pe)),
     }
 
 

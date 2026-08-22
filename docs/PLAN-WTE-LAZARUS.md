@@ -505,8 +505,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 55,6% do Pascal da casca é saída de gerador** —
-9.449 linhas geradas contra 7.546 escritas à mão. Dessas 7.546, 352 são andaime de
+**Medido com a fase 4 em curso: 54,1% do Pascal da casca é saída de gerador** —
+9.456 linhas geradas contra 8.027 escritas à mão. Dessas 8.027, 352 são andaime de
 projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
@@ -532,7 +532,12 @@ uma vez, e é o único caso até aqui: 7.233 → 7.546 à mão pelo escritor do 
 de cor, e 9.372 → 9.449 geradas porque a tabela de 95 bytes de
 `0x00423247` entrou por gerador novo, o `dump_blococor.py`. Numerador e
 denominador crescendo juntos é o sinal de que a fronteira entre dado e lógica
-foi respeitada.)
+foi respeitada. A CORR-WTE-082 repetiu o padrão numa escala maior — 7.546 →
+8.027 à mão pela `wte_tatica.pas`, a terceira unidade neutra, e 9.449 → 9.456
+geradas pelas oito cores de radar que entraram no `dump_formacoes.py`. Três
+correções seguidas moveram a fração, e nenhuma delas por corpo de handler: o
+que a §4.4 vem medindo desde 2026-08-21 é a **estrutura** que a fase 4 precisou
+criar para os handlers caberem.)
 O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712

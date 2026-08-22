@@ -3,7 +3,7 @@ id: CORR-WTE-082
 title: "Correção: a tela de tática não é enchida, e sem isso o ` Accept` do estrategia grava as coordenadas do .lfm"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -134,21 +134,20 @@ lados, para pelo menos três times distintos. O `wte/re/malhas.tsv` e a
 - [x] a seção *Bytes tocados* do `estrategia.BitBtn3Click` sem `não medido` —
       cinco regiões, 45 bytes por time, com `OFS_FORMATIONS` e `OFS_KICKER`
       fechando as duas âncoras que têm nome
-- [ ] a tela de tática do port conferida contra o oráculo em **três** times
-      distintos, com o `compara_tela.sh`
-- [ ] `estrategia.BitBtn1Click` e `MainForm.mostrar_estrategiaClick` com
-      veredito trocado, e `spec_index.py --check` verde
-- [ ] `make -C wte check` verde e `lazbuild wte/wte.lpi` sem warning novo
-- [ ] `golden-15-ficha` e `golden-16-cor` continuam verdes — a leitora não pode
-      mexer no que já fechou
-- [ ] `roms/` intocada; toda corrida sobre cópia
+- [x] a tela de tática do port conferida contra o oráculo em **três** times
+      distintos, com o `compara_tela.sh --malha`: `0`, `2` e `63`, os três
+      `PASSOU`, com as quatro posições de marcador batendo com o oráculo antes
+      e depois do clique
+- [x] `estrategia.BitBtn1Click` e `MainForm.mostrar_estrategiaClick` com
+      veredito trocado, e `spec_index.py --check` verde — 19 `aberto`
+- [x] `make -C wte check` verde e `lazbuild wte/wte.lpi` sem warning novo
+- [x] `golden-15-ficha` e `golden-16-cor` continuam verdes
+- [x] `roms/` intocada; toda corrida sobre cópia
 
 ## Log de Execução
 
-**PARCIAL — 1 dos 3 passos.** O passo 1 (medir a segunda metade do
-`0x0040a660`) está fechado e commitado. Os passos 2 e 3 — portar a
-`0x0040A0B4` e trocar o veredito dos dois chamadores — continuam abertos, e a
-correção segue **pendente**.
+**CONCLUÍDA**, em duas passagens. A primeira mediu a segunda metade do
+`0x0040a660`; a segunda portou a `0x0040A0B4` e fechou os dois vereditos.
 
 **Executado em:** 2026-08-21 (primeira passagem)
 
@@ -186,7 +185,7 @@ WTE-TASK-25, medidas por outro caminho e batendo uma a uma.
    e o primeiro copia a partir do índice **1** de `[0x00434224]` — o elemento
    zero fica de fora.
 
-**O que falta, e o que a medição mudou no tamanho dele:**
+**O que a medição mudou no tamanho do passo 2 — e o que ela poupou:**
 
 O passo 2 é maior do que esta correção estimou ao ser aberta, e agora se sabe
 por quê. A `0x0040A0B4` **não faz I/O de imagem nenhum** — sem `0x004033BC`,
@@ -208,3 +207,79 @@ preenche. Fechar o passo 2 fecha aquela divergência também.
 - modificados: `wte/re/spec/estrategia.BitBtn3Click.md` (a seção *Bytes
   tocados* e a justificativa), `docs/tasks/CORR-WTE-081.md` (a linha que dizia
   que a spec ainda estava `não medido`)
+
+---
+
+**Executado em:** 2026-08-21 (segunda passagem — o port)
+
+**Resumo do que foi feito:**
+
+Portada a `0x0040A0B4` como `PreencheTelaDeTatica`, e com ela a metade de
+LEITURA do `MainForm.mostrar_estrategiaClick` que ninguém tinha visto: sete
+chamadas a `0x004033BC` para cinco regiões. As duas moram na
+`wte/src/wte_tatica.pas`, a terceira unidade neutra deste port — o
+preenchimento precisa do `ep2002_estrategia` e do `ep2002_mainform` ao mesmo
+tempo, e nenhum dos dois pode usar o outro na interface.
+
+Os vereditos do `estrategia.BitBtn1Click` (que virou uma chamada só, como no
+original) e do `MainForm.mostrar_estrategiaClick` passaram a `implementado`;
+o índice foi de 21 para **19** `aberto`.
+
+**A conferência:** `compara_tela.sh --malha` nos times `0`, `2` e `63`, os três
+`PASSOU`. As quatro posições de marcador batem com o oráculo **antes** do
+clique, que é justamente o que o preenchimento produz — e elas diferem entre
+times (316/380/460 no time 2 contra 348/316/348/396 nos outros dois), o que
+mostra que o valor vem do dado e não de constante.
+
+**Problemas encontrados:**
+
+1. **A rotina de preenchimento escreve `Top`, não `Left`.** Na primeira
+   corrida os dez marcadores foram parar amontoados no canto superior direito.
+   O `MoveMarcadorDaMalha` já dizia por quê desde a WTE-TASK-29 — *"o `Left` do
+   marcador não é tocado: ele já está na coluna certa desde o `.dfm`"* —, e os
+   dois números da conta (passo 16, folga 3) são os mesmos `MALHA_PASSO_Y` e
+   `MALHA_FOLGA` do clique, que estavam em `wte_zonas` o tempo todo.
+2. **O corte do nome é 1 no port e 4 ou 5 no original**, e a diferença apareceu
+   na tela: onde o oráculo mostrava `?I???` o port mostrava `?`. A lista do
+   original traz um prefixo numérico antes do nome; a do port, não. Isso é uma
+   inconsistência **herdada** e ela tem um segundo sintoma, fora desta
+   correção: o `NomeDoItemSelecionado` do `MainForm` corta 4 ou 5 de um item
+   que não tem o que cortar.
+3. **As duas auxiliares pesadas já estavam portadas** — `PreparaAnimacao`
+   (`0x004097D4`, 474 B) e `PintaPosicoes` (`0x004099BC`, 227 B) —, o que tirou
+   701 dos ~2.100 bytes que esta correção estimava. O que elas precisavam era
+   deixar de receber um ÍNDICE na tabela predefinida e passar a receber o
+   REGISTRO: é o que o original sempre teve, um ponteiro em `0x00434230` que
+   ora aponta para a tabela, ora para o buffer vivo.
+4. **A tabela de zona é a mesma tabela de formações, deslocada de dois.** Os
+   dois endereços imediatos do binário (`0x00433F2D` e `0x00433F85 + 44*n`) são
+   o campo `zona` dos registros 0 e n+2 da tabela de 18 × 44 que a
+   `wte_formacoes` já trazia — não havia tabela nova para extrair.
+5. `docs/PLAN-WTE-LAZARUS.md` §4.4 moveu de novo: 7.546 → 8.027 à mão e 9.449 →
+   9.456 geradas. O `check_fase2.py` pegou.
+
+**O que fechou de brinde, e estava escrito como divergência:**
+
+O item `DEFAULT` da lista de formações não fazia nada, e a tela de tática abria
+com as bolas nas posições de projeto do `.lfm` e toda bola na zona 0. As duas
+estavam registradas na spec do `lista_formacionesClick` como divergências com
+dono nomeado — `0x0040a0b4` —, e as duas caíram junto.
+
+**O que continua vazio na tela, e não é deste handler:** os itens dos dois
+combos de cor de radar e a bandeira do canto. Os dois saem do
+`estrategia.FormCreate`, que segue `aberto`.
+
+**Arquivos criados/modificados (segunda passagem):**
+
+- criados: `wte/src/wte_tatica.pas`,
+  `wte/src/impl/ep2002_estrategia.BitBtn1Click.inc`
+- modificados: `wte/src/impl/ep2002_estrategia.aux.inc` (o corte),
+  `wte/src/impl/ep2002_estrategia.lista_formacionesClick.inc`,
+  `wte/src/impl/ep2002_mainform.mostrar_estrategiaClick.inc`, os dois `.uses`,
+  `wte/tools/dump_formacoes.py` (as oito cores de radar) e
+  `wte/src/wte_formacoes.pas`, `wte/re/spec/estrategia.BitBtn1Click.md`,
+  `wte/re/spec/MainForm.mostrar_estrategiaClick.md`,
+  `wte/re/spec/estrategia.lista_formacionesClick.md`, `wte/re/spec/INDICE.md`,
+  `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`
+- reconciliação de doc, em commit próprio: `wte/tools/dump_zonas.py` e
+  `wte/re/zonas.md`, `wte/re/formacoes.md`, `docs/tasks/progresso.md`

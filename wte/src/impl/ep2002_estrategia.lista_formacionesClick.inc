@@ -44,7 +44,13 @@ begin
   if indice = FORMACAO_DEFAULT then
     Exit;
 
-  FormacaoAplicada := indice;
-  PreparaAnimacao(indice);
-  PintaPosicoes(indice);
+  { A FORMACAO EM VIGOR passou a ser o REGISTRO, e nao mais o indice
+    (CORR-WTE-082): o original guarda um ponteiro em `0x00434230`, e ele aponta
+    ora para esta tabela, ora para o buffer VIVO do time que o
+    `PreencheTelaDeTatica` carrega. Com o registro as duas rotinas de animacao
+    servem os dois casos. }
+  FormacaoEmVigor := FORMACOES[indice];
+  FormacaoEmVigorValida := True;
+  PreparaAnimacao(FORMACOES[indice]);
+  PintaPosicoes(FORMACOES[indice]);
 end;

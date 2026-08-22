@@ -29,7 +29,7 @@ interface
 
 uses
   Classes, Types, Forms, Controls, StdCtrls, ExtCtrls, Buttons, retrace,
-  SysUtils, Graphics, wte_zonas, wte_formacoes;
+  SysUtils, Graphics, wte_zonas, wte_formacoes, wte_tatica;
 
 type
   Testrategia = class(TForm)
@@ -222,12 +222,8 @@ procedure Testrategia.malla2MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 {$I impl/ep2002_estrategia.malla2MouseDown.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.BitBtn1Click(Sender: TObject);
-begin
-  REStub('estrategia.BitBtn1Click');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.BitBtn1Click.inc}
 
 {$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.BitBtn3Click(Sender: TObject);

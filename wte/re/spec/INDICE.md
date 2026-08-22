@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 53 |
+| `implementado` | 55 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 2 |
 | `nao portado` | 1 |
-| `aberto` | 21 |
+| `aberto` | 19 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -87,7 +87,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | aberto |
 | `0x00409f4c` | `estrategia` | [malla1MouseDown](estrategia.malla1MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
-| `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | aberto |
+| `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | implementado |
 | `0x0040a660` | `estrategia` | [BitBtn3Click](estrategia.BitBtn3Click.md) | OnClick | auxiliar | aberto |
 | `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
@@ -118,7 +118,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040f69c` | `MainForm` | [grabar_memoryClick](MainForm.grabar_memoryClick.md) | OnClick | gravacao | implementado |
 | `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
 | `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
-| `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | aberto |
+| `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | implementado |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | implementado |
 | `0x00410ddc` | `MainForm` | [dorsalMouseDown](MainForm.dorsalMouseDown.md) | OnMouseDown x23 | edicao | implementado |

@@ -144,21 +144,26 @@ satisfeita por construção: o `estrategia` só é criado no arranque e só fica
 alcançável pelo `mostrar_estrategiaClick`, e nenhum handler de carga toca
 `lista_formaciones`.
 
-### A divergência, e ela tem dono
+### A divergência que havia aqui, e como ela caiu
 
-**O item `DEFAULT` não faz nada no port.** Ele precisa do buffer da formação
-viva do time (`0x00432e88..0x00432eaf`), preenchido por **`0x0040a0b4`** — a
-rotina que enche a tela de tática ao abrir o formulário, chamada pelo
-`MainForm.mostrar_estrategiaClick`, do grupo de **carga**. Ela não está
-portada e não é desta correção. Aplicar o registro zerado poria as dez bolas em
-`(-2, -12)`, fora do campo, o que é pior do que não fazer nada.
+**O item `DEFAULT` não fazia nada no port**, e a segunda metade da mesma falta
+era mais visível ainda: a tela de tática abria com as bolas nas posições de
+projeto do `.lfm` e toda bola na zona 0, até que se clicasse num item da lista.
+As duas dependiam de `0x0040a0b4` — a rotina que enche a tela ao abrir o
+formulário, chamada pelo `MainForm.mostrar_estrategiaClick`, do grupo de
+**carga** —, que não estava portada.
 
-**A mesma rotina causa uma segunda divergência, e é a que se vê primeiro:** no
-original `0x0040a0b4` aponta os quatro ponteiros **ao abrir** o formulário, e
-por isso a zona de cada bola já está certa antes de qualquer clique — e a
-animação já rodou uma vez. No port a tela de tática abre com as bolas nas
-posições de projeto do `.lfm` e toda bola na zona 0, até que se clique num
-item da lista. As duas caem quando `0x0040a0b4` for portado.
+**As duas caíram na
+[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md)**, que a portou como
+`PreencheTelaDeTatica` na [`wte_tatica`](../../src/wte_tatica.pas). Com ela o
+formulário abre já preenchido, e o `DEFAULT` que a lista mostra é o que a
+imagem diz.
+
+**O que mudou aqui por causa disso:** a formação em vigor deixou de ser um
+ÍNDICE na tabela predefinida e passou a ser o próprio registro
+(`FormacaoEmVigor: TFormacao`). É o que o original sempre teve — um ponteiro em
+`0x00434230`, que ora aponta para esta tabela, ora para o buffer vivo do time —
+e é o que faz as duas auxiliares servirem os dois casos com um corpo só.
 
 Pascal em
 [`../../src/impl/estrategia.lista_formacionesClick.inc`](../../src/impl/ep2002_estrategia.lista_formacionesClick.inc);

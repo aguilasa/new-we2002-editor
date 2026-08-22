@@ -2,7 +2,7 @@
 handler: BitBtn1Click
 formulario: estrategia
 endereco: 0x0040a658
-veredito: aberto
+veredito: implementado
 ---
 
 # estrategia.BitBtn1Click
@@ -55,20 +55,22 @@ Não trata.
 
 **Evidência:** disassembly lido
 
-## Justificativa do veredito `aberto`
+## Como o veredito fechou
 
-**A rotina que ele chama não está portada.** O
-[`mostrar_estrategiaClick`](MainForm.mostrar_estrategiaClick.md) do port diz
-isso no próprio comentário — *"encher a tela de tática (`0x0040a0b4`, 1.443
-bytes) é da WTE-TASK-26, dona do formulário `estrategia`"* — e a
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) fechou sem ela. Este
-handler é uma chamada só; o que falta é o alvo dela, e o alvo é dívida herdada,
-não trabalho de moldura de diálogo.
+**O alvo chegou.** A `0x0040A0B4` está portada como `PreencheTelaDeTatica`, na
+[`wte_tatica`](../../src/wte_tatica.pas), pela
+[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md); este handler voltou a ser
+o que sempre foi, uma chamada só.
 
-Portar a `0x0040A0B4` fecha três `aberto` de uma vez — este, o
-`mostrar_estrategiaClick` e o [`FormCreate`](estrategia.FormCreate.md) do
-mesmo formulário — e é por isso que ela merece ser um lote próprio em vez de
-um remendo aqui.
+**Ele não relê a imagem, e isso é a única sutileza.** O original chama apenas a
+`0x0040A0B4`, que trabalha sobre as globais que o `mostrar_estrategiaClick`
+encheu ao abrir. Reler aqui daria o mesmo resultado hoje e deixaria de dar no
+dia em que algo gravasse com o formulário aberto — e o
+[` Accept`](estrategia.BitBtn3Click.md) faz exatamente isso.
+
+A conferência é a do grupo de leitura: `compara_tela.sh --malha` nos três times
+`0`, `2` e `63`, com as quatro posições de marcador batendo com o oráculo antes
+e depois do clique.
 
 ## Notas
 
