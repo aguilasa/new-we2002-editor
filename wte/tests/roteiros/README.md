@@ -399,6 +399,28 @@ Duas coisas que ele ensina sobre dirigir a ficha:
   [`10-telas-que-faltavam.txt`](10-telas-que-faltavam.txt), e esperar por ela
   custou uma corrida de controle.
 
+### O `golden-16` volta a precisar de edicao, e a razao e o oposto do `15`
+
+O par [`golden-16-cor.txt`](golden-16-cor.txt) /
+[`.port.txt`](golden-16-cor.port.txt) e o gate do `ficha_color.BitBtn3Click` --
+o `OK` do editor de cor, a setima rota de escrita na imagem --, tambem da
+[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md).
+
+Aqui a edicao e obrigatoria, e vale ver por que os dois gates vizinhos se
+comportam ao contrario: as sete regioes do bloco de cor saem do que a carga leu
+da imagem, entao clicar `OK` sem editar devolve os mesmos bytes e um port que
+nao gravasse nada passaria. E a objecao que o `golden-03` teve de responder com
+o `golden-04`; no `golden-15` ela nao existia porque o `Comple.` e destrutivo
+sozinho.
+
+**A edicao e um clique so.** O `aclarar` percorre a faixa do gradiente inteira
+-- que nasce 1..16 --, entao nao depende de amostra selecionada nem de estado
+do `recuadro2`. Medido: 30 bytes mudam em `OFS_FLAG_COLOURS+96` e mais nada
+alem dos tres do arranque, embora a corrida grave 383.
+
+A janela `Cor  ` mede os 542x225 do DFM sob Wine, sem moldura -- como a
+`jugador` do `golden-15`, e ao contrario do `ficha_dorsal` do `golden-08`.
+
 ## Replicar
 
 Lado port, com o trace num arquivo próprio:
