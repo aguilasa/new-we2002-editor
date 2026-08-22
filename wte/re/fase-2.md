@@ -41,13 +41,13 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 
 | Origem | Arquivos | Linhas |
 |---|---|---|
-| Unidades Pascal geradas (`dfm2lfm.py`) | 22 | 2604 |
+| Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2681 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
-| **Gerado, subtotal** | | **9372** |
-| Escrito à mão | 96 | 7233 |
-| **Total** | | **16605** |
+| **Gerado, subtotal** | | **9449** |
+| Escrito à mão | 97 | 7546 |
+| **Total** | | **16995** |
 
-**56.4% do Pascal da casca é saída de gerador.**
+**55.6% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -63,6 +63,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_about.imagen_urlClick.inc` | 13 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.BitBtn1Click.inc` | 39 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.BitBtn2Click.inc` | 24 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_color.BitBtn3Click.inc` | 43 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.FormCreate.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.SpeedButton1Click.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.aclararClick.inc` | 19 | corpo de handler, da spec (fase 4) |
@@ -76,7 +77,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_color.lista_col0Change.inc` | 23 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.lista_col1change.inc` | 23 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.lista_col2Change.inc` | 23 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_color.lista_col3Change.inc` | 37 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_color.lista_col3Change.inc` | 38 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_color.oscurecerClick.inc` | 24 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_creditos_equipo.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_dorsal.BitBtn1Click.inc` | 17 | corpo de handler, da spec (fase 4) |
@@ -122,7 +123,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.boton_mcrClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_nombres2isoClick.inc` | 111 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_tex2isoClick.inc` | 79 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.colorearClick.inc` | 51 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.colorearClick.inc` | 61 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalClick.inc` | 97 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.dorsalMouseDown.inc` | 40 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.edit_nombre1KeyPress.inc` | 19 | corpo de handler, da spec (fase 4) |
@@ -150,7 +151,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_warning.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_warning_2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/retrace.pas` | 125 | o registrador de disparo (WTE-TASK-11) |
-| `src/wte_cor.pas` | 409 | — |
+| `src/wte_cor.pas` | 668 | — |
 | `src/wte_ficha.pas` | 973 | — |
 | `src/wte_render2d.pas` | 434 | — |
 | `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
@@ -160,7 +161,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 82.9% — e passa a medir bitmap, não geração de código.
+fração sobe para 82.3% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
@@ -182,8 +183,7 @@ gerador, e o que sobrou de teclado é andaime de projeto, não lógica do editor
 | `src/ep2002_estrategia.pas` | 4 |
 | `src/ep2002_jugador.pas` | 3 |
 | `src/ep2002_mainform.pas` | 2 |
-| `src/ep2002_color.pas` | 1 |
-| _com corpo escrito_ | 86 |
+| _com corpo escrito_ | 87 |
 | **total** | **96** |
 
 Os que já têm corpo saíram do stub para `src/impl/` — é a fase 4 chegando.
@@ -239,6 +239,7 @@ das duas formas.
 - `ficha_about.imagen_urlClick`
 - `ficha_color.BitBtn1Click`
 - `ficha_color.BitBtn2Click`
+- `ficha_color.BitBtn3Click`
 - `ficha_color.FormCreate`
 - `ficha_color.SpeedButton1Click`
 - `ficha_color.aclararClick`

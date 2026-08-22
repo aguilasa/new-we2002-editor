@@ -185,12 +185,8 @@ procedure Tficha_color.BitBtn1Click(Sender: TObject);
 procedure Tficha_color.BitBtn2Click(Sender: TObject);
 {$I impl/ep2002_color.BitBtn2Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tficha_color.BitBtn3Click(Sender: TObject);
-begin
-  REStub('ficha_color.BitBtn3Click');
-end;
-{$POP}
+{$I impl/ep2002_color.BitBtn3Click.inc}
 
 procedure Tficha_color.colorMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);

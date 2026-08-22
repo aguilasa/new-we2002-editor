@@ -29,6 +29,16 @@ begin
   { O global do editor, copiado UMA vez. Ver `TimeEmCor` na `wte_cor`. }
   TimeEmCor := indice;
 
+  { A CARGA DAS TRES REGIOES QUE O MODELO NAO GUARDA -- as oito paletas de
+    chuteira, a quarta paleta e o par de bytes do padrao de camisa
+    (CORR-WTE-081). E a parte do `0x004050D0` que faltava, e ela vem ANTES da
+    foto: o padrao de camisa que a imagem traz e o que o slot 1 passa a valer,
+    e e a foto que guarda esse valor.
+
+    Sem ela o `OK` do editor nao teria o que devolver a imagem nas duas
+    familias nao portadas. }
+  CarregaBlocoDeCorDaImagem(indice);
+
   { A FOTO DO SLOT 0, para o `Original` e o `Cancela` do editor terem o que
     restaurar (WTE-TASK-30). No original o slot 0 e refeito a cada troca de
     time, pela carga; aqui a foto sai aqui, e a diferenca so apareceria se o

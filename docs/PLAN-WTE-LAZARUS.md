@@ -505,8 +505,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 56,4% do Pascal da casca é saída de gerador** —
-9.372 linhas geradas contra 7.233 escritas à mão. Dessas 7.233, 352 são andaime de
+**Medido com a fase 4 em curso: 55,6% do Pascal da casca é saída de gerador** —
+9.449 linhas geradas contra 7.546 escritas à mão. Dessas 7.546, 352 são andaime de
 projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
@@ -526,7 +526,13 @@ outra causa: 6.816 → 7.233 à mão sem que um só corpo novo explicasse o salt
 porque o que entrou foi uma **unidade** — o `wte_ficha.pas`, para onde desceu o
 buffer de jogador quando o `Comple.` da ficha passou a precisar dele de fora do
 `ep2002_mainform`. Mudança de estrutura conta no denominador como corpo conta,
-e é bom que conte: unidade escrita à mão é exatamente o que a §4.4 mede.)
+e é bom que conte: unidade escrita à mão é exatamente o que a §4.4 mede. A
+segunda passagem dela — o `OK` do editor de cor — moveu as **duas** pontas de
+uma vez, e é o único caso até aqui: 7.233 → 7.546 à mão pelo escritor do bloco
+de cor, e 9.372 → 9.449 geradas porque a tabela de 95 bytes de
+`0x00423247` entrou por gerador novo, o `dump_blococor.py`. Numerador e
+denominador crescendo juntos é o sinal de que a fronteira entre dado e lógica
+foi respeitada.)
 O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712

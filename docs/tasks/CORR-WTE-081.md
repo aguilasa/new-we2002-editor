@@ -158,25 +158,31 @@ Ao fim, trocar o veredito das três no frontmatter da spec e regerar o
       `0x0040b2d8`, e clicar sem tocar em nada grava `3f 3f 3f 3f` sobre
       `ba b0 d7 dd`. Um port que não gravasse nada reprova, que é a objeção
       que o `golden-03` teve de responder com um par editado
-- [ ] `ficha_color.BitBtn3Click`: idem, e as duas famílias **não portadas**
-      saem intactas — provado por gravar sem editar e comparar os 288 bytes
-      delas
-- [ ] `ficha_color.BitBtn3Click`: os 30 bytes gravados por bloco, não 32, e a
-      forma da bandeira nos **cinco** offsets
+- [x] `ficha_color.BitBtn3Click`: idem, com uma edição de tela antes — um
+      clique no `aclarar`, que percorre a faixa 1..16 inteira. As duas famílias
+      **não portadas** saem intactas: dos 383 bytes gravados, só os 30 da
+      paleta editada mudam de valor, e o `cmp` contra a ROM intocada mostra
+      exatamente esses 30 mais os três do arranque
+- [x] `ficha_color.BitBtn3Click`: os 30 bytes gravados por bloco, não 32, e a
+      forma da bandeira nos **cinco** offsets. **E uma terceira assimetria que
+      a spec não previa:** o uniforme começa em `cores[1]`, não em `cores[0]` —
+      44 bytes de diferença em `OFS_KIT_PREVIEW+130` até a linha existir
 - [ ] `estrategia.BitBtn3Click`: a `0x0040A0B4` portada antes, e a tela de
       tática conferida contra o original antes de qualquer gravação
-- [ ] os três com veredito trocado e `spec_index.py --check` verde
-- [ ] `make -C wte check` verde e `lazbuild wte/wte.lpi` verde
-- [ ] `golden-03-barras` e `golden-08-dorsal-mcr` continuam verdes — nenhuma
-      das três pode mexer no que já fechou
-- [ ] `roms/` intocada; toda corrida sobre cópia
+- [ ] os três com veredito trocado e `spec_index.py --check` verde — dois de
+      três (`jugador`, `ficha_color`); 21 `aberto` no índice
+- [x] `make -C wte check` verde e `lazbuild wte/wte.lpi` verde
+- [x] `golden-03-barras` e `golden-08-dorsal-mcr` continuam verdes — nenhuma
+      das três pode mexer no que já fechou. O `golden-15-ficha` também foi
+      rerodado depois do `ficha_color`
+- [x] `roms/` intocada; toda corrida sobre cópia
 
 ## Log de Execução
 
-**PARCIAL — 1 das 3.** O `jugador.BitBtn3Click` está fechado e commitado; o
-`ficha_color.BitBtn3Click` e o `estrategia.BitBtn3Click` continuam `aberto`. A
-correção segue **pendente**, e a ordem que ela mesma fixou continua valendo
-para o que falta.
+**PARCIAL — 2 das 3.** O `jugador.BitBtn3Click` e o
+`ficha_color.BitBtn3Click` estão fechados e commitados; o
+`estrategia.BitBtn3Click` continua `aberto`, com o pré-requisito que a própria
+correção declarou fora do escopo. A correção segue **pendente**.
 
 **Executado em:** 2026-08-21 (primeira passagem)
 
@@ -224,12 +230,66 @@ o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
 
 **O que falta, e como continuar:**
 
-- **`ficha_color.BitBtn3Click`** — as sete regiões por time, os 30 bytes
-  gravados por bloco contra os 32 lidos, e a forma da bandeira nos cinco
-  offsets. Continua precisando carregar as duas famílias não portadas
-  (chuteira e quarta paleta) para devolvê-las intactas;
 - **`estrategia.BitBtn3Click`** — segue com o pré-requisito de fora: a
-  `0x0040A0B4`, que enche a tela de tática, não está portada.
+  `0x0040A0B4`, que enche a tela de tática, não está portada. Gravar as
+  posições dos componentes de uma tela que ninguém posicionou gravaria as
+  coordenadas de tempo de projeto do `.lfm`.
+
+---
+
+**Executado em:** 2026-08-21 (segunda passagem — `ficha_color.BitBtn3Click`)
+
+**Resumo do que foi feito:**
+
+Implementado o `ficha_color.BitBtn3Click` (`0x004069e8`), o `OK` do editor de
+cor: as quatro chamadas na ordem que não comuta, e a escrita de 383 bytes por
+time (`0x004051A4`) com as sete regiões, as duas assimetrias da spec e uma
+terceira que ela não previa. Fechado pelo par novo `golden-16-cor` nos três
+modos: `controle` byte-idêntico, `positivo` detectando o byte plantado em
+405228, `golden` byte-idêntico.
+
+As sete colunas por time entraram por **gerador novo** — o
+`wte/tools/dump_blococor.py`, que lê do `.exe` a tabela de 95 bytes de
+`0x00423247` e as cinco bases de `0x00423634` e emite o `wte_blococor.pas`. Ele
+aborta se qualquer uma de oito âncoras deixar de bater com um `OFS_*` do
+`we2002_core`. A lógica — as sete regiões, os tamanhos, o `30` contra o `32` —
+ficou no `wte_cor.pas`, escrita à mão: a mesma divisão que a `wte_render2d` tem
+contra o `wte_uniformes`.
+
+**Problemas encontrados:**
+
+1. **O uniforme começa na SEGUNDA palavra do vetor, e a bandeira não.** O
+   offset que o `0x00404E70` calcula para o uniforme é `OFS_KIT_PREVIEW + 2` —
+   `cores[1]` —, enquanto a bandeira começa em `cores[0]`. Gravar os dois do
+   mesmo jeito desloca os 30 bytes de uma palavra: 44 bytes de diferença em
+   `OFS_KIT_PREVIEW+130` no primeiro golden. A assimetria já estava medida por
+   outro caminho no `render2d.md` (*"16 na bandeira, 15 no uniforme"*) e usada
+   pela `wte_render2d` para desenhar; o que faltava era ligá-la ao **offset**.
+2. **Uma divergência latente, achada por revisar o que o gate NÃO veria.** O
+   `PadraoDaCamisa` nascia com o literal `(0, $65)` e nunca era carregado da
+   imagem — o comentário dele dizia, com todas as letras, que nada no port o
+   lia. As duas ROMs deste repositório guardam exatamente `00 65` naquele
+   offset, então o golden teria passado verde com o defeito dentro. A
+   `CarregaBlocoDeCorDaImagem` agora o lê junto com as duas famílias não
+   portadas, que é o `copia_slot(0, 1)` do fim da carga do original.
+3. `docs/PLAN-WTE-LAZARUS.md` §4.4 moveu as duas pontas de uma vez — 7.233 →
+   7.546 à mão e 9.372 → 9.449 geradas —, o que é o sinal de que dado e lógica
+   foram separados. O `check_fase2.py` pegou.
+
+**Arquivos criados/modificados (segunda passagem):**
+
+- criados: `wte/tools/dump_blococor.py`, `wte/tools/test_dump_blococor.py`,
+  `wte/src/wte_blococor.pas` (gerado),
+  `wte/src/impl/ep2002_color.BitBtn3Click.inc`,
+  `wte/tests/roteiros/golden-16-cor.txt` e `.port.txt`
+- modificados: `wte/src/wte_cor.pas` (a carga, os offsets e o escritor),
+  `wte/src/impl/ep2002_mainform.colorearClick.inc` (a carga antes da foto),
+  `wte/src/impl/ep2002_color.lista_col3Change.inc` (o comentário que dizia não
+  haver consumidor), `wte/re/spec/ficha_color.BitBtn3Click.md`,
+  `wte/re/spec/INDICE.md`, `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`,
+  `wte/re/fase-3-fechamento.md`
+- reconciliação de doc, em commit próprio:
+  `wte/tests/roteiros/README.md`, `docs/tasks/progresso.md`
 
 **Arquivos criados/modificados:**
 

@@ -45,7 +45,7 @@ unit wte_cor;
 interface
 
 uses
-  we2002_render;
+  we2002_render, we2002_offsets, wte_blococor;
 
 const
   { Quantas amostras o formulario tem: `color1`..`color16`. E o mesmo 16 que o
@@ -59,6 +59,11 @@ const
   COR_FAMILIA_QUARTA   = 3;
 
 type
+  { Os dois vetores de offset que o bloco de cor tem: as CINCO copias do byte
+    de forma de bandeira e as OITO paletas de chuteira. }
+  TCincoOffsets = array[0 .. 4] of TOffset;
+  TOitoOffsets = array[0 .. BLOCOCOR_CHUTEIRAS - 1] of TOffset;
+
   { O estado do editor. Os nomes sao os do comentario de cabecalho; as bases
     tambem. }
   TCorEmEdicao = record
@@ -92,12 +97,21 @@ var
     `lista_col3Change` escreve. Aqui so o slot 1 tem lugar, porque so ele tem
     quem o escreva.
 
-    **NADA NESTE PORT AINDA LE ESTES DOIS BYTES**, e isso e a metade portada de
-    uma divergencia ja registrada: o unico consumidor no original e a gravacao
-    do `BitBtn3`, que copia o slot 1 para o slot 0 e o grava. O par tambem nao
-    tem campo na camada de dados -- nem `TTeam` nem `TMlTeam` guardam padrao de
-    camisa --, e e por isso que o `MainForm.colorearClick` deixa o combo no
-    default em vez de inventar de onde ele sai. Ver a spec daquele handler. }
+    **O CONSUMIDOR CHEGOU NA CORR-WTE-081**: e a `GravaBlocoDeCorNaImagem`, o
+    `OK` do editor, que grava estes dois bytes junto com as outras seis
+    regioes. Ate 2026-08-21 esta variavel era escrita e nunca lida, e o
+    comentario dizia isso.
+
+    E COM O CONSUMIDOR VEIO A CARGA. O literal `(0, $65)` continua sendo o
+    valor de partida, mas a `CarregaBlocoDeCorDaImagem` o substitui pelo que a
+    imagem traz assim que o editor abre -- o `copia_slot(0, 1)` do fim da carga
+    do original. Sem isso o `OK` gravaria `00 65` por cima de qualquer outro
+    padrao, e o gate nao veria: as duas ROMs deste repositorio guardam
+    exatamente `00 65` ali.
+
+    O par continua sem campo na camada de dados -- nem `TTeam` nem `TMlTeam`
+    guardam padrao de camisa --, e por isso o `MainForm.colorearClick` continua
+    deixando o COMBO no default: o byte tem de onde vir, o item da lista nao. }
   PadraoDaCamisa: array[0 .. 1] of Byte = (0, $65);
 
 var
@@ -205,10 +219,72 @@ function FormaEmVigor(indice_do_time: Integer): Integer;
 procedure GuardaOriginal(indice_do_time: Integer);
 function RestauraOriginal(indice_do_time: Integer): Boolean;
 
+{ A CARGA DO QUE O MODELO NAO GUARDA -- a parte do `0x004050D0` que este port
+  nao tinha.
+
+  Tres das sete regioes do bloco de cor nao tem campo na camada de dados: as
+  oito paletas de chuteira, a quarta paleta e o par de bytes do padrao de
+  camisa. O `MainForm.colorearClick` chama esta rotina imediatamente antes de
+  abrir o editor, que e onde o original as le -- a carga dele roda a cada troca
+  de time, e o editor e modal.
+
+  ELA E O QUE TORNA A GRAVACAO POSSIVEL. Sem os bytes lidos, devolve-los
+  intactos seria impossivel: pular os 288 + 32 gravaria menos que o original, e
+  gravar zeros corromperia a imagem.
+
+  E ELA TAMBEM ESPELHA O SLOT 0 NO SLOT 1, como o `0x00405198` faz no fim da
+  carga (`copia_slot(0, 1)`): `PadraoDaCamisa` passa a valer o que a imagem
+  diz, em vez do literal com que nasce. Sem isso o `OK` gravaria `00 65` por
+  cima de qualquer outro padrao que a imagem tivesse -- e o gate so nao veria
+  porque as duas ROMs deste repositorio guardam `00 65` ali.
+
+  False quando nao ha imagem aberta, o indice nao e time, ou a leitura nao
+  completa. }
+function CarregaBlocoDeCorDaImagem(indice_do_time: Integer): Boolean;
+
+{ ONDE MORA, NA IMAGEM, CADA UMA DAS SETE REGIOES DO BLOCO DE COR.
+
+  E o `0x00404E70` do original, que enche sete globais de offset a cada troca
+  de time; a carga (`0x004050D0`) e a gravacao (`0x004051A4`) leem as mesmas
+  sete. Os numeros e a tabela de 95 bytes vem do `wte_blococor`, que os extrai
+  do `.exe` e os confere contra oito `OFS_*` do `we2002_core`.
+
+  Devolve False para indice que nao e time de verdade. }
+function OffsetsDoBlocoDeCor(indice_do_time: Integer;
+                             out bandeira: TOffset;
+                             out forma: TCincoOffsets;
+                             out uniforme0, uniforme1: TOffset;
+                             out chuteira: TOitoOffsets;
+                             out quarta, padrao: TOffset): Boolean;
+
+{ A GRAVACAO DO BLOCO DE COR -- a `0x004051A4`, 383 bytes por time.
+
+  E a setima rota de escrita na imagem, e o unico chamador dela e o
+  `ficha_color.BitBtn3Click` (medido: um `call`, em `0x004069F9`). Espelha a
+  carga bloco por bloco, com DUAS assimetrias que sao do original:
+
+  1. **le 32 e grava 30** em quatro das sete regioes -- bandeira, os dois
+     uniformes e a quarta paleta. A ultima palavra de cada paleta e carregada e
+     nunca devolvida. Gravar 32 mudaria byte que o original nunca muda;
+  2. **a forma da bandeira e lida de um offset e gravada em cinco.** A carga usa
+     a copia do meio; a gravacao percorre as cinco. O byte mora replicado.
+
+  As chuteiras (8 x 32) e o par de padrao de camisa (2) sao simetricos.
+
+  AS DUAS FAMILIAS NAO PORTADAS SAEM DA FOTO. Chuteira e quarta paleta nao tem
+  campo na camada de dados; a `GuardaOriginal` as le da imagem e esta rotina as
+  devolve intactas. Pular os 288 + 32 bytes gravaria menos que o original;
+  gravar zeros corromperia a imagem.
+
+  Devolve False sem tocar em nada quando nao ha imagem aberta, quando o indice
+  nao e time, ou quando a foto e de outro time -- gravar chuteira de um time
+  em cima de outro e o unico estrago que esta rotina poderia fazer. }
+function GravaBlocoDeCorNaImagem(indice_do_time: Integer): Boolean;
+
 implementation
 
 uses
-  we2002_estado, we2002_types;
+  we2002_estado, we2002_types, we2002_cdimage;
 
 procedure ZeraCorEmEdicao;
 begin
@@ -345,7 +421,17 @@ begin
   Result := True;
 end;
 
+const
+  { Os tamanhos do bloco de cor, do `0x004051A4`. `LIDOS` e o que a carga le,
+    `GRAVADOS` e o que a gravacao devolve -- e os dois nao sao iguais nas
+    quatro paletas, que e a primeira assimetria. }
+  PALETA_BYTES_LIDOS   = 32;
+  PALETA_BYTES_GRAVADOS = 30;
+  PADRAO_BYTES         = 2;
+
 type
+  TPaletaCrua = array[0 .. PALETA_BYTES_LIDOS - 1] of Byte;
+
   TFotoDoTime = record
     valida: Boolean;
     indice: Integer;
@@ -357,6 +443,63 @@ type
 
 var
   Foto: TFotoDoTime;
+
+  { AS DUAS FAMILIAS NAO PORTADAS, cruas, como a imagem as tem.
+
+    Nao ha campo para elas na camada de dados e NAO HA QUEM AS EDITE -- a
+    `SalvaPaleta` recusa familia nao portada. Por isso elas nao precisam do par
+    slot 0 / slot 1 que o resto do bloco tem: uma copia so, lida na carga e
+    devolvida na gravacao, faz o mesmo papel.
+
+    `CruasIndice` guarda de quem sao. A gravacao confere, e se recusa: devolver
+    chuteira de um time em cima de outro seria o unico estrago que a
+    `GravaBlocoDeCorNaImagem` poderia fazer. }
+  ChuteiraCrua: array[0 .. BLOCOCOR_CHUTEIRAS - 1] of TPaletaCrua;
+  QuartaCrua: TPaletaCrua;
+  CruasValidas: Boolean = False;
+  CruasIndice: Integer = -1;
+
+function CarregaBlocoDeCorDaImagem(indice_do_time: Integer): Boolean;
+var
+  img: TCdImage;
+  bandeira, uniforme0, uniforme1, quarta, padrao: TOffset;
+  forma: TCincoOffsets;
+  chuteira: TOitoOffsets;
+  par: array[0 .. 1] of Byte;
+  n: Integer;
+begin
+  Result := False;
+  CruasValidas := False;
+  CruasIndice := -1;
+  if ImagemAberta = '' then
+    Exit;
+  if not OffsetsDoBlocoDeCor(indice_do_time, bandeira, forma,
+                             uniforme0, uniforme1, chuteira, quarta,
+                             padrao) then
+    Exit;
+  img.Init;
+  if not img.OpenRead(ImagemAberta) then
+    Exit;
+  try
+    for n := 0 to BLOCOCOR_CHUTEIRAS - 1 do
+      if not LeDoFluxoEm(img, chuteira[n], ChuteiraCrua[n],
+                         PALETA_BYTES_LIDOS) then
+        Exit;
+    if not LeDoFluxoEm(img, quarta, QuartaCrua, PALETA_BYTES_LIDOS) then
+      Exit;
+    if not LeDoFluxoEm(img, padrao, par, PADRAO_BYTES) then
+      Exit;
+  finally
+    img.Close;
+  end;
+  { O `copia_slot(0, 1)` do fim da carga: o slot 1, que e o que o combo de
+    padrao escreve e o que o `OK` grava, nasce valendo o que a imagem diz. }
+  PadraoDaCamisa[0] := par[0];
+  PadraoDaCamisa[1] := par[1];
+  CruasValidas := True;
+  CruasIndice := indice_do_time;
+  Result := True;
+end;
 
 procedure GuardaOriginal(indice_do_time: Integer);
 begin
@@ -372,6 +515,122 @@ begin
   Foto.padrao[0] := PadraoDaCamisa[0];
   Foto.padrao[1] := PadraoDaCamisa[1];
   Foto.valida := True;
+end;
+
+function OffsetsDoBlocoDeCor(indice_do_time: Integer;
+                             out bandeira: TOffset;
+                             out forma: TCincoOffsets;
+                             out uniforme0, uniforme1: TOffset;
+                             out chuteira: TOitoOffsets;
+                             out quarta, padrao: TOffset): Boolean;
+
+  { A conta do `0x00404E70`: indice logico no fluxo de dados -> offset
+    absoluto. Ver o cabecalho do `wte_blococor`. }
+  function Absoluto(logico, base: TOffset): TOffset;
+  begin
+    Result := logico + BLOCOCOR_SALTO * (logico div BLOCOCOR_DADOS) + base;
+  end;
+
+var
+  i: Integer;
+  logico: TOffset;
+begin
+  Result := False;
+  if (indice_do_time < 0) or (indice_do_time >= BLOCOCOR_TIMES) then
+    Exit;
+
+  { O time 36 tem ramo proprio -- o `cmp eax,0x24` --, e a tabela guarda 255
+    nele justamente porque ele nao a usa. }
+  if indice_do_time = BLOCOCOR_TIME_SENEGAL then
+    logico := BLOCOCOR_LOG_SENEGAL
+  else
+    logico := BLOCOCOR_LOG_BANDEIRA
+              + PALETA_BYTES_LIDOS * PALETA_DA_BANDEIRA[indice_do_time];
+  bandeira := Absoluto(logico, BLOCOCOR_BASE_PALETA);
+
+  { As cinco copias sao offset ABSOLUTO mais o indice do time -- um byte por
+    time, sem conversao. }
+  for i := 0 to High(forma) do
+    forma[i] := FORMA_DA_BANDEIRA[i] + indice_do_time;
+
+  uniforme0 := Absoluto(BLOCOCOR_LOG_UNIFORME0
+                        + BLOCOCOR_PASSO_UNIFORME * indice_do_time,
+                        BLOCOCOR_BASE_UNIFORME);
+  uniforme1 := Absoluto(BLOCOCOR_LOG_UNIFORME1
+                        + BLOCOCOR_PASSO_UNIFORME * indice_do_time,
+                        BLOCOCOR_BASE_UNIFORME);
+
+  { As oito chuteiras e a quarta paleta NAO dependem do time: sao as mesmas
+    para todos, e por isso o editor de cor mexe nelas para o jogo inteiro. }
+  for i := 0 to BLOCOCOR_CHUTEIRAS - 1 do
+    chuteira[i] := Absoluto(BLOCOCOR_LOG_CHUTEIRA + PALETA_BYTES_LIDOS * i,
+                            BLOCOCOR_BASE_PALETA);
+  quarta := BLOCOCOR_QUARTA_PALETA;
+  padrao := BLOCOCOR_PADRAO_CAMISA;
+  Result := True;
+end;
+
+function GravaBlocoDeCorNaImagem(indice_do_time: Integer): Boolean;
+var
+  img: TCdImage;
+  bandeira, uniforme0, uniforme1, quarta, padrao: TOffset;
+  forma: TCincoOffsets;
+  chuteira: TOitoOffsets;
+  cores: TCoresDoTime;
+  b: Byte;
+  i: Integer;
+begin
+  Result := False;
+  if ImagemAberta = '' then
+    Exit;
+  if (not CruasValidas) or (CruasIndice <> indice_do_time) then
+    Exit;
+  if not OffsetsDoBlocoDeCor(indice_do_time, bandeira, forma,
+                             uniforme0, uniforme1, chuteira, quarta,
+                             padrao) then
+    Exit;
+
+  img.Init;
+  if not img.OpenReadWrite(ImagemAberta) then
+    Exit;
+  try
+    { A ordem e a do original. Ela nao muda byte nenhum -- as sete regioes nao
+      se tocam --, e fica igual porque um diff de trace comparado com o do
+      oraculo e mais facil de ler assim. }
+    cores := CoresEmVigor(indice_do_time, COR_FAMILIA_BANDEIRA, 0);
+    GravaNoFluxo(img, bandeira, cores[0], PALETA_BYTES_GRAVADOS);
+
+    b := Byte(FormaEmVigor(indice_do_time));
+    for i := 0 to High(forma) do
+      GravaNoFluxo(img, forma[i], b, 1);
+
+    { O UNIFORME COMECA NA SEGUNDA PALAVRA, e a bandeira nao. O offset que o
+      `0x00404E70` calcula para o uniforme e `OFS_KIT_PREVIEW + 2`, ou seja o
+      elemento 1 do vetor de 16 que o `we2002_database` carrega -- a palavra
+      zero fica de fora da gravacao e vale `0000` na imagem.
+
+      E o mesmo `cores[1..15]` que a `wte_render2d` ja usava para desenhar, e a
+      mesma assimetria que o `render2d.md` mediu por outro caminho: 16 cores na
+      bandeira, 15 no uniforme. Gravar a partir de `cores[0]` desloca os 30
+      bytes em uma palavra e estraga o uniforme inteiro -- foi o que o
+      `golden-16` mediu antes desta linha existir, 44 bytes de diferenca em
+      `OFS_KIT_PREVIEW+130`. }
+    cores := CoresEmVigor(indice_do_time, COR_FAMILIA_UNIFORME, 0);
+    GravaNoFluxo(img, uniforme0, cores[1], PALETA_BYTES_GRAVADOS);
+    cores := CoresEmVigor(indice_do_time, COR_FAMILIA_UNIFORME, 1);
+    GravaNoFluxo(img, uniforme1, cores[1], PALETA_BYTES_GRAVADOS);
+
+    { Chuteira: 32 gravados contra 32 lidos, e nao 30. Simetrica. }
+    for i := 0 to BLOCOCOR_CHUTEIRAS - 1 do
+      GravaNoFluxo(img, chuteira[i], ChuteiraCrua[i][0],
+                   PALETA_BYTES_LIDOS);
+
+    GravaNoFluxo(img, quarta, QuartaCrua[0], PALETA_BYTES_GRAVADOS);
+    GravaNoFluxo(img, padrao, PadraoDaCamisa[0], PADRAO_BYTES);
+  finally
+    img.Close;
+  end;
+  Result := True;
 end;
 
 function RestauraOriginal(indice_do_time: Integer): Boolean;

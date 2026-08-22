@@ -1,0 +1,94 @@
+# golden-16-cor -- o gate do `ficha_color.BitBtn3Click`, o `OK` do editor de
+# cor. E a SETIMA rota de escrita na imagem.
+#
+# CORR-WTE-081, segunda das tres gravacoes orfas. Lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-16-cor.txt \
+#        --roteiro-port wte/tests/roteiros/golden-16-cor.port.txt
+#
+# ELE EDITA ANTES DE GRAVAR, e aqui isso e obrigatorio -- ao contrario do
+# `golden-15`, onde o proprio `Comple.` era destrutivo. As sete regioes do
+# bloco de cor saem do que a carga leu da imagem: clicar `OK` sem editar
+# devolveria os mesmos bytes, e um port que nao gravasse nada passaria. E a
+# mesma objecao que o `golden-03` teve de responder com o `golden-04`.
+#
+# A EDICAO E UM CLIQUE SO, e ela mexe nas dezesseis cores de uma vez: o
+# `aclarar` (`0x00406744`) percorre a faixa do gradiente, que nasce 1..16, e
+# clareia cada uma em um passo de cinco bits por canal. Nao precisa selecionar
+# amostra nenhuma antes, e por isso o roteiro nao depende do estado do
+# `recuadro2`.
+#
+# O QUE A CORRIDA GRAVA, por time: 30 bytes de cores de bandeira, o byte de
+# forma em CINCO offsets, 30 + 30 dos dois uniformes, 8 x 32 de paleta de
+# chuteira, 30 da quarta paleta e 2 do padrao de camisa -- 383 no total. So os
+# 30 primeiros mudam de valor nesta sequencia; os outros 353 sao devolvidos
+# como estavam, e devolver o que nao se modela e metade do que este gate julga.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- o editor de cor ----
+#
+# GroupBox4 (216,8) + colorear (8,176) = (224,184), 97x25 -> centro (272,196).
+! clique 272 196
+~ 4
+
+# A janela `Cor  ` mede os 542x225 do DFM sob Wine, sem moldura -- como o
+# `jugador`, e ao contrario do `ficha_dorsal`.
+> ^Cor
+~ 1
+
+# aclarar (392,152) 25x25 -> centro (404,164).
+! clique 404 164
+~ 2
+
+# BitBtn3 `OK     ` (456,192) 73x25 -> centro (492,204).
+! clique 492 204
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= PINTAR
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C, e
+# so um `fseek` noutro ponto do mesmo arquivo a esvazia.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

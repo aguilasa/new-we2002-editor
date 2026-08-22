@@ -11,10 +11,11 @@
   O terceiro caso e o `else` do original, e nao o teste de `= 2`: um combo com
   um quarto item cairia em EXTRA.
 
-  ONDE ELES VAO PARAR, e por que isso parece pouco: no `PadraoDaCamisa` da
-  `wte_cor`, que e o slot 1 do par. **Nada neste port o le ainda** -- o unico
-  consumidor no original e a gravacao do `BitBtn3`, que nao foi portada. O
-  cabecalho da variavel explica o resto.
+  ONDE ELES VAO PARAR: no `PadraoDaCamisa` da `wte_cor`, que e o slot 1 do
+  par. Ate a CORR-WTE-081 nada neste port o lia; hoje o `OK` do editor
+  (`ficha_color.BitBtn3Click`) grava os dois bytes na imagem, que e o unico
+  consumidor que o original tambem tem. O cabecalho da variavel explica o
+  resto.
 
   E o combo esta `Enabled = False` no `.dfm`: so codigo o move. }
 begin

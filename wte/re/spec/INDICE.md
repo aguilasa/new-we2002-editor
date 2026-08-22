@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 52 |
+| `implementado` | 53 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 2 |
 | `nao portado` | 1 |
-| `aberto` | 22 |
+| `aberto` | 21 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -61,7 +61,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040690c` | `ficha_color` | [lista_col3Change](ficha_color.lista_col3Change.md) | OnChange | edicao | implementado |
 | `0x00406968` | `ficha_color` | [BitBtn1Click](ficha_color.BitBtn1Click.md) | OnClick | auxiliar | implementado |
 | `0x004069c8` | `ficha_color` | [BitBtn2Click](ficha_color.BitBtn2Click.md) | OnClick | auxiliar | implementado |
-| `0x004069e8` | `ficha_color` | [BitBtn3Click](ficha_color.BitBtn3Click.md) | OnClick | auxiliar | aberto |
+| `0x004069e8` | `ficha_color` | [BitBtn3Click](ficha_color.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x00406a0c` | `ficha_color` | [colorMouseDown](ficha_color.colorMouseDown.md) | OnMouseDown x16 | edicao | implementado |
 | `0x00406f34` | `ficha_color` | [SpeedButton1Click](ficha_color.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
 | `0x00407a68` | `jugador` | [BitBtn2Click](jugador.BitBtn2Click.md) | OnClick | auxiliar | trivial |

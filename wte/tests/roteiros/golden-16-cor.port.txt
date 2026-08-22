@@ -1,0 +1,38 @@
+# golden-16-cor, lado PORT. Par de golden-16-cor.txt.
+#
+# UMA assimetria so: a imagem vem da linha de comando. A janela `Cor  ` mede o
+# mesmo dos dois lados -- 542x225, o ClientWidth/ClientHeight do DFM --, entao
+# as coordenadas do `aclarar` e do `OK` sao as mesmas.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 272 196
+~ 4
+> ^Cor
+~ 1
+! clique 404 164
+~ 2
+! clique 492 204
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= PINTAR
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

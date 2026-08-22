@@ -2,7 +2,7 @@
 handler: BitBtn3Click
 formulario: ficha_color
 endereco: 0x004069e8
-veredito: aberto
+veredito: implementado
 ---
 
 # ficha_color.BitBtn3Click
@@ -91,29 +91,51 @@ Não trata. A `0x00403400` não devolve estado que o handler leia.
 
 **Evidência:** disassembly lido
 
-## Justificativa do veredito `aberto`
+## Como o veredito fechou
 
-**Não é moldura de diálogo, é gravação — e não tem dono.** A
-[WTE-TASK-30](../../../docs/tasks/30-handlers-auxiliares.md) esperava *"avisos
-e confirmações"* neste grupo e disse que aqui se implementa *"a moldura ... e
-as tasks 29 e 32 preenchem o miolo"*. O miolo deste não é de nenhuma das duas:
-é uma escrita na imagem, do tamanho de uma das seis que a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) carregou, e ela
-está fechada.
+Fechou pela [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), segunda das
+três gravações órfãs, com o par
+[`golden-16-cor`](../../tests/roteiros/golden-16-cor.txt) nos três modos do
+[`golden_check.sh`](../../tools/golden_check.sh): `controle` byte-idêntico,
+`positivo` detectando o byte plantado em 405228, `golden` byte-idêntico contra
+o oráculo.
 
-Implementar aqui sem o gate de gravação — golden com **controle** fechando
-antes, nas duas ROMs — seria opinião, que é o que a
-[WTE-TASK-22](../../../docs/tasks/22-harness-golden.md) existe para impedir.
+**O roteiro edita antes de gravar, e aqui isso era obrigatório.** Ao contrário
+do `golden-15`, cujo `Comple.` é destrutivo sozinho, as sete regiões daqui saem
+do que a carga leu: clicar `OK` sem editar devolveria os mesmos bytes e um port
+que não gravasse nada passaria. Um clique no `aclarar` resolve — ele percorre a
+faixa do gradiente inteira (1..16), então não depende de amostra selecionada.
+Medido: 30 bytes mudam em `OFS_FLAG_COLOURS+96`, e mais nada além dos três do
+arranque.
 
-**Dono: [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md)**, aberta em 2026-08-21 para as três gravações órfãs. Ela
-manda implementar na ordem `jugador` → `ficha_color` → `estrategia`, uma por
-vez, com o controle fechando antes de cada golden.
+**As sete colunas por time entraram por gerador, não à mão.** O
+[`dump_blococor.py`](../../tools/dump_blococor.py) lê do `.exe` a tabela de 95
+bytes de `0x00423247` — que **não é identidade**: 86 valores distintos, times
+compartilham paleta de bandeira — e as cinco bases de `0x00423634`, e emite o
+[`wte_blococor.pas`](../../src/wte_blococor.pas). Ele aborta se qualquer uma de
+oito âncoras deixar de bater com um `OFS_*` do `we2002_core`, entre elas o time
+36 (`OFS_FLAG_COLOURS_SENEGAL`, o `cmp eax,0x24` do original) e as cinco cópias
+da forma.
 
-**O que já está pronto para quem herdar:** o vetor e o slot 1 são a
-[`wte_cor`](../../src/wte_cor.pas) (`CorEmEdicao`, `SalvaPaleta`, `Jogo`), o
-slot 0 chegou nesta task (`GuardaOriginal`/`RestauraOriginal`), e o par de
-bytes de padrão de camisa já tem lugar (`PadraoDaCamisa`). Falta o escritor — e
-o `we2002_offsets` ainda não expõe as sete colunas por time que a carga usa.
+**A armadilha custou uma corrida de golden, e ela não estava na spec.** O
+uniforme começa na **segunda** palavra do vetor: o offset que o `0x00404E70`
+calcula é `OFS_KIT_PREVIEW + 2`, ou seja `cores[1]`, enquanto a bandeira começa
+em `cores[0]`. Gravar os dois do mesmo jeito desloca os 30 bytes de uma palavra
+e estraga o uniforme inteiro — 44 bytes de diferença em `OFS_KIT_PREVIEW+130`.
+É a mesma assimetria que o [`render2d.md`](../render2d.md) já tinha medido por
+outro caminho ("16 na bandeira, 15 no uniforme"), e que a
+[`wte_render2d`](../../src/wte_render2d.pas) já usava para desenhar.
+
+**As duas famílias não portadas saem de uma carga nova.** A
+`CarregaBlocoDeCorDaImagem` da [`wte_cor`](../../src/wte_cor.pas) lê da imagem
+as oito paletas de chuteira, a quarta paleta e o par de padrão de camisa quando
+o `colorearClick` abre o editor — que é onde o original as lê. Com ela o `OK`
+devolve os 353 bytes que ninguém edita exatamente como estavam.
+
+E ela consertou de passagem uma divergência latente: o `PadraoDaCamisa`
+nascia com o literal `(0, $65)` e **nunca era carregado**. As duas ROMs deste
+repositório guardam `00 65` naquele offset, então o gate não teria visto — mas
+qualquer imagem com outro padrão teria o padrão sobrescrito pelo port.
 
 ## Notas
 
@@ -125,5 +147,6 @@ consumidor no original é a gravação do `BitBtn3`"*. Medido, é isso mesmo.
 têm campo na camada de dados, mas a `0x004051A4` grava os 288 bytes delas a
 partir do slot 0 — que é o que a carga leu da imagem. Um port que pulasse os
 dois blocos gravaria menos que o original e passaria no golden **só** enquanto
-ninguém os editasse; um que gravasse zeros corromperia a imagem. Quem herdar
-precisa carregá-los para poder devolvê-los intactos.
+ninguém os editasse; um que gravasse zeros corromperia a imagem. Foi por isso
+que a `CarregaBlocoDeCorDaImagem` teve de existir: elas não são modeladas, e o
+único jeito de devolver o que não se modela é guardar os bytes como estão.
