@@ -255,8 +255,8 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-21, do `spec_index.py`): 53 `implementado`, 19 `trivial`, 2
-      `divergencia deliberada`, 1 `nao portado`, 21 `aberto`. Os 11 do
+      (2026-08-21, do `spec_index.py`): 55 `implementado`, 19 `trivial`, 2
+      `divergencia deliberada`, 1 `nao portado`, 19 `aberto`. Os 11 do
       `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
       somando-se aos 28 do grupo de carga, aos 28 do de edição que a
       WTE-TASK-26 fechou e às gravações da WTE-TASK-27; os 17 do grupo
@@ -286,8 +286,13 @@ só uma escolha de quando.
       modos, e trouxe o gerador `wte/tools/dump_blococor.py` — a tabela de 95
       bytes que diz qual paleta de bandeira cada time usa **não é identidade**,
       e escrevê-la à mão seria copiar 95 números sem quem os conferisse. Falta
-      o `estrategia`, e o pré-requisito dele continua de fora: a `0x0040A0B4`,
-      que enche a tela de tática, não está portada
+      o `estrategia`, e o pré-requisito dele **caiu em 2026-08-21**: a
+      [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) portou a `0x0040A0B4` como
+      `PreencheTelaDeTatica`, na `wte/src/wte_tatica.pas`, e com ela fecharam o
+      `estrategia.BitBtn1Click` e o `MainForm.mostrar_estrategiaClick` — mais
+      as duas divergências que a spec do `lista_formacionesClick` devia àquela
+      rotina. Medida a tela contra o oráculo em três times pelo
+      `compara_tela.sh --malha`
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão

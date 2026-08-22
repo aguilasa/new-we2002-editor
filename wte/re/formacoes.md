@@ -33,7 +33,8 @@ seis tabelas da animação e liga o `reloj`; a outra pinta os onze
 
 O item **1** (`DEFAULT`) é o outro ramo: em vez da tabela, ele lê o
 buffer da formação viva do time (`0x00432e88`), que é preenchido por
-`0x0040a0b4` — rotina de abertura do formulário, **não portada**.
+`0x0040a0b4` — rotina de abertura do formulário, portada como
+`PreencheTelaDeTatica` na `wte_tatica.pas` (CORR-WTE-082).
 
 ## As três conferências que abortam
 
