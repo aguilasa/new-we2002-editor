@@ -1,0 +1,6 @@
+handler	endereco	bytes	confirmado	o_que_o_corpo_faz
+ficha_dorsal.BitBtn1Click	0x00402b40	21	sim	grava 1 no campo de resultado modal (+0x24C) e chama TCustomForm::Hide; nenhuma chamada de escrita
+ficha_warning.FormCreate	0x00402cdc	16	sim	uma chamada a TControl::SetColor sobre a propria instancia, com 0x3C3CDC; o port poe $003C3CDC
+ficha_info.FormCreate	0x00402f8c	16	sim	idem, com 0xDCDC3C; o port poe $00DCDC3C
+ficha_warning_2.FormCreate	0x00408d88	16	sim	idem, com 0x3C3CDC; o port poe $003C3CDC
+ficha_error.SpeedButton1Click	0x00420f08	14	sim	carrega a global _ficha_info2 e chama ShowModal pelo VMT +0xE8; resultado descartado

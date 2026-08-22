@@ -43,7 +43,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-21 | 2026-08-21 |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ✅ Concluído | 2026-08-21 | ⬜ pendente |
-| [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ⬜ Pendente | — | — |
+| [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | 🔄 Em andamento | — | — |
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
@@ -255,8 +255,13 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-21, do `spec_index.py`): 56 `implementado`, 19 `trivial`, 2
-      `divergencia deliberada`, 1 `nao portado`, 18 `aberto`. Os 11 do
+      (2026-08-22, remedido pelo `check_fase4.py`): 56 `implementado`, 19
+      `trivial`, 2 `divergencia deliberada`, 1 `nao portado`, 16 `aberto`.
+      **78 dos 96 têm veredito fechado**, e os 18 que faltam estão nomeados um
+      a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
+      [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
+      (WTE-TASK-32), 4 esperam corpo Pascal e 11 esperam régua. **Doze dos 16
+      `aberto` já têm corpo escrito** — o que os segura não é código. Os 11 do
       `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
       somando-se aos 28 do grupo de carga, aos 28 do de edição que a
       WTE-TASK-26 fechou e às gravações da WTE-TASK-27; os 17 do grupo
@@ -265,8 +270,8 @@ só uma escolha de quando.
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
       `compara_tela.sh --edicao` alcançar a lista de descarte
-- [ ] **Três gravações órfãs, achado da WTE-TASK-30 (2026-08-21), hoje na
-      [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md).** O grupo `auxiliar` não era
+- [x] **Três gravações órfãs, achado da WTE-TASK-30 (2026-08-21), fechadas
+      pela [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md).** O grupo `auxiliar` não era
       de "avisos e confirmações": o `OK` do `ficha_color` (`0x004069e8`), o
       `Comple.` do `jugador` (`0x00408548`) e o ` Accept` do `estrategia`
       (`0x0040a660`) **escrevem na imagem**. A WTE-TASK-27 contava seis
@@ -311,7 +316,22 @@ só uma escolha de quando.
       **E "gravação" nem sempre quer dizer a imagem:** o `grabar_memory` emite
       um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
       2026-08-19 — comparar só as duas imagens aprovaria um port inerte
-- [ ] Cinco `trivial` reamostrados e reconferidos
+- [x] Cinco `trivial` reamostrados e reconferidos — na WTE-TASK-31
+      (2026-08-22), por disassembly, com o registro em
+      [`wte/re/fase-4-trivial.tsv`](../../wte/re/fase-4-trivial.tsv). A amostra
+      é **declarada, não sorteada**: cinco espaçados uniformemente pela lista
+      ordenada por endereço, para o `--check` poder refazê-la. Os cinco
+      confirmaram, e nos três `FormCreate` a cor que o original passa a
+      `TControl::SetColor` é a mesma que o `.inc` do port escreve
+- [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
+      2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
+      lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de
+      mover jogador e número de camisa e os dois do arranque (`FormShow`,
+      `boton_dialogo_weClick`), e **saem** o `grabar_memoryClick` e o
+      `grabar_camisetaClick`, que emitem arquivo e deixam a ROM intacta. A
+      tabela de gates do `check_fase4.py` é guardada: gravação sem roteiro
+      declarado aborta o fechamento — era por não existir essa conta que três
+      ficaram sem dono até a WTE-TASK-30
 - [x] `.mcr`: contêiner por documentação pública, conteúdo revertido — 16
       destinos mapeados dos **dois** lados em
       [`wte/re/mcr.md`](../../wte/re/mcr.md), com o contêiner lido do molde e

@@ -916,6 +916,24 @@ grava.
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
+**O estado medido está em
+[`../wte/re/fase-4.md`](../wte/re/fase-4.md)**, gerado pelo
+[`check_fase4.py`](../wte/tools/check_fase4.py), e a primeira passagem da
+WTE-TASK-31 (2026-08-22) fechou seis dos sete critérios: **78 dos 96 com
+veredito fechado**, um `não portado` justificado, três pontos soltos de
+evidência fraca com decisão escrita, cinco `trivial` reamostrados, varredura de
+decompilado limpa em 229 arquivos, e **32 de 32 corridas golden verdes** sobre
+a ROM japonesa. Falta o primeiro: 16 `aberto` e 2 sem spec.
+
+**E o fechamento corrigiu uma conta que esta seção fazia: as gravações não são
+seis nem nove, são dezessete.** Nove é o número de quem alguém *chamou* de
+gravação; lendo a seção `## Bytes tocados` das 94 specs, entram os sete de
+mover jogador e número de camisa — grupo `edicao`, que gravam dentro da
+`0x00404820` — e mais dois que gravam no arranque, e saem os dois que emitem
+arquivo em vez de tocar a ROM. A tabela de gates do gerador é guardada:
+gravação sem roteiro golden declarado **aborta** o fechamento, que é o defeito
+que deixou três sem dono até a WTE-TASK-30.
+
 ---
 
 ### Fase 5 — As features que motivaram tudo (duas executam na Fase 4)
