@@ -4,7 +4,7 @@ title: "Correção: três gravações na imagem sem dono — o OK do ficha_color
 type: correção
 category: comportamento
 status: pendente
-depends_on: []
+depends_on: ["CORR-WTE-082"]
 ---
 
 # CORR-WTE-081: três gravações na imagem sem dono
@@ -228,12 +228,34 @@ o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
 4. `docs/PLAN-WTE-LAZARUS.md` §4.4 mede a fração de Pascal gerado, e uma
    unidade nova escrita à mão a move — 57,9% → 56,4%. O `check_fase2.py` pegou.
 
-**O que falta, e como continuar:**
+**O que falta, e ele está BLOQUEADO:**
 
-- **`estrategia.BitBtn3Click`** — segue com o pré-requisito de fora: a
-  `0x0040A0B4`, que enche a tela de tática, não está portada. Gravar as
-  posições dos componentes de uma tela que ninguém posicionou gravaria as
-  coordenadas de tempo de projeto do `.lfm`.
+- **`estrategia.BitBtn3Click`** — o pré-requisito que esta correção declarou
+  fora do escopo virou correção própria, a
+  [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md), e o `depends_on` do frontmatter
+  aponta para ela. Medido em 2026-08-21, ao tentar a terceira passagem:
+
+  ```text
+  0x0040a0b4: 1443 bytes      a leitora da tela de tática, sem port
+  0x0040a660: 1931 bytes      o ` Accept`, que lê a tela para gravar
+
+  callers de 0x0040a0b4  ->  ['0x40a658', '0x4107a4']
+      estrategia.BitBtn1Click
+      MainForm.mostrar_estrategiaClick
+  ```
+
+  São **dois** buracos, não um. Além de a tela não ser enchida — e portanto o
+  handler leria as coordenadas de tempo de projeto do `.lfm` —, a seção *Bytes
+  tocados* da spec dele ainda diz `**Evidência:** não medido` para os tamanhos
+  da tática. Implementar assim seria escrever o escritor por adivinhação.
+
+  **E a soma é trabalho de task, não de correção:** portar 1.443 bytes de
+  leitora fecha mais dois `aberto` que não são desta CORR
+  (`estrategia.BitBtn1Click` e `MainForm.mostrar_estrategiaClick`), e medir a
+  metade não lida de 1.931 bytes é RE de spec. Por isso a saída foi abrir a
+  correção nova com o que se mediu, como manda o
+  [`03-corrigir.md`](/docs/prompts/03-corrigir.md) para discrepância grande, e
+  parar.
 
 ---
 

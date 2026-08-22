@@ -96,6 +96,12 @@ enchida** — a `0x0040A0B4` continua sem port, como a
 posições dos componentes de uma tela que ninguém posicionou gravaria as
 coordenadas de tempo de projeto do `.lfm`. A ordem certa é encher primeiro.
 
+**O pré-requisito virou correção própria em 2026-08-21:** a
+[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md), aberta quando a
+CORR-WTE-081 chegou aqui e mediu os dois buracos. O primeiro é a leitora, 1.443
+bytes com dois chamadores `aberto`; o segundo é esta spec, cuja seção *Bytes
+tocados* ainda diz `não medido`. Os dois têm de fechar antes deste handler.
+
 ## Notas
 
 **A aritmética de setor está inline aqui, e é a mesma geometria.** Os outros
