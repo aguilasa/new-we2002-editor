@@ -100,8 +100,9 @@ Quem lê a posição de volta é o `estrategia.BitBtn3Click`
 [WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md); quem a
 escreve a partir do dado é a rotina interna `0x0040a0b4`, portada
 como `PreencheTelaDeTatica` na `wte_tatica.pas` (CORR-WTE-082).
-**Este par é
-só a metade de entrada do caminho.**
+**O caminho fechou nos dois sentidos** desde a CORR-WTE-081: a ida é
+o `PreencheTelaDeTatica` e a volta é o ` Accept`, que grava 45 bytes
+por time e tem gate byte a byte no `golden-17-tatica`.
 
 E só o botão esquerdo faz alguma coisa: o original testa `cl` na
 entrada e sai sem fazer nada — sem limpar estado — para qualquer outro,
