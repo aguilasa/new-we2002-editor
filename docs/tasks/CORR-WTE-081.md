@@ -244,10 +244,12 @@ o compilador diria se chamasse — as três únicas quebras foram `Cadeia`,
       MainForm.mostrar_estrategiaClick
   ```
 
-  São **dois** buracos, não um. Além de a tela não ser enchida — e portanto o
-  handler leria as coordenadas de tempo de projeto do `.lfm` —, a seção *Bytes
-  tocados* da spec dele ainda diz `**Evidência:** não medido` para os tamanhos
-  da tática. Implementar assim seria escrever o escritor por adivinhação.
+  Eram **dois** buracos, não um. O segundo — a seção *Bytes tocados* da spec
+  dele, que dizia `**Evidência:** não medido` — **fechou em 2026-08-21**, na
+  primeira passagem da CORR-WTE-082: são cinco regiões e 45 bytes por time, com
+  a formação e o cobrador conferidos contra `OFS_FORMATIONS` e `OFS_KICKER`.
+  Continua faltando o primeiro, que é a leitora: sem ela o handler leria da
+  tela as coordenadas de tempo de projeto do `.lfm`.
 
   **E a soma é trabalho de task, não de correção:** portar 1.443 bytes de
   leitora fecha mais dois `aberto` que não são desta CORR

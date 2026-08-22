@@ -131,7 +131,9 @@ lados, para pelo menos três times distintos. O `wte/re/malhas.tsv` e a
 
 ## Verificação
 
-- [ ] a seção *Bytes tocados* do `estrategia.BitBtn3Click` sem `não medido`
+- [x] a seção *Bytes tocados* do `estrategia.BitBtn3Click` sem `não medido` —
+      cinco regiões, 45 bytes por time, com `OFS_FORMATIONS` e `OFS_KICKER`
+      fechando as duas âncoras que têm nome
 - [ ] a tela de tática do port conferida contra o oráculo em **três** times
       distintos, com o `compara_tela.sh`
 - [ ] `estrategia.BitBtn1Click` e `MainForm.mostrar_estrategiaClick` com
@@ -141,12 +143,68 @@ lados, para pelo menos três times distintos. O `wte/re/malhas.tsv` e a
       mexer no que já fechou
 - [ ] `roms/` intocada; toda corrida sobre cópia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**PARCIAL — 1 dos 3 passos.** O passo 1 (medir a segunda metade do
+`0x0040a660`) está fechado e commitado. Os passos 2 e 3 — portar a
+`0x0040A0B4` e trocar o veredito dos dois chamadores — continuam abertos, e a
+correção segue **pendente**.
+
+**Executado em:** 2026-08-21 (primeira passagem)
 
 **Resumo do que foi feito:**
 
+Lida instrução a instrução a faixa `0x0040A7C0`..`0x0040ADCD` do
+`estrategia.BitBtn3Click`, e a seção *Bytes tocados* da spec dele trocou o
+`**Evidência:** não medido` por **cinco regiões e 45 bytes por time**:
+
+| região | índice lógico | bytes |
+|---|---:|---:|
+| cor de radar 1 | `2*t + 0x3F534` | 2 |
+| cor de radar 2 | `2*t + 0x3F634` | 2 |
+| formação | `30*t + 2*(t div 95) + 0x40C2C` | 30 |
+| cobrador | `6*t + 2*(t div 95) + 0x46228` | 6 |
+| tática | `5*t + 0x408A8` | 5 |
+
+Duas âncoras fecham contra o `we2002_core` — para o time 0 a formação dá
+**2303700** (`OFS_FORMATIONS`) e o cobrador **2329056** (`OFS_KICKER`) —, e as
+três constantes já estavam versionadas no `.aux.inc` do `MainForm` desde a
+WTE-TASK-25, medidas por outro caminho e batendo uma a uma.
+
 **Problemas encontrados:**
 
+1. **O `spec_index.py` tem vocabulário fechado no campo evidência**, e ele
+   recusa qualificação: `disassembly lido (0x0040A7C0..0x0040ADCD)` reprova, só
+   `disassembly lido` passa. A faixa foi para a prosa acima da linha. A guarda
+   está certa — evidência qualificada deixa de ser comparável entre specs.
+2. **Os três últimos blocos não passam pela `0x00403400`.** Chamam `fseek` e
+   `fputc` da RTL direto, um byte por vez, e resolvem a fronteira de setor no
+   próprio laço: comparam o índice com `0x800` e dão `fseek(+0x130,
+   SEEK_CUR)`. Procurar a escritora comum aqui não a encontraria — é a segunda
+   vez que este handler mistura o caminho incremental com o fechado.
+3. **Os 30 bytes da formação saem de três laços de dez, não de um de trinta**,
+   e o primeiro copia a partir do índice **1** de `[0x00434224]` — o elemento
+   zero fica de fora.
+
+**O que falta, e o que a medição mudou no tamanho dele:**
+
+O passo 2 é maior do que esta correção estimou ao ser aberta, e agora se sabe
+por quê. A `0x0040A0B4` **não faz I/O de imagem nenhum** — sem `0x004033BC`,
+sem `0x00403388`, sem `fseek`. Ela lê de globais e posiciona componentes; quem
+enche as globais é o `MainForm.mostrar_estrategiaClick` (`0x00410220`), que é
+um dos chamadores da leitora comum. Portar a tela de tática é portar **os
+dois**, mais as duas auxiliares que a `0x0040A0B4` chama (`0x004099BC`, 227 B, e
+`0x004097D4`, 474 B) — cerca de 2.100 bytes somados, além da leitura da imagem
+no handler de navegação.
+
+E há um terceiro beneficiário já nomeado: o
+[`lista_formacionesClick`](../../wte/re/spec/estrategia.lista_formacionesClick.md)
+está `implementado` **com divergência nomeada** — o item `DEFAULT` não faz nada
+porque o buffer vivo do time (`0x00432E88`) é justamente o que a `0x0040A0B4`
+preenche. Fechar o passo 2 fecha aquela divergência também.
+
 **Arquivos criados/modificados:**
+
+- modificados: `wte/re/spec/estrategia.BitBtn3Click.md` (a seção *Bytes
+  tocados* e a justificativa), `docs/tasks/CORR-WTE-081.md` (a linha que dizia
+  que a spec ainda estava `não medido`)
