@@ -333,7 +333,17 @@ só uma escolha de quando.
       `ml_teams[22]`. **Não é defeito do port:** o laço é transpilado do
       `we2002_core`, o `ed.exe` para no time 55 e pula o 5 e o 22 do bloco de
       ML, e ele nunca precisou dessas cores porque não desenha bandeira. O
-      editor do Obocaman desenha, e as lê pela tabela de offsets em `.data`
+      editor do Obocaman desenha, e as lê pela tabela de offsets em `.data`.
+      **Consertado no mesmo dia pela rota B**, com a
+      `CarregaBandeirasQueOCoreNaoLe` da `wte_cor` preenchendo, depois do
+      `Load` e fora dele, só o que o core deixou zerado — o `compare_dumps.py`
+      continua idêntico nas duas ROMs. Medido antes de virar código: dos 95
+      slots, **85 batem** entre a carga do core e a tabela do Obocaman, 10 estão
+      zerados e **um diverge de propósito** (`teams[39]`). Oito dos nove
+      alcançáveis fecham em 0 de 3.840; são **sete** CLASSIC e não oito, porque
+      o `teams[63]` tem nome vazio e nenhum item do combo o alcança. O nono, o
+      combo 85, ficou com uma diferença de POSIÇÃO —
+      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md)
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
       lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de

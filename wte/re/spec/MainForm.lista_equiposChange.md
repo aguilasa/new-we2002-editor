@@ -459,6 +459,18 @@ para no time 55, e o bloco de Master League pula os índices 5 e 22. O `ed.exe`
 nunca precisou dessas cores porque não desenha bandeira; o editor do Obocaman
 precisa, e as lê pela tabela de offsets em `.data`.
 
+**Consertado em 2026-08-22**, pela rota B da
+[CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md): a
+`CarregaBandeirasQueOCoreNaoLe` da [`wte_cor`](../../src/wte_cor.pas) preenche,
+depois do `Load` e fora dele, só os slots que o core deixou zerados. Oito dos
+nove alcançáveis passaram a bater em **0 de 3.840** com tolerância zero — o
+nono, o combo 85, ficou com uma diferença de POSIÇÃO que virou a
+[CORR-WTE-084](../../../docs/tasks/CORR-WTE-084.md). E são **sete** CLASSIC,
+não oito: o `teams[63]` tem nome vazio e nenhum item do combo o alcança.
+
+O texto abaixo é o registro do dia do achado, e continua valendo como
+diagnóstico.
+
 Está na [CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md), com as duas rotas
 possíveis e a recomendação. **É mais uma razão para este veredito continuar
 `aberto`**, e a primeira delas que é de dado, não de régua: nos times 2 e 0 a
