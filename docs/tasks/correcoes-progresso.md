@@ -104,6 +104,10 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | A tela de tática nunca é enchida — a `0x0040A0B4` (1.443 B) não tem port, e sem ela o ` Accept` do `estrategia` gravaria as coordenadas de tempo de projeto do `.lfm` | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Dez times desenham bandeira preta — os 8 CLASSIC e dois clubes de ML: o `ed.exe` não lê a paleta deles e o editor do Obocaman lê | Alta | [ ] pendente | — |
 | [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md) | [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | O combo 85 (`ml_teams[22]`) diverge por POSIÇÃO depois de a paleta ser consertada — bandeira 2 px mais abaixo, e a barra `equipe` do oráculo em 76 px, fora da grade `11v+9` | Média | [ ] pendente | — |
+| [CORR-WTE-085](/docs/tasks/CORR-WTE-085.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O plano e o `progresso.md` ainda dizem "duas das **seis** gravações" onde o `check_fase4.py` mede **dezessete**; o plano se contradiz a dezesseis linhas de distância | Alta | [ ] pendente | — |
+| [CORR-WTE-086](/docs/tasks/CORR-WTE-086.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | A WTE-TASK-30 dá o `pabajoClick` como dono da rota de vínculo do `ficha_enlaza`; nenhuma spec nem código liga os dois — quem abre o modal é o `mostrar_jugadorClick`, que segue `aberto` | Baixa | [ ] pendente | — |
+| [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O Log da WTE-TASK-30 conta 12 `.inc` novos e 6 `.uses` tocados; o commit `fb640cd` tem 11 `.inc` novos e 5 `.uses` | Baixa | [ ] pendente | — |
+| [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -190,6 +194,10 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-082 — portar a `0x0040A0B4` e medir a metade de tática do ` Accept`, antes de a CORR-WTE-081 poder fechar
 - [ ] CORR-WTE-083 — dar cor à bandeira dos 8 times CLASSIC, pela tabela de offsets do Obocaman, sem mexer no `we2002_core`
 - [ ] CORR-WTE-084 — decidir de quem é o desvio do combo 85: 2 px na bandeira e uma barra fora da grade no oráculo
+- [ ] CORR-WTE-085 — acertar a conta de gravações no plano e no `progresso.md`: são dezessete
+- [ ] CORR-WTE-086 — separar o dono do `ficha_enlaza` do dono do `ficha_movertodos` na WTE-TASK-30
+- [ ] CORR-WTE-087 — corrigir a contagem de `.inc` e `.uses` do Log da WTE-TASK-30
+- [ ] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
 
 ## Detalhes por correção
 
@@ -1529,3 +1537,57 @@ dizer "fechada e fora do backlog", não "corrigida".
   produza —, e nesse caso o lugar dela é a WTE-TASK-35. O deslocamento da
   bandeira precisa da âncora medida dos dois lados, sem quebrar os nove que já
   fecham em zero
+
+### CORR-WTE-085
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md:945` e `docs/tasks/progresso.md:122`
+- **Sintoma:** as duas linhas dizem "duas das **seis** gravações". A conta subiu
+  para nove na WTE-TASK-30 e para **dezessete** na WTE-TASK-31, e o plano diz os
+  dois números — 17 na linha 929, 6 na 945
+- **Como foi detectado:** `grep -n "seis gravações" docs/PLAN-WTE-LAZARUS.md
+  docs/tasks/progresso.md` contra o `São **17**` do `wte/re/fase-4.md`, que é
+  gerado pelo `check_fase4.py`
+- **Fix:** trocar o número nas duas linhas vivas e, se sair barato, pôr a forma
+  `seis|nove gravaç` no perímetro do `check_fase4.py`, como a fase 1 faz com os
+  quatro números dela
+
+### CORR-WTE-086
+
+- **Arquivo com problema:** `docs/tasks/30-handlers-auxiliares.md`, seção
+  "E a resposta dos dois é a mesma, medida"
+- **Sintoma:** a task nomeia o `pabajoClick` como quem toca dados pelo
+  `ficha_enlaza`. O `pabajoClick` não menciona vínculo na spec nem no `.inc`, e
+  nenhum arquivo de `wte/src/` mostra o `ficha_enlaza`. Quem o alcança, pela
+  única spec que o cita, é o `MainForm.mostrar_jugadorClick` — `aberto`. O
+  veredito `trivial` dos handlers do `ficha_enlaza` continua certo: o `.dfm` só
+  tem `ModalResult = 6/7`
+- **Como foi detectado:** `grep -n "enlaza\|vincul" wte/re/spec/MainForm.pabajoClick.md`
+  (vazio) e `grep -rn "enlaza" wte/src/impl/*.inc` (vazio), contra
+  `wte/re/spec/MainForm.mostrar_jugadorClick.md:42`
+- **Fix:** separar as duas metades na task — a do `movertodos` está medida e
+  fica — e acrescentar o chamador à spec do `ficha_enlaza.FormShow`
+
+### CORR-WTE-087
+
+- **Arquivo com problema:** `docs/tasks/30-handlers-auxiliares.md`, lista de
+  arquivos criados/modificados
+- **Sintoma:** "12 `.inc` novos e 6 `.uses` tocados"; o commit `fb640cd` tem 11
+  `.inc` novos, 1 `.uses` novo e 4 `.uses` modificados. O `colorearClick.inc`,
+  citado na mesma frase, é ampliação — é ele que fecha os doze corpos
+- **Como foi detectado:** `git show --diff-filter=A --name-only --format= fb640cd
+  -- 'wte/src/impl/*'`, confirmado pela linha "Escrito à mão" do `fase-2.md` no
+  mesmo commit: 83 → 94 arquivos
+- **Fix:** trocar a contagem na task e desambiguar "doze corpos" na §4.4 do
+  plano, sem mexer nos quatro números medidos
+
+### CORR-WTE-088
+
+- **Arquivo com problema:** `wte/tools/{golden_check,roteiro,golden_run_wte,compara_tela,diff_dirigido}.sh`
+- **Sintoma:** nove comentários descrevem o ambiente corrente como `:99` — entre
+  eles a guarda 2 do `golden_check.sh`, cujo código usa o `$DISPLAY` que a
+  `roteiro_display` fixa em `:98`. Quatro outras ocorrências são registro
+  histórico e ficam, como manda o CLAUDE.md
+- **Como foi detectado:** `grep -n ':99' wte/tools/*.sh` contra
+  `grep -n 'WTE_DISPLAY' wte/tools/*.sh`, nesta revisão
+- **Fix:** trocar as nove, preservar as quatro históricas, e registrar a regra
+  no `wte/tools/README.md`
