@@ -8,7 +8,7 @@ os cinco valores muda e a comparacao passa a confrontar barras diferentes --
 divergencia falsa, ou pior, coincidencia que passa.
 
 Tudo aqui roda contra imagens montadas em memoria: nao precisa do `.exe`, nem
-do `:99`, nem de captura nenhuma.
+do `:98`, nem de captura nenhuma.
 """
 
 from __future__ import annotations

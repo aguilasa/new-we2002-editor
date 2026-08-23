@@ -3,7 +3,7 @@ id: CORR-WTE-088
 title: "Correção: nove comentários de comportamento corrente ainda dizem :99 depois da mudança para o :98"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -101,17 +101,83 @@ numa linha sem ano nem `WTE-TASK`/`CORR-` ao lado.
 
 ## Verificação
 
-- [ ] `grep -n ':99' wte/tools/*.sh` devolve só as quatro linhas históricas
-- [ ] `make -C wte check` continua verde
-- [ ] `bash wte/tools/golden_check.sh wte/tests/roteiros/golden-08-dorsal-mcr.txt --modo controle --artefato saida.mcr` continua `PASSOU: byte-identico`
-- [ ] `roms/` intocada
+- [x] `grep -n ':99' wte/tools/*.sh` devolve só as linhas históricas — **seis**,
+      não quatro: as três do `roteiro.sh` (80, 82, 150), as **duas** do
+      `compara_tela.sh` (34 e 91) e a do `golden_run_laz.sh` (11)
+- [x] `make -C wte check` verde — 733 testes, `OK (skipped=1)`, e os 30 e tantos
+      `--check` de gerador
+- [x] `golden_check.sh golden-08-dorsal-mcr.txt --modo controle --artefato
+      saida.mcr` → `saida.mcr: byte-identico nos dois lados` e
+      `PASSOU: byte-identico`, saída **0**
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-23
 
 **Resumo do que foi feito:**
 
+**Catorze linhas vivas, não nove, e uma das nove enumeradas não devia mudar.**
+A enumeração desta correção saiu de um `grep` sobre cinco arquivos; o resíduo
+mora em sete, e dois deles são `.py`.
+
+Trocadas por `:98` (14):
+
+| Arquivo | Linhas |
+|---|---|
+| `golden_check.sh` | 34, 60, 101 |
+| `roteiro.sh` | 39, 58 |
+| `golden_run_wte.sh` | 86 |
+| `diff_dirigido.sh` | 38, 87 |
+| `golden_run_laz.sh` | 39, 89 — **não estavam na lista**; as duas descrevem o presente ("os dois lados rodam no MESMO", "o diálogo de arquivo do gtk2 não se dirige por coordenada fixa") |
+| `check_edicao.py` | 17, 23, 307 — **não estavam na lista**; a 307 é o gerador do `wte/re/edicao-cobertura.md`, regerado junto |
+| `test_compara_tela.py` | 11 — **não estava na lista** |
+
+Preservadas (6, e não 4): `roteiro.sh` 80, 82, 150; `compara_tela.sh` 34 e 91;
+`golden_run_laz.sh` 11.
+
+A guarda entrou como `TestConvencaoDeDisplay`, no `test_roteiro.py`, e o
+`wte/tools/README.md` ganhou a seção que a nomeia.
+
 **Problemas encontrados:**
 
+1. **O `compara_tela.sh:34` estava na lista das nove e ficou.** A frase é
+   *"Três vezes na sessão de 2026-08-11 sobrou um `wte` ou um
+   `we-team-editor.exe` no `:99`"* — é medição datada, exatamente o que o
+   CLAUDE.md manda preservar, e trocá-la teria transformado registro em
+   afirmação falsa sobre uma sessão que aconteceu no `:99`.
+2. **A guarda sugerida não sai barata como regra, e saiu como allowlist.** A
+   forma proposta — reprovar `:99` em linha sem ano nem `WTE-TASK`/`CORR-` ao
+   lado — dá **sete falsos positivos**: metade das linhas históricas é
+   continuação de parágrafo cujo ano está uma ou duas linhas acima
+   (`roteiro.sh:82` depende do `2026-08-20` da 80; `check_bitfields.py:201` e
+   `341`, `conta_ml.py:526`, `check_lcl_combo.py:90`, `compara_tela.py:589` e
+   `check_fase2.py:530` não têm marcador na própria linha). O que entrou é uma
+   allowlist de doze sítios por (arquivo, trecho), na mesma forma do `NARRACAO`
+   do `check_fase1.py` — mais dois testes de higiene: entrada morta reprova, e
+   o default de `WTE_DISPLAY` tem de continuar `:98`. Provada nos dois sentidos:
+   com um `# comentario vivo dizendo :99` plantado no `diff_dirigido.sh` ela
+   nomeia o sítio e reprova; desfeito o plantio, passa.
+3. **O `wte/re/` fica fora.** O `ambiente.md` e o `eventos.md` têm dez
+   ocorrências, e todas são registro de sessão medida (WTE-TASK-01 e 12) —
+   mesmo critério do `compara_tela.sh:91`.
+4. **O `check_edicao.py --check` reprovou depois da troca**, porque a linha 307
+   escreve a tabela do `wte/re/edicao-cobertura.md`. Regerado; a saída é
+   byte-idêntica em duas corridas.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/tools/golden_check.sh` | modificado |
+| `wte/tools/roteiro.sh` | modificado |
+| `wte/tools/golden_run_wte.sh` | modificado |
+| `wte/tools/golden_run_laz.sh` | modificado |
+| `wte/tools/diff_dirigido.sh` | modificado |
+| `wte/tools/check_edicao.py` | modificado |
+| `wte/tools/test_compara_tela.py` | modificado |
+| `wte/re/edicao-cobertura.md` | regerado |
+| `wte/tools/test_roteiro.py` | modificado — a guarda `TestConvencaoDeDisplay` |
+| `wte/tools/README.md` | modificado — a seção da convenção e a linha do teste |
+
+O `compara_tela.sh` **não** entrou: as duas ocorrências dele são históricas.

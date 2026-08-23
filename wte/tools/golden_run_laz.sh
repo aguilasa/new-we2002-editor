@@ -36,7 +36,7 @@
 #
 # ## Por que o titulo tem de ser diferente
 #
-# Os dois lados rodam no MESMO `:99`. O `wte.lpr` acrescenta um sufixo ao
+# Os dois lados rodam no MESMO `:98`. O `wte.lpr` acrescenta um sufixo ao
 # `Caption` dos 18 formularios em tempo de execucao exatamente por isto; com
 # titulo igual o harness dirigiria o lado errado e o diff pareceria bug do port.
 set -euo pipefail
@@ -86,7 +86,7 @@ trap matar_port EXIT
 # escolhe pelo dialogo; os dois terminam com o MESMO arquivo, que e o que a
 # comparacao exige. `WTE_TEXTURA` e `WTE_MCR_ENTRADA` sao entrada, `WTE_MCR` e
 # `WTE_UNI` sao saida -- e as quatro existem pela mesma razao: o dialogo de
-# arquivo do gtk2 nao se dirige por coordenada fixa no `:99`.
+# arquivo do gtk2 nao se dirige por coordenada fixa no `:98`.
 echo ">> port: lancando $APP"
 env WTE_TRACE_FILE="$SAIDA/port-trace.log" \
   ${WTE_TEXTURA:+WTE_TEXTURA="$WTE_TEXTURA"} \

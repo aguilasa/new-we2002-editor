@@ -36,7 +36,7 @@
 #
 # ## Coordenada e sempre relativa
 #
-# Sem window manager no `:99` a origem da janela muda a cada corrida. Por isso
+# Sem window manager no `:98` a origem da janela muda a cada corrida. Por isso
 # nenhuma linha do roteiro carrega coordenada absoluta, e por isso o `>` vem
 # antes do primeiro `!`.
 #
@@ -55,7 +55,7 @@ ALVO_ID=""; ALVO_X=0; ALVO_Y=0
 
 # `ROTEIRO_FOCO=1` faz o driver dar `xdotool windowfocus` na janela alvo assim
 # que ela e resolvida. Vale para o lado PORT e so para ele -- ver
-# `golden_run_laz.sh`. Sem gerenciador de janela no `:99` o GTK2 nunca
+# `golden_run_laz.sh`. Sem gerenciador de janela no `:98` o GTK2 nunca
 # considera a janela ativa sozinho, e sem foco nenhuma tecla e entregue; o
 # `windowfocus` (que e `XSetInputFocus`) resolve, e o `windowactivate`, que
 # precisa de gerenciador, nao.

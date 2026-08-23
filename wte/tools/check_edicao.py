@@ -14,13 +14,13 @@ pulada -- e o texto continua afirmando cobertura.
 
 Este script torna a afirmacao mecanica. Ele nao mede tela nem byte: **confere
 que cada um dos 28 handlers tem um instrumento nomeado, que o instrumento
-existe, e que o instrumento que se pode rodar sem `:99` roda e passa.**
+existe, e que o instrumento que se pode rodar sem `:98` roda e passa.**
 
 ## As quatro classes de instrumento, e por que sao quatro
 
 | classe | o que e | quem verifica |
 |---|---|---|
-| `tela` | uma sequencia do `compara_tela.sh` | o proprio, no `:99`, com Wine |
+| `tela` | uma sequencia do `compara_tela.sh` | o proprio, no `:98`, com Wine |
 | `estatico` | um gerador com `--check` | este script roda |
 | `outra_task` | a conferencia mora em outra task, por decisao registrada | este script confere que a task existe |
 | `sem_instrumento` | nao ha -- e o script REPROVA | -- |
@@ -304,7 +304,7 @@ def md(handlers: list[str], estaticos: dict[str, int]) -> str:
         "",
         "| classe | o que é | quem verifica |",
         "|---|---|---|",
-        "| `tela` | uma sequência do `compara_tela.sh` | o próprio, no `:99`, com Wine |",
+        "| `tela` | uma sequência do `compara_tela.sh` | o próprio, no `:98`, com Wine |",
         "| `estatico` | um gerador com `--check` | este script roda, e o resultado está abaixo |",
         "| `outra_task` | a conferência mora em outra task, por decisão registrada | este script confere que a task existe |",
         "| `sem_instrumento` | não há — e o script **reprova** | — |",

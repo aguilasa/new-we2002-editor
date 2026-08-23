@@ -107,7 +107,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-085](/docs/tasks/CORR-WTE-085.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O plano e o `progresso.md` ainda dizem "duas das **seis** gravações" onde o `check_fase4.py` mede **dezessete**; o plano se contradiz a dezesseis linhas de distância | Alta | [x] concluída | 2026-08-23 |
 | [CORR-WTE-086](/docs/tasks/CORR-WTE-086.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | A WTE-TASK-30 dá o `pabajoClick` como dono da rota de vínculo do `ficha_enlaza`; nenhuma spec nem código liga os dois — quem abre o modal é o `mostrar_jugadorClick`, que segue `aberto` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O Log da WTE-TASK-30 conta 12 `.inc` novos e 6 `.uses` tocados; o commit `fb640cd` tem 11 `.inc` novos e 5 `.uses` | Baixa | [x] concluída | 2026-08-23 |
-| [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [ ] pendente | — |
+| [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [x] concluída | 2026-08-23 |
 
 ## Checklist
 
@@ -197,7 +197,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-085 — acertar a conta de gravações no plano e no `progresso.md`: são dezessete
 - [x] CORR-WTE-086 — separar o dono do `ficha_enlaza` do dono do `ficha_movertodos` na WTE-TASK-30
 - [x] CORR-WTE-087 — corrigir a contagem de `.inc` e `.uses` do Log da WTE-TASK-30
-- [ ] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
+- [x] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
 
 ## Detalhes por correção
 

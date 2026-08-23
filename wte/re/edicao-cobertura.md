@@ -79,7 +79,7 @@ estático não passar no próprio `--check`.
 
 | classe | o que é | quem verifica |
 |---|---|---|
-| `tela` | uma sequência do `compara_tela.sh` | o próprio, no `:99`, com Wine |
+| `tela` | uma sequência do `compara_tela.sh` | o próprio, no `:98`, com Wine |
 | `estatico` | um gerador com `--check` | este script roda, e o resultado está abaixo |
 | `outra_task` | a conferência mora em outra task, por decisão registrada | este script confere que a task existe |
 | `sem_instrumento` | não há — e o script **reprova** | — |

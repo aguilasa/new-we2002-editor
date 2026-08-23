@@ -35,7 +35,7 @@
 # no Load; le sob demanda, e um arquivo de 474 MB cheio de 0xA5 o mata no
 # primeiro clique. A medida esta no wte/re/offsets-novos.md.
 #
-# ## Regra do :99 (CLAUDE.md)
+# ## Regra do :98 (CLAUDE.md)
 #
 # Toda GUI roda no `:98`. O script fixa `DISPLAY` por conta propria em vez
 # de herdar do shell -- herdar foi o que derrubou o golden_check.sh do
@@ -84,7 +84,7 @@ LIMPA="$WORK/dd-clean.bin"
 RODA="$WORK/dd-run.bin"
 
 # O driver de roteiro e o mesmo do gate golden (WTE-TASK-22): dialeto, busca de
-# janela e a fixacao do `:99` moram em `roteiro.sh`. Duas copias divergiriam em
+# janela e a fixacao do `:98` moram em `roteiro.sh`. Duas copias divergiriam em
 # silencio, e o sintoma seria diff de bytes com cara de bug do port.
 # shellcheck source=roteiro.sh
 . "$AQUI/roteiro.sh"

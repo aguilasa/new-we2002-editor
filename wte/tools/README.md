@@ -75,7 +75,7 @@ aceite `--check` quebra o alvo — o que é o comportamento desejado.
 | `test_analisar_crash.py` ✅ | o parser do log de exceção com linha plantada — exceção completa, `6ba` da subida que **não** pode contar, registro que não vaza para a exceção seguinte, módulo builtin descartado, prólogo e `call` relativo —, mais o par de roteiros 07/08 (idênticos até `ARRANQUE`, uma ação de diferença), que é o que faz da atribuição uma medida |
 | `test_compare_dumps.py` ✅ | o comparador de bytes com arquivo plantado (a folga de 16 nos dois sentidos), o par de dumpers pelo que dá para conferir sem compilar (mesma versão de formato, mesmo `--roundtrip`, `Sofifa.cpp` fora), e a evidência do `fase-3.tsv` — inclusive a guarda de que o round-trip **mexeu** na imagem, sem a qual zero contra zero passaria verde sem medir nada. A remedição completa fica sob `WTE_ROUNDTRIP=1` |
 | `test_check_lcl_props.py` ✅ | as três guardas do `check_lcl_props.py`, com entrada plantada nos três sentidos — `ACEITA` inventada, `DESCARTA` que a LCL tem, `LCL_VERSAO` divergindo do disco —, sobre uma LCL sintética montada em diretório temporário |
-| `test_roteiro.py` ✅ | as duas coisas que a CORR-WTE-080 acrescentou ao dialeto, e as duas são sobre **falha** — que é o caso em que ninguém está olhando: `espera: <seg>` sobe o limite da próxima janela e volta ao default depois, e espera estourada na **primeira** janela diz "o app não subiu" enquanto nas demais diz que o diálogo não veio. A busca de janela é substituída por um dublê, então nada disto precisa de `DISPLAY`, de Wine nem do `.exe` |
+| `test_roteiro.py` ✅ | as duas coisas que a CORR-WTE-080 acrescentou ao dialeto, e as duas são sobre **falha** — que é o caso em que ninguém está olhando: `espera: <seg>` sobe o limite da próxima janela e volta ao default depois, e espera estourada na **primeira** janela diz "o app não subiu" enquanto nas demais diz que o diálogo não veio. A busca de janela é substituída por um dublê, então nada disto precisa de `DISPLAY`, de Wine nem do `.exe`. Mais a **convenção de display** da CORR-WTE-088: todo `:99` em `wte/tools/` tem de estar declarado na `HISTORICO_99` como medição antiga, senão reprova; a allowlist não pode ter entrada morta; e o default de `WTE_DISPLAY` continua `:98` |
 | `test_spec_index.py` ✅ | **as 15 rotas de recusa** do `spec_index.py` sobre specs sintéticas — 15 é `grep -c "raise SpecError" spec_index.py`, e é assim que se remede: TSV ausente, TSV só com cabeçalho, spec sem frontmatter, frontmatter não fechado, linha de frontmatter sem `:`, chave obrigatória ausente, decompilado colado nas sete formas de nome inventado mais o cast do Ghidra (`(int)*(int *)`, com o caso negativo em prosa), frontmatter discordando do TSV, veredito e evidência fora do vocabulário, seção faltando, seção sem evidência, `nao portado` sem justificativa, `implementado` só com observação de tela, spec órfã. **É a única coisa que mede essas regras** — `--check` verde sobre 96 `aberto` não exercita nenhuma |
 
 Teste de ferramenta **Python** mora aqui, ao lado do gerador que ele testa, com
@@ -106,6 +106,22 @@ com a conferência do decodificador contra o `objdump`, a única medida
 independente que o projeto tem dele. Pular é o desfecho certo onde falta o
 insumo; **falhar** ali ensinaria a ignorar vermelho, e **jogar a conferência
 fora** devolveria o número à memória de quem o mediu uma vez.
+
+## `:99` em comentário só como data medida; o alvo é o `:98`
+
+O display dos gates mudou em 2026-08-20, e o [`../../CLAUDE.md`](../../CLAUDE.md)
+diz o que fica e o que muda: **registro histórico continua dizendo `:99`**;
+texto que descreve o comportamento de hoje, não. A
+[CORR-WTE-073](../../docs/tasks/CORR-WTE-073.md) varreu o código executável e a
+[CORR-WTE-088](../../docs/tasks/CORR-WTE-088.md) varreu os comentários — catorze
+linhas vivas, em sete arquivos.
+
+`TestConvencaoDeDisplay`, no `test_roteiro.py`, é a guarda: todo `:99` em
+`wte/tools/` tem de estar declarado na `HISTORICO_99`, senão reprova pedindo a
+classificação. **É allowlist e não regra**, porque a regra ("linha sem ano nem
+`WTE-TASK`/`CORR-` ao lado") dá sete falsos positivos: metade das linhas
+históricas é continuação de parágrafo cujo ano está duas linhas acima. A mesma
+forma do `NARRACAO` do `check_fase1.py`.
 
 ## Código duplicado entre geradores tem de ter guarda
 

@@ -31,7 +31,7 @@
 #
 # 1. `DISPLAY` fixado aqui dentro (`:98`, ou `$WTE_DISPLAY`), nunca herdado
 #    do shell -- o `:1` e a sessao real do usuario;
-# 2. recusa comecar com janela grande ja aberta no `:99`;
+# 2. recusa comecar com janela grande ja aberta no `:98`;
 # 3. so dirige janela do processo lancado (`_NET_WM_PID`, no `roteiro.sh`);
 # 4. `roms/` nunca e alvo -- copia, sempre, e as copias sao apagadas no fim.
 #
@@ -57,7 +57,7 @@
 # ## Custo
 #
 # Duas copias da imagem por rodada. Com a japonesa sao ~586 MB de temporario;
-# com a europeia seriam ~950 MB. Nao roda em CI -- precisa de Wine, do `:99` e
+# com a europeia seriam ~950 MB. Nao roda em CI -- precisa de Wine, do `:98` e
 # do binario do Obocaman, que e gitignored.
 set -euo pipefail
 
@@ -98,7 +98,7 @@ for f in "$ROTEIRO" "$ROTEIRO_PORT" "$IMAGEM" \
   [ -e "$f" ] || { echo "ERRO: falta $f" >&2; exit 1; }
 done
 
-# Guarda 2: janela grande ja aberta no :99. Uma sobra de teste manual e dirigida
+# Guarda 2: janela grande ja aberta no :98. Uma sobra de teste manual e dirigida
 # no lugar da que esta sob teste, e o resultado e um diff de bytes que parece
 # bug do port. O piso e 400x300: o MainForm do wte.exe e 522x475 e o do port
 # tem o mesmo tamanho, e nenhum dialogo do app chega perto disso.

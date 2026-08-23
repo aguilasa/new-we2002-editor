@@ -83,7 +83,7 @@ matar_oraculo() {
     >/dev/null 2>&1 || true
 }
 # Mesma razao do lado port: corrida que falha no meio nao pode deixar janela
-# viva no `:99`. A guarda 2 do `golden_check.sh` recusaria a proxima corrida --
+# viva no `:98`. A guarda 2 do `golden_check.sh` recusaria a proxima corrida --
 # e recusar e o certo, mas o custo e uma rodada perdida.
 trap matar_oraculo EXIT
 matar_oraculo

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Testes do roteiro.sh -- CORR-WTE-080.
+"""Testes do roteiro.sh -- CORR-WTE-080, e a convencao de display -- CORR-WTE-088.
 
 O driver de roteiro e `source`ado pelos dois lados do gate golden, e nada o
 media. Aqui se medem as duas coisas que a CORR-WTE-080 acrescentou, e as duas
@@ -18,6 +18,7 @@ precisa de `DISPLAY`, de Wine ou do `.exe`.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import tempfile
 import time
@@ -97,3 +98,84 @@ class TestEspera(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ------------------------------------------- a convencao de display (CORR-088) --
+#
+# **`:99` em ferramenta viva so vale como data medida; o alvo e o `:98`.** O
+# display dos gates mudou em 2026-08-20 e o CLAUDE.md e explicito sobre o que
+# fica: registro historico continua dizendo `:99`, texto que descreve o
+# comportamento de hoje, nao. A CORR-WTE-073 varreu o codigo executavel; a
+# CORR-WTE-088 varreu os comentarios, e achou catorze linhas vivas -- cinco a
+# mais do que a propria correcao tinha enumerado, porque o `grep` dela cobria
+# cinco arquivos e o residuo estava em sete.
+#
+# **A lista abaixo e allowlist, e nao regra.** Tentou-se primeiro a regra que a
+# CORR-088 sugeriu -- "linha sem ano nem `WTE-TASK`/`CORR-` ao lado reprova" --
+# e ela da sete falsos positivos: metade destas linhas e continuacao de um
+# paragrafo cujo ano esta duas linhas acima. Uma lista explicita e o que este
+# repositorio ja usa para o mesmo problema (`NARRACAO`, no `check_fase1.py`):
+# custa uma linha por sitio e nunca erra. Editar o texto de uma delas reprova
+# aqui, e a reprovacao e o pedido para reclassificar.
+HISTORICO_99 = {
+    ("golden_run_laz.sh", 'o port nao recebe teclado no `:99`'),
+    ("roteiro.sh", "O ALVO E O `:98` DESDE 2026-08-20, e antes era o `:99`"),
+    ("roteiro.sh", "mantem uma janela de 1024x768 no `:99`"),
+    ("roteiro.sh", "No `:99` o `ficha_dorsal` do port ficava"),
+    ("compara_tela.sh", "`we-team-editor.exe` no `:99` depois de uma medicao"),
+    ("compara_tela.sh", "Medidas no `:99`, nos dois lados, em 2026-08-12"),
+    ("compara_tela.py", "Medido no `:99`: 544x495"),
+    ("conta_ml.py", "`:99`, lido da captura"),
+    ("check_lcl_combo.py", "a forma que o repositorio adotou quando saiu do `:99`"),
+    ("check_bitfields.py",
+     "medido no `:99`, o `TScrollBar` do gtk2 desenha mais alto"),
+    ("check_bitfields.py",
+     "nenhuma regua de tela pega isso: medido no `:99`"),
+    ("check_fase2.py", "Teclado não chega ao app LCL no `:99`"),
+}
+
+# Este arquivo fica de fora da propria varredura: a `HISTORICO_99` cita as
+# doze linhas verbatim, e cada citacao casaria como sitio novo.
+ESTE = Path(__file__).name
+
+FERRAMENTAS = sorted(
+    p for padrao in ("*.sh", "*.py")
+    for p in (ROOT / "wte" / "tools").glob(padrao) if p.name != ESTE)
+
+
+class TestConvencaoDeDisplay(unittest.TestCase):
+    """Nenhum `:99` novo em `wte/tools/`, e o alvo declarado e o `:98`."""
+
+    def test_todo_99_vivo_esta_declarado_como_historico(self) -> None:
+        residuo = []
+        for caminho in FERRAMENTAS:
+            for i, linha in enumerate(
+                    caminho.read_text(encoding="utf-8").splitlines(), 1):
+                if ":99" not in linha:
+                    continue
+                if any(caminho.name == arq and trecho in linha
+                       for arq, trecho in HISTORICO_99):
+                    continue
+                residuo.append(f"{caminho.name}:{i}: {linha.strip()}")
+        self.assertEqual(residuo, [], "\n".join(
+            ["`:99` em linha nao declarada como historica -- ou e o "
+             "comportamento de hoje (troque por `:98`), ou e medicao "
+             "antiga (acrescente a HISTORICO_99):"] + residuo))
+
+    def test_a_allowlist_nao_tem_entrada_morta(self) -> None:
+        """Entrada que nao casa mais e texto reescrito, e precisa ser revista."""
+        textos = {p.name: p.read_text(encoding="utf-8") for p in FERRAMENTAS}
+        mortas = [f"{arq}: {trecho!r}" for arq, trecho in sorted(HISTORICO_99)
+                  if trecho not in textos.get(arq, "")]
+        self.assertEqual(mortas, [], "\n".join(
+            ["entrada da HISTORICO_99 que nao casa com nenhuma linha:"] + mortas))
+
+    def test_o_default_declarado_e_o_98(self) -> None:
+        """O numero mora numa variavel por ferramenta, com `:98` de default."""
+        for arq, var in (("roteiro.sh", "WTE_DISPLAY"),
+                         ("compara_tela.sh", "WTE_DISPLAY")):
+            texto = (ROOT / "wte" / "tools" / arq).read_text(encoding="utf-8")
+            self.assertRegex(texto, rf'\$\{{{var}:-:98\}}',
+                             f"{arq}: o default de {var} deixou de ser `:98`")
+
+
