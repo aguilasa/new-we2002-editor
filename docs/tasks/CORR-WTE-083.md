@@ -3,7 +3,7 @@ id: CORR-WTE-083
 title: "Correção: dez times desenham bandeira preta — o ed.exe não lê a paleta deles, e o editor do Obocaman lê"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -136,12 +136,13 @@ divergir do oráculo que ele existe para reproduzir.
 
 ## Verificação
 
-- [ ] `compara_tela.sh` verde nos **nove alcançáveis** — os sete CLASSIC
+- [x] `compara_tela.sh` verde nos **nove alcançáveis** — os sete CLASSIC
       (combo 56–62) e os dois de Master League (combo 68 e 85), com a bandeira
-      batendo em pixel e tolerância zero. **Oito fecharam**; o combo 85 continua
-      divergindo por POSIÇÃO e virou a
-      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md). O décimo slot zerado,
-      `teams[63]`, não tem item de combo e não há tela para conferir
+      batendo em pixel e tolerância zero. **Os nove fecharam**: o combo 85
+      fechou em 2026-08-23, quando a
+      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md) mostrou que o desvio dele era
+      da régua e não da tela. O décimo slot zerado, `teams[63]`, não tem item de
+      combo e não há tela para conferir
 - [x] `compara_tela.sh` continua verde nos times já conferidos (0, 2)
 - [x] `compare_dumps.py` continua idêntico entre Pascal e C++ nas **duas** ROMs
       — 66.498 linhas, 0 divergência, round-trip 0 byte nas duas. A rota
@@ -153,13 +154,19 @@ divergir do oráculo que ele existe para reproduzir.
 
 ## Log de Execução
 
-**PARCIAL.** A carga está implementada e conferida; **oito dos nove
-alcançáveis** fecham em pixel com tolerância zero. O nono (combo 85) teve a
-paleta corrigida — as cores e o estêncil batem — mas sobrou uma diferença de
-POSIÇÃO, que virou a [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md). Esta correção
-segue **pendente** até aquela fechar.
+**CONCLUÍDA.** A carga está implementada e conferida, e os **nove
+alcançáveis** fecham em pixel com tolerância zero.
 
-**Executado em:** 2026-08-22
+O nono (combo 85) ficou pendente por um dia. A paleta dele foi corrigida junto
+com as outras — as cores e o estêncil batiam desde 2026-08-22 —, mas sobrou o
+que na época se leu como diferença de POSIÇÃO, e virou a
+[CORR-WTE-084](/docs/tasks/CORR-WTE-084.md). Em **2026-08-23** aquela correção
+mediu os dois desvios e nenhum era da tela: a bandeira do 85 bate em 0 de
+3.840 px com a mesma calibração dos outros dez times, e os 76 px da barra
+`equipe` eram a camisa remanejada entrando na faixa de medição do
+`compara_tela.py`. Com a régua consertada, esta correção fecha sem código novo.
+
+**Executado em:** 2026-08-22 (a carga) e 2026-08-23 (o fechamento)
 
 **Resumo do que foi feito:**
 
@@ -192,12 +199,14 @@ de `0x00423247` e a converte com a mesma aritmética do `0x00404E70`, com oito
    `TEAMS_NATIONAL_ALLSTAR = 63`, o combo salta de `teams[62]` para
    `ml_teams[0]`. O texto desta correção e o critério de verificação foram
    corrigidos.
-3. **O combo 85 não fechou, e o que sobrou não é cor.** A bandeira dele agora
-   tem as cores e as faixas certas, mas sai **2 px mais abaixo**: alinhando o
-   recorte, a diferença cai de 1.500/3.840 para 92/3.680. E o oráculo desenha a
-   barra `equipe` com **76 px**, que não é `11 * v + 9` para nenhum `v` — ali
-   quem está fora da grade é ele, e o port concorda com a camada de dados.
-   Duas corridas, mesmo resultado. Virou a CORR-WTE-084.
+3. **O combo 85 não fechou no dia, e o que sobrou não era cor.** A bandeira
+   dele ficou com as cores e as faixas certas, e o que sobrou foi lido como
+   deslocamento de 2 px mais uma barra de 76 px fora da grade. Virou a
+   CORR-WTE-084, e ela mediu no dia seguinte que **nenhum dos dois existia**:
+   os 2 px vinham de um recorte alinhado à mão, e os 76 px de a `bandas()` do
+   `compara_tela.py` somar pixel por linha em vez de medir trecho contíguo,
+   contando a camisa que o `lista_equiposChange` remaneja para dentro da faixa
+   quando `indice > 62`. A régua foi consertada lá; aqui nada mudou.
 
 **Arquivos criados/modificados:**
 

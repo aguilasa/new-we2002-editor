@@ -323,8 +323,9 @@ só uma escolha de quando.
       ordenada por endereço, para o `--check` poder refazê-la. Os cinco
       confirmaram, e nos três `FormCreate` a cor que o original passa a
       `TControl::SetColor` é a mesma que o `.inc` do port escreve
-- [ ] **Dez times desenham bandeira preta** *(achado da WTE-TASK-31,
-      2026-08-22, hoje na [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md))*. O
+- [x] **Dez times desenham bandeira preta** *(achado da WTE-TASK-31,
+      2026-08-22, fechado pela
+      [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) em 2026-08-23)*. O
       `compara_tela.sh` mediu quatro times: 2 e 0 batem em pixel nas cinco
       barras, na bandeira e no uniforme; o **56** (`CLASSIC ENGLAND`) e o combo
       **68** (`ml_teams[5]`, `HIGHLANDS`) divergem em 3.840 de 3.840 pixels de
@@ -342,8 +343,11 @@ só uma escolha de quando.
       zerados e **um diverge de propósito** (`teams[39]`). Oito dos nove
       alcançáveis fecham em 0 de 3.840; são **sete** CLASSIC e não oito, porque
       o `teams[63]` tem nome vazio e nenhum item do combo o alcança. O nono, o
-      combo 85, ficou com uma diferença de POSIÇÃO —
-      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md)
+      combo 85, ficou um dia com o que se leu como diferença de POSIÇÃO, e a
+      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md) mediu em 2026-08-23 que o
+      desvio era da régua: a `bandas()` do `compara_tela.py` somava pixel por
+      linha e contava a camisa remanejada. **Os onze times medidos fecham em
+      pixel** — 0, 2, 56–62, 68 e 85
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
       lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de

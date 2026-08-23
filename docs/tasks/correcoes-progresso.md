@@ -102,7 +102,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Três gravações na imagem sem dono — o `OK` do `ficha_color`, o `Comple.` do `jugador` e o ` Accept` do `estrategia`; a WTE-TASK-27 contava seis gravações e são nove | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | A tela de tática nunca é enchida — a `0x0040A0B4` (1.443 B) não tem port, e sem ela o ` Accept` do `estrategia` gravaria as coordenadas de tempo de projeto do `.lfm` | Alta | [x] concluída | 2026-08-21 |
-| [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Dez times desenham bandeira preta — os 8 CLASSIC e dois clubes de ML: o `ed.exe` não lê a paleta deles e o editor do Obocaman lê | Alta | [ ] pendente | — |
+| [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Dez times desenham bandeira preta — os 8 CLASSIC e dois clubes de ML: o `ed.exe` não lê a paleta deles e o editor do Obocaman lê | Alta | [x] concluída | 2026-08-23 |
 | [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md) | [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | O combo 85 (`ml_teams[22]`) diverge por POSIÇÃO depois de a paleta ser consertada — bandeira 2 px mais abaixo, e a barra `equipe` do oráculo em 76 px, fora da grade `11v+9` | Média | [x] concluída | 2026-08-23 |
 | [CORR-WTE-085](/docs/tasks/CORR-WTE-085.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O plano e o `progresso.md` ainda dizem "duas das **seis** gravações" onde o `check_fase4.py` mede **dezessete**; o plano se contradiz a dezesseis linhas de distância | Alta | [ ] pendente | — |
 | [CORR-WTE-086](/docs/tasks/CORR-WTE-086.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | A WTE-TASK-30 dá o `pabajoClick` como dono da rota de vínculo do `ficha_enlaza`; nenhuma spec nem código liga os dois — quem abre o modal é o `mostrar_jugadorClick`, que segue `aberto` | Baixa | [ ] pendente | — |
@@ -192,7 +192,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
 - [x] CORR-WTE-081 — implementar as três gravações órfãs, uma por vez, com o controle fechando antes de cada golden
 - [x] CORR-WTE-082 — portar a `0x0040A0B4` e medir a metade de tática do ` Accept`, antes de a CORR-WTE-081 poder fechar
-- [ ] CORR-WTE-083 — dar cor à bandeira dos 8 times CLASSIC, pela tabela de offsets do Obocaman, sem mexer no `we2002_core`
+- [x] CORR-WTE-083 — dar cor à bandeira dos 8 times CLASSIC, pela tabela de offsets do Obocaman, sem mexer no `we2002_core`
 - [x] CORR-WTE-084 — decidir de quem é o desvio do combo 85: 2 px na bandeira e uma barra fora da grade no oráculo
 - [ ] CORR-WTE-085 — acertar a conta de gravações no plano e no `progresso.md`: são dezessete
 - [ ] CORR-WTE-086 — separar o dono do `ficha_enlaza` do dono do `ficha_movertodos` na WTE-TASK-30
