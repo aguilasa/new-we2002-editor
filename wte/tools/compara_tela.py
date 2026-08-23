@@ -212,19 +212,49 @@ def carrega(caminho: Path):
     return Image.open(caminho).convert("RGB")
 
 
+def corrida_mais_longa(img, y: int, x0: int, x1: int) -> int:
+    """O maior trecho CONTIGUO de preenchimento na linha `y`, dentro da faixa.
+
+    **Contar pixel em vez de medir trecho lia a camisa como parte da barra.**
+    Para `indice > 62` o `lista_equiposChange` remaneja o `home1` para
+    `Left = 7, Width = 100`, e o controle passa a comecar em `x = 223` -- sete
+    pixels dentro da `FAIXA_X`, que termina em 230. No `ml_teams[22]` (`EMILIA`)
+    a faixa diagonal laranja da camisa encosta em `x = 229` nas linhas 131-133,
+    que caem dentro da banda da barra `equipe`: a soma dava 76 onde a barra tem
+    75 px contiguos (`x` 92..166), e 76 nao e `11*v + 9` para nenhum `v`.
+    Medido nos dois lados em 2026-08-23; a barra do oraculo sempre esteve na
+    grade, e quem estava fora era esta funcao.
+
+    O port escapava por um pixel de deslocamento horizontal -- a mesma camisa
+    chega so a `x = 231` la --, e por isso a divergencia aparecia como se fosse
+    do oraculo.
+    """
+    melhor = atual = 0
+    for x in range(x0, x1):
+        if e_preenchimento(img.getpixel((x, y))):
+            atual += 1
+            if atual > melhor:
+                melhor = atual
+        else:
+            atual = 0
+    return melhor
+
+
 def bandas(img) -> list[tuple[int, int, int]]:
     """As bandas horizontais de preenchimento: `(topo, base, largura)`.
 
     A largura e o **maior** valor das linhas da banda, e nao o da linha do
     meio: a borda da barra e mais estreita, e amostrar uma linha so torna a
     medida dependente de onde a banda comecou.
+
+    Cada linha contribui com o seu trecho CONTIGUO mais longo -- ver a
+    `corrida_mais_longa`, que diz por que a soma nao serve.
     """
     largura, altura = img.size
     x0, x1 = FAIXA_X[0], min(FAIXA_X[1], largura)
     por_linha = []
     for y in range(altura):
-        por_linha.append(sum(1 for x in range(x0, x1)
-                             if e_preenchimento(img.getpixel((x, y)))))
+        por_linha.append(corrida_mais_longa(img, y, x0, x1))
     saida = []
     inicio = None
     for y, n in enumerate(por_linha + [0]):

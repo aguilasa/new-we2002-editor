@@ -464,9 +464,20 @@ precisa, e as lê pela tabela de offsets em `.data`.
 `CarregaBandeirasQueOCoreNaoLe` da [`wte_cor`](../../src/wte_cor.pas) preenche,
 depois do `Load` e fora dele, só os slots que o core deixou zerados. Oito dos
 nove alcançáveis passaram a bater em **0 de 3.840** com tolerância zero — o
-nono, o combo 85, ficou com uma diferença de POSIÇÃO que virou a
+nono, o combo 85, ficou com uma diferença que virou a
 [CORR-WTE-084](../../../docs/tasks/CORR-WTE-084.md). E são **sete** CLASSIC,
 não oito: o `teams[63]` tem nome vazio e nenhum item do combo o alcança.
+
+**E a diferença do combo 85 era da régua, não da tela.** Medido em 2026-08-23
+pela [CORR-WTE-084](../../../docs/tasks/CORR-WTE-084.md): a bandeira, o `home1`
+e o `home2` do `ml_teams[22]` batem em **0 de 9.800 px, tolerância zero**, em
+duas corridas independentes, e as cinco barras batem em `[75, 86, 75, 75, 86]`
+nos dois lados. Os 76 px que apareciam na barra `equipe` do oráculo eram a
+faixa diagonal da camisa: para `indice > 62` o `home1` vai para `Left = 7,
+Width = 100` e começa em `x = 223`, dentro da `FAIXA_X` do
+[`compara_tela.py`](../../tools/compara_tela.py), que somava pixel por linha em
+vez de medir trecho contíguo. Onze times fecham hoje em pixel — 0, 2, 56–62,
+68 e 85.
 
 O texto abaixo é o registro do dia do achado, e continua valendo como
 diagnóstico.

@@ -66,6 +66,22 @@ class TestBandas(unittest.TestCase):
         img = tela([9, 9, 9, 9, 9])
         self.assertEqual(C.larguras(img, "x"), [9, 9, 9, 9, 9])
 
+    def test_camisa_encostando_na_faixa_nao_engorda_a_barra(self):
+        """A camisa do `ml_teams[22]` entrava na conta da barra `equipe`.
+
+        Para `indice > 62` o `home1` vai para `Left = 7, Width = 100` e comeca
+        em `x = 223`, dentro da `FAIXA_X`. Medido em 2026-08-23, a faixa
+        diagonal da camisa do `EMILIA` toca `x = 229` em tres linhas da banda
+        da terceira barra, e a soma por linha devolvia 76 -- que nao e
+        `11*v + 9` para nenhum `v`. Medindo o trecho contiguo, sao os 75 px da
+        barra, e o oraculo volta para a grade.
+        """
+        img = tela([9, 20, 64, 75, 141])
+        alvo = 10 + 3 * 20                      # o topo da quarta banda, de 75
+        for y in range(alvo + 4, alvo + 7):
+            img.putpixel((C.FAIXA_X[1] - 1, y), (255, 160, 0))
+        self.assertEqual(C.larguras(img, "x"), [9, 20, 64, 75, 141])
+
     def test_contagem_errada_aborta(self):
         img = tela([64, 75, 75])
         with self.assertRaises(C.TelaError) as e:

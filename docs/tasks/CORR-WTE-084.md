@@ -3,7 +3,7 @@ id: CORR-WTE-084
 title: "Correção: a bandeira do ml_teams[22] sai 2 px mais abaixo, e a barra `equipe` do oráculo sai fora da grade"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -103,19 +103,78 @@ esta correção começa por descartar ou confirmar isso.
 
 ## Verificação
 
-- [ ] `compara_tela.sh 85` verde, ou a divergência registrada como deliberada
-      com a medição que a sustenta
-- [ ] os nove que já fecham continuam em **0 de 3.840** — 56, 57, 58, 59, 60,
-      61, 62, 68, e os times 0 e 2
-- [ ] `make -C wte check` e `lazbuild` verdes
-- [ ] `roms/` intocada
+- [x] `compara_tela.sh 85` verde — as cinco barras em `[75, 86, 75, 75, 86]`
+      nos dois lados, e bandeira + uniforme em **0 de 9.800 px, tolerância
+      zero**. Não houve divergência deliberada a registrar: não havia
+      divergência
+- [x] os nove que já fecham continuam em **0 de 3.840** — 56, 57, 58, 59, 60,
+      61, 62, 68, e os times 0 e 2. Onze times medidos numa corrida só
+- [x] `make -C wte check` e `lazbuild` verdes
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-23
 
 **Resumo do que foi feito:**
 
+**Nenhum dos dois desvios existia. Quem estava errada era a régua.**
+
+O passo 1 da Correção mandava decidir de quem é o defeito antes de mexer em
+código, e a medição respondeu por um terceiro caminho que a correção não
+previa: o defeito é do
+[`compara_tela.py`](../../wte/tools/compara_tela.py).
+
+**A barra `equipe`.** O oráculo desenha 75 px contíguos, de `x = 92` a
+`x = 166` — exatamente `11 * 6 + 9`, e portanto dentro da grade. Os 76 vinham
+da `bandas()`, que **somava pixels de preenchimento por linha** em vez de medir
+o trecho contíguo. Para `indice > 62` o `lista_equiposChange` remaneja o
+`home1` para `Left = 7, Width = 100`, e o controle passa a começar em
+`x = 223` — sete pixels dentro da `FAIXA_X`, que termina em 230. No `EMILIA` a
+faixa diagonal laranja da camisa toca `x = 229` nas linhas 131–133, que caem
+dentro da banda da barra `equipe`; a soma dava 76. O port escapava por um pixel
+de deslocamento horizontal: a mesma camisa chega só a `x = 231` do lado dele.
+
+Medido na captura dos dois lados:
+
+```text
+oraculo  y=130  n=75  x92..166  gaps=[]
+oraculo  y=131  n=76  x92..229  gaps=[(166, 229)]   <- o buraco de 63 px
+port     y=131  n=75  x94..168  gaps=[]
+```
+
+A `bandas()` passou a medir o trecho contíguo mais longo por linha, pela
+`corrida_mais_longa()` nova. Onde não há intruso, contar e medir dão o mesmo
+número, e as outras dez telas não mudaram de valor.
+
+**A bandeira.** Não sai deslocada: `bandera`, `home1` e `home2` do combo 85
+batem em **0 de 3.840, 0 de 4.200 e 0 de 1.760 px**, com desvio máximo de canal
+**0**, em duas corridas independentes do `compara_tela.sh`. A `calibra()`
+devolve `(0, 0)` no oráculo e `(2, 2)` no port, e a janela dos dois sai nos
+522×475 que o `.lfm` declara — sem a escala de 1,0421 que a docstring da
+`calibra()` registra de uma medição antiga. Os 92/3.680 do enunciado foram
+medidos à mão, alinhando recorte, e não sobrevivem à medição pela mesma
+calibração que os outros dez times usam.
+
 **Problemas encontrados:**
 
+1. **O `compara_tela.sh` aborta na primeira falha, e por isso a bandeira nunca
+   foi medida pela ferramenta.** O passo das barras reprovava e o script saía
+   com 1 antes de chegar ao render — foi o que fez a medição da bandeira ser
+   feita à mão, e foi a medição à mão que trouxe os 2 px. Deixado como está: a
+   ordem é deliberada, e o que faltava era a barra estar certa.
+2. **Nada a registrar na
+   [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md).** O passo 1 previa
+   que a barra pudesse ser divergência deliberada do oráculo; ela não é, e
+   inventar uma linha de divergência para um desvio que não existe seria pior
+   do que o defeito.
+3. **`wte/re/render2d.md` não muda.** O port ancora certo; não houve medida
+   nova sobre ele.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/tools/compara_tela.py` | modificado — `corrida_mais_longa()` nova, usada pela `bandas()` |
+| `wte/tools/test_compara_tela.py` | modificado — caso de regressão da camisa encostando na faixa |
+| `wte/re/spec/MainForm.lista_equiposChange.md` | modificado — o registro do que a medição mostrou |
