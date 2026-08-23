@@ -95,11 +95,29 @@ no `.dfm`, sem `OnClick`; os únicos handlers publicados dos dois são
 serem da forma "cor" do [`wte/re/arranque.md`](../../wte/re/arranque.md).
 
 O aviso do enunciado continua certo e o dono é outro: **quem toca dados é o
-chamador**, não a janela. O desvincular está no `pabajoClick` e vizinhos e o
-mover em lote no `MoveTodosOsJogadores` do
-[`ep2002_mainform.aux.inc`](../../wte/src/impl/ep2002_mainform.aux.inc), os dois
-lendo `mrYes` do modal. `trivial` aqui não é preguiça: é que a janela realmente
-não faz nada além de devolver um resultado.
+chamador**, não a janela. `trivial` aqui não é preguiça: é que a janela
+realmente não faz nada além de devolver um resultado.
+
+**Mas os dois chamadores não estão no mesmo estado, e a primeira escrita desta
+seção juntou os dois numa frase só** — corrigido pela
+[CORR-WTE-086](/docs/tasks/CORR-WTE-086.md):
+
+- **`ficha_movertodos` — medido.** O `paderecha2Click` abre o modal e só segue
+  com `mrYes`, e o lote roda no `MoveTodosOsJogadores` do
+  [`ep2002_mainform.aux.inc`](../../wte/src/impl/ep2002_mainform.aux.inc), onde
+  o `if ficha_movertodos.ShowModal <> mrYes then` está escrito;
+- **`ficha_enlaza` — não medido, e o dono não é o `pabajoClick`.** Aquele
+  handler não menciona vínculo nem na spec nem no `.inc`. Quem alcança o modal
+  é o
+  [`MainForm.mostrar_jugadorClick`](../../wte/re/spec/MainForm.mostrar_jugadorClick.md),
+  que continua **`aberto`** — e é ali, não aqui, que a rota de vínculo será
+  fechada.
+
+Duas coisas ficam por medir do lado do `ficha_enlaza`, e é bom que estejam
+escritas: **qual condição** faz o `mostrar_jugadorClick` abrir o modal (a spec
+diz "quando o jogador escolhido é de clube de Master League", sem endereço de
+teste), e **o que o chamador faz com o `mrYes`** — que rotina desvincula, e
+quantos bytes ela toca.
 
 ---
 

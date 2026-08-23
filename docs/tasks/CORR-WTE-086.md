@@ -3,7 +3,7 @@ id: CORR-WTE-086
 title: "Correção: o dono do ficha_enlaza não é o pabajoClick — nenhuma spec ou código liga os dois"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -105,19 +105,51 @@ já fazem — é o que teria evitado a atribuição errada.
 
 ## Verificação
 
-- [ ] `grep -n "pabajoClick" docs/tasks/30-handlers-auxiliares.md` não aparece
-      mais ligado ao `ficha_enlaza`
-- [ ] A spec do `ficha_enlaza.FormShow` nomeia o chamador, e o nome bate com
-      `grep -rn "enlaza" wte/re/spec/*.md`
-- [ ] `make -C wte check` continua verde (o `spec_index.py` reindexa)
-- [ ] `roms/` intocada
+- [x] `grep -n "pabajoClick" docs/tasks/30-handlers-auxiliares.md` devolve uma
+      linha só, e ela diz o contrário do que dizia: *"o dono não é o
+      `pabajoClick`"*
+- [x] A spec do `ficha_enlaza.FormShow` nomeia o chamador, e o nome bate com
+      `grep -rn "enlaza" wte/re/spec/*.md` — o único chamador que as specs
+      nomeiam é o `MainForm.mostrar_jugadorClick`
+- [x] `make -C wte check` continua verde — 730 testes, `OK (skipped=1)`, e o
+      `spec_index.py --check` reindexou sem diferença
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-23
 
 **Resumo do que foi feito:**
 
+A frase que juntava os dois modais virou duas, uma por modal, e cada uma diz em
+que estado está: o `ficha_movertodos` **medido**, com o `paderecha2Click` e o
+`if ficha_movertodos.ShowModal <> mrYes then` do `MoveTodosOsJogadores`; o
+`ficha_enlaza` **não medido**, alcançado pelo `MainForm.mostrar_jugadorClick`,
+que continua `aberto`.
+
+O que **não** foi medido ficou escrito, que era o pedido da correção: qual
+condição faz o `mostrar_jugadorClick` abrir o modal — a spec dele diz "quando o
+jogador escolhido é de clube de Master League", sem endereço de teste — e o que
+o chamador faz com o `mrYes`.
+
+A spec do `ficha_enlaza.FormShow` ganhou a linha de quem abre o formulário, que
+é o que teria evitado a atribuição errada. O veredito `trivial` dos dois
+handlers **não mudou**, e não devia: o `.dfm` continua sem `OnClick` nos botões,
+só `ModalResult = 6/7`.
+
 **Problemas encontrados:**
 
+1. **Uma linha da Evidência desta correção envelheceu entre a abertura e a
+   execução.** Ela dizia que `grep -rn "enlaza" wte/src/impl/*.inc` não imprime
+   nada; hoje imprime quatro linhas, dos corpos
+   `ep2002_enlaza.FormShow.inc` e `ep2002_enlaza.FormCreate.inc`, criados em
+   `81f8e21`. São os handlers **do próprio modal**, não um chamador — a
+   alegação central, de que nenhum chamador do `ficha_enlaza` aparece no
+   `wte/src/`, continua de pé, e o `grep` do `pabajoClick.md` continua vazio.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/30-handlers-auxiliares.md` | modificado — a seção *"E a resposta dos dois é a mesma, medida"* |
+| `wte/re/spec/ficha_enlaza.FormShow.md` | modificado — a nota de quem abre |

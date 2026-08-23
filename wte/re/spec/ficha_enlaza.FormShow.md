@@ -44,6 +44,14 @@ Não trata.
 
 ## Notas
 
+**Quem abre este formulário** é o
+[`MainForm.mostrar_jugadorClick`](MainForm.mostrar_jugadorClick.md), quando o
+jogador escolhido é de clube de Master League. Aquele handler continua
+`aberto`, e com ele continuam sem medir a condição exata do desvio e o que o
+chamador faz com o `mrYes` que este modal devolve — ver a
+[CORR-WTE-086](../../../docs/tasks/CORR-WTE-086.md), que corrigiu a atribuição
+anterior ao `pabajoClick`.
+
 O `ficha_enlaza` pergunta *"o jogador selecionado é linkado do jogador N do
 time M; você deseja deslinkar o jogador?"*, com `BitBtn1` = " Sim" e `BitBtn2`
 = "Nao" (os `Caption` estão no DFM). Focar o botão **negativo** ao abrir é o
