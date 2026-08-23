@@ -219,6 +219,38 @@ function FormaEmVigor(indice_do_time: Integer): Integer;
 procedure GuardaOriginal(indice_do_time: Integer);
 function RestauraOriginal(indice_do_time: Integer): Boolean;
 
+{ AS PALETAS DE BANDEIRA QUE O `we2002_core` NAO CARREGA (CORR-WTE-083).
+
+  Dez slots ficam com dezesseis zeros depois do `Database.Load`, e zero na
+  paleta e PRETO: `teams[56..63]`, `ml_teams[5]` (`HIGHLANDS`) e `ml_teams[22]`
+  (`EMILIA`). Sete deles sao os times `CLASSIC`; o `teams[63]` nao tem nome e
+  nenhum item do combo o alcanca.
+
+  A CAUSA E DE ALCANCE, NAO DE DEFEITO. O laco nacional do `we2002_core` para
+  em 55 e o bloco de Master League e uma lista de indices que pula o 5, o 6, o
+  22 e o 23. Para o `ed.exe` isso nunca foi problema: ele nao desenha bandeira
+  nenhuma, e paleta que ele nao desenha ele nao precisa ler. O `wte.exe`
+  desenha, e le a cor de todos pela tabela de offsets de `.data` -- a mesma que
+  o `wte_blococor` extrai.
+
+  POR QUE ELA MORA AQUI E NAO NO GERADOR DA CAMADA DE DADOS. Estender o laco
+  transpilado faria o port divergir do `we2002_core` na CARGA, e o
+  `compare_dumps.py` compara os dois dumps byte a byte -- ele reprovaria por
+  construcao. A §4.5 do plano ja dizia de quem e cada metade: a camada de dados
+  e do `we2002_core`, e o que o Obocaman le a mais e do Obocaman. Esta rotina e
+  chamada por quem ABRE a imagem no app, depois do `Load`, e o
+  `dump_estado.pas` -- que chama o `Load` direto -- nao a ve.
+
+  O CRITERIO E "O CORE DEIXOU ZERADO", e ele nao e chute: medido nas duas ROMs,
+  85 dos 95 slots batem exatamente entre a carga do core e a tabela do
+  Obocaman, dez estao zerados, e UM diverge de proposito -- o `teams[39]`, que
+  o core le de outro ponto do arquivo (o caso `36, 39, 47` do laco). Preencher
+  so o que esta zerado nunca passa por cima do que o core leu, e e por isso que
+  o 39 fica intocado.
+
+  Devolve quantos slots preencheu. }
+function CarregaBandeirasQueOCoreNaoLe: Integer;
+
 { A CARGA DO QUE O MODELO NAO GUARDA -- a parte do `0x004050D0` que este port
   nao tinha.
 
@@ -458,6 +490,58 @@ var
   QuartaCrua: TPaletaCrua;
   CruasValidas: Boolean = False;
   CruasIndice: Integer = -1;
+
+function CarregaBandeirasQueOCoreNaoLe: Integer;
+var
+  img: TCdImage;
+  bandeira, uniforme0, uniforme1, quarta, padrao: TOffset;
+  forma: TCincoOffsets;
+  chuteira: TOitoOffsets;
+  cru: TPaletaCrua;
+  cores: TCoresDoTime;
+  idx, i, ml: Integer;
+  zerada: Boolean;
+begin
+  Result := 0;
+  if ImagemAberta = '' then
+    Exit;
+
+  img.Init;
+  if not img.OpenRead(ImagemAberta) then
+    Exit;
+  try
+    for idx := 0 to BLOCOCOR_TIMES - 1 do
+    begin
+      cores := CoresEmVigor(idx, COR_FAMILIA_BANDEIRA, 0);
+      zerada := True;
+      for i := Low(cores) to High(cores) do
+        if cores[i] <> 0 then
+        begin
+          zerada := False;
+          Break;
+        end;
+      if not zerada then
+        Continue;
+
+      if not OffsetsDoBlocoDeCor(idx, bandeira, forma, uniforme0, uniforme1,
+                                 chuteira, quarta, padrao) then
+        Continue;
+      if not LeDoFluxoEm(img, bandeira, cru, PALETA_BYTES_LIDOS) then
+        Continue;
+      for i := Low(cores) to High(cores) do
+        cores[i] := TCorBgr555(cru[2 * i] or (cru[2 * i + 1] shl 8));
+
+      ml := idx - TEAMS_NATIONAL_ALLSTAR;
+      if ml < 0 then
+        Jogo.teams[idx].flag_colours := cores
+      else
+        Jogo.ml_teams[ml].flag_colours := cores;
+      Inc(Result);
+    end;
+  finally
+    img.Close;
+  end;
+end;
 
 function CarregaBlocoDeCorDaImagem(indice_do_time: Integer): Boolean;
 var

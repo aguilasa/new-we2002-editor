@@ -103,6 +103,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Três gravações na imagem sem dono — o `OK` do `ficha_color`, o `Comple.` do `jugador` e o ` Accept` do `estrategia`; a WTE-TASK-27 contava seis gravações e são nove | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | A tela de tática nunca é enchida — a `0x0040A0B4` (1.443 B) não tem port, e sem ela o ` Accept` do `estrategia` gravaria as coordenadas de tempo de projeto do `.lfm` | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Dez times desenham bandeira preta — os 8 CLASSIC e dois clubes de ML: o `ed.exe` não lê a paleta deles e o editor do Obocaman lê | Alta | [ ] pendente | — |
+| [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md) | [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | O combo 85 (`ml_teams[22]`) diverge por POSIÇÃO depois de a paleta ser consertada — bandeira 2 px mais abaixo, e a barra `equipe` do oráculo em 76 px, fora da grade `11v+9` | Média | [ ] pendente | — |
 
 ## Checklist
 
@@ -188,6 +189,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-081 — implementar as três gravações órfãs, uma por vez, com o controle fechando antes de cada golden
 - [x] CORR-WTE-082 — portar a `0x0040A0B4` e medir a metade de tática do ` Accept`, antes de a CORR-WTE-081 poder fechar
 - [ ] CORR-WTE-083 — dar cor à bandeira dos 8 times CLASSIC, pela tabela de offsets do Obocaman, sem mexer no `we2002_core`
+- [ ] CORR-WTE-084 — decidir de quem é o desvio do combo 85: 2 px na bandeira e uma barra fora da grade no oráculo
 
 ## Detalhes por correção
 
@@ -1508,3 +1510,22 @@ dizer "fechada e fora do backlog", não "corrigida".
   precisou da cor; o editor do Obocaman lê, pela tabela de offsets em `.data`.
   Carregar os dez **fora** da camada transpilada, para o `compare_dumps.py`
   continuar idêntico
+
+### CORR-WTE-084
+
+- **Arquivo com problema:** `wte/src/wte_render2d.pas` (a âncora do desenho da
+  bandeira) e/ou o próprio `wte.exe` (a largura da barra `equipe`)
+- **Sintoma:** depois de a [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) dar cor
+  às dez paletas, nove dos alcançáveis fecham em **0 de 3.840** e o combo 85
+  não: a bandeira dele sai **2 px mais abaixo** (alinhada, a diferença cai de
+  1.500/3.840 para 92/3.680) e o oráculo desenha a barra `equipe` com **76 px**,
+  que não é `11 * v + 9` para nenhum `v` — o port desenha 75, que é o `v = 6`
+  da camada de dados
+- **Como foi detectado:** ao executar a CORR-WTE-083 e conferir os nove
+  alcançáveis com o `compara_tela.sh`, em 2026-08-22. Duas corridas, mesmo
+  resultado nas duas
+- **Fix:** decidir de quem é cada uma antes de mexer em código. A barra tem
+  cara de divergência deliberada — 76 px não é uma largura que o formato
+  produza —, e nesse caso o lugar dela é a WTE-TASK-35. O deslocamento da
+  bandeira precisa da âncora medida dos dois lados, sem quebrar os nove que já
+  fecham em zero

@@ -14,7 +14,13 @@ begin
   if not dialogo_we.Execute then
     Exit;
   if AbreImagem(dialogo_we.FileName) then
-    texto_dialogo_we.Caption := ExtractFileName(dialogo_we.FileName)
+  begin
+    { As dez paletas de bandeira que o `we2002_core` nao le (CORR-WTE-083) --
+      o mesmo passo do `FormShow`, pelo mesmo motivo. Os dois caminhos de
+      abrir imagem precisam dele. }
+    CarregaBandeirasQueOCoreNaoLe;
+    texto_dialogo_we.Caption := ExtractFileName(dialogo_we.FileName);
+  end
   else
     texto_dialogo_we.Caption :=
       'nao foi possivel abrir ' + ExtractFileName(dialogo_we.FileName);

@@ -19,9 +19,12 @@ barras batem em pixel, o uniforme bate em pixel, e a bandeira diverge em
 
 Não é um time: são **dez**, em duas famílias com mecanismos diferentes.
 
-- **`teams[56]`…`teams[63]`** — os oito CLASSIC (`CLASSIC ENGLAND`,
-  `CLASSIC FRANCE`, `CLASSIC NETHERLANDS`, `CLASSIC ITALY` e os quatro
-  seguintes);
+- **`teams[56]`…`teams[63]`** — sete CLASSIC (`CLASSIC ENGLAND`,
+  `CLASSIC FRANCE`, `CLASSIC NETHERLANDS`, `CLASSIC ITALY`, `CLASSIC GERMANY`,
+  `CLASSIC BRAZIL`, `CLASSIC ARGENTINA`) mais o `teams[63]`, que **não é
+  CLASSIC nem é alcançável**: o nome dele é vazio no dump, e o combo passa de
+  `teams[62]` para `ml_teams[0]` porque `TEAMS_NATIONAL_ALLSTAR` vale 63. Esta
+  linha dizia "os oito CLASSIC" até a execução medir os nomes;
 - **`ml_teams[5]` (`HIGHLANDS`) e `ml_teams[22]` (`EMILIA`)** — dois clubes de
   Master League.
 
@@ -133,25 +136,73 @@ divergir do oráculo que ele existe para reproduzir.
 
 ## Verificação
 
-- [ ] `compara_tela.sh` verde nos **dez** — os oito CLASSIC (combo 56–63) e os
-      dois de Master League (combo 68 e 85) —, com a bandeira batendo em pixel
-      e tolerância zero
-- [ ] `compara_tela.sh` continua verde nos times já conferidos (0, 2)
-- [ ] `compare_dumps.py` continua idêntico entre Pascal e C++ nas **duas** ROMs
-      — se a rota escolhida for a A, este critério cai e a divergência tem de
-      ser registrada na
-      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
-- [ ] `make -C wte check` e `lazbuild` verdes
-- [ ] nenhum roteiro golden muda de veredito — este achado é de **tela**, e
-      nenhum dos dois lados grava bandeira sem o usuário mandar
-- [ ] `roms/` intocada
+- [ ] `compara_tela.sh` verde nos **nove alcançáveis** — os sete CLASSIC
+      (combo 56–62) e os dois de Master League (combo 68 e 85), com a bandeira
+      batendo em pixel e tolerância zero. **Oito fecharam**; o combo 85 continua
+      divergindo por POSIÇÃO e virou a
+      [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md). O décimo slot zerado,
+      `teams[63]`, não tem item de combo e não há tela para conferir
+- [x] `compara_tela.sh` continua verde nos times já conferidos (0, 2)
+- [x] `compare_dumps.py` continua idêntico entre Pascal e C++ nas **duas** ROMs
+      — 66.498 linhas, 0 divergência, round-trip 0 byte nas duas. A rota
+      escolhida foi a **B**, e é por isso que este critério continua de pé
+- [x] `make -C wte check` e `lazbuild` verdes
+- [x] nenhum roteiro golden muda de veredito — o `golden-16-cor`, que é o que
+      grava bloco de cor, continua byte-idêntico
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**PARCIAL.** A carga está implementada e conferida; **oito dos nove
+alcançáveis** fecham em pixel com tolerância zero. O nono (combo 85) teve a
+paleta corrigida — as cores e o estêncil batem — mas sobrou uma diferença de
+POSIÇÃO, que virou a [CORR-WTE-084](/docs/tasks/CORR-WTE-084.md). Esta correção
+segue **pendente** até aquela fechar.
+
+**Executado em:** 2026-08-22
 
 **Resumo do que foi feito:**
 
+Escolhida a **rota B**, como a própria correção recomendava. A
+`CarregaBandeirasQueOCoreNaoLe`, na [`wte_cor`](../../wte/src/wte_cor.pas),
+percorre os 95 slots e, para cada um cuja paleta o `Database.Load` deixou
+inteiramente zerada, lê os 32 bytes da imagem pelo offset da tabela do Obocaman
+e os põe no `Jogo`. Ela é chamada pelos **dois** caminhos que abrem imagem —
+`MainForm.FormShow` e `boton_dialogo_weClick` —, depois do `AbreImagem` e fora
+dele: o `dump_estado.pas` chama o `Load` direto e não passa por aqui, e é por
+isso que o `compare_dumps.py` continua comparando duas cargas idênticas.
+
+**O offset não precisou ser medido: já estava extraído.** A
+[`dump_blococor.py`](../../wte/tools/dump_blococor.py), da
+[CORR-WTE-081](/docs/tasks/CORR-WTE-081.md), lê do `.exe` a tabela de 95 bytes
+de `0x00423247` e a converte com a mesma aritmética do `0x00404E70`, com oito
+âncoras conferidas contra `OFS_*` do `we2002_core`.
+
 **Problemas encontrados:**
 
+1. **O critério "o core deixou zerado" foi medido antes de virar código, e a
+   medição mudou o desenho.** Comparando os 95 slots entre a carga do core e a
+   tabela do Obocaman na ROM japonesa: **85 batem exatamente**, 10 estão
+   zerados, e **um diverge de propósito** — o `teams[39]`, que o core lê de
+   outro ponto do arquivo (o caso `36, 39, 47` do laço). Ler os 95 pela tabela
+   do Obocaman, que era a rota mais simples, teria passado por cima do 39.
+   Preencher só o que está zerado nunca sobrescreve o que o core leu.
+2. **São sete CLASSIC, não oito, e nove alcançáveis, não dez.** O `teams[63]`
+   tem nome vazio no dump e nenhum item do combo o alcança: com
+   `TEAMS_NATIONAL_ALLSTAR = 63`, o combo salta de `teams[62]` para
+   `ml_teams[0]`. O texto desta correção e o critério de verificação foram
+   corrigidos.
+3. **O combo 85 não fechou, e o que sobrou não é cor.** A bandeira dele agora
+   tem as cores e as faixas certas, mas sai **2 px mais abaixo**: alinhando o
+   recorte, a diferença cai de 1.500/3.840 para 92/3.680. E o oráculo desenha a
+   barra `equipe` com **76 px**, que não é `11 * v + 9` para nenhum `v` — ali
+   quem está fora da grade é ele, e o port concorda com a camada de dados.
+   Duas corridas, mesmo resultado. Virou a CORR-WTE-084.
+
 **Arquivos criados/modificados:**
+
+- criados: `docs/tasks/CORR-WTE-084.md`
+- modificados: `wte/src/wte_cor.pas` (a `CarregaBandeirasQueOCoreNaoLe`),
+  `wte/src/impl/ep2002_mainform.FormShow.inc`,
+  `wte/src/impl/ep2002_mainform.boton_dialogo_weClick.inc`,
+  `docs/PLAN-WTE-LAZARUS.md` §4.4, `wte/re/fase-2.md`

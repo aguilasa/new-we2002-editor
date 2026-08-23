@@ -48,6 +48,15 @@ begin
       `boton_dialogo_weClick` nao tem esta linha. Ver os dois remendos de
       arranque no `we2002_estado`. }
     PatchDeByteSoltoDeArranque(imagem);
+
+    { AS DEZ PALETAS DE BANDEIRA QUE O `we2002_core` NAO LE (CORR-WTE-083).
+
+      Ela vem DEPOIS do `AbreImagem`, e fora dele de proposito: o
+      `dump_estado.pas` chama o `Load` direto e nao passa por aqui, entao o
+      `compare_dumps.py` continua comparando duas cargas identicas. Ver o
+      cabecalho da rotina na `wte_cor`. }
+    CarregaBandeirasQueOCoreNaoLe;
+
     texto_dialogo_we.Caption := ExtractFileName(imagem);
     { Os tres combos de time nascem `Enabled = False` no DFM, e depois de
       carregar a imagem o original os aceita: clicar e teclar Down troca de
