@@ -942,7 +942,7 @@ Estas quatro são as únicas que exigem **fórmula**, não só posição de byte
 são a única parte onde o decompilador é insubstituível.
 
 **Duas delas executam dentro da Fase 4**, e isso não é desvio de rota. O `.mcr`
-(§5.2) e a camisa 2D (§5.3) são a *origem dos bytes* de duas das seis gravações
+(§5.2) e a camisa 2D (§5.3) são a *origem dos bytes* de duas das dezessete gravações
 do editor, e enquanto a gravação morava numa task e a origem noutra havia
 **ciclo**: a task de gravação não fechava sem elas, e elas declaravam
 `depends_on` a task de gravação. Cada uma passou a carregar a gravação que

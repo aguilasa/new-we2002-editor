@@ -19,6 +19,7 @@ Os testes montam a entrada em memoria: nao abrem o `.exe`, nao precisam de
 
 from __future__ import annotations
 
+import re
 import unittest
 
 import check_fase4 as C
@@ -113,6 +114,31 @@ class TestCincoTrivial(unittest.TestCase):
     def test_populacao_curta_demais_aborta(self) -> None:
         with self.assertRaises(C.Fase4Error):
             self.amostra(4)
+
+
+class TestFormaAposentada(unittest.TestCase):
+    """A guarda da CORR-WTE-085: `seis`/`nove gravacoes` em linha viva."""
+
+    def test_a_forma_velha_e_pega(self) -> None:
+        self.assertTrue(any(
+            re.search(f, "duas das seis gravações do editor", re.I)
+            for f in C.FORMAS_APOSENTADAS))
+        self.assertTrue(any(
+            re.search(f, "as nove gravações da fase 4", re.I)
+            for f in C.FORMAS_APOSENTADAS))
+
+    def test_o_digito_solto_nao_e_alvo(self) -> None:
+        """`6` e `9` sozinhos dariam falso positivo em qualquer pagina."""
+        self.assertFalse(any(
+            re.search(f, "as 6 gravações medidas", re.I)
+            for f in C.FORMAS_APOSENTADAS))
+
+    def test_a_forma_velho_para_corrente_e_perdoada(self) -> None:
+        """`seis -> dezessete` ensina; `seis` sozinho mente."""
+        self.assertTrue(C._diz_o_corrente(
+            "de seis gravações para dezessete", 17))
+        self.assertTrue(C._diz_o_corrente("seis gravações viraram 17", 17))
+        self.assertFalse(C._diz_o_corrente("duas das seis gravações", 17))
 
 
 class TestMarcasDeDecompilado(unittest.TestCase):

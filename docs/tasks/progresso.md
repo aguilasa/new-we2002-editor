@@ -119,7 +119,7 @@ objetivo completo e o modelo de verificação.
 **As quatro features são o motivo do projeto** — são o que o `ed.exe` não tem, e
 o resto do trabalho existe para chegar até elas com verificação. **Duas delas
 executam na fase 4**, e isso não é desvio de rota: o `.mcr` e a camisa 2D são a
-*origem dos bytes* de duas das seis gravações, e ficar na mesma task que a
+*origem dos bytes* de duas das dezessete gravações, e ficar na mesma task que a
 gravação é o que desfaz o ciclo que a numeração antiga carregava (a 27 dependia
 delas e elas dependiam da 27). Ver a tabela-âncora `§ → task → fase` na Fase 5
 de [`../PLAN-WTE-LAZARUS.md`](/docs/PLAN-WTE-LAZARUS.md).

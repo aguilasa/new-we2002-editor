@@ -3,7 +3,7 @@ id: CORR-WTE-085
 title: "Correção: o plano e o progresso ainda dizem \"seis gravações\" onde a ferramenta mede dezessete"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -88,18 +88,55 @@ que é o mesmo desenho de perímetro que a fase 1 usa.
 
 ## Verificação
 
-- [ ] `grep -rn "seis gravações" docs/PLAN-WTE-LAZARUS.md docs/tasks/progresso.md` sai vazio
-- [ ] `make -C wte check` continua verde
-- [ ] Se a guarda entrar: ela reprova com um `seis gravações` plantado numa
-      linha viva, e passa com a citação histórica do `correcoes-progresso.md`
-- [ ] `roms/` intocada
+- [x] `grep -rn "seis gravações" docs/PLAN-WTE-LAZARUS.md docs/tasks/progresso.md` sai vazio
+- [x] `make -C wte check` continua verde — 730 testes, `OK (skipped=1)`, e
+      `check_fase4: wte/re/fase-4.md: ok`
+- [x] A guarda entrou. Com `duas das seis gravações` replantado na linha 945 do
+      plano ela sai com **2** e nomeia o sítio; desfeito o plantio, volta a 0. A
+      citação histórica do `correcoes-progresso.md` passa, porque o arquivo está
+      na `NARRACAO` do perímetro importado
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-23
 
 **Resumo do que foi feito:**
 
+Os dois sítios trocaram `seis` por `dezessete`, e a frase continua dizendo
+"duas delas" — o total só situa.
+
+A guarda opcional **entrou**, e o desenho mudou em um ponto em relação ao que
+esta correção esboçou. A sugestão era excluir `docs/tasks/*.md` do perímetro,
+mas um dos dois sítios vivos é o próprio `docs/tasks/progresso.md`: com aquela
+exclusão, a guarda não cobriria metade do que ela existe para pegar. O que se
+usou foi o perímetro que o [`check_fase1.py`](../../wte/tools/check_fase1.py)
+já tem escrito e testado — ele deixa de fora a `NARRACAO` (onde está o
+`correcoes-progresso.md`), as `CORR-WTE-*.md`, as tasks `NN-*.md` com
+`status: concluído` e tudo o que vem depois do `## Log de Execução` —, e ele é
+**importado**, não copiado, pela regra de código duplicado do
+[`wte/tools/README.md`](../../wte/tools/README.md).
+
+O alvo é a forma **por extenso** (`seis gravações`, `nove gravações`), nunca o
+dígito, e o número corrente sai de `len(m['escritores'])`, a mesma medida que
+imprime o `São **17**` do `fase-4.md` — não há 17 escrito na guarda.
+
 **Problemas encontrados:**
 
+1. **As três ocorrências de `seis gravações` na
+   [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) ficam.** São narração
+   do dia (`nenhuma das seis gravações foi implementada`), dentro de uma task
+   concluída, e o perímetro já as deixa de fora.
+2. **O `check_fase4.py` não tinha linha no `wte/tools/README.md`, nem o
+   `test_check_fase4.py`.** Discrepância que só apareceu ao mexer na
+   ferramenta; as duas linhas entraram.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-WTE-LAZARUS.md` | modificado — linha 945 |
+| `docs/tasks/progresso.md` | modificado — linha 122 |
+| `wte/tools/check_fase4.py` | modificado — a guarda `confere_forma_aposentada()` |
+| `wte/tools/test_check_fase4.py` | modificado — três casos da guarda |
+| `wte/tools/README.md` | modificado — as duas linhas que faltavam |

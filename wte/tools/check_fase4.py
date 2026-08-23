@@ -74,6 +74,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import check_fase1 as F1  # noqa: E402  (o perimetro de doc vivo, ja escrito la)
 import dfm2lfm as D  # noqa: E402  (o nome da unidade de cada formulario)
 import spec_index as S  # noqa: E402  (o validador e o vocabulario)
 
@@ -734,9 +735,57 @@ def gera_md(m: dict) -> str:
     return "\n".join(linhas) + "\n"
 
 
+# ------------------------------------------- a guarda do numero de gravacoes --
+#
+# **A conta subiu duas vezes e o texto ficou para tras nas duas.** Seis virou
+# nove na WTE-TASK-30 e nove virou dezessete na WTE-TASK-31; a
+# CORR-WTE-085 achou o `seis` ainda vivo no preambulo da Fase 5 do plano e na
+# copia dele no `progresso.md`, a dezesseis linhas de uma linha que ja dizia
+# dezessete. Nenhum gate pegava: o `--check` daqui so compara o `fase-4.md`
+# com o disco, e o perimetro do `check_fase1.py` varre outros quatro numeros.
+#
+# O alvo e a FORMA POR EXTENSO (`seis gravacoes`, `nove gravacoes`), nao o
+# digito: `6` e `9` soltos dariam falso positivo em qualquer pagina. E o numero
+# corrente nao e constante escrita aqui -- sai de `len(m['escritores'])`, a
+# mesma medida que imprime o `São **17**` do `fase-4.md`.
+#
+# O perimetro e importado do `check_fase1.py`, nao copiado: ele ja sabe deixar
+# de fora a narracao (`correcoes-progresso.md`), as `CORR-WTE-*.md`, as tasks
+# `NN-*.md` concluidas e tudo o que vem depois do `## Log de Execução`. Duas
+# copias de perimetro divergiriam, que e o que o `wte/tools/README.md` manda
+# evitar.
+FORMAS_APOSENTADAS = (r"\bseis\s+gravaç", r"\bnove\s+gravaç")
+
+# A linha que escreve `velho -> corrente` esta ensinando, nao mentindo. Como o
+# total corrente aparece por extenso e em digito, os dois valem como perdao.
+def _diz_o_corrente(linha: str, corrente: int) -> bool:
+    return "dezessete" in linha.lower() or re.search(rf"\b{corrente}\b", linha)
+
+
+def confere_forma_aposentada(corrente: int) -> list[str]:
+    """Os sitios vivos que ainda escrevem a conta velha por extenso."""
+    achados: list[str] = []
+    for caminho in F1._markdowns():
+        if not F1._no_perimetro(caminho):
+            continue
+        for i, linha in F1._linhas_vivas(caminho):
+            if any(re.search(f, linha, re.I) for f in FORMAS_APOSENTADAS) \
+                    and not _diz_o_corrente(linha, corrente):
+                rel = caminho.relative_to(ROOT).as_posix()
+                achados.append(f"{rel}:{i}: {linha.strip()}")
+    return achados
+
+
 # ------------------------------------------------------------------- driver ---
 def generate() -> dict[str, str]:
-    return {str(OUT): gera_md(medir())}
+    m = medir()
+    residuo = confere_forma_aposentada(len(m["escritores"]))
+    if residuo:
+        raise Fase4Error(
+            "a conta de gravacoes corrente e "
+            f"{len(m['escritores'])}, e estes sitios vivos ainda escrevem a "
+            "velha por extenso:\n  " + "\n  ".join(residuo))
+    return {str(OUT): gera_md(m)}
 
 
 def do_check(files: dict[str, str]) -> int:
