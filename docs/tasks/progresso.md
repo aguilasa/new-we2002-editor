@@ -323,6 +323,17 @@ só uma escolha de quando.
       ordenada por endereço, para o `--check` poder refazê-la. Os cinco
       confirmaram, e nos três `FormCreate` a cor que o original passa a
       `TControl::SetColor` é a mesma que o `.inc` do port escreve
+- [ ] **Dez times desenham bandeira preta** *(achado da WTE-TASK-31,
+      2026-08-22, hoje na [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md))*. O
+      `compara_tela.sh` mediu quatro times: 2 e 0 batem em pixel nas cinco
+      barras, na bandeira e no uniforme; o **56** (`CLASSIC ENGLAND`) e o combo
+      **68** (`ml_teams[5]`, `HIGHLANDS`) divergem em 3.840 de 3.840 pixels de
+      bandeira, com barras e uniforme batendo na mesma corrida. `flag_colours`
+      carrega como dezesseis zeros em `teams[56..63]`, `ml_teams[5]` e
+      `ml_teams[22]`. **Não é defeito do port:** o laço é transpilado do
+      `we2002_core`, o `ed.exe` para no time 55 e pula o 5 e o 22 do bloco de
+      ML, e ele nunca precisou dessas cores porque não desenha bandeira. O
+      editor do Obocaman desenha, e as lê pela tabela de offsets em `.data`
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
       lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de

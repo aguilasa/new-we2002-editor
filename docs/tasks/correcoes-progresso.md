@@ -102,6 +102,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-080](/docs/tasks/CORR-WTE-080.md) | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | O `golden-14-uniforme` falhou por espera de janela em 3 de 4 corridas do modo controle nesta revisão; a 4ª deu byte-idêntico | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Três gravações na imagem sem dono — o `OK` do `ficha_color`, o `Comple.` do `jugador` e o ` Accept` do `estrategia`; a WTE-TASK-27 contava seis gravações e são nove | Alta | [x] concluída | 2026-08-21 |
 | [CORR-WTE-082](/docs/tasks/CORR-WTE-082.md) | [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) | A tela de tática nunca é enchida — a `0x0040A0B4` (1.443 B) não tem port, e sem ela o ` Accept` do `estrategia` gravaria as coordenadas de tempo de projeto do `.lfm` | Alta | [x] concluída | 2026-08-21 |
+| [CORR-WTE-083](/docs/tasks/CORR-WTE-083.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Dez times desenham bandeira preta — os 8 CLASSIC e dois clubes de ML: o `ed.exe` não lê a paleta deles e o editor do Obocaman lê | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -186,6 +187,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-080 — estabilizar o `golden-14-uniforme`, ou tornar a repetição explícita
 - [x] CORR-WTE-081 — implementar as três gravações órfãs, uma por vez, com o controle fechando antes de cada golden
 - [x] CORR-WTE-082 — portar a `0x0040A0B4` e medir a metade de tática do ` Accept`, antes de a CORR-WTE-081 poder fechar
+- [ ] CORR-WTE-083 — dar cor à bandeira dos 8 times CLASSIC, pela tabela de offsets do Obocaman, sem mexer no `we2002_core`
 
 ## Detalhes por correção
 
@@ -1486,3 +1488,23 @@ dizer "fechada e fora do backlog", não "corrigida".
   unidade que nenhum dos dois formulários possua — a forma que a `wte_ficha`
   estreou —, e trocar o veredito dos dois chamadores. A conferência é de TELA
   (`compara_tela.sh`, três times), não de byte: a rotina não grava
+
+### CORR-WTE-083
+
+- **Arquivo com problema:** `wte/src/we2002_database.pas` (o laço de carga, que
+  é gerado) e a tela do `MainForm`
+- **Sintoma:** **dez** times carregam `flag_colours` como dezesseis zeros e o
+  port desenha a bandeira **preta**: os oito CLASSIC (`teams[56..63]`) e dois
+  clubes de ML (`ml_teams[5]` HIGHLANDS, `ml_teams[22]` EMILIA). Medido na tela
+  em dois deles, um de cada família — 3.840 de 3.840 pixels diferentes do
+  oráculo, com as cinco barras e o uniforme batendo em pixel na mesma corrida
+- **Como foi detectado:** `compara_tela.sh 2 0 56` na conferência da
+  WTE-TASK-31, mais o dump do `dump_estado.pas`, que mostra os oito com paleta
+  zerada e `flag_shape` válido (o 56 tem `flag_shape = 4`, e `bandera4.bmp`
+  existe)
+- **Fix:** o laço nacional para em 55 — `for(i = 0;i < 56;i ++)` no
+  `Database.cpp`, transpilado para `for i := 0 to 55` — e o bloco de ML é uma
+  lista de índices que pula o 5 e o 22. O `ed.exe` não desenha bandeira e nunca
+  precisou da cor; o editor do Obocaman lê, pela tabela de offsets em `.data`.
+  Carregar os dez **fora** da camada transpilada, para o `compare_dumps.py`
+  continuar idêntico

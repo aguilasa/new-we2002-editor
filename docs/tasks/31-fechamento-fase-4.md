@@ -165,15 +165,66 @@ de ML — ainda não está feito.
   no cabeçalho do gerador — um `undefined` de Ghidra sem dígito passaria por
   ela.
 
+---
+
+### Segunda passagem — 2026-08-22
+
+**Objetivo:** as prosas de *"veredito `aberto` porque…"* de vários dos 16 citam
+bloqueios que **caíram** desde que foram escritas — `0x0040756c` portada,
+`0x00404820` portada, a tela do `MainForm` populada. Reconferir veredito contra
+a régua é trabalho de fechamento, não implementação, então a passagem rodou o
+[`compara_tela.sh`](../../wte/tools/compara_tela.sh), que é a régua do grupo de
+carga.
+
+**Nenhum veredito virou, e a razão é melhor do que se esperava: a conferência
+achou um defeito.**
+
+Quatro times medidos — 2, 0, 56 e o combo 68:
+
+| Time | Barras | Uniforme | Bandeira |
+|---|---|---|---|
+| 2 | 5/5 em pixel | em pixel | em pixel |
+| 0 | 5/5 em pixel | em pixel | em pixel |
+| 56 `CLASSIC ENGLAND` | 5/5 em pixel | em pixel | **3.840/3.840 px diferentes** |
+| 68 `HIGHLANDS` (`ml_teams[5]`) | 5/5 em pixel | em pixel | **3.840/3.840 px diferentes** |
+
+**Dez times desenham a bandeira preta no port**, e o dump da camada de dados
+diz por quê: `flag_colours` carrega como dezesseis zeros em `teams[56..63]` —
+os oito CLASSIC — e em `ml_teams[5]` e `ml_teams[22]`. Zero na paleta é preto.
+
+A causa **não é do port**, é de alcance entre os dois oráculos. O laço de carga
+é transpilado do `we2002_core`, que é byte-idêntico ao `ed.exe`, e o `ed.exe`
+para no time 55 (`for(i = 0;i < 56;i ++)`) e pula os índices 5 e 22 no bloco de
+Master League. Ele nunca precisou dessas cores: **não desenha bandeira
+nenhuma.** O editor do Obocaman desenha, e as lê pela tabela de offsets em
+`.data`. O port herdou a camada de dados de um e a tela do outro.
+
+É a classe de achado da
+[WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md) — *"os offsets que o
+Obocaman tem e nós não"* —, e escapou dela porque a conferência de tela daquela
+época não olhou a bandeira desses dez. Aberta como
+[CORR-WTE-083](/docs/tasks/CORR-WTE-083.md), com as duas rotas possíveis e a
+recomendação de **não** mexer no `we2002_core`.
+
+**O que isso ensina sobre o fechamento:** reconferir veredito velho não é
+burocracia. Três handlers de carga carregavam prosa que dizia *"falta a carga
+da tela"* enquanto a tela já carregava; medir para confirmar o óbvio custou uma
+corrida e devolveu um defeito de dez times que ninguém procurava.
+
 - **O que falta para esta task fechar:**
 
   Os 16 `aberto` e as 2 specs ausentes. Três deles são da WTE-TASK-32, que é a
-  próxima na ordem; os outros 13 precisam de dono. **Esta task volta a rodar
-  depois disso** — é fechamento, e fechamento não implementa.
+  próxima na ordem; os outros 13 precisam de dono, e um deles — o
+  `lista_equiposChange` — ganhou nesta passagem uma razão nova e concreta, a
+  CORR-WTE-083. **Esta task volta a rodar depois disso** — é fechamento, e
+  fechamento não implementa.
 
 - **Arquivos criados/modificados:**
 
   - criados: `wte/tools/check_fase4.py`, `wte/tools/test_check_fase4.py`,
     `wte/re/fase-4.md`, `wte/re/fase-4-golden.tsv`,
-    `wte/re/fase-4-trivial.tsv`
-  - modificados: `docs/tasks/progresso.md`, este arquivo
+    `wte/re/fase-4-trivial.tsv`; na segunda passagem,
+    `docs/tasks/CORR-WTE-083.md`
+  - modificados: `docs/tasks/progresso.md`, `docs/PLAN-WTE-LAZARUS.md`, e na
+    segunda passagem `docs/tasks/correcoes-progresso.md` e
+    `wte/re/spec/MainForm.lista_equiposChange.md`; este arquivo

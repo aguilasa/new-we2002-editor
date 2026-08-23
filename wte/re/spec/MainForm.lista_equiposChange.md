@@ -445,3 +445,21 @@ ele não tem barra, bandeira, uniforme nem nome editável, e é por isso que
 **A largura da barra é `11*v + 9`, não uma escala.** Vindo do disassembly como
 `v*11 + 9` (`lea` duplo mais `add`), e não de proporção sobre um máximo: o
 valor 0 dá 9 px, que é a barra vazia desenhada no DFM.
+
+### O que a WTE-TASK-31 acrescentou, em 2026-08-22
+
+A conferência de tela do fechamento rodou quatro times — 2, 0, 56 e o combo 68
+— e achou uma divergência que as passagens anteriores não tinham alcançado:
+**dez times desenham a bandeira preta no port**, porque a `flag_colours` deles
+carrega como dezesseis zeros.
+
+Não é defeito deste handler nem do render: é **alcance de carga**. O laço do
+`we2002_database.pas` — transpilado do `we2002_core`, e portanto do `ed.exe` —
+para no time 55, e o bloco de Master League pula os índices 5 e 22. O `ed.exe`
+nunca precisou dessas cores porque não desenha bandeira; o editor do Obocaman
+precisa, e as lê pela tabela de offsets em `.data`.
+
+Está na [CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md), com as duas rotas
+possíveis e a recomendação. **É mais uma razão para este veredito continuar
+`aberto`**, e a primeira delas que é de dado, não de régua: nos times 2 e 0 a
+tela bate em pixel nas cinco barras, na bandeira e no uniforme.
