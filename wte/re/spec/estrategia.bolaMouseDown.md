@@ -99,13 +99,29 @@ Quem o aponta é o
 desde 2026-08-18**, e no port a zona sai de `ZonaDaBola(i)`, que lê a formação
 aplicada.
 
-**O que sobra é outra coisa, e o dono é outro.** No original quem aponta os
-quatro ponteiros ao **abrir** o formulário é `0x0040a0b4`, a rotina que enche a
-tela de tática — chamada pelo `MainForm.mostrar_estrategiaClick`, do grupo de
-carga, e não portada. Enquanto ela não existir, o port abre a tela com toda
-bola na zona 0 e só acerta depois de um clique na lista. O retângulo aparece,
-com a geometria correta de *uma* zona — que é visivelmente diferente de não
-aparecer, e por isso a falha não passa por "não implementado".
+**O que sobrava era outra coisa, e caiu.** Por três passagens esta seção dizia
+que no original quem aponta os quatro ponteiros ao **abrir** o formulário é
+`0x0040a0b4` — a rotina que enche a tela de tática, chamada pelo
+`MainForm.mostrar_estrategiaClick` —, que ela não tinha port, e que por isso o
+port abria a tela com toda bola na zona 0. A
+[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) a portou em 2026-08-21 como
+`PreencheTelaDeTatica`, na [`wte_tatica`](../../src/wte_tatica.pas), e a
+abertura passa a apontar o registro da tática viva.
+
+### Por que o veredito continua `aberto`, medido em 2026-08-23
+
+Não é mais o bloqueio acima, e não é a régua de bytes — este handler não grava.
+**É que nada o dispara.** O `trace.log` de `compara_tela.sh --malha 2 68`, o
+roteiro que mais fundo entra nesta tela, registra `estrategia.malla1MouseDown`
+e cinco `estrategia.relojTimer`, e **nenhum** `bolaMouseDown`: o clique do
+roteiro é na malha, não numa bola.
+
+O que falta é uma régua que arraste — `MouseDown` numa bola, `MouseMove` e
+`MouseUp` por coordenada absoluta, nos dois lados, com o `--artefato` do gate
+lendo os 30 bytes de formação depois. É a mesma classe de estímulo que o
+[`golden-17-tatica`](../../tests/roteiros/golden-17-tatica.txt) já sabe julgar;
+o que ele ainda não tem é o arrasto. Enquanto ela não existir, `implementado`
+afirmaria uma verificação que não aconteceu.
 
 ### O que ele guarda e ninguém lê ainda
 

@@ -2,7 +2,7 @@
 handler: lista_equiposChange
 formulario: MainForm
 endereco: 0x0040cd6c
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.lista_equiposChange
@@ -483,6 +483,32 @@ O texto abaixo é o registro do dia do achado, e continua valendo como
 diagnóstico.
 
 Está na [CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md), com as duas rotas
-possíveis e a recomendação. **É mais uma razão para este veredito continuar
-`aberto`**, e a primeira delas que é de dado, não de régua: nos times 2 e 0 a
-tela bate em pixel nas cinco barras, na bandeira e no uniforme.
+possíveis e a recomendação. Era, no dia em que foi escrita, mais uma razão para
+o veredito continuar `aberto` — e a primeira delas que era de dado, não de
+régua: já naquela corrida os times 2 e 0 batiam em pixel nas cinco barras, na
+bandeira e no uniforme.
+
+## O veredito passou a `implementado` em 2026-08-23
+
+Terceira passagem da [WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md),
+e o que mudou não foi o Pascal: foi a última razão de `aberto` cair. Elas eram
+quatro, e as quatro estão fechadas acima —
+
+| a razão | quando caiu |
+|---|---|
+| `dorsal1..23` mostrando um a menos | 2026-08-12, WTE-TASK-26 (o `+ 1` no `NumeroDaCamisa`) |
+| o `iguala_nombres` que o port não acinzenta | 2026-08-18, CORR-WTE-060 — é do widgetset, virou divergência deliberada |
+| o mecanismo de habilitação sem resposta nos bytes | achado o `call [ecx+0x64]`, e o slot conferido em 108 classes |
+| dez times com a bandeira preta | 2026-08-23, CORR-WTE-083 e -084 — onze times fecham em pixel |
+
+**E a régua rodou de novo no dia da promoção**, para o veredito não se apoiar só
+em corrida velha. `bash wte/tools/compara_tela.sh 2 68`, ROM japonesa, um time
+de seleção e um clube de Master League:
+
+| Time | Barras, oráculo e port | Bandeira e uniforme |
+|---|---|---|
+| 2 | `[64, 53, 75, 75, 75]` nos dois, 5 de 5 contra o `we2002_core` | 0 de 8.960 px, tolerância zero |
+| 68 | `[64, 75, 75, 86, 75]` nos dois, 5 de 5 | 0 de 9.800 px, tolerância zero |
+
+O 68 é o `ml_teams[5]`, um dos dez da bandeira preta: ele é a prova de que a
+`CarregaBandeirasQueOCoreNaoLe` continua de pé fora da corrida que a instalou.

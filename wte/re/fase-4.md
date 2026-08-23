@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**78 dos 96 têm veredito fechado; 18 não.**
+**81 dos 96 têm veredito fechado; 15 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -28,11 +28,11 @@ A segunda metade do critério está cumprida — ver a seção do
 
 | Veredito | Handlers |
 |---|---:|
-| `implementado` | 56 |
+| `implementado` | 58 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 2 |
+| `divergencia deliberada` | 3 |
 | `nao portado` | 1 |
-| `aberto` | 16 |
+| `aberto` | 13 |
 | *(sem arquivo de spec)* | 2 |
 | **total** | **96** |
 
@@ -44,7 +44,7 @@ Os que não têm:
 
 ## Os que continuam `aberto`
 
-São 16, e **12 deles já têm corpo Pascal escrito**.
+São 13, e **9 deles já têm corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
@@ -56,17 +56,14 @@ a spec de cada um nomeia o que falta e quem é o dono.
 | `0x00408b50` | [jugador.casilla_dorsalKeyPress](spec/jugador.casilla_dorsalKeyPress.md) | edicao | sim |
 | `0x00408f00` | [estrategia.bolaMouseDown](spec/estrategia.bolaMouseDown.md) | edicao | sim |
 | `0x004090fc` | [estrategia.FormCreate](spec/estrategia.FormCreate.md) | carga | **não** |
-| `0x00409ba4` | [estrategia.relojTimer](spec/estrategia.relojTimer.md) | edicao | sim |
 | `0x0040adec` | [estrategia.ComboBoxDrawItem](spec/estrategia.ComboBoxDrawItem.md) | carga | **não** |
 | `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | sim |
-| `0x0040cd6c` | [MainForm.lista_equiposChange](spec/MainForm.lista_equiposChange.md) | carga | sim |
 | `0x0040dfe8` | [MainForm.boton_dialogo_texClick](spec/MainForm.boton_dialogo_texClick.md) | carga | **não** |
 | `0x0040e1a8` | [MainForm.lista_equipos_2Change](spec/MainForm.lista_equipos_2Change.md) | carga | sim |
 | `0x0040e998` | [MainForm.parribaClick](spec/MainForm.parribaClick.md) | edicao | sim |
 | `0x0040f8b8` | [MainForm.lista_jugadores_1Change](spec/MainForm.lista_jugadores_1Change.md) | carga | sim |
 | `0x0040f8d4` | [MainForm.mostrar_jugadorClick](spec/MainForm.mostrar_jugadorClick.md) | carga | sim |
 | `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | sim |
-| `0x004111d8` | [MainForm.FormShow](spec/MainForm.FormShow.md) | carga | sim |
 
 ## Quem grava na imagem, e o gate de cada um
 
@@ -102,7 +99,7 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 | `0x0040ecc0` | [MainForm.pabajoClick](spec/MainForm.pabajoClick.md) | edicao | implementado | [golden-11-descarte-ml](../tests/roteiros/golden-11-descarte-ml.txt) |
 | `0x00410a74` | [MainForm.dorsalClick](spec/MainForm.dorsalClick.md) | edicao | implementado | [golden-08-dorsal-mcr](../tests/roteiros/golden-08-dorsal-mcr.txt) |
 | `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | aberto | **nenhum** |
-| `0x004111d8` | [MainForm.FormShow](spec/MainForm.FormShow.md) | carga | aberto | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
+| `0x004111d8` | [MainForm.FormShow](spec/MainForm.FormShow.md) | carga | divergencia deliberada | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
 
 ## A bateria golden desta corrida
 

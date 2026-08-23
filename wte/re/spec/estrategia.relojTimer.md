@@ -2,7 +2,7 @@
 handler: relojTimer
 formulario: estrategia
 endereco: 0x00409ba4
-veredito: aberto
+veredito: implementado
 ---
 
 # estrategia.relojTimer
@@ -139,15 +139,30 @@ caminho, não um pixel. O texto do `.inc` foi corrigido junto.
 `0x004097d4` também é quem faz `reloj.Enabled := True` e quem **semeia
 `0x00434340`**, a bola em foco, antes de qualquer movimento de mouse.
 
-### Por que o veredito continua `aberto`
+### O veredito passou a `implementado` em 2026-08-23
 
-Não é a régua de bytes — este handler não grava. E não é mais o
-`lista_formacionesClick`, que está portado. É que `0x004097d4` é chamada
+**O que o segurava caiu, e o registro do bloqueio fica aqui porque ele explica a
+forma do gate.** Por três passagens esta seção dizia: `0x004097d4` é chamada
 **também** por `0x0040a0b4`, a rotina que enche a tela de tática ao abrir o
-formulário: no original a animação roda **na abertura**, deslizando as bolas
-das posições de projeto até a formação do time. `0x0040a0b4` não está portada —
-é do grupo de carga, pelo `MainForm.mostrar_estrategiaClick` —, então no port
-este corpo só roda depois de um clique em `lista_formaciones`.
+formulário — no original a animação roda **na abertura**, deslizando as bolas
+das posições de projeto até a formação do time —, e como `0x0040a0b4` não tinha
+port, no port este corpo só rodava depois de um clique em `lista_formaciones`.
 
-Isso é exercitável na tela, ao contrário do que esta spec afirmava: basta abrir
-a tática e clicar num item. O que não é exercitável é o caminho de abertura.
+A [CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) portou a `0x0040a0b4` em
+2026-08-21, como `PreencheTelaDeTatica` na
+[`wte_tatica`](../../src/wte_tatica.pas), e **o caminho de abertura passou a
+rodar**. Medido na terceira passagem da
+[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md), pelo `trace.log` de
+`compara_tela.sh --malha 2 68`: abrir a tela de tática dispara este handler
+**cinco vezes** — os quatro quadros de `QUADROS_DA_ANIMACAO` mais o passo que
+encaixa e desliga o timer. É exatamente a contagem que a seção Saída prevê, e
+ela não era observável enquanto a abertura não enchia a tela.
+
+**E a régua não é de pixel, é de byte.** As posições em que as bolas param
+viram os 30 bytes de formação que o
+[` Accept`](estrategia.BitBtn3Click.md) grava — dez de papel, dez de X, dez de
+Y, convertidos em célula da malha a partir da posição dos componentes. O
+[`golden-17-tatica`](../../tests/roteiros/golden-17-tatica.txt) abre a tática e
+aceita sem mexer nas bolas, e os 44 bytes que ele devolve como leu batem com o
+oráculo nos três modos. Bola parada em lugar errado sairia dali como byte
+errado; não sai.

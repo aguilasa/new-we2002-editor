@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 56 |
+| `implementado` | 58 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 2 |
+| `divergencia deliberada` | 3 |
 | `nao portado` | 1 |
-| `aberto` | 18 |
+| `aberto` | 15 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -84,7 +84,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00409780` | `estrategia` | [rectanguloDragDrop](estrategia.rectanguloDragDrop.md) | OnDragDrop | edicao | implementado |
 | `0x004097a4` | `estrategia` | [bolaEndDrag](estrategia.bolaEndDrag.md) | OnEndDrag x10 | edicao | implementado |
 | `0x00409aa0` | `estrategia` | [lista_formacionesClick](estrategia.lista_formacionesClick.md) | OnClick | carga | implementado |
-| `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | aberto |
+| `0x00409ba4` | `estrategia` | [relojTimer](estrategia.relojTimer.md) | OnTimer | edicao | implementado |
 | `0x00409f4c` | `estrategia` | [malla1MouseDown](estrategia.malla1MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | implementado |
@@ -98,7 +98,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040c9d0` | `MainForm` | [sel_barraClick](MainForm.sel_barraClick.md) | OnClick x5 | edicao | implementado |
 | `0x0040ca10` | `MainForm` | [track_barraChange](MainForm.track_barraChange.md) | OnChange | edicao | implementado |
 | `0x0040cab8` | `MainForm` | [boton_barras2isoClick](MainForm.boton_barras2isoClick.md) | OnClick | gravacao | implementado |
-| `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | aberto |
+| `0x0040cd6c` | `MainForm` | [lista_equiposChange](MainForm.lista_equiposChange.md) | OnChange | carga | implementado |
 | `0x0040d36c` | `MainForm` | [edit_nombre1KeyPress](MainForm.edit_nombre1KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d3c4` | `MainForm` | [edit_nombre2KeyPress](MainForm.edit_nombre2KeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x0040d41c` | `MainForm` | [edit_nombre3KeyPress](MainForm.edit_nombre3KeyPress.md) | OnKeyPress | edicao | implementado |
@@ -127,6 +127,6 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00410fc0` | `MainForm` | [SpeedButton1Click](MainForm.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
 | `0x00410fd0` | `MainForm` | [Image3Click](MainForm.Image3Click.md) | OnClick | auxiliar | implementado |
 | `0x00410ff4` | `MainForm` | [base_teamClick](MainForm.base_teamClick.md) | OnClick x2 | auxiliar | aberto |
-| `0x004111d8` | `MainForm` | [FormShow](MainForm.FormShow.md) | OnShow | carga | aberto |
+| `0x004111d8` | `MainForm` | [FormShow](MainForm.FormShow.md) | OnShow | carga | divergencia deliberada |
 | `0x00420e84` | `ficha_info2` | [FormCreate](ficha_info2.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00420f08` | `ficha_error` | [SpeedButton1Click](ficha_error.SpeedButton1Click.md) | OnClick | auxiliar | trivial |

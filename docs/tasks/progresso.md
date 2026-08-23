@@ -255,12 +255,12 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-22, remedido pelo `check_fase4.py`): 56 `implementado`, 19
-      `trivial`, 2 `divergencia deliberada`, 1 `nao portado`, 16 `aberto`.
-      **78 dos 96 têm veredito fechado**, e os 18 que faltam estão nomeados um
+      (2026-08-23, remedido pelo `check_fase4.py`): 58 `implementado`, 19
+      `trivial`, 3 `divergencia deliberada`, 1 `nao portado`, 13 `aberto`.
+      **81 dos 96 têm veredito fechado**, e os 15 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
-      (WTE-TASK-32), 4 esperam corpo Pascal e 11 esperam régua. **Doze dos 16
+      (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
       `aberto` já têm corpo escrito** — o que os segura não é código. Os 11 do
       `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
       somando-se aos 28 do grupo de carga, aos 28 do de edição que a
@@ -270,6 +270,22 @@ só uma escolha de quando.
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
       `compara_tela.sh --edicao` alcançar a lista de descarte
+- [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
+      da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
+      porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém
+      voltava ao arquivo — o veredito seguia afirmando um bloqueio que não
+      existia mais. **Três foram promovidos com a régua rodando no dia**: o
+      `lista_equiposChange` (`compara_tela.sh 2 68`, 5 de 5 barras em pixel e 0
+      de 8.960 / 0 de 9.800 px em bandeira e uniforme), o `FormShow` (para
+      `divergencia deliberada`, pelas duas divergências de `dat.bin` que ele já
+      declarava) e o `estrategia.relojTimer` (a `0x0040a0b4` caiu na
+      CORR-WTE-082: abrir a tática dispara o handler cinco vezes, quatro quadros
+      mais o encaixe, e as posições viram os 30 bytes que o `golden-17-tatica`
+      compara). **Os outros quatro tiveram a razão reescrita e continuam
+      `aberto`**, porque nenhuma régua os alcança. A classe ficou trancada pela
+      guarda `BLOQUEIO_VENCIDO` do `check_fase4.py`: numa spec `aberto`,
+      endereço citado como "não portada" que apareça no Pascal **aborta** o
+      fechamento — recusa vista, com a frase plantada de volta
 - [x] **Três gravações órfãs, achado da WTE-TASK-30 (2026-08-21), fechadas
       pela [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md).** O grupo `auxiliar` não era
       de "avisos e confirmações": o `OK` do `ficha_color` (`0x004069e8`), o

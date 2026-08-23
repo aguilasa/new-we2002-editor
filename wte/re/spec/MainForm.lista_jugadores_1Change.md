@@ -102,12 +102,28 @@ Qt. A medição é remedida a cada `make -C wte check` pelo
 propriedade do widgetset instalado e pode virar num upgrade sem que uma linha
 deste repositório mude.
 
-**Veredito ainda `aberto`, e agora por um motivo só: nada exercita o corpo.**
-O combo nasce `Enabled = False` e sem itens, e quem o povoa é o
-`lista_equiposChange` — que continua preso em `0x00404374`, não lido. O golden
-test não cobre isto e não deveria: ele compara bytes da imagem, e este handler
+**Veredito ainda `aberto`, e por um motivo só: nada dispara o corpo.** O golden
+test não cobre isto e não deveria — ele compara bytes da imagem, e este handler
 não grava nada. Enquanto não houver como dispará-lo, `implementado` afirmaria
 uma verificação que não aconteceu.
+
+**A causa, porém, não é a que esta seção deu por três passagens**, e a diferença
+importa porque a antiga apontava para trabalho que já foi feito. Ela dizia que o
+combo *não é povoado*, e que o `lista_equiposChange` estava *"preso em
+`0x00404374`, não lido"*. As duas coisas mudaram: aquele handler está
+`implementado` desde 2026-08-23, o combo é povoado a cada troca de time e o
+`compara_tela.sh` mede a lista resultante na montagem da janela inteira.
+
+**O que impede é o widgetset, e está medido.** A LCL **não** dispara `OnChange`
+em `ItemIndex :=`, nem no `Items.Clear` com item selecionado, nem ao reatribuir
+o mesmo índice — como o Win32, e ao contrário do Qt; é o que o
+[`check_lcl_combo.py`](../../tools/check_lcl_combo.py) reconfere a cada
+`make -C wte check`. Então povoar a lista, que é o que o irmão faz, **não**
+chama este handler: só um clique do usuário na `lista_jugadores_1` chama, e
+nenhuma régua clica ali. Medido em 2026-08-23, na terceira passagem da
+[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md): quatro corridas de
+`compara_tela.sh` (dois times em `barras`, dois em `--malha`) deixaram 150
+linhas de `trace.log` com 69 disparos do `lista_equiposChange` e **zero** deste.
 
 Uma tentativa de exercitá-lo por programa de console **falhou por outra
 razão**, e ela vale como achado: `Tficha_about.Create(nil)` — qualquer um dos

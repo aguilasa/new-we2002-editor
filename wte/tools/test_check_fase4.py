@@ -165,5 +165,61 @@ class TestMarcasDeDecompilado(unittest.TestCase):
         self.assertFalse(self.casa("undefined behaviour, not a behaviour"))
 
 
+class TestBloqueioVencido(unittest.TestCase):
+    """A guarda que impede prosa vencida de segurar um veredito `aberto`.
+
+    Ela nasceu de dois casos reais: a `0x0040a0b4` foi portada pela
+    CORR-WTE-082 e duas specs do `estrategia` continuaram dizendo que nao
+    estava, cada uma segurando o proprio `aberto`.
+    """
+
+    def cita(self, texto: str) -> set[str]:
+        achados: set[str] = set()
+        for padrao in C.BLOQUEIO_VENCIDO:
+            achados |= {m.lower() for m in padrao.findall(texto)}
+        return achados
+
+    def test_pega_as_duas_ordens(self) -> None:
+        self.assertEqual(self.cita("a `0x0040a0b4` ainda nao esta portada"),
+                         {"0x0040a0b4"})
+        self.assertEqual(self.cita("nao portada: a `0x0040A0B4` do original"),
+                         {"0x0040a0b4"})
+
+    def test_atravessa_quebra_de_linha_e_nome_qualificado(self) -> None:
+        """As duas coisas que a forma obvia erraria.
+
+        `[^.]` seria o instinto para "mesma frase" e falha duas vezes: casa
+        `\n`, e nao passa por `MainForm.mostrar_estrategiaClick` -- que era
+        exatamente a frase do `bolaMouseDown`.
+        """
+        texto = ("`0x0040a0b4`, a rotina que enche a tela\n"
+                 "-- chamada pelo `MainForm.mostrar_estrategiaClick`, do\n"
+                 "grupo de carga, e nao portada.")
+        self.assertEqual(self.cita(texto), {"0x0040a0b4"})
+
+    def test_para_na_quebra_de_paragrafo(self) -> None:
+        self.assertEqual(self.cita("`0x0040a0b4` faz isso.\n\n"
+                                   "Outra coisa nao esta portada."), set())
+
+    def test_o_endereco_e_o_mais_proximo(self) -> None:
+        """Endereco com outro pelo meio nao e o citado."""
+        self.assertEqual(
+            self.cita("`0x00111111` e a tabela, e a `0x00222222` nao "
+                      "esta portada"),
+            {"0x00222222"})
+
+    def test_o_verbo_e_so_portar(self) -> None:
+        """O alcance estreito, e ele e escolha -- ver o cabecalho do gerador.
+
+        As specs usam "nao existe" e "nao lida" para dado e para campo de
+        imagem, nao so para rotina: alargar o verbo produziria falso positivo
+        em quatro specs medidas, e guarda que erra e guarda que se desliga.
+        """
+        for texto in ("a `0x00433e5c` nao existe no arquivo: e `.bss`",
+                      "a `0x00408460` ainda nao lida antes desta passagem"):
+            with self.subTest(texto=texto):
+                self.assertEqual(self.cita(texto), set())
+
+
 if __name__ == "__main__":
     unittest.main()

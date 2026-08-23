@@ -113,8 +113,26 @@ A divisão foi decidida em 2026-08-11 e está no enunciado da
 "remover o andaime `--show` com a navegação real no lugar" arrastaria 2,7 KB de
 disassembly de outra fase.
 
-**Veredito `aberto` porque metade tem dono fora.** O Pascal da navegação está
-escrito em
+**Veredito `aberto`, e a razão mudou em 2026-08-23** — terceira passagem da
+[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md). O Pascal da
+navegação está escrito em
 [`../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc`](../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc);
 a ficha **deixou de abrir vazia** na décima segunda passagem da 26, que portou
-o `0x0040756c`. O que mantém o veredito é a `0x00404820`.
+o `0x0040756c`.
+
+O que mantinha o veredito era a `0x00404820`, e **ela está portada** — as duas
+metades, na [`wte_ficha`](../../src/wte_ficha.pas): o destino de seleção chegou
+na [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) em 2026-08-19
+e a metade de Master League depois dela, quando a
+[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) entregou o vetor
+de ocupação que o ramo precisa.
+
+**O que sobra é régua, não código: nenhuma abre a ficha e a compara.** O
+[`compara_tela.sh`](../../tools/compara_tela.sh) mede o `MainForm` — barras,
+bandeira, uniforme, habilitação, malha, cor — e não tem modo que clique
+`mostrar_jugador_1`. O [`golden-15-ficha`](../../tests/roteiros/golden-15-ficha.txt)
+chega à ficha e julga por **byte** o que o `Comple.` grava, o que é outra
+pergunta: ele não diz se o par de listas escolhido pelo `Sender.Name` foi o
+certo, porque só entra por um dos dois botões. É a metade do reserva que fica
+sem medida — e foi justamente troca de lado que a conferência de tela pegou no
+handler irmão.

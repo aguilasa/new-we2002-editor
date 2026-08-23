@@ -44,8 +44,8 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2705 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9473** |
-| Escrito à mão | 100 | 8390 |
-| **Total** | | **17863** |
+| Escrito à mão | 100 | 8391 |
+| **Total** | | **17864** |
 
 **53.0% do Pascal da casca é saída de gerador.**
 
@@ -156,7 +156,7 @@ Escrito à mão, linha por linha:
 | `src/wte_cor.pas` | 752 | — |
 | `src/wte_ficha.pas` | 973 | — |
 | `src/wte_render2d.pas` | 434 | — |
-| `src/wte_tatica.pas` | 762 | — |
+| `src/wte_tatica.pas` | 763 | — |
 | `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 42 | programa principal (WTE-TASK-02) |
 

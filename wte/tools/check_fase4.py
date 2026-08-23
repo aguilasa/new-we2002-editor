@@ -15,6 +15,7 @@ em doc ja se propagou neste repositorio (CORR-WTE-012, -014, -023).
 | forca da evidencia | as linhas `**Evidencia:**` das seis secoes obrigatorias |
 | `nao portado` justificado | secao `## Justificativa` nao vazia |
 | decompilado colado | as marcas do `spec_index.py` sobre specs, `.inc` e `.pas` |
+| bloqueio vencido | rotina que a spec `aberto` diz nao portada e o Pascal tem |
 | quem grava | a secao `## Bytes tocados` de cada spec |
 | gate por gravacao | a tabela `GOLDEN_DE` abaixo, contra os roteiros em disco |
 | resultado da bateria | `wte/re/fase-4-golden.tsv`, escrito pela corrida da task |
@@ -118,6 +119,52 @@ MARCAS = (
     (re.compile(r"__fastcall\b"), "__fastcall"),
     (re.compile(rf"\({_TIPO_C}\)\s*\*\s*\(\s*{_TIPO_C}\s*\*\s*\)"), "cast de deref"),
 )
+
+# --------------------------------------------------------------------------
+# A guarda de BLOQUEIO VENCIDO -- terceira passagem da WTE-TASK-31, 2026-08-23.
+#
+# Um veredito `aberto` e sustentado por prosa: "aberto porque a `0x…` nao esta
+# portada". A prosa envelhece e o veredito nao: a rotina e portada por outra
+# task, ninguem volta na spec, e o `aberto` continua la afirmando um bloqueio
+# que caiu. Aconteceu com o `0x0040a0b4` (portada pela CORR-WTE-082 em
+# 2026-08-21) segurando DOIS vereditos do `estrategia` por dois dias, e com o
+# `0x00404820` segurando o `mostrar_jugadorClick`.
+#
+# A guarda e mecanica: numa spec `aberto`, endereco citado como "nao portada"
+# que APARECA em `src/*.pas` ou `src/impl/*.inc` aborta o fechamento. Nao ha
+# julgamento -- ou o endereco esta no Pascal, ou nao esta.
+#
+# O ALCANCE, escrito para nao ser esquecido: ela pega a forma "nao (esta)
+# portad[ao]" e mais nenhuma. "0x… nao lida", "nao existe" e "falta a 0x…"
+# passam por ela -- foram medidas e produzem falso positivo, porque as specs
+# usam esses verbos para dado e para campo de imagem, nao so para rotina
+# ("o campo nao existe na imagem", "a tabela nao existe no arquivo: e .bss").
+# Estreitar o verbo foi a escolha: guarda que erra e desligada, guarda que
+# cala em um caso continua servindo nos outros.
+#
+# A JANELA para por quebra de paragrafo, nao por ponto. `[^.]` seria o
+# instinto e esta errado duas vezes: casa `\n` (a armadilha 2 do prompt) e
+# nao atravessa `MainForm.mostrar_estrategiaClick` -- nome qualificado tem
+# ponto, e era exatamente essa a frase do `bolaMouseDown`.
+_ENDERECO = r"0x[0-9a-fA-F]{6,8}"
+_NAO_PORTADA = "n[ãa]o\\s+(?:est[áa]\\s+)?portad[ao]"
+# vao de ate 200 caracteres sem OUTRO endereco pelo meio (para o par ser o
+# mais proximo) e sem linha em branco (para nao atravessar paragrafo)
+_VAO = rf"(?:(?!{_ENDERECO})(?!\n[ \t]*\n).){{0,200}}?"
+BLOQUEIO_VENCIDO = (
+    re.compile(rf"({_ENDERECO}){_VAO}{_NAO_PORTADA}", re.S),
+    re.compile(rf"{_NAO_PORTADA}{_VAO}({_ENDERECO})", re.S),
+)
+
+
+def enderecos_no_pascal() -> set[str]:
+    """Todo `0x…` citado no Pascal escrito a mao ou gerado, em minuscula."""
+    achados: set[str] = set()
+    for arq in sorted(SRC.glob("*.pas")) + sorted(IMPL.glob("*.inc")):
+        achados |= {e.lower() for e in
+                    re.findall(_ENDERECO, arq.read_text(encoding="utf-8"))}
+    return achados
+
 
 # Os arquivos de `re/spec/` que documentam as marcas em vez de as conterem.
 # Sao os mesmos que o `spec_index.py` reserva.
@@ -319,6 +366,7 @@ def medir() -> dict:
     triviais: list[dict] = []
     escritores: list[dict] = []
     nao_portados: list[str] = []
+    citados_como_ausentes: list[tuple[str, str]] = []
 
     for h in handlers:
         chave = f"{h['formulario']}.{h['handler']}"
@@ -357,6 +405,9 @@ def medir() -> dict:
             inc = IMPL / f"{unidade}.{h['handler']}.inc"
             abertos.append({"endereco": h["endereco"], "handler": chave,
                             "grupo": h["grupo"], "corpo": inc.exists()})
+            for padrao in BLOQUEIO_VENCIDO:
+                for citado in padrao.findall(texto):
+                    citados_como_ausentes.append((chave, citado.lower()))
 
         if grava_na_imagem(chave, secs["Bytes tocados"]):
             escritores.append({"endereco": h["endereco"], "handler": chave,
@@ -377,6 +428,18 @@ def medir() -> dict:
         raise Fase4Error(
             "GOLDEN_DE cita handler que a spec nao diz que grava: "
             f"{', '.join(sobrando)}")
+
+    # --- a guarda de bloqueio vencido ------------------------------------
+    no_pascal = enderecos_no_pascal()
+    vencidos = sorted({(h, e) for h, e in citados_como_ausentes
+                       if e in no_pascal})
+    if vencidos:
+        raise Fase4Error(
+            "spec `aberto` diz que uma rotina nao esta portada e ela esta: "
+            + ", ".join(f"{h} cita {e}" for h, e in vencidos)
+            + ". Veredito preso por prosa vencida e o modo como o `aberto` "
+              "mente sem que ninguem minta -- reconfira o veredito contra a "
+              "regua e reescreva a razao, ou promova.")
 
     disco = roteiros_em_disco()
     citados = {r for rs in GOLDEN_DE.values() for r in rs}

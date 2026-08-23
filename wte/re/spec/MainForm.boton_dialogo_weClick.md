@@ -116,6 +116,21 @@ carrega no gate é o `MainForm.FormShow`, pela linha de comando — e passa pelo
 mesmo `AbreImagem`, que é onde a injeção mora. O `.exe` tem os dois trechos de
 injeção duplicados, um aqui e outro no `FormShow`; o port tem um só.
 
-**Veredito ainda `aberto`** porque as duas faixas de cima não têm explicação
-medida, e porque a carga da tela (nome, barras, elenco) é o resto da
-WTE-TASK-25.
+**Veredito ainda `aberto`, e as duas razões antigas caíram** — reconferido na
+terceira passagem da
+[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md), 2026-08-23. Esta
+frase dizia *"porque as duas faixas de cima não têm explicação medida, e porque
+a carga da tela (nome, barras, elenco) é o resto da WTE-TASK-25"*. As faixas
+fecharam em 2026-08-20, e a seção acima já as explica byte a byte; a carga da
+tela foi medida no dia da reconferência pelo `compara_tela.sh 2 68`, que bate em
+pixel nas barras, na bandeira e no uniforme dos dois times.
+
+**O que sobra é o que as Notas acima já diziam, e é de gate, não de código:
+nenhuma régua entra por aqui.** Sem window manager o gtk2 não dá foco de
+teclado à janela, então o lado port não digita caminho em `TOpenDialog` nenhum
+(WTE-TASK-13), e quem carrega no gate é o `MainForm.FormShow`, pela linha de
+comando. Os dois passam pelo **mesmo** `AbreImagem`, que é onde a injeção e os
+dois remendos moram — o que está verificado é o corpo compartilhado, pelo
+[`golden-01-arranque`](../../tests/roteiros/golden-01-arranque.txt); o que não
+está é este ponto de entrada. Julgá-lo `implementado` pela cobertura do irmão
+seria dar por medido o único trecho que não é comum aos dois.

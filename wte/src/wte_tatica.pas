@@ -246,7 +246,8 @@ const
 
   { O `ItemIndex` de `lista_formaciones` que NAO indexa a tabela: `DEFAULT` le
     o buffer da formacao viva do time (`0x00432e88`), preenchido por
-    `0x0040a0b4`, que nao esta portado. Ver `AplicaFormacao`. }
+    `0x0040a0b4` -- que E o `PreencheTelaDeTatica` logo abaixo, portado por
+    esta mesma correcao. Ver `AplicaFormacao`. }
   FORMACAO_DEFAULT = 1;
 
   { Os `etiqposN` comecam em 1 e o goleiro e o `etiqpos1`, entao o jogador `i`

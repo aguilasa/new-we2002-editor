@@ -20,7 +20,9 @@ status: em andamento
 > três handlers do grupo `auxiliar` **gravam na imagem** e ficaram sem dono. Eles
 > estavam na [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md), que fechou em
 > 2026-08-22 — mas **sobraram outros 18**, e a primeira passagem desta task
-> (2026-08-22) mediu quais são, um a um. Ver o Log de Execução e
+> (2026-08-22) mediu quais são, um a um. A terceira (2026-08-23) baixou para
+> **15**, sem implementar nada: sete daqueles vereditos estavam presos por
+> prosa cujo bloqueio já tinha caído. Ver o Log de Execução e
 > [`wte/re/fase-4.md`](../../wte/re/fase-4.md).
 
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
@@ -73,9 +75,11 @@ de ML — ainda não está feito.
 
 ## Critério de conclusão
 
-- [ ] 96 entradas no índice, nenhuma `aberto` — **as 96 estão lá; 16 `aberto` e
-      2 sem arquivo de spec continuam.** É o único critério em aberto, e a
-      primeira passagem mediu exatamente quais
+- [ ] 96 entradas no índice, nenhuma `aberto` — **as 96 estão lá; 13 `aberto` e
+      2 sem arquivo de spec continuam.** É o único critério em aberto. A
+      primeira passagem mediu exatamente quais eram os 16; a terceira promoveu
+      três e reescreveu a razão de outros quatro, e trancou a classe de defeito
+      que os segurava com a guarda `BLOQUEIO_VENCIDO`
 - [x] Todo `não portado` com justificativa de escopo — é **um**,
       `MainForm.Button2Click`, handler órfão que nenhum componente referencia
 - [x] Specs de evidência fraca listadas, com decisão sobre cada — são **3
@@ -211,13 +215,12 @@ burocracia. Três handlers de carga carregavam prosa que dizia *"falta a carga
 da tela"* enquanto a tela já carregava; medir para confirmar o óbvio custou uma
 corrida e devolveu um defeito de dez times que ninguém procurava.
 
-- **O que falta para esta task fechar:**
+- **O que faltava para esta task fechar, ao fim da segunda passagem:**
 
-  Os 16 `aberto` e as 2 specs ausentes. Três deles são da WTE-TASK-32, que é a
-  próxima na ordem; os outros 13 precisam de dono, e um deles — o
-  `lista_equiposChange` — ganhou nesta passagem uma razão nova e concreta, a
-  CORR-WTE-083. **Esta task volta a rodar depois disso** — é fechamento, e
-  fechamento não implementa.
+  Os 16 `aberto` e as 2 specs ausentes. Três deles são da WTE-TASK-32; os
+  outros 13 precisavam de dono, e um deles — o `lista_equiposChange` — ganhou
+  na segunda passagem uma razão nova e concreta, a CORR-WTE-083. **Esta task
+  volta a rodar depois disso** — é fechamento, e fechamento não implementa.
 
 - **Arquivos criados/modificados:**
 
@@ -228,3 +231,86 @@ corrida e devolveu um defeito de dez times que ninguém procurava.
   - modificados: `docs/tasks/progresso.md`, `docs/PLAN-WTE-LAZARUS.md`, e na
     segunda passagem `docs/tasks/correcoes-progresso.md` e
     `wte/re/spec/MainForm.lista_equiposChange.md`; este arquivo
+
+---
+
+### Terceira passagem — 2026-08-23
+
+**Executada porque a segunda a agendou:** a CORR-WTE-083 e a CORR-WTE-084
+fecharam em 2026-08-23, e o combinado era reconferir veredito depois delas.
+
+**O achado é uma classe, não um caso: sete dos dezesseis `aberto` estavam
+presos por prosa cujo bloqueio já tinha caído.** A spec diz *"aberto porque a
+`0x…` não está portada"*, outra task porta a rotina, ninguém volta ao arquivo —
+e o veredito continua ali afirmando um bloqueio que não existe mais. Não é
+alguém mentindo; é documento envelhecendo sozinho enquanto o índice o lê como
+estado corrente.
+
+**Três foram promovidos, e cada um com a régua rodando no dia:**
+
+| Handler | Novo veredito | O bloqueio que caiu | A régua |
+|---|---|---|---|
+| `MainForm.lista_equiposChange` | `implementado` | a bandeira preta de dez times (CORR-WTE-083/-084) | `compara_tela.sh 2 68`: `[64,53,75,75,75]` e `[64,75,75,86,75]` idênticos, 5 de 5 contra o `we2002_core`; 0 de 8.960 e 0 de 9.800 px em bandeira e uniforme, tolerância zero |
+| `MainForm.FormShow` | `divergencia deliberada` | *"falta a carga da tela"* | a mesma corrida — quem sobe o port pela linha de comando é este handler; mais o `golden-01-arranque` nos sete setores |
+| `estrategia.relojTimer` | `implementado` | a `0x0040a0b4` sem port (caiu na CORR-WTE-082) | o `trace.log` de `--malha`: abrir a tática dispara o handler **cinco** vezes, os quatro quadros mais o encaixe, que é o que a spec previa; e as posições em que as bolas param viram os 30 bytes de formação que o `golden-17-tatica` compara |
+
+**Quatro tiveram a razão reescrita e continuam `aberto`** — o bloqueio caiu, mas
+nenhuma régua alcança o handler:
+
+| Handler | O que caiu | O que sobrou, medido |
+|---|---|---|
+| `estrategia.bolaMouseDown` | a `0x0040a0b4` | nada o dispara: o `trace.log` da corrida mais funda nesta tela traz `malla1MouseDown` e cinco `relojTimer`, e zero `bolaMouseDown` — falta um estímulo de arrasto |
+| `MainForm.mostrar_jugadorClick` | a `0x00404820`, portada nas duas metades na `wte_ficha` | nenhuma régua abre a ficha e a compara; o `golden-15-ficha` julga por byte o que o `Comple.` grava, e entra por um só dos dois botões |
+| `MainForm.lista_jugadores_1Change` | *"o combo não é povoado"* — é, desde que o irmão fechou | a LCL não dispara `OnChange` em `ItemIndex :=`, então povoar a lista **não** chama o handler: 150 linhas de `trace.log` em quatro corridas, 69 disparos do irmão e **zero** deste |
+| `MainForm.boton_dialogo_weClick` | as duas faixas de arranque (2026-08-20) e a carga da tela | sem window manager o gtk2 não dá foco de teclado, então nenhuma régua entra pelo `TOpenDialog`; o corpo compartilhado (`AbreImagem`) está coberto pelo `FormShow`, o ponto de entrada não |
+
+**E a guarda, que é o que impede a classe de voltar.** O `check_fase4.py` ganhou
+`BLOQUEIO_VENCIDO`: numa spec `aberto`, endereço citado como *"não portada"* que
+apareça em `src/*.pas` ou `src/impl/*.inc` **aborta** o fechamento. Recusa
+vista — plantada a frase de volta no `bolaMouseDown`, o gerador para com o nome
+do handler e o endereço. Cinco testes novos no `test_check_fase4.py`, 23 no
+total, verdes.
+
+Duas decisões dela valem registro, porque as duas foram medidas antes de
+virarem código:
+
+- **o verbo é só `portad[ao]`.** Alargar para "não existe" e "não lida" produzia
+  falso positivo em quatro specs — elas usam esses verbos para campo de imagem e
+  para dado (*"a tabela não existe no arquivo: é `.bss`"*), não para rotina.
+  Guarda que erra é guarda que se desliga;
+- **a janela para em quebra de parágrafo, não em ponto.** `[^.]` seria o
+  instinto e erra duas vezes: casa `\n` (a armadilha 2 do prompt) e **não**
+  atravessa `MainForm.mostrar_estrategiaClick` — nome qualificado tem ponto, e
+  era exatamente essa a frase do `bolaMouseDown`.
+
+**O placar: 81 dos 96 têm veredito fechado**, contra 78 na segunda passagem.
+Restam 13 `aberto` e 2 sem spec. Três dos quinze são da
+[WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md).
+
+- **O que ainda falta para esta task fechar:**
+
+  Os 13 `aberto` e as 2 specs ausentes. Dos treze, quatro esperam corpo Pascal
+  (`jugador.BitBtn1Click`, `estrategia.FormCreate`,
+  `estrategia.ComboBoxDrawItem`, `MainForm.boton_dialogo_texClick`), um é da
+  WTE-TASK-32 (`MainForm.base_teamClick`) e os oito restantes esperam régua que
+  os alcance. **Fechamento não implementa**, então esta task volta a rodar
+  depois de quem escrever essas quatro e de quem estender as réguas.
+
+- **Problemas encontrados na terceira passagem:**
+
+  **Um comentário de uma linha em Pascal escrito à mão derrubou o `make -C wte
+  check`.** Corrigir a frase vencida no `wte_tatica.pas` acrescentou uma linha,
+  e o `check_fase2.py` mede a fração de código gerado contra a §4.4 do plano:
+  8.390 linhas à mão viraram 8.391 e o gate reprovou pedindo o texto literal
+  novo. Está certo — é a regra de "todo número em doc vem de ferramenta"
+  funcionando —, mas vale saber que **editar comentário não é de graça** nesta
+  árvore: quem mexe em `.pas` escrito à mão reroda o `check_fase2.py` e leva a
+  §4.4 junto no commit.
+
+- **Arquivos criados/modificados na terceira passagem:**
+
+  - modificados: `wte/tools/check_fase4.py`, `wte/tools/test_check_fase4.py`,
+    `wte/src/wte_tatica.pas`, `docs/PLAN-WTE-LAZARUS.md`,
+    `docs/tasks/progresso.md`, as sete specs acima, e os gerados
+    `wte/re/fase-4.md`, `wte/re/fase-2.md`, `wte/re/spec/INDICE.md`; este
+    arquivo

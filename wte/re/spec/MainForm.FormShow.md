@@ -2,7 +2,7 @@
 handler: FormShow
 formulario: MainForm
 endereco: 0x004111d8
-veredito: aberto
+veredito: divergencia deliberada
 ---
 
 # MainForm.FormShow
@@ -77,7 +77,32 @@ diretório corrente, e reproduzir isso seria reproduzir um defeito de
 empacotamento. O port procura `$WTE_ASSETS_DIR`, depois ao lado do executável.
 A resolução definitiva é da [WTE-TASK-39](../../../docs/tasks/39-empacotamento.md).
 
-**Veredito ainda `aberto`**: os três alvos de `$00ffb676` já estão medidos e
-implementados, mas falta a carga da tela — popular `lista_equipos` e o resto do
-`MainForm` a partir do banco, que é o que sobra da
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md).
+## O veredito, e por que ele não é `implementado`
+
+**Passou de `aberto` a `divergencia deliberada` em 2026-08-23**, terceira
+passagem da [WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md).
+
+O que segurava o `aberto` era *"falta a carga da tela — popular `lista_equipos`
+e o resto do `MainForm` a partir do banco"*. **Ela não falta mais**, e a régua
+mediu isso no dia: `bash wte/tools/compara_tela.sh 2 68` sobe o port pela linha
+de comando, que é este handler carregando a imagem, e compara a tela resultante
+com a do oráculo — 5 de 5 barras em pixel nos dois times, 0 de 8.960 px e 0 de
+9.800 px em bandeira e uniforme, tolerância zero. Os sete setores que ele
+injeta seguem verdes no
+[`golden-01-arranque`](../../tests/roteiros/golden-01-arranque.txt), controle e
+golden.
+
+**`implementado` seria o veredito errado**, e por duas divergências que estão
+escritas acima e são de propósito:
+
+1. **falta do `dat.bin`** — o original encerra, o port escreve a falta no
+   `texto_dialogo_we` e segue, para a janela não sumir antes de o gate poder
+   dirigi-la;
+2. **resolução do caminho do `dat.bin`** — o original depende do diretório
+   corrente; o port procura `$WTE_ASSETS_DIR` e depois o lado do executável.
+
+As duas são entrada da
+[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), e é o
+vocabulário do [gabarito](GABARITO.md) que manda: handler portado com desvio
+consciente é `divergencia deliberada`, não `implementado` com ressalva no meio
+da prosa — a ressalva no meio da prosa é o que não se lê de um índice.
