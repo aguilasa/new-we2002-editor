@@ -520,8 +520,9 @@ casca, e o que sobra de manual é o que a §2 diz que não tem gerador possível
 Ela cai pelas **duas** pontas, e a segunda surpreende: implementar um handler
 tira linhas do numerador também, porque o stub `REStub` que ele substitui era
 saída de gerador — cinco linhas com o `{$PUSH}`/`{$POP}` viram duas com o
-`{$I}`. Foi o que a WTE-TASK-30 mediu ao escrever doze corpos de uma vez: 9.416 →
-9.374 geradas, 6.476 → 6.816 à mão. A CORR-WTE-081 mediu o mesmo movimento por
+`{$I}`. Foi o que a WTE-TASK-30 mediu ao escrever onze corpos novos e um
+ampliado de uma vez: 9.416 → 9.374 geradas, 6.476 → 6.816 à mão. A
+CORR-WTE-081 mediu o mesmo movimento por
 outra causa: 6.816 → 7.233 à mão sem que um só corpo novo explicasse o salto,
 porque o que entrou foi uma **unidade** — o `wte_ficha.pas`, para onde desceu o
 buffer de jogador quando o `Comple.` da ficha passou a precisar dele de fora do

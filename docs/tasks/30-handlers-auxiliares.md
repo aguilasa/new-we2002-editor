@@ -203,8 +203,9 @@ quantos bytes ela toca.
   E uma armadilha nova para a §4.4 do plano: **implementar handler derruba a
   fração de gerador pelas duas pontas.** O stub `REStub` que ele substitui era
   saída de gerador — cinco linhas com `{$PUSH}`/`{$POP}` viram duas com `{$I}`
-  —, então o numerador cai junto com a subida do denominador. Doze corpos de uma
-  vez levaram 9.416 → 9.374 geradas e 6.476 → 6.816 à mão. O
+  —, então o numerador cai junto com a subida do denominador. Onze corpos novos
+  e um ampliado, de uma vez, levaram 9.416 → 9.374 geradas e 6.476 → 6.816 à
+  mão. O
   `check_fase2.py --check` pegou, como foi desenhado para pegar.
 
 - **Arquivos criados/modificados:**
@@ -219,8 +220,8 @@ quantos bytes ela toca.
     `MainForm.SpeedButton2Click`, `MainForm.Image3Click`,
     `MainForm.base_teamClick`, `ficha_error.SpeedButton1Click`
   - `wte/re/spec/INDICE.md` — regerado
-  - `wte/src/impl/` — 12 `.inc` novos e 6 `.uses` tocados; o
-    `ep2002_mainform.colorearClick.inc` ganhou a foto do slot 0
+  - `wte/src/impl/` — 11 `.inc` novos, 1 `.uses` novo e 4 `.uses` modificados;
+    o `ep2002_mainform.colorearClick.inc` ganhou a foto do slot 0
   - `wte/src/wte_cor.pas` — `GuardaOriginal` e `RestauraOriginal`, o slot 0 que
     faltava
   - `wte/src/ep2002_*.pas`, `wte/forms/*.lfm`, `wte/forms/conversao.md` —

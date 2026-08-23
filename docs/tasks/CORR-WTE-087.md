@@ -3,7 +3,7 @@ id: CORR-WTE-087
 title: "Correção: o Log da WTE-TASK-30 conta 12 .inc novos e 6 .uses tocados; são 11 e 5"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -107,17 +107,43 @@ números como estão.
 
 ## Verificação
 
-- [ ] A lista da task bate com `git show --diff-filter=A --name-only --format= fb640cd -- 'wte/src/impl/*'`
-- [ ] Os quatro números da §4.4 (9.416, 9.374, 6.476, 6.816) continuam intactos
-- [ ] `make -C wte check` continua verde
-- [ ] `roms/` intocada
+- [x] A lista da task bate com `git show --diff-filter=A --name-only --format= fb640cd -- 'wte/src/impl/*'`
+      — 12 adicionados, dos quais **11** são `.inc` e um é o
+      `ep2002_error.uses`; e `--diff-filter=M` dá **4** `.uses` modificados mais
+      o `colorearClick.inc`
+- [x] Os quatro números da §4.4 (9.416, 9.374, 6.476, 6.816) continuam intactos
+      — conferidos por `grep` depois da edição, na linha 524 do plano
+- [x] `make -C wte check` continua verde — 730 testes, `OK (skipped=1)`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-23
 
 **Resumo do que foi feito:**
 
+`12 .inc novos e 6 .uses tocados` virou `11 .inc novos, 1 .uses novo e 4 .uses
+modificados`, que é o que o commit `fb640cd` mostra pelos dois
+`--diff-filter`. A frase seguinte, sobre o `colorearClick.inc`, já dizia que
+ele é ampliação, e é ela que fecha os doze corpos.
+
+A §4.4 do plano e o parágrafo gêmeo dentro da própria task diziam "doze corpos
+de uma vez". O número está certo somando o `colorearClick` ampliado, mas ao lado
+da contagem corrigida ficava ambíguo: viraram **"onze corpos novos e um
+ampliado"** nos dois lugares. Os quatro números da medição — 9.416, 9.374,
+6.476, 6.816 — não mudaram, porque a medição não mudou; mudou o modo de contar
+o que a produziu.
+
 **Problemas encontrados:**
 
+1. **A correção citava só a §4.4 do plano, e a mesma frase estava também na
+   task**, na armadilha que a WTE-TASK-30 escreveu para a §4.4. Corrigir um dos
+   dois deixaria a contradição de pé a duzentas linhas da contagem consertada.
+2. A reescrita passou de 82 colunas em duas linhas do plano; reembrulhadas.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/30-handlers-auxiliares.md` | modificado — a contagem e o "doze corpos" da armadilha |
+| `docs/PLAN-WTE-LAZARUS.md` | modificado — §4.4, linha 523 |
