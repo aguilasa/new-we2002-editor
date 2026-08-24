@@ -2,7 +2,7 @@
 handler: parribaClick
 formulario: MainForm
 endereco: 0x0040e998
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.parribaClick
@@ -107,7 +107,37 @@ dígitos. O original repete essa conta nos dois handlers; o port a fatorou na
 [`.aux.inc`](../../src/impl/ep2002_mainform.aux.inc) e deixou o `dorsalClick`
 como estava — a spec daquele já está fechada e reabri-la não mediria nada.
 
-### Veredito `aberto`, e a razão é outra que a dos irmãos
+### O veredito passou a `implementado` em 2026-08-24
+
+**A régua existia e ninguém tinha olhado para ela.** O texto abaixo é o registro
+de quando o veredito era `aberto`, e continua valendo como diagnóstico do que a
+régua de *tela* alcança — mas a régua que julga este handler não é de tela, é de
+byte, e ela já estava verde.
+
+O [`golden-11-descarte-ml`](../../tests/roteiros/golden-11-descarte-ml.txt)
+**clica a linha da lista de descarte e depois o `parriba`**, nos dois lados, com
+as mesmas coordenadas — (260,343) e (176,360) —, e essa ordem é load-bearing: é
+o próprio cabeçalho do roteiro que a explica. Medido pela
+[CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md) e registrado em
+[`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
+
+| Roteiro | Disparos |
+|---|---:|
+| `golden-11-descarte-ml` | **1** |
+
+E o disparo entra nos bytes comparados: este handler não grava, mas **guarda o
+jogador no buffer** que o `pabajoClick` grava logo depois, no mesmo roteiro.
+Buffer errado vira byte errado — que é exatamente o que aconteceu em 2026-08-20,
+descrito no último parágrafo desta seção. O gate está verde nos dois modos, e
+por isso o comportamento está verificado.
+
+**O que ainda não está medido é a tela**, e continua não estando: o
+`compara_tela.sh --edicao` não alcança a lista de descarte. A diferença é que
+isso já não segura o veredito — nenhum byte depende do pixel aqui.
+
+---
+
+### O registro de quando o veredito era `aberto`
 
 Os demais handlers de mover estão `aberto` porque falta a gravação, que é da
 WTE-TASK-27. **Este não grava**, então a metade que falta nele é só a régua:

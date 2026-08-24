@@ -127,12 +127,25 @@ e a metade de Master League depois dela, quando a
 [WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) entregou o vetor
 de ocupação que o ramo precisa.
 
-**O que sobra é régua, não código: nenhuma abre a ficha e a compara.** O
-[`compara_tela.sh`](../../tools/compara_tela.sh) mede o `MainForm` — barras,
-bandeira, uniforme, habilitação, malha, cor — e não tem modo que clique
-`mostrar_jugador_1`. O [`golden-15-ficha`](../../tests/roteiros/golden-15-ficha.txt)
-chega à ficha e julga por **byte** o que o `Comple.` grava, o que é outra
-pergunta: ele não diz se o par de listas escolhido pelo `Sender.Name` foi o
-certo, porque só entra por um dos dois botões. É a metade do reserva que fica
-sem medida — e foi justamente troca de lado que a conferência de tela pegou no
-handler irmão.
+**O que sobra é um ramo, e ele está nomeado.** Metade deste handler **está**
+verificada por byte desde sempre, e a
+[CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md) mediu a evidência em
+[`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
+
+| Roteiro | Disparos | Por qual botão |
+|---|---:|---|
+| [`golden-15-ficha`](../../tests/roteiros/golden-15-ficha.txt) | 1 | `mostrar_jugador_1` (28,402) |
+
+O gate está verde nos três modos, e o que ele julga depende deste handler: se o
+par de listas escolhido fosse o errado, o `Comple.` gravaria outro jogador.
+
+**O ramo do reserva não tem régua nenhuma.** Nenhum roteiro entra pelo
+`mostrar_jugador_2` — que fica em (492,402) e só habilita depois de o
+`lista_equipos_2Change` disparar uma vez —, e a distinção entre os dois lados é
+feita por `Sender.Name`, exatamente o tipo de despacho que erra em silêncio.
+Trocar de lado é o erro que a conferência de tela pegou no handler irmão, e
+aqui ele não teria quem o pegasse.
+
+`implementado` com metade sem régua afirmaria mais do que se mediu. Fica
+`aberto` até um roteiro entrar pelo botão do reserva — que é estímulo novo, e
+por isso trabalho de correção própria, não desta.

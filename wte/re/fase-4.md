@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**81 dos 96 têm veredito fechado; 15 não.**
+**84 dos 96 têm veredito fechado; 12 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -28,11 +28,11 @@ A segunda metade do critério está cumprida — ver a seção do
 
 | Veredito | Handlers |
 |---|---:|
-| `implementado` | 58 |
+| `implementado` | 61 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 3 |
 | `nao portado` | 1 |
-| `aberto` | 13 |
+| `aberto` | 10 |
 | *(sem arquivo de spec)* | 2 |
 | **total** | **96** |
 
@@ -44,7 +44,7 @@ Os que não têm:
 
 ## Os que continuam `aberto`
 
-São 13, e **9 deles já têm corpo Pascal escrito**.
+São 10, e **6 deles já têm corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
@@ -59,9 +59,6 @@ a spec de cada um nomeia o que falta e quem é o dono.
 | `0x0040adec` | [estrategia.ComboBoxDrawItem](spec/estrategia.ComboBoxDrawItem.md) | carga | **não** |
 | `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | sim |
 | `0x0040dfe8` | [MainForm.boton_dialogo_texClick](spec/MainForm.boton_dialogo_texClick.md) | carga | **não** |
-| `0x0040e1a8` | [MainForm.lista_equipos_2Change](spec/MainForm.lista_equipos_2Change.md) | carga | sim |
-| `0x0040e998` | [MainForm.parribaClick](spec/MainForm.parribaClick.md) | edicao | sim |
-| `0x0040f8b8` | [MainForm.lista_jugadores_1Change](spec/MainForm.lista_jugadores_1Change.md) | carga | sim |
 | `0x0040f8d4` | [MainForm.mostrar_jugadorClick](spec/MainForm.mostrar_jugadorClick.md) | carga | sim |
 | `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | sim |
 

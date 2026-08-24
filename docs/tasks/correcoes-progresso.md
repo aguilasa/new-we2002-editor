@@ -108,6 +108,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-086](/docs/tasks/CORR-WTE-086.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | A WTE-TASK-30 dá o `pabajoClick` como dono da rota de vínculo do `ficha_enlaza`; nenhuma spec nem código liga os dois — quem abre o modal é o `mostrar_jugadorClick`, que segue `aberto` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O Log da WTE-TASK-30 conta 12 `.inc` novos e 6 `.uses` tocados; o commit `fb640cd` tem 11 `.inc` novos e 5 `.uses` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [x] concluída | 2026-08-23 |
+| [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` por "nada exercita o corpo" quando a bateria golden já os exercita — o `lista_jugadores_1Change` dispara em quatro gates verdes | Alta | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -198,6 +199,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-086 — separar o dono do `ficha_enlaza` do dono do `ficha_movertodos` na WTE-TASK-30
 - [x] CORR-WTE-087 — corrigir a contagem de `.inc` e `.uses` do Log da WTE-TASK-30
 - [x] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
+- [x] CORR-WTE-089 — medir que handler dispara em que gate golden, e promover os que a régua de byte já cobria
 
 ## Detalhes por correção
 
@@ -1591,3 +1593,21 @@ dizer "fechada e fora do backlog", não "corrigida".
   `grep -n 'WTE_DISPLAY' wte/tools/*.sh`, nesta revisão
 - **Fix:** trocar as nove, preservar as quatro históricas, e registrar a regra
   no `wte/tools/README.md`
+
+### CORR-WTE-089
+
+- **Arquivo com problema:** `wte/re/spec/MainForm.lista_jugadores_1Change.md`,
+  `MainForm.lista_equipos_2Change.md`, `MainForm.parribaClick.md`
+- **Sintoma:** os três estavam `aberto` pela frase "nada exercita o corpo", e os
+  três disparam dentro de gates golden verdes — o `lista_jugadores_1Change` em
+  **quatro** (`golden-09`, `-10`, `-11`, `-15`), o `lista_equipos_2Change` com
+  **64** disparos em dois deles
+- **Como foi detectado:** rodando o lado port dos 16 roteiros com par pelo
+  `golden_run_laz.sh` e lendo o `port-trace.log` que ele já escreve; a razão
+  antiga tinha sido medida só com `compara_tela.sh`, que é régua de pixel e não
+  clica a lista de jogadores
+- **Fix:** `wte/tools/cobertura_gate.py` mede e versiona a cobertura em
+  `wte/re/fase-4-cobertura.tsv`, com quatro guardas — a principal sendo que spec
+  que cita o TSV como evidência tem de ter linha nele. Os três passam a
+  `implementado`; o `mostrar_jugadorClick` ganha a evidência do ramo titular e
+  segue `aberto` pelo do reserva

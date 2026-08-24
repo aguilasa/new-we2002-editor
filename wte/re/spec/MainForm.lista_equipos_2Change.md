@@ -2,7 +2,7 @@
 handler: lista_equipos_2Change
 formulario: MainForm
 endereco: 0x0040e1a8
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.lista_equipos_2Change
@@ -109,13 +109,33 @@ e reusa os auxiliares do lado titular — é a mesma `PreencheJogadores`, com a
 outra lista, exatamente como no original, onde `0x0040b2d8` recebe as duas
 listas como argumento e por isso tem dois chamadores.
 
-**Veredito `aberto` até a conferência de tela alcançar o lado reserva.** O
-[`compara_tela.sh`](../../tools/compara_tela.sh) dirige hoje só o combo
-titular; para julgar este handler ele precisa dirigir também o
-`lista_equipos_2`. O recorte já não é obstáculo: desde a
-[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) a montagem sai da janela
-inteira, e a metade de baixo — a `lista_jugadores_1` e os 23 dorsais — está
-nela. Falta a navegação. Enquanto ela não existir, o corpo está escrito a
-partir de spec medida e **não** verificado
-contra o original — e foi justamente a conferência de tela que achou os dois
-erros de mapeamento do handler irmão.
+## O veredito passou a `implementado` em 2026-08-24
+
+Esta seção dizia *"`aberto` até a conferência de tela alcançar o lado
+reserva"*, e isso continua **verdadeiro e irrelevante**: o
+[`compara_tela.sh`](../../tools/compara_tela.sh) de fato só dirige o combo
+titular. Mas ele é a régua de *pixel*, e este handler não desenha nada que só o
+pixel veja — ele **enche a lista de jogadores do reserva**, e essa lista decide
+quais bytes três roteiros gravam.
+
+A régua de byte já dirigia o `lista_equipos_2`, e com força: os roteiros de
+mover e de descarte descem **64 itens** até o primeiro clube de Master League.
+Medido pela [CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md), em
+[`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
+
+| Roteiro | Disparos |
+|---|---:|
+| [`golden-09-mover`](../../tests/roteiros/golden-09-mover.txt) | 2 |
+| [`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt) | **64** |
+| [`golden-11-descarte-ml`](../../tests/roteiros/golden-11-descarte-ml.txt) | **64** |
+
+**A contagem é o que dá força ao argumento, e é por isso que o TSV guarda
+número e não booleano.** Um disparo diria que o handler roda; 64 dizem que ele
+roda em 64 índices sucessivos, seleção e clube de ML, e que ao fim disso a
+lista de jogadores do reserva estava certa o bastante para o `pabajo` e o
+`paizquierda2` gravarem bytes idênticos aos do oráculo.
+
+O receio que a versão antiga desta seção registrava — *"foi justamente a
+conferência de tela que achou os dois erros de mapeamento do handler irmão"* —
+era legítimo e não se aplica aqui: aqueles dois erros eram de **qual campo vai
+em qual rótulo**, e este handler não escreve rótulo nenhum.

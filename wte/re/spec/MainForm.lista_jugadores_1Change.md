@@ -2,7 +2,7 @@
 handler: lista_jugadores_1Change
 formulario: MainForm
 endereco: 0x0040f8b8
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.lista_jugadores_1Change
@@ -102,28 +102,44 @@ Qt. A medição é remedida a cada `make -C wte check` pelo
 propriedade do widgetset instalado e pode virar num upgrade sem que uma linha
 deste repositório mude.
 
-**Veredito ainda `aberto`, e por um motivo só: nada dispara o corpo.** O golden
-test não cobre isto e não deveria — ele compara bytes da imagem, e este handler
-não grava nada. Enquanto não houver como dispará-lo, `implementado` afirmaria
-uma verificação que não aconteceu.
+## O veredito passou a `implementado` em 2026-08-24
 
-**A causa, porém, não é a que esta seção deu por três passagens**, e a diferença
-importa porque a antiga apontava para trabalho que já foi feito. Ela dizia que o
-combo *não é povoado*, e que o `lista_equiposChange` estava *"preso em
-`0x00404374`, não lido"*. As duas coisas mudaram: aquele handler está
-`implementado` desde 2026-08-23, o combo é povoado a cada troca de time e o
-`compara_tela.sh` mede a lista resultante na montagem da janela inteira.
+**E a razão anterior estava errada — este é o registro de um erro meu, não uma
+promoção limpa.** Por três passagens esta seção disse *"nada dispara o corpo"*.
+A terceira (2026-08-23) até quantificou: *"quatro corridas de `compara_tela.sh`
+deixaram 150 linhas de `trace.log` com 69 disparos do `lista_equiposChange` e
+zero deste"*.
 
-**O que impede é o widgetset, e está medido.** A LCL **não** dispara `OnChange`
-em `ItemIndex :=`, nem no `Items.Clear` com item selecionado, nem ao reatribuir
-o mesmo índice — como o Win32, e ao contrário do Qt; é o que o
+**O número estava certo e a conclusão não.** O `compara_tela.sh` é a régua de
+**pixel** do grupo de carga: ele troca de time e compara a tela, e de fato nunca
+clica a lista de jogadores. A régua de **byte** — a bateria golden — clica, e
+sempre clicou. Generalizar de um instrumento para "nada" foi o erro, e é
+exatamente o que o [`check_edicao.py`](../../tools/check_edicao.py) já
+registrava como precedente no caso do `dorsalMouseDown`.
+
+Medido pela [CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md), em
+[`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv) — **quatro** gates verdes,
+não um:
+
+| Roteiro | Disparos |
+|---|---:|
+| [`golden-09-mover`](../../tests/roteiros/golden-09-mover.txt) | 2 |
+| [`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt) | 2 |
+| [`golden-11-descarte-ml`](../../tests/roteiros/golden-11-descarte-ml.txt) | 2 |
+| [`golden-15-ficha`](../../tests/roteiros/golden-15-ficha.txt) | 1 |
+
+Nos quatro o disparo **decide os bytes comparados**: este handler escolhe o
+jogador, e o jogador escolhido é quem os quatro roteiros movem ou gravam.
+Jogador errado seria byte errado, nos quatro.
+
+**O que continua verdadeiro da leitura antiga**, e é o que explica por que
+nenhuma das quatro corridas de `compara_tela.sh` o viu: a LCL **não** dispara
+`OnChange` em `ItemIndex :=`, nem no `Items.Clear` com item selecionado, nem ao
+reatribuir o mesmo índice — como o Win32, e ao contrário do Qt; é o que o
 [`check_lcl_combo.py`](../../tools/check_lcl_combo.py) reconfere a cada
-`make -C wte check`. Então povoar a lista, que é o que o irmão faz, **não**
-chama este handler: só um clique do usuário na `lista_jugadores_1` chama, e
-nenhuma régua clica ali. Medido em 2026-08-23, na terceira passagem da
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md): quatro corridas de
-`compara_tela.sh` (dois times em `barras`, dois em `--malha`) deixaram 150
-linhas de `trace.log` com 69 disparos do `lista_equiposChange` e **zero** deste.
+`make -C wte check`. Povoar a lista não chama este handler. **Clicar nela
+chama** — e é o que os quatro roteiros fazem, com `! clique 100 402` seguido de
+`! tecla Down`.
 
 Uma tentativa de exercitá-lo por programa de console **falhou por outra
 razão**, e ela vale como achado: `Tficha_about.Create(nil)` — qualquer um dos

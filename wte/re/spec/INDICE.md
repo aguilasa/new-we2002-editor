@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 58 |
+| `implementado` | 61 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 3 |
 | `nao portado` | 1 |
-| `aberto` | 15 |
+| `aberto` | 12 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -106,17 +106,17 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d534` | `MainForm` | [boton_nombres2isoClick](MainForm.boton_nombres2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040de18` | `MainForm` | [boton_tex2isoClick](MainForm.boton_tex2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
-| `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | aberto |
+| `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | implementado |
 | `0x0040e304` | `MainForm` | [paderechaeizquierdaClick](MainForm.paderechaeizquierdaClick.md) | OnClick | edicao | implementado |
 | `0x0040e4b0` | `MainForm` | [paizquierdaClick](MainForm.paizquierdaClick.md) | OnClick | edicao | implementado |
 | `0x0040e5e8` | `MainForm` | [paderechaClick](MainForm.paderechaClick.md) | OnClick | edicao | implementado |
 | `0x0040e720` | `MainForm` | [paderecha2Click](MainForm.paderecha2Click.md) | OnClick | edicao | implementado |
 | `0x0040e85c` | `MainForm` | [paizquierda2Click](MainForm.paizquierda2Click.md) | OnClick | edicao | implementado |
-| `0x0040e998` | `MainForm` | [parribaClick](MainForm.parribaClick.md) | OnClick | edicao | aberto |
+| `0x0040e998` | `MainForm` | [parribaClick](MainForm.parribaClick.md) | OnClick | edicao | implementado |
 | `0x0040ecc0` | `MainForm` | [pabajoClick](MainForm.pabajoClick.md) | OnClick | edicao | implementado |
 | `0x0040ee80` | `MainForm` | [grabar_camisetaClick](MainForm.grabar_camisetaClick.md) | OnClick | gravacao | implementado |
 | `0x0040f69c` | `MainForm` | [grabar_memoryClick](MainForm.grabar_memoryClick.md) | OnClick | gravacao | implementado |
-| `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | aberto |
+| `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | implementado |
 | `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
 | `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | implementado |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |

@@ -255,9 +255,9 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-23, remedido pelo `check_fase4.py`): 58 `implementado`, 19
-      `trivial`, 3 `divergencia deliberada`, 1 `nao portado`, 13 `aberto`.
-      **81 dos 96 têm veredito fechado**, e os 15 que faltam estão nomeados um
+      (2026-08-24, remedido pelo `check_fase4.py`): 61 `implementado`, 19
+      `trivial`, 3 `divergencia deliberada`, 1 `nao portado`, 10 `aberto`.
+      **84 dos 96 têm veredito fechado**, e os 12 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
       (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
@@ -270,6 +270,22 @@ só uma escolha de quando.
       **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
       Sobra o `parriba`, que não grava: o que falta nele é o
       `compara_tela.sh --edicao` alcançar a lista de descarte
+- [x] **Três `aberto` estavam presos por "nada exercita o corpo" e a bateria
+      golden já os exercitava** *(medido na
+      [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md), 2026-08-24)*. A frase tinha
+      sido escrita a partir do `compara_tela.sh`, que é régua de **pixel** e não
+      clica a lista de jogadores; a régua de **byte** clica, e sempre clicou. O
+      `lista_jugadores_1Change` dispara em **quatro** gates verdes
+      (`golden-09`, `-10`, `-11`, `-15`), o `lista_equipos_2Change` em três —
+      com **64** disparos em dois deles, que é a lista inteira até o primeiro
+      clube de ML — e o `parribaClick` no `golden-11`, guardando o buffer que o
+      `pabajo` grava logo depois. Os três passaram a `implementado`. **Uma das
+      três razões era minha, de um dia antes**, e o registro fica na spec: o
+      número (69 disparos do irmão, zero deste) estava certo e a conclusão
+      generalizava de um instrumento para todos. Mecanizado pelo
+      [`cobertura_gate.py`](../../wte/tools/cobertura_gate.py), que versiona a
+      cobertura em [`fase-4-cobertura.tsv`](../../wte/re/fase-4-cobertura.tsv) e
+      **aborta** se uma spec citar o TSV como evidência sem ter linha nele
 - [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
       da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
       porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém
