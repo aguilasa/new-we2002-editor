@@ -120,6 +120,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A lista de arquivos da WTE-TASK-32 não menciona as quinze linhas acrescentadas ao `.gitignore` | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-100](/docs/tasks/CORR-WTE-100.md) | [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | A citação `` `{$Q-}` `` num comentário do `we2002_preco.pas` abre nível 2: é o único warning do build, e em `{$mode delphi}` seria erro fatal | Baixa | [x] concluída | 2026-08-24 |
+| [CORR-WTE-101](/docs/tasks/CORR-WTE-101.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O contrato da spec diz "seis seções obrigatórias" e a ferramenta cobra cinco; e a frase do `fase-4.md` apresenta as 481 linhas de evidência como se fossem todas, quando 44 outras ficam fora da conta | Média | [ ] pendente | — |
+| [CORR-WTE-102](/docs/tasks/CORR-WTE-102.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Quatro sítios vivos ainda derivam as dezessete gravações "das 94 specs"; o índice conta 96 desde que a WTE-TASK-32 escreveu as duas de preço | Média | [ ] pendente | — |
+| [CORR-WTE-103](/docs/tasks/CORR-WTE-103.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | No estado zero o `check_fase4.py` emite o título `## Os que continuam aberto` colado no parágrafo — a linha em branco mora dentro do `if` que lista os sem spec | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -222,6 +225,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature
 - [x] CORR-WTE-099 — acrescentar o `.gitignore` à lista de arquivos da WTE-TASK-32
 - [x] CORR-WTE-100 — tirar as chaves da diretiva citada na prosa do `we2002_preco.pas`
+- [ ] CORR-WTE-101 — trocar "seis seções" por cinco no gabarito e no gerador, e dizer que a conta é só delas
+- [ ] CORR-WTE-102 — atualizar de 94 para 96 a população de specs de onde saem as dezessete gravações
+- [ ] CORR-WTE-103 — tirar do `if` a linha em branco que separa o bloco de specs do título seguinte
 
 ## Detalhes por correção
 
@@ -1805,3 +1811,48 @@ dizer "fechada e fora do backlog", não "corrigida".
 > distingue `{$Q+}` de `{$Q-}`. O que sobra de real é o warning e a fragilidade
 > em `{$mode delphi}` — ver o Log da
 > [CORR-WTE-100](/docs/tasks/CORR-WTE-100.md).
+
+### CORR-WTE-101
+
+- **Arquivo com problema:** `wte/re/spec/GABARITO.md`, `wte/tools/check_fase4.py`
+  e, por tabela, `wte/re/fase-4.md`
+- **Sintoma:** três sítios dizem "seis seções obrigatórias"; o `SECOES` do
+  `spec_index.py` tem cinco, e o próprio gabarito lista cinco mais uma `## Notas`
+  declarada opcional. A frase gerada erra ainda uma segunda vez: apresenta as
+  481 linhas `**Evidência:**` como se fossem todas, e são as das cinco seções
+  cobradas — no arquivo há 525, com 44 em `## Notas`, `## Justificativa` e
+  `## Como o veredito fechou`
+- **Como foi detectado:** `len(S.SECOES)` = 5 contra o `grep` das três frases, e
+  um script que separa evidência dentro/fora das seções cobradas: 481 + 44 = 525
+- **Fix:** cinco no gabarito e no gerador; a frase do total passa a dizer que
+  conta só as seções cobradas, e a guarda amarra a prosa a `len(S.SECOES)` em
+  vez de literal
+
+### CORR-WTE-102
+
+- **Arquivo com problema:** `docs/PLAN-WTE-LAZARUS.md:943`,
+  `docs/tasks/progresso.md:445`, `wte/tools/check_fase4.py:28` e `:95`
+- **Sintoma:** a receita de como as dezessete gravações foram derivadas diz
+  "lendo a seção `## Bytes tocados` das **94** specs". Eram 94 na primeira
+  passagem da WTE-TASK-31; a WTE-TASK-32 escreveu as duas de preço e o índice
+  fecha em 96. O resultado não muda — as duas novas declaram `Nenhum` —, a
+  receita é que não confere mais. No plano a frase está quatorze linhas abaixo
+  de "96 dos 96"
+- **Como foi detectado:** `grep -rn "94 specs"` contra
+  `spec_index.py --check` (96 com spec) nesta revisão
+- **Fix:** 96 nos quatro sítios vivos, tirando o número da linha 95 do gerador,
+  que fala das formas de escrever "não grava" e não da população; o Log da
+  primeira passagem fica como está, que é registro histórico
+
+### CORR-WTE-103
+
+- **Arquivo com problema:** `wte/tools/check_fase4.py` (e o gerado `fase-4.md`)
+- **Sintoma:** a linha em branco que fecha o bloco "N dos M têm arquivo de spec"
+  é emitida dentro do `if m["sem_spec"]`. Com zero — o estado de fechamento — o
+  título `## Os que continuam aberto` sai colado no parágrafo, única junção do
+  arquivo sem separação
+- **Como foi detectado:** `sed -n '38,42p' wte/re/fase-4.md | cat -A` nesta
+  revisão; é o terceiro caso da mesma família que a quinta passagem foi caçar
+- **Fix:** mover o `a("")` para fora do `if`, e um caso de teste que recuse
+  `^## ` logo depois de linha não vazia na saída do gerador — pega os três de
+  uma vez
