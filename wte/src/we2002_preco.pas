@@ -135,7 +135,7 @@ var
   s2, s3, s4: LongInt;
 begin
   { LongInt em TODOS os quatro, e transbordo e o comportamento pedido -- ver o
-    item 1 do cabecalho. `{$Q-}` porque o FPC pode estar com verificacao de
+    item 1 do cabecalho. `$Q-` porque o FPC pode estar com verificacao de
     overflow ligada, e ai o transbordo viraria excecao em vez de valor. }
   {$PUSH}{$Q-}{$R-}
   s2 := soma * soma;
