@@ -137,10 +137,29 @@ fábrica em todos.
 **O conteúdo do jogador não explica.** No time 9 o slot 21 e o slot 22 têm a
 mesma soma (36) e a mesma posição (0), e só o 21 é gravado.
 
-**A causa está aberta**, e é a [CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md):
-a conta de offset que este port herdou do `we2002_core` dá coluna **não nula**
-para o slot 22, e o `we2002_core` é byte-idêntico ao `ed.exe`. Os dois editores
-discordam sobre o último slot.
+**A causa está aberta**, e é a [CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md).
+Duas medições dela, de 2026-08-24, estreitaram o que ainda falta:
+
+**1. O salto é real, e não byte que já estava certo.** Plantados `0xFF` nos
+slots 20, 21 e 22 do time 2 e rodado o oráculo pelo
+[`golden-22-precos`](../tests/roteiros/golden-22-precos.txt): os slots 20 e 21
+voltaram com **26** e **21**, que são exatamente o `previsto` do
+[`preco.tsv`](preco.tsv), e o slot 22 continuou **255**. A alternativa barata —
+"o oráculo grava e o byte não muda porque já valia o preço" — está descartada.
+
+**2. A conta de offset do oráculo não tem caso especial de slot.** Lida
+inteira, a `0x00404374` decide por **time**, nunca por slot: `cmp ecx,0x3f`
+separa seleção de clube de ML, e `cmp ecx,0x35` / `cmp ecx,0x38` zeram a
+terceira coluna só para os times **54 e 55** — os mesmos 46 jogadores que o
+`Database.cpp:756-764` pula. Para todo time de seleção fora desses dois, ela
+escreve `0x2ece0c + 23·time + 2·(time div 56) + slot` em `[esi+ecx*4+0x28]`, que
+é o `0x43366c` que o laço testa, **sem nenhum ramo dependente do slot**.
+
+Isso fecha o ramo grande da correção: **a conta de offset deste port não está
+errada para o slot 22** — ela é a mesma do oráculo, e o oráculo a calcula igual
+para os 23. O que sobra em aberto é uma contradição estreita e nomeada: o laço
+observa zero num campo que a rotina que acabou de rodar sempre preenche com
+valor não nulo.
 
 O port reproduz o que o **oráculo** faz, porque é contra ele que o gate mede — e
 a divergência fica escrita em vez de silenciosa. O `check_preco.py` recusa

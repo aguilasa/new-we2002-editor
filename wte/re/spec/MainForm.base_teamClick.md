@@ -116,10 +116,15 @@ em todos. No time 9 o slot 21 e o 22 têm a **mesma** soma e a **mesma** posiç�
 e só o 21 é gravado — o que descarta explicação pelo conteúdo do jogador.
 
 A causa está aberta na
-[CORR-WTE-095](../../../docs/tasks/CORR-WTE-095.md): a conta de offset que este
-port herdou do `we2002_core` dá coluna não nula para o slot 22, e o
-`we2002_core` é byte-idêntico ao `ed.exe`. Os dois editores discordam sobre o
-último slot. O port reproduz o oráculo, porque é contra ele que o gate mede.
+[CORR-WTE-095](../../../docs/tasks/CORR-WTE-095.md), e ela já mediu duas coisas
+em 2026-08-24. O salto **é real**: plantados `0xFF` nos slots 20, 21 e 22 do
+time 2, o oráculo devolveu 26 e 21 nos dois primeiros — o `previsto` do
+`preco.tsv` — e deixou o terceiro em 255. E a `0x00404374` **não tem ramo por
+slot**: ela decide por time (`cmp ecx,0x3f`, `cmp ecx,0x35`, `cmp ecx,0x38`, os
+times 54 e 55) e escreve a mesma conta linear em slot para os 23. Logo a conta
+de offset do port **não está errada** para o slot 22 — o que sobra em aberto é
+o laço observar zero num campo que a rotina anterior sempre preenche.
+O port reproduz o oráculo, porque é contra ele que o gate mede.
 
 ## Notas
 
