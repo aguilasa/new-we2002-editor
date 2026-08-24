@@ -195,7 +195,8 @@ GOLDEN_DE: dict[str, tuple[str, ...]] = {
     # a da WTE-TASK-28
     "MainForm.boton_mcr2isoClick": ("golden-12-mcr2iso", "golden-13-roundtrip"),
     # as tres orfas da WTE-TASK-30, fechadas pela CORR-WTE-081
-    "jugador.BitBtn3Click": ("golden-15-ficha",),
+    "jugador.BitBtn3Click": ("golden-15-ficha", "golden-18-ficha-edicao",
+                             "golden-19-ficha-original"),
     "ficha_color.BitBtn3Click": ("golden-16-cor",),
     "estrategia.BitBtn3Click": ("golden-17-tatica",),
     # as duas que gravam sem ser botao de gravar

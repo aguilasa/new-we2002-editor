@@ -255,9 +255,9 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-24, remedido pelo `check_fase4.py`): 61 `implementado`, 19
-      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 7 `aberto`.
-      **87 dos 96 têm veredito fechado**, e os 9 que faltam estão nomeados um
+      (2026-08-24, remedido pelo `check_fase4.py`): 63 `implementado`, 19
+      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 5 `aberto`.
+      **89 dos 96 têm veredito fechado**, e os 7 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
       (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
@@ -300,6 +300,19 @@ só uma escolha de quando.
       fase 4 prevê e o `MainForm.Button2Click` já usava. A decisão de
       *owner-draw* continua sendo da 37; o que mudou é que ela deixou de
       bloquear o fechamento da fase 4
+- [x] **Handler de *desfazer* não se julga sozinho** *(CORR-WTE-091,
+      2026-08-24)*. O `jugador.BitBtn1Click` (o botão `Original `) tem seis
+      bytes e esperava mudança de estrutura, não código: a `PreencheFicha`
+      morava no `.aux.inc` do `MainForm`, invisível de fora, e desceu para a
+      [`wte_ficha`](../../wte/src/wte_ficha.pas) como a CORR-WTE-081 já fizera
+      com o buffer de jogador. **A régua teve de ser um par**, e essa é a lição:
+      clicar `Original ` sem ter editado nada antes passaria com o corpo vazio.
+      O [`golden-18-ficha-edicao`](../../wte/tests/roteiros/golden-18-ficha-edicao.txt)
+      edita o número de camisa e grava `0xc0`; o
+      [`golden-19-ficha-original`](../../wte/tests/roteiros/golden-19-ficha-original.txt)
+      edita, clica `Original ` e grava `0x80` — **o valor que a ROM intocada já
+      tinha**. Os quatro gates deram byte-idêntico, e o par fechou também o
+      `casilla_dorsalKeyPress`, que ele exercita de passagem
 - [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
       da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
       porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém

@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**87 dos 96 têm veredito fechado; 9 não.**
+**89 dos 96 têm veredito fechado; 7 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -28,11 +28,11 @@ A segunda metade do critério está cumprida — ver a seção do
 
 | Veredito | Handlers |
 |---|---:|
-| `implementado` | 61 |
+| `implementado` | 63 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 5 |
 | `nao portado` | 2 |
-| `aberto` | 7 |
+| `aberto` | 5 |
 | *(sem arquivo de spec)* | 2 |
 | **total** | **96** |
 
@@ -44,15 +44,13 @@ Os que não têm:
 
 ## Os que continuam `aberto`
 
-São 7, e **4 deles já têm corpo Pascal escrito**.
+São 5, e **3 deles já têm corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
 
 | Endereço | Handler | Grupo | Corpo |
 |---|---|---|---|
-| `0x00407a80` | [jugador.BitBtn1Click](spec/jugador.BitBtn1Click.md) | auxiliar | **não** |
-| `0x00408b50` | [jugador.casilla_dorsalKeyPress](spec/jugador.casilla_dorsalKeyPress.md) | edicao | sim |
 | `0x00408f00` | [estrategia.bolaMouseDown](spec/estrategia.bolaMouseDown.md) | edicao | sim |
 | `0x004090fc` | [estrategia.FormCreate](spec/estrategia.FormCreate.md) | carga | **não** |
 | `0x0040dfe8` | [MainForm.boton_dialogo_texClick](spec/MainForm.boton_dialogo_texClick.md) | carga | **não** |
@@ -78,7 +76,7 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 | Endereço | Handler | Grupo | Veredito | Gate |
 |---|---|---|---|---|
 | `0x004069e8` | [ficha_color.BitBtn3Click](spec/ficha_color.BitBtn3Click.md) | auxiliar | implementado | [golden-16-cor](../tests/roteiros/golden-16-cor.txt) |
-| `0x00408548` | [jugador.BitBtn3Click](spec/jugador.BitBtn3Click.md) | auxiliar | implementado | [golden-15-ficha](../tests/roteiros/golden-15-ficha.txt) |
+| `0x00408548` | [jugador.BitBtn3Click](spec/jugador.BitBtn3Click.md) | auxiliar | implementado | [golden-15-ficha](../tests/roteiros/golden-15-ficha.txt), [golden-18-ficha-edicao](../tests/roteiros/golden-18-ficha-edicao.txt), [golden-19-ficha-original](../tests/roteiros/golden-19-ficha-original.txt) |
 | `0x0040a660` | [estrategia.BitBtn3Click](spec/estrategia.BitBtn3Click.md) | auxiliar | implementado | [golden-17-tatica](../tests/roteiros/golden-17-tatica.txt) |
 | `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | divergencia deliberada | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
 | `0x0040c46c` | [MainForm.boton_mcr2isoClick](spec/MainForm.boton_mcr2isoClick.md) | gravacao | implementado | [golden-12-mcr2iso](../tests/roteiros/golden-12-mcr2iso.txt), [golden-13-roundtrip](../tests/roteiros/golden-13-roundtrip.txt) |
@@ -97,7 +95,7 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 
 ## A bateria golden desta corrida
 
-São 17 roteiros em disco, 16 com par do lado port. Cada
+São 19 roteiros em disco, 18 com par do lado port. Cada
 um desses foi rodado **duas vezes**: `controle` (oráculo contra oráculo,
 que prova que o par roteiro+imagem é determinístico) e `golden` (oráculo
 contra o app Lazarus). **O controle vem antes do teste** — sem ele, verde
@@ -132,10 +130,12 @@ fizesse absolutamente nada, e é para isso que o `golden_check.sh` tem
 | [golden-15-ficha](../tests/roteiros/golden-15-ficha.txt) | PASSOU | PASSOU | 203 | 1 |
 | [golden-16-cor](../tests/roteiros/golden-16-cor.txt) | PASSOU | PASSOU | 187 | 1 |
 | [golden-17-tatica](../tests/roteiros/golden-17-tatica.txt) | PASSOU | PASSOU | 190 | 1 |
+| [golden-18-ficha-edicao](../tests/roteiros/golden-18-ficha-edicao.txt) | PASSOU | PASSOU | 149 | **2** |
+| [golden-19-ficha-original](../tests/roteiros/golden-19-ficha-original.txt) | PASSOU | PASSOU | 149 | 1 |
 
-**32 de 32 corridas verdes**, 3161 segundos de relógio no total.
+**36 de 36 corridas verdes**, 3459 segundos de relógio no total.
 
-**E a coluna de tentativas não é enfeite.** `golden-06-textura` precisou de mais de uma corrida; a causa de cada
+**E a coluna de tentativas não é enfeite.** `golden-06-textura`, `golden-18-ficha-edicao` precisou de mais de uma corrida; a causa de cada
 caso está no Log da task que rodou a bateria. Gate que precisa de
 repetição para ficar verde deixa de separar *"o port diverge"* de
 *"a corrida não estava pronta"*, e essa é a classe de problema que a
@@ -226,7 +226,7 @@ são os cinco, e reconferência velha não vale para handler novo.
 
 ## Varredura por decompilado colado
 
-229 arquivos varridos — as specs, os `.inc` de corpo escrito
+230 arquivos varridos — as specs, os `.inc` de corpo escrito
 à mão e as unidades de `src/`.
 
 **Nada.** É a §2 do plano sustentada por medida em vez de honra.

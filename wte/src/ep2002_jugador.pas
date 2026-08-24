@@ -333,12 +333,8 @@ implementation
 procedure Tjugador.BitBtn2Click(Sender: TObject);
 {$I impl/ep2002_jugador.BitBtn2Click.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.BitBtn1Click(Sender: TObject);
-begin
-  REStub('jugador.BitBtn1Click');
-end;
-{$POP}
+{$I impl/ep2002_jugador.BitBtn1Click.inc}
 
 procedure Tjugador.barrhabScroll(Sender: TObject; ScrollCode: TScrollCode;
   var ScrollPos: Integer);

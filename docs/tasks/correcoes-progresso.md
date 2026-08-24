@@ -110,6 +110,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` por "nada exercita o corpo" quando a bateria golden já os exercita — o `lista_jugadores_1Change` dispara em quatro gates verdes | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-090](/docs/tasks/CORR-WTE-090.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` esperando decisão já tomada ou de outra fase; o `ComboBoxDrawItem` fechava o ciclo 31→37→34→31 | Alta | [x] concluída | 2026-08-24 |
+| [CORR-WTE-091](/docs/tasks/CORR-WTE-091.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O `Original ` da ficha não alcançava a `PreencheFicha` por ciclo de `uses`, e a régua dele precisa ser um par de roteiros que difere por um clique | Alta | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -202,6 +203,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
 - [x] CORR-WTE-089 — medir que handler dispara em que gate golden, e promover os que a régua de byte já cobria
 - [x] CORR-WTE-090 — tirar do `aberto` o que espera decisão, e quebrar o ciclo do `ComboBoxDrawItem`
+- [x] CORR-WTE-091 — descer a `PreencheFicha` para a `wte_ficha` e julgar o `Original ` por um par diferencial
 
 ## Detalhes por correção
 
@@ -1630,3 +1632,20 @@ dizer "fechada e fora do backlog", não "corrigida".
   `cobertura_gate.py` virou bidirecional: ela recusou a prosa nova do
   `boton_dialogo_weClick`, que cita o TSV para dizer que dá zero linha, e a
   correção foi conferir também o sentido negativo em vez de afrouxar
+
+### CORR-WTE-091
+
+- **Arquivo com problema:** `wte/src/impl/ep2002_mainform.aux.inc` (a
+  `PreencheFicha` presa lá), `wte/re/spec/jugador.BitBtn1Click.md`
+- **Sintoma:** o `Original ` da ficha tem seis bytes no original e não tinha
+  corpo no port; o `ep2002_jugador` não alcançava a `PreencheFicha`, porque
+  `.aux.inc` é incluído na implementação e o `uses` gerado sai na interface
+- **Como foi detectado:** lendo a razão de cada `aberto` restante na quarta
+  passagem da WTE-TASK-31; a própria spec já nomeava a saída
+- **Fix:** a rotina desceu para a `wte_ficha` (unidade neutra, como a
+  CORR-WTE-081 e a -082 fizeram antes), o corpo virou uma chamada, e o gate são
+  **dois** roteiros que diferem por um clique — sem o par, clicar `Original `
+  sem ter editado nada passaria com o corpo vazio. Medido: `golden-18` grava
+  `0xc0` no byte de camisa, `golden-19` grava `0x80`, que é o valor da ROM
+  intocada. De quebra fechou o `casilla_dorsalKeyPress`, que o mesmo par
+  exercita

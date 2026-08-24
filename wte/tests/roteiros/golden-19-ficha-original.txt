@@ -1,0 +1,127 @@
+# golden-19-ficha-original -- o gate do `jugador.BitBtn1Click`, o botao `Original ` da ficha
+#
+# CORR-WTE-091. Lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-19-ficha-original.txt \
+#        --roteiro-port wte/tests/roteiros/golden-19-ficha-original.port.txt
+#
+# ESTE ROTEIRO E METADE DE UM PAR, e o par e o que da sentido a ele.
+#
+#   golden-18-ficha-edicao   edita o numero de camisa e grava
+#   golden-19-ficha-original edita, clica `Original `, e grava
+#
+# A UNICA diferenca entre os dois e o clique em `Original `. Se o
+# `jugador.BitBtn1Click` fosse stub, os dois gravariam o MESMO byte de numero
+# de camisa -- e e por isso que um roteiro so nao julgaria este handler: clicar
+# `Original ` sem ter editado nada antes passaria com o corpo vazio.
+#
+# O `Comple.` grava 10 bytes de nome, 12 de atributos, o condicional e o byte
+# de numero de camisa (`0x00404048`). O que muda entre os dois roteiros e o
+# ultimo.
+#
+# A FICHA MEDE 707x273 sob Wine, exatamente o ClientWidth/ClientHeight do DFM,
+# sem os 6x32 de moldura que o `ficha_dorsal` ganha -- por isso as coordenadas
+# valem nos dois lados. A busca e por TAMANHO porque o Caption vira o nome do
+# jogador em Shift-JIS, uma corrida de `?` que regex nenhum acha.
+#
+# LIMPAR O CAMPO E COM `End`/`shift+Home`/`BackSpace`, NUNCA `Ctrl+A` -- num
+# `TEdit` do Win32 o `Ctrl+A` nao seleciona tudo, e os dois lados receberiam
+# textos diferentes (armadilha 6 do prompt de execucao).
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ---------------------------------------------------------- o jogador 1 ----
+#
+# lista_jugadores_1 (40,72) + GroupBox1 (8,320) = (48,392) -> (100,402).
+! clique 100 402
+~ 1
+! tecla Down
+~ 3
+= JOGADOR
+
+# ------------------------------------------------------------- a ficha ----
+#
+# mostrar_jugador_1 (8,72) + GroupBox1 (8,320) = (16,392), 25x21 -> (28,402).
+! clique 28 402
+~ 5
+
+>~ 707x273
+~ 2
+
+# ------------------------------------------- edita o numero de camisa ----
+#
+# casilla_dorsal (568,211) 25x21 -> centro (580,221). O `7` e escolha
+# arbitraria e o valor nao importa: o que o par mede e se ele SOBREVIVE ao
+# `Original `.
+! clique 580 221
+~ 1
+! tecla End
+! tecla shift+Home
+! tecla BackSpace
+~ 1
+! texto 7
+~ 2
+= EDITA_DORSAL
+
+# ------------------------------------------------- desfaz pelo `Original ` --
+#
+# BitBtn1 `Original ` (464,240) 73x25 -> centro (500,252). Ele chama a
+# `0x0040756c`, que reenche a ficha a partir do registro carregado -- o `7`
+# digitado acima some e o numero guardado volta.
+! clique 500 252
+~ 2
+= ORIGINAL
+
+# ------------------------------------------------------------- `Comple.` ----
+#
+# BitBtn3 `Comple.` (624,240) 73x25 -> centro (660,252).
+! clique 660 252
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= COMPLE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C, e
+# so um `fseek` noutro ponto do mesmo arquivo a esvazia.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

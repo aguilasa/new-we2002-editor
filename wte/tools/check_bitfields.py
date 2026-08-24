@@ -57,7 +57,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 EXE = ROOT / "we-team-editor" / "we-team-editor.exe"
 PLAYER = ROOT / "wte" / "src" / "we2002_player.pas"
-FICHA = ROOT / "wte" / "src" / "impl" / "ep2002_mainform.aux.inc"
+# O `PreencheFicha` desceu do `impl/ep2002_mainform.aux.inc` para a unidade
+# neutra na CORR-WTE-091, quando ganhou um segundo chamador noutro
+# formulario (o `jugador.BitBtn1Click`). O conteudo e o mesmo; so o
+# arquivo mudou.
+FICHA = ROOT / "wte" / "src" / "wte_ficha.pas"
 SAIDA_MD = ROOT / "wte" / "re" / "bitfields.md"
 SAIDA_TSV = ROOT / "wte" / "re" / "bitfields.tsv"
 

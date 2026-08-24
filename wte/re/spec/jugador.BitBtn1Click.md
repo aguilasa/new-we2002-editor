@@ -2,7 +2,7 @@
 handler: BitBtn1Click
 formulario: jugador
 endereco: 0x00407a80
-veredito: aberto
+veredito: implementado
 ---
 
 # jugador.BitBtn1Click
@@ -52,7 +52,35 @@ Não trata.
 
 **Evidência:** disassembly lido
 
-## Justificativa do veredito `aberto`
+## O veredito passou a `implementado` em 2026-08-24
+
+A [CORR-WTE-091](../../../docs/tasks/CORR-WTE-091.md) fez as duas coisas que
+faltavam: desceu a `PreencheFicha` para a [`wte_ficha`](../../src/wte_ficha.pas)
+— a unidade neutra que nenhum dos dois formulários possui — e escreveu o corpo,
+que virou o que o original tem: uma chamada.
+
+### A régua é um PAR de roteiros, e o par é o que dá sentido a ela
+
+Clicar `Original ` sem ter editado nada antes **passaria com o corpo vazio** —
+a ficha já mostra o dado carregado, e reencher com o mesmo valor não muda byte
+nenhum. Por isso o gate são dois roteiros que diferem por um único clique:
+
+| Roteiro | O que faz | Byte de número de camisa gravado |
+|---|---|---|
+| [`golden-18-ficha-edicao`](../../tests/roteiros/golden-18-ficha-edicao.txt) | edita o campo para `7` e grava | `0xc0` |
+| [`golden-19-ficha-original`](../../tests/roteiros/golden-19-ficha-original.txt) | edita para `7`, clica `Original `, e grava | `0x80` |
+
+**`0x80` é o valor que a ROM já tinha** em `404748` — conferido no
+`roms/japanese-shift-jis.bin` intocado. Ou seja: o `Original ` não devolveu *um*
+valor, devolveu **o** valor. Com o corpo vazio os dois roteiros gravariam
+`0xc0` e o par não distinguiria nada.
+
+Os quatro gates — controle e golden de cada um — deram **byte-idêntico**, e o
+disparo está medido em
+[`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv): `golden-19` dispara este
+handler uma vez, `golden-18` nenhuma, que é exatamente a diferença entre eles.
+
+### O que segurava o veredito
 
 **O port tem a rotina e não a alcança daqui.** A `0x0040756C` está portada como
 `PreencheFicha`, e mora em

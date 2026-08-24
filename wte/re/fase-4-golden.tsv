@@ -31,3 +31,7 @@ golden-16-cor	controle	PASSOU	100	1	2026-08-22
 golden-16-cor	golden	PASSOU	87	1	2026-08-22
 golden-17-tatica	controle	PASSOU	101	1	2026-08-22
 golden-17-tatica	golden	PASSOU	89	1	2026-08-22
+golden-18-ficha-edicao	controle	PASSOU	78	1	2026-08-24
+golden-18-ficha-edicao	golden	PASSOU	71	2	2026-08-24
+golden-19-ficha-original	controle	PASSOU	76	1	2026-08-24
+golden-19-ficha-original	golden	PASSOU	73	1	2026-08-24

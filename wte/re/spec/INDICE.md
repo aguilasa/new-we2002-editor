@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 61 |
+| `implementado` | 63 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 5 |
 | `nao portado` | 2 |
-| `aberto` | 9 |
+| `aberto` | 7 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -65,14 +65,14 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00406a0c` | `ficha_color` | [colorMouseDown](ficha_color.colorMouseDown.md) | OnMouseDown x16 | edicao | implementado |
 | `0x00406f34` | `ficha_color` | [SpeedButton1Click](ficha_color.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
 | `0x00407a68` | `jugador` | [BitBtn2Click](jugador.BitBtn2Click.md) | OnClick | auxiliar | trivial |
-| `0x00407a80` | `jugador` | [BitBtn1Click](jugador.BitBtn1Click.md) | OnClick | auxiliar | aberto |
+| `0x00407a80` | `jugador` | [BitBtn1Click](jugador.BitBtn1Click.md) | OnClick | auxiliar | implementado |
 | `0x00407a88` | `jugador` | [barrhabScroll](jugador.barrhabScroll.md) | OnScroll x9 | edicao | implementado |
 | `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | divergencia deliberada |
 | `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
-| `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
+| `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |
 | `0x00408bb8` | `jugador` | etiqprecioClick | OnClick | edicao | aberto |
 | `0x00408d88` | `ficha_warning_2` | [FormCreate](ficha_warning_2.FormCreate.md) | OnCreate | carga | trivial |

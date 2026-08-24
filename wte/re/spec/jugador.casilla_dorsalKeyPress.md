@@ -2,7 +2,7 @@
 handler: casilla_dorsalKeyPress
 formulario: jugador
 endereco: 0x00408b50
-veredito: aberto
+veredito: implementado
 ---
 
 # jugador.casilla_dorsalKeyPress
@@ -103,9 +103,30 @@ oráculos confirmaram, a de que só os times **54 e 55** não têm o campo. O
 resultado é o mesmo byte a byte e não obriga a ficha a conhecer o buffer de um
 handler de outro formulário, que seria referência circular de unidade.
 
-**Veredito `aberto` ainda assim**, e agora por um motivo só: a régua de tela do
-grupo de edição (`compara_tela.sh --edicao`) não alcança a ficha do jogador.
-Não é divergência pendente — é gate que não rodou.
+## O veredito passou a `implementado` em 2026-08-24
+
+Esta seção dizia *"a régua de tela do grupo de edição
+(`compara_tela.sh --edicao`) não alcança a ficha do jogador"*, e continua
+verdadeira — mas era a régua errada para julgar este handler. Ele filtra tecla
+num campo cujo valor **vira byte na imagem**, então quem o julga é o gate de
+byte, e a [CORR-WTE-091](../../../docs/tasks/CORR-WTE-091.md) o construiu.
+
+O [`golden-18-ficha-edicao`](../../tests/roteiros/golden-18-ficha-edicao.txt)
+limpa o campo com `End`/`shift+Home`/`BackSpace` — nunca `Ctrl+A`, que num
+`TEdit` do Win32 não seleciona tudo —, digita `7` e grava pelo `Comple.`. O byte
+de número de camisa em `404748` sai `0xc0` contra os `0x80` da ROM intocada:
+**a tecla chegou, o filtro a aceitou e o valor chegou ao disco**, dos dois
+lados, byte-idêntico ao oráculo em controle e golden.
+
+Medido em [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv): **2** disparos
+em cada um dos dois roteiros do par — o `KeyPress` do dígito e o do `Return`
+implícito na sequência de limpeza.
+
+O ramo que continua sem exercício é o do `50`, e ele tem dono: é o valor que a
+ficha mostra quando o jogador não tem o byte condicional, e preço é assunto da
+[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md).
+
+### O registro de quando o veredito era `aberto`
 
 O `50` do ramo sem campo é entrada da
 [WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md): é o valor que a
