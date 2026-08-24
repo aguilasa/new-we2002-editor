@@ -22,7 +22,8 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 
 **96 dos 96 têm veredito fechado; 0 não.**
 A segunda metade do critério está cumprida — ver a seção do
-`nao portado` abaixo —, e a primeira não.
+`nao portado` abaixo —, e a primeira também: nenhum handler ficou
+`aberto`, e nenhum ficou sem arquivo de spec.
 
 ## Cobertura e vereditos
 
@@ -39,13 +40,9 @@ A segunda metade do critério está cumprida — ver a seção do
 96 dos 96 têm arquivo de spec.
 ## Os que continuam `aberto`
 
-São 0, e **0 deles já têm corpo Pascal escrito**.
-A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
-ela diz `sim`, o que segura o veredito não é código ausente, é régua —
-a spec de cada um nomeia o que falta e quem é o dono.
-
-| Endereço | Handler | Grupo | Corpo |
-|---|---|---|---|
+**Nenhum.** Todos os 96 fecharam veredito, e a seção fica no lugar
+porque o número que importa é o zero: se um handler voltar a
+`aberto` — spec nova, veredito revisto —, ele aparece aqui.
 
 ## Quem grava na imagem, e o gate de cada um
 

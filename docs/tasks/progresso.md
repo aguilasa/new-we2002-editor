@@ -43,7 +43,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-28](/docs/tasks/28-import-de-mcr.md) | Import e export de `.mcr` | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-20 | 2026-08-20 |
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-21 | 2026-08-21 |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ✅ Concluído | 2026-08-21 | 2026-08-23 |
-| [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | 🔄 Em andamento | — | — |
+| [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ✅ Concluído | 2026-08-24 | ⬜ pendente |
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
@@ -254,22 +254,18 @@ só uma escolha de quando.
 - [x] Convenção Borland aplicada; `colorearClick` com assinatura correta
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
-- [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-24, remedido pelo `check_fase4.py`): 66 `implementado`, 19
-      `trivial`, 6 `divergencia deliberada`, 2 `nao portado`, 1 `aberto`.
-      **93 dos 96 têm veredito fechado**, e os 3 que faltam estão nomeados um
-      a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
-      [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
-      (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
-      `aberto` já têm corpo escrito** — o que os segura não é código. Os 11 do
-      `ficha_color` e os 2 `malla` do `estrategia` entraram na WTE-TASK-29,
-      somando-se aos 28 do grupo de carga, aos 28 do de edição que a
-      WTE-TASK-26 fechou e às gravações da WTE-TASK-27; os 17 do grupo
-      `auxiliar` entraram na WTE-TASK-30, que fechou 11. Dos nove `aberto`
-      do grupo de edição com **dono nomeado na WTE-TASK-27** pela opção A,
-      **oito foram promovidos** — o `dorsalClick` e seis dos sete de mover.
-      Sobra o `parriba`, que não grava: o que falta nele é o
-      `compara_tela.sh --edicao` alcançar a lista de descarte
+- [x] 96 entradas em `re/spec/`, nenhuma `aberto` — **96 de 96 têm arquivo e
+      veredito fechado** (2026-08-24, quinta passagem da
+      [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md), medido pelo
+      `check_fase4.py`): 69 `implementado`, 19 `trivial`, 6 `divergencia
+      deliberada`, 2 `nao portado`, **0 `aberto`**, 0 sem spec. Registro em
+      [`wte/re/fase-4.md`](../../wte/re/fase-4.md).
+      **O critério percorreu 78 → 81 → 93 → 96 em quatro passagens, e nenhuma
+      delas implementou um handler** — o que segurava era régua que não
+      alcançava, dono não nomeado ou prosa vencida; doze dos dezesseis `aberto`
+      da primeira passagem já tinham corpo Pascal escrito. Os três últimos
+      eram de preço e vieram com a
+      [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md)
 - [x] **Três `aberto` estavam presos por "nada exercita o corpo" e a bateria
       golden já os exercitava** *(medido na
       [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md), 2026-08-24)*. A frase tinha
@@ -389,17 +385,22 @@ só uma escolha de quando.
 - [x] Corpo de handler escrito à mão tem onde morar sem quebrar a regra de
       arquivo gerado: `wte/src/impl/*.inc` referenciado por `{$I}`, com o
       `dfm2lfm.py` abortando em `.inc` órfão
-- [ ] Toda gravação byte-idêntica nas duas ROMs — **as da WTE-TASK-27 estão**,
-      e desde 2026-08-20 sem exceção nenhuma: os dois remendos literais de
+- [x] Toda gravação byte-idêntica — **as 17, com gate declarado cada uma**, e
+      desde 2026-08-20 sem exceção nenhuma: os dois remendos literais de
       arranque foram portados e **nenhum roteiro do gate declara faixa
-      `conhecida:`**. Falta o `.mcr` (28) e a camisa (29). **Medido em 2026-08-18
-      que a europeia não hospeda este grupo**: o `wte.exe` morre na troca de
-      time (49.749 violações de acesso) e a gravação nunca acontece, então o
-      oráculo não existe daquele lado. O critério vale como está para a
-      japonesa; ver [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md).
+      `conhecida:`**. O `.mcr` (28) e a camisa (29) entraram, e a bateria da
+      quinta passagem fechou **42 de 42 corridas verdes** — 21 roteiros com par,
+      cada um com controle e golden, 3.958 s. *Adaptado de "nas duas ROMs":*
+      **medido em 2026-08-18 que a europeia não hospeda este grupo** — o
+      `wte.exe` morre na troca de time (49.749 violações de acesso) e a gravação
+      nunca acontece, então o oráculo não existe daquele lado. O critério vale
+      como está para a japonesa e a europeia é da
+      [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md); ver
+      [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md).
       **E "gravação" nem sempre quer dizer a imagem:** o `grabar_memory` emite
       um `.mcr` e deixa a ROM intacta, então o gate ganhou `--artefato` em
-      2026-08-19 — comparar só as duas imagens aprovaria um port inerte
+      2026-08-19 — comparar só as duas imagens aprovaria um port inerte; quatro
+      roteiros usam
 - [x] Cinco `trivial` reamostrados e reconferidos — na WTE-TASK-31
       (2026-08-22), por disassembly, com o registro em
       [`wte/re/fase-4-trivial.tsv`](../../wte/re/fase-4-trivial.tsv). A amostra

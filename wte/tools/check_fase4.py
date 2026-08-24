@@ -622,8 +622,17 @@ def gera_md(m: dict) -> str:
     a("> justificativa escrita.")
     a("")
     a(f"**{fechados} dos {total} têm veredito fechado; {pendentes} não.**")
+    # As duas metades do criterio sao independentes, e a prosa era escrita
+    # como se a primeira nunca fechasse -- ela dizia "e a primeira nao" com
+    # `pendentes` ja em 0, na quinta passagem de 2026-08-24. Numero e frase
+    # discordando no MESMO paragrafo e a forma mais barata de um gerado
+    # passar a mentir: quem le a frase nao confere o numero ao lado.
     a("A segunda metade do critério está cumprida — ver a seção do")
-    a("`nao portado` abaixo —, e a primeira não.")
+    if pendentes:
+        a("`nao portado` abaixo —, e a primeira não.")
+    else:
+        a("`nao portado` abaixo —, e a primeira também: nenhum handler ficou")
+        a("`aberto`, e nenhum ficou sem arquivo de spec.")
     a("")
 
     a("## Cobertura e vereditos")
@@ -648,22 +657,33 @@ def gera_md(m: dict) -> str:
     com_corpo = sum(1 for x in m["abertos"] if x["corpo"])
     # A concordancia quebra em 1, e o numero chegou a 1 em 2026-08-24. O
     # `740` abaixo ja tratava o caso; este nao tratava.
+    #
+    # E quebra de novo em 0, que chegou na quinta passagem: "Sao 0, e 0 deles
+    # ja tem corpo Pascal escrito" seguido de uma tabela com cabecalho e
+    # nenhuma linha. Tabela vazia num gerado nao se le como "nenhum" -- se le
+    # como ferramenta quebrada, e manda alguem procurar o defeito que nao ha.
     n = len(m['abertos'])
-    a(f"{'É um só' if n == 1 else f'São {n}'}, e "
-      + ("**ele já tem corpo Pascal escrito**."
-         if n == 1 and com_corpo == 1 else
-         "**ele não tem corpo Pascal**." if n == 1 else
-         f"**{com_corpo} deles já têm corpo Pascal escrito**."))
-    a("A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde")
-    a("ela diz `sim`, o que segura o veredito não é código ausente, é régua —")
-    a("a spec de cada um nomeia o que falta e quem é o dono.")
-    a("")
-    a("| Endereço | Handler | Grupo | Corpo |")
-    a("|---|---|---|---|")
-    for x in sorted(m["abertos"], key=lambda d: d["endereco"]):
-        a(f"| `{x['endereco']}` | [{x['handler']}](spec/{x['handler']}.md) "
-          f"| {x['grupo']} | {'sim' if x['corpo'] else '**não**'} |")
-    a("")
+    if n == 0:
+        a("**Nenhum.** Todos os 96 fecharam veredito, e a seção fica no lugar")
+        a("porque o número que importa é o zero: se um handler voltar a")
+        a("`aberto` — spec nova, veredito revisto —, ele aparece aqui.")
+        a("")
+    else:
+        a(f"{'É um só' if n == 1 else f'São {n}'}, e "
+          + ("**ele já tem corpo Pascal escrito**."
+             if n == 1 and com_corpo == 1 else
+             "**ele não tem corpo Pascal**." if n == 1 else
+             f"**{com_corpo} deles já têm corpo Pascal escrito**."))
+        a("A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`;")
+        a("onde ela diz `sim`, o que segura o veredito não é código ausente, é")
+        a("régua — a spec de cada um nomeia o que falta e quem é o dono.")
+        a("")
+        a("| Endereço | Handler | Grupo | Corpo |")
+        a("|---|---|---|---|")
+        for x in sorted(m["abertos"], key=lambda d: d["endereco"]):
+            a(f"| `{x['endereco']}` | [{x['handler']}](spec/{x['handler']}.md) "
+              f"| {x['grupo']} | {'sim' if x['corpo'] else '**não**'} |")
+        a("")
 
     a("## Quem grava na imagem, e o gate de cada um")
     a("")

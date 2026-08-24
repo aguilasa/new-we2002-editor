@@ -5,7 +5,7 @@ type: fechamento
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-25", "WTE-TASK-26", "WTE-TASK-27", "WTE-TASK-28", "WTE-TASK-29", "WTE-TASK-30"]
-status: em andamento
+status: concluído
 ---
 
 # WTE-TASK-31: Fechamento da fase 4
@@ -75,28 +75,33 @@ de ML — ainda não está feito.
 
 ## Critério de conclusão
 
-- [ ] 96 entradas no índice, nenhuma `aberto` — **as 96 estão lá; falta 1
-      `aberto` e 2 sem arquivo de spec, e os três são da
-      [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md).** É o único critério em
-      aberto, e a quarta passagem (2026-08-24) o reduziu de 15 para 3 por seis
-      CORRs. A dependência da task deixou de ser uma lista e passou a ser
-      **uma task nomeada**
-- [x] Todo `não portado` com justificativa de escopo — é **um**,
-      `MainForm.Button2Click`, handler órfão que nenhum componente referencia
+- [x] 96 entradas no índice, nenhuma `aberto` — **96 de 96 com veredito
+      fechado, nenhum `aberto`, nenhum sem arquivo de spec.** O critério fechou
+      na quinta passagem (2026-08-24), quando a
+      [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) entregou os três que
+      faltavam. Ele percorreu 78 → 81 → 93 → 96 em quatro passagens, e nenhuma
+      delas implementou handler: o que segurava era régua, dono ou prosa vencida
+- [x] Todo `não portado` com justificativa de escopo — são **dois**,
+      `MainForm.Button2Click` (handler órfão que nenhum componente referencia) e
+      `estrategia.ComboBoxDrawItem` (a política de *owner-draw* é decisão da
+      [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md); manter `aberto`
+      travaria 31 → 34 → 37 em ciclo). Os dois com razão de escopo, não de
+      dificuldade
 - [x] Specs de evidência fraca listadas, com decisão sobre cada — são **3
       pontos soltos**, nenhuma spec inteira; a decisão de cada está no
-      `fase-4.md` e o gerador **aborta** se aparecer ponto novo sem decisão
-- [x] Golden verde para toda gravação — **32 de 32 corridas**, controle e
-      golden de cada roteiro, byte-idênticas. *Adaptado:* o critério dizia "nas
-      duas ROMs", e a europeia não hospeda o oráculo — o `wte.exe` morre ao
-      trocar de time (49.749 violações de acesso) e a gravação nunca acontece.
-      Medido em 2026-08-18 e registrado em
-      [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md); a
+      `fase-4.md` e o gerador **aborta** se aparecer ponto novo sem decisão.
+      Das 481 linhas `**Evidência:**`, 468 são `disassembly lido`
+- [x] Golden verde para toda gravação — **42 de 42 corridas**, controle e
+      golden de cada um dos 21 roteiros com par, byte-idênticas, 3.958 s de
+      relógio. *Adaptado:* o critério dizia "nas duas ROMs", e a europeia não
+      hospeda o oráculo — o `wte.exe` morre ao trocar de time (49.749 violações
+      de acesso) e a gravação nunca acontece. Medido em 2026-08-18 e registrado
+      em [`wte/re/gravacao-controle.md`](../../wte/re/gravacao-controle.md); a
       europeia é da [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md)
-- [x] Varredura por decompilado colado, limpa — **229 arquivos**, nada
+- [x] Varredura por decompilado colado, limpa — **237 arquivos**, nada
 - [x] Cinco `trivial` reamostrados e reconferidos — os cinco confirmados por
       disassembly
-- [ ] Commit no formato conventional, em inglês
+- [x] Commit no formato conventional, em inglês
 
 ## Log de Execução *(preenchido após execução)*
 
@@ -368,3 +373,74 @@ spec em vez de apagado, e a guarda que impede a classe inteira é o
 
 - **Arquivos criados/modificados na quarta passagem:** ver os Logs das seis
   CORRs. Nesta task, este arquivo e o `docs/tasks/progresso.md`.
+
+---
+
+### Quinta passagem — 2026-08-24 *(a task fechou)*
+
+**Executada porque a quarta a agendou.** A dependência dela tinha deixado de ser
+uma lista e virado **uma task nomeada** — a
+[WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md), dona dos três últimos
+`aberto`. A 32 fechou em 2026-08-24, e esta passagem só precisou medir.
+
+**O critério fechou, e não sobrou nada:**
+
+| Medida | Valor |
+|---|---:|
+| veredito fechado | **96 de 96** |
+| `aberto` | **0** |
+| sem arquivo de spec | **0** |
+
+Distribuição, que é a métrica que a task pede: **69 `implementado`, 19
+`trivial`, 6 `divergência deliberada`, 2 `não portado`**.
+
+**A comparação com o que a Fase 4 previa tem duas metades, e as duas
+surpreenderam para lados opostos.** O plano previa as quatro categorias e não
+previu quantos de cada — acertou o vocabulário. O que ele **errou** foi a conta
+de gravações: escrevia "seis" e depois "nove", e o medido é **17**. E o que
+ninguém previu foi o oposto: `trivial` ficou em 19 de 96, longe da "maioria
+esmagadora" de que a WTE-TASK-30 avisava — a reamostragem dos cinco existe
+justamente para o caso contrário, e os cinco confirmaram por disassembly.
+
+**O placar por passagem, que é o achado desta task inteira: 78 → 81 → 93 → 96, e
+nenhuma das quatro implementou um handler.** O que segurava os dezoito não era
+código — era régua que não alcançava, dono não nomeado, ou prosa vencida. Doze
+dos dezesseis `aberto` da primeira passagem **já tinham corpo Pascal escrito**.
+A lição de fechamento é essa: numa fase de comportamento, o custo de fechar não
+está onde o de implementar esteve.
+
+**O defeito que esta passagem achou está no próprio gerador, e é da mesma
+família.** O `check_fase4.py` escrevia a frase do critério com o resultado
+embutido — *"a segunda metade está cumprida … e a primeira não"* — sem olhar o
+número que ele mesmo tinha acabado de imprimir uma linha acima. Com `pendentes`
+em 0, o parágrafo dizia **96 de 96 e "a primeira não"**, número e frase se
+contradizendo dentro do mesmo parágrafo. É a forma mais barata de um arquivo
+gerado passar a mentir: quem lê a frase não confere o número ao lado.
+
+O irmão do mesmo defeito estava na seção seguinte, que em zero degradava para
+*"São 0, e 0 deles já têm corpo Pascal escrito"* seguido de uma tabela com
+cabeçalho e nenhuma linha. Tabela vazia num gerado não se lê como "nenhum" — se
+lê como ferramenta quebrada, e manda alguém procurar um defeito que não existe.
+Os dois entraram no gerador, e o arquivo foi regerado; nenhum `.md` gerado foi
+tocado à mão.
+
+- **Gates medidos nesta passagem:**
+
+  - `python3 wte/tools/check_fase4.py --check` → `wte/re/fase-4.md: ok`
+  - `python3 wte/tools/spec_index.py --check` → `96 handlers indexados, 96 com
+    spec, 0 abertos`
+  - `make -C wte check` → toda a bateria de `--check` verde
+  - `make -C wte test` → **764 testes, OK (skipped=1)**
+  - bateria golden: **42 de 42 corridas**, 3.958 s, registro em
+    [`wte/re/fase-4-golden.tsv`](../../wte/re/fase-4-golden.tsv)
+
+- **Problemas encontrados na quinta passagem:** Nenhum. A árvore estava limpa e
+  o `fase-4.md` regerou byte-idêntico antes da correção de prosa, o que
+  confirma que o estado medido já era o de fechamento — faltava só o gerador
+  saber dizê-lo.
+
+- **Arquivos criados/modificados na quinta passagem:**
+
+  - modificados: `wte/tools/check_fase4.py`, o gerado
+    `wte/re/fase-4.md`, `docs/PLAN-WTE-LAZARUS.md`,
+    `docs/tasks/progresso.md`; este arquivo

@@ -919,12 +919,24 @@ grava.
 
 **O estado medido está em
 [`../wte/re/fase-4.md`](../wte/re/fase-4.md)**, gerado pelo
-[`check_fase4.py`](../wte/tools/check_fase4.py), e a primeira passagem da
-WTE-TASK-31 (2026-08-22) fechou seis dos sete critérios: **78 dos 96 com
-veredito fechado**, um `não portado` justificado, três pontos soltos de
-evidência fraca com decisão escrita, cinco `trivial` reamostrados, varredura de
-decompilado limpa em 229 arquivos, e **32 de 32 corridas golden verdes** sobre
-a ROM japonesa. Falta o primeiro: 16 `aberto` e 2 sem spec.
+[`check_fase4.py`](../wte/tools/check_fase4.py). A fase **fechou em 2026-08-24**,
+na quinta passagem da WTE-TASK-31: **96 dos 96 com veredito fechado, nenhum
+`aberto` e nenhum sem spec** — 69 `implementado`, 19 `trivial`, 6 `divergência
+deliberada` e 2 `não portado`, os dois com justificativa de escopo. Mais três
+pontos soltos de evidência fraca com decisão escrita, cinco `trivial`
+reamostrados e confirmados por disassembly, varredura de decompilado limpa em
+237 arquivos, e **42 de 42 corridas golden verdes** — 21 roteiros com par, cada
+um com controle e golden — sobre a ROM japonesa.
+
+**O caminho até lá custou cinco passagens, e o que segurava não era código.**
+A primeira (2026-08-22) mediu 78 fechados, 16 `aberto` e 2 sem spec; a terceira
+baixou para 81 sem implementar nada, porque sete daqueles vereditos estavam
+presos por prosa cujo bloqueio já tinha caído — a spec diz *"aberto porque a
+`0x…` não está portada"*, outra task porta a rotina, e ninguém volta ao
+arquivo. É documento envelhecendo sozinho enquanto o índice o lê como estado
+corrente, e a guarda `BLOQUEIO_VENCIDO` do gerador é o que impede a classe de
+voltar: endereço citado como não portado que exista em `src/*.pas` ou
+`src/impl/*.inc` **aborta** o fechamento.
 
 **E o fechamento corrigiu uma conta que esta seção fazia: as gravações não são
 seis nem nove, são dezessete.** Nove é o número de quem alguém *chamou* de
