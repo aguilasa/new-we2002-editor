@@ -121,19 +121,23 @@ instrumentou a corrida com `strace` (`diff_dirigido.sh`) e mediu que o oráculo
 outros 22 — e a `0x004046e8` só faz essa leitura quando a coluna **não** é zero
 (`0x00404748` desvia para `0x0040477e` no caso zero, e ali não há I/O).
 
-O byte se perde na **escrita**: as sequências de syscall do slot 21 e do slot 22
-são idênticas até o `fseek` da gravação, e depois dele o 21 emite
-`write(fd,"\25",1)` e o 22 não emite nada. Um `0xFF` plantado em 3067472
-sobrevive à corrida. É dentro da `0x00403400`, entre o `fseek` de `0x00403410` e
-o `fputc` de `0x0040342a`; a `0x00403388` chamada em seguida não é flush, é o
-caminhador de setor MODE2/2352.
+O byte se perde **abaixo do `fputc`**, e o depurador fecha a conta: com
+`winedbg` anexado, o `call 0x00403400` do laço (`0x00411170`) para **23** vezes
+e o `fputc` dentro dela (`0x0040342a`) para **23** vezes, e os 23 retornam
+**sucesso** — o retorno é o caractere gravado, e o da 23ª volta é **20**,
+exatamente o `previsto` do `preco.tsv` para o slot 22 do time 2. O arquivo
+recebe **22** `write` de 1 byte. O preço do 23º jogador é calculado certo,
+aceito pelo runtime C e jogado fora na saída bufferizada da Borland. Não é
+pendência descarregável: o roteiro faz descarga depois do clique e o byte
+continua não chegando.
 
-Duas coisas ficam **fechadas** por isso: a conta de offset do port não está
-errada para o slot 22 (a `0x00404374` decide por time, nunca por slot), e o
-slot 22 é endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`, mostra o import
-de `.mcr` gravando os **23** bytes condicionais do time 3. **Aberto** continua o
-mecanismo da perda. O port reproduz o oráculo, porque é contra ele que o gate
-mede.
+Três coisas ficam **fechadas**: a conta de offset do port não está errada para
+o slot 22 (a `0x00404374` decide por time, nunca por slot); o slot 22 é
+endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`, mostra o import de `.mcr`
+gravando os **23** bytes condicionais do time 3; e o defeito é **do original**,
+registrado como divergência deliberada na
+[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md). O port
+reproduz o oráculo, porque é contra ele que o gate mede.
 
 ## Notas
 

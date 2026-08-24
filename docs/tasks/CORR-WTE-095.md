@@ -3,7 +3,7 @@ id: CORR-WTE-095
 title: "Investigar: o editor do Obocaman nunca preça o slot 22, e o `ed.exe` diz que ele tem preço"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -92,133 +92,118 @@ do port está errada para o slot 22 **em toda operação**, não só em preço, 
 
 ## Verificação
 
-- [ ] a causa escrita, com o endereço que a produz — **não atingido**, e o que
-      falta está nomeado no Log
-- [x] `golden-22-precos` verde depois, com o controle fechando antes
-- [x] `check_preco.py --check` verde
-- [ ] se a conclusão for "defeito do original", linha na WTE-TASK-35 — sem
-      conclusão ainda, então sem linha
+- [x] a causa escrita, com o endereço que a produz — `0x0040342a`, a 23ª
+      chamada do `fputc`: ela **tem sucesso**, devolve o caractere `20`, e o
+      byte não vira `write`
+- [x] `golden-22-precos` verde depois, com o controle fechando antes —
+      `controle: PASSOU: byte-identico`, depois `golden: PASSOU: byte-identico`
+- [x] `check_preco.py --check` verde — 132 jogadores em 6 times, 100%
+- [x] a conclusão é "defeito do original", e a linha entrou na
+      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
 
 ## Log de Execução
 
-**PARCIAL.** A correção segue **pendente**, mas o que ela afirmava como causa
-**foi refutado**, e por isso quatro documentos vivos mudaram nesta invocação. As
-perguntas 2 e 3 (clube de ML, "o slot 22 ou o último") deixaram de importar: a
-resposta não está do lado do slot.
+**CONCLUÍDA.** A causa está medida, e não é a que esta correção supunha nem a
+que quatro documentos afirmavam.
 
-**Executado em:** 2026-08-24 *(medição parcial; a correção não fecha)*
+**Executado em:** 2026-08-24
 
-### 1. O instrumento que faltava não era depurador — era `strace`
+### O caminho, e por que ele deu voltas
 
-O Log anterior fechou dizendo que só a observação em execução resolveria, e
-apontou para depurador sob Wine ou Ghidra. Havia um canal mais barato já
-construído no projeto: o
+A correção previa quatro perguntas, e ranqueou a leitura da `0x00404374` como a
+mais barata. Ela foi respondida primeiro e **excluiu** o desfecho grande — a
+rotina não tem ramo por slot —, mas deixou uma contradição: o laço parecia
+observar zero num campo que a rotina anterior sempre preenche. Duas medições
+desfizeram a contradição, e nenhuma delas estava na lista da correção.
+
+### 1. `strace`, e o `je` cai
+
+O instrumento não era depurador, e já existia: o
 [`diff_dirigido.sh`](../../wte/tools/diff_dirigido.sh) da WTE-TASK-19 roda o
-oráculo sob `strace`, e o cabeçalho dele diz exatamente por que isso importa —
-*"`cmp` não vê LEITURA nenhuma, e leitura é metade da resposta"*. É a metade que
-faltava aqui.
+oráculo sob `strace`, e o cabeçalho dele diz exatamente por quê — *"`cmp` não vê
+LEITURA nenhuma, e leitura é metade da resposta"*.
 
 ```bash
 bash wte/tools/diff_dirigido.sh wte/tests/roteiros/golden-22-precos.txt \
      --imagem roms/japanese-shift-jis.bin --saida <dir>
 ```
 
-### 2. A coluna do slot 22 **não** é zero
+Seeks `SEEK_SET` por offset, nos 23 bytes condicionais do time 2: **três para
+cada slot, 3067472 inclusive**. E a `0x004046e8` só lê o byte condicional na
+rota de coluna não nula — o `cmp` de `0x00404748` desvia para `0x0040477e` no
+caso zero, e ali não há I/O. Leitura em 3067472 prova coluna **não nula**.
 
-Seeks `SEEK_SET` por offset, na faixa dos 23 bytes condicionais do time 2:
+**Logo o `je` de `0x004110ad` não é o que pula o slot 22**, e era o que a
+Evidência desta correção, o `preco.md`, a spec e o `.inc` afirmavam.
 
-```text
-3067450  3     3067458  3     3067466  3
-3067451  3     ...            ...
-...            3067465  3     3067471  3
-                              3067472  3   <- o slot 22, os mesmos 3
-```
+### 2. O depurador, e a causa
 
-Vinte e três slots, **três seeks cada, sem exceção**. E a `0x004046e8` só lê o
-byte condicional na rota de coluna não nula: o
-`cmp DWORD PTR [esi*4+0x433614],0x0` de `0x00404748` desvia para `0x0040477e`
-quando ela é zero, e ali não há I/O — o que ele faz é pôr `0x32` no buffer.
-Leitura em 3067472 prova coluna não nula.
+`winedbg` anexado ao PID Wine — o `winedbg <num>` quer o PID do **Wine**, em
+hexa (`info process` numa sessão sem alvo dá a lista), não o do Unix. O app foi
+dirigido até o time selecionado, o depurador ligado, e só então o clique.
 
-**Logo o `je` de `0x004110ad` não é o que pula o slot 22**, e essa era a causa
-que a CORR, o `preco.md`, a spec e o `.inc` afirmavam.
+| Endereço | O que é | Paradas |
+|---|---|---|
+| `0x00411170` | o `call 0x403400` do laço | **23** |
+| `0x0040342a` | o `fputc` dentro da `0x403400` | **23** |
 
-### 3. O byte se perde na escrita, e o trace diz onde
+E o retorno de cada `fputc`, lido em `0x0040342f`, bate um a um com a coluna
+`previsto` do [`preco.tsv`](../../wte/re/preco.tsv) para o time 2 — inclusive o
+da 23ª volta, que devolve **20**, o preço do slot 22. Nenhum devolve `EOF`.
 
-```text
-slot 21                              slot 22
-  _llseek 3067471 SET                  _llseek 3067472 SET
-  read 512                             read 512
-  _llseek 0 CUR -> 3067983             _llseek 0 CUR -> 3067984
-  _llseek 3067983 SET                  _llseek 3067984 SET
-  _llseek 3067471 SET                  _llseek 3067472 SET
-  _llseek 0 CUR -> 3067471             _llseek 0 CUR -> 3067472
-  _llseek 3067471 SET                  _llseek 3067472 SET
-  write "\25" 1                       (nada)
-```
+O arquivo recebe **22** `write` de 1 byte, o último com `"\25"` (21, o slot 21).
 
-Idênticas até o `fseek` da gravação **inclusive**. O offset **3067473** — a
-posição do arquivo depois de uma escrita de 1 byte em 3067472 — não aparece nos
-52 MB de trace, e o `0xFF` plantado em 3067472 sobrevive à corrida. A perda é
-dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o `fputc` de
-`0x0040342a`.
+**O preço do 23º jogador é calculado certo, aceito pelo runtime C e jogado
+fora.** A perda é na saída bufferizada da Borland, abaixo do `fputc`.
 
-**E não é buffer de saída não descarregado.** A `0x00403388`, chamada depois de
-cada byte, não é um flush: é o caminhador de setor MODE2/2352 —
-`ftell % 2352 == 2072` → `fseek(+304)`, pulando os 280 de EDC/ECC mais os 24 do
-cabeçalho seguinte.
+### 3. Não é pendência descarregável
 
-### 4. O slot 22 é endereçável, e o próprio editor o grava por outro caminho
+Testado: o roteiro completo faz descarga depois do clique — troca de time, com
+I/O de sobra sobre o mesmo arquivo — e o byte continua não chegando. E a
+`0x00403388`, chamada depois de cada byte, não tem parte nisso: é o caminhador
+de setor MODE2/2352 (`ftell % 2352 == 2072` → `fseek(+304)`), não um flush.
 
-Estava versionado e ninguém tinha cruzado: o
-[`io-medido.tsv`](../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+### 4. Corroboração que já estava versionada
 
-```text
-japanese-shift-jis.bin  27-mcr2iso  IMPORTA  W  3067473  3067495  23  1304  465
-```
+O [`io-medido.tsv`](../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+`W 3067473 3067495 23`: o import de `.mcr` escreve os **23** bytes condicionais
+do time 3. O slot é endereçável, e o próprio editor o grava por outro caminho —
+o que confirma que a lacuna é deste handler, não do formato.
 
-`3067473 = CONDICIONAL_BASE + 23·3` e `3067495 = + 22`: o import de `.mcr`
-escreve os **23** bytes condicionais do time 3. Não é propriedade do formato,
-não é do time, não é do slot — é deste handler.
+### O desfecho
 
-### O que fica aberto
+É o primeiro ramo da própria correção: **defeito do editor do Obocaman**, e o
+port continua reproduzindo, com a razão escrita. A linha entrou na
+[WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) com as três réguas.
+O `ULTIMO_SLOT_PRECADO = 21` **não muda**.
 
-**Só o mecanismo**, e ele está localizado numa rotina de 70 bytes: por que a
-`0x00403400` posiciona e não escreve na 23ª volta, com `ecx = 1` posto três
-instruções antes em `0x00411160`. Isso exige `[ebp-0x4]` observado **em
-execução** dentro dela — depurador sob Wine, ou a rotina decompilada no projeto
-do Ghidra (§8.10 do plano). As perguntas 1, 2 e 3 da seção *Correção* não são
-mais o caminho: elas supunham que a resposta estava no slot ou no tipo de time,
-e a coluna do slot 22 é não nula em ambos.
+**Problemas encontrados:**
 
-### Por que ainda não fecha
-
-A Verificação pede *"a causa escrita, com o endereço que a produz"*. Há um
-endereço — `0x00403400`, entre `0x00403410` e `0x0040342a` — mas não há
-mecanismo, e escrever "perde-se ali" como causa seria trocar um "não explicado"
-por outro mais bem localizado. O `ULTIMO_SLOT_PRECADO = 21` **não muda**: o
-comportamento observável é o mesmo, e é contra ele que o gate mede.
-
-**Gates rodados**
-
-- `make -C wte check`: verde, **764** testes, `OK (skipped=1)`
-- `lazbuild -B`: o mesmo **único** warning pré-existente
-  (`we2002_preco.pas(138,27)`, de `c566455`), em arquivo que esta correção não
-  toca; 143 hints, os mesmos de antes
-- `check_preco.py --check`: verde
-- `analisar_io.py --check`: verde — as linhas de sessão `dd95` que a corrida
-  anexou ao `io-medido.tsv` e ao `cmp-medido.tsv` foram **revertidas**: são
-  medida duplicada sob rótulo de rascunho, e o valor da corrida está na prosa
-  com o comando que a refaz
-- `roms/` intocada; a corrida trabalhou sobre `work/dd-run.bin`
+1. **A causa documentada estava errada, e em quatro lugares vivos.** O `je` da
+   terceira coluna foi escrito como explicação na WTE-TASK-32 e copiado para o
+   `preco.md`, a spec, o `.inc` e esta própria correção. Ninguém tinha medido
+   **leitura** — só escrita —, e a leitura é o que derruba a explicação. Os
+   quatro foram reescritos.
+2. **`pkill -f winedbg` mata o próprio shell**, porque o padrão casa a linha de
+   comando que o contém. Custou duas corridas com saída vazia e código 144 antes
+   de o motivo aparecer.
+3. **O driver de roteiro não guarda janela entre invocações.** Ao partir o
+   roteiro em duas partes para ligar o depurador no meio, a parte B precisa
+   começar com um `>` que reancore a janela principal; sem isso o clique vai
+   para coordenada sem janela resolvida e o diálogo nunca aparece.
+4. **Fica fora de alcance, por decisão:** *por que* o runtime da Borland larga
+   exatamente o último byte. É interno ao CRT, não ao aplicativo, e este projeto
+   faz engenharia reversa do aplicativo. O comportamento observável está medido,
+   reproduzido e gateado.
 
 **Arquivos criados/modificados:**
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/preco.md` | modificado — a causa refutada e a medição que a refuta |
+| `wte/re/preco.md` | modificado — a causa medida, no lugar da aberta |
 | `wte/re/spec/MainForm.base_teamClick.md` | modificado — idem, resumido |
 | `wte/src/impl/ep2002_mainform.base_teamClick.inc` | modificado — idem, no cabeçalho que sustenta a constante |
-| `wte/tools/check_preco.py` | modificado — a justificativa do `ULTIMO_SLOT_PRECADO` não é mais "o limite do laço" |
+| `wte/tools/check_preco.py` | modificado — a regra do slot 22 agora tem explicação |
+| `docs/tasks/35-divergencias-deliberadas.md` | modificado — a entrada nova, com as três réguas |
 | `docs/PLAN-WTE-LAZARUS.md` | modificado — a fração da §4.4, que o `.inc` maior moveu |
 | `wte/re/fase-2.md` | regerado |

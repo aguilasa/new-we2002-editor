@@ -114,7 +114,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-092](/docs/tasks/CORR-WTE-092.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O ramo do reserva e o arrasto de bola não tinham estímulo; o harness não sabia produzir `mousedown` | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-093](/docs/tasks/CORR-WTE-093.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Os quatro laços do maior `FormCreate` não tinham leitura, e o dono do diálogo de textura (WTE-TASK-29) fechou sem ele | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-094](/docs/tasks/CORR-WTE-094.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | A WTE-TASK-32 abre dizendo que o `ed.exe` não calcula preço; ele calcula, o que falta é o botão — e a fórmula dele já está transpilada nesta árvore | Média | [x] concluída | 2026-08-24 |
-| [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O editor do Obocaman nunca preça o slot 22 e o `ed.exe` diz que ele tem preço; medido em seis times, e o `je` da terceira coluna já foi descartado como causa | Média | [ ] pendente | — |
+| [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O editor do Obocaman nunca preça o slot 22 e o `ed.exe` diz que ele tem preço; medido em seis times, e o `je` da terceira coluna já foi descartado como causa | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-096](/docs/tasks/CORR-WTE-096.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Chave duplicada no `GOLDEN_DE` do `check_fase4.py` apaga o gate do `base_teamClick`: o `fase-4.md` publica **nenhum** para o único escritor que tem golden verde | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-097](/docs/tasks/CORR-WTE-097.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O cabeçalho do `base_teamClick.inc` diz "medido em dois times" onde a amostra final tem seis, e é ali que mora o `ULTIMO_SLOT_PRECADO` | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [x] concluída | 2026-08-24 |
@@ -215,7 +215,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-092 — dar ao harness o verbo `arrasta` e um roteiro que entre pelo botão do reserva
 - [x] CORR-WTE-093 — ler os quatro laços do `estrategia.FormCreate` e escrever os dois últimos corpos fora de preço
 - [x] CORR-WTE-094 — corrigir a premissa de preço da WTE-TASK-32 e registrar o oráculo B que ela ganha
-- [ ] CORR-WTE-095 — descobrir por que a `0x00403400` posiciona e não escreve na 23ª volta
+- [x] CORR-WTE-095 — descobrir por que a `0x00403400` posiciona e não escreve na 23ª volta
 - [x] CORR-WTE-096 — tirar a chave duplicada do `GOLDEN_DE` e recusar gate vazio de escritor `implementado`
 - [x] CORR-WTE-097 — atualizar o cabeçalho do `base_teamClick.inc` para os seis times medidos
 - [x] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature

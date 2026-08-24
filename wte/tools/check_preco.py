@@ -23,8 +23,10 @@ Ele le o TSV versionado (`wte/re/preco.tsv`), escrito pela corrida, e confere:
 1. toda linha com `medido` tem `previsto == medido`;
 2. a amostra tem pelo menos `MINIMO_AMOSTRA` jogadores medidos, para "100%" nao
    ser dito sobre tres linhas;
-3. o slot 22 NUNCA aparece medido -- e a regra que a WTE-TASK-32 mediu e que a
-   CORR-WTE-095 investiga. Se um dia aparecer, a regra caiu e o
+3. o slot 22 NUNCA aparece medido -- e a regra que a WTE-TASK-32 mediu e a
+   CORR-WTE-095 explicou: o original calcula o preco do 23o jogador certo e o
+   perde na saida bufferizada, abaixo do `fputc`. Bug do original, reproduzido
+   de proposito (WTE-TASK-35). Se um dia aparecer medido, a regra caiu e o
    `ULTIMO_SLOT_PRECADO` do handler esta errado.
 
 Ele NAO reroda o oraculo: isso precisa de Wine e do `:98`, e `--check` roda em

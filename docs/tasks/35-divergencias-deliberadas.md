@@ -196,6 +196,52 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   o mesmo modo apontando para a European Deluxe acusaria — e **acusaria
   corretamente**, então não há exceção a nomear, e sim uma imagem a escolher de
   propósito.
+- **O preço do 23º jogador nunca é gravado** — medido pela
+  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) em 2026-08-24, e, como as três
+  entradas acima, **não é hipótese**: é o que o port faz hoje, por
+  `ULTIMO_SLOT_PRECADO = 21` no
+  [`base_teamClick.inc`](../../wte/src/impl/ep2002_mainform.base_teamClick.inc).
+  *O que diverge:* o `MainForm.base_teamClick` do original percorre os 23 slots
+  de um time e grava **22** bytes de preço, de `OFS_COST_NATIONAL + 23·t` até
+  `+ 21`. O do slot 22 fica com o valor de fábrica. O port reproduz.
+  *Natureza:* **bug do original**, e não do formato: o slot 22 é endereçável e o
+  próprio editor o grava por outro caminho — o
+  [`io-medido.tsv`](../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+  `W 3067473 3067495 23`, o import de `.mcr` escrevendo os 23 bytes
+  condicionais do time 3.
+  *Decisão:* reproduzir.
+  *Razão:* o gate da feature é byte a byte contra o oráculo
+  ([`golden-22-precos`](../../wte/tests/roteiros/golden-22-precos.txt)), e §0
+  permite não reproduzir bug do original mas exige registro — aqui reproduzir é
+  o que mantém o gate honesto. Gravar o 23º byte faria o port divergir do
+  oráculo num byte por time em toda a operação, e a "correção" seria uma escolha
+  nossa sobre dado do usuário sem nada que a valide.
+  *Evidência:* três réguas independentes, todas de 2026-08-24.
+  **(1) Plantio** — `0xFF` posto nos slots 20, 21 e 22 do time 2; depois da
+  corrida os dois primeiros voltam **26** e **21**, o `previsto` do
+  [`preco.tsv`](../../wte/re/preco.tsv), e o terceiro continua **255**. Separa
+  "não grava" de "grava o valor que já estava lá".
+  **(2) `strace`** (`diff_dirigido.sh`) — o oráculo **lê** o byte condicional do
+  slot 22 em 3067472, com o mesmo número de seeks dos outros 22, e a
+  `0x004046e8` só faz essa leitura quando a terceira coluna **não** é zero
+  (`0x00404748` desvia para `0x0040477e` no caso zero, e lá não há I/O). Logo
+  não é o `je` de `0x004110ad` que pula o slot — que era a explicação corrente
+  até esta correção. Contadas as syscalls, são **22** `write` de 1 byte para
+  **23** voltas.
+  **(3) Depurador** (`winedbg` anexado ao PID Wine) — o `call 0x00403400` do
+  laço (`0x00411170`) para **23** vezes, o `fputc` dentro dela (`0x0040342a`)
+  para **23** vezes, e os 23 retornam **sucesso**: o retorno é o caractere
+  gravado, e o da 23ª volta é **20**, exatamente o preço que a fórmula prevê
+  para o slot 22 do time 2. O byte é calculado certo, aceito pelo runtime C e
+  **não vira `write`** — perde-se na saída bufferizada da Borland, abaixo do
+  `fputc`. Não é pendência descarregável: o próprio roteiro faz descarga (troca
+  de time, com I/O de sobra) depois do clique, e o byte continua não chegando.
+  *Onde o teste sabe:* em dois lugares, e nenhum precisa de exceção nomeada,
+  porque o port **reproduz**. O `golden-22-precos` compara imagem inteira e
+  fecha byte-idêntico com 22 bytes dos dois lados; e o
+  [`check_preco.py`](../../wte/tools/check_preco.py) **recusa** qualquer linha
+  de slot 22 marcada como medida no `preco.tsv` — se a regra cair, o
+  `ULTIMO_SLOT_PRECADO` está errado e o `make -C wte check` diz isso.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.
 - **Rótulos cortados por fonte substituta** — acontece nos dois lados, e talvez
   não conte como divergência; decidir.

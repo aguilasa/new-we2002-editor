@@ -55,9 +55,16 @@
   mas a coluna do slot 22 NAO e zero: sob `strace` o oraculo LE o byte
   condicional dele em 3067472, com o mesmo numero de seeks dos outros 22, e a
   `0x4046e8` so faz essa leitura na rota de coluna nao nula (`0x00404748`
-  desvia para `0x0040477e` no caso zero, e la nao ha I/O). O byte se perde na
-  ESCRITA -- dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o
-  `fputc` de `0x0040342a` --, e o mecanismo continua aberto na CORR-WTE-095.
+  desvia para `0x0040477e` no caso zero, e la nao ha I/O).
+
+  O BYTE SE PERDE ABAIXO DO `fputc`, medido com `winedbg` anexado: o
+  `call 0x00403400` do laco (`0x00411170`) para 23 vezes, o `fputc` dentro dela
+  (`0x0040342a`) para 23 vezes, e os 23 retornam SUCESSO -- o retorno e o
+  caractere gravado, e o da 23a volta e 20, o `previsto` do `preco.tsv` para
+  este slot. O arquivo recebe 22 `write` de 1 byte. O preco do 23o jogador e
+  calculado certo, aceito pelo runtime C e jogado fora na saida bufferizada da
+  Borland. Nao adianta descarregar: o roteiro troca de time depois do clique,
+  com I/O de sobra, e o byte continua nao chegando.
 
   Como se remede a amostra, em uma linha:
 
@@ -69,16 +76,15 @@
   `preco.tsv` -- e o terceiro continuou 255. Sem esse plantio a leitura "nao
   grava" nao se separa de "grava o valor que ja estava la".
 
-  A CAUSA ESTA ABERTA (CORR-WTE-095), e o que ela ja fechou importa aqui: a
+  E BUG DO ORIGINAL, nao do formato (CORR-WTE-095, fechada em 2026-08-24). A
   `0x00404374` do proprio oraculo NAO tem ramo por slot -- ela decide por time
   (`cmp ecx,0x3f`, e os times 54 e 55 em `cmp ecx,0x35`/`cmp ecx,0x38`) e
-  escreve `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23. Ou seja, a
-  conta de offset deste port NAO esta errada para o slot 22: ela e a mesma do
-  oraculo. E o slot 22 e enderecavel: o `io-medido.tsv`, sessao `27-mcr2iso`,
-  mostra o import de `.mcr` gravando os 23 bytes condicionais do time 3. O que
-  sobra aberto e por que a `0x00403400` posiciona e nao escreve na 23a volta.
-  O port reproduz o que o ORACULO faz, porque e contra ele que o gate mede --
-  e a divergencia fica escrita em vez de silenciosa.
+  escreve `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23; a conta de
+  offset deste port e a mesma. E o slot 22 e enderecavel: o `io-medido.tsv`,
+  sessao `27-mcr2iso`, mostra o import de `.mcr` gravando os 23 bytes
+  condicionais do time 3. Fica registrado na WTE-TASK-35 como divergencia
+  deliberada. O port reproduz o que o ORACULO faz, porque e contra ele que o
+  gate mede -- e a divergencia fica escrita em vez de silenciosa.
 
   A MENSAGEM DO FIM sai do `.exe` em `0x00425079`. }
 const

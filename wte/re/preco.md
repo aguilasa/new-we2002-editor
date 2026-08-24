@@ -136,7 +136,7 @@ Medido em seis times: os bytes gravados vão de `CONDICIONAL_BASE + 23·t` até
 **O conteúdo do jogador não explica.** No time 9 o slot 21 e o slot 22 têm a
 mesma soma (36) e a mesma posição (0), e só o 21 é gravado.
 
-### O `je` NÃO é a causa, e essa linha já foi escrita errada
+### O `je` não é a causa, e essa linha já foi escrita errada
 
 Este documento afirmou, até 2026-08-24, que *"para o slot 22 a coluna sai
 zero"*. **Está medido que não sai.** A
@@ -157,10 +157,9 @@ quando ela é zero, e ali não há I/O nenhum — o que ele faz é pôr `0x32` n
 buffer. Uma leitura em 3067472 prova, portanto, que **a coluna do slot 22 não é
 zero**.
 
-### Onde o byte se perde, então
+### Onde o byte se perde: abaixo do `fputc`, e está medido
 
-No lado da **escrita**, e a sequência de syscalls diz onde com precisão. Slot 21
-e slot 22, lado a lado, na mesma corrida:
+No lado da **escrita**. Slot 21 e slot 22, lado a lado, na mesma corrida:
 
 ```text
 slot 21                              slot 22
@@ -174,18 +173,32 @@ slot 21                              slot 22
   write "\25" 1                       (nada)
 ```
 
-Idênticas até o `fseek` da escrita, inclusive. Depois dele o slot 21 grava e o
-22 não, e o offset **3067473** — a posição do arquivo depois de uma escrita de
-1 byte em 3067472 — não aparece em nenhum lugar dos 52 MB de trace. Some-se o
-plantio: `0xFF` posto em 3067472 antes da corrida continua `0xFF` depois.
+Idênticas até o `fseek` da escrita, inclusive. Contadas as syscalls do laço
+inteiro: **22** `write` de 1 byte para 23 voltas.
 
-O byte se perde dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o
-`fputc` de `0x0040342a`. E não é buffer de saída não descarregado: a
-`0x00403388`, chamada depois de cada byte, **não é um flush** — é o caminhador
+E o depurador fecha a conta. `winedbg` anexado ao PID Wine, dois breakpoints:
+
+| Endereço | O que é | Paradas |
+|---|---|---|
+| `0x00411170` | o `call 0x403400` do laço | **23** |
+| `0x0040342a` | o `fputc` dentro da `0x403400` | **23** |
+
+Os 23 `fputc` **têm sucesso** — o retorno é o caractere gravado, não `EOF` —, e
+o da 23ª volta é **20**, exatamente o `previsto` do [`preco.tsv`](preco.tsv)
+para o slot 22 do time 2. Os 23 retornos batem, um a um, com a coluna
+`previsto` daquele time.
+
+**Ou seja: o preço do 23º jogador é calculado certo, aceito pelo runtime C e
+jogado fora.** A perda é na saída bufferizada da Borland, abaixo do `fputc` —
+código do runtime, não do editor. E não é pendência descarregável: o roteiro faz
+descarga depois do clique (troca de time, com I/O de sobra) e o byte continua
+não chegando.
+
+A `0x00403388`, chamada depois de cada byte, não tem parte nisso: é o caminhador
 de setor MODE2/2352, `ftell % 2352 == 2072` → `fseek(+304)`, que pula os 280 de
 EDC/ECC mais os 24 do cabeçalho seguinte.
 
-### O que está fechado, e o que sobra
+### O que está fechado, e o que fica fora de alcance
 
 **Fechado — a conta de offset do port não está errada.** A `0x00404374` decide
 por **time**, nunca por slot: `cmp ecx,0x3f` separa seleção de clube de ML, e
@@ -201,10 +214,18 @@ caminho.** A evidência já estava versionada e ninguém tinha cruzado: o
 condicionais do time 3, slot 22 incluído. Não é propriedade do formato nem do
 time; é deste handler.
 
-**Aberto — o mecanismo.** Por que a `0x00403400` posiciona e não escreve na 23ª
-volta. Responder isso exige o que leitura estática não dá: `[ebp-0x4]` observado
-em execução dentro dela — depurador sob Wine, ou a rotina decompilada no projeto
-do Ghidra, que é o que a §8.10 do plano reserva para este tipo de pergunta.
+**Fechado — é bug do original, e o port reproduz.** Não é propriedade do
+formato, não é do time, não é do slot, e não é do port: é o editor do Obocaman
+perdendo o último byte do laço na saída bufferizada. Está registrado como
+divergência deliberada na
+[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md), com as três
+réguas que o sustentam.
+
+**Fora de alcance, e por decisão:** *por que* o runtime da Borland larga
+exatamente o último byte. Isso é interno ao CRT, não ao aplicativo — e este
+projeto faz engenharia reversa do aplicativo. O comportamento observável está
+medido, reproduzido e gateado; a víscera do runtime não muda nenhuma decisão do
+port.
 
 O port reproduz o que o **oráculo** faz, porque é contra ele que o gate mede — e
 a divergência fica escrita em vez de silenciosa. O `check_preco.py` recusa
