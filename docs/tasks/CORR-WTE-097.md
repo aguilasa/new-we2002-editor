@@ -125,7 +125,9 @@ que já estava lá" — sem isso, as seis corridas provam só que o byte não mu
    `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23, igual ao port. O
    parágrafo foi reescrito: a conta de offset do port não está errada, e o que
    sobra aberto é o `cmp` de `0x004110a6` ler zero num campo que a rotina
-   anterior acabou de preencher.
+   anterior acabou de preencher. *(A CORR-WTE-095 fechou isso em 2026-08-24: o
+   `cmp` **não** lê zero — a coluna é não nula nas 23 voltas, e o byte se perde
+   abaixo do `fputc`. O que este Log registra é o estado daquele dia.)*
 2. **O `.inc` cresceu 13 linhas e derrubou o `check_fase2.py`.** A §4.4 do plano
    cita a fração medida, e ela caiu de **52,1%** para **52,0%** — 9.453 geradas
    contra 8.719 à mão (eram 8.706). O número novo veio do próprio gate, que

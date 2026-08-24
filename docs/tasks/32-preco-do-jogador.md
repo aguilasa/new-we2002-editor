@@ -215,8 +215,15 @@ arquivo.
   [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) **refutou isso em 2026-08-24**,
   sob `strace`: o oráculo **lê** o byte condicional do slot 22 em 3067472, com o
   mesmo número de seeks dos outros 22, e a `0x004046e8` só faz essa leitura
-  quando a coluna **não** é zero. O byte se perde na **escrita**, dentro da
-  `0x00403400`, e o mecanismo continua aberto. Três coisas ficaram fechadas: o
+  quando a coluna **não** é zero. O byte se perde **abaixo do `fputc`**: com
+  `winedbg` anexado, o `call 0x00403400` do laço e o `fputc` dentro dela param
+  **23** vezes cada, os 23 `fputc` **têm sucesso** — o da 23ª volta devolve
+  **20**, o preço previsto para este slot — e o arquivo recebe **22** `write`.
+  O preço do 23º jogador é calculado certo, aceito pelo runtime C e jogado fora
+  na saída bufferizada da Borland. É **bug do original**, registrado como
+  divergência deliberada na
+  [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md). Três coisas mais
+  ficaram fechadas: o
   salto é real (`0xFF` plantado em 3067472 sobrevive à corrida), a conta de
   offset do port não está errada (a `0x00404374` decide por time, nunca por
   slot), e o slot 22 é endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`,
