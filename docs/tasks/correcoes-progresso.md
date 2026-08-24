@@ -117,7 +117,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O editor do Obocaman nunca preça o slot 22 e o `ed.exe` diz que ele tem preço; medido em seis times, causa desconhecida | Média | [ ] pendente | — |
 | [CORR-WTE-096](/docs/tasks/CORR-WTE-096.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Chave duplicada no `GOLDEN_DE` do `check_fase4.py` apaga o gate do `base_teamClick`: o `fase-4.md` publica **nenhum** para o único escritor que tem golden verde | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-097](/docs/tasks/CORR-WTE-097.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O cabeçalho do `base_teamClick.inc` diz "medido em dois times" onde a amostra final tem seis, e é ali que mora o `ULTIMO_SLOT_PRECADO` | Baixa | [x] concluída | 2026-08-24 |
-| [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [ ] pendente | — |
+| [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A lista de arquivos da WTE-TASK-32 não menciona as quinze linhas acrescentadas ao `.gitignore` | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -218,7 +218,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [ ] CORR-WTE-095 — descobrir por que a terceira coluna do slot 22 sai zero no oráculo
 - [x] CORR-WTE-096 — tirar a chave duplicada do `GOLDEN_DE` e recusar gate vazio de escritor `implementado`
 - [x] CORR-WTE-097 — atualizar o cabeçalho do `base_teamClick.inc` para os seis times medidos
-- [ ] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature
+- [x] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature
 - [ ] CORR-WTE-099 — acrescentar o `.gitignore` à lista de arquivos da WTE-TASK-32
 
 ## Detalhes por correção

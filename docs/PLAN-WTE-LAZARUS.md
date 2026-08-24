@@ -960,12 +960,24 @@ tasks citam essas sub-seções pelo número, e ela fica estável:
 | 5.3 camisa 2D | WTE-TASK-29 | **4** |
 | 5.4 slots de ML | WTE-TASK-33 | 5 |
 
-**5.1 Preço derivado dos atributos.** `etiqprecioClick` (`0x00408bb8`) e o
-formulário `jugador`. É aritmética pura sobre os atributos já
-decodificados — testável de forma exaustiva: variar um atributo por vez no
-original, ler o preço na tela, tabelar, e conferir a fórmula recuperada contra
-a tabela. **Não precisa de golden test de imagem**, precisa de tabela de
-verdade. Alvo: acerto em 100% de uma amostra grande.
+**5.1 Preço derivado dos atributos.** São **dois** handlers, e a feature só
+está inteira com os dois: o `jugador.etiqprecioClick` (`0x00408bb8`), que mostra
+o preço de **um** jogador na tela, e o `MainForm.base_teamClick`
+(`0x00410ff4`), que é a novidade da v0.99 — *"calculate credits for a whole team
+with just one click"*. É a mesma fórmula compilada duas vezes; o que muda é de
+onde vem a soma, e o segundo **grava** um byte por jogador na imagem.
+
+Por isso **a régua é dupla**, e não "tabela de verdade e mais nada": tabela de
+verdade para a fórmula, e golden de **byte** para o time inteiro — o
+[`golden-22-precos`](../wte/tests/roteiros/golden-22-precos.txt), que a
+WTE-TASK-32 escreveu e o `GOLDEN_DE` do `check_fase4.py` registra. Alvo: acerto
+em 100% de uma amostra grande.
+
+E a tabela de verdade saiu **do byte, não da tela**, que é a substituição que a
+task rendeu e este plano não previa: o preço de um jogador só se lê por OCR da
+`casilla_precio`, e o de vinte e três se lê com `cmp`. Cada corrida do oráculo
+passou a valer 22 amostras em vez de uma, e foi assim que a amostra chegou a
+**132 jogadores em 6 times, com 100% de acerto**.
 
 **5.2 Import de `.mcr`.** `boton_mcrClick` (`0x0040c2c8`) e
 `boton_mcr2isoClick` (`0x0040c46c`). Formato de memory card do PSX —
@@ -996,8 +1008,9 @@ que bater, e a verificação é diff de bitmap contra captura do original.
 e conta vagos. Depende só da Fase 3.
 
 > **Pronto quando:** cada uma das quatro tem teste próprio verde — tabela de
-> preço, round-trip de `.mcr`, diff de bitmap, contagem conferida. Duas delas
-> são gateadas dentro da Fase 4, junto com a gravação que carregam.
+> preço **e o golden do preço do time**, round-trip de `.mcr`, diff de bitmap,
+> contagem conferida. Duas delas são gateadas dentro da Fase 4, junto com a
+> gravação que carregam.
 
 ---
 

@@ -3,7 +3,7 @@ id: CORR-WTE-098
 title: "Correção: a §5.1 do plano ainda diz que o preço não precisa de golden, e ele tem um"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -103,17 +103,44 @@ jogadores.
 
 ## Verificação
 
-- [ ] `grep -n "Não precisa de golden test de imagem" docs/PLAN-WTE-LAZARUS.md` sai vazio
-- [ ] `grep -n "base_teamClick" docs/PLAN-WTE-LAZARUS.md` imprime a §5.1
-- [ ] `make -C wte check` verde (o `check_fase1.py` varre `docs/`)
-- [ ] `roms/` intocada
+- [x] `grep -n "Não precisa de golden test de imagem" docs/PLAN-WTE-LAZARUS.md` sai vazio
+- [x] `grep -n "base_teamClick" docs/PLAN-WTE-LAZARUS.md` imprime a §5.1 —
+      linha 965, onde antes não havia ocorrência nenhuma
+- [x] `make -C wte check` verde — 764 testes, `OK (skipped=1)`, com o
+      `check_fase1.py` varrendo `docs/`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
+Os três ajustes que a correção pedia, todos de fato medido:
+
+1. A §5.1 nomeia as **duas** metades — `jugador.etiqprecioClick`
+   (`0x00408bb8`) e `MainForm.base_teamClick` (`0x00410ff4`), a de v0.99 — e diz
+   o que muda entre elas: a mesma fórmula compilada duas vezes, de onde vem a
+   soma, e que a segunda **grava**;
+2. *"Não precisa de golden test de imagem"* virou a régua **dupla**, com o
+   `golden-22-precos` citado pelo caminho;
+3. O *"Pronto quando"* da Fase 5 ganhou *"e o golden do preço do time"*.
+
+Entrou também a linha que a correção pedia sobre o que a task rendeu e o plano
+não previa: a tabela de verdade saiu **do byte**, não da tela — o preço de um
+jogador só se lê por OCR e o de vinte e três se lê com `cmp` —, e é o que fez a
+amostra chegar a 132 jogadores em 6 times com 100% de acerto.
+
 **Problemas encontrados:**
 
+1. **Nenhum.** O sítio é um só e nada mais no plano dependia da frase velha: o
+   `grep` de `base_teamClick` no plano não imprimia **nada** antes desta
+   correção, o que é a própria medida de quanto a §5.1 tinha envelhecido.
+2. O link para o roteiro é **relativo** (`../wte/tests/roteiros/…`) e é o certo:
+   a regra de `/docs/` vale para alvo dentro de `docs/`, e este está fora.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-WTE-LAZARUS.md` | modificado — §5.1 e o *Pronto quando* da Fase 5 |
