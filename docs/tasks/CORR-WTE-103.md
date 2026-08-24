@@ -3,7 +3,7 @@ id: CORR-WTE-103
 title: "Correção: no estado zero o fase-4.md perde a linha em branco antes do título seguinte"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -102,18 +102,34 @@ sobre a saída, pega os três casos de uma vez e qualquer quarto.
 
 ## Verificação
 
-- [ ] `grep -B1 '^## ' wte/re/fase-4.md | grep -v '^--$' | grep -c '^$'` conta
+- [x] `grep -B1 '^## ' wte/re/fase-4.md | grep -v '^--$' | grep -c '^$'` conta
       uma linha em branco por título
-- [ ] O caso novo reprova com um `a("")` removido de propósito
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] O caso novo reprova com um `a("")` removido de propósito
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+O `a("")` que fecha o bloco de cobertura saiu do `if m["sem_spec"]` e passou a
+ser emitido nos dois estados. Medido no gerado: **9 títulos `##` e 9 linhas em
+branco** antes deles — era 9 e 8 antes, com o `## Os que continuam \`aberto\``
+colado no parágrafo da contagem de specs.
+
+A guarda (`TestSaidaBemFormada`) é a varredura de duas linhas que a CORR pedia:
+recusa `#` imediatamente depois de linha não vazia. São três casos — o plantado
+(que prova que ela pega), a saída do gerador em memória, e o `fase-4.md` em
+disco. O último é o que impede o gerador certo com o arquivo desatualizado; foi
+o estado real em que ela reprovou durante esta execução, antes da regeração.
+Removendo o `a("")` de propósito, o caso do gerador reprova — medido.
+
+**Problemas encontrados:** Nenhum.
 
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_fase4.py` — o `a("")` fora do `if`, com o porquê ao lado
+- `wte/tools/test_check_fase4.py` — `TestSaidaBemFormada`, três casos
+- `wte/re/fase-4.md` — regerado

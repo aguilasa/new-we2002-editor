@@ -681,7 +681,11 @@ def gera_md(m: dict) -> str:
         a("")
         for chave in m["sem_spec"]:
             a(f"- `{chave}`")
-        a("")
+    # A linha em branco fecha o bloco NOS DOIS ESTADOS. Dentro do `if` ela so
+    # existia quando havia handler sem spec -- e o estado de fechamento, que e
+    # o que este arquivo tem de agora em diante, e justamente `sem_spec` vazio.
+    # Ver a CORR-WTE-103: o titulo seguinte saia colado no paragrafo.
+    a("")
 
     a("## Os que continuam `aberto`")
     a("")

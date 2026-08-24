@@ -38,6 +38,7 @@ A segunda metade do critério está cumprida — ver a seção do
 | **total** | **96** |
 
 96 dos 96 têm arquivo de spec.
+
 ## Os que continuam `aberto`
 
 **Nenhum.** Todos os 96 fecharam veredito, e a seção fica no lugar

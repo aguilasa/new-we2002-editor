@@ -361,5 +361,48 @@ class TestPopulacaoNoCabecalho(unittest.TestCase):
         self.assertEqual(len(m["escritores"]), 17)
 
 
+class TestSaidaBemFormada(unittest.TestCase):
+    """A guarda da CORR-WTE-103, e ela vale mais que o conserto.
+
+    A familia ja custou tres achados na mesma passagem da WTE-TASK-31: uma
+    frase que se contradizia no zero, uma tabela vazia, e a linha em branco que
+    so era emitida quando havia o que listar. Todas do mesmo tipo -- o gerador
+    degrada mal no estado de FECHAMENTO, que e exatamente o estado que este
+    arquivo tem de agora em diante e o que ninguem exercita ao escrever o
+    ramo cheio.
+
+    A varredura e de duas linhas sobre a saida e pega os tres de uma vez.
+    O CommonMark deixa um titulo ATX interromper paragrafo, entao o GitHub
+    ainda renderiza -- o que se perde e a consistencia do gerado, e a proxima
+    ferramenta que fatiar o arquivo por paragrafo nao tera a mesma sorte.
+    """
+
+    def titulos_colados(self, texto: str) -> list[str]:
+        anterior = ""
+        colados = []
+        for linha in texto.splitlines():
+            if linha.startswith("#") and anterior.strip():
+                colados.append(linha)
+            anterior = linha
+        return colados
+
+    def test_a_varredura_pega_o_caso_plantado(self) -> None:
+        """Guarda nunca exercitada e guarda ausente."""
+        self.assertEqual(
+            self.titulos_colados("um parágrafo\n## Título\n"),
+            ["## Título"])
+        self.assertEqual(
+            self.titulos_colados("um parágrafo\n\n## Título\n"), [])
+
+    def test_o_gerado_de_hoje_nao_tem_titulo_colado(self) -> None:
+        self.assertEqual(self.titulos_colados(C.gera_md(C.medir())), [])
+
+    def test_o_arquivo_em_disco_tambem_nao(self) -> None:
+        """O commitado e o que se le -- o gerador certo nao basta se o
+        `fase-4.md` nao tiver sido regerado."""
+        self.assertEqual(
+            self.titulos_colados(C.OUT.read_text(encoding="utf-8")), [])
+
+
 if __name__ == "__main__":
     unittest.main()
