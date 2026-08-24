@@ -255,9 +255,9 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-24, remedido pelo `check_fase4.py`): 63 `implementado`, 19
-      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 5 `aberto`.
-      **89 dos 96 têm veredito fechado**, e os 7 que faltam estão nomeados um
+      (2026-08-24, remedido pelo `check_fase4.py`): 65 `implementado`, 19
+      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 3 `aberto`.
+      **91 dos 96 têm veredito fechado**, e os 5 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
       (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
@@ -313,6 +313,20 @@ só uma escolha de quando.
       edita, clica `Original ` e grava `0x80` — **o valor que a ROM intocada já
       tinha**. Os quatro gates deram byte-idêntico, e o par fechou também o
       `casilla_dorsalKeyPress`, que ele exercita de passagem
+- [x] **Gate verde não prova que o estímulo aconteceu** *(CORR-WTE-092,
+      2026-08-24)*. Se os dois lados não fizerem nada, os dois concordam. O
+      harness ganhou o verbo `arrasta` — não havia um `mousedown` sequer em
+      `wte/tools/*.sh` — e dois roteiros novos, e **os dois passaram antes de
+      estarem certos**. O arrasto na coordenada do `.lfm` caía no `campo` (as
+      bolas medem 10×10 em execução e estão onde a `PreencheTelaDeTatica` as
+      pôs, não onde o `.lfm` diz); corrigida a coordenada, o `bolaMouseDown`
+      **disparava** e o gate seguia medindo zero, porque soltar fora da zona da
+      própria bola devolve a bola ao lugar. Só dentro da zona os bytes mudam —
+      dois, o X e o Y. A régua que pegou as duas foi sempre a mesma: comparar
+      com uma corrida **sem** o estímulo. Fecharam o
+      `estrategia.bolaMouseDown` e o ramo do reserva do
+      `MainForm.mostrar_jugadorClick`, este último provado por escrever noutro
+      registro de jogador (`388807` contra `388567`)
 - [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
       da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
       porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém

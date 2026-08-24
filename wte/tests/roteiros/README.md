@@ -38,7 +38,7 @@ acrescentam três diretivas e trocam a linha de `xdotool` crua por verbos:
 | `>` | espera a janela com esse nome e passa a ser a origem das coordenadas |
 | `>~` | idem, mas pelo **tamanho** (`529x498`) — ver abaixo |
 | `=` | corta o log de I/O; tudo até a próxima marca é a conta daquela ação |
-| `!` | `clique X Y`, `duplo X Y`, `tecla <k>`, `texto <t>` |
+| `!` | `clique X Y`, `duplo X Y`, `arrasta X0 Y0 X1 Y1`, `tecla <k>`, `texto <t>` |
 
 O `>~` existe porque **três formulários trocam o próprio `Caption` pelo nome do
 time em tempo de execução** — `estrategia`, `jugador` e `ficha_dorsal`. Com a

@@ -1,0 +1,99 @@
+# golden-20-ficha-reserva -- o ramo do RESERVA do `MainForm.mostrar_jugadorClick`.
+#
+# CORR-WTE-092. Lado port.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-20-ficha-reserva.txt \
+#        --roteiro-port wte/tests/roteiros/golden-20-ficha-reserva.port.txt
+#
+# POR QUE ELE EXISTE. O `mostrar_jugadorClick` atende DOIS botoes,
+# `mostrar_jugador_1` e `mostrar_jugador_2`, e escolhe o par de listas pelo
+# `Sender.Name` -- o original le o campo `Name` do componente e o compara com a
+# cadeia `'mostrar_jugador_1'` em `0x00424f57`. Despacho por nome erra em
+# SILENCIO: com o ramo trocado a ficha abre com o jogador do lado errado, a tela
+# fica plausivel, e so a gravacao denuncia.
+#
+# O `golden-15-ficha` entra so pelo botao do titular. Este entra pelo do
+# reserva, e o `Comple.` grava o jogador que a ficha carregou -- se o ramo
+# escolhesse o par titular, os bytes seriam de outro jogador, de outro time.
+#
+# A ORDEM DOS CLIQUES E LOAD-BEARING, como no `golden-11-descarte-ml`:
+# `mostrar_jugador_2` e `lista_jugadores_2` nascem DESABILITADOS e so o
+# `lista_equipos_2Change` os habilita. Clicar neles antes de mexer no combo do
+# reserva nao produz evento nenhum -- e o roteiro passaria em silencio, medindo
+# nada.
+#
+# A ficha mede 707x273 sob Wine, exatamente o ClientWidth/ClientHeight do DFM.
+# Busca por TAMANHO porque o Caption vira o nome do jogador em Shift-JIS.
+alvo: port
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27.
+
+# ---------------------------------------------------------------- abrir ----
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+#
+# O combo do alto e quem CARREGA o time do disco.
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ o time do reserva ----
+#
+# `lista_equipos_2` (368,360) 105x21 -> centro (420,370). Sao 4 `Down` para o
+# indice 3, um time de selecao qualquer -- o ponto nao e QUAL time, e que seja
+# um time DIFERENTE do titular, para que gravar o jogador errado apareca.
+! clique 420 370
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= TIME_RESERVA
+
+# --------------------------------------------------- o jogador do reserva ----
+#
+# `lista_jugadores_2` (336,72) + GroupBox1 (8,320) = (344,392) -> (408,402).
+! clique 408 402
+~ 1
+! tecla Down
+! tecla Down
+~ 3
+= JOGADOR_RESERVA
+
+# --------------------------------------------- a ficha, pelo lado reserva ----
+#
+# `mostrar_jugador_2` (472,72) + GroupBox1 (8,320) = (480,392), 25x21 ->
+# centro (492,402).
+! clique 492 402
+~ 5
+
+>~ 707x273
+~ 2
+
+# BitBtn3 `Comple.` (624,240) 73x25 -> centro (660,252).
+! clique 660 252
+~ 3
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= COMPLE
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

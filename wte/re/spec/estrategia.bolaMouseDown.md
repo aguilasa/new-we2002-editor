@@ -2,7 +2,7 @@
 handler: bolaMouseDown
 formulario: estrategia
 endereco: 0x00408f00
-veredito: aberto
+veredito: implementado
 ---
 
 # estrategia.bolaMouseDown
@@ -108,20 +108,35 @@ port abria a tela com toda bola na zona 0. A
 `PreencheTelaDeTatica`, na [`wte_tatica`](../../src/wte_tatica.pas), e a
 abertura passa a apontar o registro da tática viva.
 
-### Por que o veredito continua `aberto`, medido em 2026-08-23
+### O veredito passou a `implementado` em 2026-08-24
 
-Não é mais o bloqueio acima, e não é a régua de bytes — este handler não grava.
-**É que nada o dispara.** O `trace.log` de `compara_tela.sh --malha 2 68`, o
-roteiro que mais fundo entra nesta tela, registra `estrategia.malla1MouseDown`
-e cinco `estrategia.relojTimer`, e **nenhum** `bolaMouseDown`: o clique do
-roteiro é na malha, não numa bola.
+Até 2026-08-23 nada o disparava: o `compara_tela.sh --malha` clica a malha, não
+uma bola, e o harness inteiro só sabia `clique`, `duplo`, `tecla` e `texto` —
+não havia um `mousedown` sequer em `wte/tools/*.sh`.
 
-O que falta é uma régua que arraste — `MouseDown` numa bola, `MouseMove` e
-`MouseUp` por coordenada absoluta, nos dois lados, com o `--artefato` do gate
-lendo os 30 bytes de formação depois. É a mesma classe de estímulo que o
-[`golden-17-tatica`](../../tests/roteiros/golden-17-tatica.txt) já sabe julgar;
-o que ele ainda não tem é o arrasto. Enquanto ela não existir, `implementado`
-afirmaria uma verificação que não aconteceu.
+A [CORR-WTE-092](../../../docs/tasks/CORR-WTE-092.md) deu ao `roteiro.sh` o
+verbo `arrasta` e escreveu o
+[`golden-21-arrasto`](../../tests/roteiros/golden-21-arrasto.txt), que julga por
+**byte**: os 30 bytes de formação do
+[` Accept`](estrategia.BitBtn3Click.md) saem da posição dos componentes, então
+bola que anda vira X e Y diferentes. Controle e golden, byte-idênticos.
+
+**Duas coisas o roteiro teve de aprender, e as duas eram silenciosas:**
+
+1. **A coordenada da bola não sai do `.lfm`.** Lá a `bola7` está em (248,120) e
+   mede 15×14; em execução as onze medem 10×10 e estão onde a
+   `PreencheTelaDeTatica` as pôs, conforme a formação do time. Arrastar da
+   coordenada de tempo de projeto cai no `campo` — `campoMouseMove` no trace,
+   `bolaMouseDown` nenhum.
+2. **Soltar fora da zona da própria bola devolve a bola ao lugar.** Com destino
+   noutra zona o handler **dispara** — `bolaMouseDown`, três `bolaMouseMove`,
+   `bolaEndDrag` — e o ` Accept` grava byte-idêntico a uma corrida sem estímulo
+   nenhum. É o que "zona" quer dizer, e é o retângulo que este handler mostra.
+
+Nos dois casos o gate teria passado **medindo nada**, e o que os pegou foi
+comparar contra uma corrida sem estímulo. Com o destino dentro da zona 4, mudam
+**dois** bytes — o X e o Y da bola, a dez de distância um do outro, como o
+arranjo 10/10/10 previa.
 
 ### O que ele guarda e ninguém lê ainda
 

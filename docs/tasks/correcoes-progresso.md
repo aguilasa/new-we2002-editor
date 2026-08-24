@@ -111,6 +111,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` por "nada exercita o corpo" quando a bateria golden já os exercita — o `lista_jugadores_1Change` dispara em quatro gates verdes | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-090](/docs/tasks/CORR-WTE-090.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` esperando decisão já tomada ou de outra fase; o `ComboBoxDrawItem` fechava o ciclo 31→37→34→31 | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-091](/docs/tasks/CORR-WTE-091.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O `Original ` da ficha não alcançava a `PreencheFicha` por ciclo de `uses`, e a régua dele precisa ser um par de roteiros que difere por um clique | Alta | [x] concluída | 2026-08-24 |
+| [CORR-WTE-092](/docs/tasks/CORR-WTE-092.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O ramo do reserva e o arrasto de bola não tinham estímulo; o harness não sabia produzir `mousedown` | Alta | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -204,6 +205,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-089 — medir que handler dispara em que gate golden, e promover os que a régua de byte já cobria
 - [x] CORR-WTE-090 — tirar do `aberto` o que espera decisão, e quebrar o ciclo do `ComboBoxDrawItem`
 - [x] CORR-WTE-091 — descer a `PreencheFicha` para a `wte_ficha` e julgar o `Original ` por um par diferencial
+- [x] CORR-WTE-092 — dar ao harness o verbo `arrasta` e um roteiro que entre pelo botão do reserva
 
 ## Detalhes por correção
 
@@ -1649,3 +1651,18 @@ dizer "fechada e fora do backlog", não "corrigida".
   `0xc0` no byte de camisa, `golden-19` grava `0x80`, que é o valor da ROM
   intocada. De quebra fechou o `casilla_dorsalKeyPress`, que o mesmo par
   exercita
+
+### CORR-WTE-092
+
+- **Arquivo com problema:** `wte/tools/roteiro.sh` (dialeto sem `mousedown`),
+  `wte/re/spec/estrategia.bolaMouseDown.md`, `MainForm.mostrar_jugadorClick.md`
+- **Sintoma:** dois handlers sem estímulo nenhum — o ramo do reserva do
+  `mostrar_jugadorClick` e o arrasto de bola, que clique não exercita
+- **Como foi detectado:** pela cobertura medida na CORR-WTE-089, que mostrou
+  zero disparo dos dois em todos os roteiros
+- **Fix:** verbo `arrasta` no `roteiro.sh` (com três passos intermediários,
+  porque salto único não gera `OnMouseMove` em gtk2) e os roteiros
+  `golden-20-ficha-reserva` e `golden-21-arrasto`. **Cada estímulo foi
+  confrontado com uma corrida sem estímulo** — sem isso o arrasto teria passado
+  duas vezes medindo nada, uma delas com o `bolaMouseDown` disparando e a bola
+  voltando ao lugar por ter sido solta fora da própria zona

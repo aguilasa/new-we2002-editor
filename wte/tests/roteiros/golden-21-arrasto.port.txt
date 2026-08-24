@@ -1,0 +1,89 @@
+# golden-21-arrasto -- o gate do `estrategia.bolaMouseDown`, o arrasto de bola
+# no campinho da tela de tatica.
+#
+# CORR-WTE-092. Lado port.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-21-arrasto.txt \
+#        --roteiro-port wte/tests/roteiros/golden-21-arrasto.port.txt
+#
+# ELE ESTREIA O VERBO `arrasta` NO HARNESS. Ate a CORR-WTE-092 o dialeto do
+# `roteiro.sh` so sabia `clique`, `duplo`, `tecla` e `texto` -- nenhum
+# `mousedown` em `wte/tools/*.sh` inteiro. Handler de `OnMouseDown` que comeca
+# arrasto nao se exercita com clique: o `bolaMouseDown` chama `BeginDrag`,
+# desliga a bola e mostra o retangulo da zona, e o que decide o destino e para
+# ONDE o ponteiro foi antes do `mouseup`.
+#
+# O QUE ELE JULGA, E POR BYTE. O ` Accept` do `estrategia` grava 30 bytes de
+# formacao -- 10 de papel, 10 de X, 10 de Y -- convertidos da POSICAO dos
+# componentes na tela. Bola arrastada para outro lugar vira X e Y diferentes.
+# O par natural deste roteiro e o `golden-17-tatica`, que aceita sem arrastar:
+# os dois tem de gravar bytes DIFERENTES, senao o arrasto nao aconteceu.
+#
+# A COORDENADA DA BOLA NAO SAI DO `.lfm`, E ESSE FOI O ERRO DA PRIMEIRA
+# TENTATIVA. O `.lfm` diz que a `bola7` esta em (248,120) e mede 15x14, e nada
+# disso vale em tempo de execucao: a `PreencheTelaDeTatica` (`0x0040a0b4`,
+# portada na CORR-WTE-082) POSICIONA as onze bolas conforme a formacao do time,
+# e a animacao do `relojTimer` as desliza ate la na abertura. Medidas na
+# captura, elas tem 10x10.
+#
+# Um `arrasta` sobre a coordenada de tempo de projeto cai no `campo`, nao na
+# bola: o `bolaMouseDown` nao dispara, o ` Accept` grava o que ja estava, e o
+# gate PASSA sem medir nada. Foi o que aconteceu, e so o confronto com uma
+# corrida sem estimulo nenhum mostrou -- byte-identica.
+#
+# AS COORDENADAS DAQUI SAO MEDIDAS, do time 2, nas capturas do
+# `compara_tela.sh --malha 2` (os dois lados dao as mesmas onze):
+#
+#   (140,42) (268,72) (108,77) (372,102) (180,122) (28,127)
+#   (108,127) (268,152) (348,152) (108,177) (140,217)
+#
+# A escolhida e a de (180,122) e o destino e (230,170).
+#
+# O DESTINO TEM DE FICAR DENTRO DA ZONA DA PROPRIA BOLA, e a segunda tentativa
+# aprendeu isso: arrastando para (300,122) o `bolaMouseDown` DISPARAVA -- o
+# trace mostra `bolaMouseDown`, tres `bolaMouseMove` e `bolaEndDrag` -- e
+# mesmo assim o ` Accept` gravava byte-identico a uma corrida sem estimulo. E o
+# que "zona" quer dizer: o retangulo que o `bolaMouseDown` mostra e o limite
+# em que aquela bola pode andar, e soltar fora dele devolve a bola ao lugar.
+#
+# Em coordenada do `campo` (que fica em (16,8)), (180,122) e (164,114) e cai na
+# zona 4 da tabela de `wte/src/wte_zonas.pas` -- (122,63)-(233,182), ou seja
+# (138,71)-(249,190) em coordenada de janela. O destino (230,170) e (214,162)
+# no campo: dentro da mesma zona, e longe o bastante para cair noutra celula da
+# malha, que e o que vira byte.
+#
+# POR ISSO ESTE ROTEIRO SO VALE PARA O TIME 2. Trocar o time move as bolas.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+# Da bola em (180,122) para (230,170) -- dentro da zona 4.
+! arrasta 180 122 230 170
+~ 2
+! clique 472 273
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= ACCEPT
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

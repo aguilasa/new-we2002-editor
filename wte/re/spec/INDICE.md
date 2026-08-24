@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 63 |
+| `implementado` | 65 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 5 |
 | `nao portado` | 2 |
-| `aberto` | 7 |
+| `aberto` | 5 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -77,7 +77,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00408bb8` | `jugador` | etiqprecioClick | OnClick | edicao | aberto |
 | `0x00408d88` | `ficha_warning_2` | [FormCreate](ficha_warning_2.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408e0c` | `estrategia` | [bolaMouseMove](estrategia.bolaMouseMove.md) | OnMouseMove x10 | edicao | implementado |
-| `0x00408f00` | `estrategia` | [bolaMouseDown](estrategia.bolaMouseDown.md) | OnMouseDown x10 | edicao | aberto |
+| `0x00408f00` | `estrategia` | [bolaMouseDown](estrategia.bolaMouseDown.md) | OnMouseDown x10 | edicao | implementado |
 | `0x004090c8` | `estrategia` | [campoMouseMove](estrategia.campoMouseMove.md) | OnMouseMove | edicao | implementado |
 | `0x004090fc` | `estrategia` | [FormCreate](estrategia.FormCreate.md) | OnCreate | carga | aberto |
 | `0x00409644` | `estrategia` | [rectanguloDragOver](estrategia.rectanguloDragOver.md) | OnDragOver | edicao | implementado |
@@ -117,7 +117,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040ee80` | `MainForm` | [grabar_camisetaClick](MainForm.grabar_camisetaClick.md) | OnClick | gravacao | implementado |
 | `0x0040f69c` | `MainForm` | [grabar_memoryClick](MainForm.grabar_memoryClick.md) | OnClick | gravacao | implementado |
 | `0x0040f8b8` | `MainForm` | [lista_jugadores_1Change](MainForm.lista_jugadores_1Change.md) | OnChange | carga | implementado |
-| `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | aberto |
+| `0x0040f8d4` | `MainForm` | [mostrar_jugadorClick](MainForm.mostrar_jugadorClick.md) | OnClick x2 | carga | implementado |
 | `0x00410220` | `MainForm` | [mostrar_estrategiaClick](MainForm.mostrar_estrategiaClick.md) | OnClick x2 | carga | implementado |
 | `0x004107c8` | `MainForm` | [FormCreate](MainForm.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00410a74` | `MainForm` | [dorsalClick](MainForm.dorsalClick.md) | OnClick x23 | edicao | implementado |

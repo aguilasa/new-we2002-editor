@@ -27,6 +27,10 @@
 #                  espera longa em todo passo esconde app que nao subiu
 #   ! clique X Y   clique simples, coordenada RELATIVA a janela alvo
 #   ! duplo  X Y   duplo clique
+#   ! arrasta X0 Y0 X1 Y1
+#                  `mousedown` em (X0,Y0), tres passos ate (X1,Y1), `mouseup`.
+#                  Os passos intermediarios sao necessarios: um salto unico nao
+#                  gera `OnMouseMove` em gtk2 (CORR-WTE-092)
 #   ! tecla  <k>   `xdotool key`
 #   ! texto  <t>   `xdotool type` -- CURTO. `xdotool type` usa `XSendEvent` e
 #                  embaralha string longa; e por isso que a unidade E: existe
@@ -258,6 +262,32 @@ roteiro_executa() {
                     click --repeat 2 --delay 120 1 ;;
           tecla)  xdotool key --clearmodifiers "$@" ;;
           texto)  xdotool type --delay 60 "${*//@IMAGEM@/$ROTEIRO_IMAGEM}" ;;
+          # `arrasta X0 Y0 X1 Y1` -- CORR-WTE-092.
+          #
+          # O harness so sabia CLICAR ate aqui, e um clique nao exercita
+          # handler de `OnMouseDown` que comeca arrasto: o
+          # `estrategia.bolaMouseDown` chama `BeginDrag` e desliga a bola, e o
+          # que decide a zona final e para ONDE o ponteiro foi antes do
+          # `mouseup`.
+          #
+          # OS PASSOS INTERMEDIARIOS NAO SAO ENFEITE. `mousedown` seguido de um
+          # `mousemove` unico e `mouseup` nao produz `OnMouseMove` nenhum em
+          # gtk2 -- o servidor entrega um salto, e o widget nunca ve o
+          # ponteiro em transito. Tres passos e o minimo que faz os dois
+          # widgetsets emitirem movimento; o `--sync` de cada um garante que o
+          # servidor processou antes do proximo.
+          arrasta)
+            local ax=$((ALVO_X+$1)) ay=$((ALVO_Y+$2))
+            local bx=$((ALVO_X+$3)) by=$((ALVO_Y+$4))
+            xdotool mousemove --sync "$ax" "$ay"
+            xdotool mousedown 1
+            local i
+            for i in 1 2 3; do
+              xdotool mousemove --sync \
+                $(( ax + (bx-ax)*i/3 )) $(( ay + (by-ay)*i/3 ))
+            done
+            xdotool mouseup 1
+            ;;
           *) echo "AVISO: verbo desconhecido: $verbo" >&2 ;;
         esac
         ;;

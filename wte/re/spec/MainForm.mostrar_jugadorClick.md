@@ -2,7 +2,7 @@
 handler: mostrar_jugadorClick
 formulario: MainForm
 endereco: 0x0040f8d4
-veredito: aberto
+veredito: implementado
 ---
 
 # MainForm.mostrar_jugadorClick
@@ -139,13 +139,26 @@ verificada por byte desde sempre, e a
 O gate está verde nos três modos, e o que ele julga depende deste handler: se o
 par de listas escolhido fosse o errado, o `Comple.` gravaria outro jogador.
 
-**O ramo do reserva não tem régua nenhuma.** Nenhum roteiro entra pelo
-`mostrar_jugador_2` — que fica em (492,402) e só habilita depois de o
-`lista_equipos_2Change` disparar uma vez —, e a distinção entre os dois lados é
-feita por `Sender.Name`, exatamente o tipo de despacho que erra em silêncio.
-Trocar de lado é o erro que a conferência de tela pegou no handler irmão, e
-aqui ele não teria quem o pegasse.
+**E o ramo do reserva ganhou régua em 2026-08-24**, pela
+[CORR-WTE-092](../../../docs/tasks/CORR-WTE-092.md): o
+[`golden-20-ficha-reserva`](../../tests/roteiros/golden-20-ficha-reserva.txt)
+entra pelo `mostrar_jugador_2` (492,402), depois de mexer no combo do reserva —
+sem isso o botão nasce desabilitado e o clique não produziria evento nenhum.
 
-`implementado` com metade sem régua afirmaria mais do que se mediu. Fica
-`aberto` até um roteiro entrar pelo botão do reserva — que é estímulo novo, e
-por isso trabalho de correção própria, não desta.
+**A prova de que o ramo certo foi tomado não é o gate passar, é onde ele
+escreve.** Gate que passa pode passar em silêncio: se os dois lados tivessem
+entrado pelo titular, também seriam idênticos. Medido, os dois roteiros gravam
+em lugares **diferentes**:
+
+| Corrida | `388567` | `388807` |
+|---|---|---|
+| ROM japonesa intocada | `0xba` | `0xb7` |
+| `golden-18-ficha-edicao` (titular) | **`0x3f`** | `0xb7` |
+| `golden-20-ficha-reserva` (reserva) | `0xba` | **`0x3f`** |
+
+Registros de jogador distintos, de times distintos. E o gate está verde nos dois
+modos — ou seja, o port escolheu **o mesmo** registro que o oráculo, pelos dois
+botões.
+
+Disparos em [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv): quatro
+roteiros, um disparo em cada.
