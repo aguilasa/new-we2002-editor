@@ -39,7 +39,10 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
      `pendente` e o campo é fácil de esquecer, porque nenhum consumidor o lê
      ainda — foi assim que a WTE-TASK-01 fechou afirmando o contrário do índice
    - o **Log de Execução** preenchido no markdown da tarefa em `docs/tasks/`:
-     data, resumo do que se aprendeu, arquivos tocados, problemas encontrados
+     data, resumo do que se aprendeu, arquivos tocados, problemas encontrados.
+     A lista de arquivos se confere contra `git show --stat --format= HEAD`,
+     não contra a memória — ela já ficou devendo um item três vezes, sempre o
+     que entrou no meio da execução por motivo lateral
 
    Tarefa parcial **não** vira `✅ Concluído` — registre no Log o que ficou
    pendente e diga isso na saída.

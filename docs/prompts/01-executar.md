@@ -356,8 +356,28 @@ Se concluída:
 - Preencher o **Log de Execução** no arquivo da tarefa:
   - **Executado em:** data de hoje
   - **Resumo do que foi feito:** 2-3 linhas, dizendo **o que se aprendeu**
-  - **Arquivos criados/modificados:** lista
+  - **Arquivos criados/modificados:** lista, **conferida contra o commit**
   - **Problemas encontrados:** ou "Nenhum"
+
+> **A lista de arquivos se confere contra o commit, não contra a memória.** É
+> uma linha, e responde sozinha:
+>
+> ```bash
+> git show --stat --format= HEAD
+> ```
+>
+> Todo caminho que aparecer ali tem de estar na lista — em nome próprio ou
+> numa forma coletiva ("os dois `.uses`", "os `ep2002_*.pas` regerados"). O
+> arquivo da própria tarefa é a única omissão convencional.
+>
+> **Já falhou três vezes**, e sempre no mesmo formato: o item que entra no meio
+> da execução, por um motivo lateral, e não volta para a lista ao escrever o
+> Log — [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md),
+> [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) e
+> [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md), esta última pelo `.gitignore`
+> que ganhou quinze linhas ao ver um binário compilado aparecer no
+> `git status`. É justamente o tipo que alguém procura depois, porque é o
+> único que não é sobre o assunto da tarefa.
 
 > **Número da §1 do plano que a tarefa mediu e o quadro da WTE-TASK-09 não
 > lista: acrescente a linha ao quadro.** Registrar no Log "reconciliação é da

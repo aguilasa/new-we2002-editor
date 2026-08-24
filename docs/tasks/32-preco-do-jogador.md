@@ -227,7 +227,13 @@ arquivo.
   - modificados: `wte/src/impl/ep2002_mainform.base_teamClick.inc` (o miolo),
     os dois `.uses`, `wte/tools/check_fase4.py`, `wte/re/fase-4-golden.tsv`,
     `wte/re/spec/MainForm.base_teamClick.md`, `docs/PLAN-WTE-LAZARUS.md` §4.4,
-    `docs/tasks/progresso.md`, `docs/tasks/correcoes-progresso.md`
+    `docs/tasks/progresso.md`, `docs/tasks/correcoes-progresso.md`,
+    `.gitignore` — as dez regras dos binários compilados de `wte/tests/`
+    (`dump_preco`, `test_preco` e os oito irmãos), que são gerados pelo
+    `check_preco.py`, pelo `compara_tela.sh` e pelos testes de ferramenta.
+    É a única alteração da task que não é sobre preço, e a que alguém
+    procuraria depois — *"quando foi que passamos a ignorar os binários de
+    teste?"*
   - regerados: `wte/re/fase-4.md`, `wte/re/fase-2.md`,
     `wte/re/fase-3-fechamento.md`, `wte/re/spec/INDICE.md`, os `ep2002_*.pas`
 
