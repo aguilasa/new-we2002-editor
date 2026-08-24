@@ -21,9 +21,9 @@ gabarito e o vocabulário de veredito estão em
 |---|---|
 | `implementado` | 61 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 3 |
-| `nao portado` | 1 |
-| `aberto` | 12 |
+| `divergencia deliberada` | 5 |
+| `nao portado` | 2 |
+| `aberto` | 9 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -69,7 +69,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00407a88` | `jugador` | [barrhabScroll](jugador.barrhabScroll.md) | OnScroll x9 | edicao | implementado |
 | `0x00407bb4` | `jugador` | [barrhab_bisScroll](jugador.barrhab_bisScroll.md) | OnScroll x7 | edicao | implementado |
 | `0x00407ce0` | `jugador` | [FormCreate](jugador.FormCreate.md) | OnCreate | carga | trivial |
-| `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | aberto |
+| `0x00408088` | `jugador` | [flechasapaClick](jugador.flechasapaClick.md) | OnClick x12 | edicao | divergencia deliberada |
 | `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | aberto |
@@ -89,9 +89,9 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040a000` | `estrategia` | [malla2MouseDown](estrategia.malla2MouseDown.md) | OnMouseDown | edicao | implementado |
 | `0x0040a658` | `estrategia` | [BitBtn1Click](estrategia.BitBtn1Click.md) | OnClick | auxiliar | implementado |
 | `0x0040a660` | `estrategia` | [BitBtn3Click](estrategia.BitBtn3Click.md) | OnClick | auxiliar | implementado |
-| `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | aberto |
+| `0x0040adec` | `estrategia` | [ComboBoxDrawItem](estrategia.ComboBoxDrawItem.md) | OnDrawItem x2 | carga | nao portado |
 | `0x0040b034` | `ficha_creditos_equipo` | [FormCreate](ficha_creditos_equipo.FormCreate.md) | OnCreate | carga | trivial |
-| `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | aberto |
+| `0x0040bd60` | `MainForm` | [boton_dialogo_weClick](MainForm.boton_dialogo_weClick.md) | OnClick | carga | divergencia deliberada |
 | `0x0040c2c8` | `MainForm` | [boton_mcrClick](MainForm.boton_mcrClick.md) | OnClick | carga | implementado |
 | `0x0040c46c` | `MainForm` | [boton_mcr2isoClick](MainForm.boton_mcr2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040c9c4` | `MainForm` | [Button2Click](MainForm.Button2Click.md) | — | auxiliar | nao portado |

@@ -109,6 +109,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | O Log da WTE-TASK-30 conta 12 `.inc` novos e 6 `.uses` tocados; o commit `fb640cd` tem 11 `.inc` novos e 5 `.uses` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-088](/docs/tasks/CORR-WTE-088.md) | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Nove comentários de ferramenta viva ainda descrevem o gate no `:99` depois da mudança para o `:98` — entre eles a lista de guardas do `golden_check.sh` | Baixa | [x] concluída | 2026-08-23 |
 | [CORR-WTE-089](/docs/tasks/CORR-WTE-089.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` por "nada exercita o corpo" quando a bateria golden já os exercita — o `lista_jugadores_1Change` dispara em quatro gates verdes | Alta | [x] concluída | 2026-08-24 |
+| [CORR-WTE-090](/docs/tasks/CORR-WTE-090.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` esperando decisão já tomada ou de outra fase; o `ComboBoxDrawItem` fechava o ciclo 31→37→34→31 | Alta | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -200,6 +201,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-087 — corrigir a contagem de `.inc` e `.uses` do Log da WTE-TASK-30
 - [x] CORR-WTE-088 — tirar o `:99` dos comentários que descrevem o comportamento de hoje
 - [x] CORR-WTE-089 — medir que handler dispara em que gate golden, e promover os que a régua de byte já cobria
+- [x] CORR-WTE-090 — tirar do `aberto` o que espera decisão, e quebrar o ciclo do `ComboBoxDrawItem`
 
 ## Detalhes por correção
 
@@ -1611,3 +1613,20 @@ dizer "fechada e fora do backlog", não "corrigida".
   que cita o TSV como evidência tem de ter linha nele. Os três passam a
   `implementado`; o `mostrar_jugadorClick` ganha a evidência do ramo titular e
   segue `aberto` pelo do reserva
+
+### CORR-WTE-090
+
+- **Arquivo com problema:** `wte/re/spec/jugador.flechasapaClick.md`,
+  `estrategia.ComboBoxDrawItem.md`, `MainForm.boton_dialogo_weClick.md`
+- **Sintoma:** os três estavam `aberto` sem pergunta em aberto — o primeiro
+  esperando decisão tomada em 2026-08-18 (CORR-WTE-063), o segundo esperando a
+  WTE-TASK-37, que é fase 6 e depende da 34, que depende da 31, que exige nenhum
+  `aberto`; o terceiro com as duas razões antigas já caídas
+- **Como foi detectado:** lendo a razão de cada `aberto` restante contra o
+  estado da árvore, na quarta passagem da WTE-TASK-31
+- **Fix:** `divergencia deliberada` nos dois que são desvio consciente e
+  `nao portado` com justificativa de **escopo** no terceiro. O ciclo fica
+  desfeito sem antecipar a decisão da 37. De quebra, a guarda do
+  `cobertura_gate.py` virou bidirecional: ela recusou a prosa nova do
+  `boton_dialogo_weClick`, que cita o TSV para dizer que dá zero linha, e a
+  correção foi conferir também o sentido negativo em vez de afrouxar

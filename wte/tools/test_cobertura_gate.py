@@ -122,6 +122,31 @@ class TestGuardas(unittest.TestCase):
             "cobre pelo " + C.TSV.name, encoding="utf-8")
         C.valida([self.linha(handler="MainForm.y")])
 
+    def test_afirmacao_negativa_verdadeira_passa(self) -> None:
+        """Citar o TSV para dizer que NAO ha cobertura e uso legitimo.
+
+        Nasceu de falso positivo real: em 2026-08-24 o `boton_dialogo_weClick`
+        passou a citar o TSV justamente para registrar que da zero linha, e a
+        primeira versao da guarda o recusou.
+        """
+        (C.S.SPEC / "MainForm.y.md").write_text(
+            "da zero linha no " + C.TSV.name, encoding="utf-8")
+        C.valida([self.linha(handler="MainForm.x")])
+
+    def test_afirmacao_negativa_desmentida_aborta(self) -> None:
+        """O outro sentido: afirmar zero e ter linha tambem e mentira."""
+        (C.S.SPEC / "MainForm.y.md").write_text(
+            "da zero linha no " + C.TSV.name, encoding="utf-8")
+        with self.assertRaises(C.CoberturaError) as ctx:
+            C.valida([self.linha(handler="MainForm.y")])
+        self.assertIn("ZERO", str(ctx.exception))
+
+    def test_a_enfase_markdown_nao_esconde_a_negativa(self) -> None:
+        """`**zero** linha` e o que a prosa real escreve."""
+        (C.S.SPEC / "MainForm.y.md").write_text(
+            "da **zero** linha no " + C.TSV.name, encoding="utf-8")
+        C.valida([self.linha(handler="MainForm.x")])
+
 
 class TestEscrita(unittest.TestCase):
     def test_ordena_e_poe_cabecalho(self) -> None:

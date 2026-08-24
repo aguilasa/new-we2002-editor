@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**84 dos 96 têm veredito fechado; 12 não.**
+**87 dos 96 têm veredito fechado; 9 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -30,9 +30,9 @@ A segunda metade do critério está cumprida — ver a seção do
 |---|---:|
 | `implementado` | 61 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 3 |
-| `nao portado` | 1 |
-| `aberto` | 10 |
+| `divergencia deliberada` | 5 |
+| `nao portado` | 2 |
+| `aberto` | 7 |
 | *(sem arquivo de spec)* | 2 |
 | **total** | **96** |
 
@@ -44,7 +44,7 @@ Os que não têm:
 
 ## Os que continuam `aberto`
 
-São 10, e **6 deles já têm corpo Pascal escrito**.
+São 7, e **4 deles já têm corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
@@ -52,12 +52,9 @@ a spec de cada um nomeia o que falta e quem é o dono.
 | Endereço | Handler | Grupo | Corpo |
 |---|---|---|---|
 | `0x00407a80` | [jugador.BitBtn1Click](spec/jugador.BitBtn1Click.md) | auxiliar | **não** |
-| `0x00408088` | [jugador.flechasapaClick](spec/jugador.flechasapaClick.md) | edicao | sim |
 | `0x00408b50` | [jugador.casilla_dorsalKeyPress](spec/jugador.casilla_dorsalKeyPress.md) | edicao | sim |
 | `0x00408f00` | [estrategia.bolaMouseDown](spec/estrategia.bolaMouseDown.md) | edicao | sim |
 | `0x004090fc` | [estrategia.FormCreate](spec/estrategia.FormCreate.md) | carga | **não** |
-| `0x0040adec` | [estrategia.ComboBoxDrawItem](spec/estrategia.ComboBoxDrawItem.md) | carga | **não** |
-| `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | sim |
 | `0x0040dfe8` | [MainForm.boton_dialogo_texClick](spec/MainForm.boton_dialogo_texClick.md) | carga | **não** |
 | `0x0040f8d4` | [MainForm.mostrar_jugadorClick](spec/MainForm.mostrar_jugadorClick.md) | carga | sim |
 | `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | sim |
@@ -83,7 +80,7 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 | `0x004069e8` | [ficha_color.BitBtn3Click](spec/ficha_color.BitBtn3Click.md) | auxiliar | implementado | [golden-16-cor](../tests/roteiros/golden-16-cor.txt) |
 | `0x00408548` | [jugador.BitBtn3Click](spec/jugador.BitBtn3Click.md) | auxiliar | implementado | [golden-15-ficha](../tests/roteiros/golden-15-ficha.txt) |
 | `0x0040a660` | [estrategia.BitBtn3Click](spec/estrategia.BitBtn3Click.md) | auxiliar | implementado | [golden-17-tatica](../tests/roteiros/golden-17-tatica.txt) |
-| `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | aberto | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
+| `0x0040bd60` | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | carga | divergencia deliberada | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
 | `0x0040c46c` | [MainForm.boton_mcr2isoClick](spec/MainForm.boton_mcr2isoClick.md) | gravacao | implementado | [golden-12-mcr2iso](../tests/roteiros/golden-12-mcr2iso.txt), [golden-13-roundtrip](../tests/roteiros/golden-13-roundtrip.txt) |
 | `0x0040cab8` | [MainForm.boton_barras2isoClick](spec/MainForm.boton_barras2isoClick.md) | gravacao | implementado | [golden-03-barras](../tests/roteiros/golden-03-barras.txt), [golden-04-barras-editada](../tests/roteiros/golden-04-barras-editada.txt) |
 | `0x0040d534` | [MainForm.boton_nombres2isoClick](spec/MainForm.boton_nombres2isoClick.md) | gravacao | implementado | [golden-05-nomes](../tests/roteiros/golden-05-nomes.txt) |
@@ -188,11 +185,12 @@ foi medido e a tabela não acompanhou.
 
 ## `nao portado`, e a justificativa de cada um
 
-É um só. O `spec_index.py` **recusa** o veredito
+São 2. O `spec_index.py` **recusa** o veredito
 sem uma seção `## Justificativa` não vazia, então a existência dela é
 mecânica; o que a task pede a mais é que a razão seja de escopo, e
 não de dificuldade.
 
+- [`estrategia.ComboBoxDrawItem`](spec/estrategia.ComboBoxDrawItem.md)
 - [`MainForm.Button2Click`](spec/MainForm.Button2Click.md)
 
 ## Os cinco `trivial` reconferidos

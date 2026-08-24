@@ -2,7 +2,7 @@
 handler: flechasapaClick
 formulario: jugador
 endereco: 0x00408088
-veredito: aberto
+veredito: divergencia deliberada
 ---
 
 # jugador.flechasapaClick
@@ -111,7 +111,26 @@ cada uma das doze linhas, a contagem de células com texto bate exatamente com
 `Max + 1` do controle no `.dfm`, e as três linhas vazias são exatamente os três
 controles de faixa maior que 8. O gerador **aborta** se isso deixar de valer.
 
-### Por que o veredito é `aberto`
+### O veredito passou a `divergencia deliberada` em 2026-08-24
+
+**A decisão que ele esperava foi tomada em 2026-08-18, e o veredito não
+acompanhou.** A [CORR-WTE-063](../../../docs/tasks/CORR-WTE-063.md) levou as
+três carregadoras de bitmap para a
+[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) como
+**exclusão deliberada** — elas abrem o `.bmp` em `"r+b"` e regravam a paleta
+dentro do arquivo de asset compartilhado, e reproduzir isso poria o port
+gravando na pasta de dados do usuário toda vez que alguém encostasse numa seta.
+
+Não falta medida nem código: o despachante está portado, os doze rótulos estão
+certos, a exclusão está escrita com a razão, e o efeito no port está descrito
+abaixo. `aberto` afirmaria que ainda há pergunta em aberto, e não há —
+`divergencia deliberada` é o que o vocabulário tem para "portado, com desvio
+consciente e registrado".
+
+O texto abaixo é o registro de quando o veredito era `aberto`, e continua
+valendo inteiro como descrição da exclusão.
+
+### O que segurava o veredito
 
 Não é a régua de bytes — este handler não grava na imagem, e a
 [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) não o alcança.

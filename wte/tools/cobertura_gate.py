@@ -82,6 +82,14 @@ CABECALHO = ("roteiro", "handler", "disparos")
 # `flechasapaClick` da sua linha de aviso com sufixo -- ver o cabecalho.
 LINHA = re.compile(r"^\s*[0-9.]+\s+==\s+([A-Za-z_0-9]+\.[A-Za-z_0-9]+)\s*$")
 
+# Spec que cita o TSV para dizer que NAO ha cobertura. A guarda abaixo trata os
+# dois sentidos, e o segundo nasceu de um falso positivo real: em 2026-08-24 o
+# `boton_dialogo_weClick` passou a citar o TSV justamente para registrar que da
+# zero linha nos 16 roteiros -- afirmacao verdadeira, util, e recusada pela
+# primeira versao desta guarda. Afrouxar seria a saida errada: a afirmacao
+# negativa e tao conferivel quanto a positiva, e agora as duas sao conferidas.
+NEGATIVA = re.compile(r"\b(?:zero|nenhuma)\s+linha|\bzero\s+disparo", re.I)
+
 
 class CoberturaError(RuntimeError):
     pass
@@ -188,23 +196,35 @@ def valida(linhas: list[dict]) -> None:
                 f"{BATERIA.name} -- cobertura dentro de gate vermelho nao "
                 "verifica nada")
 
-    # A guarda que a licao do `check_edicao.py` pede: spec que cita este TSV
-    # como evidencia tem de ter linha nele.
+    # A guarda que a licao do `check_edicao.py` pede, e ela vale nos DOIS
+    # sentidos -- ver `NEGATIVA` e o cabecalho.
     cobertos = {linha["handler"] for linha in linhas}
-    reclamam = []
+    sem_linha, com_linha = [], []
     for arq in sorted(S.SPEC.glob("*.md")):
         if arq.name in {"GABARITO.md", "INDICE.md", "README.md"}:
             continue
-        if TSV.name not in arq.read_text(encoding="utf-8"):
+        texto = arq.read_text(encoding="utf-8")
+        if TSV.name not in texto:
             continue
         chave = arq.stem
-        if chave not in cobertos:
-            reclamam.append(chave)
-    if reclamam:
+        # A enfase markdown entra no meio da frase (`**zero** linha`), entao a
+        # busca e sobre o texto sem ela -- mesma precaucao que o
+        # `check_fase4.py` toma ao ler a primeira linha de `## Bytes tocados`.
+        if NEGATIVA.search(texto.replace("*", "").replace("_", "")):
+            if chave in cobertos:
+                com_linha.append(chave)
+        elif chave not in cobertos:
+            sem_linha.append(chave)
+    if sem_linha:
         raise CoberturaError(
             "spec cita o " + TSV.name + " como evidencia e nao tem linha "
-            "nele: " + ", ".join(reclamam) + ". Citar regua e barato; ter "
+            "nele: " + ", ".join(sem_linha) + ". Citar regua e barato; ter "
             "disparo medido nao -- ver o cabecalho de " + GENERATOR)
+    if com_linha:
+        raise CoberturaError(
+            "spec afirma cobertura ZERO e o " + TSV.name + " tem linha para "
+            "ela: " + ", ".join(com_linha) + ". A afirmacao negativa e tao "
+            "conferivel quanto a positiva, e esta esta desmentida.")
 
 
 def escreve(linhas: list[tuple[str, str, int]]) -> str:

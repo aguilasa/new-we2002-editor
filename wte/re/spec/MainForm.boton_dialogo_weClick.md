@@ -2,7 +2,7 @@
 handler: boton_dialogo_weClick
 formulario: MainForm
 endereco: 0x0040bd60
-veredito: aberto
+veredito: divergencia deliberada
 ---
 
 # MainForm.boton_dialogo_weClick
@@ -116,21 +116,37 @@ carrega no gate é o `MainForm.FormShow`, pela linha de comando — e passa pelo
 mesmo `AbreImagem`, que é onde a injeção mora. O `.exe` tem os dois trechos de
 injeção duplicados, um aqui e outro no `FormShow`; o port tem um só.
 
-**Veredito ainda `aberto`, e as duas razões antigas caíram** — reconferido na
-terceira passagem da
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md), 2026-08-23. Esta
-frase dizia *"porque as duas faixas de cima não têm explicação medida, e porque
-a carga da tela (nome, barras, elenco) é o resto da WTE-TASK-25"*. As faixas
-fecharam em 2026-08-20, e a seção acima já as explica byte a byte; a carga da
-tela foi medida no dia da reconferência pelo `compara_tela.sh 2 68`, que bate em
-pixel nas barras, na bandeira e no uniforme dos dois times.
+**Veredito `divergencia deliberada` desde 2026-08-24**, e as duas razões que o
+mantinham `aberto` caíram antes disso. A frase antiga dizia *"porque as duas
+faixas de cima não têm explicação medida, e porque a carga da tela (nome,
+barras, elenco) é o resto da WTE-TASK-25"*. As faixas fecharam em 2026-08-20, e
+a seção acima já as explica byte a byte; a carga da tela foi medida em
+2026-08-23 pelo `compara_tela.sh 2 68`, que bate em pixel nas barras, na
+bandeira e no uniforme dos dois times.
 
-**O que sobra é o que as Notas acima já diziam, e é de gate, não de código:
-nenhuma régua entra por aqui.** Sem window manager o gtk2 não dá foco de
-teclado à janela, então o lado port não digita caminho em `TOpenDialog` nenhum
-(WTE-TASK-13), e quem carrega no gate é o `MainForm.FormShow`, pela linha de
-comando. Os dois passam pelo **mesmo** `AbreImagem`, que é onde a injeção e os
-dois remendos moram — o que está verificado é o corpo compartilhado, pelo
-[`golden-01-arranque`](../../tests/roteiros/golden-01-arranque.txt); o que não
-está é este ponto de entrada. Julgá-lo `implementado` pela cobertura do irmão
-seria dar por medido o único trecho que não é comum aos dois.
+**O que sobra não é pergunta em aberto, é uma diferença de estrutura que o port
+tem por decisão** — e é isso que muda o veredito em vez de o manter.
+
+**1. O port tem uma rota de injeção onde o original tem duas.** O `.exe`
+duplica o trecho de injeção de sete setores, um aqui e outro no `FormShow`; o
+port tem um só, o `AbreImagem`, chamado pelos dois. É desvio consciente, com
+ganho declarado: um lugar para corrigir em vez de dois cópia-e-cola.
+
+**2. E é justamente por isso que este ponto de entrada não tem régua própria, e
+não pode ter.** Sem window manager o gtk2 não dá foco de teclado à janela, então
+o lado port não digita caminho em `TOpenDialog` nenhum
+([WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md)); quem carrega no
+gate é o `MainForm.FormShow`, pela linha de comando. O
+[`golden-01-arranque`](../../tests/roteiros/golden-01-arranque.txt) verifica o
+corpo compartilhado, que é onde a injeção e os dois remendos moram — o que não
+verifica é o `Execute` do diálogo, que é o único trecho não comum aos dois.
+
+Chamar isso de `implementado` daria por medido o trecho que nenhum gate alcança;
+chamar de `aberto` afirmaria pergunta onde há decisão. As duas divergências vão
+para a [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), junto
+com as do `FormShow`, que é o irmão pelo qual este é coberto.
+
+E a
+[cobertura medida](../fase-4-cobertura.tsv) confirma o que se afirma aqui: este
+handler dá **zero** linha nos 16 roteiros. A régua não o alcança, e o registro
+diz isso em vez de o insinuar.

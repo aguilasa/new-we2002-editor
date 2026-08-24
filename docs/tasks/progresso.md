@@ -256,8 +256,8 @@ só uma escolha de quando.
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
       (2026-08-24, remedido pelo `check_fase4.py`): 61 `implementado`, 19
-      `trivial`, 3 `divergencia deliberada`, 1 `nao portado`, 10 `aberto`.
-      **84 dos 96 têm veredito fechado**, e os 12 que faltam estão nomeados um
+      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 7 `aberto`.
+      **87 dos 96 têm veredito fechado**, e os 9 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
       (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
@@ -286,6 +286,20 @@ só uma escolha de quando.
       [`cobertura_gate.py`](../../wte/tools/cobertura_gate.py), que versiona a
       cobertura em [`fase-4-cobertura.tsv`](../../wte/re/fase-4-cobertura.tsv) e
       **aborta** se uma spec citar o TSV como evidência sem ter linha nele
+- [x] **Três `aberto` esperavam decisão, não medição, e um deles fechava um
+      ciclo entre fases** *(CORR-WTE-090, 2026-08-24)*. O
+      `jugador.flechasapaClick` esperava exclusão **já decidida** em 2026-08-18
+      pela [CORR-WTE-063](/docs/tasks/CORR-WTE-063.md); o
+      `MainForm.boton_dialogo_weClick` tinha as duas razões antigas caídas e
+      sobrava uma diferença de estrutura por decisão — o port tem uma rota de
+      injeção onde o original tem duas; e o `estrategia.ComboBoxDrawItem`
+      esperava a [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), **que é
+      fase 6 e depende da 34, que depende desta** — esperar travava as três
+      para sempre. Viraram `divergencia deliberada`, `divergencia deliberada` e
+      `nao portado` com justificativa de **escopo**, que é o que o critério da
+      fase 4 prevê e o `MainForm.Button2Click` já usava. A decisão de
+      *owner-draw* continua sendo da 37; o que mudou é que ela deixou de
+      bloquear o fechamento da fase 4
 - [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
       da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
       porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém
