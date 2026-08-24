@@ -3,7 +3,7 @@ id: CORR-WTE-096
 title: "Correção: chave duplicada no GOLDEN_DE apaga o gate do base_teamClick, e o fase-4.md publica \"nenhum\""
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -140,20 +140,57 @@ reexecutado.
 
 ## Verificação
 
-- [ ] `python3 -c` do bloco de evidência acima imprime `chaves 17 unicas 17 []`
-- [ ] `grep -n 'base_teamClick' wte/re/fase-4.md` mostra
+- [x] `python3 -c` do bloco de evidência acima imprime `chaves 17 unicas 17 []`
+- [x] `grep -n 'base_teamClick' wte/re/fase-4.md` mostra
       `[golden-22-precos](../tests/roteiros/golden-22-precos.txt)`, não `**nenhum**`
-- [ ] O `test_check_fase4.py` reprova com uma chave repetida plantada
-- [ ] O `test_check_fase4.py` reprova com um escritor `implementado` de gate vazio
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+      — linha 83 do documento regerado
+- [x] O `test_check_fase4.py` reprova com uma chave repetida plantada, e o
+      **gerador** também: plantada a segunda entrada, o `--check` sai com
+      `ERRO: GOLDEN_DE tem chave repetida: MainForm.base_teamClick`
+- [x] O `test_check_fase4.py` reprova com um escritor `implementado` de gate
+      vazio, e o gerador idem: `ERRO: escritor 'implementado' sem roteiro em
+      GOLDEN_DE: MainForm.base_teamClick`
+- [x] `make -C wte check` verde — **764** testes, `OK (skipped=1)`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
+A segunda entrada saiu, e o `fase-4.md` regerado publica o gate na linha do
+`base_teamClick`. Nenhum outro número do documento mudou — o diff é de uma
+linha.
+
+As duas guardas entraram no próprio gerador, como a correção pedia:
+
+1. **`chaves_repetidas_no_fonte()`** lê o **fonte** com `ast`, não o `dict` em
+   memória. Tinha de ser assim: quando o módulo roda, o interpretador já
+   colapsou o literal e a duplicata é invisível. É o mesmo desenho do
+   `check_seeks()` do `port_database_pas.py`, que confere o legado e não a
+   saída;
+2. **`gates_vazios()`** recusa tupla vazia em escritor `implementado`. Ela
+   continua válida no `aberto`, onde quer dizer "o gate vem com o dono" — e é
+   por isso que a guarda pergunta pelo veredito, e não só pela tupla.
+
+Provadas nos dois sentidos, contra o gerador de verdade e não só contra o
+teste: com cada plantio o `--check` aborta nomeando a chave; desfeitos os dois,
+volta a `check_fase4: wte/re/fase-4.md: ok` e a saída é byte-idêntica em duas
+escritas.
+
 **Problemas encontrados:**
 
+1. **Nenhuma das guardas que já existiam podia pegar isto, e vale dizer por
+   quê:** as duas — "escritor fora da tabela" e "tabela cita quem não grava" —
+   perguntam sobre **chave**, e a chave existia. O que estava vazio era o
+   **valor**, e valor vazio era renderizado como `**nenhum**` em vez de
+   recusado. A guarda nova é a primeira do arquivo que olha o valor.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/tools/check_fase4.py` | modificado — a chave duplicada apagada e as duas guardas |
+| `wte/tools/test_check_fase4.py` | modificado — cinco casos, dois deles plantados |
+| `wte/re/fase-4.md` | regerado — uma linha |

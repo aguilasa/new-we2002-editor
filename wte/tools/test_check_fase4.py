@@ -19,8 +19,11 @@ Os testes montam a entrada em memoria: nao abrem o `.exe`, nao precisam de
 
 from __future__ import annotations
 
+import ast
 import re
+import tempfile
 import unittest
+from pathlib import Path
 
 import check_fase4 as C
 
@@ -114,6 +117,55 @@ class TestCincoTrivial(unittest.TestCase):
     def test_populacao_curta_demais_aborta(self) -> None:
         with self.assertRaises(C.Fase4Error):
             self.amostra(4)
+
+
+class TestGuardasDoGolden(unittest.TestCase):
+    """As duas guardas da CORR-WTE-096, com caso plantado.
+
+    Guarda nunca exercitada e guarda ausente: as duas nascem de uma tabela que
+    envelheceu em silencio, entao as duas tem de reprovar aqui antes de valerem
+    alguma coisa la.
+    """
+
+    def test_a_tabela_de_hoje_nao_tem_chave_repetida(self) -> None:
+        self.assertEqual(C.chaves_repetidas_no_fonte(), [])
+
+    def test_chave_repetida_plantada_e_pega(self) -> None:
+        """O detector le a FONTE, entao o caso plantado e texto."""
+        fonte = (
+            "GOLDEN_DE: dict[str, tuple[str, ...]] = {\n"
+            '    "MainForm.aClick": ("golden-01",),\n'
+            '    "MainForm.bClick": ("golden-02",),\n'
+            '    "MainForm.aClick": (),\n'
+            "}\n")
+        with tempfile.TemporaryDirectory() as d:
+            alvo = Path(d) / "falso.py"
+            alvo.write_text(fonte, encoding="utf-8")
+            arvore = ast.parse(alvo.read_text(encoding="utf-8"))
+            chaves = [c.value for no in ast.walk(arvore)
+                      if isinstance(no, ast.AnnAssign)
+                      and getattr(no.target, "id", "") == "GOLDEN_DE"
+                      for c in no.value.keys]
+        repetidas = sorted({c for c in chaves if chaves.count(c) > 1})
+        self.assertEqual(repetidas, ["MainForm.aClick"])
+
+    def test_escritor_implementado_sem_gate_reprova(self) -> None:
+        escritores = [{"handler": "MainForm.base_teamClick",
+                       "veredito": "implementado"},
+                      {"handler": "NaoExiste.xClick",
+                       "veredito": "implementado"}]
+        self.assertEqual(C.gates_vazios(escritores), ["NaoExiste.xClick"])
+
+    def test_escritor_aberto_pode_ter_gate_vazio(self) -> None:
+        """Tupla vazia quer dizer "o gate vem com o dono" -- so no `aberto`."""
+        self.assertEqual(
+            C.gates_vazios([{"handler": "NaoExiste.xClick",
+                             "veredito": "aberto"}]), [])
+
+    def test_a_tabela_de_hoje_nao_tem_gate_vazio(self) -> None:
+        escritores = [{"handler": h, "veredito": "implementado"}
+                      for h in C.GOLDEN_DE]
+        self.assertEqual(C.gates_vazios(escritores), [])
 
 
 class TestFormaAposentada(unittest.TestCase):

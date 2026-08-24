@@ -80,7 +80,7 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 | `0x0040e85c` | [MainForm.paizquierda2Click](spec/MainForm.paizquierda2Click.md) | edicao | implementado | [golden-10-mover-ml](../tests/roteiros/golden-10-mover-ml.txt) |
 | `0x0040ecc0` | [MainForm.pabajoClick](spec/MainForm.pabajoClick.md) | edicao | implementado | [golden-11-descarte-ml](../tests/roteiros/golden-11-descarte-ml.txt) |
 | `0x00410a74` | [MainForm.dorsalClick](spec/MainForm.dorsalClick.md) | edicao | implementado | [golden-08-dorsal-mcr](../tests/roteiros/golden-08-dorsal-mcr.txt) |
-| `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | implementado | **nenhum** |
+| `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | implementado | [golden-22-precos](../tests/roteiros/golden-22-precos.txt) |
 | `0x004111d8` | [MainForm.FormShow](spec/MainForm.FormShow.md) | carga | divergencia deliberada | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
 
 ## A bateria golden desta corrida

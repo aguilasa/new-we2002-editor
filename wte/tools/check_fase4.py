@@ -69,6 +69,7 @@ Uso:
 
 from __future__ import annotations
 
+import ast
 import re
 import sys
 from pathlib import Path
@@ -180,6 +181,15 @@ RESERVADOS = {"GABARITO.md", "INDICE.md", "README.md"}
 # A guarda e o que impede a tabela de envelhecer em silencio: todo handler que
 # a secao `## Bytes tocados` diz que grava TEM de aparecer aqui, e todo roteiro
 # citado tem de existir em disco. Gravacao nova sem gate aborta o fechamento.
+#
+# **E as duas guardas abaixo existem porque a tabela ja envelheceu em silencio
+# uma vez.** A CORR-WTE-096 achou `"MainForm.base_teamClick"` escrito DUAS
+# vezes aqui: a entrada boa, com o `golden-22-precos`, e a velha da epoca em que
+# o handler estava `aberto`, com a tupla vazia. Em Python a ultima ganha, e
+# nenhuma das guardas de cima reclama -- a chave EXISTE, e as duas se perguntam
+# sobre chave, nao sobre valor. O `fase-4.md` passou a publicar `**nenhum**` na
+# linha do unico escritor cujo gate estava verde, tres linhas abaixo da frase
+# que promete abortar nesse caso.
 GOLDEN_DE: dict[str, tuple[str, ...]] = {
     # as seis da WTE-TASK-27
     "MainForm.boton_barras2isoClick": ("golden-03-barras", "golden-04-barras-editada"),
@@ -205,8 +215,6 @@ GOLDEN_DE: dict[str, tuple[str, ...]] = {
     # as duas que gravam sem ser botao de gravar
     "MainForm.FormShow": ("golden-01-arranque",),
     "MainForm.boton_dialogo_weClick": ("golden-01-arranque",),
-    # aberto, e o gate vem com o dono -- ver a coluna `pendente` na saida
-    "MainForm.base_teamClick": (),
 }
 
 
@@ -355,6 +363,38 @@ def roteiros_em_disco() -> dict[str, dict]:
 
 
 # ------------------------------------------------------------------ medicao ---
+def chaves_repetidas_no_fonte(nome: str = "GOLDEN_DE") -> list[str]:
+    """As chaves escritas mais de uma vez no literal de `nome`, lidas da FONTE.
+
+    Quando este modulo roda, o interpretador ja colapsou o literal: o
+    `dict` em memoria tem uma entrada so, e a duplicata e invisivel. Por isso a
+    conferencia e sobre o texto do arquivo, com `ast` -- o mesmo desenho do
+    `check_seeks()` do `port_database_pas.py`, que confere o legado e nao a
+    saida.
+    """
+    arvore = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    for no in ast.walk(arvore):
+        alvo = getattr(no, "target", None)
+        if not isinstance(no, ast.AnnAssign) or getattr(alvo, "id", "") != nome:
+            continue
+        chaves = [c.value for c in no.value.keys]
+        return sorted({c for c in chaves if chaves.count(c) > 1})
+    raise Fase4Error(f"nao achei o literal de {nome} em {GENERATOR}")
+
+
+def gates_vazios(escritores: list[dict]) -> list[str]:
+    """Escritor `implementado` cuja tupla de gate esta vazia.
+
+    A tupla vazia so faz sentido para handler `aberto`, onde ela quer dizer
+    "o gate vem com o dono". Num escritor `implementado` ela vira `**nenhum**`
+    na tabela publicada, e `**nenhum**` num handler que grava e exatamente o
+    buraco que a WTE-TASK-30 pagou para descobrir.
+    """
+    return sorted(e["handler"] for e in escritores
+                  if e["veredito"] == "implementado"
+                  and not GOLDEN_DE.get(e["handler"]))
+
+
 def medir() -> dict:
     handlers = S.le_handlers()
     if len(handlers) != 96:
@@ -417,7 +457,13 @@ def medir() -> dict:
             escritores.append({"endereco": h["endereco"], "handler": chave,
                                "grupo": h["grupo"], "veredito": veredito})
 
-    # --- as duas guardas da tabela de gate -------------------------------
+    # --- as guardas da tabela de gate ------------------------------------
+    repetidas = chaves_repetidas_no_fonte()
+    if repetidas:
+        raise Fase4Error(
+            f"GOLDEN_DE tem chave repetida: {', '.join(repetidas)}. Em Python a "
+            f"ultima ocorrencia ganha, e as guardas de nome nao veem a "
+            f"diferenca -- apague a sobra em {GENERATOR}.")
     nomes_escritores = {e["handler"] for e in escritores}
     fora_da_tabela = sorted(nomes_escritores - set(GOLDEN_DE))
     if fora_da_tabela:
@@ -432,6 +478,13 @@ def medir() -> dict:
         raise Fase4Error(
             "GOLDEN_DE cita handler que a spec nao diz que grava: "
             f"{', '.join(sobrando)}")
+    vazios = gates_vazios(escritores)
+    if vazios:
+        raise Fase4Error(
+            f"escritor `implementado` sem roteiro em GOLDEN_DE: "
+            f"{', '.join(vazios)}. Tupla vazia so vale para handler `aberto`, "
+            f"onde o gate vem com o dono; aqui ela publica `**nenhum**` na "
+            f"linha de quem grava.")
 
     # --- a guarda de bloqueio vencido ------------------------------------
     no_pascal = enderecos_no_pascal()
