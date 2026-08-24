@@ -39,17 +39,25 @@
 
   ELE PRECA VINTE E DOIS SLOTS, NAO VINTE E TRES, e isso e MEDIDO, nao
   suposto. O laco do original vai de 0 a 22 (`cmp DWORD PTR [ebp-0x2c],0x17` em
-  `0x00411178`), mas cada volta comeca com
+  `0x00411178`) e grava 22 bytes. Medido em seis times da ROM japonesa
+  (0, 2, 9, 17, 30, 48): vao de `CONDICIONAL_BASE + 23*t` ate `+ 21`, e o do
+  slot 22 fica com o valor de fabrica nos seis. No time 9 o slot 21 e o 22 tem
+  a MESMA soma (36) e a mesma posicao (0), e so o 21 e gravado -- o que
+  descarta explicacao pelo conteudo do jogador.
+
+  NAO E O `je` DA TERCEIRA COLUNA, e este cabecalho dizia que era ate
+  2026-08-24. O laco realmente comeca com
 
       call 0x4046e8                        ' carrega_jogador(time, slot, 2)
       cmp DWORD PTR ds:0x43366c,0x0        ' a terceira coluna do buffer 2
       je  0x411175                         ' pula o slot
 
-  e para o slot 22 a coluna sai ZERO. Medido em seis times da ROM japonesa
-  (0, 2, 9, 17, 30, 48): os bytes gravados vao de `CONDICIONAL_BASE + 23*t` ate
-  `+ 21`, e o do slot 22 fica com o valor de fabrica nos seis. No time 9 o slot
-  21 e o 22 tem a MESMA soma (36) e a mesma posicao (0), e so o 21 e gravado --
-  o que descarta explicacao pelo conteudo do jogador.
+  mas a coluna do slot 22 NAO e zero: sob `strace` o oraculo LE o byte
+  condicional dele em 3067472, com o mesmo numero de seeks dos outros 22, e a
+  `0x4046e8` so faz essa leitura na rota de coluna nao nula (`0x00404748`
+  desvia para `0x0040477e` no caso zero, e la nao ha I/O). O byte se perde na
+  ESCRITA -- dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o
+  `fputc` de `0x0040342a` --, e o mecanismo continua aberto na CORR-WTE-095.
 
   Como se remede a amostra, em uma linha:
 
@@ -61,15 +69,16 @@
   `preco.tsv` -- e o terceiro continuou 255. Sem esse plantio a leitura "nao
   grava" nao se separa de "grava o valor que ja estava la".
 
-  A CAUSA ESTA ABERTA (CORR-WTE-095), e o que ela ja excluiu importa aqui: a
+  A CAUSA ESTA ABERTA (CORR-WTE-095), e o que ela ja fechou importa aqui: a
   `0x00404374` do proprio oraculo NAO tem ramo por slot -- ela decide por time
   (`cmp ecx,0x3f`, e os times 54 e 55 em `cmp ecx,0x35`/`cmp ecx,0x38`) e
   escreve `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23. Ou seja, a
   conta de offset deste port NAO esta errada para o slot 22: ela e a mesma do
-  oraculo. O que sobra aberto e por que o `cmp` de `0x004110a6` le zero num
-  campo que a rotina anterior acabou de preencher. O port reproduz o que o
-  ORACULO faz, porque e contra ele que o gate mede -- e a divergencia fica
-  escrita em vez de silenciosa.
+  oraculo. E o slot 22 e enderecavel: o `io-medido.tsv`, sessao `27-mcr2iso`,
+  mostra o import de `.mcr` gravando os 23 bytes condicionais do time 3. O que
+  sobra aberto e por que a `0x00403400` posiciona e nao escreve na 23a volta.
+  O port reproduz o que o ORACULO faz, porque e contra ele que o gate mede --
+  e a divergencia fica escrita em vez de silenciosa.
 
   A MENSAGEM DO FIM sai do `.exe` em `0x00425079`. }
 const

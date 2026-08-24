@@ -30,7 +30,9 @@ cmp  DWORD PTR ds:0x43366c,0x0       ' a terceira coluna do buffer 2
 je   0x411175                        ' pula o slot
 ```
 
-Para o slot 22 a coluna sai **zero**, e o slot é pulado.
+A CORR abriu afirmando que *"para o slot 22 a coluna sai zero, e o slot é
+pulado"*. **Medido em 2026-08-24: não sai** — ver o Log. O `je` acima existe e é
+real; o que ele não é é a causa deste salto.
 
 **Medido em seis times da ROM japonesa** (0, 2, 9, 17, 30, 48): os bytes
 gravados vão de `CONDICIONAL_BASE + 23·t` até `+ 21`, e o do slot 22 fica com o
@@ -99,99 +101,124 @@ do port está errada para o slot 22 **em toda operação**, não só em preço, 
 
 ## Log de Execução
 
-**PARCIAL.** A correção segue **pendente**: a pergunta 4 da seção *Correção* —
-*onde a `0x00404374` calcula a terceira coluna, e se há um `cmp` contra 22 ou um
-limite de tabela ali* — foi respondida, e a resposta **exclui** a hipótese que a
-correção mais temia, mas não produz a causa. As perguntas 1, 2 e 3 (a ficha, o
-clube de ML, "o slot 22 ou o último") continuam por medir.
+**PARCIAL.** A correção segue **pendente**, mas o que ela afirmava como causa
+**foi refutado**, e por isso quatro documentos vivos mudaram nesta invocação. As
+perguntas 2 e 3 (clube de ML, "o slot 22 ou o último") deixaram de importar: a
+resposta não está do lado do slot.
 
 **Executado em:** 2026-08-24 *(medição parcial; a correção não fecha)*
 
-**O que foi medido**
+### 1. O instrumento que faltava não era depurador — era `strace`
 
-**1. O salto é real — não é byte que já estava certo.** Esta era a explicação
-barata e ninguém a tinha descartado: se o preço do slot 22 já fosse o valor
-gravado, o diff não veria mudança e a leitura seria a mesma. Plantados `0xFF`
-nos três últimos slots do time 2 e rodado o oráculo pelo
-[`golden-22-precos`](../../wte/tests/roteiros/golden-22-precos.txt) sobre a
-cópia:
+O Log anterior fechou dizendo que só a observação em execução resolveria, e
+apontou para depurador sob Wine ou Ghidra. Havia um canal mais barato já
+construído no projeto: o
+[`diff_dirigido.sh`](../../wte/tools/diff_dirigido.sh) da WTE-TASK-19 roda o
+oráculo sob `strace`, e o cabeçalho dele diz exatamente por que isso importa —
+*"`cmp` não vê LEITURA nenhuma, e leitura é metade da resposta"*. É a metade que
+faltava aqui.
 
-```text
-slot  offset   antes   plantado   depois
-  20  3067470     19        255       26     <- previsto no preco.tsv: 26
-  21  3067471     14        255       21     <- previsto no preco.tsv: 21
-  22  3067472     19        255      255     <- nao tocado
+```bash
+bash wte/tools/diff_dirigido.sh wte/tests/roteiros/golden-22-precos.txt \
+     --imagem roms/japanese-shift-jis.bin --saida <dir>
 ```
 
-Antes disso a hipótese tinha até um apoio: os bytes de fábrica do slot 22 não
-batem com o `previsto` em nenhum dos seis times (0: 14 contra 16; 2: 19/20;
-9: 18/20; 17: 17/26; 30: 14/20; 48: 18/43). O plantio é que fecha, porque
-`0xFF` não é preço de ninguém.
+### 2. A coluna do slot 22 **não** é zero
 
-**2. Também está descartado o "escreve duas vezes no slot 21".** Se o `je` não
-fosse tomado e o `0x43366c` ficasse com o offset da volta anterior, o slot 21
-receberia o preço do 22 por último. Ele voltou com **21**, que é o preço dele,
-e não com 20, que é o do 22.
+Seeks `SEEK_SET` por offset, na faixa dos 23 bytes condicionais do time 2:
 
-**3. A `0x00404374` não tem ramo por slot.** Lida inteira — `0x00404374` a
-`0x004046e2`, as duas rotas e a cauda comum:
+```text
+3067450  3     3067458  3     3067466  3
+3067451  3     ...            ...
+...            3067465  3     3067471  3
+                              3067472  3   <- o slot 22, os mesmos 3
+```
 
-| Endereço | Teste | Sobre |
-|---|---|---|
-| `0x00404389` | `cmp ecx,0x3f` | **time** — separa seleção de clube de ML |
-| `0x00404433` + `0x00404454` | `cmp ecx,0x35` / `jle` | **time** |
-| `0x00404456` | `cmp ecx,0x38` / `jge` | **time** — só 54 e 55 caem no `xor eax,eax` de `0x00404463` |
-| `0x0040452e` | `cmp BYTE [+0x17],0x17` | só na rota de **ML**, e sobre o slot **lido do vínculo**, não o pedido |
-| `0x004046c1` | `cmp ebx,0x2` | **buffer**, não slot |
+Vinte e três slots, **três seeks cada, sem exceção**. E a `0x004046e8` só lê o
+byte condicional na rota de coluna não nula: o
+`cmp DWORD PTR [esi*4+0x433614],0x0` de `0x00404748` desvia para `0x0040477e`
+quando ela é zero, e ali não há I/O — o que ele faz é pôr `0x32` no buffer.
+Leitura em 3067472 prova coluna não nula.
 
-Na rota de seleção ela escreve `0x2ece0c + 23·time + 2·(time div 56) + slot` em
-`[esi+ecx*4+0x28]` (`0x004046c1` acima é a cauda; a escrita é `0x00404490`), e
-`[esi+ecx*4+0x28]` com `ecx = 11·buffer = 22` é exatamente o `0x43366c` que o
-laço do `base_teamClick` testa. Os times 54 e 55 são os mesmos 46 jogadores que
-o `src/core/Database.cpp:756-764` pula.
+**Logo o `je` de `0x004110ad` não é o que pula o slot 22**, e essa era a causa
+que a CORR, o `preco.md`, a spec e o `.inc` afirmavam.
 
-**O que isso fecha, e é a parte que importa**
+### 3. O byte se perde na escrita, e o trace diz onde
 
-A correção previa dois desfechos, e o segundo era o grande: *"se for propriedade
-do formato que o `we2002_core` lê errado, a conta de offset do port está errada
-para o slot 22 **em toda operação**"*. **Esse ramo está fechado.** A conta do
-oráculo é a mesma do port, linear no slot, sem caso especial — o port não lê o
-jogador errado no slot 22, nem em preço nem em nada.
+```text
+slot 21                              slot 22
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  read 512                             read 512
+  _llseek 0 CUR -> 3067983             _llseek 0 CUR -> 3067984
+  _llseek 3067983 SET                  _llseek 3067984 SET
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  _llseek 0 CUR -> 3067471             _llseek 0 CUR -> 3067472
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  write "\25" 1                       (nada)
+```
 
-**O que sobra, dito com precisão**
+Idênticas até o `fseek` da gravação **inclusive**. O offset **3067473** — a
+posição do arquivo depois de uma escrita de 1 byte em 3067472 — não aparece nos
+52 MB de trace, e o `0xFF` plantado em 3067472 sobrevive à corrida. A perda é
+dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o `fputc` de
+`0x0040342a`.
 
-Uma contradição estreita: o `cmp DWORD PTR ds:0x43366c,0x0` de `0x004110a6`
-observa **zero** num campo que a `0x00404374`, chamada três instruções antes
-pela `0x004046e8`, acaba de preencher com valor **não nulo** — e a
-`0x004046e8` não escreve nesse campo (ela o lê em `0x00404748`, e o que ela
-escreve é o byte condicional em `0x0043365c`). Uma das três é falsa, e a
-medição não diz qual:
+**E não é buffer de saída não descarregado.** A `0x00403388`, chamada depois de
+cada byte, não é um flush: é o caminhador de setor MODE2/2352 —
+`ftell % 2352 == 2072` → `fseek(+304)`, pulando os 280 de EDC/ECC mais os 24 do
+cabeçalho seguinte.
 
-1. a rota de seleção da `0x00404374` é a tomada para o slot 22;
-2. `[esi+ecx*4+0x28]` com buffer 2 é `0x43366c`;
-3. nada entre a escrita e o `cmp` zera o campo.
+### 4. O slot 22 é endereçável, e o próprio editor o grava por outro caminho
 
-**Quem continuar começa daqui, e não da estaca zero.** O instrumento que falta é
-o que a leitura estática não dá: `0x43366c` observado **em execução** na volta
-do slot 22 — depurador sob Wine, ou a `0x00404374` decompilada no projeto do
-Ghidra, que é o que a §8.10 do plano reserva para este tipo de pergunta. As
-perguntas 1 (a ficha do slot 22 no oráculo) e 2 (clube de ML) continuam válidas
-e continuam custando uma corrida de tela cada.
+Estava versionado e ninguém tinha cruzado: o
+[`io-medido.tsv`](../../wte/re/io-medido.tsv), sessão `27-mcr2iso`, traz
+
+```text
+japanese-shift-jis.bin  27-mcr2iso  IMPORTA  W  3067473  3067495  23  1304  465
+```
+
+`3067473 = CONDICIONAL_BASE + 23·3` e `3067495 = + 22`: o import de `.mcr`
+escreve os **23** bytes condicionais do time 3. Não é propriedade do formato,
+não é do time, não é do slot — é deste handler.
+
+### O que fica aberto
+
+**Só o mecanismo**, e ele está localizado numa rotina de 70 bytes: por que a
+`0x00403400` posiciona e não escreve na 23ª volta, com `ecx = 1` posto três
+instruções antes em `0x00411160`. Isso exige `[ebp-0x4]` observado **em
+execução** dentro dela — depurador sob Wine, ou a rotina decompilada no projeto
+do Ghidra (§8.10 do plano). As perguntas 1, 2 e 3 da seção *Correção* não são
+mais o caminho: elas supunham que a resposta estava no slot ou no tipo de time,
+e a coluna do slot 22 é não nula em ambos.
+
+### Por que ainda não fecha
+
+A Verificação pede *"a causa escrita, com o endereço que a produz"*. Há um
+endereço — `0x00403400`, entre `0x00403410` e `0x0040342a` — mas não há
+mecanismo, e escrever "perde-se ali" como causa seria trocar um "não explicado"
+por outro mais bem localizado. O `ULTIMO_SLOT_PRECADO = 21` **não muda**: o
+comportamento observável é o mesmo, e é contra ele que o gate mede.
 
 **Gates rodados**
 
-- `golden-22-precos`, modo controle: `PASSOU: byte-identico`
-- `golden_run_wte.sh` sobre a cópia plantada: `oraculo: fim, sem violacao de
-  acesso`, saída 0
-- `check_preco.py --check`: verde, 132 jogadores em 6 times
-- `roms/` intocada; a cópia `work/p95.bin` apagada
+- `make -C wte check`: verde, **764** testes, `OK (skipped=1)`
+- `lazbuild -B`: o mesmo **único** warning pré-existente
+  (`we2002_preco.pas(138,27)`, de `c566455`), em arquivo que esta correção não
+  toca; 143 hints, os mesmos de antes
+- `check_preco.py --check`: verde
+- `analisar_io.py --check`: verde — as linhas de sessão `dd95` que a corrida
+  anexou ao `io-medido.tsv` e ao `cmp-medido.tsv` foram **revertidas**: são
+  medida duplicada sob rótulo de rascunho, e o valor da corrida está na prosa
+  com o comando que a refaz
+- `roms/` intocada; a corrida trabalhou sobre `work/dd-run.bin`
 
 **Arquivos criados/modificados:**
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/preco.md` | modificado — as duas medições e o ramo fechado |
+| `wte/re/preco.md` | modificado — a causa refutada e a medição que a refuta |
 | `wte/re/spec/MainForm.base_teamClick.md` | modificado — idem, resumido |
-
-O `ULTIMO_SLOT_PRECADO = 21` **não muda**: o salto está confirmado, e agora com
-plantio. O `.inc` e o `check_preco.py` ficam como estão.
+| `wte/src/impl/ep2002_mainform.base_teamClick.inc` | modificado — idem, no cabeçalho que sustenta a constante |
+| `wte/tools/check_preco.py` | modificado — a justificativa do `ULTIMO_SLOT_PRECADO` não é mais "o limite do laço" |
+| `docs/PLAN-WTE-LAZARUS.md` | modificado — a fração da §4.4, que o `.inc` maior moveu |
+| `wte/re/fase-2.md` | regerado |

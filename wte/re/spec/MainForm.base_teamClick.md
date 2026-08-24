@@ -108,23 +108,32 @@ decodificadores e duas verdades.
 
 ### O achado: ele preça 22 slots, não 23
 
-O laço vai de 0 a 22 (`cmp DWORD PTR [ebp-0x2c],0x17` em `0x00411178`), mas cada
-volta pula o slot quando a terceira coluna do buffer é zero — e **para o slot 22
-ela sai zero**. Medido em seis times: os bytes gravados vão de
-`CONDICIONAL_BASE + 23·t` até `+ 21`, e o do slot 22 fica com o valor de fábrica
-em todos. No time 9 o slot 21 e o 22 têm a **mesma** soma e a **mesma** posição,
-e só o 21 é gravado — o que descarta explicação pelo conteúdo do jogador.
+O laço vai de 0 a 22 (`cmp DWORD PTR [ebp-0x2c],0x17` em `0x00411178`) e grava
+22 bytes. Medido em seis times: vão de `CONDICIONAL_BASE + 23·t` até `+ 21`, e o
+do slot 22 fica com o valor de fábrica em todos. No time 9 o slot 21 e o 22 têm
+a **mesma** soma e a **mesma** posição, e só o 21 é gravado — o que descarta
+explicação pelo conteúdo do jogador.
 
-A causa está aberta na
-[CORR-WTE-095](../../../docs/tasks/CORR-WTE-095.md), e ela já mediu duas coisas
-em 2026-08-24. O salto **é real**: plantados `0xFF` nos slots 20, 21 e 22 do
-time 2, o oráculo devolveu 26 e 21 nos dois primeiros — o `previsto` do
-`preco.tsv` — e deixou o terceiro em 255. E a `0x00404374` **não tem ramo por
-slot**: ela decide por time (`cmp ecx,0x3f`, `cmp ecx,0x35`, `cmp ecx,0x38`, os
-times 54 e 55) e escreve a mesma conta linear em slot para os 23. Logo a conta
-de offset do port **não está errada** para o slot 22 — o que sobra em aberto é
-o laço observar zero num campo que a rotina anterior sempre preenche.
-O port reproduz o oráculo, porque é contra ele que o gate mede.
+**O `je` da terceira coluna não é a causa**, ao contrário do que esta seção
+afirmou até 2026-08-24. A [CORR-WTE-095](../../../docs/tasks/CORR-WTE-095.md)
+instrumentou a corrida com `strace` (`diff_dirigido.sh`) e mediu que o oráculo
+**lê** o byte condicional do slot 22 em 3067472, com o mesmo número de seeks dos
+outros 22 — e a `0x004046e8` só faz essa leitura quando a coluna **não** é zero
+(`0x00404748` desvia para `0x0040477e` no caso zero, e ali não há I/O).
+
+O byte se perde na **escrita**: as sequências de syscall do slot 21 e do slot 22
+são idênticas até o `fseek` da gravação, e depois dele o 21 emite
+`write(fd,"\25",1)` e o 22 não emite nada. Um `0xFF` plantado em 3067472
+sobrevive à corrida. É dentro da `0x00403400`, entre o `fseek` de `0x00403410` e
+o `fputc` de `0x0040342a`; a `0x00403388` chamada em seguida não é flush, é o
+caminhador de setor MODE2/2352.
+
+Duas coisas ficam **fechadas** por isso: a conta de offset do port não está
+errada para o slot 22 (a `0x00404374` decide por time, nunca por slot), e o
+slot 22 é endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`, mostra o import
+de `.mcr` gravando os **23** bytes condicionais do time 3. **Aberto** continua o
+mecanismo da perda. O port reproduz o oráculo, porque é contra ele que o gate
+mede.
 
 ## Notas
 

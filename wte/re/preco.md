@@ -122,7 +122,7 @@ linha como medida.
 ## O achado que ninguém procurava: o original preça 22 slots, não 23
 
 O laço do `base_teamClick` vai de 0 a 22 (`cmp DWORD PTR [ebp-0x2c],0x17` em
-`0x00411178`), mas cada volta começa com
+`0x00411178`), e cada volta começa com
 
 ```text
 call 0x4046e8                        ' carrega_jogador(time, slot, buffer 2)
@@ -130,36 +130,81 @@ cmp  DWORD PTR ds:0x43366c,0x0       ' a terceira coluna do buffer
 je   0x411175                        ' pula o slot
 ```
 
-e **para o slot 22 a coluna sai zero**. Medido em seis times: os bytes gravados
-vão de `CONDICIONAL_BASE + 23·t` até `+ 21`, e o do slot 22 fica com o valor de
-fábrica em todos.
+Medido em seis times: os bytes gravados vão de `CONDICIONAL_BASE + 23·t` até
+`+ 21`, e o do slot 22 fica com o valor de fábrica em todos.
 
 **O conteúdo do jogador não explica.** No time 9 o slot 21 e o slot 22 têm a
 mesma soma (36) e a mesma posição (0), e só o 21 é gravado.
 
-**A causa está aberta**, e é a [CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md).
-Duas medições dela, de 2026-08-24, estreitaram o que ainda falta:
+### O `je` NÃO é a causa, e essa linha já foi escrita errada
 
-**1. O salto é real, e não byte que já estava certo.** Plantados `0xFF` nos
-slots 20, 21 e 22 do time 2 e rodado o oráculo pelo
-[`golden-22-precos`](../tests/roteiros/golden-22-precos.txt): os slots 20 e 21
-voltaram com **26** e **21**, que são exatamente o `previsto` do
-[`preco.tsv`](preco.tsv), e o slot 22 continuou **255**. A alternativa barata —
-"o oráculo grava e o byte não muda porque já valia o preço" — está descartada.
+Este documento afirmou, até 2026-08-24, que *"para o slot 22 a coluna sai
+zero"*. **Está medido que não sai.** A
+[CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md) instrumentou a corrida com o
+[`diff_dirigido.sh`](../tools/diff_dirigido.sh) — `strace` sobre o oráculo, que
+é a régua que enxerga **leitura**, coisa que `cmp` nenhum alcança:
 
-**2. A conta de offset do oráculo não tem caso especial de slot.** Lida
-inteira, a `0x00404374` decide por **time**, nunca por slot: `cmp ecx,0x3f`
-separa seleção de clube de ML, e `cmp ecx,0x35` / `cmp ecx,0x38` zeram a
-terceira coluna só para os times **54 e 55** — os mesmos 46 jogadores que o
-`Database.cpp:756-764` pula. Para todo time de seleção fora desses dois, ela
-escreve `0x2ece0c + 23·time + 2·(time div 56) + slot` em `[esi+ecx*4+0x28]`, que
-é o `0x43366c` que o laço testa, **sem nenhum ramo dependente do slot**.
+```text
+seeks SEEK_SET por offset, faixa 3067450..3067472 (os 23 slots do time 2)
+  3067450  3  |  3067458  3  |  3067466  3
+  ...         |  ...         |  3067471  3
+  3067472  3     <- o slot 22, o MESMO numero de seeks dos outros 22
+```
 
-Isso fecha o ramo grande da correção: **a conta de offset deste port não está
-errada para o slot 22** — ela é a mesma do oráculo, e o oráculo a calcula igual
-para os 23. O que sobra em aberto é uma contradição estreita e nomeada: o laço
-observa zero num campo que a rotina que acabou de rodar sempre preenche com
-valor não nulo.
+E a `0x004046e8` só lê o byte condicional **na rota de coluna não nula**: o
+`cmp DWORD PTR [esi*4+0x433614],0x0` de `0x00404748` desvia para `0x0040477e`
+quando ela é zero, e ali não há I/O nenhum — o que ele faz é pôr `0x32` no
+buffer. Uma leitura em 3067472 prova, portanto, que **a coluna do slot 22 não é
+zero**.
+
+### Onde o byte se perde, então
+
+No lado da **escrita**, e a sequência de syscalls diz onde com precisão. Slot 21
+e slot 22, lado a lado, na mesma corrida:
+
+```text
+slot 21                              slot 22
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  read 512                             read 512
+  _llseek 0 CUR -> 3067983             _llseek 0 CUR -> 3067984
+  _llseek 3067983 SET                  _llseek 3067984 SET
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  _llseek 0 CUR -> 3067471             _llseek 0 CUR -> 3067472
+  _llseek 3067471 SET                  _llseek 3067472 SET
+  write "\25" 1                       (nada)
+```
+
+Idênticas até o `fseek` da escrita, inclusive. Depois dele o slot 21 grava e o
+22 não, e o offset **3067473** — a posição do arquivo depois de uma escrita de
+1 byte em 3067472 — não aparece em nenhum lugar dos 52 MB de trace. Some-se o
+plantio: `0xFF` posto em 3067472 antes da corrida continua `0xFF` depois.
+
+O byte se perde dentro da `0x00403400`, entre o `fseek` de `0x00403410` e o
+`fputc` de `0x0040342a`. E não é buffer de saída não descarregado: a
+`0x00403388`, chamada depois de cada byte, **não é um flush** — é o caminhador
+de setor MODE2/2352, `ftell % 2352 == 2072` → `fseek(+304)`, que pula os 280 de
+EDC/ECC mais os 24 do cabeçalho seguinte.
+
+### O que está fechado, e o que sobra
+
+**Fechado — a conta de offset do port não está errada.** A `0x00404374` decide
+por **time**, nunca por slot: `cmp ecx,0x3f` separa seleção de clube de ML, e
+`cmp ecx,0x35` / `cmp ecx,0x38` zeram a terceira coluna só para os times **54 e
+55** — os mesmos 46 jogadores que o `Database.cpp:756-764` pula. Para todo time
+de seleção fora desses dois ela escreve
+`0x2ece0c + 23·time + 2·(time div 56) + slot`, linear no slot, para os 23.
+
+**Fechado — o slot 22 é endereçável, e o próprio editor o grava por outro
+caminho.** A evidência já estava versionada e ninguém tinha cruzado: o
+[`io-medido.tsv`](io-medido.tsv), sessão `27-mcr2iso`, traz
+`W 3067473 3067495 23` — o import de `.mcr` escreve os **23** bytes
+condicionais do time 3, slot 22 incluído. Não é propriedade do formato nem do
+time; é deste handler.
+
+**Aberto — o mecanismo.** Por que a `0x00403400` posiciona e não escreve na 23ª
+volta. Responder isso exige o que leitura estática não dá: `[ebp-0x4]` observado
+em execução dentro dela — depurador sob Wine, ou a rotina decompilada no projeto
+do Ghidra, que é o que a §8.10 do plano reserva para este tipo de pergunta.
 
 O port reproduz o que o **oráculo** faz, porque é contra ele que o gate mede — e
 a divergência fica escrita em vez de silenciosa. O `check_preco.py` recusa

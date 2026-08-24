@@ -118,9 +118,12 @@ def valida(linhas: list[dict]) -> tuple[int, int]:
     return len(medidos), len({(x["rom"], x["time"]) for x in medidos})
 
 
-# O ultimo slot que o oraculo grava. Estabelecido de dois jeitos independentes:
-# o limite do laco lido no `.text` e a FAIXA de bytes que mudou, medida em seis
-# times.
+# O ultimo slot que o oraculo grava. Estabelecido de dois jeitos independentes,
+# e nenhum deles e o limite do laco: o laco vai ate 22 (`cmp [ebp-0x2c],0x17`),
+# e para o slot 22 o oraculo LE o byte condicional e nao o grava -- medido por
+# `strace` na CORR-WTE-095. O que sustenta o 21 e (1) a FAIXA de bytes que
+# mudou, em seis times, e (2) o plantio: `0xFF` posto em 3067472 antes da
+# corrida continua `0xFF` depois.
 ULTIMO_SLOT_PRECADO = 21
 
 DUMP = ROOT / "wte" / "tests" / "dump_preco"
