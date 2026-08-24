@@ -1,0 +1,96 @@
+# golden-22-precos -- o gate do `MainForm.base_teamClick`, o preco dos 23
+# jogadores de um time, GRAVADO na imagem.
+#
+# WTE-TASK-32. Lado oraculo.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-22-precos.txt \
+#        --roteiro-port wte/tests/roteiros/golden-22-precos.port.txt
+#
+# ELE E A REGUA DE BYTE DA FEATURE DE PRECO, e a task pede as duas: tela para a
+# formula, byte para o time inteiro. Esta e a de byte, e ela e melhor do que a
+# de tela por uma razao pratica -- o preco de UM jogador so se le por OCR da
+# `casilla_precio`, e o de VINTE E TRES se le com `cmp`.
+#
+# O QUE ELE GRAVA: um byte por jogador, no offset da terceira coluna da tabela
+# de offsets -- o mesmo campo condicional que a `0x004046E8` usa. Ate 23 bytes
+# por clique, e NENHUM para o time cuja coluna e zero.
+#
+# A CONFIRMACAO E OBRIGATORIA. O handler mostra o `ficha_creditos_equipo`
+# ("Desejar calcular o preco dos jogadores???") e sai sem gravar nada se a
+# resposta for `mrCancel`. Sem o clique em ` Sim` este roteiro mediria o
+# caminho de desistir -- que tambem e byte-identico, e por isso passaria sem
+# medir a formula.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- calcular precos ----
+#
+# `base_team` (8,16) + GroupBox1 (8,320) = (16,336), 98x23 -> centro (65,347).
+! clique 65 347
+~ 4
+
+# O `ficha_creditos_equipo`. O DFM diz 285x124 e a janela X mede o MESMO --
+# e a diferenca entre esses dois numeros importa: aqui 285x124 e o tamanho
+# EXTERNO, nao o cliente. Sob Wine, sem gerenciador de janela, a moldura e
+# desenhada DENTRO da janela X (3 px de borda e 29 de titulo), entao a
+# coordenada de um controle em coordenada de cliente tem de ser somada de
+# (3,29) para virar coordenada de janela.
+#
+# E o mesmo caso que o README dos roteiros ja registrava para o `ficha_dorsal`
+# -- DFM 129x121, janela 135x153, +6 e +32.
+#
+# ISSO NAO E DETALHE: com o clique em coordenada de cliente o roteiro acerta o
+# rotulo em vez do botao, o dialogo fica aberto, o handler sai por `mrCancel` e
+# NENHUM byte e gravado. A corrida passa, e mede o caminho de desistir.
+>~ 285x124
+~ 1
+
+# BitBtn1 ` Sim' em cliente (144,48) 73x25 -> centro de cliente (180,60),
+# mais a moldura (3,29) -> (183,89).
+! clique 183 89
+~ 5
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= PRECOS
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

@@ -12,3 +12,4 @@ we2002_estado  # TimeEmEdicao, JogadorEmEdicao, JogadorTemCampoCondicional
 we2002_player  # TPlayer -- as 28 caixas de bit do BitBtn3Click
 wte_ficha      # BufferJogador, GravaJogador, GravaNumeroDaCamisa (CORR-WTE-081)
 ep2002_error2  # ficha_error2.etiq1, nas duas recusas do BitBtn3Click
+we2002_preco   # PrecoDaSoma, POSICAO_GOLEIRO, FATOR_DE_EXIBICAO (WTE-TASK-32)

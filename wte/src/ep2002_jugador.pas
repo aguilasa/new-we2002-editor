@@ -28,9 +28,9 @@ unit ep2002_jugador;
 interface
 
 uses
-  Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, retrace, SysUtils, Classes,
-  Controls, wte_legendas, Graphics, we2002_estado, we2002_player, wte_ficha,
-  ep2002_error2;
+  Forms, StdCtrls, ExtCtrls, Buttons, ComCtrls, SysUtils, Classes, Controls,
+  wte_legendas, Graphics, retrace, we2002_estado, we2002_player, wte_ficha,
+  ep2002_error2, we2002_preco;
 
 type
   Tjugador = class(TForm)
@@ -359,18 +359,10 @@ procedure Tjugador.casilla_nombreKeyPress(Sender: TObject; var Key: char);
 procedure Tjugador.casilla_dorsalKeyPress(Sender: TObject; var Key: char);
 {$I impl/ep2002_jugador.casilla_dorsalKeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.casilla_precioKeyPress(Sender: TObject; var Key: char);
-begin
-  REStub('jugador.casilla_precioKeyPress');
-end;
-{$POP}
+{$I impl/ep2002_jugador.casilla_precioKeyPress.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Tjugador.etiqprecioClick(Sender: TObject);
-begin
-  REStub('jugador.etiqprecioClick');
-end;
-{$POP}
+{$I impl/ep2002_jugador.etiqprecioClick.inc}
 
 end.

@@ -74,6 +74,21 @@ wte/assets
 # alguem abrir o wte.lpi na IDE grafica, que as cria.
 wte/lib/
 wte/backup/
+# Binarios dos programas de `wte/tests/`. Eles sao COMPILADOS a partir dos
+# `.pas` ao lado, pelo `compara_tela.sh`, pelo `check_preco.py` e pelos testes
+# de ferramenta -- executavel sem extensao no meio de fonte versionado e facil
+# de commitar por engano, e foi o que quase aconteceu com o `dump_preco` e o
+# `test_preco` na WTE-TASK-32.
+wte/tests/dump_estado
+wte/tests/dump_preco
+wte/tests/test_bmp
+wte/tests/test_camada_dados
+wte/tests/test_lcl_combo
+wte/tests/test_mcr
+wte/tests/test_ml
+wte/tests/test_offsets
+wte/tests/test_preco
+wte/tests/test_render
 # ATENCAO: nao acrescente `*.lfm` nem `*.pas` a nenhuma regra daqui. A partir
 # da fase 2 os dois sao GERADOS pelo dfm2lfm.py e, ainda assim, versionados --
 # e o `--check` que prova que ninguem os editou a mao.

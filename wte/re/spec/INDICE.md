@@ -19,14 +19,14 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 66 |
+| `implementado` | 69 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 6 |
 | `nao portado` | 2 |
-| `aberto` | 3 |
+| `aberto` | 0 |
 | **total** | **96** |
 
-94 de 96 têm arquivo de spec.
+96 de 96 têm arquivo de spec.
 
 ## Os 96
 
@@ -73,8 +73,8 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00408548` | `jugador` | [BitBtn3Click](jugador.BitBtn3Click.md) | OnClick | auxiliar | implementado |
 | `0x00408af8` | `jugador` | [casilla_nombreKeyPress](jugador.casilla_nombreKeyPress.md) | OnKeyPress | edicao | implementado |
 | `0x00408b50` | `jugador` | [casilla_dorsalKeyPress](jugador.casilla_dorsalKeyPress.md) | OnKeyPress | edicao | implementado |
-| `0x00408b9c` | `jugador` | casilla_precioKeyPress | OnKeyPress | edicao | aberto |
-| `0x00408bb8` | `jugador` | etiqprecioClick | OnClick | edicao | aberto |
+| `0x00408b9c` | `jugador` | [casilla_precioKeyPress](jugador.casilla_precioKeyPress.md) | OnKeyPress | edicao | implementado |
+| `0x00408bb8` | `jugador` | [etiqprecioClick](jugador.etiqprecioClick.md) | OnClick | edicao | implementado |
 | `0x00408d88` | `ficha_warning_2` | [FormCreate](ficha_warning_2.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00408e0c` | `estrategia` | [bolaMouseMove](estrategia.bolaMouseMove.md) | OnMouseMove x10 | edicao | implementado |
 | `0x00408f00` | `estrategia` | [bolaMouseDown](estrategia.bolaMouseDown.md) | OnMouseDown x10 | edicao | implementado |
@@ -126,7 +126,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00410fa4` | `MainForm` | [SpeedButton2Click](MainForm.SpeedButton2Click.md) | OnClick | auxiliar | implementado |
 | `0x00410fc0` | `MainForm` | [SpeedButton1Click](MainForm.SpeedButton1Click.md) | OnClick | auxiliar | trivial |
 | `0x00410fd0` | `MainForm` | [Image3Click](MainForm.Image3Click.md) | OnClick | auxiliar | implementado |
-| `0x00410ff4` | `MainForm` | [base_teamClick](MainForm.base_teamClick.md) | OnClick x2 | auxiliar | aberto |
+| `0x00410ff4` | `MainForm` | [base_teamClick](MainForm.base_teamClick.md) | OnClick x2 | auxiliar | implementado |
 | `0x004111d8` | `MainForm` | [FormShow](MainForm.FormShow.md) | OnShow | carga | divergencia deliberada |
 | `0x00420e84` | `ficha_info2` | [FormCreate](ficha_info2.FormCreate.md) | OnCreate | carga | trivial |
 | `0x00420f08` | `ficha_error` | [SpeedButton1Click](ficha_error.SpeedButton1Click.md) | OnClick | auxiliar | trivial |

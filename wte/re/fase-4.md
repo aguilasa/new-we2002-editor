@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**93 dos 96 têm veredito fechado; 3 não.**
+**96 dos 96 têm veredito fechado; 0 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -28,30 +28,24 @@ A segunda metade do critério está cumprida — ver a seção do
 
 | Veredito | Handlers |
 |---|---:|
-| `implementado` | 66 |
+| `implementado` | 69 |
 | `trivial` | 19 |
 | `divergencia deliberada` | 6 |
 | `nao portado` | 2 |
-| `aberto` | 1 |
-| *(sem arquivo de spec)* | 2 |
+| `aberto` | 0 |
+| *(sem arquivo de spec)* | 0 |
 | **total** | **96** |
 
-94 dos 96 têm arquivo de spec.
-Os que não têm:
-
-- `jugador.casilla_precioKeyPress`
-- `jugador.etiqprecioClick`
-
+96 dos 96 têm arquivo de spec.
 ## Os que continuam `aberto`
 
-É um só, e **ele já tem corpo Pascal escrito**.
+São 0, e **0 deles já têm corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
 
 | Endereço | Handler | Grupo | Corpo |
 |---|---|---|---|
-| `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | sim |
 
 ## Quem grava na imagem, e o gate de cada um
 
@@ -86,12 +80,12 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 | `0x0040e85c` | [MainForm.paizquierda2Click](spec/MainForm.paizquierda2Click.md) | edicao | implementado | [golden-10-mover-ml](../tests/roteiros/golden-10-mover-ml.txt) |
 | `0x0040ecc0` | [MainForm.pabajoClick](spec/MainForm.pabajoClick.md) | edicao | implementado | [golden-11-descarte-ml](../tests/roteiros/golden-11-descarte-ml.txt) |
 | `0x00410a74` | [MainForm.dorsalClick](spec/MainForm.dorsalClick.md) | edicao | implementado | [golden-08-dorsal-mcr](../tests/roteiros/golden-08-dorsal-mcr.txt) |
-| `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | aberto | **nenhum** |
+| `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | implementado | **nenhum** |
 | `0x004111d8` | [MainForm.FormShow](spec/MainForm.FormShow.md) | carga | divergencia deliberada | [golden-01-arranque](../tests/roteiros/golden-01-arranque.txt) |
 
 ## A bateria golden desta corrida
 
-São 21 roteiros em disco, 20 com par do lado port. Cada
+São 22 roteiros em disco, 21 com par do lado port. Cada
 um desses foi rodado **duas vezes**: `controle` (oráculo contra oráculo,
 que prova que o par roteiro+imagem é determinístico) e `golden` (oráculo
 contra o app Lazarus). **O controle vem antes do teste** — sem ele, verde
@@ -130,10 +124,11 @@ fizesse absolutamente nada, e é para isso que o `golden_check.sh` tem
 | [golden-19-ficha-original](../tests/roteiros/golden-19-ficha-original.txt) | PASSOU | PASSOU | 149 | 1 |
 | [golden-20-ficha-reserva](../tests/roteiros/golden-20-ficha-reserva.txt) | PASSOU | PASSOU | 154 | 1 |
 | [golden-21-arrasto](../tests/roteiros/golden-21-arrasto.txt) | PASSOU | PASSOU | 183 | 1 |
+| [golden-22-precos](../tests/roteiros/golden-22-precos.txt) | PASSOU | PASSOU | 162 | **2** |
 
-**40 de 40 corridas verdes**, 3796 segundos de relógio no total.
+**42 de 42 corridas verdes**, 3958 segundos de relógio no total.
 
-**E a coluna de tentativas não é enfeite.** `golden-06-textura`, `golden-18-ficha-edicao` precisou de mais de uma corrida; a causa de cada
+**E a coluna de tentativas não é enfeite.** `golden-06-textura`, `golden-18-ficha-edicao`, `golden-22-precos` precisou de mais de uma corrida; a causa de cada
 caso está no Log da task que rodou a bateria. Gate que precisa de
 repetição para ficar verde deixa de separar *"o port diverge"* de
 *"a corrida não estava pronta"*, e essa é a classe de problema que a
@@ -152,12 +147,12 @@ japonesa, e a cobertura da europeia é da
 
 Cada uma das seis seções obrigatórias de cada spec carrega a sua linha
 `**Evidência:**`. A distribuição das
-471 linhas:
+481 linhas:
 
 | Evidência | Linhas |
 |---|---:|
 | `diff medido` | 10 |
-| `disassembly lido` | 458 |
+| `disassembly lido` | 468 |
 | `observacao de tela` | 2 |
 | `nao medido` | 1 |
 
@@ -224,7 +219,7 @@ são os cinco, e reconferência velha não vale para handler novo.
 
 ## Varredura por decompilado colado
 
-232 arquivos varridos — as specs, os `.inc` de corpo escrito
+237 arquivos varridos — as specs, os `.inc` de corpo escrito
 à mão e as unidades de `src/`.
 
 **Nada.** É a §2 do plano sustentada por medida em vez de honra.

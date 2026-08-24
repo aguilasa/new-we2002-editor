@@ -44,7 +44,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-29](/docs/tasks/29-camisa-e-bandeira-2d.md) | Camisa e bandeira 2D | 4 | 08, 24, 27 | ✅ Concluído | 2026-08-21 | 2026-08-21 |
 | [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) | Handlers dos 13 diálogos auxiliares | 4 | 25 | ✅ Concluído | 2026-08-21 | 2026-08-23 |
 | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | 🔄 Em andamento | — | — |
-| [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ⬜ Pendente | — | — |
+| [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ✅ Concluído | 2026-08-24 | ⬜ pendente |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
@@ -432,6 +432,13 @@ só uma escolha de quando.
       desvio era da régua: a `bandas()` do `compara_tela.py` somava pixel por
       linha e contava a camisa remanejada. **Os onze times medidos fecham em
       pixel** — 0, 2, 56–62, 68 e 85
+- [x] **A fase 4 fechou: 96 de 96 vereditos** *(2026-08-24)*. O último era o
+      `MainForm.base_teamClick`, e ele é preço — a
+      [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) o fechou junto com os
+      dois handlers de preço da ficha, que nem spec tinham. **E o preço é a
+      décima oitava rota de escrita**, com gate próprio
+      ([`golden-22-precos`](../../wte/tests/roteiros/golden-22-precos.txt)),
+      controle antes e byte-idêntico
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
       lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de
@@ -491,8 +498,19 @@ alimenta e passou a **carregar** essa gravação.
 
 ### Fase 5 — Features
 
-- [ ] Fórmula de preço por tabela de verdade **e** conferida no disassembly
-- [ ] Saturação, arredondamento e termo cruzado testados
+- [x] Fórmula de preço por tabela de verdade **e** conferida no disassembly —
+      `s⁴ div 3000000 + s³ div 40000 + s² div 700 + s div 7 + 5`, com
+      `× 5 div 3` para goleiro, sobre a soma das dezesseis barras de
+      habilidade. **132 jogadores em 6 times, 100% de acerto**
+      ([`wte/re/preco.md`](../../wte/re/preco.md)). E as fontes são três, não
+      duas: os **dois** handlers foram lidos instrução a instrução e são a
+      mesma fórmula compilada duas vezes
+- [x] Saturação, arredondamento e termo cruzado testados — 12 conferências em
+      [`test_preco.pas`](../../wte/tests/test_preco.pas). **A saturação não é
+      teto, é transbordo de 32 bits**: o original faz `imul` de 32×32 e um
+      `cdq` logo em seguida, que joga fora a metade alta. O ponto de virada foi
+      medido — soma **216** —, e a partir dali o preço do original **cai**
+      enquanto o de 64 bits sobe. Reproduzido de propósito, com `LongInt`
 - [x] Slots de ML batendo com a tela do original nas duas ROMs — europeia `13` nos dois lados; japonesa `1` nos dois com o mesmo conteúdo de arquivo (o oráculo altera a imagem ao abrir, ver a [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md))
 
 ### Fase 6 — Paridade

@@ -186,6 +186,8 @@ GOLDEN_DE: dict[str, tuple[str, ...]] = {
     "MainForm.boton_nombres2isoClick": ("golden-05-nomes",),
     "MainForm.boton_tex2isoClick": ("golden-06-textura",),
     "MainForm.dorsalClick": ("golden-08-dorsal-mcr",),
+    # WTE-TASK-32 -- o preco do time inteiro, a nona rota de escrita.
+    "MainForm.base_teamClick": ("golden-22-precos",),
     "MainForm.paderechaClick": ("golden-09-mover",),
     "MainForm.paizquierdaClick": ("golden-09-mover",),
     "MainForm.paderechaeizquierdaClick": ("golden-09-mover",),

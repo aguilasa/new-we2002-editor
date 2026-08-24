@@ -5,7 +5,7 @@ type: implementação
 category: features
 phase: 5
 depends_on: ["WTE-TASK-24", "WTE-TASK-25"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-32: Preço do jogador
@@ -119,28 +119,128 @@ original, jogador a jogador.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/spec/etiqprecioClick.md` | criar |
+| `wte/re/spec/jugador.etiqprecioClick.md` | criar |
+| `wte/re/spec/jugador.casilla_precioKeyPress.md` | criar |
 | `wte/re/preco.md` | criar — a fórmula, a tabela de verdade, as duas fontes |
+| `wte/re/preco.tsv` | criar — a amostra medida |
 | `wte/src/we2002_preco.pas` | criar |
 | `wte/tests/test_preco.pas` | criar |
+| `wte/tests/dump_preco.pas` | criar |
+| `wte/tools/check_preco.py`, `test_check_preco.py` | criar |
+| `wte/tests/roteiros/golden-22-precos{,.port}.txt` | criar |
+
+*Adaptado na execução:* a task listava `wte/re/spec/etiqprecioClick.md` sem o
+prefixo de formulário, e o `spec_index.py` exige `<formulario>.<handler>.md`.
+E faltava a segunda spec — o `casilla_precioKeyPress` também não tinha
+arquivo.
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Fórmula recuperada por tabela de verdade
-- [ ] Fórmula conferida contra o disassembly, e as duas fontes concordando
-- [ ] Saturação, arredondamento e termo cruzado testados explicitamente
-- [ ] Cálculo do time inteiro conferido, não presumido soma
-- [ ] `base_teamClick` com golden verde — **byte, não tela** —, com o controle
-      fechando antes, e o veredito dele trocado de `aberto` no
-      `re/spec/INDICE.md`
-- [ ] 100% de acerto sobre amostra grande das duas ROMs
-- [ ] Commit no formato conventional, em inglês
+- [x] Fórmula recuperada por tabela de verdade — **132 jogadores, 6 times**,
+      em [`wte/re/preco.tsv`](../../wte/re/preco.tsv)
+- [x] Fórmula conferida contra o disassembly, e as duas fontes concordando —
+      e são **três**: os dois handlers foram lidos instrução a instrução e são
+      a mesma fórmula compilada duas vezes (`0x004110e7`..`0x0041112a` e
+      `0x00408c3b`..`0x00408c83`)
+- [x] Saturação, arredondamento e termo cruzado testados explicitamente —
+      [`test_preco.pas`](../../wte/tests/test_preco.pas), 12 conferências. A
+      saturação é **transbordo de 32 bits**, e o ponto de virada foi medido:
+      soma **216**
+- [x] Cálculo do time inteiro conferido, não presumido soma — não é soma: é a
+      mesma fórmula por jogador, e o achado foi outro (o slot 22)
+- [x] `base_teamClick` com golden verde — **byte, não tela** —, com o controle
+      fechando antes, e o veredito trocado no `re/spec/INDICE.md`
+- [x] 100% de acerto sobre amostra grande — **das duas ROMs não**, e a razão é
+      medida: a ROM europeia **não hospeda este oráculo**. A corrida sobre ela
+      gravou zero bytes; o `wte.exe` morre na troca de time com aquela imagem
+      ([CORR-WTE-044](/docs/tasks/CORR-WTE-044.md)). É a mesma adaptação que a
+      WTE-TASK-31 fez no critério 4, e as linhas europeias estão no TSV **sem**
+      `medido`, com o coletor dizendo isso em voz alta
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-24
+
 - **Resumo do que foi feito:**
+
+  A fórmula é `s⁴ div 3000000 + s³ div 40000 + s² div 700 + s div 7 + 5`, com
+  `× 5 div 3` para goleiro, sobre a soma das dezesseis barras de habilidade. Ela
+  está inteira em [`wte/re/preco.md`](../../wte/re/preco.md). **Com ela, a fase
+  4 fechou: 96 de 96 vereditos.**
+
+  **O método rendeu mais que o previsto, e por uma troca.** A task manda montar
+  a tabela de verdade lendo o preço de **um** jogador na tela. Ler a tela custa
+  OCR; mas o `base_teamClick` do oráculo **grava** o preço de 22 jogadores na
+  imagem, e byte se lê com `cmp`. Cada corrida do oráculo passou a valer 22
+  amostras em vez de uma, e a amostra final tem **132 jogadores em 6 times**,
+  com 100% de acerto. A régua ficou mais forte *e* mais barata.
+
+  **As duas metades da feature são a mesma fórmula compilada duas vezes**, e
+  isso não era garantido — o enunciado alertava que o preço do time podia ter
+  desconto ou teto. Lidas instrução a instrução, `0x004110e7`..`0x0041112a` e
+  `0x00408c3b`..`0x00408c83` são idênticas. O que muda é de onde vem a soma: o
+  `etiqprecioClick` soma o que está **na tela** (as dezesseis
+  `barrhab<N>.Position`), e o `base_teamClick` soma da **memória**, porque não
+  tem tela por jogador.
+
+- **O que se aprendeu, e vale para as próximas:**
+
+  **1. A saturação que a task previu existe, e não é teto — é transbordo.** O
+  original faz `imul` de 32×32 e logo em seguida um `cdq`, que joga fora a
+  metade alta antes da divisão. Em Pascal isso é `LongInt` **deliberado**: com
+  `Int64` o preço divergiria de toda soma ≥ **216** (medido, não estimado — é
+  onde 215⁴ deixa de caber em 31 bits), e a partir dali o preço do original
+  **cai** enquanto o de 64 bits sobe. Jogador real não chega lá; nada no formato
+  impede.
+
+  **2. O original preça 22 slots, não 23** — achado que ninguém procurava. O
+  laço vai de 0 a 22, mas a terceira coluna do slot 22 sai zero e ele é pulado.
+  Medido em seis times; no time 9 os slots 21 e 22 têm a **mesma** soma e a
+  **mesma** posição, e só o 21 é gravado, o que descarta explicação pelo
+  conteúdo. **A causa está aberta na
+  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md)**: a conta de offset herdada do
+  `we2002_core` — byte-idêntico ao `ed.exe` — dá coluna não nula ali. Os dois
+  editores discordam sobre o último slot.
+
+  **3. Duas janelas do mesmo tamanho podem exigir coordenadas diferentes.** O
+  `ficha_creditos_equipo` mede 285×124 nos **dois** lados, e o clique no botão
+  de confirmação precisa de `(183,89)` no oráculo e `(180,60)` no port: sob Wine
+  a moldura é desenhada **dentro** da janela X, sob gtk2 sem gerenciador não há
+  moldura. Buscar por tamanho não distingue os dois casos. Com a coordenada
+  errada o diálogo sai por `mrCancel`, o port não grava nada, e o diff parece
+  erro de fórmula.
+
 - **Arquivos criados/modificados:**
+
+  - criados: `wte/src/we2002_preco.pas`, `wte/tests/test_preco.pas`,
+    `wte/tests/dump_preco.pas`, `wte/tools/check_preco.py`,
+    `wte/tools/test_check_preco.py`, `wte/re/preco.md`, `wte/re/preco.tsv`,
+    `wte/re/spec/jugador.etiqprecioClick.md`,
+    `wte/re/spec/jugador.casilla_precioKeyPress.md`,
+    `wte/src/impl/ep2002_jugador.etiqprecioClick.inc`,
+    `wte/src/impl/ep2002_jugador.casilla_precioKeyPress.inc`,
+    `wte/tests/roteiros/golden-22-precos{,.port}.txt`,
+    `docs/tasks/CORR-WTE-095.md`
+  - modificados: `wte/src/impl/ep2002_mainform.base_teamClick.inc` (o miolo),
+    os dois `.uses`, `wte/tools/check_fase4.py`, `wte/re/fase-4-golden.tsv`,
+    `wte/re/spec/MainForm.base_teamClick.md`, `docs/PLAN-WTE-LAZARUS.md` §4.4,
+    `docs/tasks/progresso.md`, `docs/tasks/correcoes-progresso.md`
+  - regerados: `wte/re/fase-4.md`, `wte/re/fase-2.md`,
+    `wte/re/fase-3-fechamento.md`, `wte/re/spec/INDICE.md`, os `ep2002_*.pas`
+
 - **Problemas encontrados:**
+
+  **A guarda que escrevi pegou a mim mesmo, e estava certa.** O cabeçalho do
+  `check_preco.py` avisa que *"o byte de preço de uma imagem virgem não é
+  resposta de ninguém"*. A primeira versão do coletor ignorou o próprio aviso:
+  incluiu a amostra da ROM europeia — onde o oráculo gravou **zero** bytes — e
+  acusou 21 divergências contra os preços de fábrica. Hoje o coletor **exige
+  prova** de que o oráculo escreveu, comparando a faixa do time contra a ROM
+  virgem antes de marcar qualquer linha como medida.
+
+  **E o `golden-22-precos` reprovou na primeira corrida por coordenada, não por
+  fórmula** — ver a lição 3 acima. O diff era exatamente a faixa de preço, o que
+  faz o erro parecer de cálculo.

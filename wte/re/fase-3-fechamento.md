@@ -102,7 +102,7 @@ reprova arquivo de `src/core/` que ninguém reivindicou.
 A pergunta que a task manda responder, medida por `uses`:
 
 - **3** unidade(s) da casca (`wte/src`, `wte.lpr`) importam a camada de dados: `src/ep2002_mainform.pas`, `src/we2002_estado.pas`, `src/wte_ficha.pas`
-- **2** de teste importam: `tests/dump_estado.pas`, `tests/test_camada_dados.pas`.
+- **3** de teste importam: `tests/dump_estado.pas`, `tests/dump_preco.pas`, `tests/test_camada_dados.pas`.
 
 A integração mínima **já existe** — e este documento precisa ser
 relido, porque ele foi escrito quando ela não existia.

@@ -114,6 +114,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-092](/docs/tasks/CORR-WTE-092.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O ramo do reserva e o arrasto de bola não tinham estímulo; o harness não sabia produzir `mousedown` | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-093](/docs/tasks/CORR-WTE-093.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Os quatro laços do maior `FormCreate` não tinham leitura, e o dono do diálogo de textura (WTE-TASK-29) fechou sem ele | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-094](/docs/tasks/CORR-WTE-094.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | A WTE-TASK-32 abre dizendo que o `ed.exe` não calcula preço; ele calcula, o que falta é o botão — e a fórmula dele já está transpilada nesta árvore | Média | [x] concluída | 2026-08-24 |
+| [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O editor do Obocaman nunca preça o slot 22 e o `ed.exe` diz que ele tem preço; medido em seis times, causa desconhecida | Média | [ ] pendente | — |
 
 ## Checklist
 
@@ -210,6 +211,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-092 — dar ao harness o verbo `arrasta` e um roteiro que entre pelo botão do reserva
 - [x] CORR-WTE-093 — ler os quatro laços do `estrategia.FormCreate` e escrever os dois últimos corpos fora de preço
 - [x] CORR-WTE-094 — corrigir a premissa de preço da WTE-TASK-32 e registrar o oráculo B que ela ganha
+- [ ] CORR-WTE-095 — descobrir por que a terceira coluna do slot 22 sai zero no oráculo
 
 ## Detalhes por correção
 
@@ -1700,3 +1702,16 @@ dizer "fechada e fora do backlog", não "corrigida".
   Pascal nesta árvore. Sem presumir fórmula igual — a do `ed.exe` é `double`
   com `ceil`, a do Obocaman é inteira; o valor dele é desenhar a amostragem,
   porque exemplifica os três riscos que a própria task lista
+
+### CORR-WTE-095
+
+- **Arquivo com problema:** `wte/re/spec/MainForm.base_teamClick.md` (o achado
+  medido sem causa), `wte/src/impl/ep2002_mainform.base_teamClick.inc`
+- **Sintoma:** o `base_teamClick` do oráculo grava preço para 22 dos 23 slots; o
+  slot 22 fica com o valor de fábrica em todos os seis times medidos, mesmo
+  quando tem a mesma soma e a mesma posição do slot 21
+- **Como foi detectado:** ao construir a tabela de verdade da WTE-TASK-32 —
+  cada time dava exatamente uma divergência, e era sempre o slot 22
+- **Fix:** ainda não. O port reproduz a medida (`ULTIMO_SLOT_PRECADO = 21`) para
+  o gate poder ser byte a byte, e esta CORR estabelece a causa. As quatro
+  perguntas baratas estão no arquivo, na ordem de responder
