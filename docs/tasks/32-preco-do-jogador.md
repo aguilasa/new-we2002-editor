@@ -206,18 +206,21 @@ arquivo.
   impede.
 
   **2. O original preça 22 slots, não 23** — achado que ninguém procurava. O
-  laço vai de 0 a 22, mas a terceira coluna do slot 22 sai zero e ele é pulado.
-  Medido em seis times; no time 9 os slots 21 e 22 têm a **mesma** soma e a
-  **mesma** posição, e só o 21 é gravado, o que descarta explicação pelo
-  conteúdo. **A causa está aberta na
-  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md)**, e ela já mediu duas coisas em
-  2026-08-24 que mudam o que se pode afirmar aqui: o salto é **real** — plantado
-  `0xFF` no slot 22 do time 2, o oráculo devolveu 26 e 21 nos slots 20 e 21 e
-  deixou o 22 em 255 —, e a `0x00404374` do **oráculo** não tem ramo por slot,
-  calculando a mesma conta linear que o port para os 23. Ou seja, **os dois
-  editores não discordam sobre o offset do último slot**, como esta linha dizia
-  na véspera: o que sobra aberto é o `cmp` de `0x004110a6` ler zero num campo
-  que a rotina anterior acabou de preencher.
+  laço vai de 0 a 22 e grava 22 bytes. Medido em seis times; no time 9 os slots
+  21 e 22 têm a **mesma** soma e a **mesma** posição, e só o 21 é gravado, o que
+  descarta explicação pelo conteúdo.
+
+  Esta linha explicou o salto pelo `je` da terceira coluna — *"a terceira coluna
+  do slot 22 sai zero e ele é pulado"* — e a
+  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) **refutou isso em 2026-08-24**,
+  sob `strace`: o oráculo **lê** o byte condicional do slot 22 em 3067472, com o
+  mesmo número de seeks dos outros 22, e a `0x004046e8` só faz essa leitura
+  quando a coluna **não** é zero. O byte se perde na **escrita**, dentro da
+  `0x00403400`, e o mecanismo continua aberto. Três coisas ficaram fechadas: o
+  salto é real (`0xFF` plantado em 3067472 sobrevive à corrida), a conta de
+  offset do port não está errada (a `0x00404374` decide por time, nunca por
+  slot), e o slot 22 é endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`,
+  mostra o import de `.mcr` gravando os **23** bytes condicionais do time 3.
 
   **3. Duas janelas do mesmo tamanho podem exigir coordenadas diferentes.** O
   `ficha_creditos_equipo` mede 285×124 nos **dois** lados, e o clique no botão
