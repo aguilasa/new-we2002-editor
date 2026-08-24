@@ -120,7 +120,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A lista de arquivos da WTE-TASK-32 não menciona as quinze linhas acrescentadas ao `.gitignore` | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-100](/docs/tasks/CORR-WTE-100.md) | [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | A citação `` `{$Q-}` `` num comentário do `we2002_preco.pas` abre nível 2: é o único warning do build, e em `{$mode delphi}` seria erro fatal | Baixa | [x] concluída | 2026-08-24 |
-| [CORR-WTE-101](/docs/tasks/CORR-WTE-101.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O contrato da spec diz "seis seções obrigatórias" e a ferramenta cobra cinco; e a frase do `fase-4.md` apresenta as 481 linhas de evidência como se fossem todas, quando 44 outras ficam fora da conta | Média | [ ] pendente | — |
+| [CORR-WTE-101](/docs/tasks/CORR-WTE-101.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O contrato da spec diz "seis seções obrigatórias" e a ferramenta cobra cinco; e a frase do `fase-4.md` apresenta as 481 linhas de evidência como se fossem todas, quando 44 outras ficam fora da conta | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-102](/docs/tasks/CORR-WTE-102.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Quatro sítios vivos ainda derivam as dezessete gravações "das 94 specs"; o índice conta 96 desde que a WTE-TASK-32 escreveu as duas de preço | Média | [ ] pendente | — |
 | [CORR-WTE-103](/docs/tasks/CORR-WTE-103.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | No estado zero o `check_fase4.py` emite o título `## Os que continuam aberto` colado no parágrafo — a linha em branco mora dentro do `if` que lista os sem spec | Baixa | [ ] pendente | — |
 
@@ -225,7 +225,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature
 - [x] CORR-WTE-099 — acrescentar o `.gitignore` à lista de arquivos da WTE-TASK-32
 - [x] CORR-WTE-100 — tirar as chaves da diretiva citada na prosa do `we2002_preco.pas`
-- [ ] CORR-WTE-101 — trocar "seis seções" por cinco no gabarito e no gerador, e dizer que a conta é só delas
+- [x] CORR-WTE-101 — trocar "seis seções" por cinco no gabarito e no gerador, e dizer que a conta é só delas
 - [ ] CORR-WTE-102 — atualizar de 94 para 96 a população de specs de onde saem as dezessete gravações
 - [ ] CORR-WTE-103 — tirar do `if` a linha em branco que separa o bloco de specs do título seguinte
 

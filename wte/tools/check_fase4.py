@@ -12,7 +12,7 @@ em doc ja se propagou neste repositorio (CORR-WTE-012, -014, -023).
 |---|---|
 | cobertura | os 96 do `published_methods.tsv` contra os `.md` de `re/spec/` |
 | distribuicao de veredito | o frontmatter de cada spec, pelo validador do `spec_index.py` |
-| forca da evidencia | as linhas `**Evidencia:**` das seis secoes obrigatorias |
+| forca da evidencia | as linhas `**Evidencia:**` das cinco secoes obrigatorias |
 | `nao portado` justificado | secao `## Justificativa` nao vazia |
 | decompilado colado | as marcas do `spec_index.py` sobre specs, `.inc` e `.pas` |
 | bloqueio vencido | rotina que a spec `aberto` diz nao portada e o Pascal tem |
@@ -292,6 +292,24 @@ def le_reamostra() -> dict[str, dict]:
             for d in (dict(zip(cab, l.split("\t"))) for l in linhas[1:])}
 
 
+# ---------------------------------------------------------------- vocabulario ---
+# O numero de secoes obrigatorias SAI do `spec_index.SECOES`, nunca de literal.
+#
+# A CORR-WTE-101 nasceu de "seis secoes obrigatorias" escrito em tres lugares
+# contra as cinco que o `spec_index.py` cobra -- o `GABARITO.md` tinha contado a
+# `## Notas` opcional junto, e o numero migrou dali para o cabecalho deste
+# gerador e para a prosa que ele emite. Escrever a palavra por extenso a partir
+# de `len(S.SECOES)` faz a frase acompanhar o vocabulario: acrescentar uma secao
+# obrigatoria muda a prosa gerada em vez de produzir a proxima "seis".
+_EXTENSO = {1: "uma", 2: "duas", 3: "tres", 4: "quatro", 5: "cinco",
+            6: "seis", 7: "sete", 8: "oito", 9: "nove", 10: "dez"}
+
+
+def por_extenso(n: int) -> str:
+    """O cardinal em palavra, ou o algarismo se sair da faixa util."""
+    return _EXTENSO.get(n, str(n))
+
+
 # ------------------------------------------------------------------ leitura ---
 # Uma cerca de bloco de codigo sozinha na linha. A `boton_tex2isoClick` abre a
 # secao com um bloco `text` -- a cerca nao e a resposta, e a linha seguinte e.
@@ -403,6 +421,7 @@ def medir() -> dict:
 
     vereditos: dict[str, int] = {v: 0 for v in S.VEREDITOS}
     evidencias: dict[str, int] = {e: 0 for e in S.EVIDENCIAS}
+    evidencias_fora = 0   # linhas `**Evidencia:**` em secao que nao e cobrada
     sem_spec: list[str] = []
     fracas: list[dict] = []
     pontos_fracos: list[dict] = []
@@ -425,6 +444,15 @@ def medir() -> dict:
 
         texto = arq.read_text(encoding="utf-8")
         secs = S.secoes_de(texto)
+
+        # A conta acima e das SECOES COBRADAS. Uma spec pode escrever evidencia
+        # em `## Notas`, `## Justificativa` ou `## Como o veredito fechou`, e
+        # essas linhas existem no arquivo sem entrar na distribuicao -- medir a
+        # diferenca e o que impede a prosa de prometer "todas as linhas".
+        evidencias_fora += (
+            len(S.CABECALHO_EVIDENCIA.findall(texto))
+            - sum(len(S.CABECALHO_EVIDENCIA.findall(secs.get(nome, "")))
+                  for nome in S.SECOES))
 
         # spec cuja evidencia INTEIRA e fraca -- o `spec_index.py` ja recusa a
         # combinacao com `implementado`; aqui a pergunta e mais larga.
@@ -572,6 +600,7 @@ def medir() -> dict:
         "vereditos": vereditos,
         "sem_spec": sem_spec,
         "evidencias": evidencias,
+        "evidencias_fora": evidencias_fora,
         "fracas": fracas,
         "pontos_fracos": pontos_fracos,
         "abertos": abertos,
@@ -778,9 +807,12 @@ def gera_md(m: dict) -> str:
 
     a("## Força da evidência")
     a("")
-    a("Cada uma das seis seções obrigatórias de cada spec carrega a sua linha")
-    a("`**Evidência:**`. A distribuição das")
-    a(f"{sum(m['evidencias'].values())} linhas:")
+    a(f"Cada uma das {por_extenso(len(S.SECOES))} seções obrigatórias de cada spec")
+    a("carrega a sua linha `**Evidência:**`, e é essa a população contada:")
+    a("evidência escrita em `## Notas`, `## Justificativa` ou `## Como o veredito")
+    a("fechou` fica de fora, e são")
+    a(f"{m['evidencias_fora']} linhas. A distribuição das")
+    a(f"{sum(m['evidencias'].values())} cobradas:")
     a("")
     a("| Evidência | Linhas |")
     a("|---|---:|")

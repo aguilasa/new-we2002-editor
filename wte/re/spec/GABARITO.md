@@ -69,8 +69,10 @@ sem o time. "Não trata" é resposta.
 Livre. Ordem de evento, divergência da LCL, armadilha. Opcional.
 ````
 
-As seis seções são **obrigatórias e nesta ordem**; `## Notas` é opcional. Cada
-uma das seis carrega sua própria linha `**Evidência:**`.
+As **cinco** seções acima são obrigatórias e nesta ordem, cada uma com sua
+própria linha `**Evidência:**`; `## Notas` é opcional e **não** é cobrada — nem
+pelo validador do `spec_index.py`, nem pela conta de evidência do
+`check_fase4.py`.
 
 ---
 
@@ -167,7 +169,7 @@ foi **entendido e reescrito** ou **copiado**.
 ## Como o Pascal sai daqui
 
 1. Ler o disassembly a partir do endereço, ou medir por diff.
-2. Preencher as seis seções, cada uma com sua evidência.
+2. Preencher as cinco seções obrigatórias, cada uma com sua evidência.
 3. Escrever o Pascal **a partir deste arquivo**, sem o decompilador aberto.
 4. Golden test daquela operação.
 5. Trocar o veredito e regerar o índice.

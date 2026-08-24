@@ -3,7 +3,7 @@ id: CORR-WTE-101
 title: "Correção: \"seis seções obrigatórias\" onde o gabarito e a ferramenta têm cinco, e a conta de 481 é só delas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -150,18 +150,47 @@ próxima "seis".
 
 ## Verificação
 
-- [ ] `grep -rn "seis seç\|seis secoes" wte/ docs/` não devolve afirmação viva
-- [ ] `grep -n "cinco seções" wte/re/fase-4.md` mostra a frase regerada
-- [ ] O caso novo do `test_check_fase4.py` reprova se a frase voltar a ser literal
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "seis seç\|seis secoes" wte/ docs/` não devolve afirmação viva
+- [x] `grep -n "cinco seções" wte/re/fase-4.md` mostra a frase regerada
+- [x] O caso novo do `test_check_fase4.py` reprova se a frase voltar a ser literal
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
+Trocado `seis` por `cinco` nos três sítios do contrato — as duas frases do
+`GABARITO.md` e o cabeçalho do `check_fase4.py` — e a prosa gerada passou a
+dizer **o que conta**: a linha nasce de `por_extenso(len(S.SECOES))`, e o
+parágrafo declara que evidência em `## Notas`, `## Justificativa` e `## Como o
+veredito fechou` fica de fora, com o número medido (44) ao lado das 481
+cobradas. O `medir()` ganhou `evidencias_fora`, que é a subtração entre as
+linhas do arquivo e as das seções cobradas.
+
+A guarda (`TestProsaDaEvidencia`, cinco casos) amarra três coisas: o cardinal
+sai de `len(S.SECOES)`, a linha viva do `fase-4.md` cita o cardinal de hoje, e a
+linha do gerador tem de conter `por_extenso(len(S.SECOES))` — plantar o literal
+`"cinco"` de volta a reprova, medido. O 44 também é conferido contra a medida
+independente, não contra um literal.
+
 **Problemas encontrados:**
 
+A varredura achou dois sítios que a CORR não previa, os dois em **Log de
+Execução**: `23-formato-da-spec.md:103` (*"O gabarito tem as seis seções
+obrigatórias"*) e `26-handlers-de-edicao.md:383` (*"`disassembly lido` nas seis
+seções"*). Log costuma ser registro histórico e fica de fora — foi o critério
+da CORR-WTE-102 para o `94`. Aqui não vale: `94` era verdade no dia em que foi
+medido, e `seis` nunca foi. As duas specs citadas têm cinco linhas
+`**Evidência:**` e cinco seções obrigatórias mais `## Notas`; era o mesmo
+engano herdado do gabarito, repetido. Corrigidos os dois.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/spec/GABARITO.md` — as duas frases
+- `wte/tools/check_fase4.py` — cabeçalho, `por_extenso()`, `evidencias_fora`, a prosa
+- `wte/tools/test_check_fase4.py` — `TestProsaDaEvidencia`, cinco casos
+- `wte/re/fase-4.md` — regerado
+- `docs/tasks/23-formato-da-spec.md`, `docs/tasks/26-handlers-de-edicao.md` — a varredura

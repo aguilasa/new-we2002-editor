@@ -142,9 +142,12 @@ japonesa, e a cobertura da europeia é da
 
 ## Força da evidência
 
-Cada uma das seis seções obrigatórias de cada spec carrega a sua linha
-`**Evidência:**`. A distribuição das
-481 linhas:
+Cada uma das cinco seções obrigatórias de cada spec
+carrega a sua linha `**Evidência:**`, e é essa a população contada:
+evidência escrita em `## Notas`, `## Justificativa` ou `## Como o veredito
+fechou` fica de fora, e são
+44 linhas. A distribuição das
+481 cobradas:
 
 | Evidência | Linhas |
 |---|---:|

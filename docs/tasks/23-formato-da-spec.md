@@ -100,7 +100,7 @@ Um arquivo que lista os 96 com veredito corrente, gerado do
 - **Resumo do que foi feito:**
 
   Gabarito, vocabulário fechado, gerador de índice e os 96 indexados como
-  `aberto`. O gabarito tem as seis seções obrigatórias na ordem, cada uma com
+  `aberto`. O gabarito tem as cinco seções obrigatórias na ordem, cada uma com
   a própria linha `**Evidência:**` escolhida entre quatro valores — `diff
   medido`, `disassembly lido`, `observação de tela`, `não medido` —, e o
   vocabulário de veredito ficou em cinco, **sem acento e sem espaço

@@ -26,6 +26,7 @@ import unittest
 from pathlib import Path
 
 import check_fase4 as C
+import spec_index as S
 
 
 class TestPrimeiraLinha(unittest.TestCase):
@@ -271,6 +272,67 @@ class TestBloqueioVencido(unittest.TestCase):
                       "a `0x00408460` ainda nao lida antes desta passagem"):
             with self.subTest(texto=texto):
                 self.assertEqual(self.cita(texto), set())
+
+
+class TestProsaDaEvidencia(unittest.TestCase):
+    """A guarda da CORR-WTE-101: a prosa acompanha o vocabulario.
+
+    "Seis secoes obrigatorias" viveu em tres lugares contra as cinco que o
+    `spec_index.py` cobra -- o `GABARITO.md` contou a `## Notas` opcional junto,
+    e o numero migrou dali para o cabecalho deste gerador e para a prosa gerada.
+    Literal em prosa nao envelhece sozinho: quem acrescentar uma secao
+    obrigatoria mexe em `S.SECOES` e nao no paragrafo. Por isso o teste cobra
+    que a frase venha de `len(S.SECOES)`, e reprova se voltar a ser literal.
+    """
+
+    def prosa(self, n_secoes: int) -> str:
+        """A frase gerada com um vocabulario de `n_secoes` secoes."""
+        original = S.SECOES
+        try:
+            S.SECOES = tuple(f"S{i}" for i in range(n_secoes))
+            return C.por_extenso(len(S.SECOES))
+        finally:
+            S.SECOES = original
+
+    def test_o_cardinal_sai_do_vocabulario(self) -> None:
+        self.assertEqual(self.prosa(5), "cinco")
+        self.assertEqual(self.prosa(6), "seis")
+
+    def test_fora_da_faixa_cai_no_algarismo(self) -> None:
+        """Vocabulario improvavel nao pode produzir frase sem numero."""
+        self.assertEqual(C.por_extenso(42), "42")
+
+    def test_a_frase_gerada_cita_o_vocabulario_de_hoje(self) -> None:
+        """O ponto do teste: a linha viva do `fase-4.md`.
+
+        Se alguem reescrever a prosa com `"cinco"` literal, este caso continua
+        verde -- o seguinte e que reprova. Os dois juntos e que amarram.
+        """
+        gerado = C.OUT.read_text(encoding="utf-8")
+        self.assertIn(
+            f"Cada uma das {C.por_extenso(len(S.SECOES))} seções obrigatórias",
+            gerado)
+
+    def test_a_prosa_nao_tem_o_cardinal_literal_no_fonte(self) -> None:
+        """Literal e o defeito; a f-string com `len(S.SECOES)` e o conserto."""
+        fonte = Path(C.__file__).read_text(encoding="utf-8")
+        for linha in fonte.splitlines():
+            if "seções obrigatórias de cada spec" in linha:
+                self.assertIn("por_extenso(len(S.SECOES))", linha)
+                break
+        else:
+            self.fail("a linha da prosa sumiu do gerador")
+
+    def test_a_evidencia_de_fora_e_contada_e_nao_afirmada(self) -> None:
+        """O 44 tambem sai de medida -- era a segunda metade da CORR-WTE-101."""
+        m = C.medir()
+        self.assertEqual(
+            m["evidencias_fora"],
+            sum(len(S.CABECALHO_EVIDENCIA.findall(
+                    (S.SPEC / f"{h['formulario']}.{h['handler']}.md")
+                    .read_text(encoding="utf-8")))
+                for h in S.le_handlers())
+            - sum(m["evidencias"].values()))
 
 
 if __name__ == "__main__":

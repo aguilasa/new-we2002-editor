@@ -380,7 +380,7 @@ do `--edicao`; e o `iguala_nombres`.
 
 - **Arquivos criados/modificados:**
   - `wte/re/spec/MainForm.sel_barraClick.md`, `MainForm.track_barraChange.md`
-    — as duas specs, `disassembly lido` nas seis seções
+    — as duas specs, `disassembly lido` nas cinco seções
   - `wte/src/impl/ep2002_mainform.sel_barraClick.inc`, `.track_barraChange.inc`
   - `wte/src/impl/ep2002_mainform.aux.inc` — `BarrasEmEdicao`
   - `wte/src/impl/ep2002_mainform.lista_equiposChange.inc` — a carga passa pelo
