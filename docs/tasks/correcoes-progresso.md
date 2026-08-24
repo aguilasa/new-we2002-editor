@@ -113,6 +113,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-091](/docs/tasks/CORR-WTE-091.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O `Original ` da ficha não alcançava a `PreencheFicha` por ciclo de `uses`, e a régua dele precisa ser um par de roteiros que difere por um clique | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-092](/docs/tasks/CORR-WTE-092.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O ramo do reserva e o arrasto de bola não tinham estímulo; o harness não sabia produzir `mousedown` | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-093](/docs/tasks/CORR-WTE-093.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Os quatro laços do maior `FormCreate` não tinham leitura, e o dono do diálogo de textura (WTE-TASK-29) fechou sem ele | Alta | [x] concluída | 2026-08-24 |
+| [CORR-WTE-094](/docs/tasks/CORR-WTE-094.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | A WTE-TASK-32 abre dizendo que o `ed.exe` não calcula preço; ele calcula, o que falta é o botão — e a fórmula dele já está transpilada nesta árvore | Média | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -208,6 +209,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-091 — descer a `PreencheFicha` para a `wte_ficha` e julgar o `Original ` por um par diferencial
 - [x] CORR-WTE-092 — dar ao harness o verbo `arrasta` e um roteiro que entre pelo botão do reserva
 - [x] CORR-WTE-093 — ler os quatro laços do `estrategia.FormCreate` e escrever os dois últimos corpos fora de preço
+- [x] CORR-WTE-094 — corrigir a premissa de preço da WTE-TASK-32 e registrar o oráculo B que ela ganha
 
 ## Detalhes por correção
 
@@ -1683,3 +1685,18 @@ dizer "fechada e fora do backlog", não "corrigida".
   medido no VMT de `TListBox` (`SetItemIndex`), não suposto. O diálogo de
   textura virou `divergencia deliberada` pela troca de `FILE*` por caminho, que
   o `we2002_estado` já documentava
+
+### CORR-WTE-094
+
+- **Arquivo com problema:** `docs/tasks/32-preco-do-jogador.md`
+- **Sintoma:** a task abre afirmando que o `ed.exe` não calcula preço, e ele
+  calcula — `CalcolaCostoGiocatore` em `legacy/mfc/edDlg.cpp:7703`, com laço de
+  time inteiro em `:7948` e handler no message map em `:1286`
+- **Como foi detectado:** ao levantar o que a WTE-TASK-32 vai precisar, na
+  quarta passagem da WTE-TASK-31
+- **Fix:** a premissa vira "o `ed.exe` não **oferece** preço" — `CMD_CALCCOSTI`
+  está no `resource.h` e não no `ed.rc`, mesmo caso do `MainForm.Button2Click`.
+  E fica registrado que a task ganha oráculo B: `ComputePlayerCost`, já em
+  Pascal nesta árvore. Sem presumir fórmula igual — a do `ed.exe` é `double`
+  com `ceil`, a do Obocaman é inteira; o valor dele é desenhar a amostragem,
+  porque exemplifica os três riscos que a própria task lista

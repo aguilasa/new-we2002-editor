@@ -13,10 +13,29 @@ status: pendente
 ## Contexto
 
 - **Referência:** `docs/PLAN-WTE-LAZARUS.md` §5.1.
-- Primeira das quatro features que motivaram o projeto: o `ed.exe` não calcula
-  preço, o editor do Obocaman calcula. Novidade da v0.98 para o jogador e da
-  v0.99 para o time inteiro ("calculate credits for a whole team with just one
-  click").
+- Primeira das quatro features que motivaram o projeto: **o `ed.exe` não
+  *oferece* preço** — o editor do Obocaman oferece. Novidade da v0.98 para o
+  jogador e da v0.99 para o time inteiro ("calculate credits for a whole team
+  with just one click").
+
+> **A frase acima dizia "o `ed.exe` não calcula preço", e isso era falso**
+> ([CORR-WTE-094](/docs/tasks/CORR-WTE-094.md), 2026-08-24). Ele calcula: a
+> fórmula está em `legacy/mfc/edDlg.cpp:7703` (`CalcolaCostoGiocatore`), o laço
+> do time inteiro em `:7948`, e o handler no message map em `:1286`. O que não
+> existe é o **controle** — `CMD_CALCCOSTI` (1244) está no `resource.h` e não
+> no `ed.rc`, o mesmo caso do `MainForm.Button2Click` no binário do Obocaman.
+>
+> **Isso dá a esta task um oráculo B que ela não sabia ter**, e já em Pascal:
+> `ComputePlayerCost` em `wte/src/we2002_database.pas:1776`, transpilado de
+> `src/core/Database.cpp:1465`.
+>
+> **Sem presumir fórmula igual.** A do `ed.exe` é `double`, parte de `k = 16`,
+> ramifica por posição e fecha em `if (k<1) k = 1; return (int)ceil(k);`; a do
+> Obocaman é inteira, sobre uma soma, com `0x2DC6C0`, `0x9C40`, `0x2BC`, `7`,
+> um `+5` e a variante `× 5 div 3`. O valor dele é **desenhar a amostragem**:
+> os três riscos da seção "onde a tabela pode enganar" estão todos
+> exemplificados lá — saturação no `if (k<1)`, arredondamento no `ceil`, e
+> termo cruzado nos bônus `== 19` e no `if(foot == 2)`.
 
 **Vem primeiro entre as quatro, e fora de ordem no plano geral** (§10, passo 5):
 entrega valor antes de a Fase 4 fechar, é isolada e valida o ferramental de
