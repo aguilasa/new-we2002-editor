@@ -940,7 +940,7 @@ voltar: endereço citado como não portado que exista em `src/*.pas` ou
 
 **E o fechamento corrigiu uma conta que esta seção fazia: as gravações não são
 seis nem nove, são dezessete.** Nove é o número de quem alguém *chamou* de
-gravação; lendo a seção `## Bytes tocados` das 94 specs, entram os sete de
+gravação; lendo a seção `## Bytes tocados` das 96 specs, entram os sete de
 mover jogador e número de camisa — grupo `edicao`, que gravam dentro da
 `0x00404820` — e mais dois que gravam no arranque, e saem os dois que emitem
 arquivo em vez de tocar a ROM. A tabela de gates do gerador é guardada:

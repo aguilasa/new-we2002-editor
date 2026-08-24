@@ -3,7 +3,7 @@ id: CORR-WTE-102
 title: "Correção: quatro sítios vivos ainda dizem \"as 94 specs\" onde o índice conta 96"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -104,18 +104,45 @@ impede a terceira rodada disto — é o mesmo remédio da
 
 ## Verificação
 
-- [ ] `grep -rn "94 specs" docs wte` devolve só o Log da WTE-TASK-31
-- [ ] `python3 wte/tools/spec_index.py --check` continua em `96 com spec`
-- [ ] A tabela de escritores do `fase-4.md` continua com 17 linhas
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "94 specs" docs wte` devolve só o Log da WTE-TASK-31
+- [x] `python3 wte/tools/spec_index.py --check` continua em `96 com spec`
+- [x] A tabela de escritores do `fase-4.md` continua com 17 linhas
+- [x] `make -C wte check` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
+`das 94 specs` → `das 96 specs` no plano, no `progresso.md` e no cabeçalho do
+`check_fase4.py`. Na linha 95 o número saiu de vez: a frase ali fala das
+**formas** de escrever "não grava" que o gerador reconhece, e a população é
+ruído que envelhece sozinho — o comentário passou a dizer isso.
+
+Medido depois: `spec_index.py --check` em `96 handlers indexados, 96 com spec`,
+e a tabela de escritores do `fase-4.md` com **17** linhas. O 17 não mudou, que
+era o ponto — as duas specs de preço declaram `Nenhum` em `## Bytes tocados`.
+
+A guarda (`TestPopulacaoNoCabecalho`) cobra o número do cabeçalho contra
+`len(S.le_handlers())`. Docstring não calcula, mas dá para exigir que bata com
+a medida — é o que impede a terceira rodada disto. O segundo caso amarra o 17 à
+contagem, para a receita e o resultado não se soltarem um do outro.
+
 **Problemas encontrados:**
 
+A varredura achou um quinto sítio que a CORR não listava: o docstring do
+`test_check_fase4.py:8` dizia *"prosa escrita a mão em 94 arquivos"* — a mesma
+afirmação viva, no arquivo que agora carrega a guarda. Corrigido junto.
+
+Ficaram de fora, e devem ficar: `31-fechamento-fase-4.md:121` (o Log da
+primeira passagem, onde 94 é o que se mediu naquele dia) e
+`correcoes-progresso.md:1609` (Log da CORR-WTE-087, outra contagem).
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-WTE-LAZARUS.md` — a receita da §, linha 943
+- `docs/tasks/progresso.md` — o bullet das dezessete gravações
+- `wte/tools/check_fase4.py` — cabeçalho e o comentário do `NAO_GRAVA`
+- `wte/tools/test_check_fase4.py` — o docstring e `TestPopulacaoNoCabecalho`

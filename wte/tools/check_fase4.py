@@ -25,7 +25,7 @@ em doc ja se propagou neste repositorio (CORR-WTE-012, -014, -023).
 **As tasks nomearam nove gravacoes; medido, sao dezessete.** Nove e a conta de
 quem alguem CHAMOU de gravacao: seis na WTE-TASK-27, uma na 28, uma na 29 e as
 tres orfas da 30, menos o `grabar_memoryClick`. Lendo a secao
-`## Bytes tocados` das 94 specs, a diferenca aparece nos dois sentidos:
+`## Bytes tocados` das 96 specs, a diferenca aparece nos dois sentidos:
 
 - **entram** os sete de mover jogador e numero de camisa -- grupo `edicao`, que
   gravam dentro da `0x00404820` --, mais o `FormShow` e o
@@ -92,7 +92,9 @@ REAMOSTRA = WTE / "re" / "fase-4-trivial.tsv"
 GENERATOR = "wte/tools/check_fase4.py"
 
 # As formas aceitas de "nao toca a imagem", na primeira linha de
-# `## Bytes tocados`. Sao as que as 94 specs usam hoje.
+# `## Bytes tocados`. Sao as que as specs usam hoje -- a populacao nao entra
+# na frase de proposito: ela cresce a cada spec nova e o numero envelheceria
+# sozinho aqui, que foi o defeito da CORR-WTE-102.
 #
 # A CLASSIFICACAO E BINARIA DE PROPOSITO -- toca a imagem, ou nao toca. Uma
 # terceira classe ("nao toca, mas emite um arquivo") seria util e NAO se le

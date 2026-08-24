@@ -5,7 +5,7 @@ O que se mede aqui sao as duas leituras que o fechamento faz e que ninguem
 conferiria sozinho:
 
 1. **quem grava na imagem**, lido da primeira linha de `## Bytes tocados`. Essa
-   linha e prosa escrita a mao em 94 arquivos, e a conta de gravacoes do
+   linha e prosa escrita a mao em 96 arquivos, e a conta de gravacoes do
    fechamento inteiro sai dela -- uma frase nova de "nao grava" que o leitor nao
    reconhecesse faria a conta subir em silencio, que e o defeito que a
    CORR-WTE-012, a -014 e a -023 pegaram sempre em contagem de doc;
@@ -333,6 +333,32 @@ class TestProsaDaEvidencia(unittest.TestCase):
                     .read_text(encoding="utf-8")))
                 for h in S.le_handlers())
             - sum(m["evidencias"].values()))
+
+
+class TestPopulacaoNoCabecalho(unittest.TestCase):
+    """A guarda da CORR-WTE-102: o cabecalho nao pode envelhecer sozinho.
+
+    A receita de como as dezessete gravacoes foram derivadas -- *"lendo a secao
+    `## Bytes tocados` das N specs"* -- ficou escrita no presente em quatro
+    sitios com N=94. A WTE-TASK-32 escreveu as duas specs de preco, a populacao
+    virou 96, e o 17 NAO mudou: as duas novas declaram `Nenhum`. Por isso a
+    confusao e pior que um erro de conta -- quem repetir a receita hoje le 96
+    arquivos e vai procurar onde perdeu dois.
+
+    O cabecalho e docstring: nao da para calcular o numero ali. O que da e
+    cobrar que ele bata com a medida, que e o que este caso faz.
+    """
+
+    def test_a_populacao_do_cabecalho_bate_com_o_tsv(self) -> None:
+        achado = re.search(r"`## Bytes tocados` das (\d+) specs",
+                           C.__doc__ or "")
+        self.assertIsNotNone(achado, "a receita sumiu do cabecalho")
+        self.assertEqual(int(achado.group(1)), len(S.le_handlers()))
+
+    def test_o_numero_de_gravacoes_nao_depende_da_populacao(self) -> None:
+        """O 17 e contado, nao afirmado -- e e ele que o cabecalho promete."""
+        m = C.medir()
+        self.assertEqual(len(m["escritores"]), 17)
 
 
 if __name__ == "__main__":

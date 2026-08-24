@@ -442,7 +442,7 @@ só uma escolha de quando.
       controle antes e byte-idêntico
 - [x] **As gravações não são nove, são dezessete** *(medido na WTE-TASK-31,
       2026-08-22)*. Nove era a conta de quem alguém *chamou* de gravação;
-      lendo a seção `## Bytes tocados` das 94 specs, **entram** os sete de
+      lendo a seção `## Bytes tocados` das 96 specs, **entram** os sete de
       mover jogador e número de camisa e os dois do arranque (`FormShow`,
       `boton_dialogo_weClick`), e **saem** o `grabar_memoryClick` e o
       `grabar_camisetaClick`, que emitem arquivo e deixam a ROM intacta. A
