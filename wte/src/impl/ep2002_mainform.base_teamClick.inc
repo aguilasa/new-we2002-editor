@@ -45,18 +45,31 @@
       cmp DWORD PTR ds:0x43366c,0x0        ' a terceira coluna do buffer 2
       je  0x411175                         ' pula o slot
 
-  e para o slot 22 a coluna sai ZERO. Medido em dois times da ROM japonesa
-  (2 e 9): os bytes gravados vao de `CONDICIONAL_BASE + 23*t` ate `+ 21`, e o
-  do slot 22 fica com o valor de fabrica nos dois. No time 9 o slot 21 e o 22
-  tem a MESMA soma (36) e a mesma posicao (0), e so o 21 e gravado -- o que
-  descarta explicacao pelo conteudo do jogador.
+  e para o slot 22 a coluna sai ZERO. Medido em seis times da ROM japonesa
+  (0, 2, 9, 17, 30, 48): os bytes gravados vao de `CONDICIONAL_BASE + 23*t` ate
+  `+ 21`, e o do slot 22 fica com o valor de fabrica nos seis. No time 9 o slot
+  21 e o 22 tem a MESMA soma (36) e a mesma posicao (0), e so o 21 e gravado --
+  o que descarta explicacao pelo conteudo do jogador.
 
-  A CAUSA ESTA ABERTA (CORR-WTE-095): a conta de offset que este port herdou do
-  `we2002_core` da coluna nao-nula para o slot 22, e o `we2002_core` e
-  byte-identico ao `ed.exe`. Ou seja, o `ed.exe` e o editor do Obocaman
-  discordam sobre o ultimo slot. O port reproduz o que o ORACULO faz, porque e
-  contra ele que o gate mede -- e a divergencia fica escrita em vez de
-  silenciosa.
+  Como se remede a amostra, em uma linha:
+
+      awk -F'\t' '$3==22 && $7!="-"' wte/re/preco.tsv | wc -l   # tem de dar 0
+
+  E COMO SE REMEDE O SALTO, que e outra pergunta: plante um byte no slot 22 e
+  rode o oraculo sobre a copia. Feito em 2026-08-24 no time 2, com `0xFF` nos
+  slots 20, 21 e 22: os dois primeiros voltaram 26 e 21 -- o `previsto` do
+  `preco.tsv` -- e o terceiro continuou 255. Sem esse plantio a leitura "nao
+  grava" nao se separa de "grava o valor que ja estava la".
+
+  A CAUSA ESTA ABERTA (CORR-WTE-095), e o que ela ja excluiu importa aqui: a
+  `0x00404374` do proprio oraculo NAO tem ramo por slot -- ela decide por time
+  (`cmp ecx,0x3f`, e os times 54 e 55 em `cmp ecx,0x35`/`cmp ecx,0x38`) e
+  escreve `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23. Ou seja, a
+  conta de offset deste port NAO esta errada para o slot 22: ela e a mesma do
+  oraculo. O que sobra aberto e por que o `cmp` de `0x004110a6` le zero num
+  campo que a rotina anterior acabou de preencher. O port reproduz o que o
+  ORACULO faz, porque e contra ele que o gate mede -- e a divergencia fica
+  escrita em vez de silenciosa.
 
   A MENSAGEM DO FIM sai do `.exe` em `0x00425079`. }
 const

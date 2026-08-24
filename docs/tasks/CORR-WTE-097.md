@@ -3,7 +3,7 @@ id: CORR-WTE-097
 title: "Correção: o comentário do base_teamClick diz \"medido em dois times\" e a medida final tem seis"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -87,17 +87,60 @@ awk -F'\t' '$3==22 && $7!="-"' wte/re/preco.tsv | wc -l   # tem de dar 0
 
 ## Verificação
 
-- [ ] `grep -n "dois times" wte/src/impl/ep2002_mainform.base_teamClick.inc` sai vazio
-- [ ] `lazbuild wte/wte.lpi` compila (o `.inc` entra por `{$I}`)
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n "dois times" wte/src/impl/ep2002_mainform.base_teamClick.inc` sai vazio
+- [x] `lazbuild wte/wte.lpi` compila, e **sem warning novo**: `-B` antes e
+      depois dá o **mesmo** único warning, o
+      `we2002_preco.pas(138,27) Comment level 2 found`, que é anterior
+      (commit `c566455`) e num arquivo que esta correção não toca
+- [x] `make -C wte check` verde — 764 testes, `OK (skipped=1)`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-24
 
 **Resumo do que foi feito:**
 
+O cabeçalho passou a dizer **seis times (0, 2, 9, 17, 30, 48)**, mantida a
+observação do time 9 — slots 21 e 22 com a mesma soma e a mesma posição, só o 21
+gravado —, que continua sendo o argumento que descarta explicação pelo conteúdo.
+Entrou também a linha de como se remede a amostra, que a correção pedia:
+
+```bash
+awk -F'\t' '$3==22 && $7!="-"' wte/re/preco.tsv | wc -l   # tem de dar 0
+```
+
+**E entrou uma segunda régua, que a correção não previa e a
+[CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) produziu horas antes neste mesmo
+lote:** como se remede o **salto**, que é outra pergunta que a da amostra.
+Plantar `0xFF` no slot 22 e rodar o oráculo separa "não grava" de "grava o valor
+que já estava lá" — sem isso, as seis corridas provam só que o byte não mudou.
+
 **Problemas encontrados:**
 
+1. **A correção *k+1* tornou falso o que a *k* deixou escrito, dentro do mesmo
+   lote.** O cabeçalho dizia *"o `ed.exe` e o editor do Obocaman discordam sobre
+   o último slot"*, e isso já não é o que está medido: a CORR-WTE-095 leu a
+   `0x00404374` do próprio oráculo e ela **não** tem ramo por slot — calcula
+   `0x2ece0c + 23*time + 2*(time div 56) + slot` para os 23, igual ao port. O
+   parágrafo foi reescrito: a conta de offset do port não está errada, e o que
+   sobra aberto é o `cmp` de `0x004110a6` ler zero num campo que a rotina
+   anterior acabou de preencher.
+2. **O `.inc` cresceu 13 linhas e derrubou o `check_fase2.py`.** A §4.4 do plano
+   cita a fração medida, e ela caiu de **52,1%** para **52,0%** — 9.453 geradas
+   contra 8.719 à mão (eram 8.706). O número novo veio do próprio gate, que
+   imprime o literal esperado; o `fase-2.md` foi regerado e sai byte-idêntico em
+   duas escritas.
+3. **Um warning anterior apareceu ao medir a linha de base**, e fica registrado
+   porque ninguém o tinha notado: `we2002_preco.pas:138` tem `` `{$Q-}` `` dentro
+   de um comentário `{ }`, e a crase não protege — o `{` abre nível 2. É de
+   `c566455`, é inofensivo (o FPC avisa e segue), e está **fora** do escopo desta
+   correção.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `wte/src/impl/ep2002_mainform.base_teamClick.inc` | modificado — a amostra, as duas réguas e o parágrafo da causa |
+| `docs/PLAN-WTE-LAZARUS.md` | modificado — a fração da §4.4, 52,1% → 52,0% |
+| `wte/re/fase-2.md` | regerado |
