@@ -113,6 +113,15 @@ original, jogador a jogador.
 
 **Não precisa de golden test de imagem** — o preço não é gravado, é exibido.
 
+> **Esta linha do enunciado está errada, e a execução mediu por quê.** Ela vale
+> para o `jugador.etiqprecioClick`, que mostra o número na tela; a outra metade
+> da feature, o `MainForm.base_teamClick`, **grava** um byte por jogador. A
+> régua desta task é dupla — tela para a fórmula, byte para o time inteiro —, e
+> o golden de byte é o
+> [`golden-22-precos`](../../wte/tests/roteiros/golden-22-precos.txt). O
+> enunciado fica como foi escrito; a §5.1 do plano, que dizia o mesmo, foi
+> corrigida pela [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md).
+
 ---
 
 ## Arquivos a criar ou modificar
@@ -201,9 +210,14 @@ arquivo.
   Medido em seis times; no time 9 os slots 21 e 22 têm a **mesma** soma e a
   **mesma** posição, e só o 21 é gravado, o que descarta explicação pelo
   conteúdo. **A causa está aberta na
-  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md)**: a conta de offset herdada do
-  `we2002_core` — byte-idêntico ao `ed.exe` — dá coluna não nula ali. Os dois
-  editores discordam sobre o último slot.
+  [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md)**, e ela já mediu duas coisas em
+  2026-08-24 que mudam o que se pode afirmar aqui: o salto é **real** — plantado
+  `0xFF` no slot 22 do time 2, o oráculo devolveu 26 e 21 nos slots 20 e 21 e
+  deixou o 22 em 255 —, e a `0x00404374` do **oráculo** não tem ramo por slot,
+  calculando a mesma conta linear que o port para os 23. Ou seja, **os dois
+  editores não discordam sobre o offset do último slot**, como esta linha dizia
+  na véspera: o que sobra aberto é o `cmp` de `0x004110a6` ler zero num campo
+  que a rotina anterior acabou de preencher.
 
   **3. Duas janelas do mesmo tamanho podem exigir coordenadas diferentes.** O
   `ficha_creditos_equipo` mede 285×124 nos **dois** lados, e o clique no botão
