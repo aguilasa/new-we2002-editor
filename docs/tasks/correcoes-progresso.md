@@ -119,6 +119,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-097](/docs/tasks/CORR-WTE-097.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | O cabeçalho do `base_teamClick.inc` diz "medido em dois times" onde a amostra final tem seis, e é ali que mora o `ULTIMO_SLOT_PRECADO` | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-098](/docs/tasks/CORR-WTE-098.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A §5.1 do plano ainda diz que o preço "não precisa de golden test de imagem" e nomeia só o `etiqprecioClick`; a outra metade grava e tem o `golden-22-precos` | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | A lista de arquivos da WTE-TASK-32 não menciona as quinze linhas acrescentadas ao `.gitignore` | Baixa | [x] concluída | 2026-08-24 |
+| [CORR-WTE-100](/docs/tasks/CORR-WTE-100.md) | [CORR-WTE-095](/docs/tasks/CORR-WTE-095.md) | A citação `` `{$Q-}` `` num comentário do `we2002_preco.pas` liga a diretiva de verdade, antes do `{$PUSH}` — o `{$POP}` deixa de restaurar, e é o único warning do build | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -220,6 +221,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-097 — atualizar o cabeçalho do `base_teamClick.inc` para os seis times medidos
 - [x] CORR-WTE-098 — pôr a régua de byte na §5.1 do plano, e nomear as duas metades da feature
 - [x] CORR-WTE-099 — acrescentar o `.gitignore` à lista de arquivos da WTE-TASK-32
+- [ ] CORR-WTE-100 — tirar as chaves da diretiva citada na prosa do `we2002_preco.pas`
 
 ## Detalhes por correção
 
@@ -1780,3 +1782,19 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** acrescentar a linha aos modificados; e, se valer fechar a porta, o
   `01-executar.md` passar a conferir a lista contra `git show --stat` ao fechar
   a task — é a terceira omissão desse tipo (CORR-WTE-078, CORR-WTE-087)
+
+### CORR-WTE-100
+
+- **Arquivo com problema:** `wte/src/we2002_preco.pas:138`
+- **Sintoma:** o comentário do `PrecoDaSoma` cita `` `{$Q-}` `` entre crases, e
+  crase não é sintaxe de Pascal. O `{` abre nível 2 de comentário — o único
+  `Warning` do build — e, pior, a diretiva **é processada**: liga `Q-` antes do
+  `{$PUSH}` da linha seguinte, então o `{$POP}` da 149 restaura para um estado
+  que já tinha `Q-` e o `PrecoDoJogador` roda sem verificação de overflow
+- **Como foi detectado:** ao medir a linha de base do `lazbuild` para a
+  CORR-WTE-097, e investigado a pedido do usuário depois da CORR-WTE-095. Três
+  medições: `-Co` num programa mínimo mostra que a diretiva citada vale; o
+  mesmo com `{$PUSH}`/`{$POP}` mostra que o `POP` não restaura; e os modos
+  `objfpc`/`fpc`/`delphi` separam aviso de `Fatal: illegal character`
+- **Fix:** `` `$Q-` `` em vez de `` `{$Q-}` ``, dois caracteres. O
+  `{$PUSH}{$Q-}{$R-}` da linha 140 fica como está — aquele é o guard de verdade
