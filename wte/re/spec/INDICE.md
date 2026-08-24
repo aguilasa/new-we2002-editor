@@ -19,11 +19,11 @@ gabarito e o vocabulário de veredito estão em
 
 | Veredito | Handlers |
 |---|---|
-| `implementado` | 65 |
+| `implementado` | 66 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 5 |
+| `divergencia deliberada` | 6 |
 | `nao portado` | 2 |
-| `aberto` | 5 |
+| `aberto` | 3 |
 | **total** | **96** |
 
 94 de 96 têm arquivo de spec.
@@ -79,7 +79,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x00408e0c` | `estrategia` | [bolaMouseMove](estrategia.bolaMouseMove.md) | OnMouseMove x10 | edicao | implementado |
 | `0x00408f00` | `estrategia` | [bolaMouseDown](estrategia.bolaMouseDown.md) | OnMouseDown x10 | edicao | implementado |
 | `0x004090c8` | `estrategia` | [campoMouseMove](estrategia.campoMouseMove.md) | OnMouseMove | edicao | implementado |
-| `0x004090fc` | `estrategia` | [FormCreate](estrategia.FormCreate.md) | OnCreate | carga | aberto |
+| `0x004090fc` | `estrategia` | [FormCreate](estrategia.FormCreate.md) | OnCreate | carga | implementado |
 | `0x00409644` | `estrategia` | [rectanguloDragOver](estrategia.rectanguloDragOver.md) | OnDragOver | edicao | implementado |
 | `0x00409780` | `estrategia` | [rectanguloDragDrop](estrategia.rectanguloDragDrop.md) | OnDragDrop | edicao | implementado |
 | `0x004097a4` | `estrategia` | [bolaEndDrag](estrategia.bolaEndDrag.md) | OnEndDrag x10 | edicao | implementado |
@@ -105,7 +105,7 @@ Na ordem de endereço, como o `dump_published.py` os emite.
 | `0x0040d43c` | `MainForm` | [iguala_nombresClick](MainForm.iguala_nombresClick.md) | OnClick | edicao | implementado |
 | `0x0040d534` | `MainForm` | [boton_nombres2isoClick](MainForm.boton_nombres2isoClick.md) | OnClick | gravacao | implementado |
 | `0x0040de18` | `MainForm` | [boton_tex2isoClick](MainForm.boton_tex2isoClick.md) | OnClick | gravacao | implementado |
-| `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | aberto |
+| `0x0040dfe8` | `MainForm` | [boton_dialogo_texClick](MainForm.boton_dialogo_texClick.md) | OnClick | carga | divergencia deliberada |
 | `0x0040e1a8` | `MainForm` | [lista_equipos_2Change](MainForm.lista_equipos_2Change.md) | OnChange | carga | implementado |
 | `0x0040e304` | `MainForm` | [paderechaeizquierdaClick](MainForm.paderechaeizquierdaClick.md) | OnClick | edicao | implementado |
 | `0x0040e4b0` | `MainForm` | [paizquierdaClick](MainForm.paizquierdaClick.md) | OnClick | edicao | implementado |

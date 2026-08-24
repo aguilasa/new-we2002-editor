@@ -191,12 +191,8 @@ procedure Testrategia.campoMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 {$I impl/ep2002_estrategia.campoMouseMove.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure Testrategia.FormCreate(Sender: TObject);
-begin
-  REStub('estrategia.FormCreate');
-end;
-{$POP}
+{$I impl/ep2002_estrategia.FormCreate.inc}
 
 procedure Testrategia.rectanguloDragOver(Sender, Source: TObject;
   X, Y: Integer; State: TDragState; var Accept: Boolean);

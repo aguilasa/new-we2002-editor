@@ -591,7 +591,14 @@ def gera_md(m: dict) -> str:
     a("## Os que continuam `aberto`")
     a("")
     com_corpo = sum(1 for x in m["abertos"] if x["corpo"])
-    a(f"São {len(m['abertos'])}, e **{com_corpo} deles já têm corpo Pascal escrito**.")
+    # A concordancia quebra em 1, e o numero chegou a 1 em 2026-08-24. O
+    # `740` abaixo ja tratava o caso; este nao tratava.
+    n = len(m['abertos'])
+    a(f"{'É um só' if n == 1 else f'São {n}'}, e "
+      + ("**ele já tem corpo Pascal escrito**."
+         if n == 1 and com_corpo == 1 else
+         "**ele não tem corpo Pascal**." if n == 1 else
+         f"**{com_corpo} deles já têm corpo Pascal escrito**."))
     a("A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde")
     a("ela diz `sim`, o que segura o veredito não é código ausente, é régua —")
     a("a spec de cada um nomeia o que falta e quem é o dono.")

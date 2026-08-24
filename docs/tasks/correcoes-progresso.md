@@ -112,6 +112,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-090](/docs/tasks/CORR-WTE-090.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Três vereditos `aberto` esperando decisão já tomada ou de outra fase; o `ComboBoxDrawItem` fechava o ciclo 31→37→34→31 | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-091](/docs/tasks/CORR-WTE-091.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O `Original ` da ficha não alcançava a `PreencheFicha` por ciclo de `uses`, e a régua dele precisa ser um par de roteiros que difere por um clique | Alta | [x] concluída | 2026-08-24 |
 | [CORR-WTE-092](/docs/tasks/CORR-WTE-092.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O ramo do reserva e o arrasto de bola não tinham estímulo; o harness não sabia produzir `mousedown` | Alta | [x] concluída | 2026-08-24 |
+| [CORR-WTE-093](/docs/tasks/CORR-WTE-093.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Os quatro laços do maior `FormCreate` não tinham leitura, e o dono do diálogo de textura (WTE-TASK-29) fechou sem ele | Alta | [x] concluída | 2026-08-24 |
 
 ## Checklist
 
@@ -206,6 +207,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-090 — tirar do `aberto` o que espera decisão, e quebrar o ciclo do `ComboBoxDrawItem`
 - [x] CORR-WTE-091 — descer a `PreencheFicha` para a `wte_ficha` e julgar o `Original ` por um par diferencial
 - [x] CORR-WTE-092 — dar ao harness o verbo `arrasta` e um roteiro que entre pelo botão do reserva
+- [x] CORR-WTE-093 — ler os quatro laços do `estrategia.FormCreate` e escrever os dois últimos corpos fora de preço
 
 ## Detalhes por correção
 
@@ -1666,3 +1668,18 @@ dizer "fechada e fora do backlog", não "corrigida".
   confrontado com uma corrida sem estímulo** — sem isso o arrasto teria passado
   duas vezes medindo nada, uma delas com o `bolaMouseDown` disparando e a bola
   voltando ao lugar por ter sido solta fora da própria zona
+
+### CORR-WTE-093
+
+- **Arquivo com problema:** `wte/re/spec/estrategia.FormCreate.md` (quatro laços
+  sem leitura), `MainForm.boton_dialogo_texClick.md` (dono fechou sem ele)
+- **Sintoma:** os dois últimos `aberto` fora de preço, ambos sem corpo Pascal
+- **Como foi detectado:** na quarta passagem da WTE-TASK-31, lendo a razão de
+  cada `aberto` restante
+- **Fix:** os quatro laços foram lidos por `objdump` e são a montagem da tabela
+  de formações — 18 registros de 44 bytes, quatro colunas de 11 intercaladas —,
+  que o `dump_formacoes.py` já gera. **A leitura levou a decidir não escrever
+  código**, e o corpo faz só o que sobra. O slot virtual `0xcc` do fim foi
+  medido no VMT de `TListBox` (`SetItemIndex`), não suposto. O diálogo de
+  textura virou `divergencia deliberada` pela troca de `FILE*` por caminho, que
+  o `we2002_estado` já documentava

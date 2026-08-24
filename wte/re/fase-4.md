@@ -20,7 +20,7 @@ bateria em [`fase-4-golden.tsv`](fase-4-golden.tsv).
 > **Pronto quando:** os 96 têm veredito e nenhum é "não portado" sem
 > justificativa escrita.
 
-**91 dos 96 têm veredito fechado; 5 não.**
+**93 dos 96 têm veredito fechado; 3 não.**
 A segunda metade do critério está cumprida — ver a seção do
 `nao portado` abaixo —, e a primeira não.
 
@@ -28,11 +28,11 @@ A segunda metade do critério está cumprida — ver a seção do
 
 | Veredito | Handlers |
 |---|---:|
-| `implementado` | 65 |
+| `implementado` | 66 |
 | `trivial` | 19 |
-| `divergencia deliberada` | 5 |
+| `divergencia deliberada` | 6 |
 | `nao portado` | 2 |
-| `aberto` | 3 |
+| `aberto` | 1 |
 | *(sem arquivo de spec)* | 2 |
 | **total** | **96** |
 
@@ -44,15 +44,13 @@ Os que não têm:
 
 ## Os que continuam `aberto`
 
-São 3, e **1 deles já têm corpo Pascal escrito**.
+É um só, e **ele já tem corpo Pascal escrito**.
 A coluna `corpo` diz se existe `src/impl/<unidade>.<handler>.inc`; onde
 ela diz `sim`, o que segura o veredito não é código ausente, é régua —
 a spec de cada um nomeia o que falta e quem é o dono.
 
 | Endereço | Handler | Grupo | Corpo |
 |---|---|---|---|
-| `0x004090fc` | [estrategia.FormCreate](spec/estrategia.FormCreate.md) | carga | **não** |
-| `0x0040dfe8` | [MainForm.boton_dialogo_texClick](spec/MainForm.boton_dialogo_texClick.md) | carga | **não** |
 | `0x00410ff4` | [MainForm.base_teamClick](spec/MainForm.base_teamClick.md) | auxiliar | sim |
 
 ## Quem grava na imagem, e o gate de cada um
@@ -226,7 +224,7 @@ são os cinco, e reconferência velha não vale para handler novo.
 
 ## Varredura por decompilado colado
 
-230 arquivos varridos — as specs, os `.inc` de corpo escrito
+232 arquivos varridos — as specs, os `.inc` de corpo escrito
 à mão e as unidades de `src/`.
 
 **Nada.** É a §2 do plano sustentada por medida em vez de honra.

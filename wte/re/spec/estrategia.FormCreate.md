@@ -2,7 +2,7 @@
 handler: FormCreate
 formulario: estrategia
 endereco: 0x004090fc
-veredito: aberto
+veredito: implementado
 ---
 
 # estrategia.FormCreate
@@ -71,11 +71,47 @@ Não trata, como o `jugador.FormCreate`.
 
 ## Notas
 
-**Veredito `aberto` de propósito, e o que falta é o Pascal.** Os quatro laços
-de 11 iterações que vêm antes da zebra ainda não têm leitura escrita: 11 é o
-número de jogadores em campo, e o `estrategia` é a tela do campinho tático —
-eles muito provavelmente arrumam as 11 bolas e os 11 rótulos de posição. Mas
-"provavelmente" não é spec, e escrever o corpo a partir daí seria inventar.
+## O veredito passou a `implementado` em 2026-08-24
+
+**Os quatro laços eram a única pergunta em aberto, e a resposta não era a que se
+supunha.** Esta seção dizia: *"11 é o número de jogadores em campo, e o
+`estrategia` é a tela do campinho tático — eles muito provavelmente arrumam as
+11 bolas e os 11 rótulos de posição. Mas 'provavelmente' não é spec"*. Bem
+suspeitado e errado.
+
+Lidos no disassembly pela
+[CORR-WTE-093](../../../docs/tasks/CORR-WTE-093.md), os quatro copiam 11 bytes
+cada para `esi+0`, `esi+0x0b`, `esi+0x16` e `esi+0x21` — quatro colunas de 11
+**intercaladas num registro de 44** —, e o laço de fora fecha a conta:
+
+```text
+0x00409355   add esi,0x2c
+0x0040935b   cmp DWORD PTR [ebp-0x5c],0x12
+0x0040935f   jl  0x4092f8
+```
+
+**18 registros de 44 bytes: é a tabela de formações de `0x00433f0c`.** As
+quatro cópias de 51 dwords que esta spec já listava *"sem saber quem as lia"*
+são as quatro colunas, e o produto delas é exatamente o que o
+[`dump_formacoes.py`](../../tools/dump_formacoes.py) já extrai para
+[`wte_formacoes.pas`](../../src/wte_formacoes.pas). O port não reproduz os
+laços porque teria a mesma tabela montada à mão.
+
+**E o slot virtual do fim foi medido, não suposto.** A rotina termina com
+`call DWORD PTR [ecx+0xcc]` e `edx=1` sobre a `lista_formaciones`; lendo o VMT
+de `TListBox` no `vcl60.bpl`, o slot `0xcc` guarda
+`@Stdctrls@TCustomListBox@SetItemIndex$qqrxi` — é `ItemIndex := 1`, o mesmo
+`FORMACAO_DEFAULT` que a `wte_tatica` já declarava por outro caminho.
+
+O corpo está em
+[`../../src/impl/ep2002_estrategia.FormCreate.inc`](../../src/impl/ep2002_estrategia.FormCreate.inc)
+e faz o que sobra: a cor do formulário, a zebra dos onze trios, os dois
+ponteiros de foco, e a cor e o item inicial da lista. Os gates de tática
+(`golden-17-tatica` e `golden-21-arrasto`) seguem byte-idênticos depois dele —
+o que era de esperar, porque ele não toca a imagem, e o que precisava ser
+conferido porque ele mexe no `ItemIndex` que alimenta o ` Accept`.
+
+### O registro de quando o veredito era `aberto`
 
 A leitura completa cabe junto com o
 [`lista_formacionesClick`](estrategia.lista_formacionesClick.md) e o

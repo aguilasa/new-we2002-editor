@@ -309,12 +309,8 @@ procedure TMainForm.boton_nombres2isoClick(Sender: TObject);
 procedure TMainForm.boton_tex2isoClick(Sender: TObject);
 {$I impl/ep2002_mainform.boton_tex2isoClick.inc}
 
-{$PUSH}{$WARN 5024 OFF}  // stub ignora os parametros
 procedure TMainForm.boton_dialogo_texClick(Sender: TObject);
-begin
-  REStub('MainForm.boton_dialogo_texClick');
-end;
-{$POP}
+{$I impl/ep2002_mainform.boton_dialogo_texClick.inc}
 
 procedure TMainForm.lista_equipos_2Change(Sender: TObject);
 {$I impl/ep2002_mainform.lista_equipos_2Change.inc}

@@ -75,11 +75,12 @@ de ML — ainda não está feito.
 
 ## Critério de conclusão
 
-- [ ] 96 entradas no índice, nenhuma `aberto` — **as 96 estão lá; 13 `aberto` e
-      2 sem arquivo de spec continuam.** É o único critério em aberto. A
-      primeira passagem mediu exatamente quais eram os 16; a terceira promoveu
-      três e reescreveu a razão de outros quatro, e trancou a classe de defeito
-      que os segurava com a guarda `BLOQUEIO_VENCIDO`
+- [ ] 96 entradas no índice, nenhuma `aberto` — **as 96 estão lá; falta 1
+      `aberto` e 2 sem arquivo de spec, e os três são da
+      [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md).** É o único critério em
+      aberto, e a quarta passagem (2026-08-24) o reduziu de 15 para 3 por seis
+      CORRs. A dependência da task deixou de ser uma lista e passou a ser
+      **uma task nomeada**
 - [x] Todo `não portado` com justificativa de escopo — é **um**,
       `MainForm.Button2Click`, handler órfão que nenhum componente referencia
 - [x] Specs de evidência fraca listadas, com decisão sobre cada — são **3
@@ -314,3 +315,56 @@ Restam 13 `aberto` e 2 sem spec. Três dos quinze são da
     `docs/tasks/progresso.md`, as sete specs acima, e os gerados
     `wte/re/fase-4.md`, `wte/re/fase-2.md`, `wte/re/spec/INDICE.md`; este
     arquivo
+
+
+---
+
+### Quarta passagem — 2026-08-24
+
+**De 15 para 3, e os três restantes são de uma task só.** A passagem não
+implementou nada por si: abriu seis CORRs, e cada uma fechou uma classe de
+motivo diferente. O que segurava os quinze não era um problema, eram seis.
+
+| CORR | O que era | Fechou |
+|---|---|---:|
+| [089](/docs/tasks/CORR-WTE-089.md) | vereditos presos por "nada exercita o corpo" enquanto a bateria golden os exercitava | 3 |
+| [090](/docs/tasks/CORR-WTE-090.md) | `aberto` guardando decisão já tomada, ou de outra fase | 3 |
+| [091](/docs/tasks/CORR-WTE-091.md) | o `Original ` da ficha, preso por ciclo de `uses` | 2 |
+| [092](/docs/tasks/CORR-WTE-092.md) | dois handlers sem estímulo — o ramo do reserva e o arrasto | 2 |
+| [093](/docs/tasks/CORR-WTE-093.md) | os dois últimos corpos fora de preço | 2 |
+
+**Placar: 93 dos 96 têm veredito fechado.** Restam `MainForm.base_teamClick`,
+`jugador.etiqprecioClick` e `jugador.casilla_precioKeyPress` — os três da
+WTE-TASK-32, e os dois últimos sem arquivo de spec, porque escrever spec é RE e
+a [CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) já classificou isso como trabalho
+de task, não de correção.
+
+#### As três lições que valem para as próximas réguas
+
+**1. Gate verde não prova que o estímulo aconteceu.** Se os dois lados não
+fizerem nada, os dois concordam. O roteiro de arrasto passou **duas vezes**
+medindo zero — uma delas com o `bolaMouseDown` disparando e o trace parecendo
+saudável, porque soltar a bola fora da própria zona a devolve ao lugar. O que
+pegou as duas foi comparar com uma corrida **sem** o estímulo. Toda régua nova
+precisa desse terceiro ponto.
+
+**2. Handler de desfazer não se julga sozinho.** *"Ele desfez?"* só tem resposta
+se houve o que desfazer. O `Original ` da ficha exigiu um **par** de roteiros
+que difere por um clique: sem o par, o corpo vazio passaria.
+
+**3. Ler o disassembly pode terminar em decidir não escrever código.** Metade do
+maior `FormCreate` do projeto monta duas tabelas que este port tem **geradas**
+de fonte melhor. A leitura era necessária — sem ela não se saberia que os quatro
+laços eram *aquela* tabela —, e o resultado dela foi não reproduzi-los.
+
+#### E uma correção de rota sobre a passagem anterior
+
+A terceira passagem escreveu, com número, que o `lista_jugadores_1Change` não
+era disparado por nada. O número estava certo e a conclusão não: ela
+generalizava de um instrumento (o `compara_tela.sh`, régua de pixel) para todos.
+O handler dispara em **quatro** gates verdes. O erro está registrado na própria
+spec em vez de apagado, e a guarda que impede a classe inteira é o
+[`cobertura_gate.py`](../../wte/tools/cobertura_gate.py).
+
+- **Arquivos criados/modificados na quarta passagem:** ver os Logs das seis
+  CORRs. Nesta task, este arquivo e o `docs/tasks/progresso.md`.

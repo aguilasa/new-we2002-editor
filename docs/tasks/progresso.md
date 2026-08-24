@@ -255,9 +255,9 @@ só uma escolha de quando.
 - [x] Os 96 nomes aplicados no Ghidra por script
 - [x] Rota de VMT decidida com o teste das cinco chamadas
 - [ ] 96 entradas em `re/spec/`, nenhuma `aberto` — **94 de 96 têm arquivo**
-      (2026-08-24, remedido pelo `check_fase4.py`): 65 `implementado`, 19
-      `trivial`, 5 `divergencia deliberada`, 2 `nao portado`, 3 `aberto`.
-      **91 dos 96 têm veredito fechado**, e os 5 que faltam estão nomeados um
+      (2026-08-24, remedido pelo `check_fase4.py`): 66 `implementado`, 19
+      `trivial`, 6 `divergencia deliberada`, 2 `nao portado`, 1 `aberto`.
+      **93 dos 96 têm veredito fechado**, e os 3 que faltam estão nomeados um
       a um no Log da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) e em
       [`wte/re/fase-4.md`](../../wte/re/fase-4.md): 3 são de preço
       (WTE-TASK-32), 4 esperam corpo Pascal e 8 esperam régua. **Nove dos 13
@@ -327,6 +327,17 @@ só uma escolha de quando.
       `estrategia.bolaMouseDown` e o ramo do reserva do
       `MainForm.mostrar_jugadorClick`, este último provado por escrever noutro
       registro de jogador (`388807` contra `388567`)
+- [x] **Os dois últimos corpos fora de preço** *(CORR-WTE-093, 2026-08-24)*. Os
+      quatro laços de 11 iterações do `estrategia.FormCreate` — a única pergunta
+      que a spec se recusava a adivinhar — são a montagem da **tabela de
+      formações**: quatro colunas de 11 intercaladas em registros de 44, dezoito
+      vezes. **A leitura terminou em decidir não escrever código**, porque o
+      `dump_formacoes.py` já gera a mesma tabela; o corpo faz só o que sobra. O
+      slot virtual `0xcc` do fim foi medido no VMT de `TListBox`
+      (`SetItemIndex`), pelo mesmo método do `SetEnabled = VMT[0x64]`. E o
+      `boton_dialogo_texClick` virou `divergencia deliberada`: o original guarda
+      um `FILE*` aberto pela sessão e o port guarda caminho, divergência que o
+      `we2002_estado` já documentava antes do corpo existir
 - [x] **Sete dos dezesseis `aberto` estavam presos por prosa vencida** *(achado
       da WTE-TASK-31, terceira passagem, 2026-08-23)*. A spec dizia *"aberto
       porque a `0x…` não está portada"*, outra task portava a rotina, e ninguém
