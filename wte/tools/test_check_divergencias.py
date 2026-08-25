@@ -316,5 +316,57 @@ class TestSecoes(unittest.TestCase):
         self.assertEqual(C.secoes("## Sem numero\n### 3. fundo demais\n"), {})
 
 
+class TestPendenciaDeclarada(unittest.TestCase):
+    """A guarda da CORR-WTE-114: a direcao que as tabelas nao cobriam.
+
+    O gate confere EXCECAO DE FERRAMENTA contra entrada. Achado de divergencia
+    escrito numa task e sem entrada no registro passava batido -- e foi o que
+    aconteceu com as tres candidatas da WTE-TASK-37, uma delas se declarando
+    *"ainda sem entrada aqui"* no markdown de uma task ja `concluido`.
+
+    O alcance e estreito, e a palavra que o define e `ainda`: o enunciado da
+    REGRA (*"uma excecao no golden sem entrada aqui e buraco"*) vive em cinco
+    lugares e nao e pendencia nenhuma.
+    """
+
+    def casa(self, texto: str) -> bool:
+        return any(p.search(texto) for p in C.PENDENCIA_DECLARADA)
+
+    def test_a_declaracao_de_pendencia_e_pega(self) -> None:
+        for texto in ("Divergencia deliberada, ainda sem entrada aqui.",
+                      "e esta ainda  sem  entrada  aqui",
+                      "ainda sem entrada no registro"):
+            with self.subTest(texto=texto):
+                self.assertTrue(self.casa(texto))
+
+    def test_o_enunciado_da_regra_nao_e_alvo(self) -> None:
+        """Guarda que erra e guarda que se desliga.
+
+        Esta frase e a que define o gate, e aparece em cinco arquivos vivos.
+        Alargar o padrao para `sem entrada aqui` cru marcaria os cinco.
+        """
+        for texto in ("uma excecao no golden sem entrada aqui e buraco",
+                      "Excecao sem entrada aqui e BURACO",
+                      "exceção no golden sem entrada aqui é buraco"):
+            with self.subTest(texto=texto):
+                self.assertFalse(self.casa(texto))
+
+    def test_a_arvore_de_hoje_nao_tem_pendencia_declarada(self) -> None:
+        """Depois da CORR-WTE-114, as tres tem destino."""
+        self.assertEqual(C.pendencias_declaradas(), [])
+
+    def test_o_registro_e_o_indice_ficam_de_fora(self) -> None:
+        """Quem CITA a frase para a descrever nao pode ser marcado.
+
+        O markdown de cada correcao e o `correcoes-progresso.md` citam-na, e a
+        diferenca entre citar e declarar nao se le de uma regex -- se le de
+        onde a frase esta.
+        """
+        self.assertIn("correcoes-progresso.md",
+                      Path(C.__file__).read_text(encoding="utf-8"))
+        self.assertIn("CORR-WTE-",
+                      Path(C.__file__).read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()

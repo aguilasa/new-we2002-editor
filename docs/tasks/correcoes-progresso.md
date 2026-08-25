@@ -133,7 +133,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-111](/docs/tasks/CORR-WTE-111.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | A chave `faixa` do `CAMPOS` não é lida por ninguém, e dois dos quatro valores contradizem o medido — `edit_nombre1` declara (5,19) contra 5..13 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-112](/docs/tasks/CORR-WTE-112.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | O `filtro` de caracteres é publicado por campo no `buffers.md` e nunca conferido contra o `KeyPress`, enquanto o `predicado` de faixa ao lado aborta se sumir | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-113](/docs/tasks/CORR-WTE-113.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | `golden_suite.sh --roteiro` sem `--retomar` trunca o `golden.tsv` inteiro antes de qualquer corrida — 97 linhas viram 1, e foi assim que as 92 corridas da WTE-TASK-34 se perderam | Alta | [x] concluída | 2026-08-25 |
-| [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [ ] pendente | — |
+| [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-115](/docs/tasks/CORR-WTE-115.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | O `check_carregado.py` aborta na moldura e não tem `test_*.py`, enquanto o `check_retorno.py`, nascido no mesmo commit, tem | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -250,7 +250,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-111 — apagar a `faixa` morta do `CAMPOS`, ou torná-la expectativa conferida
 - [x] CORR-WTE-112 — conferir o `filtro` de cada campo contra o `KeyPress`, como já se faz com a faixa
 - [x] CORR-WTE-113 — fazer o `--roteiro` preservar o registro, e guardar a preservação com teste
-- [ ] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
+- [x] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
 - [ ] CORR-WTE-115 — escrever o `test_check_carregado.py` com a recusa da moldura plantada
 
 ## Detalhes por correção

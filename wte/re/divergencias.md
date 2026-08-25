@@ -30,6 +30,21 @@ E o simétrico, que esta task teve de aplicar antes de escrever a primeira
 entrada: **exceção sem divergência também não entra.** Uma isenção que
 sobreviveu à própria causa é o mesmo defeito pelo avesso — ver a §9.
 
+**E rota não portada também não é divergência deliberada.** O vocabulário
+importa: divergência deliberada é comportamento que se **escolheu** não
+reproduzir; rota não portada é trabalho que ainda não foi feito, e o lugar dela
+é o veredito da spec, não este registro. Escrever uma como a outra faz o
+documento parecer completo quando falta código.
+
+O caso corrente é o **`ficha_enlaza`**, que não tem chamador nenhum no port
+(achado 8 da reconferência de UI, 2026-08-25). Não é escolha de tela: a rota
+que o alcança é o `MainForm.mostrar_jugadorClick` para jogador de clube de
+Master League, e a
+[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) deixou escrito por
+medir *qual condição faz o modal abrir*. O dono é aquela spec; quando a
+condição for medida e a rota portada, não haverá nada a registrar aqui — e se
+a decisão for **não** portá-la, aí sim vira entrada, com a razão.
+
 ---
 
 ## 1. Sufixo ` [Lazarus]` no `Caption` dos 18 formulários
@@ -335,3 +350,70 @@ corrente.
 
 Os três controles passaram para `segue_nacional`, que é o que a spec deles diz,
 e agora **reprovam** se voltarem a divergir.
+
+---
+
+## 10. O `ficha_warning` não é levantado — o port aplica os remendos sem perguntar
+
+| Campo | |
+|---|---|
+| **O que diverge** | o aviso de tamanho de imagem, que o original mostra na carga e o port não |
+| **Natureza** | escolha de comportamento em produção |
+| **Decisão** | não reproduzir |
+
+**Razão.** O `MainForm.FormShow` do original levanta o `ficha_warning` quando a
+imagem não tem o tamanho esperado, e **pergunta antes** de aplicar os dois
+remendos de arranque. O port os aplica direto. Reproduzir o modal exigiria uma
+resposta de quem está do outro lado, e o harness golden não tem quem responda:
+todo roteiro que abre imagem passaria a depender de um clique a mais, e o que
+o gate mede — a gravação — não mudaria com ele. **É por isso que a gravação
+bate byte a byte:** os dois lados aplicam os mesmos remendos, e a diferença
+está só em o original ter perguntado.
+
+**Evidência.** Achado 8 da segunda passada da reconferência de UI
+([`visual.md`](visual.md)), medido em 2026-08-25: `Show`/`ShowModal` varrido em
+`wte/src/` não encontra **nenhum** chamador do `ficha_warning`, contra o
+`MainForm.FormShow` do original, que o levanta na carga. O formulário existe no
+port — é um dos 18 gerados —, e é o **único** que aparece só do lado do
+oráculo na tabela de capturas.
+
+**Onde o teste sabe.** No `golden-01-arranque`, e ele sabe **pelo silêncio**: o
+roteiro do lado oráculo dispensa o aviso com um clique em `(222,148)` e o do
+lado port não tem esse passo, porque não há o que dispensar. Os dois chegam à
+mesma imagem — controle e golden verdes na japonesa —, e é essa igualdade que
+prova que o modal não muda byte nenhum. Um port que passasse a perguntar
+quebraria o roteiro do lado port, que é o alarme.
+
+---
+
+## 11. `TStaticText` desabilitado pinta fundo próprio no GTK2
+
+| Campo | |
+|---|---|
+| **O que diverge** | a cor de fundo de **1** dos 37 `TStaticText` quando ele está desabilitado |
+| **Natureza** | limitação de plataforma (widgetset) |
+| **Decisão** | não reproduzir |
+
+**Razão.** É a mesma família da **§2** — o widgetset decide sozinho como pintar
+o estado desabilitado, e nenhuma propriedade do DFM controla isso. No Win32 o
+`TStaticText` desabilitado herda o fundo do formulário; no GTK2 ele pinta o
+cinza do tema. Igualar exigiria pintar o fundo à mão no `OnPaint` de um
+controle que o original nunca customizou.
+
+**E a prova de que é o estado, não o controle**, está ao lado: o `base_team`
+também tem `Enabled = False` no DFM e **bate** nos dois lados — porque o app o
+reabilita em tempo de execução. O que diverge é a pintura do desabilitado, e só
+ela.
+
+**Evidência.** Achado 11 da reconferência de UI, medido pelo
+[`check_carregado.py`](../tools/check_carregado.py) em 2026-08-25, com a lógica
+ligada e o fundo de execução por baixo: dos 37 `TStaticText` dos 18
+formulários, **um** diverge — o `help_team` (`Time Res.`), que sai `#76B6FF`
+(a cor do formulário) no oráculo e `#DCDAD5` (o cinza do tema) no port.
+
+**Onde o teste sabe.** No próprio `check_carregado.py`, que compara a cor de
+fundo dos `TStaticText` dos dois lados sobre a captura com a lógica ligada. Ele
+mede e relata; o número que importa é o **1 de 37** — se um segundo controle
+entrar na divergência, a diferença aparece na comparação, e a causa não será
+mais "o estado desabilitado do widgetset", porque os outros 36 continuam
+batendo.

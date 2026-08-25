@@ -3,7 +3,7 @@ id: CORR-WTE-114
 title: "Correção: três divergências novas ficaram numa task concluída, e o registro que existe para elas não as tem"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -116,19 +116,66 @@ prosa que se declara pendente é exatamente o que uma guarda consegue ler.
 
 ## Verificação
 
-- [ ] `grep -c "ficha_warning\|help_team" wte/re/divergencias.md` maior que zero
-- [ ] As entradas novas têm os seis campos, como as seis existentes
-- [ ] `python3 wte/tools/check_divergencias.py --check` verde, com a contagem de
-      seções atualizada
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -c "ficha_warning\|help_team" wte/re/divergencias.md` maior que
+      zero — **4**
+- [x] As entradas novas têm os seis campos, como as seis existentes
+- [x] `python3 wte/tools/check_divergencias.py --check` verde, com a contagem de
+      seções atualizada — **11**, era 9
+- [x] `make -C wte check` verde (850 testes, era 846)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+As três candidatas ganharam destino, e **não o mesmo destino** — que era o
+ponto da CORR:
+
+- **§10** do registro, `ficha_warning` não levantado: divergência deliberada de
+  comportamento, decisão *não reproduzir*;
+- **§11**, o `TStaticText` desabilitado: limitação de widgetset, ao lado da §2
+  por família;
+- o `ficha_enlaza` **não virou entrada** — é rota não portada, e foi para a
+  seção *"O que NÃO entra aqui"*, com o dono nomeado (a spec do
+  `mostrar_jugadorClick`) e o que fazer quando a condição for medida.
+
+As duas entradas seguem o formato das seis existentes: tabela de três campos
+mais **Razão**, **Evidência** e **Onde o teste sabe**. O registro foi de 9 para
+**11 seções**.
+
+O campo *onde o teste sabe* da §10 é o que valeu escrever: o
+`golden-01-arranque` sabe **pelo silêncio** — o roteiro do lado oráculo dispensa
+o aviso com um clique e o do lado port não tem esse passo, porque não há o que
+dispensar. Os dois chegam à mesma imagem, e é essa igualdade que prova que o
+modal não muda byte nenhum.
+
+A seção *"Candidatas posteriores"* da WTE-TASK-35 virou **índice**, apontando
+para os três destinos.
+
 **Problemas encontrados:**
 
+**A guarda entrou, e ela cobre a direção que faltava.** As tabelas do
+`check_divergencias.py` conferem *exceção de ferramenta contra entrada*; achado
+de divergência escrito numa task e sem entrada passava batido, com o gate verde
+— foi exatamente o que aconteceu aqui.
+
+**O alcance é estreito, e a palavra que o define é `ainda`.** O enunciado da
+regra — *"uma exceção no golden sem entrada aqui é buraco"* — vive em cinco
+arquivos e não é pendência nenhuma; ele nunca diz "ainda". Alargar para `sem
+entrada aqui` cru marcaria os cinco, e guarda que erra é guarda que se desliga.
+É a mesma escolha do `BLOQUEIO_VENCIDO` do `check_fase4.py`.
+
+**E na primeira corrida ela marcou o `correcoes-progresso.md`**, que **cita** a
+frase para descrever este defeito. Excluído por nome, junto dos `CORR-WTE-*.md`,
+e não por heurística de contexto: a diferença entre citar e declarar não se lê
+de uma regex — lê-se de onde a frase está. Plantando uma declaração na task 37,
+o gate sai com **código 2**.
+
 **Arquivos criados/modificados:**
+
+- `wte/re/divergencias.md` — as §§10 e 11, e o `ficha_enlaza` na exclusão
+- `docs/tasks/35-divergencias-deliberadas.md` — a seção virou índice
+- `wte/tools/check_divergencias.py` — `PENDENCIA_DECLARADA` e a varredura
+- `wte/tools/test_check_divergencias.py` — `TestPendenciaDeclarada`, 4 casos

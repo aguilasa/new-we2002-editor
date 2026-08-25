@@ -109,6 +109,65 @@ RETIRADAS = [
 ]
 
 
+# A DIRECAO QUE FALTAVA -- CORR-WTE-114.
+#
+# As tabelas acima conferem EXCECAO DE FERRAMENTA contra entrada. A outra
+# direcao -- achado de divergencia escrito numa task e sem entrada no registro
+# -- passava batida, e o gate ficava verde. Foi o que aconteceu com as tres
+# candidatas da WTE-TASK-37: a primeira delas se declarava *"ainda sem entrada
+# aqui"* no markdown de uma task ja `concluido`, que ninguem executaria de novo.
+#
+# Prosa que se declara pendente e exatamente o que uma guarda consegue ler.
+#
+# O ALCANCE E ESTREITO DE PROPOSITO, e a palavra que o define e `ainda`. O
+# enunciado da REGRA -- *"uma excecao no golden sem entrada aqui e buraco"* --
+# aparece em cinco lugares vivos e nao e pendencia nenhuma; ele nunca diz
+# "ainda". Alargar para `sem entrada aqui` cru marcaria os cinco, e guarda que
+# erra e guarda que se desliga. E a mesma escolha do `BLOQUEIO_VENCIDO` do
+# `check_fase4.py`, que restringe o verbo a "portar" pela mesma razao.
+PENDENCIA_DECLARADA = [
+    re.compile(r"ainda\s+sem\s+entrada\s+aqui", re.I),
+    re.compile(r"ainda\s+sem\s+entrada\s+n[oa]\s+registro", re.I),
+]
+
+# Onde ela e procurada. Sao os documentos que descrevem divergencia e que nao
+# sao o proprio registro -- o `divergencias.md` fica de fora porque uma frase
+# assim DENTRO dele seria outra coisa (uma entrada incompleta, que os seis
+# campos ja cobram).
+ONDE_PROCURAR = ("docs/tasks", "wte/re")
+
+
+def pendencias_declaradas() -> list[str]:
+    """Frase que se declara sem entrada no registro, fora do registro."""
+    achados: list[str] = []
+    for pasta in ONDE_PROCURAR:
+        raiz = ROOT / pasta
+        if not raiz.is_dir():
+            continue
+        for arq in sorted(raiz.rglob("*.md")):
+            if arq == DOC:
+                continue
+            # Os arquivos que CITAM a frase para a descrever, em vez de a
+            # declarar: o markdown de cada correcao e o indice delas. Excluir
+            # por nome, e nao por heuristica de contexto, porque a diferenca
+            # entre citar e declarar nao se le de uma regex -- se le de onde a
+            # frase esta.
+            if arq.name.startswith("CORR-WTE-"):
+                continue
+            if arq.name == "correcoes-progresso.md":
+                continue
+            texto = arq.read_text(encoding="utf-8")
+            for padrao in PENDENCIA_DECLARADA:
+                for m in padrao.finditer(texto):
+                    linha = texto.count("\n", 0, m.start()) + 1
+                    achados.append(
+                        f"{arq.relative_to(ROOT)}:{linha}: diz "
+                        f"{m.group(0)!r} -- divergencia que se declara sem "
+                        f"entrada no registro tem de TER a entrada, ou deixar "
+                        f"de se dizer divergencia. Ver a CORR-WTE-114.")
+    return achados
+
+
 def secoes(texto: str) -> dict[int, str]:
     """Numero da secao -> titulo, dos cabecalhos `## N. ...`."""
     return {int(m.group(1)): m.group(2).strip()
@@ -154,6 +213,8 @@ def mede() -> dict:
             problemas.append(
                 f"a retirada de `{r['nome']}` nao tem secao {r['secao']} em "
                 f"divergencias.md")
+
+    problemas.extend(pendencias_declaradas())
 
     # As faixas `conhecida:` da bateria de bytes. Hoje sao zero, e a secao 8 do
     # documento AFIRMA isso -- entao uma faixa nova sem entrada tem de abortar,

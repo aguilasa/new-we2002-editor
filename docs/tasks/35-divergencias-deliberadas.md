@@ -426,24 +426,34 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
 
 ## Candidatas posteriores — WTE-TASK-37 (2026-08-25)
 
-Três medidas da reconferência de UI com a lógica ligada que pedem decisão de
+Três medidas da reconferência de UI com a lógica ligada que pediam decisão de
 registro. Todas em [`wte/re/visual.md`](../../wte/re/visual.md), segunda
 passada, com captura em
 [`wte/re/visual/carregado/`](../../wte/re/visual/carregado).
 
+> **As três foram destinadas em 2026-08-25 pela
+> [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md), e esta seção virou índice.**
+> Ela existia porque o repasse foi escrito na task que criou o formato — e
+> esta task já estava `concluído`, então ninguém a executaria de novo. O
+> registro que o formato produz é o
+> [`divergencias.md`](../../wte/re/divergencias.md), e é lá que as entradas
+> moram agora.
+
 1. **`ficha_warning` não é levantado pelo port** (achado 8). O aviso de tamanho
    do original pergunta antes de aplicar os dois remendos de arranque; o port
    os aplica **sem perguntar**, e é por isso que a gravação bate byte a byte.
-   Divergência deliberada de comportamento em produção, ainda sem entrada aqui.
+   → **§10 do registro**, divergência deliberada, decisão *não reproduzir*.
 2. **`ficha_enlaza` não tem chamador nenhum no port** (achado 8). Não é escolha
    de tela: a rota que o alcança é o `MainForm.mostrar_jugadorClick` para
    jogador de clube de Master League, que a
    [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) deixou escrito por
    medir. **Rota não portada**, não divergência escolhida — o vocabulário
-   importa aqui.
+   importa aqui. → **não vira entrada**: está na seção *"O que NÃO entra
+   aqui"* do registro, com o dono nomeado.
 3. **`TStaticText` desabilitado pinta fundo próprio no GTK2** (achado 11). Um
    dos 37: `help_team` sai `#76B6FF` (a cor do formulário) no oráculo e
    `#DCDAD5` (o cinza do tema) no port. `base_team`, também `Enabled = False`
    no DFM, **bate** — porque o app o reabilita em runtime. O que diverge é a
    pintura do estado desabilitado, que nenhuma propriedade do DFM controla: é a
    mesma família da divergência 2 (os cinco glifos que não acinzentam).
+   → **§11 do registro**, decisão *não reproduzir*.
