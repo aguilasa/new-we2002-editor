@@ -137,8 +137,15 @@ REC_ALTURA_MEDIDA = 240
 #   sempre_ligado   `.Enabled := True` incondicional -- NAO pode mudar. Os
 #                   `etiq_nombreN` sao a assimetria medida do original: o campo
 #                   segue `nacional`, o rotulo ao lado nao
-#   pendente_32     `.Visible := nacional`, mas quem DESENHA e a WTE-TASK-29.
-#                   Medido e relatado, nunca reprova
+#   (REMOVIDO em 2026-08-25) `pendente_32` isentava `bandera`, `home1` e
+#                   `home2` de reprovar enquanto o 2D nao estivesse desenhado.
+#                   A WTE-TASK-29 desenhou e as CORR-WTE-083/-084 consertaram a
+#                   bandeira preta de dez times; medido pela WTE-TASK-35, os
+#                   tres BATEM -- 3840/3840, 2328/2328 e 1012/1012, numeros
+#                   identicos dos dois lados. Isencao que sobrevive a propria
+#                   causa nao protege nada e esconde regressao futura, entao os
+#                   tres voltaram para `segue_nacional`, que e o que a spec
+#                   deles diz. Ver a secao 9 do `wte/re/divergencias.md`.
 #   glifo_cinza     `.Enabled := nacional` roda nos dois, mas o glifo e
 #                   INVARIANTE sob o `gdeDisabled` da LCL -- desenhado so com
 #                   preto e branco puros sobre a cor transparente, e grayscale
@@ -172,9 +179,9 @@ CONTROLES = {
     "parriba":             (160, 336,  33, 49, "fora_da_faixa"),
     "mostrar_estrategia_1": (16, 360,  25, 21, "fora_da_faixa"),
     "mostrar_jugador_1":    (16, 392,  25, 21, "fora_da_faixa"),
-    "bandera":             (232,  36,  80, 48, "pendente_32"),
-    "home1":               (232, 104,  80, 42, "pendente_32"),
-    "home2":               (232, 146,  80, 22, "pendente_32"),
+    "bandera":             (232,  36,  80, 48, "segue_nacional"),
+    "home1":               (232, 104,  80, 42, "segue_nacional"),
+    "home2":               (232, 146,  80, 22, "segue_nacional"),
     "banderita1":          (122, 339,  30, 12, "fora_da_faixa"),
     "edit_nombre1":        (392,  64, 113, 21, "conteudo"),
     "edit_nombre2":        (392, 104, 113, 21, "conteudo"),
@@ -658,7 +665,7 @@ def confere_faixa() -> None:
     medida.
     """
     fora = [n for n, r in CONTROLES.items()
-            if r[4] in ("segue_nacional", "sempre_ligado", "pendente_32")
+            if r[4] in ("segue_nacional", "sempre_ligado")
             and r[1] + r[3] > FAIXA_CALIBRADA_Y]
     if fora:
         raise TelaError(
@@ -766,7 +773,7 @@ def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
         m_orac = n_orac > LIMIAR_MUDANCA
         m_port = n_port > LIMIAR_MUDANCA
         esperado = grupo != "sempre_ligado"
-        if m_orac != m_port and grupo not in ("pendente_32", "glifo_cinza"):
+        if m_orac != m_port and grupo != "glifo_cinza":
             veredito = "DIVERGE"
             erros.append(
                 f"{nome}: oraculo {'muda' if m_orac else 'nao muda'} "
@@ -774,8 +781,6 @@ def compara_habilitacao(nac_orac, nac_port, mod_orac, mod_port) -> dict:
                 f"({n_port} px)")
         elif m_orac != m_port and grupo == "glifo_cinza":
             veredito = "divergencia deliberada (WTE-TASK-35)"
-        elif m_orac != m_port:
-            veredito = "pendente da WTE-TASK-29"
         elif m_orac != esperado and grupo == "segue_nacional":
             veredito = "CONTRARIA A SPEC"
             erros.append(

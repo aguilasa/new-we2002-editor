@@ -174,7 +174,12 @@ class TestCobertura(unittest.TestCase):
 @unittest.skipUnless(TEM_PIL, "sem PIL/Pillow")
 class TestHabilitacao(unittest.TestCase):
     SEGUE = [n for n, r in C.CONTROLES.items() if r[4] == "segue_nacional"]
-    P32 = [n for n, r in C.CONTROLES.items() if r[4] == "pendente_32"]
+    # Os tres do render 2D. Ate 2026-08-25 esta lista se derivava do grupo
+    # `pendente_32`, que os isentava de reprovar; com o grupo removido ela
+    # virou vazia em silencio, e o teste da bandeira passou a nao medir
+    # nada. Lista derivada da tabela sob teste nao guarda a tabela --
+    # agora os nomes vem do `RENDER` do modulo, que e o proprio conjunto.
+    P32 = list(C.RENDER)
     CINZA = [n for n, r in C.CONTROLES.items() if r[4] == "glifo_cinza"]
 
     def r(self, muda_orac, muda_port, off_port=(6, 6)):
@@ -223,12 +228,30 @@ class TestHabilitacao(unittest.TestCase):
         v = {l["nome"]: l["veredito"] for l in r["linhas"]}
         self.assertEqual(v["iguala_nombres"], "bate")
 
-    def test_bandeira_so_de_um_lado_nao_reprova(self):
-        """Desenhar a bandeira e da WTE-TASK-29, e ela ainda nao chegou."""
-        r = self.r(self.SEGUE + self.P32, self.SEGUE)
-        self.assertEqual(r["erros"], [])
+    def test_bandeira_so_de_um_lado_REPROVA(self):
+        """O contrario do que este teste exigia ate 2026-08-25.
+
+        Ele travava a isencao `pendente_32`, com a premissa escrita no proprio
+        docstring: *"desenhar a bandeira e da WTE-TASK-29, e ela ainda nao
+        chegou"*. Ela chegou -- e as CORR-WTE-083/-084 ainda consertaram a
+        bandeira preta de dez times. Medido pela WTE-TASK-35 em 2026-08-25, os
+        tres controles do grupo BATEM, com numeros identicos dos dois lados:
+        3840/3840, 2328/2328 e 1012/1012.
+
+        Isencao que sobrevive a propria causa nao protege nada -- ela esconde a
+        regressao seguinte. Entao o grupo saiu, os tres voltaram para
+        `segue_nacional`, e o que este teste prende agora e a direcao oposta:
+        bandeira que mude de um lado so REPROVA.
+        """
+        # `SEGUE` passou a CONTER os tres, entao "so de um lado" agora se
+        # escreve tirando-os do lado port -- somar `P32` de um lado so
+        # nao muda mais nada.
+        so_port = [n for n in self.SEGUE if n not in self.P32]
+        r = self.r(self.SEGUE, so_port)
+        self.assertTrue(r["erros"], "bandeira divergindo tem de reprovar")
+        self.assertTrue(any("bandera" in e for e in r["erros"]), r["erros"])
         v = {l["nome"]: l["veredito"] for l in r["linhas"]}
-        self.assertEqual(v["bandera"], "pendente da WTE-TASK-29")
+        self.assertEqual(v["bandera"], "DIVERGE")
 
     def test_campo_de_texto_nao_e_medido(self):
         r = self.r(self.SEGUE + self.P32, self.SEGUE + self.P32)
@@ -250,8 +273,17 @@ class TestHabilitacao(unittest.TestCase):
         self.assertIn("parriba", str(e.exception))
 
     def test_nenhum_lado_mudando_reprova_contra_a_spec(self):
-        r = self.r(self.P32, self.P32)
+        """Os tres do render entraram na conta em 2026-08-25.
+
+        Enquanto eram `pendente_32` ficavam fora: o grupo nunca reprovava. Como
+        `segue_nacional`, um `bandera` que nao muda de lado nenhum passou a
+        contrariar a spec como qualquer outro -- e a contagem subiu de 9 para
+        12 sozinha, que e o sinal de que a isencao de fato saiu.
+        """
+        nada = []
+        r = self.r(nada, nada)
         self.assertEqual(len(r["erros"]), len(self.SEGUE))
+        self.assertEqual(len(self.SEGUE), 12)
         self.assertIn("a spec diz", r["erros"][0])
 
 

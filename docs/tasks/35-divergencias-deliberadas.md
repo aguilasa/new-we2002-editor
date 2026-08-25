@@ -5,7 +5,7 @@ type: verificação
 category: verificação
 phase: 6
 depends_on: ["WTE-TASK-34"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-35: Divergências deliberadas
@@ -294,22 +294,111 @@ problemas conhecidos vira desculpa.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/re/divergencias.md` | criar |
-| `wte/tools/golden_suite.sh` | modificar — exceções nomeadas |
+| `wte/re/divergencias.md` | criar — o registro, escrito à mão |
+| `wte/tools/check_divergencias.py` | criar — a conferência cruzada, com `--check` |
+| `wte/tools/compara_tela.py` | modificar — **remover** o grupo `pendente_32` |
+| `wte/tools/test_compara_tela.py` | modificar — o teste que travava a isenção |
+| `wte/tools/golden_suite.sh` | modificar — o ponteiro para a regra |
+
+*Adaptado na execução (2026-08-25).* Duas correções ao enunciado, e as duas são
+achado:
+
+**O `divergencias.md` não é gerado, e não deve ser.** As entradas são *decisão*
+— por que reproduzir um bug e não outro. Prosa não se gera; um gerador que a
+produzisse estaria inventando razão a partir de número. O que dá para mecanizar
+é a outra metade, a que o próprio enunciado nomeia numa frase — *"uma exceção no
+golden sem entrada aqui é buraco"* —, e é o `check_divergencias.py`.
+
+**O `golden_suite.sh` não tinha exceção nomeada para receber.** Nenhum dos 23
+roteiros declara `conhecida:`; a bateria de bytes fechou com zero. Ele ganhou o
+ponteiro para a regra, não dado — quem acrescentar uma faixa encontra ali a
+obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir.
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Toda divergência da bateria com entrada completa
-- [ ] Toda exceção do golden com entrada correspondente
-- [ ] Divergência sem causa conhecida classificada como bug aberto, não como deliberada
-- [ ] As quatro candidatas conhecidas decididas
-- [ ] Commit no formato conventional, em inglês
+- [x] Toda divergência da bateria com entrada completa — **a bateria não tem
+      divergência nenhuma**: 92 corridas, zero `REPROVOU`, e **zero roteiro
+      declarando `conhecida:`**. Está escrito como afirmação medida na §8 do
+      registro, e o `check_divergencias.py` aborta se uma faixa nova aparecer
+      sem entrada
+- [x] Toda exceção do golden com entrada correspondente — **3 exceções
+      nomeadas, as 3 com entrada**: `glifo_cinza` e `INVARIANTES` (§2) e
+      `ULTIMO_SLOT_PRECADO` (§5). Mecanizado nos **dois** sentidos, com as três
+      recusas vistas
+- [x] Divergência sem causa conhecida classificada como bug aberto, não como
+      deliberada — nenhuma apareceu. As seis entradas têm causa medida e
+      citada; a única linha ainda aberta é o truncamento, e ela **tem dono
+      nomeado** ([WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md)), que é
+      a diferença entre pendência e buraco
+- [x] As quatro candidatas conhecidas decididas — **nenhuma virou entrada**, e
+      cada veredito é medido: tolerância do render 2D é **zero**; nenhum dos 37
+      `TStaticText` usa `Transparent`; rótulo cortado acontece **nos dois
+      lados**, pela mesma fonte substituta; truncamento é da WTE-TASK-36.
+      Estão na §7 do registro
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-25
+
 - **Resumo do que foi feito:**
-- **Arquivos criados/modificados:**
+
+  Escrito o [`wte/re/divergencias.md`](../../wte/re/divergencias.md) — **seis
+  entradas** com os seis campos que o enunciado pede, mais três seções que o
+  enunciado não previa e a execução exigiu. E mecanizada a metade que dá para
+  mecanizar, no [`check_divergencias.py`](../../wte/tools/check_divergencias.py).
+
+  **O achado é uma exceção que sobreviveu à própria causa.** O grupo
+  `pendente_32` do `compara_tela.py` isentava `bandera`, `home1` e `home2` de
+  reprovar, com a justificativa *"quem DESENHA é a WTE-TASK-29"*. A 29 fechou em
+  2026-08-21 e as CORR-WTE-083/-084 ainda consertaram a bandeira preta de dez
+  times. Medido em 2026-08-25 pelo `compara_tela.sh --habilitacao`, os três
+  **batem**, com números idênticos dos dois lados — 3840/3840, 2328/2328 e
+  1012/1012.
+
+  Por isso eles **não viraram entrada, viraram remoção**. Escrever entrada de
+  divergência deliberada para algo que não diverge seria o defeito desta task
+  pelo avesso: o documento existe para que nenhuma divergência seja
+  desconhecida, e uma entrada falsa manda alguém procurar um problema que não
+  existe. Os três voltaram para `segue_nacional` e agora **reprovam** se
+  voltarem a divergir.
+
+  **E as quatro candidatas que o enunciado deixou em aberto: nenhuma virou
+  entrada.** Todas as quatro já tinham resposta medida em task anterior —
+  hipótese que não se confirma não vira divergência deliberada, vira linha
+  dizendo que foi conferida.
+
 - **Problemas encontrados:**
+
+  **Remover a isenção quebrou dois testes, e os dois modos de falha valem
+  registro.**
+
+  O primeiro era o teste que **travava a isenção**, com a premissa escrita no
+  próprio docstring: *"desenhar a bandeira é da WTE-TASK-29, e ela ainda não
+  chegou"*. Ela chegou. O teste não estava errado quando foi escrito — envelheceu
+  junto com a isenção que guardava, que é a mesma **prosa vencida** que a
+  terceira passagem da [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md)
+  batizou. Foi virado ao contrário: agora bandeira que diverge de um lado só
+  **reprova**.
+
+  O segundo é mais sutil e é o que vale levar adiante. A lista `P32` do teste se
+  **derivava da própria tabela sob teste** (`[n for n in CONTROLES if grupo ==
+  "pendente_32"]`). Removido o grupo, ela virou **lista vazia em silêncio**, e o
+  teste da bandeira passou a plantar nada e a conferir nada — passaria verde
+  para sempre sem medir coisa alguma. É exatamente a armadilha que a
+  CORR-WTE-020 achou no `dfm2lfm.py` e que o `check_glifos_disabled.py`
+  documenta: **lista derivada da tabela que ela deveria guardar não guarda
+  nada.** Agora os nomes vêm do `RENDER` do módulo.
+
+  E há um sinal de que a remoção de fato aconteceu, em vez de ter sido só
+  renomeada: a contagem de controles que contrariam a spec quando nada muda
+  subiu de **9 para 12** sozinha — os três entraram na conta ao deixar de ser
+  isentos.
+
+- **Arquivos criados/modificados:** ver `git show --stat`. Criados:
+  `wte/re/divergencias.md`, `wte/tools/check_divergencias.py`. Modificados:
+  `wte/tools/compara_tela.py` e `wte/tools/test_compara_tela.py` (a remoção da
+  isenção e os dois testes), `wte/tools/golden_suite.sh` (o ponteiro para a
+  regra), `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`; este arquivo.

@@ -47,7 +47,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
@@ -547,7 +547,21 @@ alimenta e passou a **carregar** essa gravação.
       (**49.749 violações**, o valor do `crash-causa.md`) antes da correção. A
       varredura passou a vir primeiro. **Nenhum verde anterior depende do
       defeito:** com a japonesa o roteiro sempre dirige até o fim
-- [ ] Toda exceção do golden com entrada em `divergencias.md`
+- [x] Toda exceção do golden com entrada em `divergencias.md` — **3 exceções
+      nomeadas, as 3 com entrada**, mecanizado nos dois sentidos pelo
+      [`check_divergencias.py`](../../wte/tools/check_divergencias.py) com as
+      três recusas vistas. O registro tem **seis entradas**, e a bateria de
+      bytes **não tem exceção nenhuma**: zero roteiro declara `conhecida:`, o
+      que é afirmação medida — o `golden_veredito.py` reprova faixa declarada
+      que não aparece
+- [x] **Uma exceção foi removida, não registrada** *(achado da WTE-TASK-35,
+      2026-08-25)*. O grupo `pendente_32` isentava `bandera`, `home1` e `home2`
+      de reprovar enquanto o 2D não estivesse desenhado; a WTE-TASK-29 desenhou
+      e as CORR-WTE-083/-084 consertaram a bandeira preta. Medido, os três
+      **batem** — 3840/3840, 2328/2328, 1012/1012. Isenção que sobrevive à
+      própria causa não protege nada: esconde a regressão seguinte. Os três
+      voltaram para `segue_nacional` e a contagem de "contraria a spec" subiu de
+      **9 para 12** sozinha, que é o sinal de que a isenção saiu de fato
 - [ ] Inventário de buffers com os quatro casos de borda, nas duas ROMs
 - [ ] Nenhuma ação destrutiva alcançável por `Return`
 

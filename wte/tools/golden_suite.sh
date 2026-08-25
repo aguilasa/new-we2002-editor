@@ -64,6 +64,23 @@
 # `SEM_ORACULO` no TSV. A diferenca entre "nao medimos" e "medimos e o oraculo
 # nao existe daquele lado" e a task inteira.
 #
+# ## Excecao nomeada: nao ha nenhuma, e isso e afirmacao medida
+#
+# Um roteiro pode declarar `conhecida: a..b` no cabecalho -- uma faixa de bytes
+# que os dois lados divergem DE PROPOSITO, e que o `golden_veredito.py` aceita
+# em vez de reprovar. Hoje **nenhum dos 23 declara**, e as 92 corridas da
+# WTE-TASK-34 fecharam com zero `REPROVOU`.
+#
+# Nem sempre foi assim: ate 2026-08-20 dois roteiros declaravam as faixas do
+# arranque que o oraculo gravava e o port nao, e a oitava passagem da
+# WTE-TASK-27 portou os dois remendos. O `golden_veredito.py` REPROVA faixa
+# declarada que nao aparece, entao a ausencia delas hoje e medida, nao omissao.
+#
+# **Ao acrescentar uma `conhecida:`, abra a entrada em
+# `wte/re/divergencias.md` junto.** O `check_divergencias.py` -- que o
+# `make -C wte check` roda -- aborta se aparecer faixa sem entrada: excecao no
+# golden sem registro e buraco, e e o que a WTE-TASK-35 existe para impedir.
+#
 # ## Custo
 #
 # Duas copias da imagem por corrida, apagadas ao fim de cada uma. Com a

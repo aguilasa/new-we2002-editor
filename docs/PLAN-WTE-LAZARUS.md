@@ -1052,7 +1052,28 @@ e conta vagos. Depende só da Fase 3.
    achou no gate da Fase 4 e corrigiu.
 2. **Registro de divergências deliberadas** — no formato que o
    [PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
-   que, e que evidência sustenta.
+   que, e que evidência sustenta. **Feito em 2026-08-25** pela
+   [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md), em
+   [`../wte/re/divergencias.md`](../wte/re/divergencias.md): **seis entradas**,
+   todas de comportamento em produção, nenhuma hipótese. A bateria de bytes
+   **não tem exceção nenhuma** — zero roteiro declara `conhecida:` —, e as
+   quatro candidatas que o enunciado deixou em aberto foram decididas sem virar
+   entrada, porque as quatro já tinham resposta medida.
+
+   **A metade mecanizável é a conferência cruzada**, no
+   [`check_divergencias.py`](../wte/tools/check_divergencias.py): exceção
+   nomeada numa ferramenta sem entrada no registro é **buraco**; entrada sem
+   exceção é **prosa vencida**. O gate aborta nos dois sentidos. O documento em
+   si **não é gerado**, e não deve ser — as entradas são decisão, e prosa não se
+   gera.
+
+   **O achado da task foi uma isenção que sobreviveu à própria causa.** O grupo
+   `pendente_32` do `compara_tela.py` dispensava `bandera`, `home1` e `home2` de
+   reprovar *"até a WTE-TASK-29 desenhar"*; a 29 desenhou, as CORR-WTE-083/-084
+   consertaram a bandeira preta de dez times, e a isenção ficou. Medidos, os
+   três batem com números idênticos dos dois lados. Isenção que perde a causa
+   não protege nada — esconde a regressão seguinte —, então virou **remoção**, e
+   não entrada.
 3. **Robustez que o original não tem** — o `newWe2002` aprendeu em Release que
    `strcpy` sem terminador derruba o app em toda imagem aberta. O Pascal com
    strings gerenciadas não tem essa classe de bug, mas *tem* a inversa: o

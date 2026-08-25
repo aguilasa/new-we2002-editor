@@ -25,6 +25,31 @@ Invisível em Debug. Só apareceu em Release.
 
 O original do Obocaman é C++Builder, com `char` fixo, e o mesmo padrão.
 
+> **Entrada aberta pela [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
+> em 2026-08-25 — esta task é a dona do último item em aberto do registro de
+> divergências.**
+>
+> A 35 fechou com **seis** divergências deliberadas registradas e as quatro
+> candidatas do enunciado dela decididas. Sobrou **uma** linha aberta, e é esta:
+> *"comportamento de truncamento de campo, se o Pascal não reproduzir o do
+> buffer fixo"*. Está na §7 do
+> [`wte/re/divergencias.md`](../../wte/re/divergencias.md) como **em aberto, com
+> dono** — que é o que separa pendência de buraco.
+>
+> **O que a 36 deve devolver para a 35, e em que forma.** Se algum campo
+> divergir e a decisão for não reproduzir o truncamento do original, a entrada
+> **nasce aqui e volta para o `divergencias.md`** com os seis campos que ele
+> usa: o que diverge, natureza, decisão, razão, evidência, e *onde o teste
+> sabe*. Se nenhum divergir, a linha da §7 vira "conferido, não é divergência",
+> como as outras três candidatas.
+>
+> **E se a régua ganhar exceção nomeada, ela tem de passar pelo
+> [`check_divergencias.py`](../../wte/tools/check_divergencias.py):** isenção que
+> faz um teste deixar de reprovar precisa da entrada correspondente, e o gate
+> aborta nos dois sentidos. A 35 achou uma isenção (`pendente_32`) que tinha
+> sobrevivido à própria causa por duas tasks; a guarda existe para isso não se
+> repetir.
+
 ---
 
 ## Objetivo
@@ -84,6 +109,8 @@ sobreviver vai para a WTE-TASK-35.
 - [ ] Os quatro casos de borda testados por campo
 - [ ] Bordas testadas também na ROM japonesa
 - [ ] Comportamento do original reproduzido, ou divergência registrada
+      **no `wte/re/divergencias.md`, com os seis campos** — e a linha da §7
+      de lá fechada num dos dois sentidos (ver o Contexto)
 - [ ] Nenhum campo sem entrada no inventário
 - [ ] Commit no formato conventional, em inglês
 
