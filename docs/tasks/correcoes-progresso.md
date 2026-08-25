@@ -129,6 +129,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-108](/docs/tasks/CORR-WTE-108.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A task deixa "o plano é o que falta conferir" sobre o vaivém, e o plano nunca afirmou aquilo — zero ocorrências de `idempot`/`cobrador`/`OFS_KICKER` | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Quatro sítios do lado WTE dizem que "o editor original não é idempotente", e neste projeto "o original" é o `wte.exe` — a medição da CORR-WTE-104 cobre um caminho e não a afirmação inteira | Média | [x] concluída | 2026-08-25 |
+| [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Os quatro casos de borda foram medidos num vetor só (`names`, 20 B) e o critério diz "por campo"; `abbreviations` (4 B, a menor folga), `name` e `kanji_name` não passam pelos grupos 1 e 2 | Média | [ ] pendente | — |
+| [CORR-WTE-111](/docs/tasks/CORR-WTE-111.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | A chave `faixa` do `CAMPOS` não é lida por ninguém, e dois dos quatro valores contradizem o medido — `edit_nombre1` declara (5,19) contra 5..13 | Baixa | [ ] pendente | — |
+| [CORR-WTE-112](/docs/tasks/CORR-WTE-112.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | O `filtro` de caracteres é publicado por campo no `buffers.md` e nunca conferido contra o `KeyPress`, enquanto o `predicado` de faixa ao lado aborta se sumir | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -240,6 +243,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
 - [x] CORR-WTE-108 — trocar o "falta conferir" pelo resultado da conferência: o plano não afirmava
 - [x] CORR-WTE-109 — medir a segunda gravação em geral e dar sujeito à frase da não-idempotência
+- [ ] CORR-WTE-110 — medir as bordas nos outros três vetores, ou escrever que a medição é por classe
+- [ ] CORR-WTE-111 — apagar a `faixa` morta do `CAMPOS`, ou torná-la expectativa conferida
+- [ ] CORR-WTE-112 — conferir o `filtro` de cada campo contra o `KeyPress`, como já se faz com a faixa
 
 ## Detalhes por correção
 
@@ -1947,3 +1953,44 @@ dizer "fechada e fora do backlog", não "corrigida".
   `golden.md` (linha 98, já diz `ed.exe`) e com o enunciado da WTE-TASK-34
 - **Fix:** escrever o resultado da conferência no lugar da pendência —
   resultado negativo escrito poupa a próxima busca
+
+### CORR-WTE-110
+
+- **Arquivo com problema:** `wte/tests/test_bordas.pas`
+- **Sintoma:** o critério diz *"os quatro casos de borda testados **por
+  campo**"*, e os dois grupos que medem borda de campo tocam só `t.names[0]` e
+  `t.names[1]`. Ficam de fora `abbreviations` (4 B para limite 3, a menor folga
+  do inventário, e vizinho do `kanji_name` no `TTeam`), `Player.name` (11 B) e o
+  `kanji_name` como destino. A parte estrutural — o limite caber no vetor — está
+  coberta campo a campo pelo gerador; o comportamento, não
+- **Como foi detectado:** compilado e rodado o `test_bordas.pas` nesta revisão
+  (`10/10 conferencias de borda passaram`) e grepados os vetores que ele toca
+- **Fix:** repetir os grupos 1 e 2 nos outros três — o corpo já é
+  parametrizável —, começando pelo `abbreviations`; ou escrever no critério que
+  a medição é por classe, com a razão
+
+### CORR-WTE-111
+
+- **Arquivo com problema:** `wte/tools/dump_buffers.py`, tabela `CAMPOS`
+- **Sintoma:** a chave `faixa` existe nos quatro campos de texto e **nenhum
+  código a lê** — os limites publicados saem de `lim_min`/`lim_max`, medidos das
+  tabelas por time. E dois valores contradizem o medido: `edit_nombre1` declara
+  `(5, 19)` contra **5..13**, `edit_nombre2` declara `(5, 19)` contra **7..19**.
+  A mesma chave é **viva** em `NUMERICOS`, o que torna a confusão provável
+- **Como foi detectado:** `grep` por consumidores (nenhum) e confronto
+  medido × declarado pelo próprio módulo, nesta revisão
+- **Fix:** apagar a chave, ou renomeá-la para `esperado` e **conferi-la**,
+  corrigindo antes os dois valores; mais um caso que recuse chave que ninguém lê
+
+### CORR-WTE-112
+
+- **Arquivo com problema:** `wte/tools/dump_buffers.py` e o gerado
+  `wte/re/buffers.md`
+- **Sintoma:** o conjunto de caracteres aceito por campo é declarado à mão e
+  publicado num arquivo cujo banner diz *"todo número daqui saiu do script"*,
+  sem nunca ser conferido contra o `KeyPress`. O irmão dele na mesma tabela — o
+  `predicado` de faixa dos numéricos — é lido do `.inc` e **aborta** se sumir
+- **Como foi detectado:** `grep -n "filtro"` no gerador: todas as ocorrências
+  são declaração, repasse e impressão; nenhuma abre um `.inc`
+- **Fix:** dar ao `filtro` a forma do `predicado` — trecho literal do handler,
+  conferido por substring, com a recusa plantada em `test_check_bordas.py`
