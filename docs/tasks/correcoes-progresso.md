@@ -125,6 +125,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-103](/docs/tasks/CORR-WTE-103.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | No estado zero o `check_fase4.py` emite o título `## Os que continuam aberto` colado no parágrafo — a linha em branco mora dentro do `if` que lista os sem spec | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | O `golden-24-gravacao-dupla` grava no time 2, cujos dois primeiros cobradores são iguais (`[7, 7, …]`): a troca do `Load`+`Save` que ele existe para medir é a identidade ali, e o roteiro passa com vaivém e sem ele | Alta | [x] concluída | 2026-08-25 |
 | [CORR-WTE-105](/docs/tasks/CORR-WTE-105.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | A pendência do vaivém dos cobradores foi encaminhada por prosa da WTE-TASK-34 para a 35, e a 35 não a tem em lugar nenhum — zero ocorrências no arquivo dela | Baixa | [x] concluída | 2026-08-25 |
+| [CORR-WTE-106](/docs/tasks/CORR-WTE-106.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | O `check_divergencias.py` é a única guarda de recusa do repositório sem `test_*.py`; as "três recusas vistas" do critério não deixaram artefato — as quatro foram exercitadas nesta revisão e saem com código 2 | Média | [ ] pendente | — |
+| [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [ ] pendente | — |
+| [CORR-WTE-108](/docs/tasks/CORR-WTE-108.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A task deixa "o plano é o que falta conferir" sobre o vaivém, e o plano nunca afirmou aquilo — zero ocorrências de `idempot`/`cobrador`/`OFS_KICKER` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -232,6 +235,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-103 — tirar do `if` a linha em branco que separa o bloco de specs do título seguinte
 - [x] CORR-WTE-104 — mover o `golden-24` para um time em que os dois primeiros cobradores diferem, e escrever o resultado do terceiro ponto
 - [x] CORR-WTE-105 — dar entrada na WTE-TASK-35 à pendência que a 34 encaminhou para ela
+- [ ] CORR-WTE-106 — escrever o `test_check_divergencias.py` com as quatro recusas plantadas
+- [ ] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
+- [ ] CORR-WTE-108 — trocar o "falta conferir" pelo resultado da conferência: o plano não afirmava
 
 ## Detalhes por correção
 
@@ -1894,3 +1900,48 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** acrescentar a candidata à 35, dizendo que ela espera **medição** e
   não decisão, com a CORR-WTE-104 como pré-requisito; e, se valer, o
   `01-executar.md` passar a exigir que "encaminhado para a NN" tenha linha na NN
+
+### CORR-WTE-106
+
+- **Arquivo com problema:** `wte/tools/check_divergencias.py` — não tem
+  `test_check_divergencias.py`
+- **Sintoma:** o critério da task afirma *"mecanizado nos dois sentidos, com as
+  três recusas vistas"*, e nada no repositório volta a exercitá-las. É a única
+  guarda de **recusa** sem par de teste: os irmãos todos têm
+  (`check_fase1/2/3/4`, `check_golden`, `check_preco`, `check_edicao`,
+  `check_glifos_disabled`, `cobertura_gate`, `gravacao_controle`,
+  `spec_index`), e as nove ferramentas sem teste são medidoras do `.exe`
+- **Como foi detectado:** `ls` do arquivo ausente, e as quatro recusas
+  plantadas num espelho da árvore em `/tmp` nesta revisão — isenção que some,
+  seção que some, retirada que volta, roteiro com `conhecida:` — **as quatro
+  saem com código 2**, então o gate funciona e o que falta é mantê-lo assim
+- **Fix:** escrever os quatro casos no molde do `test_check_fase4.py`, mais o
+  caso do estado de hoje e o do casamento por aspas do `RETIRADAS` (o
+  `compara_tela.py` cita `pendente_32` na prosa e passa só porque a citação usa
+  crase)
+
+### CORR-WTE-107
+
+- **Arquivo com problema:** `docs/tasks/35-divergencias-deliberadas.md`, lista
+  de arquivos
+- **Sintoma:** o commit `2e70784` tocou nove arquivos e a lista nomeia oito. O
+  que falta é `docs/tasks/36-buffers-e-truncamento.md`, o **repasse** — o único
+  dos nove que não é ferramenta, e o que aplica a lição da CORR-WTE-105
+- **Como foi detectado:** `git show --stat --format= 2e70784` contra a lista,
+  nesta revisão
+- **Fix:** acrescentar a linha, dizendo o que o repasse escreve na 36; é a
+  quarta omissão desta classe (CORR-WTE-078, -087, -099)
+
+### CORR-WTE-108
+
+- **Arquivo com problema:** `docs/tasks/35-divergencias-deliberadas.md`, linha 260
+- **Sintoma:** a candidata do vaivém fecha com *"o plano é o que falta
+  conferir"*, e o plano nunca afirmou o vaivém — `grep -c` de
+  `idempot|cobrador|OFS_KICKER|vaivém` no `PLAN-WTE-LAZARUS.md` devolve **0**.
+  A frase manda procurar texto que não existe, que é o defeito que a própria
+  task nomeia ao explicar por que removeu a isenção `pendente_32` em vez de
+  registrá-la. O `divergencias.md` está correto
+- **Como foi detectado:** `grep` no plano nesta revisão, cruzado com o
+  `golden.md` (linha 98, já diz `ed.exe`) e com o enunciado da WTE-TASK-34
+- **Fix:** escrever o resultado da conferência no lugar da pendência —
+  resultado negativo escrito poupa a próxima busca
