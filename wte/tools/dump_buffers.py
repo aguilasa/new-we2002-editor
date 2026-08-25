@@ -78,7 +78,6 @@ CAMPOS = [
         "vetor": ("we2002_team.pas", "kanji_name"),
         "origem": "runtime",
         "limite": "TEAM_NAME_KANJI_LEN[time] - 1",
-        "faixa": (5, 19),
         "modo": "dois bytes",
         "filtro": "[A-Za-z0-9 .]",
     },
@@ -88,7 +87,6 @@ CAMPOS = [
         "vetor": ("we2002_team.pas", "names"),
         "origem": "runtime",
         "limite": "TEAM_NAME_LEN_3[time] - 1",
-        "faixa": (5, 19),
         "modo": "um byte",
         "filtro": "[A-Za-z0-9 .]",
     },
@@ -98,7 +96,6 @@ CAMPOS = [
         "vetor": ("we2002_team.pas", "abbreviations"),
         "origem": "dfm",
         "limite": "3",
-        "faixa": (3, 3),
         "modo": "um byte",
         "filtro": "[A-Za-z0-9]",
     },
@@ -108,11 +105,23 @@ CAMPOS = [
         "vetor": ("we2002_player.pas", "name"),
         "origem": "dfm",
         "limite": "10",
-        "faixa": (10, 10),
         "modo": "um byte",
         "filtro": "[A-Za-z0-9 .]",
     },
 ]
+
+# A chave `faixa` NAO existe nos campos de texto, e isso e escolha: a
+# CORR-WTE-111 a apagou.
+#
+# Ela declarava a faixa de limites a mao, ninguem a lia, e dois dos quatro
+# valores contradiziam o medido (`edit_nombre1` dizia (5,19) contra 5..13
+# medidos). Os limites destes campos SAO medidos, das tabelas por time; dado
+# declarado ao lado de dado medido enfraquece o banner do `buffers.md`, que
+# promete que todo numero de la saiu do script.
+#
+# CUIDADO AO LER: a chave de mesmo nome na tabela abaixo e VIVA. Nos numericos
+# a faixa nao se mede de lugar nenhum -- ela e a regra que o handler aplica --,
+# e o gerador a cobra do `.inc`. Mesma palavra, dois papeis.
 
 # Campos NUMERICOS, e eles quebram o modelo dos de texto.
 #
@@ -393,10 +402,11 @@ def md(m: dict) -> str:
     a("guarda é a validação do handler de gravação. Os dois são")
     a("desproporcionais, e é o que o inventário existe para mostrar:")
     a("")
-    a("| Controle | `MaxLength` | Aceita digitar até | Faixa válida | Destino |")
-    a("|---|---:|---|---|---|")
+    a("| Controle | Formulário | `MaxLength` | Aceita digitar até "
+      "| Faixa válida | Destino |")
+    a("|---|---|---:|---|---|---|")
     for n in m["numericos"]:
-        a(f"| `{n['controle']}` | {n['maxlength']} | "
+        a(f"| `{n['controle']}` | `{n['formulario']}` | {n['maxlength']} | "
           f"`{'9' * n['maxlength']}` | {n['faixa']} | {n['destino']} |")
     a("")
     a("O `casilla_dorsal` é o extremo: **dez dígitos** para um número que não")

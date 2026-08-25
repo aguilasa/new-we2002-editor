@@ -3,7 +3,7 @@ id: CORR-WTE-111
 title: "Correção: o campo `faixa` do CAMPOS é dado morto, e dois dos quatro valores contradizem o medido"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -119,19 +119,59 @@ da [CORR-WTE-020](/docs/tasks/CORR-WTE-020.md).
 
 ## Verificação
 
-- [ ] `grep -c "faixa" wte/tools/dump_buffers.py` só encontra as ocorrências de
-      `NUMERICOS`, ou a chave virou `esperado` **conferida**
-- [ ] Se virar guarda: um valor plantado fora do medido faz o gerador abortar
-- [ ] `python3 wte/tools/dump_buffers.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n '"faixa"' wte/tools/dump_buffers.py` só encontra as duas
+      ocorrências de `NUMERICOS` (linhas 144 e 154)
+- [x] Guarda exercitada: chave `inventada` plantada em `CAMPOS` faz o caso
+      reprovar com a mensagem certa
+- [x] `python3 wte/tools/dump_buffers.py --check` verde; duas execuções dão
+      md5 igual nos dois arquivos
+- [x] `make -C wte check` verde (828 testes, era 823)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+Escolhida a **saída 1** da CORR — apagar a chave dos quatro campos de texto —,
+que era a recomendada. A segunda inventaria uma segunda fonte de verdade para
+um número que já tem uma: os limites destes campos são medidos das tabelas por
+time, e dado declarado ao lado de dado medido enfraquece o banner do
+`buffers.md`, que promete que todo número de lá saiu do script.
+
+Ficou registrado no próprio arquivo por que a chave não existe mais, e — o que
+importa mais — **que a chave de mesmo nome na tabela vizinha é viva**: nos
+numéricos a faixa não se mede de lugar nenhum, é a regra que o handler aplica,
+e o gerador a cobra do `.inc`. Mesma palavra, dois papéis, no mesmo arquivo.
+
+A guarda (`TestChaveMorta`) percorre as duas tabelas e recusa chave que nenhum
+código lê, procurando a leitura na fonte — no molde do
+`chaves_repetidas_no_fonte` do `check_fase4.py`. Plantando uma chave
+`inventada` em `CAMPOS`, ela reprova com a mensagem certa.
+
 **Problemas encontrados:**
 
+**A guarda achou mais duas chaves mortas na primeira corrida, e as duas em
+`NUMERICOS`** — que a CORR não previa, porque ela olhou só a `faixa`:
+
+- **`formulario`** — declarado nos dois numéricos e nunca lido, enquanto a
+  tabela de texto o publica. Não apaguei: **tornei vivo**, acrescentando a
+  coluna `Formulário` à tabela dos numéricos no `buffers.md`. Apagar perderia
+  informação verdadeira, e as duas tabelas ficam consistentes.
+- **`filtro`** — é o assunto da
+  [CORR-WTE-112](/docs/tasks/CORR-WTE-112.md), que vai confrontá-lo com o
+  `KeyPress`. Deixado como **pendência com dono nomeado** numa lista
+  `PENDENTES` da guarda, e não como buraco.
+
+**E a exceção se limpa sozinha**, que é a parte que vale copiar: há um caso que
+**reprova quando a chave passar a ser lida**, forçando quem a tornou viva a
+tirar a linha da lista. É a lição literal do grupo `pendente_32` da
+WTE-TASK-35 — isenção que sobrevive à própria causa deixa de proteger qualquer
+coisa e esconde a regressão seguinte.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_buffers.py` — a chave apagada, a nota, o `formulario` vivo
+- `wte/tools/test_check_bordas.py` — `TestChaveMorta`, 4 casos
+- `wte/re/buffers.md` — regerado (a coluna nova)

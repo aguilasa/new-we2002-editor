@@ -50,10 +50,10 @@ O destino deles não é vetor com capacidade — é uma **faixa**, e quem a
 guarda é a validação do handler de gravação. Os dois são
 desproporcionais, e é o que o inventário existe para mostrar:
 
-| Controle | `MaxLength` | Aceita digitar até | Faixa válida | Destino |
-|---|---:|---|---|---|
-| `casilla_precio` | 3 | `999` | 1..250 | o byte de credito de `OFS_COST_*` |
-| `casilla_dorsal` | 10 | `9999999999` | 1..99 (1..32 fora de Master League) | o campo de numero de camisa (`SquadNumbers`) |
+| Controle | Formulário | `MaxLength` | Aceita digitar até | Faixa válida | Destino |
+|---|---|---:|---|---|---|
+| `casilla_precio` | `jugador` | 3 | `999` | 1..250 | o byte de credito de `OFS_COST_*` |
+| `casilla_dorsal` | `jugador` | 10 | `9999999999` | 1..99 (1..32 fora de Master League) | o campo de numero de camisa (`SquadNumbers`) |
 
 O `casilla_dorsal` é o extremo: **dez dígitos** para um número que não
 passa de 99. Se a validação do handler sumisse, o `MaxLength` não

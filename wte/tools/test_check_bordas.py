@@ -98,6 +98,89 @@ class TestInventario(unittest.TestCase):
         self.assertEqual(D.main(["--check"]), 0)
 
 
+class TestChaveMorta(unittest.TestCase):
+    """A guarda da CORR-WTE-111: chave que ninguem le nao fica na tabela.
+
+    A `faixa` dos campos de TEXTO declarava a mao uma faixa de limites que o
+    gerador ja MEDE das tabelas por time, ninguem a lia, e dois dos quatro
+    valores contradiziam o medido -- `edit_nombre1` dizia (5, 19) contra 5..13.
+    Valor morto nao aparece em saida nenhuma, e e por isso que passou:
+    o risco e alguem escrever a proxima guarda SOBRE ele, achando que e medida.
+
+    A confusao era provavel porque a chave de mesmo nome na tabela vizinha e
+    viva: em `NUMERICOS` a faixa e cobrada do `.inc` do handler. Duas tabelas
+    no mesmo arquivo, a mesma palavra, dois papeis.
+
+    Esta guarda fecha a classe -- a mesma da CORR-WTE-096 (chave repetida que
+    ninguem via) e da CORR-WTE-020.
+    """
+
+    FONTE = Path(D.__file__).read_text(encoding="utf-8")
+
+    def lida(self, chave: str, var: str) -> bool:
+        """A chave aparece sendo LIDA em algum lugar do gerador?
+
+        Textual de proposito, como o `chaves_repetidas_no_fonte` do
+        `check_fase4.py`: o que se quer pegar e a chave que so e escrita na
+        tabela, e isso se ve na fonte.
+        """
+        return any(forma in self.FONTE for forma in (
+            f'{var}["{chave}"]', f"{var}['{chave}']",
+            f'{var}.get("{chave}")', f"{var}.get('{chave}')"))
+
+    def test_toda_chave_de_CAMPOS_e_lida(self) -> None:
+        for c in D.CAMPOS:
+            for chave in c:
+                with self.subTest(controle=c["controle"], chave=chave):
+                    self.assertTrue(
+                        self.lida(chave, "c"),
+                        f"a chave `{chave}` de CAMPOS nao e lida por ninguem: "
+                        "ou some, ou vira expectativa conferida")
+
+    # Chave ainda morta, com DONO NOMEADO -- pendencia nao e buraco, e a
+    # diferenca entre as duas e exatamente esta linha.
+    #
+    # O `filtro` dos numericos e o assunto da CORR-WTE-112, que vai confronta-lo
+    # com o `KeyPress` do handler. Ate la ele so e declarado. A excecao se
+    # limpa sozinha: o caso abaixo REPROVA quando a chave virar lida, forcando
+    # quem a tornou viva a tirar a linha daqui.
+    PENDENTES = {"filtro": "CORR-WTE-112"}
+
+    def test_toda_chave_de_NUMERICOS_e_lida(self) -> None:
+        for n in D.NUMERICOS:
+            for chave in n:
+                if chave in self.PENDENTES:
+                    continue
+                with self.subTest(controle=n["controle"], chave=chave):
+                    self.assertTrue(self.lida(chave, "n"),
+                                    f"a chave `{chave}` de NUMERICOS nao e lida")
+
+    def test_a_excecao_nao_sobrevive_a_propria_causa(self) -> None:
+        """Isencao que passa a proteger nada esconde a regressao seguinte.
+
+        E a licao literal da WTE-TASK-35 com o grupo `pendente_32`: a causa
+        caiu, a isencao ficou, e ela deixou de proteger qualquer coisa.
+        """
+        for chave, dono in self.PENDENTES.items():
+            with self.subTest(chave=chave):
+                self.assertFalse(
+                    self.lida(chave, "n"),
+                    f"a chave `{chave}` passou a ser lida ({dono} fez o "
+                    "trabalho): tire-a de PENDENTES, senao ela deixa de ser "
+                    "conferida por ninguem")
+
+    def test_a_guarda_pega_uma_chave_plantada(self) -> None:
+        """Guarda nunca exercitada e guarda ausente."""
+        self.assertFalse(self.lida("faixa", "c"))
+        self.assertTrue(self.lida("faixa", "n"))
+
+    def test_os_campos_de_texto_nao_declaram_faixa(self) -> None:
+        """O defeito literal, no dado -- nao so na fonte."""
+        for c in D.CAMPOS:
+            with self.subTest(controle=c["controle"]):
+                self.assertNotIn("faixa", c)
+
+
 class TestBordasEmPascal(unittest.TestCase):
     PROGRAMA = D.WTE / "tests" / "test_bordas.pas"
 
