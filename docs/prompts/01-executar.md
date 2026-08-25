@@ -370,11 +370,14 @@ Se concluída:
 > numa forma coletiva ("os dois `.uses`", "os `ep2002_*.pas` regerados"). O
 > arquivo da própria tarefa é a única omissão convencional.
 >
-> **Já falhou três vezes**, e sempre no mesmo formato: o item que entra no meio
-> da execução, por um motivo lateral, e não volta para a lista ao escrever o
-> Log — [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md),
-> [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md) e
-> [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md), esta última pelo `.gitignore`
+> **Já falhou quatro vezes**, e sempre no mesmo formato: o item que entra no
+> meio da execução, por um motivo lateral, e não volta para a lista ao escrever
+> o Log — [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md),
+> [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md),
+> [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) e
+> [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) — a última pelo **repasse** para
+> a task seguinte, que é o pior item a faltar porque é o único que não é
+> arquivo de ferramenta. A -099 foi pelo `.gitignore`
 > que ganhou quinze linhas ao ver um binário compilado aparecer no
 > `git status`. É justamente o tipo que alguém procura depois, porque é o
 > único que não é sobre o assunto da tarefa.

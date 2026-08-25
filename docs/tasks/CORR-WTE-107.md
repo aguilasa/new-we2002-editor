@@ -3,7 +3,7 @@ id: CORR-WTE-107
 title: "Correção: a lista de arquivos da WTE-TASK-35 não menciona o repasse escrito na WTE-TASK-36"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -93,16 +93,43 @@ conta continua sendo paga uma revisão por vez.
 
 ## Verificação
 
-- [ ] A lista da task cobre os nove arquivos de `git show --stat --format= 2e70784`
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] A lista da task cobre os nove arquivos de `git show --stat --format= 2e70784`
+      — conferido por script, 9 de 9
+- [x] `make -C wte check` verde (809 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+O `docs/tasks/36-buffers-e-truncamento.md` entrou na lista de arquivos da
+WTE-TASK-35, dizendo o que ele é — o **repasse**, e não mais um arquivo de
+ferramenta: a 36 passa a ser a dona declarada da única linha em aberto da §7,
+com a forma de devolução (os seis campos) e a obrigação de passar pelo
+`check_divergencias.py` se a régua ganhar isenção.
+
+Conferido por script contra `git show --stat --format= --name-only 2e70784`:
+**9 de 9** cobertos, contando o próprio arquivo da task pela forma
+convencional ("este arquivo").
+
 **Problemas encontrados:**
 
+**A regra que deveria ter pego isto já existe — e o contador dela envelheceu.**
+A [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) recomendou fechar a porta, e
+fechou: o `01-executar.md` tem o bloco *"a lista de arquivos se confere contra o
+commit, não contra a memória"*, com o `git show --stat --format= HEAD`, e o
+wrapper `.claude/commands/executar.md` reafirma. Os dois diziam **três vezes**
+— esta é a quarta, e o contador é o que dá peso à regra. Atualizados os dois,
+com a -107 nomeada e o motivo de ela ser o pior item a faltar.
+
+Vale registrar que a regra existir não bastou: ela pede conferir a lista contra
+o commit, e a lista da 35 defere ao `git show --stat` em vez de o rodar. Deferir
+não é conferir — mas isso é observação, não conserto desta correção.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/35-divergencias-deliberadas.md` — o item que faltava
+- `docs/prompts/01-executar.md` — o contador da regra, de três para quatro
+- `.claude/commands/executar.md` — o mesmo contador no wrapper

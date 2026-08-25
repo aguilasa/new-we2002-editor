@@ -406,4 +406,9 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
   `wte/re/divergencias.md`, `wte/tools/check_divergencias.py`. Modificados:
   `wte/tools/compara_tela.py` e `wte/tools/test_compara_tela.py` (a remoção da
   isenção e os dois testes), `wte/tools/golden_suite.sh` (o ponteiro para a
-  regra), `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`; este arquivo.
+  regra), `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`;
+  [`docs/tasks/36-buffers-e-truncamento.md`](/docs/tasks/36-buffers-e-truncamento.md)
+  — **o repasse**: a 36 passa a ser a dona declarada da única linha em aberto
+  da §7 do registro, com a forma de devolução escrita (os seis campos) e a
+  obrigação de passar pelo `check_divergencias.py` se a régua ganhar isenção;
+  este arquivo.

@@ -41,7 +41,7 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
    - o **Log de Execução** preenchido no markdown da tarefa em `docs/tasks/`:
      data, resumo do que se aprendeu, arquivos tocados, problemas encontrados.
      A lista de arquivos se confere contra `git show --stat --format= HEAD`,
-     não contra a memória — ela já ficou devendo um item três vezes, sempre o
+     não contra a memória — ela já ficou devendo um item quatro vezes, sempre o
      que entrou no meio da execução por motivo lateral
 
    Tarefa parcial **não** vira `✅ Concluído` — registre no Log o que ficou

@@ -126,7 +126,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | O `golden-24-gravacao-dupla` grava no time 2, cujos dois primeiros cobradores são iguais (`[7, 7, …]`): a troca do `Load`+`Save` que ele existe para medir é a identidade ali, e o roteiro passa com vaivém e sem ele | Alta | [x] concluída | 2026-08-25 |
 | [CORR-WTE-105](/docs/tasks/CORR-WTE-105.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | A pendência do vaivém dos cobradores foi encaminhada por prosa da WTE-TASK-34 para a 35, e a 35 não a tem em lugar nenhum — zero ocorrências no arquivo dela | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-106](/docs/tasks/CORR-WTE-106.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | O `check_divergencias.py` é a única guarda de recusa do repositório sem `test_*.py`; as "três recusas vistas" do critério não deixaram artefato — as quatro foram exercitadas nesta revisão e saem com código 2 | Média | [x] concluída | 2026-08-25 |
-| [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [ ] pendente | — |
+| [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-108](/docs/tasks/CORR-WTE-108.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A task deixa "o plano é o que falta conferir" sobre o vaivém, e o plano nunca afirmou aquilo — zero ocorrências de `idempot`/`cobrador`/`OFS_KICKER` | Baixa | [ ] pendente | — |
 
 ## Checklist
@@ -236,7 +236,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-104 — mover o `golden-24` para um time em que os dois primeiros cobradores diferem, e escrever o resultado do terceiro ponto
 - [x] CORR-WTE-105 — dar entrada na WTE-TASK-35 à pendência que a 34 encaminhou para ela
 - [x] CORR-WTE-106 — escrever o `test_check_divergencias.py` com as quatro recusas plantadas
-- [ ] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
+- [x] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
 - [ ] CORR-WTE-108 — trocar o "falta conferir" pelo resultado da conferência: o plano não afirmava
 
 ## Detalhes por correção
