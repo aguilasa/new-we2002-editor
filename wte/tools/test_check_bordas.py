@@ -23,6 +23,7 @@ Duas coisas se medem aqui:
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -114,7 +115,20 @@ class TestBordasEmPascal(unittest.TestCase):
                                env=dict(os.environ))
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         # Numero medido: caso que sumisse do programa sumiria em silencio.
-        self.assertIn("10/10", r.stdout)
+        #
+        # O literal era `10/10` ate a CORR-WTE-110, que estendeu os grupos 1 e 2
+        # aos outros tres campos do inventario e o levou a 25. Literal aqui e a
+        # mesma armadilha que a CORR-WTE-101 pegou na prosa: quem acrescenta um
+        # caso mexe no `.pas` e nao neste numero, e o teste vira vermelho por um
+        # motivo que nao e defeito. O que importa medir e que TODAS passaram e
+        # que ha caso algum -- nao qual e o total de hoje.
+        achado = re.search(r"(\d+)/(\d+) conferencias", r.stdout)
+        self.assertIsNotNone(achado, r.stdout)
+        passaram, total = int(achado.group(1)), int(achado.group(2))
+        self.assertEqual(passaram, total, r.stdout)
+        self.assertGreaterEqual(total, len(D.CAMPOS),
+                                "menos conferencias de borda que campos no "
+                                "inventario -- algum campo deixou de ser medido")
 
 
 if __name__ == "__main__":

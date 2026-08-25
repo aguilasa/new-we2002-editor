@@ -3,7 +3,7 @@ id: CORR-WTE-110
 title: "Correção: os quatro casos de borda foram medidos num vetor só, e o critério diz \"por campo\""
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -128,18 +128,58 @@ esta task inteira existe para não deixar acontecer.
 
 ## Verificação
 
-- [ ] `grep -c "abbreviations" wte/tests/test_bordas.pas` maior que zero, e o
-      programa continua verde
-- [ ] A contagem de conferências no critério bate com a que o programa imprime
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -c "abbreviations" wte/tests/test_bordas.pas` maior que zero — **13**
+      —, e o programa continua verde
+- [x] A contagem de conferências no critério bate com a que o programa imprime
+      — **25 de 25** nos dois
+- [x] `make -C wte check` verde (823 testes, era 815)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+Escolhida a **primeira** saída da CORR — estender o teste —, e não a segunda,
+que era reescrever o critério para dizer "por classe". A CORR pedia que se
+escrevesse qual dos dois e por quê: estender custou dois auxiliares e um
+`FillChar` por caso, contra reescrever um critério que passaria a prometer
+menos do que a task pode entregar.
+
+Os grupos 1 e 2 saíram de `t.names[0..1]` e passaram a rodar nos quatro vetores
+do inventário: `names` (20 B), `kanji_name` (20 B), `p.name` (11 B) e
+`abbreviations` (4 B). **10 de 10 → 25 de 25 conferências.**
+
+Os auxiliares são três — `BordaNExato`, `BordaAtravessa` e `BordaVazia` —, com
+parâmetro sem tipo (`var vetor`) e capacidade, porque o que muda de campo para
+campo não é o código: é a capacidade e o vizinho.
+
+**A travessia ficou medida campo a campo, e é a parte que faltava.** Com o
+registro zerado, encher o vetor sem terminador faz a leitura parar no primeiro
+byte do vizinho — comprimento igual à **capacidade**, um a mais que o teto de
+tela. E o caso que a CORR nomeia está lá: o `abbreviations[2]` cheio atravessa
+para dentro do `kanji_name`, medido em `4 + 19 = 23` com os `KKK` do vizinho
+conferidos. É o campo mais apertado do inventário, e o vizinho dele é outro
+nome — o resultado sai plausível, que é o pior tipo de erro.
+
 **Problemas encontrados:**
 
+**A contagem estava publicada em quatro lugares, e um deles era uma asserção.**
+O `test_check_bordas.py:117` afirmava `assertIn("10/10", r.stdout)` — literal.
+Ele reprovaria agora, e reprovaria por um motivo que não é defeito: quem
+acrescenta um caso de borda mexe no `.pas`, não naquele número. Trocado por uma
+leitura do par impresso, que exige **passaram == total** e `total >= len(CAMPOS)`
+— o que amarra a asserção ao inventário em vez de a um literal. É a mesma
+armadilha que a CORR-WTE-101 pegou na prosa gerada.
+
+Os outros três — o critério da task 36, o `progresso.md` e a §Fase 6 do plano —
+foram atualizados com a razão ao lado, porque "25" sem explicação faria a
+próxima pessoa procurar de onde vieram os 15 novos.
+
 **Arquivos criados/modificados:**
+
+- `wte/tests/test_bordas.pas` — os três auxiliares e os quatro campos
+- `wte/tools/test_check_bordas.py` — a asserção derivada, não literal
+- `docs/tasks/36-buffers-e-truncamento.md` — o critério
+- `docs/tasks/progresso.md`, `docs/PLAN-WTE-LAZARUS.md` — a varredura

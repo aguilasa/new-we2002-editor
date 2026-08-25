@@ -75,9 +75,62 @@ end;
   O `TTeam` poe `mixed_case_name` logo depois de `names[5]`, e `kanji_name`
   logo depois de `abbreviations`. Entao o vizinho nao e memoria qualquer: e
   outro nome, e o resultado sai plausivel -- o pior tipo de erro. }
+{ Os dois grupos abaixo eram medidos so em `names[0]`, de 20 bytes -- e o
+  criterio da task diz "por campo". A CORR-WTE-110 estendeu-os aos outros tres
+  vetores do inventario, por estes dois auxiliares.
+
+  O que muda de campo para campo NAO e o codigo, e a CAPACIDADE e o VIZINHO. O
+  `abbreviations` e o caso que faltava e o mais apertado do inventario: 4 bytes
+  para limite 3, e o `abbreviations[2]` mora coladinho no `kanji_name`. Se o
+  `- 1` do terminador errar em algum lugar, e ali. }
+
+{ `N` exato: `cap - 1` caracteres deixam o ultimo byte em NUL, e a leitura
+  devolve exatamente `cap - 1`. }
+procedure BordaNExato(const rotulo: string; var vetor; cap: Integer);
+var
+  p: PAnsiChar;
+  i: Integer;
+begin
+  p := PAnsiChar(@vetor);
+  for i := 0 to cap - 2 do
+    p[i] := AnsiChar(Ord('A') + (i mod 26));
+  p[cap - 1] := #0;
+  ConfereInt(rotulo + '/N-exato/comprimento', Length(Cadeia(vetor)), cap - 1);
+end;
+
+{ Vetor CHEIO, sem terminador. Com o registro zerado, `Cadeia` para no primeiro
+  byte do vizinho -- entao o comprimento e `cap`, e nao `cap - 1`. Essa
+  diferenca de um E a travessia: a leitura passou do fim do campo. }
+function BordaAtravessa(var vetor; cap: Integer): Integer;
+var
+  p: PAnsiChar;
+  i: Integer;
+begin
+  p := PAnsiChar(@vetor);
+  for i := 0 to cap - 1 do
+    p[i] := 'X';
+  Result := Length(Cadeia(vetor));
+end;
+
+{ Cadeia vazia, e o lixo depois do NUL: as duas conferencias do grupo 2. }
+procedure BordaVazia(const rotulo: string; var vetor; cap: Integer);
+var
+  p: PAnsiChar;
+begin
+  p := PAnsiChar(@vetor);
+  FillChar(vetor, cap, 0);
+  Confere(rotulo + '/vazia/le-como-vazia', Cadeia(vetor), '');
+
+  { `cap >= 4` em todos os campos do inventario -- o menor e o `abbreviations`,
+    com 4 -- entao "AB" mais NUL mais sujeira cabe em todos. }
+  p[0] := 'A'; p[1] := 'B'; p[2] := #0; p[3] := 'C';
+  Confere(rotulo + '/sujo-depois-do-NUL', Cadeia(vetor), 'AB');
+end;
+
 procedure Grupo1_NExato;
 var
   t: TTeam;
+  p: TPlayer;
   i: Integer;
 begin
   FillChar(t, SizeOf(t), 0);
@@ -108,6 +161,42 @@ begin
     normal, e por isso ela nao e divergencia: e uma pre-condicao mantida pelo
     limite, nao pelo tipo. }
   ConfereInt('grupo1/teto-de-tela', 20 - 1, 19);
+
+  { --- os outros tres campos do inventario (CORR-WTE-110) --- }
+
+  FillChar(t, SizeOf(t), 0);
+  BordaNExato('grupo1/kanji_name', t.kanji_name, 20);
+  FillChar(t, SizeOf(t), 0);
+  BordaNExato('grupo1/abbreviations', t.abbreviations[0], 4);
+  FillChar(p, SizeOf(p), 0);
+  BordaNExato('grupo1/name', p.name, 11);
+
+  { A travessia, campo a campo. Registro zerado: a leitura para no primeiro
+    byte do vizinho, entao o comprimento e a CAPACIDADE -- um a mais que o
+    teto de tela. }
+  FillChar(t, SizeOf(t), 0);
+  ConfereInt('grupo1/atravessa/names', BordaAtravessa(t.names[0], 20), 20);
+  FillChar(t, SizeOf(t), 0);
+  ConfereInt('grupo1/atravessa/kanji_name',
+             BordaAtravessa(t.kanji_name, 20), 20);
+  FillChar(t, SizeOf(t), 0);
+  ConfereInt('grupo1/atravessa/abbreviations',
+             BordaAtravessa(t.abbreviations[0], 4), 4);
+  FillChar(p, SizeOf(p), 0);
+  ConfereInt('grupo1/atravessa/name', BordaAtravessa(p.name, 11), 11);
+
+  { E o caso que a CORR-WTE-110 nomeia: o `abbreviations[2]` cheio atravessa
+    para o `kanji_name`, que e OUTRO NOME -- nao memoria qualquer. E a mesma
+    classe do `names[0]` -> `names[1]` do inicio deste grupo, no campo mais
+    apertado do inventario. }
+  FillChar(t, SizeOf(t), 0);
+  for i := 0 to 19 do
+    t.kanji_name[i] := 'K';
+  t.kanji_name[19] := #0;
+  ConfereInt('grupo1/abbreviations-2/atravessa-para-kanji',
+             BordaAtravessa(t.abbreviations[2], 4), 4 + 19);
+  Confere('grupo1/abbreviations-2/conteudo',
+          Copy(Cadeia(t.abbreviations[2]), 5, 3), 'KKK');
 end;
 
 { ------------------------------------------------------------------------ }
@@ -115,6 +204,7 @@ end;
 procedure Grupo2_Vazia;
 var
   t: TTeam;
+  p: TPlayer;
 begin
   FillChar(t, SizeOf(t), 0);
   Confere('grupo2/vazia/le-como-vazia', Cadeia(t.names[0]), '');
@@ -127,6 +217,11 @@ begin
   t.names[0][0] := 'A'; t.names[0][1] := 'B'; t.names[0][2] := #0;
   t.names[0][3] := 'C';
   Confere('grupo2/sujo-depois-do-NUL', Cadeia(t.names[0]), 'AB');
+
+  { --- os outros tres campos do inventario (CORR-WTE-110) --- }
+  BordaVazia('grupo2/kanji_name', t.kanji_name, 20);
+  BordaVazia('grupo2/abbreviations', t.abbreviations[0], 4);
+  BordaVazia('grupo2/name', p.name, 11);
 end;
 
 { ------------------------------------------------------------------------ }

@@ -1083,7 +1083,10 @@ e conta vagos. Depende só da Fase 3.
    **Feito em 2026-08-25** pela
    [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md), em
    [`../wte/re/buffers.md`](../wte/re/buffers.md): **seis campos** de digitação
-   inventariados, **10 de 10** conferências de borda, e **nenhuma divergência**.
+   inventariados, **25 de 25** conferências de borda, e **nenhuma divergência**.
+   *(Eram 10 no fechamento da task, todas no vetor `names`; a
+   [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) estendeu os dois grupos de
+   borda de campo aos quatro vetores do inventário.)*
 
    **A classe inversa existe mesmo, e está medida.** `Cadeia()` é `PAnsiChar`
    sobre vetor de tamanho fixo: um vetor cheio, sem NUL, faz a leitura

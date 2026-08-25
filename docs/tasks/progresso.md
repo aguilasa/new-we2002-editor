@@ -568,8 +568,11 @@ alimenta e passou a **carregar** essa gravação.
 - [x] Inventário de buffers com os quatro casos de borda, nas duas ROMs —
       **seis campos**, gerados pelo
       [`dump_buffers.py`](../../wte/tools/dump_buffers.py) em
-      [`buffers.md`](../../wte/re/buffers.md), e **10 de 10** conferências de
-      borda em [`test_bordas.pas`](../../wte/tests/test_bordas.pas), headless.
+      [`buffers.md`](../../wte/re/buffers.md), e **25 de 25** conferências de
+      borda em [`test_bordas.pas`](../../wte/tests/test_bordas.pas), headless
+      *(eram 10, todas num vetor só; a
+      [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) levou os grupos 1 e 2 aos
+      quatro campos)*.
       **Nenhuma divergência**: a linha da §7 do `divergencias.md` fechou no
       sentido negativo
 - [x] **As fontes do inventário são três, não duas** *(achado da WTE-TASK-36,

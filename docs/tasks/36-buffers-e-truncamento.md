@@ -129,8 +129,15 @@ confere estaticamente contra a capacidade do vetor.
       Um inventário que olhasse só o DFM concluiria que esses dois não têm
       limite, que é o contrário da verdade
 - [x] Os quatro casos de borda testados por campo — em
-      [`test_bordas.pas`](../../wte/tests/test_bordas.pas), **10 de 10**
-      conferências, headless
+      [`test_bordas.pas`](../../wte/tests/test_bordas.pas), **25 de 25**
+      conferências, headless. Eram 10 quando esta task fechou, e todas num
+      vetor só: os grupos 1 e 2 tocavam `names` (20 B) e mais nada, de modo
+      que a medição era por **classe**, num representante, e não por campo
+      como esta linha diz. A [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md)
+      estendeu-os aos outros três — `kanji_name` (20 B), `name` (11 B) e
+      `abbreviations` (4 B, a menor folga do inventário) —, e mediu a
+      travessia do `abbreviations[2]` para dentro do `kanji_name`, que é o
+      vizinho mais apertado que existe aqui
 - [x] Bordas testadas também na ROM japonesa — o caso do Shift-JIS é do
       **codec**, e está no grupo 3: o slot cru tem o dobro de bytes do nome
       decodificado, e `raw_kanji_name` (40 B) é exatamente o dobro de

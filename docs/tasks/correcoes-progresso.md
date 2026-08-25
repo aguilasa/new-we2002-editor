@@ -129,7 +129,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-108](/docs/tasks/CORR-WTE-108.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A task deixa "o plano é o que falta conferir" sobre o vaivém, e o plano nunca afirmou aquilo — zero ocorrências de `idempot`/`cobrador`/`OFS_KICKER` | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Quatro sítios do lado WTE dizem que "o editor original não é idempotente", e neste projeto "o original" é o `wte.exe` — a medição da CORR-WTE-104 cobre um caminho e não a afirmação inteira | Média | [x] concluída | 2026-08-25 |
-| [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Os quatro casos de borda foram medidos num vetor só (`names`, 20 B) e o critério diz "por campo"; `abbreviations` (4 B, a menor folga), `name` e `kanji_name` não passam pelos grupos 1 e 2 | Média | [ ] pendente | — |
+| [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Os quatro casos de borda foram medidos num vetor só (`names`, 20 B) e o critério diz "por campo"; `abbreviations` (4 B, a menor folga), `name` e `kanji_name` não passam pelos grupos 1 e 2 | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-111](/docs/tasks/CORR-WTE-111.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | A chave `faixa` do `CAMPOS` não é lida por ninguém, e dois dos quatro valores contradizem o medido — `edit_nombre1` declara (5,19) contra 5..13 | Baixa | [ ] pendente | — |
 | [CORR-WTE-112](/docs/tasks/CORR-WTE-112.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | O `filtro` de caracteres é publicado por campo no `buffers.md` e nunca conferido contra o `KeyPress`, enquanto o `predicado` de faixa ao lado aborta se sumir | Baixa | [ ] pendente | — |
 
@@ -243,7 +243,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
 - [x] CORR-WTE-108 — trocar o "falta conferir" pelo resultado da conferência: o plano não afirmava
 - [x] CORR-WTE-109 — medir a segunda gravação em geral e dar sujeito à frase da não-idempotência
-- [ ] CORR-WTE-110 — medir as bordas nos outros três vetores, ou escrever que a medição é por classe
+- [x] CORR-WTE-110 — medir as bordas nos outros três vetores, ou escrever que a medição é por classe
 - [ ] CORR-WTE-111 — apagar a `faixa` morta do `CAMPOS`, ou torná-la expectativa conferida
 - [ ] CORR-WTE-112 — conferir o `filtro` de cada campo contra o `KeyPress`, como já se faz com a faixa
 
