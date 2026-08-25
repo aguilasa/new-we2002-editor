@@ -14,9 +14,31 @@ A medição é a sessão `27-gravacao-controle` de
 
 Carregar um time e mandar gravar **sem tocar em campo nenhum** já muda
 bytes. Sem essa linha de base, toda divergência medida depois vem
-contaminada — e as duas armadilhas conhecidas são de naturezas
-diferentes: o `Save` do formato reconstrói dado a partir de link, e o
-`Load`+`Save` do editor original não é idempotente.
+contaminada: o `Save` do formato reconstrói dado a partir de link.
+
+**A segunda armadilha que este parágrafo citava não é deste editor.**
+Ele dizia que o `Load`+`Save` *"do editor original"* não é idempotente
+— troca os dois primeiros cobradores de cada clube de ML. A frase é
+verdadeira no [`newWe2002`](../../docs/PLAN-LINUX.md), onde o oráculo é
+o **`ed.exe`**; migrada para cá ela trocou de sujeito sem trocar de
+palavras, porque neste projeto *"o original"* é o `wte.exe` do
+Obocaman.
+
+Medido em 2026-08-25 ([CORR-WTE-109](../../docs/tasks/CORR-WTE-109.md)):
+o `wte.exe` **não tem** ciclo `Load`+`Save` de banco inteiro — ele grava
+por área. Dos 17 caminhos de gravação,
+**2** tocam `OFS_KICKER`, e os dois
+gravam duas vezes seguidas sem trocar o par:
+
+| Caminho | uma × duas gravações | a gravação aconteceu |
+|---|---:|---:|
+| ` Accept` da tática | **0** B | 11962 B contra a ROM virgem |
+| import de `.mcr` | **0** B | 12419 B contra a ROM virgem |
+
+**E o zero não é cego.** Depois da importação,
+**41** dos 96 times têm
+`cobrador[0] != cobrador[1]` — é neles que uma troca apareceria. Na
+segunda gravação, **0** trocaram.
 
 ## O que cada ação endereçou, e o que de fato mudou
 

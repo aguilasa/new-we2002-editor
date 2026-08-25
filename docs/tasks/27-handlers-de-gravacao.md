@@ -87,9 +87,14 @@ defeito que a primeira passagem daqui levou oito dias para achar.
 ### O diff de controle vem antes
 
 Como na WTE-TASK-19: gravar **sem editar nada** nos dois lados e registrar o que
-muda de graça. O `Save` reconstrói as all-star a partir dos links, e o
-`Load`+`Save` do original não é idempotente (troca os dois primeiros cobradores
-de cada clube de ML). Sem esse controle, toda medição vem contaminada.
+muda de graça. O `Save` reconstrói as all-star a partir dos links, e sem esse
+controle toda medição vem contaminada.
+
+> A segunda armadilha que esta linha citava — o `Load`+`Save` trocando os dois
+> primeiros cobradores de cada clube de ML — é do **`ed.exe`**, e chegou aqui
+> junto com a frase da WTE-TASK-19. Medido pela
+> [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) em 2026-08-25: o `wte.exe` não a
+> tem em nenhum dos dois caminhos que tocam `OFS_KICKER`.
 
 ### Critério
 

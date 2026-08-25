@@ -38,10 +38,16 @@ Para cada campo editável do original que a WTE-TASK-06 não resolveu:
 
 ### Cuidado que evita falso positivo
 
-O `Load`+`Save` do original **não é idempotente**: ele troca os dois primeiros
-cobradores de cada clube de ML (`OFS_KICKER`), porque `Load` lê o par trocado e
-`Save` grava na ordem declarada. E o `Save` reconstrói as all-star a partir dos
-links.
+O `Save` reconstrói as all-star a partir dos links.
+
+> **A outra armadilha que este parágrafo citava é do `ed.exe`, não do
+> `wte.exe`.** Ele dizia que o `Load`+`Save` "do original" não é idempotente —
+> troca os dois primeiros cobradores de cada clube de ML (`OFS_KICKER`), porque
+> `Load` lê o par trocado e `Save` grava na ordem declarada. Isso é medido no
+> `newWe2002`, onde o oráculo é o `ed.exe`; **neste projeto "o original" é o
+> `wte.exe`**, que grava por área e não tem esse ciclo. Medido em 2026-08-25
+> pela [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md): dos dois caminhos que tocam
+> `OFS_KICKER`, nenhum troca o par ao gravar duas vezes.
 
 **Então o diff de controle vem primeiro:** abrir e gravar **sem editar nada**, e
 registrar as faixas que mudam de graça. Só o que aparecer *além* dessas faixas é

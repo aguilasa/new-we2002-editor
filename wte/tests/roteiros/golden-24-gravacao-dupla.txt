@@ -6,7 +6,8 @@
 #
 # ## Gravar duas vezes, e por que e a tatica que julga isso
 #
-# O `newWe2002` registra que o editor original **nao e idempotente**:
+# O `newWe2002` registra que o **`ed.exe`** -- e nao este editor -- **nao e
+# idempotente**:
 # `Load`+`Save` troca os dois primeiros cobradores de cada clube de Master
 # League (`OFS_KICKER`), porque o `Load` le o par trocado e o `Save` grava na
 # ordem declarada -- e gravar DUAS vezes volta ao inicio. Se o app Lazarus nao

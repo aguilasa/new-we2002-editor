@@ -3,7 +3,7 @@ id: CORR-WTE-109
 title: "Correção: quatro sítios do lado WTE atribuem a não-idempotência ao \"editor original\", que aqui é o wte.exe — e o único caminho medido não a tem"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -117,18 +117,82 @@ sair da corrida.
 
 ## Verificação
 
-- [ ] A segunda gravação foi medida, e o número está escrito
-- [ ] `grep -rn "do original não é idempotente" docs wte` não devolve
-      afirmação sem sujeito
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada; trabalhou sobre cópia
+- [x] A segunda gravação foi medida, e o número está escrito — **0 bytes** nos
+      dois caminhos, com 41 times onde a troca apareceria e **0** trocados
+- [x] `grep -rn "do original não é idempotente" docs wte` não devolve
+      afirmação sem sujeito — só o teste, que cita a forma velha para a recusar
+- [x] `make -C wte check` verde (815 testes, era 809)
+- [x] `roms/` intocada; trabalhou sobre cópia
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+Medido e depois escrito, nessa ordem. Dos 17 caminhos de gravação, **dois**
+tocam `OFS_KICKER` — lido da seção `## Bytes tocados` das 96 specs, não de
+memória: o ` Accept` da tática e o import de `.mcr`. Os dois gravam duas vezes
+seguidas sem trocar o par:
+
+| Caminho | uma × duas | a gravação aconteceu |
+|---|---:|---:|
+| tática (CORR-WTE-104, time 5) | **0** B | 11.962 B contra a virgem |
+| import de `.mcr` (esta CORR, time 3) | **0** B | 12.419 B contra a virgem |
+
+O segundo foi medido aqui, encadeando duas importações da mesma fixture sobre a
+mesma cópia. **E o zero não é cego:** depois da importação, **41** dos 96 times
+têm `cobrador[0] != cobrador[1]` — é neles que uma troca apareceria —, e
+**zero** mudaram na segunda gravação. Também zero em toda a imagem, nos 307 MB.
+
+O achado que fecha a pergunta geral: **o `wte.exe` não tem ciclo `Load`+`Save`
+de banco inteiro.** Ele grava por área, e a frase herdada descreve uma
+propriedade de carga-e-gravação do banco todo, que é o que o `ed.exe` faz.
+
+Corrigidos seis sítios, mais o gerador. A guarda
+(`TestIdempotencia`, 6 casos) mora no `test_gravacao_controle.py` e cobra a
+coerência entre a tabela medida e a prosa gerada — plantando a frase velha de
+volta, ela reprova.
+
 **Problemas encontrados:**
 
+**A receita da CORR não se aplicava à ferramenta que ela nomeia.** Ela mandava
+rodar o `gravacao-controle` "duas vezes seguidas sobre a mesma cópia". O
+`gravacao_controle.py` é gerador **offline**: lê `io-medido.tsv` e
+`cmp-medido.tsv` e escreve prosa; não roda o oráculo, então rodá-lo duas vezes
+não mede nada. A medição foi feita onde ela existe — `golden_check.sh` com o
+`golden-12-mcr2iso`, encadeado. O gerador continua sendo o lugar certo do
+*registro*, que é a outra metade do que a CORR pedia.
+
+**A lista de sítios da CORR estava incompleta: são seis, não quatro.** A
+varredura achou `docs/tasks/20-round-trip-headless.md:95` e — o que mais
+importa — `docs/prompts/02-revisar.md:167`, que é **prompt vivo**: ele mandava
+o revisor cobrar gravação dupla porque *"o editor não é idempotente"*. Item de
+checklist com premissa falsa é pior que doc velho, porque dirige trabalho
+futuro. Reescrito: a gravação dupla continua valendo — o que só aparece na
+segunda gravação não aparece em lugar nenhum —, e o motivo agora é manter
+verdadeiro o que foi medido, não reproduzir um vaivém que não existe.
+
+**A própria task 19 já acertava em outro lugar.** A linha 41 dizia *"o
+`Load`+`Save` do original não é idempotente"*, e a linha 286 do mesmo arquivo
+diz *"não é o `Load`+`Save` não idempotente **do `ed.exe`**"*. O sujeito certo
+estava escrito duzentas linhas abaixo do errado, no mesmo documento — o que
+mostra que a confusão não foi ignorância e sim uma frase copiada sem reler.
+
+Os sítios que **não** foram tocados, e por quê: `docs/PLAN-LINUX.md` e o
+`CLAUDE.md` são do outro projeto, onde o oráculo é o `ed.exe` e a frase é
+verdadeira e medida; `analisar_io.py`, `offsets-novos.md` e a linha 286 da task
+19 já nomeavam o `ed.exe`; `conta_ml.py`, `ml-slots.md`,
+`boton_dialogo_weClick.md` e `we2002_estado.pas` falam de outra idempotência —
+a da sentinela de arranque.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/gravacao_controle.py` — a tabela `IDEMPOTENCIA` e a prosa
+- `wte/re/gravacao-controle.md` — regerado
+- `wte/tools/test_gravacao_controle.py` — `TestIdempotencia`, 6 casos
+- `docs/tasks/19-os-50-offsets-restantes.md`, `20-round-trip-headless.md`,
+  `27-handlers-de-gravacao.md` — o sujeito, com a medida
+- `docs/prompts/02-revisar.md` — o item de checklist (varredura)
+- `wte/tests/roteiros/golden-02-gravacao.txt`,
+  `golden-24-gravacao-dupla.txt` — os cabeçalhos

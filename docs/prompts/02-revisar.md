@@ -164,7 +164,13 @@ aposentado sozinho, ao lado da palavra que dá o contexto, deixa o
 **Fase 6-7 (WTE-TASK-34 a 40):**
 
 - A bateria cobre **edição múltipla** e **gravação dupla**, ou só operação
-  isolada? O editor não é idempotente, e isso só aparece na segunda gravação
+  isolada? Gravação dupla continua valendo a pena — o que só aparece na segunda
+  gravação não aparece em lugar nenhum. **Mas o motivo mudou:** este item dizia
+  "o editor não é idempotente", herdando do `newWe2002` uma frase sobre o
+  `ed.exe`. Medido em 2026-08-25
+  ([CORR-WTE-109](/docs/tasks/CORR-WTE-109.md)), o `wte.exe` **é** idempotente
+  nos dois caminhos que tocam `OFS_KICKER` — e o gate serve justamente para
+  isso continuar sendo verdade
 - Toda exceção do golden tem entrada em `divergencias.md`? Exceção sem entrada é
   divergência silenciosa
 - Divergência sem causa conhecida foi classificada como **bug aberto**, ou

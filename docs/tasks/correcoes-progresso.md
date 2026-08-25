@@ -128,7 +128,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-106](/docs/tasks/CORR-WTE-106.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | O `check_divergencias.py` é a única guarda de recusa do repositório sem `test_*.py`; as "três recusas vistas" do critério não deixaram artefato — as quatro foram exercitadas nesta revisão e saem com código 2 | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A lista de arquivos da WTE-TASK-35 nomeia oito dos nove do commit; falta justamente o repasse escrito na WTE-TASK-36 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-108](/docs/tasks/CORR-WTE-108.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | A task deixa "o plano é o que falta conferir" sobre o vaivém, e o plano nunca afirmou aquilo — zero ocorrências de `idempot`/`cobrador`/`OFS_KICKER` | Baixa | [x] concluída | 2026-08-25 |
-| [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Quatro sítios do lado WTE dizem que "o editor original não é idempotente", e neste projeto "o original" é o `wte.exe` — a medição da CORR-WTE-104 cobre um caminho e não a afirmação inteira | Média | [ ] pendente | — |
+| [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Quatro sítios do lado WTE dizem que "o editor original não é idempotente", e neste projeto "o original" é o `wte.exe` — a medição da CORR-WTE-104 cobre um caminho e não a afirmação inteira | Média | [x] concluída | 2026-08-25 |
 
 ## Checklist
 
@@ -239,7 +239,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-106 — escrever o `test_check_divergencias.py` com as quatro recusas plantadas
 - [x] CORR-WTE-107 — acrescentar o repasse da WTE-TASK-36 à lista de arquivos da 35
 - [x] CORR-WTE-108 — trocar o "falta conferir" pelo resultado da conferência: o plano não afirmava
-- [ ] CORR-WTE-109 — medir a segunda gravação em geral e dar sujeito à frase da não-idempotência
+- [x] CORR-WTE-109 — medir a segunda gravação em geral e dar sujeito à frase da não-idempotência
 
 ## Detalhes por correção
 

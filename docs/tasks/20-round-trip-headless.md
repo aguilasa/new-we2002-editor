@@ -92,7 +92,9 @@ não há comportamento indefinido para preservar.
 Além de ler: gravar com a camada Pascal e comparar com a gravação do
 `we2002_core` a partir do mesmo estado. Aqui a comparação é **byte a byte da
 imagem**, e agora sim vale a ressalva conhecida — o `Save` reconstrói as
-all-star, e o `Load`+`Save` do original não é idempotente.
+all-star. *(A ressalva sobre não-idempotência que esta linha trazia era do
+`ed.exe`, não do `wte.exe` — medido pela
+[CORR-WTE-109](/docs/tasks/CORR-WTE-109.md) em 2026-08-25.)*
 
 ### 6. `--check` na bateria
 

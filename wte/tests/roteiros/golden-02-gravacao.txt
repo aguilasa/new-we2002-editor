@@ -13,7 +13,14 @@
 # medicao: carregar um time e mandar gravar **sem tocar em campo nenhum**, para
 # saber o que muda de graca. Sem essa linha de base, toda divergencia medida
 # depois vem contaminada -- o `Save` do formato reconstroi coisa a partir de
-# link, e o `Load`+`Save` do editor original nao e idempotente.
+# link.
+#
+# ESTE CABECALHO CITAVA UMA SEGUNDA ARMADILHA QUE NAO E DESTE EDITOR: o
+# `Load`+`Save` trocando os dois primeiros cobradores de cada clube de ML. E do
+# `ed.exe`, medida pelo `newWe2002`; aqui "o original" e o `wte.exe`, que grava
+# por area. Medido pela CORR-WTE-109 em 2026-08-25: nenhum dos dois caminhos
+# que tocam `OFS_KICKER` troca o par ao gravar duas vezes. E este roteiro nem
+# grava cobrador -- ele grava barras e nomes.
 #
 # O roteiro que edita antes de gravar e outro arquivo, e vem depois: e o que
 # julga edicao e gravacao juntas (criterio herdado da WTE-TASK-26).

@@ -175,5 +175,63 @@ class TestPayload(unittest.TestCase):
         self.assertFalse(G.PAYLOAD_INICIO <= pos <= G.PAYLOAD_FIM)
 
 
+class TestIdempotencia(unittest.TestCase):
+    """A guarda da CORR-WTE-109: a prosa nao pode reatribuir o sujeito.
+
+    *"O `Load`+`Save` do editor original nao e idempotente"* e verdadeira no
+    `newWe2002`, onde o oraculo E o `ed.exe`. Migrada para este projeto ela
+    trocou de sujeito sem trocar de palavras -- aqui "o original" e o `wte.exe`
+    do Obocaman, que nem tem ciclo `Load`+`Save` de banco inteiro.
+
+    Nao da para remedir isso em `--check`: os numeros saem de corrida de golden,
+    com `:98`, Wine e ~600 MB de temporario. O que da e cobrar COERENCIA entre a
+    tabela e a prosa que ela gera -- e e essa a forma de a frase voltar, escrita
+    por alguem que nao leu a tabela.
+    """
+
+    def texto(self) -> str:
+        return G.gerar()
+
+    def test_a_prosa_nao_atribui_a_nao_idempotencia_ao_editor_original(self) -> None:
+        """O defeito literal, no texto GERADO."""
+        for forma in ("do editor original não é idempotente",
+                      "do original não é idempotente"):
+            self.assertNotIn(forma, self.texto())
+
+    def test_a_prosa_nomeia_o_ed_exe_como_dono_da_frase(self) -> None:
+        """Nao basta tirar: sem o sujeito certo a frase volta pela mesma porta."""
+        self.assertIn("`ed.exe`", self.texto())
+
+    def test_os_numeros_da_prosa_saem_da_tabela(self) -> None:
+        """Literal em prosa nao envelhece com a medida."""
+        i, texto = G.IDEMPOTENCIA, self.texto()
+        for chave in ("tatica_virgem_x_uma", "mcr2iso_virgem_x_uma",
+                      "times_com_par_desigual"):
+            with self.subTest(chave=chave):
+                self.assertIn(str(i[chave]), texto)
+
+    def test_a_tabela_afirma_idempotencia_nos_dois_caminhos(self) -> None:
+        """Se um dia um caminho trocar, a tabela muda e este caso reprova --
+        e a prosa acima deixa de poder dizer o que diz."""
+        i = G.IDEMPOTENCIA
+        self.assertEqual(i["tatica_uma_x_duas"], 0)
+        self.assertEqual(i["mcr2iso_uma_x_duas"], 0)
+        self.assertEqual(i["times_que_trocaram"], 0)
+
+    def test_o_zero_nao_e_cego(self) -> None:
+        """Zero so vale se houvesse onde a troca aparecer.
+
+        E a licao da CORR-WTE-104: o `golden-24` gravava num time onde os dois
+        cobradores eram iguais, e ali o zero nao distinguia nada.
+        """
+        self.assertGreater(G.IDEMPOTENCIA["times_com_par_desigual"], 0)
+
+    def test_a_gravacao_aconteceu_nos_dois(self) -> None:
+        """O outro jeito de o zero ser trivial: nenhum dos lados gravar."""
+        i = G.IDEMPOTENCIA
+        self.assertGreater(i["tatica_virgem_x_uma"], 0)
+        self.assertGreater(i["mcr2iso_virgem_x_uma"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

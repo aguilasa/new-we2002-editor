@@ -51,6 +51,37 @@ SETOR = 2352
 # que elas gravam ja tem dono na WTE-TASK-25.
 GRAVACOES = ("GRAVA_BARRAS", "GRAVA_NOMES")
 
+# A NAO-IDEMPOTENCIA, E DE QUEM ELA E -- medido pela CORR-WTE-109 em 2026-08-25.
+#
+# TABELA A MAO, E COM GUARDA, pela mesma razao do `TERCEIRO_PONTO` do
+# `check_golden.py`: o numero sai de corrida de golden, que precisa do `:98`, do
+# Wine e de ~600 MB de temporario, e nao se remede em `--check`. O que o
+# `test_gravacao_controle.py` cobra e a COERENCIA -- que a prosa gerada nao
+# volte a atribuir ao `wte.exe` um comportamento que a tabela diz ser do outro
+# binario.
+#
+# A frase que estava aqui -- *"o `Load`+`Save` do editor original nao e
+# idempotente"* -- e verdadeira no `newWe2002`, onde o oraculo E o `ed.exe`.
+# Migrada para este projeto ela trocou de sujeito sem trocar de palavras: aqui
+# "o original" e o `wte.exe` do Obocaman.
+#
+# E o `wte.exe` nao tem um ciclo `Load`+`Save` de banco inteiro -- ele grava por
+# area. Dos 17 caminhos de gravacao, DOIS tocam `OFS_KICKER`, e os dois foram
+# medidos gravando duas vezes seguidas: nenhum troca o par.
+IDEMPOTENCIA = {
+    "data": "2026-08-25",
+    "caminhos_que_tocam_kicker": 2,
+    # o ` Accept` da tela de tatica -- CORR-WTE-104, time 5
+    "tatica_uma_x_duas": 0,
+    "tatica_virgem_x_uma": 11962,
+    # o import de `.mcr` -- CORR-WTE-109, time 3, duas importacoes encadeadas
+    "mcr2iso_uma_x_duas": 0,
+    "mcr2iso_virgem_x_uma": 12419,
+    # onde a troca SERIA visivel, depois da importacao
+    "times_com_par_desigual": 41,
+    "times_que_trocaram": 0,
+}
+
 
 def _curto(caminho: Path) -> Path:
     # `is_relative_to` porque o teste aponta as fontes para um diretorio
@@ -192,9 +223,34 @@ def gerar() -> str:
     w("")
     w("Carregar um time e mandar gravar **sem tocar em campo nenhum** já muda")
     w("bytes. Sem essa linha de base, toda divergência medida depois vem")
-    w("contaminada — e as duas armadilhas conhecidas são de naturezas")
-    w("diferentes: o `Save` do formato reconstrói dado a partir de link, e o")
-    w("`Load`+`Save` do editor original não é idempotente.")
+    w("contaminada: o `Save` do formato reconstrói dado a partir de link.")
+    w("")
+    i = IDEMPOTENCIA
+    w("**A segunda armadilha que este parágrafo citava não é deste editor.**")
+    w("Ele dizia que o `Load`+`Save` *\"do editor original\"* não é idempotente")
+    w("— troca os dois primeiros cobradores de cada clube de ML. A frase é")
+    w("verdadeira no [`newWe2002`](../../docs/PLAN-LINUX.md), onde o oráculo é")
+    w("o **`ed.exe`**; migrada para cá ela trocou de sujeito sem trocar de")
+    w("palavras, porque neste projeto *\"o original\"* é o `wte.exe` do")
+    w("Obocaman.")
+    w("")
+    w(f"Medido em {i['data']} ([CORR-WTE-109](../../docs/tasks/CORR-WTE-109.md)):")
+    w("o `wte.exe` **não tem** ciclo `Load`+`Save` de banco inteiro — ele grava")
+    w("por área. Dos 17 caminhos de gravação,")
+    w(f"**{i['caminhos_que_tocam_kicker']}** tocam `OFS_KICKER`, e os dois")
+    w("gravam duas vezes seguidas sem trocar o par:")
+    w("")
+    w("| Caminho | uma × duas gravações | a gravação aconteceu |")
+    w("|---|---:|---:|")
+    w(f"| ` Accept` da tática | **{i['tatica_uma_x_duas']}** B "
+      f"| {i['tatica_virgem_x_uma']} B contra a ROM virgem |")
+    w(f"| import de `.mcr` | **{i['mcr2iso_uma_x_duas']}** B "
+      f"| {i['mcr2iso_virgem_x_uma']} B contra a ROM virgem |")
+    w("")
+    w("**E o zero não é cego.** Depois da importação,")
+    w(f"**{i['times_com_par_desigual']}** dos 96 times têm")
+    w("`cobrador[0] != cobrador[1]` — é neles que uma troca apareceria. Na")
+    w(f"segunda gravação, **{i['times_que_trocaram']}** trocaram.")
     w("")
     w("## O que cada ação endereçou, e o que de fato mudou")
     w("")
