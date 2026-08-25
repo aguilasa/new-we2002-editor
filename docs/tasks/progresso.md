@@ -48,7 +48,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
 | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
@@ -565,7 +565,26 @@ alimenta e passou a **carregar** essa gravação.
       própria causa não protege nada: esconde a regressão seguinte. Os três
       voltaram para `segue_nacional` e a contagem de "contraria a spec" subiu de
       **9 para 12** sozinha, que é o sinal de que a isenção saiu de fato
-- [ ] Inventário de buffers com os quatro casos de borda, nas duas ROMs
+- [x] Inventário de buffers com os quatro casos de borda, nas duas ROMs —
+      **seis campos**, gerados pelo
+      [`dump_buffers.py`](../../wte/tools/dump_buffers.py) em
+      [`buffers.md`](../../wte/re/buffers.md), e **10 de 10** conferências de
+      borda em [`test_bordas.pas`](../../wte/tests/test_bordas.pas), headless.
+      **Nenhuma divergência**: a linha da §7 do `divergencias.md` fechou no
+      sentido negativo
+- [x] **As fontes do inventário são três, não duas** *(achado da WTE-TASK-36,
+      2026-08-25)*. `MaxLength` não está só no DFM: `edit_nombre1` e
+      `edit_nombre2` recebem o limite em tempo de execução, de uma tabela por
+      time, e ele varia de **5 a 19**. E as pontas conciliam — o `- 1` do
+      `LimiteDoNome1` é o **mesmo** `- 1` do `KanjiToAscii`, que percorre
+      `(l - 1) * 2` bytes: o campo nunca recebe mais do que a leitura devolve.
+      Propriedade, não coincidência, e presa por teste
+- [x] **`MaxLength` não guarda os campos numéricos** *(idem)*. O
+      `casilla_dorsal` tem `MaxLength = 10` para um número que não passa de 99;
+      quem guarda a faixa é a validação do handler. A borda dos dez dígitos é
+      benigna porque `StrToIntDef` devolve `0` quando a cadeia não cabe num
+      `Integer`, e `0` reprova como qualquer inválido. O gerador **aborta** se
+      a validação sair do handler
 - [ ] Nenhuma ação destrutiva alcançável por `Return`
 
 ### Fase 7 — Acabamento

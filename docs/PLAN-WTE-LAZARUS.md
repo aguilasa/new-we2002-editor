@@ -1079,6 +1079,25 @@ e conta vagos. Depende só da Fase 3.
    strings gerenciadas não tem essa classe de bug, mas *tem* a inversa: o
    original pode depender de truncamento silencioso. Toda vez que a Fase 4
    encontrar buffer de tamanho fixo, o comportamento de estouro entra na spec.
+
+   **Feito em 2026-08-25** pela
+   [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md), em
+   [`../wte/re/buffers.md`](../wte/re/buffers.md): **seis campos** de digitação
+   inventariados, **10 de 10** conferências de borda, e **nenhuma divergência**.
+
+   **A classe inversa existe mesmo, e está medida.** `Cadeia()` é `PAnsiChar`
+   sobre vetor de tamanho fixo: um vetor cheio, sem NUL, faz a leitura
+   atravessar para o campo seguinte do registro — e o vizinho é outro nome, então
+   o resultado sai plausível. Não acontece em uso normal, e o motivo é uma
+   pré-condição mantida pelo **limite**, não pelo tipo: o teto de digitação é
+   `LEN - 1` e o vetor tem `LEN`.
+
+   **As duas pontas conciliam por construção.** O `LimiteDoNome1` põe
+   `MaxLength := TEAM_NAME_KANJI_LEN[t] - 1`, e o `KanjiToAscii` percorre
+   `(l - 1) * 2` bytes, devolvendo `l - 1` caracteres. Os dois `- 1` são o
+   mesmo. E a §8.6 ganha um irmão: `MaxLength` **não** guarda campo numérico —
+   o `casilla_dorsal` aceita dez dígitos para um número que não passa de 99, e
+   quem guarda a faixa é a validação do handler de gravação.
 4. **Sem regressão de UI** — reconferir os 18 formulários.
 
 ---

@@ -1,0 +1,5 @@
+controle	formulario	vetor	capacidade	origem	limite_min	limite_max	modo	filtro
+edit_nombre1	MainForm	kanji_name	20	runtime	5	13	dois bytes	[A-Za-z0-9 .]
+edit_nombre2	MainForm	names	20	runtime	7	19	um byte	[A-Za-z0-9 .]
+edit_nombre3	MainForm	abbreviations	4	dfm	3	3	um byte	[A-Za-z0-9]
+casilla_nombre	jugador	name	11	dfm	10	10	um byte	[A-Za-z0-9 .]

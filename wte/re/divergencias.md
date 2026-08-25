@@ -269,10 +269,16 @@ conferida.
 | tolerância de cor do render 2D | **a tolerância é ZERO**, e não há causa a nomear: 0 de 8.960 px no bitmap e 0 de 5.168 nas 16 amostras, inclusive **depois de calcular** (`--grade`) | [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md), com quatro recusas vistas |
 | `TStaticText` no GTK2 (§8.9) | **fecha sem custo: nenhum dos 37 usa `Transparent`**. Nenhuma ação, nenhum item para a fase 6 | [WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) |
 | rótulos cortados por fonte substituta | **não é divergência entre os dois lados** — acontece nos dois, pela mesma causa: `MS Sans Serif` não está instalada e a substituta é mais larga, com `AutoSize = False` no DFM. Sete formulários cortam; o `newWe2002` tem o mesmo sintoma no `ed.exe` sob Wine | [`visual.md`](visual.md), seção "Rótulos cortados" |
-| truncamento de campo | **em aberto, com dono**: é a [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md), ainda pendente. Se o Pascal não reproduzir o buffer fixo, a entrada nasce lá e volta para cá | — |
+| truncamento de campo | **conferido em 2026-08-25, não é divergência.** Os quatro campos de texto têm limite que cabe no vetor, e os dois numéricos são guardados por validação de faixa no handler — não pelo `MaxLength`. O `- 1` do limite de tela é o **mesmo** `- 1` do decodificador, então o campo nunca recebe mais do que a leitura devolve | [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md), em [`buffers.md`](buffers.md) |
 
-A última linha é a única que continua aberta, e ela **tem dono nomeado** — que
-é a diferença entre pendência e buraco.
+**As quatro fecharam.** A última era a única ainda aberta quando esta seção foi
+escrita, e a [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md) a
+fechou no dia seguinte, no sentido negativo: inventariados os seis campos de
+digitação, nenhum trunca de forma que o original e o port discordem. O
+[`dump_buffers.py`](../tools/dump_buffers.py) **aborta** se um limite passar a
+não caber, se a validação de faixa sair de um handler, ou se um campo novo
+aparecer sem entrada — então a afirmação continua conferida a cada
+`make -C wte check`, em vez de valer só no dia em que foi medida.
 
 ---
 
