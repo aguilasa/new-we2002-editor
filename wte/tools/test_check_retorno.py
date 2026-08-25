@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Testes do `check_retorno.py` e das partes puras do `check_carregado.py`.
+"""Testes do `check_retorno.py`.
 
-Nao abrem o `.exe`, nao dirigem janela e nao dependem das capturas: montam o
-texto em arquivo temporario. O que eles protegem e o que ja errou nesta task --
-o parser que engolia o objeto SEM NOME (e contava 36 `TStaticText` onde ha 37)
-e a regra da moldura de 6x32, que decide se a coordenada de um controle cai no
-lugar certo da captura.
+Nao abrem o `.exe`, nao dirigem janela: montam o texto em arquivo temporario. O
+que eles protegem e o parser da arvore de objetos e as tres afirmacoes que o
+`check_retorno.py` faz sobre ela -- `Default` unico, `Cancel` unico, ordem de
+tabulacao na ordem do arquivo.
+
+**A moldura e os retangulos saiam daqui em 2026-08-25** (CORR-WTE-115). Eles
+sao do `check_carregado.py` e moravam neste arquivo so porque ele nasceu
+primeiro -- e foi assim que a correcao veio a acreditar que a recusa da moldura
+nao era exercitada: o `ls` procurava um `test_check_carregado.py` que nao
+existia, e os casos estavam aqui o tempo todo. Agora estao em
+`test_check_carregado.py`, com o resto do modulo deles.
 """
 
 import tempfile
 import unittest
 from pathlib import Path
 
-import check_carregado
 import check_retorno
 
 
@@ -82,36 +87,6 @@ class TestArvore(unittest.TestCase):
         objetos = check_retorno.le_arvore(escreve(DFM))
         self.assertEqual(check_retorno.tabordem(objetos),
                          "BitBtn1:0,BitBtn2:1")
-
-
-class TestRetangulos(unittest.TestCase):
-    def test_o_objeto_sem_nome_entra_na_conta(self):
-        """Ha um `TStaticText` anonimo no `MainForm`, e os 37 o incluem."""
-        caminho = escreve(DFM)
-        objetos = check_retorno.le_arvore(caminho)
-        achados = check_carregado.retangulos(objetos, caminho, "TStaticText")
-        self.assertEqual(achados, [("", (4, 30, 10, 10))])
-
-
-class TestMoldura(unittest.TestCase):
-    """A moldura que o Wine desenha POR DENTRO da janela.
-
-    Sem esta regra, a coordenada de um controle sobre a captura do oraculo cai
-    3 px a esquerda e 29 px acima do lugar -- e a medida sai plausivel e
-    errada, que e o pior resultado possivel.
-    """
-
-    def test_sem_moldura_o_deslocamento_e_zero(self):
-        self.assertEqual(
-            check_carregado.deslocamento((522, 475), (522, 475), "x"), (0, 0))
-
-    def test_com_moldura_o_deslocamento_e_3_29(self):
-        self.assertEqual(
-            check_carregado.deslocamento((135, 153), (129, 121), "x"), (3, 29))
-
-    def test_tamanho_que_nao_e_nem_um_nem_outro_aborta(self):
-        with self.assertRaises(check_carregado.CarregadoError):
-            check_carregado.deslocamento((200, 100), (129, 121), "x")
 
 
 if __name__ == "__main__":
