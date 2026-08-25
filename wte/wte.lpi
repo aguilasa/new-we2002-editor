@@ -8,7 +8,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="WE2002 Team Editor (Lazarus)"/>
+      <Title Value="WE2002 - Lazarus Editor"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>

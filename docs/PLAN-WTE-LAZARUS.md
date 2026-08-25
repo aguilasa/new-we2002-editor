@@ -383,6 +383,19 @@ Se o app for publicado, o `NOTICE.md` ganha uma seção sobre a linhagem do
 Obocaman, no mesmo tom das existentes. **Isso é decisão do usuário, não minha —
 não publique sem confirmar.**
 
+**Feito em 2026-08-25** pela [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md): o
+[NOTICE.md](../NOTICE.md) ganhou a linha do Obocaman na tabela de linhagem e uma
+seção própria — *Lineage of WE2002 - Lazarus Editor* — que diz o que a
+reimplementação é feita (especificação escrita, camada de dados do
+`we2002_core`, formulários convertidos de formato) e o que **não** é
+redistribuído (os 198 `.bmp` e o `dat.bin`). A ressalva de licença passou a
+nomear os três autores, e **nenhum `LICENSE` foi adicionado** — continua sendo o
+que a §2 sempre disse.
+
+**Escrever a seção não é publicar.** O texto existe para o dia em que o usuário
+decidir publicar; a decisão continua sendo dele, e o `push` para remote público
+continua exigindo pedido explícito.
+
 ---
 
 ## 3. Ferramental
@@ -505,9 +518,9 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 52,0% do Pascal da casca é saída de gerador** —
-9.453 linhas geradas contra 8.734 escritas à mão. Dessas 8.734, 352 são andaime de
-projeto (`wte.lpr` 31, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
+**Medido com a fase 4 em curso: 51,9% do Pascal da casca é saída de gerador** —
+9.453 linhas geradas contra 8.744 escritas à mão. Dessas 8.744, 362 são andaime de
+projeto (`wte.lpr` 41, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
 handler, e `<unidade>.aux.inc`, as rotinas internas que o original chama de mais
@@ -1140,6 +1153,35 @@ e conta vagos. Depende só da Fase 3.
 tem em `packaging/`. Decidir nome do produto (**não** reusar
 "WE2002 Team Editor" tal e qual, por causa da §2). Empacotamento
 (AppImage/Flatpak) fica **fora**, igual à decisão do plano Linux.
+
+**O nome está decidido desde 2026-08-25**, pela
+[WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md): o produto é
+**`WE2002 - Lazarus Editor`** — escolhido pelo usuário, e a alusão é
+deliberada, porque Lázaro ressuscita. A separação que o `newWe2002` já usa vale
+aqui inteira:
+
+| Papel | Nome |
+|---|---|
+| Produto, o que o humano lê | `WE2002 - Lazarus Editor` |
+| Slug, o que o sistema de arquivos lê | `we2002Lazarus` |
+| AppID | `io.github.aguilasa.we2002Lazarus` |
+| Formato, o que o código lê | `we2002` |
+
+**Duas consequências que a WTE-TASK-39 herda, e nenhuma delas é cosmética.**
+
+A primeira é que o `Caption` dos 18 formulários **fica como está** — DFM mais o
+sufixo ` [Lazarus]`. Ali o critério é fidelidade de tela, e é o sufixo que
+separa os dois lados no mesmo `:98`; trocá-lo derrubaria os 27 roteiros do lado
+port de uma vez. Quem mostra o nome do produto é o `Application.Title`, que já
+foi trocado — ele dizia `WE2002 Team Editor (Lazarus)`, que tirando o parêntese
+é o nome do Obocaman letra por letra.
+
+A segunda é a **pasta de assets ausente**: decidido que o app **não encerra** —
+ele continua de pé e diz o que falta e onde pôr. Encerrar seria o que o
+original faz, e aqui custaria o harness inteiro: todo roteiro do lado port abre
+o app antes de qualquer coisa. Está registrado como divergência deliberada
+([`../wte/re/divergencias.md`](../wte/re/divergencias.md), §12), e a mensagem
+que hoje é `data/dat.bin nao encontrado` é da WTE-TASK-39.
 
 ---
 

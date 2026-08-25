@@ -50,7 +50,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
+| [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
 | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
 | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
 
@@ -624,8 +624,29 @@ alimenta e passou a **carregar** essa gravação.
 
 ### Fase 7 — Acabamento
 
-- [ ] Nome do produto escolhido, distinto do original
-- [ ] Linhagem do Obocaman no `NOTICE.md`; nenhum `LICENSE` adicionado
+- [x] Nome do produto escolhido, distinto do original — **`WE2002 - Lazarus
+      Editor`**, escolhido pelo usuário *(WTE-TASK-38, 2026-08-25)*, com a
+      alusão a Lázaro. A separação do `newWe2002` vale inteira: produto
+      `WE2002 - Lazarus Editor`, slug `we2002Lazarus`, appid
+      `io.github.aguilasa.we2002Lazarus`, formato `we2002` (inalterado). O
+      `Application.Title` **já trocou** — ele dizia `WE2002 Team Editor
+      (Lazarus)`, que tirando o parêntese é o nome do Obocaman letra por letra
+- [x] Linhagem do Obocaman no `NOTICE.md`; nenhum `LICENSE` adicionado — seção
+      *Lineage of WE2002 - Lazarus Editor*, a linha do Obocaman na tabela, e a
+      ressalva de licença nomeando os três autores. `git ls-files | grep -i
+      license` continua vazio
+- [x] **O `Caption` dos 18 formulários NÃO recebe o nome do produto** *(idem)*.
+      Ali o critério é fidelidade de tela — DFM mais o sufixo ` [Lazarus]`, que
+      é o que separa os dois lados no mesmo `:98`. Trocá-lo derrubaria os 27
+      roteiros do lado port de uma vez, e quem mostra o nome do programa é o
+      `Application.Title`, que a barra de tarefas lê
+- [ ] **O binário não abre fora de `wte/build/`** *(achado da WTE-TASK-38,
+      2026-08-25)* — morre num diálogo da LCL (`File not found. / Press OK to
+      ignore and risk data corruption.`) antes de qualquer janela, porque
+      `retrace.ResolveArquivo` resolve `<exe>/../re/trace.log` e o `Rewrite`
+      levanta quando o diretório não existe. Controle: `mkdir re` ao lado da
+      cópia e a janela abre. **Reprova a condição 3 hoje**, e conserta na
+      [WTE-TASK-39](/docs/tasks/39-empacotamento.md)
 - [ ] Árvore instalada funciona depois de movida
 - [ ] Assets ausentes produzem mensagem que diz o que falta
 - [ ] Condição 3 testada em ambiente **sem** Wine

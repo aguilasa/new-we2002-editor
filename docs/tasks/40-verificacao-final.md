@@ -94,3 +94,25 @@ seção 11 do `PLAN-WINDOWS.md` diz isso em vez de omitir.
 - **Resumo do que foi feito:**
 - **Arquivos criados/modificados:**
 - **Problemas encontrados:**
+
+---
+
+## Achado que já espera a condição 3 (WTE-TASK-38, 2026-08-25)
+
+**A condição 3 reprova hoje, e a causa não é Wine nem 32 bits.** O binário
+copiado para fora de `wte/build/` não abre: morre num diálogo da LCL — `File
+not found. / Press OK to ignore and risk data corruption. / Press Abort to kill
+the program.` — antes de qualquer janela.
+
+A causa medida é o log de trace: `ResolveArquivo` em
+[`wte/src/retrace.pas`](../../wte/src/retrace.pas) resolve
+`<dir do executável>/../re/trace.log` quando `WTE_TRACE_FILE` não está
+definida, e o `Rewrite` levanta `EInOutError` porque o diretório não existe.
+Controle: `mkdir re` ao lado da cópia, e o mesmo binário abre a janela
+principal (522×475).
+
+Quem conserta é a [WTE-TASK-39](/docs/tasks/39-empacotamento.md), que é dona da
+resolução em runtime — a linha está lá. Aqui fica o registro de que **"roda num
+ambiente sem Wine" e "funciona depois de movida" são conferências diferentes**,
+e a segunda tem um defeito conhecido esperando por ela: reconferir a de mover
+com o binário *instalado*, não com o de `build/`.

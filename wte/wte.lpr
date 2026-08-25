@@ -34,7 +34,17 @@ begin
   // rodam no mesmo :99, e os scripts acham janela por titulo e por tamanho.
   // Titulo igual faria o harness dirigir o lado errado, e o diff pareceria
   // bug do port -- e a armadilha 6 do progresso.md.
-  Application.Title := 'WE2002 Team Editor (Lazarus)';
+  //
+  // O NOME E O DA WTE-TASK-38, e ele trocou por uma razao a mais que a de
+  // cima. "WE2002 Team Editor (Lazarus)" nao colidia com o harness -- colidia
+  // com a §2 do plano, que manda NAO reusar o nome do produto do Obocaman:
+  // tirando o "(Lazarus)", a cadeia era o nome dele, letra por letra.
+  //
+  // Isto e o `Application.Title` -- o nome do PROGRAMA, o que a barra de
+  // tarefas e o `.desktop` leem. O `Caption` dos 18 formularios continua o do
+  // DFM mais o sufixo ` [Lazarus]`, porque ali o criterio e fidelidade de
+  // tela e e por ele que o harness separa os dois lados.
+  Application.Title := 'WE2002 - Lazarus Editor';
   Application.Initialize;
   CriaFormularios;
   if TrataLinhaDeComando then

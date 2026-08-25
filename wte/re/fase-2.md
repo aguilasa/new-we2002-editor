@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2685 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9453** |
-| Escrito à mão | 105 | 8734 |
-| **Total** | | **18187** |
+| Escrito à mão | 105 | 8744 |
+| **Total** | | **18197** |
 
-**52.0% do Pascal da casca é saída de gerador.**
+**51.9% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_preco.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -163,7 +163,7 @@ Escrito à mão, linha por linha:
 | `src/wte_render2d.pas` | 434 | — |
 | `src/wte_tatica.pas` | 763 | — |
 | `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
-| `wte.lpr` | 42 | programa principal (WTE-TASK-02) |
+| `wte.lpr` | 52 | programa principal (WTE-TASK-02) |
 
 ### O hex dos blobs fica fora da conta, e por quê
 

@@ -1,8 +1,14 @@
-# `wte/` — o WE2002 Team Editor em Lazarus
+# `wte/` — **WE2002 - Lazarus Editor**
 
 Reimplementação do **WE2002 Team Editor v0.99** do Obocaman (C++Builder 6,
 Win32) como aplicação **Lazarus/LCL nativa no Linux**, com paridade verificada
 byte a byte contra o binário original.
+
+> **O produto se chama `WE2002 - Lazarus Editor`; o original continua sendo
+> `WE2002 Team Editor`.** Os dois nomes aparecem nesta página o tempo todo e
+> não são intercambiáveis — um é o que se escreve, o outro é o que se mede.
+> A decisão e a razão estão na WTE-TASK-38, resumidas
+> [abaixo](#3-o-produto-se-chama-we2002---lazarus-editor).
 
 - **Plano:** [`../docs/PLAN-WTE-LAZARUS.md`](../docs/PLAN-WTE-LAZARUS.md) — a
   fonte de verdade
@@ -119,13 +125,46 @@ A exceção é `tools/test_*.py`: teste de ferramenta não é gerador e não ace
 `--check`, então o `wildcard` o filtra. Esses rodam pelo alvo `test`, do qual
 `check` depende — o comando a decorar continua sendo um só.
 
-### 3. O binário se chama `wte` — provisoriamente
+### 3. O produto se chama **WE2002 - Lazarus Editor**
 
-Nome definitivo é decisão da **WTE-TASK-38**, por causa da §2 do plano (o
-produto tem de ser distinguível do original, que é software de terceiro sem
-licença). Até lá, `wte` em toda parte: `wte.lpi`, `wte.lpr`, `build/wte`.
+*(Esta seção nasceu como "o binário se chama `wte` — provisoriamente". A
+WTE-TASK-38 decidiu, em 2026-08-25.)*
 
-Trocar depois é barato — são três nomes de arquivo e o `Application.Title`.
+O nome veio do usuário, e a alusão é deliberada: **Lázaro** ressuscita, e é o
+que este projeto faz com um editor de 2002 que só rodava sob Win32.
+
+**A separação produto/formato é herdada do `newWe2002`**, onde `newWe2002` é o
+produto e `we2002` é o formato. Aqui vale a mesma regra, e ela decide sozinha
+onde cada nome entra:
+
+| Papel | Nome | Onde aparece |
+|---|---|---|
+| **Produto** — o que o humano lê | `WE2002 - Lazarus Editor` | `Application.Title`, `Name=` do `.desktop`, `<name>` do AppStream, título desta página |
+| **Slug** — o que o sistema de arquivos lê | `we2002Lazarus` | binário, `share/<slug>/`, ícone, `StartupWMClass`, `share/doc/<slug>/` |
+| **AppID** | `io.github.aguilasa.we2002Lazarus` | AppStream e o nome dos dois arquivos de `packaging/` |
+| **Formato** — o que o código lê | `we2002` | as unidades `we2002_*.pas`, os identificadores, as variáveis `WTE_*` |
+
+O slug é camelCase porque o irmão é: `newWe2002` já ocupa `bin/`, `share/` e o
+appid neste repositório com essa forma, e um segundo produto com outra
+convenção obrigaria quem empacota a lembrar de qual é qual. AppID não leva
+hífen — a forma reversa de DNS não os aceita —, e é por isso que o slug não é
+`we2002-lazarus`.
+
+**O `Caption` dos 18 formulários NÃO recebe o nome do produto.** Ali o critério
+é fidelidade de tela: o `Caption` vem do DFM e ganha o sufixo ` [Lazarus]`, que
+é o que separa os dois lados no mesmo `:98` — e é
+[divergência registrada](re/divergencias.md). Trocar isso quebraria os **27
+roteiros** do lado port de uma vez, e não compraria nada: quem mostra o nome do
+programa é a barra de tarefas, que lê o `Application.Title`.
+
+**O que já mudou:** `Application.Title` e o `<Title>` do `wte.lpi`, que diziam
+`WE2002 Team Editor (Lazarus)` — tirando o parêntese, o nome do Obocaman letra
+por letra, que é exatamente o que a §2 do plano proíbe.
+
+**O que falta, e é da [WTE-TASK-39](../docs/tasks/39-empacotamento.md):**
+renomear `wte.lpi`/`wte.lpr`/`build/wte` para o slug (são **3** arquivos e
+**3** ferramentas que os citam), e criar `packaging/` com o `.desktop`, o
+AppStream e o ícone.
 
 ---
 
@@ -150,7 +189,17 @@ mesmo com `forms/` em `IncludeFiles`. A saída é o caminho explícito:
 
 ## Estado
 
-Fase 0. O que existe é esqueleto: um formulário vazio que prova que o build
-fecha e que a janela abre no `:98`. Os 18 formulários do original chegam na
-fase 2, gerados — [`src/WteMain.pas`](src/WteMain.pas) sai ou vira a casca do
-`Tep2002_princ`. Não invista nele.
+**Fase 7 — acabamento.** As fases 0 a 6 estão fechadas: os 18 formulários
+gerados e conferidos com a lógica ligada, os 96 handlers com veredito, a camada
+de dados gerada do `we2002_core`, e a bateria golden completa contra o
+`wte.exe` sob Wine. O que resta é empacotamento
+([WTE-TASK-39](../docs/tasks/39-empacotamento.md)) e a verificação final
+([WTE-TASK-40](../docs/tasks/40-verificacao-final.md)).
+
+O andamento por task, com data de commit, está em
+[`../docs/tasks/progresso.md`](../docs/tasks/progresso.md) — este parágrafo é
+resumo, e o índice é a fonte.
+
+*(Ele dizia "Fase 0 ... um formulário vazio" até 2026-08-25, e o
+`src/WteMain.pas` que ele mandava não investir já não existe: virou os 18
+`ep2002_*.pas` na fase 2.)*

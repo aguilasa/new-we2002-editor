@@ -417,3 +417,46 @@ mede e relata; o número que importa é o **1 de 37** — se um segundo controle
 entrar na divergência, a diferença aparece na comparação, e a causa não será
 mais "o estado desabilitado do widgetset", porque os outros 36 continuam
 batendo.
+
+---
+
+## 12. Sem a pasta de assets o app segue de pé; o original encerra
+
+| Campo | |
+|---|---|
+| **O que diverge** | o que acontece quando `data/dat.bin` não é encontrado no arranque |
+| **Natureza** | escolha de comportamento em produção |
+| **Decisão** | não reproduzir o encerramento |
+
+**Razão.** O `MainForm.FormShow` do original monta o caminho de `dat.bin` a
+partir do diretório corrente, tenta abrir, e se falhar mostra
+`The file "dat.bin" must be in the "data" directory` (cadeia `0x004250bd`) e
+**encerra**. O port mostra a falta num rótulo da própria janela e continua de
+pé.
+
+Encerrar no `OnShow` custaria o harness inteiro: **todo** roteiro do lado port
+começa abrindo o app, e um app que morre antes da primeira janela produz
+`ERRO: a PRIMEIRA janela do roteiro nunca apareceu` — diagnóstico que manda
+procurar no lugar errado. A escolha está escrita no
+[`ep2002_mainform.FormShow.inc`](../src/impl/ep2002_mainform.FormShow.inc) desde
+a WTE-TASK-25, e é ela que esta entrada registra: até 2026-08-25 o comentário
+dizia *"divergência deliberada, para a WTE-TASK-35"* e a entrada não existia.
+
+**A mensagem ainda não é a decidida.** Hoje o rótulo diz `data/dat.bin nao
+encontrado` — o que falta, não onde pôr. A regra da
+[WTE-TASK-38](../../docs/tasks/38-nome-e-linhagem.md) é que a mensagem **nomeie
+o arquivo e o diretório**, porque os assets não são redistribuídos e quem
+recebe o app não tem como adivinhar; escrevê-la é da
+[WTE-TASK-39](../../docs/tasks/39-empacotamento.md), que é dona da resolução em
+runtime.
+
+**Evidência.** Medido em 2026-08-25, com o binário copiado para um diretório
+sem `assets/` ao lado: a janela principal abre normalmente (522×475) e o app
+fica de pé — nenhum encerramento, nenhuma exceção. O controle é o mesmo binário
+com `WTE_ASSETS_DIR` apontando para a pasta do Obocaman.
+
+**Onde o teste sabe.** Em lugar nenhum, e isso é deliberado: o harness sempre
+roda com a pasta presente, porque medir gravação sem os assets mediria outra
+coisa. O que existe é o `make -C wte assets`, que **falha dizendo o que colocar
+onde** quando a pasta não está lá — a mesma mensagem que a WTE-TASK-39 tem de
+levar para dentro do app.
