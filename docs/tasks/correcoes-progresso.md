@@ -123,6 +123,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-101](/docs/tasks/CORR-WTE-101.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | O contrato da spec diz "seis seções obrigatórias" e a ferramenta cobra cinco; e a frase do `fase-4.md` apresenta as 481 linhas de evidência como se fossem todas, quando 44 outras ficam fora da conta | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-102](/docs/tasks/CORR-WTE-102.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Quatro sítios vivos ainda derivam as dezessete gravações "das 94 specs"; o índice conta 96 desde que a WTE-TASK-32 escreveu as duas de preço | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-103](/docs/tasks/CORR-WTE-103.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | No estado zero o `check_fase4.py` emite o título `## Os que continuam aberto` colado no parágrafo — a linha em branco mora dentro do `if` que lista os sem spec | Baixa | [x] concluída | 2026-08-24 |
+| [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | O `golden-24-gravacao-dupla` grava no time 2, cujos dois primeiros cobradores são iguais (`[7, 7, …]`): a troca do `Load`+`Save` que ele existe para medir é a identidade ali, e o roteiro passa com vaivém e sem ele | Alta | [ ] pendente | — |
+| [CORR-WTE-105](/docs/tasks/CORR-WTE-105.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | A pendência do vaivém dos cobradores foi encaminhada por prosa da WTE-TASK-34 para a 35, e a 35 não a tem em lugar nenhum — zero ocorrências no arquivo dela | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -228,6 +230,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-101 — trocar "seis seções" por cinco no gabarito e no gerador, e dizer que a conta é só delas
 - [x] CORR-WTE-102 — atualizar de 94 para 96 a população de specs de onde saem as dezessete gravações
 - [x] CORR-WTE-103 — tirar do `if` a linha em branco que separa o bloco de specs do título seguinte
+- [ ] CORR-WTE-104 — mover o `golden-24` para um time em que os dois primeiros cobradores diferem, e escrever o resultado do terceiro ponto
+- [ ] CORR-WTE-105 — dar entrada na WTE-TASK-35 à pendência que a 34 encaminhou para ela
 
 ## Detalhes por correção
 
@@ -1856,3 +1860,37 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** mover o `a("")` para fora do `if`, e um caso de teste que recuse
   `^## ` logo depois de linha não vazia na saída do gerador — pega os três de
   uma vez
+
+### CORR-WTE-104
+
+- **Arquivo com problema:** `wte/tests/roteiros/golden-24-gravacao-dupla{,.port}.txt`
+- **Sintoma:** o roteiro existe para medir se a segunda gravação reproduz a
+  troca de `cobrador[0]`/`cobrador[1]`, e grava no **time 2**, onde os seis
+  bytes de cobrador são `[7, 7, 8, 7, 7, 8]` — os dois primeiros iguais, a
+  troca é a identidade. O roteiro passa exatamente igual com vaivém e sem ele.
+  O terceiro ponto (uma gravação × duas), que a task deixou pendente, foi
+  rodado nesta revisão e deu **0 bytes de diferença**, com as duas imagens
+  mudando 11.966 bytes contra a ROM virgem — mas o zero é indecidível pelo
+  motivo acima
+- **Como foi detectado:** `golden-17-tatica` e `golden-24-gravacao-dupla` em
+  `--modo controle --manter`, `cmp -l` entre as duas imagens, e leitura dos seis
+  bytes em 2329068 nas três imagens (virgem, uma gravação, duas)
+- **Fix:** trocar para um time com `cobrador[0] != cobrador[1]` — há **41** na
+  ROM japonesa, e o 5 (`[9, 5, …]`, em 2329086) custa três `Down` a mais e
+  nenhuma coordenada nova —, rodar o par de novo e **escrever o resultado** no
+  `golden.md`, seja ele zero ou não. O terceiro ponto do
+  `golden-23-multiplas-edicoes` foi conferido na mesma revisão e **passa**: as
+  duas edições aparecem, a barra em 2328195 e os dez blocos de nome
+
+### CORR-WTE-105
+
+- **Arquivo com problema:** `docs/tasks/35-divergencias-deliberadas.md`
+- **Sintoma:** a WTE-TASK-34 fecha encaminhando a pendência do vaivém *"para a
+  WTE-TASK-35, que é quem registra divergência deliberada com evidência"*, e a
+  35 não tem a entrada: `grep -c "vaivém|cobrador|OFS_KICKER|idempot"` devolve
+  **0** no arquivo dela, cuja seção de candidatas tem nove entradas e nenhuma é
+  esta. A 35 está `⬜ Pendente` e é a próxima da fase
+- **Como foi detectado:** `grep` cruzado entre as duas tasks nesta revisão
+- **Fix:** acrescentar a candidata à 35, dizendo que ela espera **medição** e
+  não decisão, com a CORR-WTE-104 como pré-requisito; e, se valer, o
+  `01-executar.md` passar a exigir que "encaminhado para a NN" tenha linha na NN
