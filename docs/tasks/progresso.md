@@ -49,7 +49,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
+| [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
 | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
 | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |

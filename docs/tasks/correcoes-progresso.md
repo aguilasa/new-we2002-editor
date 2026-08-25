@@ -132,6 +132,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Os quatro casos de borda foram medidos num vetor só (`names`, 20 B) e o critério diz "por campo"; `abbreviations` (4 B, a menor folga), `name` e `kanji_name` não passam pelos grupos 1 e 2 | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-111](/docs/tasks/CORR-WTE-111.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | A chave `faixa` do `CAMPOS` não é lida por ninguém, e dois dos quatro valores contradizem o medido — `edit_nombre1` declara (5,19) contra 5..13 | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-112](/docs/tasks/CORR-WTE-112.md) | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | O `filtro` de caracteres é publicado por campo no `buffers.md` e nunca conferido contra o `KeyPress`, enquanto o `predicado` de faixa ao lado aborta se sumir | Baixa | [x] concluída | 2026-08-25 |
+| [CORR-WTE-113](/docs/tasks/CORR-WTE-113.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | `golden_suite.sh --roteiro` sem `--retomar` trunca o `golden.tsv` inteiro antes de qualquer corrida — 97 linhas viram 1, e foi assim que as 92 corridas da WTE-TASK-34 se perderam | Alta | [ ] pendente | — |
+| [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [ ] pendente | — |
+| [CORR-WTE-115](/docs/tasks/CORR-WTE-115.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | O `check_carregado.py` aborta na moldura e não tem `test_*.py`, enquanto o `check_retorno.py`, nascido no mesmo commit, tem | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -246,6 +249,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-110 — medir as bordas nos outros três vetores, ou escrever que a medição é por classe
 - [x] CORR-WTE-111 — apagar a `faixa` morta do `CAMPOS`, ou torná-la expectativa conferida
 - [x] CORR-WTE-112 — conferir o `filtro` de cada campo contra o `KeyPress`, como já se faz com a faixa
+- [ ] CORR-WTE-113 — fazer o `--roteiro` preservar o registro, e guardar a preservação com teste
+- [ ] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
+- [ ] CORR-WTE-115 — escrever o `test_check_carregado.py` com a recusa da moldura plantada
 
 ## Detalhes por correção
 
@@ -1994,3 +2000,53 @@ dizer "fechada e fora do backlog", não "corrigida".
   são declaração, repasse e impressão; nenhuma abre um `.inc`
 - **Fix:** dar ao `filtro` a forma do `predicado` — trecho literal do handler,
   conferido por substring, com a recusa plantada em `test_check_bordas.py`
+
+### CORR-WTE-113
+
+- **Arquivo com problema:** `wte/tools/golden_suite.sh`, o truncamento do TSV
+- **Sintoma:** o script reescreve o cabeçalho do `golden.tsv` sempre que
+  `--retomar` não é passado, **antes de qualquer corrida** — então `--roteiro`
+  não é filtro, é substituição. Aconteceu na WTE-TASK-37: as 92 corridas da
+  WTE-TASK-34 (1,8 h de relógio) foram apagadas ao registrar o
+  `golden-25-retorno`, recuperadas à mão do `git show HEAD:`, e o Log fechou com
+  *"vale um item para quem mexer na bateria de novo"* — item que não foi aberto
+- **Como foi detectado:** reproduzido nesta revisão sobre uma **cópia** do TSV,
+  com `--saida` apontado para ela e a corrida interrompida em 6 s: **97 linhas
+  viraram 1**, o cabeçalho, sem nenhuma corrida ter começado
+- **Fix:** truncar só quando a corrida é a bateria inteira (sem `--roteiro` e
+  com `--rom ambas`), substituindo a linha do trio `(roteiro, rom, modo)` no
+  `registra()`; ou, no mínimo, recusar `--roteiro` sem `--retomar`. Mais o teste
+  que exige que as linhas sobrevivam
+
+### CORR-WTE-114
+
+- **Arquivo com problema:** `wte/re/divergencias.md` (ausências) e
+  `docs/tasks/35-divergencias-deliberadas.md` (onde as três foram parar)
+- **Sintoma:** a WTE-TASK-37 escreveu três candidatas de divergência numa seção
+  nova da WTE-TASK-35, que está `concluído` — e o registro que a 35 produziu não
+  tem nenhuma das três. A primeira (`ficha_warning` não é levantado pelo port,
+  que aplica os remendos de arranque sem perguntar) é **divergência deliberada
+  em produção** e se declara *"ainda sem entrada aqui"*. As outras duas são o
+  `ficha_enlaza` sem chamador (rota não portada, não divergência escolhida) e o
+  `help_team` desabilitado pintando fundo próprio no GTK2
+- **Como foi detectado:** `grep -c "ficha_warning\|ficha_enlaza\|help_team"` no
+  registro devolve **0**, com o `check_divergencias.py --check` verde — ele
+  confere exceção de ferramenta contra entrada, e estas três são comportamento
+- **Fix:** abrir as entradas da 1 e da 3 com os seis campos, mandar a 2 para o
+  veredito do `mostrar_jugadorClick` e para a seção "O que NÃO entra aqui", e
+  transformar a seção da 35 em índice; guarda opcional recusando a frase
+  "sem entrada aqui" quando o alvo não tiver seção no registro
+
+### CORR-WTE-115
+
+- **Arquivo com problema:** falta `wte/tools/test_check_carregado.py`
+- **Sintoma:** dos dois conferidores criados na mesma passagem, só o
+  `check_retorno.py` ganhou par de teste. O `check_carregado.py` implementa a
+  recusa mais fácil de quebrar sem ninguém ver — a da moldura 6×32 do Wine, que
+  o Log da task registra como achado — e nada volta a exercitá-la
+- **Como foi detectado:** `ls` do arquivo ausente, e a recusa plantada num
+  espelho em `/tmp` nesta revisão: uma captura encolhida em **um** pixel faz o
+  `--check` sair com código 2 e nomear as duas medidas
+- **Fix:** escrever o teste no molde do `test_check_retorno.py`, com a captura
+  impossível, os dois casos bons (cliente e cliente + moldura, com deslocamento
+  `(0,0)` e `(3,29)`) e o formulário sem `ClientWidth` nem `Width`
