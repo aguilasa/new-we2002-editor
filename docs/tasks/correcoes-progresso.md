@@ -135,7 +135,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-113](/docs/tasks/CORR-WTE-113.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | `golden_suite.sh --roteiro` sem `--retomar` trunca o `golden.tsv` inteiro antes de qualquer corrida — 97 linhas viram 1, e foi assim que as 92 corridas da WTE-TASK-34 se perderam | Alta | [x] concluída | 2026-08-25 |
 | [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-115](/docs/tasks/CORR-WTE-115.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | O `check_carregado.py` aborta na moldura e não tem `test_*.py`, enquanto o `check_retorno.py`, nascido no mesmo commit, tem | Baixa | [x] concluída | 2026-08-25 |
-| [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | O controle que separa a causa do diálogo da LCL manda `mkdir re` "ao lado da cópia", e ali não funciona: o `retrace.pas` resolve `<dir do executável>/../re/` — medido nos três layouts | Baixa | [ ] pendente | — |
+| [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | O controle que separa a causa do diálogo da LCL manda `mkdir re` "ao lado da cópia", e ali não funciona: o `retrace.pas` resolve `<dir do executável>/../re/` — medido nos três layouts | Baixa | [x] concluída | 2026-08-25 |
 
 ## Checklist
 
@@ -253,7 +253,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-113 — fazer o `--roteiro` preservar o registro, e guardar a preservação com teste
 - [x] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
 - [x] CORR-WTE-115 — escrever o `test_check_carregado.py` com a recusa da moldura plantada
-- [ ] CORR-WTE-116 — trocar a receita do `re/` pelo layout que o `retrace.pas` realmente resolve
+- [x] CORR-WTE-116 — trocar a receita do `re/` pelo layout que o `retrace.pas` realmente resolve
 
 ## Detalhes por correção
 

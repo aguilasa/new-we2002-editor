@@ -150,8 +150,14 @@ A causa é o log de trace, não os assets: `ResolveArquivo` em
 [`wte/src/retrace.pas`](../../wte/src/retrace.pas) resolve
 `<dir do executável>/../re/trace.log` quando `WTE_TRACE_FILE` não está
 definida, e o `Rewrite` levanta `EInOutError` porque o diretório não existe.
-**Controle:** `mkdir re` ao lado da cópia e o mesmo binário abre a janela
-principal (522×475) e escreve o `trace.log` ali.
+**Controle:** com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o `re/`
+é irmão **do diretório** do binário, como `wte/re/` é irmão de `wte/build/`.
+Feito isso, o mesmo binário abre a janela principal (522×475) e escreve o
+`trace.log` lá. Sem criar diretório nenhum:
+`WTE_TRACE_FILE=/tmp/trace.log ./wte` faz o mesmo, e é a segunda evidência
+porque isola o trace dos assets. *(Ver a
+[CORR-WTE-116](/docs/tasks/CORR-WTE-116.md): esta receita punha o `re/` irmão
+do **arquivo**, e assim o diálogo continua.)*
 
 Duas consequências para esta task:
 

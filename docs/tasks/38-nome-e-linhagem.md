@@ -151,8 +151,24 @@ dois repasses.)*
   the program.` — **antes de qualquer janela**. A causa é o log de trace:
   `ResolveArquivo` do [`retrace.pas`](../../wte/src/retrace.pas) resolve
   `<dir do executável>/../re/trace.log` e o `Rewrite` levanta `EInOutError`
-  quando o diretório não existe. **Controle:** `mkdir re` ao lado da cópia, e o
-  mesmo binário abre a janela principal (522×475) e escreve o `trace.log` ali.
+  quando o diretório não existe.
+
+  **Controle:** com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o
+  `retrace.pas` resolve `<dir do executável>/../re/trace.log`, então o `re/` é
+  irmão **do diretório** do binário, como `wte/re/` é irmão de `wte/build/`.
+  Feito isso, o mesmo binário abre a janela principal (522×475) e escreve o
+  `trace.log` lá. E a versão de uma linha, que não depende de layout nenhum e
+  isola o trace de qualquer coisa de assets:
+
+  ```sh
+  WTE_TRACE_FILE=/tmp/trace.log ./wte
+  ```
+
+  *(Até 2026-08-25 esta receita punha o `re/` irmão do **arquivo**, e o código
+  o resolve irmão do **diretório** — medido nos quatro layouts pela
+  [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md). Quem a seguisse ao pé da letra
+  veria o mesmo diálogo e concluiria que a causa não era o trace, que é a
+  hipótese errada de volta pela porta que este controle existe para fechar.)*
 
   A primeira leitura foi "é a pasta de assets", e o controle a derrubou: com
   `WTE_ASSETS_DIR` apontando para a pasta do Obocaman o diálogo continuava.

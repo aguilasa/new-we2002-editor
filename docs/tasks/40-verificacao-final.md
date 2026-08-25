@@ -108,8 +108,12 @@ A causa medida é o log de trace: `ResolveArquivo` em
 [`wte/src/retrace.pas`](../../wte/src/retrace.pas) resolve
 `<dir do executável>/../re/trace.log` quando `WTE_TRACE_FILE` não está
 definida, e o `Rewrite` levanta `EInOutError` porque o diretório não existe.
-Controle: `mkdir re` ao lado da cópia, e o mesmo binário abre a janela
-principal (522×475).
+Controle: com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o `re/` é
+irmão **do diretório** do binário, não do arquivo —, e o mesmo binário abre a
+janela principal (522×475). Ou, sem diretório nenhum,
+`WTE_TRACE_FILE=/tmp/trace.log ./wte`. *(Corrigido pela
+[CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) em 2026-08-25; a receita anterior
+punha o `re/` irmão do **arquivo**, e assim não reproduz.)*
 
 Quem conserta é a [WTE-TASK-39](/docs/tasks/39-empacotamento.md), que é dona da
 resolução em runtime — a linha está lá. Aqui fica o registro de que **"roda num

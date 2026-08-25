@@ -3,7 +3,7 @@ id: CORR-WTE-116
 title: "Correção: o controle do `trace.log` diz \"mkdir re ao lado da cópia\", e ao lado da cópia não funciona"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -122,19 +122,59 @@ movido — é da 39, que é dona da resolução em runtime, e a linha já está 
 
 ## Verificação
 
-- [ ] `grep -rn "ao lado da cópia" docs/tasks/` sai vazio
-- [ ] A receita nova, seguida ao pé da letra, abre a janela 522×475 e escreve o
-      `trace.log`
-- [ ] `WTE_TRACE_FILE=/tmp/trace.log ./wte` abre a janela sem criar diretório
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "ao lado da cópia" docs/tasks/` sai vazio — fora deste arquivo
+      e do índice, que a citam para a descrever
+- [x] A receita nova, seguida ao pé da letra, abre a janela **522×475** e
+      escreve o `trace.log` (**605 B**)
+- [x] `WTE_TRACE_FILE=/tmp/trace.log ./wte` abre a janela sem criar diretório —
+      medido, mesma janela e mesmos 605 B
+- [x] `make -C wte check` verde (858 testes)
+- [x] `roms/` intocada; nada foi copiado para `work/`
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+A frase do controle foi trocada nos três sítios pelo **layout**, que não admite
+leitura dupla: com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o
+`re/` é irmão **do diretório** do binário, como `wte/re/` é irmão de
+`wte/build/`. Nos três entrou também a versão de uma linha,
+`WTE_TRACE_FILE=/tmp/trace.log ./wte`, que não depende de layout nenhum e serve
+de segunda evidência porque isola o trace de qualquer coisa de assets.
+
+Reproduzido antes de corrigir, nos **quatro** layouts:
+
+| Layout | Janela | `trace.log` |
+|---|---|---|
+| só o binário | diálogo 362×144 | não |
+| `re/` irmão do **arquivo** — a receita como estava | diálogo 362×144 | não |
+| `re/` irmão do **diretório** | principal **522×475** | **605 B** |
+| `WTE_TRACE_FILE`, sem `re/` | principal **522×475** | **605 B** |
+
+E a receita nova foi seguida **ao pé da letra**, como se fosse a primeira vez:
+janela 522×475 e os mesmos 605 B. É o que a correção existe para garantir — uma
+receita que não se reproduz não é controle, é hipótese com aparência de método.
+
 **Problemas encontrados:**
 
+**As notas históricas quase deixaram o grep de verificação vermelho.** Escrevi
+primeiro *"a frase daqui dizia `mkdir re` ao lado da cópia até…"*, que é a forma
+que este repositório usa para não reescrever história — e ela deixa a string
+viva em três lugares, contra o item de verificação que pede o grep vazio.
+
+Reescritas nomeando o **engano** em vez de repetir a frase: *"punha o `re/`
+irmão do **arquivo**, e o código o resolve irmão do **diretório**"*. Satisfaz o
+grep e diz mais — quem lê aprende qual é a distinção, que é justamente o que a
+frase velha escondia.
+
+O conserto do defeito continua sendo da
+[WTE-TASK-39](/docs/tasks/39-empacotamento.md), dona da resolução em runtime;
+esta correção é só da receita.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/38-nome-e-linhagem.md` — o controle, com o layout e a alternativa
+- `docs/tasks/39-empacotamento.md` — idem, no repasse
+- `docs/tasks/40-verificacao-final.md` — idem, na condição 3
