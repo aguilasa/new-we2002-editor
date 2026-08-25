@@ -242,6 +242,40 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   [`check_preco.py`](../../wte/tools/check_preco.py) **recusa** qualquer linha
   de slot 22 marcada como medida no `preco.tsv` — se a regra cair, o
   `ULTIMO_SLOT_PRECADO` está errado e o `make -C wte check` diz isso.
+- **O vaivém dos cobradores na segunda gravação — não existe no `wte.exe`** —
+  encaminhado pela
+  [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) e medido pela
+  [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) em 2026-08-25. É **resultado
+  negativo**, e entra aqui por isso: o que precisa de decisão não é uma
+  divergência a reproduzir, é o **enunciado da fase 6**, que atribui ao editor
+  um comportamento herdado de outro binário.
+  *O que se afirmava:* que `Load`+`Save` troca os dois primeiros cobradores de
+  cada clube de ML (`OFS_KICKER`) e que gravar duas vezes volta ao início. Isso
+  é do **`ed.exe`**, medido pelo `newWe2002`; o `wte.exe` do Obocaman é outro
+  binário e outro caminho de código, e nunca foi medido.
+  *Natureza:* nenhuma — não há divergência. O port não tem o que reproduzir, e
+  **não deve inventar** o vaivém para "ficar parecido" com o `ed.exe`.
+  *Decisão:* corrigir o enunciado da fase 6 para dizer `ed.exe` onde hoje diz
+  "o editor". A [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) já foi
+  reconciliada; o plano é o que falta conferir.
+  *Evidência:* o terceiro ponto, medido num time em que a troca **seria**
+  visível — uma gravação de tática contra duas, pelo
+  [`golden-24-gravacao-dupla`](../../wte/tests/roteiros/golden-24-gravacao-dupla.txt)
+  e por ele mesmo truncado depois da descarga. As duas imagens são **iguais**
+  (0 bytes), e os seis cobradores do time 5 saem intactos dos três estados:
+  `[9, 5, 5, 5, 7, 5]` na ROM virgem, depois de uma gravação e depois de duas.
+  E as duas gravações **aconteceram** — 11.962 bytes diferem da ROM virgem —,
+  o que impede o zero de ser dois lados parados. Está publicado em
+  [`golden.md`](../../wte/re/golden.md), pelo `check_golden.py`.
+  *Por que o time importa:* até a CORR-WTE-104 o roteiro gravava no time 2,
+  cujos dois primeiros cobradores são iguais (`[7, 7, …]`). Ali a troca é a
+  identidade e a medição **não podia** responder em nenhum dos dois sentidos —
+  a pendência que a 34 encaminhou era, sem que ela soubesse, indecidível como
+  estava escrita.
+  *Onde o teste sabe:* o `test_check_golden.py` lê o time do próprio roteiro e
+  **reprova** se os dois primeiros cobradores dele forem iguais. Se alguém
+  mover o `golden-24` de volta para um time cego, o `make -C wte check` diz
+  isso antes de o número virar doc.
 - **`TStaticText` no GTK2** (§8.9), se o fundo não puder ficar idêntico.
 - **Rótulos cortados por fonte substituta** — acontece nos dois lados, e talvez
   não conte como divergência; decidir.

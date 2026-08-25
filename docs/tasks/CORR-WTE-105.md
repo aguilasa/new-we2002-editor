@@ -3,7 +3,7 @@ id: CORR-WTE-105
 title: "Correção: a pendência que a WTE-TASK-34 encaminhou para a 35 não existe na 35"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -112,17 +112,51 @@ e o `/revisar` já confere, porque é o que esta correção acabou de fazer à m
 
 ## Verificação
 
-- [ ] `grep -c "cobrador" docs/tasks/35-divergencias-deliberadas.md` maior que zero
-- [ ] A entrada nomeia a CORR-WTE-104 como pré-requisito da medição
-- [ ] `make -C wte check` verde (o `check_fase1.py` varre `docs/`)
-- [ ] `roms/` intocada
+- [x] `grep -c "cobrador" docs/tasks/35-divergencias-deliberadas.md` maior que
+      zero — são **5**
+- [x] A entrada nomeia a CORR-WTE-104 — não mais como pré-requisito da medição,
+      e sim como quem a fez; ver os Problemas encontrados
+- [x] `make -C wte check` verde (789 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+A entrada entrou na seção *"Candidatas já conhecidas antes de a task rodar"* da
+WTE-TASK-35, no formato das outras (*O que se afirmava / Natureza / Decisão /
+Evidência / Onde o teste sabe*). De 0 para 5 ocorrências de `cobrador` no
+arquivo.
+
+E entrou o remédio de processo, que a CORR marcava como opcional e a segunda
+reincidência tornou barato: o `01-executar.md` ganhou um bloco irmão do que já
+existia para o quadro da WTE-TASK-09 — *"pendência encaminhada só vale com a
+linha escrita NA task de destino"* —, e o wrapper
+`.claude/commands/executar.md` reafirma o mesmo, porque é ele que enumera o
+fechamento com outras palavras.
+
 **Problemas encontrados:**
 
+**A entrada mudou de natureza entre a abertura da CORR e a execução, e para
+melhor.** A CORR escreveu o esboço com *"Natureza: a medir"* e a
+[CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) como **pré-requisito** da medição.
+A 104 rodou primeiro neste mesmo lote e **mediu**: uma gravação e duas dão a
+mesma imagem, com os cobradores intactos. Escrever a entrada como "a medir"
+teria produzido prosa vencida no ato — exatamente o defeito que esta correção
+existe para consertar.
+
+A entrada foi escrita no estado pós-104: **resultado negativo**, com os números
+e o motivo de o time importar. O que fica para a WTE-TASK-35 decidir não é uma
+divergência a reproduzir — é o enunciado da fase 6, que atribui ao editor um
+comportamento do `ed.exe`. A própria CORR previa o desfecho ("*se não, é
+resultado negativo e o que entra é a correção do enunciado da fase 6*"), então
+o esboço não estava errado; só foi resolvido um degrau adiante do que ele
+esperava.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/35-divergencias-deliberadas.md` — a entrada
+- `docs/prompts/01-executar.md` — a regra de encaminhamento
+- `.claude/commands/executar.md` — o mesmo rito no wrapper

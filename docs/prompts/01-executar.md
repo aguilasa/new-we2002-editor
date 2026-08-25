@@ -392,6 +392,20 @@ Se concluída:
 > ([CORR-WTE-014](/docs/tasks/CORR-WTE-014.md)) — os dois medidos, os dois
 > encaminhados para a 09, os dois ausentes do quadro que ela executa.
 
+> **Pendência encaminhada para outra task só vale com a linha escrita NA
+> task de destino.** Escrever *"encaminhado para a WTE-TASK-NN"* no Log da task
+> que fecha **não encaminha nada**: quem executar a NN lê o arquivo dela, não o
+> Log da anterior. Abra a entrada no destino, no formato que ele usa, e só
+> então cite o encaminhamento no seu Log.
+>
+> É a mesma família do quadro da WTE-TASK-09 acima, um nível mais geral, e já
+> falhou duas vezes: a WTE-TASK-30 com dono errado
+> ([CORR-WTE-086](/docs/tasks/CORR-WTE-086.md)) e o vaivém dos cobradores, que
+> a WTE-TASK-34 encaminhou para a 35 sem que a 35 tivesse uma linha sobre ele
+> ([CORR-WTE-105](/docs/tasks/CORR-WTE-105.md)). A terceira passagem da
+> WTE-TASK-31 batizou o defeito: **prosa vencida** — documento que envelhece
+> sozinho enquanto outro o lê como estado corrente.
+
 > **Marcar `✅ Concluído` não é o passo final — o commit é.** `✅ Concluído`
 > descreve um estado que precisa **já existir commitado** quando você escrever
 > isso, não uma intenção. Só escreva depois de fechar o passo 5 com sucesso.

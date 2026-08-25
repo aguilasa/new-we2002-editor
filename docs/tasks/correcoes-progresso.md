@@ -124,7 +124,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-102](/docs/tasks/CORR-WTE-102.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Quatro sítios vivos ainda derivam as dezessete gravações "das 94 specs"; o índice conta 96 desde que a WTE-TASK-32 escreveu as duas de preço | Média | [x] concluída | 2026-08-24 |
 | [CORR-WTE-103](/docs/tasks/CORR-WTE-103.md) | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | No estado zero o `check_fase4.py` emite o título `## Os que continuam aberto` colado no parágrafo — a linha em branco mora dentro do `if` que lista os sem spec | Baixa | [x] concluída | 2026-08-24 |
 | [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | O `golden-24-gravacao-dupla` grava no time 2, cujos dois primeiros cobradores são iguais (`[7, 7, …]`): a troca do `Load`+`Save` que ele existe para medir é a identidade ali, e o roteiro passa com vaivém e sem ele | Alta | [x] concluída | 2026-08-25 |
-| [CORR-WTE-105](/docs/tasks/CORR-WTE-105.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | A pendência do vaivém dos cobradores foi encaminhada por prosa da WTE-TASK-34 para a 35, e a 35 não a tem em lugar nenhum — zero ocorrências no arquivo dela | Baixa | [ ] pendente | — |
+| [CORR-WTE-105](/docs/tasks/CORR-WTE-105.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | A pendência do vaivém dos cobradores foi encaminhada por prosa da WTE-TASK-34 para a 35, e a 35 não a tem em lugar nenhum — zero ocorrências no arquivo dela | Baixa | [x] concluída | 2026-08-25 |
 
 ## Checklist
 
@@ -231,7 +231,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-102 — atualizar de 94 para 96 a população de specs de onde saem as dezessete gravações
 - [x] CORR-WTE-103 — tirar do `if` a linha em branco que separa o bloco de specs do título seguinte
 - [x] CORR-WTE-104 — mover o `golden-24` para um time em que os dois primeiros cobradores diferem, e escrever o resultado do terceiro ponto
-- [ ] CORR-WTE-105 — dar entrada na WTE-TASK-35 à pendência que a 34 encaminhou para ela
+- [x] CORR-WTE-105 — dar entrada na WTE-TASK-35 à pendência que a 34 encaminhou para ela
 
 ## Detalhes por correção
 

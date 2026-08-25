@@ -47,6 +47,11 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
    Tarefa parcial **não** vira `✅ Concluído` — registre no Log o que ficou
    pendente e diga isso na saída.
 
+   E **pendência encaminhada para outra task precisa da linha escrita na task
+   de destino**, não só no seu Log: quem executar a NN lê o arquivo dela. Já
+   falhou duas vezes ([CORR-WTE-086](../../docs/tasks/CORR-WTE-086.md),
+   [CORR-WTE-105](../../docs/tasks/CORR-WTE-105.md)).
+
 3. **`✅ Concluído` só depois do commit.** Ele descreve estado já commitado,
    não intenção. O passo 5 do prompt (commit, `git status --short` limpo)
    fecha antes de a marcação ser escrita.
