@@ -3,7 +3,7 @@ id: CORR-WTE-106
 title: "Correção: o check_divergencias.py é o único gate de recusa sem teste — as \"três recusas vistas\" não deixaram artefato"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -111,18 +111,64 @@ existir. Recusa vista sem artefato é afirmação sobre o passado; recusa em tes
 
 ## Verificação
 
-- [ ] `python3 -m unittest discover -p 'test_*.py'` em `wte/tools` conta os
-      casos novos, e todos passam
-- [ ] Cada um dos quatro reprova quando a plantação é feita, e passa sem ela
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `python3 -m unittest discover -p 'test_*.py'` em `wte/tools` conta os
+      casos novos, e todos passam — a bateria foi de **789** para **809**
+- [x] Cada um dos quatro reprova quando a plantação é feita, e passa sem ela —
+      os quatro rodados isoladamente, mais o controle sem plantação
+- [x] `make -C wte check` verde (809 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+Criado o `wte/tools/test_check_divergencias.py` com **20 casos**, no molde do
+`test_check_golden.py`: espelho da árvore em `tempfile`, caminhos do módulo
+repontados, nada de `.exe`, `DISPLAY` ou Wine. A bateria do `make -C wte check`
+foi de 789 para 809.
+
+Os quatro sentidos da recusa estão plantados e cada um foi rodado isoladamente
+para provar que reprova **por causa** da plantação, com o controle sem
+plantação passando: exceção que some (prosa vencida), seção que some (buraco),
+retirada que volta, faixa `conhecida:` nova. Mais os dois casos baratos que a
+CORR pedia — o estado de hoje passando contra a árvore real, e o casamento por
+aspas do `RETIRADAS`.
+
+**O espelho é montado a partir das tabelas reais do módulo**, não de uma cópia
+literal delas: exceção nova no `EXCECOES` entra nos testes sozinha, em vez de
+os deixar medindo um mundo que não existe mais. Foi escolha deliberada — a
+alternativa era um espelho fixo que envelhece exatamente como o documento que
+este gate protege.
+
+O critério da WTE-TASK-35 e o espelho dele no `progresso.md` trocaram *"com as
+três recusas vistas"* pela referência ao teste.
+
 **Problemas encontrados:**
 
+**A enumeração da CORR não bate, e a conclusão dela sim.** Ela diz que as nove
+ferramentas sem teste são medidoras do `.exe` (`check_barras`,
+`check_bitfields`, `sonda_dorsal`, os `dump_*`). Medido, há uma décima:
+o `check_lcl_combo.py`, que não é nenhuma dessas. Ele mede a **LCL instalada**
+— se o `TComboBox` do gtk2 dispara `OnChange` em `ItemIndex :=` — e o cabeçalho
+dele diz o mesmo contrato do `check_barras`: confere e sai 2. É medidor do
+mundo de fora, mesma família; a saída dele *é* a medição. A afirmação
+*"esta é a única guarda de recusa sem teste"* continua verdadeira; só a lista
+de exemplos era incompleta.
+
+Três casos estouraram com `ValueError` na primeira corrida: o módulo relata o
+caminho como `DOC.relative_to(ROOT)`, e um espelho em `/tmp` não é subpath da
+árvore real. É artefato do espelho, **não defeito do gate** — em uso normal o
+documento mora sempre sob a raiz —, e o conserto foi repontar `ROOT` junto, não
+afrouxar a ferramenta. Está escrito no teste para a próxima pessoa não hesitar.
+
+A saída do `main()` é engolida nos casos de código de saída: sem isso o
+relatório de uma recusa **plantada** aparecia no meio do `make -C wte check`, e
+quem lesse o gate veria a mensagem de um problema que não existe.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/test_check_divergencias.py` — criado, 20 casos
+- `docs/tasks/35-divergencias-deliberadas.md` — o critério
+- `docs/tasks/progresso.md` — o espelho do critério (varredura)

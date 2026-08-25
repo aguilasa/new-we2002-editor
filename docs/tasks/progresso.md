@@ -549,8 +549,11 @@ alimenta e passou a **carregar** essa gravação.
       defeito:** com a japonesa o roteiro sempre dirige até o fim
 - [x] Toda exceção do golden com entrada em `divergencias.md` — **3 exceções
       nomeadas, as 3 com entrada**, mecanizado nos dois sentidos pelo
-      [`check_divergencias.py`](../../wte/tools/check_divergencias.py) com as
-      três recusas vistas. O registro tem **seis entradas**, e a bateria de
+      [`check_divergencias.py`](../../wte/tools/check_divergencias.py), com as
+      recusas **versionadas** em
+      [`test_check_divergencias.py`](../../wte/tools/test_check_divergencias.py)
+      pela [CORR-WTE-106](/docs/tasks/CORR-WTE-106.md) — 20 casos, os quatro
+      sentidos plantados. O registro tem **seis entradas**, e a bateria de
       bytes **não tem exceção nenhuma**: zero roteiro declara `conhecida:`, o
       que é afirmação medida — o `golden_veredito.py` reprova faixa declarada
       que não aparece

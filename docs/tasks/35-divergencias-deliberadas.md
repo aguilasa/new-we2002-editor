@@ -325,8 +325,13 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
       sem entrada
 - [x] Toda exceção do golden com entrada correspondente — **3 exceções
       nomeadas, as 3 com entrada**: `glifo_cinza` e `INVARIANTES` (§2) e
-      `ULTIMO_SLOT_PRECADO` (§5). Mecanizado nos **dois** sentidos, com as três
-      recusas vistas
+      `ULTIMO_SLOT_PRECADO` (§5). Mecanizado nos **dois** sentidos, e as
+      recusas ficaram **versionadas** em
+      [`test_check_divergencias.py`](../../wte/tools/test_check_divergencias.py)
+      pela [CORR-WTE-106](/docs/tasks/CORR-WTE-106.md) — 20 casos, com os
+      quatro sentidos plantados. Este critério dizia *"com as três recusas
+      vistas"*, e ver não é deixar visto: as recusas da execução não
+      sobreviveram a ela, e o gate era o único de recusa sem par de teste
 - [x] Divergência sem causa conhecida classificada como bug aberto, não como
       deliberada — nenhuma apareceu. As seis entradas têm causa medida e
       citada; a única linha ainda aberta é o truncamento, e ela **tem dono
