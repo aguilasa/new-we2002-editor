@@ -161,5 +161,98 @@ class TestSaida(Base):
         self.assertIn("GERADO", texto)
 
 
+class TestPremissaDaGravacaoDupla(unittest.TestCase):
+    """A guarda da CORR-WTE-104: o roteiro tem de PODER medir o que diz medir.
+
+    O `check_golden.py` ja recusa roteiro ausente do TSV. O que ele nao sabe e
+    se um roteiro consegue distinguir os dois casos que ele existe para separar
+    -- e isso nao se mecaniza em geral. Neste caso sim: a gravacao dupla so
+    enxerga o vaivem do `Load`+`Save` num time em que `cobrador[0] !=
+    cobrador[1]`. O `golden-24` usava o time 2, onde eles sao iguais e a troca e
+    a identidade: o roteiro passaria com vaivem e sem ele.
+
+    A guarda le o TIME DO PROPRIO ROTEIRO -- pela contagem de `Down` do bloco de
+    selecao -- e nao um literal. Mexer no roteiro sem conferir a premissa
+    reprova aqui, que e o unico lugar onde isso e barato.
+    """
+
+    ROM = C.ROOT / "roms" / "japanese-shift-jis.bin"
+    ROTEIRO = C.ROTEIROS / "golden-24-gravacao-dupla.txt"
+
+    @staticmethod
+    def endereco(time: int) -> int:
+        """`TATICA_COBRADOR_LOGICO + 6*time`, com os cabecalhos de setor.
+
+        Setor MODE2/2352: 24 de cabecalho, 2048 de dados. O offset logico
+        atravessa fronteira de setor e precisa pular os cabecalhos -- e a mesma
+        aritmetica do `GravaTaticaNaImagem`.
+        """
+        setor_bytes, inicio, dados = 2352, 24, 2048
+        logico = 0x46228 + 6 * time + 2 * (time // 95)
+        return (850 * setor_bytes + inicio
+                + (logico // dados) * setor_bytes + logico % dados)
+
+    def time_do_roteiro(self) -> int:
+        """Quantos `Down` ate o marcador `= SELECIONA_TIME`, menos um.
+
+        O combo abre no time 0 e o primeiro `Down` leva ao 1, entao a contagem
+        e `time + 1` -- e por isso que o roteiro chegava ao 2 com tres.
+        """
+        downs = 0
+        for linha in self.ROTEIRO.read_text(encoding="utf-8").splitlines():
+            if linha.strip() == "= SELECIONA_TIME":
+                return downs - 1
+            if linha.strip() == "! tecla Down":
+                downs += 1
+        self.fail("o roteiro nao tem marcador `= SELECIONA_TIME`")
+
+    def cobradores(self, time: int) -> list[int]:
+        with self.ROM.open("rb") as f:
+            f.seek(self.endereco(time))
+            return list(f.read(6))
+
+    def test_a_aritmetica_bate_com_a_tabela_medida(self) -> None:
+        """O endereco do `TERCEIRO_PONTO` sai da mesma conta, nao de um literal
+        solto."""
+        tp = C.TERCEIRO_PONTO
+        self.assertEqual(self.endereco(tp["time"]), tp["endereco"])
+
+    def test_o_roteiro_usa_o_time_da_tabela(self) -> None:
+        """Roteiro e registro nao podem se soltar um do outro."""
+        if not self.ROTEIRO.is_file():
+            self.skipTest("roteiro ausente")
+        self.assertEqual(self.time_do_roteiro(), C.TERCEIRO_PONTO["time"])
+
+    def test_os_dois_primeiros_cobradores_diferem(self) -> None:
+        """O ponto da guarda. Sem isto o gate e cego para o proprio criterio."""
+        if not self.ROM.is_file():
+            self.skipTest("ROM japonesa ausente (gitignored)")
+        time = self.time_do_roteiro()
+        b = self.cobradores(time)
+        self.assertNotEqual(
+            b[0], b[1],
+            f"o golden-24 grava no time {time}, cujos cobradores sao {b}: "
+            "`cobrador[0] == cobrador[1]` torna a troca do `Load`+`Save` "
+            "invisivel, e o roteiro passa com vaivem e sem ele")
+
+    def test_o_time_2_reprovaria(self) -> None:
+        """O caso plantado -- guarda nunca exercitada e guarda ausente.
+
+        E o estado real do roteiro antes da CORR-WTE-104.
+        """
+        if not self.ROM.is_file():
+            self.skipTest("ROM japonesa ausente (gitignored)")
+        b = self.cobradores(2)
+        self.assertEqual(b[0], b[1], "o time 2 deixou de ser o contraexemplo")
+
+    def test_a_leitura_da_rom_bate_com_a_tabela(self) -> None:
+        """Os seis bytes registrados sao os da ROM, nao os que alguem lembrou."""
+        if not self.ROM.is_file():
+            self.skipTest("ROM japonesa ausente (gitignored)")
+        tp = C.TERCEIRO_PONTO
+        self.assertEqual(tuple(self.cobradores(tp["time"])),
+                         tp["cobrador_virgem"])
+
+
 if __name__ == "__main__":
     unittest.main()

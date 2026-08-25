@@ -43,8 +43,8 @@ golden-22-precos	japonesa	controle	PASSOU	100	2026-08-24
 golden-22-precos	japonesa	golden	PASSOU	88	2026-08-24
 golden-23-multiplas-edicoes	japonesa	controle	PASSOU	143	2026-08-24
 golden-23-multiplas-edicoes	japonesa	golden	PASSOU	134	2026-08-24
-golden-24-gravacao-dupla	japonesa	controle	PASSOU	157	2026-08-24
-golden-24-gravacao-dupla	japonesa	golden	PASSOU	145	2026-08-24
+golden-24-gravacao-dupla	japonesa	controle	PASSOU	158	2026-08-25
+golden-24-gravacao-dupla	japonesa	golden	PASSOU	144	2026-08-25
 golden-01-arranque	europeia	controle	PASSOU	47	2026-08-24
 golden-01-arranque	europeia	golden	PASSOU	34	2026-08-24
 golden-03-barras	europeia	controle	SEM_ORACULO	64	2026-08-24
@@ -89,5 +89,5 @@ golden-22-precos	europeia	controle	SEM_ORACULO	65	2026-08-24
 golden-22-precos	europeia	golden	NAO_APLICAVEL	0	2026-08-24
 golden-23-multiplas-edicoes	europeia	controle	SEM_ORACULO	86	2026-08-24
 golden-23-multiplas-edicoes	europeia	golden	NAO_APLICAVEL	0	2026-08-24
-golden-24-gravacao-dupla	europeia	controle	SEM_ORACULO	66	2026-08-24
-golden-24-gravacao-dupla	europeia	golden	NAO_APLICAVEL	0	2026-08-24
+golden-24-gravacao-dupla	europeia	controle	SEM_ORACULO	67	2026-08-25
+golden-24-gravacao-dupla	europeia	golden	NAO_APLICAVEL	0	2026-08-25

@@ -31,7 +31,8 @@
 #
 # ## Nenhuma coordenada e nova
 #
-#   time 2                (50,46) + 3 `Down`   -- golden-17
+#   time 5                (50,46) + 6 `Down`   -- a coordenada e do
+#                                                golden-17; a CONTAGEM nao
 #   mostrar_estrategia_1  (28,370)             -- golden-17
 #   malla1 coluna 2/5     (174,400)            -- golden-17
 #   BitBtn6 ` Accept`     (472,273)            -- golden-17
@@ -65,9 +66,24 @@ operacao: gravacao
 ~ 2
 = ARRANQUE
 
-# ------------------------------------------------------------- o time 2 ----
+# ------------------------------------------------------------- o time 5 ----
+#
+# O TIME 5 NAO E ESCOLHA LIVRE. Os cobradores dele sao [9, 5, 5, 5, 7, 5] no
+# endereco 2329086 (`TATICA_COBRADOR_LOGICO + 6*time`, setor base 850):
+# `cobrador[0] != cobrador[1]`, que e a UNICA condicao em que a troca do
+# `Load`+`Save` e observavel.
+#
+# No time 2 -- que este roteiro usava, herdado do `golden-17` junto com as
+# coordenadas -- eles sao [7, 7, 8, 7, 7, 8]: trocar o primeiro pelo segundo
+# devolve os MESMOS bytes, e o roteiro passaria com vaivem e sem ele. Ver a
+# CORR-WTE-104. Sao 41 dos 96 times em que a troca seria visivel; o 5 e o
+# primeiro deles, e custa so a contagem de `Down` -- nenhuma outra coordenada
+# muda, porque a tela de tatica e a mesma.
 ! clique 50 46
 ~ 1
+! tecla Down
+! tecla Down
+! tecla Down
 ! tecla Down
 ! tecla Down
 ! tecla Down
@@ -91,10 +107,10 @@ operacao: gravacao
 # A descarga entre as duas gravacoes NAO e enfeite: sem ela a primeira ficaria
 # no buffer do runtime C e as duas sairiam juntas no fim, que e outro teste.
 #
-# `Down` leva ao time 3 e `Up` traz de volta ao 2. As duas trocas recarregam o
+# `Down` leva ao time 6 e `Up` traz de volta ao 5. As duas trocas recarregam o
 # time, e e por ai que a segunda gravacao parte de um estado LIDO do arquivo --
 # que e a metade `Load` do `Load`+`Save` que este roteiro julga. Um segundo
-# `Down` levaria ao time 4 e a segunda gravacao seria noutro time, que e um
+# `Down` levaria ao time 7 e a segunda gravacao seria noutro time, que e um
 # teste diferente e mais fraco.
 ! clique 50 46
 ~ 1

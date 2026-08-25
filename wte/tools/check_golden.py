@@ -54,6 +54,31 @@ TSV = WTE / "re" / "golden.tsv"
 OUT = WTE / "re" / "golden.md"
 ROTEIROS = WTE / "tests" / "roteiros"
 
+# O TERCEIRO PONTO DA GRAVACAO DUPLA -- medido, nao encaminhado (CORR-WTE-104).
+#
+# TABELA A MAO, E COM GUARDA, pela mesma razao do `GOLDEN_DE` do
+# `check_fase4.py`: o numero sai de corrida de golden, que precisa do `:98`, do
+# Wine e de ~950 MB de temporario, e nao se remede em `--check`. O que a guarda
+# do `test_check_golden.py` cobra e a PREMISSA -- que no time do roteiro os dois
+# primeiros cobradores diferam --, que e a parte que envelhece sozinha se
+# alguem mexer no roteiro.
+#
+# O par NAO e mais `golden-17-tatica` x `golden-24`: desde a CORR-WTE-104 o
+# `golden-24` grava no time 5 e o `golden-17` continua no 2, e comparar as duas
+# imagens mediria a diferenca entre DOIS TIMES, nao entre uma gravacao e duas.
+# O lado "uma gravacao" e o proprio `golden-24` truncado depois da descarga --
+# mesmas coordenadas, mesmo time, mesmo caminho, uma gravacao a menos.
+TERCEIRO_PONTO = {
+    "data": "2026-08-25",
+    "time": 5,
+    "endereco": 2329086,
+    "cobrador_virgem": (9, 5, 5, 5, 7, 5),
+    "cobrador_uma": (9, 5, 5, 5, 7, 5),
+    "cobrador_duas": (9, 5, 5, 5, 7, 5),
+    "uma_x_duas": 0,          # bytes diferentes entre uma gravacao e duas
+    "virgem_x_uma": 11962,    # e as duas gravacoes ACONTECERAM
+}
+
 ROMS = ("japonesa", "europeia")
 VEREDITOS = ("PASSOU", "REPROVOU", "SEM_ORACULO", "NAO_APLICAVEL",
              "ESTOUROU_TEMPO")
@@ -252,10 +277,10 @@ def gera(m: dict) -> str:
     a("")
     a("**A gravação dupla** grava a tática duas vezes no mesmo time, com")
     a("recarga entre elas. A tática é a escolha certa porque é a gravação que")
-    a("carrega `OFS_KICKER`: o `newWe2002` registra que o editor original")
-    a("**não é idempotente** — `Load`+`Save` troca os dois primeiros cobradores")
-    a("de cada clube de Master League, e gravar duas vezes volta ao início. Se")
-    a("o app Lazarus não reproduzisse o vaivém, a segunda gravação divergiria")
+    a("carrega `OFS_KICKER`: o `newWe2002` registra que o **`ed.exe`** não é")
+    a("idempotente — `Load`+`Save` troca os dois primeiros cobradores de cada")
+    a("clube de Master League, e gravar duas vezes volta ao início. Se o app")
+    a("Lazarus não reproduzisse esse vaivém, a segunda gravação divergiria")
     a("mesmo com a primeira byte-idêntica.")
     a("")
     a("**E nenhum dos dois prova sozinho que o estímulo aconteceu.** É a lição")
@@ -263,8 +288,49 @@ def gera(m: dict) -> str:
     a("[WTE-TASK-31](../../docs/tasks/31-fechamento-fase-4.md): se os dois")
     a("lados não fizerem nada, os dois concordam. O terceiro ponto de cada um")
     a("é o par que grava **uma** vez pelo mesmo caminho —")
-    a("`golden-04-barras-editada` e `golden-05-nomes` para o primeiro,")
-    a("`golden-17-tatica` para o segundo.")
+    a("`golden-04-barras-editada` e `golden-05-nomes` para o primeiro, e para o")
+    a("segundo o próprio `golden-24` truncado depois da descarga.")
+    a("")
+
+    tp = TERCEIRO_PONTO
+    a("### O terceiro ponto da gravação dupla, medido")
+    a("")
+    a(f"Rodado em {tp['data']}, e o resultado é **negativo — e decisivo**:")
+    a("")
+    a(f"| Medida | Bytes |")
+    a("|---|---:|")
+    a(f"| uma gravação × duas gravações | **{tp['uma_x_duas']}** |")
+    a(f"| ROM virgem × uma gravação | {tp['virgem_x_uma']} |")
+    a("")
+    a("**O `wte.exe` não tem o vaivém.** Uma gravação e duas produzem a mesma")
+    a(f"imagem, e os seis cobradores do time {tp['time']} (em `{tp['endereco']}`)")
+    a("saem intactos dos três estados:")
+    a("")
+    a("| Estado | `OFS_KICKER` do time |")
+    a("|---|---|")
+    for rot, chave in (("ROM virgem", "cobrador_virgem"),
+                       ("uma gravação", "cobrador_uma"),
+                       ("duas gravações", "cobrador_duas")):
+        a(f"| {rot} | `{list(tp[chave])}` |")
+    a("")
+    a("**E as duas gravações aconteceram**, que é o que impede o zero de ser")
+    a(f"trivial: contra a ROM virgem a imagem muda em {tp['virgem_x_uma']}")
+    a("bytes. O gate não está medindo dois lados parados.")
+    a("")
+    a(f"**O time {tp['time']} não é escolha livre**, e é aí que estava o defeito")
+    a("que a [CORR-WTE-104](../../docs/tasks/CORR-WTE-104.md) achou. O roteiro")
+    a("gravava no time 2, cujos dois primeiros cobradores são iguais")
+    a("(`[7, 7, …]`): ali a troca que se procura é a identidade, e o roteiro")
+    a("passaria com vaivém e sem ele. São 41 dos 96 times em que ela seria")
+    a(f"visível; o {tp['time']} é o primeiro deles, com")
+    a(f"`{list(tp['cobrador_virgem'])[:2]}` no primeiro par.")
+    a("")
+    a("**O que isto decide.** A não-idempotência que o enunciado da fase 6")
+    a("cita é do `ed.exe` — outro binário, outro caminho de código. O")
+    a("`wte.exe` **não** a tem neste caminho, então não há divergência a")
+    a("reproduzir e o port não deve inventá-la. É entrada da")
+    a("[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) como")
+    a("resultado negativo, não como divergência.")
     a("")
 
     a("## As duas ROMs, e por que a resposta não é simétrica")

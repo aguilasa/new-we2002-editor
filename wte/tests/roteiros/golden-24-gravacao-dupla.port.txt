@@ -22,8 +22,15 @@ operacao: gravacao
 ~ 3
 = ARRANQUE
 
+# Time 5, e o numero nao e livre: os cobradores dele diferem no primeiro par
+# ([9, 5, ...] em 2329086), que e a unica condicao em que a troca do
+# `Load`+`Save` e observavel. O cabecalho do lado oraculo explica; ver a
+# CORR-WTE-104.
 ! clique 50 46
 ~ 1
+! tecla Down
+! tecla Down
+! tecla Down
 ! tecla Down
 ! tecla Down
 ! tecla Down

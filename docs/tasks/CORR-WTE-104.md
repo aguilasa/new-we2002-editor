@@ -3,7 +3,7 @@ id: CORR-WTE-104
 title: "Correção: o golden-24 grava duas vezes num time cujos dois primeiros cobradores são iguais — o vaivém seria invisível"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -163,21 +163,70 @@ linhas e amarra o roteiro à sua própria premissa.
 
 ## Verificação
 
-- [ ] Os cobradores do time do roteiro diferem:
-      o script da evidência lista o time escolhido
-- [ ] `golden-24` verde nos dois modos na japonesa, com o controle antes
-- [ ] `cmp -l` entre a imagem de uma gravação e a de duas está **escrito** no
-      `golden.md`, com o número, seja ele zero ou não
-- [ ] `python3 wte/tools/check_golden.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] Os cobradores do time do roteiro diferem:
+      time 5, `[9, 5, 5, 5, 7, 5]` em 2329086
+- [x] `golden-24` verde nos dois modos na japonesa, com o controle antes
+      (controle 158 s, golden 144 s)
+- [x] `cmp -l` entre a imagem de uma gravação e a de duas está **escrito** no
+      `golden.md`, com o número — é **0**
+- [x] `python3 wte/tools/check_golden.py --check` verde
+- [x] `make -C wte check` verde (789 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+O `golden-24` passou do time 2 para o **5** (`[9, 5, 5, 5, 7, 5]` em 2329086),
+nos dois lados do par — só a contagem de `Down` muda, de três para seis, porque
+a tela de tática é a mesma. O cabeçalho diz por que aquele time, com os seis
+bytes e o endereço, para a próxima pessoa não "simplificar" de volta.
+
+**O terceiro ponto foi medido, e o resultado é negativo e decisivo:**
+
+| Medida | Bytes |
+|---|---:|
+| uma gravação × duas gravações | **0** |
+| ROM virgem × uma gravação | 11.962 |
+
+Os cobradores do time 5 saem **intactos** dos três estados —
+`[9, 5, 5, 5, 7, 5]` na virgem, depois de uma gravação e depois de duas. Num
+time onde a troca *seria* visível, ela não acontece: **o `wte.exe` não tem o
+vaivém**. A não-idempotência do enunciado da fase 6 é do `ed.exe`, outro
+binário e outro caminho de código. E as duas gravações aconteceram, o que
+impede o zero de ser trivial.
+
+O registro entrou no gerador do `golden.md` como tabela medida com guarda — o
+padrão do `GOLDEN_DE` do `check_fase4.py` —, e as quatro linhas do `golden-24`
+no `golden.tsv` foram remedidas pela bateria (japonesa `PASSOU`/`PASSOU`,
+158 s e 144 s; europeia `SEM_ORACULO`/`NAO_APLICAVEL`, que é o esperado ali).
+
 **Problemas encontrados:**
 
+**O instrumento que a CORR mandava usar deixou de servir por causa da própria
+correção.** A seção "O terceiro ponto vira registro" manda rodar o par
+`golden-17-tatica` × `golden-24` — que era o par certo enquanto os dois
+gravavam no time 2. Com o `golden-24` no time 5 e o `golden-17` no 2, o `cmp`
+entre as duas imagens mede a diferença entre **dois times**, não entre uma
+gravação e duas: daria um número grande e sem significado.
+
+O lado "uma gravação" passou a ser o **próprio `golden-24` truncado depois da
+descarga** — mesmas coordenadas, mesmo time, mesmo caminho, uma gravação a
+menos. É instrumento melhor que o `golden-17` era, e não custa gate novo: o
+roteiro truncado é aparelho de medição, não entra no repositório. Mover o
+`golden-17` para o time 5 seria a outra saída e foi recusada — ele é um gate
+verde com história própria, e a CORR diz que a correção é só do `golden-24`.
+
+A guarda lê o time **do próprio roteiro**, pela contagem de `Down` até
+`= SELECIONA_TIME`, e não de um literal: plantando o time 2 de volta, dois
+casos reprovam, um deles com a mensagem que nomeia os cobradores iguais.
+
 **Arquivos criados/modificados:**
+
+- `wte/tests/roteiros/golden-24-gravacao-dupla.txt`, `.port.txt` — o time 5
+- `wte/tools/check_golden.py` — `TERCEIRO_PONTO` e a seção que ele gera
+- `wte/tools/test_check_golden.py` — `TestPremissaDaGravacaoDupla`, 5 casos
+- `wte/re/golden.tsv` — as quatro linhas do `golden-24`, remedidas
+- `wte/re/golden.md` — regerado
