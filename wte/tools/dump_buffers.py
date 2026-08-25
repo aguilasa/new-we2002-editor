@@ -74,6 +74,11 @@ class BufferError(Exception):
 CAMPOS = [
     {
         "controle": "edit_nombre1",
+        "filtro_handler": "ep2002_mainform.edit_nombre1KeyPress.inc",
+        "filtro_trecho": (
+            "(Key = ' ') or (Key = '.') or (Key = #8)",
+            "(Key in ['0'..'9']) or (Key in ['A'..'Z']) or (Key in ['a'..'z'])",
+        ),
         "formulario": "MainForm",
         "vetor": ("we2002_team.pas", "kanji_name"),
         "origem": "runtime",
@@ -83,6 +88,11 @@ CAMPOS = [
     },
     {
         "controle": "edit_nombre2",
+        "filtro_handler": "ep2002_mainform.edit_nombre2KeyPress.inc",
+        "filtro_trecho": (
+            "(Key = ' ') or (Key = '.') or (Key = #8)",
+            "(Key in ['0'..'9']) or (Key in ['A'..'Z']) or (Key in ['a'..'z'])",
+        ),
         "formulario": "MainForm",
         "vetor": ("we2002_team.pas", "names"),
         "origem": "runtime",
@@ -92,6 +102,10 @@ CAMPOS = [
     },
     {
         "controle": "edit_nombre3",
+        "filtro_handler": "ep2002_mainform.edit_nombre3KeyPress.inc",
+        "filtro_trecho": (
+            "(Key <> #8) and not (Key in ['0'..'9', 'A'..'Z', 'a'..'z'])",
+        ),
         "formulario": "MainForm",
         "vetor": ("we2002_team.pas", "abbreviations"),
         "origem": "dfm",
@@ -101,6 +115,11 @@ CAMPOS = [
     },
     {
         "controle": "casilla_nombre",
+        "filtro_handler": "ep2002_jugador.casilla_nombreKeyPress.inc",
+        "filtro_trecho": (
+            "(Key = ' ') or (Key = '.') or (Key = #8)",
+            "(Key in ['0'..'9']) or (Key in ['A'..'Z']) or (Key in ['a'..'z'])",
+        ),
         "formulario": "jugador",
         "vetor": ("we2002_player.pas", "name"),
         "origem": "dfm",
@@ -138,6 +157,10 @@ CAMPOS = [
 NUMERICOS = [
     {
         "controle": "casilla_precio",
+        "filtro_handler": "ep2002_jugador.casilla_precioKeyPress.inc",
+        "filtro_trecho": (
+            "(Key <> #8) and not (Key in ['0'..'9'])",
+        ),
         "formulario": "jugador",
         "handler": "ep2002_jugador.BitBtn3Click.inc",
         "predicado": "(creditos < 1) or (creditos > 250)",
@@ -148,6 +171,10 @@ NUMERICOS = [
     },
     {
         "controle": "casilla_dorsal",
+        "filtro_handler": "ep2002_jugador.casilla_dorsalKeyPress.inc",
+        "filtro_trecho": (
+            "(Key <> #8) and not (Key in ['0'..'9'])",
+        ),
         "formulario": "jugador",
         "handler": "ep2002_jugador.BitBtn3Click.inc",
         "predicado": "(numero < 1) or (numero > 99)",
@@ -220,6 +247,36 @@ def maxlength_dos_forms() -> dict[str, int]:
     return achados
 
 
+def confere_filtro(campo: dict, problemas: list[str]) -> None:
+    """O conjunto de caracteres publicado existe no `KeyPress` que o implementa?
+
+    O `filtro` era declarado a mao e nunca conferido, enquanto o `predicado` de
+    faixa dos numericos -- na mesma tabela, uma chave adiante -- e cobrado do
+    `.inc` e aborta se sumir. Esta funcao da ao `filtro` o mesmo tratamento
+    (CORR-WTE-112).
+
+    O trecho e LITERAL, e nao regex, pela razao que a WTE-TASK-36 registrou:
+    escrever regex com escape atraves de heredoc aninhado e fragil, e o alvo e
+    texto Pascal. Sao varios trechos por campo porque a condicao dos campos de
+    nome quebra em duas linhas, e literal multilinha depende da indentacao.
+    """
+    alvo = SRC / "impl" / campo["filtro_handler"]
+    if not alvo.exists():
+        problemas.append(
+            f"{campo['controle']}: falta {campo['filtro_handler']}, que e o "
+            f"`KeyPress` de onde sai o filtro `{campo['filtro']}` publicado.")
+        return
+    corpo = alvo.read_text(encoding="utf-8")
+    for trecho in campo["filtro_trecho"]:
+        if trecho not in corpo:
+            problemas.append(
+                f"{campo['controle']}: o filtro publicado e "
+                f"`{campo['filtro']}`, e o trecho que o implementa sumiu de "
+                f"{campo['filtro_handler']}: {trecho!r}. O `buffers.md` diz "
+                f"que todo numero dele saiu do script -- filtro publicado sem "
+                f"o `KeyPress` por tras e prosa vencida em arquivo gerado.")
+
+
 def mede() -> dict:
     vet = vetores()
     est = maxlength_dos_forms()
@@ -279,6 +336,8 @@ def mede() -> dict:
                 f"E o caso que o enunciado da WTE-TASK-36 nomeia: campo "
                 f"gravando em array menor e bug esperando a entrada certa.")
 
+        confere_filtro(c, problemas)
+
         linhas.append({
             "controle": c["controle"], "formulario": c["formulario"],
             "vetor": f"{chave[1]}", "arquivo": chave[0],
@@ -303,6 +362,8 @@ def mede() -> dict:
                 f"{n['handler']}. O `MaxLength = {n['maxlength']}` NAO guarda "
                 f"essa faixa -- ele deixa passar "
                 f"{'9' * n['maxlength']}. Sem a validacao o campo fica aberto.")
+        confere_filtro(n, problemas)
+
         if est.get(n["controle"]) != n["maxlength"]:
             problemas.append(
                 f"{n['controle']}: o .lfm diz MaxLength = "

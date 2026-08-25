@@ -117,34 +117,45 @@ class TestChaveMorta(unittest.TestCase):
 
     FONTE = Path(D.__file__).read_text(encoding="utf-8")
 
-    def lida(self, chave: str, var: str) -> bool:
+    # O NOME DA VARIAVEL IMPORTA, e nao e preciosismo: procurar `["chave"]` com
+    # qualquer identificador na frente faria a `faixa` dos campos de texto
+    # passar por causa da leitura que os NUMERICOS fazem da chave homonima --
+    # que e exatamente o defeito que esta guarda existe para pegar.
+    #
+    # Dai a lista por tabela. O `campo` entra nas duas porque o
+    # `confere_filtro()` e chamado com as duas, e le por esse nome.
+    LEITORES = {"CAMPOS": ("c", "campo"), "NUMERICOS": ("n", "campo")}
+
+    def lida(self, chave: str, tabela: str) -> bool:
         """A chave aparece sendo LIDA em algum lugar do gerador?
 
         Textual de proposito, como o `chaves_repetidas_no_fonte` do
         `check_fase4.py`: o que se quer pegar e a chave que so e escrita na
         tabela, e isso se ve na fonte.
         """
-        return any(forma in self.FONTE for forma in (
-            f'{var}["{chave}"]', f"{var}['{chave}']",
-            f'{var}.get("{chave}")', f"{var}.get('{chave}')"))
+        return any(
+            forma in self.FONTE
+            for var in self.LEITORES[tabela]
+            for forma in (f'{var}["{chave}"]', f"{var}['{chave}']",
+                          f'{var}.get("{chave}")', f"{var}.get('{chave}')"))
 
     def test_toda_chave_de_CAMPOS_e_lida(self) -> None:
         for c in D.CAMPOS:
             for chave in c:
                 with self.subTest(controle=c["controle"], chave=chave):
                     self.assertTrue(
-                        self.lida(chave, "c"),
+                        self.lida(chave, "CAMPOS"),
                         f"a chave `{chave}` de CAMPOS nao e lida por ninguem: "
                         "ou some, ou vira expectativa conferida")
 
     # Chave ainda morta, com DONO NOMEADO -- pendencia nao e buraco, e a
     # diferenca entre as duas e exatamente esta linha.
     #
-    # O `filtro` dos numericos e o assunto da CORR-WTE-112, que vai confronta-lo
-    # com o `KeyPress` do handler. Ate la ele so e declarado. A excecao se
-    # limpa sozinha: o caso abaixo REPROVA quando a chave virar lida, forcando
-    # quem a tornou viva a tirar a linha daqui.
-    PENDENTES = {"filtro": "CORR-WTE-112"}
+    # ESTA VAZIA, e ficou vazia depressa: o unico morador era o `filtro` dos
+    # numericos, posto aqui pela CORR-WTE-111 e retirado pela CORR-WTE-112 uma
+    # correcao depois, que o confrontou com o `KeyPress`. O mecanismo fica --
+    # e o caso abaixo e que o torna confiavel.
+    PENDENTES: dict[str, str] = {}
 
     def test_toda_chave_de_NUMERICOS_e_lida(self) -> None:
         for n in D.NUMERICOS:
@@ -152,7 +163,7 @@ class TestChaveMorta(unittest.TestCase):
                 if chave in self.PENDENTES:
                     continue
                 with self.subTest(controle=n["controle"], chave=chave):
-                    self.assertTrue(self.lida(chave, "n"),
+                    self.assertTrue(self.lida(chave, "NUMERICOS"),
                                     f"a chave `{chave}` de NUMERICOS nao e lida")
 
     def test_a_excecao_nao_sobrevive_a_propria_causa(self) -> None:
@@ -164,21 +175,92 @@ class TestChaveMorta(unittest.TestCase):
         for chave, dono in self.PENDENTES.items():
             with self.subTest(chave=chave):
                 self.assertFalse(
-                    self.lida(chave, "n"),
+                    self.lida(chave, "NUMERICOS"),
                     f"a chave `{chave}` passou a ser lida ({dono} fez o "
                     "trabalho): tire-a de PENDENTES, senao ela deixa de ser "
                     "conferida por ninguem")
 
     def test_a_guarda_pega_uma_chave_plantada(self) -> None:
         """Guarda nunca exercitada e guarda ausente."""
-        self.assertFalse(self.lida("faixa", "c"))
-        self.assertTrue(self.lida("faixa", "n"))
+        self.assertFalse(self.lida("faixa", "CAMPOS"))
+        self.assertTrue(self.lida("faixa", "NUMERICOS"))
 
     def test_os_campos_de_texto_nao_declaram_faixa(self) -> None:
         """O defeito literal, no dado -- nao so na fonte."""
         for c in D.CAMPOS:
             with self.subTest(controle=c["controle"]):
                 self.assertNotIn("faixa", c)
+
+
+class TestFiltroConferido(unittest.TestCase):
+    """A guarda da CORR-WTE-112: o filtro publicado sai de algo conferido.
+
+    O `buffers.md` publicava, por campo, o conjunto de caracteres que o
+    `KeyPress` deixa passar -- declarado a mao e nunca confrontado com o
+    handler. O contraste estava dentro do mesmo arquivo: o `predicado` de faixa
+    dos numericos E cobrado do `.inc` e aborta se sumir.
+
+    O molde e o `test_predicado_da_faixa_nao_casa_por_prefixo`: mutar o corpo em
+    memoria e afirmar que o trecho deixa de casar.
+    """
+
+    def corpo(self, campo: dict) -> str:
+        return (D.SRC / "impl" / campo["filtro_handler"]).read_text(
+            encoding="utf-8")
+
+    def test_todo_campo_tem_o_trecho_no_KeyPress(self) -> None:
+        """O estado de hoje: os seis conferem."""
+        for campo in D.CAMPOS + D.NUMERICOS:
+            with self.subTest(controle=campo["controle"]):
+                corpo = self.corpo(campo)
+                for trecho in campo["filtro_trecho"]:
+                    self.assertIn(trecho, corpo)
+
+    def test_o_trecho_removido_deixa_de_casar(self) -> None:
+        """A recusa plantada, em memoria -- o `.inc` em disco nao e tocado."""
+        for campo in D.CAMPOS + D.NUMERICOS:
+            with self.subTest(controle=campo["controle"]):
+                corpo = self.corpo(campo)
+                mutado = corpo.replace(campo["filtro_trecho"][0], "")
+                self.assertNotEqual(mutado, corpo, "o trecho nem estava la")
+                self.assertNotIn(campo["filtro_trecho"][0], mutado)
+
+    def test_o_gerador_aborta_quando_o_trecho_some(self) -> None:
+        """E o que importa: a recusa chega ao codigo de saida.
+
+        Roda o gerador com o `SRC` apontado para uma copia da arvore em que um
+        `KeyPress` perdeu o trecho. O repositorio nao e tocado.
+        """
+        campo = D.CAMPOS[0]
+        with tempfile.TemporaryDirectory() as td:
+            espelho = Path(td) / "src"
+            shutil.copytree(D.SRC, espelho)
+            alvo = espelho / "impl" / campo["filtro_handler"]
+            alvo.write_text(
+                alvo.read_text(encoding="utf-8").replace(
+                    campo["filtro_trecho"][0], ""), encoding="utf-8")
+            velho = D.SRC
+            try:
+                D.SRC = espelho
+                # `mede()` LEVANTA quando ha problema -- nao devolve a lista.
+                # E a recusa: o gerador nao escreve nada por cima de uma
+                # arvore em que o filtro publicado perdeu o handler.
+                with self.assertRaises(D.BufferError) as ctx:
+                    D.mede()
+            finally:
+                D.SRC = velho
+        self.assertIn(campo["controle"], str(ctx.exception))
+        self.assertIn("filtro", str(ctx.exception))
+
+    def test_o_filtro_publicado_continua_o_de_hoje(self) -> None:
+        """A CORR pede que o conjunto legivel nao mude -- so a origem dele."""
+        esperado = {
+            "edit_nombre1": "[A-Za-z0-9 .]", "edit_nombre2": "[A-Za-z0-9 .]",
+            "edit_nombre3": "[A-Za-z0-9]", "casilla_nombre": "[A-Za-z0-9 .]",
+            "casilla_precio": "[0-9]", "casilla_dorsal": "[0-9]",
+        }
+        medido = {c["controle"]: c["filtro"] for c in D.CAMPOS + D.NUMERICOS}
+        self.assertEqual(medido, esperado)
 
 
 class TestBordasEmPascal(unittest.TestCase):

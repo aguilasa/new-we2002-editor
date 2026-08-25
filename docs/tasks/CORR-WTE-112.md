@@ -3,7 +3,7 @@ id: CORR-WTE-112
 title: "Correção: o `filtro` de cada campo é publicado no buffers.md e nunca conferido contra o KeyPress"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -108,20 +108,63 @@ memória e afirma que o predicado deixa de casar.
 
 ## Verificação
 
-- [ ] O gerador abre um `.inc` por campo de texto e aborta quando o trecho do
-      filtro some — recusa vista, com a plantação
-- [ ] O `filtro` publicado no `buffers.md` continua igual ao de hoje para os
-      seis campos, ou a mudança está explicada
-- [ ] `python3 wte/tools/dump_buffers.py --check` verde
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] O gerador abre um `.inc` **por campo** — os seis, não só os de texto — e
+      aborta quando o trecho some: recusa plantada em disco sai com **código
+      2**, e a plantada em espelho `tempfile` levanta `BufferError`
+- [x] O `filtro` publicado no `buffers.md` continua **idêntico** para os seis:
+      `git diff` do arquivo gerado sai vazio depois de regerar
+- [x] `python3 wte/tools/dump_buffers.py --check` verde; md5 estável
+- [x] `make -C wte check` verde (832 testes, era 828)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+O `filtro` ganhou a forma que o `predicado` de faixa já tinha: cada campo passa
+a declarar o `.inc` do `KeyPress` que o implementa e os **trechos literais**
+que o compõem, e o `confere_filtro()` aborta quando um some. Literal, não
+regex, pela razão que a task registrou — o alvo é texto Pascal, e escrever
+regex com escape através de heredoc aninhado é frágil.
+
+São **vários trechos por campo**, e não um, porque a condição dos campos de
+nome quebra em duas linhas; literal multilinha dependeria da indentação.
+
+A tabela publicada não mudou: o `git diff` do `buffers.md` sai **vazio** depois
+de regerar. O que mudou é a origem — o conjunto legível passou a ser derivado
+de algo conferido, que era o pedido.
+
+Recusa exercitada nas duas formas: removendo o trecho do `.inc` em disco, o
+`--check` sai com **código 2**; removendo-o num espelho `tempfile`, o `mede()`
+levanta `BufferError`. O repositório não foi tocado em nenhuma das duas — o
+`git diff` de `wte/src/impl/` ficou vazio.
+
 **Problemas encontrados:**
 
+**O `casilla_nombre` tem filtro.** A CORR admitia que ele pudesse não ter, e
+previa uma linha `sem filtro` conferida nos dois sentidos. Medido, os **seis**
+têm `KeyPress` com teste literal, então a construção não foi necessária — e
+fica registrado que a assimetria prevista não existe.
+
+**A guarda da [CORR-WTE-111](/docs/tasks/CORR-WTE-111.md) reprovou as chaves
+novas, e estava certa.** O `confere_filtro()` lê pelo parâmetro `campo`, e a
+guarda só conhecia os nomes `c` e `n`. A saída fácil seria procurar
+`["chave"]` com qualquer identificador na frente — e ela **desliga a guarda**:
+a `faixa` dos campos de texto passaria por causa da leitura que os numéricos
+fazem da chave homônima, que é o defeito exato que a 111 existe para pegar. Em
+vez disso, a lista de leitores por tabela ganhou o `campo`, que é lido pelas
+duas porque a função é chamada com as duas.
+
+**E o `PENDENTES` esvaziou uma correção depois de nascer.** A 111 pôs ali o
+`filtro` dos numéricos com dono nomeado; esta correção o tornou conferido e
+tirou a linha — que é o caso da 111 que **reprova quando a chave passa a ser
+lida** funcionando na primeira oportunidade. O mecanismo fica, vazio.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/dump_buffers.py` — `filtro_handler`, `filtro_trecho`,
+  `confere_filtro()`, chamado pelos seis
+- `wte/tools/test_check_bordas.py` — `TestFiltroConferido` (4 casos), o
+  `PENDENTES` esvaziado e o `LEITORES` por tabela
