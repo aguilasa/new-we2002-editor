@@ -87,6 +87,11 @@ SRC = WTE / "src"
 ROTEIROS = WTE / "tests" / "roteiros"
 OUT = WTE / "re" / "fase-4.md"
 BATERIA = WTE / "re" / "fase-4-golden.tsv"
+# A bateria completa da WTE-TASK-34. Este gerador NAO a publica -- quem
+# faz isso e o `check_golden.py`. Ela e lida so para o guarda de
+# cobertura, e a ausencia do arquivo nao e erro: ate a fase 6 ele nao
+# existia, e a fase 4 fechou sem ele.
+COMPLETA = WTE / "re" / "golden.tsv"
 REAMOSTRA = WTE / "re" / "fase-4-trivial.tsv"
 
 GENERATOR = "wte/tools/check_fase4.py"
@@ -364,6 +369,33 @@ def le_bateria() -> list[dict]:
     return [dict(zip(cab, l.split("\t"))) for l in linhas[1:]]
 
 
+def le_bateria_completa() -> set[str]:
+    """Os roteiros cobertos nos DOIS modos pela bateria da WTE-TASK-34.
+
+    Ausencia do arquivo devolve conjunto vazio, e isso e deliberado: a fase 4
+    fechou antes de a bateria completa existir, e este gerador precisa
+    continuar rodando num estado em que ela nao existe. O que ele NAO pode e
+    aceitar um arquivo malformado em silencio -- ai o guarda de cobertura
+    passaria a nao guardar nada.
+    """
+    if not COMPLETA.exists():
+        return set()
+    linhas = [l for l in COMPLETA.read_text(encoding="utf-8").splitlines()
+              if l.strip()]
+    if not linhas:
+        return set()
+    cab = linhas[0].split("\t")
+    esperado = ["roteiro", "rom", "modo", "veredito", "segundos", "data"]
+    if cab != esperado:
+        raise Fase4Error(
+            f"{COMPLETA.name}: cabecalho {cab} -- esperava {esperado}")
+    modos: dict[str, set[str]] = {}
+    for l in linhas[1:]:
+        d = dict(zip(cab, l.split("\t")))
+        modos.setdefault(d["roteiro"], set()).add(d["modo"])
+    return {n for n, m in modos.items() if m == {"controle", "golden"}}
+
+
 def roteiros_em_disco() -> dict[str, dict]:
     fora: dict[str, dict] = {}
     for arq in sorted(ROTEIROS.glob("golden-*.txt")):
@@ -587,14 +619,29 @@ def medir() -> dict:
     for linha in bateria:
         por_roteiro.setdefault(linha["roteiro"], {})[linha["modo"]] = linha["veredito"]
 
-    # todo roteiro com par `.port` tem de ter as duas corridas registradas
+    # Todo roteiro com par `.port` tem de ter as duas corridas registradas --
+    # em UMA das duas baterias.
+    #
+    # Ate a WTE-TASK-34 havia uma so, e este guarda exigia o registro AQUI. A
+    # fase 6 acrescentou a bateria completa (`re/golden.tsv`, operacao x ROM) e
+    # com ela dois roteiros que sao dela e nao desta fase: o de edicao multipla
+    # e o de gravacao dupla. Exigi-los no `fase-4-golden.tsv` obrigaria o
+    # registro da fase 4 a crescer toda vez que uma fase POSTERIOR escrevesse
+    # um roteiro -- e a data daquela corrida passaria a mentir.
+    #
+    # O que o guarda quer dizer nao mudou: roteiro que existe com par foi
+    # rodado nos dois modos, e o resultado esta escrito em algum lugar
+    # versionado. So a lista de lugares e que passou a ser duas.
+    cobertos = {n for n, d in por_roteiro.items()
+                if set(d) == {"controle", "golden"}}
+    cobertos |= le_bateria_completa()
     sem_registro = sorted(
-        n for n, d in disco.items()
-        if d["par"] and set(por_roteiro.get(n, {})) != {"controle", "golden"})
+        n for n, d in disco.items() if d["par"] and n not in cobertos)
     if sem_registro:
         raise Fase4Error(
             "roteiro com par de port e sem as duas corridas em "
-            f"{BATERIA.name}: {', '.join(sem_registro)}. O criterio 4 diz "
+            f"{BATERIA.name} nem em {COMPLETA.name}: "
+            f"{', '.join(sem_registro)}. O criterio 4 diz "
             "'golden verde', e o controle vem antes do teste.")
 
     return {
@@ -751,12 +798,32 @@ def gera_md(m: dict) -> str:
     disco = m["roteiros"]
     com_par = sum(1 for d in disco.values() if d["par"])
     sem_par = sorted(n for n, d in disco.items() if not d["par"])
-    a(f"São {len(disco)} roteiros em disco, {com_par} com par do lado port. Cada")
-    a("um desses foi rodado **duas vezes**: `controle` (oráculo contra oráculo,")
-    a("que prova que o par roteiro+imagem é determinístico) e `golden` (oráculo")
-    a("contra o app Lazarus). **O controle vem antes do teste** — sem ele, verde")
-    a("e vermelho não significam nada.")
+    # A conta e de DUAS listas, e confundi-las faz este paragrafo mentir. O que
+    # esta em disco cresce quando uma fase POSTERIOR escreve roteiro -- a fase 6
+    # acrescentou o de edicao multipla e o de gravacao dupla --, e esta secao
+    # descreve a corrida DESTA fase, que aconteceu antes deles existirem.
+    aqui = sorted(m["por_roteiro"])
+    noutra = [n for n, d in disco.items() if d["par"] and n not in m["por_roteiro"]]
+    a(f"São {len(disco)} roteiros em disco, {com_par} com par do lado port, e")
+    a(f"**{len(aqui)} deles rodaram nesta bateria**. Cada um desses rodou")
+    a("**duas vezes**: `controle` (oráculo contra oráculo, que prova que o par")
+    a("roteiro+imagem é determinístico) e `golden` (oráculo contra o app")
+    a("Lazarus). **O controle vem antes do teste** — sem ele, verde e vermelho")
+    a("não significam nada.")
     a("")
+    if noutra:
+        a("Com par e fora desta bateria: "
+          + ", ".join(f"`{n}`" for n in sorted(noutra)) + ". "
+          + ("Ele é" if len(noutra) == 1 else "Eles são")
+          + " da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md),")
+        a("que roda a bateria completa (operação × ROM) e registra em")
+        a("[`golden.tsv`](golden.tsv). O guarda de cobertura aceita as **duas**")
+        a("listas: o que ele exige é que roteiro com par tenha rodado nos dois")
+        a("modos e esteja escrito em lugar versionado, não que esteja escrito")
+        a("*aqui* — senão o registro da fase 4 cresceria toda vez que uma fase")
+        a("posterior escrevesse um roteiro, e a data desta corrida passaria a")
+        a("mentir.")
+        a("")
     if sem_par:
         a("Fora da bateria por não ter lado port: "
           + ", ".join(f"`{n}`" for n in sem_par)

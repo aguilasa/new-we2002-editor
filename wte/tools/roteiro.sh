@@ -35,8 +35,18 @@
 #   ! texto  <t>   `xdotool type` -- CURTO. `xdotool type` usa `XSendEvent` e
 #                  embaralha string longa; e por isso que a unidade E: existe
 #
-# Cabecalho (`alvo:`, `estado:`, `operacao:`, `conhecida:`) e comentario sao
-# pulados aqui; quem os le e quem precisa deles.
+# Cabecalho (`alvo:`, `estado:`, `operacao:`, `conhecida:`, `artefato:`,
+# `fixture:`, `ambiente:`) e comentario sao pulados aqui; quem os le e quem
+# precisa deles.
+#
+# Os tres ultimos entraram na WTE-TASK-34 e sao lidos pelo `golden_suite.sh`.
+# Ate ela, o que a bateria precisava saber para invocar cada roteiro -- que
+# artefato comparar alem das imagens, que fixture criar antes, que variavel
+# exportar -- morava em COMENTARIO no cabecalho, como uma linha de exemplo de
+# `golden_check.sh`. Comentario nao e lido por ferramenta nenhuma, e foi por
+# isso que a primeira passagem da WTE-TASK-31 rodou o `golden-06-textura`
+# contra um `work/t.bin` de 307 MB deixado por outra corrida: a receita dizia
+# 5.000 bytes e ninguem conferia.
 #
 # ## Coordenada e sempre relativa
 #
@@ -224,7 +234,7 @@ roteiro_executa() {
   while IFS= read -r linha || [ -n "$linha" ]; do
     linha="${linha%%$'\r'}"
     case "$linha" in
-      ''|'#'*|alvo:*|estado:*|operacao:*|conhecida:*) continue ;;
+      ''|'#'*|alvo:*|estado:*|operacao:*|conhecida:*|artefato:*|fixture:*|ambiente:*) continue ;;
       'espera: '*)
         ROTEIRO_ESPERA="${linha#espera: }"
         ;;

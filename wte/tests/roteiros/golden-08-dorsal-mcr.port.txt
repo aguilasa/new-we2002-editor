@@ -11,6 +11,7 @@
 alvo: port
 estado: ok
 operacao: gravacao
+artefato: saida.mcr
 
 > W11 Team Editor PT by chagas_michel! \[Lazarus\]
 ~ 3

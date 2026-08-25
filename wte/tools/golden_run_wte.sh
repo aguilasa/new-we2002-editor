@@ -109,7 +109,30 @@ echo ">> oraculo: pid $PID_ALVO (lancador $LANCADO)"
 
 # O roteiro digita `E:\@IMAGEM@`; cada lado abre a SUA copia.
 ROTEIRO_IMAGEM="$(basename "$COPIA")"
+
+# O status da conducao NAO aborta aqui, e a ordem das duas conferencias
+# seguintes e o ponto -- ela custou 44 linhas de tabela na WTE-TASK-34.
+#
+# Ate 2026-08-24 isto era `roteiro_executa "$ROTEIRO"` cru, sob `set -e`. Com a
+# japonesa nunca fez diferenca: o roteiro dirige ate o fim e a varredura de
+# `c0000005` la embaixo sempre era alcancada. Com a EUROPEIA nao: o oraculo
+# trava ao trocar de time, o dialogo do passo seguinte nunca aparece, e o
+# `roteiro_executa` devolve 1 -- abortando o script ANTES da varredura.
+#
+# O efeito e uma inversao de acusacao. O gate saia com codigo generico, e quem
+# o le (a bateria da WTE-TASK-34) classificava como `REPROVOU` -- a unica
+# palavra do vocabulario que acusa o PORT. So que o port nem foi comparado: o
+# oraculo parou de dirigir antes de gravar. Medido: 49.749 violacoes de acesso
+# no log dessa mesma corrida, o numero exato do `wte/re/crash-causa.md`.
+#
+# Entao a varredura vem PRIMEIRO, e a falha de conducao so e reportada se o log
+# estiver limpo. Roteiro que nao dirige porque o oraculo morreu e ausencia de
+# oraculo, nao divergencia -- e e justamente quando o roteiro falha que a
+# pergunta "o oraculo morreu?" mais importa.
+set +e
 roteiro_executa "$ROTEIRO"
+CONDUZIU=$?
+set -e
 
 sleep 2
 matar_oraculo
@@ -121,5 +144,13 @@ if grep -qE 'code=c0000005|EXCEPTION_ACCESS_VIOLATION' "$LOG"; then
   echo "      entao gravou menos do que deveria e o diff sairia menor." >&2
   echo "      Log: $LOG" >&2
   exit 4
+fi
+
+if [ "$CONDUZIU" != 0 ]; then
+  echo "ERRO: o roteiro nao conseguiu dirigir o oraculo, e o log do Wine esta" >&2
+  echo "      LIMPO -- nenhuma violacao de acesso. Entao nao e o travamento" >&2
+  echo "      conhecido da europeia: e coordenada, tempo ou janela." >&2
+  echo "      Log: $LOG" >&2
+  exit "$CONDUZIU"
 fi
 echo ">> oraculo: fim, sem violacao de acesso"

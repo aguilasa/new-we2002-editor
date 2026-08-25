@@ -1029,6 +1029,27 @@ e conta vagos. Depende só da Fase 3.
 ### Fase 6 — Paridade e endurecimento
 
 1. **Bateria golden completa**, todas as operações de gravação, nas duas ROMs.
+   **Feita em 2026-08-24** pela
+   [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md), e o estado medido
+   está em [`../wte/re/golden.md`](../wte/re/golden.md): **92 corridas** — 23
+   roteiros × 2 ROMs × 2 modos —, com **48 `PASSOU`, 22 `SEM_ORACULO`, 22
+   `NAO_APLICAVEL` e zero `REPROVOU`**. A japonesa fechou **46 de 46**,
+   incluindo os dois roteiros que a fase acrescenta: edição múltipla antes de
+   gravar, e gravação dupla.
+
+   **E a europeia deixou de ser um bloco cego.** Ela hospeda o oráculo — só não
+   para quem troca de time: o `golden-01-arranque` passou controle *e* golden
+   ali, byte-idêntico, e os outros 22 roteiros trocam de time e travam o
+   `wte.exe` pelo mecanismo do [`crash-causa.md`](../wte/re/crash-causa.md). A
+   leitura anterior — *"a europeia não hospeda o oráculo"* — tinha sido medida
+   sobre **um** roteiro, e aquele roteiro trocava de time. A conclusão prática
+   não muda; o que muda é ela ser medida roteiro a roteiro.
+
+   **O vocabulário ganhou uma palavra, e ela é a task inteira.** `REPROVOU` é a
+   única que acusa o port; `SEM_ORACULO` diz que o `wte.exe` morreu e gravou
+   menos. Sem a distinção, um oráculo que trava vira acusação ao port sobre uma
+   comparação que não aconteceu — que foi exatamente o defeito que esta task
+   achou no gate da Fase 4 e corrigiu.
 2. **Registro de divergências deliberadas** — no formato que o
    [PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
    que, e que evidência sustenta.

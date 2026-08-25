@@ -6,6 +6,8 @@
 alvo: port
 estado: ok
 operacao: gravacao
+fixture: entrada.mcr 131072 exigida
+ambiente: WTE_MCR_ENTRADA=work/entrada.mcr
 
 > W11 Team Editor PT by chagas_michel! \[Lazarus\]
 ~ 3

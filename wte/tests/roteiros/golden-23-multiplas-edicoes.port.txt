@@ -1,0 +1,91 @@
+# golden-23-multiplas-edicoes -- lado PORT. Par de
+# golden-23-multiplas-edicoes.txt. WTE-TASK-34.
+#
+# Duas edicoes de naturezas diferentes na MESMA sessao -- uma barra e os tres
+# nomes --, gravadas pelos DOIS botoes sem recarregar o time entre elas. O
+# cabecalho do lado oraculo explica por que a combinacao so aparece na fase 6;
+# aqui ficam as tres diferencas de condução, todas ja medidas.
+#
+# 1. **O titulo tem o sufixo ` [Lazarus]`**, posto em tempo de execucao pelo
+#    `wtemain.pas`. Divergencia deliberada e obrigatoria: os dois lados rodam
+#    no mesmo display, e com titulo igual o harness dirigiria o lado errado.
+# 2. **O `Ok` do `ficha_info3` fica em (140,56) e nao em (142,80).** Sob Wine a
+#    moldura e desenhada dentro da janela X; sob gtk2 a janela E o cliente.
+#    Medido no `:99` em 2026-08-18.
+# 3. **O port ja abre com a imagem** -- ela vem pela linha de comando, entao
+#    nao ha `Abre`, `Cuidado` nem `Sobre...`.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 30 112
+~ 2
+! clique 190 200
+~ 2
+= EDITA_BARRA
+
+! clique 422 74
+~ 2
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+! tecla Return
+~ 1
+! tecla End
+~ 1
+! tecla shift+Home
+~ 1
+! tecla BackSpace
+~ 1
+! texto A B-C.DEFG
+~ 1
+= EDITA_NOMES
+
+! clique 52 196
+~ 3
+> W11 TE PT
+! clique 140 56
+~ 2
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+= GRAVA_BARRAS
+
+! clique 468 196
+~ 3
+> W11 TE PT
+! clique 140 56
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= GRAVA_NOMES

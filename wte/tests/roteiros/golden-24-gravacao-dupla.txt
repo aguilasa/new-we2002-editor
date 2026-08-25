@@ -1,0 +1,130 @@
+# golden-24-gravacao-dupla -- lado oraculo. WTE-TASK-34.
+#
+#   bash wte/tools/golden_check.sh \
+#        wte/tests/roteiros/golden-24-gravacao-dupla.txt \
+#        --roteiro-port wte/tests/roteiros/golden-24-gravacao-dupla.port.txt
+#
+# ## Gravar duas vezes, e por que e a tatica que julga isso
+#
+# O `newWe2002` registra que o editor original **nao e idempotente**:
+# `Load`+`Save` troca os dois primeiros cobradores de cada clube de Master
+# League (`OFS_KICKER`), porque o `Load` le o par trocado e o `Save` grava na
+# ordem declarada -- e gravar DUAS vezes volta ao inicio. Se o app Lazarus nao
+# reproduzir esse vaivem, a segunda gravacao diverge mesmo com a primeira
+# byte-identica, e nenhum gate da fase 4 olhava para isso: todos gravam uma vez
+# so.
+#
+# Das dezessete gravacoes, a que carrega cobrador e o ` Accept` da tela de
+# tatica (`estrategia.BitBtn3Click`, `0x0040a660`): 45 bytes por time, sendo 30
+# de formacao, 6 de cobrador, 5 de tatica e 2 + 2 de cor de radar -- ver
+# `wte/src/impl/ep2002_estrategia.BitBtn3Click.inc`. Por isso o duplo se faz
+# aqui e nao nas barras, que sao 5 bytes e nao tocam `OFS_KICKER`.
+#
+# ## O que o roteiro prova, e o que ele NAO prova
+#
+# Ele prova que os dois lados chegam ao MESMO byte depois de duas gravacoes
+# seguidas. Ele **nao** afirma sozinho que houve vaivem: se nenhum dos dois
+# lados mexesse em cobrador, os dois concordariam igual. Quem separa os dois
+# casos e o par com o `golden-17-tatica`, que grava UMA vez pelo mesmo
+# caminho -- a licao 1 da quarta passagem da WTE-TASK-31: *gate verde nao prova
+# que o estimulo aconteceu; toda regua nova precisa do terceiro ponto*.
+#
+# ## Nenhuma coordenada e nova
+#
+#   time 2                (50,46) + 3 `Down`   -- golden-17
+#   mostrar_estrategia_1  (28,370)             -- golden-17
+#   malla1 coluna 2/5     (174,400)            -- golden-17
+#   BitBtn6 ` Accept`     (472,273)            -- golden-17
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------- primeira gravacao ----
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! clique 174 400
+~ 2
+! clique 472 273
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ACCEPT_1
+
+# A descarga entre as duas gravacoes NAO e enfeite: sem ela a primeira ficaria
+# no buffer do runtime C e as duas sairiam juntas no fim, que e outro teste.
+#
+# `Down` leva ao time 3 e `Up` traz de volta ao 2. As duas trocas recarregam o
+# time, e e por ai que a segunda gravacao parte de um estado LIDO do arquivo --
+# que e a metade `Load` do `Load`+`Save` que este roteiro julga. Um segundo
+# `Down` levaria ao time 4 e a segunda gravacao seria noutro time, que e um
+# teste diferente e mais fraco.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+! clique 50 46
+~ 1
+! tecla Up
+~ 6
+= DESCARGA_1
+
+# --------------------------------------------------- segunda gravacao ----
+#
+# Mesmo caminho, mesma celula da malha. O que muda e o estado de que ela parte:
+# a primeira ja gravou.
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! clique 174 400
+~ 2
+! clique 472 273
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ACCEPT_2
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM

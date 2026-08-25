@@ -9,6 +9,7 @@
 alvo: port
 estado: ok
 operacao: gravacao
+artefato: saida.bin
 
 > W11 Team Editor PT by chagas_michel! \[Lazarus\]
 ~ 3

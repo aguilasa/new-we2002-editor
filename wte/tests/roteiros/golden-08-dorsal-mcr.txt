@@ -22,6 +22,7 @@
 alvo: original
 estado: ok
 operacao: gravacao
+artefato: saida.mcr
 
 # ---------------------------------------------------------------- faixas ----
 #

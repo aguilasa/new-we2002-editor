@@ -17,6 +17,8 @@
 alvo: original
 estado: ok
 operacao: gravacao
+fixture: t.bin 5000 sintetica
+ambiente: WTE_TEXTURA=work/t.bin
 
 # ---------------------------------------------------------------- faixas ----
 #

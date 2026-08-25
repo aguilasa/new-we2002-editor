@@ -25,6 +25,9 @@
 alvo: original
 estado: ok
 operacao: gravacao
+fixture: entrada.mcr 131072 exigida
+ambiente: WTE_MCR_ENTRADA=work/entrada.mcr
+artefato: saida.mcr
 
 # ---------------------------------------------------------------- faixas ----
 #

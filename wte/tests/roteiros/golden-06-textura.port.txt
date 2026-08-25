@@ -8,6 +8,8 @@
 alvo: port
 estado: ok
 operacao: gravacao
+fixture: t.bin 5000 sintetica
+ambiente: WTE_TEXTURA=work/t.bin
 
 > W11 Team Editor PT by chagas_michel! \[Lazarus\]
 ~ 3

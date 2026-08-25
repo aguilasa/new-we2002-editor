@@ -1,0 +1,71 @@
+# golden-24-gravacao-dupla -- lado PORT. Par de golden-24-gravacao-dupla.txt.
+# WTE-TASK-34.
+#
+# Duas gravacoes de tatica seguidas, no mesmo time, com recarga entre elas. O
+# cabecalho do lado oraculo explica por que a tatica e quem julga o duplo (e a
+# gravacao que carrega `OFS_KICKER`) e o que o roteiro NAO prova sozinho.
+#
+# As duas diferencas de conducao, ja medidas:
+#
+# 1. **O titulo tem o sufixo ` [Lazarus]`**, posto pelo `wtemain.pas`. Com
+#    titulo igual o harness dirigiria o lado errado.
+# 2. **O port ja abre com a imagem**, que vem pela linha de comando -- nao ha
+#    `Abre`, `Cuidado` nem `Sobre...`.
+#
+# A janela de tatica e buscada por TAMANHO (`529x498`) nos dois lados, e nao
+# por titulo: o Caption vira o nome do time em Shift-JIS.
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! clique 174 400
+~ 2
+! clique 472 273
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= ACCEPT_1
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+! clique 50 46
+~ 1
+! tecla Up
+~ 5
+= DESCARGA_1
+
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! clique 174 400
+~ 2
+! clique 472 273
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= ACCEPT_2
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

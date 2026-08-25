@@ -46,7 +46,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-31](/docs/tasks/31-fechamento-fase-4.md) | Fechamento da fase 4 | 4 | 25-30 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
 | [WTE-TASK-32](/docs/tasks/32-preco-do-jogador.md) | Preço derivado dos atributos | 5 | 24, 25 | ✅ Concluído | 2026-08-24 | 2026-08-24 |
 | [WTE-TASK-33](/docs/tasks/33-slots-de-master-league.md) | Contador de slots livres de ML | 5 | 20 | ✅ Concluído | 2026-08-19 | 2026-08-19 |
-| [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ⬜ Pendente | — | — |
+| [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ⬜ Pendente | — | — |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
@@ -516,8 +516,34 @@ alimenta e passou a **carregar** essa gravação.
 
 ### Fase 6 — Paridade
 
-- [ ] Bateria completa: operação × ROM, sem célula vazia
-- [ ] Edição múltipla e gravação dupla cobertas
+- [x] Bateria completa: operação × ROM, sem célula vazia — **92 corridas**
+      (23 roteiros × 2 ROMs × 2 modos) em
+      [`wte/re/golden.md`](../../wte/re/golden.md), rodadas pelo
+      [`golden_suite.sh`](../../wte/tools/golden_suite.sh) e publicadas pelo
+      `check_golden.py`. **48 `PASSOU`, 22 `SEM_ORACULO`, 22 `NAO_APLICAVEL`,
+      zero `REPROVOU`**; a japonesa fechou **46 de 46**
+- [x] Edição múltipla e gravação dupla cobertas — os dois roteiros novos da
+      fase 6, verdes nos dois modos na japonesa. **A gravação dupla está
+      coberta, não provada:** o par mede que os dois lados chegam ao mesmo byte
+      depois de duas gravações de tática, e não que exista vaivém de cobradores
+      neste editor — a não-idempotência de que o plano fala é do `ed.exe`. O
+      terceiro ponto (uma gravação × duas) é da
+      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
+- [x] **A europeia hospeda o oráculo — só não para quem troca de time**
+      *(medido na WTE-TASK-34, 2026-08-24)*. O `golden-01-arranque` passou
+      controle **e** golden ali, byte-idêntico; os outros 22 roteiros trocam de
+      time e dão `SEM_ORACULO`. A leitura em bloco de 2026-08-18 tinha sido
+      medida sobre **um** roteiro, e aquele trocava de time. A conclusão
+      prática não muda; o que muda é ser medida roteiro a roteiro
+- [x] **O gate classificava travamento do oráculo como divergência do port**
+      *(achado e corrigido na WTE-TASK-34)*. O `golden_run_wte.sh` varria
+      `c0000005` **depois** de executar o roteiro, e sob `set -e` um roteiro que
+      não dirige aborta antes — então na europeia o código 4 nunca era
+      alcançado e a corrida saía `REPROVOU`, a única palavra que acusa o port,
+      sem que o port tivesse sido comparado. Causa confirmada com número
+      (**49.749 violações**, o valor do `crash-causa.md`) antes da correção. A
+      varredura passou a vir primeiro. **Nenhum verde anterior depende do
+      defeito:** com a japonesa o roteiro sempre dirige até o fim
 - [ ] Toda exceção do golden com entrada em `divergencias.md`
 - [ ] Inventário de buffers com os quatro casos de borda, nas duas ROMs
 - [ ] Nenhuma ação destrutiva alcançável por `Return`
@@ -712,7 +738,7 @@ new-we2002-editor/
 │   │   ├── arranque.tsv, arranque.md ← WTE-TASK-25 (os 18 FormCreate/FormShow)
 │   │   ├── auxiliares.tsv, .md       ← WTE-TASK-25 (as rotinas nao publicadas)
 │   │   ├── spec/                     ← WTE-TASK-23 a 33
-│   │   ├── golden.md                 ← WTE-TASK-34
+│   │   ├── golden.tsv, golden.md     ← WTE-TASK-34 (operação × ROM)
 │   │   ├── divergencias.md           ← WTE-TASK-35
 │   │   └── buffers.md                ← WTE-TASK-36
 │   ├── tools/
@@ -733,7 +759,8 @@ new-we2002-editor/
 │   │   ├── golden_run_wte.sh         ← WTE-TASK-22 (lado oraculo)
 │   │   ├── golden_run_laz.sh         ← WTE-TASK-22 (lado port)
 │   │   ├── golden_veredito.py        ← WTE-TASK-22
-│   │   ├── golden_suite.sh           ← WTE-TASK-34
+│   │   ├── golden_suite.sh           ← WTE-TASK-34 (a bateria)
+│   │   ├── check_golden.py           ← WTE-TASK-34 (o gerador)
 │   │   ├── ghidra/                   ← WTE-TASK-24
 │   │   └── make_icon.py              ← WTE-TASK-39
 │   ├── packaging/                    ← WTE-TASK-39
