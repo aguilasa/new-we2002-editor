@@ -255,9 +255,18 @@ silenciosa: uma exceção no golden sem entrada aqui é buraco.
   binário e outro caminho de código, e nunca foi medido.
   *Natureza:* nenhuma — não há divergência. O port não tem o que reproduzir, e
   **não deve inventar** o vaivém para "ficar parecido" com o `ed.exe`.
-  *Decisão:* corrigir o enunciado da fase 6 para dizer `ed.exe` onde hoje diz
-  "o editor". A [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) já foi
-  reconciliada; o plano é o que falta conferir.
+  *Decisão:* **nada a corrigir no plano** — conferido em 2026-08-25, o
+  `PLAN-WTE-LAZARUS.md` tem **zero** ocorrências de
+  `idempot`/`cobrador`/`OFS_KICKER`/`vaivém`, e a fase 6 dele não fala em
+  gravar duas vezes. A afirmação morava em dois sítios e os dois já dizem
+  `ed.exe`: o enunciado da
+  [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md), reconciliado, e a
+  prosa gerada do [`golden.md`](../../wte/re/golden.md). Resultado negativo
+  escrito de propósito: quem reler daqui a um mês não refaz a busca.
+  *Fora daqui, e maior:* quatro sítios do lado WTE atribuem a
+  não-idempotência ao *"editor original"* — que neste projeto lê-se `wte.exe`,
+  não `ed.exe` — e a medição acima cobre **um** caminho de gravação, o da
+  tática. Está aberto na [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md).
   *Evidência:* o terceiro ponto, medido num time em que a troca **seria**
   visível — uma gravação de tática contra duas, pelo
   [`golden-24-gravacao-dupla`](../../wte/tests/roteiros/golden-24-gravacao-dupla.txt)

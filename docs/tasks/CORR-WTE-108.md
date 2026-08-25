@@ -3,7 +3,7 @@ id: CORR-WTE-108
 title: "Correção: a WTE-TASK-35 deixa \"o plano é o que falta conferir\" e o plano nunca afirmou aquilo"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -83,17 +83,55 @@ um mês não refaz a busca.
 
 ## Verificação
 
-- [ ] `grep -n "falta conferir" docs/tasks/35-divergencias-deliberadas.md` sai vazio
-- [ ] `grep -c "idempot\|cobrador\|OFS_KICKER" docs/PLAN-WTE-LAZARUS.md` continua `0`
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n "falta conferir" docs/tasks/35-divergencias-deliberadas.md` sai vazio
+- [x] `grep -c "idempot\|cobrador\|OFS_KICKER" docs/PLAN-WTE-LAZARUS.md` continua `0`
+- [x] `make -C wte check` verde (809 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+*"O plano é o que falta conferir"* virou o resultado da conferência: o
+`PLAN-WTE-LAZARUS.md` tem **zero** ocorrências de
+`idempot`/`cobrador`/`OFS_KICKER`/`vaivém`, e a fase 6 dele não fala em gravar
+duas vezes — conferido também por `grep "duas vezes"` no plano inteiro, que só
+acha duas linhas sobre outro assunto. Não sobra nada a corrigir ali.
+
+A frase mandava alguém procurar um texto que não existe, que é palavra por
+palavra o defeito que esta mesma task nomeia ao explicar por que **removeu** a
+isenção `pendente_32`: *"uma entrada falsa manda alguém procurar um problema
+que não existe"*.
+
 **Problemas encontrados:**
 
+**A frase era minha, escrita uma execução antes.** Ela entrou pela
+[CORR-WTE-105](/docs/tasks/CORR-WTE-105.md), no mesmo lote em que a
+[CORR-WTE-104](/docs/tasks/CORR-WTE-104.md) fez a medição — e a 105 supôs que o
+plano repetia a frase da task 34 sem conferir. Registrado porque é o tipo de
+erro que a revisão pegou depressa e que a execução não teria pego sozinha.
+
+**E a varredura achou coisa maior, que ficou fora de propósito.** Quatro sítios
+vivos do lado WTE atribuem a não-idempotência a *"o original"* / *"o editor
+original"* — e neste projeto "o original" é o **`wte.exe`**, não o `ed.exe`:
+`gravacao_controle.py:197` (gerador) e o `gravacao-controle.md:19` que ele gera,
+mais as tasks 19 e 27. O `golden-24` diz o mesmo mas **atribui** (*"o
+`newWe2002` registra que…"*), o que o salva; os do `PLAN-LINUX.md` e do
+`CLAUDE.md` estão certos, porque lá o oráculo é o `ed.exe`.
+
+Não consertei junto, e a razão é de medida, não de escopo: a CORR-WTE-104 mediu
+**um** caminho de gravação — o da tática, que é o que carrega `OFS_KICKER` — e a
+frase dos quatro sítios é sobre o ciclo `Load`+`Save` em geral. Trocar "o
+original" por "o `ed.exe`" seria provavelmente certo e não está medido; se
+outro caminho reproduzir o vaivém, a troca teria criado a mentira simétrica.
+Aberta a [CORR-WTE-109](/docs/tasks/CORR-WTE-109.md), com o caminho barato de
+medir a pergunta geral (o próprio `gravacao-controle`, rodado duas vezes), e a
+entrada da task 35 aponta para ela.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/35-divergencias-deliberadas.md` — a decisão, com o resultado
+- `docs/tasks/CORR-WTE-109.md` — criada, a discrepância maior
+- `docs/tasks/correcoes-progresso.md` — o `[x]` da 108 e a linha da 109
