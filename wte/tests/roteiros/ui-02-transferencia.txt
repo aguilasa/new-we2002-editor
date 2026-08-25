@@ -1,0 +1,181 @@
+# ui-02-transferencia -- as telas do painel de transferencia, que so existem
+# com um time de CLUBE selecionado. Lado ORACULO. Produto da WTE-TASK-37.
+#
+#   bash wte/tools/captura_ui.sh ui-02-transferencia
+#
+# ## Por que um time de clube, e por que isso e a task
+#
+# A primeira corrida desta task pediu o `ficha_movertodos` com o time 2 e a
+# janela nunca veio. Nao era coordenada: `MoveTodosOsJogadores` sai antes de
+# abrir o modal quando um dos dois combos de time do painel de baixo -- ou a
+# lista de jogadores do destino -- esta sem selecao, e com time NACIONAL
+# (indice < 95) metade da tela esta desabilitada. E o item "controle
+# habilitado ou desabilitado por estado" do enunciado, medido em vez de
+# suposto.
+#
+# `End` no combo leva ao ULTIMO time, que e clube. Ele foi escolhido em vez de
+# N `Down` por ser o mesmo gesto nos dois widgetsets -- `Next` (PageDown) nao
+# e: o tamanho da pagina do comctl32 sob Wine nao e o do gtk2, e foi
+# exatamente esse tipo de diferenca que o `--edicao` do `compara_tela.sh`
+# teve de medir antes de poder comparar.
+#
+# ## Duas janelas se chamam `Error`
+#
+# `ficha_error` e `ficha_error2` tem o mesmo `Caption` no DFM. Isso nao e
+# ambiguidade aqui porque as duas sao modais e nunca estao na tela juntas -- o
+# `janela()` do `roteiro.sh` so enumera `--onlyvisible`.
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------ o ultimo time ----
+# 96 `Down` levam ao indice 95, que e o primeiro time de CLUBE -- `nacional`
+# e `indice < 95` no handler, e e ele que habilita a metade de baixo da tela.
+#
+# `End` NAO serve, e isso foi medido aqui: o ultimo item do combo e VAZIO, e
+# selecionar o item vazio desabilita a tela inteira (a foto
+# `MainForm-clube` da primeira corrida mostra exatamente isso).
+! clique 50 46
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 8
+> W11 Team Editor PT by chagas_michel!
+~ 1
+! foto MainForm-clube
+= TIME_CLUBE
+
+# ------------------------------- os dois lados no MESMO time e jogador ----
+#
+# lista_equipos_1 (48,360) -> (100,370); lista_equipos_2 (368,360) ->
+# (420,370); lista_jugadores_1 (48,392) -> (112,402); lista_jugadores_2
+# (344,392) -> (408,402).
+! clique 100 370
+~ 1
+! tecla Down
+~ 1
+! tecla Return
+~ 4
+# O da DIREITA leva os mesmos 96 `Down`, e nao um so. Com um `Down` ele para
+# no indice 0 enquanto o da esquerda fica no 95 -- medido na foto
+# `MainForm-lados` da segunda corrida --, e dois times diferentes nao produzem
+# a recusa "mesmo jogador" que este roteiro quer fotografar.
+! clique 420 370
+~ 1
+! tecla Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down Down
+~ 1
+! tecla Return
+~ 4
+! clique 112 402
+~ 1
+! tecla Down
+~ 1
+! tecla Return
+~ 2
+! clique 408 402
+~ 1
+! tecla Down
+~ 1
+! tecla Return
+~ 2
+= LADOS_IGUAIS
+
+# ------------------------------------------------ mover todos: pergunta ----
+#
+# paderecha2 (184,392) -> (196,402). Sai por `Escape` (` Nao`), que e o que
+# NAO move os 23.
+! clique 196 402
+~ 4
+> Mover todos
+~ 1
+! foto ficha_movertodos
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ------------------------------------------- descarte vazio: ficha_error2 ----
+#
+# lista_descarte (200,336) 121x49 -- a primeira linha. pabajo (328,336) 33x49
+# -> (344,360). A linha esta vazia, e a pre-condicao do `pabajoClick` vira
+# mensagem propria.
+! clique 260 346
+~ 1
+! clique 344 360
+~ 4
+> Error
+~ 1
+! foto ficha_error2
+! tecla Return
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ----------------------------------------------------------- o Sair ----
+! clique 172 52
+~ 4
+> Fechar W11TE
+~ 1
+! foto ficha_salida
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# --------------------------- o mesmo jogador dos dois lados: ficha_error ----
+#
+# POR ULTIMO, e de proposito: e o unico passo daqui que depende de coordenada
+# DENTRO de um modal (o `SpeedButton1` do `ficha_error`, que abre o
+# `ficha_info2`), e coordenada dentro de modal e onde a moldura que o Wine
+# desenha por dentro faz os dois lados divergirem. Se ele falhar, as fotos de
+# cima ja estao no disco.
+#
+# Uma foto do estado ANTES do ultimo passo. Ela nao e enfeite: a primeira
+# corrida perdeu o `ficha_error` sem deixar como saber se o que faltou foi
+# selecao ou coordenada, e esta foto responde isso sozinha.
+! foto MainForm-lados
+
+# paderecha (216,392) -> (228,402). Os dois lados no mesmo time e no mesmo
+# slot: a `0x00404820` recusa com -2 e a `MostraCodigo` abre o `ficha_error`.
+! clique 228 402
+~ 4
+> Error
+~ 1
+! foto ficha_error
+# SpeedButton1 (104,52) 25x21 -> (116,62), MAIS a moldura que o Wine desenha
+# POR DENTRO da janela: (3,29). A conta nao e chute -- ela sai das capturas
+# desta mesma task: todo formulario que declara `ClientWidth` no DFM aparece
+# aqui 6 px mais largo e 32 px mais alto que o cliente (`ficha_error2` 376x90
+# vira 382x122; `ficha_salida` 225x90 vira 231x122), e os que declaram
+# `Width`/`Height` aparecem do tamanho declarado. Do lado do port nao ha
+# moldura nenhuma: a janela mede o cliente.
+! clique 119 91
+~ 4
+> W11TE PT
+~ 1
+! foto ficha_info2
+! tecla Return
+~ 3
+> Error
+~ 1
+! tecla Return
+~ 3
+= FIM

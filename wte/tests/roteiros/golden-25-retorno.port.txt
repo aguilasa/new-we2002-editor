@@ -1,0 +1,56 @@
+# golden-25-retorno -- o `Return` do editor de cor, medido EM BYTES.
+#
+# Produto da WTE-TASK-37. Ele e o `golden-16-cor` com uma diferenca so: o
+# editor fecha pela tecla `Return` em vez do clique no `OK`.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-25-retorno.txt \
+#        --roteiro-port wte/tests/roteiros/golden-25-retorno.port.txt
+#
+# ## Por que ele existe
+#
+# O criterio da task e "nenhuma acao destrutiva alcancavel por `Return`". O
+# `check_retorno.py` mede que 13 dos 18 formularios tem botao `Default` e que
+# UM deles -- o `OK` do `ficha_color` -- dispara um handler que grava 383 bytes
+# por time. Isso e do ORIGINAL: o `Default = True` esta no `.dfm` de 2002, e o
+# `dfm2lfm.py` o copia verbatim.
+#
+# Entao a pergunta que sobra nao e "da para chegar la pelo Return" -- da, nos
+# dois lados --, e sim "os dois lados gravam os MESMOS bytes por esse caminho".
+# Estatica, a resposta e o `.lfm` carregar o mesmo botao; medida, e este
+# roteiro.
+#
+alvo: port
+estado: ok
+operacao: gravacao
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 272 196
+~ 4
+> ^Cor
+~ 1
+! clique 404 164
+~ 2
+# O `OK` pelo `Return`, e nao pelo clique: `BitBtn3` e `Default = True` no
+# `.dfm` e no `.lfm`, e este roteiro existe para medir isso EM BYTES.
+! tecla Return
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 2
+= PINTAR
+
+! clique 50 46
+~ 1
+! tecla Down
+~ 5
+= FIM

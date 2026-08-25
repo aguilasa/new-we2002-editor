@@ -34,6 +34,10 @@
 #   ! tecla  <k>   `xdotool key`
 #   ! texto  <t>   `xdotool type` -- CURTO. `xdotool type` usa `XSendEvent` e
 #                  embaralha string longa; e por isso que a unidade E: existe
+#   ! foto  <nome>  captura a janela alvo em `$ROTEIRO_FOTO_DIR/<nome>.png`.
+#                  Sem a variavel o verbo e IGNORADO com aviso -- o gate golden
+#                  compara bytes e nao quer PNG nenhum, e o mesmo roteiro serve
+#                  aos dois. Ver a WTE-TASK-37.
 #
 # Cabecalho (`alvo:`, `estado:`, `operacao:`, `conhecida:`, `artefato:`,
 # `fixture:`, `ambiente:`) e comentario sao pulados aqui; quem os le e quem
@@ -205,6 +209,40 @@ espera_geo() {
   return 1
 }
 
+# roteiro_foto -- captura a janela alvo. WTE-TASK-37.
+#
+# CAPTURA `-window root` E RECORTA, e nao `import -window <id>`: sem window
+# manager no `:98` nao ha empilhamento garantido, e o X devolve o conteudo
+# indefinido da regiao obscurecida -- o PNG sai TODO PRETO, sem erro nenhum.
+# Medido duas vezes na WTE-TASK-12, e `xdotool windowmap` mais `xrefresh` nao
+# resolve: a VCL nao pinta janela que ela nao considera exibida.
+#
+# A geometria e relida agora, e nao herdada do `>`: o `>` guarda so X e Y, e o
+# recorte precisa de largura e altura.
+ROTEIRO_FOTO_DIR="${ROTEIRO_FOTO_DIR:-}"
+
+roteiro_foto() {
+  local nome="$1" bruto
+  [ -n "$ROTEIRO_FOTO_DIR" ] || {
+    echo "AVISO: '! foto $nome' ignorado -- ROTEIRO_FOTO_DIR vazio" >&2
+    return 0; }
+  [ -n "$ALVO_ID" ] || {
+    echo "ERRO: '! foto $nome' sem janela alvo -- falta um '>' antes" >&2
+    return 1; }
+  mkdir -p "$ROTEIRO_FOTO_DIR"
+  eval "$(xdotool getwindowgeometry --shell "$ALVO_ID")"
+  bruto="$ROTEIRO_FOTO_DIR/.raiz.png"
+  import -window root "$bruto"
+  python3 - "$bruto" "$ROTEIRO_FOTO_DIR/$nome.png" "$X" "$Y" "$WIDTH" "$HEIGHT" <<'FIM'
+import sys
+from PIL import Image
+src, dst, x, y, w, h = sys.argv[1], sys.argv[2], *map(int, sys.argv[3:7])
+Image.open(src).convert("RGB").crop((x, y, x + w, y + h)).save(dst)
+FIM
+  rm -f "$bruto"
+  echo ">> foto '$nome' = ${WIDTH}x${HEIGHT} em $X,$Y"
+}
+
 # roteiro_marca -- gancho. Quem quiser cortar log por acao redefine isto ANTES
 # de chamar `roteiro_executa`; o padrao nao faz nada, que e o que o gate quer.
 roteiro_marca() { :; }
@@ -272,6 +310,7 @@ roteiro_executa() {
                     click --repeat 2 --delay 120 1 ;;
           tecla)  xdotool key --clearmodifiers "$@" ;;
           texto)  xdotool type --delay 60 "${*//@IMAGEM@/$ROTEIRO_IMAGEM}" ;;
+          foto)   roteiro_foto "$1" ;;
           # `arrasta X0 Y0 X1 Y1` -- CORR-WTE-092.
           #
           # O harness so sabia CLICAR ate aqui, e um clique nao exercita

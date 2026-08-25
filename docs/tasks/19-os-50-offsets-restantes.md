@@ -421,3 +421,21 @@ o que a tela mostra. A ausência deles num trace é a previsão do papel que tê
   derrubadas por um experimento de minutos. A terceira só apareceu porque a
   pergunta mudou de "que dado falta" para "que instrução faltou", e essa o Wine
   responde de graça.
+
+---
+
+## Achado posterior — WTE-TASK-37 (2026-08-25): falta o nome do modelo de ML
+
+A reconferência de UI mediu que, com o índice 95 (`95 Master L.`) selecionado, o
+oráculo mostra `?????` / `PATAGONIA` / `PTA` nos três campos de nome e o port
+mostra os três **vazios**.
+
+A tela não é a causa: `NomeDoTime` cai em `Jogo.ml_default` para índice ≥
+`IDX_MODELO_ML`, e o `dump_estado` mostra `ml_default.names[0] = 20:` — vazio.
+**Falta o offset do nome do time-modelo de Master League**, que nem o
+`we2002_core` traz nem esta task endereçou.
+
+Medida e captura em [`wte/re/visual.md`](../../wte/re/visual.md), achado 9 da
+segunda passada; a linha irmã está na
+[WTE-TASK-25](/docs/tasks/25-handlers-de-carga.md), que é dona do caminho de
+tela.

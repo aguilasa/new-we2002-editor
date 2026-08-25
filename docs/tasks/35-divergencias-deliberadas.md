@@ -421,3 +421,29 @@ obrigação de abrir a entrada, e o `check_divergencias.py` aborta se não abrir
   da §7 do registro, com a forma de devolução escrita (os seis campos) e a
   obrigação de passar pelo `check_divergencias.py` se a régua ganhar isenção;
   este arquivo.
+
+---
+
+## Candidatas posteriores — WTE-TASK-37 (2026-08-25)
+
+Três medidas da reconferência de UI com a lógica ligada que pedem decisão de
+registro. Todas em [`wte/re/visual.md`](../../wte/re/visual.md), segunda
+passada, com captura em
+[`wte/re/visual/carregado/`](../../wte/re/visual/carregado).
+
+1. **`ficha_warning` não é levantado pelo port** (achado 8). O aviso de tamanho
+   do original pergunta antes de aplicar os dois remendos de arranque; o port
+   os aplica **sem perguntar**, e é por isso que a gravação bate byte a byte.
+   Divergência deliberada de comportamento em produção, ainda sem entrada aqui.
+2. **`ficha_enlaza` não tem chamador nenhum no port** (achado 8). Não é escolha
+   de tela: a rota que o alcança é o `MainForm.mostrar_jugadorClick` para
+   jogador de clube de Master League, que a
+   [WTE-TASK-30](/docs/tasks/30-handlers-auxiliares.md) deixou escrito por
+   medir. **Rota não portada**, não divergência escolhida — o vocabulário
+   importa aqui.
+3. **`TStaticText` desabilitado pinta fundo próprio no GTK2** (achado 11). Um
+   dos 37: `help_team` sai `#76B6FF` (a cor do formulário) no oráculo e
+   `#DCDAD5` (o cinza do tema) no port. `base_team`, também `Enabled = False`
+   no DFM, **bate** — porque o app o reabilita em runtime. O que diverge é a
+   pintura do estado desabilitado, que nenhuma propriedade do DFM controla: é a
+   mesma família da divergência 2 (os cinco glifos que não acinzentam).

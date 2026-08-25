@@ -1,0 +1,114 @@
+# ui-01-telas, lado PORT. Par de ui-01-telas.txt. WTE-TASK-37.
+#
+# DUAS assimetrias, e as duas ja existiam antes desta task:
+#
+# 1. a imagem vem da linha de comando -- o dialogo de arquivo do gtk2 nao se
+#    dirige por coordenada fixa sem gerenciador de janela;
+# 2. **o port nao mostra o `ficha_warning` nem o `ficha_about` na carga.** O
+#    `MainForm.FormShow` do original abre os dois; o do port aplica os remendos
+#    de arranque sem perguntar e nao levanta o splash. O `ficha_about` aparece
+#    aqui pelo `Sobre...` (SpeedButton1), que e o outro caminho dele; o
+#    `ficha_warning` nao tem segundo caminho, e a ausencia dele nas fotos e
+#    medida, nao esquecimento.
+alvo: port
+estado: ok
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+# O `Sobre...` pelo botao, que e o caminho que o port tem.
+! clique 172 26
+~ 3
+> Sobre
+~ 1
+! foto ficha_about
+! tecla Return
+~ 2
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 5
+= SELECIONA_TIME
+
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! foto estrategia
+! clique 472 241
+~ 3
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+! foto MainForm
+= TELA_PRINCIPAL
+
+! clique 28 402
+~ 5
+>~ 707x273
+~ 1
+! foto jugador
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+! clique 24 440
+~ 3
+>~ 129x121
+~ 1
+! foto ficha_dorsal
+! tecla Return
+~ 2
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+! clique 272 196
+~ 4
+> ^Cor
+~ 1
+! foto ficha_color
+! clique 276 204
+~ 3
+> Atalhos
+~ 1
+! foto ficha_info
+! tecla Return
+~ 2
+> ^Cor
+~ 1
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+! clique 65 347
+~ 4
+> Calcular precos
+~ 1
+! foto ficha_creditos_equipo
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+# O `ficha_movertodos` NAO esta aqui, e a ausencia e medida: a
+# `MoveTodosOsJogadores` sai antes de abrir o modal enquanto os combos do
+# painel de baixo estiverem sem selecao, e com time NACIONAL eles estao
+# desabilitados. Ele e do `ui-02-transferencia`, que seleciona um clube.
+
+! clique 172 52
+~ 4
+> Fechar W11TE
+~ 1
+! foto ficha_salida
+! tecla Escape
+~ 3
+= FIM

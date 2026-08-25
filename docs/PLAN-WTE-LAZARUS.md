@@ -1037,6 +1037,12 @@ e conta vagos. Depende só da Fase 3.
    incluindo os dois roteiros que a fase acrescenta: edição múltipla antes de
    gravar, e gravação dupla.
 
+   *(A bateria tem **96 corridas** desde 2026-08-25: a
+   [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) acrescentou o
+   `golden-25-retorno`, que fecha o editor de cor pela tecla `Return` em vez do
+   clique no `OK`. Mesmo resultado por ROM que o `golden-16-cor`, do qual ele
+   deriva: `PASSOU`/`PASSOU` na japonesa, sem oráculo na europeia.)*
+
    **E a europeia deixou de ser um bloco cego.** Ela hospeda o oráculo — só não
    para quem troca de time: o `golden-01-arranque` passou controle *e* golden
    ali, byte-idêntico, e os outros 22 roteiros trocam de time e travam o
@@ -1101,7 +1107,30 @@ e conta vagos. Depende só da Fase 3.
    mesmo. E a §8.6 ganha um irmão: `MaxLength` **não** guarda campo numérico —
    o `casilla_dorsal` aceita dez dígitos para um número que não passa de 99, e
    quem guarda a faixa é a validação do handler de gravação.
-4. **Sem regressão de UI** — reconferir os 18 formulários.
+4. **Sem regressão de UI** — reconferir os 18 formulários. **Feito em
+   2026-08-25** pela [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), na
+   segunda passada de [`../wte/re/visual.md`](../wte/re/visual.md), com
+   **15 pares** de captura no mesmo estado dos dois lados e duas medições
+   geradas ([`carregado.md`](../wte/re/carregado.md) e
+   [`retorno.md`](../wte/re/retorno.md)).
+
+   **A §8.9 reabriu, e maior.** Ela manda conferir os 37 `TStaticText` porque o
+   GTK2 trata cor de fundo diferente do Win32, e a WTE-TASK-12 os mediu e
+   fechou. São **151 `TLabel`** que declaram `Color` pelo mesmo DFM — quatro
+   vezes mais controles, na mesma classe de problema —, e **68 dos 178
+   rótulos medidos mostram cor de fundo diferente entre os dois lados**. A
+   causa é um *default* de widgetset sobre uma propriedade que o DFM não
+   declara: no VCL o `TLabel` nasce `Transparent = False` e pinta o `Color`; na
+   LCL nasce `True` e não pinta. Correção decidida e encaminhada ao gerador
+   ([WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md)).
+
+   **E o `Return` foi medido em bytes, não em prosa.** 13 dos 18 formulários
+   têm botão `Default`, e um deles — o `OK` do `ficha_color` — grava 383 bytes
+   por time. Isso é do original (`Default = True` está no DFM de 2002), então a
+   pergunta que sobra é se os dois lados gravam o mesmo: sim, byte-idêntico,
+   pelo roteiro `golden-25-retorno`. O risco que o enunciado nomeava — o
+   `lista_formacionesClick` destrutivo — não existe: o `estrategia` não tem
+   botão `Default`, e nenhuma lista dispara `OnClick` por tecla.
 
 ---
 

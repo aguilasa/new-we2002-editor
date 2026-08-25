@@ -72,13 +72,31 @@ vale para os dois combos desta tela e para qualquer outro *owner-draw* que
 apareça, e tomá-la aqui — dentro do fechamento de uma fase que não implementa —
 a tomaria no lugar errado, com um caso só à vista.
 
-**O efeito no port, para não ficar implícito:** os dois combos são
-`csOwnerDrawFixed` no `.lfm`, como no DFM, e o handler é stub. A LCL desenha o
-item pelo padrão dela. É diferença visível de tela, não de byte — este handler
-não toca a imagem, como a seção *Bytes tocados* mede.
+**O efeito no port, e a frase acima estava errada.** Até 2026-08-25 esta seção
+dizia *"a LCL desenha o item pelo padrão dela"*. Medido pela captura da
+WTE-TASK-37, com a imagem carregada e um time selecionado, **ela não desenha
+nada**: `Style = csOwnerDrawFixed` sem `OnDrawItem` deixa o item em branco.
 
-Entrada da WTE-TASK-37, e a decisão que ela tomar vira ou um corpo aqui, ou uma
-linha na [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+| | `ComboBox1` (Casa), 97×22 px |
+|---|---|
+| oráculo | fundo `#808080`, retângulo de amostra da cor de radar (16×11 px) e o texto branco por cima |
+| port | 1.896 px de `#DCDAD5` — o cinza do tema, sem amostra e sem texto |
+
+**Decisão da WTE-TASK-37: implementar.** O que o combo mostra é a cor de radar
+do time, e ela é dado que o ` Accept` grava na imagem (2 + 2 bytes, em
+[`estrategia.BitBtn3Click`](estrategia.BitBtn3Click.md)) — um controle que
+esconde o valor que está prestes a gravar não é diferença cosmética, e é por
+isso que a decisão não foi "registrar divergência".
+
+**O corpo continua por escrever, e não sai da captura.** Quais `TColor`, qual
+retângulo e onde o texto é medida de disassembly de `0x0040adec`, não de
+screenshot: escrever o corpo a partir da imagem seria pôr palpite num arquivo
+que este projeto trata como medido. O veredito segue `nao portado` até o corpo
+existir; o critério de aceite é a tabela acima.
+
+**Evidência da decisão:** observação de tela, em
+[`../visual.md`](../visual.md), achado 7 da segunda passada, e nas capturas de
+[`../visual/carregado/`](../visual/carregado).
 
 ## Notas
 

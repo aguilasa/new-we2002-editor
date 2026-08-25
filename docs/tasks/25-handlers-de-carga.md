@@ -1031,3 +1031,39 @@ e não simula comportamento.
   - `lista_equipos_2Change` tem Pascal e **não** foi conferido na tela: o
     `compara_tela.sh` dirige só o combo titular.
 
+---
+
+## Achados posteriores — WTE-TASK-37 (2026-08-25): duas telas com dado errado
+
+A reconferência de UI com a lógica ligada comparou os dois lados no **mesmo
+estado**, e dois achados são deste grupo de carga. Os dois estão medidos em
+[`wte/re/visual.md`](../../wte/re/visual.md) (achados 9 e 10), com captura em
+[`wte/re/visual/carregado/`](../../wte/re/visual/carregado).
+
+**1. O time-modelo de Master League mostra três campos vazios.** Índice 95
+(`95 Master L.`):
+
+| Campo | oráculo | port |
+|---|---|---|
+| Nome1 | `?????` | *(vazio)* |
+| Nome2 | `PATAGONIA` | *(vazio)* |
+| Nome3 | `PTA` | *(vazio)* |
+
+A causa está na camada de dados, não na tela: `NomeDoTime` cai em
+`Jogo.ml_default` para índice ≥ `IDX_MODELO_ML`, e o `dump_estado` mostra
+`ml_default.names[0] = 20:` — vazio. O que falta é o **offset do nome do modelo
+de ML**, e por isso a [WTE-TASK-19](/docs/tasks/19-os-50-offsets-restantes.md)
+tem a linha irmã desta.
+
+**2. As listas de jogador do painel perdem o número na frente.** Mesmo time e
+mesmo slot dos dois lados, em `lista_jugadores_1`:
+
+| | texto do item selecionado |
+|---|---|
+| oráculo | `1 P??w????Y` |
+| port | `P??W????Y` |
+
+Duas diferenças numa linha: o **prefixo de número** e a **caixa da letra**. O
+`PreencheJogadores` do `.aux.inc` monta o item com `NomeFiltrado` e nada mais;
+a rotina do original é a `0x0040b2d8`, a mesma cuja tabela de filtro a
+[CORR-WTE-081](/docs/tasks/CORR-WTE-081.md) já ajustou.

@@ -83,14 +83,14 @@ conta que três gravações ficaram sem dono até a WTE-TASK-30.
 
 ## A bateria golden desta corrida
 
-São 24 roteiros em disco, 23 com par do lado port, e
+São 25 roteiros em disco, 24 com par do lado port, e
 **21 deles rodaram nesta bateria**. Cada um desses rodou
 **duas vezes**: `controle` (oráculo contra oráculo, que prova que o par
 roteiro+imagem é determinístico) e `golden` (oráculo contra o app
 Lazarus). **O controle vem antes do teste** — sem ele, verde e vermelho
 não significam nada.
 
-Com par e fora desta bateria: `golden-23-multiplas-edicoes`, `golden-24-gravacao-dupla`. Eles são da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md),
+Com par e fora desta bateria: `golden-23-multiplas-edicoes`, `golden-24-gravacao-dupla`, `golden-25-retorno`. Eles são da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md),
 que roda a bateria completa (operação × ROM) e registra em
 [`golden.tsv`](golden.tsv). O guarda de cobertura aceita as **duas**
 listas: o que ele exige é que roteiro com par tenha rodado nos dois

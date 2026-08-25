@@ -10,7 +10,7 @@ python3 wte/tools/check_golden.py --check
 ```
 
 Produto da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).
-Fonte: [`golden.tsv`](golden.tsv), 92 corrida(s)
+Fonte: [`golden.tsv`](golden.tsv), 96 corrida(s)
 registrada(s), a mais recente de 2026-08-25.
 **Todo número daqui saiu do script.**
 
@@ -20,8 +20,8 @@ registrada(s), a mais recente de 2026-08-25.
 > produzem **imagem byte-idêntica** a partir da mesma imagem de
 > entrada, nas duas ROMs.
 
-**46 de 46 corridas verdes na japonesa.** Na europeia,
-22 de 46 não têm oráculo — ver a seção das duas ROMs.
+**48 de 48 corridas verdes na japonesa.** Na europeia,
+23 de 48 não têm oráculo — ver a seção das duas ROMs.
 
 ## Operação × ROM × resultado
 
@@ -55,6 +55,7 @@ ordem, porque é nessa ordem que eles valem.
 | [golden-22-precos](../tests/roteiros/golden-22-precos.txt) | PASSOU / PASSOU | SEM_ORACULO / NAO_APLICAVEL |
 | [golden-23-multiplas-edicoes](../tests/roteiros/golden-23-multiplas-edicoes.txt) | PASSOU / PASSOU | SEM_ORACULO / NAO_APLICAVEL |
 | [golden-24-gravacao-dupla](../tests/roteiros/golden-24-gravacao-dupla.txt) | PASSOU / PASSOU | SEM_ORACULO / NAO_APLICAVEL |
+| [golden-25-retorno](../tests/roteiros/golden-25-retorno.txt) | PASSOU / PASSOU | SEM_ORACULO / NAO_APLICAVEL |
 
 **Nenhuma célula vazia** — era o quarto critério da task, e a guarda 2
 do gerador o mecaniza: roteiro com par em disco e ausente do TSV
@@ -64,12 +65,12 @@ do gerador o mecaniza: roteiro com par em disco e ausente do TSV
 
 | Veredito | Corridas |
 |---|---:|
-| `PASSOU` | 48 |
+| `PASSOU` | 50 |
 | `REPROVOU` | 0 |
-| `SEM_ORACULO` | 22 |
-| `NAO_APLICAVEL` | 22 |
+| `SEM_ORACULO` | 23 |
+| `NAO_APLICAVEL` | 23 |
 | `ESTOUROU_TEMPO` | 0 |
-| **total** | **92** |
+| **total** | **96** |
 
 `REPROVOU` é a única que acusa o port. `SEM_ORACULO` diz que o
 `wte.exe` morreu com `c0000005` e gravou menos; `NAO_APLICAVEL` diz que
@@ -155,8 +156,8 @@ medida, não suposição:
 
 | ROM | Corridas | `PASSOU` | `SEM_ORACULO` | `NAO_APLICAVEL` | `REPROVOU` |
 |---|---:|---:|---:|---:|---:|
-| japonesa | 46 | 46 | 0 | 0 | 0 |
-| europeia | 46 | 2 | 22 | 22 | 0 |
+| japonesa | 48 | 48 | 0 | 0 | 0 |
+| europeia | 48 | 2 | 23 | 23 | 0 |
 
 Com a europeia o `wte.exe` morre ao trocar de time: a carga do time
 escreve além do fim da tabela de `0x00433580` e deixa `0x00010001` onde
@@ -175,8 +176,8 @@ nenhuma bateria pode julgar o port contra ele naquela imagem.
 
 ## Custo
 
-**6449 segundos de relógio** (1.8 h) nas
-92 corridas. Cada uma faz duas cópias da imagem e as
+**6700 segundos de relógio** (1.9 h) nas
+96 corridas. Cada uma faz duas cópias da imagem e as
 apaga no fim: ~586 MB de temporário com a japonesa, ~950 MB com a
 europeia. **`roms/` nunca é alvo** — a guarda 4 do `golden_check.sh`.
 

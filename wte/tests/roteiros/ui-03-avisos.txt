@@ -1,0 +1,110 @@
+# ui-03-avisos -- as duas telas que so aparecem depois de uma DECISAO: o
+# `ficha_warning_2` (o ` Accept` da tatica sobre um par de cores avisado) e o
+# `ficha_info3` (o fim do calculo de precos). Lado ORACULO. WTE-TASK-37.
+#
+#   bash wte/tools/captura_ui.sh ui-03-avisos
+#
+# ## O `ficha_warning_2` sai por `Escape`, e isso e o teste
+#
+# O `estrategia.BitBtn3Click` grava 45 bytes por time -- mas so DEPOIS do
+# modal, e so se a resposta for `Sim`. `Escape` e o ` Nao` (`Cancel = True`),
+# entao a corrida fotografa o aviso e nao grava nada.
+#
+# ## O par de cores nao e escolhido a esmo
+#
+# `PARES_DE_RADAR` (de `0x00423f14`, dez pares) tem o `(0, 3)` como primeiro
+# item, e sao INDICES de combo, nao cores. `Home` no `ComboBox1` leva ao 0 e
+# `Home` mais tres `Down` no `ComboBox2` leva ao 3.
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ a tela de tatica ----
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+
+# ComboBox1 (144,264) 97x22 -> (192,275); ComboBox2 (315,264) -> (363,275).
+! clique 192 275
+~ 1
+! tecla Home
+~ 1
+! tecla Return
+~ 2
+! clique 363 275
+~ 1
+! tecla Home
+! tecla Down
+! tecla Down
+! tecla Down
+~ 1
+! tecla Return
+~ 2
+! foto estrategia-radar
+= PAR_DE_RADAR
+
+# BitBtn6 ` Accept` (432,261) 81x25 -> (472,273).
+! clique 472 273
+~ 4
+> Warning
+~ 1
+! foto ficha_warning_2
+! tecla Escape
+~ 3
+
+# ` Cancela` (BitBtn2) -- sai da tatica sem aplicar.
+>~ 529x498
+~ 1
+! clique 472 241
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ------------------------------------------------------ calcular precos ----
+#
+# base_team (16,336) -> (65,347). O `Return` do `ficha_creditos_equipo` e o
+# ` Sim` (`Default = True`, `ModalResult = 6`), e ele MANDA CALCULAR: o laco
+# grava um byte de preco por jogador na copia. E o proposito do passo -- o
+# `ficha_info3` so existe depois do calculo.
+! clique 65 347
+~ 4
+> Calcular precos
+~ 1
+! tecla Return
+~ 8
+> W11 TE PT
+~ 1
+! foto ficha_info3
+# BitBtn6 (104,44) 73x25 -> (140,56), mais a moldura do Wine (3,29).
+! clique 143 85
+~ 3
+= FIM

@@ -1,0 +1,83 @@
+# ui-03-avisos, lado PORT. Par de ui-03-avisos.txt. WTE-TASK-37.
+#
+# Duas assimetrias: a imagem vem da linha de comando, e o `BitBtn6` do
+# `ficha_info3` e clicado na coordenada CRUA do `.lfm` -- a janela do port mede
+# o cliente, sem a moldura que o Wine desenha por dentro.
+alvo: port
+estado: ok
+
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 3
+= ARRANQUE
+
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ a tela de tatica ----
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+
+# ComboBox1 (144,264) 97x22 -> (192,275); ComboBox2 (315,264) -> (363,275).
+! clique 192 275
+~ 1
+! tecla Home
+~ 1
+! tecla Return
+~ 2
+! clique 363 275
+~ 1
+! tecla Home
+! tecla Down
+! tecla Down
+! tecla Down
+~ 1
+! tecla Return
+~ 2
+! foto estrategia-radar
+= PAR_DE_RADAR
+
+# BitBtn6 ` Accept` (432,261) 81x25 -> (472,273).
+! clique 472 273
+~ 4
+> Warning
+~ 1
+! foto ficha_warning_2
+! tecla Escape
+~ 3
+
+# ` Cancela` (BitBtn2) -- sai da tatica sem aplicar.
+>~ 529x498
+~ 1
+! clique 472 241
+~ 3
+> W11 Team Editor PT by chagas_michel! \[Lazarus\]
+~ 1
+
+# ------------------------------------------------------ calcular precos ----
+#
+# base_team (16,336) -> (65,347). O `Return` do `ficha_creditos_equipo` e o
+# ` Sim` (`Default = True`, `ModalResult = 6`), e ele MANDA CALCULAR: o laco
+# grava um byte de preco por jogador na copia. E o proposito do passo -- o
+# `ficha_info3` so existe depois do calculo.
+! clique 65 347
+~ 4
+> Calcular precos
+~ 1
+! tecla Return
+~ 8
+> W11 TE PT
+~ 1
+! foto ficha_info3
+# BitBtn6 (104,44) 73x25 -> (140,56). Sem moldura deste lado.
+! clique 140 56
+~ 3
+= FIM

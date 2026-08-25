@@ -184,3 +184,36 @@ construção não reconhecida. Editar `.lfm` à mão tem de quebrar o `--check`.
      `wte/re/dfm/blobs/` do `.gitignore` e as "Pendências externas" do
      [`progresso.md`](/docs/tasks/progresso.md) — pela
      [CORR-WTE-019](/docs/tasks/CORR-WTE-019.md). A §2 deixa de tensionar.
+
+---
+
+## Achado posterior — WTE-TASK-37 (2026-08-25): `TLabel` com `Color` não pinta
+
+A reconferência de UI com a lógica ligada mediu, nos 15 pares de captura,
+**68 de 178 rótulos com cor de fundo diferente entre os dois lados** — sempre
+no mesmo sentido: no port o rótulo some no fundo do formulário.
+
+| Formulário | rótulos com `Color` | divergentes |
+|---|---:|---:|
+| `jugador` | 59 | 31 |
+| `estrategia` | 43 | 18 |
+| `ficha_color` | 34 | 18 |
+| `ficha_dorsal` | 1 | 1 |
+| `MainForm` (`TStaticText`) | 27 | 0 |
+
+**A causa é um *default* de widgetset sobre uma propriedade que o DFM não
+declara.** Nenhum dos 178 declara `Transparent`. No VCL o `TLabel` nasce
+`Transparent = False` e pinta o `Color`; na LCL nasce `Transparent = True` e
+não pinta. O `TStaticText` não tem o problema — por isso os 27 do `MainForm`
+batem, e por isso a medida da WTE-TASK-12, restrita aos 37 `TStaticText` da
+§8.9, fechou verde.
+
+**O que fazer aqui:** o `dfm2lfm.py` deve emitir `Transparent = False` para
+`TLabel` que declare `Color` e não declare `Transparent` — propriedade
+sintetizada, com a razão escrita, e `--check` refeito. Não editar `.lfm` à mão:
+os 18 são gerados.
+
+**Critério de aceite, já mecânico:** `rotulos_divergentes` zerado em
+[`wte/re/carregado.tsv`](../../wte/re/carregado.tsv) depois de refazer as
+capturas com `wte/tools/captura_ui.sh`. Medida e evidência em
+[`wte/re/visual.md`](../../wte/re/visual.md), achado 6 da segunda passada.

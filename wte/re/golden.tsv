@@ -91,3 +91,7 @@ golden-23-multiplas-edicoes	europeia	controle	SEM_ORACULO	86	2026-08-24
 golden-23-multiplas-edicoes	europeia	golden	NAO_APLICAVEL	0	2026-08-24
 golden-24-gravacao-dupla	europeia	controle	SEM_ORACULO	67	2026-08-25
 golden-24-gravacao-dupla	europeia	golden	NAO_APLICAVEL	0	2026-08-25
+golden-25-retorno	japonesa	controle	PASSOU	99	2026-08-25
+golden-25-retorno	japonesa	golden	PASSOU	87	2026-08-25
+golden-25-retorno	europeia	controle	SEM_ORACULO	65	2026-08-25
+golden-25-retorno	europeia	golden	NAO_APLICAVEL	0	2026-08-25

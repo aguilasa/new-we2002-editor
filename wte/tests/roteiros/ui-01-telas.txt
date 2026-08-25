@@ -1,0 +1,166 @@
+# ui-01-telas -- as telas alcancaveis do MainForm, com a imagem carregada e um
+# time selecionado. Lado ORACULO. Produto da WTE-TASK-37.
+#
+#   bash wte/tools/captura_ui.sh ui-01-telas
+#
+# NAO E ROTEIRO DE GATE: ele nao grava byte nenhum na imagem, e o que produz
+# sao os PNG do `! foto`. O par golden que exercita `Return` com gravacao e o
+# `golden-25-retorno`.
+#
+# ## Fechar por TECLA, e nao por clique
+#
+# Todo modal daqui sai por `Escape` (o botao `Cancel = True`) ou por `Return`
+# (o `Default = True`) -- os dois lidos do `.dfm` pelo `check_retorno.py`, que
+# prova que os 18 `.lfm` carregam os mesmos dois botoes. Fechar assim mede o
+# que a task pergunta ("o que o Return alcanca") e ainda dispensa a coordenada
+# do botao, que e onde a moldura que o Wine desenha por dentro faria os dois
+# lados divergirem.
+#
+# As excecoes sao `estrategia` e `jugador`: nenhum dos dois declara `Default`
+# nem `Cancel`, entao `Return` e `Escape` nao fecham -- e nao fechar E o
+# resultado. Esses dois saem pelo ` Cancela`, clicado.
+#
+# O `ficha_color` sai por `Escape` DE PROPOSITO: o `Return` dele e o `OK`, que
+# grava 383 bytes por time (`ficha_color.BitBtn3Click`). Uma corrida de foto
+# nao grava.
+alvo: original
+estado: ok
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+# O aviso de tamanho. O `Sim` (BitBtn1, Default) fica em (222,148) sob a
+# moldura do Wine -- ele e clicado, e nao teclado, porque a janela ainda nao
+# tem foco de teclado neste ponto da carga.
+> Cuidado
+~ 1
+! foto ficha_warning
+! clique 222 148
+~ 3
+
+# O splash e o proprio `ficha_about`, e e a unica vez que ele aparece sem
+# clique -- `MainForm.FormShow` o abre.
+> Sobre...
+~ 1
+! foto ficha_about
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ a tela de tatica ----
+#
+# GroupBox1 (8,320) + mostrar_estrategia_1 (8,40) = (16,360) -> (28,370).
+! clique 28 370
+~ 5
+>~ 529x498
+~ 1
+! foto estrategia
+# ` Cancela` (BitBtn2, 432,229 + 81x25) -- o que NAO aplica formacao.
+! clique 472 241
+~ 3
+
+# A principal, ja sem lista suspensa aberta por cima.
+> W11 Team Editor PT by chagas_michel!
+~ 1
+! foto MainForm
+= TELA_PRINCIPAL
+
+# ------------------------------------------------------ a ficha do jogador ----
+#
+# GroupBox1 (8,320) + mostrar_jugador_1 (8,72) = (16,392) -> (28,402).
+! clique 28 402
+~ 5
+>~ 707x273
+~ 1
+! foto jugador
+# ` Cancela` (BitBtn2, 544,240 + 73x25).
+! clique 580 252
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ------------------------------------------------------------- o dorsal ----
+#
+# dorsal1 (16,432), 17x17 -> (24,440). Sai por `Return`: o `Ok` e o unico
+# botao e e `Default = True`, sem `Cancel`.
+! clique 24 440
+~ 3
+>~ 135x153
+~ 1
+! foto ficha_dorsal
+! tecla Return
+~ 2
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ------------------------------------------------------- o editor de cor ----
+#
+# GroupBox4 (216,8) + colorear (8,176) = (224,184) -> (272,196).
+! clique 272 196
+~ 4
+> ^Cor
+~ 1
+! foto ficha_color
+# SpeedButton1 (264,192) 25x25 -> (276,204) abre a tela de atalhos.
+! clique 276 204
+~ 3
+> Atalhos
+~ 1
+! foto ficha_info
+! tecla Return
+~ 2
+# De volta ao editor de cor: sai por `Escape`, que e o ` Cancela`.
+> ^Cor
+~ 1
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# ------------------------------------------------------- calcular precos ----
+#
+# base_team (16,336) 98x23 -> (65,347).
+! clique 65 347
+~ 4
+> Calcular precos
+~ 1
+! foto ficha_creditos_equipo
+! tecla Escape
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 1
+
+# O `ficha_movertodos` NAO esta aqui, e a ausencia e medida: a
+# `MoveTodosOsJogadores` sai antes de abrir o modal enquanto os combos do
+# painel de baixo estiverem sem selecao, e com time NACIONAL eles estao
+# desabilitados. Ele e do `ui-02-transferencia`, que seleciona um clube.
+
+# ------------------------------------------------------------- o Sair ----
+#
+# SpeedButton2 (136,40) 73x24 -> (172,52). Sai por `Escape` (` Nao`), que e o
+# que NAO encerra o app.
+! clique 172 52
+~ 4
+> Fechar W11TE
+~ 1
+! foto ficha_salida
+! tecla Escape
+~ 3
+= FIM

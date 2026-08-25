@@ -1,0 +1,19 @@
+formulario	default	default_evento	default_modalresult	bytes	cancel	cancel_modalresult	controles_tabordem	tabordem_igual
+MainForm	—	—	—	sem handler	—	—	56	sim
+estrategia	—	—	—	sem handler	—	—	6	sim
+ficha_about	BitBtn3	—	1	sem handler	—	—	1	sim
+ficha_color	BitBtn3	BitBtn3Click	1	imagem	BitBtn2	7	25	sim
+ficha_creditos_equipo	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+ficha_dorsal	BitBtn1	BitBtn1Click	1	nenhum	—	—	2	sim
+ficha_enlaza	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+ficha_error	BitBtn3	—	1	sem handler	—	—	1	sim
+ficha_error2	BitBtn3	—	1	sem handler	—	—	1	sim
+ficha_info	BitBtn3	—	1	sem handler	—	—	1	sim
+ficha_info2	BitBtn3	—	1	sem handler	—	—	1	sim
+ficha_info3	—	—	—	sem handler	—	—	1	sim
+ficha_info4	—	—	—	sem handler	—	—	1	sim
+ficha_movertodos	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+ficha_salida	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+ficha_warning	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+ficha_warning_2	BitBtn1	—	6	sem handler	BitBtn2	7	2	sim
+jugador	—	—	—	sem handler	—	—	34	sim

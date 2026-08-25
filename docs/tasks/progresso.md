@@ -49,7 +49,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | Bateria golden completa | 6 | 31-33 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md) | Registro das divergências deliberadas | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ⬜ Pendente | — | — |
+| [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | ⬜ pendente |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ⬜ Pendente | — | — |
 | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
 | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
@@ -521,7 +521,9 @@ alimenta e passou a **carregar** essa gravação.
       [`wte/re/golden.md`](../../wte/re/golden.md), rodadas pelo
       [`golden_suite.sh`](../../wte/tools/golden_suite.sh) e publicadas pelo
       `check_golden.py`. **48 `PASSOU`, 22 `SEM_ORACULO`, 22 `NAO_APLICAVEL`,
-      zero `REPROVOU`**; a japonesa fechou **46 de 46**
+      zero `REPROVOU`**; a japonesa fechou **46 de 46**. *(São **96 corridas**
+      desde 2026-08-25: a WTE-TASK-37 acrescentou o `golden-25-retorno`, com o
+      mesmo resultado por ROM do `golden-16-cor`, do qual ele deriva.)*
 - [x] Edição múltipla e gravação dupla cobertas — os dois roteiros novos da
       fase 6, verdes nos dois modos na japonesa. **A gravação dupla foi provada
       em 2026-08-25**, pela
@@ -588,7 +590,37 @@ alimenta e passou a **carregar** essa gravação.
       benigna porque `StrToIntDef` devolve `0` quando a cadeia não cabe num
       `Integer`, e `0` reprova como qualquer inválido. O gerador **aborta** se
       a validação sair do handler
-- [ ] Nenhuma ação destrutiva alcançável por `Return`
+- [x] Nenhuma ação destrutiva alcançável por `Return` — **medido nos 18 e em
+      bytes** *(WTE-TASK-37, 2026-08-25)*, em
+      [`retorno.md`](../../wte/re/retorno.md): 13 formulários têm botão
+      `Default`, 7 têm `Cancel`, e **um** `Default` dispara handler que grava na
+      imagem — o `OK` do `ficha_color`, 383 bytes por time. **É do original**
+      (`Default = True` está no DFM de 2002 e o `dfm2lfm.py` o copia verbatim),
+      então a pergunta que sobra é se os dois lados gravam o mesmo: sim,
+      byte-idêntico, pelo roteiro `golden-25-retorno`. O risco que o enunciado
+      nomeava — o `lista_formacionesClick` destrutivo — **não existe**: o
+      `estrategia` não tem botão `Default`, e lista não dispara `OnClick` por
+      tecla
+- [x] Os 18 formulários reconferidos com a lógica ligada — **15 pares** de
+      captura no mesmo estado dos dois lados, em
+      [`visual/carregado/`](../../wte/re/visual/carregado) e medidos em
+      [`carregado.md`](../../wte/re/carregado.md). **Cor de fundo de execução:
+      15 de 15 batem**; ordem de tabulação: **18 de 18 iguais**; nenhum
+      controle faltando, sobrando ou fora de posição
+- [x] **A §8.9 reabriu, e quatro vezes maior** *(achado da WTE-TASK-37)*. Ela
+      manda conferir os 37 `TStaticText` porque o GTK2 trata cor de fundo
+      diferente do Win32 — e são **151 `TLabel`** que declaram `Color` pelo
+      mesmo DFM. Medido: **68 de 178 rótulos** com cor diferente entre os dois
+      lados, sempre no mesmo sentido (no port o rótulo some no fundo). A causa é
+      *default* de widgetset sobre propriedade que o DFM não declara:
+      `Transparent` nasce `False` no VCL e `True` na LCL. Correção decidida e
+      encaminhada ao gerador ([WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md))
+- [x] **Os dois combos de radar do `estrategia` saem vazios no port** *(idem)*.
+      `csOwnerDrawFixed` sem `OnDrawItem` não desenha item nenhum — a leitura
+      anterior, *"a LCL desenha pelo padrão dela"*, estava errada. Decisão
+      tomada: **implementar**, porque o combo mostra a cor de radar que o
+      ` Accept` grava na imagem. O corpo sai do disassembly de `0x0040adec`, não
+      da captura
 
 ### Fase 7 — Acabamento
 

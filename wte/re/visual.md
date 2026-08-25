@@ -368,3 +368,259 @@ voltar como "achado" na fase 6.
 | 4 — 25 dos 37 `TStaticText` são clicáveis | fase 4 |
 | 5 — contagem fina de blob sobrepostos | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) |
 | as 14 capturas do original | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md), **se** o achado 1 se resolver |
+
+
+---
+
+# Segunda passada — WTE-TASK-37: os 18 com a lógica ligada
+
+A primeira passada (acima) conferiu os formulários **vazios**, com o andaime
+`--show`. Esta confere com a **imagem carregada e um time selecionado**, que é
+quando o problema aparece — e o que ela achou não estava escondido: estava
+esperando dado na tela.
+
+**As capturas novas estão em [`visual/carregado/`](visual/carregado)** — 19 do
+oráculo e 18 do port, tiradas pelo verbo `! foto` do
+[`../tools/roteiro.sh`](../tools/roteiro.sh), que os dois lados compartilham, e
+dirigidas pelo [`../tools/captura_ui.sh`](../tools/captura_ui.sh) sobre a ROM
+japonesa. Refazer:
+
+```sh
+bash wte/tools/captura_ui.sh ui-01-telas ui-02-transferencia ui-03-avisos
+python3 wte/tools/check_carregado.py
+python3 wte/tools/check_retorno.py
+```
+
+As duas medições geradas são [`carregado.md`](carregado.md) (alcance, tamanho,
+cor de fundo, rótulos) e [`retorno.md`](retorno.md) (`Default`, `Cancel` e
+ordem de tabulação). **Todo número desta seção saiu de uma das duas.**
+
+## Cobertura: 15 pares, e por que os três que faltam faltam
+
+| | Quantos |
+|---|---:|
+| Formulários | 18 |
+| Fotografados dos **dois** lados, no mesmo estado | **15** |
+| Só do oráculo | 1 (`ficha_warning`) |
+| De nenhum dos dois | 2 (`ficha_enlaza`, `ficha_info4`) |
+
+A primeira passada conseguiu 4 do oráculo, e não por falta de método: o
+`wte.exe` morria ao trocar de time na ROM europeia. Com a japonesa —
+CORR-WTE-044 — o mesmo roteiro não produz violação de acesso nenhuma, e os 15
+pares saíram de três roteiros.
+
+Os três roteiros levam os dois lados ao **mesmo estado** e fecham cada modal
+pela **tecla** (`Escape` = `Cancel`, `Return` = `Default`), o que dispensa a
+coordenada do botão — e é onde a moldura do Wine faria os dois lados
+divergirem:
+
+| Roteiro | O que ele alcança |
+|---|---|
+| `ui-01-telas` | o time 2 (seleção), `estrategia`, `jugador`, `ficha_dorsal`, `ficha_color`, `ficha_info`, `ficha_about`, `ficha_creditos_equipo`, `ficha_salida` |
+| `ui-02-transferencia` | o time 95 (clube), `ficha_movertodos`, `ficha_error2`, `ficha_error`, `ficha_info2` |
+| `ui-03-avisos` | `ficha_warning_2` (par de cores de radar) e `ficha_info3` (fim do cálculo de preços) |
+
+## Achado 6 — os 151 `TLabel` com `Color` não pintam no port
+
+**É o achado da task, e é a §8.9 do plano generalizada.** Ela manda conferir os
+37 `TStaticText` porque o GTK2 trata cor de fundo diferente do Win32; a primeira
+passada mediu os 37, achou que nenhum pedia transparência, e fechou (achado 4).
+O que ninguém tinha contado é que **151 `TLabel` declaram `Color` pelo mesmo
+DFM** — quatro vezes mais controles, na mesma classe de problema.
+
+Medido nos 15 pares: **68 dos 178 rótulos com `Color` mostram cor de fundo
+diferente entre os dois lados**, e sempre no mesmo sentido — no port o rótulo
+some no fundo do formulário.
+
+| Formulário | rótulos com `Color` | divergentes | o que se perde na tela |
+|---|---:|---:|---|
+| `jugador` | 59 | **31** | as faixas alternadas (`#2882D7`) atrás das 16 habilidades |
+| `estrategia` | 43 | **18** | as faixas alternadas da tabela de estratégia |
+| `ficha_color` | 34 | **18** | a faixa `seleccion` (`#000080`) e os `colcopN` pretos |
+| `ficha_dorsal` | 1 | **1** | o retângulo branco atrás do número |
+| `MainForm` | 27 (`TStaticText`) | 0 | — |
+
+**A causa é um *default* de widgetset sobre uma propriedade que o DFM não
+declara.** Nenhum dos 178 declara `Transparent`. No VCL o `TLabel` nasce
+`Transparent = False` e pinta o `Color`; na LCL ele nasce `Transparent = True`
+e não pinta. O `TStaticText` não tem o problema — por isso os 27 do `MainForm`
+batem, e por isso a medida da primeira passada, restrita a eles, fechou verde.
+
+**Decisão: corrigir no gerador.** O
+[`../tools/dfm2lfm.py`](../tools/dfm2lfm.py) deve emitir `Transparent = False`
+para `TLabel` que declare `Color` e não declare `Transparent` — propriedade
+sintetizada, com a razão escrita, que é o que um conversor existe para fazer.
+Volta para a [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md), e o
+critério de aceite já é mecânico: `rotulos_divergentes` zerado em
+[`carregado.tsv`](carregado.tsv) depois de refazer as capturas.
+
+## Achado 7 — os dois combos de radar do `estrategia` saem VAZIOS
+
+A [`spec/estrategia.ComboBoxDrawItem.md`](spec/estrategia.ComboBoxDrawItem.md)
+ficou `nao portado` com a justificativa de que a **decisão** — o port desenhar,
+ou deixar a LCL desenhar — pertencia a esta task. Ela está tomada, e o que a
+mediu foi a captura:
+
+| | `ComboBox1` (Casa) |
+|---|---|
+| oráculo | fundo `#808080`, retângulo de amostra da cor (16×11 px) e o texto branco por cima |
+| port | **nada** — 1.896 px de `#DCDAD5`, o cinza do tema |
+
+A leitura de 2026-08-24 — *"a LCL desenha o item pelo padrão dela"* — está
+errada, e a diferença importa: `Style = csOwnerDrawFixed` **sem** `OnDrawItem`
+não desenha item nenhum. O controle não fica com aparência diferente; ele fica
+**em branco**.
+
+**Decisão: implementar.** O que o combo mostra é a cor de radar do time, e ela é
+dado que o ` Accept` grava na imagem (2 + 2 bytes, `estrategia.BitBtn3Click`) —
+um controle que esconde o valor que está prestes a gravar não é diferença
+cosmética. **O corpo não entra aqui**: ele é fase 4, e escrevê-lo a partir desta
+captura seria transcrever um palpite (quais `TColor`, qual retângulo, onde o
+texto) num arquivo que o projeto trata como medido. A medida acima é o critério
+de aceite; o corpo sai do disassembly de `0x0040adec`.
+
+## Achado 8 — dois formulários não têm chamador nenhum no port
+
+`Show`/`ShowModal` varrido em `wte/src/`:
+
+| Formulário | quem o abre no port | no original |
+|---|---|---|
+| `ficha_warning` | **ninguém** | o `MainForm.FormShow` o levanta na carga — é o aviso de tamanho |
+| `ficha_enlaza` | **ninguém** | alcançado pelo `MainForm.mostrar_jugadorClick`, cuja spec segue `aberto` nessa rota |
+
+O do `ficha_warning` é consequência de uma decisão já tomada e não registrada: o
+port aplica os dois remendos de arranque **sem perguntar**, e é por isso que a
+gravação bate byte a byte. O do `ficha_enlaza` é o que a
+[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) deixou escrito por
+medir — *"qual condição faz o `mostrar_jugadorClick` abrir o modal"*.
+
+Os dois vão para a [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md):
+o primeiro como divergência deliberada a registrar, o segundo como rota ainda
+não portada.
+
+## Achado 9 — o time-modelo de Master League mostra três campos vazios
+
+Índice 95 (`95 Master L.`), o mesmo estado dos dois lados:
+
+| Campo | oráculo | port |
+|---|---|---|
+| Nome1 | `?????` | *(vazio)* |
+| Nome2 | `PATAGONIA` | *(vazio)* |
+| Nome3 | `PTA` | *(vazio)* |
+
+A causa está na camada de dados, não na tela: `NomeDoTime` cai em
+`Jogo.ml_default` para índice ≥ 95, e o `dump_estado` mostra
+`ml_default.names[0] = 20:` — **vazio**. O oráculo lê alguma coisa ali e o port
+não. Volta para a [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), com
+a [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) do lado: o que
+falta é o offset do nome do modelo de ML, não o caminho de tela.
+
+## Achado 10 — as listas de jogador do painel perdem o número na frente
+
+`lista_jugadores_1`, mesmo time e mesmo slot dos dois lados:
+
+| | texto do item selecionado |
+|---|---|
+| oráculo | `1 P??w????Y` |
+| port | `P??W????Y` |
+
+Duas diferenças numa linha só: o **prefixo de número** e a **caixa da letra**.
+O `PreencheJogadores` do port monta o item com `NomeFiltrado` e nada mais. Volta
+para a [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) — é a rotina
+`0x0040b2d8`, a mesma cuja tabela de filtro a CORR-WTE-081 já ajustou.
+
+## Achado 11 — `TStaticText` desabilitado pinta fundo próprio no GTK2
+
+A releitura do achado 4 com o fundo de execução por baixo, medida pelo
+`check_carregado.py`: dos 37 `TStaticText`, **um** tem cor de fundo diferente
+entre os dois lados — `help_team` (`Time Res.`, `Enabled = False` no DFM), que
+sai `#76B6FF` (a cor do formulário) no oráculo e `#DCDAD5` (o cinza do tema) no
+port.
+
+Não é o mesmo caso do achado 6, e a prova está ao lado: `base_team`, também
+`Enabled = False` no DFM, **bate** — porque o app o reabilita em tempo de
+execução. O que diverge é a pintura do estado **desabilitado**, que nenhuma
+propriedade do DFM controla. É a mesma família da divergência 2 já registrada
+(os cinco glifos que não acinzentam), e vai para o mesmo lugar.
+
+**A decisão do achado 4 continua de pé para os outros 36.**
+
+## Achado 12 — o que o `Return` alcança, medido nos 18 e em bytes
+
+| Medida | Valor |
+|---|---:|
+| Formulários com botão `Default = True` | **13** de 18 |
+| Com `Cancel = True` | 7 |
+| Cujo `Default` dispara handler que grava **na imagem** | **1** (`ficha_color`) |
+| Controles com `TabOrder` | 142 |
+| Formulários com ordem de tabulação diferente entre DFM e LFM | **0** |
+
+**A mordida que o `newWe2002` levou não se repete aqui, e o motivo é o
+formato.** Lá, `PUSHBUTTON` do `.rc` não carrega "sou o default", o Qt tornava
+todo botão `autoDefault` e o `Return` clicava um botão arbitrário — num diálogo
+onde um dos candidatos aplicava formação predefinida. No DFM, `Default` e
+`Cancel` são propriedades explícitas, e o `dfm2lfm.py` as copia verbatim; o
+`check_retorno.py` confere as duas nos 18 e aborta se divergirem.
+
+**O risco que o enunciado nomeava não existe:** `estrategia` — o formulário do
+`lista_formacionesClick` destrutivo — **não tem botão `Default`**, e nenhuma
+lista dispara `OnClick` por `Return`.
+
+**O que existe é outro, e é do original:** o `OK` do `ficha_color` é
+`Default = True` desde o DFM de 2002, e o handler dele grava **383 bytes por
+time**. Chega-se lá por `Return` nos dois lados — então a pergunta que sobra
+não é se dá para chegar, é se os dois gravam o mesmo. Medido em bytes pelo
+roteiro `golden-25-retorno`, que é o `golden-16-cor` fechando o editor por
+tecla em vez de clique.
+
+## Achado 13 — a moldura do Wine, medida, e o que ela explica
+
+Sete formulários saem 6 px mais largos e 32 px mais altos no oráculo — o Wine
+desenha a moldura **por dentro** da janela X, e a LCL sem window manager não
+desenha nenhuma:
+
+`ficha_dorsal`, `ficha_error`, `ficha_error2`, `ficha_info`, `ficha_info2`,
+`ficha_info3`, `ficha_salida`.
+
+Os cinco que declaram `Width`/`Height` em vez de `ClientWidth` no DFM
+(`ficha_creditos_equipo`, `ficha_enlaza`, `ficha_info4`, `ficha_movertodos`,
+`ficha_warning_2`) medem o mesmo dos dois lados, porque o número do DFM já
+inclui a moldura — e é por isso que a área de cliente deles é **menor** no
+oráculo. Daí vem a única coisa que parecia controle faltando na comparação: o
+`ficha_creditos_equipo` mostra uma barra de rolagem horizontal no oráculo e não
+no port. Não há barra nenhuma no DFM: é o `AutoScroll` do formulário reagindo a
+92 px de cliente contra 124.
+
+O `check_carregado.py` transforma isso em regra e **aborta** se uma captura não
+for nem o cliente nem o cliente mais a moldura — sem isso, todo retângulo de
+controle mediria 3 px à esquerda e 29 acima do lugar, e o resultado sairia
+plausível e errado.
+
+## O que **não** mudou, e é resultado
+
+- **Cor de fundo de execução: 15 de 15 pares batem.** O achado 3 da primeira
+  passada — 13 dos 18 formulários recebem `Color` em `FormCreate`/`FormShow` —
+  está inteiramente portado, e agora medido com a janela na tela em vez de
+  inferido do disassembly.
+- **Ordem de tabulação: 18 de 18 iguais.**
+- **Nenhum controle faltando, sobrando ou fora de posição** nos 15 pares. O que
+  diverge é cor, não geometria.
+- **Os blobs sobrepostos do `jugador` aparecem** — o retrato e as camadas de
+  `Picture` desenham nos dois lados. Eles **não** desenham a mesma cara, e isso
+  é a divergência 3 já registrada (cabelo, barba e `careto` não redesenham); a
+  "contagem fina" que a primeira passada mandou para cá não se faz por
+  screenshot e não precisa: o que interessa é que a região é desenhada, e é.
+- **Os rótulos cortados continuam cortados nos dois lados**, pela mesma fonte
+  substituta. Nada a fazer, como já estava escrito.
+
+## O que sai daqui
+
+| Achado | Para quem |
+|---|---|
+| 6 — 151 `TLabel` com `Color` não pintam (68 divergentes) | [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md) — `Transparent = False` no gerador |
+| 7 — combos de radar vazios; decisão **implementar** | corpo de `estrategia.ComboBoxDrawItem`, do disassembly |
+| 8 — `ficha_warning` e `ficha_enlaza` sem chamador | [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) |
+| 9 — nomes vazios no modelo de ML | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) e [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) |
+| 10 — prefixo de número nas listas de jogador | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
+| 11 — `TStaticText` desabilitado (1 de 37) | [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) |
+| 12 e 13 | nada — são resultado |

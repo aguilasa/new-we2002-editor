@@ -1,0 +1,91 @@
+# golden-25-retorno -- o `Return` do editor de cor, medido EM BYTES.
+#
+# Produto da WTE-TASK-37. Ele e o `golden-16-cor` com uma diferenca so: o
+# editor fecha pela tecla `Return` em vez do clique no `OK`.
+#
+#   bash wte/tools/golden_check.sh wte/tests/roteiros/golden-25-retorno.txt \
+#        --roteiro-port wte/tests/roteiros/golden-25-retorno.port.txt
+#
+# ## Por que ele existe
+#
+# O criterio da task e "nenhuma acao destrutiva alcancavel por `Return`". O
+# `check_retorno.py` mede que 13 dos 18 formularios tem botao `Default` e que
+# UM deles -- o `OK` do `ficha_color` -- dispara um handler que grava 383 bytes
+# por time. Isso e do ORIGINAL: o `Default = True` esta no `.dfm` de 2002, e o
+# `dfm2lfm.py` o copia verbatim.
+#
+# Entao a pergunta que sobra nao e "da para chegar la pelo Return" -- da, nos
+# dois lados --, e sim "os dois lados gravam os MESMOS bytes por esse caminho".
+# Estatica, a resposta e o `.lfm` carregar o mesmo botao; medida, e este
+# roteiro.
+#
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- faixas ----
+#
+# NENHUMA. Os dois remendos de arranque estao portados desde a oitava passagem
+# da WTE-TASK-27; declarar faixa que nao diverge mais REPROVA no
+# `golden_veredito.py`.
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------- o editor de cor ----
+#
+# GroupBox4 (216,8) + colorear (8,176) = (224,184), 97x25 -> centro (272,196).
+! clique 272 196
+~ 4
+
+# A janela `Cor  ` mede os 542x225 do DFM sob Wine, sem moldura -- como o
+# `jugador`, e ao contrario do `ficha_dorsal`.
+> ^Cor
+~ 1
+
+# aclarar (392,152) 25x25 -> centro (404,164).
+! clique 404 164
+~ 2
+
+# O `OK` pelo `Return`, e nao pelo clique: `BitBtn3` e `Default = True` no
+# `.dfm` e no `.lfm`, e este roteiro existe para medir isso EM BYTES.
+! tecla Return
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= PINTAR
+
+# A descarga -- o `0x00403400` escreve pela saida bufferizada do runtime C, e
+# so um `fseek` noutro ponto do mesmo arquivo a esvazia.
+! clique 50 46
+~ 1
+! tecla Down
+~ 6
+= FIM
