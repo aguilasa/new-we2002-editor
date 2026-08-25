@@ -43,10 +43,16 @@ Uma bateria versionada, reproduzível, com resultado registrado.
 mesma sessão podem não passar, se o original recalcular algo ao trocar de
 contexto. É a classe de bug que teste isolado não pega.
 
-**Gravar duas vezes.** O `newWe2002` registra que o editor **não é idempotente**
-— `Load`+`Save` troca os dois primeiros cobradores de cada clube de ML, e
-gravar duas vezes volta ao início. Se o app Lazarus não reproduzir esse
+**Gravar duas vezes.** O `newWe2002` registra que o **`ed.exe`** não é
+idempotente — `Load`+`Save` troca os dois primeiros cobradores de cada clube de
+ML, e gravar duas vezes volta ao início. Se o app Lazarus não reproduzir esse
 vaivém, a segunda gravação diverge mesmo com a primeira idêntica.
+
+> **Medido depois, e a resposta é não.** A [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md)
+> mediu o terceiro ponto num time onde a troca seria visível: uma gravação e
+> duas dão a **mesma** imagem, e os cobradores saem intactos. O `wte.exe` não
+> tem o vaivém — é resultado negativo, registrado em
+> [`golden.md`](../../wte/re/golden.md).
 
 ### Custo
 
@@ -188,7 +194,7 @@ ferramenta nenhuma.
   vez que uma fase posterior escrevesse um roteiro, e a data daquela corrida
   passaria a mentir.
 
-- **O que ficou pendente:**
+- **O que ficou pendente:** *(resolvido em 2026-08-25 — ver abaixo)*
 
   **O vaivém dos cobradores não foi provado, só coberto.** Encaminhado para a
   [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md), que é quem registra
@@ -198,6 +204,14 @@ ferramenta nenhuma.
   não diferirem, o `wte.exe` é idempotente nesse caminho e não há vaivém que
   reproduzir — resultado negativo legítimo, e que precisa ficar escrito, porque
   hoje o enunciado da fase 6 afirma um comportamento herdado de outro binário.
+
+  > **Resolvido pela [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md), em
+  > 2026-08-25.** E a pendência estava pior do que este parágrafo sabia: o
+  > roteiro gravava no time 2, cujos dois primeiros cobradores são iguais, de
+  > modo que a comparação **não podia** dar resposta. Movido para o time 5 e
+  > medido, o terceiro ponto fecha em **0 bytes** entre uma gravação e duas,
+  > com os cobradores intactos nos três estados — **resultado negativo**. Está
+  > escrito em [`golden.md`](../../wte/re/golden.md), como este parágrafo pedia.
 
 - **Arquivos criados/modificados:** ver `git show --stat`. Criados:
   `wte/tools/golden_suite.sh`, `wte/tools/check_golden.py`,

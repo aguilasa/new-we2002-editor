@@ -523,12 +523,15 @@ alimenta e passou a **carregar** essa gravação.
       `check_golden.py`. **48 `PASSOU`, 22 `SEM_ORACULO`, 22 `NAO_APLICAVEL`,
       zero `REPROVOU`**; a japonesa fechou **46 de 46**
 - [x] Edição múltipla e gravação dupla cobertas — os dois roteiros novos da
-      fase 6, verdes nos dois modos na japonesa. **A gravação dupla está
-      coberta, não provada:** o par mede que os dois lados chegam ao mesmo byte
-      depois de duas gravações de tática, e não que exista vaivém de cobradores
-      neste editor — a não-idempotência de que o plano fala é do `ed.exe`. O
-      terceiro ponto (uma gravação × duas) é da
-      [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md)
+      fase 6, verdes nos dois modos na japonesa. **A gravação dupla foi provada
+      em 2026-08-25**, pela
+      [CORR-WTE-104](/docs/tasks/CORR-WTE-104.md): o roteiro gravava num time
+      cujos dois primeiros cobradores são iguais, onde a troca é invisível;
+      movido para um em que diferem, o terceiro ponto (uma gravação × duas)
+      fecha em **0 bytes**, com os cobradores intactos nos três estados. **O
+      `wte.exe` não tem o vaivém** — a não-idempotência de que o plano fala é
+      do `ed.exe`. Resultado negativo, escrito em
+      [`golden.md`](../../wte/re/golden.md)
 - [x] **A europeia hospeda o oráculo — só não para quem troca de time**
       *(medido na WTE-TASK-34, 2026-08-24)*. O `golden-01-arranque` passou
       controle **e** golden ali, byte-idêntico; os outros 22 roteiros trocam de
