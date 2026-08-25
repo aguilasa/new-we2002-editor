@@ -166,9 +166,17 @@ acima são isso.)*
   `wte/re/golden.tsv` inteiro com as 4 corridas novas — as 92 da WTE-TASK-34
   sumiram, e quem avisou foi o `check_golden.py --check`, que passou a acusar
   23 roteiros "com par em disco e ausentes da bateria". Recuperado do
-  `git show HEAD:` e concatenado. **O `--retomar` não é conveniência: sem ele,
-  `--roteiro` não é filtro, é substituição.** Vale um item para quem mexer na
-  bateria de novo.
+  `git show HEAD:` e concatenado. **O `--retomar` não era conveniência: sem ele,
+  `--roteiro` não era filtro, era substituição.**
+
+  > **Consertado em 2026-08-25 pela
+  > [CORR-WTE-113](/docs/tasks/CORR-WTE-113.md)** — o item que este parágrafo
+  > dizia valer a pena abrir. O truncamento passou a valer só para a bateria
+  > **inteira**; corrida parcial (`--roteiro`, ou `--rom` diferente de `ambas`)
+  > preserva o registro e **substitui** a linha do trio em vez de acrescentar.
+  > Medido: 97 linhas entram, 97 saem. A decisão ficou guardada por seis casos
+  > no `test_check_golden.py`, que recortam o bloco do script e o rodam sem
+  > levantar o Wine.
 
   **2. Quatro roteiros de captura falharam antes de dar certo, e cada falha
   ensinou o estado.** O `ficha_movertodos` não abria porque a

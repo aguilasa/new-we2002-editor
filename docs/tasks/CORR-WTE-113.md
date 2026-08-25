@@ -3,7 +3,7 @@ id: CORR-WTE-113
 title: "Correção: `golden_suite.sh --roteiro` trunca o `golden.tsv` inteiro — 96 corridas viram zero"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,18 +120,56 @@ teste: 97 linhas entram, 97 (ou mais) têm de sair.
 
 ## Verificação
 
-- [ ] A reprodução acima devolve **97** nas duas medições
-- [ ] `--roteiro X` duas vezes seguidas não duplica as linhas de X
-- [ ] `python3 wte/tools/check_golden.py --check` verde depois de uma corrida parcial
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] A reprodução acima devolve **97** nas duas medições — antes do conserto
+      dava 97 → 1
+- [x] `--roteiro X` duas vezes seguidas não duplica as linhas de X — medido no
+      caso `test_parcial_ATUALIZA_a_linha_em_vez_de_duplicar`, uma linha por trio
+- [x] `python3 wte/tools/check_golden.py --check` verde
+- [x] `make -C wte check` verde (846 testes, era 832)
+- [x] `roms/` intocada; as corridas de reprodução usaram `--saida` para o
+      scratchpad, e o `golden.tsv` do repositório não foi tocado
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-25
 
 **Resumo do que foi feito:**
 
+Escolhida a saída **principal** da CORR, não a conservadora: o truncamento
+passou a valer só para a bateria **inteira**. Corrida parcial é a que não cobre
+tudo — `--roteiro`, ou `--rom` diferente de `ambas` — e nela o registro é
+preservado. Ela também **anuncia** o que preservou, para quem roda ver a
+diferença na hora.
+
+A segunda metade, que a preservação exige: o `registra()` apaga a linha velha
+do trio `(roteiro, rom, modo)` antes de pôr a nova. Sem isso, preservar viraria
+duplicar, e o `check_golden.py` passaria a ler duas datas para a mesma corrida.
+
+Medido: **97 linhas entram, 97 saem**, contra 97 → 1 antes. E a bateria completa
+**continua truncando**, que é o comportamento certo dela — sem esse caso,
+"preservar" viraria "nunca limpar", e o TSV acumularia corrida de roteiro que
+saiu do disco.
+
 **Problemas encontrados:**
 
+**A guarda quase não pôde existir.** O jeito óbvio de a escrever — rodar o
+script com `--roteiro` e conferir o TSV — dispara a bateria: Wine, `:98` e
+~586 MB de temporário, dentro do `make -C wte check`. O `--listar` não serve
+porque sai **antes** do bloco do TSV, que foi justamente como descobri isso.
+
+A saída foi marcar o bloco no script (`# <<< TSV-DECISAO` … `# >>> TSV-DECISAO`)
+e o teste recortá-lo e rodá-lo com as variáveis postas à mão. Seis casos, sem
+Wine, em 50 ms. As marcas estão comentadas no próprio script para ninguém as
+remover sem saber.
+
+**E a reprodução por `timeout` engana.** Rodar com `timeout 5` deu 97 na
+bateria completa — parecia que ela também tinha deixado de truncar. Não tinha:
+a conferência de declaração dos 24 roteiros roda **antes** do bloco do TSV e
+comeu os 5 segundos. Com 25 segundos, trunca como deve. Medida curta demais dá
+resultado que parece conserto e não é.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/golden_suite.sh` — `PARCIAL`, a decisão, o `registra()` e as marcas
+- `wte/tools/test_check_golden.py` — `TestDecisaoDoTSV`, 6 casos
+- `docs/tasks/37-reconferencia-de-ui.md` — o item que o Log dizia valer abrir

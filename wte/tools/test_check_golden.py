@@ -20,6 +20,7 @@ Wine, e rodam num clone sem a pasta `we-team-editor/`.
 
 from __future__ import annotations
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -252,6 +253,116 @@ class TestPremissaDaGravacaoDupla(unittest.TestCase):
         tp = C.TERCEIRO_PONTO
         self.assertEqual(tuple(self.cobradores(tp["time"])),
                          tp["cobrador_virgem"])
+
+
+class TestDecisaoDoTSV(unittest.TestCase):
+    """A guarda da CORR-WTE-113: corrida parcial NAO apaga o registro.
+
+    O `golden_suite.sh` reescrevia o cabecalho do TSV sempre que `--retomar`
+    nao vinha, e ANTES de qualquer corrida. Com `--roteiro` isso nao filtrava:
+    substituia. Aconteceu de verdade na WTE-TASK-37, levando as 92 corridas da
+    WTE-TASK-34 -- 1,8 hora de relogio -- e so foi notado depois, pelo
+    `check_golden.py --check`.
+
+    O teste recorta o bloco marcado `TSV-DECISAO` do script e o roda com as
+    variaveis postas a mao. E o unico jeito de exercitar a decisao sem levantar
+    o Wine e ocupar o `:98` -- rodar o script inteiro dispararia a bateria, que
+    e o oposto de um teste barato.
+    """
+
+    SCRIPT = C.WTE / "tools" / "golden_suite.sh"
+
+    def bloco(self) -> str:
+        fonte = self.SCRIPT.read_text(encoding="utf-8")
+        i = fonte.index("# <<< TSV-DECISAO")
+        j = fonte.index("# >>> TSV-DECISAO")
+        return fonte[i:j]
+
+    def roda(self, tsv: str, *, escolhidos: list[str], rom: str,
+             retomar: int, registrar: tuple[str, ...] = ()) -> str:
+        """Monta o TSV, roda o bloco, devolve o arquivo resultante."""
+        with tempfile.TemporaryDirectory() as d:
+            alvo = Path(d) / "golden.tsv"
+            alvo.write_text(tsv, encoding="utf-8")
+            decl = "\n".join([
+                "set -euo pipefail",
+                f"SAIDA={alvo}",
+                f"RETOMAR={retomar}",
+                f"ROM={rom}",
+                "ESCOLHIDOS=({})".format(
+                    " ".join(f'"{e}"' for e in escolhidos)),
+            ])
+            chamada = ("\n".join(f'registra {x}' for x in registrar)
+                       if registrar else "")
+            r = subprocess.run(["bash", "-c",
+                                decl + "\n" + self.bloco() + "\n" + chamada],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            return alvo.read_text(encoding="utf-8")
+
+    def tsv(self, *linhas: str) -> str:
+        return CAB + "".join(linhas)
+
+    def test_corrida_parcial_por_roteiro_preserva(self) -> None:
+        """O defeito literal: 97 linhas entram, 97 tem de sair."""
+        entrada = self.tsv(linha("golden-01-arranque", "japonesa", "controle"),
+                           linha("golden-01-arranque", "japonesa", "golden"))
+        saida = self.roda(entrada, escolhidos=["golden-25-retorno"],
+                          rom="ambas", retomar=0)
+        self.assertEqual(saida, entrada)
+
+    def test_corrida_parcial_por_rom_preserva(self) -> None:
+        """`--rom japonesa` tambem e parcial -- metade da bateria."""
+        entrada = self.tsv(linha("golden-01-arranque", "europeia", "controle"))
+        saida = self.roda(entrada, escolhidos=[], rom="japonesa", retomar=0)
+        self.assertEqual(saida, entrada)
+
+    def test_bateria_inteira_ainda_trunca(self) -> None:
+        """O truncamento continua certo onde sempre foi: a corrida completa.
+
+        Sem este caso, "preservar" viraria "nunca limpar", e o TSV acumularia
+        corrida velha de roteiro que saiu do disco.
+        """
+        entrada = self.tsv(linha("golden-01-arranque", "japonesa", "controle"))
+        saida = self.roda(entrada, escolhidos=[], rom="ambas", retomar=0)
+        self.assertEqual(saida, CAB)
+
+    def test_retomar_preserva_como_sempre(self) -> None:
+        entrada = self.tsv(linha("golden-01-arranque", "japonesa", "controle"))
+        saida = self.roda(entrada, escolhidos=[], rom="ambas", retomar=1)
+        self.assertEqual(saida, entrada)
+
+    def test_parcial_ATUALIZA_a_linha_em_vez_de_duplicar(self) -> None:
+        """A outra metade do conserto, e a que a preservacao exige.
+
+        Preservar sem substituir faria a segunda corrida do mesmo par deixar
+        DUAS linhas para o mesmo trio, e o `check_golden.py` passaria a ler
+        duas datas para a mesma coisa.
+        """
+        entrada = self.tsv(linha("golden-25-retorno", "japonesa", "controle"),
+                           linha("golden-01-arranque", "japonesa", "golden"))
+        saida = self.roda(entrada, escolhidos=["golden-25-retorno"],
+                          rom="ambas", retomar=0,
+                          registrar=("golden-25-retorno japonesa controle "
+                                     "REPROVOU 42",))
+        corpo = [l for l in saida.splitlines()[1:] if l]
+        trio = [l for l in corpo if l.startswith("golden-25-retorno\tjaponesa\tcontrole\t")]
+        self.assertEqual(len(trio), 1, saida)
+        self.assertIn("REPROVOU", trio[0])
+        self.assertEqual(len(corpo), 2, saida)
+
+    def test_a_linha_de_outro_par_nao_e_tocada(self) -> None:
+        """Substituir e por trio, nao por roteiro."""
+        entrada = self.tsv(linha("golden-25-retorno", "japonesa", "controle"),
+                           linha("golden-25-retorno", "japonesa", "golden"))
+        saida = self.roda(entrada, escolhidos=["golden-25-retorno"],
+                          rom="ambas", retomar=0,
+                          registrar=("golden-25-retorno japonesa controle "
+                                     "PASSOU 9",))
+        corpo = [l for l in saida.splitlines()[1:] if l]
+        self.assertEqual(len(corpo), 2, saida)
+        self.assertTrue(any(l.startswith("golden-25-retorno\tjaponesa\tgolden\t")
+                            for l in corpo), saida)
 
 
 if __name__ == "__main__":

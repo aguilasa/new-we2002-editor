@@ -228,9 +228,41 @@ if [ "$LISTAR" = 1 ]; then
 fi
 
 # ------------------------------------------------------------------ TSV ----
-if [ ! -f "$SAIDA" ] || [ "$RETOMAR" != 1 ]; then
+#
+# AS DUAS MARCAS ABAIXO SAO LIDAS PELO `test_check_golden.py`. Ele recorta este
+# bloco e o roda com as variaveis postas a mao, para exercitar a decisao sem
+# levantar o Wine nem tocar o `:98`. Nao as remova ao editar daqui para baixo.
+# <<< TSV-DECISAO
+#
+# O TRUNCAMENTO SO VALE PARA A BATERIA INTEIRA -- CORR-WTE-113.
+#
+# Ate ela, o cabecalho era reescrito sempre que `--retomar` nao vinha, e ANTES
+# de qualquer corrida. Com `--roteiro`, isso nao filtrava: SUBSTITUIA. Quem
+# registrasse uma corrida nova apagava o registro de todas as outras, e so
+# descobria depois, pelo `check_golden.py --check` acusando roteiros "com par em
+# disco e ausentes da bateria".
+#
+# Nao e hipotese: aconteceu na WTE-TASK-37 com as 92 corridas da WTE-TASK-34 --
+# 1,8 hora de relogio --, recuperadas a mao do `git show HEAD:`. Medido depois:
+# 97 linhas viravam 1 sem que uma corrida tivesse comecado.
+#
+# Corrida PARCIAL e a que nao cobre a bateria toda: `--roteiro`, ou `--rom`
+# diferente de `ambas`. Nela o registro e preservado, e a linha do trio
+# (roteiro, rom, modo) e SUBSTITUIDA em vez de acrescentada -- senao a segunda
+# corrida do mesmo par duplica a linha, e o `check_golden.py` passa a ler duas
+# datas para a mesma coisa.
+PARCIAL=0
+if [ "${#ESCOLHIDOS[@]}" -gt 0 ]; then PARCIAL=1; fi
+if [ "$ROM" != ambas ]; then PARCIAL=1; fi
+
+if [ ! -f "$SAIDA" ]; then
   printf 'roteiro\trom\tmodo\tveredito\tsegundos\tdata\n' > "$SAIDA"
+elif [ "$RETOMAR" != 1 ] && [ "$PARCIAL" != 1 ]; then
+  printf 'roteiro\trom\tmodo\tveredito\tsegundos\tdata\n' > "$SAIDA"
+else
+  echo ">> registro preservado: $(($(wc -l < "$SAIDA") - 1)) corrida(s) ja em $SAIDA"
 fi
+
 ja_tem() {   # $1 = roteiro, $2 = rom, $3 = modo
   [ "$RETOMAR" = 1 ] || return 1
   grep -qP "^$1\t$2\t$3\t" "$SAIDA"
@@ -238,8 +270,16 @@ ja_tem() {   # $1 = roteiro, $2 = rom, $3 = modo
 
 HOJE="$(date +%F)"
 registra() {   # roteiro rom modo veredito segundos
+  # Tira a linha velha do trio antes de por a nova. Em corrida completa nao ha
+  # o que tirar (o arquivo acabou de ser truncado); em parcial e o que
+  # transforma "acrescenta" em "atualiza".
+  if grep -qP "^$1\t$2\t$3\t" "$SAIDA"; then
+    grep -vP "^$1\t$2\t$3\t" "$SAIDA" > "$SAIDA.tmp"
+    mv -f "$SAIDA.tmp" "$SAIDA"
+  fi
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" "$5" "$HOJE" >> "$SAIDA"
 }
+# >>> TSV-DECISAO
 
 # Uma corrida. Devolve o veredito por eco; nunca aborta a bateria -- roteiro que
 # reprova e RESULTADO, e a tabela existe para registra-lo.
