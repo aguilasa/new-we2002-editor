@@ -1,0 +1,140 @@
+---
+id: CORR-WTE-116
+title: "Correção: o controle do `trace.log` diz \"mkdir re ao lado da cópia\", e ao lado da cópia não funciona"
+type: correção
+category: processo
+status: pendente
+depends_on: []
+---
+
+# CORR-WTE-116: o `re/` vai um nível **acima** do binário, não ao lado dele
+
+## Problema identificado
+
+A [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) achou um defeito real — o
+binário copiado para fora de `wte/build/` morre num diálogo da LCL antes de
+qualquer janela, porque o `Rewrite` do log de trace levanta `EInOutError` — e
+registrou o **controle** que separa essa causa da hipótese errada ("é a pasta
+de assets"). O controle está escrito em **três** lugares, com a mesma frase:
+
+> **Controle:** `mkdir re` **ao lado da cópia**, e o mesmo binário abre a
+> janela principal (522×475) e escreve o `trace.log` ali.
+
+*(Log da WTE-TASK-38 linha 154, e os repasses na
+[WTE-TASK-39](/docs/tasks/39-empacotamento.md) linha 153 e na
+[WTE-TASK-40](/docs/tasks/40-verificacao-final.md) linha 111 — e a 39 é
+justamente quem vai consertar o defeito.)*
+
+**Ao lado da cópia não funciona.** O caminho que o
+[`retrace.pas`](../../wte/src/retrace.pas) monta é
+
+```pascal
+Dir := ExtractFilePath(ParamStr(0));
+Result := IncludeTrailingPathDelimiter(Dir) + '../re/trace.log';
+```
+
+— ou seja, `re/` tem de ser **irmão do diretório do executável**, não irmão do
+executável. O comentário três linhas acima diz exatamente isso (*"o binário
+vive em `wte/build/`; o log vai para `wte/re/`"*), então a frase do controle
+contradiz o código que ela mesma cita.
+
+Quem seguir a receita ao pé da letra cria o diretório no lugar errado, vê o
+mesmo diálogo, e conclui que a causa **não** era o trace — que é a hipótese
+errada de volta, pela porta que o controle existia para fechar. A
+[WTE-TASK-39](/docs/tasks/39-empacotamento.md) é a dona do conserto e a
+[WTE-TASK-40](/docs/tasks/40-verificacao-final.md) tem a condição 3 esperando
+por ele: as duas leem essa frase.
+
+## Evidência
+
+Medido em 2026-08-25, com o binário de `wte/build/wte` copiado para um
+diretório limpo em `/tmp` e o `:98` vazio antes de cada corrida.
+
+**Sem `re/` nenhum** — o diálogo da LCL, e nenhuma janela principal:
+
+```text
+0x20009c "WE2002 - Lazarus Editor": ("wte" "Wte")  362x144+459+440
+```
+
+**Com `re/` ao lado da cópia** (`$D/wte` e `$D/re/`), que é a receita como está
+escrita — **o mesmo diálogo**, e o `re/` continua vazio:
+
+```text
+0x40009c "WE2002 - Lazarus Editor": ("wte" "Wte")  362x144+459+440
+```
+
+**Com `re/` um nível acima** (`$D/sub/wte` e `$D/re/`), que é o que o código
+pede:
+
+```text
+0x200166 " W11 Team Editor PT by chagas_michel! [Lazarus]": ("wte" "Wte")  522x475+132+72
+-rw-rw-r-- 1 ingmar ingmar  605 ago 25 19:21 trace.log
+```
+
+| Layout | Janela que aparece | `trace.log` |
+|---|---|---|
+| só o binário | diálogo 362×144 | não |
+| `re/` **ao lado** do binário | diálogo 362×144 | não |
+| `re/` **um nível acima** | principal **522×475** | **605 B** |
+
+O diagnóstico da task está certo; o que erra é a receita de reproduzi-lo.
+
+## Causa raiz
+
+A frase do controle descreve o `re/` pela posição do **arquivo** (`ao lado da
+cópia`) e o código o resolve pela posição do **diretório** (`<dir>/../re`).
+
+## Correção
+
+### Arquivos: `docs/tasks/38-nome-e-linhagem.md`, `39-empacotamento.md` e `40-verificacao-final.md`
+
+Trocar a frase nos três pelo layout, que não admite leitura dupla:
+
+> **Controle:** com o binário em `<algum>/sub/wte`, criar `<algum>/re/` — o
+> `retrace.pas` resolve `<dir do executável>/../re/trace.log`, então o `re/`
+> é irmão **do diretório** do binário, como `wte/re/` é irmão de `wte/build/`.
+> Feito isso, o mesmo binário abre a janela principal (522×475) e escreve o
+> `trace.log` lá.
+
+Vale acrescentar a alternativa de uma linha, que é a que alguém usaria na
+prática e não depende de layout nenhum:
+
+```sh
+WTE_TRACE_FILE=/tmp/trace.log ./wte
+```
+
+Ela existe no `ResolveArquivo` como primeira opção e responde à mesma pergunta
+sem criar diretório — e serve de segunda evidência, porque isola o trace de
+qualquer coisa relacionada a assets.
+
+### O conserto continua sendo da WTE-TASK-39
+
+Esta correção é só da receita. O defeito — binário que não abre depois de
+movido — é da 39, que é dona da resolução em runtime, e a linha já está lá.
+
+## Arquivos a criar ou modificar
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/38-nome-e-linhagem.md` | modificar |
+| `docs/tasks/39-empacotamento.md` | modificar |
+| `docs/tasks/40-verificacao-final.md` | modificar |
+
+## Verificação
+
+- [ ] `grep -rn "ao lado da cópia" docs/tasks/` sai vazio
+- [ ] A receita nova, seguida ao pé da letra, abre a janela 522×475 e escreve o
+      `trace.log`
+- [ ] `WTE_TRACE_FILE=/tmp/trace.log ./wte` abre a janela sem criar diretório
+- [ ] `make -C wte check` verde
+- [ ] `roms/` intocada
+
+## Log de Execução *(preenchido após execução)*
+
+**Executado em:**
+
+**Resumo do que foi feito:**
+
+**Problemas encontrados:**
+
+**Arquivos criados/modificados:**

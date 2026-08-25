@@ -135,6 +135,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-113](/docs/tasks/CORR-WTE-113.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | `golden_suite.sh --roteiro` sem `--retomar` trunca o `golden.tsv` inteiro antes de qualquer corrida — 97 linhas viram 1, e foi assim que as 92 corridas da WTE-TASK-34 se perderam | Alta | [x] concluída | 2026-08-25 |
 | [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-115](/docs/tasks/CORR-WTE-115.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | O `check_carregado.py` aborta na moldura e não tem `test_*.py`, enquanto o `check_retorno.py`, nascido no mesmo commit, tem | Baixa | [x] concluída | 2026-08-25 |
+| [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | O controle que separa a causa do diálogo da LCL manda `mkdir re` "ao lado da cópia", e ali não funciona: o `retrace.pas` resolve `<dir do executável>/../re/` — medido nos três layouts | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -252,6 +253,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-113 — fazer o `--roteiro` preservar o registro, e guardar a preservação com teste
 - [x] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
 - [x] CORR-WTE-115 — escrever o `test_check_carregado.py` com a recusa da moldura plantada
+- [ ] CORR-WTE-116 — trocar a receita do `re/` pelo layout que o `retrace.pas` realmente resolve
 
 ## Detalhes por correção
 
@@ -2050,3 +2052,23 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** escrever o teste no molde do `test_check_retorno.py`, com a captura
   impossível, os dois casos bons (cliente e cliente + moldura, com deslocamento
   `(0,0)` e `(3,29)`) e o formulário sem `ClientWidth` nem `Width`
+
+### CORR-WTE-116
+
+- **Arquivo com problema:** `docs/tasks/38-nome-e-linhagem.md` (linha 154),
+  `39-empacotamento.md` (153) e `40-verificacao-final.md` (111)
+- **Sintoma:** o controle que a WTE-TASK-38 usou para separar "é o log de
+  trace" de "é a pasta de assets" está escrito como `mkdir re` **ao lado da
+  cópia**, e ali não funciona: o `ResolveArquivo` do `retrace.pas` monta
+  `<dir do executável>/../re/trace.log`, então o `re/` é irmão **do diretório**
+  do binário. Quem seguir a receita vê o mesmo diálogo e conclui que a causa não
+  era o trace — a hipótese errada de volta, pela porta que o controle fechava.
+  A 39 é a dona do conserto e lê essa frase
+- **Como foi detectado:** reproduzido nos três layouts nesta revisão, com o
+  `:98` limpo antes de cada corrida: só o binário → diálogo 362×144; `re/` ao
+  lado → **o mesmo diálogo**, `re/` vazio; `re/` um nível acima → janela
+  principal **522×475** e `trace.log` de **605 B**
+- **Fix:** trocar a frase nos três pelo layout (`<algum>/sub/wte` com
+  `<algum>/re/`), e registrar a alternativa que não depende de layout:
+  `WTE_TRACE_FILE=/tmp/trace.log ./wte`, que é a primeira opção do próprio
+  `ResolveArquivo`
