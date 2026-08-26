@@ -136,6 +136,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-114](/docs/tasks/CORR-WTE-114.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | As três divergências que a WTE-TASK-37 mediu foram parqueadas numa task já concluída; o `divergencias.md` não tem nenhuma, e uma delas se declara "ainda sem entrada aqui" | Média | [x] concluída | 2026-08-25 |
 | [CORR-WTE-115](/docs/tasks/CORR-WTE-115.md) | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | O `check_carregado.py` aborta na moldura e não tem `test_*.py`, enquanto o `check_retorno.py`, nascido no mesmo commit, tem | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | O controle que separa a causa do diálogo da LCL manda `mkdir re` "ao lado da cópia", e ali não funciona: o `retrace.pas` resolve `<dir do executável>/../re/` — medido nos três layouts | Baixa | [x] concluída | 2026-08-25 |
+| [CORR-WTE-117](/docs/tasks/CORR-WTE-117.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | O `RaizDosAssets` procura em quatro lugares e a `MensagemDeAssetsAusentes` promete três; o quarto (`<exe>/../../assets`) não tem comentário nem quem o crie | Média | [ ] pendente | — |
+| [CORR-WTE-118](/docs/tasks/CORR-WTE-118.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | A seção de repasse da WTE-TASK-39 ainda manda renomear `wte.lpi`/`wte.lpr`/`build/wte`, e o Log da mesma task revogou a instrução — a seção não foi anotada | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -254,6 +256,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-114 — abrir no `divergencias.md` as entradas das três candidatas da reconferência de UI
 - [x] CORR-WTE-115 — escrever o `test_check_carregado.py` com a recusa da moldura plantada
 - [x] CORR-WTE-116 — trocar a receita do `re/` pelo layout que o `retrace.pas` realmente resolve
+- [ ] CORR-WTE-117 — decidir o que é o quarto candidato de assets: documentá-lo e anunciá-lo, ou apagá-lo
+- [ ] CORR-WTE-118 — anotar na WTE-TASK-39 que a renomeação do repasse não foi executada
 
 ## Detalhes por correção
 
@@ -2072,3 +2076,40 @@ dizer "fechada e fora do backlog", não "corrigida".
   `<algum>/re/`), e registrar a alternativa que não depende de layout:
   `WTE_TRACE_FILE=/tmp/trace.log ./wte`, que é a primeira opção do próprio
   `ResolveArquivo`
+
+### CORR-WTE-117
+
+- **Arquivo com problema:** `wte/src/wte_datafiles.pas`
+- **Sintoma:** `RaizDosAssets` percorre **quatro** candidatos e a
+  `MensagemDeAssetsAusentes`, no mesmo arquivo, lista **três**. O que falta é o
+  `candidatos[3]` (`<dir do executável>/../../assets`): é a única linha do
+  módulo sem comentário, ninguém no repositório o cria — o `make -C wte assets`
+  liga `wte/assets`, que é o `[1]` — e quem puser os assets ali é atendido sem
+  a mensagem nunca ter oferecido o lugar. O critério da task e o `wte/README.md`
+  repetem o três
+- **Como foi detectado:** leitura do módulo com `grep -n "candidatos\["` contra
+  os itens numerados da mensagem, e a mensagem medida nesta revisão com a árvore
+  instalada e **movida** — ela sai com três caminhos, resolvidos para o lugar
+  novo
+- **Fix:** decidir o que o quarto é. Se for caso previsto, comentar a linha e
+  acrescentar o item à mensagem (e corrigir o número nos dois documentos); se
+  for sobra, apagá-lo e reduzir o array — recomendada, porque o `[1]` já cobre
+  desenvolvimento e o `[2]` instalação. Mais uma guarda que exija um item de
+  mensagem por candidato relativo
+
+### CORR-WTE-118
+
+- **Arquivo com problema:** `docs/tasks/39-empacotamento.md`, seção
+  "A renomeação, com o inventário já medido" (linha 210)
+- **Sintoma:** a seção — cujo título diz *"o que a WTE-TASK-38 decidiu, e que
+  esta task aplica"* — manda `wte.lpi`, `wte.lpr` e `build/wte` passarem a levar
+  o slug. O Log da mesma task, na linha 136, revoga: o projeto continua se
+  chamando `wte` na árvore e o slug entra no `install`. A seção não foi anotada,
+  e a árvore concorda com o Log. O `wte/README.md` registra a reversão
+  corretamente, então o único documento fora de sincronia é a própria task
+- **Como foi detectado:** `grep -n` das duas frases no mesmo arquivo, cruzado
+  com `ls wte/wte.lpi wte/wte.lpr wte/build/wte` e com a instalação medida nesta
+  revisão (13 arquivos, o binário instalado é o único com o slug)
+- **Fix:** anotar a seção — título com **não executada** e a primeira linha
+  dizendo o que valeu —, guardando o inventário, que continua correto para o dia
+  em que a renomeação vier a acontecer
