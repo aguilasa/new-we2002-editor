@@ -35,6 +35,13 @@ que pode mudar bytes, por três motivos concretos:
    Microsoft traduz `0x0A` ↔ `0x0D 0x0A` e **corrompe a imagem de CD**. Hoje o
    [CdImage.cpp](../src/core/CdImage.cpp) está correto nos dois `open`; a
    questão é continuar correto.
+
+   Há **um** `ofstream` em modo texto no core, e ele é conhecido e aceito: o do
+   sidecar `<imagem>_url.txt`, em [Database.cpp](../src/core/Database.cpp). Ele
+   não toca a imagem de CD, e a decisão de deixá-lo assim está na
+   [§11](#diferença-de-plataforma-que-ficou-de-propósito). Quem auditar
+   `binary` daqui em diante vai encontrá-lo: ele é a exceção esperada, não um
+   descuido.
 3. **Padding de struct.** Nenhuma struct é gravada em bloco (`Save` escreve
    campo a campo), então o risco é baixo — mas é o golden test que diz isso, não
    eu.
@@ -614,6 +621,14 @@ que o editor escreve que **não** é a imagem de CD. Não afeta paridade nenhuma
 os dois lados leem em modo texto, então o arquivo atravessa as plataformas sem
 problema. Trocar para `ios::binary` mudaria o que o Bloco de Notas mostra sem
 ganhar nada.
+
+**Confirmado de fora em 2026-08-26**, por um caminho que esta fase não tinha: o
+`compare_dumps.py` do `wte/`, rodado no Windows, mede o sidecar dos **dois**
+lados e acusa `sidecar_igual = nao` com exatamente estes números. O lado Pascal
+grava 1911 nas duas plataformas — ele usa `TFileStream` binário e escreve o
+byte `10` à mão, por decisão própria (`wte/re/tipos.md`, decisão 5). Ou seja: a
+diferença é do C++, é a que está escrita aqui, e o `nao` naquela coluna **não é
+regressão**. Detalhe na §6 de [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
 
 ### O item que ficou aberto
 

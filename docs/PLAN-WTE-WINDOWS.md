@@ -386,50 +386,48 @@ Com todas as letras:
 
 ---
 
-## 6. Um achado que **não é** do `wte/`: o sidecar `_url.txt` sai com CRLF
+## 6. A coluna do sidecar, e por que ela **não** é um achado
 
-A única coluna do `fase-3.tsv` que não bateu com o Linux:
+A única coluna do `fase-3.tsv` que não bate com a medição do Linux:
 
 | Coluna | Linux | Windows |
 |---|---:|---:|
 | `sidecar_bytes` | 1911 | **3822** |
 | `sidecar_igual` | sim | **não** |
 
-3822 é exatamente 2 × 1911 — o arquivo tem 1911 linhas vazias, e cada `\n`
-virou `\r\n`.
+3822 é exatamente 2 × 1911 — o arquivo tem 1911 linhas vazias, e cada `\n` do
+lado C++ virou `\r\n`.
 
-**Os dois lados não fazem a mesma coisa, e quem diverge é o C++:**
+**Isto já estava registrado**, e como decisão, não como defeito: a §11 do
+[/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md), em *"Diferença de plataforma
+que ficou, de propósito"*, traz os mesmos dois números, identifica o `ofstream`
+em modo texto e conclui — *"não afeta paridade nenhuma: os dois lados leem em
+modo texto (…) trocar para `ios::binary` mudaria o que o Bloco de Notas mostra
+sem ganhar nada"*.
 
-- o Pascal ([../wte/src/we2002_database.pas](../wte/src/we2002_database.pas),
-  `WriteUrlSidecar`) grava por `TFileStream` binário e escreve o byte `10` à
-  mão. O comentário diz o porquê, e é deliberado: *"sem #13 e sem BOM"*. Dá
-  1911 nas duas plataformas;
-- o C++ ([../src/core/Database.cpp](../src/core/Database.cpp)) abre com
-  `url_file.open(UrlSidecarPath(image), std::ios::trunc)` — **sem
-  `std::ios::binary`**. Em modo texto o runtime do Windows traduz `\n` para
-  `\r\n`.
+O que esta porta acrescenta é a **outra metade da comparação**, que a fase 7
+não tinha como ver: o lado Pascal.
 
-Isso é um defeito do **`newWe2002`**, não do `wte/`, e é exatamente o risco 2
-que a §1 do [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md) nomeia — *"se algum
-`open` perder o `std::ios::binary`, o runtime da Microsoft traduz `0x0A` ↔
-`0x0D 0x0A`"*. Aquela seção auditou o `CdImage.cpp` e **não** o `ofstream` do
-sidecar.
+| Lado | Como escreve | Linux | Windows |
+|---|---|---:|---:|
+| C++ — [../src/core/Database.cpp](../src/core/Database.cpp) | `ofstream` com `std::ios::trunc`, **sem** `binary` | 1911 | 3822 |
+| Pascal — [../wte/src/we2002_database.pas](../wte/src/we2002_database.pas), `WriteUrlSidecar` | `TFileStream` binário, byte `10` à mão | 1911 | **1911** |
 
-Por que os golden tests nunca pegaram: eles comparam a **imagem de CD**, e o
-sidecar é um arquivo ao lado.
+O Pascal não segue o C++ aqui, e é deliberado dos dois lados: o comentário do
+`WriteUrlSidecar` diz *"sem #13 e sem BOM"* porque a decisão 5 do
+`wte/re/tipos.md` mandou portar à mão em vez de usar `TStringList`, cujo
+`SaveToFile` usaria o `LineEnding` da plataforma.
 
-**Não foi consertado aqui, por três razões:**
+**Consequência prática, e é só esta:** quem rodar `compare_dumps.py --medir` no
+Windows vê `sidecar_igual = nao`, e isso **não é regressão**. Os dois lados
+continuam gravando na imagem de CD exatamente os mesmos bytes — que é o que as
+outras treze colunas medem, e todas batem.
 
-1. é outro produto, e este trabalho é do `wte/`;
-2. o `Database.cpp` é **gerado** — o conserto é uma regra do
-   [../tools/port_database.py](../tools/port_database.py), linhas 73–75, e a
-   saída teria de ser regerada e reconferida;
-3. **há uma decisão a tomar antes**, e ela não é minha: o `ed.exe` de 2002 era
-   MFC em modo texto no Windows, então CRLF pode ser o comportamento
-   *original* — e o critério do `newWe2002` é clonar o original inclusive nos
-   defeitos. Hoje o port não está nem num nem noutro: escreve LF no Linux e
-   CRLF no Windows, ou seja, é inconsistente **consigo mesmo**. Qualquer das
-   duas saídas é melhor do que isso, mas a escolha é do dono do produto.
+**O que continua sem decisão registrada** é se o `wte/` deveria seguir o C++ e
+escrever CRLF no Windows. Não é urgente e não é desta porta: o sidecar não é
+lido por lado nenhum (a §"O `Load` do sidecar" do
+[../wte/re/fase-3.md](../wte/re/fase-3.md) mede isso), e o `wte/` nunca teve
+paridade de sidecar como critério.
 
 ---
 

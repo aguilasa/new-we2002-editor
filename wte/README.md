@@ -309,6 +309,15 @@ A frase, para reusar:
   titular, e o ramo do reserva segue sem régua.
 - **Outra distribuição, outra versão de GTK2, ou Wayland.** A condição 3 foi
   medida nesta máquina, com X.
+- **A bateria golden no Windows** — e ela nunca vai rodar lá: depende de Xvfb,
+  `xdotool` e Wine. O que *está* medido ali é a camada de dados (zero
+  divergência contra o `we2002_core`, nas duas ROMs) e a bateria de ferramentas;
+  o resto está na §5 de
+  [`../docs/PLAN-WTE-WINDOWS.md`](../docs/PLAN-WTE-WINDOWS.md).
+- **Os campos de nome em kanji, no Windows.** Eles aparecem como `?????` sobre
+  a ROM japonesa. Pode ser idêntico ao GTK2 — o app não mapeia fonte japonesa
+  em lado nenhum — ou ser efeito da página de código. **Não foi medido dos dois
+  lados**, e até que seja não se afirma nada sobre ele.
 
 ### Divergente por decisão
 

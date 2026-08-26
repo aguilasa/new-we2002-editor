@@ -39,7 +39,19 @@ Quem quiser refazer chama `--medir` a mao, ou roda o
 gerado contra a evidencia, que e o que o resto da bateria faz.
 
 **`roms/` nunca e alvo.** Copia em `work/`, sempre -- os tres editores gravam
-in-place e cada imagem tem ~474 MB.
+in-place e cada imagem tem ~474 MB. `WTE_WORK` move o diretorio de copias para
+fora da arvore, que e o que se quer quando o repositorio mora dentro de uma
+pasta sincronizada.
+
+**A MEDICAO DE REFERENCIA E A DO LINUX.** O `--medir` roda no Windows e da o
+mesmo resultado no que importa -- 0 divergencia no dump e 0 byte no round-trip,
+nas duas ROMs, medido em 2026-08-26 --, mas duas colunas mudam sem que nada
+tenha regredido: o sidecar `_url.txt` sai com CRLF do lado C++ ali (3822 bytes
+contra 1911), porque o `ofstream` dele e aberto em modo texto. E diferenca de
+plataforma REGISTRADA DE PROPOSITO na §11 do `docs/PLAN-WINDOWS.md`, nao
+defeito; o lado Pascal grava LF nas duas plataformas, por decisao propria. Nao
+commite o `fase-3.tsv` de uma corrida Windows: ver a §6 de
+`docs/PLAN-WTE-WINDOWS.md`.
 """
 
 from __future__ import annotations
@@ -252,6 +264,26 @@ def medir(tmp: Path) -> int:
         for l in linhas:
             w.writerow(l)
     print(f"compare_dumps: {OUT_TSV.relative_to(ROOT)}: {len(linhas)} ROM(s)")
+
+    # O AVISO SO EXISTE PORQUE ESTA MEDICAO PASSOU A RODAR EM DUAS PLATAFORMAS.
+    #
+    # O `fase-3.tsv` versionado e a evidencia do Linux. Uma corrida no Windows
+    # o reescreve inteiro, e duas colunas mudam sem que nada tenha regredido --
+    # o sidecar `_url.txt` sai com CRLF do lado C++ ali (`ofstream` em modo
+    # texto, diferenca de plataforma registrada de proposito na §11 do
+    # `docs/PLAN-WINDOWS.md`), enquanto o Pascal grava LF nas duas.
+    #
+    # Commitar isso trocaria uma medicao por outra, feita noutra maquina e com
+    # outro compilador, e o `sidecar_igual = nao` viraria a evidencia oficial.
+    if os.name != "posix":
+        print()
+        print("AVISO: esta corrida NAO e a de referencia.")
+        print(f"       O {OUT_TSV.relative_to(ROOT).as_posix()} versionado e a "
+              "medicao do Linux; nao commite este.")
+        print("       Duas colunas divergem la sem regressao nenhuma -- o "
+              "sidecar `_url.txt`")
+        print("       sai com CRLF do lado C++ no Windows. Ver a §6 de "
+              "docs/PLAN-WTE-WINDOWS.md.")
     return 0
 
 
