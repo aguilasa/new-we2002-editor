@@ -50,20 +50,27 @@ COPY := $(WORK)/$(notdir $(IMAGE))
 
 .DEFAULT_GOAL := help
 .PHONY: help configure build run run-jp run-98 copy fresh test test-release \
-        golden golden-gui install uipreview gen gen-check clean distclean
+        golden golden-gui install uipreview gen gen-check clean distclean \
+        run-obocaman run-obocaman-98 run-lazarus run-lazarus-98
 
 # ------------------------------------------------------------------ help ----
 
 help:
 	@echo 'Alvos:'
 	@echo '  build         compila o preset $$(PRESET) (atual: $(PRESET))'
-	@echo '  run           compila e abre o editor sobre uma copia de $$(IMAGE)'
+	@echo '  run           compila e abre o newWe2002 sobre uma copia de $$(IMAGE)'
 	@echo '  run-jp        idem, com roms/japanese-shift-jis.bin'
 	@echo '  run-98        run forcando DISPLAY=$(XVFB) (validacao visual)'
+	@echo
+	@echo '  Os tres editores deste repositorio, cada um sobre a propria copia:'
+	@echo '  run             o newWe2002 (port Qt do ed.exe) -- e o `run` acima'
+	@echo '  run-obocaman    o we-team-editor.exe do Obocaman, sob Wine 32 bits'
+	@echo '                  (alias de `wte`, o nome antigo)'
+	@echo '  run-lazarus     o app Lazarus deste projeto, nativo'
+	@echo '  ...-98          qualquer um dos tres forcando DISPLAY=$(XVFB)'
+	@echo
 	@echo '  oracle        abre o ed.exe original sob Wine (runner do Bottles)'
 	@echo '  oracle-98     oracle forcando DISPLAY=$(XVFB)'
-	@echo '  wte           abre o WE Team Editor do Obocaman na tela ATUAL'
-	@echo '  wte-98        idem, forcando DISPLAY=$(XVFB)'
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -79,6 +86,7 @@ help:
 	@echo 'Preset atual: $(PRESET)  ->  $(BUILD)/'
 	@echo 'Imagem:       $(IMAGE)'
 	@echo 'Copia:        $(COPY)'
+	@echo 'Copia Lazarus: $(LAZ_COPY)'
 
 # ----------------------------------------------------------------- build ----
 
@@ -108,7 +116,7 @@ $(WORK):
 copy: $(COPY)
 
 fresh:
-	@rm -rf '$(COPY)' '$(ORACLE_DIR)' '$(WTE_COPY)'
+	@rm -rf '$(COPY)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
 	@$(MAKE) --no-print-directory copy
 
 run: build $(COPY)
@@ -260,6 +268,55 @@ wte: $(WTE_COPY)
 
 wte-98:
 	@$(MAKE) --no-print-directory wte DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
+
+# ------------------------------------------------- os dois outros editores ---
+#
+# SAO TRES EDITORES NESTE REPOSITORIO, e `make run` abre o primeiro deles:
+#
+#   run              newWe2002 -- o port Qt do `ed.exe` (Moriero, 2002)
+#   run-obocaman     we-team-editor.exe -- o do Obocaman, sob Wine 32 bits
+#   run-lazarus      o app Lazarus deste projeto, nativo
+#
+# Os dois de baixo existiam e nao se alcancavam daqui: o do Obocaman so pelo
+# nome `wte`, que nao diz de quem e, e o Lazarus so por `make -C wte run`, que
+# nao aparece no `make help` da raiz. Os nomes abaixo sao o par simetrico.
+#
+# Os TRES gravam in-place, entao cada um trabalha sobre a PROPRIA copia -- ver
+# a mesma decisao no alvo `wte` acima. `make fresh` descarta as tres.
+
+.PHONY: run-obocaman run-obocaman-98 run-lazarus run-lazarus-98
+
+# Alias de `wte`, e so isso -- a receita mora la, com as guardas do stack i386
+# e do prefix win32. Dois nomes para o mesmo alvo e deliberado: `wte` e o nome
+# que os docs e o CLAUDE.md citam, e `run-obocaman` e o que se acha no help.
+run-obocaman:
+	@$(MAKE) --no-print-directory wte
+
+run-obocaman-98:
+	@$(MAKE) --no-print-directory wte-98
+
+# O app Lazarus. A compilacao e a resolucao dos assets moram no wte/Makefile;
+# aqui fica a copia da imagem, que e o que aquele alvo nao faz -- o `run` de la
+# abre o binario sem argumento, e o app entao nao tem imagem para editar.
+LAZ_BIN  := wte/build/wte
+LAZ_COPY := $(WORK)/laz-$(notdir $(IMAGE))
+
+$(LAZ_COPY): $(IMAGE) | $(WORK)
+	@test -s '$(IMAGE)' || { echo 'ERRO: imagem ausente: $(IMAGE)'; exit 1; }
+	@echo '>> copiando $(IMAGE) -> $@  (~474 MB)'
+	@cp --reflink=auto '$(IMAGE)' '$@'
+
+run-lazarus: $(LAZ_COPY)
+	@$(MAKE) --no-print-directory -C wte build
+	@# Os 198 bitmaps e o dat.bin sao do editor do Obocaman e nao sao
+	@# versionados; o symlink e idempotente e da erro legivel se a pasta faltar.
+	@$(MAKE) --no-print-directory -C wte assets >/dev/null
+	@echo '>> $(LAZ_BIN) $(LAZ_COPY)   (DISPLAY=$(DISPLAY))'
+	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') ./$(LAZ_BIN) '$(LAZ_COPY)' $(ARGS)
+
+run-lazarus-98:
+	@$(MAKE) --no-print-directory run-lazarus \
+	  DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ----------------------------------------------------------------- testes ---
 
