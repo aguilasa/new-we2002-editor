@@ -205,10 +205,24 @@ do DFM mais o sufixo ` [Lazarus]` — critério de fidelidade de tela, e é o qu
 separa os dois lados no mesmo `:98`. Trocá-lo derrubaria os **27** roteiros do
 lado port.
 
-### A renomeação, com o inventário já medido
+### A renomeação, com o inventário já medido — **não executada**
 
-`wte.lpi`, `wte.lpr` e `build/wte` passam a levar o slug. Quem os cita, medido
-em 2026-08-25 com `grep -rl`:
+> **O repasse previa isto e a execução decidiu o contrário.** Ver o Log desta
+> mesma task e a seção *"O binário se chama `wte` na árvore e `we2002Lazarus`
+> instalado"* do [`wte/README.md`](../../wte/README.md), que traz a razão:
+> `wte.lpi`, `wte.lpr` e `build/wte` **continuam** com o nome da árvore, e o
+> slug entra no `install`. A árvore concorda — os três seguem com o nome
+> antigo, e só o binário instalado leva o slug.
+>
+> **O inventário abaixo fica porque continua correto**: é quem citaria os três
+> arquivos **se** a renomeação vier a acontecer, e refazê-lo custaria o mesmo
+> `grep -rl`. Anotado pela
+> [CORR-WTE-118](/docs/tasks/CORR-WTE-118.md) em 2026-08-26 — a instrução
+> estava viva nesta seção enquanto a revogação morava setenta linhas acima, no
+> Log, sem nada ligando uma à outra.
+
+Se a renomeação for feita algum dia, quem cita os três — medido em 2026-08-25
+com `grep -rl`:
 
 - **3 ferramentas:** `wte/tools/golden_run_laz.sh`, `wte/tools/compara_tela.sh`,
   `wte/tools/captura_ui.sh` (as três apontam para `build/wte`; as duas últimas

@@ -164,10 +164,14 @@ programa é a barra de tarefas, que lê o `Application.Title`.
 `WE2002 Team Editor (Lazarus)` — tirando o parêntese, o nome do Obocaman letra
 por letra, que é exatamente o que a §2 do plano proíbe.
 
-**O que falta, e é da [WTE-TASK-39](../docs/tasks/39-empacotamento.md):**
-renomear `wte.lpi`/`wte.lpr`/`build/wte` para o slug (são **3** arquivos e
-**3** ferramentas que os citam), e criar `packaging/` com o `.desktop`, o
-AppStream e o ícone.
+**O que a [WTE-TASK-39](../docs/tasks/39-empacotamento.md) fez, e o que ela
+decidiu não fazer.** O `packaging/` existe — `.desktop`, AppStream e os sete
+PNG do ícone —, e o `install` põe 13 arquivos num prefixo. A renomeação de
+`wte.lpi`/`wte.lpr`/`build/wte` para o slug **não aconteceu**, por decisão: a
+razão está na seção *"O binário se chama `wte` na árvore e `we2002Lazarus`
+instalado"*, mais abaixo. Este parágrafo dizia que ela faltava até 2026-08-26
+([CORR-WTE-118](../docs/tasks/CORR-WTE-118.md)), contradizendo aquela seção
+neste mesmo arquivo.
 
 ---
 

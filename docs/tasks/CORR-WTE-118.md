@@ -3,7 +3,7 @@ id: CORR-WTE-118
 title: "Correção: a seção de renomeação da WTE-TASK-39 ainda manda renomear o que a própria task decidiu não renomear"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -125,18 +125,47 @@ e refazê-los custaria o mesmo `grep -rl`.
 
 ## Verificação
 
-- [ ] `grep -n "passam a levar o slug" docs/tasks/39-empacotamento.md` não
-      aparece mais como instrução sem ressalva
-- [ ] A seção diz, no título ou na primeira linha, que não foi executada
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] `grep -n "passam a levar o slug" docs/tasks/39-empacotamento.md` sai
+      vazio — a frase foi reescrita como condicional
+- [x] A seção diz, **no título**, que não foi executada
+- [x] `make -C wte check` verde (865 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-26
 
 **Resumo do que foi feito:**
 
+O título da seção passou a dizer **— não executada**, e a primeira coisa depois
+dele é a ressalva: o repasse previa, a execução decidiu o contrário, e a razão
+está no Log e no `wte/README.md`. A frase que mandava renomear virou
+condicional (*"se a renomeação for feita algum dia, quem cita os três…"*), de
+modo que o inventário medido continua servindo sem se passar por instrução.
+
 **Problemas encontrados:**
 
+**O `wte/README.md` se contradizia, e a CORR o citava como o documento que
+estava certo.** Ele registra a reversão com a razão na linha 201 — isso é
+verdade —, mas vinte e sete linhas acima ainda dizia:
+
+> **O que falta, e é da WTE-TASK-39:** renomear `wte.lpi`/`wte.lpr`/`build/wte`
+> para o slug […], e criar `packaging/` com o `.desktop`, o AppStream e o ícone.
+
+Falso duas vezes: o `packaging/` existe (`.desktop`, AppStream e os sete PNG) e
+a renomeação foi decidida contra. O mesmo arquivo dizia as duas coisas, a 27
+linhas de distância — que é exatamente o defeito desta correção, no documento
+que ela apontava como referência.
+
+Reescrito para dizer o que a task fez e o que ela decidiu **não** fazer,
+apontando para a seção que traz a razão. O `wte/Makefile:138` foi conferido e
+já registrava a decisão corretamente.
+
+Sobram duas ocorrências vivas da frase `renomear wte.lpi…`, no `Makefile` e no
+`README.md`: as duas dizem *"não foi feito"*. São registro da não-execução, que
+é o oposto de instrução viva.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/39-empacotamento.md` — o título e a ressalva
+- `wte/README.md` — a contradição, achada na varredura
