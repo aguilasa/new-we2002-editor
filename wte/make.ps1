@@ -89,6 +89,28 @@ function Get-LazarusDir {
     return (Split-Path $laz -Parent)
 }
 
+function Get-FpcDir {
+    # O DIRETORIO do `fpc.exe`, para entrar no PATH.
+    #
+    # NAO E DETALHE. Treze testes de `tools/` compilam Pascal de verdade --
+    # `test_camada_dados.pas`, `test_render.pas`, `test_bmp.pas`,
+    # `test_mcr.pas`, `test_ml.pas`, `test_preco.pas`, os offsets -- e todos
+    # procuram `fpc` com `shutil.which`. O instalador do Lazarus no Windows
+    # NAO poe o `fpc` no PATH, entao sem esta funcao os treze PULAM dizendo
+    # "sem fpc -- ... NAO foi compilado nesta execucao". Pulo honesto, mas e
+    # a camada de dados inteira deixando de ser medida.
+    if ($env:WTE_FPC) { return (Split-Path $env:WTE_FPC -Parent) }
+    $noPath = Get-Command fpc -ErrorAction SilentlyContinue
+    if ($noPath) { return (Split-Path $noPath.Source -Parent) }
+    $arvore = try { Get-LazarusDir } catch { $null }
+    if ($arvore) {
+        $c = Get-ChildItem (Join-Path $arvore 'fpc') -Filter 'fpc.exe' `
+             -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($c) { return $c.Directory.FullName }
+    }
+    return $null
+}
+
 function Get-Bash {
     # NAO e `bash` sem caminho. `C:\Windows\System32\bash.exe` e o atalho do
     # WSL, e o `CreateProcess` procura em System32 ANTES do PATH -- por o Git
@@ -131,6 +153,18 @@ if ($bash) {
     if (-not $env:LC_ALL) { $env:LC_ALL = 'C.UTF-8' }
 }
 
+# O `fpc` no PATH, pela razao que a `Get-FpcDir` explica.
+$fpcDir = Get-FpcDir
+if ($fpcDir -and ($env:PATH -notlike "*$fpcDir*")) {
+    $env:PATH = "$fpcDir;$env:PATH"
+}
+
+# E a arvore do Lazarus, que o `check_lcl_props.py` procura.
+if (-not $env:WTE_LAZARUS_DIR) {
+    $d = try { Get-LazarusDir } catch { $null }
+    if ($d) { $env:WTE_LAZARUS_DIR = $d }
+}
+
 # ------------------------------------------------------------------- alvos --
 
 function Invoke-Help {
@@ -150,6 +184,9 @@ function Invoke-Help {
     $laz = try { Get-Lazbuild } catch { '<ausente>' }
     Write-Host "  lazbuild        $laz"
     Write-Host "  arvore Lazarus  $(try { Get-LazarusDir } catch { '<ausente>' })"
+    Write-Host "  fpc             $(if ($fpcDir) { Join-Path $fpcDir 'fpc.exe' } else { '<ausente -- 13 testes pulam>' })"
+    $gpp = Get-Command g++ -ErrorAction SilentlyContinue
+    Write-Host "  g++             $(if ($gpp) { $gpp.Source } else { '<ausente -- o confronto bilingue dos offsets pula>' })"
     Write-Host "  bash            $(if ($bash) { $bash } else { '<ausente -- instale o Git for Windows>' })"
     Write-Host "  python          $(try { Get-Python } catch { '<ausente>' })"
     Write-Host ''
@@ -257,25 +294,40 @@ function Invoke-Check {
         return
     }
     if (-not $env:WTE_LAZARUS_DIR) { $env:WTE_LAZARUS_DIR = Get-LazarusDir }
+    # NAO ha caso especial aqui, e nao deve haver. Gerador que nao pode medir
+    # diz `PULADO` e sai 0 por conta propria -- e o que o `check_lcl_combo.py`
+    # sempre fez e o que o `check_lcl_props.py` passou a fazer quando a LCL do
+    # disco nao e a versao pinada. Quem sabe se mediu e a ferramenta; este
+    # laco so conta.
     $falhou = @()
+    $pulados = @()
     foreach ($g in $geradores) {
         Write-Host ">> $($g.Name) --check"
-        & $py $g.FullName --check
+        $saida = & $py $g.FullName --check 2>&1
+        $saida | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0) {
             $falhou += "$($g.Name) [exit $LASTEXITCODE]"
+        } elseif (($saida | Out-String) -match 'PULADO') {
+            $pulados += $g.Name
         }
     }
-    if ($falhou) {
+    Write-Host ''
+    if ($pulados) {
+        Write-Host "PULADOS (a ferramenta disse por que): $($pulados.Count)"
+        $pulados | ForEach-Object { Write-Host "  $_" }
         Write-Host ''
+    }
+    if ($falhou) {
         Write-Host "FALHOU: $($falhou.Count) de $($geradores.Count)"
         $falhou | ForEach-Object { Write-Host "  $_" }
         Write-Host ''
-        Write-Host 'Antes de tratar como regressao, veja a secao 4 de'
-        Write-Host '/docs/PLAN-WTE-WINDOWS.md: a maioria dos geradores le o'
+        Write-Host 'Antes de tratar como regressao, veja a secao 5 de'
+        Write-Host 'docs/PLAN-WTE-WINDOWS.md: a maioria dos geradores le o'
         Write-Host '.exe do Obocaman, que nao esta versionado.'
         throw "check reprovou em $($falhou.Count) gerador(es)"
     }
-    Write-Host ">> $($geradores.Count) gerador(es), nenhum divergiu"
+    $verdes = $geradores.Count - $pulados.Count
+    Write-Host ">> $verdes de $($geradores.Count) gerador(es) conferidos, nenhum divergiu"
 }
 
 function Invoke-Icon {

@@ -47,6 +47,7 @@ from __future__ import annotations
 import argparse
 import csv
 import filecmp
+import os
 import shutil
 import subprocess
 import sys
@@ -56,7 +57,14 @@ ROOT = Path(__file__).resolve().parents[2]
 RE_DIR = ROOT / "wte" / "re"
 TESTES = ROOT / "wte" / "tests"
 NUCLEO = ROOT / "src" / "core"
-WORK = ROOT / "work"
+# O diretorio das copias de trabalho. `work/` na raiz e o default, e e o que o
+# `Makefile` da raiz ja usa.
+#
+# `WTE_WORK` existe por uma razao de maquina, nao de projeto: a medicao copia
+# ~1,9 GB, e uma arvore dentro de uma pasta sincronizada -- OneDrive, Dropbox,
+# Drive -- manda esse 1,9 GB para a nuvem antes de alguem apagar. Apontar para
+# fora dela resolve sem mudar nada do que se mede.
+WORK = Path(os.environ.get("WTE_WORK", "")) or ROOT / "work"
 
 OUT_TSV = RE_DIR / "fase-3.tsv"
 OUT_MD = RE_DIR / "fase-3.md"

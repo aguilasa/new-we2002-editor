@@ -70,10 +70,19 @@ cd wte
 ```
 
 **Leia [`../docs/PLAN-WTE-WINDOWS.md`](../docs/PLAN-WTE-WINDOWS.md) antes**: ele
-traz o que instalar, o que trazer do Linux (a pasta do Obocaman **inteira**,
-não só o `.exe`), os oito consertos que a porta exigiu e — o mais importante —
-o que **não** roda lá. A bateria golden depende de Xvfb, `xdotool` e Wine; a
-paridade byte a byte continua sendo afirmada pela máquina Linux.
+traz o que instalar, o que precisa estar no disco (a pasta do Obocaman
+**inteira**, não só o `.exe`), os onze consertos que a porta exigiu e o que
+está medido lá.
+
+O resumo do que o Windows pode e não pode afirmar:
+
+- **pode** — a camada de dados. `compare_dumps.py --medir` roda ali, e deu
+  **zero divergência** nas duas ROMs, nas duas metades (66.498 linhas de dump
+  idênticas, round-trip Pascal × C++ byte a byte). Mais 884 testes de
+  ferramenta e 43 dos 45 geradores;
+- **não pode** — a bateria golden, que depende de Xvfb no `:98`, `xdotool` e
+  Wine. **A paridade byte a byte contra o `wte.exe` continua sendo afirmada
+  pela máquina Linux.**
 
 ## Layout
 

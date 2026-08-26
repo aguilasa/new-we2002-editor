@@ -70,6 +70,17 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 # arvore que nao seja a `LCL_VERSAO` pinada faz o script recusar -- e deve, e o
 # ponto dele.
 LCL_BASE = Path(os.environ.get("WTE_LAZARUS_BASE", "/usr/lib/lazarus"))
+
+# A arvore inteira, quando ela nao tem o nivel de versao. Vazia no layout da
+# distribuicao.
+#
+# E LIDA UMA VEZ, NO IMPORT, e nao dentro do `caminho_da_lcl`. A razao e o
+# `test_check_lcl_props.py`: ele planta uma LCL sintetica num temporario
+# trocando o `LCL_BASE` do modulo, e um `os.environ.get` dentro da funcao
+# passaria por cima da arvore plantada -- os 17 casos dele mediriam a LCL de
+# verdade em vez da fixture. Sendo um nome de modulo, o `setUp` o zera junto
+# com o `LCL_BASE`, que e o que ele ja faz com tudo o mais que planta.
+ARVORE_DIRETA = os.environ.get("WTE_LAZARUS_DIR", "")
 GENERATOR = "wte/tools/check_lcl_props.py"
 
 # A chave que o dfm2lfm usa para o formulario raiz mapeia para a classe real.
@@ -95,8 +106,7 @@ class CheckError(RuntimeError):
 
 def caminho_da_lcl(versao: str) -> Path:
     """A arvore da LCL da versao pinada, conferida contra o `lazversion.pas`."""
-    arvore = os.environ.get("WTE_LAZARUS_DIR")
-    raiz = Path(arvore) if arvore else LCL_BASE / versao
+    raiz = Path(ARVORE_DIRETA) if ARVORE_DIRETA else LCL_BASE / versao
     lcl = raiz / "lcl"
     if not lcl.is_dir():
         raise CheckError(
@@ -285,8 +295,27 @@ def conferir(lcl: Path) -> tuple[list[str], dict[str, int]]:
 
 def main(argv: list[str]) -> int:
     modo_check = "--check" in argv[1:]
+
+    # DUAS SAIDAS DIFERENTES PARA DUAS COISAS DIFERENTES, e a distincao so
+    # apareceu no Windows.
+    #
+    # "Nao ha LCL utilizavel" (ausente, ou de outra versao que a pinada) e
+    # NAO MEDIDO: nao ha regua, e nada foi conferido. Isso e `PULADO` e sai 0,
+    # dizendo o que deixou de medir -- e a mesma forma que o
+    # `check_lcl_combo.py` ja usa, e ele PEGA ESTA MESMA excecao para isso.
+    #
+    # "A tabela nao bate com a LCL" e FALHOU: a regua existe, foi aplicada, e
+    # acusou. Isso continua saindo 2.
+    #
+    # Sem separar, o `winget` (Lazarus 4.8) contra o `LCL_VERSAO = '3.0'`
+    # deixava o `check` vermelho para sempre no Windows -- e alvo sempre
+    # vermelho ninguem le.
     try:
         lcl = caminho_da_lcl(dfm2lfm.LCL_VERSAO)
+    except CheckError as erro:
+        print(f"check_lcl_props: PULADO ({erro})")
+        return 0
+    try:
         problemas, contagem = conferir(lcl)
     except CheckError as erro:
         print(f"ERRO: {erro}", file=sys.stderr)

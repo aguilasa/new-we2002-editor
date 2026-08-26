@@ -22,7 +22,11 @@ from pathlib import Path
 import check_lcl_props as mod
 import dfm2lfm
 
-LCL_REAL = mod.LCL_BASE / dfm2lfm.LCL_VERSAO / "lcl"
+# A LCL de verdade, quando ha uma. `ARVORE_DIRETA` (de `WTE_LAZARUS_DIR`) e o
+# caminho de quem a instalou fora de `/usr/lib/lazarus` -- o Windows poe a
+# arvore inteira em `C:\lazarus`, sem o nivel de versao.
+LCL_REAL = (Path(mod.ARVORE_DIRETA) / "lcl" if mod.ARVORE_DIRETA
+            else mod.LCL_BASE / dfm2lfm.LCL_VERSAO / "lcl")
 
 UNIDADE = """
 unit sintetica;
@@ -78,6 +82,12 @@ class BaseSintetica(unittest.TestCase):
             "const\n  laz_major = 9;\n  laz_minor = 9;\n  laz_release = 0;\n",
             encoding="utf-8")
         self._base, self._versao = mod.LCL_BASE, dfm2lfm.LCL_VERSAO
+        # `ARVORE_DIRETA` vem de `WTE_LAZARUS_DIR` e aponta a LCL de verdade
+        # quando ela esta fora de `/usr/lib/lazarus` (o caso do Windows). Se
+        # ficar de pe, ela ganha do `LCL_BASE` plantado abaixo e os casos
+        # daqui medem a arvore instalada em vez da fixture.
+        self._arvore = mod.ARVORE_DIRETA
+        mod.ARVORE_DIRETA = ""
         self._aceita = dict(dfm2lfm.ACEITA)
         self._descarta = dict(dfm2lfm.DESCARTA)
         self._ident = set(dfm2lfm.IDENTIFICADORES)
@@ -92,6 +102,7 @@ class BaseSintetica(unittest.TestCase):
 
     def _restaura(self):
         mod.LCL_BASE, dfm2lfm.LCL_VERSAO = self._base, self._versao
+        mod.ARVORE_DIRETA = self._arvore
         dfm2lfm.ACEITA, dfm2lfm.DESCARTA = self._aceita, self._descarta
         dfm2lfm.IDENTIFICADORES = self._ident
         dfm2lfm.ELEMENTOS_DE_CONJUNTO = self._conj
@@ -233,7 +244,34 @@ class TesteIdentificadores(BaseSintetica):
         self.assertEqual(problemas, [])
 
 
-@unittest.skipUnless(LCL_REAL.is_dir(), f"LCL nao instalada em {LCL_REAL}")
+def _lcl_utilizavel() -> str:
+    """Vazio se da para medir; senao, o motivo de nao dar.
+
+    SAO DUAS CONDICOES, e a segunda so apareceu no Windows. A primeira e ter
+    uma LCL no disco. A segunda e ela ser a versao que a tabela `PROPRIEDADES`
+    mediu: o `winget` traz Lazarus 4.8 e o `LCL_VERSAO` do `dfm2lfm.py` esta
+    pinado em `3.0`. Rodar contra a 4.8 e aceitar o que sair seria trocar a
+    regua pelo objeto medido -- e por isso o proprio `check_lcl_props.py`
+    recusa. Aqui o correto e PULAR dizendo qual e a versao do disco, nao
+    quebrar: quebra parece regressao, e nao ha regressao nenhuma.
+    """
+    if not LCL_REAL.is_dir():
+        return f"LCL nao instalada em {LCL_REAL}"
+    try:
+        no_disco = mod.versao_no_disco(LCL_REAL.parent)
+    except mod.CheckError as erro:
+        return str(erro)
+    if no_disco != dfm2lfm.LCL_VERSAO:
+        return (f"LCL do disco e {no_disco}, o LCL_VERSAO do dfm2lfm.py e "
+                f"{dfm2lfm.LCL_VERSAO} -- a tabela PROPRIEDADES NAO foi "
+                f"conferida nesta execucao")
+    return ""
+
+
+_MOTIVO = _lcl_utilizavel()
+
+
+@unittest.skipIf(_MOTIVO, _MOTIVO)
 class TesteLclInstalada(unittest.TestCase):
     """A conferencia que o `make -C wte check` roda, contra a LCL de verdade."""
 
