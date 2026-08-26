@@ -234,14 +234,96 @@ mesmo com `forms/` em `IncludeFiles`. A saída é o caminho explícito:
 
 **O `dfm2lfm.py` da WTE-TASK-10 tem de emitir essa linha nos 18 esqueletos.**
 
+## O que este projeto pode afirmar
+
+*(Produto da [WTE-TASK-40](../docs/tasks/40-verificacao-final.md), 2026-08-26.
+As três condições da definição de pronto estão medidas na §11 do
+[plano](../docs/PLAN-WTE-LAZARUS.md).)*
+
+A frase, para reusar:
+
+> **Verificado byte a byte contra o `wte.exe` nas operações que a bateria
+> cobre, na ROM japonesa; e toda divergência conhecida está escrita.**
+
+"Verificado" não é "correto", e o vocabulário abaixo é o mesmo que o
+`newWe2002` usa. As três palavras não se substituem.
+
+### Verificado
+
+- **Os 96 handlers publicados têm veredito escrito** — 69 `implementado`, 19
+  `trivial`, 6 `divergencia deliberada`, 2 `nao portado` (os dois com
+  justificativa), **0 `aberto`**. Régua: `spec_index.py --check`.
+- **As 24 operações da bateria golden gravam byte a byte o mesmo que o
+  original, na ROM japonesa** — 96 corridas em 2026-08-26, `controle` antes de
+  cada `golden`, **0 `REPROVOU`**. Régua: [`re/golden.md`](re/golden.md).
+- **Os 17 handlers que gravam na imagem têm gate nomeado**, um a um. Régua:
+  [`re/fase-4.md`](re/fase-4.md), seção *"Quem grava na imagem"*.
+- **A camada de dados lê e grava o que o `we2002_core` lê e grava** — dumps
+  Pascal × C++ com **0** bytes de diferença, nas **duas** ROMs. Régua:
+  [`re/fase-3.md`](re/fase-3.md).
+- **O app roda nativo, sem Wine e sem 32 bits** — sete medidas, sobre a árvore
+  *instalada*, num namespace onde o Wine desta máquina está coberto. Régua:
+  [`re/nativo.md`](re/nativo.md).
+
+### Não verificado
+
+- **A ROM European Deluxe, fora do arranque.** O oráculo morre com `c0000005`
+  ao trocar de time ([`re/crash-causa.md`](re/crash-causa.md)), então 23 dos 24
+  roteiros saem `SEM_ORACULO` ali. Não é falha do port: é ausência de régua. O
+  port roda nessa ROM; o que falta é com o que comparar.
+- **Qualquer ROM que não seja essas duas.** Nada foi medido fora de `roms/`.
+- **Operação fora dos 24 roteiros**, e **combinação de edições** que nenhum
+  roteiro faz. A bateria cobre o que ela cobre; o eixo é operação × ROM, não
+  todas as sequências possíveis.
+- **Ramo de handler que o gate não exercita.** O
+  [`cobertura_gate.py`](tools/cobertura_gate.py) guarda a *contagem* de
+  disparos justamente por isso — o `mostrar_jugadorClick` entra pelo botão do
+  titular, e o ramo do reserva segue sem régua.
+- **Outra distribuição, outra versão de GTK2, ou Wayland.** A condição 3 foi
+  medida nesta máquina, com X.
+
+### Divergente por decisão
+
+São **12**, cada uma com natureza, decisão, razão e evidência em
+[`re/divergencias.md`](re/divergencias.md) — da mais visível (o sufixo
+` [Lazarus]` no `Caption`, sem o qual o harness dirigiria o lado errado) à mais
+sutil (o preço do 23º jogador, que o original nunca grava). O
+[`check_divergencias.py`](tools/check_divergencias.py), que o
+`make -C wte check` roda, casa **exceção nomeada em ferramenta** com **entrada
+no registro**, nos dois sentidos: exceção sem entrada aborta, e entrada cuja
+exceção sumiu também.
+
+Neste projeto **"100%" quer dizer toda divergência conhecida e escrita**, não
+zero divergência — e a política difere da do `newWe2002` de propósito: lá o
+objetivo era clonar o `ed.exe` inclusive nos defeitos.
+
+### O que ficou aberto, e por quê
+
+Cinco itens, nenhum deles escondido:
+
+1. **O `ficha_enlaza` não tem chamador no port.** A rota que o alcança é o
+   `MainForm.mostrar_jugadorClick` para jogador de clube de Master League, e
+   *qual condição faz o modal abrir* ficou por medir na
+   [WTE-TASK-30](../docs/tasks/30-handlers-auxiliares.md). **Não** é
+   divergência deliberada — é trabalho não feito, e o dono é aquela spec.
+2. **A European Deluxe sem oráculo.** Fechar isso exigiria consertar um bug do
+   `wte.exe` — escrita além do fim de tabela — dentro do binário do Obocaman,
+   que é leitura pura neste projeto.
+3. **Sem formato de pacote** (AppImage/Flatpak). Decisão da
+   [WTE-TASK-39](../docs/tasks/39-empacotamento.md), confirmada pelo usuário:
+   o uso é pessoal, e as regras de `install` bastam.
+4. **`wte.lpi`/`wte.lpr`/`build/wte` continuam com o nome `wte` na árvore.** O
+   slug entra no `install`, que é onde ele tem consumidor — a seção acima
+   explica o custo.
+5. **Os assets do Obocaman não são redistribuídos**, então a árvore instalada
+   não roda sozinha: quem recebe o app precisa da pasta do editor original. O
+   app abre e avisa, com os três caminhos resolvidos.
+
 ## Estado
 
-**Fase 7 — acabamento.** As fases 0 a 6 estão fechadas: os 18 formulários
-gerados e conferidos com a lógica ligada, os 96 handlers com veredito, a camada
-de dados gerada do `we2002_core`, e a bateria golden completa contra o
-`wte.exe` sob Wine. O que resta é empacotamento
-([WTE-TASK-39](../docs/tasks/39-empacotamento.md)) e a verificação final
-([WTE-TASK-40](../docs/tasks/40-verificacao-final.md)).
+**Concluído.** As sete fases estão fechadas — 40 tasks e 117 correções, entre
+2026-08-05 e 2026-08-26 —, e as três condições da definição de pronto estão
+medidas em [§11 do plano](../docs/PLAN-WTE-LAZARUS.md).
 
 O andamento por task, com data de commit, está em
 [`../docs/tasks/progresso.md`](../docs/tasks/progresso.md) — este parágrafo é

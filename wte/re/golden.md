@@ -11,7 +11,7 @@ python3 wte/tools/check_golden.py --check
 
 Produto da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).
 Fonte: [`golden.tsv`](golden.tsv), 96 corrida(s)
-registrada(s), a mais recente de 2026-08-25.
+registrada(s), a mais recente de 2026-08-26.
 **Todo número daqui saiu do script.**
 
 ## O critério, e o que ele custou para virar mensurável

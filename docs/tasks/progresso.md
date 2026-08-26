@@ -52,7 +52,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ✅ Concluído | 2026-08-26 | 2026-08-26 |
-| [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
+| [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ✅ Concluído | 2026-08-26 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -667,8 +667,29 @@ alimenta e passou a **carregar** essa gravação.
       `build/wte` custaria 3 ferramentas, o `Makefile` e prosa de `docs/`, e
       nenhum desses leitores é o usuário — quem vê o nome do produto é a barra
       de tarefas, o `.desktop` e o `bin/` instalado
-- [ ] Condição 3 testada em ambiente **sem** Wine
-- [ ] Vocabulário escrito: verificado, não verificado, divergente por decisão
+- [x] **Condição 1 reconferida** — `spec_index.py --check`: 96 indexados, 96 com
+      spec, **0 abertos**; os dois `nao portado` com justificativa escrita
+      *(WTE-TASK-40, 2026-08-26)*
+- [x] **Condição 2 reconferida depois das tasks 36 a 39** — bateria **inteira**
+      refeita (`golden_suite.sh --rom ambas`, 96 corridas, 1,9 h): **0
+      `REPROVOU`**, e os 96 vereditos **idênticos** aos da WTE-TASK-34; só data
+      e segundos mudaram *(idem)*
+- [x] **Condição 3 testada em ambiente sem Wine** — e testada, não presumida.
+      O [`sem_wine.sh`](../../wte/tools/sem_wine.sh) cobre com `tmpfs` vazio o
+      runner do Bottles (que **é** o Wine desta máquina — não há pacote no
+      apt), o `/var/lib/flatpak`, os dois `work/wineprefix*` e o stack `i386`,
+      e **recusa** se `wine`/`wine64`/`wineserver` ainda responder lá dentro. O
+      [`nativo_check.sh`](../../wte/tools/nativo_check.sh) mede sete coisas
+      sobre a árvore **instalada** e as sete deram `ok` — inclusive a `carga`,
+      que separa *abriu* de *funciona*: 3 teclas `Down` viraram 3
+      `lista_equiposChange` no trace que o próprio app escreve *(idem)*
+- [x] Vocabulário escrito: verificado, não verificado, divergente por decisão —
+      em [`wte/README.md`](../../wte/README.md), seção *"O que este projeto
+      pode afirmar"*, com os **cinco** itens abertos e a razão de cada um
+      *(idem)*
+- [x] §11 do plano preenchida — as três condições medidas, os quatro defeitos
+      que quebraram em ordem de surpresa, e onde mora o fechamento de cada fase
+      *(idem)*
 
 ---
 

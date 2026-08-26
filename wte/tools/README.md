@@ -39,6 +39,8 @@ O que mora aqui, e em que task. Quem já existe leva ✅.
 | `golden_suite.sh` | 34 | a bateria completa |
 | `ghidra/` | 24 | scripts de nomeação e convenção Borland |
 | `make_icon.py` | 39 | ícone |
+| `sem_wine.sh` ✅ | 40 | **não gera nada** — fabrica um ambiente **sem Wine e sem 32 bits** num user+mount namespace (`bwrap`), cobrindo com `tmpfs` vazio o runner do Bottles, o `/var/lib/flatpak`, os dois `work/wineprefix*` e o stack `i386`, e roda o comando lá dentro. **Recusa** se `wine`/`wine64`/`wineserver` ainda responder: ambiente que só parece limpo mede tão pouco quanto não medir. É `.sh` de propósito — precisa do `bwrap` e fica fora do `--check` |
+| `nativo_check.sh` ✅ | 40 | a **condição 3** da definição de pronto, medida em sete linhas de TSV (`re/nativo.tsv`): formato do binário, `ldd` sem Wine, `ldd` sem 32 bits, a guarda do `sem_wine.sh`, a janela principal (título e 522×475), a **carga** (N teclas `Down` = N `lista_equiposChange` no trace que o app escreve) e o `/proc/<pid>/maps` do processo vivo. Instala num prefixo temporário e mede a **árvore instalada**, não o `build/wte` — que é justamente o caso especial que a WTE-TASK-39 consertou. **Recusa** imagem dentro de `roms/` |
 
 **Todo gerador daqui aceita `--check`**, e `make -C wte check` roda todos. Sem
 o `--check` não há como provar que ninguém editou a saída à mão — que é a regra

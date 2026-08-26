@@ -1,0 +1,8 @@
+medida	valor	veredito
+formato	ELF 64-bit x86-64	ok
+ldd-wine	0 de 56 bibliotecas	ok
+ldd-32	0 de 56 bibliotecas	ok
+guarda	wine/wine64/wineserver ausentes	ok
+janela	522x475, titulo conferido	ok
+carga	3 cargas de time para 3 teclas	ok
+maps	0 mapeamentos de Wine ou 32 bits	ok

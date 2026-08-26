@@ -5,7 +5,7 @@ type: fechamento
 category: verificação
 phase: 7
 depends_on: ["WTE-TASK-36", "WTE-TASK-37", "WTE-TASK-39"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-40: Verificação final
@@ -75,25 +75,96 @@ seção 11 do `PLAN-WINDOWS.md` diz isso em vez de omitir.
 | `docs/PLAN-WTE-LAZARUS.md` | modificar (§11, registro de execução) |
 | `wte/README.md` | modificar — o vocabulário e o que está aberto |
 | `docs/tasks/progresso.md` | modificar |
+| `wte/tools/sem_wine.sh` | **criar** — o ambiente sem Wine e sem 32 bits |
+| `wte/tools/nativo_check.sh` | **criar** — as sete medidas da condição 3 |
+| `wte/re/nativo.md`, `wte/re/nativo.tsv` | **criar** — a evidência da condição 3 |
+| `wte/re/golden.{tsv,md}` | modificar — a bateria refeita |
+| `wte/tools/README.md` | modificar — as duas ferramentas novas |
+
+*(As cinco últimas linhas foram acrescentadas na execução: o enunciado previa
+só documento, e a condição 3 exigia ferramenta — "testar de verdade, não
+presumir" não se cumpre escrevendo prosa.)*
 
 ---
 
 ## Critério de conclusão
 
-- [ ] Condição 1 reconferida, sem regressão
-- [ ] Condição 2 reconferida depois das tasks 36 a 39
-- [ ] Condição 3 testada em ambiente sem Wine, não presumida
-- [ ] Vocabulário escrito: o que é verificado, o que não é, o que diverge
-- [ ] Todo item aberto listado com a razão
-- [ ] §11 do plano preenchido
-- [ ] Commit no formato conventional, em inglês
+- [x] Condição 1 reconferida, sem regressão
+- [x] Condição 2 reconferida depois das tasks 36 a 39
+- [x] Condição 3 testada em ambiente sem Wine, não presumida
+- [x] Vocabulário escrito: o que é verificado, o que não é, o que diverge
+- [x] Todo item aberto listado com a razão
+- [x] §11 do plano preenchido
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-26
+
 - **Resumo do que foi feito:**
+
+  As três condições da §0 foram medidas, e **nenhuma por prosa**. A 1
+  (`spec_index.py --check`) e a 2 (`golden_suite.sh --rom ambas`) já tinham
+  ferramenta; a 3 não tinha nada, e é onde estava o trabalho.
+
+  **O que se aprendeu, e vale além desta task:** *"o app não usa Wine"* e *"o
+  app roda onde Wine não existe"* são afirmações diferentes, e a primeira é
+  fácil de entregar no lugar da segunda — um `ldd` limpo responde a errada. Esta
+  máquina **tem** Wine e não pode deixar de ter (o oráculo A depende dele),
+  então a única saída honesta era fabricar a ausência: um user+mount namespace
+  sem privilégio (`bwrap`) com `tmpfs` vazio por cima de tudo que é Wine aqui.
+  E "tudo que é Wine aqui" não é `/usr/bin/wine` — **não há pacote `wine` no
+  apt desta máquina**; o Wine é o runner `soda-9.0-1` do Bottles, em
+  `~/.var/app/`. Mascarar o caminho óbvio não teria escondido nada, e o teste
+  passaria sem medir. Por isso a guarda do `sem_wine.sh` **recusa** se
+  `wine`/`wine64`/`wineserver` ainda responder lá dentro: ambiente que só
+  *parece* limpo mede tão pouco quanto não medir.
+
+  A segunda lição é a medida `carga` do `nativo_check.sh`. Janela vazia abre
+  igual à janela boa, e um teste que só espera a janela aprova um app inerte —
+  o mesmo defeito que a bateria golden evita com o `controle`. A régua é o log
+  de trace que o **próprio app** escreve: 3 teclas `Down` têm de virar 3
+  `MainForm.lista_equiposChange`. E o alvo é a árvore **instalada**, não o
+  `wte/build/wte` — medir o `build/` mediria justamente o caso especial que a
+  WTE-TASK-39 acabou de consertar.
+
+  A condição 2 saiu mais forte do que o enunciado pedia: em vez de um
+  subconjunto, a bateria **inteira** foi refeita (96 corridas, 1,9 h), e os 96
+  vereditos vieram **idênticos** aos da WTE-TASK-34 — só data e segundos
+  mudaram. Isso é a resposta medida à pergunta que a task fazia (*as tasks 36 a
+  39 regrediram alguma coisa?*): a 36 não tocou em Pascal nenhum (foi
+  inventário e medição), e a 39 tocou em arranque e resolução de caminho, que é
+  exatamente o que uma bateria completa exercita 96 vezes.
+
 - **Arquivos criados/modificados:**
+  - `wte/tools/sem_wine.sh` — **novo**; o ambiente sem Wine e sem 32 bits
+  - `wte/tools/nativo_check.sh` — **novo**; as sete medidas da condição 3
+  - `wte/re/nativo.md`, `wte/re/nativo.tsv` — **novos**; a evidência da condição 3
+  - `wte/re/golden.tsv` — as 96 corridas refeitas (vereditos idênticos)
+  - `wte/re/golden.md` — regerado pelo `check_golden.py`
+  - `wte/tools/README.md` — as duas ferramentas novas na tabela
+  - `wte/README.md` — a seção *"O que este projeto pode afirmar"* e o `Estado`
+  - `docs/PLAN-WTE-LAZARUS.md` — a §11 inteira, e a linha de estado do
+    cabeçalho, que ainda dizia *"plano; nenhuma fase executada"* com 39 tasks
+    concluídas
+  - `docs/tasks/progresso.md` — a linha da tabela e os cinco itens da fase 7
+  - este arquivo
+
 - **Problemas encontrados:**
+
+  1. **A linha de estado do plano era prosa vencida.** O cabeçalho do
+     `PLAN-WTE-LAZARUS.md` dizia *"Estado: plano; nenhuma fase executada"* —
+     escrito em 2026-08-05 e nunca tocado, com 39 tasks fechadas desde então.
+     É o defeito que a WTE-TASK-31 batizou, no documento que é a fonte de
+     verdade do projeto. Corrigido com a nota do que ele dizia antes.
+  2. **A numeração das correções tem um buraco, e ele é declarado.** São
+     **117** correções, não 118: o `CORR-WTE-033` foi pulado na numeração (a
+     revisão da WTE-TASK-15 abriu 030, 032, 034 e 035). O primeiro rascunho
+     desta task escreveu 118 lendo o número mais alto; a contagem correta veio
+     de `ls docs/tasks/CORR-WTE-*.md | wc -l`, que é o hábito que o prompt
+     cobra — todo número vem de ferramenta, inclusive os que parecem óbvios.
+  3. **Nada mais.** A bateria não teve uma corrida vermelha, e os dois scripts
+     novos funcionaram na primeira medição.
 
 ---
 
@@ -133,3 +204,12 @@ Wine**. A conferência de 2026-08-26 foi nesta máquina, que tem Wine instalado
 para o oráculo — ela prova que o app **não usa** Wine (é ELF nativo, e o `ldd`
 não mostra nada de Wine), não que ele rode onde Wine não existe. As duas
 afirmações são diferentes, e só a segunda fecha a condição 3.
+
+> **Resolvido nesta task, em 2026-08-26.** A ausência de Wine foi **fabricada**
+> em vez de esperada: o [`sem_wine.sh`](../../wte/tools/sem_wine.sh) cobre com
+> `tmpfs` vazio o runner do Bottles — que **é** o Wine desta máquina, já que
+> não há pacote no apt —, o `/var/lib/flatpak`, os dois `work/wineprefix*` e o
+> stack `i386`, e recusa se `wine`/`wine64`/`wineserver` ainda responder. As
+> sete medidas do [`nativo_check.sh`](../../wte/tools/nativo_check.sh) deram
+> `ok` sobre a árvore **instalada**; o registro está em
+> [`wte/re/nativo.md`](../../wte/re/nativo.md).

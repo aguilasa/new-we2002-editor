@@ -12,7 +12,10 @@
 > | Oráculo de formato | `we2002_core` deste repositório, já verificado contra o `ed.exe` |
 >
 > Data da análise inicial: 2026-08-05
-> Estado: **plano; nenhuma fase executada.**
+> Estado: **executado. As sete fases estão fechadas e as três condições da §0
+> foram medidas — ver a §11.** *(Esta linha dizia "plano; nenhuma fase
+> executada" até 2026-08-26, com as 39 primeiras tasks concluídas: prosa
+> vencida, que é o defeito que a WTE-TASK-31 batizou.)*
 >
 > Este é um projeto **separado** do `newWe2002`. Não mistura código, não
 > compartilha build, não entra no `CMakeLists.txt`. O que compartilha é
@@ -1410,5 +1413,112 @@ verdade — preço virou a 32 e o fechamento da Fase 4 virou a 31.
 
 ## 11. Registro de execução
 
-*(vazio — preencher ao concluir cada fase, no formato da seção 11 do
-[PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md))*
+Executado entre **2026-08-05 e 2026-08-26**, em 40 tasks e 117 correções, nesta
+máquina: Zorin OS sobre Linux 7.0.0-30, Lazarus 3.0 + FPC 3.2.2, LCL/GTK2,
+x86-64. O oráculo A rodou sob o runner Wine do Bottles (`soda-9.0-1`) num
+prefixo `win32` próprio, sempre no `Xvfb :98` — que era o `:99` até 2026-08-20,
+e o registro histórico continua dizendo `:99` porque foi o que aconteceu.
+
+O andamento task a task, com data de commit e data de revisão, está em
+[`/docs/tasks/progresso.md`](/docs/tasks/progresso.md); as correções, em
+[`/docs/tasks/correcoes-progresso.md`](/docs/tasks/correcoes-progresso.md).
+Esta seção registra o **desfecho**, e é a WTE-TASK-40 quem a escreve.
+
+### As três condições da §0
+
+Medidas em 2026-08-26, e nenhuma por prosa.
+
+| # | Condição | Ferramenta | Resultado |
+|---|---|---|---|
+| 1 | os 96 handlers publicados têm equivalente funcional em Pascal | `spec_index.py --check` | 96 indexados, 96 com spec, **0 abertos** |
+| 2 | gravação byte-idêntica ao `wte.exe`, nas duas ROMs | `golden_suite.sh --rom ambas` | 96 corridas, **0 `REPROVOU`** |
+| 3 | roda em Linux x86-64 nativo, sem Wine, sem 32 bits | `nativo_check.sh` | **7 de 7** medidas `ok` |
+
+**Condição 1.** Dos 96: 69 `implementado`, 19 `trivial`, 6
+`divergencia deliberada`, 2 `nao portado` — e os dois com justificativa escrita
+(`estrategia.ComboBoxDrawItem`, *owner-draw* dos combos da tática;
+`MainForm.Button2Click`, nove bytes de `exit(0)` que nenhum DFM alcança).
+Detalhe em [`wte/re/spec/INDICE.md`](../wte/re/spec/INDICE.md) e
+[`wte/re/fase-4.md`](../wte/re/fase-4.md).
+
+**Condição 2.** A bateria foi **refeita inteira** depois das tasks 36 a 39 — a
+36 mexeu em comportamento de campo e a 39 mexeu na resolução de caminho em
+runtime, que é código de arranque. Os 96 vereditos saíram **idênticos** aos da
+WTE-TASK-34: só data e segundos mudaram. 1,9 h de relógio.
+
+| Veredito | Corridas | O que quer dizer |
+|---|---:|---|
+| `PASSOU` | 50 | os dois lados produziram a mesma imagem (e o mesmo artefato) |
+| `SEM_ORACULO` | 23 | o `wte.exe` morreu com `c0000005` e gravou menos |
+| `NAO_APLICAVEL` | 23 | o `controle` daquele par não passou, então o `golden` seria ilegível |
+| `REPROVOU` | **0** | — |
+
+**A assimetria entre as duas ROMs não é omissão, é medida.** Na European Deluxe
+o oráculo morre ao trocar de time — `0x00010001` no lugar do ponteiro de
+`dorsal1`, porque a carga do time escreve além do fim da tabela de
+`0x00433580` ([`wte/re/crash-causa.md`](../wte/re/crash-causa.md)). Oráculo que
+morre no meio grava **menos**: um verde ali seria mentira, e um vermelho
+acusaria o port por bytes que o original nunca chegou a escrever. Por isso há
+uma terceira palavra. O único roteiro europeu que fecha é o
+`golden-01-arranque`, que não troca de time — e fecha byte-idêntico.
+
+**Condição 3.** É a que ninguém tinha conferido, e a que quase passou por
+descuido: *"o app não usa Wine"* e *"o app roda onde Wine não existe"* são
+afirmações diferentes, e só a segunda fecha a condição. Esta máquina **tem**
+Wine, e não pode deixar de ter — o oráculo A depende dele. A saída foi o
+[`sem_wine.sh`](../wte/tools/sem_wine.sh): um user+mount namespace sem
+privilégio onde o runner do Bottles, o `/var/lib/flatpak`, os dois
+`work/wineprefix*` e o stack `i386` ficam cobertos por `tmpfs` vazio, com
+guarda que **recusa** se `wine`/`wine64`/`wineserver` ainda responder lá dentro.
+As sete medidas e o que cada uma prova estão em
+[`wte/re/nativo.md`](../wte/re/nativo.md).
+
+### O que quebrou, em ordem de surpresa
+
+| # | Sintoma | Causa | Correção |
+|---|---|---|---|
+| 1 | O binário **fora** de `wte/build/` morria num diálogo genérico da LCL — *File not found. Press OK to ignore and risk data corruption.* — antes de qualquer janela | O log de trace resolvia `<exe>/../re/trace.log`, e o `Rewrite` levantava `EInOutError` num diretório que não existe. O caso especial que a WTE-TASK-39 esperava era a pasta de assets; era o log | Uma ordem de busca só, em [`wte_datafiles.pas`](../wte/src/wte_datafiles.pas), para assets **e** trace; e o `retrace` desliga o trace em vez de derrubar o app. Diagnóstico que mata o paciente é pior que nenhum |
+| 2 | `golden_suite.sh --roteiro` sem `--retomar` **truncava o registro inteiro** antes de qualquer corrida | O cabeçalho era reescrito sempre que `--retomar` não vinha. Com `--roteiro`, isso não filtrava: substituía | Corrida **parcial** preserva o registro e substitui a linha do trio. As 92 corridas da WTE-TASK-34 — 1,8 h — foram recuperadas de `git show HEAD:` ([CORR-WTE-113](/docs/tasks/CORR-WTE-113.md)) |
+| 3 | `golden-06-textura` reprovava nos dois lados com assinatura de falha de **tempo** | Não era tempo: o roteiro exige `work/t.bin` de 5.000 bytes, e `work/` tinha um `t.bin` de 307 MB, cópia de ROM deixada por outra corrida | Cada roteiro **declara** a fixture no cabeçalho, e a bateria a **cria** (`sintetica`) ou confere o tamanho e aborta (`exigida`). `work/` é rascunho compartilhado, e nome de fixture colide com nome de cópia de trabalho |
+| 4 | A spec de três handlers afirmava "nada exercita o corpo", com o gate verde os exercitando | A frase saía do `compara_tela.sh` (régua de **pixel**) e não da bateria golden (régua de **byte**), que dirige a janela bem mais fundo | O [`cobertura_gate.py`](../wte/tools/cobertura_gate.py) lê o `port-trace.log` que o próprio gate escreve e versiona a **contagem** de disparos, não um booleano ([CORR-WTE-089](/docs/tasks/CORR-WTE-089.md)) |
+
+Nenhum dos quatro estava previsto. As armadilhas que a §8 previa — a convenção
+Borland no Ghidra, o `bitpacked record` do FPC, o `{$R *.lfm}` que ignora
+*include path* — eram reais e foram tratadas como planejado.
+
+### O vocabulário: o que o projeto pode afirmar
+
+A frase, para reusar:
+
+> **Verificado byte a byte contra o `wte.exe` nas operações que a bateria
+> cobre, na ROM japonesa; e toda divergência conhecida está escrita.**
+
+E o que ela **não** diz, item a item, está em
+[`wte/README.md`](../wte/README.md), na seção *"O que este projeto pode
+afirmar"* — verificado, não verificado e divergente por decisão, mais os cinco
+itens que ficaram abertos com a razão de cada um.
+
+### Onde o registro por fase mora
+
+Cada fechamento tem documento próprio, **gerado**, e é ali que os números vivem:
+
+| Fase | Fechamento | O que ele mede |
+|---|---|---|
+| 1 | [`wte/re/fase-1.md`](../wte/re/fase-1.md) | 18 formulários, 96 handlers, 219 atribuições `OnX`, 765 strings |
+| 2 | [`wte/re/fase-2.md`](../wte/re/fase-2.md) | os 96 stubs, os 18 `.lfm`, e **51,3%** do Pascal da casca saindo de gerador |
+| 3 | [`wte/re/fase-3.md`](../wte/re/fase-3.md), [`fase-3-fechamento.md`](../wte/re/fase-3-fechamento.md) | dumps Pascal × C++ com **0** bytes de diferença nas duas ROMs; 3.389 de 3.692 linhas da camada de dados por regra |
+| 4 | [`wte/re/fase-4.md`](../wte/re/fase-4.md) | os 96 vereditos e os **17** handlers que gravam, cada um com gate nomeado |
+| 6 | [`wte/re/golden.md`](../wte/re/golden.md), [`divergencias.md`](../wte/re/divergencias.md) | a bateria completa e as 12 divergências deliberadas |
+| 7 | [`wte/re/nativo.md`](../wte/re/nativo.md) | a condição 3 |
+
+| Data | Task | Resultado |
+|---|---|---|
+| 2026-08-05 | 01-02 | ferramental conferido; `wte/` com build próprio, deliberadamente fora do CMake da raiz |
+| 2026-08-05/06 | 03-09 | extração estática: 18 DFM, 96 handlers com dono, 765 strings, 19 offsets em `.data`, veredito das 4 unidades VCL, 198 bitmaps |
+| 2026-08-06/09 | 10-14 | a casca: `dfm2lfm.py`, os 18 formulários e os 96 stubs, comparação visual e trace de eventos contra o original |
+| 2026-08-09/10 | 15-21 | a camada de dados, transpilada do `we2002_core` — não do `.exe` — com `FORBIDDEN` e `check_seeks()` ativos |
+| 2026-08-10/24 | 22-31 | os 96 handlers, com o `golden_check.sh` como gate e o controle antes de cada medida |
+| 2026-08-19/24 | 32-33 | preço derivado dos atributos e contador de slots de ML; a 33 foi antecipada porque a 27 dependia dela |
+| 2026-08-25 | 34-37 | bateria completa (92 corridas), divergências registradas, buffers medidos, UI reconferida com a lógica ligada |
+| 2026-08-25/26 | 38-39 | o nome `WE2002 - Lazarus Editor`, a linhagem no `NOTICE.md`, e o `install` num prefixo que sobrevive a ser movido |
+| 2026-08-26 | 40 | este registro: as três condições medidas, 96 corridas refeitas com veredito idêntico |
