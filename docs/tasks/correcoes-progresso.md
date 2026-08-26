@@ -138,6 +138,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-116](/docs/tasks/CORR-WTE-116.md) | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | O controle que separa a causa do diálogo da LCL manda `mkdir re` "ao lado da cópia", e ali não funciona: o `retrace.pas` resolve `<dir do executável>/../re/` — medido nos três layouts | Baixa | [x] concluída | 2026-08-25 |
 | [CORR-WTE-117](/docs/tasks/CORR-WTE-117.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | O `RaizDosAssets` procura em quatro lugares e a `MensagemDeAssetsAusentes` promete três; o quarto (`<exe>/../../assets`) não tem comentário nem quem o crie | Média | [x] concluída | 2026-08-26 |
 | [CORR-WTE-118](/docs/tasks/CORR-WTE-118.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | A seção de repasse da WTE-TASK-39 ainda manda renomear `wte.lpi`/`wte.lpr`/`build/wte`, e o Log da mesma task revogou a instrução — a seção não foi anotada | Baixa | [x] concluída | 2026-08-26 |
+| [CORR-WTE-119](/docs/tasks/CORR-WTE-119.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | O `nativo.md` repete os sete valores do `nativo.tsv` e nada confere os dois — a condição 3 é o único documento de fechamento sem `--check` nem conferidor | Média | [ ] pendente | — |
+| [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | A prosa credita a recusa do `sem_wine.sh` ao `command -v wine*`, que nesta máquina não pode disparar; quem recusa é o laço que exige alvo vazio | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -258,6 +260,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-116 — trocar a receita do `re/` pelo layout que o `retrace.pas` realmente resolve
 - [x] CORR-WTE-117 — decidir o que é o quarto candidato de assets: documentá-lo e anunciá-lo, ou apagá-lo
 - [x] CORR-WTE-118 — anotar na WTE-TASK-39 que a renomeação do repasse não foi executada
+- [ ] CORR-WTE-119 — escrever o `check_nativo.py` e amarrar o `nativo.md` ao `nativo.tsv`
+- [ ] CORR-WTE-120 — escrever as duas cláusulas da guarda do `sem_wine.sh`, e qual delas trabalha aqui
 
 ## Detalhes por correção
 
@@ -2113,3 +2117,41 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** anotar a seção — título com **não executada** e a primeira linha
   dizendo o que valeu —, guardando o inventário, que continua correto para o dia
   em que a renomeação vier a acontecer
+
+### CORR-WTE-119
+
+- **Arquivo com problema:** `wte/re/nativo.md` e a ausência de
+  `wte/tools/check_nativo.py`
+- **Sintoma:** o `.md` declara "escrito à mão; todo número vem de ferramenta" e
+  **repete os sete valores** do `nativo.tsv` numa tabela própria; nada compara
+  as duas. O `make -C wte check` não alcança nenhum dos dois — o `GENERATORS` do
+  Makefile é `wildcard tools/*.py` e o `nativo_check.sh` é shell sem `--check`.
+  Uma corrida futura que mude um valor atualiza o TSV e deixa o `.md` afirmando
+  o velho, em verde. É o único documento de fechamento sem gerador com `--check`
+  nem conferidor (o `divergencias.md`, também à mão, tem o
+  `check_divergencias.py`)
+- **Como foi detectado:** `cat` do TSV contra `grep '^| `'` no `.md`, e
+  `ls wte/tools/check_nativo.py` (não existe) nesta revisão; a medição foi
+  refeita e o TSV produzido saiu **idêntico** ao commitado, então o problema não
+  é o número de hoje
+- **Fix:** um `check_nativo.py` no molde do `check_divergencias.py`, que aborta
+  em valor divergente, medida órfã e veredito diferente de `ok`, mais o
+  `test_check_nativo.py` com as três recusas plantadas — e, junto, a recusa do
+  `sem_wine.sh`, que também não tem teste
+
+### CORR-WTE-120
+
+- **Arquivo com problema:** `wte/tools/sem_wine.sh` (cabeçalho) e o Log da
+  WTE-TASK-40
+- **Sintoma:** os dois creditam a honestidade do ambiente à cláusula que recusa
+  se `wine`/`wine64`/`wineserver` responderem dentro do namespace. Medido:
+  `command -v` dos quatro já falha **fora** de qualquer namespace — o Wine daqui
+  é o runner do Bottles, nunca esteve no `PATH` —, então a cláusula é verdadeira
+  por construção. Quem recusa é o laço que exige cada alvo mascarado **vazio**,
+  e a prosa não o menciona
+- **Como foi detectado:** `command -v wine wine64 wineserver winecfg` (`EXIT=1`)
+  e uma cópia do script em `/tmp` com o alvo do Bottles fora das máscaras e
+  dentro da guarda: `ERRO: ... nao ficou vazio`, `EXIT=1`
+- **Fix:** escrever as duas cláusulas e qual trabalha nesta máquina, mantendo a
+  primeira (é o que faz o script valer noutra); e versionar um caso por cláusula
+  no teste que a CORR-WTE-119 cria
