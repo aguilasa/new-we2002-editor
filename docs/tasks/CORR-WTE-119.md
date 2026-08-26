@@ -3,7 +3,7 @@ id: CORR-WTE-119
 title: "Correção: o nativo.md repete os sete valores do nativo.tsv e nada amarra os dois"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -151,18 +151,65 @@ primeira.
 
 ## Verificação
 
-- [ ] `python3 wte/tools/check_nativo.py --check` verde sobre a árvore de hoje
-- [ ] Um valor plantado no `.md` diferente do `.tsv` faz o `--check` sair 2
-- [ ] Um veredito `reprovou` plantado no TSV faz o `--check` sair 2
-- [ ] `make -C wte check` alcança a ferramenta nova (ela é `tools/*.py`)
-- [ ] `roms/` intocada
+- [x] `python3 wte/tools/check_nativo.py --check` verde sobre a árvore de hoje
+      — `7 medidas publicadas, 7 com veredito ok`
+- [x] Um valor plantado no `.md` diferente do `.tsv` faz o `--check` sair **2**
+- [x] Um veredito `reprovou` plantado no TSV faz o `--check` sair **2**
+- [x] `make -C wte check` alcança a ferramenta nova pelo `wildcard` — linha 165
+      do log, e a bateria foi de **865** para **879**
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-26
 
 **Resumo do que foi feito:**
 
+Escolhida a saída **recomendada** — o conferidor, não tirar a tabela. O
+`nativo.md` continua legível numa página, que é o que os outros documentos de
+fechamento oferecem, e passou a ter quem o defenda.
+
+O `check_nativo.py` aborta em **quatro** direções, uma a mais que as três que a
+CORR numerou:
+
+1. valor do TSV que o `.md` contradiz;
+2. medida publicada no `.md` que o TSV não tem — afirmação sem fonte;
+3. veredito diferente de `ok` no TSV — a condição 3 não está cumprida, e isso é
+   resultado, não coisa para esperar leitura;
+4. **medida do TSV ausente do `.md`** — a que faltava: o documento promete sete,
+   e uma que só existe no TSV não chega a quem lê.
+
+Ele entra sozinho no `make -C wte check` pelo `wildcard tools/*.py`, e foi
+conferido na linha 165 do log.
+
+**A comparação é normalizada, e isso é escolha.** O TSV é saída de shell em
+ASCII (`522x475, titulo conferido`); o `.md` é para ler (`522×475, título
+conferido`, com crases nos nomes de binário). Exigir igualdade crua reprovaria
+a árvore de hoje e empurraria o `.md` para a feiura do TSV. Então tira crase,
+troca `×` por `x`, tira acento, e exige que o valor do TSV seja **substring** do
+valor do `.md`: o documento pode acrescentar contexto (*"…ausentes no
+namespace"*) e não pode contradizer — trocar 56 por 58 derruba o gate na hora,
+e há caso para os dois lados dessa fronteira.
+
 **Problemas encontrados:**
 
+**O `.md` tem duas tabelas, e o leitor ingênuo confundiria as duas.** A dos
+caminhos mascarados vem antes da de medidas e também traz o primeiro campo
+entre crases — `/var/lib/flatpak` viraria "medida publicada sem fonte". O que as
+separa é o número de colunas; está no comentário do `le_md()` e tem caso de
+teste próprio.
+
+O teste (`test_check_nativo.py`, **14 casos**) engole a saída do `main()` nos
+casos de código de saída: sem isso o relatório de uma recusa **plantada**
+aparecia no meio do `make -C wte check`, mostrando a quem lê o gate a mensagem
+de um problema que não existe. Foi a lição da CORR-WTE-106.
+
+Fora do escopo, e deixado para a [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md):
+os dois casos da guarda do `sem_wine.sh`, que esta CORR sugeria pôr no mesmo
+arquivo. Eles são o assunto da 120, e ela é a próxima do lote.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/check_nativo.py` — criado
+- `wte/tools/test_check_nativo.py` — criado, 14 casos
+- `wte/tools/README.md` — a ferramenta nova na tabela
