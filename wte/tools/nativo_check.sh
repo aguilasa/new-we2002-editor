@@ -129,8 +129,11 @@ n_libs="$(printf '%s\n' "$libs" | grep -c '=>' || true)"
                   || registra ldd-32 "$n_32 de 32 bits" FALHOU
 
 # ----------------------------------------------------------------- dinamico --
-# A guarda do `sem_wine.sh` e a medida 4: ele RECUSA se `wine` ainda responder
-# dentro do namespace, entao um `sem_wine.sh -- true` que sai 0 ja a mede.
+# A guarda do `sem_wine.sh` e a medida 4: um `sem_wine.sh -- true` que sai 0 ja
+# a mede. Ela tem DUAS clausulas -- alvo mascarado que nao ficou vazio, e
+# `wine`/`wine64`/`wineserver`/`winecfg` no `PATH` --, e nesta maquina so a
+# primeira pode disparar: o Wine daqui e o runner do Bottles, que nunca esteve
+# no `PATH`. Ver a CORR-WTE-120.
 if bash "$AQUI/sem_wine.sh" -- true >/dev/null 2>&1; then
   registra guarda "wine/wine64/wineserver ausentes" ok
 else

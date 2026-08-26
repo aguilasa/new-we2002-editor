@@ -139,7 +139,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-117](/docs/tasks/CORR-WTE-117.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | O `RaizDosAssets` procura em quatro lugares e a `MensagemDeAssetsAusentes` promete três; o quarto (`<exe>/../../assets`) não tem comentário nem quem o crie | Média | [x] concluída | 2026-08-26 |
 | [CORR-WTE-118](/docs/tasks/CORR-WTE-118.md) | [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | A seção de repasse da WTE-TASK-39 ainda manda renomear `wte.lpi`/`wte.lpr`/`build/wte`, e o Log da mesma task revogou a instrução — a seção não foi anotada | Baixa | [x] concluída | 2026-08-26 |
 | [CORR-WTE-119](/docs/tasks/CORR-WTE-119.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | O `nativo.md` repete os sete valores do `nativo.tsv` e nada confere os dois — a condição 3 é o único documento de fechamento sem `--check` nem conferidor | Média | [x] concluída | 2026-08-26 |
-| [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | A prosa credita a recusa do `sem_wine.sh` ao `command -v wine*`, que nesta máquina não pode disparar; quem recusa é o laço que exige alvo vazio | Baixa | [ ] pendente | — |
+| [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | A prosa credita a recusa do `sem_wine.sh` ao `command -v wine*`, que nesta máquina não pode disparar; quem recusa é o laço que exige alvo vazio | Baixa | [x] concluída | 2026-08-26 |
 
 ## Checklist
 
@@ -261,7 +261,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-117 — decidir o que é o quarto candidato de assets: documentá-lo e anunciá-lo, ou apagá-lo
 - [x] CORR-WTE-118 — anotar na WTE-TASK-39 que a renomeação do repasse não foi executada
 - [x] CORR-WTE-119 — escrever o `check_nativo.py` e amarrar o `nativo.md` ao `nativo.tsv`
-- [ ] CORR-WTE-120 — escrever as duas cláusulas da guarda do `sem_wine.sh`, e qual delas trabalha aqui
+- [x] CORR-WTE-120 — escrever as duas cláusulas da guarda do `sem_wine.sh`, e qual delas trabalha aqui
 
 ## Detalhes por correção
 

@@ -116,9 +116,18 @@ presumir" não se cumpre escrevendo prosa.)*
   E "tudo que é Wine aqui" não é `/usr/bin/wine` — **não há pacote `wine` no
   apt desta máquina**; o Wine é o runner `soda-9.0-1` do Bottles, em
   `~/.var/app/`. Mascarar o caminho óbvio não teria escondido nada, e o teste
-  passaria sem medir. Por isso a guarda do `sem_wine.sh` **recusa** se
-  `wine`/`wine64`/`wineserver` ainda responder lá dentro: ambiente que só
+  passaria sem medir. Por isso o `sem_wine.sh` tem guarda: ambiente que só
   *parece* limpo mede tão pouco quanto não medir.
+
+  **E a guarda tem duas cláusulas, das quais só uma trabalha aqui** — medido
+  pela [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md), porque este parágrafo
+  creditava a inerte. A primeira recusa se `wine`/`wine64`/`wineserver`/
+  `winecfg` responderem no `PATH`; ela pega a máquina com o pacote do apt, e
+  **aqui é verdadeira antes de mascarar qualquer coisa** — é o que as três
+  linhas acima acabaram de dizer, sem notar que isso a desarma. Quem recusa de
+  verdade é a segunda: cada alvo mascarado tem de ficar **vazio** dentro do
+  namespace. Apagar a segunda desliga a conferência mesmo com a primeira
+  intacta, e isso está medido em `test_check_nativo.py`.
 
   A segunda lição é a medida `carga` do `nativo_check.sh`. Janela vazia abre
   igual à janela boa, e um teste que só espera a janela aprova um app inerte —
@@ -209,7 +218,9 @@ afirmações são diferentes, e só a segunda fecha a condição 3.
 > em vez de esperada: o [`sem_wine.sh`](../../wte/tools/sem_wine.sh) cobre com
 > `tmpfs` vazio o runner do Bottles — que **é** o Wine desta máquina, já que
 > não há pacote no apt —, o `/var/lib/flatpak`, os dois `work/wineprefix*` e o
-> stack `i386`, e recusa se `wine`/`wine64`/`wineserver` ainda responder. As
+> stack `i386`, e **recusa** se algum desses alvos não ficar vazio lá dentro
+> (a cláusula que trabalha nesta máquina) ou se `wine`/`wine64`/`wineserver`/
+> `winecfg` responderem no `PATH`. As
 > sete medidas do [`nativo_check.sh`](../../wte/tools/nativo_check.sh) deram
 > `ok` sobre a árvore **instalada**; o registro está em
 > [`wte/re/nativo.md`](../../wte/re/nativo.md).

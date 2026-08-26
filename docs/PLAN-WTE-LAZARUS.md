@@ -1469,7 +1469,9 @@ Wine, e não pode deixar de ter — o oráculo A depende dele. A saída foi o
 [`sem_wine.sh`](../wte/tools/sem_wine.sh): um user+mount namespace sem
 privilégio onde o runner do Bottles, o `/var/lib/flatpak`, os dois
 `work/wineprefix*` e o stack `i386` ficam cobertos por `tmpfs` vazio, com
-guarda que **recusa** se `wine`/`wine64`/`wineserver` ainda responder lá dentro.
+guarda de duas cláusulas: ela **recusa** se algum alvo não ficar vazio lá
+dentro — a que trabalha nesta máquina — ou se
+`wine`/`wine64`/`wineserver`/`winecfg` responderem no `PATH`.
 As sete medidas e o que cada uma prova estão em
 [`wte/re/nativo.md`](../wte/re/nativo.md).
 

@@ -33,9 +33,26 @@
 #                                       Mascarar prova a independencia do app
 #                                       de 32 bits, que a condicao 3 tambem pede
 #
-# A guarda vem ANTES do comando: se `wine`, `wine64` ou `wineserver` ainda
-# responder dentro do namespace, o script RECUSA. Ambiente que so parece
-# limpo mede tao pouco quanto nao medir.
+# ## A guarda tem DUAS clausulas, e nesta maquina so a segunda tem trabalho
+#
+# Ela vem ANTES do comando -- ambiente que so parece limpo mede tao pouco
+# quanto nao medir --, e recusa por dois motivos diferentes:
+#
+#   1. `wine`, `wine64`, `wineserver` ou `winecfg` respondem no `PATH` dentro
+#      do namespace. E a clausula que pega uma maquina com o pacote do apt.
+#      **Aqui ela e verdadeira antes de mascarar qualquer coisa**: o Wine desta
+#      maquina e o runner do Bottles, em `~/.var/app/`, e nunca esteve no
+#      `PATH` -- `command -v wine wine64 wineserver winecfg` ja sai 1 fora de
+#      namespace nenhum. Ela FICA, porque custa quatro linhas e e o que faz
+#      este script valer noutra maquina, que e o caso que a condicao 3 quer
+#      sobreviver;
+#   2. cada alvo mascarado tem de ficar VAZIO dentro do namespace. **E esta que
+#      trabalha aqui**, e e ela que prova que o runner do Bottles sumiu.
+#
+# **Apagar a segunda desliga a conferencia**, mesmo com a primeira intacta --
+# e a primeira e a que parece a protecao, porque nomeia o Wine. A CORR-WTE-120
+# nasceu de a prosa creditar a clausula inerte; as duas estao medidas no
+# `test_check_nativo.py`, uma recusa por clausula.
 set -euo pipefail
 
 AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

@@ -31,8 +31,13 @@ privilégio, onde os caminhos do Wine ficam cobertos por `tmpfs` vazio. Só a
 inteiro para a corrida seguinte do gate.
 
 Quem fabrica esse ambiente é o [`sem_wine.sh`](../tools/sem_wine.sh), e ele
-**recusa** se `wine`, `wine64` ou `wineserver` ainda responder lá dentro —
-ambiente que só *parece* limpo mede tão pouco quanto não medir.
+**recusa** por dois motivos — ambiente que só *parece* limpo mede tão pouco
+quanto não medir. Recusa se algum alvo mascarado **não ficar vazio** dentro do
+namespace, que é a cláusula com dentes nesta máquina, e recusa se
+`wine`/`wine64`/`wineserver`/`winecfg` responderem no `PATH`, que é a que pega
+uma máquina com o pacote do apt — aqui ela é verdadeira antes de mascarar
+qualquer coisa, porque o Wine daqui nunca esteve no `PATH`. As duas estão
+medidas no `test_check_nativo.py`, uma recusa por cláusula.
 
 ## O que fica coberto, e por quê cada um
 

@@ -678,7 +678,9 @@ alimenta e passou a **carregar** essa gravação.
       O [`sem_wine.sh`](../../wte/tools/sem_wine.sh) cobre com `tmpfs` vazio o
       runner do Bottles (que **é** o Wine desta máquina — não há pacote no
       apt), o `/var/lib/flatpak`, os dois `work/wineprefix*` e o stack `i386`,
-      e **recusa** se `wine`/`wine64`/`wineserver` ainda responder lá dentro. O
+      e **recusa** se algum alvo não ficar vazio lá dentro — a cláusula que
+      trabalha nesta máquina — ou se `wine`/`wine64`/`wineserver`/`winecfg`
+      responderem no `PATH` ([CORR-WTE-120](/docs/tasks/CORR-WTE-120.md)). O
       [`nativo_check.sh`](../../wte/tools/nativo_check.sh) mede sete coisas
       sobre a árvore **instalada** e as sete deram `ok` — inclusive a `carga`,
       que separa *abriu* de *funciona*: 3 teclas `Down` viraram 3

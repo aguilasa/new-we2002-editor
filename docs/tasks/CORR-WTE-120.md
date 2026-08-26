@@ -3,7 +3,7 @@ id: CORR-WTE-120
 title: "Correção: a guarda do sem_wine.sh é creditada à metade que nesta máquina não pode disparar"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -107,19 +107,65 @@ vazio.
 
 ## Verificação
 
-- [ ] O cabeçalho do `sem_wine.sh` nomeia as duas cláusulas e diz qual trabalha
-      nesta máquina
-- [ ] Um alvo fora das máscaras faz o script recusar, com o nome do diretório
-- [ ] Um `wine` falso no `PATH` faz o script recusar pela primeira cláusula
-- [ ] `bash wte/tools/nativo_check.sh --imagem <cópia>` continua com 7 de 7 `ok`
-- [ ] `roms/` intocada
+- [x] O cabeçalho do `sem_wine.sh` nomeia as duas cláusulas e diz qual trabalha
+      nesta máquina — e há caso de teste cobrando essa prosa
+- [x] Um alvo fora das máscaras faz o script recusar, com o nome do diretório
+- [x] Um `wine` falso no `PATH` faz o script recusar pela primeira cláusula
+- [x] `bash wte/tools/nativo_check.sh --imagem <cópia>` continua com **7 de 7**
+      `ok`, e o `nativo.tsv` saiu idêntico ao commitado
+- [x] `roms/` intocada — a corrida usou cópia no scratchpad, já removida
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-26
 
 **Resumo do que foi feito:**
 
+O cabeçalho do `sem_wine.sh` passou a nomear as **duas** cláusulas e a dizer
+qual trabalha aqui: a primeira (`command -v wine…`) pega a máquina com o pacote
+do apt e **é verdadeira antes de mascarar qualquer coisa** nesta, porque o Wine
+daqui é o runner do Bottles e nunca esteve no `PATH`; a segunda — cada alvo
+mascarado tem de ficar vazio — é a que recusa de verdade. A primeira **fica**:
+custa quatro linhas e é o que faz o script valer noutra máquina, que é o caso
+que a condição 3 quer sobreviver.
+
+**A afirmação central foi medida, não repetida.** A CORR diz que apagar a
+segunda desliga a conferência mesmo com a primeira intacta — medido em dois
+espelhos: com o laço de vazio, um alvo cheio dá `EXIT=1` com o nome do
+diretório; **sem** o laço, o mesmo alvo cheio passa com *"guarda passou"*. Está
+como caso de teste, e é o que transforma a correção de precisão de prosa em
+proteção.
+
+Cinco casos entraram no `test_check_nativo.py` (que a
+[CORR-WTE-119](/docs/tasks/CORR-WTE-119.md) criou uma correção antes): o
+controle, uma recusa por cláusula, a demonstração acima, e um que cobra a
+própria prosa do cabeçalho — sem ele, esta correção envelhece na próxima
+leitura. Os dois casos de recusa **fabricam o próprio alvo** em `tempfile`, e
+não dependem de esta máquina ter o Bottles.
+
 **Problemas encontrados:**
 
+**A prosa estava em seis sítios, e a CORR previa dois.** Além do `sem_wine.sh`
+e da task 40 (em **duas** passagens, o Log e o resumo), creditavam a cláusula
+inerte: o `PLAN-WTE-LAZARUS.md:1472`, o `progresso.md:681`, o `wte/re/nativo.md:34`
+e o `wte/tools/README.md:42`. Todos corrigidos.
+
+**O que eu não toquei, e quase toquei:** a linha 64 do `nativo.md` —
+`` | `guarda` | `wine`/`wine64`/`wineserver` ausentes no namespace | ok | `` —
+não é prosa: é o **valor medido**, que o `nativo_check.sh` escreve no TSV.
+Reescrevê-la derrubaria o `check_nativo.py` criado na correção anterior, e com
+razão: o `.md` não pode contradizer o que a ferramenta mede. A prosa que
+descreve a guarda mudou; o valor que a mede, não.
+
+Desconfiei dos testes por serem rápidos demais — 4 casos em 66 ms, com três
+invocações de `bwrap`. Medido à mão: um `sem_wine.sh -- /bin/true` leva **13 a
+28 ms**. Namespace custa milissegundos e as máscaras são `tmpfs`; a suspeita era
+infundada, e fica registrada porque a próxima pessoa vai desconfiar igual.
+
 **Arquivos criados/modificados:**
+
+- `wte/tools/sem_wine.sh` — o cabeçalho, com as duas cláusulas
+- `wte/tools/test_check_nativo.py` — `TestGuardaDoSemWine`, 5 casos
+- `docs/tasks/40-verificacao-final.md` — o Log e o resumo
+- `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`, `wte/re/nativo.md`,
+  `wte/tools/README.md`, `wte/tools/nativo_check.sh` — a varredura

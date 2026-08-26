@@ -15,6 +15,9 @@ from __future__ import annotations
 
 import contextlib
 import io
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -180,6 +183,119 @@ class TestLeitura(Base):
         with self.assertRaises(C.NativoError) as ctx:
             C.mede()
         self.assertIn("3 campos", str(ctx.exception))
+
+
+class TestGuardaDoSemWine(unittest.TestCase):
+    """As duas clausulas da guarda do `sem_wine.sh` -- CORR-WTE-120.
+
+    A prosa creditava a recusa ao `command -v wine/wine64/wineserver/winecfg`, e
+    **nesta maquina essa clausula nao pode disparar**: o Wine daqui e o runner
+    do Bottles, em `~/.var/app/`, e nunca esteve no `PATH` -- ela e verdadeira
+    antes de mascarar coisa nenhuma. Quem recusa de verdade e o laco que exige
+    cada alvo VAZIO dentro do namespace.
+
+    Nao e afirmacao falsa -- a guarda recusa. E credito na clausula errada, e o
+    custo e concreto: quem simplificar o script achando que o `command -v` e a
+    protecao pode apagar o laco de vazio, e o ambiente deixa de ser limpo sem
+    que nada reclame.
+
+    Os dois casos abaixo NAO dependem desta maquina: cada um fabrica o proprio
+    alvo em `tempfile`. Precisam do `bwrap`, e pulam sem ele.
+    """
+
+    SCRIPT = C.RAIZ / "wte" / "tools" / "sem_wine.sh"
+
+    def setUp(self) -> None:
+        if not shutil.which("bwrap"):
+            self.skipTest("sem bwrap -- a guarda NAO foi exercitada")
+        # O modulo pode estar repontado por outro caso; o script mora na arvore.
+        self.script = Path(__file__).resolve().parent / "sem_wine.sh"
+
+    def roda(self, script: Path, ambiente: dict | None = None):
+        env = dict(os.environ)
+        env.update(ambiente or {})
+        return subprocess.run(["bash", str(script), "--", "/bin/true"],
+                              capture_output=True, text=True, env=env)
+
+    def test_o_estado_de_hoje_passa(self) -> None:
+        """O controle: sem plantar nada, a guarda deixa passar."""
+        r = self.roda(self.script)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("guarda passou", r.stdout)
+
+    def test_clausula_1_PATH_sujo_recusa(self) -> None:
+        """Um `wine` falso no `PATH` -- a clausula que nesta maquina esta
+        sempre satisfeita, exercitada fabricando o caso que ela existe para
+        pegar."""
+        with tempfile.TemporaryDirectory() as d:
+            falso = Path(d) / "wine"
+            falso.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            falso.chmod(0o755)
+            r = self.roda(self.script, {"PATH": f"{d}:{os.environ['PATH']}"})
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("wine ainda responde dentro do namespace", r.stderr)
+
+    def test_clausula_2_alvo_nao_vazio_recusa(self) -> None:
+        """A clausula que trabalha nesta maquina.
+
+        Um diretorio na lista da guarda e FORA das mascaras: dentro do
+        namespace ele continua cheio, e o laco recusa com o nome dele. E
+        exatamente o que aconteceria se alguem tirasse um alvo do `tmpfs` e
+        esquecesse de tirar da guarda -- ou o contrario.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            alvo = Path(d) / "cheio"
+            alvo.mkdir()
+            (alvo / "algo").write_text("x", encoding="utf-8")
+
+            fonte = self.script.read_text(encoding="utf-8")
+            velho = "for d in '\"${ALVOS[*]}\"'; do"
+            self.assertIn(velho, fonte, "o laco de vazio sumiu do script")
+            fonte = fonte.replace(
+                velho, f"for d in '\"${{ALVOS[*]}}\"' \"{alvo}\"; do", 1)
+            espelho = Path(d) / "sem_wine.sh"
+            espelho.write_text(fonte, encoding="utf-8")
+            r = self.roda(espelho)
+            esperado = f"ERRO: {alvo} nao ficou vazio"
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn(esperado, r.stderr)
+
+    def test_apagar_a_clausula_2_DESLIGA_a_conferencia(self) -> None:
+        """A afirmacao central da CORR-WTE-120, medida.
+
+        Com o laco de vazio, um alvo cheio recusa. Sem ele -- e com a primeira
+        clausula INTACTA -- o mesmo alvo cheio passa: o ambiente deixa de ser
+        limpo e nada reclama. E por isso que creditar a guarda ao `command -v`
+        e perigoso, e nao so impreciso.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            alvo = Path(d) / "cheio"
+            alvo.mkdir()
+            (alvo / "algo").write_text("x", encoding="utf-8")
+
+            fonte = self.script.read_text(encoding="utf-8")
+            velho = "for d in '\"${ALVOS[*]}\"'; do"
+            com = fonte.replace(
+                velho, f"for d in '\"${{ALVOS[*]}}\"' \"{alvo}\"; do", 1)
+            i, j = com.index("for d in"), com.index("'\n\nexec bwrap")
+            sem = com[:i] + com[j:]
+
+            p_com, p_sem = Path(d) / "com.sh", Path(d) / "sem.sh"
+            p_com.write_text(com, encoding="utf-8")
+            p_sem.write_text(sem, encoding="utf-8")
+            r_com, r_sem = self.roda(p_com), self.roda(p_sem)
+
+        self.assertEqual(r_com.returncode, 1, "com o laco, tinha de recusar")
+        self.assertEqual(r_sem.returncode, 0,
+                         "sem o laco, o alvo cheio passa -- e e esse o ponto")
+        self.assertIn("guarda passou", r_sem.stdout)
+
+    def test_o_cabecalho_nomeia_as_duas_clausulas(self) -> None:
+        """Prosa e o que esta correcao consertou; sem isto ela envelhece de
+        novo na proxima leitura."""
+        fonte = self.script.read_text(encoding="utf-8")
+        self.assertIn("DUAS clausulas", fonte)
+        self.assertIn("so a segunda tem trabalho", fonte)
 
 
 if __name__ == "__main__":
