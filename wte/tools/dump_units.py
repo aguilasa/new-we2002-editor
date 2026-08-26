@@ -1578,7 +1578,7 @@ def generate() -> dict[str, str]:
         raise DumpError(
             f"{REL_DFM} nao existe. Rode antes: python3 "
             f"wte/tools/dfm_extract.py")
-    dfm_paths = sorted(DFM.glob("*.dfm"))
+    dfm_paths = sorted(DFM.glob("*.dfm"), key=lambda p: p.as_posix())
     if not dfm_paths:
         raise DumpError(f"{REL_DFM} nao tem nenhum .dfm")
 

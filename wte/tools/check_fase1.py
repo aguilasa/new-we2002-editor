@@ -201,7 +201,7 @@ def _markdowns() -> list[Path]:
     # `rglob` sobre `wte` ja cobre `wte/re/`. A base larga entrou com a
     # CORR-WTE-016: o sitio vivo estava em `wte/README.md`, fora do alcance.
     for base in ("docs", "wte"):
-        achados.extend(sorted((ROOT / base).rglob("*.md")))
+        achados.extend(sorted((ROOT / base).rglob("*.md"), key=lambda p: p.as_posix()))
     return achados
 
 
@@ -277,7 +277,7 @@ def ler_dfm() -> dict[str, list[tuple[int, str, str]]]:
         raise CheckError(f"{DFM.relative_to(ROOT)} nao existe")
     objeto = re.compile(r"^(\s+)object (?:(\w+): )?(T\w+)\s*$")
     formularios: dict[str, list[tuple[int, str, str]]] = {}
-    for arq in sorted(DFM.glob("*.dfm")):
+    for arq in sorted(DFM.glob("*.dfm"), key=lambda p: p.as_posix()):
         comps: list[tuple[int, str, str]] = []
         for linha in arq.read_text(encoding="utf-8").splitlines():
             m = objeto.match(linha)
@@ -312,7 +312,7 @@ def eventos_dfm(formularios: dict[str, list]) -> tuple[set, int]:
     atrib = re.compile(r"^\s+(On[A-Za-z]+) = ([A-Za-z_]\w*)\s*$")
     triplas: set[tuple[str, str, str]] = set()
     total = 0
-    for arq in sorted(DFM.glob("*.dfm")):
+    for arq in sorted(DFM.glob("*.dfm"), key=lambda p: p.as_posix()):
         for linha in arq.read_text(encoding="utf-8").splitlines():
             m = atrib.match(linha)
             if m:
@@ -392,8 +392,10 @@ def bitmaps() -> tuple[int, list[tuple[str, int]], int]:
             f"we-team-editor/image nao existe -- a pasta do Obocaman e "
             f"gitignored e o usuario a mantem, como faz com roms/")
     por_pasta: list[tuple[str, int]] = []
-    raiz = sorted(p for p in IMAGE.glob("*") if p.suffix.lower() == ".bmp")
-    for sub in sorted(p for p in IMAGE.iterdir() if p.is_dir()):
+    raiz = sorted((p for p in IMAGE.glob("*") if p.suffix.lower() == ".bmp"),
+                  key=lambda p: p.as_posix())
+    for sub in sorted((p for p in IMAGE.iterdir() if p.is_dir()),
+                      key=lambda p: p.as_posix()):
         n = len([p for p in sub.rglob("*") if p.suffix.lower() == ".bmp"])
         por_pasta.append((sub.name, n))
     por_pasta.append(("(raiz de image/)", len(raiz)))
@@ -493,7 +495,7 @@ def blobs_por_dono(formularios: dict[str, list]) -> dict[str, int]:
     objeto = re.compile(r"^(\s+)object (?:(\w+): )?(T\w+)\s*$")
     blob = re.compile(r"^\s+(\w+(?:\.\w+)*) = \{blob ")
     contagem: dict[str, int] = {}
-    for arq in sorted(DFM.glob("*.dfm")):
+    for arq in sorted(DFM.glob("*.dfm"), key=lambda p: p.as_posix()):
         pilha: list[tuple[int, str]] = []
         n = 0
         for linha in arq.read_text(encoding="utf-8").splitlines():

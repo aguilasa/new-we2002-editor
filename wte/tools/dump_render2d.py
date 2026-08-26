@@ -413,7 +413,7 @@ def bitmaps() -> tuple[dict[str, int], dict[str, int]]:
     # pastas dele: `careto_base.bmp` e maior e nao entra em redesenho nenhum
     # desta task (CORR-WTE-063 tirou cara, cabelo e barba do escopo).
     maior = [0, 0, 0]
-    for caminho in sorted(IMAGEM.rglob("*.bmp")):
+    for caminho in sorted(IMAGEM.rglob("*.bmp"), key=lambda p: p.as_posix()):
         nome = caminho.name.lower()
         cab = caminho.read_bytes()[:54]
         if len(cab) < 54 or cab[:2] != b"BM":

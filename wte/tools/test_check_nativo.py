@@ -22,6 +22,18 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# O interpretador bash, e por que ele nao e a cadeia literal `"bash"`.
+#
+# No Windows a busca do `CreateProcess` olha `C:\Windows\System32` ANTES do
+# `PATH`, e la mora o `bash.exe` da Microsoft -- o atalho do WSL. Com WSL sem
+# distribuicao instalada ele sai 1 dizendo "Windows Subsystem for Linux has no
+# installed distributions", e por PATH nenhum se chega ao bash do Git for
+# Windows: pos-lo na frente do PATH nao adianta, porque o System32 vem antes.
+#
+# `WTE_BASH` da o caminho completo. Sem ela nada muda -- no Linux `bash` e o
+# que sempre foi.
+BASH = os.environ.get("WTE_BASH", "bash")
+
 import check_nativo as C
 
 
@@ -214,7 +226,7 @@ class TestGuardaDoSemWine(unittest.TestCase):
     def roda(self, script: Path, ambiente: dict | None = None):
         env = dict(os.environ)
         env.update(ambiente or {})
-        return subprocess.run(["bash", str(script), "--", "/bin/true"],
+        return subprocess.run([BASH, str(script), "--", "/bin/true"],
                               capture_output=True, text=True, env=env)
 
     def test_o_estado_de_hoje_passa(self) -> None:

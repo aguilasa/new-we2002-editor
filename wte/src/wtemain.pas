@@ -62,6 +62,7 @@ implementation
 
 uses
   SysUtils, Forms,
+  {$IFDEF WINDOWS}Windows,{$ENDIF}
   retrace,
   ep2002_mainform, ep2002_estrategia, ep2002_jugador, ep2002_dorsal,
   ep2002_enlaza, ep2002_color, ep2002_info, ep2002_warning, ep2002_error,
@@ -137,23 +138,78 @@ begin
   Result := ImagemPedida;
 end;
 
+{ SAIDA DE TEXTO, E POR QUE ELA NAO E UM `WriteLn` DIRETO.
+
+  No Linux o binario tem `stdout` sempre, e `WriteLn` bastava -- foi o que
+  esteve aqui ate 2026-08-26. No Windows nao: o `.lpi` pede
+  `GraphicApplication`, e um `.exe` do subsistema GUI nasce SEM handle de
+  saida padrao. A RTL do FPC nao abre `Output` nesse caso, e o primeiro
+  `WriteLn` levanta `EInOutError`, que a LCL transforma no dialogo generico
+
+    File not open. / Press OK to ignore and risk data corruption.
+
+  antes de qualquer janela. Medido em 2026-08-26: `wte.exe --list` e
+  `wte.exe --help` travavam ali, e nem a lista nem a ajuda saiam. Redirecionar
+  a saida no shell NAO resolve -- quem nao abriu o arquivo foi a RTL, nao o
+  sistema.
+
+  A saida e `AttachConsole(ATTACH_PARENT_PROCESS)`: se quem lancou tem
+  console, o processo entra nele e `SysInitStdIO` religa `Output`; se nao tem
+  (duplo clique no icone), nao ha para onde escrever e a impressao vira
+  silencio, que e o certo -- e o que o Linux faria com `stdout` fechado.
+
+  A resolucao e PREGUICOSA de proposito. Fazer isso no arranque anexaria um
+  console a toda abertura normal do editor, sem ninguem para ler. }
+var
+  SaidaResolvida: Boolean = False;
+  SaidaLigada: Boolean = False;
+
+procedure Linha(const s: string = '');
+begin
+  if not SaidaResolvida then
+  begin
+    SaidaResolvida := True;
+    {$IFDEF WINDOWS}
+    SaidaLigada := AttachConsole(ATTACH_PARENT_PROCESS);
+    if SaidaLigada then
+    begin
+      IsConsole := True;
+      SysInitStdIO;
+    end;
+    {$ELSE}
+    SaidaLigada := True;
+    {$ENDIF}
+  end;
+  if not SaidaLigada then
+    Exit;
+  // A checagem de I/O desligada fecha o ultimo buraco: console anexado que
+  // morre no meio da impressao (terminal fechado) devolveria o mesmo dialogo.
+  // Aqui vira codigo de erro, a saida se desliga, e o programa segue.
+  {$I-}
+  WriteLn(s);
+  Flush(Output);
+  {$I+}
+  if IOResult <> 0 then
+    SaidaLigada := False;
+end;
+
 procedure Ajuda;
 var
   i: Integer;
 begin
-  WriteLn('wte -- a casca da fase 2 (WTE-TASK-11). Nenhum acesso a imagem de CD.');
-  WriteLn;
-  WriteLn('  wte                   abre o MainForm');
-  WriteLn('  wte --list            lista os nomes e sai');
-  WriteLn('  wte --help            isto');
-  WriteLn('  wte <imagem.bin>      guarda o caminho e registra no trace;');
-  WriteLn('                        NAO le a imagem -- ver a WTE-TASK-25');
-  WriteLn;
-  WriteLn('O trace vai para wte/re/trace.log, ou para $WTE_TRACE_FILE.');
-  WriteLn;
-  WriteLn('Formularios, na ordem de criacao medida no original:');
+  Linha('wte -- a casca da fase 2 (WTE-TASK-11). Nenhum acesso a imagem de CD.');
+  Linha;
+  Linha('  wte                   abre o MainForm');
+  Linha('  wte --list            lista os nomes e sai');
+  Linha('  wte --help            isto');
+  Linha('  wte <imagem.bin>      guarda o caminho e registra no trace;');
+  Linha('                        NAO le a imagem -- ver a WTE-TASK-25');
+  Linha;
+  Linha('O trace vai para wte/re/trace.log, ou para $WTE_TRACE_FILE.');
+  Linha;
+  Linha('Formularios, na ordem de criacao medida no original:');
   for i := 0 to Screen.FormCount - 1 do
-    WriteLn('  ', Screen.Forms[i].Name, ' : ', Screen.Forms[i].ClassName);
+    Linha('  ' + Screen.Forms[i].Name + ' : ' + Screen.Forms[i].ClassName);
 end;
 
 function TrataLinhaDeComando: Boolean;
@@ -172,7 +228,7 @@ begin
     else if ParamStr(i) = '--list' then
     begin
       for k := 0 to Screen.FormCount - 1 do
-        WriteLn(Screen.Forms[k].Name);
+        Linha(Screen.Forms[k].Name);
       Exit(False);
     end
     else if Copy(ParamStr(i), 1, 1) = '-' then

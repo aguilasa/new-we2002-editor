@@ -141,7 +141,7 @@ def conferir_roteiros() -> int:
     roteiro do gate so exploderia no meio de uma corrida de dez minutos, com
     duas copias de ~300 MB ja feitas.
     """
-    golden = sorted(ROTEIROS.glob("golden-*.txt"))
+    golden = sorted(ROTEIROS.glob("golden-*.txt"), key=lambda p: p.as_posix())
     if not golden:
         print(f"golden_veredito: nenhum roteiro golden-*.txt em "
               f"{ROTEIROS}", file=sys.stderr)

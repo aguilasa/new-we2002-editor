@@ -982,7 +982,7 @@ def le_impl() -> tuple[dict[tuple[str, str], str], dict[str, list[str]],
     impl_dir = SRC_OUT / "impl"
     if not impl_dir.is_dir():
         return corpos, uses, aux
-    for caminho in sorted(impl_dir.iterdir()):
+    for caminho in sorted(impl_dir.iterdir(), key=lambda p: p.as_posix()):
         if caminho.name.startswith("."):
             continue
         if caminho.name.endswith(".aux.inc"):
@@ -1407,7 +1407,7 @@ def converte() -> tuple[dict[str, str], list[dict]]:
     digitos hexadecimais: e o gabarito do `--check`. Quem quer o hex de verdade
     chama `com_blobs()`, que e o que o modo de escrita faz.
     """
-    dfms = sorted(DFM_DIR.glob("*.dfm"))
+    dfms = sorted(DFM_DIR.glob("*.dfm"), key=lambda p: p.as_posix())
     if len(dfms) != 18:
         raise Dfm2LfmError(
             f"{REL_DFM}: esperados 18 arquivos .dfm, achados {len(dfms)}. "
@@ -1733,11 +1733,11 @@ def do_check(arquivos: dict[str, str], formularios: list[dict]) -> int:
                     f"{rel}: {blob.arquivo}: SHA-256 diverge do .dfm")
 
     esperados = set(arquivos)
-    for caminho in sorted(FORMS_OUT.glob("ep2002_*.lfm")):
+    for caminho in sorted(FORMS_OUT.glob("ep2002_*.lfm"), key=lambda p: p.as_posix()):
         rel = f"{REL_FORMS}/{caminho.name}"
         if rel not in esperados:
             problemas.append(f"{rel}: sobra, nenhum .dfm o gera")
-    for caminho in sorted(SRC_OUT.glob("ep2002_*.pas")):
+    for caminho in sorted(SRC_OUT.glob("ep2002_*.pas"), key=lambda p: p.as_posix()):
         rel = f"{REL_SRC}/{caminho.name}"
         if rel not in esperados:
             problemas.append(f"{rel}: sobra, nenhum .dfm o gera")

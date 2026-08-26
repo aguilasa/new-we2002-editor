@@ -836,12 +836,12 @@ def do_check(text_files: dict[str, str], blob_files: dict[str, bytes]) -> int:
             problems.append(f"blobs/{name}: conteudo diverge do .exe")
 
     expected_text = set(text_files)
-    for path in sorted(OUT.glob("*.dfm")):
+    for path in sorted(OUT.glob("*.dfm"), key=lambda p: p.as_posix()):
         if path.name not in expected_text:
             problems.append(f"{path.name}: sobra, nao sai do .exe")
     expected_blobs = set(blob_files)
     if BLOBS.is_dir():
-        for path in sorted(BLOBS.rglob("*.bin")):
+        for path in sorted(BLOBS.rglob("*.bin"), key=lambda p: p.as_posix()):
             rel = path.relative_to(BLOBS).as_posix()
             if rel not in expected_blobs:
                 problems.append(f"blobs/{rel}: sobra, nao sai do .exe")

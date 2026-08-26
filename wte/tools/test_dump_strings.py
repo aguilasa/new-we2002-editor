@@ -343,7 +343,7 @@ class TestContraObjdump(unittest.TestCase):
     def setUpClass(cls):
         img = d.Image(d.EXE.read_bytes())
         handlers = d.read_published(d.PUB.read_text(encoding="utf-8"))
-        cls.m = d.Measurement(img, handlers, sorted(d.DFM.glob("*.dfm")))
+        cls.m = d.Measurement(img, handlers, sorted(d.DFM.glob("*.dfm"), key=lambda p: p.as_posix()))
         cls.img = img
         text = cls.m.text
         cls.text_va = img.image_base + text.rva

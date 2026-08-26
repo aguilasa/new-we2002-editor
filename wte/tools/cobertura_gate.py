@@ -115,7 +115,7 @@ def colhe(raiz: Path) -> list[tuple[str, str, int]]:
     linhas: list[tuple[str, str, int]] = []
     conhecidos = handlers_conhecidos()
     achou = False
-    for sub in sorted(raiz.iterdir()):
+    for sub in sorted(raiz.iterdir(), key=lambda p: p.as_posix()):
         trace = sub / "port-trace.log"
         if not trace.is_file():
             continue
@@ -200,7 +200,7 @@ def valida(linhas: list[dict]) -> None:
     # sentidos -- ver `NEGATIVA` e o cabecalho.
     cobertos = {linha["handler"] for linha in linhas}
     sem_linha, com_linha = [], []
-    for arq in sorted(S.SPEC.glob("*.md")):
+    for arq in sorted(S.SPEC.glob("*.md"), key=lambda p: p.as_posix()):
         if arq.name in {"GABARITO.md", "INDICE.md", "README.md"}:
             continue
         texto = arq.read_text(encoding="utf-8")

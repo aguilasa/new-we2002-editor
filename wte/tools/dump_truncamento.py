@@ -180,7 +180,7 @@ SEM_GOVERNO = {
 def maxlength_dos_dfm() -> dict[tuple[str, str], int]:
     """(`formulario`, `controle`) -> `MaxLength` declarado."""
     fora: dict[tuple[str, str], int] = {}
-    for caminho in sorted(DFM_DIR.glob("*.dfm")):
+    for caminho in sorted(DFM_DIR.glob("*.dfm"), key=lambda p: p.as_posix()):
         formulario = caminho.stem
         atual: str | None = None
         for linha in caminho.read_text(encoding="latin1").splitlines():

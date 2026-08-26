@@ -102,7 +102,15 @@ class TestGuards(unittest.TestCase):
 
 
 class TestPascal(unittest.TestCase):
-    """O `we2002_mcr.pas` e escrito a mao; o layout daqui e o guard dele."""
+    """O `we2002_mcr.pas` e escrito a mao; o layout daqui e o guard dele.
+
+    ESTES TESTES MEXEM NO FONTE DE VERDADE -- plantam o erro no arquivo da
+    arvore e o restauram no `finally`. Por isso todo `write_text` daqui leva
+    `newline` explicito: no Windows o Python escreveria CRLF, e a restauracao
+    devolveria um arquivo que difere do commitado em toda linha. O sintoma e
+    `git status` acusando `wte/src/we2002_mcr.pas` modificado depois de uma
+    corrida de teste que passou. Medido em 2026-08-26.
+    """
 
     def setUp(self) -> None:
         if not M.PASCAL.is_file():
@@ -117,12 +125,12 @@ class TestPascal(unittest.TestCase):
             M.PASCAL.write_text(
                 self.original.replace("MCR_CAPITAO        = $6500;",
                                       "MCR_CAPITAO        = $6501;"),
-                encoding="utf-8")
+                encoding="utf-8", newline="\n")
             with self.assertRaises(M.McrError) as ctx:
                 M.confere_pascal(M.COBRADORES_ESPERADOS)
             self.assertIn("MCR_CAPITAO", str(ctx.exception))
         finally:
-            M.PASCAL.write_text(self.original, encoding="utf-8")
+            M.PASCAL.write_text(self.original, encoding="utf-8", newline="\n")
 
     def test_tabela_de_cobradores_plantada_recusa(self) -> None:
         try:
@@ -133,7 +141,7 @@ class TestPascal(unittest.TestCase):
                 M.confere_pascal(M.COBRADORES_ESPERADOS)
             self.assertIn("MCR_COBRADORES", str(ctx.exception))
         finally:
-            M.PASCAL.write_text(self.original, encoding="utf-8")
+            M.PASCAL.write_text(self.original, encoding="utf-8", newline="\n")
 
     def test_toda_constante_da_tabela_existe_no_pascal(self) -> None:
         achados = M.constantes_do_pascal()
@@ -182,12 +190,13 @@ class TestCarregadorDeBuffer(unittest.TestCase):
             M.FICHA.write_text(
                 self.original_ficha.replace("  IDENT_NENHUMA = $FF;",
                                             "  IDENT_NENHUMA = $00;"),
-                encoding="utf-8")
+                encoding="utf-8", newline="\n")
             with self.assertRaises(M.McrError) as ctx:
                 M.confere_carregador(*M.carimbos_do_carregador(self.blob))
             self.assertIn("IDENT_NENHUMA", str(ctx.exception))
         finally:
-            M.FICHA.write_text(self.original_ficha, encoding="utf-8")
+            M.FICHA.write_text(self.original_ficha,
+                               encoding="utf-8", newline="\n")
 
     def test_atribuicao_removida_recusa(self) -> None:
         try:
@@ -195,12 +204,12 @@ class TestCarregadorDeBuffer(unittest.TestCase):
                 self.original.replace(
                     "BufferJogador[buffer].ident_time := IDENT_NENHUMA;",
                     "BufferJogador[buffer].ident_time := 0;"),
-                encoding="utf-8")
+                encoding="utf-8", newline="\n")
             with self.assertRaises(M.McrError) as ctx:
                 M.confere_carregador(*M.carimbos_do_carregador(self.blob))
             self.assertIn("ident_time", str(ctx.exception))
         finally:
-            M.AUX.write_text(self.original, encoding="utf-8")
+            M.AUX.write_text(self.original, encoding="utf-8", newline="\n")
 
 
 class TestRoundTrip(unittest.TestCase):

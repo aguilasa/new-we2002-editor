@@ -168,7 +168,7 @@ BLOQUEIO_VENCIDO = (
 def enderecos_no_pascal() -> set[str]:
     """Todo `0x…` citado no Pascal escrito a mao ou gerado, em minuscula."""
     achados: set[str] = set()
-    for arq in sorted(SRC.glob("*.pas")) + sorted(IMPL.glob("*.inc")):
+    for arq in sorted(SRC.glob("*.pas"), key=lambda p: p.as_posix()) + sorted(IMPL.glob("*.inc"), key=lambda p: p.as_posix()):
         achados |= {e.lower() for e in
                     re.findall(_ENDERECO, arq.read_text(encoding="utf-8"))}
     return achados
@@ -398,7 +398,7 @@ def le_bateria_completa() -> set[str]:
 
 def roteiros_em_disco() -> dict[str, dict]:
     fora: dict[str, dict] = {}
-    for arq in sorted(ROTEIROS.glob("golden-*.txt")):
+    for arq in sorted(ROTEIROS.glob("golden-*.txt"), key=lambda p: p.as_posix()):
         if arq.name.endswith(".port.txt"):
             continue
         nome = arq.stem
@@ -568,9 +568,9 @@ def medir() -> dict:
             f"GOLDEN_DE cita roteiro que nao existe: {', '.join(faltando)}")
 
     # --- varredura de decompilado ----------------------------------------
-    alvos = [a for a in sorted(S.SPEC.glob("*.md")) if a.name not in RESERVADOS]
-    alvos += sorted(IMPL.glob("*.inc"))
-    alvos += sorted(SRC.glob("*.pas"))
+    alvos = [a for a in sorted(S.SPEC.glob("*.md"), key=lambda p: p.as_posix()) if a.name not in RESERVADOS]
+    alvos += sorted(IMPL.glob("*.inc"), key=lambda p: p.as_posix())
+    alvos += sorted(SRC.glob("*.pas"), key=lambda p: p.as_posix())
     suspeitos = []
     for arq in alvos:
         texto = arq.read_text(encoding="utf-8")

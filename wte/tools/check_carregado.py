@@ -195,7 +195,7 @@ def retangulos_com_cor(dfm: Path, lfm: Path):
 def chamadores() -> dict[str, list[str]]:
     """formulario -> arquivos de `wte/src` que o abrem."""
     fora: dict[str, set[str]] = {}
-    for caminho in sorted(SRC.rglob("*")):
+    for caminho in sorted(SRC.rglob("*"), key=lambda p: p.as_posix()):
         if caminho.is_dir() or caminho.suffix not in (".pas", ".inc", ".lpr"):
             continue
         for linha in caminho.read_text(encoding="utf-8",
@@ -218,7 +218,13 @@ def mede() -> list[dict]:
     from PIL import Image
     quem = chamadores()
     linhas = []
-    for caminho in sorted(DFM.glob("*.dfm")):
+    # `key=` E OBRIGATORIO, e a razao e de plataforma. `sorted()` sobre
+    # `Path` compara pelo `_str_normcase`, que no Windows e MINUSCULO: la
+    # `MainForm.dfm` cai depois de `estrategia.dfm`, e no Linux vem antes
+    # (`M` = 0x4D < `e` = 0x65). O `carregado.tsv` sairia noutra ordem e o
+    # `--check` acusaria divergencia que nao existe. Ordenar pelo `name` cru
+    # e case-sensitive nos dois. Medido em 2026-08-26 no Windows.
+    for caminho in sorted(DFM.glob("*.dfm"), key=lambda p: p.name):
         objetos = le_arvore(caminho)
         formulario = objetos[0]["nome"]
         cli = cliente(objetos, caminho)

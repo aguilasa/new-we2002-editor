@@ -137,7 +137,7 @@ def glifos() -> dict[tuple[str, str], int]:
     if not FORMS.is_dir():
         raise CheckError(f"{FORMS} nao existe")
     achados: dict[tuple[str, str], int] = {}
-    for lfm in sorted(FORMS.glob("*.lfm")):
+    for lfm in sorted(FORMS.glob("*.lfm"), key=lambda p: p.as_posix()):
         texto = lfm.read_text(encoding="utf-8", errors="replace")
         for m in OBJETO.finditer(texto):
             nome, corpo = m.group(1), m.group(3)

@@ -882,7 +882,7 @@ class TestCorpusReal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.arvores = []
-        for caminho in sorted(g.DFM_DIR.glob("*.dfm")):
+        for caminho in sorted(g.DFM_DIR.glob("*.dfm"), key=lambda p: p.as_posix()):
             cls.arvores.append(
                 (caminho.stem,
                  g.ler_dfm(caminho.stem, caminho.read_text(encoding="ascii"))))

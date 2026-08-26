@@ -224,7 +224,7 @@ def entrada_por_gerador() -> dict[str, list[tuple[str, int]]]:
             raise CheckError(f"o gen_tables_pas reivindica {caminho}, que nao "
                              f"existe")
         fora.setdefault("gen_tables_pas.py", []).append(
-            (str(caminho.relative_to(P.CORE)),
+            (caminho.relative_to(P.CORE).as_posix(),
              linhas(caminho.read_text(encoding="utf-8"))))
     return fora
 
@@ -259,8 +259,8 @@ def consumidores() -> tuple[list[str], list[str]]:
     app **nao** le, por mais que a camada compile.
     """
     casca, teste = [], []
-    alvos = ([(p, "casca") for p in sorted(SRC.glob("*.pas"))]
-             + [(p, "teste") for p in sorted(TESTS.glob("*.pas"))]
+    alvos = ([(p, "casca") for p in sorted(SRC.glob("*.pas"), key=lambda p: p.as_posix())]
+             + [(p, "teste") for p in sorted(TESTS.glob("*.pas"), key=lambda p: p.as_posix())]
              + [(LPR, "casca")])
     for caminho, especie in alvos:
         if caminho.name in DA_CAMADA:
@@ -269,7 +269,7 @@ def consumidores() -> tuple[list[str], list[str]]:
         usa = any("we2002_database" in m.group(1)
                   for m in UNIDADE_DE_USES.finditer(texto))
         if usa:
-            rel = str(caminho.relative_to(ROOT / "wte"))
+            rel = caminho.relative_to(ROOT / "wte").as_posix()
             (casca if especie == "casca" else teste).append(rel)
     if not teste:
         raise CheckError("nenhum teste da `uses we2002_database` -- os dumps "

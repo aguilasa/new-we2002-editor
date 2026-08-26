@@ -161,7 +161,7 @@ def colhe(diretorio: Path) -> list[str]:
             "tests/dump_preco.pas`")
     saida: list[str] = []
     achou = False
-    for arq in sorted(diretorio.glob("amostra-*-*.bin")):
+    for arq in sorted(diretorio.glob("amostra-*-*.bin"), key=lambda p: p.as_posix()):
         m = re.fullmatch(r"amostra-(.+)-([0-9]+)", arq.stem)
         if not m:
             continue

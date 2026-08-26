@@ -270,7 +270,13 @@ class TestAritmetica(unittest.TestCase):
 
 
 class TestGuardDoPascal(unittest.TestCase):
-    """O `we2002_render.pas` e escrito a mao; este e o guard dele."""
+    """O `we2002_render.pas` e escrito a mao; este e o guard dele.
+
+    Mesmo cuidado do `test_dump_mcr.py`: estes testes plantam o erro no fonte
+    da arvore e o restauram no `finally`, entao todo `write_text` leva
+    `newline` explicito -- sem ele o Windows devolveria o arquivo com CRLF e
+    o `git status` ficaria sujo depois de um teste que passou.
+    """
 
     def setUp(self) -> None:
         if not R.EXE.is_file() or not R.PASCAL.is_file():
@@ -297,12 +303,12 @@ class TestGuardDoPascal(unittest.TestCase):
             R.PASCAL.write_text(
                 self.original.replace("  RENDER_EXPANSAO = 3;",
                                       "  RENDER_EXPANSAO = 4;"),
-                encoding="utf-8")
+                encoding="utf-8", newline="\n")
             with self.assertRaises(R.RenderError) as ctx:
                 R.confere_pascal(R.imediatos_do_exe(self.blob))
             self.assertIn("RENDER_EXPANSAO", str(ctx.exception))
         finally:
-            R.PASCAL.write_text(self.original, encoding="utf-8")
+            R.PASCAL.write_text(self.original, encoding="utf-8", newline="\n")
 
     def test_round_no_lugar_de_trunc_recusa(self) -> None:
         """O risco nomeado, guardado por grep -- e barato."""
@@ -315,7 +321,7 @@ class TestGuardDoPascal(unittest.TestCase):
                 R.confere_pascal(R.imediatos_do_exe(self.blob))
             self.assertIn("TRUNCA", str(ctx.exception))
         finally:
-            R.PASCAL.write_text(self.original, encoding="utf-8")
+            R.PASCAL.write_text(self.original, encoding="utf-8", newline="\n")
 
     def test_seek_de_paleta_errado_recusa(self) -> None:
         with self.assertRaises(R.RenderError) as ctx:

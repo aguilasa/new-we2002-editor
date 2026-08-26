@@ -43,6 +43,18 @@ import sys
 import time
 from pathlib import Path
 
+# O interpretador bash, e por que ele nao e a cadeia literal `"bash"`.
+#
+# No Windows a busca do `CreateProcess` olha `C:\Windows\System32` ANTES do
+# `PATH`, e la mora o `bash.exe` da Microsoft -- o atalho do WSL. Com WSL sem
+# distribuicao instalada ele sai 1 dizendo "Windows Subsystem for Linux has no
+# installed distributions", e por PATH nenhum se chega ao bash do Git for
+# Windows: pos-lo na frente do PATH nao adianta, porque o System32 vem antes.
+#
+# `WTE_BASH` da o caminho completo. Sem ela nada muda -- no Linux `bash` e o
+# que sempre foi.
+BASH = os.environ.get("WTE_BASH", "bash")
+
 ROOT = Path(__file__).resolve().parents[2]
 EXE_DIR = ROOT / "we-team-editor"
 VCL = EXE_DIR / "vcl60.bpl"
@@ -315,7 +327,7 @@ def censo_dorsais(mem: Mem, form: int):
 
 def medir(roteiro: Path, saida: Path, imagem: Path | None,
           vizinhanca: bool) -> int:
-    cmd = ["bash", str(ROOT / "wte/tools/diff_dirigido.sh"), str(roteiro),
+    cmd = [BASH, str(ROOT / "wte/tools/diff_dirigido.sh"), str(roteiro),
            "--saida", str(saida)]
     if imagem:
         cmd += ["--imagem", str(imagem)]

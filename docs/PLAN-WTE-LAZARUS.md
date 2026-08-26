@@ -521,9 +521,9 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 51,3% do Pascal da casca é saída de gerador** —
-9.453 linhas geradas contra 8.968 escritas à mão. Dessas 8.968, 585 são andaime de
-projeto — `wte.lpr` 52, `retrace.pas` 148, `wtemain.pas` 196 e
+**Medido com a fase 4 em curso: 51,2% do Pascal da casca é saída de gerador** —
+9.453 linhas geradas contra 9.024 escritas à mão. Dessas 9.024, 641 são andaime de
+projeto — `wte.lpr` 52, `retrace.pas` 148, `wtemain.pas` 252 e
 `wte_datafiles.pas` 189, os quatro contados pelo
 [`check_fase2.py`](../wte/tools/check_fase2.py) e listados em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md) — e o resto é corpo escrito à
@@ -560,7 +560,12 @@ que a §4.4 vem medindo desde 2026-08-21 é a **estrutura** que a fase 4 preciso
 criar para os handlers caberem. A quarta — o ` Accept` da tática, que fechou a
 CORR-WTE-081 — foi a primeira do lote a mover a fração por CORPO, e mesmo
 assim o numerador subiu junto: 9.456 → 9.473 geradas pelos dez pares de cor de
-radar que entraram no `dump_formacoes.py`, contra 8.027 → 8.291 à mão.)
+radar que entraram no `dump_formacoes.py`, contra 8.027 → 8.291 à mão. A quinta
+não é da fase 4 nem de handler nenhum: 8.968 → 9.024 à mão pelo `wtemain.pas`,
+que ganhou a saída de texto segura da porta para Windows —
+`AttachConsole` mais a checagem de I/O desligada, sem as quais o `--help` e o
+`--list` morriam num diálogo da LCL antes de imprimir. Ver a §3 de
+[`/docs/PLAN-WTE-WINDOWS.md`](/docs/PLAN-WTE-WINDOWS.md).)
 O número sai do
 [`check_fase2.py`](../wte/tools/check_fase2.py) e a conta inteira está em
 [`../wte/re/fase-2.md`](../wte/re/fase-2.md), inclusive por que as 25.712
@@ -1507,7 +1512,7 @@ Cada fechamento tem documento próprio, **gerado**, e é ali que os números viv
 | Fase | Fechamento | O que ele mede |
 |---|---|---|
 | 1 | [`wte/re/fase-1.md`](../wte/re/fase-1.md) | 18 formulários, 96 handlers, 219 atribuições `OnX`, 765 strings |
-| 2 | [`wte/re/fase-2.md`](../wte/re/fase-2.md) | os 96 stubs, os 18 `.lfm`, e **51,3%** do Pascal da casca saindo de gerador |
+| 2 | [`wte/re/fase-2.md`](../wte/re/fase-2.md) | os 96 stubs, os 18 `.lfm`, e **51,2%** do Pascal da casca saindo de gerador |
 | 3 | [`wte/re/fase-3.md`](../wte/re/fase-3.md), [`fase-3-fechamento.md`](../wte/re/fase-3-fechamento.md) | dumps Pascal × C++ com **0** bytes de diferença nas duas ROMs; 3.389 de 3.692 linhas da camada de dados por regra |
 | 4 | [`wte/re/fase-4.md`](../wte/re/fase-4.md) | os 96 vereditos e os **17** handlers que gravam, cada um com gate nomeado |
 | 6 | [`wte/re/golden.md`](../wte/re/golden.md), [`divergencias.md`](../wte/re/divergencias.md) | a bateria completa e as 12 divergências deliberadas |

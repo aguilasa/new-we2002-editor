@@ -203,7 +203,7 @@ DECL = re.compile(
 def vetores() -> dict[tuple[str, str], dict]:
     """Todo `array[0..N] of AnsiChar/Byte` declarado na camada de dados."""
     achados: dict[tuple[str, str], dict] = {}
-    for arq in sorted(SRC.glob("we2002_*.pas")):
+    for arq in sorted(SRC.glob("we2002_*.pas"), key=lambda p: p.as_posix()):
         texto = arq.read_text(encoding="utf-8")
         for m in DECL.finditer(texto):
             nome, n1, n2, tipo = m.group(1), int(m.group(2)), m.group(3), m.group(4)
@@ -235,7 +235,7 @@ def tabela_limites(nome: str) -> list[int]:
 def maxlength_dos_forms() -> dict[str, int]:
     """Os `MaxLength` estaticos, por nome de objeto, dos `.lfm` gerados."""
     achados: dict[str, int] = {}
-    for arq in sorted(FORMS.glob("*.lfm")):
+    for arq in sorted(FORMS.glob("*.lfm"), key=lambda p: p.as_posix()):
         objeto = None
         for linha in arq.read_text(encoding="utf-8", errors="replace").splitlines():
             m = re.match(r"\s*object (\w+):", linha)

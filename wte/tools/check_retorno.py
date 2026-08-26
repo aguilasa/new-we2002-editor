@@ -175,7 +175,7 @@ def bytes_do_handler(formulario: str, handler: str) -> tuple[str, str]:
 
 def lfm_do_formulario(nome: str) -> Path:
     """O `.lfm` cujo objeto raiz tem esse nome."""
-    for caminho in sorted(LFM.glob("*.lfm")):
+    for caminho in sorted(LFM.glob("*.lfm"), key=lambda p: p.as_posix()):
         primeira = caminho.read_text(encoding="utf-8",
                                      errors="replace").splitlines()[0]
         m = RE_RAIZ.match(primeira.strip())
@@ -192,7 +192,7 @@ COLUNAS = ("formulario", "default", "default_evento", "default_modalresult",
 def mede() -> list[dict]:
     metodos = le_metodos()
     linhas = []
-    for caminho in sorted(DFM.glob("*.dfm")):
+    for caminho in sorted(DFM.glob("*.dfm"), key=lambda p: p.as_posix()):
         objetos = le_arvore(caminho)
         formulario = objetos[0]["nome"]
         objetos_lfm = le_arvore(lfm_do_formulario(formulario))

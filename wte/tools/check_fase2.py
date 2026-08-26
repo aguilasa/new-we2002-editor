@@ -120,7 +120,7 @@ def inventario() -> dict:
     mostrou: 96.2% viraria 89.4%, com dois arquivos gerados contados como mao.
     """
     gerados, mao, fora = [], [], []
-    for pas in sorted(SRC.glob("*.pas")):
+    for pas in sorted(SRC.glob("*.pas"), key=lambda p: p.as_posix()):
         if pas.name.startswith(PREFIXO_DADOS):
             fora.append(f"src/{pas.name}")
             continue
@@ -141,11 +141,11 @@ def inventario() -> dict:
     # fracao SUBIA a cada handler implementado. E o mesmo erro da CORR-WTE-051,
     # que ja tinha custado uma publicacao errada -- fracao so vale se os dois
     # lados contarem a mesma populacao.
-    for inc in sorted((SRC / "impl").glob("*.inc")):
+    for inc in sorted((SRC / "impl").glob("*.inc"), key=lambda p: p.as_posix()):
         mao.append((f"src/impl/{inc.name}", linhas_de(inc)))
 
     lfm_estrutura = lfm_hex = 0
-    lfms = sorted(FORMS.glob("*.lfm"))
+    lfms = sorted(FORMS.glob("*.lfm"), key=lambda p: p.as_posix())
     for lfm in lfms:
         e, h = lfm_particionado(lfm)
         lfm_estrutura += e
@@ -175,7 +175,7 @@ def conferir_stubs(handlers: list[dict]) -> tuple[dict[str, int], list[str]]:
     que ela nao afrouxou: some um, e a conta nao fecha.
     """
     fontes = {}
-    for pas in sorted(SRC.glob("*.pas")):
+    for pas in sorted(SRC.glob("*.pas"), key=lambda p: p.as_posix()):
         fontes[pas.name] = pas.read_text(encoding="utf-8", errors="replace")
     implementados = {p.name[:-4] for p in (SRC / "impl").glob("*.inc")}
 
@@ -237,7 +237,7 @@ def conferir_formularios() -> list[str]:
     # O nome muda de proposito -- MainForm.dfm vira ep2002_mainform.lfm --
     # entao o pareamento e pelo objeto raiz do .lfm, nao pelo nome do arquivo.
     raizes = []
-    for lfm in sorted(FORMS.glob("*.lfm")):
+    for lfm in sorted(FORMS.glob("*.lfm"), key=lambda p: p.as_posix()):
         primeira = lfm.read_text(encoding="utf-8", errors="replace").splitlines()[0]
         m = re.match(r"object\s+(\S+)\s*:", primeira)
         if not m:

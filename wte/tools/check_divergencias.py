@@ -144,7 +144,7 @@ def pendencias_declaradas() -> list[str]:
         raiz = ROOT / pasta
         if not raiz.is_dir():
             continue
-        for arq in sorted(raiz.rglob("*.md")):
+        for arq in sorted(raiz.rglob("*.md"), key=lambda p: p.as_posix()):
             if arq == DOC:
                 continue
             # Os arquivos que CITAM a frase para a descrever, em vez de a

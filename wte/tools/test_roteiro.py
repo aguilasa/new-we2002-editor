@@ -18,12 +18,25 @@ precisa de `DISPLAY`, de Wine ou do `.exe`.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import tempfile
 import time
 import unittest
 from pathlib import Path
+
+# O interpretador bash, e por que ele nao e a cadeia literal `"bash"`.
+#
+# No Windows a busca do `CreateProcess` olha `C:\Windows\System32` ANTES do
+# `PATH`, e la mora o `bash.exe` da Microsoft -- o atalho do WSL. Com WSL sem
+# distribuicao instalada ele sai 1 dizendo "Windows Subsystem for Linux has no
+# installed distributions", e por PATH nenhum se chega ao bash do Git for
+# Windows: pos-lo na frente do PATH nao adianta, porque o System32 vem antes.
+#
+# `WTE_BASH` da o caminho completo. Sem ela nada muda -- no Linux `bash` e o
+# que sempre foi.
+BASH = os.environ.get("WTE_BASH", "bash")
 
 ROOT = Path(__file__).resolve().parents[2]
 ROTEIRO_SH = ROOT / "wte" / "tools" / "roteiro.sh"
@@ -47,11 +60,16 @@ def roda(roteiro: str, achadas: int) -> tuple[int, str]:
     """Executa `roteiro` com um duble que acha as `achadas` primeiras janelas."""
     with tempfile.TemporaryDirectory() as td:
         alvo = Path(td) / "r.txt"
-        alvo.write_text(roteiro, encoding="utf-8")
-        script = PROLOGO.format(sh=ROTEIRO_SH, cnt=Path(td) / "cnt",
+        # `newline` e `as_posix` pelo mesmo motivo do `test_check_golden.py`: o
+        # `roteiro.sh` le este arquivo linha a linha (CRLF entraria no ultimo
+        # campo de cada uma) e o caminho vai para dentro de um script bash, que
+        # trataria a contrabarra do Windows como escape.
+        alvo.write_text(roteiro, encoding="utf-8", newline="\n")
+        script = PROLOGO.format(sh=ROTEIRO_SH.as_posix(),
+                                cnt=(Path(td) / "cnt").as_posix(),
                                 achadas=achadas)
-        script += f'roteiro_executa "{alvo}"\n'
-        r = subprocess.run(["bash", "-c", script], capture_output=True,
+        script += f'roteiro_executa "{alvo.as_posix()}"\n'
+        r = subprocess.run([BASH, "-c", script], capture_output=True,
                            text=True)
         return r.returncode, r.stdout + r.stderr
 

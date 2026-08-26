@@ -56,6 +56,25 @@ usuário. O `run-98` resolve o `XAUTHORITY` do Xvfb sozinho; à mão é preciso
 fazer o que o [`../CLAUDE.md`](../CLAUDE.md) descreve, ou o GTK morre com
 `Invalid MIT-MAGIC-COOKIE-1 key`.
 
+### No Windows
+
+O `Makefile` é GNU make + bash, e nenhum dos dois vem com o Windows. Lá o
+equivalente é o [`make.ps1`](make.ps1), com os mesmos alvos menos os três que
+não fazem sentido (`assets`, `run-98`, `install`):
+
+```powershell
+cd wte
+.\make.ps1              # lista os alvos e o ambiente achado
+.\make.ps1 build
+.\make.ps1 run -Imagem C:\caminho\copia.bin
+```
+
+**Leia [`../docs/PLAN-WTE-WINDOWS.md`](../docs/PLAN-WTE-WINDOWS.md) antes**: ele
+traz o que instalar, o que trazer do Linux (a pasta do Obocaman **inteira**,
+não só o `.exe`), os oito consertos que a porta exigiu e — o mais importante —
+o que **não** roda lá. A bateria golden depende de Xvfb, `xdotool` e Wine; a
+paridade byte a byte continua sendo afirmada pela máquina Linux.
+
 ## Layout
 
 ```text

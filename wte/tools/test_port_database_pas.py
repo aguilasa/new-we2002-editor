@@ -505,7 +505,7 @@ class TestEntradaReal(unittest.TestCase):
         no_disco = set()
         for p in list(P.CORE.glob("*.cpp")) + list(
                 (P.CORE / "include/we2002").glob("*.hpp")):
-            no_disco.add(str(p.relative_to(P.CORE)))
+            no_disco.add(p.relative_to(P.CORE).as_posix())
 
         orfaos = sorted(no_disco - mapeados - set(P.FORA_DO_TRANSPILADOR))
         self.assertEqual(

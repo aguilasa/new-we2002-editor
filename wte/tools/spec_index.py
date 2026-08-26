@@ -231,7 +231,7 @@ def monta() -> tuple[str, dict]:
     # Spec orfa e erro: arquivo que nao casa com handler nenhum quer dizer
     # nome errado, e um nome errado some do indice em silencio.
     reservados = {"GABARITO.md", "INDICE.md", "README.md"}
-    for arq in sorted(SPEC.glob("*.md")):
+    for arq in sorted(SPEC.glob("*.md"), key=lambda p: p.as_posix()):
         if arq.name in reservados:
             continue
         chave = arq.name[:-3]

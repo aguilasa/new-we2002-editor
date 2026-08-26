@@ -46,6 +46,7 @@ Uso:
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -55,7 +56,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dfm2lfm  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-LCL_BASE = Path("/usr/lib/lazarus")
+# Onde a arvore do Lazarus mora, e por que sao duas variaveis.
+#
+# `/usr/lib/lazarus/<versao>/` e o layout da distribuicao: a versao e um nivel
+# de diretorio, e por isso `LCL_BASE` e so a raiz. Nem toda instalacao tem esse
+# nivel -- a do Windows poe a arvore inteira em `C:\lazarus`, e a do
+# fpcupdeluxe num diretorio escolhido pelo usuario. Para essas, `WTE_LAZARUS_DIR`
+# aponta a ARVORE (a que contem `lcl/` e `components/lazutils/lazversion.pas`)
+# e o nivel de versao sai do caminho.
+#
+# A CONFERENCIA DE VERSAO CONTINUA VALENDO nos dois casos: o `lazversion.pas`
+# e que decide, nao o nome do diretorio. Apontar `WTE_LAZARUS_DIR` para uma
+# arvore que nao seja a `LCL_VERSAO` pinada faz o script recusar -- e deve, e o
+# ponto dele.
+LCL_BASE = Path(os.environ.get("WTE_LAZARUS_BASE", "/usr/lib/lazarus"))
 GENERATOR = "wte/tools/check_lcl_props.py"
 
 # A chave que o dfm2lfm usa para o formulario raiz mapeia para a classe real.
@@ -81,7 +95,8 @@ class CheckError(RuntimeError):
 
 def caminho_da_lcl(versao: str) -> Path:
     """A arvore da LCL da versao pinada, conferida contra o `lazversion.pas`."""
-    raiz = LCL_BASE / versao
+    arvore = os.environ.get("WTE_LAZARUS_DIR")
+    raiz = Path(arvore) if arvore else LCL_BASE / versao
     lcl = raiz / "lcl"
     if not lcl.is_dir():
         raise CheckError(
@@ -126,7 +141,7 @@ def fontes(lcl: Path) -> list[Path]:
     """Os `.pp`/`.pas` da LCL, inclusive os do widgetset GTK2."""
     achados: list[Path] = []
     for sufixo in ("*.pp", "*.pas", "*.inc"):
-        achados.extend(sorted(lcl.rglob(sufixo)))
+        achados.extend(sorted(lcl.rglob(sufixo), key=lambda p: p.as_posix()))
     return achados
 
 

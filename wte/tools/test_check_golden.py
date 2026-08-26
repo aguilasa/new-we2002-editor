@@ -20,10 +20,23 @@ Wine, e rodam num clone sem a pasta `we-team-editor/`.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+
+# O interpretador bash, e por que ele nao e a cadeia literal `"bash"`.
+#
+# No Windows a busca do `CreateProcess` olha `C:\Windows\System32` ANTES do
+# `PATH`, e la mora o `bash.exe` da Microsoft -- o atalho do WSL. Com WSL sem
+# distribuicao instalada ele sai 1 dizendo "Windows Subsystem for Linux has no
+# installed distributions", e por PATH nenhum se chega ao bash do Git for
+# Windows: pos-lo na frente do PATH nao adianta, porque o System32 vem antes.
+#
+# `WTE_BASH` da o caminho completo. Sem ela nada muda -- no Linux `bash` e o
+# que sempre foi.
+BASH = os.environ.get("WTE_BASH", "bash")
 
 import check_golden as C
 
@@ -283,10 +296,21 @@ class TestDecisaoDoTSV(unittest.TestCase):
         """Monta o TSV, roda o bloco, devolve o arquivo resultante."""
         with tempfile.TemporaryDirectory() as d:
             alvo = Path(d) / "golden.tsv"
-            alvo.write_text(tsv, encoding="utf-8")
+            # O `newline` explicito: sem ele o Python escreve CRLF no Windows,
+            # e o bloco de shell abaixo compara campo a campo -- o carriage
+            # return gruda na ultima coluna, a linha existente nunca casa, e a
+            # decisao ACRESCENTA em vez de substituir. O sintoma e um TSV com a
+            # linha duplicada, que parece bug da decisao e nao e. Medido em
+            # 2026-08-26.
+            alvo.write_text(tsv, encoding="utf-8", newline="\n")
             decl = "\n".join([
                 "set -euo pipefail",
-                f"SAIDA={alvo}",
+                # `as_posix()`, nao `str()`: no Windows o caminho sai com
+                # contrabarra, e o bash le as sequencias dela como escape -- o
+                # bloco grava noutro lugar e o teste ve o TSV intacto, como se
+                # a decisao nao tivesse rodado. O bash do Git for Windows
+                # entende a forma com barra normal.
+                f"SAIDA={alvo.as_posix()}",
                 f"RETOMAR={retomar}",
                 f"ROM={rom}",
                 "ESCOLHIDOS=({})".format(
@@ -294,7 +318,7 @@ class TestDecisaoDoTSV(unittest.TestCase):
             ])
             chamada = ("\n".join(f'registra {x}' for x in registrar)
                        if registrar else "")
-            r = subprocess.run(["bash", "-c",
+            r = subprocess.run([BASH, "-c",
                                 decl + "\n" + self.bloco() + "\n" + chamada],
                                capture_output=True, text=True)
             self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

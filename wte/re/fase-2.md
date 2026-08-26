@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2685 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9453** |
-| Escrito à mão | 106 | 8968 |
-| **Total** | | **18421** |
+| Escrito à mão | 106 | 9024 |
+| **Total** | | **18477** |
 
-**51.3% do Pascal da casca é saída de gerador.**
+**51.2% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_preco.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -163,14 +163,14 @@ Escrito à mão, linha por linha:
 | `src/wte_ficha.pas` | 1182 | — |
 | `src/wte_render2d.pas` | 434 | — |
 | `src/wte_tatica.pas` | 763 | — |
-| `src/wtemain.pas` | 196 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
+| `src/wtemain.pas` | 252 | auto-create, linha de comando e a marca de título (WTE-TASK-11) |
 | `wte.lpr` | 52 | programa principal (WTE-TASK-02) |
 
 ### O hex dos blobs fica fora da conta, e por quê
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 79.7% — e passa a medir bitmap, não geração de código.
+fração sobe para 79.6% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda
