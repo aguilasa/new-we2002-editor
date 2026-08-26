@@ -35,7 +35,7 @@ uses
   we2002_tables, ep2002_info3, we2002_offsets, we2002_cdimage, we2002_ml,
   ep2002_info4, we2002_mcr, we2002_render, wte_render2d, wte_cor,
   ep2002_color, ep2002_about, ep2002_salida, LCLIntf, ep2002_creditos_equipo,
-  wte_ficha, wte_tatica, we2002_preco;
+  wte_ficha, wte_tatica, we2002_preco, wte_datafiles;
 
 type
   TMainForm = class(TForm)

@@ -279,28 +279,17 @@ function JogadorTemCampoCondicional(indice, slot: Integer): Boolean;
 implementation
 
 uses
-  Classes;
+  Classes, wte_datafiles;
 
+{ A REGRA MORA NO `wte_datafiles` desde a WTE-TASK-39, e este corpo virou
+  encaminhamento. O nome fica aqui porque quatro chamadores o usam e porque a
+  raiz e estado de execucao como qualquer outro desta unidade; o que saiu foi
+  a ORDEM DE BUSCA, que passou a ser a mesma do log de trace -- e ela ganhou
+  um candidato, o prefixo instalado (`../share/we2002Lazarus`), sem o qual a
+  arvore instalada nao acharia os assets. }
 function RaizDosAssets: string;
-var
-  candidatos: array[0..2] of string;
-  i: Integer;
-  base: string;
 begin
-  base := ExtractFilePath(ParamStr(0));
-  candidatos[0] := GetEnvironmentVariable('WTE_ASSETS_DIR');
-  candidatos[1] := base + '..' + DirectorySeparator + 'assets';
-  candidatos[2] := base + '..' + DirectorySeparator + '..'
-                        + DirectorySeparator + 'assets';
-  for i := Low(candidatos) to High(candidatos) do
-  begin
-    if candidatos[i] = '' then
-      Continue;
-    Result := IncludeTrailingPathDelimiter(candidatos[i]);
-    if FileExists(Result + 'data' + DirectorySeparator + 'dat.bin') then
-      Exit;
-  end;
-  Result := '';
+  Result := wte_datafiles.RaizDosAssets;
 end;
 
 procedure ResolveDiretorios;

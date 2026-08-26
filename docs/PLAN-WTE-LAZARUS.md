@@ -518,9 +518,12 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 51,9% do Pascal da casca é saída de gerador** —
-9.453 linhas geradas contra 8.744 escritas à mão. Dessas 8.744, 362 são andaime de
-projeto (`wte.lpr` 41, `retrace.pas` 125, `wtemain.pas` 196) e o resto é corpo escrito à
+**Medido com a fase 4 em curso: 51,3% do Pascal da casca é saída de gerador** —
+9.453 linhas geradas contra 8.956 escritas à mão. Dessas 8.956, 573 são andaime de
+projeto — `wte.lpr` 52, `retrace.pas` 148, `wtemain.pas` 196 e
+`wte_datafiles.pas` 177, os quatro contados pelo
+[`check_fase2.py`](../wte/tools/check_fase2.py) e listados em
+[`../wte/re/fase-2.md`](../wte/re/fase-2.md) — e o resto é corpo escrito à
 mão em `src/impl/` e nas unidades de formato, que é exatamente a última linha da
 tabela acima: a parte que tem de ser manual. São de duas formas — `<unidade>.<handler>.inc`, um corpo de
 handler, e `<unidade>.aux.inc`, as rotinas internas que o original chama de mais
@@ -1182,6 +1185,33 @@ original faz, e aqui custaria o harness inteiro: todo roteiro do lado port abre
 o app antes de qualquer coisa. Está registrado como divergência deliberada
 ([`../wte/re/divergencias.md`](../wte/re/divergencias.md), §12), e a mensagem
 que hoje é `data/dat.bin nao encontrado` é da WTE-TASK-39.
+
+**A instalação está feita desde 2026-08-26**, pela
+[WTE-TASK-39](/docs/tasks/39-empacotamento.md): `make -C wte install
+PREFIX=<prefixo>` põe binário, `.desktop`, AppStream, os sete ícones e a
+documentação nos lugares do freedesktop, e o `share/we2002Lazarus/` nasce com
+um `README.txt` que diz o que pôr ali — porque os assets não são
+redistribuídos. **Nenhum caminho é compilado**: a ordem de busca mora no
+[`../wte/src/wte_datafiles.pas`](../wte/src/wte_datafiles.pas) e vale para os
+assets **e para o log de trace**, que era o que derrubava o binário fora de
+`wte/build/`.
+
+Duas coisas mudaram de forma em relação ao previsto, e as duas com razão
+escrita:
+
+- **o projeto continua se chamando `wte` na árvore**; o slug entra no
+  `install`. Renomear `wte.lpi`/`wte.lpr`/`build/wte` custaria 3 ferramentas, o
+  `Makefile` e prosa de `docs/`, e nenhum desses leitores é o usuário;
+- **a mensagem de assets ausentes sai em três lugares** — rótulo, saída de erro
+  e diálogo —, porque tem três leitores, e traz os caminhos já resolvidos.
+
+**Formato de pacote continua fora**, como o plano Linux decidiu. E o usuário
+registrou em 2026-08-26 que, *a princípio*, esta aplicação **não será
+distribuída na internet**: é de uso próprio e vai servir de base para um app
+novo, que juntará o que ela e o `newWe2002` fazem. O `.desktop` e o AppStream
+foram escritos assim mesmo — são o que faz o ícone e a entrada de menu
+existirem na máquina de quem instala, e o AppStream é o único arquivo do lote
+que só teria consumidor numa loja.
 
 ---
 

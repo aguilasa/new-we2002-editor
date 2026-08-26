@@ -120,3 +120,16 @@ resolução em runtime — a linha está lá. Aqui fica o registro de que **"rod
 ambiente sem Wine" e "funciona depois de movida" são conferências diferentes**,
 e a segunda tem um defeito conhecido esperando por ela: reconferir a de mover
 com o binário *instalado*, não com o de `build/`.
+
+**Consertado em 2026-08-26 pela WTE-TASK-39**, e a metade de "movida" está
+medida: `make -C wte install PREFIX=<p>`, `mv <p> <outro>`, e o binário
+instalado abriu, achou os assets no caminho novo e carregou um time da imagem
+japonesa. A regra passou a viver no
+[`wte/src/wte_datafiles.pas`](../../wte/src/wte_datafiles.pas), e ela cobre
+assets **e** trace.
+
+**O que esta task ainda deve, e é a outra metade:** rodar num ambiente **sem
+Wine**. A conferência de 2026-08-26 foi nesta máquina, que tem Wine instalado
+para o oráculo — ela prova que o app **não usa** Wine (é ELF nativo, e o `ldd`
+não mostra nada de Wine), não que ele rode onde Wine não existe. As duas
+afirmações são diferentes, e só a segunda fecha a condição 3.

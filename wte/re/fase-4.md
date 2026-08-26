@@ -230,7 +230,7 @@ são os cinco, e reconferência velha não vale para handler novo.
 
 ## Varredura por decompilado colado
 
-237 arquivos varridos — as specs, os `.inc` de corpo escrito
+238 arquivos varridos — as specs, os `.inc` de corpo escrito
 à mão e as unidades de `src/`.
 
 **Nada.** É a §2 do plano sustentada por medida em vez de honra.

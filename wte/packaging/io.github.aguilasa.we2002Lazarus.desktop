@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=WE2002 - Lazarus Editor
+GenericName=Editor de times de Winning Eleven 2002
+Comment=Edita times, jogadores, taticas, uniformes e bandeiras numa imagem de CD do Winning Eleven 2002
+Exec=we2002Lazarus %f
+Icon=we2002Lazarus
+Terminal=false
+# O binario instalado se chama we2002Lazarus, e a LCL/GTK2 monta o WM_CLASS a
+# partir do nome do executavel -- medido com xprop na arvore instalada. Sem
+# esta linha o shell nao liga a janela a esta entrada, porque a entrada tem o
+# nome do appid e a janela tem o nome do binario. E a mesma nota que o
+# .desktop do newWe2002 carrega, pela mesma razao.
+StartupWMClass=we2002Lazarus
+Categories=Game;
+Keywords=winning eleven;pro evolution soccer;playstation;psx;rom;editor;

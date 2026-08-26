@@ -35,8 +35,20 @@ begin
     { O original encerra. Aqui so se avisa: encerrar no `OnShow` levaria a
       janela embora antes de o harness do gate poder dirigi-la, e o
       diagnostico seria "a janela nao apareceu" -- que manda procurar no
-      lugar errado. Divergencia deliberada, para a WTE-TASK-35. }
-    texto_dialogo_we.Caption := 'data/dat.bin nao encontrado';
+      lugar errado. Divergencia deliberada, registrada na secao 12 do
+      `wte/re/divergencias.md`.
+
+      A MENSAGEM E DA WTE-TASK-39, e ela diz O QUE FALTA E ONDE POR -- os
+      assets nao sao redistribuidos, entao quem recebe o app nao tem como
+      adivinhar. Ela sai em tres lugares, e cada um tem um leitor: o rotulo da
+      janela (que tem 105 px e so cabe o resumo), a saida de erro (para quem
+      rodou pelo terminal) e um dialogo (para quem clicou no icone e nao tem
+      terminal nenhum). }
+    texto_dialogo_we.Caption := 'faltam os assets';
+    WriteLn(StdErr, MensagemDeAssetsAusentes);
+    Flush(StdErr);
+    MessageDlg('WE2002 - Lazarus Editor', MensagemDeAssetsAusentes,
+               mtWarning, [mbOK], 0);
     Exit;
   end;
   imagem := ImagemDaLinhaDeComando;

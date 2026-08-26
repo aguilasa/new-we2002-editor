@@ -34,6 +34,8 @@ make -C wte build     # lazbuild wte.lpi -> wte/build/wte
 make -C wte assets    # symlink para a pasta do Obocaman (uma vez)
 make -C wte run-98    # roda no Xvfb :98
 make -C wte check     # --check de todos os geradores de tools/
+make -C wte icon      # redesenha os 7 PNG do ícone (sem --check -- olhe)
+make -C wte install PREFIX=~/.local    # instala; aceita DESTDIR
 make -C wte           # lista os alvos
 ```
 
@@ -66,6 +68,7 @@ wte/
     dfm/  spec/  ambiente.md
   tools/              geradores e scripts de golden test
   tests/              testes do lado Pascal
+  packaging/          .desktop, AppStream e os 7 PNG do ícone -- VERSIONADO
   build/              saída do lazbuild -- ignorada
 ```
 
@@ -167,6 +170,46 @@ renomear `wte.lpi`/`wte.lpr`/`build/wte` para o slug (são **3** arquivos e
 AppStream e o ícone.
 
 ---
+
+## Instalação (WTE-TASK-39)
+
+`make -C wte install PREFIX=<prefixo>` põe a árvore no lugar, no mesmo formato
+que o `newWe2002` instala pelo CMake:
+
+| Item | Destino |
+|---|---|
+| binário | `bin/we2002Lazarus` |
+| onde os assets são procurados | `share/we2002Lazarus/` (com um `README.txt` dizendo o que pôr ali) |
+| `.desktop` | `share/applications/io.github.aguilasa.we2002Lazarus.desktop` |
+| ícone, 7 tamanhos | `share/icons/hicolor/<n>x<n>/apps/we2002Lazarus.png` |
+| AppStream | `share/metainfo/io.github.aguilasa.we2002Lazarus.metainfo.xml` |
+| documentação | `share/doc/we2002Lazarus/{NOTICE.md,README.md}` |
+
+**Nenhum caminho é compilado no binário.** A ordem de busca vive no
+[`src/wte_datafiles.pas`](src/wte_datafiles.pas) e é a mesma para assets e para
+o log de trace: variável de ambiente, ao lado do executável, o prefixo
+instalado, a árvore de fonte. Medido em 2026-08-26: a árvore instalada foi
+**movida de diretório** e o app abriu, achou os assets no novo lugar e carregou
+um time da imagem — as mensagens que ele imprime trazem o caminho novo.
+
+### O binário se chama `wte` na árvore e `we2002Lazarus` instalado
+
+O repasse da WTE-TASK-38 previa renomear `wte.lpi`, `wte.lpr` e `build/wte`
+para o slug. **Não foi feito, e a razão é de custo:** o nome `wte` aparece em 3
+ferramentas, no `LPI`/`BIN` do `Makefile` e em prosa de `docs/`, e **nenhum
+desses leitores é o usuário**. Quem vê o nome do produto é a barra de tarefas
+(`Application.Title`), o `.desktop` e o `bin/` instalado. A renomeação
+acontece no `install`, que é onde ela tem consumidor; o harness golden não muda
+de forma por causa de nome.
+
+### O que **não** é instalado, e não é esquecimento
+
+Os 198 `.bmp` e o `data/dat.bin` do editor do Obocaman. Eles não são
+redistribuídos (WTE-TASK-38), e é por isso que `share/we2002Lazarus/` nasce com
+um `README.txt` em vez de vazio. Sem eles o app **abre e avisa** — a mensagem
+diz o que falta e em quais três diretórios ele procura, com os caminhos já
+resolvidos. Ela sai em três lugares porque tem três leitores: o rótulo da
+janela, a saída de erro e um diálogo.
 
 ## Armadilha já paga: o `.lfm` em `forms/`
 

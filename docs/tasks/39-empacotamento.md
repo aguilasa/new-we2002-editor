@@ -5,7 +5,7 @@ type: implementação
 category: empacotamento
 phase: 7
 depends_on: ["WTE-TASK-38"]
-status: pendente
+status: concluído
 ---
 
 # WTE-TASK-39: Empacotamento
@@ -71,30 +71,115 @@ resultado** — é a única coisa gerada que teste nenhum julga.
 
 | Arquivo | Ação |
 |---|---|
-| `wte/packaging/*.desktop` | criar |
-| `wte/packaging/*.metainfo.xml` | criar |
+| `wte/packaging/io.github.aguilasa.we2002Lazarus.desktop` | criar |
+| `wte/packaging/io.github.aguilasa.we2002Lazarus.metainfo.xml` | criar |
+| `wte/packaging/README-assets.txt` | criar — o que vai em `share/we2002Lazarus/` |
+| `wte/packaging/icons/we2002Lazarus-*.png` | criar — os 7, gerados |
 | `wte/tools/make_icon.py` | criar |
-| `wte/src/datafiles.pas` | criar — a ordem de busca |
-| `wte/Makefile` ou equivalente | modificar — alvo de install |
+| `wte/src/wte_datafiles.pas` | criar — a ordem de busca *(o enunciado dizia `datafiles.pas`; o prefixo `wte_` é o que as outras unidades de aplicação usam)* |
+| `wte/src/retrace.pas` | modificar — o trace passa pela mesma resolução, e nunca derruba o app |
+| `wte/src/we2002_estado.pas` | modificar — `RaizDosAssets` vira encaminhamento |
+| `wte/src/impl/ep2002_mainform.FormShow.inc` + `.uses` | modificar — a mensagem de assets ausentes |
+| `wte/Makefile` | modificar — alvos `install` e `icon` |
 
 ---
 
 ## Critério de conclusão
 
-- [ ] `install` num prefixo temporário põe tudo no lugar
-- [ ] Árvore instalada funciona depois de movida
-- [ ] Assets ausentes produzem mensagem que diz o que falta e onde pôr
-- [ ] `.desktop` e AppStream validados pelas ferramentas do freedesktop
-- [ ] Ícone conferido a olho, nos sete tamanhos
-- [ ] Nenhum formato de pacote (AppImage/Flatpak) adicionado
-- [ ] Commit no formato conventional, em inglês
+- [x] `install` num prefixo temporário põe tudo no lugar — **13 arquivos**,
+      conferidos por `find`: `bin/we2002Lazarus`, o `.desktop`, o AppStream, os
+      7 PNG em `hicolor/*/apps/`, `share/we2002Lazarus/README.txt` e os dois
+      documentos em `share/doc/we2002Lazarus/`
+- [x] Árvore instalada funciona depois de movida — instalada num prefixo,
+      **movida de diretório**, e o binário abriu, achou os assets no caminho
+      novo (`share/we2002Lazarus/`) e carregou o time 2 da ROM japonesa, com
+      bandeira e uniforme desenhados. As mensagens que ele imprime trazem o
+      caminho novo, o que é a prova de que nada é compilado
+- [x] Assets ausentes produzem mensagem que diz o que falta e onde pôr — em
+      **três lugares**, porque tem três leitores: o rótulo da janela, a saída de
+      erro e um diálogo. Ela nomeia os arquivos (`image/` e `data/dat.bin`) e os
+      três diretórios onde o app procura, com os caminhos resolvidos
+- [x] `.desktop` e AppStream validados pelas ferramentas do freedesktop —
+      `desktop-file-validate` sem saída; `appstreamcli validate --pedantic`
+      **verde**, com uma nota pedante (`cid-contains-uppercase-letter`) que o
+      metainfo do `newWe2002` também tem, pela mesma razão: o appid segue o
+      slug camelCase do produto
+- [x] Ícone conferido a olho, nos sete tamanhos — bandeirinha de escanteio,
+      legível em 16 px, distinta da camisa do irmão. As três cores saem do
+      próprio app (`$00FFB676`, `$00E68F41`, `$003C3CDC`)
+- [x] Nenhum formato de pacote (AppImage/Flatpak) adicionado
+- [x] Commit no formato conventional, em inglês
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-- **Executado em:**
+- **Executado em:** 2026-08-26
+
 - **Resumo do que foi feito:**
-- **Arquivos criados/modificados:**
+
+  A instalação existe e foi **provada movendo a árvore**: `make -C wte install
+  PREFIX=<p>`, `mv <p> <outro>`, e o binário abriu, achou os assets em
+  `share/we2002Lazarus/` do lugar novo e carregou o time 2 da ROM japonesa com
+  bandeira e uniforme desenhados. As mensagens que ele imprime trazem o caminho
+  novo — é isso que prova que nada é compilado.
+
+  **O que estava quebrado não era o que a task previa.** O enunciado esperava
+  que o caso especial fosse a pasta de assets; o defeito real era o **log de
+  trace**, que resolvia `<exe>/../re/trace.log` e derrubava o app com um
+  diálogo genérico da LCL antes de qualquer janela. As duas resoluções de
+  caminho viraram uma, no
+  [`wte_datafiles.pas`](../../wte/src/wte_datafiles.pas), com a mesma ordem de
+  busca — e o `retrace` passou a **desligar o log** quando o arquivo não abre,
+  em vez de matar o programa. Um log é diagnóstico; diagnóstico que mata o
+  paciente é pior que nenhum, e este matou.
+
+  **Uma decisão mudou de forma em relação ao repasse da WTE-TASK-38:** o
+  projeto continua se chamando `wte` na árvore, e o slug `we2002Lazarus` entra
+  no `install`. Renomear `wte.lpi`/`wte.lpr`/`build/wte` custaria 3 ferramentas,
+  o `Makefile` e prosa de `docs/`, e nenhum desses leitores é o usuário.
+
+  **O escopo veio do usuário**, em 2026-08-26: *a princípio* esta aplicação não
+  será distribuída na internet — é de uso próprio, e vai servir de base para um
+  app novo que juntará o que ela e o `newWe2002` fazem. Nada de formato de
+  pacote (já estava fora); o `.desktop` e os ícones ficam porque são o que faz a
+  entrada de menu existir na máquina de quem instala, e o AppStream ficou por
+  ser o único do lote que só teria consumidor numa loja — escrevê-lo custou um
+  arquivo e mantém a porta aberta.
+
+- **Arquivos criados/modificados:** conferido contra `git show --stat`.
+
+  Criados: `wte/src/wte_datafiles.pas`, `wte/tools/make_icon.py`,
+  `wte/packaging/` inteiro (o `.desktop`, o `.metainfo.xml`, o
+  `README-assets.txt` e os **7 PNG** de `icons/`).
+
+  Modificados: `wte/Makefile` (alvos `install` e `icon`), `wte/src/retrace.pas`,
+  `wte/src/we2002_estado.pas`, `wte/src/impl/ep2002_mainform.FormShow.inc` e o
+  `.uses` dele (mais o `wte/src/ep2002_mainform.pas`, **regerado** pelo
+  `dfm2lfm.py` por causa do `.uses`), `wte/README.md`, `wte/re/fase-2.md` e
+  `wte/re/fase-4.md` (**regerados**), `docs/PLAN-WTE-LAZARUS.md`,
+  `docs/tasks/progresso.md`, este arquivo, e o repasse em
+  [`docs/tasks/40-verificacao-final.md`](/docs/tasks/40-verificacao-final.md).
+
 - **Problemas encontrados:**
+
+  **1. `pkill -x -f <caminho>` não mata processo que recebeu argumento.** O
+  `-x` exige casamento exato da linha de comando inteira, e o app tinha sido
+  lançado com o caminho da imagem. O processo sobreviveu, a janela ficou no
+  `:98`, e o `golden_check.sh` **recusou começar** — a guarda de janela grande
+  fez exatamente o que existe para fazer. Custou uma corrida de gate.
+
+  **2. Mexer no `.uses` do `MainForm` derruba o `check_fase2.py`, e mexer no
+  Pascal também.** Cada linha nova de código escrito à mão move a fração da
+  §4.4 do plano (`51,9%` → `51,3%`). Pior: a passagem anterior escreveu os
+  números por arquivo **à mão** (`wte.lpr` 41, `retrace.pas` 125) e eles nunca
+  bateram com a tabela do `fase-2.md`, que é quem os mede — 52 e 148. Corrigido
+  aqui, com o ponteiro para a tabela ao lado, para a próxima passagem copiar em
+  vez de estimar.
+
+  **3. O `cd` do shell é persistente entre comandos.** Os três arquivos de
+  `packaging/` nasceram em `wte/packaging/icons/wte/packaging/`, porque o
+  comando anterior tinha entrado em `icons/`. Movidos, e o diretório espúrio
+  removido — mas o tipo de erro merece registro: caminho relativo depois de
+  `cd` num shell que não voltou.
 
 ---
 

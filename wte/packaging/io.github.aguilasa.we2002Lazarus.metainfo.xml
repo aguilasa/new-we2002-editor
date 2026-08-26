@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     AppStream do WE2002 - Lazarus Editor.
+
+     project_license e LicenseRef-proprietary e NAO um identificador SPDX: o
+     codigo herdado nao tem licenca nenhuma (ver NOTICE.md), e declarar uma
+     seria afirmar direito que este projeto nao tem. E a mesma escolha do
+     metainfo do newWe2002.
+
+     Nenhum hifen duplo aqui dentro: XML o proibe em comentario.
+-->
+<component type="desktop-application">
+  <id>io.github.aguilasa.we2002Lazarus</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+
+  <name>WE2002 - Lazarus Editor</name>
+  <summary>Editor de times para imagens de CD do Winning Eleven 2002</summary>
+
+  <description>
+    <p>
+      Edita times, jogadores, taticas, uniformes e bandeiras direto numa imagem
+      de CD do Winning Eleven 2002 (PSX). Reimplementacao nativa em Lazarus/LCL
+      do WE2002 Team Editor v0.99 do Obocaman, escrita a partir de
+      especificacao e verificada byte a byte contra o binario original.
+    </p>
+    <p>
+      Os arquivos de arte do editor original (os bitmaps de image/ e o
+      data/dat.bin) NAO sao distribuidos com este programa. Sem eles a
+      aplicacao abre e avisa o que falta e onde por.
+    </p>
+  </description>
+
+  <developer id="io.github.aguilasa">
+    <name>aguilasa</name>
+  </developer>
+
+  <launchable type="desktop-id">io.github.aguilasa.we2002Lazarus.desktop</launchable>
+
+  <url type="homepage">https://github.com/aguilasa/new-we2002-editor</url>
+  <url type="bugtracker">https://github.com/aguilasa/new-we2002-editor/issues</url>
+
+  <categories>
+    <category>Game</category>
+  </categories>
+
+  <provides>
+    <binary>we2002Lazarus</binary>
+  </provides>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1" date="2026-08-26">
+      <description>
+        <p>Primeira arvore instalavel.</p>
+      </description>
+    </release>
+  </releases>
+</component>

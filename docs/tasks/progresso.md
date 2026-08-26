@@ -51,7 +51,7 @@ compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 | [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md) | Buffers de tamanho fixo e truncamento | 6 | 26, 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) | Reconferência de UI com a lógica ligada | 6 | 34 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
 | [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md) | Nome do produto e linhagem no `NOTICE.md` | 7 | 35 | ✅ Concluído | 2026-08-25 | 2026-08-25 |
-| [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ⬜ Pendente | — | — |
+| [WTE-TASK-39](/docs/tasks/39-empacotamento.md) | Ícone, `.desktop`, AppStream, `install` | 7 | 38 | ✅ Concluído | 2026-08-26 | ⬜ pendente |
 | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | Verificação final | 7 | 36, 37, 39 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
@@ -640,15 +640,33 @@ alimenta e passou a **carregar** essa gravação.
       é o que separa os dois lados no mesmo `:98`. Trocá-lo derrubaria os 27
       roteiros do lado port de uma vez, e quem mostra o nome do programa é o
       `Application.Title`, que a barra de tarefas lê
-- [ ] **O binário não abre fora de `wte/build/`** *(achado da WTE-TASK-38,
-      2026-08-25)* — morre num diálogo da LCL (`File not found. / Press OK to
+- [x] **O binário não abre fora de `wte/build/`** *(achado da WTE-TASK-38,
+      2026-08-25)* — morria num diálogo da LCL (`File not found. / Press OK to
       ignore and risk data corruption.`) antes de qualquer janela, porque
-      `retrace.ResolveArquivo` resolve `<exe>/../re/trace.log` e o `Rewrite`
-      levanta quando o diretório não existe. Controle: `mkdir re` ao lado da
-      cópia e a janela abre. **Reprova a condição 3 hoje**, e conserta na
-      [WTE-TASK-39](/docs/tasks/39-empacotamento.md)
-- [ ] Árvore instalada funciona depois de movida
-- [ ] Assets ausentes produzem mensagem que diz o que falta
+      `retrace.ResolveArquivo` resolvia `<exe>/../re/trace.log` e o `Rewrite`
+      levantava quando o diretório não existia. **Consertado em 2026-08-26**
+      pela [WTE-TASK-39](/docs/tasks/39-empacotamento.md): a regra passou para o
+      [`wte_datafiles.pas`](../../wte/src/wte_datafiles.pas), que cobre assets
+      **e** trace, e o `retrace` desliga o log em vez de derrubar o app quando
+      o arquivo não abre
+- [x] Árvore instalada funciona depois de movida — instalada num prefixo,
+      **movida de diretório**, e o binário abriu, achou os assets no caminho
+      novo e carregou o time 2 da ROM japonesa, com bandeira e uniforme
+      desenhados *(WTE-TASK-39, 2026-08-26)*. As mensagens trazem o caminho
+      novo, que é a prova de que nada é compilado
+- [x] Assets ausentes produzem mensagem que diz o que falta — **e onde pôr**,
+      em três lugares, porque tem três leitores: o rótulo da janela, a saída de
+      erro e um diálogo. Ela nomeia `image/` e `data/dat.bin` e os três
+      diretórios onde o app procura, com os caminhos resolvidos
+- [x] `install` num prefixo põe 13 arquivos no lugar — binário, `.desktop`,
+      AppStream, os 7 ícones, o `README.txt` de `share/we2002Lazarus/` e os
+      dois documentos de `share/doc/`. `desktop-file-validate` sem saída e
+      `appstreamcli validate --pedantic` verde
+- [x] **O projeto continua se chamando `wte` na árvore; o slug entra no
+      `install`** *(decisão da WTE-TASK-39)*. Renomear `wte.lpi`/`wte.lpr`/
+      `build/wte` custaria 3 ferramentas, o `Makefile` e prosa de `docs/`, e
+      nenhum desses leitores é o usuário — quem vê o nome do produto é a barra
+      de tarefas, o `.desktop` e o `bin/` instalado
 - [ ] Condição 3 testada em ambiente **sem** Wine
 - [ ] Vocabulário escrito: verificado, não verificado, divergente por decisão
 

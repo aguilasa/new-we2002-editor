@@ -49,41 +49,62 @@ function RETraceFile: string;
 implementation
 
 uses
-  SysUtils;
+  SysUtils, wte_datafiles;
 
 var
   Inicio: TDateTime;
   Arquivo: string = '';
   Saida: TextFile;
   Aberto: Boolean = False;
+  // Ligado uma vez quando o log nao abre. Sem ele, cada `REMark` tentaria de
+  // novo e a sessao inteira pagaria uma excecao por marca.
+  Desligado: Boolean = False;
 
-// Onde o log mora, na mesma ordem de resolucao que o wte/README.md fixou
-// para os assets -- variavel de ambiente primeiro, arvore de fonte depois.
-// Aqui a arvore de fonte e o destino normal: `wte/re/trace.log` e o que a
-// WTE-TASK-13 le. Note que ele NAO e versionado (e saida de execucao), e a
-// WTE-TASK-13 e que decide o que vai para `wte/re/eventos.md`.
+// Onde o log mora: a regra inteira esta no `wte_datafiles`, junto com a dos
+// assets, e o motivo de ela ter saido daqui e concreto.
+//
+// ISTO DERRUBAVA O APP FORA DE `wte/build/`. Esta funcao resolvia
+// `<dir do executavel>/../re/trace.log` e entregava o caminho sem conferir
+// nada; o `Rewrite` abaixo levantava `EInOutError` quando o diretorio nao
+// existia, e a LCL mostrava `File not found. / Press OK to ignore and risk
+// data corruption.` ANTES da primeira janela. Medido na WTE-TASK-38, com
+// controle: `mkdir re` ao lado da copia e o mesmo binario abria.
+//
+// `wte/re/trace.log` continua sendo o destino na arvore de fonte -- e o que a
+// WTE-TASK-13 le, e ele NAO e versionado.
 function ResolveArquivo: string;
-var
-  Dir: string;
 begin
-  Result := GetEnvironmentVariable('WTE_TRACE_FILE');
-  if Result <> '' then
-    Exit;
-  // O binario vive em wte/build/; o log vai para wte/re/.
-  Dir := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Dir) + '../re/trace.log';
+  Result := CaminhoDeTrace;
 end;
 
+// TRACE NUNCA DERRUBA O APP. Se o arquivo nao abrir -- diretorio somente
+// leitura, disco cheio, caminho vazio --, o trace se desliga para a sessao
+// inteira e o programa segue. Um log e diagnostico; diagnostico que mata o
+// paciente e pior que nenhum, e este ja matou.
 procedure Garante;
 begin
-  if Aberto then
+  if Aberto or Desligado then
     Exit;
   Inicio := Now;
   Arquivo := ResolveArquivo;
+  if Arquivo = '' then
+  begin
+    Desligado := True;
+    Exit;
+  end;
   AssignFile(Saida, Arquivo);
-  // Trunca: cada execucao e um trace novo. Acumular faria a WTE-TASK-13
-  // comparar duas sessoes coladas e chamar isso de divergencia.
-  Rewrite(Saida);
+  try
+    // Trunca: cada execucao e um trace novo. Acumular faria a WTE-TASK-13
+    // comparar duas sessoes coladas e chamar isso de divergencia.
+    Rewrite(Saida);
+  except
+    on E: Exception do
+    begin
+      Desligado := True;
+      Arquivo := '';
+      Exit;
+    end;
+  end;
   Aberto := True;
 end;
 
@@ -97,6 +118,8 @@ end;
 procedure Emite(const Prefixo, Texto: string);
 begin
   Garante;
+  if not Aberto then
+    Exit;
   WriteLn(Saida, Format('%7.3f  %s%s', [Decorrido, Prefixo, Texto]));
   // Flush a cada linha: a sessao termina com a janela sendo morta por
   // `xdotool`/`kill`, e buffer nao esvaziado perde justamente o fim do
