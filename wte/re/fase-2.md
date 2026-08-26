@@ -44,8 +44,8 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2685 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9453** |
-| Escrito à mão | 106 | 8956 |
-| **Total** | | **18409** |
+| Escrito à mão | 106 | 8968 |
+| **Total** | | **18421** |
 
 **51.3% do Pascal da casca é saída de gerador.**
 
@@ -159,7 +159,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_warning_2.FormCreate.inc` | 12 | corpo de handler, da spec (fase 4) |
 | `src/retrace.pas` | 148 | o registrador de disparo (WTE-TASK-11) |
 | `src/wte_cor.pas` | 752 | — |
-| `src/wte_datafiles.pas` | 177 | — |
+| `src/wte_datafiles.pas` | 189 | — |
 | `src/wte_ficha.pas` | 1182 | — |
 | `src/wte_render2d.pas` | 434 | — |
 | `src/wte_tatica.pas` | 763 | — |

@@ -82,9 +82,23 @@ begin
                    + 'data' + DirectorySeparator + 'dat.bin');
 end;
 
+{ Os candidatos, em ordem, e cada um tem um consumidor:
+
+    [0] `$WTE_ASSETS_DIR`             -- quem poe a pasta noutro lugar
+    [1] `<exe>/../assets`             -- `make -C wte assets`, que liga
+                                         `wte/assets`; e o prefixo instalado,
+                                         se a pasta for posta la
+    [2] `<exe>/../share/<slug>`       -- `make -C wte install`
+
+  A LISTA E EXATAMENTE A DA `MensagemDeAssetsAusentes`, e isso e cobrado pelo
+  `test_wte_datafiles.py`. Candidato que a busca aceita e a mensagem nao oferece
+  atende quem acertar por acaso e nao ajuda ninguem -- e um quarto assim existiu
+  ate a CORR-WTE-117: `<exe>/../../assets`, sem comentario, fora da mensagem, e
+  sem nada no repositorio que o criasse. Ao acrescentar um caminho aqui,
+  acrescente o item la. }
 function RaizDosAssets: string;
 var
-  candidatos: array[0..3] of string;
+  candidatos: array[0..2] of string;
   i: Integer;
   base: string;
 begin
@@ -93,8 +107,6 @@ begin
   candidatos[1] := base + '..' + DirectorySeparator + 'assets';
   candidatos[2] := base + '..' + DirectorySeparator + 'share'
                         + DirectorySeparator + SLUG;
-  candidatos[3] := base + '..' + DirectorySeparator + '..'
-                        + DirectorySeparator + 'assets';
   for i := Low(candidatos) to High(candidatos) do
     if TemAssets(candidatos[i]) then
       Exit(IncludeTrailingPathDelimiter(candidatos[i]));

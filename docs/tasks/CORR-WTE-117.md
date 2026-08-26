@@ -3,7 +3,7 @@ id: CORR-WTE-117
 title: "Correção: o app procura os assets em quatro lugares e a mensagem promete três, sem dizer o que é o quarto"
 type: correção
 category: empacotamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -141,21 +141,63 @@ dos documentos deixa de ser copiado à mão.
 
 ## Verificação
 
-- [ ] O número de candidatos relativos em `RaizDosAssets` é igual ao número de
-      itens da `MensagemDeAssetsAusentes`
-- [ ] A guarda reprova quando se acrescenta um candidato sem tocar na mensagem
-- [ ] `lazbuild wte/wte.lpi` compila
-- [ ] `make -C wte install PREFIX=<tmp>` continua com 13 arquivos, e o binário
-      movido acha os assets e abre a janela 522×475
-- [ ] `make -C wte check` verde
-- [ ] `roms/` intocada
+- [x] O número de candidatos relativos em `RaizDosAssets` é igual ao número de
+      itens da `MensagemDeAssetsAusentes` — **3 e 3**, e conferidos par a par,
+      não só na contagem
+- [x] A guarda reprova quando se acrescenta um candidato sem tocar na mensagem
+      — plantado o `[3]` de volta, **4 casos** reprovam
+- [x] `lazbuild wte/wte.lpi` compila — 5.431 linhas, 0 erro
+- [x] `make -C wte install PREFIX=<tmp>` continua com **13 arquivos**, e o
+      binário movido acha os assets e abre a janela **522×475**
+- [x] `make -C wte check` verde (865 testes)
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-26
 
 **Resumo do que foi feito:**
 
+Escolhida a saída **recomendada**: o `candidatos[3]` era sobra, e foi apagado.
+O array voltou a `0..2`, e a busca passou a dizer exatamente o que a mensagem
+promete.
+
+A medição que fechou a decisão: **nenhum layout usa o `[3]`**. Do binário de
+desenvolvimento (`wte/build/`) ele resolve `<repo>/assets`, que nada cria — o
+`make -C wte assets` liga `wte/assets`, que é o `[1]`. Do binário instalado
+(`<prefixo>/bin/`) resolve um irmão do prefixo, que o `install` também não
+cria. E o `git log` do arquivo mostra que os quatro entraram **no mesmo
+commit**, então não havia intenção posterior a descobrir.
+
+A lista ganhou o comentário que faltava — uma linha por candidato, dizendo quem
+o popula —, e a guarda (`test_wte_datafiles.py`, 7 casos) amarra a busca à
+mensagem. Ela confere **par a par**, e não só a contagem: cada caminho relativo
+montado na busca tem de ser o mesmo texto Pascal montado na mensagem.
+
 **Problemas encontrados:**
 
+**O conserto derrubou o `check_fase2.py`, e ele estava certo.** O comentário
+novo acrescentou 12 linhas ao `wte_datafiles.pas`, e a §4.4 do plano publica a
+fração de Pascal gerado contra escrito à mão — com o total literal. O gate
+recusou, dizendo a frase esperada palavra por palavra.
+
+Atualizado com o que a ferramenta mede, não com soma à mão: **8.968** escritas à
+mão (era 8.956) e **585** de andaime (era 573), com o `wte_datafiles.pas` em
+**189** — os quatro andaimes remedidos por `wc -l`. A fração continua **51,3%**.
+E o `fase-2.md`, que é gerado, foi **regerado** pelo gerador; três linhas dele
+mudaram.
+
+Vale registrar que o gate pegou isto sozinho: um comentário em Pascal move um
+número publicado no plano, e ninguém adivinharia essa ligação lendo a CORR.
+
+**A guarda lê o Pascal em vez de rodar o app**, e isso é escolha. Rodar
+responderia "achou" ou "não achou" para **um** layout de cada vez, e a
+afirmação é sobre a lista inteira — que a busca e a mensagem falem dos mesmos
+lugares é estrutural, e se lê da fonte, sem `:98` e sem os assets.
+
 **Arquivos criados/modificados:**
+
+- `wte/src/wte_datafiles.pas` — o `[3]` apagado e o comentário da lista
+- `wte/tools/test_wte_datafiles.py` — criado, 7 casos
+- `docs/PLAN-WTE-LAZARUS.md` — a §4.4, remedida
+- `wte/re/fase-2.md` — regerado
