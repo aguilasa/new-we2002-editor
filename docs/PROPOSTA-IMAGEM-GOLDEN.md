@@ -7,9 +7,13 @@
 > apontando para ela.
 >
 > **Dois dos três portões já correram, e passaram** — na máquina Windows, em
-> 2026-08-27. O resultado está na [§8](#8-a-corrida-dos-portões). O portão 3
-> continua sendo Linux: a bateria do `wte/` depende de Xvfb, `xdotool` e Wine
-> — §5.4 de [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
+> 2026-08-27. O que foi medido está na [§8](#8-a-corrida-dos-portões); o que
+> falta, com os comandos na ordem, na
+> [§8.3](#83-o-que-falta-no-linux). O resto é Linux por dependência de Xvfb,
+> `xdotool` e Wine — §5.4 de
+> [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
+>
+> Em uma frase: **está provado que dá; falta provar que vale a pena.**
 >
 > Diagnóstico do travamento em
 > [../wte/re/crash-causa.md](../wte/re/crash-causa.md).
@@ -248,6 +252,18 @@ dia em que manter três imagens de ~450 MB incomodar mais do que remedir tudo.
 Em 2026-08-27, na máquina Windows. Os dois portões que não dependem de Xvfb
 correram; os dois passaram.
 
+| | o que mede | onde roda | estado |
+|---|---|---|---|
+| **Portão 1** — core | `ed.exe` vs `golden_tool roundtrip` | Windows (nativo) ou Linux (Wine) | ✅ **passou** — [§8.1](#81-portão-1--o-edexe-sobre-a-ptbr-remaster) |
+| **Portão 1** — GUI | `ed.exe` vs a janela Qt | **só Linux** | ⬜ falta — [§8.3](#83-o-que-falta-no-linux) |
+| **Portão 2** | Pascal do `wte/` vs `we2002_core` | qualquer uma | ✅ **passou** — [§8.2](#82-portão-2--a-camada-de-dados) |
+| **Portão 3** | os 24 roteiros com oráculo vivo | **só Linux** | ⬜ falta — [§8.3](#83-o-que-falta-no-linux) |
+
+Em uma frase: **está provado que dá; falta provar que vale a pena.** O portão 1
+respondeu a primeira pergunta — o `ed.exe` de 2002 lê e grava essa imagem, e o
+port grava os mesmos bytes. O portão 3 responde a segunda, e é ele que ainda
+não correu.
+
 Método comum aos dois: **`roms/` nunca é alvo**. Três cópias limpas em `work/`
 — uma para o oráculo, uma para o port, uma para medir só a carga.
 
@@ -320,12 +336,91 @@ plataforma registrada na §11 do [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md),
 e a §6 do [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md) proíbe
 commitar TSV medido aqui. A evidência versionada continua sendo a do Linux.
 
-### 8.3 O que falta
+### 8.3 O que falta, no Linux
 
-O portão 3, no Linux, com a mudança de `--rom ptbr` no
-[../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh). É ele que responde
-a pergunta de valor: se os 24 roteiros correm com oráculo vivo nessa imagem, ela
-compra o que nenhuma das duas atuais compra.
+Quatro passos, em ordem. Os dois do meio são os que faltam de verdade, e os
+dois **só rodam no Linux**: dependem de Xvfb, `xdotool` e Wine, e valem a regra
+do `DISPLAY=:98` do [../CLAUDE.md](../CLAUDE.md).
+
+#### Passo 0 — a imagem tem de estar lá
+
+`roms/` está no `.gitignore`: o arquivo **não** vem com o `git pull`. A
+`ptbr-remaster.bin` foi renomeada na máquina Windows, então na Linux ela ou não
+existe ou está com o nome do dump. Confira antes de tudo:
+
+```sh
+ls -la roms/ptbr-remaster.bin roms/ptbr-remaster.cue
+```
+
+Sem ela, os dois passos abaixo não têm objeto. O `.cue` acompanha e o `FILE`
+dele já aponta para o nome novo.
+
+#### Passo 1 — a metade GUI do portão 1
+
+O que não deu para medir no Windows: a janela Qt no lugar do core headless.
+
+```sh
+make golden-gui IMAGE=roms/ptbr-remaster.bin
+```
+
+**Critério:** o mesmo do portão 1 — só a faixa `405724..405739`.
+
+**Não exige mudança nenhuma de código.** Feche qualquer editor aberto no `:98`
+antes: os dois lados acham o diálogo principal pelo tamanho, e uma janela
+esquecida é dirigida no lugar da que está sob teste.
+
+Vale rodar o `make golden` (headless) junto, mesmo tendo passado no Windows: é
+a mesma medição com o `golden_tool` do GCC no lugar do MSVC, custa pouco, e
+fecha a única folga que sobrou do portão 1 — que ele foi medido em um
+compilador só nessa imagem.
+
+#### Passo 2 — o portão 3, que é o que decide o valor
+
+Exige a mudança de código da [§5](#5-as-mudanças-que-o-protocolo-exige) no
+[../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh): duas linhas.
+
+```sh
+# no `case` que valida --rom
+case "$ROM" in japonesa|europeia|ptbr|ambas) : ;;
+
+# no mapa de imagens
+declare -A IMAGEM_DE=(
+  [japonesa]="$RAIZ/roms/japanese-shift-jis.bin"
+  [europeia]="$RAIZ/roms/golden-european-deluxe.bin"
+  [ptbr]="$RAIZ/roms/ptbr-remaster.bin"
+)
+```
+
+Depois:
+
+```sh
+bash wte/tools/golden_suite.sh --rom ptbr
+```
+
+**Critério:** zero `REPROVOU` e **zero `SEM_ORACULO`**. O segundo é o ponto
+inteiro: na europeia, 23 dos 24 roteiros saem `SEM_ORACULO` porque o
+`we-team-editor.exe` morre ao trocar de time. Se aqui saírem com veredito, a
+`ptbr-remaster` compra a régua que nenhuma das duas atuais compra.
+
+Leva de 2 a 6 minutos por roteiro e não roda em CI.
+
+#### Passo 3 — só se os dois acima passarem
+
+A decisão da [§6](#6-critério-de-decisão) fica tomada, e aí sim entra a segunda
+mudança de código:
+
+1. aplicar a tupla `ptbr-remaster` no `ROMS` do
+   [../wte/tools/compare_dumps.py](../wte/tools/compare_dumps.py) — texto na
+   [§5](#5-as-mudanças-que-o-protocolo-exige);
+2. rodar `python3 wte/tools/compare_dumps.py --medir` **no Linux**, que é a
+   medição de referência, e commitar o `fase-3.tsv` de três linhas;
+3. rodar `python3 wte/tools/compare_dumps.py` sem argumento para regerar o
+   `fase-3.md`, senão o `ctest` acusa divergência;
+4. seguir a [§7](#7-adotar-como-trocar-ou-acrescentar) — a recomendação é
+   **acrescentar**, não substituir.
+
+Nada disso deve ser feito antes: commitar a tupla com o portão 3 pendente
+quebra o `--check` até alguém regerar, e a decisão ainda pode ser não.
 
 ---
 
