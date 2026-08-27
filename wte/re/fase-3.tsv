@@ -1,3 +1,4 @@
 rom	arquivo	o_que_valida	linhas_dump	divergencias_dump	bytes_imagem	faixas_rt_vs_original	bytes_rt_vs_original	divergencias_rt_pascal_vs_cpp	sidecar_bytes	sidecar_igual	kanji_duplo	kanji_decodificado	squad_numbers_nao_zero
 european-deluxe	golden-european-deluxe.bin	offsets, nomes latinos e os ramos de mapeamento do codec	66498	0	474784128	4	270	0	1911	sim	95	95	64
 japanese	japanese-shift-jis.bin	o ramo padrao do codec: katakana vira espaco	66498	0	307187664	15	1249	0	1911	sim	95	0	64
+ptbr-remaster	ptbr-remaster.bin	os mesmos ramos do codec que a europeia, com oráculo vivo no wte/	66498	0	474784128	9	41	0	1911	sim	95	95	64

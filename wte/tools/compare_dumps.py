@@ -95,6 +95,8 @@ ROMS = [
      "offsets, nomes latinos e os ramos de mapeamento do codec"),
     ("japanese", "japanese-shift-jis.bin",
      "o ramo padrao do codec: katakana vira espaco"),
+    ("ptbr-remaster", "ptbr-remaster.bin",
+     "os mesmos ramos do codec que a europeia, com oráculo vivo no wte/"),
 ]
 
 COLS = ["rom", "arquivo", "o_que_valida", "linhas_dump", "divergencias_dump",

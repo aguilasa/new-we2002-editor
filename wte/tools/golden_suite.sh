@@ -3,7 +3,7 @@
 #
 #   bash wte/tools/golden_suite.sh [opcoes]
 #
-#     --rom japonesa|europeia|ambas   (padrao: ambas)
+#     --rom japonesa|europeia|ptbr|ambas   (padrao: ambas)
 #     --roteiro <nome>               so este, repetivel (padrao: todos com par)
 #     --saida <tsv>                  padrao: wte/re/golden.tsv
 #     --retomar                      pula o que ja esta registrado no TSV
@@ -109,13 +109,14 @@ while [ $# -gt 0 ]; do
     *) echo "opcao desconhecida: $1" >&2; exit 2 ;;
   esac
 done
-case "$ROM" in japonesa|europeia|ambas) : ;;
+case "$ROM" in japonesa|europeia|ptbr|ambas) : ;;
   *) echo "rom desconhecida: $ROM" >&2; exit 2 ;;
 esac
 
 declare -A IMAGEM_DE=(
   [japonesa]="$RAIZ/roms/japanese-shift-jis.bin"
   [europeia]="$RAIZ/roms/golden-european-deluxe.bin"
+  [ptbr]="$RAIZ/roms/ptbr-remaster.bin"
 )
 ROMS=()
 case "$ROM" in

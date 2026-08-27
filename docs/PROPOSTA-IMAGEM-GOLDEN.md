@@ -6,14 +6,16 @@
 > alterado: a europeia continua sendo a golden e as ferramentas continuam
 > apontando para ela.
 >
-> **Dois dos três portões já correram, e passaram** — na máquina Windows, em
-> 2026-08-27. O que foi medido está na [§8](#8-a-corrida-dos-portões); o que
-> falta, com os comandos na ordem, na
-> [§8.3](#83-o-que-falta-no-linux). O resto é Linux por dependência de Xvfb,
-> `xdotool` e Wine — §5.4 de
-> [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
+> **Os três portões correram.** Os dois primeiros na máquina Windows e o
+> terceiro no Linux, ambos em 2026-08-27. O que foi medido está na
+> [§8](#8-a-corrida-dos-portões).
 >
-> Em uma frase: **está provado que dá; falta provar que vale a pena.**
+> **Decisão tomada: adotar na forma (a), acrescentar** — a `ptbr-remaster`
+> entra como terceira imagem, a europeia continua sendo a golden do
+> `newWe2002`, e nenhuma evidência versionada foi reescrita. O porquê está na
+> [§8.4](#84-a-leitura-do-portão-3).
+>
+> Em uma frase: **dá, e vale — e a régua nova achou um bug no primeiro uso.**
 >
 > Diagnóstico do travamento em
 > [../wte/re/crash-causa.md](../wte/re/crash-causa.md).
@@ -30,14 +32,13 @@ Em uma frase:
 A proposta **não** é trocar agora. É que a troca deixe de ser opinião: quando
 este documento foi escrito não se sabia se ela era possível, porque o oráculo
 do `newWe2002` — o `Debug/ed.exe` — nunca tinha sido rodado sobre essa imagem.
-**Foi rodado**, e passou; o mesmo vale para o portão 2. Falta o 3, e é ele que
-responde se a troca *vale a pena*. Ver a [§8](#8-a-corrida-dos-portões).
+**Foi rodado**, e passou; o mesmo vale para os portões 2 e 3. Ver a
+[§8](#8-a-corrida-dos-portões).
 
-E há uma segunda pergunta, que o protocolo responde de graça: **vale a pena?**
-Se a `ptbr-remaster` passar nos três, ela vira a **única imagem que os dois
-oráculos aceitam** — o `ed.exe` e o `we-team-editor.exe`. Nenhuma das duas
-atuais é. Esse é o ganho concreto que justifica o trabalho; sem ele, a troca é
-só troca.
+E há uma segunda pergunta, que o protocolo respondeu de graça: **vale a pena?**
+Vale. Ela é a **única imagem que os dois oráculos aceitam** — o `ed.exe` e o
+`we-team-editor.exe` — e a única que também exercita os ramos do codec. Nenhuma
+das duas atuais é. Medido na [§8.4](#84-a-leitura-do-portão-3).
 
 ---
 
@@ -171,8 +172,11 @@ oráculo nessa imagem, o que na europeia não acontece.
 `SEM_ORACULO` aqui significaria que ela trava como a europeia, e aí ela não
 compra nada.
 
-**Resultado: pendente.** Só roda no Linux, e **exige uma mudança de código** —
-ver a [§5](#5-as-mudanças-que-o-protocolo-exige).
+**Resultado: ⚠️ 24/24 com oráculo, 2 reprovações** (2026-08-27, Linux).
+O `SEM_ORACULO` — o número que este critério chama de "o ponto" — deu **zero**;
+as duas reprovações são um defeito do port que só esta imagem expõe. A leitura
+está na [§8.4](#84-a-leitura-do-portão-3), e o defeito virou
+[CORR-WTE-121](/docs/tasks/CORR-WTE-121.md).
 
 ---
 
@@ -183,16 +187,17 @@ ferramentas a enxergar a terceira imagem:
 
 | arquivo | o quê | estado |
 |---|---|---|
-| [../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh) | o mapa de ROMs (`[japonesa]=`, `[europeia]=`) e o `case` que valida `--rom` ganham `ptbr` | pendente (portão 3) |
+| [../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh) | o mapa de ROMs (`[japonesa]=`, `[europeia]=`), o `case` que valida `--rom` e a linha de uso ganham `ptbr` | **aplicada** (3 linhas) |
 | [../wte/tools/compare_dumps.py](../wte/tools/compare_dumps.py) | a lista `ROMS` ganha uma terceira tupla | **exercitada** no portão 2, e revertida depois — ver abaixo |
 
 O portão 1 **não exige nada**: `make golden IMAGE=` já aceita qualquer imagem.
 
-**A tupla do `compare_dumps.py` foi aplicada para medir e desfeita em seguida**,
-de propósito: enquanto a decisão não está tomada, o `--medir` do Linux passaria a
-escrever um `fase-3.tsv` de três linhas, e o `fase-3.md` versionado — que o
-`ctest` confere — divergiria até alguém regerar. A tupla entra junto com a
-decisão, não antes dela. O texto é o de cima; aplicar de novo é uma linha.
+**A tupla do `compare_dumps.py` foi aplicada para medir no Windows e desfeita em
+seguida**, de propósito: enquanto a decisão não estava tomada, o `--medir` do
+Linux passaria a escrever um `fase-3.tsv` de três linhas, e o `fase-3.md`
+versionado — que o `ctest` confere — divergiria até alguém regerar. Com a
+decisão tomada ela **entrou para valer**: o `fase-3.tsv` versionado tem as três
+ROMs, medido no Linux, e o `fase-3.md` foi regerado.
 
 ---
 
@@ -203,11 +208,25 @@ negociada depois:
 
 | P1 (`ed.exe`) | P2 (dados) | P3 (bateria `wte/`) | decisão |
 |:-:|:-:|:-:|---|
-| ✅ | ✅ | *pendente* | **onde estamos hoje** — falta só o portão 3 |
 | ✅ | ✅ | ✅ | **Adotar.** É a única imagem que os dois oráculos aceitam — ver a [§7](#7-adotar-como-trocar-ou-acrescentar) |
 | ✅ | ✅ | ❌ | **Não trocar.** Passa como golden mas não compra nada: o ganho era o portão 3 |
 | ✅ | ❌ | — | **Parar e investigar.** Divergência entre os dois compiladores na mesma imagem é achado sobre o *código*, não sobre a ROM |
 | ❌ | — | — | **Arquivar a proposta**, com o diff do portão 1 registrado — ele é o resultado útil |
+
+**A tabela não previu o que aconteceu, e isso fica registrado.** O portão 3 deu
+**zero `SEM_ORACULO` e duas reprovações** — nem a linha ✅✅✅ nem a ✅✅❌. As
+duas alternativas partiam do mesmo pressuposto: que `REPROVOU` acusaria a
+imagem. Ele acusou o port, num defeito que existia antes e que nenhuma das
+outras duas ROMs consegue mostrar.
+
+A decisão tomada foi **adotar**, pela linha ✅✅✅, com o argumento na
+[§8.4](#84-a-leitura-do-portão-3): o critério pedia que ela *comprasse a régua*,
+e ela comprou — 24/24 contra 1/24 da europeia. O defeito virou
+[CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), não motivo de recusa.
+
+Registrado assim de propósito. A tabela foi escrita antes justamente para a
+resposta não ser negociada depois; então em vez de reescrevê-la para caber no
+resultado, fica dito onde ela não alcançou e com que argumento se decidiu.
 
 ---
 
@@ -255,14 +274,16 @@ correram; os dois passaram.
 | | o que mede | onde roda | estado |
 |---|---|---|---|
 | **Portão 1** — core | `ed.exe` vs `golden_tool roundtrip` | Windows (nativo) ou Linux (Wine) | ✅ **passou** — [§8.1](#81-portão-1--o-edexe-sobre-a-ptbr-remaster) |
-| **Portão 1** — GUI | `ed.exe` vs a janela Qt | **só Linux** | ⬜ falta — [§8.3](#83-o-que-falta-no-linux) |
+| **Portão 1** — GUI | `ed.exe` vs a janela Qt | **só Linux** | ✅ **passou** — [§8.3](#83-a-corrida-do-linux) |
 | **Portão 2** | Pascal do `wte/` vs `we2002_core` | qualquer uma | ✅ **passou** — [§8.2](#82-portão-2--a-camada-de-dados) |
-| **Portão 3** | os 24 roteiros com oráculo vivo | **só Linux** | ⬜ falta — [§8.3](#83-o-que-falta-no-linux) |
+| **Portão 3** | os 24 roteiros com oráculo vivo | **só Linux** | ⚠️ **24/24 com oráculo, 2 reprovações** — [§8.3](#83-a-corrida-do-linux) |
 
-Em uma frase: **está provado que dá; falta provar que vale a pena.** O portão 1
-respondeu a primeira pergunta — o `ed.exe` de 2002 lê e grava essa imagem, e o
-port grava os mesmos bytes. O portão 3 responde a segunda, e é ele que ainda
-não correu.
+O portão 1 respondeu a primeira pergunta — o `ed.exe` de 2002 lê e grava essa
+imagem, e o port grava os mesmos bytes. O portão 3 respondeu a segunda, e a
+resposta veio com uma dobra que o critério escrito não previa: ela **comprou** a
+régua (24/24 com oráculo, contra 1/24 da europeia) e a régua **imediatamente
+acusou** um defeito do port que nenhuma das outras duas imagens consegue ver.
+A leitura está na [§8.4](#84-a-leitura-do-portão-3).
 
 Método comum aos dois: **`roms/` nunca é alvo**. Três cópias limpas em `work/`
 — uma para o oráculo, uma para o port, uma para medir só a carga.
@@ -336,93 +357,93 @@ plataforma registrada na §11 do [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md),
 e a §6 do [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md) proíbe
 commitar TSV medido aqui. A evidência versionada continua sendo a do Linux.
 
-### 8.3 O que falta, no Linux
+### 8.3 A corrida do Linux
 
-Quatro passos, em ordem. Os dois do meio são os que faltam de verdade, e os
-dois **só rodam no Linux**: dependem de Xvfb, `xdotool` e Wine, e valem a regra
-do `DISPLAY=:98` do [../CLAUDE.md](../CLAUDE.md).
+Em 2026-08-27, no `DISPLAY=:98`, com o Xvfb em 1280×1024 e sem `-auth`.
 
-#### Passo 0 — a imagem tem de estar lá
+#### A metade GUI do portão 1 — ✅ passou
 
-`roms/` está no `.gitignore`: o arquivo **não** vem com o `git pull`. A
-`ptbr-remaster.bin` foi renomeada na máquina Windows, então na Linux ela ou não
-existe ou está com o nome do dump. Confira antes de tudo:
-
-```sh
-ls -la roms/ptbr-remaster.bin roms/ptbr-remaster.cue
+```text
+make golden     IMAGE=roms/ptbr-remaster.bin   →  Passed  24.65 sec
+make golden-gui IMAGE=roms/ptbr-remaster.bin   →  Passed  24.48 sec
+   gui: dialogo principal 0x200006
+   OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
 ```
 
-Sem ela, os dois passos abaixo não têm objeto. O `.cue` acompanha e o `FILE`
-dele já aponta para o nome novo.
+Fecha a folga que o Windows não podia fechar — lá o `golden_gui` não roda,
+porque widget Qt não é controle nativo e não há `GetDlgItem` para pegar. E o
+`make golden` headless correu de novo com o `golden_tool` do **GCC** no lugar do
+MSVC: o portão 1 deixa de ter sido medido num compilador só.
 
-#### Passo 1 — a metade GUI do portão 1
+#### O portão 3 — 48 corridas, 83 minutos
 
-O que não deu para medir no Windows: a janela Qt no lugar do core headless.
+As três linhas da [§5](#5-as-mudanças-que-o-protocolo-exige) entraram no
+`golden_suite.sh`. O TSV completo está em
+[../wte/re/golden-ptbr.tsv](../wte/re/golden-ptbr.tsv).
 
-```sh
-make golden-gui IMAGE=roms/ptbr-remaster.bin
+| ROM | oráculo vivo (`controle`) | veredito (`golden`) |
+|---|---|---|
+| europeia | 1/24 — **23 `SEM_ORACULO`** | 1 `PASSOU`, 23 `NAO_APLICAVEL` |
+| japonesa | 24/24 | 24 `PASSOU` |
+| **`ptbr-remaster`** | **24/24** | 22 `PASSOU`, **2 `REPROVOU`** |
+
+**Zero `SEM_ORACULO`** — o número que o critério da
+[§4](#portão-3--a-bateria-do-wte-com-oráculo-vivo) chamava de "o ponto".
+
+As duas reprovações são **o mesmo defeito**, com faixas idênticas byte a byte:
+
+```text
+2003945..2003948   4 byte(s)  data  OFS_TEAM_NAME_KANJI_A+17
+4599401..4599402   2 byte(s)  data  OFS_TEAM_MIXED_CASE_NAME+805
+5652568..5652634  10 byte(s)  data  OFS_TEAM_NAME_6_B+204
 ```
 
-**Critério:** o mesmo do portão 1 — só a faixa `405724..405739`.
+Os dois roteiros que reprovam — `golden-05-nomes` e
+`golden-23-multiplas-edicoes` — são os que editam nome de time. O `controle`
+dos dois **passou** (122 s e 144 s), então o oráculo gravou até o fim e a
+divergência é do port, não de régua truncada.
 
-**Não exige mudança nenhuma de código.** Feche qualquer editor aberto no `:98`
-antes: os dois lados acham o diálogo principal pelo tamanho, e uma janela
-esquecida é dirigida no lugar da que está sob teste.
+### 8.4 A leitura do portão 3
 
-Vale rodar o `make golden` (headless) junto, mesmo tendo passado no Windows: é
-a mesma medição com o `golden_tool` do GCC no lugar do MSVC, custa pouco, e
-fecha a única folga que sobrou do portão 1 — que ele foi medido em um
-compilador só nessa imagem.
+Pela **letra** da [§6](#6-critério-de-decisão), o portão 3 reprovou: o critério
+pede zero `REPROVOU` *e* zero `SEM_ORACULO`, e houve duas reprovações.
 
-#### Passo 2 — o portão 3, que é o que decide o valor
+Pelo **conteúdo**, ele mediu outra coisa. A [§4](#portão-3--a-bateria-do-wte-com-oráculo-vivo)
+é explícita sobre por que `SEM_ORACULO` era o número que importava:
 
-Exige a mudança de código da [§5](#5-as-mudanças-que-o-protocolo-exige) no
-[../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh): duas linhas.
+> `SEM_ORACULO` aqui significaria que ela trava como a europeia, e aí ela não
+> compra nada.
 
-```sh
-# no `case` que valida --rom
-case "$ROM" in japonesa|europeia|ptbr|ambas) : ;;
+Ela não travou em nenhum dos 24. Comprou a régua inteira — e a primeira coisa
+que a régua fez, no primeiro uso, foi achar um defeito de gravação de nome no
+port Lazarus que **nenhuma das outras duas imagens consegue ver**: a japonesa
+passa nesses dois roteiros porque o codec entrega espaço no lugar do resíduo, e
+a europeia nem chega a rodá-los.
 
-# no mapa de imagens
-declare -A IMAGEM_DE=(
-  [japonesa]="$RAIZ/roms/japanese-shift-jis.bin"
-  [europeia]="$RAIZ/roms/golden-european-deluxe.bin"
-  [ptbr]="$RAIZ/roms/ptbr-remaster.bin"
-)
-```
+O critério foi escrito supondo que `REPROVOU` acusaria a **imagem**. Aqui ele
+acusou o **port**, que é o que uma régua serve para fazer. Reprovar a imagem por
+ter funcionado seria inverter o instrumento.
 
-Depois:
+Somando com a [§3.2](#32-ela-cobre-os-mesmos-ramos-do-codec-que-a-europeia), o
+quadro das três:
 
-```sh
-bash wte/tools/golden_suite.sh --rom ptbr
-```
+| | `ed.exe` | `we-team-editor.exe` | ramos do codec |
+|---|:-:|:-:|:-:|
+| `golden-european-deluxe` | ✅ | ❌ | ✅ |
+| `japanese-shift-jis` | ✅ | ✅ | ❌ (`kanji_decodificado = 0`) |
+| **`ptbr-remaster`** | ✅ | ✅ | ✅ |
 
-**Critério:** zero `REPROVOU` e **zero `SEM_ORACULO`**. O segundo é o ponto
-inteiro: na europeia, 23 dos 24 roteiros saem `SEM_ORACULO` porque o
-`we-team-editor.exe` morre ao trocar de time. Se aqui saírem com veredito, a
-`ptbr-remaster` compra a régua que nenhuma das duas atuais compra.
+É a única com as três colunas — a tese da [§1](#1-o-que-se-propõe), agora
+medida.
 
-Leva de 2 a 6 minutos por roteiro e não roda em CI.
+**Decisão: adotar na forma (a), acrescentar** ([§7](#7-adotar-como-trocar-ou-acrescentar)).
+As três imagens ficam, a europeia continua sendo a golden do `newWe2002`,
+nenhum dos seis TSVs foi remedido, e a `ptbr-remaster` entra como a ROM em que a
+bateria do `wte/` roda com oráculo.
 
-#### Passo 3 — só se os dois acima passarem
-
-A decisão da [§6](#6-critério-de-decisão) fica tomada, e aí sim entra a segunda
-mudança de código:
-
-1. aplicar a tupla `ptbr-remaster` no `ROMS` do
-   [../wte/tools/compare_dumps.py](../wte/tools/compare_dumps.py) — texto na
-   [§5](#5-as-mudanças-que-o-protocolo-exige);
-2. rodar `python3 wte/tools/compare_dumps.py --medir` **no Linux**, que é a
-   medição de referência, e commitar o `fase-3.tsv` de três linhas;
-3. rodar `python3 wte/tools/compare_dumps.py` sem argumento para regerar o
-   `fase-3.md`, senão o `ctest` acusa divergência;
-4. seguir a [§7](#7-adotar-como-trocar-ou-acrescentar) — a recomendação é
-   **acrescentar**, não substituir.
-
-Nada disso deve ser feito antes: commitar a tupla com o portão 3 pendente
-quebra o `--check` até alguém regerar, e a decisão ainda pode ser não.
-
----
+O defeito virou [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), com prioridade
+alta. Ele **não** bloqueia a adoção: é anterior a ela, e o que mudou foi passar
+a ser visível.
 
 ## 9. O que já mudou, e não depende desta decisão
 

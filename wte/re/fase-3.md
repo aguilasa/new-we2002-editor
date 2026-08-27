@@ -38,6 +38,7 @@ razão dos dois `test_offsets.*` da WTE-TASK-16.
 |---|---|---:|---:|
 | `golden-european-deluxe.bin` | offsets, nomes latinos e os ramos de mapeamento do codec | 66498 | **0** |
 | `japanese-shift-jis.bin` | o ramo padrao do codec: katakana vira espaco | 66498 | **0** |
+| `ptbr-remaster.bin` | os mesmos ramos do codec que a europeia, com oráculo vivo no wte/ | 66498 | **0** |
 
 **Zero divergência nas duas ROMs.** O critério aqui não admite
 faixa conhecida, diferente do golden test de imagem do `newWe2002`:
@@ -58,6 +59,7 @@ isso o TSV conta, por ROM, quanto do dado exercitado é não-trivial:
 |---|---:|---:|---:|
 | `european-deluxe` | 95 | 95 | 64 |
 | `japanese` | 95 | 0 | 64 |
+| `ptbr-remaster` | 95 | 95 | 64 |
 
 A primeira coluna conta o campo **cru** com pelo menos um byte alto,
 que é o que caracteriza Shift-JIS de dois bytes; a segunda conta a
@@ -105,6 +107,7 @@ lados concordam byte a byte, e o `ed.exe` mostra os mesmos espaços.
 |---|---:|---|
 | `european-deluxe` | **0** bytes | 270 bytes em 4 faixa(s) |
 | `japanese` | **0** bytes | 1249 bytes em 15 faixa(s) |
+| `ptbr-remaster` | **0** bytes | 41 bytes em 9 faixa(s) |
 
 **As duas gravações são byte a byte idênticas.**
 
@@ -121,6 +124,7 @@ isso igual**.
 |---|---:|:---:|
 | `european-deluxe` | 1911 B | sim |
 | `japanese` | 1911 B | sim |
+| `ptbr-remaster` | 1911 B | sim |
 
 O sidecar entra porque o `Save` o escreve — herdado do `OnWriteCD`
 original — e porque ele é a decisão 5 do [`tipos.md`](tipos.md): 1.911
