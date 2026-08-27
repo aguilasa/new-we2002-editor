@@ -112,7 +112,18 @@ decisão e o motivo estão no [../wte/wte.lpr](../wte/wte.lpr).
 Isso é o comportamento certo para este projeto e **não** precisa de conserto.
 Só há uma consequência prática: **régua de pixel em captura de tela mede 1,5×**
 num display escalado. Quem for comparar screenshot com o Linux tira a captura
-num display a 100%, ou divide.
+num display a 100%, ou divide. Processo que mede ou captura precisa chamar
+`SetProcessDPIAware()` antes, senão lê coordenada virtualizada e recorta
+errado.
+
+### Janela fora da tela — a regra do `:98` aqui
+
+**Nenhum editor abre na sessão visível do usuário no Windows.** É a mesma regra
+obrigatória do `DISPLAY=:98`, com outro mecanismo: lance e mova para
+`(-32000, -32000)` com `SetWindowPos`, e dirija por `SendMessage`. A regra
+inteira, com o que foi medido e os três caminhos que **não** servem — desktop
+Win32 separado, `SendInput`, `ShowWindow(SW_HIDE)` —, está na primeira seção do
+[../CLAUDE.md](../CLAUDE.md).
 
 ---
 

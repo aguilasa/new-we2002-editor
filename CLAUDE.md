@@ -81,6 +81,53 @@ Disponível no host: `Xvfb`, `xvfb-run`, `xdotool`, `import` (ImageMagick),
   `make wte` existe em parte por isso, mapeando uma letra de unidade para
   encurtar o caminho.
 
+### A mesma regra no Windows: **fora da tela**
+
+**Nenhum editor abre na sessão visível do usuário no Windows tampouco.** A
+razão é a do `:98` e não muda com a plataforma: ele usa a máquina enquanto o
+trabalho corre, e janela que aparece atrapalha e rouba foco. O que muda é o
+mecanismo — lá existe um Xvfb, aqui não.
+
+Lance e **mova para fora da tela imediatamente**, antes de dirigir:
+
+```
+SetWindowPos(h, NULL, -32000, -32000, 0, 0,
+             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE)
+```
+
+`SendMessage`/`BM_CLICK` e `PrintWindow` **continuam funcionando** com a janela
+ali. Medido em 2026-08-27 sobre o `Debug\ed.exe`: a mesma captura, 7.337 pixels
+de conteúdo, dentro e fora da tela. O usuário vê no máximo um piscar no
+instante da abertura.
+
+Três coisas que **não** servem aqui, todas medidas:
+
+- **Desktop Win32 separado** (`CreateDesktop` + `STARTUPINFO.lpDesktop`) seria
+  o equivalente exato do `:98`, e **não funciona nesta máquina**: o
+  `CreateProcessW` sai com erro **123** em toda variante testada — com
+  `lpApplicationName`, com `lpCommandLine`, e até com `lpDesktop` vazio. A
+  suspeita é o Citrix App Protection, cuja `Desktop Viewer` roda aqui e
+  engancha API. Não insista nesse caminho.
+- **`SendInput`, `SetCursorPos`, `click_input`** — dependem de janela visível e
+  de foco, e a Citrix desta máquina filtra input sintético. É o mesmo tropeço
+  registrado na §11 do [docs/PLAN-WINDOWS.md](docs/PLAN-WINDOWS.md). Dirija por
+  **mensagem de janela**, que não passa por esse filtro.
+- **`ShowWindow(SW_HIDE)`** — esconde, mas o `PrintWindow` passa a capturar
+  quadro em branco. Fora da tela preserva o desenho; escondido, não.
+
+Duas armadilhas de identificação de janela no Windows, já pagas:
+
+- **Botão de VCL não é `Button`.** O editor do Obocaman usa `TBitBtn`, e um
+  filtro por classe `Button` não acha o `Sim` do aviso de tamanho. Filtre por
+  `Contains("BitBtn") || Contains("Button")`.
+- **`Process.MainWindowTitle` mente durante a carga.** Ele devolve o modal da
+  vez (`Cuidado`, `Sobre...`), não o formulário principal. Enumere as janelas
+  visíveis do PID e escolha pela largura, como o `wait_for_main` faz no Linux.
+
+Num display escalado (o desta máquina está a 150%), processo que não é
+DPI-aware lê coordenada virtualizada e captura recorte errado. Chame
+`SetProcessDPIAware()` antes de medir ou capturar.
+
 ---
 
 ## O que é este repositório
