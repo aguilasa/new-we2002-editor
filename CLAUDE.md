@@ -91,7 +91,7 @@ táticas, uniformes e bandeiras gravando direto na imagem de CD. Escrito em
 migrado para VS2010. Fork com feature adicional de importar dados do SoFIFA.
 
 O código é Windows-only. Há um plano de port para Linux em
-[PLAN-LINUX.md](PLAN-LINUX.md) — **leia antes de mexer em qualquer coisa de
+[docs/PLAN-LINUX.md](docs/PLAN-LINUX.md) — **leia antes de mexer em qualquer coisa de
 portabilidade**; ele contém o diagnóstico completo, as armadilhas já mapeadas e
 o faseamento acordado.
 
@@ -384,6 +384,17 @@ colar. O aviso de tamanho é o mesmo do `ed.exe` e é igualmente inofensivo.
 
 `we-team-editor/` está no `.gitignore`: binário sem fonte e sem licença não
 entra no repositório. O usuário mantém a pasta, como faz com `roms/`.
+
+**Nada disto vale no Windows, e a diferença é grande.** Lá o
+`we-team-editor.exe` é só um PE32 num x64: o WOW64 o roda **nativo**, sem
+Wine, sem prefix `win32`, sem loader de 32 bits e sem o stack X i386 — as três
+guardas do alvo `wte` deixam de ter objeto. Quem abre os editores no Windows é
+o [`make.ps1`](make.ps1) da raiz (`run-obocaman`, `run-lazarus`); quem compila
+e verifica o app Lazarus é o [`wte/make.ps1`](wte/make.ps1). Os dois `Makefile`
+não rodam lá — são GNU make + bash. Ver
+[docs/PLAN-WTE-WINDOWS.md](docs/PLAN-WTE-WINDOWS.md), que também registra os
+onze consertos de portabilidade que a porta exigiu e o que **não** roda no
+Windows (a bateria golden inteira, que depende de Xvfb, `xdotool` e Wine).
 
 Existe um plano de engenharia reversa desse binário, com alvo em Lazarus/FPC
 nativo no Linux, em [docs/PLAN-WTE-LAZARUS.md](docs/PLAN-WTE-LAZARUS.md). É

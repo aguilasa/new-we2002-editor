@@ -276,10 +276,62 @@ mede.
 
 ## 4. Compilar e rodar
 
-Não há `make` nem bash no Windows, então o `wte/Makefile` não serve. O
-[../wte/make.ps1](../wte/make.ps1) cobre os alvos que fazem sentido e **recusa
-os que não fazem, dizendo por quê** — a mesma regra do `check` do Makefile:
-alvo verde sem medição é pior do que alvo ausente.
+Não há `make` nem bash no Windows, então nem o `Makefile` da raiz nem o de
+`wte/` servem. São **dois** scripts PowerShell, e a divisão é a mesma dos dois
+Makefiles que eles substituem:
+
+| Script | O que faz | O que ele substitui |
+|---|---|---|
+| [../make.ps1](../make.ps1) | **abre os editores**, cada um sobre a própria cópia | os alvos `run-*` do `Makefile` da raiz |
+| [../wte/make.ps1](../wte/make.ps1) | **compila e verifica** o app Lazarus | o `wte/Makefile` |
+
+Os dois cobrem os alvos que fazem sentido e **recusam os que não fazem, dizendo
+por quê** — a mesma regra do `check` do Makefile: alvo verde sem medição é pior
+do que alvo ausente.
+
+### Abrir os editores — `make.ps1` na raiz
+
+```powershell
+.\make.ps1                                     # alvos e ambiente achado
+.\make.ps1 run-obocaman                        # o editor do Obocaman
+.\make.ps1 run-lazarus                         # o WE2002 - Lazarus Editor
+.\make.ps1 fresh                               # descarta as cópias
+
+.\make.ps1 run-obocaman -Image roms\japanese-shift-jis.bin
+.\make.ps1 run-lazarus  -Work D:\tmp\we2002    # cópias fora do OneDrive
+```
+
+**Cada editor sobre a própria cópia**, porque os três gravam in-place. `roms/`
+nunca é alvo. O `fresh` apaga só `obo-*` e `laz-*`: `work\` é compartilhado com
+as ferramentas de `wte/`, e limpar a pasta inteira levaria junto fixture que
+ninguém mandou apagar.
+
+> #### O editor do Obocaman roda **nativo** aqui
+>
+> É a maior diferença desta porta, e ela simplifica em vez de complicar. No
+> Linux o alvo `wte` do Makefile precisa de **Wine**, de um prefix
+> `WINEARCH=win32` próprio e do stack X **i386** no host — e confere os três
+> antes de tentar. No Windows x64 o `we-team-editor.exe` é só um PE32: o WOW64
+> o roda, e não há nada disso para montar nem conferir.
+>
+> Medido em 2026-08-27: a janela abre, e o diálogo "Abre" é o comum do Windows,
+> com o filtro `ISO do W11 (.bin)`.
+>
+> **O CWD tem de ser a pasta do editor** — ele monta o caminho do `dat.bin` e
+> dos 198 bitmaps a partir do diretório corrente, e é por isso que o script não
+> pode abrir o diálogo já no diretório da cópia. Sobra encurtar o caminho: sem
+> opção nenhuma ele **imprime o caminho** para colar em *File name* (o diálogo
+> comum aceita caminho inteiro), e `-Subst E` mapeia a unidade `E:` para a
+> pasta das cópias enquanto o editor roda, desfazendo ao sair. É o equivalente
+> nativo do `dosdevices/e:` que o alvo do Makefile cria dentro do prefix Wine.
+>
+> **Na European Deluxe ele trava ao trocar de time** — `c0000005`, escrita
+> além do fim de tabela. É bug dele, diagnosticado em
+> [../wte/re/crash-causa.md](../wte/re/crash-causa.md), e é a razão de 23 dos
+> 24 roteiros golden saírem `SEM_ORACULO` naquela ROM. O alvo avisa quando a
+> imagem é essa.
+
+### Compilar e verificar — `wte\make.ps1`
 
 ```powershell
 cd wte
@@ -292,15 +344,17 @@ cd wte
 .\make.ps1 clean
 ```
 
-**Sempre sobre cópia** — o editor grava in-place, como os outros três.
+O `run` daqui abre o binário direto; quem cuida da **cópia** da imagem é o
+`run-lazarus` da raiz, como no par de Makefiles.
 
-### Os três alvos que o Makefile tem e este script não
+### Os alvos que os Makefiles têm e estes scripts não
 
-| Alvo | Por que não existe aqui |
-|---|---|
-| `assets` | é `ln -sfn`. Aqui o alvo **diz onde pôr** — ver a §1 |
-| `run-98` | é Xvfb. Não há `:98` no Windows; a janela abre no desktop |
-| `install` | é o layout do freedesktop. Não há equivalente, e empacotar ficou de fora por decisão (WTE-TASK-39) |
+| Alvo | Onde | Por que não existe aqui |
+|---|---|---|
+| `assets` | `wte/` | é `ln -sfn`. Aqui o alvo **diz onde pôr** — ver a §1 |
+| `run-98`, `*-98` | ambos | é Xvfb. Não há `:98` no Windows; a janela abre no desktop |
+| `install` | `wte/` | é o layout do freedesktop, e empacotar ficou de fora por decisão (WTE-TASK-39) |
+| `run`, `oracle`, `golden*` | raiz | são do `newWe2002` e do `ed.exe` — precisam de Qt6, MSVC e (os golden) de Xvfb e Wine. Ver a §2 de [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md) e a §5.4 aqui |
 
 ---
 
@@ -435,7 +489,8 @@ paridade de sidecar como critério.
 
 | Arquivo | O quê |
 |---|---|
-| [../wte/make.ps1](../wte/make.ps1) | **novo** — o irmão do `Makefile` |
+| [../make.ps1](../make.ps1) | **novo** — abre os dois editores, o irmão dos `run-*` do `Makefile` da raiz |
+| [../wte/make.ps1](../wte/make.ps1) | **novo** — o irmão do `wte/Makefile` |
 | [../wte/src/wtemain.pas](../wte/src/wtemain.pas) | a saída de texto segura da §3.1 |
 | `wte/tools/*.py` — 25 arquivos | as §§3.2 a 3.11 |
 | [/docs/PLAN-WTE-LAZARUS.md](/docs/PLAN-WTE-LAZARUS.md) §4.4 | a fração caiu de 51,3% para 51,2% — o `wtemain.pas` cresceu 56 linhas |

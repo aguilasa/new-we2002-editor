@@ -58,16 +58,25 @@ fazer o que o [`../CLAUDE.md`](../CLAUDE.md) descreve, ou o GTK morre com
 
 ### No Windows
 
-O `Makefile` é GNU make + bash, e nenhum dos dois vem com o Windows. Lá o
-equivalente é o [`make.ps1`](make.ps1), com os mesmos alvos menos os três que
-não fazem sentido (`assets`, `run-98`, `install`):
+Os `Makefile` são GNU make + bash, e nenhum dos dois vem com o Windows. Lá o
+equivalente são **dois** scripts, na mesma divisão dos dois Makefiles:
+[`make.ps1`](make.ps1) daqui compila e verifica, e
+[`../make.ps1`](../make.ps1) na raiz abre os editores.
 
 ```powershell
 cd wte
 .\make.ps1              # lista os alvos e o ambiente achado
 .\make.ps1 build
-.\make.ps1 run -Imagem C:\caminho\copia.bin
+.\make.ps1 check
+
+cd ..
+.\make.ps1 run-lazarus  # compila, copia a imagem e abre
+.\make.ps1 run-obocaman # o editor do Obocaman -- NATIVO, sem Wine
 ```
+
+O `run-obocaman` é a maior diferença: aqui o `we-team-editor.exe` é um PE32
+num Windows x64, e o WOW64 o roda direto. Nada de prefix `WINEARCH=win32`, de
+loader de 32 bits nem do stack X i386 que o alvo `wte` do Makefile confere.
 
 **Leia [`../docs/PLAN-WTE-WINDOWS.md`](../docs/PLAN-WTE-WINDOWS.md) antes**: ele
 traz o que instalar, o que precisa estar no disco (a pasta do Obocaman
