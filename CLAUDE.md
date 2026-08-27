@@ -123,6 +123,15 @@ Duas armadilhas de identificação de janela no Windows, já pagas:
 - **`Process.MainWindowTitle` mente durante a carga.** Ele devolve o modal da
   vez (`Cuidado`, `Sobre...`), não o formulário principal. Enumere as janelas
   visíveis do PID e escolha pela largura, como o `wait_for_main` faz no Linux.
+- **`GetWindowText` não lê controle de outro processo.** Ele devolve a legenda
+  em cache, então botão e título saem certos e **`Edit` sai vazio** — inclusive
+  logo depois de um `WM_SETTEXT` que funcionou. Confira com `WM_GETTEXT` de
+  verdade (`SendMessageW` com buffer); senão a guarda acusa falha que não
+  houve.
+- **`ed.exe` esquecido de uma corrida anterior segura a imagem**, e o
+  `CFileDialog` recusa com *"This file is in use"*, que parece erro de caminho
+  e não é. Mate o que sobrou antes de abrir — no Linux o `golden_check.sh` já
+  faz o equivalente com a guarda de janela grande.
 
 Num display escalado (o desta máquina está a 150%), processo que não é
 DPI-aware lê coordenada virtualizada e captura recorte errado. Chame

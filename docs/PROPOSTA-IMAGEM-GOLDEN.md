@@ -6,10 +6,10 @@
 > alterado: a europeia continua sendo a golden e as ferramentas continuam
 > apontando para ela.
 >
-> **O protocolo roda na máquina Linux.** A bateria golden depende de Xvfb,
-> `xdotool` e Wine — §5.4 de
-> [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md). O que a máquina
-> Windows já mediu está na [§3](#3-o-que-já-está-medido).
+> **Dois dos três portões já correram, e passaram** — na máquina Windows, em
+> 2026-08-27. O resultado está na [§8](#8-a-corrida-dos-portões). O portão 3
+> continua sendo Linux: a bateria do `wte/` depende de Xvfb, `xdotool` e Wine
+> — §5.4 de [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md).
 >
 > Diagnóstico do travamento em
 > [../wte/re/crash-causa.md](../wte/re/crash-causa.md).
@@ -23,10 +23,11 @@ Em uma frase:
 > **Rodar os três portões da [§4](#4-o-protocolo-de-validação) sobre a
 > `ptbr-remaster.bin` e, se os três passarem, promovê-la a imagem golden.**
 
-A proposta **não** é trocar agora. É que a troca deixe de ser opinião: hoje
-não se sabe se ela é possível, porque o oráculo do `newWe2002` — o
-`Debug/ed.exe` — nunca foi rodado sobre essa imagem. O portão 1 existe para
-responder exatamente isso.
+A proposta **não** é trocar agora. É que a troca deixe de ser opinião: quando
+este documento foi escrito não se sabia se ela era possível, porque o oráculo
+do `newWe2002` — o `Debug/ed.exe` — nunca tinha sido rodado sobre essa imagem.
+**Foi rodado**, e passou; o mesmo vale para o portão 2. Falta o 3, e é ele que
+responde se a troca *vale a pena*. Ver a [§8](#8-a-corrida-dos-portões).
 
 E há uma segunda pergunta, que o protocolo responde de graça: **vale a pena?**
 Se a `ptbr-remaster` passar nos três, ela vira a **única imagem que os dois
@@ -133,6 +134,8 @@ e grava a partir da memória vizinha. Qualquer outra faixa reprova.
 **Se reprovar:** a proposta morre aqui, e o resultado é informação boa — quer
 dizer que a imagem tem algo que a europeia não tem, e o diff dirá o quê.
 
+**Resultado: ✅ passou** (2026-08-27, Windows). [§8.1](#81-portão-1--o-edexe-sobre-a-ptbr-remaster).
+
 > **Atenção ao que "reprovar" significa.** Divergência nova pode ser defeito da
 > imagem **ou** um caminho do `ed.exe` que a europeia nunca exercitou. Antes de
 > condenar a ROM, ver de que offset é a faixa: se cair em região que os 43.556
@@ -149,7 +152,7 @@ mesma coisa nessa imagem — o aceite da fase 3.
 
 **Critério:** `divergencias_dump = 0` e `divergencias_rt_pascal_vs_cpp = 0`.
 
-**Exige uma mudança de código** — ver a [§5](#5-as-mudanças-que-o-protocolo-exige).
+**Resultado: ✅ passou** (2026-08-27, Windows). [§8.2](#82-portão-2--a-camada-de-dados).
 
 ### Portão 3 — a bateria do `wte/` com oráculo vivo
 
@@ -164,7 +167,8 @@ oráculo nessa imagem, o que na europeia não acontece.
 `SEM_ORACULO` aqui significaria que ela trava como a europeia, e aí ela não
 compra nada.
 
-**Exige uma mudança de código** — ver a [§5](#5-as-mudanças-que-o-protocolo-exige).
+**Resultado: pendente.** Só roda no Linux, e **exige uma mudança de código** —
+ver a [§5](#5-as-mudanças-que-o-protocolo-exige).
 
 ---
 
@@ -173,12 +177,18 @@ compra nada.
 Pequenas, nomeadas, e **reversíveis** — nenhuma troca a golden, só ensinam as
 ferramentas a enxergar a terceira imagem:
 
-| arquivo | o quê |
-|---|---|
-| [../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh) | o mapa de ROMs (`[japonesa]=`, `[europeia]=`) e o `case` que valida `--rom` ganham `ptbr` |
-| [../wte/tools/compare_dumps.py](../wte/tools/compare_dumps.py) | a lista `ROMS` ganha uma terceira tupla |
+| arquivo | o quê | estado |
+|---|---|---|
+| [../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh) | o mapa de ROMs (`[japonesa]=`, `[europeia]=`) e o `case` que valida `--rom` ganham `ptbr` | pendente (portão 3) |
+| [../wte/tools/compare_dumps.py](../wte/tools/compare_dumps.py) | a lista `ROMS` ganha uma terceira tupla | **exercitada** no portão 2, e revertida depois — ver abaixo |
 
 O portão 1 **não exige nada**: `make golden IMAGE=` já aceita qualquer imagem.
+
+**A tupla do `compare_dumps.py` foi aplicada para medir e desfeita em seguida**,
+de propósito: enquanto a decisão não está tomada, o `--medir` do Linux passaria a
+escrever um `fase-3.tsv` de três linhas, e o `fase-3.md` versionado — que o
+`ctest` confere — divergiria até alguém regerar. A tupla entra junto com a
+decisão, não antes dela. O texto é o de cima; aplicar de novo é uma linha.
 
 ---
 
@@ -189,6 +199,7 @@ negociada depois:
 
 | P1 (`ed.exe`) | P2 (dados) | P3 (bateria `wte/`) | decisão |
 |:-:|:-:|:-:|---|
+| ✅ | ✅ | *pendente* | **onde estamos hoje** — falta só o portão 3 |
 | ✅ | ✅ | ✅ | **Adotar.** É a única imagem que os dois oráculos aceitam — ver a [§7](#7-adotar-como-trocar-ou-acrescentar) |
 | ✅ | ✅ | ❌ | **Não trocar.** Passa como golden mas não compra nada: o ganho era o portão 3 |
 | ✅ | ❌ | — | **Parar e investigar.** Divergência entre os dois compiladores na mesma imagem é achado sobre o *código*, não sobre a ROM |
@@ -232,7 +243,93 @@ dia em que manter três imagens de ~450 MB incomodar mais do que remedir tudo.
 
 ---
 
-## 8. O que já mudou, e não depende desta decisão
+## 8. A corrida dos portões
+
+Em 2026-08-27, na máquina Windows. Os dois portões que não dependem de Xvfb
+correram; os dois passaram.
+
+Método comum aos dois: **`roms/` nunca é alvo**. Três cópias limpas em `work/`
+— uma para o oráculo, uma para o port, uma para medir só a carga.
+
+### 8.1 Portão 1 — o `ed.exe` sobre a `ptbr-remaster`
+
+O `Debug\ed.exe` roda **nativo** aqui, sem Wine. Foi dirigido por mensagem de
+janela, com a janela em `-32000,-32000` desde antes de nascer, como manda a
+regra do [../CLAUDE.md](../CLAUDE.md).
+
+O lado do port é o `we2002_golden_tool.exe` do preset `windows-release`
+(MSVC 19.44), `roundtrip` sobre a outra cópia — Load+Save sem editar nada, que
+é exatamente o que o clique em `Write into CD image` faz do outro lado.
+
+```
+tools/golden_compare.py work/g1-oracle.bin work/g1-port.bin
+1 run(s), 15 byte(s) differ
+
+     start        end    span    diff  sector      kind  region
+---------------------------------------------------------------
+    405724     405739      16      15     172      data  OFS_SQUAD_NUMBERS_NATIONAL+1008
+```
+
+**Passou.** A única divergência é a faixa conhecida — o slot 64 de um array de
+63, que o original lê e grava a partir da memória vizinha. Nenhuma outra.
+
+Duas medidas que saíram de brinde:
+
+- **`ed.exe` carrega essa imagem sem reclamar de nada.** O `CMB_NSQUADRE` sai
+  com **97 times**, e nenhum modal apareceu no caminho — nem o aviso de tamanho.
+- **Abrir não altera a imagem.** Uma terceira cópia foi aberta e fechada **sem**
+  clicar em gravar: `cmp` contra a original em `roms/` dá igual, byte a byte.
+
+O segundo item encerra uma observação solta de uma corrida anterior não
+controlada, que parecia dizer o contrário. O que ela via era a **gravação**: o
+diff da cópia gravada hoje contra a original em `roms/` dá exatamente os mesmos
+**56 bytes em 6 faixas** daquela observação — `OFS_PLAYER_NAME_7+471`,
+a faixa conhecida, três em `OFS_PLAYER_ATTR_8` e `OFS_KICKER+384`. As duas
+últimas são as duas não-idempotências que o
+[../CLAUDE.md](../CLAUDE.md) já descreve: o `Save` reconstrói as all-star a
+partir dos links, e troca os dois primeiros cobradores de cada clube de ML.
+
+Fica de fora, e é registro honesto: o `golden_gui` — a metade que põe a janela
+Qt no lugar do core — **não** correu no Windows. Ele dirige widget Qt por
+`xdotool`, e widget Qt não é controle nativo: não há `GetDlgItem` para pegar.
+Essa metade continua sendo do Linux.
+
+### 8.2 Portão 2 — a camada de dados
+
+```
+python3 wte/tools/compare_dumps.py --medir
+```
+
+| rom | linhas_dump | divergencias_dump | faixas_rt_vs_original | divergencias_rt_pascal_vs_cpp |
+|---|---:|---:|---:|---:|
+| european-deluxe | 66.498 | 0 | 4 | **0** |
+| japanese | 66.498 | 0 | 15 | **0** |
+| **ptbr-remaster** | 66.498 | **0** | 9 | **0** |
+
+**Passou.** O Pascal do `wte/` e o C++ do `we2002_core` leem a mesma coisa nessa
+imagem e gravam os mesmos bytes.
+
+As colunas de cobertura confirmam a [§3.2](#32-ela-cobre-os-mesmos-ramos-do-codec-que-a-europeia)
+sobre dado medido de novo, não copiado: `kanji_duplo = 95`,
+`kanji_decodificado = 95`, `squad_numbers_nao_zero = 64` — os mesmos da
+europeia.
+
+**O `fase-3.tsv` versionado não foi tocado.** A corrida foi do Windows, e o
+sidecar `_url.txt` sai com CRLF aqui (3.822 bytes contra 1.911) — diferença de
+plataforma registrada na §11 do [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md),
+e a §6 do [/docs/PLAN-WTE-WINDOWS.md](/docs/PLAN-WTE-WINDOWS.md) proíbe
+commitar TSV medido aqui. A evidência versionada continua sendo a do Linux.
+
+### 8.3 O que falta
+
+O portão 3, no Linux, com a mudança de `--rom ptbr` no
+[../wte/tools/golden_suite.sh](../wte/tools/golden_suite.sh). É ele que responde
+a pergunta de valor: se os 24 roteiros correm com oráculo vivo nessa imagem, ela
+compra o que nenhuma das duas atuais compra.
+
+---
+
+## 9. O que já mudou, e não depende desta decisão
 
 - A imagem foi renomeada para `ptbr-remaster.bin`, e o `FILE` do `.cue`
   corrigido — apontava para um nome que não existia no disco.
