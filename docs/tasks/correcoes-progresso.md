@@ -141,7 +141,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-119](/docs/tasks/CORR-WTE-119.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | O `nativo.md` repete os sete valores do `nativo.tsv` e nada confere os dois — a condição 3 é o único documento de fechamento sem `--check` nem conferidor | Média | [x] concluída | 2026-08-26 |
 | [CORR-WTE-120](/docs/tasks/CORR-WTE-120.md) | [WTE-TASK-40](/docs/tasks/40-verificacao-final.md) | A prosa credita a recusa do `sem_wine.sh` ao `command -v wine*`, que nesta máquina não pode disparar; quem recusa é o laço que exige alvo vazio | Baixa | [x] concluída | 2026-08-26 |
 | [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md) | [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md) | O port grava 3 faixas de nome de time diferentes do oráculo; `golden-05-nomes` e `golden-23-multiplas-edicoes` reprovam na `ptbr-remaster`, a única ROM com oráculo vivo **e** nomes latinos | Alta | [x] concluída | 2026-08-28 |
-| [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | O `progresso.md` chama a régua desta série de "`golden_gui` com `GOLDEN_EDIT`"; o `golden_gui.sh` lê `GOLDEN_GUI_EDIT`, e a própria PAR-TASK-01 corrigiu esse nome no arquivo dela e deixou no `progresso.md` | Média | [ ] pendente | — |
+| [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | O `progresso.md` chama a régua desta série de "`golden_gui` com `GOLDEN_EDIT`"; o `golden_gui.sh` lê `GOLDEN_GUI_EDIT`, e a própria PAR-TASK-01 corrigiu esse nome no arquivo dela e deixou no `progresso.md` | Média | [x] concluída | 2026-08-28 |
 | [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Os seis roteiros das seis corridas golden não estão versionados em lugar nenhum, e a "Definição de pronto" marca "cada item com evidência: **o comando**" — as seis corridas verdes não são repetíveis | Alta | [ ] pendente | — |
 
 ## Checklist
@@ -266,7 +266,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-119 — escrever o `check_nativo.py` e amarrar o `nativo.md` ao `nativo.tsv`
 - [x] CORR-WTE-120 — escrever as duas cláusulas da guarda do `sem_wine.sh`, e qual delas trabalha aqui
 - [x] CORR-WTE-121 — diagnosticar e corrigir as três faixas de nome de time que só a `ptbr-remaster` expõe
-- [ ] CORR-WTE-122 — trocar o nome do hook no `progresso.md` e dizer que são dois, um por lado
+- [x] CORR-WTE-122 — trocar o nome do hook no `progresso.md` e dizer que são dois, um por lado
 - [ ] CORR-WTE-123 — versionar os seis roteiros da §8.1 em `tools/par/` e amarrar cada item ao seu
 
 ## Detalhes por correção

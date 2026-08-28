@@ -3,7 +3,7 @@ id: CORR-WTE-122
 title: "Correção: o progresso.md ainda chama o hook do lado do port de GOLDEN_EDIT, nome que o golden_gui.sh não lê"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -88,18 +88,34 @@ série medir os dois lados com o mesmo estímulo, e é o que a frase precisa diz
 
 ## Verificação
 
-- [ ] `grep -n 'GOLDEN_EDIT' docs/tasks/progresso.md` não devolve mais nenhuma
+- [x] `grep -n 'GOLDEN_EDIT' docs/tasks/progresso.md` não devolve mais nenhuma
       linha que atribua `GOLDEN_EDIT` ao `golden_gui`
-- [ ] Os dois nomes aparecem com o script que os lê ao lado
-- [ ] `python3 tools/check_tasks.py` continua `ok`
-- [ ] `roms/` intocada
+- [x] Os dois nomes aparecem com o script que os lê ao lado
+- [x] `python3 tools/check_tasks.py` continua `ok`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-28
 
 **Resumo do que foi feito:**
 
+A frase que abre a série `PAR-TASK-*` no `progresso.md` (linha 1267) passou a
+nomear os **dois** hooks com o script que lê cada um: `golden_gui.sh` com
+`GOLDEN_GUI_EDIT` no lado do port, `golden_run.sh` com `GOLDEN_EDIT` no lado do
+`ed.exe`. A frase ganhou também a razão de os dois aceitarem o mesmo trecho de
+shell (`$MAIN` em escopo, `dlu_x`/`dlu_y` com a mesma conversão) — que é o que
+a série usa e o que a redação antiga escondia ao citar um nome só.
+
 **Problemas encontrados:**
 
+A varredura por `GOLDEN_EDIT` em `docs`, `wte/re`, `.claude` e `CLAUDE.md`
+achou mais duas menções, e **as duas estão certas**: `CLAUDE.md:361` e
+`docs/tasks/22-harness-golden.md:66` atribuem `GOLDEN_EDIT` ao
+`golden_run.sh`, que é o dono dele. Nenhuma delas foi tocada. O `CLAUDE.md`
+não documenta o `GOLDEN_GUI_EDIT` em lugar nenhum — é ausência, não afirmação
+falsa, e fica fora do escopo desta correção.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/progresso.md` — a frase da linha 1267

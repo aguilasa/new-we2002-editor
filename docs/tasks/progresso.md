@@ -1264,8 +1264,11 @@ desligado até a paridade estar conferida.
 
 A **01 é a primeira** por três razões que convergem: é onde bug acabou de
 aparecer no projeto irmão, é o que destrava o item aberto da Fase 7 no Windows,
-e a régua (`golden_gui` com `GOLDEN_EDIT`) já está pronta e rodou nas três
-imagens.
+e a régua (`golden_gui.sh` com `GOLDEN_GUI_EDIT` no lado do port, e
+`golden_run.sh` com `GOLDEN_EDIT` no lado do `ed.exe`) já está pronta e rodou
+nas três imagens. Os dois recebem `$MAIN` em escopo e definem `dlu_x`/`dlu_y`
+com a mesma conversão, então o **mesmo** trecho de shell serve aos dois — é o
+que faz a série medir os dois lados com o mesmo estímulo.
 
 A **09 não depende de nada** e é a mais barata — serve de aquecimento se a 01
 travar por qualquer motivo.
