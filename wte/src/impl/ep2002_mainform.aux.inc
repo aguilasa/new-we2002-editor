@@ -236,7 +236,29 @@ type
 
   O comprimento devolvido e a LARGURA DO SLOT -- nome mais enchimento --, e e
   ela que limita a gravacao. Para o bloco de dois bytes o original ainda
-  desconta um. }
+  desconta um.
+
+  O SALTO DE SETOR AQUI NAO E O DO `LeDoFluxo`, e a diferenca vale bytes.
+  As duas rotinas de bloco -- `0x004033bc` (ler `count`) e `0x00403400`
+  (gravar `count`) -- chamam o `0x00403388` depois de CADA byte, inclusive o
+  ultimo, e e isso que o `LeDoFluxo` faz. A varredura do `0x00403c0c` nao: o
+  `call 0x403388` mora no topo do laco (`0x00403c42` e `0x00403c56`), entao
+  ele roda ENTRE duas leituras e NUNCA depois do byte que encerra o laco --
+  nem o `0` que termina o nome, nem o nao-zero que abre o proximo.
+
+  Sao dois bytes por registro sem teste de fronteira. Quando um deles cai
+  exatamente no `2072 mod 2352`, o original NAO pula os 304 bytes de EDC/ECC
+  e a varredura sai de fase; quem pulasse ali contaria registros a mais e
+  gravaria no time errado. Foi o que a CORR-WTE-121 mediu no
+  `OFS_TEAM_NAME_6` da `ptbr-remaster`: o oraculo grava o time 2 em
+  5652568 (`CHL`) e o port gravava em 5652628 (`S.AFRIC`), 8 registros
+  adiante. Modelado o laco byte a byte como o `.exe`, os 10 blocos que o
+  `golden-05-nomes` toca batem 10/10 com o que o oraculo gravou.
+
+  Indice 95 (o time-modelo) NAO e recusado: o original pede `94 - 95 = -1`
+  registros de salto, o laco nao roda, e ele mede o registro 0 -- o do time
+  94. E a mesma leitura que o `IndiceNaTabela` ja documentava; recusar aqui
+  criaria duas regras para o mesmo caso. }
 function LocalizaBlocoDeNome(var img: TCdImage; campo, bloco, indice: Integer;
                              out achado: TBlocoDeNome): Boolean;
 var
@@ -244,6 +266,14 @@ var
   restantes, i: Integer;
   b: Byte;
   n: LongInt;
+
+  { Um byte cru, SEM o salto -- quem decide o salto e o laco. }
+  function Cru: Boolean;
+  begin
+    b := 0;
+    Result := img.Read(b, 1) = 1;
+  end;
+
 begin
   Result := False;
   achado.offset := 0;
@@ -255,33 +285,45 @@ begin
   if base = 0 then
     Exit;
   restantes := ULTIMO_TIME_DOS_BLOCOS - indice;
-  if restantes < 0 then
-    Exit;
 
   img.Seek(base + 1, soBeginning);
   for i := 1 to restantes do
   begin
     { ate o fim do nome corrente... }
-    repeat
-      if not LeDoFluxo(img, b) then Exit;
-    until b = 0;
+    if not Cru then Exit;
+    while b <> 0 do
+    begin
+      SaltaFronteiraDeSetor(img);
+      if not Cru then Exit;
+    end;
     { ...e pelo enchimento, ate o primeiro byte do nome seguinte. }
-    repeat
-      if not LeDoFluxo(img, b) then Exit;
-    until b <> 0;
+    if not Cru then Exit;
+    while b = 0 do
+    begin
+      SaltaFronteiraDeSetor(img);
+      if not Cru then Exit;
+    end;
   end;
 
-  { O ultimo byte lido e o primeiro caractere do slot procurado. }
+  { O ultimo byte lido e o primeiro caractere do slot procurado, e nenhum
+    salto correu depois dele -- por isso o `- 1` e o `ftell`/`dec eax` do
+    `0x00403c8d`. }
   achado.offset := img.Tell - 1;
   n := 1;
-  repeat
-    if not LeDoFluxo(img, b) then Exit;
-    if b <> 0 then Inc(n);
-  until b = 0;
-  repeat
-    if not LeDoFluxo(img, b) then Exit;
-    if b = 0 then Inc(n);
-  until b <> 0;
+  if not Cru then Exit;
+  while b <> 0 do
+  begin
+    Inc(n);
+    SaltaFronteiraDeSetor(img);
+    if not Cru then Exit;
+  end;
+  if not Cru then Exit;
+  while b = 0 do
+  begin
+    Inc(n);
+    SaltaFronteiraDeSetor(img);
+    if not Cru then Exit;
+  end;
   achado.comprimento := n + 1;
 
   if (campo = 0) and (bloco = 0) then
@@ -346,6 +388,22 @@ begin
     Inc(destino);
     Inc(origem);
   end;
+  { O TERMINADOR e incondicional, e nao e detalhe. A saida comum do
+    `0x00403a68` faz, para os dois modos,
+
+        403bcd:  mov ecx,[ebp+0x14]                 ; o buffer
+        403bd0:  mov eax,[ebp+0x0c]                 ; o comprimento
+        403bd3:  mov BYTE PTR [ecx+eax*1-0x1],0x0   ; buffer[comprimento-1] := 0
+
+    O texto pode encher os `comprimento` bytes -- o `0x00403dcc` grava todos
+    eles --, e mesmo assim o ultimo sai zero. So aparece em slot ESTREITO:
+    quando o texto acaba antes, a cauda ja e zero e o efeito e invisivel.
+    Foi assim que a CORR-WTE-121 o achou, num unico byte: `OFS_TEAM_NAME_6`
+    da `ptbr-remaster` da ao time 2 um slot de 4 (`CHL`), o campo trazia
+    `A BC.DE`, e o port gravava `A BC` onde o oraculo grava `A B` mais o
+    NUL. }
+  if (comprimento > 0) and (comprimento <= Length(buffer)) then
+    buffer[comprimento - 1] := 0;
 end;
 
 { Cadeia a partir de um vetor de AnsiChar terminado em NUL, que e como a
@@ -496,28 +554,87 @@ end;
   (`0x00403598` compara com `0x82`, o byte-lider Shift-JIS): 1 = dois bytes por
   caractere, 2 = um byte.
 
-  Como a largura do registro e `TEAM_NAME_KANJI_LEN*2`, o `div 2` do valor
-  decrementado da exatamente `TEAM_NAME_KANJI_LEN - 1`.
-
   Medido na tela do oraculo em TRES times de larguras diferentes, digitando
-  `ABCDEFGHIJKLMNOP` (CORR-WTE-064, 2026-08-18):
+  `ABCDEFGHIJKLMNOP` (CORR-WTE-064, 2026-08-18, na japonesa):
 
       time  2  (LEN  6)  ->  ABCDE          =  5
       time  0  (LEN  8)  ->  ABCDEFG        =  7
       time 56  (LEN 14)  ->  ABCDEFGHIJKLM  = 13
 
   A diferenca contra a derivacao ingenua era CONSTANTE em 1, nao proporcional
-  -- foi isso que apontou um decremento em vez de erro de escala. Antes desta
+  -- foi isso que apontou um decremento em vez de erro de escala. Antes daquela
   medicao esta funcao devolvia o literal 5, que so valia para os 59 times de
-  LEN 6. }
-function LimiteDoNome1(indice: Integer): Integer;
+  LEN 6.
+
+  ATE A CORR-WTE-121 este bloco terminava dizendo que, como a largura do
+  registro e `TEAM_NAME_KANJI_LEN*2`, o `div 2` do valor decrementado da
+  exatamente `TEAM_NAME_KANJI_LEN - 1`. **Isso so vale na japonesa.** A
+  largura e o que a varredura mede na IMAGEM, e nas ROMs ocidentais o slot de
+  kanji recebeu nome latino: o lixo depois do terminador encurta a distancia
+  ate o registro seguinte, e a tabela erra em 29 dos 95 times da
+  `ptbr-remaster` e em 49 dos 95 da European Deluxe. A tabela ficou de
+  reserva, para quando nao ha imagem aberta. }
+{ A largura do registro `(campo, bloco)` do time, MEDIDA na imagem -- a mesma
+  varredura que o `0x00403c0c` faz a cada troca de time para encher os 18
+  registros de `0x00433a0c`. False quando nao ha imagem aberta.
+
+  Ela existe porque a tabela constante NAO serve para os dois campos, e isso
+  e medido: contra a varredura do `.exe`, em 95 times por ROM,
+
+      TEAM_NAME_LEN_3    (nombre2)  bate 285/285  -- japonesa, ptbr, europeia
+      TEAM_NAME_KANJI_LEN(nombre1)  bate  95/95 na japonesa,
+                                    erra  29/95 na ptbr-remaster,
+                                    erra  49/95 na European Deluxe
+
+  O slot de kanji e o unico que recebeu nome latino nas ROMs ocidentais, e o
+  lixo que sobrou depois do terminador encurta a distancia ate o registro
+  seguinte. Os dois campos passam por aqui mesmo assim: o original mede os
+  dois, e deixar um medido e o outro tabelado seria manter, sem ganho, a
+  regra que a CORR-WTE-121 acabou de derrubar. Como o `nombre2` bate 285/285,
+  a mudanca dele nao move byte nenhum hoje -- e ele deixa de depender de a
+  proxima ROM tambem bater. }
+function LarguraMedidaDoNome(campo, bloco, indice: Integer;
+                             out comprimento: LongInt): Boolean;
+var
+  img: TCdImage;
+  achado: TBlocoDeNome;
 begin
-  Result := TEAM_NAME_KANJI_LEN[IndiceNaTabela(indice)] - 1;
+  Result := False;
+  comprimento := 0;
+  if ImagemAberta = '' then
+    Exit;
+  img.Init;
+  if not img.OpenRead(ImagemAberta) then
+    Exit;
+  try
+    Result := LocalizaBlocoDeNome(img, campo, bloco, indice, achado);
+    if Result then
+      comprimento := achado.comprimento;
+  finally
+    img.Close;
+  end;
+end;
+
+function LimiteDoNome1(indice: Integer): Integer;
+var
+  comprimento: LongInt;
+begin
+  { `div 2` porque o bloco de kanji gasta dois bytes por caractere, e o
+    `comprimento` ja vem com o `dec` do `0x00403d95`. }
+  if LarguraMedidaDoNome(0, 0, indice, comprimento) then
+    Result := comprimento div 2
+  else
+    Result := TEAM_NAME_KANJI_LEN[IndiceNaTabela(indice)] - 1;
 end;
 
 function LimiteDoNome2(indice: Integer): Integer;
+var
+  comprimento: LongInt;
 begin
-  Result := TEAM_NAME_LEN_3[IndiceNaTabela(indice)] - 1;
+  if LarguraMedidaDoNome(1, 0, indice, comprimento) then
+    Result := comprimento - 1
+  else
+    Result := TEAM_NAME_LEN_3[IndiceNaTabela(indice)] - 1;
 end;
 
 { Um dos seis nomes em caixa alta do time `indice`. }

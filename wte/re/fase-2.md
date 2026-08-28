@@ -44,10 +44,10 @@ hoje, com a fase 2 fechada e as fases 3 e 4 ainda por vir:
 | Unidades Pascal geradas (`dfm2lfm.py`) | 23 | 2685 |
 | Formulários `.lfm`, estrutura | 18 | 6768 |
 | **Gerado, subtotal** | | **9453** |
-| Escrito à mão | 106 | 9024 |
-| **Total** | | **18477** |
+| Escrito à mão | 106 | 9155 |
+| **Total** | | **18608** |
 
-**51.2% do Pascal da casca é saída de gerador.**
+**50.8% do Pascal da casca é saída de gerador.**
 
 Fora desta conta, por não serem casca: `src/we2002_bmp.pas`, `src/we2002_cdimage.pas`, `src/we2002_database.pas`, `src/we2002_estado.pas`, `src/we2002_mcr.pas`, `src/we2002_ml.pas`, `src/we2002_offsets.pas`, `src/we2002_player.pas`, `src/we2002_preco.pas`, `src/we2002_render.pas`, `src/we2002_tables.pas`, `src/we2002_team.pas`, `src/we2002_textcodec.pas`, `src/we2002_types.pas`.
 São a camada de dados da fase 3, e cada uma tem gerador e `--check` próprios.
@@ -121,7 +121,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.Image3Click.inc` | 25 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.SpeedButton1Click.inc` | 15 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.SpeedButton2Click.inc` | 26 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.aux.inc` | 1189 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.aux.inc` | 1306 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.base_teamClick.inc` | 133 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_barras2isoClick.inc` | 33 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.boton_dialogo_texClick.inc` | 48 | corpo de handler, da spec (fase 4) |
@@ -139,7 +139,7 @@ Escrito à mão, linha por linha:
 | `src/impl/ep2002_mainform.grabar_camisetaClick.inc` | 104 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.grabar_memoryClick.inc` | 47 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.iguala_nombresClick.inc` | 33 | corpo de handler, da spec (fase 4) |
-| `src/impl/ep2002_mainform.lista_equiposChange.inc` | 185 | corpo de handler, da spec (fase 4) |
+| `src/impl/ep2002_mainform.lista_equiposChange.inc` | 199 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_equipos_2Change.inc` | 59 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.lista_jugadores_1Change.inc` | 22 | corpo de handler, da spec (fase 4) |
 | `src/impl/ep2002_mainform.mostrar_estrategiaClick.inc` | 41 | corpo de handler, da spec (fase 4) |
@@ -170,7 +170,7 @@ Escrito à mão, linha por linha:
 
 Os 118 blobs viraram **25712 linhas** de hexadecimal inline nos 18 `.lfm`
 (decisão de 2026-08-06, registrada no `re/dfm/README.md`). Contados junto, a
-fração sobe para 79.6% — e passa a medir bitmap, não geração de código.
+fração sobe para 79.3% — e passa a medir bitmap, não geração de código.
 O número que responde à §4.4 é o de cima.
 
 ### O que este número **não** decide ainda

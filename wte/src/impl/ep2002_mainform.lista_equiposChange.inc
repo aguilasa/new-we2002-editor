@@ -5,13 +5,27 @@
   nesta lista. Tres blocos, na ordem do original -- estado de controle, as
   cinco barras, o resto da tela.
 
-  NAO LE A IMAGEM, e isso e decisao medida, nao atalho. O original reabre o
-  arquivo e calcula endereco a cada troca de time; as contas dele caem nos
-  mesmos bytes que a camada de dados ja carregou -- `OFS_TEAM_BARS` para as
-  barras (conferido byte a byte, e remedido a cada build pelo
+  QUASE NAO LE A IMAGEM, e a excecao e nova. O original reabre o arquivo e
+  calcula endereco a cada troca de time; para quase tudo as contas dele caem
+  nos mesmos bytes que a camada de dados ja carregou -- `OFS_TEAM_BARS` para
+  as barras (conferido byte a byte, e remedido a cada build pelo
   `wte/tools/check_barras.py`), a tabela de offsets em `0x004231a0` para os
   nomes (a mesma que a WTE-TASK-06 registrou), e o mesmo elenco para os nomes
   de jogador. Ver `wte/re/auxiliares.md`.
+
+  A EXCECAO SAO OS DOIS `MaxLength`. Ate a CORR-WTE-121 eles tambem saiam de
+  tabela constante, e para o `edit_nombre1` isso estava ERRADO fora da
+  japonesa: o limite do original e a largura MEDIDA do registro de kanji, e
+  nas ROMs ocidentais o slot recebeu nome latino, cujo lixo depois do
+  terminador encurta a distancia ate o registro seguinte. A tabela erra em 29
+  dos 95 times da `ptbr-remaster` e em 49 dos 95 da European Deluxe, e o
+  efeito nao era cosmetico -- o campo cortava o nome do usuario antes de
+  gravar, e o `golden-05-nomes` reprovava em duas faixas.
+
+  Por isso o `LimiteDoNome1`/`LimiteDoNome2` fazem a varredura do
+  `0x00403c0c`, como o original faz. O custo e uma abertura em leitura e cerca
+  de 1 KB lido por troca de time; o resto do handler continua sem tocar o
+  disco.
 
   O `95` NAO e o numero de times: e o indice do item `95 Master L. `, o
   time-modelo que a Master League usa ao criar clube. E por isso que ele

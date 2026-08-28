@@ -521,8 +521,8 @@ Só a última linha é trabalho manual de verdade. E ela é a única que **tem**
 ser manual, pelos dois motivos que já ficaram registrados: a lógica só existe
 compilada (§1.2) e transcrever decompilado vira obra derivada (§2).
 
-**Medido com a fase 4 em curso: 51,2% do Pascal da casca é saída de gerador** —
-9.453 linhas geradas contra 9.024 escritas à mão. Dessas 9.024, 641 são andaime de
+**Medido com a fase 4 em curso: 50,8% do Pascal da casca é saída de gerador** —
+9.453 linhas geradas contra 9.155 escritas à mão. Dessas 9.024, 641 são andaime de
 projeto — `wte.lpr` 52, `retrace.pas` 148, `wtemain.pas` 252 e
 `wte_datafiles.pas` 189, os quatro contados pelo
 [`check_fase2.py`](../wte/tools/check_fase2.py) e listados em

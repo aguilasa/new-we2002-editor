@@ -11,7 +11,7 @@ python3 wte/tools/check_golden.py --check
 
 Produto da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).
 Fonte: [`golden.tsv`](golden.tsv), 96 corrida(s)
-registrada(s), a mais recente de 2026-08-26.
+registrada(s), a mais recente de 2026-08-28.
 **Todo número daqui saiu do script.**
 
 ## O critério, e o que ele custou para virar mensurável
@@ -176,7 +176,7 @@ nenhuma bateria pode julgar o port contra ele naquela imagem.
 
 ## Custo
 
-**6700 segundos de relógio** (1.9 h) nas
+**6703 segundos de relógio** (1.9 h) nas
 96 corridas. Cada uma faz duas cópias da imagem e as
 apaga no fim: ~586 MB de temporário com a japonesa, ~950 MB com a
 europeia. **`roms/` nunca é alvo** — a guarda 4 do `golden_check.sh`.
