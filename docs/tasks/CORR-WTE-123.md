@@ -1,0 +1,175 @@
+---
+id: CORR-WTE-123
+title: "Correção: os seis roteiros da PAR-TASK-01 não estão em lugar nenhum, e a 'Definição de pronto' promete o comando"
+type: correção
+category: verificação
+status: pendente
+depends_on: []
+---
+
+# CORR-WTE-123: as seis corridas verdes que ninguém consegue repetir
+
+## Problema identificado
+
+A [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) fecha com este item marcado:
+
+```markdown
+- [x] Cada item com evidência: o comando, a faixa que saiu do golden_compare.py,
+      e o veredito
+```
+
+**A faixa e o veredito existem** — estão na §8.1 do
+[/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md), item a item. **O
+comando não existe em lugar nenhum.** Os seis roteiros `GOLDEN_GUI_EDIT` /
+`GOLDEN_EDIT` que produziram os seis estímulos foram shell avulso, e o commit
+que fechou a task (`b5997b7`) só tocou três markdowns — nenhum arquivo em
+`tools/`, nenhum bloco de roteiro nos três.
+
+O que isso custa, em ordem de gravidade:
+
+1. **As seis corridas não são repetíveis.** Verde de golden é asserção sobre um
+   estímulo; sem o estímulo versionado, a asserção não tem sujeito. Não há como
+   re-rodar a §8.1 depois de um commit no `TeamView.cpp` — não é regressão, é
+   memória.
+2. **A [PAR-TASK-10](/docs/tasks/PAR-TASK-10.md) é literalmente o mesmo
+   trabalho na outra plataforma** ("aqui não há Citrix filtrando input"), e
+   depende da 01. Ela herda o bloqueio e não herda o roteiro.
+3. **As PAR-TASK-02 a 09 repetem a navegação.** O Log documenta em prosa as
+   duas descobertas de navegação (`Home` antes do `Down`; `End` cai em
+   `Master League (default)`, e um `Up` dá o último clube), mas **não** o
+   terceiro fato, sem o qual nenhuma das duas funciona — ver a evidência.
+
+Isto é a versão de processo da mesma lição que a task aprendeu no conteúdo:
+ela mostrou que **verde sem controle positivo não mede nada**, e o controle
+positivo também é um comando que não ficou escrito.
+
+## Evidência
+
+Esta revisão teve de **reconstruir** o roteiro do primeiro item do zero para
+poder medir. A reconstrução exigiu uma decisão que o Log não registra:
+
+> **O clique no `CMB_TEAM` abre o popup, e `Home`+`Down` só movem o item
+> destacado — a seleção não é confirmada sem um `Return`.** Medido nesta
+> revisão, no `:98`, com captura da janela: sem o `Return` o popup continua
+> aberto e o formulário não troca de time. Com ele, os dois lados chegam a
+> `Nation 1 - Ireland`.
+
+O roteiro reconstruído (o que deveria estar versionado):
+
+```sh
+xdotool mousemove --window $MAIN 315 20 click 1; sleep 2   # CMB_TEAM
+xdotool key --clearmodifiers Home;   sleep 1
+xdotool key --clearmodifiers Down;   sleep 1
+xdotool key --clearmodifiers Return; sleep 2               # confirma o popup
+i=1
+for y in 59 80 101 122 143 165; do                         # TXT_TEAM_NAME1..6
+  xdotool mousemove --window $MAIN 72 $y click 1; sleep 1
+  xdotool key --clearmodifiers End;       sleep 1
+  xdotool key --clearmodifiers shift+Home; sleep 1
+  xdotool key --clearmodifiers BackSpace;  sleep 1
+  xdotool type --delay 40 "GOLDEN$i"; sleep 1
+  i=$((i+1))
+done
+xdotool mousemove --window $MAIN 72 208 click 1; sleep 2   # tira o foco do 6º
+```
+
+Com ele, as duas medições que a task afirma se reproduzem. O golden:
+
+```text
+$ WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$(cat routine.sh)" \
+  GOLDEN_GUI_EDIT="$GOLDEN_EDIT" bash tools/golden_check.sh roms/ptbr-remaster.bin
+OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+```
+
+E o controle positivo (cópia gravada contra a imagem original), que é o que
+prova que o estímulo chegou ao disco:
+
+```text
+$ python3 tools/golden_compare.py roms/ptbr-remaster.bin ctrl.bin
+11 run(s), 77 byte(s) differ
+   1013936    1013942       7       6     431   data  OFS_TEAM_NAME_1_A+200
+   1882896    1882902       7       6     800   data  OFS_TEAM_NAME_2+928
+   2004988    2004994       7       6     852   data  OFS_TEAM_NAME_3+992
+   2830940    2830946       7       6    1203   data  OFS_TEAM_NAME_4+780
+   4824020    4824026       7       6    2051   data  OFS_TEAM_NAME_5_A+44
+   5652904    5652910       7       6    2403   data  OFS_TEAM_NAME_6_B+540
+```
+
+Seis faixas, `span` 7 cada, contra o `(7)` dos seis rótulos — que é o item 1 da
+§8.1, medido de novo. As outras cinco linhas são as não-idempotências que o Log
+já nomeia (`OFS_PLAYER_ATTR_8`, `OFS_KICKER`, `OFS_PLAYER_NAME_7+471`).
+
+**A medição confirma a task.** O que ela não confirma é a repetibilidade: o
+roteiro acima é uma reconstrução desta revisão, não o que a task rodou, e os
+outros cinco continuam sem original nem reconstrução.
+
+## Causa raiz
+
+A série não tem onde guardar roteiro. O `wte/` resolveu o mesmo problema com
+roteiros versionados e um TSV de vereditos (`wte/re/golden-ptbr.tsv`); o lado
+`newWe2002` nunca precisou, porque até aqui o `golden_gui` rodava sem edição.
+
+## Correção
+
+### Arquivo: `tools/par/` (novo diretório)
+
+Um arquivo de roteiro por item da §8, nomeado pelo item, contendo só o trecho
+de shell que os dois hooks recebem:
+
+```
+tools/par/8.1-nomes-6-slots.sh
+tools/par/8.1-kanji-e-mista.sh
+tools/par/8.1-abreviacoes.sh
+tools/par/8.1-copy-selecao.sh
+tools/par/8.1-copy-clube-ml.sh
+tools/par/8.1-clube-ml-extras.sh
+```
+
+Cada um roda nos dois lados sem alteração — é o que o `$MAIN` comum garante. O
+cabeçalho de cada arquivo diz o item da §8 que ele exercita e o time que
+seleciona.
+
+### Arquivo: `docs/tasks/PAR-TASK-01.md`
+
+No Log, apontar cada um dos cinco itens para o seu roteiro, e registrar o
+terceiro fato de navegação (o `Return` que confirma o popup) junto dos dois que
+já estão lá.
+
+### Arquivo: `docs/PARIDADE-FUNCIONAL.md` §8.1
+
+Em cada item, o nome do roteiro ao lado da faixa medida — assim "o comando, a
+faixa e o veredito" passa a ser verdade literal.
+
+**Se algum dos cinco roteiros restantes não puder ser recuperado**, reconstruí-lo
+e **remedir** o item, registrando a faixa nova. Roteiro reconstruído com faixa
+remedida é evidência; roteiro ausente com faixa antiga é lembrança.
+
+## Arquivos a criar ou modificar
+
+| Arquivo | Ação |
+|---|---|
+| `tools/par/8.1-*.sh` (6) | criar |
+| `docs/tasks/PAR-TASK-01.md` | modificar |
+| `docs/PARIDADE-FUNCIONAL.md` | modificar |
+
+## Verificação
+
+- [ ] Os seis roteiros existem e cada um roda nos dois hooks sem edição
+- [ ] Cada item da §8.1 nomeia o seu roteiro
+- [ ] Ao menos um item re-rodado do zero pelo arquivo versionado dá o mesmo
+      veredito: `bash tools/golden_check.sh roms/ptbr-remaster.bin` com
+      `WE2002_GOLDEN_MODE=gui` e os dois hooks apontando para o arquivo
+- [ ] O controle positivo de cada roteiro está registrado com as faixas, não só
+      o veredito do golden
+- [ ] `python3 tools/check_tasks.py` continua `ok`
+- [ ] `roms/` intocada — toda corrida sobre cópia
+
+## Log de Execução *(preenchido após execução)*
+
+**Executado em:**
+
+**Resumo do que foi feito:**
+
+**Problemas encontrados:**
+
+**Arquivos criados/modificados:**
