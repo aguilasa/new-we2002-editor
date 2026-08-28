@@ -45,10 +45,10 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
+- [ ] Abrir o combo  ← **reprovou, CORR-WTE-123**, **navegar com as setas sem sair do controle**, apertar
       ESC/clicar fora — conferir se grava ou não igual ao original
-- [ ] Escolher e sair com Tab; conferir os 6 campos
-- [ ] Lembrar da troca do par de cobradores a cada gravação (é esperada)
+- [x] Escolher e sair com Tab; conferir os 6 campos
+- [x] Lembrar da troca do par de cobradores a cada gravação (é esperada)
 
 **É o bloco mais sensível a diferença de framework.** `QComboBox` não tem
 `killFocus`; os combos gravavam em `CBN_KILLFOCUS` e um `eventFilter` de
@@ -72,4 +72,35 @@ duas vezes volta ao início. Não acuse como divergência.
       offset simbólico
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
+
+**Executado em:** 2026-08-28 — **PARCIAL: 2 de 3 itens.**
+
+**Resumo:**
+
+Itens 2 e 3 fechados; o item 1 reprovou e virou
+[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md).
+
+**O que se aprendeu:**
+
+**O item 1 encontrou o que existia para encontrar, e o achado contradiz o
+inventário.** A §3.5 diz que o original usa `CBN_KILLFOCUS` "justamente para
+navegar a lista com as setas sem gravar". Medido: três `Down` e `Escape` levam
+`kick_long_fk` de 3 a **6 no `ed.exe`** e o deixam em **3 no port**. Os dois
+gravam em perda de foco — isso a §3.5 acerta —, mas o valor que chega lá é
+outro, porque `Escape` mantém o item navegado no MFC e **reverte** no
+`QComboBox`. A frase do inventário entra na CORR junto com o código.
+
+**O irmão do item 1 passa, e isso delimita a correção.** Escolher com `Return` e
+sair com `Tab` grava 3 → 5 **nos dois**, com os outros cinco campos intactos.
+Quem diverge é só o caminho do `Escape`.
+
+**Problemas encontrados:** o item 1, acima. A task fica aberta.
+
+**Arquivos criados/modificados:**
+
+- `docs/PARIDADE-FUNCIONAL.md` — os dois itens conferidos, o reprovado, e a
+  nota sobre a frase errada da §3.5
+- `docs/tasks/CORR-WTE-123.md` — o achado
+- `docs/tasks/correcoes-progresso.md` — a linha e o checklist
+- `docs/tasks/PAR-TASK-03.md` — este Log

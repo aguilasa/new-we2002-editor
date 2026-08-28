@@ -589,10 +589,28 @@ reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
 > do oráculo mede 148×82 e o `OK` fica no centro horizontal a ~40% da altura.
 
 ### 8.3 Cobradores e capitão
+
+**Dois de três conferidos em 2026-08-28** pela
+[PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). O primeiro reprovou e virou
+[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md).
+
 - [ ] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
-      ESC/clicar fora — conferir se grava ou não igual ao original
-- [ ] Escolher e sair com Tab; conferir os 6 campos
-- [ ] Lembrar da troca do par de cobradores a cada gravação (é esperada)
+      ESC/clicar fora — conferir se grava ou não igual ao original —
+      **reprovou**: três `Down` e `Escape` levam `kick_long_fk` de 3 a **6 no
+      `ed.exe`** e o deixam em **3 no port**.
+      [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md)
+- [x] Escolher e sair com Tab; conferir os 6 campos — `kick_long_fk` vai de 3 a
+      5 **nos dois**, e os outros cinco ficam intactos
+- [x] Lembrar da troca do par de cobradores a cada gravação (é esperada) —
+      confirmada em toda corrida desta série: `OFS_KICKER+384` aparece no
+      controle positivo mesmo quando nada de cobrador foi tocado
+
+> **A frase da [§3.5](#35-cobradores-e-capitão) está errada, e a
+> [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) a corrige junto com o código.**
+> Ela diz que o original usava `CBN_KILLFOCUS` "justamente para navegar a lista
+> com as setas sem gravar". Os dois gravam em perda de foco, isso está certo —
+> mas o **valor** que chega lá é outro: `Escape` mantém o item navegado no MFC e
+> reverte no `QComboBox`.
 
 ### 8.4 Atributos do jogador
 - [ ] Clampar habilidade abaixo de 12 e acima de 19
