@@ -1232,7 +1232,7 @@ mesma família de campo no `newWe2002` nunca foi conferida pela tela.
 
 | ID | Tarefa | §  | Itens | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | -- | ----: | ------------ | ------ | ------------ | ----------- |
-| [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | 8.1 | 5 | — | ⬜ Pendente | — | — |
+| [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | 8.1 | 5 | — | ✅ Concluído | 2026-08-28 | ⬜ pendente |
 | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | 8.2 | 3 | 01 | ⬜ Pendente | — | — |
 | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | 8.3 | 3 | 01 | ⬜ Pendente | — | — |
 | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | Atributos do jogador e os clamps | 8.4 | 5 | 01 | ⬜ Pendente | — | — |

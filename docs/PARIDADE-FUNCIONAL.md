@@ -509,13 +509,38 @@ Para cada bloco, o critério de aprovação é o mesmo: **fazer a mesma coisa no
 `tools/golden_compare.py`.** Divergência esperada: só `405724..405739`.
 
 ### 8.1 Nomes e abreviações
-- [ ] Editar os 6 slots de nome de uma seleção; conferir que o `(n)` de cada
-      rótulo bate com o truncamento real
-- [ ] Editar kanji e caixa mista
-- [ ] Editar as 3 abreviações
-- [ ] `CMD_COPY_TEAM_NAMES` numa seleção e num clube de ML — conferir o quirk do
-      comprimento kanji (§3.3)
-- [ ] Repetir num clube de ML, incluindo os dois nomes extras
+
+**Conferido em 2026-08-28** pela [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md), na
+`ptbr-remaster.bin`, com o `golden_check.sh` em modo `gui`. As seis corridas
+saíram `OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`.
+
+- [x] Editar os 6 slots de nome de uma seleção; conferir que o `(n)` de cada
+      rótulo bate com o truncamento real — **6 faixas, 7 bytes cada**, contra o
+      `(7)` que os seis rótulos mostram no `Nation 1 - Ireland`
+- [x] Editar kanji e caixa mista — `OFS_TEAM_NAME_KANJI_A` sai com **span 13 /
+      diff 7** (a codificação ocupa mais que os caracteres digitados) e
+      `OFS_TEAM_MIXED_CASE_NAME` com **7 bytes**
+- [x] Editar as 3 abreviações — **3 bytes cada**, o `setMaxLength(3)` fixo em
+      código, não por tabela
+- [x] `CMD_COPY_TEAM_NAMES` numa seleção e num clube de ML — conferir o quirk do
+      comprimento kanji (§3.3). **11 regiões** na seleção, **13** no clube (mais
+      `OFS_ML_TEAM_NAME_7`/`_8`), e o kanji sai com **span 9 / diff 4**, fora do
+      padrão dos outros — que é o quirk preservado
+- [x] Repetir num clube de ML, incluindo os dois nomes extras — no
+      `Master League 32` os limites são `(11)(11)(11)(7)(7)(7)` mais `(8)` e
+      `(11)`, e as faixas gravadas batem com cada um
+
+**O truncamento segue o rótulo em todos os limites medidos** — quatro
+diferentes na mesma tela do clube de ML.
+
+> **Verde de gravação exige controle positivo.** A primeira corrida deste bloco
+> passou sem que **nada** tivesse sido editado: o port abre com o combo de time
+> em `---` e os campos vazios, e digitar ali não grava em time nenhum. Os dois
+> lados fizeram `Load`+`Save` e saíram iguais — verde que não media nada. O que
+> denunciou foi comparar a cópia gravada contra a imagem **original**: só as
+> não-idempotências conhecidas (all-star, cobradores) apareciam, e nenhuma
+> região de nome. **Selecionar um time é parte do roteiro, não preâmbulo**, e
+> toda corrida desta série leva o par golden + controle positivo.
 
 ### 8.2 Números de camisa
 - [ ] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
