@@ -1,0 +1,68 @@
+---
+id: PAR-TASK-05
+title: "Troca de jogador nos quatro tipos de slot"
+type: verificação
+category: core
+projeto: newWe2002
+depends_on: ["PAR-TASK-04"]
+status: pendente
+---
+
+# PAR-TASK-05: Troca de jogador nos quatro tipos de slot
+
+## Contexto
+
+- **Referência:** [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.5.
+- **Projeto:** `newWe2002` (port Qt do `ed.exe`), **não** o `wte/` Lazarus.
+
+---
+
+## Método
+
+O mesmo para toda a série, e é o que a §8 do inventário já fixa: **fazer a
+mesma coisa no `ed.exe` sob Wine e no port, gravar as duas cópias e comparar
+com `tools/golden_compare.py`.**
+
+```sh
+cp roms/ptbr-remaster.bin  "$SCRATCH/v.bin"
+DISPLAY=:98 ./build/src/app/newWe2002 "$SCRATCH/v.bin"
+```
+
+**Critério de aprovação:** a única divergência é `405724..405739`, o slot 64 do
+array de 63. Qualquer outra faixa é achado, e vira CORR.
+
+**Sempre sobre cópia, sempre no `:98`.** O `roms/` nunca é alvo. Feche qualquer
+editor aberto no display antes: os dois lados acham o diálogo principal pelo
+tamanho, e uma janela esquecida é dirigida no lugar da que está sob teste.
+
+**A imagem preferida desta série é a `ptbr-remaster.bin`.** Ela é a única com
+oráculo vivo nos dois editores e com os ramos do codec exercitados — medido na
+[PROPOSTA-IMAGEM-GOLDEN](/docs/PROPOSTA-IMAGEM-GOLDEN.md) §8.4. Onde o item
+pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`.
+
+---
+
+## Itens a conferir
+
+- [ ] Slot de seleção nacional: "complete" e "incomplete"
+- [ ] Slot de clube de ML: link para contratado e para agente livre
+- [ ] Agente livre com nacionalidade padrão × escolhida no combo
+- [ ] Slot de all-star: conferir que os nomes se refazem depois
+
+O último item toca uma não-idempotência conhecida: o `Save` reconstrói as
+all-star a partir dos links (`OFS_PLAYER_ATTR_8`), então `Load`+`Save` sem
+editar nada **não** devolve a imagem intacta — e não deveria. O oráculo faz o
+mesmo. Conferir contra o `ed.exe`, nunca contra o arquivo original.
+
+---
+
+## Definição de pronto
+
+- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.5
+- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+      e o veredito
+- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
+      offset simbólico
+- [ ] `roms/` intocada
+
+## Log de Execução *(preenchido após execução)*

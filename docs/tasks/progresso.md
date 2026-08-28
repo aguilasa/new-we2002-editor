@@ -9,6 +9,13 @@ favor do plano.
 compartilha é conhecimento de formato: `Offsets.hpp`, `Tables.cpp` e o
 `we2002_core` inteiro, que é a entrada do transpilador da fase 3.
 
+> **As `PAR-TASK-*` no fim deste arquivo são do outro projeto.** Elas rastreiam
+> a paridade do **`newWe2002`** (port Qt do `ed.exe`) contra o
+> [PARIDADE-FUNCIONAL](/docs/PARIDADE-FUNCIONAL.md) §8, e moram aqui por
+> conveniência de leitura, não por pertencerem ao plano Lazarus. **Nenhuma
+> `WTE-TASK` depende delas, e vice-versa.** A fonte de verdade delas é o
+> `PARIDADE-FUNCIONAL.md`, não o `PLAN-WTE-LAZARUS.md`.
+
 ## Resumo
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
@@ -1194,3 +1201,85 @@ lições de ferramenta saíram junto: **`Position :=` dispara `OnChange` na LCL*
 (oposto do `TComboBox`, que o `check_lcl_combo.py` mediu), e **coordenada de
 clique não é comum aos dois lados no rodapé do formulário** — o gtk2 desenha
 6 px de borda que o Wine não desenha, e a diferença cresce descendo a janela.
+
+
+---
+
+# Anexo — `newWe2002`: paridade funcional pela tela
+
+> **Outro projeto.** Estas tasks não são do `wte/` Lazarus e não entram nas
+> fases de 0 a 7 acima. Fonte de verdade:
+> [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.
+
+## Por que existem
+
+O escopo Linux do `newWe2002` está fechado e verificado contra o `ed.exe` nos
+dois níveis — o core headless (teste `golden`) e a janela Qt dirigida por
+`xdotool` (teste `golden_gui`). O que **nenhum dos dois alcança** é o
+comportamento que só aparece clicando: clamp de campo, foco de combo, botão que
+habilita ou desabilita, ida e volta de arquivo `.t2002`/`.b2002`/`.m2002`.
+
+O `PARIDADE-FUNCIONAL.md` §8 lista 44 desses itens. Até 2026-08-28, **zero
+estavam marcados** — o inventário existia, o roteiro não tinha dono. Estas 11
+tasks dão dono a ele.
+
+A [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md) é a razão de a ordem começar por
+nomes de time: ela corrigiu, no port Lazarus, três faixas de gravação de nome
+que **existiam desde sempre** e que só a `ptbr-remaster` conseguiu expor. A
+mesma família de campo no `newWe2002` nunca foi conferida pela tela.
+
+## Resumo
+
+| ID | Tarefa | §  | Itens | Dependências | Status |
+| -- | ------ | -- | ----: | ------------ | ------ |
+| [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Nomes e abreviações de time, pela tela | 8.1 | 5 | — | ⬜ Pendente |
+| [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | 8.2 | 3 | 01 | ⬜ Pendente |
+| [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | 8.3 | 3 | 01 | ⬜ Pendente |
+| [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | Atributos do jogador e os clamps | 8.4 | 5 | 01 | ⬜ Pendente |
+| [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | 8.5 | 4 | 04 | ⬜ Pendente |
+| [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | 8.7 | 5 | 03 | ⬜ Pendente |
+| [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ⬜ Pendente |
+| [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Operações em massa | 8.9 | 5 | 04, 07 | ⬜ Pendente |
+| [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Ciclo de vida da janela | 8.10 | 5 | — | ⬜ Pendente |
+| [PAR-TASK-10](/docs/tasks/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | 8.11 | 1 | 01 | 🔒 Bloqueado |
+| [PAR-TASK-11](/docs/tasks/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | 8.6 | 5 | 01–09 | 🔒 Bloqueado |
+
+**44 itens, 11 tasks.** As duas bloqueadas têm bloqueio nomeado: a 10 pela
+Citrix filtrar input sintético no Windows, a 11 por decisão de manter o SoFIFA
+desligado até a paridade estar conferida.
+
+## Ordem sugerida
+
+```
+01 ─┬─ 02
+    ├─ 03 ── 06 ─┐
+    ├─ 04 ─┬─ 05 │
+    │      └─────┴─ 08
+    ├─ 07 ─────────┘
+    └─ 10 (destrava só depois da 01)
+
+09  independente — pode correr a qualquer momento
+11  depois de 01–09
+```
+
+A **01 é a primeira** por três razões que convergem: é onde bug acabou de
+aparecer no projeto irmão, é o que destrava o item aberto da Fase 7 no Windows,
+e a régua (`golden_gui` com `GOLDEN_EDIT`) já está pronta e rodou nas três
+imagens.
+
+A **09 não depende de nada** e é a mais barata — serve de aquecimento se a 01
+travar por qualquer motivo.
+
+## Método comum
+
+O mesmo da §8 do inventário, e cada arquivo de task o repete: fazer a mesma
+coisa no `ed.exe` sob Wine e no port, gravar as duas cópias, comparar com
+`tools/golden_compare.py`. **Aprovação = só a faixa `405724..405739`.**
+
+Imagem preferida: **`ptbr-remaster.bin`** — a única com oráculo vivo nos dois
+editores e com os ramos do codec exercitados
+([PROPOSTA-IMAGEM-GOLDEN](/docs/PROPOSTA-IMAGEM-GOLDEN.md) §8.4). Onde o item
+pedir kanji, a `japanese-shift-jis.bin`.
+
+Divergência fora da faixa conhecida vira **CORR**, com a faixa e o offset
+simbólico — mesma via da CORR-WTE-121.
