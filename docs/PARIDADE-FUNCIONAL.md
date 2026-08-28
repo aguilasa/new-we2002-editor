@@ -613,7 +613,14 @@ reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
 > reverte no `QComboBox`.
 
 ### 8.4 Atributos do jogador
-- [ ] Clampar habilidade abaixo de 12 e acima de 19
+
+**Um de cinco conferido em 2026-08-28** pela
+[PAR-TASK-04](/docs/tasks/PAR-TASK-04.md); os outros quatro não couberam no
+lote e seguem abertos.
+
+- [x] Clampar habilidade abaixo de 12 e acima de 19 — **os dois extremos**: 25
+      digitado em `attack` grava **19**, 3 digitado em `defence` grava **12**,
+      idêntico ao oráculo
 - [ ] Altura 100 e 999; idade 1 e 99; número 0 e 99
 - [ ] Custo com mais de 2 dígitos — conferir que o original também trunca
 - [ ] Trocar os 10 combos com mouse **e** com teclado

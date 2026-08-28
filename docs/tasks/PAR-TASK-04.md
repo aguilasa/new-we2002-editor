@@ -45,7 +45,7 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Clampar habilidade abaixo de 12 e acima de 19
+- [x] Clampar habilidade abaixo de 12 e acima de 19
 - [ ] Altura 100 e 999; idade 1 e 99; número 0 e 99
 - [ ] Custo com mais de 2 dígitos — conferir que o original também trunca
 - [ ] Trocar os 10 combos com mouse **e** com teclado
@@ -69,4 +69,33 @@ só um deles passa pelo `eventFilter` da PAR-TASK-03.
       offset simbólico
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
+
+**Executado em:** 2026-08-28 — **PARCIAL: 1 de 5 itens.**
+
+**Resumo:**
+
+O item 1 fechou: `golden_check.sh` em modo `gui` saiu
+`OK: identico ao oraculo, exceto o slot 64 conhecido`, e o controle positivo
+mostra `OFS_PLAYER_ATTR+7` com 2 bytes. O clamp foi medido **nos dois
+extremos numa corrida só**: 25 digitado em `attack` grava 19, 3 digitado em
+`defence` grava 12.
+
+Os outros quatro itens **não foram executados** — o lote de três tarefas
+(PAR-TASK-02, 03 e 04) consumiu o orçamento nas duas primeiras, que renderam
+duas CORRs. Não há nada medido sobre eles; ficam abertos como estavam.
+
+**O que se aprendeu, e vale para quem retomar:**
+
+**O `PlayerSkillsDialog` é janela própria, de 493×323 px**, e as coordenadas
+dos 21 campos do `controls.json` são relativas **a ele**, não ao `MainDialog` —
+o roteiro precisa de `--window "$SKILLS"`, com a janela achada por tamanho, como
+o `skills_win()` do roteiro faz. `CMD_SKILLS1` fica em dlu (392,36) no
+`MainDialog` e `Escape` fecha o diálogo.
+
+**Problemas encontrados:** nenhum no item executado.
+
+**Arquivos criados/modificados:**
+
+- `docs/PARIDADE-FUNCIONAL.md` — o item 1 da §8.4
+- `docs/tasks/PAR-TASK-04.md` — este Log
