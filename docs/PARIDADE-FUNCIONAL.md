@@ -563,9 +563,30 @@ diferentes na mesma tela do clube de ML.
 > toda corrida desta série leva o par golden + controle positivo.
 
 ### 8.2 Números de camisa
-- [ ] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
-- [ ] Digitar num clube de ML (sem clamp) e conferir
-- [ ] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu
+
+**Dois de três conferidos em 2026-08-28** pela
+[PAR-TASK-02](/docs/tasks/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
+reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
+
+- [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco — **a tela
+      mostra 32** e o `dump_estado` dá **31**, porque o campo guarda
+      `número − 1`; 31 é o teto, então o clamp aconteceu nos dois
+- [x] Digitar num clube de ML (sem clamp) e conferir — o mesmo 33 grava **32**
+      lá, contra 31 na seleção. A assimetria é do original e está reproduzida
+- [ ] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu —
+      **reprovou**: o port grava 37 faixas contra 20 do `ed.exe`, 18
+      divergências fora da faixa conhecida.
+      [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md)
+
+> **O botão abre `"Operation done!"`, e dispensar a caixa faz parte do
+> roteiro.** Sem isso ela fica na frente do `CMB_WRITE`, o clique de gravar não
+> chega, e o `wait_for_window` do `golden_gui.sh` toma **essa** caixa pela
+> confirmação de gravação: imprime "gravado" e o arquivo sai intacto. Como os
+> dois lados se comportam assim, o golden fica **verde sem ter medido nada**.
+>
+> E `Return` não serve para dispensá-la: fecha a `QMessageBox` do port e **não**
+> fecha a do MFC sob Wine. O que funciona nos dois é clicar no botão — a caixa
+> do oráculo mede 148×82 e o `OK` fica no centro horizontal a ~40% da altura.
 
 ### 8.3 Cobradores e capitão
 - [ ] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
