@@ -147,13 +147,30 @@ Nos dois, o que sobra do comprimento é preenchido com `0x00`, e o laço para no
 comprimento do registro — nunca no fim do texto. É truncamento por campo, o
 mesmo que o [`truncamento.md`](../truncamento.md) mapeou para a tela.
 
+**E o último byte do registro é NUL, sempre.** A saída comum dos dois modos
+(`0x00403bcd`) faz, depois do laço e sem condição nenhuma:
+
+```text
+403bcd:  mov ecx,[ebp+0x14]                 ; o buffer
+403bd0:  mov eax,[ebp+0x0c]                 ; o comprimento
+403bd3:  mov BYTE PTR [ecx+eax*1-0x1],0x0   ; buffer[comprimento-1] := 0
+```
+
+O gravador (`0x00403dcc`) passa `comprimento` cheio ao `0x00403400`, então o
+byte forçado **é gravado**. O efeito só aparece em slot mais estreito que o
+texto: quando o texto acaba antes, a cauda já era zero. Foi um byte só que
+denunciou — a [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md), no
+`OFS_TEAM_NAME_6` da `ptbr-remaster`, onde o time 2 tem slot de 4 (`CHL`) e o
+campo trazia `A BC.DE`: o oráculo grava `A B` mais o NUL, e o port gravava
+`A BC`.
+
 ### A regra que enche os 18 registros — `0x00403c0c`
 
 É a peça que faltava, e ela não usa tabela de offset por time nem de
 comprimento: **varre a imagem**.
 
 ```text
-restantes := 94 - indice
+restantes := 94 - indice                   (indice 95 da -1: o laco nao roda)
 seek(tabela[campo][bloco] + 1)
 repetir `restantes` vezes:
     anda ate o fim do nome corrente        (ate o byte 0)
@@ -164,6 +181,20 @@ le o slot para o buffer do registro e marca o fim com 0xFF
 se (campo, bloco) = (0, 0):  comprimento := comprimento - 1;  modo := 1
 senao:                       modo := 2
 ```
+
+**O salto de setor desta varredura NÃO é o das rotinas de bloco**, e a
+diferença vale bytes gravados. O `call 0x403388` mora no **topo** de cada laço
+(`0x00403c42`, `0x00403c56`, `0x00403cb9`, `0x00403cce`): ele roda entre duas
+leituras, e nunca depois do byte que **encerra** o laço — nem o `0` que termina
+o nome, nem o não-zero que abre o próximo. São dois bytes por registro sem
+teste de fronteira; quando um deles cai em `2072 mod 2352`, o original não pula
+os 304 de EDC/ECC.
+
+Medido pela [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md) na
+`ptbr-remaster`: um port que testasse também nesses dois bytes sai **8
+registros** de fase no `OFS_TEAM_NAME_6` e grava o time 2 em 5652628
+(`S.AFRIC`) onde o oráculo grava em 5652568 (`CHL`). Modelado o laço byte a
+byte como o `.exe`, os dez blocos batem **10/10** com o que o oráculo gravou.
 
 Duas coisas que isso revela e que nenhuma tabela diria:
 
@@ -178,15 +209,26 @@ Há um caso especial morto no original: `(campo 0, bloco 5, 32º registro)` faz
 um `seek` fixo para `0x563f8d`. O bloco 5 da linha 0 é buraco na tabela, então
 o laço nunca chega lá. Não foi portado, e a razão está aqui.
 
+*Reconferido pela [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md): o teste
+é `test edi,edi` (campo) / `cmp [ebp-4],0x5` (bloco) / `cmp esi,0x1f` em
+`0x00403c68`, e `edi` é mesmo a linha — o `lea ecx,[ecx*8+0x433a0c]` com
+`ecx = edi*39` dá o passo de 312 = 6 × 52 da linha. O endereço `0x563f8d` é
+`OFS_TEAM_NAME_6_B + 1`, o que faz o caso parecer o do `(campo 1, bloco 5)`;
+não é, e a rota continua morta.*
+
 ### O salto de setor é do fluxo, não do endereço — `0x00403388`
 
-Depois de **cada** byte lido ou gravado, o original testa
-`posicao mod 2352 = 2072` e, se bate, pula 304. É o que torna o formato
-MODE2/2352 invisível para o resto do código: nome que atravessa fronteira de
-setor não escreve por cima do EDC/ECC.
+Nas duas rotinas de bloco — `0x004033bc` (ler `count`) e `0x00403400` (gravar
+`count`) — o original testa `posicao mod 2352 = 2072` depois de **cada** byte,
+inclusive o último, e se bate pula 304. É o que torna o formato MODE2/2352
+invisível para o resto do código: nome que atravessa fronteira de setor não
+escreve por cima do EDC/ECC.
 
 No port isso é `SaltaFronteiraDeSetor` / `LeDoFluxo` / `GravaNoFluxo`, no
 `we2002_estado`.
+
+**A varredura do `0x00403c0c` é a exceção**, e ela não usa o `LeDoFluxo` —
+ver a seção anterior.
 
 ### O espaço é codificado diferente do `ed.exe`, e isso é medição
 

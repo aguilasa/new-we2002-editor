@@ -100,8 +100,23 @@ e [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md).
 
 O lote kanji tem um `dec` que nenhum outro tem (`0x00403d95`, só para linha 0
 coluna 0): ele guarda a largura **menos um**, e o campo `+8` recebe `1` em vez
-do `2` dos demais — o modo do decodificador de texto. É por isso que o limite é
-`TEAM_NAME_KANJI_LEN − 1` e não `TEAM_NAME_KANJI_LEN`.
+do `2` dos demais — o modo do decodificador de texto.
+
+**A largura é medida na imagem, e a tabela constante não a substitui.** Até a
+[CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md) esta seção terminava
+dizendo que o limite é `TEAM_NAME_KANJI_LEN − 1`; a igualdade só vale na
+japonesa. Contra a varredura do `.exe`, em 95 times por ROM:
+
+| tabela | japonesa | `ptbr-remaster` | European Deluxe |
+|---|---:|---:|---:|
+| `TEAM_NAME_LEN_3` (`edit_nombre2`) | 95/95 | 95/95 | 95/95 |
+| `TEAM_NAME_KANJI_LEN` (`edit_nombre1`) | 95/95 | **66/95** | **46/95** |
+
+O slot de kanji é o único que recebeu nome latino nas ROMs ocidentais, e o
+lixo que sobrou depois do terminador encurta a distância até o registro
+seguinte. Por isso o port passou a varrer, como o original: os dois
+`LimiteDoNome*` medem, e a tabela ficou de reserva para quando não há imagem
+aberta.
 
 **Evidência:** disassembly lido
 

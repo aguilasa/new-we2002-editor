@@ -1126,9 +1126,14 @@ e conta vagos. Depende só da Fase 3.
    `LEN - 1` e o vetor tem `LEN`.
 
    **As duas pontas conciliam por construção.** O `LimiteDoNome1` põe
-   `MaxLength := TEAM_NAME_KANJI_LEN[t] - 1`, e o `KanjiToAscii` percorre
+   `MaxLength := largura_medida div 2`, e o `KanjiToAscii` percorre
    `(l - 1) * 2` bytes, devolvendo `l - 1` caracteres. Os dois `- 1` são o
-   mesmo. E a §8.6 ganha um irmão: `MaxLength` **não** guarda campo numérico —
+   mesmo — o `dec` de `0x00403d95` já está dentro da largura medida.
+   *(A largura vinha de `TEAM_NAME_KANJI_LEN[t]` até a
+   [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), 2026-08-28: a tabela só bate
+   na japonesa — erra 29 dos 95 times da `ptbr-remaster` e 49 dos 95 da
+   European Deluxe —, e o campo cortava o nome antes de gravar. O
+   `LimiteDoNome1` passou a varrer a imagem, como o original.)* E a §8.6 ganha um irmão: `MaxLength` **não** guarda campo numérico —
    o `casilla_dorsal` aceita dez dígitos para um número que não passa de 99, e
    quem guarda a faixa é a validação do handler de gravação.
 4. **Sem regressão de UI** — reconferir os 18 formulários. **Feito em

@@ -159,34 +159,40 @@ com as três imagens divergindo, e é esta entrada que explica por quê.
 
 ---
 
-## 4. O `MaxLength` do `edit_nombre1` na European Deluxe
+## 4. O `MaxLength` do `edit_nombre1` foi **corrigido**, não mantido
 
-| Campo | |
-|---|---|
-| **O que diverge** | o limite do primeiro campo de nome, em **49 dos 95** times, e **só** na European Deluxe |
-| **Natureza** | consequência de uma decisão já registrada |
-| **Decisão** | manter |
+Esta entrada registrava uma divergência deliberada: o limite do primeiro campo
+de nome saía de `TEAM_NAME_KANJI_LEN`, do `we2002_core`, enquanto o original
+mede a largura do registro **andando pelo arquivo** a cada troca de time. A
+decisão era *manter*, com a razão de que reproduzir exigiria o port reabrir a
+imagem — a decisão contrária à do
+[`lista_equiposChange.inc`](../src/impl/ep2002_mainform.lista_equiposChange.inc).
 
-**Razão.** O original **anda pelo arquivo** a cada troca de time, medindo a
-largura do registro como "bytes não-zero até o próximo não-zero". O port não
-reabre a imagem — decisão medida, escrita no cabeçalho do
-[`lista_equiposChange.inc`](../src/impl/ep2002_mainform.lista_equiposChange.inc)
-— e tira o número de `TEAM_NAME_KANJI_LEN`, do `we2002_core`. Os dois caminhos
-dão o mesmo resultado quando o slot de kanji contém kanji. Na European Deluxe
-nomes latinos foram escritos em slot de kanji e deixaram lixo depois do
-terminador, então a distância ao próximo registro encurta. Reproduzir exigiria o
-port reabrir a imagem a cada troca de time, que é a decisão contrária.
+**A decisão caiu, e o que a derrubou foi uma régua nova.** A entrada afirmava
+que o efeito era do `MaxLength` e só da European Deluxe. Ele não era: assim que
+a `ptbr-remaster` entrou na bateria — a primeira ROM com oráculo vivo **e**
+nomes latinos — o `golden-05-nomes` e o `golden-23-multiplas-edicoes`
+reprovaram em duas faixas de bytes gravados. O campo cortava o nome digitado
+antes de gravar, e isso não é limite de tela: é dado do usuário perdido na
+imagem.
 
-**Evidência.** [CORR-WTE-064](../../docs/tasks/CORR-WTE-064.md), 2026-08-18:
-emulada a travessia do original sobre as duas imagens,
-`(largura − 1) div 2 == TEAM_NAME_KANJI_LEN − 1` em **95/95** times na japonesa
-e **46/95** na European Deluxe. O lote `OFS_TEAM_NAME_3`, que o `edit_nombre2`
-usa, bate **95/95 nas duas** — o problema é do slot de kanji, não do método.
+Medido pela [CORR-WTE-121](../../docs/tasks/CORR-WTE-121.md) em 2026-08-28,
+contra a varredura do `.exe`, em 95 times por ROM:
 
-**Onde o teste sabe.** Não há exceção a nomear, e sim uma imagem escolhida de
-propósito: o `compara_tela.sh --nomes` roda sobre a japonesa, onde não há
-divergência. Rodar o mesmo modo apontando para a European Deluxe acusaria — e
-**acusaria corretamente**.
+| tabela | japonesa | `ptbr-remaster` | European Deluxe |
+|---|---:|---:|---:|
+| `TEAM_NAME_LEN_3` (`edit_nombre2`) | 95/95 | 95/95 | 95/95 |
+| `TEAM_NAME_KANJI_LEN` (`edit_nombre1`) | 95/95 | **66/95** | **46/95** |
+
+Os dois `LimiteDoNome*` passaram a medir na imagem, como o original mede. O
+`edit_nombre2` entrou junto embora bata 285/285 — o original mede os dois, e
+deixar um medido e o outro tabelado manteria, sem ganho, a regra recém-caída.
+
+**Por que remoção e não reescrita.** É a mesma família da §9: divergência
+deliberada que foi consertada não vira entrada com texto novo, vira registro de
+que deixou de existir. Uma entrada viva aqui faz alguém procurar um problema
+que já não há — e o `compara_tela.sh --nomes`, que a entrada antiga mandava
+rodar só sobre a japonesa, agora pode rodar sobre qualquer uma das três.
 
 ---
 
