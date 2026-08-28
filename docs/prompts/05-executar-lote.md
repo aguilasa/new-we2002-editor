@@ -7,7 +7,9 @@ Object Pascal sobre Lazarus/LCL no Linux), localizado em:
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
 - **Arquivo de progresso:** `docs/tasks/progresso.md`
 - **Tarefas detalhadas:** `docs/tasks/`
-- **Fonte de verdade do projeto:** `docs/PLAN-WTE-LAZARUS.md`
+- **Fonte de verdade:** **a que a própria task declarar** no campo
+  `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
+  nome — a task em mãos é quem diz contra o que ela se mede.
 - **Regras do repositório:** `CLAUDE.md` — leia antes de tocar em qualquer coisa
 
 ---
@@ -99,13 +101,11 @@ leitura pura sobre o `.exe`, cada uma escrevendo seu próprio arquivo em
    da fase por ID crescente.
 3. Filtrar por `depends_on` **satisfeito** — usar o grafo do `progresso.md`.
 
-> **As `PAR-TASK-*` são de outro projeto, e entram por último.** Elas rastreiam a
-> paridade do **`newWe2002`** (port Qt do `ed.exe`) contra a §8 do
-> [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md), que é a fonte de
-> verdade delas — **não** o `PLAN-WTE-LAZARUS.md`. Estão na tabela do anexo, no
-> fim do `progresso.md`, não têm fase, e vêm depois de todas as `WTE-TASK`, na
-> ordem numérica delas. As marcadas ❌ não são selecionáveis. Mapeamento completo
-> no [`01-executar.md`](/docs/prompts/01-executar.md).
+> **A ordem é a do `progresso.md`, lida de cima para baixo.** Este prompt não a
+> recalcula nem conhece prefixo de ID: onde houver `phase:` no frontmatter, ela
+> ordena dentro da tabela; onde não houver, vale a ordem escrita. Tarefa marcada
+> ❌ não é selecionável. Cada uma declara a própria fonte no campo
+> `fonte_de_verdade` — leia a dela, não um plano fixo.
    Dependência que só fecharia dentro deste mesmo lote **não** conta como
    satisfeita para efeito de seleção paralela; ela força ordem.
 4. Se existir tarefa `🔄 Em andamento`, ela é a primeira do lote.
@@ -148,7 +148,7 @@ Duas tarefas só rodam em paralelo se **todas** as condições valerem:
 | `git` (index, `HEAD`, commit) | **sempre no thread principal**, nunca dentro de subagente |
 | `docs/tasks/progresso.md` | toda tarefa escreve nele — tabela, checklist, duas colunas de data. É o arquivo mais garantido de colidir |
 | `wte/Makefile` | a bateria de `--check` mora ali (decisão da WTE-TASK-01, ver `wte/README.md`). **Toda tarefa de fase 1 que cria gerador acrescenta um alvo** — as 03, 04, 05 e 06 querem a mesma mão no mesmo arquivo |
-| `docs/PLAN-WTE-LAZARUS.md` | fonte de verdade; tarefa que reconcilia número do plano colide com irmã |
+| o arquivo de `fonte_de_verdade` de duas tasks do lote | tarefa que reconcilia número do plano colide com irmã que lê o mesmo |
 
 **A serialização do `:98` é a mais restritiva deste projeto.** Na prática,
 **toda tarefa que exercita o oráculo, roda o golden ou tira captura é
@@ -188,7 +188,7 @@ para efeito de paralelismo — ela ocupa o display. Essas vão em série.
 Para cada tarefa do lote, e podendo ser um subagente por tarefa, **read-only**:
 
 - ler o markdown da tarefa por inteiro;
-- ler a seção de `docs/PLAN-WTE-LAZARUS.md` do campo "Referência", e os docs de
+- ler o que o campo `fonte_de_verdade` da task apontar, e os docs de
   `wte/re/` que ela citar;
 - se a tarefa depende de outra já concluída, **reler o artefato real** que
   aquela produziu — o markdown descreve a intenção, e a execução pode ter

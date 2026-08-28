@@ -5,6 +5,7 @@ type: ferramenta
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-07"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.4 e Fase 2 item 1"
 status: concluído
 ---
 

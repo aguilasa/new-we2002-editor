@@ -71,4 +71,12 @@ if(Python3_FOUND)
     add_test(NAME glossary
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/apply_glossary.py --check)
+
+    # The prompts under docs/prompts/ are project-agnostic: they read the
+    # progress files and each task states its own source of truth in the
+    # `fonte_de_verdade` frontmatter field. This enforces the four conventions
+    # that make that work -- see .claude/rules/tasks.md.
+    add_test(NAME tasks
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/check_tasks.py)
 endif()

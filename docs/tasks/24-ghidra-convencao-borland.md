@@ -5,6 +5,7 @@ type: infra
 category: engenharia-reversa
 phase: 4
 depends_on: ["WTE-TASK-04", "WTE-TASK-06"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §8.1, §8.2 e §8.3"
 status: concluído
 ---
 

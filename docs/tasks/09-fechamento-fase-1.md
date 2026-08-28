@@ -5,6 +5,7 @@ type: fechamento
 category: engenharia-reversa
 phase: 1
 depends_on: ["WTE-TASK-03", "WTE-TASK-04", "WTE-TASK-05", "WTE-TASK-06", "WTE-TASK-07", "WTE-TASK-08"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 1, critério de pronto"
 status: concluído
 ---
 

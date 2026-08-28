@@ -5,6 +5,7 @@ type: ferramenta
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-15"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.4 e Fase 3 item 3"
 status: concluído
 ---
 

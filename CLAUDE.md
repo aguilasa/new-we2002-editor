@@ -771,8 +771,16 @@ exatamente esses saltos — no legado esses três ainda se chamam `OFS_NOMI_SQ1`
 
 ## Convenções da documentação
 
-Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há uma:
+Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
 
+- [.claude/rules/tasks.md](.claude/rules/tasks.md)
+  — **os prompts de `docs/prompts/` são agnósticos de projeto.** Eles leem os
+  dois arquivos de progresso, abrem a task pelo link da linha dela, e medem
+  contra o que o campo `fonte_de_verdade` do frontmatter dela apontar. Nunca
+  codifique num prompt o nome de um plano, um prefixo de ID, uma fase ou um
+  mapeamento `ID → arquivo` — este repositório tem dois projetos no mesmo
+  `progresso.md` e terá outros. `ctest -R tasks` (`tools/check_tasks.py`)
+  confere as quatro convenções que fazem isso funcionar.
 - [.claude/rules/links.md](.claude/rules/links.md)
   — link de um markdown de `docs/` para outro markdown dentro de `docs/` usa
   `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`

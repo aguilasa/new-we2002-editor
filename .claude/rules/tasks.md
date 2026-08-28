@@ -1,0 +1,81 @@
+# Convenções de task
+
+## A task declara a própria fonte de verdade
+
+**Todo arquivo de task em `docs/tasks/` tem `fonte_de_verdade` no frontmatter**,
+com um caminho `/docs/...` mais a seção:
+
+```yaml
+---
+id: PAR-TASK-01
+title: "Nomes e abreviações de time, pela tela"
+type: verificação
+category: ui
+depends_on: []
+fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.1"
+status: pendente
+---
+```
+
+O campo é **obrigatório**, e a mesma referência aparece em prosa na seção
+`## Contexto` (`- **Referência:** ...`) — a duplicação é deliberada: o
+frontmatter serve a quem automatiza, a prosa a quem lê.
+
+### Por que, e o que isso proíbe
+
+Os prompts de `docs/prompts/` — que os comandos de `.claude/commands/`
+carregam — **são agnósticos de projeto**. Eles sabem:
+
+1. ler `docs/tasks/progresso.md` e `docs/tasks/correcoes-progresso.md`;
+2. abrir o markdown da task pelo **link na linha dela**;
+3. fazer o que a task pede, medindo contra o que o `fonte_de_verdade` dela
+   apontar.
+
+Nada mais. **Não codifique num prompt** o nome de um plano, um prefixo de ID,
+uma fase ou um mapeamento `ID → arquivo`. Este repositório já tem dois projetos
+(`wte/` Lazarus e `newWe2002`) com planos diferentes no mesmo `progresso.md`, e
+terá outros; prompt que conhece um deles pelo nome quebra no próximo.
+
+Sintomas de que a regra foi violada, todos já vistos aqui:
+
+| sintoma | o que estava errado |
+|---|---|
+| o prompt manda "ler a seção de `PLAN-X.md`" | fonte fixa; a task de outro projeto se mede contra outro arquivo |
+| o prompt tem tabela `ID → arquivo` | duplica os links do `progresso.md`, e envelhece |
+| o prompt ordena por prefixo de ID | ordem é do `progresso.md`, de cima para baixo |
+
+### Ao criar uma task nova
+
+- `fonte_de_verdade` preenchido e apontando para **arquivo que existe** — se
+  a fonte ainda não existe, escreva-a antes, ou descreva o critério **dentro da
+  própria task** e aponte para ela mesma;
+- `status:` do frontmatter **igual** ao símbolo da tabela do `progresso.md`
+  (`pendente`↔`⬜ Pendente`, `bloqueado`↔`❌ Bloqueado`, `concluído`↔`✅ Concluído`);
+- linha na tabela do `progresso.md` **com link** para o arquivo — é assim que o
+  prompt o encontra;
+- `depends_on` só com IDs que existem.
+
+Uma task que não diz contra o que se mede não é executável, e adivinhar o plano
+pelo prefixo do ID é exatamente o acoplamento que esta regra impede.
+
+## As CORRs são autocontidas
+
+`CORR-*.md` **não** leva `fonte_de_verdade`: ela traz `## Problema
+identificado`, `## Evidência`, `## Causa raiz` e `## Correção`, que já dizem
+contra o que o fix se mede. A origem — a task que a gerou — é a segunda coluna
+da tabela do `correcoes-progresso.md`.
+
+O pool de correções é **único**, com a numeração `CORR-WTE-XXX` contínua,
+qualquer que seja o projeto. O prefixo `WTE-` ali é histórico e não afirma
+projeto; o corpo da CORR diz de qual se trata. Dois pools custariam um segundo
+prompt de correção sem ganho nenhum.
+
+## Conferência
+
+```bash
+cd /home/ingmar/desenvolvimento/github/new-we2002-editor
+python3 tools/check_tasks.py
+```
+
+Ele confere as quatro coisas da lista acima em todas as tasks, e é o que impede
+a regra de virar prosa. Rode antes de commitar task nova.

@@ -6,11 +6,19 @@ Object Pascal sobre Lazarus/LCL no Linux), localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
 - **Arquivo de progresso:** `docs/tasks/progresso.md`
+- **Fonte de verdade:** **a que a própria task declarar** no campo
+  `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
+  nome, e não deve passar a conhecer — ver "A fonte de verdade mora na task"
+  abaixo.
 - **Tarefas detalhadas:** `docs/tasks/`
-- **Fonte de verdade do projeto:** `docs/PLAN-WTE-LAZARUS.md`
 - **Regras do repositório:** `CLAUDE.md` — leia antes de tocar em qualquer coisa
-- **Registro técnico dos achados:** `wte/re/`
-- **Binário alvo:** `we-team-editor/we-team-editor.exe` — **somente leitura**
+
+Os caminhos abaixo servem à maioria das tasks deste repositório, e estão aqui
+como atalho, **não** como definição: quem define é o `fonte_de_verdade` da task
+em mãos.
+
+- **Registro técnico dos achados do `wte/`:** `wte/re/`
+- **Binário alvo do `wte/`:** `we-team-editor/we-team-editor.exe` — **somente leitura**
 
 ---
 
@@ -27,9 +35,8 @@ Quero que você:
    - Verificar se as dependências declaradas em `depends_on` já estão
      concluídas — ver o grafo em `progresso.md`
 3. Abra o markdown detalhado da tarefa em `docs/tasks/` — ver mapeamento abaixo
-4. Leia a seção referenciada no campo "Referência" da task, e os docs que ela
-   citar — `docs/PLAN-WTE-LAZARUS.md` + `wte/re/` para as `WTE-TASK`,
-   `docs/PARIDADE-FUNCIONAL.md` para as `PAR-TASK`
+4. Leia o que o campo `fonte_de_verdade` do frontmatter apontar, e os demais
+   docs que a task citar na seção "Contexto"
 5. Execute a tarefa
 6. Ao final, atualize o `progresso.md` marcando a tarefa como `✅ Concluído`
    (tabela de resumo E checklist da fase), e **preencha a coluna "Concluída
@@ -39,100 +46,40 @@ Quero que você:
 
 ---
 
-## Mapeamento de tarefas — ID → arquivo
+## A fonte de verdade mora na task
 
-Se esta tabela divergir do `progresso.md`, **o `progresso.md` manda** — e a
-divergência é achado a registrar.
+**Este prompt é agnóstico de projeto.** Ele sabe ler o `progresso.md`, abrir o
+markdown da tarefa e fazer o que ela pede — nada além disso. Não há plano,
+fase ou prefixo de ID codificado aqui, e acrescentar um é regressão.
 
-| ID | Fase | Arquivo em `docs/tasks/` |
-| --- | --- | --- |
-| WTE-TASK-01 | 0 | `01-ferramental.md` |
-| WTE-TASK-02 | 0 | `02-esqueleto-do-projeto.md` |
-| WTE-TASK-03 | 1 | `03-extrator-de-dfm.md` |
-| WTE-TASK-04 | 1 | `04-mapa-de-handlers.md` |
-| WTE-TASK-05 | 1 | `05-inventario-de-strings.md` |
-| WTE-TASK-06 | 1 | `06-mapa-de-offsets.md` |
-| WTE-TASK-07 | 1 | `07-unidades-duvidosas.md` |
-| WTE-TASK-08 | 1 | `08-convencao-dos-assets.md` |
-| WTE-TASK-09 | 1 | `09-fechamento-fase-1.md` |
-| WTE-TASK-10 | 2 | `10-conversor-dfm-para-lfm.md` |
-| WTE-TASK-11 | 2 | `11-app-com-a-casca-completa.md` |
-| WTE-TASK-12 | 2 | `12-comparacao-visual.md` |
-| WTE-TASK-13 | 2 | `13-trace-de-eventos.md` |
-| WTE-TASK-14 | 2 | `14-fechamento-fase-2.md` |
-| WTE-TASK-15 | 3 | `15-mapeamento-de-tipo.md` |
-| WTE-TASK-16 | 3 | `16-gerador-de-tabelas.md` |
-| WTE-TASK-17 | 3 | `17-transpilador-da-camada-de-dados.md` |
-| WTE-TASK-18 | 3 | `18-camada-de-dados-gerada.md` |
-| WTE-TASK-19 | 3 | `19-os-50-offsets-restantes.md` |
-| WTE-TASK-20 | 3 | `20-round-trip-headless.md` |
-| WTE-TASK-21 | 3 | `21-fechamento-fase-3.md` |
-| WTE-TASK-22 | 4 | `22-harness-golden.md` |
-| WTE-TASK-23 | 4 | `23-formato-da-spec.md` |
-| WTE-TASK-24 | 4 | `24-ghidra-convencao-borland.md` |
-| WTE-TASK-25 | 4 | `25-handlers-de-carga.md` |
-| WTE-TASK-26 | 4 | `26-handlers-de-edicao.md` |
-| WTE-TASK-27 | 4 | `27-handlers-de-gravacao.md` |
-| WTE-TASK-28 | 4 | `28-import-de-mcr.md` |
-| WTE-TASK-29 | 4 | `29-camisa-e-bandeira-2d.md` |
-| WTE-TASK-30 | 4 | `30-handlers-auxiliares.md` |
-| WTE-TASK-31 | 4 | `31-fechamento-fase-4.md` |
-| WTE-TASK-32 | 5 | `32-preco-do-jogador.md` |
-| WTE-TASK-33 | 5 | `33-slots-de-master-league.md` |
-| WTE-TASK-34 | 6 | `34-bateria-golden-completa.md` |
-| WTE-TASK-35 | 6 | `35-divergencias-deliberadas.md` |
-| WTE-TASK-36 | 6 | `36-buffers-e-truncamento.md` |
-| WTE-TASK-37 | 6 | `37-reconferencia-de-ui.md` |
-| WTE-TASK-38 | 7 | `38-nome-e-linhagem.md` |
-| WTE-TASK-39 | 7 | `39-empacotamento.md` |
-| WTE-TASK-40 | 7 | `40-verificacao-final.md` |
+Duas consequências práticas:
 
-### As `PAR-TASK-*` — outro projeto, mesmo rastreamento
+| você precisa de | onde está |
+|---|---|
+| o arquivo da tarefa | **o link na tabela do `progresso.md`** — toda linha tem um |
+| o que a tarefa considera verdade | **o campo `fonte_de_verdade`** do frontmatter dela |
 
-As onze abaixo são do **`newWe2002`** (port Qt do `ed.exe`), não do `wte/`
-Lazarus. Elas moram no mesmo `progresso.md` — num anexo no fim — porque é o
-arquivo que estes prompts leem. Três diferenças que mudam o que você faz:
+O `fonte_de_verdade` é um caminho `/docs/...` mais a seção, e é **obrigatório**
+em toda task. Se faltar, ou apontar para arquivo inexistente, **pare e
+informe** — task que não diz contra o que ela se mede não é executável, e
+adivinhar o plano pelo prefixo do ID é exatamente o acoplamento que esta seção
+existe para impedir.
 
-- **A fonte de verdade delas é [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8**,
-  não o `PLAN-WTE-LAZARUS.md`. No passo 4, leia a seção do PARIDADE que o campo
-  "Referência" da task apontar.
-- **Elas não têm fase.** Entram depois de todas as `WTE-TASK`, na ordem
-  numérica delas, e o `depends_on` é entre `PAR-TASK` apenas.
-- **O `⬜ Pendente` delas está na tabela do anexo**, não no checklist de fase —
-  no fechamento, marque lá.
-
-| ID | § do PARIDADE | Arquivo em `docs/tasks/` |
-| --- | --- | --- |
-| PAR-TASK-01 | 8.1 | `PAR-TASK-01.md` |
-| PAR-TASK-02 | 8.2 | `PAR-TASK-02.md` |
-| PAR-TASK-03 | 8.3 | `PAR-TASK-03.md` |
-| PAR-TASK-04 | 8.4 | `PAR-TASK-04.md` |
-| PAR-TASK-05 | 8.5 | `PAR-TASK-05.md` |
-| PAR-TASK-06 | 8.7 | `PAR-TASK-06.md` |
-| PAR-TASK-07 | 8.8 | `PAR-TASK-07.md` |
-| PAR-TASK-08 | 8.9 | `PAR-TASK-08.md` |
-| PAR-TASK-09 | 8.10 | `PAR-TASK-09.md` |
-| PAR-TASK-10 | 8.11 | `PAR-TASK-10.md` — ❌ bloqueada (Citrix filtra input no Windows) |
-| PAR-TASK-11 | 8.6 | `PAR-TASK-11.md` — ❌ bloqueada (SoFIFA desligado por decisão) |
-
-**As duas bloqueadas não são selecionáveis** enquanto o bloqueio valer. Elas
-têm `status: bloqueado` no frontmatter e ❌ na tabela — trate como `depends_on`
-insatisfeito e informe, não execute.
-
-**A correção gerada por uma `PAR-TASK` continua sendo `CORR-WTE-XXX`**, no
-mesmo `correcoes-progresso.md` e na mesma numeração. O pool de correções é
-único de propósito: dois pools custariam um segundo prompt de correção sem
-ganho nenhum. O prefixo `WTE-` ali é histórico, não afirma projeto — o corpo da
-CORR diz de qual se trata.
+*(Houve aqui uma tabela `ID → arquivo` com as 51 linhas, e ela saiu em
+2026-08-28. Ela duplicava os links que o `progresso.md` já tem — o próprio
+prompt admitia isso na frase "se esta tabela divergir do `progresso.md`, o
+`progresso.md` manda". Duplicata que se declara perdedora é duplicata que só
+espera para envelhecer.)*
 
 ---
 
 ## Regras de seleção da tarefa
 
-1. Procurar a **primeira tarefa com `⬜ Pendente`** no `progresso.md`, na ordem
-   de fases e, dentro da fase, na ordem numérica. **As `PAR-TASK-*` vêm depois
-   de todas as `WTE-TASK`**, na ordem numérica delas — elas não têm fase, e
-   estão na tabela do anexo, no fim do arquivo
+1. Procurar a **primeira tarefa com `⬜ Pendente`** no `progresso.md`, **na ordem
+   em que o arquivo as apresenta** — de cima para baixo, tabela a tabela. O
+   `progresso.md` é quem define a ordem; este prompt não a recalcula. Onde
+   houver `phase:` no frontmatter, ela ordena dentro da tabela; onde não
+   houver, vale a ordem escrita
 2. Verificar se todas as tarefas em `depends_on` estão concluídas — se não,
    **não executar**, e informar o bloqueio
 3. Se existir tarefa `🔄 Em andamento`, priorizar concluí-la
@@ -178,8 +125,11 @@ foi invocado por aqui, o lote não é opção: uma tarefa, e pare.
 
 ## Contexto essencial — decisões já confirmadas
 
-**Leia isto antes de tocar em qualquer arquivo.** São decisões de
-`docs/PLAN-WTE-LAZARUS.md` que **não devem ser revertidas** sem o usuário pedir:
+**Leia isto antes de tocar em qualquer arquivo.** São decisões já tomadas que
+**não devem ser revertidas** sem o usuário pedir. Valem para as tasks do `wte/`
+Lazarus, e a fonte delas é o `/docs/PLAN-WTE-LAZARUS.md`; se a task em mãos
+declarar outro `fonte_de_verdade`, leia o dela — estas continuam valendo como
+contexto do repositório, não como critério da tarefa:
 
 - **O original é Borland C++Builder 6, não Delphi.** Os dois usam a mesma VCL,
   os mesmos `rtl60.bpl`/`vcl60.bpl` e o mesmo `.dfm`; o que separa é o mangling
@@ -270,8 +220,9 @@ Combinados, a semântica sai sem decompilar. Ver §4.2 do plano.
 ```text
 new-we2002-editor/
   docs/
-    PLAN-WTE-LAZARUS.md    # fonte de verdade deste projeto
-    PLAN-LINUX.md          # o port Qt (newWe2002) -- projeto irmao, fechado
+    PLAN-WTE-LAZARUS.md    # fonte das tasks do wte/ Lazarus
+    PLAN-LINUX.md          # como o port Qt (newWe2002) foi feito
+    PARIDADE-FUNCIONAL.md  # fonte das tasks de paridade do newWe2002
     tasks/                 # tasks, CORRs e progresso
     prompts/               # estes prompts
   wte/                     # o projeto Lazarus
@@ -330,9 +281,9 @@ registro.
 ### 1) Ler contexto
 
 - Ler `docs/tasks/progresso.md`
-- Ler o markdown da tarefa em `docs/tasks/`
-- Ler a seção de `docs/PLAN-WTE-LAZARUS.md` referenciada, e os docs de
-  `wte/re/` citados na task
+- Ler o markdown da tarefa — o link está na linha dela, na tabela do progresso
+- Ler o que o campo `fonte_de_verdade` do frontmatter apontar, e os demais docs
+  que a task citar na seção "Contexto"
 - Se a task depender de outra concluída, **reler o artefato real** que ela
   produziu — o markdown descreve a intenção, e a execução pode ter adaptado
 

@@ -5,6 +5,7 @@ type: verificação
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-18", "WTE-TASK-19"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.2 (oráculo B), §6 e Fase 3 itens 5 e 6"
 status: concluído
 ---
 

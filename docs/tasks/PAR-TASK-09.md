@@ -5,6 +5,7 @@ type: verificação
 category: ui
 projeto: newWe2002
 depends_on: []
+fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.10"
 status: pendente
 ---
 

@@ -94,7 +94,7 @@ correção de doc, de gerador e de código que não precisa de tela.
 A varredura de discrepância do `03-corrigir.md` pode puxar **qualquer** doc para
 dentro de uma correção — não dá para prever o conjunto final pela lista da CORR.
 Trate como conflito provável qualquer par que possa cair nos mesmos:
-`CLAUDE.md`, `docs/PLAN-WTE-LAZARUS.md`, `docs/tasks/progresso.md`,
+`CLAUDE.md`, o plano que a CORR citar, `docs/tasks/progresso.md`,
 `wte/re/offsets.md`, `wte/re/strings.tsv`, `wte/re/published_methods.tsv`,
 `wte/re/tipos.md`, `wte/re/divergencias.md`, `wte/re/spec/*`,
 `docs/prompts/*`, `.claude/commands/*`.

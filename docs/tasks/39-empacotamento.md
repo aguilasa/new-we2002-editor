@@ -5,6 +5,7 @@ type: implementação
 category: empacotamento
 phase: 7
 depends_on: ["WTE-TASK-38"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 7"
 status: concluído
 ---
 

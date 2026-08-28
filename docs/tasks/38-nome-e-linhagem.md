@@ -5,6 +5,7 @@ type: decisão
 category: empacotamento
 phase: 7
 depends_on: ["WTE-TASK-35"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §2 e Fase 7"
 status: concluído
 ---
 

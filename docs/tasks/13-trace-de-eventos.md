@@ -5,6 +5,7 @@ type: verificação
 category: comportamento
 phase: 2
 depends_on: ["WTE-TASK-11"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.3 item 3 e Fase 2 item 4"
 status: concluído
 ---
 

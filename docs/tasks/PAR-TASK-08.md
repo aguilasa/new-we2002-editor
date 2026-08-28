@@ -5,6 +5,7 @@ type: verificação
 category: core
 projeto: newWe2002
 depends_on: ["PAR-TASK-04", "PAR-TASK-07"]
+fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.9"
 status: pendente
 ---
 

@@ -5,6 +5,7 @@ type: fechamento
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-25", "WTE-TASK-26", "WTE-TASK-27", "WTE-TASK-28", "WTE-TASK-29", "WTE-TASK-30"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4, critério de pronto"
 status: concluído
 ---
 

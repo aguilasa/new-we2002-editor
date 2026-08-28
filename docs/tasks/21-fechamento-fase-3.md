@@ -5,6 +5,7 @@ type: fechamento
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-20"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3, critério de pronto"
 status: concluído
 ---
 

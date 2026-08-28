@@ -3,7 +3,9 @@
 Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em:
 
 - **Projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
-- **Fonte de verdade:** `docs/PLAN-WTE-LAZARUS.md` — **e `docs/PARIDADE-FUNCIONAL.md` §8 quando a tarefa revisada for uma `PAR-TASK-*`**, que são do `newWe2002` e moram no anexo do `progresso.md`
+- **Fonte de verdade:** **a que a própria task declarar** no campo
+  `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
+  nome — a task em mãos é quem diz contra o que ela se mede.
 - **Arquivo de progresso:** `docs/tasks/progresso.md`
 - **Regras do repositório:** `CLAUDE.md`
 - **Correções existentes:** `docs/tasks/CORR-WTE-*.md`
@@ -45,10 +47,9 @@ controle fechando antes. **Rode a ferramenta.**
 
 ### Etapa 0 — Ler o plano e as regras
 
-- `docs/PARIDADE-FUNCIONAL.md` §8 — **se a task revisada for uma `PAR-TASK-*`**,
-  esta substitui o plano Lazarus como referência; o critério de aprovação de
-  todas elas é o mesmo: divergência só em `405724..405739`
-- `docs/PLAN-WTE-LAZARUS.md` — a seção referenciada pela task, mais §2 (método:
+- **o que o `fonte_de_verdade` da task apontar** — é ele que diz contra o que a
+  tarefa se mede, e muda de task para task
+- `docs/PLAN-WTE-LAZARUS.md` §2 (método:
   spec, não transcrição), §4.4 e §4.5 (o que é gerado), §6 (testes) e §8
   (armadilhas)
 - `CLAUDE.md` — em especial a regra do `:98` e a seção do `make wte`

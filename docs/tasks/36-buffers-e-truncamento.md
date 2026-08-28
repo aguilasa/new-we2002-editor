@@ -5,6 +5,7 @@ type: verificação
 category: verificação
 phase: 6
 depends_on: ["WTE-TASK-26", "WTE-TASK-34"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 6 item 3"
 status: concluído
 ---
 

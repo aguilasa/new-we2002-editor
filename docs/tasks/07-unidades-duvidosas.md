@@ -5,6 +5,7 @@ type: extração
 category: engenharia-reversa
 phase: 1
 depends_on: ["WTE-TASK-02"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5 e Fase 1 item 5"
 status: concluído
 ---
 

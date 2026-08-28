@@ -5,6 +5,7 @@ type: implementação
 category: comportamento
 phase: 4
 depends_on: ["WTE-TASK-25"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 4"
 status: concluído
 ---
 

@@ -5,6 +5,7 @@ type: verificação
 category: features
 projeto: newWe2002
 depends_on: ["PAR-TASK-01", "PAR-TASK-02", "PAR-TASK-03", "PAR-TASK-04", "PAR-TASK-05", "PAR-TASK-06", "PAR-TASK-07", "PAR-TASK-08", "PAR-TASK-09"]
+fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.6"
 status: bloqueado
 ---
 

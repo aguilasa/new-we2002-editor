@@ -5,6 +5,7 @@ type: implementação
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-10"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.3 e Fase 2 item 2"
 status: concluído
 ---
 

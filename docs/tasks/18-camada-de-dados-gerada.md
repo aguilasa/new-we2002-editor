@@ -5,6 +5,7 @@ type: implementação
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-17"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3 item 3"
 status: concluído
 ---
 

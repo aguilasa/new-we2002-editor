@@ -5,6 +5,7 @@ type: fechamento
 category: ui
 phase: 2
 depends_on: ["WTE-TASK-12", "WTE-TASK-13"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 2, critério de pronto"
 status: concluído
 ---
 

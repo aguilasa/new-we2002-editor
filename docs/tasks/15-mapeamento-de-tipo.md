@@ -5,6 +5,7 @@ type: decisão
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-02"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 3 item 2, §8.6 e §8.11"
 status: concluído
 ---
 

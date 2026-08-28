@@ -5,6 +5,7 @@ type: implementação
 category: features
 phase: 4
 depends_on: ["WTE-TASK-08", "WTE-TASK-24", "WTE-TASK-27"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §5.2"
 status: concluído
 ---
 

@@ -5,6 +5,7 @@ type: fechamento
 category: verificação
 phase: 7
 depends_on: ["WTE-TASK-36", "WTE-TASK-37", "WTE-TASK-39"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §0, definição de pronto"
 status: concluído
 ---
 

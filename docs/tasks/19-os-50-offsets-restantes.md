@@ -5,6 +5,7 @@ type: extração
 category: dados
 phase: 3
 depends_on: ["WTE-TASK-06", "WTE-TASK-18"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §4.2 e Fase 3 item 4"
 status: concluído
 ---
 

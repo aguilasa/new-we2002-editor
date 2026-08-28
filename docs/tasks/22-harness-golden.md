@@ -5,6 +5,7 @@ type: ferramenta
 category: verificação
 phase: 4
 depends_on: ["WTE-TASK-11", "WTE-TASK-21"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §6"
 status: concluído
 ---
 

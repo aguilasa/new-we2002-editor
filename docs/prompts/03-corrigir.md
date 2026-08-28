@@ -59,7 +59,8 @@ mais.
 > `progresso.md`.
 >
 > **EXCLUSÃO OBRIGATÓRIA 4 — respeitar as decisões confirmadas:**
-> Confirme que o fix é compatível com `docs/PLAN-WTE-LAZARUS.md` §2, §4.4, §4.5
+> Confirme que o fix é compatível com o que a CORR aponta como origem — e, para
+> as do `wte/`, com `docs/PLAN-WTE-LAZARUS.md` §2, §4.4, §4.5
 > e §8.10. Nunca use a correção como desculpa para: **editar à mão arquivo que
 > um gerador produz**, **colar saída de decompilador** em spec ou em Pascal,
 > **apontar o transpilador para decompilado**, ou **escrever no
@@ -158,7 +159,7 @@ ter pegado.**
 ```text
 new-we2002-editor/
   docs/
-    PLAN-WTE-LAZARUS.md    # fonte de verdade deste projeto
+    PLAN-WTE-LAZARUS.md    # fonte das tasks do wte/ Lazarus
     tasks/                 # tasks, CORRs e progresso
     prompts/               # estes prompts
   wte/

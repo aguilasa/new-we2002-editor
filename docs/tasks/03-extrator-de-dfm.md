@@ -5,6 +5,7 @@ type: ferramenta
 category: engenharia-reversa
 phase: 1
 depends_on: ["WTE-TASK-02"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md §1.6 e Fase 1 item 1"
 status: concluído
 ---
 

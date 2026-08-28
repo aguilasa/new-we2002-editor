@@ -5,6 +5,7 @@ type: infra
 category: infra
 phase: 0
 depends_on: ["WTE-TASK-01"]
+fonte_de_verdade: "/docs/PLAN-WTE-LAZARUS.md Fase 0"
 status: concluído
 ---
 
