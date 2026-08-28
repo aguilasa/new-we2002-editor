@@ -5,7 +5,7 @@ type: verificação
 category: verificação
 projeto: newWe2002
 depends_on: ["PAR-TASK-01"]
-status: pendente
+status: bloqueado
 ---
 
 # PAR-TASK-10: O item aberto do Windows: nome de time pela janela Qt

@@ -27,8 +27,9 @@ Quero que você:
    - Verificar se as dependências declaradas em `depends_on` já estão
      concluídas — ver o grafo em `progresso.md`
 3. Abra o markdown detalhado da tarefa em `docs/tasks/` — ver mapeamento abaixo
-4. Leia a seção de `docs/PLAN-WTE-LAZARUS.md` referenciada no campo
-   "Referência" da task, e os docs de `wte/re/` que ela citar
+4. Leia a seção referenciada no campo "Referência" da task, e os docs que ela
+   citar — `docs/PLAN-WTE-LAZARUS.md` + `wte/re/` para as `WTE-TASK`,
+   `docs/PARIDADE-FUNCIONAL.md` para as `PAR-TASK`
 5. Execute a tarefa
 6. Ao final, atualize o `progresso.md` marcando a tarefa como `✅ Concluído`
    (tabela de resumo E checklist da fase), e **preencha a coluna "Concluída
@@ -86,12 +87,52 @@ divergência é achado a registrar.
 | WTE-TASK-39 | 7 | `39-empacotamento.md` |
 | WTE-TASK-40 | 7 | `40-verificacao-final.md` |
 
+### As `PAR-TASK-*` — outro projeto, mesmo rastreamento
+
+As onze abaixo são do **`newWe2002`** (port Qt do `ed.exe`), não do `wte/`
+Lazarus. Elas moram no mesmo `progresso.md` — num anexo no fim — porque é o
+arquivo que estes prompts leem. Três diferenças que mudam o que você faz:
+
+- **A fonte de verdade delas é [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8**,
+  não o `PLAN-WTE-LAZARUS.md`. No passo 4, leia a seção do PARIDADE que o campo
+  "Referência" da task apontar.
+- **Elas não têm fase.** Entram depois de todas as `WTE-TASK`, na ordem
+  numérica delas, e o `depends_on` é entre `PAR-TASK` apenas.
+- **O `⬜ Pendente` delas está na tabela do anexo**, não no checklist de fase —
+  no fechamento, marque lá.
+
+| ID | § do PARIDADE | Arquivo em `docs/tasks/` |
+| --- | --- | --- |
+| PAR-TASK-01 | 8.1 | `PAR-TASK-01.md` |
+| PAR-TASK-02 | 8.2 | `PAR-TASK-02.md` |
+| PAR-TASK-03 | 8.3 | `PAR-TASK-03.md` |
+| PAR-TASK-04 | 8.4 | `PAR-TASK-04.md` |
+| PAR-TASK-05 | 8.5 | `PAR-TASK-05.md` |
+| PAR-TASK-06 | 8.7 | `PAR-TASK-06.md` |
+| PAR-TASK-07 | 8.8 | `PAR-TASK-07.md` |
+| PAR-TASK-08 | 8.9 | `PAR-TASK-08.md` |
+| PAR-TASK-09 | 8.10 | `PAR-TASK-09.md` |
+| PAR-TASK-10 | 8.11 | `PAR-TASK-10.md` — ❌ bloqueada (Citrix filtra input no Windows) |
+| PAR-TASK-11 | 8.6 | `PAR-TASK-11.md` — ❌ bloqueada (SoFIFA desligado por decisão) |
+
+**As duas bloqueadas não são selecionáveis** enquanto o bloqueio valer. Elas
+têm `status: bloqueado` no frontmatter e ❌ na tabela — trate como `depends_on`
+insatisfeito e informe, não execute.
+
+**A correção gerada por uma `PAR-TASK` continua sendo `CORR-WTE-XXX`**, no
+mesmo `correcoes-progresso.md` e na mesma numeração. O pool de correções é
+único de propósito: dois pools custariam um segundo prompt de correção sem
+ganho nenhum. O prefixo `WTE-` ali é histórico, não afirma projeto — o corpo da
+CORR diz de qual se trata.
+
 ---
 
 ## Regras de seleção da tarefa
 
 1. Procurar a **primeira tarefa com `⬜ Pendente`** no `progresso.md`, na ordem
-   de fases e, dentro da fase, na ordem numérica
+   de fases e, dentro da fase, na ordem numérica. **As `PAR-TASK-*` vêm depois
+   de todas as `WTE-TASK`**, na ordem numérica delas — elas não têm fase, e
+   estão na tabela do anexo, no fim do arquivo
 2. Verificar se todas as tarefas em `depends_on` estão concluídas — se não,
    **não executar**, e informar o bloqueio
 3. Se existir tarefa `🔄 Em andamento`, priorizar concluí-la

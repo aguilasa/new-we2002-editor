@@ -1241,8 +1241,8 @@ mesma família de campo no `newWe2002` nunca foi conferida pela tela.
 | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ⬜ Pendente |
 | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Operações em massa | 8.9 | 5 | 04, 07 | ⬜ Pendente |
 | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Ciclo de vida da janela | 8.10 | 5 | — | ⬜ Pendente |
-| [PAR-TASK-10](/docs/tasks/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | 8.11 | 1 | 01 | 🔒 Bloqueado |
-| [PAR-TASK-11](/docs/tasks/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | 8.6 | 5 | 01–09 | 🔒 Bloqueado |
+| [PAR-TASK-10](/docs/tasks/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | 8.11 | 1 | 01 | ❌ Bloqueado |
+| [PAR-TASK-11](/docs/tasks/PAR-TASK-11.md) | SoFIFA: o que dá para conferir sem rede | 8.6 | 5 | 01–09 | ❌ Bloqueado |
 
 **44 itens, 11 tasks.** As duas bloqueadas têm bloqueio nomeado: a 10 pela
 Citrix filtrar input sintético no Windows, a 11 por decisão de manter o SoFIFA

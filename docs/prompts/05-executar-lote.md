@@ -98,6 +98,14 @@ leitura pura sobre o `.exe`, cada uma escrevendo seu próprio arquivo em
 2. Listar as `⬜ Pendente` na ordem: fase 0 antes da 1, antes da 2, …, e dentro
    da fase por ID crescente.
 3. Filtrar por `depends_on` **satisfeito** — usar o grafo do `progresso.md`.
+
+> **As `PAR-TASK-*` são de outro projeto, e entram por último.** Elas rastreiam a
+> paridade do **`newWe2002`** (port Qt do `ed.exe`) contra a §8 do
+> [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md), que é a fonte de
+> verdade delas — **não** o `PLAN-WTE-LAZARUS.md`. Estão na tabela do anexo, no
+> fim do `progresso.md`, não têm fase, e vêm depois de todas as `WTE-TASK`, na
+> ordem numérica delas. As marcadas ❌ não são selecionáveis. Mapeamento completo
+> no [`01-executar.md`](/docs/prompts/01-executar.md).
    Dependência que só fecharia dentro deste mesmo lote **não** conta como
    satisfeita para efeito de seleção paralela; ela força ordem.
 4. Se existir tarefa `🔄 Em andamento`, ela é a primeira do lote.
