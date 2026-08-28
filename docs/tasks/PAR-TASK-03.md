@@ -45,7 +45,7 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Abrir o combo  ← **reprovou, CORR-WTE-123**, **navegar com as setas sem sair do controle**, apertar
+- [ ] Abrir o combo  ← **reprovou, CORR-WTE-125**, **navegar com as setas sem sair do controle**, apertar
       ESC/clicar fora — conferir se grava ou não igual ao original
 - [x] Escolher e sair com Tab; conferir os 6 campos
 - [x] Lembrar da troca do par de cobradores a cada gravação (é esperada)
@@ -79,7 +79,7 @@ duas vezes volta ao início. Não acuse como divergência.
 **Resumo:**
 
 Itens 2 e 3 fechados; o item 1 reprovou e virou
-[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md).
+[CORR-WTE-125](/docs/tasks/CORR-WTE-125.md).
 
 **O que se aprendeu:**
 
@@ -101,6 +101,6 @@ Quem diverge é só o caminho do `Escape`.
 
 - `docs/PARIDADE-FUNCIONAL.md` — os dois itens conferidos, o reprovado, e a
   nota sobre a frase errada da §3.5
-- `docs/tasks/CORR-WTE-123.md` — o achado
+- `docs/tasks/CORR-WTE-125.md` — o achado
 - `docs/tasks/correcoes-progresso.md` — a linha e o checklist
 - `docs/tasks/PAR-TASK-03.md` — este Log

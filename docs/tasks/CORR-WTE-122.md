@@ -1,124 +1,105 @@
 ---
 id: CORR-WTE-122
-title: "Correção: CMD_DEFAULT_NUMBERS grava 37 faixas no port contra 20 no ed.exe"
+title: "Correção: o progresso.md ainda chama o hook do lado do port de GOLDEN_EDIT, nome que o golden_gui.sh não lê"
 type: correção
-category: paridade
+category: processo
 status: pendente
 depends_on: []
 ---
 
-# CORR-WTE-122: `CMD_DEFAULT_NUMBERS` diverge do oráculo
+# CORR-WTE-122: o nome do hook que a PAR-TASK-01 corrigiu num arquivo e deixou no outro
 
 ## Problema identificado
 
-O botão `CMD_DEFAULT_NUMBERS` (`CMD_NUMDEF` no `.rc`, rotulado *"pl. n° = team
-n°"*) grava **mais** no port do que no `ed.exe`, com o mesmo estímulo:
+A prosa que abre a série `PAR-TASK-*` no
+[/docs/tasks/progresso.md](/docs/tasks/progresso.md) (linha 1267) diz que a
+régua desta série é **"`golden_gui` com `GOLDEN_EDIT`"**. O `golden_gui.sh`
+não lê essa variável. Ele lê **`GOLDEN_GUI_EDIT`**; `GOLDEN_EDIT` é o hook do
+`golden_run.sh`, do lado do `ed.exe`.
 
-| lado | faixas contra a imagem original | bytes |
-|---|---:|---:|
-| `Debug/ed.exe` | 20 | 118 |
-| `newWe2002` | **37** | **151** |
-| um contra o outro | **19** | 63 |
+Este é exatamente o erro que a própria [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md)
+identificou e corrigiu — o Log dela registra o achado sob "Problemas
+encontrados" e o texto da task foi ajustado. O commit que fechou a task
+(`b5997b7`) **tocou o `progresso.md`**, mas só a célula de status da linha da
+tabela; a frase errada, duas linhas acima da mesma tabela, ficou.
 
-Medido em 2026-08-28 na `ptbr-remaster.bin`, pela
-[PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) item 3. O `golden_check.sh` em modo
-`gui` reprova com **18 divergências** fora da faixa conhecida:
+Quem executa a PAR-TASK-02 entra pelo `progresso.md`, não pelo Log da 01.
+Exportar `GOLDEN_EDIT` sozinho num modo `gui` não dá erro: o
+`golden_run.sh` aplica o roteiro no oráculo, o `golden_gui.sh` não aplica nada
+no port, e **os dois lados divergem em toda faixa editada** — um falso vermelho
+que parece bug do port.
+
+## Evidência
+
+O que o `progresso.md` afirma:
 
 ```text
-FALHOU: 18 divergencia(s) nao esperada(s):
-  1013316..1013319  4 byte(s)  data  OFS_TEAM_NAME_1+676
-  1882648..1882651  4 byte(s)  data  OFS_TEAM_NAME_2+680
-  1929016..1929016  1 byte(s)  data  OFS_FLAG_SHAPE_COPY_1+12
-  2004888..2004890  3 byte(s)  data  OFS_TEAM_NAME_3+892
-  2005424..2005424  1 byte(s)  data  OFS_FLAG_SHAPE_COPY_2+12
-  2303730..2303730  1 byte(s)  data  OFS_FORMATIONS+30
-  2305109..2305112  4 byte(s)  data  OFS_FORMATIONS_A+125
-  2328072..2328072  1 byte(s)  data  OFS_FLAG_SHAPE_COPY_3+12
-  2329064..2329067  3 byte(s)  data  OFS_KICKER+8
-  2667758..2667761  4 byte(s)  data  OFS_KIT_PREVIEW+502
-  2668258..2668261  4 byte(s)  data  OFS_KIT_PREVIEW+1002
-  2668758..2668759  2 byte(s)  data  OFS_KIT_PREVIEW+1502
-  2669562..2669565  4 byte(s)  data  OFS_KIT_PREVIEW_A+18
-  4599304..4599307  4 byte(s)  data  OFS_TEAM_MIXED_CASE_NAME+708
-  4904676..4904676  1 byte(s)  data  OFS_FLAG_SHAPE_COPY_4+12
-  5711652..5711652  1 byte(s)  data  OFS_FLAG_SHAPE_COPY_5+12
-  12549688..12549691  4 byte(s)  data  OFS_FLAG_COLOURS+170
-  12549934..12549935  2 byte(s)  data  OFS_FLAG_COLOURS+416
+$ sed -n '1267p' docs/tasks/progresso.md
+e a régua (`golden_gui` com `GOLDEN_EDIT`) já está pronta e rodou nas três
 ```
 
-O `region` é o offset conhecido mais próximo, **não** a estrutura: as faixas
-caem em `+676`, `+502`, `+1002`, `+12` de cinco `FLAG_SHAPE_COPY` — o
-espaçamento regular sugere um campo por time, não corrupção de nome ou bandeira.
+O que a ferramenta lê:
 
-## Evidência de que não é artefato do harness
+```text
+$ grep -rn "GOLDEN_GUI_EDIT\|GOLDEN_EDIT" tools/
+tools/golden_gui.sh:112:if [ -n "${GOLDEN_GUI_EDIT:-}" ]; then
+tools/golden_gui.sh:113:    echo "gui: aplicando GOLDEN_GUI_EDIT"
+tools/golden_gui.sh:114:    eval "$GOLDEN_GUI_EDIT"
+tools/golden_run.sh:150:if [ -n "${GOLDEN_EDIT:-}" ]; then
+tools/golden_run.sh:152:    eval "$GOLDEN_EDIT"
+```
 
-Três descartes, todos medidos:
+E o que a própria task já diz, no arquivo vizinho:
 
-1. **Não depende de time selecionado.** O botão é global (percorre os 64 times),
-   e a corrida **sem** nenhuma seleção dá as **mesmas 18 faixas**.
-2. **Não é o modal.** O botão abre `"Operation done!"`, e a caixa é dispensada
-   nos dois lados antes de gravar — com clique, não com `Return` (ver abaixo).
-   Medido: depois da dispensa o modal não está mais em pé em nenhum dos dois.
-3. **Não é clique perdido no lado Qt.** Depois do `Return` que fecha a
-   `QMessageBox`, o port não tem nenhuma janela entre 100–900 × 60–400 px, então
-   o ramo de clique do `dispensa_modal` não dispara ali.
+```text
+$ sed -n '131,133p' docs/tasks/PAR-TASK-01.md
+**O markdown desta task afirmava que o `golden_gui` aceita `GOLDEN_EDIT`.**
+Não aceita: o hook do lado do port chama-se **`GOLDEN_GUI_EDIT`**
+```
 
 ## Causa raiz
 
-**Não diagnosticada.** Os dois laços parecem equivalentes, e é isso que torna o
-achado interessante. O legado (`legacy/mfc/edDlg.cpp`, `OnNumeriDefault`):
-
-```cpp
-for(i=0;i<64;i++) {
-    gioc[462+(i*23)].numero = (int)squad_nazall[i].stc_numeri.order_1+1;
-    ...  // as 23 linhas, order_1 a order_23, escritas uma a uma
-}
-```
-
-O port (`src/app/Commands.cpp`, `OnDefaultNumbers`):
-
-```cpp
-for (int t = 0; t < we2002::TEAMS_NATIONAL_ALLSTAR_SLOTS; ++t)
-    for (int k = 0; k < 23; ++k)
-        db_.players[PLAYERS_NC + (t * 23) + k].number =
-            static_cast<int>(SquadNumberAt(db_.teams[t].squad_numbers, k)) + 1;
-```
-
-`TEAMS_NATIONAL_ALLSTAR_SLOTS` é 64 e `PLAYERS_NC` é 462 — os limites batem. A
-suspeita a investigar primeiro é a **fonte da leitura**: o legado lê
-`squad_nazall[i]` e o port lê `db_.teams[t]`. Se os dois arrays não forem a
-mesma coisa para todo `i` — em particular nos slots de all-star —, os números
-saem de times diferentes, e o `number` do jogador vai parar em registros que o
-original não toca.
-
-Confirmar exige comparar, para o mesmo `i`, o que cada lado lê antes de escrever.
+A correção do nome foi aplicada no arquivo da task, e o `progresso.md` — que
+carrega a mesma frase, escrita no commit anterior (`cac09df`) — não foi
+reconciliado no commit que fechou a task.
 
 ## Correção
 
-1. dumpar `squad_nazall[i]` e `db_.teams[i]` lado a lado para os 64 `i`, e achar
-   onde divergem;
-2. se forem arrays diferentes por construção, alinhar o port com a fonte que o
-   original usa;
-3. se forem iguais, o defeito está em `SquadNumberAt` contra a ordem
-   `order_1..order_23` — e aí é o mapeamento de bitfield, com a armadilha 9 do
-   `01-executar.md` (`DWORD`/ordem de bit) como primeira suspeita.
+### Arquivo: `docs/tasks/progresso.md`
+
+Na frase "A **01 é a primeira** por três razões que convergem", trocar o nome
+do hook e dizer que são **dois**, que é a informação que a série usa:
+
+```markdown
+e a régua (`golden_gui.sh` com `GOLDEN_GUI_EDIT` no lado do port, e
+`golden_run.sh` com `GOLDEN_EDIT` no lado do `ed.exe`) já está pronta e rodou
+nas três imagens.
+```
+
+Os dois recebem `$MAIN` em escopo e definem `dlu_x`/`dlu_y` com a mesma
+conversão, então o **mesmo** trecho de shell serve aos dois — é o que faz a
+série medir os dois lados com o mesmo estímulo, e é o que a frase precisa dizer.
 
 ## Arquivos a criar ou modificar
 
 | Arquivo | Ação |
 |---|---|
-| `src/app/Commands.cpp` | modificar — `OnDefaultNumbers`, depois do diagnóstico |
-| `docs/PARIDADE-FUNCIONAL.md` | modificar — marcar o item 3 da §8.2 quando fechar |
-| `docs/tasks/PAR-TASK-02.md` | modificar — o item 3 e o Log |
+| `docs/tasks/progresso.md` | modificar |
 
 ## Verificação
 
-- [ ] A divergência tem causa nomeada, com o array e o índice onde aparece
-- [ ] `golden_check.sh` em modo `gui` com o roteiro do item 3 sai `OK`
-- [ ] O `number` do jogador acompanha o número de camisa do time, medido no
-      `dump_estado`
-- [ ] `ctest` do `newWe2002` continua verde — `Commands.cpp` é do app, mas o
-      core não pode ter regredido
+- [ ] `grep -n 'GOLDEN_EDIT' docs/tasks/progresso.md` não devolve mais nenhuma
+      linha que atribua `GOLDEN_EDIT` ao `golden_gui`
+- [ ] Os dois nomes aparecem com o script que os lê ao lado
+- [ ] `python3 tools/check_tasks.py` continua `ok`
 - [ ] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
+
+**Executado em:**
+
+**Resumo do que foi feito:**
+
+**Problemas encontrados:**
+
+**Arquivos criados/modificados:**

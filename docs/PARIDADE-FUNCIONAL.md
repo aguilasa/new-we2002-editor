@@ -566,7 +566,7 @@ diferentes na mesma tela do clube de ML.
 
 **Dois de três conferidos em 2026-08-28** pela
 [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
-reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
+reprovou e virou [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
 
 - [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco — **a tela
       mostra 32** e o `dump_estado` dá **31**, porque o campo guarda
@@ -576,7 +576,7 @@ reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
 - [ ] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu —
       **reprovou**: o port grava 37 faixas contra 20 do `ed.exe`, 18
       divergências fora da faixa conhecida.
-      [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md)
+      [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md)
 
 > **O botão abre `"Operation done!"`, e dispensar a caixa faz parte do
 > roteiro.** Sem isso ela fica na frente do `CMB_WRITE`, o clique de gravar não
@@ -592,13 +592,13 @@ reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
 
 **Dois de três conferidos em 2026-08-28** pela
 [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). O primeiro reprovou e virou
-[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md).
+[CORR-WTE-125](/docs/tasks/CORR-WTE-125.md).
 
 - [ ] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
       ESC/clicar fora — conferir se grava ou não igual ao original —
       **reprovou**: três `Down` e `Escape` levam `kick_long_fk` de 3 a **6 no
       `ed.exe`** e o deixam em **3 no port**.
-      [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md)
+      [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)
 - [x] Escolher e sair com Tab; conferir os 6 campos — `kick_long_fk` vai de 3 a
       5 **nos dois**, e os outros cinco ficam intactos
 - [x] Lembrar da troca do par de cobradores a cada gravação (é esperada) —
@@ -606,7 +606,7 @@ reprovou e virou [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
       controle positivo mesmo quando nada de cobrador foi tocado
 
 > **A frase da [§3.5](#35-cobradores-e-capitão) está errada, e a
-> [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) a corrige junto com o código.**
+> [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) a corrige junto com o código.**
 > Ela diz que o original usava `CBN_KILLFOCUS` "justamente para navegar a lista
 > com as setas sem gravar". Os dois gravam em perda de foco, isso está certo —
 > mas o **valor** que chega lá é outro: `Escape` mantém o item navegado no MFC e

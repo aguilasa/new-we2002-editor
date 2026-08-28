@@ -47,7 +47,7 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 - [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
 - [x] Digitar num clube de ML (sem clamp) e conferir
-- [ ] `CMD_DEFAULT_NUMBERS` e conferir  ← **reprovou, CORR-WTE-122** que o `number` do jogador seguiu
+- [ ] `CMD_DEFAULT_NUMBERS` e conferir  ← **reprovou, CORR-WTE-124** que o `number` do jogador seguiu
 
 O clamp existe só na seleção nacional; no clube de ML não há. A assimetria é do
 original e tem de ser reproduzida, não corrigida.
@@ -76,7 +76,7 @@ original e tem de ser reproduzida, não corrigida.
 Itens 1 e 2 fechados, com `golden_check.sh` em modo `gui` saindo
 `OK: identico ao oraculo, exceto o slot 64 conhecido` e controle positivo
 mostrando o estímulo no disco. O item 3 **reprovou** e virou
-[CORR-WTE-122](/docs/tasks/CORR-WTE-122.md).
+[CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
 
 **O que se aprendeu:**
 
@@ -112,6 +112,6 @@ concluída.
 **Arquivos criados/modificados:**
 
 - `docs/PARIDADE-FUNCIONAL.md` — os dois itens conferidos e a nota do modal
-- `docs/tasks/CORR-WTE-122.md` — o achado do item 3
+- `docs/tasks/CORR-WTE-124.md` — o achado do item 3
 - `docs/tasks/correcoes-progresso.md` — a linha e o checklist da CORR
 - `docs/tasks/PAR-TASK-02.md` — este Log
