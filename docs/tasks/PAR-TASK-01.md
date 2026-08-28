@@ -45,13 +45,18 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
+Cada um tem o seu roteiro versionado em `tools/par/`, e é ele o "comando" da
+Definição de pronto:
+
 - [x] Editar os 6 slots de nome de uma seleção; conferir que o `(n)` de cada
-      rótulo bate com o truncamento real
-- [x] Editar kanji e caixa mista
-- [x] Editar as 3 abreviações
+      rótulo bate com o truncamento real — `tools/par/8.1-nomes-6-slots.sh`
+- [x] Editar kanji e caixa mista — `tools/par/8.1-kanji-e-mista.sh`
+- [x] Editar as 3 abreviações — `tools/par/8.1-abreviacoes.sh`
 - [x] `CMD_COPY_TEAM_NAMES` numa seleção e num clube de ML — conferir o quirk do
-      comprimento kanji (§3.3)
-- [x] Repetir num clube de ML, incluindo os dois nomes extras
+      comprimento kanji (§3.3) — `tools/par/8.1-copy-selecao.sh` e
+      `tools/par/8.1-copy-clube-ml.sh`
+- [x] Repetir num clube de ML, incluindo os dois nomes extras —
+      `tools/par/8.1-clube-ml-extras.sh`
 
 ### Por que esta é a primeira
 
@@ -118,6 +123,14 @@ significa "o próximo", que depende do estado inicial; com ele, "o primeiro".
 Medido idêntico nos dois lados: os dois chegam a `Nation 1 - Ireland`, com
 `IRLANDA` nos campos e `(7)` nos rótulos.
 
+**E precisa de um `Return` no fim.** O clique no `CMB_TEAM` abre o popup, e
+`Home`/`End`/`Down`/`Up` só movem o item destacado — a seleção **não é
+confirmada** sem o `Return`. Sem ele o popup fica aberto, o formulário não
+troca de time, e tudo o que vem depois no roteiro digita no time errado (ou em
+time nenhum): é a mesma família do verde-sem-controle-positivo acima, e dá o
+mesmo sintoma. Este terceiro fato faltava no Log original e foi medido de novo
+pela [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md).
+
 **`End` no combo cai em `Master League (default)`**, que é um item especial de
 campos desabilitados e não serve de clube. Um `Up` a partir dele dá o último
 clube real (`Master League 32`), sem depender de contar quantos são.
@@ -148,3 +161,12 @@ vazio e travar até o timeout.
 - `docs/tasks/PAR-TASK-01.md` — este Log, o `status`, e a correção do nome do
   hook
 - `docs/tasks/progresso.md` — a linha da PAR-TASK-01 no anexo
+
+**Adendo da [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md), 2026-08-28.** Os seis
+roteiros desta task foram shell avulso e não ficaram em lugar nenhum, o que
+tornava as seis corridas verdes não repetíveis. Foram **reconstruídos e
+remedidos**, e agora vivem em `tools/par/`, um arquivo por corrida, cada um
+rodando nos dois hooks sem alteração. As faixas do controle positivo de cada um
+estão na §8.1 do inventário. A remedição confirmou os cinco itens e corrigiu
+uma frase: o `span 9 / diff 4` do kanji é do **clube de ML**; na seleção, para
+a mesma fonte de 6 caracteres, o mesmo `copy` dá `span 13 / diff 7`.

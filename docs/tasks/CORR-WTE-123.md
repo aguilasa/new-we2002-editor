@@ -3,7 +3,7 @@ id: CORR-WTE-123
 title: "Correção: os seis roteiros da PAR-TASK-01 não estão em lugar nenhum, e a 'Definição de pronto' promete o comando"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -154,22 +154,86 @@ remedida é evidência; roteiro ausente com faixa antiga é lembrança.
 
 ## Verificação
 
-- [ ] Os seis roteiros existem e cada um roda nos dois hooks sem edição
-- [ ] Cada item da §8.1 nomeia o seu roteiro
-- [ ] Ao menos um item re-rodado do zero pelo arquivo versionado dá o mesmo
+- [x] Os seis roteiros existem e cada um roda nos dois hooks sem edição
+- [x] Cada item da §8.1 nomeia o seu roteiro
+- [x] Ao menos um item re-rodado do zero pelo arquivo versionado dá o mesmo
       veredito: `bash tools/golden_check.sh roms/ptbr-remaster.bin` com
       `WE2002_GOLDEN_MODE=gui` e os dois hooks apontando para o arquivo
-- [ ] O controle positivo de cada roteiro está registrado com as faixas, não só
+- [x] O controle positivo de cada roteiro está registrado com as faixas, não só
       o veredito do golden
-- [ ] `python3 tools/check_tasks.py` continua `ok`
-- [ ] `roms/` intocada — toda corrida sobre cópia
+- [x] `python3 tools/check_tasks.py` continua `ok`
+- [x] `roms/` intocada — toda corrida sobre cópia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-28
 
 **Resumo do que foi feito:**
 
+Os seis roteiros foram **reconstruídos e remedidos** — nenhum dos originais
+existia para recuperar —, e vivem em `tools/par/`, um por corrida, nomeados
+pelo item da §8 que exercitam. Cada arquivo é o trecho de shell que os dois
+hooks recebem sem alteração: preâmbulo com `par_click` (centro de um controle,
+a partir da geometria em DLU do `ed.rc`) e `par_type` (limpa com `End`,
+`shift+Home`, `BackSpace` — `Ctrl+A` não seleciona tudo num `CEdit`), depois a
+seleção do time e o estímulo.
+
+As doze corridas — seis pares golden + controle positivo — saíram na
+`ptbr-remaster.bin`. **Todas as seis deram
+`1 run(s)` em `405724..405739`**, a faixa conhecida, e nada mais. Os controles
+positivos, descontadas as cinco não-idempotências que aparecem em todas
+(`OFS_PLAYER_NAME_7+471`, três de `OFS_PLAYER_ATTR_8`, `OFS_KICKER+384`):
+
+| Roteiro | Regiões | Faixas |
+|---|---|---|
+| `8.1-nomes-6-slots.sh` | 6 | `OFS_TEAM_NAME_1_A+200`, `_2+928`, `_3+992`, `_4+780`, `_5_A+44`, `_6_B+540` — span 7 cada |
+| `8.1-kanji-e-mista.sh` | 2 | `OFS_TEAM_NAME_KANJI_A+53` span 13 / diff 7; `OFS_TEAM_MIXED_CASE_NAME+820` span 7 |
+| `8.1-abreviacoes.sh` | 3 | `OFS_TEAM_ABBREV_1/_2/_3+376` — span 3 cada |
+| `8.1-copy-selecao.sh` | 11 | 6 nomes (7), 3 abreviações (2), mista (7), kanji span 13 / diff 7 |
+| `8.1-copy-clube-ml.sh` | 13 | as 11 acima com offsets `+0` do clube, mais `OFS_ML_TEAM_NAME_7`/`_8` (7); kanji span 9 / diff 4 |
+| `8.1-clube-ml-extras.sh` | 8 | nomes 1–3 span 10, 4–6 span 7, `OFS_ML_TEAM_NAME_7` span 7, `_8` span 10 |
+
+O item 1 foi ainda re-rodado **do zero pelo arquivo versionado**, pelo caminho
+literal da Verificação:
+
+```text
+$ R="$(cat tools/par/8.1-nomes-6-slots.sh)"
+$ WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$R" GOLDEN_GUI_EDIT="$R" \
+    bash tools/golden_check.sh roms/ptbr-remaster.bin
+OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+```
+
 **Problemas encontrados:**
 
+**A §8.1 atribuía o `span 9 / diff 4` do kanji ao `copy` em geral.** A
+remedição mostrou que ele é do **clube de ML**: na seleção, para a mesma fonte
+de 6 caracteres, o mesmo `CMD_COPY_TEAM_NAMES` dá `span 13 / diff 7`. O quirk
+continua sendo que o kanji não acompanha o comprimento dos outros; o que muda é
+que o quanto ele desanda depende do time. Corrigido no inventário.
+
+**O terceiro fato de navegação foi confirmado e registrado.** O clique no
+`CMB_TEAM` abre o popup e as teclas só movem o item destacado — sem `Return` a
+seleção não é confirmada, o formulário não troca de time, e o resto do roteiro
+digita em time nenhum. Está agora no Log da PAR-TASK-01, junto dos dois que já
+estavam.
+
+**A varredura de discrepância puxou dois documentos que a CORR não previa.** O
+`CLAUDE.md` descrevia o modo `gui` sem dizer que os dois lados têm hooks de
+nomes diferentes nem onde ficam os roteiros; e o "Método comum" da série
+`PAR-TASK-*` no `progresso.md` mandava comparar com o `golden_compare.py` sem
+dizer que o estímulo vai versionado. Os dois ganharam o parágrafo, porque a
+próxima PAR-TASK entra por eles.
+
 **Arquivos criados/modificados:**
+
+- `tools/par/8.1-nomes-6-slots.sh`, `8.1-kanji-e-mista.sh`,
+  `8.1-abreviacoes.sh`, `8.1-copy-selecao.sh`, `8.1-copy-clube-ml.sh`,
+  `8.1-clube-ml-extras.sh` — criados
+- `docs/PARIDADE-FUNCIONAL.md` — §8.1: o roteiro de cada item, a nota sobre o
+  controle positivo e as faixas remedidas, e a correção do kanji
+- `docs/tasks/PAR-TASK-01.md` — itens apontando para os roteiros, o `Return` no
+  Log, e o adendo desta correção
+- `docs/tasks/progresso.md` — o "Método comum" da série ganha a convenção de
+  `tools/par/`
+- `CLAUDE.md` — a seção do golden test ganha os dois nomes de hook, o exemplo
+  com o mesmo roteiro nos dois lados, e o `tools/par/`

@@ -514,21 +514,41 @@ Para cada bloco, o critério de aprovação é o mesmo: **fazer a mesma coisa no
 `ptbr-remaster.bin`, com o `golden_check.sh` em modo `gui`. As seis corridas
 saíram `OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`.
 
+**Os seis roteiros estão em `tools/par/`**, um por corrida, e cada item abaixo
+nomeia o seu. Cada arquivo é o trecho de shell que os **dois** hooks recebem
+sem alteração — `GOLDEN_EDIT` no `golden_run.sh` (o `ed.exe`) e
+`GOLDEN_GUI_EDIT` no `golden_gui.sh` (o port) —, porque os dois exportam
+`$MAIN` e definem `dlu_x`/`dlu_y` com a mesma conversão do `ed.rc`. As faixas
+abaixo são as do **controle positivo** (a cópia gravada contra a imagem
+original), remedidas em 2026-08-28 a partir dos arquivos versionados; as cinco
+não-idempotências conhecidas (`OFS_PLAYER_NAME_7+471`, três de
+`OFS_PLAYER_ATTR_8`, `OFS_KICKER+384`) aparecem em todas e não são contadas.
+
 - [x] Editar os 6 slots de nome de uma seleção; conferir que o `(n)` de cada
       rótulo bate com o truncamento real — **6 faixas, 7 bytes cada**, contra o
       `(7)` que os seis rótulos mostram no `Nation 1 - Ireland`
+      (`tools/par/8.1-nomes-6-slots.sh`)
 - [x] Editar kanji e caixa mista — `OFS_TEAM_NAME_KANJI_A` sai com **span 13 /
       diff 7** (a codificação ocupa mais que os caracteres digitados) e
       `OFS_TEAM_MIXED_CASE_NAME` com **7 bytes**
-- [x] Editar as 3 abreviações — **3 bytes cada**, o `setMaxLength(3)` fixo em
-      código, não por tabela
+      (`tools/par/8.1-kanji-e-mista.sh`)
+- [x] Editar as 3 abreviações — **3 bytes cada** em `OFS_TEAM_ABBREV_1/_2/_3`,
+      o `setMaxLength(3)` fixo em código, não por tabela
+      (`tools/par/8.1-abreviacoes.sh`)
 - [x] `CMD_COPY_TEAM_NAMES` numa seleção e num clube de ML — conferir o quirk do
-      comprimento kanji (§3.3). **11 regiões** na seleção, **13** no clube (mais
-      `OFS_ML_TEAM_NAME_7`/`_8`), e o kanji sai com **span 9 / diff 4**, fora do
-      padrão dos outros — que é o quirk preservado
+      comprimento kanji (§3.3). **11 regiões** na seleção
+      (`tools/par/8.1-copy-selecao.sh`) e **13** no clube
+      (`tools/par/8.1-copy-clube-ml.sh`, as duas a mais são
+      `OFS_ML_TEAM_NAME_7`/`_8`). **O kanji não acompanha o comprimento dos
+      outros, e o quanto ele desanda depende do time:** no clube sai com
+      **span 9 / diff 4** enquanto os nomes saem com 7, e na seleção sai com
+      **span 13 / diff 7** para a mesma fonte de 6 caracteres. É o quirk
+      preservado
 - [x] Repetir num clube de ML, incluindo os dois nomes extras — no
       `Master League 32` os limites são `(11)(11)(11)(7)(7)(7)` mais `(8)` e
-      `(11)`, e as faixas gravadas batem com cada um
+      `(11)`, e as faixas gravadas batem com cada um: **10, 10, 10, 7, 7, 7**
+      nos seis nomes, **7** em `OFS_ML_TEAM_NAME_7` e **10** em
+      `OFS_ML_TEAM_NAME_8` (`tools/par/8.1-clube-ml-extras.sh`)
 
 **O truncamento segue o rótulo em todos os limites medidos** — quatro
 diferentes na mesma tela do clube de ML.

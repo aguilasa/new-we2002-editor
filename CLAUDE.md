@@ -289,6 +289,28 @@ outra pelo port, e compara com `tools/golden_compare.py`. Falha se aparecer
 headless, dirige a janela Qt com `tools/golden_gui.sh`. É o teste `golden_gui`
 do ctest, e é o que cobre a camada de widgets da Fase 5.
 
+**Os dois lados aceitam um roteiro de edição, e os nomes das variáveis são
+diferentes:** `GOLDEN_EDIT` no `golden_run.sh` (o `ed.exe`) e
+**`GOLDEN_GUI_EDIT`** no `golden_gui.sh` (o port). Exportar só um deles num
+modo `gui` não dá erro — um lado edita, o outro não, e os dois divergem em toda
+faixa tocada, num falso vermelho que parece bug do port. Como os dois recebem
+`$MAIN` em escopo e definem `dlu_x`/`dlu_y` com a mesma conversão, o **mesmo**
+trecho de shell serve aos dois:
+
+```sh
+R="$(cat tools/par/8.1-nomes-6-slots.sh)"
+WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$R" GOLDEN_GUI_EDIT="$R" \
+  tools/golden_check.sh roms/ptbr-remaster.bin
+```
+
+**`tools/par/`** guarda esses roteiros, um por item do inventário de paridade
+([docs/PARIDADE-FUNCIONAL.md](docs/PARIDADE-FUNCIONAL.md) §8), nomeados pelo
+item. Verde de golden é asserção sobre um estímulo: sem o estímulo versionado a
+corrida não é repetível, e o par verde+faixa vira lembrança. Toda corrida da
+série leva também um **controle positivo** — a cópia gravada comparada contra a
+imagem original —, sem o qual um roteiro que não chegou a editar nada passa
+verde sem medir nada.
+
 Essa faixa é `405724..405739` (`OFS_SQUAD_NUMBERS_NATIONAL+1008`): o slot 64
 de um array de 63, que o original lê e grava por engano a partir da memória
 vizinha (`ml_teams[0]`). O port preserva o que está na imagem em vez de

@@ -1286,3 +1286,12 @@ pedir kanji, a `japanese-shift-jis.bin`.
 
 Divergência fora da faixa conhecida vira **CORR**, com a faixa e o offset
 simbólico — mesma via da CORR-WTE-121.
+
+**O roteiro de cada corrida vai versionado em `tools/par/`**, nomeado pelo item
+da §8 que ele exercita, e o item do inventário nomeia o arquivo. Verde de
+golden é asserção sobre um estímulo: sem o estímulo versionado a corrida não é
+repetível, e o par verde+faixa vira lembrança — foi o que a
+[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) teve de reconstruir depois da 01.
+Cada corrida leva também o **controle positivo** (a cópia gravada contra a
+imagem original), sem o qual um roteiro que não editou nada passa verde sem
+medir nada.
