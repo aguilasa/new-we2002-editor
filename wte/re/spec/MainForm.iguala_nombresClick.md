@@ -93,8 +93,12 @@ mov  [0x00433a14 + ...], 1
 **O lote kanji guarda a largura menos um**, e o campo `+8` recebe `1` em vez do
 `2` dos outros — é o modo do decodificador de texto (`0x00403598` compara com
 `0x82`, o byte-líder Shift-JIS): 1 = dois bytes por caractere, 2 = um byte.
-Como a largura é `TEAM_NAME_KANJI_LEN × 2`, o `div 2` do valor decrementado dá
-`TEAM_NAME_KANJI_LEN − 1`.
+A largura é a que a varredura mede na imagem, e o `div 2` do valor decrementado
+dá o limite do campo. *(Esta linha dizia que a largura é
+`TEAM_NAME_KANJI_LEN × 2` e que o resultado é `TEAM_NAME_KANJI_LEN − 1`. A
+igualdade só vale na japonesa — ver a
+[CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md): a tabela erra em 29 dos 95
+times da `ptbr-remaster` e em 49 dos 95 da European Deluxe.)*
 
 Medido pela [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md) em três times
 de larguras diferentes: `LEN` 6 → 5, 8 → 7, 14 → 13, com oráculo e port
