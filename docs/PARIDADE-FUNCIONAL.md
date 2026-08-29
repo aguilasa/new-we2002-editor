@@ -741,8 +741,12 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 - [ ] **Com rede, se ainda funcionar:** um jogador real, ida e volta
 
 ### 8.7 Táticas
-- [ ] Clampar x em 0/48 e y em 0/112
-- [ ] Trocar papel e conferir a legenda do marcador
+- [x] Clampar x em 0/48 e y em 0/112 — **os dois tetos, medidos no
+      `raw_formation`**: 99 digitado em x grava `0x30` = 48, e 999 em y grava
+      `0x70` = 112. Com 0 e 0, nada é clampado
+- [x] Trocar papel e conferir a legenda do marcador — dois `Down` levam o 1º
+      papel de `0x02` a `0x04` nos dois lados, e a legenda do marcador passa de
+      `CB SX` a **`SW`** também nos dois, conferida em captura
 - [x] **`Escape` depois de navegar um combo de papel** — os dez gravam pelo
       **mesmo** `FocusOut` dos seis de cobrador, então o `Escape` divergia aqui
       exatamente como divergia lá: três `Down` a partir do papel `0x02` davam
@@ -753,9 +757,28 @@ abre o `PlayerSelectDialog` e não roda sozinho.
       slots ficam intactos, e a legenda do marcador mostra `LIB` nos dois —
       conferida em captura. Roteiros `tools/par/8.7-escape-papel.sh` e
       `tools/par/8.7-escape-papel-sem-navegar.sh`
-- [ ] Aplicar os 16 presets num time
-- [ ] Editar e renomear um preset no `DefaultTacticsDialog`
+- [x] Aplicar os 16 presets num time — os dezesseis em sequência e o preset 1
+      isolado dão `raw_formation` diferentes entre si, os dois idênticos ao
+      oráculo
+- [ ] Editar e renomear um preset no `DefaultTacticsDialog` — **bloqueado**,
+      ver a nota abaixo
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
+      — **bloqueado pelo mesmo**: `CMD_IMP` e `CMD_EXP` moram dentro do
+      `DefaultTacticsDialog`
+
+> **O `IDOK` do `DefaultTacticsDialog` não é desenhado — nem no port, nem no
+> `ed.exe`.** O manifesto o põe em dlu `[197,17,50,14]`, dentro da área do
+> diálogo (481×297 px), e a captura da faixa do topo mostra ali apenas
+> `Selection` e `Name`, nos **dois** lados. Como as duas telas concordam, isto é
+> paridade e não defeito do port — mas deixa os dois últimos itens sem caminho
+> de confirmação.
+>
+> Três formas de fechar o diálogo foram medidas e **nenhuma serve**: `Return`
+> não fecha em nenhum dos dois; clicar na posição do `IDOK` também não; e
+> deixá-lo aberto faz a gravação sair `IDENTICAL` à imagem original — ou seja,
+> **sem confirmar, as edições do diálogo não são aplicadas**. Quem retomar
+> precisa de um quarto caminho (o `.rc` do `IDOK`, ou o handler que o
+> `DefaultTacticsDialog` liga ao fechamento), não de repetir estes três.
 
 ### 8.8 Bandeira e uniformes
 - [ ] Cores no teto (65535) e acima
