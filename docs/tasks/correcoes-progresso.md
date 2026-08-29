@@ -147,6 +147,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Os itens 1 e 2 da §8.2 não têm roteiro em `tools/par/` e a "Definição de pronto" marca "cada item com evidência: **o comando**"; a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou um dia antes | Alta | [ ] pendente | — |
 | [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | O conserto do `Escape` da CORR-WTE-125 não alcança os dez combos de papel, que gravam pelo **mesmo** `FocusOut`; medido: três `Down` e `Escape` num combo de papel reprovam o golden em `OFS_FORMATIONS+0` | Alta | [ ] pendente | — |
+| [CORR-WTE-128](/docs/tasks/CORR-WTE-128.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O item 1 da §8.4 (clamp de habilidade) não tem roteiro em `tools/par/`, e a seção afirma "Roteiros em `tools/par/8.4-*.sh`" para os cinco — o quinto arquivo é o prelúdio, que não roda sozinho | Alta | [ ] pendente | — |
+| [CORR-WTE-129](/docs/tasks/CORR-WTE-129.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O Log da PAR-TASK-04 põe o `CMD_SKILLS1` em dlu (392,36) na seção escrita para quem retomar; o `controls.json`, a §8.4 e o `8.4-prelude.sh` dizem (382,32) | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -276,6 +278,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
 - [ ] CORR-WTE-126 — versionar os roteiros dos itens 1 e 2 da §8.2 e amarrar cada item ao seu
 - [ ] CORR-WTE-127 — estender o filtro de `Escape` aos dez combos de papel e dar item à §8.7
+- [ ] CORR-WTE-128 — versionar o roteiro do item 1 da §8.4 e acertar a frase de cobertura
+- [ ] CORR-WTE-129 — corrigir a dlu do `CMD_SKILLS1` no Log da PAR-TASK-04
 
 ## Detalhes por correção
 
@@ -2240,3 +2244,33 @@ dizer "fechada e fora do backlog", não "corrigida".
 - **Fix:** instalar o filtro em `cmb_role_[i]->view()` e estender o laço do
   `Escape` aos dez, versionar `tools/par/8.7-escape-papel.sh` e abrir o item na
   §8.7
+
+### CORR-WTE-128
+
+- **Arquivo com problema:** ausência de `tools/par/8.4-habilidade.sh`; a frase
+  de abertura da §8.4 do `docs/PARIDADE-FUNCIONAL.md`
+- **Sintoma:** dos cinco itens da §8.4, o primeiro — o clamp de habilidade em
+  `12..19`, medido em 2026-08-28, véspera dos outros quatro — não tem roteiro.
+  Os cinco arquivos `8.4-*.sh` parecem cobrir os cinco itens, mas um deles é o
+  `8.4-prelude.sh`, que o próprio cabeçalho diz não rodar sozinho
+- **Como foi detectado:** `head -1 tools/par/8.4-*.sh` nomeia os itens 2, 3, 4 e
+  5 e nenhum o 1. Os outros quatro foram **remedidos** nesta revisão, os quatro
+  com golden `OK` e controle positivo: `height 187→155`/`210`, `age 26→15`/`46`,
+  `number` piso 1 / teto 32, `cost 25→12`, nove combos +1 com o
+  `out_of_position` parado, e `name` com os 10 bytes de `JOGADORxyz`
+- **Fix:** um `8.4-habilidade.sh` com os dois extremos numa corrida (25 em
+  `attack`, 3 em `defence`), o nome dele na §8.4, e a frase de abertura dizendo
+  que o prelúdio não é item
+
+### CORR-WTE-129
+
+- **Arquivo com problema:** `docs/tasks/PAR-TASK-04.md`, na seção "O que se
+  aprendeu, e vale para quem retomar"
+- **Sintoma:** o Log põe o `CMD_SKILLS1` em dlu `(392,36)`; o `controls.json`
+  (gerado do `ed.rc`), a §8.4 e o `tools/par/8.4-prelude.sh` dizem `(382,32)`.
+  São 15 px à direita e 6 abaixo, sobre um botão de 30×14 px — fora dele. Não
+  quebra corrida nenhuma hoje, porque quem clica é o roteiro, que está certo;
+  quebra quem ler o Log para escrever o próximo
+- **Como foi detectado:** `grep -n '392,36\|382,32'` nos três arquivos, contra
+  o `controls.json`: `('CMD_SKILLS1', [382, 32, 20, 9], [573, 52, 30, 14])`
+- **Fix:** trocar o número no Log e dizer de onde ele sai
