@@ -144,7 +144,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-122](/docs/tasks/CORR-WTE-122.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | O `progresso.md` chama a régua desta série de "`golden_gui` com `GOLDEN_EDIT`"; o `golden_gui.sh` lê `GOLDEN_GUI_EDIT`, e a própria PAR-TASK-01 corrigiu esse nome no arquivo dela e deixou no `progresso.md` | Média | [x] concluída | 2026-08-28 |
 | [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Os seis roteiros das seis corridas golden não estão versionados em lugar nenhum, e a "Definição de pronto" marca "cada item com evidência: **o comando**" — as seis corridas verdes não são repetíveis | Alta | [x] concluída | 2026-08-28 |
 | [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | `CMD_DEFAULT_NUMBERS` grava 37 faixas no port contra 20 no `ed.exe`; 18 divergências fora da faixa conhecida, reprodutíveis sem seleção de time | Alta | [x] concluída | 2026-08-29 |
-| [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [ ] pendente | — |
+| [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [x] concluída | 2026-08-29 |
 
 ## Checklist
 
@@ -271,7 +271,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-122 — trocar o nome do hook no `progresso.md` e dizer que são dois, um por lado
 - [x] CORR-WTE-123 — versionar os seis roteiros da §8.1 em `tools/par/` e amarrar cada item ao seu
 - [x] CORR-WTE-124 — diagnosticar a divergência do `CMD_DEFAULT_NUMBERS` contra o `ed.exe`
-- [ ] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
+- [x] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
 
 ## Detalhes por correção
 

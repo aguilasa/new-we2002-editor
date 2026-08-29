@@ -247,8 +247,14 @@ comprimento e a cópia entrega outro. **Reproduzido de propósito.**
 
 A ordem dos seis é load-bearing: é a ordem em que o handler indexa e a ordem dos
 campos em `Team`/`MlTeam`. **Commit em `FocusOut`, não em mudança de seleção** —
-o original usava `CBN_KILLFOCUS` justamente para navegar a lista com as setas sem
-gravar. Ver §8.3 para o teste que fecha isso.
+o original usava `CBN_KILLFOCUS`, e é por isso que navegar a lista com as setas
+não grava **na hora**. Grava depois, quando o foco sai: medido na §8.3, três
+`Down` e um `Escape` levam `kick_long_fk` de 3 a 6 no `ed.exe`. O que o
+`Escape` decide é qual valor chega ao killfocus, e aí os dois frameworks
+divergiam — no MFC as setas movem o `CurSel` do próprio combo e o `Escape` só
+fecha a lista, no Qt elas movem a linha corrente da *view* e o `Escape`
+desfaz. O port intercepta o `Escape` no popup dos seis para manter o item
+navegado ([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)).
 
 Lembrete permanente: `Load` lê os dois primeiros cobradores de ML **trocados** e
 `Save` grava na ordem declarada, então toda gravação troca o par. Bug do
@@ -603,27 +609,34 @@ item reprovou na primeira medição e foi fechado em 2026-08-29 pela
 
 ### 8.3 Cobradores e capitão
 
-**Dois de três conferidos em 2026-08-28** pela
-[PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). O primeiro reprovou e virou
+**Conferido em 2026-08-28** pela
+[PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). O primeiro item reprovou na primeira
+medição e foi fechado em 2026-08-29 pela
 [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md).
 
-- [ ] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
-      ESC/clicar fora — conferir se grava ou não igual ao original —
-      **reprovou**: três `Down` e `Escape` levam `kick_long_fk` de 3 a **6 no
-      `ed.exe`** e o deixam em **3 no port**.
-      [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)
-- [x] Escolher e sair com Tab; conferir os 6 campos — `kick_long_fk` vai de 3 a
-      5 **nos dois**, e os outros cinco ficam intactos
+- [x] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
+      ESC/clicar fora — conferir se grava ou não igual ao original
+      (`tools/par/8.3-escape-cobrador.sh`) — reprovou na primeira medição, com
+      três `Down` e `Escape` levando `kick_long_fk` de 3 a **6 no `ed.exe`** e o
+      deixando em **3 no port**, e foi corrigido pela
+      [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md). Remedido depois do conserto:
+      **6 nos dois**, golden `OK`. E a contraprova
+      (`tools/par/8.3-escape-sem-navegar.sh`): `Escape` **sem** navegar deixa o
+      campo em 3 nos dois e não põe `OFS_KICKER+0` no controle positivo
+- [x] Escolher e sair com Tab; conferir os 6 campos
+      (`tools/par/8.3-escolher-e-tab.sh`) — `kick_long_fk` vai de 3 a 5 **nos
+      dois**, e os outros cinco ficam intactos. Remedido depois do conserto do
+      `Escape`, que não podia quebrá-lo
 - [x] Lembrar da troca do par de cobradores a cada gravação (é esperada) —
       confirmada em toda corrida desta série: `OFS_KICKER+384` aparece no
       controle positivo mesmo quando nada de cobrador foi tocado
 
-> **A frase da [§3.5](#35-cobradores-e-capitão) está errada, e a
-> [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) a corrige junto com o código.**
-> Ela diz que o original usava `CBN_KILLFOCUS` "justamente para navegar a lista
-> com as setas sem gravar". Os dois gravam em perda de foco, isso está certo —
-> mas o **valor** que chega lá é outro: `Escape` mantém o item navegado no MFC e
-> reverte no `QComboBox`.
+> **`Escape` num combo não é "cancelar".** A [§3.5](#35-cobradores-e-capitão)
+> chegou a dizer que o original usava `CBN_KILLFOCUS` "justamente para navegar a
+> lista com as setas sem gravar"; a metade certa é que ele não grava **na hora**.
+> O valor navegado sobrevive ao `Escape` no MFC e era desfeito no `QComboBox`,
+> e é essa diferença que a [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) fechou —
+> no código e na frase da §3.5.
 
 ### 8.4 Atributos do jogador
 

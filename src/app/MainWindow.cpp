@@ -3,11 +3,13 @@
 
 #include "MainWindow.hpp"
 
+#include <QAbstractItemView>
 #include <QComboBox>
 #include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLabel>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -168,6 +170,8 @@ void MainWindow::ConnectSignals() {
         connect(txt_team_name_[i], &QLineEdit::editingFinished, this,
                 [this, i] { OnTeamNameEdited(i); });
         cmb_kicker_[i]->installEventFilter(this);
+        // ...and the popup, for the Escape that MFC and Qt disagree about.
+        cmb_kicker_[i]->view()->installEventFilter(this);
     }
     for (int i = 0; i < 3; ++i) {
         connect(txt_abbrev_[i], &QLineEdit::editingFinished, this,
@@ -215,6 +219,34 @@ void MainWindow::ConnectSignals() {
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
+    // Escape in an open kicker combo keeps whatever the arrows moved to.
+    //
+    // Both editors commit these six on loss of focus -- CBN_KILLFOCUS there,
+    // FocusOut here -- but the value that reaches the commit differs. In MFC,
+    // arrow keys move the combo's own CurSel and Escape only closes the list,
+    // so the navigated item is what gets written. Qt moves the *view's*
+    // current row instead and rolls it back when Escape hides the popup, so
+    // the original value gets written. Measured on Nation 1 - Ireland: three
+    // Down and Escape take kick_long_fk from 3 to 6 in ed.exe and leave it at
+    // 3 here. See CORR-WTE-125.
+    //
+    // Escape without having navigated stays a no-op: showPopup puts the view
+    // on the combo's current row, so the index put back is the one already
+    // there.
+    if (event->type() == QEvent::KeyPress &&
+        static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
+        for (int i = 0; i < 6; ++i) {
+            if (watched != cmb_kicker_[i]->view()) {
+                continue;
+            }
+            const int row = cmb_kicker_[i]->view()->currentIndex().row();
+            cmb_kicker_[i]->hidePopup();
+            if (row >= 0) {
+                cmb_kicker_[i]->setCurrentIndex(row);
+            }
+            return true;
+        }
+    }
     if (event->type() == QEvent::FocusOut) {
         for (int i = 0; i < 10; ++i) {
             if (watched == cmb_role_[i]) {

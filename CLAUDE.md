@@ -585,6 +585,12 @@ Três diferenças de sinal entre Qt e MFC que valem saber antes de mexer:
   `CBN_KILLFOCUS`; um `eventFilter` de `FocusOut` no `MainWindow` reproduz.
   E como `setCurrentIndex` **dispara** `currentIndexChanged` (`SetCurSel` não
   disparava `CBN_SELCHANGE`), as cargas de time usam `QSignalBlocker`.
+- **`Escape` num combo aberto não significa o mesmo nos dois.** No MFC as setas
+  movem o `CurSel` do próprio combo e o `Escape` só fecha a lista, então o
+  killfocus grava o item navegado; no Qt as setas movem a linha corrente da
+  *view* e o `Escape` desfaz. O mesmo `eventFilter` intercepta o `Escape` no
+  popup dos seis combos de cobrador e repõe o índice navegado. Medido: três
+  `Down` e `Escape` levam `kick_long_fk` de 3 a 6 nos dois lados.
 
 Cuidado com `slots`: é macro do Qt. Uma variável local com esse nome não
 compila, com erro que não menciona macro nenhuma.

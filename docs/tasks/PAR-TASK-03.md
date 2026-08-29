@@ -6,7 +6,7 @@ category: ui
 projeto: newWe2002
 depends_on: ["PAR-TASK-01"]
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.3"
-status: pendente
+status: concluído
 ---
 
 # PAR-TASK-03: Cobradores, capitão e o foco de combo
@@ -45,9 +45,13 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Abrir o combo  ← **reprovou, CORR-WTE-125**, **navegar com as setas sem sair do controle**, apertar
-      ESC/clicar fora — conferir se grava ou não igual ao original
-- [x] Escolher e sair com Tab; conferir os 6 campos
+- [x] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
+      ESC/clicar fora — conferir se grava ou não igual ao original — reprovou
+      aqui, e foi fechado pela [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md);
+      roteiros em `tools/par/8.3-escape-cobrador.sh` e
+      `tools/par/8.3-escape-sem-navegar.sh`
+- [x] Escolher e sair com Tab; conferir os 6 campos —
+      `tools/par/8.3-escolher-e-tab.sh`
 - [x] Lembrar da troca do par de cobradores a cada gravação (é esperada)
 
 **É o bloco mais sensível a diferença de framework.** `QComboBox` não tem
@@ -65,16 +69,18 @@ duas vezes volta ao início. Não acuse como divergência.
 
 ## Definição de pronto
 
-- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.3
-- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+- [x] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.3
+- [x] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
       e o veredito
-- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
-      offset simbólico
-- [ ] `roms/` intocada
+- [x] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
+      offset simbólico — foi a [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)
+- [x] `roms/` intocada
 
 ## Log de Execução
 
-**Executado em:** 2026-08-28 — **PARCIAL: 2 de 3 itens.**
+**Executado em:** 2026-08-28 — parcial, 2 de 3 itens. **Fechada em
+2026-08-29**, quando a [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) corrigiu o
+item 1.
 
 **Resumo:**
 
@@ -103,4 +109,12 @@ Quem diverge é só o caminho do `Escape`.
   nota sobre a frase errada da §3.5
 - `docs/tasks/CORR-WTE-125.md` — o achado
 - `docs/tasks/correcoes-progresso.md` — a linha e o checklist
+
+**Adendo da [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md), 2026-08-29.** O item 1
+foi corrigido: o port passa a interceptar o `Escape` no popup dos seis combos de
+cobrador e a manter o índice navegado, em vez de deixar o Qt desfazê-lo. Os três
+roteiros da §8.3 ficaram versionados em `tools/par/`, e os três saem com o
+golden em `OK`: `Escape` depois de três `Down` dá **6 nos dois lados**, `Escape`
+sem navegar deixa **3 nos dois** e não escreve `OFS_KICKER+0`, e o irmão do item
+2 continua em **3 → 5 nos dois**.
 - `docs/tasks/PAR-TASK-03.md` — este Log

@@ -922,10 +922,14 @@ Três diferenças de sinal precisaram de decisão explícita:
   trocar de time, então esses ficaram em `textChanged` (e não em `textEdited`),
   de propósito.
 - **`QComboBox` não tem `killFocus`.** Os combos de papel e de cobrador
-  gravavam em `CBN_KILLFOCUS` justamente para navegar a lista sem escrever no
-  banco; um `eventFilter` de `FocusOut` no `MainWindow` reproduz o momento.
+  gravavam em `CBN_KILLFOCUS`, então navegar a lista não escreve no banco **na
+  hora**; um `eventFilter` de `FocusOut` no `MainWindow` reproduz o momento.
   `SetCurSel` não dispara `CBN_SELCHANGE`, mas `setCurrentIndex` dispara
   `currentIndexChanged` — por isso as cargas de time usam `QSignalBlocker`.
+  **Reproduzir o momento não bastou:** `Escape` mantém o item navegado no MFC e
+  o desfazia no `QComboBox`, então o killfocus recebia valores diferentes nos
+  dois lados. O port intercepta o `Escape` no popup dos seis combos de cobrador
+  (CORR-WTE-125).
 
 #### Verificação
 
