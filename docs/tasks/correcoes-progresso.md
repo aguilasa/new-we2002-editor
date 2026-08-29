@@ -145,6 +145,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Os seis roteiros das seis corridas golden não estão versionados em lugar nenhum, e a "Definição de pronto" marca "cada item com evidência: **o comando**" — as seis corridas verdes não são repetíveis | Alta | [x] concluída | 2026-08-28 |
 | [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | `CMD_DEFAULT_NUMBERS` grava 37 faixas no port contra 20 no `ed.exe`; 18 divergências fora da faixa conhecida, reprodutíveis sem seleção de time | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [x] concluída | 2026-08-29 |
+| [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Os itens 1 e 2 da §8.2 não têm roteiro em `tools/par/` e a "Definição de pronto" marca "cada item com evidência: **o comando**"; a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou um dia antes | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -272,6 +273,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-123 — versionar os seis roteiros da §8.1 em `tools/par/` e amarrar cada item ao seu
 - [x] CORR-WTE-124 — diagnosticar a divergência do `CMD_DEFAULT_NUMBERS` contra o `ed.exe`
 - [x] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
+- [ ] CORR-WTE-126 — versionar os roteiros dos itens 1 e 2 da §8.2 e amarrar cada item ao seu
 
 ## Detalhes por correção
 
@@ -2196,3 +2198,23 @@ dizer "fechada e fora do backlog", não "corrigida".
   o controle positivo mostrou as seis faixas de `span` 7
 - **Fix:** um roteiro por item em `tools/par/`, citado na §8.1 ao lado da faixa;
   roteiro que não puder ser recuperado é reconstruído **e o item remedido**
+
+### CORR-WTE-126
+
+- **Arquivo com problema:** ausência de `tools/par/8.2-clamp-selecao.sh` e
+  `tools/par/8.2-clamp-clube-ml.sh`; `docs/PARIDADE-FUNCIONAL.md` §8.2 e
+  `docs/tasks/PAR-TASK-02.md`
+- **Sintoma:** dos três itens da §8.2, só o terceiro nomeia roteiro — o que a
+  CORR-WTE-124 criou. Os itens 1 e 2, que são justamente os que medem o clamp e
+  a assimetria seleção × clube de ML, afirmam números de disco (`31` e `32`)
+  sem comando que os re-derive, e a medição deles passa por `dump_estado`, cuja
+  invocação também não ficou registrada
+- **Como foi detectado:** `ls tools/par/8.2-*` devolve um arquivo para três
+  itens, contra 6/5 na §8.1, 3/3 na §8.3 e 5/5 na §8.4; e
+  `sed -n '/^### 8.2/,/^### 8.3/p' docs/PARIDADE-FUNCIONAL.md | grep '^- \[x\]'`
+  mostra o parêntese com o arquivo só no terceiro item. O comportamento
+  afirmado **está correto** — conferido nesta revisão em
+  `legacy/mfc/edDlg.cpp:6644-6653` contra `src/app/TeamView.cpp:464-473`, que
+  são linha a linha o mesmo clamp e a mesma ausência dele no ramo de ML
+- **Fix:** um roteiro por item, no molde dos existentes, com a invocação do
+  `dump_estado` na §8.2 ao lado da faixa — e **remedir** ao versionar
