@@ -6,7 +6,7 @@ category: core
 projeto: newWe2002
 depends_on: ["PAR-TASK-01"]
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.2"
-status: pendente
+status: concluído
 ---
 
 # PAR-TASK-02: Números de camisa e o clamp em 32
@@ -47,7 +47,10 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 - [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
 - [x] Digitar num clube de ML (sem clamp) e conferir
-- [ ] `CMD_DEFAULT_NUMBERS` e conferir  ← **reprovou, CORR-WTE-124** que o `number` do jogador seguiu
+- [x] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu —
+      reprovou aqui, e foi fechado pela
+      [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md);
+      roteiro em `tools/par/8.2-numeros-default.sh`
 
 O clamp existe só na seleção nacional; no clube de ML não há. A assimetria é do
 original e tem de ser reproduzida, não corrigida.
@@ -60,16 +63,18 @@ original e tem de ser reproduzida, não corrigida.
 
 ## Definição de pronto
 
-- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.2
-- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+- [x] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.2
+- [x] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
       e o veredito
-- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
-      offset simbólico
-- [ ] `roms/` intocada
+- [x] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
+      offset simbólico — foi a [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md)
+- [x] `roms/` intocada
 
 ## Log de Execução
 
-**Executado em:** 2026-08-28 — **PARCIAL: 2 de 3 itens.**
+**Executado em:** 2026-08-28 — parcial, 2 de 3 itens. **Fechada em
+2026-08-29**, quando a [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md) corrigiu o
+terceiro.
 
 **Resumo:**
 
@@ -101,6 +106,12 @@ O que funciona nos dois é clicar no botão; a caixa do oráculo mede 148×82 e 
 `OK` fica no centro horizontal a **~40% da altura**, não junto à base — a
 primeira tentativa mirou a base e errou o alvo.
 
+> **Isto vale só para o oráculo.** A `QMessageBox` do port mede **188×100** e
+> tem o `OK` a ~77% da largura e ~75% da altura — medido na
+> [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md). Um roteiro que use só o ponto
+> acima clica no texto do port, a caixa fica em pé e engole o clique de gravar.
+> O `tools/par/8.2-numeros-default.sh` tenta os dois pontos em ordem.
+
 **Problemas encontrados:**
 
 O item 3 reprovou de verdade: 18 divergências, reprodutíveis **sem** seleção de
@@ -115,3 +126,13 @@ concluída.
 - `docs/tasks/CORR-WTE-124.md` — o achado do item 3
 - `docs/tasks/correcoes-progresso.md` — a linha e o checklist da CORR
 - `docs/tasks/PAR-TASK-02.md` — este Log
+
+**Adendo da [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md), 2026-08-29.** O item 3
+foi diagnosticado e corrigido: o `OnDefaultNumbers` do port ia aos 64 slots do
+array de times em vez dos 63 times reais, e a 64ª volta escrevia
+`players[1911..1933]` — fora de `players[]`, em cima de `teams[]`, que **é**
+gravado na imagem. O original faz o mesmo estouro, mas ali o vizinho é
+`gioc_fifa[]`, que não vai para o disco: a 64ª volta não tem efeito observável.
+Com o laço em 63 o golden sai `OK`. O roteiro do item ficou versionado em
+`tools/par/8.2-numeros-default.sh`, com a dispensa da caixa que funciona nos
+dois lados — o `OK` fica em lugar diferente em cada um.

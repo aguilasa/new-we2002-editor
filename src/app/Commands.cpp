@@ -82,7 +82,20 @@ void MainWindow::OnFlagKitPreview() {
 void MainWindow::OnDefaultNumbers() {
     // Push each national squad's number list down onto the player records, so
     // that a player's own shirt number matches the slot they occupy.
-    for (int t = 0; t < we2002::TEAMS_NATIONAL_ALLSTAR_SLOTS; ++t) {
+    //
+    // 63 teams, not the 64 slots the array has. The original loops to 64
+    // (edDlg.cpp:7667) and writes gioc[462 + 63*23 + k] = gioc[1911..1933],
+    // one past the end of gioc[GIOCATORI_TOT] with GIOCATORI_TOT == 1911. On
+    // Windows that lands in gioc_fifa[], which is never written to the image,
+    // so the 64th iteration has no observable effect there.
+    //
+    // Here players[] has the same 1911 entries but is followed by teams[64],
+    // which IS written to the image -- so looping to 64 clobbered team names,
+    // kit and flag data and the kicker table, 18 ranges the oracle does not
+    // touch. Stopping at 63 reproduces what the original actually does to the
+    // disc, and drops the undefined behaviour instead of imitating it, the
+    // same call the 64th squad-number slot already got. See CORR-WTE-124.
+    for (int t = 0; t < we2002::TEAMS_NATIONAL_ALLSTAR; ++t) {
         for (int k = 0; k < 23; ++k) {
             db_.players[PLAYERS_NC + (t * 23) + k].number =
                 static_cast<int>(

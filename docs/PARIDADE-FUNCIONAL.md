@@ -564,19 +564,28 @@ diferentes na mesma tela do clube de ML.
 
 ### 8.2 Números de camisa
 
-**Dois de três conferidos em 2026-08-28** pela
+**Conferido em 2026-08-28** pela
 [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
-reprovou e virou [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
+item reprovou na primeira medição e foi fechado em 2026-08-29 pela
+[CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
 
 - [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco — **a tela
       mostra 32** e o `dump_estado` dá **31**, porque o campo guarda
       `número − 1`; 31 é o teto, então o clamp aconteceu nos dois
 - [x] Digitar num clube de ML (sem clamp) e conferir — o mesmo 33 grava **32**
       lá, contra 31 na seleção. A assimetria é do original e está reproduzida
-- [ ] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu —
-      **reprovou**: o port grava 37 faixas contra 20 do `ed.exe`, 18
-      divergências fora da faixa conhecida.
-      [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md)
+- [x] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu
+      (`tools/par/8.2-numeros-default.sh`) — reprovou na primeira medição, com
+      **37 faixas no port contra 20 do `ed.exe`**, e foi corrigido pela
+      [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md): o laço ia aos **64 slots** do
+      array em vez dos **63 times**, e a 64ª volta escrevia fora de
+      `players[1911]`, em cima de `teams[]`. Remedido depois do conserto: o
+      controle do oráculo dá **20 faixas / 118 bytes**, o do port **19 / 103** —
+      a diferença é exatamente a faixa conhecida do slot 64 —, e o golden sai
+      `OK`. Pelo `dump_estado`, o `number` que **não** batia com o número de
+      camisa do time cai de **62 slots na imagem original para 3**, os mesmos 3
+      nos dois lados (time 55, slots 7/14/21 — all-star, que o `Save` refaz a
+      partir dos links)
 
 > **O botão abre `"Operation done!"`, e dispensar a caixa faz parte do
 > roteiro.** Sem isso ela fica na frente do `CMB_WRITE`, o clique de gravar não
@@ -585,8 +594,12 @@ reprovou e virou [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
 > dois lados se comportam assim, o golden fica **verde sem ter medido nada**.
 >
 > E `Return` não serve para dispensá-la: fecha a `QMessageBox` do port e **não**
-> fecha a do MFC sob Wine. O que funciona nos dois é clicar no botão — a caixa
-> do oráculo mede 148×82 e o `OK` fica no centro horizontal a ~40% da altura.
+> fecha a do MFC sob Wine. O que funciona nos dois é clicar no botão, e ele fica
+> em lugar **diferente** em cada um: a caixa do oráculo mede 148×82 com o `OK`
+> no centro horizontal a ~40% da altura, e a do port mede 188×100 com o `OK` a
+> ~77% da largura e ~75% da altura. Como o roteiro é o mesmo nos dois lados, o
+> `8.2-numeros-default.sh` tenta os pontos em ordem e reconfere a caixa entre
+> eles — o clique que erra o botão não faz nada.
 
 ### 8.3 Cobradores e capitão
 
