@@ -45,11 +45,17 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [x] Clampar habilidade abaixo de 12 e acima de 19
-- [x] Altura 100 e 999; idade 1 e 99; número 0 e 99
-- [x] Custo com mais de 2 dígitos — conferir que o original também trunca
-- [x] Trocar os 10 combos com mouse **e** com teclado
-- [x] Editar nome de jogador (é aqui que se edita, não no diálogo principal)
+Cada um sobre o `tools/par/8.4-prelude.sh`, que abre o `PlayerSkillsDialog` e
+não roda sozinho:
+
+- [x] Clampar habilidade abaixo de 12 e acima de 19 — `tools/par/8.4-habilidade.sh`
+- [x] Altura 100 e 999; idade 1 e 99; número 0 e 99 —
+      `tools/par/8.4-limites-fisicos.sh`
+- [x] Custo com mais de 2 dígitos — conferir que o original também trunca —
+      `tools/par/8.4-custo.sh`
+- [x] Trocar os 10 combos com mouse **e** com teclado — `tools/par/8.4-combos.sh`
+- [x] Editar nome de jogador (é aqui que se edita, não no diálogo principal) —
+      `tools/par/8.4-nome-jogador.sh`
 
 O terceiro item é o que mais engana: a suspeita natural é que o truncamento seja
 defeito do port. **Meça o original antes de mexer** — os 198 `strcpy` em buffer
@@ -114,3 +120,12 @@ cópias a partir de `"100 1 0 baixo"` produziu um único arquivo `p-.bin`, com
 - `tools/par/8.4-prelude.sh` — o prelúdio comum (abre o `PlayerSkillsDialog`)
 - `tools/par/8.4-limites-fisicos.sh`, `8.4-custo.sh`, `8.4-combos.sh`,
   `8.4-nome-jogador.sh` — um roteiro por item
+
+**Adendo da [CORR-WTE-128](/docs/tasks/CORR-WTE-128.md), 2026-08-29.** O item 1
+tinha sido medido em 2026-08-28, no dia em que a
+[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) criou o `tools/par/`, e ficou sem
+roteiro — os outros quatro, do dia seguinte, já nasceram com o seu. A frase
+"Roteiros em `tools/par/8.4-*.sh`" fazia a conta parecer fechada porque o
+`8.4-prelude.sh` entrava no `ls`, e ele não é roteiro de item. O
+`tools/par/8.4-habilidade.sh` foi escrito e o item **remedido**: `players[462]`
+sai de `attack 13 / defence 17` para `19 / 12` nos dois lados, golden `OK`.

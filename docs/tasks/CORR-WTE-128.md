@@ -3,7 +3,7 @@ id: CORR-WTE-128
 title: "Correção: o item 1 da §8.4 não tem roteiro, e a seção afirma que os cinco têm"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -123,22 +123,62 @@ a contagem de arquivos continua parecendo cobrir a seção.
 
 ## Verificação
 
-- [ ] `ls tools/par/8.4-*` devolve seis arquivos: o prelúdio e um por item
-- [ ] O golden com o roteiro novo sai `OK`:
+- [x] `ls tools/par/8.4-*` devolve seis arquivos: o prelúdio e um por item
+- [x] O golden com o roteiro novo sai `OK`:
       `WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$(cat prelude; cat roteiro)"
       GOLDEN_GUI_EDIT="$GOLDEN_EDIT" bash tools/golden_check.sh
       roms/ptbr-remaster.bin`
-- [ ] O controle positivo mostra `players[462].attack = 19` e
+- [x] O controle positivo mostra `players[462].attack = 19` e
       `players[462].defence = 12` — **remedido**, não copiado do Log
-- [ ] A §8.4 nomeia roteiro nos cinco itens
-- [ ] `roms/` intocada
+- [x] A §8.4 nomeia roteiro nos cinco itens
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-29
 
 **Resumo do que foi feito:**
 
+O `tools/par/8.4-habilidade.sh` foi escrito no molde dos outros quatro — os dois
+extremos numa corrida só, `25` no `TXT_ATTACK` (175,13,21,13) e `3` no
+`TXT_DEFENCE` (175,29,21,13), sobre o prelúdio — e o item **remedido**:
+
+```text
+ptbr-remaster.bin  players[462].attack = 13   players[462].defence = 17
+oracle.bin         players[462].attack = 19   players[462].defence = 12
+port.bin           players[462].attack = 19   players[462].defence = 12
+```
+
+Teto e piso, os dois nos dois lados. O controle positivo traz
+`OFS_PLAYER_ATTR+7`, 2 bytes — os dois campos são vizinhos no registro. E o
+caminho literal da Verificação:
+
+```text
+$ R="$(cat tools/par/8.4-prelude.sh tools/par/8.4-habilidade.sh)"
+$ WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$R" GOLDEN_GUI_EDIT="$R" \
+    bash tools/golden_check.sh roms/ptbr-remaster.bin
+OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+```
+
+`ls tools/par/8.4-*` devolve agora **seis** arquivos: o prelúdio e um por item.
+
 **Problemas encontrados:**
 
+**A frase de abertura da §8.4 escondia a falta.** "Roteiros em
+`tools/par/8.4-*.sh`" logo abaixo de "Os cinco conferidos" fazia o `ls` parecer
+fechar a conta, porque o `8.4-prelude.sh` entra na contagem e não é roteiro de
+item. A frase passou a dizer **um roteiro por item**, e que o prelúdio é o
+sexto arquivo e não roda sozinho — que é o que impede a próxima leitura de
+confiar no `ls`.
+
+**Os itens da PAR-TASK-04 não nomeavam roteiro nenhum**, nem os quatro que já
+tinham. Estava só na lista de arquivos do Log, onde não ajuda quem lê o item.
+Os cinco passaram a nomear o seu, como a PAR-TASK-01 e a 02 já fazem.
+
 **Arquivos criados/modificados:**
+
+- `tools/par/8.4-habilidade.sh` — criado
+- `docs/PARIDADE-FUNCIONAL.md` — §8.4: o roteiro e a faixa remedida no item 1,
+  e a frase de abertura dizendo que o prelúdio não é item
+- `docs/tasks/PAR-TASK-04.md` — os cinco itens apontando para o seu roteiro e o
+  adendo no Log

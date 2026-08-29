@@ -669,18 +669,22 @@ medição e foi fechado em 2026-08-29 pela
 ### 8.4 Atributos do jogador
 
 **Os cinco conferidos** pela [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) — o
-primeiro em 2026-08-28, os outros quatro em 2026-08-29. Roteiros em
-`tools/par/8.4-*.sh`, todos sobre o `8.4-prelude.sh`, que abre o
-`PlayerSkillsDialog`.
+primeiro em 2026-08-28, os outros quatro em 2026-08-29. **Um roteiro por item**
+em `tools/par/8.4-*.sh`, todos concatenados **depois** do `8.4-prelude.sh`, que
+abre o `PlayerSkillsDialog` e não roda sozinho — são seis arquivos para cinco
+itens, e o prelúdio é o sexto.
 
 > **Este bloco edita numa janela própria.** O `PlayerSkillsDialog` mede 493×323
 > px, e as coordenadas dos seus 21 campos no `controls.json` são relativas **a
 > ele**, não ao `MainDialog` — daí o `sk_click` do prelúdio, que usa
 > `--window "$SKILLS"`. `CMD_SKILLS1` fica em dlu (382,32) e `Escape` fecha.
 
-- [x] Clampar habilidade abaixo de 12 e acima de 19 — **os dois extremos**: 25
-      digitado em `attack` grava **19**, 3 digitado em `defence` grava **12**,
-      idêntico ao oráculo
+- [x] Clampar habilidade abaixo de 12 e acima de 19
+      (`tools/par/8.4-habilidade.sh`) — **os dois extremos**: 25 digitado em
+      `attack` grava **19**, 3 digitado em `defence` grava **12**, idêntico ao
+      oráculo. Remedido em 2026-08-29 a partir do arquivo versionado:
+      `players[462]` sai de `attack 13 / defence 17` para `19 / 12` nos dois
+      lados, e o controle positivo traz `OFS_PLAYER_ATTR+7`, 2 bytes
 - [x] Altura 100 e 999; idade 1 e 99; número 0 e 99 — **os seis extremos, com
       clamp em todos**: altura `155..210`, idade `15..46`, número com teto 32
       (o mesmo da §8.2) e piso 1
