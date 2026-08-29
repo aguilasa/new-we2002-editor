@@ -928,8 +928,9 @@ Três diferenças de sinal precisaram de decisão explícita:
   `currentIndexChanged` — por isso as cargas de time usam `QSignalBlocker`.
   **Reproduzir o momento não bastou:** `Escape` mantém o item navegado no MFC e
   o desfazia no `QComboBox`, então o killfocus recebia valores diferentes nos
-  dois lados. O port intercepta o `Escape` no popup dos seis combos de cobrador
-  (CORR-WTE-125).
+  dois lados. O port intercepta o `Escape` no popup dos **dezesseis** combos que
+  gravam assim — os seis de cobrador (CORR-WTE-125) e os dez de papel
+  (CORR-WTE-127), que usam o mesmo `FocusOut`.
 
 #### Verificação
 

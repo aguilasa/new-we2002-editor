@@ -149,6 +149,8 @@ void MainWindow::ConnectSignals() {
         connect(cmb_role_[i], &QComboBox::currentIndexChanged, this,
                 [this, i] { OnRoleShown(i); });
         cmb_role_[i]->installEventFilter(this);
+        // ...and the popup, for the same Escape the kicker combos need.
+        cmb_role_[i]->view()->installEventFilter(this);
 
         // EN_CHANGE: must fire on programmatic setText too, because that is
         // how the pitch redraws when a team is loaded.
@@ -219,30 +221,45 @@ void MainWindow::ConnectSignals() {
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
-    // Escape in an open kicker combo keeps whatever the arrows moved to.
+    // Escape in an open combo keeps whatever the arrows moved to.
     //
-    // Both editors commit these six on loss of focus -- CBN_KILLFOCUS there,
-    // FocusOut here -- but the value that reaches the commit differs. In MFC,
-    // arrow keys move the combo's own CurSel and Escape only closes the list,
-    // so the navigated item is what gets written. Qt moves the *view's*
-    // current row instead and rolls it back when Escape hides the popup, so
-    // the original value gets written. Measured on Nation 1 - Ireland: three
-    // Down and Escape take kick_long_fk from 3 to 6 in ed.exe and leave it at
-    // 3 here. See CORR-WTE-125.
+    // All sixteen of these -- the ten tactical roles and the six kickers --
+    // commit on loss of focus: CBN_KILLFOCUS there, FocusOut here. (The roles'
+    // currentIndexChanged only repaints the pitch marker's caption; it writes
+    // nothing, exactly as CBN_SELCHANGE did not.) But the value that reaches
+    // the commit differs. In MFC, arrow keys move the combo's own CurSel and
+    // Escape only closes the list, so the navigated item is what gets written.
+    // Qt moves the *view's* current row instead and rolls it back when Escape
+    // hides the popup, so the original value gets written.
+    //
+    // Measured on Nation 1 - Ireland, three Down then Escape: kick_long_fk
+    // goes 3 -> 6 in ed.exe and stayed at 3 here (CORR-WTE-125), and
+    // raw_formation[0] goes 0x02 -> 0x05 there and stayed 0x02 here
+    // (CORR-WTE-127). Same defect, two families of combo.
     //
     // Escape without having navigated stays a no-op: showPopup puts the view
     // on the combo's current row, so the index put back is the one already
-    // there.
+    // there. Putting it back does fire currentIndexChanged, which repaints the
+    // role caption -- wanted, because CBN_SELCHANGE had already repainted it
+    // during the navigation in the original.
     if (event->type() == QEvent::KeyPress &&
         static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
-        for (int i = 0; i < 6; ++i) {
-            if (watched != cmb_kicker_[i]->view()) {
-                continue;
+        QComboBox* combo = nullptr;
+        for (int i = 0; i < 10 && combo == nullptr; ++i) {
+            if (watched == cmb_role_[i]->view()) {
+                combo = cmb_role_[i];
             }
-            const int row = cmb_kicker_[i]->view()->currentIndex().row();
-            cmb_kicker_[i]->hidePopup();
+        }
+        for (int i = 0; i < 6 && combo == nullptr; ++i) {
+            if (watched == cmb_kicker_[i]->view()) {
+                combo = cmb_kicker_[i];
+            }
+        }
+        if (combo != nullptr) {
+            const int row = combo->view()->currentIndex().row();
+            combo->hidePopup();
             if (row >= 0) {
-                cmb_kicker_[i]->setCurrentIndex(row);
+                combo->setCurrentIndex(row);
             }
             return true;
         }

@@ -47,6 +47,15 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 - [ ] Clampar x em 0/48 e y em 0/112
 - [ ] Trocar papel e conferir a legenda do marcador
+- [x] `Escape` depois de navegar um combo de papel — **já fechado** pela
+      [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md), fora desta task, porque a
+      divergência apareceu na revisão da
+      [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md): os dez combos de papel gravam
+      pelo mesmo `FocusOut` dos seis de cobrador, e o `Escape` divergia igual.
+      Roteiros `tools/par/8.7-escape-papel.sh` e
+      `tools/par/8.7-escape-papel-sem-navegar.sh`; medição na §8.7 do
+      inventário. **Não precisa ser refeito aqui** — mas se o item 2 acima
+      mexer no `OnRoleShown` ou no `eventFilter`, re-rode os dois roteiros
 - [ ] Aplicar os 16 presets num time
 - [ ] Editar e renomear um preset no `DefaultTacticsDialog`
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original

@@ -253,8 +253,10 @@ não grava **na hora**. Grava depois, quando o foco sai: medido na §8.3, três
 `Escape` decide é qual valor chega ao killfocus, e aí os dois frameworks
 divergiam — no MFC as setas movem o `CurSel` do próprio combo e o `Escape` só
 fecha a lista, no Qt elas movem a linha corrente da *view* e o `Escape`
-desfaz. O port intercepta o `Escape` no popup dos seis para manter o item
-navegado ([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)).
+desfaz. O port intercepta o `Escape` no popup para manter o item navegado
+([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)) — nos **dezesseis** combos que
+gravam assim, porque os dez de papel da §3.7 usam o mesmo `FocusOut`
+([CORR-WTE-127](/docs/tasks/CORR-WTE-127.md)).
 
 Lembrete permanente: `Load` lê os dois primeiros cobradores de ML **trocados** e
 `Save` grava na ordem declarada, então toda gravação troca o par. Bug do
@@ -285,6 +287,7 @@ Dez slots (o 1 é o goleiro e não tem posição editável — daí a numeraçã
 |---|---|---|---|---|
 | `CMB_SLOT_ROLE2..11` | selchange | repinta a legenda do botão no campinho | `OnRoleShown(slot)` | D |
 | `CMB_SLOT_ROLE2..11` | killfocus | grava `raw_formation[0..9]` (papel + 2) | `OnRoleCommitted(slot)` | D |
+| `CMB_SLOT_ROLE2..11` | `Escape` no popup | mantém o item navegado, para o killfocus gravá-lo | `eventFilter` na `view()` | D |
 | `TXT_SLOT_X2..11` | change | move o marcador no campinho | `OnSlotMoved(slot)` | D |
 | `TXT_SLOT_X2..11` | killfocus | clampa 0..48 e grava `raw_formation[10..19]` | `OnSlotXCommitted(slot)` | D |
 | `TXT_SLOT_Y2..11` | change | move o marcador | `OnSlotMoved(slot)` | D |
@@ -657,6 +660,11 @@ medição e foi fechado em 2026-08-29 pela
 > O valor navegado sobrevive ao `Escape` no MFC e era desfeito no `QComboBox`,
 > e é essa diferença que a [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) fechou —
 > no código e na frase da §3.5.
+>
+> **A emenda vale para os dezesseis combos que gravam em perda de foco**, não
+> só para estes seis: os dez de papel usam o mesmo `FocusOut`, e divergiam do
+> mesmo jeito. A [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) estendeu o filtro
+> e pôs o item na §8.7.
 
 ### 8.4 Atributos do jogador
 
@@ -701,6 +709,16 @@ primeiro em 2026-08-28, os outros quatro em 2026-08-29. Roteiros em
 ### 8.7 Táticas
 - [ ] Clampar x em 0/48 e y em 0/112
 - [ ] Trocar papel e conferir a legenda do marcador
+- [x] **`Escape` depois de navegar um combo de papel** — os dez gravam pelo
+      **mesmo** `FocusOut` dos seis de cobrador, então o `Escape` divergia aqui
+      exatamente como divergia lá: três `Down` a partir do papel `0x02` davam
+      `0x05` no `ed.exe` e deixavam `0x02` no port, reprovando o golden em
+      `OFS_FORMATIONS+0`. Fechado pela
+      [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md), que estendeu o filtro aos
+      dezesseis: agora `raw_formation[0]` vai a `0x05` nos dois, os outros nove
+      slots ficam intactos, e a legenda do marcador mostra `LIB` nos dois —
+      conferida em captura. Roteiros `tools/par/8.7-escape-papel.sh` e
+      `tools/par/8.7-escape-papel-sem-navegar.sh`
 - [ ] Aplicar os 16 presets num time
 - [ ] Editar e renomear um preset no `DefaultTacticsDialog`
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original

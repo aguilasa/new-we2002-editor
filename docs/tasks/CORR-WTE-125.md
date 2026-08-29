@@ -147,6 +147,15 @@ não os dez de papel tático (`cmb_role_`): estes gravam por
 `currentIndexChanged`, não pelo mesmo caminho, e a §8.7 é quem os mede. Alargar
 sem medida seria trocar uma divergência conhecida por uma não medida.
 
+> **Este parágrafo estava errado, e a
+> [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) o corrigiu no dia seguinte.** Os
+> dez combos de papel gravam pelo **mesmo** `FocusOut`, no mesmo
+> `eventFilter`; o `currentIndexChanged` deles só repinta a legenda do
+> marcador e não toca em dado nenhum. E a §8.7 não media este caminho — o
+> único item dela sobre papel era "trocar papel e conferir a legenda". Medido:
+> três `Down` e `Escape` num `CMB_SLOT_ROLE2` reprovavam o golden em
+> `OFS_FORMATIONS+0`. O filtro foi estendido aos dezesseis.
+
 **Arquivos criados/modificados:**
 
 - `src/app/MainWindow.cpp` — o `eventFilter` do popup e o `installEventFilter`

@@ -3,7 +3,7 @@ id: CORR-WTE-127
 title: "Correção: o Escape da CORR-WTE-125 continua divergindo nos dez combos de papel, e a razão dada para excluí-los não bate com o código"
 type: correção
 category: ui
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -133,24 +133,82 @@ O item novo, para quem executar a §8.7 encontrá-lo.
 
 ## Verificação
 
-- [ ] O golden com o roteiro do papel sai `OK`, e não mais
+- [x] O golden com o roteiro do papel sai `OK`, e não mais
       `FALHOU ... OFS_FORMATIONS+0`
-- [ ] O controle positivo mostra `raw_formation[0]` indo de `2` ao papel
+- [x] O controle positivo mostra `raw_formation[0]` indo de `2` ao papel
       navegado, e os outros nove slots intactos
-- [ ] Os três roteiros da §8.3 continuam `OK` — a emenda não pode regredir os
+- [x] Os três roteiros da §8.3 continuam `OK` — a emenda não pode regredir os
       cobradores
-- [ ] `Escape` sem navegar num combo de papel continua sem gravar nada
-- [ ] A legenda do marcador mostra o papel navegado depois do `Escape`, como no
+- [x] `Escape` sem navegar num combo de papel continua sem gravar nada
+- [x] A legenda do marcador mostra o papel navegado depois do `Escape`, como no
       `ed.exe`
-- [ ] `ctest --preset debug -E golden` 4/4
-- [ ] `roms/` intocada
+- [x] `ctest --preset debug -E golden` 4/4
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-29
 
 **Resumo do que foi feito:**
 
+O achado se confirmou antes de qualquer edição: o roteiro do papel reprovava o
+golden com `2303700..2303700  OFS_FORMATIONS+0`, e o `dump_estado` mostrava
+`raw_formation[0]` indo de `0x02` a `0x05` no oráculo e ficando em `0x02` no
+port — o mesmo quadro do `kick_long_fk`, no outro combo.
+
+O filtro do `Escape` passou a cobrir os **dezesseis**. Em vez de repetir o laço,
+o corpo virou um `QComboBox* combo` resolvido pelos dez de papel e depois pelos
+seis de cobrador; o resto é o que já estava — ler `currentIndex().row()`,
+`hidePopup()`, repor o índice, consumir o evento.
+
+| Roteiro | Golden | Medido |
+|---|---|---|
+| `8.7-escape-papel.sh` | antes `FALHOU ... OFS_FORMATIONS+0`; depois **`OK`** | `raw_formation[0]` `0x02 → 0x05` nos dois; os outros nove slots intactos |
+| `8.7-escape-papel-sem-navegar.sh` | `OK` | `raw_formation` **inteiro intacto** nos dois; sem `OFS_FORMATIONS+0` no controle |
+| `8.3-escape-cobrador.sh` | `OK` | sem regressão |
+| `8.3-escape-sem-navegar.sh` | `OK` | sem regressão |
+| `8.3-escolher-e-tab.sh` | `OK` | sem regressão |
+
+**A legenda do marcador foi conferida em captura**, que é a única forma: o
+`setCurrentIndex` da reposição dispara `currentIndexChanged` e repinta o
+campinho, e era preciso ver que ele mostra o papel **navegado**, como no
+original. Depois do `Escape`, o combo lê `LIB` nos dois lados e o campinho
+inteiro sai com as mesmas dez legendas — `LB`, `LIB`, `CB DX`, `RB`, `DH SX`,
+`DH DX`, `OH SX`, `OH DX`, `CF SX`, `CF DX` — no `ed.exe` e no port.
+
+`ctest --test-dir build -E golden` 4/4; `we2002_tests` 69 checks, 0 falhas.
+
 **Problemas encontrados:**
 
+**A `PAR-TASK-06` ainda não rodou, e o item novo já está fechado.** Marcá-lo
+`[x]` na task de outra pessoa seria dar por conferido o que ela não conferiu, e
+deixá-lo `[ ]` mandaria refazer o que já tem gate. O item entrou com o `[x]` e a
+nota de que foi fechado **fora** da task, mais a condição em que ela deve
+re-rodá-lo: se o item 2 (trocar papel e conferir a legenda) mexer no
+`OnRoleShown` ou no `eventFilter`.
+
+**A varredura puxou três documentos que a CORR não previa**, todos afirmando
+"os seis": a §3.5 e a §8.3 do inventário, o §Fase 5 do
+[/docs/PLAN-LINUX.md](/docs/PLAN-LINUX.md) e a nota de sinais do `CLAUDE.md`.
+Os quatro passaram a dizer dezesseis, e o `CLAUDE.md` ganhou a armadilha por
+extenso — o `currentIndexChanged` dos combos de papel engana, porque parece o
+caminho de gravação e não é.
+
+**O parágrafo "escopo deliberadamente estreito" da
+[CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) ficou falso** e recebeu a ressalva
+no próprio Log dela, em vez de ser reescrito: ele registra o que se pensou
+ontem, e apagá-lo perderia a lição de que a razão dada não tinha sido medida.
+
 **Arquivos criados/modificados:**
+
+- `src/app/MainWindow.cpp` — o `installEventFilter` na `view()` dos dez de
+  papel e o laço do `Escape` cobrindo os dezesseis
+- `tools/par/8.7-escape-papel.sh` e `tools/par/8.7-escape-papel-sem-navegar.sh`
+  — criados (o segundo não estava na lista da CORR, mas a Verificação pede a
+  medição, e a convenção do `tools/par/` manda versioná-la)
+- `docs/PARIDADE-FUNCIONAL.md` — o item novo na §8.7, a linha do `Escape` na
+  tabela da §3.7, e as notas da §3.5 e da §8.3 falando em dezesseis
+- `docs/tasks/PAR-TASK-06.md` — o item novo, já fechado, com a condição de
+  re-rodagem
+- `docs/tasks/CORR-WTE-125.md` — a ressalva no parágrafo do escopo
+- `docs/PLAN-LINUX.md`, `CLAUDE.md` — reconciliação do "seis" para "dezesseis"
