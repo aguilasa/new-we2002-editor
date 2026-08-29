@@ -700,20 +700,25 @@ itens, e o prelúdio é o sexto.
 
 **Os quatro conferidos em 2026-08-29** pela
 [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md), na `ptbr-remaster.bin`. Sete
-corridas de `golden_check.sh` em modo `gui`, todas `OK`. Roteiros em
-`tools/par/8.5-*.sh`, sobre o `8.5-prelude.sh`.
+corridas de `golden_check.sh` em modo `gui`, todas `OK`. **Um roteiro por item**
+em `tools/par/8.5-*.sh`, todos concatenados **depois** do `8.5-prelude.sh`, que
+abre o `PlayerSelectDialog` e não roda sozinho.
 
-- [x] Slot de seleção nacional: "complete" e "incomplete" — os dois modos
-      gravam **coisas diferentes**: desmarcado toca **um** registro de jogador
-      (`OFS_PLAYER_NAME+0` e `OFS_PLAYER_ATTR+0`), marcado toca **dois**
+- [x] Slot de seleção nacional: "complete" e "incomplete"
+      (`tools/par/8.5-selecao-nacional.sh`, os dois modos na mesma corrida por
+      `PAR_COMPLETA=0|1`) — os dois gravam **coisas diferentes**: desmarcado
+      (*incomplete*) toca **um** registro de jogador (`OFS_PLAYER_NAME+0` e
+      `OFS_PLAYER_ATTR+0`), marcado (*complete*, `PAR_COMPLETA=1`) toca **dois**
       (mais `+1044` e `OFS_PLAYER_ATTR_1+356`)
-- [x] Slot de clube de ML: link para contratado e para agente livre — os dois
-      gravam em `OFS_LINK_ML2+1122`, com **valores diferentes entre si**
-- [x] Agente livre com nacionalidade padrão × escolhida no combo — a escolha
-      muda **1 byte** no mesmo `OFS_LINK_ML2+1122`
-- [x] Slot de all-star: conferir que os nomes se refazem depois —
-      `OFS_PLAYER_NAME_7+124` muda junto com o link em `OFS_PLAYER_ATTR_8+36`,
-      e o `ed.exe` refaz igual
+- [x] Slot de clube de ML: link para contratado e para agente livre
+      (`tools/par/8.5-clube-ml.sh`) — os dois gravam em `OFS_LINK_ML2+1122`,
+      com **valores diferentes entre si**
+- [x] Agente livre com nacionalidade padrão × escolhida no combo
+      (`tools/par/8.5-nacionalidade-livre.sh`) — a escolha muda **1 byte** no
+      mesmo `OFS_LINK_ML2+1122`
+- [x] Slot de all-star: conferir que os nomes se refazem depois
+      (`tools/par/8.5-allstar.sh`) — `OFS_PLAYER_NAME_7+124` muda junto com o
+      link em `OFS_PLAYER_ATTR_8+36`, e o `ed.exe` refaz igual
 
 > **O `PlayerSelectDialog` é a terceira janela desta série**, de 390×404 px —
 > nem o `MainDialog` nem os 493×323 do `PlayerSkillsDialog` da §8.4. Os
