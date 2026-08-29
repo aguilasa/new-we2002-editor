@@ -697,10 +697,35 @@ itens, e o prelúdio é o sexto.
       `JOGADORxyz` grava os 10 bytes do `setMaxLength(10)`
 
 ### 8.5 Troca de jogador
-- [ ] Slot de seleção nacional: "complete" e "incomplete"
-- [ ] Slot de clube de ML: link para contratado e para agente livre
-- [ ] Agente livre com nacionalidade padrão × escolhida no combo
-- [ ] Slot de all-star: conferir que os nomes se refazem depois
+
+**Os quatro conferidos em 2026-08-29** pela
+[PAR-TASK-05](/docs/tasks/PAR-TASK-05.md), na `ptbr-remaster.bin`. Sete
+corridas de `golden_check.sh` em modo `gui`, todas `OK`. Roteiros em
+`tools/par/8.5-*.sh`, sobre o `8.5-prelude.sh`.
+
+- [x] Slot de seleção nacional: "complete" e "incomplete" — os dois modos
+      gravam **coisas diferentes**: desmarcado toca **um** registro de jogador
+      (`OFS_PLAYER_NAME+0` e `OFS_PLAYER_ATTR+0`), marcado toca **dois**
+      (mais `+1044` e `OFS_PLAYER_ATTR_1+356`)
+- [x] Slot de clube de ML: link para contratado e para agente livre — os dois
+      gravam em `OFS_LINK_ML2+1122`, com **valores diferentes entre si**
+- [x] Agente livre com nacionalidade padrão × escolhida no combo — a escolha
+      muda **1 byte** no mesmo `OFS_LINK_ML2+1122`
+- [x] Slot de all-star: conferir que os nomes se refazem depois —
+      `OFS_PLAYER_NAME_7+124` muda junto com o link em `OFS_PLAYER_ATTR_8+36`,
+      e o `ed.exe` refaz igual
+
+> **O `PlayerSelectDialog` é a terceira janela desta série**, de 390×404 px —
+> nem o `MainDialog` nem os 493×323 do `PlayerSkillsDialog` da §8.4. Os
+> controles de link e nacionalidade (`CHK_ML`, `CHK_LK_DEF`, `CHK_LK_NDEF`,
+> `CMB_NATIONALITY`) **não existem na tela** quando o destino é uma seleção
+> nacional: só aparecem para time por link e para o pool de agentes livres,
+> como a [§4.2](#42-selezdlg--playerselectdialog-8-on_) descreve.
+>
+> **Item de lista se escolhe por teclado, não por coordenada de linha.** O Qt e
+> o MFC não desenham a mesma altura de linha, então calcular `topo + i*altura`
+> erra de lado diferente em cada um. Clicar na lista, `Home` para ancorar, e
+> `Down` N vezes — a mesma lição do `CMB_TEAM` na §8.1.
 
 ### 8.6 SoFIFA (sem rede, o possível) — **só depois de reativar (§1.1)**
 - [ ] Sem `SOFIFA attributes.txt` → aviso "Impossible to read SOFIFA attributes !"
