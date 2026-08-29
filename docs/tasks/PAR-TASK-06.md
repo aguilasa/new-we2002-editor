@@ -136,3 +136,6 @@ junto porque `CMD_IMP` e `CMD_EXP` moram **dentro** desse diálogo.
   ele, traz o próprio `par_click` e não deve ser concatenado com este)
 - `tools/par/8.7-clamp-xy.sh`, `8.7-troca-papel.sh`, `8.7-presets-16.sh` — um
   roteiro por item fechado
+- `tools/par/8.7-preset-renomear.sh` — o esqueleto do item 4, versionado **com
+  aviso no cabeçalho de que não fecha o diálogo e portanto não mede nada**:
+  abrir, escolher, renomear e editar funcionam; falta só o caminho de confirmar
