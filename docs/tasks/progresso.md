@@ -1236,7 +1236,7 @@ mesma família de campo no `newWe2002` nunca foi conferida pela tela.
 | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Números de camisa e o clamp em 32 | 8.2 | 3 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
 | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | Cobradores, capitão e o foco de combo | 8.3 | 3 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
 | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | Atributos do jogador e os clamps | 8.4 | 5 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
-| [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | 8.5 | 4 | 04 | ✅ Concluído | 2026-08-29 | ⬜ pendente |
+| [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | 8.5 | 4 | 04 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
 | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | 8.7 | 5 | 03 | ⬜ Pendente | — | — |
 | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ⬜ Pendente | — | — |
 | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Operações em massa | 8.9 | 5 | 04, 07 | ⬜ Pendente | — | — |
