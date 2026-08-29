@@ -146,6 +146,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | `CMD_DEFAULT_NUMBERS` grava 37 faixas no port contra 20 no `ed.exe`; 18 divergências fora da faixa conhecida, reprodutíveis sem seleção de time | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Os itens 1 e 2 da §8.2 não têm roteiro em `tools/par/` e a "Definição de pronto" marca "cada item com evidência: **o comando**"; a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou um dia antes | Alta | [ ] pendente | — |
+| [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | O conserto do `Escape` da CORR-WTE-125 não alcança os dez combos de papel, que gravam pelo **mesmo** `FocusOut`; medido: três `Down` e `Escape` num combo de papel reprovam o golden em `OFS_FORMATIONS+0` | Alta | [ ] pendente | — |
 
 ## Checklist
 
@@ -274,6 +275,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-124 — diagnosticar a divergência do `CMD_DEFAULT_NUMBERS` contra o `ed.exe`
 - [x] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
 - [ ] CORR-WTE-126 — versionar os roteiros dos itens 1 e 2 da §8.2 e amarrar cada item ao seu
+- [ ] CORR-WTE-127 — estender o filtro de `Escape` aos dez combos de papel e dar item à §8.7
 
 ## Detalhes por correção
 
@@ -2218,3 +2220,23 @@ dizer "fechada e fora do backlog", não "corrigida".
   são linha a linha o mesmo clamp e a mesma ausência dele no ramo de ML
 - **Fix:** um roteiro por item, no molde dos existentes, com a invocação do
   `dump_estado` na §8.2 ao lado da faixa — e **remedir** ao versionar
+
+### CORR-WTE-127
+
+- **Arquivo com problema:** `src/app/MainWindow.cpp` (o `eventFilter`), mais a
+  §8.7 do `docs/PARIDADE-FUNCIONAL.md` e a `docs/tasks/PAR-TASK-06.md`
+- **Sintoma:** o `Escape` depois de navegar continua divergindo nos dez combos
+  de papel — o port desfaz, o `ed.exe` mantém o item navegado. A CORR-WTE-125
+  os excluiu dizendo que "gravam por `currentIndexChanged`, outro caminho";
+  eles gravam em `FocusOut` (`OnRoleCommitted`), o mesmo caminho dos cobradores,
+  e o `currentIndexChanged` só repinta a legenda — espelhando o par
+  `ON_CBN_SELCHANGE` (legenda) + `ON_CBN_KILLFOCUS` (gravação) do legado. O
+  adiamento para a §8.7 também não tem destinatário: o único item de papel lá é
+  "trocar papel e conferir a legenda"
+- **Como foi detectado:** golden com o roteiro da §8.3 apontado para o
+  `CMB_SLOT_ROLE2` — `FALHOU: 1 divergencia(s) ... 2303700..2303700 1 byte(s)
+  data OFS_FORMATIONS+0` —, e o controle positivo mais o `dump_estado` mostrando
+  `teams[0].raw_formation` **idêntico** à imagem original do lado do port
+- **Fix:** instalar o filtro em `cmb_role_[i]->view()` e estender o laço do
+  `Escape` aos dez, versionar `tools/par/8.7-escape-papel.sh` e abrir o item na
+  §8.7
