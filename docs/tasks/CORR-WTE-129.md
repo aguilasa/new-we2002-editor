@@ -3,7 +3,7 @@ id: CORR-WTE-129
 title: "Correção: o Log da PAR-TASK-04 põe o CMD_SKILLS1 em dlu (392,36); o controle está em (382,32)"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -72,16 +72,47 @@ próxima transcrição de errar de novo.
 
 ## Verificação
 
-- [ ] `grep -rn '392,36' docs/` não devolve nada
-- [ ] O Log, a §8.4 e o `8.4-prelude.sh` dizem os mesmos `382,32`
-- [ ] `python3 tools/check_tasks.py` continua `ok`
+- [x] `grep -rn '392,36' docs/` não devolve nada **fora do registro desta
+      própria correção** — ela e a linha do `correcoes-progresso.md` citam o
+      valor errado como sintoma, e têm de continuar citando
+- [x] O Log, a §8.4 e o `8.4-prelude.sh` dizem os mesmos `382,32`
+- [x] `python3 tools/check_tasks.py` continua `ok`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-29
 
 **Resumo do que foi feito:**
 
+A frase do Log da PAR-TASK-04 passou a dizer `(382,32)`, com os dois pares de
+números como o `controls.json` os traz — `[382, 32, 20, 9]` em DLU e
+`[573, 52, 30, 14]` em px — e com a instrução de ler dali em vez de
+transcrever. É o que impede a próxima transcrição de errar de novo: o
+`controls.json` é gerado do `ed.rc` e conferido pelo `ctest -R ui_forms`.
+
+Os três sítios concordam:
+
+```text
+docs/tasks/PAR-TASK-04.md:106   `CMD_SKILLS1` fica em dlu **(382,32)** no
+docs/PARIDADE-FUNCIONAL.md:680  `CMD_SKILLS1` fica em dlu (382,32) e `Escape` fecha.
+tools/par/8.4-prelude.sh:47     # CMD_SKILLS1 (382,32,20,9) abre o diálogo do 1º jogador.
+```
+
+`check_tasks: 51 task(s), ok`.
+
 **Problemas encontrados:**
 
+**A primeira linha da Verificação não podia ficar como estava escrita.** Um
+`grep -rn '392,36' docs/` **nunca** devolverá vazio: esta CORR e a linha dela no
+`correcoes-progresso.md` citam o valor errado — é o sintoma, e apagá-lo apagaria
+o registro do achado. A linha foi reescrita para excluir o registro da própria
+correção, e o comando com a exclusão devolve vazio:
+
+```text
+$ grep -rno "392,36" docs --include='*.md' | grep -v 'CORR-WTE-129.md\|correcoes-progresso.md'
+(nenhum)
+```
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/PAR-TASK-04.md` — a frase do Log

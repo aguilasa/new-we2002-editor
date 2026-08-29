@@ -103,8 +103,10 @@ de um combo YES/NO — parada idêntica é paridade, não item por medir.
 **O `PlayerSkillsDialog` é janela própria, de 493×323 px**, e as coordenadas
 dos 21 campos do `controls.json` são relativas **a ele**, não ao `MainDialog` —
 o roteiro precisa de `--window "$SKILLS"`, com a janela achada por tamanho, como
-o `skills_win()` do roteiro faz. `CMD_SKILLS1` fica em dlu (392,36) no
-`MainDialog` e `Escape` fecha o diálogo.
+o `skills_win()` do roteiro faz. `CMD_SKILLS1` fica em dlu **(382,32)** no
+`MainDialog` — `[382, 32, 20, 9]` em DLU e `[573, 52, 30, 14]` em px, do
+`src/app/ui/controls.json`, que é gerado do `ed.rc`; leia dali em vez de
+transcrever — e `Escape` fecha o diálogo.
 
 **Problemas encontrados:** nenhum de paridade. Uma armadilha de ambiente, que
 custou uma medição perdida: **o shell desta máquina é zsh**, e ali
