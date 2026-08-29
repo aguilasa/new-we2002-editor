@@ -3,7 +3,7 @@ id: CORR-WTE-126
 title: "Correção: os itens 1 e 2 da §8.2 não têm roteiro versionado, e a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -160,24 +160,65 @@ com nome melhor.
 
 ## Verificação
 
-- [ ] `ls tools/par/8.2-*` devolve três arquivos, um por item da §8.2
-- [ ] Cada item da §8.2 nomeia o seu roteiro, e os dois primeiros também a
+- [x] `ls tools/par/8.2-*` devolve três arquivos, um por item da §8.2
+- [x] Cada item da §8.2 nomeia o seu roteiro, e os dois primeiros também a
       invocação do `dump_estado` que dá o `31` e o `32`
-- [ ] Os dois roteiros novos rodam nos dois hooks sem edição:
+- [x] Os dois roteiros novos rodam nos dois hooks sem edição:
       `WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$(cat <roteiro>)"
       GOLDEN_GUI_EDIT="$GOLDEN_EDIT" bash tools/golden_check.sh
       roms/ptbr-remaster.bin` sai `OK`
-- [ ] Cada um com **controle positivo** registrado — a cópia gravada contra a
+- [x] Cada um com **controle positivo** registrado — a cópia gravada contra a
       imagem original, com as faixas, não só o veredito do golden
-- [ ] `ctest --preset debug -E golden` continua 4/4
-- [ ] `roms/` intocada — toda corrida sobre cópia
+- [x] `ctest --preset debug -E golden` continua 4/4
+- [x] `roms/` intocada — toda corrida sobre cópia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-29
 
 **Resumo do que foi feito:**
 
+Os dois roteiros que faltavam foram escritos e os dois itens **remedidos** na
+`ptbr-remaster.bin`. A §8.2 deixa de ser a seção fora da convenção: três itens,
+três arquivos.
+
+| Roteiro | Golden | Controle positivo | `dump_estado` |
+|---|---|---|---|
+| `8.2-clamp-selecao.sh` | `OK` | `OFS_SQUAD_NUMBERS_NATIONAL+0`, 1 byte | `teams[0].squad_numbers[0]` **0 → 31**, `players[462].number` **1 → 32** |
+| `8.2-clamp-clube-ml.sh` | `OK` | `OFS_SQUAD_NUMBERS_ML+737`, 1 byte | `ml_teams[31].raw_numbers[0]` **0 → 32** |
+
+Os dois números iguais nos dois lados, e a assimetria que a §8.2 existe para
+fixar aparece nas duas linhas: 31 na seleção contra 32 no clube, para o mesmo
+`33` digitado. O `31` é o teto porque o campo guarda `número − 1`.
+
+Os dois pelo caminho literal da Verificação, cada um com os dois hooks
+apontados para o mesmo arquivo:
+
+```text
+8.2-clamp-selecao        OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+8.2-clamp-clube-ml       OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+```
+
+`ctest --test-dir build -E golden` 4/4.
+
 **Problemas encontrados:**
 
+**A invocação do `dump_estado` não estava em lugar nenhum**, e sem ela o
+roteiro sozinho não bastaria: `squad_numbers` é bitfield empacotado, byte cru
+no disco dá `63`, e os números que a §8.2 afirma (`31`, `32`) só saem do
+dumper. A linha de compilação e os dois `grep` entraram na §8.2, acima dos
+itens — é o instrumento, e ele vale para os dois.
+
+O `dump_estado.cpp` é compilado à mão com `g++` sobre `src/core/*.cpp`, fora do
+CMake, como o `compare_dumps.py` do `wte/` faz. Não há alvo para ele no build
+do `newWe2002`, então a linha completa foi registrada em vez de um nome de
+binário que ninguém tem.
+
 **Arquivos criados/modificados:**
+
+- `tools/par/8.2-clamp-selecao.sh` e `tools/par/8.2-clamp-clube-ml.sh` — criados
+- `docs/PARIDADE-FUNCIONAL.md` — §8.2: o roteiro e a faixa remedida em cada um
+  dos dois itens, mais a invocação do `dump_estado` e a nota de que a seção tem
+  um roteiro por item
+- `docs/tasks/PAR-TASK-02.md` — os dois itens apontando para o seu roteiro e o
+  adendo no Log

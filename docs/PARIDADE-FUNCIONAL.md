@@ -573,13 +573,33 @@ diferentes na mesma tela do clube de ML.
 **Conferido em 2026-08-28** pela
 [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
 item reprovou na primeira medição e foi fechado em 2026-08-29 pela
-[CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
+[CORR-WTE-124](/docs/tasks/CORR-WTE-124.md). **Um roteiro por item em
+`tools/par/8.2-*.sh`**, os três remedidos a partir dos arquivos versionados.
 
-- [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco — **a tela
-      mostra 32** e o `dump_estado` dá **31**, porque o campo guarda
-      `número − 1`; 31 é o teto, então o clamp aconteceu nos dois
-- [x] Digitar num clube de ML (sem clamp) e conferir — o mesmo 33 grava **32**
-      lá, contra 31 na seleção. A assimetria é do original e está reproduzida
+**Os dois primeiros itens não se medem por byte cru.** `squad_numbers` é
+bitfield empacotado, e lê-lo à mão no disco dá `63`, um número que não
+significa nada. Quem decodifica é o `dump_estado`, e a invocação que produziu o
+`31` e o `32` abaixo é esta:
+
+```sh
+g++ -std=c++17 -Isrc/core/include src/core/{CdImage,Database,Player,Tables,Team,TextCodec}.cpp \
+    wte/tests/dump_estado.cpp -o dump_cpp
+./dump_cpp <copia-gravada.bin> | grep -E '^teams\[0\]\.squad_numbers|^players\[462\]\.number'
+./dump_cpp <copia-gravada.bin> | grep -E '^ml_teams\[31\]\.raw_numbers'
+```
+
+- [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
+      (`tools/par/8.2-clamp-selecao.sh`) — **a tela mostra 32** e o
+      `dump_estado` dá **31**, porque o campo guarda `número − 1`; 31 é o teto,
+      então o clamp aconteceu nos dois. Remedido em 2026-08-29 a partir do
+      arquivo versionado: `teams[0].squad_numbers[0]` vai de `0` a **31** e
+      `players[462].number` de `1` a **32**, iguais nos dois lados; o controle
+      positivo traz `OFS_SQUAD_NUMBERS_NATIONAL+0`, 1 byte
+- [x] Digitar num clube de ML (sem clamp) e conferir
+      (`tools/par/8.2-clamp-clube-ml.sh`) — o mesmo 33 grava **32** lá, contra
+      31 na seleção. A assimetria é do original e está reproduzida. Remedido:
+      `ml_teams[31].raw_numbers[0]` vai de `0` a **32** nos dois lados, com
+      `OFS_SQUAD_NUMBERS_ML+737` de 1 byte no controle positivo
 - [x] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu
       (`tools/par/8.2-numeros-default.sh`) — reprovou na primeira medição, com
       **37 faixas no port contra 20 do `ed.exe`**, e foi corrigido pela

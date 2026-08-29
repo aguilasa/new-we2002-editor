@@ -145,7 +145,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) | [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md) | Os seis roteiros das seis corridas golden não estão versionados em lugar nenhum, e a "Definição de pronto" marca "cada item com evidência: **o comando**" — as seis corridas verdes não são repetíveis | Alta | [x] concluída | 2026-08-28 |
 | [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | `CMD_DEFAULT_NUMBERS` grava 37 faixas no port contra 20 no `ed.exe`; 18 divergências fora da faixa conhecida, reprodutíveis sem seleção de time | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | `Escape` depois de navegar um combo de cobrador grava no `ed.exe` e não no port; a §3.5 afirma o contrário do medido | Alta | [x] concluída | 2026-08-29 |
-| [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Os itens 1 e 2 da §8.2 não têm roteiro em `tools/par/` e a "Definição de pronto" marca "cada item com evidência: **o comando**"; a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou um dia antes | Alta | [ ] pendente | — |
+| [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md) | [PAR-TASK-02](/docs/tasks/PAR-TASK-02.md) | Os itens 1 e 2 da §8.2 não têm roteiro em `tools/par/` e a "Definição de pronto" marca "cada item com evidência: **o comando**"; a §8.2 é a única seção fora da convenção que a CORR-WTE-123 fixou um dia antes | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | O conserto do `Escape` da CORR-WTE-125 não alcança os dez combos de papel, que gravam pelo **mesmo** `FocusOut`; medido: três `Down` e `Escape` num combo de papel reprovam o golden em `OFS_FORMATIONS+0` | Alta | [ ] pendente | — |
 | [CORR-WTE-128](/docs/tasks/CORR-WTE-128.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O item 1 da §8.4 (clamp de habilidade) não tem roteiro em `tools/par/`, e a seção afirma "Roteiros em `tools/par/8.4-*.sh`" para os cinco — o quinto arquivo é o prelúdio, que não roda sozinho | Alta | [ ] pendente | — |
 | [CORR-WTE-129](/docs/tasks/CORR-WTE-129.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O Log da PAR-TASK-04 põe o `CMD_SKILLS1` em dlu (392,36) na seção escrita para quem retomar; o `controls.json`, a §8.4 e o `8.4-prelude.sh` dizem (382,32) | Baixa | [ ] pendente | — |
@@ -276,7 +276,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-123 — versionar os seis roteiros da §8.1 em `tools/par/` e amarrar cada item ao seu
 - [x] CORR-WTE-124 — diagnosticar a divergência do `CMD_DEFAULT_NUMBERS` contra o `ed.exe`
 - [x] CORR-WTE-125 — fazer o `Escape` do combo de cobrador gravar como o original, e corrigir a §3.5
-- [ ] CORR-WTE-126 — versionar os roteiros dos itens 1 e 2 da §8.2 e amarrar cada item ao seu
+- [x] CORR-WTE-126 — versionar os roteiros dos itens 1 e 2 da §8.2 e amarrar cada item ao seu
 - [ ] CORR-WTE-127 — estender o filtro de `Escape` aos dez combos de papel e dar item à §8.7
 - [ ] CORR-WTE-128 — versionar o roteiro do item 1 da §8.4 e acertar a frase de cobertura
 - [ ] CORR-WTE-129 — corrigir a dlu do `CMD_SKILLS1` no Log da PAR-TASK-04

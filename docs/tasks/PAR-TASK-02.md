@@ -45,8 +45,10 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco
-- [x] Digitar num clube de ML (sem clamp) e conferir
+- [x] Digitar 33 numa seleção → tem que virar 32 na tela e no disco —
+      `tools/par/8.2-clamp-selecao.sh`
+- [x] Digitar num clube de ML (sem clamp) e conferir —
+      `tools/par/8.2-clamp-clube-ml.sh`
 - [x] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu —
       reprovou aqui, e foi fechado pela
       [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md);
@@ -136,3 +138,13 @@ gravado na imagem. O original faz o mesmo estouro, mas ali o vizinho é
 Com o laço em 63 o golden sai `OK`. O roteiro do item ficou versionado em
 `tools/par/8.2-numeros-default.sh`, com a dispensa da caixa que funciona nos
 dois lados — o `OK` fica em lugar diferente em cada um.
+
+**Adendo da [CORR-WTE-126](/docs/tasks/CORR-WTE-126.md), 2026-08-29.** Os itens
+1 e 2 tinham sido medidos em 2026-08-28, no mesmo dia em que a
+[CORR-WTE-123](/docs/tasks/CORR-WTE-123.md) criou o `tools/par/`, e ficaram sem
+roteiro versionado — a §8.2 era a única seção fora da convenção. Os dois foram
+escritos e **remedidos**: seleção `0 → 31` no `squad_numbers[0]` e `1 → 32` no
+`players[462].number`, clube de ML `0 → 32` no `raw_numbers[0]`, iguais nos
+dois lados, com o golden `OK` nos dois. A §8.2 passou a trazer também a
+invocação do `dump_estado` que decodifica o bitfield — sem ela os dois números
+não têm fonte re-executável, porque byte cru ali dá 63.
