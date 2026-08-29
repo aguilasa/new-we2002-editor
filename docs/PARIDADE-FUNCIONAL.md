@@ -614,17 +614,29 @@ reprovou e virou [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md).
 
 ### 8.4 Atributos do jogador
 
-**Um de cinco conferido em 2026-08-28** pela
-[PAR-TASK-04](/docs/tasks/PAR-TASK-04.md); os outros quatro não couberam no
-lote e seguem abertos.
+**Os cinco conferidos** pela [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) — o
+primeiro em 2026-08-28, os outros quatro em 2026-08-29. Roteiros em
+`tools/par/8.4-*.sh`, todos sobre o `8.4-prelude.sh`, que abre o
+`PlayerSkillsDialog`.
+
+> **Este bloco edita numa janela própria.** O `PlayerSkillsDialog` mede 493×323
+> px, e as coordenadas dos seus 21 campos no `controls.json` são relativas **a
+> ele**, não ao `MainDialog` — daí o `sk_click` do prelúdio, que usa
+> `--window "$SKILLS"`. `CMD_SKILLS1` fica em dlu (382,32) e `Escape` fecha.
 
 - [x] Clampar habilidade abaixo de 12 e acima de 19 — **os dois extremos**: 25
       digitado em `attack` grava **19**, 3 digitado em `defence` grava **12**,
       idêntico ao oráculo
-- [ ] Altura 100 e 999; idade 1 e 99; número 0 e 99
-- [ ] Custo com mais de 2 dígitos — conferir que o original também trunca
-- [ ] Trocar os 10 combos com mouse **e** com teclado
-- [ ] Editar nome de jogador (é aqui que se edita, não no diálogo principal)
+- [x] Altura 100 e 999; idade 1 e 99; número 0 e 99 — **os seis extremos, com
+      clamp em todos**: altura `155..210`, idade `15..46`, número com teto 32
+      (o mesmo da §8.2) e piso 1
+- [x] Custo com mais de 2 dígitos — conferir que o original também trunca —
+      `12345` grava **12**, e o `ed.exe` trunca igual
+- [x] Trocar os 10 combos com mouse **e** com teclado — cinco por caminho,
+      **nove avançam exatamente 1**; o décimo (`out_of_position`) fica parado
+      nos dois lados por já estar no último item de um combo YES/NO
+- [x] Editar nome de jogador (é aqui que se edita, não no diálogo principal) —
+      `JOGADORxyz` grava os 10 bytes do `setMaxLength(10)`
 
 ### 8.5 Troca de jogador
 - [ ] Slot de seleção nacional: "complete" e "incomplete"
