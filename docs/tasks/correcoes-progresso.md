@@ -149,7 +149,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) | [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md) | O conserto do `Escape` da CORR-WTE-125 não alcança os dez combos de papel, que gravam pelo **mesmo** `FocusOut`; medido: três `Down` e `Escape` num combo de papel reprovam o golden em `OFS_FORMATIONS+0` | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-128](/docs/tasks/CORR-WTE-128.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O item 1 da §8.4 (clamp de habilidade) não tem roteiro em `tools/par/`, e a seção afirma "Roteiros em `tools/par/8.4-*.sh`" para os cinco — o quinto arquivo é o prelúdio, que não roda sozinho | Alta | [x] concluída | 2026-08-29 |
 | [CORR-WTE-129](/docs/tasks/CORR-WTE-129.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O Log da PAR-TASK-04 põe o `CMD_SKILLS1` em dlu (392,36) na seção escrita para quem retomar; o `controls.json`, a §8.4 e o `8.4-prelude.sh` dizem (382,32) | Baixa | [x] concluída | 2026-08-29 |
-| [CORR-WTE-130](/docs/tasks/CORR-WTE-130.md) | [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | O cabeçalho do `8.5-selecao-nacional.sh` diz que a caixa desmarcada é a substituição completa; é o contrário, e `PAR_INCOMPLETE=1` roda a **completa** | Média | [ ] pendente | — |
+| [CORR-WTE-130](/docs/tasks/CORR-WTE-130.md) | [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | O cabeçalho do `8.5-selecao-nacional.sh` diz que a caixa desmarcada é a substituição completa; é o contrário, e `PAR_INCOMPLETE=1` roda a **completa** | Média | [x] concluída | 2026-08-29 |
 
 ## Checklist
 
@@ -281,7 +281,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-127 — estender o filtro de `Escape` aos dez combos de papel e dar item à §8.7
 - [x] CORR-WTE-128 — versionar o roteiro do item 1 da §8.4 e acertar a frase de cobertura
 - [x] CORR-WTE-129 — corrigir a dlu do `CMD_SKILLS1` no Log da PAR-TASK-04
-- [ ] CORR-WTE-130 — desinverter completa/incompleta no roteiro da §8.5 e renomear a variável
+- [x] CORR-WTE-130 — desinverter completa/incompleta no roteiro da §8.5 e renomear a variável
 
 ## Detalhes por correção
 

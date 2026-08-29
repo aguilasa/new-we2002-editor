@@ -82,7 +82,7 @@ dois modos que gravassem o mesmo passariam os dois verdes sem medir nada:
 
 | item | evidência |
 |---|---|
-| complete × incomplete | 1 registro de jogador contra **2** |
+| desmarcada (*incomplete*) × marcada (*complete*) | **1** registro de jogador contra **2** — `PAR_COMPLETA=1` é a de dois |
 | ML contratado × agente livre | mesmo `OFS_LINK_ML2+1122`, valores diferentes |
 | nacionalidade padrão × escolhida | **1 byte** no mesmo campo |
 | all-star | `OFS_PLAYER_NAME_7+124` refeito junto com o link |

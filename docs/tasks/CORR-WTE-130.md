@@ -3,7 +3,7 @@ id: CORR-WTE-130
 title: "Correção: o roteiro da §8.5 troca completa por incompleta, e o PAR_INCOMPLETE=1 roda a completa"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -129,20 +129,55 @@ Na tabela de evidência do Log, escrever a linha pelo estado da caixa, como a
 
 ## Verificação
 
-- [ ] `grep -n PAR_INCOMPLETE tools/ docs/` não devolve nada
-- [ ] O cabeçalho do roteiro diz que **marcada** é a completa, de 2 registros
-- [ ] `PAR_COMPLETA=1` produz as duas faixas a mais
+- [x] `grep -n PAR_INCOMPLETE tools/ docs/` não devolve nada
+- [x] O cabeçalho do roteiro diz que **marcada** é a completa, de 2 registros
+- [x] `PAR_COMPLETA=1` produz as duas faixas a mais
       (`OFS_PLAYER_NAME+1044` e `OFS_PLAYER_ATTR_1+356`) no controle positivo,
       e `PAR_COMPLETA=0` não
-- [ ] Os dois goldens continuam `OK`
-- [ ] `roms/` intocada
+- [x] Os dois goldens continuam `OK`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-29
 
 **Resumo do que foi feito:**
 
+O cabeçalho do roteiro passou a descrever a caixa **pelo estado**, com a razão
+de o rótulo enganar: `CHK_COMPLETE_SWAP` nasce desmarcado e mostra
+`incomplete substitution`, que é o nome do estado em que ele **está** — o
+rótulo é reescrito ao alternar (`PlayerSelectDialog.cpp:201-205`). A variável
+virou `PAR_COMPLETA`, sem sinônimo.
+
+Remedido nos dois modos, na `ptbr-remaster.bin`, os dois goldens `OK`:
+
+| | faixas no controle positivo | registros de jogador |
+|---|---:|---|
+| `PAR_COMPLETA=0` (desmarcada, *incomplete*) | 7 | `OFS_PLAYER_NAME+0`, `OFS_PLAYER_ATTR+0` — **1** |
+| `PAR_COMPLETA=1` (marcada, *complete*) | 9 | os mesmos, mais `OFS_PLAYER_NAME+1044` e `OFS_PLAYER_ATTR_1+356` — **2** |
+
+E as duas cópias uma contra a outra, que isola o que o modo muda:
+
+```text
+$ python3 tools/golden_compare.py port-0.bin port-1.bin
+2 run(s), 18 byte(s) differ
+    388836    388841    6    6   165  data  OFS_PLAYER_NAME+1044
+   2180684   2180695   12   12   927  data  OFS_PLAYER_ATTR_1+356
+```
+
+`PAR_COMPLETA=1` é a de dois registros — a completa, como o nome agora diz.
+
 **Problemas encontrados:**
 
+**A §8.5 do inventário não nomeia roteiro em item nenhum**, só no cabeçalho
+("Roteiros em `tools/par/8.5-*.sh`"). Com a variável renomeada, quem ler o item
+1 não tem como re-rodar nenhum dos dois modos — a incompletude passa a doer por
+causa desta correção. Os quatro itens ganharam o nome do seu roteiro, e o item
+1 também o da variável, em **commit próprio** de reconciliação.
+
 **Arquivos criados/modificados:**
+
+- `tools/par/8.5-selecao-nacional.sh` — cabeçalho e nome da variável
+- `docs/tasks/PAR-TASK-05.md` — a linha da tabela de evidência, escrita pelo
+  estado da caixa
+- `docs/PARIDADE-FUNCIONAL.md` — §8.5, no commit de reconciliação
