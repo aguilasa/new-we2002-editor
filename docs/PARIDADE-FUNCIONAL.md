@@ -760,25 +760,30 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 - [x] Aplicar os 16 presets num time — os dezesseis em sequência e o preset 1
       isolado dão `raw_formation` diferentes entre si, os dois idênticos ao
       oráculo
-- [ ] Editar e renomear um preset no `DefaultTacticsDialog` — **bloqueado**,
-      ver a nota abaixo
+- [ ] Editar e renomear um preset no `DefaultTacticsDialog` — **medido, e
+      reprovou**: o `ed.exe` grava 7 faixas / 61 bytes e o port sai
+      `IDENTICAL`. [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
       — **bloqueado pelo mesmo**: `CMD_IMP` e `CMD_EXP` moram dentro do
       `DefaultTacticsDialog`
 
-> **O `IDOK` do `DefaultTacticsDialog` não é desenhado — nem no port, nem no
-> `ed.exe`.** O manifesto o põe em dlu `[197,17,50,14]`, dentro da área do
-> diálogo (481×297 px), e a captura da faixa do topo mostra ali apenas
-> `Selection` e `Name`, nos **dois** lados. Como as duas telas concordam, isto é
-> paridade e não defeito do port — mas deixa os dois últimos itens sem caminho
-> de confirmação.
+> **O `IDOK` do `DefaultTacticsDialog` é `NOT WS_VISIBLE` no próprio `ed.rc`**
+> (linha 627: `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`), e o
+> `rc2ui.py` traduz isso corretamente para `visible: false`. A tela concorda
+> nos dois lados — o botão não aparece em nenhum. **A tradução está certa; o
+> que diverge é o efeito.**
 >
-> Três formas de fechar o diálogo foram medidas e **nenhuma serve**: `Return`
-> não fecha em nenhum dos dois; clicar na posição do `IDOK` também não; e
-> deixá-lo aberto faz a gravação sair `IDENTICAL` à imagem original — ou seja,
-> **sem confirmar, as edições do diálogo não são aplicadas**. Quem retomar
-> precisa de um quarto caminho (o `.rc` do `IDOK`, ou o handler que o
-> `DefaultTacticsDialog` liga ao fechamento), não de repetir estes três.
+> No MFC o original **aplica as edições enquanto se digita**, então gravar com
+> o diálogo aberto funciona. No Qt o commit depende do `accept()`, e um
+> `QPushButton` invisível não pode ser clicado nem ativado por `Return` — o
+> diálogo fica sem caminho de confirmação e **o que se edita ali se perde**.
+> Medido: `ed.exe` grava 7 faixas, port sai `IDENTICAL`.
+> [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
+>
+> Quatro caminhos de fechamento foram descartados por medição, e não vale
+> repeti-los: `Return` sem foco, `Return` com `windowfocus`,
+> `xdotool key --window` (XSendEvent, que o Qt ignora) e clicar na posição do
+> botão invisível.
 
 ### 8.8 Bandeira e uniformes
 - [ ] Cores no teto (65535) e acima

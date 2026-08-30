@@ -57,8 +57,8 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
       inventário. **Não precisa ser refeito aqui** — mas se o item 2 acima
       mexer no `OnRoleShown` ou no `eventFilter`, re-rode os dois roteiros
 - [x] Aplicar os 16 presets num time
-- [ ] Editar e renomear um preset no `DefaultTacticsDialog`  ← **bloqueado, ver o Log**
-- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original  ← **bloqueado pelo mesmo**
+- [ ] Editar e renomear um preset no `DefaultTacticsDialog`  ← **medido, reprovou: CORR-WTE-131**
+- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original  ← **bloqueado pela CORR-WTE-131**
 
 O quinto item é o mais valioso da série inteira: **troca de arquivo nos dois
 sentidos** entre port e original é a prova de formato mais forte que existe
@@ -85,8 +85,9 @@ Cuidado ao aplicar preset: num diálogo com 86 botões e nenhum `DEFPUSHBUTTON`,
 
 ## Log de Execução
 
-**Executado em:** 2026-08-29 — **PARCIAL: 3 de 5 itens** (o 6º da lista já
-estava fechado pela CORR-WTE-127, fora desta task).
+**Executado em:** 2026-08-29 (itens 1-3) e 2026-08-30 (o item 4, medido) —
+**PARCIAL: 3 de 5 itens fechados, 1 medido e reprovado, 1 bloqueado** (o 6º da
+lista já estava fechado pela CORR-WTE-127, fora desta task).
 
 **Resumo:**
 
@@ -108,23 +109,37 @@ eles diria que o estímulo não chegou. Quem guarda é o `raw_formation`, nos
 bytes `10 + slot` e `20 + slot` — que é onde o `OnSlotXCommitted` escreve. O
 `golden_compare.py` apontou o caminho ao mostrar `OFS_FORMATIONS+10`.
 
-**Os itens 4 e 5 estão bloqueados, e o bloqueio é o mesmo.** O `IDOK` do
-`DefaultTacticsDialog` **não é desenhado em nenhum dos dois lados** — o
-manifesto o põe em dlu `[197,17,50,14]`, dentro dos 481×297 px do diálogo, e a
-captura do topo mostra ali só `Selection` e `Name`, no port e no `ed.exe`. As
-duas telas concordam, então isto é paridade, não defeito.
+**O item 4 saiu do bloqueio e virou medição — e o palpite de ontem estava
+errado.** Ontem registrei que o `IDOK` "não é desenhado nos dois lados, logo é
+paridade". A primeira metade é verdade e a conclusão não era: seguindo o quarto
+caminho que eu mesmo tinha deixado escrito — ler o `.rc` —, o `ed.rc` linha 627
+diz `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`. O botão é invisível
+**por design**, e o `rc2ui.py` traduz certo.
 
-**Três caminhos foram medidos e descartados**, e ficam registrados para quem
-retomar não repetir:
+O que diverge é o efeito, e só se vê medindo os dois lados **separadamente**:
+com o diálogo aberto e o mesmo roteiro, o `ed.exe` grava **7 faixas / 61 bytes**
+e o port sai **`IDENTICAL`**. No MFC o original aplica as edições enquanto se
+digita; no Qt o commit depende do `accept()`, e um `QPushButton` invisível não
+pode ser clicado nem ativado por `Return`. O diálogo é inutilizável no port.
+[CORR-WTE-131](/docs/tasks/CORR-WTE-131.md).
 
-1. `Return` — não fecha o diálogo em nenhum dos dois;
-2. clicar na posição do `IDOK` do manifesto — também não fecha;
-3. deixar o diálogo aberto e gravar — a imagem sai `IDENTICAL` à original, ou
-   seja, **sem confirmação as edições do diálogo não são aplicadas**.
+**A lição de método:** "os dois lados se comportam igual na tela" não é
+paridade — paridade é o que sai no disco. Ontem parei na tela e concluí cedo
+demais.
 
-O quarto caminho a tentar é o `.rc` do `IDOK` (por que ele não aparece) ou o
-handler que o `DefaultTacticsDialog` liga ao fechamento. O item do `.t2002` cai
-junto porque `CMD_IMP` e `CMD_EXP` moram **dentro** desse diálogo.
+**Quatro caminhos de fechamento descartados por medição**, para não se
+repetirem: `Return` sem foco, `Return` depois de `windowfocus`,
+`xdotool key --window` (XSendEvent, que o Qt ignora) e clicar na posição do
+botão invisível.
+
+**O item 5 continua bloqueado** pela mesma causa: `CMD_IMP` e `CMD_EXP` moram
+dentro desse diálogo, e sem caminho de confirmação não há como exercitá-los. Ele
+destrava junto com a CORR-WTE-131.
+
+**Uma armadilha do roteiro, medida:** abrir o `CMB_FORMATION` com o diálogo por
+cima deixa a gravação do oráculo sem confirmar (`a gravacao nao confirmou`) e a
+corrida morre antes de medir. E um `Return` ao fim é necessário: ele não fecha o
+diálogo, mas confirma o campo em edição — sem ele, o oráculo também não grava.
 
 **Problemas encontrados:** o bloqueio acima. A task fica aberta.
 
@@ -136,6 +151,7 @@ junto porque `CMD_IMP` e `CMD_EXP` moram **dentro** desse diálogo.
   ele, traz o próprio `par_click` e não deve ser concatenado com este)
 - `tools/par/8.7-clamp-xy.sh`, `8.7-troca-papel.sh`, `8.7-presets-16.sh` — um
   roteiro por item fechado
-- `tools/par/8.7-preset-renomear.sh` — o esqueleto do item 4, versionado **com
-  aviso no cabeçalho de que não fecha o diálogo e portanto não mede nada**:
-  abrir, escolher, renomear e editar funcionam; falta só o caminho de confirmar
+- `tools/par/8.7-preset-renomear.sh` — o roteiro do item 4. Deixou de ser
+  esqueleto: ele **mede**, e o veredito é a CORR-WTE-131. O cabeçalho explica
+  por que não há clique de confirmação (o `IDOK` é `NOT WS_VISIBLE` no `.rc`)
+- `docs/tasks/CORR-WTE-131.md` e `docs/tasks/correcoes-progresso.md` — o achado
