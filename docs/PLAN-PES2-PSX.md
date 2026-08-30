@@ -540,13 +540,56 @@ que editar o gerado falhe em teste. Nunca o contrário.
 
 ### Fase 0 — Infra
 
-- Instalar emulador + debugger; confirmar boot (§3.3).
+- Instalar emulador + debugger; confirmar boot (§3.3). **Pendente** — é
+  instalação de pacote de sistema, e depende de decisão do usuário.
 - `tools/pes2/iso.py`: listar, extrair e **reinjetar** arquivo do ISO
   preservando setor e cauda EDC/ECC. Reinjeção é o que permite o ciclo de
-  `poke`; sem ela cada teste é edição manual em hexeditor.
+  `poke`; sem ela cada teste é edição manual em hexeditor. **Feito** —
+  `ls`, `extract`, `inject`, `anchors`, `roundtrip`.
 - Guarda de round-trip: extrair todos os 252 arquivos e reinjetá-los sem
   mudança tem de devolver o `.bin` **byte a byte idêntico**. Se não devolver,
-  a ferramenta está errada e tudo o que vier depois é ruído.
+  a ferramenta está errada e tudo o que vier depois é ruído. **Feito e
+  verde**, com controle negativo — ver §5.1.
+
+#### 5.1 O que a Fase 0 mediu
+
+`python3 tools/pes2/iso.py roundtrip <track1.bin>` copia a imagem, lê e
+regrava os **244** arquivos legíveis e compara: **byte a byte idêntico**.
+
+Guarda verde não vale nada sem prova de que sabe ficar vermelha, então o
+mesmo caminho de escrita foi exercitado com um controle negativo: trocar
+o `P` de `PIEMONTE` por `X` em `SELECT.BIN` mudou **exatamente um byte**
+em toda a imagem de 445 MiB, no offset absoluto **2002800** — que é o que
+a aritmética de setor prevê, e ele cai dentro da área de dados
+(`24..2071`), com cabeçalho e cauda intactos.
+
+O caso não é trivial: o registro fica no offset 3272 de um arquivo que
+começa no LBA 850, então **atravessa a fronteira de setor** — 3272 ÷ 2048
+= LBA 851, resto 1224, mais os 24 de cabeçalho = 1248. É exatamente a
+armadilha da §6.3, e ela está coberta.
+
+O `anchors` resolve os oito marcadores da §1.13 nas duas releases, cada um
+ocorrendo uma única vez.
+
+#### 5.2 Oito arquivos que a ferramenta não toca, e por quê
+
+O levantamento da §1.3 contou 252 arquivos. Nem todos são legíveis a
+partir do Track 1, e isso é achado, não defeito:
+
+| Arquivos | Estado | Motivo |
+|---|---|---|
+| 244 | `form1` | setores Form 1, 2.048 B de dados — tudo que interessa |
+| 1 | `form2` | `/MOVIE/ISS_2002.STR`: setores Form 2, 2.324 B e sem ECC |
+| 7 | `outside` | `/SD/DA/*.DA`: LBA 198606 em diante, **depois do fim do Track 1** (198456 setores) |
+
+Os sete `.DA` moram nas **trilhas de áudio**. O diretório ISO cobre o
+disco inteiro e por isso nomeia arquivos que, num dump multi-track, estão
+em *outro arquivo*. Uma ferramenta que não confira isso lê depois do fim
+do `.bin` e recebe menos bytes do que pediu — foi o primeiro defeito que a
+guarda pegou. O `iso.py` classifica cada arquivo em `form1`/`form2`/
+`outside` e recusa os dois últimos em vez de adivinhar.
+
+Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
 
 ### Fase 1 — Diferencial barato
 
@@ -633,25 +676,32 @@ converte para absoluto na hora de gravar; misturar os dois é como se erra.
 Ver §1.1. Uma ferramenta que abra o `.cue` e concatene as trilhas produz
 offsets que não existem em lugar nenhum.
 
-### 6.5 Offset constante entre releases grava lixo
+### 6.5 O diretório ISO nomeia arquivo que não está no Track 1
+
+Ver §5.2. Os sete `/SD/DA/*.DA` começam no LBA 198606 e o Track 1 acaba
+em 198456. Ler por LBA sem conferir o limite devolve menos bytes do que se
+pediu, em silêncio, e o erro só aparece três camadas adiante. `iso.py`
+levanta `OutsideTrack`.
+
+### 6.6 Offset constante entre releases grava lixo
 
 Ver §1.12. Quatro das sete cópias de tabela estão no mesmo offset em
 `(EsIt)` e `(EnFrDe)`, e três não. Um mapa constante calibrado numa das
 duas parece funcionar na outra — até tocar `SELECTC.BIN`, deslocado
 8.604 bytes. Ancorar por marcador (§1.13) é o que evita isso.
 
-### 6.6 Não recalcular EDC/ECC, e não "consertar"
+### 6.7 Não recalcular EDC/ECC, e não "consertar"
 
 Preservar os 280 B de cauda. O jogo não confere; corrigir muda bytes que
 nenhum teste espera e destrói a comparação de round-trip.
 
-### 6.7 Os nomes licenciados não estão lá
+### 6.8 Os nomes licenciados não estão lá
 
 Ver §1.9. Procurar `JUVENTUS` e concluir "está criptografado" custou uma
 varredura de delta na imagem inteira. A release europeia é **inteiramente
 fictícia nos clubes**; as seleções, essas, têm nome real.
 
-### 6.8 Não estender o `we2002_core` para PES2
+### 6.9 Não estender o `we2002_core` para PES2
 
 O core está verificado byte a byte contra o `ed.exe` em dois níveis. Um
 ramo de "que jogo é este" dentro dele põe em risco a única coisa
@@ -659,7 +709,7 @@ verificada do repositório, em troca de reuso de umas poucas funções. Se
 algo tiver de ser compartilhado, que seja copiado com atribuição no
 comentário.
 
-### 6.9 Regra do `:98` vale aqui também
+### 6.10 Regra do `:98` vale aqui também
 
 Emulador é GUI. Se ele for dirigido por script, roda no `DISPLAY=:98`,
 pelas razões do [CLAUDE.md](../CLAUDE.md). Sessão de mapeamento manual, com
@@ -672,7 +722,7 @@ como a regra manda.
 
 | Fase | Entregável |
 |---|---|
-| 0 | `tools/pes2/iso.py` + teste de round-trip de extração/reinjeção |
+| 0 | `tools/pes2/iso.py` + teste de round-trip de extração/reinjeção — **feito**, menos o emulador |
 | 1 | tabela de âncoras `OFS_* → (arquivo, offset relativo)`; diff entre releases |
 | 2 | inventário de texto; contagem e ordem canônica; primeiro `poke` verificado |
 | 3 | estrutura do registro de jogador |
