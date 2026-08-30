@@ -53,10 +53,17 @@ BigCj34**. A lista do Dzanic os traz na ordem do disco, e os dois FAQs
 concordam no mapeamento (`MEDOC` = Bordeaux, `NORMANDIE` = PSG) — é erro
 de ordem de digitação, não ambiguidade.
 
-A mesma inversão vale para os elencos: a Irlanda no disco termina em
-`Given` (goleiro), enquanto os FAQs a começam por `Given`. **O disco
-guarda cada elenco na ordem inversa da de exibição.** Um editor que
-mostre a lista na ordem do arquivo apresenta o goleiro por último.
+A mesma inversão vale para os elencos **de `SELECTC.BIN`**: a Irlanda ali
+termina em `Given` (goleiro), enquanto os FAQs a começam por `Given`. Um
+editor que mostre essa lista na ordem do arquivo apresenta o goleiro por
+último.
+
+**Mas a inversão não é regra do disco.** Medido em 2026-08-30 contra o
+memory card do DuckStation, que guarda os 54 elencos rotulados: os 49 que
+moram em `SELECTC.BIN` estão invertidos, e a França e a Alemanha, que
+moram em `SLES_039.57`, estão na ordem direta. A ordem é propriedade da
+tabela, e o mapa tem de declará-la por tabela — como já acontece com o
+esquema de registro. Ver a §3.3 do plano.
 
 O agrupamento por liga confirma a leitura: os seis últimos índices são os
 clubes ingleses, os cinco anteriores os espanhóis, e assim por diante —

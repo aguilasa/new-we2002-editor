@@ -263,9 +263,12 @@ contra o disco casou **27 desses 63 com 20 ou mais dos 23 nomes** (8 com os
 23 em cheio). O que ainda falta é a fronteira exata de cada bloco, não o
 tamanho.
 
-Uma coisa esse alinhamento já provou: **o disco guarda cada elenco na ordem
-inversa da de exibição.** A Irlanda termina em `Given`, o goleiro, que os
-FAQs listam primeiro. A mesma inversão vale para a lista de clubes. Ver
+Uma coisa esse alinhamento sugeriu: em `SELECTC.BIN` o elenco está na
+ordem inversa da de exibição — a Irlanda termina em `Given`, o goleiro,
+que os FAQs listam primeiro. **Mas isso não vale para o disco inteiro.**
+A §3.3 mediu os 54 elencos contra o memory card: os 49 que moram em
+`SELECTC.BIN` estão invertidos, e os dois que moram em `SLES_039.57`
+estão na ordem direta. A ordem é propriedade da tabela. Ver
 [/docs/PES2-NOMES.md](/docs/PES2-NOMES.md).
 
 ### 1.8 O que o disco **não** tem: o clube real
@@ -461,26 +464,110 @@ a mesma disciplina do resto do repositório:
 `cdrdao`, Python 3, ImageMagick, `xdotool`, `ffmpeg`, `Xvfb`, Wine (via
 Bottles), Bottles, PCSX2, e as ferramentas deste repositório.
 
-### 3.2 O que falta, e é bloqueante
+### 3.2 O emulador: **resolvido em 2026-08-30**
+
+O plano listava o emulador como bloqueante das Fases 2–6. Ele já está na
+máquina, instalado pelo usuário em 2026-08-29:
+
+| | |
+|---|---|
+| binário | `~/Applications/DuckStation-x64.AppImage` (não é Flatpak, e não está no `PATH`) |
+| dados | `~/.local/share/duckstation/` |
+| BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
+| biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |
+| já rodou | sim — há `gameicons/SLES-03957.png` e um memory card gravado |
+
+Isso destrava o oráculo da §4.1 e, de brinde, a alavanca da §4.2.3 já
+tem munição: ver a §3.3.
+
+O que ainda falta, e não bloqueia agora:
 
 | Falta | Para quê | Bloqueia |
 |---|---|---|
-| **Emulador de PlayStation** — DuckStation ou Mednafen | rodar o jogo e ver o efeito de um `poke` | Fases 2–6 |
-| **Debugger de RAM** no emulador (DuckStation tem; Mednafen tem via `mednafen`+`debugger`) | achar a struct carregada e correlacionar com o disco | Fase 3 |
-| `numpy` | varredura de padrão em 466 MB em tempo civilizado | Fase 2 |
-| Desmontador MIPS — Ghidra, ou `radare2`/`rizin` | ler o código que consome a tabela, quando a estatística empacar | Fase 4 |
+| `numpy` | varredura de padrão em 466 MB em tempo civilizado | conforto, não capacidade |
+| Desmontador MIPS — Ghidra, ou `radare2`/`rizin` | ler o código que consome a tabela, quando a estatística empacar | Fase 4, se ela empacar |
 
-Nenhum está instalado. PCSX2 **não serve** — é PS2.
+PCSX2 **não serve** — é PS2.
 
-### 3.3 Confirmar antes de começar
+### 3.3 O memory card já existente, e o que ele entrega
 
-1. O jogo dá boot no emulador escolhido, a partir do `.cue` multi-track, e
-   chega ao menu de seleção de time.
-2. O emulador tem *save state* e dump de RAM (`.sav`/`.state` ou o painel de
-   memória), porque a Fase 3 depende disso.
-3. O emulador aceita cartão de memória em `.mcr`, porque a Fase 3.2 depende
-   disso.
-4. Cópia do Track 1 no scratchpad, com o `.cue` ajustado para apontá-la.
+`~/.local/share/duckstation/memcards/…(Es,It)_1.mcd` — 128 KiB, formato
+cru de cartão PSX, o mesmo `.mcr` que a §4.2.3 pede. Três slots ocupados:
+
+| Slot | Nome | Tamanho | O que é |
+|---|---|---|---|
+| 1–2 | `BESLES-03957PES-OPT` | 16 KiB | **as opções e a tabela de nomes editável** |
+| 3 | `BESLES-03957PES-D4A` | 8 KiB | uma formação salva |
+
+Os dois nomes de arquivo confirmam as strings `LES-03957PES-OPT` e
+`LES-03957PES-D0A` já vistas em `SELECT.BIN` — o jogo monta o nome com um
+dígito variável.
+
+**O título do save está em Shift-JIS de largura dupla, e o
+`KanjiToAscii` do WE2002 o decodifica sem uma linha de adaptação:**
+`ProEvolutionSoccer2 OPTION FILE` e `ProEvolutionSoccer2 FORMATION1`.
+Mais uma confirmação da §1.4 — é a mesma engine.
+
+#### A tabela de nomes do cartão
+
+Dentro do `PES-OPT`, no offset **516**, começam **1.242 registros de 10
+bytes fixos**, preenchidos com `NUL` à direita. E 1.242 = **54 × 23**
+exato: as 54 seleções reais, 23 jogadores cada. Bate com o que o FAQ do
+BigCj34 diz — só jogador de seleção é editável.
+
+Os 1.242 nomes existem todos em `SELECTC.BIN`. Isso torna o cartão uma
+**chave de alinhamento**: cada bloco de 23 do cartão é um elenco
+rotulado, e procurá-lo no disco dá a fronteira exata daquele elenco.
+
+#### As fronteiras de elenco, fechadas
+
+Foi o que se fez. Dos 54 elencos:
+
+| | |
+|---|---|
+| **49** | localizados exatamente em `SELECTC.BIN`, offsets de 19344 a 30640 |
+| **2** | França e Alemanha, exatamente em `SLES_039.57` (offsets 286100 e 287480) |
+| 3 | Noruega, Argentina e Austrália — 19, 15 e 21 dos 23 nomes existem, o resto difere |
+
+Isso resolve o que a §1.7 deixou em aberto: o tamanho de elenco é 23 e as
+fronteiras agora são medidas, não estimadas.
+
+Os três parciais **não são defeito, são material da Fase 3**: o cartão
+guarda o nome *editado* e o disco o original, então cada divergência é um
+par rotulado de graça. É o diferencial da §4.2.3 acontecendo sem esforço.
+
+#### A ordem de armazenamento é por tabela, não do jogo
+
+Os 49 casaram **todos em ordem reversa** à do cartão, e nenhum em ordem
+direta. Mas França e Alemanha, no executável, casaram em ordem
+**direta**.
+
+Ou seja: `SELECTC.BIN` guarda o elenco de trás para frente e
+`SLES_039.57` de frente para trás. **A ordem é propriedade da tabela.**
+Um leitor que assuma uma delas inverte 23 jogadores por time em metade
+das tabelas — e o erro é invisível, porque a lista continua parecendo um
+elenco.
+
+### 3.4 Confirmar antes de começar
+
+| | Estado |
+|---|---|
+| 1. O jogo dá boot a partir do `.cue` multi-track | **verificado em 2026-08-30, no `:98`** — atravessa o vídeo de abertura, chega à tela-título e à partida de demonstração, com 3D em tempo real |
+| 2. O emulador tem *save state* e dump de RAM | disponível; nenhum feito ainda |
+| 3. O emulador aceita cartão em `.mcr` | **sim** — o `.mcd` do DuckStation é o mesmo formato cru de 128 KiB, e já foi lido (§3.3) |
+| 4. Cópia do Track 1 no scratchpad | **feita** — as oito faixas, 571 MiB |
+
+Tudo isso roda no **`DISPLAY=:98`**, por decisão do usuário em 2026-08-30,
+que é a regra do [CLAUDE.md](../CLAUDE.md) sem exceção para este projeto.
+
+A receita está em **`tools/pes2/run_duckstation.sh`**, e não em histórico
+de shell, porque quase nada nela é adivinhável — ver a §6.11. Ele imprime
+o PID e o id da janela, prontos para um script de direção.
+
+O `run_duckstation.sh` usa um `XDG_DATA_HOME` **isolado**: configuração
+própria, cartão de memória próprio, e só o BIOS emprestado por link
+simbólico. O `settings.ini` e o memory card do usuário nunca são escritos
+— o cartão dele é dado de save real e é insubstituível.
 
 ---
 
@@ -540,8 +627,9 @@ que editar o gerado falhe em teste. Nunca o contrário.
 
 ### Fase 0 — Infra
 
-- Instalar emulador + debugger; confirmar boot (§3.3). **Pendente** — é
-  instalação de pacote de sistema, e depende de decisão do usuário.
+- Instalar emulador + debugger; confirmar boot (§3.4). **Feito** — o
+  DuckStation já estava instalado (§3.2) e o boot foi verificado no
+  `:98`, com a receita versionada em `tools/pes2/run_duckstation.sh`.
 - `tools/pes2/iso.py`: listar, extrair e **reinjetar** arquivo do ISO
   preservando setor e cauda EDC/ECC. Reinjeção é o que permite o ciclo de
   `poke`; sem ela cada teste é edição manual em hexeditor. **Feito** —
@@ -620,6 +708,10 @@ Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
   É esse teste que fecha a fase, não a varredura.
 
 ### Fase 3 — O registro de jogador
+
+*(Começou de graça: a §3.3 já localizou a tabela de nomes do cartão, as 54
+fronteiras de elenco e três times com nome divergente entre cartão e
+disco.)*
 
 - Diferencial de memory card (§4.2.3): um atributo por vez, `.mcr` antes e
   depois, isolar o byte e o bit.
@@ -711,10 +803,53 @@ comentário.
 
 ### 6.10 Regra do `:98` vale aqui também
 
-Emulador é GUI. Se ele for dirigido por script, roda no `DISPLAY=:98`,
-pelas razões do [CLAUDE.md](../CLAUDE.md). Sessão de mapeamento manual, com
-o usuário olhando a tela, é caso legítimo de `:1` — **mas pergunte antes**,
-como a regra manda.
+Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
+mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
+de `:1` para este projeto.
+
+### 6.11 Nove armadilhas ao dirigir o DuckStation
+
+Todas medidas em 2026-08-30, todas resolvidas dentro do
+`tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
+aponta para o lugar errado.
+
+1. **O AppImage não está no `PATH`** e não responde a `--help`. É `-help`,
+   com um traço só.
+2. **Um diálogo pede para criar atalho de lançador** na primeira execução
+   com um `XDG_DATA_HOME` novo, e **bloqueia o boot**. Parece o emulador
+   travando.
+3. **Não existe `-renderer` na linha de comando.** Sem GPU no Xvfb, o
+   `Renderer = Software` tem de ir para o `settings.ini`.
+4. **Um `settings.ini` escrito à mão não tem binding nenhum**, e o
+   DuckStation não cria os de teclado sozinho. Toda tecla é descartada em
+   silêncio e o jogo fica no laço de atração para sempre — parece que o
+   `xdotool` não funciona. (A configuração do usuário desta máquina só tem
+   binding de gamepad SDL, então copiá-la não resolve.)
+5. **A janela nasce fora da tela.** Sem window manager ninguém a posiciona,
+   e ela escolheu `x=2480` num display de 1280. O `import` falha com
+   `Resource temporarily unavailable`, que é a mesma mensagem de janela
+   obscurecida por modal — e manda investigar a coisa errada.
+6. **Uma instância morta ainda responde ao `xdotool search`.** Capturar
+   por nome pega a janela velha e devolve quadro preto. Casar pelo
+   `_NET_WM_PID` e conferir se o processo vive.
+7. **`pkill -f DuckStation` mata o próprio shell**, porque o padrão casa
+   com a linha de comando de quem o executa. Matar por PID.
+8. **`SIGTERM` deixa o DuckStation parado num "Confirm Exit"** para
+   sempre, mesmo com `ConfirmPowerOff = false`. É `kill -9`.
+9. **O AppImage roda como `AppRun`, não como `DuckStation-x64`.** Um
+   `pgrep -x DuckStation-x64` não casa com nada, e a limpeza de instância
+   anterior vira no-op — cada execução deixa a anterior viva. O sintoma
+   aparece longe da causa: janelas órfãs no `:98` que nenhum processo
+   *aparentemente* sustenta, e uma captura que pega o jogo errado. Casar
+   os dois nomes, conferir pelo `/proc/<pid>/cmdline`, e nunca matar o
+   próprio script.
+
+   Duas caudas disso, medidas ao consertar: o AppImage **deixa a
+   montagem FUSE** em `/tmp/.mount_Duck*` quando morre por `kill -9`; e
+   **desmontar antes de o processo soltar o squashfs falha em silêncio**,
+   deixando o mount para trás. Esperar a morte, depois desmontar, com
+   retentativa. O `run_duckstation.sh --kill` faz isso e é o jeito certo
+   de encerrar.
 
 ---
 
