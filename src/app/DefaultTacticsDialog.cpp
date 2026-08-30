@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QGroupBox>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -102,6 +103,32 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
 
 DefaultTacticsDialog::~DefaultTacticsDialog() {
     delete ui_;
+}
+
+void DefaultTacticsDialog::keyPressEvent(QKeyEvent* event) {
+    // Return confirms the dialog, which is the only way out of it.
+    //
+    // ed.rc:627 declares the OK button NOT WS_VISIBLE, and rc2ui.py translates
+    // that faithfully. In MFC an invisible DEFPUSHBUTTON is still the dialog's
+    // default, so Return reaches IDOK and EndDialog runs; Qt skips a default
+    // button that is not visible -- measured with setDefault(true) on this very
+    // button, which changed nothing. Without a way out, exec() kept blocking
+    // the main dialog and the write button could not be reached at all: the
+    // preset edits, which are already committed field by field into
+    // db_.preset_formations, never got a chance to be saved. See CORR-WTE-131.
+    //
+    // The key event only arrives here after the focused QLineEdit has ignored
+    // it, and QLineEdit emits returnPressed/editingFinished first -- so the
+    // field being typed into is committed before the dialog closes, which is
+    // the order the original had too.
+    if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) &&
+        (event->modifiers() & ~Qt::KeypadModifier) == Qt::NoModifier) {
+        accept();
+        return;
+    }
+    // Escape and everything else stay with QDialog, which rejects on Escape --
+    // the same exit IDCANCEL gave in the original.
+    QDialog::keyPressEvent(event);
 }
 
 int DefaultTacticsDialog::Current() const {

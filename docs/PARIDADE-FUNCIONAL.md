@@ -498,7 +498,7 @@ disco no fluxo dos golden tests, a última porque só afeta o arquivo lateral.
 | `OnEsportaTot` / `OnImportaTot` (`.tt2002`) | `CMD_ESP_TOT` / `CMD_IMP_TOT` | idem, `ed.rc:368,369` |
 | Item "About" no menu de sistema | `OnSysCommand` + `CAboutDlg` | `QDialog` não tem menu de sistema; a caixa não editava nada |
 | Ícone desenhado com a janela minimizada | `OnPaint` | sem equivalente, não faz falta |
-| `Return` fecha o editor | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada**, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois |
+| `Return` fecha o editor **(diálogo principal)** | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada** ali, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois. **Vale só para o `MainWindow`:** o `DefaultTacticsDialog` trata `Return` e confirma, porque lá o botão de confirmação é `NOT WS_VISIBLE` e sem isso o diálogo não teria saída (§8.7, [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)) |
 | Pacote de distribuição (AppImage/Flatpak) | — | decisão da Fase 6 |
 
 ---
@@ -760,12 +760,19 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 - [x] Aplicar os 16 presets num time — os dezesseis em sequência e o preset 1
       isolado dão `raw_formation` diferentes entre si, os dois idênticos ao
       oráculo
-- [ ] Editar e renomear um preset no `DefaultTacticsDialog` — **medido, e
-      reprovou**: o `ed.exe` grava 7 faixas / 61 bytes e o port sai
-      `IDENTICAL`. [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
+- [x] Editar e renomear um preset no `DefaultTacticsDialog`
+      (`tools/par/8.7-preset-renomear.sh`) — reprovou na primeira medição, com
+      o `ed.exe` gravando 7 faixas / 61 bytes contra o `IDENTICAL` do port, e
+      foi corrigido pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md).
+      Remedido em 2026-08-30: o port grava **7 faixas / 48 bytes** contra a
+      imagem original, com as duas do preset —
+      `before first offset+374780` (o nome) e
+      `OFS_TEAM_MIXED_CASE_NAME+223676` (a geometria do slot) — nos mesmos
+      offsets do oráculo, e o golden sai `OK`
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
-      — **bloqueado pelo mesmo**: `CMD_IMP` e `CMD_EXP` moram dentro do
-      `DefaultTacticsDialog`
+      — `CMD_IMP` e `CMD_EXP` moram dentro do `DefaultTacticsDialog`, que
+      **deixou de ser um beco sem saída** com a
+      [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md); falta medir
 
 > **O `IDOK` do `DefaultTacticsDialog` é `NOT WS_VISIBLE` no próprio `ed.rc`**
 > (linha 627: `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`), e o
@@ -775,17 +782,25 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 >
 > **Os dois lados aplicam as edições campo a campo, e os dois são modais.** O
 > port escreve direto em `db_.preset_formations`, que o `OnPresetTactics` passa
-> por ponteiro; nada ali espera pelo `accept()`. O que diverge é **fechar o
+> por ponteiro; nada ali espera pelo `accept()`. O que divergia era **fechar o
 > diálogo**: no MFC o `DEFPUSHBUTTON` invisível continua sendo o default, e
 > `Return` roda o `EndDialog` — só então o clique em `CMB_WRITE` alcança o
-> diálogo principal. O Qt não ativa por `Return` um botão invisível, o `exec()`
-> segue bloqueando, e o `Database::Save()` nunca roda.
+> diálogo principal. O Qt não ativava nada, o `exec()` seguia bloqueando, e o
+> `Database::Save()` nunca rodava.
 >
 > Medido em 2026-08-30: `ed.exe` grava 8 faixas / 63 bytes contra a imagem
-> original, port sai `IDENTICAL`. E o **oráculo sem o `Return` final** sai
+> original, port saía `IDENTICAL`. E o **oráculo sem o `Return` final** sai
 > `a gravacao nao confirmou`, também `IDENTICAL` — é o controle que mostra que
 > o `Return` fecha o modal, e não que o original grave com ele aberto.
-> [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
+>
+> **O conserto foi um `keyPressEvent`**, não um botão default:
+> `setDefault(true)` no `IDOK` invisível foi medido e **não muda nada** — o Qt
+> pula um default que não está visível. O `DefaultTacticsDialog` passou a
+> tratar `Return` e chamar `accept()`; `Escape` continua com o `QDialog`, que
+> rejeita, como o `IDCANCEL` fazia. O evento só chega ao diálogo depois de o
+> `QLineEdit` focado ignorá-lo, e ele emite `editingFinished` antes — então o
+> campo em edição é gravado antes de a janela fechar, na mesma ordem do
+> original. [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
 >
 > Quatro caminhos de fechamento foram descartados por medição, e não vale
 > repeti-los: `Return` sem foco, `Return` com `windowfocus`,

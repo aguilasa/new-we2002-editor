@@ -3,7 +3,7 @@ id: CORR-WTE-131
 title: "Correção: as edições do DefaultTacticsDialog não chegam ao disco no port, e chegam no ed.exe"
 type: correção
 category: paridade
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -119,14 +119,14 @@ está tomada:
 
 ## Verificação
 
-- [ ] `golden_check.sh` em modo `gui` com `tools/par/8.7-preset-renomear.sh`
+- [x] `golden_check.sh` em modo `gui` com `tools/par/8.7-preset-renomear.sh`
       sai `OK`
-- [ ] O preset renomeado e a geometria editada aparecem no disco do port, nos
+- [x] O preset renomeado e a geometria editada aparecem no disco do port, nos
       mesmos offsets do `ed.exe`
-- [ ] O item 5 da §8.7 (`.t2002`) destrava: `CMD_IMP` e `CMD_EXP` moram nesse
+- [x] O item 5 da §8.7 (`.t2002`) destrava: `CMD_IMP` e `CMD_EXP` moram nesse
       diálogo e hoje não têm como ser exercitados
-- [ ] `ctest` do `newWe2002` continua verde
-- [ ] `roms/` intocada
+- [x] `ctest` do `newWe2002` continua verde
+- [x] `roms/` intocada
 
 ## Log de Execução
 
@@ -193,4 +193,70 @@ divergência conhecida por uma não medida — o mesmo erro que a
 
 ---
 
-## Log de Execução *(a preencher quando a correção for implementada)*
+## Log de Execução — 2026-08-30, a implementação
+
+**Executado em:** 2026-08-30
+
+**Resumo do que foi feito:**
+
+Medida a saída 1 e **descartada**: `setDefault(true)` no `IDOK` invisível
+**não muda nada** — o diálogo continua de pé depois do `Return` e a cópia sai
+`IDENTICAL`. O Qt pula um botão default que não está visível, que era
+exatamente a dúvida que a seção **Correção** mandava resolver antes de
+escolher.
+
+Implementada a **saída 2**: `DefaultTacticsDialog::keyPressEvent` trata
+`Return`/`Enter` sem modificador e chama `accept()`; todo o resto, `Escape`
+inclusive, segue com o `QDialog`, que rejeita — a mesma saída que o `IDCANCEL`
+dava no original.
+
+A ordem sai de graça e é a certa: o evento só chega ao diálogo depois de o
+`QLineEdit` focado ignorá-lo, e ele já emitiu `returnPressed`/
+`editingFinished` — então o campo em edição é gravado **antes** de a janela
+fechar, como no MFC.
+
+**Medições, na `ptbr-remaster.bin` com `8.7-prelude.sh` + `8.7-preset-renomear.sh`:**
+
+| | diálogo depois do roteiro | cópia contra a imagem original |
+|---|---|---|
+| antes | de pé | `IDENTICAL` |
+| saída 1 (`setDefault`) | **de pé** | `IDENTICAL` |
+| saída 2 (`keyPressEvent`) | **fechou** | **7 faixas / 48 bytes** |
+
+As duas faixas do preset saem nos mesmos offsets do oráculo:
+`before first offset+374780` (o nome) e `OFS_TEAM_MIXED_CASE_NAME+223676` (a
+geometria do slot). As outras cinco são as não-idempotências que toda gravação
+produz. O oráculo dá 8 faixas / 63 bytes porque escreve também o slot 64
+conhecido, que o port preserva — e é por isso que o golden fecha:
+
+```text
+$ R="$(cat tools/par/8.7-prelude.sh tools/par/8.7-preset-renomear.sh)"
+$ WE2002_GOLDEN_MODE=gui GOLDEN_EDIT="$R" GOLDEN_GUI_EDIT="$R" \
+    bash tools/golden_check.sh roms/ptbr-remaster.bin
+OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)
+```
+
+`ctest --test-dir build -E golden` 4/4; `we2002_tests` 69 checks, 0 falhas.
+
+**Problemas encontrados:**
+
+**A saída "fiel" não existia.** A seção Correção classificava o botão default
+como "a que reproduz o original" e o `keyPressEvent` como a alternativa; medido,
+a primeira não funciona no Qt e a segunda é a única que reproduz o efeito. O
+que se reproduz é o **comportamento** — `Return` confirma —, não o mecanismo,
+porque o mecanismo do MFC não tem equivalente aqui.
+
+**O item 5 da §8.7 continua `[ ]`, e isso é de propósito.** O que a CORR
+destravou foi a saída do diálogo: `CMD_IMP` e `CMD_EXP` agora podem ser
+exercitados e o resultado pode ser gravado. Medir a ida e volta do `.t2002` é o
+item da [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md), não desta correção.
+
+**Arquivos criados/modificados:**
+
+- `src/app/DefaultTacticsDialog.hpp` — a declaração do `keyPressEvent`
+- `src/app/DefaultTacticsDialog.cpp` — o override, com o porquê e a medição da
+  saída descartada
+- `docs/PARIDADE-FUNCIONAL.md` — §8.7: o item 4 fechado com as faixas, o item 5
+  destravado, e a nota do `IDOK` dizendo o que o conserto foi; §7, para a linha
+  do `Return` não valer para o `DefaultTacticsDialog`
+- `docs/tasks/PAR-TASK-06.md` — os dois itens e o Log

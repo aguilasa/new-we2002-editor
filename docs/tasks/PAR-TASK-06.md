@@ -57,8 +57,12 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
       inventário. **Não precisa ser refeito aqui** — mas se o item 2 acima
       mexer no `OnRoleShown` ou no `eventFilter`, re-rode os dois roteiros
 - [x] Aplicar os 16 presets num time
-- [ ] Editar e renomear um preset no `DefaultTacticsDialog`  ← **medido, reprovou: CORR-WTE-131**
-- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original  ← **bloqueado pela CORR-WTE-131**
+- [x] Editar e renomear um preset no `DefaultTacticsDialog` — reprovou aqui, e
+      foi fechado pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md); roteiro
+      `tools/par/8.7-preset-renomear.sh`
+- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
+      — **destravado** pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md), que
+      deu saída ao diálogo onde `CMD_IMP` e `CMD_EXP` moram; falta medir
 
 O quinto item é o mais valioso da série inteira: **troca de arquivo nos dois
 sentidos** entre port e original é a prova de formato mais forte que existe
@@ -118,8 +122,9 @@ diz `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`. O botão é invisíve
 
 O que diverge é o efeito, e só se vê medindo os dois lados **separadamente**:
 com o mesmo roteiro, o `ed.exe` grava **7 faixas / 61 bytes** e o port sai
-**`IDENTICAL`**. O diálogo é inutilizável no port.
-[CORR-WTE-131](/docs/tasks/CORR-WTE-131.md).
+**`IDENTICAL`**. O diálogo era inutilizável no port — **e deixou de ser** em
+2026-08-30, com a [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md): o port agora
+grava 7 faixas / 48 bytes, nos mesmos offsets, e o golden sai `OK`.
 
 > **A explicação que escrevi aqui para esse `IDENTICAL` estava errada**, e a
 > execução da CORR-WTE-131 a mediu em 2026-08-30. Eu disse que "no MFC o

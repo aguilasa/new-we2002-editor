@@ -11,6 +11,7 @@
 #include "we2002/Team.hpp"
 
 class QComboBox;
+class QKeyEvent;
 class QLineEdit;
 class QPushButton;
 
@@ -24,6 +25,9 @@ class DefaultTacticsDialog : public QDialog {
 public:
     DefaultTacticsDialog(we2002::Formation* formations, QWidget* parent = nullptr);
     ~DefaultTacticsDialog() override;
+
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
 
 private slots:
     void OnFormationSelected();
