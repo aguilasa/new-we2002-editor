@@ -79,4 +79,29 @@ if(Python3_FOUND)
     add_test(NAME tasks
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/check_tasks.py)
+
+    # PES2 (docs/PLAN-PES2-PSX.md) is a separate project that shares no code
+    # with we2002_core, but its tools are Python and belong in the same run.
+    #
+    # Two tests, because the two things worth guarding have very different
+    # costs. The self-test builds a 24-sector disc in a temporary directory
+    # and exercises the sector arithmetic, the Form 1 / Form 2 split and the
+    # three refusals of iso.py -- it needs nothing and runs everywhere.
+    add_test(NAME pes2_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/selftest.py)
+
+    # The other needs a ~445 MiB disc image, which the repository cannot
+    # carry. Point WE2002_PES2_IMAGE at one and it re-measures the anchors of
+    # plan 1.13, the table counts and digests of 1.6, and the appendix
+    # docs/PES2-NOMES.md against the disc; WE2002_PES2_IMAGE_B, _CARD and
+    # _TMPDIR add the release diff, the memory-card alignment and the
+    # negative control. Without WE2002_PES2_IMAGE it reports itself skipped,
+    # the same way the golden tests do.
+    add_test(NAME pes2_image
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/check_image.py)
+    set_tests_properties(pes2_image PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 600)
 endif()
