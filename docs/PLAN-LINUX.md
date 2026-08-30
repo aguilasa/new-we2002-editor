@@ -1219,9 +1219,17 @@ Nenhum dos três muda byte de saída — os golden tests provam.
   `DLG_PTATTICHE` declaram um.
 
   No original o `Return` ia para o `IDOK` implícito do `CDialog` e **fechava** o
-  editor (o `CanExit()` é um stub que retorna `TRUE`). Agora não faz nada, que
-  é mais seguro que os dois comportamentos. `Escape` continua fechando, como
-  nos dois.
+  editor (o `CanExit()` é um stub que retorna `TRUE`). No diálogo principal
+  agora não faz nada, que é mais seguro que os dois comportamentos. `Escape`
+  continua fechando, como nos dois.
+
+  **Um dos dois `DEFPUSHBUTTON` obrigou a exceção.** O do `DLG_PTATTICHE` é
+  `NOT WS_VISIBLE` (`ed.rc:627`), e o Qt **pula** um botão default invisível —
+  medido: `setDefault(true)` nele não muda nada. Como os dois lados são modais,
+  isso deixava o `DefaultTacticsDialog` sem saída e a gravação inalcançável. O
+  diálogo passou a tratar `Return` no `keyPressEvent` e chamar `accept()`
+  (CORR-WTE-131). Reproduz o comportamento, não o mecanismo — aqui o mecanismo
+  do MFC não tem equivalente.
 
 - **`ResolveMlLink` estourava os limites.** `START_LINK[lk[0]]` com `lk[0]`
   sendo um byte — até 255 — numa tabela de 120 entradas, e o resultado indexando

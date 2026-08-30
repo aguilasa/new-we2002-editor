@@ -605,6 +605,15 @@ arbitrária, e um dos candidatos aplica formação predefinida sobre o time
 selecionado. Quem decide isso é o `rc2ui.py`; só `DEFPUSHBUTTON` vira default,
 que é o que o `.rc` quer dizer.
 
+**E `DEFPUSHBUTTON` invisível não vira nada.** O `IDOK` do
+`DefaultTacticsDialog` é `NOT WS_VISIBLE` (`ed.rc:627`); no MFC ele continua
+sendo o default e `Return` fecha o diálogo, no Qt um default invisível é
+**pulado** — medido, `setDefault(true)` nele não muda nada. Como os dois lados
+são modais, o diálogo ficava sem saída e a gravação inalcançável. Ele trata
+`Return` no `keyPressEvent` e chama `accept()`; `Escape` segue com o `QDialog`.
+Ao mexer num diálogo cujo botão de confirmação não aparece na tela, confira se
+ele tem como ser confirmado.
+
 ### Código gerado — não editar à mão
 
 `src/core/Database.cpp`, `Tables.cpp`, `include/we2002/Offsets.hpp`,
