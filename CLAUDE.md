@@ -520,12 +520,87 @@ Duas releases que não vale usar:
   divergem em 3 bytes de dados (patch anti-pirataria em código MIPS), fora de
   qualquer região do editor; comparação na seção 3 do
   [PLAN-LINUX.md](docs/PLAN-LINUX.md).
-- `Pro Evolution Soccer 2 (Europe) (EnFrDe)` — **NÃO USAR.** Layout diverge
-  após ~2 MB; o editor corrompe a imagem.
+- `Pro Evolution Soccer 2 (Europe) (EnFrDe)` — **NÃO USAR com o
+  `newWe2002`.** Layout diverge após ~2 MB; o editor corrompe a imagem.
+  A proibição é sobre este editor, e só. **PES2 é outro jogo, com projeto
+  próprio** ([docs/PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md)), e ali as duas
+  releases europeias — `(EsIt)` e `(EnFrDe)` — são justamente as duas
+  amostras de trabalho. Ver a seção de PES2 mais abaixo.
 
 **Sempre trabalhar sobre cópia** — o editor grava in-place e cada imagem tem
 ~474 MB. As de `roms/` são as originais: copie para o scratchpad antes de
 apontar o editor ou o golden test para elas.
+
+## PES2 (PSX) — projeto separado, em `tools/pes2/`
+
+*Pro Evolution Soccer 2* (PlayStation, Konami, 2002, `SLES-03957`) é um
+**quarto projeto** deste repositório, ao lado do `newWe2002`, do `wte/` e
+dos planos de Windows. O objetivo é mapear o banco de times e jogadores da
+imagem de CD e tornar viável um editor escrito do zero — **não existe
+editor conhecido para ele**, e portanto não existe oráculo. O plano é
+[docs/PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md); o apêndice de nomes
+fictícios é [docs/PES2-NOMES.md](docs/PES2-NOMES.md).
+
+Ele **não compartilha código** com o `newWe2002`: nada em `src/` sabe o que
+é PES2, e `tools/pes2/` é Python 3 e shell puros. O que se empresta é
+conhecimento de formato — as duas engines são a mesma, e o `KanjiToAscii`
+do WE2002 decodifica o título de save do PES2 sem uma linha de adaptação.
+
+Duas imagens, as duas em `roms/`, as duas fora do versionamento:
+`Pro Evolution Soccer 2 (Europe) (EsIt)/` e `…(EnFrDe)/`. São **dumps
+multi-track** — 1 trilha de dados e 7 de áudio —, e todo offset só vale
+dentro do `(Track 1).bin`. O banco é o mesmo nas duas; o que muda é onde
+cada tabela cai dentro do overlay, e é por isso que o mapa ancora por
+**marcador**, nunca por offset constante.
+
+As ferramentas, e o que cada uma responde:
+
+| Comando | O que faz |
+|---|---|
+| `python3 tools/pes2/iso.py ls\|extract\|inject <track1.bin>` | lê e reinjeta arquivo preservando setor e cauda EDC/ECC |
+| `python3 tools/pes2/iso.py roundtrip <track1.bin>` | a guarda: reescreve os 244 arquivos e exige imagem idêntica |
+| `python3 tools/pes2/iso.py negative <track1.bin> --tmpdir <dir>` | a prova de que a guarda sabe ficar vermelha |
+| `python3 tools/pes2/tables.py <track1.bin> --check` | conta e digere as onze tabelas de texto |
+| `python3 tools/pes2/diff_releases.py <a> <b> --check` | o confronto entre as duas releases |
+| `python3 tools/pes2/memcard.py <card.mcd> <track1.bin> --check` | alinha o memory card e fecha as fronteiras de elenco |
+| `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
+| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98`, isolado; `--kill` encerra |
+| `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
+
+No `ctest` são dois alvos: **`pes2_selftest`**, que monta um disco sintético
+de 24 setores e roda em qualquer lugar, e **`pes2_image`**, que precisa de
+`WE2002_PES2_IMAGE` e se reporta *skipped* sem ela — mesma convenção do
+`WE2002_TEST_IMAGE` e dos golden.
+
+```sh
+WE2002_PES2_IMAGE="roms/Pro Evolution Soccer 2 (Europe) (EsIt)/…(Track 1).bin" \
+WE2002_PES2_IMAGE_B="roms/Pro Evolution Soccer 2 (Europe) (EnFrDe)/…(Track 1).bin" \
+WE2002_PES2_CARD="$HOME/.local/share/duckstation/memcards/…(Es,It)_1.mcd" \
+WE2002_PES2_TMPDIR=<~450 MiB livres> \
+  ctest --test-dir build -R pes2
+```
+
+Quatro coisas que custam tempo se descobertas tarde:
+
+- **O emulador é DuckStation, e não está no `PATH`** — é um AppImage em
+  `~/Applications/`. O `run_duckstation.sh` usa um `XDG_DATA_HOME`
+  isolado: configuração e cartão próprios, só o BIOS emprestado por link.
+  O cartão do usuário é save real e **nunca** é escrito.
+- **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
+  release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
+  apontar qualquer coisa que escreva.
+- **"Cópia" de tabela não quer dizer mesma lista.** As cinco cópias de nome
+  de time têm 106, 99, 95, 94 e 123 entradas, e o índice 34 de uma é outro
+  time no índice 34 da outra. Casar por índice grava no time errado, e o
+  resultado parece plausível em tela. §6.1 do plano.
+- **A ordem de armazenamento é propriedade da tabela.** `SELECTC.BIN`
+  guarda elenco de trás para frente; o executável de boot, de frente para
+  trás. Quem assume uma inverte 23 jogadores por time na metade das
+  tabelas, sem sintoma visível. §3.3 do plano.
+
+Nada de PES2 tem task em `docs/tasks/progresso.md` — o projeto está
+**fora do pool** enquanto for exploratório, e isso é escolha, não
+esquecimento.
 
 ## Arquitetura
 

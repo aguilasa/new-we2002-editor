@@ -13,7 +13,7 @@
 > | Track 1 | 466.768.512 B = 198.456 setores exatos |
 > | Editor existente | **nenhum conhecido** — é o ponto de partida do projeto |
 > | Âncora | os 69 `OFS_*` de [`Offsets.hpp`](../src/core/include/we2002/Offsets.hpp), já verificados contra o `ed.exe` |
-> | Estado | **plano. Nenhuma fase executada.** A §1 é diagnóstico já medido. |
+> | Estado | **Fase 0 concluída e verde** (§5.1). A §1 é diagnóstico medido; as Fases 1–6 não começaram. |
 >
 > Data da análise inicial: 2026-08-29
 >
@@ -176,37 +176,77 @@ Registro de 4 B, terminador incluso.
 **Cópias das duas tabelas** — e este é o ponto que decide a arquitetura do
 editor:
 
-| Tabela | cópias medidas |
-|---|---|
-| nomes de time (caixa alta) | `SELECT.BIN` @3128, `ENDING.BIN` @1256 |
-| nomes de time (caixa mista) | `RESULT.BIN` @~304 (`Patagonia`, `Marmara`, …) |
-| abreviações | `SELECT.BIN` @4292, `SELECT8.BIN` @1016, `REPLAYS.BIN` @11000 |
+| Tabela | cópias medidas (offset em `(EsIt)`) | entradas |
+|---|---|---|
+| nomes de time, caixa alta | `SELECT.BIN` @3128 | 106 |
+| nomes de time, caixa alta | `ENDING.BIN` @1256 | 95 |
+| nomes de time, caixa mista | `SELECTC.BIN` @16576 | 99 |
+| nomes de time, caixa mista | `REPLAYS.BIN` @11380 | 123 |
+| nomes de time, caixa mista | `RESULT.BIN` @524 | 94 |
+| abreviações | `SELECT.BIN` @4292 | 95 |
+| abreviações | `SELECT8.BIN` @1016 | 95 |
+| abreviações | `REPLAYS.BIN` @11000 | 95 |
+
+Os offsets saem de `tools/pes2/tables.py`, que os resolve por marcador nas
+duas releases; os de `RESULT.BIN`, `REPLAYS.BIN` e `SELECTC.BIN` são
+outros em `(EnFrDe)` — ver a §1.12.
 
 É o mesmo padrão do WE2002, onde o editor grava seis cópias de nome e três
 de abreviação. **Gravar uma só cópia produz um jogo inconsistente**, com o
 nome novo numa tela e o velho na outra.
 
-**Nomes de jogador**, `SELECTC.BIN` offset relativo **20736**, em duas
-famílias contíguas: os reais (`Bonano`, `Batistuta`, `Caniggia`, `Aimar`,
-`Gallardo`, `Almeyda`, `Sorin`, `Placente`, `Pochettino`, `Sensini`,
-`Ortega`, `C.Lopez`, `Crespo`, `Veron`, …) e, antes deles, os fictícios
-(`Dalcorso`, `Kediaves`, `Mondiz`, `Chele`, `Obegone`, …). Uma segunda massa
-de nomes fictícios vive no próprio executável, `SLES_039.57` @291750
-(`Baser`, `Amabri`, `Emakrif`, …).
+**E a coluna de contagem já avisa o que a §6.1 cobra: as cinco "cópias"
+de nome de time não são a mesma lista.** Uma tem 106 entradas, outra 95,
+outra 99, outra 123, outra 94. Casar qualquer par delas por índice grava
+no time errado.
+
+**Nomes de jogador**, `SELECTC.BIN` offset relativo **17604**, em duas
+famílias contíguas — e os dois números que circulam são os dois extremos da
+mesma tabela, não uma correção do outro:
+
+| offset | o que é |
+|---|---|
+| **17604** | onde a tabela **começa**, com os fictícios (`Di Sephoro`, `Filimol`, `Karpes`, `Dimaz`, `Orimas`, …) |
+| **20736** | onde, dentro dela, começam os **reais** (`Cavallero`, `Bonano`, `Batistuta`, `Caniggia`, `Aimar`, `Gallardo`, …) |
+
+São 1.399 entradas no total. Um mapa construído a partir de 20736 perde a
+primeira família inteira — e ela é metade do problema da §1.7.
+
+Uma segunda massa de nomes vive no próprio executável, `SLES_039.57`
+@284720: **1.449 registros de 10 B fixos**, a mesma faixa da tabela de
+`SELECTC.BIN` guardada **de trás para frente** e 50 entradas mais longa.
+`Baser`, `Amabri`, `Emakrif` são parte dela, em @291750.
 
 ### 1.6 Contagem e ordem — medido, não estimado
 
 A varredura fechou as tabelas de texto por inteiro. Estes são números
-duros, não hipóteses:
+duros, não hipóteses — e desde 2026-08-30 eles saem de uma ferramenta
+versionada, `tools/pes2/tables.py`, que reproduz a medição inteira em
+menos de um segundo:
 
-| Tabela | Arquivo | Offset relativo | Entradas |
-|---|---|---|---|
-| nome de time, caixa alta | `SELECT.BIN` | 3128 | **106** (2 de cabeçalho + 104 times) |
-| abreviação de 3 letras | `SELECT.BIN` | 4292 | **95** (registro fixo de 4 B) |
-| nome de time, caixa mista | `SELECTC.BIN` | 16576 | **99** |
-| nome de jogador | `SELECTC.BIN` | 17604 | **1.399** |
-| nome de jogador (2ª massa) | `SLES_039.57` | ~288460 | continua além |
-| jogador de clube, **10 B fixos** | `SELECT.BIN` | 5320 | **463** |
+| Tabela | Arquivo | Offset `(EsIt)` | Entradas | Registro |
+|---|---|---:|---:|---|
+| nome de time, caixa alta | `SELECT.BIN` | 3128 | **106** | 2 de cabeçalho + 104 times |
+| abreviação de 3 letras | `SELECT.BIN` | 4292 | **95** | fixo de 4 B |
+| jogador de clube | `SELECT.BIN` | 5320 | **463** | fixo de 10 B |
+| nome de time, caixa alta (cópia) | `ENDING.BIN` | 1256 | **95** | terminado em `NUL` |
+| abreviação (cópia) | `SELECT8.BIN` | 1016 | **95** | fixo de 4 B |
+| abreviação (cópia) | `REPLAYS.BIN` | 11000 | **95** | fixo de 4 B |
+| nome de time, caixa mista (cópia) | `REPLAYS.BIN` | 11380 | **123** | terminado em `NUL` |
+| nome de time, caixa mista (cópia) | `RESULT.BIN` | 524 | **94** | terminado em `NUL` |
+| nome de time, caixa mista | `SELECTC.BIN` | 16576 | **99** | terminado em `NUL` |
+| nome de jogador | `SELECTC.BIN` | 17604 | **1.399** | terminado em `NUL` |
+| nome de jogador | executável de boot | 284720 | **1.449** | fixo de 10 B |
+
+```
+python3 tools/pes2/tables.py "<track1.bin>" --check     # conta e digere
+python3 tools/pes2/tables.py "<track1.bin>" --dump team-names
+```
+
+O `--check` confere a contagem **e um digest SHA-256 das entradas
+concatenadas**. Os onze digests são idênticos em `(EsIt)` e `(EnFrDe)`, o
+que transforma a conclusão da §1.12 — mesmo banco, um editor só — de
+lembrança em teste.
 
 As duas primeiras entradas do bloco de nomes são `MASTER DATA` e
 `? ? ? ?` — cabeçalho e *placeholder* de slot vazio, não times. Os 104
@@ -378,10 +418,34 @@ outro conjunto de idiomas, e o banco de dados é o mesmo. Medido em
 | Comparação | Resultado |
 |---|---|
 | arquivos em comum | 236 (252 × 257 no total) |
-| **byte a byte idênticos** | **204** |
-| diferem | 32 |
-| exclusivos de cada lado | os `LC_*`/`T_NAME_*`/`DAT2D_*`/`FNOTE_*`/`DATSEL*` por idioma, os `SD/PES2*.RA` de narração, e o executável |
+| **byte a byte idênticos** | **202** |
+| diferem | 27 |
+| não comparáveis a partir do Track 1 | 7 |
+| exclusivos de cada lado | 16 × 21 — os `LC_*`/`T_NAME_*`/`DAT2D_*`/`FNOTE_*`/`DATSEL*` por idioma, os `SD/PES2*.RA` de narração, e o executável |
 | executável | `SLES_039.57` (EsIt) × `SLES_039.46` (EnFrDe) |
+
+**Estes não são os números que esta seção trazia até 2026-08-30**, que
+eram 204 idênticos e 32 diferentes. Aqueles foram contados à mão, sem
+procedimento escrito, e não voltaram. Os de agora saem de
+`tools/pes2/diff_releases.py`, com a lista completa em
+[/docs/samples/pes2-diff-releases.md](/docs/samples/pes2-diff-releases.md):
+
+```
+python3 tools/pes2/diff_releases.py "<esit>" "<enfrde>" --check
+python3 tools/pes2/diff_releases.py "<esit>" "<enfrde>" --markdown > docs/samples/pes2-diff-releases.md
+```
+
+Os 7 não comparáveis são os `/SD/DA/*.DA`: eles moram nas trilhas de
+áudio, e o Track 1 não guarda versão nenhuma deles para comparar (§6.5).
+O único arquivo Form 2, `/MOVIE/ISS_2002.STR`, **é idêntico** nas duas — a
+comparação dele é de setor cru, porque ele não tem área de 2.048 B.
+
+Dos 27 que diferem, 19 mudam de tamanho (texto localizado) e 8 mantêm o
+tamanho e mudam conteúdo: `GAME.BIN` (38.213 B), `SELECT4.BIN` (6.884),
+`ENTER.BIN` (3.272), `PKMATCH.BIN` (242), `TRAINING.BIN` (126),
+`FNOTE_G.BIN` (105), `MOVIE.BIN` (79) e `SYSTEM.CNF` (2, que é o nome do
+executável). São esses oito que merecem olhar na Fase 1, porque ali pode
+haver dado de jogo e não texto.
 
 E, sobretudo: **as tabelas de nome têm conteúdo idêntico nas duas.** As
 201 entradas de nome de time + abreviação de `SELECT.BIN` e as 1.498 de
@@ -410,16 +474,28 @@ falha mais caro possível, porque parece funcionar.
 ### 1.13 Ancoragem por marcador, em vez de offset constante
 
 A saída é localizar cada tabela em tempo de abertura, por um literal que
-só aparece uma vez no arquivo. Sete marcadores foram testados nas duas
-releases e **todos ocorrem exatamente uma vez** em cada arquivo:
+só aparece uma vez no arquivo. `python3 tools/pes2/iso.py anchors
+<track1.bin>` reconfere **oito** desses literais nas duas releases, e
+**todos ocorrem exatamente uma vez** no arquivo que lhes toca.
 
-| Marcador | Arquivo | acha |
-|---|---|---|
-| `MASTER DATA\0` | `SELECT.BIN` | início da tabela de nome de time |
-| `PTA\0MRA\0BZA\0` | `SELECT.BIN`, `SELECT8.BIN`, `REPLAYS.BIN` | as três cópias de abreviação |
-| `PATAGONIA\0` | `ENDING.BIN` | cópia de nome de time |
-| `Patagonia\0` | `RESULT.BIN` | cópia em caixa mista |
-| `Belarus\0Georgia\0` | `SELECTC.BIN` | times em caixa mista + jogadores |
+Marcador e tabela não são a mesma contagem, e vale separar: os oito
+marcadores ancoram **onze** localizações de tabela, porque dois deles
+servem a mais de uma — `Belarus\0Georgia\0` acha os times e, 1028 bytes
+adiante, os jogadores; `PTA\0MRA\0BZA\0` acha três cópias de abreviação e,
+380 bytes adiante em `REPLAYS.BIN`, mais uma de nome de time. Quem resolve
+as onze é `tools/pes2/tables.py`.
+
+| Marcador | Arquivo | acha | deslocamento |
+|---|---|---|---:|
+| `MASTER DATA\0` | `SELECT.BIN` | início da tabela de nome de time | 0 |
+| `PTA\0MRA\0BZA\0` | `SELECT.BIN`, `SELECT8.BIN`, `REPLAYS.BIN` | as três cópias de abreviação | 0 |
+| `PATAGONIA\0` | `ENDING.BIN` | cópia de nome de time | 0 |
+| `Patagonia\0` | `RESULT.BIN` | cópia em caixa mista | 0 |
+| `Belarus\0Georgia\0` | `SELECTC.BIN` | times em caixa mista | 0 |
+| `Belarus\0Georgia\0` | `SELECTC.BIN` | nomes de jogador | +1028 |
+| `PTA\0MRA\0BZA\0` | `REPLAYS.BIN` | cópia em caixa mista | +380 |
+| `Given\0\0\0\0\0Staunton\0\0` | executável de boot | jogadores de 10 B | 0 |
+| `Oranges001` | `SELECT.BIN` | jogadores de clube, 10 B | **−1740** |
 
 O mapa passa então a guardar **(arquivo, marcador, deslocamento a partir
 do marcador)** em vez de offset absoluto. Três ganhos, além de resolver a
@@ -432,6 +508,27 @@ divergência da §1.12:
 
 A identidade da release, quando for preciso saber, sai do `SYSTEM.CNF`:
 `BOOT = cdrom:SLES_039.57;1` contra `SLES_039.46;1`.
+
+**Duas coisas que a lista acima já obriga o formato do mapa a ter, e que a
+redação original de "(arquivo, marcador, deslocamento)" não previa:**
+
+1. **O deslocamento é assinado.** `Oranges001` **não marca o começo** da
+   tabela que ancora: ele resolve em 7060 nas duas releases e a tabela de
+   10 B começa em 5320 — é o registro **174** de 463, e o delta é
+   **−1740**. Marcador dentro do meio da tabela é caso normal, não
+   exceção, porque quem escolhe o literal é quem procura um trecho único,
+   não um trecho inicial.
+2. **O mapa tem de declarar a contagem, por tabela.** Nenhuma tabela deste
+   disco tem sentinela de fim. O que separa uma da seguinte é só o número
+   de entradas — e no caso mais apertado, **zero byte**: os 106 nomes de
+   time ocupam de 3128 a 4292, e 4292 é exatamente onde `PTA\0` começa. No
+   disco lê-se `EURO ALLSTARS\0\0\0PTA\0` corrido. Escrever um 107º nome
+   invade a primeira abreviação. A §6.2 já manda truncar em vez de
+   deslocar; a margem que ela protege é nula.
+
+`tools/pes2/tables.py` é onde essas três coisas — marcador, delta assinado
+e regra de fim — estão escritas para cada tabela, e `--check` as reconfere
+contra o disco.
 
 **Ressalva:** isto está provado para as tabelas de texto, que têm literal
 óbvio. As tabelas numéricas das Fases 3 e 4 não têm, e ali a âncora terá
@@ -463,6 +560,23 @@ a mesma disciplina do resto do repositório:
 
 `cdrdao`, Python 3, ImageMagick, `xdotool`, `ffmpeg`, `Xvfb`, Wine (via
 Bottles), Bottles, PCSX2, e as ferramentas deste repositório.
+
+E, em `tools/pes2/`, o que a Fase 0 deixou pronto. Nenhuma delas depende do
+`we2002_core` nem do Qt; são Python 3 e shell, e só o `iso.py` é importado
+pelas outras:
+
+| Ferramenta | Para quê |
+|---|---|
+| `iso.py` | `ls`, `extract`, `inject`, `anchors`, `roundtrip`, `negative` |
+| `tables.py` | acha, conta e despeja as onze tabelas de texto da §1.6 |
+| `diff_releases.py` | o confronto entre as duas releases da §1.12 |
+| `memcard.py` | alinha o memory card contra o disco — as fronteiras de elenco da §3.3 |
+| `faq_check.py` | confere a `docs/PES2-NOMES.md` contra o disco e contra os dois FAQs |
+| `selftest.py` | disco sintético de 24 setores; é o `ctest -R pes2_selftest` |
+| `check_image.py` | roda tudo que precisa de imagem; é o `ctest -R pes2_image` |
+| `run_duckstation.sh` | sobe o jogo no `:98`, isolado, e imprime PID e janela |
+| `boot_check.sh` | mede que ele botou de verdade — §3.4 |
+| `faq2md.py` | converte os FAQs de terceiros em Markdown |
 
 ### 3.2 O emulador: **resolvido em 2026-08-30**
 
@@ -521,38 +635,50 @@ rotulado, e procurá-lo no disco dá a fronteira exata daquele elenco.
 
 #### As fronteiras de elenco, fechadas
 
-Foi o que se fez. Dos 54 elencos:
+Foi o que se fez, e desde 2026-08-30 com ferramenta versionada:
+
+```
+python3 tools/pes2/memcard.py "<card.mcd>" "<track1.bin>" --check
+```
+
+Dos 54 elencos, **os 54 casam exatos**, 23 de 23 nomes:
 
 | | |
 |---|---|
-| **49** | localizados exatamente em `SELECTC.BIN`, offsets de 19344 a 30640 |
-| **2** | França e Alemanha, exatamente em `SLES_039.57` (offsets 286100 e 287480) |
-| 3 | Noruega, Argentina e Austrália — 19, 15 e 21 dos 23 nomes existem, o resto difere |
+| **49** | em `SELECTC.BIN`, offsets de 19344 a 30640, **em ordem reversa** |
+| **5** | no executável de boot, **em ordem direta** — França @286100, Alemanha @287480, Noruega @287940, Argentina @295300, Austrália @296910 |
 
 Isso resolve o que a §1.7 deixou em aberto: o tamanho de elenco é 23 e as
 fronteiras agora são medidas, não estimadas.
 
-Os três parciais **não são defeito, são material da Fase 3**: o cartão
-guarda o nome *editado* e o disco o original, então cada divergência é um
-par rotulado de graça. É o diferencial da §4.2.3 acontecendo sem esforço.
+**Correção de 2026-08-30:** esta seção dizia 49 + 2 exatos e três
+parciais — Noruega, Argentina e Austrália, "19, 15 e 21 dos 23 nomes". Os
+três são exatos. A varredura da vez procurava no executável só onde a
+França e a Alemanha já haviam aparecido; a tabela de 10 B de lá tem
+**1.449 entradas** (§1.5), e os três estavam nela o tempo todo. Não havia
+par editado/original nenhum a colher, e a alavanca da §4.2.3 continua
+inteira — só não foi ela que aconteceu aqui.
 
 #### A ordem de armazenamento é por tabela, não do jogo
 
-Os 49 casaram **todos em ordem reversa** à do cartão, e nenhum em ordem
-direta. Mas França e Alemanha, no executável, casaram em ordem
+Os 49 de `SELECTC.BIN` casaram **todos em ordem reversa** à do cartão, e
+nenhum em ordem direta. Os 5 do executável casaram todos em ordem
 **direta**.
 
-Ou seja: `SELECTC.BIN` guarda o elenco de trás para frente e
-`SLES_039.57` de frente para trás. **A ordem é propriedade da tabela.**
-Um leitor que assuma uma delas inverte 23 jogadores por time em metade
-das tabelas — e o erro é invisível, porque a lista continua parecendo um
-elenco.
+Ou seja: `SELECTC.BIN` guarda o elenco de trás para frente e o executável
+de frente para trás. **A ordem é propriedade da tabela.** Um leitor que
+assuma uma delas inverte 23 jogadores por time em metade das tabelas — e
+o erro é invisível, porque a lista continua parecendo um elenco.
+
+A inversão vale para a tabela inteira, não só para os elencos: as 1.449
+entradas de 10 B do executável são a mesma faixa das 1.399 de
+`SELECTC.BIN`, do fim para o começo.
 
 ### 3.4 Confirmar antes de começar
 
 | | Estado |
 |---|---|
-| 1. O jogo dá boot a partir do `.cue` multi-track | **verificado em 2026-08-30, no `:98`** — atravessa o vídeo de abertura, chega à tela-título e à partida de demonstração, com 3D em tempo real |
+| 1. O jogo dá boot a partir do `.cue` multi-track | **verificado em 2026-08-30, no `:98`**, e reverificável: `tools/pes2/boot_check.sh` |
 | 2. O emulador tem *save state* e dump de RAM | disponível; nenhum feito ainda |
 | 3. O emulador aceita cartão em `.mcr` | **sim** — o `.mcd` do DuckStation é o mesmo formato cru de 128 KiB, e já foi lido (§3.3) |
 | 4. Cópia do Track 1 no scratchpad | **feita** — as oito faixas, 571 MiB |
@@ -568,6 +694,28 @@ O `run_duckstation.sh` usa um `XDG_DATA_HOME` **isolado**: configuração
 própria, cartão de memória próprio, e só o BIOS emprestado por link
 simbólico. O `settings.ini` e o memory card do usuário nunca são escritos
 — o cartão dele é dado de save real e é insubstituível.
+
+#### A evidência de que ele bota, e por que ela é medida e não guardada
+
+"Dá boot" foi escrito depois de alguém olhar uma vez. Afirmação que
+ninguém consegue repetir é lembrança, não verificação — a mesma regra que
+o `CLAUDE.md` aplica aos golden. `tools/pes2/boot_check.sh` refaz a
+afirmação e mede três coisas:
+
+1. a janela aparece, com o tamanho que o emulador diz;
+2. o quadro **não é chapado** — emulador morto e emulador carregando são
+   idênticos num log e opostos num desvio-padrão;
+3. dois quadros separados por alguns segundos **diferem**, que é o que
+   separa "rodando" de "travado no primeiro quadro".
+
+Medido em 2026-08-30 sobre a cópia de trabalho de `(EsIt)`, janela de
+**800×655** no `:98`: quadro 1 com desvio-padrão 0,228, quadro 2 com
+0,243, e **259.994 de 524.000 pixels diferentes** entre os dois. Aos ~2
+min de execução a tela é a partida de demonstração, em 3D de tempo real.
+
+Os quadros **não entram no repositório**: são de um jogo comercial, e
+seguem a mesma regra de `roms/` e dos FAQs. O que entra é o script e o
+número.
 
 ---
 
@@ -633,7 +781,7 @@ que editar o gerado falhe em teste. Nunca o contrário.
 - `tools/pes2/iso.py`: listar, extrair e **reinjetar** arquivo do ISO
   preservando setor e cauda EDC/ECC. Reinjeção é o que permite o ciclo de
   `poke`; sem ela cada teste é edição manual em hexeditor. **Feito** —
-  `ls`, `extract`, `inject`, `anchors`, `roundtrip`.
+  `ls`, `extract`, `inject`, `anchors`, `roundtrip`, `negative`.
 - Guarda de round-trip: extrair todos os 252 arquivos e reinjetá-los sem
   mudança tem de devolver o `.bin` **byte a byte idêntico**. Se não devolver,
   a ferramenta está errada e tudo o que vier depois é ruído. **Feito e
@@ -645,11 +793,20 @@ que editar o gerado falhe em teste. Nunca o contrário.
 regrava os **244** arquivos legíveis e compara: **byte a byte idêntico**.
 
 Guarda verde não vale nada sem prova de que sabe ficar vermelha, então o
-mesmo caminho de escrita foi exercitado com um controle negativo: trocar
-o `P` de `PIEMONTE` por `X` em `SELECT.BIN` mudou **exatamente um byte**
-em toda a imagem de 445 MiB, no offset absoluto **2002800** — que é o que
-a aritmética de setor prevê, e ele cai dentro da área de dados
-(`24..2071`), com cabeçalho e cauda intactos.
+mesmo caminho de escrita é exercitado com um controle negativo — e ele
+também é comando, não prosa:
+
+```
+python3 tools/pes2/iso.py negative <track1.bin> --tmpdir <~450 MiB livres>
+```
+
+Trocar o `P` de `PIEMONTE` por `X` em `SELECT.BIN` muda **exatamente um
+byte** em toda a imagem de 445 MiB, no offset absoluto **2002800** — que é
+o que a aritmética de setor prevê, e ele cai dentro da área de dados
+(`24..2071`), com cabeçalho e cauda intactos. O comando calcula o offset
+esperado a partir do LBA do arquivo e confere contra onde o byte de fato
+se mexeu, então ele falha tanto se a escrita errar quanto se a aritmética
+mudar.
 
 O caso não é trivial: o registro fica no offset 3272 de um arquivo que
 começa no LBA 850, então **atravessa a fronteira de setor** — 3272 ÷ 2048
@@ -658,6 +815,18 @@ armadilha da §6.3, e ela está coberta.
 
 O `anchors` resolve os oito marcadores da §1.13 nas duas releases, cada um
 ocorrendo uma única vez.
+
+##### O que roda sem imagem, e o que precisa dela
+
+O `ctest` deste repositório conhece os dois casos desde 2026-08-30:
+
+| Teste | Precisa de | O que faz |
+|---|---|---|
+| `pes2_selftest` | nada | monta um disco sintético de 24 setores em `/tmp` e exercita a aritmética de setor, o par Form 1 × Form 2, o caso `outside` e as **três recusas** do `write_file` — crescer, misto, fora da trilha |
+| `pes2_image` | `WE2002_PES2_IMAGE` | âncoras (§1.13), contagens e digests (§1.6), e a `docs/PES2-NOMES.md` contra o disco. Com `WE2002_PES2_IMAGE_B`, `_CARD` e `_TMPDIR` acrescenta o diff de releases (§1.12), o alinhamento de cartão (§3.3) e o controle negativo |
+
+Sem `WE2002_PES2_IMAGE` o segundo se reporta **skipped**, como já fazem os
+golden do `newWe2002`.
 
 #### 5.2 Oito arquivos que a ferramenta não toca, e por quê
 
@@ -682,15 +851,21 @@ Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
 ### Fase 1 — Diferencial barato
 
 - `cmp` arquivo a arquivo entre `(EsIt)` e `(EnFrDe)`; classificar cada um
-  em *idêntico* / *difere*. *(Feito — §1.12. 204 idênticos, 32 diferem.
-  Falta classificar **por que** cada um dos 32 difere: os que mudam de
-  tamanho são texto localizado; os que mantêm tamanho e mudam conteúdo —
-  `GAME.BIN` com 38.213 bytes, `SELECT4.BIN` com 6.884, `ENTER.BIN` com
-  3.272 — são os que merecem olhar, porque ali pode haver dado de jogo.)*
-- Mapear os 69 `OFS_*` do WE2002 para `(arquivo, offset relativo)` e
-  publicar a tabela (a §1.4 tem o esqueleto; falta o offset relativo de
-  cada um).
-- Saída: `docs/samples/pes2-diff-releases.md` e a tabela de âncoras.
+  em *idêntico* / *difere*. **Feito, e versionado** —
+  `tools/pes2/diff_releases.py`, saída em
+  [/docs/samples/pes2-diff-releases.md](/docs/samples/pes2-diff-releases.md).
+  202 idênticos, 27 diferem, 7 fora do Track 1 (§1.12). A classificação do
+  *porquê* também está feita: 19 dos 27 mudam de tamanho e são texto
+  localizado; os outros 8 mantêm tamanho e mudam conteúdo.
+- **Falta:** olhar os oito de tamanho fixo — `GAME.BIN` (38.213 B de
+  diferença), `SELECT4.BIN` (6.884), `ENTER.BIN` (3.272), `PKMATCH.BIN`
+  (242), `TRAINING.BIN` (126), `FNOTE_G.BIN` (105), `MOVIE.BIN` (79) e
+  `SYSTEM.CNF` (2). É ali que pode haver dado de jogo em vez de texto.
+- **Falta:** mapear os 69 `OFS_*` do WE2002 para `(arquivo, offset
+  relativo)` e publicar a tabela (a §1.4 tem o esqueleto; falta o offset
+  relativo de cada um).
+- Saída: `docs/samples/pes2-diff-releases.md` **(feita)** e a tabela de
+  âncoras **(feita — §1.13, e `tools/pes2/tables.py`)**.
 
 ### Fase 2 — Inventário de texto
 
@@ -743,12 +918,31 @@ Só aqui se decide linguagem e UI. As três condições da §0 são o portão.
 
 ## 6. Armadilhas conhecidas
 
-### 6.1 Uma cópia gravada é pior que nenhuma
+### 6.1 Uma cópia gravada é pior que nenhuma — e nenhuma cópia é cópia
 
-A §1.5 mostra a mesma tabela em três e quatro arquivos. Um editor que grava
+A §1.5 mostra a mesma tabela em cinco e três arquivos. Um editor que grava
 só a de `SELECT.BIN` produz um jogo que mostra o nome novo na seleção de
 time e o velho no replay e no resultado. **Toda gravação é para o conjunto
 de cópias**, e o mapa declara o conjunto.
+
+**A armadilha de verdade, porém, é a palavra "cópia".** Medido em
+2026-08-30: as cinco listas de nome de time têm 106, 99, 95, 94 e 123
+entradas, e as diferenças não são de recorte, são de **conteúdo**:
+
+| Lista | n | O que ela tem que as outras não |
+|---|---:|---|
+| `SELECT.BIN` @3128 | 106 | `MASTER DATA` e `? ? ? ?` de cabeçalho, mais os 7 *classic*, `WORLD ALLSTARS` e `EURO ALLSTARS` no fim |
+| `SELECTC.BIN` @16576 | 99 | abre com `Belarus`, `Georgia`, `Uzbekistan`, `Iceland` — quatro nações que nenhuma outra lista traz |
+| `ENDING.BIN` @1256 | 95 | só os 32 fictícios, as 7 seleções temáticas, as 2 *elite* e as 54 reais |
+| `RESULT.BIN` @524 | 94 | no lugar das 7 temáticas e das 2 *elite*, traz 6 *classic* e as 2 *allstars* |
+| `REPLAYS.BIN` @11380 | 123 | `Edit`, `Free`, `Default` e o elenco de nações inteiro do modo de edição |
+
+Ou seja: o índice 34 de `SELECT.BIN` é `ALWAYS ARGENTINA` e o índice 34 de
+`RESULT.BIN` é `Classic Brazil`. **Casar duas listas por índice grava no
+time errado**, e o resultado — um nome plausível no lugar de outro — não
+parece defeito em tela nenhuma. O mapa da Fase 5 tem de guardar, por
+cópia, a lista **e a correspondência**, e a correspondência tem de sair de
+comparação de conteúdo, nunca de posição.
 
 ### 6.2 Registro de tamanho variável não aceita nome maior
 
@@ -857,7 +1051,7 @@ aponta para o lugar errado.
 
 | Fase | Entregável |
 |---|---|
-| 0 | `tools/pes2/iso.py` + teste de round-trip de extração/reinjeção — **feito**, menos o emulador |
+| 0 | `tools/pes2/iso.py` + round-trip + controle negativo + o emulador — **feito e verde** (§5.1) |
 | 1 | tabela de âncoras `OFS_* → (arquivo, offset relativo)`; diff entre releases |
 | 2 | inventário de texto; contagem e ordem canônica; primeiro `poke` verificado |
 | 3 | estrutura do registro de jogador |
