@@ -5,9 +5,13 @@
 # instead of in someone's shell history. Everything it does that is not
 # obvious is a trap that cost time once; see docs/PLAN-PES2-PSX.md 6.11.
 #
-#   PES2_IMAGE     .cue of the working copy (required)
+#   PES2_IMAGE     .cue of the working copy (required, except for --kill)
 #   PES2_DISPLAY   X display, default :98 -- the one place the number lives
-#   PES2_DATA      isolated DuckStation data dir, default <scratch>/ds-data
+#   PES2_DATA      isolated DuckStation data dir, absolute; defaults to
+#                  `ds-data` next to PES2_IMAGE, so each working copy keeps
+#                  its own memory cards and save states
+#   PES2_BIOS      where to borrow the BIOS from, default
+#                  ~/.local/share/duckstation/bios
 #
 # Prints the PID and the window id, so a driver script can take it from here.
 set -euo pipefail
@@ -15,75 +19,7 @@ set -euo pipefail
 DISPLAY_="${PES2_DISPLAY:-:98}"
 APPIMAGE="${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}"
 IMAGE="${PES2_IMAGE:-}"
-DATA="${PES2_DATA:-$(dirname "$IMAGE")/../ds-data}"
-
-[ -f "$APPIMAGE" ] || { echo "no DuckStation at $APPIMAGE" >&2; exit 1; }
-
-
-# The Xvfb of this project runs without -auth, so XAUTHORITY must be empty
-# rather than inherited from the desktop session. Same rule as the rest of
-# the repository -- see CLAUDE.md.
-export DISPLAY="$DISPLAY_"
-export XAUTHORITY=""
-export XDG_DATA_HOME="$DATA"
-
-mkdir -p "$DATA/duckstation"/{memcards,savestates,screenshots,cache}
-# The BIOS stays where the user put it; we only borrow it.
-ln -sfn "$HOME/.local/share/duckstation/bios" "$DATA/duckstation/bios"
-
-# Written every run on purpose: this file is the whole configuration, and a
-# half-written one fails in ways that look like emulator bugs. Two settings
-# are load-bearing. Renderer=Software because Xvfb has no GPU and there is
-# no -renderer on the command line. The [Pad1] keyboard bindings because
-# DuckStation binds nothing by default here -- without them every keypress
-# is silently dropped and the game sits in its attract loop forever.
-cat > "$DATA/duckstation/settings.ini" <<'INI'
-[Main]
-SettingsVersion = 3
-ConfirmPowerOff = false
-PauseOnFocusLoss = false
-SaveStateOnExit = false
-StartFullscreen = false
-InhibitScreensaver = false
-
-[BIOS]
-SearchDirectory = bios
-PatchFastBoot = true
-
-[GPU]
-Renderer = Software
-
-[Display]
-VSync = false
-SyncToHostRefreshRate = false
-
-[Audio]
-Backend = Null
-
-[MemoryCards]
-Card1Type = PerGame
-Directory = memcards
-
-[InputSources]
-Keyboard = true
-SDL = false
-XInput = false
-
-[Pad1]
-Type = AnalogController
-Up = Keyboard/Up
-Down = Keyboard/Down
-Left = Keyboard/Left
-Right = Keyboard/Right
-Cross = Keyboard/X
-Circle = Keyboard/C
-Square = Keyboard/Z
-Triangle = Keyboard/V
-Start = Keyboard/Return
-Select = Keyboard/Backspace
-L1 = Keyboard/Q
-R1 = Keyboard/E
-INI
+BIOS="${PES2_BIOS:-$HOME/.local/share/duckstation/bios}"
 
 # A leftover instance is driven by mistake instead of the new one, and the
 # result is a screenshot of the wrong game state.
@@ -139,8 +75,90 @@ if [ "${1:-}" = "--kill" ]; then
     exit 0
 fi
 
+# Everything below this line needs an image, and everything below it also
+# *writes*. `--kill` returned above without reaching any of it: it used to
+# resolve DATA from an empty IMAGE -- `$(dirname "")/../ds-data` is
+# `./../ds-data` -- and lay a whole DuckStation configuration in the parent
+# of whatever directory it happened to be run from.
 [ -n "$IMAGE" ] || { echo "set PES2_IMAGE to the .cue of a working copy" >&2; exit 1; }
 [ -f "$IMAGE" ] || { echo "no image at $IMAGE" >&2; exit 1; }
+[ -f "$APPIMAGE" ] || { echo "no DuckStation at $APPIMAGE" >&2; exit 1; }
+
+# `ln -sfn` happily links to nothing. A dangling BIOS link shows up much
+# later as DuckStation finding no BIOS at all and dying during the load,
+# far from the cause -- exactly the shape of trap section 6.11 catalogues.
+[ -d "$BIOS" ] || { echo "no BIOS directory at $BIOS" >&2; exit 1; }
+ls "$BIOS"/* >/dev/null 2>&1 || { echo "no BIOS file in $BIOS" >&2; exit 1; }
+
+# Absolute, and a sibling of the image rather than of its parent: the old
+# default carried a `..` whose meaning changed with whether PES2_IMAGE was
+# absolute or relative.
+DATA="${PES2_DATA:-$(cd "$(dirname "$IMAGE")" && pwd)/ds-data}"
+
+# The Xvfb of this project runs without -auth, so XAUTHORITY must be empty
+# rather than inherited from the desktop session. Same rule as the rest of
+# the repository -- see CLAUDE.md.
+export DISPLAY="$DISPLAY_"
+export XAUTHORITY=""
+export XDG_DATA_HOME="$DATA"
+
+mkdir -p "$DATA/duckstation"/{memcards,savestates,screenshots,cache}
+# The BIOS stays where the user put it; we only borrow it.
+ln -sfn "$BIOS" "$DATA/duckstation/bios"
+
+# Written every run on purpose: this file is the whole configuration, and a
+# half-written one fails in ways that look like emulator bugs. Two settings
+# are load-bearing. Renderer=Software because Xvfb has no GPU and there is
+# no -renderer on the command line. The [Pad1] keyboard bindings because
+# DuckStation binds nothing by default here -- without them every keypress
+# is silently dropped and the game sits in its attract loop forever.
+cat > "$DATA/duckstation/settings.ini" <<'INI'
+[Main]
+SettingsVersion = 3
+ConfirmPowerOff = false
+PauseOnFocusLoss = false
+SaveStateOnExit = false
+StartFullscreen = false
+InhibitScreensaver = false
+
+[BIOS]
+SearchDirectory = bios
+PatchFastBoot = true
+
+[GPU]
+Renderer = Software
+
+[Display]
+VSync = false
+SyncToHostRefreshRate = false
+
+[Audio]
+Backend = Null
+
+[MemoryCards]
+Card1Type = PerGame
+Directory = memcards
+
+[InputSources]
+Keyboard = true
+SDL = false
+XInput = false
+
+[Pad1]
+Type = AnalogController
+Up = Keyboard/Up
+Down = Keyboard/Down
+Left = Keyboard/Left
+Right = Keyboard/Right
+Cross = Keyboard/X
+Circle = Keyboard/C
+Square = Keyboard/Z
+Triangle = Keyboard/V
+Start = Keyboard/Return
+Select = Keyboard/Backspace
+L1 = Keyboard/Q
+R1 = Keyboard/E
+INI
 
 kill_leftovers
 sleep 1

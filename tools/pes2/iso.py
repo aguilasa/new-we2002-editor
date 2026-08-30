@@ -28,11 +28,17 @@ Usage:
     python3 tools/pes2/iso.py inject    <track1.bin> /SELECT.BIN new.bin
     python3 tools/pes2/iso.py anchors   <track1.bin>
     python3 tools/pes2/iso.py roundtrip <track1.bin>
+    python3 tools/pes2/iso.py negative  <track1.bin>
 
 `roundtrip` is the phase-0 guard: it copies the image, reads every Form 1
 file and writes it straight back, then compares against the original. A
 single differing byte means the extract/inject pair is wrong and every
 offset measured through it is noise.
+
+`negative` is the other half of that guard, and the half a green run is
+worthless without: it makes one deliberate one-byte change and insists
+the comparison goes red, at the byte sector arithmetic predicts and
+nowhere else.
 """
 
 import argparse
@@ -104,15 +110,23 @@ class Image:
     def __init__(self, path, writable=False):
         self.path = path
         self.f = open(path, "r+b" if writable else "rb")
-        size = os.path.getsize(path)
-        if size % RAW_SECTOR:
-            raise ValueError(
-                f"{path}: {size} bytes is not a whole number of 2352-byte "
-                f"sectors -- is this the data track?"
-            )
-        self.sector_count = size // RAW_SECTOR
-        self.files = {}
-        self._read_filesystem()
+        # Everything past the open() can raise -- a truncated track, a
+        # missing PVD, a directory record that does not parse. Without this
+        # the descriptor leaks, and on a writable image that also means the
+        # lock outlives the failure.
+        try:
+            size = os.path.getsize(path)
+            if size % RAW_SECTOR:
+                raise ValueError(
+                    f"{path}: {size} bytes is not a whole number of 2352-byte "
+                    f"sectors -- is this the data track?"
+                )
+            self.sector_count = size // RAW_SECTOR
+            self.files = {}
+            self._read_filesystem()
+        except BaseException:
+            self.f.close()
+            raise
 
     # ---- sectors ----------------------------------------------------
 
@@ -235,6 +249,16 @@ class Image:
                 f"{path}: is {e.size} bytes, refusing to write {len(data)} -- "
                 f"in-place only"
             )
+        # Check the whole run *before* writing a byte. Trusting write_sector
+        # to raise would leave a mixed file half rewritten and the image in a
+        # state no one asked for: on a 445 MiB working copy that is a slow
+        # recopy to undo. None of the 244 form1 files is mixed today, so this
+        # is a latent defect -- but inject is the tool of the poke cycle.
+        state = self.status(path)
+        if state != "form1":
+            raise (OutsideTrack if state == "outside" else Form2Sector)(
+                f"{path}: {state}; refusing to write any of it"
+            )
         for i in range(e.sectors):
             chunk = data[i * FORM1_DATA : (i + 1) * FORM1_DATA]
             # The final sector is usually part slack. Write only the bytes
@@ -341,6 +365,88 @@ def cmd_roundtrip(args):
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
+# The negative control of section 5.1 of the plan. PIEMONTE is a good
+# subject for one reason beyond being easy to spell: its record crosses a
+# sector boundary, which is trap 6.3. A write path that forgot the 304
+# bytes of header and tail would land somewhere else, or on two bytes.
+NEGATIVE_FILE = "/SELECT.BIN"
+NEGATIVE_WORD = b"PIEMONTE"
+NEGATIVE_BYTE = ord("X")
+
+
+def cmd_negative(args):
+    """Change one byte on purpose, and insist the guard notices.
+
+    A green round-trip only means something if the same comparison can go
+    red. This proves it can, and proves the sector arithmetic at the same
+    time: the expected absolute offset is computed from the file's LBA and
+    the record's offset inside it, then checked against where the byte
+    actually moved.
+    """
+    with Image(args.image) as img:
+        entry = img.entry(NEGATIVE_FILE)
+        data = img.read_file(NEGATIVE_FILE)
+    n = data.count(NEGATIVE_WORD)
+    if n != 1:
+        print(f"{NEGATIVE_FILE}: {NEGATIVE_WORD!r} occurs {n} times, expected 1")
+        return 1
+    rel = data.index(NEGATIVE_WORD)
+
+    lba = entry.lba + rel // FORM1_DATA
+    inside = rel % FORM1_DATA
+    expected = lba * RAW_SECTOR + HEADER + inside
+    crosses = (rel % FORM1_DATA) != rel
+
+    tmpdir = tempfile.mkdtemp(prefix="pes2-negative-", dir=args.tmpdir)
+    copy = os.path.join(tmpdir, "track1.bin")
+    try:
+        print(f"copying {os.path.getsize(args.image) // (1 << 20)} MiB to {copy} ...")
+        shutil.copyfile(args.image, copy)
+
+        edited = bytearray(data)
+        edited[rel] = NEGATIVE_BYTE
+        with Image(copy, writable=True) as img:
+            img.write_file(NEGATIVE_FILE, bytes(edited))
+
+        print(f"{NEGATIVE_FILE} starts at LBA {entry.lba}; {NEGATIVE_WORD.decode()} "
+              f"at file offset {rel}")
+        print(f"  {rel} / {FORM1_DATA} = LBA {lba}, remainder {inside}, "
+              f"+{HEADER} header -> absolute {expected}"
+              f"{'   (crosses a sector boundary)' if crosses else ''}")
+
+        diff = _first_difference(args.image, copy)
+        if diff is None:
+            print("NEGATIVE CONTROL FAILED: the image did not change at all -- "
+                  "the guard cannot go red")
+            return 1
+        off, a, b = diff
+        n_diff = _count_differences(args.image, copy)
+        ok = (off == expected and n_diff == 1
+              and a == NEGATIVE_WORD[0] and b == NEGATIVE_BYTE)
+        print(f"  first difference at {off}: {a:#04x} -> {b:#04x}; "
+              f"{n_diff} byte(s) changed in the whole image")
+        if not ok:
+            print(f"NEGATIVE CONTROL FAILED: expected exactly 1 byte at {expected}")
+            return 1
+        print("NEGATIVE CONTROL OK: one byte, where the arithmetic says, "
+              "header and tail untouched")
+        return 0
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def _count_differences(p1, p2, chunk=1 << 22):
+    total = 0
+    with open(p1, "rb") as f1, open(p2, "rb") as f2:
+        while True:
+            a = f1.read(chunk)
+            b = f2.read(chunk)
+            if not a:
+                return total
+            if a != b:
+                total += sum(1 for x, y in zip(a, b) if x != y)
+
+
 def _first_difference(p1, p2, chunk=1 << 22):
     if os.path.getsize(p1) != os.path.getsize(p2):
         return (min(os.path.getsize(p1), os.path.getsize(p2)), 0, 0)
@@ -377,6 +483,10 @@ def main(argv=None):
     p.add_argument("source", help="local file, must be exactly the same size")
     add("anchors", cmd_anchors, help="resolve the marker literals of plan 1.13")
     p = add("roundtrip", cmd_roundtrip, help="extract-and-reinject guard")
+    p.add_argument("--tmpdir", default=None,
+                   help="where to put the working copy (needs ~450 MiB)")
+    p = add("negative", cmd_negative,
+            help="prove the round-trip guard can go red")
     p.add_argument("--tmpdir", default=None,
                    help="where to put the working copy (needs ~450 MiB)")
 

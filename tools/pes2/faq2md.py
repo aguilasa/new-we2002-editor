@@ -12,10 +12,13 @@ classificado em um de tres:
   lista       nomes curtos, um por linha -> bloco de codigo
   prosa       o resto                    -> intacto
 
-Uso:  python3 tools/pes2/faq2md.py ENTRADA.txt SAIDA.md
+Uso:  python3 tools/pes2/faq2md.py ENTRADA.txt SAIDA.md [TITULO]
+
+O titulo e opcional e vira o `#` do topo; e o que o `.gitignore` manda
+passar ao reconverter os FAQs, que nao entram no git.
 """
+import argparse
 import re
-import sys
 
 FENCE_EQ = re.compile(r"^={3,}\s*$")
 FENCE_DASH = re.compile(r"^-{3,}\s*$")
@@ -159,8 +162,18 @@ def convert(path, title):
     return "\n".join(clean).rstrip() + "\n"
 
 
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("entrada", help="FAQ de texto puro")
+    ap.add_argument("saida", help="Markdown a escrever")
+    ap.add_argument("titulo", nargs="?", default="FAQ",
+                    help="titulo do documento (default: FAQ)")
+    args = ap.parse_args(argv)
+    with open(args.saida, "w", encoding="utf-8") as fh:
+        fh.write(convert(args.entrada, args.titulo))
+    print(f"{args.entrada} -> {args.saida}")
+    return 0
+
+
 if __name__ == "__main__":
-    src, dst = sys.argv[1], sys.argv[2]
-    title = sys.argv[3] if len(sys.argv) > 3 else "FAQ"
-    open(dst, "w", encoding="utf-8").write(convert(src, title))
-    print(f"{src} -> {dst}")
+    raise SystemExit(main())
