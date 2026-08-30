@@ -773,11 +773,18 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 > nos dois lados — o botão não aparece em nenhum. **A tradução está certa; o
 > que diverge é o efeito.**
 >
-> No MFC o original **aplica as edições enquanto se digita**, então gravar com
-> o diálogo aberto funciona. No Qt o commit depende do `accept()`, e um
-> `QPushButton` invisível não pode ser clicado nem ativado por `Return` — o
-> diálogo fica sem caminho de confirmação e **o que se edita ali se perde**.
-> Medido: `ed.exe` grava 7 faixas, port sai `IDENTICAL`.
+> **Os dois lados aplicam as edições campo a campo, e os dois são modais.** O
+> port escreve direto em `db_.preset_formations`, que o `OnPresetTactics` passa
+> por ponteiro; nada ali espera pelo `accept()`. O que diverge é **fechar o
+> diálogo**: no MFC o `DEFPUSHBUTTON` invisível continua sendo o default, e
+> `Return` roda o `EndDialog` — só então o clique em `CMB_WRITE` alcança o
+> diálogo principal. O Qt não ativa por `Return` um botão invisível, o `exec()`
+> segue bloqueando, e o `Database::Save()` nunca roda.
+>
+> Medido em 2026-08-30: `ed.exe` grava 8 faixas / 63 bytes contra a imagem
+> original, port sai `IDENTICAL`. E o **oráculo sem o `Return` final** sai
+> `a gravacao nao confirmou`, também `IDENTICAL` — é o controle que mostra que
+> o `Return` fecha o modal, e não que o original grave com ele aberto.
 > [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
 >
 > Quatro caminhos de fechamento foram descartados por medição, e não vale

@@ -117,11 +117,24 @@ diz `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`. O botão é invisíve
 **por design**, e o `rc2ui.py` traduz certo.
 
 O que diverge é o efeito, e só se vê medindo os dois lados **separadamente**:
-com o diálogo aberto e o mesmo roteiro, o `ed.exe` grava **7 faixas / 61 bytes**
-e o port sai **`IDENTICAL`**. No MFC o original aplica as edições enquanto se
-digita; no Qt o commit depende do `accept()`, e um `QPushButton` invisível não
-pode ser clicado nem ativado por `Return`. O diálogo é inutilizável no port.
+com o mesmo roteiro, o `ed.exe` grava **7 faixas / 61 bytes** e o port sai
+**`IDENTICAL`**. O diálogo é inutilizável no port.
 [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md).
+
+> **A explicação que escrevi aqui para esse `IDENTICAL` estava errada**, e a
+> execução da CORR-WTE-131 a mediu em 2026-08-30. Eu disse que "no MFC o
+> original aplica as edições enquanto se digita; no Qt o commit depende do
+> `accept()`". A segunda metade é falsa: o port **também** aplica campo a
+> campo, direto em `db_.preset_formations`, que o `OnPresetTactics` passa por
+> ponteiro. Os dois são modais e os dois bloqueiam a gravação com o diálogo de
+> pé; o que falta ao port é **fechá-lo** — no MFC o `DEFPUSHBUTTON` invisível
+> segue sendo o default e o `Return` roda o `EndDialog`.
+>
+> O controle que desfaz o engano é rodar o oráculo **sem** o `Return` final:
+> ele sai `a gravacao nao confirmou` e a cópia fica `IDENTICAL`. Sonda de
+> janela não serve — o "Modify default tactics" aparece mapeado nos dois lados,
+> porque o `dlg_tatt` do original é objeto membro e o Wine não destrói a janela
+> X depois do `EndDialog`.
 
 **A lição de método:** "os dois lados se comportam igual na tela" não é
 paridade — paridade é o que sai no disco. Ontem parei na tela e concluí cedo
