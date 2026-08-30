@@ -126,3 +126,17 @@ wte/re/dfm/blobs/
 # rodada e diverge no carimbo. O que a WTE-TASK-13 concluir dele vai para
 # `wte/re/eventos.md`, esse sim versionado. Vem DEPOIS do `!wte/re/**`.
 wte/re/trace.log
+
+# FAQs de PES2 de terceiros, e as conversoes em Markdown deles.
+# Obra do BigCj34 e do Denis Dzanic, com nota de copyright propria -- o
+# segundo diz literalmente "may not be published". Commitar num repo
+# publico e publicar. O que este repositorio guarda e o que foi extraido
+# deles com credito, em docs/PES2-NOMES.md; os documentos ficam no disco
+# do usuario, como roms/ e we-team-editor/.
+# Os .txt originais ja foram convertidos e descartados; a entrada continua
+# listada porque um novo download nao pode ser commitado tampouco.
+# Reconverter: python3 tools/pes2/faq2md.py <entrada>.txt <saida>.md "<titulo>"
+/docs/Pro Evolution Soccer 2 FAQ for PSone.txt
+/docs/Pro Evolution Soccer 2 FAQ for PSone.md
+/docs/Pro Evolution Soccer 2.txt
+/docs/Pro Evolution Soccer 2.md
