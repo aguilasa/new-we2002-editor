@@ -152,6 +152,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-130](/docs/tasks/CORR-WTE-130.md) | [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | O cabeçalho do `8.5-selecao-nacional.sh` diz que a caixa desmarcada é a substituição completa; é o contrário, e `PAR_INCOMPLETE=1` roda a **completa** | Média | [x] concluída | 2026-08-29 |
 | [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | As edições do `DefaultTacticsDialog` não chegam ao disco no port e chegam no `ed.exe`; o `IDOK` é `NOT WS_VISIBLE` e no Qt isso deixa o diálogo sem caminho de confirmação | Alta | [x] concluída | 2026-08-30 |
 | [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Diagnóstico invertido: os 52 bytes do port é que estão certos (`tattDlg.cpp:701` valida 52); quem exporta errado é o `ed.exe` x64. Fechada sem mudar código | Alta | [x] concluída | 2026-09-01 |
+| [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | `CMB_EDITALLLOOK` grava 92 bytes diferentes do `ed.exe` em quatro faixas de atributo, dentro de 3468 que concordam | Média | [ ] pendente | — |
 
 ## Checklist
 
@@ -286,6 +287,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-130 — desinverter completa/incompleta no roteiro da §8.5 e renomear a variável
 - [x] CORR-WTE-131 — dar ao `DefaultTacticsDialog` um caminho de confirmação, que é o que o original tem
 - [x] CORR-WTE-132 — diagnóstico refeito: o port está certo, o `ed.exe` x64 é que exporta errado
+- [ ] CORR-WTE-133 — achar onde o `reset def. look` se separa do original no `defaultlook.txt`
 
 ## Detalhes por correção
 

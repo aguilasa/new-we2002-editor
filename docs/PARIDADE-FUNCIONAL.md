@@ -873,13 +873,38 @@ primeira vista**.
 > de origem, formatos vizinhos, resultados opostos.
 
 ### 8.9 Operações em massa
+**Três de cinco medidos em 2026-09-01** pela
+[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md); dois não são mensuráveis nesta
+máquina. Roteiros em `tools/par/8.9-*.sh`.
+
 - [ ] `CMD_SORT_RESERVES` numa seleção e num clube (a ordem torta é a certa).
       **O botão é invisível nos dois** — exige build de teste com o controle
-      visível dos dois lados; não commitar
-- [ ] Clube com 1 goleiro na reserva × com 2
-- [ ] `CMD_UPDATE_COSTS`
-- [ ] `CMB_EDITALLLOOK`
-- [ ] `CMB_EDITALLBARS` — conferir que 57..63 ficaram intactos
+      visível dos dois lados; não commitar. **Não medido:** o `.rc` confirma o
+      `NOT WS_VISIBLE`, e tornar o controle visível no `ed.exe` exige MSVC com
+      MFC estático, que não existe nesta máquina
+- [ ] Clube com 1 goleiro na reserva × com 2 — **não medido pela mesma razão**:
+      é o mesmo `OnSortReserves`, cujo comentário descreve justamente o caso de
+      um goleiro só (as duas últimas vagas trocam)
+- [x] `CMD_UPDATE_COSTS` — golden `OK`
+- [ ] `CMB_EDITALLLOOK` — **reprovou**: 92 bytes em quatro faixas de
+      `OFS_PLAYER_ATTR`, dentro de 3468 que concordam.
+      [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md)
+- [x] `CMB_EDITALLBARS` — conferir que 57..63 ficaram intactos — **ficaram**:
+      as barras de 56..63 saem `7 8 9 7 8 9 9 0` antes e depois, enquanto as de
+      0..5 vão de `7 4 5 7 8 8` a `7 7 7 7 7 7`, provando que o botão agiu
+
+> **Nem toda operação em massa abre `"Operation done!"`, e os dois lados não
+> concordam sobre isso.** O `CMD_UPDATE_COSTS` abre nos dois; o
+> `CMB_EDITALLBARS` abre **só no port** (uma caixa de 126×100) e não no
+> `ed.exe`. Um `Return` seco resolve os dois casos — fecha a `QMessageBox` e é
+> inócuo no diálogo do original, que não tem `DEFPUSHBUTTON`.
+>
+> **O que não serve é o `dispensa_modal`** do roteiro da §8.2 quando não há
+> caixa: sob Wine os controles do MFC são janelas X de verdade, e vários caem
+> na faixa de tamanho que ele procura (206×80, 148×82). Ele acha um
+> **controle**, clica nele, e a gravação do oráculo não acontece — a cópia sai
+> `IDENTICAL` enquanto o port grava, e o golden acusa o port por uma
+> divergência que é do roteiro.
 
 ### 8.10 Ciclo de vida
 - [ ] Cancelar o diálogo de abertura
