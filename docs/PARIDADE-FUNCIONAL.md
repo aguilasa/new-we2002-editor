@@ -886,9 +886,12 @@ máquina. Roteiros em `tools/par/8.9-*.sh`.
       é o mesmo `OnSortReserves`, cujo comentário descreve justamente o caso de
       um goleiro só (as duas últimas vagas trocam)
 - [x] `CMD_UPDATE_COSTS` — golden `OK`
-- [ ] `CMB_EDITALLLOOK` — **reprovou**: 92 bytes em quatro faixas de
-      `OFS_PLAYER_ATTR`, dentro de 3468 que concordam.
-      [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md)
+- [x] `CMB_EDITALLLOOK` — reprovou na primeira medição (92 bytes em quatro
+      faixas de `OFS_PLAYER_ATTR`), e a
+      [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) mostrou que **não era
+      código**: o legado abre `defaultlook.txt` por caminho relativo e lê a
+      cópia de `Debug/`, que é gitignored e tinha 4 das 95 linhas diferentes da
+      versionada. Alinhada a fixture, sai `OK`
 - [x] `CMB_EDITALLBARS` — conferir que 57..63 ficaram intactos — **ficaram**:
       as barras de 56..63 saem `7 8 9 7 8 9 9 0` antes e depois, enquanto as de
       0..5 vão de `7 4 5 7 8 8` a `7 7 7 7 7 7`, provando que o botão agiu

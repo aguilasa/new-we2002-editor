@@ -50,7 +50,7 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
       visível dos dois lados; não commitar
 - [ ] Clube com 1 goleiro na reserva × com 2  ← **não medido: mesmo handler**
 - [x] `CMD_UPDATE_COSTS`
-- [ ] `CMB_EDITALLLOOK`  ← **reprovou, CORR-WTE-133**
+- [x] `CMB_EDITALLLOOK`
 - [x] `CMB_EDITALLBARS` — conferir que 57..63 ficaram intactos
 
 **O primeiro item exige build descartável dos dois lados**, e o enunciado é
@@ -76,8 +76,8 @@ o oráculo, não contra o que parece ordenado.
 
 ## Log de Execução
 
-**Executado em:** 2026-09-01 — **PARCIAL: 2 de 5 fechados, 1 reprovado, 2 não
-mensuráveis nesta máquina.**
+**Executado em:** 2026-09-01 — **PARCIAL: 3 de 5 fechados, 2 não mensuráveis nesta máquina.**
+(O item 4 fechou em 2026-09-01, pela CORR-WTE-133.)
 
 **Resumo:**
 
@@ -86,7 +86,7 @@ mensuráveis nesta máquina.**
 | `CMD_SORT_RESERVES` | **não medido** — botão `NOT WS_VISIBLE` nos dois; exige MSVC |
 | 1 goleiro × 2 | **não medido** — mesmo handler do anterior |
 | `CMD_UPDATE_COSTS` | golden `OK` |
-| `CMB_EDITALLLOOK` | **reprovou** — 92 bytes, [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) |
+| `CMB_EDITALLLOOK` | golden `OK` depois da [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md), que era fixture, não código |
 | `CMB_EDITALLBARS` | golden `OK`, e 57..63 intactos |
 
 **Os dois não medidos, e por que não se inventou caminho.** O enunciado é
@@ -115,7 +115,13 @@ e o golden acusa o port por uma divergência que é do roteiro. Foi o que
 produziu, em sequência, um vermelho falso e depois um **verde vazio** — os dois
 lados sem gravar, saindo iguais.
 
-**Problemas encontrados:** o item 4, acima. A task fica aberta.
+**Problemas encontrados:** o item 4 reprovou na primeira medição e foi fechado
+pela [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md), que achou a causa **fora do
+código**: o legado abre `defaultlook.txt` por caminho relativo, lê a cópia
+gitignored de `Debug/`, e ela tinha 4 linhas diferentes da versionada. Cada
+lado gravava certo o que lia.
+
+A task fica aberta só pelos dois itens que exigem MSVC.
 
 **Arquivos criados/modificados:**
 

@@ -987,5 +987,24 @@ dos fontes é ASCII puro. Exceções que devem permanecer como estão:
   "Costa d'Avorio"). É **dado lido em runtime** por `edDlg.cpp:5165`;
   converter muda o que o parser enxerga.
 
+**Há duas cópias do `defaultlook.txt`, e elas precisam bater.** O port lê
+`data/defaultlook.txt`, versionado; o `ed.exe` abre `"defaultlook.txt"` com
+**caminho relativo** (`edDlg.cpp`, no `OnEditAllPlayersLook`), e como o
+`golden_run.sh` o executa de dentro de `Debug/`, quem ele lê é
+`Debug/defaultlook.txt` — que é **gitignored** e sai de sincronia sem que nada
+reclame.
+
+Em 2026-09-01 as duas divergiam em 4 das 95 linhas, e o golden do
+`CMB_EDITALLLOOK` acusava 92 bytes de diferença que **não eram de código**: os
+dois lados liam arquivos diferentes e cada um gravava certo o que leu. O
+versionado é o fiel — bate com o `defaultlook.txt` do commit raiz. Ao mexer em
+qualquer coisa que leia esse arquivo, confira antes:
+
+```sh
+cmp Debug/defaultlook.txt data/defaultlook.txt
+```
+
+Detalhe na [CORR-WTE-133](docs/tasks/CORR-WTE-133.md).
+
 Arquivos `debugio*.txt` / `debugread*.txt` na raiz são dumps de depuração do
 autor, não fixtures de teste.
