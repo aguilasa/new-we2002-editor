@@ -775,6 +775,13 @@ Os quadros **não entram no repositório**: são de um jogo comercial, e
 seguem a mesma regra de `roms/` e dos FAQs. O que entra é o script e o
 número.
 
+Se for preciso comparar contra um quadro de referência, `PES2_REFERENCE`
+aponta um PNG de fora do repositório e `PES2_TOLERANCE` diz quanto pode
+diferir. Medido nos dois sentidos: contra o quadro de outra corrida no
+mesmo instante do vídeo de abertura, 8.178 de 76.800 pixels diferem
+(10,6%) e passa; contra o quadro da partida de demonstração, 58.451
+(76,1%) e falha. O default de 35% fica entre os dois.
+
 ---
 
 ## 4. Estratégia

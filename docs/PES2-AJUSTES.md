@@ -346,6 +346,14 @@ faz as vezes dele.** O que aparecer para fazer entra aqui, não lá.
       `PES2_TOLERANCE` diz quanto pode diferir (35% por padrão — emulação
       não é exata quadro a quadro e a partida de demonstração nunca se
       repete, então é teste de "mesma tela", não golden).
+
+      **Exercitado nos dois sentidos em 2026-08-30**, porque escrever o
+      caminho não é o mesmo que rodá-lo: contra o quadro de uma corrida
+      anterior no mesmo instante do vídeo de abertura, **8.178 de 76.800
+      pixels diferem (10,6%)** e passa; contra o quadro da partida de
+      demonstração, **58.451 (76,1%)** e falha com *"frame 2 is not the
+      same screen as the reference"*. A tolerância de 35% fica com folga
+      entre os dois.
 - [x] **`boot_check.sh` não entrava no `ctest`.** Entra agora, como
       **`pes2_boot`**, nos mesmos termos dos golden: sai 77 e se reporta
       *skipped* se faltar imagem, DuckStation, ImageMagick, `xdotool` ou
