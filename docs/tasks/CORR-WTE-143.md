@@ -3,7 +3,7 @@ id: CORR-WTE-143
 title: "Correção: `8.10-return-nao-dispara.sh` é chamado de hook de golden, mas `golden_check.sh` com ele sempre reprova"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -103,12 +103,37 @@ Na frase que classifica os quatro roteiros, dizer que o do item 4 é hook de
       `Return` e a de controle sem tecla dá arquivos iguais
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+O cabeçalho do roteiro abre agora com `>>> ESTE ROTEIRO É HOOK DE UM LADO SÓ:
+GOLDEN_GUI_EDIT, o port. <<<`, no modelo do `8.7-t2002-importar.sh`, e diz o que
+acontece do outro lado — o oráculo encerra, o `golden_run.sh` sai
+`nao consegui focar a janela 0xe00001`, e a reprovação é o resultado esperado
+(CORR-WTE-141). O veredito do item ficou escrito com o comando que o produz:
+`cmp` entre a corrida com `Return` e a de controle sem tecla nenhuma.
+
+Na §8.10, a frase que dizia "dois roteiros são hooks de golden" virou tabela dos
+quatro, com **como se roda** e **qual é o veredito** de cada um — que é a
+distinção que faltava.
+
+**Problemas encontrados:** nenhum.
+
+A sequência que o cabeçalho novo prescreve foi rodada como está escrita, e
+fecha:
+
+```text
+$ cmp "$SCRATCH/ret.bin" "$SCRATCH/ctl.bin" && echo "cmp: IGUAIS"
+cmp: IGUAIS
+$ python3 tools/golden_compare.py roms/ptbr-remaster.bin "$SCRATCH/ret.bin"
+5 run(s), 41 byte(s) differ
+```
 
 **Arquivos criados/modificados:**
+
+- `tools/par/8.10-return-nao-dispara.sh` — o cabeçalho
+- `docs/PARIDADE-FUNCIONAL.md` — a tabela dos quatro roteiros na §8.10
+- `docs/tasks/PAR-TASK-09.md` — nota posterior

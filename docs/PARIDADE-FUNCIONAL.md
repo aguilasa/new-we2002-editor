@@ -1075,11 +1075,26 @@ Rendeu duas CORRs, a [140](/docs/tasks/CORR-WTE-140.md) e a
 as duas foram decididas em 2026-08-31 do mesmo jeito: **o port fica como está e
 a divergência vai para a §6**, linhas 7 e 8.
 
-Dois roteiros são hooks de golden (`tools/par/8.10-reload-descarta.sh` e
-`8.10-return-nao-dispara.sh`) e dois rodam sozinhos
-(`8.10-ciclo-oraculo.sh`, `8.10-ciclo-port.sh`) — arranque e encerramento o
-harness não expõe, porque ele já entra pelo diálogo de abertura e já sai
-gravando.
+**Os quatro roteiros da seção não se rodam do mesmo jeito**, e a distinção
+importa na hora de reconferir:
+
+| roteiro | como se roda | veredito |
+|---|---|---|
+| `8.10-reload-descarta.sh` | hook dos **dois** lados | `OK` do `golden_check.sh`, mais a corrida gêmea `PAR_SEM_RELOAD=1` como controle |
+| `8.10-return-nao-dispara.sh` | hook de **um lado só** (`GOLDEN_GUI_EDIT`) | `cmp` contra uma corrida sem tecla nenhuma |
+| `8.10-ciclo-oraculo.sh` | sozinho | captura de tela |
+| `8.10-ciclo-port.sh` | sozinho | captura de tela |
+
+Os dois últimos rodam sozinhos porque arranque e encerramento o harness não
+expõe — ele já entra pelo diálogo de abertura e já sai gravando.
+
+**O do item 4 é hook de um lado só porque os dois lados não podem fazer a mesma
+coisa**: com `GOLDEN_EDIT` o oráculo recebe o `Return`, **encerra** — que é
+exatamente o achado do item — e o `golden_run.sh` morre antes de gravar
+(`nao consegui focar a janela 0xe00001`). Um `golden_check.sh` com ele reprova
+**sempre**, e isso é o esperado, não regressão
+([CORR-WTE-143](/docs/tasks/CORR-WTE-143.md) escreveu isso no cabeçalho do
+roteiro, para o vermelho não ser confundido com achado novo).
 
 **Os itens 1, 2 e 5 não têm veredito de `golden_compare.py`** — não podem ter,
 porque nenhum dos dois lados chega a gravar — e a evidência deles é **captura de

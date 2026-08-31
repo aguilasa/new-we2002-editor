@@ -162,3 +162,14 @@ Seis capturas saem agora, e os vereditos não mudaram: `ed.exe` de pé com o
 diálogo principal vazio depois do cancelamento (`ora-cancelar-janela.png`, nova
 nesta correção), port encerrado, os dois carregando a imagem de tamanho errado,
 `Escape` encerrando os dois.
+
+### Nota posterior — 2026-08-31, [CORR-WTE-143](/docs/tasks/CORR-WTE-143.md)
+
+**Este Log listava os quatro roteiros como se fossem duas duplas, e são quatro
+coisas diferentes.** O `8.10-return-nao-dispara.sh` é hook de **um lado só**: com
+`GOLDEN_EDIT` o oráculo recebe o `Return`, encerra — o achado do próprio item —
+e o `golden_run.sh` morre antes de gravar, então `golden_check.sh` com ele
+reprova sempre. O cabeçalho do roteiro passou a dizer isso, e o veredito do item
+(que é `cmp` contra uma corrida sem tecla, não o `OK` do golden) ficou escrito
+junto com o comando. A §8.10 traz a tabela dos quatro.
+

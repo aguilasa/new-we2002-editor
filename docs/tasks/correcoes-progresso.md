@@ -162,7 +162,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Cancelar o diálogo de abertura encerra o port e deixa o `ed.exe` com o diálogo principal vazio: `return FALSE` no `OnInitDialog` não fecha diálogo em MFC, e o comentário do `main.cpp` afirma que fecha | Média | [x] concluída | 2026-08-31 |
 | [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | `Return` na janela principal encerra o `ed.exe` (`CDialog::OnOK`, sem `DEFPUSHBUTTON`) e não faz nada no port; nenhum dos dois dispara edição, o ciclo de vida é que diverge | Média | [x] concluída | 2026-08-31 |
 | [CORR-WTE-142](/docs/tasks/CORR-WTE-142.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Os roteiros de ciclo de vida gravam captura em `/tmp/c09`, que nenhum deles cria — nenhuma imagem é produzida, e o do oráculo imprime "captura em ..." mesmo assim | Alta | [x] concluída | 2026-08-31 |
-| [CORR-WTE-143](/docs/tasks/CORR-WTE-143.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | `8.10-return-nao-dispara.sh` é classificado como hook de golden, mas com `GOLDEN_EDIT` o oráculo encerra e o `golden_check.sh` reprova por construção; o cabeçalho não avisa | Baixa | [ ] pendente | — |
+| [CORR-WTE-143](/docs/tasks/CORR-WTE-143.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | `8.10-return-nao-dispara.sh` é classificado como hook de golden, mas com `GOLDEN_EDIT` o oráculo encerra e o `golden_check.sh` reprova por construção; o cabeçalho não avisa | Baixa | [x] concluída | 2026-08-31 |
 
 ## Checklist
 
@@ -307,7 +307,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-140 — decidir se o port reproduz a janela vazia do cancelamento, e corrigir o comentário do `main.cpp`
 - [x] CORR-WTE-141 — decidir se o `Return` fecha a janela principal do port, e escrever a razão
 - [x] CORR-WTE-142 — criar o destino das capturas e não anunciar arquivo que não foi escrito
-- [ ] CORR-WTE-143 — dizer no cabeçalho que o roteiro do item 4 é hook de um lado só
+- [x] CORR-WTE-143 — dizer no cabeçalho que o roteiro do item 4 é hook de um lado só
 
 ## Detalhes por correção
 
