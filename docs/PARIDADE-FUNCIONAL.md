@@ -770,9 +770,16 @@ abre o `PlayerSelectDialog` e não roda sozinho.
       `OFS_TEAM_MIXED_CASE_NAME+223676` (a geometria do slot) — nos mesmos
       offsets do oráculo, e o golden sai `OK`
 - [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
-      — `CMD_IMP` e `CMD_EXP` moram dentro do `DefaultTacticsDialog`, que
-      **deixou de ser um beco sem saída** com a
-      [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md); falta medir
+      (`tools/par/8.7-t2002-exportar.sh`) — `CMD_IMP` e `CMD_EXP` moram dentro
+      do `DefaultTacticsDialog`, que **deixou de ser um beco sem saída** com a
+      [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md). **Medido em 2026-08-30, e
+      reprovou:** a mesma tática exportada dos dois lados dá **56 bytes no
+      `ed.exe` e 52 no port**. A assinatura `f.m.tatt` e o corpo do registro
+      batem; o que diverge são os bytes entre eles — oito no original
+      (`18e3 5c40 0100 0000`, determinísticos) contra quatro zeros no port —, e
+      isso desalinha o resto do arquivo. A troca nos dois sentidos, que é o que
+      este item existe para provar, não funciona hoje.
+      [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)
 
 > **O `IDOK` do `DefaultTacticsDialog` é `NOT WS_VISIBLE` no próprio `ed.rc`**
 > (linha 627: `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`), e o

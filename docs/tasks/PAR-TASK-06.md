@@ -89,9 +89,29 @@ Cuidado ao aplicar preset: num diálogo com 86 botões e nenhum `DEFPUSHBUTTON`,
 
 ## Log de Execução
 
-**Executado em:** 2026-08-29 (itens 1-3) e 2026-08-30 (o item 4, medido) —
-**PARCIAL: 3 de 5 itens fechados, 1 medido e reprovado, 1 bloqueado** (o 6º da
-lista já estava fechado pela CORR-WTE-127, fora desta task).
+**Executado em:** 2026-08-29 (itens 1-3) e 2026-08-30 (itens 4 e 5) —
+**PARCIAL: 4 de 5 itens fechados, 1 medido e reprovado** (o 6º da lista já
+estava fechado pela CORR-WTE-127, fora desta task).
+
+### Terceira passagem, 2026-08-30 — o item 5
+
+**Ele destravou e reprovou.** Com o `DefaultTacticsDialog` confirmável pela
+[CORR-WTE-131](/docs/tasks/CORR-WTE-131.md), o `CMD_EXP` pôde enfim ser
+exercitado. Exportar a mesma tática dos dois lados dá **56 bytes no `ed.exe` e
+52 no port**: assinatura e corpo batem, e o que diverge são os bytes entre eles
+— oito no original (`18e3 5c40 0100 0000`) contra quatro zeros no port.
+
+**Os oito bytes do original são determinísticos**, não lixo: duas exportações
+seguidas deram o mesmo valor. Foi a primeira coisa que medi, porque "parece
+ponteiro" convidava a descartá-los como memória não inicializada — e aí a
+conclusão teria sido a oposta.
+
+A causa está em duas constantes de `DefaultTacticsDialog.cpp`: `VPTR_BYTES` é 4
+onde o oráculo — que é **x86-64** — usa 8, e `FILE_BYTES` não soma esse campo.
+Como a **leitura** usa o mesmo `VPTR_BYTES`, o port exporta e importa o próprio
+formato sem erro nenhum; é o que escondeu o defeito até a comparação com o
+outro lado. **Formato só se confere contra o outro lado**, nunca contra si
+mesmo. [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
 
 **Resumo:**
 
@@ -170,6 +190,9 @@ diálogo, mas confirma o campo em edição — sem ele, o oráculo também não 
 - `tools/par/8.7-clamp-xy.sh`, `8.7-troca-papel.sh`, `8.7-presets-16.sh` — um
   roteiro por item fechado
 - `tools/par/8.7-preset-renomear.sh` — o roteiro do item 4. Deixou de ser
+- `tools/par/8.7-t2002-exportar.sh` — o roteiro do item 5, que mediu a
+  divergência do formato
+- `docs/tasks/CORR-WTE-132.md` e `docs/tasks/correcoes-progresso.md` — o achado
   esqueleto: ele **mede**, e o veredito é a CORR-WTE-131. O cabeçalho explica
   por que não há clique de confirmação (o `IDOK` é `NOT WS_VISIBLE` no `.rc`)
 - `docs/tasks/CORR-WTE-131.md` e `docs/tasks/correcoes-progresso.md` — o achado
