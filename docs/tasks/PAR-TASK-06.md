@@ -74,11 +74,23 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
       produz 56 bytes, que nem ele mesmo lê. Defeito do oráculo, não do port —
       [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)
       — **destravado** pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md), que
-      deu saída ao diálogo onde `CMD_IMP` e `CMD_EXP` moram; falta medir
+      deu saída ao diálogo onde `CMD_IMP` e `CMD_EXP` moram.
+
+      **Medido em 2026-08-31** pela [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md),
+      que é quando o item ganhou o veredito de `golden_compare.py` que a
+      Definição de pronto exige — antes dela ele se apoiava em tamanhos de
+      arquivo e leitura de fonte. Exportar sai `OK`, com os 40 bytes de carga
+      byte-idênticos entre os dois arquivos. Importar **diverge em 3 faixas, e
+      quem erra é o oráculo**: ele lê o registro 4 bytes adiante do lugar certo
+      (o vptr de 8 bytes do binário x64 contra os 4 do formato), então grava
+      `MP` mais bytes de papel onde o port grava `PARIMP`. Faixas e tabela na
+      §8.7 do inventário
 
 O quinto item é o mais valioso da série inteira: **troca de arquivo nos dois
 sentidos** entre port e original é a prova de formato mais forte que existe
-fora do golden test.
+fora do golden test. E foi o que entregou: a troca nos dois sentidos é que
+mostrou, em bytes, que o deslocamento é do oráculo — a leitura de fonte da
+CORR-WTE-132 dizia a mesma coisa, mas dizer não é medir.
 
 Os `TXT_TATX/TATY` usam `textChanged`, não `textEdited`, porque `EN_CHANGE`
 disparava em `SetWindowText` e é o que move os marcadores do campinho ao trocar

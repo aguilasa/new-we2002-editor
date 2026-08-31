@@ -815,12 +815,46 @@ primeira vista**.
       offsets do oráculo, e o golden sai `OK`
 - [x] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
       (`tools/par/8.7-t2002-exportar.sh`, `8.7-t2002-importar.sh`) —
-      **o port está certo, e a assimetria é do oráculo.** O formato é de **52
-      bytes**, que é o que `tattDlg.cpp:701` valida ao importar e o que o port
-      grava; o `Debug/ed.exe`, sendo x86-64, exporta **56** e recusa o próprio
-      arquivo. Medido: o `ed.exe` **aceita** o `.t2002` de 52 bytes do port e
-      grava a tática. [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), fechada sem
-      mudar código.
+      **o port está certo, e a assimetria é do oráculo.** As duas pernas foram
+      medidas com `golden_compare.py` e controle positivo dos dois lados em
+      2026-08-31, pela [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md); até então o
+      item se apoiava só em tamanhos de arquivo e na leitura do fonte.
+
+      **Exportar: `OK`.** O port grava **52 bytes** e o `Debug/ed.exe` **56** —
+      a diferença é a largura do vptr, 4 contra 8, porque `tattica` tem
+      destrutor virtual e o oráculo é um rebuild x86-64. O port zera os quatro
+      bytes; o oráculo vaza um endereço de processo (`18e3 5c40 0100 0000`). Os
+      **40 bytes de carga são byte-idênticos**: `cmp` de `port[12..51]` contra
+      `oráculo[16..55]` não acusa nada. A gravação na imagem sai
+      `OK: identico ao oraculo, exceto o slot 64 conhecido`, e o controle
+      positivo do port dá 5 faixas / 41 bytes — só as não-idempotências, porque
+      exportar não altera a imagem.
+
+      **Importar: diverge, e a divergência é do oráculo.** Os dois lados
+      importaram o **mesmo** arquivo de 52 bytes, editado para ser observável
+      (nome `4-5-1A` → `PARIMP`, `roles[1]` `0x02` → `0x05`). O golden reprova
+      em 3 faixas — `374188..374198`, `374780..374797` e
+      `OFS_TEAM_MIXED_CASE_NAME+223676` —, e os controles positivos dizem quem
+      errou:
+
+      | | faixas / bytes | o que gravou no nome do preset |
+      |---|---|---|
+      | port | 7 / 48 | `5041 5249 4d50` = `PARIMP` |
+      | `ed.exe` | 9 / 91 | `4d50 0001 0506` = `MP`, e depois bytes de papel |
+
+      **O oráculo lê o registro 4 bytes adiante do lugar certo.** Ele valida o
+      tamanho contra o literal 52 (`legacy/mfc/tattDlg.cpp:701`) — por isso
+      aceita o arquivo —, mas decodifica com o vptr de 8 bytes do próprio
+      binário x64, e tudo depois do magic sai deslocado: o nome vira o fim do
+      nome, os papéis viram o começo do `x[]`. O port muda exatamente os dois
+      campos que o arquivo mudou: 1 byte em `before first offset+374189`
+      (`roles[1]`) e 6 em `OFS_TEAM_MIXED_CASE_NAME+223676` (o nome).
+
+      **Este item não pode ficar verde, e não deve.** Verde exigiria o port
+      reproduzir o deslocamento — isto é, ler errado de propósito um formato
+      que o próprio fonte do original define como de 52 bytes. É a mesma
+      conclusão da [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), agora com a
+      prova em bytes em vez de por leitura de fonte.
 
 > **A ida e volta funciona no sentido port → `ed.exe`, e não no inverso** —
 > porque o arquivo que o oráculo x64 produz é que está torto, não o formato. O

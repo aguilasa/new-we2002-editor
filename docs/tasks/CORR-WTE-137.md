@@ -1,113 +1,115 @@
 ---
 id: CORR-WTE-137
-title: "Correção: `8.8-b2002-exportar.sh` não reproduz, não confere nada e deixa o modal aberto"
+title: "Correção: `Return` depois de clicar um botão do `DefaultTacticsDialog` reabre o botão no port e fecha o diálogo no original"
 type: correção
-category: verificação
+category: comportamento
 status: pendente
 depends_on: []
 ---
 
-# CORR-WTE-137: o roteiro de exportação da §8.8 é um falso verde à espera
+# CORR-WTE-137: o botão focado come o `Return` no port
 
 ## Problema identificado
 
-O item 3 da §8.8 — "`.b2002` e `.m2002`: exportar do port e importar no
-`ed.exe`, e vice-versa" — se apoia em
-[`tools/par/8.8-b2002-exportar.sh`](../../tools/par/8.8-b2002-exportar.sh), e o
-roteiro tem três defeitos que se somam:
+No `DefaultTacticsDialog`, depois de **clicar** `CMD_IMP` ou `CMD_EXP`, a tecla
+`Return` faz coisas diferentes nos dois lados:
 
-1. **Não reproduz.** Quatro corridas idênticas desta revisão deram quatro
-   resultados diferentes.
-2. **Não confere nada.** Não há guarda de que o arquivo apareceu, nem de que
-   tem 41 / 40 bytes. Corrida que não exportou é indistinguível de corrida que
-   exportou.
-3. **Não fecha o `FlagKitDialog`**, que é modal nos dois lados — ao contrário do
-   `8.8-cores-teto.sh` e do `8.8-b2002-importar.sh`, que terminam com
-   `fk_click 196 26 36 14` no botão "Close". Com o modal de pé o clique em
-   `CMB_WRITE` não alcança o diálogo principal, o `Database::Save()` não roda —
-   **e o harness diz que gravou**.
+| | o que `Return` faz |
+|---|---|
+| `ed.exe` | vai para o botão **default** do diálogo — o `IDOK`, invisível — e **fecha** o diálogo |
+| port | o `QPushButton` clicado ficou com o foco, e um botão focado **se auto-clica**: reabre o diálogo de arquivo |
 
-O terceiro é o mais perigoso, porque é exatamente a armadilha que a §8.7 já
-tinha pago (CORR-WTE-131): dois lados que **não** gravam produzem imagens
-idênticas, e um `golden_check.sh` com este roteiro sai verde sem ter medido
-nada.
+No Win32 o `Return` de um diálogo vai para o `DEFPUSHBUTTON`, não para o
+controle focado; no Qt um `QPushButton` com foco trata `Return` como ativação
+antes de o evento chegar ao `keyPressEvent` do diálogo — que é onde a
+[CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) pôs o `accept()`.
+
+O efeito prático é que **o diálogo não tem saída pelo teclado enquanto o foco
+estiver num botão**: cada `Return` reabre o diálogo de arquivo, indefinidamente.
+E como o diálogo é modal, o `CMB_WRITE` do diálogo principal fica inalcançável —
+a imagem nunca é gravada.
 
 ## Evidência
 
-**As quatro corridas**, mesmo roteiro, mesmas variáveis, `ptbr-remaster.bin`:
+Medido em 2026-08-31, durante a [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md).
+Roteiro: prelúdio da §8.7, `CMD_EDIT_PRESETS`, `CMD_EXP`, digitar o caminho,
+e três `Return`.
 
-| corrida | `.b2002` | `.m2002` | saída do harness |
-|---|---|---|---|
-| 1 | 41 bytes, conteúdo correto | — | `X Error … BadWindow`, exit 1 |
-| 2 | — | — | `gui: gravado`, **exit 0** |
-| 3 | — | — | `gui: gravado`, **exit 0** |
-| 4 | **0 bytes** | — | `X Error … BadWindow`, exit 1 |
-
-O `.m2002` **não saiu em nenhuma**. O único arquivo bom, o da corrida 1, está
-certo — 41 bytes, `f.m.band`, estilo `0x00` e `flag_colours[0] = 0x0dc3` =
-3523, que é o valor da imagem:
+Janelas no fim do roteiro, lado do port — o diálogo de arquivo **de volta**
+depois de cinco `Return`:
 
 ```text
-00000000: 662e 6d2e 6261 6e64 00c3 0d82 89bd f718  f.m.band........
-00000010: e359 8ef6 8dcb aedc 8ebd f7bd f7bd f7bd  .Y..............
-00000020: f700 8000 8020 cd00 00                   ..... ...
+  2097158 Geometry: 1077x547 :: WE2002 Editor
+  2097178 Geometry: 481x297  ::  Modify default tactics — WE2002 Editor
+  4195823 Geometry: 1124x822 :: TACTIC FILE TO EXPORT
+foco: 4195823
 ```
 
-**O falso verde, medido:** nas corridas que saíram `exit 0` dizendo
-`gui: gravado`, a imagem **não foi gravada**:
+E o resultado na imagem, contra a original:
 
 ```text
-$ python3 tools/golden_compare.py roms/ptbr-remaster.bin "$S/c883.bin"
-IDENTICAL
-$ python3 tools/golden_compare.py roms/ptbr-remaster.bin "$S/c884.bin"
+$ python3 tools/golden_compare.py roms/ptbr-remaster.bin port-img.bin
 IDENTICAL
 ```
+
+`IDENTICAL` apesar de o `.t2002` de 52 bytes ter sido gravado em disco: o
+arquivo saiu, a imagem não. Do lado do oráculo, o mesmo roteiro grava 6 faixas /
+56 bytes.
+
+Com um clique no `TXT_FORMATION_NAME` antes do `Return` — que tira o foco do
+botão — o port passa a gravar 5 faixas / 41 bytes, e o golden da perna de
+exportar sai `OK`. É o contorno que os roteiros
+`tools/par/8.7-t2002-exportar.sh` e `8.7-t2002-importar.sh` usam hoje, e o
+mesmo que o `8.7-preset-renomear.sh` já usava — lá sem que ninguém tivesse
+medido por quê.
 
 ## Causa raiz
 
-O roteiro dirige por coordenada relativa à janela (`fk_click` faz
-`xdotool mousemove --window "$FK"`), mas o clique cai em **quem estiver por
-cima naquele ponto** — e depois de cada export sobe um `AfxMessageBox` /
-`QMessageBox` ("Flag exported !"). Quando o `Return` de dispensa não chega a
-tempo, o clique seguinte (`CMD_EXPORT_KIT1`) acerta a caixa de mensagem, e daí
-para frente o roteiro digita no vazio. Nada disso é detectado, porque o roteiro
-não confere efeito e não fecha o diálogo.
+`QAbstractButton` trata `Qt::Key_Return` como ativação quando tem foco, e
+consome o evento. O `keyPressEvent` do `DefaultTacticsDialog` só vê a tecla
+depois de o widget focado a ignorar — que é o caso do `QLineEdit`, e não o do
+botão.
+
+No MFC não há esse caminho: `CDialog` roteia o `Return` para o
+`DEFPUSHBUTTON`, e o foco do botão clicado não participa da decisão.
 
 ## Correção
 
-### Arquivo: `tools/par/8.8-b2002-exportar.sh`
+O `autoDefault=false` que o `rc2ui.py` já põe nos `PUSHBUTTON` **não resolve**:
+ele governa o botão default, não a ativação por foco. O caminho é o
+`keyPressEvent` do diálogo — que já existe — **ver o `Return` antes do botão**,
+por `eventFilter` nos botões ou por `Qt::Key_Return` interceptado no filtro do
+diálogo, chamando `accept()` como a CORR-WTE-131 faz.
 
-1. **Fechar o modal ao fim**, como os outros dois roteiros da seção:
-   `fk_click 196 26 36 14` no "Close". Sem isso o roteiro é inseguro para
-   `golden_check.sh`, e o cabeçalho deve dizer por quê.
-2. **Esperar o efeito em vez de dormir**: depois de cada `Return` de confirmação,
-   aguardar o arquivo aparecer com o tamanho esperado (41 para o `.b2002`, 40
-   para o `.m2002`) antes de seguir, e **falhar alto** se não aparecer — o
-   padrão de `tact_win`/`flag_win`, que já retornam erro quando a janela não
-   surge.
-3. Dispensar a caixa de mensagem por espera de janela, não por `sleep` fixo.
+**Cuidado com o alcance.** O `MainWindow` tem 86 botões e a mesma mecânica; e
+lá `Return` não deve fechar nada, porque o `IDD_ED_DIALOG` não tem
+`DEFPUSHBUTTON` — no MFC o Enter cai em `CDialog::OnOK` e **encerra o editor**
+(medido: é o que produz `nao consegui focar a janela` no `golden_run.sh`).
+Reproduzir isso no port é decisão à parte, e **não** é o que esta CORR pede.
+O escopo aqui é o `DefaultTacticsDialog`.
 
-### Arquivo: `docs/PARIDADE-FUNCIONAL.md` e `docs/tasks/PAR-TASK-07.md`
-
-Re-medir o item 3 com o roteiro consertado e registrar os dois tamanhos e o
-`cmp` entre o arquivo do port e o do `ed.exe` — a afirmação "byte-idênticos" é
-a que precisa de corrida reproduzível para valer.
+Ao fechar, os dois roteiros do `.t2002` podem perder o clique de foco — mas só
+depois de o golden mostrar que perdem sem mudar o veredito.
 
 ## Arquivos a criar ou modificar
 
 | Arquivo | Ação |
 |---|---|
-| `tools/par/8.8-b2002-exportar.sh` | modificar |
-| `docs/PARIDADE-FUNCIONAL.md` | modificar — item 3 da §8.8 |
-| `docs/tasks/PAR-TASK-07.md` | modificar — o Log do item 3 |
+| `src/app/DefaultTacticsDialog.cpp` | modificar |
+| `tools/par/8.7-t2002-exportar.sh` | modificar, se o contorno puder sair |
+| `tools/par/8.7-t2002-importar.sh` | idem |
+| `docs/PARIDADE-FUNCIONAL.md` | modificar — a §8.7 |
 
 ## Verificação
 
-- [ ] Três corridas seguidas do roteiro produzem **os dois** arquivos, com 41 e
-      40 bytes, e `cmp` idêntico entre elas
-- [ ] Uma corrida em que o export falha **falha alto**, em vez de sair `exit 0`
-- [ ] Com o roteiro no `golden_check.sh`, o controle positivo do port contra a
-      imagem original **não** sai `IDENTICAL`
+- [ ] Com o foco em `CMD_EXP`, `Return` fecha o diálogo no port, como no
+      `ed.exe`
+- [ ] A perna de exportar continua `OK` no golden, com controle positivo
+      **não** vazio
+- [ ] `tools/par/8.7-preset-renomear.sh` e
+      `tools/par/8.7-escape-papel-preset.sh` continuam `OK`
+- [ ] O `MainWindow` não mudou de comportamento
+- [ ] `ctest --preset debug` verde
 - [ ] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
