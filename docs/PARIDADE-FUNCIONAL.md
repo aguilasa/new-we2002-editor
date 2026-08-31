@@ -1081,6 +1081,19 @@ Dois roteiros são hooks de golden (`tools/par/8.10-reload-descarta.sh` e
 harness não expõe, porque ele já entra pelo diálogo de abertura e já sai
 gravando.
 
+**Os itens 1, 2 e 5 não têm veredito de `golden_compare.py`** — não podem ter,
+porque nenhum dos dois lados chega a gravar — e a evidência deles é **captura de
+tela**. Os dois roteiros que rodam sozinhos as produzem em
+`work/par-8.10/` (`PAR_OUT` muda o destino), seis arquivos:
+`ora-cancelar.png` e `port-cancelar.png` (o mesmo aviso nos dois lados),
+`ora-cancelar-janela.png` (a janela que só o `ed.exe` mantém de pé),
+`ora-tamanho.png` e `port-tamanho.png` (o aviso de tamanho) e
+`ora-carregado.png` (o oráculo com a imagem carregada). Refazer é rodar os dois
+roteiros; o destino é criado por eles. Até a
+[CORR-WTE-142](/docs/tasks/CORR-WTE-142.md) o destino era um `/tmp/c09` que
+ninguém criava, com o `import` calado — **nenhuma captura era produzida, e o
+roteiro do oráculo ainda anunciava as que não fez**.
+
 - [x] Cancelar o diálogo de abertura — **DIVERGE.** Os dois mostram
       `Impossible editing without CD image !`; depois disso o `ed.exe` **fica de
       pé com o diálogo principal inteiro e vazio** (combo sem itens, campos em

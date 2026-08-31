@@ -57,6 +57,15 @@ Oráculo:
 E a captura da janela que sobra mostra o diálogo completo, **vazio** — nenhum
 nome de time, nenhuma barra, nenhum jogador.
 
+> **Nota de 2026-08-31, [CORR-WTE-142](/docs/tasks/CORR-WTE-142.md):** a linha
+> `captura em /tmp/c09/ora-cancelar.png` acima **anunciava um arquivo que não
+> foi escrito** — o diretório não existia e o `import` estava calado por
+> `2>/dev/null`. A saída fica aqui como registro do que a ferramenta imprimiu
+> na época. A captura existe agora, e é reproduzível: rodar
+> `tools/par/8.10-ciclo-oraculo.sh` deixa em `work/par-8.10/` o
+> `ora-cancelar.png` (o aviso) e o `ora-cancelar-janela.png` (o diálogo vazio
+> que sustenta esta CORR).
+
 Port:
 
 ```text

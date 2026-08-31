@@ -3,7 +3,7 @@ id: CORR-WTE-142
 title: "Correção: os roteiros de ciclo de vida gravam captura em `/tmp/c09`, que ninguém cria — e o do oráculo anuncia a captura que não fez"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -121,12 +121,51 @@ próximo leitor conseguir refazer os três itens.
       imagem de tamanho errado; `Escape` encerra os dois
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+Destino das capturas passou a ser `${PAR_OUT:-$REPO/work/par-8.10}`, criado
+pelos dois roteiros com `mkdir -p`. As cinco chamadas soltas de `import` viraram
+um `capturar()` que imprime a linha de confirmação **só** com o arquivo escrito
+e, quando falha, mostra a mensagem do próprio `import` em vez de engoli-la.
+
 **Problemas encontrados:**
 
+**Eram dois defeitos, e o segundo estava escondido atrás do primeiro.** Com o
+erro visível, a primeira corrida acusou:
+
+```text
+  captura FALHOU (.../port-cancelar.png): import-im6.q16: unable to read
+  X window image `4194310': Resource temporarily unavailable
+```
+
+Ou seja: mesmo com o diretório existindo, `import -window <id>` não lia a
+janela. Duas causas, as duas consertadas aqui:
+
+1. **A janela estava obscurecida pelo modal** — a armadilha que o `CLAUDE.md`
+   já registra na seção do `:98`. O `capturar()` tenta a janela e cai para
+   `-window root`, que sempre funciona e, sem gerente de janelas, mostra a
+   mesma tela; a mensagem diz qual das duas produziu o arquivo.
+2. **A busca de janela por título não filtrava por visibilidade.** O
+   `xdotool search --name` devolvia uma janela **não mapeada** de mesmo nome
+   (o `4194310` do erro, contra o `4194317` que a listagem mostrava), que não
+   se captura nem se dirige. Passou a usar `--onlyvisible` nos dois roteiros.
+
+**Uma captura faltava**, e o item 1 é justamente quem precisava dela: o roteiro
+do oráculo reportava `janela principal? 0xe00001` e nunca a fotografava — a
+janela vazia que o `ed.exe` mantém de pé é a evidência do item. Agora sai como
+`ora-cancelar-janela.png`, depois de um `sleep` que deixa o MFC terminar de
+pintar (sem ele a captura pega meia tela de rótulos, medido).
+
 **Arquivos criados/modificados:**
+
+- `tools/par/8.10-ciclo-port.sh` — destino, `capturar()`, `--onlyvisible`
+- `tools/par/8.10-ciclo-oraculo.sh` — idem, mais a captura da janela que sobra
+  e o `sleep` de pintura
+- `docs/PARIDADE-FUNCIONAL.md` — §8.10 diz onde as capturas caem e como refazê-las
+- `docs/tasks/PAR-TASK-09.md` — nota posterior
+- `docs/tasks/CORR-WTE-140.md` — a linha que anunciava a captura inexistente
+  ganhou a nota do que realmente aconteceu

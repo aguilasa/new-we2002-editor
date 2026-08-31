@@ -134,3 +134,31 @@ PAR-TASK-08 pareceu ausente do `.rc` por um momento. Ele está lá, na linha 370
 - `docs/tasks/correcoes-progresso.md` — as duas linhas novas
 - `docs/tasks/progresso.md` — a linha da tabela
 - `docs/tasks/PAR-TASK-09.md` — este Log
+
+### Nota posterior — 2026-08-31, [CORR-WTE-142](/docs/tasks/CORR-WTE-142.md)
+
+**A evidência dos itens 1, 2 e 5 não era reproduzível, e o roteiro do oráculo
+anunciava captura que não fez.** Os dois roteiros de ciclo de vida escreviam em
+`/tmp/c09`, que nenhum deles criava, com o `import` calado por `2>/dev/null`;
+dois dos três `echo` do lado do oráculo estavam fora do `&&`. Numa árvore limpa
+saíam zero imagens — e são justamente os três itens sem veredito de
+`golden_compare.py`, cuja prova é a tela.
+
+Consertado: destino em `work/par-8.10/` (`PAR_OUT` muda), criado pelos próprios
+roteiros; nenhuma linha de confirmação fora do `&&`; e a mensagem de erro do
+`import` passa a aparecer em vez de sumir. Foram dois defeitos, não um — o
+segundo só apareceu porque o primeiro deixou de ser silencioso:
+
+1. **O destino não existia.** Nenhum `mkdir`, e o erro ia para `/dev/null`.
+2. **`import -window <id>` falhava** com `Resource temporarily unavailable` —
+   a janela estava obscurecida pelo modal, que é a armadilha do `:98` que o
+   `CLAUDE.md` já registra. O `capturar()` tenta a janela e cai para
+   `-window root`, dizendo qual das duas produziu o arquivo. E o
+   `esperar_titulo`/`janela_por_titulo` passou a filtrar por `--onlyvisible`:
+   sem isso ele devolvia uma janela **não mapeada** de mesmo nome, que não se
+   captura nem se dirige.
+
+Seis capturas saem agora, e os vereditos não mudaram: `ed.exe` de pé com o
+diálogo principal vazio depois do cancelamento (`ora-cancelar-janela.png`, nova
+nesta correção), port encerrado, os dois carregando a imagem de tamanho errado,
+`Escape` encerrando os dois.
