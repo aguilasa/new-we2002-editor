@@ -907,6 +907,20 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > campo em edição é gravado antes de a janela fechar, na mesma ordem do
 > original. [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
 >
+> **Botão focado também fecha o diálogo, e isso custou uma segunda emenda.** No
+> Win32 o `Return` de um diálogo vai para o `DEFPUSHBUTTON`, não para o controle
+> focado — então, depois de clicar `Import` ou `Export`, o `Return` chega ao
+> `IDOK` e o `EndDialog` roda. No Qt um `QAbstractButton` com foco trata
+> `Return` como ativação e **consome** o evento, que nunca chegava ao
+> `keyPressEvent`: o botão se auto-clicava e reabria o diálogo de arquivo,
+> indefinidamente. Com o modal de pé o `CMB_WRITE` fica inalcançável, e o port
+> saía `IDENTICAL` contra a imagem original onde o `ed.exe` gravava 6 faixas /
+> 56 bytes. O `autoDefault=false` do `rc2ui.py` **não** resolve: ele governa
+> qual botão é o default, não a ativação por foco. O `eventFilter` do diálogo
+> passou a ver o `Return` antes dos botões
+> ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)); medido depois do conserto, o
+> controle positivo do port dá 5 faixas / 41 bytes em vez de `IDENTICAL`.
+>
 > Quatro caminhos de fechamento foram descartados por medição, e não vale
 > repeti-los: `Return` sem foco, `Return` com `windowfocus`,
 > `xdotool key --window` (XSendEvent, que o Qt ignora) e clicar na posição do

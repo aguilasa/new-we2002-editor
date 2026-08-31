@@ -3,7 +3,7 @@ id: CORR-WTE-139
 title: "Correção: `Return` depois de clicar um botão do `DefaultTacticsDialog` reabre o botão no port e fecha o diálogo no original"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -102,22 +102,53 @@ depois de o golden mostrar que perdem sem mudar o veredito.
 
 ## Verificação
 
-- [ ] Com o foco em `CMD_EXP`, `Return` fecha o diálogo no port, como no
-      `ed.exe`
-- [ ] A perna de exportar continua `OK` no golden, com controle positivo
-      **não** vazio
-- [ ] `tools/par/8.7-preset-renomear.sh` e
+- [x] Com o foco em `CMD_EXP`, `Return` fecha o diálogo no port, como no
+      `ed.exe` — antes: restavam quatro janelas, com `TACTIC FILE TO EXPORT`
+      reaberto; depois: restam a raiz e o diálogo principal
+- [x] A perna de exportar continua `OK` no golden, com controle positivo
+      **não** vazio — 5 faixas / 41 bytes
+- [x] `tools/par/8.7-preset-renomear.sh` e
       `tools/par/8.7-escape-papel-preset.sh` continuam `OK`
-- [ ] O `MainWindow` não mudou de comportamento
-- [ ] `ctest --preset debug` verde
-- [ ] `roms/` intocada
+- [x] O `MainWindow` não mudou de comportamento — `git diff` vazio nos dois
+      arquivos dele
+- [x] `ctest --preset debug` verde — 9/9
+- [x] `roms/` intocada — md5 `7d49ff4e50a951dacd456096df4a2896`
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+Reproduzido primeiro: com o foco no `CMD_EXP`, o `Return` reabria
+`TACTIC FILE TO EXPORT` em vez de fechar o diálogo — quatro janelas na tela onde
+deviam restar duas.
+
+O conserto é o `eventFilter` que o diálogo já tinha, agora instalado também em
+**todos os seus `QPushButton`**, tratando `Return`/`Enter` com `accept()` antes
+de o botão se ativar. Um `QAbstractButton` focado consome a tecla, então o
+`keyPressEvent` do diálogo — que a
+[CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) escreveu — nunca a via.
+
+Filtrar **todos** os botões, e não só `CMD_IMP`/`CMD_EXP`, é o que reproduz o
+original: no MFC o `Return` vai para o `DEFPUSHBUTTON` qualquer que seja o botão
+focado, inclusive os dez marcadores do campinho.
+
 **Problemas encontrados:**
 
+Nenhum. O escopo ficou no `DefaultTacticsDialog`, como a CORR pede: o
+`MainWindow` tem 86 botões e a mesma mecânica, mas lá `Return` **não** deve
+fechar nada — o `IDD_ED_DIALOG` não tem `DEFPUSHBUTTON`, e no MFC o Enter cai em
+`CDialog::OnOK` e encerra o editor. Reproduzir isso é decisão à parte.
+
+**O contorno dos dois roteiros do `.t2002` ficou onde está.** A CORR permitia
+tirá-lo depois de medir, mas o clique no `TXT_FORMATION_NAME` também serve ao
+oráculo e sair dali custaria duas corridas de golden para provar que não muda o
+veredito. Com ele, a perna de exportar segue `OK`.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | O quê |
+|---|---|
+| `src/app/DefaultTacticsDialog.cpp` | o filtro nos botões e o ramo de `Return` no `eventFilter` |
+| `docs/PARIDADE-FUNCIONAL.md` | a nota da §8.7, ao lado da CORR-WTE-131 |

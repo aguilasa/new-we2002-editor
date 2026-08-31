@@ -158,7 +158,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-136](/docs/tasks/CORR-WTE-136.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | A §8.7 diz "seis roteiros em `tools/par/8.7-*.sh`" onde há oito, e o Log chama de "6º da lista" o item que é o 3º | Baixa | [x] concluída | 2026-08-31 |
 | [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md) | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | `8.8-b2002-exportar.sh` não reproduz (4 corridas, 4 resultados), não confere que o arquivo saiu, e deixa o `FlagKitDialog` modal aberto — o harness diz `gravado` com a imagem `IDENTICAL` | Alta | [x] concluída | 2026-08-31 |
 | [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md) | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Os ids 69 e 86 do item 2 da §8.8 estão marcados `[x]` sem evidência; são os dois de Master League, abertos pelo outro ramo do `OnButtgraf` | Baixa | [x] concluída | 2026-08-31 |
-| [CORR-WTE-139](/docs/tasks/CORR-WTE-139.md) | [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | `Return` depois de clicar `CMD_IMP`/`CMD_EXP` reabre o botão no port e fecha o diálogo no `ed.exe`: o `QPushButton` focado consome a tecla antes do `keyPressEvent`, e o diálogo fica sem saída pelo teclado | Média | [ ] pendente | — |
+| [CORR-WTE-139](/docs/tasks/CORR-WTE-139.md) | [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | `Return` depois de clicar `CMD_IMP`/`CMD_EXP` reabre o botão no port e fecha o diálogo no `ed.exe`: o `QPushButton` focado consome a tecla antes do `keyPressEvent`, e o diálogo fica sem saída pelo teclado | Média | [x] concluída | 2026-08-31 |
 
 ## Checklist
 
@@ -299,7 +299,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-136 — acertar a contagem de roteiros da §8.7 e o ordinal do item da CORR-WTE-127
 - [x] CORR-WTE-137 — fechar o modal, esperar o arquivo e falhar alto no roteiro de export da §8.8
 - [x] CORR-WTE-138 — medir os ids 69 e 86, que o item 2 lista sem ter medido
-- [ ] CORR-WTE-139 — fazer o `keyPressEvent` do `DefaultTacticsDialog` ver o `Return` antes do botão focado
+- [x] CORR-WTE-139 — fazer o `keyPressEvent` do `DefaultTacticsDialog` ver o `Return` antes do botão focado
 
 ## Detalhes por correção
 

@@ -114,6 +114,24 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
             &DefaultTacticsDialog::OnExport);
     connect(ui_->IDOK, &QPushButton::clicked, this, &QDialog::accept);
 
+    // `Return` num botão focado fecha o diálogo, como no original.
+    //
+    // No Win32 o `Return` de um diálogo vai para o `DEFPUSHBUTTON`, não para o
+    // controle focado -- então, depois de clicar `Import` ou `Export`, o
+    // `Return` do usuário chega ao `IDOK` e o `EndDialog` roda. No Qt um
+    // `QAbstractButton` com foco trata `Return` como ativação e CONSOME o
+    // evento, que assim nunca chega ao `keyPressEvent` daqui: o botão se
+    // auto-clicava e reabria o diálogo de arquivo, indefinidamente. Com o
+    // diálogo modal de pé o `CMB_WRITE` fica inalcançável e a imagem nunca é
+    // gravada -- medido, o port saía `IDENTICAL` contra a imagem original onde
+    // o `ed.exe` gravava 6 faixas / 56 bytes. Ver CORR-WTE-139.
+    //
+    // `autoDefault=false`, que o rc2ui.py já põe nos `PUSHBUTTON`, NÃO resolve:
+    // ele governa qual botão é o default, não a ativação por foco.
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->installEventFilter(this);
+    }
+
     ui_->CMB_FORMATION->setCurrentIndex(0);
     Load();
 }
@@ -168,6 +186,16 @@ bool DefaultTacticsDialog::eventFilter(QObject* watched, QEvent* event) {
     // Escape without having navigated stays a no-op: the row put back is the
     // one already current, setCurrentIndex does nothing, and no role is
     // written -- which is right, because there is no new value to keep.
+    if (event->type() == QEvent::KeyPress) {
+        const int key = static_cast<QKeyEvent*>(event)->key();
+        if ((key == Qt::Key_Return || key == Qt::Key_Enter) &&
+            qobject_cast<QPushButton*>(watched) != nullptr) {
+            // Chega antes de o botão se ativar. O `keyPressEvent` do diálogo
+            // faria o mesmo, mas o botão focado consome a tecla antes dele.
+            accept();
+            return true;
+        }
+    }
     if (event->type() == QEvent::KeyPress &&
         static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
         for (int i = 0; i < 10; ++i) {
