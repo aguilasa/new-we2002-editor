@@ -154,8 +154,29 @@ caem em treze arquivos:
 | `RESULT.BIN`, `OPENNING.BIN`, `SELECT3.BIN`, `SELECT8.BIN`, `SELECTC.BIN` | 1 cada | — |
 
 **Cada `OFS_*` do WE2002 é uma hipótese testável no PES2**: mesmo arquivo,
-mesmo tipo de conteúdo, offset relativo próximo. A Fase 2 transforma essa
-lista em busca dirigida em vez de varredura cega.
+mesmo tipo de conteúdo, offset relativo próximo.
+
+A tabela completa — os 69, cada um como `(arquivo, offset relativo)` — está
+em [/docs/samples/pes2-ofs-map.md](/docs/samples/pes2-ofs-map.md), gerada
+por `tools/pes2/ofs_map.py`. **Os 69 caem em 13 arquivos e nenhum ficou de
+fora**, e os 13 existem no PES2, contando o executável, cujo nome é o
+único que muda (`SLPM_870.56` × `SLES_039.57`).
+
+Cinco desses pares já se pode afirmar, porque o lado PES2 está localizado
+por marcador:
+
+| `OFS_*` | Arquivo | WE2002 | PES2 `(EsIt)` | Δ |
+|---|---|---:|---:|---:|
+| `OFS_TEAM_NAME_1` | `ENDING.BIN` | 1256 | 1256 | **0** |
+| `OFS_TEAM_ABBREV_3` | `SELECT8.BIN` | 860 | 1016 | +156 |
+| `OFS_TEAM_NAME_2` | `RESULT.BIN` | 344 | 524 | +180 |
+| `OFS_TEAM_ABBREV_2` | `REPLAYS.BIN` | 5636 | 11000 | +5364 |
+| `OFS_TEAM_MIXED_CASE_NAME` | `SELECTC.BIN` | 10652 | 16576 | +5924 |
+
+A primeira linha é a confirmação mais forte desta seção: a cópia de nome
+de time do `ENDING.BIN` está no **mesmo offset relativo nos dois jogos**.
+As outras quatro se deslocam, e pela mesma razão da §1.12 — o texto de
+interface que as precede tem outro tamanho.
 
 ### 1.5 O que já foi localizado no PES2
 
@@ -213,9 +234,24 @@ São 1.399 entradas no total. Um mapa construído a partir de 20736 perde a
 primeira família inteira — e ela é metade do problema da §1.7.
 
 Uma segunda massa de nomes vive no próprio executável, `SLES_039.57`
-@284720: **1.449 registros de 10 B fixos**, a mesma faixa da tabela de
-`SELECTC.BIN` guardada **de trás para frente** e 50 entradas mais longa.
-`Baser`, `Amabri`, `Emakrif` são parte dela, em @291750.
+@284720: **1.449 registros de 10 B fixos**. Medido em 2026-08-30 por
+`tools/pes2/player_map.py`, a relação entre as duas é exata e é o
+contrário do que a diferença de 50 sugere:
+
+- as duas guardam **os mesmos 1.399 nomes distintos**; nenhuma tem um que
+  a outra não tenha;
+- `SELECTC.BIN` guarda cada nome **uma vez**; o executável **repete 50**
+  deles;
+- `SELECTC.BIN` é **subsequência exata** do executável lido de trás para
+  frente.
+
+Isto é: **`SELECTC.BIN` é um pool de string deduplicado e o executável é
+ordenado por vaga.** Jogador que está em dois elencos ganha dois registros
+lá e um aqui. `Baser`, `Amabri`, `Emakrif` são parte dela, em @291750.
+
+E ainda há mais nome em `SELECTC.BIN` **depois** do pool: 25 blocos, cerca
+de 2.000 trechos, de 31552 até por volta de 50000, nenhum entre os 1.399.
+Ver a Fase 2.
 
 ### 1.6 Contagem e ordem — medido, não estimado
 
@@ -571,6 +607,10 @@ pelas outras:
 | `tables.py` | acha, conta e despeja as onze tabelas de texto da §1.6 |
 | `diff_releases.py` | o confronto entre as duas releases da §1.12 |
 | `memcard.py` | alinha o memory card contra o disco — as fronteiras de elenco da §3.3 |
+| `team_map.py` | alinha as cinco listas de nome de time entre si — §6.1 |
+| `player_map.py` | relaciona as duas tabelas de nome de jogador |
+| `strings_inventory.py` | varre o disco por texto e agrupa em blocos densos |
+| `ofs_map.py` | os 69 `OFS_*` do WE2002 como `(arquivo, offset relativo)` — §1.4 |
 | `faq_check.py` | confere a `docs/PES2-NOMES.md` contra o disco e contra os dois FAQs |
 | `selftest.py` | disco sintético de 24 setores; é o `ctest -R pes2_selftest` |
 | `check_image.py` | roda tudo que precisa de imagem; é o `ctest -R pes2_image` |
@@ -658,6 +698,24 @@ França e a Alemanha já haviam aparecido; a tabela de 10 B de lá tem
 **1.449 entradas** (§1.5), e os três estavam nela o tempo todo. Não havia
 par editado/original nenhum a colher, e a alavanca da §4.2.3 continua
 inteira — só não foi ela que aconteceu aqui.
+
+**E há uma razão mecânica para serem exatamente esses cinco.** Como a
+§1.5 mostra, `SELECTC.BIN` é um pool deduplicado: cada nome aparece uma
+vez. Os cinco elencos que só casam no executável são, cada um, um elenco
+que contém **um** jogador cujo nome se repete em outro elenco —
+
+| Elenco | Índice no executável | Nome repetido |
+|---|---:|---|
+| França | 138–160 | `Petit` |
+| Alemanha | 276–298 | `Butt` |
+| Noruega | 322–344 | `Sorensen` |
+| Argentina | 1058–1080 | `Zanetti` |
+| Austrália | 1219–1241 | `Moore` |
+
+— e no pool essas 23 vagas viram 22, então deixam de ser um trecho
+contíguo. Nada está faltando; o pool só não repete. Os outros 45 dos 50
+repetidos ficam numa janela de 46 vagas, que é 2 × 23: os dois elencos
+*elite*, cujos membros já estão, por construção, em alguma seleção.
 
 #### A ordem de armazenamento é por tabela, não do jogo
 
@@ -823,10 +881,12 @@ O `ctest` deste repositório conhece os dois casos desde 2026-08-30:
 | Teste | Precisa de | O que faz |
 |---|---|---|
 | `pes2_selftest` | nada | monta um disco sintético de 24 setores em `/tmp` e exercita a aritmética de setor, o par Form 1 × Form 2, o caso `outside` e as **três recusas** do `write_file` — crescer, misto, fora da trilha |
-| `pes2_image` | `WE2002_PES2_IMAGE` | âncoras (§1.13), contagens e digests (§1.6), e a `docs/PES2-NOMES.md` contra o disco. Com `WE2002_PES2_IMAGE_B`, `_CARD` e `_TMPDIR` acrescenta o diff de releases (§1.12), o alinhamento de cartão (§3.3) e o controle negativo |
+| `pes2_image` | `WE2002_PES2_IMAGE` | âncoras (§1.13), contagens e digests (§1.6), o alinhamento das cinco listas de time (§6.1), a relação entre as duas tabelas de jogador, e a `docs/PES2-NOMES.md` contra o disco. Com `WE2002_PES2_IMAGE_B`, `_CARD` e `_TMPDIR` acrescenta o diff de releases (§1.12), o alinhamento de cartão (§3.3) e o controle negativo |
+| `pes2_boot` | `PES2_IMAGE`, DuckStation, o `:98` | o boot medido da §3.4, ~90 s |
 
-Sem `WE2002_PES2_IMAGE` o segundo se reporta **skipped**, como já fazem os
-golden do `newWe2002`.
+Sem a variável, os dois últimos se reportam **skipped**, como já fazem os
+golden do `newWe2002`. O `pes2_boot` nunca roda em CI, pelo mesmo motivo
+que o `golden` não roda.
 
 #### 5.2 Oito arquivos que a ferramenta não toca, e por quê
 
@@ -857,30 +917,70 @@ Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
   202 idênticos, 27 diferem, 7 fora do Track 1 (§1.12). A classificação do
   *porquê* também está feita: 19 dos 27 mudam de tamanho e são texto
   localizado; os outros 8 mantêm tamanho e mudam conteúdo.
-- **Falta:** olhar os oito de tamanho fixo — `GAME.BIN` (38.213 B de
-  diferença), `SELECT4.BIN` (6.884), `ENTER.BIN` (3.272), `PKMATCH.BIN`
-  (242), `TRAINING.BIN` (126), `FNOTE_G.BIN` (105), `MOVIE.BIN` (79) e
-  `SYSTEM.CNF` (2). É ali que pode haver dado de jogo em vez de texto.
-- **Falta:** mapear os 69 `OFS_*` do WE2002 para `(arquivo, offset
-  relativo)` e publicar a tabela (a §1.4 tem o esqueleto; falta o offset
-  relativo de cada um).
-- Saída: `docs/samples/pes2-diff-releases.md` **(feita)** e a tabela de
-  âncoras **(feita — §1.13, e `tools/pes2/tables.py`)**.
+- Olhar os oito de tamanho fixo. **Feito, e a resposta é não** —
+  `diff_releases.py --explain` classifica cada palavra que difere:
+
+  | Arquivo | Palavras que diferem | Relocação |
+  |---|---:|---:|
+  | `GAME.BIN` | 21.737 | 99,8% |
+  | `SELECT4.BIN` | 4.337 | 99,8% |
+  | `ENTER.BIN` | 1.749 | 99,6% |
+  | `PKMATCH.BIN` | 174 | 100% |
+  | `TRAINING.BIN` | 94 | 100% |
+  | `MOVIE.BIN` | 64 | 100% |
+
+  São overlays de código MIPS, e quase toda diferença é **a mesma rotina
+  realocada**: alvo de `j`/`jal`, imediato de `lui`/`addiu`, ou ponteiro
+  `0x800xxxxx`, deslocados por um punhado de constantes — **+3176** domina.
+  O resíduo é de dezenas de palavras, e o pouco que tem significado é
+  constante de código (cinco `slti` de 4 para 2 em `SELECT4.BIN`), não
+  banco de dados. Os dois restantes são o que aparentavam: `FNOTE_G.BIN`
+  é texto alemão reescrito com o mesmo tamanho, e `SYSTEM.CNF` é o nome do
+  executável. **Nenhum dos oito guarda dado de jogo diferente.**
+- Mapear os 69 `OFS_*` do WE2002 para `(arquivo, offset relativo)`.
+  **Feito** — `tools/pes2/ofs_map.py`, tabela em
+  [/docs/samples/pes2-ofs-map.md](/docs/samples/pes2-ofs-map.md). 69 de 69
+  localizados, em 13 arquivos; ver a §1.4.
+- Saída: `docs/samples/pes2-diff-releases.md` **(feita)**, a tabela de
+  âncoras **(feita — §1.13, e `tools/pes2/tables.py`)** e
+  `docs/samples/pes2-ofs-map.md` **(feita)**.
+
+**A Fase 1 está fechada.**
 
 ### Fase 2 — Inventário de texto
 
-- Varredura de string em todos os 252 arquivos, com classificação:
-  nome de time, abreviação, nome de jogador, texto de interface, lixo.
-  *(As cinco tabelas da §1.6 já estão fechadas; falta o restante do
-  disco e a segunda massa de nomes do executável.)*
-- Fechar **contagem e ordem** de cada tabela: quantos times, quantas
-  seleções, quantos jogadores, e em que ordem.
-- Confirmar as cópias (§1.5) e procurar as que faltam — a suspeita, pelo
-  padrão do WE2002, é que existam mais de duas de nome e mais de três de
-  abreviação.
-- Primeiro `poke` de validação: renomear `PIEMONTE`, dentro do slot, em
-  **todas** as cópias, e ver o nome novo no emulador em todas as telas.
-  É esse teste que fecha a fase, não a varredura.
+- Varredura de string em todos os arquivos, com classificação. **Feita** —
+  `tools/pes2/strings_inventory.py`, saída em
+  [/docs/samples/pes2-strings.md](/docs/samples/pes2-strings.md).
+
+  Ranquear arquivo não serve: `SELECT.BIN` são 216 kB de código MIPS com
+  uma ilha de 6 kB de tabela dentro, e some abaixo de qualquer arquivo
+  uniformemente ruidoso. A ferramenta agrupa os trechos em **blocos
+  densos**, que é a forma que uma tabela tem vista de fora, e ranqueia os
+  blocos: 171.161 trechos em 217 arquivos, **281 blocos**.
+
+  Duas armadilhas de medição que valem registro. Os `SD/*.RA` de narração
+  são áudio comprimido e produzem dezenas de milhares de trechos
+  "imprimíveis" por acaso; a ferramenta pontua cada arquivo contra o que o
+  acaso preveria e trata como ruído o que não passa de 4×. E um nome curto
+  em caixa mista cai em "texto de interface" se não houver balde para ele,
+  o que apagou o achado abaixo na primeira corrida.
+- **Achado que abre a Fase 3:** há **mais nomes** em `SELECTC.BIN` do que
+  o pool da §1.6. Depois do fim dele (30853) vêm mais 25 blocos de nome,
+  ~2.000 trechos, de 31552 a cerca de 50000 — `Tomazi`, `Navaji`,
+  `Davinno`, `Beckenboer`, `Lupateli`. Nenhum está entre os 1.399. O que
+  são, e a que time pertencem, é trabalho da Fase 3.
+- Fechar **contagem e ordem** de cada tabela. **Feito para as onze**
+  (§1.6), com contagem e digest reconferidos por ferramenta.
+- Confirmar as cópias (§1.5) e procurar as que faltam. **Feito** — havia
+  uma nona, em caixa mista no `REPLAYS.BIN`, e a correspondência entre as
+  cinco listas de nome de time está em
+  [/docs/samples/pes2-team-lists.md](/docs/samples/pes2-team-lists.md),
+  gerada por `tools/pes2/team_map.py`. Ver a §6.1.
+- **Falta:** o primeiro `poke` de validação — renomear `PIEMONTE`, dentro
+  do slot, em **todas** as cópias, e ver o nome novo no emulador em todas
+  as telas. É esse teste que fecha a fase, não a varredura, e ele é o
+  único item que sobrou dela.
 
 ### Fase 3 — O registro de jogador
 

@@ -563,14 +563,20 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/tables.py <track1.bin> --check` | conta e digere as onze tabelas de texto |
 | `python3 tools/pes2/diff_releases.py <a> <b> --check` | o confronto entre as duas releases |
 | `python3 tools/pes2/memcard.py <card.mcd> <track1.bin> --check` | alinha o memory card e fecha as fronteiras de elenco |
+| `python3 tools/pes2/team_map.py <track1.bin> --team N` | onde o time N mora em cada uma das cinco listas |
+| `python3 tools/pes2/player_map.py <track1.bin> --check` | relaciona as duas tabelas de nome de jogador |
+| `python3 tools/pes2/strings_inventory.py <track1.bin>` | varre o disco por texto, agrupado em blocos densos |
+| `python3 tools/pes2/ofs_map.py <we2002.bin> --pes2 <track1.bin>` | os 69 `OFS_*` como `(arquivo, offset relativo)` |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98`, isolado; `--kill` encerra |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
 
-No `ctest` são dois alvos: **`pes2_selftest`**, que monta um disco sintético
-de 24 setores e roda em qualquer lugar, e **`pes2_image`**, que precisa de
-`WE2002_PES2_IMAGE` e se reporta *skipped* sem ela — mesma convenção do
-`WE2002_TEST_IMAGE` e dos golden.
+No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
+sintético de 24 setores e roda em qualquer lugar; **`pes2_image`**, que
+precisa de `WE2002_PES2_IMAGE`; e **`pes2_boot`**, que precisa do
+DuckStation e do `:98` e leva ~90 s. Os dois últimos se reportam *skipped*
+sem o que precisam — mesma convenção do `WE2002_TEST_IMAGE` e dos golden,
+e como eles não rodam em CI.
 
 ```sh
 WE2002_PES2_IMAGE="roms/Pro Evolution Soccer 2 (Europe) (EsIt)/…(Track 1).bin" \
@@ -597,6 +603,11 @@ Quatro coisas que custam tempo se descobertas tarde:
   guarda elenco de trás para frente; o executável de boot, de frente para
   trás. Quem assume uma inverte 23 jogadores por time na metade das
   tabelas, sem sintoma visível. §3.3 do plano.
+- **`SELECTC.BIN` é pool deduplicado, o executável é ordenado por vaga.**
+  Os dois guardam os mesmos 1.399 nomes; o executável repete 50 deles,
+  porque jogador em dois elencos ocupa duas vagas. Ler o pool como se
+  fosse lista de elenco desalinha tudo depois do primeiro nome repetido.
+  §1.5 do plano.
 
 Nada de PES2 tem task em `docs/tasks/progresso.md` — o projeto está
 **fora do pool** enquanto for exploratório, e isso é escolha, não

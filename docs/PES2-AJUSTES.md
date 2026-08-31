@@ -4,10 +4,13 @@
 > [/docs/PES2-NOMES.md](/docs/PES2-NOMES.md) e dos três commits que os
 > acompanham (`934ef1f`, `d345a0e`, `35a6d92`), feita em **2026-08-30**.
 >
-> **Executada no mesmo dia.** Todos os itens de §1 a §4 estão feitos, e
-> dois dos quatro de §5. Os outros dois não são trabalho de código e
-> viraram a §7 — que, enquanto PES2 estiver fora do `progresso.md`, **é o
-> backlog do projeto**.
+> **Executada no mesmo dia**, e a §7 depois dela. Estão feitos: §1 a §4
+> inteiras, dois dos quatro de §5, e **oito dos dez** da §7. Os dois que
+> sobram não são trabalho de código — criar as tasks e instalar pacote —
+> e continuam esperando decisão.
+>
+> Com isso a **Fase 1 fecha** e a **Fase 2 fica a um item**: o `poke` de
+> validação, que precisa do emulador e não da varredura.
 >
 > **O que estava certo, e vale dizer antes:** a Fase 0 é real. O
 > `roundtrip` do `iso.py` foi executado nesta revisão sobre o Track 1
@@ -258,7 +261,41 @@ os três "parciais" estavam nela inteiros.
 Isso custa uma alavanca: os três pares editado/original que a §4.2.3
 esperava colher de graça não existem, porque não havia divergência.
 
-### 6.3 Três fatos novos que mudam o formato do mapa
+### 6.3 As duas tabelas de jogador são o mesmo pool, uma delas deduplicada
+
+Perseguir as "50 entradas a mais" do executável (§7.4) devolveu o
+contrário da pergunta. As duas guardam **os mesmos 1.399 nomes
+distintos** — nenhuma tem um que a outra não tenha. `SELECTC.BIN` guarda
+cada nome **uma vez**; o executável **repete 50**; e `SELECTC.BIN` é
+**subsequência exata** do executável lido de trás para frente.
+
+Ou seja, `SELECTC.BIN` é um **pool de string deduplicado** e o executável
+é **ordenado por vaga**. Jogador em dois elencos ganha dois registros lá e
+um aqui.
+
+Isso explica a §3.3 sem apelar a dado faltante: os cinco elencos que só
+casam no executável são exatamente os cinco que contêm um jogador de nome
+repetido — `Petit`, `Butt`, `Sorensen`, `Zanetti`, `Moore` — de modo que
+no pool suas 23 vagas viram 22 e deixam de ser um trecho contíguo. E 45
+das 50 repetições ficam numa janela de 46 vagas, que é 2 × 23: os dois
+elencos *elite*.
+
+### 6.4 Os oito arquivos de tamanho fixo são código realocado, não dado
+
+99,6% a 100% das palavras que diferem em `GAME.BIN`, `SELECT4.BIN`,
+`ENTER.BIN`, `PKMATCH.BIN`, `TRAINING.BIN` e `MOVIE.BIN` são a mesma
+rotina MIPS deslocada — e o deslocamento dominante é o mesmo **+3176** em
+arquivos diferentes. **Nenhum dos oito guarda dado de jogo diferente**, o
+que fecha a Fase 1 com resposta em vez de com uma lista de suspeitos.
+
+### 6.5 Há mais nome em `SELECTC.BIN` do que o pool
+
+Depois do fim do pool (30853) vêm mais 25 blocos de nome, cerca de 2.000
+trechos, de 31552 a por volta de 50000 — `Tomazi`, `Navaji`, `Davinno`,
+`Beckenboer`, `Lupateli`. Nenhum está entre os 1.399. É achado da
+varredura da §7.4 e é onde a Fase 3 começa.
+
+### 6.6 Três fatos novos que mudam o formato do mapa
 
 - **"Cópia" de tabela não quer dizer mesma lista.** As cinco listas de
   nome de time têm 106, 99, 95, 94 e 123 entradas, e diferem em conteúdo,
@@ -291,50 +328,65 @@ faz as vezes dele.** O que aparecer para fazer entra aqui, não lá.
 
 ### 7.2 Dívida das ferramentas novas
 
-- [ ] **O teste de descritor vazado do `selftest.py` é fraco.** Ele fica
-      verde mesmo sem o `except BaseException` do `Image.__init__`, porque
-      o CPython coleta o objeto de arquivo assim que a exceção desenrola.
-      Está dito no próprio teste; se um dia importar de verdade, o jeito é
-      segurar uma referência à exceção e conferir `/proc/self/fd` com ela
-      viva.
-- [ ] **A evidência de boot é número, não imagem** — desvio-padrão e
-      contagem de pixels diferentes. Os quadros são de jogo comercial e
-      ficam fora do git, como `roms/` e os FAQs. Quem quiser rever roda
-      `tools/pes2/boot_check.sh`. Se algum dia for preciso comparar
-      *contra* um quadro de referência, o lugar dele é fora do
-      repositório, e o caminho vira variável de ambiente.
-- [ ] **`boot_check.sh` não entra no `ctest`.** Ele precisa do `:98`, do
-      DuckStation e de ~90 s; é o mesmo motivo pelo qual os golden do
-      `newWe2002` também não rodam em CI. Fica como comando à mão.
+- [x] **O teste de descritor vazado do `selftest.py` era fraco.**
+      Consertado, e o conserto precisou de duas tentativas — que é o
+      próprio motivo do item. Segurar o traceback mantém o frame de
+      `__init__` vivo, e com ele o `self`, então o descritor continua
+      aberto se ninguém o fechou de propósito. **Mas a primeira versão
+      continuava verde**: ela comparava o *conjunto de números* de
+      `/proc/self/fd` antes e depois, e o descritor vazado caía num
+      número baixo que já estava em uso antes, então a diferença de
+      conjuntos dava vazia. Varrer por **caminho de destino** pega. Com o
+      `except BaseException` removido à mão, o teste agora acusa
+      `still open: ['4']`.
+- [x] **A evidência de boot é número, não imagem** — e continua sendo, por
+      escolha: os quadros são de jogo comercial e ficam fora do git, como
+      `roms/` e os FAQs. O que faltava era o caminho de comparação, e ele
+      existe: `PES2_REFERENCE` aponta um PNG de fora do repositório e
+      `PES2_TOLERANCE` diz quanto pode diferir (35% por padrão — emulação
+      não é exata quadro a quadro e a partida de demonstração nunca se
+      repete, então é teste de "mesma tela", não golden).
+- [x] **`boot_check.sh` não entrava no `ctest`.** Entra agora, como
+      **`pes2_boot`**, nos mesmos termos dos golden: sai 77 e se reporta
+      *skipped* se faltar imagem, DuckStation, ImageMagick, `xdotool` ou
+      servidor X. Continua fora do CI, pelo mesmo motivo que o `golden`.
 
 ### 7.3 Fase 1, o que a execução deixou apontado
 
-- [ ] **Olhar os oito arquivos que diferem sem mudar de tamanho** entre as
-      releases — `GAME.BIN` (38.213 B de diferença), `SELECT4.BIN`
-      (6.884), `ENTER.BIN` (3.272), `PKMATCH.BIN` (242), `TRAINING.BIN`
-      (126), `FNOTE_G.BIN` (105), `MOVIE.BIN` (79), `SYSTEM.CNF` (2). A
-      lista está fechada em
-      [/docs/samples/pes2-diff-releases.md](/docs/samples/pes2-diff-releases.md);
-      falta o que há dentro. É ali que pode haver dado de jogo em vez de
-      texto localizado.
-- [ ] **Mapear os 69 `OFS_*` do WE2002** para `(arquivo, offset
-      relativo)` no PES2. A §1.4 do plano tem o esqueleto; falta o offset
-      relativo de cada um.
+- [x] **Olhar os oito arquivos que diferem sem mudar de tamanho.** Feito
+      com `diff_releases.py --explain`, **e a resposta é não**: 99,6% a
+      100% das palavras que diferem nos seis overlays são a mesma rotina
+      MIPS **realocada** — alvo de `j`/`jal`, imediato de `lui`/`addiu`,
+      ponteiro `0x800xxxxx` —, deslocada por um punhado de constantes com
+      **+3176** dominando. O resíduo é de dezenas de palavras e o pouco
+      que significa algo é constante de código, não banco. Os outros dois
+      são o que aparentavam: `FNOTE_G.BIN` é alemão reescrito no mesmo
+      tamanho e `SYSTEM.CNF` é o nome do executável.
+- [x] **Mapear os 69 `OFS_*`.** Feito — `tools/pes2/ofs_map.py`, tabela em
+      [/docs/samples/pes2-ofs-map.md](/docs/samples/pes2-ofs-map.md).
+      **69 de 69 localizados**, em 13 arquivos, e os 13 existem no PES2
+      (o executável com outro nome). Cinco pares já se pode afirmar, e um
+      deles é a confirmação mais forte da §1.4: `OFS_TEAM_NAME_1` está no
+      **mesmo offset relativo (1256) nos dois jogos**.
 
 ### 7.4 Fase 2, idem
 
-- [ ] **Varrer os 252 arquivos restantes** por string, classificando em
-      nome de time / abreviação / nome de jogador / interface / lixo. As
-      onze tabelas da §1.6 estão fechadas; o resto do disco não.
-- [ ] **Fechar a correspondência entre as cinco listas de nome de time.**
-      Elas têm 106, 99, 95, 94 e 123 entradas e **não são a mesma lista**
-      (§6.3). O mapa da Fase 5 precisa da correspondência entrada a
-      entrada, tirada de comparação de conteúdo — nunca de índice. Sem
-      isso, gravar "todas as cópias" grava no time errado em pelo menos
-      duas delas.
-- [ ] **Classificar a segunda massa de nomes do executável.** São 1.449
-      registros de 10 B contra os 1.399 de `SELECTC.BIN` (§1.5): faltam
-      dizer quais são as 50 entradas a mais e por que só elas moram lá.
+- [x] **Varrer o disco por string.** Feito — `strings_inventory.py`,
+      saída em [/docs/samples/pes2-strings.md](/docs/samples/pes2-strings.md).
+      171.161 trechos em 217 arquivos, agrupados em **281 blocos densos**,
+      que é a forma que uma tabela tem vista de fora. Ranquear arquivo não
+      servia: `SELECT.BIN` são 216 kB de código com 6 kB de tabela dentro.
+- [x] **Fechar a correspondência entre as cinco listas.** Feito —
+      `team_map.py`, saída em
+      [/docs/samples/pes2-team-lists.md](/docs/samples/pes2-team-lists.md).
+      Cada cópia é uma sequência de **trechos** da lista canônica, e o
+      `--team N` diz onde um time está em cada uma. Exemplo do perigo que
+      isso fecha: o time canônico 34 fica no índice 34, 36, 32 e 60 de
+      quatro listas e **não existe** na quinta.
+- [x] **Classificar a segunda massa do executável.** Feito —
+      `player_map.py`. As duas guardam os **mesmos 1.399 nomes
+      distintos**; `SELECTC.BIN` é um pool deduplicado e o executável é
+      ordenado por vaga, repetindo 50. Ver a §6.3.
 
 ---
 
