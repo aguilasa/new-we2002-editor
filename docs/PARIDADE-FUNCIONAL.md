@@ -764,16 +764,36 @@ primeira vista**.
 - [x] Trocar papel e conferir a legenda do marcador — dois `Down` levam o 1º
       papel de `0x02` a `0x04` nos dois lados, e a legenda do marcador passa de
       `CB SX` a **`SW`** também nos dois, conferida em captura
-- [x] **`Escape` depois de navegar um combo de papel** — os dez gravam pelo
-      **mesmo** `FocusOut` dos seis de cobrador, então o `Escape` divergia aqui
-      exatamente como divergia lá: três `Down` a partir do papel `0x02` davam
-      `0x05` no `ed.exe` e deixavam `0x02` no port, reprovando o golden em
-      `OFS_FORMATIONS+0`. Fechado pela
+- [x] **`Escape` depois de navegar um combo de papel** — **são dois conjuntos
+      de dez, em formulários diferentes, e cada um custou uma CORR.** Os dez do
+      `MainWindow` gravam pelo **mesmo** `FocusOut` dos seis de cobrador, então
+      o `Escape` divergia ali exatamente como divergia lá: três `Down` a partir
+      do papel `0x02` davam `0x05` no `ed.exe` e deixavam `0x02` no port,
+      reprovando o golden em `OFS_FORMATIONS+0`. Fechado pela
       [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md), que estendeu o filtro aos
       dezesseis: agora `raw_formation[0]` vai a `0x05` nos dois, os outros nove
       slots ficam intactos, e a legenda do marcador mostra `LIB` nos dois —
       conferida em captura. Roteiros `tools/par/8.7-escape-papel.sh` e
-      `tools/par/8.7-escape-papel-sem-navegar.sh`
+      `tools/par/8.7-escape-papel-sem-navegar.sh`.
+
+      Os **outros dez** são os `CMB_SLOT_ROLE2..11` do `DefaultTacticsDialog`
+      (`TCMB_TAT2..11` no `.rc`), que escrevem os `roles[]` dos **presets**. O
+      filtro da CORR-WTE-127 não os alcançava, e eles divergiam pelo mesmo
+      motivo: três `Down` no primeiro papel do preset davam `0x05` no `ed.exe`
+      e deixavam `0x02` no port, reprovando o golden em
+      `before first offset+374189` — 1 faixa / 1 byte. Fechado pela
+      [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md); roteiro
+      `tools/par/8.7-escape-papel-preset.sh`. Depois do conserto o golden sai
+      `OK` e o controle positivo do port contra a imagem original dá **6
+      faixas / 42 bytes**, com o byte de papel em `0x05` — o mesmo valor que o
+      oráculo grava.
+
+      **O caminho de commit dos dois conjuntos não é o mesmo**, e é o que torna
+      o conserto do segundo diferente do primeiro: no `MainWindow` a escrita é
+      no `FocusOut`; no diálogo de presets ela mora dentro do
+      `currentIndexChanged`, guardada por `hasFocus()`. Repor o índice com o
+      combo já sem foco não grava nada — daí o `setFocus()` explícito depois do
+      `hidePopup()`
 - [x] Aplicar os 16 presets num time — os dezesseis em sequência e o preset 1
       isolado dão `raw_formation` diferentes entre si, os dois idênticos ao
       oráculo

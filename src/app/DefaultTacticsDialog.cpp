@@ -1,5 +1,6 @@
 #include "DefaultTacticsDialog.hpp"
 
+#include <QAbstractItemView>
 #include <QComboBox>
 #include <QFile>
 #include <QFileDialog>
@@ -64,6 +65,13 @@ DefaultTacticsDialog::DefaultTacticsDialog(we2002::Formation* formations,
         }
         txt_slot_x_[i]->setMaxLength(2);
         txt_slot_y_[i]->setMaxLength(3);
+
+        // Escape in an open role combo keeps whatever the arrows moved to --
+        // the same disagreement between MFC and Qt that CORR-WTE-127 fixed for
+        // the sixteen combos of the main dialog. These ten are a separate set:
+        // TCMB_TAT2..11 in ed.rc, writing the presets' roles instead of the
+        // team's, and the eventFilter there never reached them (CORR-WTE-134).
+        cmb_role_[i]->view()->installEventFilter(this);
 
         connect(cmb_role_[i], &QComboBox::currentIndexChanged, this,
                 [this, i](int index) {
@@ -138,6 +146,44 @@ void DefaultTacticsDialog::keyPressEvent(QKeyEvent* event) {
     // Escape and everything else stay with QDialog, which rejects on Escape --
     // the same exit IDCANCEL gave in the original.
     QDialog::keyPressEvent(event);
+}
+
+bool DefaultTacticsDialog::eventFilter(QObject* watched, QEvent* event) {
+    // Same defect as CORR-WTE-125/127, one form over: in MFC the arrow keys
+    // move the combo's own CurSel and Escape only closes the list, so the
+    // navigated role is the one that gets committed. Qt moves the *view's*
+    // current row and rolls it back when Escape hides the popup, so the
+    // original value survives and nothing is written. Measured on preset 1
+    // with three Down: raw_formation[0] goes 0x02 -> 0x05 in ed.exe and stayed
+    // 0x02 here.
+    //
+    // The commit path is NOT the one the main dialog has, and that is what
+    // makes the order below load-bearing. There the write happens on FocusOut;
+    // here it happens inside currentIndexChanged, guarded by hasFocus(). So the
+    // combo has to hold the focus when setCurrentIndex runs, or the guard
+    // swallows the write and the fix fixes nothing. hidePopup() gives the focus
+    // back and setFocus() makes that explicit rather than dependent on when the
+    // container gets around to releasing it.
+    //
+    // Escape without having navigated stays a no-op: the row put back is the
+    // one already current, setCurrentIndex does nothing, and no role is
+    // written -- which is right, because there is no new value to keep.
+    if (event->type() == QEvent::KeyPress &&
+        static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
+        for (int i = 0; i < 10; ++i) {
+            if (watched != cmb_role_[i]->view()) {
+                continue;
+            }
+            const int row = cmb_role_[i]->view()->currentIndex().row();
+            cmb_role_[i]->hidePopup();
+            if (row >= 0) {
+                cmb_role_[i]->setFocus();
+                cmb_role_[i]->setCurrentIndex(row);
+            }
+            return true;
+        }
+    }
+    return QDialog::eventFilter(watched, event);
 }
 
 int DefaultTacticsDialog::Current() const {

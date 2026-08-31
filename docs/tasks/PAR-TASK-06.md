@@ -47,15 +47,23 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 - [x] Clampar x em 0/48 e y em 0/112
 - [x] Trocar papel e conferir a legenda do marcador
-- [x] `Escape` depois de navegar um combo de papel — **já fechado** pela
+- [x] `Escape` depois de navegar um combo de papel — fechado em **duas**
+      etapas, porque **há dois conjuntos de combo de papel**, em formulários
+      diferentes. Os **dez do `MainWindow`** gravam pelo mesmo `FocusOut` dos
+      seis de cobrador, e foram fechados pela
       [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md), fora desta task, porque a
       divergência apareceu na revisão da
-      [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md): os dez combos de papel gravam
-      pelo mesmo `FocusOut` dos seis de cobrador, e o `Escape` divergia igual.
-      Roteiros `tools/par/8.7-escape-papel.sh` e
-      `tools/par/8.7-escape-papel-sem-navegar.sh`; medição na §8.7 do
-      inventário. **Não precisa ser refeito aqui** — mas se o item 2 acima
-      mexer no `OnRoleShown` ou no `eventFilter`, re-rode os dois roteiros
+      [PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). Os **outros dez, do
+      `DefaultTacticsDialog`** (`CMB_SLOT_ROLE2..11`, os `TCMB_TAT2..11` do
+      `.rc`), escrevem os `roles[]` dos **presets** e gravam por outro caminho
+      — `currentIndexChanged` guardado por `hasFocus()` —, e a CORR-WTE-127 não
+      os alcançou: divergiam igual, e foram fechados pela
+      [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md).
+      Roteiros `tools/par/8.7-escape-papel.sh`,
+      `tools/par/8.7-escape-papel-sem-navegar.sh` (o `MainWindow`) e
+      `tools/par/8.7-escape-papel-preset.sh` (o diálogo); medição na §8.7 do
+      inventário. Se o item 2 acima mexer no `OnRoleShown` ou em qualquer dos
+      dois `eventFilter`, re-rode os três roteiros
 - [x] Aplicar os 16 presets num time
 - [x] Editar e renomear um preset no `DefaultTacticsDialog` — reprovou aqui, e
       foi fechado pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md); roteiro

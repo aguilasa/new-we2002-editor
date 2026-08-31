@@ -3,7 +3,7 @@ id: CORR-WTE-134
 title: "Correção: o `Escape` nos dez combos de papel do `DefaultTacticsDialog` diverge do original"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -104,22 +104,63 @@ commit.
 
 ## Verificação
 
-- [ ] A sonda (prelúdio + `8.7-escape-papel-preset.sh`) sai
+- [x] A sonda (prelúdio + `8.7-escape-papel-preset.sh`) sai
       `OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`
-- [ ] Controle positivo: o port contra a imagem original acusa o byte
-      `before first offset+374189` **mudado para `0x05`**, e não intacto
-- [ ] `tools/par/8.7-escape-papel.sh` e `8.7-escape-papel-sem-navegar.sh`
+- [x] Controle positivo: o port contra a imagem original acusa o byte
+      `before first offset+374189` **mudado para `0x05`**, e não intacto —
+      6 faixas / 42 bytes, e `xxd` em 374186 dá `0000 0105` contra o
+      `0000 0102` da imagem original
+- [x] `tools/par/8.7-escape-papel.sh` e `8.7-escape-papel-sem-navegar.sh`
       continuam `OK` (a correção não pode mexer no `MainWindow`)
-- [ ] `tools/par/8.7-preset-renomear.sh` continua `OK`
-- [ ] `ctest --preset debug` verde
-- [ ] `roms/` intocada
+- [x] `tools/par/8.7-preset-renomear.sh` continua `OK`
+- [x] `ctest --preset debug` verde — 9/9, 0 falhas
+- [x] `roms/` intocada — `md5sum roms/ptbr-remaster.bin` segue
+      `7d49ff4e50a951dacd456096df4a2896`
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+Reproduzido primeiro: a sonda saiu `FALHOU: 1 divergencia(s) nao esperada(s):
+374189..374189  1 byte(s)  data  before first offset+374189` — o sintoma que a
+CORR descreve, no byte que ela nomeia.
+
+O conserto é um `eventFilter` no próprio `DefaultTacticsDialog`, instalado nas
+dez `view()` dos `cmb_role_`. **Não é cópia do filtro do `MainWindow`**, e o
+aviso da CORR estava certo: lá a escrita mora no `FocusOut`, aqui no
+`currentIndexChanged` guardado por `hasFocus()`. Repor o índice com o combo já
+sem foco cairia no guard e não gravaria nada — daí o `setFocus()` explícito
+entre o `hidePopup()` e o `setCurrentIndex()`.
+
+Depois do conserto: golden `OK`, e o controle positivo mostra o byte em `0x05`,
+o mesmo valor que o oráculo grava.
+
 **Problemas encontrados:**
 
+**A primeira corrida saiu `par: DefaultTacticsDialog nao abriu` e morreu com
+`BadWindow`, e não era o defeito** — era um segundo `newWe2002` esquecido no
+`:98`, com janela de 1077×548 na mesma posição, roubando os cliques. Sem
+gerente de janelas o clique vai para quem está por cima, e a guarda de janela
+grande do `golden_check.sh` só olha a largada. Duas consequências entraram no
+trabalho:
+
+1. O roteiro novo faz `exit 1` quando o diálogo não abre. Sem isso o `Escape`
+   seguinte chega ao `MainWindow` — que é um `QDialog` e **rejeita** —, o port
+   morre no meio, e o clique de gravação estoura `BadWindow`: uma falha de
+   ambiente com cara de falha de harness.
+2. Antes de cada corrida, `pgrep -x newWe2002 | xargs -r kill -9`. Um
+   `pkill -f` com o caminho do binário mata o próprio shell que o executa, e
+   um `grep -E '[n]ewWe2002'` também — o padrão casa o texto do heredoc na
+   linha de comando do shell. O `pgrep -x` casa só o nome do processo.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | O quê |
+|---|---|
+| `src/app/DefaultTacticsDialog.cpp` | o `eventFilter`, o `installEventFilter` nas dez `view()` e o include de `QAbstractItemView` |
+| `src/app/DefaultTacticsDialog.hpp` | a declaração do override |
+| `tools/par/8.7-escape-papel-preset.sh` | criado — a sonda versionada |
+| `docs/PARIDADE-FUNCIONAL.md` | o item 3 da §8.7, que agora diz que são dois conjuntos de dez |
+| `docs/tasks/PAR-TASK-06.md` | o item 3, idem |

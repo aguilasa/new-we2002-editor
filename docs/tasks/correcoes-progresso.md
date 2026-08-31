@@ -153,7 +153,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | As edições do `DefaultTacticsDialog` não chegam ao disco no port e chegam no `ed.exe`; o `IDOK` é `NOT WS_VISIBLE` e no Qt isso deixa o diálogo sem caminho de confirmação | Alta | [x] concluída | 2026-08-30 |
 | [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Diagnóstico invertido: os 52 bytes do port é que estão certos (`tattDlg.cpp:701` valida 52); quem exporta errado é o `ed.exe` x64. Fechada sem mudar código | Alta | [x] concluída | 2026-09-01 |
 | [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Os dois lados liam `defaultlook.txt` diferentes — o legado abre por caminho relativo e lê a cópia gitignored de `Debug/`. Sem mudança de código | Média | [x] concluída | 2026-09-01 |
-| [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O `Escape` depois de navegar um dos dez combos de papel do `DefaultTacticsDialog` não grava no port e grava no `ed.exe` — a CORR-WTE-127 só alcançou os dezesseis do `MainWindow` | Alta | [ ] pendente | — |
+| [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O `Escape` depois de navegar um dos dez combos de papel do `DefaultTacticsDialog` não grava no port e grava no `ed.exe` — a CORR-WTE-127 só alcançou os dezesseis do `MainWindow` | Alta | [x] concluída | 2026-08-31 |
 | [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O item 5 da §8.7 (o `.t2002`) foi fechado sem veredito de `golden_compare.py`; a perna "importar de volta" só existe como comentário dentro do roteiro | Alta | [ ] pendente | — |
 | [CORR-WTE-136](/docs/tasks/CORR-WTE-136.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | A §8.7 diz "seis roteiros em `tools/par/8.7-*.sh`" onde há oito, e o Log chama de "6º da lista" o item que é o 3º | Baixa | [ ] pendente | — |
 | [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md) | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | `8.8-b2002-exportar.sh` não reproduz (4 corridas, 4 resultados), não confere que o arquivo saiu, e deixa o `FlagKitDialog` modal aberto — o harness diz `gravado` com a imagem `IDENTICAL` | Alta | [ ] pendente | — |
@@ -293,7 +293,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-131 — dar ao `DefaultTacticsDialog` um caminho de confirmação, que é o que o original tem
 - [x] CORR-WTE-132 — diagnóstico refeito: o port está certo, o `ed.exe` x64 é que exporta errado
 - [x] CORR-WTE-133 — a divergência era fixture: `Debug/defaultlook.txt` fora de sincronia com o versionado
-- [ ] CORR-WTE-134 — estender o filtro de `Escape` aos dez combos de papel do diálogo de presets
+- [x] CORR-WTE-134 — estender o filtro de `Escape` aos dez combos de papel do diálogo de presets
 - [ ] CORR-WTE-135 — medir o import do `.t2002` nos dois lados, com controle, e registrar a faixa
 - [ ] CORR-WTE-136 — acertar a contagem de roteiros da §8.7 e o ordinal do item da CORR-WTE-127
 - [ ] CORR-WTE-137 — fechar o modal, esperar o arquivo e falhar alto no roteiro de export da §8.8
