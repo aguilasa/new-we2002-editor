@@ -149,7 +149,7 @@ port; todos são do estímulo:
    original, sem nunca gravar. No MFC o `Return` vai para o botão default do
    diálogo. O roteiro clica no `TXT_FORMATION_NAME` antes de confirmar, como o
    `8.7-preset-renomear.sh` já fazia. **É divergência de comportamento e virou
-   [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md)** — aqui foi contornada para
+   [CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)** — aqui foi contornada para
    poder medir o item 5.
 3. **Laço de `Return` guardado por `tact_win` fecha o editor.** No oráculo o
    Wine deixa a janela do "Modify default tactics" mapeada depois de o modal

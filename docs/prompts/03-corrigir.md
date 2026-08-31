@@ -124,6 +124,14 @@ golden inteiro (que custa ~1 GB de temporário e uma sessão de Wine), ou toca
 decisão do plano — não a resolva de afogadilho: abra a CORR nova, registre o que
 mediu, e reporte.
 
+**Ao abrir CORR nova, releia o maior número do disco na hora de criar o
+arquivo** — `ls docs/tasks/CORR-WTE-*.md | tail -1` —, e não use o número que o
+inventário da fase 0 sugeria. Um `/revisar` pode ter criado CORRs entre uma
+coisa e outra, e o próximo livre muda sem aviso. Já custou duas vezes: a
+CORR-WTE-122/123 e a CORR-WTE-137, esta última com o arquivo de outra CORR
+**sobrescrito** por ter o mesmo nome. O `git status` não acusa — o arquivo já
+existia, e a substituição entra como modificação comum.
+
 ---
 
 ## Arquitetura do projeto

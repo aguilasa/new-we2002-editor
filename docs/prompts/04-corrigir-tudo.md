@@ -137,6 +137,13 @@ Três desfechos, e o terceiro é o que este prompt acrescenta ao `03`:
 Uma CORR fora do lote **não bloqueia** as outras, a menos que alguém dependa
 dela.
 
+**Achado que vira CORR nova: releia o maior número na hora de criar o arquivo.**
+`ls docs/tasks/CORR-WTE-*.md | tail -1`, não o número que a fase 0 leu. Num lote
+longo a distância entre inventário e criação é de horas, e um `/revisar` no meio
+consome números. A CORR-WTE-137 foi criada duas vezes por isso, e a segunda
+**sobrescreveu o arquivo da primeira** — mesmo nome, e o `git status` mostra só
+uma modificação. Ver `03-corrigir.md`, "Se a discrepância for grande".
+
 ---
 
 ## Fase 2 — executar, onda a onda
