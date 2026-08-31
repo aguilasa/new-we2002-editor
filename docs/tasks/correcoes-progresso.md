@@ -161,6 +161,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-139](/docs/tasks/CORR-WTE-139.md) | [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | `Return` depois de clicar `CMD_IMP`/`CMD_EXP` reabre o botão no port e fecha o diálogo no `ed.exe`: o `QPushButton` focado consome a tecla antes do `keyPressEvent`, e o diálogo fica sem saída pelo teclado | Média | [x] concluída | 2026-08-31 |
 | [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Cancelar o diálogo de abertura encerra o port e deixa o `ed.exe` com o diálogo principal vazio: `return FALSE` no `OnInitDialog` não fecha diálogo em MFC, e o comentário do `main.cpp` afirma que fecha | Média | [x] concluída | 2026-08-31 |
 | [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | `Return` na janela principal encerra o `ed.exe` (`CDialog::OnOK`, sem `DEFPUSHBUTTON`) e não faz nada no port; nenhum dos dois dispara edição, o ciclo de vida é que diverge | Média | [x] concluída | 2026-08-31 |
+| [CORR-WTE-142](/docs/tasks/CORR-WTE-142.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Os roteiros de ciclo de vida gravam captura em `/tmp/c09`, que nenhum deles cria — nenhuma imagem é produzida, e o do oráculo imprime "captura em ..." mesmo assim | Alta | [ ] pendente | — |
+| [CORR-WTE-143](/docs/tasks/CORR-WTE-143.md) | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | `8.10-return-nao-dispara.sh` é classificado como hook de golden, mas com `GOLDEN_EDIT` o oráculo encerra e o `golden_check.sh` reprova por construção; o cabeçalho não avisa | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -304,6 +306,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-139 — fazer o `keyPressEvent` do `DefaultTacticsDialog` ver o `Return` antes do botão focado
 - [x] CORR-WTE-140 — decidir se o port reproduz a janela vazia do cancelamento, e corrigir o comentário do `main.cpp`
 - [x] CORR-WTE-141 — decidir se o `Return` fecha a janela principal do port, e escrever a razão
+- [ ] CORR-WTE-142 — criar o destino das capturas e não anunciar arquivo que não foi escrito
+- [ ] CORR-WTE-143 — dizer no cabeçalho que o roteiro do item 4 é hook de um lado só
 
 ## Detalhes por correção
 
@@ -2394,3 +2398,34 @@ dizer "fechada e fora do backlog", não "corrigida".
   port (`FlagKitDialog.cpp:118`)
 - **Fix:** medir com `PAR_TEAM=69` e `PAR_TEAM=86` as duas metades — caixas
   desabilitadas e export recusado —, ou dizer no item quais ids foram medidos
+
+### CORR-WTE-142
+
+- **Arquivo com problema:** `tools/par/8.10-ciclo-oraculo.sh` e
+  `tools/par/8.10-ciclo-port.sh`
+- **Sintoma:** as cinco chamadas de `import` escrevem em `/tmp/c09/`, que
+  nenhum dos dois cria, e todas saem com `2>/dev/null`. Numa árvore limpa
+  nenhuma captura é produzida — e os itens 1, 2 e 5 da §8.10 são justamente os
+  que não têm veredito de `golden_compare.py` e se apoiam em captura. Pior: dois
+  dos três `echo` do roteiro do oráculo estão fora do `&&` e anunciam a captura
+  que não houve
+- **Como foi detectado:** rodar os dois roteiros nesta revisão. O oráculo
+  imprimiu `captura em /tmp/c09/ora-cancelar.png` e `.../ora-tamanho.png` com
+  `ls -d /tmp/c09` respondendo `No such file or directory`; a terceira captura
+  do mesmo roteiro, guardada por `&&`, ficou calada
+- **Fix:** destino parametrizado sob `work/` com `mkdir -p`, nenhum `echo` de
+  captura fora do `&&`, e mensagem quando o `import` falhar
+
+### CORR-WTE-143
+
+- **Arquivo com problema:** `tools/par/8.10-return-nao-dispara.sh` e a frase da
+  §8.10 que classifica os quatro roteiros
+- **Sintoma:** o roteiro é chamado de hook de golden junto com o do item 3, mas
+  com `GOLDEN_EDIT` o oráculo encerra ao receber o `Return` — o achado do item
+  4 — e o `golden_run.sh` sai `nao consegui focar a janela`. A corrida reprova
+  sempre, e o cabeçalho não diz que isso é o esperado
+- **Como foi detectado:** leitura do cabeçalho contra a evidência da
+  CORR-WTE-141, mais a medição do lado do port nesta revisão (`cmp` contra a
+  corrida sem tecla: arquivos iguais)
+- **Fix:** cabeçalho no modelo do `8.7-t2002-importar.sh`, dizendo que é hook de
+  um lado só e como se lê o resultado do outro
