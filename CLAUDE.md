@@ -710,6 +710,13 @@ arbitrária, e um dos candidatos aplica formação predefinida sobre o time
 selecionado. Quem decide isso é o `rc2ui.py`; só `DEFPUSHBUTTON` vira default,
 que é o que o `.rc` quer dizer.
 
+**Efeito colateral virou decisão:** no `ed.exe` o `Return` na janela principal
+**encerra o editor** (`CDialog::OnOK`, via um `CanExit()` que devolve `TRUE`
+sempre), e no port ele não faz nada. Medido em 2026-08-31 e mantido de
+propósito — reproduzir faria uma tecla acidental descartar o não gravado. É
+divergência deliberada registrada
+([CORR-WTE-141](docs/tasks/CORR-WTE-141.md)); não "conserte" isso.
+
 **E `DEFPUSHBUTTON` invisível não vira nada.** O `IDOK` do
 `DefaultTacticsDialog` é `NOT WS_VISIBLE` (`ed.rc:627`); no MFC ele continua
 sendo o default e `Return` fecha o diálogo, no Qt um default invisível é

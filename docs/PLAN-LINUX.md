@@ -966,9 +966,10 @@ argumento e pula o `QFileDialog`. O original não tinha argumento nenhum.
 
 #### Divergências deliberadas
 
-Além do slot 64 herdado da Fase 3, quatro da própria Fase 5 e uma decidida
-depois, em 2026-08-31, pela paridade de tela
-([PAR-TASK-09](/docs/tasks/PAR-TASK-09.md)):
+Além do slot 64 herdado da Fase 3, quatro da própria Fase 5 e **duas decididas
+depois**, em 2026-08-31, pela paridade de tela
+([PAR-TASK-09](/docs/tasks/PAR-TASK-09.md)) — as duas de ciclo de vida, nenhuma
+delas grava byte:
 
 - **`editFromFIFA` terminava com `costo = CalcolaCostoGiocatore(i)`**, onde `i`
   era o contador que sobrou da varredura de posições — sempre 8. Todo jogador
@@ -1001,6 +1002,18 @@ depois, em 2026-08-31, pela paridade de tela
   ([CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)): botão de gravar clicável sem
   imagem carregada é pior que nenhuma janela, e o que o original faz nesse
   clique nunca foi medido. Não muda byte — os dois avisam igual antes.
+- **`Return` no diálogo principal encerra o `ed.exe` e não faz nada no port.**
+  `IDD_ED_DIALOG` não tem `DEFPUSHBUTTON` nem controle `IDOK`, então o Enter cai
+  em `CDialog::OnOK`; o `CEdDlg` sobrescreve esse handler
+  (`legacy/mfc/edDlg.cpp:1529`) só para consultar `CanExit()`, que devolve
+  `TRUE` sempre — o editor fecha sem gravar. No port nenhum dos 86 botões é
+  default (`autoDefault=false`, emitido pelo `rc2ui.py`), e a tecla não encontra
+  destino. Decidido em 2026-08-31
+  ([CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)): reproduzir faria uma tecla
+  acidental descartar o trabalho não gravado, que é justamente o defeito do
+  original. O `Escape` **concorda** e fecha nos dois. Vale só para o
+  `MainWindow` — no `DefaultTacticsDialog` o `Return` confirma, e deve, porque
+  lá o `.rc` declara um `DEFPUSHBUTTON` (invisível, mas declarado).
 
 #### O que não foi portado, e por quê
 

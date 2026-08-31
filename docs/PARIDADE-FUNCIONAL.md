@@ -493,12 +493,12 @@ clique, mesmo efeito.
 
 ## 6. Divergências deliberadas
 
-Cinco registradas nas fases, uma levantada pelo inventário, e uma decidida em
-2026-08-31 pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) — a de ciclo de vida,
-que a §8.10 mediu. **Nenhuma altera os bytes gravados na imagem**: as quatro
-primeiras porque não tocam regiões de disco no fluxo dos golden tests, a sexta
-porque só afeta o arquivo lateral, e a sétima porque decide **quando a janela
-existe**, não o que ela grava.
+Cinco registradas nas fases, uma levantada pelo inventário, e **duas decididas
+em 2026-08-31** pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) — as de ciclo de
+vida, que a §8.10 mediu. **Nenhuma altera os bytes gravados na imagem**: as
+quatro primeiras porque não tocam regiões de disco no fluxo dos golden tests, a
+sexta porque só afeta o arquivo lateral, e as duas últimas porque decidem
+**quando a janela existe**, não o que ela grava.
 
 | # | O que o original fazia | O que o port faz | Por quê |
 |---|---|---|---|
@@ -509,6 +509,7 @@ existe**, não o que ela grava.
 | 5 | `graf` tinha **dois** testes de "tem bandeira própria" que discordavam na borda (56) | um só: `id>0 && id!=69 && id!=86 && (id<56 \|\| id>63)` | 56 é a World All-Stars, que também não tem bandeira própria |
 | 6 | `EN_CHANGE` das 23 caixas de URL dispara também no `SetWindowText` da carga, então **trocar de time regravava a URL** — e para as all-star (55/56) escrevia a URL do jogador ligado por link no jogador do slot aritmético, que é outro | `textEdited`: só grava quando o usuário digita | levantado em 2026-08-05. Invisível no original porque ele nunca salvava o arquivo de URLs; no port, que salva, reproduzir isso corromperia o `_url.txt` ao navegar |
 | 7 | Cancelar o diálogo de abertura **não fecha o editor**: `OnInitDialog` faz `return FALSE` (`legacy/mfc/edDlg.cpp:1331`), que em MFC só diz que o foco já foi tratado — sem `EndDialog`, o `ed.exe` fica de pé com o diálogo principal inteiro e vazio, e com `Write into CD image` clicável | **encerra** depois do aviso `Impossible editing without CD image !` | decidido em 2026-08-31, [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md). Botão de gravar clicável sem imagem carregada é pior que nenhuma janela, e o que o original faria nesse clique nunca foi medido. Não grava byte: os dois avisam igual antes |
+| 8 | `Return` no diálogo principal **encerra o editor**: `IDD_ED_DIALOG` não tem `DEFPUSHBUTTON` nem controle `IDOK`, então o Enter cai em `CDialog::OnOK` — que o `CEdDlg` sobrescreve (`legacy/mfc/edDlg.cpp:1529`) só para consultar `CanExit()`, sempre `TRUE`. Nada é gravado | **ignora**: sem botão default (`autoDefault=false` em todos os 86), o `Return` não encontra destino | decidido em 2026-08-31, [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md). Reproduzir faria uma tecla acidental descartar o trabalho não gravado, que é o próprio defeito do original. `Escape` **concorda** e fecha nos dois. Vale só para o `MainWindow`: no `DefaultTacticsDialog` o `Return` confirma, e deve — lá o `.rc` declara um `DEFPUSHBUTTON` ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)) |
 
 ---
 
@@ -520,7 +521,7 @@ existe**, não o que ela grava.
 | `OnEsportaTot` / `OnImportaTot` (`.tt2002`) | `CMD_ESP_TOT` / `CMD_IMP_TOT` | idem, `ed.rc:368,369` |
 | Item "About" no menu de sistema | `OnSysCommand` + `CAboutDlg` | `QDialog` não tem menu de sistema; a caixa não editava nada |
 | Ícone desenhado com a janela minimizada | `OnPaint` | sem equivalente, não faz falta |
-| `Return` fecha o editor **(diálogo principal)** | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada** ali, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois. **Vale só para o `MainWindow`:** o `DefaultTacticsDialog` trata `Return` e confirma, porque lá o botão de confirmação é `NOT WS_VISIBLE` e sem isso o diálogo não teria saída (§8.7, [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)) |
+| `Return` fecha o editor **(diálogo principal)** | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada** ali, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois. **Vale só para o `MainWindow`:** o `DefaultTacticsDialog` trata `Return` e confirma, porque lá o botão de confirmação é `NOT WS_VISIBLE` e sem isso o diálogo não teria saída (§8.7, [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)). **Medido dos dois lados e decidido em 2026-08-31** — a razão mora na §6, linha 8 |
 | Pacote de distribuição (AppImage/Flatpak) | — | decisão da Fase 6 |
 
 ---
@@ -1049,9 +1050,9 @@ máquina. Roteiros em `tools/par/8.9-*.sh`.
 2026-08-31. **Três concordam e dois divergem** — e os dois que divergem são de
 ciclo de vida, não de dado: nenhuma das duas divergências grava byte nenhum.
 Rendeu duas CORRs, a [140](/docs/tasks/CORR-WTE-140.md) e a
-[141](/docs/tasks/CORR-WTE-141.md) — as duas pediam **decisão**, não conserto. A
-140 está decidida (o port mantém o encerramento, §6 linha 7); a 141 segue
-esperando.
+[141](/docs/tasks/CORR-WTE-141.md) — as duas pediam **decisão**, não conserto, e
+as duas foram decididas em 2026-08-31 do mesmo jeito: **o port fica como está e
+a divergência vai para a §6**, linhas 7 e 8.
 
 Dois roteiros são hooks de golden (`tools/par/8.10-reload-descarta.sh` e
 `8.10-return-nao-dispara.sh`) e dois rodam sozinhos
@@ -1086,8 +1087,12 @@ gravando.
       o que o item existe para garantir: no port a imagem gravada depois do
       `Return` é **byte-idêntica** à de um `Load`+`Save` sem tecla nenhuma. Mas
       no `ed.exe` o `Return` **encerra o editor** — `IDD_ED_DIALOG` não tem
-      `DEFPUSHBUTTON` e o Enter cai em `CDialog::OnOK` —, então lá nada é
-      gravado porque não há mais janela.
+      `DEFPUSHBUTTON` e o Enter cai em `CDialog::OnOK`, que o `CEdDlg`
+      sobrescreve (`legacy/mfc/edDlg.cpp:1529`) apenas para consultar
+      `CanExit()`, sempre `TRUE` —, então lá nada é gravado porque não há mais
+      janela. **Decidido em 2026-08-31: o port continua ignorando o `Return`**,
+      registrado como divergência deliberada (§6, linha 8) — reproduzir faria
+      uma tecla acidental descartar o trabalho não gravado.
       [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)
 - [x] `Escape` fecha — **concordam**: `IDCANCEL`/`CDialog::OnCancel` de um lado,
       `QDialog::reject` do outro, e o processo termina nos dois
