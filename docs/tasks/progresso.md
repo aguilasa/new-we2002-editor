@@ -1238,7 +1238,7 @@ mesma família de campo no `newWe2002` nunca foi conferida pela tela.
 | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | Atributos do jogador e os clamps | 8.4 | 5 | 01 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
 | [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | Troca de jogador nos quatro tipos de slot | 8.5 | 4 | 04 | ✅ Concluído | 2026-08-29 | 2026-08-29 |
 | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Táticas, presets e o formato `.t2002` | 8.7 | 5 | 03 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ✅ Concluído | 2026-08-31 | ⬜ pendente |
+| [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Bandeira, uniformes e os times sem bandeira própria | 8.8 | 3 | 01 | ✅ Concluído | 2026-08-31 | 2026-09-01 |
 | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Operações em massa | 8.9 | 5 | 04, 07 | ⬜ Pendente | — | — |
 | [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) | Ciclo de vida da janela | 8.10 | 5 | — | ⬜ Pendente | — | — |
 | [PAR-TASK-10](/docs/tasks/PAR-TASK-10.md) | O item aberto do Windows: nome de time pela janela Qt | 8.11 | 1 | 01 | ❌ Bloqueado | — | — |

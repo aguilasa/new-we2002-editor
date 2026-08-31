@@ -156,6 +156,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O `Escape` depois de navegar um dos dez combos de papel do `DefaultTacticsDialog` não grava no port e grava no `ed.exe` — a CORR-WTE-127 só alcançou os dezesseis do `MainWindow` | Alta | [ ] pendente | — |
 | [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O item 5 da §8.7 (o `.t2002`) foi fechado sem veredito de `golden_compare.py`; a perna "importar de volta" só existe como comentário dentro do roteiro | Alta | [ ] pendente | — |
 | [CORR-WTE-136](/docs/tasks/CORR-WTE-136.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | A §8.7 diz "seis roteiros em `tools/par/8.7-*.sh`" onde há oito, e o Log chama de "6º da lista" o item que é o 3º | Baixa | [ ] pendente | — |
+| [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md) | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | `8.8-b2002-exportar.sh` não reproduz (4 corridas, 4 resultados), não confere que o arquivo saiu, e deixa o `FlagKitDialog` modal aberto — o harness diz `gravado` com a imagem `IDENTICAL` | Alta | [ ] pendente | — |
+| [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md) | [PAR-TASK-07](/docs/tasks/PAR-TASK-07.md) | Os ids 69 e 86 do item 2 da §8.8 estão marcados `[x]` sem evidência; são os dois de Master League, abertos pelo outro ramo do `OnButtgraf` | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -294,6 +296,8 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [ ] CORR-WTE-134 — estender o filtro de `Escape` aos dez combos de papel do diálogo de presets
 - [ ] CORR-WTE-135 — medir o import do `.t2002` nos dois lados, com controle, e registrar a faixa
 - [ ] CORR-WTE-136 — acertar a contagem de roteiros da §8.7 e o ordinal do item da CORR-WTE-127
+- [ ] CORR-WTE-137 — fechar o modal, esperar o arquivo e falhar alto no roteiro de export da §8.8
+- [ ] CORR-WTE-138 — medir os ids 69 e 86, que o item 2 lista sem ter medido
 
 ## Detalhes por correção
 
@@ -2354,3 +2358,33 @@ dizer "fechada e fora do backlog", não "corrigida".
   itens da §8.7 e da task
 - **Fix:** separar na frase os oito roteiros dos seis com veredito `OK`, e
   trocar "6º" por "3º" no Log
+
+### CORR-WTE-137
+
+- **Arquivo com problema:** `tools/par/8.8-b2002-exportar.sh`, e o item 3 da
+  §8.8 mais o Log da `PAR-TASK-07.md`, que se apoiam nele
+- **Sintoma:** quatro corridas idênticas deram: 41 bytes + crash, nada + `exit
+  0`, nada + `exit 0`, 0 bytes + crash. O `.m2002` não saiu em nenhuma. E nas
+  duas que saíram `exit 0` dizendo `gui: gravado`, a imagem ficou `IDENTICAL` —
+  o `FlagKitDialog` é modal e o roteiro não o fecha, então o `CMB_WRITE` não
+  alcança o diálogo principal e o `Database::Save()` não roda
+- **Como foi detectado:** quatro execuções de `tools/golden_gui.sh` com o
+  roteiro, mais `tools/golden_compare.py roms/ptbr-remaster.bin <cópia>` em cada
+  uma
+- **Fix:** fechar o modal no fim (`fk_click 196 26 36 14`, como os outros dois
+  roteiros da seção), esperar o arquivo com o tamanho esperado em vez de `sleep`
+  fixo, e falhar alto quando ele não aparecer
+
+### CORR-WTE-138
+
+- **Arquivo com problema:** `docs/PARIDADE-FUNCIONAL.md` §8.8 item 2 e
+  `docs/tasks/PAR-TASK-07.md`
+- **Sintoma:** o item lista "57..63, 69, 86 e o 56" e está `[x]`, mas a
+  evidência cobre só o 56 e os 57..63; 69 e 86 são clubes de Master League,
+  abertos pelo segundo ramo do `OnButtgraf` (`squad_ml[id-64]`), que os outros
+  ids não exercitam
+- **Como foi detectado:** leitura da §8.8 contra a lista do próprio item, e das
+  duas guardas do original (`graf.cpp:271` e `:681`) contra o teste único do
+  port (`FlagKitDialog.cpp:118`)
+- **Fix:** medir com `PAR_TEAM=69` e `PAR_TEAM=86` as duas metades — caixas
+  desabilitadas e export recusado —, ou dizer no item quais ids foram medidos
