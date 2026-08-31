@@ -3,7 +3,7 @@ id: CORR-WTE-136
 title: "Correção: a §8.7 conta seis roteiros onde há oito, e o Log erra o ordinal do item da CORR-WTE-127"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -75,17 +75,43 @@ que os dois roteiros do item 5 **não** estão entre os seis re-rodados.
 
 ## Verificação
 
-- [ ] `ls tools/par/8.7-*.sh | wc -l` bate com o que a §8.7 afirma
-- [ ] O ordinal do item da CORR-WTE-127 bate com a posição dele nas duas listas
-- [ ] `ctest -R tasks` verde
-- [ ] `roms/` intocada
+- [x] `ls tools/par/8.7-*.sh | wc -l` bate com o que a §8.7 afirma — **10**,
+      e a seção diz "dez arquivos: o prelúdio mais nove roteiros"
+- [x] O ordinal do item da CORR-WTE-127 bate com a posição dele nas duas
+      listas — **3º** nas duas
+- [x] `ctest -R tasks` verde — 51 tasks
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+A contagem foi escrita depois das outras duas CORRs deste lote, de propósito: a
+[134](/docs/tasks/CORR-WTE-134.md) acrescentou o `8.7-escape-papel-preset.sh` ao
+glob e a [135](/docs/tasks/CORR-WTE-135.md) deu veredito aos dois do `.t2002`.
+Contar antes teria produzido um número que envelheceria na mesma sessão.
+
+O glob tem **10** arquivos — o prelúdio mais nove roteiros. A §8.7 agora separa
+o que a frase antiga misturava: sete roteiros com veredito `OK` e dois do item
+do `.t2002`, cuja perna de importar **diverge de propósito**, porque quem lê
+errado é o oráculo. O "cinco conferidos" da abertura virou "seis", que é o
+número de itens da lista; e as "três CORRs" viraram cinco.
+
+O ordinal do item do `Escape` é **3º** nas duas listas, não 6º.
+
 **Problemas encontrados:**
 
+A frase errada não era só imprecisa — ela **dava uma instrução ruim**. "Seis
+roteiros, os seis saindo `OK`" convida a re-medir a §8.7 rodando seis coisas, e
+os dois que ficam de fora são justamente os do item que a própria task chama de
+mais valioso da série. Foi exatamente o que aconteceu na quarta passagem da
+PAR-TASK-06, e é o que a CORR-WTE-135 teve de ir medir depois.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | O quê |
+|---|---|
+| `docs/PARIDADE-FUNCIONAL.md` | a abertura da §8.7: dez arquivos, sete `OK`, dois do item 6, cinco CORRs |
+| `docs/tasks/PAR-TASK-06.md` | o ordinal, a ressalva de que os seis re-rodados não são todos, e as cinco CORRs |

@@ -119,22 +119,34 @@ Cuidado ao aplicar preset: num diálogo com 86 botões e nenhum `DEFPUSHBUTTON`,
 
 **Executado em:** 2026-08-29 (itens 1-3), 2026-08-30 (itens 4 e 5) e
 2026-09-01 (fechamento) —
-**COMPLETA, 5 de 5** (o 6º da lista já estava fechado pela CORR-WTE-127, fora
-desta task).
+**COMPLETA, 5 de 5** (o **3º** da lista — o do `Escape` — já estava fechado
+pela CORR-WTE-127, fora desta task; o 6º é o do `.t2002`, que é desta e fechou
+aqui). O ordinal dizia "6º" e estava errado nos dois documentos até a
+[CORR-WTE-136](/docs/tasks/CORR-WTE-136.md).
 
 ### Quarta passagem, 2026-09-01 — fechamento
 
 A [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) desfez a única reprovação que
 restava, e não por conserto: o diagnóstico é que estava invertido. Com ela
-fechada, os **seis roteiros da §8.7 foram re-rodados** contra o binário
+fechada, **seis roteiros da §8.7 foram re-rodados** contra o binário
 reconstruído, e os seis saem
 `OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`:
 `8.7-clamp-xy.sh`, `8.7-troca-papel.sh`, `8.7-presets-16.sh`,
 `8.7-preset-renomear.sh`, `8.7-escape-papel.sh` e
 `8.7-escape-papel-sem-navegar.sh`.
 
-**Esta seção rendeu três CORRs, e nenhuma das três foi o que parecia à
-primeira vista** — vale como resumo do que a §8.7 ensinou:
+**Seis não são todos**, e a distinção custou uma CORR: o
+`8.7-t2002-exportar.sh` e o `8.7-t2002-importar.sh`, os dois do item 6,
+**ficaram de fora desta lista** — e eram justamente os do item que esta task
+chama de mais valioso da série. Foram medidos depois, pela
+[CORR-WTE-135](/docs/tasks/CORR-WTE-135.md). O
+`8.7-escape-papel-preset.sh` é posterior, da
+[CORR-WTE-134](/docs/tasks/CORR-WTE-134.md).
+
+**Esta seção rendeu cinco CORRs, e nenhuma delas foi o que parecia à
+primeira vista** — vale como resumo do que a §8.7 ensinou. As três primeiras
+saíram desta passagem; a [134](/docs/tasks/CORR-WTE-134.md) e a
+[135](/docs/tasks/CORR-WTE-135.md) saíram da revisão dela:
 
 | CORR | pareceu | era |
 |---|---|---|

@@ -765,12 +765,22 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 
 ### 8.7 Táticas
 
-**Os cinco conferidos**, e a seção fechou em 2026-09-01 pela
-[PAR-TASK-06](/docs/tasks/PAR-TASK-06.md). Seis roteiros em `tools/par/8.7-*.sh`,
-os seis saindo `OK`. Rendeu três CORRs — a
-[127](/docs/tasks/CORR-WTE-127.md), a [131](/docs/tasks/CORR-WTE-131.md) e a
-[132](/docs/tasks/CORR-WTE-132.md) — e **nenhuma das três era o que parecia à
-primeira vista**.
+**Os seis conferidos**, e a seção fechou em 2026-09-01 pela
+[PAR-TASK-06](/docs/tasks/PAR-TASK-06.md).
+
+O glob `tools/par/8.7-*.sh` tem **dez arquivos**: o prelúdio, que não roda
+sozinho, mais **nove roteiros**. Sete saem `OK` de golden. Os outros dois são
+os do item 6, o do `.t2002`: exportar sai `OK` e **importar diverge de
+propósito**, porque quem lê errado é o oráculo — faixas, tabela e prova em
+bytes no item. A contagem separa as duas coisas porque a frase anterior dizia
+"seis roteiros, os seis saindo `OK`" e mandava, sem querer, re-medir a seção
+inteira sem tocar no item mais valioso dela
+([CORR-WTE-136](/docs/tasks/CORR-WTE-136.md)).
+
+Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
+[131](/docs/tasks/CORR-WTE-131.md), a [132](/docs/tasks/CORR-WTE-132.md), a
+[134](/docs/tasks/CORR-WTE-134.md) e a [135](/docs/tasks/CORR-WTE-135.md) — e
+**nenhuma delas era o que parecia à primeira vista**.
 
 - [x] Clampar x em 0/48 e y em 0/112 — **os dois tetos, medidos no
       `raw_formation`**: 99 digitado em x grava `0x30` = 48, e 999 em y grava
