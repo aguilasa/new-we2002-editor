@@ -112,6 +112,18 @@ conclusão sobre o outro.
 - `tools/par/8.8-cores-teto.sh`, `8.8-b2002-exportar.sh`,
   `8.8-b2002-importar.sh` — um roteiro por caminho medido
 
+### Nota posterior — 2026-08-31, [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md)
+
+**Os ids 69 e 86 do item 2 estavam marcados sem terem sido medidos.** A
+evidência deste Log cobria o 56 e os 57..63; sobre os dois de Master League não
+havia linha. Eles passam pelo **outro** ramo do `OnButtgraf` — `squad_ml[id-64]`
+em vez de `squad_nazall[id-1]` —, então 57..63 não os cobre.
+
+Medidos agora, nas duas metades e nos dois lados: caixas de cor desabilitadas em
+ambos (`Style` 54 no 69, 56 no 86, iguais), export recusado em ambos com a caixa
+`Choose a team (that has "indipendent" flag too) !`, e golden `OK` nas duas
+corridas. Roteiro `tools/par/8.8-sem-bandeira.sh`.
+
 ### Nota posterior — 2026-08-31, [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md)
 
 **O `8.8-b2002-exportar.sh` deste Log não media o item 3**, e o verde dele era

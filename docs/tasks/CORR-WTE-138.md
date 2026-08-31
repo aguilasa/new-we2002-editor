@@ -3,7 +3,7 @@ id: CORR-WTE-138
 title: "Correção: os ids 69 e 86 do item 2 da §8.8 estão marcados sem terem sido medidos"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -93,16 +93,48 @@ que não foram.
 
 ## Verificação
 
-- [ ] `PAR_TEAM=69` e `PAR_TEAM=86` medidos nos dois lados, com veredito escrito
-- [ ] O item 2 nomeia os ids efetivamente medidos
-- [ ] `roms/` intocada
+- [x] `PAR_TEAM=69` e `PAR_TEAM=86` medidos nos dois lados, com veredito escrito
+- [x] O item 2 nomeia os ids efetivamente medidos
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+Medidos os dois ids, nas duas metades, nos dois lados — duas corridas de
+`golden_check.sh` em modo `gui`, uma por id, cada uma exercitando os dois lados
+e produzindo captura de cada um.
+
+**Concordam, que era a hipótese.** Caixas de cor desabilitadas em ambos os lados
+nos dois ids, com `Style` 54 no 69 e 56 no 86 — o mesmo valor dos dois lados, e
+os valores das duas camisas também iguais. `CMD_EXPORT_FLAG` recusado em ambos:
+nenhum diálogo de arquivo abre, e sobe a caixa
+`Choose a team (that has "indipendent" flag too) !`. Golden `OK` nas duas
+corridas.
+
+O estímulo ficou versionado em `tools/par/8.8-sem-bandeira.sh`, com o id em
+`PAR_TEAM` — pela mesma razão da [CORR-WTE-123](/docs/tasks/CORR-WTE-123.md):
+verde sem estímulo versionado não é repetível.
+
 **Problemas encontrados:**
 
+Nenhum na medição. O roteiro nasceu com as três lições que a
+[CORR-WTE-137](/docs/tasks/CORR-WTE-137.md) tinha acabado de pagar — dispensar
+aviso com o ponteiro sobre ele, teclar uma vez e esperar, e fechar o
+`FlagKitDialog` no fim —, e por isso saiu certo na primeira corrida.
+
+Vale registrar o que este roteiro **não** afirma: ele não grava nada, então os
+dois lados saem `IDENTICAL` contra a imagem original a menos das
+não-idempotências. Aqui isso é o resultado certo, e não um falso verde, porque o
+que se mede é justamente que nada foi exportado nem alterado — o veredito vem da
+tela e da ausência do diálogo de arquivo, não da imagem.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | O quê |
+|---|---|
+| `tools/par/8.8-sem-bandeira.sh` | criado — o estímulo, parametrizado por `PAR_TEAM` |
+| `docs/PARIDADE-FUNCIONAL.md` | o item 2 da §8.8, com os dois ids e o porquê de serem outro caminho |
+| `docs/tasks/PAR-TASK-07.md` | nota posterior no Log |

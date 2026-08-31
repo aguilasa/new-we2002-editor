@@ -923,8 +923,25 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       dois lados. O uniforme muda em `home_kit[2]`, não `[0]`, confirmando que
       as palavras 0 e 1 das 16 não são expostas
 - [x] Time sem bandeira própria (57..63, 69, 86 e o 56) → caixas desabilitadas e
-      import/export recusado — **as duas metades medidas, e o 56 diverge como
-      previsto**; ver a nota abaixo
+      import/export recusado — **as duas metades medidas em todos os ids da
+      lista, e o 56 diverge como previsto**; ver a nota abaixo.
+
+      Os **69 e 86 foram medidos depois, em 2026-08-31**, pela
+      [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md): eles estavam nomeados no item
+      sem nunca terem ido à tela, e não são mais do mesmo — 56 e 57..63 são
+      seleções e all-star, tratadas pelo primeiro ramo do `OnButtgraf`
+      (`squad_nazall[id-1]`), enquanto **69 e 86 são clubes de Master League**,
+      abertos pelo segundo (`squad_ml[id-64]`; `db_.ml_teams[id-64]` no port,
+      [src/app/Commands.cpp:65](../src/app/Commands.cpp)). Medir 57..63 não
+      exercitava esse caminho.
+
+      **Os dois lados concordam nos dois ids, nas duas metades.** As caixas de
+      cor saem desabilitadas em ambos — capturado nos quatro cruzamentos, com
+      `Style` 54 no id 69 e 56 no id 86, iguais dos dois lados —, e o
+      `CMD_EXPORT_FLAG` é recusado em ambos: nenhum diálogo de arquivo abre e
+      sobe a caixa `Choose a team (that has "indipendent" flag too) !`. Golden
+      `OK` nas duas corridas. Roteiro
+      `tools/par/8.8-sem-bandeira.sh`, com o id em `PAR_TEAM`
 - [x] `.b2002` e `.m2002`: exportar do port e importar no `ed.exe`, e vice-versa
       — **funciona nos dois sentidos**. Os arquivos exportados são
       **byte-idênticos** (41 e 40 bytes), e importar o mesmo `.b2002` alterado
