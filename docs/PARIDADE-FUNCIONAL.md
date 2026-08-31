@@ -822,10 +822,42 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 > botão invisível.
 
 ### 8.8 Bandeira e uniformes
-- [ ] Cores no teto (65535) e acima
-- [ ] Time sem bandeira própria (57..63, 69, 86 e o 56) → caixas desabilitadas e
-      import/export recusado
-- [ ] `.b2002` e `.m2002`: exportar do port e importar no `ed.exe`, e vice-versa
+
+**Os três conferidos em 2026-08-31** pela
+[PAR-TASK-07](/docs/tasks/PAR-TASK-07.md), na `ptbr-remaster.bin`. Roteiros em
+`tools/par/8.8-*.sh`, sobre o `8.8-prelude.sh`.
+
+- [x] Cores no teto (65535) e acima — `flag_colours[0]` vai de 3523 a **65535**
+      tanto com `65535` quanto com `99999` digitado: clampa no teto, igual nos
+      dois lados. O uniforme muda em `home_kit[2]`, não `[0]`, confirmando que
+      as palavras 0 e 1 das 16 não são expostas
+- [x] Time sem bandeira própria (57..63, 69, 86 e o 56) → caixas desabilitadas e
+      import/export recusado — **as duas metades medidas, e o 56 diverge como
+      previsto**; ver a nota abaixo
+- [x] `.b2002` e `.m2002`: exportar do port e importar no `ed.exe`, e vice-versa
+      — **funciona nos dois sentidos**. Os arquivos exportados são
+      **byte-idênticos** (41 e 40 bytes), e importar o mesmo `.b2002` alterado
+      nos dois lados grava `OFS_FLAG_COLOURS+2` em ambos, com as imagens saindo
+      idênticas salvo a faixa conhecida
+
+> **A divergência deliberada da Fase 5 está medida na tela, e é a esperada.** No
+> id **56** (World All-Stars) o port **desabilita** as caixas de cor e o
+> `ed.exe` as **habilita** — capturado nos dois. É o que a
+> [§6 item 5](#6-divergências-deliberadas) descreve: o `graf` original tinha
+> **dois** testes de "tem bandeira própria" que discordavam nessa borda, e o
+> port usa um só. Nos ids **57..63** os dois lados concordam (ambos
+> desabilitam), e o export é recusado com a **mesma** mensagem em ambos —
+> `Choose a team (that has "indipendent" flag too) !`.
+>
+> **Isto não é CORR**: a divergência está na lista de aceitas do
+> [/docs/PLAN-LINUX.md](/docs/PLAN-LINUX.md), e este item era justamente onde
+> ela finalmente se mediria.
+>
+> **O contraste com o `.t2002` da §8.7 vale registrar.** Aqui os dois formatos
+> saem byte-idênticos e a troca funciona nos dois sentidos; lá o arquivo do
+> port tem 52 bytes contra 56 do original e o `ed.exe` recusa até o que ele
+> mesmo exportou ([CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)). Mesmo diálogo
+> de origem, formatos vizinhos, resultados opostos.
 
 ### 8.9 Operações em massa
 - [ ] `CMD_SORT_RESERVES` numa seleção e num clube (a ordem torta é a certa).

@@ -6,7 +6,7 @@ category: ui
 projeto: newWe2002
 depends_on: ["PAR-TASK-01"]
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.8"
-status: pendente
+status: concluído
 ---
 
 # PAR-TASK-07: Bandeira, uniformes e os times sem bandeira própria
@@ -45,10 +45,10 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Cores no teto (65535) e acima
-- [ ] Time sem bandeira própria (57..63, 69, 86 e o 56) → caixas desabilitadas e
+- [x] Cores no teto (65535) e acima
+- [x] Time sem bandeira própria (57..63, 69, 86 e o 56) → caixas desabilitadas e
       import/export recusado
-- [ ] `.b2002` e `.m2002`: exportar do port e importar no `ed.exe`, e vice-versa
+- [x] `.b2002` e `.m2002`: exportar do port e importar no `ed.exe`, e vice-versa
 
 O segundo item carrega uma **divergência deliberada** da Fase 5: o port usa teste
 único de "tem bandeira própria" onde o original repetia a condição. Ela está na
@@ -61,11 +61,53 @@ O terceiro é ida e volta de arquivo, como o `.t2002` da PAR-TASK-06.
 
 ## Definição de pronto
 
-- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.8
-- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+- [x] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.8
+- [x] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
       e o veredito
-- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
-      offset simbólico
-- [ ] `roms/` intocada
+- [x] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
+      offset simbólico — **nenhuma nova**; a do id 56 é a deliberada da Fase 5
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
+
+**Executado em:** 2026-08-31 — **COMPLETA, 3 de 3.**
+
+**Resumo:**
+
+Duas corridas de `golden_check.sh` em modo `gui` (`OK` nas duas) para o item 1,
+e medição por captura e por arquivo para os itens 2 e 3. Nenhuma divergência
+nova, nenhuma CORR aberta.
+
+**O que se aprendeu:**
+
+**A divergência deliberada da Fase 5 apareceu na tela, e é exatamente a
+prevista.** No id 56 o port desabilita as caixas de cor e o `ed.exe` as
+habilita; nos ids 57..63 os dois concordam. O `graf` original tinha **dois**
+testes de "tem bandeira própria" que discordavam nessa borda, e o port usa um
+só — este item era onde isso finalmente se mediria, e mediu. Não é CORR: está
+na lista de aceitas do plano.
+
+**A recusa de export é idêntica nos dois**, com a mesma mensagem
+(`Choose a team (that has "indipendent" flag too) !`) e sem gerar arquivo. O
+botão não é desabilitado em nenhum dos dois — quem recusa é a ação.
+
+**O `.b2002` e o `.m2002` fazem o que o `.t2002` não faz.** Os arquivos saem
+**byte-idênticos** dos dois lados (41 e 40 bytes), e importar o mesmo arquivo
+alterado em cada um grava o mesmo `OFS_FLAG_COLOURS+2`, com as imagens saindo
+idênticas salvo a faixa conhecida. É a troca nos dois sentidos funcionando —
+contra o `.t2002`, onde o port grava 52 bytes contra 56 e o `ed.exe` recusa até
+o próprio arquivo ([CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)). **Formatos
+vizinhos do mesmo diálogo podem estar em estados opostos**, e um não autoriza
+conclusão sobre o outro.
+
+**Problemas encontrados:** nenhum.
+
+**Arquivos criados/modificados:**
+
+- `docs/PARIDADE-FUNCIONAL.md` — os três itens da §8.8 e a nota da divergência
+- `docs/tasks/PAR-TASK-07.md` — este Log e o `status`
+- `docs/tasks/progresso.md` — a linha da tabela do anexo
+- `tools/par/8.8-prelude.sh` — o prelúdio (abre o `FlagKitDialog`; escolhe o
+  time por `PAR_TEAM`)
+- `tools/par/8.8-cores-teto.sh`, `8.8-b2002-exportar.sh`,
+  `8.8-b2002-importar.sh` — um roteiro por caminho medido
