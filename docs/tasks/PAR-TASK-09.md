@@ -6,7 +6,7 @@ category: ui
 projeto: newWe2002
 depends_on: []
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.10"
-status: pendente
+status: concluído
 ---
 
 # PAR-TASK-09: Ciclo de vida da janela
@@ -45,11 +45,12 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] Cancelar o diálogo de abertura
-- [ ] Abrir arquivo com tamanho errado → aviso, e carrega
-- [ ] `CMB_RELOAD` depois de editar → descarta as edições
-- [ ] `Return` na janela principal não pode disparar nada
-- [ ] `Escape` fecha
+- [x] Cancelar o diálogo de abertura — **DIVERGE**, [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)
+- [x] Abrir arquivo com tamanho errado → aviso, e carrega — concordam
+- [x] `CMB_RELOAD` depois de editar → descarta as edições — golden `OK`
+- [x] `Return` na janela principal não pode disparar nada — cumprido nos dois;
+      o ciclo de vida **DIVERGE**, [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)
+- [x] `Escape` fecha — concordam
 
 O quarto item é guarda de regressão com história: dentro de um `QDialog` o Qt
 torna todo botão auto-default, e num diálogo com 86 botões e nenhum
@@ -65,11 +66,69 @@ original carrega assim mesmo, e o port tem de carregar também.
 
 ## Definição de pronto
 
-- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.10
-- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
-      e o veredito
-- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
-      offset simbólico
-- [ ] `roms/` intocada
+- [x] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.10
+- [x] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+      e o veredito — os quatro roteiros estão em `tools/par/8.10-*.sh`
+- [x] Divergência fora de `405724..405739` registrada como CORR — **duas**, a
+      [140](/docs/tasks/CORR-WTE-140.md) e a [141](/docs/tasks/CORR-WTE-141.md).
+      Nenhuma das duas tem faixa nem offset simbólico, e **isso é o achado**:
+      são divergências de ciclo de vida, em que um lado grava zero byte porque
+      já não há janela
+- [x] `roms/` intocada — md5 `7d49ff4e50a951dacd456096df4a2896`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
+
+**Executado em:** 2026-08-31 — **COMPLETA, 5 de 5.**
+
+**Resumo do que foi feito:**
+
+| item | oráculo | port | veredito |
+|---|---|---|---|
+| 1 cancelar abertura | aviso, e **fica com o diálogo vazio** | aviso, e **encerra** | **DIVERGE** |
+| 2 tamanho errado | avisa e carrega | avisa e carrega | concordam |
+| 3 `CMB_RELOAD` | descarta a edição | descarta a edição | golden `OK` |
+| 4 `Return` | **encerra o editor** | não faz nada | edição: nenhum dispara. Ciclo de vida: **DIVERGE** |
+| 5 `Escape` | fecha | fecha | concordam |
+
+**O que se aprendeu, e é o achado da task: `BOOL OnInitDialog()` não é
+"deu certo".** É "eu mesmo cuidei do foco". O `return FALSE` do
+`legacy/mfc/edDlg.cpp:1331` não fecha diálogo nenhum — quem fecharia é
+`EndDialog`, que não é chamado —, e o `ed.exe` segue de pé com a janela inteira
+vazia. O `main.cpp` do port tem um comentário afirmando o contrário
+("bailed out of the dialog if the user cancelled"), escrito por quem leu o
+`BOOL` como aborto. As duas divergências desta seção saem daí e de uma prima:
+no item 4, `CDialog::OnOK` é o destino do Enter num diálogo sem
+`DEFPUSHBUTTON`, e ele encerra o editor.
+
+**Nenhuma das duas divergências grava byte.** É por isso que elas nunca
+apareceram em golden nenhum, e é por isso que a Definição de pronto desta task
+pede faixa e offset simbólico e não recebe: um dos lados simplesmente já não
+tem janela para clicar `CMB_WRITE`.
+
+**Problemas encontrados:**
+
+**O item 3 precisava de controle, e o controle é a metade que quase não se
+escreve.** "A edição não chegou ao disco" é indistinguível de "o roteiro não
+chegou a digitar". A corrida gêmea com `PAR_SEM_RELOAD=1` fecha isso: mesmo
+estímulo, sem o `CMB_RELOAD`, e a edição aparece em `OFS_TEAM_NAME_1_A+200` —
+6 faixas / 46 bytes contra as 5 / 41 da corrida com reload.
+
+**Dois dos cinco itens não cabiam no harness golden**, e não por limitação
+dele: arranque e encerramento estão fora do que ele expõe, porque ele já entra
+pelo diálogo de abertura e já sai gravando. Daí os dois roteiros que rodam
+sozinhos.
+
+**`grep` no `ed.rc` precisa de `-a`.** O arquivo é ISO-8859-1 e o grep o trata
+como binário, engolindo toda saída — foi assim que o `CMD_CALCFORZA2` da
+PAR-TASK-08 pareceu ausente do `.rc` por um momento. Ele está lá, na linha 370.
+
+**Arquivos criados/modificados:**
+
+- `tools/par/8.10-reload-descarta.sh` — item 3, com o `PAR_SEM_RELOAD` do controle
+- `tools/par/8.10-return-nao-dispara.sh` — item 4
+- `tools/par/8.10-ciclo-oraculo.sh` e `tools/par/8.10-ciclo-port.sh` — itens 1, 2 e 5
+- `docs/PARIDADE-FUNCIONAL.md` — a §8.10 inteira
+- `docs/tasks/CORR-WTE-140.md` e `docs/tasks/CORR-WTE-141.md` — as duas divergências
+- `docs/tasks/correcoes-progresso.md` — as duas linhas novas
+- `docs/tasks/progresso.md` — a linha da tabela
+- `docs/tasks/PAR-TASK-09.md` — este Log

@@ -1040,11 +1040,63 @@ máquina. Roteiros em `tools/par/8.9-*.sh`.
 > divergência que é do roteiro.
 
 ### 8.10 Ciclo de vida
-- [ ] Cancelar o diálogo de abertura
-- [ ] Abrir arquivo com tamanho errado → aviso, e carrega
-- [ ] `CMB_RELOAD` depois de editar → descarta as edições
-- [ ] `Return` na janela principal não pode disparar nada
-- [ ] `Escape` fecha
+
+**Os cinco conferidos** pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md), em
+2026-08-31. **Três concordam e dois divergem** — e os dois que divergem são de
+ciclo de vida, não de dado: nenhuma das duas divergências grava byte nenhum.
+Rendeu duas CORRs, a [140](/docs/tasks/CORR-WTE-140.md) e a
+[141](/docs/tasks/CORR-WTE-141.md), as duas esperando **decisão**, não conserto.
+
+Dois roteiros são hooks de golden (`tools/par/8.10-reload-descarta.sh` e
+`8.10-return-nao-dispara.sh`) e dois rodam sozinhos
+(`8.10-ciclo-oraculo.sh`, `8.10-ciclo-port.sh`) — arranque e encerramento o
+harness não expõe, porque ele já entra pelo diálogo de abertura e já sai
+gravando.
+
+- [x] Cancelar o diálogo de abertura — **DIVERGE.** Os dois mostram
+      `Impossible editing without CD image !`; depois disso o `ed.exe` **fica de
+      pé com o diálogo principal inteiro e vazio** (combo sem itens, campos em
+      branco, `Write into CD image` clicável) e o port **encerra**. A causa é uma
+      armadilha de MFC: `OnInitDialog` faz `return FALSE`
+      (`legacy/mfc/edDlg.cpp:1331`), e esse retorno **não fecha diálogo** — só
+      diz que o foco já foi tratado. [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)
+- [x] Abrir arquivo com tamanho errado → aviso, e carrega — **concordam.** Os
+      dois avisam `Not WE2002 CD image (474.431.328 bytes)!` e carregam assim
+      mesmo; no legado a linha que abortaria está comentada
+      (`// return FALSE;`), e o port copia isso com o comentário
+      "A warning only, exactly as in the original"
+- [x] `CMB_RELOAD` depois de editar → descarta as edições — **concordam**,
+      golden `OK`. Editar `TXT_TEAM_NAME1` para `RELOAD`, recarregar e gravar dá
+      **5 faixas / 41 bytes** contra a imagem original, que são só as
+      não-idempotências. O **controle** é a corrida gêmea sem o `CMB_RELOAD`
+      (`PAR_SEM_RELOAD=1`): ali saem **6 faixas / 46 bytes**, e a sexta é
+      `OFS_TEAM_NAME_1_A+200`, a edição chegando ao disco. Sem esse controle o
+      item passaria com um roteiro que nem chegou a digitar
+- [x] `Return` na janela principal não pode disparar nada — **cumprido nos dois,
+      e o ciclo de vida DIVERGE.** Nenhum dos dois dispara ação de edição, que é
+      o que o item existe para garantir: no port a imagem gravada depois do
+      `Return` é **byte-idêntica** à de um `Load`+`Save` sem tecla nenhuma. Mas
+      no `ed.exe` o `Return` **encerra o editor** — `IDD_ED_DIALOG` não tem
+      `DEFPUSHBUTTON` e o Enter cai em `CDialog::OnOK` —, então lá nada é
+      gravado porque não há mais janela.
+      [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)
+- [x] `Escape` fecha — **concordam**: `IDCANCEL`/`CDialog::OnCancel` de um lado,
+      `QDialog::reject` do outro, e o processo termina nos dois
+
+> **Este item é a guarda do `autoDefault=false`, e é por isso que ele importa.**
+> Dentro de um `QDialog` o Qt torna todo botão auto-default; num diálogo com 86
+> botões e nenhum `DEFPUSHBUTTON`, o `Return` clicaria o primeiro da ordem de
+> tabulação — e um dos candidatos aplica formação predefinida sobre o time
+> selecionado. O `rc2ui.py` emite `autoDefault=false` por causa disso, e o
+> roteiro `8.10-return-nao-dispara.sh` é o que impede a emenda de apodrecer em
+> silêncio.
+>
+> **A decisão do `DefaultTacticsDialog` não contradiz esta.** Lá o `Return`
+> **fecha**, e deve ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)), porque o
+> `ed.rc` declara um `DEFPUSHBUTTON` — invisível, mas declarado (linha 627).
+> Aqui não há nenhum. A regra é a mesma nos dois: o `Return` vai para o botão
+> default do diálogo, e o comportamento muda porque um diálogo tem esse botão e
+> o outro não.
 
 ### 8.11 Windows (o item aberto da Fase 7)
 - [ ] Editar nome de time pela janela Qt no Windows e comparar com o
