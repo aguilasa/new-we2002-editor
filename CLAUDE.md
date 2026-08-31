@@ -674,12 +674,20 @@ Três diferenças de sinal entre Qt e MFC que valem saber antes de mexer:
 - **`Escape` num combo aberto não significa o mesmo nos dois.** No MFC as setas
   movem o `CurSel` do próprio combo e o `Escape` só fecha a lista, então o
   killfocus grava o item navegado; no Qt as setas movem a linha corrente da
-  *view* e o `Escape` desfaz. O mesmo `eventFilter` intercepta o `Escape` no
-  popup dos **dezesseis** combos que gravam em perda de foco — os seis de
-  cobrador e os dez de papel — e repõe o índice navegado. Medido: três `Down` e
-  `Escape` levam `kick_long_fk` de 3 a 6 e `raw_formation[0]` de `0x02` a
-  `0x05`, nos dois lados. Os dez de papel enganam: o `currentIndexChanged` deles
-  só repinta a legenda do marcador, e quem grava é o `FocusOut`, como nos seis.
+  *view* e o `Escape` desfaz. Um `eventFilter` do `MainWindow` intercepta o
+  `Escape` no popup dos **dezesseis** combos que gravam em perda de foco — os
+  seis de cobrador e os dez de papel — e repõe o índice navegado. Medido: três
+  `Down` e `Escape` levam `kick_long_fk` de 3 a 6 e `raw_formation[0]` de
+  `0x02` a `0x05`, nos dois lados. Os dez de papel enganam: o
+  `currentIndexChanged` deles só repinta a legenda do marcador, e quem grava é
+  o `FocusOut`, como nos seis.
+- **E são vinte e seis combos, não dezesseis.** O `DefaultTacticsDialog` tem
+  **outros dez** de papel (`CMB_SLOT_ROLE2..11`), que escrevem os `roles[]` dos
+  presets e precisaram do **próprio** filtro. O caminho de gravação de lá é
+  outro — `currentIndexChanged` guardado por `hasFocus()`, não `FocusOut` —, e
+  isso muda o conserto: repor o índice com o combo já sem foco não grava nada,
+  então o filtro chama `setFocus()` depois do `hidePopup()`. Ao mexer no filtro
+  de um formulário, confira o outro (CORR-WTE-134).
 
 Cuidado com `slots`: é macro do Qt. Uma variável local com esse nome não
 compila, com erro que não menciona macro nenhuma.

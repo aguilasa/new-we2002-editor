@@ -254,9 +254,11 @@ não grava **na hora**. Grava depois, quando o foco sai: medido na §8.3, três
 divergiam — no MFC as setas movem o `CurSel` do próprio combo e o `Escape` só
 fecha a lista, no Qt elas movem a linha corrente da *view* e o `Escape`
 desfaz. O port intercepta o `Escape` no popup para manter o item navegado
-([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)) — nos **dezesseis** combos que
-gravam assim, porque os dez de papel da §3.7 usam o mesmo `FocusOut`
-([CORR-WTE-127](/docs/tasks/CORR-WTE-127.md)).
+([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)) — nos **dezesseis** combos do
+diálogo principal que gravam assim, porque os dez de papel da §3.7 usam o mesmo
+`FocusOut` ([CORR-WTE-127](/docs/tasks/CORR-WTE-127.md)). Os dez combos de
+papel do `DefaultTacticsDialog` divergiam igual e têm filtro próprio
+([CORR-WTE-134](/docs/tasks/CORR-WTE-134.md)) — **vinte e seis ao todo**.
 
 Lembrete permanente: `Load` lê os dois primeiros cobradores de ML **trocados** e
 `Save` grava na ordem declarada, então toda gravação troca o par. Bug do
@@ -674,6 +676,11 @@ medição e foi fechado em 2026-08-29 pela
 > só para estes seis: os dez de papel usam o mesmo `FocusOut`, e divergiam do
 > mesmo jeito. A [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) estendeu o filtro
 > e pôs o item na §8.7.
+>
+> **E não são dezesseis no total, são vinte e seis.** Os dez combos de papel do
+> `DefaultTacticsDialog` divergiam pelo mesmo motivo e ficaram de fora daquele
+> filtro, porque gravam por outro caminho —
+> [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md).
 
 ### 8.4 Atributos do jogador
 
