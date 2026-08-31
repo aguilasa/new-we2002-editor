@@ -971,9 +971,12 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > `ed.exe` as **habilita** — capturado nos dois. É o que a
 > [§6 item 5](#6-divergências-deliberadas) descreve: o `graf` original tinha
 > **dois** testes de "tem bandeira própria" que discordavam nessa borda, e o
-> port usa um só. Nos ids **57..63** os dois lados concordam (ambos
+> port usa um só. Nos ids **57..63, 69 e 86** os dois lados concordam (ambos
 > desabilitam), e o export é recusado com a **mesma** mensagem em ambos —
-> `Choose a team (that has "indipendent" flag too) !`.
+> `Choose a team (that has "indipendent" flag too) !`. Os dois de Master League
+> entraram nesta conta em 2026-08-31, pela
+> [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md); antes dela a concordância só
+> estava medida em 57..63.
 >
 > **Isto não é CORR**: a divergência está na lista de aceitas do
 > [/docs/PLAN-LINUX.md](/docs/PLAN-LINUX.md), e este item era justamente onde

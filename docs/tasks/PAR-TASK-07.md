@@ -82,7 +82,9 @@ nova, nenhuma CORR aberta.
 
 **A divergência deliberada da Fase 5 apareceu na tela, e é exatamente a
 prevista.** No id 56 o port desabilita as caixas de cor e o `ed.exe` as
-habilita; nos ids 57..63 os dois concordam. O `graf` original tinha **dois**
+habilita; nos ids 57..63, 69 e 86 os dois concordam — os dois últimos medidos
+depois, pela [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md). O `graf` original
+tinha **dois**
 testes de "tem bandeira própria" que discordavam nessa borda, e o port usa um
 só — este item era onde isso finalmente se mediria, e mediu. Não é CORR: está
 na lista de aceitas do plano.
