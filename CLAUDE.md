@@ -80,6 +80,17 @@ Disponível no host: `Xvfb`, `xvfb-run`, `xdotool`, `import` (ImageMagick),
   "Path does not exist" que parecia bug do app. Prefira digitar curto: o
   `make wte` existe em parte por isso, mapeando uma letra de unidade para
   encurtar o caminho.
+- **O foco de teclado segue o ponteiro** (`PointerRoot`), e é isto que decide
+  para onde vai um `xdotool key`. Uma caixa de aviso que sobe sozinha — depois
+  de um export, por exemplo — **não** recebe foco; o `Return` vai para onde o
+  último clique deixou o ponteiro, que costuma ser o diálogo por baixo, e
+  **fecha o diálogo** em vez da caixa. O gesto certo é `xdotool mousemove
+  --window <caixa>` e só então `xdotool key Return`, sem `--window`. Medido em
+  2026-08-31, três gestos na mesma corrida (CORR-WTE-137): mousemove+`Return`
+  fecha a caixa e preserva o diálogo; `xdotool key --window` (XSendEvent) não é
+  entregue; clicar dentro da caixa leva o diálogo junto. Consequência prática:
+  **teclar uma vez e esperar o efeito**, nunca em laço — o `Return` a mais,
+  disparado enquanto a caixa ainda some, é o que fecha o que não devia.
 
 ### A mesma regra no Windows: **fora da tela**
 
