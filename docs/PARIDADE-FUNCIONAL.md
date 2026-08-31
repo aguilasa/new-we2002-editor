@@ -750,6 +750,14 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 - [ ] **Com rede, se ainda funcionar:** um jogador real, ida e volta
 
 ### 8.7 Táticas
+
+**Os cinco conferidos**, e a seção fechou em 2026-09-01 pela
+[PAR-TASK-06](/docs/tasks/PAR-TASK-06.md). Seis roteiros em `tools/par/8.7-*.sh`,
+os seis saindo `OK`. Rendeu três CORRs — a
+[127](/docs/tasks/CORR-WTE-127.md), a [131](/docs/tasks/CORR-WTE-131.md) e a
+[132](/docs/tasks/CORR-WTE-132.md) — e **nenhuma das três era o que parecia à
+primeira vista**.
+
 - [x] Clampar x em 0/48 e y em 0/112 — **os dois tetos, medidos no
       `raw_formation`**: 99 digitado em x grava `0x30` = 48, e 999 em y grava
       `0x70` = 112. Com 0 e 0, nada é clampado

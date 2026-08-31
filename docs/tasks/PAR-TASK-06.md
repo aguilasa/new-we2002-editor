@@ -6,7 +6,7 @@ category: ui
 projeto: newWe2002
 depends_on: ["PAR-TASK-03"]
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.7"
-status: pendente
+status: concluído
 ---
 
 # PAR-TASK-06: Táticas, presets e o formato `.t2002`
@@ -84,18 +84,43 @@ Cuidado ao aplicar preset: num diálogo com 86 botões e nenhum `DEFPUSHBUTTON`,
 
 ## Definição de pronto
 
-- [ ] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.7
-- [ ] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
+- [x] Todo item acima marcado no [/docs/PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) §8.7
+- [x] Cada item com evidência: o comando, a faixa que saiu do `golden_compare.py`,
       e o veredito
-- [ ] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
-      offset simbólico
-- [ ] `roms/` intocada
+- [x] Divergência fora de `405724..405739` registrada como CORR, com a faixa e o
+      offset simbólico — **três**, todas fechadas:
+      [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) (o `Escape` do combo de
+      papel), [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) (o diálogo sem
+      confirmação) e [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) (que se
+      fechou sem código, por diagnóstico invertido)
+- [x] `roms/` intocada
 
 ## Log de Execução
 
-**Executado em:** 2026-08-29 (itens 1-3) e 2026-08-30 (itens 4 e 5) —
-**PARCIAL: 4 de 5 itens fechados, 1 medido e reprovado** (o 6º da lista já
-estava fechado pela CORR-WTE-127, fora desta task).
+**Executado em:** 2026-08-29 (itens 1-3), 2026-08-30 (itens 4 e 5) e
+2026-09-01 (fechamento) —
+**COMPLETA, 5 de 5** (o 6º da lista já estava fechado pela CORR-WTE-127, fora
+desta task).
+
+### Quarta passagem, 2026-09-01 — fechamento
+
+A [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) desfez a única reprovação que
+restava, e não por conserto: o diagnóstico é que estava invertido. Com ela
+fechada, os **seis roteiros da §8.7 foram re-rodados** contra o binário
+reconstruído, e os seis saem
+`OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`:
+`8.7-clamp-xy.sh`, `8.7-troca-papel.sh`, `8.7-presets-16.sh`,
+`8.7-preset-renomear.sh`, `8.7-escape-papel.sh` e
+`8.7-escape-papel-sem-navegar.sh`.
+
+**Esta seção rendeu três CORRs, e nenhuma das três foi o que parecia à
+primeira vista** — vale como resumo do que a §8.7 ensinou:
+
+| CORR | pareceu | era |
+|---|---|---|
+| 127 | divergência só nos combos de cobrador (§8.3) | os dez de papel gravam pelo mesmo `FocusOut` |
+| 131 | paridade — "o `IDOK` não aparece nos dois" | o Qt ignora botão default invisível, e o diálogo ficava sem saída |
+| 132 | o port grava o `.t2002` errado | o port grava certo; o `ed.exe` x64 é que exporta 56 e recusa o próprio arquivo |
 
 ### Terceira passagem, 2026-08-30 — o item 5
 
