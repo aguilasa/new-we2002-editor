@@ -153,6 +153,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | As edições do `DefaultTacticsDialog` não chegam ao disco no port e chegam no `ed.exe`; o `IDOK` é `NOT WS_VISIBLE` e no Qt isso deixa o diálogo sem caminho de confirmação | Alta | [x] concluída | 2026-08-30 |
 | [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Diagnóstico invertido: os 52 bytes do port é que estão certos (`tattDlg.cpp:701` valida 52); quem exporta errado é o `ed.exe` x64. Fechada sem mudar código | Alta | [x] concluída | 2026-09-01 |
 | [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) | [PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) | Os dois lados liam `defaultlook.txt` diferentes — o legado abre por caminho relativo e lê a cópia gitignored de `Debug/`. Sem mudança de código | Média | [x] concluída | 2026-09-01 |
+| [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O `Escape` depois de navegar um dos dez combos de papel do `DefaultTacticsDialog` não grava no port e grava no `ed.exe` — a CORR-WTE-127 só alcançou os dezesseis do `MainWindow` | Alta | [ ] pendente | — |
+| [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O item 5 da §8.7 (o `.t2002`) foi fechado sem veredito de `golden_compare.py`; a perna "importar de volta" só existe como comentário dentro do roteiro | Alta | [ ] pendente | — |
+| [CORR-WTE-136](/docs/tasks/CORR-WTE-136.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | A §8.7 diz "seis roteiros em `tools/par/8.7-*.sh`" onde há oito, e o Log chama de "6º da lista" o item que é o 3º | Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -288,6 +291,9 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-131 — dar ao `DefaultTacticsDialog` um caminho de confirmação, que é o que o original tem
 - [x] CORR-WTE-132 — diagnóstico refeito: o port está certo, o `ed.exe` x64 é que exporta errado
 - [x] CORR-WTE-133 — a divergência era fixture: `Debug/defaultlook.txt` fora de sincronia com o versionado
+- [ ] CORR-WTE-134 — estender o filtro de `Escape` aos dez combos de papel do diálogo de presets
+- [ ] CORR-WTE-135 — medir o import do `.t2002` nos dois lados, com controle, e registrar a faixa
+- [ ] CORR-WTE-136 — acertar a contagem de roteiros da §8.7 e o ordinal do item da CORR-WTE-127
 
 ## Detalhes por correção
 
@@ -2303,3 +2309,48 @@ dizer "fechada e fora do backlog", não "corrigida".
   `complete substitution` justamente quando marcada
 - **Fix:** inverter as duas frases do cabeçalho, renomear para `PAR_COMPLETA`, e
   escrever a linha do Log por estado de caixa, como a §8.5 já faz
+
+### CORR-WTE-134
+
+- **Arquivo com problema:** `src/app/DefaultTacticsDialog.cpp` (nenhum
+  `installEventFilter`), e o item 3 da §8.7 mais o da `PAR-TASK-06.md`, que o
+  dão por fechado
+- **Sintoma:** três `Down` e `Escape` no `CMB_SLOT_ROLE2` do diálogo de presets
+  levam `ruoli[1]` de `0x02` a `0x05` no `ed.exe` e deixam `0x02` no port —
+  `374189..374189`, `before first offset+374189`. É o mesmo defeito e o mesmo
+  par de valores da CORR-WTE-127, no formulário que ela não alcançou
+- **Como foi detectado:** sonda desta revisão sob
+  `WE2002_GOLDEN_MODE=gui tools/golden_check.sh roms/ptbr-remaster.bin`, com o
+  caminho normal (`Return` no lugar do `Escape`) medido junto como controle: ele
+  sai `OK` e o controle positivo do port acusa 6 faixas / 42 bytes
+- **Fix:** instalar o `eventFilter` nos dez combos e nas dez `view()`, como o
+  `MainWindow` faz, lembrando que aqui o commit é `currentIndexChanged` +
+  `hasFocus()` e não `FocusOut`
+
+### CORR-WTE-135
+
+- **Arquivo com problema:** `docs/PARIDADE-FUNCIONAL.md` §8.7 item 5 e
+  `docs/tasks/PAR-TASK-06.md`
+- **Sintoma:** o item mais valioso da série está `[x]` sem faixa e sem veredito;
+  a perna "importar de volta" tem como único registro um comentário em
+  `tools/par/8.7-t2002-importar.sh`, e os dois roteiros do item ficaram fora dos
+  seis re-rodados no fechamento
+- **Como foi detectado:** `grep -rn "aceita o próprio arquivo" docs/ tools/par/`
+  devolve só a linha do roteiro; o Log da quarta passagem lista por nome os seis
+  re-rodados, e nenhum é `8.7-t2002-*`
+- **Fix:** rodar o import do arquivo de 52 bytes nos dois lados — o que a
+  CORR-WTE-132 tornou possível ao medir que o `ed.exe` o aceita —, com controle
+  positivo em cada lado, e escrever comando, faixa e veredito nos dois
+  documentos
+
+### CORR-WTE-136
+
+- **Arquivo com problema:** `docs/PARIDADE-FUNCIONAL.md` §8.7 (frase de
+  abertura) e `docs/tasks/PAR-TASK-06.md` (Log da quarta passagem)
+- **Sintoma:** "Seis roteiros em `tools/par/8.7-*.sh`" contra nove arquivos no
+  glob — o prelúdio e oito roteiros; e "o 6º da lista já estava fechado pela
+  CORR-WTE-127" para um item que é o 3º nas duas listas
+- **Como foi detectado:** `ls tools/par/8.7-*.sh | wc -l` = 9, e a contagem dos
+  itens da §8.7 e da task
+- **Fix:** separar na frase os oito roteiros dos seis com veredito `OK`, e
+  trocar "6º" por "3º" no Log
