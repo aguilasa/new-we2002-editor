@@ -50,14 +50,20 @@ sleep 0.8
 xdotool key --clearmodifiers Return; sleep 1.5
 xdotool key --clearmodifiers Return; sleep 1.5
 
-# O CLIQUE NO CAMPO DE NOME NÃO É ENFEITE.
+# O CLIQUE NO CAMPO DE NOME: por que ele fica, agora que o defeito foi corrigido.
 #
-# O `CMD_IMP`/`CMD_EXP` fica com o foco depois de clicado, e no Qt um
-# `QPushButton` focado consome o `Return` e se auto-clica -- reabrindo o
-# diálogo de arquivo indefinidamente, e o port sai `IDENTICAL` contra a imagem
-# original sem nunca gravar. No MFC o `Return` vai para o botão DEFAULT do
-# diálogo (o `IDOK`, invisível), e o foco do botão não atrapalha. O
-# `TXT_FORMATION_NAME` é o mesmo alvo que o `8.7-preset-renomear.sh` usa antes
-# do seu `Return`, e pelo mesmo motivo.
+# Ele nasceu como contorno. O `CMD_IMP`/`CMD_EXP` fica com o foco depois de
+# clicado, e no Qt um `QPushButton` focado consumia o `Return` e se auto-clicava
+# -- reabrindo o diálogo de arquivo indefinidamente, com o port saindo
+# `IDENTICAL` contra a imagem original sem nunca gravar. No MFC o `Return` vai
+# para o botão DEFAULT do diálogo (o `IDOK`, invisível), e o foco do botão não
+# atrapalha.
+#
+# A CORR-WTE-139 consertou isso no port: o `eventFilter` do
+# `DefaultTacticsDialog` vê o `Return` antes dos botões. O clique CONTINUA aqui
+# porque serve aos dois lados de qualquer modo -- é o mesmo alvo que o
+# `8.7-preset-renomear.sh` usa antes do seu `Return` -- e tirá-lo exigiria duas
+# corridas de golden só para provar que o veredito não muda. Se algum dia sair,
+# é isso que tem de ser medido antes.
 tct_click 80 31 27 12; sleep 1
 xdotool key --clearmodifiers Return; sleep 1.5
