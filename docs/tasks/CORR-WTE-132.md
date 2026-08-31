@@ -1,9 +1,9 @@
 ---
 id: CORR-WTE-132
-title: "Correção: o .t2002 exportado pelo port tem 52 bytes contra 56 do ed.exe"
+title: "Correção: nenhuma — os 52 bytes do port é que estão certos; quem diverge é o ed.exe x64"
 type: correção
 category: paridade
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -50,101 +50,128 @@ pelo port e vice-versa, porque o registro começa em offsets diferentes.
 
 ## Causa raiz
 
-Em [`src/app/DefaultTacticsDialog.cpp`](../../src/app/DefaultTacticsDialog.cpp):
+**O port está certo, e a CORR nasceu com o diagnóstico invertido.** O que
+diverge é o `ed.exe` que serve de oráculo.
+
+`legacy/mfc/tattica.h` declara a classe assim:
 
 ```cpp
-constexpr int RECORD_BYTES = 44;
-constexpr int FILE_BYTES   = sizeof(MAGIC) + RECORD_BYTES;   // 8 + 44 = 52
-constexpr int VPTR_BYTES   = 4;
-...
-char* rec = out + sizeof(MAGIC) + VPTR_BYTES;                // escreve em 8+4
+class tattica {
+public:
+    char nome[7];
+    char ruoli[11], x[10], y[10];   // 38 bytes de dados
+    tattica();
+    virtual ~tattica();             // ... e um vptr, por causa disto
+};
 ```
 
-Dois defeitos que se somam:
+O destrutor virtual põe um vptr no início do objeto, e **o tamanho dele muda
+com a arquitetura**:
 
-1. **`FILE_BYTES` não soma `VPTR_BYTES`.** O buffer tem 52 bytes, mas o
-   registro é escrito a partir do byte 12 — então os últimos `VPTR_BYTES` do
-   registro caem fora do que foi dimensionado.
-2. **`VPTR_BYTES` é 4, e no original são 8.** O `ed.exe` é PE32+ **x86-64**
-   (`CLAUDE.md`), onde o ponteiro de vtable de uma classe C++ ocupa 8 bytes. O
-   `4` corresponderia a um binário de 32 bits.
+| build | vptr | `sizeof(tattica)` | arquivo (`8 + sizeof`) |
+|---|---:|---:|---:|
+| 32-bit — o que o fonte original pressupõe | 4 | 44 | **52** |
+| x86-64 — o `Debug/ed.exe` deste repositório | 8 | 48 | **56** |
 
-O mesmo `VPTR_BYTES` é usado na leitura (linha 202), então o port **é
-consistente consigo mesmo** — exporta e importa o próprio formato sem erro. Foi
-o que escondeu o defeito até a comparação com o oráculo.
+E o import do original, em `legacy/mfc/tattDlg.cpp:701`, valida com um número
+**literal**:
+
+```cpp
+if(strcmp(aux,"f.m.tatt") != 0 || fil_ctrl.GetLength() != 52)
+{
+    AfxMessageBox("Not right file !");
+```
+
+Ou seja: **o formato do `.t2002` é de 52 bytes**, o `52` está escrito no fonte,
+e o port grava exatamente isso. O `ed.exe` x64 exporta 56 porque o
+`sizeof(tattica)` cresceu na recompilação, enquanto o `52` do import ficou —
+por isso ele **recusa o arquivo que ele mesmo produz**. É um defeito de
+recompilação do oráculo, não do formato nem do port.
+
+**Medido, e é o que fecha o caso:** o `ed.exe` **aceita** o arquivo de 52 bytes
+exportado pelo port, e grava a tática importada (`before first offset+374188` e
+`+374780`, mais `OFS_TEAM_MIXED_CASE_NAME+223676`). A troca funciona no sentido
+port → `ed.exe`; o inverso falha porque o arquivo do oráculo é que está torto.
+
+**Por contraste, `.b2002` e `.m2002` funcionam nos dois sentidos** (§8.8): as
+classes de bandeira e uniforme **não têm destrutor virtual**, então não têm
+vptr e o tamanho não muda entre 32 e 64 bits — `graf.cpp` valida 41 e 40, e os
+dois lados exportam byte-idêntico. O contraste que a §8.8 registrou tem esta
+causa.
 
 ## Correção
 
-1. `VPTR_BYTES = 8`, com o comentário dizendo por quê (o oráculo é x64);
-2. `FILE_BYTES = sizeof(MAGIC) + VPTR_BYTES + RECORD_BYTES`;
-3. decidir o que gravar nos 8 bytes. O original grava um valor estável que
-   parece ponteiro; **reproduzi-lo byte a byte não é possível nem desejável** —
-   o valor é do espaço de endereços dele.
+**Nenhuma. Esta CORR se fecha sem mudar código, e mudar seria regressão.**
 
-**Medir antes de escolher.** Escrever um valor inventado sem saber se o
-original o valida troca uma divergência conhecida por uma não medida — o erro
-que a [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) já cobrou uma vez.
+Aplicar o que a redação original pedia — `VPTR_BYTES = 8` e `FILE_BYTES`
+somando-o — faria o port gravar 56 bytes: o mesmo arquivo que **o import do
+original recusa**. Trocaria um port correto por um que reproduz um defeito de
+recompilação do oráculo.
 
-### A medição do passo 3 não pôde ser feita, e o motivo é um achado novo
+`VPTR_BYTES = 4` e `FILE_BYTES = 52` em
+[`src/app/DefaultTacticsDialog.cpp`](../../src/app/DefaultTacticsDialog.cpp)
+**ficam como estão**, e o comentário de lá passa a dizer por quê.
 
-A pergunta era **"o `ed.exe` confere esses 8 bytes ao importar?"**. Ela não tem
-resposta por este caminho, porque **o import do `ed.exe` recusa até o arquivo
-que o próprio `ed.exe` exportou**, com o aviso `Not right file !`.
+O que sobra é de documentação, e está feito nesta invocação:
 
-Medido em 2026-08-31, com o `CMD_IMP` do `DefaultTacticsDialog`:
-
-| arquivo | origem | veredito do `ed.exe` |
-|---|---|---|
-| `o.t2002` | exportado pelo próprio `ed.exe`, intacto | **`Not right file !`** |
-| `z.t2002` | o mesmo, com os 8 bytes do cabeçalho zerados | **`Not right file !`** |
-| `d.t2002` | o mesmo, com nome e um byte do corpo alterados | **`Not right file !`** |
-
-Não é o caminho: as três recusas se repetiram com `Z:\tmp\<nome>` e com o
-arquivo copiado para o CWD do `ed.exe` (`Debug/`), digitando só `o.t2002` —
-curto, sem barras, como o `CLAUDE.md` recomenda.
-
-**O port, no mesmo teste, aceita o arquivo que ele próprio exportou** sem
-aviso nenhum.
-
-Antes disso houve uma medição que *parecia* responder a pergunta e não
-respondia: importar `o.t2002` e `z.t2002` no oráculo deu imagens **idênticas**,
-o que se leria como "o `ed.exe` ignora os 8 bytes". O controle desmentiu — a
-comparação contra a imagem original mostrou **só as não-idempotências
-conhecidas**, nenhuma faixa de formação. Os dois imports tinham falhado igual.
-**Dois caminhos que falham produzem o mesmo resultado que dois que concordam.**
-
-### O que fazer antes de escolher, agora
-
-1. descobrir **o que o import do `ed.exe` valida** — o `OnImp` do diálogo de
-   táticas no `legacy/mfc/`, que é código deste repositório e não exige
-   decompilar nada;
-2. com isso, saber se os 56 bytes exportados são sequer o formato que ele lê —
-   a hipótese que o achado abre é **export e import assimétricos no próprio
-   original**;
-3. só então decidir o conteúdo dos 8 bytes, e implementar os passos 1 e 2.
+1. o item 5 da §8.7 do inventário dizia "reprovou" — não reprovou, e a
+   assimetria é do oráculo;
+2. a §4.3 do inventário e o `PLAN-LINUX.md` foram editados em 2026-08-31 para
+   dizer que "o medido é 8" — conclusão errada, propagada por esta mesma CORR
+   antes de o fonte ser lido. Revertidos.
 
 ## Arquivos a criar ou modificar
 
 | Arquivo | Ação |
 |---|---|
-| `src/app/DefaultTacticsDialog.cpp` | modificar — as duas constantes |
-| `docs/PARIDADE-FUNCIONAL.md` | modificar — o item 5 da §8.7 |
-| `docs/tasks/PAR-TASK-06.md` | modificar — o item 5 e o Log |
+| `src/app/DefaultTacticsDialog.cpp` | **não mudar as constantes** — só o comentário, dizendo por que 4 e 52 estão certos |
+| `docs/PARIDADE-FUNCIONAL.md` | corrigir a §4.3 (revertida) e o item 5 da §8.7 |
+| `docs/PLAN-LINUX.md` | reverter a edição de 2026-08-31 |
+| `docs/tasks/PAR-TASK-06.md` | corrigir o item 5 e o Log |
 
 ## Verificação
 
-- [ ] Um `.t2002` exportado pelo port tem **56 bytes** e é byte-idêntico ao do
-      `ed.exe` no que não for o campo de ponteiro
-- [ ] O `ed.exe` **importa** o arquivo do port, e a tática resultante bate
-- [ ] O port **importa** o arquivo do `ed.exe`, e a tática resultante bate
-- [ ] `golden_check.sh` em modo `gui` com o roteiro de importação sai `OK`
-- [ ] `ctest` do `newWe2002` continua verde
-- [ ] `roms/` intocada
+- [x] O fonte do original diz qual é o formato — `tattDlg.cpp:701` valida 52
+- [x] A conta de `sizeof(tattica)` explica os dois números (44 em 32 bits, 48
+      em x64), e `tattica.h` mostra o destrutor virtual que a causa
+- [x] O `ed.exe` **aceita** o `.t2002` de 52 bytes do port, e grava a tática
+- [x] As constantes do port ficaram intactas
+- [x] Os docs que afirmavam "8 bytes" foram revertidos
+- [x] `ctest` do `newWe2002` verde
+- [x] `roms/` intocada
 
 ## Log de Execução
 
-**Executado em:** 2026-08-31 — **PARCIAL: nada implementado, medição
-bloqueada.**
+**Executado em:** 2026-08-31 (primeira passagem, parcial) e 2026-09-01
+(diagnóstico refeito, CORR fechada sem mudar código).
+
+### Segunda passagem — o diagnóstico estava invertido
+
+A pendência da primeira passagem era ler o `OnImporta` do `tattDlg` para saber
+o que o import valida. Lido, e a resposta desfaz a CORR:
+`legacy/mfc/tattDlg.cpp:701` compara `GetLength()` com **52**, um literal. O
+formato é de 52 bytes, o port grava 52, e **o port está certo**.
+
+Quem diverge é o `Debug/ed.exe`: ele é x86-64, onde o vptr da `class tattica`
+(que tem destrutor virtual) passa de 4 para 8 bytes, e `sizeof(tattica)` de 44
+para 48 — por isso ele exporta 56 e **recusa o próprio arquivo**. Defeito de
+recompilação do oráculo.
+
+Medido para fechar: **o `ed.exe` aceita o arquivo de 52 bytes do port** e grava
+a tática. A troca funciona no sentido port → oráculo.
+
+**Nada implementado, e implementar seria regressão.** `VPTR_BYTES = 8` faria o
+port gravar 56 — o arquivo que o import do original recusa.
+
+**O que se aprendeu, e custou dois documentos:** eu tratei o `ed.exe` como
+definição do formato, quando ele é **um binário recompilado** do fonte que está
+neste repositório. Onde os dois discordam, **o fonte manda** — ele é a fonte de
+verdade, o binário é uma build. E propaguei a conclusão errada para a §4.3 do
+inventário e para o `PLAN-LINUX.md` **antes** de abrir o fonte; as duas edições
+foram revertidas nesta invocação. Ler o `.h` custou dois minutos e teria evitado
+os dois.
+
+### Primeira passagem, 2026-08-31 — parcial
 
 **Resumo do que foi feito:**
 

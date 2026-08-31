@@ -1003,15 +1003,15 @@ Além do slot 64 herdado da Fase 3, quatro:
 
 O `.t2002` de tática (`tattDlg`) e o `.b2002`/`.m2002` de bandeira e uniforme
 (`graf`) **foram** portados, porque ali os botões existem. O `.t2002` também é
-uma imagem de memória, mas de uma classe com destrutor virtual: o vptr,
-depois `nome[7]`, `ruoli[11]`, `x[10]`, `y[10]`, 2 de padding. O port escreve o
-vptr como zero e o ignora na leitura — o vptr era um endereço de processo, não
-significava nada no arquivo nem então.
+uma imagem de memória, mas de uma classe com destrutor virtual: 4 bytes de
+vptr, depois `nome[7]`, `ruoli[11]`, `x[10]`, `y[10]`, 2 de padding, 44 no
+total. O port escreve os 4 bytes de vptr como zero e os ignora na leitura — o
+vptr era um endereço de processo, não significava nada no arquivo nem então.
 
-**O tamanho desse vptr dizia 4 aqui, e o medido é 8**: o `ed.exe` é PE32+
-x86-64, e o arquivo que ele exporta tem 56 bytes contra os 52 do port. Com isso
-a troca de arquivo entre os dois lados não funciona — medido em 2026-08-31, e
-registrado na [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
+Os 4 bytes são os do fonte original, que é de 32 bits, e o arquivo tem 52 bytes
+— o número que `tattDlg.cpp:701` valida ao importar. O `Debug/ed.exe` é x86-64,
+exporta 56 e recusa o próprio arquivo; ele **aceita** o de 52 do port. Medido
+na [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
 
 Ainda não portado, e conhecido: o `ed.exe` mostra o ícone quando minimizado
 (`OnPaint`) e tem um item "About" no menu de sistema. Nenhum dos dois existe em

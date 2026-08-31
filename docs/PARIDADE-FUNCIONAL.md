@@ -412,17 +412,19 @@ As 16 formações predefinidas (as mesmas que os `CMD_TACT1..16` aplicam).
 | campinho com 10 marcadores | idem | D |
 | `CMD_IMP` / `CMD_EXP` | importa/exporta `.t2002` | D |
 
-Formato `.t2002`: magic, **vptr** (o original gravava a imagem de memória de
-uma classe com destrutor virtual), `nome[7]`, `ruoli[11]`, `x[10]`, `y[10]`,
-2 de padding. O port grava zeros no vptr e ignora na leitura.
+Formato `.t2002`: magic, **4 bytes de vptr** (o original gravava a imagem de
+memória de uma classe com destrutor virtual), `nome[7]`, `ruoli[11]`, `x[10]`,
+`y[10]`, 2 de padding — 44 bytes. O port grava zeros no vptr e ignora na
+leitura. Arquivos antigos continuam legíveis.
 
-> **O tamanho do vptr aqui dizia 4, e o medido é 8.** O `ed.exe` é PE32+
-> **x86-64**, onde o ponteiro de vtable ocupa 8 bytes: o arquivo que ele
-> exporta tem **56 bytes**, contra **52** do port. Medido em 2026-08-31 —
-> [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), que também registra por que a
-> correção ainda não foi aplicada. A frase seguinte, "arquivos antigos
-> continuam legíveis", vale **dentro do port**: ele lê o que ele mesmo grava.
-> Entre os dois lados a troca não funciona hoje.
+> **Os 4 bytes estão certos, e o `Debug/ed.exe` é que exporta errado.** O
+> formato é de **52 bytes** (`8 + sizeof(tattica)` com vptr de 4), e é o que o
+> import do original valida — `tattDlg.cpp:701` compara `GetLength()` com um
+> **52** literal. O `ed.exe` deste repositório é **x86-64**, onde o vptr vira 8
+> e `sizeof(tattica)` vai a 48: ele exporta 56 bytes e **recusa o próprio
+> arquivo**. Defeito de recompilação do oráculo, não do formato. O `ed.exe`
+> **aceita** o arquivo de 52 bytes do port — medido em
+> [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
 
 ### 4.4 `graf` → `FlagKitDialog` (50 `ON_*`)
 
@@ -776,17 +778,20 @@ abre o `PlayerSelectDialog` e não roda sozinho.
       `before first offset+374780` (o nome) e
       `OFS_TEAM_MIXED_CASE_NAME+223676` (a geometria do slot) — nos mesmos
       offsets do oráculo, e o golden sai `OK`
-- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
-      (`tools/par/8.7-t2002-exportar.sh`) — `CMD_IMP` e `CMD_EXP` moram dentro
-      do `DefaultTacticsDialog`, que **deixou de ser um beco sem saída** com a
-      [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md). **Medido em 2026-08-30, e
-      reprovou:** a mesma tática exportada dos dois lados dá **56 bytes no
-      `ed.exe` e 52 no port**. A assinatura `f.m.tatt` e o corpo do registro
-      batem; o que diverge são os bytes entre eles — oito no original
-      (`18e3 5c40 0100 0000`, determinísticos) contra quatro zeros no port —, e
-      isso desalinha o resto do arquivo. A troca nos dois sentidos, que é o que
-      este item existe para provar, não funciona hoje.
-      [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)
+- [x] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
+      (`tools/par/8.7-t2002-exportar.sh`, `8.7-t2002-importar.sh`) —
+      **o port está certo, e a assimetria é do oráculo.** O formato é de **52
+      bytes**, que é o que `tattDlg.cpp:701` valida ao importar e o que o port
+      grava; o `Debug/ed.exe`, sendo x86-64, exporta **56** e recusa o próprio
+      arquivo. Medido: o `ed.exe` **aceita** o `.t2002` de 52 bytes do port e
+      grava a tática. [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), fechada sem
+      mudar código.
+
+> **A ida e volta funciona no sentido port → `ed.exe`, e não no inverso** —
+> porque o arquivo que o oráculo x64 produz é que está torto, não o formato. O
+> `.b2002` e o `.m2002` da §8.8 não têm esse problema: as classes de bandeira e
+> uniforme **não têm destrutor virtual**, então não têm vptr, e o tamanho não
+> muda entre 32 e 64 bits.
 
 > **O `IDOK` do `DefaultTacticsDialog` é `NOT WS_VISIBLE` no próprio `ed.rc`**
 > (linha 627: `DEFPUSHBUTTON "OK",IDOK,197,17,50,14,NOT WS_VISIBLE`), e o

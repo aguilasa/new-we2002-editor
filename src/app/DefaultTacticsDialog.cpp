@@ -28,6 +28,15 @@ namespace {
 /// address: it meant nothing in the file then and means nothing now, so it is
 /// written as zero and skipped on read. Everything a reader cares about lands
 /// at the byte it always did.
+///
+/// The 4 and the 44 are the 32-bit numbers, and they are the right ones: the
+/// original's own importer validates the length against a literal 52
+/// (legacy/mfc/tattDlg.cpp:701), which is 8 + sizeof(tattica) with a 4-byte
+/// vptr. Debug/ed.exe is an x86-64 rebuild of that source, where the vptr
+/// grows to 8 and sizeof(tattica) to 48, so it EXPORTS 56 bytes and then
+/// refuses its own file -- while accepting the 52-byte one this code writes.
+/// Do not "fix" these to 8 and 56: that would make the port emit the file the
+/// original rejects. See CORR-WTE-132.
 constexpr char MAGIC[8] = {'f', '.', 'm', '.', 't', 'a', 't', 't'};
 constexpr int RECORD_BYTES = 44;
 constexpr int FILE_BYTES = static_cast<int>(sizeof(MAGIC)) + RECORD_BYTES;

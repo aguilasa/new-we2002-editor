@@ -151,7 +151,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 | [CORR-WTE-129](/docs/tasks/CORR-WTE-129.md) | [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) | O Log da PAR-TASK-04 põe o `CMD_SKILLS1` em dlu (392,36) na seção escrita para quem retomar; o `controls.json`, a §8.4 e o `8.4-prelude.sh` dizem (382,32) | Baixa | [x] concluída | 2026-08-29 |
 | [CORR-WTE-130](/docs/tasks/CORR-WTE-130.md) | [PAR-TASK-05](/docs/tasks/PAR-TASK-05.md) | O cabeçalho do `8.5-selecao-nacional.sh` diz que a caixa desmarcada é a substituição completa; é o contrário, e `PAR_INCOMPLETE=1` roda a **completa** | Média | [x] concluída | 2026-08-29 |
 | [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | As edições do `DefaultTacticsDialog` não chegam ao disco no port e chegam no `ed.exe`; o `IDOK` é `NOT WS_VISIBLE` e no Qt isso deixa o diálogo sem caminho de confirmação | Alta | [x] concluída | 2026-08-30 |
-| [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | O `.t2002` exportado pelo port tem 52 bytes contra 56 do `ed.exe`: `VPTR_BYTES` é 4 e o oráculo é x64, e `FILE_BYTES` não soma esse campo | Alta | [ ] pendente | — |
+| [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) | [PAR-TASK-06](/docs/tasks/PAR-TASK-06.md) | Diagnóstico invertido: os 52 bytes do port é que estão certos (`tattDlg.cpp:701` valida 52); quem exporta errado é o `ed.exe` x64. Fechada sem mudar código | Alta | [x] concluída | 2026-09-01 |
 
 ## Checklist
 
@@ -285,7 +285,7 @@ dizer "fechada e fora do backlog", não "corrigida".
 - [x] CORR-WTE-129 — corrigir a dlu do `CMD_SKILLS1` no Log da PAR-TASK-04
 - [x] CORR-WTE-130 — desinverter completa/incompleta no roteiro da §8.5 e renomear a variável
 - [x] CORR-WTE-131 — dar ao `DefaultTacticsDialog` um caminho de confirmação, que é o que o original tem
-- [ ] CORR-WTE-132 — alinhar o cabeçalho do `.t2002` com o do original (8 bytes, não 4)
+- [x] CORR-WTE-132 — diagnóstico refeito: o port está certo, o `ed.exe` x64 é que exporta errado
 
 ## Detalhes por correção
 

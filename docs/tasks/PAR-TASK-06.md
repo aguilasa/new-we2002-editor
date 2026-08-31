@@ -60,7 +60,11 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 - [x] Editar e renomear um preset no `DefaultTacticsDialog` — reprovou aqui, e
       foi fechado pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md); roteiro
       `tools/par/8.7-preset-renomear.sh`
-- [ ] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
+- [x] Exportar `.t2002`, importar de volta, e importar um `.t2002` do original
+      — o port exporta o formato **certo** (52 bytes) e o `ed.exe` o aceita;
+      importar um arquivo *do original* é impossível porque o `ed.exe` x64
+      produz 56 bytes, que nem ele mesmo lê. Defeito do oráculo, não do port —
+      [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)
       — **destravado** pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md), que
       deu saída ao diálogo onde `CMD_IMP` e `CMD_EXP` moram; falta medir
 
@@ -95,23 +99,29 @@ estava fechado pela CORR-WTE-127, fora desta task).
 
 ### Terceira passagem, 2026-08-30 — o item 5
 
-**Ele destravou e reprovou.** Com o `DefaultTacticsDialog` confirmável pela
+**Ele destravou, e o que pareceu reprovação era diagnóstico invertido.** Com o
+`DefaultTacticsDialog` confirmável pela
 [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md), o `CMD_EXP` pôde enfim ser
 exercitado. Exportar a mesma tática dos dois lados dá **56 bytes no `ed.exe` e
 52 no port**: assinatura e corpo batem, e o que diverge são os bytes entre eles
-— oito no original (`18e3 5c40 0100 0000`) contra quatro zeros no port.
+— oito no original (`18e3 5c40 0100 0000`, determinísticos) contra quatro zeros
+no port.
 
-**Os oito bytes do original são determinísticos**, não lixo: duas exportações
-seguidas deram o mesmo valor. Foi a primeira coisa que medi, porque "parece
-ponteiro" convidava a descartá-los como memória não inicializada — e aí a
-conclusão teria sido a oposta.
+**A leitura disso, feita em 2026-08-30, estava errada, e a
+[CORR-WTE-132](/docs/tasks/CORR-WTE-132.md) a desfez no dia seguinte.** O fonte
+do original valida o `.t2002` contra um **52** literal
+(`legacy/mfc/tattDlg.cpp:701`), que é `8 + sizeof(tattica)` com vptr de 4:
+**o formato é de 52 bytes e o port grava certo**. Quem diverge é o
+`Debug/ed.exe` — sendo x86-64, o vptr da `class tattica` (que tem destrutor
+virtual) vira 8, `sizeof(tattica)` vai a 48, e ele exporta 56 **recusando o
+próprio arquivo**. Medido: o `ed.exe` **aceita** o de 52 bytes do port e grava
+a tática importada.
 
-A causa está em duas constantes de `DefaultTacticsDialog.cpp`: `VPTR_BYTES` é 4
-onde o oráculo — que é **x86-64** — usa 8, e `FILE_BYTES` não soma esse campo.
-Como a **leitura** usa o mesmo `VPTR_BYTES`, o port exporta e importa o próprio
-formato sem erro nenhum; é o que escondeu o defeito até a comparação com o
-outro lado. **Formato só se confere contra o outro lado**, nunca contra si
-mesmo. [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
+**A lição, e ela custou dois documentos:** eu tratei o `ed.exe` como definição
+do formato, quando ele é **uma build do fonte que está neste repositório**.
+Onde os dois discordam, o fonte manda. A conclusão errada chegou a ser
+propagada para a §4.3 do inventário e para o `PLAN-LINUX.md`, e as duas edições
+foram revertidas.
 
 **Resumo:**
 
