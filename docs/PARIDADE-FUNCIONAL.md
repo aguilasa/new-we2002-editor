@@ -412,10 +412,17 @@ As 16 formações predefinidas (as mesmas que os `CMD_TACT1..16` aplicam).
 | campinho com 10 marcadores | idem | D |
 | `CMD_IMP` / `CMD_EXP` | importa/exporta `.t2002` | D |
 
-Formato `.t2002`: magic, **4 bytes de vptr** (o original gravava a imagem de
-memória de uma classe com destrutor virtual), `nome[7]`, `ruoli[11]`, `x[10]`,
-`y[10]`, 2 de padding — 44 bytes. O port grava zeros no vptr e ignora na leitura.
-Arquivos antigos continuam legíveis.
+Formato `.t2002`: magic, **vptr** (o original gravava a imagem de memória de
+uma classe com destrutor virtual), `nome[7]`, `ruoli[11]`, `x[10]`, `y[10]`,
+2 de padding. O port grava zeros no vptr e ignora na leitura.
+
+> **O tamanho do vptr aqui dizia 4, e o medido é 8.** O `ed.exe` é PE32+
+> **x86-64**, onde o ponteiro de vtable ocupa 8 bytes: o arquivo que ele
+> exporta tem **56 bytes**, contra **52** do port. Medido em 2026-08-31 —
+> [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), que também registra por que a
+> correção ainda não foi aplicada. A frase seguinte, "arquivos antigos
+> continuam legíveis", vale **dentro do port**: ele lê o que ele mesmo grava.
+> Entre os dois lados a troca não funciona hoje.
 
 ### 4.4 `graf` → `FlagKitDialog` (50 `ON_*`)
 
