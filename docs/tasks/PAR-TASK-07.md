@@ -111,3 +111,27 @@ conclusão sobre o outro.
   time por `PAR_TEAM`)
 - `tools/par/8.8-cores-teto.sh`, `8.8-b2002-exportar.sh`,
   `8.8-b2002-importar.sh` — um roteiro por caminho medido
+
+### Nota posterior — 2026-08-31, [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md)
+
+**O `8.8-b2002-exportar.sh` deste Log não media o item 3**, e o verde dele era
+falso: quatro corridas idênticas davam quatro resultados, o `.m2002` não saía
+em nenhuma, e em duas delas o harness dizia `gui: gravado` com a imagem
+`IDENTICAL` — o `FlagKitDialog` ficava de pé, modal, e o clique em `CMB_WRITE`
+não alcançava o diálogo principal. O roteiro foi reescrito com guardas; o item
+3 da §8.8 traz a medição repetível que ele agora produz.
+
+Quatro coisas foram medidas ao consertá-lo, e valem para qualquer roteiro que
+dirija um diálogo com aviso:
+
+1. **Sem gerente de janelas o foco segue o ponteiro.** `Return` só dispensa o
+   aviso se o ponteiro estiver **sobre ele**; parado onde o último clique o
+   deixou, a tecla vai para o diálogo — e o fecha.
+2. **`xdotool key --window` (XSendEvent) não é entregue**, e clicar dentro da
+   caixa leva junto o diálogo. Só o par mousemove+`Return` serve.
+3. **O oráculo fecha o `FlagKitDialog` ao dispensar o aviso do primeiro
+   export.** Não é piscada de repintura: seis segundos de espera e ele não
+   volta. O roteiro reabre pelo `CMD_FLAG_KIT`.
+4. **No port o arquivo só existe depois do aviso.** O `QFile` é local e fecha
+   ao sair de escopo, o que acontece depois de o `QMessageBox` retornar —
+   conferir o tamanho antes pega 0 byte e acusa falha que não houve.

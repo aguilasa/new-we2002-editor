@@ -3,7 +3,7 @@ id: CORR-WTE-137
 title: "Correção: `8.8-b2002-exportar.sh` não reproduz, não confere nada e deixa o modal aberto"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -103,19 +103,66 @@ a que precisa de corrida reproduzível para valer.
 
 ## Verificação
 
-- [ ] Três corridas seguidas do roteiro produzem **os dois** arquivos, com 41 e
-      40 bytes, e `cmp` idêntico entre elas
-- [ ] Uma corrida em que o export falha **falha alto**, em vez de sair `exit 0`
-- [ ] Com o roteiro no `golden_check.sh`, o controle positivo do port contra a
-      imagem original **não** sai `IDENTICAL`
-- [ ] `roms/` intocada
+- [x] Três corridas seguidas do roteiro produzem **os dois** arquivos, com 41 e
+      40 bytes, e `cmp` idêntico entre elas — e também entre port e oráculo
+- [x] Uma corrida em que o export falha **falha alto**, em vez de sair `exit 0`
+      — visto seis vezes durante o conserto: `par: <arquivo> nao saiu com 41
+      bytes`, `par: 'SHIRT FILE TO EXPORT' nao abriu`, `par: o FlagKitDialog
+      sumiu antes de ...`
+- [x] Com o roteiro no `golden_check.sh`, o controle positivo do port contra a
+      imagem original **não** sai `IDENTICAL` — dá 5 faixas / 41 bytes
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-08-31
 
 **Resumo do que foi feito:**
 
+Reproduzido primeiro, e os três defeitos estavam lá: o roteiro não fechava o
+modal (os dois irmãos da seção fecham), não tinha guarda nenhuma sobre o
+arquivo, e dormia em vez de esperar janela.
+
+Reescrito com quatro guardas — espera pela janela do diálogo de arquivo (título
+igual nos dois lados), confirmação por retentativa até ela sumir, exigência do
+arquivo com o tamanho exato (**falhando alto**, com `exit`), e o fechamento do
+`FlagKitDialog` no "Close". Resultado: **três corridas seguidas** produzem os
+dois arquivos nos dois lados, `cmp` limpo entre corridas **e** entre lados,
+golden `OK`, e o controle positivo do port em 5 faixas / 41 bytes em vez de
+`IDENTICAL`.
+
 **Problemas encontrados:**
 
+O conserto custou dez corridas porque **quatro mecanismos diferentes** estavam
+escondidos atrás do mesmo sintoma. Cada um deles vale para qualquer roteiro que
+dirija diálogo com aviso, e está comentado no arquivo:
+
+1. **Sem gerente de janelas o foco de teclado segue o ponteiro.** O `Return` só
+   dispensa o aviso se o ponteiro estiver **sobre ele**. Parado onde o último
+   clique o deixou, a tecla vai para o diálogo por baixo — e o **fecha**, o que
+   aparecia depois como `BadWindow` num clique seguinte. Medidos três gestos na
+   mesma corrida: mousemove+`Return` fecha a caixa e preserva o diálogo;
+   `xdotool key --window` (XSendEvent) não é entregue; clique dentro da caixa
+   leva o diálogo junto.
+2. **Teclar uma vez por rodada e depois esperar.** Um `Return` a mais enquanto a
+   caixa ainda sumia ia para o ponteiro, sobre o diálogo, e o fechava.
+3. **O oráculo fecha o `FlagKitDialog` ao dispensar o aviso do primeiro
+   export** — e não é piscada de repintura: seis segundos de polling e ele não
+   volta. O roteiro reabre pelo `CMD_FLAG_KIT`, o que preserva o estímulo e é o
+   que o torna repetível.
+4. **No port o arquivo só tem bytes depois do aviso.** O `QFile` do
+   `OnExportFlag` é local e só fecha ao sair de escopo, o que acontece **depois**
+   de o `QMessageBox` retornar. A guarda conferia antes e pegava 0 byte, acusando
+   um export que tinha acontecido. A ordem "dispensar, depois conferir" é
+   load-bearing.
+
+E uma armadilha de caminho: `PAR_B`/`PAR_M` é o caminho **digitado** (Windows no
+oráculo), mas o `stat` da guarda roda no Linux. Daí `PAR_B_FILE`/`PAR_M_FILE`.
+
 **Arquivos criados/modificados:**
+
+| Arquivo | O quê |
+|---|---|
+| `tools/par/8.8-b2002-exportar.sh` | reescrito: quatro guardas, reabertura do diálogo, fechamento do modal |
+| `docs/PARIDADE-FUNCIONAL.md` | o item 3 da §8.8, com a medição repetível |
+| `docs/tasks/PAR-TASK-07.md` | nota posterior no Log, com os quatro mecanismos |

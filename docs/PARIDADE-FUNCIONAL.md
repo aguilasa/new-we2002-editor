@@ -929,7 +929,25 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       — **funciona nos dois sentidos**. Os arquivos exportados são
       **byte-idênticos** (41 e 40 bytes), e importar o mesmo `.b2002` alterado
       nos dois lados grava `OFS_FLAG_COLOURS+2` em ambos, com as imagens saindo
-      idênticas salvo a faixa conhecida
+      idênticas salvo a faixa conhecida.
+
+      **Remedido em 2026-08-31 pela
+      [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md)**, porque o roteiro que
+      sustentava este item era um falso verde: em quatro corridas idênticas ele
+      dava quatro resultados, nunca produzia o `.m2002`, e em duas delas saía
+      `gui: gravado` com a imagem `IDENTICAL` contra a original — não gravava e
+      dizia que sim. Com o roteiro consertado, **três corridas seguidas** dão os
+      dois arquivos nos dois lados, com os mesmos bytes entre corridas e entre
+      lados (`cmp` limpo), o golden sai
+      `OK: identico ao oraculo, exceto o slot 64 conhecido` e o controle
+      positivo do port dá **5 faixas / 41 bytes** — as não-idempotências, que é
+      a assinatura de que o `Save()` rodou. O `.b2002` do port, na íntegra:
+
+      ```text
+      00000000: 662e 6d2e 6261 6e64 00c3 0d82 89bd f718  f.m.band........
+      00000010: e359 8ef6 8dcb aedc 8ebd f7bd f7bd f7bd  .Y..............
+      00000020: f700 8000 8020 cd00 00                   ..... ...
+      ```
 
 > **A divergência deliberada da Fase 5 está medida na tela, e é a esperada.** No
 > id **56** (World All-Stars) o port **desabilita** as caixas de cor e o
