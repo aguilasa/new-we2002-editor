@@ -6,7 +6,7 @@ category: core
 projeto: newWe2002
 depends_on: ["PAR-TASK-04", "PAR-TASK-07"]
 fonte_de_verdade: "/docs/PARIDADE-FUNCIONAL.md §8.9"
-status: pendente
+status: bloqueado
 ---
 
 # PAR-TASK-08: Operações em massa
@@ -45,10 +45,11 @@ pedir nome latino legível, é ela; onde pedir kanji, a `japanese-shift-jis.bin`
 
 ## Itens a conferir
 
-- [ ] `CMD_SORT_RESERVES`  ← **não medido: exige MSVC** numa seleção e num clube (a ordem torta é a certa).
-      **O botão é invisível nos dois** — exige build de teste com o controle
-      visível dos dois lados; não commitar
-- [ ] Clube com 1 goleiro na reserva × com 2  ← **não medido: mesmo handler**
+- [ ] `CMD_SORT_RESERVES` numa seleção e num clube (a ordem torta é a certa)
+      ← **BLOQUEADO, encaminhado ao Windows.** O botão é invisível nos dois;
+      exige build de teste com o controle visível dos dois lados, e o lado
+      `ed.exe` pede MSVC com MFC estático. Não commitar a build
+- [ ] Clube com 1 goleiro na reserva × com 2  ← **BLOQUEADO, mesmo handler**
 - [x] `CMD_UPDATE_COSTS`
 - [x] `CMB_EDITALLLOOK`
 - [x] `CMB_EDITALLBARS` — conferir que 57..63 ficaram intactos
@@ -76,7 +77,8 @@ o oráculo, não contra o que parece ordenado.
 
 ## Log de Execução
 
-**Executado em:** 2026-09-01 — **PARCIAL: 3 de 5 fechados, 2 não mensuráveis nesta máquina.**
+**Executado em:** 2026-09-01 (itens 3-5) e 2026-08-31 (fechamento do estado) —
+**BLOQUEADA: 3 de 5 fechados, 2 encaminhados ao Windows.**
 (O item 4 fechou em 2026-09-01, pela CORR-WTE-133.)
 
 **Resumo:**
@@ -91,12 +93,57 @@ o oráculo, não contra o que parece ordenado.
 
 **Os dois não medidos, e por que não se inventou caminho.** O enunciado é
 explícito: *"se isso não for viável, o item fica registrado como não-medido,
-com a razão. Não invente medição por outro caminho."* O `.rc` confirma o
-`NOT WS_VISIBLE` (`CMD_CALCFORZA2`), e tornar o controle visível **no lado do
-`ed.exe`** exigiria editar o `.rc` e recompilar com MSVC + MFC estático, o que
-o `CLAUDE.md` registra como impossível aqui. O item 2 cai junto porque é o
-mesmo `OnSortReserves` — o comentário do handler descreve exatamente o caso de
-um goleiro só.
+com a razão. Não invente medição por outro caminho."* O item 2 cai junto com o
+1 porque é o mesmo `OnSortReserves` — o comentário do handler descreve
+exatamente o caso de um goleiro só.
+
+### Segunda passagem, 2026-08-31 — o bloqueio, medido e encaminhado
+
+A primeira passagem disse "exige MSVC" e parou aí. Conferido por ferramenta, o
+bloqueio é **mais forte do que se pensava**: o comando não é alcançável por
+usuário nenhum, em nenhum dos dois programas.
+
+| conferência | resultado |
+|---|---|
+| `ed.rc:370-371` | `PUSHBUTTON "sort reserve",CMD_CALCFORZA2,439,243,72,15,NOT WS_VISIBLE` |
+| `grep -an CALCFORZA legacy/mfc/*` | só o `ON_BN_CLICKED` (`edDlg.cpp:1287`) e o `#define` (`resource.h:320`) — **nenhum `ShowWindow`** |
+| tabela `ACCELERATORS` no `.rc` | **não existe** — não há caminho por teclado |
+| `ui_MainDialog.h:1131` | `CMD_SORT_RESERVES->setVisible(false);` |
+| `grep -rn CMD_SORT_RESERVES src/app/` | só o `connect` e o `.ui` — o port também nunca o mostra |
+| controles `NOT WS_VISIBLE` no diálogo principal | **6 de 248**, e os outros cinco são os campos extras de ML, que o `OnTeamSelected` mostra em runtime |
+
+Ou seja: a paridade **observável** está cumprida — o botão está escondido nos
+dois. O que não se pode medir é o comportamento de um comando que nenhum
+usuário dispara.
+
+**Encaminhado para o Windows**, onde o MSVC existe: a linha está escrita na
+seção "Bônus que só o Windows consegue" do
+[/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md), com os dois itens, as duas
+ressalvas (não commitar a build; o `ctest -R ui_forms` quebra) e a observação
+de que **uma das quatro divergências deliberadas da Fase 5 mora nesse
+handler** — o swap fora do array — e portanto nunca foi observada em execução.
+
+**E uma armadilha de ferramenta que quase inverteu a leitura:** `grep` no
+`ed.rc` **sem `-a`** não imprime nada. O arquivo é ISO-8859-1 e o grep o trata
+como binário; por um momento o `CMD_CALCFORZA2` pareceu ausente do `.rc`, o que
+teria sido um achado falso e grave (handler ligado a controle inexistente).
+Ele está lá, na linha 370.
+
+### Discrepância consertada nesta passagem
+
+A nota da §8.9 e o comentário do `8.9-update-bars.sh` diziam que um `Return`
+seco é *"inócuo no diálogo do original, que não tem `DEFPUSHBUTTON`"*. **É o
+contrário**: sem `DEFPUSHBUTTON` o Enter cai em `CDialog::OnOK` e **encerra o
+editor** — medido no item 4 da §8.10 ([CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)).
+
+O que torna o `Return` inócuo nesses roteiros é o **ponteiro**: ele acabou de
+clicar o botão da operação e continua sobre ele, e no Win32 um pushbutton com
+foco vira o default temporário — o `Return` re-clica esse botão, idempotente,
+em vez de alcançar o `IDOK`. As duas medições que estabelecem isso já existiam
+e diferem **só em onde o ponteiro estava**: a corrida verde do
+`8.9-update-bars.sh` e a sonda do item 4 da §8.10. A razão certa está agora nos
+dois sítios, e importa: mexer no `par_click` daquele roteiro sem mexer no
+`Return` pode fechar o oráculo antes de gravar.
 
 **O que se aprendeu, e custou três corridas erradas:**
 
@@ -121,7 +168,8 @@ código**: o legado abre `defaultlook.txt` por caminho relativo, lê a cópia
 gitignored de `Debug/`, e ela tinha 4 linhas diferentes da versionada. Cada
 lado gravava certo o que lia.
 
-A task fica aberta só pelos dois itens que exigem MSVC.
+A task fica **bloqueada** pelos dois itens que exigem MSVC, e o destino deles
+está escrito no `PLAN-WINDOWS.md` — não só neste Log.
 
 **Arquivos criados/modificados:**
 

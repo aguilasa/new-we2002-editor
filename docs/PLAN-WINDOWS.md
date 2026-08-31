@@ -449,6 +449,33 @@ oportunidade real de varrer 198 `strcpy` e 8.456 linhas de código de 2002 em
 busca de estouro. Não é obrigatório para fechar a fase, mas é o item de maior
 retorno da lista — e é *aqui* ou em lugar nenhum.
 
+**Os dois itens de `CMD_SORT_RESERVES` da §8.9 também são daqui.** A
+[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) ficou **bloqueada no Linux** com 3 de
+5 itens medidos, e os dois que faltam são:
+
+1. `CMD_SORT_RESERVES` numa seleção e num clube — a ordem torta é a certa, e o
+   port reproduz o *bubble sort* do original de propósito
+   ([src/app/Commands.cpp](../src/app/Commands.cpp), `OnSortReserves`)
+2. clube com **1** goleiro na reserva × com **2** — mesmo handler; com um só, as
+   duas últimas vagas trocam
+
+O bloqueio é de ferramenta, e só o Windows o resolve: o botão é
+`NOT WS_VISIBLE` nos dois editores (`legacy/mfc/ed.rc:370`, e o `.ui` gerado
+traz `CMD_SORT_RESERVES->setVisible(false)`), não há tabela `ACCELERATORS` no
+`.rc`, e `CMD_CALCFORZA2` aparece **só** no message map e no `resource.h` —
+nenhum `ShowWindow`. Ou seja, **nenhum usuário alcança o comando em nenhum dos
+dois programas**, e para exercitá-lo é preciso tornar o controle visível **dos
+dois lados**. O lado Qt é uma linha; o lado `ed.exe` exige editar o `.rc` e
+recompilar com **MSVC + MFC estático**, que não existe na máquina Linux.
+
+Duas ressalvas para quem for fazer:
+
+- **Não commitar a build de teste.** Ela quebra a fidelidade e o
+  `ctest -R ui_forms`, que regenera os `.ui` do `ed.rc` e compara.
+- **Uma das quatro divergências deliberadas da Fase 5 mora nesse handler** — o
+  swap fora do array. Ela nunca foi observada em execução, justamente porque o
+  botão não é alcançável; medir estes dois itens é o que a tira do papel.
+
 ---
 
 ## 7. Empacotamento

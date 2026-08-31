@@ -1009,17 +1009,28 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 
 ### 8.9 Operações em massa
 **Três de cinco medidos em 2026-09-01** pela
-[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md); dois não são mensuráveis nesta
-máquina. Roteiros em `tools/par/8.9-*.sh`.
+[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md), que ficou **bloqueada no Linux**: os
+outros dois exigem MSVC e foram **encaminhados para o Windows**, na seção
+"Bônus que só o Windows consegue" do
+[/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md). Roteiros em
+`tools/par/8.9-*.sh`.
 
-- [ ] `CMD_SORT_RESERVES` numa seleção e num clube (a ordem torta é a certa).
-      **O botão é invisível nos dois** — exige build de teste com o controle
-      visível dos dois lados; não commitar. **Não medido:** o `.rc` confirma o
-      `NOT WS_VISIBLE`, e tornar o controle visível no `ed.exe` exige MSVC com
-      MFC estático, que não existe nesta máquina
-- [ ] Clube com 1 goleiro na reserva × com 2 — **não medido pela mesma razão**:
+- [ ] `CMD_SORT_RESERVES` numa seleção e num clube (a ordem torta é a certa) —
+      **bloqueado, encaminhado.** O comando é **inalcançável por qualquer
+      usuário nos dois programas**, e isso foi conferido por ferramenta em
+      2026-08-31: `ed.rc:370` declara `NOT WS_VISIBLE`, o `.ui` gerado emite
+      `CMD_SORT_RESERVES->setVisible(false)`, o `.rc` **não tem tabela
+      `ACCELERATORS`**, e `CMD_CALCFORZA2` aparece só no message map e no
+      `resource.h` — nenhum `ShowWindow`. Exercitá-lo exige tornar o controle
+      visível **dos dois lados**, e o lado `ed.exe` pede MSVC com MFC estático
+- [ ] Clube com 1 goleiro na reserva × com 2 — **bloqueado pela mesma razão**:
       é o mesmo `OnSortReserves`, cujo comentário descreve justamente o caso de
       um goleiro só (as duas últimas vagas trocam)
+
+> **Uma das quatro divergências deliberadas da Fase 5 mora nesse handler** — o
+> swap fora do array — e portanto **nunca foi observada em execução**. Não é
+> defeito: é consequência de o botão não ser alcançável. Vale saber ao ler a
+> lista de divergências como se todas tivessem sido vistas na tela.
 - [x] `CMD_UPDATE_COSTS` — golden `OK`
 - [x] `CMB_EDITALLLOOK` — reprovou na primeira medição (92 bytes em quatro
       faixas de `OFS_PLAYER_ATTR`), e a
@@ -1034,8 +1045,18 @@ máquina. Roteiros em `tools/par/8.9-*.sh`.
 > **Nem toda operação em massa abre `"Operation done!"`, e os dois lados não
 > concordam sobre isso.** O `CMD_UPDATE_COSTS` abre nos dois; o
 > `CMB_EDITALLBARS` abre **só no port** (uma caixa de 126×100) e não no
-> `ed.exe`. Um `Return` seco resolve os dois casos — fecha a `QMessageBox` e é
-> inócuo no diálogo do original, que não tem `DEFPUSHBUTTON`.
+> `ed.exe`. Um `Return` seco resolve os dois casos — mas **não pela razão que
+> esta nota deu até 2026-08-31**, e a razão errada era perigosa.
+>
+> Dizia-se "inócuo no diálogo do original, que não tem `DEFPUSHBUTTON`". É o
+> contrário: **sem `DEFPUSHBUTTON` o Enter cai em `CDialog::OnOK` e encerra o
+> editor** (§8.10 item 4, [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)). O que
+> torna o `Return` inócuo nestes roteiros é o **ponteiro**: ele acabou de
+> clicar o botão da operação e continua sobre ele, e no Win32 um pushbutton com
+> foco vira o default temporário — o `Return` re-clica esse botão, que é
+> idempotente, em vez de alcançar o `IDOK`. As duas medições que estabelecem
+> isso são a corrida verde do `8.9-update-bars.sh` e a sonda do item 4 da §8.10,
+> que diferem **só em onde o ponteiro estava**.
 >
 > **O que não serve é o `dispensa_modal`** do roteiro da §8.2 quando não há
 > caixa: sob Wine os controles do MFC são janelas X de verdade, e vários caem
