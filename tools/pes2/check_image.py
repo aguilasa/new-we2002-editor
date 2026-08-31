@@ -30,6 +30,8 @@ import iso                                                   # noqa: E402
 import tables                                                # noqa: E402
 import faq_check                                             # noqa: E402
 import diff_releases                                         # noqa: E402
+import team_map                                              # noqa: E402
+import player_map                                            # noqa: E402
 import memcard                                               # noqa: E402
 
 SKIP = 77
@@ -58,6 +60,12 @@ def main():
 
     print("\n== tables (plan 1.6) ==")
     bad += tables.cmd(Args(image=image, check=True, dump=None, verbose=False))
+
+    print("\n== the five team-name lists, aligned (plan 6.1) ==")
+    bad += team_map.main([image, "--check"])
+
+    print("\n== the two player-name tables (plan 1.5, 3.3) ==")
+    bad += player_map.main([image, "--check"])
 
     print("\n== docs/PES2-NOMES.md against the disc ==")
     bad += faq_check.main(["--image", image])

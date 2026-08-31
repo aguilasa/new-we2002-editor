@@ -99,6 +99,14 @@ def build(path):
     return files
 
 
+def _points_at(fd, path):
+    """Whether /proc/self/fd/<fd> is an open handle on `path`."""
+    try:
+        return os.readlink(f"/proc/self/fd/{fd}") == path
+    except OSError:
+        return False
+
+
 def check(label, condition, detail=""):
     print(f"  {'ok  ' if condition else 'FAIL'} {label}"
           f"{'  -- ' + detail if detail and not condition else ''}")
@@ -183,19 +191,38 @@ def main():
     bad += check("and none of the three wrote a byte",
                  open(path, "rb").read() == original)
 
-    # A failed open must not leave the descriptor behind. Note what this
-    # can and cannot prove: under CPython the unbound file object is
-    # collected the moment the exception unwinds, so this stays green even
-    # without the explicit close in Image.__init__. It is here to catch the
-    # loud version of the bug -- a descriptor still open after the failure
-    # -- not to stand in for reading the code.
+    # A failed open must not leave the descriptor behind.
+    #
+    # Getting this to actually test something took a second try. Simply
+    # calling Image() on a bad file and counting descriptors afterwards
+    # stays green either way: the unbound file object has no reference
+    # left once the exception unwinds, so CPython closes it for us and the
+    # explicit close in Image.__init__ never shows. Keeping the traceback
+    # alive keeps the frame alive, and the frame is what holds `self` --
+    # so with the traceback in hand the descriptor is still open if
+    # nothing closed it on purpose.
     truncated = os.path.join(tmp, "truncated.bin")
     with open(truncated, "wb") as fh:
         fh.write(b"\x00" * (RAW_SECTOR + 7))
-    before = len(os.listdir("/proc/self/fd"))
-    bad += check("a bad image raises", raises(ValueError, Image, truncated))
-    bad += check("and does not leak the descriptor",
-                 len(os.listdir("/proc/self/fd")) == before)
+
+    def open_bad_keeping_traceback():
+        try:
+            Image(truncated)
+        except ValueError:
+            return sys.exc_info()[2]        # frames stay alive with it
+        return None
+
+    tb = open_bad_keeping_traceback()
+    bad += check("a bad image raises", tb is not None)
+    # Scan by target path, not by fd number. Diffing the set of numbers
+    # before and against after misses it: the leaked descriptor lands on a
+    # low number that was already in use earlier in this run, so the set
+    # difference is empty while the file is still open.
+    leaked = [fd for fd in os.listdir("/proc/self/fd")
+              if _points_at(fd, truncated)]
+    bad += check("and closes the descriptor even with the frames alive",
+                 not leaked, f"still open: {leaked}")
+    del tb
 
     os.remove(path)
     os.remove(truncated)

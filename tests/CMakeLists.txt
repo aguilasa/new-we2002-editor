@@ -105,3 +105,16 @@ if(Python3_FOUND)
         SKIP_RETURN_CODE 77
         TIMEOUT 600)
 endif()
+
+# Booting the game is a third cost bracket: it needs DuckStation, an X
+# display and about ninety seconds of wall clock. Registered anyway, on the
+# same terms as the golden tests -- it skips itself unless PES2_IMAGE names
+# a working copy, so a machine without the emulator sees a skip and not a
+# failure. Never runs in CI, for the same reason golden does not.
+if(UNIX)
+    add_test(NAME pes2_boot
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/boot_check.sh)
+    set_tests_properties(pes2_boot PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 600)
+endif()
