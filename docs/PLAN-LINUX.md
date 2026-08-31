@@ -966,7 +966,9 @@ argumento e pula o `QFileDialog`. O original não tinha argumento nenhum.
 
 #### Divergências deliberadas
 
-Além do slot 64 herdado da Fase 3, quatro:
+Além do slot 64 herdado da Fase 3, quatro da própria Fase 5 e uma decidida
+depois, em 2026-08-31, pela paridade de tela
+([PAR-TASK-09](/docs/tasks/PAR-TASK-09.md)):
 
 - **`editFromFIFA` terminava com `costo = CalcolaCostoGiocatore(i)`**, onde `i`
   era o contador que sobrou da varredura de posições — sempre 8. Todo jogador
@@ -990,6 +992,15 @@ Além do slot 64 herdado da Fase 3, quatro:
   na borda: o `OnInitDialog` desabilitava as caixas para 57..63 e o
   import/export recusava 56..63. 56 é a World All-Stars, que também não tem
   bandeira própria, então o teste mais largo é o certo.
+- **Cancelar o diálogo de abertura encerra o port; o original fica de pé com o
+  diálogo principal vazio.** `OnInitDialog` faz `return FALSE`
+  (`legacy/mfc/edDlg.cpp:1331`), e em MFC esse retorno **não fecha diálogo** —
+  só diz que o foco já foi tratado, e nenhum `EndDialog` é chamado. O `ed.exe`
+  segue com o combo de times sem itens, os campos em branco e `Write into CD
+  image` clicável. O port encerra depois do mesmo aviso. Decidido em 2026-08-31
+  ([CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)): botão de gravar clicável sem
+  imagem carregada é pior que nenhuma janela, e o que o original faz nesse
+  clique nunca foi medido. Não muda byte — os dois avisam igual antes.
 
 #### O que não foi portado, e por quê
 

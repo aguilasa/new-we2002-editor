@@ -37,8 +37,15 @@ int main(int argc, char** argv) {
     const QString image = (args.size() > 1) ? args.at(1) : QString();
 
     MainWindow window;
-    // The original asked for the image inside OnInitDialog and bailed out of
-    // the dialog if the user cancelled. Same order here: no image, no window.
+    // The original asked for the image inside OnInitDialog too, but it did not
+    // bail out: `return FALSE` there (legacy/mfc/edDlg.cpp:1331) only tells MFC
+    // that the focus was already handled -- it does not end the dialog, and no
+    // EndDialog is called. Cancelling leaves ed.exe standing with the whole
+    // main dialog empty and `Write into CD image` still clickable.
+    //
+    // Exiting instead is a deliberate divergence: a save button with no image
+    // loaded is worse than no window. See PARIDADE-FUNCIONAL.md section 6 and
+    // docs/tasks/CORR-WTE-140.md.
     if (!window.OpenImage(image)) {
         return 1;
     }

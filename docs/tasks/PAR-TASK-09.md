@@ -94,9 +94,11 @@ original carrega assim mesmo, e o port tem de carregar também.
 "deu certo".** É "eu mesmo cuidei do foco". O `return FALSE` do
 `legacy/mfc/edDlg.cpp:1331` não fecha diálogo nenhum — quem fecharia é
 `EndDialog`, que não é chamado —, e o `ed.exe` segue de pé com a janela inteira
-vazia. O `main.cpp` do port tem um comentário afirmando o contrário
+vazia. O `main.cpp` do port tinha um comentário afirmando o contrário
 ("bailed out of the dialog if the user cancelled"), escrito por quem leu o
-`BOOL` como aborto. As duas divergências desta seção saem daí e de uma prima:
+`BOOL` como aborto — corrigido em 2026-08-31 pela
+[CORR-WTE-140](/docs/tasks/CORR-WTE-140.md), que também registrou o
+encerramento do port como divergência deliberada. As duas divergências desta seção saem daí e de uma prima:
 no item 4, `CDialog::OnOK` é o destino do Enter num diálogo sem
 `DEFPUSHBUTTON`, e ele encerra o editor.
 

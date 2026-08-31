@@ -493,9 +493,12 @@ clique, mesmo efeito.
 
 ## 6. Divergências deliberadas
 
-Cinco já registradas nas fases, mais uma levantada agora. **Nenhuma altera os
-bytes gravados na imagem** — as quatro primeiras porque não tocam regiões de
-disco no fluxo dos golden tests, a última porque só afeta o arquivo lateral.
+Cinco registradas nas fases, uma levantada pelo inventário, e uma decidida em
+2026-08-31 pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) — a de ciclo de vida,
+que a §8.10 mediu. **Nenhuma altera os bytes gravados na imagem**: as quatro
+primeiras porque não tocam regiões de disco no fluxo dos golden tests, a sexta
+porque só afeta o arquivo lateral, e a sétima porque decide **quando a janela
+existe**, não o que ela grava.
 
 | # | O que o original fazia | O que o port faz | Por quê |
 |---|---|---|---|
@@ -505,6 +508,7 @@ disco no fluxo dos golden tests, a última porque só afeta o arquivo lateral.
 | 4 | ~~Nunca gravava o `<imagem>_url.txt`~~ — **registro errado, corrigido em 2026-08-05**: `OnWriteCD` grava o sidecar desde sempre (`legacy/mfc/edDlg.cpp:6207-6214`) | o `Database::Save()` gerado grava igual; o `MainWindow::SaveUrls()` que a Fase 5 acrescentou só reescreve o mesmo arquivo com o mesmo conteúdo, e está desligado junto com o resto do SoFIFA | não havia divergência. A Fase 5 do PLAN-LINUX registrou o contrário e foi corrigida |
 | 5 | `graf` tinha **dois** testes de "tem bandeira própria" que discordavam na borda (56) | um só: `id>0 && id!=69 && id!=86 && (id<56 \|\| id>63)` | 56 é a World All-Stars, que também não tem bandeira própria |
 | 6 | `EN_CHANGE` das 23 caixas de URL dispara também no `SetWindowText` da carga, então **trocar de time regravava a URL** — e para as all-star (55/56) escrevia a URL do jogador ligado por link no jogador do slot aritmético, que é outro | `textEdited`: só grava quando o usuário digita | levantado em 2026-08-05. Invisível no original porque ele nunca salvava o arquivo de URLs; no port, que salva, reproduzir isso corromperia o `_url.txt` ao navegar |
+| 7 | Cancelar o diálogo de abertura **não fecha o editor**: `OnInitDialog` faz `return FALSE` (`legacy/mfc/edDlg.cpp:1331`), que em MFC só diz que o foco já foi tratado — sem `EndDialog`, o `ed.exe` fica de pé com o diálogo principal inteiro e vazio, e com `Write into CD image` clicável | **encerra** depois do aviso `Impossible editing without CD image !` | decidido em 2026-08-31, [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md). Botão de gravar clicável sem imagem carregada é pior que nenhuma janela, e o que o original faria nesse clique nunca foi medido. Não grava byte: os dois avisam igual antes |
 
 ---
 
@@ -1045,7 +1049,9 @@ máquina. Roteiros em `tools/par/8.9-*.sh`.
 2026-08-31. **Três concordam e dois divergem** — e os dois que divergem são de
 ciclo de vida, não de dado: nenhuma das duas divergências grava byte nenhum.
 Rendeu duas CORRs, a [140](/docs/tasks/CORR-WTE-140.md) e a
-[141](/docs/tasks/CORR-WTE-141.md), as duas esperando **decisão**, não conserto.
+[141](/docs/tasks/CORR-WTE-141.md) — as duas pediam **decisão**, não conserto. A
+140 está decidida (o port mantém o encerramento, §6 linha 7); a 141 segue
+esperando.
 
 Dois roteiros são hooks de golden (`tools/par/8.10-reload-descarta.sh` e
 `8.10-return-nao-dispara.sh`) e dois rodam sozinhos
@@ -1059,7 +1065,10 @@ gravando.
       branco, `Write into CD image` clicável) e o port **encerra**. A causa é uma
       armadilha de MFC: `OnInitDialog` faz `return FALSE`
       (`legacy/mfc/edDlg.cpp:1331`), e esse retorno **não fecha diálogo** — só
-      diz que o foco já foi tratado. [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)
+      diz que o foco já foi tratado. **Decidido em 2026-08-31: o port mantém o
+      encerramento**, registrado como divergência deliberada (§6, linha 7) —
+      janela com `Write into CD image` clicável e sem imagem carregada é pior
+      que nenhuma janela. [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)
 - [x] Abrir arquivo com tamanho errado → aviso, e carrega — **concordam.** Os
       dois avisam `Not WE2002 CD image (474.431.328 bytes)!` e carregam assim
       mesmo; no legado a linha que abortaria está comentada
