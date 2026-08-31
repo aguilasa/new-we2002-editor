@@ -427,6 +427,13 @@ leitura. Arquivos antigos continuam legíveis.
 > arquivo**. Defeito de recompilação do oráculo, não do formato. O `ed.exe`
 > **aceita** o arquivo de 52 bytes do port — medido em
 > [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
+>
+> **Mas aceitar não é ler direito.** Ele passa na conferência de tamanho e
+> decodifica com o vptr de 8 bytes, 4 adiante do lugar certo: importando o
+> mesmo arquivo, o port grava `PARIMP` no nome do preset e o `ed.exe` grava
+> `MP` seguido de bytes de papel. Medido na
+> [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md), com controle positivo dos dois
+> lados; a §8.7 traz as faixas.
 
 ### 4.4 `graf` → `FlagKitDialog` (50 `ON_*`)
 

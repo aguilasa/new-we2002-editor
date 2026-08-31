@@ -1017,6 +1017,12 @@ Os 4 bytes são os do fonte original, que é de 32 bits, e o arquivo tem 52 byte
 exporta 56 e recusa o próprio arquivo; ele **aceita** o de 52 do port. Medido
 na [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
 
+**Aceitar não é ler direito**, e a diferença só apareceu quando os dois lados
+importaram o mesmo arquivo com controle positivo: o `ed.exe` passa na
+conferência de tamanho e então decodifica com o vptr de 8 bytes do próprio
+binário, **4 bytes adiante do lugar certo** — grava `MP` mais bytes de papel
+onde o port grava `PARIMP`. [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md).
+
 Ainda não portado, e conhecido: o `ed.exe` mostra o ícone quando minimizado
 (`OnPaint`) e tem um item "About" no menu de sistema. Nenhum dos dois existe em
 Qt sem trabalho específico e nenhum edita a imagem.
