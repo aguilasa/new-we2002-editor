@@ -55,6 +55,7 @@ Two details of the C that a careless port loses:
 """
 
 import argparse
+import collections
 import os
 import struct
 import sys
@@ -73,10 +74,25 @@ RAM_HI = 0x80200000
 
 BIN_DIR = "/BIN/"
 
-# The largest block any container on these discs decompresses to is 16 KiB.
-# The cap exists for the resync scan, where a wrong offset can decode into
-# a plausible-looking stream forever.
+# The largest block measured on these discs is 16.725 B -- japanese-shift-jis;
+# 16.676 in both PES2 releases, 16.501 in the European Deluxe -- and five to
+# seven blocks per disc pass 16 KiB. The 256 KiB here is deliberate slack over
+# that, not a measurement: the cap exists for the resync scan, where a wrong
+# offset can decode into a plausible-looking stream forever. `--sizes`
+# reprints the distribution, so the next change to it need not be guessed.
+#
+# (This comment claimed "the largest block is 16 KiB" until 2026-09-01, which
+# was never measured and is false by 341 bytes.)
 PROBE_CAP = 1 << 18
+
+# A decode shorter than this is not reported as a block. Three bytes of any
+# file "decompress" to one byte somewhere, so the resync scan needs a floor
+# -- but the floor is what separates the `none` verdict from `whole`, and it
+# was chosen by plausibility. Measured 2026-09-01 over the four discs: the
+# smallest real block is **1.152 B**, the same on all four, so the margin
+# under this floor is **128 bytes**. A real 1 KiB block on a fifth disc would
+# drop out of the count in silence and take its container to `none`.
+MIN_BLOCK = 1024
 
 
 # What each disc is measured to hold, keyed on its container count -- the
@@ -316,7 +332,7 @@ def stream_start(data):
     return 4 * len(header_words(data))
 
 
-def scan(data, start=None, minimum=1024):
+def scan(data, start=None, minimum=MIN_BLOCK):
     """Every LZSS stream in a container, found by decoding and resyncing.
 
     Streams are 4-byte aligned and separated by gaps this task does not
@@ -325,7 +341,8 @@ def scan(data, start=None, minimum=1024):
     decodes, and reports what it covered.
 
     `minimum` rejects the short accidental decodes: three bytes of any
-    file will "decompress" to one byte somewhere.
+    file will "decompress" to one byte somewhere. It also *defines* the
+    `none` verdict -- see `MIN_BLOCK` for what the number is worth.
     """
     if start is None:
         start = stream_start(data)
@@ -423,6 +440,7 @@ def one(args, image, grand):
               f"in {BIN_DIR}")
         tally = {"whole": 0, "partial": 0, "none": 0}
         blocks_total = raw_total = comp_total = 0
+        sizes = []
         bad = 0
         for path in paths:
             data = img.read_file(path)
@@ -430,6 +448,7 @@ def one(args, image, grand):
             verdict, blocks, leftover = classify(data)
             tally[verdict] += 1
             blocks_total += len(blocks)
+            sizes += [b[2] for b in blocks]
             raw_total += sum(b[2] for b in blocks)
             comp_total += sum(b[1] for b in blocks)
             if args.file or args.verbose:
@@ -454,6 +473,16 @@ def one(args, image, grand):
               f"not LZSS {tally['none']}   (of {len(paths)})")
         print(f"  {blocks_total} block(s), {comp_total} B compressed -> "
               f"{raw_total} B plain")
+
+        if args.sizes and sizes:
+            counted = collections.Counter(sizes)
+            print(f"  block sizes: min {min(sizes)}  max {max(sizes)}  "
+                  f"over 16 KiB {sum(1 for x in sizes if x > 16384)}  "
+                  f"(MIN_BLOCK {MIN_BLOCK}, margin {min(sizes) - MIN_BLOCK} B; "
+                  f"PROBE_CAP {PROBE_CAP})")
+            print("  most common: "
+                  + ", ".join(f"{v}x{k}" for k, v in counted.most_common(6)))
+
         for key in ("whole", "partial", "none"):
             grand[key] += tally[key]
         grand["files"] += len(paths)
@@ -501,6 +530,9 @@ def main(argv=None):
     ap.add_argument("-v", "--verbose", action="store_true")
     ap.add_argument("--roundtrip", action="store_true",
                     help="assert decompress(compress(x)) == x on every block")
+    ap.add_argument("--sizes", action="store_true",
+                    help="print the block-size distribution, which is what "
+                         "justifies MIN_BLOCK and PROBE_CAP")
     ap.add_argument("--check", action="store_true",
                     help="assert the block-literal opcode, and the measured "
                          "verdict and block counts of a disc on record")

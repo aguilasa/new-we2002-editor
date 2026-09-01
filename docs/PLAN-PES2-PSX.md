@@ -702,9 +702,15 @@ Os três verdictos, como a ferramenta os define:
   (a) nomeia. O codec lê o arquivo, e a regra de largura acha a porta.
 - **parcial** — há fluxo, mas não onde o cabeçalho diz. São sempre os mesmos
   três, `GDC_AD`, `GDC_AN` e `GDC_BN`: estádios, que a (d) já põe fora.
-- **não é LZSS** — nada decodifica em lugar nenhum. São 33 por disco, **a
-  mesma lista nos quatro**: os 17 `GRDM_*` e o `MODEL.BIN` (estádios e malha,
-  fora por (d)), `ANIME`, `DEMODATA`, `EDT_MOD`, `ENDANIME`, e **onze
+- **não é LZSS** — nada decodifica **para um bloco de 1 KiB ou mais**, em
+  offset nenhum. O limiar é o `MIN_BLOCK` da ferramenta, e é ele que separa
+  este verdicto do primeiro: com 64 em vez de 1024, *todo* arquivo desta
+  lista produz bloco. Medido em 2026-09-01 sobre os quatro discos, o menor
+  bloco real tem **1.152 B** — nos quatro —, de modo que a **margem sob o
+  limiar é de 128 bytes**; `lzss.py --sizes` reimprime a distribuição.
+  São 33 por disco, **a mesma lista nos quatro**: os 17 `GRDM_*` e o
+  `MODEL.BIN` (estádios e malha, fora por (d)), `ANIME`, `DEMODATA`,
+  `EDT_MOD`, `ENDANIME`, e **onze
   `CG*.BIN`** — estes últimos são o achado que a
   [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) tem de explicar, porque a
   §5 Fase 10 do `PLAN-FEATURES` contava com eles como contêiner gráfico.

@@ -3,7 +3,7 @@ id: CORR-PES2-010
 title: "Correção: as duas constantes do `scan` do `lzss.py` — uma decide todo verdicto com 128 B de margem, a outra é justificada por um número errado"
 type: correção
 category: formato
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -99,19 +99,58 @@ margem de 128 B registrada — é ela que diz quanto o número aguenta.
 
 ## Verificação
 
-- [ ] as quatro contagens da §1.14(e) continuam idênticas depois da mudança
+- [x] as quatro contagens da §1.14(e) continuam idênticas depois da mudança
       (208/172/3/33/2.153 e as outras três linhas)
-- [ ] a ferramenta imprime o menor e o maior bloco medidos, e os dois batem
+- [x] a ferramenta imprime o menor e o maior bloco medidos, e os dois batem
       com 1.152 e 16.676 em `(EsIt)`
-- [ ] `lzss.py --check` verde nos quatro discos
-- [ ] `roms/` intocada
+- [x] `lzss.py --check` verde nos quatro discos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** O `1024` virou `MIN_BLOCK`, com o número que o
+justifica no comentário e a consequência escrita: é ele que **define** o
+verdicto `none`, e a margem sob ele é de 128 B. O comentário do `PROBE_CAP`
+passou a dizer o valor medido e a admitir, em uma linha, o que afirmava
+antes. Entrou `--sizes`, que reimprime a distribuição por disco — o ponto é
+que a próxima medição não precise de script descartável:
 
-**Problemas encontrados:**
+```
+block sizes: min 1152  max 16676  over 16 KiB 5  (MIN_BLOCK 1024, margin 128 B; PROBE_CAP 262144)
+```
+
+**As quatro contagens não mudaram:** 208/172/3/33/2.153, 210/174/3/33/2.195,
+177/141/3/33/1.842, 195/159/3/33/2.027, `CHECK OK` nos quatro.
+
+**Problemas encontrados.** Dois, os dois por medir o que a CORR afirmava de
+um disco só:
+
+1. **O maior bloco do conjunto não é 16.676 — é 16.725**, na
+   `japanese-shift-jis`, que também tem **sete** blocos acima de 16 KiB
+   contra cinco das outras três (a European Deluxe vai a 16.501). A CORR mediu
+   só `(EsIt)`. O comentário do `PROBE_CAP` traz os quatro; o teto de 256 KiB
+   continua folgado por qualquer um deles.
+2. **O item opcional não tem instância nos quatro discos, e por isso ficou de
+   fora.** Ele propõe aceitar um bloco abaixo do limiar quando ele está no
+   offset que o cabeçalho nomeia. Medido: dos 36 contêineres não-`whole` de
+   `(EsIt)`, **zero** decodificam qualquer coisa no offset do cabeçalho — eles
+   levantam `LzssError` ali, não um bloco curto. O ramo não teria caso em
+   disco nenhum que temos, e um ramo sem caso é o que a CORR-PES2-005 acabou
+   de consertar noutro lugar. O buraco que ele mira — bloco real de 1 KiB num
+   quinto disco — fica coberto pela outra metade da correção: a margem de
+   128 B agora está escrita nos dois lugares, e o `--sizes` a reimprime.
+
+O menor bloco, esse sim, é **1.152 nos quatro discos** — a margem de 128 B
+não é de uma amostra.
+
+**Gates.** `lzss.py --check --sizes` nos quatro discos: `CHECK OK` × 4,
+exit 0, contagens idênticas às da §1.14(e). `--roundtrip` no disco tocado:
+**2153/2153 OK**. `check_tasks.py` 82 tasks ok. Todos os números do doc saíram
+da ferramenta. `roms/` intocada.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/lzss.py`
+- `docs/PLAN-PES2-PSX.md`
