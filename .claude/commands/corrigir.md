@@ -22,7 +22,8 @@ primeira `[ ]` em `correcoes-progresso.md`".
 
 2. **Escopo de arquivo.** Abra **só** o `CORR-<PREFIXO>-XXX.md` selecionado. Não
    leia os outros, mesmo apontando para o mesmo gerador ou o mesmo formulário.
-   E nunca execute `WTE-TASK-XX` por aqui — isso é do `/executar`.
+   E nunca execute uma tarefa (`<PREFIXO>-TASK-XX`) por aqui — isso é do
+   `/executar`.
 
 3. **Reproduzir a evidência antes de corrigir.** Rode o comando da seção
    "Evidência" e confira que o sintoma ainda existe. Se não bater, **pare e
@@ -54,7 +55,7 @@ primeira `[ ]` em `correcoes-progresso.md`".
    fechar. O `.claude/` está aí porque estes wrappers repetem o mesmo rito com
    outras palavras, e já ficaram para trás de uma mudança de processo uma vez.
    Registrar no Log e seguir não vale: quem lê o doc errado amanhã não lê o seu
-   Log. O limite continua sendo `WTE-TASK` e implementação de handler, que não
+   Log. O limite continua sendo `<PREFIXO>-TASK` e implementação de handler, que não
    são deste comando.
 
 8. **Se tocar `src/core/`, o projeto irmão tem de continuar verde.** O

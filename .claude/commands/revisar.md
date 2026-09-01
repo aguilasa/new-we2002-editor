@@ -11,7 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 Se `$ARGUMENTS` estiver preenchido, trate como a tarefa a revisar (ex.:
-`WTE-TASK-04`). Argumento vazio significa "a última `✅ Concluído` do
+`PES2-TASK-04`, com o prefixo que o `progresso.md` declarar). Argumento vazio
+significa "a última `✅ Concluído` do
 `progresso.md` com a coluna **"Revisado em"** ainda em `⬜ pendente`".
 
 ## O que este comando garante

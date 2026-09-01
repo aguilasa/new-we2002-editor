@@ -5,7 +5,11 @@ reversa do editor do Obocaman, C++Builder 6 / Win32, e reimplementação em
 Object Pascal sobre Lazarus/LCL no Linux), localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
-- **Arquivo de progresso:** `docs/tasks/progresso.md`
+- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+  task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
+  antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
+  o deduza do que este prompt escreve como exemplo nem de citação a task
+  antiga.
 - **Tarefas detalhadas:** `docs/tasks/`
 - **Fonte de verdade:** **a que a própria task declarar** no campo
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
@@ -40,7 +44,8 @@ nenhuma outra.** Tudo o mais continua valendo palavra por palavra:
 Em dúvida sobre qualquer ponto não coberto aqui, o `01-executar.md` é a fonte.
 
 > **EXCLUSÃO OBRIGATÓRIA — sem CORRs:**
-> Este prompt é exclusivo para `WTE-TASK-XX`. **Nunca** execute uma correção
+> Este prompt é exclusivo para `<PREFIXO>-TASK-XX`, com o prefixo que o
+> `progresso.md` declarar. **Nunca** execute uma correção
 > (`CORR-<PREFIXO>-XXX`, com o prefixo que o `correcoes-progresso.md` declarar)
 > por aqui — elas são do `03-corrigir.md` / `04-corrigir-tudo.md` e rastreadas
 > em `correcoes-progresso.md`.
@@ -65,7 +70,7 @@ Em dúvida sobre qualquer ponto não coberto aqui, o `01-executar.md` é a fonte
 | --- | --- |
 | vazio | **2** tarefas — as duas próximas prontas |
 | só dígitos (`3`) | esse número de tarefas |
-| IDs (`WTE-TASK-03 WTE-TASK-05`) | esse conjunto, ainda em ordem de dependência |
+| IDs (`<PREFIXO>-TASK-03 <PREFIXO>-TASK-05`) | esse conjunto, ainda em ordem de dependência |
 | `--plano` | pare depois da fase 0 e entregue só o plano |
 | número **e** IDs juntos | **erro** — pergunte ao usuário qual dos dois vale |
 
@@ -260,7 +265,7 @@ Depois do commit daquela tarefa, e para ela só:
   (`git log -1 --date=short --pretty=%ad`), formato `AAAA-MM-DD`. Num lote as
   tarefas podem cair em dias diferentes: a data é **por tarefa**, nunca a do
   fechamento do lote;
-- célula do ID como link `[WTE-TASK-XX](/docs/tasks/XX-nome.md)` — sempre
+- célula do ID como link `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome.md)` — sempre
   `/docs/` + caminho do arquivo, ver `.claude/rules/links.md`;
 - **"Revisado em"** de `—` para `⬜ pendente`. **Não escreva data aí** — quem
   revisa é o `/revisar`, em invocação separada;

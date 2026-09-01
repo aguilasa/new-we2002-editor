@@ -5,7 +5,11 @@ reversa do editor do Obocaman, C++Builder 6 / Win32, e reimplementação em
 Object Pascal sobre Lazarus/LCL no Linux), localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
-- **Arquivo de progresso:** `docs/tasks/progresso.md`
+- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+  task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
+  antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
+  o deduza do que este prompt escreve como exemplo nem de citação a task
+  antiga.
 - **Fonte de verdade:** **a que a própria task declarar** no campo
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
   nome, e não deve passar a conhecer — ver "A fonte de verdade mora na task"
@@ -335,7 +339,7 @@ Se concluída:
   de commit, não data de hoje — quem lê o histórico depois cruza a tabela com o
   `git log`
 - Conferir que a célula do ID é **link para o markdown da tarefa**, no formato
-  `[WTE-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)` — **sempre no formato
+  `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)` — **sempre no formato
   `/docs/` + caminho do arquivo**, nunca relativo, como manda
   `.claude/rules/links.md`. Linha de tabela sem link é defeito,
   mesmo em linha pendente

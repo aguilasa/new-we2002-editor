@@ -57,7 +57,8 @@ mais.
 > mesmo arquivo.
 >
 > **EXCLUSÃO OBRIGATÓRIA 3 — sem tasks:**
-> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute `WTE-TASK-XX`
+> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute uma
+> tarefa (`<PREFIXO>-TASK-XX`, com o prefixo que o `progresso.md` declarar)
 > por aqui — elas são do `prompts/01-executar.md` e rastreadas em
 > `progresso.md`.
 >
@@ -116,7 +117,7 @@ entra nesta invocação.
 | número que a sua ferramenta remede e não bate com o doc | **conserte agora**, com a data |
 | rótulo ambíguo que a sua mudança cria | **conserte agora** |
 | bug ou dívida sem relação com esta CORR | **abra `CORR-<PREFIXO>-XXX` novo** e siga |
-| handler a implementar, formulário a gerar, trabalho de `WTE-TASK` | **não faça** — as exclusões 2, 3 e 4 continuam valendo |
+| handler a implementar, formulário a gerar, trabalho de `<PREFIXO>-TASK` | **não faça** — as exclusões 2, 3 e 4 continuam valendo |
 
 **Commit separado.** A correção num commit; a reconciliação de doc que ela
 obrigou, em commit próprio, dizendo no corpo qual correção o provocou. Dois

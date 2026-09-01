@@ -26,12 +26,13 @@ Este prompt é o irmão em lote do `03-corrigir.md`. **Ele relaxa exatamente uma
 regra daquele — "uma CORR por invocação" — e nenhuma outra.** Tudo o mais
 (escopo de arquivo por CORR, reproduzir a evidência antes de corrigir, correção
 no gerador e não no gerado, `[x]` só depois do commit, um commit por CORR,
-reconciliação de doc em commit próprio, nada de `WTE-TASK`) continua valendo
+reconciliação de doc em commit próprio, nada de `<PREFIXO>-TASK`) continua valendo
 palavra por palavra. Em dúvida sobre qualquer ponto não coberto aqui, o
 `03-corrigir.md` é a fonte.
 
 > **EXCLUSÃO OBRIGATÓRIA — sem tasks:**
-> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute `WTE-TASK-XX`
+> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute uma
+> tarefa (`<PREFIXO>-TASK-XX`, com o prefixo que o `progresso.md` declarar)
 > por aqui — elas são do `01-executar.md` e rastreadas em `progresso.md`.
 
 > **EXCLUSÃO OBRIGATÓRIA — respeitar as decisões confirmadas:**
@@ -249,6 +250,6 @@ Não me entregue um plano e pare — a menos que `$ARGUMENTS` diga `--plano`.
 Execute o lote inteiro, um commit por correção, `[x]` só depois do commit.
 Paralelize só o que a matriz de conflito autoriza; **na dúvida, sequencial** —
 e o `:98` é sempre sequencial.
-Nada de `WTE-TASK`, nada de decompilado colado, nada de editar à mão o que um
+Nada de `<PREFIXO>-TASK`, nada de decompilado colado, nada de editar à mão o que um
 gerador produz, nada de escrever no `.exe` ou em `roms/`.
 `push` só se o usuário pedir.

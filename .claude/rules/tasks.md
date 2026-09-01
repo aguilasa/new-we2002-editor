@@ -73,6 +73,13 @@ de PES2. **Quem abre uma correção lê o prefixo ali, nunca o deduz do prefixo
 das tasks nem do que um prompt escreveu.** Dois pools no mesmo ciclo custariam
 um segundo prompt de correção sem ganho nenhum.
 
+**O prefixo das tasks segue a mesma regra, e quem o declara é o
+`progresso.md`.** Foi `WTE-TASK-` no ciclo arquivado, e é `PES2-TASK-` no ciclo
+de PES2. Os prompts escrevem os dois como `<PREFIXO>-TASK-XX` e
+`CORR-<PREFIXO>-XXX` justamente por isso: **exclusão que nomeia um prefixo
+morto não exclui coisa nenhuma** — as três "nunca execute … por aqui"
+passaram um ciclo inteiro sem alcançar task alguma.
+
 ## Projeto encerrado vai para `docs/tasks/concluidos/`
 
 Quando um projeto fecha, **tudo dele desce um nível**: as tasks, as `CORR-*.md`

@@ -11,7 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 Se `$ARGUMENTS` estiver preenchido, trate como pedido de tarefa específica
-(ex.: `WTE-TASK-32`) e confira contra as regras de seleção do prompt antes de
+(ex.: `PES2-TASK-04`, com o prefixo que o `progresso.md` declarar) e confira
+contra as regras de seleção do prompt antes de
 executar — a antecipação da WTE-TASK-32 (preço) exige pedido
 explícito do usuário. Argumento vazio significa "a próxima pendente na ordem".
 
@@ -29,7 +30,7 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
      `✅ Concluído`
    - coluna **"Concluída em"** da tabela de resumo com a data do commit
      (`AAAA-MM-DD`), e a célula do ID como link para o markdown da tarefa
-     (`[WTE-TASK-XX](/docs/tasks/XX-nome.md)` — sempre `/docs/` + caminho do
+     (`[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome.md)` — sempre `/docs/` + caminho do
      arquivo, ver `.claude/rules/links.md`)
    - coluna **"Revisado em"** de `—` para `⬜ pendente`, que é o marcador pelo
      qual o `/revisar` escolhe a próxima. A data ali é do `/revisar`, nunca

@@ -11,7 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 `$ARGUMENTS` vazio significa **2 tarefas**. Só dígitos (`3`) é o tamanho do
-lote. Com IDs (`WTE-TASK-03 WTE-TASK-05`), o lote é esse conjunto, ainda em
+lote. Com IDs (`<PREFIXO>-TASK-03 <PREFIXO>-TASK-05`, com o prefixo que o
+`progresso.md` declarar), o lote é esse conjunto, ainda em
 ordem de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 Número **e** IDs juntos é erro — pergunte qual dos dois vale.
 

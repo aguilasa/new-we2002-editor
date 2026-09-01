@@ -6,7 +6,11 @@ Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em
 - **Fonte de verdade:** **a que a própria task declarar** no campo
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
   nome — a task em mãos é quem diz contra o que ela se mede.
-- **Arquivo de progresso:** `docs/tasks/progresso.md`
+- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+  task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
+  antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
+  o deduza do que este prompt escreve como exemplo nem de citação a task
+  antiga.
 - **Regras do repositório:** `CLAUDE.md`
 - **Correções existentes:** `docs/tasks/CORR-*.md`. **O prefixo é do ciclo, e
   quem o declara é a primeira seção do `correcoes-progresso.md`** — hoje
@@ -287,7 +291,7 @@ Se ainda não existir:
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-<PREFIXO>-001](/docs/tasks/CORR-<PREFIXO>-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
+| [CORR-<PREFIXO>-001](/docs/tasks/CORR-<PREFIXO>-001.md) | [<PREFIXO>-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -313,7 +317,7 @@ Se já existir, acrescente sem alterar as entradas anteriores.
    `.claude/rules/links.md`. O `/revisar` cria o `.md` na mesma
    invocação, então o link nunca nasce quebrado.
 2. **A coluna "ID Task Origem" é a tarefa que esta revisão estava revisando**,
-   também linkada: `[WTE-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)`. É sempre
+   também linkada: `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)`. É sempre
    a mesma para todas as CORRs abertas numa invocação — a que você escolheu no
    passo 1.
    **Não é a task que a correção menciona no texto**: uma CORR aberta revisando
@@ -374,7 +378,7 @@ A revisão normalmente produz só markdown em `docs/tasks/`:
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
 git add docs/tasks/CORR-<PREFIXO>-XXX.md docs/tasks/correcoes-progresso.md \
         docs/tasks/progresso.md
-git commit -m "docs: open CORR-<PREFIXO>-XXX from the WTE-TASK-YY review"
+git commit -m "docs: open CORR-<PREFIXO>-XXX from the <PREFIXO>-TASK-YY review"
 ```
 
 O `progresso.md` entra **sempre**, porque é onde mora a coluna "Revisado em".
@@ -384,7 +388,7 @@ o único arquivo do commit:
 
 ```bash
 git add docs/tasks/progresso.md
-git commit -m "docs: review WTE-TASK-YY: <o que foi medido>, no discrepancy"
+git commit -m "docs: review <PREFIXO>-TASK-YY: <o que foi medido>, no discrepancy"
 ```
 
 Sem esse commit a revisão não deixa rastro nenhum, e a próxima invocação

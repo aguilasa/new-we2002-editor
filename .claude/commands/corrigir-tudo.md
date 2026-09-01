@@ -63,7 +63,8 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
    golden** não fechando, que indica problema do harness ou do `:98` e torna
    sem sentido qualquer resultado seguinte.
 
-10. **Nunca execute `WTE-TASK-XX` por aqui** — isso é do `/executar`. E nunca
+10. **Nunca execute uma tarefa (`<PREFIXO>-TASK-XX`) por aqui** — isso é do
+    `/executar`. E nunca
     cole decompilado, edite à mão o que um gerador produz, ou escreva no
     `we-team-editor.exe` / em `roms/`.
 

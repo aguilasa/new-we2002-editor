@@ -3,7 +3,7 @@ id: CORR-PES2-003
 title: "Correção: os prompts e os wrappers cravam WTE-TASK-XX; o ciclo vivo é PES2-TASK-XX"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: [CORR-PES2-002]
 ---
 
@@ -107,21 +107,64 @@ a metade que falta: o de **task** também é, e quem o declara é o `progresso.m
 
 ## Verificação
 
-- [ ] Nenhuma ocorrência **prescritiva** de `WTE-TASK` sobra em
-      `docs/prompts/` e `.claude/commands/`; as que sobrarem são citação de
-      task real do ciclo fechado, e o Log diz quantas e quais
-- [ ] `grep -rn 'WTE-TASK' docs/tasks/concluidos/ | wc -l` inalterado
-- [ ] As três exclusões "nunca execute … por aqui" passam a alcançar o objeto
-      que proíbem no ciclo vivo
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] Conferência de link de `.claude/rules/links.md` sem quebrado novo
+- [x] Nenhuma ocorrência **prescritiva** de `WTE-TASK` sobra em
+      `docs/prompts/` e `.claude/commands/`. Das 50, **20 eram prescritivas** e
+      viraram `<PREFIXO>-TASK-XX`; **28 são citação de task real do ciclo
+      fechado** e ficaram (as duas exceções de antecipação, os gates datados,
+      os cinco cabeçalhos de fase da Etapa 3 do `02-revisar.md`, as armadilhas
+      da §"prosa vencida"); as **2 restantes** são as linhas novas de
+      declaração, que nomeiam `WTE-TASK-XX` como o prefixo *anterior*
+- [x] `grep -rn 'WTE-TASK' docs/tasks/concluidos/ | wc -l` inalterado em **1411**
+- [x] As três exclusões "nunca execute … por aqui" passam a alcançar o objeto
+      que proíbem no ciclo vivo — conferidas verbatim, as três dizem agora
+      `<PREFIXO>-TASK-XX` com a fonte do prefixo ao lado
+- [x] `python3 tools/check_tasks.py` verde — 76 tasks, ok
+- [x] Conferência de link de `.claude/rules/links.md` sem quebrado novo — a de
+      destino sai vazia; a de forma sobra só `../README.md` (alvo fora de
+      `docs/`) e transcrição em `concluidos/`, ambos pré-existentes
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** Evidência reproduzida verbatim antes de editar:
+**39 + 11 = 50** ocorrências, distribuídas exatamente como a CORR previa, e o
+`progresso.md` vivo com **25** `PES2-TASK-*`. A classificação é o trabalho, e
+repetiu o método da [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md): **20
+prescritivas** viraram `<PREFIXO>-TASK-XX` — as três exclusões "nunca execute …
+por aqui", os quatro modelos de link de tabela, os dois `git commit -m` de
+modelo, os exemplos de argumento dos wrappers, e as menções genéricas a
+"trabalho de `WTE-TASK`" —, e **28 citações de task real do ciclo fechado**
+ficaram intactas. Três prompts ganharam a linha que declara de onde sai o
+`<PREFIXO>` (o `progresso.md`, análogo do `correcoes-progresso.md`), e a regra
+ganhou a metade que faltava.
 
-**Problemas encontrados:**
+**Problemas encontrados.** Dois, nenhum bloqueante.
+
+1. **Um caso em que trocar seria pior que não trocar**, e ele decidiu o
+   critério. Os cinco cabeçalhos da Etapa 3 do `02-revisar.md` — `**Fase 0-1
+   (WTE-TASK-01 a 09)**` e irmãos — indexam 73 linhas de checklist sobre `.dfm`,
+   `.lfm`, stubs e assets do Obocaman. Reescrevê-los como `<PREFIXO>-TASK-01 a
+   09` afirmaria que esse checklist vale para as fases de PES2, que não têm nada
+   disso. Ficaram como estão: o texto está certo sobre o ciclo que descreve.
+2. **Isso revelou uma discrepância maior que esta CORR**, e ela virou
+   [CORR-PES2-004](/docs/tasks/CORR-PES2-004.md): os prompts ficaram agnósticos
+   de plano e de prefixo e continuam com um corpo inteiro de conteúdo
+   operacional do `wte/` — 64 caminhos `wte/` cravados, os gates datados por
+   task de outro ciclo, a tabela de geradores, e o `04-corrigir-tudo.md`
+   abrindo com *"Você vai trabalhar no projeto WE2002 Team Editor → Lazarus"*.
+   Não é substituição, é separação, e a forma é decisão do usuário — exatamente
+   o "se a discrepância for grande, abra a CORR nova e reporte" do
+   `03-corrigir.md`.
 
 **Arquivos criados/modificados:**
+
+- `.claude/rules/tasks.md` — parágrafo novo: o prefixo de task também é do
+  ciclo, e quem o declara é o `progresso.md`
+- `docs/prompts/01-executar.md` — 2 (declaração + modelo de link)
+- `docs/prompts/02-revisar.md` — 5
+- `docs/prompts/03-corrigir.md` — 2
+- `docs/prompts/04-corrigir-tudo.md` — 3
+- `docs/prompts/05-executar-lote.md` — 4
+- `.claude/commands/{executar,executar-lote,revisar,corrigir,corrigir-tudo}.md` — 7
+- `docs/tasks/correcoes-progresso.md` — tabela, checklist e data
