@@ -24,6 +24,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 |---|---|---|---|---|---|
 | [CORR-PES2-001](/docs/tasks/CORR-PES2-001.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A §3.2 diz que sem `-EL` o `objdump` mente; medido, sem `-EL` a saída é idêntica — quem mente é o `-EB` | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [x] concluída | 2026-09-01 |
+| [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | Os prompts e os wrappers cravam `WTE-TASK-XX`; o ciclo vivo é `PES2-TASK-XX` | Média | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -41,6 +42,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 
 - [x] CORR-PES2-001 — o `-EL` do `objdump` na §3.2 está anotado no flag errado
 - [x] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
+- [ ] CORR-PES2-003 — o prefixo de *task* continua cravado nos prompts e nos wrappers
 
 ## Detalhes por correção
 
@@ -73,6 +75,23 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - **Fix:** a regra passa a dizer que o prefixo é do ciclo e sai do
   `correcoes-progresso.md`; os prompts passam a `CORR-<PREFIXO>-XXX`, como os
   `*.template.md` já fazem. `docs/tasks/concluidos/` não se toca
+
+### CORR-PES2-003
+
+- **Arquivo com problema:** `.claude/rules/tasks.md`, os cinco prompts de
+  `docs/prompts/` e os cinco wrappers de `.claude/commands/` — 39 + 11
+  ocorrências de `WTE-TASK`
+- **Sintoma:** a CORR-PES2-002 tirou dos prompts o prefixo de *correção* e
+  deixou o de *task*: eles mandam executar `WTE-TASK-XX`, e o `progresso.md`
+  vivo lista `PES2-TASK-01` a `-25`. As três exclusões "nunca execute
+  `WTE-TASK-XX` por aqui" não nomeiam nenhuma task existente
+- **Como foi detectado:** varredura de discrepância da CORR-PES2-002, ao
+  conferir o que mais o mesmo parágrafo da regra proíbe. Dívida independente —
+  nem criada nem revelada pelo conserto dela —, aberta em vez de redimensionar
+  a correção no meio do lote
+- **Fix:** `<PREFIXO>-TASK-XX`, com o prefixo saindo do `progresso.md`, e a
+  mesma distinção da 002 entre placeholder prescritivo e citação de task real
+  do ciclo fechado. Glob executável fica `docs/tasks/*-TASK-*.md`
 
 <!-- Modelo de bloco, para quando a primeira for aberta:
 
