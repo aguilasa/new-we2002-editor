@@ -32,7 +32,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A varredura do `poke.py` só reconhece registro delimitado por NUL, e o disco tem três tabelas de largura fixa | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-009](/docs/tasks/CORR-PES2-009.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O `--check` do `lzss.py` passa verde com o bug de `k3` assinado reintroduzido: 172 contêineres inteiros caem para 41 e o gate não pisca | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-010](/docs/tasks/CORR-PES2-010.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | As duas constantes do `scan`: `minimum=1024` decide todo verdicto com 128 B de margem, e o comentário do `PROBE_CAP` afirma um máximo de 16 KiB que são 16.676 | Média | [x] concluída | 2026-09-01 |
-| [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O prefixo de registro citado na §1.14(e) é o do quarto registro da cauda, não a forma deles | Baixa | [ ] pendente | — |
+| [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O prefixo de registro citado na §1.14(e) é o do quarto registro da cauda, não a forma deles | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-012](/docs/tasks/CORR-PES2-012.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
@@ -59,7 +59,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-008 — a varredura do `poke.py` assume um esquema de registro
 - [x] CORR-PES2-009 — o `--check` do `lzss.py` não sabe ficar vermelho
 - [x] CORR-PES2-010 — os dois limiares do `scan`, um deles com 128 B de margem
-- [ ] CORR-PES2-011 — prefixo de registro citado é uma instância, não a forma
+- [x] CORR-PES2-011 — prefixo de registro citado é uma instância, não a forma
 - [ ] CORR-PES2-012 — contagem de contêineres afirmada por jogo, medida por disco
 
 ## Detalhes por correção

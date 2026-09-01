@@ -722,10 +722,25 @@ opcode `0xC0..0xFE`, que o da Konami emite, e a saída recomprimida sai sempre
 0,2% a 2,0% menor.
 
 **O que fica fora de qualquer fluxo é a tabela de entradas**, não defeito:
-registros de 16 bytes que começam `0f 80 0a 00 20 02 80 01`, 15.538 bytes
-deles depois do último bloco de `DAT2D.BIN` no PES2 `(EsIt)`. É o candidato
-direto ao `DATA_HEADER` da Fase 10, e é assunto da PES2-TASK-27; o `lzss.py`
-mede quantos bytes são, por arquivo, e não os julga.
+registros de 16 bytes — o **primeiro** deles
+`00 00 0a 00 00 02 00 01 20 00 80 00 00 00 08 00` —, 15.538 bytes deles
+depois do último bloco de `DAT2D.BIN` no PES2 `(EsIt)`. Os quatro primeiros
+diferem justamente nos oito bytes iniciais; o que é **comum** aos quatro é
+`0a 00` nos bytes 2-3, `20 00 80 00` nos bytes 8-11, e os quatro últimos
+crescendo de registro a registro (`0800`, `0e1c`, `1d4c`, `247c` lidos como
+dois inteiros de 16 bits little-endian), que é o que se espera de
+deslocamento acumulado. É o candidato direto ao `DATA_HEADER` da Fase 10, e é
+assunto da PES2-TASK-27; o `lzss.py` mede quantos bytes são, por arquivo, e
+não os julga.
+
+Os 15.538 são o que vem **depois do último bloco**, a partir de 53018. A
+coluna `outside` do `lzss.py` diz **15.574** para o mesmo arquivo, e a
+diferença são os 36 bytes de cabeçalho de contêiner, que também ficam fora de
+qualquer fluxo: são duas medidas diferentes, as duas certas.
+
+> Esta frase citava `0f 80 0a 00 20 02 80 01` como o início dos registros até
+> a [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md). É o **quarto** deles, em
+> 53066 — três registros depois do começo da cauda, em 53018.
 
 **A divergência da §5c, fechada.** Ela dizia que o fluxo de `TEX_00.BIN`
 começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro

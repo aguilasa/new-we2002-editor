@@ -389,8 +389,11 @@ def classify(data):
     - `none`    -- nothing decodes anywhere. Not an LZSS container.
 
     **`leftover` is not failure.** A container ends with a table of
-    16-byte entry records -- `0f 80 0a 00 20 02 80 01 …` -- and `DAT2D`
-    carries 15.538 bytes of it after its last stream. Counting that as
+    16-byte entry records -- the first of `DAT2D`'s reads
+    `00 00 0a 00 00 02 00 01 20 00 80 00 00 00 08 00`, and what the first
+    four share is `0a 00` at bytes 2-3, `20 00 80 00` at bytes 8-11, and a
+    last word that grows -- and `DAT2D` carries 15.538 bytes of it after
+    its last stream. Counting that as
     "stopped in the middle" would report a defect that is not there; what
     it really is, is PES2-TASK-27's subject. So it is measured and
     reported, never judged.

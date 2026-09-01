@@ -66,8 +66,10 @@ imagens em 2026-09-01. O que ele deixou para esta task:
    `python3 tools/pes2/lzss.py <track1.bin> | grep none:`, e é idêntica nas
    quatro imagens.
 2. **O que sobra depois do último fluxo é a tabela de entradas** — registros
-   de 16 bytes, `0f 80 0a 00 20 02 80 01 20 00 80 00 00 00 4c 1d` e assim por
-   diante, 15.538 bytes deles em `DAT2D.BIN` do PES2 `(EsIt)`. É o candidato
+   de 16 bytes, o primeiro deles
+   `00 00 0a 00 00 02 00 01 20 00 80 00 00 00 08 00`, com `0a 00` nos bytes
+   2-3 e `20 00 80 00` nos bytes 8-11 em todos e os quatro últimos crescendo;
+   15.538 bytes deles em `DAT2D.BIN` do PES2 `(EsIt)`. É o candidato
    direto ao `DATA_HEADER` da §5 Fase 10, e o `lzss.py` já imprime quantos
    bytes ficam fora de qualquer fluxo, por arquivo.
 3. **Os três `GDC_*` têm fluxo, mas não onde o cabeçalho diz.** `GDC_AD`,
