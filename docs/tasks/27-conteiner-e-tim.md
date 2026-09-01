@@ -50,6 +50,36 @@ exportá-la como PNG.
    engine e não da release. Se lê só um, a hipótese da §1.4 tem limite, e o
    limite tem de ser escrito.
 
+### Vindo da PES2-TASK-26: três coisas medidas, e uma delas contraria o critério abaixo
+
+O `tools/pes2/lzss.py` varreu os 790 contêineres `form1` de `/BIN/` das quatro
+imagens em 2026-09-01. O que ele deixou para esta task:
+
+1. **Onze `CG*.BIN` não têm fluxo LZSS nenhum** — nem no offset que o
+   cabeçalho nomeia, nem em lugar algum do arquivo. Depois dos ponteiros de
+   RAM vem `00000041 00000000 00000001` e dali segue conteúdo que o codec não
+   consome. **Isso contraria o critério de conclusão desta task**, que manda
+   extrair "todas as entradas de … `CG*`": ou eles guardam entrada
+   **não comprimida**, ou o caminho de entrada é outro. Medir antes de
+   escrever parser. Os onze são `CGAF`, `CGAM`, `CGAS`, `CGEU`, `CGIC`,
+   `CGKO`, `CGLE`, `CGML`, `CGOL`, `CGOLB_O` e `CGOLS_O` — a lista sai de
+   `python3 tools/pes2/lzss.py <track1.bin> | grep none:`, e é idêntica nas
+   quatro imagens.
+2. **O que sobra depois do último fluxo é a tabela de entradas** — registros
+   de 16 bytes, `0f 80 0a 00 20 02 80 01 20 00 80 00 00 00 4c 1d` e assim por
+   diante, 15.538 bytes deles em `DAT2D.BIN` do PES2 `(EsIt)`. É o candidato
+   direto ao `DATA_HEADER` da §5 Fase 10, e o `lzss.py` já imprime quantos
+   bytes ficam fora de qualquer fluxo, por arquivo.
+3. **Os três `GDC_*` têm fluxo, mas não onde o cabeçalho diz.** `GDC_AD`,
+   `GDC_AN` e `GDC_BN` decodificam 30, 30 e 46 blocos começando adiante do
+   offset derivado do cabeçalho. São estádios, que a §1.14(d) põe fora de
+   escopo — registrado para não ser rediagnosticado como bug do codec.
+
+E uma armadilha de leitura, não de formato: **na imagem golden European Deluxe
+os 105 `TEX_*.BIN` são Form 2**, e o `iso.py` recusa lê-los. Um parser que se
+diga "rodando nas duas imagens de WE2002" tem de dizer qual arquivo ele não
+alcançou ali, ou a cobertura afirmada é maior do que a medida.
+
 ### O que a §1.14 já entrega de graça
 
 `/BIN/DAT2D.BIN` no WE2002 guarda as **cores de bandeira** — é onde caem
@@ -63,8 +93,10 @@ achado antes de qualquer uma escrever no mapa.
 ## Critério de conclusão
 
 - [ ] `tools/pes2/bin_archive.py` versionado, com `ls` e `export`.
-- [ ] Todas as entradas de `DAT2D*`, `DATSEL*`, `LOGO`, `TITLE`, `CG*` e
-      `TEX_*` das **duas** releases extraídas, sem entrada órfã e sem estouro.
+- [ ] Todas as entradas de `DAT2D*`, `DATSEL*`, `LOGO`, `TITLE` e `TEX_*` das
+      **duas** releases extraídas, sem entrada órfã e sem estouro.
+- [ ] Os onze `CG*.BIN` explicados — entrada não comprimida, outro caminho de
+      entrada, ou fora de escopo com a razão escrita. Ver o item 1 acima.
 - [ ] `w × h × bpp / 8 == tamanho descomprimido` em 100% das entradas, com a
       contagem escrita.
 - [ ] O parser rodando também nas duas imagens de WE2002, ou o limite da

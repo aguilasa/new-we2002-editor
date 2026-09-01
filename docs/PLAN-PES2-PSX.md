@@ -677,10 +677,59 @@ ser refeitas para o PES2: o formato é o mesmo, e a Fase 8 já está pronta do
 lado de cá. O que sobra é a Fase 7 deste plano — verificar, e adaptar onde a
 localização europeia multiplicou os arquivos.
 
-**A divergência aberta.** A §5c do `PLAN-FEATURES` diz que o fluxo de
-`TEX_00.BIN` começa em **28**; a varredura de (a) diz **48** — 12 palavras,
-uma nula no índice 6, nos dois jogos. Uma das duas leituras está errada, e a
-[PES2-TASK-26](/docs/tasks/26-codec-lzss.md) tem de decidir qual por medição.
+**(e) O codec lê os quatro discos — medido em 2026-09-01, pela
+[PES2-TASK-26](/docs/tasks/26-codec-lzss.md).** O `tools/pes2/lzss.py` porta o
+LZSS do `WECompress.cpp` (crédito e condição no [NOTICE.md](../NOTICE.md)) e
+foi apontado para todo `BIN/*.BIN` `form1` das duas releases de PES2 e das
+duas imagens de WE2002:
+
+| Disco | contêineres | inteiro | parcial | não é LZSS | blocos |
+|---|---:|---:|---:|---:|---:|
+| PES2 `(EsIt)` | 208 | **172** | 3 | 33 | 2.153 |
+| PES2 `(EnFrDe)` | 210 | **174** | 3 | 33 | 2.195 |
+| WE2002 European Deluxe | 177 | **141** | 3 | 33 | 1.842 |
+| WE2002 japonês | 195 | **159** | 3 | 33 | 2.027 |
+| **total** | **790** | **646** | **12** | **132** | **8.217** |
+
+```
+python3 tools/pes2/lzss.py "<a>" "<b>" "<c>" "<d>" --check
+python3 tools/pes2/lzss.py "<track1.bin>" --roundtrip
+```
+
+Os três verdictos, como a ferramenta os define:
+
+- **inteiro** — um fluxo decodifica exatamente no offset que o cabeçalho de
+  (a) nomeia. O codec lê o arquivo, e a regra de largura acha a porta.
+- **parcial** — há fluxo, mas não onde o cabeçalho diz. São sempre os mesmos
+  três, `GDC_AD`, `GDC_AN` e `GDC_BN`: estádios, que a (d) já põe fora.
+- **não é LZSS** — nada decodifica em lugar nenhum. São 33 por disco, **a
+  mesma lista nos quatro**: os 17 `GRDM_*` e o `MODEL.BIN` (estádios e malha,
+  fora por (d)), `ANIME`, `DEMODATA`, `EDT_MOD`, `ENDANIME`, e **onze
+  `CG*.BIN`** — estes últimos são o achado que a
+  [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) tem de explicar, porque a
+  §5 Fase 10 do `PLAN-FEATURES` contava com eles como contêiner gráfico.
+
+**Round-trip: 8.217 de 8.217 blocos**, `decompress(compress(x)) == x` nos
+quatro discos. O sentido contrário não é exigido e não vale a pena tentar — a
+§5c do `PLAN-FEATURES` mediu por quê: o compressor do CARP deixa comentado o
+opcode `0xC0..0xFE`, que o da Konami emite, e a saída recomprimida sai sempre
+0,2% a 2,0% menor.
+
+**O que fica fora de qualquer fluxo é a tabela de entradas**, não defeito:
+registros de 16 bytes que começam `0f 80 0a 00 20 02 80 01`, 15.538 bytes
+deles depois do último bloco de `DAT2D.BIN` no PES2 `(EsIt)`. É o candidato
+direto ao `DATA_HEADER` da Fase 10, e é assunto da PES2-TASK-27; o `lzss.py`
+mede quantos bytes são, por arquivo, e não os julga.
+
+**A divergência da §5c, fechada.** Ela dizia que o fluxo de `TEX_00.BIN`
+começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro
+discos: 24, 28, 32 e 44 falham, e falham na primeira distância que aponta para
+antes do começo da saída. A linha da §5c foi corrigida no arquivo dela. O
+provável motivo de a medição antiga não se reproduzir também ficou medido: na
+imagem golden European Deluxe os 105 `TEX_*.BIN` são **Form 2**, e o `iso.py`
+recusa lê-los — quem os leu em 2026-08-02 leu com outro fatiamento de setor, o
+que casa com o `16.400 = 16.384 + 16` que ela registrava. As outras cinco
+linhas daquela tabela **se reproduzem exatamente**.
 
 ---
 

@@ -66,6 +66,37 @@ wrong side.
 If you are Obocaman, or hold rights to *WE2002 Team Editor*, and want this work
 licensed, relicensed, or taken down, please open an issue.
 
+## Lineage of the `BIN/*.BIN` asset tooling
+
+`tools/pes2/lzss.py` is the first file in this repository derived from the
+**CARP** tool suite. Section 9 of
+[`docs/PLAN-FEATURES.md`](docs/PLAN-FEATURES.md) made this section a
+*blocking* requirement of that file existing, so it lands in the same commit.
+
+| Author | Work | What was taken |
+|---|---|---|
+| **Maximiliano Ducoli (CARP)** | [WECompressor](https://github.com/maxiducoli/WECompressor) and the companion tools — `SinSala-BIN`, `GraphicsTools`, `T_NAME-Maker`, `WEVagExtractor` | The `.BIN` container and `.RA` audio formats, and the LZSS codec of `WECompress.cpp`, ported to Python in `tools/pes2/lzss.py`. His condition is **non-commercial use, with credit to him as original author**; this project is non-commercial and carries the credit here. |
+| **Author unknown** | `WECompress.cpp` itself | The codec predates CARP's suite and he maintained it rather than wrote it: its comments are in **Italian** (`"esci dal ciclo"`, `"numero di bytes da arretrare"`), the same language as `legacy/mfc/edDlg.cpp`, which points at the 2002–2003 Italian modding scene that produced `ed.exe`. Authorship is **not established**; the credit above is to the publisher, and this row exists so the gap is on the record rather than quietly filled. |
+| **BAT_WE** | [Winning Eleven Image Manager](https://github.com/maxiducoli/Winning-Eleven-Image-Manager---by-BAT-2005-) (2005) | Nothing yet. Listed because the plan adopts its image-grid × palette-grid model when a browser is built, and the credit is owed at that point, not after. |
+
+**What crossed over, and what did not.** What `lzss.py` implements is the
+**format** — the flag byte read low bit first, the three command shapes, the
+`0xFF` terminator — written fresh in Python from a reading of the C. Two
+behaviours are reproduced deliberately because the data requires them, and both
+are commented at the site: the signed `k3` of `while (k3-- >= 0)`, and the
+`0xC0..0xFE` block-literal opcode that the CARP compressor leaves commented out
+while its decompressor reads it. The match search is **not** his: the ring
+buffer and hash chain were replaced by a three-byte-key index, which is legal
+for this format because the encoder may pick any valid match. The consequence
+was already measured in §5(c) of `PLAN-FEATURES` and holds here — recompressed
+output is never byte-identical to Konami's, so the invariant asserted is
+`decompress(compress(x)) == x` and never the reverse.
+
+No file of his is redistributed here, and no game asset is.
+
+If you are Maximiliano Ducoli, or hold rights to `WECompress.cpp`, and want
+this use licensed, relicensed, or taken down, please open an issue.
+
 ## Copyright and license status
 
 **This project has no license.**

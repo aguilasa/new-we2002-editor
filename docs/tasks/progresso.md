@@ -68,7 +68,7 @@ PES2-TASK-22.
 | [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | 22 | ⬜ Pendente | — | — |
 | [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | 23 | ⬜ Pendente | — | — |
 | [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final contra a definição de pronto | 6 | 24 | ⬜ Pendente | — | — |
-| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | ⬜ pendente |
 | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ⬜ Pendente | — | — |
 | [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
 | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ⬜ Pendente | — | — |
@@ -273,11 +273,12 @@ emulador, são elas o trabalho barato que continua.
 
 ### Fase 7 — Assets do disco
 
-- [ ] Os 208 contêineres de cada release classificados: descomprimiu inteiro,
-      parou no meio, não é LZSS
-- [ ] `decompress(compress(x)) == x` em 100% dos blocos
-- [ ] O início do fluxo de `TEX_00.BIN` decidido — 28 ou 48 — e a fonte errada
-      corrigida no arquivo em que ela está
+- [x] Os 208 contêineres de cada release classificados: descomprimiu inteiro,
+      parou no meio, não é LZSS — **790 contêineres nos quatro discos, 646
+      inteiros, 12 parciais, 132 não-LZSS** (§1.14(e))
+- [x] `decompress(compress(x)) == x` em 100% dos blocos — **8.217 de 8.217**
+- [x] O início do fluxo de `TEX_00.BIN` decidido — **48**; a §5c do
+      `PLAN-FEATURES` corrigida no arquivo dela
 - [ ] `w × h × bpp / 8` batendo com o tamanho descomprimido em 100% das
       entradas gráficas
 - [ ] Conjunto de cópias por idioma **varrido**, e a ferramenta recusando se

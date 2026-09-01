@@ -253,7 +253,25 @@ algoritmo do CARP e comparei com os bytes da Konami.
 | `TITLE` | 8 | 3.015 | 8.192 | 2.968 | −1,6% | não | ok |
 | `T_NAME` | 4 | 1.890 | 8.192 | 1.852 | −2,0% | não | ok |
 | `DATSEL3` | 8 | 2.973 | 8.192 | 2.939 | −1,1% | não | ok |
-| `TEX_00` | 28 | 6.453 | 16.400 | 6.396 | −0,9% | não | ok |
+| `TEX_00` | **48** | 5.145 | 16.384 | — | — | não | ok |
+
+**A linha do `TEX_00` foi corrigida em 2026-09-01, pela
+[PES2-TASK-26](/docs/tasks/26-codec-lzss.md).** Ela dizia início **28**,
+comprimido 6.453, descomprimido 16.400, e nenhum dos três se reproduz. Nas
+quatro imagens que o `tools/pes2/lzss.py` lê, o fluxo de `TEX_00.BIN` começa
+em **48** — as 12 palavras de cabeçalho da §1.14 do `PLAN-PES2-PSX`, com a
+nula do índice 6 no meio delas — e rende 16.384 bytes; 24, 28, 32 e 44 falham
+todos, e falham cedo, na primeira distância que aponta para antes do começo da
+saída. Os números da linha nova são os do PES2 `(EsIt)`.
+
+**Por que a medição antiga não se reproduz**, e vale saber antes de tentar: na
+imagem golden European Deluxe os 105 `TEX_*.BIN` são **Form 2**. O `iso.py`
+recusa lê-los — não há área de 2.048 bytes num setor Form 2 —, e quem os leu em
+2026-08-02 leu por outro caminho, com outro fatiamento de setor. O `16.400 =
+16.384 + 16` da linha velha é compatível com isso. As outras cinco linhas desta
+tabela, essas, **se reproduzem exatamente**: `DAT2D` 8/7.447/16.345, `LOGO`
+8/3.186/8.192, `TITLE` 8/3.015/8.192, `T_NAME` 4/1.890/8.192 e `DATSEL3`
+8/2.973/8.192, remedidas na mesma imagem pelo `lzss.py`.
 
 Três leituras:
 
@@ -266,8 +284,11 @@ Três leituras:
 - **`decompress(compress(x)) == x` em 100% dos casos.** Perda de dados não é a
   preocupação.
 
-O offset de início do fluxo varia (4, 8, 28) — cada contêiner tem cabeçalho
-próprio, o que a Fase 10 vai ter que mapear.
+O offset de início do fluxo varia (4, 8, 48) — cada contêiner tem cabeçalho
+próprio, e desde 2026-09-01 a regra está medida: é **quatro vezes o número de
+ponteiros de RAM que abrem o arquivo**, nulos internos incluídos. O
+`tools/pes2/lzss.py` a aplica e ela acerta em 646 dos 790 contêineres das
+quatro imagens; ver a §1.14 do `PLAN-PES2-PSX`.
 
 > **Decidido:** o `BinArchive` guarda os bytes comprimidos originais de cada
 > entrada e **só regenera as que o usuário editou**. Isso dá a invariante que
@@ -478,11 +499,12 @@ Três consequências para **este** plano:
   não é documentado. O começo do arquivo é um cabeçalho **VAB** da Sony, que é
   formato público; o `fsize` de 251 kB num arquivo de 20 MB indica cadeia de
   bancos, não índice proprietário.
-- **A §5c tem uma divergência aberta.** Ela registra o fluxo de `TEX_00.BIN`
-  começando em **28**; a varredura de cabeçalho diz **48** — 12 palavras, uma
-  nula no índice 6, nos dois jogos. Quem medir primeiro corrige os dois
-  arquivos. A [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) tem isso no
-  critério de conclusão.
+- ~~**A §5c tem uma divergência aberta.**~~ **Fechada em 2026-09-01** pela
+  [PES2-TASK-26](/docs/tasks/26-codec-lzss.md): o fluxo de `TEX_00.BIN`
+  começa em **48**, e 24, 28, 32 e 44 falham cedo nas quatro imagens. A linha
+  da tabela da §5c foi corrigida, com o registro do que a medição antiga
+  provavelmente leu — os `TEX_*` da imagem golden são **Form 2**, e o
+  `iso.py` não os lê.
 
 **O que continua separado é o código**, e por decisão: a §6.9 do plano de PES2
 proíbe estender o `we2002_core`, e `tools/pes2/` é Python 3 e shell puros

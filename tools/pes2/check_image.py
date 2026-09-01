@@ -35,6 +35,7 @@ import team_map                                              # noqa: E402
 import player_map                                            # noqa: E402
 import memcard                                               # noqa: E402
 import poke                                                  # noqa: E402
+import lzss                                                  # noqa: E402
 
 SKIP = 77
 
@@ -68,6 +69,9 @@ def main():
 
     print("\n== the two player-name tables (plan 1.5, 3.3) ==")
     bad += player_map.main([image, "--check"])
+
+    print("\n== the LZSS containers of /BIN/ (plan 1.14) ==")
+    bad += lzss.main([image, "--check"])
 
     print("\n== docs/PES2-NOMES.md against the disc ==")
     bad += faq_check.main(["--image", image])
