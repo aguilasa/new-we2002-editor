@@ -3,7 +3,7 @@ id: CORR-PES2-008
 title: "Correção: a varredura do `poke.py` só enxerga registro delimitado por NUL, e o disco tem tabela de largura fixa"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -100,19 +100,62 @@ Silêncio é o que esta correção existe para eliminar; recusa explícita serve
 
 ## Verificação
 
-- [ ] um caso sintético — um nome de exatamente 10 caracteres plantado num
+- [x] um caso sintético — um nome de exatamente 10 caracteres plantado num
       registro de `club-players` numa **cópia** — é achado pela varredura
-- [ ] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
+- [x] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
       continua verde nas duas releases, com a varredura sem sobra
-- [ ] `ctest --test-dir build -R pes2` verde
-- [ ] `roms/` intocada
+- [x] `ctest --test-dir build -R pes2` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** A forma principal, não a alternativa mínima:
+`leftovers()` decide "registro inteiro" **por esquema**, e o esquema sai da
+tabela. Entrou `fixed_tables(img)`, que resolve toda tabela de largura fixa
+do disco por marcador e devolve `{arquivo: [(início, largura, entradas)]}`, e
+`_whole_record()`, que escolhe o teste: dentro de uma tabela fixa daquele
+arquivo, o casamento tem de começar em fronteira de registro e o que sobra
+dentro do registro tem de ser NUL ou nada; fora de qualquer tabela fixa, vale
+o teste `cstr` de antes, que é a leitura conservadora de área que nenhuma
+tabela descreve.
 
-**Problemas encontrados:**
+**O caso sintético que a CORR pede, medido.** `Zzyzxwqvkj` — dez caracteres,
+enchendo o registro — plantado sobre `Eddington` no registro 7 de
+`club-players`, numa cópia:
+
+```
+club-players em /SELECT.BIN @5320, 463 registros de 10 B
+  registro 7 @5390 = b'Eddington\x00'
+varredura NOVA acha:   [('/SELECT.BIN', 5390, 'Zzyzxwqvkj')]
+varredura ANTIGA (teste cstr) no mesmo offset 5390: whole=False
+```
+
+A antiga **calava** sobre um registro que está claramente lá, que é o silêncio
+que esta correção existe para eliminar.
+
+**Problemas encontrados.** Dois, os dois medidos e não previstos pela CORR:
+
+1. **São cinco tabelas de largura fixa, não três.** A linha da tabela do
+   `correcoes-progresso.md` diz três, porque a evidência da CORR mostrou as
+   três linhas de `tables.py --check` que se lêem como nome. `fixed_tables`
+   resolvidas no disco: `/SELECT.BIN` @4292 (largura 4, n=95), `/SELECT.BIN`
+   @5320 (10, 463), `/SELECT8.BIN` @1016 (4, 95), `/REPLAYS.BIN` @11000
+   (4, 95) e `/SLES_039.57` @284720 (10, 1449). O texto da linha fica como
+   está — é o registro do que se abriu; a medida mora aqui.
+2. **O cache que a primeira versão tinha era um perigo.** `fixed_tables`
+   nasceu com um `_cache` chaveado em `id(img)`, e `id()` é reusado depois
+   que um objeto morre — o `self_check` abre e fecha a mesma cópia três
+   vezes. Uma corrida azarada devolveria o mapa da imagem anterior. Removido:
+   são cinco tabelas para resolver, e o `pes2_image` inteiro leva ~2 s.
+
+**Gates.** `--self-check` `SELF-CHECK OK` nas duas releases, com
+`swept every Form 1 file: no unmapped copy of 'MARMARA' left behind` —
+nenhum falso positivo novo; `ctest -R pes2_selftest|pes2_image` 2/2 `Passed`.
+`roms/` intocada: o caso sintético gravou sobre cópia no scratchpad, removida
+ao fim.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/poke.py`

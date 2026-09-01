@@ -29,7 +29,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-005](/docs/tasks/CORR-PES2-005.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | Duas das cinco recusas do `--self-check` do `poke.py` medem a mesma guarda; a regra de fim e o último registro nunca são exercitados | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-006](/docs/tasks/CORR-PES2-006.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | O `poke.py` trabalha com oito listas e continua dizendo cinco em nove lugares, dois deles impressos na tela | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-007](/docs/tasks/CORR-PES2-007.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A tabela de testes do plano, o estado da Fase 2 e a verificação de Fase 2 do perfil ainda dizem cinco listas | Média | [x] concluída | 2026-09-01 |
-| [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A varredura do `poke.py` só reconhece registro delimitado por NUL, e o disco tem três tabelas de largura fixa | Baixa | [ ] pendente | — |
+| [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A varredura do `poke.py` só reconhece registro delimitado por NUL, e o disco tem três tabelas de largura fixa | Baixa | [x] concluída | 2026-09-01 |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -52,7 +52,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-005 — o `--self-check` do `poke.py` não exercita duas guardas
 - [x] CORR-PES2-006 — `poke.py` diz cinco listas e trabalha com oito
 - [x] CORR-PES2-007 — três textos vivos ainda dizem cinco listas
-- [ ] CORR-PES2-008 — a varredura do `poke.py` assume um esquema de registro
+- [x] CORR-PES2-008 — a varredura do `poke.py` assume um esquema de registro
 
 ## Detalhes por correção
 

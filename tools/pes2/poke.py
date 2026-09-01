@@ -272,6 +272,46 @@ def plan(img, team, value, allow_partial=False, truncate=False,
     return canon[team][1], steps, missing
 
 
+def fixed_tables(img):
+    """{path: [(start, width, count)]} for every fixed-width table on the disc.
+
+    What `leftovers` needs to tell a record of one from a coincidence: the
+    boundaries. `T.TABLES` already says which tables are fixed and how wide,
+    and `T.resolve_full` says where each one starts in the release at hand --
+    the anchors move between releases, the schemes do not.
+
+    A table whose marker this release does not place is skipped rather than
+    fatal: the sweep then falls back to the `cstr` test over that area, which
+    is what it did before this existed.
+
+    Recomputed per call rather than cached: five tables to resolve, and a
+    cache keyed on the image would have to key on something that survives
+    the open/close cycle `self_check` does around one copy.
+    """
+    out = {}
+    for t in T.TABLES:
+        if t.scheme == "cstr":
+            continue
+        try:
+            path, offset, entries, _ = T.resolve_full(img, t)
+        except (ValueError, KeyError):
+            continue
+        out.setdefault(path, []).append((offset, t.scheme[1], len(entries)))
+    return out
+
+
+def _whole_record(data, i, n, fixed):
+    """Is the match at `i`, `n` bytes long, a whole record? See `leftovers`."""
+    for start, width, count in fixed:
+        if not start <= i < start + width * count:
+            continue
+        if (i - start) % width or n > width:
+            return False       # inside a fixed table, but not a record of it
+        return all(b == 0 for b in data[i + n:i + width])
+    return (i == 0 or data[i - 1] == 0) \
+        and i + n < len(data) and data[i + n] == 0
+
+
 def leftovers(img, steps):
     """Every whole record on the disc still holding the old name.
 
@@ -282,24 +322,43 @@ def leftovers(img, steps):
     again. Writing five of eight is section 6.1 word for word -- the new
     name on one screen and the old one on the next.
 
-    A hit counts only when the match is a whole NUL-delimited record, so a
-    name that is a prefix of another does not raise one.
+    A hit counts only when the match is a **whole record**, so a name that
+    is a prefix of another does not raise one -- and "whole" is decided per
+    scheme, because the scheme is a property of the table (1.10):
+
+      **string + terminator**: NUL before (or the start of the file) and
+      NUL after. This is the whole of the eight team-name lists.
+
+      **fixed width**: the match starts on a record boundary of a fixed
+      table *of that file*, and what follows it inside the record is NUL or
+      nothing. A name that fills the width carries no terminator at all --
+      `NachtegallHeggem` is how two 10-character names read on the disc --
+      so the NUL test above answers `False` for a record that is plainly
+      there, and the sweep would fall silent on the case it exists to
+      catch. Silence reads as "swept and nothing left".
+
+    Nothing on this disc yet needs the second form: the eight team-name
+    lists are all `cstr`. Phase 3 goes straight at one that does
+    (`player-names-boot`, 1449 records of 10 fixed bytes).
+
+    Outside every fixed table of the file, the `cstr` test is the answer,
+    which is the conservative reading of an area no table describes.
     """
     wanted = {s["old"] for s in steps}
     planned = [(s["path"], s["rel"], s["rel"] + s["slot"]) for s in steps]
+    fixed = fixed_tables(img)
     out = []
     for path in sorted(img.files):
         if not img.is_form1(path):
             continue
         data = img.read_file(path)
+        here = fixed.get(path, ())
         for name in wanted:
             raw = name.encode("latin-1")
             i = data.find(raw)
             while i >= 0:
-                whole = (i == 0 or data[i - 1] == 0) \
-                    and i + len(raw) < len(data) and data[i + len(raw)] == 0
                 covered = any(p == path and a <= i < b for p, a, b in planned)
-                if whole and not covered:
+                if not covered and _whole_record(data, i, len(raw), here):
                     out.append((path, i, name))
                 i = data.find(raw, i + 1)
     return out
