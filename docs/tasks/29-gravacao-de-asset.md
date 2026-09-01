@@ -89,6 +89,25 @@ mexer no que não foi tocado.
    direta de que *entrada regravada sem conferir contra o registro produz
    exatamente esse estado*. A japonesa, não hackeada, não tem nenhuma.
 
+### Vindo da PES2-TASK-28: o orçamento já foi visto mordendo
+
+Medido em 2026-09-01 com `tools/pes2/tname.py swap`, que recomprime uma
+entrada de `T_NAME_I.BIN` e confere contra a folga até o próximo registro:
+
+- copiar a banda 3 sobre a 2 dá **1.904 B contra 1.868 B de folga** —
+  recusado, 36 bytes acima;
+- copiar a banda 2 sobre a 3 dá **1.817 B** — passa, e a gravação fecha nas
+  duas cópias com round-trip byte a byte.
+
+Duas coisas para o gravador desta task:
+
+1. **A folga é até o próximo registro ou próximo fluxo**, o que vier antes —
+   não até o fim do arquivo. É essa a conta que decide o *fit-or-fail*.
+2. **"Recomprimir sempre encolhe" é falso por entrada.** Sobre as 28 entradas
+   do `T_NAME_I`, o total sai −0,8% (61.212 B contra 61.688), dentro da faixa
+   que a §5c mediu — mas **6 das 28 saem maiores**. A §5c fala do agregado; um
+   gravador decide por entrada.
+
 ## Critério de conclusão
 
 - [ ] Abrir e salvar sem editar devolve a imagem **byte a byte idêntica**, nas

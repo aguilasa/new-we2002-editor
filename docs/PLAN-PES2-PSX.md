@@ -1613,15 +1613,48 @@ python3 tools/pes2/lang_map.py "<track1.bin>" --asset /BIN/T_NAME_I.BIN
 python3 tools/pes2/lang_map.py "<track1.bin>" --self-check --tmpdir <dir>
 ```
 
-**A fonte de apresentação está no `DAT2D` de idioma.** O `T_NAME` guarda os
-nomes **já rasterizados** — a primeira entrada de `T_NAME_I.BIN` é um bloco de
-128×128 a 4 bpp com `Ireland`, `Scotland`, `Wales` e `England` empilhados, 28
-entradas de 4 nomes cada. A face itálica com que estão desenhados é a de dois
-blocos vizinhos de `/BIN/DAT2D_I.BIN`: registros nos offsets relativos
-**20432** e **24768**, VRAM (640, 0) e (672, 0), 32×128 unidades cada, com o
-alfabeto maiúsculo, o minúsculo e os dígitos. Na `(EnFrDe)` o arquivo é
-`DAT2D_E`/`_F`/`_G` e os offsets são outros — ache o registro pelo
-`bin_archive.py`, não por constante.
+**A fonte de apresentação não está no disco — medido, e é resultado, não
+desistência.** O `T_NAME` guarda os nomes **já rasterizados**: 28 entradas de
+128×128 a 4 bpp, quatro nomes por entrada num passo de 32 linhas, e a primeira
+traz `Ireland`, `Scotland`, `Wales` e `England`. Os glifos têm **12 a 13
+pixels** de altura (`tools/pes2/tname.py bands`).
+
+*Uma versão anterior desta seção dizia que a face vinha de dois blocos de
+`/BIN/DAT2D_I.BIN`, nos offsets 20432 e 24768.* **Não vem**, e a medida é
+simples: aqueles blocos têm bandas de 18, 15 e 9 pixels, e nenhuma de 12. A
+semelhança que motivou a afirmação era só o itálico.
+
+O `tools/pes2/tname.py fontscan` é a busca que fechou a questão — toda entrada
+de imagem de todo contêiner que não é estádio, atrás da grade regular de
+bandas curtas que uma folha de alfabeto faria neste tamanho. São 84 candidatos
+na `(EsIt)` e 111 na `(EnFrDe)`, e **todos são texto já desenhado**: as
+strings de interface dos `LC_*`, do `EDT_2D` e dos `CG<idioma>`, e os próprios
+nomes do `T_NAME`. Alfabeto, nenhum.
+
+Ou seja, os nomes de apresentação foram rasterizados **fora do disco**, com a
+fonte que os desenvolvedores usaram — que é o que o `T_NAME-Maker` do CARP faz
+do outro lado, com uma fonte de PC. E compor letra a letra a partir dos pixels
+do próprio disco também não dá: a face é itálica e as letras se encostam, de
+modo que `Ireland` é uma corrida ininterrupta de 92 colunas com tinta, sem
+nenhuma coluna vazia onde cortar.
+
+**O que dá, e o `tname.py swap` faz**, é mover para outro slot um nome que já
+está rasterizado. É a operação que um editor pode oferecer honestamente hoje,
+e exercita o caminho de gravação inteiro — geometria de banda, recompressão,
+orçamento e o conjunto de cópias.
+
+**E o orçamento morde.** Recomprimir a entrada 0 do `T_NAME_I` depois de
+copiar a banda 3 sobre a 2 dá 1.904 bytes contra **1.868** de folga até o
+próximo registro: **recusado, 36 bytes acima**. A mesma entrada com a banda 2
+sobre a 3 dá 1.817 e passa. Isto é a política *fit-or-fail* da §5(a) do
+`PLAN-FEATURES` acontecendo em dado real, e é da
+[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md).
+
+**Um número da §5c a refinar.** Ela mede que recomprimir dá sempre 0,2% a 2,0%
+*menor*. Sobre as 28 entradas do `T_NAME_I`, o compressor daqui dá 61.212
+bytes contra os 61.688 da Konami — **−0,8%**, dentro da faixa —, mas **6 das
+28 entradas saem maiores**. "Sempre menor" vale no agregado e não vale por
+entrada, que é justamente a granularidade em que um gravador decide.
 
 E como na §6.1, **o conjunto se varre, nunca se declara**: o
 `lang_map.py` recusa gravar num arquivo que não tenha cópia, e depois de

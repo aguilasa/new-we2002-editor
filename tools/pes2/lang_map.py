@@ -57,13 +57,11 @@ EXPECT = {
                    ("T_NAME_E.BIN", "T_NAME_F.BIN", "T_NAME_G.BIN")],
 }
 
-# The presentation font, measured in PES2-TASK-28. Section 6.12 asked which
-# container holds it; it is the language copy of DAT2D, in two adjacent
-# 128x128 tiles at 4 bpp -- the same italic face the T_NAME bitmaps are
-# drawn in. Offsets are of `(EsIt)`; on another release they move, so the
-# record is found through bin_archive rather than read from here.
-FONT_FILE = "DAT2D_"
-FONT_VRAM = ((640, 0), (672, 0))
+# Section 6.12 asked which container holds the presentation font. **None
+# does** -- see `tools/pes2/tname.py`, which measured it: the T_NAME glyphs
+# band at 12-13 px and no image entry on either disc carries an alphabet at
+# that size. An earlier revision of this file named two DAT2D_I tiles here;
+# they band at 18, 15 and 9 px, and the resemblance was only the italic.
 
 
 class Refused(Exception):

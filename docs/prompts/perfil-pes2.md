@@ -131,6 +131,7 @@ python3 tools/pes2/lzss.py          "<track1.bin>" --roundtrip        # ~70 s po
 python3 tools/pes2/bin_archive.py check "<track1.bin>"               # o indice de imagem e CLUT
 python3 tools/pes2/lang_map.py      "<track1.bin>" --check            # os conjuntos de copia
 python3 tools/pes2/lang_map.py      "<track1.bin>" --self-check --tmpdir <dir>
+python3 tools/pes2/tname.py         swap "<track1.bin>" --tmpdir <dir>   # grava e desfaz
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra

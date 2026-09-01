@@ -85,9 +85,14 @@ Duas consequências para esta task:
 - [x] Conjunto de cópias por idioma varrido por ferramenta, com a lista
       completa dos pares medidos em `/BIN/`.
 - [x] A ferramenta **recusa** gravar se achar cópia fora do plano.
-- [x] Fonte do jogo localizada, com arquivo e offset relativo.
+- [x] Fonte do jogo localizada, com arquivo e offset relativo — **resultado
+      negativo, medido: não há fonte no disco no tamanho do `T_NAME`.** Ver o
+      Log e a §6.12.
 - [ ] Um nome renderizado, inserido nas duas cópias, e **visto na tela** —
-      nos dois idiomas. **Bloqueado na PES2-TASK-03** — ver o Log.
+      nos dois idiomas. **Metade feita:** a inserção fecha nas duas releases,
+      com recompressão, orçamento e round-trip; o *renderizar a partir de
+      glifos* é impossível com o que o disco tem, e o *ver na tela* está
+      **bloqueado na PES2-TASK-03**. Ver o Log.
 - [ ] O nome antigo ausente de todas as telas alcançadas. **Bloqueado na
       PES2-TASK-03**, pela mesma razão.
 - [x] Round-trip de volta: `cmp` zero contra a release original.
@@ -97,8 +102,8 @@ Duas consequências para esta task:
 
 ## Log de Execução
 
-**Executado em:** 2026-09-01 — **parcial.** Cinco dos sete critérios fechados;
-os dois de tela estão bloqueados, e a task **não** está concluída.
+**Executado em:** 2026-09-01 — **parcial**, em duas sessões. Cinco critérios
+e meio dos sete; o que falta é ver na tela, e a task **não** está concluída.
 
 **Resumo do que foi feito.** `tools/pes2/lang_map.py` agrupa os arquivos do
 disco por digest de conteúdo — o disco inteiro, não só `/BIN/`, porque os
@@ -131,13 +136,46 @@ tinha listado.
 traz `DATSEL`, `DATSEL2`, `DATSEL3` e nenhuma com. Agrupar por nome acha
 conjuntos diferentes em cada disco. Por conteúdo, não.
 
-**A fonte, localizada.** O `T_NAME` guarda os nomes **já rasterizados** — a
-primeira entrada de `T_NAME_I.BIN` é 128×128 a 4 bpp com `Ireland`,
-`Scotland`, `Wales` e `England` empilhados; são 28 entradas de 4 nomes. A face
-itálica é a de dois blocos vizinhos de `/BIN/DAT2D_I.BIN`, registros nos
-offsets relativos **20432** e **24768**, VRAM (640, 0) e (672, 0), com
-maiúsculas, minúsculas e dígitos. Conferido a olho, renderizando os dois
-blocos.
+**A fonte: resultado negativo, e a primeira sessão errou aqui.** O `T_NAME`
+guarda os nomes **já rasterizados** — 28 entradas de 128×128 a 4 bpp, quatro
+nomes por entrada num passo de 32 linhas, a primeira com `Ireland`,
+`Scotland`, `Wales` e `England`. Os glifos têm **12 a 13 px**.
+
+A primeira sessão escreveu, aqui e na §6.12, que a face vinha de dois blocos
+de `/BIN/DAT2D_I.BIN` nos offsets 20432 e 24768. **Está errado**, e a medida
+que o mostra é de uma linha: aqueles blocos têm bandas de 18, 15 e 9 px, e
+nenhuma de 12. A semelhança que motivou a afirmação era só o itálico — foi
+conferido a olho e não conferido em número, que é exatamente como uma
+afirmação dessas passa.
+
+O `tools/pes2/tname.py fontscan` é a busca que fechou a questão: toda entrada
+de imagem de todo contêiner que não é estádio, atrás da grade de bandas curtas
+que um alfabeto faria. **84 candidatos na `(EsIt)`, 111 na `(EnFrDe)`, e todos
+são texto já desenhado** — as strings dos `LC_*`, do `EDT_2D`, dos
+`CG<idioma>`, e os próprios nomes do `T_NAME`. Nenhum alfabeto. Os nomes foram
+rasterizados fora do disco, como o `T_NAME-Maker` do CARP faz com uma fonte de
+PC.
+
+**E compor a partir dos pixels do disco também não dá:** a face é itálica e as
+letras se encostam — `Ireland` é uma corrida ininterrupta de 92 colunas com
+tinta, sem coluna vazia onde cortar.
+
+**O que dá foi feito, e é o caminho de gravação inteiro.** O
+`tname.py swap` move um nome já rasterizado para outro slot, recomprime,
+confere o orçamento, grava em todas as cópias e desfaz:
+
+- banda 3 sobre a 2: **1.904 B contra 1.868 B de folga — recusado**, 36 bytes
+  acima. É a política *fit-or-fail* da §5(a) do `PLAN-FEATURES` acontecendo em
+  dado real;
+- banda 2 sobre a 3: **1.817 B**, passa. `Ireland / Scotland / Wales / Wales`
+  conferido a olho no PNG, 2 cópias gravadas na `(EsIt)` e 3 na `(EnFrDe)`,
+  disco varrido sem sobra do conteúdo antigo, imagem de volta **byte a byte**.
+
+**Um número da §5c refinado.** Ela mede recompressão sempre 0,2% a 2,0%
+*menor*. Nas 28 entradas do `T_NAME_I` o total daqui é 61.212 B contra 61.688
+da Konami — **−0,8%**, dentro da faixa — mas **6 das 28 saem maiores**.
+"Sempre menor" vale no agregado, não por entrada, que é a granularidade em que
+um gravador decide. Repassado à PES2-TASK-29.
 
 **Resultado medido.** `--check` verde nas duas releases; `--self-check` verde
 nas duas: 2 cópias gravadas na `(EsIt)` e 3 na `(EnFrDe)`, disco varrido sem
@@ -153,18 +191,21 @@ idioma no emulador, que é exatamente o roteiro da
 o refizer deve acrescentar a 03. A linha do que a 03 precisa entregar para
 desbloquear esta está escrita **no arquivo dela**.
 
-Com o bloqueio, também não foi feita a **renderização de um nome novo a partir
-da fonte** — sem tela para conferir, o resultado seria uma afirmação sem
-medida. O que existe e foi exercitado é o caminho de gravação: uma alteração
-de mesmo tamanho no `T_NAME`, escrita em todas as cópias e desfeita com `cmp`
-zero.
+A **renderização de um nome novo a partir de glifos** não está bloqueada na
+03: é impossível com o que este disco tem, pelas duas razões acima — não há
+alfabeto, e as letras não se separam. Um editor que queira nome arbitrário
+precisa de uma fonte de fora, e isso é decisão de escopo, não de medição.
 
 **Arquivos criados/modificados**
 
 - `tools/pes2/lang_map.py` — novo
-- `tools/pes2/check_image.py` — o `--check` dos conjuntos no `pes2_image`
+- `tools/pes2/tname.py` — novo: `bands`, `fontscan` e `swap`
+- `tools/pes2/check_image.py` — o `--check` dos conjuntos e a geometria de
+  banda do `T_NAME` no `pes2_image`
 - `docs/PLAN-PES2-PSX.md` — a §6.12 remedida e corrigida
 - `docs/tasks/03-direcao-do-emulador.md` — o que a 28 espera dela
+- `docs/tasks/29-gravacao-de-asset.md` — o orçamento medido e o "−0,8% no
+  agregado, 6 de 28 maiores"
 - `docs/tasks/progresso.md`, `docs/prompts/perfil-pes2.md`, `CLAUDE.md` — o
   gate novo e a ferramenta nova
 

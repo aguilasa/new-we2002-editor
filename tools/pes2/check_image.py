@@ -38,6 +38,7 @@ import poke                                                  # noqa: E402
 import lzss                                                  # noqa: E402
 import bin_archive                                           # noqa: E402
 import lang_map                                              # noqa: E402
+import tname                                                 # noqa: E402
 
 SKIP = 77
 
@@ -80,6 +81,9 @@ def main():
 
     print("\n== the copy set of each asset, by content (plan 6.12) ==")
     bad += lang_map.main([image, "--check"])
+
+    print("\n== T_NAME: band geometry and the font search (plan 6.12) ==")
+    bad += tname.cmd_bands(Args(image=image, verbose=False))
 
     print("\n== docs/PES2-NOMES.md against the disc ==")
     bad += faq_check.main(["--image", image])
