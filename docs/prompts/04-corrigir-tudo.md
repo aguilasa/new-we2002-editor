@@ -1,8 +1,13 @@
 # Corrigir tudo
 
-Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em:
+Você vai trabalhar no repositório localizado em:
 
 - **Projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
+
+**Este prompt é agnóstico de ciclo.** Ele tem o rito; o que é do ciclo mora no
+**perfil**, nomeado pelo campo `perfil:` do `docs/tasks/progresso.md`. **Leia o
+perfil antes de executar** — dele vêm os gates, o que é gerado, o que é leitura
+pura e os arquivos quentes da matriz de conflito.
 
 A documentação de correções está em:
 
@@ -37,10 +42,10 @@ palavra por palavra. Em dúvida sobre qualquer ponto não coberto aqui, o
 
 > **EXCLUSÃO OBRIGATÓRIA — respeitar as decisões confirmadas:**
 > Nunca use uma correção como desculpa para editar à mão arquivo que um gerador
-> produz, colar saída de decompilador em spec ou em Pascal, apontar o
-> transpilador para decompilado, ou escrever no `we-team-editor.exe` / em
-> `roms/` — a menos que a CORR diga isso explicitamente e o usuário tenha
-> confirmado. Ver `docs/PLAN-WTE-LAZARUS.md` §2, §4.4, §4.5 e §8.10.
+> produz, colar saída de decompilador em spec ou em código, ou escrever no que o
+> perfil marca como **leitura pura** (o binário alvo, `roms/`) — a menos que a
+> CORR diga isso explicitamente e o usuário tenha confirmado. As "decisões já
+> confirmadas" do perfil do ciclo valem aqui inteiras.
 
 Se `$ARGUMENTS` trouxer IDs (`CORR-<PREFIXO>-013 CORR-<PREFIXO>-016`), o lote é **esse
 conjunto**, ainda em ordem de dependência. Se trouxer `--plano`, pare depois
@@ -80,13 +85,15 @@ Duas correções só rodam em paralelo se **todas** as condições valerem:
 | Recurso | Por que serializa |
 | --- | --- |
 | **o `DISPLAY=:98`** | não há window manager, e os dois lados do golden acham a janela por heurística. Duas sessões de GUI simultâneas dirigem a janela uma da outra, e o diff resultante parece bug do port |
-| `golden_check.sh` / `work/` | duas cópias de ~474 MB por rodada, num diretório de trabalho único. Duas rodadas simultâneas leem a cópia da outra |
-| Wine / `work/wineprefix*` | prefix único por editor; `wineserver` compartilhado |
+| o gate de comportamento / `work/` | cópias de centenas de MB por rodada, num diretório de trabalho único. Duas rodadas simultâneas leem a cópia da outra |
 | qualquer gerador em modo de escrita | regenera a árvore inteira — duas execuções simultâneas leem a saída da outra |
-| `lazbuild` / saída de build | unidades compiladas e binário únicos |
-| projeto do Ghidra | banco de dados único, escrita exclusiva |
+| saída de build | objetos compilados e binário únicos |
 | `git` (index, `HEAD`, commit) | **sempre no thread principal**, nunca dentro de subagente |
 | `correcoes-progresso.md` | toda CORR escreve nele; é o arquivo mais garantido de colidir |
+
+**O perfil do ciclo acrescenta os seus** — emulador, prefix de Wine, banco de
+dados de desmontador, diretório temporário dimensionado. Leia a seção "arquivos
+quentes" dele antes de montar as ondas.
 
 **A serialização do `:98` é a mais restritiva deste projeto**, e não tem
 equivalente no `snes`. Na prática, **toda CORR que exercita o oráculo, roda o
@@ -99,9 +106,8 @@ A varredura de discrepância do `03-corrigir.md` pode puxar **qualquer** doc par
 dentro de uma correção — não dá para prever o conjunto final pela lista da CORR.
 Trate como conflito provável qualquer par que possa cair nos mesmos:
 `CLAUDE.md`, o plano que a CORR citar, `docs/tasks/progresso.md`,
-`wte/re/offsets.md`, `wte/re/strings.tsv`, `wte/re/published_methods.tsv`,
-`wte/re/tipos.md`, `wte/re/divergencias.md`, `wte/re/spec/*`,
-`docs/prompts/*`, `.claude/commands/*`.
+`docs/prompts/*` (os perfis inclusive), `.claude/commands/*`, **mais os que o
+perfil do ciclo listar como quentes**.
 
 Os wrappers de `.claude/commands/` entram nessa lista pelo mesmo motivo que os
 prompts: são versionados e reafirmam o mesmo rito com outras palavras. Correção
@@ -159,8 +165,8 @@ Para cada onda, na ordem:
    e 3: implementar exatamente a seção **Correção**, mais a discrepância que o
    conserto revelar.
 2. **Os subagentes editam; quem commita é o thread principal.** Subagente não
-   roda `git`, não roda `lazbuild`, não roda `golden_check.sh`, não roda
-   gerador em modo de escrita, não abre janela no `:98`. Se uma CORR precisa de
+   roda `git`, não roda o build do ciclo, não roda o gate de comportamento, não
+   roda gerador em modo de escrita, não abre janela no `:98`. Se uma CORR precisa de
    um desses, ela é sequencial por definição — está na tabela de recursos
    serializados.
 3. Rodar os gates aplicáveis (tabela abaixo), **uma CORR por vez**, mesmo que a
@@ -181,18 +187,22 @@ Para cada onda, na ordem:
 | Se a correção tocou | Gate |
 | --- | --- |
 | gerador ou saída de gerador | `--check` verde; rodar duas vezes dá bytes iguais |
-| Pascal | `lazbuild wte/wte.lpi` sem warning novo |
-| comportamento (handler, gravação) | `golden_check.sh` verde, com o controle (original contra original) fechando antes, e nenhuma janela grande no `:98` na largada |
+| código compilado | o build do ciclo, sem warning novo |
+| comportamento (handler, gravação) | o gate de comportamento do ciclo, com o controle fechando antes, e nenhuma janela grande no `:98` na largada |
 | `src/core/` | `ctest --preset debug` e o golden do `newWe2002` verdes |
 | número em doc | o número novo veio de ferramenta, não de soma à mão |
-| qualquer coisa que rode o oráculo | trabalhou sobre cópia; `roms/` intocada; temporário limpo |
+| qualquer coisa que escreva na imagem | trabalhou sobre cópia; `roms/` intocada; temporário limpo |
+
+**Os comandos concretos estão no perfil do ciclo**, com a disponibilidade de
+cada um.
 
 ### Depois de cada commit, antes do próximo
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
 git status --short          # limpo para a correção que acabou
-grep -rn "<o termo que voce mudou>" docs wte/re .claude CLAUDE.md
+grep -rn "<o termo que voce mudou>" docs .claude CLAUDE.md \
+  <as pastas de codigo que o perfil nomear>
 ```
 
 **A varredura de discrepância se repete a cada CORR, não uma vez no fim.** Num
@@ -204,14 +214,14 @@ lote, a correção *k+1* costuma tornar falso um doc que a *k* acabou de escreve
 - Não marque `[x]`. Registre o status parcial e as pendências no Log de
   Execução, e commite o que estiver **coerente** (se nada estiver, não commite).
 - **Não aborte o lote.** Siga para as CORRs que não dependem dela.
-- Se o que falhou for um gate global (`lazbuild` não compila, `golden_check.sh`
-  vermelho no **controle**, `ctest` do `newWe2002` quebrado), aí **pare o
-  lote**: gate global quebrado contamina toda correção seguinte, e commit em
+- Se o que falhou for um gate global (o build do ciclo não compila, o gate de
+  comportamento vermelho no **controle**, `ctest` do `newWe2002` quebrado), aí
+  **pare o lote**: gate global quebrado contamina toda correção seguinte, e commit em
   cima disso é dívida que ninguém acha depois.
 
-O caso mais provável de gate global quebrado aqui é o **controle do golden**:
-se original contra original não fecha, o problema é do harness ou do `:98`, não
-das correções — e nenhum resultado do lote significa nada até isso voltar.
+O caso mais provável de gate global quebrado aqui é o **controle do gate de
+comportamento**: se original contra original não fecha, o problema é do harness
+ou do `:98`, não das correções — e nenhum resultado do lote significa nada até isso voltar.
 
 ---
 
@@ -225,8 +235,8 @@ das correções — e nenhum resultado do lote significa nada até isso voltar.
 4. Varredura final de discrepância pelos termos de todas as CORRs do lote.
 5. Se alguma CORR ficou de fora (envelhecida, parcial, bloqueada), ela aparece
    no relatório — nunca some em silêncio.
-6. Conferir que `work/` não ficou com cópia de imagem esquecida — cada rodada de
-   golden deixa ~950 MB para trás.
+6. Conferir que `work/` não ficou com cópia de imagem esquecida — uma rodada de
+   gate de comportamento deixa centenas de MB para trás.
 
 ---
 

@@ -31,7 +31,7 @@ significa "a última `✅ Concluído` do
    verificada contra um binário de 2002 rodando sob Wine — ler o código não
    basta nos dois casos. No gerado, o que prova é o `--check` (e rodar duas
    vezes dando bytes iguais); no comportamento, o que prova é o
-   `golden_check.sh` com o controle fechando antes. Compare com o que o Log de
+   o gate de comportamento com o controle fechando antes. Compare com o que o Log de
    Execução afirma; o Log é pista, não verdade.
 
 4. **Recontar o que a task afirma.** Os números do plano vieram de script

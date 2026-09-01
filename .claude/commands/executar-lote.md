@@ -38,15 +38,15 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
    que serializa no `:98` roda em sequência e está correto — a economia ali é
    de rito, não de tempo de máquina. O paralelismo paga na **fase 1** (03 a
    07): extração estática, leitura pura sobre o `.exe`, cada uma escrevendo seu
-   arquivo em `wte/re/`.
+   arquivo de registro técnico.
 
 5. **O `:98` é o recurso mais serializado deste projeto.** Não há window
    manager, e os dois lados do golden acham a janela por heurística: duas
    sessões de GUI simultâneas dirigem a janela uma da outra. **Toda tarefa que
    abre o oráculo, roda o golden ou tira captura é sequencial.** Serializam
    junto: `work/` e as cópias de ~474 MB, o prefix do Wine, gerador em modo de
-   escrita, `lazbuild`, o projeto do Ghidra, `git`, o `progresso.md` e o
-   `wte/Makefile` — onde mora a bateria de `--check`, e onde as tarefas 03 a 06
+   escrita, a saída de build, `git`, o `progresso.md`, o arquivo de build do
+   ciclo — onde a bateria de `--check` costuma morar, e onde várias tarefas
    **todas** querem acrescentar um alvo.
 
 6. **Grafo e matriz divergem, e a matriz manda.** O `progresso.md` diz que 12 e
@@ -60,8 +60,9 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
    ainda ia mudar.
 
 8. **Subagente edita; o thread principal commita.** Subagente não roda `git`,
-   nem `lazbuild`, nem `golden_check.sh`, nem gerador em modo de escrita, não
-   abre janela no `:98`, e não escreve no `progresso.md` nem no `wte/Makefile`.
+   nem o build do ciclo, nem o gate de comportamento, nem gerador em modo de
+   escrita, não abre janela no `:98`, e não escreve no `progresso.md` nem no
+   arquivo de build do ciclo.
 
 9. **Varredura de discrepância a cada tarefa, não uma no fim.** Num lote a
    tarefa *k+1* torna falso o doc que a *k* acabou de escrever.
@@ -73,7 +74,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
     frontmatter da tarefa acompanha o `✅`, também por tarefa.
 
 11. **Falha isolada não aborta o lote** — siga para quem não depende dela. Gate
-    global quebrado **para o lote**: `lazbuild` não compila, `ctest` do
+    global quebrado **para o lote**: o build do ciclo não compila, `ctest` do
     `newWe2002` vermelho, ou — o caso mais provável aqui — o **controle do
     golden** não fechando, que indica problema do harness ou do `:98` e torna
     sem sentido qualquer resultado seguinte.

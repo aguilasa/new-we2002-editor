@@ -5,6 +5,17 @@ Rastreamento das tasks de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md), que
 registra **objetivo e critério**. Divergência entre os dois se resolve a favor
 do plano.
 
+**Perfil deste ciclo:** [`/docs/prompts/perfil-pes2.md`](/docs/prompts/perfil-pes2.md).
+
+Os prompts de `docs/prompts/` têm o **rito** e são agnósticos de projeto; o que
+é **deste ciclo** — decisões confirmadas, armadilhas, fontes binárias, o que é
+gerado, os gates, os arquivos quentes e as verificações por fase — mora no
+perfil, e é este campo que o nomeia. Mesma mecânica do `fonte_de_verdade` da
+task, um nível acima: a task nomeia o plano contra o qual se mede, o progresso
+nomeia o perfil sob o qual o ciclo roda. O ciclo anterior tem o seu em
+[`/docs/prompts/perfil-wte.md`](/docs/prompts/perfil-wte.md), e ele **não vale
+aqui**.
+
 **Projeto separado do `newWe2002`, do `wte/` e dos planos de Windows.** Não
 compartilha build nem código: nada em `src/` sabe o que é PES2, e
 `tools/pes2/` é Python 3 e shell puros. O que compartilha é **conhecimento de

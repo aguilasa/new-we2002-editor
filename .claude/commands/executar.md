@@ -58,7 +58,7 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
    fecha antes de a marcação ser escrita.
 
 4. **O gate da fase, medido.** `--check` dos geradores nas fases 1 a 3;
-   `lazbuild` a partir da 2; `golden_check.sh` **com o controle fechando
+   o build e o gate de comportamento do ciclo, este **com o controle fechando
    antes** a partir da 4. Controle é original contra original dando zero
    divergência — sem ele, verde e vermelho não significam nada.
 

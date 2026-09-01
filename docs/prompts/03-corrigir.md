@@ -1,8 +1,13 @@
 # Corrigir
 
-Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em:
+Você vai trabalhar no repositório localizado em:
 
 - **Projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
+
+**Este prompt é agnóstico de ciclo.** Ele tem o rito; o que é do ciclo — as
+decisões confirmadas, as armadilhas, as fontes binárias, o que é gerado, os
+gates e os arquivos quentes — mora no **perfil**, e quem o nomeia é o campo
+`perfil:` do `docs/tasks/progresso.md`. **Leia o perfil antes de executar.**
 
 A documentação de correções está em:
 
@@ -63,12 +68,11 @@ mais.
 > `progresso.md`.
 >
 > **EXCLUSÃO OBRIGATÓRIA 4 — respeitar as decisões confirmadas:**
-> Confirme que o fix é compatível com o que a CORR aponta como origem — e, para
-> as do `wte/`, com `docs/PLAN-WTE-LAZARUS.md` §2, §4.4, §4.5
-> e §8.10. Nunca use a correção como desculpa para: **editar à mão arquivo que
-> um gerador produz**, **colar saída de decompilador** em spec ou em Pascal,
-> **apontar o transpilador para decompilado**, ou **escrever no
-> `we-team-editor.exe` / em `roms/`** — a menos que a CORR diga isso
+> Confirme que o fix é compatível com o que a CORR aponta como origem **e com
+> as "decisões já confirmadas" do perfil do ciclo**. Nunca use a correção como
+> desculpa para: **editar à mão arquivo que um gerador produz**, **colar saída
+> de decompilador** em spec ou em código, ou **escrever no que o perfil marca
+> como leitura pura** (o binário alvo, `roms/`) — a menos que a CORR diga isso
 > explicitamente e o usuário tenha confirmado.
 
 ---
@@ -88,10 +92,11 @@ repositório dizendo as duas coisas.
 
 Alvos prováveis de varredura, por serem os que repetem número e afirmação:
 
-- `docs/PLAN-WTE-LAZARUS.md` (§1 é quase só número medido)
-- `docs/tasks/progresso.md` (a seção "Estado medido na criação destas tasks")
+- o **plano do ciclo** — o que a CORR citar, ou o que o perfil nomear
+- `docs/tasks/progresso.md`
 - `docs/tasks/<a task de origem>.md`
-- `wte/re/*.md`
+- o **perfil do ciclo** (`docs/prompts/perfil-*.md`) e os registros técnicos que
+  ele listar como arquivos quentes
 - `CLAUDE.md`
 - `.claude/commands/*.md` — os wrappers dos slash commands. **Eles são
   versionados e reafirmam com outras palavras o rito que estes prompts
@@ -103,7 +108,8 @@ Antes de commitar, faça a varredura:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rn "<o termo ou numero que voce mudou>" docs wte/re .claude CLAUDE.md
+grep -rn "<o termo ou numero que voce mudou>" docs .claude CLAUDE.md \
+  <as pastas de codigo que o perfil nomear>
 ```
 
 Toda ocorrência que ficou falsa, incompleta ou apontando para o estado velho
@@ -138,67 +144,36 @@ existia, e a substituição entra como modificação comum.
 
 ---
 
-## Arquitetura do projeto
+## O que o perfil do ciclo diz, e você tem de ler
 
-### O que é leitura pura
+O `perfil:` do `docs/tasks/progresso.md` nomeia o arquivo. Dele vêm, para esta
+invocação:
 
-| Fonte | Papel |
+| Do perfil | Por que importa aqui |
 | --- | --- |
-| `we-team-editor/we-team-editor.exe` | alvo da RE e oráculo comportamental. **Não editável** |
-| `roms/*.bin` | as duas imagens de teste, ~474 MB cada. **Sempre cópia** |
+| **o que é leitura pura** | binário alvo e imagens de teste não se escrevem; trabalhe sobre cópia |
+| **o que é gerado, e por qual gerador** | se o alvo da CORR estiver na lista, **a correção entra no gerador** e a árvore é regenerada. Editar a saída à mão não é correção — é a discrepância que a revisão deveria ter pegado |
+| **os gates** | quais rodar, e a partir de quando cada um existe |
+| **os arquivos quentes** | onde a varredura de discrepância costuma esbarrar |
+| **as decisões confirmadas** | o que não se reverte sem o usuário pedir |
 
-Não existe ferramenta que escreva no `.exe`, e não deve haver. Diferente do
-projeto `snes`, onde o `.diz` é editado pelo `ImportCli`.
-
-### O que é gerado
-
-Se o alvo da correção estiver nesta lista, **a correção entra no gerador**, e o
-arquivo é regenerado:
-
-| Saída | Gerador |
-| --- | --- |
-| `wte/re/dfm/*.dfm` | `wte/tools/dfm_extract.py` |
-| `wte/forms/*.lfm`, esqueleto das units | `wte/tools/dfm2lfm.py` |
-| `wte/src/we2002_offsets.pas`, `we2002_tables.pas` | `wte/tools/gen_tables_pas.py` |
-| `wte/src/we2002_{database,player,team,cdimage,textcodec,types}.pas` | `wte/tools/port_database_pas.py` |
-| `wte/re/spec/INDICE.md` | `wte/tools/spec_index.py` |
-
-**Editar a saída à mão não é correção — é a discrepância que a revisão deveria
-ter pegado.**
-
-### Estrutura
+Estrutura comum a qualquer ciclo:
 
 ```text
 new-we2002-editor/
   docs/
-    PLAN-WTE-LAZARUS.md    # fonte das tasks do wte/ Lazarus
     tasks/                 # tasks, CORRs e progresso
-    prompts/               # estes prompts
-  wte/
-    src/ forms/ re/ tools/ tests/ packaging/
-  src/core/                # we2002_core -- entrada do transpilador
-  we-team-editor/          # binario do Obocaman (gitignored)
-  roms/                    # as duas imagens (gitignored)
+    prompts/               # estes prompts + os perfis de ciclo
+  roms/                    # imagens de teste (gitignored)
   work/                    # copias de trabalho (gitignored)
-```
-
-### Comandos de validação
-
-```bash
-cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-
-python3 wte/tools/<gerador>.py --check    # o gerado bate com o commitado
-lazbuild wte/wte.lpi                      # o app compila
-bash wte/tools/golden_check.sh            # o gate de comportamento
-ctest --preset debug                      # o newWe2002 nao regrediu
 ```
 
 ### A regra do `:98`
 
 Toda execução com GUI acontece no `DISPLAY=:98`, com o `XAUTHORITY` resolvido
 pelo `ps` (ver `CLAUDE.md`). **Feche qualquer janela grande no `:98` antes de
-rodar o golden** — os dois lados acham a janela por heurística, e uma sobra de
-teste manual é dirigida em vez da que está sob teste.
+rodar um gate de GUI** — os dois lados de um golden acham a janela por
+heurística, e uma sobra de teste manual é dirigida em vez da que está sob teste.
 
 ---
 
@@ -211,7 +186,8 @@ teste manual é dirigida em vez da que está sob teste.
 - **Reproduzir a evidência** da seção "Evidência" com o mesmo comando. Se o
   resultado não bater com o que a CORR descreve, **pare e reporte** — a CORR
   pode ter envelhecido
-- Se a correção tocar comportamento, reler a spec do handler em `wte/re/spec/`
+- Se a correção tocar comportamento, reler a spec dele onde o perfil disser
+  que ela mora
 
 ### 2) Implementar
 
@@ -223,7 +199,7 @@ teste manual é dirigida em vez da que está sob teste.
   regenerada.** Ver a tabela acima
 - **Se a correção for de spec, ela não pode virar transcrição.** O campo
   evidência diz de onde veio o fato; trecho de decompilado vai parafraseado,
-  nunca copiado (§2)
+  nunca copiado
 - **Se a correção tocar `src/core/`**, lembre que o `newWe2002` está com escopo
   fechado e verificado: rode `ctest` e o golden dele depois, e diga o resultado
 
@@ -235,17 +211,21 @@ CORR, mais os gates que se aplicarem:
 | Se a correção tocou | Gate |
 | --- | --- |
 | gerador ou saída de gerador | `--check` verde; rodar duas vezes dá bytes iguais |
-| Pascal | `lazbuild wte/wte.lpi` sem warning novo |
-| comportamento (handler, gravação) | `golden_check.sh` verde, com o **controle** (original contra original) fechando antes |
-| `src/core/` | `ctest --preset debug` e o golden do `newWe2002` verdes |
+| código compilado | o build do ciclo, sem warning novo |
+| comportamento (handler, gravação) | o gate de comportamento do ciclo, com o **controle** fechando antes |
+| `src/core/` | `ctest --preset debug` e o golden do `newWe2002` verdes — ele está com escopo fechado |
 | número em doc | o número novo veio de ferramenta, não de soma à mão |
-| qualquer coisa que rode o oráculo | trabalhou sobre cópia; `roms/` intocada |
+| qualquer coisa que escreva na imagem | trabalhou sobre cópia; `roms/` intocada |
+
+**Os comandos concretos estão no perfil**, com a disponibilidade de cada um.
+Esta tabela diz *o que* conferir; o perfil diz *como*, no ciclo em vigor.
 
 Antes de fechar, a varredura de discrepância:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rn "<o termo que voce mudou>" docs wte/re .claude CLAUDE.md
+grep -rn "<o termo que voce mudou>" docs .claude CLAUDE.md \
+  <as pastas de codigo que o perfil nomear>
 ```
 
 Toda ocorrência que ficou falsa, incompleta ou apontando para o estado velho é

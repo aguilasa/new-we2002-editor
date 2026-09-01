@@ -3,7 +3,7 @@ id: CORR-PES2-004
 title: "Correção: os prompts ficaram agnósticos de plano e de prefixo, e continuam cheios de corpo WTE-específico"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: [CORR-PES2-003]
 ---
 
@@ -128,24 +128,94 @@ então esta CORR **não a toma sozinha**.
 
 ## Verificação
 
-- [ ] A decisão de forma foi tomada **com o usuário**, e está escrita
-- [ ] Nenhum prompt cita `wte/`, `PLAN-WTE-LAZARUS.md`, `.dfm`, `.lfm`,
-      `lazbuild` ou Obocaman como instrução; o que sobrar é citação datada de
-      ciclo fechado, e o Log diz quantas
-- [ ] O `04-corrigir-tudo.md` não abre mais dizendo que o projeto é o
-      Lazarus
-- [ ] Existe verificação por fase para as seis fases do
-      [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md), ou está escrito que não haverá
-- [ ] `grep -rn 'WTE-TASK' docs/tasks/concluidos/ | wc -l` inalterado em 1411
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] Conferência de link de `.claude/rules/links.md` sem quebrado novo
+- [x] A decisão de forma foi tomada **com o usuário**: *perfil por ciclo*,
+      arquivo `docs/prompts/perfil-<ciclo>.md` nomeado pelo campo `perfil:` do
+      `progresso.md`. Está escrita em três lugares — o cabeçalho do
+      `progresso.md`, a seção nova de `.claude/rules/tasks.md`, e o cabeçalho de
+      cada perfil
+- [x] Nenhum prompt cita `wte/`, `PLAN-WTE-LAZARUS.md`, `.dfm`, `.lfm`,
+      `lazbuild` ou Obocaman **como instrução**. Sobraram **3**, todas citação:
+      `02-revisar.md:94` e `01-executar.md:308` dizem "no ciclo `wte/`" na
+      própria frase, e `01-executar.md:353` é uma mensagem de commit real do
+      histórico, usada como exemplo de **formato**. Nos cinco wrappers,
+      **zero**
+- [x] O `04-corrigir-tudo.md` não abre mais dizendo que o projeto é o Lazarus —
+      os cinco prompts abrem com "Você vai trabalhar no repositório localizado
+      em", seguido da declaração de que o prompt é agnóstico e o perfil é quem
+      diz o resto
+- [x] Existe verificação por fase para as seis fases do
+      [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md), no `perfil-pes2.md`. As fases
+      0 e 1 estão fechadas e o perfil diz o que revisar nelas (que a premissa
+      não foi quebrada, não reexecutá-las); as 2 a 6 têm checklist próprio,
+      escrito das §§1.5, 3.3, 4.4, 6.1–6.9 do plano
+- [x] `grep -rn 'WTE-TASK' docs/tasks/concluidos/ | wc -l` inalterado em **1411**
+- [x] `python3 tools/check_tasks.py` verde — 76 tasks, ok
+- [x] Conferência de link de `.claude/rules/links.md` sem quebrado novo — a
+      conferência canônica de destino sai **vazia**; a de forma sobra só alvo
+      fora de `docs/`, e os dois links novos dos perfis (`../../CLAUDE.md`,
+      `../../wte/re/fase-1.md`) são desse tipo
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** Evidência reproduzida verbatim antes de editar: a
+Etapa 3 nas mesmas cinco linhas, **64** caminhos `wte/` (10/10/21/8/15), os
+gates datados em `01-executar.md:249,251`, e o `04-corrigir-tudo.md` abrindo com
+o projeto errado. A decisão de forma foi levada ao usuário com quatro saídas
+medidas, e ele escolheu **perfil por ciclo**.
 
-**Problemas encontrados:**
+Nasceram dois perfis. O [`perfil-wte.md`](/docs/prompts/perfil-wte.md) recebeu o
+conteúdo do ciclo arquivado **movido, não reescrito** — as decisões confirmadas,
+as armadilhas de RE e de gerador, as duas fontes binárias, os dois oráculos, a
+tabela de geradores, os gates com disponibilidade, os arquivos quentes, os dois
+precedentes de antecipação e as 73 linhas de verificação por fase —, com um
+aviso no topo de que o ciclo está fechado e o perfil **não vale** para o vivo. O
+[`perfil-pes2.md`](/docs/prompts/perfil-pes2.md) foi escrito do plano: o "não há
+oráculo" da §4.1, as onze armadilhas das §§1.5/3.3/6.1–6.11, as ferramentas de
+`tools/pes2/` como gates, e verificação para as seis fases.
+
+O `progresso.md` ganhou o campo **`perfil:`**, e a regra ganhou a seção que
+explica a mecânica com uma tabela de duas colunas — o que fica no prompt, o que
+fica no perfil.
+
+**Problemas encontrados.** Três, nenhum bloqueante.
+
+1. **A pergunta era mesmo bloqueante**, e foi certo a CORR não a ter tomado. As
+   quatro saídas dão trabalhos diferentes em ordem de grandeza: o perfil por
+   ciclo custou dois arquivos novos de ~250 linhas mais a reescrita dos cinco
+   prompts; "cercar sem reescrever" custaria cinco parágrafos.
+2. **Nem tudo que parecia do ciclo era.** Três armadilhas da lista do
+   `01-executar.md` — cópia sempre, janela esquecida no `:98`, todo número vem
+   de ferramenta — valem para o **repositório**, não para um ciclo, e estão no
+   `CLAUDE.md`. Ficaram no prompt. Movê-las junto teria feito um prompt agnóstico
+   perder regra que vale sempre.
+3. **A conferência de link deu falso vermelho, e a causa está na regra.** Rodar
+   a busca de destino incluindo `docs/prompts/*.md` acusa cinco quebrados
+   (`CORR-<PREFIXO>-XXX.md`, `XX-nome-do-arquivo.md`…) — são os **placeholders**
+   que a `.claude/rules/links.md` exclui explicitamente da conferência de
+   existência. O comando canônico da regra não inclui aquela pasta, e sai vazio.
+   Os perfis são `docs/prompts/`, então herdam a mesma isenção.
+
+**Os cinco prompts somavam 1.841 linhas e passaram a 1.677** — as 498 linhas
+dos dois perfis não são acréscimo líquido: a maior parte é conteúdo que já
+existia, movido para onde não mente.
 
 **Arquivos criados/modificados:**
+
+- `docs/prompts/perfil-wte.md` — **criado** (267 linhas), conteúdo movido
+- `docs/prompts/perfil-pes2.md` — **criado** (231 linhas), escrito do plano
+- `docs/prompts/01-executar.md` — 492 → 413 linhas; "Contexto essencial" e
+  "Arquitetura do projeto" viraram ponteiro, a antecipação ficou só com o padrão
+  abstrato, a tabela de gate por fase ficou com as duas linhas universais
+- `docs/prompts/02-revisar.md` — a Etapa 2 e a Etapa 3 viraram ponteiro, com as
+  quatro perguntas que valem para qualquer fase mantidas no prompt
+- `docs/prompts/03-corrigir.md` — "Arquitetura do projeto" virou a tabela "o que
+  o perfil diz"; a regra do `:98` ficou, por ser do repositório
+- `docs/prompts/04-corrigir-tudo.md` — cabeçalho, exclusão, recursos
+  serializados, arquivos quentes e gates
+- `docs/prompts/05-executar-lote.md` — idem, mais a matriz de conflito
+- `.claude/commands/*.md` — os cinco wrappers, 16 ocorrências
+- `.claude/rules/tasks.md` — seção "O ciclo declara o próprio perfil"
+- `docs/tasks/progresso.md` — o campo `perfil:`
+- `docs/tasks/correcoes-progresso.md` — tabela, checklist e data

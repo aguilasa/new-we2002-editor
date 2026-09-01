@@ -1,8 +1,6 @@
 # Prompt para execução de tarefas
 
-Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus** (engenharia
-reversa do editor do Obocaman, C++Builder 6 / Win32, e reimplementação em
-Object Pascal sobre Lazarus/LCL no Linux), localizado em:
+Você vai trabalhar no repositório localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
 - **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
@@ -17,12 +15,10 @@ Object Pascal sobre Lazarus/LCL no Linux), localizado em:
 - **Tarefas detalhadas:** `docs/tasks/`
 - **Regras do repositório:** `CLAUDE.md` — leia antes de tocar em qualquer coisa
 
-Os caminhos abaixo servem à maioria das tasks deste repositório, e estão aqui
-como atalho, **não** como definição: quem define é o `fonte_de_verdade` da task
-em mãos.
-
-- **Registro técnico dos achados do `wte/`:** `wte/re/`
-- **Binário alvo do `wte/`:** `we-team-editor/we-team-editor.exe` — **somente leitura**
+- **Perfil do ciclo:** o que o campo `perfil:` do `progresso.md` nomear.
+  **Leia-o antes de executar** — dele vêm as decisões confirmadas, as
+  armadilhas, as fontes binárias, o que é gerado, os gates e os arquivos
+  quentes deste ciclo. Este prompt tem o **rito**, e é agnóstico de projeto.
 
 ---
 
@@ -87,26 +83,16 @@ espera para envelhecer.)*
 2. Verificar se todas as tarefas em `depends_on` estão concluídas — se não,
    **não executar**, e informar o bloqueio
 3. Se existir tarefa `🔄 Em andamento`, priorizar concluí-la
-4. **Antecipação, e as duas que já se justificaram.** Tarefa fora da vez só
-   entra com **pedido explícito do usuário**. Duas cabem no critério, e o
-   critério é o mesmo: `depends_on` inteiramente concluído, e razão escrita.
+4. **Antecipação.** Tarefa fora da vez só entra com **pedido explícito do
+   usuário**, `depends_on` inteiramente concluído e razão escrita.
 
-   - **WTE-TASK-32 (preço)** — plano §10 passo 5, se a 24 e a 25 estiverem
-     concluídas. É isolada, não depende de gravação, e valida o ferramental de
-     decompilação num alvo pequeno. Até a renumeração de 2026-08-19 isso se
-     chamava "fora de ordem", e era: preço era a 30 e o fechamento da fase 4
-     era a 29. Hoje ela **está** em ordem — antecipar é só escolher quando.
-   - **WTE-TASK-33 (slots de ML)** — antecipada em 2026-08-19, a pedido. É
-     fase 5, e a razão é que a fase 4 dependia dela: a
-     [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) tinha o ramo de
-     destino de Master League da `0x00404820` parado esperando o contador
-     `0x004335c0`, que é a 33 quem calcula. Não era ciclo — a 33 depende só da
-     20 —, era inversão de ordem entre fases, e a regra de seleção (fase antes
-     de número) faria a 27 ser escolhida para sempre sem nunca fechar.
-
-   O padrão a reconhecer: **tarefa de fase adiante que uma tarefa da fase
+   O padrão que autoriza: **tarefa de fase adiante que uma tarefa da fase
    corrente precisa**. Renumerar resolveria, mas mover uma task arrasta as
-   vizinhas; antecipar com pedido explícito custa uma linha aqui
+   vizinhas; antecipar com pedido explícito custa uma linha. Sem esse padrão,
+   não antecipe.
+
+   **Os precedentes do ciclo estão no perfil**, com a razão de cada um — leia-os
+   antes de propor um novo, porque é neles que o critério fica concreto.
 5. Dentro de uma fase, várias tarefas podem estar prontas ao mesmo tempo (as
    03-07, por exemplo, só dependem da 02). **Execute só uma** — a de menor ID
 
@@ -127,128 +113,63 @@ foi invocado por aqui, o lote não é opção: uma tarefa, e pare.
 
 ---
 
-## Contexto essencial — decisões já confirmadas
+## Contexto essencial — está no perfil do ciclo
 
-**Leia isto antes de tocar em qualquer arquivo.** São decisões já tomadas que
-**não devem ser revertidas** sem o usuário pedir. Valem para as tasks do `wte/`
-Lazarus, e a fonte delas é o `/docs/PLAN-WTE-LAZARUS.md`; se a task em mãos
-declarar outro `fonte_de_verdade`, leia o dela — estas continuam valendo como
-contexto do repositório, não como critério da tarefa:
+**Leia o perfil antes de tocar em qualquer arquivo.** Ele traz as **decisões já
+confirmadas** — coisas que não devem ser revertidas sem o usuário pedir — e as
+**armadilhas medidas** do ciclo, cada uma tendo custado tempo real. Este prompt
+não as repete, porque elas mudam com o ciclo e ele não.
 
-- **O original é Borland C++Builder 6, não Delphi.** Os dois usam a mesma VCL,
-  os mesmos `rtl60.bpl`/`vcl60.bpl` e o mesmo `.dfm`; o que separa é o mangling
-  `$qqr`, os símbolos `___CPPdebugHook`/`__GetExceptDLLinfo` e a string
-  `c:\bcb\emuvcl\utilcls.h`. (§1.1)
-- **Recuperação de especificação, não transcrição.** O decompilador serve para
-  *responder perguntas*; a resposta vai para `wte/re/spec/<handler>.md`, e o
-  Pascal é escrito **a partir do `.md`**. Nunca cole C++ decompilado em spec nem
-  em código. (§2)
-- **O que dá para gerar, se gera.** Formulários, esqueletos de unidade,
-  offsets, tabelas e a camada de dados inteira saem de gerador. Corrigir arquivo
-  gerado à mão não conta como correção — a correção entra no gerador e o
-  arquivo é regenerado. (§4.4)
-- **A camada de dados vem do `we2002_core` deste repositório, não do `.exe`.**
-  Ele já é byte-idêntico ao `ed.exe` nas duas ROMs. (§4.5)
-- **O transpilador só digere código deste repositório.** Nunca apontá-lo para
-  saída de decompilador: ali o `FORBIDDEN` deixa de segurar e a saída é Pascal
-  quebrado com cara de certo. (§8.10)
-- **Diff antes de decompilador.** Pergunta de *onde* se responde com `cmp` em
-  dois minutos; o decompilador é para pergunta de *fórmula*. (§4.2)
-- **"100%" significa toda divergência conhecida e escrita**, não zero
-  divergência. (§0, §9)
-- **O `newWe2002` está com escopo fechado e verificado.** Mexer em `src/core/`
-  exige rodar `ctest` e o golden dele depois. Só a WTE-TASK-18 prevê isso.
+Se a task em mãos declarar um `fonte_de_verdade` de outro projeto, leia o dela:
+as decisões do perfil continuam valendo como contexto do repositório, não como
+critério da tarefa.
+
+Três armadilhas valem para o **repositório inteiro**, não para um ciclo, e por
+isso ficam aqui:
+
+1. **Cópia, sempre.** Os editores gravam in-place e cada imagem tem centenas de
+   MB. **Nunca apontar nada para `roms/`.**
+2. **Janela esquecida no `:98` derruba gate de GUI.** Os dois lados de um golden
+   acham a janela por heurística; uma sobra de teste manual é dirigida em vez da
+   que está sob teste, e o diff parece bug do port. Feche tudo antes.
+3. **Todo número em doc vem de ferramenta**, não de soma à mão nem de script
+   descartável que ninguém guardou.
+
+Mais duas de GUI, que o `CLAUDE.md` detalha: `xdotool type --window` embaralha
+string longa (usa `XSendEvent` — digite curto), e `xdotool windowactivate`
+falha no Xvfb, que não tem window manager (dirija por coordenada absoluta).
 
 ---
 
-## Armadilhas medidas — valem para todas as fases
+## Arquitetura — o que vem do perfil
 
-Cada uma custou tempo real, aqui ou no `newWe2002`.
+O perfil do ciclo traz, e você precisa dos cinco antes de executar:
 
-1. **Ghidra assume `__cdecl`; o C++Builder passa `this` em `EAX`.** Sem
-   convenção customizada (`EAX, EDX, ECX`), a saída do decompilador é ruído
-   convincente — o pior tipo de erro, porque parece certo. (§8.1)
-2. **`[^x]` casa `\n` em regex.** Foi assim que um `Seek(begin)` virou
-   `SeekCurrent` no `port_database.py`: compilava, passava nos testes, passava
-   no ASan, e só o confronto com o `ed.exe` mostrou.
-3. **Cópia, sempre.** Os três editores gravam in-place e cada imagem tem
-   ~474 MB. **Nunca apontar nada para `roms/`.**
-4. **Diff de controle antes de medir qualquer coisa.** `Load`+`Save` sem editar
-   já muda bytes: o `Save` reconstrói as all-star, e o original troca os dois
-   primeiros cobradores de cada clube de ML. Sem o controle, toda medição vem
-   contaminada.
-5. **Janela esquecida no `:98` derruba o golden test.** Os dois lados acham a
-   janela por heurística; uma sobra de teste manual é dirigida em vez da que
-   está sob teste, e o diff parece bug do port. Feche tudo antes.
-6. **`Ctrl+A` não seleciona tudo num `TEdit`.** Limpar campo com `End`,
-   `shift+Home`, `BackSpace` — senão os dois lados recebem textos diferentes.
-7. **`xdotool type --window` embaralha string longa** (usa `XSendEvent`).
-   Digitar curto; mapear unidade para encurtar caminho, como o `make wte` faz.
-8. **`xdotool windowactivate` falha no Xvfb** — não há window manager. Dirigir
-   por coordenada absoluta.
-9. **Tipo de tamanho dependente de plataforma embaralha número de camisa.**
-   `DWORD` virou 64-bit no Linux LP64 e custou o bug inteiro. Em FPC o risco
-   irmão é a ordem de bit do `bitpacked record`. (§8.6, §8.11)
-10. **Release não é o mesmo teste que Debug.** Um `strcpy` estourando um byte
-    era invisível em Debug e derrubava o app em Release com `_FORTIFY_SOURCE`.
-11. **Todo número em doc vem de ferramenta.** Os números da §1 do plano foram
-    medidos por script descartável em 2026-08-05; a WTE-TASK-09 os remede com
-    ferramenta versionada e reconcilia.
+| Do perfil | O que decide |
+| --- | --- |
+| **as fontes de verdade binárias** | o que é leitura pura, o que é sempre cópia, e o que pode ser escrito e sob que condição |
+| **os oráculos, se houver** | contra o que a tarefa se mede. Um ciclo pode não ter nenhum — aí a evidência é outra, e o perfil diz qual |
+| **o que é gerado, e por qual gerador** | corrigir arquivo gerado à mão não conta: a correção entra no gerador |
+| **os gates** | quais rodar, e a partir de quando cada um existe |
+| **os arquivos quentes** | onde a varredura de discrepância costuma esbarrar |
 
----
-
-## Arquitetura do projeto
-
-### As duas fontes de verdade binárias
-
-| Fonte | Papel | Pode escrever? |
-| --- | --- | --- |
-| `we-team-editor/we-team-editor.exe` | alvo da RE, oráculo comportamental | **não** — leitura pura |
-| `roms/*.bin` | imagens de teste, ~474 MB cada | **não** — sempre cópia |
-| `src/core/` (`we2002_core`) | oráculo de formato, entrada do transpilador | só na rota 2 da WTE-TASK-18, com golden do `newWe2002` depois |
-
-O `.exe` **não é editável** — diferente do `.diz` do projeto `snes`, aqui não há
-ferramenta que escreva no binário e nem deve haver.
-
-### Os dois oráculos
-
-- **Oráculo A, comportamental:** `wte.exe` sob Wine 32-bit, dirigido por
-  `xdotool` no `:98`. Responde *que bytes esta operação grava?*
-- **Oráculo B, de formato:** o `we2002_core`, já byte-idêntico ao `ed.exe`.
-  Responde *o que significam estes bytes?*
-
-Combinados, a semântica sai sem decompilar. Ver §4.2 do plano.
-
-### Estrutura
+Estrutura comum a qualquer ciclo:
 
 ```text
 new-we2002-editor/
   docs/
-    PLAN-WTE-LAZARUS.md    # fonte das tasks do wte/ Lazarus
-    PLAN-LINUX.md          # como o port Qt (newWe2002) foi feito
-    PARIDADE-FUNCIONAL.md  # fonte das tasks de paridade do newWe2002
     tasks/                 # tasks, CORRs e progresso
-    prompts/               # estes prompts
-  wte/                     # o projeto Lazarus
-    src/ forms/ re/ tools/ tests/ packaging/
-  src/core/                # we2002_core -- entrada do transpilador, NAO alvo
-  we-team-editor/          # o binario do Obocaman (gitignored)
-  roms/                    # as duas imagens (gitignored)
+    prompts/               # estes prompts + os perfis de ciclo
+  roms/                    # imagens de teste (gitignored)
+  work/                    # copias de trabalho (gitignored)
 ```
 
-### Comandos
+E dois comandos que valem para o repositório, não para um ciclo:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-
-make wte            # abre o editor do Obocaman (oraculo A) no DISPLAY do shell
-make wte-98         # idem, no Xvfb :98
 make run-98         # abre o newWe2002 (o port Qt) no :98
 make test           # ctest do newWe2002, sem os golden
-
-lazbuild wte/wte.lpi                      # a partir da WTE-TASK-02
-python3 wte/tools/<gerador>.py --check    # conforme forem existindo
-bash wte/tools/golden_check.sh            # a partir da WTE-TASK-22
 ```
 
 ### A regra do Xvfb — obrigatória
@@ -307,15 +228,14 @@ markdown da tarefa.
 
 Checklist geral por fase:
 
+**O gate obrigatório de cada fase está no perfil do ciclo**, na seção "gates",
+junto com a disponibilidade de cada ferramenta. Dois valem para **todas** as
+fases de qualquer ciclo, e por isso ficam aqui:
+
 | Fase | Gate obrigatório |
 | --- | --- |
-| 0 | `lazbuild` compila e abre janela no `:98`; `make wte` ainda abre o original |
-| 1 | ferramenta determinística, `--check` verde, saída byte-estável; nenhum número vindo de contagem à mão |
-| 2 | `--check` do `dfm2lfm.py` verde; os 18 formulários abrem; nenhum arquivo gerado editado à mão |
-| 3 | `FORBIDDEN` e `check_seeks()` ativos; dumps Pascal e C++ idênticos nas **duas** ROMs |
-| 4-6 | `golden_check.sh` verde, com o **controle** (original contra original) fechando antes |
-| 7 | árvore instalada funciona depois de movida; app roda sem Wine |
-| todas | todo número novo em doc veio de ferramenta; `roms/` intocada |
+| todas | todo número novo em doc veio de **ferramenta**, não de contagem à mão |
+| todas | `roms/` **intocada**; o que se mede, se mede sobre cópia |
 
 **O controle vem antes do teste.** Original contra original tem de dar zero
 divergência, e um byte plantado tem de ser detectado com o offset certo. Sem os
@@ -378,18 +298,19 @@ Se concluída:
 > `git status`. É justamente o tipo que alguém procura depois, porque é o
 > único que não é sobre o assunto da tarefa.
 
-> **Número da §1 do plano que a tarefa mediu e o quadro da WTE-TASK-09 não
-> lista: acrescente a linha ao quadro.** Registrar no Log "reconciliação é da
-> WTE-TASK-09" não basta — a 09 executa o quadro, e o que não está nele não é
-> remedido. Quadro em
-> [`/docs/tasks/concluidos/09-fechamento-fase-1.md`](/docs/tasks/concluidos/09-fechamento-fase-1.md),
-> seção "Recontagem obrigatória"; a linha nova diz a afirmação do plano e a
-> ferramenta (ou o comando, se não houver gerador) que a remede.
+> **Número do plano que a tarefa mediu e a task de recontagem não lista:
+> acrescente a linha ao quadro dela.** Registrar no Log "a reconciliação é da
+> task NN" não basta — quem executa o quadro remede o que está nele, e o que
+> não está não é remedido. A linha nova diz a afirmação do plano e a ferramenta
+> (ou o comando, se não houver gerador) que a remede. Se o ciclo em vigor não
+> tiver task de recontagem, o destino é o próprio plano, com a data.
 >
-> Isso já falhou duas vezes: os imports de `rtl60`/`vcl60` da WTE-TASK-07
-> ([CORR-WTE-012](/docs/tasks/concluidos/CORR-WTE-012.md)) e os bitmaps da WTE-TASK-08
-> ([CORR-WTE-014](/docs/tasks/concluidos/CORR-WTE-014.md)) — os dois medidos, os dois
-> encaminhados para a 09, os dois ausentes do quadro que ela executa.
+> Isso já falhou duas vezes no ciclo `wte/`: os imports de `rtl60`/`vcl60` da
+> WTE-TASK-07 ([CORR-WTE-012](/docs/tasks/concluidos/CORR-WTE-012.md)) e os
+> bitmaps da WTE-TASK-08
+> ([CORR-WTE-014](/docs/tasks/concluidos/CORR-WTE-014.md)) — os dois medidos, os
+> dois encaminhados para a task de fechamento, os dois ausentes do quadro que
+> ela executa.
 
 > **Pendência encaminhada para outra task só vale com a linha escrita NA
 > task de destino.** Escrever *"encaminhado para a WTE-TASK-NN"* no Log da task

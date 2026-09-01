@@ -35,17 +35,19 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
    sessões de GUI simultâneas dirigem a janela uma da outra, e o diff parece
    bug do port. Na prática, **toda CORR que abre o oráculo, roda o golden ou
    tira captura é sequencial**. Serializam junto: `work/` e as cópias de ~474 MB,
-   o prefix do Wine, gerador em modo de escrita, `lazbuild`, o projeto do
-   Ghidra, `git`, e o próprio `correcoes-progresso.md`.
+   gerador em modo de escrita, a saída de build, `git`, o próprio
+   `correcoes-progresso.md`, e os recursos que o **perfil do ciclo** listar.
 
-5. **Doc quente presume conflito.** `CLAUDE.md`, `docs/PLAN-WTE-LAZARUS.md`,
-   `docs/tasks/progresso.md`, `wte/re/*`, `.claude/commands/*` — a varredura de
+5. **Doc quente presume conflito.** `CLAUDE.md`, o plano do ciclo,
+   `docs/tasks/progresso.md`, `docs/prompts/*` (os perfis inclusive),
+   `.claude/commands/*`, mais os que o perfil listar — a varredura de
    discrepância puxa doc que a lista da CORR não previa. Estes wrappers entram
    na lista porque reafirmam o mesmo rito dos prompts com outras palavras.
    **Na dúvida, sequencial.**
 
 6. **Subagente edita; o thread principal commita.** Subagente não roda `git`,
-   nem `lazbuild`, nem `golden_check.sh`, nem gerador em modo de escrita, e não
+   nem o build do ciclo, nem o gate de comportamento, nem gerador em modo de
+   escrita, e não
    abre janela no `:98`. Correção que precisa de um desses é sequencial por
    definição.
 
@@ -58,7 +60,7 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
    serve. O `status:` do frontmatter da CORR acompanha o `[x]`, também por CORR.
 
 9. **Falha isolada não aborta o lote** — siga para quem não depende dela. Gate
-   global quebrado **para o lote**: `lazbuild` não compila, `ctest` do
+   global quebrado **para o lote**: o build do ciclo não compila, `ctest` do
    `newWe2002` vermelho, ou — o caso mais provável aqui — o **controle do
    golden** não fechando, que indica problema do harness ou do `:98` e torna
    sem sentido qualquer resultado seguinte.

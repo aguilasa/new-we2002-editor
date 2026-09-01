@@ -58,6 +58,55 @@ Sintomas de que a regra foi violada, todos já vistos aqui:
 Uma task que não diz contra o que se mede não é executável, e adivinhar o plano
 pelo prefixo do ID é exatamente o acoplamento que esta regra impede.
 
+## O ciclo declara o próprio perfil
+
+**Todo `progresso.md` traz um campo `perfil:`** logo no cabeçalho, apontando
+para um `/docs/prompts/perfil-<ciclo>.md`:
+
+```markdown
+**Perfil deste ciclo:** [`/docs/prompts/perfil-pes2.md`](/docs/prompts/perfil-pes2.md).
+```
+
+É a mesma mecânica do `fonte_de_verdade`, um nível acima: **a task nomeia o
+plano contra o qual se mede; o progresso nomeia o perfil sob o qual o ciclo
+roda.**
+
+### O que fica no prompt e o que fica no perfil
+
+| No prompt (agnóstico) | No perfil (do ciclo) |
+| --- | --- |
+| ler o progresso, achar a próxima pendente, conferir `depends_on` | as decisões já confirmadas, que não se revertem sem o usuário pedir |
+| medir contra o `fonte_de_verdade` da task | as armadilhas medidas do ciclo |
+| varrer discrepância, `[x]`/`✅` só depois do commit | as fontes de verdade binárias, e o que é leitura pura |
+| um commit por item, reconciliação em commit próprio | o que é gerado, e por qual gerador |
+| a regra do `:98` e "cópia, sempre" (são do repositório) | os gates, e a partir de quando cada um existe |
+| a forma da tabela e do frontmatter | os arquivos quentes e os recursos serializados do ciclo |
+| o padrão que autoriza antecipação | os precedentes de antecipação já aceitos |
+| as quatro perguntas de revisão que valem para qualquer fase | as verificações específicas por fase |
+
+### Por que, e o que isso proíbe
+
+O motivo é o mesmo do `fonte_de_verdade`, e a falha que o mostrou foi medida:
+três correções seguidas tiraram dos prompts o nome do plano e os dois prefixos
+de ID, e o corpo operacional do ciclo `wte/` continuou lá — 64 caminhos `wte/`
+cravados e 73 linhas de checklist sobre `.dfm` e `.lfm` num arquivo que executa
+tasks de PES2 ([CORR-PES2-004](/docs/tasks/CORR-PES2-004.md)).
+
+**Não escreva num prompt** o nome de uma ferramenta, de um gerador, de um
+diretório de código ou de uma fase de projeto. Se a frase deixa de ser
+verdadeira quando o ciclo muda, ela é do perfil.
+
+**A distinção que custa reconhecer:** trocar um nome específico por um
+placeholder nem sempre é o conserto. Um checklist que pergunta *"os 18 DFM
+decodificaram inteiros?"* não vira agnóstico ao ser reindexado por
+`<PREFIXO>-TASK-01 a 09` — vira uma **afirmação falsa** sobre o ciclo novo.
+Texto que descreve um ciclo se **move** para o perfil dele; só o que descreve o
+rito se generaliza no lugar.
+
+**Citação datada de ciclo fechado fica onde está.** Uma armadilha que os
+prompts registram — *"isso já falhou duas vezes no ciclo `wte/`"* — é evidência
+do que aconteceu, e apagá-la para satisfazer um `grep` destrói o registro.
+
 ## As CORRs são autocontidas
 
 `CORR-*.md` **não** leva `fonte_de_verdade`: ela traz `## Problema

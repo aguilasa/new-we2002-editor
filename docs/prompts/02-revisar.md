@@ -56,11 +56,11 @@ controle fechando antes. **Rode a ferramenta.**
 
 - **o que o `fonte_de_verdade` da task apontar** — é ele que diz contra o que a
   tarefa se mede, e muda de task para task
-- `docs/PLAN-WTE-LAZARUS.md` §2 (método:
-  spec, não transcrição), §4.4 e §4.5 (o que é gerado), §6 (testes) e §8
-  (armadilhas)
-- `CLAUDE.md` — em especial a regra do `:98` e a seção do `make wte`
-- Os docs de `wte/re/` que a task cita
+- **o perfil do ciclo**, nomeado pelo campo `perfil:` do `progresso.md`: as
+  decisões confirmadas, o que é gerado, os gates e as armadilhas medidas. É
+  contra ele que se julga se a task respeitou o método do ciclo
+- `CLAUDE.md` — em especial a regra do `:98`
+- Os registros técnicos que a task cita, e que o perfil lista como quentes
 
 ### Etapa 1 — Ler o escopo da tarefa
 
@@ -75,128 +75,54 @@ No markdown da tarefa:
 
 **Rode as ferramentas.** Todo número que a task ou o Log afirma tem de bater.
 
+**Quais ferramentas, e a partir de quando cada uma existe, está no perfil do
+ciclo** — seção "gates". Rode as que se aplicam ao que a task tocou. Duas valem
+para o repositório e não para um ciclo:
+
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
 
-# os geradores conferem contra o commitado -- conforme forem existindo
-python3 wte/tools/dfm_extract.py --check
-python3 wte/tools/dfm2lfm.py --check
-python3 wte/tools/gen_tables_pas.py --check
-python3 wte/tools/port_database_pas.py --check
-
-# o app compila
-lazbuild wte/wte.lpi
-
-# o gate de comportamento (a partir da WTE-TASK-22) -- feche janela no :98 antes
-bash wte/tools/golden_check.sh
-
-# o projeto irmao nao regrediu, se a task tocou em src/core/
-ctest --preset debug
+ctest --preset debug     # o projeto irmao (newWe2002) nao regrediu,
+                         # se a task tocou em src/core/
 ```
 
-**Contagens que a task afirma se remede, não se relê.** Os valores correntes
-estão na §5 de [`wte/re/fase-1.md`](../../wte/re/fase-1.md), que é **gerada** —
-não os copie para cá, senão esta linha vira mais um sítio a reconciliar.
-Exemplos do que já mudou uma vez: componentes (`~430` → 441), strings com
-enchimento (70 → 13), bitmaps (197 → 198), imports de `rtl60`/`vcl60`
-(300 → 267).
+E antes de qualquer gate de GUI: **feche janela grande no `:98`** — os dois
+lados acham a janela por heurística.
 
-Este arquivo está **dentro** do perímetro do `check_fase1.py` desde a
-CORR-WTE-018: número velho afirmado aqui é gabarito para quem revisa, e reprova
-task correta. A forma `velho → corrente` acima é história e passa; o número
-aposentado sozinho, ao lado da palavra que dá o contexto, deixa o
-`make -C wte check` vermelho — e é para deixar.
+**Contagem que a task afirma se remede, não se relê.** Onde os valores correntes
+moram — e se eles são gerados — está no perfil; não os copie para cá, senão esta
+linha vira mais um sítio a reconciliar. No ciclo `wte/` isso já custou uma
+correção: este arquivo entrou no perímetro de um `--check` justamente porque
+número velho afirmado aqui reprova task correta.
 
 ### Etapa 3 — Verificações específicas por fase
 
-**Fase 0-1 (WTE-TASK-01 a 09) — infra e extração estática:**
+**Elas moram no perfil do ciclo**, porque são a parte da revisão que muda
+inteira de um projeto para o outro: o que se pergunta de uma fase de extração de
+formulário não é o que se pergunta de uma fase de inventário de texto.
 
-- O gerador é **determinístico**? Rodar duas vezes dá bytes iguais? Sem isso o
-  `--check` é decorativo
-- Ele **falha alto** em construção que não reconhece, ou emite parcial? Saída
-  truncada que "parece completa" é o furo principal desta fase
-- Os 18 DFM decodificaram **inteiros**? Os três que o protótipo truncou
-  (`ficha_creditos_equipo`, `ficha_movertodos`, `ficha_warning_2`) estão
-  completos?
-- Os blobs binários foram **preservados**, ou viraram `<bin N>`?
-- O limite da tabela de offsets foi **medido** ou estimado pelo olho? Estimar
-  aqui é a armadilha §8.7 — o slot 64 de um array de 63
-- Todo número do doc veio de ferramenta versionada, não de script descartável?
+Abra a seção "verificações específicas por fase" do perfil, ache a fase da task
+em mãos (a coluna `Fase` do `progresso.md`), e responda item a item. Se o perfil
+não tiver entrada para essa fase, **diga isso na saída** em vez de improvisar —
+fase sem verificação escrita é achado, e vira CORR.
 
-**Fase 2 (WTE-TASK-10 a 14) — casca:**
+Quatro perguntas valem para **qualquer** fase de qualquer ciclo:
 
-- Algum `.lfm` ou unidade gerada foi **editado à mão**? Rode o `--check` sobre a
-  árvore commitada. **Editar o gerado em vez do gerador é discrepância crítica**
-- Propriedade que a LCL não tem virou **comentário**, ou sumiu calado? Sumir
-  calado é diferença visual que só aparece muito depois da causa
-- Os 96 stubs estão na **unidade certa**? A coluna `formulario` existe e foi
-  usada? `FormCreate` aparece 16 vezes
-- A comparação visual tem **veredito escrito por formulário**, ou uma frase
-  geral? Frase geral não é conferência
-- O roteiro de eventos é **arquivo fixo**, ou driver que reage à tela? Driver
-  reativo muda o estímulo quando um lado diverge, e os dois param de receber a
-  mesma entrada
-
-**Fase 3 (WTE-TASK-15 a 21) — dados:**
-
-- `FORBIDDEN` e `check_seeks()` **existem e foram testados com entrada
-  plantada**, ou só com a entrada boa? Guard nunca exercitado é guard ausente
-- A fração de código gerado foi **medida**? A tese da §4.5 diz "a maior parte";
-  se veio metade à mão, a tese caiu e o plano precisa dizer
-- Os dumps batem nas **duas** ROMs? A japonesa é o único teste real do
-  `KanjiToAscii`/`AsciiToKanji`
-- O bitfield de `SquadNumbers` foi conferido **contra imagem real**, ou
-  presumido correto pelo `bitpacked record`? (§8.11)
-- O **diff de controle** (gravar sem editar) foi medido antes dos offsets
-  novos? Sem ele toda medição de offset vem contaminada
-- Se a task tocou `src/core/`, o `ctest` e o golden do `newWe2002` rodaram
-  depois?
-
-**Fase 4-5 (WTE-TASK-22 a 33) — comportamento e features:**
-
-- O harness roda o **controle** (original contra original) e ele fecha? Sem
-  isso, verde e vermelho não significam nada
-- Ele detecta um **byte plantado**, com o offset certo?
-- As quatro guardas do golden estão implementadas (`DISPLAY` fixo, recusa com
-  janela aberta, `_NET_WM_PID`, `roms/` intocada)?
-- A convenção Borland foi aplicada **a todas as funções**, e `colorearClick` sai
-  com a assinatura correta? Sem isso o decompilador entrega ruído convincente
-- Alguma spec tem **C++ decompilado colado**? A §2 depende disso e ninguém
-  confere sozinho
-- Quantas specs se apoiam só em "observação de tela"? São hipóteses vestidas de
-  spec
-- `trivial` virou maioria esmagadora? Provavelmente foi atribuído sem olhar —
-  amostre cinco e reconfira
-- A fórmula de preço tem **as duas fontes** (tabela de verdade e disassembly)
-  concordando, ou só uma?
-- O render 2D tem tolerância **medida**, com máximo conhecido e causa nomeada,
-  ou tolerância implícita?
-
-**Fase 6-7 (WTE-TASK-34 a 40):**
-
-- A bateria cobre **edição múltipla** e **gravação dupla**, ou só operação
-  isolada? Gravação dupla continua valendo a pena — o que só aparece na segunda
-  gravação não aparece em lugar nenhum. **Mas o motivo mudou:** este item dizia
-  "o editor não é idempotente", herdando do `newWe2002` uma frase sobre o
-  `ed.exe`. Medido em 2026-08-25
-  ([CORR-WTE-109](/docs/tasks/concluidos/CORR-WTE-109.md)), o `wte.exe` **é** idempotente
-  nos dois caminhos que tocam `OFS_KICKER` — e o gate serve justamente para
-  isso continuar sendo verdade
-- Toda exceção do golden tem entrada em `divergencias.md`? Exceção sem entrada é
-  divergência silenciosa
-- Divergência sem causa conhecida foi classificada como **bug aberto**, ou
-  entrou como "deliberada"? Confundir os dois é como lista de problemas
-  conhecidos vira desculpa
-- A condição "roda sem Wine" foi **testada**, ou presumida?
-- Algum asset do Obocaman foi versionado? (`we-team-editor/` é gitignored)
-- Foi adicionado `LICENSE`? **Não deve haver.**
+- A ferramenta é **determinística**? Rodar duas vezes dá bytes iguais? Sem isso
+  o `--check` é decorativo
+- Ela **falha alto** no que não reconhece, ou emite parcial? Saída truncada que
+  "parece completa" é o furo mais caro de achar
+- Todo número do doc veio de **ferramenta versionada**, não de script
+  descartável nem de contagem à mão?
+- Algum arquivo **gerado** foi editado à mão? Rode o `--check` sobre a árvore
+  commitada. Editar o gerado em vez do gerador é discrepância crítica
 
 ### Etapa 4 — Classificar discrepâncias
 
 | Tipo | Descrição | Ação |
 | --- | --- | --- |
-| **Crítica** | Arquivo gerado editado à mão; decompilado colado em spec ou código; golden sem controle; gravação divergente sem veredito; `roms/` tocada; asset de terceiro versionado; `LICENSE` adicionado | Criar CORR |
-| **Alta** | Número em doc que não bate com a ferramenta; guard não exercitado; gerador não determinístico; limite de array estimado; teste só numa das duas ROMs; propriedade descartada em silêncio | Criar CORR |
+| **Crítica** | Arquivo gerado editado à mão; decompilado colado em spec ou código; gate de comportamento sem controle; gravação divergente sem veredito; `roms/` tocada; asset de terceiro versionado; `LICENSE` adicionado | Criar CORR |
+| **Alta** | Número em doc que não bate com a ferramenta; guard não exercitado; gerador não determinístico; limite de array estimado; teste numa amostra só quando o ciclo tem duas; propriedade descartada em silêncio | Criar CORR |
 | **Baixa** | Veredito de formulário ausente; spec sem campo evidência; doc desatualizado sem contradição; link de tabela faltando | Criar CORR |
 | **Não é discrepância** | Diferença intencional já registrada no Log; resultado negativo (unidade transitiva, offset irrelevante) — é resultado legítimo | Ignorar, mas registrar no relatório |
 
@@ -260,9 +186,9 @@ arquivo gerado, a correção entra no **gerador**.>
 
 - [ ] <item verificável, com o comando que o verifica>
 - [ ] `--check` do gerador afetado continua verde (se tocar em gerado)
-- [ ] `lazbuild wte/wte.lpi` compila (se tocar em Pascal)
-- [ ] `golden_check.sh` verde, com o controle fechando antes (se tocar em
-      comportamento)
+- [ ] o build do ciclo compila, sem warning novo (se tocar em código)
+- [ ] o gate de comportamento do ciclo verde, com o controle fechando antes
+      (se tocar em comportamento)
 - [ ] `ctest --preset debug` e o golden do `newWe2002` verdes (se tocar em
       `src/core/`)
 - [ ] `roms/` intocada
@@ -285,7 +211,7 @@ Em `docs/tasks/correcoes-progresso.md`.
 Se ainda não existir:
 
 ```markdown
-# Progresso de Correções — WE2002 Team Editor → Lazarus
+# Progresso de Correções — <o ciclo em vigor>
 
 ## Resumo executivo
 
@@ -337,8 +263,8 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 > `progresso.md` que este prompt escreve é a coluna "Revisado em" da tarefa
 > que ele acabou de revisar — nunca "Status", nunca "Concluída em", nunca
 > outra linha.
-> **Não rode gerador em modo de escrita.** Rodar `--check`, `lazbuild`,
-> `golden_check.sh`, `ctest`, `objdump`, `cmp` é obrigatório e não conta como
+> **Não rode gerador em modo de escrita.** Rodar `--check`, o build, o gate de
+> comportamento, `ctest`, `objdump`, `cmp` é obrigatório e não conta como
 > implementação. Rodar um gerador **sem** `--check` reescreve a árvore e é
 > implementação.
 >

@@ -33,11 +33,11 @@ primeira `[ ]` em `correcoes-progresso.md`".
 4. **Correção no gerador, não no gerado.** Se o alvo sair de `dfm_extract.py`,
    `dfm2lfm.py`, `gen_tables_pas.py`, `port_database_pas.py` ou
    `spec_index.py`, o fix entra no gerador e a árvore é regenerada. Editar
-   `wte/forms/*.lfm` ou `wte/src/we2002_*.pas` à mão não é correção — é a
+   a saída de um gerador à mão não é correção — é a
    discrepância que a revisão deveria ter pegado.
 
 5. **Nada de decompilado colado, nada de escrita no que é leitura pura.** Spec
-   e Pascal se escrevem a partir de `wte/re/spec/`, com trecho parafraseado e
+   e código se escrevem a partir da spec, com trecho parafraseado e
    nunca copiado. O `we-team-editor.exe` e `roms/` são leitura pura — trabalhe
    sobre cópia em `work/`.
 
@@ -51,7 +51,8 @@ primeira `[ ]` em `correcoes-progresso.md`".
 7. **Discrepância achada no caminho se conserta, não se registra.** A lista de
    arquivos da CORR é o mínimo. Doc que o seu conserto tornou falso ou
    incompleto entra nesta mesma invocação, em commit próprio — `grep -rn` pelo
-   termo que você mudou, em `docs`, `wte/re`, `.claude` e `CLAUDE.md`, antes de
+   termo que você mudou, em `docs`, `.claude`, `CLAUDE.md` e nas pastas de
+   código que o perfil nomear, antes de
    fechar. O `.claude/` está aí porque estes wrappers repetem o mesmo rito com
    outras palavras, e já ficaram para trás de uma mudança de processo uma vez.
    Registrar no Log e seguir não vale: quem lê o doc errado amanhã não lê o seu
