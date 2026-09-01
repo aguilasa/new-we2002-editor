@@ -34,6 +34,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-010](/docs/tasks/CORR-PES2-010.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | As duas constantes do `scan`: `minimum=1024` decide todo verdicto com 128 B de margem, e o comentário do `PROBE_CAP` afirma um máximo de 16 KiB que são 16.676 | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O prefixo de registro citado na §1.14(e) é o do quarto registro da cauda, não a forma deles | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-012](/docs/tasks/CORR-PES2-012.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | Baixa | [x] concluída | 2026-09-01 |
+| [CORR-PES2-013](/docs/tasks/CORR-PES2-013.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | O `check` do `bin_archive.py` sai 1 na imagem golden e nenhum doc diz; a §1.14(f) afirma que nenhuma falha está fora dos estádios, e o `TEX_70.BIN` está | Alta | [ ] pendente | — |
+| [CORR-PES2-014](/docs/tasks/CORR-PES2-014.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Quatro documentos dizem que os 105 `TEX_*.BIN` da European Deluxe são Form 2; são 18, e esta task lê os outros 87 | Alta | [ ] pendente | — |
+| [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Dos quatro offsets de bandeira citados, o 72400 é forma e mora em `/SELFORM.BIN`; o quarto de cor, 75776, ficou de fora | Alta | [ ] pendente | — |
+| [CORR-PES2-016](/docs/tasks/CORR-PES2-016.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | `depth_of()` decide a profundidade por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 cores contra 5 de 256 | Alta | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -61,6 +65,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-010 — os dois limiares do `scan`, um deles com 128 B de margem
 - [x] CORR-PES2-011 — prefixo de registro citado é uma instância, não a forma
 - [x] CORR-PES2-012 — contagem de contêineres afirmada por jogo, medida por disco
+- [ ] CORR-PES2-013 — gate vermelho na imagem golden, sem veredito escrito
+- [ ] CORR-PES2-014 — 18 dos 105 `TEX_*` são Form 2, não os 105
+- [ ] CORR-PES2-015 — offset de forma citado como cor, e noutro arquivo
+- [ ] CORR-PES2-016 — profundidade decidida por contêiner, não por paleta
 
 ## Detalhes por correção
 
@@ -265,3 +273,60 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
   quatro discos, cujo cabeçalho imprime a contagem de cada um
 - **Fix:** dar os quatro números por disco e tirar o número do item de
   checklist, que quer garantir os três verdictos, não a contagem
+
+### CORR-PES2-013
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §1.14(f), e o gate
+  `bin_archive.py check` na imagem golden European Deluxe
+- **Sintoma:** a §1.14(f) diz que as falhas são "todas em `GDC_*` … nenhuma
+  fora dos estádios, nos quatro discos"; na golden há uma fora — o registro em
+  18052 de `/BIN/TEX_70.BIN`, que não é estádio nem Form 2 —, e é ela mais os
+  cinco *outros* que fazem o `check` sair **1** com `CHECK FAILED` naquele
+  disco. Nenhum documento registra que o gate é vermelho ali
+- **Como foi detectado:** revisão da PES2-TASK-27 — `bin_archive.py check` nos
+  quatro discos, com o código de saída
+- **Fix:** escrever o veredito (esperado, seis registros, disco hackeado) ou
+  contá-los à parte, como já se fez com os estádios da §1.14(d)
+
+### CORR-PES2-014
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §1.14(e),
+  `docs/PLAN-FEATURES.md` §5c, e o Log da PES2-TASK-26 e o Contexto da
+  PES2-TASK-27
+- **Sintoma:** "na imagem golden European Deluxe os **105** `TEX_*.BIN` são
+  Form 2". Medido: **18**; os outros 87 são Form 1 e o `bin_archive.py` desta
+  mesma task os lê — `TEX_03`, `TEX_06`, `TEX_28`, `TEX_70` e `TEX_84`
+  aparecem no relatório dele
+- **Como foi detectado:** revisão da PES2-TASK-27 — `is_form1()` sobre os 105
+  nos três discos
+- **Fix:** "18 dos 105", com o comando; a explicação do `TEX_00` continua
+  valendo, porque ele é um dos 18
+
+### CORR-PES2-015
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §1.14(f) e o repasse em
+  `docs/tasks/14-bandeiras.md`
+- **Sintoma:** "os quatro `OFS_FLAG_*` caem em `/BIN/DAT2D.BIN` nos offsets
+  69798, 72400, 73254 e 73728". O **72400** é `OFS_FLAG_SHAPE_COPY_4` —
+  forma, não cor — e mora em **`/SELFORM.BIN`**; o quarto de cor,
+  `OFS_FLAG_COLOURS_B`, está em **75776** e ficou de fora
+- **Como foi detectado:** revisão da PES2-TASK-27 — `ofs_map.locate()` sobre
+  os nove `OFS_FLAG_*`; o resumo do `ofs_map.py` corta em três por arquivo, o
+  que escondeu o quarto de `DAT2D.BIN`
+- **Fix:** 69798, 73254, 73728, 75776; e uma linha dizendo onde moram os cinco
+  `OFS_FLAG_SHAPE_COPY_*`
+
+### CORR-PES2-016
+
+- **Arquivo com problema:** `tools/pes2/bin_archive.py`, `depth_of()`; e a
+  regra como enunciada na §1.14(f)
+- **Sintoma:** a profundidade é decidida por contêiner com `max(widths)`, e o
+  `/BIN/DAT2D.BIN` das duas releases de PES2 tem **261 CLUTs de 16 cores e 5
+  de 256** — o arquivo inteiro é lido a 8 bpp por causa dos cinco. Silencioso:
+  a contagem de bytes não muda com a profundidade, então o `check` fica verde
+  e o `export` escreve PNG errado. É o arquivo para o qual a §1.14(f) manda a
+  PES2-TASK-14 olhar
+- **Como foi detectado:** revisão da PES2-TASK-27 — larguras de CLUT por
+  contêiner nos três discos originais
+- **Fix:** profundidade do **par imagem-paleta**, saindo do CLUT em uso; o
+  `check` conta os contêineres de largura mista em vez de escondê-los
