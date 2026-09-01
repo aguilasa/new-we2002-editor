@@ -3,7 +3,7 @@ id: CORR-PES2-012
 title: "Correção: o estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -75,18 +75,45 @@ mediu. O Log já está certo e não se toca.
 
 ## Verificação
 
-- [ ] `grep -rn "208 contêineres\|208 no PES2" docs/ CLAUDE.md` não devolve
+- [x] `grep -rn "208 contêineres\|208 no PES2" docs/ CLAUDE.md` não devolve
       afirmação por jogo
-- [ ] os quatro números batem com o `lzss.py --check`
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] os quatro números batem com o `lzss.py --check`
+- [x] `python3 tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** A linha da tabela de estado passou a dar os
+quatro números por disco — 208, 210, 177 e 195, 790 no total — e a apontar
+para a §1.14(e). A explicação dos "13 de diferença" **não sumiu**: ela ficou,
+dizendo entre quais dois discos vale. É a segunda opção que a CORR abre, e é
+a certa, porque a frase é verdadeira nesse par: 208 − 195 são `(EsIt)` contra
+a japonesa, exatamente as duas colunas do histograma da §1.14(a), que já se
+rotulam por disco. O item da Fase 7 e o critério da task perderam o número e
+ficaram com a conta dos três verdictos, que é o que eles querem garantir.
 
-**Problemas encontrados:**
+**Problemas encontrados.** Dois.
+
+1. **A mesma afirmação estava também no plano, fora da lista da CORR.** O
+   `PLAN-PES2-PSX.md`, no resumo da Fase 7, mandava *"descomprimir os 208
+   contêineres das duas releases"* — e são 208 e 210. Corrigido junto.
+2. **Duas ocorrências de "208" ficam de propósito, e não são esta
+   afirmação.** A §6.13 do plano e o item correspondente do `progresso.md`
+   dizem *"constante lê do lugar errado em 205 dos 208 arquivos"*. É uma
+   razão medida sobre um disco, não uma contagem generalizada para o jogo;
+   reescrevê-la sem remedir o numerador em cada disco trocaria um número
+   medido por um palpite. Fica como está.
+
+**Gates.** Os quatro números saíram do `lzss.py --check` sobre os quatro
+discos nesta mesma corrida (208/210/177/195, total 790) — nenhum somado à
+mão. `grep -rn "208 contêineres\|208 no PES2" docs/ CLAUDE.md` sem afirmação
+por jogo. `check_tasks.py` 82 tasks ok; conferência de link sem quebrado novo.
+`roms/` intocada — correção de doc.
 
 **Arquivos criados/modificados:**
+
+- `docs/tasks/progresso.md`
+- `docs/tasks/26-codec-lzss.md`
+- `docs/PLAN-PES2-PSX.md` (o resumo da Fase 7, não previsto pela CORR)

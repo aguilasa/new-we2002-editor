@@ -1261,7 +1261,7 @@ formato é o do WE2002, o `PLAN-FEATURES` já o descreve fase a fase, e a
 camada ISO9660 (Fase 8 de lá) já está pronta e verde no `iso.py`.
 
 - **Codec LZSS** ([PES2-TASK-26](/docs/tasks/26-codec-lzss.md)). Descomprimir
-  os 208 contêineres das duas releases; round-trip
+  os contêineres das duas releases — 208 e 210, §1.14(e); round-trip
   `decompress(compress(x)) == x`. Decide a divergência do `TEX_00` da §1.14.
 - **Contêiner e TIM** ([PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md)).
   Lista de entradas, `DATA_HEADER`, 4 e 8 bpp com CLUT, export PNG. É a de

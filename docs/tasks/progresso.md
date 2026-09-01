@@ -273,7 +273,7 @@ emulador, são elas o trabalho barato que continua.
 
 ### Fase 7 — Assets do disco
 
-- [x] Os 208 contêineres de cada release classificados: descomprimiu inteiro,
+- [x] Os contêineres de cada release classificados: descomprimiu inteiro,
       parou no meio, não é LZSS — **790 contêineres nos quatro discos, 646
       inteiros, 12 parciais, 132 não-LZSS** (§1.14(e))
 - [x] `decompress(compress(x)) == x` em 100% dos blocos — **8.217 de 8.217**
@@ -446,7 +446,7 @@ que estes números tenham comando que os reproduza.
 | Diff entre releases | 202 idênticos, 27 diferem, 7 não comparáveis — *corrigido*: era 204/32 |
 | Os 8 que diferem sem mudar de tamanho | **nenhum guarda dado de jogo** — 99,6% a 100% é rotina MIPS realocada, `+3176` dominando |
 | Os 69 `OFS_*` do WE2002 | **69 de 69** mapeados, em 13 arquivos, os 13 presentes no PES2 |
-| Contêineres `form1` em `/BIN/` | **208** no PES2, 195 no WE2002 — os 13 de diferença são cópia de idioma |
+| Contêineres `form1` em `/BIN/` | **por disco, não por jogo**: 208 em PES2 `(EsIt)`, **210** em PES2 `(EnFrDe)`, 177 na European Deluxe e 195 na japonesa — 790 nos quatro (§1.14(e), com o comando que os reproduz). Os 13 de diferença que a medição de 2026-08-30 atribuiu a cópia de idioma são entre `(EsIt)` e a japonesa, as duas pontas que ela comparou; a faixa tem quatro valores |
 | Cabeçalho de contêiner | ponteiros de RAM, **16 larguras** distintas, **mesmo histograma nos dois jogos** |
 | `DAT2D.BIN` entre os dois jogos | **2.070 bytes de fluxo comprimido idênticos** a partir do byte 8 |
 | `T_NAME_I` × `T_NAME_S` | 62.196 B cada, **byte a byte idênticos** |

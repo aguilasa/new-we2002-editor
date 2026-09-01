@@ -20,14 +20,15 @@ status: concluído
   — como a PES2-TASK-08 e a 09, é o trabalho barato que continua se a Fase 2
   travar.
 
-Os 208 arquivos `form1` de `/BIN/` do PES2 são contêineres comprimidos com o
-LZSS que o `WECompressor` do CARP descomprime. A §1.14 mede a evidência: os
+Os arquivos `form1` de `/BIN/` do PES2 são contêineres comprimidos com o
+LZSS que o `WECompressor` do CARP descomprime — 208 em `(EsIt)` e 210 em
+`(EnFrDe)`; a contagem é do disco, não do jogo. A §1.14 mede a evidência: os
 2.070 primeiros bytes do fluxo de `DAT2D.BIN` são **idênticos** entre o
 PES2 `(EsIt)` e o WE2002 japonês, e o histograma de largura de cabeçalho é o
 mesmo nos dois discos.
 
 O que **não** está medido é o fluxo inteiro: prefixo idêntico prova que o
-mesmo decodificador consome os dois, não que ele chega ao fim de todos os 208.
+mesmo decodificador consome os dois, não que ele chega ao fim de todos eles.
 É isso que esta task fecha.
 
 ---
@@ -49,7 +50,7 @@ releases, com round-trip provado.
      assimetria; não "completar por simetria" sem medir.
 2. **Achar o início do fluxo** pelo cabeçalho de ponteiros (§1.14) — não por
    constante. A largura varia de 0 a 204 palavras entre os arquivos.
-3. **Rodar nos 208 × 2 releases + nas duas imagens de WE2002**, e classificar
+3. **Rodar nas duas releases + nas duas imagens de WE2002**, e classificar
    cada arquivo em: descomprimiu inteiro / parou no meio / não é fluxo LZSS.
 4. **Round-trip**: `decompress(compress(x)) == x` para cada bloco
    descomprimido. **Não** se exige `compress(decompress(y)) == y` — o
@@ -69,7 +70,7 @@ está escrita**.
 ## Critério de conclusão
 
 - [x] `tools/pes2/lzss.py` versionado, com `--check` que roda sobre uma imagem.
-- [x] Os 208 contêineres de cada release classificados, com a conta dos três
+- [x] Os contêineres de cada release classificados, com a conta dos três
       números: descomprimiu inteiro, parou no meio, não é LZSS.
 - [x] `decompress(compress(x)) == x` em 100% dos blocos descomprimidos.
 - [x] O início do fluxo de `TEX_00.BIN` decidido por medição, e a fonte errada
