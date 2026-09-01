@@ -49,7 +49,7 @@ Não trata.
 jogador escolhido é de clube de Master League. Aquele handler continua
 `aberto`, e com ele continuam sem medir a condição exata do desvio e o que o
 chamador faz com o `mrYes` que este modal devolve — ver a
-[CORR-WTE-086](../../../docs/tasks/CORR-WTE-086.md), que corrigiu a atribuição
+[CORR-WTE-086](../../../docs/tasks/concluidos/CORR-WTE-086.md), que corrigiu a atribuição
 anterior ao `pabajoClick`.
 
 O `ficha_enlaza` pergunta *"o jogador selecionado é linkado do jogador N do

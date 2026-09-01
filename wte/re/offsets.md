@@ -1,6 +1,6 @@
 # `re/offsets.md` — a tabela de offsets do `we-team-editor.exe`
 
-Produto da [WTE-TASK-06](../../docs/tasks/06-mapa-de-offsets.md). Gerado por
+Produto da [WTE-TASK-06](../../docs/tasks/concluidos/06-mapa-de-offsets.md). Gerado por
 [`../tools/dump_offsets.py`](../tools/dump_offsets.py), a partir de
 `we-team-editor/we-team-editor.exe` e de
 [`Offsets.hpp`](../../src/core/include/we2002/Offsets.hpp).

@@ -3,7 +3,7 @@
 
 Gera `wte/re/legendas.md`, `wte/re/legendas.tsv` e a unidade Pascal
 `wte/src/wte_legendas.pas` -- insumo da
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md), grupo de edicao.
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md), grupo de edicao.
 
 ## O problema que ele resolve
 
@@ -460,7 +460,7 @@ def md(ficha: list[Slot], cabelo: list[Slot], slots: list[Slot],
     linhas = [
         "# `re/legendas.md` — as legendas enumeradas da ficha do jogador",
         "",
-        "Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md).",
+        "Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md).",
         "Gerado por [`../tools/dump_legendas.py`](../tools/dump_legendas.py) a",
         f"partir de `{REL_EXE}`. **Não editar à mão.** As tabelas estão em",
         f"[`{TSV_NAME}`]({TSV_NAME}); este arquivo é a leitura delas, e a unidade",

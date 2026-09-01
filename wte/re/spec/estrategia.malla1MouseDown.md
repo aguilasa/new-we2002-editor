@@ -144,6 +144,6 @@ pior do que não funcionar de nenhum.
 
 Quem lê a posição do marcador de volta é o `estrategia.BitBtn3Click`
 (`0x0040a660`, que também cita `"simbolo"` e `"tirador"`), da
-[WTE-TASK-30](../../../docs/tasks/30-handlers-auxiliares.md); quem a escreve a
+[WTE-TASK-30](../../../docs/tasks/concluidos/30-handlers-auxiliares.md); quem a escreve a
 partir do dado carregado é a rotina interna `0x0040a0b4`. Nenhuma das duas é
 desta task, e nenhuma das duas muda o que este handler faz.

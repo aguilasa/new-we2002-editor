@@ -75,7 +75,7 @@ como "bola sendo arrastada" no
 original pode fazer isso porque para apertar o botão sobre a bola o ponteiro
 necessariamente passou por ela primeiro, e este handler já a registrou.
 
-**Divergência deliberada** ([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):
+**Divergência deliberada** ([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)):
 o port confere se os globais são `nil`. Sem o `relojTimer` portado nada os
 semeia, e sem a guarda o primeiro movimento derrubaria o formulário.
 

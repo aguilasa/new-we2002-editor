@@ -70,6 +70,24 @@ qualquer que seja o projeto. O prefixo `WTE-` ali é histórico e não afirma
 projeto; o corpo da CORR diz de qual se trata. Dois pools custariam um segundo
 prompt de correção sem ganho nenhum.
 
+## Projeto encerrado vai para `docs/tasks/concluidos/`
+
+Quando um projeto fecha, **tudo dele desce um nível**: as tasks, as `CORR-*.md`
+e os dois arquivos de progresso vão juntos para `docs/tasks/concluidos/`, e
+`docs/tasks/` fica só com `progresso.template.md` e
+`correcoes-progresso.template.md` — a base do próximo.
+
+**A pasta é um conjunto fechado, e é isso que faz a convenção continuar
+valendo.** A task é conferida contra o `progresso.md` que mora **ao lado dela**;
+o `tools/check_tasks.py` varre `docs/tasks/` e cada subpasta que tenha um
+`progresso.md` próprio, e nunca cruza uma pasta com o progresso de outra. Mover
+as tasks sem mover o progresso junto quebraria as três convenções de uma vez.
+
+**Os prompts continuam apontando para `docs/tasks/progresso.md`** — o vivo, o
+que a próxima leva de tasks vai criar do template. Eles não conhecem o arquivo,
+e não devem: `concluidos/` é história, e prompt que aponta para história executa
+task já feita.
+
 ## Conferência
 
 ```bash

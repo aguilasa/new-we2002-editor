@@ -174,9 +174,9 @@ Duas coisas que **não** explicam a diferença, as duas medidas:
 **Condição de contorno achada.** O oráculo A é dirigível — com
 `roms/japanese-shift-jis.bin`. É o desfecho positivo dos dois que a
 CORR-WTE-044 previu, e ele desfaz a circularidade: a
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) não precisa mais do
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md) não precisa mais do
 `lista_equiposChange` entendido para montar o gate, e a
-[WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) volta a poder
+[WTE-TASK-19](../../docs/tasks/concluidos/19-os-50-offsets-restantes.md) volta a poder
 levar o editor além da tela de carga.
 
 Três ressalvas que vão junto, e nenhuma é pequena:

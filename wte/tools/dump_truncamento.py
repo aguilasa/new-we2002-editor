@@ -3,7 +3,7 @@
 
 Gera `wte/re/truncamento.md` e `wte/re/truncamento.tsv` -- fecha o criterio
 "comportamento de truncamento documentado por campo" da
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md).
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md).
 
 ## O problema que ele resolve
 
@@ -557,7 +557,7 @@ def md(linhas: list[Linha]) -> str:
     fora = [
         "# `re/truncamento.md` — onde cada campo editável corta o texto",
         "",
-        "Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md), o",
+        "Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md), o",
         "critério *comportamento de truncamento documentado por campo*. Gerado",
         "por [`../tools/dump_truncamento.py`](../tools/dump_truncamento.py).",
         f"**Não editar à mão.** A tabela está em [`{TSV_NAME}`]({TSV_NAME}).",
@@ -663,7 +663,7 @@ def md(linhas: list[Linha]) -> str:
         "a distância ao próximo registro encurta.",
         "",
         "**Isso era tratado como comportamento do original com aquela imagem, e",
-        "não era.** A [CORR-WTE-121](../../docs/tasks/CORR-WTE-121.md) mediu o",
+        "não era.** A [CORR-WTE-121](../../docs/tasks/concluidos/CORR-WTE-121.md) mediu o",
         "efeito na gravação: com a tabela, o campo cortava o nome digitado antes",
         "de gravá-lo, e o `golden-05-nomes` reprovava em duas faixas na",
         "`ptbr-remaster`. Os dois `LimiteDoNome*` passaram a medir a largura na",

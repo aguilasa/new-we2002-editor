@@ -18,7 +18,7 @@ literal — o que muda é a direção e o tamanho.
 
 **Evidência:** disassembly lido
 
-> **O enunciado da [WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md)
+> **O enunciado da [WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
 > dizia que ele grava na imagem, e não grava.** A ROM sai intacta: o único
 > `fopen` de escrita é o do destino, em `"wb"`. Medido em 2026-08-20; a
 > consequência é o formato do gate, ver o fim.
@@ -77,7 +77,7 @@ ficha_info3.ShowModal
 ela; nenhum `fwrite` tem a imagem como destino. É por isso que o critério de
 EDC/ECC da task não se aplica aqui, e é a segunda vez seguida que um critério
 de EDC/ECC fecha por refutação — a primeira foi na
-[WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md).
+[WTE-TASK-28](../../../docs/tasks/concluidos/28-import-de-mcr.md).
 
 No **arquivo de destino**, `tamanho` bytes, com
 

@@ -112,7 +112,7 @@ spec daquela rotina.
 **A regra de validação que a WTE-TASK-26 pedia não é um `if` — é o `Max` da
 barra.** Clube de Master League (índice `> 62`) aceita até **99**; seleção, até
 **32**. Bate com a mensagem de erro que a
-[WTE-TASK-05](../../../docs/tasks/05-inventario-de-strings.md) mapeou
+[WTE-TASK-05](../../../docs/tasks/concluidos/05-inventario-de-strings.md) mapeou
 (`Numero do uniforme invalido ([33 ... 99] somente na Mastere`) e com o teto de
 32 do `newWe2002`, que grava os cinco bits do `TSquadNumbers`. O usuário não
 consegue digitar um número inválido porque **não há onde digitar**: a escolha é
@@ -123,7 +123,7 @@ uma barra de rolagem com faixa fixada na abertura.
 faz a edição e a gravação, e a gravação é a `GravaNumeroDaCamisa` do
 `.aux.inc`. Ele fechou `aberto` na WTE-TASK-26 pela **opção A** — não misturar
 duas causas possíveis num golden vermelho —, e é **o primeiro dos nove** que a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) promove.
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md) promove.
 
 É também a primeira escrita **pontual** do port: o `we2002_database.pas` gerado
 sabe `Save` do banco inteiro, não "escreve estes dois bytes aqui". O que

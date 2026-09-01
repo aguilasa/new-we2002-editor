@@ -483,9 +483,9 @@ precisa saturar do mesmo jeito, ou tratar o 7 explicitamente e registrar a
 divergência, é a **WTE-TASK-27** — não a 32.
 
 > Esta linha dizia WTE-TASK-29 até 2026-08-18. A
-> [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) tirou cara, cabelo e barba do
+> [CORR-WTE-063](../../docs/tasks/concluidos/CORR-WTE-063.md) tirou cara, cabelo e barba do
 > escopo daquela task — as três carregadoras viraram exclusão deliberada da
-> [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) —, mas a
+> [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md) —, mas a
 > saturação **sobrevive à decisão**: ela mora no `TUpDown`, que o port já tem, e
 > o 6 chega ao disco pela gravação. Não desenhar a barba não faz o 7 parar de
 > virar 6.
@@ -511,7 +511,7 @@ arquivo de asset.
 `0x36` = 54 = primeira entrada da paleta. `0x5e` = 54 + 10 × 4 = entrada 10.
 
 > **A tabela dizia "16 entradas" para o uniforme até 2026-08-20, e são 15.** A
-> [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) remediu instrução a
+> [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) remediu instrução a
 > instrução: o laço da bandeira para em `cmp esi,0x10` e o do uniforme em
 > `cmp esi,0xf`, e o do uniforme roda duas vezes, uma por arquivo. Foi
 > generalização — as três rotinas se parecem o bastante para alguém escrever
@@ -583,9 +583,9 @@ Três, todas para quem for escrever o lado Lazarus:
 >
 > Vale para os **dois renderizadores do `MainForm`**, que são os da WTE-TASK-29.
 > Para os **três da ficha do jogador** a recomendação caducou em 2026-08-18: a
-> [CORR-WTE-063](../../docs/tasks/CORR-WTE-063.md) decidiu **não implementá-los**,
+> [CORR-WTE-063](../../docs/tasks/concluidos/CORR-WTE-063.md) decidiu **não implementá-los**,
 > e a entrada está na
-> [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md). Recolorir em
+> [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md). Recolorir em
 > memória é trabalho, e trabalho que ninguém pediu para cara, cabelo e barba.
 
 ---

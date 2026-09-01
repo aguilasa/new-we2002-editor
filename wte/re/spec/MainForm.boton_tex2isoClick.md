@@ -97,7 +97,7 @@ muda por onde o caminho entra, e os dois lados terminam com o mesmo arquivo.
 
 Enquanto isso, o `boton_dialogo_texClick` continua `aberto`: portá-lo pela
 metade daria um veredito que afirma mais do que se fez, e o formato `.tex` é da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md). Na janela do
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md). Na janela do
 port o botão de diálogo segue inerte.
 
 ### A régua

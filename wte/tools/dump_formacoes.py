@@ -3,7 +3,7 @@
 
 Gera `wte/re/formacoes.md`, `wte/re/formacoes.tsv` e a unidade Pascal
 `wte/src/wte_formacoes.pas` -- insumo da
-[CORR-WTE-062](../../docs/tasks/CORR-WTE-062.md), que porta o
+[CORR-WTE-062](../../docs/tasks/concluidos/CORR-WTE-062.md), que porta o
 `estrategia.lista_formacionesClick`.
 
 ## O problema que ele resolve
@@ -355,7 +355,7 @@ def md(formacoes, nomes, passo) -> str:
     fora = [
         "# `re/formacoes.md` — as 18 formações do campinho tático",
         "",
-        "Produto da [CORR-WTE-062](../../docs/tasks/CORR-WTE-062.md). Gerado",
+        "Produto da [CORR-WTE-062](../../docs/tasks/concluidos/CORR-WTE-062.md). Gerado",
         f"por [`../tools/dump_formacoes.py`](../tools/dump_formacoes.py).",
         f"**Não editar à mão.** A tabela está em [`{TSV_NAME}`]({TSV_NAME}); a",
         "unidade Pascal é",

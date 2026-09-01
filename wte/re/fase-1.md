@@ -1,6 +1,6 @@
 # `re/fase-1.md` — fechamento da fase 1
 
-Produto da [WTE-TASK-09](../../docs/tasks/09-fechamento-fase-1.md).
+Produto da [WTE-TASK-09](../../docs/tasks/concluidos/09-fechamento-fase-1.md).
 Gerado por [`../tools/check_fase1.py`](../tools/check_fase1.py).
 **Não editar à mão** — correção entra no script e o arquivo é regerado:
 
@@ -111,7 +111,7 @@ pelos dois testes independentes que ele confronta.
 resultado é confrontado a cada rodada com a coluna `nota` do
 [`offsets.tsv`](offsets.tsv), que o `dump_offsets.py` preenche lendo a
 seção de cada ocorrência no PE. Até a
-[CORR-WTE-017](../../docs/tasks/CORR-WTE-017.md) o corte era
+[CORR-WTE-017](../../docs/tasks/concluidos/CORR-WTE-017.md) o corte era
 `"0x0042" not in va`, teste de faixa escrito como teste de substring:
 os últimos 4 KiB de `.text` casam o prefixo e `.data` passa de
 `0x0042ffff`, então ele errava nos dois sentidos — em silêncio.
@@ -185,7 +185,7 @@ porque só uma delas é erro de medição:
   pé; o que muda é **onde procurar as outras** — nos `.dfm`, não aqui;
 - **imports de `rtl60`/`vcl60`: 300 → 267.** Erro de medição
   do script descartável de 2026-08-05, corrigido pela
-  [CORR-WTE-012](../../docs/tasks/CORR-WTE-012.md). O total de
+  [CORR-WTE-012](../../docs/tasks/concluidos/CORR-WTE-012.md). O total de
   322 imports sempre esteve certo;
 - **bitmaps: 197 → 198.** Erro de **soma na prosa**: a §1.8 do
   plano lista as cinco pastas com os números certos e soma errado.
@@ -209,9 +209,9 @@ perímetro corrente, sobre a árvore anterior à correção
 (`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do
 script, porque não há como remedi-los sobre a árvore de hoje. Cada vez
 que o perímetro cresce eles são **remedidos**, não ajustados: a
-[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) levou bitmaps de 8 para
+[CORR-WTE-016](../../docs/tasks/concluidos/CORR-WTE-016.md) levou bitmaps de 8 para
 9 ao trazer `wte/README.md` para dentro, e a
-[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) somou os três sítios de
+[CORR-WTE-018](../../docs/tasks/concluidos/CORR-WTE-018.md) somou os três sítios de
 `docs/prompts/`. Os sítios
 corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,
 a tabela de estado e três seções do `progresso.md`, os enunciados ainda
@@ -223,7 +223,7 @@ de erro e regra de empacotamento sobre uma contagem inexistente — e o
 o que o enunciado da WTE-TASK-09 pediu, e ali fechou em zero — mas o
 `wte/README.md` continuava afirmando 197 fora do alcance da guarda, que
 é exatamente o espalhamento que esta seção diz combater. A
-[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) trocou as duas bases
+[CORR-WTE-016](../../docs/tasks/concluidos/CORR-WTE-016.md) trocou as duas bases
 por `docs/` e `wte/`; o `rglob` sobre `wte` já cobre `wte/re/`.
 
 Fica fora do perímetro o documento que **narra** a correção: os
@@ -242,7 +242,7 @@ placeholder e não dá para conferir —, mas destino de link não é o que
 esta guarda mede, e número de referência afirmado em prosa entrou de
 carona. O `02-revisar.md` citava três números aposentados como “o que já
 está no plano”, e quem revisasse leria o valor velho como gabarito. A
-[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) trouxe a pasta para
+[CORR-WTE-018](../../docs/tasks/concluidos/CORR-WTE-018.md) trouxe a pasta para
 dentro.
 
 O corte exige o número **e** uma palavra de contexto na mesma linha.

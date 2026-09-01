@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """A tabela de barras do original é a nossa `OFS_TEAM_BARS`. Prova disso.
 
-Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), spec de
+Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), spec de
 `MainForm.lista_equiposChange`. Estendido pela
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md) para o lado da
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md) para o lado da
 edição: além de *de onde vêm* os cinco bytes, agora se confere **onde eles
 moram enquanto são editados** — ver "O buffer de edição", abaixo.
 

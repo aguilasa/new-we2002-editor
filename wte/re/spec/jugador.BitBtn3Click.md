@@ -78,7 +78,7 @@ conferida.
 ## Como o veredito fechou
 
 **Fechou pela régua do grupo de gravação, que é byte.** O
-[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md) o implementou em
+[CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md) o implementou em
 [`impl/ep2002_jugador.BitBtn3Click.inc`](../../src/impl/ep2002_jugador.BitBtn3Click.inc)
 e o fechou com o par
 [`golden-15-ficha`](../../tests/roteiros/golden-15-ficha.txt), nos três modos
@@ -111,6 +111,6 @@ gravar. O `mostrar_jugadorClick` liga `0x00423168` antes do `ShowModal`
 **O campo de créditos aparece aqui, e a fórmula dele não.** Este handler só
 **valida** a faixa 1..250; quem *calcula* o preço a partir dos atributos é o
 `jugador.etiqprecioClick`, da
-[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md). São coisas
+[WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md). São coisas
 diferentes no mesmo campo, e confundi-las faria a task de preço parecer
 dependente de gravação — ela não é.

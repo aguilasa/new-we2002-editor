@@ -1,7 +1,7 @@
 # `re/divergencias.md` — o que diverge do original, e por quê
 
 **Escrito à mão.** Produto da
-[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md). O que é
+[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md). O que é
 *medido* aqui vem de ferramenta e está citado entrada a entrada; o que é
 *decidido* é prosa, e prosa não se gera.
 
@@ -40,7 +40,7 @@ O caso corrente é o **`ficha_enlaza`**, que não tem chamador nenhum no port
 (achado 8 da reconferência de UI, 2026-08-25). Não é escolha de tela: a rota
 que o alcança é o `MainForm.mostrar_jugadorClick` para jogador de clube de
 Master League, e a
-[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) deixou escrito por
+[WTE-TASK-30](../../docs/tasks/concluidos/30-handlers-auxiliares.md) deixou escrito por
 medir *qual condição faz o modal abrir*. O dono é aquela spec; quando a
 condição for medida e a rota portada, não haverá nada a registrar aqui — e se
 a decisão for **não** portá-la, aí sim vira entrada, com a razão.
@@ -57,7 +57,7 @@ a decisão for **não** portá-la, aí sim vira entrada, com a razão.
 
 **Razão.** O `Caption` vem do DFM, e o do `MainForm` é literalmente
 `' W11 Team Editor PT by chagas_michel!'`. A partir da
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) os dois editores rodam no
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md) os dois editores rodam no
 **mesmo** display, e o harness acha janela por título e por tamanho — título
 igual faria ele dirigir o lado errado, que é a armadilha 5 do prompt de
 execução e a causa de um diff que pareceria bug do port.
@@ -69,7 +69,7 @@ execução e a causa de um diff que pareceria bug do port.
 `W11 Team Editor PT by chagas_michel! \[Lazarus\]`, e os do lado oráculo o nome
 sem sufixo; é o que separa os dois lados no mesmo display. No `:98` não há
 window manager, nenhuma barra de título é desenhada, e a captura da
-[WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) não enxerga o sufixo —
+[WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) não enxerga o sufixo —
 num desktop de verdade enxerga, e deve.
 
 ---
@@ -92,7 +92,7 @@ desenhar à mão um segundo glifo (`NumGlyphs = 2`) que **não existe no recurso
 original**, ou reescrever o `TButtonGlyph` da LCL.
 
 **Evidência.** Medida pela
-[CORR-WTE-060](../../docs/tasks/CORR-WTE-060.md) em 2026-08-18 e remedida em
+[CORR-WTE-060](../../docs/tasks/concluidos/CORR-WTE-060.md) em 2026-08-18 e remedida em
 2026-08-25: `iguala_nombres` muda **518 px** no oráculo sob Wine e **0** no port
 (`compara_tela.sh --habilitacao`, recorte `(344,184,73,25)`). Duas hipóteses
 anteriores foram **refutadas** num harness LCL isolado — `ParentFont := True`
@@ -131,8 +131,8 @@ que todos usam, na pasta do Obocaman.
 As saídas seriam duas — reproduzir a gravação in-place, tornando o porte
 read-write sobre dado do usuário, ou escrever um segundo caminho de recolorir em
 memória — e **nenhuma tinha dono**: a
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md) é dona de handler e
-excluiu as três; a [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) é
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md) é dona de handler e
+excluiu as três; a [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) é
 dona de asset, mas dos dois do `MainForm`. Caíam entre as duas definições, e é a
 própria 26 que escreve a regra: *"Exclusão sem dono nomeado é buraco."* Esta
 entrada é o dono.
@@ -148,7 +148,7 @@ intacto.
 **O que esta exclusão não cobre.** A saturação em `7` do `beard_style`: o disco
 guarda 3 bits (0..7), o `Max` do controle é 6 e só existem `barba_0..6`. Isso é
 comportamento de **gravação**, é da
-[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md), e não deixa de valer
+[WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md), e não deixa de valer
 por o desenho não sair.
 
 **Onde o teste sabe.** **Nenhuma régua alcança o formulário `jugador`**, e por
@@ -176,7 +176,7 @@ reprovaram em duas faixas de bytes gravados. O campo cortava o nome digitado
 antes de gravar, e isso não é limite de tela: é dado do usuário perdido na
 imagem.
 
-Medido pela [CORR-WTE-121](../../docs/tasks/CORR-WTE-121.md) em 2026-08-28,
+Medido pela [CORR-WTE-121](../../docs/tasks/concluidos/CORR-WTE-121.md) em 2026-08-28,
 contra a varredura do `.exe`, em 95 times por ROM:
 
 | tabela | japonesa | `ptbr-remaster` | European Deluxe |
@@ -217,7 +217,7 @@ que mantém o gate honesto. Gravar o 23º byte faria o port divergir do oráculo
 num byte por time em toda a operação, e a "correção" seria uma escolha nossa
 sobre dado do usuário sem nada que a valide.
 
-**Evidência.** [CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md), 2026-08-24,
+**Evidência.** [CORR-WTE-095](../../docs/tasks/concluidos/CORR-WTE-095.md), 2026-08-24,
 três réguas independentes:
 
 1. **Plantio** — `0xFF` nos slots 20, 21 e 22 do time 2; depois da corrida os
@@ -256,7 +256,7 @@ cada clube de ML (`OFS_KICKER`) e que gravar duas vezes volta ao início. Isso �
 do **`ed.exe`**, medido pelo `newWe2002`; o `wte.exe` do Obocaman é outro
 binário e outro caminho de código, e nunca tinha sido medido.
 
-**Evidência.** [CORR-WTE-104](../../docs/tasks/CORR-WTE-104.md), 2026-08-25 — o
+**Evidência.** [CORR-WTE-104](../../docs/tasks/concluidos/CORR-WTE-104.md), 2026-08-25 — o
 terceiro ponto, medido num time em que a troca **seria** visível: uma gravação
 de tática contra duas, pelo
 [`golden-24-gravacao-dupla`](../tests/roteiros/golden-24-gravacao-dupla.txt). As
@@ -268,7 +268,7 @@ diferem da ROM virgem —, o que impede o zero de ser dois lados parados.
 **Por que o time importa.** Até a CORR-WTE-104 o roteiro gravava no time 2, cujos
 dois primeiros cobradores são iguais (`[7, 7, …]`). Ali a troca é a identidade e
 a medição **não podia** responder em nenhum dos dois sentidos — a pendência que
-a [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md) encaminhou era,
+a [WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md) encaminhou era,
 sem que ela soubesse, indecidível como estava escrita.
 
 **Onde o teste sabe.** O `test_check_golden.py` lê o time do próprio roteiro e
@@ -287,13 +287,13 @@ conferida.
 
 | Candidata | Veredito | Onde foi medido |
 |---|---|---|
-| tolerância de cor do render 2D | **a tolerância é ZERO**, e não há causa a nomear: 0 de 8.960 px no bitmap e 0 de 5.168 nas 16 amostras, inclusive **depois de calcular** (`--grade`) | [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md), com quatro recusas vistas |
-| `TStaticText` no GTK2 (§8.9) | **fecha sem custo: nenhum dos 37 usa `Transparent`**. Nenhuma ação, nenhum item para a fase 6 | [WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) |
+| tolerância de cor do render 2D | **a tolerância é ZERO**, e não há causa a nomear: 0 de 8.960 px no bitmap e 0 de 5.168 nas 16 amostras, inclusive **depois de calcular** (`--grade`) | [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), com quatro recusas vistas |
+| `TStaticText` no GTK2 (§8.9) | **fecha sem custo: nenhum dos 37 usa `Transparent`**. Nenhuma ação, nenhum item para a fase 6 | [WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) |
 | rótulos cortados por fonte substituta | **não é divergência entre os dois lados** — acontece nos dois, pela mesma causa: `MS Sans Serif` não está instalada e a substituta é mais larga, com `AutoSize = False` no DFM. Sete formulários cortam; o `newWe2002` tem o mesmo sintoma no `ed.exe` sob Wine | [`visual.md`](visual.md), seção "Rótulos cortados" |
-| truncamento de campo | **conferido em 2026-08-25, não é divergência.** Os quatro campos de texto têm limite que cabe no vetor, e os dois numéricos são guardados por validação de faixa no handler — não pelo `MaxLength`. O `- 1` do limite de tela é o **mesmo** `- 1` do decodificador, então o campo nunca recebe mais do que a leitura devolve | [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md), em [`buffers.md`](buffers.md) |
+| truncamento de campo | **conferido em 2026-08-25, não é divergência.** Os quatro campos de texto têm limite que cabe no vetor, e os dois numéricos são guardados por validação de faixa no handler — não pelo `MaxLength`. O `- 1` do limite de tela é o **mesmo** `- 1` do decodificador, então o campo nunca recebe mais do que a leitura devolve | [WTE-TASK-36](../../docs/tasks/concluidos/36-buffers-e-truncamento.md), em [`buffers.md`](buffers.md) |
 
 **As quatro fecharam.** A última era a única ainda aberta quando esta seção foi
-escrita, e a [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md) a
+escrita, e a [WTE-TASK-36](../../docs/tasks/concluidos/36-buffers-e-truncamento.md) a
 fechou no dia seguinte, no sentido negativo: inventariados os seis campos de
 digitação, nenhum trunca de forma que o original e o port discordem. O
 [`dump_buffers.py`](../tools/dump_buffers.py) **aborta** se um limite passar a
@@ -307,13 +307,13 @@ aparecer sem entrada — então a afirmação continua conferida a cada
 
 Medido em 2026-08-25, e vale escrever porque é o resultado que ninguém procura:
 **nenhum dos 23 roteiros declara `conhecida:`**. As 92 corridas da
-[WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md) fecharam com
+[WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md) fecharam com
 **zero `REPROVOU`** e zero faixa de divergência declarada.
 
 Isso não é sorte, e nem sempre foi assim: até 2026-08-20 dois roteiros
 declaravam as faixas `1921862..1921862` e `2012984..2012985` — os dois remendos
 de arranque que o oráculo gravava e o port não. A oitava passagem da
-[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md) achou os autores
+[WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md) achou os autores
 (`0x00411616` no `FormShow` e `0x0040c19e` no `boton_dialogo_weClick`) e portou
 os dois. **Declarar faixa que não diverge mais REPROVA** no
 [`golden_veredito.py`](../tools/golden_veredito.py), então a ausência delas hoje
@@ -350,7 +350,7 @@ divergência deliberada para algo que não diverge seria o defeito desta task pe
 avesso: o documento existe para que nenhuma divergência seja desconhecida, e
 uma entrada falsa faz alguém procurar um problema que não existe. É a mesma
 família que a terceira passagem da
-[WTE-TASK-31](../../docs/tasks/31-fechamento-fase-4.md) batizou — **prosa
+[WTE-TASK-31](../../docs/tasks/concluidos/31-fechamento-fase-4.md) batizou — **prosa
 vencida**, documento que envelhece sozinho enquanto outro o lê como estado
 corrente.
 
@@ -450,10 +450,10 @@ dizia *"divergência deliberada, para a WTE-TASK-35"* e a entrada não existia.
 
 **A mensagem ainda não é a decidida.** Hoje o rótulo diz `data/dat.bin nao
 encontrado` — o que falta, não onde pôr. A regra da
-[WTE-TASK-38](../../docs/tasks/38-nome-e-linhagem.md) é que a mensagem **nomeie
+[WTE-TASK-38](../../docs/tasks/concluidos/38-nome-e-linhagem.md) é que a mensagem **nomeie
 o arquivo e o diretório**, porque os assets não são redistribuídos e quem
 recebe o app não tem como adivinhar; escrevê-la é da
-[WTE-TASK-39](../../docs/tasks/39-empacotamento.md), que é dona da resolução em
+[WTE-TASK-39](../../docs/tasks/concluidos/39-empacotamento.md), que é dona da resolução em
 runtime.
 
 **Evidência.** Medido em 2026-08-25, com o binário copiado para um diretório

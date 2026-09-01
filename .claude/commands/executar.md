@@ -49,8 +49,8 @@ explícito do usuário. Argumento vazio significa "a próxima pendente na ordem"
 
    E **pendência encaminhada para outra task precisa da linha escrita na task
    de destino**, não só no seu Log: quem executar a NN lê o arquivo dela. Já
-   falhou duas vezes ([CORR-WTE-086](../../docs/tasks/CORR-WTE-086.md),
-   [CORR-WTE-105](../../docs/tasks/CORR-WTE-105.md)).
+   falhou duas vezes ([CORR-WTE-086](../../docs/tasks/concluidos/CORR-WTE-086.md),
+   [CORR-WTE-105](../../docs/tasks/concluidos/CORR-WTE-105.md)).
 
 3. **`✅ Concluído` só depois do commit.** Ele descreve estado já commitado,
    não intenção. O passo 5 do prompt (commit, `git status --short` limpo)

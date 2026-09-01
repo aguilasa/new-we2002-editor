@@ -1,6 +1,6 @@
 # `re/truncamento.md` — onde cada campo editável corta o texto
 
-Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md), o
+Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md), o
 critério *comportamento de truncamento documentado por campo*. Gerado
 por [`../tools/dump_truncamento.py`](../tools/dump_truncamento.py).
 **Não editar à mão.** A tabela está em [`truncamento.tsv`](truncamento.tsv).
@@ -105,7 +105,7 @@ escritos em slot de kanji e deixaram lixo depois do terminador, então
 a distância ao próximo registro encurta.
 
 **Isso era tratado como comportamento do original com aquela imagem, e
-não era.** A [CORR-WTE-121](../../docs/tasks/CORR-WTE-121.md) mediu o
+não era.** A [CORR-WTE-121](../../docs/tasks/concluidos/CORR-WTE-121.md) mediu o
 efeito na gravação: com a tabela, o campo cortava o nome digitado antes
 de gravá-lo, e o `golden-05-nomes` reprovava em duas faixas na
 `ptbr-remaster`. Os dois `LimiteDoNome*` passaram a medir a largura na

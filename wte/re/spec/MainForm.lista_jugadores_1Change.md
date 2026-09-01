@@ -88,7 +88,7 @@ que grava esse ponteiro.
 e a rotina em
 [`ep2002_mainform.aux.inc`](../../src/impl/ep2002_mainform.aux.inc) — a casa
 dos auxiliares que não são handler, decidida na quinta passagem da
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md).
+[WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md).
 
 **E não há bloqueio de sinal, porque a LCL não precisa.** A pergunta era real:
 o Win32 não dispara `CBN_SELCHANGE` em `SetCurSel`, o Qt **dispara**
@@ -117,7 +117,7 @@ sempre clicou. Generalizar de um instrumento para "nada" foi o erro, e é
 exatamente o que o [`check_edicao.py`](../../tools/check_edicao.py) já
 registrava como precedente no caso do `dorsalMouseDown`.
 
-Medido pela [CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md), em
+Medido pela [CORR-WTE-089](../../../docs/tasks/concluidos/CORR-WTE-089.md), em
 [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv) — **quatro** gates verdes,
 não um:
 

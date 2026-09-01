@@ -59,7 +59,7 @@ Não trata.
 
 **O alvo chegou.** A `0x0040A0B4` está portada como `PreencheTelaDeTatica`, na
 [`wte_tatica`](../../src/wte_tatica.pas), pela
-[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md); este handler voltou a ser
+[CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md); este handler voltou a ser
 o que sempre foi, uma chamada só.
 
 **Ele não relê a imagem, e isso é a única sutileza.** O original chama apenas a

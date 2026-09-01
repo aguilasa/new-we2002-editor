@@ -2437,9 +2437,9 @@ def emitir_doc(notas: list[Nota],
       "\u00e0 m\u00e3o.**")
     w("Regenerar: `python3 wte/tools/port_database_pas.py`.")
     w()
-    w("Produto da [WTE-TASK-17](../../docs/tasks/"
+    w("Produto da [WTE-TASK-17](../../docs/tasks/concluidos/"
       "17-transpilador-da-camada-de-dados.md) (tabela e guards) e da")
-    w("[WTE-TASK-18](../../docs/tasks/18-camada-de-dados-gerada.md) (passe "
+    w("[WTE-TASK-18](../../docs/tasks/concluidos/18-camada-de-dados-gerada.md) (passe "
       "estrutural e portes a m\u00e3o).")
     w("A rota escolhida para cada recusa est\u00e1 em "
       "[`recusas.md`](recusas.md).")
@@ -2498,7 +2498,7 @@ def emitir_doc(notas: list[Nota],
     w("`Formation`, os tr\u00eas registros que `Database.hpp:45-48` usa como "
       "campo \u2014 e nada")
     w("no `--check` acusou. Quem apanhou foi revis\u00e3o humana "
-      "([CORR-WTE-034](../../docs/tasks/CORR-WTE-034.md)).")
+      "([CORR-WTE-034](../../docs/tasks/concluidos/CORR-WTE-034.md)).")
     w()
     w("---")
     w()

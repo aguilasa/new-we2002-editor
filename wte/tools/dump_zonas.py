@@ -3,7 +3,7 @@
 
 Gera `wte/re/zonas.md`, `wte/re/zonas.tsv` e a unidade Pascal
 `wte/src/wte_zonas.pas` -- insumo da
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md), grupo de edicao.
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md), grupo de edicao.
 
 ## O problema que ele resolve
 
@@ -589,7 +589,7 @@ def md_malhas(malhas) -> list[str]:
         "dividir, achar o marcador pelo nome, escrever `Top`.",
         "Quem lê a posição de volta é o `estrategia.BitBtn3Click`",
         "(`0x0040a660`), que é da",
-        "[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md); quem a",
+        "[WTE-TASK-30](../../docs/tasks/concluidos/30-handlers-auxiliares.md); quem a",
         "escreve a partir do dado é a rotina interna `0x0040a0b4`, portada",
         "como `PreencheTelaDeTatica` na `wte_tatica.pas` (CORR-WTE-082).",
         "**O caminho fechou nos dois sentidos** desde a CORR-WTE-081: a ida é",
@@ -610,7 +610,7 @@ def md(zonas) -> str:
     linhas = [
         "# `re/zonas.md` — onde cada bola do campinho pode ser solta",
         "",
-        "Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md).",
+        "Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md).",
         "Gerado por [`../tools/dump_zonas.py`](../tools/dump_zonas.py) a partir",
         f"de `{REL_EXE}`. **Não editar à mão.** A tabela está em",
         f"[`{TSV_NAME}`]({TSV_NAME}); a unidade Pascal é",

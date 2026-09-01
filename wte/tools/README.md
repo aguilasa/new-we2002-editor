@@ -115,8 +115,8 @@ fora** devolveria o número à memória de quem o mediu uma vez.
 O display dos gates mudou em 2026-08-20, e o [`../../CLAUDE.md`](../../CLAUDE.md)
 diz o que fica e o que muda: **registro histórico continua dizendo `:99`**;
 texto que descreve o comportamento de hoje, não. A
-[CORR-WTE-073](../../docs/tasks/CORR-WTE-073.md) varreu o código executável e a
-[CORR-WTE-088](../../docs/tasks/CORR-WTE-088.md) varreu os comentários — catorze
+[CORR-WTE-073](../../docs/tasks/concluidos/CORR-WTE-073.md) varreu o código executável e a
+[CORR-WTE-088](../../docs/tasks/concluidos/CORR-WTE-088.md) varreu os comentários — catorze
 linhas vivas, em sete arquivos.
 
 `TestConvencaoDeDisplay`, no `test_roteiro.py`, é a guarda: todo `:99` em

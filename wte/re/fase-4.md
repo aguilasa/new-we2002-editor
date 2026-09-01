@@ -8,7 +8,7 @@ python3 wte/tools/check_fase4.py
 python3 wte/tools/check_fase4.py --check   # o que `make -C wte check` roda
 ```
 
-Produto da [WTE-TASK-31](../../docs/tasks/31-fechamento-fase-4.md).
+Produto da [WTE-TASK-31](../../docs/tasks/concluidos/31-fechamento-fase-4.md).
 Fonte: [`published_methods.tsv`](published_methods.tsv), os `.md` de
 [`spec/`](spec/), os `.inc` de [`../src/impl/`](../src/impl/), os
 roteiros de [`../tests/roteiros/`](../tests/roteiros/) e o registro da
@@ -90,7 +90,7 @@ roteiro+imagem é determinístico) e `golden` (oráculo contra o app
 Lazarus). **O controle vem antes do teste** — sem ele, verde e vermelho
 não significam nada.
 
-Com par e fora desta bateria: `golden-23-multiplas-edicoes`, `golden-24-gravacao-dupla`, `golden-25-retorno`. Eles são da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md),
+Com par e fora desta bateria: `golden-23-multiplas-edicoes`, `golden-24-gravacao-dupla`, `golden-25-retorno`. Eles são da [WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md),
 que roda a bateria completa (operação × ROM) e registra em
 [`golden.tsv`](golden.tsv). O guarda de cobertura aceita as **duas**
 listas: o que ele exige é que roteiro com par tenha rodado nos dois
@@ -140,7 +140,7 @@ fizesse absolutamente nada, e é para isso que o `golden_check.sh` tem
 caso está no Log da task que rodou a bateria. Gate que precisa de
 repetição para ficar verde deixa de separar *"o port diverge"* de
 *"a corrida não estava pronta"*, e essa é a classe de problema que a
-[CORR-WTE-080](../../docs/tasks/CORR-WTE-080.md) nomeou — a causa não
+[CORR-WTE-080](../../docs/tasks/concluidos/CORR-WTE-080.md) nomeou — a causa não
 precisa ser a mesma para o custo ser.
 
 **As duas ROMs, e por que a conta é de uma só.** O critério da task diz
@@ -149,7 +149,7 @@ precisa ser a mesma para o custo ser.
 o oráculo não existe daquele lado. Está medido e registrado em
 [`gravacao-controle.md`](gravacao-controle.md); a bateria roda sobre a
 japonesa, e a cobertura da europeia é da
-[WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).
+[WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md).
 
 ## Força da evidência
 
@@ -180,7 +180,7 @@ são seções isoladas dentro de specs cujo resto está medido:
 |---|---|---|---|
 | [MainForm.boton_dialogo_weClick](spec/MainForm.boton_dialogo_weClick.md) | Comportamento de erro | `observacao de tela` | **Fica.** A afirmação é sobre **ausência** de tratamento — o original não confere nada além do tamanho, e a checagem de tamanho é só aviso. Ausência não tem endereço para ler: o disassembly já mostrou que não há ramo de erro, e a tela mostrou o que acontece sem ele. |
 | [MainForm.mostrar_jugadorClick](spec/MainForm.mostrar_jugadorClick.md) | Bytes tocados | `nao medido` | **Fica.** A seção diz `Nenhum gravado`, e o que ficou por medir são as faixas **lidas**. O golden do grupo prova a metade que importa para a fase 4 — ele não grava —, e o mapa de leitura só faz falta a quem for otimizar carga, que não é desta fase. |
-| [MainForm.FormShow](spec/MainForm.FormShow.md) | Comportamento de erro | `observacao de tela` | **Fica, e tem dono.** O original encerra e o port não — é divergência deliberada, registrada para a [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md). Para *"o original encerra"*, tela é a evidência certa: o que se mede é o efeito observável, não a instrução. |
+| [MainForm.FormShow](spec/MainForm.FormShow.md) | Comportamento de erro | `observacao de tela` | **Fica, e tem dono.** O original encerra e o port não — é divergência deliberada, registrada para a [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md). Para *"o original encerra"*, tela é a evidência certa: o que se mede é o efeito observável, não a instrução. |
 
 **Nenhum dos três pede disassembly antes da Fase 6**, e a tabela acima
 diz por quê, um a um. O gerador **aborta** se aparecer ponto fraco sem

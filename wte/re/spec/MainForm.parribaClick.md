@@ -82,7 +82,7 @@ resolvido pelo nome importado no thunk).
 de 64 bits dividido por 10.000 na apresentação. A conta não produz `10000`:
 produz `'1'`. Lida como aritmética inteira, ela pareceria um preço de
 transferência — e num editor que tem preço de jogador como funcionalidade
-([WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md)) essa leitura errada
+([WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md)) essa leitura errada
 teria sobrevivido a uma revisão.
 
 O que confirma a leitura certa é o próprio `.dfm`: `lista_descarte` nasce com as
@@ -93,7 +93,7 @@ legenda produzem.
 
 `linha + 3` dá 23 buffers além dos três já conhecidos — um por linha da lista de
 descarte. A oitava passagem da
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) tinha visto o ramo
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md) tinha visto o ramo
 `indice > 2` daquela rotina (`+0x16 := 0xff`, `+0x19 := 3`) sem saber de quem
 era: é deste handler. O `0xff` não é índice de time válido, então um jogador
 vindo do descarte **nunca** bate identidade com o destino — a recusa `-2` não
@@ -118,7 +118,7 @@ O [`golden-11-descarte-ml`](../../tests/roteiros/golden-11-descarte-ml.txt)
 **clica a linha da lista de descarte e depois o `parriba`**, nos dois lados, com
 as mesmas coordenadas — (260,343) e (176,360) —, e essa ordem é load-bearing: é
 o próprio cabeçalho do roteiro que a explica. Medido pela
-[CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md) e registrado em
+[CORR-WTE-089](../../../docs/tasks/concluidos/CORR-WTE-089.md) e registrado em
 [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
 
 | Roteiro | Disparos |
@@ -145,7 +145,7 @@ o `compara_tela.sh --edicao` não foi estendido à lista de descarte. Exercitá-
 exige selecionar time nos dois lados, jogador na esquerda e linha na lista —
 quatro cliques cuja coordenada precisa da varredura que cada grupo novo custa
 (risco 3 do plano de fechamento da
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md)).
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md)).
 
 Marcar `implementado` sem ela seria dizer que a régua da task passou quando ela
 não rodou — e o veredito passaria a medir quanta leitura foi feita, não o estado
@@ -155,7 +155,7 @@ e o gate de tela fica para quando o `--edicao` alcançar este grupo — junto co
 `pabajoClick`, que é a outra metade da lista de descarte.
 
 **Divergência deliberada do port**
-([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)): índice fora
+([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)): índice fora
 da faixa sai sem fazer nada, em vez de escrever em `Items[-1]` e carregar o
 buffer errado.
 

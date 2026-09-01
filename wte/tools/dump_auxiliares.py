@@ -2,7 +2,7 @@
 """As rotinas internas que o grupo de carga chama, e o que cada uma toca.
 
 Gera `wte/re/auxiliares.md` e `wte/re/auxiliares.tsv` — insumo da
-[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), grupo de carga.
+[WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), grupo de carga.
 
 ## Por que ele existe
 
@@ -53,7 +53,7 @@ valer, o texto vira mentira em silêncio.
    reprova.
 3. **A base da tabela de offsets.** `0x0040cbc8` carrega um endereço de `.data`
    e o percorre em linhas de seis colunas. Esse endereço tem de ser o mesmo que
-   a [WTE-TASK-06](../../docs/tasks/06-mapa-de-offsets.md) registrou como
+   a [WTE-TASK-06](../../docs/tasks/concluidos/06-mapa-de-offsets.md) registrou como
    primeiro slot em [`offsets.tsv`](offsets.tsv) — é a mesma tabela vista dos
    dois lados, e a conferência lê a base do corpo da rotina em vez de repeti-la.
 
@@ -170,8 +170,8 @@ PAPEIS: dict[int, str] = {
                 "dois uniformes, as oito chuteiras, a quarta paleta, a "
                 "forma e o padrão — para o slot 0, e o espelha no slot 1",
     0x0040CBC8: "percorre a tabela de offsets em `.data`, seis colunas por linha",
-    0x00405270: "desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",
-    0x004056C8: "desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)",
+    0x00405270: "desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)",
+    0x004056C8: "desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)",
     0x0040B0B4: "preenche as 23 legendas `dorsalN` com os numeros de camisa",
     0x0040B188: "marca a camisa N: apaga a marcada, acha a nova por "
                 "`FindComponent`, destaca",
@@ -864,7 +864,7 @@ def gera_md(m: dict) -> str:
     a = w.append
     a("# `re/auxiliares.md` — as rotinas internas que o grupo de carga chama")
     a("")
-    a("Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md). Gerado")
+    a("Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md). Gerado")
     a("por [`../tools/dump_auxiliares.py`](../tools/dump_auxiliares.py) a partir")
     a(f"de `{REL_EXE}` e de")
     a("[`published_methods.tsv`](published_methods.tsv). **Não editar à mão:**")
@@ -961,7 +961,7 @@ def gera_md(m: dict) -> str:
     a("pulando a coluna que estiver zerada.")
     a("")
     a("Esse endereço é o mesmo que a")
-    a("[WTE-TASK-06](../../docs/tasks/06-mapa-de-offsets.md) registrou como")
+    a("[WTE-TASK-06](../../docs/tasks/concluidos/06-mapa-de-offsets.md) registrou como")
     a("primeiro slot em [`offsets.tsv`](offsets.tsv), medido por outro caminho:")
     a("lá pela varredura de constantes que batem com os nossos `OFS_*`, aqui")
     a("pelo código que as consome. O script lê a base do corpo da rotina e")

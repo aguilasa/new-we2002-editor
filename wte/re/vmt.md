@@ -1,12 +1,12 @@
 # Chamada virtual da VCL — a rota escolhida e o teste que a decidiu
 
-Produto da [WTE-TASK-24](../../docs/tasks/24-ghidra-convencao-borland.md).
+Produto da [WTE-TASK-24](../../docs/tasks/concluidos/24-ghidra-convencao-borland.md).
 Referência: `PLAN-WTE-LAZARUS.md` §8.1, §8.2, §8.3.
 
 Todo número deste arquivo saiu de `wte/tools/ghidra/vmt_probe.java` e de
 `decompile_one.java`, rodando sobre o projeto que o `run_headless.sh` monta —
 **inclusive os votos da âncora**, que até a
-[CORR-WTE-054](../../docs/tasks/CORR-WTE-054.md) eram os dois únicos calculados
+[CORR-WTE-054](../../docs/tasks/concluidos/CORR-WTE-054.md) eram os dois únicos calculados
 fora. Nenhum veio de leitura de decompilado, e **nenhum trecho decompilado foi
 colado aqui** — recuperação de especificação, não transcrição (§2, §8.10).
 

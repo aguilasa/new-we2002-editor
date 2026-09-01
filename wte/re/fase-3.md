@@ -3,7 +3,7 @@
 **Gerado por [`wte/tools/compare_dumps.py`](../tools/compare_dumps.py)
 — não editar à mão.** Evidência em [`fase-3.tsv`](fase-3.tsv).
 
-Produto da [WTE-TASK-20](../../docs/tasks/20-round-trip-headless.md). É
+Produto da [WTE-TASK-20](../../docs/tasks/concluidos/20-round-trip-headless.md). É
 o primeiro momento em que o projeto afirma algo **verificado** sobre
 dados, e não sobre forma.
 
@@ -17,7 +17,7 @@ sem guarda.
 
 Não é o `wte.exe` — ele é o oráculo de **comportamento**, e a pergunta
 desta task é de **formato**. Ele é dirigível desde a
-[CORR-WTE-044](../../docs/tasks/CORR-WTE-044.md), com
+[CORR-WTE-044](../../docs/tasks/concluidos/CORR-WTE-044.md), com
 `roms/japanese-shift-jis.bin`, e mesmo assim não sabe dizer o que os
 bytes significam: mostra o que o editor **faz**, não o que o campo **é**
 ([`crash-causa.md`](crash-causa.md) explica por que a ROM é essa).
@@ -134,7 +134,7 @@ lados apareceria aqui.
 ## O que isto não mede
 
 - **As faixas que nenhum `OFS_*` explica.** Não são os `OFS_*` da
-  [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) — esses
+  [WTE-TASK-19](../../docs/tasks/concluidos/19-os-50-offsets-restantes.md) — esses
   moram todos no `Offsets.hpp`, têm lado C++ e estão dentro deste diff.
   São as regiões que o `wte.exe` endereça e que este repositório nunca
   nomeou, a maior delas a do uniforme. Sem lado C++, nenhum diff

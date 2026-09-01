@@ -32,7 +32,7 @@ quatro do meio penduram em `image`, e `data` pendura na raiz, **não** em
 ```
 
 São as seis pastas de asset que a
-[WTE-TASK-08](../../../docs/tasks/08-convencao-dos-assets.md) já tinha medido
+[WTE-TASK-08](../../../docs/tasks/concluidos/08-convencao-dos-assets.md) já tinha medido
 pelo lado do consumo ([`../assets.md`](../assets.md) seção 2); aqui aparece o
 lado da produção, e os dois batem.
 
@@ -73,13 +73,13 @@ directory`. Reproduzir isso seria reproduzir um defeito de empacotamento. O
 port resolve a raiz por `WTE_ASSETS_DIR`, depois ao lado do executável, depois
 a árvore de fonte (`we2002_estado.RaizDosAssets`). **Os seis nomes, a ordem e o
 encadeamento são os do original.** Registrar na
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md).
 
 **O que não se reproduz:** o cache dos três `TImage` em global. É detalhe de
 implementação em C++ sem efeito observável — em Pascal os três se alcançam pelo
 campo do formulário. Vale registrar porque o global irmão desse trio,
 `0x004335e4`, é exatamente o que a
-[CORR-WTE-044](../../../docs/tasks/CORR-WTE-044.md) mediu sendo sobrescrito
+[CORR-WTE-044](../../../docs/tasks/concluidos/CORR-WTE-044.md) mediu sendo sobrescrito
 pela carga de time com a ROM europeia: ponteiro de controle guardado em global
 é o padrão que produziu o travamento do oráculo.
 

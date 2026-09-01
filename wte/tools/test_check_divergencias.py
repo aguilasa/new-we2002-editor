@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Testes do check_divergencias.py -- CORR-WTE-106.
 
-O criterio da [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md)
+O criterio da [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md)
 dizia *"mecanizado nos dois sentidos, com as tres recusas vistas"*. **Ver nao e
 o mesmo que deixar visto:** as recusas foram observadas na execucao e nao
 sobreviveram a ela. E a regra que o proprio repositorio escreveu, no cabecalho

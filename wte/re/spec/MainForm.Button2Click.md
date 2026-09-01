@@ -58,7 +58,7 @@ Conferido nos dois sentidos: não há `object Button2:` no
 
 A tabela sobrevive ao `/STRIP` porque o streaming de DFM precisa dela em tempo
 de execução (é o mesmo motivo pelo qual a
-[WTE-TASK-04](../../../docs/tasks/04-mapa-de-handlers.md) conseguiu recuperar os
+[WTE-TASK-04](../../../docs/tasks/concluidos/04-mapa-de-handlers.md) conseguiu recuperar os
 96 nomes); o que ela **não** garante é que cada método tenha um componente
 ligado. Este é o resto de um botão que o autor apagou do formulário e não do
 código.

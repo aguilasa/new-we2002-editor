@@ -234,10 +234,10 @@ GROUP_LABEL = {
 }
 
 GROUP_TASK = {
-    "carga": ("WTE-TASK-25", "../../docs/tasks/25-handlers-de-carga.md"),
-    "edicao": ("WTE-TASK-26", "../../docs/tasks/26-handlers-de-edicao.md"),
-    "gravacao": ("WTE-TASK-27", "../../docs/tasks/27-handlers-de-gravacao.md"),
-    "auxiliar": ("WTE-TASK-30", "../../docs/tasks/30-handlers-auxiliares.md"),
+    "carga": ("WTE-TASK-25", "../../docs/tasks/concluidos/25-handlers-de-carga.md"),
+    "edicao": ("WTE-TASK-26", "../../docs/tasks/concluidos/26-handlers-de-edicao.md"),
+    "gravacao": ("WTE-TASK-27", "../../docs/tasks/concluidos/27-handlers-de-gravacao.md"),
+    "auxiliar": ("WTE-TASK-30", "../../docs/tasks/concluidos/30-handlers-auxiliares.md"),
 }
 
 
@@ -933,7 +933,7 @@ def render_md(m: Measurement) -> str:
 
     add("# `re/published_methods.md` — os 96 handlers, com dono\n")
     add("Produto da "
-        "[WTE-TASK-04](../../docs/tasks/04-mapa-de-handlers.md). "
+        "[WTE-TASK-04](../../docs/tasks/concluidos/04-mapa-de-handlers.md). "
         "Gerado por\n"
         "[`../tools/dump_published.py`](../tools/dump_published.py), a partir "
         f"de\n`{REL_EXE}` e dos 18 formulários de\n[`dfm/`](dfm/).\n"
@@ -1190,7 +1190,7 @@ def render_md(m: Measurement) -> str:
         "delas muda uma\nconclusão; todas mudam um número que alguém usaria "
         "para se conferir.\n")
     add("A coluna **Diz** cita o texto como ele estava quando a WTE-TASK-04 "
-        "mediu. A\n[CORR-WTE-006](../../docs/tasks/CORR-WTE-006.md) propagou "
+        "mediu. A\n[CORR-WTE-006](../../docs/tasks/concluidos/CORR-WTE-006.md) propagou "
         "estas linhas para os\narquivos citados, então a citação já não é o "
         "que se lê lá — é o registro do que\nfoi corrigido, e envelhece "
         "junto. Quem decide se a seção inteira vira histórico\nao fechar a "

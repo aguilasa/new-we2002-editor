@@ -3,7 +3,7 @@
 
 Gera `wte/re/ml-slots.md`, `wte/re/ml-slots.tsv` e o include Pascal
 `wte/src/we2002_ml_tabela.inc` -- insumo da
-[WTE-TASK-33](../../docs/tasks/33-slots-de-master-league.md).
+[WTE-TASK-33](../../docs/tasks/concluidos/33-slots-de-master-league.md).
 
     python3 wte/tools/conta_ml.py                  # regera as tres saidas
     python3 wte/tools/conta_ml.py --check          # o que `make -C wte check` roda
@@ -568,7 +568,7 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
           "de vinculo, e trocar `(102, 23)` por `(0, 27)` custa um bloco\n"
           "livre.\n")
         w("**Quem escreve fechou em 2026-08-20**, na oitava passagem da\n"
-          "[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md):\n"
+          "[WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md):\n"
           "`0x0040c19e` no `boton_dialogo_weClick` e `0x00411616` no\n"
           "`FormShow`, com o endereco IMEDIATO no `.text` (`push 0x1eb738`).\n"
           "E por isso que procurar por `OFS_LINK_ML` nunca os achou -- a unica\n"
@@ -589,7 +589,7 @@ def gera_md(contagem: list[int], pref: list[int], core: list[int]) -> str:
       f"fora de `0..{TOTAL - 1}` e contado num dicionario a parte, entao o\n"
       "numero na tela e o mesmo do original e nenhuma variavel vizinha e\n"
       "atingida. Divergencia deliberada, para a\n"
-      "[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md).\n")
+      "[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md).\n")
     return "".join(s if s.endswith("\n") else s + "\n" for s in out)
 
 

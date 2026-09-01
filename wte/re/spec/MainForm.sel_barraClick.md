@@ -70,14 +70,14 @@ conferido.** Os cinco `object sel_barra*` são consecutivos no formulário
 (posições 44 a 48 do [`ep2002_mainform.lfm`](../../forms/ep2002_mainform.lfm),
 na ordem do `.dfm`), e a LCL cria na ordem do arquivo como a VCL criava. Isso
 é a ordem de **criação**, não a de campo — a distinção que a
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md) pagou para aprender
+[WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md) pagou para aprender
 (`.dfm` acerta 73 de 440 deslocamentos de campo). Aqui a ordem certa é
 justamente a do `.dfm`, porque `ComponentIndex` é posição na lista
 `Components` do dono, que a criação preenche.
 
 **Duas divergências deliberadas do port**, as duas de robustez e nenhuma
 alcançável pela tela — entrada para a
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md):
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md):
 
 1. `Sender` que não seja `TComponent` sai sem fazer nada;
 2. índice fora de 0..4 sai sem fazer nada, em vez de ler o byte vizinho.
@@ -99,7 +99,7 @@ tela de um handler que não rodou.
 
 **O que a régua não julga:** que o índice escolhido leve ao byte certo da
 imagem. Isso é `boton_barras2isoClick`, da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), e é critério de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md), e é critério de
 conclusão dela.
 
 Pascal em

@@ -85,7 +85,7 @@ sem fazer nada nos dois casos, que é o mais próximo de não acontecer.
 
 As duas de fora são o combo `lista_col2` (`BOOTS TYPE`, oito itens) e uma quarta
 paleta sem combo visível. Nenhuma das duas é camisa nem bandeira, que é o
-escopo da [WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md); portar
+escopo da [WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md); portar
 chuteira exigiria descobrir onde o dado dela mora na imagem.
 
 **O port não pinta nada quando a família não é portada.** O original pinta: com

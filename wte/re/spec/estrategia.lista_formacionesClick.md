@@ -72,7 +72,7 @@ rotinas alcança `FindComponent`, `CurrToStr`, `TTimer::SetEnabled`,
 `TFont::SetColor`, `TControl::SetText` e helpers de `AnsiString`/`Currency` —
 nenhuma escritora de arquivo. A versão anterior desta spec dizia "não medido" e
 mandava perguntar à
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md); a resposta é
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md); a resposta é
 nenhum byte, e a pergunta não precisa ser feita.
 
 **Evidência:** disassembly lido
@@ -154,7 +154,7 @@ formulário, chamada pelo `MainForm.mostrar_estrategiaClick`, do grupo de
 **carga** —, que não estava portada.
 
 **As duas caíram na
-[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md)**, que a portou como
+[CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md)**, que a portou como
 `PreencheTelaDeTatica` na [`wte_tatica`](../../src/wte_tatica.pas). Com ela o
 formulário abre já preenchido, e o `DEFAULT` que a lista mostra é o que a
 imagem diz.

@@ -1,7 +1,7 @@
 # `tests/roteiros/` — os roteiros de interação, fixos e versionados
 
-Insumo da [WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md) e, depois, do
-harness golden da [WTE-TASK-22](../../../docs/tasks/22-harness-golden.md).
+Insumo da [WTE-TASK-13](../../../docs/tasks/concluidos/13-trace-de-eventos.md) e, depois, do
+harness golden da [WTE-TASK-22](../../../docs/tasks/concluidos/22-harness-golden.md).
 
 **Roteiro é fixo, nunca reativo.** Um driver que olha a tela e decide o próximo
 passo muda o estímulo quando um lado diverge — e aí os dois param de receber a
@@ -136,7 +136,7 @@ a imagem.
 ### Os `golden-*` sao do gate, e falam o mesmo dialeto
 
 [`golden-01-arranque.txt`](golden-01-arranque.txt) e o roteiro do gate da
-[WTE-TASK-22](../../../docs/tasks/22-harness-golden.md), rodado pelo
+[WTE-TASK-22](../../../docs/tasks/concluidos/22-harness-golden.md), rodado pelo
 [`../../tools/golden_check.sh`](../../tools/golden_check.sh). Duas diferencas
 em relacao aos da WTE-TASK-19, e as duas existem porque o gate roda o **mesmo**
 roteiro em **dois** lados:
@@ -171,7 +171,7 @@ O limite default de `>` e `>~` e 30s (`ROTEIRO_ESPERA_PADRAO` no
 descarregada. Passo que vem logo depois da acao mais cara do roteiro estoura
 esse limite quando a maquina esta ocupada: o `golden-14-uniforme` reprovou por
 tempo em 3 de 4 corridas de controle, medido na
-[CORR-WTE-080](../../../docs/tasks/CORR-WTE-080.md), sempre no dialogo que vem
+[CORR-WTE-080](../../../docs/tasks/concluidos/CORR-WTE-080.md), sempre no dialogo que vem
 logo apos a troca de time.
 
 `espera: <seg>` sobe o limite **so da proxima janela**, e volta ao default
@@ -248,7 +248,7 @@ some e o gate roda um roteiro so.
 ### Os `27-*` sao da gravacao, e o par de sondas mede o buffer
 
 [`golden-02-gravacao.txt`](golden-02-gravacao.txt) e o roteiro do **diff de
-controle** da [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md):
+controle** da [WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md):
 carrega um time e manda gravar sem tocar em campo nenhum.
 
 Ele tem uma coisa que nenhum roteiro anterior precisava, e que nao e enfeite:
@@ -379,7 +379,7 @@ Duas consequencias que valem para todo roteiro de gravacao que vier depois:
 O par [`golden-15-ficha.txt`](golden-15-ficha.txt) /
 [`.port.txt`](golden-15-ficha.port.txt) e o gate do
 `jugador.BitBtn3Click` -- o `Comple.` da ficha --, aberto pela
-[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md). Ele parece violar a licao
+[CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md). Ele parece violar a licao
 do `golden-03`: nao toca em barrinha, nem em seta, nem em caixa de texto, e
 mesmo assim distingue um port que grava de um que nao grava.
 
@@ -404,7 +404,7 @@ Duas coisas que ele ensina sobre dirigir a ficha:
 O par [`golden-16-cor.txt`](golden-16-cor.txt) /
 [`.port.txt`](golden-16-cor.port.txt) e o gate do `ficha_color.BitBtn3Click` --
 o `OK` do editor de cor, a setima rota de escrita na imagem --, tambem da
-[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md).
+[CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md).
 
 Aqui a edicao e obrigatoria, e vale ver por que os dois gates vizinhos se
 comportam ao contrario: as sete regioes do bloco de cor saem do que a carga leu

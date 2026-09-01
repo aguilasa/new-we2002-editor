@@ -450,7 +450,7 @@ busca de estouro. Não é obrigatório para fechar a fase, mas é o item de maio
 retorno da lista — e é *aqui* ou em lugar nenhum.
 
 **Os dois itens de `CMD_SORT_RESERVES` da §8.9 também são daqui.** A
-[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md) ficou **bloqueada no Linux** com 3 de
+[PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md) ficou **bloqueada no Linux** com 3 de
 5 itens medidos, e os dois que faltam são:
 
 1. `CMD_SORT_RESERVES` numa seleção e num clube — a ordem torta é a certa, e o

@@ -90,7 +90,7 @@ Não trata.
 **Veredito `aberto` pela dependência de `0x0040b2d8`** (preencher lista de
 jogadores). A outra metade fechou: `0x00405468` — desenhar a bandeira do
 reserva — é chamada desde a terceira passagem da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md), em 2026-08-20.
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), em 2026-08-20.
 
 O port faz os **dois** caminhos que o parágrafo acima descreve: copia o
 `bandera` quando as duas listas apontam para o mesmo time, e desenha quando
@@ -120,7 +120,7 @@ quais bytes três roteiros gravam.
 
 A régua de byte já dirigia o `lista_equipos_2`, e com força: os roteiros de
 mover e de descarte descem **64 itens** até o primeiro clube de Master League.
-Medido pela [CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md), em
+Medido pela [CORR-WTE-089](../../../docs/tasks/concluidos/CORR-WTE-089.md), em
 [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
 
 | Roteiro | Disparos |

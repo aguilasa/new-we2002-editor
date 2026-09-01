@@ -12,7 +12,7 @@ byte a byte contra o binário original.
 
 - **Plano:** [`../docs/PLAN-WTE-LAZARUS.md`](../docs/PLAN-WTE-LAZARUS.md) — a
   fonte de verdade
-- **Andamento:** [`../docs/tasks/progresso.md`](../docs/tasks/progresso.md)
+- **Andamento:** [`../docs/tasks/concluidos/progresso.md`](../docs/tasks/concluidos/progresso.md)
 - **Achados da engenharia reversa:** [`re/`](re/)
 - **Ambiente medido:** [`re/ambiente.md`](re/ambiente.md)
 
@@ -201,13 +201,13 @@ programa é a barra de tarefas, que lê o `Application.Title`.
 `WE2002 Team Editor (Lazarus)` — tirando o parêntese, o nome do Obocaman letra
 por letra, que é exatamente o que a §2 do plano proíbe.
 
-**O que a [WTE-TASK-39](../docs/tasks/39-empacotamento.md) fez, e o que ela
+**O que a [WTE-TASK-39](../docs/tasks/concluidos/39-empacotamento.md) fez, e o que ela
 decidiu não fazer.** O `packaging/` existe — `.desktop`, AppStream e os sete
 PNG do ícone —, e o `install` põe 13 arquivos num prefixo. A renomeação de
 `wte.lpi`/`wte.lpr`/`build/wte` para o slug **não aconteceu**, por decisão: a
 razão está na seção *"O binário se chama `wte` na árvore e `we2002Lazarus`
 instalado"*, mais abaixo. Este parágrafo dizia que ela faltava até 2026-08-26
-([CORR-WTE-118](../docs/tasks/CORR-WTE-118.md)), contradizendo aquela seção
+([CORR-WTE-118](../docs/tasks/concluidos/CORR-WTE-118.md)), contradizendo aquela seção
 neste mesmo arquivo.
 
 ---
@@ -273,7 +273,7 @@ mesmo com `forms/` em `IncludeFiles`. A saída é o caminho explícito:
 
 ## O que este projeto pode afirmar
 
-*(Produto da [WTE-TASK-40](../docs/tasks/40-verificacao-final.md), 2026-08-26.
+*(Produto da [WTE-TASK-40](../docs/tasks/concluidos/40-verificacao-final.md), 2026-08-26.
 As três condições da definição de pronto estão medidas na §11 do
 [plano](../docs/PLAN-WTE-LAZARUS.md).)*
 
@@ -350,13 +350,13 @@ Cinco itens, nenhum deles escondido:
 1. **O `ficha_enlaza` não tem chamador no port.** A rota que o alcança é o
    `MainForm.mostrar_jugadorClick` para jogador de clube de Master League, e
    *qual condição faz o modal abrir* ficou por medir na
-   [WTE-TASK-30](../docs/tasks/30-handlers-auxiliares.md). **Não** é
+   [WTE-TASK-30](../docs/tasks/concluidos/30-handlers-auxiliares.md). **Não** é
    divergência deliberada — é trabalho não feito, e o dono é aquela spec.
 2. **A European Deluxe sem oráculo.** Fechar isso exigiria consertar um bug do
    `wte.exe` — escrita além do fim de tabela — dentro do binário do Obocaman,
    que é leitura pura neste projeto.
 3. **Sem formato de pacote** (AppImage/Flatpak). Decisão da
-   [WTE-TASK-39](../docs/tasks/39-empacotamento.md), confirmada pelo usuário:
+   [WTE-TASK-39](../docs/tasks/concluidos/39-empacotamento.md), confirmada pelo usuário:
    o uso é pessoal, e as regras de `install` bastam.
 4. **`wte.lpi`/`wte.lpr`/`build/wte` continuam com o nome `wte` na árvore.** O
    slug entra no `install`, que é onde ele tem consumidor — a seção acima
@@ -372,7 +372,7 @@ Cinco itens, nenhum deles escondido:
 medidas em [§11 do plano](../docs/PLAN-WTE-LAZARUS.md).
 
 O andamento por task, com data de commit, está em
-[`../docs/tasks/progresso.md`](../docs/tasks/progresso.md) — este parágrafo é
+[`../docs/tasks/concluidos/progresso.md`](../docs/tasks/concluidos/progresso.md) — este parágrafo é
 resumo, e o índice é a fonte.
 
 *(Ele dizia "Fase 0 ... um formulário vazio" até 2026-08-25, e o

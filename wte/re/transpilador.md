@@ -3,8 +3,8 @@
 **GERADO por `wte/tools/port_database_pas.py` — não editar à mão.**
 Regenerar: `python3 wte/tools/port_database_pas.py`.
 
-Produto da [WTE-TASK-17](../../docs/tasks/17-transpilador-da-camada-de-dados.md) (tabela e guards) e da
-[WTE-TASK-18](../../docs/tasks/18-camada-de-dados-gerada.md) (passe estrutural e portes a mão).
+Produto da [WTE-TASK-17](../../docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md) (tabela e guards) e da
+[WTE-TASK-18](../../docs/tasks/concluidos/18-camada-de-dados-gerada.md) (passe estrutural e portes a mão).
 A rota escolhida para cada recusa está em [`recusas.md`](recusas.md).
 
 ---
@@ -46,7 +46,7 @@ nos dois sentidos, então motivo escrito para arquivo que sumiu também reprova.
 A guarda existe porque a ausência **já aconteceu**: a primeira versão do
 `UNITS` esqueceu `Team.hpp` e `Team.cpp` — que declaram `Team`, `MlTeam` e
 `Formation`, os três registros que `Database.hpp:45-48` usa como campo — e nada
-no `--check` acusou. Quem apanhou foi revisão humana ([CORR-WTE-034](../../docs/tasks/CORR-WTE-034.md)).
+no `--check` acusou. Quem apanhou foi revisão humana ([CORR-WTE-034](../../docs/tasks/concluidos/CORR-WTE-034.md)).
 
 ---
 

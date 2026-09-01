@@ -91,10 +91,10 @@ Inventar de onde eles saem seria pior do que deixar o combo no default do
 formulário, então o port não escreve o `ItemIndex`. É divergência de **tela**,
 não de dado: nenhum byte de imagem depende dela, e o `lista_col3` não alimenta
 nenhuma das duas famílias de paleta que a
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md) porta.
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) porta.
 
 Entrada para a
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md).
 
 ### O gate
 

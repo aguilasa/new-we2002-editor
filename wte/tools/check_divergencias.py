@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """O registro de divergencias deliberadas confere com o que as ferramentas isentam?
 
-Produto da [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md).
+Produto da [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md).
 
     python3 wte/tools/check_divergencias.py           # relata
     python3 wte/tools/check_divergencias.py --check   # o que `make -C wte check` roda

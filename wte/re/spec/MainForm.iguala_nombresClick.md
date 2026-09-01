@@ -32,7 +32,7 @@ literal no original e casa com o `MaxLength = 3` que o DFM põe no
 
 **Nenhum.** Mexe só nos dois `TEdit`. Quem leva nome para a imagem é o
 `boton_nombres2isoClick`, da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -54,7 +54,7 @@ Não trata. Com `edit_nombre1` vazio, os outros dois ficam vazios.
 
 **O limite do segundo campo era o motivo do veredito, e o que a Fase anterior
 escreveu aqui estava errado — medido e corrigido em 2026-08-18 pela
-[CORR-WTE-061](../../../docs/tasks/CORR-WTE-061.md).** O original usa
+[CORR-WTE-061](../../../docs/tasks/concluidos/CORR-WTE-061.md).** O original usa
 `DWORD[0x00433b48] - 1`, e essa global **não é constante**.
 
 `lista_equiposChange` chama `0x0040cbc8`, que percorre uma tabela de **lotes**
@@ -97,19 +97,19 @@ A largura é a que a varredura mede na imagem, e o `div 2` do valor decrementado
 dá o limite do campo. *(Esta linha dizia que a largura é
 `TEAM_NAME_KANJI_LEN × 2` e que o resultado é `TEAM_NAME_KANJI_LEN − 1`. A
 igualdade só vale na japonesa — ver a
-[CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md): a tabela erra em 29 dos 95
+[CORR-WTE-121](../../../docs/tasks/concluidos/CORR-WTE-121.md): a tabela erra em 29 dos 95
 times da `ptbr-remaster` e em 49 dos 95 da European Deluxe.)*
 
-Medido pela [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md) em três times
+Medido pela [CORR-WTE-064](../../../docs/tasks/concluidos/CORR-WTE-064.md) em três times
 de larguras diferentes: `LEN` 6 → 5, 8 → 7, 14 → 13, com oráculo e port
 mostrando o mesmo em todos. A diferença contra a derivação ingênua era
 **constante em 1**, não proporcional — foi isso que apontou um decremento em
 vez de erro de escala.
 
 **O que mantinha o veredito `aberto` era outra coisa, e ela foi medida em
-2026-08-18 pela [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md): não é
+2026-08-18 pela [CORR-WTE-060](../../../docs/tasks/concluidos/CORR-WTE-060.md): não é
 defeito do port.** A
-[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) tinha medido que o port
+[CORR-WTE-057](../../../docs/tasks/concluidos/CORR-WTE-057.md) tinha medido que o port
 **não desabilita** o `iguala_nombres` no time-modelo — 518 px de mudança no
 oráculo, **0** no port — com a linha presente no `.inc` do
 `lista_equiposChange` e o vizinho `boton_nombres2iso` acinzentando certo.
@@ -147,7 +147,7 @@ botões com glifo dos 18 formulários e acha **5** invariantes — `iguala_nombr
 ou sair desse conjunto derruba o `make -C wte check`.
 
 Registrado como **divergência deliberada** na
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md): é limitação
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md): é limitação
 de plataforma, atinge cinco botões, e o estado lógico está certo nos dois lados
 — o que difere é só o desenho.
 

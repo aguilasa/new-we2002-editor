@@ -18,7 +18,7 @@ janela abriu, **sem fechá-la**.
 - `lista_col1.ItemIndex` (campo `+0x398`), o jogo de uniforme em exibição;
 - o byte de forma da bandeira do slot 0 (`0x00432F14`);
 - a tabela de 95 bytes em `0x004231E8`, que a
-  [WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md) portou como
+  [WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) portou como
   `FORMA_PADRAO` na [`wte_uniformes`](../../src/wte_uniformes.pas).
 
 O `Sender` não é olhado. Os dois campos saem do

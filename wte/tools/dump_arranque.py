@@ -2,7 +2,7 @@
 """O que os 18 `FormCreate`/`FormShow` do original fazem.
 
 Gera `wte/re/arranque.md` e `wte/re/arranque.tsv` — insumo da
-[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), grupo de carga, linha
+[WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), grupo de carga, linha
 "`FormCreate` / `FormShow` — 18 endereços".
 
 ## O que a medição responde
@@ -716,7 +716,7 @@ def gera_md(medidas: list[dict]) -> str:
     a = w.append
     a("# `re/arranque.md` — o que os 18 `FormCreate`/`FormShow` fazem")
     a("")
-    a("Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), grupo de")
+    a("Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), grupo de")
     a("carga. Gerado por [`../tools/dump_arranque.py`](../tools/dump_arranque.py),")
     a(f"a partir de `{REL_EXE}`, de [`published_methods.tsv`](published_methods.tsv)")
     a("e de [`campos.tsv`](campos.tsv). **Não editar à mão:**")
@@ -776,7 +776,7 @@ def gera_md(medidas: list[dict]) -> str:
     a("`clNavy` — nenhuma delas é isto. A cor de projeto **nunca aparece na tela**:")
     a("o `OnCreate` a substitui antes de o formulário ser exibido. Um port que")
     a("respeitasse só o DFM ficaria cinza onde o original é colorido, e a")
-    a("[WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) comparou justamente")
+    a("[WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) comparou justamente")
     a("as janelas nesse estado.")
     a("")
     compostos = [m for m in medidas if m["forma"] == "composto"]

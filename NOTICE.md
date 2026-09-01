@@ -54,7 +54,7 @@ already has. The application resolves the folder at run time, in a fixed search
 order; the rule for the missing case is that it must name the files it wants
 and the directory it wants them in, never a bare file-not-found. Today it says
 only `data/dat.bin nao encontrado` and keeps running — closing that gap is
-[WTE-TASK-39](docs/tasks/39-empacotamento.md), which owns the run-time
+[WTE-TASK-39](docs/tasks/concluidos/39-empacotamento.md), which owns the run-time
 resolution.
 
 **The product name is deliberately not Obocaman's.** *WE2002 Team Editor* names

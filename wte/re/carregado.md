@@ -48,7 +48,7 @@ A tabela está em [`carregado.tsv`](carregado.tsv); este arquivo é a leitura de
 
 ## Como ler a coluna `no fundo`
 
-Quantos `TStaticText` do formulário têm, no retângulo deles, a **mesma cor dominante** do formulário inteiro. É a releitura do achado 4 da [WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) com o fundo de execução por baixo: os que declaram `Color` próprio ficam **fora** dessa conta nos dois lados — é o que se espera, e é o que faz a medida valer alguma coisa —, e os que herdam a cor do pai entram nela nos dois. Contagem diferente entre os lados é o sintoma que a §8.9 do plano mandava procurar.
+Quantos `TStaticText` do formulário têm, no retângulo deles, a **mesma cor dominante** do formulário inteiro. É a releitura do achado 4 da [WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) com o fundo de execução por baixo: os que declaram `Color` próprio ficam **fora** dessa conta nos dois lados — é o que se espera, e é o que faz a medida valer alguma coisa —, e os que herdam a cor do pai entram nela nos dois. Contagem diferente entre os lados é o sintoma que a §8.9 do plano mandava procurar.
 
 ## E a coluna `divergentes`
 

@@ -94,7 +94,7 @@ espera para envelhecer.)*
      era a 29. Hoje ela **está** em ordem — antecipar é só escolher quando.
    - **WTE-TASK-33 (slots de ML)** — antecipada em 2026-08-19, a pedido. É
      fase 5, e a razão é que a fase 4 dependia dela: a
-     [WTE-TASK-27](/docs/tasks/27-handlers-de-gravacao.md) tinha o ramo de
+     [WTE-TASK-27](/docs/tasks/concluidos/27-handlers-de-gravacao.md) tinha o ramo de
      destino de Master League da `0x00404820` parado esperando o contador
      `0x004335c0`, que é a 33 quem calcula. Não era ciclo — a 33 depende só da
      20 —, era inversão de ordem entre fases, e a regra de seleção (fase antes
@@ -364,10 +364,10 @@ Se concluída:
 >
 > **Já falhou quatro vezes**, e sempre no mesmo formato: o item que entra no
 > meio da execução, por um motivo lateral, e não volta para a lista ao escrever
-> o Log — [CORR-WTE-078](/docs/tasks/CORR-WTE-078.md),
-> [CORR-WTE-087](/docs/tasks/CORR-WTE-087.md),
-> [CORR-WTE-099](/docs/tasks/CORR-WTE-099.md) e
-> [CORR-WTE-107](/docs/tasks/CORR-WTE-107.md) — a última pelo **repasse** para
+> o Log — [CORR-WTE-078](/docs/tasks/concluidos/CORR-WTE-078.md),
+> [CORR-WTE-087](/docs/tasks/concluidos/CORR-WTE-087.md),
+> [CORR-WTE-099](/docs/tasks/concluidos/CORR-WTE-099.md) e
+> [CORR-WTE-107](/docs/tasks/concluidos/CORR-WTE-107.md) — a última pelo **repasse** para
 > a task seguinte, que é o pior item a faltar porque é o único que não é
 > arquivo de ferramenta. A -099 foi pelo `.gitignore`
 > que ganhou quinze linhas ao ver um binário compilado aparecer no
@@ -378,13 +378,13 @@ Se concluída:
 > lista: acrescente a linha ao quadro.** Registrar no Log "reconciliação é da
 > WTE-TASK-09" não basta — a 09 executa o quadro, e o que não está nele não é
 > remedido. Quadro em
-> [`/docs/tasks/09-fechamento-fase-1.md`](/docs/tasks/09-fechamento-fase-1.md),
+> [`/docs/tasks/concluidos/09-fechamento-fase-1.md`](/docs/tasks/concluidos/09-fechamento-fase-1.md),
 > seção "Recontagem obrigatória"; a linha nova diz a afirmação do plano e a
 > ferramenta (ou o comando, se não houver gerador) que a remede.
 >
 > Isso já falhou duas vezes: os imports de `rtl60`/`vcl60` da WTE-TASK-07
-> ([CORR-WTE-012](/docs/tasks/CORR-WTE-012.md)) e os bitmaps da WTE-TASK-08
-> ([CORR-WTE-014](/docs/tasks/CORR-WTE-014.md)) — os dois medidos, os dois
+> ([CORR-WTE-012](/docs/tasks/concluidos/CORR-WTE-012.md)) e os bitmaps da WTE-TASK-08
+> ([CORR-WTE-014](/docs/tasks/concluidos/CORR-WTE-014.md)) — os dois medidos, os dois
 > encaminhados para a 09, os dois ausentes do quadro que ela executa.
 
 > **Pendência encaminhada para outra task só vale com a linha escrita NA
@@ -395,9 +395,9 @@ Se concluída:
 >
 > É a mesma família do quadro da WTE-TASK-09 acima, um nível mais geral, e já
 > falhou duas vezes: a WTE-TASK-30 com dono errado
-> ([CORR-WTE-086](/docs/tasks/CORR-WTE-086.md)) e o vaivém dos cobradores, que
+> ([CORR-WTE-086](/docs/tasks/concluidos/CORR-WTE-086.md)) e o vaivém dos cobradores, que
 > a WTE-TASK-34 encaminhou para a 35 sem que a 35 tivesse uma linha sobre ele
-> ([CORR-WTE-105](/docs/tasks/CORR-WTE-105.md)). A terceira passagem da
+> ([CORR-WTE-105](/docs/tasks/concluidos/CORR-WTE-105.md)). A terceira passagem da
 > WTE-TASK-31 batizou o defeito: **prosa vencida** — documento que envelhece
 > sozinho enquanto outro o lê como estado corrente.
 

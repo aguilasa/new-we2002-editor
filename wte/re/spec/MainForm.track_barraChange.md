@@ -47,7 +47,7 @@ tela capaz de julgar este handler.
 Quem leva esses cinco bytes para o disco é o `boton_barras2isoClick`
 (`0x0040cab8`), que carrega o mesmo `0x00434592` em `ebx` — medido em
 `0x0040cb3d`. É da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -97,7 +97,7 @@ japonesa:
 As quatro não editadas continuarem ancoradas no dump é metade do resultado: ela
 mostra que a edição **não respingou**. A outra metade é a barra editada ter
 mudado — sem isso, "os dois lados concordam" passaria com a tela intacta, que
-é o par que a [WTE-TASK-20](../../../docs/tasks/20-round-trip-headless.md)
+é o par que a [WTE-TASK-20](../../../docs/tasks/concluidos/20-round-trip-headless.md)
 ensinou a exigir: concordam, **e** fizeram alguma coisa. Do lado do port o
 `compara_tela.sh` ainda exige do trace 1 `sel_barraClick` e o número previsto
 de `track_barraChange`.
@@ -111,6 +111,6 @@ divergência de tela que não é do handler. **Os dois andam +2 por clique**
 
 **O que esta régua NÃO julga, e quem julga:** que os bytes editados cheguem à
 imagem certa. Isso é `boton_barras2isoClick`, da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) — e é critério de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md) — e é critério de
 conclusão **dela**, não exclusão silenciosa daqui. Pixel igual dos dois lados
 não prova que os dois escreveram o mesmo byte do modelo.

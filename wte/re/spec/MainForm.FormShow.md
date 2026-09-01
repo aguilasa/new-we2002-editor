@@ -66,7 +66,7 @@ antes de o harness do gate poder dirigi-la, e o diagnóstico seria "a janela nã
 apareceu" — que manda procurar no lugar errado.
 
 É divergência deliberada, e vai para a
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md).
 
 **Evidência:** observacao de tela
 
@@ -75,12 +75,12 @@ apareceu" — que manda procurar no lugar errado.
 A resolução do caminho do `dat.bin` diverge de propósito: o original depende do
 diretório corrente, e reproduzir isso seria reproduzir um defeito de
 empacotamento. O port procura `$WTE_ASSETS_DIR`, depois ao lado do executável.
-A resolução definitiva é da [WTE-TASK-39](../../../docs/tasks/39-empacotamento.md).
+A resolução definitiva é da [WTE-TASK-39](../../../docs/tasks/concluidos/39-empacotamento.md).
 
 ## O veredito, e por que ele não é `implementado`
 
 **Passou de `aberto` a `divergencia deliberada` em 2026-08-23**, terceira
-passagem da [WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md).
+passagem da [WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md).
 
 O que segurava o `aberto` era *"falta a carga da tela — popular `lista_equipos`
 e o resto do `MainForm` a partir do banco"*. **Ela não falta mais**, e a régua
@@ -102,7 +102,7 @@ escritas acima e são de propósito:
    corrente; o port procura `$WTE_ASSETS_DIR` e depois o lado do executável.
 
 As duas são entrada da
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), e é o
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md), e é o
 vocabulário do [gabarito](GABARITO.md) que manda: handler portado com desvio
 consciente é `divergencia deliberada`, não `implementado` com ressalva no meio
 da prosa — a ressalva no meio da prosa é o que não se lê de um índice.

@@ -2,7 +2,7 @@
 """O `.mcr` do WE2002: o conteiner pela documentacao publica, o bloco pelo `.exe`.
 
 Gera `wte/re/mcr.md` e `wte/re/mcr.tsv` -- insumo da
-[WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md).
+[WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md).
 
     python3 wte/tools/dump_mcr.py           # regera as duas saidas
     python3 wte/tools/dump_mcr.py --check   # o que `make -C wte check` roda
@@ -487,7 +487,7 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
       f"escrever por cima. Os **{len(dat) - CARTAO_BYTES}** restantes são os\n"
       "sete setores que a abertura da imagem injeta, descritos na seção 8 do\n"
       "[`assets.md`](assets.md). Era a pergunta que o enunciado da\n"
-      "[WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md) mandava responder\n"
+      "[WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md) mandava responder\n"
       "antes de usar o arquivo como fixture.\n")
 
     w("## O contêiner\n")
@@ -556,7 +556,7 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
       "from .mcr files\"*, e capitão e cobradores são exatamente campos do\n"
       "bloco 3. O veredito — se o cartão emitido é válido para o console, ou se\n"
       "só serve de transporte entre cópias do editor — é da\n"
-      "[WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md); aqui fica a\n"
+      "[WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md); aqui fica a\n"
       "medição.\n")
 
     med = linhas_medidas()
@@ -582,7 +582,7 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
           "entre o bloco declarado e o bloco livre.\n")
     w("## O que o `boton_mcr2isoClick` faz com isso\n")
     w("`0x0040c46c`. Ele **não** é um leitor a mais: reusa as duas rotinas de\n"
-      "gravação que a [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md)\n"
+      "gravação que a [WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md)\n"
       "portou. Para cada um dos 23 slots, enche o buffer 23 a partir do `.mcr`\n"
       "(`0x0040478c`) e chama a `0x00404820` — a mesma dos handlers de mover —,\n"
       "depois grava o número de camisa pela `0x00404048`. Formação e tática vão\n"

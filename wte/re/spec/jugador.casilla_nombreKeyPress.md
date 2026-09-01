@@ -54,7 +54,7 @@ Tecla recusada vira `#0`, sem aviso.
 **O conjunto aceito é o mesmo do filtro de exibição de nome.** Letra, dígito,
 ponto e espaço — exatamente as quatro classes que a rotina `0x0040b2d8` deixa
 passar ao montar a lista de jogadores, medida na
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md). O autor filtrou a
+[WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md). O autor filtrou a
 entrada com a mesma régua que usa na saída; a diferença é que ali byte acima de
 `z` vira `?` e aqui a tecla simplesmente não entra.
 
@@ -65,7 +65,7 @@ original.
 
 **Não há limite de comprimento aqui.** O truncamento vem do `MaxLength` do
 `TEdit` e do buffer de gravação, e inventariar isso é a
-[WTE-TASK-36](../../../docs/tasks/36-buffers-e-truncamento.md).
+[WTE-TASK-36](../../../docs/tasks/concluidos/36-buffers-e-truncamento.md).
 
 Pascal em
 [`../../src/impl/ep2002_jugador.casilla_nombreKeyPress.inc`](../../src/impl/ep2002_jugador.casilla_nombreKeyPress.inc).

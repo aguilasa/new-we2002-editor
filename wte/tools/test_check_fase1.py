@@ -199,14 +199,14 @@ class TestePerimetro(unittest.TestCase):
         feito = self._escreve(
             "docs/tasks/08-assets.md", "---\nstatus: concluído\n---\ncorpo\n")
         pendente = self._escreve(
-            "docs/tasks/39-empacotamento.md", "---\nstatus: pendente\n---\nx\n")
+            "docs/tasks/concluidos/39-empacotamento.md", "---\nstatus: pendente\n---\nx\n")
         self.assertFalse(mod._no_perimetro(feito))
         self.assertTrue(mod._no_perimetro(pendente))
 
     def test_narracao_sai_do_perimetro(self):
-        for rel in ("docs/tasks/correcoes-progresso.md",
-                    "docs/tasks/CORR-WTE-014.md",
-                    "docs/tasks/09-fechamento-fase-1.md",
+        for rel in ("docs/tasks/concluidos/correcoes-progresso.md",
+                    "docs/tasks/concluidos/CORR-WTE-014.md",
+                    "docs/tasks/concluidos/09-fechamento-fase-1.md",
                     "wte/re/assets.md",
                     "wte/re/strings.md",
                     # narra a propria guarda, e cita 430 para explicar o corte
@@ -219,7 +219,7 @@ class TestePerimetro(unittest.TestCase):
         # perimetro antigo (`docs/` + `wte/re/`) nao alcancava. Os prompts
         # entraram com a CORR-WTE-018, pelo mesmo motivo -- a exclusao deles
         # valia para destino de link, que nao e o que esta guarda mede.
-        for rel in ("docs/PLAN-WTE-LAZARUS.md", "docs/tasks/progresso.md",
+        for rel in ("docs/PLAN-WTE-LAZARUS.md", "docs/tasks/concluidos/progresso.md",
                     "wte/re/offsets.md", "wte/README.md",
                     "docs/prompts/01-executar.md",
                     "docs/prompts/02-revisar.md"):
@@ -281,7 +281,7 @@ class TestePerimetro(unittest.TestCase):
         self.assertEqual(dict(mod.varrer())["197 bitmaps"], [])
 
     def test_varrer_acha_residuo_e_zera_quando_corrigido(self):
-        alvo = self._escreve("docs/tasks/progresso.md",
+        alvo = self._escreve("docs/tasks/concluidos/progresso.md",
                              "| Assets | 197 `.bmp` |\n")
         achados = dict(mod.varrer())
         self.assertEqual(len(achados["197 bitmaps"]), 1)

@@ -1,6 +1,6 @@
 # `re/published_methods.md` — os 96 handlers, com dono
 
-Produto da [WTE-TASK-04](../../docs/tasks/04-mapa-de-handlers.md). Gerado por
+Produto da [WTE-TASK-04](../../docs/tasks/concluidos/04-mapa-de-handlers.md). Gerado por
 [`../tools/dump_published.py`](../tools/dump_published.py), a partir de
 `we-team-editor/we-team-editor.exe` e dos 18 formulários de
 [`dfm/`](dfm/).
@@ -147,10 +147,10 @@ identificável, não reabrir um julgamento.
 
 | Grupo | Task | Quantos |
 |---|---|---:|
-| carga | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) | 28 |
-| edição | [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md) | 44 |
-| gravação | [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md) | 6 |
-| auxiliar | [WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) | 18 |
+| carga | [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) | 28 |
+| edição | [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md) | 44 |
+| gravação | [WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md) | 6 |
+| auxiliar | [WTE-TASK-30](../../docs/tasks/concluidos/30-handlers-auxiliares.md) | 18 |
 | **total** | | **96** |
 
 ### As oito regras, na ordem em que são tentadas
@@ -358,7 +358,7 @@ Tudo abaixo é contagem do script contra texto já escrito. Nenhuma delas muda u
 conclusão; todas mudam um número que alguém usaria para se conferir.
 
 A coluna **Diz** cita o texto como ele estava quando a WTE-TASK-04 mediu. A
-[CORR-WTE-006](../../docs/tasks/CORR-WTE-006.md) propagou estas linhas para os
+[CORR-WTE-006](../../docs/tasks/concluidos/CORR-WTE-006.md) propagou estas linhas para os
 arquivos citados, então a citação já não é o que se lê lá — é o registro do que
 foi corrigido, e envelhece junto. Quem decide se a seção inteira vira histórico
 ao fechar a fase 1 é a WTE-TASK-09.

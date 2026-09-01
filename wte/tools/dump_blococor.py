@@ -2,7 +2,7 @@
 """Onde na imagem mora o bloco de cor de cada time.
 
 Gera `wte/src/wte_blococor.pas` -- insumo da
-[CORR-WTE-081](../../docs/tasks/CORR-WTE-081.md), segunda das tres gravacoes
+[CORR-WTE-081](../../docs/tasks/concluidos/CORR-WTE-081.md), segunda das tres gravacoes
 orfas (`ficha_color.BitBtn3Click`).
 
     python3 wte/tools/dump_blococor.py           # regera

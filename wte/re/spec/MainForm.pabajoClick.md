@@ -60,7 +60,7 @@ intocado: dar a seta para baixo duas vezes copia o mesmo jogador duas vezes.
 ## Bytes tocados
 
 **Grava**, dentro da `0x00404820`. Offset por ramo é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -106,7 +106,7 @@ o ramo de ALOCAÇÃO** da `0x00404820`. Alocar exige origem do tipo 3, e o
 seis trabalham com os buffers 1 e 2 e nunca chegam lá.
 
 Fechado em 2026-08-20 pela oitava passagem da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), com golden verde
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md), com golden verde
 próprio ([`golden-11-descarte-ml`](../../tests/roteiros/golden-11-descarte-ml.txt)),
 **byte-idêntico e sem faixa declarada**.
 
@@ -124,5 +124,5 @@ dois lados alocam o bloco **350** — vínculo em `2012730`, nome em `2010092`,
 atributos em `2208920`, custo em `3069862`.
 
 **Divergência deliberada do port**
-([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)): a faixa da
+([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)): a faixa da
 linha e o `ItemIndex >= 0` do lado direito, que o original não confere.

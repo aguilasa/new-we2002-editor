@@ -1,6 +1,6 @@
 # `re/formacoes.md` — as 18 formações do campinho tático
 
-Produto da [CORR-WTE-062](../../docs/tasks/CORR-WTE-062.md). Gerado
+Produto da [CORR-WTE-062](../../docs/tasks/concluidos/CORR-WTE-062.md). Gerado
 por [`../tools/dump_formacoes.py`](../tools/dump_formacoes.py).
 **Não editar à mão.** A tabela está em [`formacoes.tsv`](formacoes.tsv); a
 unidade Pascal é

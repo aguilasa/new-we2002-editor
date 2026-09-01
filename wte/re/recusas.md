@@ -23,7 +23,7 @@ tabela, `src/core/` não foi tocado nesta task.
 
 ## O ponto de partida: 498 recusas em 13 motivos
 
-Números da execução que fechou a [WTE-TASK-17](../../docs/tasks/17-transpilador-da-camada-de-dados.md),
+Números da execução que fechou a [WTE-TASK-17](../../docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md),
 lidos do `transpilador.md` daquele commit — não contados à mão. Hoje o
 `port_database_pas.py --report` diz **0 recusa(s) em 0 motivo(s)**.
 
@@ -143,7 +143,7 @@ campo —, então empacotá-los só perderia alinhamento. A exceção é
 ## Rota 3 — o que o `tipos.md` já decidira que não é transpilação
 
 Três peças, todas com desenho escrito desde a
-[WTE-TASK-15](../../docs/tasks/15-mapeamento-de-tipo.md). O Pascal delas mora
+[WTE-TASK-15](../../docs/tasks/concluidos/15-mapeamento-de-tipo.md). O Pascal delas mora
 **dentro do gerador** (`MANUAIS`, `TRECHOS_MANUAIS`), nunca no arquivo de
 saída: a unidade continua sendo gerada por inteiro, e o trecho vai marcado
 `PORTE A MAO (rota 3)`.
@@ -224,7 +224,7 @@ de Windows daria 1.911 linhas com CRLF e passaria.
 classe, constante, `using` — tem de ser transpilado **ou** reivindicado com
 razão escrita; item que ninguém reivindica recusa, e reivindicação de item que
 sumiu da entrada também. É a regressão da
-[CORR-WTE-034](../../docs/tasks/CORR-WTE-034.md) no nível de item: lá o `UNITS`
+[CORR-WTE-034](../../docs/tasks/concluidos/CORR-WTE-034.md) no nível de item: lá o `UNITS`
 esqueceu `Team.hpp` e nada no `--check` acusou.
 
 ---
@@ -248,7 +248,7 @@ número. Fica aqui porque é aqui que os defeitos desta classe são registrados.
 | `<<` com lookbehind `(?<![\w\s])` | `hair_style<<4` (`Player.cpp:65`) atravessava intacto | regra simples, sem lookbehind |
 | `static_cast<unsigned int>` depois das regras de tipo | virava `static_cast<LongWord>`, que a regra do cast não casa mais | os casts rodam **antes** das regras de tipo |
 | `as` como nome de parâmetro | `as` é o operador de type-cast do Pascal; o corpo de `AsciiToKanji` não compilava | tabela `RESERVADAS`/`RENOMEIA`; identificador reservado sem mapeamento recusa |
-| `AnsiChar` para campo inteiro **largo** com `Ord` ([CORR-WTE-043](../../docs/tasks/CORR-WTE-043.md)) | `players[i].cost := Ord(buf1[0])`: o `char` do x86 tem sinal, então `0xC8` chega como **200** onde o C++ entrega **-56** | `ajustar_atribuicao()` emite `ShortInt(...)` quando o destino é largo e mantém `Ord` quando é de um byte (`UM_BYTE`) |
+| `AnsiChar` para campo inteiro **largo** com `Ord` ([CORR-WTE-043](../../docs/tasks/concluidos/CORR-WTE-043.md)) | `players[i].cost := Ord(buf1[0])`: o `char` do x86 tem sinal, então `0xC8` chega como **200** onde o C++ entrega **-56** | `ajustar_atribuicao()` emite `ShortInt(...)` quando o destino é largo e mantém `Ord` quando é de um byte (`UM_BYTE`) |
 
 Faltavam também três regras que a entrada exige e a tabela não tinha: literal
 hexadecimal (`0x07` → `$07`), `&`/`|` bit-a-bit e as compostas `&=`/`|=`/`^=`.
@@ -267,10 +267,10 @@ parênteses viraria `(x or defence) - 12`.
 | Linhas C++ de entrada | 2.504 | `transpilador.md` |
 | `Read`/`Write`/`Seek`/`strcpy` | idênticos à entrada, mais a duplicação do `[[fallthrough]]` | `test_a_contagem_de_io_bate_com_a_entrada` |
 | Compilação | `fpc` limpo, **zero aviso** | `test_as_seis_unidades_compilam` |
-| Decisões do `tipos.md` | **26** casos, todos verdes (23 na WTE-TASK-18; 3 vieram com a [CORR-WTE-043](../../docs/tasks/CORR-WTE-043.md)) | `wte/tests/test_camada_dados.pas` |
+| Decisões do `tipos.md` | **26** casos, todos verdes (23 na WTE-TASK-18; 3 vieram com a [CORR-WTE-043](../../docs/tasks/concluidos/CORR-WTE-043.md)) | `wte/tests/test_camada_dados.pas` |
 
 O que **não** está medido aqui, e é da
-[WTE-TASK-20](../../docs/tasks/20-round-trip-headless.md): que a camada Pascal
+[WTE-TASK-20](../../docs/tasks/concluidos/20-round-trip-headless.md): que a camada Pascal
 lê e grava os mesmos bytes que o `we2002_core` nas duas ROMs. Compilar e provar
 as decisões de tipo é condição necessária, não suficiente — o `Load` inteiro
 ainda não foi executado contra imagem nenhuma.

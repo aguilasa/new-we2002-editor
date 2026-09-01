@@ -54,7 +54,7 @@ BYTE[0x00423169] := 0
 
 **Grava duas vezes**, dentro da `0x00404820` — o jogador da esquerda no slot da
 direita e vice-versa. Offset por ramo é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -133,11 +133,11 @@ O Pascal
 faz tudo, as duas gravações inclusive.
 
 Fechado em 2026-08-20 pela oitava passagem da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md): o ramo de
 **destino de Master League** da `0x00404820` foi portado, com golden verde
 ([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
 contador de blocos livres vindo da
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md).
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md).
 
 **Este handler é o único que precisa do `TrocaEmCurso`**, e agora se vê por
 quê: o ramo de Master League mostra um aviso modal (`ficha_info4`) quando o
@@ -147,5 +147,5 @@ liga antes e desliga depois existe para calá-lo, e até esta passagem ele era u
 sinalizador sem leitor no port.
 
 **Divergências deliberadas do port**
-([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)): sai sem
+([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)): sai sem
 fazer nada se qualquer `ItemIndex` for negativo.

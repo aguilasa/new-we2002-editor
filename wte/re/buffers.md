@@ -7,7 +7,7 @@ python3 wte/tools/dump_buffers.py
 python3 wte/tools/dump_buffers.py --check   # o que `make -C wte check` roda
 ```
 
-Produto da [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md).
+Produto da [WTE-TASK-36](../../docs/tasks/concluidos/36-buffers-e-truncamento.md).
 **Todo número daqui saiu do script.**
 
 ## As duas fontes, conciliadas

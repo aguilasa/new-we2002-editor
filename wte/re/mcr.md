@@ -18,7 +18,7 @@ dentro — o molde que o `grabar_memoryClick` copia inteiro antes de
 escrever por cima. Os **14336** restantes são os
 sete setores que a abertura da imagem injeta, descritos na seção 8 do
 [`assets.md`](assets.md). Era a pergunta que o enunciado da
-[WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md) mandava responder
+[WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md) mandava responder
 antes de usar o arquivo como fixture.
 
 ## O contêiner
@@ -115,7 +115,7 @@ v0.98 consertou *"the problem with the captain and kickers when loading
 from .mcr files"*, e capitão e cobradores são exatamente campos do
 bloco 3. O veredito — se o cartão emitido é válido para o console, ou se
 só serve de transporte entre cópias do editor — é da
-[WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md); aqui fica a
+[WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md); aqui fica a
 medição.
 
 ## A fixture, e por que ela NAO e versionada
@@ -141,7 +141,7 @@ entre o bloco declarado e o bloco livre.
 
 ## O que o `boton_mcr2isoClick` faz com isso
 `0x0040c46c`. Ele **não** é um leitor a mais: reusa as duas rotinas de
-gravação que a [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md)
+gravação que a [WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md)
 portou. Para cada um dos 23 slots, enche o buffer 23 a partir do `.mcr`
 (`0x0040478c`) e chama a `0x00404820` — a mesma dos handlers de mover —,
 depois grava o número de camisa pela `0x00404048`. Formação e tática vão

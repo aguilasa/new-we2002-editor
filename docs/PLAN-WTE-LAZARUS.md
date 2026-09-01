@@ -386,7 +386,7 @@ Se o app for publicado, o `NOTICE.md` ganha uma seção sobre a linhagem do
 Obocaman, no mesmo tom das existentes. **Isso é decisão do usuário, não minha —
 não publique sem confirmar.**
 
-**Feito em 2026-08-25** pela [WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md): o
+**Feito em 2026-08-25** pela [WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md): o
 [NOTICE.md](../NOTICE.md) ganhou a linha do Obocaman na tabela de linhagem e uma
 seção própria — *Lineage of WE2002 - Lazarus Editor* — que diz o que a
 reimplementação é feita (especificação escrita, camada de dados do
@@ -1054,7 +1054,7 @@ e conta vagos. Depende só da Fase 3.
 
 1. **Bateria golden completa**, todas as operações de gravação, nas duas ROMs.
    **Feita em 2026-08-24** pela
-   [WTE-TASK-34](/docs/tasks/34-bateria-golden-completa.md), e o estado medido
+   [WTE-TASK-34](/docs/tasks/concluidos/34-bateria-golden-completa.md), e o estado medido
    está em [`../wte/re/golden.md`](../wte/re/golden.md): **92 corridas** — 23
    roteiros × 2 ROMs × 2 modos —, com **48 `PASSOU`, 22 `SEM_ORACULO`, 22
    `NAO_APLICAVEL` e zero `REPROVOU`**. A japonesa fechou **46 de 46**,
@@ -1062,7 +1062,7 @@ e conta vagos. Depende só da Fase 3.
    gravar, e gravação dupla.
 
    *(A bateria tem **96 corridas** desde 2026-08-25: a
-   [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md) acrescentou o
+   [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md) acrescentou o
    `golden-25-retorno`, que fecha o editor de cor pela tecla `Return` em vez do
    clique no `OK`. Mesmo resultado por ROM que o `golden-16-cor`, do qual ele
    deriva: `PASSOU`/`PASSOU` na japonesa, sem oráculo na europeia.)*
@@ -1083,7 +1083,7 @@ e conta vagos. Depende só da Fase 3.
 2. **Registro de divergências deliberadas** — no formato que o
    [PARIDADE-FUNCIONAL.md](/docs/PARIDADE-FUNCIONAL.md) já usa: o que diverge, por
    que, e que evidência sustenta. **Feito em 2026-08-25** pela
-   [WTE-TASK-35](/docs/tasks/35-divergencias-deliberadas.md), em
+   [WTE-TASK-35](/docs/tasks/concluidos/35-divergencias-deliberadas.md), em
    [`../wte/re/divergencias.md`](../wte/re/divergencias.md): **seis entradas**,
    todas de comportamento em produção, nenhuma hipótese. A bateria de bytes
    **não tem exceção nenhuma** — zero roteiro declara `conhecida:` —, e as
@@ -1111,11 +1111,11 @@ e conta vagos. Depende só da Fase 3.
    encontrar buffer de tamanho fixo, o comportamento de estouro entra na spec.
 
    **Feito em 2026-08-25** pela
-   [WTE-TASK-36](/docs/tasks/36-buffers-e-truncamento.md), em
+   [WTE-TASK-36](/docs/tasks/concluidos/36-buffers-e-truncamento.md), em
    [`../wte/re/buffers.md`](../wte/re/buffers.md): **seis campos** de digitação
    inventariados, **25 de 25** conferências de borda, e **nenhuma divergência**.
    *(Eram 10 no fechamento da task, todas no vetor `names`; a
-   [CORR-WTE-110](/docs/tasks/CORR-WTE-110.md) estendeu os dois grupos de
+   [CORR-WTE-110](/docs/tasks/concluidos/CORR-WTE-110.md) estendeu os dois grupos de
    borda de campo aos quatro vetores do inventário.)*
 
    **A classe inversa existe mesmo, e está medida.** `Cadeia()` é `PAnsiChar`
@@ -1130,14 +1130,14 @@ e conta vagos. Depende só da Fase 3.
    `(l - 1) * 2` bytes, devolvendo `l - 1` caracteres. Os dois `- 1` são o
    mesmo — o `dec` de `0x00403d95` já está dentro da largura medida.
    *(A largura vinha de `TEAM_NAME_KANJI_LEN[t]` até a
-   [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), 2026-08-28: a tabela só bate
+   [CORR-WTE-121](/docs/tasks/concluidos/CORR-WTE-121.md), 2026-08-28: a tabela só bate
    na japonesa — erra 29 dos 95 times da `ptbr-remaster` e 49 dos 95 da
    European Deluxe —, e o campo cortava o nome antes de gravar. O
    `LimiteDoNome1` passou a varrer a imagem, como o original.)* E a §8.6 ganha um irmão: `MaxLength` **não** guarda campo numérico —
    o `casilla_dorsal` aceita dez dígitos para um número que não passa de 99, e
    quem guarda a faixa é a validação do handler de gravação.
 4. **Sem regressão de UI** — reconferir os 18 formulários. **Feito em
-   2026-08-25** pela [WTE-TASK-37](/docs/tasks/37-reconferencia-de-ui.md), na
+   2026-08-25** pela [WTE-TASK-37](/docs/tasks/concluidos/37-reconferencia-de-ui.md), na
    segunda passada de [`../wte/re/visual.md`](../wte/re/visual.md), com
    **15 pares** de captura no mesmo estado dos dois lados e duas medições
    geradas ([`carregado.md`](../wte/re/carregado.md) e
@@ -1151,7 +1151,7 @@ e conta vagos. Depende só da Fase 3.
    causa é um *default* de widgetset sobre uma propriedade que o DFM não
    declara: no VCL o `TLabel` nasce `Transparent = False` e pinta o `Color`; na
    LCL nasce `True` e não pinta. Correção decidida e encaminhada ao gerador
-   ([WTE-TASK-10](/docs/tasks/10-conversor-dfm-para-lfm.md)).
+   ([WTE-TASK-10](/docs/tasks/concluidos/10-conversor-dfm-para-lfm.md)).
 
    **E o `Return` foi medido em bytes, não em prosa.** 13 dos 18 formulários
    têm botão `Default`, e um deles — o `OK` do `ficha_color` — grava 383 bytes
@@ -1171,7 +1171,7 @@ tem em `packaging/`. Decidir nome do produto (**não** reusar
 (AppImage/Flatpak) fica **fora**, igual à decisão do plano Linux.
 
 **O nome está decidido desde 2026-08-25**, pela
-[WTE-TASK-38](/docs/tasks/38-nome-e-linhagem.md): o produto é
+[WTE-TASK-38](/docs/tasks/concluidos/38-nome-e-linhagem.md): o produto é
 **`WE2002 - Lazarus Editor`** — escolhido pelo usuário, e a alusão é
 deliberada, porque Lázaro ressuscita. A separação que o `newWe2002` já usa vale
 aqui inteira:
@@ -1200,7 +1200,7 @@ o app antes de qualquer coisa. Está registrado como divergência deliberada
 que hoje é `data/dat.bin nao encontrado` é da WTE-TASK-39.
 
 **A instalação está feita desde 2026-08-26**, pela
-[WTE-TASK-39](/docs/tasks/39-empacotamento.md): `make -C wte install
+[WTE-TASK-39](/docs/tasks/concluidos/39-empacotamento.md): `make -C wte install
 PREFIX=<prefixo>` põe binário, `.desktop`, AppStream, os sete ícones e a
 documentação nos lugares do freedesktop, e o `share/we2002Lazarus/` nasce com
 um `README.txt` que diz o que pôr ali — porque os assets não são
@@ -1430,8 +1430,8 @@ prefixo `win32` próprio, sempre no `Xvfb :98` — que era o `:99` até 2026-08-
 e o registro histórico continua dizendo `:99` porque foi o que aconteceu.
 
 O andamento task a task, com data de commit e data de revisão, está em
-[`/docs/tasks/progresso.md`](/docs/tasks/progresso.md); as correções, em
-[`/docs/tasks/correcoes-progresso.md`](/docs/tasks/correcoes-progresso.md).
+[`/docs/tasks/concluidos/progresso.md`](/docs/tasks/concluidos/progresso.md); as correções, em
+[`/docs/tasks/concluidos/correcoes-progresso.md`](/docs/tasks/concluidos/correcoes-progresso.md).
 Esta seção registra o **desfecho**, e é a WTE-TASK-40 quem a escreve.
 
 ### As três condições da §0
@@ -1490,9 +1490,9 @@ As sete medidas e o que cada uma prova estão em
 | # | Sintoma | Causa | Correção |
 |---|---|---|---|
 | 1 | O binário **fora** de `wte/build/` morria num diálogo genérico da LCL — *File not found. Press OK to ignore and risk data corruption.* — antes de qualquer janela | O log de trace resolvia `<exe>/../re/trace.log`, e o `Rewrite` levantava `EInOutError` num diretório que não existe. O caso especial que a WTE-TASK-39 esperava era a pasta de assets; era o log | Uma ordem de busca só, em [`wte_datafiles.pas`](../wte/src/wte_datafiles.pas), para assets **e** trace; e o `retrace` desliga o trace em vez de derrubar o app. Diagnóstico que mata o paciente é pior que nenhum |
-| 2 | `golden_suite.sh --roteiro` sem `--retomar` **truncava o registro inteiro** antes de qualquer corrida | O cabeçalho era reescrito sempre que `--retomar` não vinha. Com `--roteiro`, isso não filtrava: substituía | Corrida **parcial** preserva o registro e substitui a linha do trio. As 92 corridas da WTE-TASK-34 — 1,8 h — foram recuperadas de `git show HEAD:` ([CORR-WTE-113](/docs/tasks/CORR-WTE-113.md)) |
+| 2 | `golden_suite.sh --roteiro` sem `--retomar` **truncava o registro inteiro** antes de qualquer corrida | O cabeçalho era reescrito sempre que `--retomar` não vinha. Com `--roteiro`, isso não filtrava: substituía | Corrida **parcial** preserva o registro e substitui a linha do trio. As 92 corridas da WTE-TASK-34 — 1,8 h — foram recuperadas de `git show HEAD:` ([CORR-WTE-113](/docs/tasks/concluidos/CORR-WTE-113.md)) |
 | 3 | `golden-06-textura` reprovava nos dois lados com assinatura de falha de **tempo** | Não era tempo: o roteiro exige `work/t.bin` de 5.000 bytes, e `work/` tinha um `t.bin` de 307 MB, cópia de ROM deixada por outra corrida | Cada roteiro **declara** a fixture no cabeçalho, e a bateria a **cria** (`sintetica`) ou confere o tamanho e aborta (`exigida`). `work/` é rascunho compartilhado, e nome de fixture colide com nome de cópia de trabalho |
-| 4 | A spec de três handlers afirmava "nada exercita o corpo", com o gate verde os exercitando | A frase saía do `compara_tela.sh` (régua de **pixel**) e não da bateria golden (régua de **byte**), que dirige a janela bem mais fundo | O [`cobertura_gate.py`](../wte/tools/cobertura_gate.py) lê o `port-trace.log` que o próprio gate escreve e versiona a **contagem** de disparos, não um booleano ([CORR-WTE-089](/docs/tasks/CORR-WTE-089.md)) |
+| 4 | A spec de três handlers afirmava "nada exercita o corpo", com o gate verde os exercitando | A frase saía do `compara_tela.sh` (régua de **pixel**) e não da bateria golden (régua de **byte**), que dirige a janela bem mais fundo | O [`cobertura_gate.py`](../wte/tools/cobertura_gate.py) lê o `port-trace.log` que o próprio gate escreve e versiona a **contagem** de disparos, não um booleano ([CORR-WTE-089](/docs/tasks/concluidos/CORR-WTE-089.md)) |
 
 Nenhum dos quatro estava previsto. As armadilhas que a §8 previa — a convenção
 Borland no Ghidra, o `bitpacked record` do FPC, o `{$R *.lfm}` que ignora

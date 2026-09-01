@@ -58,7 +58,7 @@ Não trata.
 ## Notas
 
 **A decisão que este parágrafo adiou foi tomada na quinta passagem da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md), em 2026-08-21.**
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), em 2026-08-21.**
 Até lá o veredito era `aberto` de propósito: os cinco globais em
 `0x00433dc0`…`0x00433dd0` são o estado do editor de cor 2D, e escrever este
 corpo antes de decidir onde esse estado mora significaria inventar.

@@ -30,7 +30,7 @@ A conferência roda no fim de cada corrida (`analisar_io.py --conferir`),
 e é ela que pegou os três defeitos de instrumento das passagens
 anteriores. O resultado dela morria no diretório da sessão, em `/tmp`:
 das cinco primeiras corridas, uma só teve o número registrado, em prosa
-([CORR-WTE-047](../../docs/tasks/CORR-WTE-047.md)). Agora o `cmp.tsv` de
+([CORR-WTE-047](../../docs/tasks/concluidos/CORR-WTE-047.md)). Agora o `cmp.tsv` de
 cada sessão é fundido em [`cmp-medido.tsv`](cmp-medido.tsv), e a linha
 abaixo é derivada dele — como o resto deste arquivo.
 
@@ -298,7 +298,7 @@ zero violação de acesso. Ver [`crash-causa.md`](crash-causa.md).
 **A coluna `Bloqueado` vale para a imagem que esta medição usou, a
 europeia.** O `wte.exe` é o **oráculo comportamental** do projeto (§4.2
 do plano), e a
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) monta o gate golden
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md) monta o gate golden
 em cima dele; com `roms/japanese-shift-jis.bin` ele passa da troca de
 time, então o gate tem em que se apoiar. A seção seguinte é a medição
 que isso destravou.
@@ -439,7 +439,7 @@ O maior offset que o `Offsets.hpp` conhece é `12552648`: esta região
 está **8 MB acima** dele, e o
 `newWe2002` nunca precisou nomeá-la porque não desenha uniforme.
 
-É a entrada da [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md), e é a maior região
+É a entrada da [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), e é a maior região
 nova que esta task achou.
 
 ---

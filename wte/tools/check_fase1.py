@@ -120,8 +120,8 @@ class CheckError(RuntimeError):
 
 # Documentos que narram a correcao: o numero velho ali e citacao, e fica.
 NARRACAO = {
-    "docs/tasks/correcoes-progresso.md",
-    "docs/tasks/09-fechamento-fase-1.md",
+    "docs/tasks/concluidos/correcoes-progresso.md",
+    "docs/tasks/concluidos/09-fechamento-fase-1.md",
     "wte/re/assets.md",
     "wte/re/strings.md",
     "wte/tools/README.md",   # narra esta guarda: cita 430 para explicar o corte
@@ -209,9 +209,11 @@ def _no_perimetro(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
     if rel in NARRACAO:
         return False
-    if re.fullmatch(r"docs/tasks/CORR-WTE-\d+\.md", rel):
+    # o `(?:[^/]+/)?` alcanca o arquivo de projeto encerrado
+    # (`docs/tasks/concluidos/`) sem deixar de valer para `docs/tasks/` raso
+    if re.fullmatch(r"docs/tasks/(?:[^/]+/)?CORR-WTE-\d+\.md", rel):
         return False
-    if re.match(r"docs/tasks/\d\d-", rel):
+    if re.match(r"docs/tasks/(?:[^/]+/)?\d\d-", rel):
         cabeca = path.read_text(encoding="utf-8")[:600]
         if re.search(r"^status:\s*conclu", cabeca, re.M):
             return False
@@ -520,7 +522,7 @@ def montar(**d) -> str:
 
     w(f"# `re/{MD_NAME}` — fechamento da fase 1")
     w("")
-    w("Produto da [WTE-TASK-09](../../docs/tasks/09-fechamento-fase-1.md).")
+    w("Produto da [WTE-TASK-09](../../docs/tasks/concluidos/09-fechamento-fase-1.md).")
     w(f"Gerado por [`../tools/check_fase1.py`](../tools/check_fase1.py).")
     w("**Não editar à mão** — correção entra no script e o arquivo é regerado:")
     w("")
@@ -647,7 +649,7 @@ def montar(**d) -> str:
     w("resultado é confrontado a cada rodada com a coluna `nota` do")
     w("[`offsets.tsv`](offsets.tsv), que o `dump_offsets.py` preenche lendo a")
     w("seção de cada ocorrência no PE. Até a")
-    w("[CORR-WTE-017](../../docs/tasks/CORR-WTE-017.md) o corte era")
+    w("[CORR-WTE-017](../../docs/tasks/concluidos/CORR-WTE-017.md) o corte era")
     w("`\"0x0042\" not in va`, teste de faixa escrito como teste de substring:")
     w("os últimos 4 KiB de `.text` casam o prefixo e `.data` passa de")
     w("`0x0042ffff`, então ele errava nos dois sentidos — em silêncio.")
@@ -724,7 +726,7 @@ def montar(**d) -> str:
     w("  pé; o que muda é **onde procurar as outras** — nos `.dfm`, não aqui;")
     w(f"- **imports de `rtl60`/`vcl60`: 300 → {d['n_imp_bpl']}.** Erro de medição")
     w("  do script descartável de 2026-08-05, corrigido pela")
-    w("  [CORR-WTE-012](../../docs/tasks/CORR-WTE-012.md). O total de")
+    w("  [CORR-WTE-012](../../docs/tasks/concluidos/CORR-WTE-012.md). O total de")
     w(f"  {d['n_imp']} imports sempre esteve certo;")
     w(f"- **bitmaps: 197 → {d['n_bmp']}.** Erro de **soma na prosa**: a §1.8 do")
     w("  plano lista as cinco pastas com os números certos e soma errado.")
@@ -749,9 +751,9 @@ def montar(**d) -> str:
     w("(`git archive 65cc4be docs wte`); estão fixos na tabela `SITIOS` do")
     w("script, porque não há como remedi-los sobre a árvore de hoje. Cada vez")
     w("que o perímetro cresce eles são **remedidos**, não ajustados: a")
-    w("[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) levou bitmaps de 8 para")
+    w("[CORR-WTE-016](../../docs/tasks/concluidos/CORR-WTE-016.md) levou bitmaps de 8 para")
     w("9 ao trazer `wte/README.md` para dentro, e a")
-    w("[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) somou os três sítios de")
+    w("[CORR-WTE-018](../../docs/tasks/concluidos/CORR-WTE-018.md) somou os três sítios de")
     w("`docs/prompts/`. Os sítios")
     w("corrigidos foram a §1.2, a §1.5, a §1.6, a §1.8, a §5 e a §8.8 do plano,")
     w("a tabela de estado e três seções do `progresso.md`, os enunciados ainda")
@@ -763,7 +765,7 @@ def montar(**d) -> str:
     w("o que o enunciado da WTE-TASK-09 pediu, e ali fechou em zero — mas o")
     w("`wte/README.md` continuava afirmando 197 fora do alcance da guarda, que")
     w("é exatamente o espalhamento que esta seção diz combater. A")
-    w("[CORR-WTE-016](../../docs/tasks/CORR-WTE-016.md) trocou as duas bases")
+    w("[CORR-WTE-016](../../docs/tasks/concluidos/CORR-WTE-016.md) trocou as duas bases")
     w("por `docs/` e `wte/`; o `rglob` sobre `wte` já cobre `wte/re/`.")
     w("")
     w("Fica fora do perímetro o documento que **narra** a correção: os")
@@ -782,7 +784,7 @@ def montar(**d) -> str:
     w("esta guarda mede, e número de referência afirmado em prosa entrou de")
     w("carona. O `02-revisar.md` citava três números aposentados como “o que já")
     w("está no plano”, e quem revisasse leria o valor velho como gabarito. A")
-    w("[CORR-WTE-018](../../docs/tasks/CORR-WTE-018.md) trouxe a pasta para")
+    w("[CORR-WTE-018](../../docs/tasks/concluidos/CORR-WTE-018.md) trouxe a pasta para")
     w("dentro.")
     w("")
     w("O corte exige o número **e** uma palavra de contexto na mesma linha.")

@@ -70,4 +70,4 @@ comportamento indefinido que o `botonClick` já descreve.
 
 Na prática o combo está `Enabled = False` no `.dfm`: só o `botonClick` o
 alcança, e ele o alcança para ler, não para disparar este handler. Entrada para
-a [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+a [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md).

@@ -1,6 +1,6 @@
 # `re/preco.md` — a fórmula de preço
 
-Produto da [WTE-TASK-32](../../docs/tasks/32-preco-do-jogador.md). A feature que
+Produto da [WTE-TASK-32](../../docs/tasks/concluidos/32-preco-do-jogador.md). A feature que
 motivou o projeto, e a única das quatro que é **aritmética** em vez de formato.
 
 ## O que se recuperou
@@ -110,7 +110,7 @@ resultado em [`preco.tsv`](preco.tsv).
 
 A corrida sobre ela gravou **zero** bytes — o `wte.exe` morre na troca de time
 com aquela imagem, medido na
-[CORR-WTE-044](../../docs/tasks/CORR-WTE-044.md). As linhas dela estão no TSV
+[CORR-WTE-044](../../docs/tasks/concluidos/CORR-WTE-044.md). As linhas dela estão no TSV
 **sem** `medido`, e o coletor diz isso em voz alta.
 
 **Isso já enganou uma vez, e a guarda nasceu daí.** A primeira versão do coletor
@@ -140,7 +140,7 @@ mesma soma (36) e a mesma posição (0), e só o 21 é gravado.
 
 Este documento afirmou, até 2026-08-24, que *"para o slot 22 a coluna sai
 zero"*. **Está medido que não sai.** A
-[CORR-WTE-095](../../docs/tasks/CORR-WTE-095.md) instrumentou a corrida com o
+[CORR-WTE-095](../../docs/tasks/concluidos/CORR-WTE-095.md) instrumentou a corrida com o
 [`diff_dirigido.sh`](../tools/diff_dirigido.sh) — `strace` sobre o oráculo, que
 é a régua que enxerga **leitura**, coisa que `cmp` nenhum alcança:
 
@@ -218,7 +218,7 @@ time; é deste handler.
 formato, não é do time, não é do slot, e não é do port: é o editor do Obocaman
 perdendo o último byte do laço na saída bufferizada. Está registrado como
 divergência deliberada na
-[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md), com as três
+[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md), com as três
 réguas que o sustentam.
 
 **Fora de alcance, e por decisão:** *por que* o runtime da Borland larga

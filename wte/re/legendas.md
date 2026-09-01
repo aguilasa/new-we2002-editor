@@ -1,6 +1,6 @@
 # `re/legendas.md` — as legendas enumeradas da ficha do jogador
 
-Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md).
+Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md).
 Gerado por [`../tools/dump_legendas.py`](../tools/dump_legendas.py) a
 partir de `we-team-editor/we-team-editor.exe`. **Não editar à mão.** As tabelas estão em
 [`legendas.tsv`](legendas.tsv); este arquivo é a leitura delas, e a unidade

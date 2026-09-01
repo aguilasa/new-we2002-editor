@@ -241,7 +241,7 @@ DECISAO_FRACA: dict[tuple[str, str], str] = {
     ("MainForm.FormShow", "Comportamento de erro"):
         "**Fica, e tem dono.** O original encerra e o port não — é divergência "
         "deliberada, registrada para a "
-        "[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md). "
+        "[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md). "
         "Para *\"o original encerra\"*, tela é a evidência certa: o que se mede é "
         "o efeito observável, não a instrução.",
     ("MainForm.mostrar_jugadorClick", "Bytes tocados"):
@@ -687,7 +687,7 @@ def gera_md(m: dict) -> str:
     a(f"python3 {GENERATOR} --check   # o que `make -C wte check` roda")
     a("```")
     a("")
-    a("Produto da [WTE-TASK-31](../../docs/tasks/31-fechamento-fase-4.md).")
+    a("Produto da [WTE-TASK-31](../../docs/tasks/concluidos/31-fechamento-fase-4.md).")
     a("Fonte: [`published_methods.tsv`](published_methods.tsv), os `.md` de")
     a("[`spec/`](spec/), os `.inc` de [`../src/impl/`](../src/impl/), os")
     a("roteiros de [`../tests/roteiros/`](../tests/roteiros/) e o registro da")
@@ -815,7 +815,7 @@ def gera_md(m: dict) -> str:
         a("Com par e fora desta bateria: "
           + ", ".join(f"`{n}`" for n in sorted(noutra)) + ". "
           + ("Ele é" if len(noutra) == 1 else "Eles são")
-          + " da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md),")
+          + " da [WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md),")
         a("que roda a bateria completa (operação × ROM) e registra em")
         a("[`golden.tsv`](golden.tsv). O guarda de cobertura aceita as **duas**")
         a("listas: o que ele exige é que roteiro com par tenha rodado nos dois")
@@ -866,7 +866,7 @@ def gera_md(m: dict) -> str:
         a("caso está no Log da task que rodou a bateria. Gate que precisa de")
         a("repetição para ficar verde deixa de separar *\"o port diverge\"* de")
         a("*\"a corrida não estava pronta\"*, e essa é a classe de problema que a")
-        a("[CORR-WTE-080](../../docs/tasks/CORR-WTE-080.md) nomeou — a causa não")
+        a("[CORR-WTE-080](../../docs/tasks/concluidos/CORR-WTE-080.md) nomeou — a causa não")
         a("precisa ser a mesma para o custo ser.")
         a("")
     a("**As duas ROMs, e por que a conta é de uma só.** O critério da task diz")
@@ -875,7 +875,7 @@ def gera_md(m: dict) -> str:
     a("o oráculo não existe daquele lado. Está medido e registrado em")
     a("[`gravacao-controle.md`](gravacao-controle.md); a bateria roda sobre a")
     a("japonesa, e a cobertura da europeia é da")
-    a("[WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).")
+    a("[WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md).")
     a("")
 
     a("## Força da evidência")

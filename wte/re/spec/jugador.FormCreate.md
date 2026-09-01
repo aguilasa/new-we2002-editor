@@ -60,7 +60,7 @@ usá-lo.
 
 Não trata. Se um dos 56 rótulos não existisse, `FindComponent` devolveria nulo
 e a chamada seguinte cairia — é o mesmo padrão de `FindComponent("dorsal" + N)`
-que a [CORR-WTE-044](../../../docs/tasks/CORR-WTE-044.md) mediu derrubando o
+que a [CORR-WTE-044](../../../docs/tasks/concluidos/CORR-WTE-044.md) mediu derrubando o
 oráculo. Aqui não cai, porque os 56 existem.
 
 **Evidência:** disassembly lido

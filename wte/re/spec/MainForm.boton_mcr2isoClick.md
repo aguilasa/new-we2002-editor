@@ -10,7 +10,7 @@ veredito: implementado
 Leva o time inteiro de um memory card para a imagem de CD: 23 jogadores,
 23 números de camisa, formação e tática. **1.361 bytes**, e quase nada deles é
 gravação nova — o handler é sobretudo um laço em volta das duas rotinas de
-escrita que a [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md)
+escrita que a [WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md)
 já portou.
 
 É o sentido inverso do `grabar_memoryClick`, e os dois lados do formato estão
@@ -28,7 +28,7 @@ mapeados em [`../mcr.md`](../mcr.md).
 - a imagem aberta, na global `0x00432e58`;
 - o vetor de ocupação de blocos de Master League (`0x00433224`) e o contador
   de blocos livres (`0x004335c0`), os dois da
-  [WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md).
+  [WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md).
 
 **Evidência:** disassembly lido
 
@@ -73,7 +73,7 @@ ficha_?.<slot +0xe8>                            ' o mesmo `W11 TE PT` do
 ```
 
 **O aviso do fim ficou de fora da primeira leitura desta spec**, e so apareceu
-quando a [WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md) escreveu o
+quando a [WTE-TASK-28](../../../docs/tasks/concluidos/28-import-de-mcr.md) escreveu o
 primeiro roteiro que precisa clicar DEPOIS do import: sem dismissar a janela, o
 clique seguinte nao alcanca a principal.
 
@@ -177,7 +177,7 @@ abre `W11 TE PT` com `MCR inserida no jogo!!!.` ao terminar; o `MostraCodigo`
 do port só fala nas duas recusas. Nenhum byte muda por causa disso — o
 [`golden-13-roundtrip`](../../tests/roteiros/golden-13-roundtrip.txt) sai
 byte-idêntico com o lado oráculo tendo um clique a mais para dismissar. Fica
-para a [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)
+para a [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)
 decidir se o aviso entra.
 
 **Ele reusa, não reimplementa.** Vale escrever porque a tentação é a oposta:

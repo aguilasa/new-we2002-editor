@@ -36,7 +36,7 @@ estrategia.ShowModal
 
 **Nenhum gravado. As LEITURAS são deste handler, e não da `0x0040a0b4`** — o
 contrário do que esta seção dizia até a
-[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md). Medido: a `0x0040a0b4` não
+[CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md). Medido: a `0x0040a0b4` não
 tem `0x004033BC`, `0x00403388` nem `fseek` no corpo; ela só posiciona a tela a
 partir de globais. Quem lê são as sete chamadas a `0x004033BC` daqui, para
 cinco regiões:
@@ -80,7 +80,7 @@ Não trata.
 
 **A divisão que deixou a metade sem dono.** Navegação era da WTE-TASK-25 e
 encher a tela ficou anotado como da
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md), dona do formulário
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md), dona do formulário
 `estrategia` — que fechou sem ela. A rotina caiu na fronteira entre as duas e
 só ganhou dono na CORR-WTE-082, que a portou como `PreencheTelaDeTatica` na
 [`wte_tatica`](../../src/wte_tatica.pas).

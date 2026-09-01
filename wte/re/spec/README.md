@@ -25,5 +25,5 @@ python3 wte/tools/spec_index.py --check   # o que `make -C wte check` roda
 ```
 
 As 96 entradas chegam nas **WTE-TASK-25 a 33**. Hoje são 96 `aberto`, e é a
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md) que exige que nenhum
+[WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md) que exige que nenhum
 sobre.

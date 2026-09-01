@@ -12,7 +12,7 @@ Fonte: [`../published_methods.tsv`](../published_methods.tsv)
 (WTE-TASK-04) mais os `<formulario>.<handler>.md` desta pasta. O
 gabarito e o vocabulário de veredito estão em
 [`GABARITO.md`](GABARITO.md); é a
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md) que exige nenhum
+[WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md) que exige nenhum
 `aberto`.
 
 ## Contagem

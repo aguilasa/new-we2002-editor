@@ -55,12 +55,12 @@ estado do canvas não são os mesmos, e desenho é a categoria em que a diferen�
 aparece como "quase igual" — o pior resultado possível para comparar. O corpo
 depende de escolher entre **o port desenhar** e **deixar a LCL desenhar**, e
 essa é a pergunta da conferência de UI da
-[WTE-TASK-37](../../../docs/tasks/37-reconferencia-de-ui.md), que olha os 18
+[WTE-TASK-37](../../../docs/tasks/concluidos/37-reconferencia-de-ui.md), que olha os 18
 formulários com a lógica ligada e dado carregado.
 
 **O ciclo, medido em 2026-08-24:** a WTE-TASK-37 é fase 6 e depende da
-[WTE-TASK-34](../../../docs/tasks/34-bateria-golden-completa.md), que depende da
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md), que é o fechamento
+[WTE-TASK-34](../../../docs/tasks/concluidos/34-bateria-golden-completa.md), que depende da
+[WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md), que é o fechamento
 da fase 4 e exige que este veredito deixe de ser `aberto`. Manter `aberto`
 travava as três para sempre.
 
@@ -101,4 +101,4 @@ existir; o critério de aceite é a tabela acima.
 ## Notas
 
 O `estrategia` inteiro só fica alcançável pelo `mostrar_estrategiaClick`, e a
-tela de tática é da [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md).
+tela de tática é da [WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md).

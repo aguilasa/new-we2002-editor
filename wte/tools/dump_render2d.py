@@ -2,7 +2,7 @@
 """O render 2D do WE2002 Team Editor: cor, aritmetica e arredondamento.
 
 Gera `wte/re/render2d.md` e `wte/re/render2d.tsv` -- insumo da
-[WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md).
+[WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md).
 
     python3 wte/tools/dump_render2d.py           # regera as duas saidas
     python3 wte/tools/dump_render2d.py --check   # o que `make -C wte check` roda
@@ -694,7 +694,7 @@ def gera_md(provas, desenhistas, contas, forma, cores: bytes,
 
     w("## As três perguntas que a task manda responder antes do código\n")
     w("O enunciado da\n"
-      "[WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) é explícito:\n"
+      "[WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) é explícito:\n"
       "*\"descobrir qual antes de escrever código — muda o algoritmo inteiro\"*.\n"
       "As três têm resposta no `.text`, e nenhuma precisou de decompilador.\n")
     w("| pergunta | resposta | onde está a prova |\n"

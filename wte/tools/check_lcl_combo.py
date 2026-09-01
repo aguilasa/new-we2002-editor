@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """O `TComboBox` da LCL dispara `OnChange` quando o codigo mexe nele?
 
-Da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), criterio
+Da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), criterio
 "comportamento de `OnChange` na carga decidido e testado". **Nao escreve
 arquivo** -- mesmo contrato do [`check_lcl_props.py`](check_lcl_props.py) e do
 [`check_barras.py`](check_barras.py): confere e sai 2 quando diverge.

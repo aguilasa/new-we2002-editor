@@ -207,7 +207,7 @@ e hoje **só o `roundtrip` a cumpre**.
       release é justamente a segunda amostra deste projeto. Quem ler só o
       `CLAUDE.md` conclui o contrário.
 - [→] **Nenhuma task de PES2 em
-      [/docs/tasks/progresso.md](/docs/tasks/progresso.md).** É uma
+      [/docs/tasks/concluidos/progresso.md](/docs/tasks/concluidos/progresso.md).** É uma
       decisão a tomar, não necessariamente um erro: as seis fases do plano
       poderiam virar tasks com `fonte_de_verdade` apontando para as seções
       dele, como manda [.claude/rules/tasks.md](../.claude/rules/tasks.md),
@@ -318,7 +318,7 @@ faz as vezes dele.** O que aparecer para fazer entra aqui, não lá.
 ### 7.1 Decisões do usuário, não de código
 
 - [ ] **Criar as tasks das seis fases** em
-      [/docs/tasks/progresso.md](/docs/tasks/progresso.md), com
+      [/docs/tasks/concluidos/progresso.md](/docs/tasks/concluidos/progresso.md), com
       `fonte_de_verdade` apontando para as seções do plano — ou decidir
       que o projeto segue fora do pool. Adiado em 2026-08-30.
 - [ ] **`numpy`** para varredura de padrão em 466 MB em tempo civilizado,

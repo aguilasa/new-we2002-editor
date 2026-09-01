@@ -254,11 +254,11 @@ não grava **na hora**. Grava depois, quando o foco sai: medido na §8.3, três
 divergiam — no MFC as setas movem o `CurSel` do próprio combo e o `Escape` só
 fecha a lista, no Qt elas movem a linha corrente da *view* e o `Escape`
 desfaz. O port intercepta o `Escape` no popup para manter o item navegado
-([CORR-WTE-125](/docs/tasks/CORR-WTE-125.md)) — nos **dezesseis** combos do
+([CORR-WTE-125](/docs/tasks/concluidos/CORR-WTE-125.md)) — nos **dezesseis** combos do
 diálogo principal que gravam assim, porque os dez de papel da §3.7 usam o mesmo
-`FocusOut` ([CORR-WTE-127](/docs/tasks/CORR-WTE-127.md)). Os dez combos de
+`FocusOut` ([CORR-WTE-127](/docs/tasks/concluidos/CORR-WTE-127.md)). Os dez combos de
 papel do `DefaultTacticsDialog` divergiam igual e têm filtro próprio
-([CORR-WTE-134](/docs/tasks/CORR-WTE-134.md)) — **vinte e seis ao todo**.
+([CORR-WTE-134](/docs/tasks/concluidos/CORR-WTE-134.md)) — **vinte e seis ao todo**.
 
 Lembrete permanente: `Load` lê os dois primeiros cobradores de ML **trocados** e
 `Save` grava na ordem declarada, então toda gravação troca o par. Bug do
@@ -426,13 +426,13 @@ leitura. Arquivos antigos continuam legíveis.
 > e `sizeof(tattica)` vai a 48: ele exporta 56 bytes e **recusa o próprio
 > arquivo**. Defeito de recompilação do oráculo, não do formato. O `ed.exe`
 > **aceita** o arquivo de 52 bytes do port — medido em
-> [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
+> [CORR-WTE-132](/docs/tasks/concluidos/CORR-WTE-132.md).
 >
 > **Mas aceitar não é ler direito.** Ele passa na conferência de tamanho e
 > decodifica com o vptr de 8 bytes, 4 adiante do lugar certo: importando o
 > mesmo arquivo, o port grava `PARIMP` no nome do preset e o `ed.exe` grava
 > `MP` seguido de bytes de papel. Medido na
-> [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md), com controle positivo dos dois
+> [CORR-WTE-135](/docs/tasks/concluidos/CORR-WTE-135.md), com controle positivo dos dois
 > lados; a §8.7 traz as faixas.
 
 ### 4.4 `graf` → `FlagKitDialog` (50 `ON_*`)
@@ -494,7 +494,7 @@ clique, mesmo efeito.
 ## 6. Divergências deliberadas
 
 Cinco registradas nas fases, uma levantada pelo inventário, e **duas decididas
-em 2026-08-31** pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md) — as de ciclo de
+em 2026-08-31** pela [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md) — as de ciclo de
 vida, que a §8.10 mediu. **Nenhuma altera os bytes gravados na imagem**: as
 quatro primeiras porque não tocam regiões de disco no fluxo dos golden tests, a
 sexta porque só afeta o arquivo lateral, e as duas últimas porque decidem
@@ -508,8 +508,8 @@ sexta porque só afeta o arquivo lateral, e as duas últimas porque decidem
 | 4 | ~~Nunca gravava o `<imagem>_url.txt`~~ — **registro errado, corrigido em 2026-08-05**: `OnWriteCD` grava o sidecar desde sempre (`legacy/mfc/edDlg.cpp:6207-6214`) | o `Database::Save()` gerado grava igual; o `MainWindow::SaveUrls()` que a Fase 5 acrescentou só reescreve o mesmo arquivo com o mesmo conteúdo, e está desligado junto com o resto do SoFIFA | não havia divergência. A Fase 5 do PLAN-LINUX registrou o contrário e foi corrigida |
 | 5 | `graf` tinha **dois** testes de "tem bandeira própria" que discordavam na borda (56) | um só: `id>0 && id!=69 && id!=86 && (id<56 \|\| id>63)` | 56 é a World All-Stars, que também não tem bandeira própria |
 | 6 | `EN_CHANGE` das 23 caixas de URL dispara também no `SetWindowText` da carga, então **trocar de time regravava a URL** — e para as all-star (55/56) escrevia a URL do jogador ligado por link no jogador do slot aritmético, que é outro | `textEdited`: só grava quando o usuário digita | levantado em 2026-08-05. Invisível no original porque ele nunca salvava o arquivo de URLs; no port, que salva, reproduzir isso corromperia o `_url.txt` ao navegar |
-| 7 | Cancelar o diálogo de abertura **não fecha o editor**: `OnInitDialog` faz `return FALSE` (`legacy/mfc/edDlg.cpp:1331`), que em MFC só diz que o foco já foi tratado — sem `EndDialog`, o `ed.exe` fica de pé com o diálogo principal inteiro e vazio, e com `Write into CD image` clicável | **encerra** depois do aviso `Impossible editing without CD image !` | decidido em 2026-08-31, [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md). Botão de gravar clicável sem imagem carregada é pior que nenhuma janela, e o que o original faria nesse clique nunca foi medido. Não grava byte: os dois avisam igual antes |
-| 8 | `Return` no diálogo principal **encerra o editor**: `IDD_ED_DIALOG` não tem `DEFPUSHBUTTON` nem controle `IDOK`, então o Enter cai em `CDialog::OnOK` — que o `CEdDlg` sobrescreve (`legacy/mfc/edDlg.cpp:1529`) só para consultar `CanExit()`, sempre `TRUE`. Nada é gravado | **ignora**: sem botão default (`autoDefault=false` em todos os 86), o `Return` não encontra destino | decidido em 2026-08-31, [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md). Reproduzir faria uma tecla acidental descartar o trabalho não gravado, que é o próprio defeito do original. `Escape` **concorda** e fecha nos dois. Vale só para o `MainWindow`: no `DefaultTacticsDialog` o `Return` confirma, e deve — lá o `.rc` declara um `DEFPUSHBUTTON` ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)) |
+| 7 | Cancelar o diálogo de abertura **não fecha o editor**: `OnInitDialog` faz `return FALSE` (`legacy/mfc/edDlg.cpp:1331`), que em MFC só diz que o foco já foi tratado — sem `EndDialog`, o `ed.exe` fica de pé com o diálogo principal inteiro e vazio, e com `Write into CD image` clicável | **encerra** depois do aviso `Impossible editing without CD image !` | decidido em 2026-08-31, [CORR-WTE-140](/docs/tasks/concluidos/CORR-WTE-140.md). Botão de gravar clicável sem imagem carregada é pior que nenhuma janela, e o que o original faria nesse clique nunca foi medido. Não grava byte: os dois avisam igual antes |
+| 8 | `Return` no diálogo principal **encerra o editor**: `IDD_ED_DIALOG` não tem `DEFPUSHBUTTON` nem controle `IDOK`, então o Enter cai em `CDialog::OnOK` — que o `CEdDlg` sobrescreve (`legacy/mfc/edDlg.cpp:1529`) só para consultar `CanExit()`, sempre `TRUE`. Nada é gravado | **ignora**: sem botão default (`autoDefault=false` em todos os 86), o `Return` não encontra destino | decidido em 2026-08-31, [CORR-WTE-141](/docs/tasks/concluidos/CORR-WTE-141.md). Reproduzir faria uma tecla acidental descartar o trabalho não gravado, que é o próprio defeito do original. `Escape` **concorda** e fecha nos dois. Vale só para o `MainWindow`: no `DefaultTacticsDialog` o `Return` confirma, e deve — lá o `.rc` declara um `DEFPUSHBUTTON` ([CORR-WTE-139](/docs/tasks/concluidos/CORR-WTE-139.md)) |
 
 ---
 
@@ -521,7 +521,7 @@ sexta porque só afeta o arquivo lateral, e as duas últimas porque decidem
 | `OnEsportaTot` / `OnImportaTot` (`.tt2002`) | `CMD_ESP_TOT` / `CMD_IMP_TOT` | idem, `ed.rc:368,369` |
 | Item "About" no menu de sistema | `OnSysCommand` + `CAboutDlg` | `QDialog` não tem menu de sistema; a caixa não editava nada |
 | Ícone desenhado com a janela minimizada | `OnPaint` | sem equivalente, não faz falta |
-| `Return` fecha o editor **(diálogo principal)** | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada** ali, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois. **Vale só para o `MainWindow`:** o `DefaultTacticsDialog` trata `Return` e confirma, porque lá o botão de confirmação é `NOT WS_VISIBLE` e sem isso o diálogo não teria saída (§8.7, [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)). **Medido dos dois lados e decidido em 2026-08-31** — a razão mora na §6, linha 8 |
+| `Return` fecha o editor **(diálogo principal)** | `IDOK` implícito do `CDialog`, com `CanExit()` sempre `TRUE` | no Qt, `Return` acionaria um dos 86 botões (um deles aplica formação!). O `rc2ui.py` emite `autoDefault=false`; hoje `Return` **não faz nada** ali, que é mais seguro que os dois comportamentos. `Escape` fecha, como nos dois. **Vale só para o `MainWindow`:** o `DefaultTacticsDialog` trata `Return` e confirma, porque lá o botão de confirmação é `NOT WS_VISIBLE` e sem isso o diálogo não teria saída (§8.7, [CORR-WTE-131](/docs/tasks/concluidos/CORR-WTE-131.md)). **Medido dos dois lados e decidido em 2026-08-31** — a razão mora na §6, linha 8 |
 | Pacote de distribuição (AppImage/Flatpak) | — | decisão da Fase 6 |
 
 ---
@@ -542,7 +542,7 @@ Para cada bloco, o critério de aprovação é o mesmo: **fazer a mesma coisa no
 
 ### 8.1 Nomes e abreviações
 
-**Conferido em 2026-08-28** pela [PAR-TASK-01](/docs/tasks/PAR-TASK-01.md), na
+**Conferido em 2026-08-28** pela [PAR-TASK-01](/docs/tasks/concluidos/PAR-TASK-01.md), na
 `ptbr-remaster.bin`, com o `golden_check.sh` em modo `gui`. As seis corridas
 saíram `OK: identico ao oraculo, exceto o slot 64 conhecido (405724..405739)`.
 
@@ -597,9 +597,9 @@ diferentes na mesma tela do clube de ML.
 ### 8.2 Números de camisa
 
 **Conferido em 2026-08-28** pela
-[PAR-TASK-02](/docs/tasks/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
+[PAR-TASK-02](/docs/tasks/concluidos/PAR-TASK-02.md), na `ptbr-remaster.bin`. O terceiro
 item reprovou na primeira medição e foi fechado em 2026-08-29 pela
-[CORR-WTE-124](/docs/tasks/CORR-WTE-124.md). **Um roteiro por item em
+[CORR-WTE-124](/docs/tasks/concluidos/CORR-WTE-124.md). **Um roteiro por item em
 `tools/par/8.2-*.sh`**, os três remedidos a partir dos arquivos versionados.
 
 **Os dois primeiros itens não se medem por byte cru.** `squad_numbers` é
@@ -629,7 +629,7 @@ g++ -std=c++17 -Isrc/core/include src/core/{CdImage,Database,Player,Tables,Team,
 - [x] `CMD_DEFAULT_NUMBERS` e conferir que o `number` do jogador seguiu
       (`tools/par/8.2-numeros-default.sh`) — reprovou na primeira medição, com
       **37 faixas no port contra 20 do `ed.exe`**, e foi corrigido pela
-      [CORR-WTE-124](/docs/tasks/CORR-WTE-124.md): o laço ia aos **64 slots** do
+      [CORR-WTE-124](/docs/tasks/concluidos/CORR-WTE-124.md): o laço ia aos **64 slots** do
       array em vez dos **63 times**, e a 64ª volta escrevia fora de
       `players[1911]`, em cima de `teams[]`. Remedido depois do conserto: o
       controle do oráculo dá **20 faixas / 118 bytes**, o do port **19 / 103** —
@@ -656,16 +656,16 @@ g++ -std=c++17 -Isrc/core/include src/core/{CdImage,Database,Player,Tables,Team,
 ### 8.3 Cobradores e capitão
 
 **Conferido em 2026-08-28** pela
-[PAR-TASK-03](/docs/tasks/PAR-TASK-03.md). O primeiro item reprovou na primeira
+[PAR-TASK-03](/docs/tasks/concluidos/PAR-TASK-03.md). O primeiro item reprovou na primeira
 medição e foi fechado em 2026-08-29 pela
-[CORR-WTE-125](/docs/tasks/CORR-WTE-125.md).
+[CORR-WTE-125](/docs/tasks/concluidos/CORR-WTE-125.md).
 
 - [x] Abrir o combo, **navegar com as setas sem sair do controle**, apertar
       ESC/clicar fora — conferir se grava ou não igual ao original
       (`tools/par/8.3-escape-cobrador.sh`) — reprovou na primeira medição, com
       três `Down` e `Escape` levando `kick_long_fk` de 3 a **6 no `ed.exe`** e o
       deixando em **3 no port**, e foi corrigido pela
-      [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md). Remedido depois do conserto:
+      [CORR-WTE-125](/docs/tasks/concluidos/CORR-WTE-125.md). Remedido depois do conserto:
       **6 nos dois**, golden `OK`. E a contraprova
       (`tools/par/8.3-escape-sem-navegar.sh`): `Escape` **sem** navegar deixa o
       campo em 3 nos dois e não põe `OFS_KICKER+0` no controle positivo
@@ -681,22 +681,22 @@ medição e foi fechado em 2026-08-29 pela
 > chegou a dizer que o original usava `CBN_KILLFOCUS` "justamente para navegar a
 > lista com as setas sem gravar"; a metade certa é que ele não grava **na hora**.
 > O valor navegado sobrevive ao `Escape` no MFC e era desfeito no `QComboBox`,
-> e é essa diferença que a [CORR-WTE-125](/docs/tasks/CORR-WTE-125.md) fechou —
+> e é essa diferença que a [CORR-WTE-125](/docs/tasks/concluidos/CORR-WTE-125.md) fechou —
 > no código e na frase da §3.5.
 >
 > **A emenda vale para os dezesseis combos que gravam em perda de foco**, não
 > só para estes seis: os dez de papel usam o mesmo `FocusOut`, e divergiam do
-> mesmo jeito. A [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md) estendeu o filtro
+> mesmo jeito. A [CORR-WTE-127](/docs/tasks/concluidos/CORR-WTE-127.md) estendeu o filtro
 > e pôs o item na §8.7.
 >
 > **E não são dezesseis no total, são vinte e seis.** Os dez combos de papel do
 > `DefaultTacticsDialog` divergiam pelo mesmo motivo e ficaram de fora daquele
 > filtro, porque gravam por outro caminho —
-> [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md).
+> [CORR-WTE-134](/docs/tasks/concluidos/CORR-WTE-134.md).
 
 ### 8.4 Atributos do jogador
 
-**Os cinco conferidos** pela [PAR-TASK-04](/docs/tasks/PAR-TASK-04.md) — o
+**Os cinco conferidos** pela [PAR-TASK-04](/docs/tasks/concluidos/PAR-TASK-04.md) — o
 primeiro em 2026-08-28, os outros quatro em 2026-08-29. **Um roteiro por item**
 em `tools/par/8.4-*.sh`, todos concatenados **depois** do `8.4-prelude.sh`, que
 abre o `PlayerSkillsDialog` e não roda sozinho — são seis arquivos para cinco
@@ -727,7 +727,7 @@ itens, e o prelúdio é o sexto.
 ### 8.5 Troca de jogador
 
 **Os quatro conferidos em 2026-08-29** pela
-[PAR-TASK-05](/docs/tasks/PAR-TASK-05.md), na `ptbr-remaster.bin`. Sete
+[PAR-TASK-05](/docs/tasks/concluidos/PAR-TASK-05.md), na `ptbr-remaster.bin`. Sete
 corridas de `golden_check.sh` em modo `gui`, todas `OK`. **Um roteiro por item**
 em `tools/par/8.5-*.sh`, todos concatenados **depois** do `8.5-prelude.sh`, que
 abre o `PlayerSelectDialog` e não roda sozinho.
@@ -771,7 +771,7 @@ abre o `PlayerSelectDialog` e não roda sozinho.
 ### 8.7 Táticas
 
 **Os seis conferidos**, e a seção fechou em 2026-09-01 pela
-[PAR-TASK-06](/docs/tasks/PAR-TASK-06.md).
+[PAR-TASK-06](/docs/tasks/concluidos/PAR-TASK-06.md).
 
 O glob `tools/par/8.7-*.sh` tem **dez arquivos**: o prelúdio, que não roda
 sozinho, mais **nove roteiros**. Sete saem `OK` de golden. Os outros dois são
@@ -780,11 +780,11 @@ propósito**, porque quem lê errado é o oráculo — faixas, tabela e prova em
 bytes no item. A contagem separa as duas coisas porque a frase anterior dizia
 "seis roteiros, os seis saindo `OK`" e mandava, sem querer, re-medir a seção
 inteira sem tocar no item mais valioso dela
-([CORR-WTE-136](/docs/tasks/CORR-WTE-136.md)).
+([CORR-WTE-136](/docs/tasks/concluidos/CORR-WTE-136.md)).
 
-Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
-[131](/docs/tasks/CORR-WTE-131.md), a [132](/docs/tasks/CORR-WTE-132.md), a
-[134](/docs/tasks/CORR-WTE-134.md) e a [135](/docs/tasks/CORR-WTE-135.md) — e
+Rendeu **cinco** CORRs — a [127](/docs/tasks/concluidos/CORR-WTE-127.md), a
+[131](/docs/tasks/concluidos/CORR-WTE-131.md), a [132](/docs/tasks/concluidos/CORR-WTE-132.md), a
+[134](/docs/tasks/concluidos/CORR-WTE-134.md) e a [135](/docs/tasks/concluidos/CORR-WTE-135.md) — e
 **nenhuma delas era o que parecia à primeira vista**.
 
 - [x] Clampar x em 0/48 e y em 0/112 — **os dois tetos, medidos no
@@ -799,7 +799,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       o `Escape` divergia ali exatamente como divergia lá: três `Down` a partir
       do papel `0x02` davam `0x05` no `ed.exe` e deixavam `0x02` no port,
       reprovando o golden em `OFS_FORMATIONS+0`. Fechado pela
-      [CORR-WTE-127](/docs/tasks/CORR-WTE-127.md), que estendeu o filtro aos
+      [CORR-WTE-127](/docs/tasks/concluidos/CORR-WTE-127.md), que estendeu o filtro aos
       dezesseis: agora `raw_formation[0]` vai a `0x05` nos dois, os outros nove
       slots ficam intactos, e a legenda do marcador mostra `LIB` nos dois —
       conferida em captura. Roteiros `tools/par/8.7-escape-papel.sh` e
@@ -811,7 +811,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       motivo: três `Down` no primeiro papel do preset davam `0x05` no `ed.exe`
       e deixavam `0x02` no port, reprovando o golden em
       `before first offset+374189` — 1 faixa / 1 byte. Fechado pela
-      [CORR-WTE-134](/docs/tasks/CORR-WTE-134.md); roteiro
+      [CORR-WTE-134](/docs/tasks/concluidos/CORR-WTE-134.md); roteiro
       `tools/par/8.7-escape-papel-preset.sh`. Depois do conserto o golden sai
       `OK` e o controle positivo do port contra a imagem original dá **6
       faixas / 42 bytes**, com o byte de papel em `0x05` — o mesmo valor que o
@@ -829,7 +829,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 - [x] Editar e renomear um preset no `DefaultTacticsDialog`
       (`tools/par/8.7-preset-renomear.sh`) — reprovou na primeira medição, com
       o `ed.exe` gravando 7 faixas / 61 bytes contra o `IDENTICAL` do port, e
-      foi corrigido pela [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md).
+      foi corrigido pela [CORR-WTE-131](/docs/tasks/concluidos/CORR-WTE-131.md).
       Remedido em 2026-08-30: o port grava **7 faixas / 48 bytes** contra a
       imagem original, com as duas do preset —
       `before first offset+374780` (o nome) e
@@ -839,7 +839,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       (`tools/par/8.7-t2002-exportar.sh`, `8.7-t2002-importar.sh`) —
       **o port está certo, e a assimetria é do oráculo.** As duas pernas foram
       medidas com `golden_compare.py` e controle positivo dos dois lados em
-      2026-08-31, pela [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md); até então o
+      2026-08-31, pela [CORR-WTE-135](/docs/tasks/concluidos/CORR-WTE-135.md); até então o
       item se apoiava só em tamanhos de arquivo e na leitura do fonte.
 
       **Exportar: `OK`.** O port grava **52 bytes** e o `Debug/ed.exe` **56** —
@@ -875,7 +875,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       **Este item não pode ficar verde, e não deve.** Verde exigiria o port
       reproduzir o deslocamento — isto é, ler errado de propósito um formato
       que o próprio fonte do original define como de 52 bytes. É a mesma
-      conclusão da [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md), agora com a
+      conclusão da [CORR-WTE-132](/docs/tasks/concluidos/CORR-WTE-132.md), agora com a
       prova em bytes em vez de por leitura de fonte.
 
 > **A ida e volta funciona no sentido port → `ed.exe`, e não no inverso** —
@@ -910,7 +910,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > rejeita, como o `IDCANCEL` fazia. O evento só chega ao diálogo depois de o
 > `QLineEdit` focado ignorá-lo, e ele emite `editingFinished` antes — então o
 > campo em edição é gravado antes de a janela fechar, na mesma ordem do
-> original. [CORR-WTE-131](/docs/tasks/CORR-WTE-131.md)
+> original. [CORR-WTE-131](/docs/tasks/concluidos/CORR-WTE-131.md)
 >
 > **Botão focado também fecha o diálogo, e isso custou uma segunda emenda.** No
 > Win32 o `Return` de um diálogo vai para o `DEFPUSHBUTTON`, não para o controle
@@ -923,7 +923,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > 56 bytes. O `autoDefault=false` do `rc2ui.py` **não** resolve: ele governa
 > qual botão é o default, não a ativação por foco. O `eventFilter` do diálogo
 > passou a ver o `Return` antes dos botões
-> ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)); medido depois do conserto, o
+> ([CORR-WTE-139](/docs/tasks/concluidos/CORR-WTE-139.md)); medido depois do conserto, o
 > controle positivo do port dá 5 faixas / 41 bytes em vez de `IDENTICAL`.
 >
 > Quatro caminhos de fechamento foram descartados por medição, e não vale
@@ -934,7 +934,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 ### 8.8 Bandeira e uniformes
 
 **Os três conferidos em 2026-08-31** pela
-[PAR-TASK-07](/docs/tasks/PAR-TASK-07.md), na `ptbr-remaster.bin`. Roteiros em
+[PAR-TASK-07](/docs/tasks/concluidos/PAR-TASK-07.md), na `ptbr-remaster.bin`. Roteiros em
 `tools/par/8.8-*.sh`, sobre o `8.8-prelude.sh`.
 
 - [x] Cores no teto (65535) e acima — `flag_colours[0]` vai de 3523 a **65535**
@@ -946,7 +946,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       lista, e o 56 diverge como previsto**; ver a nota abaixo.
 
       Os **69 e 86 foram medidos depois, em 2026-08-31**, pela
-      [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md): eles estavam nomeados no item
+      [CORR-WTE-138](/docs/tasks/concluidos/CORR-WTE-138.md): eles estavam nomeados no item
       sem nunca terem ido à tela, e não são mais do mesmo — 56 e 57..63 são
       seleções e all-star, tratadas pelo primeiro ramo do `OnButtgraf`
       (`squad_nazall[id-1]`), enquanto **69 e 86 são clubes de Master League**,
@@ -968,7 +968,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
       idênticas salvo a faixa conhecida.
 
       **Remedido em 2026-08-31 pela
-      [CORR-WTE-137](/docs/tasks/CORR-WTE-137.md)**, porque o roteiro que
+      [CORR-WTE-137](/docs/tasks/concluidos/CORR-WTE-137.md)**, porque o roteiro que
       sustentava este item era um falso verde: em quatro corridas idênticas ele
       dava quatro resultados, nunca produzia o `.m2002`, e em duas delas saía
       `gui: gravado` com a imagem `IDENTICAL` contra a original — não gravava e
@@ -994,7 +994,7 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > desabilitam), e o export é recusado com a **mesma** mensagem em ambos —
 > `Choose a team (that has "indipendent" flag too) !`. Os dois de Master League
 > entraram nesta conta em 2026-08-31, pela
-> [CORR-WTE-138](/docs/tasks/CORR-WTE-138.md); antes dela a concordância só
+> [CORR-WTE-138](/docs/tasks/concluidos/CORR-WTE-138.md); antes dela a concordância só
 > estava medida em 57..63.
 >
 > **Isto não é CORR**: a divergência está na lista de aceitas do
@@ -1004,12 +1004,12 @@ Rendeu **cinco** CORRs — a [127](/docs/tasks/CORR-WTE-127.md), a
 > **O contraste com o `.t2002` da §8.7 vale registrar.** Aqui os dois formatos
 > saem byte-idênticos e a troca funciona nos dois sentidos; lá o arquivo do
 > port tem 52 bytes contra 56 do original e o `ed.exe` recusa até o que ele
-> mesmo exportou ([CORR-WTE-132](/docs/tasks/CORR-WTE-132.md)). Mesmo diálogo
+> mesmo exportou ([CORR-WTE-132](/docs/tasks/concluidos/CORR-WTE-132.md)). Mesmo diálogo
 > de origem, formatos vizinhos, resultados opostos.
 
 ### 8.9 Operações em massa
 **Três de cinco medidos em 2026-09-01** pela
-[PAR-TASK-08](/docs/tasks/PAR-TASK-08.md), que ficou **bloqueada no Linux**: os
+[PAR-TASK-08](/docs/tasks/concluidos/PAR-TASK-08.md), que ficou **bloqueada no Linux**: os
 outros dois exigem MSVC e foram **encaminhados para o Windows**, na seção
 "Bônus que só o Windows consegue" do
 [/docs/PLAN-WINDOWS.md](/docs/PLAN-WINDOWS.md). Roteiros em
@@ -1034,7 +1034,7 @@ outros dois exigem MSVC e foram **encaminhados para o Windows**, na seção
 - [x] `CMD_UPDATE_COSTS` — golden `OK`
 - [x] `CMB_EDITALLLOOK` — reprovou na primeira medição (92 bytes em quatro
       faixas de `OFS_PLAYER_ATTR`), e a
-      [CORR-WTE-133](/docs/tasks/CORR-WTE-133.md) mostrou que **não era
+      [CORR-WTE-133](/docs/tasks/concluidos/CORR-WTE-133.md) mostrou que **não era
       código**: o legado abre `defaultlook.txt` por caminho relativo e lê a
       cópia de `Debug/`, que é gitignored e tinha 4 das 95 linhas diferentes da
       versionada. Alinhada a fixture, sai `OK`
@@ -1050,7 +1050,7 @@ outros dois exigem MSVC e foram **encaminhados para o Windows**, na seção
 >
 > Dizia-se "inócuo no diálogo do original, que não tem `DEFPUSHBUTTON`". É o
 > contrário: **sem `DEFPUSHBUTTON` o Enter cai em `CDialog::OnOK` e encerra o
-> editor** (§8.10 item 4, [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)). O que
+> editor** (§8.10 item 4, [CORR-WTE-141](/docs/tasks/concluidos/CORR-WTE-141.md)). O que
 > torna o `Return` inócuo nestes roteiros é o **ponteiro**: ele acabou de
 > clicar o botão da operação e continua sobre ele, e no Win32 um pushbutton com
 > foco vira o default temporário — o `Return` re-clica esse botão, que é
@@ -1067,11 +1067,11 @@ outros dois exigem MSVC e foram **encaminhados para o Windows**, na seção
 
 ### 8.10 Ciclo de vida
 
-**Os cinco conferidos** pela [PAR-TASK-09](/docs/tasks/PAR-TASK-09.md), em
+**Os cinco conferidos** pela [PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md), em
 2026-08-31. **Três concordam e dois divergem** — e os dois que divergem são de
 ciclo de vida, não de dado: nenhuma das duas divergências grava byte nenhum.
-Rendeu duas CORRs, a [140](/docs/tasks/CORR-WTE-140.md) e a
-[141](/docs/tasks/CORR-WTE-141.md) — as duas pediam **decisão**, não conserto, e
+Rendeu duas CORRs, a [140](/docs/tasks/concluidos/CORR-WTE-140.md) e a
+[141](/docs/tasks/concluidos/CORR-WTE-141.md) — as duas pediam **decisão**, não conserto, e
 as duas foram decididas em 2026-08-31 do mesmo jeito: **o port fica como está e
 a divergência vai para a §6**, linhas 7 e 8.
 
@@ -1093,7 +1093,7 @@ coisa**: com `GOLDEN_EDIT` o oráculo recebe o `Return`, **encerra** — que é
 exatamente o achado do item — e o `golden_run.sh` morre antes de gravar
 (`nao consegui focar a janela 0xe00001`). Um `golden_check.sh` com ele reprova
 **sempre**, e isso é o esperado, não regressão
-([CORR-WTE-143](/docs/tasks/CORR-WTE-143.md) escreveu isso no cabeçalho do
+([CORR-WTE-143](/docs/tasks/concluidos/CORR-WTE-143.md) escreveu isso no cabeçalho do
 roteiro, para o vermelho não ser confundido com achado novo).
 
 **Os itens 1, 2 e 5 não têm veredito de `golden_compare.py`** — não podem ter,
@@ -1105,7 +1105,7 @@ tela**. Os dois roteiros que rodam sozinhos as produzem em
 `ora-tamanho.png` e `port-tamanho.png` (o aviso de tamanho) e
 `ora-carregado.png` (o oráculo com a imagem carregada). Refazer é rodar os dois
 roteiros; o destino é criado por eles. Até a
-[CORR-WTE-142](/docs/tasks/CORR-WTE-142.md) o destino era um `/tmp/c09` que
+[CORR-WTE-142](/docs/tasks/concluidos/CORR-WTE-142.md) o destino era um `/tmp/c09` que
 ninguém criava, com o `import` calado — **nenhuma captura era produzida, e o
 roteiro do oráculo ainda anunciava as que não fez**.
 
@@ -1118,7 +1118,7 @@ roteiro do oráculo ainda anunciava as que não fez**.
       diz que o foco já foi tratado. **Decidido em 2026-08-31: o port mantém o
       encerramento**, registrado como divergência deliberada (§6, linha 7) —
       janela com `Write into CD image` clicável e sem imagem carregada é pior
-      que nenhuma janela. [CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)
+      que nenhuma janela. [CORR-WTE-140](/docs/tasks/concluidos/CORR-WTE-140.md)
 - [x] Abrir arquivo com tamanho errado → aviso, e carrega — **concordam.** Os
       dois avisam `Not WE2002 CD image (474.431.328 bytes)!` e carregam assim
       mesmo; no legado a linha que abortaria está comentada
@@ -1142,7 +1142,7 @@ roteiro do oráculo ainda anunciava as que não fez**.
       janela. **Decidido em 2026-08-31: o port continua ignorando o `Return`**,
       registrado como divergência deliberada (§6, linha 8) — reproduzir faria
       uma tecla acidental descartar o trabalho não gravado.
-      [CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)
+      [CORR-WTE-141](/docs/tasks/concluidos/CORR-WTE-141.md)
 - [x] `Escape` fecha — **concordam**: `IDCANCEL`/`CDialog::OnCancel` de um lado,
       `QDialog::reject` do outro, e o processo termina nos dois
 
@@ -1155,7 +1155,7 @@ roteiro do oráculo ainda anunciava as que não fez**.
 > silêncio.
 >
 > **A decisão do `DefaultTacticsDialog` não contradiz esta.** Lá o `Return`
-> **fecha**, e deve ([CORR-WTE-139](/docs/tasks/CORR-WTE-139.md)), porque o
+> **fecha**, e deve ([CORR-WTE-139](/docs/tasks/concluidos/CORR-WTE-139.md)), porque o
 > `ed.rc` declara um `DEFPUSHBUTTON` — invisível, mas declarado (linha 627).
 > Aqui não há nenhum. A regra é a mesma nos dois: o `Return` vai para o botão
 > default do diálogo, e o comportamento muda porque um diálogo tem esse botão e

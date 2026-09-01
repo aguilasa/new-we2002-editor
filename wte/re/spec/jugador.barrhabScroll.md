@@ -44,7 +44,7 @@ Pascal ser escrito: os 300 bytes alcançam `FindComponent`, `IntToStr`, `Copy`,
 nenhuma escritora de imagem (`0x00403400`, `0x00404048`, `0x00404820`).
 
 É o único lote desta task que fecha sem depender da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -82,7 +82,7 @@ controles que não existe.
 Medido pelo [`check_lcl_combo.py`](../../tools/check_lcl_combo.py), que passou a
 cobrir os dois controles da ficha: **`TScrollBar` dispara** (e só quando o valor
 muda de verdade), **`TUpDown` não**. É a mesma resposta que o `TTrackBar` deu na
-segunda passagem da [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md),
+segunda passagem da [WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md),
 e a oposta à do `TComboBox`.
 
 Consequência: o `PreencheFicha` reentra neste handler dezesseis vezes ao encher

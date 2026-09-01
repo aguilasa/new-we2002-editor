@@ -10,7 +10,7 @@ explícito. O mesmo risco atravessa para Pascal com outra roupa — ver a §8.11
 [`PLAN-WTE-LAZARUS.md`](../../docs/PLAN-WTE-LAZARUS.md).
 
 **Escopo:** o que a camada de dados gerada usa. *Como* o gerador implementa é da
-[WTE-TASK-17](../../docs/tasks/17-transpilador-da-camada-de-dados.md).
+[WTE-TASK-17](../../docs/tasks/concluidos/17-transpilador-da-camada-de-dados.md).
 
 **Entrada real medida** — os tipos que de fato aparecem na entrada do
 transpilador, que são **2.504 linhas** em 11 arquivos, separando implementação

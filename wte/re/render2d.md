@@ -8,7 +8,7 @@ python3 wte/tools/dump_render2d.py --check
 
 ## As três perguntas que a task manda responder antes do código
 O enunciado da
-[WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) é explícito:
+[WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) é explícito:
 *"descobrir qual antes de escrever código — muda o algoritmo inteiro"*.
 As três têm resposta no `.text`, e nenhuma precisou de decompilador.
 

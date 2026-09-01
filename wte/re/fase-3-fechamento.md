@@ -2,7 +2,7 @@
 
 **Gerado por [`wte/tools/check_fase3.py`](../tools/check_fase3.py) — não editar à mão.**
 
-Produto da [WTE-TASK-21](../../docs/tasks/21-fechamento-fase-3.md). O
+Produto da [WTE-TASK-21](../../docs/tasks/concluidos/21-fechamento-fase-3.md). O
 irmão é [`fase-3.md`](fase-3.md), da WTE-TASK-20, e a divisão é de
 pergunta: lá se mede se **os valores batem**; aqui, **quem escreveu o**
 **código que os produz** e **quem o consome**.
@@ -23,7 +23,7 @@ dentro da própria saída antes de entrar na conta.
 Dizer isso importa porque as duas primeiras já foram contadas por réguas
 diferentes — total com branco menos manual sem branco —, e as 26 linhas
 em branco dos blocos manuais acabavam creditadas a *por regra*
-([CORR-WTE-051](../../docs/tasks/CORR-WTE-051.md)). O casamento de cada
+([CORR-WTE-051](../../docs/tasks/concluidos/CORR-WTE-051.md)). O casamento de cada
 bloco contra a saída continua ignorando branco e indentação, que é outra
 pergunta: *este bloco ainda é emitido?*
 
@@ -58,7 +58,7 @@ o encontro com a biblioteca padrão de outra linguagem.
 **A razão é por gerador.** Os oito `.pas` saem de *dois*, e dividir a
 soma dos dois pela entrada de um só creditava ao transpilador linhas que
 o `gen_tables_pas.py` emitiu
-([CORR-WTE-050](../../docs/tasks/CORR-WTE-050.md)).
+([CORR-WTE-050](../../docs/tasks/concluidos/CORR-WTE-050.md)).
 
 | entrada | gerador | linhas |
 |---|---|---:|
@@ -129,7 +129,7 @@ As citações existentes são **negativas ou de contexto**, e ficam transcritas:
 - `crash-causa.md`: endereço abaixo vem de comando, não de leitura do Ghidra transcrita.
 
 O único uso real de Ghidra no projeto é a
-[WTE-TASK-24](../../docs/tasks/24-ghidra-convencao-borland.md), que é
+[WTE-TASK-24](../../docs/tasks/concluidos/24-ghidra-convencao-borland.md), que é
 **fase 4** e existe para isso. Consequência para a estimativa: a fase 4
 não herda dívida de decompilação da 3 — começa com o Ghidra já
 configurado e nenhum trecho de fase 3 dependendo dele.
@@ -144,7 +144,7 @@ configurado e nenhum trecho de fase 3 dependendo dele.
 - **Comportamento.** Os 96 handlers continuam stubs que logam. A camada
   de dados não sabe nada sobre eles.
 - **Os `OFS_*` que o `we2002_core` não nomeia.** As faixas sem dono que
-  a [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md)
+  a [WTE-TASK-19](../../docs/tasks/concluidos/19-os-50-offsets-restantes.md)
   mediu — a maior é a região do uniforme — não têm lado C++, então
   nenhum diff Pascal × C++ as alcança. Nomeá-las é fase 4 e 5.
 - **Que o `Load` do sidecar funcione.** Nenhum dos dois lados lê

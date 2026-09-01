@@ -9,7 +9,7 @@ veredito: implementado
 
 Um corpo para as 16 amostras `color1`…`color16`, 1.320 bytes — o maior do
 formulário. **É o cola-cores que dá título à
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md)**, e o readme do
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)**, e o readme do
 original o vende como *"an improvement over WE2002 Painter features"*.
 
 **Evidência:** disassembly lido

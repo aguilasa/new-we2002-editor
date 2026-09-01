@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Quais glifos a LCL **não consegue** acinzentar, e por quê. Prova disso.
 
-Produto da [CORR-WTE-060](../../docs/tasks/CORR-WTE-060.md), que foi aberta
+Produto da [CORR-WTE-060](../../docs/tasks/concluidos/CORR-WTE-060.md), que foi aberta
 para medir um botão que não acinzentava e terminou medindo uma propriedade da
 LCL inteira.
 

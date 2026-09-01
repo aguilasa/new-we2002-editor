@@ -72,7 +72,7 @@ global de offset em cada um — só troca a `0x004033BC` (ler) pela `0x00403400`
 Sete regiões por time, todas endereçadas por global de offset em vez de
 constante — os endereços absolutos dependem do time selecionado e saem da
 tabela em `.data` que a
-[WTE-TASK-06](../../../docs/tasks/06-mapa-de-offsets.md) mapeou. Os tamanhos
+[WTE-TASK-06](../../../docs/tasks/concluidos/06-mapa-de-offsets.md) mapeou. Os tamanhos
 estão na tabela acima: 30 + 5×1 + 30 + 30 + 8×32 + 30 + 2 = **383 bytes** por
 gravação.
 
@@ -93,7 +93,7 @@ Não trata. A `0x00403400` não devolve estado que o handler leia.
 
 ## Como o veredito fechou
 
-Fechou pela [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), segunda das
+Fechou pela [CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md), segunda das
 três gravações órfãs, com o par
 [`golden-16-cor`](../../tests/roteiros/golden-16-cor.txt) nos três modos do
 [`golden_check.sh`](../../tools/golden_check.sh): `controle` byte-idêntico,

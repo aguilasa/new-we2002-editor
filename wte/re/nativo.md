@@ -3,7 +3,7 @@
 **Escrito à mão; todo número vem de ferramenta.** A medição é o
 [`nativo_check.sh`](../tools/nativo_check.sh), e o registro dela é
 [`nativo.tsv`](nativo.tsv). Produto da
-[WTE-TASK-40](../../docs/tasks/40-verificacao-final.md).
+[WTE-TASK-40](../../docs/tasks/concluidos/40-verificacao-final.md).
 
 ```sh
 cp roms/japanese-shift-jis.bin work/copia.bin
@@ -83,7 +83,7 @@ tema GTK trazido em tempo de execução apareceria só na segunda.
 
 ## A árvore instalada roda **depois de movida**
 
-Medido na [WTE-TASK-39](../../docs/tasks/39-empacotamento.md), em 2026-08-26, e
+Medido na [WTE-TASK-39](../../docs/tasks/concluidos/39-empacotamento.md), em 2026-08-26, e
 não remedido aqui: `make -C wte install PREFIX=<p>`, `mv <p> <outro>`, e o
 binário instalado abriu, achou os assets no caminho novo e carregou um time.
 A regra mora no [`wte_datafiles.pas`](../src/wte_datafiles.pas) e vale para

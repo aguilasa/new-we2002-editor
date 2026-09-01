@@ -4,7 +4,7 @@
 [`../tools/gravacao_controle.py`](../tools/gravacao_controle.py) e
 reexecute. `make -C wte check` roda o `--check`.
 
-Produto da [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md).
+Produto da [WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 A medição é a sessão `27-gravacao-controle` de
 [`../tools/diff_dirigido.sh`](../tools/diff_dirigido.sh) sobre
 `roms/japanese-shift-jis.bin`, com o roteiro
@@ -24,7 +24,7 @@ o **`ed.exe`**; migrada para cá ela trocou de sujeito sem trocar de
 palavras, porque neste projeto *"o original"* é o `wte.exe` do
 Obocaman.
 
-Medido em 2026-08-25 ([CORR-WTE-109](../../docs/tasks/CORR-WTE-109.md)):
+Medido em 2026-08-25 ([CORR-WTE-109](../../docs/tasks/concluidos/CORR-WTE-109.md)):
 o `wte.exe` **não tem** ciclo `Load`+`Save` de banco inteiro — ele grava
 por área. Dos 17 caminhos de gravação,
 **2** tocam `OFS_KICKER`, e os dois
@@ -139,7 +139,7 @@ Rodado nesta mesma passagem, o roteiro acima sobre
 `roms/golden-european-deluxe.bin` morre na troca de time: a caixa de
 confirmação da gravação nunca aparece, e o log do Wine traz **49.749**
 violações de acesso — o mesmo número que a
-[CORR-WTE-044](../../docs/tasks/CORR-WTE-044.md) já tinha medido, e
+[CORR-WTE-044](../../docs/tasks/concluidos/CORR-WTE-044.md) já tinha medido, e
 reproduzido aqui com
 `grep -cE 'code=c0000005' <log>`. O `golden_run_wte.sh` reprova com
 código 4 exatamente por isso: oráculo que morreu no meio grava menos,
@@ -184,7 +184,7 @@ nova entra sozinha, e listar à mão seria a forma conhecida de o número
 envelhecer calado.
 
 **A conta alcança o projeto inteiro, e isso foi medido depois.** O
-enunciado da [WTE-TASK-28](../../docs/tasks/28-import-de-mcr.md)
+enunciado da [WTE-TASK-28](../../docs/tasks/concluidos/28-import-de-mcr.md)
 previa que o `boton_mcr2isoClick` escreveria **setor inteiro**, e que
 ali preservar EDC/ECC deixaria de ser consequência e viraria decisão.
 Medido, não é: a sessão `27-mcr2iso` já está entre as contadas

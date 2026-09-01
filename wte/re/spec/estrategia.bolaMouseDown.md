@@ -62,7 +62,7 @@ pontas.
 nenhuma: são `SubString`, a conversão para inteiro, `ClientToScreen`,
 `SetLeft`/`SetTop`/`SetWidth`/`SetHeight`, `BeginDrag`, `SetVisible` e o
 `SetEnabled` virtual. A tática só vai ao disco pelo botão de gravar, que é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -104,7 +104,7 @@ que no original quem aponta os quatro ponteiros ao **abrir** o formulário é
 `0x0040a0b4` — a rotina que enche a tela de tática, chamada pelo
 `MainForm.mostrar_estrategiaClick` —, que ela não tinha port, e que por isso o
 port abria a tela com toda bola na zona 0. A
-[CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) a portou em 2026-08-21 como
+[CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md) a portou em 2026-08-21 como
 `PreencheTelaDeTatica`, na [`wte_tatica`](../../src/wte_tatica.pas), e a
 abertura passa a apontar o registro da tática viva.
 
@@ -114,7 +114,7 @@ Até 2026-08-23 nada o disparava: o `compara_tela.sh --malha` clica a malha, nã
 uma bola, e o harness inteiro só sabia `clique`, `duplo`, `tecla` e `texto` —
 não havia um `mousedown` sequer em `wte/tools/*.sh`.
 
-A [CORR-WTE-092](../../../docs/tasks/CORR-WTE-092.md) deu ao `roteiro.sh` o
+A [CORR-WTE-092](../../../docs/tasks/concluidos/CORR-WTE-092.md) deu ao `roteiro.sh` o
 verbo `arrasta` e escreveu o
 [`golden-21-arrasto`](../../tests/roteiros/golden-21-arrasto.txt), que julga por
 **byte**: os 30 bytes de formação do

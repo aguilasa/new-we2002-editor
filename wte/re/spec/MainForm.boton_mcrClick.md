@@ -65,7 +65,7 @@ Não trata no corpo do handler.
 ## Notas
 
 **Veredito `aberto`, com dono nomeado:** o formato `.mcr` é a
-[WTE-TASK-28](../../../docs/tasks/28-import-de-mcr.md), que trata de import e
+[WTE-TASK-28](../../../docs/tasks/concluidos/28-import-de-mcr.md), que trata de import e
 export de memory card. Este handler é a porta de entrada dela, e implementá-lo
 sem a 28 seria abrir um diálogo que não leva a lugar nenhum.
 
@@ -75,7 +75,7 @@ Pascal deste handler está em
 [`../../src/impl/ep2002_mainform.boton_mcrClick.inc`](../../src/impl/ep2002_mainform.boton_mcrClick.inc).
 
 **Duas divergências deliberadas**
-([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):
+([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)):
 
 1. **arquivo que não é cartão para aqui.** O original chama a `0x0040b9ec`
    sobre o que vier e habilita o botão; o port confere magia e tamanho antes,

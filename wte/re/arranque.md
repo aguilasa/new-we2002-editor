@@ -1,6 +1,6 @@
 # `re/arranque.md` — o que os 18 `FormCreate`/`FormShow` fazem
 
-Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), grupo de
+Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), grupo de
 carga. Gerado por [`../tools/dump_arranque.py`](../tools/dump_arranque.py),
 a partir de `we-team-editor/we-team-editor.exe`, de [`published_methods.tsv`](published_methods.tsv)
 e de [`campos.tsv`](campos.tsv). **Não editar à mão:**
@@ -72,7 +72,7 @@ Nos 18 DFM a propriedade `Color` do formulário é `clBtnFace`, `clSilver` ou
 `clNavy` — nenhuma delas é isto. A cor de projeto **nunca aparece na tela**:
 o `OnCreate` a substitui antes de o formulário ser exibido. Um port que
 respeitasse só o DFM ficaria cinza onde o original é colorido, e a
-[WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) comparou justamente
+[WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) comparou justamente
 as janelas nesse estado.
 
 ## Os `composto`, um a um

@@ -11,7 +11,7 @@ Grava os três nomes do time selecionado nos blocos de nome da imagem. 2.268
 bytes, do `0x0040d534` ao `0x0040de15` — o maior handler do grupo, e o único
 que depende de duas tabelas e de duas rotinas internas.
 
-Portado na [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), com
+Portado na [WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md), com
 golden verde.
 
 ## Entrada
@@ -23,12 +23,12 @@ golden verde.
 - a **tabela de blocos** em `0x004231a0`: 3 linhas × 6 `DWORD`. A linha é o
   campo, a coluna é o bloco de nome, e o valor zero quer dizer "este campo não
   tem esse bloco". Extraída pela
-  [WTE-TASK-06](../../../docs/tasks/06-mapa-de-offsets.md);
+  [WTE-TASK-06](../../../docs/tasks/concluidos/06-mapa-de-offsets.md);
 - a **tabela de registros** em `0x00433a0c`: 3 × 6 registros de 52 bytes,
   preenchidos por time na carga. Cada um é
   `{offset absoluto: DWORD, comprimento: DWORD, modo: DWORD, buffer: 40 bytes}`.
   O `+4` dela é o `0x00433a10` que a
-  [CORR-WTE-061](../../../docs/tasks/CORR-WTE-061.md) mediu como largura por
+  [CORR-WTE-061](../../../docs/tasks/concluidos/CORR-WTE-061.md) mediu como largura por
   time.
 
 **Evidência:** disassembly lido
@@ -159,7 +159,7 @@ mesmo que o [`truncamento.md`](../truncamento.md) mapeou para a tela.
 O gravador (`0x00403dcc`) passa `comprimento` cheio ao `0x00403400`, então o
 byte forçado **é gravado**. O efeito só aparece em slot mais estreito que o
 texto: quando o texto acaba antes, a cauda já era zero. Foi um byte só que
-denunciou — a [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md), no
+denunciou — a [CORR-WTE-121](../../../docs/tasks/concluidos/CORR-WTE-121.md), no
 `OFS_TEAM_NAME_6` da `ptbr-remaster`, onde o time 2 tem slot de 4 (`CHL`) e o
 campo trazia `A BC.DE`: o oráculo grava `A B` mais o NUL, e o port gravava
 `A BC`.
@@ -190,7 +190,7 @@ o nome, nem o não-zero que abre o próximo. São dois bytes por registro sem
 teste de fronteira; quando um deles cai em `2072 mod 2352`, o original não pula
 os 304 de EDC/ECC.
 
-Medido pela [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md) na
+Medido pela [CORR-WTE-121](../../../docs/tasks/concluidos/CORR-WTE-121.md) na
 `ptbr-remaster`: um port que testasse também nesses dois bytes sai **8
 registros** de fase no `OFS_TEAM_NAME_6` e grava o time 2 em 5652628
 (`S.AFRIC`) onde o oráculo grava em 5652568 (`CHL`). Modelado o laço byte a
@@ -209,7 +209,7 @@ Há um caso especial morto no original: `(campo 0, bloco 5, 32º registro)` faz
 um `seek` fixo para `0x563f8d`. O bloco 5 da linha 0 é buraco na tabela, então
 o laço nunca chega lá. Não foi portado, e a razão está aqui.
 
-*Reconferido pela [CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md): o teste
+*Reconferido pela [CORR-WTE-121](../../../docs/tasks/concluidos/CORR-WTE-121.md): o teste
 é `test edi,edi` (campo) / `cmp [ebp-4],0x5` (bloco) / `cmp esi,0x1f` em
 `0x00403c68`, e `edi` é mesmo a linha — o `lea ecx,[ecx*8+0x433a0c]` com
 `ecx = edi*39` dá o passo de 312 = 6 × 52 da linha. O endereço `0x563f8d` é

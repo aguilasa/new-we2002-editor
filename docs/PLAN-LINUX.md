@@ -968,7 +968,7 @@ argumento e pula o `QFileDialog`. O original não tinha argumento nenhum.
 
 Além do slot 64 herdado da Fase 3, quatro da própria Fase 5 e **duas decididas
 depois**, em 2026-08-31, pela paridade de tela
-([PAR-TASK-09](/docs/tasks/PAR-TASK-09.md)) — as duas de ciclo de vida, nenhuma
+([PAR-TASK-09](/docs/tasks/concluidos/PAR-TASK-09.md)) — as duas de ciclo de vida, nenhuma
 delas grava byte:
 
 - **`editFromFIFA` terminava com `costo = CalcolaCostoGiocatore(i)`**, onde `i`
@@ -999,7 +999,7 @@ delas grava byte:
   só diz que o foco já foi tratado, e nenhum `EndDialog` é chamado. O `ed.exe`
   segue com o combo de times sem itens, os campos em branco e `Write into CD
   image` clicável. O port encerra depois do mesmo aviso. Decidido em 2026-08-31
-  ([CORR-WTE-140](/docs/tasks/CORR-WTE-140.md)): botão de gravar clicável sem
+  ([CORR-WTE-140](/docs/tasks/concluidos/CORR-WTE-140.md)): botão de gravar clicável sem
   imagem carregada é pior que nenhuma janela, e o que o original faz nesse
   clique nunca foi medido. Não muda byte — os dois avisam igual antes.
 - **`Return` no diálogo principal encerra o `ed.exe` e não faz nada no port.**
@@ -1009,7 +1009,7 @@ delas grava byte:
   `TRUE` sempre — o editor fecha sem gravar. No port nenhum dos 86 botões é
   default (`autoDefault=false`, emitido pelo `rc2ui.py`), e a tecla não encontra
   destino. Decidido em 2026-08-31
-  ([CORR-WTE-141](/docs/tasks/CORR-WTE-141.md)): reproduzir faria uma tecla
+  ([CORR-WTE-141](/docs/tasks/concluidos/CORR-WTE-141.md)): reproduzir faria uma tecla
   acidental descartar o trabalho não gravado, que é justamente o defeito do
   original. O `Escape` **concorda** e fecha nos dois. Vale só para o
   `MainWindow` — no `DefaultTacticsDialog` o `Return` confirma, e deve, porque
@@ -1039,13 +1039,13 @@ vptr era um endereço de processo, não significava nada no arquivo nem então.
 Os 4 bytes são os do fonte original, que é de 32 bits, e o arquivo tem 52 bytes
 — o número que `tattDlg.cpp:701` valida ao importar. O `Debug/ed.exe` é x86-64,
 exporta 56 e recusa o próprio arquivo; ele **aceita** o de 52 do port. Medido
-na [CORR-WTE-132](/docs/tasks/CORR-WTE-132.md).
+na [CORR-WTE-132](/docs/tasks/concluidos/CORR-WTE-132.md).
 
 **Aceitar não é ler direito**, e a diferença só apareceu quando os dois lados
 importaram o mesmo arquivo com controle positivo: o `ed.exe` passa na
 conferência de tamanho e então decodifica com o vptr de 8 bytes do próprio
 binário, **4 bytes adiante do lugar certo** — grava `MP` mais bytes de papel
-onde o port grava `PARIMP`. [CORR-WTE-135](/docs/tasks/CORR-WTE-135.md).
+onde o port grava `PARIMP`. [CORR-WTE-135](/docs/tasks/concluidos/CORR-WTE-135.md).
 
 Ainda não portado, e conhecido: o `ed.exe` mostra o ícone quando minimizado
 (`OnPaint`) e tem um item "About" no menu de sistema. Nenhum dos dois existe em

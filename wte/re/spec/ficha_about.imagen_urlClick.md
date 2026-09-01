@@ -62,7 +62,7 @@ navegador faz com ela não volta para o app.
 ## Notas
 
 **A LCL não tem `TBrowseURL`**, e a
-[WTE-TASK-10](../../../docs/tasks/10-conversor-dfm-para-lfm.md) já tinha
+[WTE-TASK-10](../../../docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) já tinha
 resolvido metade disto: o `dfm2lfm.py` converte a ação num `TLabel` inerte e
 guarda o valor na constante `LANZA_URL_URL` da unidade, com um `TODO` pedindo
 `OpenURL()` no handler que dispara. Este é o handler que dispara, e o `TODO`

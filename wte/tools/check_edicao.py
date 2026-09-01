@@ -3,7 +3,7 @@
 
 Gera `wte/re/edicao-cobertura.md` -- fecha o criterio *conferencia verde para
 cada grupo de edicao, uma por rodada* da
-[WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md).
+[WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md).
 
 ## O problema que ele resolve
 
@@ -240,7 +240,8 @@ def confere(handlers: list[str]) -> list[str]:
             problemas.append(f"{h}: `wte/tools/{alvo}` nao existe")
         elif classe == OUTRA:
             nome = alvo.replace("WTE-TASK-", "")
-            achou = list((ROOT / "docs/tasks").glob(f"{nome}-*.md"))
+            # `rglob`: a task pode ter descido para `docs/tasks/concluidos/`
+            achou = list((ROOT / "docs/tasks").rglob(f"{nome}-*.md"))
             if not achou:
                 problemas.append(f"{h}: {alvo} nao tem arquivo em docs/tasks")
 
@@ -273,7 +274,7 @@ def md(handlers: list[str], estaticos: dict[str, int]) -> str:
     linhas = [
         "# `re/edicao-cobertura.md` — o instrumento de cada handler de edição",
         "",
-        "Produto da [WTE-TASK-26](../../docs/tasks/26-handlers-de-edicao.md), o",
+        "Produto da [WTE-TASK-26](../../docs/tasks/concluidos/26-handlers-de-edicao.md), o",
         "critério *conferência verde para cada grupo de edição*. Gerado por",
         f"[`../tools/check_edicao.py`](../tools/check_edicao.py). **Não editar à mão.**",
         "",
@@ -311,7 +312,7 @@ def md(handlers: list[str], estaticos: dict[str, int]) -> str:
         "",
         "A terceira **não é escapatória**: ela existe porque a **opção A**,",
         "decidida pelo usuário em 2026-08-12, põe a metade de gravação de nove",
-        "handlers na [WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md).",
+        "handlers na [WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md).",
         "",
         "**E o grupo `mover` não tem régua de tela por medição, não por",
         "conveniência:** o `GravaJogador` do port devolve o código do caminho",

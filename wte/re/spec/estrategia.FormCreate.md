@@ -80,7 +80,7 @@ supunha.** Esta seção dizia: *"11 é o número de jogadores em campo, e o
 suspeitado e errado.
 
 Lidos no disassembly pela
-[CORR-WTE-093](../../../docs/tasks/CORR-WTE-093.md), os quatro copiam 11 bytes
+[CORR-WTE-093](../../../docs/tasks/concluidos/CORR-WTE-093.md), os quatro copiam 11 bytes
 cada para `esi+0`, `esi+0x0b`, `esi+0x16` e `esi+0x21` — quatro colunas de 11
 **intercaladas num registro de 44** —, e o laço de fora fecha a conta:
 

@@ -1,6 +1,6 @@
 # `re/unidades-vcl.md` — `Registry`, `Printers`, `Comobj` e `Winhelpviewer`
 
-Produto da [WTE-TASK-07](../../docs/tasks/07-unidades-duvidosas.md). Gerado por
+Produto da [WTE-TASK-07](../../docs/tasks/concluidos/07-unidades-duvidosas.md). Gerado por
 [`../tools/dump_units.py`](../tools/dump_units.py), a partir de
 `we-team-editor/we-team-editor.exe`, de
 [`published_methods.tsv`](published_methods.tsv), de [`strings.tsv`](strings.tsv)

@@ -66,7 +66,7 @@ bytes do `.tex` é o
 [`boton_tex2isoClick`](MainForm.boton_tex2isoClick.md), portado e com gate
 próprio (`golden-06-textura`). Aqui só se escolhe o arquivo.
 
-A [CORR-WTE-093](../../../docs/tasks/CORR-WTE-093.md) escreveu o corpo,
+A [CORR-WTE-093](../../../docs/tasks/concluidos/CORR-WTE-093.md) escreveu o corpo,
 espelhando o irmão
 [`boton_dialogo_weClick`](MainForm.boton_dialogo_weClick.md).
 
@@ -85,7 +85,7 @@ caminhos, e o `golden-06-textura` continua byte-idêntico depois deste corpo.
 tocados* a listava como metade não lida; ela é a rotina de I/O da RTL que abre o
 arquivo e lê o tamanho — exatamente o par que o port substitui pelo caminho.
 
-Entrada da [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md).
+Entrada da [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md).
 
 ## Notas
 

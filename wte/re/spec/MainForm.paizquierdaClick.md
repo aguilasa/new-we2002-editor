@@ -54,7 +54,7 @@ ela não pode ser lida como "origem/destino".
 ## Bytes tocados
 
 **Grava**, dentro da `0x00404820`, como o `paderechaClick`. Offset por ramo é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -79,11 +79,11 @@ pela mesma `0x00403e20`. Ver
 faz tudo, gravação inclusive.
 
 Fechado em 2026-08-20 pela oitava passagem da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md): o ramo de
 **destino de Master League** da `0x00404820` foi portado, com golden verde
 ([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
 contador de blocos livres vindo da
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md). Com ele a
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md). Com ele a
 recusa `-1` passou a ser alcançável e o `casilla_xmlibres` mostra o número de
 verdade.
 

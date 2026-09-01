@@ -172,7 +172,7 @@ aposentado sozinho, ao lado da palavra que dá o contexto, deixa o
   gravação não aparece em lugar nenhum. **Mas o motivo mudou:** este item dizia
   "o editor não é idempotente", herdando do `newWe2002` uma frase sobre o
   `ed.exe`. Medido em 2026-08-25
-  ([CORR-WTE-109](/docs/tasks/CORR-WTE-109.md)), o `wte.exe` **é** idempotente
+  ([CORR-WTE-109](/docs/tasks/concluidos/CORR-WTE-109.md)), o `wte.exe` **é** idempotente
   nos dois caminhos que tocam `OFS_KICKER` — e o gate serve justamente para
   isso continuar sendo verdade
 - Toda exceção do golden tem entrada em `divergencias.md`? Exceção sem entrada é

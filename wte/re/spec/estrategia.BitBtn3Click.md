@@ -115,7 +115,7 @@ com pergunta. Fora isso, não trata.
 
 ## Como o veredito fechou
 
-Fechou pela [CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), terceira e
+Fechou pela [CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md), terceira e
 última das três gravações órfãs, com o par
 [`golden-17-tatica`](../../tests/roteiros/golden-17-tatica.txt) nos três modos
 do [`golden_check.sh`](../../tools/golden_check.sh): `controle` byte-idêntico,
@@ -124,7 +124,7 @@ do [`golden_check.sh`](../../tools/golden_check.sh): `controle` byte-idêntico,
 **Ele dependia de uma correção inteira, e ela veio antes.** A tela de tática do
 port não era enchida — a `0x0040A0B4` não tinha port —, e ler a posição de
 componentes que ninguém posicionou gravaria as coordenadas de tempo de projeto
-do `.lfm`. A [CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) portou a
+do `.lfm`. A [CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md) portou a
 leitora e mediu a metade de tática desta spec, que dizia `não medido`.
 
 **A edição do roteiro é o clique na `malla1` que o `compara_tela.sh --malha` já

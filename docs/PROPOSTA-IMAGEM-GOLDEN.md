@@ -176,7 +176,7 @@ compra nada.
 O `SEM_ORACULO` — o número que este critério chama de "o ponto" — deu **zero**;
 as duas reprovações são um defeito do port que só esta imagem expõe. A leitura
 está na [§8.4](#84-a-leitura-do-portão-3), e o defeito virou
-[CORR-WTE-121](/docs/tasks/CORR-WTE-121.md).
+[CORR-WTE-121](/docs/tasks/concluidos/CORR-WTE-121.md).
 
 ---
 
@@ -222,7 +222,7 @@ outras duas ROMs consegue mostrar.
 A decisão tomada foi **adotar**, pela linha ✅✅✅, com o argumento na
 [§8.4](#84-a-leitura-do-portão-3): o critério pedia que ela *comprasse a régua*,
 e ela comprou — 24/24 contra 1/24 da europeia. O defeito virou
-[CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), não motivo de recusa.
+[CORR-WTE-121](/docs/tasks/concluidos/CORR-WTE-121.md), não motivo de recusa.
 
 Registrado assim de propósito. A tabela foi escrita antes justamente para a
 resposta não ser negociada depois; então em vez de reescrevê-la para caber no
@@ -441,7 +441,7 @@ As três imagens ficam, a europeia continua sendo a golden do `newWe2002`,
 nenhum dos seis TSVs foi remedido, e a `ptbr-remaster` entra como a ROM em que a
 bateria do `wte/` roda com oráculo.
 
-O defeito virou [CORR-WTE-121](/docs/tasks/CORR-WTE-121.md), com prioridade
+O defeito virou [CORR-WTE-121](/docs/tasks/concluidos/CORR-WTE-121.md), com prioridade
 alta. Ele **não** bloqueia a adoção: é anterior a ela, e o que mudou foi passar
 a ser visível.
 

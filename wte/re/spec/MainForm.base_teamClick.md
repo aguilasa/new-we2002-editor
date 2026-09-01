@@ -90,7 +90,7 @@ igual a `-1` entraria no laço.
 
 ## O veredito passou a `implementado` em 2026-08-24
 
-A [WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md) fechou as duas
+A [WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md) fechou as duas
 metades. A moldura era da WTE-TASK-30; o miolo — a `formula(soma)` e a soma que
 a alimenta — está em [`../preco.md`](../preco.md), com a fórmula, as três
 armadilhas dela e a tabela de verdade.
@@ -115,7 +115,7 @@ a **mesma** soma e a **mesma** posição, e só o 21 é gravado — o que descar
 explicação pelo conteúdo do jogador.
 
 **O `je` da terceira coluna não é a causa**, ao contrário do que esta seção
-afirmou até 2026-08-24. A [CORR-WTE-095](../../../docs/tasks/CORR-WTE-095.md)
+afirmou até 2026-08-24. A [CORR-WTE-095](../../../docs/tasks/concluidos/CORR-WTE-095.md)
 instrumentou a corrida com `strace` (`diff_dirigido.sh`) e mediu que o oráculo
 **lê** o byte condicional do slot 22 em 3067472, com o mesmo número de seeks dos
 outros 22 — e a `0x004046e8` só faz essa leitura quando a coluna **não** é zero
@@ -136,13 +136,13 @@ o slot 22 (a `0x00404374` decide por time, nunca por slot); o slot 22 é
 endereçável — o `io-medido.tsv`, sessão `27-mcr2iso`, mostra o import de `.mcr`
 gravando os **23** bytes condicionais do time 3; e o defeito é **do original**,
 registrado como divergência deliberada na
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md). O port
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md). O port
 reproduz o oráculo, porque é contra ele que o gate mede.
 
 ## Notas
 
 **Este handler grava na imagem, e a task de preço precisa saber disso.** A
-[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md) foi descrita como
+[WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md) foi descrita como
 *"isolada, não depende de gravação"* — verdade para o
 `jugador.etiqprecioClick`, que só mostra o número na tela, e **falso** para
 este, que percorre 23 jogadores e escreve um byte em cada. A régua da 32 tem de

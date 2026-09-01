@@ -1,6 +1,6 @@
 # `re/auxiliares.md` — as rotinas internas que o grupo de carga chama
 
-Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md). Gerado
+Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md). Gerado
 por [`../tools/dump_auxiliares.py`](../tools/dump_auxiliares.py) a partir
 de `we-team-editor/we-team-editor.exe` e de
 [`published_methods.tsv`](published_methods.tsv). **Não editar à mão:**
@@ -26,8 +26,8 @@ Medido, esse handler chama **13** rotinas internas —
 sem:
 
 - `0x004050d0` — carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1
-- `0x00405270` — desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
-- `0x004056c8` — desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
+- `0x00405270` — desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
+- `0x004056c8` — desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
 - `0x0040b0b4` — preenche as 23 legendas `dorsalN` com os numeros de camisa
 - `0x0040b188` — marca a camisa N: apaga a marcada, acha a nova por `FindComponent`, destaca
 - `0x0040b2d8` — preenche `lista_jugadores_1` com os 23 nomes, filtrados
@@ -86,9 +86,9 @@ de sumir da tabela. Nenhuma delas tem papel lido.
 | `0x00404e70` | 2 | 285 | `0x004050d0` | — |
 | `0x00404f90` | 2 | 318 | `0x004050d0` | — |
 | `0x004050d0` | 1 | 209 | `MainForm.lista_equiposChange` | carrega da imagem o bloco de cor do time — bandeira, os dois uniformes, as oito chuteiras, a quarta paleta, a forma e o padrão — para o slot 0, e o espelha no slot 1 |
-| `0x00405270` | 1 | 502 | `MainForm.lista_equiposChange` | desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
+| `0x00405270` | 1 | 502 | `MainForm.lista_equiposChange` | desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) |
 | `0x00405468` | 1 | 606 | `MainForm.lista_equipos_2Change` | — |
-| `0x004056c8` | 1 | 1034 | `MainForm.lista_equiposChange` | desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md) |
+| `0x004056c8` | 1 | 1034 | `MainForm.lista_equiposChange` | desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md) |
 | `0x00406fb4` | 2 | 44 | `0x0040756c` | — |
 | `0x00406fe0` | 2 | 301 | `0x0040756c` | — |
 | `0x00407110` | 2 | 552 | `0x0040756c` | — |
@@ -188,7 +188,7 @@ em linhas de 0x18 bytes, 6 colunas de quatro —
 pulando a coluna que estiver zerada.
 
 Esse endereço é o mesmo que a
-[WTE-TASK-06](../../docs/tasks/06-mapa-de-offsets.md) registrou como
+[WTE-TASK-06](../../docs/tasks/concluidos/06-mapa-de-offsets.md) registrou como
 primeiro slot em [`offsets.tsv`](offsets.tsv), medido por outro caminho:
 lá pela varredura de constantes que batem com os nossos `OFS_*`, aqui
 pelo código que as consome. O script lê a base do corpo da rotina e
@@ -311,7 +311,7 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 ### `0x00405270` — 502 bytes
 
-- **Papel:** desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
+- **Papel:** desenha a bandeira 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
 - **Chamada por:** `MainForm.lista_equiposChange`
 - **Chama internas:** `0x00415718`, `0x0041978c`, `0x0042120c`, `0x004213f8`, `0x004213b4`, `0x00417530`, `0x00417810`, `0x00404dd4`, `0x00418f98`, `0x00417170`
 - **Importados:** `@Sysutils@CurrToStr$qqr15System@Currency`, `@Graphics@TPicture@LoadFromFile$qqrx17System@AnsiString`
@@ -320,7 +320,7 @@ endereços da `.data` alcançados por `mov eax,moffs32` ou
 
 ### `0x004056c8` — 1034 bytes
 
-- **Papel:** desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/29-camisa-e-bandeira-2d.md)
+- **Papel:** desenha o uniforme 2D — [WTE-TASK-29](../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)
 - **Chamada por:** `MainForm.lista_equiposChange`
 - **Chama internas:** `0x00415718`, `0x0041978c`, `0x0042120c`, `0x004213f8`, `0x004213e4`, `0x004213b4`, `0x00417530`, `0x00417810`, `0x00404dd4`, `0x00418f98`, `0x00417170`
 - **Importados:** `@Sysutils@CurrToStr$qqr15System@Currency`, `@Graphics@TPicture@LoadFromFile$qqrx17System@AnsiString`

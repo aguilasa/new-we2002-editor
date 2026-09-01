@@ -9,7 +9,7 @@ python3 wte/tools/check_golden.py       # regera este arquivo
 python3 wte/tools/check_golden.py --check
 ```
 
-Produto da [WTE-TASK-34](../../docs/tasks/34-bateria-golden-completa.md).
+Produto da [WTE-TASK-34](../../docs/tasks/concluidos/34-bateria-golden-completa.md).
 Fonte: [`golden.tsv`](golden.tsv), 96 corrida(s)
 registrada(s), a mais recente de 2026-08-28.
 **Todo número daqui saiu do script.**
@@ -104,7 +104,7 @@ mesmo com a primeira byte-idêntica.
 
 **E nenhum dos dois prova sozinho que o estímulo aconteceu.** É a lição
 1 da quarta passagem da
-[WTE-TASK-31](../../docs/tasks/31-fechamento-fase-4.md): se os dois
+[WTE-TASK-31](../../docs/tasks/concluidos/31-fechamento-fase-4.md): se os dois
 lados não fizerem nada, os dois concordam. O terceiro ponto de cada um
 é o par que grava **uma** vez pelo mesmo caminho —
 `golden-04-barras-editada` e `golden-05-nomes` para o primeiro, e para o
@@ -134,7 +134,7 @@ trivial: contra a ROM virgem a imagem muda em 11962
 bytes. O gate não está medindo dois lados parados.
 
 **O time 5 não é escolha livre**, e é aí que estava o defeito
-que a [CORR-WTE-104](../../docs/tasks/CORR-WTE-104.md) achou. O roteiro
+que a [CORR-WTE-104](../../docs/tasks/concluidos/CORR-WTE-104.md) achou. O roteiro
 gravava no time 2, cujos dois primeiros cobradores são iguais
 (`[7, 7, …]`): ali a troca que se procura é a identidade, e o roteiro
 passaria com vaivém e sem ele. São 41 dos 96 times em que ela seria
@@ -145,7 +145,7 @@ visível; o 5 é o primeiro deles, com
 cita é do `ed.exe` — outro binário, outro caminho de código. O
 `wte.exe` **não** a tem neste caminho, então não há divergência a
 reproduzir e o port não deve inventá-la. É entrada da
-[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) como
+[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md) como
 resultado negativo, não como divergência.
 
 ## As duas ROMs, e por que a resposta não é simétrica

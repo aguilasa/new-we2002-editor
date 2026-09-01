@@ -1,6 +1,6 @@
 # `re/campos.md` — nome → deslocamento dos campos publicados
 
-Produto da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md).
+Produto da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md).
 Gerado por [`../tools/dump_campos.py`](../tools/dump_campos.py), a partir
 de `we-team-editor/we-team-editor.exe` e dos 18 formulários de [`dfm/`](dfm/).
 **Não editar à mão** — correção entra no script e o arquivo é regerado:
@@ -27,7 +27,7 @@ assim por diante. Medido nos 18 formulários, essa regra acerta
 **73 de 440** campos. A ordem do `.dfm` é a de criação; a dos
 campos é a da declaração no `.h`, e o C++Builder não as mantém em sincronia.
 Derivar dali produziria leitura errada com cara de certa — a armadilha 1 do
-[`../../docs/tasks/progresso.md`](../../docs/tasks/progresso.md) por outro
+[`../../docs/tasks/concluidos/progresso.md`](../../docs/tasks/concluidos/progresso.md) por outro
 caminho.
 
 ## De onde o mapa sai
@@ -36,7 +36,7 @@ Da *published field table* que o VMT aponta em deslocamento **-56**. Ela
 existe porque o streaming de DFM precisa resolver `object lista_equipos:
 TComboBox` no campo certo, por nome, em tempo de execução — e por isso
 sobreviveu ao `/STRIP`, como a published method table da
-[WTE-TASK-04](../../docs/tasks/04-mapa-de-handlers.md) (-52).
+[WTE-TASK-04](../../docs/tasks/concluidos/04-mapa-de-handlers.md) (-52).
 
 ```text
 word  contagem

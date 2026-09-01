@@ -69,7 +69,7 @@ reposicionado: `Left := 7`, `Width := 100`, e o `punto` some. Abaixo disso,
 > 2026-08-11 porque `TControl::SetEnabled` tem **zero** `call rel32` na `.text`
 > inteira, e a dúzia de `.Enabled :=` desta seção não tinha, aparentemente, de
 > onde ter sido lida; subiu para `observacao de tela` no mesmo dia pela
-> [CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md), que mediu o **efeito**
+> [CORR-WTE-057](../../../docs/tasks/concluidos/CORR-WTE-057.md), que mediu o **efeito**
 > na tela do próprio oráculo, controle a controle.
 >
 > **A WTE-TASK-26 achou o mecanismo, e ele estava nos bytes o tempo todo:
@@ -95,15 +95,15 @@ edit_nombre3.MaxLength := 3                       ' literal
 ```
 
 **Os dois primeiros são por time**, e o port os punha uma vez só no `FormShow`,
-com número fixo. Corrigido pelas [CORR-WTE-061](../../../docs/tasks/CORR-WTE-061.md)
-e [CORR-WTE-064](../../../docs/tasks/CORR-WTE-064.md).
+com número fixo. Corrigido pelas [CORR-WTE-061](../../../docs/tasks/concluidos/CORR-WTE-061.md)
+e [CORR-WTE-064](../../../docs/tasks/concluidos/CORR-WTE-064.md).
 
 O lote kanji tem um `dec` que nenhum outro tem (`0x00403d95`, só para linha 0
 coluna 0): ele guarda a largura **menos um**, e o campo `+8` recebe `1` em vez
 do `2` dos demais — o modo do decodificador de texto.
 
 **A largura é medida na imagem, e a tabela constante não a substitui.** Até a
-[CORR-WTE-121](../../../docs/tasks/CORR-WTE-121.md) esta seção terminava
+[CORR-WTE-121](../../../docs/tasks/concluidos/CORR-WTE-121.md) esta seção terminava
 dizendo que o limite é `TEAM_NAME_KANJI_LEN − 1`; a igualdade só vale na
 japonesa. Contra a varredura do `.exe`, em 95 times por ROM:
 
@@ -158,7 +158,7 @@ combo só fica alcançável depois da carga.
 
 Não trata. `FindComponent` é usado sem conferir o resultado, para
 `barra0..4` e `sel_barra0..4` — o mesmo padrão que a
-[CORR-WTE-044](../../../docs/tasks/CORR-WTE-044.md) mediu derrubando o oráculo
+[CORR-WTE-044](../../../docs/tasks/concluidos/CORR-WTE-044.md) mediu derrubando o oráculo
 com `dorsal` + N, e no mesmo handler de carga de time. Aqui os dez existem.
 
 **Evidência:** disassembly lido
@@ -232,7 +232,7 @@ cada uma sai de `[vmt - 0x2c]`, o mesmo `vmtClassName` que a
 cada `make -C wte check` e reprova em qualquer outro slot.
 
 Com isso a seção Saída volta a `disassembly lido`, e a medição de tela da
-[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) deixa de ser a única
+[CORR-WTE-057](../../../docs/tasks/concluidos/CORR-WTE-057.md) deixa de ser a única
 sustentação dos 27 `.Enabled :=` do Pascal — passa a ser a segunda, que é onde
 ela vale mais.
 
@@ -240,11 +240,11 @@ ela vale mais.
 leitura: dos dois defeitos que a conferência de tela achou, os `dorsal1..23` um
 a menos foi corrigido em 2026-08-12, e o `iguala_nombres` que o port não
 desabilita deixou de ser defeito em 2026-08-18 — a
-[CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md) mediu a causa no widgetset,
+[CORR-WTE-060](../../../docs/tasks/concluidos/CORR-WTE-060.md) mediu a causa no widgetset,
 não no código, e ela virou divergência deliberada.
 
 > Esta frase já esteve errada duas vezes. A
-> [CORR-WTE-059](../../../docs/tasks/CORR-WTE-059.md) corrigiu a primeira
+> [CORR-WTE-059](../../../docs/tasks/concluidos/CORR-WTE-059.md) corrigiu a primeira
 > ("é o custo de ainda não ter conferido contra a tela", escrita na 6ª
 > passagem, desmentida pela seção que a 8ª pôs logo abaixo); a segunda foi
 > dizer que o mecanismo de habilitação "continua sem resposta nos bytes", o que
@@ -259,11 +259,11 @@ leva os dois lados ao mesmo índice e **confirma o do port pelo número de
 disparos no `trace.log`** antes de comparar; a medição é do
 [`compara_tela.py`](../../tools/compara_tela.py). ROM japonesa.
 
-O critério da [WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md) enumera
+O critério da [WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md) enumera
 cinco grupos de campo. Por três passagens a conferência cobriu **três** — o
 recorte comparado tinha 240 px de altura, e a `lista_jugadores_1` está em y 392
 e os `dorsal1..23` em y 432. A
-[CORR-WTE-057](../../../docs/tasks/CORR-WTE-057.md) abriu os outros dois, e cada
+[CORR-WTE-057](../../../docs/tasks/concluidos/CORR-WTE-057.md) abriu os outros dois, e cada
 um trouxe um erro do port que nada mais pegaria:
 
 | Grupo do critério | Régua | Veredito |
@@ -377,7 +377,7 @@ Três coisas saem daqui:
    Os três medem 0 px de mudança nos dois lados.
 2. **O `iguala_nombres` muda 0 px no port contra 518 no oráculo, e a causa é o
    widgetset.** Medida pela
-   [CORR-WTE-060](../../../docs/tasks/CORR-WTE-060.md) em 2026-08-18: a LCL
+   [CORR-WTE-060](../../../docs/tasks/concluidos/CORR-WTE-060.md) em 2026-08-18: a LCL
    desenha glifo desabilitado aplicando `gdeDisabled`, que é conversão para
    tons de cinza, e pixel com `R = G = B` é ponto fixo dela. O glifo do
    `iguala_nombres` tem três cores — `#000000`, `#FFFFFF` e a transparente —,
@@ -386,7 +386,7 @@ Três coisas saem daqui:
    exatamente o número que ele muda. O `.Enabled := nacional` **roda dos dois
    lados**: o que não aparece é o desenho. Registrado como divergência
    deliberada na
-   [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), com o
+   [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md), com o
    conjunto dos cinco glifos invariantes travado pelo
    [`check_glifos_disabled.py`](../../tools/check_glifos_disabled.py).
 3. **Sete controles ficaram fora da régua**, e estão nomeados no
@@ -400,7 +400,7 @@ Três coisas saem daqui:
 
 **A bandeira e o uniforme 2D (`0x00405270` e `0x004056c8`) passaram a ser
 desenhados aqui na terceira passagem da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md)**, em
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md)**, em
 2026-08-20. Até então este parágrafo dizia que o corpo só acertava a
 visibilidade. São três chamadas, nesta ordem:
 
@@ -439,7 +439,7 @@ diverge — e **não é só de tela**, embora esta linha dissesse isso até
 2026-08-21: o [`jugador.BitBtn3Click`](jugador.BitBtn3Click.md) grava os dez
 bytes de nome a partir do campo da ficha, e o campo mostra o texto da lista. O
 port reproduz o filtro desde a
-[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md), no `NomeFiltrado` do
+[CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md), no `NomeFiltrado` do
 `.aux.inc`. Conferido a cada build pelo `dump_auxiliares.py`, que aborta se as
 tabelas deixarem de ser identidade.
 
@@ -450,7 +450,7 @@ tem pré-somada nos `OFS_*` — o original a resolve em tempo de execução. Ter
 vez que os dois oráculos se encontram no mesmo lugar por caminhos diferentes,
 depois da `OFS_TEAM_BARS` acima e da tabela de offsets que `0x0040cbc8` varre a
 partir de `0x004231a0`, exatamente onde a
-[WTE-TASK-06](../../../docs/tasks/06-mapa-de-offsets.md) a registrou.
+[WTE-TASK-06](../../../docs/tasks/concluidos/06-mapa-de-offsets.md) a registrou.
 
 **O `95` não é o número de times, é o índice do modelo de Master League.** O
 item 95 do combo é `95 Master L. `, o time-modelo que a ML usa ao criar clube;
@@ -475,16 +475,16 @@ nunca precisou dessas cores porque não desenha bandeira; o editor do Obocaman
 precisa, e as lê pela tabela de offsets em `.data`.
 
 **Consertado em 2026-08-22**, pela rota B da
-[CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md): a
+[CORR-WTE-083](../../../docs/tasks/concluidos/CORR-WTE-083.md): a
 `CarregaBandeirasQueOCoreNaoLe` da [`wte_cor`](../../src/wte_cor.pas) preenche,
 depois do `Load` e fora dele, só os slots que o core deixou zerados. Oito dos
 nove alcançáveis passaram a bater em **0 de 3.840** com tolerância zero — o
 nono, o combo 85, ficou com uma diferença que virou a
-[CORR-WTE-084](../../../docs/tasks/CORR-WTE-084.md). E são **sete** CLASSIC,
+[CORR-WTE-084](../../../docs/tasks/concluidos/CORR-WTE-084.md). E são **sete** CLASSIC,
 não oito: o `teams[63]` tem nome vazio e nenhum item do combo o alcança.
 
 **E a diferença do combo 85 era da régua, não da tela.** Medido em 2026-08-23
-pela [CORR-WTE-084](../../../docs/tasks/CORR-WTE-084.md): a bandeira, o `home1`
+pela [CORR-WTE-084](../../../docs/tasks/concluidos/CORR-WTE-084.md): a bandeira, o `home1`
 e o `home2` do `ml_teams[22]` batem em **0 de 9.800 px, tolerância zero**, em
 duas corridas independentes, e as cinco barras batem em `[75, 86, 75, 75, 86]`
 nos dois lados. Os 76 px que apareciam na barra `equipe` do oráculo eram a
@@ -497,7 +497,7 @@ vez de medir trecho contíguo. Onze times fecham hoje em pixel — 0, 2, 56–62
 O texto abaixo é o registro do dia do achado, e continua valendo como
 diagnóstico.
 
-Está na [CORR-WTE-083](../../../docs/tasks/CORR-WTE-083.md), com as duas rotas
+Está na [CORR-WTE-083](../../../docs/tasks/concluidos/CORR-WTE-083.md), com as duas rotas
 possíveis e a recomendação. Era, no dia em que foi escrita, mais uma razão para
 o veredito continuar `aberto` — e a primeira delas que era de dado, não de
 régua: já naquela corrida os times 2 e 0 batiam em pixel nas cinco barras, na
@@ -505,7 +505,7 @@ bandeira e no uniforme.
 
 ## O veredito passou a `implementado` em 2026-08-23
 
-Terceira passagem da [WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md),
+Terceira passagem da [WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md),
 e o que mudou não foi o Pascal: foi a última razão de `aberto` cair. Elas eram
 quatro, e as quatro estão fechadas acima —
 

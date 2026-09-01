@@ -620,7 +620,7 @@ Quatro coisas que custam tempo se descobertas tarde:
   fosse lista de elenco desalinha tudo depois do primeiro nome repetido.
   §1.5 do plano.
 
-Nada de PES2 tem task em `docs/tasks/progresso.md` — o projeto está
+Nada de PES2 tem task em `docs/tasks/concluidos/progresso.md` — o projeto está
 **fora do pool** enquanto for exploratório, e isso é escolha, não
 esquecimento.
 
@@ -715,7 +715,7 @@ que é o que o `.rc` quer dizer.
 sempre), e no port ele não faz nada. Medido em 2026-08-31 e mantido de
 propósito — reproduzir faria uma tecla acidental descartar o não gravado. É
 divergência deliberada registrada
-([CORR-WTE-141](docs/tasks/CORR-WTE-141.md)); não "conserte" isso.
+([CORR-WTE-141](docs/tasks/concluidos/CORR-WTE-141.md)); não "conserte" isso.
 
 **E `DEFPUSHBUTTON` invisível não vira nada.** O `IDOK` do
 `DefaultTacticsDialog` é `NOT WS_VISIBLE` (`ed.rc:627`); no MFC ele continua
@@ -938,6 +938,25 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`
   (`../NOTICE.md`, `../CLAUDE.md`) continua relativo.
 
+**Projeto encerrado é arquivado em `docs/tasks/concluidos/`.** Em 2026-09-01 as
+195 tasks, `CORR-*.md` e os dois arquivos de progresso do ciclo `WTE-TASK` +
+`PAR-TASK` desceram para lá, e `docs/tasks/` ficou só com
+`progresso.template.md` e `correcoes-progresso.template.md` — a base do próximo
+ciclo. Três coisas que decorrem disso, e que já custaram conserto na mudança:
+
+- **A pasta é um conjunto fechado.** Task e progresso viajam juntos, porque o
+  `check_tasks.py` confere cada task contra o `progresso.md` que mora **ao lado
+  dela** — ele varre `docs/tasks/` e cada subpasta que tenha progresso próprio.
+- **Os prompts continuam apontando para `docs/tasks/progresso.md`**, o vivo, que
+  a próxima leva cria do template. Prompt que aponta para o arquivo executa
+  task já feita.
+- **Os `CORR-*.md` são cheios de transcrição** — saída de `grep`, de `git show`,
+  fonte de gerador — e ali `docs/tasks/…` dentro de **bloco de código ou entre
+  crases** é **evidência do que um arquivo dizia**, não link. Reescrever é
+  falsificar a evidência. A varredura da mudança pulou as duas formas de
+  propósito, e a versão ingênua tropeçou nas duas antes disso: sete
+  transcrições em bloco e duas entre crases.
+
 ## Estado do repositório
 
 Fases 1 (higiene), 2 (core portável), 3 (golden tests), 3.5 (nomenclatura do
@@ -1030,7 +1049,7 @@ qualquer coisa que leia esse arquivo, confira antes:
 cmp Debug/defaultlook.txt data/defaultlook.txt
 ```
 
-Detalhe na [CORR-WTE-133](docs/tasks/CORR-WTE-133.md).
+Detalhe na [CORR-WTE-133](docs/tasks/concluidos/CORR-WTE-133.md).
 
 Arquivos `debugio*.txt` / `debugread*.txt` na raiz são dumps de depuração do
 autor, não fixtures de teste.

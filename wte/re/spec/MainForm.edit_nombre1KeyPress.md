@@ -60,7 +60,7 @@ letra, dígito, ponto e espaço.
 **Não há limite de comprimento aqui.** Ele vem do `MaxLength` que o original
 põe no campo ao carregar a imagem, e **o port não põe** — divergência aberta,
 registrada na [spec do `iguala_nombresClick`](MainForm.iguala_nombresClick.md)
-e entrada da [WTE-TASK-36](../../../docs/tasks/36-buffers-e-truncamento.md).
+e entrada da [WTE-TASK-36](../../../docs/tasks/concluidos/36-buffers-e-truncamento.md).
 
 Pascal em
 [`../../src/impl/ep2002_mainform.edit_nombre1KeyPress.inc`](../../src/impl/ep2002_mainform.edit_nombre1KeyPress.inc).

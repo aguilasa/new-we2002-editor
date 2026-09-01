@@ -1,6 +1,6 @@
 # A convenção Borland no Ghidra — o procedimento, para refazer
 
-Produto da [WTE-TASK-24](../../../docs/tasks/24-ghidra-convencao-borland.md).
+Produto da [WTE-TASK-24](../../../docs/tasks/concluidos/24-ghidra-convencao-borland.md).
 
 **Por que isto está escrito.** O projeto do Ghidra é um banco binário local, não
 versionado (`work/ghidra/`, coberto pelo `.gitignore`). Ele **vai** se perder —

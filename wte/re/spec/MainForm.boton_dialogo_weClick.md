@@ -35,7 +35,7 @@ Três coisas, nesta ordem:
 ## Bytes tocados
 
 **Grava na imagem**, e este é o achado que contraria o enunciado da
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md) — ele previa provar
+[WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md) — ele previa provar
 que o grupo de carga não escreve nada.
 
 ```
@@ -135,7 +135,7 @@ ganho declarado: um lugar para corrigir em vez de dois cópia-e-cola.
 **2. E é justamente por isso que este ponto de entrada não tem régua própria, e
 não pode ter.** Sem window manager o gtk2 não dá foco de teclado à janela, então
 o lado port não digita caminho em `TOpenDialog` nenhum
-([WTE-TASK-13](../../../docs/tasks/13-trace-de-eventos.md)); quem carrega no
+([WTE-TASK-13](../../../docs/tasks/concluidos/13-trace-de-eventos.md)); quem carrega no
 gate é o `MainForm.FormShow`, pela linha de comando. O
 [`golden-01-arranque`](../../tests/roteiros/golden-01-arranque.txt) verifica o
 corpo compartilhado, que é onde a injeção e os dois remendos moram — o que não
@@ -143,7 +143,7 @@ verifica é o `Execute` do diálogo, que é o único trecho não comum aos dois.
 
 Chamar isso de `implementado` daria por medido o trecho que nenhum gate alcança;
 chamar de `aberto` afirmaria pergunta onde há decisão. As duas divergências vão
-para a [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md), junto
+para a [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md), junto
 com as do `FormShow`, que é o irmão pelo qual este é coberto.
 
 E a

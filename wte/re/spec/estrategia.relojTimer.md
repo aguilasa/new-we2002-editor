@@ -148,11 +148,11 @@ formulário — no original a animação roda **na abertura**, deslizando as bol
 das posições de projeto até a formação do time —, e como `0x0040a0b4` não tinha
 port, no port este corpo só rodava depois de um clique em `lista_formaciones`.
 
-A [CORR-WTE-082](../../../docs/tasks/CORR-WTE-082.md) portou a `0x0040a0b4` em
+A [CORR-WTE-082](../../../docs/tasks/concluidos/CORR-WTE-082.md) portou a `0x0040a0b4` em
 2026-08-21, como `PreencheTelaDeTatica` na
 [`wte_tatica`](../../src/wte_tatica.pas), e **o caminho de abertura passou a
 rodar**. Medido na terceira passagem da
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md), pelo `trace.log` de
+[WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md), pelo `trace.log` de
 `compara_tela.sh --malha 2 68`: abrir a tela de tática dispara este handler
 **cinco vezes** — os quatro quadros de `QUADROS_DA_ANIMACAO` mais o passo que
 encaixa e desliga o timer. É exatamente a contagem que a seção Saída prevê, e

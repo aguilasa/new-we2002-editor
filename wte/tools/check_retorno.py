@@ -3,7 +3,7 @@
 tabulacao dos dois lados.
 
 Gera `wte/re/retorno.md` e `wte/re/retorno.tsv` — produto da
-[WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md).
+[WTE-TASK-37](../../docs/tasks/concluidos/37-reconferencia-de-ui.md).
 
 ## O risco que ele mede, e por que ele nao e hipotetico
 

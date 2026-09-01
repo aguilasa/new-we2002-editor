@@ -48,7 +48,7 @@ casilla_xmlibres.Caption := IntToStr(WORD[0x004335c0])
 **Grava vinte e três vezes**, uma por slot, dentro da `0x00404820` — os mesmos
 bytes que o [`paderechaClick`](MainForm.paderechaClick.md) grava uma vez.
 Offset por ramo é da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido
 
@@ -81,7 +81,7 @@ com código `>= 0`, é o que mostra que este corpo não é aquele num laço.
 ## Notas
 
 **A tela de confirmação é deste botão, e não do `paderechaeizquierdaClick`.** O
-enunciado da [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md)
+enunciado da [WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md)
 atribuía o `ficha_movertodos` àquele handler ("a novidade da v0.98 — mover todos
 os jogadores de cada time com um clique"). Medido, é este par de botões que a
 abre: o global `0x00432e48` que os dois corpos carregam é o
@@ -103,11 +103,11 @@ ordem seria escolher por gosto onde há medição.
 faz tudo, gravação inclusive.
 
 Fechado em 2026-08-20 pela oitava passagem da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md): o ramo de
 **destino de Master League** da `0x00404820` foi portado, com golden verde
 ([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
 contador de blocos livres vindo da
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md). Com ele a
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md). Com ele a
 recusa `-1` passou a ser alcançável e o `casilla_xmlibres` mostra o número de
 verdade.
 

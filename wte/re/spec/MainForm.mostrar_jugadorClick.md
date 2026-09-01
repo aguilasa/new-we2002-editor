@@ -43,7 +43,7 @@ O `ficha_enlaza` também é alcançado — é o diálogo de confirmação de ví
 que aparece quando o jogador escolhido é de clube de Master League.
 
 > **Duas linhas desta lista estavam erradas, e a
-> [WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) as corrigiu ao
+> [WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md) as corrigiu ao
 > ler as rotinas.** Elas diziam "não lida" e "enche a ficha", escritas na
 > décima passagem da WTE-TASK-25 a partir do que o handler *parecia* precisar.
 > Medido:
@@ -105,16 +105,16 @@ Não trata.
 a WTE-TASK-25 deve é *abrir a ficha* — escolher o par de listas certo pelo
 `Sender.Name`, guardar a seleção e mostrar o formulário. **Encher a ficha**
 (`0x00404820` e `0x0040756c`, 2.734 bytes) é editar jogador, e isso é a
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md), dona do formulário
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md), dona do formulário
 `jugador`.
 
 A divisão foi decidida em 2026-08-11 e está no enunciado da
-[WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md). Sem ela, o critério
+[WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md). Sem ela, o critério
 "remover o andaime `--show` com a navegação real no lugar" arrastaria 2,7 KB de
 disassembly de outra fase.
 
 **Veredito `aberto`, e a razão mudou em 2026-08-23** — terceira passagem da
-[WTE-TASK-31](../../../docs/tasks/31-fechamento-fase-4.md). O Pascal da
+[WTE-TASK-31](../../../docs/tasks/concluidos/31-fechamento-fase-4.md). O Pascal da
 navegação está escrito em
 [`../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc`](../../src/impl/ep2002_mainform.mostrar_jugadorClick.inc);
 a ficha **deixou de abrir vazia** na décima segunda passagem da 26, que portou
@@ -122,14 +122,14 @@ o `0x0040756c`.
 
 O que mantinha o veredito era a `0x00404820`, e **ela está portada** — as duas
 metades, na [`wte_ficha`](../../src/wte_ficha.pas): o destino de seleção chegou
-na [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) em 2026-08-19
+na [WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md) em 2026-08-19
 e a metade de Master League depois dela, quando a
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) entregou o vetor
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md) entregou o vetor
 de ocupação que o ramo precisa.
 
 **O que sobra é um ramo, e ele está nomeado.** Metade deste handler **está**
 verificada por byte desde sempre, e a
-[CORR-WTE-089](../../../docs/tasks/CORR-WTE-089.md) mediu a evidência em
+[CORR-WTE-089](../../../docs/tasks/concluidos/CORR-WTE-089.md) mediu a evidência em
 [`../fase-4-cobertura.tsv`](../fase-4-cobertura.tsv):
 
 | Roteiro | Disparos | Por qual botão |
@@ -140,7 +140,7 @@ O gate está verde nos três modos, e o que ele julga depende deste handler: se 
 par de listas escolhido fosse o errado, o `Comple.` gravaria outro jogador.
 
 **E o ramo do reserva ganhou régua em 2026-08-24**, pela
-[CORR-WTE-092](../../../docs/tasks/CORR-WTE-092.md): o
+[CORR-WTE-092](../../../docs/tasks/concluidos/CORR-WTE-092.md): o
 [`golden-20-ficha-reserva`](../../tests/roteiros/golden-20-ficha-reserva.txt)
 entra pelo `mostrar_jugador_2` (492,402), depois de mexer no combo do reserva —
 sem isso o botão nasce desabilitado e o clique não produziria evento nenhum.

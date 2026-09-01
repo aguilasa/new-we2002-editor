@@ -62,7 +62,7 @@ nome em `[vmt - 0x2c]` e ler o slot: `TComboBox +0xc8` é
 **Grava**, e a gravação não está neste corpo: está dentro da `0x00404820`, que
 escreve 10 bytes de nome, 12 de atributos e o byte condicional no destino, mais
 o número de camisa quando o slot é o 48. Que offset exatamente, por ramo, é o
-que a [WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) precisa
+que a [WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md) precisa
 medir — é lá que existe gate por byte.
 
 **Evidência:** disassembly lido
@@ -99,7 +99,7 @@ o formulário sobe como modal.
 O `-2` é a comparação de identidade descrita abaixo. O `-1` sai do ramo em que
 o destino é um slot de clube de ML que ainda não tem bloco próprio e
 `WORD[0x004335c0]` vale zero — é a
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md) aparecendo por
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md) aparecendo por
 dentro deste lote.
 
 **Evidência:** disassembly lido
@@ -110,7 +110,7 @@ dentro deste lote.
 
 `0x004335ec` guarda registros de 44 bytes. O argumento `1`/`2` que este corpo
 passa **não é modo de operação** — a sexta passagem da
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md) leu assim e estava
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md) leu assim e estava
 errado. É índice de buffer, e o buffer acompanha o **lado da tela**: 1 é o
 esquerdo, 2 é o direito, 0 é o destino que a rotina de gravação prepara para si.
 As duas chamadas a `0x004046e8` são **leituras**: a primeira carrega a origem,
@@ -164,7 +164,7 @@ depois do 55. Medido na cópia da ROM europeia, os 64 bytes em `0x2ecc0c` e em
 `0x2ece0c` são **diferentes**. Um dos dois está errado sobre o formato, e o
 `we2002_core` é o que já é byte-idêntico ao `ed.exe`.
 
-Isso é pergunta da [WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md), e
+Isso é pergunta da [WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md), e
 está anotado como pergunta. Nesta task nada lê o valor: o port enche o campo a
 partir do `cost` do modelo — mesmo papel, mesma largura, mesma ausência — e
 quem levar isso à imagem tem de responder antes.
@@ -179,11 +179,11 @@ e a gravação fechou em duas metades. A primeira, **destino de seleção**, em
 **destino de Master League**, em 2026-08-20.
 
 Fechado em 2026-08-20 pela oitava passagem da
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md): o ramo de
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md): o ramo de
 **destino de Master League** da `0x00404820` foi portado, com golden verde
 ([`golden-10-mover-ml`](../../tests/roteiros/golden-10-mover-ml.txt)) e o
 contador de blocos livres vindo da
-[WTE-TASK-33](../../../docs/tasks/33-slots-de-master-league.md). Com ele a
+[WTE-TASK-33](../../../docs/tasks/concluidos/33-slots-de-master-league.md). Com ele a
 recusa `-1` passou a ser alcançável e o `casilla_xmlibres` mostra o número de
 verdade.
 
@@ -206,7 +206,7 @@ o `golden-10-mover-ml` exercita: medido, o oráculo escreve exatamente 2 bytes,
 em `2012734..2012735`.
 
 **Divergências deliberadas do port**
-([WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md)):
+([WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md)):
 
 1. sai sem fazer nada se qualquer um dos quatro `ItemIndex` for negativo;
 2. no caminho de `0x00404d73` o original decrementa

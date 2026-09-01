@@ -2,7 +2,7 @@
 """Os formularios com a logica ligada: alcance, tamanho e cor de fundo real.
 
 Gera `wte/re/carregado.md` e `wte/re/carregado.tsv` — produto da
-[WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md), a reconferencia de
+[WTE-TASK-37](../../docs/tasks/concluidos/37-reconferencia-de-ui.md), a reconferencia de
 UI que a WTE-TASK-12 nao podia fazer: ela olhou os 18 VAZIOS, com o andaime
 `--show` que a WTE-TASK-25 removeu depois.
 
@@ -375,7 +375,7 @@ def render(linhas: list[dict]) -> tuple[str, str]:
         "",
         "Quantos `TStaticText` do formulário têm, no retângulo deles, a **mesma "
         "cor dominante** do formulário inteiro. É a releitura do achado 4 da "
-        "[WTE-TASK-12](../../docs/tasks/12-comparacao-visual.md) com o fundo "
+        "[WTE-TASK-12](../../docs/tasks/concluidos/12-comparacao-visual.md) com o fundo "
         "de execução por baixo: os que declaram `Color` próprio ficam **fora** "
         "dessa conta nos dois lados — é o que se espera, e é o que faz a "
         "medida valer alguma coisa —, e os que herdam a cor do pai entram nela "

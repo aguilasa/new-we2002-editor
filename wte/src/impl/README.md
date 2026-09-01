@@ -1,6 +1,6 @@
 # `src/impl/` — os corpos de handler escritos à mão
 
-Da [WTE-TASK-25](../../../docs/tasks/25-handlers-de-carga.md) em diante. É o
+Da [WTE-TASK-25](../../../docs/tasks/concluidos/25-handlers-de-carga.md) em diante. É o
 **único** conteúdo escrito à mão que entra nas 18 unidades `ep2002_*.pas`.
 
 O problema que esta pasta resolve: os `ep2002_*.pas` são saída do
@@ -48,7 +48,7 @@ Duas diferenças para o `.inc` de handler, e as duas têm razão:
 As linhas dele contam como escritas à mão no `check_fase2.py`, junto com os
 demais `.inc`. Sem isso a fração da §4.4 do plano **subiria** a cada auxiliar
 escrito, que é o defeito da
-[CORR-WTE-051](../../../docs/tasks/CORR-WTE-051.md).
+[CORR-WTE-051](../../../docs/tasks/concluidos/CORR-WTE-051.md).
 
 Alternativa descartada: unidade `we2002_*` nova. Esse prefixo é a camada de
 dados gerada, e auxiliar que mexe em controle de formulário não é dado.

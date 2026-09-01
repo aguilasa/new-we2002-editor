@@ -66,7 +66,7 @@ faixa (32 ou 99, conforme a família do time) é o
 [`dorsalClick`](MainForm.dorsalClick.md), pela barra de rolagem da janelinha —
 que é outro caminho de edição do mesmo dado. Se o campo da ficha aceita o que
 a janelinha recusa, isso é comportamento do original e entra na
-[WTE-TASK-36](../../../docs/tasks/36-buffers-e-truncamento.md) como borda a
+[WTE-TASK-36](../../../docs/tasks/concluidos/36-buffers-e-truncamento.md) como borda a
 medir, não como defeito a consertar.
 
 **A condição do `SetFocus` está medida, e ela não é sobre foco — é sobre o dado
@@ -109,7 +109,7 @@ Esta seção dizia *"a régua de tela do grupo de edição
 (`compara_tela.sh --edicao`) não alcança a ficha do jogador"*, e continua
 verdadeira — mas era a régua errada para julgar este handler. Ele filtra tecla
 num campo cujo valor **vira byte na imagem**, então quem o julga é o gate de
-byte, e a [CORR-WTE-091](../../../docs/tasks/CORR-WTE-091.md) o construiu.
+byte, e a [CORR-WTE-091](../../../docs/tasks/concluidos/CORR-WTE-091.md) o construiu.
 
 O [`golden-18-ficha-edicao`](../../tests/roteiros/golden-18-ficha-edicao.txt)
 limpa o campo com `End`/`shift+Home`/`BackSpace` — nunca `Ctrl+A`, que num
@@ -124,12 +124,12 @@ implícito na sequência de limpeza.
 
 O ramo que continua sem exercício é o do `50`, e ele tem dono: é o valor que a
 ficha mostra quando o jogador não tem o byte condicional, e preço é assunto da
-[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md).
+[WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md).
 
 ### O registro de quando o veredito era `aberto`
 
 O `50` do ramo sem campo é entrada da
-[WTE-TASK-32](../../../docs/tasks/32-preco-do-jogador.md): é o valor que a
+[WTE-TASK-32](../../../docs/tasks/concluidos/32-preco-do-jogador.md): é o valor que a
 ficha mostra quando o jogador não tem o byte, e preço é o assunto dela.
 
 Pascal em

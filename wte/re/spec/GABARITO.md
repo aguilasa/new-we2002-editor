@@ -1,6 +1,6 @@
 # Gabarito de `re/spec/<formulario>.<handler>.md`
 
-Produto da [WTE-TASK-23](../../../docs/tasks/23-formato-da-spec.md). É o gabarito que
+Produto da [WTE-TASK-23](../../../docs/tasks/concluidos/23-formato-da-spec.md). É o gabarito que
 torna executável o método da §2 do
 [`PLAN-WTE-LAZARUS.md`](../../../docs/PLAN-WTE-LAZARUS.md): **recuperação de
 especificação, não transcrição.** O decompilador responde *perguntas*; a
@@ -103,7 +103,7 @@ de *fórmula*.
 |---|---|
 | `implementado` | spec escrita, Pascal escrito, **a régua da task do handler verde** |
 | `trivial` | só habilita/desabilita controle; **não toca a imagem** |
-| `divergencia deliberada` | o port faz diferente, de propósito, e está registrado na [WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) |
+| `divergencia deliberada` | o port faz diferente, de propósito, e está registrado na [WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md) |
 | `nao portado` | fora de escopo, **com justificativa escrita** |
 | `aberto` | ainda não estudado |
 
@@ -115,7 +115,7 @@ assim mesmo) para não haver duas grafias do mesmo veredito.
 `implementado` dizia **golden verde**, e isso estava certo enquanto todo grupo
 tivesse como gravar. O grupo de edição não tem: ele muda estado em memória, e
 quem leva esse estado ao disco é a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md), que
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md), que
 `depends_on` a 26. Com a definição antiga, **nenhum handler de edição poderia
 ser `implementado`** — nem os já conferidos —, e o veredito passaria a medir a
 ordem das tasks em vez do estado do handler.
@@ -124,9 +124,9 @@ Decisão do usuário, 2026-08-12 (ver o enunciado das duas tasks):
 
 | grupo | régua que fecha o handler | ferramenta |
 |---|---|---|
-| carga ([25](../../../docs/tasks/25-handlers-de-carga.md)) | tela + estado interno contra o `we2002_core` | `compara_tela.sh` |
-| **edição ([26](../../../docs/tasks/26-handlers-de-edicao.md))** | **tela, depois de editar** | `compara_tela.sh --edicao` |
-| gravação ([27](../../../docs/tasks/27-handlers-de-gravacao.md)) | **byte** — e é lá que a edição volta a ser julgada, com uma edição de tela antes de cada gravação | `golden_check.sh` |
+| carga ([25](../../../docs/tasks/concluidos/25-handlers-de-carga.md)) | tela + estado interno contra o `we2002_core` | `compara_tela.sh` |
+| **edição ([26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md))** | **tela, depois de editar** | `compara_tela.sh --edicao` |
+| gravação ([27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md)) | **byte** — e é lá que a edição volta a ser julgada, com uma edição de tela antes de cada gravação | `golden_check.sh` |
 
 **Isso não afrouxa o critério, muda de dono.** A metade por byte não sumiu: é
 linha de critério de conclusão da 27. O que não pode acontecer é ela sumir sem

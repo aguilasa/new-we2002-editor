@@ -54,7 +54,7 @@ Não trata.
 
 ## O veredito passou a `implementado` em 2026-08-24
 
-A [CORR-WTE-091](../../../docs/tasks/CORR-WTE-091.md) fez as duas coisas que
+A [CORR-WTE-091](../../../docs/tasks/concluidos/CORR-WTE-091.md) fez as duas coisas que
 faltavam: desceu a `PreencheFicha` para a [`wte_ficha`](../../src/wte_ficha.pas)
 — a unidade neutra que nenhum dos dois formulários possui — e escreveu o corpo,
 que virou o que o original tem: uma chamada.
@@ -99,7 +99,7 @@ de handler — abrir isso dentro de uma task de moldura de diálogo é o oposto 
 *"fechar um lote por inteiro"*.
 
 **A unidade neutra existe desde 2026-08-21, e o que falta aqui encolheu.** A
-[CORR-WTE-081](../../../docs/tasks/CORR-WTE-081.md) criou a
+[CORR-WTE-081](../../../docs/tasks/concluidos/CORR-WTE-081.md) criou a
 [`wte_ficha`](../../src/wte_ficha.pas) para o
 [`BitBtn3`](jugador.BitBtn3Click.md) e desceu para lá o buffer de jogador
 inteiro, com `GravaJogador` e `GravaNumeroDaCamisa`; o `ep2002_jugador` já a

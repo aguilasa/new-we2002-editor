@@ -2,7 +2,7 @@
 """Inventario dos campos de tamanho fixo, e as duas fontes conciliadas.
 
 Gera `wte/re/buffers.md` e `wte/re/buffers.tsv` -- produto da
-[WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md).
+[WTE-TASK-36](../../docs/tasks/concluidos/36-buffers-e-truncamento.md).
 
     python3 wte/tools/dump_buffers.py           # regera as duas saidas
     python3 wte/tools/dump_buffers.py --check   # o que `make -C wte check` roda
@@ -413,7 +413,7 @@ def md(m: dict) -> str:
     a(f"python3 {GERADOR} --check   # o que `make -C wte check` roda")
     a("```")
     a("")
-    a("Produto da [WTE-TASK-36](../../docs/tasks/36-buffers-e-truncamento.md).")
+    a("Produto da [WTE-TASK-36](../../docs/tasks/concluidos/36-buffers-e-truncamento.md).")
     a("**Todo número daqui saiu do script.**")
     a("")
     a("## As duas fontes, conciliadas")

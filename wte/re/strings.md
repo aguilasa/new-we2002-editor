@@ -1,6 +1,6 @@
 # `re/strings.md` — as strings de `.data`, e quem as usa
 
-Produto da [WTE-TASK-05](../../docs/tasks/05-inventario-de-strings.md). Gerado por
+Produto da [WTE-TASK-05](../../docs/tasks/concluidos/05-inventario-de-strings.md). Gerado por
 [`../tools/dump_strings.py`](../tools/dump_strings.py), a partir de
 `we-team-editor/we-team-editor.exe` e de
 [`published_methods.tsv`](published_methods.tsv).
@@ -292,7 +292,7 @@ são idênticas à viva: o texto difere, e é disso que sai a seção seguinte.
 
 É o que a §8.8 do plano dava como perdido — "conseguir o binário original em
 espanhol resolveria isso". Em parte, não é preciso: o próprio arquivo carrega
-outra versão do mesmo texto, e a §8.8 passou a dizer isso ([CORR-WTE-009](../../docs/tasks/CORR-WTE-009.md)).
+outra versão do mesmo texto, e a §8.8 passou a dizer isso ([CORR-WTE-009](../../docs/tasks/concluidos/CORR-WTE-009.md)).
 
 **`0x00424ac0`** — viva, `jugador.BitBtn3Click`:
 
@@ -364,7 +364,7 @@ veio primeiro não sai daqui.
 Tudo abaixo é contagem do script contra texto já escrito.
 
 A coluna **Diz** cita o texto como ele estava quando esta página foi medida. A
-[CORR-WTE-009](../../docs/tasks/CORR-WTE-009.md) já levou a última linha à §8.8 e à
+[CORR-WTE-009](../../docs/tasks/concluidos/CORR-WTE-009.md) já levou a última linha à §8.8 e à
 lista de pendências do `progresso.md`, então aquela citação é registro do que foi
 corrigido, não do que se lê lá hoje. As duas primeiras seguem de pé — o `70`
 contra `13` é da WTE-TASK-09, que tem a reconciliação no critério.

@@ -1038,7 +1038,7 @@ def render_md(m: Measurement) -> str:
     w("# `re/unidades-vcl.md` — `Registry`, `Printers`, `Comobj` e "
       "`Winhelpviewer`")
     w("")
-    w("Produto da [WTE-TASK-07](../../docs/tasks/07-unidades-duvidosas.md). "
+    w("Produto da [WTE-TASK-07](../../docs/tasks/concluidos/07-unidades-duvidosas.md). "
       "Gerado por")
     w(f"[`../tools/dump_units.py`](../tools/dump_units.py), a partir de")
     w(f"`{REL_EXE}`, de")

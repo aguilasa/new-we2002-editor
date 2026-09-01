@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compara a tela do oraculo com a do port depois de carregar um time.
 
-Da [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), criterio "tela
+Da [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), criterio "tela
 conferida contra o original para pelo menos 3 times distintos". Quem dirige os
 dois lados e [`compara_tela.sh`](compara_tela.sh); este arquivo **mede**.
 
@@ -28,7 +28,7 @@ Entao a divisao e esta, e ela e deliberada:
 
 ## O criterio enumera cinco grupos, e o recorte medido cobre dois
 
-A [CORR-WTE-057](../../docs/tasks/CORR-WTE-057.md) achou o buraco: o recorte de
+A [CORR-WTE-057](../../docs/tasks/concluidos/CORR-WTE-057.md) achou o buraco: o recorte de
 520x240 termina em y 240, e a `lista_jugadores_1` esta em y 392 e os
 `dorsal1..23` em y 432. Tres passagens marcaram o criterio `[x]` sem que os dois
 grupos tivessem sido olhados uma vez. A montagem passou a sair da janela

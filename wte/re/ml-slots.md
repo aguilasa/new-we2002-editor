@@ -174,7 +174,7 @@ acrescenta e o SIGNIFICADO da segunda: sao os dois bytes de um par
 de vinculo, e trocar `(102, 23)` por `(0, 27)` custa um bloco
 livre.
 **Quem escreve fechou em 2026-08-20**, na oitava passagem da
-[WTE-TASK-27](../../docs/tasks/27-handlers-de-gravacao.md):
+[WTE-TASK-27](../../docs/tasks/concluidos/27-handlers-de-gravacao.md):
 `0x0040c19e` no `boton_dialogo_weClick` e `0x00411616` no
 `FormShow`, com o endereco IMEDIATO no `.text` (`push 0x1eb738`).
 E por isso que procurar por `OFS_LINK_ML` nunca os achou -- a unica
@@ -194,4 +194,4 @@ daqui. Ele reproduz a conta, **e nao reproduz o estouro**: o indice
 fora de `0..461` e contado num dicionario a parte, entao o
 numero na tela e o mesmo do original e nenhuma variavel vizinha e
 atingida. Divergencia deliberada, para a
-[WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md).
+[WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md).

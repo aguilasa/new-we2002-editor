@@ -114,9 +114,9 @@ controles de faixa maior que 8. O gerador **aborta** se isso deixar de valer.
 ### O veredito passou a `divergencia deliberada` em 2026-08-24
 
 **A decisão que ele esperava foi tomada em 2026-08-18, e o veredito não
-acompanhou.** A [CORR-WTE-063](../../../docs/tasks/CORR-WTE-063.md) levou as
+acompanhou.** A [CORR-WTE-063](../../../docs/tasks/concluidos/CORR-WTE-063.md) levou as
 três carregadoras de bitmap para a
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) como
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md) como
 **exclusão deliberada** — elas abrem o `.bmp` em `"r+b"` e regravam a paleta
 dentro do arquivo de asset compartilhado, e reproduzir isso poria o port
 gravando na pasta de dados do usuário toda vez que alguém encostasse numa seta.
@@ -133,19 +133,19 @@ valendo inteiro como descrição da exclusão.
 ### O que segurava o veredito
 
 Não é a régua de bytes — este handler não grava na imagem, e a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md) não o alcança.
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md) não o alcança.
 É a **metade dos bitmaps**: o segundo despachante está portado como estrutura,
 mas as três carregadoras (`0x00406fe0`, 301 B; `0x00407110`, 552 B;
 `0x00407338`, 561 B — 1.414 somados) ficaram fora da
-[WTE-TASK-26](../../../docs/tasks/26-handlers-de-edicao.md), que é dona de
+[WTE-TASK-26](../../../docs/tasks/concluidos/26-handlers-de-edicao.md), que é dona de
 handler, e fora da
-[WTE-TASK-29](../../../docs/tasks/29-camisa-e-bandeira-2d.md), que é dona de
+[WTE-TASK-29](../../../docs/tasks/concluidos/29-camisa-e-bandeira-2d.md), que é dona de
 asset mas dos dois do `MainForm` — uniforme e bandeira.
 
 **Elas têm dono desde 2026-08-18, e o dono é uma decisão, não uma
 implementação.** A
-[CORR-WTE-063](../../../docs/tasks/CORR-WTE-063.md) levou as três para a
-[WTE-TASK-35](../../../docs/tasks/35-divergencias-deliberadas.md) como
+[CORR-WTE-063](../../../docs/tasks/concluidos/CORR-WTE-063.md) levou as três para a
+[WTE-TASK-35](../../../docs/tasks/concluidos/35-divergencias-deliberadas.md) como
 **exclusão deliberada**: não serão portadas. A razão é a mesma medida da
 [§6 de `assets.md`](../assets.md) — as três abrem o `.bmp` em `"r+b"` e
 regravam a paleta dentro do arquivo de asset compartilhado —, e reproduzir isso
@@ -172,11 +172,11 @@ no disco. Já registrado na §5.1 da [`assets.md`](../assets.md); aparece aqui
 porque é este handler que fecha o ciclo.
 
 **Não é da WTE-TASK-29, e deixou de poder ser.** A
-[CORR-WTE-063](../../../docs/tasks/CORR-WTE-063.md) tirou cara, cabelo e barba
+[CORR-WTE-063](../../../docs/tasks/concluidos/CORR-WTE-063.md) tirou cara, cabelo e barba
 do escopo dela — a 29 continua sendo dona de uniforme e bandeira do `MainForm`
 e não ganha nada da ficha. A saturação, porém, **não morre com o desenho**: ela
 acontece no `TUpDown`, que o port já tem, e o 7 que vira 6 chega ao disco pela
 gravação. O dono é a
-[WTE-TASK-27](../../../docs/tasks/27-handlers-de-gravacao.md).
+[WTE-TASK-27](../../../docs/tasks/concluidos/27-handlers-de-gravacao.md).
 
 **Evidência:** disassembly lido

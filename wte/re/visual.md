@@ -10,7 +10,7 @@ Capturas em [`visual/lazarus/`](visual/lazarus) (18) e
 válidas; o que não existe mais é a maneira de refazer as 18 de uma vez.** Elas
 saíram do `wte/tools/capture_forms.sh`, que dependia do andaime `--show` do
 `wtemain.pas`, e a
-[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) removeu os dois ao pôr
+[WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) removeu os dois ao pôr
 navegação de verdade no lugar do andaime — o `--show` tinha dono e prazo desde
 que nasceu.
 
@@ -18,7 +18,7 @@ Quem dirige o app hoje é o
 [`compara_tela.sh`](../tools/compara_tela.sh), que leva os dois lados ao
 mesmo time e captura a janela inteira; ele alcança o `MainForm`, não os 18. Os
 outros formulários voltam a ser capturáveis quando a navegação chegar a eles,
-que é a [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) — a
+que é a [WTE-TASK-37](../../docs/tasks/concluidos/37-reconferencia-de-ui.md) — a
 reconferência da UI com a lógica ligada.
 
 ---
@@ -79,7 +79,7 @@ distinguir.** Instalar outro runner é decisão do usuário.
 **Consequência, e era grave:** quase toda operação do editor começa por
 escolher um time. Enquanto isto não se resolveu, o oráculo A não executou nem
 os 14 formulários desta task nem a maior parte da bateria golden. Entregue à
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md).
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md).
 
 **Resolvido em 2026-08-10 pela CORR-WTE-044, e o que resolveu foi a imagem:**
 com `roms/japanese-shift-jis.bin` o mesmo roteiro de troca de time dá **zero**
@@ -139,12 +139,12 @@ tem 474.784.128 e a japonesa, 307.187.664. Ou seja, o caminho que grava é o
 caminho normal.
 
 **Tudo acima é a europeia.** Na japonesa — a que a
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md) fixa no gate — os mesmos
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md) fixa no gate — os mesmos
 11.952 bytes aparecem, recortados pelos limites de setor em sete faixas, mais
 3 bytes que a europeia não tem. A conta por faixa está na seção 2 daquela task.
 
 **Isto muda o desenho do golden test**, e vai para a
-[WTE-TASK-22](../../docs/tasks/22-harness-golden.md): *original contra original*
+[WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md): *original contra original*
 continua dando zero (os dois lados gravam os mesmos 11.952 bytes), mas
 *original contra imagem intocada* **não** dá — e o port terá de reproduzir
 esses bytes ou o harness terá de declarar a faixa, como o `newWe2002` faz com
@@ -184,7 +184,7 @@ WTE-TASK-04:
 a tabela estática. Que seja o `FormCreate` a escrever `Color` é a hipótese mais
 econômica — é o único handler que roda antes de a janela aparecer —, **não** um
 fato medido. O disassembly desses endereços é da
-[WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md).
+[WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md).
 
 > **Resolvido em 2026-08-11 pela WTE-TASK-25, e a hipótese estava certa nos dois
 > sentidos — inclusive no de ser piso.** O
@@ -238,7 +238,7 @@ No original o `TStaticText` é usado como widget clicável, não como rótulo.
 
 ## Achado 5 — os 118 blobs aparecem
 
-Critério herdado da [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md),
+Critério herdado da [WTE-TASK-10](../../docs/tasks/concluidos/10-conversor-dfm-para-lfm.md),
 que provou a preservação byte a byte e não podia provar a exibição.
 
 Os 118 se dividem em 18 `Icon.Data`, 59 `Glyph.Data` e 41 `Picture.Data`, e os
@@ -362,12 +362,12 @@ voltar como "achado" na fase 6.
 
 | Achado | Para quem |
 |---|---|
-| 1 — o oráculo quebra ao selecionar time | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md), **bloqueante** |
-| 2 — aceitar o aviso grava 11.952 bytes | [WTE-TASK-22](../../docs/tasks/22-harness-golden.md) e [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
-| 3 — cor de fundo em runtime | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
+| 1 — o oráculo quebra ao selecionar time | [WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md), **bloqueante** |
+| 2 — aceitar o aviso grava 11.952 bytes | [WTE-TASK-22](../../docs/tasks/concluidos/22-harness-golden.md) e [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) |
+| 3 — cor de fundo em runtime | [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) |
 | 4 — 25 dos 37 `TStaticText` são clicáveis | fase 4 |
-| 5 — contagem fina de blob sobrepostos | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md) |
-| as 14 capturas do original | [WTE-TASK-37](../../docs/tasks/37-reconferencia-de-ui.md), **se** o achado 1 se resolver |
+| 5 — contagem fina de blob sobrepostos | [WTE-TASK-37](../../docs/tasks/concluidos/37-reconferencia-de-ui.md) |
+| as 14 capturas do original | [WTE-TASK-37](../../docs/tasks/concluidos/37-reconferencia-de-ui.md), **se** o achado 1 se resolver |
 
 
 ---
@@ -450,7 +450,7 @@ batem, e por isso a medida da primeira passada, restrita a eles, fechou verde.
 [`../tools/dfm2lfm.py`](../tools/dfm2lfm.py) deve emitir `Transparent = False`
 para `TLabel` que declare `Color` e não declare `Transparent` — propriedade
 sintetizada, com a razão escrita, que é o que um conversor existe para fazer.
-Volta para a [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md), e o
+Volta para a [WTE-TASK-10](../../docs/tasks/concluidos/10-conversor-dfm-para-lfm.md), e o
 critério de aceite já é mecânico: `rotulos_divergentes` zerado em
 [`carregado.tsv`](carregado.tsv) depois de refazer as capturas.
 
@@ -491,10 +491,10 @@ de aceite; o corpo sai do disassembly de `0x0040adec`.
 O do `ficha_warning` é consequência de uma decisão já tomada e não registrada: o
 port aplica os dois remendos de arranque **sem perguntar**, e é por isso que a
 gravação bate byte a byte. O do `ficha_enlaza` é o que a
-[WTE-TASK-30](../../docs/tasks/30-handlers-auxiliares.md) deixou escrito por
+[WTE-TASK-30](../../docs/tasks/concluidos/30-handlers-auxiliares.md) deixou escrito por
 medir — *"qual condição faz o `mostrar_jugadorClick` abrir o modal"*.
 
-Os dois vão para a [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md):
+Os dois vão para a [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md):
 o primeiro como divergência deliberada a registrar, o segundo como rota ainda
 não portada.
 
@@ -511,8 +511,8 @@ não portada.
 A causa está na camada de dados, não na tela: `NomeDoTime` cai em
 `Jogo.ml_default` para índice ≥ 95, e o `dump_estado` mostra
 `ml_default.names[0] = 20:` — **vazio**. O oráculo lê alguma coisa ali e o port
-não. Volta para a [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md), com
-a [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) do lado: o que
+não. Volta para a [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md), com
+a [WTE-TASK-19](../../docs/tasks/concluidos/19-os-50-offsets-restantes.md) do lado: o que
 falta é o offset do nome do modelo de ML, não o caminho de tela.
 
 ## Achado 10 — as listas de jogador do painel perdem o número na frente
@@ -526,7 +526,7 @@ falta é o offset do nome do modelo de ML, não o caminho de tela.
 
 Duas diferenças numa linha só: o **prefixo de número** e a **caixa da letra**.
 O `PreencheJogadores` do port monta o item com `NomeFiltrado` e nada mais. Volta
-para a [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) — é a rotina
+para a [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) — é a rotina
 `0x0040b2d8`, a mesma cuja tabela de filtro a CORR-WTE-081 já ajustou.
 
 ## Achado 11 — `TStaticText` desabilitado pinta fundo próprio no GTK2
@@ -617,10 +617,10 @@ plausível e errado.
 
 | Achado | Para quem |
 |---|---|
-| 6 — 151 `TLabel` com `Color` não pintam (68 divergentes) | [WTE-TASK-10](../../docs/tasks/10-conversor-dfm-para-lfm.md) — `Transparent = False` no gerador |
+| 6 — 151 `TLabel` com `Color` não pintam (68 divergentes) | [WTE-TASK-10](../../docs/tasks/concluidos/10-conversor-dfm-para-lfm.md) — `Transparent = False` no gerador |
 | 7 — combos de radar vazios; decisão **implementar** | corpo de `estrategia.ComboBoxDrawItem`, do disassembly |
-| 8 — `ficha_warning` e `ficha_enlaza` sem chamador | [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) |
-| 9 — nomes vazios no modelo de ML | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) e [WTE-TASK-19](../../docs/tasks/19-os-50-offsets-restantes.md) |
-| 10 — prefixo de número nas listas de jogador | [WTE-TASK-25](../../docs/tasks/25-handlers-de-carga.md) |
-| 11 — `TStaticText` desabilitado (1 de 37) | [WTE-TASK-35](../../docs/tasks/35-divergencias-deliberadas.md) |
+| 8 — `ficha_warning` e `ficha_enlaza` sem chamador | [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md) |
+| 9 — nomes vazios no modelo de ML | [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) e [WTE-TASK-19](../../docs/tasks/concluidos/19-os-50-offsets-restantes.md) |
+| 10 — prefixo de número nas listas de jogador | [WTE-TASK-25](../../docs/tasks/concluidos/25-handlers-de-carga.md) |
+| 11 — `TStaticText` desabilitado (1 de 37) | [WTE-TASK-35](../../docs/tasks/concluidos/35-divergencias-deliberadas.md) |
 | 12 e 13 | nada — são resultado |
