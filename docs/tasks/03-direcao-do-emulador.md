@@ -77,6 +77,25 @@ O que entra é o script que o cria e o caminho de onde ele mora.
 
 ---
 
+### Quem está esperando: a PES2-TASK-28 parou aqui
+
+Em 2026-09-01 a [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md)
+fechou tudo o que não precisa de emulador — o conjunto de cópias varrido, a
+recusa, a fonte localizada, o round-trip byte a byte — e **ficou parada nos
+dois itens de tela**. Ela precisa de duas coisas deste roteiro, e vale
+tê-las em mente ao escolher as telas:
+
+- **A tela de apresentação**, a que desenha o nome do time a partir do
+  `T_NAME`. É onde o nome novo tem de aparecer, e não é a mesma tela de
+  seleção de time que a PES2-TASK-04 usa: o `T_NAME` é bitmap rasterizado, a
+  tabela de texto é outra coisa, e é justamente por serem duas que a §6.12
+  existe.
+- **A troca de idioma.** A `(EsIt)` tem duas cópias de `T_NAME` e a
+  `(EnFrDe)` três, todas com o mesmo conteúdo; o jogo escolhe pelo idioma.
+  Verificar num idioma só deixa passar exatamente o defeito que a §6.12
+  descreve, então o roteiro precisa saber chegar ao menu de idioma, ou a
+  task 28 tem de dizer por escrito que não conseguiu.
+
 ## Critério de conclusão
 
 - [ ] Pelo menos **três** das cinco telas alcançadas e capturadas, com o PNG

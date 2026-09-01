@@ -283,8 +283,9 @@ emulador, são elas o trabalho barato que continua.
       entradas gráficas — **918/960/637/815 registros de imagem nos quatro
       discos; zero divergência fora dos estádios e do disco hackeado**
       (§1.14(f))
-- [ ] Conjunto de cópias por idioma **varrido**, e a ferramenta recusando se
-      sobrar cópia fora do plano
+- [x] Conjunto de cópias por idioma **varrido**, e a ferramenta recusando se
+      sobrar cópia fora do plano — **3 conjuntos por release; o `T_NAME` é o
+      mesmo arquivo nas duas, 5 cópias em 2 discos** (§6.12)
 - [ ] Um nome de `T_NAME` visto na tela nos dois idiomas, e o antigo ausente
 - [ ] Abrir e salvar sem editar devolve `cmp` zero nas duas releases
 - [ ] Estouro de orçamento recusa, dizendo quantos bytes faltaram

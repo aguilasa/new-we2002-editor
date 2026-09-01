@@ -1577,9 +1577,56 @@ no idioma que foi gravado. O modo de falha é o mesmo da §6.1, com o agravante
 de ser **invisível na verificação** se o roteiro do emulador não trocar de
 idioma.
 
-Os outros pares que a §1.4 lista têm de ser tratados do mesmo jeito:
-`DAT2D_I`/`DAT2D_S`, `DATSEL_I`/`DATSEL2I`/`DATSEL3I`, `LC_*`,
-`FNOTE_{G,I,S}`. E como na §6.1, **o conjunto se varre, nunca se declara**.
+**Varrido em 2026-09-01, pela
+[PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md), e o resultado
+corrige a frase que estava aqui.** O `tools/pes2/lang_map.py` agrupa por
+digest de conteúdo sobre **todo** arquivo `form1` do disco, e acha **três**
+conjuntos de cópia por release, não os pares que esta seção listava:
+
+| Conjunto | `(EsIt)` | `(EnFrDe)` | tamanho |
+|---|---|---|---:|
+| nome de apresentação | `T_NAME_I`, `T_NAME_S` | `T_NAME_E`, `T_NAME_F`, `T_NAME_G` | 62.196 B |
+| `LC` | `LC_MS`, `LC_OL` | idem | 10.420 B |
+| `TEX` | `TEX_99`, `TEX_A0`, `TEX_A1`, `TEX_A2` | idem | 32.752 B |
+
+E o `T_NAME` é o **mesmo arquivo nas duas releases** — mesmo digest, mesmos
+62.196 bytes. São **cinco cópias em dois discos, um conteúdo só**.
+
+**Os outros arquivos que esta seção listava não são cópias.** `DAT2D_I` tem
+39.820 bytes e `DAT2D_S` tem 37.728; os três `DATSEL*I` diferem entre si; os
+catorze `LC_*` também. São **variantes de idioma**, que é o problema oposto:
+gravar as duas com o mesmo conteúdo estraga uma. A distinção é medida, não
+suposta, e é por isso que o agrupamento é por conteúdo.
+
+**E o sufixo não sobrevive nem à troca de release:** a `(EsIt)` traz
+`DATSEL_I`, `DATSEL2I` e `DATSEL3I` e nenhuma forma sem sufixo; a `(EnFrDe)`
+traz `DATSEL`, `DATSEL2` e `DATSEL3` e nenhuma com. Quem varrer por sufixo
+acha conjuntos diferentes em cada disco.
+
+Os `FNOTE_{G,I,S}` **não estão em `/BIN/`** — estão na raiz do disco, e têm
+1.896, 1.884 e 1.792 bytes: três arquivos diferentes, não um conjunto. A
+varredura cobre o disco inteiro por causa deles.
+
+```
+python3 tools/pes2/lang_map.py "<track1.bin>" --check
+python3 tools/pes2/lang_map.py "<track1.bin>" --asset /BIN/T_NAME_I.BIN
+python3 tools/pes2/lang_map.py "<track1.bin>" --self-check --tmpdir <dir>
+```
+
+**A fonte de apresentação está no `DAT2D` de idioma.** O `T_NAME` guarda os
+nomes **já rasterizados** — a primeira entrada de `T_NAME_I.BIN` é um bloco de
+128×128 a 4 bpp com `Ireland`, `Scotland`, `Wales` e `England` empilhados, 28
+entradas de 4 nomes cada. A face itálica com que estão desenhados é a de dois
+blocos vizinhos de `/BIN/DAT2D_I.BIN`: registros nos offsets relativos
+**20432** e **24768**, VRAM (640, 0) e (672, 0), 32×128 unidades cada, com o
+alfabeto maiúsculo, o minúsculo e os dígitos. Na `(EnFrDe)` o arquivo é
+`DAT2D_E`/`_F`/`_G` e os offsets são outros — ache o registro pelo
+`bin_archive.py`, não por constante.
+
+E como na §6.1, **o conjunto se varre, nunca se declara**: o
+`lang_map.py` recusa gravar num arquivo que não tenha cópia, e depois de
+gravar varre o disco atrás do conteúdo antigo — a metade da medida que uma
+captura de tela no idioma certo nunca pegaria.
 
 ### 6.13 O cabeçalho de contêiner tem largura variável — 16 larguras medidas
 
