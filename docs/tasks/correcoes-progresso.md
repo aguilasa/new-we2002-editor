@@ -26,6 +26,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | Os prompts e os wrappers cravam `WTE-TASK-XX`; o ciclo vivo é `PES2-TASK-XX` | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-004](/docs/tasks/CORR-PES2-004.md) | [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | Os prompts ficaram agnósticos de plano e de prefixo, e continuam com o corpo operacional inteiro do ciclo `wte/` | Média | [x] concluída | 2026-09-01 |
+| [CORR-PES2-005](/docs/tasks/CORR-PES2-005.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | Duas das cinco recusas do `--self-check` do `poke.py` medem a mesma guarda; a regra de fim e o último registro nunca são exercitados | Alta | [ ] pendente | — |
+| [CORR-PES2-006](/docs/tasks/CORR-PES2-006.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | O `poke.py` trabalha com oito listas e continua dizendo cinco em nove lugares, dois deles impressos na tela | Alta | [ ] pendente | — |
+| [CORR-PES2-007](/docs/tasks/CORR-PES2-007.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A tabela de testes do plano, o estado da Fase 2 e a verificação de Fase 2 do perfil ainda dizem cinco listas | Média | [ ] pendente | — |
+| [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A varredura do `poke.py` só reconhece registro delimitado por NUL, e o disco tem três tabelas de largura fixa | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -45,6 +49,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
 - [x] CORR-PES2-003 — o prefixo de *task* continua cravado nos prompts e nos wrappers
 - [x] CORR-PES2-004 — corpo WTE-específico nos prompts que se dizem agnósticos
+- [ ] CORR-PES2-005 — o `--self-check` do `poke.py` não exercita duas guardas
+- [ ] CORR-PES2-006 — `poke.py` diz cinco listas e trabalha com oito
+- [ ] CORR-PES2-007 — três textos vivos ainda dizem cinco listas
+- [ ] CORR-PES2-008 — a varredura do `poke.py` assume um esquema de registro
 
 ## Detalhes por correção
 
@@ -144,3 +152,56 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **"Não reproduz" é resultado**, e fecha a correção como `[x] envelhecida`
   quando o sintoma deixou de existir entre a abertura e a execução. O Log dela
   traz as medidas que mostram isso.
+
+### CORR-PES2-005
+
+- **Arquivo com problema:** `tools/pes2/poke.py`, o `self_check()`; e o Log da
+  `docs/tasks/02-poke-por-conjunto-de-copias.md`, que afirma cinco recusas
+  exercitadas
+- **Sintoma:** o caso da regra de fim (`team=96`, `IRELAND`) é interceptado
+  pela guarda de time ausente, porque o 96 não está em `team-names-select2`.
+  As duas linhas da saída medem a **mesma** guarda, e a de último registro da
+  tabela não tem caso nenhum
+- **Como foi detectado:** revisão da PES2-TASK-02 — `--self-check` nas duas
+  releases, e `plan(..., allow_partial=True)` mostrando que as duas guardas
+  funcionam quando alcançadas
+- **Fix:** `_expect_refusal` passa a conferir o **texto** da recusa; o caso da
+  regra de fim leva `allow_partial=True`; entra o caso do último registro
+
+### CORR-PES2-006
+
+- **Arquivo com problema:** `tools/pes2/poke.py`, nove ocorrências de "five"
+- **Sintoma:** o `--self-check` imprime `in all five lists` e, três linhas
+  adiante, `the tightest of the 8 slots` / `8 copy/copies`. O docstring do
+  módulo repete a lista de cinco contagens que a §6.1 já corrigiu para oito
+- **Como foi detectado:** revisão da PES2-TASK-02 — `grep -n five
+  tools/pes2/poke.py` contra `team_map.py --check` e `check_image.py`
+- **Fix:** as duas strings derivam de `len(KEYS)`; comentários e docstring
+  passam a dizer oito, menos o de `leftovers`, que narra o achado
+
+### CORR-PES2-007
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` (§5.1 linha 1048 e o
+  estado da Fase 2, linhas 1140-1141) e `docs/prompts/perfil-pes2.md`
+  (linha 197)
+- **Sintoma:** os três dizem "cinco listas/cópias"; a linha 1048 ainda
+  descreve o `pes2_image` sem o `poke`, que a task acrescentou ao mesmo teste.
+  O perfil se contradiz: a armadilha nº 2 dele já diz oito
+- **Como foi detectado:** revisão da PES2-TASK-02 —
+  `grep -rn "cinco listas\|cinco cópias" docs/ CLAUDE.md`
+- **Fix:** trocar por oito nos três, e citar o `poke` na célula do
+  `pes2_image`. `PES2-AJUSTES.md` e as frases datadas ficam como estão
+
+### CORR-PES2-008
+
+- **Arquivo com problema:** `tools/pes2/poke.py`, `leftovers()`
+- **Sintoma:** a varredura conta um casamento como registro só com NUL antes e
+  depois. `SELECT.BIN` @5320 e o executável guardam registros de 10 B **sem
+  terminador quando o nome enche a largura** — nesse caso a varredura não vê a
+  cópia e **cala**, e silêncio se lê como "não sobrou"
+- **Como foi detectado:** revisão da PES2-TASK-02 — leitura do teste `whole`
+  contra o docstring de `_read_fixed` em `tables.py`, que diz que
+  "termina em NUL" não é o teste
+- **Fix:** aceitar também a forma de largura fixa, usando as tabelas fixas que
+  `T.TABLES` já descreve para o arquivo; ou, no mínimo, **recusar** em vez de
+  calar quando o nome tem exatamente a largura de uma delas
