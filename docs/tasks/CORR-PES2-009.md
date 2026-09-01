@@ -3,7 +3,7 @@ id: CORR-PES2-009
 title: "Correção: o `--check` do `lzss.py` não sabe ficar vermelho — o bug de porte que a própria task nomeia passa verde"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -128,19 +128,80 @@ quatro contagens —, como a linha do `poke.py --self-check` já faz.
 
 ## Verificação
 
-- [ ] `lzss.py <quatro discos> --check` verde, nomeando os quatro discos
-- [ ] **o controle negativo**: com `count = b - 0xB9` (o bug do `k3` assinado)
+- [x] `lzss.py <quatro discos> --check` verde, nomeando os quatro discos
+- [x] **o controle negativo**: com `count = b - 0xB9` (o bug do `k3` assinado)
       numa cópia da ferramenta, o `--check` fica **vermelho** e sai diferente
       de zero
-- [ ] `ctest --test-dir build -R pes2_image` verde, com caminhos absolutos
-- [ ] `roms/` intocada
+- [x] `ctest --test-dir build -R pes2_image` verde, com caminhos absolutos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** O laço tautológico saiu e entraram **duas**
+asserções, uma por disco e uma independente de disco.
 
-**Problemas encontrados:**
+A **primeira forma** da CORR: `EXPECT`, chaveada pela contagem de contêineres,
+com os quatro conjuntos que a §1.14(e) do plano publica. O `--check` diz qual
+disco reconheceu e compara `whole`/`partial`/`none`/blocos:
+
+```
+CHECK: recognised PES2 (EsIt) by its 208 containers          CHECK OK
+CHECK: recognised PES2 (EnFrDe) by its 210 containers        CHECK OK
+CHECK: recognised WE2002 European Deluxe by its 177 …        CHECK OK
+CHECK: recognised WE2002 Japanese by its 195 containers      CHECK OK
+```
+
+**Controle negativo, o que a CORR pede:** com `count = b - 0xB9` numa cópia da
+ferramenta no scratchpad, quatro linhas vermelhas e exit 1 —
+
+```
+CHECK FAILED: PES2 (EsIt): whole is 41, measured 172
+CHECK FAILED: PES2 (EsIt): partial is 118, measured 3
+CHECK FAILED: PES2 (EsIt): none is 49, measured 33
+CHECK FAILED: PES2 (EsIt): blocks is 812, measured 2153
+```
+
+**Problemas encontrados.** Três, os dois primeiros medidos e contra o que a
+CORR previa:
+
+1. **A segunda forma da CORR não é independente de disco.** Ela propõe o
+   SHA-256 do primeiro bloco de `TEX_00.BIN` @48 como âncora barata "e
+   independente de disco". Medido: `(EsIt)` e `(EnFrDe)` batem
+   (`1a3d87d33f167794…`, 16.384 B), a **japonesa é outra**
+   (`17305ae935ef73f9…`, 5.005 B comprimidos contra 5.145), e a European
+   Deluxe **não tem** `TEX_00.BIN` legível — o setor 8415 é Form 2. Seria uma
+   quinta constante por disco, não uma âncora.
+2. **A primeira forma sozinha deixa um buraco, e ele é o do disco novo.**
+   Contagem desconhecida não reprova (é o que a CORR pede, e está certo), mas
+   então um decodificador quebrado sobre um quinto disco passa verde de novo —
+   exatamente o defeito que esta correção conserta. Entrou
+   `check_block_literal()`: um fluxo de 16 bytes construído aqui que exercita
+   o opcode `0xC0..0xFE`, o ramo onde o bug do `k3` mora e que nem o
+   `--roundtrip` alcança (o `compress()` nunca o emite). Medido, disco fora da
+   tabela **e** com o bug:
+
+   ```
+   CHECK FAILED: the block-literal opcode does not decode at all: …
+   CHECK: 208 containers is no disc on record -- counts not asserted
+   CHECK FAILED    exit=1
+   ```
+
+3. **A primeira versão da asserção sintética estava errada, e ela mesma
+   acusou.** Com o flag byte `0x01` só o primeiro token é comando: o `0xFF`
+   terminador é lido como literal e o fluxo corre para fora do fim
+   (`input ended mid-token at 16`) — vermelho nos quatro discos íntegros. O
+   flag certo é `0x03`, os dois primeiros tokens comando. O comentário
+   registra isso, porque é o erro que a próxima asserção escrita à mão repete.
+
+**Gates.** `lzss.py --check` nos quatro discos: `CHECK OK` × 4, exit 0, cada
+disco nomeado. Dois controles negativos vermelhos (bug com disco conhecido;
+bug com disco fora da tabela). `ctest -R pes2_selftest|pes2_image` 2/2
+`Passed`. Os quatro conjuntos de `EXPECT` são os da tabela da §1.14(e) do
+plano, remedidos hoje pela ferramenta — não somados à mão. `roms/` intocada.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/lzss.py`
+- `docs/prompts/perfil-pes2.md`

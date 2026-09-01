@@ -50,7 +50,7 @@ Two details of the C that a careless port loses:
 
     python3 tools/pes2/lzss.py <track1.bin>              # every BIN/*.BIN
     python3 tools/pes2/lzss.py <track1.bin> --file /BIN/DAT2D.BIN
-    python3 tools/pes2/lzss.py <track1.bin> --check      # the invariants
+    python3 tools/pes2/lzss.py <track1.bin> --check      # measured counts
     python3 tools/pes2/lzss.py <track1.bin> --roundtrip  # every block
 """
 
@@ -77,6 +77,27 @@ BIN_DIR = "/BIN/"
 # The cap exists for the resync scan, where a wrong offset can decode into
 # a plausible-looking stream forever.
 PROBE_CAP = 1 << 18
+
+
+# What each disc is measured to hold, keyed on its container count -- the
+# cheapest thing a disc says about itself, and distinct across the four we
+# have. A fifth disc that collided on the count would need a better key;
+# the check says which disc it matched, so a wrong match is visible.
+#
+# These are the numbers section 1.14(e) of the plan publishes, remeasured
+# 2026-09-01. The count *is* the assertion: the signed-`k3` porting bug the
+# module docstring warns about takes (EsIt) from whole 172 to whole 41, and
+# nothing weaker than a measured value notices.
+EXPECT = {
+    208: ("PES2 (EsIt)",
+          {"whole": 172, "partial": 3, "none": 33, "blocks": 2153}),
+    210: ("PES2 (EnFrDe)",
+          {"whole": 174, "partial": 3, "none": 33, "blocks": 2195}),
+    177: ("WE2002 European Deluxe",
+          {"whole": 141, "partial": 3, "none": 33, "blocks": 1842}),
+    195: ("WE2002 Japanese",
+          {"whole": 159, "partial": 3, "none": 33, "blocks": 2027}),
+}
 
 
 class LzssError(Exception):
@@ -233,6 +254,36 @@ def compress(plain):
     close_group()
     out.append(0x00)                 # the CARP terminator writes this too
     return bytes(out)
+
+
+def check_block_literal():
+    """Assert the `0xC0..0xFE` branch, on a stream built here.
+
+    The expectation table above catches this too, but only on a disc it
+    recognises; this holds on any disc and on none. It is the branch
+    `compress()` never emits -- so `--roundtrip` cannot reach it either --
+    and it is where the one porting bug the module docstring names lives:
+    `while (k3-- >= 0)` is signed, so `0xC5` introduces `0xC5 - 0xB9 + 1`
+    = 13 literal bytes, not 12.
+
+    Returns a list of complaints, empty when the branch is right.
+    """
+    bad = []
+    # Flag byte 0x03: **both** of the first two tokens are commands -- token
+    # 0 the block literal of 13, token 1 the 0xFF that ends the stream. With
+    # 0x01 the terminator is read as a literal and the stream runs off the
+    # end, which is what the first draft of this assertion did.
+    stream = bytes([0x03, 0xC5]) + b"0123456789abc" + bytes([0xFF])
+    try:
+        plain, used = decompress(stream, 0)
+    except LzssError as exc:
+        return [f"the block-literal opcode does not decode at all: {exc}"]
+    if plain != b"0123456789abc":
+        bad.append(f"0xC5 gave {plain!r}, expected b'0123456789abc' -- the "
+                   f"literal block is k3 + 1 bytes, `k3` being signed")
+    if used != len(stream):
+        bad.append(f"0xC5 consumed {used} of {len(stream)} bytes")
+    return bad
 
 
 # ---- containers ------------------------------------------------------
@@ -414,21 +465,29 @@ def one(args, image, grand):
                   + ("FAILED" if bad else f"{blocks_total}/{blocks_total} OK"))
 
         if args.check:
-            # Not a count -- counts differ between the four discs. What is
-            # asserted is the shape: nothing regresses from `whole`, and
-            # every stream the scan reports really does decode from the
-            # offset it names.
-            if tally["whole"] == 0:
-                print("CHECK FAILED: no container decodes at its header offset",
-                      file=sys.stderr)
+            # Against **measured value**, not shape. The loop that used to
+            # stand here re-decoded the blocks `scan` had just decoded, at
+            # the same offsets, with the same deterministic function: it
+            # could not disagree. What it left asserting was
+            # `tally["whole"] > 0`, a floor only a completely dead decoder
+            # reaches -- the signed-`k3` bug drops (EsIt) from 172 whole to
+            # 41 and cleared it comfortably.
+            for complaint in check_block_literal():
+                print(f"CHECK FAILED: {complaint}", file=sys.stderr)
                 bad += 1
-            for path in paths:
-                data = img.read_file(path)
-                for off, used, raw in scan(data):
-                    plain, again = decompress(data, off)
-                    if again != used or len(plain) != raw:
-                        print(f"CHECK FAILED: {path} @{off} is not stable",
-                              file=sys.stderr)
+            want = EXPECT.get(len(paths))
+            if want is None:
+                print(f"CHECK: {len(paths)} containers is no disc on record "
+                      f"-- counts not asserted", file=sys.stderr)
+            else:
+                label, counts = want
+                got = dict(tally, blocks=blocks_total)
+                print(f"CHECK: recognised {label} by its {len(paths)} "
+                      f"containers", file=sys.stderr)
+                for key in ("whole", "partial", "none", "blocks"):
+                    if got[key] != counts[key]:
+                        print(f"CHECK FAILED: {label}: {key} is {got[key]}, "
+                              f"measured {counts[key]}", file=sys.stderr)
                         bad += 1
             print("CHECK OK" if not bad else "CHECK FAILED", file=sys.stderr)
     grand["bad"] += bad
@@ -443,8 +502,8 @@ def main(argv=None):
     ap.add_argument("--roundtrip", action="store_true",
                     help="assert decompress(compress(x)) == x on every block")
     ap.add_argument("--check", action="store_true",
-                    help="assert every container decodes whole, from the "
-                         "offset its own header names")
+                    help="assert the block-literal opcode, and the measured "
+                         "verdict and block counts of a disc on record")
     args = ap.parse_args(argv)
     return cmd(args)
 

@@ -146,7 +146,7 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | ferramenta de `tools/pes2/` | o `--check` dela verde; `pes2_selftest` verde |
 | qualquer coisa que escreva na imagem | `iso.py roundtrip` verde **e** o `negative` provando que ele sabe ficar vermelho |
 | gravação de nome de time | `poke.py --self-check` verde nas duas releases: recusas, varredura sem sobra, e a imagem de volta byte a byte |
-| codec ou contêiner de `/BIN/` | `lzss.py --check` verde nos **quatro** discos — as duas releases de PES2 e as duas imagens de WE2002 —, e `--roundtrip` 100% nos blocos que o disco tocado tem |
+| codec ou contêiner de `/BIN/` | `lzss.py --check` verde nos **quatro** discos — as duas releases de PES2 e as duas imagens de WE2002 —, cada um **reconhecido pelo nome** (`recognised PES2 (EsIt) by its 208 containers`) e batendo nas quatro contagens medidas: 208/172/3/33/2.153, 210/174/3/33/2.195, 177/141/3/33/1.842 e 195/159/3/33/2.027 (contêineres/`whole`/`partial`/`none`/blocos). E `--roundtrip` 100% nos blocos que o disco tocado tem |
 | offset ou tabela | remedido nas **duas** releases; a divergência sai por marcador, não por offset absoluto |
 | comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), e o quadro **fora** do git |
 | número em doc | veio de ferramenta, não de soma à mão |
