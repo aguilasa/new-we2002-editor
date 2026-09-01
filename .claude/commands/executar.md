@@ -10,11 +10,16 @@ nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
+projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
+os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
+o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+
 Se `$ARGUMENTS` estiver preenchido, trate como pedido de tarefa específica
 (ex.: `PES2-TASK-04`, com o prefixo que o `progresso.md` declarar) e confira
 contra as regras de seleção do prompt antes de
-executar — a antecipação da WTE-TASK-32 (preço) exige pedido
-explícito do usuário. Argumento vazio significa "a próxima pendente na ordem".
+executar — antecipar tarefa fora da vez exige pedido explícito do usuário, e os
+precedentes do ciclo estão no perfil. Argumento vazio significa "a próxima pendente na ordem".
 
 ## O que este comando garante
 

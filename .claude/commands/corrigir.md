@@ -10,6 +10,11 @@ nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
+projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
+os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
+o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+
 Se `$ARGUMENTS` estiver preenchido, trate como a correção a executar (ex.:
 `CORR-PES2-003`, com o prefixo que o `correcoes-progresso.md` declarar) e
 confira as dependências antes. Argumento vazio significa "a

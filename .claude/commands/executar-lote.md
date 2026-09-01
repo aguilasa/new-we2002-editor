@@ -10,6 +10,11 @@ escrito nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
+projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
+os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
+o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+
 `$ARGUMENTS` vazio significa **2 tarefas**. Só dígitos (`3`) é o tamanho do
 lote. Com IDs (`<PREFIXO>-TASK-03 <PREFIXO>-TASK-05`, com o prefixo que o
 `progresso.md` declarar), o lote é esse conjunto, ainda em
