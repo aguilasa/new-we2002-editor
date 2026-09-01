@@ -791,14 +791,27 @@ colunas que não são exatas, cada uma com causa medida:
   64×64 —, cujo fluxo rende o dobro dos 8.192 declarados. Aparece nos quatro
   discos, e fica **aberto**: não há evidência aqui de se o excedente é uma
   segunda transferência ou folga.
-- **Falham.** Todas em `GDC_*`, que a (d) já põe fora de escopo. Nenhuma fora
-  dos estádios, nos quatro discos.
+- **Falham.** Nos três discos originais, todas em `GDC_*`, que a (d) já põe
+  fora de escopo. Na European Deluxe há **mais uma, fora dos estádios**: o
+  registro em 18052 de `/BIN/TEX_70.BIN`, cujo fluxo morre em `distance 0 at
+  16938`. 20 falhas menos as 19 de estádio. É o mesmo estrago dos cinco
+  *outros* logo abaixo, e pela mesma razão — **é a imagem hackeada**.
 - **Outros.** Zero nos três discos originais, e **cinco na European Deluxe** —
   fluxos que rendem 15.481, 16.395, 16.430, 16.501 e 16.345 onde o registro
   declara 16.384 ou 8.192. É a imagem **hackeada**: o hack reinseriu gráfico
   sem respeitar o retângulo do próprio índice, e o `DAT2D` dela é um dos
   cinco. Isto explica de onde vinha o `16.345` que a §5c registrava para o
   `DAT2D` daquele disco.
+
+**O veredito do gate, disco a disco.** `bin_archive.py check` sai **0 nos três
+discos originais**. Na European Deluxe são **seis** registros que não cabem no
+próprio retângulo — os cinco *outros* mais o `TEX_70` —, e a ferramenta os
+conta como categoria própria em vez de reprovar, do mesmo modo que já faz com
+os estádios da (d): um gate vermelho por motivo que ninguém pretende consertar
+é ruído, não sinal. **A contagem é a asserção** — as seis são permitidas, uma
+sétima não é, e o disco é reconhecido pelo rótulo que a tabela da (e) resolve
+a partir da contagem de contêineres. Um `check --file` isolado **não** recebe a
+permissão, e diz isso.
 
 **O registro é o índice; a varredura de ressincronização da (e) é uma
 aproximação dele.** Onde as duas discordam, o registro ganha, e dá para

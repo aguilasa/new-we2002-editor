@@ -94,6 +94,19 @@ def is_stadium(path):
     return path.startswith(STADIUM)
 
 
+# The golden European Deluxe is a **hacked** WE2002 image, and the hack
+# reinserted graphics without respecting its own index: six image records
+# there do not fit -- five whose stream is a different size than the rect
+# declares, and one, `TEX_70.BIN` at 18052, whose stream dies on `distance
+# 0`. Nobody is going to fix that disc, so a gate that is red for it is red
+# forever, which is the failure mode the stadium carve-out above already
+# fixed once.
+#
+# The count is the assertion: the six are allowed, a seventh is not. Keyed
+# on the disc label `lzss.EXPECT` resolves from the container count.
+HACKED = {"WE2002 European Deluxe": 6}
+
+
 class Entry:
     __slots__ = ("pos", "kind", "param", "x", "y", "w", "h", "offset")
 
@@ -328,8 +341,10 @@ def cmd_check(args):
     allowed to be counted rather than hidden.
     """
     bad = 0
+    notfit = 0            # records whose payload disagrees with their rect
     with Image(args.image) as img:
         paths = targets(img, args.file)
+        disc = lzss.EXPECT.get(len(lzss.containers(img)), (None,))[0]
         stats = {"images": 0, "cluts": 0, "exact": 0, "double": 0,
                  "other": 0, "failed": 0, "orphan": 0, "files": 0,
                  "short": 0, "noclut": 0, "bpp4": 0, "bpp8": 0,
@@ -373,7 +388,7 @@ def cmd_check(args):
                     else:
                         print(f"  {path}: image record at {e.pos} does not "
                               f"decompress: {exc}")
-                        bad += 1
+                        notfit += 1
                     continue
                 if len(plain) == e.expected:
                     stats["exact"] += 1
@@ -384,7 +399,7 @@ def cmd_check(args):
                     print(f"  {path}: {e!r} declares {e.expected} B, the "
                           f"stream gives {len(plain)}")
                     stats["other"] += 1
-                    bad += 1
+                    notfit += 1
             for off, _, _ in lzss.scan(data):
                 if off not in declared:
                     stats["orphan"] += 1
@@ -405,6 +420,23 @@ def cmd_check(args):
               f"list at all; {stats['stadiums']} indexed container(s) are "
               f"stadiums, whose {stats['stadium_failed']} failing record(s) "
               f"are out of scope by plan 1.14(d)")
+
+        allowance = HACKED.get(disc) if not args.file else None
+        if allowance is None:
+            if disc in HACKED:
+                print(f"  {disc}: the known-hacked allowance is not applied "
+                      f"to a single --file run; {notfit} record(s) counted "
+                      f"as failures", file=sys.stderr)
+            bad += notfit
+        elif notfit == allowance:
+            print(f"  {disc} is a hacked image: its {notfit} record(s) that "
+                  f"do not fit their own rect are the known ones (plan "
+                  f"1.14(f)), and are counted, not failed", file=sys.stderr)
+        else:
+            print(f"CHECK FAILED: {disc}: {notfit} record(s) do not fit, "
+                  f"and {allowance} are the measured, known ones",
+                  file=sys.stderr)
+            bad += 1
         print("CHECK OK" if not bad else "CHECK FAILED", file=sys.stderr)
     return 1 if bad else 0
 

@@ -3,7 +3,7 @@ id: CORR-PES2-013
 title: "Correção: o `check` do `bin_archive.py` sai vermelho na imagem golden, e nenhum documento diz isso"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -99,18 +99,60 @@ os `GDC_*`.
 
 ## Verificação
 
-- [ ] `bin_archive.py check` nos quatro discos, com o resultado de cada um
+- [x] `bin_archive.py check` nos quatro discos, com o resultado de cada um
       escrito — três verdes e o veredito da European Deluxe
-- [ ] a §1.14(f) nomeia o `TEX_70.BIN` entre as falhas do disco hackeado
-- [ ] `ctest --test-dir build -R pes2_image` verde
-- [ ] `roms/` intocada
+- [x] a §1.14(f) nomeia o `TEX_70.BIN` entre as falhas do disco hackeado
+- [x] `ctest --test-dir build -R pes2_image` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** Foi feita a forma **opcional**, que a própria CORR
+diz ser melhor que a nota: a European Deluxe é reconhecida pelo rótulo que o
+`lzss.EXPECT` resolve da contagem de contêineres, e os seis registros que não
+cabem no próprio retângulo viram categoria própria em vez de `bad` — a mesma
+disciplina que a task já aplicou aos estádios da §1.14(d). O gate agora sai
+**0 nos quatro discos**:
 
-**Problemas encontrados:**
+```
+Pro Evolution Soccer 2 (Es,It)     CHECK OK   exit=0
+Pro Evolution Soccer 2 (En,Fr,De)  CHECK OK   exit=0
+golden-european-deluxe.bin         WE2002 European Deluxe is a hacked image:
+  its 6 record(s) that do not fit their own rect are the known ones (plan
+  1.14(f)), and are counted, not failed          CHECK OK   exit=0
+japanese-shift-jis.bin             CHECK OK   exit=0
+```
+
+**A contagem é a asserção, não uma anistia.** Três controles negativos:
+
+```
+esperado 5, medido 6   -> CHECK FAILED: … 6 record(s) do not fit, and 5 are the measured, known ones
+permissao removida     -> CHECK FAILED
+check --file no golden -> the known-hacked allowance is not applied to a single
+                          --file run; 1 record(s) counted as failures  CHECK FAILED
+```
+
+Uma sétima falha naquele disco fica vermelha, que é o ponto: sem isso a
+permissão esconderia regressão em vez de nomear o conhecido.
+
+A §1.14(f) passou a nomear o `TEX_70.BIN` entre as falhas — 20 menos as 19 de
+estádio — e ganhou o parágrafo do veredito por disco. A linha do gate no perfil
+diz o mesmo com o número.
+
+**Problemas encontrados.** Um: **a mesma afirmação estava no `PLAN-FEATURES.md`
+§5 Fase 10**, fora da lista da CORR — o critério de aceite dizia "na European
+Deluxe são cinco entradas que não batem". São seis, e a sexta é de outra
+natureza (não decodifica, contra cinco de tamanho). Corrigido junto.
+
+**Gates.** `bin_archive.py check` exit 0 nos quatro discos; três controles
+negativos vermelhos; `ctest -R pes2_selftest|pes2_image` 2/2 `Passed`;
+`check_tasks.py` 82 tasks ok. `roms/` intocada — leitura pura.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/bin_archive.py`
+- `docs/PLAN-PES2-PSX.md`
+- `docs/prompts/perfil-pes2.md`
+- `docs/PLAN-FEATURES.md` (não previsto pela CORR)

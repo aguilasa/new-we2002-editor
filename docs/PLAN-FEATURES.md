@@ -376,9 +376,11 @@ de aceite abaixo.
 *Aceite:* extrair todas as entradas de `DAT2D.BIN`, `DATSEL*.BIN`, `LOGO.BIN`
 e `TITLE.BIN` das três imagens sem entrada órfã e sem estourar buffer;
 largura × altura × bpp bate com o tamanho descomprimido em 100% das entradas
-**das imagens não hackeadas** — na European Deluxe são cinco entradas que não
-batem, e a causa é o hack, não o parser (§1.14(f)). Um punhado de PNGs conferidos a olho contra o Image Manager rodando
-sob Wine.
+**das imagens não hackeadas** — na European Deluxe são **seis** entradas que
+não batem: cinco de tamanho e o registro em 18052 de `TEX_70.BIN`, que nem
+decodifica. A causa é o hack, não o parser (§1.14(f)), e o `bin_archive.py
+check` as conta em vez de reprovar. Um punhado de PNGs conferidos a olho
+contra o Image Manager rodando sob Wine.
 
 *Risco:* **o mais alto do plano.** É o único ponto onde o formato ainda é
 hipótese. Se o cabeçalho divergir entre arquivos, esta fase incha.
