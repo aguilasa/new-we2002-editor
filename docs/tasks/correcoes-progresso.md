@@ -15,15 +15,15 @@ junto com as tasks que o geraram — a pasta é um conjunto fechado, e o
 dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 único dentro do ciclo** continua valendo.
 
-**Nenhuma correção aberta ainda.** Este arquivo nasce com a estrutura pronta e
-sem linha, junto com o pool de tasks de PES2, em 2026-09-01. A primeira entrada
-virá de uma revisão, não de uma suposição.
+**As duas primeiras entradas vieram da revisão da PES2-TASK-01**, em
+2026-09-01 — como devia: de uma medição, não de uma suposição.
 
 ## Resumo executivo
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| — | — | *(nenhuma correção aberta)* | — | — | — |
+| [CORR-PES2-001](/docs/tasks/CORR-PES2-001.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A §3.2 diz que sem `-EL` o `objdump` mente; medido, sem `-EL` a saída é idêntica — quem mente é o `-EB` | Alta | [ ] pendente | — |
+| [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -39,11 +39,40 @@ virá de uma revisão, não de uma suposição.
 
 ## Checklist
 
-*(vazio — sem correção aberta)*
+- [ ] CORR-PES2-001 — o `-EL` do `objdump` na §3.2 está anotado no flag errado
+- [ ] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
 
 ## Detalhes por correção
 
-*(vazio — sem correção aberta)*
+### CORR-PES2-001
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` (§3.2) e o Log da
+  `docs/tasks/01-ferramental-das-fases-3-e-4.md`, de onde a frase saiu
+- **Sintoma:** o plano afirma, como medido, que sem `-EL` o `objdump` decodifica
+  big-endian sobre bytes little-endian e "não falha, só mente". Remedido: 1.017
+  linhas com e sem `-EL`, **mnemônicos idênticos** — o alvo default do
+  `mipsel-linux-gnu-objdump` 2.42 já é `elf32-tradlittlemips`. Quem mente é o
+  `-EB`, que o plano não menciona
+- **Como foi detectado:** revisão da PES2-TASK-01 — os dois comandos da §3.2
+  rodados verbatim sobre `/SLES_039.57` extraído para o scratchpad, mais as
+  variantes sem `-EL` e com `-EB`, comparadas por `diff` na coluna de mnemônico
+- **Fix:** trocar a frase pela medida, mantendo o `-EL` explícito no comando e
+  movendo a lição "não falha, só mente" para o `-EB`
+
+### CORR-PES2-002
+
+- **Arquivo com problema:** `.claude/rules/tasks.md` (linha 68) e os cinco
+  prompts de `docs/prompts/` — 43 ocorrências de `CORR-WTE` ao todo
+- **Sintoma:** a regra afirma que a numeração é `CORR-WTE-XXX` "qualquer que
+  seja o projeto", enquanto o `correcoes-progresso.md` vivo declara
+  `CORR-PES2-001`. A mesma regra proíbe cravar prefixo de ID em prompt, e os
+  cinco prompts cravam
+- **Como foi detectado:** revisão da PES2-TASK-01, ao ter de escolher o nome do
+  primeiro arquivo de correção do ciclo. Resolvida a favor do pool, que é o
+  texto mais novo (`0bdf350` contra `602218d`)
+- **Fix:** a regra passa a dizer que o prefixo é do ciclo e sai do
+  `correcoes-progresso.md`; os prompts passam a `CORR-<PREFIXO>-XXX`, como os
+  `*.template.md` já fazem. `docs/tasks/concluidos/` não se toca
 
 <!-- Modelo de bloco, para quando a primeira for aberta:
 
