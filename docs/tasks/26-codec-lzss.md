@@ -119,9 +119,11 @@ quatro. `ctest -R pes2` verde em 12,45 s.
 e 44 falham no `TEX_00.BIN`, e falham cedo — na primeira distância que aponta
 para antes do começo da saída. A §5c do `PLAN-FEATURES` foi corrigida no
 arquivo dela, e com o provável motivo de a medição antiga não se reproduzir:
-**na imagem golden European Deluxe os 105 `TEX_*.BIN` são Form 2**, e o
-`iso.py` recusa lê-los, então quem mediu em 2026-08-02 leu com outro
-fatiamento de setor — o que casa com o `16.400 = 16.384 + 16` da linha velha.
+**na imagem golden European Deluxe 18 dos 105 `TEX_*.BIN` são Form 2**, o
+`TEX_00.BIN` entre eles, e o `iso.py` recusa lê-los, então quem mediu em
+2026-08-02 leu com outro fatiamento de setor — o que casa com o
+`16.400 = 16.384 + 16` da linha velha. (Este Log dizia "os 105" até a
+[CORR-PES2-014](/docs/tasks/CORR-PES2-014.md); os outros 87 são Form 1.)
 As outras cinco linhas daquela tabela **se reproduzem exatamente** pelo
 `lzss.py`: `DAT2D` 8/7.447/16.345, `LOGO` 8/3.186/8.192, `TITLE`
 8/3.015/8.192, `T_NAME` 4/1.890/8.192 e `DATSEL3` 8/2.973/8.192. Essa

@@ -35,7 +35,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O prefixo de registro citado na §1.14(e) é o do quarto registro da cauda, não a forma deles | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-012](/docs/tasks/CORR-PES2-012.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-013](/docs/tasks/CORR-PES2-013.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | O `check` do `bin_archive.py` sai 1 na imagem golden e nenhum doc diz; a §1.14(f) afirma que nenhuma falha está fora dos estádios, e o `TEX_70.BIN` está | Alta | [x] concluída | 2026-09-01 |
-| [CORR-PES2-014](/docs/tasks/CORR-PES2-014.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Quatro documentos dizem que os 105 `TEX_*.BIN` da European Deluxe são Form 2; são 18, e esta task lê os outros 87 | Alta | [ ] pendente | — |
+| [CORR-PES2-014](/docs/tasks/CORR-PES2-014.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Quatro documentos dizem que os 105 `TEX_*.BIN` da European Deluxe são Form 2; são 18, e esta task lê os outros 87 | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Dos quatro offsets de bandeira citados, o 72400 é forma e mora em `/SELFORM.BIN`; o quarto de cor, 75776, ficou de fora | Alta | [ ] pendente | — |
 | [CORR-PES2-016](/docs/tasks/CORR-PES2-016.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | `depth_of()` decide a profundidade por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 cores contra 5 de 256 | Alta | [ ] pendente | — |
 
@@ -66,7 +66,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-011 — prefixo de registro citado é uma instância, não a forma
 - [x] CORR-PES2-012 — contagem de contêineres afirmada por jogo, medida por disco
 - [x] CORR-PES2-013 — gate vermelho na imagem golden, sem veredito escrito
-- [ ] CORR-PES2-014 — 18 dos 105 `TEX_*` são Form 2, não os 105
+- [x] CORR-PES2-014 — 18 dos 105 `TEX_*` são Form 2, não os 105
 - [ ] CORR-PES2-015 — offset de forma citado como cor, e noutro arquivo
 - [ ] CORR-PES2-016 — profundidade decidida por contêiner, não por paleta
 

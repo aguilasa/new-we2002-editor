@@ -844,11 +844,28 @@ começa em 65876 e o contêiner não a indexa. No PES2 o mesmo arquivo indexa �
 começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro
 discos: 24, 28, 32 e 44 falham, e falham na primeira distância que aponta para
 antes do começo da saída. A linha da §5c foi corrigida no arquivo dela. O
-provável motivo de a medição antiga não se reproduzir também ficou medido: na
-imagem golden European Deluxe os 105 `TEX_*.BIN` são **Form 2**, e o `iso.py`
-recusa lê-los — quem os leu em 2026-08-02 leu com outro fatiamento de setor, o
-que casa com o `16.400 = 16.384 + 16` que ela registrava. As outras cinco
-linhas daquela tabela **se reproduzem exatamente**.
+provável motivo de a medição antiga não se reproduzir também ficou medido:
+na imagem golden European Deluxe **18 dos 105 `TEX_*.BIN` são Form 2**, e o
+`iso.py` recusa lê-los — não há área de 2.048 bytes num setor Form 2. O
+`TEX_00.BIN`, que é justamente o arquivo da divergência, é um deles; quem o
+leu em 2026-08-02 leu com outro fatiamento de setor, o que casa com o
+`16.400 = 16.384 + 16` que ela registrava. As outras cinco linhas daquela
+tabela **se reproduzem exatamente**.
+
+Os **outros 87 são Form 1** e são lidos normalmente — os relatórios de
+`TEX_03`, `TEX_06`, `TEX_28`, `TEX_70` e `TEX_84` da (f) saem deles. Os 18,
+por nome:
+
+`TEX_00`, `TEX_01`, `TEX_02`, `TEX_10`, `TEX_13`, `TEX_17`, `TEX_34`,
+`TEX_36`, `TEX_41`, `TEX_43`, `TEX_48`, `TEX_50`, `TEX_51`, `TEX_52`,
+`TEX_63`, `TEX_73`, `TEX_81` e `TEX_83`
+
+Nas outras três imagens os 105 são Form 1. O número sai de `iso.py`:
+
+```python
+[p for p in sorted(img.files)
+ if p.startswith("/BIN/TEX_") and not img.is_form1(p)]
+```
 
 ---
 

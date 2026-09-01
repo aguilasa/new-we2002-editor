@@ -77,10 +77,16 @@ imagens em 2026-09-01. O que ele deixou para esta task:
    offset derivado do cabeçalho. São estádios, que a §1.14(d) põe fora de
    escopo — registrado para não ser rediagnosticado como bug do codec.
 
-E uma armadilha de leitura, não de formato: **na imagem golden European Deluxe
-os 105 `TEX_*.BIN` são Form 2**, e o `iso.py` recusa lê-los. Um parser que se
-diga "rodando nas duas imagens de WE2002" tem de dizer qual arquivo ele não
-alcançou ali, ou a cobertura afirmada é maior do que a medida.
+E uma armadilha de leitura, não de formato: na imagem golden European Deluxe
+**18 dos 105 `TEX_*.BIN` são Form 2**, e o `iso.py` recusa lê-los. Os outros
+**87 são Form 1**, e esta task os lê — os relatórios de `TEX_03`, `TEX_06`,
+`TEX_28`, `TEX_70` e `TEX_84` do `check` naquele disco saem justamente deles.
+Um parser que se diga "rodando nas duas imagens de WE2002" tem de **nomear** os
+18 que não alcançou, e não a família inteira: os nomes são
+
+`TEX_00`, `TEX_01`, `TEX_02`, `TEX_10`, `TEX_13`, `TEX_17`, `TEX_34`,
+`TEX_36`, `TEX_41`, `TEX_43`, `TEX_48`, `TEX_50`, `TEX_51`, `TEX_52`,
+`TEX_63`, `TEX_73`, `TEX_81` e `TEX_83`.
 
 ### O que a §1.14 já entrega de graça
 

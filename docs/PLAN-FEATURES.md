@@ -265,9 +265,10 @@ todos, e falham cedo, na primeira distância que aponta para antes do começo da
 saída. Os números da linha nova são os do PES2 `(EsIt)`.
 
 **Por que a medição antiga não se reproduz**, e vale saber antes de tentar: na
-imagem golden European Deluxe os 105 `TEX_*.BIN` são **Form 2**. O `iso.py`
-recusa lê-los — não há área de 2.048 bytes num setor Form 2 —, e quem os leu em
-2026-08-02 leu por outro caminho, com outro fatiamento de setor. O `16.400 =
+imagem golden European Deluxe **18 dos 105 `TEX_*.BIN` são Form 2**, e o
+`TEX_00.BIN` é um deles. O `iso.py` recusa lê-los — não há área de 2.048 bytes
+num setor Form 2 —, e quem o leu em 2026-08-02 leu por outro caminho, com outro
+fatiamento de setor. Os outros 87 são Form 1 e são lidos normalmente. O `16.400 =
 16.384 + 16` da linha velha é compatível com isso. As outras cinco linhas desta
 tabela, essas, **se reproduzem exatamente**: `DAT2D` 8/7.447/16.345, `LOGO`
 8/3.186/8.192, `TITLE` 8/3.015/8.192, `T_NAME` 4/1.890/8.192 e `DATSEL3`

@@ -3,7 +3,7 @@ id: CORR-PES2-014
 title: "Correção: não são os 105 `TEX_*.BIN` da European Deluxe que são Form 2 — são 18"
 type: correção
 category: formato
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -80,18 +80,51 @@ A explicação de por que a medição de 2026-08-02 do `TEX_00` não se reproduz
 
 ## Verificação
 
-- [ ] o número 18 sai de comando versionado (`iso.py`/`is_form1`), citado no
+- [x] o número 18 sai de comando versionado (`iso.py`/`is_form1`), citado no
       texto
-- [ ] `grep -rn "105 .TEX_" docs/` não devolve mais a afirmação antiga
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "105 .TEX_" docs/` não devolve mais a afirmação antiga
+- [x] `python3 tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** Os quatro textos passaram a dizer **18 dos 105**,
+e os 18 entraram **por nome**, que é o que a §1.14 pedia sem ter: `TEX_00`,
+`01`, `02`, `10`, `13`, `17`, `34`, `36`, `41`, `43`, `48`, `50`, `51`, `52`,
+`63`, `73`, `81` e `83`. O plano leva junto o trecho de `iso.py` que os
+produz, e a lista impressa por ele bate com a do texto, nome a nome:
 
-**Problemas encontrados:**
+```
+18 TEX_00 TEX_01 TEX_02 TEX_10 TEX_13 TEX_17 TEX_34 TEX_36 TEX_41 TEX_43
+   TEX_48 TEX_50 TEX_51 TEX_52 TEX_63 TEX_73 TEX_81 TEX_83
+```
+
+Nas outras três imagens os 105 são Form 1 — medido, `form2=0`.
+
+**Onde a frase justificava cobertura menor, a conclusão mudou de fato.** No
+Contexto da PES2-TASK-27 ela dizia que um parser honesto tem de dizer "qual
+arquivo não alcançou"; agora diz que tem de **nomear os 18**, e registra que
+esta mesma task lê os outros 87 — os relatórios de `TEX_03`, `TEX_06`,
+`TEX_28`, `TEX_70` e `TEX_84` do `check` no golden saem justamente deles. A
+desculpa era cinco vezes maior que o buraco.
+
+A explicação de 2026-08-02 **continua válida e ficou mais forte**: o
+`TEX_00.BIN`, que é o arquivo da divergência 28 × 48, é um dos 18. Isso está
+dito em cada um dos quatro lugares agora, em vez de depender da generalização.
+
+**Problemas encontrados.** Nenhum. Os quatro lugares eram os quatro que a CORR
+listou; a varredura por `105 \`TEX_` não devolve mais nada fora dos arquivos
+de correção.
+
+**Gates.** O número e os nomes saíram de `iso.py`/`is_form1`, não de contagem
+à mão. `check_tasks.py` 82 tasks ok; conferência de link sem quebrado novo.
+`roms/` intocada — leitura pura.
 
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-PES2-PSX.md`
+- `docs/PLAN-FEATURES.md`
+- `docs/tasks/26-codec-lzss.md`
+- `docs/tasks/27-conteiner-e-tim.md`
