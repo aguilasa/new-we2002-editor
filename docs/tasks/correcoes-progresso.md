@@ -30,6 +30,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-006](/docs/tasks/CORR-PES2-006.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | O `poke.py` trabalha com oito listas e continua dizendo cinco em nove lugares, dois deles impressos na tela | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-007](/docs/tasks/CORR-PES2-007.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A tabela de testes do plano, o estado da Fase 2 e a verificação de Fase 2 do perfil ainda dizem cinco listas | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-008](/docs/tasks/CORR-PES2-008.md) | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | A varredura do `poke.py` só reconhece registro delimitado por NUL, e o disco tem três tabelas de largura fixa | Baixa | [x] concluída | 2026-09-01 |
+| [CORR-PES2-009](/docs/tasks/CORR-PES2-009.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O `--check` do `lzss.py` passa verde com o bug de `k3` assinado reintroduzido: 172 contêineres inteiros caem para 41 e o gate não pisca | Alta | [ ] pendente | — |
+| [CORR-PES2-010](/docs/tasks/CORR-PES2-010.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | As duas constantes do `scan`: `minimum=1024` decide todo verdicto com 128 B de margem, e o comentário do `PROBE_CAP` afirma um máximo de 16 KiB que são 16.676 | Média | [ ] pendente | — |
+| [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O prefixo de registro citado na §1.14(e) é o do quarto registro da cauda, não a forma deles | Baixa | [ ] pendente | — |
+| [CORR-PES2-012](/docs/tasks/CORR-PES2-012.md) | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O estado medido diz 208 contêineres no PES2 e 195 no WE2002; os quatro discos medem 208, 210, 177 e 195 | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -53,6 +57,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-006 — `poke.py` diz cinco listas e trabalha com oito
 - [x] CORR-PES2-007 — três textos vivos ainda dizem cinco listas
 - [x] CORR-PES2-008 — a varredura do `poke.py` assume um esquema de registro
+- [ ] CORR-PES2-009 — o `--check` do `lzss.py` não sabe ficar vermelho
+- [ ] CORR-PES2-010 — os dois limiares do `scan`, um deles com 128 B de margem
+- [ ] CORR-PES2-011 — prefixo de registro citado é uma instância, não a forma
+- [ ] CORR-PES2-012 — contagem de contêineres afirmada por jogo, medida por disco
 
 ## Detalhes por correção
 
@@ -205,3 +213,55 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **Fix:** aceitar também a forma de largura fixa, usando as tabelas fixas que
   `T.TABLES` já descreve para o arquivo; ou, no mínimo, **recusar** em vez de
   calar quando o nome tem exatamente a largura de uma delas
+
+### CORR-PES2-009
+
+- **Arquivo com problema:** `tools/pes2/lzss.py`, o `--check`; e por herança o
+  `pes2_image` do `ctest`, que o roda
+- **Sintoma:** com `count = b - 0xB9` (o bug do `k3` assinado que a própria
+  task nomeia), `(EsIt)` cai de 172 inteiros / 2.153 blocos para 41 / 812, e o
+  `--check` imprime `CHECK OK` e sai 0. O laço de estabilidade compara
+  `decompress` consigo mesmo; o `--roundtrip` é cego ao mesmo bug porque o
+  `compress` daqui nunca emite `0xC0..0xFE`
+- **Como foi detectado:** revisão da PES2-TASK-26 — cópia da ferramenta no
+  scratchpad com o bug reintroduzido
+- **Fix:** assertar valor medido por disco (as quatro linhas que a §1.14(e) já
+  publica), ou digest do primeiro bloco de `TEX_00.BIN`; e corrigir o `--help`
+
+### CORR-PES2-010
+
+- **Arquivo com problema:** `tools/pes2/lzss.py`, `scan()` e `PROBE_CAP`; e a
+  definição do verdicto `none` na §1.14(e) do plano
+- **Sintoma:** `minimum=1024` é o que separa `none` de `partial` — com 64 todo
+  arquivo `none` produz blocos —, o menor bloco real do disco tem 1.152 B, e a
+  margem de 128 B nunca foi escrita. O comentário do `PROBE_CAP` diz que o
+  maior bloco é 16 KiB; são 16.676, com cinco acima de 16 KiB em `(EsIt)`
+- **Como foi detectado:** revisão da PES2-TASK-26 — varredura com
+  `minimum=64` sobre os 36 não-`whole`, e distribuição de tamanho dos 2.153
+  blocos
+- **Fix:** nomear o limiar com o número que o justifica, publicar a
+  distribuição, e a §1.14(e) dizer "não decodifica para 1 KiB ou mais"
+
+### CORR-PES2-011
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §1.14(e)
+- **Sintoma:** o prefixo `0f 80 0a 00 20 02 80 01`, apresentado como a forma
+  dos registros de 16 B da cauda, é o do **quarto**: o primeiro é
+  `00 00 0a 00 00 02 00 01`, e o literal só aparece em 53066. Os 15.538 bytes,
+  esses, conferem exatamente
+- **Como foi detectado:** revisão da PES2-TASK-26 — dump da cauda de
+  `DAT2D.BIN` a partir do fim do último bloco
+- **Fix:** citar o primeiro registro e o que é comum aos quatro (`0a 00` nos
+  bytes 2-3, `20 00 80 00` nos 8-11, os quatro últimos crescendo)
+
+### CORR-PES2-012
+
+- **Arquivo com problema:** `docs/tasks/progresso.md` (estado medido e
+  checklist da Fase 7) e `docs/tasks/26-codec-lzss.md` (Contexto e critério)
+- **Sintoma:** "208 no PES2, 195 no WE2002" e "os 208 contêineres de cada
+  release"; medido, são 208, 210, 177 e 195 — a contagem é do disco, não do
+  jogo, e os "13 de diferença" comparam duas pontas de uma faixa de quatro
+- **Como foi detectado:** revisão da PES2-TASK-26 — `lzss.py --check` nos
+  quatro discos, cujo cabeçalho imprime a contagem de cada um
+- **Fix:** dar os quatro números por disco e tirar o número do item de
+  checklist, que quer garantir os três verdictos, não a contagem

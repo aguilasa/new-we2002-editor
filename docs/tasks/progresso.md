@@ -68,7 +68,7 @@ PES2-TASK-22.
 | [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | 22 | ⬜ Pendente | — | — |
 | [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | 23 | ⬜ Pendente | — | — |
 | [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final contra a definição de pronto | 6 | 24 | ⬜ Pendente | — | — |
-| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | ⬜ pendente |
+| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ⬜ Pendente | — | — |
 | [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
 | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ⬜ Pendente | — | — |
