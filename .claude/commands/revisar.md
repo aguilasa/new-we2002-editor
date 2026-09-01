@@ -38,10 +38,10 @@ Se `$ARGUMENTS` estiver preenchido, trate como a tarefa a revisar (ex.:
    19 de 69 offsets, 70 strings com padding, 197 bitmaps. Se a task afirma
    algum, remede com a ferramenta versionada.
 
-5. **Saída em `docs/tasks/`:** um `CORR-WTE-XXX.md` por discrepância, no
+5. **Saída em `docs/tasks/`:** um `CORR-<PREFIXO>-XXX.md` por discrepância, no
    formato do prompt, mais `correcoes-progresso.md` atualizado sem alterar as
    entradas anteriores. Linha nova na tabela nasce com o ID **linkado**
-   (`[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`, sempre `/docs/` + caminho do
+   (`[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`, sempre `/docs/` + caminho do
    arquivo — ver `.claude/rules/links.md`), a coluna **"ID Task
    Origem"** com a tarefa revisada, também linkada, e a "Concluída em" em `—` —
    quem preenche a data é quem executa a correção. Sem discrepância, diga isso

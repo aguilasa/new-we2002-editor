@@ -65,10 +65,13 @@ identificado`, `## Evidência`, `## Causa raiz` e `## Correção`, que já dizem
 contra o que o fix se mede. A origem — a task que a gerou — é a segunda coluna
 da tabela do `correcoes-progresso.md`.
 
-O pool de correções é **único**, com a numeração `CORR-WTE-XXX` contínua,
-qualquer que seja o projeto. O prefixo `WTE-` ali é histórico e não afirma
-projeto; o corpo da CORR diz de qual se trata. Dois pools custariam um segundo
-prompt de correção sem ganho nenhum.
+O pool de correções é **único dentro do ciclo**, com numeração contínua a
+partir de `001`. **O prefixo é do ciclo, não da ferramenta** — quem o declara é
+o `correcoes-progresso.md` vivo, na primeira seção. Foi `CORR-WTE-` de 001 a
+143 no ciclo arquivado em `docs/tasks/concluidos/`, e é `CORR-PES2-` no ciclo
+de PES2. **Quem abre uma correção lê o prefixo ali, nunca o deduz do prefixo
+das tasks nem do que um prompt escreveu.** Dois pools no mesmo ciclo custariam
+um segundo prompt de correção sem ganho nenhum.
 
 ## Projeto encerrado vai para `docs/tasks/concluidos/`
 

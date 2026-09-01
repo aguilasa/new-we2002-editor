@@ -3,7 +3,7 @@ id: CORR-PES2-002
 title: "Correção: as regras e os prompts dizem CORR-WTE, o pool vivo é CORR-PES2"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -116,19 +116,65 @@ história do ciclo fechado e o texto deles é evidência.
 
 ## Verificação
 
-- [ ] `grep -rn 'CORR-WTE' docs/prompts/ .claude/rules/` não devolve nada
-- [ ] `grep -rn 'CORR-WTE' docs/tasks/concluidos/ | wc -l` continua no valor de
-      antes — o arquivo histórico não foi tocado
-- [ ] A regra nova nomeia o `correcoes-progresso.md` como fonte do prefixo
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] Conferência de link de `.claude/rules/links.md` sem quebrado novo
+- [x] `grep -rn 'CORR-WTE' docs/prompts/ .claude/rules/` não devolve **nenhuma
+      ocorrência prescritiva** — sobram 5, todas **citação de CORR real do ciclo
+      fechado** (018, 137, 001, 122/123, e a frase da própria regra que nomeia o
+      prefixo antigo). O item nasceu pedindo zero, o que contradiria a instrução
+      desta mesma CORR de não mexer em história; a redação foi corrigida na
+      execução, e a medida é o que está escrito aqui
+- [x] `grep -rn 'CORR-WTE' docs/tasks/concluidos/ | wc -l` continua em **1155** —
+      o arquivo histórico não foi tocado
+- [x] A regra nova nomeia o `correcoes-progresso.md` como fonte do prefixo
+- [x] `python3 tools/check_tasks.py` verde — 76 tasks, ok
+- [x] Conferência de link de `.claude/rules/links.md` sem quebrado novo — a
+      varredura de forma sobra só alvo fora de `docs/`, e a de existência sai
+      vazia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** As 43 ocorrências foram separadas em duas classes
+antes de qualquer troca, e essa separação é o trabalho: **placeholder
+prescritivo** — o que o prompt manda escrever — virou `CORR-<PREFIXO>-XXX`, e
+**citação de CORR real do ciclo fechado** ficou como estava, porque é
+evidência. As 8 do `01-executar.md` eram *todas* da segunda classe (linkadas a
+`concluidos/`), então aquele prompt **não foi modificado**, ao contrário do que
+a lista de arquivos previa. A regra passou a dizer que o prefixo é do ciclo e
+que quem o declara é a primeira seção do `correcoes-progresso.md`. Os globs
+executáveis viraram `CORR-*.md`, que funciona em qualquer prefixo —
+`CORR-<PREFIXO>-*.md` não é glob que rode.
 
-**Problemas encontrados:**
+**Problemas encontrados.** Três, nenhum bloqueante.
+
+1. **O item 1 da Verificação pedia o impossível certo.** `grep -rn 'CORR-WTE'
+   docs/prompts/ .claude/rules/` devolvendo *nada* exigiria apagar a citação de
+   CORR-WTE-018, -137, -001 e -122/123 — as armadilhas que os prompts registram
+   —, o que contradiz a própria instrução desta CORR de não mexer em história.
+   O item foi reescrito para a medida que importa: nenhuma ocorrência
+   **prescritiva**.
+2. **A varredura puxou dois arquivos que a lista da CORR não previa**, e os dois
+   entraram nesta invocação: `.claude/rules/links.md` (o §"Template em bloco de
+   código conta" citava `/docs/tasks/CORR-WTE-XXX.md` como o placeholder que os
+   prompts escrevem — deixou de ser verdade no mesmo instante) e os quatro
+   wrappers de `.claude/commands/`, com 9 ocorrências prescritivas, entre elas
+   duas na linha `description:` do frontmatter, que é o texto que o usuário lê
+   ao digitar a barra.
+3. **Um segundo acoplamento da mesma família ficou de fora, e virou CORR nova.**
+   Os prompts também cravam `WTE-TASK-XX` — prefixo de *task*, proibido pela
+   mesma regra e pelo mesmo motivo —, e o ciclo vivo usa `PES2-TASK-XX`. É
+   dívida independente desta correção: nem criada nem revelada por ela, e
+   redimensionar no meio de um lote é o que o `04-corrigir-tudo.md` desaconselha.
 
 **Arquivos criados/modificados:**
+
+- `.claude/rules/tasks.md` — o parágrafo do pool
+- `.claude/rules/links.md` — o placeholder citado no §"Template em bloco de código conta"
+- `docs/prompts/02-revisar.md` — 13 trocas: modelo de frontmatter, de tabela, de
+  checklist, de bloco, os dois exemplos de `git`
+- `docs/prompts/03-corrigir.md` — 9 trocas
+- `docs/prompts/04-corrigir-tudo.md` — 6 trocas
+- `docs/prompts/05-executar-lote.md` — 2 trocas
+- `.claude/commands/{corrigir,corrigir-tudo,revisar,executar-lote}.md` — 9 trocas
+- `docs/prompts/01-executar.md` — **não modificado**; as 8 ocorrências são história
+- `docs/tasks/correcoes-progresso.md` — tabela, checklist e data

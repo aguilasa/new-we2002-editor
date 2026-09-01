@@ -36,7 +36,7 @@ A regra alcança o link escrito **dentro de bloco de código** quando o bloco é
 modelo do que vira markdown de verdade. É o caso dos templates de tabela de
 `docs/prompts/`: o link do modelo é o que o `/executar` e o `/revisar` copiam
 para o `progresso.md` e o `correcoes-progresso.md`. Os destinos ali são
-placeholder (`/docs/tasks/CORR-WTE-XXX.md`,
+placeholder (`/docs/tasks/CORR-<PREFIXO>-XXX.md`,
 `/docs/tasks/XX-nome-do-arquivo.md`) — não são link quebrado, e ficam **fora**
 da conferência de existência abaixo.
 

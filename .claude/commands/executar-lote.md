@@ -77,7 +77,7 @@ Número **e** IDs juntos é erro — pergunte qual dos dois vale.
     golden** não fechando, que indica problema do harness ou do `:98` e torna
     sem sentido qualquer resultado seguinte.
 
-12. **Nunca execute `CORR-WTE-XXX` por aqui** — isso é do `/corrigir` e do
+12. **Nunca execute uma correção (`CORR-<PREFIXO>-XXX`) por aqui** — isso é do `/corrigir` e do
     `/corrigir-tudo`. E nunca cole decompilado, edite à mão o que um gerador
     produz, ou escreva no `we-team-editor.exe` / em `roms/`.
 

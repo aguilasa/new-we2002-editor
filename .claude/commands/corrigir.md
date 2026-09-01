@@ -1,5 +1,5 @@
 ---
-description: Executa a proxima correcao pendente (CORR-WTE-XXX), seguindo docs/prompts/03-corrigir.md
+description: Executa a proxima correcao pendente (CORR-<PREFIXO>-XXX), seguindo docs/prompts/03-corrigir.md
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob, Skill, TodoWrite
 ---
 
@@ -11,7 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 Se `$ARGUMENTS` estiver preenchido, trate como a correção a executar (ex.:
-`CORR-WTE-003`) e confira as dependências antes. Argumento vazio significa "a
+`CORR-PES2-003`, com o prefixo que o `correcoes-progresso.md` declarar) e
+confira as dependências antes. Argumento vazio significa "a
 primeira `[ ]` em `correcoes-progresso.md`".
 
 ## O que este comando garante
@@ -19,7 +20,7 @@ primeira `[ ]` em `correcoes-progresso.md`".
 1. **Uma correção por invocação.** Concluída e commitada, **pare** — não
    avance para a próxima `[ ]` mesmo que seja no mesmo arquivo.
 
-2. **Escopo de arquivo.** Abra **só** o `CORR-WTE-XXX.md` selecionado. Não
+2. **Escopo de arquivo.** Abra **só** o `CORR-<PREFIXO>-XXX.md` selecionado. Não
    leia os outros, mesmo apontando para o mesmo gerador ou o mesmo formulário.
    E nunca execute `WTE-TASK-XX` por aqui — isso é do `/executar`.
 
@@ -43,7 +44,7 @@ primeira `[ ]` em `correcoes-progresso.md`".
    intenção. Correção parcial não vira `[x]` — registre a pendência no Log de
    Execução. Junto do `[x]` vai a data do commit na coluna "Concluída em" da
    tabela de resumo, igual à do `Executado em` do Log, e o `status:` do
-   frontmatter do `CORR-WTE-XXX.md` vira `concluído` — o `/revisar` abre toda
+   frontmatter do `CORR-<PREFIXO>-XXX.md` vira `concluído` — o `/revisar` abre toda
    correção com `pendente`, e o campo duplica a coluna Status.
 
 7. **Discrepância achada no caminho se conserta, não se registra.** A lista de

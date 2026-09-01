@@ -8,7 +8,10 @@ Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em
   nome — a task em mãos é quem diz contra o que ela se mede.
 - **Arquivo de progresso:** `docs/tasks/progresso.md`
 - **Regras do repositório:** `CLAUDE.md`
-- **Correções existentes:** `docs/tasks/CORR-WTE-*.md`
+- **Correções existentes:** `docs/tasks/CORR-*.md`. **O prefixo é do ciclo, e
+  quem o declara é a primeira seção do `correcoes-progresso.md`** — hoje
+  `PES2`, antes `WTE`. Leia-o ali; não o deduza do prefixo das tasks nem do
+  que este prompt escreve como exemplo. Abaixo ele aparece como `<PREFIXO>`
 
 ---
 
@@ -28,7 +31,7 @@ Quero que você:
 3. **Inspecione o artefato real** — cada arquivo que a tarefa dizia criar ou
    modificar, e **rode as ferramentas** que produzem os números que ela afirma
 4. Compare o que foi pedido com o que existe
-5. Para cada discrepância, crie um `CORR-WTE-XXX.md` e registre em
+5. Para cada discrepância, crie um `CORR-<PREFIXO>-XXX.md` e registre em
    `correcoes-progresso.md`
 6. Se não houver discrepância, diga isso explicitamente
 7. Preencha a coluna **"Revisado em"** da tarefa revisada, na tabela de resumo
@@ -203,15 +206,16 @@ transitiva" entregou o que devia.
 
 ### Determinar o próximo ID
 
-1. Leia os `CORR-WTE-*.md` existentes em `docs/tasks/`
+1. Leia os `CORR-*.md` existentes em `docs/tasks/`
 2. O maior número + 1 é o próximo
-3. Se não existir nenhum, comece em `CORR-WTE-001`
+3. Se não existir nenhum, comece em `CORR-<PREFIXO>-001`, com o prefixo que o
+   `correcoes-progresso.md` declarar
 
-### Formato de cada `CORR-WTE-XXX.md`
+### Formato de cada `CORR-<PREFIXO>-XXX.md`
 
 ```markdown
 ---
-id: CORR-WTE-XXX
+id: CORR-<PREFIXO>-XXX
 title: "Correção: <descrição curta do problema>"
 type: correção
 category: <engenharia-reversa | ui | dados | comportamento | features | verificação | processo>
@@ -219,7 +223,7 @@ status: pendente
 depends_on: []
 ---
 
-# CORR-WTE-XXX: <título>
+# CORR-<PREFIXO>-XXX: <título>
 
 ## Problema identificado
 
@@ -283,15 +287,15 @@ Se ainda não existir:
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-WTE-001](/docs/tasks/CORR-WTE-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
+| [CORR-<PREFIXO>-001](/docs/tasks/CORR-<PREFIXO>-001.md) | [WTE-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
 
 ## Checklist
 
-- [ ] CORR-WTE-001 — <título curto>
+- [ ] CORR-<PREFIXO>-001 — <título curto>
 
 ## Detalhes por correção
 
-### CORR-WTE-001
+### CORR-<PREFIXO>-001
 
 - **Arquivo com problema:** `caminho`
 - **Sintoma:** <o que está errado>
@@ -304,7 +308,7 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 **Três regras da tabela de resumo, que valem para toda linha nova:**
 
 1. **A célula do ID é link** para o markdown da correção —
-   `[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`. **Sempre `/docs/` + caminho
+   `[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`. **Sempre `/docs/` + caminho
    do arquivo**, nunca relativo, como manda
    `.claude/rules/links.md`. O `/revisar` cria o `.md` na mesma
    invocação, então o link nunca nasce quebrado.
@@ -368,9 +372,9 @@ A revisão normalmente produz só markdown em `docs/tasks/`:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-git add docs/tasks/CORR-WTE-XXX.md docs/tasks/correcoes-progresso.md \
+git add docs/tasks/CORR-<PREFIXO>-XXX.md docs/tasks/correcoes-progresso.md \
         docs/tasks/progresso.md
-git commit -m "docs: open CORR-WTE-XXX from the WTE-TASK-YY review"
+git commit -m "docs: open CORR-<PREFIXO>-XXX from the WTE-TASK-YY review"
 ```
 
 O `progresso.md` entra **sempre**, porque é onde mora a coluna "Revisado em".

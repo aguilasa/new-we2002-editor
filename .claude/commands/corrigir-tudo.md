@@ -1,5 +1,5 @@
 ---
-description: Executa todas as correcoes pendentes (CORR-WTE-XXX) em lote, seguindo docs/prompts/04-corrigir-tudo.md
+description: Executa todas as correcoes pendentes (CORR-<PREFIXO>-XXX) em lote, seguindo docs/prompts/04-corrigir-tudo.md
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob, Skill, Agent, TodoWrite
 ---
 
@@ -11,7 +11,8 @@ comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
 `$ARGUMENTS` vazio significa "todas as `[ ]` de `correcoes-progresso.md`".
-Com IDs (`CORR-WTE-013 CORR-WTE-016`), o lote é esse conjunto, ainda em ordem
+Com IDs (`CORR-<PREFIXO>-013 CORR-<PREFIXO>-016`, com o prefixo que o
+`correcoes-progresso.md` declarar), o lote é esse conjunto, ainda em ordem
 de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
 
 ## O que este comando garante

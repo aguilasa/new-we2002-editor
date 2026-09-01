@@ -12,7 +12,10 @@ O arquivo de progresso das correções está em:
 
 `docs/tasks/correcoes-progresso.md`
 
-Os detalhes das correções estão nos arquivos `CORR-WTE-*.md` no mesmo diretório.
+Os detalhes das correções estão nos arquivos `CORR-<PREFIXO>-*.md` no mesmo
+diretório. **`<PREFIXO>` é do ciclo, e quem o declara é a primeira seção do
+`correcoes-progresso.md`** — hoje `PES2`, antes `WTE`. Leia o prefixo ali; não
+o deduza do prefixo das tasks nem do que este prompt escreve como exemplo.
 
 ## Objetivo
 
@@ -28,7 +31,7 @@ palavra por palavra. Em dúvida sobre qualquer ponto não coberto aqui, o
 `03-corrigir.md` é a fonte.
 
 > **EXCLUSÃO OBRIGATÓRIA — sem tasks:**
-> Este prompt é exclusivo para `CORR-WTE-XXX`. **Nunca** execute `WTE-TASK-XX`
+> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute `WTE-TASK-XX`
 > por aqui — elas são do `01-executar.md` e rastreadas em `progresso.md`.
 
 > **EXCLUSÃO OBRIGATÓRIA — respeitar as decisões confirmadas:**
@@ -38,7 +41,7 @@ palavra por palavra. Em dúvida sobre qualquer ponto não coberto aqui, o
 > `roms/` — a menos que a CORR diga isso explicitamente e o usuário tenha
 > confirmado. Ver `docs/PLAN-WTE-LAZARUS.md` §2, §4.4, §4.5 e §8.10.
 
-Se `$ARGUMENTS` trouxer IDs (`CORR-WTE-013 CORR-WTE-016`), o lote é **esse
+Se `$ARGUMENTS` trouxer IDs (`CORR-<PREFIXO>-013 CORR-<PREFIXO>-016`), o lote é **esse
 conjunto**, ainda em ordem de dependência. Se trouxer `--plano`, pare depois
 da fase 0 e entregue só o plano.
 
@@ -49,7 +52,7 @@ da fase 0 e entregue só o plano.
 1. Ler `correcoes-progresso.md` e listar **todas** as `[ ]`, da tabela **e** do
    checklist. Se as duas listas divergirem, a divergência é o primeiro achado
    do relatório — não escolha uma em silêncio.
-2. Para cada pendente, ler **só** o cabeçalho do seu `CORR-WTE-XXX.md`
+2. Para cada pendente, ler **só** o cabeçalho do seu `CORR-<PREFIXO>-XXX.md`
    (frontmatter + seções "Problema identificado", "Evidência", "Correção",
    "Arquivos a criar ou modificar"). O escopo de arquivo do `03-corrigir.md`
    continua valendo **dentro** de cada execução: ao corrigir a 013 você não
@@ -138,7 +141,7 @@ Uma CORR fora do lote **não bloqueia** as outras, a menos que alguém dependa
 dela.
 
 **Achado que vira CORR nova: releia o maior número na hora de criar o arquivo.**
-`ls docs/tasks/CORR-WTE-*.md | tail -1`, não o número que a fase 0 leu. Num lote
+`ls docs/tasks/CORR-*.md | tail -1`, não o número que a fase 0 leu. Num lote
 longo a distância entre inventário e criação é de horas, e um `/revisar` no meio
 consome números. A CORR-WTE-137 foi criada duas vezes por isso, e a segunda
 **sobrescreveu o arquivo da primeira** — mesmo nome, e o `git status` mostra só
@@ -167,7 +170,7 @@ Para cada onda, na ordem:
 5. Marcar `[x]` no `correcoes-progresso.md` (tabela **e** checklist), preencher
    a coluna **"Concluída em"** com a data do commit daquela CORR (`AAAA-MM-DD`,
    a mesma do `Executado em`), conferir que a célula do ID é link para o
-   `CORR-WTE-XXX.md`, trocar o `status:` do frontmatter da CORR para
+   `CORR-<PREFIXO>-XXX.md`, trocar o `status:` do frontmatter da CORR para
    `concluído`, e preencher o **Log de Execução**. `[x]` descreve estado
    **já commitado**, nunca intenção. Num lote as CORRs podem cair em dias
    diferentes: a data é **por CORR**, não a do fechamento do lote.

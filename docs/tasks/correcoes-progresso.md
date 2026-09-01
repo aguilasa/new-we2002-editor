@@ -23,7 +23,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
 | [CORR-PES2-001](/docs/tasks/CORR-PES2-001.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A §3.2 diz que sem `-EL` o `objdump` mente; medido, sem `-EL` a saída é idêntica — quem mente é o `-EB` | Alta | [x] concluída | 2026-09-01 |
-| [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [ ] pendente | — |
+| [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [x] concluída | 2026-09-01 |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -40,7 +40,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 ## Checklist
 
 - [x] CORR-PES2-001 — o `-EL` do `objdump` na §3.2 está anotado no flag errado
-- [ ] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
+- [x] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
 
 ## Detalhes por correção
 

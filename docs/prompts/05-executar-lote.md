@@ -40,7 +40,8 @@ nenhuma outra.** Tudo o mais continua valendo palavra por palavra:
 Em dúvida sobre qualquer ponto não coberto aqui, o `01-executar.md` é a fonte.
 
 > **EXCLUSÃO OBRIGATÓRIA — sem CORRs:**
-> Este prompt é exclusivo para `WTE-TASK-XX`. **Nunca** execute `CORR-WTE-XXX`
+> Este prompt é exclusivo para `WTE-TASK-XX`. **Nunca** execute uma correção
+> (`CORR-<PREFIXO>-XXX`, com o prefixo que o `correcoes-progresso.md` declarar)
 > por aqui — elas são do `03-corrigir.md` / `04-corrigir-tudo.md` e rastreadas
 > em `correcoes-progresso.md`.
 
@@ -344,6 +345,6 @@ Execute exatamente `N` tarefas (2 por padrão), um commit por tarefa,
 `✅ Concluído` só depois do commit.
 Paralelize só o que a matriz de conflito autoriza; **na dúvida, sequencial** — e
 o `:98` é sempre sequencial.
-Nada de `CORR-WTE`, nada de decompilado colado, nada de editar à mão o que um
+Nada de correção (`CORR-*`), nada de decompilado colado, nada de editar à mão o que um
 gerador produz, nada de escrever no `.exe` ou em `roms/`.
 `push` só se o usuário pedir.

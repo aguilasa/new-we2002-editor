@@ -12,7 +12,10 @@ O arquivo de progresso das correções está em:
 
 `docs/tasks/correcoes-progresso.md`
 
-Os detalhes das correções estão nos arquivos `CORR-WTE-*.md` no mesmo diretório.
+Os detalhes das correções estão nos arquivos `CORR-<PREFIXO>-*.md` no mesmo
+diretório. **`<PREFIXO>` é do ciclo, e quem o declara é a primeira seção do
+`correcoes-progresso.md`** — hoje `PES2`, antes `WTE`. Leia o prefixo ali; não
+o deduza do prefixo das tasks nem do que este prompt escreve como exemplo.
 
 ## Objetivo
 
@@ -46,7 +49,7 @@ mais.
 3. Se alguma correção estiver marcada como "em andamento", conclua-a antes
 
 > **EXCLUSÃO OBRIGATÓRIA 1 — escopo de arquivo:**
-> Abra **apenas o `CORR-WTE-XXX.md` da correção selecionada**. Não leia os
+> Abra **apenas o `CORR-<PREFIXO>-XXX.md` da correção selecionada**. Não leia os
 > outros, mesmo que apontem para o mesmo gerador ou o mesmo formulário.
 >
 > **EXCLUSÃO OBRIGATÓRIA 2 — uma CORR por execução:**
@@ -54,7 +57,7 @@ mais.
 > mesmo arquivo.
 >
 > **EXCLUSÃO OBRIGATÓRIA 3 — sem tasks:**
-> Este prompt é exclusivo para `CORR-WTE-XXX`. **Nunca** execute `WTE-TASK-XX`
+> Este prompt é exclusivo para `CORR-<PREFIXO>-XXX`. **Nunca** execute `WTE-TASK-XX`
 > por aqui — elas são do `prompts/01-executar.md` e rastreadas em
 > `progresso.md`.
 >
@@ -112,7 +115,7 @@ entra nesta invocação.
 | doc que a sua correção tornou falso ou incompleto | **conserte agora** |
 | número que a sua ferramenta remede e não bate com o doc | **conserte agora**, com a data |
 | rótulo ambíguo que a sua mudança cria | **conserte agora** |
-| bug ou dívida sem relação com esta CORR | **abra `CORR-WTE-XXX` novo** e siga |
+| bug ou dívida sem relação com esta CORR | **abra `CORR-<PREFIXO>-XXX` novo** e siga |
 | handler a implementar, formulário a gerar, trabalho de `WTE-TASK` | **não faça** — as exclusões 2, 3 e 4 continuam valendo |
 
 **Commit separado.** A correção num commit; a reconciliação de doc que ela
@@ -125,7 +128,7 @@ decisão do plano — não a resolva de afogadilho: abra a CORR nova, registre o
 mediu, e reporte.
 
 **Ao abrir CORR nova, releia o maior número do disco na hora de criar o
-arquivo** — `ls docs/tasks/CORR-WTE-*.md | tail -1` —, e não use o número que o
+arquivo** — `ls docs/tasks/CORR-*.md | tail -1` —, e não use o número que o
 inventário da fase 0 sugeria. Um `/revisar` pode ter criado CORRs entre uma
 coisa e outra, e o próximo livre muda sem aviso. Já custou duas vezes: a
 CORR-WTE-122/123 e a CORR-WTE-137, esta última com o arquivo de outra CORR
@@ -203,7 +206,7 @@ teste manual é dirigida em vez da que está sob teste.
 ### 1) Ler contexto
 
 - Ler `correcoes-progresso.md`
-- Ler o `CORR-WTE-XXX.md`
+- Ler o `CORR-<PREFIXO>-XXX.md`
 - **Reproduzir a evidência** da seção "Evidência" com o mesmo comando. Se o
   resultado não bater com o que a CORR descreve, **pare e reporte** — a CORR
   pode ter envelhecido
@@ -259,11 +262,11 @@ Se concluída:
   correção (`git log -1 --date=short --pretty=%ad`), formato `AAAA-MM-DD`. É a
   mesma data do `Executado em` do Log — se divergirem, uma delas está errada
 - Conferir que a célula do ID é link para o markdown da correção
-  (`[CORR-WTE-XXX](/docs/tasks/CORR-WTE-XXX.md)`, **sempre `/docs/` + caminho
+  (`[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`, **sempre `/docs/` + caminho
   do arquivo**, como manda `.claude/rules/links.md`); se a linha
   veio sem link, ponha
 - Trocar `status: pendente` por `status: concluído` no **frontmatter do
-  `CORR-WTE-XXX.md`**. O `02-revisar.md` abre toda correção com `pendente`, e o
+  `CORR-<PREFIXO>-XXX.md`**. O `02-revisar.md` abre toda correção com `pendente`, e o
   campo duplica a coluna Status do `correcoes-progresso.md`; os dois têm de
   concordar. Mesma regra do `01-executar.md` §4 para as tasks
 - Preencher o **Log de Execução**:
@@ -282,7 +285,7 @@ Código e documentação da correção juntos, no mesmo commit:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-git add <arquivos específicos> docs/tasks/CORR-WTE-XXX.md docs/tasks/correcoes-progresso.md
+git add <arquivos específicos> docs/tasks/CORR-<PREFIXO>-XXX.md docs/tasks/correcoes-progresso.md
 git commit -m "fix: <titulo curto no imperativo>"
 ```
 
