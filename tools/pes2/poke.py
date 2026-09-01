@@ -389,10 +389,22 @@ def _first_pokeable(img):
     raise Refused("no canonical team can be written in all five lists")
 
 
-def _expect_refusal(img, what, **kw):
+def _expect_refusal(img, what, expect, **kw):
+    """Assert that `plan` refuses, *and* that it refuses for the stated reason.
+
+    Checking only that `Refused` rose is not enough, and the gap was
+    measured: the end-rule case was written as team 96 (`IRELAND`), which
+    is absent from `team-names-select2`, so the missing-list guard --
+    which `plan` reaches first -- answered for it. Two lines of the
+    self-check printed the same guard, and the end rule was never
+    exercised at all. `expect` is what keeps that from coming back.
+    """
     try:
         plan(img, **kw)
     except Refused as exc:
+        if expect not in str(exc):
+            print(f"  FAILED: {what} was refused for the wrong reason: {exc}")
+            return 1
         print(f"  refused {what}: {exc}")
         return 0
     print(f"  FAILED: {what} was accepted and should have been refused")
@@ -416,14 +428,26 @@ def self_check(image, tmpdir):
 
         print("\n-- refusals, on the original, read-only --")
         bad += _expect_refusal(img, "a name past the slot",
+                               "pass --truncate",
                                team=team, value=original + "XXXXXXXXXXXX")
         bad += _expect_refusal(img, "a partial team without --allow-partial",
+                               "pass --allow-partial",
                                team=102, value="Classic Gaul")
+        # Both of the next two need --allow-partial to be *reached*: team 96
+        # is out of `team-names-select2` and team 105 out of six lists, and
+        # the missing-list guard runs before either of them.
         bad += _expect_refusal(img, "the record an end rule stops on",
-                               team=96, value="Eire")
+                               "end rule stops on",
+                               team=96, value="Eire", allow_partial=True)
+        bad += _expect_refusal(img, "the last record of a table",
+                               "last record of the table",
+                               team=105, value="Euro Allstar",
+                               allow_partial=True)
         bad += _expect_refusal(img, "a non-printable name",
+                               "outside the printable range",
                                team=team, value="Piemonteé")
         bad += _expect_refusal(img, "a record a marker is anchored on",
+                               "start marker",
                                team=2, value="Patagonza")
 
         room = min(s["room"] for s in plan(img, team, original)[1])

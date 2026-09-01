@@ -3,7 +3,7 @@ id: CORR-PES2-005
 title: "Correção: duas das cinco recusas do `--self-check` do `poke.py` medem a mesma coisa; a regra de fim e o último registro nunca são exercitados"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -111,20 +111,66 @@ correção — seis recusas, cada uma conferida pela mensagem.
 
 ## Verificação
 
-- [ ] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
+- [x] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
       verde nas **duas** releases, imprimindo uma recusa distinta por guarda
-- [ ] trocar `expect` por um texto errado faz o `--self-check` ficar vermelho
+- [x] trocar `expect` por um texto errado faz o `--self-check` ficar vermelho
       (a prova de que a conferência de mensagem não é decorativa)
-- [ ] `ctest --test-dir build -R pes2` verde, com `WE2002_PES2_IMAGE` e
+- [x] `ctest --test-dir build -R pes2` verde, com `WE2002_PES2_IMAGE` e
       `WE2002_PES2_TMPDIR` **absolutos**
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** `_expect_refusal` passou a receber um trecho
+esperado da mensagem e a **falhar** quando a recusa que subiu não é a que o
+caso pretende medir — é essa conferência que impede o modo de falha desta
+correção de voltar. O caso da regra de fim (time 96, `IRELAND`) e o novo caso
+de último registro (time 105, `EURO ALLSTARS`) levam `allow_partial=True`,
+sem o qual a guarda de time ausente responde por eles antes: medido, o 96 está
+fora de `team-names-select2` e o 105 fora de seis das oito listas. Os quatro
+casos antigos ganharam o `expect` correspondente.
 
-**Problemas encontrados:**
+O `--self-check` passou de **cinco linhas medindo quatro guardas** para **seis
+linhas medindo seis**, com texto distinto em cada uma, idêntico nas duas
+releases:
+
+```
+refused a name past the slot: … -- pass --truncate to cut it, never to move anything
+refused a partial team without --allow-partial: canonical team 102 ('CLASSIC FRANCE') is not in … -- pass --allow-partial …
+refused the record an end rule stops on: team-names-selectc: 'Ireland' is the value that table's end rule stops on …
+refused the last record of a table: team-names: 'EURO ALLSTARS' is the last record of the table, and no table on this disc has a sentinel …
+refused a non-printable name: 'Piemonteé' has a byte outside the printable range 0x20..0x7E …
+refused a record a marker is anchored on: team-names-ending: the 12-byte slot at 1256 overlaps the team-names-ending start marker …
+```
+
+Antes, as linhas 2 e 3 eram a **mesma** guarda — as duas terminavam em
+`is not in team-names-select2 … --allow-partial`.
+
+**Controle negativo da própria correção.** Trocado o `expect` da regra de fim
+por um texto que não aparece em recusa nenhuma, o `--self-check` fica vermelho
+com a mensagem certa, e volta a verde ao repor:
+
+```
+FAILED: the record an end rule stops on was refused for the wrong reason: team-names-selectc: 'Ireland' is the value …
+bad = 1
+```
+
+**Problemas encontrados.** O caso do último registro precisa de
+`allow_partial=True` tanto quanto o da regra de fim — a CORR previa o
+`allow_partial` só para o primeiro. Medido nas duas releases: sem ele, o time
+105 é interceptado pela mesma guarda de ausência, e o caso novo teria nascido
+com o defeito que esta correção conserta. O comentário acima dos dois casos
+diz por que eles o levam.
+
+**Gates.** `--self-check` verde nas duas releases (`SELF-CHECK OK`, exit 0,
+round-trip byte a byte); `ctest -R pes2_selftest|pes2_image` 2/2 `Passed`, com
+`ALL OK` do `check_image.py` incluindo `== the poke, over the whole copy set
+(plan 6.1) ==`; `check_tasks.py` 82 tasks ok. `roms/` intocada — as duas
+corridas de escrita foram sobre cópia em `--tmpdir`, removida pelo `finally`.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/poke.py`
+- `docs/tasks/02-poke-por-conjunto-de-copias.md`

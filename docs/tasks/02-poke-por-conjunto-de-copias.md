@@ -84,12 +84,20 @@ cinco no papel, são **oito** no disco.
 **Resumo do que foi feito.** `tools/pes2/poke.py` grava um nome de time em
 todas as cópias que o tocam, resolvendo a correspondência por
 `team_map.where()` — por conteúdo, nunca por índice —, medindo o slot pela
-distância até o registro seguinte, e recusando em vez de deslocar. Cinco
-recusas, todas exercitadas pelo `--self-check`: nome que não cabe (com o
-tamanho disponível no texto), time ausente de alguma lista, registro em que
-a regra de fim de uma tabela para, registro que um **marcador** ancora, e
-nome com byte fora de 0x20..0x7E. Escrever em `roms/` é recusado sem
+distância até o registro seguinte, e recusando em vez de deslocar. Seis
+recusas, cada uma exercitada pelo `--self-check` e conferida **pelo texto**
+da recusa: nome que não cabe (com o tamanho disponível no texto), time
+ausente de alguma lista, registro em que a regra de fim de uma tabela para,
+registro que é o **último** da tabela, registro que um **marcador** ancora,
+e nome com byte fora de 0x20..0x7E. Escrever em `roms/` é recusado sem
 override.
+
+> Esta frase dizia "cinco recusas, todas exercitadas" até a
+> [CORR-PES2-005](/docs/tasks/CORR-PES2-005.md). Eram quatro guardas
+> distintas: o caso da regra de fim escolhia o time 96 (`IRELAND`), que
+> está fora de `team-names-select2`, e a guarda de time ausente respondia
+> por ele; a de último registro não tinha caso nenhum. `_expect_refusal`
+> passou a conferir a mensagem, e é isso que impede o engano de voltar.
 
 **O achado que dominou a execução: o conjunto de cópias era cinco no papel
 e é oito no disco.** A primeira corrida do `--self-check` gravou as cinco e
