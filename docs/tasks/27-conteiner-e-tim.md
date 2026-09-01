@@ -171,10 +171,12 @@ imagens, 609 exatas e 105 duplas, nenhuma outra**.
    geometria. A §5 Fase 10 do `PLAN-FEATURES` os listava para extrair, e foi
    corrigida.
 
-**A pergunta da bandeira, respondida.** Os quatro `OFS_FLAG_*` caem em
-`/BIN/DAT2D.BIN` do WE2002 em 69798, 72400, 73254 e 73728, e ali estão
+**A pergunta da bandeira, respondida.** Os quatro `OFS_FLAG_COLOURS*` caem em
+`/BIN/DAT2D.BIN` do WE2002 em **69798, 73254, 73728 e 75776**, e ali estão
 halfwords BGR555 com o bit de semitransparência, fechando em
-`0x8000 0x8000 0x8000 0x0000`. São entradas de CLUT. **E o `DAT2D.BIN` do
+`0x8000 0x8000 0x8000 0x0000`. São entradas de CLUT. Os cinco
+`OFS_FLAG_SHAPE_COPY_*` são forma, e estão noutros arquivos — o 72400 que esta
+frase citava é o do `/SELFORM.BIN` (CORR-PES2-015). **E o `DAT2D.BIN` do
 WE2002 tem 23 registros de imagem e zero de CLUT**, nas duas imagens — a
 região de paleta começa em 65876 e o contêiner não a indexa, que é exatamente
 por que Moriero cravou offset. No PES2 o mesmo arquivo indexa. A linha está

@@ -29,11 +29,21 @@ A estrutura de bandeira: forma (o padrão de faixas ou o desenho) e as cores.
 
 ### Vindo da PES2-TASK-27: as cores de bandeira são entradas de CLUT
 
-Medido em 2026-09-01. No WE2002 os quatro `OFS_*` de bandeira caem em
-`/BIN/DAT2D.BIN` nos offsets relativos **69798, 72400, 73254 e 73728**, e o
+Medido em 2026-09-01. No WE2002 os quatro `OFS_FLAG_COLOURS*` caem em
+`/BIN/DAT2D.BIN` nos offsets relativos **69798, 73254, 73728 e 75776**, e o
 que está ali são **halfwords BGR555 com o bit de semitransparência ligado** —
-`0x8dc3 0x8982 0x97bd …`, terminando em `0x8000 0x8000 0x8000 0x0000`, que é o
-fim de uma paleta. São entradas de CLUT, não uma tabela de cor própria.
+`0x8dc3 0x8982 0x97bd …` em 69798 **na imagem japonesa**, terminando em
+`0x8000 0x8000 0x8000 0x0000`, que é o fim de uma paleta. São entradas de
+CLUT, não uma tabela de cor própria. (A European Deluxe é a imagem hackeada e
+lê outros valores nos mesmos offsets; a japonesa é a que reproduz o literal.)
+
+Os cinco `OFS_FLAG_SHAPE_COPY_*` são **outra coisa** — forma de bandeira, não
+cor — e moram noutros arquivos: `/OPENNING.BIN` +20820, `/SELECT.BIN` +5580 e
++286580, `/SELFORM.BIN` +72400 e `/REPLAYS.BIN` +58304. O **72400** que esta
+frase citava até a [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) é o do
+`/SELFORM.BIN`, e em `DAT2D.BIN` +72400 lê-se `0x0d4d 0x118f 0x11d2 0x1613`,
+com o bit alto **apagado** — o contrário do que a frase descreve. Quem localiza
+os nove é `python3 tools/pes2/ofs_map.py <img>`.
 
 **E é por isso que Moriero teve de cravar offset.** No `DAT2D.BIN` do WE2002 —
 nas duas imagens, a japonesa e a European Deluxe — há **23 registros de imagem

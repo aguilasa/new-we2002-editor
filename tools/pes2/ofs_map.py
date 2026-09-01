@@ -39,6 +39,11 @@ OFFSETS_HPP = os.path.join(REPO, "src", "core", "include", "we2002",
                            "Offsets.hpp")
 DECL = re.compile(r"inline constexpr Offset\s+(OFS_\w+)\s*=\s*(\d+)\s*;")
 
+# How many offsets the terminal summary prints per file before saying how
+# many it left out. Four, not three, so that no file of four -- which is
+# what /BIN/DAT2D.BIN holds -- is shown as three with the count saying 4.
+SUMMARY_ROWS = 4
+
 # Where an OFS_* and a table of tools/pes2/tables.py are the same thing in
 # the two games. Only the five that are unambiguous: same file, same kind
 # of content, and the PES2 side already located by marker. The rest need
@@ -168,8 +173,18 @@ def main(argv=None):
             if pes2_sizes:
                 mark = "  in PES2" if p in pes2_sizes else "  NOT IN PES2"
             print(f"  {p:24s} {len(by_file[p]):3d}{mark}")
-            for name, value, rel in sorted(by_file[p], key=lambda r: r[2])[:3]:
+            # The summary shows the first few and then *says how many it is
+            # not showing*. Silently cutting at three put the header's count
+            # and the list under it in contradiction on the same screen, and
+            # that is how `OFS_FLAG_COLOURS_B` -- the fourth of four in
+            # /BIN/DAT2D.BIN -- came to be missing from a list the plan then
+            # copied as complete (CORR-PES2-015).
+            rows = sorted(by_file[p], key=lambda r: r[2])
+            for name, value, rel in rows[:SUMMARY_ROWS]:
                 print(f"      {name:32s} {value:9d} -> {rel}")
+            if len(rows) > SUMMARY_ROWS:
+                print(f"      ... and {len(rows) - SUMMARY_ROWS} more; "
+                      f"the full list is in the markdown output")
         for name, value, why in unplaced:
             print(f"  UNPLACED {name} = {value}: {why}")
     return 0

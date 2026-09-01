@@ -831,10 +831,19 @@ interessam. Neles a geometria da entrada não está declarada em lugar nenhum do
 arquivo, e é um limite a escrever, não a contornar.
 
 **As cores de bandeira são entradas de CLUT, e é por isso que o WE2002 as
-cravava.** Os quatro `OFS_FLAG_*` da §1.4 caem em `/BIN/DAT2D.BIN` nos offsets
-relativos 69798, 72400, 73254 e 73728, e o que está ali são halfwords BGR555
-com o bit de semitransparência — `0x8dc3 0x8982 0x97bd …`, fechando em
-`0x8000 0x8000 0x8000 0x0000`. Só que o `DAT2D.BIN` do WE2002 tem **23
+cravava.** Os quatro `OFS_FLAG_COLOURS*` da §1.4 caem em `/BIN/DAT2D.BIN` nos
+offsets relativos **69798, 73254, 73728 e 75776**, e o que está ali são
+halfwords BGR555 com o bit de semitransparência — `0x8dc3 0x8982 0x97bd …` em
+69798 **na imagem japonesa**; a European Deluxe, que é a hackeada, tem outros
+valores ali —, fechando em `0x8000 0x8000 0x8000 0x0000`.
+
+Os cinco `OFS_FLAG_SHAPE_COPY_*` são **outra coisa** — forma de bandeira, não
+cor — e moram noutros arquivos: `/OPENNING.BIN` +20820, `/SELECT.BIN` +5580 e
++286580, `/SELFORM.BIN` +72400 e `/REPLAYS.BIN` +58304. O **72400** que esta
+frase citava até a [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) é o do
+`/SELFORM.BIN`, e em `DAT2D.BIN` +72400 lê-se `0x0d4d 0x118f 0x11d2 0x1613`,
+com o bit alto **apagado** — o contrário do que a frase descreve. Quem localiza
+os nove é `python3 tools/pes2/ofs_map.py <img>`. Só que o `DAT2D.BIN` do WE2002 tem **23
 registros de imagem e zero de CLUT** nas duas imagens: a região de paleta
 começa em 65876 e o contêiner não a indexa. No PES2 o mesmo arquivo indexa —
 266 CLUTs, cargas em 53372..64284. É a via de entrada da

@@ -3,7 +3,7 @@ id: CORR-PES2-015
 title: "Correção: um dos quatro offsets de bandeira citados é de forma, e mora noutro arquivo; o quarto de cor é 75776"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -97,19 +97,66 @@ que a contagem do cabeçalho e a lista não se contradigam na mesma tela.
 
 ## Verificação
 
-- [ ] os quatro offsets do doc batem com o `ofs_map.py`, arquivo e valor
-- [ ] `grep -rn "72400" docs/` não devolve mais a afirmação de que é cor em
+- [x] os quatro offsets do doc batem com o `ofs_map.py`, arquivo e valor
+- [x] `grep -rn "72400" docs/` não devolve mais a afirmação de que é cor em
       `DAT2D.BIN`
-- [ ] se o `ofs_map.py` mudar, o resumo dele não contradiz mais o próprio
+- [x] se o `ofs_map.py` mudar, o resumo dele não contradiz mais o próprio
       contador por arquivo
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** A lista passou a ser **69798, 73254, 73728 e
+75776**, dita como os quatro `OFS_FLAG_COLOURS*`, e entrou a linha que faltava:
+os cinco `OFS_FLAG_SHAPE_COPY_*` são forma e moram noutros arquivos —
+`/OPENNING.BIN` +20820, `/SELECT.BIN` +5580 e +286580, `/SELFORM.BIN` +72400 e
+`/REPLAYS.BIN` +58304 —, com o comando que os localiza.
 
-**Problemas encontrados:**
+**E a causa foi consertada, não só o sintoma.** O resumo de tela do
+`ofs_map.py` cortava em três por arquivo, e o cabeçalho contava quatro: a
+contradição estava na mesma tela, e é ela que fez o quarto offset sumir do
+doc. Agora mostra quatro e **diz quantos deixou de fora**:
+
+```
+  /BIN/DAT2D.BIN             4
+      OFS_FLAG_COLOURS_SENEGAL          12545758 -> 69798
+      OFS_FLAG_COLOURS                  12549518 -> 73254
+      OFS_FLAG_COLOURS_A                12550296 -> 73728
+      OFS_FLAG_COLOURS_B                12552648 -> 75776
+  /SELECT.BIN               32
+      … quatro linhas …
+      ... and 28 more; the full list is in the markdown output
+```
+
+4 + 28 = 32, que é o que o cabeçalho diz.
+
+**Em qual imagem o literal foi lido, medido.** O `0x8dc3 0x8982 0x97bd` de
+69798 reproduz na **japonesa**; a European Deluxe, que é a hackeada, lê
+`0x7ec2 0x7ec2 0x77ff` no mesmo offset. Os dois docs passaram a dizer qual.
+
+E o `DAT2D.BIN` **+72400** — o número trazido do outro arquivo — lê
+`0x0d4d 0x118f 0x11d2 0x1613` nas duas imagens, com o bit alto **apagado**, o
+contrário do que a frase descrevia. Está registrado no plano.
+
+**Problemas encontrados.** Um: **a `docs/tasks/27-conteiner-e-tim.md` repetia
+os mesmos quatro offsets**, fora da lista da CORR — é o Log da task que gerou
+a frase. Corrigido junto.
+
+O `docs/samples/pes2-ofs-map.md` é **gerado** pelo mesmo `ofs_map.py` e já
+estava certo (traz `OFS_FLAG_SHAPE_COPY_4` sob `/SELFORM.BIN`): o corte em
+três era só do resumo de tela. Regenerado para conferir — **idêntico byte a
+byte** ao versionado, e duas corridas dão o mesmo arquivo.
+
+**Gates.** Os quatro offsets e os cinco de forma saíram do `ofs_map.py`; os
+valores lidos nos dois discos saíram do `iso.py`. Markdown gerado idêntico e
+determinístico. `ctest -R pes2_selftest|pes2_image` 2/2 `Passed`;
+`check_tasks.py` 82 tasks ok. `roms/` intocada.
 
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-PES2-PSX.md`
+- `docs/tasks/14-bandeiras.md`
+- `tools/pes2/ofs_map.py`
+- `docs/tasks/27-conteiner-e-tim.md` (não previsto pela CORR)
