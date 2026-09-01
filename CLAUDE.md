@@ -620,9 +620,13 @@ Quatro coisas que custam tempo se descobertas tarde:
   fosse lista de elenco desalinha tudo depois do primeiro nome repetido.
   §1.5 do plano.
 
-Nada de PES2 tem task em `docs/tasks/concluidos/progresso.md` — o projeto está
-**fora do pool** enquanto for exploratório, e isso é escolha, não
-esquecimento.
+**PES2 entrou no pool em 2026-09-01**, e o backlog dele é
+[docs/tasks/progresso.md](docs/tasks/progresso.md) — 25 tasks nas seis fases do
+plano, cada uma com `fonte_de_verdade` apontando para a seção que a mede. Até
+essa data o projeto estava fora do pool *por escolha*, e o backlog era a §7 do
+[docs/PES2-AJUSTES.md](docs/PES2-AJUSTES.md); aquela seção agora é registro
+histórico. O que sobrou de aberto lá é um item só, e não é código: instalar
+`numpy` e um desmontador MIPS, decisão do dono da máquina.
 
 ## Arquitetura
 

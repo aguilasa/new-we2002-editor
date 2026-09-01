@@ -206,17 +206,15 @@ e hoje **só o `roundtrip` a cumpre**.
       explica que a proibição vale para o **`newWe2002`**, e que a
       release é justamente a segunda amostra deste projeto. Quem ler só o
       `CLAUDE.md` conclui o contrário.
-- [→] **Nenhuma task de PES2 em
-      [/docs/tasks/concluidos/progresso.md](/docs/tasks/concluidos/progresso.md).** É uma
-      decisão a tomar, não necessariamente um erro: as seis fases do plano
-      poderiam virar tasks com `fonte_de_verdade` apontando para as seções
-      dele, como manda [.claude/rules/tasks.md](../.claude/rules/tasks.md),
-      ou o projeto pode ficar fora do pool enquanto for exploratório.
-      **Adiado por decisão do usuário em 2026-08-30**, para não misturar
-      criação de tarefa com esta rodada. O `CLAUDE.md` já diz, em uma
-      linha, que o projeto está fora do pool *por escolha* — o que remove
-      o "sem ninguém ter decidido". Enquanto isso, **o backlog de PES2 é
-      a §7 deste arquivo**, não o `progresso.md`. Item vivo na **§7.1**.
+- [x] **Nenhuma task de PES2 no `progresso.md`.** Era uma decisão a tomar,
+      não um erro: as seis fases do plano poderiam virar tasks com
+      `fonte_de_verdade` apontando para as seções dele, como manda a
+      [.claude/rules/tasks.md](../.claude/rules/tasks.md), ou o projeto podia
+      ficar fora do pool enquanto exploratório. **Adiado em 2026-08-30** para
+      não misturar criação de tarefa com aquela rodada, e **decidido em
+      2026-09-01**: o projeto entra no pool, com 25 tasks em
+      [/docs/tasks/progresso.md](/docs/tasks/progresso.md). Enquanto esteve
+      adiado, o backlog foi a §7 deste arquivo; agora não é mais.
 - [→] **Preparo para as Fases 3 e 4:** `numpy` não está instalado
       (confirmado), e não há desmontador MIPS — `ghidra`, `radare2` e
       `rizin` todos ausentes. **Não instalado nesta execução**: instalar
@@ -310,17 +308,28 @@ varredura da §7.4 e é onde a Fase 3 começa.
 
 ---
 
-## 7. Pendências — o backlog de PES2 mora aqui
+## 7. Pendências — o backlog de PES2 **morava** aqui
 
-Enquanto o projeto estiver fora do `progresso.md` (§5), **é esta seção que
-faz as vezes dele.** O que aparecer para fazer entra aqui, não lá.
+Esta seção fez as vezes do `progresso.md` enquanto o projeto estava fora do
+pool. **Deixou de estar em 2026-09-01**, e desde então o backlog é
+[/docs/tasks/progresso.md](/docs/tasks/progresso.md) — 25 tasks nas seis
+fases, cada uma com `fonte_de_verdade` apontando para a seção do plano que a
+mede. O que aparecer para fazer entra **lá**, não aqui.
+
+O que sobrou desta seção é registro do que a revisão de 2026-08-30 apontou, e
+de onde cada item foi parar. Um único item continua vivo, e por não ser
+trabalho de código: a instalação de pacote da §7.1.
 
 ### 7.1 Decisões do usuário, não de código
 
-- [ ] **Criar as tasks das seis fases** em
-      [/docs/tasks/concluidos/progresso.md](/docs/tasks/concluidos/progresso.md), com
-      `fonte_de_verdade` apontando para as seções do plano — ou decidir
-      que o projeto segue fora do pool. Adiado em 2026-08-30.
+- [x] **Criar as tasks das seis fases** — feito em 2026-09-01, em
+      [/docs/tasks/progresso.md](/docs/tasks/progresso.md), com
+      `fonte_de_verdade` apontando para as seções do plano como manda a
+      [.claude/rules/tasks.md](../.claude/rules/tasks.md). São **25 tasks**:
+      uma de decisão de ferramental, três que fecham a Fase 2 pelo `poke` de
+      validação, seis na Fase 3, seis na Fase 4, cinco na Fase 5 e quatro na
+      Fase 6. O `correcoes-progresso.md` do ciclo nasceu junto, vazio, com a
+      numeração `CORR-PES2-XXX`.
 - [ ] **`numpy`** para varredura de padrão em 466 MB em tempo civilizado,
       e um **desmontador MIPS** (`ghidra`, `radare2` ou `rizin` — os três
       ausentes). Nada das Fases 0–2 precisa deles; a Fase 4 precisa, se
