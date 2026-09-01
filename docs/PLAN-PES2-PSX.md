@@ -1045,7 +1045,7 @@ O `ctest` deste repositório conhece os dois casos desde 2026-08-30:
 | Teste | Precisa de | O que faz |
 |---|---|---|
 | `pes2_selftest` | nada | monta um disco sintético de 24 setores em `/tmp` e exercita a aritmética de setor, o par Form 1 × Form 2, o caso `outside` e as **três recusas** do `write_file` — crescer, misto, fora da trilha |
-| `pes2_image` | `WE2002_PES2_IMAGE` | âncoras (§1.13), contagens e digests (§1.6), o alinhamento das cinco listas de time (§6.1), a relação entre as duas tabelas de jogador, e a `docs/PES2-NOMES.md` contra o disco. Com `WE2002_PES2_IMAGE_B`, `_CARD` e `_TMPDIR` acrescenta o diff de releases (§1.12), o alinhamento de cartão (§3.3) e o controle negativo |
+| `pes2_image` | `WE2002_PES2_IMAGE` | âncoras (§1.13), contagens e digests (§1.6), o alinhamento das oito listas de time (§6.1), a relação entre as duas tabelas de jogador, e a `docs/PES2-NOMES.md` contra o disco. Com `WE2002_PES2_IMAGE_B`, `_CARD` e `_TMPDIR` acrescenta o diff de releases (§1.12), o alinhamento de cartão (§3.3), o controle negativo e o `poke` sobre o conjunto de cópias (§6.1) |
 | `pes2_boot` | `PES2_IMAGE`, DuckStation, o `:98` | o boot medido da §3.4, ~90 s |
 
 Sem a variável, os dois últimos se reportam **skipped**, como já fazem os
@@ -1138,7 +1138,7 @@ Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
   (§1.6), com contagem e digest reconferidos por ferramenta.
 - Confirmar as cópias (§1.5) e procurar as que faltam. **Feito** — havia
   uma nona, em caixa mista no `REPLAYS.BIN`, e a correspondência entre as
-  cinco listas de nome de time está em
+  oito listas de nome de time (§6.1) está em
   [/docs/samples/pes2-team-lists.md](/docs/samples/pes2-team-lists.md),
   gerada por `tools/pes2/team_map.py`. Ver a §6.1.
 - **Falta:** o primeiro `poke` de validação — renomear `PIEMONTE`, dentro

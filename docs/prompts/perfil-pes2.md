@@ -194,7 +194,7 @@ foi quebrada, não reexecutá-las.
   número medido — ou só no arquivo?
 - A gravação passou pelo `iso.py roundtrip`, e o `negative` provou que a guarda
   sabe ficar vermelha?
-- O texto foi escrito na tabela certa? **As cinco cópias de nome de time não são
+- O texto foi escrito na tabela certa? **As oito cópias de nome de time não são
   a mesma lista** — casar por índice grava no time errado com resultado
   plausível em tela (§6.1)
 - A medição foi repetida na **outra** release?

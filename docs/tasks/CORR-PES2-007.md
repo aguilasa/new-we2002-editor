@@ -3,7 +3,7 @@ id: CORR-PES2-007
 title: "Correção: três textos vivos ainda dizem cinco listas, e a tabela de testes do plano não conhece o `poke`"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -101,19 +101,50 @@ se media naquele dia. Mesma razão pela qual a linha 51 do perfil
 
 ## Verificação
 
-- [ ] `grep -rn "cinco listas\|cinco cópias" docs/ CLAUDE.md` só devolve
+- [x] `grep -rn "cinco listas\|cinco cópias" docs/ CLAUDE.md` só devolve
       `PES2-AJUSTES.md`, os Logs de task e as frases datadas ("eram cinco
       até…", "gravou as cinco conhecidas")
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] a conferência de link de `.claude/rules/links.md` sem quebrado novo
-- [ ] `roms/` intocada
+- [x] `python3 tools/check_tasks.py` verde
+- [x] a conferência de link de `.claude/rules/links.md` sem quebrado novo
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** Os três textos vivos passaram a dizer oito, e a
+célula do `pes2_image` passou a citar o `poke` da §6.1 — que a PES2-TASK-02
+acrescentou ao mesmo teste e a tabela não registrava. A célula lista agora o
+que o `_TMPDIR` habilita de fato: o controle negativo **e** o `poke` sobre o
+conjunto de cópias, que é o que o `check_image.py` roda (linhas 91-94). A
+linha 1141 ganhou o ponteiro `(§6.1)`, onde a tabela das oito está.
 
-**Problemas encontrados:**
+O que sobra de "cinco" na varredura é exatamente o conjunto que a CORR manda
+não tocar:
+
+```
+docs/PES2-AJUSTES.md:298,400        registro datado de 2026-08-30
+docs/PLAN-PES2-PSX.md:1227          "gravar as cinco cópias que este documento listava até"
+docs/tasks/04-poke-de-validacao.md:53   "tinha cinco listas e tem oito"
+docs/tasks/02-poke-…:149            a nota que diz que o AJUSTES fica como está, de propósito
+docs/PARIDADE-FUNCIONAL.md:104      as cinco cópias da tabela de bandeira do WE2002 — outro jogo
+```
+
+A do `PARIDADE-FUNCIONAL.md` não estava prevista na CORR e é de outro projeto
+(formato de bandeira do WE2002); fica como está pelo motivo mais simples: não
+fala de PES2.
+
+**Problemas encontrados.** Nenhum. A linha 51 do perfil (*"Eram cinco no papel
+até 2026-09-01"*) continua correta e não foi tocada, como a CORR pede — é o
+que explica por que a armadilha nº 2 diz oito.
+
+**Gates.** `check_tasks.py` 82 tasks ok; a conferência de forma e de destino de
+link da `.claude/rules/links.md` sem quebrado novo (os cinco destinos que ela
+acusa são placeholder de prompt e transcrição em `concluidos/`, os dois casos
+que a própria regra exclui). `roms/` intocada — correção de doc, sem leitura de
+imagem.
 
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-PES2-PSX.md`
+- `docs/prompts/perfil-pes2.md`
