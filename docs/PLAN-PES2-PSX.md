@@ -595,7 +595,9 @@ a mesma disciplina do resto do repositório:
 ### 3.1 O que já existe na máquina
 
 `cdrdao`, Python 3, ImageMagick, `xdotool`, `ffmpeg`, `Xvfb`, Wine (via
-Bottles), Bottles, PCSX2, e as ferramentas deste repositório.
+Bottles), Bottles, PCSX2, e as ferramentas deste repositório. Desde
+2026-09-01, também `numpy`, `radare2` e `mipsel-linux-gnu-objdump` — ver a
+§3.2, que é quem registra a decisão e como invocá-los.
 
 E, em `tools/pes2/`, o que a Fase 0 deixou pronto. Nenhuma delas depende do
 `we2002_core` nem do Qt; são Python 3 e shell, e só o `iso.py` é importado
@@ -634,12 +636,46 @@ máquina, instalado pelo usuário em 2026-08-29:
 Isso destrava o oráculo da §4.1 e, de brinde, a alavanca da §4.2.3 já
 tem munição: ver a §3.3.
 
-O que ainda falta, e não bloqueia agora:
+O que faltava — `numpy` e um desmontador MIPS — **foi instalado em
+2026-09-01** (PES2-TASK-01), a pedido do dono da máquina:
 
-| Falta | Para quê | Bloqueia |
+| Ferramenta | Versão | Como entrou |
 |---|---|---|
-| `numpy` | varredura de padrão em 466 MB em tempo civilizado | conforto, não capacidade |
-| Desmontador MIPS — Ghidra, ou `radare2`/`rizin` | ler o código que consome a tabela, quando a estatística empacar | Fase 4, se ela empacar |
+| `numpy` | 2.5.2 | `pip3 install numpy`, no Python 3.13 do `mise` |
+| `radare2` | 5.5.0 | `apt-get install radare2` |
+| `mipsel-linux-gnu-objdump` | 2.42 | `apt-get install binutils-mipsel-linux-gnu` |
+
+**Ghidra ficou de fora, e a razão é escrita:** não está nos repositórios do
+Zorin 18.1, o `.zip` oficial pesa ~1,2 GB e exige JDK 21 — a máquina tem o 17.
+O que ele traz a mais é o **decompilador**; para *ler uma rotina de acesso a
+tabela*, que é o uso previsto na §4.2.4, o par acima basta. Se a Fase 4 pedir
+decompilação de verdade, instalar Ghidra é uma decisão de meia hora tomada
+naquele momento, e não antes.
+
+São **dois** desmontadores de propósito, e não é redundância: o `objdump` é
+determinístico e roteirizável — a saída entra em `diff` sem esforço —, e o
+`radare2` é o que se usa para navegar, seguir referência cruzada e achar quem
+lê um endereço.
+
+**O overlay não é ELF, e os dois precisam da base explícita.** O executável de
+boot é `PS-X EXE`: cabeçalho de 2.048 B, `t_addr` em `+0x18` e `pc0` em `+0x10`
+— no `(EsIt)` valem `0x80010000` e `0x80010008`. Medido em 2026-09-01, os dois
+comandos abaixo desmontam o mesmo laço de zeragem de BSS na entrada:
+
+```sh
+# objdump: --adjust-vma = t_addr − 0x800, para o cabeçalho não deslocar tudo
+mipsel-linux-gnu-objdump -D -b binary -m mips:3000 -EL \
+  --adjust-vma=0x8000f800 --start-address=0x80010000 SLES_039.57
+
+# radare2: mesma conta no -m; ele reconhece PS-X EXE e já marca o entry0
+r2 -qq -a mips -b 32 -e cfg.bigendian=false -m 0x8000f800 \
+   -c 's 0x80010008; pd 6' SLES_039.57
+```
+
+Os demais overlays (`SELECT.BIN` e irmãos) **não** têm esse cabeçalho: são
+código realocado, e a base sai de onde o carregador os põe, não do arquivo.
+Descobri-la é trabalho da Fase 4 — até lá, desmontar overlay com base chutada
+produz alvo de `jal` que parece endereço e não é.
 
 PCSX2 **não serve** — é PS2.
 

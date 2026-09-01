@@ -24,7 +24,7 @@ quadro; a §7 vira registro histórico.
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | `numpy` e desmontador MIPS — decisão do dono da máquina | 0 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | `numpy` e desmontador MIPS — decisão do dono da máquina | 0 | — | ✅ Concluído | 2026-09-01 | ⬜ pendente |
 | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `poke.py` — gravação pelo conjunto de cópias | 2 | — | ⬜ Pendente | — | — |
 | [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar e capturar | 2 | — | ⬜ Pendente | — | — |
 | [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de PIEMONTE em todas as telas — **fecha a Fase 2** | 2 | 02, 03 | ⬜ Pendente | — | — |
@@ -66,7 +66,8 @@ sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 verdes desde 2026-08-30, com ferramenta versionada e reexecutável (§5.1 e §5,
 Fase 1 do plano). A única task de fase 0 no quadro — a PES2-TASK-01 — é uma
 **decisão do dono da máquina** que sobrou da §7.1 do `PES2-AJUSTES.md`, e não
-bloqueia nada até a Fase 4.
+bloqueava nada até a Fase 4. Foi tomada em 2026-09-01, com instalação: a
+Fase 0 está inteira fechada.
 
 **A Fase 2 entra com um item só.** A varredura, as contagens, os digests e a
 correspondência entre as cinco listas estão feitos; falta o `poke` de
@@ -85,7 +86,7 @@ para o objetivo completo e o modelo de verificação.
 
 | Fase | Tasks | O que entrega |
 | --- | --- | --- |
-| 0 — Infra | 01 | `iso.py`, round-trip, controle negativo, emulador — **feito**; sobra a decisão de ferramental |
+| 0 — Infra | 01 | `iso.py`, round-trip, controle negativo, emulador e o ferramental das fases 3–4 — **fechada** |
 | 1 — Diferencial barato | — | âncoras `OFS_*`, diff entre releases — **fechada** |
 | 2 — Inventário de texto | 02 a 04 | o `poke` de validação, verificado em tela |
 | 3 — O registro de jogador | 05 a 10 | campo, deslocamento, largura em bits, domínio |
@@ -293,10 +294,12 @@ alcançam qualquer task.
 
 ## Pendências externas
 
-- **`numpy` e um desmontador MIPS** (`ghidra`, `radare2` ou `rizin` — os três
-  ausentes). Instalar pacote na máquina é decisão do dono dela. Nada das
-  Fases 0 a 3 precisa deles; a Fase 4 precisa **se** a estatística empacar. É
-  a PES2-TASK-01, e ela existe para dar dono à decisão, não para tomá-la.
+- ~~**`numpy` e um desmontador MIPS**~~ — **resolvido em 2026-09-01** pela
+  [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md), a pedido do
+  dono da máquina: `numpy` 2.5.2, `radare2` 5.5.0 e
+  `mipsel-linux-gnu-objdump` 2.42. **Ghidra ficou de fora**, com razão escrita
+  na §3.2 do plano — se a Fase 4 pedir decompilação de verdade, a decisão se
+  retoma ali.
 - **Os dois FAQs de terceiros** que sustentam o mapa fictício → real de
   `docs/PES2-NOMES.md` não entram no git, e o GameFAQs recusa requisição
   automatizada (HTTP 403 e desafio Cloudflare). O que entra é o `faq_check.py`,

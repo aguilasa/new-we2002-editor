@@ -330,10 +330,14 @@ trabalho de código: a instalação de pacote da §7.1.
       validação, seis na Fase 3, seis na Fase 4, cinco na Fase 5 e quatro na
       Fase 6. O `correcoes-progresso.md` do ciclo nasceu junto, vazio, com a
       numeração `CORR-PES2-XXX`.
-- [ ] **`numpy`** para varredura de padrão em 466 MB em tempo civilizado,
-      e um **desmontador MIPS** (`ghidra`, `radare2` ou `rizin` — os três
-      ausentes). Nada das Fases 0–2 precisa deles; a Fase 4 precisa, se
-      empacar. Instalar pacote é decisão do dono da máquina.
+- [x] **`numpy`** para varredura de padrão em 466 MB em tempo civilizado,
+      e um **desmontador MIPS** — resolvido em 2026-09-01 (PES2-TASK-01), a
+      pedido do dono da máquina: `numpy` 2.5.2, `radare2` 5.5.0 e
+      `mipsel-linux-gnu-objdump` 2.42. **Ghidra ficou de fora** — fora dos
+      repositórios do Zorin 18.1, ~1,2 GB, e exige JDK 21 contra o 17 da
+      máquina; o que ele traz a mais é o decompilador, e a §4.2.4 pede leitura
+      de rotina, não decompilação. Detalhe e os comandos com base explícita na
+      §3.2 do plano.
 
 ### 7.2 Dívida das ferramentas novas
 
