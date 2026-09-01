@@ -39,11 +39,21 @@ no `.bin`, como o `ed.exe` faz no WE2002.
   `Database` do core é declarado sobre o layout do WE2002. Fazer um `if` de
   jogo dentro daquele core estragaria os golden tests que hoje o sustentam.
 - **Não** mexer nas trilhas de áudio (2–8), no `MOVIE/ISS_2002.STR` (37 MB)
-  nem nos `SD/*.RA` (117 MB de streaming). Nada de banco de dados mora ali.
+  nem nos `/SD/DA/*.DA` (112 MB de CD-XA). Nada de banco de dados mora ali, e
+  os `.DA` nem estão no Track 1 (§6.5).
+
+  **Emenda de 2026-09-01: os `SD/*.RA` saíram desta linha.** A razão original
+  continua verdadeira — dado de jogo não mora ali —, mas ela mede o objetivo
+  errado depois que a Fase 7 entrou: `.RA` não é streaming, é **banco de som
+  VAB**, e editar som é feature de editor. Medição na §1.14, task na
+  [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md). O `MOVIE/` e os `.DA`
+  continuam fora.
 - **Não** recalcular EDC/ECC. O `ed.exe` não recalcula e o jogo não confere;
   gravação in-place preservando os 280 bytes de cauda é a política herdada.
 - **Não** decidir agora a linguagem nem a UI do editor. O mapa vem antes;
-  sem ele não há o que a UI mostre.
+  sem ele não há o que a UI mostre. A Fase 7 entra nessa mesma conta: um
+  editor desenhado sem saber que há grade de imagem × paleta nasce sem lugar
+  para ela, e é por isso que a PES2-TASK-30 é portão da PES2-TASK-22.
 
 ### Definição de pronto (Fase 6)
 
@@ -596,6 +606,82 @@ de ser outra coisa — o fim da tabela de texto que as precede, uma
 assinatura de conteúdo, ou um offset relativo a um marcador próximo.
 Decidir isso caso a caso é trabalho da Fase 5.
 
+### 1.14 Os assets do disco são os mesmos do WE2002 — medido
+
+A §1.4 mostrou que os dois jogos compartilham a árvore de disco. Esta seção
+mostra que compartilham também o **formato de dentro dos arquivos** — e é o
+que traz para o PES2 o [PLAN-FEATURES](/docs/PLAN-FEATURES.md) inteiro, que
+foi escrito para o WE2002 a partir das ferramentas do CARP.
+
+Medido em **2026-09-01**, extraindo os contêineres das duas imagens com o
+`tools/pes2/iso.py` — que, notado de passagem, **lê a imagem do WE2002 sem
+adaptação**, e portanto já entrega a Fase 8 daquele plano.
+
+**(a) O cabeçalho de contêiner é um array de ponteiros de RAM, e a largura
+bate arquivo a arquivo.** As primeiras palavras de 32 bits de todo `BIN/*.BIN`
+são endereços da RAM da PSX (`0x800xxxxx`); o fluxo comprimido começa depois
+da última. Contando quantas palavras cada arquivo tem, o histograma de
+`/BIN/` é **o mesmo nos dois jogos**:
+
+| palavras de cabeçalho | WE2002 (JP) | PES2 `(EsIt)` | exemplo |
+|---:|---:|---:|---|
+| 0 | 1 | 1 | `DEMODATA.BIN` |
+| 1 | 2 | 5 | `T_NAME*.BIN`, `DAT2D_I.BIN` |
+| 2 | 20 | 30 | `DAT2D.BIN`, `LOGO.BIN`, `TITLE.BIN` |
+| 4 | 1 | 1 | `DATSEL*.BIN` |
+| 6 | 3 | 3 | `CGAS.BIN` |
+| 7 | 39 | 39 | `CGAF.BIN` |
+| 8 / 9 / 15 / 18 | 1 cada | 1 cada | `CGEU`, `CGAM`, `CGLE`, `MODEL` |
+| 12 | **105** | **105** | `TEX_*.BIN` |
+| 26 / 28 / 29 | 9 / 7 / 2 | 9 / 7 / 2 | `GRDM_*`, `ENDCSR` |
+| 46 / 204 | 1 / 1 | 1 / 1 | `ENDANIME`, `ANIME` |
+| **total `form1` em `/BIN/`** | **195** | **208** | |
+
+Os treze de diferença são todos cópia de idioma, e caem nos baldes de 1, 2 e
+7 palavras — os únicos três que se movem. Todo o resto é igual **na contagem**,
+não só na forma.
+
+**(b) O fluxo comprimido é o mesmo codec, e no começo os mesmos bytes.**
+Comparando `BIN/DAT2D.BIN` do WE2002 japonês (81.124 B) com o do PES2 `(EsIt)`
+(68.556 B), a partir do byte 8 de cada um:
+
+```
+prefixo comum = 2.070 bytes byte a byte idênticos
+```
+
+Dois jogos diferentes, de anos diferentes, com 2 kB de fluxo comprimido
+idêntico. É o mesmo compressor e, no começo, o mesmo gráfico. A §2 do
+`PLAN-FEATURES` já provara que o descompressor do `WECompressor` consome esse
+arquivo no lado WE2002; o prefixo o estende ao PES2.
+
+**(c) O `.RA` de áudio começa com um cabeçalho VAB da Sony, idêntico nos dois
+discos.** `/SD/W2002J00.RA` e `/SD/PES2000.RA` estão **no mesmo LBA 20000**, e
+os 32 primeiros bytes são o mesmo cabeçalho:
+
+```
+"VABp"  versão 7  vabid 0  fsize 251.152  programas 4  tones 64
+VAGs 29  mvol 127  pan 64
+```
+
+O `fsize` de 251 kB num arquivo de 20 MB diz que o `.RA` é **mais de um
+banco**. Isto corrige a §5 Fase 14 do `PLAN-FEATURES`, que registra que o
+índice do `.RA` não é documentado: o começo dele é um VAB comum, que é.
+
+**(d) Os estádios também batem.** 51 arquivos `GDC_*`/`GRDM_*` em cada jogo,
+`GDC_AD.BIN` no **mesmo LBA 12560** nos dois. São TMD, e ficam fora — pelo
+motivo do [PLAN-STADIUMS](/docs/PLAN-STADIUMS.md), que é projeto e não
+feature. Registrado aqui para não ser redescoberto.
+
+**O que isto muda no custo.** As fases 8 a 14 do `PLAN-FEATURES` não precisam
+ser refeitas para o PES2: o formato é o mesmo, e a Fase 8 já está pronta do
+lado de cá. O que sobra é a Fase 7 deste plano — verificar, e adaptar onde a
+localização europeia multiplicou os arquivos.
+
+**A divergência aberta.** A §5c do `PLAN-FEATURES` diz que o fluxo de
+`TEX_00.BIN` começa em **28**; a varredura de (a) diz **48** — 12 palavras,
+uma nula no índice 6, nos dois jogos. Uma das duas leituras está errada, e a
+[PES2-TASK-26](/docs/tasks/26-codec-lzss.md) tem de decidir qual por medição.
+
 ---
 
 ## 2. Ressalva legal
@@ -1090,7 +1176,41 @@ analogia".
 
 ### Fase 6 — Editor
 
-Só aqui se decide linguagem e UI. As três condições da §0 são o portão.
+Só aqui se decide linguagem e UI. As três condições da §0 são o portão, e a
+Fase 7 é a quarta: a lista de telas que a PES2-TASK-30 entrega.
+
+### Fase 7 — Assets do disco
+
+**Corre em paralelo com as Fases 3 a 5**, não depois. Nada aqui depende do
+registro de jogador nem do mapa, e as tasks 26, 27 e 31 são **leitura pura** —
+sem emulador, sem cartão, sem imagem gravável. São o trabalho barato que
+continua quando a Fase 2 trava.
+
+O que a §1.14 já entrega, e que esta fase gasta em vez de redescobrir: o
+formato é o do WE2002, o `PLAN-FEATURES` já o descreve fase a fase, e a
+camada ISO9660 (Fase 8 de lá) já está pronta e verde no `iso.py`.
+
+- **Codec LZSS** ([PES2-TASK-26](/docs/tasks/26-codec-lzss.md)). Descomprimir
+  os 208 contêineres das duas releases; round-trip
+  `decompress(compress(x)) == x`. Decide a divergência do `TEX_00` da §1.14.
+- **Contêiner e TIM** ([PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md)).
+  Lista de entradas, `DATA_HEADER`, 4 e 8 bpp com CLUT, export PNG. É a de
+  risco mais alto — o único ponto onde o formato ainda é hipótese. Também é a
+  via provável para as bandeiras da Fase 4: os quatro `OFS_FLAG_COLOURS_*`
+  caem em `BIN/DAT2D.BIN` (§1.4).
+- **Cópias de idioma**
+  ([PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md)). `T_NAME_I` e
+  `T_NAME_S` são byte a byte idênticos; gravar um só repete a §6.1 uma camada
+  acima. Varrer o conjunto, nunca declará-lo.
+- **Gravação** ([PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md)).
+  Fit-or-fail, recompressão só do editado, e a decisão de EDC/ECC entre a §6.7
+  daqui e a §5(b) de lá.
+- **Fechamento** ([PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md)). Os
+  três números por eixo, e a lista do que a UI tem de cobrir. **É portão da
+  PES2-TASK-22.**
+- **Áudio** ([PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md)). VAB, VAG,
+  ADPCM. **Independente e fora do portão** — dá para parar antes dela sem
+  perder o salto de valor.
 
 ---
 
@@ -1236,6 +1356,37 @@ aponta para o lugar errado.
 
 ---
 
+### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
+
+A §6.1 vale para as tabelas de texto. Vale igual para os assets, e o caso mais
+puro está medido: `/BIN/T_NAME_I.BIN` e `/BIN/T_NAME_S.BIN` têm 62.196 bytes
+cada e são **byte a byte idênticos**. O jogo escolhe por idioma.
+
+Gravar um e deixar o outro produz um disco que parece certo — para quem joga
+no idioma que foi gravado. O modo de falha é o mesmo da §6.1, com o agravante
+de ser **invisível na verificação** se o roteiro do emulador não trocar de
+idioma.
+
+Os outros pares que a §1.4 lista têm de ser tratados do mesmo jeito:
+`DAT2D_I`/`DAT2D_S`, `DATSEL_I`/`DATSEL2I`/`DATSEL3I`, `LC_*`,
+`FNOTE_{G,I,S}`. E como na §6.1, **o conjunto se varre, nunca se declara**.
+
+### 6.13 O cabeçalho de contêiner tem largura variável — 16 larguras medidas
+
+Não existe "cabeçalho de 8 bytes". O que existe é um array de ponteiros de RAM
+cuja **contagem é propriedade do arquivo**: 0 palavras em `DEMODATA.BIN`, 2 em
+`DAT2D.BIN`, 12 em todo `TEX_*`, 204 em `ANIME.BIN` — dezesseis larguras
+distintas em `/BIN/`, e o mesmo histograma nos dois jogos (§1.14).
+
+Cravar uma constante lê o fluxo comprimido a partir do lugar errado em 205 dos
+208 arquivos. A largura se **deriva**, palavra a palavra, enquanto o valor
+couber na RAM da PSX.
+
+E o zero conta como palavra de cabeçalho: `TEX_00.BIN` tem uma nula no índice
+6, nos dois jogos, com ponteiros válidos depois. Parar no primeiro zero
+encurta o cabeçalho pela metade — que é, muito provavelmente, a origem da
+divergência de `28` × `48` que a §1.14 deixou aberta.
+
 ## 7. Entregáveis
 
 | Fase | Entregável |
@@ -1247,3 +1398,4 @@ aponta para o lugar errado.
 | 4 | estrutura de time, formação, uniforme, bandeira, Master League |
 | 5 | `pes2_map.json` + gerador + round-trip headless |
 | 6 | editor |
+| 7 | codec LZSS; extrator de entrada gráfica; gravação fit-or-fail; conjunto de cópias por idioma; e, fora do portão, o áudio |

@@ -4,7 +4,7 @@ title: "Decisão de linguagem e UI do editor"
 type: decisão
 category: projeto
 phase: 6
-depends_on: ["PES2-TASK-21"]
+depends_on: ["PES2-TASK-21", "PES2-TASK-30"]
 fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §5 (Fase 6)"
 status: pendente
 ---
@@ -18,6 +18,10 @@ status: pendente
   ele não há o que a UI mostre."*
 - **Esta task é o "agora" que a §0 adiava.** Ela só abre depois da
   PES2-TASK-21, e é a primeira do projeto que decide sobre o editor.
+- **E depois da PES2-TASK-30**, pelo mesmo argumento uma camada adiante: a
+  Fase 7 acrescentou assets — grade de imagem × paleta, import/export de PNG,
+  cópias por idioma. Decidir a UI sem a lista que a 30 entrega é desenhar uma
+  janela sem lugar para metade do que o editor vai mostrar.
 
 ---
 

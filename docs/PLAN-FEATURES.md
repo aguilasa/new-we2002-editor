@@ -450,3 +450,46 @@ diante dá para parar a qualquer momento com valor entregue:
 
 A Fase 7 (Windows) não conflita: só a Fase 12 mexe em Qt, e as camadas de 8 a
 11 são portáveis por construção.
+
+---
+
+## 11. O mesmo formato serve ao PES2 — medido em 2026-09-01
+
+Este plano foi escrito para o WE2002. O **PES2 (PSX)** — o quarto projeto do
+repositório, plano em [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md) — usa os
+mesmos formatos, e isso está medido, não suposto. A evidência inteira está na
+§1.14 daquele plano; o resumo:
+
+| Eixo | Achado |
+|---|---|
+| Cabeçalho de contêiner | array de ponteiros de RAM `0x800xxxxx`, **largura variável**; o histograma de `/BIN/` é o **mesmo** nos dois jogos (105 arquivos com 12 palavras, 39 com 7, 9 com 26, 1 com 204, …) |
+| Fluxo LZSS | `BIN/DAT2D.BIN` do WE2002 japonês e do PES2 `(EsIt)` têm **2.070 bytes de prefixo comprimido byte a byte idênticos** |
+| `.RA` de áudio | mesmo LBA 20000, e os **32 bytes de cabeçalho idênticos**: magic `VABp`, versão 7, 4 programas, 64 tones, 29 VAGs |
+| Estádios | 51 arquivos `GDC_*`/`GRDM_*` em cada jogo, `GDC_AD.BIN` no **mesmo LBA 12560** |
+
+Três consequências para **este** plano:
+
+- **A Fase 8 já existe do outro lado.** O `tools/pes2/iso.py` faz
+  `ls`/`extract`/`inject` preservando setor e cauda, tem round-trip dos 244
+  arquivos e um controle negativo — e **lê a imagem do WE2002 sem adaptação**.
+  Quem for executar a Fase 8 aqui deve começar dali, não do zero. A direção do
+  empréstimo se inverteu.
+- **A §5 Fase 14 está desatualizada num ponto.** Ela diz que o índice do `.RA`
+  não é documentado. O começo do arquivo é um cabeçalho **VAB** da Sony, que é
+  formato público; o `fsize` de 251 kB num arquivo de 20 MB indica cadeia de
+  bancos, não índice proprietário.
+- **A §5c tem uma divergência aberta.** Ela registra o fluxo de `TEX_00.BIN`
+  começando em **28**; a varredura de cabeçalho diz **48** — 12 palavras, uma
+  nula no índice 6, nos dois jogos. Quem medir primeiro corrige os dois
+  arquivos. A [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) tem isso no
+  critério de conclusão.
+
+**O que continua separado é o código**, e por decisão: a §6.9 do plano de PES2
+proíbe estender o `we2002_core`, e `tools/pes2/` é Python 3 e shell puros
+contra o `src/assets/` em C++ previsto na §4 daqui. O que se compartilha é
+**conhecimento de formato** — exatamente como o `KanjiToAscii` e os 69 `OFS_*`
+já se compartilham hoje.
+
+**Ordem entre os dois planos.** Nenhum bloqueia o outro. O PES2 chega antes
+porque o ferramental dele está em Python e a camada ISO já está de pé; o que
+ele medir da §1.14 em diante entra aqui como fato, e poupa a fase equivalente.

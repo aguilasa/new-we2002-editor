@@ -31,6 +31,14 @@ das seis fases … ou decidir que o projeto segue fora do pool."* Enquanto não
 existiam tasks, **o backlog de PES2 era a §7 daquele arquivo**. Agora é este
 quadro; a §7 vira registro histórico.
 
+**A Fase 7 entrou em 2026-09-01**, depois de medir que as features do
+[PLAN-FEATURES](/docs/PLAN-FEATURES.md) — escrito para o WE2002 a partir das
+ferramentas do CARP — se aplicam ao PES2 sem tradução: mesmo cabeçalho de
+contêiner, mesmo codec LZSS, 2.070 bytes de fluxo comprimido idênticos entre
+os dois discos, e o mesmo cabeçalho VAB nos `.RA`. A evidência está na §1.14
+do plano. Ela **corre em paralelo** com as Fases 3 a 5 e trava só a
+PES2-TASK-22.
+
 ## Resumo
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
@@ -56,10 +64,16 @@ quadro; a §7 vira registro histórico.
 | [PES2-TASK-19](/docs/tasks/19-gerador-e-guarda.md) | O gerador — do mapa ao código, com `--check` | 5 | 18 | ⬜ Pendente | — | — |
 | [PES2-TASK-20](/docs/tasks/20-round-trip-pelo-mapa.md) | Round-trip headless pelo mapa | 5 | 19 | ⬜ Pendente | — | — |
 | [PES2-TASK-21](/docs/tasks/21-fechamento-fase-5.md) | Fechamento da Fase 5 — **o portão da Fase 6** | 5 | 04, 18, 20 | ⬜ Pendente | — | — |
-| [PES2-TASK-22](/docs/tasks/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | 21 | ⬜ Pendente | — | — |
+| [PES2-TASK-22](/docs/tasks/22-decisao-de-linguagem-e-ui.md) | Decisão de linguagem e UI do editor | 6 | 21, 30 | ⬜ Pendente | — | — |
 | [PES2-TASK-23](/docs/tasks/23-editor-leitura.md) | O editor — leitura e exibição | 6 | 22 | ⬜ Pendente | — | — |
 | [PES2-TASK-24](/docs/tasks/24-editor-gravacao.md) | O editor — gravação | 6 | 23 | ⬜ Pendente | — | — |
 | [PES2-TASK-25](/docs/tasks/25-verificacao-final.md) | Verificação final contra a definição de pronto | 6 | 24 | ⬜ Pendente | — | — |
+| [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ⬜ Pendente | — | — |
+| [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
+| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ⬜ Pendente | — | — |
+| [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
+| [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -104,6 +118,7 @@ para o objetivo completo e o modelo de verificação.
 | 4 — O resto do banco | 11 a 16 | elenco, formação, uniforme, bandeira, Master League |
 | 5 — Mapa e leitor | 17 a 21 | `pes2_map.json`, gerador, round-trip headless |
 | 6 — Editor | 22 a 25 | o editor, e a verificação contra a definição de pronto |
+| 7 — Assets do disco | 26 a 31 | codec LZSS, contêiner e TIM, cópias por idioma, gravação, áudio — **em paralelo com 3 a 5** |
 
 **O que não pode ser pulado:**
 
@@ -124,6 +139,14 @@ para o objetivo completo e o modelo de verificação.
   reescrever tudo.
 - **A 21 antes da 22.** É o portão da §0. Decidir linguagem e UI antes de o
   mapa estar verificado é decidir sobre o que a UI não tem o que mostrar.
+- **A 26 antes da 27.** Não há como parsear a lista de entradas de um
+  contêiner sem descomprimi-lo, e o início do fluxo depende do cabeçalho de
+  largura variável da §6.13 — cravar constante lê do lugar errado em 205 dos
+  208 arquivos.
+- **A 30 antes da 22.** Mesmo argumento do item acima, uma camada adiante: a
+  Fase 7 acrescentou grade de imagem × paleta, import/export e cópias por
+  idioma. Decidir a UI sem a lista que a 30 entrega desenha uma janela sem
+  lugar para metade do que o editor vai mostrar.
 
 ---
 
@@ -146,7 +169,12 @@ Fase 4                                  └─► 11 ──┬──► 12
                                             11..15 ──► 16 ──► 18 ◄─┘
 Fase 5                                                      18 ──► 19 ──► 20
                                                       04, 18, 20 ──► 21
-Fase 6                                                      21 ──► 22 ──► 23 ──► 24 ──► 25
+Fase 6                                                  21, 30 ──► 22 ──► 23 ──► 24 ──► 25
+
+Fase 7 (paralela, não depende de nenhuma das acima)
+  26 ──► 27 ──┬──► 28 ──┐
+              └──► 29 ──┴──► 30 ──────────────────────────────► (portão da 22)
+  31 (áudio, solto e fora do portão)
 ```
 
 **Sequência mínima de execução:**
@@ -162,7 +190,27 @@ Fase 6                                                      21 ──► 22 ─�
 8.  17 pode ser antecipada — ver abaixo
 9.  18, 19, 20, 21
 10. 22, 23, 24, 25
+
+A Fase 7 corre por fora, a qualquer momento a partir de agora:
+
+    a. 26 (leitura pura, sem emulador — pode começar hoje)
+    b. 27
+    c. 28 e 29 em paralelo
+    d. 30 — e é ela que libera a 22
+    e. 31 quando der; não trava nada
 ```
+
+**A Fase 7 não depende de nenhuma das outras, e é onde está o trabalho barato.**
+As tasks 26, 27 e 31 são varredura sobre a imagem — nem emulador, nem cartão,
+nem cópia gravável. Junto com a 08 e a 09, são o que continua rendendo se a
+Fase 2 travar no DuckStation. A origem delas é o
+[PLAN-FEATURES](/docs/PLAN-FEATURES.md), escrito para o WE2002, e a §1.14 do
+plano mede por que ele se aplica aqui: mesmo cabeçalho de contêiner, mesmo
+codec, 2.070 bytes de fluxo comprimido idênticos entre os dois jogos.
+
+**A Fase 8 daquele plano já está feita deste lado.** O `iso.py` faz a camada
+ISO9660 inteira, com round-trip e controle negativo, e lê a imagem do WE2002
+sem adaptação. Quem começar a 26 começa com essa camada de pé.
 
 **A 17 é antecipável, e vale antecipar.** Ela depende só da 10, não da 16: as
 quatro exigências que o formato do mapa já tem de atender — delta assinado,
@@ -223,6 +271,25 @@ emulador, são elas o trabalho barato que continua.
 - [ ] Um campo de cada família editado e verificado na tela do emulador
 - [ ] Os sete entregáveis da §7 do plano com estado medido
 
+### Fase 7 — Assets do disco
+
+- [ ] Os 208 contêineres de cada release classificados: descomprimiu inteiro,
+      parou no meio, não é LZSS
+- [ ] `decompress(compress(x)) == x` em 100% dos blocos
+- [ ] O início do fluxo de `TEX_00.BIN` decidido — 28 ou 48 — e a fonte errada
+      corrigida no arquivo em que ela está
+- [ ] `w × h × bpp / 8` batendo com o tamanho descomprimido em 100% das
+      entradas gráficas
+- [ ] Conjunto de cópias por idioma **varrido**, e a ferramenta recusando se
+      sobrar cópia fora do plano
+- [ ] Um nome de `T_NAME` visto na tela nos dois idiomas, e o antigo ausente
+- [ ] Abrir e salvar sem editar devolve `cmp` zero nas duas releases
+- [ ] Estouro de orçamento recusa, dizendo quantos bytes faltaram
+- [ ] Política de EDC/ECC decidida por medição, e escrita na §6.7
+- [ ] Estádios (`GDC_*`/`GRDM_*`) medidos e registrados como fora de escopo
+- [ ] Lista do que a UI tem de cobrir, entregue à PES2-TASK-22
+- [ ] *(fora do portão)* um clipe de áudio trocado e ouvido no emulador
+
 ---
 
 ## Decisões de design
@@ -242,6 +309,10 @@ Vindas de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) e de erro já pago.
 | Fonte do código de leitura/gravação | **o mapa é o fonte**, o resto é gerado com `--check` | mesma disciplina do `newWe2002`, onde ela pegou dois erros de gerador e um seek trocado |
 | Conteúdo do jogo no git | **nunca** | mapa é fato sobre o formato; tabela copiada de dentro da imagem é conteúdo comercial (§2). Vale para quadro de emulador, save state e dump de RAM |
 | Display | **`:98`, sem exceção** | regra do [CLAUDE.md](../../CLAUDE.md), e a §6.10 do plano diz que não há exceção para este projeto |
+| Asset que não cabe no extent | **fit-or-fail**, e rebuild de ISO fica fora do projeto | o jogo não acha arquivo por nome — as LBAs estão cravadas no MIPS e o buffer de destino continua do tamanho antigo mesmo com o diretório ISO corrigido (§5a do `PLAN-FEATURES`) |
+| Entrada de contêiner não editada | **nunca recomprime** | o compressor do CARP nunca reproduz os bytes da Konami; guardar os originais é o que dá o "abrir e salvar sem editar devolve `cmp` zero" da §0 |
+| Cópias de asset por idioma | **varrido, nunca declarado** | `T_NAME_I` e `T_NAME_S` são byte a byte idênticos; gravar um só repete a §6.1 uma camada acima, e o erro é invisível para quem joga no idioma gravado (§6.12) |
+| Largura do cabeçalho de contêiner | **derivada, nunca constante** | dezesseis larguras distintas em `/BIN/`, de 0 a 204 palavras; constante lê do lugar errado em 205 dos 208 arquivos (§6.13) |
 
 ---
 
@@ -296,7 +367,19 @@ alcançam qualquer task.
     **discordou duas vezes**: o diff entre releases era 202/27/7 e não 204/32,
     e os 54 elencos casavam todos, sem parcial nenhum. Medida sem comando que a
     reproduza é lembrança.
-11. **Os nomes licenciados não estão no disco.** Procurar `JUVENTUS` e concluir
+11. **Asset também tem conjunto de cópias, e ele é por idioma.**
+    `/BIN/T_NAME_I.BIN` e `/BIN/T_NAME_S.BIN` têm 62.196 bytes e são **byte a
+    byte idênticos**; o jogo escolhe por idioma. Gravar um e deixar o outro é
+    a armadilha 1 desta lista uma camada acima — e pior, porque a verificação
+    passa se o roteiro do emulador não trocar de idioma. Vale igual para
+    `DAT2D_I`/`_S`, `DATSEL_I`/`2I`/`3I`, `LC_*` e `FNOTE_{G,I,S}`.
+12. **O cabeçalho de contêiner não tem tamanho fixo.** São ponteiros de RAM
+    da PSX, e a contagem é propriedade do arquivo: 0 palavras em
+    `DEMODATA.BIN`, 2 em `DAT2D.BIN`, 12 em todo `TEX_*`, 204 em `ANIME.BIN`.
+    E **zero conta como palavra** — `TEX_00.BIN` tem uma nula no índice 6 com
+    ponteiros válidos depois; parar no primeiro zero encurta o cabeçalho pela
+    metade.
+13. **Os nomes licenciados não estão no disco.** Procurar `JUVENTUS` e concluir
     "está criptografado" custou uma varredura de delta na imagem inteira. A
     release europeia é integralmente fictícia nos clubes; as seleções têm nome
     real. O mapa fictício → real é conhecimento externo
@@ -334,6 +417,7 @@ new-we2002-editor/
 │       └── correcoes-progresso.md
 └── tools/pes2/                       ← Python 3 e shell; nada de C++, nada de Qt
     ├── iso.py tables.py memcard.py team_map.py player_map.py …
+    ├── lzss.py bin_archive.py            ← a partir da PES2-TASK-26 e 27
     ├── pes2_map.json                 ← a partir da PES2-TASK-18
     └── run_duckstation.sh boot_check.sh
 ```
@@ -361,6 +445,12 @@ que estes números tenham comando que os reproduza.
 | Diff entre releases | 202 idênticos, 27 diferem, 7 não comparáveis — *corrigido*: era 204/32 |
 | Os 8 que diferem sem mudar de tamanho | **nenhum guarda dado de jogo** — 99,6% a 100% é rotina MIPS realocada, `+3176` dominando |
 | Os 69 `OFS_*` do WE2002 | **69 de 69** mapeados, em 13 arquivos, os 13 presentes no PES2 |
+| Contêineres `form1` em `/BIN/` | **208** no PES2, 195 no WE2002 — os 13 de diferença são cópia de idioma |
+| Cabeçalho de contêiner | ponteiros de RAM, **16 larguras** distintas, **mesmo histograma nos dois jogos** |
+| `DAT2D.BIN` entre os dois jogos | **2.070 bytes de fluxo comprimido idênticos** a partir do byte 8 |
+| `T_NAME_I` × `T_NAME_S` | 62.196 B cada, **byte a byte idênticos** |
+| `SD/*.RA` | cabeçalho **VAB** (`VABp`, v7, 4 programas, 64 tones, 29 VAGs), **idêntico** ao do WE2002, mesmo LBA 20000 |
+| Estádios | 51 `GDC_*`/`GRDM_*` em cada jogo, `GDC_AD.BIN` no mesmo LBA 12560 — **fora de escopo** |
 | Boot no `:98` | janela 800×655, dois quadros com desvio-padrão 0,228 e 0,243 e **259.994 de 524.000 pixels diferentes** |
 
 ---
