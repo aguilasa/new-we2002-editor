@@ -25,6 +25,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-001](/docs/tasks/CORR-PES2-001.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A §3.2 diz que sem `-EL` o `objdump` mente; medido, sem `-EL` a saída é idêntica — quem mente é o `-EB` | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | A regra e os cinco prompts mandam abrir `CORR-WTE-XXX`; o pool vivo é `CORR-PES2-XXX` | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | [CORR-PES2-002](/docs/tasks/CORR-PES2-002.md) | Os prompts e os wrappers cravam `WTE-TASK-XX`; o ciclo vivo é `PES2-TASK-XX` | Média | [x] concluída | 2026-09-01 |
+| [CORR-PES2-004](/docs/tasks/CORR-PES2-004.md) | [CORR-PES2-003](/docs/tasks/CORR-PES2-003.md) | Os prompts ficaram agnósticos de plano e de prefixo, e continuam com o corpo operacional inteiro do ciclo `wte/` | Média | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -43,6 +44,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-001 — o `-EL` do `objdump` na §3.2 está anotado no flag errado
 - [x] CORR-PES2-002 — prefixo do pool contradito pela regra e pelos prompts
 - [x] CORR-PES2-003 — o prefixo de *task* continua cravado nos prompts e nos wrappers
+- [ ] CORR-PES2-004 — corpo WTE-específico nos prompts que se dizem agnósticos
 
 ## Detalhes por correção
 
@@ -92,6 +94,25 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - **Fix:** `<PREFIXO>-TASK-XX`, com o prefixo saindo do `progresso.md`, e a
   mesma distinção da 002 entre placeholder prescritivo e citação de task real
   do ciclo fechado. Glob executável fica `docs/tasks/*-TASK-*.md`
+
+### CORR-PES2-004
+
+- **Arquivo com problema:** os cinco prompts de `docs/prompts/` — 64 caminhos
+  `wte/` cravados, e as 73 linhas da Etapa 3 do `02-revisar.md` indexadas por
+  faixa de task de um ciclo fechado
+- **Sintoma:** três correções tiraram dos prompts o plano e os dois prefixos, e
+  o corpo operacional do `wte/` ficou: checklist de `.dfm`/`.lfm`/stubs, gates
+  datados por task que não existe no ciclo vivo, tabela de geradores de
+  `wte/tools/`, e o `04-corrigir-tudo.md` abrindo com "Você vai trabalhar no
+  projeto WE2002 Team Editor → Lazarus" — o arquivo que executa as correções de
+  PES2. As seis fases do `PLAN-PES2-PSX.md` não têm entrada nenhuma
+- **Como foi detectado:** varredura da CORR-PES2-003, ao decidir que os cinco
+  cabeçalhos de fase **não** deviam virar `<PREFIXO>-TASK`: trocar afirmaria que
+  um checklist de `.dfm` vale para PES2. O caso que separa "prefixo mal escrito"
+  de "conteúdo do ciclo errado"
+- **Fix:** separação, não substituição — o rito fica no prompt, o que é do ciclo
+  sai para um perfil que o `progresso.md` nomeia. **A forma é decisão do
+  usuário** e a CORR não a toma sozinha
 
 <!-- Modelo de bloco, para quando a primeira for aberta:
 
