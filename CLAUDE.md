@@ -571,10 +571,11 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/iso.py ls\|extract\|inject <track1.bin>` | lê e reinjeta arquivo preservando setor e cauda EDC/ECC |
 | `python3 tools/pes2/iso.py roundtrip <track1.bin>` | a guarda: reescreve os 244 arquivos e exige imagem idêntica |
 | `python3 tools/pes2/iso.py negative <track1.bin> --tmpdir <dir>` | a prova de que a guarda sabe ficar vermelha |
-| `python3 tools/pes2/tables.py <track1.bin> --check` | conta e digere as onze tabelas de texto |
+| `python3 tools/pes2/tables.py <track1.bin> --check` | conta e digere as catorze tabelas de texto |
 | `python3 tools/pes2/diff_releases.py <a> <b> --check` | o confronto entre as duas releases |
 | `python3 tools/pes2/memcard.py <card.mcd> <track1.bin> --check` | alinha o memory card e fecha as fronteiras de elenco |
-| `python3 tools/pes2/team_map.py <track1.bin> --team N` | onde o time N mora em cada uma das cinco listas |
+| `python3 tools/pes2/team_map.py <track1.bin> --team N` | onde o time N mora em cada uma das oito listas |
+| `python3 tools/pes2/poke.py <copia.bin> --team N --name X` | grava o nome em todas as cópias e varre o disco atrás do que sobrou |
 | `python3 tools/pes2/player_map.py <track1.bin> --check` | relaciona as duas tabelas de nome de jogador |
 | `python3 tools/pes2/strings_inventory.py <track1.bin>` | varre o disco por texto, agrupado em blocos densos |
 | `python3 tools/pes2/ofs_map.py <we2002.bin> --pes2 <track1.bin>` | os 69 `OFS_*` como `(arquivo, offset relativo)` |
@@ -606,10 +607,13 @@ Quatro coisas que custam tempo se descobertas tarde:
 - **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
   release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
   apontar qualquer coisa que escreva.
-- **"Cópia" de tabela não quer dizer mesma lista.** As cinco cópias de nome
-  de time têm 106, 99, 95, 94 e 123 entradas, e o índice 34 de uma é outro
-  time no índice 34 da outra. Casar por índice grava no time errado, e o
-  resultado parece plausível em tela. §6.1 do plano.
+- **"Cópia" de tabela não quer dizer mesma lista, e o conjunto de cópias não
+  se declara.** São **oito** listas de nome de time — 106, 99, 95, 94, 123,
+  32, 99 e 99 entradas —, e o índice 34 de uma é outro time no índice 34 da
+  outra. Casar por índice grava no time errado, e o resultado parece plausível
+  em tela. As três últimas só apareceram porque o `poke.py` varre o disco
+  atrás do nome velho depois de gravar; gravar as cinco conhecidas deixava
+  três telas com o nome antigo. §6.1 do plano.
 - **A ordem de armazenamento é propriedade da tabela.** `SELECTC.BIN`
   guarda elenco de trás para frente; o executável de boot, de frente para
   trás. Quem assume uma inverte 23 jogadores por time na metade das

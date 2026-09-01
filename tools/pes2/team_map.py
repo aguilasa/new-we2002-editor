@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""Align the five team-name lists against each other -- phase 2.
+"""Align the eight team-name lists against each other -- phase 2.
 
 Section 6.1 of the plan says a written copy is worse than no copy, and
 section 6.3 of docs/PES2-AJUSTES.md says the word "copy" is the trap: the
-five lists hold 106, 99, 95, 94 and 123 entries and differ in *content*,
-not merely in extent. Index 34 is `ALWAYS ARGENTINA` in one of them and
-`Classic Brazil` in another.
+lists hold 106, 99, 95, 94, 123, 32, 99 and 99 entries and differ in
+*content*, not merely in extent. Index 34 is `ALWAYS ARGENTINA` in one of
+them and `Classic Brazil` in another.
 
-So an editor cannot write "team 34" to five places. It needs, per team,
+So an editor cannot write "team 34" to eight places. It needs, per team,
 the set of (file, offset) that actually hold that team -- which is what
 this computes, by matching on the name rather than on the position.
+
+**Eight, not five.** The plan measured five until 2026-09-01, when the
+poke of PES2-TASK-02 wrote all five and then swept the disc for the old
+name: `SELECT.BIN` carries a *second*, mixed-case list of the 32
+fictitious clubs, and `SELECT3.BIN` and `SELFORM.BIN` each carry the
+99-entry list byte for byte. Five writes would have left three screens
+showing the old name -- which is section 6.1 exactly.
 
 The canonical list is `SELECT.BIN` @3128, the only one with all 106
 entries. Every other list is expressed as a sequence of **runs** into it,
@@ -33,7 +40,9 @@ import tables as T                                           # noqa: E402
 
 CANONICAL = "team-names"
 COPIES = ["team-names-selectc", "team-names-ending",
-          "team-names-result", "team-names-replays"]
+          "team-names-result", "team-names-replays",
+          "team-names-select2", "team-names-select3",
+          "team-names-selform"]
 
 # Measured on 2026-08-30, identical in (EsIt) and (EnFrDe). A run is
 # (first copy index, last copy index, first canonical index); `None` for a
@@ -44,6 +53,10 @@ EXPECT = {
     "team-names-result": [(0, 31, 2), (32, 36, 97), (37, 39, 103),
                           (40, 93, 43)],
     "team-names-replays": [(0, 31, 2), (32, 59, None), (60, 122, 34)],
+    # Measured on 2026-09-01, when the sweep of PES2-TASK-02 found them.
+    "team-names-select2": [(0, 31, 2)],
+    "team-names-select3": [(0, 3, None), (4, 98, 2)],
+    "team-names-selform": [(0, 3, None), (4, 98, 2)],
 }
 
 
@@ -95,11 +108,12 @@ def report(lists, markdown=False):
     add = out.append
 
     if markdown:
-        add("# PES2 — as cinco listas de nome de time, alinhadas\n")
+        add(f"# PES2 — as {len(COPIES) + 1} listas de nome de time, "
+            f"alinhadas\n")
         add("Gerado por `tools/pes2/team_map.py`. Offsets de `(EsIt)`.\n")
-        add("A lista canônica é `SELECT.BIN` @3128, a única com as 106 "
-            "entradas. As outras quatro são expressas como **trechos** "
-            "dela.\n")
+        add(f"A lista canônica é `SELECT.BIN` @3128, a única com as 106 "
+            f"entradas. As outras {len(COPIES)} são expressas como "
+            f"**trechos** dela.\n")
         add("| Lista | Arquivo | Entradas | Estrutura |")
         add("|---|---|---:|---|")
         add(f"| canônica | `{canon_path}` | {len(canon)} | 2 de cabeçalho "
@@ -139,7 +153,7 @@ def report(lists, markdown=False):
             add(", ".join(extras[key]))
             add("```")
             add("")
-        add("## As três armadilhas que este alinhamento fecha\n")
+        add("## As quatro armadilhas que este alinhamento fecha\n")
         add("1. **`RESULT.BIN` pula nove e traz oito outras.** Onde a "
             "canônica tem as 7 seleções temáticas e as 2 *elite* "
             "(índices 34–42), ela não tem nada; e no lugar traz 6 dos 7 "
@@ -149,14 +163,22 @@ def report(lists, markdown=False):
             "`Free`, `Default` e 25 nações que só o modo de edição "
             "conhece — entre os fictícios e as seleções temáticas.")
         add("3. **`SELECTC.BIN` insere 4 no começo** — `Belarus`, "
-            "`Georgia`, `Uzbekistan`, `Iceland`.")
+            "`Georgia`, `Uzbekistan`, `Iceland`. `SELECT3.BIN` e "
+            "`SELFORM.BIN` trazem a mesma lista, com o mesmo digest.")
+        add("4. **`SELECT.BIN` tem duas listas, não uma.** Além da "
+            "canônica em caixa alta, uma segunda em caixa mista @33188 "
+            "com os 32 clubes fictícios e nada mais — ela termina em "
+            "`Aragon` e emenda direto nas strings de interface "
+            "localizadas. Ficou fora do mapa até 2026-09-01.")
         add("")
-        add("Nenhuma das três é visível para quem casa listas por índice, "
-            "e todas as três fazem o editor gravar no time errado com um "
-            "nome plausível.")
+        add("Nenhuma das quatro é visível para quem casa listas por "
+            "índice, e todas fazem o editor gravar no time errado com um "
+            "nome plausível — ou deixar de gravar e mostrar o nome velho "
+            "numa tela.")
         add("")
         add("## Cobertura por time\n")
-        add("Quantas das cinco listas contêm cada faixa da canônica.\n")
+        add(f"Quantas das {len(COPIES) + 1} listas contêm cada faixa da "
+            f"canônica.\n")
         add("| Faixa canônica | O que é | Em quantas listas |")
         add("|---|---|---:|")
         bands = [(0, 1, "cabeçalho (`MASTER DATA`, `? ? ? ?`)"),

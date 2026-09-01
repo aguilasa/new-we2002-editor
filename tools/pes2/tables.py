@@ -103,6 +103,23 @@ TABLES = [
           note="also a different list: where the upper-case one has the 7 "
                "themed sides and the 2 elites, this one has the classics "
                "and the allstars"),
+    Table("team-names-select2", "team name, mixed case (copy)",
+          "/SELECT.BIN", b"Patagonia\x00", 0, "cstr",
+          ("value", b"Aragon"), 32, "eb70ab28760aee19",
+          note="a second team-name list in the same file as the canonical "
+               "one: the 32 fictitious clubs only, and then straight into "
+               "the localized UI strings -- which is why the end rule is "
+               "the last club and not IRELAND"),
+    Table("team-names-select3", "team name, mixed case (copy)",
+          "/SELECT3.BIN", b"Belarus\x00Georgia\x00", 0, "cstr",
+          ("value", b"Ireland"), 99, "035b8ad4e45d62da",
+          note="the same 99-entry list as SELECTC.BIN, four nations and "
+               "all; the offset differs between the releases"),
+    Table("team-names-selform", "team name, mixed case (copy)",
+          "/SELFORM.BIN", b"Belarus\x00Georgia\x00", 0, "cstr",
+          ("value", b"Ireland"), 99, "035b8ad4e45d62da",
+          note="the formation overlay carries the whole list too, and ends "
+               "with MIPS code rather than more text"),
     Table("team-names-selectc", "team name, mixed case",
           "/SELECTC.BIN", b"Belarus\x00Georgia\x00", 0, "cstr",
           ("value", b"Ireland"), 99, "035b8ad4e45d62da",
@@ -192,6 +209,19 @@ def _read_fixed(data, start, width, stop_at, stop_value):
 
 def resolve(img, table):
     """(path, offset, entries) for one table in this image."""
+    path, offset, entries, _ = resolve_full(img, table)
+    return path, offset, entries
+
+
+def resolve_full(img, table):
+    """(path, offset, entries, end) -- `resolve` plus where the table stops.
+
+    The end is what a writer needs and a reader does not: with no sentinel
+    on this disc (section 1.13), the last record's slot is bounded by
+    whatever follows the table, and for `team-names` that is zero bytes of
+    slack. `None` means the end rule is a value or a shape, so the bound
+    is not a known offset.
+    """
     path = boot_executable(img) if table.file is BOOT else table.file
     data = img.read_file(path)
     n = data.count(table.anchor)
@@ -217,7 +247,7 @@ def resolve(img, table):
         entries = _read_cstr(data, offset, stop_at, stop_value)
     else:
         entries = _read_fixed(data, offset, table.scheme[1], stop_at, stop_value)
-    return path, offset, entries
+    return path, offset, entries, stop_at
 
 
 def digest_of(entries):

@@ -204,6 +204,9 @@ editor:
 | nomes de time, caixa mista | `SELECTC.BIN` @16576 | 99 |
 | nomes de time, caixa mista | `REPLAYS.BIN` @11380 | 123 |
 | nomes de time, caixa mista | `RESULT.BIN` @524 | 94 |
+| nomes de time, caixa mista | `SELECT.BIN` @33188 | 32 |
+| nomes de time, caixa mista | `SELECT3.BIN` @9448 | 99 |
+| nomes de time, caixa mista | `SELFORM.BIN` @460 | 99 |
 | abreviações | `SELECT.BIN` @4292 | 95 |
 | abreviações | `SELECT8.BIN` @1016 | 95 |
 | abreviações | `REPLAYS.BIN` @11000 | 95 |
@@ -216,10 +219,15 @@ outros em `(EnFrDe)` — ver a §1.12.
 de abreviação. **Gravar uma só cópia produz um jogo inconsistente**, com o
 nome novo numa tela e o velho na outra.
 
-**E a coluna de contagem já avisa o que a §6.1 cobra: as cinco "cópias"
+**E a coluna de contagem já avisa o que a §6.1 cobra: as oito "cópias"
 de nome de time não são a mesma lista.** Uma tem 106 entradas, outra 95,
-outra 99, outra 123, outra 94. Casar qualquer par delas por índice grava
-no time errado.
+outra 99, outra 123, outra 94, outra 32. Casar qualquer par delas por
+índice grava no time errado.
+
+**Eram cinco até 2026-09-01.** As três últimas — a segunda lista de
+`SELECT.BIN`, e as de `SELECT3.BIN` e `SELFORM.BIN` — apareceram quando o
+`poke` da PES2-TASK-02 gravou as cinco conhecidas e varreu o disco atrás
+do nome velho. Ver a §1.6.
 
 **Nomes de jogador**, `SELECTC.BIN` offset relativo **17604**, em duas
 famílias contíguas — e os dois números que circulam são os dois extremos da
@@ -271,6 +279,9 @@ menos de um segundo:
 | nome de time, caixa mista (cópia) | `REPLAYS.BIN` | 11380 | **123** | terminado em `NUL` |
 | nome de time, caixa mista (cópia) | `RESULT.BIN` | 524 | **94** | terminado em `NUL` |
 | nome de time, caixa mista | `SELECTC.BIN` | 16576 | **99** | terminado em `NUL` |
+| nome de time, caixa mista (cópia) | `SELECT.BIN` | 33188 | **32** | terminado em `NUL` |
+| nome de time, caixa mista (cópia) | `SELECT3.BIN` | 9448 | **99** | terminado em `NUL` |
+| nome de time, caixa mista (cópia) | `SELFORM.BIN` | 460 | **99** | terminado em `NUL` |
 | nome de jogador | `SELECTC.BIN` | 17604 | **1.399** | terminado em `NUL` |
 | nome de jogador | executável de boot | 284720 | **1.449** | fixo de 10 B |
 
@@ -280,9 +291,20 @@ python3 tools/pes2/tables.py "<track1.bin>" --dump team-names
 ```
 
 O `--check` confere a contagem **e um digest SHA-256 das entradas
-concatenadas**. Os onze digests são idênticos em `(EsIt)` e `(EnFrDe)`, o
-que transforma a conclusão da §1.12 — mesmo banco, um editor só — de
-lembrança em teste.
+concatenadas**. Os catorze digests são idênticos em `(EsIt)` e
+`(EnFrDe)`, o que transforma a conclusão da §1.12 — mesmo banco, um editor
+só — de lembrança em teste.
+
+**As três últimas cópias de nome de time entraram em 2026-09-01**, pela
+PES2-TASK-02, e não por varredura nova: o `poke` gravou as cinco que esta
+tabela listava e depois varreu todo arquivo `form1` atrás do nome velho.
+Ele sobreviveu em três lugares. `SELECT3.BIN` e `SELFORM.BIN` guardam a
+lista de 99 com o **mesmo digest** de `SELECTC.BIN`; `SELECT.BIN` guarda
+uma **segunda** lista, em caixa mista, só com os 32 clubes fictícios —
+ela termina em `Aragon` e emenda direto nas strings de interface
+localizadas, e é por isso que a regra de fim dela é o último clube e não
+`IRELAND`. A lição é da §6.1 e vale repetir: **o conjunto de cópias não se
+declara, se varre.**
 
 As duas primeiras entradas do bloco de nomes são `MASTER DATA` e
 `? ? ? ?` — cabeçalho e *placeholder* de slot vazio, não times. Os 104
@@ -511,15 +533,15 @@ falha mais caro possível, porque parece funcionar.
 
 A saída é localizar cada tabela em tempo de abertura, por um literal que
 só aparece uma vez no arquivo. `python3 tools/pes2/iso.py anchors
-<track1.bin>` reconfere **oito** desses literais nas duas releases, e
-**todos ocorrem exatamente uma vez** no arquivo que lhes toca.
+<track1.bin>` reconfere **onze** desses pares (arquivo, literal) nas duas
+releases, e **todos ocorrem exatamente uma vez** no arquivo que lhes toca.
 
-Marcador e tabela não são a mesma contagem, e vale separar: os oito
-marcadores ancoram **onze** localizações de tabela, porque dois deles
+Marcador e tabela não são a mesma contagem, e vale separar: os onze pares
+ancoram **catorze** localizações de tabela, porque dois deles
 servem a mais de uma — `Belarus\0Georgia\0` acha os times e, 1028 bytes
 adiante, os jogadores; `PTA\0MRA\0BZA\0` acha três cópias de abreviação e,
 380 bytes adiante em `REPLAYS.BIN`, mais uma de nome de time. Quem resolve
-as onze é `tools/pes2/tables.py`.
+as catorze é `tools/pes2/tables.py`.
 
 | Marcador | Arquivo | acha | deslocamento |
 |---|---|---|---:|
@@ -527,7 +549,9 @@ as onze é `tools/pes2/tables.py`.
 | `PTA\0MRA\0BZA\0` | `SELECT.BIN`, `SELECT8.BIN`, `REPLAYS.BIN` | as três cópias de abreviação | 0 |
 | `PATAGONIA\0` | `ENDING.BIN` | cópia de nome de time | 0 |
 | `Patagonia\0` | `RESULT.BIN` | cópia em caixa mista | 0 |
+| `Patagonia\0` | `SELECT.BIN` | a segunda lista do arquivo, 32 clubes | 0 |
 | `Belarus\0Georgia\0` | `SELECTC.BIN` | times em caixa mista | 0 |
+| `Belarus\0Georgia\0` | `SELECT3.BIN`, `SELFORM.BIN` | cópias da lista de 99 | 0 |
 | `Belarus\0Georgia\0` | `SELECTC.BIN` | nomes de jogador | +1028 |
 | `PTA\0MRA\0BZA\0` | `REPLAYS.BIN` | cópia em caixa mista | +380 |
 | `Given\0\0\0\0\0Staunton\0\0` | executável de boot | jogadores de 10 B | 0 |
@@ -606,10 +630,11 @@ pelas outras:
 | Ferramenta | Para quê |
 |---|---|
 | `iso.py` | `ls`, `extract`, `inject`, `anchors`, `roundtrip`, `negative` |
-| `tables.py` | acha, conta e despeja as onze tabelas de texto da §1.6 |
+| `tables.py` | acha, conta e despeja as catorze tabelas de texto da §1.6 |
 | `diff_releases.py` | o confronto entre as duas releases da §1.12 |
 | `memcard.py` | alinha o memory card contra o disco — as fronteiras de elenco da §3.3 |
-| `team_map.py` | alinha as cinco listas de nome de time entre si — §6.1 |
+| `team_map.py` | alinha as oito listas de nome de time entre si — §6.1 |
+| `poke.py` | grava um nome de time em **todas** as cópias, e varre o disco atrás do que sobrou — §6.1, §6.2 |
 | `player_map.py` | relaciona as duas tabelas de nome de jogador |
 | `strings_inventory.py` | varre o disco por texto e agrupa em blocos densos |
 | `ofs_map.py` | os 69 `OFS_*` do WE2002 como `(arquivo, offset relativo)` — §1.4 |
@@ -1023,7 +1048,7 @@ Nenhum dos oito carrega dado de jogo: são vídeo e áudio.
   ~2.000 trechos, de 31552 a cerca de 50000 — `Tomazi`, `Navaji`,
   `Davinno`, `Beckenboer`, `Lupateli`. Nenhum está entre os 1.399. O que
   são, e a que time pertencem, é trabalho da Fase 3.
-- Fechar **contagem e ordem** de cada tabela. **Feito para as onze**
+- Fechar **contagem e ordem** de cada tabela. **Feito para as catorze**
   (§1.6), com contagem e digest reconferidos por ferramenta.
 - Confirmar as cópias (§1.5) e procurar as que faltam. **Feito** — havia
   uma nona, em caixa mista no `REPLAYS.BIN`, e a correspondência entre as
@@ -1073,14 +1098,22 @@ Só aqui se decide linguagem e UI. As três condições da §0 são o portão.
 
 ### 6.1 Uma cópia gravada é pior que nenhuma — e nenhuma cópia é cópia
 
-A §1.5 mostra a mesma tabela em cinco e três arquivos. Um editor que grava
+A §1.5 mostra a mesma tabela em oito e três arquivos. Um editor que grava
 só a de `SELECT.BIN` produz um jogo que mostra o nome novo na seleção de
 time e o velho no replay e no resultado. **Toda gravação é para o conjunto
 de cópias**, e o mapa declara o conjunto.
 
+**E o conjunto não se declara: varre-se.** Medido em 2026-09-01, na
+PES2-TASK-02: gravar as cinco cópias que este documento listava até
+então deixava o nome velho vivo em **três** outros lugares. O `poke.py`
+varre todo arquivo `form1` atrás do nome antigo depois de planejar a
+gravação, e **recusa** se sobrar registro que nenhuma tabela conhece. Foi
+essa varredura que achou as três.
+
 **A armadilha de verdade, porém, é a palavra "cópia".** Medido em
-2026-08-30: as cinco listas de nome de time têm 106, 99, 95, 94 e 123
-entradas, e as diferenças não são de recorte, são de **conteúdo**:
+2026-08-30 e reconferido em 2026-09-01: as oito listas de nome de time
+têm 106, 99, 95, 94, 123, 32, 99 e 99 entradas, e as diferenças não são de
+recorte, são de **conteúdo**:
 
 | Lista | n | O que ela tem que as outras não |
 |---|---:|---|
@@ -1089,6 +1122,9 @@ entradas, e as diferenças não são de recorte, são de **conteúdo**:
 | `ENDING.BIN` @1256 | 95 | só os 32 fictícios, as 7 seleções temáticas, as 2 *elite* e as 54 reais |
 | `RESULT.BIN` @524 | 94 | no lugar das 7 temáticas e das 2 *elite*, traz 6 *classic* e as 2 *allstars* |
 | `REPLAYS.BIN` @11380 | 123 | `Edit`, `Free`, `Default` e o elenco de nações inteiro do modo de edição |
+| `SELECT.BIN` @33188 | 32 | **só** os 32 clubes fictícios; para em `Aragon` e emenda nas strings de interface localizadas |
+| `SELECT3.BIN` @9448 | 99 | a lista de `SELECTC.BIN` outra vez, digest por digest |
+| `SELFORM.BIN` @460 | 99 | idem, no overlay de formação |
 
 Ou seja: o índice 34 de `SELECT.BIN` é `ALWAYS ARGENTINA` e o índice 34 de
 `RESULT.BIN` é `Classic Brazil`. **Casar duas listas por índice grava no

@@ -68,7 +68,10 @@ ANCHORS = [
     ("abbreviations (copy)", "/REPLAYS.BIN", b"PTA\x00MRA\x00BZA\x00"),
     ("team names (copy)", "/ENDING.BIN", b"PATAGONIA\x00"),
     ("mixed case (copy)", "/RESULT.BIN", b"Patagonia\x00"),
+    ("mixed case (copy)", "/SELECT.BIN", b"Patagonia\x00"),
     ("teams + players", "/SELECTC.BIN", b"Belarus\x00Georgia\x00"),
+    ("mixed case (copy)", "/SELECT3.BIN", b"Belarus\x00Georgia\x00"),
+    ("mixed case (copy)", "/SELFORM.BIN", b"Belarus\x00Georgia\x00"),
     ("club players, 10 B records", "/SELECT.BIN", b"Oranges001"),
 ]
 

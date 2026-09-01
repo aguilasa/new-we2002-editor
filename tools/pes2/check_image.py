@@ -14,12 +14,13 @@ copy of it.
                          release diff of plan section 1.12
     WE2002_PES2_CARD     a raw .mcd/.mcr memory card, for the squad
                          alignment of plan section 3.3
-    WE2002_PES2_TMPDIR   where the negative control may put its ~450 MiB
-                         working copy; without it the negative control is
+    WE2002_PES2_TMPDIR   where the negative control and the poke may put
+                         their ~450 MiB working copy; without it both are
                          skipped rather than filling /tmp
 
-Nothing here writes to the images it is given: the only write path taken
-is the negative control, and that works on a copy.
+Nothing here writes to the images it is given: the two write paths -- the
+negative control and the poke of plan section 6.1 -- both work on a copy
+and both put the original bytes back before they finish.
 """
 
 import os
@@ -33,6 +34,7 @@ import diff_releases                                         # noqa: E402
 import team_map                                              # noqa: E402
 import player_map                                            # noqa: E402
 import memcard                                               # noqa: E402
+import poke                                                  # noqa: E402
 
 SKIP = 77
 
@@ -61,7 +63,7 @@ def main():
     print("\n== tables (plan 1.6) ==")
     bad += tables.cmd(Args(image=image, check=True, dump=None, verbose=False))
 
-    print("\n== the five team-name lists, aligned (plan 6.1) ==")
+    print("\n== the eight team-name lists, aligned (plan 6.1) ==")
     bad += team_map.main([image, "--check"])
 
     print("\n== the two player-name tables (plan 1.5, 3.3) ==")
@@ -88,9 +90,11 @@ def main():
     if tmpdir and os.path.isdir(tmpdir):
         print("\n== negative control (plan 5.1) ==")
         bad += iso.cmd_negative(Args(image=image, tmpdir=tmpdir))
+        print("\n== the poke, over the whole copy set (plan 6.1) ==")
+        bad += poke.self_check(image, tmpdir)
     else:
-        print("\n== negative control: skipped, set WE2002_PES2_TMPDIR to a "
-              "directory with ~450 MiB free ==")
+        print("\n== negative control and the poke: skipped, set "
+              "WE2002_PES2_TMPDIR to a directory with ~450 MiB free ==")
 
     print("\nFAILED" if bad else "\nALL OK")
     return 1 if bad else 0

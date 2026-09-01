@@ -43,28 +43,32 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 1. **Uma cópia gravada é pior que nenhuma — e nenhuma cópia é cópia.** PES2
    grava in-place como o WE2002, e a release inteira são 571 MiB em oito
    trilhas. Copie tudo antes de apontar qualquer coisa que escreva. (§6.1)
-2. **"Cópia" de tabela não quer dizer mesma lista.** As cinco cópias de nome de
-   time têm 106, 99, 95, 94 e 123 entradas, e o índice 34 de uma é outro time no
-   índice 34 da outra. Casar por índice grava no time errado, e o resultado
-   parece plausível em tela. (§6.1)
-3. **A ordem de armazenamento é propriedade da tabela.** `SELECTC.BIN` guarda
+2. **"Cópia" de tabela não quer dizer mesma lista.** As oito cópias de nome de
+   time têm 106, 99, 95, 94, 123, 32, 99 e 99 entradas, e o índice 34 de uma é
+   outro time no índice 34 da outra. Casar por índice grava no time errado, e o
+   resultado parece plausível em tela. (§6.1)
+3. **O conjunto de cópias se varre, não se declara.** Eram cinco no papel até
+   2026-09-01; gravar as cinco deixava o nome velho vivo em três outros
+   lugares. O `poke.py` varre todo arquivo `form1` atrás do nome antigo depois
+   de planejar, e recusa se sobrar registro que nenhuma tabela conhece. (§6.1)
+4. **A ordem de armazenamento é propriedade da tabela.** `SELECTC.BIN` guarda
    elenco de trás para frente; o executável de boot, de frente para trás. Quem
    assume uma inverte 23 jogadores por time na metade das tabelas, sem sintoma
    visível. (§3.3)
-4. **`SELECTC.BIN` é pool deduplicado, o executável é ordenado por vaga.** Os
+5. **`SELECTC.BIN` é pool deduplicado, o executável é ordenado por vaga.** Os
    dois guardam os mesmos 1.399 nomes; o executável repete 50 deles, porque
    jogador em dois elencos ocupa duas vagas. Ler o pool como lista de elenco
    desalinha tudo depois do primeiro nome repetido. (§1.5)
-5. **Registro de tamanho variável não aceita nome maior.** (§6.2)
-6. **A fronteira de setor continua mordendo.** Setor de 2352 B com 2048 de
+6. **Registro de tamanho variável não aceita nome maior.** (§6.2)
+7. **A fronteira de setor continua mordendo.** Setor de 2352 B com 2048 de
    dados; offset que atravessa cabeçalho é a primeira suspeita de round-trip
    quebrado. (§6.3)
-7. **Multi-track: o offset é dentro do `(Track 1).bin`.** (§6.4)
-8. **O diretório ISO nomeia arquivo que não está no Track 1.** (§6.5)
-9. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
-10. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
+8. **Multi-track: o offset é dentro do `(Track 1).bin`.** (§6.4)
+9. **O diretório ISO nomeia arquivo que não está no Track 1.** (§6.5)
+10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
+11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-11. **Nove armadilhas ao dirigir o DuckStation**, todas medidas. (§6.11)
+12. **Nove armadilhas ao dirigir o DuckStation**, todas medidas. (§6.11)
 
 ---
 
@@ -120,6 +124,7 @@ python3 tools/pes2/iso.py negative  "<track1.bin>" --tmpdir <dir>   # a prova de
 python3 tools/pes2/tables.py        "<track1.bin>" --check
 python3 tools/pes2/diff_releases.py "<a>" "<b>" --check
 python3 tools/pes2/player_map.py    "<track1.bin>" --check
+python3 tools/pes2/poke.py          "<track1.bin>" --self-check --tmpdir <dir>
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra
@@ -137,6 +142,7 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | --- | --- |
 | ferramenta de `tools/pes2/` | o `--check` dela verde; `pes2_selftest` verde |
 | qualquer coisa que escreva na imagem | `iso.py roundtrip` verde **e** o `negative` provando que ele sabe ficar vermelho |
+| gravação de nome de time | `poke.py --self-check` verde nas duas releases: recusas, varredura sem sobra, e a imagem de volta byte a byte |
 | offset ou tabela | remedido nas **duas** releases; a divergência sai por marcador, não por offset absoluto |
 | comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), e o quadro **fora** do git |
 | número em doc | veio de ferramenta, não de soma à mão |

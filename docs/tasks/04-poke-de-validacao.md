@@ -31,7 +31,7 @@ Provar, com captura de tela, que:
 
 1. o mapa de cópias da §1.5 está **completo** — nenhuma tela mostra o nome
    velho depois do `poke`;
-2. a correspondência entre as cinco listas da §6.1 está **certa** — o nome
+2. a correspondência entre as **oito** listas da §6.1 está **certa** — o nome
    novo aparece no time certo, não num vizinho plausível;
 3. o jogo **não trava** com o valor novo.
 
@@ -47,6 +47,30 @@ tools/pes2/drive.sh <scratch>/…/…(Track 1).bin --screen team-select,result,r
 **`PIEMONTE2` tem 9 caracteres, como `PIEMONTE` tem 8** — cabe no slot
 alinhado sem deslocar nada, e é visivelmente diferente na tela. Se não
 couber em alguma cópia, o nome escolhido está errado, não a ferramenta.
+
+### Vindo da PES2-TASK-02: o conjunto de cópias é oito, e já foi varrido
+
+**O mapa de cópias da §1.5 tinha cinco listas e tem oito.** A PES2-TASK-02
+gravou as cinco conhecidas e varreu todo arquivo `form1` atrás do nome
+velho: ele sobreviveu em `SELECT.BIN` (uma **segunda** lista, em caixa
+mista, @33188), `SELECT3.BIN` @9448 e `SELFORM.BIN` @460. As três entraram
+em `tables.py` e em `team_map.py`, e o `--check` das duas está verde nas
+duas releases.
+
+O que isso muda para esta task, e o que **não** muda:
+
+- **No arquivo, a asserção já está fechada.** Medido em 2026-09-01 sobre
+  uma cópia da `(EsIt)`: depois de `--team 14 --name PIEMONTE2`, o disco
+  tem `PIEMONTE2`/`Piemonte2` em **oito** registros e **zero** ocorrência
+  de `PIEMONTE`/`Piemonte`. O `iso.py roundtrip` continua idêntico.
+- **Em tela, não.** Oito lugares no disco não são oito telas, e a §6.1 é
+  sobre tela. As três telas deste critério continuam por alcançar, e
+  `SELECT3.BIN`, `SELFORM.BIN` e a segunda lista de `SELECT.BIN` dizem
+  quais valem a pena: **a de formação** (`SELFORM.BIN`) e a que use
+  `SELECT3.BIN` são telas que o mapa antigo não cobria.
+- **Se aparecer uma nona.** O `poke.py` recusa a gravação quando sobra
+  registro que nenhuma tabela conhece; se ele recusar aqui, a resposta é
+  mapear a tabela nova, não passar `--allow-unmapped`.
 
 ### Controle: o nome velho também tem de sumir
 
@@ -70,6 +94,8 @@ gravador novo.
 - [ ] O jogo roda pelo menos dois minutos depois do `poke` sem travar
       (medido como o `boot_check.sh` mede: dois quadros que diferem).
 - [ ] Round-trip de volta: `cmp` zero contra o original.
+- [ ] A varredura do `poke.py` sem sobra na release usada — nenhum
+      `UNMAPPED` na saída, que é o que sustenta "o mapa está completo".
 - [ ] Resultado escrito na §5 do plano, fechando a Fase 2 — com o número, não
       com "funcionou".
 - [ ] Os PNGs **não** entram no git (jogo comercial). O que entra é o script

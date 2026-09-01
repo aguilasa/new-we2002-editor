@@ -36,7 +36,7 @@ quadro; a §7 vira registro histórico.
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
 | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | `numpy` e desmontador MIPS — decisão do dono da máquina | 0 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `poke.py` — gravação pelo conjunto de cópias | 2 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `poke.py` — gravação pelo conjunto de cópias | 2 | — | ✅ Concluído | 2026-09-01 | ⬜ pendente |
 | [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar e capturar | 2 | — | ⬜ Pendente | — | — |
 | [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de PIEMONTE em todas as telas — **fecha a Fase 2** | 2 | 02, 03 | ⬜ Pendente | — | — |
 | [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | 03 | ⬜ Pendente | — | — |
@@ -81,7 +81,7 @@ bloqueava nada até a Fase 4. Foi tomada em 2026-09-01, com instalação: a
 Fase 0 está inteira fechada.
 
 **A Fase 2 entra com um item só.** A varredura, as contagens, os digests e a
-correspondência entre as cinco listas estão feitos; falta o `poke` de
+correspondência entre as oito listas estão feitos; falta o `poke` de
 validação, e é ele que fecha a fase — as PES2-TASK-02 a 04 são exatamente isso,
 partido em ferramenta, direção e medida.
 
@@ -182,8 +182,8 @@ emulador, são elas o trabalho barato que continua.
 
 ### Fase 2 — Inventário de texto
 
-- [ ] `poke.py` grava em todas as cópias, com `--dry-run` que não toca a imagem
-- [ ] `poke.py` recusa nome que não cabe no slot alinhado, dizendo o tamanho
+- [x] `poke.py` grava em todas as cópias, com `--dry-run` que não toca a imagem
+- [x] `poke.py` recusa nome que não cabe no slot alinhado, dizendo o tamanho
 - [ ] Pelo menos três telas do jogo alcançadas por roteiro repetível
 - [ ] `PIEMONTE2` visível nessas telas **e** `PIEMONTE` ausente de todas
 - [ ] Round-trip de volta: `cmp` zero contra o original
@@ -233,7 +233,8 @@ Vindas de [`../PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) e de erro já pago.
 | --- | --- | --- |
 | Oráculo | **o jogo rodando** | não existe editor conhecido para PES2 (§4.1); um campo só está mapeado quando um `poke` muda o que a tela mostra |
 | Ancoragem | **marcador + delta assinado**, nunca offset constante | três das sete cópias se deslocam entre as releases; um mapa constante parece funcionar e escreve lixo (§1.12, §6.6) |
-| Correspondência entre cópias | **por conteúdo** | as cinco listas de nome de time têm 106, 99, 95, 94 e 123 entradas e diferem em conteúdo; casar por índice grava no time errado (§6.1) |
+| Correspondência entre cópias | **por conteúdo** | as oito listas de nome de time têm 106, 99, 95, 94, 123, 32, 99 e 99 entradas e diferem em conteúdo; casar por índice grava no time errado (§6.1) |
+| O conjunto de cópias | **varrido, nunca declarado** | gravar as cinco listadas deixava o nome velho vivo em três lugares; o `poke.py` varre todo `form1` depois de planejar e recusa se sobrar (§6.1) |
 | Nome maior que o slot | **truncar**, não deslocar | a margem entre a última tabela e a próxima é de **zero byte** (§1.13); até haver prova de índice reconstruível (§6.2) |
 | EDC/ECC | **preservar** | o jogo não confere; corrigir muda bytes que nenhum teste espera e destrói a comparação de round-trip (§6.7) |
 | Entrada das ferramentas | **o `(Track 1).bin`** | dump multi-track; concatenar as trilhas produz offsets que não existem (§1.1, §6.4) |
@@ -250,9 +251,9 @@ Cada uma custou tempo real. As nove de dirigir o DuckStation estão na §6.11 do
 plano e todas já resolvidas dentro do `run_duckstation.sh` — estas são as que
 alcançam qualquer task.
 
-1. **"Cópia" de tabela não quer dizer mesma lista.** As cinco cópias de nome de
-   time têm 106, 99, 95, 94 e 123 entradas, e o índice 34 de uma é outro time
-   no índice 34 da outra — `ALWAYS ARGENTINA` contra `Classic Brazil`. Casar
+1. **"Cópia" de tabela não quer dizer mesma lista.** As oito cópias de nome de
+   time têm 106, 99, 95, 94, 123, 32, 99 e 99 entradas, e o índice 34 de uma é
+   outro time no índice 34 da outra — `ALWAYS ARGENTINA` contra `Classic Brazil`. Casar
    por índice grava no time errado, e o resultado parece plausível em tela
    nenhuma acusa. Usar o `team_map.py`, sempre.
 2. **A ordem de armazenamento é propriedade da tabela.** `SELECTC.BIN` guarda
@@ -351,8 +352,8 @@ que estes números tenham comando que os reproduza.
 | Arquivos no ISO | 252 — **244 `form1`**, 1 `form2`, 7 fora do Track 1 |
 | Round-trip do `iso.py` | **byte a byte idêntico**, 244 arquivos reescritos |
 | Controle negativo | **exatamente um byte** muda, no offset absoluto 2002800, atravessando fronteira de setor |
-| Marcadores da §1.13 | **8**, cada um ocorrendo **uma vez** nas duas releases |
-| Tabelas de texto | **11**, com contagem e digest SHA-256 idênticos nas duas releases |
+| Marcadores da §1.13 | **11** pares (arquivo, literal), cada um ocorrendo **uma vez** nas duas releases — *corrigido*: eram 8 |
+| Tabelas de texto | **14**, com contagem e digest SHA-256 idênticos nas duas releases — *corrigido*: eram 11 |
 | Nomes de time | 106 em `SELECT.BIN` — 2 de cabeçalho + 104 times |
 | Abreviações | 95 — os 7 *classic* e os 2 *allstars* **não têm** |
 | Nomes de jogador | 1.399 em `SELECTC.BIN`, 1.449 no executável; **os mesmos 1.399 distintos** |
