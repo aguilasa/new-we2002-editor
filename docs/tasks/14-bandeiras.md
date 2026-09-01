@@ -58,6 +58,14 @@ não por offset constante.** O `tools/pes2/bin_archive.py ls <img> --file
 descobrir qual CLUT é de qual seleção, e o caminho barato para isso é um
 `poke` de cor com o `run_duckstation.sh`, do jeito que a Fase 2 fez com nome.
 
+**E procure entre as de 16 cores.** Dos 266 CLUTs, **261 são de 16 cores e 5
+de 256** — `DAT2D.BIN` é o único contêiner de largura mista dos quatro discos.
+A maioria esmagadora diz 4 bpp, e a bandeira quase certamente está entre elas;
+a imagem correspondente é, portanto, `largura × 4` pixels, não `largura × 2`.
+Exportar com `--clut <um de 16>` já sai na geometria certa — o `export` tira a
+profundidade do CLUT que recebe (§1.14(f), CORR-PES2-016). O par
+imagem-paleta continua **em aberto**, e é ele que o `poke` resolve.
+
 ### O que o WE2002 separa, e que vale conferir aqui
 
 No WE2002 há uma decisão explícita do port sobre bandeira — o *"teste único

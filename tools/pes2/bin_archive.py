@@ -145,15 +145,48 @@ class Entry:
                 f"{self.w:3d}x{self.h:3d}")
 
 
-def depth_of(recs):
-    """4 or 8, from the CLUTs of the same container.
+def depth_of_clut(clut):
+    """4 or 8, from **one** palette -- the only honest form of the rule.
 
     The image record carries no depth field; the palette width is the only
-    thing on the disc that says it. A container with no CLUT at all gets 8,
-    and `check` counts those separately rather than pretending.
+    thing on the disc that says it. So the depth belongs to the
+    *image-palette pair*, not to the file: `/BIN/DAT2D.BIN` of both PES2
+    releases holds 261 CLUTs of 16 colours and 5 of 256, and a per-file
+    answer lets five outvote 261.
     """
-    widths = {e.colours for e in recs if e.is_clut}
-    return 4 if widths and max(widths) <= 16 else 8
+    return 4 if clut.colours <= 16 else 8
+
+
+def clut_widths(recs):
+    """{colours: how many} over the CLUT records of one container."""
+    out = {}
+    for e in recs:
+        if e.is_clut:
+            out[e.colours] = out.get(e.colours, 0) + 1
+    return out
+
+
+def depth_of(recs):
+    """The container's depth when it has **one** answer, else `None`.
+
+    `None` is the point. This used to return `4 if max(widths) <= 16 else
+    8`, which gave a number for every container and was wrong for the one
+    that matters: `DAT2D.BIN` came back 8 bpp on the strength of 5 palettes
+    against 261 saying 4. And it was silent -- the byte count is `width *
+    height * 2` either way, so `check` stayed green while `export` wrote a
+    PNG twice as wide with half the pixels right.
+
+    A caller that has a CLUT in hand should use `depth_of_clut`. A caller
+    that has none has to say it does not know.
+    """
+    widths = set(clut_widths(recs))
+    if not widths:
+        return None
+    if widths <= {16}:
+        return 4
+    if widths <= {256}:
+        return 8
+    return None
 
 
 def entries(data):
@@ -271,14 +304,25 @@ def cmd_ls(args):
             print(f"{path:22s} {len(data):8d} B   {len(im)} image(s), "
                   f"{len(cl)} clut(s)"
                   + (f", {len(other)} of another kind" if other else ""))
+            if cl and depth_of(recs) is None:
+                print(f"  CLUT widths {clut_widths(recs)}: this container's "
+                      f"palettes do not agree, so an image's depth is the "
+                      f"depth of the palette it is paired with, and the "
+                      f"pairing is not on the disc -- both geometries below")
             if args.file or args.verbose:
                 for e in recs:
                     extra = ""
                     if e.is_image:
-                        w, h = e.pixels(depth_of(recs))
+                        bpp = depth_of(recs)
+                        if bpp is None:
+                            geom = (f"{e.w * 4}x{e.h} px 4bpp / "
+                                    f"{e.w * 2}x{e.h} 8bpp")
+                        else:
+                            w, h = e.pixels(bpp)
+                            geom = f"{w}x{h} px {bpp}bpp"
                         try:
                             plain, used = read_image(data, e)
-                            extra = (f"  {w}x{h} px 8bpp  comp {used} -> "
+                            extra = (f"  {geom}  comp {used} -> "
                                      f"{len(plain)}"
                                      + ("" if len(plain) == e.expected
                                         else f"  <-- expected {e.expected}"))
@@ -286,7 +330,7 @@ def cmd_ls(args):
                             extra = f"  FAILED: {exc}"
                     elif e.is_clut:
                         extra = (f"  {e.colours} colours, {e.colours * 2} B raw"
-                                 f"  -> {4 if e.colours <= 16 else 8} bpp")
+                                 f"  -> {depth_of_clut(e)} bpp")
                     print(f"    rec@{e.pos:6d}  {e!r}  param {e.param:#04x}{extra}")
         if not args.file:
             print(f"  {images} image record(s), {cluts} clut record(s)")
@@ -311,7 +355,7 @@ def cmd_export(args):
                 continue
             which = cl[min(args.clut, len(cl) - 1)]
             palette = read_clut(data, which)
-            bpp = depth_of(recs)
+            bpp = depth_of_clut(which)      # the chosen palette decides
             stem = os.path.basename(path).rsplit(".", 1)[0]
             for i, e in enumerate(e for e in recs if e.is_image):
                 plain, _ = read_image(data, e)
@@ -327,7 +371,8 @@ def cmd_export(args):
                 written += 1
         print(f"wrote {written} PNG(s) to {args.out}")
         print(f"  palette: CLUT #{args.clut} of each container -- the "
-              f"container does not say which CLUT an image uses")
+              f"container does not say which CLUT an image uses, and the "
+              f"depth follows the palette that was picked")
     return 0
 
 
@@ -347,7 +392,7 @@ def cmd_check(args):
         disc = lzss.EXPECT.get(len(lzss.containers(img)), (None,))[0]
         stats = {"images": 0, "cluts": 0, "exact": 0, "double": 0,
                  "other": 0, "failed": 0, "orphan": 0, "files": 0,
-                 "short": 0, "noclut": 0, "bpp4": 0, "bpp8": 0,
+                 "short": 0, "noclut": 0, "bpp4": 0, "bpp8": 0, "mixed": 0,
                  "stadium_failed": 0, "unindexed": 0, "stadiums": 0}
         for path in paths:
             data = img.read_file(path)
@@ -361,8 +406,16 @@ def cmd_check(args):
             stats["files"] += 1
             if is_stadium(path):
                 stats["stadiums"] += 1
-            if any(e.is_clut for e in recs):
-                stats["bpp4" if depth_of(recs) == 4 else "bpp8"] += 1
+            bpp = depth_of(recs)
+            if bpp == 4:
+                stats["bpp4"] += 1
+            elif bpp == 8:
+                stats["bpp8"] += 1
+            elif any(e.is_clut for e in recs):
+                stats["mixed"] += 1
+                if args.verbose:
+                    print(f"  {path}: CLUT widths {clut_widths(recs)} -- the "
+                          f"depth is per image-palette pair here")
             else:
                 stats["noclut"] += 1
             declared = set()
@@ -411,7 +464,8 @@ def cmd_check(args):
               f"{stats['other']} other, {stats['failed']} that fail to "
               f"decompress")
         print(f"  {stats['cluts']} clut record(s); {stats['bpp4']} container(s) "
-              f"4 bpp, {stats['bpp8']} 8 bpp, {stats['noclut']} with no CLUT; "
+              f"4 bpp, {stats['bpp8']} 8 bpp, {stats['mixed']} of mixed CLUT "
+              f"width, {stats['noclut']} with no CLUT; "
               f"{stats['short']} clut(s) truncated by the end of the file")
         print(f"  {stats['orphan']} stream(s) the codec's resync scan finds "
               f"that no record declares -- the record is the index, the scan "

@@ -762,14 +762,30 @@ registro depois de cada fluxo, onze listas ao todo. As duas se leem do mesmo
 jeito: achar o `0x800f 0x00ff` que fecha uma lista e andar para trás de 16 em
 16 enquanto a etiqueta se mantiver.
 
-**A largura do CLUT é o que diz a profundidade da imagem.** O registro de
-imagem não tem campo de bpp. 256 cores ⇒ **8 bpp**, 16 cores ⇒ **4 bpp**, e os
-dois aparecem no mesmo disco: `TITLE.BIN` é 8 bpp e `LOGO.BIN` é 4. O
-retângulo é sempre em unidades de 16 bits, então a imagem tem `largura × 2`
-pixels a 8 bpp e `largura × 4` a 4 bpp — a contagem de bytes é a mesma,
-`largura × altura × 2`, só a leitura de um byte muda. Assumir 256 em toda
-parte faz a paleta de 32 bytes do `LOGO.BIN` ser lida como 512 e passar do fim
-do arquivo.
+**A largura do CLUT é o que diz a profundidade da imagem — do par
+imagem-paleta, não do arquivo.** O registro de imagem não tem campo de bpp.
+256 cores ⇒ **8 bpp**, 16 cores ⇒ **4 bpp**, e os dois aparecem no mesmo
+disco: `TITLE.BIN` é 8 bpp e `LOGO.BIN` é 4. O retângulo é sempre em unidades
+de 16 bits, então a imagem tem `largura × 2` pixels a 8 bpp e `largura × 4` a
+4 bpp — a contagem de bytes é a mesma, `largura × altura × 2`, só a leitura de
+um byte muda. Assumir 256 em toda parte faz a paleta de 32 bytes do
+`LOGO.BIN` ser lida como 512 e passar do fim do arquivo.
+
+**E os dois aparecem no mesmo *contêiner*, que é o que obriga a regra a ser do
+par.** O `/BIN/DAT2D.BIN` das duas releases de PES2 tem **261 CLUTs de 16
+cores contra 5 de 256** — é o único contêiner de largura mista dos quatro
+discos, e é justamente aquele para onde as cores de bandeira mandam olhar.
+Responder pelo arquivo deixaria as 5 decidirem contra as 261, e **em
+silêncio**: a contagem de bytes não muda com a profundidade, então o gate
+segue verde e só a imagem sai errada — medido, 64×128 em vez de 128×128.
+
+Como o contêiner **não diz qual CLUT vai com qual imagem** (limite já escrito
+acima), a profundidade de uma imagem de `DAT2D.BIN` **está em aberto** até
+esse par ser resolvido. O `bin_archive.py` passou a dizer isso em vez de
+escolher: `ls` mostra as duas geometrias para contêiner de largura mista,
+`export` tira a profundidade do CLUT que recebeu em `--clut`, e `check` conta
+quantos contêineres são mistos — **1 nas duas releases de PES2, 0 nas duas
+imagens de WE2002**.
 
 ```
 python3 tools/pes2/bin_archive.py ls    "<track1.bin>" --file /BIN/TITLE.BIN

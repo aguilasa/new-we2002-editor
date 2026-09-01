@@ -3,7 +3,7 @@ id: CORR-PES2-016
 title: "Correção: a profundidade é decidida por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 contra 5 de 256"
 type: correção
 category: formato
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -96,22 +96,69 @@ já está escrito, mas sabendo que a imagem correspondente é 4 bpp.
 
 ## Verificação
 
-- [ ] `bin_archive.py ls <img> --file /BIN/DAT2D.BIN` mostra profundidade por
+- [x] `bin_archive.py ls <img> --file /BIN/DAT2D.BIN` mostra profundidade por
       CLUT, não uma só para o arquivo
-- [ ] `bin_archive.py check` conta os contêineres de largura mista e o número
+- [x] `bin_archive.py check` conta os contêineres de largura mista e o número
       é 1 nas duas releases de PES2, 0 na japonesa
-- [ ] as contagens da tabela da §1.14(f) não mudam (918/798/105/15/804 na
+- [x] as contagens da tabela da §1.14(f) não mudam (918/798/105/15/804 na
       `(EsIt)` e as outras três linhas)
-- [ ] um PNG de `DAT2D.BIN` exportado com CLUT de 16 cores sai legível — o
+- [x] um PNG de `DAT2D.BIN` exportado com CLUT de 16 cores sai legível — o
       critério "conferido a olho" da task, aplicado ao caso que faltava
-- [ ] `roms/` intocada, e nenhum PNG versionado
+- [x] `roms/` intocada, e nenhum PNG versionado
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** `depth_of()` deixou de devolver um número sempre.
+Entraram `depth_of_clut(clut)` — a regra na forma honesta, sobre **uma**
+paleta — e `clut_widths(recs)`; `depth_of(recs)` agora devolve `None` quando
+as larguras do contêiner discordam, e é esse `None` que obriga cada chamador a
+dizer o que sabe:
 
-**Problemas encontrados:**
+- **`ls`** imprime a ressalva uma vez por contêiner e as **duas** geometrias
+  por imagem (`128x128 px 4bpp / 64x128 8bpp`). Contêiner de paleta única
+  segue com um número só (`LOGO.BIN`: `128x128 px 4bpp`).
+- **`export`** tira a profundidade do CLUT que recebeu em `--clut` — quem
+  escolhe a paleta escolhe a leitura.
+- **`check`** conta os mistos: **1** nas duas releases de PES2, **0** nas duas
+  imagens de WE2002.
+
+As contagens da tabela da §1.14(f) **não mudaram** nos quatro discos
+(918/798/105/15/804 na `(EsIt)`, e as outras três linhas), e o `check` segue
+exit 0 nos quatro.
+
+**O "conferido a olho", feito.** `DAT2D.BIN` exportado das duas maneiras, sobre
+o mesmo registro de imagem 0:
+
+| CLUT | cores | bpp | PNG |
+|---|---:|---:|---|
+| `--clut 5` | 16 | 4 | **128×128** — as figuras saem em proporção |
+| `--clut 0` | 256 | 8 | 64×128 — as mesmas figuras, espremidas na horizontal |
+
+O 4 bpp é o legível, e é o que 261 das 266 paletas dizem. Os PNGs ficaram no
+scratchpad e foram apagados; nada versionado.
+
+**Problemas encontrados.** Dois, de medição:
+
+1. **O sentido do estrago é o inverso do que a CORR descreve.** Ela diz que o
+   `export` escrevia "PNG com o dobro da largura"; medido, escrevia **metade**
+   — 64 px onde são 128 —, porque `largura × 2` a 8 bpp contra `largura × 4` a
+   4 bpp. O defeito é o mesmo e o diagnóstico é o mesmo; só a direção do erro
+   estava trocada na frase.
+2. **A paleta certa continua desconhecida, e isso não é o que esta correção
+   fecha.** O `--clut 5` dá a geometria certa, não a cor certa: o contêiner não
+   diz qual CLUT vai com qual imagem, e o plano passou a registrar que a
+   profundidade de uma imagem de `DAT2D` está **em aberto** até esse par ser
+   resolvido — que é trabalho da PES2-TASK-14, pelo `poke` de cor.
+
+**Gates.** `bin_archive.py check` exit 0 nos quatro discos, contagens da
+§1.14(f) idênticas, mistos 1/1/0/0; `ctest -R pes2_selftest|pes2_image` 2/2
+`Passed`; `check_tasks.py` 82 tasks ok. `roms/` intocada; nenhum PNG
+versionado.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/bin_archive.py`
+- `docs/PLAN-PES2-PSX.md`
+- `docs/tasks/14-bandeiras.md`
