@@ -91,8 +91,15 @@ BSS na entrada:
   **`t_addr − 0x800`** = `0x8000f800`, senão o cabeçalho desloca tudo em 2 KiB
   e todo alvo de `jal` sai 2.048 bytes adiante — número plausível, endereço
   errado.
-- `objdump` precisa de `-b binary -m mips:3000 -EL`: sem o `-EL` a saída é MIPS
-  big-endian sobre bytes little-endian, e ela **não** falha, só mente.
+- `objdump` precisa de `-b binary -m mips:3000`. O `-EL` deste Log foi anotado
+  pelo que se esperava dele: remedido na revisão desta task
+  ([CORR-PES2-001](/docs/tasks/CORR-PES2-001.md)), **omiti-lo não muda uma
+  instrução sequer** — o `mipsel-linux-gnu-objdump` 2.42 já tem alvo
+  `elf32-tradlittlemips`, e 1.017 linhas com e sem ele dão mnemônicos
+  idênticos. Quem **não** falha e só mente é o **`-EB`**: sobre o mesmo laço de
+  BSS ele decodifica `j 0x8003800c` e `bltz s4,0x800108fc`, alvo de salto que
+  parece endereço e não é. Manter o `-EL` explícito continua certo — muda a
+  razão, não o comando.
 - `radare2` reconhece o formato `PS-X EXE` sozinho e já rotula `entry0`; com
   `-m` ele avisa (`using oba to load the syminfo from different mapaddress`) e
   funciona.

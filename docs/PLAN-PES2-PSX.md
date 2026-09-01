@@ -672,6 +672,16 @@ r2 -qq -a mips -b 32 -e cfg.bigendian=false -m 0x8000f800 \
    -c 's 0x80010008; pd 6' SLES_039.57
 ```
 
+**O `-EL` do `objdump` é redundante aqui, e quem mente é o `-EB`.** O
+`mipsel-linux-gnu-objdump` 2.42 já tem alvo `elf32-tradlittlemips`, então
+omitir o `-EL` não muda uma instrução sequer — medido em 2026-09-01, 1.017
+linhas com e sem ele, mnemônicos idênticos; o que muda é só a coluna de palavra
+crua (`03e00008` contra `0800e003`). Vale mantê-lo explícito porque o mesmo
+comando com um `objdump` de alvo big-endian sai errado, e é o **`-EB`** que
+produz a saída plausível-e-falsa: ele não falha, decodifica `j 0x8003800c` e
+`bltz s4,0x800108fc` sobre esse mesmo laço de BSS, alvo de salto que parece
+endereço e não é.
+
 Os demais overlays (`SELECT.BIN` e irmãos) **não** têm esse cabeçalho: são
 código realocado, e a base sai de onde o carregador os põe, não do arquivo.
 Descobri-la é trabalho da Fase 4 — até lá, desmontar overlay com base chutada

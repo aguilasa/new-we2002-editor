@@ -3,7 +3,7 @@ id: CORR-PES2-001
 title: "Correção: o -EL do objdump não é o que a §3.2 diz que é — quem mente é o -EB"
 type: correção
 category: infra
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -123,19 +123,38 @@ linha que a remedição veio da revisão.
 
 ## Verificação
 
-- [ ] O `diff` de mnemônicos com e sem `-EL` continua `IDENTICAL`, e o texto do
+- [x] O `diff` de mnemônicos com e sem `-EL` continua `IDENTICAL`, e o texto do
       plano concorda com isso
-- [ ] O bloco de `-EB` do plano reproduz: `j 0x8003800c` na primeira linha
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] `roms/` intocada — a extração vai para o scratchpad, via
+- [x] O bloco de `-EB` do plano reproduz: `j 0x8003800c` na primeira linha
+- [x] `python3 tools/check_tasks.py` verde
+- [x] `roms/` intocada — a extração vai para o scratchpad, via
       `iso.py extract ... -o`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** A evidência foi reproduzida verbatim antes de
+qualquer edição, sobre o `/SLES_039.57` da release `(EsIt)` extraído para o
+scratchpad pelo `iso.py extract`: **1.017 linhas de cada lado, `diff`
+`IDENTICAL`**, coluna crua `03e00008` com `-EL` contra `0800e003` sem ele, e o
+`-EB` decodificando `j 0x8003800c` / `bltz s4,0x800108fc` sobre o mesmo laço de
+BSS. Alvo default confirmado com `objdump -i`: `elf32-tradlittlemips`. A §3.2
+do plano ganhou um parágrafo com a medida, ao lado do bloco de comando — que
+ficou como estava, com o `-EL` explícito —, e o terceiro marcador do Log da
+PES2-TASK-01 trocou a afirmação pela remedição, apontando para esta CORR.
 
-**Problemas encontrados:**
+**Problemas encontrados.** Um, e não bloqueou: **a frase incorreta nunca esteve
+na §3.2 do plano** — só no Log da task. O plano usava o `-EL` sem justificá-lo,
+então a §3.2 *ganhou* o texto medido em vez de trocá-lo. O gesto é o mesmo que
+a seção Correção prescreve; o que muda é que ele acrescenta em um dos dois
+arquivos em vez de substituir. A premissa da CORR ("a §3.2 afirma, como coisa
+medida") é imprecisa quanto ao arquivo, e é este Log que registra isso.
 
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-PES2-PSX.md` — §3.2, parágrafo novo entre o bloco de comandos e o
+  aviso sobre os overlays sem cabeçalho
+- `docs/tasks/01-ferramental-das-fases-3-e-4.md` — terceiro marcador do bloco
+  "O que se aprendeu"
+- `docs/tasks/correcoes-progresso.md` — tabela, checklist e data
