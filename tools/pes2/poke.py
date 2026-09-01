@@ -7,11 +7,15 @@ name on the team-select screen and the old one in the replay and in the
 result. So the unit of a write is not a table, it is the **set of copies**
 of one logical entity.
 
-And the word "copy" is the trap. The five team-name lists hold 106, 99,
-95, 94 and 123 entries and differ in *content*: index 34 is
+And the word "copy" is the trap. The eight team-name lists hold 106, 99,
+95, 94, 123, 32, 99 and 99 entries and differ in *content*: index 34 is
 `ALWAYS ARGENTINA` in one and `Classic Brazil` in another. The
 correspondence therefore comes from `team_map.where()`, which matches on
 the name, and never from the position.
+
+Eight, not five: the plan listed five until 2026-09-01, and it was
+`leftovers` below -- which sweeps the disc after planning -- that found the
+other three. The count lives in `len(KEYS)`, never in a sentence.
 
 Three more rules this tool cannot violate:
 
@@ -19,7 +23,7 @@ Three more rules this tool cannot violate:
   team name and the abbreviations that follow it is *zero bytes*. A
   longer name is refused; `--truncate` cuts it, and nothing ever moves.
 
-  **the record scheme is a property of the table** (1.10). These five are
+  **the record scheme is a property of the table** (1.10). These eight are
   string + terminator, aligned to 4; `SELECT.BIN` @5320 is 463 records of
   10 fixed bytes with no terminator when the name fills them. Writing a
   NUL into the latter eats the first character of the neighbour.
@@ -50,10 +54,10 @@ from iso import Image, RAW_SECTOR, HEADER, FORM1_DATA        # noqa: E402
 import tables as T                                           # noqa: E402
 import team_map as TM                                        # noqa: E402
 
-# The five lists, and the case each one stores. It is declared rather than
+# The eight lists, and the case each one stores. It is declared rather than
 # guessed, and then *checked* against what is on the disc before any write
 # -- see `case_of`. `SELECT.BIN` and `ENDING.BIN` hold `ALWAYS ARGENTINA`;
-# the other three hold `Always Argentina`.
+# the other six hold `Always Argentina`.
 CASE = {
     "team-names": "upper",
     "team-names-selectc": "mixed",
@@ -86,7 +90,7 @@ def absolute(entry, rel):
 
 
 def resolve_all(img):
-    """key -> (path, offset, entries, end) for the five team-name lists."""
+    """key -> (path, offset, entries, end) for the eight team-name lists."""
     out = {}
     for key in KEYS:
         t = next(x for x in T.TABLES if x.key == key)
@@ -156,7 +160,7 @@ def anchor_ranges(img, path, cache):
     Measured, and it bites at once: `PATAGONIA\0` is the marker that
     anchors `team-names-ending` and `Patagonia\0` the one that anchors
     `team-names-result` -- so renaming canonical team 2, the first team of
-    the disc, makes two of the five tables unfindable. A tool that only
+    the disc, makes two of the eight tables unfindable. A tool that only
     guarded the *end* of a table would have written it and produced an
     image no reader here can open.
     """
@@ -371,10 +375,10 @@ def _sha(path, chunk=1 << 22):
 
 
 def _first_pokeable(img):
-    """The lowest canonical index in all five lists that the guards allow.
+    """The lowest canonical index in all the lists that the guards allow.
 
-    Not merely "in all five": canonical team 2 is `PATAGONIA`, which is in
-    all five *and* is the marker two of the tables are anchored on. The
+    Not merely "in all of them": canonical team 2 is `PATAGONIA`, which is
+    in all eight *and* is the marker two of the tables are anchored on. The
     only honest test of "may I write this" is to plan the write.
     """
     lists = as_lists(resolve_all(img))
@@ -386,7 +390,7 @@ def _first_pokeable(img):
         except Refused:
             continue
         return i
-    raise Refused("no canonical team can be written in all five lists")
+    raise Refused(f"no canonical team can be written in all {len(KEYS)} lists")
 
 
 def _expect_refusal(img, what, expect, **kw):
@@ -424,7 +428,7 @@ def self_check(image, tmpdir):
         team = _first_pokeable(img)
         lists = as_lists(resolve_all(img))
         original = lists[TM.CANONICAL][1][team][1]
-        print(f"canonical team {team} = {original!r}, in all five lists")
+        print(f"canonical team {team} = {original!r}, in all {len(KEYS)} lists")
 
         print("\n-- refusals, on the original, read-only --")
         bad += _expect_refusal(img, "a name past the slot",

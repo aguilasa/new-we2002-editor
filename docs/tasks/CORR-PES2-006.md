@@ -3,7 +3,7 @@ id: CORR-PES2-006
 title: "Correção: o `poke.py` mede oito listas e continua dizendo cinco — inclusive no que imprime"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -97,19 +97,50 @@ raise Refused(f"no canonical team can be written in all {len(KEYS)} lists")
 
 ## Verificação
 
-- [ ] `grep -n "five" tools/pes2/poke.py` devolve só a linha do `leftovers`
-      que narra o achado ("the five lists the plan listed were not all of them")
-- [ ] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
+- [x] `grep -n "five" tools/pes2/poke.py` devolve só narrativa do achado —
+      as **duas** linhas do `leftovers`, e a nova do docstring do módulo
+      (ver o Log: a checkbox previa uma, e são três)
+- [x] `python3 tools/pes2/poke.py "<track1.bin>" --self-check --tmpdir <dir>`
       verde nas duas releases, e a primeira linha diz oito
-- [ ] `ctest --test-dir build -R pes2` verde
-- [ ] `roms/` intocada
+- [x] `ctest --test-dir build -R pes2` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito.** As duas strings que o usuário lê passaram a
+derivar a contagem de `len(KEYS)` em vez de afirmá-la, e os seis comentários
+passaram a dizer oito. O `--self-check` agora concorda consigo mesmo nas três
+linhas que se contradiziam, idêntico nas duas releases:
 
-**Problemas encontrados:**
+```
+canonical team 3 = 'MARMARA', in all 8 lists
+-- the poke: 7 characters, the tightest of the 8 slots --
+canonical team 'MARMARA' -- 8 copy/copies
+```
+
+O docstring do módulo passou a listar as oito contagens medidas — 106, 99, 95,
+94, 123, 32, 99 e 99 —, com a data, na mesma forma que o `team_map.py` já usa.
+Duas afirmações vizinhas foram remedidas em vez de só reindexadas, e as duas
+mudaram de número junto: as oito listas são **todas** `cstr` (o parágrafo do
+esquema de registro dizia "these five are string + terminator"), e o `CASE`
+tem 2 `upper` contra 6 `mixed`, não 2 contra 3 — o comentário dizia "the other
+three hold `Always Argentina`".
+
+**Problemas encontrados.** A checkbox de verificação previa que sobrasse **uma**
+linha com "five", e sobram **três**: as duas do `leftovers`, que a própria CORR
+manda não tocar, e a que o docstring ganhou por instrução dela ("com a data da
+medição, como faz a §6.1"). As três são narrativa do achado — a contagem
+operacional saiu do texto e mora em `len(KEYS)`. Reescrever qualquer uma delas
+apagaria o registro de que eram cinco no papel.
+
+**Gates.** `--self-check` `SELF-CHECK OK` nas duas releases, com round-trip byte
+a byte; `ctest -R pes2_selftest|pes2_image` 2/2 `Passed`. Varredura de
+discrepância: os três `five` restantes em `tools/pes2/` fora do `poke.py`
+(`ofs_map.py`, `player_map.py`, `team_map.py`) são de outro assunto ou são o
+registro histórico já correto. `roms/` intocada.
 
 **Arquivos criados/modificados:**
+
+- `tools/pes2/poke.py`
