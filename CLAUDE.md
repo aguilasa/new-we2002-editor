@@ -580,6 +580,7 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/strings_inventory.py <track1.bin>` | varre o disco por texto, agrupado em blocos densos |
 | `python3 tools/pes2/ofs_map.py <we2002.bin> --pes2 <track1.bin>` | os 69 `OFS_*` como `(arquivo, offset relativo)` |
 | `python3 tools/pes2/lzss.py <track1.bin> --check` | o codec LZSS dos `BIN/*.BIN`; aceita vários discos e soma |
+| `python3 tools/pes2/bin_archive.py ls\|export\|check <track1.bin>` | o índice do contêiner: imagens, CLUTs e PNG |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98`, isolado; `--kill` encerra |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |

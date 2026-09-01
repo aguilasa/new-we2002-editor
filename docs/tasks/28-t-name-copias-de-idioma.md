@@ -59,6 +59,27 @@ declarado —, e renderizar um nome novo no `T_NAME`.
 
 ---
 
+### Vindo da PES2-TASK-27: os `T_NAME_*` são contêiner indexado sem paleta
+
+Medido em 2026-09-01. `T_NAME_I.BIN` e `T_NAME_S.BIN` na `(EsIt)`,
+`T_NAME_F.BIN` e `T_NAME_G.BIN` na `(EnFrDe)` **têm lista de registros e
+nenhum registro de CLUT** — são 22 contêineres nessa condição na `(EsIt)`,
+entre eles os `DAT2D_I`/`DAT2D_S` e os `CG<idioma>.BIN`. O
+`bin_archive.py export` os pula dizendo `no CLUT in this container`, e é
+comportamento correto: sem paleta no arquivo, a cor vem de outro lugar.
+
+Duas consequências para esta task:
+
+- **O conjunto de cópias por idioma tem forma no nome**, e o sufixo é a pista:
+  `_I`/`_S` na release espanhola-italiana, `_F`/`_G` na
+  inglesa-francesa-alemã. Varra por sufixo, não por lista fixa — o número de
+  cópias muda de release para release, que é exatamente o que o critério
+  abaixo cobra.
+- **Comparar dois idiomas é comparar índice, não pixel.** Os registros dizem
+  retângulo de VRAM e offset; se dois idiomas têm o mesmo retângulo e fluxos
+  diferentes, a diferença é o texto desenhado. `bin_archive.py ls <img>
+  --file /BIN/T_NAME_I.BIN` dá a lista.
+
 ## Critério de conclusão
 
 - [ ] Conjunto de cópias por idioma varrido por ferramenta, com a lista

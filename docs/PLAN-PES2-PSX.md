@@ -742,6 +742,91 @@ qualquer fluxo: são duas medidas diferentes, as duas certas.
 > a [CORR-PES2-011](/docs/tasks/CORR-PES2-011.md). É o **quarto** deles, em
 > 53066 — três registros depois do começo da cauda, em 53018.
 
+**(f) O índice do contêiner: 16 bytes por entrada, dois tipos — medido em
+2026-09-01, pela [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md).** A §5
+Fase 10 do `PLAN-FEATURES` previa um `DATA_HEADER` de 32 bytes. São **16**, e
+há duas espécies:
+
+| campo | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|---|---|---|
+| significado | tipo | `vram_x` | `vram_y` | largura | altura | 0 | offset | `0x800f` |
+
+O byte baixo do campo 0 é `0x0a` para **imagem** e `0x09` para **CLUT**; o
+byte alto é 0 em toda imagem e varia nos CLUT. Listas terminam na halfword
+`0x00ff`. A carga de uma imagem é um fluxo LZSS; a de um CLUT é **crua**.
+
+**Onde a lista mora não é fixo, e por isso ela é achada, não calculada.**
+`DAT2D.BIN` põe os 21 registros de imagem numa lista só depois do último
+fluxo, e uma segunda lista de 266 CLUTs depois dela; `TEX_00.BIN` põe **um**
+registro depois de cada fluxo, onze listas ao todo. As duas se leem do mesmo
+jeito: achar o `0x800f 0x00ff` que fecha uma lista e andar para trás de 16 em
+16 enquanto a etiqueta se mantiver.
+
+**A largura do CLUT é o que diz a profundidade da imagem.** O registro de
+imagem não tem campo de bpp. 256 cores ⇒ **8 bpp**, 16 cores ⇒ **4 bpp**, e os
+dois aparecem no mesmo disco: `TITLE.BIN` é 8 bpp e `LOGO.BIN` é 4. O
+retângulo é sempre em unidades de 16 bits, então a imagem tem `largura × 2`
+pixels a 8 bpp e `largura × 4` a 4 bpp — a contagem de bytes é a mesma,
+`largura × altura × 2`, só a leitura de um byte muda. Assumir 256 em toda
+parte faz a paleta de 32 bytes do `LOGO.BIN` ser lida como 512 e passar do fim
+do arquivo.
+
+```
+python3 tools/pes2/bin_archive.py ls    "<track1.bin>" --file /BIN/TITLE.BIN
+python3 tools/pes2/bin_archive.py check "<track1.bin>"
+python3 tools/pes2/bin_archive.py export "<track1.bin>" --file /BIN/TITLE.BIN --out <dir>
+```
+
+| Disco | contêineres com índice | registros de imagem | exatos | duplos | falham | CLUTs |
+|---|---:|---:|---:|---:|---:|---:|
+| PES2 `(EsIt)` | 139 | 918 | 798 | 105 | 15 | 804 |
+| PES2 `(EnFrDe)` | 141 | 960 | 840 | 105 | 15 | 804 |
+| WE2002 European Deluxe | 109 | 637 | 530 | 82 | 20 | 447 |
+| WE2002 japonês | 130 | 815 | 688 | 105 | 22 | 547 |
+
+*Exato* quer dizer `largura × altura × 2 == bytes descomprimidos`. As três
+colunas que não são exatas, cada uma com causa medida:
+
+- **Duplos.** Um registro por `TEX_*.BIN`, sempre o mesmo — VRAM (704, 256),
+  64×64 —, cujo fluxo rende o dobro dos 8.192 declarados. Aparece nos quatro
+  discos, e fica **aberto**: não há evidência aqui de se o excedente é uma
+  segunda transferência ou folga.
+- **Falham.** Todas em `GDC_*`, que a (d) já põe fora de escopo. Nenhuma fora
+  dos estádios, nos quatro discos.
+- **Outros.** Zero nos três discos originais, e **cinco na European Deluxe** —
+  fluxos que rendem 15.481, 16.395, 16.430, 16.501 e 16.345 onde o registro
+  declara 16.384 ou 8.192. É a imagem **hackeada**: o hack reinseriu gráfico
+  sem respeitar o retângulo do próprio índice, e o `DAT2D` dela é um dos
+  cinco. Isto explica de onde vinha o `16.345` que a §5c registrava para o
+  `DAT2D` daquele disco.
+
+**O registro é o índice; a varredura de ressincronização da (e) é uma
+aproximação dele.** Onde as duas discordam, o registro ganha, e dá para
+mostrar: em `TEX_01.BIN` a varredura começa um fluxo em 5276 e rende 16.381
+bytes — número que não é potência de dois —, e o registro diz 5284, que rende
+16.384 exatos.
+
+**Os onze `CG*.BIN` não são contêiner gráfico.** Sem fluxo LZSS (e) e **sem
+registro nenhum** (f): depois dos ponteiros de RAM vem `0x41` = 65 e uma
+tabela cuja carga é coordenada assinada de 16 bits terminada em `0x00f0`, que
+é geometria. Vão com os estádios, para fora do escopo 2D, e isso **corrige** a
+§5 Fase 10 do `PLAN-FEATURES`, que os listava entre os contêineres a extrair.
+
+**Trinta e seis contêineres têm fluxo e nenhuma lista de registros** —
+`DATSEL_I.BIN`, `DATSEL2I.BIN`, `DAT_CG.BIN` e `EDTR_2D.BIN` entre os que
+interessam. Neles a geometria da entrada não está declarada em lugar nenhum do
+arquivo, e é um limite a escrever, não a contornar.
+
+**As cores de bandeira são entradas de CLUT, e é por isso que o WE2002 as
+cravava.** Os quatro `OFS_FLAG_*` da §1.4 caem em `/BIN/DAT2D.BIN` nos offsets
+relativos 69798, 72400, 73254 e 73728, e o que está ali são halfwords BGR555
+com o bit de semitransparência — `0x8dc3 0x8982 0x97bd …`, fechando em
+`0x8000 0x8000 0x8000 0x0000`. Só que o `DAT2D.BIN` do WE2002 tem **23
+registros de imagem e zero de CLUT** nas duas imagens: a região de paleta
+começa em 65876 e o contêiner não a indexa. No PES2 o mesmo arquivo indexa —
+266 CLUTs, cargas em 53372..64284. É a via de entrada da
+[PES2-TASK-14](/docs/tasks/14-bandeiras.md), e a linha está escrita lá.
+
 **A divergência da §5c, fechada.** Ela dizia que o fluxo de `TEX_00.BIN`
 começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro
 discos: 24, 28, 32 e 44 falham, e falham na primeira distância que aponta para

@@ -359,14 +359,25 @@ de teste próprio:
 
 ### Fase 10 — Contêiner `.BIN` e TIM
 
-Parsear o cabeçalho de contêiner (8 bytes, a confirmar), a lista de entradas e
-o `DATA_HEADER` de 32 bytes (`ID`, `VramX`, `VramY`, `width`, `height`,
-`offset`, …). Decodificar 4 bpp e 8 bpp com CLUT. Exportar PNG.
+Parsear o cabeçalho de contêiner, a lista de entradas e o registro de
+entrada. Decodificar 4 bpp e 8 bpp com CLUT. Exportar PNG.
 
-*Aceite:* extrair todas as entradas de `DAT2D.BIN`, `DATSEL*.BIN`, `LOGO.BIN`,
-`TITLE.BIN` e `CG*.BIN` das três imagens sem entrada órfã e sem estourar
-buffer; largura × altura × bpp bate com o tamanho descomprimido em 100% das
-entradas. Um punhado de PNGs conferidos a olho contra o Image Manager rodando
+**Medido em 2026-09-01, do lado do PES2** (§1.14(f) do
+[PLAN-PES2-PSX](/docs/PLAN-PES2-PSX.md)), e vale igual aqui porque o formato é
+o mesmo: o cabeçalho é um array de ponteiros de RAM de largura variável, não
+8 bytes fixos; e o registro de entrada tem **16 bytes, não 32** —
+`tipo, vram_x, vram_y, largura, altura, 0, offset, 0x800f` em halfwords, com
+`0x0a` = imagem e `0x09` = CLUT, listas fechando em `0x00ff`. A profundidade
+**não** está no registro de imagem: quem a diz é a largura do CLUT do
+contêiner, 16 cores ⇒ 4 bpp e 256 ⇒ 8 bpp. E `CG*.BIN` **não é contêiner
+gráfico** — não tem fluxo LZSS nem registro; a carga é geometria. Sai da lista
+de aceite abaixo.
+
+*Aceite:* extrair todas as entradas de `DAT2D.BIN`, `DATSEL*.BIN`, `LOGO.BIN`
+e `TITLE.BIN` das três imagens sem entrada órfã e sem estourar buffer;
+largura × altura × bpp bate com o tamanho descomprimido em 100% das entradas
+**das imagens não hackeadas** — na European Deluxe são cinco entradas que não
+batem, e a causa é o hack, não o parser (§1.14(f)). Um punhado de PNGs conferidos a olho contra o Image Manager rodando
 sob Wine.
 
 *Risco:* **o mais alto do plano.** É o único ponto onde o formato ainda é

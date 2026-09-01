@@ -27,6 +27,27 @@ status: pendente
 
 A estrutura de bandeira: forma (o padrão de faixas ou o desenho) e as cores.
 
+### Vindo da PES2-TASK-27: as cores de bandeira são entradas de CLUT
+
+Medido em 2026-09-01. No WE2002 os quatro `OFS_*` de bandeira caem em
+`/BIN/DAT2D.BIN` nos offsets relativos **69798, 72400, 73254 e 73728**, e o
+que está ali são **halfwords BGR555 com o bit de semitransparência ligado** —
+`0x8dc3 0x8982 0x97bd …`, terminando em `0x8000 0x8000 0x8000 0x0000`, que é o
+fim de uma paleta. São entradas de CLUT, não uma tabela de cor própria.
+
+**E é por isso que Moriero teve de cravar offset.** No `DAT2D.BIN` do WE2002 —
+nas duas imagens, a japonesa e a European Deluxe — há **23 registros de imagem
+e nenhum registro de CLUT**: a região de paleta começa depois da lista, em
+65876, e o contêiner não a indexa. No PES2 o mesmo arquivo tem **21 imagens e
+266 CLUTs**, com as cargas em 53372..64284 e a lista de registros em
+64284..68540.
+
+Consequência prática para esta task: **procure a bandeira pelo índice de CLUT,
+não por offset constante.** O `tools/pes2/bin_archive.py ls <img> --file
+/BIN/DAT2D.BIN` lista os 266, com offset e largura de cada um; o que falta é
+descobrir qual CLUT é de qual seleção, e o caminho barato para isso é um
+`poke` de cor com o `run_duckstation.sh`, do jeito que a Fase 2 fez com nome.
+
 ### O que o WE2002 separa, e que vale conferir aqui
 
 No WE2002 há uma decisão explícita do port sobre bandeira — o *"teste único

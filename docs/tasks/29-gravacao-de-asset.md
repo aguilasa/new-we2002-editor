@@ -68,6 +68,27 @@ mexer no que não foi tocado.
 
 ---
 
+### Vindo da PES2-TASK-27: o que o gravador vai encontrar
+
+1. **O registro de entrada tem 16 bytes, não 32**, e há dois tipos: `0x0a`
+   imagem (retângulo de VRAM + offset de um fluxo LZSS) e `0x09` CLUT
+   (`largura × 1`, carga **crua**, 16 ou 256 cores). Gravar imagem mexe em
+   fluxo comprimido; gravar paleta mexe em bytes crus, e as duas coisas têm
+   orçamentos diferentes.
+2. **A profundidade não está no registro de imagem** — quem a diz é a largura
+   do CLUT do contêiner: 16 cores ⇒ 4 bpp, 256 ⇒ 8 bpp. Um gravador que
+   assuma 8 bpp escreve metade da largura em `LOGO.BIN`.
+3. **Nem todo contêiner tem índice.** Nesta release, 36 têm fluxo e nenhuma
+   lista de registros — entre eles `DATSEL_I.BIN` e `DATSEL2I.BIN`, que são
+   justamente as cópias de idioma da PES2-TASK-28. Sem índice não há como
+   validar dimensão antes de gravar; a política de recusa tem de cobrir esse
+   caso explicitamente.
+4. **A imagem golden European Deluxe discorda de si mesma em cinco entradas** —
+   fluxos que rendem 15.481, 16.395, 16.430, 16.501 e 16.345 bytes onde o
+   registro declara 16.384 ou 8.192. É disco **hackeado**, e é a evidência
+   direta de que *entrada regravada sem conferir contra o registro produz
+   exatamente esse estado*. A japonesa, não hackeada, não tem nenhuma.
+
 ## Critério de conclusão
 
 - [ ] Abrir e salvar sem editar devolve a imagem **byte a byte idêntica**, nas

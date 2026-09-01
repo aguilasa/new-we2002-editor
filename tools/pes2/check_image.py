@@ -36,6 +36,7 @@ import player_map                                            # noqa: E402
 import memcard                                               # noqa: E402
 import poke                                                  # noqa: E402
 import lzss                                                  # noqa: E402
+import bin_archive                                           # noqa: E402
 
 SKIP = 77
 
@@ -72,6 +73,9 @@ def main():
 
     print("\n== the LZSS containers of /BIN/ (plan 1.14) ==")
     bad += lzss.main([image, "--check"])
+
+    print("\n== the container index: images and CLUTs (plan 1.14) ==")
+    bad += bin_archive.cmd_check(Args(image=image, file=None, verbose=False))
 
     print("\n== docs/PES2-NOMES.md against the disc ==")
     bad += faq_check.main(["--image", image])

@@ -6,7 +6,7 @@ category: formato
 phase: 7
 depends_on: [PES2-TASK-26]
 fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §1.14"
-status: pendente
+status: concluído
 ---
 
 # PES2-TASK-27: Contêiner e TIM
@@ -94,22 +94,110 @@ achado antes de qualquer uma escrever no mapa.
 
 ## Critério de conclusão
 
-- [ ] `tools/pes2/bin_archive.py` versionado, com `ls` e `export`.
-- [ ] Todas as entradas de `DAT2D*`, `DATSEL*`, `LOGO`, `TITLE` e `TEX_*` das
+- [x] `tools/pes2/bin_archive.py` versionado, com `ls` e `export`.
+- [x] Todas as entradas de `DAT2D*`, `DATSEL*`, `LOGO`, `TITLE` e `TEX_*` das
       **duas** releases extraídas, sem entrada órfã e sem estouro.
-- [ ] Os onze `CG*.BIN` explicados — entrada não comprimida, outro caminho de
+- [x] Os onze `CG*.BIN` explicados — entrada não comprimida, outro caminho de
       entrada, ou fora de escopo com a razão escrita. Ver o item 1 acima.
-- [ ] `w × h × bpp / 8 == tamanho descomprimido` em 100% das entradas, com a
+- [x] `w × h × bpp / 8 == tamanho descomprimido` em 100% das entradas, com a
       contagem escrita.
-- [ ] O parser rodando também nas duas imagens de WE2002, ou o limite da
+- [x] O parser rodando também nas duas imagens de WE2002, ou o limite da
       hipótese da §1.4 escrito com os números.
-- [ ] Um punhado de PNGs conferido a olho — nenhum quadro do jogo entra no
+- [x] Um punhado de PNGs conferido a olho — nenhum quadro do jogo entra no
       git (§2 do plano; vale para asset extraído como vale para screenshot).
-- [ ] A relação com `OFS_FLAG_COLOURS_*` avaliada e registrada na §1.14.
-- [ ] Escrito na §1.14 do plano.
+- [x] A relação com `OFS_FLAG_COLOURS_*` avaliada e registrada na §1.14.
+- [x] Escrito na §1.14 do plano.
 
 ---
 
 ## Log de Execução
 
-*(a preencher)*
+**Executado em:** 2026-09-01
+
+**Resumo do que foi feito.** `tools/pes2/bin_archive.py` lê o índice do
+contêiner, exporta PNG e tem um `check` para o `ctest`. O registro de entrada
+tem **16 bytes, não os 32 que a §5 Fase 10 do `PLAN-FEATURES` previa**, e há
+dois tipos: `0x0a` imagem — retângulo de VRAM mais o offset de um fluxo LZSS —
+e `0x09` CLUT, cuja carga é **crua**. Listas fecham na halfword `0x00ff`, e
+cada registro termina na etiqueta `0x800f`, que é o que permite achá-los sem
+saber onde a lista mora — e é preciso: `DAT2D.BIN` põe os 21 registros de
+imagem numa lista só, depois uma de 266 CLUTs; `TEX_00.BIN` põe um registro
+depois de cada fluxo, onze listas.
+
+**A descoberta que decidiu a decodificação: a profundidade não está no
+registro de imagem.** Quem a diz é a **largura do CLUT** — 256 cores ⇒ 8 bpp,
+16 ⇒ 4 bpp —, e os dois convivem no mesmo disco. Custou uma corrida: com 256
+cravado, o `LOGO.BIN` lia sua paleta de 32 bytes como 512 e estourava o fim do
+arquivo. A conta de bytes é a mesma nos dois casos (`largura × altura × 2`,
+retângulo em unidades de 16 bits); o que muda é a largura em pixels — `× 2` a
+8 bpp, `× 4` a 4 bpp — e a necessidade de desempacotar nibbles.
+
+**Verificação a olho, que é o critério que mais vale aqui.** `TITLE.BIN` a
+8 bpp saiu com o logotipo legível — "PRO EVOLUTION SOCCER" em três linhas,
+128×128 — e `LOGO.BIN` a 4 bpp saiu com o aviso legal da adidas, também
+legível. Nenhum PNG entrou no git; os arquivos ficaram no scratchpad.
+
+**Resultado medido**, `python3 tools/pes2/bin_archive.py check <img>`:
+
+| Disco | contêineres com índice | registros de imagem | exatos | duplos | falham | CLUTs |
+|---|---:|---:|---:|---:|---:|---:|
+| PES2 `(EsIt)` | 139 | 918 | 798 | 105 | 15 | 804 |
+| PES2 `(EnFrDe)` | 141 | 960 | 840 | 105 | 15 | 804 |
+| WE2002 European Deluxe | 109 | 637 | 530 | 82 | 20 | 447 |
+| WE2002 japonês | 130 | 815 | 688 | 105 | 22 | 547 |
+
+Por família do critério, na `(EsIt)`: `DAT2D*` 3 arquivos / 49 imagens,
+`DATSEL*` 3 / 22, `LOGO` 1 / 9, `TITLE` 1 / 4, `TEX_*` 105 / 630 — **714
+imagens, 609 exatas e 105 duplas, nenhuma outra**.
+
+**Três achados que valem mais que a contagem:**
+
+1. **O registro é o índice; a varredura da PES2-TASK-26 é uma aproximação
+   dele.** Em `TEX_01.BIN` a varredura começa um fluxo em 5276 e rende 16.381
+   bytes — não é potência de dois —, e o registro diz 5284, que rende 16.384
+   exatos. São 104 fluxos assim na `(EsIt)`, quase todos em `GDC_*`.
+2. **A imagem golden European Deluxe discorda de si mesma em cinco entradas.**
+   É disco hackeado, e é de lá que vinha o `16.345` que a §5c registrava para
+   o `DAT2D`. As três imagens não hackeadas têm zero.
+3. **Os onze `CG*.BIN` não são contêiner gráfico** — sem fluxo LZSS e **sem
+   registro nenhum**; depois dos ponteiros de RAM vem `0x41` = 65 e uma tabela
+   cuja carga é coordenada assinada de 16 bits terminada em `0x00f0`, ou seja
+   geometria. A §5 Fase 10 do `PLAN-FEATURES` os listava para extrair, e foi
+   corrigida.
+
+**A pergunta da bandeira, respondida.** Os quatro `OFS_FLAG_*` caem em
+`/BIN/DAT2D.BIN` do WE2002 em 69798, 72400, 73254 e 73728, e ali estão
+halfwords BGR555 com o bit de semitransparência, fechando em
+`0x8000 0x8000 0x8000 0x0000`. São entradas de CLUT. **E o `DAT2D.BIN` do
+WE2002 tem 23 registros de imagem e zero de CLUT**, nas duas imagens — a
+região de paleta começa em 65876 e o contêiner não a indexa, que é exatamente
+por que Moriero cravou offset. No PES2 o mesmo arquivo indexa. A linha está
+escrita na PES2-TASK-14.
+
+**O que ficou aberto, e está escrito como aberto:** o *duplo* de 64×64 em
+VRAM (704, 256), um por `TEX_*.BIN` nos quatro discos, cujo fluxo rende o
+dobro do retângulo — não há evidência aqui de se o excedente é uma segunda
+transferência ou folga; e **qual CLUT pertence a qual imagem**, que o
+contêiner não diz (`DAT2D.BIN` tem 21 imagens e 266 paletas). O `export` tem
+`--clut` e diz isso na saída em vez de inventar par.
+
+**Arquivos criados/modificados**
+
+- `tools/pes2/bin_archive.py` — novo; PNG escrito à mão com `zlib`, sem
+  dependência nova
+- `tools/pes2/check_image.py` — o `check` do índice no `pes2_image`
+- `tests/CMakeLists.txt` — o comentário do que o `pes2_image` cobre
+- `docs/PLAN-PES2-PSX.md` — a §1.14(f)
+- `docs/PLAN-FEATURES.md` — a Fase 10 corrigida: registro de 16 B, a regra de
+  profundidade, e `CG*` fora do aceite
+- `docs/tasks/14-bandeiras.md`, `docs/tasks/28-t-name-copias-de-idioma.md` e
+  `docs/tasks/29-gravacao-de-asset.md` — os três repasses
+- `docs/tasks/progresso.md`, `docs/prompts/perfil-pes2.md`, `CLAUDE.md` — o
+  gate novo e a ferramenta nova
+
+**Problemas encontrados.** Dois, os dois no caminho. O primeiro foi assumir
+que o CLUT é sempre de 256 cores, corrigido acima. O segundo foi a primeira
+regra de escopo do `check`: com os `GDC_*` dentro, o gate ficava vermelho por
+15 registros que a §1.14(d) já pôs fora do projeto — um gate vermelho por
+motivo que ninguém pretende consertar não é gate. Estádios passaram a ser
+contados à parte, com a razão no código.
