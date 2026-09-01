@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Confere as convencoes de `.claude/rules/tasks.md` nas tasks de `docs/tasks/`.
 
+Varre `docs/tasks/` **e as subpastas**, porque projeto encerrado vai inteiro
+para `docs/tasks/concluidos/` -- tasks, correcoes e os dois arquivos de
+progresso juntos. Cada pasta e um conjunto fechado: a task e conferida contra o
+`progresso.md` que mora **ao lado dela**, e nunca contra o de outra pasta.
+
 Quatro coisas, e a razao de cada uma esta na regra:
 
 1. toda task tem `fonte_de_verdade` no frontmatter, apontando para arquivo que
@@ -21,7 +26,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 TASKS = RAIZ / "docs" / "tasks"
-PROGRESSO = TASKS / "progresso.md"
+PROGRESSOS = "progresso.md", "correcoes-progresso.md"
 
 SIMBOLO = {
     "pendente": "⬜ Pendente",
@@ -44,19 +49,50 @@ def frontmatter(texto: str) -> dict[str, str]:
     return campos
 
 
-def main() -> int:
-    progresso = PROGRESSO.read_text(encoding="utf-8")
-    arquivos = sorted(
-        p for p in TASKS.glob("*.md")
-        if not p.name.startswith("CORR-") and p.name not in
-        ("progresso.md", "correcoes-progresso.md")
+def pastas_com_progresso() -> list[Path]:
+    """As pastas de `docs/tasks/` que tem um `progresso.md` proprio."""
+    return sorted(
+        d for d in [TASKS, *(x for x in TASKS.iterdir() if x.is_dir())]
+        if (d / "progresso.md").is_file()
     )
-    if not arquivos:
-        print("check_tasks: nenhuma task encontrada", file=sys.stderr)
+
+
+def tasks_de(pasta: Path) -> list[Path]:
+    return sorted(
+        p for p in pasta.glob("*.md")
+        if not p.name.startswith("CORR-") and not p.name.endswith(".template.md")
+        and p.name not in PROGRESSOS
+    )
+
+
+def main() -> int:
+    pastas = pastas_com_progresso()
+    if not pastas:
+        print("check_tasks: nenhum progresso.md em docs/tasks/", file=sys.stderr)
         return 1
 
-    ids = {frontmatter(p.read_text(encoding="utf-8")).get("id") for p in arquivos}
     erros: list[str] = []
+    total = 0
+    for pasta in pastas:
+        total += confere(pasta, erros)
+
+    if erros:
+        print(f"check_tasks: {len(erros)} problema(s) em {total} task(s):", file=sys.stderr)
+        for e in erros:
+            print(f"  {e}", file=sys.stderr)
+        return 1
+    print(f"check_tasks: {total} task(s), ok")
+    return 0
+
+
+def confere(pasta: Path, erros: list[str]) -> int:
+    progresso = (pasta / "progresso.md").read_text(encoding="utf-8")
+    arquivos = tasks_de(pasta)
+    if not arquivos:
+        # pasta so com templates e um progresso recem-criado -- nada a conferir
+        return 0
+
+    ids = {frontmatter(p.read_text(encoding="utf-8")).get("id") for p in arquivos}
 
     for p in arquivos:
         texto = p.read_text(encoding="utf-8")
@@ -78,14 +114,13 @@ def main() -> int:
             elif not (RAIZ / m.group(1).lstrip("/")).is_file():
                 erros.append(f"{nome}: `fonte_de_verdade` aponta para arquivo inexistente: {m.group(1)}")
 
-        # 3. linha com link no progresso
-        if f"({nome})" not in progresso and f"/docs/tasks/{nome})" not in progresso:
-            erros.append(f"{nome}: sem linha COM LINK no progresso.md")
-            linha = None
-        else:
-            linha = next((l for l in progresso.splitlines()
-                          if l.lstrip().startswith("|") and
-                          (f"({nome})" in l or f"/docs/tasks/{nome})" in l)), None)
+        # 3. linha com link no progresso, que vive ao lado da task
+        rel = pasta.relative_to(RAIZ).as_posix()          # docs/tasks[/<subpasta>]
+        marcas = (f"({nome})", f"/{rel}/{nome})")
+        linha = next((l for l in progresso.splitlines()
+                      if l.lstrip().startswith("|") and any(m in l for m in marcas)), None)
+        if linha is None:
+            erros.append(f"{nome}: sem linha COM LINK no progresso.md de {rel}/")
 
         # 2. status x simbolo
         status = (fm.get("status") or "").lower()
@@ -100,15 +135,7 @@ def main() -> int:
             if dep not in ids:
                 erros.append(f"{nome}: `depends_on` cita {dep}, que nao existe")
 
-    if erros:
-        print(f"check_tasks: {len(erros)} problema(s) em {len(arquivos)} task(s):",
-              file=sys.stderr)
-        for e in erros:
-            print(f"  {e}", file=sys.stderr)
-        return 1
-
-    print(f"check_tasks: {len(arquivos)} task(s), ok")
-    return 0
+    return len(arquivos)
 
 
 if __name__ == "__main__":
