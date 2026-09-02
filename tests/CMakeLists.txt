@@ -95,8 +95,8 @@ if(Python3_FOUND)
     # carry. Point WE2002_PES2_IMAGE at one and it re-measures the anchors of
     # plan 1.13, the table counts and digests of 1.6, the LZSS containers and
     # the image/CLUT index of 1.14, and docs/PES2-NOMES.md against the disc; WE2002_PES2_IMAGE_B, _CARD and
-    # _TMPDIR add the release diff, the memory-card alignment and the
-    # negative control. Without WE2002_PES2_IMAGE it reports itself skipped,
+    # _TMPDIR add the release diff, the memory-card alignment, the
+    # negative control and the asset write path of 6.7. Without WE2002_PES2_IMAGE it reports itself skipped,
     # the same way the golden tests do.
     add_test(NAME pes2_image
         COMMAND ${Python3_EXECUTABLE}

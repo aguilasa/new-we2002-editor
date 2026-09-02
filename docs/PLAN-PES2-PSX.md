@@ -865,6 +865,42 @@ começa em 65876 e o contêiner não a indexa. No PES2 o mesmo arquivo indexa �
 266 CLUTs, cargas em 53372..64284. É a via de entrada da
 [PES2-TASK-14](/docs/tasks/14-bandeiras.md), e a linha está escrita lá.
 
+**(g) Gravar de volta: fit-or-fail, medido — 2026-09-01, pela
+[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md).** O
+`tools/pes2/asset_write.py` importa PNG indexado, recomprime **só** a entrada
+tocada, confere antes de escrever e recusa o que não couber.
+
+**São dois orçamentos, não um.** O da §5(a) do `PLAN-FEATURES` é o do
+*extent*: o arquivo não pode mudar de tamanho, e sai de graça porque o
+`iso.py write_file` recusa qualquer mudança de comprimento. O que morde é o da
+**entrada**: a distância do offset de um fluxo até o próximo registro ou
+próximo fluxo, o que vier antes. E ele é apertadíssimo — a folga medida nas
+entradas de `TITLE.BIN` e `LOGO.BIN` é de **0 a 4 bytes**.
+
+Consequência que um editor precisa saber antes de prometer round-trip:
+**reimportar a imagem exportada sem alterar nada é recusado em algumas
+entradas.** `TITLE.BIN` entrada 0 pede 7.858 B e tem 7.836 — 22 acima. Não é
+defeito: é o compressor daqui não ser o da Konami, o que a §5c já media no
+agregado (−0,8% no `T_NAME_I`) e que por entrada vai para os dois lados. Das
+13 entradas de `TITLE.BIN` e `LOGO.BIN`, **10 recomprimem dentro do próprio
+orçamento e 3 não**.
+
+O que o gravador garante, e o `check` afirma a cada corrida:
+
+| Garantia | Medida |
+|---|---|
+| abrir e salvar sem editar devolve a imagem idêntica | 139 contêineres com índice reescritos, imagem byte a byte igual |
+| entrada não editada nunca recomprime | só a tocada é regenerada; o resto é carregado |
+| toda reescrita é conferida **antes** do disco | `decompress(compress(x)) == x` sobre os bytes que vão ser gravados, sem flag |
+| estouro recusa com a conta | `TITLE.BIN` entrada 0: 22 bytes acima, nada gravado |
+| controle negativo | um pixel no `LOGO.BIN` entrada 2 muda **745 bytes**, o primeiro exatamente no offset da entrada |
+| uma cor de paleta toca o que deve | 2 bytes, **1 setor** (4711), no offset absoluto previsto 11081454 |
+| `roms/` recusado | como no `poke.py` |
+
+Paleta é carga **crua**: não há fluxo para caber, e por isso a gravação de cor
+nunca esbarra em orçamento — é a via barata para verificar em tela, e foi a
+usada na §6.7.
+
 **A divergência da §5c, fechada.** Ela dizia que o fluxo de `TEX_00.BIN`
 começa em **28**; a varredura de (a) dizia **48**. É **48**, nos quatro
 discos: 24, 28, 32 e 44 falham, e falham na primeira distância que aponta para
@@ -1499,6 +1535,32 @@ duas parece funcionar na outra — até tocar `SELECTC.BIN`, deslocado
 
 Preservar os 280 B de cauda. O jogo não confere; corrigir muda bytes que
 nenhum teste espera e destrói a comparação de round-trip.
+
+**Decidido por medição em 2026-09-01, pela
+[PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md), e havia divergência a
+resolver.** A §5(b) do [PLAN-FEATURES](/docs/PLAN-FEATURES.md) decidiu
+**recalcular** EDC/ECC no caminho de assets; esta seção decide **preservar**.
+As duas não podem valer no mesmo comando, e a medida decide:
+
+1. **A gravação preserva a cauda, e isso é verificável.** O
+   `tools/pes2/asset_write.py` grava só a área de 2.048 bytes de dados, pelo
+   `iso.py write_file`. Depois de reescrever uma cor de paleta do
+   `/BIN/TITLE.BIN`, o setor 4711 tem **2 bytes de dados diferentes**,
+   cabeçalho igual e os **280 B de cauda idênticos**; o mesmo no setor 4608 do
+   `/BIN/LOGO.BIN`, com 89 bytes de dados. O `check` do gravador afirma isso a
+   cada corrida.
+2. **O jogo boota e desenha com a cauda obsoleta.** Depois de repintar as
+   paletas do `LOGO.BIN` e do `TITLE.BIN` de uma cópia de trabalho — 598 bytes
+   em 2 setores —, o disco chega à tela de título no DuckStation e o
+   logotipo, o `PRESS ANY BUTTON`, o `POWERED BY UMBRO` e o aviso de copyright
+   aparecem todos em magenta. **11.854 de 76.800 pixels** diferem do mesmo
+   quadro do disco original. É a prova direta de que o jogo não confere EDC.
+
+**A regra, portanto:** preservar é o padrão e o único comportamento do caminho
+de gravação. Um recálculo, se algum dia entrar, é **comando avulso e opt-in** —
+o `fixecc` que o próprio `PLAN-FEATURES` prevê — e nunca fica ligado a gravar.
+Preservar é o que mantém honestos o round-trip da §0 e o controle negativo do
+`iso.py`; recalcular apagaria os dois.
 
 ### 6.8 Os nomes licenciados não estão lá
 

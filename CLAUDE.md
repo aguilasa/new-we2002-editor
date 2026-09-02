@@ -583,6 +583,8 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/bin_archive.py ls\|export\|check <track1.bin>` | o índice do contêiner: imagens, CLUTs e PNG |
 | `python3 tools/pes2/lang_map.py <track1.bin> --check` | os conjuntos de cópia de asset, agrupados por conteúdo |
 | `python3 tools/pes2/tname.py bands\|fontscan\|swap <track1.bin>` | os nomes rasterizados do `T_NAME`, e a busca que mostrou não haver fonte no disco |
+| `python3 tools/pes2/asset_write.py save\|import\|palette\|negative\|check <copia.bin>` | grava asset editado, fit-or-fail; recusa `roms/` |
+| `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98`, isolado; `--kill` encerra |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |

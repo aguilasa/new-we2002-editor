@@ -132,6 +132,8 @@ python3 tools/pes2/bin_archive.py check "<track1.bin>"               # o indice 
 python3 tools/pes2/lang_map.py      "<track1.bin>" --check            # os conjuntos de copia
 python3 tools/pes2/lang_map.py      "<track1.bin>" --self-check --tmpdir <dir>
 python3 tools/pes2/tname.py         swap "<track1.bin>" --tmpdir <dir>   # grava e desfaz
+python3 tools/pes2/asset_write.py   check "<track1.bin>" --tmpdir <dir>  # o caminho de gravacao
+PES2_IMAGE=<copia.cue> tools/pes2/asset_screen.sh                        # quadros do boot
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra
@@ -150,6 +152,7 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | ferramenta de `tools/pes2/` | o `--check` dela verde; `pes2_selftest` verde |
 | qualquer coisa que escreva na imagem | `iso.py roundtrip` verde **e** o `negative` provando que ele sabe ficar vermelho |
 | gravação de nome de time | `poke.py --self-check` verde nas duas releases: recusas, varredura sem sobra, e a imagem de volta byte a byte |
+| gravação de asset editado | `asset_write.py check` verde: salvar sem editar devolve a imagem idêntica, o orçamento recusa com a conta, o controle negativo fica localizado, e a cauda EDC/ECC sobrevive |
 | gravação de asset, ou conjunto de cópias | `lang_map.py --check` verde nas duas releases, e `--self-check` provando que toda cópia recebeu e que nenhum arquivo do disco ficou com o conteúdo antigo |
 | índice de contêiner, imagem ou paleta | `bin_archive.py check` **exit 0 nos quatro discos**. Nas imagens não hackeadas não há entrada cujo retângulo discorde do fluxo; na European Deluxe são **seis** — cinco de tamanho e o `TEX_70.BIN` em 18052, que nem decodifica —, contadas como categoria própria e não como falha, com a linha `is a hacked image: its 6 record(s) …`. A **contagem é asserção**: uma sétima fica vermelha (§1.14(f)) |
 | codec ou contêiner de `/BIN/` | `lzss.py --check` verde nos **quatro** discos — as duas releases de PES2 e as duas imagens de WE2002 —, cada um **reconhecido pelo nome** (`recognised PES2 (EsIt) by its 208 containers`) e batendo nas quatro contagens medidas: 208/172/3/33/2.153, 210/174/3/33/2.195, 177/141/3/33/1.842 e 195/159/3/33/2.027 (contêineres/`whole`/`partial`/`none`/blocos). E `--roundtrip` 100% nos blocos que o disco tocado tem |

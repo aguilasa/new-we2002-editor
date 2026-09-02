@@ -71,7 +71,7 @@ PES2-TASK-22.
 | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
-| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ⬜ Pendente | — | — |
+| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | ⬜ pendente |
 | [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
 
@@ -287,9 +287,12 @@ emulador, são elas o trabalho barato que continua.
       sobrar cópia fora do plano — **3 conjuntos por release; o `T_NAME` é o
       mesmo arquivo nas duas, 5 cópias em 2 discos** (§6.12)
 - [ ] Um nome de `T_NAME` visto na tela nos dois idiomas, e o antigo ausente
-- [ ] Abrir e salvar sem editar devolve `cmp` zero nas duas releases
-- [ ] Estouro de orçamento recusa, dizendo quantos bytes faltaram
-- [ ] Política de EDC/ECC decidida por medição, e escrita na §6.7
+- [x] Abrir e salvar sem editar devolve `cmp` zero nas duas releases — **139
+      contêineres com índice reescritos, imagem byte a byte igual**
+- [x] Estouro de orçamento recusa, dizendo quantos bytes faltaram — **22 bytes
+      acima no `TITLE.BIN` entrada 0**
+- [x] Política de EDC/ECC decidida por medição, e escrita na §6.7 —
+      **preservar; o jogo boota e desenha com a cauda obsoleta**
 - [ ] Estádios (`GDC_*`/`GRDM_*`) medidos e registrados como fora de escopo
 - [ ] Lista do que a UI tem de cobrir, entregue à PES2-TASK-22
 - [ ] *(fora do portão)* um clipe de áudio trocado e ouvido no emulador

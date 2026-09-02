@@ -39,6 +39,7 @@ import lzss                                                  # noqa: E402
 import bin_archive                                           # noqa: E402
 import lang_map                                              # noqa: E402
 import tname                                                 # noqa: E402
+import asset_write                                           # noqa: E402
 
 SKIP = 77
 
@@ -108,6 +109,9 @@ def main():
         bad += iso.cmd_negative(Args(image=image, tmpdir=tmpdir))
         print("\n== the poke, over the whole copy set (plan 6.1) ==")
         bad += poke.self_check(image, tmpdir)
+        print("\n== writing an asset back: fit-or-fail (plan 6.7, 1.14) ==")
+        bad += asset_write.cmd_check(
+            asset_write._Args(image=image, tmpdir=tmpdir))
     else:
         print("\n== negative control and the poke: skipped, set "
               "WE2002_PES2_TMPDIR to a directory with ~450 MiB free ==")
