@@ -1598,7 +1598,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Nove armadilhas ao dirigir o DuckStation
+### 6.11 Treze armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1641,6 +1641,33 @@ aponta para o lugar errado.
    deixando o mount para trás. Esperar a morte, depois desmontar, com
    retentativa. O `run_duckstation.sh --kill` faz isso e é o jeito certo
    de encerrar.
+
+10. **Toque não é apertar, e foi isto que travou a Fase 2 inteira.**
+    `xdotool key X` é press e release no mesmo instante, e o jogo **não vê**
+    o botão: na tela de título, três formas de tocar — simples, com
+    `windowfocus`, com `--clearmodifiers` — deixaram o quadro idêntico até a
+    sexta casa decimal, e um `keydown` / **1 s** / `keyup` entrou. Um jogo de
+    PSX lê o pad uma vez por quadro, e um toque cai inteiro entre duas
+    leituras. Com 0,4 s ainda não basta.
+11. **Um `settings.ini` escrito à mão não vincula hotkey nenhuma**, pelo mesmo
+    motivo que já valia para `[Pad1]` na armadilha 4 — e sem `[Hotkeys]` o
+    fast-forward, o save state e o load state simplesmente não existem. Com
+    `FastForward = Keyboard/Tab` **mantido**, os cerca de dois minutos de
+    `MOVIE/WE2002.STR` viram 25 segundos, o que muda o custo de toda rota.
+12. **A Citrix não é a culpada aqui, e a suspeita custa caro.** A
+    `libAppProtection.so` do `/etc/ld.so.preload` exporta `XNextEvent`,
+    `XPeekEvent`, `xcb_poll_for_event`, `xcb_wait_for_event` e
+    `XRecordQueryVersion` — é um anti-keylogger, e a leitura óbvia é que ela
+    filtra o XTEST do `xdotool`. **Não filtra:** o input chega, e o
+    `tools/run-sanitized.sh` não é necessário para dirigir o emulador. A
+    frase do [CLAUDE.md](../CLAUDE.md) sobre a Citrix filtrar input sintético
+    é do **Windows**; no `:98` ela não vale. Testado em 2026-09-01, antes de
+    gastar o namespace num problema que não existia.
+13. **Não edite um `.sh` enquanto ele roda.** O bash relê o arquivo por
+    offset, então uma edição no meio da execução corrompe o que ainda não foi
+    lido — e o sintoma é um `unexpected EOF while looking for matching "`
+    numa linha que está perfeita em disco. Custou uma corrida de dois minutos
+    e uma investigação de sintaxe que não tinha o que achar.
 
 ---
 

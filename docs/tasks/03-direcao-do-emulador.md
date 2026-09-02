@@ -99,17 +99,107 @@ tê-las em mente ao escolher as telas:
 ## Critério de conclusão
 
 - [ ] Pelo menos **três** das cinco telas alcançadas e capturadas, com o PNG
-      mostrando um nome de time legível.
+      mostrando um nome de time legível. **Nenhuma das cinco** — a rota até o
+      menu não foi estabelecida. Ver o Log.
 - [ ] O roteiro é repetível: duas corridas seguidas produzem a mesma tela
+      — **medido para a única rota que existe** (`title`): 5 corridas, 5
+      acertos. Fica aberto porque o critério fala das telas do quadro, e
+      nenhuma delas foi alcançada.
       (dentro da tolerância do `PES2_TOLERANCE`, pela mesma razão do
       `boot_check.sh` — emulação não é exata quadro a quadro).
-- [ ] As telas não alcançadas estão listadas, com o motivo e a via proposta.
-- [ ] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
+- [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
+- [x] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
       FUSE nem janela órfã no `:98`.
-- [ ] Roda no `DISPLAY=:98`. Sem exceção (§6.10).
+- [x] Roda no `DISPLAY=:98`. Sem exceção (§6.10).
 
 ---
 
 ## Log de Execução
 
-*(a preencher)*
+**Executado em:** 2026-09-01 / 2026-09-02 — **parcial.** A ferramenta e a
+mecânica estão de pé e medidas; a navegação por menu **não** foi estabelecida,
+e nenhuma das cinco telas do quadro foi alcançada. A task **não** está
+concluída.
+
+**O que existe.** `tools/pes2/drive.sh`: rotas nomeadas, passos
+`wait / key / down / up / shot / until`, encerramento pelo
+`run_duckstation.sh --kill` no `trap`, recusa de `roms/`, e captura por
+`import -window root` recortada à geometria da janela. Mais quatro peças que
+não existiam:
+
+1. **`[Hotkeys]` no `run_duckstation.sh`.** Um `settings.ini` escrito à mão
+   não vincula hotkey nenhuma — exatamente o que a armadilha 4 da §6.11 já
+   dizia do `[Pad1]`. Sem isso, fast-forward, save state e load state não
+   existiam. Entraram `FastForward = Tab`, `SaveSelectedSaveState = F2`,
+   `LoadSelectedSaveState = F1`, `TogglePause = Space`.
+2. **Tecla mantida.** `xdotool key` é press e release no mesmo instante e o
+   jogo não vê o botão; `keydown` / **1 s** / `keyup` vê. Medido na tela de
+   título: três formas de tocar deixaram o quadro idêntico até a sexta casa
+   decimal, e 0,4 s de pressão ainda não bastam.
+3. **`Tab` mantido corta o intro.** Os cerca de dois minutos de
+   `MOVIE/WE2002.STR` viram **25 segundos** de fast-forward.
+4. **O passo `until:`**, que espera a *assinatura do quadro* em vez de contar
+   segundos. É o que torna a rota repetível: a duração do intro varia entre
+   corridas, e todo `sleep` fixo ou passa do ponto ou para antes.
+
+**O número que a rota existente entrega.** A rota `title` acertou a tela em
+**5 de 5** corridas, com médias de 0,5502 a 0,5528 e desvios de 0,3397 a
+0,3411 — a dispersão é a animação de brilhos do fundo, e é uma ordem de
+grandeza menor que a tolerância de 0,02.
+
+**O que não foi conseguido, e o que foi tentado.** Sair do título para o menu.
+Seis corridas, e o comportamento não se reproduz: às vezes o `X` deixa o
+título intacto, às vezes cai de volta no laço de atração, e **uma única
+corrida** — a primeira sonda de input — chegou a um menu com o cabeçalho
+`PRO EVOLUTION SOCCER 2`, sem que a sequência que a produziu se repetisse
+depois. Tentados, um por corrida: toque simples; `windowfocus` antes;
+`--clearmodifiers`; `keydown`/`keyup` de 0,4 s e de 1 s; um, dois e três `X`
+com esperas de 5, 6, 10, 12 e 25 s; e fast-forward de 15, 20, 25, 30, 40 e
+45 s antes do título.
+
+**Três hipóteses derrubadas por medição**, que valem tanto quanto o que
+funcionou e estão na §6.11 como armadilhas 10 a 13:
+
+- *o input não chega* — chega; faltava manter a tecla;
+- *a Citrix filtra o XTEST* — ela engancha `XNextEvent`, `xcb_poll_for_event`
+  e `XRecordQueryVersion`, e **não** bloqueia. A frase do `CLAUDE.md` sobre
+  input sintético é do Windows e não vale no `:98`. O `run-sanitized.sh` não
+  é necessário aqui;
+- *o `unexpected EOF` era erro de sintaxe* — era edição do `.sh` **durante a
+  execução**; o bash relê o arquivo por offset.
+
+**O save state não funcionou.** `F2` com a hotkey vinculada não escreveu nada
+em `ds-data/duckstation/savestates`. Não foi diagnosticado — os nomes
+`SaveSelectedSaveState` / `LoadSelectedSaveState` saíram do `settings.ini` do
+próprio usuário, mas a versão do AppImage pode usar outros, ou a hotkey pode
+exigir foco que o `press()` só passou a dar depois. **É a via mais promissora
+para a próxima sessão**: com um estado salvo no menu, a navegação deixa de
+custar dois minutos por tentativa e passa a ser carregar-e-navegar, que é
+exatamente o que a seção "Save state como atalho" desta task previa.
+
+**As telas não alcançadas, com a via proposta** — que é o terceiro critério:
+
+| Tela | Estado | Via proposta |
+|---|---|---|
+| `team-select` | não alcançada | destravar o save state e navegar a partir de um estado no menu |
+| `result` | não alcançada | idem, e depende de completar uma partida — candidata a save state próprio |
+| `replay` | não alcançada | idem |
+| `ending` | não alcançada | a própria task já previa que exigiria save state |
+| `edit` | não alcançada | idem `team-select` |
+
+E uma via que não depende de save state: **pedir a sequência de botões a quem
+conhece o jogo**. Foi oferecido e recusado nesta sessão, com razão — a
+descoberta autônoma é o método —, mas continua sendo o caminho de menor custo
+se a próxima sessão também travar aqui.
+
+**Arquivos criados/modificados**
+
+- `tools/pes2/drive.sh` — novo
+- `tools/pes2/run_duckstation.sh` — a seção `[Hotkeys]`
+- `docs/PLAN-PES2-PSX.md` — a §6.11 passou de nove para treze armadilhas
+
+**Problemas encontrados.** Os quatro acima. O de método que mais custou: mudar
+mais de uma variável por corrida. Cada subida leva de um minuto e meio a dois,
+e nas primeiras tentativas eu alterei espera e tecla ao mesmo tempo, o que
+tornou dois resultados inúteis. Da quarta corrida em diante passei a mexer em
+uma coisa por vez, e foi aí que as armadilhas 10 e 12 apareceram.

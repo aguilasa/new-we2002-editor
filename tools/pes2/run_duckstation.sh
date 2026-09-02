@@ -158,6 +158,14 @@ Start = Keyboard/Return
 Select = Keyboard/Backspace
 L1 = Keyboard/Q
 R1 = Keyboard/E
+
+[Hotkeys]
+FastForward = Keyboard/Tab
+LoadSelectedSaveState = Keyboard/F1
+SaveSelectedSaveState = Keyboard/F2
+SelectPreviousSaveStateSlot = Keyboard/F3
+SelectNextSaveStateSlot = Keyboard/F4
+TogglePause = Keyboard/Space
 INI
 
 kill_leftovers

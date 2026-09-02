@@ -68,7 +68,12 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Nove armadilhas ao dirigir o DuckStation**, todas medidas. (§6.11)
+12. **Treze armadilhas ao dirigir o DuckStation**, todas medidas (§6.11). As
+    quatro últimas são de 2026-09-01/02 e mudam como se escreve uma rota:
+    **toque não é apertar** (`keydown` + 1 s + `keyup`), um `settings.ini` à
+    mão **não vincula hotkey** (sem `[Hotkeys]` não há fast-forward nem save
+    state), a **Citrix não filtra o XTEST** aqui — a frase do `CLAUDE.md` é do
+    Windows —, e **editar um `.sh` enquanto ele roda** corrompe a execução.
 
 ---
 
@@ -138,6 +143,7 @@ python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra
 tools/pes2/boot_check.sh             # mede que ele botou -- janela, quadro vivo, dois quadros diferentes
+tools/pes2/drive.sh "<copia.cue>" --screen title --out-dir <dir>   # rota nomeada e captura
 
 ctest --test-dir build -R pes2       # pes2_selftest, pes2_image, pes2_boot
 ```
