@@ -166,9 +166,17 @@ Sobrescrever `HOME` isola de verdade e foi tentado; aí o primeiro boot para no
 assistente de nove páginas, que `SetupWizardIncomplete = false` não pula —
 medido com a bandeira presente, com os `resources/` semeados de uma instalação
 que funciona, com o BIOS como arquivo em vez de link, e com o `settings.ini` do
-usuário copiado verbatim. **Fica em aberto** (armadilha 20 da §6.11). Enquanto
-isso o `drive.py` **lê os bindings do `settings.ini` que de fato vale**, em vez
-de declarar os seus — o que é honesto e sobrevive a o usuário remapear.
+usuário copiado verbatim.
+
+**E aí a isolação foi encerrada por decisão do usuário**, na mesma sessão: esta
+máquina roda DuckStation para este projeto, e isolar não interessa. O lançador
+**deixou de escrever configuração** — arquivo que ninguém lê é pior que nenhum,
+porque passou um dia parecendo aplicado — e o `drive.py` **lê os bindings do
+`settings.ini` que de fato vale**. Efeito colateral bem-vindo: remapear um
+botão na interface do DuckStation basta, sem tocar no repositório. Save state e
+cartão caem em `~/.local/share/duckstation`, como em qualquer sessão do
+emulador; a armadilha 20 fica registrada para o caso de a isolação voltar a
+interessar.
 
 **O caminho feliz, dado pelo usuário e medido passo a passo.** Os botões não
 são todos o mesmo, que é o que custou uma dúzia de subidas para enxergar:
@@ -215,8 +223,9 @@ rota `title` segue medida em 5 de 5 (médias 0,5502–0,5528).
 
 - `tools/pes2/drive.py` — novo, substitui o `drive.sh`
 - `tools/pes2/drive.sh` — removido
-- `tools/pes2/run_duckstation.sh` — `PES2_PAD_TYPE`, os nomes de tecla
-  corrigidos, e o achado do `$HOME` registrado onde ele engana
+- `tools/pes2/run_duckstation.sh` — a escrita de `settings.ini` removida
+  inteira (com ela o `PES2_PAD_TYPE`, o `PES2_BIOS` e o `XDG_DATA_HOME`), e o
+  achado do `$HOME` registrado onde ele engana
 - `tools/pes2/selftest.py` — a lógica de quadro do `drive.py`
 - `docs/PLAN-PES2-PSX.md` — §6.11 de treze para **vinte** armadilhas, e as 4
   e 11 corrigidas: elas afirmavam o contrário do que se mediu
@@ -231,6 +240,9 @@ fato sobre a configuração.** O teste que resolveu — mudar algo que não é
 default (`StartFullscreen`) e olhar o efeito — custa uma subida e devia ter
 sido o primeiro.
 
-**Pendência encaminhada.** A isolação por `HOME` esbarra no assistente de
-configuração; enquanto não for resolvida, as corridas leem o `settings.ini` do
-usuário e escrevem save state no diretório dele.
+**Pendência encaminhada.** Nenhuma sobre configuração: a isolação foi
+encerrada por decisão e o lançador encolheu de 302 para 173 linhas. O que fica
+para quem seguir é a navegação **a partir** do menu, que agora é alcançável em
+3 de 3 — `Modo Partido` para `team-select`, `Modo Editar` para `edit`, e save
+state para `result`, `replay` e `ending`, agora que se sabe que o `F2`
+funciona.

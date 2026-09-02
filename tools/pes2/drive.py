@@ -52,12 +52,17 @@ class Fail(Exception):
 # --- the pad -----------------------------------------------------------
 #
 # **The bindings are read from the emulator's own configuration, not
-# declared here.** `run_duckstation.sh` writes a `[Pad1]` section that
-# DuckStation never reads -- it resolves its data directory from $HOME
-# rather than from XDG_DATA_HOME, so the file in force is the machine's
-# own. Twelve boots went into pressing keys that were bound to nothing
-# because this was assumed the other way round. Read what is actually
-# there, and fall back to DuckStation's defaults if there is no file.
+# declared here.** The launcher used to write a `[Pad1]` section that
+# DuckStation never read -- the AppImage resolves its data directory from
+# $HOME, not from XDG_DATA_HOME -- and twelve boots went into pressing keys
+# bound to nothing before that was measured. The user's call on 2026-09-02
+# was to stop isolating: this machine's DuckStation is for this project, so
+# its configuration is the one that runs and the launcher writes none.
+#
+# Reading it rather than declaring it is what makes that work, and it has a
+# side benefit: remapping a button in the DuckStation GUI is all it takes,
+# with nothing to change here. Falls back to DuckStation's defaults if
+# there is no file to read.
 #
 # The two namespaces disagree, which is the other half of the trap: the
 # value in the configuration is DuckStation's name, and what xdotool needs

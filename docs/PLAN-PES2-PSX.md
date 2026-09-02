@@ -1611,12 +1611,14 @@ aponta para o lugar errado.
    travando.
 3. **Não existe `-renderer` na linha de comando.** Sem GPU no Xvfb, o
    `Renderer = Software` tem de ir para o `settings.ini`.
-4. **O `settings.ini` que o lançador escreve nunca foi lido** — e isto aqui
-   dizia outra coisa até 2026-09-02. A leitura antiga era "um `settings.ini`
-   escrito à mão não tem binding nenhum, então declare `[Pad1]`"; o
-   `[Pad1]` foi declarado e continuou sem efeito. A causa está na armadilha
-   14. Enquanto ela não for resolvida, **quem manda é o `settings.ini` do
-   próprio usuário**, e é dele que o `drive.py` lê os bindings.
+4. **O lançador não configura o DuckStation, e isso é decisão.** Este item
+   dizia, até 2026-09-02, "um `settings.ini` escrito à mão não tem binding
+   nenhum, então declare `[Pad1]`". O `[Pad1]` foi declarado e continuou sem
+   efeito, pela armadilha 14. A saída não foi insistir na configuração
+   própria: **a máquina roda DuckStation para este projeto**, então a
+   configuração dele é a que vale, o lançador não escreve nenhuma, e o
+   `drive.py` **lê** os bindings do arquivo em vigor. Remapear um botão na
+   interface do DuckStation basta; não há nada a mudar no repositório.
 
 5. **A janela nasce fora da tela.** Sem window manager ninguém a posiciona,
    e ela escolheu `x=2480` num display de 1280. O `import` falha com
@@ -1677,12 +1679,20 @@ aponta para o lugar errado.
     um dia.** Ele resolve o diretório de dados a partir do **`$HOME`**, então
     toda corrida até 2026-09-02 usou `~/.local/share/duckstation` — o do
     usuário. A prova é de uma linha: `StartFullscreen = true` no arquivo que
-    o lançador escreve, e a janela sai com 800×655. Consequências medidas:
-    nosso `[Pad1]` nunca valeu, dois save states nossos foram parar no
-    diretório do usuário, e o `F2` que parecia não gravar **gravava** — no
-    lugar errado. O cartão de memória do usuário não foi tocado (digest
-    conferido antes e depois). Sobrescrever `HOME` isola de verdade, mas aí
-    o primeiro boot para no assistente de configuração (armadilha 20).
+    o lançador escrevia, e a janela sai com 800×655. Consequências medidas:
+    o `[Pad1]` do lançador nunca valeu, dois save states nossos foram parar
+    no diretório do usuário, e o `F2` que parecia não gravar **gravava** — no
+    lugar errado. O cartão de memória não foi tocado (digest conferido antes
+    e depois). Sobrescrever `HOME` isola de verdade, mas aí o primeiro boot
+    para no assistente de configuração (armadilha 20).
+
+    **Encerrado por decisão, não por conserto:** o usuário determinou em
+    2026-09-02 que esta máquina roda DuckStation para este projeto e que
+    isolar não interessa. O lançador deixou de escrever configuração — um
+    arquivo que ninguém lê é pior que nenhum, porque passa um dia parecendo
+    aplicado — e o `drive.py` lê o que está em vigor. Save state e cartão
+    caem em `~/.local/share/duckstation` como em qualquer sessão do
+    emulador.
 15. **Tecla que funciona não prova que a configuração foi lida.** `Tab`,
     `Enter` e as quatro setas funcionaram o tempo todo — porque são
     **defaults** do DuckStation, não porque o arquivo tivesse efeito. A
@@ -1715,8 +1725,9 @@ aponta para o lugar errado.
     `SetupWizardIncomplete = false` não pula. Medido com a bandeira presente,
     com os `resources/` semeados de uma instalação que funciona e com o BIOS
     como arquivo de verdade em vez de link: as nove páginas sobem do mesmo
-    jeito e nenhuma janela de jogo aparece atrás delas. É o que mantém a
-    armadilha 14 em aberto.
+    jeito e nenhuma janela de jogo aparece atrás delas. Registrado porque é o
+    que fecha a porta da isolação, caso ela volte a interessar — a armadilha
+    14 foi encerrada por decisão, não por conserto.
 
 ---
 

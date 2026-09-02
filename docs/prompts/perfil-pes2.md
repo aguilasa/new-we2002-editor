@@ -84,7 +84,7 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 | `roms/Pro Evolution Soccer 2 (Europe) (EsIt)/` | amostra de trabalho A, dump multi-track | **não** — sempre cópia |
 | `roms/Pro Evolution Soccer 2 (Europe) (EnFrDe)/` | amostra de trabalho B, o confronto entre releases | **não** — sempre cópia |
 | `roms/golden-european-deluxe.bin`, `roms/japanese-shift-jis.bin` | as duas imagens de **WE2002**; desde a Fase 7 elas são amostra deste ciclo também, porque o formato de contêiner é o mesmo (§1.14) | **não** — leitura pura aqui |
-| o memory card do usuário | save real, alinha elenco e fecha fronteira | **não** — nunca escrito; o `run_duckstation.sh` usa cartão próprio |
+| o memory card do usuário | save real, alinha elenco e fecha fronteira | **não** por ferramenta nossa. O emulador usa esse mesmo cartão desde que a isolação foi encerrada; digest conferido em 2026-09-02 e inalterado |
 | `src/core/` (`we2002_core`) | empresta **conhecimento de formato**, não código | **não** — §6.9 |
 
 **Não existe oráculo comportamental.** O que mais se aproxima é o jogo sob
@@ -141,7 +141,7 @@ python3 tools/pes2/asset_write.py   check "<track1.bin>" --tmpdir <dir>  # o cam
 PES2_IMAGE=<copia.cue> tools/pes2/asset_screen.sh                        # quadros do boot
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
-tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra
+tools/pes2/run_duckstation.sh        # sobe o jogo no :98; --kill encerra
 tools/pes2/boot_check.sh             # mede que ele botou -- janela, quadro vivo, dois quadros diferentes
 python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --out-dir <dir>
 
@@ -167,8 +167,11 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | número em doc | veio de ferramenta, não de soma à mão |
 
 **O emulador não está no `PATH`** — é um AppImage em `~/Applications/`. O
-`run_duckstation.sh` usa um `XDG_DATA_HOME` isolado: configuração e cartão
-próprios, só o BIOS emprestado por link.
+`run_duckstation.sh` **não configura nada**: o AppImage resolve o diretório de
+dados pelo `$HOME`, e a decisão de 2026-09-02 é não isolar, porque esta máquina
+roda DuckStation para este projeto. Quem manda é a configuração do próprio
+emulador, e o `drive.py` lê os bindings dela. Save state e cartão caem em
+`~/.local/share/duckstation`.
 
 ---
 
@@ -179,8 +182,10 @@ Presumir conflito em: [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md),
 [`PES2-AJUSTES.md`](/docs/PES2-AJUSTES.md), `tools/pes2/*`, e o
 `pes2_map.json` quando existir.
 
-Recursos serializados deste ciclo, além dos do repositório: o **DuckStation** e
-o `XDG_DATA_HOME` isolado dele (uma instância por vez no `:98`), e o
+Recursos serializados deste ciclo, além dos do repositório: o **DuckStation**
+e o diretório de dados dele em `~/.local/share/duckstation` — que é **um só**,
+porque a isolação foi encerrada por decisão, então uma instância por vez no
+`:98` e nenhuma corrida paralela que boote —, e o
 **`WE2002_PES2_TMPDIR`** — o round-trip precisa de ~450 MiB livres e duas
 corridas simultâneas leem o temporário uma da outra.
 

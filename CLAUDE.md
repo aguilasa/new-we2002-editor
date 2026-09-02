@@ -586,7 +586,7 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/asset_write.py save\|import\|palette\|negative\|check <copia.bin>` | grava asset editado, fit-or-fail; recusa `roms/` |
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
-| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98`, isolado; `--kill` encerra |
+| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra |
 | `python3 tools/pes2/drive.py <copia.cue> --screen main-menu` | dirige o emulador por rota nomeada e captura; espera a tela pela assinatura do quadro, não pelo relógio |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
 
@@ -608,9 +608,18 @@ WE2002_PES2_TMPDIR=<~450 MiB livres> \
 Quatro coisas que custam tempo se descobertas tarde:
 
 - **O emulador é DuckStation, e não está no `PATH`** — é um AppImage em
-  `~/Applications/`. O `run_duckstation.sh` usa um `XDG_DATA_HOME`
-  isolado: configuração e cartão próprios, só o BIOS emprestado por link.
-  O cartão do usuário é save real e **nunca** é escrito.
+  `~/Applications/`. O `run_duckstation.sh` **não configura nada**, por
+  decisão de 2026-09-02: esta máquina roda DuckStation para este projeto,
+  então a configuração dele é a que vale, e o `drive.py` **lê** os bindings
+  de `[Pad1]` do arquivo em vigor em vez de declarar os seus. Remapear um
+  botão na interface do emulador basta. Save state e cartão caem em
+  `~/.local/share/duckstation` como em qualquer sessão dele.
+
+  Isto dizia "usa um `XDG_DATA_HOME` isolado" até aquela data, e era
+  **falso**: o AppImage resolve o diretório de dados pelo `$HOME`, então o
+  `settings.ini` que o lançador escrevia nunca foi lido — doze subidas
+  apertando teclas ligadas a nada. Detalhe nas armadilhas 14 e 20 da §6.11
+  do [PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md).
 - **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
   release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
   apontar qualquer coisa que escreva.
