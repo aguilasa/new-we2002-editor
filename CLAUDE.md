@@ -587,7 +587,7 @@ As ferramentas, e o que cada uma responde:
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra |
-| `python3 tools/pes2/drive.py <copia.cue> --screen main-menu` | dirige o emulador por rota nomeada e captura; espera a tela pela assinatura do quadro, não pelo relógio |
+| `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco

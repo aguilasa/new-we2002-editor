@@ -1232,6 +1232,15 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    costuma ser a mesma**, e isso dá a estrutura do registro de jogador quase
    pronta. (O editor do Obocaman já importa `.mcr` do WE2002 — ver
    [PLAN-WTE-LAZARUS.md](/docs/PLAN-WTE-LAZARUS.md).)
+3b. **Os nomes dos atributos, lidos da tela.** O Modo Editar mostra os
+   **dezesseis** campos por jogador, em ordem, e a ordem de tela costuma ser
+   a ordem do registro: `Ataque`, `Defensa`, `Equilib.`, `Resisten`,
+   `Velocid.`, `Acelerar`, `Respues.`, `Regate`, `Pase`, `Precisión`,
+   `Potencia`, `Cabezazo`, `Salto`, `Técnica`, `Efecto`, `Positivo` — mais
+   `Nación`, `Altura`, `Edad`, `Posición` e `Pie` no bloco de identificação.
+   Capturado em 2026-09-02 por `drive.py --screen edit`. **Ele só edita
+   jogador criado**, não os times embutidos, então o nome de time de
+   `SELECTC.BIN` @16576 fica atrás de criar um jogador primeiro.
 4. **Desmontagem do MIPS**, para os campos que a estatística não resolver.
    É o último recurso, e é o mais caro. Existe ferramenta de terceiro que o
    resolveria quase inteiro, avaliada e **não adotada** — o porquê, e o
@@ -1600,7 +1609,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Vinte armadilhas ao dirigir o DuckStation
+### 6.11 Vinte e duas armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1730,6 +1739,22 @@ aponta para o lugar errado.
     jeito e nenhuma janela de jogo aparece atrás delas. Registrado porque é o
     que fecha a porta da isolação, caso ela volte a interessar — a armadilha
     14 foi encerrada por decisão, não por conserto.
+
+21. **O d-pad quer toque, o botão de face quer pressão — e os dois requisitos
+    brigam.** A armadilha 10 estabeleceu que tocar não é apertar, e isso vale
+    para os botões. Para a direção vale o **contrário**: um `Down` de 1 s
+    dispara o auto-repeat do próprio jogo, e num menu de sete itens ele dá a
+    volta inteira e para no item de onde saiu — diferença de 0,0004, que se
+    lê exatamente como tecla perdida. Medido lado a lado no menu principal:
+    a 1,0 s **duas de seis** "sumiram"; a 0,15 s as seis moveram, diferenças
+    de 0,0136 a 0,0178. A duração é escolhida por botão, não fixada uma vez.
+22. **Apertar-até-mudar está errado numa lista.** A tentativa extra move uma
+    linha a mais, e o resultado é confirmar o item errado calado: cinco
+    linhas pedidas viraram dez teclas e a rota do `Modo Editar` caiu no
+    `Modo Copa`. Numa lista, tecla lenta a desenhar e tecla perdida são
+    indistinguíveis, então **espere mais em vez de apertar de novo**, e
+    conte quantas linhas registraram — quem para curto é visível, quem passa
+    do ponto não é.
 
 ---
 

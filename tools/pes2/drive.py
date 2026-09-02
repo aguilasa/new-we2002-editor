@@ -134,6 +134,17 @@ HOTKEY = {
 # enough on the title screen.
 HOLD = float(os.environ.get("PES2_HOLD", "1.0"))
 
+# **The d-pad wants the opposite, and the two requirements fight.** A one
+# second Down on a menu triggers the game's own auto-repeat, and on a
+# seven-item list that walks the whole way round and lands on the item it
+# started from -- a difference of 0.0004, which reads exactly like a dropped
+# press. Measured side by side on the main menu: at 1.0 s two of six presses
+# "vanished"; at 0.15 s all six moved, differences 0.0136 to 0.0178. A face
+# button still needs the long press, so the duration is chosen per button
+# rather than set once.
+TAP = float(os.environ.get("PES2_TAP", "0.15"))
+DPAD = frozenset(("up", "down", "left", "right"))
+
 # The title screen's signature, measured over five runs of the shell driver
 # it replaced: means 0.5502..0.5528, standard deviations 0.3397..0.3411.
 # The spread is the sparkle animation, an order of magnitude inside the
@@ -144,6 +155,23 @@ TITLE = (0.550, 0.341)
 # means 0.140639, 0.140682, 0.140679; standard deviations 0.212488,
 # 0.212449, 0.212435.
 MAIN_MENU = (0.1407, 0.2124)
+
+# The team-select grid of flags, where a name out of SELECT.BIN @3128 is on
+# screen. Measured 2026-09-02.
+TEAM_SELECT = (0.1685, 0.2488)
+
+# Save states are the shortcut the task asks for: a state parked on a screen
+# turns three minutes of menu into a load and a capture. They live in the
+# emulator's own directory -- the isolation was dropped by decision -- and
+# they are derived from a commercial game, so they stay out of git exactly
+# like roms/ and the boot frames do. What is versioned is the route that
+# makes one.
+SERIAL = "SLES-03957"
+STATE_DIR = os.path.expanduser("~/.local/share/duckstation/savestates")
+
+
+def state_path(slot=1):
+    return os.path.join(STATE_DIR, f"{SERIAL}_{slot}.sav")
 
 
 # --- frames ------------------------------------------------------------
@@ -199,12 +227,10 @@ class Frame:
 class Session:
     """A booted emulator plus the window it draws into."""
 
-    def __init__(self, cue, out_dir, display=None, pad_type=None,
-                 verbose=True):
+    def __init__(self, cue, out_dir, display=None, verbose=True):
         self.cue = cue
         self.out_dir = out_dir
         self.display = display or os.environ.get("PES2_DISPLAY", ":98")
-        self.pad_type = pad_type
         self.verbose = verbose
         self.window = None
         self.shots = []
@@ -215,8 +241,6 @@ class Session:
     def __enter__(self):
         env = dict(os.environ, PES2_IMAGE=self.cue,
                    PES2_DISPLAY=self.display)
-        if self.pad_type:
-            env["PES2_PAD_TYPE"] = self.pad_type
         launcher = os.path.join(HERE, "run_duckstation.sh")
         out = subprocess.run([launcher], env=env, capture_output=True,
                              text=True)
@@ -258,8 +282,14 @@ class Session:
         self._xdotool("windowfocus", self.window)
         self._xdotool("mousemove", "--window", self.window, "20", "20")
 
-    def press(self, button, hold=HOLD):
-        """Hold a pad button down for `hold` seconds, then release."""
+    def press(self, button, hold=None):
+        """Press a pad button, held for as long as that button needs.
+
+        A face button needs about a second; a direction needs a tap. See the
+        note by TAP -- getting this backwards looks like dropped input.
+        """
+        if hold is None:
+            hold = TAP if button in DPAD else HOLD
         key = PAD.get(button, HOTKEY.get(button, button))
         self._aim()
         self._xdotool("keydown", key)
@@ -278,7 +308,7 @@ class Session:
         self.say(f"held {button} for {seconds}s")
 
     def wait_for_stats(self, mean, sd, tol=0.02, timeout=120, poll=0.0,
-                       box=None):
+                       box=None, fast=False):
         """Wait until the frame's mean and standard deviation both land
         within `tol` of the given pair, and return that frame.
 
@@ -292,22 +322,65 @@ class Session:
         tenths of a second, and every one of those spent sleeping is a
         chance to miss the screen.
         """
+        # Holding fast forward through the wait matters more than it looks.
+        # The attract loop is minutes long and the title is a few seconds of
+        # it, so a wait that is merely long enough at 100% speed is a
+        # coin toss -- twice it ran out at 120 s with the demo still
+        # playing. Fast forward shortens the loop far more than it shortens
+        # the title, and the poll is as fast as a capture allows.
+        key = HOTKEY["fast-forward"]
+        if fast:
+            self._aim()
+            self._xdotool("keydown", key)
         deadline = time.time() + timeout
         best = None
-        while time.time() < deadline:
-            frame = self.capture()
-            m, s = frame.stats(box)
-            near = abs(m - mean) + abs(s - sd)
-            if best is None or near < best[0]:
-                best = (near, m, s)
-            if abs(m - mean) <= tol and abs(s - sd) <= tol:
-                self.say(f"recognised  mean={m:.6f} sd={s:.6f}")
-                return frame
-            if poll:
-                time.sleep(poll)
+        try:
+            while time.time() < deadline:
+                frame = self.capture()
+                m, s = frame.stats(box)
+                near = abs(m - mean) + abs(s - sd)
+                if best is None or near < best[0]:
+                    best = (near, m, s)
+                if abs(m - mean) <= tol and abs(s - sd) <= tol:
+                    self.say(f"recognised  mean={m:.6f} sd={s:.6f}")
+                    return frame
+                if poll:
+                    time.sleep(poll)
+        finally:
+            if fast:
+                self._xdotool("keyup", key)
         raise Fail(f"no frame matched mean={mean} sd={sd} (+-{tol}) within "
                    f"{timeout}s; closest was mean={best[1]:.6f} "
                    f"sd={best[2]:.6f}")
+
+    # -- save states --
+
+    def save_state(self, slot=1, timeout=20):
+        """Press the save hotkey and wait for the file to actually change.
+
+        Pressing and hoping is not enough: the whole reason the previous
+        session concluded "F2 wrote nothing" is that it looked for the file
+        in a directory DuckStation was not using. Check where it really
+        goes, and check that it moved.
+        """
+        path = state_path(slot)
+        before = os.path.getmtime(path) if os.path.exists(path) else 0
+        self.press("save-state", hold=0.3)
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            time.sleep(1)
+            if os.path.exists(path) and os.path.getmtime(path) > before:
+                size = os.path.getsize(path)
+                self.say(f"saved state slot {slot}  {size} B  {path}")
+                return path
+        raise Fail(f"no save state appeared at {path} within {timeout}s")
+
+    def load_state(self, slot=1):
+        if not os.path.exists(state_path(slot)):
+            raise Fail(f"no save state at {state_path(slot)} -- make one "
+                       f"with --save-state on a route that reaches a screen")
+        self.press("load-state", hold=0.3)
+        self.say(f"loaded state slot {slot}")
 
     # -- output --
 
@@ -446,8 +519,7 @@ def route_title(s):
     that follows the title is as animated as the movie before it.
     """
     time.sleep(6)
-    s.hold("fast-forward", 25)
-    frame = s.wait_for_stats(*TITLE, tol=0.02, timeout=120)
+    frame = s.wait_for_stats(*TITLE, tol=0.02, timeout=240, fast=True)
     s.capture("title")
     return frame
 
@@ -471,8 +543,7 @@ def route_main_menu(s):
     """
     s.say("step 1: fast forward, then wait for the title")
     time.sleep(6)
-    s.hold("fast-forward", 25)
-    s.wait_for_stats(*TITLE, tol=0.02, timeout=120)
+    s.wait_for_stats(*TITLE, tol=0.02, timeout=240, fast=True)
 
     # No capture between recognising the title and pressing. The title
     # hands itself to the attract demo within seconds -- one `import` in
@@ -509,15 +580,102 @@ def route_main_menu(s):
     return frame
 
 
+def from_main_menu(s, slot=1):
+    """Be at the main menu, by whatever is cheaper.
+
+    With a state parked there this costs about half a minute; without one it
+    walks the whole opening, which is two and a half minutes. Either way it
+    *verifies* by signature rather than assuming, because loading a state
+    that was parked somewhere else is a silent way to shoot the wrong screen.
+    """
+    if os.path.exists(state_path(slot)):
+        time.sleep(12)
+        s.load_state(slot)
+        time.sleep(3)
+        try:
+            return s.wait_for_stats(*MAIN_MENU, tol=0.02, timeout=30)
+        except Fail:
+            s.say("the state did not land on the main menu -- walking it")
+    route_main_menu(s)
+    return s.wait_for_stats(*MAIN_MENU, tol=0.02, timeout=30)
+
+
+def menu_pick(s, index, label, wait=2.5, tol=0.002):
+    """Move `index` rows down the main menu and confirm.
+
+    **`nudge` is wrong for this, and using it landed on Modo Copa when the
+    route asked for Modo Editar.** Its retry presses again when it has not
+    seen a change, which on a list means moving a second row: five rows
+    asked for, ten presses sent, and the wrong item confirmed. A press that
+    is merely slow to draw is indistinguishable from one that was dropped,
+    so the safe move on a list is to wait longer rather than to press again
+    -- an overshoot is silent, a missed row is visible as landing short.
+
+    So: one press per row, a generous wait, and a count of how many actually
+    registered, which the caller can check against what it asked for.
+    """
+    moved = 0
+    for row in range(index):
+        before = s.capture()
+        s.press("down")
+        time.sleep(wait)
+        if s.capture().difference(before) > tol:
+            moved += 1
+        else:
+            s.say(f"row {row + 1} did not register")
+    s.say(f"{moved} of {index} rows moved")
+    if moved != index:
+        raise Fail(f"asked for {index} rows down and {moved} registered -- "
+                   f"confirming here would pick the wrong item")
+    s.capture(f"menu-{label}")
+    return s.nudge("cross", tol=0.005)
+
+
 def route_team_select(s):
-    raise Fail("the route past the main menu is not established -- "
-               "see PES2-TASK-03")
+    """Main menu -> Modo Partido -> Partido de exhibicion -> the flag grid.
+
+    Three Crosses from the menu, with a screen in between that assigns the
+    pads to Local and Visitante. The grid is the screen PES2-TASK-04 needs:
+    the name above it comes out of `SELECT.BIN` @3128, so a poke that
+    changes that table changes what is captured here.
+    """
+    from_main_menu(s)
+    s.say("Modo Partido")
+    s.nudge("cross", tol=0.005)
+    s.capture("match-submenu")
+
+    s.say("Partido de exhibicion")
+    s.nudge("cross", tol=0.02)
+    s.settle(tol=0.006, timeout=40)
+    s.capture("pad-assignment")
+
+    s.say("past the pad assignment")
+    s.nudge("cross", tol=0.02)
+    frame = s.settle(tol=0.006, timeout=40)
+    s.capture("team-select")
+    m, sd = frame.stats()
+    if abs(m - TEAM_SELECT[0]) > 0.03 or abs(sd - TEAM_SELECT[1]) > 0.03:
+        raise Fail(f"this is not the flag grid: mean={m:.4f} sd={sd:.4f}")
+    return frame
+
+
+def route_edit(s):
+    """Main menu -> Modo Editar. Sixth row of the menu."""
+    from_main_menu(s)
+    s.say("Modo Editar")
+    menu_pick(s, 5, "edit")
+    # Looser than the other screens on purpose: this one renders an animated
+    # player beside the list, so it never goes as still as a flat menu.
+    frame = s.settle(tol=0.012, timeout=40)
+    s.capture("edit")
+    return frame
 
 
 ROUTES = {
     "title": route_title,
     "main-menu": route_main_menu,
     "team-select": route_team_select,
+    "edit": route_edit,
 }
 
 
@@ -576,7 +734,7 @@ def self_check():
         assert small.difference(black) == 1.0, \
             "mismatched sizes must read as fully different"
 
-        for name in ("title", "main-menu", "team-select"):
+        for name in ("title", "main-menu", "team-select", "edit"):
             assert name in ROUTES, f"route {name} went missing"
         for button in ("cross", "down", "up", "start"):
             assert button in PAD, f"pad button {button} went missing"
@@ -618,8 +776,9 @@ def main(argv=None):
     ap.add_argument("--screen", default=os.environ.get("PES2_SCREEN"))
     ap.add_argument("--out-dir", default=os.environ.get("PES2_OUTDIR"))
     ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
-    ap.add_argument("--pad-type", default=os.environ.get("PES2_PAD_TYPE"),
-                    help="AnalogController (default) or DigitalController")
+    ap.add_argument("--save-state", type=int, metavar="SLOT", nargs="?",
+                    const=1, default=None,
+                    help="park a save state on the screen the route reaches")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args(argv)
@@ -644,9 +803,10 @@ def main(argv=None):
         os.makedirs(out_dir, exist_ok=True)
         print(f"route: {args.screen} -> {out_dir}")
 
-        with Session(cue, out_dir, display=args.display,
-                     pad_type=args.pad_type) as s:
+        with Session(cue, out_dir, display=args.display) as s:
             ROUTES[args.screen](s)
+            if args.save_state is not None:
+                s.save_state(args.save_state)
         print(f"DRIVE OK: {out_dir}")
         return 0
     except Skip as e:

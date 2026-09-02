@@ -99,12 +99,14 @@ tê-las em mente ao escolher as telas:
 ## Critério de conclusão
 
 - [ ] Pelo menos **três** das cinco telas alcançadas e capturadas, com o PNG
-      mostrando um nome de time legível. **Nenhuma das cinco** — a rota até o
-      menu não foi estabelecida. Ver o Log.
+      mostrando um nome de time legível. **Uma** — `team-select`, com
+      `IRELAND` legível. O `edit` foi alcançado e capturado, mas o Modo
+      Editar do PES2 só edita jogador **criado**, então nenhum nome de time
+      aparece nele sem criar um antes. Ver o Log.
 - [ ] O roteiro é repetível: duas corridas seguidas produzem a mesma tela
-      — **medido para a única rota que existe** (`title`): 5 corridas, 5
-      acertos. Fica aberto porque o critério fala das telas do quadro, e
-      nenhuma delas foi alcançada.
+      — medido para `title` (5 de 5) e `main-menu` (4 de 4, médias 0,140546
+      a 0,140682). `team-select` e `edit` foram alcançadas, mas cada uma numa
+      corrida só; falta a segunda.
       (dentro da tolerância do `PES2_TOLERANCE`, pela mesma razão do
       `boot_check.sh` — emulação não é exata quadro a quadro).
 - [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
@@ -239,6 +241,80 @@ doze subidas tratando "a tecla não funciona" como fato sobre o jogo quando era
 fato sobre a configuração.** O teste que resolveu — mudar algo que não é
 default (`StartFullscreen`) e olhar o efeito — custa uma subida e devia ter
 sido o primeiro.
+
+---
+
+### Segunda sessão de 2026-09-02 — do menu para dentro
+
+**O save state destravou tudo.** Ele existe agora como `--save-state` do
+`drive.py`, e `from_main_menu()` carrega-o quando existe: **2,5 min por
+tentativa viraram ~40 s**. O estado é derivado de jogo comercial e fica
+**fora do git**, como `roms/` e os quadros do `boot_check.sh`; o que está
+versionado é a rota que o cria. Ele mora em
+`~/.local/share/duckstation/savestates/SLES-03957_1.sav`, 1.553.197 B — e o
+`save_state()` **confere a mtime do arquivo** em vez de apertar e torcer,
+que é o erro exato que fez a sessão anterior concluir que o `F2` não gravava.
+
+**Duas telas novas, e a segunda quase não conta.**
+
+| rota | como se chega | assinatura | nome de time? |
+|---|---|---|---|
+| `team-select` | menu → `Modo Partido` → `Partido de exhibición` → passa a atribuição de controle | 0,1686 / 0,2490 | **sim**, `IRELAND` legível |
+| `edit` | menu → sexta linha | 0,1530 / 0,2103 | **não** |
+
+O `edit` decepciona por um motivo do jogo, não da ferramenta: o **Modo
+Editar do PES2 só edita jogador criado**. `Cambiar` e `Registrar jugador`
+mostram doze linhas de `–NO DATA–`, e o nome de time de `SELECTC.BIN`
+@16576 fica atrás de criar um jogador primeiro — várias telas de entrada de
+nome.
+
+Em compensação ele entregou de graça o que a §4.2 queria: os **dezesseis
+atributos por jogador, em ordem de tela** — `Ataque`, `Defensa`, `Equilib.`,
+`Resisten`, `Velocid.`, `Acelerar`, `Respues.`, `Regate`, `Pase`,
+`Precisión`, `Potencia`, `Cabezazo`, `Salto`, `Técnica`, `Efecto`,
+`Positivo`, mais `Nación`, `Altura`, `Edad`, `Posición` e `Pie`. Está na
+§4.2 do plano como item 3b.
+
+**Duas armadilhas novas, as 21 e 22 da §6.11, e a segunda escondia um bug
+que confirmava o item errado calado:**
+
+- **o d-pad quer toque, o botão de face quer pressão.** Medido lado a lado
+  no menu: `Down` de 1,0 s perdeu **duas de seis**; de 0,15 s, seis de seis.
+  Não era tecla perdida — 1 s dispara o auto-repeat e num menu de sete itens
+  dá a volta inteira, parando no mesmo item. Isso também explica a
+  instabilidade da tela de idioma: com toque curto, `down`, `cross` e `up`
+  passaram a pegar na **primeira** tentativa;
+- **`nudge` está errado numa lista.** A tentativa extra dele move uma linha
+  a mais: cinco linhas pedidas viraram dez teclas e a rota do `Modo Editar`
+  caiu no `Modo Copa` **sem reclamar**. O `menu_pick` passou a mandar uma
+  tecla por linha, esperar mais, e **contar** quantas registraram — e a
+  recusa disparou de verdade ("3 de 5") antes de o toque curto consertar a
+  causa.
+
+**As três que faltam, e por quê.** `result`, `replay` e `ending` estão atrás
+de uma partida terminada. Medido: **onze minutos de fast-forward não
+terminaram** uma partida de exibição na duração padrão — a média do quadro
+ficou em 0,30 o tempo todo. E `Opciones de Partido` **não** tem duração de
+partida: tem `MEMORY CARD`, `Repetición de la moviola`, botões, som e tela.
+A duração mora na configuração de cada modo — a tela do `Modo Copa` mostra
+`Duración del partido  10 min.`
+
+Via proposta, agora medida em vez de suposta:
+
+| Tela | Via |
+|---|---|
+| `result` | `Modo Copa` ou `Modo Liga` com a menor duração, e **save state antes do apito final** — daí vira carregar-e-capturar |
+| `replay` | idem; `Opciones de Partido → Repetición de la moviola` controla o replay |
+| `ending` | campeonato completo; save state é o único caminho sensato |
+| `edit` com nome de time | criar um jogador primeiro, e então `Registrar jugador` pede o time |
+
+**Arquivos desta sessão**
+
+- `tools/pes2/drive.py` — `save_state`/`load_state`, `from_main_menu`,
+  `menu_pick`, as rotas `team-select` e `edit`, `wait_for_stats(fast=)`, e
+  `TAP`/`DPAD`
+- `docs/PLAN-PES2-PSX.md` — armadilhas 21 e 22, o item 3b da §4.2, e a §6.14
+  (a ferramenta externa avaliada)
 
 **Pendência encaminhada.** Nenhuma sobre configuração: a isolação foi
 encerrada por decisão e o lançador encolheu de 302 para 173 linhas. O que fica
