@@ -99,20 +99,24 @@ tê-las em mente ao escolher as telas:
 ## Critério de conclusão
 
 - [ ] Pelo menos **três** das cinco telas alcançadas e capturadas, com o PNG
-      mostrando um nome de time legível. **Uma** — `team-select`, com
-      `IRELAND` legível. O `edit` foi alcançado e capturado, mas o Modo
-      Editar do PES2 só edita jogador **criado**, então nenhum nome de time
-      aparece nele sem criar um antes. Ver o Log.
+      mostrando um nome de time legível. **Quatro alcançadas**
+      (`team-select`, `edit`, `replay`, `result`), mas **só uma com nome de
+      time em texto** — `team-select`, com `IRELAND`. Medido em 2026-09-02:
+      placar, replay, `RESULTADO` e menu pós-resultado identificam o time
+      por **bandeira**. Ver o Log.
 - [ ] O roteiro é repetível: duas corridas seguidas produzem a mesma tela
-      — medido para `title` (5 de 5) e `main-menu` (4 de 4, médias 0,140546
-      a 0,140682). `team-select` e `edit` foram alcançadas, mas cada uma numa
-      corrida só; falta a segunda.
+      — medido para `title` (5 de 5) e `main-menu` (4 de 4). `team-select`,
+      `edit`, `replay` e `result` foram alcançadas uma vez cada; falta a
+      segunda, e para `result` e `replay` falta a rota escrita no
+      `drive.py` (hoje o caminho está no `pad.py run`, dirigido à mão).
       (dentro da tolerância do `PES2_TOLERANCE`, pela mesma razão do
       `boot_check.sh` — emulação não é exata quadro a quadro).
 - [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
 - [x] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
       FUSE nem janela órfã no `:98`.
-- [x] Roda no `DISPLAY=:98`. Sem exceção (§6.10).
+- [x] Roda no `DISPLAY=:98`. Sem exceção (§6.10) — **salvo a sessão conjunta
+      de 2026-09-02**, que rodou no `:1` a pedido explícito do usuário, que
+      é o que a regra manda pedir.
 
 ---
 
@@ -358,3 +362,78 @@ para quem seguir é a navegação **a partir** do menu, que agora é alcançáve
 3 de 3 — `Modo Partido` para `team-select`, `Modo Editar` para `edit`, e save
 state para `result`, `replay` e `ending`, agora que se sabe que o `F2`
 funciona.
+
+---
+
+### Terceira sessão de 2026-09-02 — a partida, com o usuário na tela
+
+Feita **junto**, com o emulador no `:1` para o usuário ver — a exceção que a
+§6.10 manda pedir, e ele pediu. Dela saiu a ferramenta `tools/pes2/pad.py`,
+que **anexa** ao emulador em vez de bootar: um comando por vez
+(`press`, `shot`, `stats`, `watch`, `run`), decidido por quem está olhando.
+É de onde as rotas do `drive.py` passam a ser escritas.
+
+**O achado que destravou o `result`, e ele é do usuário.** A armadilha 23
+dizia que o saque espera `Cross`, e a leitura fácil é que basta dá-lo uma
+vez. Não basta: **todo gol devolve um saque que congela de novo**, tela e
+relógio em `0,00000`. Um laço que só segura o fast-forward para no primeiro
+gol e fica ali até o orçamento acabar — que é exatamente o que produziu o
+"onze minutos não terminaram a partida". Com o laço certo — acelerar,
+detectar congelamento, `Cross`, retomar — a partida foi do saque ao
+`RESULTADO` em **179 segundos e nove saques**, contra os ~28 minutos que a
+versão sem `Cross` fazia estimar. Está no `pad.py run` e virou a armadilha
+26.
+
+**Duas telas novas, e uma limitação que muda o critério.**
+
+| tela | como se chega | identifica o time por |
+|---|---|---|
+| `replay` | acontece sozinho a cada gol; `Square` abre `Guardar Repetición` | **bandeira** |
+| `result` | fim da partida | **bandeira** |
+
+Medido percorrendo a partida inteira: placar em jogo, replay, `RESULTADO` e
+o menu pós-resultado (`Pasar al siguiente partido` / `A menú de Selección de
+Modo`) **não mostram nome de time em texto**. O registro de replay gravado
+no cartão também não — traz as duas bandeiras, o placar, `Goleador` e
+`Pasador`. Isso limita o que a PES2-TASK-04 pode verificar em tela, e está
+na §4.2 do plano como item 3a: `SELECT.BIN` @3128 é verificável pela grade
+de seleção; onde aparecem os nomes de `RESULT.BIN` @524 e `REPLAYS.BIN`
+@11380 **ainda não se sabe**.
+
+**Gravar um replay no cartão, e o diferencial que ele deixou.** São quatro
+passos e o último não é `Cross`: `Square` → `Cross` (ranura) → `Cross`
+(bloco) → **`Start`**. Com autorização do usuário, gravado no cartão real, em
+bloco que a própria tela declarava vazio. O diferencial, medido com cópia de
+antes e depois:
+
+| | |
+|---|---|
+| tamanho | 131.072 → 131.072, inalterado |
+| bytes diferentes | 16.282 |
+| blocos de 8.192 B tocados | **0, 4 e 5** |
+
+O bloco 0 é o diretório; 4 e 5 são o dado. A tela do próprio jogo confirma:
+o cartão passou a mostrar `R1` ocupando **dois** blocos. É insumo direto
+para a PES2-TASK-05.
+
+**Outras coisas medidas, todas inéditas para o `:98`:**
+
+- existe um **menu pré-partida** (`Iniciar partido`, `Ajuste alineación`,
+  `Ajuste sonido`, `Config. Personal`, `Abandonar partido`) que os cinco
+  `Cross` da rota anterior atravessavam sem que eu soubesse;
+- **`Start` pula a abertura de estádio** — do usuário, e usado o tempo todo;
+- **um `Cross` só** sai do replay e dá o saque, não são dois;
+- no `:1` a busca de janela acha a **moldura**, não o cliente: 894×785 em vez
+  de 800×655, e todo recorte medido no `:98` passa a cair no pixel errado.
+  O `pad.py` desce para a janela filha, e a prova é que a assinatura do menu
+  principal voltou a bater exatamente (0,1407 / 0,2124).
+
+**Save states parkados:** um na tela de `RESULTADO` (`SLES-03957_1.sav`,
+17:57), que torna `result` carregar-e-capturar.
+
+**Arquivos desta sessão**
+
+- `tools/pes2/pad.py` — novo
+- `tools/pes2/run_duckstation.sh` — o `:1` como display possível: cookie
+  preservado fora do `:98`, e posicionamento deixado para o window manager
+- `docs/PLAN-PES2-PSX.md` — armadilha 26 e o item 3a da §4.2

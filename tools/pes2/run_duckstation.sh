@@ -6,7 +6,11 @@
 # obvious is a trap that cost time once; see docs/PLAN-PES2-PSX.md 6.11.
 #
 #   PES2_IMAGE     .cue of the working copy (required, except for --kill)
-#   PES2_DISPLAY   X display, default :98 -- the one place the number lives
+#   PES2_DISPLAY   X display, default :98 -- the one place the number lives.
+#                  Set it to :1 to open on the user's own screen, which is
+#                  for working *with* them and needs them to have asked;
+#                  the cookie is kept in that case, and window placement is
+#                  left to the window manager.
 #   PES2_DATA      where the run's log goes; defaults to `ds-data` next to
 #                  PES2_IMAGE. It is *not* a DuckStation data directory --
 #                  see the note about configuration below.
@@ -109,8 +113,16 @@ DATA="${PES2_DATA:-$(cd "$(dirname "$IMAGE")" && pwd)/ds-data}"
 # The Xvfb of this project runs without -auth, so XAUTHORITY must be empty
 # rather than inherited from the desktop session. Same rule as the rest of
 # the repository -- see CLAUDE.md.
+#
+# **Except on the user's own display.** :1 is a real X server with a real
+# cookie, and blanking XAUTHORITY there means the emulator cannot connect at
+# all. Running there is the exception the repository rule asks to be asked
+# about, and it exists for driving a session the user is watching -- see
+# PES2_DISPLAY. The rule stands: nothing routine opens a window on :1.
 export DISPLAY="$DISPLAY_"
-export XAUTHORITY=""
+if [ "$DISPLAY_" = ":98" ]; then
+    export XAUTHORITY=""
+fi
 
 mkdir -p "$DATA"
 
@@ -154,9 +166,12 @@ done
 
 # With no window manager the window places itself wherever it likes, and it
 # picked x=2480 on a 1280-wide screen -- off the edge, where `import` cannot
-# reach it. Move it on screen before anyone tries to capture.
-xdotool windowmove "$WIN" 0 0
-sleep 1
+# reach it. Move it on screen before anyone tries to capture. On a display
+# that has a window manager, leave placement to it.
+if [ "$DISPLAY_" = ":98" ]; then
+    xdotool windowmove "$WIN" 0 0
+    sleep 1
+fi
 
 echo "PID=$PID"
 echo "WINDOW=$WIN"

@@ -584,6 +584,7 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/lang_map.py <track1.bin> --check` | os conjuntos de cópia de asset, agrupados por conteúdo |
 | `python3 tools/pes2/tname.py bands\|fontscan\|swap <track1.bin>` | os nomes rasterizados do `T_NAME`, e a busca que mostrou não haver fonte no disco |
 | `python3 tools/pes2/asset_write.py save\|import\|palette\|negative\|check <copia.bin>` | grava asset editado, fit-or-fail; recusa `roms/` |
+| `python3 tools/pes2/pad.py press\|shot\|stats\|watch\|run` | dirige o emulador **já rodando**, um comando por vez — para trabalhar junto com o usuário, com `PES2_DISPLAY=:1`. O `run` acelera a partida dando `Cross` em cada saque, que é o que a faz terminar |
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra |

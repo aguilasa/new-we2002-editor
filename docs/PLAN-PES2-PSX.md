@@ -1232,6 +1232,16 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    costuma ser a mesma**, e isso dá a estrutura do registro de jogador quase
    pronta. (O editor do Obocaman já importa `.mcr` do WE2002 — ver
    [PLAN-WTE-LAZARUS.md](/docs/PLAN-WTE-LAZARUS.md).)
+3a. **Nem toda tela mostra nome de time — várias mostram bandeira.** Medido
+   em 2026-09-02 percorrendo uma partida inteira: o placar em jogo, o
+   replay, o `RESULTADO` e o menu pós-resultado identificam os times por
+   **bandeira**, não por texto. O registro de replay gravado no cartão
+   também: ele traz as duas bandeiras, o placar, `Goleador` e `Pasador`. Isso
+   limita o que uma tela pode verificar — um `poke` num nome de time **não
+   se vê** nessas telas, e a verificação de `RESULT.BIN` @524 e de
+   `REPLAYS.BIN` @11380 precisa achar onde esses nomes de fato aparecem.
+   `SELECT.BIN` @3128 continua verificável: a grade de seleção de time
+   mostra o nome em texto.
 3b. **Os nomes dos atributos, lidos da tela.** O Modo Editar mostra os
    **dezesseis** campos por jogador, em ordem, e a ordem de tela costuma ser
    a ordem do registro: `Ataque`, `Defensa`, `Equilib.`, `Resisten`,
@@ -1609,7 +1619,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Vinte e cinco armadilhas ao dirigir o DuckStation
+### 6.11 Vinte e seis armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1783,6 +1793,19 @@ aponta para o lugar errado.
     `probe28.py` mata o shell antes de ele fazer o que ia fazer, e o
     sintoma é um script que nunca chega a ser escrito. Duas corridas
     perdidas assim em 2026-09-02. Exclua o próprio PID, ou mate por PID.
+
+26. **Todo gol devolve um saque, e ele também espera `Cross`.** A armadilha
+    23 vale para o saque inicial e a leitura fácil é que basta dá-lo uma vez.
+    Não basta: a cada gol a partida volta à formação de saque e **congela de
+    novo**, com tela e relógio em `0,00000`. Um roteiro que só segura o
+    fast-forward para no primeiro gol e fica parado até o orçamento acabar —
+    exatamente o sintoma que produziu o "onze minutos não terminaram a
+    partida". O laço certo é *acelerar → detectar congelamento → `Cross` →
+    retomar*, e está no `pad.py run`. Medido em 2026-09-02, com o usuário
+    olhando a tela: **179 segundos e nove saques** do início ao `RESULTADO`,
+    contra a estimativa de ~28 minutos que a versão sem `Cross` sugeria.
+    Um `Cross` só serve para as duas coisas quando há replay na frente: ele
+    sai do replay **e** dá o saque.
 
 ---
 
