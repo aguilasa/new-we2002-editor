@@ -3,7 +3,7 @@ id: CORR-PES2-020
 title: "Correção: a conferência antes da gravação nunca foi vista ficando vermelha"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -84,12 +84,33 @@ e afirmar a recusa.
 - [ ] `ctest --test-dir build -R pes2` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** `rewrite_image` ganhou o parâmetro privado
+`_codec=lzss`, e o `cmd_check` um caso que lhe passa um compressor cuja saída
+**não** volta ao original — `lzss.compress` com um byte do primeiro literal
+invertido — exigindo o `Refused`.
 
-**Problemas encontrados:**
+Medido, na ordem em que o `check` imprime:
 
-**Arquivos criados/modificados:**
+```
+-- the verification before the disk, made to refuse --
+  refused: the recompressed stream does not decompress to what was
+           compressed -- refusing to write it
+```
+
+E o critério que importa, a guarda tendo de ser necessária: **removendo as três
+linhas da conferência, o `check` fica vermelho** —
+
+```
+$ (sem as tres linhas)  → WRITE CHECK FAILED
+$ (restaurado)          → WRITE CHECK OK
+```
+
+**Problemas encontrados:** nenhum. O ponto de injeção é privado e tem o módulo
+real como padrão, de modo que nenhum caminho de produção passa por ele; quem
+o usa é só o `check`.
+
+**Arquivos criados/modificados:** `tools/pes2/asset_write.py`.

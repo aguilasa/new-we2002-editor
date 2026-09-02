@@ -41,7 +41,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-017](/docs/tasks/CORR-PES2-017.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas e três revisadas | Média | [x] concluída | 2026-09-01 |
 | [CORR-PES2-018](/docs/tasks/CORR-PES2-018.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A §1.14(g) diz "10 de 13 recomprimem no orçamento" e "folga de 0 a 4 bytes"; medido são 9 de 13 e 0 a 3 | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-019](/docs/tasks/CORR-PES2-019.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O `import` não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | Alta | [x] concluída | 2026-09-01 |
-| [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [ ] pendente | — |
+| [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [x] concluída | 2026-09-01 |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -76,7 +76,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-017 — a Fase 7 não tem verificações escritas no perfil
 - [x] CORR-PES2-018 — dois números da §1.14(g) não batem com a ferramenta
 - [x] CORR-PES2-019 — o `import` aceita a profundidade errada
-- [ ] CORR-PES2-020 — a conferência antes do disco não é exercitada
+- [x] CORR-PES2-020 — a conferência antes do disco não é exercitada
 
 ## Detalhes por correção
 

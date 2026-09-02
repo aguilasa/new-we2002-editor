@@ -213,14 +213,21 @@ def splice(data, entry, blob):
     return bytes(out)
 
 
-def rewrite_image(data, entry, indices, bpp):
-    """Compressed bytes for one image entry, verified, budget checked."""
+def rewrite_image(data, entry, indices, bpp, _codec=lzss):
+    """Compressed bytes for one image entry, verified, budget checked.
+
+    `_codec` is private and exists for one reason: the verification below
+    had no way of ever being seen refusing. A guard that only ever goes
+    green is decoration -- CORR-PES2-009 made that point about `lzss.py`
+    and CORR-PES2-020 makes it here -- so `check` passes a deliberately
+    broken codec and requires the refusal.
+    """
     packed = pack(indices, bpp)
     if len(packed) != entry.expected:
         raise Refused(
             f"{len(packed)} B of pixels against the {entry.expected} B the "
             f"record declares -- the picture is the wrong size for this slot")
-    blob = lzss.compress(packed)
+    blob = _codec.compress(packed)
 
     # Before the disk, never after, and with no way to turn it off.
     back, _ = lzss.decompress(blob, 0)
@@ -502,6 +509,29 @@ def cmd_check(args):
             cmd_import(_Args(image=copy, file="/BIN/TITLE.BIN", entry=2,
                              png=shot, clut=0, bpp=None, repaint=False))
             print("  FAILED: a 4 bpp picture was accepted by an 8 bpp slot")
+            bad += 1
+        except Refused as exc:
+            print(f"  refused: {exc}")
+
+        print("\n-- the verification before the disk, made to refuse --")
+
+        class _Broken:
+            """A compressor whose output decodes to something else."""
+
+            @staticmethod
+            def compress(plain):
+                blob = bytearray(lzss.compress(plain))
+                blob[1] ^= 0xFF          # corrupt the first literal
+                return bytes(blob)
+
+        try:
+            with Image(copy) as img:
+                data = img.read_file("/BIN/LOGO.BIN")
+                entry, _ = find(data, 2, "image")
+                plain, _ = BA.read_image(data, entry)
+                rewrite_image(data, entry, BA.unpack4(plain), 4,
+                              _codec=_Broken)
+            print("  FAILED: a stream that does not round-trip was accepted")
             bad += 1
         except Refused as exc:
             print(f"  refused: {exc}")
