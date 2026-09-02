@@ -38,6 +38,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-014](/docs/tasks/CORR-PES2-014.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Quatro documentos dizem que os 105 `TEX_*.BIN` da European Deluxe são Form 2; são 18, e esta task lê os outros 87 | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-015](/docs/tasks/CORR-PES2-015.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Dos quatro offsets de bandeira citados, o 72400 é forma e mora em `/SELFORM.BIN`; o quarto de cor, 75776, ficou de fora | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-016](/docs/tasks/CORR-PES2-016.md) | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | `depth_of()` decide a profundidade por contêiner, e o `DAT2D.BIN` do PES2 tem 261 paletas de 16 cores contra 5 de 256 | Alta | [x] concluída | 2026-09-01 |
+| [CORR-PES2-017](/docs/tasks/CORR-PES2-017.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas e três revisadas | Média | [ ] pendente | — |
+| [CORR-PES2-018](/docs/tasks/CORR-PES2-018.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A §1.14(g) diz "10 de 13 recomprimem no orçamento" e "folga de 0 a 4 bytes"; medido são 9 de 13 e 0 a 3 | Alta | [ ] pendente | — |
+| [CORR-PES2-019](/docs/tasks/CORR-PES2-019.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O `import` não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | Alta | [ ] pendente | — |
+| [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -69,6 +73,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-014 — 18 dos 105 `TEX_*` são Form 2, não os 105
 - [x] CORR-PES2-015 — offset de forma citado como cor, e noutro arquivo
 - [x] CORR-PES2-016 — profundidade decidida por contêiner, não por paleta
+- [ ] CORR-PES2-017 — a Fase 7 não tem verificações escritas no perfil
+- [ ] CORR-PES2-018 — dois números da §1.14(g) não batem com a ferramenta
+- [ ] CORR-PES2-019 — o `import` aceita a profundidade errada
+- [ ] CORR-PES2-020 — a conferência antes do disco não é exercitada
 
 ## Detalhes por correção
 
@@ -330,3 +338,32 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
   contêiner nos três discos originais
 - **Fix:** profundidade do **par imagem-paleta**, saindo do CLUT em uso; o
   `check` conta os contêineres de largura mista em vez de escondê-los
+
+### CORR-PES2-017
+
+- **Arquivo com problema:** `docs/prompts/perfil-pes2.md`
+- **Sintoma:** a seção "Verificações específicas por fase" vai da Fase 2 à 6 e pula a 7, que já teve as tasks 26, 27, 28 e 29 executadas.
+- **Como foi detectado:** `sed -n '/Verificações específicas por fase/,$p' docs/prompts/perfil-pes2.md | grep '^\*\*Fase'` — a Fase 7 não aparece.
+- **Fix:** acrescentar a seção da Fase 7, com as perguntas que as quatro tasks já executadas mostraram valer.
+
+### CORR-PES2-018
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §1.14(g) e `docs/tasks/29-gravacao-de-asset.md`
+- **Sintoma:** afirmam "10 de 13 recomprimem dentro do orçamento" e "folga de 0 a 4 bytes"; a medição completa dá **9 de 13** e **0 a 3**.
+- **Como foi detectado:** rodando o laço sem o filtro `if i < 4 or ok`, que escondia a entrada 8 do `LOGO.BIN` — 1.081 B contra 1.076 de folga.
+- **Fix:** um subcomando `budget` no `asset_write.py` que imprime a conta, e os dois números corrigidos a partir dele.
+
+### CORR-PES2-019
+
+- **Arquivo com problema:** `tools/pes2/asset_write.py`, `cmd_import`
+- **Sintoma:** um PNG de 4 bpp exportado do `LOGO.BIN` é aceito e gravado no `TITLE.BIN`, que é 8 bpp. A dimensão em pixels é a mesma nos dois e a contagem de bytes também, então nenhuma das três validações existentes dispara.
+- **Como foi detectado:** `export` do `/BIN/LOGO.BIN` entrada 2 seguido de `import` no `/BIN/TITLE.BIN` entrada 2, sobre cópia: `written, and verified before it went`, exit 0.
+- **Fix:** derivar a profundidade do PNG do tamanho da `PLTE`, recusar quando não for a do destino, comparar a paleta com o CLUT do slot, e exercitar a recusa no `check`.
+
+### CORR-PES2-020
+
+- **Arquivo com problema:** `tools/pes2/asset_write.py`, `rewrite_image`
+- **Sintoma:** a conferência `decompress(compress(x)) == x` roda antes de toda gravação e nunca foi vista recusando; o `check` só a atravessa em verde.
+- **Como foi detectado:** lendo o que o `check` exercita — a guarda de orçamento aparece em vermelho, esta não aparece.
+- **Fix:** ponto de injeção privado para um codec defeituoso, e um caso no `check` que exige o `Refused`.
+

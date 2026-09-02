@@ -71,7 +71,7 @@ PES2-TASK-22.
 | [PES2-TASK-26](/docs/tasks/26-codec-lzss.md) | O codec LZSS dos contêineres `BIN/*.BIN` | 7 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-27](/docs/tasks/27-conteiner-e-tim.md) | Cabeçalho de contêiner e entradas TIM | 7 | 26 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-28](/docs/tasks/28-t-name-copias-de-idioma.md) | `T_NAME_I`/`T_NAME_S` — o conjunto de cópias por idioma | 7 | 27 | ⬜ Pendente | — | — |
-| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | ⬜ pendente |
+| [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
 
