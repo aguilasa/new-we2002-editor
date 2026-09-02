@@ -68,7 +68,8 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Treze armadilhas ao dirigir o DuckStation**, todas medidas (§6.11). As
+12. **Vinte e seis armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. As
     quatro últimas são de 2026-09-01/02 e mudam como se escreve uma rota:
     **toque não é apertar** (`keydown` + 1 s + `keyup`), um `settings.ini` à
     mão **não vincula hotkey** (sem `[Hotkeys]` não há fast-forward nem save
@@ -145,6 +146,7 @@ tools/pes2/run_duckstation.sh        # sobe o jogo no :98; --kill encerra
 tools/pes2/boot_check.sh             # mede que ele botou -- janela, quadro vivo, dois quadros diferentes
 python3 tools/pes2/drive.py "<copia.cue>" --screen team-select --out-dir <dir>
 python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --save-state  # atalho
+python3 tools/pes2/savestate.py selftest                              # o leitor de save state, com os casos vermelhos
 
 ctest --test-dir build -R pes2       # pes2_selftest, pes2_image, pes2_boot
 ```
@@ -157,6 +159,7 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | Se a tarefa ou correção tocou | Gate |
 | --- | --- |
 | ferramenta de `tools/pes2/` | o `--check` dela verde; `pes2_selftest` verde |
+| RAM lida de save state | `savestate.py selftest` verde, e ele está dentro do `pes2_selftest`. Toda extração de RAM passa pela guarda do kernel (`PS-X Control PAD Driver` nos primeiros 64 KiB): sem ela um deslocamento errado devolve 2 MiB plausíveis e a busca de valor responde com um endereço que parece um endereço (§6.14) |
 | qualquer coisa que escreva na imagem | `iso.py roundtrip` verde **e** o `negative` provando que ele sabe ficar vermelho |
 | gravação de nome de time | `poke.py --self-check` verde nas duas releases: recusas, varredura sem sobra, e a imagem de volta byte a byte |
 | gravação de asset editado | `asset_write.py check` verde: salvar sem editar devolve a imagem idêntica, o orçamento recusa com a conta, o controle negativo fica localizado, e a cauda EDC/ECC sobrevive |

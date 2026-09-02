@@ -74,7 +74,7 @@ PES2-TASK-22.
 | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
-| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -90,10 +90,13 @@ sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
 **Não há task de Fase 0 nem de Fase 1 de trabalho.** As duas estão fechadas e
 verdes desde 2026-08-30, com ferramenta versionada e reexecutável (§5.1 e §5,
-Fase 1 do plano). A única task de fase 0 no quadro — a PES2-TASK-01 — é uma
-**decisão do dono da máquina** que sobrou da §7.1 do `PES2-AJUSTES.md`, e não
-bloqueava nada até a Fase 4. Foi tomada em 2026-09-01, com instalação: a
-Fase 0 está inteira fechada.
+Fase 1 do plano). As duas tasks de fase 0 no quadro são **decisões sobre o
+ferramental da máquina**, não sobre o disco, e nenhuma bloqueia fase alguma: a
+PES2-TASK-01 sobrou da §7.1 do `PES2-AJUSTES.md` e foi tomada em 2026-09-01,
+com instalação; a PES2-TASK-32 foi aberta a pedido do usuário em 2026-09-02 e
+fechou no mesmo dia, com **decisão negativa medida** — o MCP do DuckStation
+não entra, porque o caminho barato que ele substituiria funciona (§6.14). A
+Fase 0 está fechada.
 
 **A Fase 2 entra com um item só.** A varredura, as contagens, os digests e a
 correspondência entre as oito listas estão feitos; falta o `poke` de
@@ -228,6 +231,13 @@ emulador, são elas o trabalho barato que continua.
 ---
 
 ## Checklist geral
+
+### Fase 0 — Ferramental da máquina
+
+- [x] `numpy` e desmontador MIPS instalados, com o que ficou de fora escrito
+- [x] MCP do DuckStation decidido **por medição**: o fork não se compila, e o
+      motivo é que save state entrega busca de valor e diff de memória
+- [x] O leitor de RAM tem controle e casos vermelhos dentro do `pes2_selftest`
 
 ### Fase 2 — Inventário de texto
 

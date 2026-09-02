@@ -1272,8 +1272,11 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    `SELECTC.BIN` @16576 fica atrás de criar um jogador primeiro.
 4. **Desmontagem do MIPS**, para os campos que a estatística não resolver.
    É o último recurso, e é o mais caro. Existe ferramenta de terceiro que o
-   resolveria quase inteiro, avaliada e **não adotada** — o porquê, e o
-   caminho mais barato a tentar antes dela, na §6.14.
+   resolveria quase inteiro, avaliada e **não adotada** — o porquê está na
+   §6.14, junto com o caminho mais barato, que foi medido em 2026-09-02 e
+   funciona: **busca de valor e diff de memória saem de um save state**, em
+   Python puro, por `tools/pes2/savestate.py`. Tente por ali antes.
+   Desmontar continua sendo o único caminho para *quem escreve* um endereço.
 
 ### 4.3 Ordem: texto antes de número
 
@@ -1941,9 +1944,10 @@ divergência de `28` × `48` que a §1.14 deixou aberta.
 
 ### 6.14 Ferramenta externa avaliada: `duckstation-claude-plugin`
 
-Avaliada em 2026-09-02, a pedido do usuário. **Não adotada agora**, e o
-registro existe porque ela resolve exatamente o item 4 da §4.2 — a
-desmontagem do MIPS, "o último recurso, e o mais caro".
+Avaliada em 2026-09-02 a pedido do usuário, **medida no mesmo dia** pela
+PES2-TASK-32, e **não adotada** — agora por resultado e não por previsão. O
+registro existe porque ela resolve o item 4 da §4.2, a desmontagem do MIPS,
+"o último recurso, e o mais caro".
 
 <https://github.com/sadnescity/duckstation-claude-plugin>
 
@@ -1957,12 +1961,13 @@ prontos. Instalação: `/plugin marketplace add sadnescity/claude-plugins`.
 `sadnescity/duckstation`, branch `mcp`. `EnableMCPServer` não existe no
 build oficial: conferido por `strings` sobre o AppImage extraído, e as
 únicas ocorrências de `2346` são número de linha de `fullscreenui_settings.cpp`.
-O fork tem **3 estrelas e 0 forks**, não publica binário — o próprio README
-manda baixar do upstream —, então adotá-lo é compilar um emulador C++ de
-12.330 commits. E trocar de binário **invalida toda assinatura de quadro
-medida**: a da tela de título (0,550 / 0,341) e a do menu (0,1405 / 0,2124)
-saem do renderer e da versão, e as vinte armadilhas da §6.11 são sobre o
-AppImage oficial.
+O fork tem **3 estrelas e 0 forks** e **não publica binário próprio** — a
+página de releases que o README aponta é a do *upstream* `stenzek/duckstation`,
+que é justamente o build sem o servidor; reconferido em 2026-09-02, 12.330
+commits na branch. Adotá-lo é compilar um emulador C++ inteiro. E trocar de
+binário **invalida toda assinatura de quadro medida**: a da tela de título
+(0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
+e as vinte e seis armadilhas da §6.11 são sobre o AppImage oficial.
 
 **Quatro dos sete fluxos batem no que falta aqui:**
 
@@ -1978,19 +1983,119 @@ ferramentas dele seriam melhores — `input_sequence()` e `load_state()` não
 têm o jogo de foco `PointerRoot` nem a calibragem de tempo de tecla da §6.11
 —, mas é a parte que já está de pé e medida.
 
-**O caminho barato, a tentar primeiro.** Um save state contém a RAM inteira,
-e o `F2` já funciona: os dois estados medidos tinham 1.750.327 e 1.583.714
-bytes comprimidos contra os 2 MiB de RAM do PSX. O `zstd` está na máquina
-(CLI 1.5.5; o módulo Python não, e não é preciso), e
-`SaveStateCompression = Uncompressed` na interface do emulador dispensa até
-ele. Isso entrega **os fluxos C e D em Python puro, sem fork nenhum** —
-não entrega breakpoint nem disassembly, para os quais o fork é
-insubstituível. O layout do arquivo **não foi medido**: é hipótese
-fundamentada no tamanho, não leitura.
+#### O caminho barato, agora medido
 
-**Decisão:** reavaliar quando o projeto chegar na fase de RAM/MIPS, e
-reavaliar **contra o caminho do save state primeiro**, que é mais barato e
-não põe um fork de três estrelas no meio da cadeia de medição.
+O parágrafo anterior desta seção era uma **inferência a partir do tamanho do
+arquivo**, e dizia isso. A PES2-TASK-32 leu o formato, e a inferência estava
+certa: **um save state contém a RAM inteira**, e ela sai dele em Python puro.
+O leitor é `tools/pes2/savestate.py`.
+
+O arquivo, medido sobre os estados desta máquina (versão 86 do formato):
+
+```
+DUCC | u32 version | title[128] | serial[32] | 12 x u32
+  media_filename_{length,offset}, media_subimage_index,
+  screenshot_{compression,width,height,compressed_size,offset},
+  data_{compression,compressed_size,uncompressed_size,offset}
+```
+
+`data_offset + data_compressed_size` bate **exatamente** com o tamanho do
+arquivo, e é a única identidade aritmética que o cabeçalho oferece — vale
+como guarda, porque um estado truncado infla sem reclamar e varre curto. O
+tipo de compressão **2** é um único frame `zstd` (o CLI 1.5.5 da máquina
+basta; o módulo Python não é preciso); o tipo **0** é armazenamento cru, que
+é o que `SaveStateCompression = Uncompressed` escreve.
+
+O fluxo inflado é uma sequência de seções com nome prefixado por tamanho —
+`System`, `CPU`, `Bus`, `DMA`, `InterruptController`, `GPU`, `GPU-VRAM`,
+`GPUTextureCache`, `CDROM`, `Pad`, `Timers`, `SPU`, `MDEC`, `SIO`, `PIO`,
+`Events` —, e os 2 MiB de RAM principal são a **cauda de `Bus`**, encostados
+na marca `DMA`.
+
+**O deslocamento é derivado, nunca presumido.** `Bus` abre com o tamanho da
+RAM em u32, e a RAM termina onde `DMA` começa, então o início é uma
+subtração; nos estados medidos ela cai no offset 6799 do fluxo inflado, mas
+esse número é resultado, não constante. Em cima disso toda extração é
+conferida contra o kernel que a BIOS deixa na RAM baixa: `PS-X Control PAD
+Driver` tem de estar nos primeiros 64 KiB. Sem essa guarda, um deslocamento
+errado devolve 2 MiB de lixo plausível e a busca de valor responde com um
+endereço que **parece** um endereço.
+
+Duas coisas que a leitura do formato deu de brinde e que valem para outras
+fases:
+
+- O **screenshot embutido** é a tela no instante do save, o que faz o estado
+  carregar a própria evidência: `savestate.py shot` a extrai sem uma segunda
+  captura. Ela é 256×192, grossa demais para ler o placar; para *ler* número
+  em tela continua valendo a captura viva de 800×655.
+- O estado guarda o caminho da mídia, e o DuckStation **carrega um estado
+  cuja mídia mudou de lugar** — a POC carregou um estado gravado sobre
+  `~/ROMs/psx/…` apontando o emulador para a cópia do scratchpad, e o único
+  efeito foi o aviso `Memory card 1 from save state does not match current
+  card data`.
+
+#### A prova de conceito: o fluxo C, ponta a ponta
+
+O alvo foi o **placar da partida**, escolhido por ser visível em tela, mudar
+de forma controlada e já haver rota até ele. O laço: segurar fast-forward,
+detectar o congelamento do relógio — que em PES2 é um saque, e todo saque
+vem de um gol —, capturar a tela com o placar aparecendo (ele **só** aparece
+em parada), salvar o estado com `F2`, e dar o `Cross` que reinicia o jogo.
+Oito leituras, sete de uma mesma partida Irlanda × Dinamarca e a oitava a
+tela de `RESULTADO` de **outra sessão**, com o placar lido no quadro:
+
+| leitura | placar em tela | candidatos que sobram |
+|---|---|---|
+| 1–2 | 0-1, 0-2 | 130 |
+| 3 | 0-3 | 8 |
+| 4 | 0-3 (repetido) | 6 |
+| 5 | 0-4 | 4 |
+| 6 | 0-5 | 4 |
+| 7 | 0-6 | 3 |
+| 8 | 0-17, outra sessão | **2** |
+
+Sobram `0x000714EE` e `0x00137BE5`, e **as duas são placar de verdade**: as
+duas seguem 1→2→3→4→5→6 na partida corrente *e* valem 17 na tela de
+resultado de uma partida que nem é esta. Não é ambiguidade a resolver, é o
+mesmo que a §6.1 já cobra do texto — **este motor guarda tudo em mais de um
+lugar**, e um editor de RAM que gravasse só uma cópia repetiria o modo de
+falha do `poke` de nome de time. `0x000714EE` é u16 e `0x00137BE5` é u8; o
+byte imediatamente anterior a cada uma vale 0 nas oito leituras, que é onde
+o placar do mandante estaria — a Irlanda não marcou nenhuma vez, então isso
+é **consistente, não provado**.
+
+A leitura 4 é instrutiva: repetir um valor **não filtra nada de graça** —
+cortou 8 para 6 só porque o resto da RAM andou. Quem quiser encurtar a
+corrida precisa de valores *diferentes*, não de mais estados.
+
+Custo medido: as sete leituras da partida saíram em duas corridas de ~50 s de
+relógio sob fast-forward, sobre 13 MB de estados; a varredura das oito é de
+**0,25 s e 104 MiB de pico**. Contra dias de compilação de um emulador.
+
+O **fluxo D** também fecha, com uma ressalva que vale para a PES2-TASK-05:
+dois estados a um gol de distância diferem em **13.188 trechos e 149.191
+bytes, 7,11% da RAM**, porque a partida é viva — posições, relógio,
+gerador aleatório. O controle de um estado contra ele mesmo dá zero. Ou seja,
+diff de memória só é barato em **tela estática**, que é exatamente o cenário
+do Modo Editar.
+
+Os fluxos **A** e **E** continuam sem resposta: breakpoint de escrita e
+disassembly não saem de um arquivo salvo. `savestate.py read` entrega os
+bytes de uma instrução, mas não a decodifica.
+
+**Decisão, 2026-09-02:** **não compilar o fork.** Os dois fluxos que o
+projeto precisa hoje — C, para achar campo por valor de tela, e D, para
+"o que essa edição mudou?" — estão de pé em Python puro, com controle e
+casos vermelhos no `pes2_selftest`, sem trocar o binário do emulador e sem
+invalidar nenhuma assinatura de quadro da §6.11. O fork volta à mesa **se e
+quando** o laço disco↔RAM precisar do fluxo A: saber *quem escreve* um
+endereço é a única coisa aqui que nenhum save state responde, e é o que
+transformaria um endereço de RAM em um offset de disco sem cutucar e olhar.
+Até lá, o custo — compilar 12.330 commits de C++ de um repositório de três
+estrelas e remedir as assinaturas de quadro — não se paga.
+
+**Nada do fork entrou no repositório**, e nada dele foi baixado. O que entrou
+é o procedimento, os números acima e `tools/pes2/savestate.py`.
 
 ---
 

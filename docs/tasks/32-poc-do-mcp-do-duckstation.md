@@ -6,7 +6,7 @@ category: ferramental
 phase: 0
 depends_on: []
 fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §6.14"
-status: pendente
+status: concluído
 ---
 
 # PES2-TASK-32: Prova de conceito do MCP do DuckStation
@@ -69,26 +69,38 @@ um punhado de endereços. Depois `read_memory` neles e conferir contra a tela.
 
 ## Critério de conclusão
 
-- [ ] O fork compila **ou** se decide, com o motivo escrito, que compilar não
-      vale — e nesse caso a task fecha como decisão negativa, que é resultado
-      legítimo. O tempo de compilação medido entra no registro.
-- [ ] O servidor MCP responde: as ferramentas aparecem, e uma leitura trivial
-      (`read_memory` num endereço qualquer da RAM) devolve bytes.
-- [ ] O fluxo C completo: o endereço do placar isolado, e `read_memory` nele
-      batendo com o número na tela **em duas leituras diferentes** — 0-1 e
-      0-2, por exemplo. Uma leitura só não distingue acerto de coincidência.
-- [ ] Medido quanto custa uma corrida com o fork **contra** o AppImage oficial:
-      se as assinaturas de quadro do `drive.py` mudarem, está registrado quais
-      e quanto, porque `TITLE`, `MAIN_MENU` e `TEAM_SELECT` são medidas do
-      binário oficial (§6.11, armadilha 15).
-- [ ] A recomendação da §6.14 **reescrita** com o que a POC mediu — adotar,
-      não adotar, ou adotar só para uma fase. O texto atual diz "reavaliar
-      quando o projeto chegar na fase de RAM/MIPS"; esta task é essa
-      reavaliação e o parágrafo tem de deixar de ser previsão.
-- [ ] Nada do fork entra no repositório. Ele é binário de terceiro sem
-      licença nossa, mesma regra do `we-team-editor.exe` e de `roms/`. O que
-      entra é o **procedimento** e os números.
-- [ ] Roda sobre **cópia** da imagem, nunca `roms/`.
+- [x] **Decisão negativa, com o motivo escrito: o fork não foi compilado.**
+      O caminho barato que a própria task mandava medir primeiro entregou os
+      fluxos C e D em Python puro, e com isso a POC do fork passaria a ter de
+      justificar só A e E — que este projeto não precisa hoje. O custo que
+      ela evita está reconferido, não relembrado: `sadnescity/duckstation`
+      tem 3 estrelas, 0 forks, 12.330 commits na branch `mcp`, e **nenhuma
+      release própria** — a página que o README aponta é a do upstream
+      `stenzek/duckstation`, que é justamente o build sem o servidor.
+- [x] Sem servidor MCP para responder, a leitura trivial de RAM foi feita
+      pelo outro caminho: `savestate.py read` devolve bytes de qualquer
+      endereço, e a extração passa por uma guarda de kernel que a faz falhar
+      alto quando o deslocamento está errado.
+- [x] **Fluxo C completo, e com oito leituras em vez de duas.** O placar
+      visitante caiu de 130 candidatos (2 leituras) para 2 (8 leituras), e os
+      dois sobreviventes — `0x000714EE` u16 e `0x00137BE5` u8 — batem com o
+      número na tela em 0-1, 0-2, 0-3, 0-4, 0-5, 0-6 e, numa partida de
+      **outra sessão**, 0-17. Não são candidato e ruído: são duas cópias
+      vivas do placar, que é o mesmo padrão que a §6.1 cobra do texto.
+- [x] Não se aplica na forma escrita, e o motivo é o resultado: **o binário
+      não mudou**. Toda a POC correu sobre o AppImage oficial, então nenhuma
+      assinatura de quadro do `drive.py` se moveu — o `pes2_boot` fechou
+      verde depois da corrida, em 91,54 s.
+- [x] §6.14 reescrita. Ela deixou de dizer "reavaliar quando o projeto chegar
+      na fase de RAM/MIPS" e passou a registrar o formato do save state, o
+      funil da varredura, os números do fluxo D e a decisão datada. A §4.2,
+      item 4, que apontava para a previsão, aponta agora para o caminho que
+      funciona.
+- [x] Nada do fork entrou no repositório, e nada dele foi baixado. Entraram
+      o procedimento, os números e `tools/pes2/savestate.py`.
+- [x] Correu sobre a cópia de `(EsIt)` no scratchpad — `roms/` intocada. Os
+      três save states do usuário foram copiados antes e devolvidos byte a
+      byte depois (`cmp` limpo nos três).
 
 ---
 
@@ -109,6 +121,10 @@ justificar só os fluxos A e E.
 
 > O layout do save state **não foi lido**. O parágrafo acima é inferência a
 > partir do tamanho, e está escrito como inferência de propósito.
+>
+> **Lido em 2026-09-02, e a inferência estava certa.** A RAM está inteira lá,
+> e os fluxos C e D saíram em Python puro. O formato, o funil da varredura e
+> os números estão na §6.14 do plano; o leitor é `tools/pes2/savestate.py`.
 
 ---
 
@@ -128,4 +144,55 @@ justificar só os fluxos A e E.
 
 ## Log de Execução
 
-*(a preencher)*
+**Executado em:** 2026-09-02
+
+**Resumo.** O caminho barato funciona, e por isso o fork não foi compilado.
+Um save state do DuckStation (formato versão 86) é um cabeçalho fixo, um
+screenshot e **um frame zstd** cujo conteúdo é uma sequência de seções com
+nome prefixado por tamanho; os 2 MiB de RAM principal são a cauda de `Bus`,
+encostados na marca `DMA`. O deslocamento **se deriva** — `Bus` abre com o
+tamanho da RAM, e a RAM termina onde `DMA` começa — e nos estados desta
+máquina cai em 6799, que é resultado e não constante.
+
+O fluxo C fechou com oito leituras: 130 candidatos com duas, 2 com oito. Os
+dois sobreviventes são placar de verdade, e é isso que ensina — **o motor
+guarda o placar em mais de um lugar**, exatamente como guarda o nome de time
+em oito tabelas (§6.1). Um editor de RAM que gravasse uma cópia só repetiria
+o modo de falha do `poke`.
+
+Três coisas medidas que valem para a PES2-TASK-05 e adiante:
+
+- a leitura 4 repetiu o valor 0-3 e **cortou quase nada** (8 para 6): o que
+  filtra é valor *diferente*, não estado a mais;
+- o fluxo D entre dois estados a um gol de distância mexe em **7,11% da
+  RAM**, porque a partida é viva. Diff de memória só é barato em tela
+  estática — que é o cenário do Modo Editar;
+- o placar **só aparece na tela em parada de jogo**, então o instante de
+  salvar é o congelamento do relógio, não um momento qualquer. O laço de
+  coleta é o do `pad.py run` com um save no meio.
+
+**Arquivos criados/modificados** (conferidos contra `git show --stat`):
+
+- `tools/pes2/savestate.py` — novo. Leitor do save state, `scan` (fluxo C),
+  `diff` (fluxo D), `read`, `ram`, `shot`, `info` e `selftest`.
+- `tools/pes2/selftest.py` — chama o `self_check()` do leitor, para o
+  `pes2_selftest` cobri-lo numa máquina sem emulador, sem disco e sem zstd.
+- `docs/PLAN-PES2-PSX.md` — §6.14 reescrita; §4.2 item 4 reapontado.
+- `CLAUDE.md` — a linha do `savestate.py` na tabela de ferramentas de PES2.
+- `docs/prompts/perfil-pes2.md` — o gate novo, e a contagem de armadilhas do
+  §6.11 corrigida (ver abaixo).
+- `docs/tasks/progresso.md` e este arquivo.
+
+**Problemas encontrados.**
+
+1. **O thumbnail do save state não serve para ler placar.** São 256×192, e a
+   1 vira 7 no aumento. A tela viva de 800×655 lê; o embutido documenta.
+   Registrado na §6.14 para ninguém tentar de novo.
+2. **Duas contagens vencidas, corrigidas de passagem.** A §6.14 dizia "as
+   vinte armadilhas da §6.11" e o perfil do ciclo dizia "Treze armadilhas";
+   o `awk` sobre a seção conta **26**. Os dois textos foram corrigidos, o do
+   perfil dizendo desde quando envelheceu.
+3. **O `pes2_boot` do `ctest` se reporta *skipped* com `WE2002_PES2_IMAGE`
+   sozinho** — ele quer `PES2_IMAGE` apontando para o `.cue`. Foi rodado à
+   parte com as duas, e passou. Não é defeito, é uma variável a mais que a
+   linha do perfil não mostra.

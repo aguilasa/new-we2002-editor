@@ -590,6 +590,7 @@ As ferramentas, e o que cada uma responde:
 | `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
+| `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
 sintético de 24 setores e roda em qualquer lugar; **`pes2_image`**, que

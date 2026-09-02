@@ -238,6 +238,20 @@ def main():
         bad += check("drive.py frame logic", False,
                      f"{type(exc).__name__}: {exc}")
 
+    # The save-state reader, on states built here. It needs neither an
+    # emulator nor a disc nor zstd -- the synthetic states are stored
+    # uncompressed -- so the only thing that can hold it back is numpy.
+    try:
+        import savestate                                      # noqa: E402
+        failures = savestate.self_check(verbose=False)
+        bad += check("savestate.py reader, scan and guards", not failures,
+                     ", ".join(failures))
+    except savestate.Skip as why:                             # noqa: F821
+        print(f"  ..   savestate.py skipped: {why}")
+    except Exception as exc:                                  # noqa: BLE001
+        bad += check("savestate.py reader, scan and guards", False,
+                     f"{type(exc).__name__}: {exc}")
+
     os.remove(path)
     os.remove(truncated)
     os.rmdir(tmp)
