@@ -291,22 +291,58 @@ que confirmava o item errado calado:**
   recusa disparou de verdade ("3 de 5") antes de o toque curto consertar a
   causa.
 
-**As três que faltam, e por quê.** `result`, `replay` e `ending` estão atrás
-de uma partida terminada. Medido: **onze minutos de fast-forward não
-terminaram** uma partida de exibição na duração padrão — a média do quadro
-ficou em 0,30 o tempo todo. E `Opciones de Partido` **não** tem duração de
-partida: tem `MEMORY CARD`, `Repetición de la moviola`, botões, som e tela.
-A duração mora na configuração de cada modo — a tela do `Modo Copa` mostra
+**As três que faltam, e por quê — com o número refeito.** Esta seção dizia
+"onze minutos de fast-forward não terminaram a partida", e **estava errada**:
+media uma partida que nunca havia começado. O usuário apontou a causa e ela
+se confirmou por medição — **o relógio não anda até o passe inicial**. O
+saque fica em `1°  0:00` esperando o `Cross` do jogador 1, e para qualquer
+medida sobre o quadro inteiro isso é idêntico a uma partida correndo: a
+câmera se mexe, os jogadores respiram, a média fica em ~0,30.
+
+O teste honesto recorta **só o relógio** e compara dois quadros. Na mesma
+tela de saque, com o quadro conferido (`1°  0:00`, placar 0-0, HUD com
+`Quinn` e `Sand`):
+
+| | diferença do recorte do relógio |
+|---|---:|
+| antes do `Cross` | **0,00000** |
+| 5 s depois do `Cross` | andando |
+
+**Chegar ao saque também precisou de medição**, porque três telas seguidas —
+abertura de estádio, entrada dos times e saque — têm todas média entre 0,21
+e 0,30, e duas sondas apertaram `Cross` na tela errada por isso. O que as
+separa é o **desvio da faixa do topo** `(0,60)-(800,200)`: saque
+0,1170–0,1204, entrada 0,1531, abertura 0,2317–0,2537. O teste usado é a
+conjunção dela com o relógio congelado, porque cada um sozinho já deu falso
+positivo — o recorte do relógio sobre o céu da abertura também fica parado.
+E **`Start` pula a abertura de estádio**, o que poupa a espera.
+
+**Com o passe dado, o ritmo real:** 600 s de fast-forward levaram a partida
+a `1°  7:06`. São ~0,71 minuto de jogo por minuto real, e uma partida
+padrão inteira sai por volta de **28 minutos reais** mais o intervalo.
+
+`Opciones de Partido` **não** tem duração: tem `MEMORY CARD`,
+`Repetición de la moviola`, botões, som e tela. A duração mora na
+configuração de cada modo — a tela do `Modo Copa` mostra
 `Duración del partido  10 min.`
 
 Via proposta, agora medida em vez de suposta:
 
 | Tela | Via |
 |---|---|
-| `result` | `Modo Copa` ou `Modo Liga` com a menor duração, e **save state antes do apito final** — daí vira carregar-e-capturar |
+| `result` | **`Partido a Penaltis`** primeiro — segunda linha do submenu do `Modo Partido`, e uma disputa de pênaltis termina em muito menos que os ~28 min de uma partida padrão. Se não servir, `Modo Copa`/`Liga` na menor duração, com **save state antes do apito final**, que transforma a espera em carregar-e-capturar |
 | `replay` | idem; `Opciones de Partido → Repetición de la moviola` controla o replay |
 | `ending` | campeonato completo; save state é o único caminho sensato |
 | `edit` com nome de time | criar um jogador primeiro, e então `Registrar jugador` pede o time |
+
+**O erro de método desta sessão, e ele é o mesmo de sempre.** Registrei como
+propriedade do jogo ("a partida não termina em onze minutos") um número que
+era propriedade do meu roteiro (a partida não tinha começado). O sintoma —
+quadro se mexendo, média estável — era compatível com as duas leituras, e eu
+escolhi a que não exigia mais trabalho. O conserto foi medir a coisa
+específica (o relógio) em vez da tela inteira. Duas outras corridas se
+perderam para a armadilha 25, o `pgrep -f` casando o próprio shell, que já
+estava documentada e eu repeti duas vezes seguidas.
 
 **Arquivos desta sessão**
 

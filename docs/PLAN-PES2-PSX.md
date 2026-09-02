@@ -1609,7 +1609,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Vinte e duas armadilhas ao dirigir o DuckStation
+### 6.11 Vinte e cinco armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1755,6 +1755,34 @@ aponta para o lugar errado.
     indistinguíveis, então **espere mais em vez de apertar de novo**, e
     conte quantas linhas registraram — quem para curto é visível, quem passa
     do ponto não é.
+
+23. **O relógio da partida não anda até o passe inicial.** O saque fica
+    parado em `1°  0:00` esperando o `Cross` do jogador 1, e uma partida
+    parada no saque **é indistinguível de uma partida correndo** para
+    qualquer medida sobre o quadro inteiro: a câmera se mexe, os jogadores
+    respiram, a média fica em ~0,30. Foi assim que uma corrida registrou
+    "onze minutos de fast-forward não terminaram a partida" medindo uma
+    partida que nunca começou. O teste honesto é recortar **só o relógio**
+    (`(560,90)-(760,130)` na janela de 800×649) e comparar dois quadros:
+    parado dá **0,00000**, andando dá diferença franca. Hipótese do usuário,
+    confirmada por medição em 2026-09-02.
+24. **Três telas seguidas se parecem para a média, e o desvio as separa.**
+    Abertura de estádio, entrada dos times e saque têm todas média entre
+    0,21 e 0,30, e duas sondas pressionaram `Cross` na tela errada por
+    isso. O que separa é o **desvio-padrão da faixa do topo**
+    `(0,60)-(800,200)`, onde o saque tem a barra uniforme do placar sobre
+    gramado: saque **0,1170–0,1204**, entrada dos times **0,1531**,
+    abertura de estádio **0,2317–0,2537**. Usado em conjunção com o relógio
+    congelado, porque cada um sozinho já deu falso positivo uma vez — o
+    relógio recortado sobre o céu da abertura também fica parado.
+    E `Start` pula a abertura de estádio, o que economiza a espera.
+25. **`pgrep -f` e `pkill -f` casam a linha de comando do próprio shell.**
+    Está registrado dentro do `run_duckstation.sh` desde a armadilha 7, para
+    o padrão `DuckStation` — e vale para **qualquer** padrão: um
+    `pkill -f probe28.py` digitado num shell cujo comando contém
+    `probe28.py` mata o shell antes de ele fazer o que ia fazer, e o
+    sintoma é um script que nunca chega a ser escrito. Duas corridas
+    perdidas assim em 2026-09-02. Exclua o próprio PID, ou mate por PID.
 
 ---
 
