@@ -147,6 +147,19 @@ def read_png(path):
 
 # ---- the container ---------------------------------------------------
 
+def png_depth(palette):
+    """4 or 8, from how many colours the PNG carries.
+
+    The depth has to be recovered from the palette because a VRAM rect is
+    the *same* pixel width at both depths -- 32 units is 128 px at 4 bpp
+    and 64 units is 128 px at 8 bpp -- so dimensions alone never say which
+    slot a picture belongs to. CORR-PES2-019 is the write that proved it:
+    a 4 bpp export of LOGO.BIN went into an 8 bpp slot of TITLE.BIN with
+    every existing check green.
+    """
+    return 4 if len(palette) <= 16 else 8
+
+
 def find(data, index, kind):
     recs = [e for e in BA.entries(data)
             if (e.is_image if kind == "image" else e.is_clut)]
@@ -270,6 +283,14 @@ def cmd_export(args):
         cl = [e for e in BA.entries(data) if e.is_clut]
         palette = (BA.read_clut(data, cl[args.clut]) if cl
                    else [(i, i, i, 255) for i in range(1 << bpp)])
+        # The PNG has to carry the depth, and the only place it fits is the
+        # palette length -- so pad or refuse rather than write a 16-colour
+        # table for an 8 bpp slot and lose the distinction on the way out.
+        if len(palette) > (1 << bpp):
+            raise Refused(
+                f"the CLUT has {len(palette)} colours and this slot is "
+                f"{bpp} bpp -- pick another --clut")
+        palette = palette + [(0, 0, 0, 0)] * ((1 << bpp) - len(palette))
         BA.write_png(args.png, w, h, px, palette)
         print(f"{args.file} entry {args.entry}: {w}x{h} px {bpp} bpp -> "
               f"{args.png}")
@@ -289,14 +310,31 @@ def cmd_import(args):
             raise Refused(
                 f"{args.png} is {width}x{height} and this slot is "
                 f"{want_w}x{want_h} -- refusing to resize it for you")
+        got = png_depth(palette)
+        if got != bpp:
+            raise Refused(
+                f"{args.png} is {got} bpp ({len(palette)} colours) and this "
+                f"slot is {bpp} bpp. The two have the same pixel size, so the "
+                f"dimensions agreeing means nothing -- pick the right slot, or "
+                f"re-export the picture at {bpp} bpp")
         if bpp == 4 and any(i > 15 for i in indices):
             raise Refused(
                 f"{args.png} uses index {max(indices)} and this slot is 4 bpp, "
                 f"so only 0..15 exist here")
-        if len(palette) > (1 << bpp):
-            raise Refused(
-                f"{args.png} has {len(palette)} colours and this slot is "
-                f"{bpp} bpp")
+
+        cl = [e for e in BA.entries(data) if e.is_clut]
+        if cl and not args.repaint:
+            here = BA.read_clut(data, cl[args.clut])
+            here = here + [(0, 0, 0, 0)] * ((1 << bpp) - len(here))
+            if [c[:3] for c in palette] != [c[:3] for c in here]:
+                first = next(i for i, (a, b) in enumerate(zip(palette, here))
+                             if a[:3] != b[:3])
+                raise Refused(
+                    f"{args.png} does not carry the palette of CLUT "
+                    f"{args.clut}: they first differ at colour {first}, "
+                    f"{palette[first][:3]} against {here[first][:3]}. Pass "
+                    f"--repaint to write the pixels anyway, knowing the game "
+                    f"paints them with the CLUT that is on the disc")
 
         blob, room = rewrite_image(data, entry, indices, bpp)
         print(f"{args.file} entry {args.entry}: {width}x{height} {bpp} bpp, "
@@ -456,6 +494,18 @@ def cmd_check(args):
         except Refused as exc:
             print(f"  refused: {exc}")
 
+        print("\n-- import refusing the wrong depth --")
+        shot = os.path.join(work, "four-bpp.png")
+        cmd_export(_Args(image=copy, file="/BIN/LOGO.BIN", entry=2,
+                         png=shot, clut=0, bpp=None))
+        try:
+            cmd_import(_Args(image=copy, file="/BIN/TITLE.BIN", entry=2,
+                             png=shot, clut=0, bpp=None, repaint=False))
+            print("  FAILED: a 4 bpp picture was accepted by an 8 bpp slot")
+            bad += 1
+        except Refused as exc:
+            print(f"  refused: {exc}")
+
         print("\n-- the negative control --")
         bad += cmd_negative(_Args(image=copy, file="/BIN/LOGO.BIN",
                                   entry=2, bpp=None))
@@ -546,8 +596,12 @@ def main(argv=None):
                            help="depth, when the container's CLUTs disagree")
         if name in ("export", "import"):
             p.add_argument("--png", required=True)
-        if name == "export":
+        if name in ("export", "import"):
             p.add_argument("--clut", type=int, default=0)
+        if name == "import":
+            p.add_argument("--repaint", action="store_true",
+                           help="accept a picture whose palette is not the "
+                                "slot's CLUT")
         if name == "palette":
             p.add_argument("--clut", type=int, default=0)
             p.add_argument("--index", type=int, required=True)

@@ -902,6 +902,16 @@ O que o gravador garante, e o `check` afirma a cada corrida:
 | controle negativo | um pixel no `LOGO.BIN` entrada 2 muda **745 bytes**, o primeiro exatamente no offset da entrada |
 | uma cor de paleta toca o que deve | 2 bytes, **1 setor** (4711), no offset absoluto previsto 11081454 |
 | `roms/` recusado | como no `poke.py` |
+| import recusa a profundidade errada | um PNG de 4 bpp num slot de 8 bpp é recusado, com as duas profundidades no texto |
+| import recusa paleta que não é a do slot | compara com o CLUT do destino e diz a primeira cor que difere; `--repaint` aceita conscientemente |
+
+**A validação de import não pode ser por dimensão.** Um retângulo de VRAM tem
+a **mesma** largura em pixels nas duas profundidades — 32 unidades são 128 px
+a 4 bpp e 64 unidades são 128 px a 8 bpp — e a contagem de bytes também é a
+mesma. Um PNG de 4 bpp exportado do `LOGO.BIN` foi aceito e gravado no
+`TITLE.BIN`, que é 8 bpp, com as três validações antigas verdes
+(CORR-PES2-019). A profundidade agora sai do tamanho da `PLTE` do PNG e é
+comparada com a do slot, e a recusa é exercitada pelo `check`.
 
 Paleta é carga **crua**: não há fluxo para caber, e por isso a gravação de cor
 nunca esbarra em orçamento — é a via barata para verificar em tela, e foi a

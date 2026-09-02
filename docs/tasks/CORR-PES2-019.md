@@ -3,7 +3,7 @@ id: CORR-PES2-019
 title: "Correção: o import não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -99,12 +99,44 @@ CORR-PES2-009.
 - [ ] `ctest --test-dir build -R pes2` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** quatro mudanças no `asset_write.py`.
 
-**Problemas encontrados:**
+1. `png_depth(palette)` — a profundidade sai do tamanho da `PLTE`: ≤16 cores é
+   4 bpp, senão 8. É o único lugar onde ela cabe, porque a dimensão em pixels
+   é a mesma nas duas.
+2. `cmd_export` passou a **preencher** a paleta até `1 << bpp`, para o PNG
+   carregar a profundidade em vez de deixá-la implícita, e a recusar um
+   `--clut` maior que o slot.
+3. `cmd_import` recusa quando a profundidade do PNG não é a do destino, com os
+   dois valores e a razão no texto, e **compara a paleta com o CLUT do slot**,
+   dizendo a primeira cor que difere. `--repaint` aceita conscientemente, que é
+   o caso legítimo de repintar.
+4. O `check` ganhou o caso em vermelho: exporta a entrada 2 do `LOGO.BIN`
+   (4 bpp) e tenta importá-la na entrada 2 do `TITLE.BIN` (8 bpp), exigindo o
+   `Refused`. Sem isso a validação nova seria mais um verde que nunca pôde ser
+   vermelho.
 
-**Arquivos criados/modificados:**
+Medido, sobre cópia:
+
+```
+--- 4bpp em slot 8bpp: deve RECUSAR ---
+refused: … is 4 bpp (16 colours) and this slot is 8 bpp. The two have the
+same pixel size, so the dimensions agreeing means nothing …
+exit=1
+--- de volta ao próprio slot: deve ACEITAR ---
+/BIN/LOGO.BIN entry 2: 128x128 4 bpp, 887 B of 900 B
+written, and verified before it went
+exit=0
+```
+
+**Problemas encontrados:** nenhum. Vale a nota de método: a validação antiga
+não era frouxa por descuido, era frouxa porque comparava a grandeza errada —
+dimensão em pixels, que é ambígua neste formato. Trocar a grandeza resolveu;
+apertar a antiga não resolveria.
+
+**Arquivos criados/modificados:** `tools/pes2/asset_write.py`,
+`docs/PLAN-PES2-PSX.md`.
