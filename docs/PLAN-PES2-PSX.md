@@ -1232,9 +1232,28 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    costuma ser a mesma**, e isso dá a estrutura do registro de jogador quase
    pronta. (O editor do Obocaman já importa `.mcr` do WE2002 — ver
    [PLAN-WTE-LAZARUS.md](/docs/PLAN-WTE-LAZARUS.md).)
-3a. **Nem toda tela mostra nome de time — várias mostram bandeira.** Medido
-   em 2026-09-02 percorrendo uma partida inteira: o placar em jogo, o
-   replay, o `RESULTADO` e o menu pós-resultado identificam os times por
+3a. **Nem toda tela mostra nome de time — várias mostram bandeira**, e a
+   [bíblia do WE2002](/docs/biblia-we2002/10-textos.md) diz por quê: o jogo
+   tem **três** tipos de texto — aberto, criptografado e **gráfico** —, e
+   entre os que ela lista como imagem está *"os nomes dos times que aparecem
+   antes da partida iniciar"*, em `T_NAME.BIN`. É o mesmo `T_NAME` que a
+   §6.12 já tinha estudado sem saber o motivo: não há atlas de fonte no
+   disco porque os nomes vêm **pré-desenhados**.
+
+   **E a cópia criptografada não existe aqui — medido.** A bíblia diz que no
+   WE2002 os nomes de time são texto *criptografado*, achável só passando
+   pelo `WinWEcodif`; se PES2 tivesse uma cópia assim, a varredura em texto
+   claro do `poke.py` passaria por ela sem ver, e a §6.1 seria violada em
+   silêncio. Portando o `AsciiToKanji` de `src/core/TextCodec.cpp` para
+   Python e varrendo os arquivos Form 1 da `(EsIt)` atrás de `PATAGONIA`,
+   `Patagonia`, `IRELAND`, `Ireland`, `BRAZIL` e `Brazil` codificados:
+   **nenhuma ocorrência**. A codificação é do WE2002 japonês; nesta release
+   os nomes estão em claro, e a varredura do `poke.py` basta. Confere com a
+   própria bíblia, que documenta `82 71` como a letra `R` — 0x52 + 31 = 0x71,
+   exatamente o que o codec faz.
+
+   Medido em 2026-09-02 percorrendo uma partida inteira: o placar em jogo,
+   o replay, o `RESULTADO` e o menu pós-resultado identificam os times por
    **bandeira**, não por texto. O registro de replay gravado no cartão
    também: ele traz as duas bandeiras, o placar, `Goleador` e `Pasador`. Isso
    limita o que uma tela pode verificar — um `poke` num nome de time **não
