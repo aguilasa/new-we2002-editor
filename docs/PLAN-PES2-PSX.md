@@ -1233,7 +1233,9 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    pronta. (O editor do Obocaman já importa `.mcr` do WE2002 — ver
    [PLAN-WTE-LAZARUS.md](/docs/PLAN-WTE-LAZARUS.md).)
 4. **Desmontagem do MIPS**, para os campos que a estatística não resolver.
-   É o último recurso, e é o mais caro.
+   É o último recurso, e é o mais caro. Existe ferramenta de terceiro que o
+   resolveria quase inteiro, avaliada e **não adotada** — o porquê, e o
+   caminho mais barato a tentar antes dela, na §6.14.
 
 ### 4.3 Ordem: texto antes de número
 
@@ -1841,6 +1843,61 @@ E o zero conta como palavra de cabeçalho: `TEX_00.BIN` tem uma nula no índice
 6, nos dois jogos, com ponteiros válidos depois. Parar no primeiro zero
 encurta o cabeçalho pela metade — que é, muito provavelmente, a origem da
 divergência de `28` × `48` que a §1.14 deixou aberta.
+
+### 6.14 Ferramenta externa avaliada: `duckstation-claude-plugin`
+
+Avaliada em 2026-09-02, a pedido do usuário. **Não adotada agora**, e o
+registro existe porque ela resolve exatamente o item 4 da §4.2 — a
+desmontagem do MIPS, "o último recurso, e o mais caro".
+
+<https://github.com/sadnescity/duckstation-claude-plugin>
+
+**O que é.** 95 ferramentas MCP sobre um servidor que roda *dentro* do
+DuckStation, em `localhost:2346`, expostas ao Claude Code. Debugger de CPU
+(registradores, disassembly, breakpoints), leitura e escrita de RAM e VRAM,
+save states, cartões, input de controle, e sete fluxos de engenharia reversa
+prontos. Instalação: `/plugin marketplace add sadnescity/claude-plugins`.
+
+**O que custaria.** Um **fork de terceiro** do emulador —
+`sadnescity/duckstation`, branch `mcp`. `EnableMCPServer` não existe no
+build oficial: conferido por `strings` sobre o AppImage extraído, e as
+únicas ocorrências de `2346` são número de linha de `fullscreenui_settings.cpp`.
+O fork tem **3 estrelas e 0 forks**, não publica binário — o próprio README
+manda baixar do upstream —, então adotá-lo é compilar um emulador C++ de
+12.330 commits. E trocar de binário **invalida toda assinatura de quadro
+medida**: a da tela de título (0,550 / 0,341) e a do menu (0,1405 / 0,2124)
+saem do renderer e da versão, e as vinte armadilhas da §6.11 são sobre o
+AppImage oficial.
+
+**Quatro dos sete fluxos batem no que falta aqui:**
+
+| fluxo | ferramentas | o que resolveria |
+|---|---|---|
+| C — busca de valor | `memory_scan`, `read_memory` | endereço de RAM de um atributo pelo valor em tela; é o caminho mais curto para os campos por jogador ainda desconhecidos |
+| A — quem escreve | `breakpoint` de escrita, `read_registers`, `disassemble` | do endereço ao **carregador**, e do carregador ao offset no disco — fecha o laço disco↔RAM, hoje feito só por cutucar e olhar |
+| D — diff de memória | `snapshot_memory`, `diff_memory` | "o que o Modo Editar muda?", que é a PES2-TASK-05 em RAM em vez de cartão |
+| E — verificar ASM | `read_memory`, `disassemble`, `breakpoint` de execução | confirmar que um disco remendado carregou o que se esperava |
+
+O fluxo **F (automação de UI)** duplica o `tools/pes2/drive.py`. As
+ferramentas dele seriam melhores — `input_sequence()` e `load_state()` não
+têm o jogo de foco `PointerRoot` nem a calibragem de tempo de tecla da §6.11
+—, mas é a parte que já está de pé e medida.
+
+**O caminho barato, a tentar primeiro.** Um save state contém a RAM inteira,
+e o `F2` já funciona: os dois estados medidos tinham 1.750.327 e 1.583.714
+bytes comprimidos contra os 2 MiB de RAM do PSX. O `zstd` está na máquina
+(CLI 1.5.5; o módulo Python não, e não é preciso), e
+`SaveStateCompression = Uncompressed` na interface do emulador dispensa até
+ele. Isso entrega **os fluxos C e D em Python puro, sem fork nenhum** —
+não entrega breakpoint nem disassembly, para os quais o fork é
+insubstituível. O layout do arquivo **não foi medido**: é hipótese
+fundamentada no tamanho, não leitura.
+
+**Decisão:** reavaliar quando o projeto chegar na fase de RAM/MIPS, e
+reavaliar **contra o caminho do save state primeiro**, que é mais barato e
+não põe um fork de três estrelas no meio da cadeia de medição.
+
+---
 
 ## 7. Entregáveis
 
