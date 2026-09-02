@@ -74,6 +74,7 @@ PES2-TASK-22.
 | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
