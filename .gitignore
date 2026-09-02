@@ -140,3 +140,11 @@ wte/re/trace.log
 /docs/Pro Evolution Soccer 2 FAQ for PSone.md
 /docs/Pro Evolution Soccer 2.txt
 /docs/Pro Evolution Soccer 2.md
+
+# O PDF da "Biblia" do Mago_Branco (2002), fonte da transcricao em
+# docs/biblia-we2002/. Obra de terceiro sem licenca, como os FAQs de PES2
+# acima -- o que este repositorio guarda e a transcricao com credito, nao o
+# original. O PDF fica no disco do usuario, como roms/ e we-team-editor/.
+# Reextrair o texto: pdftotext -layout -enc UTF-8 <arquivo>.pdf
+# Reextrair as imagens: pdfimages -png -p <arquivo>.pdf docs/biblia-we2002/img/fig
+/docs/pdf/
