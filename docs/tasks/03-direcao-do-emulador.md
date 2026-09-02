@@ -27,12 +27,12 @@ atração, entrar no menu, chegar à tela de seleção de time, e capturar.
 
 ## Objetivo
 
-`tools/pes2/drive.sh` (ou `drive.py`), que recebe um **roteiro nomeado** e
+`tools/pes2/drive.py`, que recebe um **roteiro nomeado** e
 entrega um PNG por tela pedida.
 
 ```
-tools/pes2/drive.sh <copia/track1.bin> --screen team-select --out /tmp/a.png
-tools/pes2/drive.sh <copia/track1.bin> --screen replay,result --out-dir /tmp/
+python3 tools/pes2/drive.py <copia/track1.bin> --screen team-select --out /tmp/a.png
+python3 tools/pes2/drive.py <copia/track1.bin> --screen replay,result --out-dir /tmp/
 ```
 
 ### Os roteiros que a Fase 2 precisa
@@ -116,90 +116,121 @@ tê-las em mente ao escolher as telas:
 
 ## Log de Execução
 
-**Executado em:** 2026-09-01 / 2026-09-02 — **parcial.** A ferramenta e a
-mecânica estão de pé e medidas; a navegação por menu **não** foi estabelecida,
-e nenhuma das cinco telas do quadro foi alcançada. A task **não** está
-concluída.
+**Executado em:** 2026-09-01 / 2026-09-02 — **parcial.** A ferramenta está de
+pé, reescrita em Python, e o **menu principal é alcançado em 3 de 3
+corridas**. As cinco telas do quadro (`team-select`, `result`, `replay`,
+`ending`, `edit`) continuam **não alcançadas**: elas ficam depois do menu, e a
+navegação a partir dele não foi escrita. A task **não** está concluída.
 
-**O que existe.** `tools/pes2/drive.sh`: rotas nomeadas, passos
-`wait / key / down / up / shot / until`, encerramento pelo
-`run_duckstation.sh --kill` no `trap`, recusa de `roms/`, e captura por
-`import -window root` recortada à geometria da janela. Mais quatro peças que
-não existiam:
+**A ferramenta é `tools/pes2/drive.py`**, que substituiu o `drive.sh` a pedido
+do usuário — regra nova do repositório: ferramenta se escreve em Python, salvo
+motivo específico em contrário. O shell era herança, não escolha, e cobrou:
+o bash relê script por *offset de byte*, então editar o `.sh` no meio da
+corrida corrompeu uma; cada espera saía por `identify -format`, um processo por
+poll devolvendo string; e a rota era string separada por espaço, que teste
+nenhum alcançava sem emulador. Ficou em shell o que é shell puro: o lançador,
+com as armadilhas de `pgrep` e o `fusermount` do `--kill`.
 
-1. **`[Hotkeys]` no `run_duckstation.sh`.** Um `settings.ini` escrito à mão
-   não vincula hotkey nenhuma — exatamente o que a armadilha 4 da §6.11 já
-   dizia do `[Pad1]`. Sem isso, fast-forward, save state e load state não
-   existiam. Entraram `FastForward = Tab`, `SaveSelectedSaveState = F2`,
-   `LoadSelectedSaveState = F1`, `TogglePause = Space`.
-2. **Tecla mantida.** `xdotool key` é press e release no mesmo instante e o
-   jogo não vê o botão; `keydown` / **1 s** / `keyup` vê. Medido na tela de
-   título: três formas de tocar deixaram o quadro idêntico até a sexta casa
-   decimal, e 0,4 s de pressão ainda não bastam.
-3. **`Tab` mantido corta o intro.** Os cerca de dois minutos de
-   `MOVIE/WE2002.STR` viram **25 segundos** de fast-forward.
-4. **O passo `until:`**, que espera a *assinatura do quadro* em vez de contar
-   segundos. É o que torna a rota repetível: a duração do intro varia entre
-   corridas, e todo `sleep` fixo ou passa do ponto ou para antes.
+O que a versão Python tem e a outra não podia ter:
 
-**O número que a rota existente entrega.** A rota `title` acertou a tela em
-**5 de 5** corridas, com médias de 0,5502 a 0,5528 e desvios de 0,3397 a
-0,3411 — a dispersão é a animação de brilhos do fundo, e é uma ordem de
-grandeza menor que a tolerância de 0,02.
+- **comparação por região.** A espera antiga era a média do quadro **inteiro**,
+  e é por isso que a rota do menu não fechava: duas telas diferentes podem ter
+  a mesma média. `Frame.difference(box=…)` compara um recorte;
+- **`settle` que recusa preto.** Tela de carregamento é preta e é *parada* —
+  a primeira versão devolvia no instante em que o título esmaecia, e o passo
+  seguinte apertava `Down` num carregamento;
+- **`nudge`**, que aperta até algo mudar. Justificou-se sozinho: numa das três
+  corridas verdes o `Down` da tela de idioma só pegou na **quinta** tentativa;
+- **`self_check`** sem emulador, registrado no `pes2_selftest` — inclusive o
+  caso em que duas metades trocadas têm a mesma média e só o recorte as separa.
 
-**O que não foi conseguido, e o que foi tentado.** Sair do título para o menu.
-Seis corridas, e o comportamento não se reproduz: às vezes o `X` deixa o
-título intacto, às vezes cai de volta no laço de atração, e **uma única
-corrida** — a primeira sonda de input — chegou a um menu com o cabeçalho
-`PRO EVOLUTION SOCCER 2`, sem que a sequência que a produziu se repetisse
-depois. Tentados, um por corrida: toque simples; `windowfocus` antes;
-`--clearmodifiers`; `keydown`/`keyup` de 0,4 s e de 1 s; um, dois e três `X`
-com esperas de 5, 6, 10, 12 e 25 s; e fast-forward de 15, 20, 25, 30, 40 e
-45 s antes do título.
+**A causa raiz de tudo, e ela é grave: `XDG_DATA_HOME` nunca isolou nada.**
+Este AppImage resolve o diretório de dados a partir do **`$HOME`**, então toda
+corrida usou `~/.local/share/duckstation`, o do usuário. A prova é de uma
+linha — `StartFullscreen = true` no arquivo que o lançador escreve, janela sai
+com 800×655. Consequências medidas:
 
-**Três hipóteses derrubadas por medição**, que valem tanto quanto o que
-funcionou e estão na §6.11 como armadilhas 10 a 13:
+- o `[Pad1]` que o lançador escreve **nunca valeu**; o que valia era o
+  `settings.ini` do usuário. Doze subidas foram gastas apertando teclas ligadas
+  a coisa nenhuma;
+- `Tab`, `Enter` e as setas funcionavam por serem **defaults** do DuckStation,
+  não por causa do arquivo — o que fez a configuração parecer aplicada;
+- dois save states nossos foram parar no diretório do usuário. Um deles é o
+  `SLES-03957_1.sav` de 2026-09-01 22:26: **o `F2` da sessão anterior
+  funcionou**, e a conclusão de que "o save state não gravou" estava errada —
+  ele gravou no lugar errado;
+- o cartão de memória do usuário **não** foi tocado: digest `4acca062…`,
+  mtime de 29/ago, conferido antes e depois.
 
-- *o input não chega* — chega; faltava manter a tecla;
-- *a Citrix filtra o XTEST* — ela engancha `XNextEvent`, `xcb_poll_for_event`
-  e `XRecordQueryVersion`, e **não** bloqueia. A frase do `CLAUDE.md` sobre
-  input sintético é do Windows e não vale no `:98`. O `run-sanitized.sh` não
-  é necessário aqui;
-- *o `unexpected EOF` era erro de sintaxe* — era edição do `.sh` **durante a
-  execução**; o bash relê o arquivo por offset.
+Sobrescrever `HOME` isola de verdade e foi tentado; aí o primeiro boot para no
+assistente de nove páginas, que `SetupWizardIncomplete = false` não pula —
+medido com a bandeira presente, com os `resources/` semeados de uma instalação
+que funciona, com o BIOS como arquivo em vez de link, e com o `settings.ini` do
+usuário copiado verbatim. **Fica em aberto** (armadilha 20 da §6.11). Enquanto
+isso o `drive.py` **lê os bindings do `settings.ini` que de fato vale**, em vez
+de declarar os seus — o que é honesto e sobrevive a o usuário remapear.
 
-**O save state não funcionou.** `F2` com a hotkey vinculada não escreveu nada
-em `ds-data/duckstation/savestates`. Não foi diagnosticado — os nomes
-`SaveSelectedSaveState` / `LoadSelectedSaveState` saíram do `settings.ini` do
-próprio usuário, mas a versão do AppImage pode usar outros, ou a hotkey pode
-exigir foco que o `press()` só passou a dar depois. **É a via mais promissora
-para a próxima sessão**: com um estado salvo no menu, a navegação deixa de
-custar dois minutos por tentativa e passa a ser carregar-e-navegar, que é
-exatamente o que a seção "Save state como atalho" desta task previa.
+**O caminho feliz, dado pelo usuário e medido passo a passo.** Os botões não
+são todos o mesmo, que é o que custou uma dúzia de subidas para enxergar:
 
-**As telas não alcançadas, com a via proposta** — que é o terceiro critério:
+| passo | botão | evidência |
+|---|---|---|
+| 1. passar do vídeo | `Tab` mantido 25 s | `Cross` **não** pula: 24 pressionamentos em 80 s deixaram o FMV correndo |
+| 2. sair do título | **`Start`** | 5 `Cross` nele deram diff 0,0003; `Start` deu 0,5502 |
+| 3. `Seleziona Lingua` | `Down`, `Cross` | `Down` 0,00634; `Cross` 0,02176 e a tela vira espanhol |
+| 4. `¿Estás seguro?` | `Up`, `Cross` | `Up` 0,00554 |
+| 5. ranura de MEMORY CARD | `Cross` | sai para o menu, diff 0,132939 |
+
+**3 de 3 corridas chegaram ao menu**, com assinaturas 0,140639/0,212488,
+0,140682/0,212449 e 0,140679/0,212435 — dispersão na quarta casa decimal. A
+rota `title` segue medida em 5 de 5 (médias 0,5502–0,5528).
+
+**Sete hipóteses derrubadas por medição**, todas na §6.11 como armadilhas 14 a
+20, mais as 10 a 13 da sessão anterior:
+
+- *o `settings.ini` do lançador vale* — não vale, e é a raiz de tudo;
+- *`Tab` funcionar prova que o arquivo foi lido* — não prova: é default;
+- *`Keyboard/X` é nome de tecla* — não é. A tabela do binário sai com
+  `strings` e tem `UpArrow`, `Enter`, `Space`, `Escape`, `F1`–`F4`, `F10`,
+  `F11` e as letras `A D E F G H I J K L Q S T W`. `X`, `P`, `Insert`,
+  `Delete`, `Home` não estão lá e nunca vincularam;
+- *`Keyboard/Space` serve para `Cross`* — serve como nome e **pausa o
+  emulador**: hotkey ganha de pad, e o glifo de pausa no canto da captura foi
+  o que denunciou;
+- *o título aceita `Cross`* — aceita `Start`;
+- *um pressionamento basta* — não basta;
+- *o `F2` não gravava* — gravava, no diretório do usuário.
+
+**As telas do quadro, com a via proposta** — o terceiro critério:
 
 | Tela | Estado | Via proposta |
 |---|---|---|
-| `team-select` | não alcançada | destravar o save state e navegar a partir de um estado no menu |
-| `result` | não alcançada | idem, e depende de completar uma partida — candidata a save state próprio |
+| `team-select` | não alcançada | `Modo Partido` a partir do menu, que agora é alcançável em 3 de 3 |
+| `result` | não alcançada | exige completar uma partida — candidata a save state, que agora se sabe que funciona |
 | `replay` | não alcançada | idem |
-| `ending` | não alcançada | a própria task já previa que exigiria save state |
-| `edit` | não alcançada | idem `team-select` |
-
-E uma via que não depende de save state: **pedir a sequência de botões a quem
-conhece o jogo**. Foi oferecido e recusado nesta sessão, com razão — a
-descoberta autônoma é o método —, mas continua sendo o caminho de menor custo
-se a próxima sessão também travar aqui.
+| `ending` | não alcançada | save state |
+| `edit` | não alcançada | `Modo Editar` a partir do menu |
 
 **Arquivos criados/modificados**
 
-- `tools/pes2/drive.sh` — novo
-- `tools/pes2/run_duckstation.sh` — a seção `[Hotkeys]`
-- `docs/PLAN-PES2-PSX.md` — a §6.11 passou de nove para treze armadilhas
+- `tools/pes2/drive.py` — novo, substitui o `drive.sh`
+- `tools/pes2/drive.sh` — removido
+- `tools/pes2/run_duckstation.sh` — `PES2_PAD_TYPE`, os nomes de tecla
+  corrigidos, e o achado do `$HOME` registrado onde ele engana
+- `tools/pes2/selftest.py` — a lógica de quadro do `drive.py`
+- `docs/PLAN-PES2-PSX.md` — §6.11 de treze para **vinte** armadilhas, e as 4
+  e 11 corrigidas: elas afirmavam o contrário do que se mediu
+- `CLAUDE.md`, `docs/prompts/perfil-pes2.md`, `docs/tasks/04-*`, `05-*` — a
+  ferramenta trocou de nome
 
-**Problemas encontrados.** Os quatro acima. O de método que mais custou: mudar
-mais de uma variável por corrida. Cada subida leva de um minuto e meio a dois,
-e nas primeiras tentativas eu alterei espera e tecla ao mesmo tempo, o que
-tornou dois resultados inúteis. Da quarta corrida em diante passei a mexer em
-uma coisa por vez, e foi aí que as armadilhas 10 e 12 apareceram.
+**Problemas encontrados.** Os sete acima. O de método que mais custou continua
+sendo mudar mais de uma variável por corrida; a correção — uma coisa por
+subida — é o que fez as armadilhas aparecerem. E um segundo, novo: **passei
+doze subidas tratando "a tecla não funciona" como fato sobre o jogo quando era
+fato sobre a configuração.** O teste que resolveu — mudar algo que não é
+default (`StartFullscreen`) e olhar o efeito — custa uma subida e devia ter
+sido o primeiro.
+
+**Pendência encaminhada.** A isolação por `HOME` esbarra no assistente de
+configuração; enquanto não for resolvida, as corridas leem o `settings.ini` do
+usuário e escrevem save state no diretório dele.

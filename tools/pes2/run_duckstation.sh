@@ -12,6 +12,9 @@
 #                  its own memory cards and save states
 #   PES2_BIOS      where to borrow the BIOS from, default
 #                  ~/.local/share/duckstation/bios
+#   PES2_PAD_TYPE  controller in port 1, default AnalogController. The other
+#                  value worth passing is DigitalController -- see the note
+#                  by [Pad1] below.
 #
 # Prints the PID and the window id, so a driver script can take it from here.
 set -euo pipefail
@@ -20,6 +23,7 @@ DISPLAY_="${PES2_DISPLAY:-:98}"
 APPIMAGE="${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}"
 IMAGE="${PES2_IMAGE:-}"
 BIOS="${PES2_BIOS:-$HOME/.local/share/duckstation/bios}"
+PAD_TYPE="${PES2_PAD_TYPE:-AnalogController}"
 
 # A leftover instance is driven by mistake instead of the new one, and the
 # result is a screenshot of the wrong game state.
@@ -100,11 +104,27 @@ DATA="${PES2_DATA:-$(cd "$(dirname "$IMAGE")" && pwd)/ds-data}"
 # the repository -- see CLAUDE.md.
 export DISPLAY="$DISPLAY_"
 export XAUTHORITY=""
-export XDG_DATA_HOME="$DATA"
 
-mkdir -p "$DATA/duckstation"/{memcards,savestates,screenshots,cache}
+# **XDG_DATA_HOME does not isolate this AppImage, and believing it did cost
+# a day.** It resolves its data directory from $HOME, so every run before
+# 2026-09-02 used ~/.local/share/duckstation -- the user's own. Proved by
+# setting StartFullscreen = true and getting an 800x655 window: the file
+# below was never read, so DuckStation's *default* pad bindings were in
+# force the whole time. Arrows and Enter worked because they are defaults;
+# nothing this file said about the pad ever applied. It also wrote a resume
+# save state into the user's directory.
+#
+# Overriding HOME does isolate it, and then the first boot stops on the
+# nine-page setup wizard, which `SetupWizardIncomplete = false` does not
+# skip -- measured with the flag present, with the resources seeded from a
+# working install and with the BIOS as real files rather than a link. That
+# is the open end; see PES2-TASK-03.
+export XDG_DATA_HOME="$DATA"
+DS="$XDG_DATA_HOME/duckstation"
+
+mkdir -p "$DS"/{memcards,savestates,screenshots,cache}
 # The BIOS stays where the user put it; we only borrow it.
-ln -sfn "$BIOS" "$DATA/duckstation/bios"
+ln -sfn "$BIOS" "$DS/bios"
 
 # Written every run on purpose: this file is the whole configuration, and a
 # half-written one fails in ways that look like emulator bugs. Two settings
@@ -112,11 +132,64 @@ ln -sfn "$BIOS" "$DATA/duckstation/bios"
 # no -renderer on the command line. The [Pad1] keyboard bindings because
 # DuckStation binds nothing by default here -- without them every keypress
 # is silently dropped and the game sits in its attract loop forever.
-cat > "$DATA/duckstation/settings.ini" <<'INI'
+#
+# **And Tab working proved nothing.** Fast forward on Tab is DuckStation's
+# *default* binding, so it kept working while this file was being ignored
+# whole -- which is why the pad seemed dead for a dozen runs while the
+# emulator plainly answered the keyboard. Three things were wrong with the
+# file, all found by diffing it against the configuration the user drives
+# by hand, which works:
+#
+#   - `SettingsVersion = 3` was stale. A version DuckStation does not
+#     expect makes it reset the settings rather than read them.
+#   - `DisableBackgroundInput` was unset, so its default applied. There is
+#     no window manager on this display and the window never holds focus,
+#     so the pad was being dropped as background input while hotkeys, which
+#     do not go through that path, came through.
+#   - `[InputSources] Keyboard = true` is not a key DuckStation writes.
+#
+# **And a letter is not a key name here.** `Keyboard/P` and `Keyboard/p`
+# both failed to bind, tested against TogglePause -- which is the cheapest
+# probe there is, since a pause is visible against the animated intro
+# without reaching any particular screen. `Keyboard/F9` bound on the first
+# try, and so did `UpArrow`, `DownArrow` and `Enter`. Special and function
+# keys work; letters do not, whatever case they are written in. The
+# configuration the user drives by hand does say `Cross = Keyboard/M`, but
+# that file also has `SDL = true` and a full set of SDL-0 bindings, so its
+# letters were very likely never exercised. Hence the face buttons on F5 to
+# F8 -- which did not work either, because the function keys are where
+# DuckStation keeps its own default hotkeys and they are consumed before
+# the pad ever sees them. The names below were read out of the binary's own
+# name table (`strings` over the extracted AppImage: UpArrow, Insert,
+# Delete, Home, End, PageUp, PageDown, Backspace, Enter) rather than
+# guessed. Only the names in that table bind: `X`, `P`, `Insert`, `Delete`
+# and `Home` are not in it and never bound, which is what made the pad look
+# dead for a dozen boots.
+#
+# **And a hotkey beats a pad binding.** `Keyboard/Space` is a valid name and
+# is DuckStation's own pause key, so binding Cross to it paused the
+# emulator instead of pressing a button -- visible as the pause glyph in
+# the corner of the capture, and as every frame after it being identical.
+# The letters below are all in the table and none of them is a hotkey.
+#
+# **The key names are DuckStation's, not X keysyms**, and the two disagree
+# exactly where it hurts: the d-pad is `UpArrow`/`DownArrow`/`LeftArrow`/
+# `RightArrow` here and `Up`/`Down`/`Left`/`Right` to xdotool, and Start is
+# `Enter` here and `Return` there. A name DuckStation does not recognise
+# does not become a binding and does not complain -- it logs nothing at all
+# -- so every arrow press was dropped in silence, which is why no route
+# past the title screen ever worked. Measured against the configuration the
+# user drives by hand, which does work.
+cat > "$DS/settings.ini" <<'INI'
 [Main]
-SettingsVersion = 3
+# Without these two the first run stops on the setup wizard and on the
+# create-a-shortcut dialog, and no game window ever appears. They were
+# invisible before 2026-09-02 because this file was not being read at all.
+SetupWizardIncomplete = false
+NoDesktopFile = true
 ConfirmPowerOff = false
 PauseOnFocusLoss = false
+DisableBackgroundInput = false
 SaveStateOnExit = false
 StartFullscreen = false
 InhibitScreensaver = false
@@ -140,21 +213,21 @@ Card1Type = PerGame
 Directory = memcards
 
 [InputSources]
-Keyboard = true
+RawInput = false
 SDL = false
 XInput = false
 
 [Pad1]
 Type = AnalogController
-Up = Keyboard/Up
-Down = Keyboard/Down
-Left = Keyboard/Left
-Right = Keyboard/Right
-Cross = Keyboard/X
-Circle = Keyboard/C
-Square = Keyboard/Z
-Triangle = Keyboard/V
-Start = Keyboard/Return
+Up = Keyboard/UpArrow
+Down = Keyboard/DownArrow
+Left = Keyboard/LeftArrow
+Right = Keyboard/RightArrow
+Cross = Keyboard/K
+Circle = Keyboard/L
+Square = Keyboard/J
+Triangle = Keyboard/I
+Start = Keyboard/Q
 Select = Keyboard/Backspace
 L1 = Keyboard/Q
 R1 = Keyboard/E
@@ -165,8 +238,13 @@ LoadSelectedSaveState = Keyboard/F1
 SaveSelectedSaveState = Keyboard/F2
 SelectPreviousSaveStateSlot = Keyboard/F3
 SelectNextSaveStateSlot = Keyboard/F4
-TogglePause = Keyboard/Space
+TogglePause = Keyboard/F9
 INI
+
+# Substituted rather than interpolated: the heredoc is quoted so that no
+# binding can be eaten by shell expansion, and one knob is not worth
+# unquoting it for.
+sed -i "s#^Type = AnalogController\$#Type = $PAD_TYPE#" "$DS/settings.ini"
 
 kill_leftovers
 sleep 1

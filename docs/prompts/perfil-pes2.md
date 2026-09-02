@@ -143,7 +143,7 @@ python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 tools/pes2/run_duckstation.sh        # sobe o jogo no :98, isolado; --kill encerra
 tools/pes2/boot_check.sh             # mede que ele botou -- janela, quadro vivo, dois quadros diferentes
-tools/pes2/drive.sh "<copia.cue>" --screen title --out-dir <dir>   # rota nomeada e captura
+python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --out-dir <dir>
 
 ctest --test-dir build -R pes2       # pes2_selftest, pes2_image, pes2_boot
 ```

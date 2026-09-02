@@ -34,9 +34,9 @@ estreita. Começar deste ciclo, e não daquele achado.
 `tools/pes2/card_diff.py`, mais o roteiro de emulador que o alimenta.
 
 ```
-tools/pes2/drive.sh <copia> --screen edit-player --save-card <scratch>/antes.mcd
+python3 tools/pes2/drive.py <copia> --screen edit-player --save-card <scratch>/antes.mcd
 # … edita um atributo na tela …
-tools/pes2/drive.sh … --save-card <scratch>/depois.mcd
+python3 tools/pes2/drive.py … --save-card <scratch>/depois.mcd
 python3 tools/pes2/card_diff.py <scratch>/antes.mcd <scratch>/depois.mcd
 ```
 

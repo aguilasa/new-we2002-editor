@@ -1598,7 +1598,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Treze armadilhas ao dirigir o DuckStation
+### 6.11 Vinte armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1611,11 +1611,13 @@ aponta para o lugar errado.
    travando.
 3. **Não existe `-renderer` na linha de comando.** Sem GPU no Xvfb, o
    `Renderer = Software` tem de ir para o `settings.ini`.
-4. **Um `settings.ini` escrito à mão não tem binding nenhum**, e o
-   DuckStation não cria os de teclado sozinho. Toda tecla é descartada em
-   silêncio e o jogo fica no laço de atração para sempre — parece que o
-   `xdotool` não funciona. (A configuração do usuário desta máquina só tem
-   binding de gamepad SDL, então copiá-la não resolve.)
+4. **O `settings.ini` que o lançador escreve nunca foi lido** — e isto aqui
+   dizia outra coisa até 2026-09-02. A leitura antiga era "um `settings.ini`
+   escrito à mão não tem binding nenhum, então declare `[Pad1]`"; o
+   `[Pad1]` foi declarado e continuou sem efeito. A causa está na armadilha
+   14. Enquanto ela não for resolvida, **quem manda é o `settings.ini` do
+   próprio usuário**, e é dele que o `drive.py` lê os bindings.
+
 5. **A janela nasce fora da tela.** Sem window manager ninguém a posiciona,
    e ela escolheu `x=2480` num display de 1280. O `import` falha com
    `Resource temporarily unavailable`, que é a mesma mensagem de janela
@@ -1649,11 +1651,13 @@ aponta para o lugar errado.
     sexta casa decimal, e um `keydown` / **1 s** / `keyup` entrou. Um jogo de
     PSX lê o pad uma vez por quadro, e um toque cai inteiro entre duas
     leituras. Com 0,4 s ainda não basta.
-11. **Um `settings.ini` escrito à mão não vincula hotkey nenhuma**, pelo mesmo
-    motivo que já valia para `[Pad1]` na armadilha 4 — e sem `[Hotkeys]` o
-    fast-forward, o save state e o load state simplesmente não existem. Com
-    `FastForward = Keyboard/Tab` **mantido**, os cerca de dois minutos de
-    `MOVIE/WE2002.STR` viram 25 segundos, o que muda o custo de toda rota.
+11. **O fast-forward corta a abertura de dois minutos para 25 segundos**, e
+    é o único jeito de passar dela: `Cross` **não** pula o vídeo — vinte e
+    quatro pressionamentos ao longo de oitenta segundos deixaram o FMV
+    correndo. `Tab` é o binding *default* do DuckStation, o que é a razão de
+    ele ter funcionado durante todo o período em que o arquivo de
+    configuração era ignorado (armadilha 14).
+
 12. **A Citrix não é a culpada aqui, e a suspeita custa caro.** A
     `libAppProtection.so` do `/etc/ld.so.preload` exporta `XNextEvent`,
     `XPeekEvent`, `xcb_poll_for_event`, `xcb_wait_for_event` e
@@ -1668,6 +1672,51 @@ aponta para o lugar errado.
     lido — e o sintoma é um `unexpected EOF while looking for matching "`
     numa linha que está perfeita em disco. Custou uma corrida de dois minutos
     e uma investigação de sintaxe que não tinha o que achar.
+
+14. **`XDG_DATA_HOME` não isola este AppImage, e acreditar que isolava custou
+    um dia.** Ele resolve o diretório de dados a partir do **`$HOME`**, então
+    toda corrida até 2026-09-02 usou `~/.local/share/duckstation` — o do
+    usuário. A prova é de uma linha: `StartFullscreen = true` no arquivo que
+    o lançador escreve, e a janela sai com 800×655. Consequências medidas:
+    nosso `[Pad1]` nunca valeu, dois save states nossos foram parar no
+    diretório do usuário, e o `F2` que parecia não gravar **gravava** — no
+    lugar errado. O cartão de memória do usuário não foi tocado (digest
+    conferido antes e depois). Sobrescrever `HOME` isola de verdade, mas aí
+    o primeiro boot para no assistente de configuração (armadilha 20).
+15. **Tecla que funciona não prova que a configuração foi lida.** `Tab`,
+    `Enter` e as quatro setas funcionaram o tempo todo — porque são
+    **defaults** do DuckStation, não porque o arquivo tivesse efeito. A
+    tabela de defaults está no próprio binário e sai com
+    `strings`: `UpArrow`, `DownArrow`, `LeftArrow`, `RightArrow`, `Enter`,
+    `Backspace`, `Space`, `Escape`, `Tab`, `F1`–`F4`, `F10`, `F11`, os
+    dígitos `1`–`4` e as letras `A D E F G H I J K L Q S T W`. Para saber se
+    o arquivo vale, mude algo que **não** seja default e confira o efeito.
+16. **São dois espaços de nomes de tecla, e eles discordam.** O valor no
+    `settings.ini` é o nome do DuckStation; o que o `xdotool` manda é keysym
+    do X. `UpArrow` contra `Up`, `Enter` contra `Return`, `Backspace` contra
+    `BackSpace`. Manter os dois numa tabela só está errado em um dos lados.
+17. **A tela de título aceita `Start`, não `Cross`.** Cinco `Cross` nela não
+    mudaram nada — o quadro seguia idêntico até a sexta decimal — e o preto
+    que vinha depois era a tela expirando sozinha para o laço de atração,
+    não o botão. Com `Start` ela sai na hora. E o título é **passageiro**:
+    entre reconhecê-lo e capturá-lo cabe um `import`, e num deles a média
+    caiu de 0,550 para 0,197 nesse intervalo — pressione antes de capturar.
+18. **Um pressionamento não basta, e o segundo não é desperdício.** Uma tela
+    recém-desvanecida engole o primeiro: na tela de idioma o mesmo `Down`
+    registrou na primeira tentativa numa corrida e só na **quinta** noutra.
+    Rota que pressiona uma vez e conclui "o botão não funciona" está medindo
+    o fade, não o binding.
+19. **Hotkey ganha de binding de pad.** `Keyboard/Space` é nome válido e é a
+    tecla de pausa do DuckStation: ligar `Cross` nela **pausa o emulador** em
+    vez de apertar botão. O sintoma engana — todo quadro seguinte fica
+    idêntico, que é exatamente como "o jogo travou" se parece —, e o que
+    denuncia é o glifo de pausa no canto da captura.
+20. **Um diretório de dados virgem para no assistente de configuração**, e
+    `SetupWizardIncomplete = false` não pula. Medido com a bandeira presente,
+    com os `resources/` semeados de uma instalação que funciona e com o BIOS
+    como arquivo de verdade em vez de link: as nove páginas sobem do mesmo
+    jeito e nenhuma janela de jogo aparece atrás delas. É o que mantém a
+    armadilha 14 em aberto.
 
 ---
 

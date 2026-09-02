@@ -41,7 +41,7 @@ Provar, com captura de tela, que:
 cp -r "roms/…(EsIt)" <scratch>/pes2-poke/          # 571 MiB, as oito faixas
 python3 tools/pes2/poke.py <scratch>/…/…(Track 1).bin --team <PIEMONTE> --name PIEMONTE2 --dry-run
 python3 tools/pes2/poke.py <scratch>/…/…(Track 1).bin --team <PIEMONTE> --name PIEMONTE2
-tools/pes2/drive.sh <scratch>/…/…(Track 1).bin --screen team-select,result,replay --out-dir <scratch>/shots/
+python3 tools/pes2/drive.py <scratch>/…/…(Track 1).bin --screen team-select,result,replay --out-dir <scratch>/shots/
 ```
 
 **`PIEMONTE2` tem 9 caracteres, como `PIEMONTE` tem 8** — cabe no slot

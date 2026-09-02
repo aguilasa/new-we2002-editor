@@ -224,6 +224,20 @@ def main():
                  not leaked, f"still open: {leaked}")
     del tb
 
+    # The frame comparison the emulator driver is built on, exercised with
+    # no emulator in sight -- which is exactly what the shell version it
+    # replaced could not do, and why the region comparison that finally
+    # told two screens apart had no test behind it for a day.
+    try:
+        import drive                                          # noqa: E402
+        drive.self_check()
+        bad += check("drive.py frame logic", True)
+    except drive.Skip as why:                                 # noqa: F821
+        print(f"  ..   drive.py frame logic skipped: {why}")
+    except Exception as exc:                                  # noqa: BLE001
+        bad += check("drive.py frame logic", False,
+                     f"{type(exc).__name__}: {exc}")
+
     os.remove(path)
     os.remove(truncated)
     os.rmdir(tmp)
