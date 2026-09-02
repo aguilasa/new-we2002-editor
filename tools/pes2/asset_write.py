@@ -41,6 +41,7 @@ not Konami's and never reproduces her output.
     python3 tools/pes2/asset_write.py import   <copy.bin> --file P --entry N --png F
     python3 tools/pes2/asset_write.py palette  <copy.bin> --file P --clut N --index I --rgb R,G,B
     python3 tools/pes2/asset_write.py negative <copy.bin> --file P --entry N
+    python3 tools/pes2/asset_write.py budget   <copy.bin> [--file P] -v
 """
 
 import argparse
@@ -369,6 +370,55 @@ def cmd_negative(args):
     return 0
 
 
+def cmd_budget(args):
+    """Per entry: what Konami spent, what we spend, and the room there is.
+
+    It exists because the number it prints went into the plan once from a
+    listing that was filtered for screen -- `if i < 4 or ok` -- which hid
+    the one entry of LOGO.BIN that overruns, and the doc said 10 of 13
+    where the truth is 9. A count belongs to a command that prints the
+    total, not to whoever reads the rows.
+    """
+    fits = total = 0
+    slack_lo = slack_hi = None
+    with Image(args.image) as img:
+        paths = [args.file] if args.file else [
+            p for p in sorted(img.files)
+            if p.startswith("/BIN/") and img.is_form1(p)]
+        for path in paths:
+            data = img.read_file(path)
+            recs = [e for e in BA.entries(data) if e.is_image]
+            if not recs:
+                continue
+            try:
+                bpp = depth_for(data, recs[0], getattr(args, "bpp", None))
+            except Refused as exc:
+                if args.verbose:
+                    print(f"{path:22s} skipped: {exc}")
+                continue
+            for i, e in enumerate(recs):
+                try:
+                    plain, used = BA.read_image(data, e)
+                except lzss.LzssError:
+                    continue
+                again = lzss.compress(plain)
+                room = entry_room(data, e)
+                slack = room - used
+                slack_lo = slack if slack_lo is None else min(slack_lo, slack)
+                slack_hi = slack if slack_hi is None else max(slack_hi, slack)
+                ok = len(again) <= room
+                total += 1
+                fits += ok
+                if args.verbose or args.file:
+                    print(f"{path:22s} {i:3d}  konami {used:6d}  ours "
+                          f"{len(again):6d}  room {room:6d}  slack {slack:3d}  "
+                          + ("fits" if ok else f"OVER by {len(again) - room}"))
+    print(f"{fits} of {total} entries re-encode inside their own budget; "
+          f"{total - fits} do not")
+    print(f"slack (room minus the original stream): {slack_lo}..{slack_hi} bytes")
+    return 0
+
+
 def cmd_check(args):
     """Everything this tool promises, on a copy, then put back.
 
@@ -478,12 +528,17 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in (("save", cmd_save), ("export", cmd_export),
                      ("import", cmd_import), ("palette", cmd_palette),
-                     ("negative", cmd_negative), ("check", cmd_check)):
+                     ("negative", cmd_negative), ("budget", cmd_budget),
+                     ("check", cmd_check)):
         p = sub.add_parser(name)
         p.add_argument("image")
+        if name == "budget":
+            p.add_argument("--file", metavar="PATH")
+            p.add_argument("--bpp", type=int, choices=(4, 8))
+            p.add_argument("-v", "--verbose", action="store_true")
         if name == "check":
             p.add_argument("--tmpdir", required=True)
-        if name not in ("save", "check"):
+        if name not in ("save", "check", "budget"):
             p.add_argument("--file", required=True, metavar="PATH")
         if name in ("export", "import", "negative"):
             p.add_argument("--entry", type=int, default=0)

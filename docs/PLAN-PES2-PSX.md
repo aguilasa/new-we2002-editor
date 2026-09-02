@@ -875,15 +875,21 @@ tocada, confere antes de escrever e recusa o que não couber.
 `iso.py write_file` recusa qualquer mudança de comprimento. O que morde é o da
 **entrada**: a distância do offset de um fluxo até o próximo registro ou
 próximo fluxo, o que vier antes. E ele é apertadíssimo — a folga medida nas
-entradas de `TITLE.BIN` e `LOGO.BIN` é de **0 a 4 bytes**.
+entradas de `TITLE.BIN` e `LOGO.BIN` é de **0 a 3 bytes**.
 
 Consequência que um editor precisa saber antes de prometer round-trip:
 **reimportar a imagem exportada sem alterar nada é recusado em algumas
 entradas.** `TITLE.BIN` entrada 0 pede 7.858 B e tem 7.836 — 22 acima. Não é
 defeito: é o compressor daqui não ser o da Konami, o que a §5c já media no
 agregado (−0,8% no `T_NAME_I`) e que por entrada vai para os dois lados. Das
-13 entradas de `TITLE.BIN` e `LOGO.BIN`, **10 recomprimem dentro do próprio
-orçamento e 3 não**.
+13 entradas de `TITLE.BIN` e `LOGO.BIN`, **9 recomprimem dentro do próprio
+orçamento e 4 não**.
+
+Os dois números saem de `python3 tools/pes2/asset_write.py budget <copia.bin>
+--file <contêiner>`, que imprime a conta e a faixa de folga. Ele existe porque
+a primeira versão desta seção dizia *10 de 13* e *0 a 4*: veio de uma listagem
+filtrada para caber na tela, que escondia a entrada 8 do `LOGO.BIN` — 1.081
+bytes contra 1.076 de folga (CORR-PES2-018).
 
 O que o gravador garante, e o `check` afirma a cada corrida:
 

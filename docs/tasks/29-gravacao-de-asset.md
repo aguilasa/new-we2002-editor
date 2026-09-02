@@ -141,14 +141,16 @@ markdown definia orçamento como "tamanho original arredondado até o fim do
 qualquer mudança de comprimento. O que morde é o da **entrada** — a distância
 do offset do fluxo até o próximo registro ou próximo fluxo, o que vier antes —
 e ele é apertadíssimo: a folga medida nas entradas de `TITLE.BIN` e `LOGO.BIN`
-é de **0 a 4 bytes**. Os dois são conferidos, o da entrada primeiro.
+é de **0 a 3 bytes**. Os dois são conferidos, o da entrada primeiro.
 
 **A consequência que um editor precisa saber antes de prometer round-trip:**
 reimportar o PNG exportado **sem alterar nada** é recusado em algumas
 entradas. `TITLE.BIN` entrada 0 pede 7.858 B e tem 7.836 — 22 acima. Não é
 defeito; é o compressor daqui não ser o da Konami. Das 13 entradas de
-`TITLE.BIN` e `LOGO.BIN`, **10 recomprimem dentro do próprio orçamento e 3
-não**.
+`TITLE.BIN` e `LOGO.BIN`, **9 recomprimem dentro do próprio orçamento e 4
+não**. *(Os dois números foram corrigidos pela CORR-PES2-018: a primeira
+redação dizia 10 de 13 e folga de 0 a 4, lidos de uma listagem filtrada para a
+tela. Agora saem de `asset_write.py budget`.)*
 
 **A divergência de EDC/ECC, resolvida por medição.** A §5(b) do
 `PLAN-FEATURES` mandava recalcular, a §6.7 mandava preservar. Duas medidas

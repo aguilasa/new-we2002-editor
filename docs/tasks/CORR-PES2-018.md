@@ -3,7 +3,7 @@ id: CORR-PES2-018
 title: "Correção: são 9 de 13 entradas que recomprimem no orçamento, não 10 de 3, e a folga vai a 3 bytes, não 4"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -91,12 +91,32 @@ passaram a sair do subcomando novo.
 - [ ] `ctest --test-dir build -R pes2` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** `asset_write.py` ganhou o subcomando `budget`, que
+imprime por entrada `konami / ours / room / slack` e fecha com a conta e a
+faixa de folga. Com ele, medido:
 
-**Problemas encontrados:**
+```
+$ python3 tools/pes2/asset_write.py budget <copia> --file /BIN/TITLE.BIN
+2 of 4 entries re-encode inside their own budget; 2 do not
+slack (room minus the original stream): 0..3 bytes
+$ python3 tools/pes2/asset_write.py budget <copia> --file /BIN/LOGO.BIN
+7 of 9 entries re-encode inside their own budget; 2 do not
+slack (room minus the original stream): 0..3 bytes
+```
 
-**Arquivos criados/modificados:**
+Conjunto: **9 de 13** cabem, **4** não, folga **0..3**. Os dois números foram
+corrigidos na §1.14(g) do plano e no Log da PES2-TASK-29, com a nota de onde
+passam a sair.
+
+**Problemas encontrados:** nenhum além do já descrito. Vale registrar a forma
+do erro, que é reutilizável: o laço original imprimia `if i < 4 or ok`, de modo
+que a única entrada que estourava depois da quarta — a 8 do `LOGO.BIN`, 1.081
+contra 1.076 — nunca apareceu, e a soma foi feita sobre o que a tela mostrava.
+Filtro de impressão é um jeito silencioso de mentir numa contagem.
+
+**Arquivos criados/modificados:** `tools/pes2/asset_write.py`,
+`docs/PLAN-PES2-PSX.md`, `docs/tasks/29-gravacao-de-asset.md`.
