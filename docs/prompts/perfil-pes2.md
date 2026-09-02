@@ -248,3 +248,35 @@ foi quebrada, não reexecutá-las.
   do git e o número no doc?
 - Alguma coisa em `src/` passou a saber o que é PES2? **Não deve** (§6.9)
 - Algum quadro do jogo ou trecho de `roms/` foi versionado? **Não deve**
+
+**Fase 7 (tasks 26 a 31) — os assets do disco:**
+
+A fase entrou no quadro em 2026-09-01, junto com a §1.14 do plano, e estas
+perguntas saem do que as tasks já executadas mostraram valer.
+
+- A medição foi feita nos **quatro** discos — as duas releases de PES2 e as
+  duas imagens de WE2002 — ou numa só? O formato é o mesmo nos quatro, e é
+  isso que a §1.14 afirma (§1.14(e), (f))
+- O que a ferramenta trata como índice é o **registro de entrada**, e não a
+  varredura de ressincronização do codec? Onde as duas discordam, o registro
+  ganha — em `TEX_01.BIN` a varredura começa um fluxo 8 bytes antes e rende
+  16.381 em vez de 16.384 (§1.14(f))
+- A **profundidade** veio da largura do CLUT, e não de um palpite por arquivo?
+  O `DAT2D.BIN` tem 261 paletas de 16 cores contra 5 de 256, e um voto por
+  arquivo dá a resposta errada em silêncio, porque a contagem de bytes é a
+  mesma nas duas profundidades (CORR-PES2-016)
+- Gravação: os **dois** orçamentos foram conferidos — o do extent e o da
+  **entrada** — e o da entrada primeiro? É ele que morde: a folga medida é de
+  poucos bytes, e algumas entradas não recomprimem nem sem alteração (§1.14(g))
+- A validação de import recusa **profundidade e paleta** divergentes, não só
+  dimensão? Um retângulo de VRAM tem a mesma largura em pixels a 4 e a 8 bpp,
+  então dimensão igual não quer dizer slot compatível (CORR-PES2-019)
+- **EDC/ECC preservado**, com a cauda de 280 B conferida byte a byte, e o
+  recálculo fora do caminho de gravação? (§6.7)
+- O conjunto de cópias do asset foi **varrido por conteúdo**, nunca declarado
+  por sufixo de nome? O sufixo não sobrevive à troca de release (§6.12)
+- Toda guarda nova foi vista **ficando vermelha**, ou só passou verde? Verde
+  que nunca pôde ser vermelho é decoração — foi o que a CORR-PES2-009 cobrou
+  no `lzss.py` e a CORR-PES2-020 no gravador
+- Quadro do jogo **fora** do git; o que entra é o comando que o produz e o
+  número medido

@@ -3,7 +3,7 @@ id: CORR-PES2-017
 title: "Correção: o perfil do ciclo não tem seção de Fase 7, e a Fase 7 já teve quatro tasks executadas"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -85,12 +85,19 @@ tasks já executadas mostraram valer. Sugestão, a confirmar por quem executar:
 - [ ] `python3 tools/check_tasks.py` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-01
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** o `perfil-pes2.md` ganhou a seção **Fase 7 (tasks
+26 a 31) — os assets do disco**, depois da Fase 6. As nove perguntas saem do
+que as quatro tasks já executadas mostraram valer, e cada uma cita a seção ou a
+CORR que a originou: os quatro discos, o registro contra a varredura, a
+profundidade pela largura do CLUT, os dois orçamentos, a validação de import,
+o EDC/ECC, o conjunto de cópias por conteúdo, a guarda vista em vermelho, e o
+quadro fora do git.
 
-**Problemas encontrados:**
+**Problemas encontrados:** nenhum. A seção era o único buraco; as Fases 2 a 6
+já estavam escritas.
 
-**Arquivos criados/modificados:**
+**Arquivos criados/modificados:** `docs/prompts/perfil-pes2.md`.
