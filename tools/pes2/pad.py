@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Send one pad action to an already-running DuckStation, and look at it.
 
-`drive.py` runs a whole route and shuts the emulator down after it. This is
-for the other way of working: the emulator stays up -- on the user's own
+`mcp_drive.py` runs a whole route and shuts the emulator down after it. This
+is for the other way of working: the emulator stays up -- on the user's own
 display, where they can see it -- and one action is sent at a time, with a
 person deciding the next one. It is what the routes get written *from*.
 
-    tools/pes2/run_duckstation.sh            # PES2_DISPLAY=:1, leaves it up
+    tools/pes2/fork.py launch <copy.cue>     # or start it by hand
     python3 tools/pes2/pad.py press cross
     python3 tools/pes2/pad.py press down down cross
     python3 tools/pes2/pad.py shot /tmp/a.png
@@ -16,106 +16,86 @@ person deciding the next one. It is what the routes get written *from*.
                                                # give every kickoff
 
 Buttons are pad names -- cross, circle, square, triangle, start, select,
-up, down, left, right, l1, r1 -- plus the hotkeys fast-forward, save-state,
-load-state and pause. The keys they map to are read from the emulator's own
-configuration, and the press is held for as long as that kind of button
-needs; both are drive.py's doing and neither is guessable.
+up, down, left, right, l1, l2, r1, r2, l3, r3.
 
-    PES2_DISPLAY   which display to talk to, default :98
-    PES2_WINDOW    window id, if the search finds the wrong one
+**Ported from `xdotool` to MCP on 2026-09-03**, and three things went away
+with it rather than being reimplemented:
+
+* **The display stopped mattering.** This used to find the game window,
+  then find the *client* inside it, because on a display with a window
+  manager the search returns the frame and capturing that gives 894x785
+  instead of 800x655 -- which silently invalidated every crop measured on
+  the headless display. The emulator hands over its own frame buffer now,
+  so there is no window to find and no frame to mistake for it. `:1` and
+  `:98` are the same code path.
+* **The key bindings stopped mattering.** They were read out of the user's
+  `settings.ini` and translated from DuckStation's names to X keysyms,
+  because declaring them had already failed once. `press_button` takes the
+  pad button by name.
+* **The press duration stopped being a guess.** A face button was held 1.0 s
+  and a direction 0.15 s, both calibrated by trial against the game's own
+  auto-repeat. `duration_frames` is counted by the emulator.
+
+    PES2_MCP_PORT   the server's port, default 2346
 """
 
 import os
-import subprocess
 import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+
 import drive                                                  # noqa: E402
+from mcp import Client, NotRunning                            # noqa: E402
 
-
-def env_for(display):
-    env = dict(os.environ, DISPLAY=display)
-    # Same split as the launcher: the headless server has no cookie, the
-    # user's own display does and needs it.
-    if display == ":98":
-        env["XAUTHORITY"] = ""
-    return env
-
-
-def client_of(window, env):
-    """The window the game actually draws into.
-
-    On a display with a window manager the search finds the *frame*, and
-    capturing that includes the title bar: 894x785 instead of 800x655, which
-    silently invalidates every crop measured on the headless display -- the
-    clock and the top band both land on the wrong pixels. The client is a
-    child with the same name.
-    """
-    out = subprocess.run(["xwininfo", "-id", window, "-children"],
-                         env=env, capture_output=True, text=True).stdout
-    for line in out.splitlines():
-        line = line.strip()
-        if not line.startswith("0x") or "Pro Evolution Soccer 2" not in line:
-            continue
-        child = line.split()[0]
-        if child != window:
-            return child
-    return window
-
-
-def find_window(display):
-    if os.environ.get("PES2_WINDOW"):
-        return os.environ["PES2_WINDOW"]
-    env = env_for(display)
-    out = subprocess.run(
-        ["xdotool", "search", "--name", "^Pro Evolution Soccer 2$"],
-        env=env, capture_output=True, text=True)
-    for w in out.stdout.split():
-        pid = subprocess.run(["xprop", "-id", w, "_NET_WM_PID"], env=env,
-                             capture_output=True, text=True).stdout.split()
-        if pid and pid[-1].isdigit() and os.path.exists(f"/proc/{pid[-1]}"):
-            return client_of(w, env)
-    raise SystemExit(f"no live game window on {display} -- is it running?")
-
-
-class Live:
-    """A session that attaches instead of booting, so nothing is lost
-    between commands."""
-
-    def __init__(self, display, window):
-        self.display = display
-        self.window = window
-        self.verbose = True
-        self._tmp = "/tmp"
-
-    say = drive.Session.say
-    press = drive.Session.press
-    _aim = drive.Session._aim
-
-    def _xdotool(self, *args):
-        return subprocess.run(["xdotool", *args], env=env_for(self.display),
-                              capture_output=True, text=True)
-
-    def capture(self, path=None):
-        path = path or os.path.join(
-            "/tmp", f"pes2-live-{time.time():.3f}.png")
-        r = subprocess.run(["import", "-window", self.window, path],
-                           env=env_for(self.display), capture_output=True,
-                           text=True)
-        if r.returncode != 0 or not os.path.exists(path):
-            raise SystemExit(f"capture failed: {r.stderr.strip()}")
-        return drive.Frame(path)
-
+BUTTONS = ("cross", "circle", "square", "triangle", "up", "down", "left",
+           "right", "l1", "l2", "r1", "r2", "start", "select", "l3", "r3")
 
 BAND = (0, 60, 800, 200)          # the strip that tells kickoff apart
 CLOCK = (560, 90, 760, 130)       # the match clock
 
+# Same numbers as the routes: three frames down, seventeen to act on it.
+PRESS_FRAMES = 3
+AFTER_FRAMES = 17
+
+
+class Live:
+    """An emulator someone else started, left running between commands."""
+
+    def __init__(self, client):
+        self.client = client
+
+    def press(self, button, frames=PRESS_FRAMES, after=AFTER_FRAMES):
+        """One button, held for an exact number of the game's own frames.
+
+        Paused around the press so that the count means something; the
+        caller resumes if it wants the game to carry on.
+        """
+        self.client.call("pause")
+        self.client.call("press_button", button=button.capitalize(),
+                         duration_frames=frames)
+        for _ in range(frames + after):
+            self.client.call("frame_step")
+
+    def resume(self):
+        self.client.call("continue")
+
+    def capture(self, path=None):
+        path = path or f"/tmp/pes2-live-{time.time():.3f}.png"
+        self.client.call("take_screenshot", path=path)
+        if not os.path.exists(path):
+            raise SystemExit(f"the emulator reported a screenshot at {path} "
+                             f"and there is no file there")
+        return drive.Frame(path)
+
+    def fast_forward(self, on):
+        self.client.call("set_speed", fast_forward=bool(on))
+
 
 def describe(frame):
     if frame.size != (800, 655):
-        print(f"  aviso: janela {frame.size[0]}x{frame.size[1]}, nao 800x655"
+        print(f"  aviso: quadro {frame.size[0]}x{frame.size[1]}, nao 800x655"
               f" -- os recortes do relogio e da faixa nao valem",
               file=sys.stderr)
     m, sd = frame.stats()
@@ -128,25 +108,32 @@ def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
         return 0
-    display = os.environ.get("PES2_DISPLAY", ":98")
-    window = find_window(display)
-    live = Live(display, window)
+
+    try:
+        client = Client()
+        client.initialize()
+    except NotRunning as e:
+        print(f"{e}", file=sys.stderr)
+        return 77
+
+    live = Live(client)
     cmd, rest = argv[0], argv[1:]
 
     if cmd == "press":
         if not rest:
             raise SystemExit("press what? see --help for the button names")
         for button in rest:
-            if button not in drive.PAD and button not in drive.HOTKEY:
+            if button.lower() not in BUTTONS:
                 raise SystemExit(f"unknown button {button!r}")
         for button in rest:
-            live.press(button)
-            time.sleep(0.8)
+            live.press(button.lower())
+        live.resume()
+        time.sleep(0.5)
         print(describe(live.capture()))
 
     elif cmd == "shot":
         path = rest[0] if rest else "/tmp/pes2.png"
-        frame = live.capture(path)
+        frame = live.capture(os.path.abspath(path))
         print(f"{path}\n{describe(frame)}")
 
     elif cmd == "stats":
@@ -164,18 +151,19 @@ def main(argv):
 
     elif cmd == "run":
         # Acelerar e esperar nao termina uma partida: **todo gol devolve um
-        # saque que espera Cross**, e uma corrida que so segura o Tab para
-        # no primeiro gol parecendo que a partida nao acaba -- foi assim que
-        # um "onze minutos de fast-forward nao terminaram a partida" entrou
-        # num documento. Medido em 2026-09-02 com o usuario olhando a tela.
+        # saque que espera Cross**, e uma corrida que so segura o
+        # fast-forward para no primeiro gol parecendo que a partida nao
+        # acaba -- foi assim que um "onze minutos de fast-forward nao
+        # terminaram a partida" entrou num documento. Medido em 2026-09-02
+        # com o usuario olhando a tela, e o caso continua existindo aqui:
+        # o que mudou e que o fast-forward agora e uma chamada e nao um
+        # `keydown` que precisa de um `keyup` num `finally`.
         budget = float(rest[0]) if rest else 600
-        key = drive.HOTKEY["fast-forward"]
-        live._aim()
-        live._xdotool("keydown", key)
-        held = True
         t0 = time.time()
         passes = 0
         try:
+            live.fast_forward(True)
+            live.resume()
             previous = live.capture()
             while time.time() - t0 < budget:
                 time.sleep(6)
@@ -187,23 +175,19 @@ def main(argv):
                           f"sd={sd:.4f}", flush=True)
                     break
                 if current.difference(previous, CLOCK) < 0.001:
-                    live._xdotool("keyup", key)
-                    held = False
                     live.press("cross")
                     passes += 1
                     print(f"  {elapsed}s: congelado -> Cross ({passes})",
                           flush=True)
+                    live.resume()
                     time.sleep(2)
-                    live._aim()
-                    live._xdotool("keydown", key)
-                    held = True
                     current = live.capture()
                 previous = current
             else:
                 print(f"  ainda no gramado apos {int(budget)}s", flush=True)
         finally:
-            if held:
-                live._xdotool("keyup", key)
+            live.fast_forward(False)
+            live.resume()
         print(f"  {passes} saque(s) dado(s)")
         print(describe(live.capture()))
 

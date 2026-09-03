@@ -76,7 +76,7 @@ PES2-TASK-22.
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
 | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | ✅ Concluído |
 | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | 32 | ✅ Concluído | 2026-09-03 | ✅ Concluído |
-| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | 33 | ⬜ Pendente | — | — |
+| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | 33 | ✅ Concluído | 2026-09-03 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -113,9 +113,16 @@ pergunta diferente:
    por causa dos fluxos de engenharia reversa, e sim do fluxo F — dirigir o
    jogo. Com `pause` + `frame_step`, cinco teclas são cinco linhas; por
    `xdotool` num display sem window manager, são uma aposta. O que isso
-   arrasta está na §6.14 e é a [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+   arrasta está na §6.14 e foi a [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
 
-**A Fase 0 deixou de estar fechada** com a 34, e fecha quando ela fechar.
+**A Fase 0 voltou a estar fechada** com a 34, em 2026-09-03. E ela mediu uma
+coisa que nenhuma das três decisões previa: **as assinaturas de quadro não se
+moveram por causa do fork.** Toda média sobreviveu à troca de binário; o
+desvio da tela de título não reproduz em binário nenhum, nem no AppImage
+intocado, e a causa continua não identificada. O par saiu de critério por
+isso — um número que não se reproduz um dia depois no mesmo binário não é
+critério — e no lugar dele entrou a asserção que contar quadro permite: uma
+tecla a mais na lista **falha**, em vez de confirmar o item errado.
 
 **A Fase 2 entra com um item só.** A varredura, as contagens, os digests e a
 correspondência entre as oito listas estão feitos; falta o `poke` de

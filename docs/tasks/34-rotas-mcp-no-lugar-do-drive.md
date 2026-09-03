@@ -6,7 +6,7 @@ category: ferramental
 phase: 0
 depends_on: [PES2-TASK-33]
 fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §6.14 (fluxo F)"
-status: pendente
+status: concluído
 ---
 
 # PES2-TASK-34: Rotas MCP no lugar do `drive.py`
@@ -167,35 +167,35 @@ o que é uma pegadinha a registrar junto das do lançador.
 
 ## Critério de conclusão
 
-- [ ] Um cliente MCP versionado em `tools/pes2/`, com `initialize`, sessão e
+- [x] Um cliente MCP versionado em `tools/pes2/`, com `initialize`, sessão e
       `tools/call`, e um caso vermelho para servidor ausente que diga
       "o fork não está rodando" em vez de despejar um traceback de `urllib`.
-- [ ] Um lançador do fork que dispensa o aviso de build não-oficial e espera
+- [x] Um lançador do fork que dispensa o aviso de build não-oficial e espera
       a porta, com as três falhas acima distinguidas na mensagem.
-- [ ] As quatro rotas do `drive.py` — `title`, `main-menu`, `team-select`,
+- [x] As quatro rotas do `drive.py` — `title`, `main-menu`, `team-select`,
       `edit` — reproduzidas por MCP, **e a comparação medida** contra as
       atuais: tempo de relógio e número de tentativas até a tela.
-- [ ] Pelo menos uma rota que hoje espera por assinatura de quadro passando a
+- [x] Pelo menos uma rota que hoje espera por assinatura de quadro passando a
       contar quadros, com a asserção que isso permite escrita como caso
       vermelho: uma tecla a mais deve **falhar**, não passar despercebida.
-- [ ] As assinaturas de quadro do fork medidas contra as do AppImage, e o
+- [x] As assinaturas de quadro do fork medidas contra as do AppImage, e o
       resultado escrito na §6.14 — remedidas, ou aposentadas como critério
       com o motivo.
-- [ ] O lugar definitivo do binário do fork combinado com o usuário, e a
+- [x] O lugar definitivo do binário do fork combinado com o usuário, e a
       receita de reconstruí-lo fora do Log de uma task concluída.
-- [ ] O `pes2_boot` continua verde, e o log diz **contra qual binário** ele
+- [x] O `pes2_boot` continua verde, e o log diz **contra qual binário** ele
       correu. Se a decisão for o fork, ele foi remedido; se for conviver, o
       gate diz qual dos dois julga.
-- [ ] O `pad.py` — que é a ferramenta de trabalhar **junto com o usuário**,
+- [x] O `pad.py` — que é a ferramenta de trabalhar **junto com o usuário**,
       no `:1` — decidido: portado, mantido em `xdotool` ou aposentado. Ele
       tem um caso que as rotas não têm, o `run` que dá `Cross` em cada saque,
       e esse caso tem de continuar existindo em alguma forma.
-- [ ] As armadilhas novas na §6.11, com a contagem da seção **recontada**, não
+- [x] As armadilhas novas na §6.11, com a contagem da seção **recontada**, não
       incrementada de cabeça — ela já envelheceu duas vezes (§6.14 dizia
       "vinte", o perfil dizia "treze", e o `awk` contava 26).
-- [ ] `.mcp.json` decidido: commitado com o escopo justificado, ou removido em
+- [x] `.mcp.json` decidido: commitado com o escopo justificado, ou removido em
       favor de escopo local, com o motivo escrito.
-- [ ] Nada do fork no repositório. Sobre cópia, sempre — `roms/` intocada.
+- [x] Nada do fork no repositório. Sobre cópia, sempre — `roms/` intocada.
 
 ---
 
@@ -220,4 +220,95 @@ o que é uma pegadinha a registrar junto das do lançador.
 
 ## Log de Execução
 
-<!-- preenchido por quem executar -->
+**Executado em:** 2026-09-03
+
+## Resumo do que foi feito
+
+As quatro rotas passaram a ser dirigidas por MCP, e o que a task esperava
+provar sobre as assinaturas de quadro **saiu diferente do previsto**. A
+premissa era "trocar de binário invalida as assinaturas"; o que se mediu é
+que **toda média sobreviveu** — à troca de binário, a uma troca de
+configuração e à virada do dia — e que o **desvio da tela de título não
+reproduz em binário nenhum**: o AppImage é o mesmo arquivo de 29 de agosto,
+intocado, e hoje dá 0,3587 onde deu 0,341 anteontem. Quatro hipóteses foram
+medidas e descartadas (o fork, o caminho de captura, a escala de resolução, o
+recorte), e a causa continua não identificada. O par saiu de critério não
+porque mudou com o fork, mas porque **não se reproduz nem se explica um dia
+depois no mesmo binário** — o que é um argumento melhor do que o que a task
+tinha.
+
+No lugar dele entrou a asserção que contar quadro permite. Com o emulador
+parado entre um toque e o próximo, a mesma linha de menu difere de si mesma
+por 0,0002..0,0005 e de outra por 0,0082..0,0125 — vinte vezes de distância —,
+e sobre isso o `menu_pick` assere que **todo toque moveu** e que **nenhum caiu
+numa linha já visitada**. A segunda é o caso vermelho pedido: a lista dá a
+volta, então uma tecla a mais falha em vez de confirmar o item errado. O
+`--measure-menu` mede as sete linhas do menu e depois pede sete, o que tem de
+falhar, e falha.
+
+Cinco defeitos foram encontrados **por rodar**, não por ler, e cada um virou
+armadilha na §6.11: o `RUNPATH` absoluto que impedia o binário de achar as
+próprias bibliotecas fora da árvore de build; o filtro de `kill_leftovers`
+sensível a maiúsculas, que descartava o fork logo depois de a lista de nomes
+passar a encontrá-lo; a imobilidade exata, que só serve em tela realmente
+parada e "funciona por sorte de fatia" nas outras quatro; o teste de preto,
+que parava no splash e deixou a rota devolver `mean=0.000000` declarando
+sucesso; e o custo de 57 ms por `frame_step`, que obriga a dividir quadro para
+precisão e relógio para distância.
+
+E duas coisas que a §6.14 afirmava foram medidas e estão erradas: o diálogo
+que o fork abre é o `Automatic Updater`, não o de build não-oficial, e
+`Escape` não o fecha; e a **porta 2346 abre antes** de ele ser dispensado.
+
+## Arquivos criados/modificados
+
+- `tools/pes2/mcp.py` — **novo.** O cliente MCP, stdlib pura: `initialize`,
+  sessão por `MCP-Session-Id`, `tools/call`, decodificação de JSON e de SSE
+  de um evento, e o caso vermelho de servidor ausente.
+- `tools/pes2/fork.py` — **novo.** O lançador: acha o fork em
+  `~/Applications/duckstation-mcp/`, monta `LD_LIBRARY_PATH` e
+  `QT_PLUGIN_PATH`, dispensa o modal, espera o `initialize`, e distingue as
+  quatro falhas. `kill` alcança os três nomes de processo; `recipe` imprime
+  como reconstruí-lo; `status` diz qual binário está rodando.
+- `tools/pes2/mcp_drive.py` — **novo.** As quatro rotas por MCP, o
+  `menu_pick` que conta linhas e o `--measure-menu` que exercita o caso
+  vermelho contra o jogo vivo.
+- `tools/pes2/pad.py` — portado para MCP. Mesmos cinco comandos, incluindo o
+  `run` que dá `Cross` em cada saque.
+- `tools/pes2/boot_check.sh` — prefere o fork, cai para o AppImage, e a linha
+  final diz contra qual dos dois correu. `PES2_BINARY` força.
+- `tools/pes2/run_duckstation.sh` — o `--kill` alcança `duckstation-qt`, e o
+  filtro de `/proc/*/cmdline` ficou insensível a maiúsculas.
+- `tools/pes2/selftest.py` — os três `self_check` novos entraram no
+  `pes2_selftest`.
+- `docs/PLAN-PES2-PSX.md` — a §6.11 foi de 27 para **34** armadilhas
+  (recontadas, não incrementadas), e a §6.14 ganhou a seção de resultado
+  desta task: onde o binário mora, as assinaturas medidas, a asserção, a
+  comparação e o que ficou decidido. As duas afirmações erradas da seção
+  ficaram no lugar, com a correção medida ao lado.
+- `docs/prompts/perfil-pes2.md` — a armadilha 12, o quadro de gates e o
+  parágrafo do emulador, que agora descreve **dois** binários e diz qual
+  ferramenta usa qual.
+- `CLAUDE.md` — a tabela de ferramentas de PES2 e a nota do emulador.
+- `docs/tasks/progresso.md`, `docs/tasks/34-rotas-mcp-no-lugar-do-drive.md`.
+
+Fora do repositório, por licença: o binário do fork foi instalado em
+`~/Applications/duckstation-mcp/` (249 MB), escolhido pelo usuário.
+
+## Problemas encontrados
+
+- **A comparação de tempo exigiu as duas séries inteiras.** As quatro rotas
+  foram corridas dos dois lados na mesma máquina e no mesmo `:98`:
+  274,54 s por `xdotool` contra 116,93 s por MCP. Mas nesta corrida o
+  `drive.py` **não precisou de nenhuma repetição**, o que é sorte e é
+  justamente o ponto: uma tentativa que nem sempre é necessária não pode ser
+  assegurada. O ganho a registrar é que a coluna "tentativas" deixou de
+  existir.
+- **`pgrep -f`/`pkill -f` casou a linha de comando do próprio shell de novo**
+  — armadilha 25, agora contra `mcp_drive.py` — e matou a tarefa de fundo
+  junto. É o motivo de o `fork.running_pids()` usar `pgrep -x`.
+- **Três rotas falharam antes de fechar**, e as três por presumir imobilidade:
+  o menu principal (bola girando), a atribuição de controle (pisca entre duas
+  imagens) e a grade de bandeiras (cursor piscando). Cada uma custou uma
+  corrida.
+

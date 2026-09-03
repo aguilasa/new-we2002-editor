@@ -25,6 +25,17 @@
 #                  reference, default 0.35. Emulation is not frame-exact
 #                  across runs and the demo match never repeats, so this
 #                  is a "same screen" test, not a golden one.
+#   PES2_BINARY    `fork`, `appimage`, or unset. Unset prefers the fork and
+#                  falls back to the AppImage -- see below.
+#
+# **Which emulator this judges, and why it is not one of them.** The fork
+# `sadnescity/duckstation` is the working binary of this project since
+# 2026-09-03 (section 6.14), and it is what this prefers. The official
+# AppImage is what a third party can reproduce, and it stays as the
+# fallback. Either way the run *says which one it was*: a boot check that
+# does not name its binary cannot be compared with the one before it, and
+# the two binaries do not render the same picture -- the title screen's
+# standard deviation differs by 0.019 between them.
 #
 # Exits non-zero, loudly, on any of the checks. Exits 77 -- which ctest
 # reads as *skipped* -- when the machine cannot run it at all: no image,
@@ -41,8 +52,35 @@ skip() { echo "skipping the PES2 boot check: $*"; exit "$SKIP"; }
 
 [ -n "${PES2_IMAGE:-}" ] || skip "PES2_IMAGE is not set"
 [ -f "${PES2_IMAGE}" ]   || skip "no image at $PES2_IMAGE"
-[ -f "${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}" ] ||
-    skip "no DuckStation AppImage"
+
+# Pick the binary before anything else: which one is available decides the
+# launcher, the cleanup and the line this prints at the end.
+BINARY="${PES2_BINARY:-}"
+if [ -z "$BINARY" ]; then
+    if python3 "$HERE/fork.py" which >/dev/null 2>&1; then
+        BINARY=fork
+    else
+        BINARY=appimage
+    fi
+fi
+case "$BINARY" in
+    fork)
+        python3 "$HERE/fork.py" which >/dev/null 2>&1 ||
+            skip "no DuckStation fork -- see tools/pes2/fork.py recipe"
+        LAUNCH=(python3 "$HERE/fork.py" launch "$PES2_IMAGE")
+        KILL=(python3 "$HERE/fork.py" kill)
+        WHICH="the fork ($(python3 "$HERE/fork.py" which | head -1))"
+        ;;
+    appimage)
+        [ -f "${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage}" ] ||
+            skip "no DuckStation AppImage"
+        LAUNCH=("$HERE/run_duckstation.sh")
+        KILL=("$HERE/run_duckstation.sh" --kill)
+        WHICH="the official AppImage (${PES2_DUCKSTATION:-$HOME/Applications/DuckStation-x64.AppImage})"
+        ;;
+    *) echo "PES2_BINARY must be fork or appimage, not $BINARY" >&2; exit 1 ;;
+esac
+
 command -v import   >/dev/null || skip "ImageMagick import is missing"
 command -v identify >/dev/null || skip "ImageMagick identify is missing"
 command -v xdotool  >/dev/null || skip "xdotool is missing"
@@ -50,11 +88,11 @@ DISPLAY="${PES2_DISPLAY:-:98}" XAUTHORITY= xdotool getdisplaygeometry >/dev/null
     skip "no X server on ${PES2_DISPLAY:-:98}"
 
 mkdir -p "$SHOTDIR"
-cleanup() { "$HERE/run_duckstation.sh" --kill >/dev/null 2>&1 || true; }
+cleanup() { "${KILL[@]}" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
-echo "== launching =="
-OUT="$("$HERE/run_duckstation.sh")"
+echo "== launching $WHICH =="
+OUT="$("${LAUNCH[@]}")"
 echo "$OUT"
 WIN="$(sed -n 's/^WINDOW=//p' <<<"$OUT")"
 DPY="$(sed -n 's/^DISPLAY=//p' <<<"$OUT")"
@@ -135,6 +173,6 @@ if [ -n "$REFERENCE" ]; then
 fi
 
 if [ "$fail" -eq 0 ]; then
-    echo "BOOT OK: window ${WIN}, $(geom), two live frames in $SHOTDIR"
+    echo "BOOT OK: $WHICH, window ${WIN}, $(geom), two live frames in $SHOTDIR"
 fi
 exit "$fail"

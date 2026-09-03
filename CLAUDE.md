@@ -584,12 +584,15 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/lang_map.py <track1.bin> --check` | os conjuntos de cópia de asset, agrupados por conteúdo |
 | `python3 tools/pes2/tname.py bands\|fontscan\|swap <track1.bin>` | os nomes rasterizados do `T_NAME`, e a busca que mostrou não haver fonte no disco |
 | `python3 tools/pes2/asset_write.py save\|import\|palette\|negative\|check <copia.bin>` | grava asset editado, fit-or-fail; recusa `roms/` |
-| `python3 tools/pes2/pad.py press\|shot\|stats\|watch\|run` | dirige o emulador **já rodando**, um comando por vez — para trabalhar junto com o usuário, com `PES2_DISPLAY=:1`. O `run` acelera a partida dando `Cross` em cada saque, que é o que a faz terminar |
+| `python3 tools/pes2/pad.py press\|shot\|stats\|watch\|run` | manda **um** comando ao emulador já rodando — para trabalhar junto com o usuário. Por MCP desde 2026-09-03, então o display deixou de importar. O `run` acelera a partida dando `Cross` em cada saque, que é o que a faz terminar |
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
-| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. **Lança o AppImage oficial**, que não tem MCP — a troca pelo fork é a PES2-TASK-34 |
+| `python3 tools/pes2/mcp.py --list\|--status\|--call <tool>` | o cliente MCP do fork, stdlib pura: `initialize`, sessão por `MCP-Session-Id`, `tools/call`. **95 ferramentas**, contadas contra o servidor e não contra o fonte, que declara 99 |
+| `python3 tools/pes2/fork.py launch\|kill\|status\|recipe` | sobe o **fork com MCP** de `~/Applications/duckstation-mcp/`, dispensa o `Automatic Updater` e espera a porta; o `kill` alcança os três nomes de processo, e o `recipe` diz como reconstruí-lo |
+| `python3 tools/pes2/mcp_drive.py <copia.cue> --screen ...` | as mesmas quatro rotas do `drive.py`, por MCP. `--measure-menu` é o caso vermelho: mede as sete linhas do menu e depois pede sete, o que tem de falhar |
+| `tools/pes2/run_duckstation.sh` | sobe o **AppImage oficial** no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. Continua existindo porque é o binário que um terceiro reproduz |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
-| `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
+| `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes — e diz **contra qual binário** correu. Prefere o fork; `PES2_BINARY=appimage` força o outro |
 | `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador. O que ele **não** dá é quem escreveu — para isso é breakpoint, e aí é o fork |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
@@ -609,34 +612,39 @@ WE2002_PES2_TMPDIR=<~450 MiB livres> \
 
 Quatro coisas que custam tempo se descobertas tarde:
 
-- **O emulador é DuckStation, e não está no `PATH`** — é um AppImage em
-  `~/Applications/`. O `run_duckstation.sh` **não configura nada**, por
-  decisão de 2026-09-02: esta máquina roda DuckStation para este projeto,
-  então a configuração dele é a que vale, e o `drive.py` **lê** os bindings
-  de `[Pad1]` do arquivo em vigor em vez de declarar os seus. Remapear um
-  botão na interface do emulador basta. Save state e cartão caem em
-  `~/.local/share/duckstation` como em qualquer sessão dele.
+- **São dois DuckStation, e nenhum está no `PATH`.** O de trabalho, desde
+  2026-09-03, é o **fork `sadnescity/duckstation`, branch `mcp`, compilado
+  localmente** — o único com servidor MCP, que é o que permite dirigir o jogo
+  por chamada em vez de `xdotool` (`pause` + `frame_step`: cinco teclas,
+  cinco linhas). Ele mora em `~/Applications/duckstation-mcp/`, sobe pelo
+  `tools/pes2/fork.py`, e `fork.py recipe` diz como reconstruí-lo. O
+  **AppImage oficial** continua em `~/Applications/` e continua sendo o que
+  um terceiro reproduz; quem o sobe é o `run_duckstation.sh`, e quem o dirige
+  é o `drive.py`.
 
-  Isto dizia "usa um `XDG_DATA_HOME` isolado" até aquela data, e era
+  A licença do DuckStation é **CC-BY-NC-ND-4.0**: o fork não se versiona nem
+  se publica, como `roms/` e o `we-team-editor.exe`.
+
+  **Nenhum dos dois lançadores configura o DuckStation**, por decisão de
+  2026-09-02: esta máquina roda DuckStation para este projeto, então a
+  configuração dele é a que vale, e o `drive.py` **lê** os bindings de
+  `[Pad1]` do arquivo em vigor em vez de declarar os seus (o `mcp_drive.py`
+  não precisa deles — `press_button` recebe o botão pelo nome). Remapear um
+  botão na interface do emulador basta. Save state e cartão caem em
+  `~/.local/share/duckstation` como em qualquer sessão dele — e é **um só**
+  diretório, então uma instância por vez.
+
+  Isto dizia "usa um `XDG_DATA_HOME` isolado" até 2026-09-02, e era
   **falso**: o AppImage resolve o diretório de dados pelo `$HOME`, então o
   `settings.ini` que o lançador escrevia nunca foi lido — doze subidas
   apertando teclas ligadas a nada. Detalhe nas armadilhas 14 e 20 da §6.11
   do [PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md).
 
-  **E desde 2026-09-03 o binário de trabalho é outro: o fork
-  `sadnescity/duckstation`, branch `mcp`, compilado localmente** — o único
-  com servidor MCP, que é o que permite dirigir o jogo por chamada em vez de
-  `xdotool` (`pause` + `frame_step`: cinco teclas, cinco linhas). O
-  parágrafo acima descreve o que as ferramentas fazem **hoje** e vale até a
-  [PES2-TASK-34](docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) trocá-las: o
-  `run_duckstation.sh` ainda lança o AppImage, o `--kill` dele não alcança o
-  fork (o processo é `duckstation-qt`, não `AppRun`), e o `pes2_boot` ainda
-  julga o AppImage. Duas armadilhas ao subir o fork à mão: o diálogo de
-  build não-oficial tem `Yes` = **sair** como default — um `Return` reflexo
-  mata o processo —, e a porta 2346 só abre depois que ele é dispensado. A
-  licença do DuckStation é **CC-BY-NC-ND-4.0**: o fork não se versiona nem
-  se publica, como `roms/` e o `we-team-editor.exe`. Decisão e consequências
-  na §6.14.
+  Ao subir o fork à mão, duas coisas medidas em 2026-09-03: o diálogo que
+  sobe é o **`Automatic Updater`** — não o de build não-oficial — e
+  `Escape` **não** o fecha, e a **porta 2346 abre antes** de ele ser
+  dispensado. O `fork.py launch` cuida dos dois. Decisão, medições e a
+  comparação entre os dois binários na §6.14.
 - **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
   release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
   apontar qualquer coisa que escreva.

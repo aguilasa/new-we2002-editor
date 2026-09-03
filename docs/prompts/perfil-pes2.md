@@ -68,13 +68,19 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Vinte e seis armadilhas ao dirigir o DuckStation**, todas medidas
-    (§6.11) — eram treze quando este perfil foi escrito. As
-    quatro últimas são de 2026-09-01/02 e mudam como se escreve uma rota:
-    **toque não é apertar** (`keydown` + 1 s + `keyup`), um `settings.ini` à
-    mão **não vincula hotkey** (sem `[Hotkeys]` não há fast-forward nem save
-    state), a **Citrix não filtra o XTEST** aqui — a frase do `CLAUDE.md` é do
-    Windows —, e **editar um `.sh` enquanto ele roda** corrompe a execução.
+12. **Trinta e quatro armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. As sete últimas são
+    de 2026-09-03 e são sobre dirigir por **MCP**, que desde essa data é
+    como as rotas dirigem: o binário do fork **não acha as próprias
+    bibliotecas** fora da árvore de build (`LD_LIBRARY_PATH` *e*
+    `QT_PLUGIN_PATH`), o diálogo que ele abre é o **`Automatic Updater`** e
+    `Escape` não o fecha, a **porta 2346 abre antes** de ele ser dispensado,
+    o filtro de `kill_leftovers` era **sensível a maiúsculas** e descartava
+    o fork logo depois de achá-lo, **imobilidade exata só serve na tela
+    realmente parada** (quatro das nossas piscam ou animam), **"não preto"
+    não é "chegou"** — a rota do Modo Editar devolveu `mean=0.000000`
+    declarando sucesso —, e **`frame_step` custa 57 ms**, três vezes o tempo
+    real: quadro para precisão, relógio para distância.
 
 ---
 
@@ -142,8 +148,16 @@ python3 tools/pes2/asset_write.py   check "<track1.bin>" --tmpdir <dir>  # o cam
 PES2_IMAGE=<copia.cue> tools/pes2/asset_screen.sh                        # quadros do boot
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
-tools/pes2/run_duckstation.sh        # sobe o jogo no :98; --kill encerra
-tools/pes2/boot_check.sh             # mede que ele botou -- janela, quadro vivo, dois quadros diferentes
+python3 tools/pes2/fork.py launch "<copia.cue>"   # sobe o fork com MCP; `kill` encerra os tres binarios
+python3 tools/pes2/fork.py recipe                # como reconstruir o fork
+python3 tools/pes2/mcp.py --self-check           # o cliente MCP, sem emulador
+python3 tools/pes2/mcp.py --list                 # as 95 ferramentas, contra o servidor vivo
+python3 tools/pes2/fork.py --self-check          # caminhos, lista de kill, recusas
+python3 tools/pes2/mcp_drive.py --self-check     # rotas, limiares, assinaturas
+python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen edit --out-dir <dir>
+python3 tools/pes2/mcp_drive.py --measure-menu   # o caso vermelho: uma tecla a mais tem de falhar
+tools/pes2/run_duckstation.sh        # sobe o AppImage no :98; --kill encerra
+tools/pes2/boot_check.sh             # mede que ele botou -- e diz contra qual binario
 python3 tools/pes2/drive.py "<copia.cue>" --screen team-select --out-dir <dir>
 python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --save-state  # atalho
 python3 tools/pes2/savestate.py selftest                              # o leitor de save state, com os casos vermelhos
@@ -167,25 +181,37 @@ setores e roda em qualquer lugar; **`pes2_image`** precisa de
 | índice de contêiner, imagem ou paleta | `bin_archive.py check` **exit 0 nos quatro discos**. Nas imagens não hackeadas não há entrada cujo retângulo discorde do fluxo; na European Deluxe são **seis** — cinco de tamanho e o `TEX_70.BIN` em 18052, que nem decodifica —, contadas como categoria própria e não como falha, com a linha `is a hacked image: its 6 record(s) …`. A **contagem é asserção**: uma sétima fica vermelha (§1.14(f)) |
 | codec ou contêiner de `/BIN/` | `lzss.py --check` verde nos **quatro** discos — as duas releases de PES2 e as duas imagens de WE2002 —, cada um **reconhecido pelo nome** (`recognised PES2 (EsIt) by its 208 containers`) e batendo nas quatro contagens medidas: 208/172/3/33/2.153, 210/174/3/33/2.195, 177/141/3/33/1.842 e 195/159/3/33/2.027 (contêineres/`whole`/`partial`/`none`/blocos). E `--roundtrip` 100% nos blocos que o disco tocado tem |
 | offset ou tabela | remedido nas **duas** releases; a divergência sai por marcador, não por offset absoluto |
-| comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), e o quadro **fora** do git |
+| comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), o quadro **fora** do git, e a linha final dizendo **contra qual binário** ele correu |
+| rota de emulador | `mcp_drive.py --self-check` verde, e `--measure-menu` contra o jogo vivo: ele mede as sete linhas do menu e depois pede sete, o que **tem de falhar**. Verde que nunca pôde ser vermelho é decoração |
+| cliente ou lançador de MCP | `mcp.py --self-check` e `fork.py --self-check` verdes; os dois rodam sem emulador e os dois têm o caso de servidor ausente |
 | número em doc | veio de ferramenta, não de soma à mão |
 
-**O emulador não está no `PATH`** — é um AppImage em `~/Applications/`. O
-`run_duckstation.sh` **não configura nada**: o AppImage resolve o diretório de
-dados pelo `$HOME`, e a decisão de 2026-09-02 é não isolar, porque esta máquina
-roda DuckStation para este projeto. Quem manda é a configuração do próprio
-emulador, e o `drive.py` lê os bindings dela. Save state e cartão caem em
-`~/.local/share/duckstation`.
+**São dois emuladores, e nenhum está no `PATH`.** O de trabalho é o **fork
+com servidor MCP** desde 2026-09-03 (§6.14 do plano), em
+`~/Applications/duckstation-mcp/`; quem o sobe é o `tools/pes2/fork.py`, e
+`fork.py recipe` diz como reconstruí-lo. O AppImage oficial continua em
+`~/Applications/` porque é o que um terceiro reproduz, e quem o sobe continua
+sendo o `run_duckstation.sh`. **Nada do fork entra no repositório** — a
+licença do DuckStation é CC-BY-NC-ND-4.0, mesma regra de `roms/`.
 
-**E o binário de trabalho mudou em 2026-09-03: é o fork com servidor MCP**
-(§6.14 do plano). O parágrafo acima descreve o que as ferramentas fazem
-**hoje**, e continua verdadeiro até a
-[PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) trocá-las — o
-`run_duckstation.sh` ainda lança o AppImage, o `--kill` dele não alcança o
-fork (`duckstation-qt`, não `AppRun`), e o `pes2_boot` ainda julga o AppImage.
-Duas coisas a saber antes de subir o fork à mão: o diálogo de build
-não-oficial tem `Yes` = **sair** como default, e a porta 2346 só abre depois
-que ele é dispensado. O diretório de dados segue sendo um só, e serializado.
+| quero | ferramenta | binário |
+| --- | --- | --- |
+| dirigir uma rota | `mcp_drive.py` | fork |
+| mandar um comando com o usuário olhando | `pad.py` | fork |
+| o caminho que um terceiro reproduz | `drive.py` + `run_duckstation.sh` | AppImage |
+| o gate de boot | `boot_check.sh` | prefere o fork; `PES2_BINARY` força |
+
+**Nenhum dos dois lançadores configura o DuckStation**: ele resolve o
+diretório de dados pelo `$HOME`, e a decisão de 2026-09-02 é não isolar,
+porque esta máquina roda DuckStation para este projeto. Quem manda é a
+configuração do próprio emulador — o `drive.py` lê os bindings dela, e o
+`mcp_drive.py` não precisa deles, porque `press_button` recebe o botão pelo
+nome. Save state e cartão caem em `~/.local/share/duckstation`, que é **um
+só** e serializado: uma instância por vez.
+
+Ao subir o fork à mão, duas coisas medidas em 2026-09-03: o diálogo que sobe
+é o **`Automatic Updater`** e `Escape` não o fecha, e a **porta 2346 abre
+antes** de ele ser dispensado. O `fork.py launch` cuida dos dois.
 
 ---
 

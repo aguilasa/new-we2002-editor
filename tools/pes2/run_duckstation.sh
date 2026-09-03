@@ -49,14 +49,24 @@ IMAGE="${PES2_IMAGE:-}"
 # matches the command line of the shell running it and kills the caller.
 # And `pgrep -x DuckStation-x64` misses it: the AppImage runs as **AppRun**,
 # so a name filter on the inner binary matches nothing while two live
-# instances keep their windows on the display. Match both names, and never
+# instances keep their windows on the display. Match every name, and never
 # this script.
+#
+# **`duckstation-qt` is the third**, added 2026-09-03: the MCP fork is a
+# plain binary rather than an AppImage, so it escaped both of the names
+# above and an instance of it went on holding the display through a run of
+# this launcher. `tools/pes2/fork.py kill` has the same list.
 kill_leftovers() {
     local pid killed=""
     for pid in $(pgrep -x 'AppRun' 2>/dev/null || true) \
-               $(pgrep -x 'DuckStation-x64' 2>/dev/null || true); do
+               $(pgrep -x 'DuckStation-x64' 2>/dev/null || true) \
+               $(pgrep -x 'duckstation-qt' 2>/dev/null || true); do
         [ "$pid" = "$$" ] && continue
-        grep -qs 'DuckStation' "/proc/$pid/cmdline" || continue
+        # Case-insensitively, and that is not a nicety: the AppImage's path
+        # says `DuckStation` and the fork's says `duckstation-mcp`, so the
+        # exact-case version of this guard skipped every fork it had just
+        # been taught to find.
+        grep -qsi 'duckstation' "/proc/$pid/cmdline" || continue
         # SIGTERM leaves it parked on a "Confirm Exit" dialog forever,
         # holding its windows open, even with ConfirmPowerOff = false.
         kill -9 "$pid" 2>/dev/null || true

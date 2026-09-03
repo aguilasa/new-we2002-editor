@@ -1642,7 +1642,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Vinte e sete armadilhas ao dirigir o DuckStation
+### 6.11 Trinta e quatro armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1849,6 +1849,66 @@ aponta para o lugar errado.
     terminou em `Aborting application`. Para dispensar diálogo, clique no
     botão dele por coordenada; para encerrar o emulador, mate o PID.
 
+28. **O binário do fork não acha as próprias bibliotecas fora da árvore de
+    build.** O `RUNPATH` dele é um **caminho absoluto** para o
+    `dep/prebuilt/linux-x64/lib` do diretório em que foi compilado — que é
+    um scratchpad que se apaga. Copiar só o `bin/` para o lugar definitivo
+    dá um binário que morre com `could not load the Qt platform plugin
+    "xcb"`, sintoma de display e causa de biblioteca. Sem `patchelf` nesta
+    máquina, a saída é o lançador exportar `LD_LIBRARY_PATH` **e**
+    `QT_PLUGIN_PATH` — os dois, porque o Qt acha o plugin de plataforma por
+    prefixo próprio e não pelo caminho de biblioteca. Medido em 2026-09-03;
+    é o que o `tools/pes2/fork.py` faz.
+
+29. **O diálogo que o fork abre é o `Automatic Updater`, não o de build
+    não-oficial**, e **`Escape` não o fecha**: os três botões são
+    `Download and Install…`, `Skip This Update` e `Remind Me Later`, e
+    nenhum tem papel de rejeição. Fecha-se clicando, por coordenada relativa
+    à janela. O `fork.py` clica no `Remind Me Later` — o `Skip` calaria o
+    aviso de vez, mas escrevendo a configuração do usuário, que é o que a
+    armadilha 4 proíbe.
+
+30. **A porta 2346 abre antes de o diálogo ser dispensado.** A §6.14
+    registrava o contrário, a partir da PES2-TASK-33; medido em 2026-09-03,
+    o `initialize` respondeu com o modal ainda na tela e o jogo já rodando.
+    O diálogo continua sendo dispensado, e por outro motivo: ele fica **por
+    cima** da janela do jogo, então um `import -window` o captura junto.
+    Uma captura por MCP não o veria — o emulador entrega o próprio frame
+    buffer —, o que é uma razão a mais para capturar por lá.
+
+31. **O filtro de segurança do `kill_leftovers` era sensível a
+    maiúsculas.** Ele confere `/proc/$pid/cmdline` contra `DuckStation`
+    antes de matar, e o caminho do fork diz `duckstation-mcp` — então
+    acrescentar `duckstation-qt` à lista de nomes **não bastou**: o pid era
+    encontrado e descartado na linha seguinte. Uma lista de nomes estendida
+    e um filtro que não acompanha é pior que nenhum dos dois, porque parece
+    consertado.
+
+32. **Imobilidade exata só serve nas telas realmente paradas.** Com o
+    emulador parado entre uma olhada e a próxima, uma tela estática fica
+    **bit-idêntica**, e as caixas azuis da abertura assentam com tolerância
+    zero onde o `drive.py` precisava de 0,004, 0,006 e 0,012 adivinhados por
+    tela. Passando da abertura, acaba: o menu principal gira uma bola, o
+    Modo Editar anda com um jogador, a atribuição de controle pisca entre
+    duas imagens a 0,000346 uma da outra, e a grade de bandeiras pisca o
+    cursor. Pior que não funcionar, **funciona por sorte de fatia**: com
+    fatia de 2 s o Modo Editar alinhava e com 1 s nunca — critério que é
+    cara ou coroa. Nessas quatro o que se reconhece é a **média**.
+
+33. **"Não preto" não é "chegou".** O caminho para o Modo Editar é splash
+    (0,0042), preto de verdade (0,0000) e só então a tela (0,1549), e um
+    teste de preto para no splash. A rota devolveu `mean=0.000000`
+    declarando sucesso, com as cinco linhas do menu asseguradas e o item
+    certo confirmado — tudo verdadeiro e a captura vazia. O limiar tem de
+    ser uma média mínima, não a ausência de preto.
+
+34. **`frame_step` custa ~57 ms por chamada, três vezes o tempo real.**
+    São 20 ms por quadro a 50 fps, e cada passo é uma ida e volta HTTP. Uma
+    rota que atravesse uma tela de carga de trezentos quadros passo a passo
+    gasta 17 s onde `continue` + `sleep` + `pause` gasta 6. A divisão que
+    funciona: **quadro para precisão** — um toque e a consequência dele —,
+    **relógio para distância**.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -1987,7 +2047,14 @@ que é justamente o build sem o servidor; reconferido em 2026-09-02, 12.330
 commits na branch. Adotá-lo é compilar um emulador C++ inteiro. E trocar de
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
-e as vinte e seis armadilhas da §6.11 são sobre o AppImage oficial.
+e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
+naquela data, trinta e quatro hoje.
+
+> **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
+> pela metade.** As médias sobreviveram à troca de binário; o desvio da
+> tela de título não sobreviveu **em binário nenhum**, nem no fork nem no
+> próprio AppImage intocado. Ver "As assinaturas de quadro, medidas" na
+> PES2-TASK-34, mais abaixo nesta seção.
 
 **Quatro dos sete fluxos batem no que falta aqui:**
 
@@ -2222,7 +2289,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das vinte e sete armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das trinta e quatro armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.
@@ -2232,8 +2299,15 @@ porque não dá para confiar que cinco teclas movam cinco.
 > tira de script versionado, que é entregável da
 > [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
 
-**O que a decisão arrasta, e ainda não está feito.** Nada disto é opinião —
-é consequência mecânica de trocar o binário, e cada item é da PES2-TASK-34:
+**O que a decisão arrasta.** Nada disto é opinião — é consequência mecânica
+de trocar o binário, e cada item era da PES2-TASK-34.
+
+> **Os seis itens abaixo foram fechados em 2026-09-03**, e o que cada um
+> virou está em "PES2-TASK-34: as rotas passam para o MCP", logo abaixo. A
+> lista fica porque dois deles **estavam errados**, e isso é o registro:
+> as assinaturas não se moveram por causa do binário (o item 1), e a porta
+> 2346 não espera o diálogo (o item 4). Os dois foram medidos, não
+> deduzidos.
 
 - **As assinaturas de quadro saem do renderer e da versão** (o parágrafo de
   custo desta seção já dizia isso). A da tela de título (0,550 / 0,341) e a
@@ -2252,6 +2326,13 @@ porque não dá para confiar que cinco teclas movam cinco.
   release!"* tem `Yes` como default, e `Yes` significa **sair**: um `Return`
   reflexo mata o processo sem janela e sem porta, parecendo build quebrado.
   E a porta 2346 **só abre depois** que ele é dispensado.
+
+  > **Medido em 2026-09-03 e as duas metades saíram diferentes.** O diálogo
+  > que sobe em toda subida é o `Automatic Updater`, não este — e `Escape`
+  > não o fecha (armadilha 29). E a porta **abre antes**: o `initialize`
+  > respondeu com o modal ainda na tela (armadilha 30). O diálogo continua
+  > sendo dispensado, mas por ficar por cima da janela do jogo, não por
+  > segurar a porta.
 - **Onde o binário mora é pergunta em aberto.** Ele foi compilado no
   scratchpad da sessão, que é temporário. Emulador de trabalho não pode
   morar num diretório que se apaga, e a licença CC-BY-NC-ND proíbe versioná-lo
@@ -2262,6 +2343,133 @@ porque não dá para confiar que cinco teclas movam cinco.
 continua sendo o que um terceiro consegue reproduzir; a §6.11 continua
 descrevendo o que foi medido sobre ele; e a proibição de versionar ou
 publicar o fork continua valendo, pela licença.
+
+#### PES2-TASK-34, 2026-09-03: as rotas passam para o MCP
+
+A decisão acima virou ferramenta. O que entrou em `tools/pes2/`:
+`mcp.py` (o cliente, stdlib pura), `fork.py` (o lançador e o `kill` que
+alcança os três binários), `mcp_drive.py` (as quatro rotas) e um `pad.py`
+reescrito. Nada do fork entrou no repositório.
+
+**Onde o binário mora.** `~/Applications/duckstation-mcp/`, escolhido pelo
+usuário, ao lado do AppImage oficial que continua instalado. São três
+diretórios — `bin/`, `lib/`, `plugins/` — porque o `RUNPATH` do binário
+aponta para a árvore de build em que ele nasceu (armadilha 28); o lançador
+exporta `LD_LIBRARY_PATH` e `QT_PLUGIN_PATH`. A receita de reconstruí-lo
+saiu do Log da PES2-TASK-33 e virou `tools/pes2/fork.py recipe`, que é
+executável e não envelhece calado.
+
+##### As assinaturas de quadro, medidas
+
+A pergunta era se elas sobrevivem à troca de binário. O resultado dividiu:
+
+| tela | registrado 2026-09-02 | fork, 2026-09-03 | AppImage, 2026-09-03 |
+|---|---|---|---|
+| título | 0,5502..0,5528 / **0,3397..0,3411** | 0,550140..0,552796 / **0,359942..0,360497** | 0,555093 / **0,358742** |
+| menu principal | 0,140639..0,140682 / 0,212435..0,212488 | 0,140514..0,140611 / 0,212382..0,212412 | — |
+| grade de bandeiras | 0,1685 / 0,2488 | 0,168337..0,168602 / 0,248755..0,249048 | 0,168461 / 0,248793 |
+
+**Toda média reproduziu. O desvio da tela de título não reproduziu — e não
+reproduziu em binário nenhum.** É esta a frase que importa, e ela custou
+quatro hipóteses descartadas, cada uma medida:
+
+- **não é o fork:** o AppImage é o mesmo arquivo de 29 de agosto, intocado,
+  e hoje ele dá 0,3587 onde deu 0,341 anteontem;
+- **não é o caminho de captura:** o mesmo quadro **pausado**, tirado por
+  MCP e por `import -window`, difere 0,002245 no total;
+- **não é a escala de resolução:** forçada a 1× e de volta a 4× por
+  `set_setting`, a tela de título deu 0,360384 e 0,360408, e o
+  `settings.ini` ficou byte a byte igual;
+- **não é o recorte:** afastar a borda move média e desvio **juntos** — 8 px
+  levam 0,5551/0,3587 para 0,5684/0,3523 —, e a média não se moveu.
+
+O que mudou não foi identificado. E é exatamente por isso que o par sai de
+critério: **um número que não se reproduz nem se explica um dia depois, no
+mesmo binário, não é critério** — e ele tinha 0,0006 de folga dentro da
+tolerância de ±0,02 que o julgava. As médias ficam, porque sobreviveram a
+troca de binário, a troca de configuração e a virada do dia. O resto uma
+rota agora **assere contando**.
+
+##### A asserção que contar quadro permite
+
+Com o emulador parado entre um toque e o próximo, `press_button` com
+`duration_frames` mais doze `frame_step` move **uma** linha, e isso deixa de
+ser esperança. Medido no menu principal, nove capturas sobre um recorte que
+contém só a lista:
+
+| comparação | diferença |
+|---|---|
+| a mesma linha de novo | 0,0002 .. 0,0005 |
+| duas linhas diferentes | 0,0082 .. 0,0125 |
+
+Vinte vezes de distância, então o limiar de 0,003 fica longe dos dois lados.
+Sobre isso, `menu_pick` faz duas asserções que o `drive.py` queria e não
+podia: **todo toque tem de mover**, e **nenhum pode cair numa linha já
+visitada**. A segunda é o caso vermelho — a lista dá a volta em vez de parar
+no fim, então uma tecla a mais **falha** em vez de confirmar o item errado,
+que foi como o driver anterior escolheu `Modo Copa` quando a rota pedia
+`Modo Editar`.
+
+O número de linhas do menu é **medido**, não declarado: a caminhada dá a
+volta em `r0==r7`, então são sete, que é o que está na tela. E o caso
+vermelho corre de verdade —
+`python3 tools/pes2/mcp_drive.py --measure-menu` mede as sete e depois pede
+sete, o que tem de falhar:
+
+```
+the list wraps: row 7 is row 0 again -> 7 rows
+the main menu has 7 rows (measured, not declared)
+RED CASE OK: asking for 7 rows failed -- press 7 of 7 landed back on row 0
+```
+
+##### A comparação, medida
+
+As quatro rotas, mesma imagem, mesma máquina, mesmo `:98`, em 2026-09-03. As
+duas primeiras a frio (sem save state), as duas últimas a partir de um
+estado no menu principal:
+
+| rota | `drive.py` (AppImage, `xdotool`) | `mcp_drive.py` (fork, MCP) |
+|---|---:|---:|
+| `title` | 48,09 s | **15,79 s** |
+| `main-menu` | 89,21 s | **53,81 s** |
+| `team-select` | 62,96 s | **19,63 s** |
+| `edit` | 74,28 s | **27,70 s** |
+| **total** | **274,54 s** | **116,93 s** |
+
+**Mas o ganho a registrar não é o 2,3×.** É que a coluna "tentativas"
+deixou de existir. O `drive.py` repete: `advance` tenta até quatro vezes,
+`nudge` até seis, e nesta corrida nenhuma precisou — o que é sorte, e é o
+problema. Uma tentativa que não é sempre necessária é uma tentativa que não
+se pode assegurar. O `mcp_drive.py` não tem caminho de repetição: as rotas
+gastaram 8, 3 e 6 toques exatos e 160, 92 e 132 quadros contados, e um toque
+que não mova é falha, não segunda tentativa.
+
+##### O que ficou decidido
+
+- **`.mcp.json` fica**, em escopo `project`, como o usuário decidiu em
+  2026-09-03. Ele publica um endereço de `localhost`, não o binário; num
+  clone sem o fork compilado a entrada aparece como servidor quebrado, e
+  documentar ganhou de esconder. Ele exige **aprovação manual** na primeira
+  sessão (`claude mcp list` mostra `⏸ Pending approval`).
+- **O `pad.py` foi portado**, decisão do usuário. Ele continua sendo a
+  ferramenta de trabalhar *junto* com o usuário, um comando por vez, e o
+  caso do `run` — dar `Cross` em cada saque — continua lá. Três coisas
+  sumiram em vez de serem reescritas: o display deixou de importar (não há
+  janela a achar, nem *frame* a confundir com o *client* — era 894×785
+  contra 800×655 e invalidava todo recorte em silêncio), os bindings
+  deixaram de importar, e a duração do toque deixou de ser calibrada.
+- **O `pes2_boot` prefere o fork e cai para o AppImage**, e **diz qual dos
+  dois julgou** na linha final. `PES2_BINARY=fork|appimage` força. Um gate
+  que não nomeia o binário não se compara com a corrida anterior, e os dois
+  não desenham a mesma tela.
+- **O `run_duckstation.sh` continua lançando o AppImage**, de propósito: é
+  o binário que um terceiro reproduz. O que mudou nele é o `--kill`, que
+  agora alcança `duckstation-qt` — e o filtro de segurança dele, que era
+  sensível a maiúsculas e descartava o fork logo depois de encontrá-lo
+  (armadilha 31).
+- **O `drive.py` fica.** Ele é o caminho que funciona sobre o AppImage
+  oficial, e as armadilhas da §6.11 que ele contorna continuam sendo o
+  registro de por que a direção por `xdotool` custa o que custa.
 
 ---
 

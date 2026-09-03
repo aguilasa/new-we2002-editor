@@ -252,6 +252,21 @@ def main():
         bad += check("savestate.py reader, scan and guards", False,
                      f"{type(exc).__name__}: {exc}")
 
+    # The MCP client, its launcher and the routes written on them. All
+    # three run with no emulator: what they can prove here is the decoding,
+    # the thresholds and the red cases -- including the one that matters
+    # most day to day, that an absent server says "the fork is not running"
+    # instead of unrolling a urllib traceback.
+    for name, what in (("mcp", "mcp.py client, decoding and red cases"),
+                       ("fork", "fork.py paths, kill list and refusals"),
+                       ("mcp_drive", "mcp_drive.py routes and thresholds")):
+        try:
+            module = __import__(name)
+            failures = module.self_check(verbose=False)
+            bad += check(what, not failures, ", ".join(failures))
+        except Exception as exc:                              # noqa: BLE001
+            bad += check(what, False, f"{type(exc).__name__}: {exc}")
+
     os.remove(path)
     os.remove(truncated)
     os.rmdir(tmp)
