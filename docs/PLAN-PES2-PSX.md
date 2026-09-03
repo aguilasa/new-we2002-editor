@@ -2412,15 +2412,46 @@ que foi como o driver anterior escolheu `Modo Copa` quando a rota pedia
 
 O número de linhas do menu é **medido**, não declarado: a caminhada dá a
 volta em `r0==r7`, então são sete, que é o que está na tela. E o caso
-vermelho corre de verdade —
-`python3 tools/pes2/mcp_drive.py --measure-menu` mede as sete e depois pede
-sete, o que tem de falhar:
+vermelho corre de verdade, em **dois comandos versionados**, sobre uma cópia
+e sem depender de save state nenhum:
+
+```sh
+python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen main-menu --keep-alive
+python3 tools/pes2/mcp_drive.py --measure-menu
+```
 
 ```
-the list wraps: row 7 is row 0 again -> 7 rows
+  left running on main-menu -- `fork.py kill` when done
+MCP DRIVE OK: ...  51.2s, 8 presses, 160 frames stepped
+  on the main menu: mean=0.140724
+  the list wraps: row 7 is row 0 again -> 7 rows
 the main menu has 7 rows (measured, not declared)
 RED CASE OK: asking for 7 rows failed -- press 7 of 7 landed back on row 0
 ```
+
+**As duas linhas são a correção da CORR-PES2-024, e cada uma conserta um
+furo de precondição.** Toda rota mata no `__exit__` o emulador que subiu, e
+por isso o `--measure-menu` só fechava a partir de um save state deixado
+para trás à mão — gate que depende de sobra de outra corrida não é gate. O
+`--keep-alive` põe `_own = False` e é o único jeito de um comando versionado
+deixar o jogo de pé numa tela nomeada.
+
+E o `--measure-menu` **confere a tela antes de medir**, com o mesmo
+`on_main_menu()` que as rotas usam. Sem isso ele mediria o que estivesse na
+frente e imprimiria "the main menu has N rows" sobre outra tela — a
+armadilha 33 desta seção, *"não preto não é chegou"*, dentro da ferramenta
+escrita contra ela. Medido na tela de título:
+
+```
+MCP DRIVE FAILED: not on the main menu: mean=0.552783, wanted 0.1406 +-0.01
+-- park it there with `--screen main-menu --keep-alive` first
+```
+
+A cerca é exercitada **sem emulador** no `--self-check`, contra as médias
+das outras telas (título nos dois dias, Modo Editar, quadro preto). A
+vizinha mais próxima é o Modo Editar, a 0,0141 do menu — 0,0041 de folga
+sobre a tolerância de 0,010 —, e é esse par que limita qualquer alargamento
+futuro do limiar.
 
 ##### A comparação, medida
 

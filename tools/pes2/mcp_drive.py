@@ -134,6 +134,16 @@ TITLE_TOL = 0.010
 MAIN_MENU_MEAN = 0.1406
 MAIN_MENU_TOL = 0.010
 
+
+def on_main_menu(mean):
+    """Is this frame the main menu? The one signature that says so.
+
+    Pulled out of the routes so the fence can be exercised with no
+    emulator: `self_check` feeds it the means measured on the other
+    screens and requires a refusal.
+    """
+    return abs(mean - MAIN_MENU_MEAN) <= MAIN_MENU_TOL
+
 # The Modo Editar menu -- Crear, Cambiar, Borrar and four more. It cycles
 # something slowly, so consecutive looks are bit-identical for a few seconds
 # at a time and `still` does settle on it. 0.154324..0.155040 measured.
@@ -559,7 +569,7 @@ def route_main_menu(s):
     mean = None
     for _ in range(8):
         mean = s.capture().stats()[0]
-        if abs(mean - MAIN_MENU_MEAN) <= MAIN_MENU_TOL:
+        if on_main_menu(mean):
             break
         s.press("Cross")
         s.run(4)
@@ -588,7 +598,7 @@ def from_main_menu(s, slot=1):
         s.load_state(slot)
         s.run(2)
         frame = s.capture()
-        if abs(frame.stats()[0] - MAIN_MENU_MEAN) <= MAIN_MENU_TOL:
+        if on_main_menu(frame.stats()[0]):
             s.say("the state was on the main menu")
             return frame
         s.say("the state was parked elsewhere -- walking the opening")
@@ -681,11 +691,26 @@ ROUTES = {
 def measure_menu(s):
     """Measure the main menu's length, and prove the assertion bites.
 
-    Run against an emulator already on the main menu. It reports the row
-    count it measured and then asks for one row too many, which **must**
-    fail: that is the check `drive.py` could not write, and a green that
-    was never able to go red is decoration.
+    Run against an emulator already on the main menu -- park it there with
+
+        mcp_drive.py <copy.cue> --screen main-menu --keep-alive
+        mcp_drive.py --measure-menu
+
+    It reports the row count it measured and then asks for one row too many,
+    which **must** fail: that is the check `drive.py` could not write, and a
+    green that was never able to go red is decoration.
+
+    It checks the screen before it measures. Without that it would run on
+    whatever is up and print "the main menu has N rows" about some other
+    screen -- trap 33 of section 6.11, *"not black is not arrived"*, in the
+    very tool written to fix it.
     """
+    mean = s.capture().stats()[0]
+    if not on_main_menu(mean):
+        raise Fail(f"not on the main menu: mean={mean:.6f}, wanted "
+                   f"{MAIN_MENU_MEAN} +-{MAIN_MENU_TOL} -- park it there "
+                   f"with `--screen main-menu --keep-alive` first")
+    s.say(f"on the main menu: mean={mean:.6f}")
     rows = s.menu_rows()
     print(f"the main menu has {rows} rows (measured, not declared)")
 
@@ -746,7 +771,24 @@ def self_check(verbose=True):
           abs(MAIN_MENU_MEAN - TITLE_MEAN) > TITLE_TOL)
     for reading in (0.140514, 0.140682):
         check(f"the main-menu mean {reading} is recognised",
-              abs(reading - MAIN_MENU_MEAN) <= MAIN_MENU_TOL)
+              on_main_menu(reading))
+
+    # The fence `--measure-menu` puts in front of the measurement, fed the
+    # means measured on the other screens. Each has to be refused: without
+    # this the gate reports a row count for whatever screen happens to be
+    # up, which is trap 33 in the tool written against it.
+    for reading, screen in ((0.552796, "the title screen"),
+                            (0.550140, "the title screen, the other day"),
+                            (EDIT_MEAN, "Modo Editar"),
+                            (0.000000, "a black frame")):
+        check(f"--measure-menu refuses {screen} (mean {reading})",
+              not on_main_menu(reading))
+    # Modo Editar is the closest neighbour the fence has to keep out, and it
+    # is close: 0.0041 of margin. If a threshold here is ever widened, this
+    # is the pair that decides how far it can go.
+    check("and Modo Editar is the tightest of those, with room to spare",
+          abs(EDIT_MEAN - MAIN_MENU_MEAN) - MAIN_MENU_TOL > 0.003,
+          f"{abs(EDIT_MEAN - MAIN_MENU_MEAN) - MAIN_MENU_TOL:.4f}")
 
     # The standard deviation really did move, on both binaries, which is
     # the reason it is gone: the old pair at +-0.02 had 0.0006 of margin.
@@ -775,8 +817,12 @@ def main(argv=None):
     ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
     ap.add_argument("--save-state", type=int, metavar="SLOT", nargs="?",
                     const=1, default=None)
+    ap.add_argument("--keep-alive", action="store_true",
+                    help="leave the emulator running after the route, so "
+                         "--measure-menu has something to attach to")
     ap.add_argument("--measure-menu", action="store_true",
-                    help="against a running game already on the main menu")
+                    help="against a running game already on the main menu; "
+                         "park it there with --screen main-menu --keep-alive")
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args(argv)
@@ -809,6 +855,16 @@ def main(argv=None):
             ROUTES[args.screen](s)
             if args.save_state is not None:
                 s.save_state(args.save_state)
+            if args.keep_alive:
+                # The only way a versioned command can leave the emulator
+                # standing on a named screen. Without it every route kills
+                # what it started in `__exit__`, and `--measure-menu` has
+                # nothing to attach to -- which is how that gate came to
+                # depend on a save state left behind by hand.
+                s._own = False
+                s.resume()
+                print(f"  left running on {args.screen} -- "
+                      f"`fork.py kill` when done")
             print(f"MCP DRIVE OK: {out_dir}  "
                   f"{time.time() - started:.1f}s, {s.presses} presses, "
                   f"{s.steps} frames stepped")
