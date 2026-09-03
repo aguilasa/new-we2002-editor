@@ -228,29 +228,49 @@ def main():
     # no emulator in sight -- which is exactly what the shell version it
     # replaced could not do, and why the region comparison that finally
     # told two screens apart had no test behind it for a day.
+    # Import outside the block, for the reason spelled out at the savestate
+    # block below: an `except` that names the module cannot run when the
+    # import is what failed.
     try:
         import drive                                          # noqa: E402
-        drive.self_check()
-        bad += check("drive.py frame logic", True)
-    except drive.Skip as why:                                 # noqa: F821
-        print(f"  ..   drive.py frame logic skipped: {why}")
     except Exception as exc:                                  # noqa: BLE001
         bad += check("drive.py frame logic", False,
                      f"{type(exc).__name__}: {exc}")
+    else:
+        try:
+            drive.self_check()
+            bad += check("drive.py frame logic", True)
+        except drive.Skip as why:
+            print(f"  ..   drive.py frame logic skipped: {why}")
+        except Exception as exc:                              # noqa: BLE001
+            bad += check("drive.py frame logic", False,
+                         f"{type(exc).__name__}: {exc}")
 
     # The save-state reader, on states built here. It needs neither an
     # emulator nor a disc nor zstd -- the synthetic states are stored
     # uncompressed -- so the only thing that can hold it back is numpy.
+    # The import stays *outside* the block whose `except` names the module.
+    # With it inside, a failed import leaves `savestate` undefined when the
+    # interpreter evaluates `except savestate.Skip`, which raises NameError
+    # while handling -- and the sibling `except Exception` does not catch
+    # that, because the exception escapes the whole try. The result was this
+    # self-test dying with a traceback instead of reporting the FAIL that
+    # very handler was written to give.
     try:
         import savestate                                      # noqa: E402
-        failures = savestate.self_check(verbose=False)
-        bad += check("savestate.py reader, scan and guards", not failures,
-                     ", ".join(failures))
-    except savestate.Skip as why:                             # noqa: F821
-        print(f"  ..   savestate.py skipped: {why}")
     except Exception as exc:                                  # noqa: BLE001
         bad += check("savestate.py reader, scan and guards", False,
                      f"{type(exc).__name__}: {exc}")
+    else:
+        try:
+            failures = savestate.self_check(verbose=False)
+            bad += check("savestate.py reader, scan and guards", not failures,
+                         ", ".join(failures))
+        except savestate.Skip as why:
+            print(f"  ..   savestate.py skipped: {why}")
+        except Exception as exc:                              # noqa: BLE001
+            bad += check("savestate.py reader, scan and guards", False,
+                         f"{type(exc).__name__}: {exc}")
 
     # The MCP client, its launcher and the routes written on them. All
     # three run with no emulator: what they can prove here is the decoding,

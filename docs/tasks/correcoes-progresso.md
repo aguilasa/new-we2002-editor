@@ -50,7 +50,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-026](/docs/tasks/CORR-PES2-026.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | A correção de 45 bytes arrumou os dois endereços do fluxo C e deixou o offset da RAM em 6799; o leitor mede 6754 | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | O `pes2_boot` nunca roda pela receita documentada: ele quer `PES2_IMAGE` e os docs só dão `WE2002_PES2_*` | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Dois docs dizem que o fork não publica binário próprio; ele publica quatorze, e o AppImage x64 traz o servidor MCP | Alta | [x] concluída | 2026-09-03 |
-| [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [ ] pendente | — |
+| [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [x] concluída | 2026-09-03 |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -94,7 +94,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-026 — o offset da RAM ficou no valor de antes do conserto de 45 bytes
 - [x] CORR-PES2-027 — o gate de boot se reporta *skipped* na única receita escrita
 - [x] CORR-PES2-028 — o fork publica binário próprio, e ele tem o MCP
-- [ ] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
+- [x] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
 
 ## Detalhes por correção
 

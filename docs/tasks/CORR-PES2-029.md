@@ -3,7 +3,7 @@ id: CORR-PES2-029
 title: "Correção: estado ausente despeja traceback no `savestate.py`, e o `except` do `selftest.py` vira NameError"
 type: correção
 category: ferramenta
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -149,22 +149,81 @@ is refused"; falta "a missing state is refused".
 
 ## Verificação
 
-- [ ] `python3 tools/pes2/savestate.py info /nao/existe.sav` imprime
+- [x] `python3 tools/pes2/savestate.py info /nao/existe.sav` imprime
       `error: …` e sai não-zero, sem traceback
-- [ ] o mesmo para `read`, `diff`, `ram`, `shot` e `scan`, e no `scan` a
+- [x] o mesmo para `read`, `diff`, `ram`, `shot` e `scan`, e no `scan` a
       mensagem nomeia o estado que faltou
-- [ ] `python3 tools/pes2/savestate.py selftest` verde, com o caso vermelho
+- [x] `python3 tools/pes2/savestate.py selftest` verde, com o caso vermelho
       novo aparecendo na lista de recusas
-- [ ] renomear `tools/pes2/savestate.py` temporariamente faz o
+- [x] renomear `tools/pes2/savestate.py` temporariamente faz o
       `pes2_selftest` reportar `FAIL`, não um `NameError`
-- [ ] `ctest --test-dir build -R pes2_selftest` verde com o arquivo no lugar
+- [x] `ctest --test-dir build -R pes2_selftest` verde com o arquivo no lugar
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** os dois caminhos, mais um terceiro que a leitura
+que a CORR mandava fazer revelou.
 
-**Problemas encontrados:**
+1. **`savestate.py`.** O `open` do `SaveState.__init__` recusa `OSError` como
+   `BadState`, que o `main` já imprime como `error: …` com saída 2. Como
+   **todo** comando constrói um `SaveState`, um ponto só cobre os seis — e a
+   mensagem leva o caminho, que é o que o `scan` precisa por receber vários.
+   Um caso vermelho novo no `self_check`: os três que existiam são arquivos
+   que **existem e mentem**; este é o que não está lá.
+2. **`selftest.py`, bloco do `savestate`.** O import saiu do `try` cujo
+   `except` nomeia o módulo, com o padrão `try/except/else`. O
+   `# noqa: F821` saiu junto — o linter tinha visto e alguém o calou.
+3. **`selftest.py`, bloco do `drive`** — a CORR mandava "merece a mesma
+   leitura antes de se dar por fechado", e ele tinha **o mesmo defeito**:
+   `import drive` dentro do `try`, `except drive.Skip` fora de alcance, e o
+   mesmo `# noqa: F821`. Corrigido igual. O laço que roda `mcp`, `fork` e
+   `mcp_drive` usa `__import__(name)` e não nomeia o módulo no `except`, então
+   é seguro e ficou como está — foi conferido, não presumido.
+
+**Problemas encontrados:** nenhum, e nenhum doc vivo ficou falso.
+
+**Gates, com o número medido.** Os seis comandos com estado ausente, todos
+`exit=2` e sem traceback:
+
+```
+info   /nao/existe.sav              error: /nao/existe.sav: No such file or directory
+ram    /nao/existe.sav --out …      error: /nao/existe.sav: No such file or directory
+shot   /nao/existe.sav --out …      error: /nao/existe.sav: No such file or directory
+read   /nao/existe.sav 0x80000000   error: /nao/existe.sav: No such file or directory
+diff   /nao/a.sav /nao/b.sav        error: /nao/a.sav: No such file or directory
+scan   <bom>=1 /nao/existe.sav=2    error: /nao/existe.sav: No such file or directory
+```
+
+O `scan` **nomeia** o que faltou, e não o primeiro da lista. De brinde, um
+diretório em vez de arquivo: `error: /tmp: Is a directory`.
+
+O caso vermelho novo, na lista de recusas do `selftest`:
+
+```
+  [ok] a missing state is refused -- …/there-is-no-such-state.sav: No such file or directory
+all checks passed, and every guard was seen refusing
+```
+
+E os dois `NameError` fechados, medidos por remoção do módulo:
+
+```
+$ mv tools/pes2/savestate.py … && python3 tools/pes2/selftest.py
+  FAIL savestate.py reader, scan and guards  -- ModuleNotFoundError: No module named 'savestate'
+FAILED                                                             exit 1
+$ mv tools/pes2/drive.py … && python3 tools/pes2/selftest.py
+  FAIL drive.py frame logic  -- ModuleNotFoundError: No module named 'drive'
+  FAIL mcp_drive.py routes and thresholds  -- ModuleNotFoundError: No module named 'drive'
+```
+
+Antes, os dois saíam com `NameError: name 'savestate' is not defined` levantado
+**durante o tratamento**, que o `except Exception` irmão não pega. Com os
+arquivos no lugar, `pes2_selftest` **Passed 0,34 s**.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `tools/pes2/savestate.py` | modificado (`SaveState.__init__`, caso vermelho no `self_check`) |
+| `tools/pes2/selftest.py` | modificado (os blocos do `savestate` e do `drive`) |

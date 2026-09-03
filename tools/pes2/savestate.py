@@ -119,8 +119,16 @@ def _tag(name):
 class SaveState:
     def __init__(self, path):
         self.path = path
-        with open(path, "rb") as fh:
-            self.raw = fh.read()
+        # A state that is not there is a refusal like any other, not a
+        # traceback. Every command builds one of these, so guarding the
+        # open here covers info, ram, shot, read, diff and scan at once --
+        # and `scan` takes several paths, so the message has to name which
+        # one failed, which is why `path` is in it.
+        try:
+            with open(path, "rb") as fh:
+                self.raw = fh.read()
+        except OSError as exc:
+            raise BadState(f"{path}: {exc.strerror or exc}") from None
         if len(self.raw) < _HDR.size:
             raise BadState(f"{path}: too short to be a save state")
         (magic, self.version, title, serial, *f) = _HDR.unpack_from(self.raw)
@@ -557,6 +565,17 @@ def self_check(tmpdir=None, verbose=True):
             check("a wrong RAM size is refused", False, "accepted it")
         except BadState:
             check("a wrong RAM size is refused", True)
+        # A state that is not there at all. The three above are files that
+        # exist and lie; this is the one that used to unroll a traceback,
+        # which reads to whoever hits it as a defect in the tool rather
+        # than a typo in the path.
+        missing = os.path.join(tmp, "there-is-no-such-state.sav")
+        try:
+            SaveState(missing)
+            check("a missing state is refused", False, "accepted it")
+        except BadState as exc:
+            check("a missing state is refused",
+                  "No such file" in str(exc), str(exc))
 
     print()
     return failures
