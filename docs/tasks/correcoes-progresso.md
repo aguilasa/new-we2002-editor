@@ -47,6 +47,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [x] concluída | 2026-09-03 |
 | [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `--measure-menu` é gate, não confere se está no menu principal, e nenhum comando versionado leva o emulador até lá | Média | [x] concluída | 2026-09-03 |
 | [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | Baixa | [x] concluída | 2026-09-03 |
+| [CORR-PES2-026](/docs/tasks/CORR-PES2-026.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | A correção de 45 bytes arrumou os dois endereços do fluxo C e deixou o offset da RAM em 6799; o leitor mede 6754 | Alta | [ ] pendente | — |
+| [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | O `pes2_boot` nunca roda pela receita documentada: ele quer `PES2_IMAGE` e os docs só dão `WE2002_PES2_*` | Alta | [ ] pendente | — |
+| [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Dois docs dizem que o fork não publica binário próprio; ele publica quatorze, e o AppImage x64 traz o servidor MCP | Alta | [ ] pendente | — |
+| [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -87,6 +91,10 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
 - [x] CORR-PES2-024 — o caso vermelho não confere a tela nem tem caminho versionado
 - [x] CORR-PES2-025 — a §3.2 descreve como aberto um item que a 34 fechou
+- [ ] CORR-PES2-026 — o offset da RAM ficou no valor de antes do conserto de 45 bytes
+- [ ] CORR-PES2-027 — o gate de boot se reporta *skipped* na única receita escrita
+- [ ] CORR-PES2-028 — o fork publica binário próprio, e ele tem o MCP
+- [ ] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
 
 ## Detalhes por correção
 
@@ -411,3 +419,31 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **Sintoma:** a tabela do emulador diz que onde o fork mora "é item aberto da PES2-TASK-34"; a task fechou o item e a §6.14, o `CLAUDE.md` e o perfil já dizem `~/Applications/duckstation-mcp/`.
 - **Como foi detectado:** `grep -n "item aberto" docs/PLAN-PES2-PSX.md`, contra `python3 tools/pes2/fork.py which`.
 - **Fix:** trocar a oração pelo caminho, com a nota de licença.
+
+### CORR-PES2-026
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §6.14 e o Log da PES2-TASK-32
+- **Sintoma:** os dois dizem que a RAM começa no offset 6799 do fluxo inflado; o `savestate.py` mede 6754 em oito estados, inclusive um de hoje. A diferença são os 45 bytes que a PES2-TASK-33 corrigiu — ela reescreveu os dois endereços (+45) e não o deslocamento (−45).
+- **Como foi detectado:** `savestate.py info` nos oito estados da POC contra `grep -rn "6799" docs/`.
+- **Fix:** trocar para 6754 e escrever de onde ele vem, para o próximo conserto de base não deixar o número para trás.
+
+### CORR-PES2-027
+
+- **Arquivo com problema:** `CLAUDE.md`, `docs/prompts/perfil-pes2.md`, `tools/pes2/boot_check.sh`
+- **Sintoma:** a receita de `ctest -R pes2` documentada só define `WE2002_PES2_*`, e o `boot_check.sh` pula sem `PES2_IMAGE`. O único gate que põe o jogo na tela nunca corre, e o skip é igual ao de uma máquina sem emulador.
+- **Como foi detectado:** `WE2002_PES2_IMAGE=… ctest -R pes2_boot` → `***Skipped 0.01 sec`; a mesma corrida com `PES2_IMAGE=<copia>.cue` fecha `BOOT OK`.
+- **Fix:** pôr `PES2_IMAGE` (o `.cue`) na receita dos dois docs, e fazer o skip distinguir variável trocada de máquina sem emulador.
+
+### CORR-PES2-028
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md` §6.14, critério da PES2-TASK-32, `tools/pes2/fork.py recipe`
+- **Sintoma:** os dois docs afirmam que o fork "não publica binário próprio". Ele publica quatorze na release `latest`, de 2026-08-29, e o `DuckStation-x64.AppImage` dela traz `EnableMCPServer`, `MCPServerPort` e `duckstation-mcp`. O custo de ter um binário com MCP é um download, não 107 s de compilação — e a receita só conhece o caminho longo.
+- **Como foi detectado:** `gh api repos/sadnescity/duckstation/releases`, download do AppImage, `--appimage-extract` e `strings -a … | grep -x EnableMCPServer` → 1.
+- **Fix:** corrigir a frase nos dois lugares, pôr o download como primeiro caminho da receita com a conferência por `strings`, e registrar que o engano veio de ler o README (que é o do upstream) em vez da aba de releases.
+
+### CORR-PES2-029
+
+- **Arquivo com problema:** `tools/pes2/savestate.py`, `tools/pes2/selftest.py`
+- **Sintoma:** arquivo que não é save state recebe `error: … not DUCC`; arquivo que não existe recebe `FileNotFoundError` cru. E o `except savestate.Skip` do `selftest.py`, com o import dentro do mesmo `try`, vira `NameError` se o import falhar — que o `except Exception` irmão não pega.
+- **Como foi detectado:** `savestate.py info /nao/existe.sav` contra `savestate.py info CLAUDE.md`; o padrão do `except` reproduzido isolado.
+- **Fix:** recusar `OSError` com a forma `error: …` em todos os subcomandos, tirar o import do `try` no `selftest.py`, e um caso vermelho de estado ausente no `self_check`.
