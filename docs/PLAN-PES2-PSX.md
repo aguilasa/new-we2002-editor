@@ -1001,7 +1001,7 @@ máquina, instalado pelo usuário em 2026-08-29:
 | | |
 |---|---|
 | binário | `~/Applications/DuckStation-x64.AppImage` (não é Flatpak, e não está no `PATH`) |
-| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Mora em `~/Applications/duckstation-mcp/`, **fora do repositório** por licença (CC-BY-NC-ND-4.0, mesma regra de `roms/`); sobe pelo `tools/pes2/fork.py`, e `fork.py recipe` diz como reconstruí-lo. Decisão e consequências na §6.14 |
+| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Mora em `~/Applications/duckstation-mcp/`, **fora do repositório** por licença (CC-BY-NC-ND-4.0, mesma regra de `roms/`); sobe pelo `tools/pes2/fork.py`, e `fork.py recipe` diz como obtê-lo — o binário que o CI dele publica, ou a compilação. Decisão e consequências na §6.14 |
 | dados | `~/.local/share/duckstation/` |
 | BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
 | biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |
@@ -2184,7 +2184,11 @@ corrida precisa de valores *diferentes*, não de mais estados.
 
 Custo medido: as sete leituras da partida saíram em duas corridas de ~50 s de
 relógio sob fast-forward, sobre 13 MB de estados; a varredura das oito é de
-**0,25 s e 104 MiB de pico**. Contra dias de compilação de um emulador.
+**0,25 s e 104 MiB de pico**. (A comparação escrita aqui era "contra dias de
+compilação de um emulador", e ela caiu duas vezes: a PES2-TASK-33 mediu
+**107 s** de build, e a CORR-PES2-028 mostrou que o fork publica binário
+pronto. O caminho barato continua sendo o barato — o que não se sustenta é a
+ordem de grandeza que se atribuía ao outro.)
 
 O **fluxo D** também fecha, com uma ressalva que vale para a PES2-TASK-05:
 dois estados a um gol de distância diferem em **13.188 trechos e 149.191
@@ -2370,9 +2374,10 @@ reescrito. Nada do fork entrou no repositório.
 usuário, ao lado do AppImage oficial que continua instalado. São três
 diretórios — `bin/`, `lib/`, `plugins/` — porque o `RUNPATH` do binário
 aponta para a árvore de build em que ele nasceu (armadilha 28); o lançador
-exporta `LD_LIBRARY_PATH` e `QT_PLUGIN_PATH`. A receita de reconstruí-lo
-saiu do Log da PES2-TASK-33 e virou `tools/pes2/fork.py recipe`, que é
-executável e não envelhece calado.
+exporta `LD_LIBRARY_PATH` e `QT_PLUGIN_PATH`. A receita saiu do Log da
+PES2-TASK-33 e virou `tools/pes2/fork.py recipe`, que é executável e não
+envelhece calado — e desde a CORR-PES2-028 traz **dois** caminhos, o download
+do binário publicado pelo CI do fork antes da compilação.
 
 ##### As assinaturas de quadro, medidas
 

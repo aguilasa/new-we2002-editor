@@ -149,7 +149,7 @@ PES2_IMAGE=<copia.cue> tools/pes2/asset_screen.sh                        # quadr
 python3 tools/pes2/faq_check.py --image "<track1.bin>"
 
 python3 tools/pes2/fork.py launch "<copia.cue>"   # sobe o fork com MCP; `kill` encerra os tres binarios
-python3 tools/pes2/fork.py recipe                # como reconstruir o fork
+python3 tools/pes2/fork.py recipe                # os dois caminhos ate o fork: baixar ou compilar
 python3 tools/pes2/mcp.py --self-check           # o cliente MCP, sem emulador
 python3 tools/pes2/mcp.py --list                 # as 95 ferramentas, contra o servidor vivo
 python3 tools/pes2/fork.py --self-check          # caminhos, lista de kill, recusas
@@ -206,7 +206,8 @@ PES2_IMAGE="<copia>/….cue" \
 **São dois emuladores, e nenhum está no `PATH`.** O de trabalho é o **fork
 com servidor MCP** desde 2026-09-03 (§6.14 do plano), em
 `~/Applications/duckstation-mcp/`; quem o sobe é o `tools/pes2/fork.py`, e
-`fork.py recipe` diz como reconstruí-lo. O AppImage oficial continua em
+`fork.py recipe` diz como obtê-lo — dois caminhos, o download do binário
+que o CI dele publica primeiro, a compilação depois. O AppImage oficial continua em
 `~/Applications/` porque é o que um terceiro reproduz, e quem o sobe continua
 sendo o `run_duckstation.sh`. **Nada do fork entra no repositório** — a
 licença do DuckStation é CC-BY-NC-ND-4.0, mesma regra de `roms/`.
@@ -281,9 +282,11 @@ tem lista própria em vez de virar premissa como a 1.
 - Todo número afirmado sobre a ferramenta externa foi contado **contra ela
   viva**, não contra o fonte dela? O `TOOLS_JSON` do fork declara 99 nomes e
   o `tools/list` devolve 95
-- O binário de terceiro ficou **fora** do repositório, e a receita de
-  reconstruí-lo é executável em vez de prosa num Log? (licença
-  CC-BY-NC-ND-4.0, mesma regra de `roms/`)
+- O binário de terceiro ficou **fora** do repositório, e a receita de obtê-lo
+  é executável em vez de prosa num Log? (licença CC-BY-NC-ND-4.0, mesma regra
+  de `roms/`). E ela cobre o caminho **barato**, não só o que se descobriu
+  primeiro: a de 2026-09-03 só ensinava a compilar, porque a aba de releases
+  do próprio fork nunca tinha sido aberta (CORR-PES2-028)
 - O gate que julga comportamento **diz contra qual binário** correu? São
   dois DuckStation, e nem a mesma leitura se reproduz entre dias no mesmo
   binário (CORR-PES2-021)

@@ -131,6 +131,10 @@ breakpoint nem disassembly — para esses o fork é insubstituível.
 funcionar muda o que a POC do fork precisa provar: ela passa a ter de
 justificar só os fluxos A e E.
 
+> *"Dias de compilação" não se sustentou* — a PES2-TASK-33 mediu **107 s** de
+> build, e a CORR-PES2-028 achou o binário pronto que o CI do fork publica. O
+> resultado desta task não muda; a premissa de custo do parágrafo acima, sim.
+
 > O layout do save state **não foi lido**. O parágrafo acima é inferência a
 > partir do tamanho, e está escrito como inferência de propósito.
 >

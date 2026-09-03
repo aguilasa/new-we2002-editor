@@ -588,7 +588,7 @@ As ferramentas, e o que cada uma responde:
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
 | `python3 tools/pes2/mcp.py --list\|--status\|--call <tool>` | o cliente MCP do fork, stdlib pura: `initialize`, sessão por `MCP-Session-Id`, `tools/call`. **95 ferramentas**, contadas contra o servidor e não contra o fonte, que declara 99 |
-| `python3 tools/pes2/fork.py launch\|kill\|status\|recipe` | sobe o **fork com MCP** de `~/Applications/duckstation-mcp/`, dispensa o `Automatic Updater` e espera a porta; o `kill` alcança os três nomes de processo, e o `recipe` diz como reconstruí-lo |
+| `python3 tools/pes2/fork.py launch\|kill\|status\|recipe` | sobe o **fork com MCP** de `~/Applications/duckstation-mcp/`, dispensa o `Automatic Updater` e espera a porta; o `kill` alcança os três nomes de processo, e o `recipe` diz como obtê-lo, por download ou compilação |
 | `python3 tools/pes2/mcp_drive.py <copia.cue> --screen ...` | as mesmas quatro rotas do `drive.py`, por MCP. `--keep-alive` deixa o jogo de pé na tela alcançada, e é o que torna o caso vermelho alcançável: `--measure-menu` mede as sete linhas do menu e depois pede sete, o que tem de falhar — e recusa antes de medir se a tela não for o menu |
 | `tools/pes2/run_duckstation.sh` | sobe o **AppImage oficial** no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. Continua existindo porque é o binário que um terceiro reproduz |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
@@ -626,7 +626,8 @@ Quatro coisas que custam tempo se descobertas tarde:
   localmente** — o único com servidor MCP, que é o que permite dirigir o jogo
   por chamada em vez de `xdotool` (`pause` + `frame_step`: cinco teclas,
   cinco linhas). Ele mora em `~/Applications/duckstation-mcp/`, sobe pelo
-  `tools/pes2/fork.py`, e `fork.py recipe` diz como reconstruí-lo. O
+  `tools/pes2/fork.py`, e `fork.py recipe` diz como obtê-lo — o CI do fork
+  publica um AppImage com o servidor, e compilar é o segundo caminho. O
   **AppImage oficial** continua em `~/Applications/` e continua sendo o que
   um terceiro reproduz; quem o sobe é o `run_duckstation.sh`, e quem o dirige
   é o `drive.py`.
