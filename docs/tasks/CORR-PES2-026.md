@@ -3,7 +3,7 @@ id: CORR-PES2-026
 title: "Correção: o offset da RAM no fluxo inflado ficou em 6799; o leitor corrigido mede 6754"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -96,19 +96,52 @@ lugar certo para a menção.
 
 ## Verificação
 
-- [ ] `grep -rn "6799" docs/ | grep -v concluidos` só devolve a menção
+- [x] `grep -rn "6799" docs/ | grep -v concluidos` só devolve a menção
       histórica, nunca uma afirmação do valor corrente
-- [ ] o número escrito bate com
+- [x] o número escrito bate com
       `python3 tools/pes2/savestate.py info <state.sav> | grep '^  RAM'`
-- [ ] `python3 tools/pes2/savestate.py selftest` continua verde
-- [ ] `ctest --test-dir build -R pes2_selftest` verde
+- [x] `python3 tools/pes2/savestate.py selftest` continua verde
+- [x] `ctest --test-dir build -R pes2_selftest` verde
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** 6799 → **6754** nos dois lugares, com a origem
+escrita ao lado. A §6.14 do plano ganhou o parêntese que explica de onde o
+número veio e por que ele escapou da reconciliação anterior: **o deslocamento
+e os endereços andam em sentidos opostos** — a base desce 45, os endereços
+sobem 45 —, então um `grep` pelo endereço publicado nunca encontra o
+deslocamento que o produziu. O Log da PES2-TASK-32 recebeu a mesma correção
+no Resumo, mais um parágrafo no bloco **Corrigido em: 2026-09-03** que já
+existia ali, dizendo o que ficou para trás naquela varredura.
 
-**Problemas encontrados:**
+A defesa "resultado, não constante" foi mantida nos dois — ela está certa e
+não era o problema. O problema é que o valor conferido por quem desconfia do
+leitor era o de antes do conserto.
+
+**Problemas encontrados:** nenhum. A varredura não achou o número em
+`tools/` nem em `.claude/`, e o único "payload offset" fora dos docs de
+correção é a transcrição dentro da própria CORR.
+
+**Gates, com o número medido:**
+
+```
+$ python3 tools/pes2/savestate.py info <state.sav> | grep '^  RAM'
+  RAM               2097152 B at payload offset 6754      (nos dois estados desta máquina)
+$ python3 tools/pes2/savestate.py selftest
+all checks passed, and every guard was seen refusing
+$ ctest --test-dir build -R pes2_selftest
+1/1 Test #7: pes2_selftest .......... Passed  0.54 sec
+```
+
+`grep -rn "6799" docs/` devolve três linhas, e as três são menção histórica
+datada ("Era 6799 até 2026-09-03", "dizia 6799") — nenhuma afirma o valor
+corrente.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-PES2-PSX.md` | modificado (§6.14, o parágrafo do deslocamento) |
+| `docs/tasks/32-poc-do-mcp-do-duckstation.md` | modificado (Log: bloco "Corrigido em" e o Resumo) |

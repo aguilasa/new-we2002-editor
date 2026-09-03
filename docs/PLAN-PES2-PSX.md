@@ -2101,8 +2101,13 @@ na marca `DMA`.
 
 **O deslocamento é derivado, nunca presumido.** `Bus` abre com o tamanho da
 RAM em u32, e a RAM termina onde `DMA` começa, então o início é uma
-subtração; nos estados medidos ela cai no offset 6799 do fluxo inflado, mas
-esse número é resultado, não constante. Em cima disso toda extração é
+subtração; nos estados desta máquina ela cai no offset **6754** do fluxo
+inflado — medido por `savestate.py info`, e resultado, não constante. (Era
+6799 até 2026-09-03: a PES2-TASK-33 achou os 45 bytes de `MEMCTRL.regs` e
+`RAM_SIZE.bits` que `Bus` escreve **depois** da RAM. O deslocamento desce 45
+e os endereços do fluxo C sobem 45 — os dois andam em sentidos opostos, e é
+por isso que um `grep` pelo endereço não acha o deslocamento: quem reconciliar
+um tem de reconciliar o outro.) Em cima disso toda extração é
 conferida contra o kernel que a BIOS deixa na RAM baixa: `PS-X Control PAD
 Driver` tem de estar nos primeiros 64 KiB. Sem essa guarda, um deslocamento
 errado devolve 2 MiB de lixo plausível e a busca de valor responde com um

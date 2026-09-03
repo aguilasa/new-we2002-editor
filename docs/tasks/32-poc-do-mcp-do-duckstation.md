@@ -153,13 +153,20 @@ confrontar o leitor com o servidor MCP, e os números acima já são os certos.
 As leituras desta task continuam válidas — o que estava errado era o
 endereço, nunca o valor.
 
+O **deslocamento** ficou para trás naquela reconciliação e só foi corrigido em
+2026-09-03 pela [CORR-PES2-026](/docs/tasks/CORR-PES2-026.md): o Resumo abaixo
+dizia 6799, e o leitor mede **6754**. Os dois números se movem em sentidos
+opostos — a base desce 45, os endereços sobem 45 —, então procurar pelo
+endereço publicado não encontra o deslocamento que o produziu.
+
 **Resumo.** O caminho barato funciona, e por isso o fork não foi compilado.
 Um save state do DuckStation (formato versão 86) é um cabeçalho fixo, um
 screenshot e **um frame zstd** cujo conteúdo é uma sequência de seções com
 nome prefixado por tamanho; os 2 MiB de RAM principal são a cauda de `Bus`,
 encostados na marca `DMA`. O deslocamento **se deriva** — `Bus` abre com o
 tamanho da RAM, e a RAM termina onde `DMA` começa — e nos estados desta
-máquina cai em 6799, que é resultado e não constante.
+máquina cai em **6754**, que é resultado e não constante. (Este Resumo dizia
+6799 até 2026-09-03 — ver o bloco **Corrigido em** acima.)
 
 O fluxo C fechou com oito leituras: 130 candidatos com duas, 2 com oito. Os
 dois sobreviventes são placar de verdade, e é isso que ensina — **o motor
