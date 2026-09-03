@@ -159,6 +159,7 @@ python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen main-menu --keep-alive  #
 python3 tools/pes2/mcp_drive.py --measure-menu   # o caso vermelho: uma tecla a mais tem de falhar
 tools/pes2/run_duckstation.sh        # sobe o AppImage no :98; --kill encerra
 tools/pes2/boot_check.sh             # mede que ele botou -- e diz contra qual binario
+tools/pes2/boot_check.sh --self-check   # o veredito e seus casos vermelhos, sem emulador
 python3 tools/pes2/drive.py "<copia.cue>" --screen team-select --out-dir <dir>
 python3 tools/pes2/drive.py "<copia.cue>" --screen main-menu --save-state  # atalho
 python3 tools/pes2/savestate.py selftest                              # o leitor de save state, com os casos vermelhos
@@ -198,7 +199,7 @@ PES2_IMAGE="<copia>/….cue" \
 | índice de contêiner, imagem ou paleta | `bin_archive.py check` **exit 0 nos quatro discos**. Nas imagens não hackeadas não há entrada cujo retângulo discorde do fluxo; na European Deluxe são **seis** — cinco de tamanho e o `TEX_70.BIN` em 18052, que nem decodifica —, contadas como categoria própria e não como falha, com a linha `is a hacked image: its 6 record(s) …`. A **contagem é asserção**: uma sétima fica vermelha (§1.14(f)) |
 | codec ou contêiner de `/BIN/` | `lzss.py --check` verde nos **quatro** discos — as duas releases de PES2 e as duas imagens de WE2002 —, cada um **reconhecido pelo nome** (`recognised PES2 (EsIt) by its 208 containers`) e batendo nas quatro contagens medidas: 208/172/3/33/2.153, 210/174/3/33/2.195, 177/141/3/33/1.842 e 195/159/3/33/2.027 (contêineres/`whole`/`partial`/`none`/blocos). E `--roundtrip` 100% nos blocos que o disco tocado tem |
 | offset ou tabela | remedido nas **duas** releases; a divergência sai por marcador, não por offset absoluto |
-| comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), o quadro **fora** do git, e a linha final dizendo **contra qual binário** ele correu |
+| comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), o quadro **fora** do git, e a linha final dizendo **contra qual binário** ele correu. E `boot_check.sh --self-check` verde: o veredito é função e seus casos vermelhos rodam sem emulador — inclusive o quadro congelado, que é o modo de falha real. **A prova de vida amostra uma vez por segundo** ao longo do `PES2_GAP` e guarda a maior diferença; a forma antiga, de dois quadros em relógio fixo, falhava 1 em 3 numa tela de abertura parada (CORR-PES2-030) |
 | rota de emulador | `mcp_drive.py --self-check` verde, e `--measure-menu` contra o jogo vivo: ele mede as sete linhas do menu e depois pede sete, o que **tem de falhar**. Verde que nunca pôde ser vermelho é decoração. **São dois comandos, e o primeiro é parte do gate:** `--screen main-menu --keep-alive` deixa o jogo de pé no menu — sem ele toda rota mata no `__exit__` o emulador que subiu, e o caso vermelho passa a depender de um save state esquecido de outra corrida. O `--measure-menu` confere a tela antes de medir, e recusa alto se não for o menu (CORR-PES2-024) |
 | cliente ou lançador de MCP | `mcp.py --self-check` e `fork.py --self-check` verdes; os dois rodam sem emulador e os dois têm o caso de servidor ausente |
 | número em doc | veio de ferramenta, não de soma à mão |

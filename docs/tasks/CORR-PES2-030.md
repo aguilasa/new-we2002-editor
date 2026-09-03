@@ -3,7 +3,7 @@ id: CORR-PES2-030
 title: "Correção: o `pes2_boot` prova vida exigindo que dois quadros difiram, e falha na tela de intro que não anima"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -140,20 +140,75 @@ produziu por acidente, e que hoje não tem teste.
 
 ## Verificação
 
-- [ ] dez corridas seguidas de `boot_check.sh` sobre a mesma cópia, todas
+- [x] dez corridas seguidas de `boot_check.sh` sobre a mesma cópia, todas
       verdes — a frequência medida hoje é de 1 falha em 3
-- [ ] o gate continua ficando **vermelho** com o emulador morto ou a tela
+- [x] o gate continua ficando **vermelho** com o emulador morto ou a tela
       preta, e o caso está exercitado
-- [ ] a mensagem de falha diz o que foi medido, não a conclusão
-- [ ] `ctest --test-dir build -R pes2` verde com a receita completa
-- [ ] `roms/` intocada; nenhum quadro do jogo versionado
+- [x] a mensagem de falha diz o que foi medido, não a conclusão
+- [x] `ctest --test-dir build -R pes2` verde com a receita completa
+- [x] `roms/` intocada; nenhum quadro do jogo versionado
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** a opção 1 da CORR — amostrar em vez de apostar
+em dois instantes. O gate tira **um quadro por segundo** ao longo do
+`PES2_GAP` e guarda a **maior** diferença contra o quadro 1; um boot que anda
+sai de qualquer tela parada dentro da janela, e uma tela parada deixa de
+decidir o veredito sozinha. A opção 2 (perguntar a contagem de quadros ao
+MCP) ficou de fora de propósito: ela não degrada para o AppImage oficial, que
+não tem servidor, e é justamente o binário que um terceiro reproduz.
 
-**Problemas encontrados:**
+Duas coisas a mais, que a CORR pedia e que valem tanto quanto:
+
+- **A mensagem parou de concluir.** Era `the two frames are the same -- it is
+  not running`, que afirma o que não sabe. Agora diz o medido e as duas
+  causas possíveis: `no sample differed from frame 1 across 12s (12 samples,
+  largest diff 0 of 524000) -- a dead emulator looks like this, and so does a
+  still screen that outlasted the window`.
+- **O veredito virou função `judge()`, e o script ganhou `--self-check`.** O
+  caso vermelho deste gate é constrangedor de produzir de verdade — exige um
+  emulador morto —, e por isso nunca tinha sido visto. Agora roda sem
+  emulador, com os números da falha real.
+
+**Problemas encontrados:** nenhum. A varredura puxou dois textos que
+descrevem o gate pela forma antiga (`CLAUDE.md` e o critério da
+PES2-TASK-04), reconciliados em **commit próprio**. O registro datado do
+`progresso.md` ("dois quadros com desvio-padrão 0,228 e 0,243") ficou como
+está: é a medição de 2026-08-30, não uma descrição do gate.
+
+**Gates, com o número medido.** Dez corridas seguidas sobre a mesma cópia:
+
+```
+run  1..10  OK   changed pixels: 260000 of 524000  (largest over 12 samples)
+=== 10 verdes, 0 vermelhas de 10 ===
+```
+
+Contra **1 falha em 3** antes da troca. E o veredito exercitado sem
+emulador:
+
+```
+$ tools/pes2/boot_check.sh --self-check
+  ok   a moving picture passes
+  ok   a frozen picture is refused           <- sd=0.13657, 0 de 524000: a falha real
+  ok   a black screen is refused
+  ok   movement at exactly the threshold is refused
+  ok   movement just over it passes
+  ok   an unusable comparison is refused
+  ok   two copies of one frame compare to 0
+  ok   two different frames do not
+SELF-CHECK OK: the verdict, its red cases and the comparison
+```
+
+Os dois últimos medem o **caminho de comparação**, não só a aritmética: duas
+cópias de um quadro dão 0 e dois quadros diferentes não. `roms/` intocada,
+quadros fora do git.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `tools/pes2/boot_check.sh` | modificado (amostragem, `judge()`, `--self-check`, a mensagem) |
+| `docs/PLAN-PES2-PSX.md` | modificado (§3.4, o item 3 da evidência de boot) |
+| `docs/prompts/perfil-pes2.md` | modificado (bloco de gates e a linha "comportamento em tela") |

@@ -1183,8 +1183,22 @@ afirmação e mede três coisas:
 1. a janela aparece, com o tamanho que o emulador diz;
 2. o quadro **não é chapado** — emulador morto e emulador carregando são
    idênticos num log e opostos num desvio-padrão;
-3. dois quadros separados por alguns segundos **diferem**, que é o que
-   separa "rodando" de "travado no primeiro quadro".
+3. **alguma** amostra tirada ao longo do `PES2_GAP` difere da primeira, que
+   é o que separa "rodando" de "travado no primeiro quadro".
+
+O item 3 era *"dois quadros separados por alguns segundos diferem"* até
+2026-09-03, e essa forma é intermitente: ela só vale se a tela em que os dois
+instantes caem **animar**, e um boot de PSX é feito de telas paradas cujo
+tempo de início varia a cada corrida. Medido, **uma falha em três corridas
+seguidas do mesmo comando** — os dois quadros byte a byte iguais, 0 de
+524.000 pixels, com `sd=0,13657`, que é conteúdo desenhado e não tela preta.
+É a armadilha 32 da §6.11 ao contrário: lá o risco é esperar imobilidade numa
+tela que anima, aqui é exigir movimento de uma que não anima; as duas saem de
+tratar o relógio como se ele dissesse em que tela se está. O gate passou a
+amostrar **uma vez por segundo** ao longo do intervalo e a guardar a maior
+diferença — **10 corridas seguidas verdes** depois da troca (CORR-PES2-030).
+O veredito virou função, e `tools/pes2/boot_check.sh --self-check` a exercita
+sem emulador, incluindo o caso congelado que falhou e a tela preta.
 
 Medido em 2026-08-30 sobre a cópia de trabalho de `(EsIt)`, janela de
 **800×655** no `:98`: quadro 1 com desvio-padrão 0,228, quadro 2 com

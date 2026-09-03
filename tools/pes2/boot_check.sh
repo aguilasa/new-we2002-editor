@@ -17,7 +17,10 @@
 #                  repository the same way roms/ and the FAQs do.
 #   PES2_WARMUP    seconds to let the intro run before the first frame,
 #                  default 45
-#   PES2_GAP       seconds between the two frames, default 12
+#   PES2_GAP       seconds the liveness sampling spans, default 12. One
+#                  frame a second is taken across it and the largest
+#                  difference from frame 1 decides -- see the note by the
+#                  loop for why it is not two frames any more.
 #   PES2_REFERENCE a PNG to compare the second frame against. It lives
 #                  outside the repository -- it is a frame of a commercial
 #                  game -- so it is a path, not a committed file.
@@ -52,6 +55,86 @@ GAP="${PES2_GAP:-12}"
 
 SKIP=77
 skip() { echo "skipping the PES2 boot check: $*"; exit "$SKIP"; }
+
+# judge <sd_a> <sd_b> <changed> <total> <samples> <gap>
+#
+# The verdict, as a function, so `--self-check` can drive it with no emulator.
+# It prints its FAILs and returns 1 if any fired. A gate whose red case has
+# never been seen is decoration -- and this one's red case is the awkward
+# sort, because producing it for real means a dead emulator.
+judge() {
+    local sd_a="$1" sd_b="$2" changed="$3" total="$4" samples="$5" gap="$6"
+    local bad=0
+    awk -v a="$sd_a" 'BEGIN{exit !(a > 0.02)}' ||
+        { echo "FAIL: frame 1 is flat (sd=$sd_a) -- black screen or dead emulator"; bad=1; }
+    awk -v b="$sd_b" 'BEGIN{exit !(b > 0.02)}' ||
+        { echo "FAIL: frame 2 is flat (sd=$sd_b)"; bad=1; }
+    case "$changed" in
+        ''|*[!0-9.e+]*)
+            echo "FAIL: could not compare the frames ($changed)"; bad=1 ;;
+        # Say what was measured, not the conclusion. "It is not running" is
+        # an inference; all this knows is that nothing moved across the
+        # window it watched.
+        *) awk -v c="$changed" -v t="$total" 'BEGIN{exit !(c > t*0.001)}' ||
+               { echo "FAIL: no sample differed from frame 1 across ${gap}s ($samples samples, largest diff $changed of $total) -- a dead emulator looks like this, and so does a still screen that outlasted the window"; bad=1; } ;;
+    esac
+    return "$bad"
+}
+
+self_check() {
+    local bad=0
+    ok() { echo "  ok   $1"; }
+    no() { echo "  FAIL $1"; bad=1; }
+
+    # A live boot: something moved.
+    judge 0.20 0.23 260000 524000 12 12 >/dev/null &&
+        ok "a moving picture passes" || no "a moving picture passes"
+    # The measured failure of 2026-09-03: content on screen, nothing moving.
+    judge 0.13657 0.13657 0 524000 12 12 >/dev/null &&
+        no "a frozen picture is refused" || ok "a frozen picture is refused"
+    # A black screen, which is the dead-emulator case the flat test catches.
+    judge 0.0 0.0 0 524000 12 12 >/dev/null &&
+        no "a black screen is refused" || ok "a black screen is refused"
+    # Movement just under the threshold: 0.1% of the frame is the line.
+    judge 0.20 0.23 524 524000 12 12 >/dev/null &&
+        no "movement at exactly the threshold is refused" ||
+        ok "movement at exactly the threshold is refused"
+    judge 0.20 0.23 525 524000 12 12 >/dev/null &&
+        ok "movement just over it passes" || no "movement just over it passes"
+    # A comparison that produced nothing usable.
+    judge 0.20 0.23 "" 524000 12 12 >/dev/null &&
+        no "an unusable comparison is refused" ||
+        ok "an unusable comparison is refused"
+
+    # And the measurement path itself, not just the arithmetic: two identical
+    # images must compare to 0, two different ones must not.
+    if command -v convert >/dev/null && command -v compare >/dev/null; then
+        local t; t="$(mktemp -d -t pes2-boot-self-XXXXXX)"
+        convert -size 64x64 gradient:black-white "$t/a.png"
+        cp "$t/a.png" "$t/same.png"
+        convert -size 64x64 gradient:white-black "$t/other.png"
+        [ "$(compare -metric AE "$t/a.png" "$t/same.png" null: 2>&1)" = "0" ] &&
+            ok "two copies of one frame compare to 0" ||
+            no "two copies of one frame compare to 0"
+        [ "$(compare -metric AE "$t/a.png" "$t/other.png" null: 2>&1)" != "0" ] &&
+            ok "two different frames do not" || no "two different frames do not"
+        rm -rf "$t"
+    else
+        echo "  ..   ImageMagick missing, skipping the comparison path"
+    fi
+
+    if [ "$bad" -eq 0 ]; then
+        echo "SELF-CHECK OK: the verdict, its red cases and the comparison"
+    else
+        echo "SELF-CHECK FAILED"
+    fi
+    return "$bad"
+}
+
+if [ "${1:-}" = "--self-check" ]; then
+    self_check
+    exit $?
+fi
 
 # Two families of variable live side by side in this project -- WE2002_PES2_*
 # for the disc tools, PES2_* for the emulator ones -- and the `ctest` recipe
@@ -142,17 +225,43 @@ shoot "$A"
 read -r MEAN_A SD_A <<<"$(stats "$A")"
 echo "frame 1  $A  mean=$MEAN_A  sd=$SD_A"
 
-echo "== ${GAP}s later =="
-sleep "$GAP"
-B="$SHOTDIR/boot-2.png"
-shoot "$B"
-read -r MEAN_B SD_B <<<"$(stats "$B")"
-echo "frame 2  $B  mean=$MEAN_B  sd=$SD_B"
-
-# Fraction of pixels that differ between the two frames.
-CHANGED="$(compare -metric AE "$A" "$B" null: 2>&1 || true)"
+# Liveness, sampled rather than guessed at.
+#
+# This used to be one more frame `PES2_GAP` seconds later, and "they differ"
+# was the proof of life. That assertion is only sound if the screen those two
+# instants land on *animates*, and a PSX opening is mostly static screens
+# whose timing shifts from run to run: when both samples fell inside one of
+# them the gate declared "it is not running" about a perfectly live emulator.
+# Measured 2026-09-03, one failure in three consecutive runs of the same
+# command -- both frames byte-identical, 0 of 524000 pixels, at sd=0.13657,
+# which is drawn content and not a black screen.
+#
+# It is pitfall 32 of section 6.11 inverted: there the risk is waiting for
+# stillness on a screen that animates, here it is demanding movement from one
+# that does not. Both come from treating the clock as if it said which screen
+# you are on. So sample once a second across the gap and keep the largest
+# difference any of them has from the first frame: a boot that is running
+# crosses out of whatever still screen it is on, and one still screen no
+# longer decides the verdict.
 TOTAL="$(identify -format "%[fx:w*h]" "$A")"
-echo "changed pixels: $CHANGED of $TOTAL"
+CHANGED=0
+SAMPLES=0
+B="$SHOTDIR/boot-2.png"
+echo "== sampling once a second for ${GAP}s =="
+for _ in $(seq 1 "$GAP"); do
+    sleep 1
+    shoot "$B"
+    SAMPLES=$((SAMPLES + 1))
+    d="$(compare -metric AE "$A" "$B" null: 2>&1 || true)"
+    case "$d" in
+        ''|*[!0-9.e+]*) : ;;
+        *) awk -v d="$d" -v c="$CHANGED" 'BEGIN{exit !(d > c)}' &&
+               CHANGED="$d" ;;
+    esac
+done
+read -r MEAN_B SD_B <<<"$(stats "$B")"
+echo "frame 2  $B  mean=$MEAN_B  sd=$SD_B  (last of $SAMPLES samples)"
+echo "changed pixels: $CHANGED of $TOTAL  (largest over $SAMPLES samples)"
 
 REFERENCE="${PES2_REFERENCE:-}"
 TOLERANCE="${PES2_TOLERANCE:-0.35}"
@@ -173,13 +282,7 @@ if [ -n "$REFERENCE" ]; then
 fi
 
 fail=0
-awk -v a="$SD_A" 'BEGIN{exit !(a > 0.02)}' || { echo "FAIL: frame 1 is flat (sd=$SD_A) -- black screen or dead emulator"; fail=1; }
-awk -v b="$SD_B" 'BEGIN{exit !(b > 0.02)}' || { echo "FAIL: frame 2 is flat (sd=$SD_B)"; fail=1; }
-case "$CHANGED" in
-    ''|*[!0-9.e+]*) echo "FAIL: could not compare the two frames ($CHANGED)"; fail=1 ;;
-    *) awk -v c="$CHANGED" -v t="$TOTAL" 'BEGIN{exit !(c > t*0.001)}' ||
-           { echo "FAIL: the two frames are the same -- it is not running"; fail=1; } ;;
-esac
+judge "$SD_A" "$SD_B" "$CHANGED" "$TOTAL" "$SAMPLES" "$GAP" || fail=1
 
 if [ -n "$REFERENCE" ]; then
     case "$REF_DIFF" in
@@ -191,6 +294,6 @@ if [ -n "$REFERENCE" ]; then
 fi
 
 if [ "$fail" -eq 0 ]; then
-    echo "BOOT OK: $WHICH, window ${WIN}, $(geom), two live frames in $SHOTDIR"
+    echo "BOOT OK: $WHICH, window ${WIN}, $(geom), $((SAMPLES + 1)) live frames in $SHOTDIR"
 fi
 exit "$fail"
