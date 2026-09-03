@@ -3,7 +3,7 @@ id: CORR-PES2-022
 title: "Correção: a coluna \"Revisado em\" das PES2-TASK-32 e 33 diz `✅ Concluído`, e nenhuma das duas foi revisada"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -101,17 +101,44 @@ este prompt escreve é a Revisado em").
 
 ## Verificação
 
-- [ ] `grep -c '| ✅ Concluído |$' docs/tasks/progresso.md` devolve `0`
-- [ ] `python3 tools/check_tasks.py` continua verde
-- [ ] o `/revisar` sem argumento escolhe a `PES2-TASK-32`
-- [ ] as duas revisões pendentes são feitas, uma invocação por vez
+- [x] `grep -c '| ✅ Concluído |$' docs/tasks/progresso.md` devolve `0`
+- [x] `python3 tools/check_tasks.py` continua verde
+- [x] o `/revisar` sem argumento escolhe a `PES2-TASK-32`
+- [ ] as duas revisões pendentes são feitas, uma invocação por vez — **fora do
+      escopo desta correção**, que repõe a fila; revisar é do `/revisar`, uma
+      invocação por task
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** as duas células "Revisado em" das PES2-TASK-32 e
+33 voltaram a `⬜ pendente`, devolvendo as duas tasks à fila do `/revisar`. E a
+cerca que faltava foi escrita no `01-executar.md`: o passo que preenche a
+coluna já dizia "não escreva data aí", mas o erro medido não foi uma data — foi
+o **símbolo da coluna vizinha copiado uma casa adiante**. O texto agora nomeia
+o valor único que o prompt de execução escreve ali (`⬜ pendente`), nomeia o que
+`✅ Concluído` provoca (tira a task da fila e afirma revisão que não houve), e
+cita a ocorrência.
 
-**Problemas encontrados:**
+**Problemas encontrados:** nenhum. Uma frase próxima foi conferida e **não** é
+discrepância: a §6.14 do plano diz "Revista em 2026-09-03 pela PES2-TASK-33" —
+é a **seção** que a task revisitou, não a task que foi revisada.
+
+**Gates:**
+
+- `grep -c '| ✅ Concluído |$' docs/tasks/progresso.md` → `0` (era `2`)
+- `python3 tools/check_tasks.py` → `check_tasks: 85 task(s), ok`
+- a fila do `/revisar` — linhas `✅ Concluído` com `⬜ pendente` na última
+  coluna — passou a ter exatamente **PES2-TASK-32 e 33**, e a de menor ID é a
+  **32**, que é o que o `02-revisar.md` toma
+
+A ordem de revisão é 32, 33, e a 34 fica com a data que já tinha: repor a fila
+das duas anteriores não desfaz a revisão que houve.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/tasks/progresso.md` | modificado (linhas 77 e 78) |
+| `docs/prompts/01-executar.md` | modificado (a cerca da coluna "Revisado em") |

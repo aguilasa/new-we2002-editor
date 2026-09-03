@@ -265,7 +265,13 @@ Se concluída:
   mesmo em linha pendente
 - Trocar a coluna **"Revisado em"** de `—` para `⬜ pendente` — a tarefa passou
   a existir para ser revisada, e o `02-revisar.md` procura por esse marcador.
-  **Não escreva data aí**: quem revisa é o `/revisar`, em invocação separada
+  **`⬜ pendente` é o único valor que este prompt escreve nessa célula.** Nem
+  data, nem `✅ Concluído`: quem revisa é o `/revisar`, em invocação separada, e
+  é ele quem escreve ali — é a mesma cerca que o `02-revisar.md` já tem do outro
+  lado ("a única célula do `progresso.md` que este prompt escreve é a Revisado
+  em"). Escrever `✅ Concluído` aí — o símbolo da coluna **vizinha**, copiado uma
+  casa adiante — **tira a tarefa da fila do `/revisar`** e afirma uma revisão que
+  não houve; foi o que aconteceu com as PES2-TASK-32 e 33 (CORR-PES2-022)
 - Trocar `status: pendente` por `status: concluído` no **frontmatter do arquivo
   da tarefa**. O campo duplica a coluna Status do `progresso.md`; os dois têm de
   concordar, senão o arquivo da task afirma o contrário do índice
