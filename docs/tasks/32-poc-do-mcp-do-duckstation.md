@@ -208,5 +208,13 @@ Três coisas medidas que valem para a PES2-TASK-05 e adiante:
    perfil dizendo desde quando envelheceu.
 3. **O `pes2_boot` do `ctest` se reporta *skipped* com `WE2002_PES2_IMAGE`
    sozinho** — ele quer `PES2_IMAGE` apontando para o `.cue`. Foi rodado à
-   parte com as duas, e passou. Não é defeito, é uma variável a mais que a
-   linha do perfil não mostra.
+   parte com as duas, e passou.
+
+   *Corrigido em 2026-09-03 pela
+   [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md):* este item concluía "não é
+   defeito, é uma variável a mais que a linha do perfil não mostra", e **era
+   defeito**. A linha do perfil era a única instrução que existia, então o
+   gate nunca corria pela receita escrita — e pulava com o mesmo `Skipped`
+   de uma máquina sem emulador, o que fazia a corrida imprimir
+   `100% tests passed` sem ter julgado o boot. A receita ganhou o
+   `PES2_IMAGE` e o `boot_check.sh` ganhou três recusas distintas.
