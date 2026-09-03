@@ -177,6 +177,16 @@ roda DuckStation para este projeto. Quem manda é a configuração do próprio
 emulador, e o `drive.py` lê os bindings dela. Save state e cartão caem em
 `~/.local/share/duckstation`.
 
+**E o binário de trabalho mudou em 2026-09-03: é o fork com servidor MCP**
+(§6.14 do plano). O parágrafo acima descreve o que as ferramentas fazem
+**hoje**, e continua verdadeiro até a
+[PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) trocá-las — o
+`run_duckstation.sh` ainda lança o AppImage, o `--kill` dele não alcança o
+fork (`duckstation-qt`, não `AppRun`), e o `pes2_boot` ainda julga o AppImage.
+Duas coisas a saber antes de subir o fork à mão: o diálogo de build
+não-oficial tem `Yes` = **sair** como default, e a porta 2346 só abre depois
+que ele é dispensado. O diretório de dados segue sendo um só, e serializado.
+
 ---
 
 ## Arquivos quentes deste ciclo

@@ -74,8 +74,9 @@ PES2-TASK-22.
 | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | Gravação de asset — fit-or-fail | 7 | 27 | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-30](/docs/tasks/30-fechamento-fase-7.md) | Fechamento da Fase 7 — **o portão da 22** | 7 | 27, 28, 29 | ⬜ Pendente | — | — |
 | [PES2-TASK-31](/docs/tasks/31-audio-ra-e-vag.md) | Áudio — o banco `.RA` (VAB) e os VAG | 7 | — | ⬜ Pendente | — | — |
-| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | ⬜ pendente |
-| [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | 32 | ✅ Concluído | 2026-09-03 | ⬜ pendente |
+| [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | ✅ Concluído |
+| [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | 32 | ✅ Concluído | 2026-09-03 | ✅ Concluído |
+| [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | 33 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -91,13 +92,30 @@ sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
 **Não há task de Fase 0 nem de Fase 1 de trabalho.** As duas estão fechadas e
 verdes desde 2026-08-30, com ferramenta versionada e reexecutável (§5.1 e §5,
-Fase 1 do plano). As duas tasks de fase 0 no quadro são **decisões sobre o
+Fase 1 do plano). As tasks de fase 0 no quadro são **decisões sobre o
 ferramental da máquina**, não sobre o disco, e nenhuma bloqueia fase alguma: a
 PES2-TASK-01 sobrou da §7.1 do `PES2-AJUSTES.md` e foi tomada em 2026-09-01,
-com instalação; a PES2-TASK-32 foi aberta a pedido do usuário em 2026-09-02 e
-fechou no mesmo dia, com **decisão negativa medida** — o MCP do DuckStation
-não entra, porque o caminho barato que ele substituiria funciona (§6.14). A
-Fase 0 está fechada.
+com instalação.
+
+**O MCP do DuckStation levou três decisões em dois dias, e vale ler as três
+na ordem** — a §6.14 do plano guarda todas, porque cada uma respondia a uma
+pergunta diferente:
+
+1. **2026-09-02, PES2-TASK-32: não compilar o fork.** Medida, e certa para a
+   pergunta que ela fez — *"preciso do MCP?"* —, porque o save state entrega
+   busca de valor e diff de memória em Python puro.
+2. **2026-09-03, PES2-TASK-33: o fork entra como ferramenta de diagnóstico.**
+   A pergunta que faltava era *"o MCP funciona?"*, e a premissa de custo
+   estava errada: o fork compila em **107 s**, não em dias. O breakpoint de
+   escrita achou quem grava o placar, e o confronto entre as duas ferramentas
+   expôs um erro de 45 bytes no nosso leitor de save state.
+3. **2026-09-03, decisão do usuário: o fork é o emulador de trabalho.** Não
+   por causa dos fluxos de engenharia reversa, e sim do fluxo F — dirigir o
+   jogo. Com `pause` + `frame_step`, cinco teclas são cinco linhas; por
+   `xdotool` num display sem window manager, são uma aposta. O que isso
+   arrasta está na §6.14 e é a [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+
+**A Fase 0 deixou de estar fechada** com a 34, e fecha quando ela fechar.
 
 **A Fase 2 entra com um item só.** A varredura, as contagens, os digests e a
 correspondência entre as oito listas estão feitos; falta o `poke` de
@@ -236,9 +254,13 @@ emulador, são elas o trabalho barato que continua.
 ### Fase 0 — Ferramental da máquina
 
 - [x] `numpy` e desmontador MIPS instalados, com o que ficou de fora escrito
-- [x] MCP do DuckStation decidido **por medição**: o fork não se compila, e o
-      motivo é que save state entrega busca de valor e diff de memória
+- [x] MCP do DuckStation decidido **por medição**, três vezes em dois dias:
+      não compilar (32), compilar e usar para diagnóstico (33), e — decisão
+      do usuário em 2026-09-03 — adotar o fork como emulador de trabalho,
+      pelo que ele dá ao **dirigir** o jogo
 - [x] O leitor de RAM tem controle e casos vermelhos dentro do `pes2_selftest`
+- [ ] Direção do emulador por MCP, com a decisão de qual binário é o de
+      trabalho medida e escrita
 
 ### Fase 2 — Inventário de texto
 

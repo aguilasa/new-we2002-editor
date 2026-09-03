@@ -129,6 +129,13 @@ motivo para não fazer — é motivo para o usuário saber que está sendo feito
 ## Log de Execução
 
 **Executado em:** 2026-09-03
+**Superada em:** 2026-09-03 — a decisão que fecha esta task, *"o fork entra
+como ferramenta de diagnóstico, não como emulador de trabalho"*, foi
+**revista pelo usuário no mesmo dia**: o fork passa a ser o emulador de
+trabalho, pelo fluxo F — dirigir o jogo por MCP em vez de `xdotool`. O que
+está escrito abaixo é o que esta task mediu e continua valendo como
+evidência; o que a troca de binário arrasta está na §6.14 do plano e é a
+[PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
 
 **Resumo.** O fork compila em **107 segundos**, o servidor MCP responde, e o
 fluxo A entregou o que nenhum save state entrega. Mas o achado que mais vale

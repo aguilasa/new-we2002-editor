@@ -587,10 +587,10 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/pad.py press\|shot\|stats\|watch\|run` | dirige o emulador **já rodando**, um comando por vez — para trabalhar junto com o usuário, com `PES2_DISPLAY=:1`. O `run` acelera a partida dando `Cross` em cada saque, que é o que a faz terminar |
 | `tools/pes2/asset_screen.sh` | quadros do boot no `:98`, para ver um asset editado na tela |
 | `python3 tools/pes2/faq_check.py --image <track1.bin>` | confere `docs/PES2-NOMES.md` contra o disco |
-| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra |
+| `tools/pes2/run_duckstation.sh` | sobe o jogo no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. **Lança o AppImage oficial**, que não tem MCP — a troca pelo fork é a PES2-TASK-34 |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
 | `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes |
-| `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador |
+| `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador. O que ele **não** dá é quem escreveu — para isso é breakpoint, e aí é o fork |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
 sintético de 24 setores e roda em qualquer lugar; **`pes2_image`**, que
@@ -622,6 +622,21 @@ Quatro coisas que custam tempo se descobertas tarde:
   `settings.ini` que o lançador escrevia nunca foi lido — doze subidas
   apertando teclas ligadas a nada. Detalhe nas armadilhas 14 e 20 da §6.11
   do [PLAN-PES2-PSX.md](docs/PLAN-PES2-PSX.md).
+
+  **E desde 2026-09-03 o binário de trabalho é outro: o fork
+  `sadnescity/duckstation`, branch `mcp`, compilado localmente** — o único
+  com servidor MCP, que é o que permite dirigir o jogo por chamada em vez de
+  `xdotool` (`pause` + `frame_step`: cinco teclas, cinco linhas). O
+  parágrafo acima descreve o que as ferramentas fazem **hoje** e vale até a
+  [PES2-TASK-34](docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) trocá-las: o
+  `run_duckstation.sh` ainda lança o AppImage, o `--kill` dele não alcança o
+  fork (o processo é `duckstation-qt`, não `AppRun`), e o `pes2_boot` ainda
+  julga o AppImage. Duas armadilhas ao subir o fork à mão: o diálogo de
+  build não-oficial tem `Yes` = **sair** como default — um `Return` reflexo
+  mata o processo —, e a porta 2346 só abre depois que ele é dispensado. A
+  licença do DuckStation é **CC-BY-NC-ND-4.0**: o fork não se versiona nem
+  se publica, como `roms/` e o `we-team-editor.exe`. Decisão e consequências
+  na §6.14.
 - **`roms/` tem os originais; PES2 grava in-place como o WE2002.** Copie a
   release inteira (571 MiB, as oito trilhas) para o scratchpad antes de
   apontar qualquer coisa que escreva.

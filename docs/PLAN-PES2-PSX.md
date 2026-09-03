@@ -1001,6 +1001,7 @@ máquina, instalado pelo usuário em 2026-08-29:
 | | |
 |---|---|
 | binário | `~/Applications/DuckStation-x64.AppImage` (não é Flatpak, e não está no `PATH`) |
+| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Decisão e consequências na §6.14; onde ele passa a morar é item aberto da [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) |
 | dados | `~/.local/share/duckstation/` |
 | BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
 | biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |
@@ -1647,6 +1648,17 @@ Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
 aponta para o lugar errado.
 
+> **Elas são sobre o AppImage oficial, e o emulador de trabalho mudou em
+> 2026-09-03** (§6.14). As que descrevem o *lançador* — 1, 2, 6, 9 — não
+> alcançam o fork: ele não é `AppRun`, é `duckstation-qt`, e sobe por outro
+> caminho. As que descrevem o *jogo* seguem valendo, porque o jogo é o mesmo.
+> E as que existem por dirigir a tela com `xdotool` — a calibragem de tecla,
+> o foco `PointerRoot`, o auto-repeat — deixam de ter objeto na medida em que
+> a direção passa a ser por MCP, que é a
+> [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md). **Nenhuma
+> foi removida daqui**: armadilha medida é registro, e some quando a
+> ferramenta que a contorna morrer, não antes.
+
 1. **O AppImage não está no `PATH`** e não responde a `--help`. É `-help`,
    com um traço só.
 2. **Um diálogo pede para criar atalho de lançador** na primeira execução
@@ -2197,6 +2209,59 @@ antes de usá-lo de novo:
 
 **Nada do fork entrou no repositório**, e nada dele foi baixado. O que entrou
 é o procedimento, os números acima e `tools/pes2/savestate.py`.
+
+#### Decisão do usuário, 2026-09-03: **o fork é o emulador de trabalho**
+
+As duas decisões acima ficam como registro do que foi medido e quando; esta
+as **supera**, e o motivo não é nenhum dos fluxos de engenharia reversa: é o
+**fluxo F**, o que esta seção descartara por já estar de pé.
+
+O que mudou de fato entre a decisão de diagnóstico e esta foi uma medição do
+mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
+`xdotool`**, do vídeo de abertura ao menu principal, e do menu ao cursor em
+`Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
+Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
+`xdotool` num display sem window manager não consegue dar, e é a raiz de boa
+parte das vinte e sete armadilhas da §6.11: o foco que segue o ponteiro, o
+`TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
+menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
+porque não dá para confiar que cinco teclas movam cinco.
+
+> A corrida acima usou cliente descartável no scratchpad, e por isso
+> **nenhum número dela é resultado versionado**. Quem os quiser em documento
+> tira de script versionado, que é entregável da
+> [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md).
+
+**O que a decisão arrasta, e ainda não está feito.** Nada disto é opinião —
+é consequência mecânica de trocar o binário, e cada item é da PES2-TASK-34:
+
+- **As assinaturas de quadro saem do renderer e da versão** (o parágrafo de
+  custo desta seção já dizia isso). A da tela de título (0,550 / 0,341) e a
+  do menu (0,1405 / 0,2124) foram medidas sob o AppImage e **valem até
+  prova em contrário sob o fork**. Duas capturas e uma subtração resolvem;
+  se baterem, nada mais muda, e se não baterem a saída boa é deixarem de ser
+  critério — com `frame_step` decidindo quando a tela chegou, elas viram
+  evidência e não julgamento.
+- **O `pes2_boot` julga o AppImage.** Ele e o `boot_check.sh` continuam
+  apontados para lá; a troca é da task.
+- **O `run_duckstation.sh` lança o AppImage e não alcança o fork.** O
+  `--kill` dele casa `AppRun` e `DuckStation-x64`; o processo do fork é
+  `duckstation-qt` (armadilha 6, agora com um binário a mais para escapar
+  dela).
+- **O fork não sobe sozinho.** O diálogo *"You are not using an official
+  release!"* tem `Yes` como default, e `Yes` significa **sair**: um `Return`
+  reflexo mata o processo sem janela e sem porta, parecendo build quebrado.
+  E a porta 2346 **só abre depois** que ele é dispensado.
+- **Onde o binário mora é pergunta em aberto.** Ele foi compilado no
+  scratchpad da sessão, que é temporário. Emulador de trabalho não pode
+  morar num diretório que se apaga, e a licença CC-BY-NC-ND proíbe versioná-lo
+  — então ele precisa de um lugar fora do repositório e fora do scratchpad,
+  escolhido pelo dono da máquina.
+
+**O que a decisão não muda.** O AppImage oficial continua instalado e
+continua sendo o que um terceiro consegue reproduzir; a §6.11 continua
+descrevendo o que foi medido sobre ele; e a proibição de versionar ou
+publicar o fork continua valendo, pela licença.
 
 ---
 
