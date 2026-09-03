@@ -592,7 +592,7 @@ As ferramentas, e o que cada uma responde:
 | `python3 tools/pes2/mcp_drive.py <copia.cue> --screen ...` | as mesmas quatro rotas do `drive.py`, por MCP. `--keep-alive` deixa o jogo de pé na tela alcançada, e é o que torna o caso vermelho alcançável: `--measure-menu` mede as sete linhas do menu e depois pede sete, o que tem de falhar — e recusa antes de medir se a tela não for o menu |
 | `tools/pes2/run_duckstation.sh` | sobe o **AppImage oficial** no `:98` sob a configuração do próprio DuckStation da máquina; `--kill` encerra. Continua existindo porque é o binário que um terceiro reproduz |
 | `python3 tools/pes2/drive.py <copia.cue> --screen title\|main-menu\|team-select\|edit` | dirige o emulador por rota nomeada e captura; espera pela assinatura do quadro, não pelo relógio. `--save-state` deixa um estado na tela alcançada, e as rotas o reusam — 2,5 min por tentativa viram ~40 s |
-| `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, dois quadros diferentes — e diz **contra qual binário** correu. Prefere o fork; `PES2_BINARY=appimage` força o outro |
+| `tools/pes2/boot_check.sh` | mede que ele botou — janela, quadro vivo, e alguma de doze amostras diferindo da primeira — e diz **contra qual binário** correu. Prefere o fork; `PES2_BINARY=appimage` força o outro |
 | `python3 tools/pes2/savestate.py info\|ram\|shot\|read\|diff\|scan <state.sav>` | a RAM de dentro de um save state do DuckStation — busca de valor e diff de memória em Python puro, sem fork do emulador. O que ele **não** dá é quem escreveu — para isso é breakpoint, e aí é o fork |
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco

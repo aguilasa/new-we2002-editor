@@ -92,7 +92,9 @@ gravador novo.
 - [ ] `PIEMONTE2` visível em pelo menos três telas, com PNG por tela.
 - [ ] `PIEMONTE` ausente de todas as telas capturadas.
 - [ ] O jogo roda pelo menos dois minutos depois do `poke` sem travar
-      (medido como o `boot_check.sh` mede: dois quadros que diferem).
+      (medido como o `boot_check.sh` mede: alguma amostra diferindo da
+      primeira ao longo do intervalo — dois quadros em relógio fixo era a
+      forma antiga, e ela falhava 1 em 3, CORR-PES2-030).
 - [ ] Round-trip de volta: `cmp` zero contra o original.
 - [ ] A varredura do `poke.py` sem sobra na release usada — nenhum
       `UNMAPPED` na saída, que é o que sustenta "o mapa está completo".
