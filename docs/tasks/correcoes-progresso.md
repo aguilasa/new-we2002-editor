@@ -46,7 +46,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-022](/docs/tasks/CORR-PES2-022.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`; nenhuma das duas foi revisada, e o valor as tirou da fila | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [x] concluída | 2026-09-03 |
 | [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `--measure-menu` é gate, não confere se está no menu principal, e nenhum comando versionado leva o emulador até lá | Média | [x] concluída | 2026-09-03 |
-| [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | Baixa | [ ] pendente | — |
+| [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | Baixa | [x] concluída | 2026-09-03 |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -86,7 +86,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-022 — duas tasks saíram da fila de revisão sem terem sido revisadas
 - [x] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
 - [x] CORR-PES2-024 — o caso vermelho não confere a tela nem tem caminho versionado
-- [ ] CORR-PES2-025 — a §3.2 descreve como aberto um item que a 34 fechou
+- [x] CORR-PES2-025 — a §3.2 descreve como aberto um item que a 34 fechou
 
 ## Detalhes por correção
 

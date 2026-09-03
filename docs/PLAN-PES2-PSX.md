@@ -1001,7 +1001,7 @@ máquina, instalado pelo usuário em 2026-08-29:
 | | |
 |---|---|
 | binário | `~/Applications/DuckStation-x64.AppImage` (não é Flatpak, e não está no `PATH`) |
-| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Decisão e consequências na §6.14; onde ele passa a morar é item aberto da [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) |
+| binário de trabalho, desde 2026-09-03 | o **fork** `sadnescity/duckstation`, branch `mcp`, compilado localmente — é o único com servidor MCP. Mora em `~/Applications/duckstation-mcp/`, **fora do repositório** por licença (CC-BY-NC-ND-4.0, mesma regra de `roms/`); sobe pelo `tools/pes2/fork.py`, e `fork.py recipe` diz como reconstruí-lo. Decisão e consequências na §6.14 |
 | dados | `~/.local/share/duckstation/` |
 | BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
 | biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |

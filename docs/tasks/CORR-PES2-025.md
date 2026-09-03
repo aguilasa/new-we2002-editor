@@ -3,7 +3,7 @@ id: CORR-PES2-025
 title: "Correção: a §3.2 do plano ainda chama a morada do fork de \"item aberto da PES2-TASK-34\""
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -81,17 +81,44 @@ consequências na §6.14 |
 
 ## Verificação
 
-- [ ] `grep -n "item aberto" docs/PLAN-PES2-PSX.md` não devolve nada
-- [ ] a §3.2 e a §6.14 dizem o mesmo caminho, e ele bate com
+- [x] `grep -n "item aberto" docs/PLAN-PES2-PSX.md` não devolve nada
+- [x] a §3.2 e a §6.14 dizem o mesmo caminho, e ele bate com
       `python3 tools/pes2/fork.py which`
-- [ ] nenhum caminho do fork entrou no repositório
+- [x] nenhum caminho do fork entrou no repositório
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** a oração final da linha 1004 da §3.2 foi
+substituída pelo lugar. A tabela do emulador agora diz onde o fork mora
+(`~/Applications/duckstation-mcp/`), por que ele não está no repositório
+(licença CC-BY-NC-ND-4.0, mesma regra de `roms/`), quem o sobe
+(`tools/pes2/fork.py`) e onde está a receita de reconstruí-lo
+(`fork.py recipe`) — que é o conjunto que a §6.14, o `CLAUDE.md` e o perfil
+já traziam, e que faltava justamente na tabela que se abre primeiro para
+saber onde o emulador está.
 
-**Problemas encontrados:**
+**Problemas encontrados:** nenhum. A varredura por `duckstation-mcp` mostrou
+que os outros quatro lugares (§6.14, perfil, e duas linhas do `CLAUDE.md`) já
+concordavam entre si; a §3.2 era o único fora.
+
+**Gates:**
+
+```
+$ grep -n "item aberto" docs/PLAN-PES2-PSX.md
+(vazio)
+$ python3 tools/pes2/fork.py which
+/home/ingmar/Applications/duckstation-mcp/bin/duckstation-qt
+installed
+```
+
+O caminho impresso pela ferramenta bate com o escrito na §3.2 e na §6.14.
+`git ls-files | grep -i duckstation` devolve só o markdown da PES2-TASK-32 e
+o `run_duckstation.sh` — nenhum binário nem árvore do fork no repositório.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-PES2-PSX.md` | modificado (§3.2, linha 1004) |
