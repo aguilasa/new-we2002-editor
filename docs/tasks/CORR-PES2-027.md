@@ -3,7 +3,7 @@ id: CORR-PES2-027
 title: "Correção: o `pes2_boot` nunca roda pela receita documentada — ele quer `PES2_IMAGE`, e os docs só dão `WE2002_PES2_*`"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -136,19 +136,78 @@ fi
 
 ## Verificação
 
-- [ ] a receita do `CLAUDE.md`, copiada e colada com as quatro variáveis, faz
+- [x] a receita do `CLAUDE.md`, copiada e colada com as quatro variáveis, faz
       o `pes2_boot` **correr** — `Passed`, ~90 s, não `Skipped` em 0,01 s
-- [ ] com só `WE2002_PES2_IMAGE`, o skip diz que a variável trocada é a causa
-- [ ] `PES2_IMAGE` apontando para o `(Track 1).bin` em vez do `.cue` também
+- [x] com só `WE2002_PES2_IMAGE`, o skip diz que a variável trocada é a causa
+- [x] `PES2_IMAGE` apontando para o `(Track 1).bin` em vez do `.cue` também
       diz o que fazer
-- [ ] `roms/` intocada — a receita aponta para cópia
+- [x] `roms/` intocada — a receita aponta para cópia
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** as duas frentes, e a segunda ficou maior do que
+a CORR pedia.
 
-**Problemas encontrados:**
+1. **A receita.** `PES2_IMAGE` entrou na receita do `CLAUDE.md` e do perfil,
+   apontando o **`.cue`**, e a linha que descreve o `pes2_boot` passou a
+   nomear a variável em vez de só "DuckStation e o `:98`". Os dois ganharam
+   um parágrafo dizendo que **são duas famílias** — `WE2002_PES2_*` para as
+   ferramentas de disco, apontando o `(Track 1).bin`, e `PES2_*` para as de
+   emulador, apontando o `.cue` — porque é a distinção que faz o furo
+   voltar. E a receita do `CLAUDE.md` passou a apontar para **cópia**, não
+   para `roms/`, que era o que ela mandava.
+2. **A mensagem de skip.** O `boot_check.sh` distinguia "faltou a variável"
+   de "esta máquina não roda isso" com a mesma frase, e era isso que fazia o
+   furo sobreviver. Agora são **três** recusas: sem nada, com a variável
+   trocada (nomeando `WE2002_PES2_IMAGE` e dizendo que este gate quer o
+   `.cue`), e — caso que a CORR não previa — com `PES2_IMAGE` apontando um
+   `.bin` de trilha, que é o erro seguinte de quem acabou de ler que existem
+   duas famílias.
+
+**Problemas encontrados:** a varredura achou uma frase viva que o conserto
+torna falsa, no Log da PES2-TASK-32: *"Não é defeito, é uma variável a mais
+que a linha do perfil não mostra."* Era defeito. Reconciliada em **commit
+próprio**.
+
+**Gates, com o número medido.** A receita inteira, copiada do `CLAUDE.md`
+com as cinco variáveis, sobre cópias no scratchpad:
+
+```
+1/3 Test #7: pes2_selftest .......... Passed    0.37 sec
+2/3 Test #8: pes2_image ............. Passed   13.69 sec
+3/3 Test #9: pes2_boot .............. Passed   62.06 sec
+100% tests passed, 0 tests failed out of 3
+```
+
+O `pes2_boot` **correu**, 62,06 s. Antes, com a receita como estava escrita:
+
+```
+1/1 Test #9: pes2_boot .............. ***Skipped   0.01 sec
+100% tests passed, 0 tests failed out of 1
+```
+
+As três recusas, medidas:
+
+```
+$ WE2002_PES2_IMAGE=… tools/pes2/boot_check.sh
+skipping the PES2 boot check: PES2_IMAGE is not set -- WE2002_PES2_IMAGE is,
+but this gate wants the .cue of a working copy, not the Track 1 .bin
+$ tools/pes2/boot_check.sh
+skipping the PES2 boot check: PES2_IMAGE is not set
+$ PES2_IMAGE=…"(Track 1).bin" tools/pes2/boot_check.sh
+skipping the PES2 boot check: PES2_IMAGE points at … (Track 1).bin -- this
+gate wants the .cue of a working copy, which is what the emulator opens, not
+a track .bin
+```
+
+`roms/` intocada — tudo correu sobre cópias.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `CLAUDE.md` | modificado (a receita de `ctest -R pes2` e a descrição dos três alvos) |
+| `docs/prompts/perfil-pes2.md` | modificado (idem, no bloco de gates) |
+| `tools/pes2/boot_check.sh` | modificado (as três recusas) |

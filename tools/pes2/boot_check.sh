@@ -53,8 +53,23 @@ GAP="${PES2_GAP:-12}"
 SKIP=77
 skip() { echo "skipping the PES2 boot check: $*"; exit "$SKIP"; }
 
-[ -n "${PES2_IMAGE:-}" ] || skip "PES2_IMAGE is not set"
+# Two families of variable live side by side in this project -- WE2002_PES2_*
+# for the disc tools, PES2_* for the emulator ones -- and the `ctest` recipe
+# only carried the first for a while. The result was this gate reporting the
+# same `Skipped` for "you set the other one" as for "this machine has no
+# emulator", so a full run of the documented recipe printed 100% passed with
+# the only gate that puts the game on screen never having run. Say which.
+if [ -z "${PES2_IMAGE:-}" ]; then
+    if [ -n "${WE2002_PES2_IMAGE:-}" ]; then
+        skip "PES2_IMAGE is not set -- WE2002_PES2_IMAGE is, but this gate wants the .cue of a working copy, not the Track 1 .bin"
+    fi
+    skip "PES2_IMAGE is not set"
+fi
 [ -f "${PES2_IMAGE}" ]   || skip "no image at $PES2_IMAGE"
+case "${PES2_IMAGE}" in
+    *.cue) : ;;
+    *) skip "PES2_IMAGE points at ${PES2_IMAGE##*/} -- this gate wants the .cue of a working copy, which is what the emulator opens, not a track .bin" ;;
+esac
 
 # Pick the binary before anything else: which one is available decides the
 # launcher, the cleanup and the line this prints at the end.

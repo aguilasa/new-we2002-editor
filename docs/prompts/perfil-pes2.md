@@ -168,8 +168,24 @@ ctest --test-dir build -R pes2       # pes2_selftest, pes2_image, pes2_boot
 
 Os três alvos do `ctest`: **`pes2_selftest`** monta um disco sintético de 24
 setores e roda em qualquer lugar; **`pes2_image`** precisa de
-`WE2002_PES2_IMAGE`; **`pes2_boot`** precisa do DuckStation e do `:98`, e leva
-~90 s. Os dois últimos se reportam *skipped* sem o que precisam.
+`WE2002_PES2_IMAGE`; **`pes2_boot`** precisa de `PES2_IMAGE` apontando o
+**`.cue`** de uma cópia, do DuckStation e do `:98`, e leva ~90 s. Os dois
+últimos se reportam *skipped* sem o que precisam.
+
+**São duas famílias de variável, e a receita precisa das duas** —
+`WE2002_PES2_*` para as ferramentas de disco, apontando o `(Track 1).bin`, e
+`PES2_*` para as de emulador, apontando o `.cue`. Rodar `ctest -R pes2` só
+com a primeira dá `100% tests passed` com o `pes2_boot` *skipped* em 0,01 s,
+que é o gate que põe o jogo na tela (CORR-PES2-027):
+
+```bash
+WE2002_PES2_IMAGE="<copia>/…(Track 1).bin" \
+WE2002_PES2_IMAGE_B="<copia B>/…(Track 1).bin" \
+WE2002_PES2_CARD="…_1.mcd" \
+WE2002_PES2_TMPDIR=<~450 MiB livres> \
+PES2_IMAGE="<copia>/….cue" \
+  ctest --test-dir build -R pes2
+```
 
 | Se a tarefa ou correção tocou | Gate |
 | --- | --- |

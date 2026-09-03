@@ -597,16 +597,25 @@ As ferramentas, e o que cada uma responde:
 
 No `ctest` são três alvos: **`pes2_selftest`**, que monta um disco
 sintético de 24 setores e roda em qualquer lugar; **`pes2_image`**, que
-precisa de `WE2002_PES2_IMAGE`; e **`pes2_boot`**, que precisa do
-DuckStation e do `:98` e leva ~90 s. Os dois últimos se reportam *skipped*
-sem o que precisam — mesma convenção do `WE2002_TEST_IMAGE` e dos golden,
-e como eles não rodam em CI.
+precisa de `WE2002_PES2_IMAGE`; e **`pes2_boot`**, que precisa de
+`PES2_IMAGE` apontando o **`.cue` de uma cópia**, do DuckStation e do `:98`,
+e leva ~90 s. Os dois últimos se reportam *skipped* sem o que precisam —
+mesma convenção do `WE2002_TEST_IMAGE` e dos golden, e como eles não rodam
+em CI.
+
+**São duas famílias de variável, e a receita precisa das duas.**
+`WE2002_PES2_*` serve às ferramentas de disco e aponta para o
+`(Track 1).bin`; `PES2_*` serve às de emulador e aponta para o **`.cue`**,
+que é outro arquivo. A receita passou um tempo só com a primeira, e nesse
+tempo o `pes2_boot` — o único gate que põe o jogo na tela — se reportava
+*skipped* em 0,01 s enquanto a corrida imprimia `100% tests passed`.
 
 ```sh
-WE2002_PES2_IMAGE="roms/Pro Evolution Soccer 2 (Europe) (EsIt)/…(Track 1).bin" \
-WE2002_PES2_IMAGE_B="roms/Pro Evolution Soccer 2 (Europe) (EnFrDe)/…(Track 1).bin" \
+WE2002_PES2_IMAGE="<copia>/…(Es,It) (Track 1).bin" \
+WE2002_PES2_IMAGE_B="<copia>/…(EnFrDe) (Track 1).bin" \
 WE2002_PES2_CARD="$HOME/.local/share/duckstation/memcards/…(Es,It)_1.mcd" \
 WE2002_PES2_TMPDIR=<~450 MiB livres> \
+PES2_IMAGE="<copia>/…(Es,It).cue" \
   ctest --test-dir build -R pes2
 ```
 
