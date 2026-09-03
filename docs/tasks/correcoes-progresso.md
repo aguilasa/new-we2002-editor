@@ -42,7 +42,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-018](/docs/tasks/CORR-PES2-018.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A §1.14(g) diz "10 de 13 recomprimem no orçamento" e "folga de 0 a 4 bytes"; medido são 9 de 13 e 0 a 3 | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-019](/docs/tasks/CORR-PES2-019.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O `import` não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [x] concluída | 2026-09-01 |
-| [CORR-PES2-021](/docs/tasks/CORR-PES2-021.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `boot_check.sh` justifica nomear o binário com 0,019 entre os dois; a §6.14 da mesma task mede ~0,0015 e descarta o binário como causa | Alta | [ ] pendente | — |
+| [CORR-PES2-021](/docs/tasks/CORR-PES2-021.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `boot_check.sh` justifica nomear o binário com 0,019 entre os dois; a §6.14 da mesma task mede ~0,0015 e descarta o binário como causa | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-022](/docs/tasks/CORR-PES2-022.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`; nenhuma das duas foi revisada, e o valor as tirou da fila | Alta | [ ] pendente | — |
 | [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [ ] pendente | — |
 | [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `--measure-menu` é gate, não confere se está no menu principal, e nenhum comando versionado leva o emulador até lá | Média | [ ] pendente | — |
@@ -82,7 +82,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-018 — dois números da §1.14(g) não batem com a ferramenta
 - [x] CORR-PES2-019 — o `import` aceita a profundidade errada
 - [x] CORR-PES2-020 — a conferência antes do disco não é exercitada
-- [ ] CORR-PES2-021 — o 0,019 entre binários foi desmentido pela própria task
+- [x] CORR-PES2-021 — o 0,019 entre binários foi desmentido pela própria task
 - [ ] CORR-PES2-022 — duas tasks saíram da fila de revisão sem terem sido revisadas
 - [ ] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
 - [ ] CORR-PES2-024 — o caso vermelho não confere a tela nem tem caminho versionado

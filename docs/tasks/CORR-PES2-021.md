@@ -3,7 +3,7 @@ id: CORR-PES2-021
 title: "Correção: o `boot_check.sh` justifica nomear o binário com um 0,019 que a própria task mediu e desmentiu"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,18 +109,48 @@ a mesma imagem".
 
 ## Verificação
 
-- [ ] `grep -rn "0\.019" tools/pes2/` não devolve mais a atribuição ao binário
-- [ ] o parágrafo restante bate com a tabela da §6.14 do `PLAN-PES2-PSX.md`
-- [ ] `PES2_IMAGE=<copia.cue> tools/pes2/boot_check.sh` continua verde e
+- [x] `grep -rn "0\.019" tools/pes2/` não devolve mais a atribuição ao binário
+- [x] o parágrafo restante bate com a tabela da §6.14 do `PLAN-PES2-PSX.md`
+- [x] `PES2_IMAGE=<copia.cue> tools/pes2/boot_check.sh` continua verde e
       continua nomeando o binário na linha `BOOT OK:`
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** as três últimas linhas do parágrafo "Which
+emulator this judges" do `boot_check.sh` foram reescritas com o que a §6.14
+sustenta. A frase deixou de atribuir os 0,019 à troca de binário e passa a
+dizer as duas coisas medidas: as **médias** de quadro concordam entre os dois
+binários, e o **desvio-padrão não se reproduz nem no mesmo binário de um dia
+para o outro** — os 0,019 são a deriva do AppImage intocado entre 2026-09-01
+e 2026-09-03. A conclusão fica explícita: um número que ninguém julga é razão
+para **registrar** o binário, não para confiar no quadro.
 
-**Problemas encontrados:**
+**Problemas encontrados:** nenhum. O `0.019` continua no arquivo, agora
+atribuído ao lado certo — a deriva do mesmo AppImage entre dias —, que é
+exatamente o que a CORR pede; o que sumiu é a atribuição ao par de binários
+(`grep -rn "differs by 0\.019" tools/pes2/` vazio).
+
+**Gate:** `PES2_IMAGE=<cópia EsIt no scratchpad> tools/pes2/boot_check.sh`
+verde contra o fork —
+
+```
+frame 1  mean=0.154569  sd=0.202177
+frame 2  mean=0.126603  sd=0.233843
+changed pixels: 260000 of 524000
+BOOT OK: the fork (/home/ingmar/Applications/duckstation-mcp/bin/duckstation-qt),
+window 4194311, 800x655, two live frames in /tmp/pes2-boot-k9cjpI
+```
+
+A linha final nomeia o binário, que é o comportamento que o parágrafo
+justifica. Os quadros ficaram no `/tmp` do `mktemp`, fora do repositório.
+`roms/` intocada — o boot correu sobre cópia da release `(EsIt)` no
+scratchpad, e o `duckstation-fork.log` do lançador caiu na cópia.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `tools/pes2/boot_check.sh` | modificado (linhas 35-41 do cabeçalho) |

@@ -33,9 +33,12 @@
 # 2026-09-03 (section 6.14), and it is what this prefers. The official
 # AppImage is what a third party can reproduce, and it stays as the
 # fallback. Either way the run *says which one it was*: a boot check that
-# does not name its binary cannot be compared with the one before it, and
-# the two binaries do not render the same picture -- the title screen's
-# standard deviation differs by 0.019 between them.
+# does not name its binary cannot be compared with the one before it. The
+# two binaries agree on every frame *mean* measured (section 6.14), and the
+# title screen's standard deviation reproduces under neither -- it moved
+# 0.019 on the untouched AppImage from one day to the next, which is why it
+# was retired as a criterion. A number nobody judges by is a reason to
+# record the binary, not to trust the frame.
 #
 # Exits non-zero, loudly, on any of the checks. Exits 77 -- which ctest
 # reads as *skipped* -- when the machine cannot run it at all: no image,
