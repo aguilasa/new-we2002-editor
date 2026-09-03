@@ -71,6 +71,19 @@ STORED, ZSTD = 0, 2
 # for the extraction: no match means the offset is wrong, and a memory scan
 # over the wrong 2 MiB answers with an address that looks like an address.
 KERNEL_MARK = b"PS-X Control PAD Driver"
+
+# Counted forward from the "Bus" tag: 4 + 3 for the tag itself, 4 for the
+# ram_size DoEx, and 5 x std::array<TickCount, 3> of access times. Read out
+# of Bus::DoState rather than guessed.
+BUS_TAG_TO_RAM = 4 + 3 + 4 + 5 * 3 * 4
+
+# Where the BIOS leaves the kernel marker, measured against the MCP server's
+# dump of the live bus on 2026-09-03. **Checking that the marker merely
+# exists is not enough** -- that is exactly what let a 45-byte offset error
+# live: the string was there, 45 bytes from where it belongs, and every
+# address the tool reported was wrong by that much while every value it read
+# was right.
+KERNEL_MARK_AT = 29236
 KERNEL_WINDOW = 0x10000
 
 PSX_RAM = 0x200000
@@ -186,6 +199,28 @@ class SaveState:
         return out
 
     def _ram_span(self):
+        """Where main RAM begins, counted forward from the Bus tag.
+
+        **This used to count backwards from the DMA tag, and it was wrong
+        by 45 bytes.** `start = dma - size` assumes RAM is the last thing
+        the Bus section writes; it is not -- `MEMCTRL.regs` and
+        `RAM_SIZE.bits` follow it. The error was invisible because every
+        read and every scan used the same shifted base, so values matched
+        the screen while the addresses they were reported at pointed 45
+        bytes off. It took a second, independent reader to see it: the MCP
+        server of PES2-TASK-33 dumped the live bus and the kernel marker
+        landed at a different index. (§6.14)
+
+        The layout comes from `Bus::DoState` in DuckStation's own source,
+        not from fitting a constant:
+
+            <u32 len><"Bus">            the tag, 4 + 3
+            <u32 ram_size>              DoEx, 4
+            5 x std::array<TickCount,3> the access times, 5 x 12 = 60
+            <ram_size bytes>            the RAM
+
+        so RAM starts 71 bytes past the tag.
+        """
         bus = self.data.find(_tag("Bus"))
         dma = self.data.find(_tag("DMA"))
         if bus < 0 or dma < 0 or dma <= bus:
@@ -194,9 +229,9 @@ class SaveState:
         if size != PSX_RAM:
             raise BadState(f"{self.path}: Bus declares {size} bytes of RAM, "
                            f"not {PSX_RAM}")
-        start = dma - size
-        if start <= bus:
-            raise BadState(f"{self.path}: RAM would start inside the Bus tag")
+        start = bus + BUS_TAG_TO_RAM
+        if start + size > len(self.data):
+            raise BadState(f"{self.path}: RAM would run past the payload")
         return start, size
 
     @property
@@ -206,12 +241,20 @@ class SaveState:
         if self._ram is None:
             start, size = self._ram_span()
             ram = self.data[start:start + size]
-            if KERNEL_MARK not in ram[:KERNEL_WINDOW]:
+            at = ram[:KERNEL_WINDOW].find(KERNEL_MARK)
+            if at < 0:
                 raise BadState(
                     f"{self.path}: {KERNEL_MARK.decode()!r} is not in the "
                     f"first {KERNEL_WINDOW // 1024} KiB -- the RAM offset "
                     f"is wrong, and a scan over it would answer confidently "
                     f"with a wrong address")
+            if at != KERNEL_MARK_AT:
+                raise BadState(
+                    f"{self.path}: the kernel marker is at {at}, not "
+                    f"{KERNEL_MARK_AT} -- the RAM offset is off by "
+                    f"{at - KERNEL_MARK_AT} bytes. Values read would still "
+                    f"look right; the addresses they are reported at would "
+                    f"not")
             self._ram = ram
         return self._ram
 
@@ -364,12 +407,27 @@ def cmd_scan(args):
 
 # -- the control ---------------------------------------------------------
 
+# What Bus::DoState writes after the RAM and before the DMA tag:
+# MEMCTRL.regs and RAM_SIZE.bits. The fixture carries it so that a reader
+# which counts backwards from DMA -- as this one used to -- comes out
+# wrong here too, instead of passing on a fixture shaped around the bug.
+BUS_RAM_TO_DMA = 45
+
+
 def _synth(tmpdir, name, ram, shot=b"", version=86):
-    """A save state built by hand, so the reader can be shown failing."""
+    """A save state built by hand, so the reader can be shown failing.
+
+    **The padding is the format's, not a fitted number.** This used to put
+    105 bytes between the size field and the RAM, chosen so that counting
+    backwards from the DMA tag happened to land -- and it put the kernel
+    marker at 29191, which is 29236 shifted by the same 45 bytes the reader
+    was wrong by. Fixture and bug agreed, so the guard could never go red.
+    """
     payload = (_tag("System") + b"\0" * 8 +
                _tag("CPU") + b"\0" * 16 +
                _tag("Bus") + struct.pack("<I", len(ram)) +
-               b"\0" * 105 + ram +
+               b"\0" * (BUS_TAG_TO_RAM - 4 - 3 - 4) + ram +
+               b"\0" * BUS_RAM_TO_DMA +
                _tag("DMA") + b"\0" * 8)
     shot_w, shot_h = 2, 2
     shot = shot or b"\0" * (shot_w * shot_h * 4)
@@ -422,7 +480,7 @@ def self_check(tmpdir=None, verbose=True):
         # A RAM image with the kernel mark where the BIOS leaves it, and a
         # counter at a known address.
         ram = bytearray(PSX_RAM)
-        ram[0x7207:0x7207 + len(KERNEL_MARK)] = KERNEL_MARK
+        ram[KERNEL_MARK_AT:KERNEL_MARK_AT + len(KERNEL_MARK)] = KERNEL_MARK
         addr = 0x1234a0
         good = []
         for i, value in enumerate((0, 7, 8)):
@@ -468,6 +526,21 @@ def self_check(tmpdir=None, verbose=True):
         except BadState as exc:
             check("RAM with no kernel mark is refused", True,
                   str(exc).split(" -- ")[0].split(": ")[-1][:40])
+        # The kernel marker present but in the wrong place -- the case that
+        # went undetected for a day. Shifting it by the same 45 bytes the
+        # old derivation was wrong by is the point: a guard that only asks
+        # "is the string there?" says yes to this one.
+        shifted = bytearray(PSX_RAM)
+        off = KERNEL_MARK_AT + 45
+        shifted[off:off + len(KERNEL_MARK)] = KERNEL_MARK
+        moved = _synth(tmp, "shifted.sav", bytes(shifted))
+        try:
+            SaveState(moved).ram
+            check("a kernel mark 45 bytes off is refused", False,
+                  "accepted it -- this is the bug that shipped")
+        except BadState as exc:
+            check("a kernel mark 45 bytes off is refused", True,
+                  str(exc).split(" -- ")[0].split(": ")[-1][:44])
         # A truncated file.
         cut = os.path.join(tmp, "cut.sav")
         with open(good[0], "rb") as fh, open(cut, "wb") as out:

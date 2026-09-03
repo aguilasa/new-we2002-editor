@@ -1641,7 +1641,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Vinte e seis armadilhas ao dirigir o DuckStation
+### 6.11 Vinte e sete armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1828,6 +1828,14 @@ aponta para o lugar errado.
     contra a estimativa de ~28 minutos que a versão sem `Cross` sugeria.
     Um `Cross` só serve para as duas coisas quando há replay na frente: ele
     sai do replay **e** dá o saque.
+
+27. **`xdotool windowkill` mata o processo, não a janela.** Ele encerra o
+    **cliente X**, então usá-lo para dispensar um diálogo lateral — o do
+    atualizador automático, no caso — derruba o emulador inteiro e leva junto
+    qualquer sessão presa a ele. Medido em 2026-09-03: o `windowkill` no
+    diálogo `Automatic Updater` fechou o DuckStation e a sessão MCP, e o log
+    terminou em `Aborting application`. Para dispensar diálogo, clique no
+    botão dele por coordenada; para encerrar o emulador, mate o PID.
 
 ---
 
@@ -2054,12 +2062,24 @@ tela de `RESULTADO` de **outra sessão**, com o placar lido no quadro:
 | 7 | 0-6 | 3 |
 | 8 | 0-17, outra sessão | **2** |
 
-Sobram `0x000714EE` e `0x00137BE5`, e **as duas são placar de verdade**: as
+> **Os dois endereços abaixo estavam errados por 45 bytes, e a PES2-TASK-33
+> os corrigiu.** Eram `0x000714EE` e `0x00137BE5`; são
+> **`0x0007151B` e `0x00137C12`**. O `savestate.py` derivava o início da RAM
+> contando **para trás** a partir da tag `DMA`, e a RAM não é a última coisa
+> que a seção `Bus` escreve — `MEMCTRL.regs` e `RAM_SIZE.bits` vêm depois
+> dela, 45 bytes. Todas as leituras batiam com a tela porque busca e leitura
+> usavam a **mesma** base deslocada: o valor certo, o endereço errado. Quem
+> viu foi um segundo leitor independente — o servidor MCP despejou o
+> barramento vivo e a marca do kernel caiu em índice diferente. O texto
+> abaixo fica com os números corrigidos; o parágrafo seguinte conta o que a
+> guarda deixou passar.
+
+Sobram `0x0007151B` e `0x00137C12`, e **as duas são placar de verdade**: as
 duas seguem 1→2→3→4→5→6 na partida corrente *e* valem 17 na tela de
 resultado de uma partida que nem é esta. Não é ambiguidade a resolver, é o
 mesmo que a §6.1 já cobra do texto — **este motor guarda tudo em mais de um
 lugar**, e um editor de RAM que gravasse só uma cópia repetiria o modo de
-falha do `poke` de nome de time. `0x000714EE` é u16 e `0x00137BE5` é u8; o
+falha do `poke` de nome de time. `0x0007151B` é u16 e `0x00137C12` é u8; o
 byte imediatamente anterior a cada uma vale 0 nas oito leituras, que é onde
 o placar do mandante estaria — a Irlanda não marcou nenhuma vez, então isso
 é **consistente, não provado**.
@@ -2097,11 +2117,83 @@ projeto precisa hoje — C, para achar campo por valor de tela, e D, para
 "o que essa edição mudou?" — estão de pé em Python puro, com controle e
 casos vermelhos no `pes2_selftest`, sem trocar o binário do emulador e sem
 invalidar nenhuma assinatura de quadro da §6.11. O fork volta à mesa **se e
-quando** o laço disco↔RAM precisar do fluxo A: saber *quem escreve* um
-endereço é a única coisa aqui que nenhum save state responde, e é o que
-transformaria um endereço de RAM em um offset de disco sem cutucar e olhar.
-Até lá, o custo — compilar 12.330 commits de C++ de um repositório de três
-estrelas e remedir as assinaturas de quadro — não se paga.
+quando** o laço disco↔RAM precisar do fluxo A.
+
+**Revista em 2026-09-03 pela [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md),
+e a premissa de custo estava errada.** A frase acima dava como motivo
+"compilar 12.330 commits de C++", e isso foi medido:
+
+| etapa | medido |
+|---|---:|
+| clone raso da branch `mcp` | **8,16 s**, 180 MB |
+| pack de dependências pré-compiladas | **2,43 s**, 44 MB → 204 MB |
+| `cmake` configure | **3,74 s** |
+| **compilação, 464 alvos em 16 núcleos** | **107 s** |
+| árvore de build | 324 MB |
+
+Menos de três minutos do zero ao binário, não dias. O que faltava era um
+pacote — `clang-tools-18`, pelo `clang-scan-deps` que o CMake usa para varrer
+módulos C++20 — e a instalação da lista de dependências do README, feita com
+autorização do usuário.
+
+**O servidor responde, e as 95 ferramentas são reais.** `duckstation-mcp`
+1.0.0 em `127.0.0.1:2346`, protocolo `2025-11-25`, Streamable HTTP com
+`MCP-Session-Id`. Entre elas `breakpoint`, `disassemble`, `read_registers`,
+`step_into/over/out`, `memory_scan`, `snapshot_memory`/`diff_memory`,
+`read_memory`/`write_memory` — o número 95, que esta seção citava do README,
+agora é medido.
+
+**Fluxo A, ponta a ponta.** Breakpoint de escrita em `0x0007151B`, o jogo
+dirigido até uma partida nova, e ele disparou em `PC = 0x80083578`. O
+`disassemble` em volta entrega mais que o endereço:
+
+```
+0x80083574   sb zero, 0x21a(v0)    addr=0x8007151b   ← o placar
+0x80083578   sb zero, 0x5f(v0)     addr=0x80071360
+```
+
+com `s0 = 0x80071300`, `v0 = 0x80071301`, `ra = 0x800834C0`. É um bloco de
+`sb zero` em sequência — limpeza de estrutura. **O placar é o campo `+0x21B`
+de um registro baseado em `0x80071300`**, zerado pela rotina em `0x80083560`
+no reinício de partida. Um save state nunca daria isso: ele diz o que a
+memória contém, nunca quem escreveu.
+
+**E o confronto entre as duas ferramentas achou um defeito nosso.** O
+critério pedia que `read_memory` e o `savestate.py` concordassem no mesmo
+endereço. Não concordaram. Despejando a RAM inteira pelos dois caminhos, a
+marca do kernel caiu em 29236 no barramento e 29191 no leitor de save state:
+**45 bytes de deslocamento**. Com a correção, 99,95% do primeiro MiB bate;
+sem ela, 13,17%. A causa é a derivação — `start = dma - size` supõe que a
+RAM é a última coisa da seção `Bus`, e não é: `MEMCTRL.regs` e
+`RAM_SIZE.bits` vêm depois. O certo se conta **para frente** a partir da tag,
+e sai do `Bus::DoState` do próprio DuckStation: 4+3 da tag, 4 do `ram_size`,
+e cinco `std::array<TickCount,3>` de tempos de acesso — 71 bytes.
+
+A guarda do kernel existia e não pegou, porque perguntava se a marca
+**existe**, não se está no **índice certo** — e a fixture do `selftest`
+plantava a marca em 29191, o valor já deslocado, então guarda e defeito
+concordavam. As duas coisas foram corrigidas, e a guarda nova tem caso
+vermelho: uma marca 45 bytes fora é recusada com a conta na mensagem.
+
+**Decisão, 2026-09-03: o fork entra como ferramenta de diagnóstico**, não
+como emulador de trabalho. As rotas do `drive.py` continuam medidas contra o
+AppImage oficial e nenhuma assinatura de quadro se moveu, porque nada nesta
+task correu sob o fork exceto o próprio diagnóstico. Três coisas a saber
+antes de usá-lo de novo:
+
+- **licença.** O DuckStation é CC-BY-NC-ND-4.0, e o próprio binário avisa na
+  abertura que build modificado **não pode ser distribuído**. Uso local não
+  é distribuição, mas isso proíbe qualquer ideia de versionar ou publicar o
+  fork — a mesma regra que já vale para `roms/` e o `we-team-editor.exe`.
+- **isolação continua impossível**, e agora está confirmado com build nativo,
+  não só com AppImage: HOME próprio cai no assistente de configuração mesmo
+  com `SetupWizardIncomplete = false`, e a página de BIOS não aceita `Next`
+  nem com `SearchDirectory` absoluto. O fork roda sobre o diretório do
+  usuário, que ganhou `[Debug] EnableMCPServer` e `MCPServerPort` — duas
+  linhas, com autorização, e o `diff` do arquivo mostra só elas.
+- **`xdotool windowkill` mata o processo inteiro**, não a janela: ele encerra
+  o cliente X. Usado no diálogo do atualizador, derrubou o emulador e a
+  sessão MCP junto.
 
 **Nada do fork entrou no repositório**, e nada dele foi baixado. O que entrou
 é o procedimento, os números acima e `tools/pes2/savestate.py`.

@@ -83,7 +83,7 @@ um punhado de endereços. Depois `read_memory` neles e conferir contra a tela.
       alto quando o deslocamento está errado.
 - [x] **Fluxo C completo, e com oito leituras em vez de duas.** O placar
       visitante caiu de 130 candidatos (2 leituras) para 2 (8 leituras), e os
-      dois sobreviventes — `0x000714EE` u16 e `0x00137BE5` u8 — batem com o
+      dois sobreviventes — `0x0007151B` u16 e `0x00137C12` u8 — batem com o
       número na tela em 0-1, 0-2, 0-3, 0-4, 0-5, 0-6 e, numa partida de
       **outra sessão**, 0-17. Não são candidato e ruído: são duas cópias
       vivas do placar, que é o mesmo padrão que a §6.1 cobra do texto.
@@ -145,6 +145,13 @@ justificar só os fluxos A e E.
 ## Log de Execução
 
 **Executado em:** 2026-09-02
+**Corrigido em:** 2026-09-03 — os dois endereços publicados aqui estavam
+deslocados 45 bytes, porque o `savestate.py` derivava o início da RAM
+contando para trás a partir da tag `DMA`. A
+[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) achou o erro ao
+confrontar o leitor com o servidor MCP, e os números acima já são os certos.
+As leituras desta task continuam válidas — o que estava errado era o
+endereço, nunca o valor.
 
 **Resumo.** O caminho barato funciona, e por isso o fork não foi compilado.
 Um save state do DuckStation (formato versão 86) é um cabeçalho fixo, um
