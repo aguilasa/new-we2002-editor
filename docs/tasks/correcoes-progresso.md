@@ -51,6 +51,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | O `pes2_boot` nunca roda pela receita documentada: ele quer `PES2_IMAGE` e os docs só dão `WE2002_PES2_*` | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Dois docs dizem que o fork não publica binário próprio; ele publica quatorze, e o AppImage x64 traz o servidor MCP | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [x] concluída | 2026-09-03 |
+| [CORR-PES2-030](/docs/tasks/CORR-PES2-030.md) | [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | O `pes2_boot` prova vida exigindo que dois quadros difiram, e a tela de intro que não anima o faz falhar: 1 em 3 corridas | Alta | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -95,6 +96,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-027 — o gate de boot se reporta *skipped* na única receita escrita
 - [x] CORR-PES2-028 — o fork publica binário próprio, e ele tem o MCP
 - [x] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
+- [ ] CORR-PES2-030 — o gate de boot falha na tela parada, e diz que o emulador morreu
 
 ## Detalhes por correção
 
@@ -384,6 +386,25 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **Sintoma:** a conferência `decompress(compress(x)) == x` roda antes de toda gravação e nunca foi vista recusando; o `check` só a atravessa em verde.
 - **Como foi detectado:** lendo o que o `check` exercita — a guarda de orçamento aparece em vermelho, esta não aparece.
 - **Fix:** ponto de injeção privado para um codec defeituoso, e um caso no `check` que exige o `Refused`.
+
+### CORR-PES2-030
+
+- **Arquivo com problema:** `tools/pes2/boot_check.sh`, a asserção de vida
+  (linhas 178-182)
+- **Sintoma:** o gate tira dois quadros em relógio fixo — 45 s e mais 12 s — e
+  exige que difiram. Numa tela de abertura estática os dois saem **byte a
+  byte iguais** e ele imprime `FAIL: the two frames are the same -- it is not
+  running` sobre um emulador vivo: `sd=0,13657` é conteúdo desenhado, a janela
+  existia e o MCP respondeu. Medido em três corridas seguidas do mesmo
+  comando: 0 de 524.000 pixels na primeira, 260.000 nas duas seguintes
+- **Como foi detectado:** a verificação final da [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md),
+  que é o que fez o `pes2_boot` correr pela receita pela primeira vez — o gate
+  passou a ser exercitado, e a intermitência apareceu na segunda corrida
+- **Fix:** a prova de vida não pode depender de o jogo animar naquele
+  instante. Amostrar N vezes ao longo do `PES2_GAP` e exigir que alguma difira;
+  ou perguntar a contagem de quadros ao MCP do fork, degradando para a tela
+  quando o binário é o AppImage. E a mensagem tem de dizer o que foi medido —
+  "estas duas amostras são idênticas" — e não a conclusão
 
 ### CORR-PES2-021
 
