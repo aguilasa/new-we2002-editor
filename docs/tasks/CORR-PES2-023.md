@@ -3,7 +3,7 @@ id: CORR-PES2-023
 title: "Correção: o perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde há oito"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -132,18 +132,49 @@ no `--measure-menu`.
 
 ## Verificação
 
-- [ ] `grep -n "^\*\*Fase" docs/prompts/perfil-pes2.md` mostra entrada de
+- [x] `grep -n "^\*\*Fase" docs/prompts/perfil-pes2.md` mostra entrada de
       Fase 0
-- [ ] `grep -n "seis fases" docs/prompts/perfil-pes2.md` não devolve nada
-- [ ] as fases da seção batem com `grep "^### Fase" docs/PLAN-PES2-PSX.md`
-- [ ] `python3 tools/check_tasks.py` continua verde
+- [x] `grep -n "seis fases" docs/prompts/perfil-pes2.md` não devolve nada
+- [x] as fases da seção batem com `grep "^### Fase" docs/PLAN-PES2-PSX.md`
+- [x] `python3 tools/check_tasks.py` continua verde
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** as três afirmações desatualizadas foram
+substituídas. "As seis fases" virou "As oito fases"; o parágrafo que juntava
+Fases 0 e 1 foi partido — a **Fase 1** continua fechada e premissa, e a **Fase
+0** ganhou lista própria de sete perguntas, saídas do que as tasks 32, 33 e 34
+mostraram valer. O parágrafo da Fase 0 diz por que ela tem lista em vez de
+virar premissa como a 1: foi dada por fechada e reaberta duas vezes, e as
+tasks que entraram nela entregaram ferramenta.
 
-**Problemas encontrados:**
+Dois itens da lista citam a correção que os cobra, como a de Fase 7 já faz:
+o do binário aponta para a CORR-PES2-021 (nem a mesma leitura se reproduz
+entre dias no mesmo binário), e o do comando versionado até o estado, para a
+CORR-PES2-024.
+
+**Problemas encontrados:** a varredura de discrepância puxou **dois documentos
+que a CORR não previa**, com a mesma afirmação envelhecida:
+
+- `docs/tasks/progresso.md` (linha 93) — "Não há task de Fase 0 nem de Fase 1
+  de trabalho", contradita duas linhas abaixo pelo próprio parágrafo;
+- `CLAUDE.md` (linha 669) — "25 tasks nas seis fases do plano"; medido, são
+  **34** tasks e o plano tem **oito** fases, das quais sete têm task.
+
+Os dois foram reconciliados em **commit próprio**, como manda o rito.
+
+**Gates:**
+
+- `grep -n "^\*\*Fase" docs/prompts/perfil-pes2.md` → oito entradas, com a
+  Fase 0 na linha 253
+- `grep -n "seis fases" docs/prompts/perfil-pes2.md` → vazio
+- as fases do perfil e as do plano batem (`diff` dos dois `grep` → idêntico)
+- `python3 tools/check_tasks.py` → `check_tasks: 85 task(s), ok`
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/prompts/perfil-pes2.md` | modificado (a abertura de "Verificações específicas por fase") |

@@ -44,7 +44,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [x] concluída | 2026-09-01 |
 | [CORR-PES2-021](/docs/tasks/CORR-PES2-021.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `boot_check.sh` justifica nomear o binário com 0,019 entre os dois; a §6.14 da mesma task mede ~0,0015 e descarta o binário como causa | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-022](/docs/tasks/CORR-PES2-022.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`; nenhuma das duas foi revisada, e o valor as tirou da fila | Alta | [x] concluída | 2026-09-03 |
-| [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [ ] pendente | — |
+| [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [x] concluída | 2026-09-03 |
 | [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `--measure-menu` é gate, não confere se está no menu principal, e nenhum comando versionado leva o emulador até lá | Média | [ ] pendente | — |
 | [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | Baixa | [ ] pendente | — |
 
@@ -84,7 +84,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-020 — a conferência antes do disco não é exercitada
 - [x] CORR-PES2-021 — o 0,019 entre binários foi desmentido pela própria task
 - [x] CORR-PES2-022 — duas tasks saíram da fila de revisão sem terem sido revisadas
-- [ ] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
+- [x] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
 - [ ] CORR-PES2-024 — o caso vermelho não confere a tela nem tem caminho versionado
 - [ ] CORR-PES2-025 — a §3.2 descreve como aberto um item que a 34 fechou
 

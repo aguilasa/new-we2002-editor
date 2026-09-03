@@ -242,14 +242,40 @@ da fase corrente precisa.
 
 ## Verificações específicas por fase
 
-As seis fases são as do [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) §5, e o
+As oito fases são as do [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) §5, e o
 quadro de tasks está no [`progresso.md`](/docs/tasks/progresso.md).
 
-**Fases 0 e 1 — infra e diferencial barato — estão fechadas.** Não há task de
-trabalho nelas; o que entregaram (o `iso.py`, o round-trip, o controle negativo,
-o emulador, as âncoras `OFS_*` e o diff entre releases) é premissa das
-seguintes. Revisar uma task que as toque significa conferir que a premissa não
-foi quebrada, não reexecutá-las.
+**Fase 1 — diferencial barato — está fechada.** Não há task de trabalho nela; o
+que entregou (as âncoras `OFS_*` e o diff entre releases) é premissa das
+seguintes. Revisar uma task que a toque significa conferir que a premissa não
+foi quebrada, não reexecutá-la.
+
+**Fase 0 (tasks 01, 32, 33, 34) — o ferramental da máquina:**
+
+A fase não é sobre o disco: ela decide e constrói **com o que** se mede. Foi
+dada por fechada e reaberta duas vezes depois disso — o `savestate.py`, o fork
+com MCP e as rotas por MCP entraram todos como Fase 0 —, e é por isso que ela
+tem lista própria em vez de virar premissa como a 1.
+
+- A ferramenta nova tem `--self-check` que roda **sem** o recurso externo
+  (sem emulador, sem imagem), e ele está dentro do `pes2_selftest`?
+- O caso de recurso ausente diz o que fazer, ou despeja traceback? "o fork
+  não está rodando" contra um `URLError` de `urllib`
+- Todo número afirmado sobre a ferramenta externa foi contado **contra ela
+  viva**, não contra o fonte dela? O `TOOLS_JSON` do fork declara 99 nomes e
+  o `tools/list` devolve 95
+- O binário de terceiro ficou **fora** do repositório, e a receita de
+  reconstruí-lo é executável em vez de prosa num Log? (licença
+  CC-BY-NC-ND-4.0, mesma regra de `roms/`)
+- O gate que julga comportamento **diz contra qual binário** correu? São
+  dois DuckStation, e nem a mesma leitura se reproduz entre dias no mesmo
+  binário (CORR-PES2-021)
+- Uma decisão de máquina (onde o binário mora, `.mcp.json`, configuração do
+  emulador) foi **perguntada** ao dono da máquina, e não inventada?
+- Toda asserção nova foi vista **ficando vermelha**, e existe um comando
+  versionado que a leva ao estado em que ela pode ser exercitada? Gate que só
+  fecha a partir de um save state esquecido de outra corrida não é gate
+  (CORR-PES2-024)
 
 **Fase 2 (tasks 02 a 04) — inventário de texto:**
 
