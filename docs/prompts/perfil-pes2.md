@@ -68,10 +68,14 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Trinta e quatro armadilhas ao dirigir o DuckStation**, todas medidas
-    (§6.11) — eram treze quando este perfil foi escrito. As sete últimas são
-    de 2026-09-03 e são sobre dirigir por **MCP**, que desde essa data é
-    como as rotas dirigem: o binário do fork **não acha as próprias
+12. **Trinta e cinco armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. A última é a que
+    mais custa hoje: **o fork cai sozinho em execução livre e não escreve
+    nada** — quatro mortes em seis corridas, entre 15 s e 90 s, não
+    determinístico, e o `mcp.py` passou a distinguir "nunca subiu" de "caiu
+    agora" porque a mensagem única custou três leituras erradas numa revisão
+    só. As sete anteriores são de 2026-09-03 e são sobre dirigir por **MCP**,
+    que desde essa data é como as rotas dirigem: o binário do fork **não acha as próprias
     bibliotecas** fora da árvore de build (`LD_LIBRARY_PATH` *e*
     `QT_PLUGIN_PATH`), o diálogo que ele abre é o **`Automatic Updater`** e
     `Escape` não o fecha, a **porta 2346 abre antes** de ele ser dispensado,

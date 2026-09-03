@@ -116,6 +116,31 @@ class Client:
             detail = e.read().decode("utf-8", "replace")[:400]
             raise ToolError(f"HTTP {e.code} from the server: {detail}") from None
         except (urllib.error.URLError, socket.timeout, ConnectionError) as e:
+            # "The fork is not running" is true either way and useless in one
+            # of the two cases. The fork dies on its own during free
+            # execution (pitfall 35), and when it does every tool printed the
+            # sentence that describes *forgetting to launch it* -- which cost
+            # three wrong readings in one review before a `pgrep` showed the
+            # process had simply gone. Ask, since `fork.py` already knows how.
+            try:
+                import fork
+                alive = bool(fork.running_pids())
+            except Exception:                            # noqa: BLE001
+                alive = None
+            if alive:
+                raise NotRunning(
+                    f"no MCP server at {self.url} -- but duckstation-qt IS "
+                    f"running. The emulator is up and the server is not "
+                    f"answering: it was started without EnableMCPServer, or "
+                    f"it is on another port. [{type(e).__name__}]") from None
+            if alive is False:
+                raise NotRunning(
+                    f"no MCP server at {self.url} -- and no DuckStation "
+                    f"process either. It was never started, or it died "
+                    f"mid-run (pitfall 35 of section 6.11: the fork dies "
+                    f"silently during free execution). Start it with "
+                    f"tools/pes2/fork.py launch (the official AppImage has "
+                    f"no MCP server). [{type(e).__name__}]") from None
             raise NotRunning(
                 f"no MCP server at {self.url} -- the DuckStation fork is not "
                 f"running. Start it with tools/pes2/fork.py launch "
@@ -289,17 +314,32 @@ def self_check(verbose=True):
     # **The red case that matters**: a port nobody listens on must say the
     # fork is not running, not raise a URLError. Port 1 is reserved and
     # refuses instantly.
-    c = Client(port=1, timeout=2.0)
-    try:
-        c.call("get_status")
-        check("an absent server is a NotRunning", False, "it connected")
-    except NotRunning as e:
-        msg = str(e)
-        check("an absent server says the fork is not running",
-              "not running" in msg and "fork.py" in msg, msg)
-    except Exception as e:                                   # noqa: BLE001
-        check("an absent server is a NotRunning", False,
-              f"{type(e).__name__}: {e}")
+    #
+    # And it must say *which* of the two silences it is, because they call
+    # for opposite actions: launch the emulator, or work out why a live one
+    # stopped answering. Both branches are driven here by standing in for
+    # `fork.running_pids`, so neither is a promise -- and the branch that
+    # matters most is the one nobody would think to test, since the fork
+    # dying mid-run reads exactly like never having launched it.
+    def _absent(pids, want, label):
+        import fork as _fork
+        real = _fork.running_pids
+        _fork.running_pids = lambda: pids
+        try:
+            Client(port=1, timeout=2.0).call("get_status")
+            check(label, False, "it connected")
+        except NotRunning as e:
+            msg = str(e)
+            check(label, all(w in msg for w in want), msg)
+        except Exception as e:                               # noqa: BLE001
+            check(label, False, f"{type(e).__name__}: {e}")
+        finally:
+            _fork.running_pids = real
+
+    _absent([], ["no DuckStation process either", "pitfall 35", "fork.py"],
+            "an absent server with no process names the crash and the launcher")
+    _absent([4242], ["duckstation-qt IS running", "not answering"],
+            "an absent server with a live process says the server is the problem")
 
     # Constructing a client must not talk to anything -- tools build one to
     # look at its shape on machines with no emulator.

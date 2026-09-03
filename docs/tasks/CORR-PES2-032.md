@@ -3,7 +3,7 @@ id: CORR-PES2-032
 title: "Correção: o fork morre calado durante execução livre, e toda ferramenta relata isso como \"não está rodando\""
 type: correção
 category: ferramental
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -149,23 +149,82 @@ morte. Hoje ele abre com `"wb"`.
 
 ## Verificação
 
-- [ ] a §6.11 tem a armadilha, e a contagem do título bate com
+- [x] a §6.11 tem a armadilha, e a contagem do título bate com
       `awk '/^### 6\.11/,/^### 6\.12/' docs/PLAN-PES2-PSX.md | grep -cE '^[0-9]+\. '`
-- [ ] com o emulador morto, `mcp.py --status` diz que **não há processo**, e
+- [x] com o emulador morto, `mcp.py --status` diz que **não há processo**, e
       cita a armadilha
-- [ ] com o emulador vivo e o servidor derrubado, a outra mensagem aparece —
+- [x] com o emulador vivo e o servidor derrubado, a outra mensagem aparece —
       exercitado, não presumido
-- [ ] `python3 tools/pes2/mcp.py --self-check` e
+- [x] `python3 tools/pes2/mcp.py --self-check` e
       `python3 tools/pes2/fork.py --self-check` verdes
-- [ ] `ctest --test-dir build -R pes2_selftest` verde
-- [ ] `roms/` intocada
+- [x] `ctest --test-dir build -R pes2_selftest` verde
+- [x] `roms/` intocada
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** as três coisas, e a mensagem ganhou caso vermelho
+dos dois lados.
 
-**Problemas encontrados:**
+1. **A armadilha 35 entrou na §6.11**, com os números medidos, e a contagem
+   foi **recontada** por `awk` (35) e propagada aos quatro lugares que
+   afirmavam trinta e quatro — o título da seção, duas linhas do plano e a
+   armadilha 12 do perfil.
+2. **O `mcp.py` distingue os dois silêncios.** São ações opostas — lançar o
+   emulador, ou descobrir por que um vivo parou de responder — e a frase era
+   a mesma. Ele agora pergunta a `fork.running_pids()`.
+3. **O `fork.py launch` acrescenta ao log** em vez de truncá-lo, com uma
+   linha de fronteira por corrida. O `"wb"` apagava a evidência da corrida
+   anterior exatamente quando alguém ia procurá-la — e é a única evidência
+   que existe, porque o emulador não escreve nada ao morrer.
+
+**Problemas encontrados: a queda não reproduziu.** Três corridas de execução
+livre nesta execução — 40 s / 20 chamadas, e duas de 110 s / 55 chamadas —
+**sobreviveram todas**. Isso não desfaz as quatro mortes em seis corridas da
+revisão: confirma que o defeito é não determinístico, que é exatamente o que
+o torna caro. O texto da armadilha registra **as duas medições**, com data,
+em vez de afirmar uma frequência que a segunda bateria não sustenta.
+
+Uma correção de fato ao que a CORR escreveu: `coredumpctl` **não está
+instalado** nesta máquina, então "nada em `coredumpctl`" era, na verdade, a
+ausência da ferramenta. A armadilha diz isso.
+
+E o `--self-check` do `mcp.py` **ficou vermelho** na primeira escrita — ele
+casava a frase antiga (`"not running" in msg`), que o ramo novo não tem. Foi
+o gate fazendo o trabalho dele; a asserção passou a exercitar **os dois
+ramos**, pondo-se no lugar de `fork.running_pids`.
+
+**Gates, com o número medido:**
+
+```
+$ awk '/^### 6\.11 /,/^### 6\.12 /' docs/PLAN-PES2-PSX.md | grep -cE '^[0-9]+\. '
+35                                    # e o título diz "Trinta e cinco"
+$ python3 tools/pes2/mcp.py --status  # emulador morto
+no MCP server at … -- and no DuckStation process either. It was never
+started, or it died mid-run (pitfall 35 of section 6.11: the fork dies
+silently during free execution). Start it with tools/pes2/fork.py launch …
+```
+
+O outro ramo, **contra o emulador de verdade** rodando e uma porta em que
+ninguém escuta — não por substituto:
+
+```
+no MCP server at http://127.0.0.1:1/mcp -- but duckstation-qt IS running.
+The emulator is up and the server is not answering: it was started without
+EnableMCPServer, or it is on another port.
+```
+
+`mcp.py --self-check`, `fork.py --self-check`, `mcp_drive.py --self-check` e
+`boot_check.sh --self-check` todos exit 0; `pes2_selftest` **Passed 0,34 s**.
+O log de uma cópia foi de 3 para 8 linhas depois de um segundo `launch`, com
+`=== launch 2026-09-03 19:28:21 … ===` na fronteira. `roms/` intocada.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-PES2-PSX.md` | modificado (§6.11: armadilha 35 e a contagem em três lugares) |
+| `docs/prompts/perfil-pes2.md` | modificado (armadilha 12) |
+| `tools/pes2/mcp.py` | modificado (a mensagem e o caso vermelho dos dois ramos) |
+| `tools/pes2/fork.py` | modificado (`launch` acrescenta ao log) |

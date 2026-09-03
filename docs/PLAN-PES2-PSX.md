@@ -1656,7 +1656,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Trinta e quatro armadilhas ao dirigir o DuckStation
+### 6.11 Trinta e cinco armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1923,6 +1923,38 @@ aponta para o lugar errado.
     funciona: **quadro para precisão** — um toque e a consequência dele —,
     **relógio para distância**.
 
+35. **O fork cai sozinho em execução livre, e não escreve nada.** Medido na
+    revisão da PES2-TASK-33, em 2026-09-03: **quatro mortes em seis
+    corridas**, entre 15 s e 90 s de jogo rodando; o controle — 75 s de
+    execução livre **sem nenhuma chamada MCP** — sobreviveu, e morreu logo
+    depois das duas primeiras chamadas.
+
+    **Não é determinístico, e é isso que o torna caro:** ele não reprova
+    nada, só interrompe. Três corridas do mesmo teste horas depois, na
+    execução da CORR-PES2-032, **sobreviveram** — 40 s / 20 chamadas e duas
+    de 110 s / 55 chamadas. Silêncio não é conserto: quem for depender de
+    execução livre longa conte com a queda e repita.
+
+    Nada aparece em lugar nenhum: o log que o `fork.py` captura tem três
+    linhas de Qt e mais nada, não há `~/.local/share/duckstation/*.log`,
+    `journalctl --user` não menciona o processo, e não há coletor de core
+    dump instalado nesta máquina (`coredumpctl` não existe). Por isso o
+    `fork.py launch` passou a **acrescentar** ao log em vez de truncá-lo —
+    a corrida seguinte apagava a evidência da anterior exatamente quando
+    alguém ia procurá-la.
+
+    **As rotas do `mcp_drive.py` quase não sentem**, e a razão importa: elas
+    **pausam** o emulador e andam por `frame_step`, então quase não há
+    execução livre. Quem sente é o **fluxo A** — armar breakpoint e deixar o
+    jogo correr até disparar —, que é a única capacidade pela qual o fork foi
+    adotado.
+
+    E **nunca leia "the fork is not running" como esquecimento** sem
+    conferir com `pgrep -x duckstation-qt`. A frase custou três leituras
+    erradas numa revisão só, porque era a mesma para "nunca subiu" e para
+    "caiu há um minuto"; o `mcp.py` passou a distinguir os dois casos, e o
+    que diz "and no DuckStation process either" cita esta armadilha.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -2072,7 +2104,7 @@ continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar 
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
-naquela data, trinta e quatro hoje.
+naquela data, trinta e cinco hoje.
 
 > **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
 > pela metade.** As médias sobreviveram à troca de binário; o desvio da
@@ -2322,7 +2354,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das trinta e quatro armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das trinta e cinco armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.

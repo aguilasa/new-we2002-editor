@@ -344,7 +344,16 @@ def launch(image, display=None, timeout=120, home=None, verbose=True,
 
     log = log or os.path.join(
         os.path.dirname(os.path.abspath(image)), "duckstation-fork.log")
-    handle = open(log, "wb")
+    # Append, never truncate. The fork dies on its own during free execution
+    # (pitfall 35) and writes nothing when it goes, so the only chance of
+    # ever catching it is a log that survives the next launch -- and the old
+    # "wb" erased the previous run's evidence at exactly the moment someone
+    # went looking for it. A run boundary goes in first so the file stays
+    # readable.
+    handle = open(log, "ab")
+    handle.write(f"\n=== launch {time.strftime('%Y-%m-%d %H:%M:%S')} "
+                 f"{os.path.basename(image)} ===\n".encode())
+    handle.flush()
     process = subprocess.Popen(
         [binary(home), "-batch", "-fastboot", "-nogui", "--", image],
         env=env_for(display, home), stdout=handle, stderr=subprocess.STDOUT)
