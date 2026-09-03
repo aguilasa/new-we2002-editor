@@ -148,14 +148,20 @@ O servidor foi registrado no projeto em 2026-09-03 a pedido do usuário:
     "url": "http://127.0.0.1:2346/mcp" } } }
 ```
 
-O arquivo está **sem commit**, e a task decide se entra. Dois pontos a pesar,
-e nenhum é óbvio:
+**Decidido em 2026-09-03 pelo usuário: entra, em escopo `project`.** Os dois
+pontos que pesavam contra e a favor ficam registrados, porque o segundo é um
+efeito real que quem clonar vai ver:
 
 - ele publica um endereço de `localhost`, **não** o fork — dentro da regra de
   licença da §6.14, que proíbe versionar ou publicar o binário;
-- mas ele descreve um servidor que **só existe nesta máquina**, e num repo
-  clonado a entrada aparece como servidor quebrado. Escopo `local` em vez de
-  `project` evita isso ao custo de não documentar nada.
+- mas ele descreve um servidor que **só existe nesta máquina**: num clone
+  sem o fork compilado, a entrada aparece como servidor quebrado. Escopo
+  `local` evitaria isso ao custo de o repositório não documentar nada — e
+  documentar ganhou.
+
+Resta desta seção uma coisa só, e é de execução: a entrada exige **aprovação
+manual** na primeira sessão (`claude mcp list` mostra `⏸ Pending approval`),
+o que é uma pegadinha a registrar junto das do lançador.
 
 ---
 
