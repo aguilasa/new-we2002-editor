@@ -666,8 +666,9 @@ Quatro coisas que custam tempo se descobertas tarde:
   §1.5 do plano.
 
 **PES2 entrou no pool em 2026-09-01**, e o backlog dele é
-[docs/tasks/progresso.md](docs/tasks/progresso.md) — 25 tasks nas seis fases do
-plano, cada uma com `fonte_de_verdade` apontando para a seção que a mede. Até
+[docs/tasks/progresso.md](docs/tasks/progresso.md) — hoje 34 tasks, cobrindo
+sete das oito fases do plano (a Fase 1 não tem task), cada uma com
+`fonte_de_verdade` apontando para a seção que a mede. Até
 essa data o projeto estava fora do pool *por escolha*, e o backlog era a §7 do
 [docs/PES2-AJUSTES.md](docs/PES2-AJUSTES.md); aquela seção agora é registro
 histórico. O que sobrou de aberto lá é um item só, e não é código: instalar

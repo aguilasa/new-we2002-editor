@@ -90,12 +90,18 @@ PES2-TASK-22.
 **Revisão sem discrepância também preenche a coluna.** É resultado legítimo, e
 sem a data não há como distinguir "revisada, nada achado" de "nunca revisada".
 
-**Não há task de Fase 0 nem de Fase 1 de trabalho.** As duas estão fechadas e
-verdes desde 2026-08-30, com ferramenta versionada e reexecutável (§5.1 e §5,
-Fase 1 do plano). As tasks de fase 0 no quadro são **decisões sobre o
-ferramental da máquina**, não sobre o disco, e nenhuma bloqueia fase alguma: a
+**A Fase 1 não tem task de trabalho.** Ela está fechada e verde desde
+2026-08-30, com ferramenta versionada e reexecutável (§5, Fase 1 do plano).
+
+**A Fase 0 tem quatro** — 01, 32, 33 e 34 —, e elas são **decisões sobre o
+ferramental da máquina**, não sobre o disco: nenhuma bloqueia fase alguma, e a
+infra do disco (§5.1) continua fechada e verde desde 2026-08-30. A
 PES2-TASK-01 sobrou da §7.1 do `PES2-AJUSTES.md` e foi tomada em 2026-09-01,
-com instalação.
+com instalação; as outras três entregaram ferramenta — o `savestate.py`, a
+compilação do fork com MCP, e o trio `mcp.py` / `fork.py` / `mcp_drive.py`.
+É por isso que a Fase 0 tem lista de verificação própria no
+[perfil](/docs/prompts/perfil-pes2.md) e a Fase 1 não: a 1 é premissa, a 0
+continua produzindo.
 
 **O MCP do DuckStation levou três decisões em dois dias, e vale ler as três
 na ordem** — a §6.14 do plano guarda todas, porque cada uma respondia a uma
