@@ -52,6 +52,8 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Dois docs dizem que o fork não publica binário próprio; ele publica quatorze, e o AppImage x64 traz o servidor MCP | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [x] concluída | 2026-09-03 |
 | [CORR-PES2-030](/docs/tasks/CORR-PES2-030.md) | [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | O `pes2_boot` prova vida exigindo que dois quadros difiram, e a tela de intro que não anima o faz falhar: 1 em 3 corridas | Alta | [ ] pendente | — |
+| [CORR-PES2-031](/docs/tasks/CORR-PES2-031.md) | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | O fluxo A, única razão de o fork existir, não tem ferramenta versionada: o procedimento mora num Log | Média | [ ] pendente | — |
+| [CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | O fork morre calado em execução livre — quatro vezes em seis corridas — e toda ferramenta relata isso como "não está rodando" | Alta | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -97,6 +99,8 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-028 — o fork publica binário próprio, e ele tem o MCP
 - [x] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
 - [ ] CORR-PES2-030 — o gate de boot falha na tela parada, e diz que o emulador morreu
+- [ ] CORR-PES2-031 — o fluxo A não virou ferramenta, como o fluxo C virou
+- [ ] CORR-PES2-032 — a queda intermitente do emulador não está escrita em lugar nenhum
 
 ## Detalhes por correção
 
@@ -468,3 +472,18 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **Sintoma:** arquivo que não é save state recebe `error: … not DUCC`; arquivo que não existe recebe `FileNotFoundError` cru. E o `except savestate.Skip` do `selftest.py`, com o import dentro do mesmo `try`, vira `NameError` se o import falhar — que o `except Exception` irmão não pega.
 - **Como foi detectado:** `savestate.py info /nao/existe.sav` contra `savestate.py info CLAUDE.md`; o padrão do `except` reproduzido isolado.
 - **Fix:** recusar `OSError` com a forma `error: …` em todos os subcomandos, tirar o import do `try` no `selftest.py`, e um caso vermelho de estado ausente no `self_check`.
+
+### CORR-PES2-031
+
+- **Arquivo com problema:** `tools/pes2/` — nenhuma ferramenta arma breakpoint
+- **Sintoma:** o fluxo A é a justificativa inteira do fork depois que a PES2-TASK-32 entregou C e D em Python puro, e ele não virou comando: `grep -rn "breakpoint" tools/pes2/*.py` devolve só um comentário dizendo que ele é preciso. O fluxo C virou `savestate.py scan`, com selftest e casos vermelhos; o A virou um parágrafo de Log.
+- **Como foi detectado:** ao tentar reproduzir o disparo desta revisão foi preciso escrever a sequência MCP à mão — e foi nesse caminho que a queda da CORR-PES2-030 apareceu.
+- **Fix:** `who_writes.py <endereço>`, com espera que distingue queda de servidor ausente, `--self-check` no `pes2_selftest`, e uma linha na tabela de gates.
+
+### CORR-PES2-032
+
+- **Arquivo com problema:** o binário do fork, mais `tools/pes2/mcp.py`, `tools/pes2/fork.py` e a §6.11 do plano
+- **Sintoma:** o emulador de trabalho cai sozinho durante execução livre — quatro mortes em seis corridas, de 15 s a 90 s —, sem log, sem core dump e sem journal; um controle de 75 s sem chamada MCP sobreviveu. Nada avisa, e a mensagem de servidor ausente diz "the fork is not running. Start it with fork.py launch", que descreve esquecimento e não queda.
+- **Como foi detectado:** seis corridas nesta revisão, com `pgrep -x duckstation-qt` mostrando o processo sumido; o log do `fork.py` tem três linhas de Qt depois de todas elas.
+- **Fix:** armadilha 35 na §6.11 com a contagem recontada, mensagem que distingue "caiu" de "nunca subiu", e log que acumula em vez de truncar.
+
