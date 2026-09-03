@@ -2083,6 +2083,15 @@ Os fluxos **A** e **E** continuam sem resposta: breakpoint de escrita e
 disassembly não saem de um arquivo salvo. `savestate.py read` entrega os
 bytes de uma instrução, mas não a decodifica.
 
+**A pergunta que a PES2-TASK-32 não respondeu.** Ela mediu *"preciso do
+MCP?"* e concluiu que não; nunca mediu *"o MCP funciona?"*, porque o fork não
+foi baixado nem compilado e o servidor nunca respondeu nada. A distinção ficou
+enterrada num critério marcado até o usuário apontá-la em 2026-09-03. Quem
+quiser a segunda resposta a tem como
+[PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md), com escopo já
+reduzido aos fluxos **A** e **E** — os únicos que o save state não cobre,
+porque uma foto de RAM diz o que ela contém e nunca quem escreveu.
+
 **Decisão, 2026-09-02:** **não compilar o fork.** Os dois fluxos que o
 projeto precisa hoje — C, para achar campo por valor de tela, e D, para
 "o que essa edição mudou?" — estão de pé em Python puro, com controle e
