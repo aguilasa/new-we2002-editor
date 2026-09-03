@@ -132,21 +132,89 @@ e o disparo reproduzido no endereço em questão; sem o disparo é conjectura |
 
 ## Verificação
 
-- [ ] `python3 tools/pes2/who_writes.py --self-check` verde, com o caso
+- [x] `python3 tools/pes2/who_writes.py --self-check` verde, com o caso
       vermelho do prazo aparecendo
 - [ ] contra o jogo vivo, `who_writes.py 0x8007151B --width 2` reproduz o
       resultado de 2026-09-03: instrução em `0x80083574`, `v0 = 0x80071301`,
-      `ra = 0x800834C0`
-- [ ] `ctest --test-dir build -R pes2_selftest` verde
-- [ ] a espera distingue "caiu" de "não está rodando"
-- [ ] `roms/` intocada; nada do fork versionado
+      `ra = 0x800834C0` — **em aberto**, ver o Log
+- [x] `ctest --test-dir build -R pes2_selftest` verde
+- [x] a espera distingue "caiu" de "não está rodando"
+- [x] `roms/` intocada; nada do fork versionado
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03 — **parcial. A correção continua `[ ]`.**
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** `tools/pes2/who_writes.py` existe, com a forma
+das outras ferramentas do ciclo: limpa os breakpoints, arma o watchpoint de
+escrita, retoma, espera, e no disparo lê os registradores e desmonta em volta
+do `PC`, imprimindo instrução, registrador-base, deslocamento, a conferência
+`base + deslocamento == alvo`, e o `ra`. `--self-check` roda sem emulador e
+entrou no `pes2_selftest`.
 
-**Problemas encontrados:**
+**O que ficou em aberto: a reprodução da leitura de 2026-09-03.** O watchpoint
+nunca disparou nas seis janelas tentadas. **Não é a ferramenta**, e a medição
+que separa as duas coisas foi feita:
+
+- o watchpoint **arma e conta** — `hit_count` foi de 0 a **9** ao longo de
+  400 s de partida sob `pad.py run`, que é quem dá os saques;
+- um breakpoint de **execução** no `PC` corrente **para** a CPU
+  (`status: paused`, `pc` parado, `hit_count: 1`), então o mecanismo serve;
+- **60 s de partida livre sem interferência nenhuma** deixaram o watchpoint
+  de escrita em `hit_count: 0`.
+
+O endereço não é escrito continuamente: ele é escrito no **reinício de
+partida**, precondição que a própria §6.14 registra ("o jogo dirigido até uma
+partida nova"). Nenhuma das janelas — 150, 180, 200, 280 s, partindo do meio
+da partida e do `team-select`, no endereço virtual `0x8007151B` e no físico
+`0x0007151B` — chegou a encenar esse reinício. **Falta o comando versionado
+que leva o jogo até lá**, que é o mesmo tipo de lacuna que a CORR-PES2-024
+fechou para o `--measure-menu` com o `--keep-alive`.
+
+**Problemas encontrados — três, e os três viraram asserção:**
+
+1. **`wait_for_pause` responde em `status`, não em `paused` nem `state`.**
+   Medido contra o servidor vivo: rodando dá
+   `{"status": "running", "poll_after_ms": 50, …}`, parado dá
+   `{"status": "paused", "pc": "0x80019DE8"}`. A primeira versão adivinhou os
+   dois nomes óbvios, leu toda resposta como "ainda rodando", e **duas
+   corridas foram creditadas ao jogo quando a culpa era do parser**. As
+   quatro formas estão fixadas no `--self-check`.
+2. **`press_button` retoma a máquina para entregar a tecla**, então cutucar
+   às cegas desfaz a parada que se espera. A espera passou a olhar **antes**
+   de cutucar, e outra vez logo depois.
+3. **Sessões MCP não convivem.** Rodar `pad.py` ao lado invalida a sessão do
+   `who_writes` (`missing or invalid MCP-Session-Id`), então o cutucão tem de
+   sair **deste** cliente — é por isso que `--nudge` existe em vez de
+   "rode o `pad.py` junto".
+
+E o `--self-check` ficou vermelho dentro do `pes2_selftest` enquanto passava
+sozinho, porque dependia de o emulador estar vivo — exatamente o que a lista
+de Fase 0 do perfil proíbe. O `alive()` virou parâmetro injetado, e os dois
+caminhos de falha são dirigidos sem emulador nenhum.
+
+**Gates:**
+
+```
+$ python3 tools/pes2/who_writes.py --self-check      # com o emulador MORTO
+SELF-CHECK OK: addresses, stores, registers, both waits      exit 0
+$ ctest --test-dir build -R pes2_selftest
+1/1 Test #7: pes2_selftest .......... Passed  9.33 sec
+```
+
+26 asserções, três delas vermelhas por construção: o prazo que expira, a
+morte no meio da espera (que cita a armadilha 35 em vez de "não está
+rodando"), e o cutucão que só sai quando pedido. `roms/` intocada, nada do
+fork versionado.
+
+**O que falta para fechar:** encenar o reinício de partida por comando
+versionado e rodar `who_writes.py 0x8007151B --width 2` contra ele.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `tools/pes2/who_writes.py` | criado |
+| `tools/pes2/selftest.py` | modificado (entra no `pes2_selftest`) |
+| `docs/PLAN-PES2-PSX.md` | modificado (§6.14, fluxo A: o comando e o que falta) |
+| `docs/prompts/perfil-pes2.md` | modificado (bloco de gates e uma linha na tabela) |

@@ -279,7 +279,8 @@ def main():
     # instead of unrolling a urllib traceback.
     for name, what in (("mcp", "mcp.py client, decoding and red cases"),
                        ("fork", "fork.py paths, kill list and refusals"),
-                       ("mcp_drive", "mcp_drive.py routes and thresholds")):
+                       ("mcp_drive", "mcp_drive.py routes and thresholds"),
+                       ("who_writes", "who_writes.py addresses, stores and waits")):
         try:
             module = __import__(name)
             failures = module.self_check(verbose=False)

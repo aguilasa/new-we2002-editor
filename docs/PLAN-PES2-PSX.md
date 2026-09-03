@@ -2302,6 +2302,33 @@ de um registro baseado em `0x80071300`**, zerado pela rotina em `0x80083560`
 no reinício de partida. Um save state nunca daria isso: ele diz o que a
 memória contém, nunca quem escreveu.
 
+**O procedimento virou comando em 2026-09-03** —
+`python3 tools/pes2/who_writes.py <endereço> [--nudge Cross]` (CORR-PES2-031).
+Ele limpa os breakpoints, arma o watchpoint de escrita, retoma, espera, e no
+disparo lê os registradores e desmonta em volta do `PC`, imprimindo a leitura
+pronta: instrução, registrador-base, deslocamento e `ra`. Era prosa num Log
+até então, enquanto o fluxo C tinha `savestate.py scan` desde a TASK-32 — e a
+diferença não é de conforto: a PES2-TASK-07 e o laço disco↔RAM da §4.2 são
+fluxo A repetido sobre outros endereços.
+
+**A reprodução da leitura acima por esse comando continua em aberto**, e o
+que se mediu ao tentar vale mais que o silêncio:
+
+- o watchpoint **arma e conta** — `hit_count` foi de 0 a **9** durante 400 s
+  de partida sob `pad.py run`, que é quem dá os saques;
+- um breakpoint de **execução** no `PC` corrente **para** a CPU
+  (`status: paused`, `hit_count: 1`), então o mecanismo de parada serve;
+- em **60 s de partida livre sem interferência** o watchpoint de escrita
+  ficou em `hit_count: 0`. O endereço **não é escrito continuamente**: ele é
+  escrito no **reinício de partida**, que é a precondição que este parágrafo
+  já registrava ("o jogo dirigido até uma partida nova") e que nenhuma das
+  seis janelas tentadas — de 150 a 280 s, do meio da partida e do
+  `team-select`, no endereço virtual e no físico — chegou a produzir.
+
+Ou seja: falta **encenar o reinício**, não consertar a ferramenta. Quem
+fechar isso deve deixar o comando versionado que leva o jogo até lá, como o
+`--keep-alive` fez pelo `--measure-menu` (CORR-PES2-024).
+
 **E o confronto entre as duas ferramentas achou um defeito nosso.** O
 critério pedia que `read_memory` e o `savestate.py` concordassem no mesmo
 endereço. Não concordaram. Despejando a RAM inteira pelos dois caminhos, a
