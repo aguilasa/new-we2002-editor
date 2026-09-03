@@ -2041,10 +2041,20 @@ prontos. Instalação: `/plugin marketplace add sadnescity/claude-plugins`.
 `sadnescity/duckstation`, branch `mcp`. `EnableMCPServer` não existe no
 build oficial: conferido por `strings` sobre o AppImage extraído, e as
 únicas ocorrências de `2346` são número de linha de `fullscreenui_settings.cpp`.
-O fork tem **3 estrelas e 0 forks** e **não publica binário próprio** — a
-página de releases que o README aponta é a do *upstream* `stenzek/duckstation`,
-que é justamente o build sem o servidor; reconferido em 2026-09-02, 12.330
-commits na branch. Adotá-lo é compilar um emulador C++ inteiro. E trocar de
+O fork tem **3 estrelas e 0 forks**, e **publica binário próprio** — o CI
+dele deposita quatorze ativos na release `latest` (a de 2026-08-29), entre
+eles um `DuckStation-x64.AppImage` de 93 MB cujo `duckstation-qt` traz
+`EnableMCPServer`, `MCPServerPort`, `duckstation-mcp` e os nomes de
+ferramenta do servidor — medido por `strings` em 2026-09-03, e todos ausentes
+do AppImage oficial. **A frase acima dizia "não publica binário próprio" até
+essa data**, e o engano tem uma lição própria: o **README** do fork é o do
+upstream, intocado, e por isso aponta para as releases do
+`stenzek/duckstation`, que são o build sem o servidor. Ler o README e concluir
+dali que não há binário do fork foi o erro; a aba de releases do próprio
+repositório nunca tinha sido aberta. O custo de obter um binário com MCP
+nunca foi de dias nem dos 107 s de compilação que a PES2-TASK-33 mediu — é um
+download. Os outros três números foram reconferidos em 2026-09-03 e
+continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar de
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis

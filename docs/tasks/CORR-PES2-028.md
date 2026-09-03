@@ -3,7 +3,7 @@ id: CORR-PES2-028
 title: "Correção: o fork publica binário próprio, e o AppImage dele traz o servidor MCP"
 type: correção
 category: ferramental
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -162,22 +162,76 @@ o que se corrige é o registro, não o resultado.
 
 ## Verificação
 
-- [ ] `grep -rn "não publica binário próprio\|nenhuma release própria" docs/ | grep -v concluidos`
+- [x] `grep -rn "não publica binário próprio\|nenhuma release própria" docs/ | grep -v concluidos`
       só devolve menção histórica datada
-- [ ] `python3 tools/pes2/fork.py recipe` imprime os dois caminhos, o de
+- [x] `python3 tools/pes2/fork.py recipe` imprime os dois caminhos, o de
       download primeiro, com a conferência por `strings`
-- [ ] `python3 tools/pes2/fork.py --self-check` verde — os dois casos que
+- [x] `python3 tools/pes2/fork.py --self-check` verde — os dois casos que
       cobram a receita (nomear a licença e o diretório de instalação)
       continuam passando
-- [ ] `ctest --test-dir build -R pes2_selftest` verde
-- [ ] nada do fork versionado; o AppImage baixado não fica no repositório
+- [x] `ctest --test-dir build -R pes2_selftest` verde
+- [x] nada do fork versionado; o AppImage baixado não fica no repositório
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:**
+**Executado em:** 2026-09-03
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito:** o fato foi corrigido nos dois documentos e a
+receita ganhou o caminho barato.
 
-**Problemas encontrados:**
+A §6.14 passa a dizer que o fork **publica** binário próprio, com o que foi
+medido, e guarda a lição do engano: o **README** do fork é o do upstream,
+intocado, e por isso aponta para as releases do `stenzek/duckstation` — ler o
+README e concluir dali que não há binário do fork foi o erro, e a aba de
+releases do próprio repositório nunca tinha sido aberta. Os outros três
+números foram reconferidos e continuam certos.
+
+O `fork.py recipe` passa a imprimir **dois caminhos, o download primeiro**,
+com a conferência por `strings` como parte da receita e não como enfeite — a
+release é reconstruída a cada push, e nada garante que o próximo build ainda
+traga o servidor. O critério de conclusão da PES2-TASK-32 recebeu a correção
+datada ao lado, dizendo o que muda (a conta de custo) e o que não muda (a
+decisão, que se sustentava no caminho barato ter entregado os fluxos C e D).
+
+**Problemas encontrados:** um escape a menos na primeira escrita da receita —
+a continuação de linha `\` do `gh release download` foi consumida pelo
+próprio Python e juntou as duas linhas do comando. Corrigido antes do commit;
+o `recipe` imprime o comando em duas linhas.
+
+E a varredura achou três textos que o conserto torna imprecisos, reconciliados
+em **commit próprio**: duas comparações vivas com "dias de compilação de um
+emulador" e as três menções a `fork.py recipe` como "diz como reconstruí-lo",
+que agora descreve só metade do que ele imprime.
+
+**Gates, com o número medido:**
+
+```
+$ gh api repos/sadnescity/duckstation/releases --jq 'length'
+1                                        # release `latest`, 2026-08-29, 14 ativos
+$ strings -a squashfs-root/usr/bin/duckstation-qt | grep -cx EnableMCPServer
+1                                        # e 0 no AppImage oficial
+```
+
+Os oito nomes conferidos no `DuckStation-x64.AppImage` publicado —
+`EnableMCPServer`, `MCPServerPort`, `duckstation-mcp`, `memory_scan`,
+`snapshot_memory`, `press_button`, `frame_step`, `load_state` — dão 1 cada; os
+três primeiros dão **0** no AppImage oficial, que é o mesmo teste que a §6.14
+já usava para mostrar que o oficial não tem o servidor.
+
+```
+$ python3 tools/pes2/fork.py --self-check      exit 0
+SELF-CHECK OK: paths, kill list, refusals, recipe
+$ ctest --test-dir build -R pes2_selftest
+1/1 Test #7: pes2_selftest .......... Passed  0.52 sec
+```
+
+O AppImage de 93 MB e o `squashfs-root` extraído ficaram no scratchpad e
+foram removidos; nada do fork entrou no repositório.
 
 **Arquivos criados/modificados:**
+
+| Arquivo | Ação |
+|---|---|
+| `docs/PLAN-PES2-PSX.md` | modificado (§6.14, o parágrafo "O que custaria") |
+| `tools/pes2/fork.py` | modificado (`RECIPE`: os dois caminhos) |
+| `docs/tasks/32-poc-do-mcp-do-duckstation.md` | modificado (critério de conclusão, correção datada) |

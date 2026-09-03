@@ -80,7 +80,30 @@ GAME_WINDOW = "^Pro Evolution Soccer 2$"
 DIALOGS = ("Automatic Updater", "DuckStation")
 
 RECIPE = """\
-Rebuilding the fork -- measured 2026-09-03, 107 s for the compile itself.
+Getting the fork -- two ways, cheapest first.
+
+1. Download the build its own CI publishes. The fork's README is the
+   upstream's, untouched, so it points at `stenzek/duckstation` releases --
+   which are the build *without* the server. Its own releases tab is a
+   different page, and the CI drops fourteen assets there on every push:
+
+     gh release download latest --repo sadnescity/duckstation \\
+        --pattern 'DuckStation-x64.AppImage'
+
+   Confirm before trusting it. The release is rebuilt on every push and
+   nothing promises the next build still carries the server -- this check is
+   part of the recipe, not decoration:
+
+     ./DuckStation-x64.AppImage --appimage-extract
+     strings -a squashfs-root/usr/bin/duckstation-qt | grep -x EnableMCPServer
+
+   Measured 2026-09-03 on the `latest` release of 2026-08-29:
+   EnableMCPServer, MCPServerPort, duckstation-mcp, memory_scan,
+   snapshot_memory, press_button, frame_step and load_state all present --
+   and all absent from the official AppImage.
+
+2. Build it from source -- measured 2026-09-03, 107 s for the compile
+   itself, and what you want if you need to change it.
 
   git clone --depth 1 -b mcp https://github.com/sadnescity/duckstation.git
   cd duckstation

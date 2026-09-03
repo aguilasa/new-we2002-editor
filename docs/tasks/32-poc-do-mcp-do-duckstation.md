@@ -77,6 +77,18 @@ um punhado de endereços. Depois `read_memory` neles e conferir contra a tela.
       tem 3 estrelas, 0 forks, 12.330 commits na branch `mcp`, e **nenhuma
       release própria** — a página que o README aponta é a do upstream
       `stenzek/duckstation`, que é justamente o build sem o servidor.
+
+      *Corrigido em 2026-09-03 pela
+      [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md):* três dos quatro números
+      continuam certos, e **"nenhuma release própria" é falso**. O fork
+      publica quatorze ativos na release `latest`, de 2026-08-29, e o
+      `DuckStation-x64.AppImage` dela **traz o servidor MCP**. A frase sobre
+      o README continua verdadeira e foi justamente o que enganou: o README é
+      o do upstream, e a aba de releases do próprio fork nunca foi aberta. A
+      decisão desta task não muda por isso — ela se sustentava no caminho
+      barato ter entregado os fluxos C e D —, mas a conta de custo estava
+      errada duas vezes: nem dias, nem os 107 s que a PES2-TASK-33 mediu, e
+      sim um download.
 - [x] Sem servidor MCP para responder, a leitura trivial de RAM foi feita
       pelo outro caminho: `savestate.py read` devolve bytes de qualquer
       endereço, e a extração passa por uma guarda de kernel que a faz falhar
