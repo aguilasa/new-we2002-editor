@@ -42,6 +42,11 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-018](/docs/tasks/CORR-PES2-018.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A §1.14(g) diz "10 de 13 recomprimem no orçamento" e "folga de 0 a 4 bytes"; medido são 9 de 13 e 0 a 3 | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-019](/docs/tasks/CORR-PES2-019.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | O `import` não valida profundidade nem paleta, e grava um PNG de 4 bpp num slot de 8 bpp em silêncio | Alta | [x] concluída | 2026-09-01 |
 | [CORR-PES2-020](/docs/tasks/CORR-PES2-020.md) | [PES2-TASK-29](/docs/tasks/29-gravacao-de-asset.md) | A conferência `decompress(compress(x))` antes da gravação nunca foi vista ficando vermelha | Baixa | [x] concluída | 2026-09-01 |
+| [CORR-PES2-021](/docs/tasks/CORR-PES2-021.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `boot_check.sh` justifica nomear o binário com 0,019 entre os dois; a §6.14 da mesma task mede ~0,0015 e descarta o binário como causa | Alta | [ ] pendente | — |
+| [CORR-PES2-022](/docs/tasks/CORR-PES2-022.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A coluna "Revisado em" das PES2-TASK-32 e 33 diz `✅ Concluído`; nenhuma das duas foi revisada, e o valor as tirou da fila | Alta | [ ] pendente | — |
+| [CORR-PES2-023](/docs/tasks/CORR-PES2-023.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O perfil não tem verificações de Fase 0, diz que ela não tem task de trabalho, e conta seis fases onde a §5 tem oito | Média | [ ] pendente | — |
+| [CORR-PES2-024](/docs/tasks/CORR-PES2-024.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | O `--measure-menu` é gate, não confere se está no menu principal, e nenhum comando versionado leva o emulador até lá | Média | [ ] pendente | — |
+| [CORR-PES2-025](/docs/tasks/CORR-PES2-025.md) | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | A §3.2 do plano ainda chama a morada do fork de "item aberto da PES2-TASK-34" | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.
@@ -77,6 +82,11 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-018 — dois números da §1.14(g) não batem com a ferramenta
 - [x] CORR-PES2-019 — o `import` aceita a profundidade errada
 - [x] CORR-PES2-020 — a conferência antes do disco não é exercitada
+- [ ] CORR-PES2-021 — o 0,019 entre binários foi desmentido pela própria task
+- [ ] CORR-PES2-022 — duas tasks saíram da fila de revisão sem terem sido revisadas
+- [ ] CORR-PES2-023 — a Fase 0 não tem verificações escritas no perfil
+- [ ] CORR-PES2-024 — o caso vermelho não confere a tela nem tem caminho versionado
+- [ ] CORR-PES2-025 — a §3.2 descreve como aberto um item que a 34 fechou
 
 ## Detalhes por correção
 
@@ -367,3 +377,37 @@ Três consequências para a seção `## Evidência` de qualquer `CORR-PES2-*`:
 - **Como foi detectado:** lendo o que o `check` exercita — a guarda de orçamento aparece em vermelho, esta não aparece.
 - **Fix:** ponto de injeção privado para um codec defeituoso, e um caso no `check` que exige o `Refused`.
 
+### CORR-PES2-021
+
+- **Arquivo com problema:** `tools/pes2/boot_check.sh`, linha 38
+- **Sintoma:** o cabeçalho justifica o gate nomear o binário dizendo que "the title screen's standard deviation differs by 0.019 between them"; a tabela da §6.14, escrita no mesmo commit, mede 0,359942..0,360497 (fork) contra 0,358742 (AppImage) — ~0,0015 — e descarta explicitamente o binário como causa dos 0,019.
+- **Como foi detectado:** `grep -rn "0\.019"` na árvore, e a rota `main-menu` remedida nesta revisão: `sd=0.359966` no fork.
+- **Fix:** reescrever o parágrafo com o que a §6.14 sustenta — as médias sobrevivem, o desvio não se reproduz nem no mesmo binário, e é por isso que o gate precisa dizer qual binário correu.
+
+### CORR-PES2-022
+
+- **Arquivo com problema:** `docs/tasks/progresso.md`, linhas das PES2-TASK-32 e 33
+- **Sintoma:** a célula "Revisado em" das duas tem `✅ Concluído`, que é o símbolo da coluna vizinha. Nenhuma das duas foi revisada — não há commit de revisão nem CORR de origem —, e o valor as tirou da fila do `/revisar`.
+- **Como foi detectado:** `git show 65e980a:docs/tasks/progresso.md` contra `4d3a574`, mais `git log --oneline --all | grep review` e `grep -c "PES2-TASK-3" correcoes-progresso.md`.
+- **Fix:** repor `⬜ pendente` nas duas células e cercar o rito no `01-executar.md`.
+
+### CORR-PES2-023
+
+- **Arquivo com problema:** `docs/prompts/perfil-pes2.md`, "Verificações específicas por fase"
+- **Sintoma:** não há entrada de Fase 0; o parágrafo diz "Não há task de trabalho nelas" com quatro tasks de Fase 0 no quadro e três delas entregando ferramenta; e diz "As seis fases" onde a §5 tem oito.
+- **Como foi detectado:** `grep "^\*\*Fase" perfil-pes2.md` contra `grep "^### Fase" PLAN-PES2-PSX.md`, e a contagem da coluna Fase do `progresso.md`.
+- **Fix:** separar a Fase 1 (fechada) da Fase 0, escrever a lista de Fase 0, e corrigir a contagem.
+
+### CORR-PES2-024
+
+- **Arquivo com problema:** `tools/pes2/mcp_drive.py`, `measure_menu`
+- **Sintoma:** o caso vermelho que o perfil promove a gate não confere estar no menu principal antes de medir, e nenhum comando versionado deixa o emulador parado lá — toda rota o mata no `__exit__`. O que salvou a corrida foi um save state não versionado que sobrou da task.
+- **Como foi detectado:** `--screen main-menu` seguido de `--measure-menu` devolve `skipping: no MCP server`; a corrida só fechou com `fork.py launch` + `mcp.py --call load_state slot=1`.
+- **Fix:** verificar `MAIN_MENU_MEAN ± MAIN_MENU_TOL` antes de medir, e dar um caminho versionado até o estado (`--keep-alive` ou `--measure-menu <imagem>`).
+
+### CORR-PES2-025
+
+- **Arquivo com problema:** `docs/PLAN-PES2-PSX.md`, §3.2, linha 1004
+- **Sintoma:** a tabela do emulador diz que onde o fork mora "é item aberto da PES2-TASK-34"; a task fechou o item e a §6.14, o `CLAUDE.md` e o perfil já dizem `~/Applications/duckstation-mcp/`.
+- **Como foi detectado:** `grep -n "item aberto" docs/PLAN-PES2-PSX.md`, contra `python3 tools/pes2/fork.py which`.
+- **Fix:** trocar a oração pelo caminho, com a nota de licença.
