@@ -159,7 +159,7 @@ python3 tools/pes2/mcp.py --list                 # as 95 ferramentas, contra o s
 python3 tools/pes2/fork.py --self-check          # caminhos, lista de kill, recusas
 python3 tools/pes2/mcp_drive.py --self-check     # rotas, limiares, assinaturas
 python3 tools/pes2/who_writes.py --self-check    # fluxo A: enderecos, stores, as duas esperas
-python3 tools/pes2/who_writes.py 0x8007151B --nudge Cross   # quem escreve, contra o jogo vivo
+python3 tools/pes2/who_writes.py 0x8007151B --nudge Cross   # quem escreve; depois de --screen team-select --keep-alive
 python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen edit --out-dir <dir>
 python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen main-menu --keep-alive  # deixa o jogo de pe no menu
 python3 tools/pes2/mcp_drive.py --measure-menu   # o caso vermelho: uma tecla a mais tem de falhar
@@ -208,7 +208,7 @@ PES2_IMAGE="<copia>/….cue" \
 | comportamento em tela | `boot_check.sh`, com o número medido (desvio-padrão e contagem de pixels), o quadro **fora** do git, e a linha final dizendo **contra qual binário** ele correu. E `boot_check.sh --self-check` verde: o veredito é função e seus casos vermelhos rodam sem emulador — inclusive o quadro congelado, que é o modo de falha real. **A prova de vida amostra uma vez por segundo** ao longo do `PES2_GAP` e guarda a maior diferença; a forma antiga, de dois quadros em relógio fixo, falhava 1 em 3 numa tela de abertura parada (CORR-PES2-030) |
 | rota de emulador | `mcp_drive.py --self-check` verde, e `--measure-menu` contra o jogo vivo: ele mede as sete linhas do menu e depois pede sete, o que **tem de falhar**. Verde que nunca pôde ser vermelho é decoração. **São dois comandos, e o primeiro é parte do gate:** `--screen main-menu --keep-alive` deixa o jogo de pé no menu — sem ele toda rota mata no `__exit__` o emulador que subiu, e o caso vermelho passa a depender de um save state esquecido de outra corrida. O `--measure-menu` confere a tela antes de medir, e recusa alto se não for o menu (CORR-PES2-024) |
 | cliente ou lançador de MCP | `mcp.py --self-check` e `fork.py --self-check` verdes; os dois rodam sem emulador e os dois têm o caso de servidor ausente |
-| endereço de RAM atribuído a um escritor | `who_writes.py --self-check` verde **e** o disparo reproduzido no endereço em questão. Sem o disparo é conjectura: o watchpoint conta sem parar o jogo, e "não disparou" pode ser o endereço não ser escrito naquele estado. A ferramenta falha alto nesse caso em vez de devolver vazio, e o `--nudge` existe porque o PES2 congela em cada saque — jogo parado não escreve nada (CORR-PES2-031) |
+| endereço de RAM atribuído a um escritor | `who_writes.py --self-check` verde **e** o disparo reproduzido no endereço em questão. Sem o disparo é conjectura: "não disparou" pode ser o endereço não ser escrito naquele estado, e a ferramenta falha alto em vez de devolver vazio. O rito são **dois comandos**, como o do `--measure-menu`: `mcp_drive.py … --screen team-select --keep-alive` e depois `who_writes.py <endereço> --nudge Cross` — o `--nudge` existe porque o PES2 congela em cada saque, e ele passa `duration_frames`, **sem o que o botão fica preso** e todo cutucão seguinte é inócuo (CORR-PES2-031) |
 | número em doc | veio de ferramenta, não de soma à mão |
 
 **São dois emuladores, e nenhum está no `PATH`.** O de trabalho é o **fork

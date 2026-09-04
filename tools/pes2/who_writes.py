@@ -62,6 +62,9 @@ except Exception:                                             # noqa: BLE001
 
 SKIP = 77
 POLL_SECONDS = 1.0
+# Long enough for the game to read it as a tap. `mcp_drive` holds 6 frames
+# for menu work and this is the same order; the emulator releases it itself.
+NUDGE_FRAMES = 6
 
 
 class Fail(Exception):
@@ -223,7 +226,16 @@ def wait_for_hit(client, timeout, say=print, nudge=None, every=6.0,
         if nudge and time.time() - last_nudge >= every:
             last_nudge = time.time()
             try:
-                client.call("press_button", button=nudge)
+                # `duration_frames` or the button is never released. Without
+                # it `press_button` answers `{"state": "pressed"}` and leaves
+                # it held, so the first nudge pins the pad down and every one
+                # after it is a no-op -- which looks exactly like a game that
+                # will not advance. The release has to run on the emulator's
+                # own clock, because during free execution there is nothing
+                # here stepping frames to release it on.
+                client.call("press_button", button=nudge.capitalize()
+                            if nudge.islower() else nudge,
+                            duration_frames=NUDGE_FRAMES)
             except ToolError:
                 pass
             if is_paused(client.call("wait_for_pause")):
@@ -397,10 +409,12 @@ def self_check(verbose=True):
     class _Counting:
         def __init__(self):
             self.presses = 0
+            self.held = None
 
         def call(self, name, **kw):
             if name == "press_button":
                 self.presses += 1
+                self.held = kw.get("duration_frames")
             return {"status": "running"}
 
     c = _Counting()
@@ -410,6 +424,9 @@ def self_check(verbose=True):
     except Fail:
         pass
     check("the nudge is pressed while waiting", c.presses >= 2, str(c.presses))
+    # Without a duration the pad stays held and every later nudge is a no-op,
+    # which reads as a game that refuses to advance.
+    check("and it carries a release", c.held == NUDGE_FRAMES, str(c.held))
     c = _Counting()
     try:
         wait_for_hit(c, timeout=3.0, say=lambda _m: None, alive=lambda: True)

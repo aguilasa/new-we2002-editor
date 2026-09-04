@@ -3,7 +3,7 @@ id: CORR-PES2-031
 title: "Correção: o fluxo A, que é a razão de o fork existir, não tem ferramenta versionada"
 type: correção
 category: ferramental
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -134,16 +134,16 @@ e o disparo reproduzido no endereço em questão; sem o disparo é conjectura |
 
 - [x] `python3 tools/pes2/who_writes.py --self-check` verde, com o caso
       vermelho do prazo aparecendo
-- [ ] contra o jogo vivo, `who_writes.py 0x8007151B --width 2` reproduz o
+- [x] contra o jogo vivo, `who_writes.py 0x8007151B --width 2` reproduz o
       resultado de 2026-09-03: instrução em `0x80083574`, `v0 = 0x80071301`,
-      `ra = 0x800834C0` — **em aberto**, ver o Log
+      `ra = 0x800834C0`
 - [x] `ctest --test-dir build -R pes2_selftest` verde
 - [x] a espera distingue "caiu" de "não está rodando"
 - [x] `roms/` intocada; nada do fork versionado
 
 ## Log de Execução *(preenchido após execução)*
 
-**Executado em:** 2026-09-03 — **parcial. A correção continua `[ ]`.**
+**Executado em:** 2026-09-03 (parcial) e **2026-09-04 (fechada)**
 
 **Resumo do que foi feito:** `tools/pes2/who_writes.py` existe, com a forma
 das outras ferramentas do ciclo: limpa os breakpoints, arma o watchpoint de
@@ -207,8 +207,73 @@ morte no meio da espera (que cita a armadilha 35 em vez de "não está
 rodando"), e o cutucão que só sai quando pedido. `roms/` intocada, nada do
 fork versionado.
 
-**O que falta para fechar:** encenar o reinício de partida por comando
-versionado e rodar `who_writes.py 0x8007151B --width 2` contra ele.
+---
+
+## Fechamento, 2026-09-04
+
+**A leitura foi reproduzida, e os quatro valores batem.** O rito são dois
+comandos versionados, sobre cópia:
+
+```sh
+python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen team-select --keep-alive
+python3 tools/pes2/who_writes.py 0x8007151B --width 2 --nudge Cross
+```
+
+```
+  the watchpoint fired after 42.9s
+
+address      0x8007151B  (width 2)
+stopped at   0x80083578
+written by   0x80083574  sb zero, 0x0000021A(v0)
+             v0 = 0x80071301, 0x80071301 + 0x0000021A = 0x8007151B
+called from  ra = 0x800834C0
+
+  0x80083568  sb zero, 0x21d(a3)
+  0x8008356C  sb zero, 0x21c(a3)
+  0x80083570  sb zero, 0x224(v0)
+  0x80083574  sb zero, 0x21a(v0) <-
+  0x80083578  sb zero, 0x5f(v0)
+```
+
+Instrução, `v0`, ponto de parada e `ra` idênticos aos de 2026-09-03, e a
+janela em volta mostra o mesmo bloco de `sb zero` em sequência.
+
+**A causa das seis falhas de ontem não era o reinício de partida — era o
+botão preso.** `press_button` **sem `duration_frames`** responde
+`{"state": "pressed"}` e deixa o pad apertado: o primeiro cutucão prendia o
+Cross e todos os seguintes eram inócuos, o que na tela é indistinguível de um
+jogo que se recusa a avançar. O `mcp_drive.press` sempre passou a duração; o
+`--nudge` não passava. O `NUDGE_FRAMES = 6` entrou, e o `--self-check` passou
+a **exigir** que o cutucão carregue a duração — sem essa asserção o defeito
+volta calado.
+
+Duas hipóteses foram medidas e descartadas no caminho, e as duas valia
+descartar:
+
+- **`press_button` não apaga breakpoint.** Armado, `continue`, `press_button`
+  e `pause`: a lista continua com `hit_count` intacto nos quatro momentos. A
+  lista vazia observada ontem era o `finally` do próprio `who_writes`.
+- **O endereço físico não era o problema.** `0x0007151B` e `0x8007151B` se
+  comportam igual; o que faltava era o jogo andar.
+
+**Gates:**
+
+```
+$ python3 tools/pes2/who_writes.py --self-check     # 27 asserções
+SELF-CHECK OK: addresses, stores, registers, both waits      exit 0
+$ ctest --test-dir build -R pes2_selftest
+1/1 Test #7: pes2_selftest .......... Passed  9.38 sec
+```
+
+`roms/` intocada — tudo correu sobre cópia da release `(EsIt)` no scratchpad.
+
+**Arquivos do fechamento:**
+
+| Arquivo | Ação |
+|---|---|
+| `tools/pes2/who_writes.py` | modificado (`NUDGE_FRAMES`, a duração no cutucão, a asserção) |
+| `docs/PLAN-PES2-PSX.md` | modificado (§6.14: a reprodução, e a causa das falhas) |
+| `docs/prompts/perfil-pes2.md` | modificado (o rito de dois comandos na tabela de gates) |
 
 **Arquivos criados/modificados:**
 

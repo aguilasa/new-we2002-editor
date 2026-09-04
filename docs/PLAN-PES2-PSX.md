@@ -2311,23 +2311,44 @@ até então, enquanto o fluxo C tinha `savestate.py scan` desde a TASK-32 — e 
 diferença não é de conforto: a PES2-TASK-07 e o laço disco↔RAM da §4.2 são
 fluxo A repetido sobre outros endereços.
 
-**A reprodução da leitura acima por esse comando continua em aberto**, e o
-que se mediu ao tentar vale mais que o silêncio:
+**A leitura acima foi reproduzida pelo comando em 2026-09-04**, em dois
+passos versionados, sobre cópia:
+
+```sh
+python3 tools/pes2/mcp_drive.py "<copia.cue>" --screen team-select --keep-alive
+python3 tools/pes2/who_writes.py 0x8007151B --width 2 --nudge Cross
+```
+
+```
+  the watchpoint fired after 42.9s
+address      0x8007151B  (width 2)
+stopped at   0x80083578
+written by   0x80083574  sb zero, 0x0000021A(v0)
+             v0 = 0x80071301, 0x80071301 + 0x0000021A = 0x8007151B
+called from  ra = 0x800834C0
+```
+
+Os quatro valores de 2026-09-03 batem, e a janela em volta mostra o mesmo
+bloco de `sb zero` em sequência (`0x21d(a3)`, `0x21c(a3)`, `0x224(v0)`,
+`0x21a(v0)`, `0x5f(v0)`).
+
+**O que estava faltando não era o reinício, era soltar o botão.** As seis
+tentativas anteriores falharam por causa de `press_button` **sem
+`duration_frames`**: ele responde `{"state": "pressed"}` e deixa o pad
+**preso**, então o primeiro cutucão prendia o Cross e todos os seguintes eram
+inócuos — o que na tela é indistinguível de um jogo que se recusa a avançar.
+O `mcp_drive.press` sempre passou a duração; o `--nudge` não passava. Três
+medições que sobreviveram à investigação e vale guardar, porque cada uma
+descartou uma hipótese:
 
 - o watchpoint **arma e conta** — `hit_count` foi de 0 a **9** durante 400 s
   de partida sob `pad.py run`, que é quem dá os saques;
 - um breakpoint de **execução** no `PC` corrente **para** a CPU
-  (`status: paused`, `hit_count: 1`), então o mecanismo de parada serve;
-- em **60 s de partida livre sem interferência** o watchpoint de escrita
-  ficou em `hit_count: 0`. O endereço **não é escrito continuamente**: ele é
-  escrito no **reinício de partida**, que é a precondição que este parágrafo
-  já registrava ("o jogo dirigido até uma partida nova") e que nenhuma das
-  seis janelas tentadas — de 150 a 280 s, do meio da partida e do
-  `team-select`, no endereço virtual e no físico — chegou a produzir.
-
-Ou seja: falta **encenar o reinício**, não consertar a ferramenta. Quem
-fechar isso deve deixar o comando versionado que leva o jogo até lá, como o
-`--keep-alive` fez pelo `--measure-menu` (CORR-PES2-024).
+  (`status: paused`, `hit_count: 1`);
+- em **60 s de partida livre** o watchpoint de escrita ficou em
+  `hit_count: 0` — o endereço não é escrito continuamente, só no reinício de
+  partida, e `press_button` **não** apaga breakpoint, que era a outra
+  suspeita.
 
 **E o confronto entre as duas ferramentas achou um defeito nosso.** O
 critério pedia que `read_memory` e o `savestate.py` concordassem no mesmo

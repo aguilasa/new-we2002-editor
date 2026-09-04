@@ -99,7 +99,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 - [x] CORR-PES2-028 — o fork publica binário próprio, e ele tem o MCP
 - [x] CORR-PES2-029 — dois caminhos de falha saem como traceback em vez de recusa
 - [x] CORR-PES2-030 — o gate de boot falha na tela parada, e diz que o emulador morreu
-- [ ] CORR-PES2-031 — o fluxo A não virou ferramenta, como o fluxo C virou
+- [x] CORR-PES2-031 — o fluxo A não virou ferramenta, como o fluxo C virou
 - [x] CORR-PES2-032 — a queda intermitente do emulador não está escrita em lugar nenhum
 
 ## Detalhes por correção
