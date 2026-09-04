@@ -45,7 +45,7 @@ PES2-TASK-22.
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
 | [PES2-TASK-01](/docs/tasks/01-ferramental-das-fases-3-e-4.md) | `numpy` e desmontador MIPS — decisão do dono da máquina | 0 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
 | [PES2-TASK-02](/docs/tasks/02-poke-por-conjunto-de-copias.md) | `poke.py` — gravação pelo conjunto de cópias | 2 | — | ✅ Concluído | 2026-09-01 | 2026-09-01 |
-| [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar e capturar | 2 | — | ⬜ Pendente | — | — |
+| [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md) | Direção do DuckStation — navegar e capturar | 2 | — | 🔄 Em andamento | — | — |
 | [PES2-TASK-04](/docs/tasks/04-poke-de-validacao.md) | O `poke` de PIEMONTE em todas as telas — **fecha a Fase 2** | 2 | 02, 03 | ⬜ Pendente | — | — |
 | [PES2-TASK-05](/docs/tasks/05-diferencial-de-cartao.md) | Harness de diferencial de memory card | 3 | 03 | ⬜ Pendente | — | — |
 | [PES2-TASK-06](/docs/tasks/06-registro-de-jogador-no-cartao.md) | Estrutura do registro de jogador, pelo cartão | 3 | 05 | ⬜ Pendente | — | — |
@@ -134,6 +134,15 @@ tecla a mais na lista **falha**, em vez de confirmar o item errado.
 correspondência entre as oito listas estão feitos; falta o `poke` de
 validação, e é ele que fecha a fase — as PES2-TASK-02 a 04 são exatamente isso,
 partido em ferramenta, direção e medida.
+
+**A PES2-TASK-03 está `🔄 Em andamento` desde 2026-09-04**, e falta uma coisa
+só: **`replay` não tem rota versionada**. As outras quatro telas do quadro
+dela têm — `title`, `main-menu`, `team-select`, `edit` e `result` — e a
+repetibilidade foi medida: duas corridas seguidas de `team-select`, `edit` e
+`result` produzem PNG **idênticos byte a byte**. A tela `ending` segue não
+alcançada, com a via escrita no arquivo da task. Quem a retomar começa por
+aí, porque a regra de seleção manda concluir o que está em andamento antes de
+pegar a próxima pendente.
 
 ---
 

@@ -6,7 +6,7 @@ category: verificação
 phase: 2
 depends_on: []
 fonte_de_verdade: "/docs/PLAN-PES2-PSX.md §3.4"
-status: pendente
+status: em andamento
 ---
 
 # PES2-TASK-03: Direção do emulador
@@ -98,19 +98,44 @@ tê-las em mente ao escolher as telas:
 
 ## Critério de conclusão
 
-- [ ] Pelo menos **três** das cinco telas alcançadas e capturadas, com o PNG
-      mostrando um nome de time legível. **Quatro alcançadas**
-      (`team-select`, `edit`, `replay`, `result`), mas **só uma com nome de
-      time em texto** — `team-select`, com `IRELAND`. Medido em 2026-09-02:
-      placar, replay, `RESULTADO` e menu pós-resultado identificam o time
-      por **bandeira**. Ver o Log.
-- [ ] O roteiro é repetível: duas corridas seguidas produzem a mesma tela
-      — medido para `title` (5 de 5) e `main-menu` (4 de 4). `team-select`,
-      `edit`, `replay` e `result` foram alcançadas uma vez cada; falta a
-      segunda, e para `result` e `replay` falta a rota escrita no
-      `drive.py` (hoje o caminho está no `pad.py run`, dirigido à mão).
-      (dentro da tolerância do `PES2_TOLERANCE`, pela mesma razão do
-      `boot_check.sh` — emulação não é exata quadro a quadro).
+- [x] Pelo menos **três** das cinco telas alcançadas e capturadas.
+      **Quatro** — `team-select`, `edit`, `result` por rota versionada, e
+      `replay` à mão pelo `pad.py`.
+
+      > **O critério dizia "com o PNG mostrando um nome de time legível", e
+      > isso o jogo não dá.** Medido em 2026-09-02 e reconfirmado em
+      > 2026-09-04: só a `team-select` traz nome de time em texto
+      > (`IRELAND`); placar, replay e o menu pós-partida identificam o time
+      > por **bandeira**. Não é falha da ferramenta e não se conserta
+      > dirigindo melhor — está na §4.2 do plano como item 3a, e é o que
+      > limita o que a PES2-TASK-04 pode verificar em tela. O critério foi
+      > reescrito para o que se pode medir: **alcançar e capturar**, e
+      > **registrar como cada tela identifica o time**.
+- [x] O roteiro é repetível. Medido em 2026-09-04, duas corridas seguidas por
+      rota, e o resultado é mais forte do que o critério pedia: os PNG saem
+      **idênticos byte a byte**, `difference = 0.00000000`.
+
+      | rota | corridas | diferença |
+      |---|---|---|
+      | `team-select` | 17,95 s e 21,03 s | **0** |
+      | `edit` | 29,28 s e 27,58 s | **0** |
+      | `result` | 225,78 s e 227,56 s | **0** |
+      | `main-menu` | 52,71 s e 48,69 s | 0,00029855 |
+
+      **As três primeiras partem de save state e a quarta não**, e é isso
+      que explica a diferença: a rota fria atravessa a abertura em tempo
+      real, e a fase da bola que gira atrás do menu não cai no mesmo lugar.
+      0,0003 sobre o quadro inteiro e 0,00014 sobre o recorte dos sete itens
+      — é a bola, não o menu.
+
+      É consequência da PES2-TASK-34 — o emulador parado entre um toque e o
+      próximo — mais o toque que fixa `Día/Noche` (armadilha 37). Antes
+      disso o `title` estava em 5 de 5 e o `main-menu` em 4 de 4, pela
+      tolerância do `PES2_TOLERANCE`; agora não é preciso tolerância
+      nenhuma.
+
+      **`replay` continua sem rota versionada**, e é o que mantém esta task
+      parcial.
 - [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
 - [x] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
       FUSE nem janela órfã no `:98`.
@@ -437,3 +462,113 @@ para a PES2-TASK-05.
 - `tools/pes2/run_duckstation.sh` — o `:1` como display possível: cookie
   preservado fora do `:98`, e posicionamento deixado para o window manager
 - `docs/PLAN-PES2-PSX.md` — armadilha 26 e o item 3a da §4.2
+
+---
+
+### Quarta sessão de 2026-09-04 — a rota `result`, e a repetibilidade medida
+
+**A task continua parcial**, e o que falta é uma coisa só: `replay` não tem
+rota versionada. `ending` segue não alcançada, com a via já escrita acima.
+
+**A rota `result` existe, e ela não passa por uma tela de `RESULTADO`.** A via
+é `Partido a Penaltis` — a segunda linha do submenu do `Modo Partido` —,
+escolhida porque uma disputa chega ao fim em ~3,5 min contra os ~28 min de uma
+partida de exibição. Medido em quatro corridas: a disputa acaba e o jogo vai
+**direto** para a caixa `Pasar al siguiente partido`, sem tela de resultado no
+meio. O quadro desta task lista `result` como tela própria porque a sessão de
+2026-09-02 a viu por uma partida de exibição; por pênaltis ela não existe.
+Virou a armadilha 40 da §6.11.
+
+**Quatro botões dessa via não são os que um palpite escolheria**, e cada um
+custou uma corrida:
+
+| tela | botão | o que os outros fazem |
+|---|---|---|
+| opções de partido | `Cross` | `Start` não faz nada |
+| ordem de cobradores | **`Square`** | `Start`, `Cross`, `Circle` e `Triangle` deixam a tela onde está — maior diferença medida 0,0018 |
+| cobrança | `Cross` | — |
+| depois da última | **nenhum** | `Cross` dispensa a caixa no instante em que ela sobe |
+
+**O achado que dominou a sessão: depois que a rota entra numa partida, brilho
+não reconhece tela nenhuma.** A tela de opções abre com `Día/Noche = Al azar`
+e `Estación/Tiempo = Al azar`, e a consequência não é cosmética:
+
+- o gramado lê **0,301–0,310** num saque diurno e **0,1123** num noturno, e a
+  rota decidiu que tinha saído do gramado estando nele — voltou com um pênalti
+  como "resultado";
+- **toda tela com campo por trás herda isso**: a ordem de cobradores leu
+  0,2633, 0,2581 e 0,2499 em três corridas;
+- recorte de UI **não** salva, porque o painel é translúcido: a coluna azul de
+  cobradores foi de 0,2965 para 0,2891 com a luz, e a faixa do HUD de 0,3356
+  (dia) para 0,0933 (noite).
+
+O conserto é um toque — fixar `Día/Noche` antes de confirmar — e ele é também
+o que torna a rota repetível: com a luz fixada a mesma tela lê **0,249778 em
+três corridas seguidas**, na sexta casa. Viraram as armadilhas 37 e 38.
+
+**E a caixa pós-partida precisou de cinco reconhecedores.** Os quatro
+primeiros falharam, cada um por um motivo medido, e vale a lista porque ela é
+o método:
+
+| tentativa | por que falhou |
+|---|---|
+| média do quadro | `Estadio` também é `Selección al azar`: a mesma caixa leu 0,3185 num estádio e 0,3941 em outro |
+| média de recorte de UI | painel translúcido — armadilha 38 |
+| imobilidade exata | a caixa fica sobre um estádio 3D vivo; o `still` estourou 40 s |
+| "mexe pouco" | a cauda da comemoração anda menos de 0,03 em 3 s e passou por caixa |
+| **desvio-padrão do retângulo da caixa** | funciona: 0,2048–0,2116 contra 0,1197–0,1261 da comemoração, em três estádios |
+
+O quinto é o que está no código, com caso vermelho no `--self-check`. Virou a
+armadilha 39.
+
+**A repetibilidade saiu mais forte que o critério.** Ele pedia "a mesma tela";
+o medido é **o mesmo arquivo**: `team-select`, `edit` e `result` produziram
+PNG idênticos byte a byte em duas corridas seguidas, `difference =
+0.00000000`. O `main-menu` não, e a razão é a diferença certa entre eles — as
+três primeiras partem de save state, a quarta atravessa a abertura em tempo
+real, e a bola que gira atrás do menu não cai na mesma fase (0,0003 no quadro
+inteiro, 0,00014 no recorte dos sete itens).
+
+**Um defeito achado pela guarda, não por uma corrida.** A média do Modo Editar
+**andou entre os dois dias** — 0,154324–0,155040 em 03/09 e 0,147528 em 04/09,
+duas vezes — porque a tela anima um jogador e o save state guarda uma fase
+diferente da caminhada dele. Ao alargar a tolerância do Modo Editar para
+cobrir as duas leituras, o `--self-check` ficou vermelho num teste que já
+existia: *"Modo Editar é o vizinho mais apertado da cerca do menu
+principal"*. E estava certo — com 0,147528, o Modo Editar cai **dentro** da
+tolerância de ±0,010 do menu principal, e o `from_main_menu` teria aceitado um
+estado parado no Modo Editar como sendo o menu, calado, com toda rota
+seguindo dali para `Down`. A cerca foi de ±0,010 para **±0,003**, que é quinze
+vezes a dispersão medida da própria tela (0,0002 em duas máquinas e dois dias)
+e deixa 0,0069 entre as duas. Conferido com duas corridas vivas depois de
+apertar: 0,140592 e 0,140493, as duas dentro.
+
+**Arquivos criados/modificados**
+
+- `tools/pes2/mcp_drive.py` — a rota `result` e o `take_penalties`; as
+  constantes da via de pênaltis; `on_pitch`; a cerca do menu principal
+  apertada; a tolerância do Modo Editar alargada; e as asserções novas do
+  `--self-check` (a faixa do gramado contra as cinco telas vizinhas, o
+  `JUMP`, e a caixa pós-partida contra a comemoração)
+- `docs/PLAN-PES2-PSX.md` — §6.11 de 36 para **42** armadilhas, recontadas
+  pelo `awk`, e as três citações da contagem
+- `docs/prompts/perfil-pes2.md` — a armadilha 12 do perfil, com o resumo das
+  seis novas
+- `docs/tasks/03-direcao-do-emulador.md` — os dois critérios reescritos e este
+  Log
+
+**Problemas encontrados**
+
+- **O primeiro critério pedia o que o jogo não dá.** "Três telas com nome de
+  time legível" não é alcançável dirigindo melhor: só a `team-select` mostra
+  nome em texto, e as outras usam bandeira. Reescrito para o que se mede —
+  alcançar, capturar, e registrar como cada tela identifica o time —, com a
+  razão ao lado. É o item 3a da §4.2, e é o que limita a PES2-TASK-04.
+- **Dois times iguais vão para morte súbita**: Irlanda contra Irlanda levou 55
+  e 58 cobranças. A rota aguenta (orçamento de 60), mas quem quiser metade do
+  tempo escolhe times de força diferente. Armadilha 41.
+- **Errei o mesmo erro duas vezes na mesma sessão**, e o módulo já o
+  documentava: a nota do `mcp_drive.py` diz que imobilidade exata só serve na
+  tela realmente parada, e eu a usei duas vezes em telas que animam — no Modo
+  Editar em 03/09 e na caixa pós-partida hoje. Ler a própria nota antes de
+  escrever o `wait` custaria dois minutos e poupou zero.

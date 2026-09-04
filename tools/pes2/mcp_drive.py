@@ -132,7 +132,13 @@ TITLE_TOL = 0.010
 # `from_main_menu` landed where it thinks. 0.140514..0.140611 under the
 # fork, 0.140639..0.140682 under the AppImage.
 MAIN_MENU_MEAN = 0.1406
-MAIN_MENU_TOL = 0.010
+# **It was +-0.010 and that was too loose**, which the self-check below
+# caught rather than a run: when Modo Editar drifted to 0.147528 on
+# 2026-09-04 it came inside this fence, and `from_main_menu` would have
+# accepted a state parked on Modo Editar as the main menu -- silently, since
+# every route that calls it then presses Down. 0.003 is fifteen times the
+# measured spread of the screen itself and puts 0.0069 between the two.
+MAIN_MENU_TOL = 0.003
 
 
 def on_main_menu(mean):
@@ -144,11 +150,17 @@ def on_main_menu(mean):
     """
     return abs(mean - MAIN_MENU_MEAN) <= MAIN_MENU_TOL
 
-# The Modo Editar menu -- Crear, Cambiar, Borrar and four more. It cycles
-# something slowly, so consecutive looks are bit-identical for a few seconds
-# at a time and `still` does settle on it. 0.154324..0.155040 measured.
-EDIT_MEAN = 0.1547
-EDIT_TOL = 0.010
+# The Modo Editar menu -- Crear, Cambiar, Borrar and four more.
+#
+# **This one drifts between days, and the tolerance has to know it.**
+# 0.154324..0.155040 on 2026-09-03 and 0.147528 on 2026-09-04, twice over,
+# which is 0.0072 from the midpoint and left 0.0028 of a +-0.010 tolerance.
+# The screen animates a player, and which frame of his walk the save state
+# was parked on changes the whole-frame mean; a state remade tomorrow moves
+# it again. Widened rather than re-centred, because the next state will not
+# land where either of these did.
+EDIT_MEAN = 0.1511
+EDIT_TOL = 0.015
 
 # The pad-assignment screen between the submenu and the grid, and the flag
 # grid itself. Neither ever goes bit-identical -- both blink a cursor -- so
@@ -158,10 +170,61 @@ PAD_ASSIGN_MEAN = 0.1883
 TEAM_SELECT_MEAN = 0.1685
 SCREEN_TOL = 0.010
 
+# The penalty-shootout path, measured 2026-09-04. `Partido a Penaltis` is
+# the second row of the Modo Partido submenu, and it is in these routes for
+# one reason: a shootout reaches the result screen in about a minute, where
+# an exhibition match takes roughly 28 minutes of wall clock (pitfall 26).
+MATCH_OPTIONS_MEAN = 0.1626      # Dia/Noche, Duracion, Estadio...
+KICKER_ORDER_MEAN = 0.2499       # the eleven kickers of each side
+# The post-match box (`Pasar al siguiente partido`). **Its mean is not a
+# constant** -- `Estadio` stays on `Seleccion al azar`, and the same screen
+# read 0.3185 in one stadium and 0.3941 in another. It is kept only so the
+# self-check can prove the pitch band excludes it. What recognises it is
+# POST_MATCH_CALM below.
+POST_MATCH_MEAN = 0.3185
+# **The post-match box is recognised by the contrast of its own text**, and
+# nothing else on this path is. Four recognisers were tried against it on
+# 2026-09-04 and the first three failed for a measured reason:
+#
+#   whole-frame mean   `Estadio` stays on `Seleccion al azar`, so the same
+#                      box read 0.3185 in one stadium and 0.3941 in another
+#   a UI crop's mean   the panels are semi-transparent, so they inherit the
+#                      lighting they were supposed to be independent of
+#   exact stillness    the box sits over a live 3D stadium
+#   "how little it     the tail of the celebration is slower than 0.03 per
+#    moves"            three seconds, so it passed as the box
+#
+# What does work is the *standard deviation* of the box's own rectangle:
+# white text on a dark panel, and the text dominates the crop whatever is
+# behind it. Measured over three stadiums: the box 0.2048..0.2116, the
+# celebration 0.1197..0.1261. The threshold sits between with 0.045 of
+# margin on the tighter side.
+#
+# It is not a signature for the *screen* -- the pitch reads 0.2105 in the
+# same crop and the kicker order 0.1990 -- and it does not need to be. By
+# the time it is asked, the shootout has ended and neither is on the way.
+POST_MATCH_BOX = (190, 240, 615, 345)
+POST_MATCH_BOX_SD = 0.16
+
+# The pitch during a penalty, **with the lighting pinned**: 0.301..0.310
+# over 42 samples. Unpinned it is not a band at all -- a night kick-off
+# reads 0.1123 -- which is why the route spends a press on `Dia/Noche`
+# before it gets here. Even pinned this is a band and not a signature,
+# because the camera and the crowd move: consecutive looks differ by
+# 0.001..0.036, so what tells the shootout it has ended is a *jump*.
+PITCH_LOW = float(os.environ.get("PES2_PITCH_LOW", 0.295))
+PITCH_HIGH = float(os.environ.get("PES2_PITCH_HIGH", 0.315))
+JUMP = 0.12
+
 # Below this a frame is a loading screen, not a destination. The way into
 # Modo Editar goes splash (0.0042), black (0.0000), screen (0.1549); the
 # darkest real screen of the four routes is the language one at 0.043.
 LIT = 0.02
+
+
+def on_pitch(mean):
+    """Is this frame the penalty pitch? A band, for the reason above."""
+    return PITCH_LOW <= mean <= PITCH_HIGH
 
 SERIAL = "SLES-03957"
 STATE_DIR = os.path.expanduser("~/.local/share/duckstation/savestates")
@@ -678,11 +741,177 @@ def route_edit(s):
     return frame
 
 
+def route_result(s):
+    """Main menu -> Partido a Penaltis -> the shootout -> the result screen.
+
+    **A shootout, not a match.** An exhibition match runs about 0.71 minutes
+    of game per minute of wall clock, so reaching a result that way is some
+    28 minutes (pitfall 26); a penalty shootout gets there in about a
+    minute. It is the same result screen either way.
+
+    Four buttons on this path are not the ones a first guess would pick, and
+    each cost a run on 2026-09-04:
+
+      * the match-options screen (`Dia/Noche`, `Duracion`, `Estadio`) takes
+        **Cross**, and `Start` on it does nothing at all;
+      * the kicker-order screen takes **Square**. `Start`, `Cross`, `Circle`
+        and `Triangle` all leave it exactly where it is -- measured, four
+        presses, largest difference 0.0018;
+      * on the pitch, each kick takes Cross;
+      * and then **the presses have to stop.** Cross dismisses the result
+        screen the instant it appears, so a loop that keeps pressing walks
+        straight past the thing it was sent to capture -- which is what
+        three runs of this did before the loop learned to let go.
+    """
+    from_main_menu(s)
+
+    s.say("Modo Partido")
+    before = s.capture()
+    s.press("Cross")
+    s.until_changed(before, box=SUBMENU)
+
+    s.say("Partido a Penaltis, the second row")
+    s.press("Down")
+    s.capture("penalty-submenu")
+
+    s.say("past the pad assignment")
+    before = s.capture()
+    s.press("Cross")
+    s.until_changed(before, tol=0.02)
+    s.until_lit(label="the pad assignment")
+    s.wait_for_mean(PAD_ASSIGN_MEAN, SCREEN_TOL, budget=30, seconds=1.0,
+                    fast=False)
+    before = s.capture()
+    s.press("Cross")
+    s.until_changed(before, tol=0.02)
+    s.until_lit(label="the flag grid")
+    s.wait_for_mean(TEAM_SELECT_MEAN, SCREEN_TOL, budget=30, seconds=1.0,
+                    fast=False)
+    s.capture("penalty-teams")
+
+    s.say("both sides")
+    s.press("Cross")
+    s.run(1.5)
+    s.press("Right")
+    s.press("Cross")
+    s.wait_for_mean(MATCH_OPTIONS_MEAN, SCREEN_TOL, budget=30, seconds=1.0,
+                    fast=False)
+    s.capture("match-options")
+
+    # **`Dia/Noche` defaults to `Al azar`, and that alone breaks the route.**
+    # The pitch is recognised by a band of brightness, and a night kick-off
+    # reads 0.1123 where a daylight one reads 0.288..0.310 -- so the loop
+    # below decided it had left the pitch while standing on it, and came
+    # back with a penalty as its "result". Nail the lighting down: it costs
+    # one press and it is also what makes two runs comparable at all.
+    s.say("pinning Dia/Noche so the pitch has one brightness")
+    before = s.capture()
+    s.press("Right")
+    s.capture("match-options-lit")
+    if s.capture().difference(before) < 0.0005:
+        raise Fail("Right on Dia/Noche changed nothing -- the cursor is not "
+                   "on the first row")
+
+    s.say("Cross confirms the options -- Start does not")
+    s.press("Cross")
+    s.until_lit(label="the kicker order")
+    s.wait_for_mean(KICKER_ORDER_MEAN, SCREEN_TOL, budget=40, seconds=1.0,
+                    fast=False)
+    s.capture("kicker-order")
+
+    s.say("Square starts the shootout")
+    s.press("Square")
+    s.run(2)
+
+    return take_penalties(s)
+
+
+def take_penalties(s, budget=60):
+    """Kick until the screen leaves the pitch, then stop pressing.
+
+    The stopping is the whole trick. Between rounds the screen cuts to black
+    and comes back to the pitch, so "not the pitch" alone would end the
+    shootout at the first cut; and the result screen answers Cross by going
+    away, so one press too many loses it.
+    """
+    previous = s.capture()
+    for kick in range(budget):
+        s.press("Cross")
+        # **No fast forward here, and that is the whole of it.** With it on,
+        # 1.2 s of wall clock is four or five seconds of game, and the
+        # result screen fits inside that window: the first version of this
+        # loop ran the shootout perfectly and came back holding the *kicker
+        # order* of the rematch, having flown past the screen it was sent
+        # for. Two looks per kick, at real speed, and the window cannot
+        # close between them.
+        for _ in range(2):
+            s.run(0.7)
+            frame = s.capture()
+            mean = frame.stats()[0]
+            moved = frame.difference(previous)
+            previous = frame
+            if frame.is_black() or on_pitch(mean) or moved < JUMP:
+                continue
+
+            # **A jump is not an arrival.** Between rounds the screen fades
+            # through a grey that is neither the pitch nor black -- 0.0031
+            # with sd 0.0208, which `is_black` rightly refuses -- and an
+            # earlier version of this returned that fade as the result.
+            # Let it land, pressing nothing while it does, and only then
+            # decide.
+            s.run(2.0)
+            settled = s.capture()
+            arrived = settled.stats()[0]
+            previous = settled
+            if on_pitch(arrived) or arrived < LIT:
+                s.say(f"    a cut, not the end (mean={arrived:.6f})")
+                continue
+            s.say(f"the shootout ended after {kick + 1} kicks "
+                  f"(mean={arrived:.6f})")
+
+            # **What follows the last kick is a celebration, and it is
+            # animated.** Its mean sits on top of every other pitch-lit
+            # screen -- 0.2494 against the kicker order's 0.2498 -- so no
+            # brightness tells them apart, and an earlier version returned
+            # the celebration as the result. What does tell them apart is
+            # that the celebration *moves* and the result screen does not:
+            # this is one of the few places where exact stillness earns its
+            # keep (see the module note on where it does not).
+            #
+            # Press nothing through any of it. Cross dismisses the result.
+            #
+            # **And it is not recognised by stillness either**, which was
+            # the second wrong guess: the post-match box sits over a live
+            # 3D stadium, so it never goes bit-identical and `still`
+            # timed out on it. Nor by a mean -- `Estadio` is still
+            # `Seleccion al azar`, so the same screen read 0.3185 in one
+            # stadium and 0.3941 in another. What is stable across both is
+            # how *little* it moves: the celebration shifts by 0.2..0.3
+            # between looks three seconds apart, the box by under 0.01.
+            for _ in range(12):
+                s.run(2.0)
+                frame = s.capture()
+                if frame.is_black() or frame.stats()[0] < LIT:
+                    continue
+                sd = frame.stats(POST_MATCH_BOX)[1]
+                if sd >= POST_MATCH_BOX_SD:
+                    s.say(f"the post-match box is up "
+                          f"(box sd={sd:.6f})")
+                    s.capture("result")
+                    return frame
+            raise Fail("the post-match box never came up after the "
+                       "shootout ended")
+    raise Fail(f"{budget} kicks and the shootout never ended -- two equally "
+               f"rated sides go to sudden death for ever, which is what "
+               f"picking the same team twice does")
+
+
 ROUTES = {
     "title": route_title,
     "main-menu": route_main_menu,
     "team-select": route_team_select,
     "edit": route_edit,
+    "result": route_result,
 }
 
 
@@ -738,10 +967,45 @@ def self_check(verbose=True):
         if not ok:
             bad.append(f"{what}{': ' + detail if detail else ''}")
 
-    for name in ("title", "main-menu", "team-select", "edit"):
+    for name in ("title", "main-menu", "team-select", "edit", "result"):
         check(f"route {name} exists", name in ROUTES)
-    check("the routes match drive.py's",
-          set(ROUTES) == {"title", "main-menu", "team-select", "edit"})
+    check("the routes cover drive.py's, plus result",
+          set(ROUTES) == {"title", "main-menu", "team-select", "edit",
+                          "result"})
+
+    # The pitch is a band and every screen it has to be told apart from
+    # must fall outside it, or `take_penalties` never stops -- or stops on
+    # the first cut between rounds.
+    check("the pitch band admits the pinned pitch",
+          on_pitch(0.301) and on_pitch(0.310) and on_pitch(0.3056))
+    check("and excludes an unpinned night kick-off",
+          not on_pitch(0.1123))
+    for mean, what in ((MAIN_MENU_MEAN, "the main menu"),
+                       (KICKER_ORDER_MEAN, "the kicker order"),
+                       (POST_MATCH_MEAN, "the post-match menu"),
+                       (TEAM_SELECT_MEAN, "the flag grid"),
+                       (MATCH_OPTIONS_MEAN, "the match options"),
+                       (0.0, "a black frame")):
+        check(f"the pitch band excludes {what}", not on_pitch(mean),
+              f"{mean}")
+    # And the jump has to be bigger than the pitch's own restlessness:
+    # 0.036 was the largest difference between two consecutive looks at it,
+    # and 0.184 the smallest real screen change.
+    check("JUMP is above the pitch's own movement", JUMP > 0.036, f"{JUMP}")
+    check("JUMP is below a real screen change", JUMP < 0.184, f"{JUMP}")
+
+    # The post-match box against the celebration it has to be told from,
+    # over the three stadiums each was measured in. This is the one that
+    # took four tries, so it is the one with a test.
+    for sd in (0.2048, 0.2077, 0.2116):
+        check(f"the post-match box is recognised at sd={sd}",
+              sd >= POST_MATCH_BOX_SD)
+    for sd in (0.1197, 0.1261):
+        check(f"the celebration is refused at sd={sd}",
+              sd < POST_MATCH_BOX_SD)
+    x0, y0, x1, y1 = POST_MATCH_BOX
+    check("the post-match box is inside an 800x655 frame",
+          0 <= x0 < x1 <= 800 and 0 <= y0 < y1 <= 655)
 
     # The threshold has to sit between what was measured, with room on both
     # sides. Same row 0.0002..0.0005, different row 0.0082..0.0125.
@@ -769,9 +1033,14 @@ def self_check(verbose=True):
     # And it must not admit the main menu, or the two screens are one.
     check("the title tolerance excludes the main menu",
           abs(MAIN_MENU_MEAN - TITLE_MEAN) > TITLE_TOL)
-    for reading in (0.140514, 0.140682):
+    for reading in (0.140514, 0.140682, 0.140657):
         check(f"the main-menu mean {reading} is recognised",
               on_main_menu(reading))
+    # Modo Editar drifts between days -- see the note by EDIT_MEAN -- so both
+    # readings have to be admitted by its own tolerance.
+    for reading in (0.154324, 0.155040, 0.147528):
+        check(f"the Modo Editar mean {reading} is recognised",
+              abs(reading - EDIT_MEAN) <= EDIT_TOL)
 
     # The fence `--measure-menu` puts in front of the measurement, fed the
     # means measured on the other screens. Each has to be refused: without
@@ -779,16 +1048,19 @@ def self_check(verbose=True):
     # up, which is trap 33 in the tool written against it.
     for reading, screen in ((0.552796, "the title screen"),
                             (0.550140, "the title screen, the other day"),
-                            (EDIT_MEAN, "Modo Editar"),
+                            (0.154324, "Modo Editar, as read 2026-09-03"),
+                            (0.147528, "Modo Editar, as read 2026-09-04"),
                             (0.000000, "a black frame")):
         check(f"--measure-menu refuses {screen} (mean {reading})",
               not on_main_menu(reading))
-    # Modo Editar is the closest neighbour the fence has to keep out, and it
-    # is close: 0.0041 of margin. If a threshold here is ever widened, this
-    # is the pair that decides how far it can go.
+    # Modo Editar is the closest neighbour this fence keeps out, and it got
+    # closer: drifting from 0.1543 to 0.1475 took the old +-0.010 fence from
+    # 0.0037 of margin to **minus** 0.0031, at which point it would have
+    # accepted Modo Editar as the main menu. This pair decides how far
+    # either threshold can be widened; widen one and re-run this.
     check("and Modo Editar is the tightest of those, with room to spare",
-          abs(EDIT_MEAN - MAIN_MENU_MEAN) - MAIN_MENU_TOL > 0.003,
-          f"{abs(EDIT_MEAN - MAIN_MENU_MEAN) - MAIN_MENU_TOL:.4f}")
+          abs(0.147528 - MAIN_MENU_MEAN) - MAIN_MENU_TOL > 0.003,
+          f"{abs(0.147528 - MAIN_MENU_MEAN) - MAIN_MENU_TOL:.4f}")
 
     # The standard deviation really did move, on both binaries, which is
     # the reason it is gone: the old pair at +-0.02 had 0.0006 of margin.

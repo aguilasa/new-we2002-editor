@@ -68,9 +68,22 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Trinta e seis armadilhas ao dirigir o DuckStation**, todas medidas
-    (§6.11) — eram treze quando este perfil foi escrito. A última é curta e
-    cara: **`press_button` sem `duration_frames` deixa o botão preso**, e um
+12. **Quarenta e duas armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. **As seis últimas
+    são de 2026-09-04 e todas dizem a mesma coisa**: depois que a rota entra
+    numa partida, **brilho não reconhece tela nenhuma**. As opções de partida
+    abrem em `Al azar`, então o gramado lê 0,301 de dia e 0,1123 de noite, e
+    toda tela com campo por trás herda isso — a ordem de cobradores leu
+    0,2633, 0,2581 e 0,2499 em três corridas. Recorte de UI não salva: os
+    painéis são translúcidos. Fixar `Día/Noche` com um toque salva, e aí a
+    mesma tela lê **0,249778 três vezes seguidas**. Depois da partida nem
+    isso: a caixa `Pasar al siguiente partido` só se reconhece pelo
+    **desvio-padrão do próprio retângulo** (0,2048–0,2116 contra 0,1197–0,1261
+    da comemoração), depois de quatro reconhecedores errados. E duas do
+    jogo: **não há tela de `RESULTADO` numa disputa de pênaltis**, e nela
+    quem começa é **`Square`**, não `Start` nem `Cross`.
+
+    Antes dessas, uma curta e cara: **`press_button` sem `duration_frames` deixa o botão preso**, e um
     pad preso é indistinguível de um jogo que não avança — seis corridas
     perdidas nisso em 2026-09-04. A anterior é a que mais custa: **o fork cai
     sozinho em execução livre e não escreve nada** — quatro mortes em seis corridas, entre 15 s e 90 s, não

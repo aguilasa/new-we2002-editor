@@ -1656,7 +1656,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Trinta e seis armadilhas ao dirigir o DuckStation
+### 6.11 Quarenta e duas armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1970,6 +1970,56 @@ aponta para o lugar errado.
     que o `who_writes.py --nudge` usa, na mesma ordem de grandeza do que as
     rotas usam para trabalho de menu.
 
+37. **`Al azar` não é enfeite: ele destrói o reconhecimento por brilho.**
+    A tela de opções de partida abre com `Día/Noche = Al azar` e
+    `Estación/Tiempo = Al azar`, e o gramado então **não tem faixa de
+    média**: 0,301–0,310 num saque diurno e **0,1123** num noturno, medidos
+    no mesmo roteiro. A rota decidiu que tinha saído do gramado enquanto
+    estava nele, e voltou com um pênalti como "resultado". Pior, o estrago
+    não para no gramado: **toda tela que mostra o campo por trás herda a
+    iluminação dele** — a ordem de cobradores leu 0,2633, 0,2581 e 0,2499 em
+    três corridas. O conserto é um toque: fixar `Día/Noche` antes de
+    confirmar. Com ele fixado a mesma tela lê **0,249778 em três corridas
+    seguidas**, na sexta casa.
+
+38. **Recorte de UI não é independente de iluminação, porque o painel é
+    translúcido.** A saída óbvia para a armadilha 37 é medir um pedaço da
+    interface em vez do campo. Medido, não funciona: a coluna azul de
+    cobradores foi de 0,2965 para 0,2891 com a luz, e a faixa do HUD do
+    pênalti de 0,3356 (dia) para 0,0933 (noite). O jogo desenha esses
+    painéis por cima do 3D com transparência, então eles carregam a cena
+    junto.
+
+39. **Depois da partida nada se reconhece por média, e a saída é o
+    *contraste* de um retângulo.** A sequência que fecha uma disputa de
+    pênaltis é comemoração → preto → caixa `Pasar al siguiente partido`, e a
+    caixa **não tem média própria**: 0,3185 num estádio e 0,3941 em outro,
+    porque `Estadio` também é `Selección al azar`. Imobilidade exata também
+    não serve — a caixa fica sobre um estádio 3D vivo, e o `still` estourou
+    o orçamento nela. Nem "mexe pouco": a cauda da comemoração anda menos de
+    0,03 em três segundos e passou por caixa. O que separa é o **desvio-
+    padrão do retângulo da própria caixa**, onde o texto branco domina:
+    0,2048–0,2116 para a caixa contra 0,1197–0,1261 para a comemoração, em
+    três estádios diferentes. Quatro reconhecedores errados antes desse.
+
+40. **Não há tela de `RESULTADO` numa disputa de pênaltis.** O quadro da
+    PES2-TASK-03 lista `result` como tela própria, e por uma partida de
+    exibição ela existe (medida em 2026-09-02). Por `Partido a Penaltis` a
+    disputa termina e o jogo vai direto para a caixa pós-partida — medido em
+    quatro corridas, com captura a cada dois segundos ao longo dos doze que
+    seguem o último pênalti.
+
+41. **Dois times iguais vão para morte súbita, e ela é longa.** Escolher
+    Irlanda dos dois lados numa disputa de pênaltis levou **55 e 58
+    cobranças** para decidir, contra as cinco de cada lado do formato. A
+    rota aguenta — o orçamento é de 60 cobranças —, mas quem quiser a
+    metade do tempo escolhe times de força diferente.
+
+42. **Na tela de ordem de cobradores, quem começa é `Square`.** `Start`,
+    `Cross`, `Circle` e `Triangle` foram medidos nela e os quatro deixam a
+    tela exatamente onde está: maior diferença 0,0018. E na tela de opções
+    de partida é o contrário — lá `Cross` confirma e `Start` não faz nada.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -2119,7 +2169,7 @@ continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar 
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
-naquela data, trinta e seis hoje.
+naquela data, quarenta e duas hoje.
 
 > **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
 > pela metade.** As médias sobreviveram à troca de binário; o desvio da
@@ -2417,7 +2467,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das trinta e seis armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das quarenta e duas armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.
