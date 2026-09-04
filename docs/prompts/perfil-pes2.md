@@ -68,10 +68,12 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Trinta e cinco armadilhas ao dirigir o DuckStation**, todas medidas
-    (§6.11) — eram treze quando este perfil foi escrito. A última é a que
-    mais custa hoje: **o fork cai sozinho em execução livre e não escreve
-    nada** — quatro mortes em seis corridas, entre 15 s e 90 s, não
+12. **Trinta e seis armadilhas ao dirigir o DuckStation**, todas medidas
+    (§6.11) — eram treze quando este perfil foi escrito. A última é curta e
+    cara: **`press_button` sem `duration_frames` deixa o botão preso**, e um
+    pad preso é indistinguível de um jogo que não avança — seis corridas
+    perdidas nisso em 2026-09-04. A anterior é a que mais custa: **o fork cai
+    sozinho em execução livre e não escreve nada** — quatro mortes em seis corridas, entre 15 s e 90 s, não
     determinístico, e o `mcp.py` passou a distinguir "nunca subiu" de "caiu
     agora" porque a mensagem única custou três leituras erradas numa revisão
     só. As sete anteriores são de 2026-09-03 e são sobre dirigir por **MCP**,

@@ -1656,7 +1656,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Trinta e cinco armadilhas ao dirigir o DuckStation
+### 6.11 Trinta e seis armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -1955,6 +1955,21 @@ aponta para o lugar errado.
     "caiu há um minuto"; o `mcp.py` passou a distinguir os dois casos, e o
     que diz "and no DuckStation process either" cita esta armadilha.
 
+36. **`press_button` sem `duration_frames` deixa o botão preso.** Ele
+    responde `{"slot": 0, "button": "Cross", "state": "pressed"}` e não
+    solta: o primeiro toque prende o pad e todo toque seguinte é inócuo. Em
+    tela isso é **indistinguível de um jogo que se recusa a avançar**, e foi
+    o que custou seis corridas de watchpoint em 2026-09-04, todas creditadas
+    à precondição errada ("falta encenar o reinício de partida") antes de a
+    causa aparecer.
+
+    O `mcp_drive.press` e o `pad.py` sempre passaram a duração — a armadilha
+    pega quem escreve uma chamada nova. Durante **execução livre** ela é a
+    única saída: não há nada do lado de cá dando `frame_step` para soltar o
+    botão, então quem solta é o relógio do emulador. `duration_frames=6` é o
+    que o `who_writes.py --nudge` usa, na mesma ordem de grandeza do que as
+    rotas usam para trabalho de menu.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -2104,7 +2119,7 @@ continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar 
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
-naquela data, trinta e cinco hoje.
+naquela data, trinta e seis hoje.
 
 > **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
 > pela metade.** As médias sobreviveram à troca de binário; o desvio da
@@ -2402,7 +2417,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das trinta e cinco armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das trinta e seis armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.
