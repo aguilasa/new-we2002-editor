@@ -572,3 +572,36 @@ apertar: 0,140592 e 0,140493, as duas dentro.
   tela realmente parada, e eu a usei duas vezes em telas que animam — no Modo
   Editar em 03/09 e na caixa pós-partida hoje. Ler a própria nota antes de
   escrever o `wait` custaria dois minutos e poupou zero.
+
+---
+
+### `ending`: decisão do usuário, 2026-09-04
+
+**A tela não é alcançável dirigindo.** Chegar ao fim de um campeonato exige
+jogar e vencer a final, e isso é do dono da máquina, não do roteiro — foi ele
+quem apontou, e a via que este arquivo já propunha ("campeonato completo; save
+state é o único caminho sensato") era exatamente isso dito por outras
+palavras.
+
+**Decidido: o usuário joga uma vez e o estado fica parkado.** A rota `ending`
+passa a ser `load_state` + verificar + capturar, como o `from_main_menu` já
+faz para as rotas mornas — ~10 s por corrida depois da partida única.
+
+Três consequências, e a primeira limita o que a rota vale:
+
+- **Ela fica verificável só nesta máquina.** Save state é derivado de jogo
+  comercial e não entra no git, mesma regra de `roms/` e dos quadros do
+  `boot_check.sh`. Num clone a rota `ending` reporta *skipped*, como o
+  `pes2_image` sem imagem. As outras cinco rotas não têm isso — são
+  navegação do zero.
+- **Não o slot 1.** Ele é o atalho do menu principal, e é o que o
+  `from_main_menu` carrega; sobrescrevê-lo tira o atalho de `team-select`,
+  `edit` e `result`. O `ending` vai para o **slot 3**.
+- **O estado tem de ser feito sob o fork**, que é o binário de trabalho desde
+  2026-09-03 (§6.14). Estado é preso à versão do emulador que o escreveu.
+
+**O que ainda não se sabe, e é o que decide se valeu:** se a tela de `ending`
+mostra nome de time **em texto** ou por bandeira. Só a `team-select` mostra
+texto entre as cinco (§4.2, item 3a); se a `ending` usar bandeira, ela não
+verifica `ENDING.BIN` @1256 e o custo compra só o registro de que não
+verifica. Isso se responde na primeira captura.

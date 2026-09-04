@@ -139,10 +139,15 @@ partido em ferramenta, direção e medida.
 só: **`replay` não tem rota versionada**. As outras quatro telas do quadro
 dela têm — `title`, `main-menu`, `team-select`, `edit` e `result` — e a
 repetibilidade foi medida: duas corridas seguidas de `team-select`, `edit` e
-`result` produzem PNG **idênticos byte a byte**. A tela `ending` segue não
-alcançada, com a via escrita no arquivo da task. Quem a retomar começa por
+`result` produzem PNG **idênticos byte a byte**. Quem a retomar começa por
 aí, porque a regra de seleção manda concluir o que está em andamento antes de
 pegar a próxima pendente.
+
+**A tela `ending` deixou de ser item de roteiro em 2026-09-04**, por decisão
+do usuário: ela exige jogar e vencer uma final, e ele joga uma vez para o
+estado ficar parkado no **slot 3**. A rota vira `load_state` + capturar, e
+fica verificável **só nesta máquina** — save state não entra no git. Detalhe
+no arquivo da task.
 
 ---
 
