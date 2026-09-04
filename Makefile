@@ -51,7 +51,8 @@ COPY := $(WORK)/$(notdir $(IMAGE))
 .DEFAULT_GOAL := help
 .PHONY: help configure build run run-jp run-98 copy fresh test test-release \
         golden golden-gui install uipreview gen gen-check clean distclean \
-        run-obocaman run-obocaman-98 run-lazarus run-lazarus-98
+        run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
+        pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status
 
 # ------------------------------------------------------------------ help ----
 
@@ -71,6 +72,15 @@ help:
 	@echo
 	@echo '  oracle        abre o ed.exe original sob Wine (runner do Bottles)'
 	@echo '  oracle-98     oracle forcando DISPLAY=$(XVFB)'
+	@echo
+	@echo '  PES2 -- outro jogo, outro projeto, e nao tem editor:'
+	@echo '  pes2          abre o JOGO sob o fork do DuckStation (com MCP),'
+	@echo '                no $(XVFB), sobre uma copia em $$(WORK)'
+	@echo '  pes2-play     idem, na SUA tela -- para jogar/assistir (§6.10)'
+	@echo '  pes2-copy     so a copia da release (~571 MB, 8 trilhas)'
+	@echo '  pes2-kill     encerra o emulador (os tres nomes de processo)'
+	@echo '  pes2-status   diz o que esta rodando, e se e o fork ou o AppImage'
+	@echo '                PES2_TAG=EsIt|EnFrDe escolhe a release'
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -87,6 +97,7 @@ help:
 	@echo 'Imagem:       $(IMAGE)'
 	@echo 'Copia:        $(COPY)'
 	@echo 'Copia Lazarus: $(LAZ_COPY)'
+	@echo 'Copia PES2:   $(PES2_DIR)/'
 
 # ----------------------------------------------------------------- build ----
 
@@ -115,6 +126,9 @@ $(WORK):
 
 copy: $(COPY)
 
+# A copia de PES2 NAO entra aqui, de proposito: sao 571 MB para recopiar e,
+# pior, e nela que fica a partida jogada a mao de que o save state depende
+# (ver o alvo pes2). Para zerar essa, `rm -rf $(PES2_DIR)`.
 fresh:
 	@rm -rf '$(COPY)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
 	@$(MAKE) --no-print-directory copy
@@ -268,6 +282,98 @@ wte: $(WTE_COPY)
 
 wte-98:
 	@$(MAKE) --no-print-directory wte DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
+
+# ------------------------------------------------------------------ pes2 ----
+#
+# PES2 e outro jogo e outro projeto -- docs/PLAN-PES2-PSX.md. Ele nao tem
+# editor, entao o que estes alvos abrem e o JOGO, sob o fork do DuckStation
+# com servidor MCP, que e o binario de trabalho desde 2026-09-03 (secao 6.14).
+#
+# Tres coisas o separam dos alvos acima:
+#
+#   a release e um DUMP MULTI-TRACK -- oito .bin e um .cue, 571 MB --, entao
+#   a copia e de diretorio e o alvo acha o .cue dentro dela em vez de montar
+#   o nome (o das duas releases difere: "(Es,It)" contra "(En,Fr,De)");
+#
+#   o fork NAO e versionado -- licenca CC-BY-NC-ND, mesma regra de roms/ -- e
+#   nao esta no PATH. Ele mora em ~/Applications/duckstation-mcp/, e
+#   `python3 tools/pes2/fork.py recipe` imprime como reconstrui-lo;
+#
+#   o display default e o $(XVFB), nao o do shell. Os alvos `wte` e `oracle`
+#   abrem na tela do usuario porque o ponto deles e olhar; a secao 6.10 do
+#   plano de PES2 e mais estrita e diz que "nao ha excecao de :1 para este
+#   projeto". A excecao existe e tem nome proprio: `pes2-play`, para as
+#   sessoes que o usuario pede.
+#
+# A copia fica em $(WORK)/ e NAO num scratchpad, de proposito: um save state
+# guarda o caminho da midia, e uma partida longa investida numa copia em /tmp
+# se perde com o /tmp. Por isso ela tambem nao entra no `fresh` -- ver o
+# comentario la. `distclean` leva junto, como leva o resto de $(WORK)/.
+
+PES2_TAG     ?= EsIt
+PES2_RELEASE ?= roms/Pro Evolution Soccer 2 (Europe) ($(PES2_TAG))
+PES2_DIR     := $(WORK)/pes2-$(PES2_TAG)
+PES2_STAMP   := $(PES2_DIR)/.copied
+
+# **Uma variavel propria, e nao o $(DISPLAY) do shell.** A primeira versao
+# deste alvo passava $(DISPLAY) e por isso abriu uma janela na tela do
+# usuario na primeira corrida -- exatamente o que a 6.10 proibe, e o
+# contrario do que o comentario acima prometia. O default aqui nao depende de
+# quem chamou.
+PES2_DISPLAY ?= $(XVFB)
+
+.PHONY: pes2 pes2-play pes2-copy pes2-kill pes2-status
+
+$(PES2_STAMP): | $(WORK)
+	@test -d '$(PES2_RELEASE)' || { \
+	  echo 'ERRO: release ausente: $(PES2_RELEASE)'; \
+	  echo '      as imagens ficam em roms/ e nao sao versionadas.'; \
+	  echo '      PES2_TAG=EsIt|EnFrDe escolhe qual.'; exit 1; }
+	@echo '>> copiando $(PES2_RELEASE)'
+	@echo '   -> $(PES2_DIR)  (~571 MB, 8 trilhas)'
+	@mkdir -p '$(PES2_DIR)'
+	@cp --reflink=auto '$(PES2_RELEASE)'/* '$(PES2_DIR)/'
+	@touch '$@'
+
+pes2-copy: $(PES2_STAMP)
+
+# O fork sobe e FICA rodando: o `launch` dispensa o Automatic Updater, espera
+# a porta MCP responder e volta com o PID. Encerre com `make pes2-kill`, que
+# alcanca os tres nomes de processo (o `--kill` do run_duckstation.sh nao
+# alcancava o fork -- armadilha 31 da secao 6.11).
+pes2: $(PES2_STAMP)
+	@python3 tools/pes2/fork.py which >/dev/null 2>&1 || { \
+	  echo 'ERRO: fork do DuckStation ausente.'; \
+	  echo '      Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:'; \
+	  echo '        python3 tools/pes2/fork.py recipe'; exit 1; }
+	@cue=$$(ls '$(PES2_DIR)'/*.cue 2>/dev/null | head -1); \
+	 test -n "$$cue" || { \
+	   echo 'ERRO: nenhum .cue em $(PES2_DIR) -- refaca com `make pes2-copy`'; \
+	   exit 1; }; \
+	 echo ">> $$cue"; \
+	 echo ">> DISPLAY=$(PES2_DISPLAY)"; \
+	 python3 tools/pes2/fork.py launch "$$cue" --display '$(PES2_DISPLAY)'
+
+# A excecao da secao 6.10, e ela existe porque o usuario a pede: jogar. E o
+# caso de `ending`, que so se alcanca vencendo uma final -- decidido em
+# 2026-09-04, ver docs/tasks/03-direcao-do-emulador.md.
+pes2-play:
+	@echo '>> abrindo na SUA tela (DISPLAY=$(DISPLAY)) -- excecao da 6.10,'
+	@echo '   que existe para as sessoes em que voce joga ou assiste.'
+	@echo '>> para parkar um save state, peca: o slot 1 e o atalho do menu'
+	@echo '   principal e nao deve ser sobrescrito.'
+	@$(MAKE) --no-print-directory pes2 PES2_DISPLAY='$(DISPLAY)'
+
+# Alias explicito de `pes2`, pela simetria com o resto do arquivo -- todo alvo
+# de GUI aqui tem o par `-98`, e quem procurar por ele tem de achar.
+pes2-98:
+	@$(MAKE) --no-print-directory pes2 PES2_DISPLAY=$(XVFB)
+
+pes2-kill:
+	@python3 tools/pes2/fork.py kill
+
+pes2-status:
+	@python3 tools/pes2/fork.py status
 
 # ------------------------------------------------- os dois outros editores ---
 #

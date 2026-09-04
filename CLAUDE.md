@@ -203,7 +203,8 @@ que a linha de comando crua não resolve:
 | `make run-98` | `run` no `:98`, resolvendo o `XAUTHORITY` do Xvfb sozinho |
 | `make oracle` / `oracle-98` | abre o `Debug/ed.exe` original sob o runner Wine do Bottles, em prefix dedicado |
 | `make wte` / `wte-98` | abre o editor de terceiro do Obocaman (C++Builder 6, PE32), em prefix `win32` próprio |
-| `make fresh` | descarta as cópias de trabalho e refaz do original |
+| `make pes2` / `pes2-play` | abre o **jogo** PES2 sob o fork do DuckStation (o com MCP), sobre uma cópia em `work/`. O `pes2` vai para o `:98`; o `pes2-play` é a exceção da §6.10, para as sessões em que o usuário joga ou assiste. `pes2-copy`, `pes2-kill` e `pes2-status` completam o grupo, e `PES2_TAG=EsIt\|EnFrDe` escolhe a release |
+| `make fresh` | descarta as cópias de trabalho e refaz do original — **menos a de PES2**, que guarda a partida jogada à mão de que o save state depende |
 | `make test` / `test-release` | `ctest` sem os golden |
 | `make golden` / `golden-gui` | exportam `WE2002_GOLDEN_IMAGE` absoluto |
 | `make gen` / `gen-check` | os geradores; o `-check` complementa o `ctest` com `git diff` |
