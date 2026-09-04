@@ -52,7 +52,7 @@ dela. O prefixo muda porque o projeto muda; a convenção de que **o pool é
 | [CORR-PES2-028](/docs/tasks/CORR-PES2-028.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Dois docs dizem que o fork não publica binário próprio; ele publica quatorze, e o AppImage x64 traz o servidor MCP | Alta | [x] concluída | 2026-09-03 |
 | [CORR-PES2-029](/docs/tasks/CORR-PES2-029.md) | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Estado ausente despeja traceback no `savestate.py`, e o `except savestate.Skip` do `selftest.py` vira `NameError` | Baixa | [x] concluída | 2026-09-03 |
 | [CORR-PES2-030](/docs/tasks/CORR-PES2-030.md) | [CORR-PES2-027](/docs/tasks/CORR-PES2-027.md) | O `pes2_boot` prova vida exigindo que dois quadros difiram, e a tela de intro que não anima o faz falhar: 1 em 3 corridas | Alta | [x] concluída | 2026-09-03 |
-| [CORR-PES2-031](/docs/tasks/CORR-PES2-031.md) | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | O fluxo A, única razão de o fork existir, não tem ferramenta versionada: o procedimento mora num Log | Média | [ ] pendente | — |
+| [CORR-PES2-031](/docs/tasks/CORR-PES2-031.md) | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | O fluxo A, única razão de o fork existir, não tem ferramenta versionada: o procedimento mora num Log | Média | [x] concluída | 2026-09-04 |
 | [CORR-PES2-032](/docs/tasks/CORR-PES2-032.md) | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | O fork morre calado em execução livre — quatro vezes em seis corridas — e toda ferramenta relata isso como "não está rodando" | Alta | [x] concluída | 2026-09-03 |
 
 <!-- Criticidade: Alta · Média · Baixa.
