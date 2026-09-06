@@ -99,8 +99,8 @@ tê-las em mente ao escolher as telas:
 ## Critério de conclusão
 
 - [x] Pelo menos **três** das cinco telas alcançadas e capturadas.
-      **Quatro** — `team-select`, `edit`, `result` por rota versionada, e
-      `replay` à mão pelo `pad.py`.
+      **Cinco** desde 2026-09-06 — `team-select`, `edit`, `result` e
+      `ending` por rota versionada, e `replay` à mão pelo `pad.py`.
 
       > **O critério dizia "com o PNG mostrando um nome de time legível", e
       > isso o jogo não dá.** Medido em 2026-09-02 e reconfirmado em
@@ -121,6 +121,7 @@ tê-las em mente ao escolher as telas:
       | `edit` | 29,28 s e 27,58 s | **0** |
       | `result` | 225,78 s e 227,56 s | **0** |
       | `main-menu` | 52,71 s e 48,69 s | 0,00029855 |
+      | `ending` | 131,03 s e 128,87 s | **0** (nas cinco capturas) |
 
       **As três primeiras partem de save state e a quarta não**, e é isso
       que explica a diferença: a rota fria atravessa a abertura em tempo
@@ -135,7 +136,7 @@ tê-las em mente ao escolher as telas:
       nenhuma.
 
       **`replay` continua sem rota versionada**, e é o que mantém esta task
-      parcial.
+      parcial — as outras quatro têm, `ending` desde 2026-09-06.
 - [x] As telas não alcançadas estão listadas, com o motivo e a via proposta.
 - [x] Encerra sempre pelo `run_duckstation.sh --kill`, sem deixar montagem
       FUSE nem janela órfã no `:98`.
@@ -600,8 +601,97 @@ Três consequências, e a primeira limita o que a rota vale:
 - **O estado tem de ser feito sob o fork**, que é o binário de trabalho desde
   2026-09-03 (§6.14). Estado é preso à versão do emulador que o escreveu.
 
-**O que ainda não se sabe, e é o que decide se valeu:** se a tela de `ending`
-mostra nome de time **em texto** ou por bandeira. Só a `team-select` mostra
-texto entre as cinco (§4.2, item 3a); se a `ending` usar bandeira, ela não
-verifica `ENDING.BIN` @1256 e o custo compra só o registro de que não
-verifica. Isso se responde na primeira captura.
+**Respondido em 2026-09-06, e valeu: a tela mostra o nome em texto.**
+`CHAMPION BRAZIL`, em corpo grande — então `ENDING.BIN` @1256 é verificável em
+tela. De quebra, a `Tabla torneo`, três toques antes do fim, também escreve os
+nomes por extenso (`Brazil`, `Italy`, `Denmark`, `South Africa`), e é a
+leitura mais barata das duas. A §4.2 item 3a foi corrigida: são **quatro**
+telas com nome de time em texto, não uma. Ver a quinta sessão no Log.
+
+---
+
+### Quinta sessão de 2026-09-06 — o `ending`, e a §4.2 corrigida
+
+**O usuário jogou uma Copa do Mundo e ganhou** (Brasil, 7×0 na final contra a
+Itália), parkou a prorrogação da final no slot 3 e escreveu a sequência de
+botões que leva dali ao fim. Isto é o que a decisão de 2026-09-04 previa, e
+foi o que destravou a tela.
+
+**A resposta que decidia se valia a pena: sim, o `ending` mostra nome de time
+em texto.** `CHAMPION BRAZIL`, em corpo grande, sobre a foto do elenco. Então
+`ENDING.BIN` @1256 **é** verificável em tela, e a §4.2 item 3a — que dizia que
+só a grade de seleção mostra nome por extenso — foi corrigida: **são quatro
+telas**, não uma.
+
+| tela | identifica o time por | onde |
+|---|---|---|
+| grade de seleção | **texto** (`IRELAND`) | rota `team-select` |
+| `Programa` | **texto** (`Brasil`, `Rusia`, `Camerún`…) | tabela de jogos do campeonato |
+| `Tabla torneo` | **texto** (`Brazil`, `Italy`, `Denmark`, `South Africa`) | rota `ending`, três toques antes do fim |
+| **fim de campeonato** | **texto**: `CHAMPION BRAZIL` | rota `ending` |
+| placar, replay, `RESULTADO`, menu pós-partida | bandeira | — |
+
+O `RESULTADO` de campeonato foi medido aqui pela primeira vez — a via de
+pênaltis da sessão anterior não passa por ele — e confirma o que a §4.2 já
+dizia: bandeira dos dois lados. Mas a **segunda página** dele traz
+`Goleador`/`Assist` com **nome de jogador** em texto (`R. Larcos`,
+`Naldorinho`, `Radolno`, `Vilsa`), e a esteira do fim traz nome, número e
+posição dos onze. Nada disso é nome de time, mas serve às fases 3 e 4.
+
+**A rota `ending` existe e é repetível.** 130,3 s e 128,9 s em duas corridas
+seguidas, e as **cinco capturas saem idênticas byte a byte** —
+`difference = 0.00000000` em `result`, `result-scorers`, `tabla-torneo`,
+`pasar-al-siguiente` e `ending`.
+
+Ela é a única rota que **não** parte de boot frio: precisa do slot 3, e um
+save state não é versionado (derivado de jogo comercial, mesma regra de
+`roms/`). Em outra máquina ela reporta *skipped*, como o `pes2_image` sem
+imagem. Foi o que a decisão de 2026-09-04 aceitou de olhos abertos.
+
+**Três armadilhas novas, 43 a 45 da §6.11.** A `Tabla torneo` se deixa com
+`Triangle` mais quatro `Down` — `Cross` ali seleciona o item corrente, que é
+a própria `Tabla torneo` —, e quem indica é o **título no topo**, não a coluna
+de ícones. A animação do fim **se assiste**: são ~90 s, e um `Cross` no meio
+pula a tela de campeão.
+
+A terceira é a que vale além desta task: **média sozinha confirma a tela
+errada**, pela terceira vez nesta família. A animação passa por 0,2536 a
+caminho da tela de campeão, que lê 0,2553 — 0,0017 de distância. O par
+média+imobilidade resolve aqui e **falhou** na caixa pós-partida (armadilha
+39). A diferença não é o teste, é a margem: lá 0,03 contra uma comemoração que
+se arrastava a 0,02; aqui 0,010 contra uma animação que salta 0,09. Trinta
+vezes, não uma e meia.
+
+**O cartão do usuário mudou, e não por ferramenta nossa.** Passada a
+demonstração de créditos, o próprio jogo grava — foi assim que o digest foi de
+`4acca062…` para `0249211887…`, e é o que desbloqueou o time EURO ELITE. A
+rota `ending` para na tela de campeão, muito antes disso, e o cartão foi
+conferido antes e depois de duas corridas: **igual**. O perfil do ciclo
+registra o digest novo.
+
+**Arquivos criados/modificados**
+
+- `tools/pes2/mcp_drive.py` — a rota `ending`, o `wait_for_champion`, as
+  constantes da sequência de fim, e as asserções novas do `--self-check` (a
+  tela de campeão contra a animação, e o slot que não pode ser o 1)
+- `docs/PLAN-PES2-PSX.md` — a §4.2 item 3a corrigida com as quatro telas, e a
+  §6.11 de 42 para **45** armadilhas, recontadas pelo `awk`
+- `docs/prompts/perfil-pes2.md` — a contagem, e o digest novo do cartão
+- `docs/tasks/03-direcao-do-emulador.md`, `docs/tasks/progresso.md`
+
+Fora do repositório, por serem derivados de jogo comercial:
+`work/pes2-states/` guarda os save states e a cópia do cartão (`work/` é
+gitignored).
+
+**Problemas encontrados**
+
+- **O `:98` não estava de pé** e o `make pes2` saiu 77 (*skipping*), que é o
+  comportamento certo — mas vale saber que ele **não** sobe o Xvfb sozinho,
+  ao contrário do `make run-98`.
+- **O slot 3 foi sobrescrito** entre a primeira e a segunda gravação do
+  usuário, e o estado do início do campeonato se perdeu. Não fazia falta, mas
+  a lição é a de sempre: fiz backup só do slot 1 e devia ter feito de tudo.
+  Agora `work/pes2-states/` guarda cada `.sav` e `.bak` com a data no nome.
+
+**O que continua faltando nesta task:** `replay` não tem rota versionada.
+É o único item aberto, e é o que a mantém `🔄 Em andamento`.

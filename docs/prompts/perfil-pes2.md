@@ -68,7 +68,7 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 10. **Não recalcular EDC/ECC, e não "consertar".** (§6.7)
 11. **Os nomes licenciados não estão lá** — o disco não tem o clube real.
     (§1.8, §6.8)
-12. **Quarenta e duas armadilhas ao dirigir o DuckStation**, todas medidas
+12. **Quarenta e cinco armadilhas ao dirigir o DuckStation**, todas medidas
     (§6.11) — eram treze quando este perfil foi escrito. **As seis últimas
     são de 2026-09-04 e todas dizem a mesma coisa**: depois que a rota entra
     numa partida, **brilho não reconhece tela nenhuma**. As opções de partida
@@ -110,7 +110,7 @@ As de GUI e de cópia valem para o repositório inteiro e estão no
 | `roms/Pro Evolution Soccer 2 (Europe) (EsIt)/` | amostra de trabalho A, dump multi-track | **não** — sempre cópia |
 | `roms/Pro Evolution Soccer 2 (Europe) (EnFrDe)/` | amostra de trabalho B, o confronto entre releases | **não** — sempre cópia |
 | `roms/golden-european-deluxe.bin`, `roms/japanese-shift-jis.bin` | as duas imagens de **WE2002**; desde a Fase 7 elas são amostra deste ciclo também, porque o formato de contêiner é o mesmo (§1.14) | **não** — leitura pura aqui |
-| o memory card do usuário | save real, alinha elenco e fecha fronteira | **não** por ferramenta nossa. O emulador usa esse mesmo cartão desde que a isolação foi encerrada; digest conferido em 2026-09-02 e inalterado |
+| o memory card do usuário | save real, alinha elenco e fecha fronteira | **não** por ferramenta nossa. O emulador usa esse mesmo cartão desde que a isolação foi encerrada. **O digest mudou em 2026-09-06** — `4acca062…` → `0249211887…` — e não por ferramenta nossa: o usuário jogou uma Copa do Mundo, e o próprio jogo gravou no fim (o que também desbloqueou o time EURO ELITE). Cópia em `work/pes2-states/`. Quem reconciliar `memcard.py` contra o cartão remede contra o novo |
 | `src/core/` (`we2002_core`) | empresta **conhecimento de formato**, não código | **não** — §6.9 |
 
 **Não existe oráculo comportamental.** O que mais se aproxima é o jogo sob

@@ -143,11 +143,16 @@ repetibilidade foi medida: duas corridas seguidas de `team-select`, `edit` e
 aí, porque a regra de seleção manda concluir o que está em andamento antes de
 pegar a próxima pendente.
 
-**A tela `ending` deixou de ser item de roteiro em 2026-09-04**, por decisão
-do usuário: ela exige jogar e vencer uma final, e ele joga uma vez para o
-estado ficar parkado no **slot 3**. A rota vira `load_state` + capturar, e
-fica verificável **só nesta máquina** — save state não entra no git. Detalhe
-no arquivo da task.
+**A tela `ending` foi alcançada em 2026-09-06.** O usuário jogou e ganhou uma
+Copa do Mundo, parkou a final no **slot 3**, e a rota `ending` existe: 130 s,
+repetível byte a byte, verificável **só nesta máquina** — save state não entra
+no git, então em outro clone ela reporta *skipped*.
+
+**E ela respondeu a pergunta que limitava a Fase 2: o fim de campeonato
+escreve o nome do time em TEXTO** (`CHAMPION BRAZIL`), e a `Tabla torneo` no
+caminho também. A §4.2 item 3a do plano dizia que só a grade de seleção fazia
+isso; são **quatro** telas. `ENDING.BIN` @1256 é verificável em tela, o que
+muda o que a PES2-TASK-04 consegue medir.
 
 ---
 

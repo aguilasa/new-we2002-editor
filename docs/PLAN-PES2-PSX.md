@@ -1276,6 +1276,35 @@ lento, é manual, e é o motivo de o emulador estar na lista de bloqueantes.
    `REPLAYS.BIN` @11380 precisa achar onde esses nomes de fato aparecem.
    `SELECT.BIN` @3128 continua verificável: a grade de seleção de time
    mostra o nome em texto.
+
+   > **Corrigido em 2026-09-06: são quatro telas com nome em texto, não
+   > uma.** O parágrafo acima mediu uma partida de exibição, e a conclusão
+   > "várias mostram bandeira" está certa para o que ele mediu — só a
+   > generalização foi longe demais. Dentro de um **campeonato** aparecem
+   > três telas que escrevem o nome do time por extenso, e a última é a que
+   > mais importa:
+   >
+   > | tela | como identifica | onde |
+   > |---|---|---|
+   > | grade de seleção | **texto** (`IRELAND`) | rota `team-select` |
+   > | `Programa` | **texto** (`Brasil`, `Rusia`, `Camerún`…) | tabela de jogos do campeonato |
+   > | `Tabla torneo` | **texto** (`Brazil`, `Italy`, `Denmark`, `South Africa`) | rota `ending`, três toques antes do fim |
+   > | **fim de campeonato** | **texto**, em corpo grande: `CHAMPION BRAZIL` | rota `ending` |
+   > | placar, replay, `RESULTADO`, menu pós-partida | bandeira | — |
+   >
+   > O `RESULTADO` de campeonato foi medido nesta data e confirma o
+   > parágrafo acima — bandeira dos dois lados, sem texto —, mas a **segunda
+   > página** dele traz `Goleador`/`Assist` com **nome de jogador** em texto.
+   >
+   > Consequência para a Fase 2: `ENDING.BIN` @1256 **é** verificável em
+   > tela, e a `Tabla torneo` dá uma segunda leitura mais barata dentro da
+   > mesma corrida. `RESULT.BIN` @524 e `REPLAYS.BIN` @11380 continuam sem
+   > tela conhecida que os mostre por extenso.
+   >
+   > Medido com um campeonato jogado à mão pelo usuário (Brasil campeão,
+   > 7×0 na final contra a Itália) e um save state parkado na prorrogação
+   > da final — ver a rota `ending` do `mcp_drive.py` e o Log da
+   > [PES2-TASK-03](/docs/tasks/03-direcao-do-emulador.md).
 3b. **Os nomes dos atributos, lidos da tela.** O Modo Editar mostra os
    **dezesseis** campos por jogador, em ordem, e a ordem de tela costuma ser
    a ordem do registro: `Ataque`, `Defensa`, `Equilib.`, `Resisten`,
@@ -1656,7 +1685,7 @@ Emulador é GUI, e roda no `DISPLAY=:98` — **inclusive a sessão de
 mapeamento manual**, decidido pelo usuário em 2026-08-30. Não há exceção
 de `:1` para este projeto.
 
-### 6.11 Quarenta e duas armadilhas ao dirigir o DuckStation
+### 6.11 Quarenta e cinco armadilhas ao dirigir o DuckStation
 
 Todas medidas em 2026-08-30, todas resolvidas dentro do
 `tools/pes2/run_duckstation.sh`. Estão aqui porque o sintoma de cada uma
@@ -2020,6 +2049,40 @@ aponta para o lugar errado.
     tela exatamente onde está: maior diferença 0,0018. E na tela de opções
     de partida é o contrário — lá `Cross` confirma e `Start` não faz nada.
 
+43. **Sair da `Tabla torneo` é `Triangle` mais quatro `Down`, e `Cross` ali
+    faz outra coisa.** A tela mostra a chave do campeonato e tem uma coluna
+    de cinco ícones à esquerda; `Cross` **seleciona o item corrente**, que
+    nasce em `Tabla torneo` — quem quer sair aperta `Triangle` (a própria
+    tela rotula `△ Cancelar`) e desce quatro linhas até o título no topo
+    virar `Pasar al siguiente partido`. **O título é o indicador**, não a
+    coluna: os cinco ícones são pequenos e só o realce muda. Medido em
+    2026-09-06.
+
+44. **A animação de fim de campeonato se assiste, não se atravessa.** São
+    ~90 s entre o último toque e a tela de campeão — comemoração, taça,
+    esteira com os nomes dos jogadores, e depois um jogo de demonstração com
+    os créditos. `Cross` no meio **pula a tela de campeão**, que é a única
+    das quatro do fim que escreve o nome do time por extenso. A rota
+    `ending` não aperta nada depois do `Cross` que abre a animação.
+
+    E há um motivo a mais para não atravessar até o fim: **passada a
+    demonstração, o jogo grava no memory card do usuário** — foi assim que o
+    digest mudou em 2026-09-06. A rota para na tela de campeão, muito antes
+    disso, e o cartão foi conferido antes e depois de duas corridas: igual.
+
+45. **Média sozinha confirma a tela errada no fim de campeonato — pela
+    terceira vez nesta família.** A tela de campeão lê 0,2553, e a animação
+    que a precede **passa por 0,2536** a caminho, a 0,0017 dela. O que
+    separa é que a tela de campeão *descansa*: 0,0015–0,0029 entre olhadas a
+    2,5 s, contra 0,092–0,460 de qualquer quadro animado em volta.
+
+    O par média+imobilidade é o mesmo que **falhou** na caixa pós-partida
+    (armadilha 39), e a diferença é a margem: lá o limiar de 0,03 disputava
+    com uma comemoração que se arrastava a 0,02, aqui o de 0,010 disputa com
+    uma animação que salta 0,09. **Trinta vezes, não uma e meia.** Quando o
+    teste é o mesmo e o resultado é outro, quem decide é a distância medida
+    entre os dois lados — não o teste.
+
 ---
 
 ### 6.12 Asset também tem conjunto de cópias — e ele é por idioma
@@ -2169,7 +2232,7 @@ continuam certos: 3 estrelas, 0 forks, 12.330 commits na branch `mcp`. E trocar 
 binário **invalida toda assinatura de quadro medida**: a da tela de título
 (0,550 / 0,341) e a do menu (0,1405 / 0,2124) saem do renderer e da versão,
 e as armadilhas da §6.11 são sobre o AppImage oficial — vinte e seis
-naquela data, quarenta e duas hoje.
+naquela data, quarenta e cinco hoje.
 
 > **A frase sobre as assinaturas foi medida em 2026-09-03 e está errada
 > pela metade.** As médias sobreviveram à troca de binário; o desvio da
@@ -2467,7 +2530,7 @@ mesmo dia — o caminho feliz inteiro percorrido **sem uma chamada de
 `Modo Editar` por `pause` mais cinco vezes (`Down` + doze `frame_step`).
 Cinco teclas, cinco linhas, com o emulador parado entre elas. É isso que o
 `xdotool` num display sem window manager não consegue dar, e é a raiz de boa
-parte das quarenta e duas armadilhas da §6.11: o foco que segue o ponteiro, o
+parte das quarenta e cinco armadilhas da §6.11: o foco que segue o ponteiro, o
 `TAP` contra o `HOLD` calibrados na tentativa, o auto-repeat que dá volta num
 menu de sete itens, e o `menu_pick` que **conta** quantas linhas registraram
 porque não dá para confiar que cinco teclas movam cinco.

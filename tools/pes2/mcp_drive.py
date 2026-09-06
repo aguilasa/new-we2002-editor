@@ -226,6 +226,43 @@ def on_pitch(mean):
     """Is this frame the penalty pitch? A band, for the reason above."""
     return PITCH_LOW <= mean <= PITCH_HIGH
 
+# --- the championship ending -------------------------------------------
+#
+# **This one route needs a save state that is not, and cannot be, in the
+# repository.** The ending sits behind winning a cup final, which is not
+# something a route can drive to: the user played a World Cup on 2026-09-06
+# and parked the final's injury time in slot 3. A state is derived from a
+# commercial game and stays out of git like `roms/` does, so on any other
+# machine this route reports *skipped*, the same way `pes2_image` does
+# without an image. The decision is in docs/tasks/03-direcao-do-emulador.md.
+#
+# What it buys is the answer to the question that bounded PES2-TASK-04:
+# **the ending names the team in text.** `CHAMPION BRAZIL`, in letters, where
+# the result screen and the replay identify the side by flag. So does the
+# `Tabla torneo` screen on the way -- `Brazil`, `Italy`, `Denmark`,
+# `South Africa` -- which is the cheaper of the two to reach and lands three
+# button presses before the ending.
+ENDING_SLOT = int(os.environ.get("PES2_ENDING_SLOT", "3"))
+
+# Measured 2026-09-06, driving the sequence the user wrote down.
+RESULT_MEAN = 0.2330        # RESULTADO, page 1: flags and the score
+RESULT_SCORERS_MEAN = 0.2250    # page 2: Goleador / Assist, in text
+TABLA_MEAN = 0.1222         # `Tabla torneo` -- team names in TEXT
+CHAMPION_MEAN = 0.2553      # `CHAMPION <team>` over the squad photo
+
+# The ending is reached through a two-minute animation whose mean swings
+# from 0.040 to 0.711, and 0.2536 turns up in the middle of it -- 0.0017
+# from the champion screen, which a mean alone would confirm. What separates
+# them is that the champion screen **rests**: 0.0015..0.0029 between looks
+# 2.5 s apart, against 0.092..0.460 for every animated frame around it.
+#
+# This is the same "how little it moves" test that failed on the post-match
+# box, and it is worth saying why it works here: there the margin was 0.03
+# against a celebration that crept at 0.02, and here it is 0.01 against an
+# animation that leaps by 0.09. Thirty times, not one and a half.
+CHAMPION_TOL = 0.005
+CHAMPION_CALM = 0.010
+
 SERIAL = "SLES-03957"
 STATE_DIR = os.path.expanduser("~/.local/share/duckstation/savestates")
 
@@ -906,12 +943,99 @@ def take_penalties(s, budget=60):
                f"picking the same team twice does")
 
 
+def route_ending(s):
+    """The end-of-championship screen, from the state the user parked.
+
+    Needs `ENDING_SLOT` to hold the final in play -- see the note by that
+    constant for why this one route cannot be driven from a cold boot, and
+    why it skips rather than fails when the state is not there.
+
+    The button sequence is the user's, written down after playing it on
+    2026-09-06, and two steps of it are not guessable:
+
+      * the `Tabla torneo` screen is left by **Triangle**, and then the
+        left-hand column takes **four Downs** to move from `Tabla torneo`
+        to `Pasar al siguiente partido` -- the title at the top changes to
+        tell you which one is selected;
+      * everything after that is animation, and it must be watched, not
+        pressed through. Cross here would skip the champion screen.
+    """
+    if not os.path.exists(state_path(ENDING_SLOT)):
+        raise Skip(
+            f"no save state at {state_path(ENDING_SLOT)} -- this route needs "
+            f"a championship final parked there, and a state is not "
+            f"versioned (it is derived from a commercial game, same rule as "
+            f"roms/). See docs/tasks/03-direcao-do-emulador.md")
+
+    s.say(f"loading the final from slot {ENDING_SLOT}")
+    s.load_state(ENDING_SLOT)
+    s.run(2)
+
+    s.say("letting the match finish")
+    s.wait_for_mean(RESULT_MEAN, SCREEN_TOL, budget=40, seconds=1.5,
+                    fast=False)
+    s.capture("result")
+
+    s.say("the scorers page")
+    s.press("Cross")
+    s.wait_for_mean(RESULT_SCORERS_MEAN, SCREEN_TOL, budget=30, seconds=1.5,
+                    fast=False)
+    s.capture("result-scorers")
+
+    s.say("Tabla torneo -- and this one names the teams in text")
+    s.press("Cross")
+    s.wait_for_mean(TABLA_MEAN, SCREEN_TOL, budget=40, seconds=1.5,
+                    fast=False)
+    s.capture("tabla-torneo")
+
+    s.say("Triangle, then four rows down to Pasar al siguiente partido")
+    s.press("Triangle")
+    for _ in range(4):
+        s.press("Down")
+    s.capture("pasar-al-siguiente")
+
+    s.say("into the ending -- pressing nothing from here")
+    s.press("Cross")
+    frame = wait_for_champion(s)
+    s.capture("ending")
+    return frame
+
+
+def wait_for_champion(s, budget=60, seconds=2.5):
+    """Watch the ending animation until the champion screen rests.
+
+    Mean **and** stillness, because neither alone is enough: the animation
+    passes through 0.2536 on its way, and it also has still-looking frames
+    at other means. See the note by CHAMPION_TOL.
+    """
+    previous = s.capture()
+    best = None
+    for _ in range(budget):
+        s.run(seconds)
+        frame = s.capture()
+        mean = frame.stats()[0]
+        moved = frame.difference(previous)
+        previous = frame
+        if abs(mean - CHAMPION_MEAN) > CHAMPION_TOL:
+            continue
+        if best is None or moved < best:
+            best = moved
+        if moved <= CHAMPION_CALM:
+            s.say(f"champion screen  mean={mean:.6f} moved={moved:.6f}")
+            return frame
+    raise Fail(f"the champion screen never settled in "
+               f"{budget * seconds:.0f}s of ending; the calmest frame at "
+               f"the right brightness moved by "
+               f"{best if best is not None else float('nan')}")
+
+
 ROUTES = {
     "title": route_title,
     "main-menu": route_main_menu,
     "team-select": route_team_select,
     "edit": route_edit,
     "result": route_result,
+    "ending": route_ending,
 }
 
 
@@ -967,11 +1091,31 @@ def self_check(verbose=True):
         if not ok:
             bad.append(f"{what}{': ' + detail if detail else ''}")
 
-    for name in ("title", "main-menu", "team-select", "edit", "result"):
+    for name in ("title", "main-menu", "team-select", "edit", "result",
+                 "ending"):
         check(f"route {name} exists", name in ROUTES)
-    check("the routes cover drive.py's, plus result",
+    check("the routes cover drive.py's, plus result and ending",
           set(ROUTES) == {"title", "main-menu", "team-select", "edit",
-                          "result"})
+                          "result", "ending"})
+
+    # The champion screen against the animation it has to be told from.
+    # Mean alone is not enough and that is the point of the pair: 0.2536
+    # turns up mid-animation, 0.0017 away from it.
+    check("the champion mean admits what was measured",
+          all(abs(m - CHAMPION_MEAN) <= CHAMPION_TOL
+              for m in (0.255226, 0.255517, 0.255250)))
+    check("a mean alone would take the animation's 0.253573 too",
+          abs(0.253573 - CHAMPION_MEAN) <= 0.010)
+    check("and the stillness half refuses it",
+          0.126057 > CHAMPION_CALM, "the frame moved 0.126057")
+    for moved in (0.001470, 0.002853):
+        check(f"the champion screen rests at {moved}",
+              moved <= CHAMPION_CALM)
+    for moved in (0.092262, 0.140634, 0.460366):
+        check(f"an animated frame at {moved} is refused",
+              moved > CHAMPION_CALM)
+    check("ENDING_SLOT is not the main-menu shortcut",
+          ENDING_SLOT != 1, f"slot {ENDING_SLOT}")
 
     # The pitch is a band and every screen it has to be told apart from
     # must fall outside it, or `take_penalties` never stops -- or stops on
