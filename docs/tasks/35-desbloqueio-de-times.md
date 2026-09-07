@@ -76,19 +76,31 @@ com o mecanismo nomeado do mesmo jeito. Um "não" medido fecha a task; um
 Quatro passos, do mais barato ao mais caro. **Pare no primeiro que responder**
 — os seguintes existem para o caso de ele não responder.
 
-### 1. O gate está no cartão?
+### 1. O gate está no cartão? E de onde o cartão o herda?
 
-O jeito de saber é dois estados e uma subtração:
+**Meia resposta já existe, medida em 2026-09-07** (§1.15 do plano): o
+`PES-OPT` do cartão carrega quatro blocos que estão **byte a byte no
+executável de boot** — 865 B, 732 B, 508 B e 172 B, em quatro deltas
+**diferentes**. Ou seja: o *option file* padrão não é um blob de 16 KiB no
+disco; o save é **semeado** por tabelas de default espalhadas pelo
+`SLES_039.57`, a maior delas emendando exatamente onde a tabela de 1.449
+nomes do executável termina (299210 → 299211).
 
-- um `PES-OPT` de cartão **virgem** e um do cartão do usuário
-  (`~/.local/share/duckstation/memcards/…(Es,It)_1.mcd`, que já tem partidas);
-- `memcard.py` já isola o save; a tabela de nomes ocupa **516..12936** e
-  sobram **3.448 B** de opções — é aí que um bit de progresso moraria (§3.3
-  do plano).
+Isso muda o alvo: procurar "o option file padrão" não leva a lugar nenhum;
+procurar **a tabela que semeia o campo de desbloqueio** leva.
 
-Se algum bit dessa faixa mudar com o desbloqueio, o gate é de save — e o
-passo 2 continua sendo necessário, porque **o pedido é remendar o disco**,
-não o cartão: o que se procura vira *quem lê esse bit*.
+O que falta medir aqui:
+
+- um `PES-OPT` de cartão **virgem** contra o do usuário
+  (`~/.local/share/duckstation/memcards/…(Es,It)_1.mcd`, que já tem uma Copa
+  ganha). O virgem sai de bootar com cartão vazio e deixar o jogo criar o
+  save — rota do `mcp_drive.py`, cartão de cópia;
+- a faixa candidata: fora dos 1.242 nomes (516..12936) sobram o cabeçalho
+  (0..516, que tem uma **tabela de máscara de bit** em 256..370) e a cauda
+  (12936..16384), com 2.445 bytes não nulos;
+- para cada byte que diferir, se ele cai dentro de um dos quatro blocos de
+  default, o endereço no `.exe` sai por subtração — e é ali que o remendo
+  vai.
 
 **Não escreva no cartão do usuário.** Cópia, sempre — inclusive dele.
 
@@ -150,6 +162,11 @@ existe por causa disso), então há um estado "com progresso" alcançável:
 - [ ] `iso.py roundtrip` verde na cópia remendada.
 - [ ] A medição repetida na `(EnFrDe)`, ou a razão escrita de ela não valer
       lá.
+- [ ] `tools/pes2/optfile.py` — a ferramenta que **reproduz a medição de
+      2026-09-07**: lê o `PES-OPT` de um cartão, mapeia as faixas, e localiza
+      os blocos de default no executável. Os quatro deltas da §1.15 saíram de
+      script de scratchpad e só viram fato versionado por aqui; se a
+      ferramenta discordar, quem manda é ela.
 - [ ] Uma ferramenta versionada em `tools/pes2/` que aplique o remendo —
       Python, pela regra do ferramental —, com `--check` e um **caso
       vermelho**: imagem já remendada, ou overlay que não casa a assinatura,

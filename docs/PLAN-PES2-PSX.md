@@ -992,11 +992,75 @@ não no cartão, não por jogar:
   **conteúdo**; progresso de jogo está fora do que ele toca. Não há o que
   copiar de lá, e é por isso que esta seção existe em vez de uma referência.
 
+#### O *option file* padrão vem do disco — medido em 2026-09-07
+
+A hipótese do usuário — *"o WE2002 e o PES2 têm um option file padrão; o
+segredo deve estar ali"* — está **meio certa, e a metade que falha é a que
+importa para o remendo**.
+
+Certa: o `PES-OPT` do cartão contém trechos que estão **byte a byte no
+executável de boot**. Quatro blocos, medidos contra
+`…(Es,It)_1.mcd` e o `SLES_039.57` da `(EsIt)`:
+
+| no save (`PES-OPT`) | no `/SLES_039.57` | corrida idêntica | delta |
+|---:|---:|---:|---:|
+| 13059 | 299211 | **865 B** | 286152 |
+| 13960 | 300224 | **172 B** | 286264 |
+| 14216 | 270704 | **732 B** | 256488 |
+| 14980 | 300396 | **508 B** | 285416 |
+
+O primeiro começa exatamente onde a tabela de 1.449 nomes de 10 B do
+executável termina — 284720 + 14490 = **299210** (§1.6) —, e o bloco de
+defaults emenda em 299211.
+
+Errada: **os quatro deltas são diferentes**, então não existe uma imagem
+contígua de 16 KiB do save dentro do executável. O save é **montado** a
+partir de várias tabelas de default espalhadas pelo `.exe`, não copiado de um
+molde único. Quem procurar "o option file padrão" como um blob vai procurar o
+que não está lá; o que existe são **as tabelas que o semeiam**, e é nelas que
+um bit de desbloqueio moraria.
+
+Duas outras coisas que a mesma medição mostrou, e que economizam uma volta:
+
+- **O título do save é composto em tempo de execução.** Os 16 primeiros bytes
+  do título Shift-JIS estão em `/SELECT.BIN` @14776 e `/REPLAYS.BIN` @12692,
+  seguidos de `FORMATION`, `OPTION FILE` e `REPLAY` como sufixos separados.
+  Não é save-modelo; é fábrica de nome.
+- **O cartão tem um terceiro save que a §3.3 não listava**:
+  `BESLES-03957PES-R0A`, 16 KiB, título `ProEvolutionSoccer2 REPLAY1`. A
+  tabela daquela seção descreve o cartão como estava em 2026-08-30.
+
+E o mapa grosseiro do `PES-OPT`, que a §3.3 só descrevia da tabela de nomes
+em diante:
+
+| faixa | conteúdo |
+|---|---|
+| 0..68 | cabeçalho `SC` + título Shift-JIS |
+| 96..128 | 32 B densos |
+| 128..256 | dado empacotado em *nibbles* |
+| 256..370 | pares `00 80`, `00 40`, `00 20`, `00 10`, `00 08` — **tabela de máscara de bit** |
+| 370..384 | ~14 B de ajuste |
+| 512..516 | prelúdio de 4 B da tabela de nomes |
+| 516..12936 | os 1.242 nomes de 10 B (§3.3) |
+| 13059..13924 | default vindo do `.exe` @299211 |
+| 13952..14150 | listas de identificadores (`e0 80`… `e0 ab`, `f2 00`… `f2 14`, `f4 00`… `f4 0a`, `f5 00`… `f5 0a`) |
+| 14192..14952 | 23 registros de 32 B, o padrão de `.exe` @270704 |
+| 14980..15990 | dois blocos de `0xFF` com cabeçalho `fa 01 06 00` — vaga vazia |
+
+> **Estes números foram medidos à mão nesta sessão, num script de
+> scratchpad.** Pela disciplina do projeto eles valem como *ponto de partida*,
+> não como fato versionado: a [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md)
+> entrega a ferramenta que os reproduz, e é ela que os promove — ou os
+> corrige.
+
 #### As quatro hipóteses, da mais barata de testar à mais cara
 
 1. **Bit de progresso no save**, lido na montagem da grade. Testa-se por
    diferencial de cartão (§4.2, alavanca 3) ou por `savestate.py scan` sobre
-   dois estados.
+   dois estados. **É a hipótese que a medição de 2026-09-07 favorece**, e ela
+   dá o endereço por onde começar: se o bit nasce zerado, ele nasce numa das
+   quatro tabelas de default do `SLES_039.57` acima — e aí o remendo é no
+   `.exe`, que é disco, que é o que o usuário pediu.
 2. **Constante de limite na rotina da grade** — o `slti`/`addiu` com o número
    de times percorridos. Testa-se por breakpoint de leitura na tabela de
    nomes e `disassemble` em volta.
