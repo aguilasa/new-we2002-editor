@@ -19,6 +19,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-003](/docs/tasks/port-mcr/CORR-MCR-003.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | o link do `progresso.md` no `correcoes-progresso.template.md` aponta para o ciclo raso, contra a própria frase ao lado | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-004](/docs/tasks/port-mcr/CORR-MCR-004.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | o inventário atribui todo o cache do WebView2 a `bin/`/`obj/`, e 164 arquivos dele são a linha `packages/` | Alta | [x] concluída | 2026-09-07 |
 | [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [x] concluída | 2026-09-07 |
+| [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -32,6 +33,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-003 — levar o link do cabeçalho do `correcoes-progresso.template.md` para `<CICLO>/`
 - [x] CORR-MCR-004 — corrigir a atribuição do WebView2 e declarar a profundidade do prefixo na tabela do inventário
 - [x] CORR-MCR-005 — separar o que está fora da conta do que está dentro dela e não é fonte
+- [ ] CORR-MCR-006 — corrigir as duas referências do lado `wte/` e registrar o caminho cravado
 
 ---
 
@@ -109,3 +111,20 @@ ciclo arquivado, o dele em
 - **Fix:** separar as duas naturezas — o raspador de fato não é arquivo; os
   `.dll` e a arte estão contados e não são fonte — e publicar a decomposição
   por extensão, que é o que torna a linha auditável.
+
+### CORR-MCR-006
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md`
+  (`Problemas encontrados` §2)
+- **Sintoma:** a citação `wte/tools/test_dump_mcr.py:341` é dada como o lugar de
+  `WTE_MCR_ENTRADA` e `WTE_MCR_FIXTURE`. Medido: `WTE_MCR_FIXTURE` está na
+  **354**, `WTE_MCR_ENTRADA` **não está nesse arquivo** (está em
+  `wte/src/impl/ep2002_mainform.FormShow.inc:146` e nos roteiros), e a **341** é
+  `ENTRADA = M.ROOT / "work" / "entrada.mcr"` — um caminho **cravado**, que é a
+  parte mais afiada da armadilha e ficou sem registro.
+- **Como foi detectado:** `grep -n` no arquivo citado e `git grep` da variável
+  em `wte/tools` (vazio), na revisão da MCR-TASK-03. Todo o resto do Log
+  remediu exato.
+- **Fix:** nomear as três formas de alcance com as linhas certas, e dizer que a
+  cravada é a razão de o digest ser a régua. O `perfil-mcr.md` não erra — cita
+  só as variáveis.
