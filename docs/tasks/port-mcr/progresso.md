@@ -37,7 +37,7 @@ por princípio.
 | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ⬜ Pendente | — | — |
+| [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ✅ Concluído | 2026-09-07 | ⬜ pendente |
 | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | 04 | ⬜ Pendente | — | — |
 | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` × `Player::Decode/Encode` | 1 | 05 | ⬜ Pendente | — | — |
 | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | 05 | ⬜ Pendente | — | — |
@@ -89,7 +89,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 
 ### Fase 1 — o núcleo
 
-- [ ] MCR-TASK-04 — `card.py`, com as recusas
+- [x] MCR-TASK-04 — `card.py`, com as recusas
 - [ ] MCR-TASK-05 — `layout.py`, 17/17
 - [ ] MCR-TASK-06 — `attributes.py`, 0 divergências
 - [ ] MCR-TASK-07 — `numbers.py` e `text.py`, 23/23 e cp932
@@ -144,6 +144,8 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Eixo | Estado |
 | --- | --- |
 | Cartão | 131.072 B, magic `MC`, entrada 1 do diretório `51 00 00 00 / 00 40 00 00 / 01 00`. SHA-256 `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546` — **é este cartão que os números abaixo medem**; o ciclo `wte/` usa o mesmo arquivo como fixture dele e o cabeçalho da `golden-13-roundtrip` manda regerá-lo de `work/saida.mcr`, então confira o digest antes de tratar uma divergência como bug |
+| Cadeia do save | quadros **1 e 2** (`0x51` + `0x53`), 16.384 B declarados, primeiro bloco em `0x2000`. O `link` é **0-based sobre os blocos de dados**: o quadro 1 tem link `1` e aponta para o quadro 2 — lido como número de quadro, aponta para si mesmo. Os 16 checksums XOR batem |
+| Dado fora da cadeia | o bloco 3 tem **41 bytes não-zero** e o diretório o marca `0xA0`, livre — é onde ficam formação, cobradores e tática. `tools/mcr/card.py <cartão> --blocks` |
 | Registro de jogador | `0x5904`, passo 32, 23 entradas — 12 B de atributo + 10 B de nome + 10 B intocados |
 | Dorsais | `0x5404`, 4 grupos de 4 B, 6 × 5 bits, deslocamentos `[0,5,2,7,4,1]`, guardado menos um |
 | Dorsal duplo | **23 de 23** concordam entre o bit-field do registro e a tabela |

@@ -21,6 +21,13 @@ status: pendente
   cobradores, 25256/25266/25557.
 - **Esta task trava a 06, a 07 e a 08.** Decodificador escrito contra endereço
   não conferido produz campo plausível e errado, e o sintoma só aparece no jogo.
+- **O contêiner já responde em que bloco cada endereço cai**, e a MCR-TASK-04
+  mediu: o save declarado ocupa os blocos **1 e 2** (16.384 B), e o bloco 3 —
+  onde caem 14 dos 17 destinos — está **fora da cadeia declarada**, com 41
+  bytes não-zero num quadro que o diretório marca `0xA0`. Use
+  `card.Card.find_save()` e `python3 tools/mcr/card.py <cartão> --blocks` em vez
+  de dividir endereço por 8192 na mão; e note que a divisão simples continua
+  certa para o **número** do bloco, mas não diz se ele é declarado.
 
 ---
 

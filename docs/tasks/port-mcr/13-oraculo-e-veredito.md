@@ -45,6 +45,14 @@ Responder com valor medido o que hoje é opinião.
       14 dos 17 destinos caem no bloco 3, que o diretório declara livre, e
       ninguém recalcula checksum. Um cartão gravado pelo port aberto no
       DuckStation responde se isso importa.
+
+      **A MCR-TASK-04 já mediu o lado do contêiner**, e o comando que reproduz
+      é `python3 tools/mcr/card.py <cartão> --blocks`: na fixture, os blocos
+      1 e 2 são a cadeia declarada (16.384 B), o bloco 3 tem **41 bytes
+      não-zero** e o diretório o marca `0xA0`, e **os 16 checksums de quadro
+      batem** — o cartão está formalmente íntegro *exceto* por esse dado fora
+      da cadeia. É esse o estado exato que o console tem de julgar; leve um
+      cartão nessa condição ao experimento, não um recém-gravado sem conferir.
 - [ ] O que for medido volta para a §1.8 e a §5.6 do plano; hipótese descartada
       fica, com o motivo.
 
