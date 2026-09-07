@@ -54,6 +54,11 @@ status: pendente
 
 ## Critério de conclusão
 
+*(Precedente da MCR-TASK-07, que vale para os cobradores e os papéis: gravar
+por **read-modify-write** e nunca montar o campo do zero. Na tabela de dorsais
+sobram 2 bits em cada grupo de 32 e o slot 24 não é jogador; montar do zero os
+apaga, e o controle negativo que planta isso fica vermelho em dois checks.)*
+
 - [ ] X, Y e papéis lidos e gravados, com o `+2` do papel simétrico.
 - [ ] Os cinco cobradores pela **tabela** `0x614F, 0x6140, 0x6122, 0x6113,
       0x6131`, nunca por aritmética — ela não é crescente.

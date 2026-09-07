@@ -52,6 +52,15 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       v4.2 — o self-check morreu no meio e três checks não rodaram. A terceira
       cópia já nasceu; **escolha uma casa só para os dois** ao montar o
       `selftest`.
+- [ ] **O harness precisa de um guard EXTERNO, não só de helpers.** Cinco vezes
+      neste ciclo um `ok(...)` cuja expressão levanta matou a corrida e
+      escondeu os checks seguintes — MCR-TASK-04 (`find_save`), MCR-TASK-06
+      (o `try/except` de recusa), e três vezes na MCR-TASK-07 (`encode_table`,
+      `read_all`, `decode_name`). Passar cada chamada por `attempt()` conserta
+      **uma de cada vez** e a sexta volta. O conserto durável é envolver o
+      corpo inteiro do `self_check` de modo que qualquer exceção que escape
+      vire uma falha nomeada e a contagem final ainda saia. Faça isso no
+      harness compartilhado, e os cinco módulos herdam.
 - [ ] **O `selftest` importa `layout` dentro do `attempt()`**, não no escopo do
       módulo: as vistas nomeadas do `layout.py` levantam `LayoutError` no
       import quando um destino some, e o `mcr_selftest` é o gate
