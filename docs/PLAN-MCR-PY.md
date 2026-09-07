@@ -333,13 +333,37 @@ Cada módulo abre com três linhas dizendo qual célula desta tabela ele é.
 | `tactics.py` | — | `wte/re/mcr.md` | aberta — sem oráculo | — |
 | `domains.py` | — | — | upstream inteiro | — |
 
-### 3.5 Nomenclatura
+### 3.5 Nomenclatura e idioma do código
 
-Identificadores em **inglês**; docstrings em **português**. O fonte de origem é
-espanhol, então `glossary.py` carrega o mapa (`jugador→player`, `cancha→pitch`,
-`formacion→formation`, `grabar→write`, `bufersizenum→group_size`) e o
-`selftest` recusa espanhol remanescente. Mesma mecânica de
-[tools/glossary.py](../tools/glossary.py) com o italiano do `legacy/mfc/`.
+**Todo o código deste port é en-US** — identificadores, docstrings,
+comentários, mensagens de erro, texto de `--help` e do CLI, e rótulo de UI.
+Decisão do dono do repositório, **2026-09-07**.
+
+**A fronteira é o arquivo, não a frase.** `tools/mcr/**.py` é inglês de ponta a
+ponta; `docs/**` — este plano, as tasks, o perfil, as `CORR-MCR-*` — continua em
+português. Um módulo cuja docstring cita este plano traduz a frase, não o link:
+a referência continua sendo `§1.6 do plano`.
+
+O que a regra **não** alcança: `Makefile`, `tests/CMakeLists.txt` e o que mais
+for arquivo compartilhado do repositório. Eles são portugueses inteiros desde
+antes deste ciclo, e uma ilha de inglês dentro deles custa legibilidade sem
+comprar nada. Os alvos `mcr`/`mcr-98` seguem o idioma do arquivo em que moram.
+
+O fonte de origem é espanhol, então `glossary.py` carrega o mapa
+(`jugador→player`, `cancha→pitch`, `formacion→formation`, `grabar→write`,
+`bufersizenum→group_size`) e o `selftest` recusa espanhol remanescente. Mesma
+mecânica de [tools/glossary.py](../tools/glossary.py) com o italiano do
+`legacy/mfc/`. **A mesma varredura é o lugar da recusa de português em
+`tools/mcr/`** — uma lista curta de palavras que só aparecem em prosa
+(`quadro`, `cartao`, `escrita`, `recusa`, `falha`) pega a recaída sem
+falso-positivo, e sem ela a regra é prosa.
+
+**Uma dívida aberta:** o `card.py` da MCR-TASK-04 foi escrito **antes** desta
+decisão, sob a regra anterior ("identificadores em inglês, docstrings em
+português"), e está em português nas docstrings, nos comentários, nas mensagens
+de recusa, nas chaves do `--json` e na saída do `self_check`. A retradução é a
+[CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md); enquanto ela não fecha, o
+módulo é a **única** exceção, e nenhum módulo novo a herda.
 
 ---
 

@@ -29,6 +29,12 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 - **PySide6 em venv, nunca por `apt`.** O Python desta máquina é duplo. (§4)
 - **Tática é somente leitura na v1.** O escritor original grava seis destinos e
   o leitor dele nunca lê nenhum. (§1.9)
+- **O código do port é en-US, a documentação é português.** Identificadores,
+  docstrings, comentários, mensagens de erro, `--help` e rótulo de UI em inglês;
+  `docs/**` em português. A fronteira é o arquivo. Decisão do dono do
+  repositório, 2026-09-07. O `card.py` da MCR-TASK-04 é anterior a ela e está em
+  português — é a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md), e é a
+  única exceção. (§3.5 do plano)
 - **Cartão de jogo não se versiona.** A fixture é `work/entrada.mcr`, apontada
   por `WE2002_MCR_CARD`. Mesma regra de `roms/`.
 
@@ -147,7 +153,10 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   mesmo jeito. `/executar` sem argumento escolhe a mesma task de antes;
   `pip freeze` do venv no Log.
 - **Fase 1** — todo módulo novo traz `self_check()` com **caso vermelho**; nenhum
-  endereço fora de `layout.py`; round-trip nas duas formas.
+  endereço fora de `layout.py`; round-trip nas duas formas; e **nada em
+  português no módulo** — docstring, comentário, literal de prosa, mensagem de
+  recusa e identificador local em en-US (§3.5). O `card.py` é a exceção
+  conhecida até a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) fechar.
 - **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2
   skipped.
 - **Fase 3** — captura de tela no `:98` no Log; o arquivo gravado pela UI passa

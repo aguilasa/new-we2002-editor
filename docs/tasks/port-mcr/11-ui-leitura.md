@@ -39,6 +39,9 @@ Abrir um cartão e mostrar o que o núcleo já lê, sem gravar nada.
 - [ ] Nome em cp932 aparecendo correto na tela, inclusive o katakana.
 - [ ] **Nenhum caminho de gravação ligado** nesta task: abrir é seguro por
       construção.
+- [ ] **Toda a UI em en-US** — título de janela, aba, rótulo, cabeçalho de
+      coluna, tooltip e mensagem. A regra é a §3.5 do plano e vale para o texto
+      que o usuário lê, não só para o identificador.
 - [ ] Captura de tela no `:98` anexada ao Log.
 
 ---

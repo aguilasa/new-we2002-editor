@@ -119,6 +119,13 @@ Cinco controles negativos, cada um plantado numa cópia em `/tmp` (o
 | `if len(data) != CARD_BYTES:` → `if False:` | 🔴 | 1 — recusou, mas pela mensagem de magic |
 | `if data[:len(MAGIC)] != MAGIC:` → `if False:` | 🔴 | 1 |
 
+> **Nota de 2026-09-07, posterior a esta corrida.** Os trechos de mensagem
+> citados nesta tabela são os que o `self_check` imprimia **em português**, e
+> ficam como estão — são a evidência da corrida. A §3.5 do plano passou a exigir
+> **en-US em todo o código do port** no mesmo dia, e a retradução do `card.py` é
+> a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md); depois dela os mesmos
+> cinco casos continuam vermelhos, pelos trechos equivalentes em inglês.
+
 **5/5 vermelhos, `rc=1` em todos.** O quarto merece nota: com a checagem de
 tamanho desligada, o buffer truncado passa a falhar pelo **magic**, e o check
 acusa exatamente isso ("recusou, mas sem dizer 'bytes, e um memory card'") —

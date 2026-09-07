@@ -38,6 +38,15 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       `"PySide6" not in sys.modules` depois de importar o núcleo inteiro.
 - [ ] `cli.py` com `info`, `dump`, `get`, `set`, `roundtrip`, `negative` e
       `check`, saída determinística.
+- [ ] `glossary.py` — o mapa `es → en` (§3.5), que até aqui não tinha task
+      dona: `jugador→player`, `cancha→pitch`, `formacion→formation`,
+      `grabar→write`, `bufersizenum→group_size`.
+- [ ] A varredura de idioma no `selftest`: **nenhum espanhol remanescente e
+      nenhuma prosa portuguesa em `tools/mcr/**.py`**. Todo o código do port é
+      **en-US** — docstrings, comentários, mensagens, `--help` e saída do CLI
+      (§3.5). O `card.py` é a exceção conhecida até a
+      [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) fechar; a varredura
+      nasce sabendo disso, e a lista de exceção morre com ela.
 - [ ] Três alvos em `tests/CMakeLists.txt`: `mcr_selftest` (obrigatório),
       `mcr_card` (`WE2002_MCR_CARD`, skip 77) e `mcr_ui` (venv + `:98`, skip 77).
 - [ ] **Numa máquina sem venv e sem fixture**, `ctest -R mcr` reporta

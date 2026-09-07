@@ -42,6 +42,8 @@ passando no round-trip.
 - [ ] O `0x6500` desenhado conforme o veredito da MCR-TASK-13, ou ausente se
       ela ainda não tiver fechado.
 - [ ] Captura de tela no `:98`, antes e depois, anexada ao Log.
+- [ ] Diálogo, confirmação e mensagem de erro da gravação **em en-US**, como o
+      resto da UI (§3.5).
 
 ---
 
