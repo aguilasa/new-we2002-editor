@@ -102,13 +102,19 @@ git -C work/easy-mcr ls-tree -r -l HEAD | awk '{s+=$4; n++} END {print n, s}'
 | raiz | 5 | 190.704 |
 
 **O que não entra, e por quê.** Categorias disjuntas, na ordem em que foram
-descontadas (`git ls-tree -r -l HEAD` filtrado por prefixo e extensão):
+descontadas (`git ls-tree -r -l HEAD` filtrado por prefixo e extensão; **o
+prefixo casa em qualquer profundidade** — `.vs/` e `packages/` também
+aparecem sob `lite/`, e é por isso que somam 20 e 164 contra os 13 e 82 do
+topo). O cache do WebView2 **atravessa duas linhas** e por isso não é linha:
+são 1.820 arquivos e 319.637.837 B ao todo, 1.656 / 218.698.891 sob
+`bin/`+`obj/` e os outros 164 / 100.938.946 sob `packages/`, que é
+inteiramente ele.
 
 | categoria | arquivos | bytes | por quê |
 | --- | ---: | ---: | --- |
 | `.vs/` | 20 | 3.996.160 | cache do Visual Studio |
-| `packages/` | 164 | 100.938.946 | NuGet restaurado, inclusive o WebView2 |
-| `bin/` e `obj/` | 2586 | 363.366.917 | saída de build — **é aqui que mora todo o cache do WebView2**, 1820 arquivos e 319.637.837 B |
+| `packages/` | 164 | 100.938.946 | NuGet restaurado — é **inteiramente** o WebView2 |
+| `bin/` e `obj/` | 2586 | 363.366.917 | saída de build — inclui **1.656 arquivos e 218.698.891 B** do cache do WebView2, que é a maior parte dele mas não o todo |
 | `BD.accdb` | 1 | 2.543.616 | banco Access privado dele (aparências e faces); não é dado de save |
 | `.bmp` | 6 | 996.032 | faces e o `cancha.bmp` do editor de formação — arte |
 | `.png` | 2 | 92.204 | arte |
@@ -167,6 +173,8 @@ Nenhum que bloqueasse. Duas coisas a registrar:
 2. **`packages/` some do inventário se o WebView2 for descontado primeiro.**
    A primeira medição casou por `webview2` antes de casar por prefixo e
    devolveu `packages/ 0 arquivos`, o que é falso como leitura e verdadeiro
-   como aritmética. A tabela acima desconta na ordem prefixo → extensão, e diz
-   explicitamente que o cache do WebView2 está dentro de `bin/`/`obj/`.
+   como aritmética. A tabela acima desconta na ordem prefixo → extensão, e a
+   legenda diz o que isso implica: o WebView2 **atravessa** `bin/`+`obj/` e
+   `packages/`, então ele é descontado por prefixo, nunca por nome, e não
+   pode ser atribuído a uma das duas linhas.
 

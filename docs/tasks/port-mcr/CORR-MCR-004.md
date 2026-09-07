@@ -3,7 +3,7 @@ id: CORR-MCR-004
 title: "Correção: o cache do WebView2 não mora todo em `bin/`/`obj/` — um terço dele é a linha `packages/`"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -149,12 +149,34 @@ certos.
 - [ ] `work/easy-mcr/` e `roms/` intocados; `git status --short` sem nada de
       `work/`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A célula de razão de `bin/`+`obj/` passou a trazer os números medidos —
+**1.656 arquivos e 218.698.891 B** do cache do WebView2 —, e a legenda da tabela
+ganhou as duas coisas que faltavam: que o prefixo casa em **qualquer
+profundidade** (o que explica 20 contra 13 e 164 contra 82) e que o WebView2
+**atravessa** duas linhas, com a repartição 1.656/218.698.891 sob `bin/`+`obj/`
+e 164/100.938.946 sob `packages/`. O `Problemas encontrados` §2 deixou de citar
+a frase errada e passou a dizer o que a ordem de desconto de fato implica.
+
+Os dois `awk` da Evidência remedem exato: `1656 218698891` e
+`1820 319637837`. As profundidades também: `.vs/` 13→20, `packages/` 82→164.
+
 **Problemas encontrados:**
 
+Uma discrepância que o conserto revelou, na mesma tabela: a célula de
+`packages/` dizia "NuGet restaurado, **inclusive** o WebView2", o que ficou mais
+fraco que a legenda logo acima, que agora afirma que aquela linha é
+inteiramente ele. Trocado por "é **inteiramente** o WebView2".
+
+`NOTICE.md` conferido e intocado, como a CORR previu: lá o WebView2 aparece
+numa lista de naturezas, sem atribuição a diretório.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/02-base-legal-e-linhagem.md` — legenda da tabela, as
+  células de `bin/`+`obj/` e de `packages/`, e o `Problemas encontrados` §2
