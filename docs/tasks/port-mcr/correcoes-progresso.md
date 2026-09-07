@@ -22,7 +22,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [x] concluída | 2026-09-07 |
 | [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [ ] pendente | — |
+| [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -39,7 +39,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-006 — corrigir as duas referências do lado `wte/` e registrar o caminho cravado
 - [x] CORR-MCR-007 — traduzir o `card.py` para en-US e fechar a dívida da §3.5
 - [x] CORR-MCR-008 — registrar o efeito do erro de import na tabela de controles e exigir o `attempt()` em volta do import no `selftest`
-- [ ] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
+- [x] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
 
 ---
 

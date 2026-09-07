@@ -3,7 +3,7 @@ id: CORR-MCR-009
 title: "Correção: a tabela de controles da MCR-TASK-06 descreve o defeito em prosa, e duas das cinco contagens não reproduzem"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -138,12 +138,70 @@ decisão de fazê-lo agora ou não é de quem executar a 10.
 - [ ] `roms/` e `work/entrada.mcr` intocados — o digest continua
       `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A tabela dos cinco controles da MCR-TASK-06 passou a dizer a **substituição
+literal** de cada defeito — linha de origem e de destino — em vez do efeito
+pretendido, e as duas contagens que não reproduziam foram reconciliadas com o
+que a edição escrita produz: o `speed`/`dribbling` dá **2** falhas (não 4) e o
+`stamina` movido dá **5** (não 6). O cabeçalho da seção diz por que a mudança
+importa: "trocar dois campos no encoder" tem mais de uma leitura, e cada leitura
+dá uma contagem diferente.
+
+Entrou também a nota **"Como replantar"**, e a MCR-TASK-10 ganhou o item de
+decidir se o subcomando `negative` planta os controles em vez de descrevê-los —
+onde a contagem passa a ser medida por comando em vez de anotada à mão.
+
+`tools/mcr/attributes.py` **não foi tocado**: o defeito era do registro, não do
+módulo.
+
+**Medições — os cinco controles replantados da raiz do repositório, com
+`PYTHONPATH=tools/mcr` e `WE2002_MCR_CARD=work/mcr-entrada.mcr`:**
+
+| substituição | `rc` | falhas | divergência |
+|---|---:|---:|---|
+| `speed`/`dribbling` nos dois lados do `encode_masks` | 1 | **2** | 87.484/100.000 |
+| `r[3] \|= (v["number"] - 1) << 2` → sem o `-1` | 1 | 2 | 100.000/100.000 |
+| `Field("stamina", 49, …)` → `50` | 1 | **5** | `gaps=(3, 12, 16, 45, 49)`, 87.346 |
+| `r = bytearray(blob)` → `bytearray(12)` | 1 | 2 | 93.748/100.000 |
+| `Field("jump", 82, 3, bias=12)` → `bias=11` | 1 | 2 | 100.000/100.000 |
+
+**5/5 vermelhos.** As três contagens de blob que o Log já trazia — 87.484,
+100.000, 93.748 — bateram exatamente, como a CORR afirma.
+
+Os demais gates:
+
+| gate | resultado |
+|---|---|
+| `attributes.py --self-check` com fixture | **22 checks, 0 falhas**; duas corridas byte-idênticas |
+| idem sem `WE2002_MCR_CARD` | 0 falhas, com o check da fixture em `skip` |
+| `--upstream-weights work/easy-mcr` | `21/21` |
+| `layout.py --rule1` | `0 address(es) outside layout.py` |
+| `import attributes` | não traz `PySide6` |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / `1/1 Passed` |
+| fixture | `e53f4895…`, inalterada |
+
 **Problemas encontrados:**
 
+**Uma armadilha de replantação a mais que a CORR não previa**, e que é irmã da
+que a [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) achou no `layout.py`:
+a tabela dizia "numa cópia em `/tmp`", e de `/tmp` a corrida **roda** — mas o
+check das 21 tabelas de peso vira `skip  the upstream weight tables (no
+work/easy-mcr)` **em silêncio**, e a corrida reporta `0 failure(s)` numa
+dimensão que não foi medida. O `PYTHONPATH` que a CORR pede também foi
+confirmado: sem ele, `ModuleNotFoundError: No module named 'layout'` antes de
+qualquer medição. As duas foram para a nota "Como replantar".
+
+A citação equivalente da MCR-TASK-04 (`/tmp`, para o `card.py`) continua certa
+e ficou como está: aquele módulo não importa `layout` nem lê `work/easy-mcr`.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/06-codec-de-atributos.md` — a tabela dos cinco controles
+  e a nota "Como replantar"
+- `docs/tasks/port-mcr/10-selftest-cli-e-gate.md` — o item do subcomando
+  `negative`

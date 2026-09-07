@@ -143,18 +143,33 @@ são dos nibbles e o plano não os mencionava.
 
 ### Os controles negativos
 
-Cinco defeitos plantados numa cópia em `/tmp`:
+Cinco defeitos plantados numa cópia do módulo (o do repositório não foi
+tocado). **Cada linha diz a substituição literal**, não o efeito pretendido:
+"trocar dois campos no encoder" tem mais de uma leitura, e cada leitura dá uma
+contagem diferente — foi o que a
+[CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) mediu ao tentar repetir
+estes controles.
 
-| defeito plantado | resultado |
+| substituição plantada | resultado |
 |---|---|
-| **o bug da v4.2**: `speed`/`dribbling` trocados no encoder | 🔴 4 falhas, 87.484/100.000 blobs divergindo |
-| tirar o `-1` do dorsal no `encode_masks` | 🔴 2 falhas, **100.000/100.000** |
-| mover `stamina` um bit | 🔴 6 falhas, e o `GAP_BITS` denuncia o bit órfão |
-| gravar a partir de buffer zerado (mata os gaps) | 🔴 2 falhas, 93.748/100.000 |
-| `bias=11` no `jump` | 🔴 2 falhas, e os 23 registros divergem |
+| **o bug da v4.2**, nos **dois** lados do `encode_masks`: `r[6] \|= ((v["speed"] - 12) << 7) & 0xFF` → `v["dribbling"]`, `r[7] \|= (v["speed"] - 12) >> 1` → `v["dribbling"]`, e `r[6] \|= (v["dribbling"] - 12) << 4` → `v["speed"]` | 🔴 2 falhas, 87.484/100.000 blobs divergindo |
+| `r[3] \|= (v["number"] - 1) << 2` → `r[3] \|= v["number"] << 2` | 🔴 2 falhas, **100.000/100.000** |
+| `Field("stamina", 49, 3, bias=12)` → `Field("stamina", 50, 3, bias=12)` | 🔴 5 falhas, e o `GAP_BITS` denuncia o bit órfão: `gaps=(3, 12, 16, 45, 49)` |
+| `r = bytearray(blob)` → `r = bytearray(12)` no `encode_masks` (mata os gaps) | 🔴 2 falhas, 93.748/100.000 |
+| `Field("jump", 82, 3, bias=12)` → `bias=11` | 🔴 2 falhas, 100.000/100.000, e os 23 registros divergem |
 
 **5/5 vermelhos, `rc=1` em todos.** O primeiro é o caso vermelho que o critério
 pede, e o segundo é a divergência deliberada da §6 pelo outro lado.
+
+> **Como replantar.** A cópia precisa de `PYTHONPATH` apontando `tools/mcr`: o
+> módulo importa `layout`, e fora da pasta ele não resolve — a corrida morre em
+> `ModuleNotFoundError` antes de medir qualquer coisa, o que parece defeito do
+> controle e não é. E a cópia vai **dentro da árvore**: de `/tmp` ela roda, mas
+> o check das 21 tabelas de peso vira `skip  the upstream weight tables (no
+> work/easy-mcr)` **em silêncio** — a corrida reporta `0 failure(s)` numa
+> dimensão que não foi medida. Da raiz do repositório, com
+> `WE2002_MCR_CARD=work/mcr-entrada.mcr`, os cinco reproduzem as contagens
+> acima.
 
 ### Divergências deliberadas, mantidas
 

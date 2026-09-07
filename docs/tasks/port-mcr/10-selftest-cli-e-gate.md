@@ -63,6 +63,16 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       MCR-TASK-04 pagou e que vale para as tasks 05 a 10.
 - [ ] `cli.py` com `info`, `dump`, `get`, `set`, `roundtrip`, `negative` e
       `check`, saída determinística.
+- [ ] **Decidir se o `negative` planta os controles em vez de descrevê-los.**
+      Hoje o estímulo de cada controle mora em prosa numa tabela de Log, e a
+      [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) mediu o custo disso:
+      duas das cinco contagens da MCR-TASK-06 não reproduziam a partir da
+      descrição, porque "trocar dois campos no encoder" tem mais de uma
+      leitura. Como subcomando — plantar a substituição, rodar, exigir o
+      vermelho e a contagem —, o número passa a ser **medido** em vez de
+      anotado à mão. É a mesma regra que o `CLAUDE.md` já aplica aos golden:
+      sem o estímulo versionado a corrida não é repetível. A decisão de fazê-lo
+      agora é de quem executar esta task; o que não vale é deixá-la implícita.
 - [ ] `glossary.py` — o mapa `es → en` (§3.5), que até aqui não tinha task
       dona: `jugador→player`, `cancha→pitch`, `formacion→formation`,
       `grabar→write`, `bufersizenum→group_size`.
