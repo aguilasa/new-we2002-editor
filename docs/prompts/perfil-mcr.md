@@ -61,6 +61,15 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
    núcleo, o round-trip morre.
 8. **A tabela de cobradores não é crescente** — `0x614F, 0x6140, 0x6122,
    0x6113, 0x6131`. Aritmética no lugar da tabela grava no campo errado.
+9. **A fixture é compartilhada com o ciclo `wte/`, e aquele lado sabe
+   regerá-la.** `work/entrada.mcr` é apontada aqui por `WE2002_MCR_CARD` e lá
+   por `WTE_MCR_ENTRADA`/`WTE_MCR_FIXTURE`; nenhum dos dois escreve nela, mas o
+   cabeçalho da `golden-13-roundtrip` manda `cp work/saida.mcr
+   work/entrada.mcr`, e o `golden_check.sh` produz esse `saida.mcr`. Trocado o
+   cartão, os números medidos deste ciclo — 23/23 dorsais, `[7,7,8,7,7]`, o
+   cp932 dos slots 0 e 20 — passam a ser sobre outro save, e a divergência
+   parece bug do port. O digest que os ancora está na tabela "Estado medido" do
+   `progresso.md`: `sha256sum work/entrada.mcr` antes de acusar qualquer coisa.
 
 ---
 
@@ -82,8 +91,9 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 ```text
 tools/mcr/            o núcleo Python (12 módulos), o CLI e o selftest
 tools/mcr/ui/         a UI PySide6 -- não importa layout/card/io
-work/venv-mcr/        o venv com PySide6 (fora do git)
-work/entrada.mcr      a fixture (fora do git)
+work/venv-mcr/        o venv com PySide6 6.11.2 (fora do git, 663 MB)
+work/entrada.mcr      a fixture (fora do git) -- compartilhada com o ciclo wte/
+work/mcr-entrada.mcr  a copia que o `make mcr` edita; a fixture nao se abre
 work/easy-mcr/        o clone do upstream (fora do git)
 docs/PLAN-MCR-PY.md   a fonte de verdade
 docs/tasks/port-mcr/  este ciclo

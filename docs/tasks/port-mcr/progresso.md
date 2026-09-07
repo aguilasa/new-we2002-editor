@@ -36,7 +36,7 @@ por princípio.
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
 | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ⬜ Pendente | — | — |
+| [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ✅ Concluído | 2026-09-07 | ⬜ pendente |
 | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ⬜ Pendente | — | — |
 | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | 04 | ⬜ Pendente | — | — |
 | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` × `Player::Decode/Encode` | 1 | 05 | ⬜ Pendente | — | — |
@@ -85,7 +85,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 - [x] MCR-TASK-01 — o Passo 0 nos 5 prompts e nos 5 wrappers, sem citar o nome
       deste ciclo em nenhum deles
 - [x] MCR-TASK-02 — linhagem no `NOTICE.md`, SHA fixado, inventário do upstream
-- [ ] MCR-TASK-03 — fixture nomeada, venv com PySide6, versões registradas
+- [x] MCR-TASK-03 — fixture nomeada, venv com PySide6, versões registradas
 
 ### Fase 1 — o núcleo
 
@@ -143,7 +143,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 
 | Eixo | Estado |
 | --- | --- |
-| Cartão | 131.072 B, magic `MC`, entrada 1 do diretório `51 00 00 00 / 00 40 00 00 / 01 00` |
+| Cartão | 131.072 B, magic `MC`, entrada 1 do diretório `51 00 00 00 / 00 40 00 00 / 01 00`. SHA-256 `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546` — **é este cartão que os números abaixo medem**; o ciclo `wte/` usa o mesmo arquivo como fixture dele e o cabeçalho da `golden-13-roundtrip` manda regerá-lo de `work/saida.mcr`, então confira o digest antes de tratar uma divergência como bug |
 | Registro de jogador | `0x5904`, passo 32, 23 entradas — 12 B de atributo + 10 B de nome + 10 B intocados |
 | Dorsais | `0x5404`, 4 grupos de 4 B, 6 × 5 bits, deslocamentos `[0,5,2,7,4,1]`, guardado menos um |
 | Dorsal duplo | **23 de 23** concordam entre o bit-field do registro e a tabela |

@@ -17,6 +17,7 @@
 #   JOBS=<n>                          paralelismo do build           (nproc)
 #   DISPLAY=:98                       display X para a GUI    (herda do shell)
 #   XVFB=:98                          o Xvfb dos alvos -98        (default :98)
+#   WE2002_MCR_CARD=<caminho.mcr>     o cartao dos alvos mcr   (work/entrada.mcr)
 #   ARGS='...'                        argumentos extras para o binario
 #
 # Ex.: make run PRESET=release IMAGE=roms/japanese-shift-jis.bin
@@ -52,7 +53,8 @@ COPY := $(WORK)/$(notdir $(IMAGE))
 .PHONY: help configure build run run-jp run-98 copy fresh test test-release \
         golden golden-gui install uipreview gen gen-check clean distclean \
         run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
-        pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status
+        pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
+        mcr mcr-98 mcr-venv
 
 # ------------------------------------------------------------------ help ----
 
@@ -81,6 +83,12 @@ help:
 	@echo '  pes2-kill     encerra o emulador (os tres nomes de processo)'
 	@echo '  pes2-status   diz o que esta rodando, e se e o fork ou o AppImage'
 	@echo '                PES2_TAG=EsIt|EnFrDe escolhe a release'
+	@echo
+	@echo '  Editor de .mcr (memory card) -- projeto separado, Python + PySide6:'
+	@echo '  mcr-venv      cria $$(MCR_VENV) e instala PySide6 (nunca por apt)'
+	@echo '  mcr           abre o editor sobre uma COPIA de $$(WE2002_MCR_CARD)'
+	@echo '  mcr-98        idem, forcando DISPLAY=$(XVFB)'
+	@echo
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
 	@echo '  test          testes unitarios (sem imagem)'
 	@echo '  test-release  testes no preset release (pega _FORTIFY_SOURCE)'
@@ -98,6 +106,7 @@ help:
 	@echo 'Copia:        $(COPY)'
 	@echo 'Copia Lazarus: $(LAZ_COPY)'
 	@echo 'Copia PES2:   $(PES2_DIR)/'
+	@echo 'Cartao .mcr:  $(WE2002_MCR_CARD)  ->  $(MCR_COPY)'
 
 # ----------------------------------------------------------------- build ----
 
@@ -423,6 +432,71 @@ run-lazarus: $(LAZ_COPY)
 run-lazarus-98:
 	@$(MAKE) --no-print-directory run-lazarus \
 	  DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
+
+# --------------------------------------------------- editor de .mcr (Python) -
+
+# O port em Python do editor de memory card (docs/PLAN-MCR-PY.md). Projeto
+# separado: nao compartilha build nem codigo com o resto deste Makefile -- e
+# Python 3 puro mais uma UI PySide6 num venv proprio.
+#
+# POR QUE UM VENV, E NAO `apt install python3-pyqt6`: o Python desta maquina e
+# DUPLO. `python3` do PATH e o mise 3.13; /usr/bin/python3 e o 3.12 do sistema,
+# e e para ele que o apt instala. O apt termina em verde e o `import` continua
+# falhando -- a falha e silenciosa, que e o pior formato dela. Some-se a
+# licenca: PySide6 e LGPL, PyQt6 e GPL-ou-comercial, e este repositorio nao
+# pode ser licenciado (NOTICE.md).
+#
+# O `make fresh` NAO apaga o venv: ele remove quatro caminhos nomeados, e
+# nenhum e $(MCR_VENV). Quem zera o venv e `rm -rf $(MCR_VENV)`.
+
+MCR_VENV   ?= $(WORK)/venv-mcr
+MCR_PY     := $(MCR_VENV)/bin/python
+# A fixture e nomeada por VARIAVEL, nunca por caminho cravado -- e a mesma
+# WE2002_MCR_CARD que o alvo `mcr_card` do ctest le.
+WE2002_MCR_CARD ?= $(WORK)/entrada.mcr
+MCR_COPY   := $(WORK)/mcr-$(notdir $(WE2002_MCR_CARD))
+MCR_UI     := tools/mcr/ui/app.py
+
+.PHONY: mcr mcr-98 mcr-venv
+
+# O venv e reproduzivel por comando, nao por prosa num log.
+mcr-venv: $(MCR_PY)
+
+$(MCR_PY):
+	@echo '>> criando $(MCR_VENV) com $$(python3) = '"$$(python3 -VV)"
+	@python3 -m venv '$(MCR_VENV)'
+	@'$(MCR_VENV)/bin/pip' install --disable-pip-version-check 'PySide6>=6.8'
+	@'$(MCR_PY)' -c 'import PySide6; print(">> PySide6", PySide6.__version__)'
+
+# Copia, sempre: o editor grava IN-PLACE no cartao, como os de imagem de CD.
+# O $(WE2002_MCR_CARD) e fixture -- cartao de jogo do usuario, fora do git.
+#
+# O $(wildcard) NAO e enfeite, e tirar ele quebra a guarda de baixo: como
+# prerequisito cru, um cartao inexistente faz o make abortar com
+# "No rule to make target 'work/x.mcr'" ANTES de a receita rodar, e a mensagem
+# que nomeia a variavel -- a unica util aqui -- fica inalcancavel justamente no
+# caso para o qual foi escrita. Medido. Com o wildcard: existe -> prerequisito
+# de verdade, e a copia se refaz quando o cartao muda; nao existe -> lista
+# vazia, a receita roda e o `test -s` fala.
+$(MCR_COPY): $(wildcard $(WE2002_MCR_CARD)) | $(WORK)
+	@test -s '$(WE2002_MCR_CARD)' || { \
+	  echo 'ERRO: cartao nao encontrado ou vazio: $(WE2002_MCR_CARD)'; \
+	  echo '      aponte WE2002_MCR_CARD para um .mcr de 128 KiB;'; \
+	  echo '      cartao de jogo nao e versionado, como roms/.'; exit 1; }
+	@echo '>> copiando $(WE2002_MCR_CARD) -> $@'
+	@cp --reflink=auto '$(WE2002_MCR_CARD)' '$@'
+
+mcr: $(MCR_PY) $(MCR_COPY)
+	@test -f '$(MCR_UI)' || { \
+	  echo 'ERRO: $(MCR_UI) ainda nao existe.'; \
+	  echo '      A UI e a MCR-TASK-11; o nucleo, a 04 a 10.'; \
+	  echo '      Ate la o venv ja esta pronto: make mcr-venv'; exit 1; }
+	@echo '>> $(MCR_PY) $(MCR_UI) $(MCR_COPY)   (DISPLAY=$(DISPLAY))'
+	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
+	  '$(MCR_PY)' '$(MCR_UI)' '$(MCR_COPY)' $(ARGS)
+
+mcr-98:
+	@$(MAKE) --no-print-directory mcr DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'
 
 # ----------------------------------------------------------------- testes ---
 
