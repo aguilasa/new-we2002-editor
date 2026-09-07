@@ -120,11 +120,31 @@ inteiramente ele.
 | `.png` | 2 | 92.204 | arte |
 | `.pfx` | 2 | 3.304 | `fifatomcr_TemporaryKey.pfx`, chave de assinatura — as duas cópias |
 | **soma excluída** | **2781** | **471.937.179** | |
-| **resto (o fonte que importa)** | **72** | **4.751.336** | |
+| **resto** | **72** | **4.751.336** | fonte, recursos, e 11 arquivos que não são nem um nem outro — decompostos abaixo |
 
-Fora da conta por não ser arquivo: o raspador de Sofifa/Transfermarkt/FMInside/
-PESMaster, que a §0 do plano já lista como não-objetivo, e as três cópias de
-`PlayerStatsSkills.dll` (11.776 B cada), que é binário de terceiro sem fonte.
+O resto por extensão, que é o que torna a linha auditável (mesma classificação
+disjunta, mesmo `ls-tree`):
+
+| ext | arquivos | bytes | |
+| --- | ---: | ---: | --- |
+| `vb` | 34 | 3.139.331 | fonte |
+| `resx` | 10 | 1.143.958 | recurso de formulário |
+| `xsd` | 1 | 210.021 | esquema do dataset |
+| `ico` | 2 | 127.964 | **arte** |
+| `jpg` | 6 | 67.512 | **arte** |
+| `dll` | 3 | 35.328 | **binário de terceiro** — os `PlayerStatsSkills.dll` |
+| demais (`vbproj`, `sln`, `settings`, `md`, `user`, `config`, `myapp`, `xsc`, `xss`) | 16 | 27.222 | projeto e configuração |
+| **total** | **72** | **4.751.336** | fecha com a linha acima |
+
+Fora da conta **por não ser arquivo**: o raspador de Sofifa/Transfermarkt/
+FMInside/PESMaster, que a §0 do plano já lista como não-objetivo — é
+comportamento espalhado pelos `.vb`, não um caminho a excluir.
+
+**Dentro** da conta, mas não portável: as três cópias de
+`PlayerStatsSkills.dll` (11.776 B cada, 35.328 B ao todo), binário de terceiro
+sem fonte, e os 8 arquivos de arte (`.ico` e `.jpg`, 195.476 B) que sobraram por
+não casarem com as extensões descontadas. Nenhum entra no port; ficam contados
+porque a tabela desconta por prefixo e extensão, e nenhuma das duas os alcança.
 
 **O `.gitignore` já cobre `work/`** (linha 48), e `git status --short` depois do
 clone não lista nada de `work/easy-mcr/`.

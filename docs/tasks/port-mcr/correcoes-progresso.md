@@ -18,7 +18,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-002](/docs/tasks/port-mcr/CORR-MCR-002.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | a verificação de Fase 0 do `perfil-mcr.md` pede um `grep` de escopo que não tem como sair vazio | Alta | [x] concluída | 2026-09-07 |
 | [CORR-MCR-003](/docs/tasks/port-mcr/CORR-MCR-003.md) | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | o link do `progresso.md` no `correcoes-progresso.template.md` aponta para o ciclo raso, contra a própria frase ao lado | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-004](/docs/tasks/port-mcr/CORR-MCR-004.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | o inventário atribui todo o cache do WebView2 a `bin/`/`obj/`, e 164 arquivos dele são a linha `packages/` | Alta | [x] concluída | 2026-09-07 |
-| [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [ ] pendente | — |
+| [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [x] concluída | 2026-09-07 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -31,7 +31,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-002 — pôr o escopo medido no `grep` de Fase 0 do `perfil-mcr.md`
 - [x] CORR-MCR-003 — levar o link do cabeçalho do `correcoes-progresso.template.md` para `<CICLO>/`
 - [x] CORR-MCR-004 — corrigir a atribuição do WebView2 e declarar a profundidade do prefixo na tabela do inventário
-- [ ] CORR-MCR-005 — separar o que está fora da conta do que está dentro dela e não é fonte
+- [x] CORR-MCR-005 — separar o que está fora da conta do que está dentro dela e não é fonte
 
 ---
 

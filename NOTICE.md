@@ -152,10 +152,13 @@ cache, Visual Studio caches, and art — none of it save data. Named
 specifically, because each is a thing someone might otherwise assume was
 omitted by accident: `lite/fifatomcr/BD.accdb` (his private Access database of
 appearances and faces, 2,543,616 B), the `.bmp` faces and `cancha.bmp` pitch
-art, `PlayerStatsSkills.dll`, the two copies of the
-`fifatomcr_TemporaryKey.pfx` signing key, and the `bin/`+`obj/` trees. Nor is
-his scraper of Sofifa, Transfermarkt, FMInside and PESMaster ported: it is not
-save data, and §0 of the plan lists it under non-objectives.
+art, the two copies of the `fifatomcr_TemporaryKey.pfx` signing key, and the
+`bin/`+`obj/` trees. Two kinds sit *inside* the remaining 72 files rather than
+among those 2,781, and are just as unportable: the three copies of
+`PlayerStatsSkills.dll` (11,776 B each), a third-party binary with no source,
+and 8 `.ico`/`.jpg` art files that no discounted prefix or extension reaches.
+Nor is his scraper of Sofifa, Transfermarkt, FMInside and PESMaster ported: it
+is not save data, and §0 of the plan lists it under non-objectives.
 
 If you are Zetaprog, and want this use licensed, relicensed, or taken down,
 please open an issue.

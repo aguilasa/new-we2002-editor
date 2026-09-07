@@ -3,7 +3,7 @@ id: CORR-MCR-005
 title: "Correção: os três `PlayerStatsSkills.dll` estão dentro do resto, não fora da conta"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -117,12 +117,36 @@ ser arquivo"): uma que de fato não é arquivo e outra que é, e que ficou conta
 - [ ] `python3 tools/check_tasks.py` verde e `ctest -R tasks` verde
 - [ ] `work/easy-mcr/` e `roms/` intocados
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A linha final perdeu a etiqueta "o fonte que importa" e passou a dizer o que de
+fato carrega, e logo abaixo dela entrou a **decomposição por extensão** — as 15
+extensões, fechando em 72 / 4.751.336 —, que é o que torna a linha auditável.
+A nota seguinte foi partida em duas naturezas: o raspador, que de fato **não é
+arquivo**; e o que está **dentro** da conta mas não é portável — as três cópias
+de `PlayerStatsSkills.dll` (35.328 B) e os 8 arquivos de arte `.ico`/`.jpg`
+(195.476 B), com a razão de ficarem contados (nenhum prefixo nem extensão
+descontada os alcança).
+
 **Problemas encontrados:**
 
+**Um ponto em que esta execução discorda da CORR.** Ela afirma que o
+`NOTICE.md` não erra. Erra, de forma mais sutil: a lista "Named specifically"
+está gramaticalmente presa à frase dos **2.781 excluídos**, e todos os outros
+itens dela — `BD.accdb`, os `.bmp`, os dois `.pfx`, as árvores `bin/`+`obj/` —
+estão mesmo lá. Só `PlayerStatsSkills.dll` não: ele é 3 dos 72. Sob o título da
+seção ("What does not enter this repository") a frase é defensável, mas deixá-la
+punha o arquivo público de linhagem em desacordo com a decomposição recém
+publicada. O `.dll` saiu daquela lista para uma oração própria, que diz que ele
+e os 8 de arte estão **dentro** dos 72 e são igualmente não portáveis.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/02-base-legal-e-linhagem.md` — rótulo da linha `resto`,
+  a decomposição por extensão, e a nota logo abaixo
+- `NOTICE.md` — a atribuição do `PlayerStatsSkills.dll` (discrepância revelada
+  pela varredura; a CORR o dava por correto)
