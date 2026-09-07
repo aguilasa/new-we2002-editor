@@ -21,6 +21,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [x] concluída | 2026-09-07 |
+| [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -36,6 +37,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-005 — separar o que está fora da conta do que está dentro dela e não é fonte
 - [x] CORR-MCR-006 — corrigir as duas referências do lado `wte/` e registrar o caminho cravado
 - [x] CORR-MCR-007 — traduzir o `card.py` para en-US e fechar a dívida da §3.5
+- [ ] CORR-MCR-008 — registrar o efeito do erro de import na tabela de controles e exigir o `attempt()` em volta do import no `selftest`
 
 ---
 
@@ -152,3 +154,24 @@ ciclo arquivado, o dele em
   `recusa()` casa **substring** da mensagem, então traduzir um lado só deixa o
   gate verde por acidente. Depois disso, tirar a "dívida aberta" da §3.5 e a
   exceção do `perfil-mcr.md`.
+
+### CORR-MCR-008
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/05-layout-e-cross-check.md`
+  (tabela dos seis controles) e `docs/tasks/port-mcr/10-selftest-cli-e-gate.md`
+  (o critério que falta)
+- **Sintoma:** nos dois controles que **tiram** um destino da tabela, o
+  `_required()` levanta `LayoutError` no **import** e o `--self-check` sai por
+  traceback — nenhuma das 29 asserções roda. O veredito é o certo e o Log o
+  registra, mas não diz que ali o harness não chegou a começar. Adiante isso
+  vira risco: se o `mcr_selftest` da MCR-TASK-10 — o gate **obrigatório** —
+  importar `layout` no escopo do módulo, uma tabela quebrada derruba a corrida
+  inteira em vez de virar uma falha nomeada.
+- **Como foi detectado:** os seis controles replantados na revisão da
+  MCR-TASK-05, dentro da árvore para o `--check` achar o `wte/re/mcr.md`. 6/6
+  vermelhos, `rc=1`; as contagens 3, 1, 1, 3 batem, e o 18º destino precisa ir
+  **no fim** da lista para dar 3.
+- **Fix:** dizer na tabela de controles o que acontece com o `--self-check` nas
+  linhas 1 e 3, e pôr na MCR-TASK-10 o critério de importar `layout` dentro do
+  `attempt()`. O `layout.py` não muda: falhar no import é o comportamento certo
+  para o módulo cuja razão de existir é a tabela.
