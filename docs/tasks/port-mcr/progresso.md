@@ -34,7 +34,7 @@ por princípio.
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | ⬜ pendente |
+| [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ⬜ Pendente | — | — |
 | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ⬜ Pendente | — | — |
 | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ⬜ Pendente | — | — |
