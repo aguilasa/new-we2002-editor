@@ -221,11 +221,18 @@ mesma fragilidade latente — não foram tocados por estarem fora do escopo dest
 task, e porque as imagens de `roms/` de fato existem nesta máquina.
 
 **2. A fixture é compartilhada com o ciclo `wte/`, e aquele lado sabe
-regerá-la.** `work/entrada.mcr` é apontada aqui por `WE2002_MCR_CARD` e lá por
-`WTE_MCR_ENTRADA` e `WTE_MCR_FIXTURE` (`wte/tools/test_dump_mcr.py:341`,
-`wte/tests/roteiros/golden-1{2,3}-*.txt`). Nenhum dos dois **escreve** nela,
-mas o cabeçalho da `golden-13-roundtrip` manda `cp work/saida.mcr
-work/entrada.mcr`, e o `golden_check.sh` produz esse `saida.mcr`. Trocado o
+regerá-la.** `work/entrada.mcr` é apontada aqui por `WE2002_MCR_CARD` e
+alcançada do lado `wte/` de três formas: por `WTE_MCR_FIXTURE`, lida em
+`wte/tools/test_dump_mcr.py:354`; por `WTE_MCR_ENTRADA`, definida nos
+`wte/tests/roteiros/golden-1{2,3}-*.txt`, repassada por
+`wte/tools/golden_run_laz.sh:94` e lida pelo app em
+`wte/src/impl/ep2002_mainform.FormShow.inc:146`; e — o que decide — por
+**caminho cravado**, em `wte/tools/test_dump_mcr.py:341`
+(`ENTRADA = M.ROOT / "work" / "entrada.mcr"`). Trocar variável não desvia o lado
+de lá, e é por isso que só o digest resolve a suspeita. Nenhuma das formas
+**escreve** nela, mas o cabeçalho da `golden-13-roundtrip` manda
+`cp work/saida.mcr work/entrada.mcr`, e o `golden_check.sh` produz esse
+`saida.mcr`. Trocado o
 cartão, os números que este ciclo mede — 23/23 dorsais, `[7,7,8,7,7]`, o cp932
 dos slots 0 e 20 — passam a ser sobre outro save, e a divergência pareceria bug
 do port.

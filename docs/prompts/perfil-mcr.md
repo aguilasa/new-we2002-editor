@@ -63,7 +63,10 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
    0x6113, 0x6131`. Aritmética no lugar da tabela grava no campo errado.
 9. **A fixture é compartilhada com o ciclo `wte/`, e aquele lado sabe
    regerá-la.** `work/entrada.mcr` é apontada aqui por `WE2002_MCR_CARD` e lá
-   por `WTE_MCR_ENTRADA`/`WTE_MCR_FIXTURE`; nenhum dos dois escreve nela, mas o
+   por `WTE_MCR_ENTRADA`/`WTE_MCR_FIXTURE` — e por **caminho cravado** em
+   `wte/tools/test_dump_mcr.py:341`, que é a razão de o digest ser a régua:
+   trocar variável não desvia o lado de lá. Nenhuma das formas escreve nela,
+   mas o
    cabeçalho da `golden-13-roundtrip` manda `cp work/saida.mcr
    work/entrada.mcr`, e o `golden_check.sh` produz esse `saida.mcr`. Trocado o
    cartão, os números medidos deste ciclo — 23/23 dorsais, `[7,7,8,7,7]`, o

@@ -3,7 +3,7 @@ id: CORR-MCR-006
 title: "Correção: a citação da fixture compartilhada aponta para a linha errada, e para um arquivo que não tem a variável"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -110,12 +110,48 @@ ganhar a oração do caminho cravado, que é a razão de o digest ser a régua.
 - [ ] nada em `wte/` foi modificado — é leitura pura aqui
 - [ ] `roms/` e `work/entrada.mcr` intocados
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+O `Problemas encontrados` §2 da MCR-TASK-03 passou a nomear as **três** formas
+de alcance, cada uma com a linha certa: `WTE_MCR_FIXTURE` em
+`wte/tools/test_dump_mcr.py:354`; `WTE_MCR_ENTRADA` definida nos roteiros,
+repassada por `wte/tools/golden_run_laz.sh:94` e lida pelo app em
+`wte/src/impl/ep2002_mainform.FormShow.inc:146`; e o **caminho cravado** da
+`test_dump_mcr.py:341`, que é o que torna o digest a única régua — trocar
+variável não desvia o lado de lá.
+
+A armadilha 9 do `perfil-mcr.md` ganhou a mesma oração do caminho cravado (a
+parte opcional da CORR). Ela é a razão de o digest existir, e sem ela a
+armadilha pede que se confira a variável errada.
+
 **Problemas encontrados:**
 
+**Uma linha da Evidência desta CORR é falsa, e não foi satisfeita.** Ela
+transcreve `git grep -n 'WTE_MCR_ENTRADA' -- wte/tools` como `(vazio)`, e o item
+correspondente da Verificação pede que continue vazio. Medido agora, devolve
+**quatro** acertos:
+
+```
+wte/tools/golden_run_laz.sh:81, 87, 94
+wte/tools/golden_suite.sh:298
+```
+
+A `golden_run_laz.sh:94` é justamente quem **repassa** a variável ao app. O
+núcleo do sintoma continua de pé — `WTE_MCR_ENTRADA` não está em
+`test_dump_mcr.py`, que era a atribuição errada —, mas a generalização "não
+está em `wte/tools`" não se sustenta. O texto novo diz o caminho completo da
+variável em vez de negar um diretório; a Evidência da CORR ficou como o revisor
+a escreveu, que é o registro do que ele mediu.
+
+O digest da fixture continua `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546`,
+o mesmo que o Log da task registra. Nada em `wte/` foi tocado.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md` — o `Problemas
+  encontrados` §2
+- `docs/prompts/perfil-mcr.md` — a armadilha 9 (a parte opcional da CORR)
