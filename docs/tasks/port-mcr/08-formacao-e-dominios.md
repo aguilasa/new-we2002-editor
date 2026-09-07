@@ -23,6 +23,16 @@ status: pendente
 - **O `0x6500` está em aberto** (§1.8): capitão pela nossa RE, sexto cobrador
   pelo upstream. Até a MCR-TASK-13 responder, o byte **passa intacto** e não
   aparece na UI.
+- **O upstream tem duas árvores, e o que esta task precisa está na menos
+  óbvia.** Medido na MCR-TASK-02: `work/easy-mcr/` traz `fifatomcr/` (.NET 8, a
+  do `<Copyright>` que o plano cita) e `lite/fifatomcr/` (.NET Framework
+  4.7.2), e **nenhuma é subconjunto da outra**. A tabela de cobradores
+  (`24911, 24896, 24866, 24851, 24881` = `0x614F, 0x6140, 0x6122, 0x6113,
+  0x6131`) e o `25856` = `0x6500` existem **só** em
+  `lite/fifatomcr/FrmFormation.vb`, que a árvore principal não tem — lá o
+  editor de formação está dobrado dentro do `Frmmcr.vb`, que guarda apenas
+  X/Y/papéis (`25256`, `25266`, `25557`). Ler só a árvore principal deixa esta
+  task sem os cinco cobradores e sem o byte em aberto.
 
 ---
 

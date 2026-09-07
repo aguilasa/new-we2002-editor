@@ -97,12 +97,75 @@ No file of his is redistributed here, and no game asset is.
 If you are Maximiliano Ducoli, or hold rights to `WECompress.cpp`, and want
 this use licensed, relicensed, or taken down, please open an issue.
 
+## Lineage of the `.mcr` editor port (the `tools/mcr/` tree)
+
+`tools/mcr/` is a fifth product in this repository: a Python port of
+**Easy MCR**, Zetaprog's VB.NET/WinForms editor for the Winning Eleven 2002
+save inside a PlayStation memory card. It edits a `.mcr`, never a CD image, and
+shares no build and no code with `newWe2002`, `wte/` or the PES2 tooling.
+
+| Author | Work | What was taken |
+|---|---|---|
+| **Zetaprog** | [Easy-Mcr-Winning-Eleven-2002-PS1](https://github.com/zetaprog/Easy-Mcr-Winning-Eleven-2002-PS1), SHA `30af1fe59cf96beee3b066f6cdfcb1b6f3df37cc`, five commits all dated 2026-05-27 | The semantics his sources add over our own reverse engineering: that `0x62A8`/`0x62B2`/`0x63D5` are X, Y and positional role of the ten outfield players; the label tables (hairstyles, positions, beards, boots, foot, the twenty roles, the formation presets); and the field names of the packed 12-byte attribute record. |
+
+**There is no license, and the decision to port it anyway is the repository
+owner's.** The upstream has no `LICENSE` file, no source header, `"license":
+null` in the GitHub API, and a bare `<Copyright>Copyright ©  2023</Copyright>`
+in `fifatomcr/fifatomcr.vbproj`. All rights reserved by default. The owner was
+told this in as many words on 2026-09-07 and chose to port literally; §2 of
+[`docs/PLAN-MCR-PY.md`](docs/PLAN-MCR-PY.md) records the decision and this
+section records its consequence. The repository's position does not change: it
+still has no `LICENSE`, for the reasons stated below.
+
+**Why the method here differs from the `wte/` tree — and it does.** Above, in
+the Lazarus section, transcribing decompiler output is refused *as a matter of
+method*: Obocaman shipped a binary and no source, so his editor is treated as
+something to **measure**, never to copy, and each of the 96 handlers got a
+written specification before a line of Pascal existed. Here there is source,
+and the owner decided to transcribe it. The two positions are not in conflict
+and neither supersedes the other — a future reader needs both reasons side by
+side so as not to conclude the rule quietly changed:
+
+- against Obocaman's `.exe` there was **nothing to copy** short of decompiler
+  output, which is a derivative work of a binary nobody licensed. Measuring was
+  the only honest route, and it was also the cheaper one, because a
+  specification is reviewable and decompiled C++ is not;
+- against Zetaprog's repository there **is** readable source, and the thing it
+  contributes is *semantics* — which byte means "role", what the twenty role
+  labels are called. Semantics cannot be measured out of our fixture: the
+  bytes are there either way, and only he says what they mean. Reimplementing
+  from a paraphrase would be the same act with a thinner paper trail.
+
+So the boundary is drawn per module instead of per project, and §3.4 of the
+plan makes every module state which side of it each of its facts came from:
+`card.py` and `layout.py` are ours, `attributes.py` is checked against
+`src/core/Player.cpp` and takes only names from him, and `formation.py` and
+`domains.py` are his labels, marked as third-party labels rather than
+measurements.
+
+**What does not enter this repository.** The VB sources are cloned to
+`work/easy-mcr/` (gitignored, the same arrangement `we-team-editor/` and
+`roms/` already have) at the SHA pinned above; only the port is versioned. Of
+the upstream's 2,853 files and 476,688,515 bytes, 2,781 files and 471,937,179
+bytes are build output, restored NuGet packages, an embedded WebView2 browser
+cache, Visual Studio caches, and art — none of it save data. Named
+specifically, because each is a thing someone might otherwise assume was
+omitted by accident: `lite/fifatomcr/BD.accdb` (his private Access database of
+appearances and faces, 2,543,616 B), the `.bmp` faces and `cancha.bmp` pitch
+art, `PlayerStatsSkills.dll`, the two copies of the
+`fifatomcr_TemporaryKey.pfx` signing key, and the `bin/`+`obj/` trees. Nor is
+his scraper of Sofifa, Transfermarkt, FMInside and PESMaster ported: it is not
+save data, and §0 of the plan lists it under non-objectives.
+
+If you are Zetaprog, and want this use licensed, relicensed, or taken down,
+please open an issue.
+
 ## Copyright and license status
 
 **This project has no license.**
 
-Neither Francesco Moriero, thyddralisk, nor Obocaman released their work under
-any license:
+Neither Francesco Moriero, thyddralisk, Obocaman, nor Zetaprog released their
+work under any license:
 
 - The 2002 `readme.txt` contains only a liability disclaimer — no grant of
   rights to copy, modify, or redistribute.
@@ -112,10 +175,13 @@ any license:
 - No source file contains a license header.
 - `we-team-editor.exe` ships with no license text of any kind, and no source.
   It is not in this repository for that reason.
+- Zetaprog's Easy MCR repository has no `LICENSE`, reports `"license": null`
+  through the GitHub API, and states only `<Copyright>Copyright ©  2023</Copyright>`
+  in its `.vbproj`. Its sources are not in this repository either.
 
 By default, that means the inherited code — and Obocaman's binary, which is
-studied but not inherited — is **all rights reserved** by its original
-authors. No permission has been granted to anyone, including the
+studied but not inherited, and Zetaprog's sources, which are read but not
+redistributed — is **all rights reserved** by its original authors. No permission has been granted to anyone, including the
 maintainer of this repository.
 
 Consequently, no `LICENSE` file is provided here. Adding one would claim

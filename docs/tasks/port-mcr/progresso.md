@@ -35,7 +35,7 @@ por princípio.
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
 | [MCR-TASK-01](/docs/tasks/port-mcr/01-ciclo-em-subpasta.md) | O ciclo em subpasta — o Passo 0 agnóstico nos prompts e wrappers | 0 | — | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ⬜ Pendente | — | — |
+| [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | Base legal, linhagem e o SHA fixado do upstream | 0 | 01 | ✅ Concluído | 2026-09-07 | ⬜ pendente |
 | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | A fixture nomeada, o venv e o binding Qt | 0 | 01 | ⬜ Pendente | — | — |
 | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | `card.py` — diretório, blocos, quadros, checksum e as recusas | 1 | 03 | ⬜ Pendente | — | — |
 | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | 04 | ⬜ Pendente | — | — |
@@ -84,7 +84,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 
 - [x] MCR-TASK-01 — o Passo 0 nos 5 prompts e nos 5 wrappers, sem citar o nome
       deste ciclo em nenhum deles
-- [ ] MCR-TASK-02 — linhagem no `NOTICE.md`, SHA fixado, inventário do upstream
+- [x] MCR-TASK-02 — linhagem no `NOTICE.md`, SHA fixado, inventário do upstream
 - [ ] MCR-TASK-03 — fixture nomeada, venv com PySide6, versões registradas
 
 ### Fase 1 — o núcleo

@@ -18,6 +18,11 @@ status: pendente
   não da UI. E deve ser, porque o veredito muda a tela da MCR-TASK-12.
 - O oráculo é o editor do Obocaman por `make wte` — Wine, prefix `win32`, no
   `:98`. Ele **não é oráculo de tudo**: é de três perguntas, e só.
+- **O lado do upstream da discordância mora em `lite/fifatomcr/FrmFormation.vb`,
+  e só ali.** Medido na MCR-TASK-02: o `25856` (= `0x6500`) não aparece em
+  nenhum arquivo da árvore principal `fifatomcr/`, que é a do `<Copyright>`
+  citado no plano. Ao citar o que "o upstream diz" sobre o sexto cobrador,
+  a referência é esse arquivo — a árvore principal não opina sobre o byte.
 
 ---
 
