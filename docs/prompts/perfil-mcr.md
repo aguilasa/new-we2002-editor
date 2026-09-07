@@ -127,8 +127,12 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
 
 ## Verificações específicas por fase
 
-- **Fase 0** — `grep -rn 'port-mcr' docs/prompts .claude` vazio; `/executar`
-  sem argumento escolhe a mesma task de antes; `pip freeze` do venv no Log.
+- **Fase 0** — `grep -rn 'port-mcr' docs/prompts/0*.md docs/prompts/geral.md
+  .claude/commands` vazio: o **rito** não conhece ciclo pelo nome. As duas
+  regras de `.claude/rules/` e este perfil **citam** `port-mcr`, e devem —
+  convenção sem caso concreto vira prosa, e elas já nomeiam `PES2` e `WTE` do
+  mesmo jeito. `/executar` sem argumento escolhe a mesma task de antes;
+  `pip freeze` do venv no Log.
 - **Fase 1** — todo módulo novo traz `self_check()` com **caso vermelho**; nenhum
   endereço fora de `layout.py`; round-trip nas duas formas.
 - **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2

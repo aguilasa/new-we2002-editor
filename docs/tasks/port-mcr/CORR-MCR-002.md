@@ -3,7 +3,7 @@ id: CORR-MCR-002
 title: "Correção: a verificação de Fase 0 do perfil pede um `grep` que não tem como sair vazio"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -97,12 +97,29 @@ escopo medido, dizendo por que ele é esse:
 - [ ] `python3 tools/check_tasks.py` verde e `ctest -R tasks` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A linha da Fase 0 de `docs/prompts/perfil-mcr.md` passou a levar o escopo que a
+MCR-TASK-01 mediu — `docs/prompts/0*.md docs/prompts/geral.md
+.claude/commands` — e a dizer por que ele é esse: o **rito** é que não conhece
+ciclo pelo nome; as duas regras de `.claude/rules/` e o próprio perfil citam
+`port-mcr` de propósito, como já citam `PES2` e `WTE`.
+
+Rodado como está escrito, o comando sai vazio (`rc=1`, sem linha). O escopo
+antigo continua devolvendo 11 acertos, e é isso que o tornava impossível de
+satisfazer.
+
 **Problemas encontrados:**
 
+Nenhum. A varredura do termo só devolve os dois sítios dentro do próprio
+`CORR-MCR-002.md`, que são a transcrição do sintoma; nenhum outro perfil traz
+verificação de Fase 0 por `grep`.
+
 **Arquivos criados/modificados:**
+
+- `docs/prompts/perfil-mcr.md` — a linha da Fase 0 de "Verificações específicas
+  por fase"
