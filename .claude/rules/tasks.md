@@ -26,7 +26,9 @@ frontmatter serve a quem automatiza, a prosa a quem lê.
 Os prompts de `docs/prompts/` — que os comandos de `.claude/commands/`
 carregam — **são agnósticos de projeto**. Eles sabem:
 
-1. ler `docs/tasks/progresso.md` e `docs/tasks/correcoes-progresso.md`;
+1. ler o `progresso.md` e o `correcoes-progresso.md` da **pasta do ciclo**
+   (`docs/tasks/`, ou a subpasta que o argumento nomear — ver
+   "O ciclo pode morar numa subpasta");
 2. abrir o markdown da task pelo **link na linha dela**;
 3. fazer o que a task pede, medindo contra o que o `fonte_de_verdade` dela
    apontar.
@@ -173,10 +175,11 @@ o `tools/check_tasks.py` varre `docs/tasks/` e cada subpasta que tenha um
 `progresso.md` próprio, e nunca cruza uma pasta com o progresso de outra. Mover
 as tasks sem mover o progresso junto quebraria as três convenções de uma vez.
 
-**Os prompts continuam apontando para `docs/tasks/progresso.md`** — o vivo, o
-que a próxima leva de tasks vai criar do template. Eles não conhecem o arquivo,
-e não devem: `concluidos/` é história, e prompt que aponta para história executa
-task já feita.
+**Os prompts nunca apontam para esta pasta.** Até 2026-09-07 eles cravavam
+`docs/tasks/progresso.md`, o vivo; desde então resolvem a **pasta do ciclo**
+no Passo 0 e trabalham com `<CICLO>`. Em nenhuma das duas formas
+`concluidos/` é alcançável — é história, e prompt que aponta para história
+executa task já feita.
 
 ## Conferência
 

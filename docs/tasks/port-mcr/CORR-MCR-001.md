@@ -3,7 +3,7 @@ id: CORR-MCR-001
 title: "Correção: `.claude/rules/tasks.md` ainda afirma que os prompts apontam para `docs/tasks/progresso.md`"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -97,12 +97,34 @@ mesmo arquivo de regra, que falavam do mesmo caminho.
 - [ ] a conferência de forma de link de `.claude/rules/links.md` sem sítio novo
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A linha 29 de `.claude/rules/tasks.md` deixou de cravar o caminho e passou a
+falar da **pasta do ciclo**, remetendo à seção "O ciclo pode morar numa
+subpasta" do mesmo arquivo. A linha 176 foi reescrita no espírito do
+`CLAUDE.md`: registra que os prompts cravavam `docs/tasks/progresso.md` até
+2026-09-07 e que desde então resolvem `<CICLO>` no Passo 0, e mantém a
+conclusão do parágrafo — `concluidos/` não é alcançável em nenhuma das duas
+formas.
+
+A varredura do termo puxou um sítio irmão que a CORR não previa:
+`docs/prompts/perfil-wte.md:15` dizia, em tempo presente, que o perfil em vigor
+é o que o `/docs/tasks/progresso.md` nomeia — singular e raso, falso desde que
+o ciclo vivo pode morar numa subpasta. Corrigido na mesma passagem, pela regra
+"discrepância achada no caminho".
+
 **Problemas encontrados:**
 
+O sítio irmão do `perfil-wte.md` acima. O restante dos 30 acertos do termo é
+legítimo: o ciclo de PES2 **é** o raso, e as tasks dele citam o próprio
+`progresso.md` com razão; as citações dentro dos `CORR-MCR-*` descrevem o
+sintoma.
+
 **Arquivos criados/modificados:**
+
+- `.claude/rules/tasks.md` — linhas 29 e 176
+- `docs/prompts/perfil-wte.md` — linha 15 (discrepância revelada pela varredura)

@@ -11,8 +11,9 @@ aqui.
 > [`docs/tasks/concluidos/`](/docs/tasks/concluidos/progresso.md) em
 > 2026-09-01. Este perfil continua no lugar porque o `wte/` pode ser reaberto,
 > e porque o que ele registra foi medido — não vale para o ciclo vivo, e não
-> deve ser lido como se valesse. O perfil em vigor é o que o
-> [`progresso.md`](/docs/tasks/progresso.md) nomear.
+> deve ser lido como se valesse. O perfil em vigor é o que o `progresso.md`
+> **da pasta do ciclo** nomear — `docs/tasks/`, ou a subpasta que o argumento
+> do comando resolver.
 
 ---
 
