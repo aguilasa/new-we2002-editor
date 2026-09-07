@@ -7,15 +7,15 @@ Você vai trabalhar no repositório localizado em:
 **Este prompt é agnóstico de ciclo.** Ele tem o rito; o que é do ciclo — as
 decisões confirmadas, as armadilhas, as fontes binárias, o que é gerado, os
 gates e os arquivos quentes — mora no **perfil**, e quem o nomeia é o campo
-`perfil:` do `docs/tasks/progresso.md`. **Leia o perfil antes de executar.**
+`perfil:` do `<CICLO>/progresso.md`. **Leia o perfil antes de executar.**
 
 A documentação de correções está em:
 
-`docs/tasks/`
+`<CICLO>/`
 
 O arquivo de progresso das correções está em:
 
-`docs/tasks/correcoes-progresso.md`
+`<CICLO>/correcoes-progresso.md`
 
 Os detalhes das correções estão nos arquivos `CORR-<PREFIXO>-*.md` no mesmo
 diretório. **`<PREFIXO>` é do ciclo, e quem o declara é a primeira seção do
@@ -44,6 +44,36 @@ mais.
 7. Atualize `correcoes-progresso.md` marcando `[x]`
 8. Preencha o **Log de Execução** no arquivo da correção
 9. **Pare.** Não leia nem execute a próxima correção
+
+---
+
+## Passo 0 — a pasta do ciclo
+
+Os arquivos de progresso podem estar em `docs/tasks/` (raso) ou numa
+**subpasta** dela. Resolva a pasta **antes de qualquer leitura**:
+
+1. Se o primeiro termo do argumento nomear uma subpasta de `docs/tasks/` que
+   contenha um `progresso.md`, a pasta do ciclo é essa.
+2. Senão, a pasta do ciclo é `docs/tasks/`.
+
+**Um argumento é nome de ciclo se, e só se, `docs/tasks/<arg>/progresso.md`
+existe** — confira com `ls`, nunca pelo formato do texto. Um ID de task, um ID
+de correção e um número não são pastas, e um nome de pasta só é ciclo enquanto
+a pasta existir. Argumento que não resolve para pasta continua sendo o que este
+prompt já dizia. Dois termos são `<ciclo> <item>`, nessa ordem. **Sem argumento
+nenhum, nada muda.**
+
+Daí em diante **`<CICLO>` é o caminho da pasta a partir da raiz do
+repositório** — `docs/tasks` ou `docs/tasks/<subpasta>` —, e todo caminho deste
+prompt sai dele: `<CICLO>/progresso.md`, `<CICLO>/correcoes-progresso.md`,
+`<CICLO>/<arquivo-da-task>.md`, `<CICLO>/CORR-<PREFIXO>-XXX.md`. Os links que
+você escrever nas tabelas são `/<CICLO>/<arquivo>.md` — `/docs/` mais o
+caminho, como sempre (`.claude/rules/links.md`).
+
+O campo `perfil:` e o prefixo dos IDs saem do `progresso.md` **da pasta
+resolvida**, nunca do de outra pasta. Duas pastas nunca se cruzam:
+`depends_on` não atravessa pasta, e o pool de correções é único **dentro** do
+ciclo.
 
 ---
 
@@ -93,8 +123,8 @@ repositório dizendo as duas coisas.
 Alvos prováveis de varredura, por serem os que repetem número e afirmação:
 
 - o **plano do ciclo** — o que a CORR citar, ou o que o perfil nomear
-- `docs/tasks/progresso.md`
-- `docs/tasks/<a task de origem>.md`
+- `<CICLO>/progresso.md`
+- `<CICLO>/<a task de origem>.md`
 - o **perfil do ciclo** (`docs/prompts/perfil-*.md`) e os registros técnicos que
   ele listar como arquivos quentes
 - `CLAUDE.md`
@@ -135,7 +165,7 @@ decisão do plano — não a resolva de afogadilho: abra a CORR nova, registre o
 mediu, e reporte.
 
 **Ao abrir CORR nova, releia o maior número do disco na hora de criar o
-arquivo** — `ls docs/tasks/CORR-*.md | tail -1` —, e não use o número que o
+arquivo** — `ls <CICLO>/CORR-*.md | tail -1` —, e não use o número que o
 inventário da fase 0 sugeria. Um `/revisar` pode ter criado CORRs entre uma
 coisa e outra, e o próximo livre muda sem aviso. Já custou duas vezes: a
 CORR-WTE-122/123 e a CORR-WTE-137, esta última com o arquivo de outra CORR
@@ -146,7 +176,7 @@ existia, e a substituição entra como modificação comum.
 
 ## O que o perfil do ciclo diz, e você tem de ler
 
-O `perfil:` do `docs/tasks/progresso.md` nomeia o arquivo. Dele vêm, para esta
+O `perfil:` do `<CICLO>/progresso.md` nomeia o arquivo. Dele vêm, para esta
 invocação:
 
 | Do perfil | Por que importa aqui |
@@ -243,7 +273,7 @@ Se concluída:
   correção (`git log -1 --date=short --pretty=%ad`), formato `AAAA-MM-DD`. É a
   mesma data do `Executado em` do Log — se divergirem, uma delas está errada
 - Conferir que a célula do ID é link para o markdown da correção
-  (`[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`, **sempre `/docs/` + caminho
+  (`[CORR-<PREFIXO>-XXX](/<CICLO>/CORR-<PREFIXO>-XXX.md)`, **sempre `/docs/` + caminho
   do arquivo**, como manda `.claude/rules/links.md`); se a linha
   veio sem link, ponha
 - Trocar `status: pendente` por `status: concluído` no **frontmatter do
@@ -266,7 +296,7 @@ Código e documentação da correção juntos, no mesmo commit:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-git add <arquivos específicos> docs/tasks/CORR-<PREFIXO>-XXX.md docs/tasks/correcoes-progresso.md
+git add <arquivos específicos> <CICLO>/CORR-<PREFIXO>-XXX.md <CICLO>/correcoes-progresso.md
 git commit -m "fix: <titulo curto no imperativo>"
 ```
 

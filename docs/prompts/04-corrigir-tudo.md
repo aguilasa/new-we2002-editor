@@ -5,17 +5,17 @@ Você vai trabalhar no repositório localizado em:
 - **Projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
 
 **Este prompt é agnóstico de ciclo.** Ele tem o rito; o que é do ciclo mora no
-**perfil**, nomeado pelo campo `perfil:` do `docs/tasks/progresso.md`. **Leia o
+**perfil**, nomeado pelo campo `perfil:` do `<CICLO>/progresso.md`. **Leia o
 perfil antes de executar** — dele vêm os gates, o que é gerado, o que é leitura
 pura e os arquivos quentes da matriz de conflito.
 
 A documentação de correções está em:
 
-`docs/tasks/`
+`<CICLO>/`
 
 O arquivo de progresso das correções está em:
 
-`docs/tasks/correcoes-progresso.md`
+`<CICLO>/correcoes-progresso.md`
 
 Os detalhes das correções estão nos arquivos `CORR-<PREFIXO>-*.md` no mesmo
 diretório. **`<PREFIXO>` é do ciclo, e quem o declara é a primeira seção do
@@ -50,6 +50,36 @@ palavra por palavra. Em dúvida sobre qualquer ponto não coberto aqui, o
 Se `$ARGUMENTS` trouxer IDs (`CORR-<PREFIXO>-013 CORR-<PREFIXO>-016`), o lote é **esse
 conjunto**, ainda em ordem de dependência. Se trouxer `--plano`, pare depois
 da fase 0 e entregue só o plano.
+
+---
+
+## Passo 0 — a pasta do ciclo
+
+Os arquivos de progresso podem estar em `docs/tasks/` (raso) ou numa
+**subpasta** dela. Resolva a pasta **antes de qualquer leitura**:
+
+1. Se o primeiro termo do argumento nomear uma subpasta de `docs/tasks/` que
+   contenha um `progresso.md`, a pasta do ciclo é essa.
+2. Senão, a pasta do ciclo é `docs/tasks/`.
+
+**Um argumento é nome de ciclo se, e só se, `docs/tasks/<arg>/progresso.md`
+existe** — confira com `ls`, nunca pelo formato do texto. Um ID de task, um ID
+de correção e um número não são pastas, e um nome de pasta só é ciclo enquanto
+a pasta existir. Argumento que não resolve para pasta continua sendo o que este
+prompt já dizia. Dois termos são `<ciclo> <item>`, nessa ordem. **Sem argumento
+nenhum, nada muda.**
+
+Daí em diante **`<CICLO>` é o caminho da pasta a partir da raiz do
+repositório** — `docs/tasks` ou `docs/tasks/<subpasta>` —, e todo caminho deste
+prompt sai dele: `<CICLO>/progresso.md`, `<CICLO>/correcoes-progresso.md`,
+`<CICLO>/<arquivo-da-task>.md`, `<CICLO>/CORR-<PREFIXO>-XXX.md`. Os links que
+você escrever nas tabelas são `/<CICLO>/<arquivo>.md` — `/docs/` mais o
+caminho, como sempre (`.claude/rules/links.md`).
+
+O campo `perfil:` e o prefixo dos IDs saem do `progresso.md` **da pasta
+resolvida**, nunca do de outra pasta. Duas pastas nunca se cruzam:
+`depends_on` não atravessa pasta, e o pool de correções é único **dentro** do
+ciclo.
 
 ---
 
@@ -105,7 +135,7 @@ correção de doc, de gerador e de código que não precisa de tela.
 A varredura de discrepância do `03-corrigir.md` pode puxar **qualquer** doc para
 dentro de uma correção — não dá para prever o conjunto final pela lista da CORR.
 Trate como conflito provável qualquer par que possa cair nos mesmos:
-`CLAUDE.md`, o plano que a CORR citar, `docs/tasks/progresso.md`,
+`CLAUDE.md`, o plano que a CORR citar, `<CICLO>/progresso.md`,
 `docs/prompts/*` (os perfis inclusive), `.claude/commands/*`, **mais os que o
 perfil do ciclo listar como quentes**.
 
@@ -148,7 +178,7 @@ Uma CORR fora do lote **não bloqueia** as outras, a menos que alguém dependa
 dela.
 
 **Achado que vira CORR nova: releia o maior número na hora de criar o arquivo.**
-`ls docs/tasks/CORR-*.md | tail -1`, não o número que a fase 0 leu. Num lote
+`ls <CICLO>/CORR-*.md | tail -1`, não o número que a fase 0 leu. Num lote
 longo a distância entre inventário e criação é de horas, e um `/revisar` no meio
 consome números. A CORR-WTE-137 foi criada duas vezes por isso, e a segunda
 **sobrescreveu o arquivo da primeira** — mesmo nome, e o `git status` mostra só

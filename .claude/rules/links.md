@@ -71,22 +71,42 @@ Forma do link:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rnoE '\]\([^)]*\.md[^)]*\)' --include='*.md' docs | grep -v '](/docs/'
+grep -rnoE '\]\([^)]*\.md[^)]*\)' --include='*.md' docs |
+  grep -v '](/docs/' | grep -v '](/<CICLO>/'
 ```
 
 Deve sobrar só alvo fora de `docs/` (`../NOTICE.md`, `../CLAUDE.md`,
 `../../wte/...`) e URL absoluta.
+
+**O `](/<CICLO>/…)` dos prompts é a mesma forma, com a pasta por resolver.**
+Desde 2026-09-07 os cinco prompts de `docs/prompts/` não cravam mais
+`docs/tasks/`: eles resolvem a pasta do ciclo no Passo 0 e escrevem
+`<CICLO>` no lugar dela. Um link de modelo lá — `/<CICLO>/XX-nome.md` — vira
+`/docs/tasks/XX-nome.md` num ciclo raso e `/docs/tasks/<subpasta>/XX-nome.md`
+num ciclo em subpasta. É placeholder, como os `<PREFIXO>`, e por isso sai da
+conferência de forma junto com eles.
 
 Destino existe (`docs/prompts/`, os `*.template.md` e o arquivo de
 `docs/tasks/concluidos/` ficam de fora — ver abaixo):
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-grep -rhoE '\]\(/docs/[^)#]*\)' --include='*.md' --exclude='*.template.md' \
-  docs/*.md docs/tasks/*.md |
-  sed 's#^](/##; s#)$##' | sort -u |
+for f in docs/*.md docs/tasks/*.md docs/tasks/*/*.md; do
+  case "$f" in docs/tasks/concluidos/*|*.template.md) continue;; esac
+  grep -hoE '\]\(/docs/[^)#]*\)' "$f"
+done | sed 's#^](/##; s#)$##' | sort -u |
   while read p; do [ -f "$p" ] || echo "QUEBRADO: $p"; done
 ```
+
+**Por que o laço em vez de um glob maior.** `docs/tasks/*/*.md` sozinho
+engoliria `docs/tasks/concluidos/`, que está fora **de propósito** (ver abaixo).
+O laço alcança **ciclo vivo em subpasta** — `docs/tasks/port-mcr/`, desde
+2026-09-07 — e continua excluindo o arquivo morto. E vale saber de antemão: o
+motivo da exclusão não é a pasta, é o **`CORR-*.md`**, que é cheio de
+transcrição de `grep` e de `git show` dentro de bloco de código. Quando os
+`CORR-*` de um ciclo vivo tiverem transcrição, a exclusão certa passa a ser por
+`CORR-*.md`, não por pasta — dizer isso agora custa uma frase, e descobrir
+depois custa um falso vermelho.
 
 Saída vazia é o esperado. Rode antes de commitar doc que ganhou link novo.
 

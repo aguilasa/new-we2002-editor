@@ -10,10 +10,17 @@ escrito nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**A pasta do ciclo vem do argumento.** Se a primeira palavra de `$ARGUMENTS`
+nomear uma subpasta de `docs/tasks/` que tenha `progresso.md` próprio, ela é a
+**pasta do ciclo**, e o resto do argumento segue sendo o que este comando já
+dizia. Sem isso, a pasta é `docs/tasks/` — o comportamento de sempre. Daí em
+diante `<CICLO>` é o caminho dela a partir da raiz, e todo caminho abaixo sai
+dele. A regra completa está no **Passo 0** do prompt.
+
 **Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
 projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
 os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
-o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+o campo `perfil:` do `<CICLO>/progresso.md` nomeia.
 
 `$ARGUMENTS` vazio significa "todas as `[ ]` de `correcoes-progresso.md`".
 Com IDs (`CORR-<PREFIXO>-013 CORR-<PREFIXO>-016`, com o prefixo que o
@@ -44,7 +51,7 @@ de dependência. Com `--plano`, entregue só o plano da fase 0 e pare.
    `correcoes-progresso.md`, e os recursos que o **perfil do ciclo** listar.
 
 5. **Doc quente presume conflito.** `CLAUDE.md`, o plano do ciclo,
-   `docs/tasks/progresso.md`, `docs/prompts/*` (os perfis inclusive),
+   `<CICLO>/progresso.md`, `docs/prompts/*` (os perfis inclusive),
    `.claude/commands/*`, mais os que o perfil listar — a varredura de
    discrepância puxa doc que a lista da CORR não previa. Estes wrappers entram
    na lista porque reafirmam o mesmo rito dos prompts com outras palavras.

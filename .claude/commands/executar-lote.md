@@ -10,10 +10,21 @@ escrito nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**A pasta do ciclo vem do argumento.** Se a primeira palavra de `$ARGUMENTS`
+nomear uma subpasta de `docs/tasks/` que tenha `progresso.md` próprio, ela é a
+**pasta do ciclo**, e o resto do argumento segue sendo o que este comando já
+dizia. Sem isso, a pasta é `docs/tasks/` — o comportamento de sempre. Daí em
+diante `<CICLO>` é o caminho dela a partir da raiz, e todo caminho abaixo sai
+dele. A regra completa está no **Passo 0** do prompt.
+
+No caso deste comando os três formatos convivem: `<ciclo> 3` é pasta e
+tamanho, `<ciclo>` sozinho é pasta com o tamanho padrão, e `3` sozinho é o
+ciclo raso com tamanho 3.
+
 **Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
 projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
 os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
-o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+o campo `perfil:` do `<CICLO>/progresso.md` nomeia.
 
 `$ARGUMENTS` vazio significa **2 tarefas**. Só dígitos (`3`) é o tamanho do
 lote. Com IDs (`<PREFIXO>-TASK-03 <PREFIXO>-TASK-05`, com o prefixo que o

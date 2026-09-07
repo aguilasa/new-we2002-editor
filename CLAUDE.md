@@ -685,6 +685,49 @@ essa data o projeto estava fora do pool *por escolha*, e o backlog era a §7 do
 histórico. O que sobrou de aberto lá é um item só, e não é código: instalar
 `numpy` e um desmontador MIPS, decisão do dono da máquina.
 
+## Port do editor de `.mcr` — projeto separado, em `tools/mcr/`
+
+Um **quinto projeto**, aberto em 2026-09-07: o port em Python do
+[`zetaprog/Easy-Mcr-Winning-Eleven-2002-PS1`](https://github.com/zetaprog/Easy-Mcr-Winning-Eleven-2002-PS1)
+(VB.NET/WinForms), que edita o save do WE2002 dentro de um **memory card**
+`.mcr` de 128 KiB — 23 jogadores, dorsais, formação, cobradores. Núcleo Python
+puro em `tools/mcr/`, UI **PySide6** em `tools/mcr/ui/`, separados por regra.
+
+O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
+[docs/tasks/port-mcr/](docs/tasks/port-mcr/progresso.md), com prefixo
+`MCR-TASK-` e pool `CORR-MCR-`, e roda por `/executar port-mcr`.
+
+**É cartão, não imagem de CD.** Não toca `roms/`, não estende o `we2002_core`, e
+não compartilha build com nada. O que empresta é conhecimento de formato — e
+aqui ele é forte:
+
+- **os 17 destinos já estão medidos** em [wte/re/mcr.md](wte/re/mcr.md), do
+  `we-team-editor.exe`, e os offsets do upstream batem com os nossos;
+- **o codec de 12 bytes já tem oráculo em casa**: `src/core/Player.cpp`
+  decodifica o mesmo blob campo por campo. A parte mais cara do port é um
+  cross-check, não uma descoberta.
+
+Quatro coisas que custam tempo se descobertas tarde:
+
+- **O Python desta máquina é duplo.** `python3` do `PATH` é o mise 3.13.13;
+  `/usr/bin/python3` é 3.12.3; o `build/CMakeCache.txt` fixou o mise. **`apt
+  install python3-pyqt6` instala para o 3.12 e fica invisível** — o apt termina
+  em verde e o `import` continua falhando. Por isso PySide6 num venv em
+  `work/venv-mcr/` (e LGPL, num repositório que não pode ser licenciado).
+- **O nome de 10 bytes é cp932, não ASCII.** O `KanjiToAscii` do `we2002_core`
+  devolve espaço para tudo que não seja par `0x82`, então usá-lo aqui apaga
+  nome japonês em silêncio. O upstream tem o mesmo defeito.
+- **Os bytes `0..137` do cartão são o quadro `MC` e o cabeçalho da entrada 1 do
+  diretório.** O upstream grava IDs de um banco privado ali; o port **recusa**
+  qualquer escrita abaixo de `0x800`.
+- **O upstream não tem licença**, e a decisão de portar literalmente é do dono
+  do repositório, com o aviso na mesa. O fonte VB **não entra no git** — clone
+  em `work/easy-mcr/`, SHA `30af1fe5` fixado. A linhagem e a diferença de
+  método para o ciclo `wte/` ficam em [NOTICE.md](NOTICE.md).
+
+O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
+**Cartão de jogo não se versiona**, mesma regra de `roms/`.
+
 ## Arquitetura
 
 ### Layout do repositório (pós-Fase 5)
@@ -999,6 +1042,17 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`
   (`../NOTICE.md`, `../CLAUDE.md`) continua relativo.
 
+**Um ciclo vivo também pode morar numa subpasta**, desde 2026-09-07, e o
+primeiro que mora é o `docs/tasks/port-mcr/`. Quem escolhe a pasta é o
+**argumento do comando** — `/executar port-mcr`, `/revisar port-mcr` —, e sem
+argumento tudo continua lendo `docs/tasks/` raso, que hoje é o ciclo de PES2. A
+regra é o **Passo 0**, idêntico nos cinco prompts; a convenção está em
+[.claude/rules/tasks.md](.claude/rules/tasks.md), seção "O ciclo pode morar numa
+subpasta". Três coisas que decorrem: nenhum prompt cita o nome de um ciclo
+(`grep -rn 'port-mcr' docs/prompts .claude` sai vazio); `depends_on` não
+atravessa pasta; e pasta com `correcoes-progresso.md` e sem `progresso.md` é
+recusada pelo `check_tasks.py`, porque seria invisível para a varredura.
+
 **Projeto encerrado é arquivado em `docs/tasks/concluidos/`.** Em 2026-09-01 as
 195 tasks, `CORR-*.md` e os dois arquivos de progresso do ciclo `WTE-TASK` +
 `PAR-TASK` desceram para lá, e `docs/tasks/` ficou só com
@@ -1008,9 +1062,11 @@ ciclo. Três coisas que decorrem disso, e que já custaram conserto na mudança:
 - **A pasta é um conjunto fechado.** Task e progresso viajam juntos, porque o
   `check_tasks.py` confere cada task contra o `progresso.md` que mora **ao lado
   dela** — ele varre `docs/tasks/` e cada subpasta que tenha progresso próprio.
-- **Os prompts continuam apontando para `docs/tasks/progresso.md`**, o vivo, que
-  a próxima leva cria do template. Prompt que aponta para o arquivo executa
-  task já feita.
+- **Os prompts nunca apontam para o arquivo.** Até 2026-09-07 eles cravavam
+  `docs/tasks/progresso.md`, o vivo; desde então resolvem a **pasta do ciclo**
+  no Passo 0 e trabalham com `<CICLO>`. O efeito é o mesmo — prompt que aponta
+  para história executa task já feita —, e agora vale também quando há mais de
+  um ciclo vivo.
 - **Os `CORR-*.md` são cheios de transcrição** — saída de `grep`, de `git show`,
   fonte de gerador — e ali `docs/tasks/…` dentro de **bloco de código ou entre
   crases** é **evidência do que um arquivo dizia**, não link. Reescrever é

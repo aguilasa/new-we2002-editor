@@ -3,8 +3,8 @@
 ```
 Execute o que está em `/home/ingmar/desenvolvimento/github/new-we2002-editor/docs/prompts/01-executar.md`,
 sempre releia o arquivo.
-Após atualize o arquivo /home/ingmar/desenvolvimento/github/new-we2002-editor/docs/tasks/progresso.md
-com o progresso da task, incluindo a data de conclusão na tabela de resumo.
+Após atualize o `progresso.md` da pasta do ciclo com o progresso da task,
+incluindo a data de conclusão na tabela de resumo.
 ```
 
 ```
@@ -26,6 +26,12 @@ sempre releia o arquivo
 Execute o que está em `/home/ingmar/desenvolvimento/github/new-we2002-editor/docs/prompts/05-executar-lote.md`,
 sempre releia o arquivo
 ```
+
+**Ciclo em subpasta.** Os cinco comandos aceitam, como primeira palavra do
+argumento, o nome de uma subpasta de `docs/tasks/` que tenha `progresso.md`
+próprio — é a **pasta do ciclo**, e todos os caminhos passam a sair dela
+(`/executar <subpasta>`, `/revisar <subpasta>`). Sem argumento, a pasta é
+`docs/tasks/`, como sempre. A regra está no **Passo 0** de cada prompt.
 
 **Dois pares, a mesma forma.** Em cada par o prompt em lote relaxa exatamente
 uma regra do singular — "uma por invocação" — e nenhuma outra:

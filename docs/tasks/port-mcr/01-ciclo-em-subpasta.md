@@ -6,7 +6,7 @@ category: processo
 phase: 0
 depends_on: []
 fonte_de_verdade: "/docs/tasks/port-mcr/01-ciclo-em-subpasta.md §Critério de conclusão"
-status: pendente
+status: concluído
 ---
 
 # MCR-TASK-01: O ciclo em subpasta
@@ -60,36 +60,40 @@ Entra logo depois do cabeçalho de cada prompt:
 
 ## Critério de conclusão
 
-- [ ] O Passo 0 nos cinco prompts de `docs/prompts/`, com o **mesmo texto**, e
+- [x] O Passo 0 nos cinco prompts de `docs/prompts/`, com o **mesmo texto**, e
       os literais `docs/tasks/…` do corpo resolvidos para `<CICLO>/…`.
-- [ ] **As citações datadas de ciclo fechado ficam intactas.** As linhas que
+- [x] **As citações datadas de ciclo fechado ficam intactas.** As linhas que
       citam `docs/tasks/concluidos/CORR-WTE-*` são evidência do que aconteceu;
       reindexá-las falsifica o registro, e `.claude/rules/tasks.md` diz isso em
       letras. `git diff` não pode tocá-las.
-- [ ] O parágrafo do argumento nos cinco wrappers de `.claude/commands/`, com o
+- [x] O parágrafo do argumento nos cinco wrappers de `.claude/commands/`, com o
       caso torto do `executar-lote` explicitado: `<ciclo> 3` é pasta + tamanho,
       `<ciclo>` sozinho é pasta + o padrão, `3` sozinho é raso + 3.
-- [ ] `docs/prompts/geral.md` sem o caminho absoluto cravado, e com o bloco do
+- [x] `docs/prompts/geral.md` sem o caminho absoluto cravado, e com o bloco do
       ciclo em subpasta.
-- [ ] Os dois `*.template.md` com o segmento de ciclo nos links de exemplo, e o
+- [x] Os dois `*.template.md` com o segmento de ciclo nos links de exemplo, e o
       `progresso.template.md` com a linha "**Pasta deste ciclo:**" e o campo
       `perfil:`, que hoje falta nele.
-- [ ] `.claude/rules/tasks.md` com a seção `## O ciclo pode morar numa subpasta`
+- [x] `.claude/rules/tasks.md` com a seção `## O ciclo pode morar numa subpasta`
       e as quatro afirmações: pasta é ciclo se tem `progresso.md`;
       `correcoes-progresso.md` sozinho **não** qualifica; link de dentro continua
       `/docs/` + caminho completo; `depends_on` não atravessa pasta.
-- [ ] `.claude/rules/links.md` com a conferência de existência alcançando a
+- [x] `.claude/rules/links.md` com a conferência de existência alcançando a
       subpasta e excluindo `docs/tasks/concluidos/` — e registrando que, quando
       os `CORR-MCR-*.md` tiverem transcrição de `grep`, a exclusão certa passa a
       ser por `CORR-*.md` e não por pasta.
-- [ ] `tools/check_tasks.py` recusando pasta que tem `correcoes-progresso.md` e
+- [x] `tools/check_tasks.py` recusando pasta que tem `correcoes-progresso.md` e
       **não** tem `progresso.md` — o buraco conhecido vira vermelho.
-- [ ] `CLAUDE.md` com o parágrafo do projeto novo e a nota de que ciclo **vivo**
+- [x] `CLAUDE.md` com o parágrafo do projeto novo e a nota de que ciclo **vivo**
       pode morar em subpasta (hoje o único enquadramento é `concluidos/`, que é
       história).
-- [ ] `grep -rn 'port-mcr' docs/prompts .claude` sai **vazio**.
-- [ ] `python3 tools/check_tasks.py` verde, e `ctest -R tasks` verde.
-- [ ] `/executar` sem argumento escolhe **a mesma** task de antes.
+- [x] `grep -rn 'port-mcr' docs/prompts/0*.md docs/prompts/geral.md .claude/commands`
+      sai **vazio** — o rito não conhece ciclo pelo nome. As duas regras de
+      `.claude/rules/` **podem** citá-lo como exemplo, e citam: elas já nomeiam
+      `PES2` e `WTE` do mesmo jeito, e o que descreve uma convenção precisa de
+      um caso concreto para não virar prosa.
+- [x] `python3 tools/check_tasks.py` verde, e `ctest -R tasks` verde.
+- [x] `/executar` sem argumento escolhe **a mesma** task de antes.
 
 ---
 
@@ -108,4 +112,68 @@ Entra logo depois do cabeçalho de cada prompt:
 
 ## Log de Execução
 
-*(a preencher)*
+**Executado em:** 2026-09-07
+
+## Resumo do que foi feito
+
+O rito deixou de conhecer a pasta. Os cinco prompts ganharam o **Passo 0** —
+texto idêntico nos cinco — e os literais do corpo viraram `<CICLO>/…`: 7 sítios
+no `01`, 11 no `02`, 9 no `03`, 5 no `04` e 5 no `05`. Os cinco wrappers de
+`.claude/commands/` ganharam o parágrafo do argumento antes da frase do
+`perfil:`, e o `executar-lote` ganhou os três formatos explicitados
+(`<ciclo> 3`, `<ciclo>`, `3`).
+
+**A varredura pulou toda linha que cita `concluidos`**, e o `git diff` prova:
+zero linhas com `concluidos` no diff dos prompts. São citação datada de ciclo
+fechado, e reindexá-las falsificaria o registro.
+
+Duas coisas saíram diferentes do previsto, as duas por medição:
+
+- **O `grep` de "nenhum prompt cita o ciclo" precisou de escopo.** As duas
+  regras de `.claude/rules/` **citam** `port-mcr` — e devem: elas já nomeiam
+  `PES2` e `WTE` do mesmo jeito, e convenção sem caso concreto vira prosa. O
+  critério passou a ser sobre `docs/prompts/0*.md`, `geral.md` e
+  `.claude/commands/`, que é onde a regra tem efeito. O `geral.md`, que é folha
+  de colar, usa `<subpasta>`.
+- **A conferência de *forma* de link de `.claude/rules/links.md` ficou vermelha**
+  com os modelos dos prompts: `](/<CICLO>/XX-nome.md)` não casa `](/docs/`. É
+  placeholder, como o `<PREFIXO>`, e entrou na exclusão junto com eles, com o
+  parágrafo que explica.
+
+O caso vermelho do `check_tasks.py` foi exercitado de verdade: uma pasta com
+`correcoes-progresso.md` e sem `progresso.md` faz o gate sair 1 dizendo
+`_teste_orfao/: tem correcoes-progresso.md e nao tem progresso.md`. Antes desta
+task esse caso passava calado — a pasta ficava invisível para a varredura.
+
+## Arquivos criados/modificados
+
+- `docs/prompts/01-executar.md` … `05-executar-lote.md` — o Passo 0 e os 37
+  sítios resolvidos.
+- `docs/prompts/geral.md` — sem o caminho absoluto do progresso; com o bloco do
+  ciclo em subpasta.
+- `.claude/commands/{executar,revisar,corrigir,corrigir-tudo,executar-lote}.md`
+  — o parágrafo do argumento e os caminhos por `<CICLO>`.
+- `docs/tasks/progresso.template.md` — "Pasta deste ciclo", o campo `perfil:`
+  (que faltava) e o prefixo declarado; links de exemplo com `<CICLO>/`.
+- `docs/tasks/correcoes-progresso.template.md` — idem, e o `progresso.md` do
+  link é o **ao lado deste arquivo**.
+- `.claude/rules/tasks.md` — a seção `## O ciclo pode morar numa subpasta`.
+- `.claude/rules/links.md` — a conferência de existência alcança subpasta viva e
+  exclui `concluidos/`; a de forma aceita `/<CICLO>/`.
+- `tools/check_tasks.py` — a quinta conferência, com o caso vermelho.
+- `CLAUDE.md` — o parágrafo do ciclo vivo em subpasta, e o bullet que dizia "os
+  prompts continuam apontando para `docs/tasks/progresso.md`", que envelheceu
+  nesta data.
+
+## Verificação
+
+| item | resultado |
+|---|---|
+| `grep -rn 'port-mcr' docs/prompts/0*.md docs/prompts/geral.md .claude/commands` | vazio |
+| `git diff docs/prompts \| grep -c concluidos` | **0** |
+| conferência de forma de link | só o arquivo histórico, que já era assim |
+| conferência de existência de link | vazia |
+| `python3 tools/check_tasks.py` | `100 task(s), ok` |
+| `ctest -R tasks` | 1/1 passed |
+| caso vermelho do gate | sai 1, com a pasta nomeada |
+| `/executar` sem argumento | `<CICLO>` = `docs/tasks`, e a seleção é a mesma de antes — a `PES2-TASK-03`, que está `🔄 Em andamento` |

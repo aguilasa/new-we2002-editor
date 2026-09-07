@@ -10,10 +10,17 @@ nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**A pasta do ciclo vem do argumento.** Se a primeira palavra de `$ARGUMENTS`
+nomear uma subpasta de `docs/tasks/` que tenha `progresso.md` próprio, ela é a
+**pasta do ciclo**, e o resto do argumento segue sendo o que este comando já
+dizia. Sem isso, a pasta é `docs/tasks/` — o comportamento de sempre. Daí em
+diante `<CICLO>` é o caminho dela a partir da raiz, e todo caminho abaixo sai
+dele. A regra completa está no **Passo 0** do prompt.
+
 **Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
 projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
 os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
-o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+o campo `perfil:` do `<CICLO>/progresso.md` nomeia.
 
 Se `$ARGUMENTS` estiver preenchido, trate como pedido de tarefa específica
 (ex.: `PES2-TASK-04`, com o prefixo que o `progresso.md` declarar) e confira
@@ -29,13 +36,13 @@ precedentes do ciclo estão no perfil. Argumento vazio significa "a próxima pen
    ficam prontas ao mesmo tempo — as 03 a 07 só dependem da 02 —, executa-se a
    de menor ID.
 
-2. **Ao final, `docs/tasks/progresso.md` fica atualizado** com o progresso da
+2. **Ao final, `<CICLO>/progresso.md` fica atualizado** com o progresso da
    tarefa:
    - tabela de resumo E checklist da fase trocados de `⬜ Pendente` para
      `✅ Concluído`
    - coluna **"Concluída em"** da tabela de resumo com a data do commit
      (`AAAA-MM-DD`), e a célula do ID como link para o markdown da tarefa
-     (`[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome.md)` — sempre `/docs/` + caminho do
+     (`[<PREFIXO>-TASK-XX](/<CICLO>/XX-nome.md)` — sempre `/docs/` + caminho do
      arquivo, ver `.claude/rules/links.md`)
    - coluna **"Revisado em"** de `—` para `⬜ pendente`, que é o marcador pelo
      qual o `/revisar` escolhe a próxima. A data ali é do `/revisar`, nunca
@@ -44,7 +51,7 @@ precedentes do ciclo estão no perfil. Argumento vazio significa "a próxima pen
      tarefa**. Ele duplica a coluna Status da tabela; as 40 tasks nascem
      `pendente` e o campo é fácil de esquecer, porque nenhum consumidor o lê
      ainda — foi assim que a WTE-TASK-01 fechou afirmando o contrário do índice
-   - o **Log de Execução** preenchido no markdown da tarefa em `docs/tasks/`:
+   - o **Log de Execução** preenchido no markdown da tarefa em `<CICLO>/`:
      data, resumo do que se aprendeu, arquivos tocados, problemas encontrados.
      A lista de arquivos se confere contra `git show --stat --format= HEAD`,
      não contra a memória — ela já ficou devendo um item quatro vezes, sempre o

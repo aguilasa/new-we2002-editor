@@ -3,7 +3,7 @@
 Você vai trabalhar no repositório localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
-- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+- **Arquivo de progresso:** `<CICLO>/progresso.md`. **O prefixo dos IDs de
   task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
   antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
   o deduza do que este prompt escreve como exemplo nem de citação a task
@@ -12,7 +12,7 @@ Você vai trabalhar no repositório localizado em:
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
   nome, e não deve passar a conhecer — ver "A fonte de verdade mora na task"
   abaixo.
-- **Tarefas detalhadas:** `docs/tasks/`
+- **Tarefas detalhadas:** `<CICLO>/`
 - **Regras do repositório:** `CLAUDE.md` — leia antes de tocar em qualquer coisa
 
 - **Perfil do ciclo:** o que o campo `perfil:` do `progresso.md` nomear.
@@ -22,11 +22,41 @@ Você vai trabalhar no repositório localizado em:
 
 ---
 
+## Passo 0 — a pasta do ciclo
+
+Os arquivos de progresso podem estar em `docs/tasks/` (raso) ou numa
+**subpasta** dela. Resolva a pasta **antes de qualquer leitura**:
+
+1. Se o primeiro termo do argumento nomear uma subpasta de `docs/tasks/` que
+   contenha um `progresso.md`, a pasta do ciclo é essa.
+2. Senão, a pasta do ciclo é `docs/tasks/`.
+
+**Um argumento é nome de ciclo se, e só se, `docs/tasks/<arg>/progresso.md`
+existe** — confira com `ls`, nunca pelo formato do texto. Um ID de task, um ID
+de correção e um número não são pastas, e um nome de pasta só é ciclo enquanto
+a pasta existir. Argumento que não resolve para pasta continua sendo o que este
+prompt já dizia. Dois termos são `<ciclo> <item>`, nessa ordem. **Sem argumento
+nenhum, nada muda.**
+
+Daí em diante **`<CICLO>` é o caminho da pasta a partir da raiz do
+repositório** — `docs/tasks` ou `docs/tasks/<subpasta>` —, e todo caminho deste
+prompt sai dele: `<CICLO>/progresso.md`, `<CICLO>/correcoes-progresso.md`,
+`<CICLO>/<arquivo-da-task>.md`, `<CICLO>/CORR-<PREFIXO>-XXX.md`. Os links que
+você escrever nas tabelas são `/<CICLO>/<arquivo>.md` — `/docs/` mais o
+caminho, como sempre (`.claude/rules/links.md`).
+
+O campo `perfil:` e o prefixo dos IDs saem do `progresso.md` **da pasta
+resolvida**, nunca do de outra pasta. Duas pastas nunca se cruzam:
+`depends_on` não atravessa pasta, e o pool de correções é único **dentro** do
+ciclo.
+
+---
+
 ## Objetivo
 
 Quero que você:
 
-1. Leia `docs/tasks/progresso.md`
+1. Leia `<CICLO>/progresso.md`
 2. Identifique a **próxima tarefa não executada**, respeitando a ordem:
    - Fase 0 (infra) antes da 1 (extração estática), antes da 2 (casca), antes da
      3 (dados), antes da 4 (comportamento), antes da 5 (features), antes da 6
@@ -34,7 +64,7 @@ Quero que você:
    - Dentro da fase, seguir a ordem numérica (01, 02, …)
    - Verificar se as dependências declaradas em `depends_on` já estão
      concluídas — ver o grafo em `progresso.md`
-3. Abra o markdown detalhado da tarefa em `docs/tasks/` — ver mapeamento abaixo
+3. Abra o markdown detalhado da tarefa em `<CICLO>/` — ver mapeamento abaixo
 4. Leia o que o campo `fonte_de_verdade` do frontmatter apontar, e os demais
    docs que a task citar na seção "Contexto"
 5. Execute a tarefa
@@ -205,7 +235,7 @@ registro.
 
 ### 1) Ler contexto
 
-- Ler `docs/tasks/progresso.md`
+- Ler `<CICLO>/progresso.md`
 - Ler o markdown da tarefa — o link está na linha dela, na tabela do progresso
 - Ler o que o campo `fonte_de_verdade` do frontmatter apontar, e os demais docs
   que a task citar na seção "Contexto"
@@ -259,7 +289,7 @@ Se concluída:
   de commit, não data de hoje — quem lê o histórico depois cruza a tabela com o
   `git log`
 - Conferir que a célula do ID é **link para o markdown da tarefa**, no formato
-  `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)` — **sempre no formato
+  `[<PREFIXO>-TASK-XX](/<CICLO>/XX-nome-do-arquivo.md)` — **sempre no formato
   `/docs/` + caminho do arquivo**, nunca relativo, como manda
   `.claude/rules/links.md`. Linha de tabela sem link é defeito,
   mesmo em linha pendente
@@ -342,7 +372,7 @@ Commitar artefatos e documentação **juntos, no mesmo commit**.
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-git add <arquivos específicos> docs/tasks/progresso.md docs/tasks/<arquivo-da-task>.md
+git add <arquivos específicos> <CICLO>/progresso.md <CICLO>/<arquivo-da-task>.md
 git commit -F - <<'MSG'
 docs: <titulo imperativo curto>
 

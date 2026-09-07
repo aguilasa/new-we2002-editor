@@ -129,6 +129,37 @@ de PES2. Os prompts escrevem os dois como `<PREFIXO>-TASK-XX` e
 morto não exclui coisa nenhuma** — as três "nunca execute … por aqui"
 passaram um ciclo inteiro sem alcançar task alguma.
 
+## O ciclo pode morar numa subpasta
+
+**Uma pasta é ciclo se, e só se, tem `progresso.md` próprio.** Vale para
+`docs/tasks/` e para qualquer subpasta dela; é exatamente o que o
+`pastas_com_progresso()` do `tools/check_tasks.py` implementa, e é a mesma
+regra que faz `docs/tasks/concluidos/` ser conferida contra o progresso dela e
+não contra o de outra.
+
+**Os comandos recebem a pasta por argumento.** `/executar port-mcr` resolve o
+ciclo para `docs/tasks/port-mcr/`; sem argumento, a pasta é `docs/tasks/`, e
+nada muda. A resolução é por `ls`, nunca pelo formato do texto: um ID de task,
+um ID de correção e um número não são pastas. A regra completa é o **Passo 0**,
+idêntico nos cinco prompts de `docs/prompts/`.
+
+Quatro consequências, e a razão de cada uma:
+
+1. **Nenhum prompt cita o nome de um ciclo.** Ele resolve o argumento contra o
+   disco e trabalha com `<CICLO>`. Prompt que conhece uma pasta pelo nome
+   quebra na próxima — é a mesma proibição do plano e do prefixo, um nível
+   acima.
+2. **`correcoes-progresso.md` sozinho não qualifica pasta**, e uma pasta assim
+   fica **invisível** para a varredura. Desde 2026-09-07 o `check_tasks.py`
+   recusa esse caso em vez de ignorá-lo.
+3. **Link de dentro da subpasta continua `/docs/` + caminho completo** —
+   `/docs/tasks/port-mcr/04-conteiner-do-cartao.md`. É a marca que o
+   `check_tasks.py` procura para ligar task e progresso.
+4. **`depends_on` não atravessa pasta, e não deve passar a atravessar.** A
+   pasta é um conjunto fechado; é isso que faz a convenção continuar valendo
+   quando o projeto desce para `concluidos/`. Task que precisa de outra pasta é
+   sinal de que os dois ciclos são um só.
+
 ## Projeto encerrado vai para `docs/tasks/concluidos/`
 
 Quando um projeto fecha, **tudo dele desce um nível**: as tasks, as `CORR-*.md`

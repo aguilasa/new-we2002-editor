@@ -10,10 +10,17 @@ nele.
 comando e muda com o projeto — não trabalhe de memória nem do que ficou no
 contexto de uma execução anterior.
 
+**A pasta do ciclo vem do argumento.** Se a primeira palavra de `$ARGUMENTS`
+nomear uma subpasta de `docs/tasks/` que tenha `progresso.md` próprio, ela é a
+**pasta do ciclo**, e o resto do argumento segue sendo o que este comando já
+dizia. Sem isso, a pasta é `docs/tasks/` — o comportamento de sempre. Daí em
+diante `<CICLO>` é o caminho dela a partir da raiz, e todo caminho abaixo sai
+dele. A regra completa está no **Passo 0** do prompt.
+
 **Leia também o perfil do ciclo.** O prompt tem o rito e é agnóstico de
 projeto; o que é do ciclo — decisões confirmadas, armadilhas, o que é gerado,
 os gates, os arquivos quentes e as verificações por fase — mora no arquivo que
-o campo `perfil:` do `docs/tasks/progresso.md` nomeia.
+o campo `perfil:` do `<CICLO>/progresso.md` nomeia.
 
 Se `$ARGUMENTS` estiver preenchido, trate como a tarefa a revisar (ex.:
 `PES2-TASK-04`, com o prefixo que o `progresso.md` declarar). Argumento vazio
@@ -44,10 +51,10 @@ significa "a última `✅ Concluído` do
    19 de 69 offsets, 70 strings com padding, 197 bitmaps. Se a task afirma
    algum, remede com a ferramenta versionada.
 
-5. **Saída em `docs/tasks/`:** um `CORR-<PREFIXO>-XXX.md` por discrepância, no
+5. **Saída em `<CICLO>/`:** um `CORR-<PREFIXO>-XXX.md` por discrepância, no
    formato do prompt, mais `correcoes-progresso.md` atualizado sem alterar as
    entradas anteriores. Linha nova na tabela nasce com o ID **linkado**
-   (`[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`, sempre `/docs/` + caminho do
+   (`[CORR-<PREFIXO>-XXX](/<CICLO>/CORR-<PREFIXO>-XXX.md)`, sempre `/docs/` + caminho do
    arquivo — ver `.claude/rules/links.md`), a coluna **"ID Task
    Origem"** com a tarefa revisada, também linkada, e a "Concluída em" em `—` —
    quem preenche a data é quem executa a correção. Sem discrepância, diga isso

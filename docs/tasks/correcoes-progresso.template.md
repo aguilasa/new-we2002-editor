@@ -2,7 +2,8 @@
 
 Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](/docs/prompts/02-revisar.md))
 e fechadas pelo `/corrigir`. O andamento das **tarefas** fica em
-[`progresso.md`](/docs/tasks/progresso.md); este arquivo só rastreia correção.
+[`progresso.md`](/docs/tasks/progresso.md) — o que mora **ao lado deste
+arquivo**, na mesma pasta; este arquivo só rastreia correção.
 
 **"Concluída em" nasce `—`** e é preenchida por quem executa a correção, com a
 data do commit — o `/revisar` abre a correção, não a fecha.
@@ -20,12 +21,17 @@ execução, e o Log dela traz as medidas que mostram isso. `[x]` ali quer dizer
 "fechada e fora do backlog", não "corrigida".
 -->
 
+<!-- `<CICLO>/` nos links some quando o ciclo e raso, e vira o nome da
+     subpasta quando ele mora numa. O prefixo deste pool e declarado aqui,
+     na primeira secao: quem abre uma correcao le ele deste arquivo, nunca
+     do prefixo das tasks nem do que um prompt escreveu. -->
+
 ## Resumo executivo
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-<PREFIXO>-001](/docs/tasks/CORR-<PREFIXO>-001.md) | [<PREFIXO>-TASK-01](/docs/tasks/01-<nome-do-arquivo>.md) | <o problema em uma frase, não o fix> | Alta | [ ] pendente | — |
-| [CORR-<PREFIXO>-002](/docs/tasks/CORR-<PREFIXO>-002.md) | [<PREFIXO>-TASK-01](/docs/tasks/01-<nome-do-arquivo>.md) | <o problema em uma frase, não o fix> | Baixa | [ ] pendente | — |
+| [CORR-<PREFIXO>-001](/docs/tasks/<CICLO>/CORR-<PREFIXO>-001.md) | [<PREFIXO>-TASK-01](/docs/tasks/<CICLO>/01-<nome-do-arquivo>.md) | <o problema em uma frase, não o fix> | Alta | [ ] pendente | — |
+| [CORR-<PREFIXO>-002](/docs/tasks/<CICLO>/CORR-<PREFIXO>-002.md) | [<PREFIXO>-TASK-01](/docs/tasks/<CICLO>/01-<nome-do-arquivo>.md) | <o problema em uma frase, não o fix> | Baixa | [ ] pendente | — |
 
 <!-- Criticidade: Alta · Média · Baixa.
      Status: `[ ] pendente` · `[x] concluída` · `[x] envelhecida`.

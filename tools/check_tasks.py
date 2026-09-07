@@ -17,6 +17,10 @@ Quatro coisas, e a razao de cada uma esta na regra:
    o arquivo, desde que o mapeamento `ID -> arquivo` saiu dos prompts;
 4. `depends_on` so cita IDs que existem.
 
+E uma quinta, que nao e sobre task: pasta de `docs/tasks/` que tenha
+`correcoes-progresso.md` e nao tenha `progresso.md` e recusada -- ela seria
+invisivel para a varredura, e um ciclo inteiro ficaria sem gate.
+
 Sai com 1 e imprime o que falhou. Sem argumento, confere tudo.
 """
 from __future__ import annotations
@@ -75,6 +79,14 @@ def main() -> int:
     total = 0
     for pasta in pastas:
         total += confere(pasta, erros)
+
+    # Pasta com correcoes e sem progresso e invisivel para a varredura acima --
+    # `pastas_com_progresso()` so olha o `progresso.md`. Antes de 2026-09-07 esse
+    # caso passava calado; um ciclo em subpasta que esquecesse o progresso teria
+    # as tasks e as CORRs sem gate nenhum.
+    for d in sorted(x for x in TASKS.iterdir() if x.is_dir()):
+        if (d / "correcoes-progresso.md").is_file() and not (d / "progresso.md").is_file():
+            erros.append(f"{d.name}/: tem correcoes-progresso.md e nao tem progresso.md")
 
     if erros:
         print(f"check_tasks: {len(erros)} problema(s) em {total} task(s):", file=sys.stderr)

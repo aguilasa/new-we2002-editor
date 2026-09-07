@@ -4,6 +4,18 @@ Rastreamento das tasks de [`../<PLANO>.md`](/docs/<PLANO>.md), que é a fonte de
 verdade do projeto. Este arquivo registra **andamento**; o plano registra
 **objetivo e critério**. Divergência entre os dois se resolve a favor do plano.
 
+**Pasta deste ciclo:** `docs/tasks/` — ou `docs/tasks/<subpasta>/`, se o ciclo
+morar numa subpasta. Todos os caminhos deste arquivo e das tasks ao lado dele
+saem daqui, e é o nome da subpasta que os comandos recebem como argumento
+(`/executar <subpasta>`). Sem argumento, os comandos leem `docs/tasks/` raso.
+
+**Perfil deste ciclo:** [`/docs/prompts/perfil-<ciclo>.md`](/docs/prompts/perfil-<ciclo>.md).
+O prompt tem o **rito** e é agnóstico de projeto; o que é deste ciclo mora no
+perfil, e é este campo que o nomeia.
+
+**Prefixo dos IDs:** `<PREFIXO>-TASK-`. O pool de correções é
+`CORR-<PREFIXO>-`, declarado no `correcoes-progresso.md` ao lado deste arquivo.
+
 <!-- Se o projeto for separado de outro do mesmo repositório, diga aqui o que
      compartilha e o que não compartilha (build, código, conhecimento de
      formato) -- é o que impede alguém de assumir dependência que não existe. -->
@@ -19,8 +31,13 @@ verdade do projeto. Este arquivo registra **andamento**; o plano registra
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [<PREFIXO>-TASK-01](/docs/tasks/01-<nome-do-arquivo>.md) | <o que a task entrega> | 0 | — | ⬜ Pendente | — | — |
-| [<PREFIXO>-TASK-02](/docs/tasks/02-<nome-do-arquivo>.md) | <o que a task entrega> | 0 | 01 | ⬜ Pendente | — | — |
+| [<PREFIXO>-TASK-01](/docs/tasks/<CICLO>/01-<nome-do-arquivo>.md) | <o que a task entrega> | 0 | — | ⬜ Pendente | — | — |
+| [<PREFIXO>-TASK-02](/docs/tasks/<CICLO>/02-<nome-do-arquivo>.md) | <o que a task entrega> | 0 | 01 | ⬜ Pendente | — | — |
+
+<!-- Nos links acima, `<CICLO>/` some quando o ciclo e raso: o link vira
+     `/docs/tasks/01-<nome-do-arquivo>.md`. Com subpasta ele fica
+     `/docs/tasks/<subpasta>/01-<nome-do-arquivo>.md` -- e o
+     `tools/check_tasks.py` confere exatamente essa forma. -->
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 

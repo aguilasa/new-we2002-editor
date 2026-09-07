@@ -6,16 +6,46 @@ Você vai trabalhar no projeto **WE2002 Team Editor → Lazarus**, localizado em
 - **Fonte de verdade:** **a que a própria task declarar** no campo
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
   nome — a task em mãos é quem diz contra o que ela se mede.
-- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+- **Arquivo de progresso:** `<CICLO>/progresso.md`. **O prefixo dos IDs de
   task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
   antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
   o deduza do que este prompt escreve como exemplo nem de citação a task
   antiga.
 - **Regras do repositório:** `CLAUDE.md`
-- **Correções existentes:** `docs/tasks/CORR-*.md`. **O prefixo é do ciclo, e
+- **Correções existentes:** `<CICLO>/CORR-*.md`. **O prefixo é do ciclo, e
   quem o declara é a primeira seção do `correcoes-progresso.md`** — hoje
   `PES2`, antes `WTE`. Leia-o ali; não o deduza do prefixo das tasks nem do
   que este prompt escreve como exemplo. Abaixo ele aparece como `<PREFIXO>`
+
+---
+
+## Passo 0 — a pasta do ciclo
+
+Os arquivos de progresso podem estar em `docs/tasks/` (raso) ou numa
+**subpasta** dela. Resolva a pasta **antes de qualquer leitura**:
+
+1. Se o primeiro termo do argumento nomear uma subpasta de `docs/tasks/` que
+   contenha um `progresso.md`, a pasta do ciclo é essa.
+2. Senão, a pasta do ciclo é `docs/tasks/`.
+
+**Um argumento é nome de ciclo se, e só se, `docs/tasks/<arg>/progresso.md`
+existe** — confira com `ls`, nunca pelo formato do texto. Um ID de task, um ID
+de correção e um número não são pastas, e um nome de pasta só é ciclo enquanto
+a pasta existir. Argumento que não resolve para pasta continua sendo o que este
+prompt já dizia. Dois termos são `<ciclo> <item>`, nessa ordem. **Sem argumento
+nenhum, nada muda.**
+
+Daí em diante **`<CICLO>` é o caminho da pasta a partir da raiz do
+repositório** — `docs/tasks` ou `docs/tasks/<subpasta>` —, e todo caminho deste
+prompt sai dele: `<CICLO>/progresso.md`, `<CICLO>/correcoes-progresso.md`,
+`<CICLO>/<arquivo-da-task>.md`, `<CICLO>/CORR-<PREFIXO>-XXX.md`. Os links que
+você escrever nas tabelas são `/<CICLO>/<arquivo>.md` — `/docs/` mais o
+caminho, como sempre (`.claude/rules/links.md`).
+
+O campo `perfil:` e o prefixo dos IDs saem do `progresso.md` **da pasta
+resolvida**, nunca do de outra pasta. Duas pastas nunca se cruzam:
+`depends_on` não atravessa pasta, e o pool de correções é único **dentro** do
+ciclo.
 
 ---
 
@@ -136,7 +166,7 @@ transitiva" entregou o que devia.
 
 ### Determinar o próximo ID
 
-1. Leia os `CORR-*.md` existentes em `docs/tasks/`
+1. Leia os `CORR-*.md` existentes em `<CICLO>/`
 2. O maior número + 1 é o próximo
 3. Se não existir nenhum, comece em `CORR-<PREFIXO>-001`, com o prefixo que o
    `correcoes-progresso.md` declarar
@@ -206,7 +236,7 @@ arquivo gerado, a correção entra no **gerador**.>
 
 ### Criar/atualizar `correcoes-progresso.md`
 
-Em `docs/tasks/correcoes-progresso.md`.
+Em `<CICLO>/correcoes-progresso.md`.
 
 Se ainda não existir:
 
@@ -217,7 +247,7 @@ Se ainda não existir:
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 |---|---|---|---|---|---|
-| [CORR-<PREFIXO>-001](/docs/tasks/CORR-<PREFIXO>-001.md) | [<PREFIXO>-TASK-01](/docs/tasks/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
+| [CORR-<PREFIXO>-001](/<CICLO>/CORR-<PREFIXO>-001.md) | [<PREFIXO>-TASK-01](/<CICLO>/01-ferramental.md) | <título> | Crítica/Alta/Baixa | [ ] pendente | — |
 
 ## Checklist
 
@@ -238,12 +268,12 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 **Três regras da tabela de resumo, que valem para toda linha nova:**
 
 1. **A célula do ID é link** para o markdown da correção —
-   `[CORR-<PREFIXO>-XXX](/docs/tasks/CORR-<PREFIXO>-XXX.md)`. **Sempre `/docs/` + caminho
+   `[CORR-<PREFIXO>-XXX](/<CICLO>/CORR-<PREFIXO>-XXX.md)`. **Sempre `/docs/` + caminho
    do arquivo**, nunca relativo, como manda
    `.claude/rules/links.md`. O `/revisar` cria o `.md` na mesma
    invocação, então o link nunca nasce quebrado.
 2. **A coluna "ID Task Origem" é a tarefa que esta revisão estava revisando**,
-   também linkada: `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome-do-arquivo.md)`. É sempre
+   também linkada: `[<PREFIXO>-TASK-XX](/<CICLO>/XX-nome-do-arquivo.md)`. É sempre
    a mesma para todas as CORRs abertas numa invocação — a que você escolheu no
    passo 1.
    **Não é a task que a correção menciona no texto**: uma CORR aberta revisando
@@ -298,12 +328,12 @@ Se já existir, acrescente sem alterar as entradas anteriores.
 
 ## Commit final
 
-A revisão normalmente produz só markdown em `docs/tasks/`:
+A revisão normalmente produz só markdown em `<CICLO>/`:
 
 ```bash
 cd /home/ingmar/desenvolvimento/github/new-we2002-editor
-git add docs/tasks/CORR-<PREFIXO>-XXX.md docs/tasks/correcoes-progresso.md \
-        docs/tasks/progresso.md
+git add <CICLO>/CORR-<PREFIXO>-XXX.md <CICLO>/correcoes-progresso.md \
+        <CICLO>/progresso.md
 git commit -m "docs: open CORR-<PREFIXO>-XXX from the <PREFIXO>-TASK-YY review"
 ```
 
@@ -313,7 +343,7 @@ O `progresso.md` entra **sempre**, porque é onde mora a coluna "Revisado em".
 o único arquivo do commit:
 
 ```bash
-git add docs/tasks/progresso.md
+git add <CICLO>/progresso.md
 git commit -m "docs: review <PREFIXO>-TASK-YY: <o que foi medido>, no discrepancy"
 ```
 

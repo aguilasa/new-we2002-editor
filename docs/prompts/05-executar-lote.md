@@ -3,16 +3,46 @@
 Você vai trabalhar no repositório localizado em:
 
 - **Raiz do projeto:** `/home/ingmar/desenvolvimento/github/new-we2002-editor/`
-- **Arquivo de progresso:** `docs/tasks/progresso.md`. **O prefixo dos IDs de
+- **Arquivo de progresso:** `<CICLO>/progresso.md`. **O prefixo dos IDs de
   task é do ciclo, e quem o declara é este arquivo** — hoje `PES2-TASK-XX`,
   antes `WTE-TASK-XX`. Abaixo ele aparece como `<PREFIXO>`; leia-o ali, não
   o deduza do que este prompt escreve como exemplo nem de citação a task
   antiga.
-- **Tarefas detalhadas:** `docs/tasks/`
+- **Tarefas detalhadas:** `<CICLO>/`
 - **Fonte de verdade:** **a que a própria task declarar** no campo
   `fonte_de_verdade` do frontmatter. Este prompt não conhece plano nenhum pelo
   nome — a task em mãos é quem diz contra o que ela se mede.
 - **Regras do repositório:** `CLAUDE.md` — leia antes de tocar em qualquer coisa
+
+---
+
+## Passo 0 — a pasta do ciclo
+
+Os arquivos de progresso podem estar em `docs/tasks/` (raso) ou numa
+**subpasta** dela. Resolva a pasta **antes de qualquer leitura**:
+
+1. Se o primeiro termo do argumento nomear uma subpasta de `docs/tasks/` que
+   contenha um `progresso.md`, a pasta do ciclo é essa.
+2. Senão, a pasta do ciclo é `docs/tasks/`.
+
+**Um argumento é nome de ciclo se, e só se, `docs/tasks/<arg>/progresso.md`
+existe** — confira com `ls`, nunca pelo formato do texto. Um ID de task, um ID
+de correção e um número não são pastas, e um nome de pasta só é ciclo enquanto
+a pasta existir. Argumento que não resolve para pasta continua sendo o que este
+prompt já dizia. Dois termos são `<ciclo> <item>`, nessa ordem. **Sem argumento
+nenhum, nada muda.**
+
+Daí em diante **`<CICLO>` é o caminho da pasta a partir da raiz do
+repositório** — `docs/tasks` ou `docs/tasks/<subpasta>` —, e todo caminho deste
+prompt sai dele: `<CICLO>/progresso.md`, `<CICLO>/correcoes-progresso.md`,
+`<CICLO>/<arquivo-da-task>.md`, `<CICLO>/CORR-<PREFIXO>-XXX.md`. Os links que
+você escrever nas tabelas são `/<CICLO>/<arquivo>.md` — `/docs/` mais o
+caminho, como sempre (`.claude/rules/links.md`).
+
+O campo `perfil:` e o prefixo dos IDs saem do `progresso.md` **da pasta
+resolvida**, nunca do de outra pasta. Duas pastas nunca se cruzam:
+`depends_on` não atravessa pasta, e o pool de correções é único **dentro** do
+ciclo.
 
 ---
 
@@ -99,7 +129,7 @@ forma.
 
 ## Fase 0 — inventário e plano (sempre, e sempre primeiro)
 
-1. Ler `docs/tasks/progresso.md` — a **tabela de resumo** e o **checklist da
+1. Ler `<CICLO>/progresso.md` — a **tabela de resumo** e o **checklist da
    fase**. Se as duas listas divergirem, a divergência é o primeiro achado do
    relatório; não escolha uma em silêncio.
 2. Listar as `⬜ Pendente` na ordem: fase 0 antes da 1, antes da 2, …, e dentro
@@ -151,7 +181,7 @@ Duas tarefas só rodam em paralelo se **todas** as condições valerem:
 | saída de build | objetos compilados e binário únicos |
 | projeto do Ghidra | banco de dados único, escrita exclusiva |
 | `git` (index, `HEAD`, commit) | **sempre no thread principal**, nunca dentro de subagente |
-| `docs/tasks/progresso.md` | toda tarefa escreve nele — tabela, checklist, duas colunas de data. É o arquivo mais garantido de colidir |
+| `<CICLO>/progresso.md` | toda tarefa escreve nele — tabela, checklist, duas colunas de data. É o arquivo mais garantido de colidir |
 | o arquivo de build do ciclo | quando a bateria de `--check` mora num alvo só, **toda tarefa que cria gerador acrescenta um alvo ali** — e várias querem a mesma mão no mesmo arquivo. O perfil diz se o ciclo tem esse arquivo e qual é |
 | o arquivo de `fonte_de_verdade` de duas tasks do lote | tarefa que reconcilia número do plano colide com irmã que lê o mesmo |
 
@@ -262,7 +292,7 @@ Depois do commit daquela tarefa, e para ela só:
   (`git log -1 --date=short --pretty=%ad`), formato `AAAA-MM-DD`. Num lote as
   tarefas podem cair em dias diferentes: a data é **por tarefa**, nunca a do
   fechamento do lote;
-- célula do ID como link `[<PREFIXO>-TASK-XX](/docs/tasks/XX-nome.md)` — sempre
+- célula do ID como link `[<PREFIXO>-TASK-XX](/<CICLO>/XX-nome.md)` — sempre
   `/docs/` + caminho do arquivo, ver `.claude/rules/links.md`;
 - **"Revisado em"** de `—` para `⬜ pendente`. **Não escreva data aí** — quem
   revisa é o `/revisar`, em invocação separada;
