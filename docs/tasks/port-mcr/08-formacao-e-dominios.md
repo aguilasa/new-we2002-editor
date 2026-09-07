@@ -1,0 +1,55 @@
+---
+id: MCR-TASK-08
+title: "`formation.py` e `domains.py` — X/Y, papéis, cobradores e presets"
+type: implementação
+category: núcleo
+phase: 1
+depends_on: ["MCR-TASK-05"]
+fonte_de_verdade: "/docs/PLAN-MCR-PY.md §1.7"
+status: pendente
+---
+
+# MCR-TASK-08: Formação e domínios
+
+## Contexto
+
+- **Referência:** [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md) §1.7 e §1.8.
+- **É aqui que o upstream acrescenta de fato.** Nossa RE tinha `0x62A8` (20 B) e
+  `0x63D5` (10 B) como faixas opacas; ele diz que são X[10], Y[10] e papel
+  posicional. Medido na fixture: X `0b 0b 0b 0f 0f 14 1f 1f 2c 29`,
+  Y `20 34 48 11 57 32 1e 3e 2a 3e`, papéis `02 03 06 07 08 0a 0e 10 11 13`.
+- O papel é gravado como **índice + 2** sobre 20 rótulos. Os fatores `X*7` e
+  `Y*2` do upstream são **de tela**, não de formato — não entram no núcleo.
+- **O `0x6500` está em aberto** (§1.8): capitão pela nossa RE, sexto cobrador
+  pelo upstream. Até a MCR-TASK-13 responder, o byte **passa intacto** e não
+  aparece na UI.
+
+---
+
+## Objetivo
+
+`formation.py` (X, Y, papéis, os cinco cobradores, o byte em aberto) e
+`domains.py` (as tabelas de rótulo).
+
+---
+
+## Critério de conclusão
+
+- [ ] X, Y e papéis lidos e gravados, com o `+2` do papel simétrico.
+- [ ] Os cinco cobradores pela **tabela** `0x614F, 0x6140, 0x6122, 0x6113,
+      0x6131`, nunca por aritmética — ela não é crescente.
+- [ ] O `0x6500` exposto como campo cru e **rotulado como em aberto**, com a
+      referência à MCR-TASK-13.
+- [ ] `domains.py` com as tabelas do upstream — 32 cabelos, 8 posições, 7
+      barbas, 8 cores de cabelo, 4 tons de pele, 7 cores de barba, alturas,
+      idades, 8 corpos, chuteiras A..H, pé R/L/B, os 20 papéis e os 17 presets
+      — cada uma marcada como **rótulo de terceiro, não medição**.
+- [ ] Os índices conferidos por faixa (valor fora da faixa recusa); os **nomes**
+      não são asseridos, porque não têm oráculo.
+- [ ] Round-trip da formação da fixture: ler e regravar não muda byte nenhum.
+
+---
+
+## Log de Execução
+
+*(a preencher)*

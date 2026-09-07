@@ -1,0 +1,58 @@
+---
+id: MCR-TASK-13
+title: "O oráculo do Obocaman: o `0x6500`, o nome cheio e o veredito do console"
+type: verificação
+category: engenharia-reversa
+phase: 3
+depends_on: ["MCR-TASK-09"]
+fonte_de_verdade: "/docs/PLAN-MCR-PY.md §5.5"
+status: pendente
+---
+
+# MCR-TASK-13: O oráculo, e as três perguntas
+
+## Contexto
+
+- **Referência:** [`/docs/PLAN-MCR-PY.md`](/docs/PLAN-MCR-PY.md) §5.5 e §1.8.
+- **Pode ser antecipada** assim que a MCR-TASK-09 fechar: ela precisa do leitor,
+  não da UI. E deve ser, porque o veredito muda a tela da MCR-TASK-12.
+- O oráculo é o editor do Obocaman por `make wte` — Wine, prefix `win32`, no
+  `:98`. Ele **não é oráculo de tudo**: é de três perguntas, e só.
+
+---
+
+## Objetivo
+
+Responder com valor medido o que hoje é opinião.
+
+---
+
+## Critério de conclusão
+
+- [ ] **O `0x6500`**: capitão ou sexto cobrador. Experimento discriminante — pôr
+      o capitão num slot conhecido e os cinco cobradores em slots distintos,
+      salvar, ler os seis bytes. Na fixture eles valem `[7,7,8,7,7]` e `8`, e
+      **o valor sozinho não discrimina**.
+- [ ] **O nome que enche os 10 bytes**: escrever nome de 10 caracteres com
+      espaço no fim, salvar, ler de volta. Confirma (ou derruba) a leitura de
+      que o campo não é cadeia terminada em NUL.
+- [ ] **O veredito do console**, ou a razão escrita de ele não ter sido obtido:
+      14 dos 17 destinos caem no bloco 3, que o diretório declara livre, e
+      ninguém recalcula checksum. Um cartão gravado pelo port aberto no
+      DuckStation responde se isso importa.
+- [ ] O que for medido volta para a §1.8 e a §5.6 do plano; hipótese descartada
+      fica, com o motivo.
+
+---
+
+## Armadilhas
+
+- **Feche qualquer editor aberto no `:98` antes.** Os roteiros acham o diálogo
+  pelo tamanho, e janela esquecida é dirigida no lugar da certa.
+- **Cópia, sempre** — inclusive do cartão. O `work/entrada.mcr` é fixture.
+
+---
+
+## Log de Execução
+
+*(a preencher)*

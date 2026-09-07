@@ -24,6 +24,10 @@ arquivo** (TEX, VAG, RA). Os únicos que tocam no mesmo terreno que o
 > Nada aqui foi baixado, clonado ou executado — o levantamento é só de
 > metadados e README lidos pela API.
 
+**O que este arquivo não cobre.** Ele é do GitHub, e a cena de WE2002 não mora
+no GitHub. Os links de blog, YouTube e fórum ficam em
+[CENA-FORA-DO-GITHUB.md](/docs/CENA-FORA-DO-GITHUB.md).
+
 ---
 
 ## 1. Edição de dados do jogo em binário (o mesmo terreno deste projeto)
