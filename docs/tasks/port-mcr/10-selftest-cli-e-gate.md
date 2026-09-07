@@ -43,11 +43,15 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       `0x4000..0x8000` **e** dos mesmos endereços em decimal — o upstream
       escreve `22788` e `21508`, que passariam batido por varredura só de hex.
       Hoje devolve **0**; o `selftest` tem de chamá-la, não reimplementá-la.
-- [ ] **O `attempt()` está duplicado em `card.py` e `layout.py`**, e a
-      MCR-TASK-04 mediu por que ele existe: sem ele, o primeiro defeito que
-      levanta exceção mata a corrida e esconde os checks seguintes. Ao montar o
-      `selftest`, escolha uma casa só para ele em vez de deixar a terceira
-      cópia nascer.
+- [ ] **O `attempt()` está em `card.py`, `layout.py` e `attributes.py`**, e o
+      `refuses()`/`recusa()` em dois deles. A MCR-TASK-04 mediu por que o
+      primeiro existe (sem ele, o defeito que levanta exceção mata a corrida e
+      esconde os checks seguintes) e a MCR-TASK-06 mediu por que o segundo
+      também: um `try/except ErroEspecífico` escrito à mão deixa passar
+      **qualquer outra** exceção, e foi o que aconteceu ao plantar o swap da
+      v4.2 — o self-check morreu no meio e três checks não rodaram. A terceira
+      cópia já nasceu; **escolha uma casa só para os dois** ao montar o
+      `selftest`.
 - [ ] **O `selftest` importa `layout` dentro do `attempt()`**, não no escopo do
       módulo: as vistas nomeadas do `layout.py` levantam `LayoutError` no
       import quando um destino some, e o `mcr_selftest` é o gate

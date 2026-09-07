@@ -24,6 +24,12 @@ status: pendente
       que reproduz cada um colado no Log.
 - [ ] O plano atualizado com o que a execução mediu — inclusive o que saiu
       diferente do previsto, que é o que vale registrar.
+- [ ] **A §5.4 do plano diz "os 30 campos" e são 29.** Medido na MCR-TASK-06
+      contra o próprio `Player.cpp`, que é quem define o conjunto:
+      `awk '/^void Player::Decode/,/^}/' src/core/Player.cpp | grep -oE '^\t[a-z_]+ =' | sed 's/[ \t=]//g' | sort -u | wc -l`
+      devolve **29**, e `python3 tools/mcr/attributes.py --self-check` afirma o
+      mesmo no primeiro check. O texto da MCR-TASK-06 já foi corrigido; o plano
+      não.
 - [ ] **A §1.1 do plano remedida**, que a MCR-TASK-04 tocou e nenhuma outra
       task remede: ela cita a entrada 1 do diretório em bytes crus e **não diz
       que a cadeia tem dois blocos**. O comando é

@@ -24,6 +24,25 @@ status: pendente
 
 ---
 
+- **`[0,5,2,7,4,1]` é a posição DENTRO DO BYTE, não o offset dentro do grupo.**
+  Medido na MCR-TASK-06, e custou um vermelho: o offset do valor `j` dentro do
+  grupo de 4 bytes é `5·(j mod 6)` — 0, 5, 10, 15, 20, 25 —, que cai nos bytes
+  0, 0, 1, 1, 2, 3 com os deslocamentos 0, 5, 2, 7, 4, 1. Usar a tabela
+  documentada **como se fosse o offset do grupo** devolve
+  `1 5 1 26 9 1 6 11 18 …` na fixture: números que parecem dorsais e não são.
+  A leitura certa dá `1 5 4 3 2 7 6 11 10 9 8 16 17 13 19 22 12 18 20 14 15 21 23`,
+  que é o que a §1.5 do plano registra. Há uma leitura mínima de referência em
+  `attributes.shirt_numbers_from_table()`, escrita só para a tripwire; o
+  `numbers.py` é quem a implementa de verdade, com domínio e gravação.
+- **O upstream monta os bytes `+0..+3` concatenando dígitos hexadecimais como
+  string**, não somando pesos — `cuartobite = idfeedoutside.Text &
+  idheigth2.Text`. É onde moram o dorsal (5 bits) e o `out_of_position`, e é
+  por isso que os pesos `id*` daqueles quatro bytes **não** são
+  `índice << shift` como os dos oito seguintes (`idfeedoutside` vale `[0, 9]`).
+  Se algo do dorsal do upstream não fechar, é aqui que ele difere do nosso.
+
+---
+
 ## Objetivo
 
 `numbers.py` (leitura e gravação dos 24 valores de 5 bits) e `text.py` (o nome
