@@ -3,7 +3,7 @@ id: CORR-MCR-003
 title: "Correção: o link do `progresso.md` no `correcoes-progresso.template.md` não leva o segmento do ciclo"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -93,12 +93,31 @@ ciclo e raso… -->`) cobre o caso raso sem texto novo.
 - [ ] `python3 tools/check_tasks.py` verde e `ctest -R tasks` verde
 - [ ] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+O link do cabeçalho de `docs/tasks/correcoes-progresso.template.md` passou a
+levar o segmento do ciclo, como os demais links do mesmo arquivo. A frase ao
+lado dele — "o que mora **ao lado deste arquivo**, na mesma pasta" — ficou
+intacta, e agora o link concorda com ela; o comentário logo abaixo já cobre o
+caso raso, em que o segmento some.
+
+A varredura alcançou o gêmeo: `docs/tasks/progresso.template.md:192` — a linha
+de exemplo do "outro projeto no mesmo progresso" — tinha ficado sem o `<CICLO>/`
+que as linhas 34 e 35 do mesmo arquivo ganharam na MCR-TASK-01. Mesma classe de
+esquecimento, corrigida na mesma passagem.
+
 **Problemas encontrados:**
 
+O `grep` escrito na seção Evidência da CORR (`grep -n 'progresso.md](' …`) sai
+vazio: o texto real tem uma crase entre `progresso.md` e o `]`. O padrão que
+mede é `progresso.md\`](`. A linha também é a **5**, não a 3. O sintoma em si
+está confirmado, e é o descrito.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/correcoes-progresso.template.md` — o link do cabeçalho
+- `docs/tasks/progresso.template.md` — linha 192 (discrepância da varredura)

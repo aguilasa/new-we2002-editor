@@ -2,7 +2,7 @@
 
 Correções abertas pelo `/revisar` ([`../prompts/02-revisar.md`](/docs/prompts/02-revisar.md))
 e fechadas pelo `/corrigir`. O andamento das **tarefas** fica em
-[`progresso.md`](/docs/tasks/progresso.md) — o que mora **ao lado deste
+[`progresso.md`](/docs/tasks/<CICLO>/progresso.md) — o que mora **ao lado deste
 arquivo**, na mesma pasta; este arquivo só rastreia correção.
 
 **"Concluída em" nasce `—`** e é preenchida por quem executa a correção, com a

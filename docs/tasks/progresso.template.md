@@ -189,7 +189,7 @@ alcançam, e por que estas tasks dão dono a isso.>
 
 | ID | Tarefa | §  | Itens | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | -- | ----: | ------------ | ------ | ------------ | ----------- |
-| [<OUTRO>-TASK-01](/docs/tasks/<OUTRO>-TASK-01.md) | <o que a task confere> | N.1 | 0 | — | ⬜ Pendente | — | — |
+| [<OUTRO>-TASK-01](/docs/tasks/<CICLO>/<OUTRO>-TASK-01.md) | <o que a task confere> | N.1 | 0 | — | ⬜ Pendente | — | — |
 
 **<N> itens, <M> tasks.** <se houver bloqueada, o bloqueio de cada uma, nomeado.>
 
