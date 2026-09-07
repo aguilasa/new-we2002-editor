@@ -944,6 +944,90 @@ Nas outras três imagens os 105 são Form 1. O número sai de `iso.py`:
  if p.startswith("/BIN/TEX_") and not img.is_form1(p)]
 ```
 
+### 1.15 Times secretos e a lista de Master League — o que trava, não está medido
+
+**Pergunta aberta em 2026-09-07, a pedido do usuário.** Duas telas mostram
+menos do que o disco nomeia, e o objetivo é destravar as duas **na imagem** —
+não no cartão, não por jogar:
+
+- os **times secretos**: os 7 *classic* (`CLASSIC ARGENTINA` …
+  `CLASSIC ENGLAND`) e `WORLD ALLSTARS` / `EURO ALLSTARS`, que a §1.6 mede
+  como as nove últimas entradas das 106 de `SELECT.BIN` @3128;
+- os **times de Master League na tela de seleção de times**, que a grade não
+  oferece numa partida comum.
+
+#### O que já está medido, e serve de ponto de partida
+
+- **A tabela nomeia mais do que a grade exibe.** São 106 entradas — 2 de
+  cabeçalho + 104 times — e os nove secretos estão lá, em texto, no disco de
+  fábrica (§1.6). O que falta não é o nome: é o que decide **quais** entradas
+  a grade percorre.
+- **As nove não têm abreviação** — a tabela de 3 letras cobre só as 95
+  primeiras (§1.6). Um filtro que exija abreviação seria um mecanismo
+  plausível, e é barato de testar.
+- **As oito listas têm comprimentos diferentes** — 106, 99, 95, 94, 123, 32,
+  99, 99 —, e a §6.1 já custou três telas por casar índice entre elas. Seja
+  qual for o gate, ele não pode ser deduzido de um comprimento só.
+- **Constante de limite em `.BIN` de overlay é coisa que existe neste jogo.**
+  A §6.4 do [PES2-AJUSTES](/docs/PES2-AJUSTES.md) mediu que `SELECT4.BIN`
+  difere entre as duas releases em **cinco `slti`**, de 4 para 2 — resíduo
+  com significado depois de descontada a realocação. Um `slti` com o número
+  de times exibidos é exatamente a forma que um gate assim teria.
+- **O cartão tem espaço para guardar progresso.** O `PES-OPT` são 16 KiB, a
+  tabela de nomes ocupa 516..12936, e sobram **3.448 B** de opções (§3.3).
+  Se o gate for um bit de save, "desbloquear no disco" quer dizer remendar o
+  **teste** ou o **default**, não escrever no cartão.
+- **A alavanca de "quem escreve" está de pé.** O fluxo A do MCP foi
+  percorrido ponta a ponta em 2026-09-03 (§6.14): breakpoint de escrita num
+  endereço de RAM, `read_registers` e `disassemble` em volta. Do endereço ao
+  carregador, e do carregador ao offset no disco.
+- **O WE2002 não dá precedente.** O editor original não desbloqueia nada:
+
+  ```sh
+  grep -rniE 'sblocc|segret|nascost|unlock|secret|abilita' legacy/mfc/
+  ```
+
+  dá **dois** acertos, e os dois são outra coisa — `disabilita colori
+  bandiera classic` e `salvare abilita - decodifica`. O `ed.exe` edita
+  **conteúdo**; progresso de jogo está fora do que ele toca. Não há o que
+  copiar de lá, e é por isso que esta seção existe em vez de uma referência.
+
+#### As quatro hipóteses, da mais barata de testar à mais cara
+
+1. **Bit de progresso no save**, lido na montagem da grade. Testa-se por
+   diferencial de cartão (§4.2, alavanca 3) ou por `savestate.py scan` sobre
+   dois estados.
+2. **Constante de limite na rotina da grade** — o `slti`/`addiu` com o número
+   de times percorridos. Testa-se por breakpoint de leitura na tabela de
+   nomes e `disassemble` em volta.
+3. **Byte de atributo por time**, numa tabela paralela à lista de nomes, com
+   um bit de "disponível". Testa-se por varredura de tabela de 104/106
+   entradas alinhada à ordem canônica da §1.6.
+4. **Não é gate nenhum, é outro fluxo de UI** — a tela de ML é outra tela, e
+   o que se pede é fazer a grade comum enxergá-la. Neste caso o entregável
+   muda de natureza, e a resposta honesta é dizer isso em vez de forçar um
+   remendo.
+
+#### Critério — o que fecha a pergunta
+
+1. O mecanismo **nomeado com endereço**: arquivo do ISO e offset relativo a
+   ele (§6.4: offset absoluto só vale dentro do Track 1), mais o que o byte
+   significa.
+2. Um remendo aplicado a **cópia** que faça a grade exibir os nove secretos e
+   os times de ML **com o cartão vazio** — cartão limpo é o que separa
+   "remendo no disco" de "estado no save", e sem essa condição a prova não
+   vale.
+3. A prova **em tela**, por rota do `mcp_drive.py`, mostrando na grade nomes
+   que antes não apareciam.
+4. `iso.py roundtrip` verde depois do remendo, EDC/ECC preservado (§6.7).
+5. A medição repetida na **outra release**, ou a razão escrita de ela não
+   valer lá — a §1.13 existe porque offset constante entre releases grava
+   lixo.
+
+**Não é objetivo** escrever troféu, alterar cartão do usuário, nem tocar
+`roms/`. E um "não dá para fazer no disco, e aqui está a evidência" fecha
+esta seção tão bem quanto um remendo: o que ela não aceita é palpite.
+
 ---
 
 ## 2. Ressalva legal

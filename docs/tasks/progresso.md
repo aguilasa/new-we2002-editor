@@ -77,6 +77,7 @@ PES2-TASK-22.
 | [PES2-TASK-32](/docs/tasks/32-poc-do-mcp-do-duckstation.md) | Prova de conceito do MCP do DuckStation | 0 | — | ✅ Concluído | 2026-09-02 | 2026-09-03 |
 | [PES2-TASK-33](/docs/tasks/33-compilar-e-validar-o-mcp.md) | Compilar o fork e validar o MCP de fato | 0 | 32 | ✅ Concluído | 2026-09-03 | 2026-09-03 |
 | [PES2-TASK-34](/docs/tasks/34-rotas-mcp-no-lugar-do-drive.md) | Rotas MCP no lugar do `drive.py` | 0 | 33 | ✅ Concluído | 2026-09-03 | 2026-09-03 |
+| [PES2-TASK-35](/docs/tasks/35-desbloqueio-de-times.md) | Desbloqueio de times secretos e da lista de ML, pelo disco | 4 | — | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
