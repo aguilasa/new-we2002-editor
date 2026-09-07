@@ -1,0 +1,566 @@
+#!/usr/bin/env python3
+"""The save's 17 destinations -- THE SINGLE SOURCE OF ADDRESSES.
+
+Provenance (section 3.4 of the plan):
+
+  container   --
+  address     `wte/re/mcr.md`, the 17 destinations measured out of
+              `we-team-editor.exe`, both sides: the writer at `0x0040f150`
+              (`grabar_memoryClick`) and the reader at `0x0040b9ec`
+  semantics   the field names are ours; what X, Y, roles and the domains MEAN
+              is the upstream's, and that lives in `formation.py`/`domains.py`
+  codec       --
+
+Rule 1 of section 3.3: no other module of `tools/mcr/` writes an address
+constant. A decoder written against an unverified address produces a plausible
+wrong field, and the symptom only shows up in the game -- which is why this
+module ships a `--check` instead of a comment saying it was verified.
+
+The check reads `wte/re/mcr.md`, the committed artifact, and not
+`wte/tools/dump_mcr.py`. Two reasons: the markdown is versioned while
+`we-team-editor.exe` is not, so the check runs on a clean clone; and the table
+below is written independently of the tool that emits the markdown, so the two
+agreeing means something. Importing the generator would be checking it against
+itself.
+
+Usage:
+
+    python3 tools/mcr/layout.py
+    python3 tools/mcr/layout.py --check
+    python3 tools/mcr/layout.py --self-check
+"""
+
+import argparse
+import dataclasses
+import os
+import re
+import sys
+
+_MEASUREMENT = os.path.join("wte", "re", "mcr.md")
+
+
+def _find_measurement() -> str:
+    """Walks up from this file looking for `wte/re/mcr.md`.
+
+    Counting `dirname` hops looked equivalent and is not: copy the module
+    anywhere -- which is what its own negative controls do -- and a fixed hop
+    count points at a directory that does not exist, so `--check` dies with a
+    path error instead of running. Every control run then reported three
+    failures that had nothing to do with the planted defect, which is exactly
+    how a control stops being readable. Walking up finds the repository from
+    wherever the module actually sits, and the fallback keeps a nameable path
+    in the error when there is no repository at all.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    while True:
+        candidate = os.path.join(here, _MEASUREMENT)
+        if os.path.isfile(candidate):
+            return candidate
+        parent = os.path.dirname(here)
+        if parent == here:
+            return os.path.join(here, _MEASUREMENT)
+        here = parent
+
+
+MCR_MD = _find_measurement()
+
+BLOCK_BYTES = 8192      # only to derive the block number; the container is card.py
+
+
+class LayoutError(Exception):
+    """The written layout and the measured one disagree."""
+
+
+@dataclasses.dataclass(frozen=True)
+class Destination:
+    """One measured destination.
+
+    `total_bytes` is what the measurement counts: for a strided field it is
+    `item_size * count`, NOT the span. The player record is the case that makes
+    the difference matter -- 276 bytes of attributes live as 23 chunks of 12 at
+    stride 32, so the span is 23*32 and reading `0x5904..0x5904+276` would walk
+    straight through names and untouched bytes.
+    """
+
+    address: int
+    total_bytes: int
+    field: str
+    reads_back: bool = True      # the writer and the reader are NOT symmetric
+    item_size: int | None = None
+    count: int | None = None
+    stride: int | None = None
+
+    @property
+    def block(self) -> int:
+        return self.address // BLOCK_BYTES
+
+    @property
+    def strided(self) -> bool:
+        return self.stride is not None
+
+    def item_address(self, index: int) -> int:
+        """The address of item `index` of a strided destination."""
+        if not self.strided:
+            raise LayoutError(f"{self.field} is not strided")
+        if not 0 <= index < self.count:
+            raise LayoutError(
+                f"{self.field}: index {index} outside 0..{self.count - 1}")
+        return self.address + index * self.stride
+
+
+# --- the 17 destinations ---------------------------------------------------
+# Written from `wte/re/mcr.md`, and checked back against it by `--check`.
+# The order is the address order of the markdown table, so a diff between the
+# two reads straight.
+
+SQUAD_SIZE = 23
+PLAYER_STRIDE = 32
+
+DESTINATIONS: tuple[Destination, ...] = (
+    Destination(0x5404, 16, "shirt numbers, 23 x 5 bits"),
+    Destination(0x5904, 12 * SQUAD_SIZE, "player j: 12 B of attributes",
+                item_size=12, count=SQUAD_SIZE, stride=PLAYER_STRIDE),
+    Destination(0x5910, 10 * SQUAD_SIZE, "player j: 10 B of name",
+                item_size=10, count=SQUAD_SIZE, stride=PLAYER_STRIDE),
+    # The six tactics destinations are written and NEVER read back by
+    # `0x0040b9ec`. That asymmetry is measured, and it is why v1 passes tactics
+    # through untouched (section 1.9 of the plan).
+    Destination(0x6102, 1, "tactics byte 0, plus 50", reads_back=False),
+    Destination(0x6113, 1, "kicker 3"),
+    Destination(0x6122, 1, "kicker 2"),
+    Destination(0x6131, 1, "kicker 4"),
+    Destination(0x6140, 1, "kicker 1"),
+    Destination(0x614F, 1, "kicker 0"),
+    Destination(0x62A8, 20, "formation, bytes 10..29"),
+    Destination(0x63D5, 10, "formation, bytes 0..9"),
+    Destination(0x6479, 1, "tactics byte 1, high nibble", reads_back=False),
+    Destination(0x6488, 1, "tactics byte 1, low nibble", reads_back=False),
+    Destination(0x6497, 1, "tactics byte 2, low nibble", reads_back=False),
+    Destination(0x64A6, 1, "tactics byte 2, high nibble", reads_back=False),
+    Destination(0x64E2, 1, "tactics byte 0, raw", reads_back=False),
+    Destination(0x6500, 1, "kicker 5 (the captain)"),
+)
+
+BY_ADDRESS = {d.address: d for d in DESTINATIONS}
+
+
+def _required(address: int, what: str) -> Destination:
+    """A named view over a destination that has to be in the table.
+
+    Bare `_required(0x63D5, "FORMATION_ROLES")` raises `KeyError: 25557` at import time when a row
+    is deleted -- a decimal number, no file, no hint that a destination went
+    missing. Measured while planting exactly that defect.
+    """
+    try:
+        return BY_ADDRESS[address]
+    except KeyError:
+        raise LayoutError(
+            f"{what} needs the destination {address:#06x}, which is not in "
+            f"DESTINATIONS. A row was removed or its address was changed; "
+            f"`--check` says which side disagrees with wte/re/mcr.md.") from None
+
+# --- named views over the table -------------------------------------------
+# Everything below is DERIVED. Nothing here introduces an address that is not
+# already one of the 17 above.
+
+SHIRT_NUMBERS = _required(0x5404, "SHIRT_NUMBERS")
+PLAYER_ATTRIBUTES = _required(0x5904, "PLAYER_ATTRIBUTES")
+PLAYER_NAME = _required(0x5910, "PLAYER_NAME")
+
+# The five kickers in KICKER ORDER (0..4), which is not address order. The
+# table is `0x614F, 0x6140, 0x6122, 0x6113, 0x6131`: it DECREASES, then jumps
+# back up. Arithmetic in place of a table writes into the wrong field, and the
+# result still looks like a formation.
+KICKER_ADDRESSES = (0x614F, 0x6140, 0x6122, 0x6113, 0x6131)
+
+# The sixth slot, and the open question of section 1.8: our RE of the `.exe`
+# calls it the captain, the upstream calls it a sixth kicker. Both store a slot
+# index, so the VALUE alone does not discriminate -- MCR-TASK-13 settles it with
+# an experiment. Until then it is named for the doubt, not for one of the two
+# answers.
+CAPTAIN_OR_SIXTH_KICKER = _required(0x6500, "CAPTAIN_OR_SIXTH_KICKER")
+
+# The 20 bytes at `0x62A8` are ONE destination in the measurement, and the
+# upstream reads them as two arrays of ten: X then Y. That split is semantics,
+# not a new address, so it stays derived -- adding it to DESTINATIONS would make
+# the count 18 and break the very check this module exists for.
+FORMATION_XY = _required(0x62A8, "FORMATION_XY")
+FORMATION_X_ADDRESS = FORMATION_XY.address            # 0x62A8, 10 bytes
+FORMATION_Y_ADDRESS = FORMATION_XY.address + 10       # 0x62B2, 10 bytes
+FORMATION_ROLES = _required(0x63D5, "FORMATION_ROLES")
+OUTFIELD_COUNT = 10
+
+TACTICS = tuple(d for d in DESTINATIONS if not d.reads_back)
+
+# Bit shifts of the 5-bit shirt number: six values per 4-byte group, 30 bits
+# used and 2 lost, four groups, 16 bytes. Same shape as `SquadNumbers` in
+# `we2002_core`.
+SHIRT_NUMBER_BIT_SHIFTS = (0, 5, 2, 7, 4, 1)
+SHIRT_NUMBERS_PER_GROUP = 6
+SHIRT_NUMBER_GROUP_BYTES = 4
+
+
+def player_attribute_address(index: int) -> int:
+    return PLAYER_ATTRIBUTES.item_address(index)
+
+
+def player_name_address(index: int) -> int:
+    return PLAYER_NAME.item_address(index)
+
+
+def kicker_address(kicker: int) -> int:
+    if not 0 <= kicker < len(KICKER_ADDRESSES):
+        raise LayoutError(
+            f"kicker {kicker} outside 0..{len(KICKER_ADDRESSES) - 1}")
+    return KICKER_ADDRESSES[kicker]
+
+
+# --- the cross-check against `wte/re/mcr.md` -------------------------------
+
+_ROW = re.compile(
+    r"^\|\s*`0x([0-9a-fA-F]+)`\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|")
+
+
+def parse_mcr_md(path: str = MCR_MD) -> dict[int, tuple[int, int, str]]:
+    """`{address: (block, total_bytes, field)}` from the measured table.
+
+    Only rows whose first cell is a backticked hex address count, which is what
+    separates the destination table from the directory table above it.
+    """
+    try:
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+    except OSError as e:
+        raise LayoutError(f"cannot read the measurement at {path}: {e}") from e
+
+    out: dict[int, tuple[int, int, str]] = {}
+    for line in text.splitlines():
+        m = _ROW.match(line)
+        if not m:
+            continue
+        addr = int(m.group(1), 16)
+        if addr in out:
+            raise LayoutError(
+                f"{path}: address {addr:#06x} appears twice in the table")
+        out[addr] = (int(m.group(2)), int(m.group(3)), m.group(4))
+    if not out:
+        raise LayoutError(
+            f"{path}: no destination row parsed. The table shape changed, and "
+            f"a check that parses nothing passes for the wrong reason.")
+    return out
+
+
+def check(path: str = MCR_MD, verbose: bool = True) -> list[str]:
+    """Compares this table with the measured one. Returns the complaints."""
+    problems: list[str] = []
+    measured = parse_mcr_md(path)
+    ours = {d.address: d for d in DESTINATIONS}
+
+    # Both directions: present on one side and absent on the other is a failure.
+    only_ours = sorted(set(ours) - set(measured))
+    only_theirs = sorted(set(measured) - set(ours))
+    for a in only_ours:
+        problems.append(
+            f"{a:#06x} ({ours[a].field}) is in layout.py and NOT in the "
+            f"measurement")
+    for a in only_theirs:
+        problems.append(
+            f"{a:#06x} ({measured[a][2]}) is in the measurement and NOT in "
+            f"layout.py")
+
+    for a in sorted(set(ours) & set(measured)):
+        block, total, field = measured[a]
+        d = ours[a]
+        if d.total_bytes != total:
+            problems.append(
+                f"{a:#06x} ({field}): {d.total_bytes} bytes here, {total} "
+                f"measured")
+        if d.block != block:
+            problems.append(
+                f"{a:#06x} ({field}): block {d.block} here, {block} measured")
+
+    if verbose:
+        n = len(set(ours) & set(measured))
+        print(f"layout.py --check: {n}/{len(measured)} destinations agree with "
+              f"{os.path.relpath(path)}"
+              + ("" if not problems else f", {len(problems)} problem(s)"))
+        for p in problems:
+            print(f"  FAIL {p}")
+    return problems
+
+
+# --- Rule 1, enforced -----------------------------------------------------
+# "Only layout.py has addresses" is worth nothing as prose. This is the sweep
+# that can fail on it, and MCR-TASK-10 aggregates it into `selftest.py`.
+
+MCR_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# The save's own address space. Every one of the 17 destinations falls inside
+# it, and no container constant does: `card.py` carries 0x20000, 8192, 128 and
+# the derived 0x800, all outside. Narrower than "any hex literal" on purpose --
+# a sweep that flags 0x800 gets switched off within a week.
+SAVE_SPACE = (0x4000, 0x8000)
+
+_HEX = re.compile(r"0[xX][0-9a-fA-F]+")
+_DEC = re.compile(r"(?<![\w.])\d{4,6}(?![\w.])")
+
+
+def address_monopoly(directory: str = MCR_DIR) -> list[str]:
+    """Modules other than this one carrying a save address. Empty is correct.
+
+    Both notations are swept, because the upstream writes them in decimal --
+    22788 and 21508 read as ordinary numbers and would walk straight past a
+    hex-only sweep.
+    """
+    known = {d.address for d in DESTINATIONS} | set(KICKER_ADDRESSES) \
+        | {FORMATION_Y_ADDRESS}
+    complaints = []
+    here = os.path.basename(__file__)
+    for name in sorted(os.listdir(directory)):
+        if not name.endswith(".py") or name == here:
+            continue
+        path = os.path.join(directory, name)
+        with open(path, encoding="utf-8") as fh:
+            for n, line in enumerate(fh, 1):
+                for m in _HEX.finditer(line):
+                    v = int(m.group(), 16)
+                    if SAVE_SPACE[0] <= v < SAVE_SPACE[1]:
+                        complaints.append(
+                            f"{name}:{n}: {m.group()} is in the save address "
+                            f"space; addresses belong in layout.py")
+                for m in _DEC.finditer(line):
+                    if int(m.group()) in known:
+                        complaints.append(
+                            f"{name}:{n}: {m.group()} is a save address in "
+                            f"decimal; addresses belong in layout.py")
+    return complaints
+
+
+# --- self-check ------------------------------------------------------------
+
+def self_check(verbose: bool = True) -> int:
+    """Exercises the module. Returns the number of failures.
+
+    The red case is the point: changing one address by hand has to make
+    `--check` fail AND NAME IT. A check that only counts rows stays green when
+    an address moves, which is the exact defect it exists to catch.
+    """
+    failures = []
+
+    def ok(name, cond, detail=""):
+        if cond:
+            if verbose:
+                print(f"  ok    {name}")
+        else:
+            failures.append(name)
+            print(f"  FAIL  {name}  {detail}")
+
+    def attempt(name, fn, default=None):
+        """An unexpected exception becomes a named failure, and the run goes on.
+
+        Measured in MCR-TASK-04: without this, the first defect that raises
+        kills the run and hides every check after it.
+        """
+        try:
+            return fn()
+        except Exception as e:                        # noqa: BLE001
+            failures.append(name)
+            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
+            return default
+
+    import tempfile
+
+    print("layout.py self-check")
+
+    ok("17 destinations", len(DESTINATIONS) == 17, f"n={len(DESTINATIONS)}")
+    ok("no duplicate address", len(BY_ADDRESS) == len(DESTINATIONS))
+    ok("addresses in ascending order",
+       list(BY_ADDRESS) == sorted(BY_ADDRESS))
+
+    # The two assertions `mcr.md` already charges for.
+    ok("the kicker table is NOT increasing",
+       list(KICKER_ADDRESSES) != sorted(KICKER_ADDRESSES),
+       f"table={[hex(a) for a in KICKER_ADDRESSES]}")
+    ok("every kicker address is one of the 17",
+       all(a in BY_ADDRESS for a in KICKER_ADDRESSES))
+    ok("shirt bit shifts are (5*(j mod 6)) mod 8",
+       SHIRT_NUMBER_BIT_SHIFTS
+       == tuple((5 * (j % SHIRT_NUMBERS_PER_GROUP)) % 8
+                for j in range(SHIRT_NUMBERS_PER_GROUP)),
+       f"shifts={SHIRT_NUMBER_BIT_SHIFTS}")
+    groups = SHIRT_NUMBERS.total_bytes // SHIRT_NUMBER_GROUP_BYTES
+    ok("16 bytes = 4 groups of 4, holding 24 five-bit numbers",
+       SHIRT_NUMBERS.total_bytes == 16 and groups == 4
+       and groups * SHIRT_NUMBERS_PER_GROUP == 24
+       and groups * SHIRT_NUMBERS_PER_GROUP > SQUAD_SIZE,
+       f"bytes={SHIRT_NUMBERS.total_bytes} groups={groups}")
+
+    # The strided player record -- the case where total_bytes is not a span.
+    ok("attributes: 23 x 12 at stride 32",
+       PLAYER_ATTRIBUTES.count == 23 and PLAYER_ATTRIBUTES.item_size == 12
+       and PLAYER_ATTRIBUTES.stride == 32)
+    ok("attributes total is 276, not the span",
+       PLAYER_ATTRIBUTES.total_bytes == 276
+       and PLAYER_ATTRIBUTES.total_bytes != 23 * 32)
+    ok("name sits 12 bytes past the attributes, same record",
+       PLAYER_NAME.address - PLAYER_ATTRIBUTES.address
+       == PLAYER_ATTRIBUTES.item_size)
+    ok("player 0 and player 22 addresses",
+       player_attribute_address(0) == 0x5904
+       and player_attribute_address(22) == 0x5904 + 22 * 32)
+    ok("name of player 22", player_name_address(22) == 0x5910 + 22 * 32)
+
+    def out_of_range():
+        player_attribute_address(23)
+    try:
+        out_of_range()
+        failures.append("refuses player index 23")
+        print("  FAIL  refuses player index 23: did NOT refuse")
+    except LayoutError as e:
+        ok("refuses player index 23", "outside 0..22" in str(e), str(e))
+
+    # The six tactics destinations, written and never read back.
+    ok("6 tactics destinations, none read back", len(TACTICS) == 6)
+    ok("tactics addresses match the measurement",
+       tuple(d.address for d in TACTICS)
+       == (0x6102, 0x6479, 0x6488, 0x6497, 0x64A6, 0x64E2))
+
+    # Blocks: derived here, and checked against the measurement by --check.
+    ok("shirt numbers and players are in block 2",
+       SHIRT_NUMBERS.block == 2 and PLAYER_ATTRIBUTES.block == 2
+       and PLAYER_NAME.block == 2)
+    ok("formation, kickers and tactics are in block 3",
+       all(_required(a, "kicker").block == 3 for a in KICKER_ADDRESSES)
+       and FORMATION_XY.block == 3 and FORMATION_ROLES.block == 3
+       and all(d.block == 3 for d in TACTICS)
+       and CAPTAIN_OR_SIXTH_KICKER.block == 3)
+    ok("14 of the 17 fall in block 3",
+       sum(1 for d in DESTINATIONS if d.block == 3) == 14,
+       f"n={sum(1 for d in DESTINATIONS if d.block == 3)}")
+
+    # X and Y are derived, not extra entries.
+    ok("X and Y live inside the 20 bytes of 0x62A8",
+       FORMATION_X_ADDRESS == 0x62A8 and FORMATION_Y_ADDRESS == 0x62B2
+       and FORMATION_XY.total_bytes == 2 * OUTFIELD_COUNT)
+    ok("0x62B2 is NOT a separate destination", 0x62B2 not in BY_ADDRESS)
+
+    # --- the cross-check itself
+    problems = attempt("--check runs", lambda: check(verbose=False), default=None)
+    ok("17/17 against wte/re/mcr.md", problems == [], f"problems={problems}")
+
+    # --- the red case: a moved address has to be named
+    saved = DESTINATIONS
+    try:
+        globals()["DESTINATIONS"] = tuple(
+            dataclasses.replace(d, address=d.address + 1)
+            if d.address == 0x5404 else d for d in saved)
+        moved = attempt("--check with a moved address",
+                        lambda: check(verbose=False), default=[])
+        ok("a moved address makes --check fail", len(moved) >= 2,
+           f"problems={moved}")
+        ok("and it names both sides",
+           any("0x5405" in p for p in moved) and any("0x5404" in p for p in moved),
+           f"problems={moved}")
+    finally:
+        globals()["DESTINATIONS"] = saved
+
+    # --- the red case: a wrong size
+    try:
+        globals()["DESTINATIONS"] = tuple(
+            dataclasses.replace(d, total_bytes=d.total_bytes + 1)
+            if d.address == 0x62A8 else d for d in saved)
+        sized = attempt("--check with a wrong size",
+                        lambda: check(verbose=False), default=[])
+        ok("a wrong size makes --check fail",
+           any("21 bytes here, 20 measured" in p for p in sized),
+           f"problems={sized}")
+    finally:
+        globals()["DESTINATIONS"] = saved
+
+    # --- Rule 1: no other module carries an address
+    monopoly = attempt("the address sweep runs", address_monopoly, default=None)
+    ok("no other module of tools/mcr/ has a save address", monopoly == [],
+       f"complaints={monopoly}")
+
+    with tempfile.TemporaryDirectory() as d:
+        with open(os.path.join(d, "layout.py"), "w") as fh:
+            fh.write("# stands in for this module; the sweep skips it\n")
+        with open(os.path.join(d, "guilty.py"), "w") as fh:
+            fh.write("BASE = 0x5904\nALSO = 21508\nFINE = 0x20000\n")
+        caught = attempt("the sweep runs on a planted module",
+                         lambda: address_monopoly(d), default=[])
+        # The sweep skips the file it is defined in, which here is the real
+        # layout.py, so the planted stand-in is swept too and stays quiet.
+        ok("the sweep catches a planted hex address",
+           any("0x5904" in c for c in caught), f"caught={caught}")
+        ok("and a planted decimal one",
+           any("21508" in c for c in caught), f"caught={caught}")
+        ok("and leaves container constants alone",
+           not any("0x20000" in c for c in caught), f"caught={caught}")
+
+    # --- the red case: a table that parses nothing must not pass
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as fh:
+        fh.write("# no table here\n")
+        empty = fh.name
+    try:
+        try:
+            parse_mcr_md(empty)
+            failures.append("refuses a table that parses nothing")
+            print("  FAIL  refuses a table that parses nothing: did NOT refuse")
+        except LayoutError as e:
+            ok("refuses a table that parses nothing",
+               "no destination row parsed" in str(e), str(e))
+    finally:
+        os.unlink(empty)
+
+    print(f"layout.py: {len(failures)} failure(s)")
+    return len(failures)
+
+
+# --- CLI -------------------------------------------------------------------
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--check", action="store_true",
+                    help="cross-check against wte/re/mcr.md")
+    ap.add_argument("--self-check", action="store_true",
+                    help="run the self-check, including the red cases")
+    ap.add_argument("--rule1", action="store_true",
+                    help="sweep tools/mcr/ for addresses outside layout.py")
+    ap.add_argument("--mcr-md", default=MCR_MD,
+                    help="path to the measurement (default: wte/re/mcr.md)")
+    a = ap.parse_args(argv)
+
+    if a.self_check:
+        return 1 if self_check() else 0
+
+    if a.rule1:
+        found = address_monopoly()
+        for c in found:
+            print(f"  FAIL {c}")
+        print(f"layout.py --rule1: {len(found)} address(es) outside layout.py")
+        return 1 if found else 0
+
+    if a.check:
+        try:
+            return 1 if check(a.mcr_md) else 0
+        except LayoutError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+
+    print(f"{len(DESTINATIONS)} destinations, from wte/re/mcr.md\n")
+    print(" address  block  bytes  reads back  field")
+    for d in DESTINATIONS:
+        print(f"  {d.address:#06x}      {d.block}  {d.total_bytes:5d}  "
+              f"{'yes' if d.reads_back else 'NO ':<10}  {d.field}"
+              + (f"  [{d.count} x {d.item_size} @ stride {d.stride}]"
+                 if d.strided else ""))
+    print()
+    print(f"kickers, in kicker order: "
+          f"{', '.join(f'{a:#06x}' for a in KICKER_ADDRESSES)}  (not increasing)")
+    print(f"shirt-number bit shifts:  {SHIRT_NUMBER_BIT_SHIFTS}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -20,6 +20,15 @@ status: pendente
   Y `20 34 48 11 57 32 1e 3e 2a 3e`, papéis `02 03 06 07 08 0a 0e 10 11 13`.
 - O papel é gravado como **índice + 2** sobre 20 rótulos. Os fatores `X*7` e
   `Y*2` do upstream são **de tela**, não de formato — não entram no núcleo.
+- **X e Y são uma vista derivada, não um endereço novo.** A medição de
+  `wte/re/mcr.md` tem **um** destino de 20 bytes em `0x62A8`; a leitura do
+  upstream o parte em X[10] e Y[10]. A MCR-TASK-05 deixou isso pronto em
+  `layout.py` como `FORMATION_X_ADDRESS` e `FORMATION_Y_ADDRESS` (= `0x62B2`),
+  derivados do destino de 20 bytes. **Não acrescente `0x62B2` a
+  `DESTINATIONS`** — isso faria a contagem virar 18 e derrubaria o
+  `layout.py --check`, que é 17/17 contra a medição. E não escreva endereço
+  nenhum aqui: `layout.py --rule1` varre `formation.py` atrás de hex em
+  `0x4000..0x8000` e de decimal como `25256`.
 - **O `0x6500` está em aberto** (§1.8): capitão pela nossa RE, sexto cobrador
   pelo upstream. Até a MCR-TASK-13 responder, o byte **passa intacto** e não
   aparece na UI.
