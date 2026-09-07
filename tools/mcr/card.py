@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
-"""O conteiner do memory card PSX -- diretorio, blocos, quadros e as recusas.
+"""The PSX memory card container -- directory, blocks, frames and the refusals.
 
-Proveniencia (secao 3.4 do plano):
+Provenance (section 3.4 of the plan):
 
-  conteiner   spec publica do nocash ("Memory Card Data Format"), e o
-              `wte/tools/dump_mcr.py` deste repositorio, que ja a implementa
-  endereco    NENHUM. Os 17 destinos do save moram em `layout.py`, e so la
-              (Regra 1 da secao 3.3). O `0x800` deste modulo nao e um deles:
-              ele e DERIVADO do tamanho do quadro e da contagem de quadros de
-              diretorio, e por isso e calculado, nao escrito
-  semantica   --
+  container   the public nocash spec ("Memory Card Data Format"), and this
+              repository's `wte/tools/dump_mcr.py`, which already implements it
+  address     NONE. The save's 17 destinations live in `layout.py`, and only
+              there (Rule 1 of section 3.3). This module's `0x800` is not one
+              of them: it is DERIVED from the frame size and the directory
+              frame count, and is therefore computed, not written
+  semantics   --
   codec       --
 
-O que este modulo existe para impedir, e que o upstream faz: tratar o cartao
-como um binario plano de 131.072 bytes. O `Easy MCR` nao menciona diretorio,
-quadro, bloco nem estado em lugar nenhum do fonte, e o efeito e triplo -- so
-funciona com dump raw, quebra em silencio se o save mudar de bloco, e grava IDs
-de um banco privado nos bytes 0..137, que sao o quadro de cabecalho `MC`
-inteiro mais o `state`+`size`+`link` da entrada 1. O resultado e um cartao que
-nenhum console le. Ver a secao 1.10 do plano.
+What this module exists to prevent, and what the upstream does: treating the
+card as a flat 131,072-byte binary. `Easy MCR` never mentions directory, frame,
+block or state anywhere in its source, and the effect is threefold -- it only
+works with a raw dump, it breaks silently if the save moves to another block,
+and it writes IDs from a private database into bytes 0..137, which are the whole
+`MC` header frame plus the `state`+`size`+`link` of entry 1. The result is a
+card no console reads. See section 1.10 of the plan.
 
-Uso:
+Usage:
 
-    python3 tools/mcr/card.py <cartao.mcr>
-    python3 tools/mcr/card.py <cartao.mcr> --json
+    python3 tools/mcr/card.py <card.mcr>
+    python3 tools/mcr/card.py <card.mcr> --json
     python3 tools/mcr/card.py --self-check
 """
 
@@ -34,63 +34,63 @@ import os
 import re
 import sys
 
-# --- o conteiner ----------------------------------------------------------
-# Numeros da spec publica do nocash, os mesmos quatro que o `dump_mcr.py` ja
-# carrega. Nao ha nada de WE2002 aqui: qualquer memory card de PSX e assim.
+# --- the container --------------------------------------------------------
+# Numbers from the public nocash spec, the same four `dump_mcr.py` already
+# carries. There is nothing of WE2002 here: every PSX memory card is like this.
 
-CARD_BYTES = 0x20000        # 131.072 = 16 blocos
+CARD_BYTES = 0x20000        # 131,072 = 16 blocks
 BLOCK_BYTES = 8192
 FRAME_BYTES = 128
-DIRECTORY_FRAMES = 15       # o quadro 0 e o cabecalho `MC`; os 15 seguintes
-                            # descrevem os blocos 1..15
+DIRECTORY_FRAMES = 15       # frame 0 is the `MC` header; the next 15 describe
+                            # blocks 1..15
 MAGIC = b"MC"
 
-# O primeiro byte que pertence a DADO e nao a estrutura. E o `0x800` da secao
-# 1.10 do plano, e ele e derivado de proposito: escrito como constante, ele
-# vira mais um numero magico que ninguem sabe de onde veio, e a proxima pessoa
-# que mudar FRAME_BYTES o deixa para tras.
+# The first byte that belongs to DATA and not to structure. It is the `0x800`
+# of section 1.10 of the plan, and it is derived on purpose: written as a
+# constant it becomes one more magic number nobody knows the origin of, and the
+# next person to change FRAME_BYTES leaves it behind.
 HEADER_BYTES = FRAME_BYTES * (DIRECTORY_FRAMES + 1)   # 2048 = 0x800
 
-# Os oito estados de quadro. O nibble alto separa livre de em uso; o baixo diz
-# a posicao na cadeia.
+# The eight frame states. The high nibble separates free from in use; the low
+# one gives the position in the chain.
 FRAME_STATES = {
-    0x51: "em uso, primeiro bloco da cadeia",
-    0x52: "em uso, bloco do meio",
-    0x53: "em uso, ultimo bloco da cadeia",
-    0xA0: "livre (formatado)",
-    0xA1: "livre (era o primeiro de uma cadeia apagada)",
-    0xA2: "livre (era do meio)",
-    0xA3: "livre (era o ultimo)",
-    0xFF: "sem uso",
+    0x51: "in use, first block of the chain",
+    0x52: "in use, middle block",
+    0x53: "in use, last block of the chain",
+    0xA0: "free (formatted)",
+    0xA1: "free (was the first of a deleted chain)",
+    0xA2: "free (was a middle one)",
+    0xA3: "free (was the last one)",
+    0xFF: "unused",
 }
 
 IN_USE_STATES = (0x51, 0x52, 0x53)
 CHAIN_END = 0xFFFF
 
-# O nome do save do WE2002, como ele aparece no quadro de diretorio.
+# The name of the WE2002 save, as it appears in the directory frame.
 #
-# MEDIDO, e so um: `BISLPM-86600WEW-OPT`, na fixture japonesa. O `B` e o
-# cabecalho de save do PSX, a letra seguinte e a regiao (I=Japao, E=Europa,
-# A=America) e o resto e o codigo de produto mais o nome do arquivo.
+# MEASURED, and only one: `BISLPM-86600WEW-OPT`, in the Japanese fixture. The
+# `B` is the PSX save header, the next letter is the region (I=Japan, E=Europe,
+# A=America) and the rest is the product code plus the file name.
 #
-# As variantes europeia e americana estao no padrao POR FORMA, nao por
-# medicao: nenhum cartao SLES ou SLUS passou por aqui, e inventar o numero de
-# produto deles seria fabricar dado. O que identifica o save e o sufixo
-# `WEW-OPT`; e por ele que se casa, e o prefixo so confere que a coisa tem
-# cara de nome de save de PSX.
+# The European and American variants are in the pattern BY FORM, not by
+# measurement: no SLES or SLUS card has passed through here, and inventing their
+# product number would be fabricating data. What identifies the save is the
+# `WEW-OPT` suffix; that is what is matched, and the prefix only checks that the
+# thing looks like a PSX save name.
 SAVE_NAME_RE = re.compile(r"^B[A-Z]SL[A-Z]{2}-\d{5}WEW-OPT$")
 
 
 class CardError(Exception):
-    """Cartao que nao e um cartao, ou que nao e o que se pediu."""
+    """A card that is not a card, or that is not the one asked for."""
 
 
 class Refused(Exception):
-    """Uma escrita que este modulo nao faz, com a razao que um humano precisa."""
+    """A write this module does not perform, with the reason a human needs."""
 
 
 def frame_checksum(frame: bytes) -> int:
-    """O XOR dos 127 primeiros bytes, que e o que o byte 127 guarda."""
+    """The XOR of the first 127 bytes, which is what byte 127 holds."""
     x = 0
     for b in frame[:FRAME_BYTES - 1]:
         x ^= b
@@ -99,20 +99,20 @@ def frame_checksum(frame: bytes) -> int:
 
 @dataclasses.dataclass
 class DirectoryEntry:
-    """Um dos 15 quadros de diretorio, ja lido."""
+    """One of the 15 directory frames, already read."""
 
     frame: int              # 1..15
-    block: int              # o bloco que ele descreve -- o mesmo numero
+    block: int              # the block it describes -- the same number
     state: int
-    size: int               # tamanho declarado do save, em bytes
-    link: int               # proximo da cadeia, 0-based, ou 0xFFFF
+    size: int               # declared size of the save, in bytes
+    link: int               # next in the chain, 0-based, or 0xFFFF
     name: str
     stored_checksum: int
     computed_checksum: int
 
     @property
     def state_name(self) -> str:
-        return FRAME_STATES.get(self.state, "desconhecido")
+        return FRAME_STATES.get(self.state, "unknown")
 
     @property
     def in_use(self) -> bool:
@@ -124,14 +124,14 @@ class DirectoryEntry:
 
     @property
     def next_frame(self) -> int | None:
-        """O quadro seguinte da cadeia, ou `None` se este e o ultimo.
+        """The next frame in the chain, or `None` if this is the last one.
 
-        O `link` e 0-BASED sobre os 15 blocos de dados, e o quadro e 1-based:
-        link 1 quer dizer quadro 2. Ler o link como numero de quadro faz a
-        cadeia da fixture apontar para si mesma -- o quadro 1 tem link 1 -- e
-        um leitor ingenuo entra em laco infinito ou conclui "cadeia de um
-        bloco" para um save de 16.384 bytes. E o tamanho declarado que
-        desempata, e foi assim que isto foi medido.
+        The `link` is 0-BASED over the 15 data blocks, and the frame is
+        1-based: link 1 means frame 2. Reading the link as a frame number makes
+        the fixture's chain point at itself -- frame 1 has link 1 -- and a naive
+        reader either loops forever or concludes "one-block chain" for a
+        16,384-byte save. It is the declared size that breaks the tie, and that
+        is how this was measured.
         """
         if self.link == CHAIN_END:
             return None
@@ -139,29 +139,29 @@ class DirectoryEntry:
 
 
 class Card:
-    """Os 131.072 bytes de um cartao, com o diretorio por cima.
+    """The 131,072 bytes of a card, with the directory on top.
 
-    Os bytes crus sao normativos (Regra 2 da secao 3.3): este objeto guarda o
-    cartao inteiro e edita por read-modify-write no campo. Nada e remontado, e
-    e por isso que o round-trip byte-identico e alcancavel.
+    The raw bytes are normative (Rule 2 of section 3.3): this object holds the
+    whole card and edits it by read-modify-write in place. Nothing is
+    reassembled, and that is why a byte-identical round-trip is reachable.
     """
 
-    def __init__(self, data: bytes, origin: str = "<memoria>"):
+    def __init__(self, data: bytes, origin: str = "<memory>"):
         if len(data) != CARD_BYTES:
             raise CardError(
-                f"{origin}: {len(data)} bytes, e um memory card de PSX tem "
-                f"{CARD_BYTES} ({CARD_BYTES // BLOCK_BYTES} blocos de "
-                f"{BLOCK_BYTES}). Formatos com cabecalho -- .gme, .vgs, .mcd de "
-                f"emulador -- nao sao dump raw e nao servem aqui.")
+                f"{origin}: {len(data)} bytes, and a PSX memory card has "
+                f"{CARD_BYTES} ({CARD_BYTES // BLOCK_BYTES} blocks of "
+                f"{BLOCK_BYTES}). Formats with a header -- .gme, .vgs, an "
+                f"emulator .mcd -- are not raw dumps and do not serve here.")
         if data[:len(MAGIC)] != MAGIC:
             raise CardError(
-                f"{origin}: os dois primeiros bytes sao "
-                f"{data[:2].hex(' ')} e nao {MAGIC.decode()} "
-                f"({MAGIC.hex(' ')}). Isto nao e um memory card formatado.")
+                f"{origin}: the first two bytes are "
+                f"{data[:2].hex(' ')} and not {MAGIC.decode()} "
+                f"({MAGIC.hex(' ')}). This is not a formatted memory card.")
         self.data = bytearray(data)
         self.origin = origin
 
-    # -- leitura ----------------------------------------------------------
+    # -- reading ----------------------------------------------------------
 
     @classmethod
     def from_file(cls, path) -> "Card":
@@ -175,7 +175,7 @@ class Card:
         return bytes(self.data[index * BLOCK_BYTES:(index + 1) * BLOCK_BYTES])
 
     def header_checksum_ok(self) -> bool:
-        """O quadro 0 tambem tem checksum, e tambem nao se conserta."""
+        """Frame 0 has a checksum too, and it is not repaired either."""
         q = self.frame(0)
         return q[FRAME_BYTES - 1] == frame_checksum(q)
 
@@ -196,19 +196,19 @@ class Card:
         return out
 
     def stray_blocks(self) -> list[tuple[int, int, int]]:
-        """Blocos com dado que o diretorio nao declara: `(bloco, estado, nao_zero)`.
+        """Blocks holding data the directory does not declare: `(block, state, non_zero)`.
 
-        MEDIDO na fixture: o bloco 3 tem 41 bytes nao-zero e o diretorio o
-        marca `0xA0`, livre. Nao e sujeira -- e onde moram formacao,
-        cobradores e tatica. E o que torna "este cartao e valido para o
-        console?" uma pergunta em aberto (secao 5.6 do plano), e e por isso
-        que esta medicao e um comando e nao um script perdido.
+        MEASURED in the fixture: block 3 has 41 non-zero bytes and the directory
+        marks it `0xA0`, free. It is not litter -- it is where the formation,
+        the kickers and the tactic live. It is what makes "is this card valid
+        for the console?" an open question (section 5.6 of the plan), and it is
+        why this measurement is a command and not a stray script.
         """
-        achado = self.find_save()
-        declarados = set(achado[1]) if achado else set()
+        found = self.find_save()
+        declared = set(found[1]) if found else set()
         out = []
         for b in range(1, DIRECTORY_FRAMES + 1):
-            if b in declarados:
+            if b in declared:
                 continue
             nz = sum(1 for x in self.block(b) if x)
             if nz:
@@ -216,92 +216,92 @@ class Card:
         return out
 
     def bad_checksums(self) -> list[int]:
-        """Os quadros cujo XOR nao bate -- RELATADOS, nunca consertados.
+        """The frames whose XOR does not match -- REPORTED, never repaired.
 
-        Nao recalcular o checksum e comportamento MEDIDO do original, e a
-        secao 6 do plano manda reproduzi-lo por ora: divergir sem oraculo
-        troca um desconhecido por outro. Quem quiser mudar isso mede primeiro,
-        na MCR-TASK-13.
+        Not recalculating the checksum is MEASURED behaviour of the original,
+        and section 6 of the plan says to reproduce it for now: diverging with
+        no oracle trades one unknown for another. Whoever wants to change that
+        measures first, in MCR-TASK-13.
         """
         bad = [] if self.header_checksum_ok() else [0]
         bad += [d.frame for d in self.directory() if not d.checksum_ok]
         return bad
 
     def chain(self, start_frame: int) -> list[int]:
-        """Os quadros de uma cadeia, seguindo o `link` a partir de `start_frame`."""
+        """The frames of one chain, following `link` from `start_frame`."""
         seen: list[int] = []
         entries = {d.frame: d for d in self.directory()}
         cur = start_frame
         while cur is not None:
             if cur in seen:
                 raise CardError(
-                    f"{self.origin}: a cadeia que comeca no quadro "
-                    f"{start_frame} volta ao quadro {cur} -- diretorio "
-                    f"corrompido, ou o `link` foi lido como numero de quadro "
-                    f"em vez de indice 0-based de bloco.")
+                    f"{self.origin}: the chain starting at frame "
+                    f"{start_frame} returns to frame {cur} -- corrupt "
+                    f"directory, or the `link` was read as a frame number "
+                    f"instead of a 0-based block index.")
             if cur not in entries:
                 raise CardError(
-                    f"{self.origin}: a cadeia que comeca no quadro "
-                    f"{start_frame} aponta para o quadro {cur}, fora de "
+                    f"{self.origin}: the chain starting at frame "
+                    f"{start_frame} points to frame {cur}, outside "
                     f"1..{DIRECTORY_FRAMES}.")
             seen.append(cur)
             cur = entries[cur].next_frame
         return seen
 
     def find_save(self, pattern: re.Pattern = SAVE_NAME_RE):
-        """O save do WE2002: a entrada, e os blocos em que ele de fato esta.
+        """The WE2002 save: the entry, and the blocks it actually occupies.
 
-        Devolve `(entrada, [blocos])`, ou `None` se nao houver.
+        Returns `(entry, [blocks])`, or `None` if there is none.
 
-        DIZER O BLOCO E O PONTO. O upstream assume onde o save esta e, se ele
-        estiver noutro lugar, todo endereco se desloca em multiplos de 8192 e o
-        resultado continua parecendo plausivel na tela -- e a armadilha 6 do
-        perfil. Aqui o bloco e lido do diretorio e devolvido junto.
+        NAMING THE BLOCK IS THE POINT. The upstream assumes where the save is
+        and, if it is somewhere else, every address shifts by multiples of 8192
+        and the result still looks plausible on screen -- that is trap 6 of the
+        profile. Here the block is read from the directory and returned with it.
         """
         for d in self.directory():
             if d.in_use and d.state == 0x51 and pattern.match(d.name):
                 return d, self.chain(d.frame)
         return None
 
-    # -- escrita ----------------------------------------------------------
+    # -- writing ----------------------------------------------------------
 
     def write(self, offset: int, payload: bytes) -> None:
-        """Grava `payload` em `offset`, ou RECUSA com a razao.
+        """Writes `payload` at `offset`, or REFUSES with the reason.
 
-        A recusa abaixo de `0x800` nao e um comentario de cortesia: e o caso de
-        controle negativo da secao 5.2 do plano, e ela existe porque o
-        `GrabarData` do upstream grava exatamente ali.
+        The refusal below `0x800` is not a courtesy comment: it is the negative
+        control case of section 5.2 of the plan, and it exists because the
+        upstream's `GrabarData` writes exactly there.
         """
         if offset < 0:
-            raise Refused(f"offset negativo: {offset}")
+            raise Refused(f"negative offset: {offset}")
         end = offset + len(payload)
         if end > CARD_BYTES:
             raise Refused(
-                f"escrita de {len(payload)} bytes em {offset:#07x} passa do "
-                f"fim do cartao ({CARD_BYTES:#07x}).")
+                f"a {len(payload)}-byte write at {offset:#07x} runs past the "
+                f"end of the card ({CARD_BYTES:#07x}).")
         if offset < HEADER_BYTES:
             raise Refused(
-                f"escrita em {offset:#07x}, abaixo de {HEADER_BYTES:#05x}: "
-                f"ali estao o quadro de cabecalho `MC` e os "
-                f"{DIRECTORY_FRAMES} quadros de diretorio -- estado, tamanho, "
-                f"link, nome e checksum de cada bloco. Um cartao com isso "
-                f"sobrescrito nao e lido por console nenhum. E o que o "
-                f"upstream faz nos bytes 0..137, e o port nao faz.")
+                f"write at {offset:#07x}, below {HEADER_BYTES:#05x}: that is "
+                f"where the `MC` header frame and the {DIRECTORY_FRAMES} "
+                f"directory frames live -- state, size, link, name and "
+                f"checksum of every block. A card with that overwritten is "
+                f"read by no console. It is what the upstream does to bytes "
+                f"0..137, and what the port does not do.")
         self.data[offset:end] = payload
 
     def to_bytes(self) -> bytes:
         return bytes(self.data)
 
 
-# --- o cartao sintetico, para o self-check --------------------------------
+# --- the synthetic card, for the self-check -------------------------------
 
 def synthetic_card(save_name: str = "BISLPM-86600WEW-OPT",
                    blocks: int = 2) -> Card:
-    """Um cartao valido montado em memoria -- sem fixture, sem disco.
+    """A valid card assembled in memory -- no fixture, no disk.
 
-    E o que faz o `mcr_selftest` rodar em qualquer maquina. A cadeia tem
-    `blocks` blocos para que o teste do `link` 0-based tenha o que exercitar:
-    com um bloco so, ler o link errado passaria despercebido.
+    It is what makes `mcr_selftest` run on any machine. The chain has `blocks`
+    blocks so that the 0-based `link` test has something to exercise: with a
+    single block, reading the link wrongly would go unnoticed.
     """
     data = bytearray(b"\x00" * CARD_BYTES)
     data[0:2] = MAGIC
@@ -310,7 +310,7 @@ def synthetic_card(save_name: str = "BISLPM-86600WEW-OPT",
         if i <= blocks:
             q[0] = 0x51 if i == 1 else (0x53 if i == blocks else 0x52)
             q[4:8] = (BLOCK_BYTES * blocks).to_bytes(4, "little")
-            # link 0-based: o quadro i aponta para o quadro i+1 com o valor i
+            # 0-based link: frame i points to frame i+1 with the value i
             q[8:10] = (CHAIN_END if i == blocks else i).to_bytes(2, "little")
             if i == 1:
                 q[10:10 + len(save_name)] = save_name.encode("ascii")
@@ -320,180 +320,186 @@ def synthetic_card(save_name: str = "BISLPM-86600WEW-OPT",
         q[FRAME_BYTES - 1] = frame_checksum(q)
         data[i * FRAME_BYTES:(i + 1) * FRAME_BYTES] = q
     data[127] = frame_checksum(data[0:FRAME_BYTES])
-    return Card(bytes(data), origin="<sintetico>")
+    return Card(bytes(data), origin="<synthetic>")
 
 
 # --- self-check -----------------------------------------------------------
 
 def self_check(verbose: bool = True) -> int:
-    """Exercita o modulo contra um cartao sintetico. Devolve o numero de falhas.
+    """Exercises the module against a synthetic card. Returns the failure count.
 
-    Cada recusa e um CASO VERMELHO: o teste nao pergunta "o modulo aceita o que
-    e valido", pergunta "o modulo recusa o que e invalido, e pela razao certa".
-    Um guard que nunca ficou vermelho e decoracao -- a licao das CORR-PES2-009
-    e -020.
+    Every refusal is a RED CASE: the test does not ask "does the module accept
+    what is valid", it asks "does the module refuse what is invalid, and for the
+    right reason". A guard that has never gone red is decoration -- the lesson
+    of CORR-PES2-009 and -020.
     """
-    falhas = []
+    failures = []
 
-    def ok(nome, cond, detalhe=""):
+    def ok(name, cond, detail=""):
         if cond:
             if verbose:
-                print(f"  ok    {nome}")
+                print(f"  ok    {name}")
         else:
-            falhas.append(nome)
-            print(f"  FALHA {nome}  {detalhe}")
+            failures.append(name)
+            print(f"  FAIL  {name}  {detail}")
 
-    def tenta(nome, fn, default=None):
-        """Roda `fn()` e devolve o valor; excecao INESPERADA vira falha.
+    def attempt(name, fn, default=None):
+        """Runs `fn()` and returns the value; an UNEXPECTED exception is a failure.
 
-        Sem isto, um defeito que levanta em vez de devolver errado mata a
-        corrida no meio e esconde tudo que vinha depois -- medido: tirar o
-        `+1` do `link` fazia o `find_save` estourar no sexto check e os outros
-        vinte nunca rodavam. O gate ficava vermelho, mas por traceback, e o
-        relatorio nao dizia o que mais estava quebrado.
+        Without this, a defect that raises instead of returning something wrong
+        kills the run halfway and hides everything that came after -- measured:
+        dropping the `+1` from `link` made `find_save` blow up on the sixth
+        check and the other twenty never ran. The gate went red, but by
+        traceback, and the report did not say what else was broken.
         """
         try:
             return fn()
         except Exception as e:                        # noqa: BLE001
-            falhas.append(nome)
-            print(f"  FALHA {nome}: levantou {type(e).__name__}: {e}")
+            failures.append(name)
+            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
             return default
 
-    def recusa(nome, fn, trecho, excecao=Refused):
-        """Exige que `fn()` levante `excecao` com `trecho` na mensagem."""
+    def refuses(name, fn, fragment, exception=Refused):
+        """Requires `fn()` to raise `exception` with `fragment` in the message."""
         try:
             fn()
-        except excecao as e:
-            if trecho in str(e):
+        except exception as e:
+            if fragment in str(e):
                 if verbose:
-                    print(f"  ok    {nome} (recusou: {str(e)[:60]}...)")
+                    print(f"  ok    {name} (refused: {str(e)[:60]}...)")
             else:
-                falhas.append(nome)
-                print(f"  FALHA {nome}: recusou, mas sem dizer {trecho!r}: {e}")
+                failures.append(name)
+                print(f"  FAIL  {name}: refused, but without saying "
+                      f"{fragment!r}: {e}")
         except Exception as e:                        # noqa: BLE001
-            falhas.append(nome)
-            print(f"  FALHA {nome}: levantou {type(e).__name__}, "
-                  f"esperado {excecao.__name__}: {e}")
+            failures.append(name)
+            print(f"  FAIL  {name}: raised {type(e).__name__}, "
+                  f"expected {exception.__name__}: {e}")
         else:
-            falhas.append(nome)
-            print(f"  FALHA {nome}: NAO recusou -- o guard esta verde a toa")
+            failures.append(name)
+            print(f"  FAIL  {name}: did NOT refuse -- the guard is green for nothing")
 
     print("card.py self-check")
 
     c = synthetic_card()
 
-    # --- o que tem de funcionar
-    ok("magic e tamanho aceitos", c.to_bytes()[:2] == MAGIC
+    # --- what has to work
+    ok("magic and size accepted", c.to_bytes()[:2] == MAGIC
        and len(c.to_bytes()) == CARD_BYTES)
-    ok("checksum do cabecalho bate", c.header_checksum_ok())
-    ok("nenhum checksum ruim no sintetico", c.bad_checksums() == [],
-       f"ruins={c.bad_checksums()}")
-    ok("15 quadros de diretorio", len(c.directory()) == DIRECTORY_FRAMES)
+    ok("header checksum matches", c.header_checksum_ok())
+    ok("no bad checksum in the synthetic card", c.bad_checksums() == [],
+       f"bad={c.bad_checksums()}")
+    ok("15 directory frames", len(c.directory()) == DIRECTORY_FRAMES)
 
     d = c.directory()
-    ok("quadro 1 em uso, primeiro da cadeia", d[0].state == 0x51 and d[0].in_use)
-    ok("quadro 1 nomeia o estado", d[0].state_name.startswith("em uso"))
-    ok("quadro 3 livre", d[2].state == 0xA0 and not d[2].in_use)
+    ok("frame 1 in use, first of the chain", d[0].state == 0x51 and d[0].in_use)
+    ok("frame 1 names its state", d[0].state_name.startswith("in use"))
+    ok("frame 3 free", d[2].state == 0xA0 and not d[2].in_use)
 
-    achado = tenta("acha o save pelo nome", c.find_save)
-    ok("acha o save pelo nome", achado is not None)
-    if achado:
-        entrada, blocos = achado
-        ok("diz em que blocos o save esta", blocos == [1, 2], f"blocos={blocos}")
-        ok("tamanho declarado bate com a cadeia",
-           entrada.size == len(blocos) * BLOCK_BYTES,
-           f"size={entrada.size} blocos={len(blocos)}")
+    found = attempt("finds the save by name", c.find_save)
+    ok("finds the save by name", found is not None)
+    if found:
+        entry, blocks = found
+        ok("says which blocks the save is in", blocks == [1, 2], f"blocks={blocks}")
+        ok("declared size matches the chain",
+           entry.size == len(blocks) * BLOCK_BYTES,
+           f"size={entry.size} blocks={len(blocks)}")
 
-    # O link 0-based, exercitado de frente: quadro 1 tem link 1 e aponta para o
-    # quadro 2. Lido como numero de quadro, apontaria para si mesmo.
-    ok("link 0-based vira o quadro seguinte",
+    # The 0-based link, exercised head on: frame 1 has link 1 and points to
+    # frame 2. Read as a frame number, it would point at itself.
+    ok("0-based link becomes the next frame",
        d[0].link == 1 and d[0].next_frame == 2,
        f"link={d[0].link} next={d[0].next_frame}")
-    ok("fim de cadeia e None", d[1].next_frame is None)
+    ok("end of chain is None", d[1].next_frame is None)
 
-    ok("HEADER_BYTES e derivado e vale 0x800", HEADER_BYTES == 0x800)
+    ok("HEADER_BYTES is derived and equals 0x800", HEADER_BYTES == 0x800)
 
-    # escrita valida, no dado
-    antes = c.to_bytes()
+    # valid write, into the data
+    before = c.to_bytes()
     c.write(HEADER_BYTES, b"\xAA\xBB")
-    ok("escrita em 0x800 e aceita", c.to_bytes()[0x800:0x802] == b"\xAA\xBB")
-    ok("escrita valida so toca o que pediu",
-       sum(1 for a, b in zip(antes, c.to_bytes()) if a != b) == 2)
+    ok("write at 0x800 is accepted", c.to_bytes()[0x800:0x802] == b"\xAA\xBB")
+    ok("a valid write only touches what it asked for",
+       sum(1 for a, b in zip(before, c.to_bytes()) if a != b) == 2)
 
-    # --- as recusas: os casos vermelhos
-    recusa("recusa escrita em 0x0000",
-           lambda: c.write(0, b"\x00" * 138), "abaixo de 0x800")
-    recusa("recusa escrita no ultimo byte do diretorio",
-           lambda: c.write(HEADER_BYTES - 1, b"\x00"), "abaixo de 0x800")
-    recusa("recusa escrita que atravessa o fim do cartao",
-           lambda: c.write(CARD_BYTES - 1, b"\x00\x00"), "passa do fim")
-    recusa("recusa offset negativo",
-           lambda: c.write(-1, b"\x00"), "negativo")
+    # --- the refusals: the red cases
+    refuses("refuses a write at 0x0000",
+            lambda: c.write(0, b"\x00" * 138), "below 0x800")
+    refuses("refuses a write at the last directory byte",
+            lambda: c.write(HEADER_BYTES - 1, b"\x00"), "below 0x800")
+    refuses("refuses a write running past the end of the card",
+            lambda: c.write(CARD_BYTES - 1, b"\x00\x00"), "past the end")
+    refuses("refuses a negative offset",
+            lambda: c.write(-1, b"\x00"), "negative")
 
-    recusa("recusa arquivo truncado em 1 byte",
-           lambda: Card(bytes(CARD_BYTES - 1), origin="<truncado>"),
-           "bytes, e um memory card", CardError)
-    recusa("recusa arquivo sem MC",
-           lambda: Card(b"\x00" * CARD_BYTES, origin="<sem magic>"),
-           "nao e um memory card formatado", CardError)
+    refuses("refuses a file truncated by 1 byte",
+            lambda: Card(bytes(CARD_BYTES - 1), origin="<truncated>"),
+            "bytes, and a PSX memory card", CardError)
+    refuses("refuses a file with no MC",
+            lambda: Card(b"\x00" * CARD_BYTES, origin="<no magic>"),
+            "not a formatted memory card", CardError)
 
-    # checksum divergente e RELATADO, nunca consertado
-    sujo = synthetic_card()
-    sujo.data[3 * FRAME_BYTES + FRAME_BYTES - 1] ^= 0xFF
-    ok("checksum divergente e relatado", sujo.bad_checksums() == [3],
-       f"ruins={sujo.bad_checksums()}")
-    ok("checksum divergente NAO e consertado",
-       sujo.frame(3)[FRAME_BYTES - 1] != frame_checksum(sujo.frame(3)))
+    # a diverging checksum is REPORTED, never repaired
+    dirty = synthetic_card()
+    dirty.data[3 * FRAME_BYTES + FRAME_BYTES - 1] ^= 0xFF
+    ok("a diverging checksum is reported", dirty.bad_checksums() == [3],
+       f"bad={dirty.bad_checksums()}")
+    ok("a diverging checksum is NOT repaired",
+       dirty.frame(3)[FRAME_BYTES - 1] != frame_checksum(dirty.frame(3)))
 
-    fora = tenta("dado fora da cadeia e calculavel", c.stray_blocks, default=None)
-    ok("sintetico nao tem dado fora da cadeia", fora == [], f"fora={fora}")
-    sujeira = synthetic_card()
-    sujeira.write(3 * BLOCK_BYTES, b"\x01\x02\x03")
-    suja = tenta("bloco livre com dado e calculavel", sujeira.stray_blocks)
-    ok("dado num bloco livre e denunciado", suja == [(3, 0xA0, 3)], f"fora={suja}")
+    stray = attempt("data outside the chain is computable", c.stray_blocks,
+                    default=None)
+    ok("the synthetic card has no data outside the chain", stray == [],
+       f"stray={stray}")
+    littered = synthetic_card()
+    littered.write(3 * BLOCK_BYTES, b"\x01\x02\x03")
+    found_stray = attempt("a free block with data is computable",
+                          littered.stray_blocks)
+    ok("data in a free block is denounced", found_stray == [(3, 0xA0, 3)],
+       f"stray={found_stray}")
 
-    # o negativo da secao 5.2: trocar o estado do quadro 1 de 0x51 para 0xA0
-    perdido = synthetic_card()
-    perdido.data[1 * FRAME_BYTES] = 0xA0
-    perdido.data[1 * FRAME_BYTES + FRAME_BYTES - 1] = frame_checksum(
-        perdido.frame(1))
-    ok("save some quando o quadro 1 vira 0xA0",
-       tenta("find_save no cartao sem save", perdido.find_save, "?") is None)
+    # the negative of section 5.2: turning frame 1's state from 0x51 to 0xA0
+    lost = synthetic_card()
+    lost.data[1 * FRAME_BYTES] = 0xA0
+    lost.data[1 * FRAME_BYTES + FRAME_BYTES - 1] = frame_checksum(
+        lost.frame(1))
+    ok("the save disappears when frame 1 turns 0xA0",
+       attempt("find_save on a card with no save", lost.find_save, "?") is None)
 
-    # cadeia que volta em si -- o sintoma de ler o link como numero de quadro
-    laco = synthetic_card()
-    laco.data[1 * FRAME_BYTES + 8:1 * FRAME_BYTES + 10] = (0).to_bytes(2, "little")
-    recusa("recusa cadeia circular",
-           lambda: laco.chain(1), "volta ao quadro", CardError)
+    # a chain that comes back on itself -- the symptom of reading the link as a
+    # frame number
+    loop = synthetic_card()
+    loop.data[1 * FRAME_BYTES + 8:1 * FRAME_BYTES + 10] = (0).to_bytes(2, "little")
+    refuses("refuses a circular chain",
+            lambda: loop.chain(1), "returns to frame", CardError)
 
-    print(f"card.py: {len(falhas)} falha(s)")
-    return len(falhas)
+    print(f"card.py: {len(failures)} failure(s)")
+    return len(failures)
 
 
 # --- CLI ------------------------------------------------------------------
 
 def _report(card: Card) -> dict:
-    achado = card.find_save()
+    found = card.find_save()
     return {
-        "origem": card.origin,
+        "origin": card.origin,
         "bytes": CARD_BYTES,
         "magic_ok": True,
-        "checksums_ruins": card.bad_checksums(),
-        "save": None if achado is None else {
-            "nome": achado[0].name,
-            "blocos": achado[1],
-            "tamanho_declarado": achado[0].size,
-            "offset_do_primeiro_bloco": achado[1][0] * BLOCK_BYTES,
+        "bad_checksums": card.bad_checksums(),
+        "save": None if found is None else {
+            "name": found[0].name,
+            "blocks": found[1],
+            "declared_size": found[0].size,
+            "first_block_offset": found[1][0] * BLOCK_BYTES,
         },
-        "blocos_fora_da_cadeia": [
-            {"bloco": b, "estado": f"{e:#04x}", "bytes_nao_zero": n}
+        "blocks_outside_the_chain": [
+            {"block": b, "state": f"{e:#04x}", "non_zero_bytes": n}
             for b, e, n in card.stray_blocks()
         ],
-        "diretorio": [
-            {"quadro": d.frame, "estado": f"{d.state:#04x}",
-             "estado_nome": d.state_name, "tamanho": d.size,
-             "link": f"{d.link:#06x}", "proximo_quadro": d.next_frame,
-             "nome": d.name, "checksum_ok": d.checksum_ok}
+        "directory": [
+            {"frame": d.frame, "state": f"{d.state:#04x}",
+             "state_name": d.state_name, "size": d.size,
+             "link": f"{d.link:#06x}", "next_frame": d.next_frame,
+             "name": d.name, "checksum_ok": d.checksum_ok}
             for d in card.directory()
         ],
     }
@@ -501,57 +507,58 @@ def _report(card: Card) -> dict:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("card", nargs="?", help="o .mcr a inspecionar")
-    ap.add_argument("--json", action="store_true", help="saida em JSON")
+    ap.add_argument("card", nargs="?", help="the .mcr to inspect")
+    ap.add_argument("--json", action="store_true", help="output as JSON")
     ap.add_argument("--blocks", action="store_true",
-                    help="bytes nao-zero por bloco, e o que cai fora da cadeia")
+                    help="non-zero bytes per block, and what falls outside "
+                         "the chain")
     ap.add_argument("--self-check", action="store_true",
-                    help="roda o self-check, sem cartao nenhum")
+                    help="run the self-check, with no card at all")
     a = ap.parse_args(argv)
 
     if a.self_check:
         return 1 if self_check() else 0
 
     if not a.card:
-        ap.error("informe um .mcr, ou use --self-check")
+        ap.error("give a .mcr, or use --self-check")
 
     try:
         card = Card.from_file(a.card)
     except (CardError, OSError) as e:
-        print(f"erro: {e}", file=sys.stderr)
+        print(f"error: {e}", file=sys.stderr)
         return 2
 
     if a.blocks:
-        achado = card.find_save()
-        declarados = set(achado[1]) if achado else set()
+        found = card.find_save()
+        declared = set(found[1]) if found else set()
         d = {x.frame: x for x in card.directory()}
-        print(" bloco  estado  bytes nao-zero")
+        print(" block  state  non-zero bytes")
         for b in range(1, DIRECTORY_FRAMES + 1):
             nz = sum(1 for x in card.block(b) if x)
-            marca = "  <-- fora da cadeia declarada" if nz and b not in declarados else ""
-            print(f"   {b:2d}   {d[b].state:#04x}   {nz:6d}{marca}")
+            mark = "  <-- outside the declared chain" if nz and b not in declared else ""
+            print(f"   {b:2d}   {d[b].state:#04x}   {nz:6d}{mark}")
         return 0
 
-    rel = _report(card)
+    rep = _report(card)
     if a.json:
-        print(json.dumps(rel, indent=2, ensure_ascii=False))
+        print(json.dumps(rep, indent=2, ensure_ascii=False))
         return 0
 
     print(f"{card.origin}: {CARD_BYTES} bytes, magic MC")
-    ruins = rel["checksums_ruins"]
-    print(f"checksums de quadro: "
-          f"{'todos batem' if not ruins else f'DIVERGEM nos quadros {ruins}'}"
-          f"  (relatado, nunca consertado)")
-    if rel["save"]:
-        s = rel["save"]
-        print(f"save WE2002: {s['nome']!r} nos blocos {s['blocos']}, "
-              f"{s['tamanho_declarado']} bytes declarados, "
-              f"primeiro bloco em {s['offset_do_primeiro_bloco']:#07x}")
+    bad = rep["bad_checksums"]
+    print(f"frame checksums: "
+          f"{'all match' if not bad else f'DIVERGE in frames {bad}'}"
+          f"  (reported, never repaired)")
+    if rep["save"]:
+        s = rep["save"]
+        print(f"WE2002 save: {s['name']!r} in blocks {s['blocks']}, "
+              f"{s['declared_size']} bytes declared, "
+              f"first block at {s['first_block_offset']:#07x}")
     else:
-        print("save WE2002: NAO encontrado neste cartao")
+        print("WE2002 save: NOT found on this card")
     print()
-    print("  q  estado  como                                       tam  link"
-          "   nome")
+    print("  f  state   as                                        size  link"
+          "   name")
     for d in card.directory():
         print(f" {d.frame:2d}   {d.state:#04x}  {d.state_name:<40} "
               f"{d.size:>6}  {d.link:#06x}  {d.name}")

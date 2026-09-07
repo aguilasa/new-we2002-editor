@@ -32,9 +32,9 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 - **O código do port é en-US, a documentação é português.** Identificadores,
   docstrings, comentários, mensagens de erro, `--help` e rótulo de UI em inglês;
   `docs/**` em português. A fronteira é o arquivo. Decisão do dono do
-  repositório, 2026-09-07. O `card.py` da MCR-TASK-04 é anterior a ela e está em
-  português — é a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md), e é a
-  única exceção. (§3.5 do plano)
+  repositório, 2026-09-07. O `card.py` era anterior a ela e foi retraduzido pela
+  [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) no mesmo dia; **não há
+  exceção aberta**. (§3.5 do plano)
 - **Cartão de jogo não se versiona.** A fixture é `work/entrada.mcr`, apontada
   por `WE2002_MCR_CARD`. Mesma regra de `roms/`.
 
@@ -155,8 +155,11 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
 - **Fase 1** — todo módulo novo traz `self_check()` com **caso vermelho**; nenhum
   endereço fora de `layout.py`; round-trip nas duas formas; e **nada em
   português no módulo** — docstring, comentário, literal de prosa, mensagem de
-  recusa e identificador local em en-US (§3.5). O `card.py` é a exceção
-  conhecida até a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) fechar.
+  recusa e identificador local em en-US (§3.5). **Ao traduzir um módulo que já
+  tem `self_check`, traduza o trecho esperado junto com a mensagem** — o
+  `recusa()` casa substring, e traduzir um lado só deixa o gate verde por
+  acidente; foi o que a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md)
+  mediu, replantando os cinco controles negativos.
 - **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2
   skipped.
 - **Fase 3** — captura de tela no `:98` no Log; o arquivo gravado pela UI passa

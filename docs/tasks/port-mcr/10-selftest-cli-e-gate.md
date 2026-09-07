@@ -44,9 +44,9 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
 - [ ] A varredura de idioma no `selftest`: **nenhum espanhol remanescente e
       nenhuma prosa portuguesa em `tools/mcr/**.py`**. Todo o código do port é
       **en-US** — docstrings, comentários, mensagens, `--help` e saída do CLI
-      (§3.5). O `card.py` é a exceção conhecida até a
-      [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) fechar; a varredura
-      nasce sabendo disso, e a lista de exceção morre com ela.
+      (§3.5). **A varredura nasce sem lista de exceção:** o `card.py` era a
+      única, e a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) a fechou
+      em 2026-09-07, antes desta task.
 - [ ] Três alvos em `tests/CMakeLists.txt`: `mcr_selftest` (obrigatório),
       `mcr_card` (`WE2002_MCR_CARD`, skip 77) e `mcr_ui` (venv + `:98`, skip 77).
 - [ ] **Numa máquina sem venv e sem fixture**, `ctest -R mcr` reporta

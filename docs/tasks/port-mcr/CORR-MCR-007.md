@@ -3,7 +3,7 @@ id: CORR-MCR-007
 title: "Correção: retraduzir o `card.py` para en-US e fechar a dívida aberta da §3.5"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -125,12 +125,81 @@ essa varredura fica verde.
 - [ ] `roms/` e `work/entrada.mcr` intocados — o digest continua
       `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+`tools/mcr/card.py` traduzido para en-US de ponta a ponta — as 17 docstrings, os
+45 comentários (36 de linha e 9 inline), os 9 valores de `FRAME_STATES` mais o
+`"unknown"` do `state_name`, as 20 chaves do `--json`, as 7 mensagens de recusa,
+os 20 `print` e os identificadores locais (`falhas`→`failures`,
+`tenta`→`attempt`, `recusa`→`refuses`, `nome`→`name`, `detalhe`→`detail`,
+`excecao`→`exception`, `trecho`→`fragment`, `achado`→`found`,
+`declarados`→`declared`, `sujo`→`dirty`, `sujeira`→`littered`,
+`perdido`→`lost`, `laco`→`loop`, `antes`→`before`, `entrada`→`entry`,
+`blocos`→`blocks`, `ruins`→`bad`, `rel`→`rep`, `marca`→`mark`), e os quatro
+`origin` sintéticos (`<memoria>`→`<memory>`, `<sintetico>`→`<synthetic>`,
+`<truncado>`→`<truncated>`, `<sem magic>`→`<no magic>`). A **API pública não
+mudou**: `Card`, `DirectoryEntry`, `frame_checksum`, `next_frame`, `chain`,
+`find_save`, `bad_checksums`, `stray_blocks`, `write`, `to_bytes`,
+`synthetic_card`, `self_check` seguem como estavam.
+
+Os trechos que o `refuses()` casa por substring foram traduzidos **no mesmo
+movimento** que as mensagens: `"abaixo de 0x800"`→`"below 0x800"`,
+`"passa do fim"`→`"past the end"`, `"negativo"`→`"negative"`,
+`"bytes, e um memory card"`→`"bytes, and a PSX memory card"`,
+`"nao e um memory card formatado"`→`"not a formatted memory card"`,
+`"volta ao quadro"`→`"returns to frame"`, mais o
+`state_name.startswith("em uso")`→`startswith("in use")`.
+
+A §3.5 do plano perdeu o parágrafo da dívida aberta e o `perfil-mcr.md` perdeu
+a oração da exceção.
+
+**Medições:**
+
+| gate | resultado |
+|---|---|
+| `--self-check` | **27 checks, 0 failures**, `rc=0`; duas corridas dão saída idêntica (`cmp`) |
+| cinco controles negativos replantados | **5/5 vermelhos**, `rc=1`, falhas **2, 8, 1, 1, 1** — as mesmas contagens da corrida original |
+| `--blocks` na fixture | blocos `[1, 2]`, 5844 e 6253 bytes não-zero, 41 no bloco 3 marcado fora da cadeia |
+| `--json` | 7 chaves de topo, todas em inglês; `declared_size` 16.384, `first_block_offset` 8192 |
+| `grep -inE 'quadro|cartao|escrita|recusa|falha' card.py` | vazio |
+| Regra 1 (endereço só em `layout.py`) | nenhum dos 17 destinos (`0x5404`…`0x6500`) em `card.py` |
+| Regra 3 (núcleo sem Qt) | `import card` não traz `PySide6` |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / `1/1 Passed` |
+| fixture | digest inalterado, `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546` |
+
+O controle 4 continua falhando **pela mensagem de magic**, que é o
+comportamento documentado na MCR-TASK-04: com a checagem de tamanho desligada,
+o buffer truncado passa a ser recusado pelo magic, e a asserção é sobre *qual*
+recusa dispara.
+
 **Problemas encontrados:**
 
+**Um sítio que a CORR não listava**, achado pela varredura: a
+[MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md), linha 47, dizia
+que o `card.py` é "a exceção conhecida até a CORR-MCR-007 fechar" e que a
+varredura de idioma "nasce sabendo disso". Como a CORR fechou antes daquela
+task começar, a varredura nasce **sem lista de exceção** — a linha foi reescrita
+nesse sentido.
+
+Junto: a linha da CORR-MCR-007 na tabela do `correcoes-progresso.md` estava
+separada da 006 por uma **linha em branco**, o que partia a tabela em duas e
+deixava a 007 fora do corpo renderizado. Removida.
+
+A nota datada de 2026-09-07 na MCR-TASK-04 — que preserva em português os
+trechos casados pelos cinco controles — **ficou como está**: é evidência da
+corrida que aconteceu, não texto a reindexar.
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/card.py` — tradução para en-US, sem mudança de API nem de
+  comportamento
+- `docs/PLAN-MCR-PY.md` — §3.5, o parágrafo da dívida aberta
+- `docs/prompts/perfil-mcr.md` — a decisão de idioma e a verificação de Fase 1
+- `docs/tasks/port-mcr/10-selftest-cli-e-gate.md` — linha 47 (discrepância da
+  varredura)
+- `docs/tasks/port-mcr/correcoes-progresso.md` — a linha em branco que partia a
+  tabela

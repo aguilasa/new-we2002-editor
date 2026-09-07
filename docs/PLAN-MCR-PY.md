@@ -358,12 +358,11 @@ mecânica de [tools/glossary.py](../tools/glossary.py) com o italiano do
 (`quadro`, `cartao`, `escrita`, `recusa`, `falha`) pega a recaída sem
 falso-positivo, e sem ela a regra é prosa.
 
-**Uma dívida aberta:** o `card.py` da MCR-TASK-04 foi escrito **antes** desta
-decisão, sob a regra anterior ("identificadores em inglês, docstrings em
-português"), e está em português nas docstrings, nos comentários, nas mensagens
-de recusa, nas chaves do `--json` e na saída do `self_check`. A retradução é a
-[CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md); enquanto ela não fecha, o
-módulo é a **única** exceção, e nenhum módulo novo a herda.
+O `card.py` da MCR-TASK-04 foi escrito **antes** desta decisão e ficou em
+português; a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) o retraduziu
+em 2026-09-07, replantando os cinco controles negativos da task para provar que
+os trechos que o `recusa()` casa por substring foram traduzidos junto com as
+mensagens. **Não há exceção aberta** — a varredura acima vale para todo módulo.
 
 ---
 
