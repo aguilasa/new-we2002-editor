@@ -21,6 +21,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-005](/docs/tasks/port-mcr/CORR-MCR-005.md) | [MCR-TASK-02](/docs/tasks/port-mcr/02-base-legal-e-linhagem.md) | os três `PlayerStatsSkills.dll` são declarados fora da conta e estão dentro da linha "o fonte que importa" | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [x] concluída | 2026-09-07 |
 
+| [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [ ] pendente | — |
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
 
@@ -34,6 +35,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-004 — corrigir a atribuição do WebView2 e declarar a profundidade do prefixo na tabela do inventário
 - [x] CORR-MCR-005 — separar o que está fora da conta do que está dentro dela e não é fonte
 - [x] CORR-MCR-006 — corrigir as duas referências do lado `wte/` e registrar o caminho cravado
+- [ ] CORR-MCR-007 — traduzir o `card.py` para en-US e fechar a dívida da §3.5
 
 ---
 
@@ -128,3 +130,25 @@ ciclo arquivado, o dele em
 - **Fix:** nomear as três formas de alcance com as linhas certas, e dizer que a
   cravada é a razão de o digest ser a régua. O `perfil-mcr.md` não erra — cita
   só as variáveis.
+
+### CORR-MCR-007
+
+- **Arquivo com problema:** `tools/mcr/card.py` (o módulo inteiro)
+- **Sintoma:** 17 docstrings, 36 linhas de comentário (mais 9 inline), os 9
+  valores de estado de quadro, 15 das 20 chaves do `--json`, as 7 mensagens de
+  recusa e os 20 `print` do CLI e do `self_check` estão em português, contra a
+  §3.5 do plano, reescrita em 2026-09-07 para **en-US em todo o código do
+  port**. Os identificadores **públicos** já são ingleses; os locais
+  (`falhas`, `tenta`, `recusa`, `ok`, `nome`, `detalhe`, `excecao`, `trecho`) e
+  o default `origin="<memoria>"` não.
+- **Como foi detectado:** a decisão de idioma do dono do repositório,
+  2026-09-07, aplicada de volta sobre o que a MCR-TASK-04 já havia entregue, e
+  remedida por `ast`/`tokenize` na revisão dessa task. **Não é erro de
+  execução** — a task cumpriu a regra que existia no dia. Referência: 25 dos 26
+  módulos de `tools/pes2/` já estão em inglês.
+- **Fix:** traduzir texto e identificadores locais, **preservando a API pública**
+  e o comportamento; replantar os cinco controles negativos da MCR-TASK-04 e
+  exigir 5/5 vermelhos, com as contagens 2, 8, 1, 1, 1, pelos trechos novos — o
+  `recusa()` casa **substring** da mensagem, então traduzir um lado só deixa o
+  gate verde por acidente. Depois disso, tirar a "dívida aberta" da §3.5 e a
+  exceção do `perfil-mcr.md`.
