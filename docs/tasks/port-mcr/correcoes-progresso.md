@@ -22,6 +22,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-006](/docs/tasks/port-mcr/CORR-MCR-006.md) | [MCR-TASK-03](/docs/tasks/port-mcr/03-ambiente-fixture-e-qt.md) | a citação da fixture compartilhada aponta a linha da constante cravada e atribui `WTE_MCR_ENTRADA` a um arquivo que não a tem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [x] concluída | 2026-09-07 |
 | [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [x] concluída | 2026-09-07 |
+| [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -38,6 +39,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-006 — corrigir as duas referências do lado `wte/` e registrar o caminho cravado
 - [x] CORR-MCR-007 — traduzir o `card.py` para en-US e fechar a dívida da §3.5
 - [x] CORR-MCR-008 — registrar o efeito do erro de import na tabela de controles e exigir o `attempt()` em volta do import no `selftest`
+- [ ] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
 
 ---
 
@@ -175,3 +177,26 @@ ciclo arquivado, o dele em
   linhas 1 e 3, e pôr na MCR-TASK-10 o critério de importar `layout` dentro do
   `attempt()`. O `layout.py` não muda: falhar no import é o comportamento certo
   para o módulo cuja razão de existir é a tabela.
+
+### CORR-MCR-009
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/06-codec-de-atributos.md`
+  (tabela dos cinco controles negativos)
+- **Sintoma:** os cinco vereditos reproduzem (5/5 🔴, `rc=1`) e as três
+  contagens de blobs batem exatamente — 87.484, 100.000, 93.748 —, mas duas das
+  cinco contagens de falha não: o `speed`/`dribbling` trocado dá **2** e não 4,
+  e o `stamina` movido um bit dá **5** e não 6. O defeito está descrito pelo
+  efeito pretendido, não pela substituição literal, e "trocar dois campos no
+  encoder" tem mais de uma leitura — o `encode_stream` é dirigido por tabela e
+  ali a troca mudaria o decoder junto.
+- **Como foi detectado:** os cinco controles replantados na revisão da
+  MCR-TASK-06, numa cópia dentro da árvore com `PYTHONPATH=tools/mcr`. Todo o
+  resto da task remediu exato, inclusive fora da ferramenta: as 29 expressões
+  de `Player::Decode` transcritas à mão dão 0 divergências em 100.000 blobs, a
+  tripwire lida com leitor próprio dá 23/23, e três tabelas de peso do upstream
+  conferem contra o `Frmmcr.designer.vb`.
+- **Fix:** escrever a edição exata em cada linha da tabela e reconciliar as duas
+  contagens; registrar que a cópia plantada precisa de `PYTHONPATH` apontando
+  `tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir. E deixar
+  uma linha na MCR-TASK-10 para os controles virarem subcomando do `selftest`,
+  onde a contagem passa a ser medida em vez de anotada.
