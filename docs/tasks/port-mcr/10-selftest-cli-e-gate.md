@@ -48,6 +48,15 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       levanta exceção mata a corrida e esconde os checks seguintes. Ao montar o
       `selftest`, escolha uma casa só para ele em vez de deixar a terceira
       cópia nascer.
+- [ ] **O `selftest` importa `layout` dentro do `attempt()`**, não no escopo do
+      módulo: as vistas nomeadas do `layout.py` levantam `LayoutError` no
+      import quando um destino some, e o `mcr_selftest` é o gate
+      **obrigatório** — uma tabela quebrada tem de virar uma falha nomeada
+      entre as demais, não um traceback que derruba a corrida inteira. Medido
+      na [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md): nos dois
+      controles que tiram um destino, o `layout.py --self-check` sai por
+      traceback com **0** das 29 asserções rodadas. É a mesma lição que a
+      MCR-TASK-04 pagou e que vale para as tasks 05 a 10.
 - [ ] `cli.py` com `info`, `dump`, `get`, `set`, `roundtrip`, `negative` e
       `check`, saída determinística.
 - [ ] `glossary.py` — o mapa `es → en` (§3.5), que até aqui não tinha task

@@ -116,21 +116,51 @@ plantados, e deixa `0x20000` em paz.
 
 ### Os controles negativos
 
-Seis defeitos plantados numa cópia em `/tmp` (o módulo do repositório não foi
-tocado):
+Seis defeitos plantados numa cópia do módulo (o do repositório não foi tocado).
+**Onde a cópia mora decide se o resultado é legível** — ver "Como replantar",
+logo abaixo:
 
-| defeito plantado | resultado |
-|---|---|
-| apagar o destino `0x63D5` (16 em vez de 17) | 🔴 `LayoutError` nomeando `FORMATION_ROLES` e o `0x63d5` |
-| inventar um 18º destino `0x6600` | 🔴 3 falhas, uma delas "is in layout.py and NOT in the measurement" |
-| mover `0x5404` para `0x5405` | 🔴 `LayoutError` nomeando o destino que sumiu |
-| tabela de cobradores em ordem crescente | 🔴 1 falha, imprimindo a tabela |
-| deslocamentos `(0,1,2,3,4,5)` | 🔴 1 falha, imprimindo os deslocamentos |
-| `PLAYER_STRIDE = 22` | 🔴 3 falhas: passo, endereço do jogador 0/22, e o do nome |
+| defeito plantado | `--check` | `--self-check` |
+|---|---|---|
+| apagar o destino `0x63D5` (16 em vez de 17) | 🔴 `LayoutError` nomeando `FORMATION_ROLES` e o `0x63d5` | **traceback, 0 asserções** |
+| inventar um 18º destino `0x6600`, **no fim** | 🔴 `1 problem(s)`, "is in layout.py and NOT in the measurement" | 🔴 3 falhas |
+| mover `0x5404` para `0x5405` | 🔴 `LayoutError` nomeando o destino que sumiu | **traceback, 0 asserções** |
+| tabela de cobradores em ordem crescente | verde — não é o papel dele | 🔴 1 falha, imprimindo a tabela |
+| deslocamentos `(0,1,2,3,4,5)` | verde | 🔴 1 falha, imprimindo os deslocamentos |
+| `PLAYER_STRIDE = 22` | 🔴 — | 🔴 3 falhas: passo, endereço do jogador 0/22, e o do nome |
 
 **6/6 vermelhos, `rc=1` em todos.** Mais quatro casos vermelhos que rodam
 *dentro* do `--self-check` a cada corrida — endereço movido, tamanho errado,
 tabela que não parseia nada, e o par de plantações da varredura da Regra 1.
+
+Nos dois controles que **tiram** um destino da tabela, o `LayoutError` é de
+**import**: o `--self-check` sai por traceback e nenhuma das 29 asserções roda.
+É o veredito certo — módulo com tabela de endereço quebrada não deve importar —,
+mas quem lê a tabela precisa saber que ali o `0 failure(s)` não aparece porque o
+harness não chegou a começar, e não porque estava tudo bem. Adiante isso vira
+risco, e a [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) carrega
+o critério: o `selftest` importa `layout` **dentro do `attempt()`**.
+
+### Como replantar, para o resultado querer dizer alguma coisa
+
+Três detalhes, os três medidos em 2026-09-07 na
+[CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md), e nenhum óbvio antes de
+custar uma corrida ilegível:
+
+- **A cópia vai dentro da árvore do repositório, mas NÃO em `tools/mcr/`.**
+  De `/tmp` o `--check` sobe até `/` sem achar o `wte/re/mcr.md` e o
+  `--self-check` reporta **7 falhas** sem defeito nenhum plantado — é a mesma
+  doença do defeito 1 abaixo, que a task consertou para cópia dentro da árvore
+  e não tinha como consertar para fora dela. E dentro de `tools/mcr/` a cópia é
+  varrida pela guarda da Regra 1 — ela **é** um `layout.py` cheio de endereço —,
+  o que soma **+1 falha a cada um dos seis** e desloca as contagens para 4, 2,
+  2, 4. A raiz do repositório serve.
+- **O 18º destino vai no fim da lista.** No meio dá **4** falhas em vez de 3,
+  porque a asserção de ordem crescente também cai — e aí o controle passa a
+  medir duas coisas.
+- **Contagem que não bate é suspeita do harness antes de ser do módulo.** Foi
+  assim que os dois itens acima apareceram: 4, 2, 2, 4 onde se esperava
+  3, 1, 1, 3, com o mesmo `+1` em todos, e o extra sempre com o mesmo nome.
 
 ### Os dois defeitos que os controles acharam
 

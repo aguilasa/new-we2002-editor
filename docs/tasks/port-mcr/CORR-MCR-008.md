@@ -3,7 +3,7 @@ id: CORR-MCR-008
 title: "Correção: destino faltando mata o `layout.py` no import, e o `--self-check` não chega a rodar"
 type: correção
 category: núcleo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -141,12 +141,84 @@ para um módulo cuja única razão de existir é a tabela de endereços; o que f
 - [ ] a MCR-TASK-10 carrega o critério do `attempt()` em volta do import
 - [ ] `roms/` e `work/entrada.mcr` intocados
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A tabela dos seis controles da MCR-TASK-05 ganhou a **coluna do
+`--self-check`**, que é o que faltava: nas linhas 1 e 3 ela agora diz
+`traceback, 0 asserções`, com o parágrafo que explica por que esse é o veredito
+certo e por que, ainda assim, quem lê a tabela precisa saber que ali o
+`0 failure(s)` não aparece porque o harness não chegou a começar. Separar a
+coluna do `--check` da do `--self-check` também corrigiu duas linhas que
+apareciam como 🔴 sem dizer qual dos dois ficava vermelho — os controles 4 e 5
+deixam o `--check` **verde**, e isso é o papel dele.
+
+A MCR-TASK-10 ganhou o critério do `attempt()` em volta do import de `layout`,
+ao lado do que a MCR-TASK-05 já havia deixado lá sobre o `attempt()` duplicado.
+
+`tools/mcr/layout.py` **não foi tocado** — falhar no import é o comportamento
+certo para o módulo cuja única razão de existir é a tabela de endereços; o que
+faltava era o consumidor saber disso.
+
+**Medições:**
+
+| gate | resultado |
+|---|---|
+| `layout.py --self-check` | **29 asserções, 0 falhas**; duas corridas byte-idênticas |
+| `layout.py --check` | `17/17 destinations agree with wte/re/mcr.md` |
+| `layout.py --rule1` | `0 address(es) outside layout.py` |
+| seis controles replantados | **6/6 vermelhos, `rc=1`**; `--self-check` = traceback/0, 3, traceback/0, 1, 1, 3 |
+| 18º destino no meio, em vez do fim | 4 falhas — confirma a nota da CORR |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / `1/1 Passed` |
+| fixture | `e53f4895…`, inalterada |
+
 **Problemas encontrados:**
 
+**Duas armadilhas de replantação que a CORR não previa, e que só apareceram
+porque as contagens não bateram.** A primeira corrida deu **4, 2, 2, 4** onde a
+CORR diz 3, 1, 1, 3 — o mesmo `+1` em todos os quatro, e o extra sempre com o
+mesmo nome:
+
+```
+FAIL  no other module of tools/mcr/ has a save address
+      complaints=['layout.py:81: 0x5904 is in the save address range', ...]
+```
+
+A causa era o **meu harness**, não o módulo: eu havia posto a cópia de controle
+em `tools/mcr/`, e a guarda da Regra 1 varre exatamente essa pasta — a cópia
+**é** um `layout.py` cheio de endereço, então ela mesma acende a falha. Com a
+cópia na raiz do repositório, as contagens batem exatamente com a CORR.
+
+A segunda saiu da mesma investigação: a MCR-TASK-05 dizia *"seis defeitos
+plantados numa cópia em `/tmp`"*, e de `/tmp` **isso não reproduz** — o
+`--check` sobe até `/` sem achar o `wte/re/mcr.md` e o `--self-check` reporta
+**7 falhas** sem defeito nenhum plantado. É a mesma doença do defeito 1 que
+aquela task registra logo abaixo, que ela consertou para cópia dentro da árvore
+e não tinha como consertar para fora dela. A frase foi trocada por uma seção
+**"Como replantar"** com os três detalhes medidos: onde a cópia mora, o 18º
+destino no fim, e a regra de bolso de desconfiar do harness quando a contagem
+desloca por igual.
+
+A citação equivalente da MCR-TASK-04 (`cópia em /tmp`, para o `card.py`)
+**ficou como está, e está certa**: aquele módulo não lê o `wte/re/mcr.md` nem
+varre `tools/mcr/`, e seus cinco controles reproduzem de `/tmp` — remedidos
+nesta sessão em 2, 8, 1, 1, 1.
+
+**Uma terceira, do próprio rito desta execução.** O script que marca o `[x]`
+falhou numa asserção (a criticidade desta CORR é **Baixa**, e o literal
+procurado dizia `Média`), e o `git commit` da mesma invocação correu assim
+mesmo: o conserto entrou commitado **sem** a escrituração. Corrigido por
+`git commit --amend`, para manter um commit por CORR. A lição é do encadeamento:
+script de escrituração e `git` no mesmo comando deixam o commit sair mesmo com o
+script vermelho.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/05-layout-e-cross-check.md` — a tabela dos seis
+  controles, o parágrafo do erro de import, e a seção "Como replantar"
+  (discrepância da varredura)
+- `docs/tasks/port-mcr/10-selftest-cli-e-gate.md` — o critério do `attempt()`
+  em volta do import
