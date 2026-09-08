@@ -381,11 +381,15 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
             moved2 = attempt("number probe",
                              lambda: edit_probe(work, 0, "number", 30), [])
             n = layout.SHIRT_NUMBERS
-            ok("a shirt number moves the record AND the table",
+            ok("a shirt number moves the record and the table, "
+               "and nothing else",
                any(base <= i < base + attributes.BLOB_BYTES for i in moved2)
                and any(n.address <= i < n.address + n.total_bytes
+                       for i in moved2)
+               and all(base <= i < base + attributes.BLOB_BYTES
+                       or n.address <= i < n.address + n.total_bytes
                        for i in moved2),
-               f"moved={moved2}")
+               f"moved={[hex(i) for i in moved2]}")
 
             # The truncated file, through the real path.
             short = os.path.join(tmp, "short.mcr")

@@ -282,9 +282,18 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
        f"record={reread.players[1].attributes['number'] if reread else None}")
     ok("and the tripwire stays quiet",
        reread is not None and reread.disagreements() == [])
+    moved_n = [i for i, (a, b) in enumerate(zip(c.to_bytes(), before2))
+               if a != b]
+    rec1 = layout.player_attribute_address(1)
+    tab = layout.SHIRT_NUMBERS
     ok("a number touches the record and the table, and nothing else",
-       len([i for i, (a, b) in enumerate(zip(c.to_bytes(), before2))
-            if a != b]) > 0)
+       any(rec1 <= i < rec1 + attributes.BLOB_BYTES for i in moved_n)
+       and any(tab.address <= i < tab.address + tab.total_bytes
+               for i in moved_n)
+       and all(rec1 <= i < rec1 + attributes.BLOB_BYTES
+               or tab.address <= i < tab.address + tab.total_bytes
+               for i in moved_n),
+       f"moved={[hex(i) for i in moved_n]}")
 
     # Changing only the record's copy must be VISIBLE, not repaired.
     s2 = attempt("read once more", lambda: Save.read(c))

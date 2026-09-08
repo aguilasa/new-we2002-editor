@@ -43,7 +43,7 @@ round-trip que prova os dois.
 - [x] **Round-trip forma 2** — ler → decodificar os 23 → re-codificar todos →
       gravar: `cmp` = **0 bytes**. É esta que pega bug de encoder.
 - [x] O **controle negativo** completo, 5/5 vermelhos (§5.2 do plano) — mais
-      seis controles de substituição literal, 6/6 vermelhos.
+      sete controles de substituição literal, 7/7 vermelhos.
 - [x] Gravação **sempre sobre cópia**; a ferramenta recusa escrever no arquivo
       apontado por `WE2002_MCR_CARD` sem `--force`, e recusa `roms/` mesmo
       **com** `--force`.
@@ -142,7 +142,7 @@ cada uma reproduz o que o defeito faria e pergunta ao guard que a possui. A
 injeção 2 é literal — gravar `n + STORED_BIAS` armazena `n`, que é exatamente o
 que a falta do `−1` faz.
 
-### E os seis controles de substituição literal, 6/6 vermelhos
+### E os sete controles de substituição literal, 7/7 vermelhos
 
 Estes provam o outro lado: que os guards **sabem** ficar vermelhos. Cada um
 numa cópia da árvore em `/tmp`, com `wte/re/mcr.md` levado junto e
@@ -156,13 +156,22 @@ em todos.
 | 2 | `mcrio.py` :: `check_destination` | `if not force:` | `if False:` | 🔴 mcrio, 1 falha |
 | 3 | `mcrio.py` :: `check_card` | `if found is None:` | `if False:` | 🔴 mcrio, 2 falhas |
 | 4 | `model.py` :: `Save.write_player` | `if not 0 <= index < SQUAD_SIZE:` | `if False:` | 🔴 model, 2 falhas |
-| 5 | `model.py` :: `Save.set_number` | `p.shirt_number = number` | `pass` | 🔴 model, 3 falhas |
+| 5 | `model.py` :: `Save.set_number` | `p.shirt_number = number` | `pass` | 🔴 model **e** mcrio — 4 e 1 falhas (era 3 e 1; a quarta é o conjunto fechado da [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md), e o 1 do `mcrio` já era vermelho e não estava anotado) |
 | 6 | `model.py` :: `Save.write` | `for i in range(SQUAD_SIZE):` | `for i in range(0):` | 🔴 model **e** mcrio, 1 falha cada |
+| 7 | `model.py` :: `Save._write_number` | `table[index] = number` | `if table[index] != number:`⏎`    self.card.write(layout.player_attribute_address(5) + 22, b"\x7f")`⏎`table[index] = number` | 🔴 model **e** mcrio, 1 falha cada |
 
 O 4 merece nota: com a guarda de índice desligada, o que sobe é `IndexError` e
 `LayoutError`, não `ModelError` — e o `refuses()` reporta isso como falha
 ("raised X, expected ModelError"), que é o comportamento certo. A asserção é
 sobre *qual* recusa dispara, não sobre haver alguma.
+
+O 7 é o que a [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) plantou, e
+existe porque nenhum dos outros seis alcança o conjunto de bytes que uma
+gravação de dorsal toca. Ele escreve um byte nos **dez intocados** do jogador 5
+e só quando o dorsal **muda**, o que o faz sobreviver ao round-trip — este
+regrava os mesmos valores e não dispara o ramo. Antes do conserto os dois
+`--self-check` saíam `rc=0`, `0 failure(s)`, com o check nomeado dizendo `ok`;
+depois dele saem `rc=1`, e o `moved=` de cada um imprime o `0x059ba` plantado.
 
 ### Os gates da fase
 

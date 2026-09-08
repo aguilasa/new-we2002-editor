@@ -25,7 +25,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | o plano diz que **um** nome enche os dez bytes e são dois: os slots 5 e 20 | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | o check chamado "e nada mais" só afirma que algum byte mudou, e a exclusividade do caminho do dorsal fica sem guarda | Alta | [ ] pendente | — |
+| [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | o check chamado "e nada mais" só afirma que algum byte mudou, e a exclusividade do caminho do dorsal fica sem guarda | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, não cita o `Save`, e a task atribui a frase à §5.1 | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
@@ -46,7 +46,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
 - [x] CORR-MCR-010 — nomear os dois slots que enchem os dez bytes, no plano e na task
 - [x] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
-- [ ] CORR-MCR-012 — fechar o conjunto de bytes no check do dorsal, nos dois módulos, com o caso vermelho
+- [x] CORR-MCR-012 — fechar o conjunto de bytes no check do dorsal, nos dois módulos, com o caso vermelho
 - [ ] CORR-MCR-013 — pôr `Player`/`Save` na §3.2 do plano e corrigir a citação de seção na task
 
 ---
