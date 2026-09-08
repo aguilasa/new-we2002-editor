@@ -1,0 +1,70 @@
+# 13-controle -- o CONTROLE do experimento do `0x6500` (MCR-TASK-13).
+#
+# Abre a imagem, seleciona o time 2 e exporta o `.mcr` SEM tocar na tela de
+# tatica. E o par obrigatorio do `13-seis-linhas.txt`: sem ele, seis valores
+# distintos lidos depois da edicao nao provam que foi a edicao que os pos ali.
+#
+#   rm -f work/oraculo-13-controle.mcr
+#   bash wte/tools/golden_run_wte.sh tools/mcr/oracle/13-controle.txt \
+#        work/wte-japanese-shift-jis.bin /tmp/oraculo-13
+#   python3 tools/mcr/formation.py work/oraculo-13-controle.mcr
+#
+# A IMAGEM E A JAPONESA, e nao por gosto: com a europeia o `wte.exe` morre ao
+# trocar de time -- 49.749 violacoes de acesso contra 0 (`wte/re/crash-causa.md`).
+#
+# APAGUE O `.mcr` ANTES. O `dialogo_grabar_memory` tem `ofOverwritePrompt`, e um
+# arquivo no lugar acrescenta uma caixa que este roteiro nao preve.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+#
+# Trocar de time e o que HABILITA o botao: `lista_equiposChange` chama
+# SetEnabled(True) sobre `grabar_memory` (`0x0040d31a`).
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- gravar ----
+#
+# grupo_memorycard (8,224) + grabar_memory (88,56) = (96,280), 25x25.
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\oraculo-13-controle.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR

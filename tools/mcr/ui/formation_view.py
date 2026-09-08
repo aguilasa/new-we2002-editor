@@ -28,10 +28,18 @@ Zetaprog's combo and checked against his source every run; nothing in the
 fixture confirms the MEANING of the twenty labels, and the pitch says so in its
 own caption rather than quietly presenting them as measured.
 
-`0x6500` IS READ, NEVER WRITTEN, and stays that way until MCR-TASK-13 says
-what it means. `formation.write` leaves the byte alone; this view shows it and
-offers no editor for it, because a screen that lets someone set a byte whose
-meaning is unsettled is how a round-trip stops being evidence.
+THE CAPTAIN IS EDITABLE SINCE MCR-TASK-13, and was a read-only label before
+it. `0x6500` was carried as an open byte -- the captain by our RE, a sixth
+kicker by the upstream -- and the verdict is the captain, from three
+measurements that agree: the sixth marker of the oracle's own grid is labelled
+`Captain`, driving that grid writes this byte and no other, and the upstream's
+own local for it is called `CP`.
+
+THE RANGE OF THESE SPIN BOXES IS 0..10, AND THAT IS MEASURED, not guessed. The
+oracle's `malla2` is 144x176 with a 24x16 step -- six columns by ELEVEN rows --
+so what a kicker and the captain hold is a position in the starting eleven,
+never one of the twenty-three squad slots. MCR-TASK-12 offered 0..22 here, and
+that was wrong by a factor of two.
 """
 
 import os
@@ -57,6 +65,17 @@ MARKER = 14             # marker diameter, in pitch pixels
 # drawn at the top of it. The two factors are untouched -- what changed is how
 # much room the drawing gets, not where a player is.
 SURFACE_HEIGHT = PITCH_HEIGHT + LABEL_DROP * Y_SCALE + 12
+
+# The eleven starters. Measured in MCR-TASK-13 from the oracle's own grid:
+# `malla2` is 144x176 with a 24x16 step, so six columns by ELEVEN rows, and a
+# kicker or the captain is a position in the starting eleven -- not one of the
+# twenty-three squad slots, which is what MCR-TASK-12 offered here.
+STARTERS = 11
+
+# The five set-piece labels, transcribed from the oracle's `Label1..5` Hints
+# and confirmed by the upstream's own local variable names: SF, LF, RC, LC, PK
+# -- and CP for the sixth, which is the captain.
+KICKER_LABELS = ("SF", "LF", "RC", "LC", "PK")
 
 # How far a marker may be dragged, in the CARD's units. The byte holds 0..255
 # and `formation.write` is what enforces that; this narrower limit is the
@@ -252,36 +271,46 @@ class FormationView(QtWidgets.QWidget):
             grid.addWidget(QtWidgets.QLabel(str(i + 1)), i // 5, (i % 5) * 2)
             grid.addWidget(combo, i // 5, (i % 5) * 2 + 1)
 
+        # The six markers of the oracle's own grid, in its own order: the five
+        # set-piece takers and the captain. Five and one, not six -- see the
+        # header.
         self.kickers = [QtWidgets.QSpinBox() for _ in range(5)]
         kick_box = QtWidgets.QGroupBox(
-            "Free kicks and corners, in kicker order (squad slot)")
+            f"Set pieces and captain, as positions in the starting "
+            f"{STARTERS} (0..{STARTERS - 1})")
         kick_grid = QtWidgets.QHBoxLayout(kick_box)
         for k, spin in enumerate(self.kickers):
-            spin.setRange(0, 22)
+            spin.setRange(0, STARTERS - 1)
             spin.valueChanged.connect(
                 lambda value, slot=k: self._commit_kicker(slot, value))
-            kick_grid.addWidget(QtWidgets.QLabel(str(k + 1)))
+            kick_grid.addWidget(QtWidgets.QLabel(KICKER_LABELS[k]))
             kick_grid.addWidget(spin)
+
+        kick_grid.addSpacing(24)
+        self.captain = QtWidgets.QSpinBox()
+        self.captain.setRange(0, STARTERS - 1)
+        self.captain.valueChanged.connect(self._commit_captain)
+        kick_grid.addWidget(QtWidgets.QLabel("CP"))
+        kick_grid.addWidget(self.captain)
         kick_grid.addStretch(1)
 
-        self._open_byte = QtWidgets.QLabel("")
         caption = QtWidgets.QLabel(
             "Drag a marker to move a player; X and Y are the card's own "
             "units, scaled by 7 and 2 for this drawing only, and divided "
             "back before anything reaches the model. Role names come from "
-            "the upstream editor and are not measured.")
+            "the upstream editor and are not measured; the six set-piece "
+            "labels are, and so is the captain (MCR-TASK-13).")
         caption.setWordWrap(True)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.pitch, 1)
         layout.addWidget(roles_box)
         layout.addWidget(kick_box)
-        layout.addWidget(self._open_byte)
         layout.addWidget(caption)
         self._enable(False)
 
     def _enable(self, on: bool) -> None:
-        for widget in self.roles + self.kickers:
+        for widget in self.roles + self.kickers + [self.captain]:
             widget.setEnabled(on)
 
     def set_save(self, save) -> None:
@@ -289,7 +318,6 @@ class FormationView(QtWidgets.QWidget):
             self._formation = None
             self.pitch.set_formation(None)
             self._enable(False)
-            self._open_byte.setText("")
             return
         self._formation = save.formation
         self.pitch.set_formation(self._formation)
@@ -300,13 +328,10 @@ class FormationView(QtWidgets.QWidget):
                 role = self._formation.role[i]
                 combo.setCurrentIndex(role if 0 <= role < combo.count() else 0)
             for k, spin in enumerate(self.kickers):
-                spin.setValue(self._formation.kickers[k])
+                spin.setValue(self._clamped(self._formation.kickers[k]))
+            self.captain.setValue(self._clamped(self._formation.captain))
         finally:
             self._loading = False
-        self._open_byte.setText(
-            f"Open byte 0x6500: {self._formation.open_slot_byte} -- captain by "
-            f"our reverse engineering, sixth kicker by the upstream, and read "
-            f"only until MCR-TASK-13 settles it.")
 
     def _pitch_moved(self) -> None:
         self.changed.emit()
@@ -318,6 +343,26 @@ class FormationView(QtWidgets.QWidget):
             return
         self._formation.role[slot] = value
         self.pitch.update()
+        self.changed.emit()
+
+    @staticmethod
+    def _clamped(value: int) -> int:
+        """A card value brought into the spin box's range, for DISPLAY only.
+
+        The measured domain is 0..10, but the field is a byte and a card
+        written by something else can hold anything. Refusing to show it would
+        be worse than showing the nearest legal value, and `formation.write`
+        still accepts the full byte -- what this clamp cannot do is silently
+        change the card, because nothing is written until the value is edited.
+        """
+        return max(0, min(STARTERS - 1, value))
+
+    def _commit_captain(self, value: int) -> None:
+        if self._loading or self._formation is None:
+            return
+        if self._formation.captain == value:
+            return
+        self._formation.captain = value
         self.changed.emit()
 
     def _commit_kicker(self, slot: int, value: int) -> None:

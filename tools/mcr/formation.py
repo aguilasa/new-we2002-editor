@@ -26,11 +26,27 @@ THREE THINGS THAT ARE EASY TO GET WRONG, all of them measured:
   in the upstream's window. They are not in this module and must not be: put
   them in and the round-trip dies.
 
-AND ONE THING NOBODY KNOWS. `0x6500` is the captain by our reverse engineering
-of the `.exe` and a sixth kicker by the upstream. Both store a slot index, so
-the value alone does not discriminate -- MCR-TASK-13 settles it with an
-experiment. Until then this module exposes it as `open_slot_byte`, named for
-the doubt, and passes it through untouched.
+THE CAPTAIN, AND IT WAS OUR READING THAT WAS WRONG. `0x6500` was carried as
+`open_slot_byte` while section 1.8 of the plan had it as the captain by our RE
+of the `.exe` and a sixth kicker by the upstream. MCR-TASK-13 settled it, and
+the two third parties never disagreed:
+
+  the Obocaman editor's `estrategia` form puts six markers on one grid, and
+  the sixth one's label reads `Hint = 'Captain'`, `Caption = 'CP'`;
+  driving that grid -- six columns on six distinct rows -- puts 0, 1, 2, 3, 4
+  in the five kicker addresses and **5 here**, so this byte is written by that
+  sixth column and by nothing else;
+  the upstream writes 25856 from a local called `CP`, beside `SF`, `LF`, `RC`,
+  `LC` and `PK`.
+
+"Sixth kicker" was read off its POSITION -- sixth in a group of six -- and not
+off any label. The byte is now written like every other field.
+
+THE MEASURED DOMAIN IS 0..10, because the grid has eleven rows: the starting
+eleven, not the twenty-three squad slots. The write below still accepts any
+byte, because refusing a value this port merely does not understand would
+destroy a card it was only asked to carry; the domain lives on the screen,
+where it is a choice offered rather than a rule enforced.
 
 Usage:
 
@@ -63,15 +79,15 @@ class Formation:
     """What the card holds, in the card's own units.
 
     `x`, `y` and `role` are ten long. `kickers` is five slot indices in KICKER
-    ORDER, which is not address order. `open_slot_byte` is `0x6500`, carried
-    raw because its meaning is unsettled.
+    ORDER, which is not address order. `captain` is `0x6500`, measured in
+    MCR-TASK-13; its domain is the eleven starters, 0..10.
     """
 
     x: list[int]
     y: list[int]
     role: list[int]
     kickers: list[int]
-    open_slot_byte: int
+    captain: int
 
     def role_labels(self) -> list[str]:
         """The upstream's names. Third-party labels, no oracle."""
@@ -91,7 +107,7 @@ def read(card: Card) -> Formation:
         y=list(xy[OUTFIELD:]),
         role=[b - ROLE_BIAS for b in roles],
         kickers=[card.data[a] for a in layout.KICKER_ADDRESSES],
-        open_slot_byte=card.data[layout.CAPTAIN_OR_SIXTH_KICKER.address],
+        captain=card.data[layout.CAPTAIN.address],
     )
 
 
@@ -106,9 +122,10 @@ def _check_lengths(f: Formation) -> None:
 def write(card: Card, f: Formation) -> None:
     """Read-modify-write, field by field. Nothing else on the card is touched.
 
-    `open_slot_byte` is NOT written back: until MCR-TASK-13 says what it means,
-    the port reads it and leaves it alone. Writing a byte whose semantics are
-    unsettled is how a round-trip stops being evidence.
+    `captain` IS written back, and has been since MCR-TASK-13 measured what it
+    is. It was not before: writing a byte whose meaning is unsettled is how a
+    round-trip stops being evidence, and until the verdict the port carried it
+    through untouched.
     """
     _check_lengths(f)
     for i, v in enumerate(f.x):
@@ -136,12 +153,15 @@ def write(card: Card, f: Formation) -> None:
     for k, slot in enumerate(f.kickers):
         if not 0 <= slot <= 0xFF:
             raise FormationError(f"kicker {k}={slot} does not fit a byte")
+    if not 0 <= f.captain <= 0xFF:
+        raise FormationError(f"captain={f.captain} does not fit a byte")
 
     card.write(layout.FORMATION_XY.address, bytes(f.x) + bytes(f.y))
     card.write(layout.FORMATION_ROLES.address,
                bytes(r + ROLE_BIAS for r in f.role))
     for k, slot in enumerate(f.kickers):
         card.write(layout.kicker_address(k), bytes([slot]))
+    card.write(layout.CAPTAIN.address, bytes([f.captain]))
 
 
 # --- self-check ------------------------------------------------------------
@@ -172,7 +192,7 @@ def _checks(c, card_path: str | None = None) -> None:
     # red on the arithmetic inside the self-check itself. A lint against your
     # own file measures the file, not the behaviour.
     probe = Formation(x=[7] * OUTFIELD, y=[2] * OUTFIELD, role=[0] * OUTFIELD,
-                      kickers=[0] * KICKERS, open_slot_byte=0)
+                      kickers=[0] * KICKERS, captain=0)
     attempt("write the scaling probe", lambda: write(c, probe))
     ok("X reaches the card unscaled",
        c.data[layout.FORMATION_X_ADDRESS] == 7,
@@ -185,7 +205,7 @@ def _checks(c, card_path: str | None = None) -> None:
         y=list(range(30, 40)),
         role=[0, 1, 4, 5, 6, 8, 12, 14, 15, 19],
         kickers=[1, 2, 3, 4, 5],
-        open_slot_byte=0,
+        captain=0,
     )
     attempt("write a formation to a synthetic card", lambda: write(c, wanted))
     got = attempt("read it back", lambda: read(c))
@@ -205,16 +225,19 @@ def _checks(c, card_path: str | None = None) -> None:
        got is not None and got.role_labels()[0] == "CB-L"
        and got.role_labels()[-1] == "RW", f"labels={got.role_labels() if got else None}")
 
-    # The open byte is read and never written.
-    c.data[layout.CAPTAIN_OR_SIXTH_KICKER.address] = 0x2A
-    reread = attempt("read after poking the open byte", lambda: read(c))
-    ok("the open byte is read", reread is not None
-       and reread.open_slot_byte == 0x2A)
-    before = c.data[layout.CAPTAIN_OR_SIXTH_KICKER.address]
-    attempt("write again", lambda: write(c, wanted))
-    ok("and write() leaves it alone",
-       c.data[layout.CAPTAIN_OR_SIXTH_KICKER.address] == before,
-       f"before={before} after={c.data[layout.CAPTAIN_OR_SIXTH_KICKER.address]}")
+    # The captain goes both ways since MCR-TASK-13. Read first...
+    c.data[layout.CAPTAIN.address] = 0x2A
+    reread = attempt("read after poking the captain", lambda: read(c))
+    ok("the captain is read", reread is not None and reread.captain == 0x2A)
+    # ...and then written, which is the half that did not exist before the
+    # verdict. A writer that skips one field leaves every round-trip check
+    # green, so the check demands the byte MOVE to what the model says.
+    attempt("write a captain",
+            lambda: write(c, dataclasses.replace(wanted, captain=6)))
+    ok("write() puts the captain on the card",
+       c.data[layout.CAPTAIN.address] == 6,
+       f"captain={c.data[layout.CAPTAIN.address]}")
+    attempt("write the original back", lambda: write(c, wanted))
 
     # Writing the formation must not touch the tactics bytes next door.
     tactics_before = {t.address: c.data[t.address] for t in layout.TACTICS}
@@ -257,10 +280,9 @@ def _checks(c, card_path: str | None = None) -> None:
             ok("the kickers are [7, 7, 8, 7, 7]",
                f is not None and f.kickers == [7, 7, 8, 7, 7],
                f"kickers={f.kickers if f else None}")
-            ok("the open byte is 8, which does not discriminate",
-               f is not None and f.open_slot_byte == 8
-               and f.open_slot_byte in f.kickers,
-               f"open={f.open_slot_byte if f else None}")
+            ok("the captain is 8, inside the measured domain 0..10",
+               f is not None and f.captain == 8 and 0 <= f.captain <= 10,
+               f"captain={f.captain if f else None}")
 
             # Round-trip on a COPY in memory; the fixture is never written.
             copy = Card(real.to_bytes(), origin="<copy>")
@@ -298,8 +320,8 @@ def main(argv=None) -> int:
               f"{f.role[i]:2d} {f.role_labels()[i]}")
     print()
     print(f"kickers (kicker order): {f.kickers}")
-    print(f"0x6500 = {f.open_slot_byte}  -- captain or sixth kicker, OPEN "
-          f"until MCR-TASK-13; read, never written")
+    print(f"captain (0x6500) = {f.captain}  -- measured in MCR-TASK-13; "
+          f"the domain is the eleven starters, 0..10")
     return 0
 
 

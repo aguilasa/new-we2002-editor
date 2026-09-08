@@ -223,7 +223,8 @@ def _judge(r: dict, source: str, before: bytes,
                 ("shirt number (record)", p.attributes["number"], r["number"]),
                 ("the dragged position", [f.x[0], f.y[0]], list(target)),
                 ("role", f.role[0], r["role"]),
-                ("kicker", f.kickers[0], r["kicker"])):
+                ("kicker", f.kickers[0], r["kicker"]),
+                ("captain", f.captain, r["captain"])):
             if got != want:
                 bad.append(f"{what} came back {got}, the gate asked for {want}")
     return bad

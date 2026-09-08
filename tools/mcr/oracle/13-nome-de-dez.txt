@@ -1,0 +1,105 @@
+# 13-nome-de-dez -- a segunda pergunta da MCR-TASK-13: o nome que ENCHE os dez
+# bytes, com espaco no fim.
+#
+# Abre a ficha do primeiro jogador do time 2, apaga o nome, digita nove letras
+# e um ESPACO -- dez caracteres exatos --, aceita e exporta o `.mcr`. Se os dez
+# bytes voltam com `0x20` no decimo e sem terminador, o campo nao e cadeia
+# terminada em NUL, que e o que a §1.6 do plano afirma e o que os slots 5 e 20
+# da fixture ja mostravam.
+#
+#   rm -f work/oraculo-13-nome.mcr
+#   bash wte/tools/golden_run_wte.sh tools/mcr/oracle/13-nome-de-dez.txt \
+#        work/wte-japanese-shift-jis.bin /tmp/oraculo-13
+#   python3 tools/mcr/text.py work/oraculo-13-nome.mcr
+#
+# O ESPACO VAI POR `! tecla space`, e nao no fim do `! texto`: espaco no fim de
+# uma linha de roteiro nao sobrevive a leitura, e o que se mede aqui e
+# exatamente o decimo byte. O filtro do campo aceita espaco -- o
+# `casilla_nombreKeyPress` deixa passar `[A-Za-z0-9 .]`, e o `MaxLength` do
+# `jugador.dfm` e 10.
+#
+# QUAL SLOT foi editado nao se supoe: compara-se com o cartao do
+# `13-controle.txt` e o slot e aquele cujos dez bytes mudaram.
+#
+# A IMAGEM E A JAPONESA. APAGUE O `.mcr` ANTES -- `ofOverwritePrompt`.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------------- a ficha ----
+#
+# mostrar_jugador_1 (8,72) + GroupBox1 (8,320) = (16,392), 25x21 -> (28,402).
+! clique 28 402
+~ 5
+
+>~ 707x273
+~ 2
+
+# ------------------------------------------------- o nome de dez bytes ----
+#
+# casilla_nombre (368,243) 81x21 -> centro (408,253). MaxLength = 10.
+! clique 408 253
+~ 1
+! tecla End
+! tecla shift+Home
+! tecla BackSpace
+~ 1
+! texto ABCDEFGHI
+~ 1
+! tecla space
+~ 2
+= NOME_DE_DEZ
+
+# BitBtn3 `Comple.` (624,240) 73x25 -> centro (660,252).
+! clique 660 252
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= COMPLE
+
+# ------------------------------------------------------------- gravar ----
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\oraculo-13-nome.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR

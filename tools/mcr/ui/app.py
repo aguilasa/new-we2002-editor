@@ -154,9 +154,15 @@ def write_probe(app, window, out_dir: str,
     window.formation.roles[0].setCurrentIndex(PROBE_ROLE)
     kicker = 1 if formation.kickers[0] != 1 else 2
     window.formation.kickers[0].setValue(kicker)
+    # The captain became editable in MCR-TASK-13; before it, the byte was read
+    # and never written, so this is the one field whose write path is newer
+    # than the probe that exercises it.
+    captain = 2 if formation.captain != 2 else 3
+    window.formation.captain.setValue(captain)
     app.processEvents()
     report["role"] = PROBE_ROLE
     report["kicker"] = kicker
+    report["captain"] = captain
 
     full = window.save_as(os.path.join(out_dir, "full.mcr"))
     report["full"] = full

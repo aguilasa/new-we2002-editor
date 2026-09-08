@@ -194,15 +194,41 @@ Os cobradores ficam numa **tabela não-crescente** — `0x614F, 0x6140, 0x6122,
 0x6113, 0x6131` —, o que é razão suficiente para tabela em vez de aritmética.
 Na fixture eles valem `[7, 7, 8, 7, 7]`.
 
-### 1.8 A discordância do `0x6500`
+### 1.8 O `0x6500` é o **capitão** — medido na MCR-TASK-13
 
-`0x6500` (=25856) vale `8` na fixture. Nossa RE do `.exe` o chama de
-**capitão**; o zetaprog o chama de **sexto cobrador** ("C"). Os dois papéis
-guardam índice de slot, então **o valor sozinho não discrimina** — só um
-experimento no oráculo do Obocaman resolve, e é a MCR-TASK-13.
+`0x6500` (=25856) vale `8` na fixture. Este plano registrava uma discordância —
+capitão pela nossa RE do `.exe`, "sexto cobrador" pelo zetaprog — e a
+MCR-TASK-13 mostrou que **os dois terceiros nunca discordaram**: o "sexto
+cobrador" era leitura nossa, tirada da **posição** do byte (sexto de um grupo
+de seis) e não de rótulo nenhum. Quatro medições, independentes entre si:
 
-Enquanto não houver veredito, o port **passa o byte intacto** e não o expõe na
-UI.
+1. **O formulário do oráculo.** O `estrategia.dfm` do `we-team-editor.exe` põe
+   seis marcadores numa grade só, e os seis rótulos acima deles são `SF`, `LF`,
+   `RC`, `LC`, `PK` e `CP` — este último com `Hint = 'Captain'`.
+2. **O experimento dirigido.** Pondo as seis colunas da `malla2` em seis linhas
+   distintas e exportando o `.mcr`, os cinco cobradores saem `0, 1, 2, 3, 4` e
+   o `0x6500` sai **`5`** — e nenhum outro byte da família se mexe. O byte é
+   escrito pela sexta coluna, aquela cujo rótulo diz `Captain`.
+3. **O fonte do upstream.** No `lite/fifatomcr/FrmFormation.vb`, o valor
+   gravado em `25856` sai de um local chamado **`CP`**, ao lado de `SF`, `LF`,
+   `RC`, `LC` e `PK` nos cinco endereços de cobrador. As mesmas seis siglas.
+4. **O readme do próprio Obocaman**, já citado por
+   [`wte/re/mcr.md`](../wte/re/mcr.md): a v0.98 consertou *"the problem with
+   the **captain and kickers** when loading from .mcr files"* — o autor separa
+   os dois.
+
+O experimento também fixou **qual cobrador é qual**, o que a tabela de
+endereços não dizia: na ordem de `layout.KICKER_ADDRESSES` os cinco são `SF`,
+`LF`, `RC`, `LC`, `PK`.
+
+E fixou o **domínio**: a `malla2` tem seis colunas por **onze** linhas, então o
+que um cobrador e o capitão guardam é uma posição no **onze inicial**, `0..10`
+— não um dos 23 slots do elenco. A MCR-TASK-12 oferecia `0..22` na tela, e
+estava errada por um fator de dois.
+
+Desde o veredito o port **grava** o byte, como grava qualquer outro campo. Ele
+não gravava antes, e não devia: gravar byte de significado incerto é como um
+round-trip deixa de ser evidência.
 
 ### 1.9 A tática vai e não volta
 
@@ -543,9 +569,23 @@ dá o diff C++ × Python sem transcrição no meio.
    nenhum (§1.9). v1: somente leitura, bytes intactos.
 2. **Se o cartão emitido é válido para o console.** 14 dos 17 destinos caem no
    bloco 3, que o diretório declara livre, e ninguém recalcula checksum.
-   Ninguém botou um PSX com um cartão assim. A MCR-TASK-13 agenda o
-   experimento; **a definição de pronto da v1 não depende dele** — ela se mede
-   contra o original, não contra o console.
+   Ninguém botou um PSX com um cartão assim. **A definição de pronto da v1 não
+   depende dele** — ela se mede contra o original, não contra o console.
+
+   A MCR-TASK-13 mediu **por que ele não foi obtido**, e não é falta de vontade:
+   a fixture é um save chamado `BISLPM-86600WEW-OPT`, e as três imagens de
+   `roms/` declaram `cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`. O
+   sufixo `WEW-OPT` é o mesmo — é por isso que todos os offsets batem —, mas o
+   código de produto não, e um jogo de PSX acha o save dele **pelo nome**.
+   Renomear a entrada do diretório é exatamente a escrita abaixo de `0x800` que
+   o port recusa (§8, armadilha 3).
+
+   O caminho que resta está escrito e é alcançável: subir
+   `roms/golden-european-deluxe.cue` ou `roms/ptbr-remaster.cue` no DuckStation
+   — as duas são `SLPM-87056` e as duas têm `.cue`, ao contrário da
+   `japanese-shift-jis.bin` — com um cartão **vazio**, deixar o jogo criar o
+   próprio `BISLPM-87056WEW-OPT`, editar **esse** cartão com o port e botar de
+   novo.
 3. **Os 17 presets de formação.** São a tabela do autor do upstream.
 4. **Os rótulos das tabelas de domínio** — 32 cabelos, 7 barbas, 8 cores. Os
    *índices* são conferíveis por faixa; os *nomes* são opinião de terceiro, e
@@ -596,7 +636,10 @@ O quadro com as 14 tasks, dependências e datas está em
 - **10 antes de 12** — gravação pela UI sem gate é o que perde cartão do
   usuário.
 - **13 antes de 12 fechar** — se o `0x6500` for capitão, a tela tem um campo
-  "capitão"; se for o sexto cobrador, tem seis cobradores.
+  "capitão"; se for o sexto cobrador, tem seis cobradores. **Não aconteceu**: a
+  12 fechou antes, com o byte em leitura e um rótulo dizendo as duas leituras,
+  e a 13 acrescentou o campo depois. Custou uma tela reaberta, que é o preço
+  que esta antecipação existia para evitar.
 
 ---
 

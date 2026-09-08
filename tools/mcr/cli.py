@@ -87,8 +87,8 @@ def cmd_dump(a) -> int:
     print(f"formation Y     {f.y}")
     print(f"roles           {f.role_labels()}")
     print(f"kickers         {f.kickers}")
-    print(f"0x6500          {f.open_slot_byte}  (captain or sixth kicker -- "
-          f"open until MCR-TASK-13)")
+    print(f"captain         {f.captain}  (0x6500; measured in MCR-TASK-13, "
+          f"domain 0..10 -- the starting eleven)")
     return 0
 
 

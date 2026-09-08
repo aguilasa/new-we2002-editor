@@ -159,6 +159,13 @@ CONTROLS = (
             "import mcrio                                             # noqa: E402",
             ("selftest",),
             "Rule 3: the window may not reach a module that knows an address"),
+    Control("formation-captain-not-written", "formation.py", "write",
+            "    card.write(layout.CAPTAIN.address, bytes([f.captain]))",
+            "    pass",
+            ("formation",),
+            "the captain was read and never written until MCR-TASK-13 "
+            "measured what it is; a writer that skips one field leaves every "
+            "round-trip check green"),
     Control("ui-writes-from-two-places", os.path.join("ui", "squad_view.py"),
             "SquadView._select",
             "        self.form.show_player(self._save.players[row])",

@@ -45,8 +45,13 @@ cabeçalho (`MC`) mais 15 quadros de
 | 15 | `0xa0` | livre (formatado) | 0 | `0xffff` | `—` |
 
 O save ocupa os blocos **[1, 2]** e se chama
-`BISLPM-86600WEW-OPT` — `SLPM-86600` é o *World Soccer Winning Eleven
-2002* japonês, o mesmo da ROM que o gate usa.
+`BISLPM-86600WEW-OPT`. O codigo de produto e `SLPM-86600`, e ele **nao e o
+da ROM que o gate usa**: as imagens de `roms/` declaram
+`cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`. O sufixo
+`WEW-OPT` e o mesmo nos dois, e e por isso que o layout deste documento
+vale para os dois; o que difere e o codigo, e a consequencia esta em
+[MCR-TASK-13](../../docs/tasks/port-mcr/13-oraculo-e-veredito.md): um
+console com este cartao e aquela ROM nao acha este save.
 
 ## O conteúdo do bloco do WE2002
 Os dois lados foram medidos: quem escreve é o `0x0040f150` do
@@ -71,7 +76,7 @@ chama. **Eles não são simétricos**, e a assimetria está na coluna `lê`.
 | `0x6497` | 3 | 1 | tatica byte 2, nibble baixo | `0x0040f3d8` | `-` **—** |
 | `0x64a6` | 3 | 1 | tatica byte 2, nibble alto | `0x0040f3a6` | `-` **—** |
 | `0x64e2` | 3 | 1 | tatica byte 0, cru | `0x0040f33d` | `-` **—** |
-| `0x6500` | 3 | 1 | cobrador 5 (o capitao) | `0x0040f4f8` | `0x0040bb68` |
+| `0x6500` | 3 | 1 | capitao | `0x0040f4f8` | `0x0040bb68` |
 
 ### A tática vai e não volta
 **6 destinos são escritos e nunca lidos de volta** por

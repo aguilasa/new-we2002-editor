@@ -113,7 +113,7 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 | como se empacotam os 12 bytes | [`src/core/Player.cpp`](../../src/core/Player.cpp) — **normativo** |
 | o contêiner PSX | spec pública do nocash, já implementada em `wte/tools/dump_mcr.py` |
 | o que significam X, Y, papéis e os domínios | o upstream — **rótulo de terceiro, não medição** |
-| o `0x6500` | **em aberto** até a MCR-TASK-13 |
+| o `0x6500` | **o capitão** — medido na MCR-TASK-13 por quatro caminhos independentes (§1.8 do plano). O domínio é o onze inicial, `0..10`, e não os 23 slots |
 | a tática | **sem oráculo** — v1 passa intacta |
 
 ---
@@ -180,7 +180,10 @@ task** — já dizia dezesseis ([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017
 
 A **MCR-TASK-13 pode ser antecipada** assim que a 09 fechar, e deve: ela precisa
 do leitor, não da UI, e o veredito do `0x6500` decide se a tela da MCR-TASK-12
-tem um campo "capitão" ou seis cobradores. É o padrão que o `01-executar.md` já
+tem um campo "capitão" ou seis cobradores. **Não foi antecipada**, e a 12 fechou
+com o byte em leitura; a 13 abriu a tela de novo para pôr o campo. O precedente
+fica com o custo medido: antecipar teria poupado uma reabertura.
+É o padrão que o `01-executar.md` já
 autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
 
 ---

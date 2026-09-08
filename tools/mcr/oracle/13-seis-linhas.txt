@@ -1,0 +1,115 @@
+# 13-seis-linhas -- o EXPERIMENTO DISCRIMINANTE do `0x6500` (MCR-TASK-13).
+#
+# Poe as seis colunas da `malla2` em seis linhas DISTINTAS -- coluna c na linha
+# c, para c de 0 a 5 -- aceita, e exporta o `.mcr`. Se os cinco cobradores
+# saem 0,1,2,3,4 e o `0x6500` sai 5, o byte e escrito pela SEXTA coluna da
+# mesma malha, aquela cujo rotulo o proprio editor chama de `Captain`.
+#
+# O par obrigatorio e o `13-controle.txt`: la a tela de tatica nao e aberta, e
+# os seis bytes tem de sair como o jogo os gravou. Sem esse controle, seis
+# valores distintos nao provam que foi a edicao que os pos ali.
+#
+#   rm -f work/oraculo-13-seis.mcr
+#   bash wte/tools/golden_run_wte.sh tools/mcr/oracle/13-seis-linhas.txt \
+#        work/wte-japanese-shift-jis.bin /tmp/oraculo-13
+#   python3 tools/mcr/formation.py work/oraculo-13-seis.mcr
+#
+# A GEOMETRIA SAI DE `wte/re/zonas.md`, medida do `.text` e conferida contra o
+# formulario: `malla2` em (368,312), 144x176, passo 24 x 16, folga 3 -- seis
+# colunas e onze linhas. Clicar escolhe a COLUNA pelo X e move o marcador
+# daquela coluna para a LINHA do Y. Centro da coluna c: 368 + 24c + 12.
+# Centro da linha r: 312 + 16r + 8.
+#
+#   col 0 = SF (Short Foul Kick)      col 3 = LC (Left Corner Kick)
+#   col 1 = LF (Long Foul Kick)       col 4 = PK (Penalty Kick)
+#   col 2 = RC (Right Corner Kick)    col 5 = CP (Captain)
+#
+# Os seis rotulos sao os `Hint` dos `Label1..6` do `estrategia.dfm`, e o sexto
+# e a metade da discordancia: o OBJETO chama-se `tirador6` -- sexto cobrador --
+# e o rotulo dele diz `Captain`.
+#
+# A IMAGEM E A JAPONESA: com a europeia o `wte.exe` morre ao trocar de time.
+# APAGUE O `.mcr` ANTES -- `ofOverwritePrompt`.
+alvo: original
+estado: ok
+operacao: gravacao
+
+# ---------------------------------------------------------------- abrir ----
+> Abre
+~ 2
+! clique 315 304
+! texto E:\@IMAGEM@
+! tecla Return
+~ 3
+
+> Cuidado
+! clique 222 148
+~ 3
+
+> Sobre...
+! clique 110 243
+~ 4
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ARRANQUE
+
+# ------------------------------------------------------------- o time 2 ----
+! clique 50 46
+~ 1
+! tecla Down
+! tecla Down
+! tecla Down
+~ 6
+= SELECIONA_TIME
+
+# ------------------------------------------------------ a tela de tatica ----
+#
+# GroupBox1 (8,320) + mostrar_estrategia_1 (8,40) = (16,360) -> (28,370).
+! clique 28 370
+~ 5
+
+# A janela mede os 529x498 do DFM. Busca por TAMANHO porque o Caption vira o
+# nome do time em Shift-JIS.
+>~ 529x498
+~ 1
+
+# ------------------------------------------- as seis colunas, seis linhas ----
+! clique 380 320
+~ 1
+! clique 404 336
+~ 1
+! clique 428 352
+~ 1
+! clique 452 368
+~ 1
+! clique 476 384
+~ 1
+! clique 500 400
+~ 1
+= SEIS_MARCADORES
+
+# BitBtn6 ` Accept` (432,261) 81x25 -> centro (472,273).
+! clique 472 273
+~ 3
+
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= ACCEPT
+
+# ------------------------------------------------------------- gravar ----
+! clique 108 292
+~ 3
+> Extrair MCR do jogo
+~ 1
+! clique 315 304
+! texto E:\oraculo-13-seis.mcr
+! tecla Return
+~ 4
+
+> W11 TE PT
+! clique 142 80
+~ 3
+> W11 Team Editor PT by chagas_michel!
+~ 2
+= GRAVA_MCR

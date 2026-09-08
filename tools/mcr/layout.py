@@ -160,7 +160,7 @@ DESTINATIONS: tuple[Destination, ...] = (
     Destination(0x6497, 1, "tactics byte 2, low nibble", reads_back=False),
     Destination(0x64A6, 1, "tactics byte 2, high nibble", reads_back=False),
     Destination(0x64E2, 1, "tactics byte 0, raw", reads_back=False),
-    Destination(0x6500, 1, "kicker 5 (the captain)"),
+    Destination(0x6500, 1, "captain"),
 )
 
 BY_ADDRESS = {d.address: d for d in DESTINATIONS}
@@ -195,12 +195,16 @@ PLAYER_NAME = _required(0x5910, "PLAYER_NAME")
 # result still looks like a formation.
 KICKER_ADDRESSES = (0x614F, 0x6140, 0x6122, 0x6113, 0x6131)
 
-# The sixth slot, and the open question of section 1.8: our RE of the `.exe`
-# calls it the captain, the upstream calls it a sixth kicker. Both store a slot
-# index, so the VALUE alone does not discriminate -- MCR-TASK-13 settles it with
-# an experiment. Until then it is named for the doubt, not for one of the two
-# answers.
-CAPTAIN_OR_SIXTH_KICKER = _required(0x6500, "CAPTAIN_OR_SIXTH_KICKER")
+# The captain. SETTLED IN MCR-TASK-13, and it was our reading that was wrong:
+# section 1.8 of the plan had this as the captain by our RE of the `.exe` and a
+# sixth kicker by the upstream. Three measurements agree it is the captain --
+# the sixth column of the `estrategia` form's `malla2`, whose label's Hint is
+# `Captain`; a driven experiment that put the six columns on six distinct rows
+# and got 0,1,2,3,4 in the five kickers and 5 here; and the upstream's own
+# source, where the value written to 25856 is a local called `CP`, beside
+# `SF`, `LF`, `RC`, `LC` and `PK`. Nobody ever called it a sixth kicker: we
+# read that off its POSITION, sixth in a group of six.
+CAPTAIN = _required(0x6500, "CAPTAIN")
 
 # The 20 bytes at `0x62A8` are ONE destination in the measurement, and the
 # upstream reads them as two arrays of ten: X then Y. That split is semantics,
@@ -481,7 +485,7 @@ def _checks(c) -> None:
        all(_required(a, "kicker").block == 3 for a in KICKER_ADDRESSES)
        and FORMATION_XY.block == 3 and FORMATION_ROLES.block == 3
        and all(d.block == 3 for d in TACTICS)
-       and CAPTAIN_OR_SIXTH_KICKER.block == 3)
+       and CAPTAIN.block == 3)
     ok("14 of the 17 fall in block 3",
        sum(1 for d in DESTINATIONS if d.block == 3) == 14,
        f"n={sum(1 for d in DESTINATIONS if d.block == 3)}")

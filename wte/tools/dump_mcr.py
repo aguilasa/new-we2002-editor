@@ -112,7 +112,13 @@ LAYOUT = [
     (0x6497, "tatica byte 2, nibble baixo", 1, "0x0040f3d8", "-"),
     (0x64A6, "tatica byte 2, nibble alto", 1, "0x0040f3a6", "-"),
     (0x64E2, "tatica byte 0, cru", 1, "0x0040f33d", "-"),
-    (0x6500, "cobrador 5 (o capitao)", 1, "0x0040f4f8", "0x0040bb68"),
+    # "cobrador 5 (o capitao)" ate 2026-09-08. A MCR-TASK-13 mediu, e a duvida
+    # vinha da POSICAO -- sexto de um grupo de seis --, nao de rotulo nenhum:
+    # o `Label6` da `estrategia` tem `Hint = 'Captain'` e `Caption = 'CP'`,
+    # dirigir as seis colunas da `malla2` em seis linhas distintas poe 0..4 nos
+    # cinco cobradores e 5 aqui, e o upstream do port em Python escreve 25856
+    # a partir de um local chamado `CP`.
+    (0x6500, "capitao", 1, "0x0040f4f8", "0x0040bb68"),
 ]
 
 VA_TABELA_COBRADORES = 0x00423F84   # 5 DWORDs: os destinos de cobrador
@@ -500,9 +506,21 @@ def gera_md(dat, card, dir_, usados, ocupados, fora, nao_zero, cob, bits,
         w(f"| {d['bloco']} | `{d['estado']:#04x}` | "
           f"{ESTADOS.get(d['estado'], '**desconhecido**')} | {d['tamanho']} | "
           f"`{d['link']:#06x}` | `{d['nome'] or '—'}` |\n")
+    # O codigo sai do NOME, e nao de um literal: a frase antiga cravava
+    # `SLPM-86600` e ainda afirmava ser "o mesmo da ROM que o gate usa".
+    # Medido em 2026-09-08 (MCR-TASK-13): as tres imagens de `roms/` dizem
+    # `cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`; o cartao-molde diz
+    # `BISLPM-86600WEW-OPT`. Mesmo sufixo `WEW-OPT` -- por isso o layout bate
+    # campo a campo --, codigos de produto diferentes.
+    codigo = dir_[0]["nome"][2:12] if len(dir_[0]["nome"] or "") >= 12 else "?"
     w(f"O save ocupa os blocos **{usados}** e se chama\n"
-      f"`{dir_[0]['nome']}` — `SLPM-86600` é o *World Soccer Winning Eleven\n"
-      "2002* japonês, o mesmo da ROM que o gate usa.\n")
+      f"`{dir_[0]['nome']}`. O codigo de produto e `{codigo}`, e ele **nao e o\n"
+      "da ROM que o gate usa**: as imagens de `roms/` declaram\n"
+      "`cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`. O sufixo\n"
+      "`WEW-OPT` e o mesmo nos dois, e e por isso que o layout deste documento\n"
+      "vale para os dois; o que difere e o codigo, e a consequencia esta em\n"
+      "[MCR-TASK-13](../../docs/tasks/port-mcr/13-oraculo-e-veredito.md): um\n"
+      "console com este cartao e aquela ROM nao acha este save.\n")
 
     w("## O conteúdo do bloco do WE2002\n")
     w("Os dois lados foram medidos: quem escreve é o `0x0040f150` do\n"

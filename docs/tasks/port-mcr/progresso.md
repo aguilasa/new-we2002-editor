@@ -46,7 +46,7 @@ por princípio.
 | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — **fecha a Fase 1** | 2 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ⬜ Pendente | — | — |
+| [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ✅ Concluído | 2026-09-08 | ⬜ pendente |
 | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
@@ -104,7 +104,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 
 - [x] MCR-TASK-11 — leitura na tela
 - [x] MCR-TASK-12 — gravação pela tela
-- [ ] MCR-TASK-13 — o `0x6500` respondido com valor medido
+- [x] MCR-TASK-13 — o `0x6500` respondido com valor medido
 
 ### Fase 4 — fechamento
 
@@ -151,8 +151,8 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Dorsal duplo | **23 de 23** concordam entre o bit-field do registro e a tabela |
 | Nome | **cp932**, não ASCII; os slots 5 e 20 usam os 10 bytes sem terminador |
 | Formação | X `0x62A8`, Y `0x62B2`, papéis `0x63D5` (índice + 2, sobre 20 rótulos) |
-| Cobradores | `0x614F, 0x6140, 0x6122, 0x6113, 0x6131` — tabela não-crescente; valem `[7,7,8,7,7]` |
-| `0x6500` | vale `8` — **capitão** pela nossa RE, "sexto cobrador" pelo upstream. Em aberto |
+| Cobradores | `0x614F, 0x6140, 0x6122, 0x6113, 0x6131` — tabela não-crescente; valem `[7,7,8,7,7]`. Nessa ordem são **SF, LF, RC, LC, PK**, medido na MCR-TASK-13 |
+| `0x6500` | vale `8` e é o **capitão** — medido na MCR-TASK-13. Dirigindo as seis colunas da `malla2` do oráculo em seis linhas distintas, os cinco cobradores saem `0,1,2,3,4` e este byte sai `5`; o rótulo do sexto marcador é `Captain` e o local do upstream chama-se `CP`. Domínio `0..10` — o onze inicial, não os 23 slots. `bash wte/tools/golden_run_wte.sh tools/mcr/oracle/13-seis-linhas.txt work/wte-japanese-shift-jis.bin` |
 | Tática | `0x64E2 = 1`, `0x6102 = 51`, nibbles `0/14` e `4/9` — escrita e nunca lida pelo original |
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
 | Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |

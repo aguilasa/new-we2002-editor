@@ -207,7 +207,7 @@ def _planted_card() -> Card:
     formation_mod.write(c, Formation(
         x=list(range(10, 20)), y=list(range(30, 40)),
         role=[0, 1, 4, 5, 6, 8, 12, 14, 15, 17],
-        kickers=[7, 7, 8, 7, 7], open_slot_byte=0))
+        kickers=[7, 7, 8, 7, 7], captain=0))
     return c
 
 
