@@ -41,7 +41,7 @@ por princípio.
 | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | `layout.py` e o cross-check dos 17 destinos | 1 | 04 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` × `Player::Decode/Encode` | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-08](/docs/tasks/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y/papéis, cobradores, presets | 1 | 05 | ✅ Concluído | 2026-09-07 | ⬜ pendente |
+| [MCR-TASK-08](/docs/tasks/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y/papéis, cobradores, presets | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `io.py` e o round-trip byte-idêntico | 1 | 06, 07, 08 | ⬜ Pendente | — | — |
 | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — **fecha a Fase 1** | 2 | 09 | ⬜ Pendente | — | — |
 | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ⬜ Pendente | — | — |
