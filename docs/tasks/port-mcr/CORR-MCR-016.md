@@ -3,7 +3,7 @@ id: CORR-MCR-016
 title: "Correção: \"os três últimos nasceram na MCR-TASK-10\" não são os três últimos da lista"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -84,18 +84,48 @@ tabelas deste ciclo linkam o arquivo em vez de dizer "a linha de cima".
 
 ## Verificação
 
-- [ ] `grep -n "três últimos" docs/PLAN-MCR-PY.md` sai vazio
-- [ ] os três nomes da abertura são os mesmos que o parágrafo explica
-- [ ] conferência de forma e de existência de link de `.claude/rules/links.md`
+- [x] `grep -n "três últimos" docs/PLAN-MCR-PY.md` sai vazio
+- [x] os três nomes da abertura são os mesmos que o parágrafo explica
+- [x] conferência de forma e de existência de link de `.claude/rules/links.md`
       vazias
-- [ ] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
+- [x] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+A abertura do parágrafo nomeia os três — `harness.py`, `controls.py`,
+`ui_check.py` — em vez de apontá-los por posição, e diz por que: os dois
+primeiros entraram no **meio** da lista, perto do que se parecem. Nome resiste
+a reordenação; posição não. O resto do parágrafo já os explicava um a um, nessa
+mesma ordem.
+
 **Problemas encontrados:**
 
+**A varredura achou, no mesmo parágrafo, uma afirmação que a CORR-MCR-014 tinha
+acabado de tornar parcial.** A frase seguinte dizia que o estímulo de todo
+controle negativo "agora é substituição literal versionada". Passou a ser
+verdade de catorze dos quinze: o décimo quinto **cria** um arquivo uma pasta
+abaixo, porque o defeito que ele mede é uma varredura que não desce. A cláusula
+entrou, com o link para a CORR. É o segundo caso deste lote em que a correção
+*k+1* alcança o doc que a *k* escreveu — o outro foi a contagem no
+`tests/CMakeLists.txt`.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `grep -n "três últimos" docs/PLAN-MCR-PY.md` | **vazio** |
+| os três nomes da abertura | `harness.py`, `controls.py`, `ui_check.py` — os mesmos que o parágrafo explica, na mesma ordem |
+| outros ponteiros por posição no ciclo | nenhum (as ocorrências restantes são de PES2 e do ciclo arquivado) |
+| conferência de forma de link | 284 linhas, **todas** alvo fora de `docs/` (`../CLAUDE.md`, `../NOTICE.md`, `../../../wte/re/*.md`) |
+| conferência de existência de link | **vazia** |
+| `tools/check_tasks.py` | **100 task(s), ok** |
+| `ctest -R tasks` | **1/1 Passed** |
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-MCR-PY.md` — a abertura por nome, e a cláusula do controle que
+  cria arquivo (varredura de discrepância)

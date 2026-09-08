@@ -29,7 +29,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, não cita o `Save`, e a task atribui a frase à §5.1 | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | a varredura da Regra 1 e a de idioma usam `os.listdir` e param no topo: a `tools/mcr/ui/` da MCR-TASK-11 fica invisível para as duas | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o `add_test` dele, e o `pes2_boot` ficou sem comentário | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [ ] pendente | — |
+| [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [x] concluída | 2026-09-08 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -53,7 +53,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-013 — pôr `Player`/`Save` na §3.2 do plano e corrigir a citação de seção na task
 - [x] CORR-MCR-014 — descer as duas varreduras com `os.walk`, e registrar o caso vermelho da `ui/` como controle
 - [x] CORR-MCR-015 — pôr cada `add_test` sob o comentário que o descreve
-- [ ] CORR-MCR-016 — nomear os três módulos novos em vez de apontá-los por posição
+- [x] CORR-MCR-016 — nomear os três módulos novos em vez de apontá-los por posição
 
 ---
 
