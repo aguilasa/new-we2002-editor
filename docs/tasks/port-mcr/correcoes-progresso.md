@@ -30,6 +30,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | a varredura da Regra 1 e a de idioma usam `os.listdir` e param no topo: a `tools/mcr/ui/` da MCR-TASK-11 fica invisível para as duas | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o `add_test` dele, e o `pes2_boot` ficou sem comentário | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [x] concluída | 2026-09-08 |
+| [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, e a frase só descreve um dos dois tipos | Alta | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -54,6 +55,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-014 — descer as duas varreduras com `os.walk`, e registrar o caso vermelho da `ui/` como controle
 - [x] CORR-MCR-015 — pôr cada `add_test` sob o comentário que o descreve
 - [x] CORR-MCR-016 — nomear os três módulos novos em vez de apontá-los por posição
+- [ ] CORR-MCR-017 — pôr 16 e os dois tipos no perfil, e fazer o `controls.py` imprimir o resumo
 
 ---
 
@@ -324,3 +326,23 @@ ciclo arquivado, o dele em
   MCR-TASK-10.
 - **Fix:** nomear os três na abertura em vez de apontá-los por posição — nome
   resiste a reordenação, posição não.
+
+### CORR-MCR-017
+
+- **Arquivo com problema:** `docs/prompts/perfil-mcr.md`, linhas 141 e 149
+- **Sintoma:** a tabela de gates diz que o `mcr_selftest` exige "as **15**
+  substituições literais" e o parágrafo abaixo dela diz "As **quinze**
+  substituições moram em `tools/mcr/controls.py`". `python3
+  tools/mcr/controls.py` mede `16 of 16 red` — a MCR-TASK-11 criou o
+  `ui-imports-an-address`. E a frase descreve um tipo só: dos 16, quinze são
+  substituição literal e um (`ui-below-the-sweep`, da CORR-MCR-014) **cria um
+  arquivo** uma pasta abaixo. O `progresso.md` do mesmo ciclo, atualizado pela
+  mesma task, já diz "16/16 … quinze por substituição literal, um que cria um
+  arquivo".
+- **Como foi detectado:** `controls.py` rodado na revisão da MCR-TASK-11, com
+  e sem fixture, contra o que o perfil promete; o `git show 7901d36 --
+  docs/prompts/perfil-mcr.md` mostra que as linhas 124 e 143 foram editadas e
+  a 141 ficou.
+- **Fix:** 16 e os dois tipos no perfil, e o `controls.py` passando a
+  **imprimir** o resumo por tipo — reportar em vez de afirmar, como o
+  `--edit-probe` da MCR-TASK-09 já faz.
