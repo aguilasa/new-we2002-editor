@@ -52,6 +52,21 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       v4.2 — o self-check morreu no meio e três checks não rodaram. A terceira
       cópia já nasceu; **escolha uma casa só para os dois** ao montar o
       `selftest`.
+- [ ] **`layout.find_upward()` é o resolvedor compartilhado de caminho**, e a
+      MCR-TASK-08 o hasteou para lá depois de o mesmo defeito aparecer três
+      vezes: `layout.py` (o `mcr.md`), `attributes.py` e `domains.py` (o clone
+      do upstream) localizavam o alvo contando saltos de `dirname` a partir de
+      `__file__`. Uma cópia do módulo um diretório mais raso — que é o que todo
+      controle negativo é — aponta para lugar nenhum, e o check **pula** em vez
+      de falhar. Use-o em qualquer módulo novo que precise achar algo fora de
+      `tools/mcr/`.
+- [ ] **A varredura da Regra 1 tokeniza, não greppeia.** Desde a MCR-TASK-08 a
+      `address_monopoly()` ignora comentários, literais de string e os tokens
+      de f-string (`FSTRING_MIDDLE`, novos no 3.12 — sem eles a prosa dentro de
+      um `print` f-string é lida como código). O motivo: um módulo tem de poder
+      nomear na própria documentação o endereço sobre o qual ele opera, e o
+      `formation.py` nomeia onze. Ao mexer nela, replante uma constante de
+      verdade e confira que continua vermelha.
 - [ ] **O harness precisa de um guard EXTERNO, não só de helpers.** Cinco vezes
       neste ciclo um `ok(...)` cuja expressão levanta matou a corrida e
       escondeu os checks seguintes — MCR-TASK-04 (`find_save`), MCR-TASK-06

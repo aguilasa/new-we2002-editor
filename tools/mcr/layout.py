@@ -64,6 +64,27 @@ def _find_measurement() -> str:
 
 MCR_MD = _find_measurement()
 
+
+def find_upward(relative: str) -> str | None:
+    """Walks up from this file looking for `relative`; `None` if never found.
+
+    The generalisation of `_find_measurement`, hoisted here after the same
+    defect appeared twice more: `attributes.py` and `domains.py` each located
+    the upstream clone by counting `dirname` hops from `__file__`, so a copy of
+    the module one directory shallower -- which is what every negative control
+    is -- pointed at a directory that does not exist. The check did not fail;
+    it SKIPPED, and the control came out green with an invented label in place.
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    while True:
+        candidate = os.path.join(here, relative)
+        if os.path.exists(candidate):
+            return candidate
+        parent = os.path.dirname(here)
+        if parent == here:
+            return None
+        here = parent
+
 BLOCK_BYTES = 8192      # only to derive the block number; the container is card.py
 
 
@@ -305,6 +326,45 @@ _HEX = re.compile(r"0[xX][0-9a-fA-F]+")
 _DEC = re.compile(r"(?<![\w.])\d{4,6}(?![\w.])")
 
 
+def _code_lines(path: str):
+    """`(lineno, source)` with comments and string literals removed.
+
+    THE SWEEP MEASURES CODE, NOT PROSE. A module that operates on `0x62A8` has
+    to be able to say so in its own docstring, and `formation.py` names eleven
+    addresses in its documentation on purpose -- the open `0x6500` is a
+    completion criterion of MCR-TASK-08. A textual sweep flagged all eleven,
+    which would have left two bad options: gut the documentation, or switch the
+    sweep off. Tokenising costs four lines and keeps both.
+
+    String literals go too. A constant smuggled as `int("0x5904", 16)` would
+    escape, which is a contrivance nobody writes by accident; forbidding a
+    module to quote the address it documents is a cost paid every day.
+    """
+    import io
+    import tokenize
+    with open(path, "rb") as fh:
+        source = fh.read()
+    skip = {tokenize.COMMENT, tokenize.STRING, tokenize.NL, tokenize.NEWLINE,
+            tokenize.INDENT, tokenize.DEDENT, tokenize.ENCODING,
+            tokenize.ENDMARKER}
+    # Python 3.12 split f-strings into their own token types, so the literal
+    # text inside one is FSTRING_MIDDLE and NOT STRING. Without these three the
+    # sweep reads the prose inside every f-string as code -- measured: a `print`
+    # that names `0x6500` in its message was reported as a stray address.
+    for extra in ("FSTRING_START", "FSTRING_MIDDLE", "FSTRING_END"):
+        if hasattr(tokenize, extra):
+            skip.add(getattr(tokenize, extra))
+    lines: dict[int, list[str]] = {}
+    try:
+        for tok in tokenize.tokenize(io.BytesIO(source).readline):
+            if tok.type in skip:
+                continue
+            lines.setdefault(tok.start[0], []).append(tok.string)
+    except tokenize.TokenError as e:
+        raise LayoutError(f"{path}: cannot be tokenised: {e}") from None
+    return [(n, " ".join(parts)) for n, parts in sorted(lines.items())]
+
+
 def address_monopoly(directory: str = MCR_DIR) -> list[str]:
     """Modules other than this one carrying a save address. Empty is correct.
 
@@ -320,19 +380,18 @@ def address_monopoly(directory: str = MCR_DIR) -> list[str]:
         if not name.endswith(".py") or name == here:
             continue
         path = os.path.join(directory, name)
-        with open(path, encoding="utf-8") as fh:
-            for n, line in enumerate(fh, 1):
-                for m in _HEX.finditer(line):
-                    v = int(m.group(), 16)
-                    if SAVE_SPACE[0] <= v < SAVE_SPACE[1]:
-                        complaints.append(
-                            f"{name}:{n}: {m.group()} is in the save address "
-                            f"space; addresses belong in layout.py")
-                for m in _DEC.finditer(line):
-                    if int(m.group()) in known:
-                        complaints.append(
-                            f"{name}:{n}: {m.group()} is a save address in "
-                            f"decimal; addresses belong in layout.py")
+        for lineno, text in _code_lines(path):
+            for m in _HEX.finditer(text):
+                v = int(m.group(), 16)
+                if SAVE_SPACE[0] <= v < SAVE_SPACE[1]:
+                    complaints.append(
+                        f"{name}:{lineno}: {m.group()} is in the save address "
+                        f"space; addresses belong in layout.py")
+            for m in _DEC.finditer(text):
+                if int(m.group()) in known:
+                    complaints.append(
+                        f"{name}:{lineno}: {m.group()} is a save address in "
+                        f"decimal; addresses belong in layout.py")
     return complaints
 
 

@@ -47,6 +47,12 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
   `PYTHONPATH=tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir, e
   **confira que a substituição casou**: literal que não bate deixa a cópia
   intacta e a corrida sai verde.
+  **E casar não basta — o check que o defeito deveria acender tem de ter
+  rodado.** Na MCR-TASK-08 um rótulo inventado passou verde com a substituição
+  confirmada: a cópia em `/tmp` não enxergava `work/easy-mcr`, o check contra o
+  upstream **pulou**, e "0 failure(s)" foi lido como aprovação. Leve para o
+  sandbox o que o módulo precisa (a fixture, o clone) ou confira que a linha de
+  `skip` não é justamente a do defeito plantado.
 
 ---
 

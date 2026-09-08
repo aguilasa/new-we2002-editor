@@ -584,10 +584,8 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                f"table={table} record={from_record}")
 
     # --- the upstream's weights, if the clone is present
-    clone = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__)))), "work", "easy-mcr")
-    if not os.path.isdir(clone):
+    clone = layout.find_upward(os.path.join("work", "easy-mcr"))
+    if clone is None:
         print("  skip  the upstream weight tables (no work/easy-mcr)")
     else:
         w = attempt("the upstream weight check runs",

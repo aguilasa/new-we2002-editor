@@ -23,6 +23,15 @@ status: pendente
 
 ---
 
+- **Três campos têm mais valores do que o upstream deu nomes**, medido na
+  MCR-TASK-08: `beard_style` e `beard_colour` guardam 3 bits (8 valores) e ele
+  nomeia 7; `foot` guarda 2 bits (4) e ele nomeia 3. O índice extra **não é
+  ilegal** — é anônimo. O `domains.label()` devolve `domains.UNNAMED` (`"?"`)
+  nesse caso e **levanta** só quando o valor está fora da faixa do campo; a
+  tela precisa distinguir as duas coisas, senão um cartão legítimo vira erro.
+
+---
+
 ## Objetivo
 
 Abrir um cartão e mostrar o que o núcleo já lê, sem gravar nada.
