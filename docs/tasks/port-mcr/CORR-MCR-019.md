@@ -3,7 +3,7 @@ id: CORR-MCR-019
 title: "Correção: o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da MCR-TASK-14 ficou apoiada num fato que deixou de valer"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -122,23 +122,52 @@ consertada em vez de tolerada.
 
 ## Verificação
 
-- [ ] o bloco do `mcr_ui` está em inglês e mantém a ressalva do
-      `WE2002_MCR_CARD`
-- [ ] `grep -nE '^\s*#' tests/CMakeLists.txt` não mostra português em nenhuma
-      das linhas de comentário
-- [ ] o item da MCR-TASK-14 descreve o que se mede hoje, com um comando que
-      alcança o arquivo inteiro
-- [ ] `cmake --preset debug` reconfigura sem aviso novo
-- [ ] `ctest -R mcr` = 3 de 3 com `WE2002_MCR_CARD`; `make test` verde
-- [ ] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
-- [ ] `roms/` intocada
+- [x] o bloco do `mcr_ui` está em inglês e mantém a ressalva do
+      `WE2002_MCR_CARD`, inclusive a frase que diz que sem ela o alvo passa
+      com a janela sozinha **e avisa**
+- [x] `grep -nE '^\s*#' tests/CMakeLists.txt` não mostra português em nenhuma
+      das linhas de comentário: as 74 continuam 74, e a contagem da Evidência
+      caiu de **6 para 0**
+- [x] o item da MCR-TASK-14 descreve o que se mede hoje, com
+      `grep -nE '^\s*#' tests/CMakeLists.txt` — o arquivo inteiro — no lugar
+      do `sed` de vinte linhas, e registra o episódio como o argumento a favor
+      de consertar a §3.5 em vez de tolerá-la
+- [x] `cmake --preset debug` reconfigura sem aviso novo
+- [x] `ctest -R mcr` = **3 de 3** com `WE2002_MCR_CARD`; `make test` **10 de 10**
+- [x] `python3 tools/check_tasks.py` (100 ok) e `ctest -R tasks` (1 de 1) verdes
+- [x] `roms/` intocada — esta correção não abre cartão nenhum
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+Reproduzido antes de mexer: 74 linhas de comentário no arquivo, **6** delas
+portuguesas, todas introduzidas por `2c7ec25` e todas no bloco que a
+MCR-TASK-10 escreveu em inglês depois de medir o idioma do arquivo. Reposto o
+bloco em inglês **com o conteúdo novo intacto** — a ressalva do
+`WE2002_MCR_CARD` é o que a MCR-TASK-12 acrescentou de útil ali, e ela
+sobreviveu à volta. A contagem caiu de 6 para 0; as 74 continuam 74.
+
+O item da MCR-TASK-14 foi reancorado num comando que alcança o **arquivo
+inteiro**. O `sed -n '1,20p'` que ele mandava rodar não alcançava nenhuma das
+seis linhas novas — quem executasse a task mediria um arquivo diferente do que
+o item descreve e decidiria a favor da §3.5 por uma evidência produzida sem
+querer. O episódio ficou registrado no próprio item, porque é ele que mostra
+por que a frase da §3.5 precisa ser consertada e não tolerada: enquanto os dois
+idiomas forem permitidos neste arquivo, a consistência **dele** é o único
+critério que sobra, e nenhuma varredura do ciclo o vigia — a `glossary.sweep()`
+cobre `tools/mcr/**.py` e para ali, por desenho.
+
 **Problemas encontrados:**
 
+Nenhum. A correção é de idioma e de âncora; nada de comportamento mudou, e os
+quatro gates confirmam: `ctest -R mcr` 3 de 3 com a fixture apontada,
+`make test` 10 de 10, `ctest -R tasks` 1 de 1, `check_tasks` 100 ok.
+
 **Arquivos criados/modificados:**
+
+- `tests/CMakeLists.txt` — o bloco do `mcr_ui` de volta ao inglês
+- `docs/tasks/port-mcr/14-verificacao-final.md` — o item reancorado
+- `docs/tasks/port-mcr/correcoes-progresso.md`

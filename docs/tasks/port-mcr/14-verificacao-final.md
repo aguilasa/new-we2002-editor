@@ -69,8 +69,15 @@ status: pendente
       `tests/CMakeLists.txt` são **ingleses** desde antes deste ciclo (o bloco
       de PES2 inteiro é), e o `Makefile` é português. A regra que vale — seguir
       o idioma **do arquivo** — é a mesma; a frase é que generaliza demais.
-      `sed -n '1,20p' tests/CMakeLists.txt` e `sed -n '1,10p' Makefile`
-      decidem em duas linhas.
+      O comando é `grep -nE '^\s*#' tests/CMakeLists.txt` e
+      `sed -n '1,10p' Makefile`: **o arquivo inteiro**, não as vinte primeiras
+      linhas. A MCR-TASK-12 reescreveu o bloco do `mcr_ui` em português — 6 das
+      74 linhas de comentário, e nenhuma delas nas vinte primeiras —, a
+      [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) repôs, e o episódio
+      é o argumento: enquanto a §3.5 tolerar os dois idiomas neste arquivo, a
+      consistência dele é o único critério que sobra, e ela se perde sem que
+      varredura nenhuma reclame — a `glossary.sweep()` cobre `tools/mcr/**.py`
+      e não alcança o CMake, por desenho.
 - [ ] [`/docs/prompts/perfil-mcr.md`](/docs/prompts/perfil-mcr.md) com as
       decisões confirmadas, as armadilhas medidas, os gates e os arquivos
       quentes do ciclo.
