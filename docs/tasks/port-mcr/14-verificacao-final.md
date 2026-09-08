@@ -54,6 +54,13 @@ status: pendente
       escreve ninguém deixa toda checagem de "não mudou byte" verde, porque
       escrever ninguém não muda nada. O `model.py` ganhou um check que prova
       que o escritor rodou; se o plano continuar mudo, acrescente a frase.
+- [ ] **A §3.5 do plano põe `tests/CMakeLists.txt` e o `Makefile` no mesmo
+      saco, e eles não estão.** Medido na MCR-TASK-10: os comentários do
+      `tests/CMakeLists.txt` são **ingleses** desde antes deste ciclo (o bloco
+      de PES2 inteiro é), e o `Makefile` é português. A regra que vale — seguir
+      o idioma **do arquivo** — é a mesma; a frase é que generaliza demais.
+      `sed -n '1,20p' tests/CMakeLists.txt` e `sed -n '1,10p' Makefile`
+      decidem em duas linhas.
 - [ ] [`/docs/prompts/perfil-mcr.md`](/docs/prompts/perfil-mcr.md) com as
       decisões confirmadas, as armadilhas medidas, os gates e os arquivos
       quentes do ciclo.

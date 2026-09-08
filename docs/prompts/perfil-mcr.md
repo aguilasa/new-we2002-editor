@@ -114,7 +114,7 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 ## Estrutura
 
 ```text
-tools/mcr/            o núcleo Python (12 módulos), o CLI e o selftest
+tools/mcr/            15 módulos: o núcleo, o harness, os controles, o CLI e os gates
 tools/mcr/ui/         a UI PySide6 -- não importa layout/card/io
 work/venv-mcr/        o venv com PySide6 6.11.2 (fora do git, 663 MB)
 work/entrada.mcr      a fixture (fora do git) -- compartilhada com o ciclo wte/
@@ -131,12 +131,20 @@ docs/tasks/port-mcr/  este ciclo
 | gate | a partir de | o que julga |
 |---|---|---|
 | `ctest -R tasks` | já existe | as convenções de task, inclusive nesta subpasta |
-| `mcr_selftest` | MCR-TASK-10 | núcleo e recusas, sem fixture e sem Qt — **obrigatório** |
-| `mcr_card` | MCR-TASK-10 | round-trip e cross-checks contra `WE2002_MCR_CARD` (skip 77) |
-| `mcr_ui` | MCR-TASK-11 | a UI sobe no `:98` com o venv (skip 77) |
+| `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e as 14 substituições literais, exigidas vermelhas** — sem fixture e sem Qt, ~13 s. **Obrigatório** |
+| `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
+| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. Registrado já; pula com 77 até a MCR-TASK-11 criar o `app.py` |
 
-Antes da MCR-TASK-10 **não há gate deste ciclo**, e é por isso que a ordem
-manda: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12.
+Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
+mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde
+2026-09-08 há**, e o `mcr_selftest` é o obrigatório.
+
+**Controle negativo se roda, não se descreve.** As catorze substituições moram
+em `tools/mcr/controls.py` — arquivo, função, linha exata, e o que ela vira —,
+e `python3 tools/mcr/controls.py` planta cada uma numa cópia da árvore e exige
+o vermelho. Substituição que casa zero ou duas vezes é reportada como
+**controle quebrado**, não como vermelho. O `mcr_selftest` as roda a cada
+corrida.
 
 ---
 
@@ -187,7 +195,12 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   antes de qualquer código nosso rodar; um `io.py` aqui roda como script e não
   é importável por ninguém. Medido na MCR-TASK-09, plano corrigido.
 - **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2
-  skipped.
+  skipped. **E o harness não se confere com ele mesmo:** o controle
+  `harness-counts-nothing` (o ramo de falha do `Checker.ok` virando `pass`)
+  deixou as catorze corridas **verdes**, porque toda asserção do próprio
+  harness é um `ok(...)`. O conserto é a única exceção do port a "não use
+  `raise` num self-check": o `_checks` do `harness.py` levanta, e o guard
+  externo conta por um caminho que o `ok` não percorre.
 - **Fase 3** — captura de tela no `:98` no Log; o arquivo gravado pela UI passa
   no `mcr roundtrip`.
 - **Fase 4** — os seis itens da definição de pronto, cada um com o comando que o

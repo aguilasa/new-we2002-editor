@@ -55,6 +55,7 @@ import numbers as numbers_mod                            # noqa: E402
 from card import (Card, CardError, FRAME_BYTES, Refused,   # noqa: E402
                   synthetic_card)
 from model import Formation, Save                        # noqa: E402
+import harness                                           # noqa: E402
 
 CARD_ENV = "WE2002_MCR_CARD"
 READ_ONLY_DIR = "roms"
@@ -278,46 +279,13 @@ def negative(verbose: bool = True) -> list[tuple[str, str, bool]]:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("mcrio.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=IoRefused):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("mcrio.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(IoRefused)
     ok("no Qt in the I/O", "PySide6" not in sys.modules)
     # Why this file is not `io.py`: with `tools/mcr` first on `sys.path`,
     # `import io` still resolves to the interpreter's own, because CPython
@@ -433,9 +401,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                    lambda: roundtrip(card_path, form=2), [None]) == [])
         ok("and the fixture itself was not written",
            os.path.getmtime(card_path) == before)
-
-    print(f"mcrio.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

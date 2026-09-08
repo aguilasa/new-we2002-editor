@@ -104,6 +104,33 @@ if(Python3_FOUND)
     set_tests_properties(pes2_image PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 600)
+
+    # The .mcr editor port (docs/PLAN-MCR-PY.md) is a fifth project: Python 3
+    # for the core, PySide6 in a venv for the UI, and no build shared with
+    # anything. Three targets, one per cost bracket -- section 4.4 of the plan.
+    #
+    # The mandatory one needs nothing. Every module builds the card it needs in
+    # memory, and selftest.py unsets WE2002_MCR_CARD before calling any of
+    # them, so this runs the same on a machine that has never seen a memory
+    # card. It also plants the fourteen negative controls and demands each one
+    # go red -- a guard that has never been red is decoration.
+    add_test(NAME mcr_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/mcr/selftest.py)
+    set_tests_properties(mcr_selftest PROPERTIES TIMEOUT 300)
+
+    # The second needs a real 128 KiB card. Point WE2002_MCR_CARD at one and it
+    # re-measures the round-trip in both forms, the two copies of every shirt
+    # number, the 17 destinations against wte/re/mcr.md and the upstream's
+    # label and weight tables when work/easy-mcr is there. Without the variable
+    # it reports itself skipped, the same way the golden tests do. It never
+    # writes the card it is given -- the last check re-reads it to prove it.
+    add_test(NAME mcr_card
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/mcr/cli.py check)
+    set_tests_properties(mcr_card PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 600)
 endif()
 
 # Booting the game is a third cost bracket: it needs DuckStation, an X
@@ -111,6 +138,19 @@ endif()
 # same terms as the golden tests -- it skips itself unless PES2_IMAGE names
 # a working copy, so a machine without the emulator sees a skip and not a
 # failure. Never runs in CI, for the same reason golden does not.
+# The third mcr bracket needs the venv with PySide6 and an X display, which is
+# the same class of dependency as the golden tests -- so it is UNIX-only and
+# skips itself when the venv, the UI or the display is missing. Today it skips
+# on the UI: tools/mcr/ui/app.py is MCR-TASK-11.
+if(UNIX AND Python3_FOUND)
+    add_test(NAME mcr_ui
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/mcr/ui_check.py)
+    set_tests_properties(mcr_ui PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 300)
+endif()
+
 if(UNIX)
     add_test(NAME pes2_boot
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/boot_check.sh)

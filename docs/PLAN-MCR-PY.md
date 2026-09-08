@@ -298,10 +298,23 @@ tools/mcr/
                   reexporta
   mcrio.py        ler, gravar, validar, recusar
   glossary.py     es -> en, e a recusa de espanhol remanescente
+  harness.py      ok/attempt/refuses -- e o guard externo do self-check
+  controls.py     os controles negativos, como substituicao literal
   cli.py          argparse: info dump get set roundtrip negative check
   selftest.py     o agregador, com o controle negativo
+  ui_check.py     o gate mcr_ui: a janela sobe no :98, ou pula com 77
   ui/             app.py, main_window.py, squad_view.py, player_form.py, formation_view.py
 ```
+
+**Os três últimos nasceram na MCR-TASK-10** e não estavam neste esboço. O
+`harness.py` porque a mesma cópia dos três helpers vivia em nove arquivos e
+nenhuma delas tinha o **guard externo** — cinco vezes neste ciclo uma exceção
+fora do `attempt()` matou a corrida e escondeu os checks seguintes. O
+`controls.py` porque o estímulo de cada controle negativo morava em prosa, e a
+[CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) mediu que prosa não
+reproduz; agora é substituição literal versionada, como os roteiros de
+`tools/par/` são para o golden. O `ui_check.py` porque o alvo `mcr_ui` precisa
+de um executável que decida sozinho entre pular e falhar.
 
 **`mcrio.py` chamava-se `io.py` até 2026-09-08**, e o nome não funciona. Todo
 módulo daqui põe `tools/mcr` na frente do `sys.path`, e `io` é módulo da

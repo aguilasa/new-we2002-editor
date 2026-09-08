@@ -33,6 +33,7 @@ import json
 import os
 import re
 import sys
+import harness                                           # noqa: E402
 
 # --- the container --------------------------------------------------------
 # Numbers from the public nocash spec, the same four `dump_mcr.py` already
@@ -325,7 +326,7 @@ def synthetic_card(save_name: str = "BISLPM-86600WEW-OPT",
 
 # --- self-check -----------------------------------------------------------
 
-def self_check(verbose: bool = True) -> int:
+def self_check(verbose: bool=True) -> int:
     """Exercises the module against a synthetic card. Returns the failure count.
 
     Every refusal is a RED CASE: the test does not ask "does the module accept
@@ -333,54 +334,12 @@ def self_check(verbose: bool = True) -> int:
     right reason". A guard that has never gone red is decoration -- the lesson
     of CORR-PES2-009 and -020.
     """
-    failures = []
+    return harness.run("card.py", _checks, verbose)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        """Runs `fn()` and returns the value; an UNEXPECTED exception is a failure.
-
-        Without this, a defect that raises instead of returning something wrong
-        kills the run halfway and hides everything that came after -- measured:
-        dropping the `+1` from `link` made `find_save` blow up on the sixth
-        check and the other twenty never ran. The gate went red, but by
-        traceback, and the report did not say what else was broken.
-        """
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, exception=Refused):
-        """Requires `fn()` to raise `exception` with `fragment` in the message."""
-        try:
-            fn()
-        except exception as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name} (refused: {str(e)[:60]}...)")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused, but without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {exception.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse -- the guard is green for nothing")
-
-    print("card.py self-check")
-
+def _checks(c) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(Refused)
     c = synthetic_card()
 
     # --- what has to work
@@ -433,10 +392,10 @@ def self_check(verbose: bool = True) -> int:
 
     refuses("refuses a file truncated by 1 byte",
             lambda: Card(bytes(CARD_BYTES - 1), origin="<truncated>"),
-            "bytes, and a PSX memory card", CardError)
+            "bytes, and a PSX memory card", kind=CardError)
     refuses("refuses a file with no MC",
             lambda: Card(b"\x00" * CARD_BYTES, origin="<no magic>"),
-            "not a formatted memory card", CardError)
+            "not a formatted memory card", kind=CardError)
 
     # a diverging checksum is REPORTED, never repaired
     dirty = synthetic_card()
@@ -470,10 +429,7 @@ def self_check(verbose: bool = True) -> int:
     loop = synthetic_card()
     loop.data[1 * FRAME_BYTES + 8:1 * FRAME_BYTES + 10] = (0).to_bytes(2, "little")
     refuses("refuses a circular chain",
-            lambda: loop.chain(1), "returns to frame", CardError)
-
-    print(f"card.py: {len(failures)} failure(s)")
-    return len(failures)
+            lambda: loop.chain(1), "returns to frame", kind=CardError)
 
 
 # --- CLI ------------------------------------------------------------------

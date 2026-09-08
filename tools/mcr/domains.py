@@ -41,6 +41,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import attributes                                        # noqa: E402
 import layout                                            # noqa: E402
+import harness                                           # noqa: E402
 
 UNNAMED = "?"          # what `label()` gives for an index the upstream skipped
 
@@ -198,46 +199,13 @@ def check(clone: str, verbose: bool = True) -> list[str]:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(verbose: bool = True) -> int:
-    failures = []
+def self_check(verbose: bool=True) -> int:
+    return harness.run("domains.py", _checks, verbose)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=DomainError):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("domains.py self-check")
-
+def _checks(c) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(DomainError)
     ok("20 positional roles", len(ROLE) == 20, f"n={len(ROLE)}")
     ok("17 formation presets", len(FORMATION_PRESET) == 17,
        f"n={len(FORMATION_PRESET)}")
@@ -287,9 +255,6 @@ def self_check(verbose: bool = True) -> int:
                            lambda: check(clone, verbose=False), default=None)
         ok("every transcribed table matches the upstream source",
            problems == [], f"problems={problems}")
-
-    print(f"domains.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

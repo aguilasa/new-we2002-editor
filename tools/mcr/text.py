@@ -44,6 +44,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import layout                                            # noqa: E402
 from card import Card                                    # noqa: E402
+import harness                                           # noqa: E402
 
 ENCODING = "cp932"
 NAME_BYTES = 10
@@ -125,46 +126,13 @@ def kanji_to_ascii(kj: bytes, length: int = 6) -> str:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("text.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=TextError):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("text.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(TextError)
     # The two slots section 1.6 measured, carried here as literals so the
     # module is checkable with no card at all.
     SLOT0 = bytes.fromhex("50a58357aeb0d9835900")
@@ -284,9 +252,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                 ok(f"TextCodec blanks all {layout.SQUAD_SIZE} names",
                    len(lost) == layout.SQUAD_SIZE, f"survived={sorted(set(range(layout.SQUAD_SIZE)) - set(lost))}")
                 ok("and reproduces none of them", kept == [], f"kept={kept}")
-
-    print(f"text.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

@@ -33,6 +33,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import layout                                            # noqa: E402
 from card import Card                                    # noqa: E402
+import harness                                           # noqa: E402
 
 WIDTH = 5
 SLOTS = 24                  # 4 groups x 6; the squad uses 23 of them
@@ -136,46 +137,13 @@ def cross_check(card: Card) -> list[tuple[int, int, int]]:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("numbers.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=NumbersError):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("numbers.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(NumbersError)
     size = layout.SHIRT_NUMBERS.total_bytes
     ok("24 slots of 5 bits in 16 bytes",
        SLOTS * WIDTH == 120 and size == 16 and SLOTS * WIDTH <= size * 8)
@@ -275,9 +243,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                             default=None)
             ok(f"tripwire: {layout.SQUAD_SIZE}/{layout.SQUAD_SIZE} agree with "
                f"the player records", diffs == [], f"differ={diffs}")
-
-    print(f"numbers.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

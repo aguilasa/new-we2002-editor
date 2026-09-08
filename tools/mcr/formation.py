@@ -47,6 +47,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import domains                                           # noqa: E402
 import layout                                            # noqa: E402
 from card import Card                                    # noqa: E402
+import harness                                           # noqa: E402
 
 OUTFIELD = layout.OUTFIELD_COUNT      # 10 -- the goalkeeper has no X/Y here
 ROLE_BIAS = 2                         # the role is stored as index + 2
@@ -145,46 +146,13 @@ def write(card: Card, f: Formation) -> None:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("formation.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=FormationError):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("formation.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(FormationError)
     ok("ten outfield players", OUTFIELD == 10)
     ok("five kickers", KICKERS == 5)
     ok("the kicker table is not increasing",
@@ -301,9 +269,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                copy.to_bytes() == real.to_bytes(),
                f"differ at "
                f"{[i for i, (a, b) in enumerate(zip(copy.to_bytes(), real.to_bytes())) if a != b][:8]}")
-
-    print(f"formation.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

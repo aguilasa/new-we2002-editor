@@ -53,6 +53,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import layout                                            # noqa: E402
 from card import Card                                    # noqa: E402
+import harness                                           # noqa: E402
 
 BLOB_BYTES = 12
 BLOB_BITS = BLOB_BYTES * 8
@@ -413,55 +414,13 @@ def check_upstream_weights(clone: str, verbose: bool = True) -> list[str]:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("attributes.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=AttributeError_):
-        """Demands that `fn()` raise `kind` with `fragment` in the message.
-
-        Hand-rolled `try/except SpecificError` around a refusal looks equivalent
-        and is not: any OTHER exception walks straight past it and kills the
-        run. Measured here -- the planted v4.2 swap made this block raise
-        KeyError, the self-check died mid-way, and three checks never ran. It is
-        the same fragility MCR-TASK-04 found, in the one place this module
-        wrote by hand.
-        """
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("attributes.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(AttributeError_)
     ok("29 fields", len(FIELDS) == 29, f"n={len(FIELDS)}")
     ok("no field name repeats", len(BY_NAME) == len(FIELDS))
     ok("fields do not overlap and stay inside 96 bits",
@@ -593,9 +552,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                     default=None)
         ok(f"all {len(UPSTREAM_COMBO)} upstream weight tables are "
            f"`index << shift` with our shifts", w == [], f"problems={w}")
-
-    print(f"attributes.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------

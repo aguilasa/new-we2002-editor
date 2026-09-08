@@ -40,6 +40,20 @@ Abrir um cartão e mostrar o que o núcleo já lê, sem gravar nada.
 
 ## Critério de conclusão
 
+- [ ] **`ui/app.py --smoke` abre a janela, deixa o Qt pintar um quadro e sai
+      com 0, sem esperar por ninguém.** É o contrato que o alvo `mcr_ui` já
+      chama: o `tools/mcr/ui_check.py` da MCR-TASK-10 resolve o venv, resolve o
+      `XAUTHORITY` do `:98` como o `make run-98` faz, e roda **exatamente essa
+      linha**. Hoje ele pula com 77 dizendo "app.py does not exist yet
+      (MCR-TASK-11)"; assim que o arquivo existir sem `--smoke`, o alvo passa a
+      **falhar** — que é a pressão certa, e é por isso que a linha está aqui e
+      não só no Log de lá.
+- [ ] **A Regra 3 é varrida, não prometida.** O `selftest.py` lê cada
+      `tools/mcr/ui/*.py` e recusa `import layout`, `import card` e
+      `import mcrio` (e as formas `from X import`). Enquanto a pasta não
+      existe ele **pula dizendo isso**; no dia em que ela existir, a varredura
+      passa a valer sem ninguém religar nada.
+
 - [ ] Janela com a lista dos 23 jogadores, rotulada como o upstream (`[GK] Nome`).
 - [ ] Ficha do jogador em leitura: posição, aparência, físico, os 16 atributos
       (exibidos 12..19), dorsal, pé e chuteira.

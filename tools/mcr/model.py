@@ -47,6 +47,7 @@ import numbers as numbers_mod                            # noqa: E402
 import text                                              # noqa: E402
 from card import Card                                    # noqa: E402
 from formation import Formation                          # noqa: E402
+import harness                                           # noqa: E402
 
 SQUAD_SIZE = layout.SQUAD_SIZE
 
@@ -164,46 +165,13 @@ class Save:
 
 # --- self-check ------------------------------------------------------------
 
-def self_check(card_path: str | None = None, verbose: bool = True) -> int:
-    failures = []
+def self_check(card_path: str | None=None, verbose: bool=True) -> int:
+    return harness.run("model.py", _checks, verbose, card_path=card_path)
 
-    def ok(name, cond, detail=""):
-        if cond:
-            if verbose:
-                print(f"  ok    {name}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}  {detail}")
 
-    def attempt(name, fn, default=None):
-        try:
-            return fn()
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}: {e}")
-            return default
-
-    def refuses(name, fn, fragment, kind=ModelError):
-        try:
-            fn()
-        except kind as e:
-            if fragment in str(e):
-                if verbose:
-                    print(f"  ok    {name}")
-            else:
-                failures.append(name)
-                print(f"  FAIL  {name}: refused without saying "
-                      f"{fragment!r}: {e}")
-        except Exception as e:                        # noqa: BLE001
-            failures.append(name)
-            print(f"  FAIL  {name}: raised {type(e).__name__}, "
-                  f"expected {kind.__name__}: {e}")
-        else:
-            failures.append(name)
-            print(f"  FAIL  {name}: did NOT refuse")
-
-    print("model.py self-check")
-
+def _checks(c, card_path: str | None = None) -> None:
+    ok, attempt = c.ok, c.attempt
+    refuses = c.refusing(ModelError)
     ok("the squad is 23 slots", SQUAD_SIZE == 23)
     ok("no Qt in the model", "PySide6" not in sys.modules)
 
@@ -333,9 +301,6 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
                copy.to_bytes() == original,
                f"differ at "
                f"{[i for i, (a, b) in enumerate(zip(copy.to_bytes(), original)) if a != b][:8]}")
-
-    print(f"model.py: {len(failures)} failure(s)")
-    return len(failures)
 
 
 # --- CLI -------------------------------------------------------------------
