@@ -115,6 +115,27 @@ def check_destination(path, force: bool = False) -> str:
     return target
 
 
+EDITED_SUFFIX = "-edited"
+
+
+def copy_target(path) -> str:
+    """Where a write goes by DEFAULT: a copy beside the card, never the card.
+
+    This is the whole of the copy-first policy, in one place so that it can be
+    measured. The only irreversible thing this port does is write over a memory
+    card, and a card is a save nobody can re-earn -- every other refusal in
+    this file exists for that reason. So the screen's Save lands here, and
+    overwriting the file that was opened is a separate action that asks first.
+
+    An already-derived name comes back unchanged, so saving twice in one
+    session does not grow `x-edited-edited.mcr`.
+    """
+    base, ext = os.path.splitext(os.path.abspath(str(path)))
+    if base.endswith(EDITED_SUFFIX):
+        return base + (ext or ".mcr")
+    return base + EDITED_SUFFIX + (ext or ".mcr")
+
+
 def write_card(card: Card, path, force: bool = False) -> str:
     target = check_destination(path, force=force)
     with open(target, "wb") as fh:
@@ -322,6 +343,21 @@ def _checks(c, card_path: str | None = None) -> None:
                attempt("a normal destination",
                        lambda: check_destination(
                            os.path.join(tmp, "copy.mcr"))) is not None)
+
+            # The copy-first policy. The default destination of a write is
+            # never the card that was opened -- that is what makes the
+            # screen's Save safe without a dialog, and the overwrite a
+            # separate act.
+            ok("the default destination is never the card that was opened",
+               copy_target(fixture) != os.path.abspath(fixture),
+               f"copy_target({fixture}) = {copy_target(fixture)}")
+            ok("and it is a destination this module agrees to write",
+               attempt("the default destination of the fixture",
+                       lambda: check_destination(copy_target(fixture)))
+               is not None)
+            ok("deriving twice does not grow the name",
+               copy_target(copy_target(fixture)) == copy_target(fixture),
+               f"{copy_target(copy_target(fixture))}")
 
             # Both round-trips, through real files, on a card that is not the
             # fixture.

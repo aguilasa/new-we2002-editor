@@ -36,6 +36,7 @@ import importlib
 import inspect
 import os
 import sys
+import tokenize
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import harness                                           # noqa: E402
@@ -49,6 +50,43 @@ MODULES = ("harness", "glossary", "controls", "card", "layout", "attributes",
 
 # What the UI is forbidden to import (Rule 3, section 3.3 of the plan).
 FORBIDDEN_IN_UI = ("layout", "card", "mcrio")
+
+# The write door, and the one file allowed to open it. MCR-TASK-11's form was
+# read only BY CONSTRUCTION -- every value a label, no signal reaching a write
+# path -- and MCR-TASK-12 spent that guarantee to make the screen editable. The
+# substitute has to be measured, and this is it: every `model.store(` under
+# `tools/mcr/ui/` lives in one file, so "where does this program write?" has
+# one answer that a sweep can confirm.
+WRITE_DOOR = ("model", ".", "store", "(")
+WRITE_DOOR_FILE = "main_window.py"
+
+
+def _write_doors(directory: str) -> list[str]:
+    """Every call of the write door under `directory`, as `path:line`.
+
+    TOKENISED, not grepped, and for the reason `layout.address_monopoly` is:
+    three files in `ui/` explain in their own docstrings that the window is
+    what calls `model.store()`, and a textual sweep would count the prose and
+    report the very files it is meant to clear.
+    """
+    found = []
+    for root, dirs, names in os.walk(directory):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(names):
+            if not name.endswith(".py"):
+                continue
+            path = os.path.join(root, name)
+            rel = os.path.relpath(path, directory)
+            with open(path, encoding="utf-8") as fh:
+                try:
+                    tokens = [t for t in tokenize.generate_tokens(fh.readline)
+                              if t.type in (tokenize.NAME, tokenize.OP)]
+                except tokenize.TokenError:
+                    tokens = []
+            for i in range(len(tokens) - 3):
+                if tuple(t.string for t in tokens[i:i + 4]) == WRITE_DOOR:
+                    found.append(f"{rel}:{tokens[i].start[0]}")
+    return found
 
 
 def _rules(c) -> None:
@@ -90,6 +128,16 @@ def _rules(c) -> None:
                                 offenders.append(f"ui/{rel}:{lineno}: {banned}")
         ok("Rule 3: the UI imports no core module that knows an address",
            offenders == [], f"{offenders}")
+
+        # The write door. Not part of Rule 3, but the same kind of guarantee,
+        # and the one that replaced "nothing in the UI writes".
+        doors = attempt("sweep for the write door",
+                        lambda: _write_doors(UI_DIR), default=None)
+        ok("the UI writes from exactly one file, and it is "
+           f"{WRITE_DOOR_FILE}",
+           bool(doors) and all(d.split(":")[0] == WRITE_DOOR_FILE
+                               for d in doors),
+           f"{doors}")
 
     # Rule 3, second half -- the core knows no Qt. Without this the mandatory
     # gate would start requiring PySide6 the day someone imports it upstream

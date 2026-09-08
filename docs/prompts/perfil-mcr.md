@@ -220,5 +220,16 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   externo conta por um caminho que o `ok` não percorre.
 - **Fase 3** — captura de tela no `:98` no Log; o arquivo gravado pela UI passa
   no `mcr roundtrip`.
+  **E o `mcr_ui` só mede a gravação com `WE2002_MCR_CARD` apontado.** Desde a
+  MCR-TASK-12 o alvo dirige os widgets, grava dois cartões e confere o
+  round-trip deles — mas sem a variável ele passa com a janela sozinha e
+  imprime `note: no WE2002_MCR_CARD, so the write probe did not run`. É a
+  mesma armadilha da receita de PES2, onde `100% tests passed` convivia com o
+  único gate que põe o jogo na tela pulando em 0,01 s: **leia a linha, não o
+  `Passed`**.
+  **Quem mede é o `ui_check.py`, não a tela.** A Regra 3 mantém `layout` e
+  `mcrio` fora de `ui/`, então o `app.py --write-probe` **relata** o que fez em
+  JSON e não afirma nada sobre byte; quem julga localidade, round-trip e
+  releitura é o gate, que pode importar os dois.
 - **Fase 4** — os seis itens da definição de pronto, cada um com o comando que o
   reproduz.

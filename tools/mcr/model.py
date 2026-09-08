@@ -74,6 +74,28 @@ class Player:
         """The upstream's name for a coded field. Third-party label."""
         return domains.label(field, self.attributes[field])
 
+    def set_number(self, number: int) -> None:
+        """Change BOTH copies of the shirt number, and say so by name.
+
+        The card stores it in the 12-byte record and in the 5-bit table, and
+        moving one is how a card starts disagreeing with itself. Whoever wants
+        both changed calls this; whoever sets `attributes["number"]` alone gets
+        reported by the cross-check, which is the point of having two.
+        """
+        self.attributes["number"] = number
+        self.shirt_number = number
+
+    def set_name(self, name: str) -> None:
+        """The only supported way to change the name -- it refuses what will
+        not fit rather than truncating.
+
+        Ten bytes of cp932, and a two-byte character straddling the tenth is
+        why `text.encode_name` refuses. The check belongs here and not on the
+        screen: a line edit holds any string at all, and the field does not.
+        """
+        text.encode_name(name)
+        self.name = name
+
 
 @dataclasses.dataclass
 class Save:
@@ -146,9 +168,7 @@ class Save:
         `attributes["number"]` alone leaves the table behind, and the
         cross-check will report it -- which is the point of having two.
         """
-        p = self.players[index]
-        p.attributes["number"] = number
-        p.shirt_number = number
+        self.players[index].set_number(number)
 
     def write(self) -> None:
         """Every player and the formation back to the card.
@@ -182,6 +202,33 @@ def load(path) -> Save:
     """
     import mcrio
     return mcrio.load(path)
+
+
+def store(save: Save, path, force: bool = False) -> str:
+    """Flush the model into the card and write it out. THE UI'S ONLY WAY OUT.
+
+    The mirror of `load()`, deferred for the same reason, and delegating for a
+    stronger one: `mcrio.store` keeps the three refusals -- `roms/`, the
+    fixture named by the variable, and a destination that is not writable --
+    and calls `Save.write()` before the file is opened. A window that wrote the
+    file itself would be a second writer with none of that, and it would be the
+    one running when it matters.
+
+    `force` is passed through and the UI never sets it: lifting the fixture
+    refusal is a decision for whoever typed the command, not for a screen.
+    """
+    import mcrio
+    return mcrio.store(save, path, force=force)
+
+
+def copy_target(path) -> str:
+    """Where a write goes by default: a copy, never the card that was opened.
+
+    The policy is `mcrio`'s; this is the door, because Rule 3 keeps the screen
+    out of that module.
+    """
+    import mcrio
+    return mcrio.copy_target(path)
 
 
 # --- self-check ------------------------------------------------------------
@@ -294,6 +341,37 @@ def _checks(c, card_path: str | None = None) -> None:
            s3 is not None and [d[0] for d in s3.disagreements()] == [2],
            f"disagreements={s3.disagreements() if s3 else None}")
 
+    # The write door, end to end. `store()` is what the screen calls, and the
+    # failure it has to be able to report is the one MCR-TASK-09 measured on
+    # `Save.write` -- a path that opens the file without flushing the model
+    # writes a card with none of the edits in it, and every "no byte moved"
+    # check stays green. So: edit, store, re-read from DISK, demand the value.
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        s4 = attempt("read for the store probe", lambda: Save.read(c))
+        if s4 is not None:
+            s4.players[3].attributes["heading"] = \
+                attributes.BY_NAME["heading"].low + 6
+            s4.players[3].set_number(19)
+            out = os.path.join(tmp, "stored.mcr")
+            written = attempt("store the model", lambda: store(s4, out))
+            ok("store() writes the file it names", written is not None
+               and os.path.isfile(out))
+            reread = attempt("read the stored file back",
+                             lambda: Save.read(Card.from_file(out)))
+            ok("store() flushes the model -- the edit survives the file",
+               reread is not None
+               and reread.players[3].attributes["heading"]
+               == attributes.BY_NAME["heading"].low + 6
+               and reread.players[3].shirt_number == 19,
+               f"heading={reread.players[3].attributes['heading'] if reread else None} "
+               f"number={reread.players[3].shirt_number if reread else None}")
+            ok("the default destination is a copy, not the file opened",
+               copy_target(out) != os.path.abspath(out))
+
+    refuses("refuses a name that does not fit ten bytes",
+            lambda: s.players[0].set_name("A" * 11), "holds 10",
+            kind=text.TextError)
     refuses("refuses a slot past the squad",
             lambda: s.write_player(SQUAD_SIZE), "outside 0..22")
     refuses("refuses a negative slot",

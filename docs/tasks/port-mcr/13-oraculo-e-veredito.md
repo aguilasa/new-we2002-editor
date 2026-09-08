@@ -34,6 +34,14 @@ Responder com valor medido o que hoje é opinião.
 
 ## Critério de conclusão
 
+- [ ] **A tela já está esperando o veredito, e sabe onde pô-lo.** A MCR-TASK-12
+      deixou o `0x6500` em **leitura**, com o rótulo `_open_byte` do
+      `tools/mcr/ui/formation_view.py` dizendo as duas leituras e que o byte é
+      lido e nunca gravado. Fechado o veredito, o editor entra ali — um campo
+      "capitão" (um índice de slot) ou um sexto cobrador ao lado dos cinco —, e
+      **o `formation.write` precisa passar a gravar o byte**: hoje ele o pula
+      de propósito, com o comentário dizendo por quê. São dois arquivos, e os
+      dois estão nomeados aqui para não se descobrir isso relendo a tela.
 - [ ] **O `0x6500`**: capitão ou sexto cobrador. Experimento discriminante — pôr
       o capitão num slot conhecido e os cinco cobradores em slots distintos,
       salvar, ler os seis bytes. Na fixture eles valem `[7,7,8,7,7]` e `8`, e

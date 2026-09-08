@@ -135,10 +135,12 @@ if(Python3_FOUND)
         TIMEOUT 600)
 endif()
 
-# The third mcr bracket needs the venv with PySide6 and an X display, which is
-# the same class of dependency as the golden tests -- so it is UNIX-only and
-# skips itself when the venv, the UI or the display is missing. Today it skips
-# on the UI: tools/mcr/ui/app.py is MCR-TASK-11.
+# O terceiro bracket de mcr precisa do venv com PySide6 e de um display X, que
+# e a mesma classe de dependencia dos golden -- entao e UNIX-only e se pula
+# sozinho quando falta o venv, a UI ou o display. Desde a MCR-TASK-11 ele
+# passa; desde a MCR-TASK-12 ele tambem dirige os widgets, grava dois cartoes e
+# confere o round-trip deles, mas so quando WE2002_MCR_CARD aponta um cartao --
+# sem ele o alvo continua passando com a janela sozinha.
 if(UNIX AND Python3_FOUND)
     add_test(NAME mcr_ui
         COMMAND ${Python3_EXECUTABLE}

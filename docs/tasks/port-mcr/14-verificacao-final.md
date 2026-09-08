@@ -22,6 +22,16 @@ status: pendente
 
 - [ ] Os seis itens da definição de pronto conferidos **um a um**, com o comando
       que reproduz cada um colado no Log.
+- [ ] **O item 5 da definição de pronto — "a UI abre, edita, grava, e o
+      arquivo gravado passa no round-trip" — só é medido com
+      `WE2002_MCR_CARD` apontado.** Desde a MCR-TASK-12 o `mcr_ui` dirige os
+      widgets, grava dois cartões e confere o round-trip dos dois; **sem** a
+      variável ele passa com a janela sozinha e imprime `note: no
+      WE2002_MCR_CARD, so the write probe did not run`. O comando do Log é
+      `WE2002_MCR_CARD=$PWD/work/entrada.mcr ctest --test-dir build -R mcr -V`,
+      e o que se cola é a linha `probe:`, não o `Passed` — é a mesma armadilha
+      que a receita de PES2 registra, onde `100% tests passed` convivia com o
+      único gate que põe o jogo na tela pulando em 0,01 s.
 - [ ] O plano atualizado com o que a execução mediu — inclusive o que saiu
       diferente do previsto, que é o que vale registrar.
 - [ ] **A §5.4 do plano diz "os 30 campos" e são 29.** Medido na MCR-TASK-06

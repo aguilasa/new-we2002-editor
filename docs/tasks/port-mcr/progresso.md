@@ -45,7 +45,7 @@ por princípio.
 | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | 06, 07, 08 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — **fecha a Fase 1** | 2 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ⬜ Pendente | — | — |
+| [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ✅ Concluído | 2026-09-08 | ⬜ pendente |
 | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ⬜ Pendente | — | — |
 | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ⬜ Pendente | — | — |
 
@@ -103,7 +103,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 ### Fase 3 — a UI e o oráculo
 
 - [x] MCR-TASK-11 — leitura na tela
-- [ ] MCR-TASK-12 — gravação pela tela
+- [x] MCR-TASK-12 — gravação pela tela
 - [ ] MCR-TASK-13 — o `0x6500` respondido com valor medido
 
 ### Fase 4 — fechamento
@@ -157,6 +157,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
 | Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |
 | Controles negativos | **16/16 vermelhos**, com e sem fixture: quinze por substituição literal, um que cria um arquivo uma pasta abaixo. `python3 tools/mcr/controls.py` |
+| Gravação pela tela | um atributo pelo spin box move **1 byte** (`0x0590d`, dentro dos 12 do registro do jogador 0); o arraste levou o jogador de linha 1 de `[11, 32]` a `[14, 43]` em unidades do cartão; os dois cartões gravados passam nas duas formas do round-trip. `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
 | Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |
 

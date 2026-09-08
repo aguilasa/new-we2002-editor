@@ -362,6 +362,22 @@ a entrada do diretório), porque escrever um segundo carregador, mais fraco,
 para a tela é exatamente como uma janela acaba lendo um cartão que o gate teria
 recusado.
 
+**E a de saída é o `model.store()`**, escrita na MCR-TASK-12, pelo mesmo
+desenho e pela mesma razão: ela chama `Save.write()` e só então `mcrio`, então
+as três recusas — `roms/`, a fixture nomeada pela variável, e o destino que não
+se pode escrever — continuam valendo quando quem grava é uma tela. O `force`
+atravessa e **a UI nunca o passa**: levantar a recusa da fixture é decisão de
+quem digitou o comando, não de uma janela.
+
+**A garantia estrutural da MCR-TASK-11 foi gasta, e a substituta é medida.**
+Enquanto todo valor da ficha era um `QLabel`, "nada na tela grava" era verdade
+por construção. Com a ficha editável, o que ficou no lugar é uma varredura: o
+`selftest.py` **tokeniza** `tools/mcr/ui/**.py` e exige que todo `model.store(`
+more no `main_window.py` — tokeniza porque três arquivos de lá explicam na
+própria docstring que quem grava é a janela, e uma varredura textual contaria a
+prosa e acusaria justamente os arquivos que ela deveria inocentar. O controle
+`ui-writes-from-two-places` planta a segunda chamada e tem de ficar vermelho.
+
 ### 3.4 Proveniência — quem sabe o quê
 
 Cada módulo abre com três linhas dizendo qual célula desta tabela ele é.
