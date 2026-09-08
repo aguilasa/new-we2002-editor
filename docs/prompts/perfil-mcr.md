@@ -176,6 +176,16 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   `recusa()` casa substring, e traduzir um lado só deixa o gate verde por
   acidente; foi o que a [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md)
   mediu, replantando os cinco controles negativos.
+  **E toda checagem de round-trip precisa de uma companheira que prove que o
+  escritor rodou.** Na MCR-TASK-09 o laço de `Save.write` trocado por
+  `range(0)` deixou o `model.py` **verde**: escrever ninguém não muda byte
+  nenhum, e "não mudou byte" é exatamente o que o round-trip pergunta. Só a
+  injeção do `mcrio.py` pegou. O par é: round-trip idêntico **mais** uma
+  edição que tem de reaparecer na releitura.
+  **O módulo de I/O chama-se `mcrio.py`, não `io.py`** — com `tools/mcr` na
+  frente do `sys.path`, `import io` devolve o da stdlib, que o CPython cacheia
+  antes de qualquer código nosso rodar; um `io.py` aqui roda como script e não
+  é importável por ninguém. Medido na MCR-TASK-09, plano corrigido.
 - **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2
   skipped.
 - **Fase 3** — captura de tela no `:98` no Log; o arquivo gravado pela UI passa

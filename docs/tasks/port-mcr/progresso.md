@@ -42,7 +42,7 @@ por princípio.
 | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | `attributes.py` × `Player::Decode/Encode` | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | `numbers.py` e `text.py` — os 5 bits e o cp932 | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
 | [MCR-TASK-08](/docs/tasks/port-mcr/08-formacao-e-dominios.md) | `formation.py` e `domains.py` — X/Y/papéis, cobradores, presets | 1 | 05 | ✅ Concluído | 2026-09-07 | 2026-09-07 |
-| [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `io.py` e o round-trip byte-idêntico | 1 | 06, 07, 08 | ⬜ Pendente | — | — |
+| [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | `model.py`, `mcrio.py` e o round-trip byte-idêntico | 1 | 06, 07, 08 | ✅ Concluído | 2026-09-08 | ⬜ pendente |
 | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | `selftest.py`, o CLI e os três alvos de `ctest` — **fecha a Fase 1** | 2 | 09 | ⬜ Pendente | — | — |
 | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ⬜ Pendente | — | — |
 | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ⬜ Pendente | — | — |
@@ -94,7 +94,7 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 - [x] MCR-TASK-06 — `attributes.py`, 0 divergências
 - [x] MCR-TASK-07 — `numbers.py` e `text.py`, 23/23 e cp932
 - [x] MCR-TASK-08 — `formation.py` e `domains.py`
-- [ ] MCR-TASK-09 — `model.py`, `io.py`, round-trip nas duas formas
+- [x] MCR-TASK-09 — `model.py`, `mcrio.py`, round-trip nas duas formas
 
 ### Fase 2 — o gate
 
@@ -155,6 +155,8 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | `0x6500` | vale `8` — **capitão** pela nossa RE, "sexto cobrador" pelo upstream. Em aberto |
 | Tática | `0x64E2 = 1`, `0x6102 = 51`, nibbles `0/14` e `4/9` — escrita e nunca lida pelo original |
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
+| Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |
+| Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |
 
 ---

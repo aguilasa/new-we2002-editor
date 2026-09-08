@@ -118,8 +118,20 @@ def write(card: Card, f: Formation) -> None:
             raise FormationError(f"y[{i}]={v} does not fit a byte")
     for i, r in enumerate(f.role):
         if not 0 <= r < len(domains.ROLE):
+            extra = ""
+            if r < 0:
+                # MEASURED in MCR-TASK-09: the role is stored as index + 2, so
+                # a byte of 0 reads back as -2. A card whose formation region
+                # was never written -- a blank card, the synthetic one -- comes
+                # out of `read()` like this and cannot be written back. That is
+                # correct and not a round-trip failure: there is no formation
+                # there to preserve. Without this clause the message is just
+                # "-2", and the reader looks for a decoder bug.
+                extra = (f" -- the stored byte is {r + ROLE_BIAS}, and a "
+                         f"formation region of zeros always reads as "
+                         f"{-ROLE_BIAS}")
             raise FormationError(
-                f"role[{i}]={r} is outside 0..{len(domains.ROLE) - 1}")
+                f"role[{i}]={r} is outside 0..{len(domains.ROLE) - 1}{extra}")
     for k, slot in enumerate(f.kickers):
         if not 0 <= slot <= 0xFF:
             raise FormationError(f"kicker {k}={slot} does not fit a byte")

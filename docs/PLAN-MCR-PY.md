@@ -293,12 +293,21 @@ tools/mcr/
   tactics.py      os 6 campos de tatica -- somente leitura na v1
   domains.py      cabelos, posicoes, barbas, cores, alturas, idades, corpos, chuteiras, pe
   model.py        Card / Player / Formation -- dataclasses, sem Qt, sem endereco
-  io.py           ler, gravar, validar, recusar
+  mcrio.py        ler, gravar, validar, recusar
   glossary.py     es -> en, e a recusa de espanhol remanescente
   cli.py          argparse: info dump get set roundtrip negative check
   selftest.py     o agregador, com o controle negativo
   ui/             app.py, main_window.py, squad_view.py, player_form.py, formation_view.py
 ```
+
+**`mcrio.py` chamava-se `io.py` até 2026-09-08**, e o nome não funciona. Todo
+módulo daqui põe `tools/mcr` na frente do `sys.path`, e `io` é módulo da
+biblioteca padrão que o CPython **já importou e cacheou** antes de qualquer
+linha nossa rodar: `import io` devolve o da stdlib, sempre — medido, o
+`io.__file__` volta como o do interpretador. Um arquivo chamado `io.py` aqui
+seria executável como script e **importável por ninguém**, o que é fatal para o
+agregador da MCR-TASK-10. Medido na MCR-TASK-09; a asserção mora no
+`self_check` do `mcrio.py`.
 
 ### 3.3 As três regras de desenho
 
@@ -317,7 +326,7 @@ arquivo, e por isso consegue escrever no cabeçalho.
 
 **Regra 3 — a UI não conhece endereço, e o núcleo não conhece Qt.** Duas
 guardas mecânicas no `selftest.py`: `tools/mcr/ui/*.py` não importa `layout`,
-`card` nem `io`; e depois de importar o núcleo inteiro,
+`card` nem `mcrio`; e depois de importar o núcleo inteiro,
 `assert "PySide6" not in sys.modules`. Sem a segunda, o gate obrigatório passa
 a exigir Qt.
 

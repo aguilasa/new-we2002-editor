@@ -37,6 +37,16 @@ status: pendente
       `"blocos": [1, 2]`, `"tamanho_declarado": 16384` e um único bloco fora da
       cadeia (o 3, `0xA0`, 41 bytes não-zero). Se o plano continuar mudo sobre
       a cadeia, acrescente a frase.
+- [ ] **A §3.2 do plano nomeava `io.py` e o módulo é `mcrio.py`.** Corrigida na
+      MCR-TASK-09, junto com a menção na Regra 3 da §3.3; confira que as duas
+      continuam batendo com o disco:
+      `ls tools/mcr/*.py` e `grep -n 'mcrio' docs/PLAN-MCR-PY.md`. A razão está
+      medida no `self_check` do `mcrio.py` — `import io` devolve a stdlib.
+- [ ] **A §5.1 do plano diz "as duas formas" e não diz que a forma 2 precisa de
+      companheira.** Medido na MCR-TASK-09: um `Save.write()` cujo laço não
+      escreve ninguém deixa toda checagem de "não mudou byte" verde, porque
+      escrever ninguém não muda nada. O `model.py` ganhou um check que prova
+      que o escritor rodou; se o plano continuar mudo, acrescente a frase.
 - [ ] [`/docs/prompts/perfil-mcr.md`](/docs/prompts/perfil-mcr.md) com as
       decisões confirmadas, as armadilhas medidas, os gates e os arquivos
       quentes do ciclo.

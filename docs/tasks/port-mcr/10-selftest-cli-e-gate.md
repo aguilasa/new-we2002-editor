@@ -34,8 +34,19 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
 
 - [ ] `tools/mcr/selftest.py` monta um cartão sintético em memória e agrega os
       `self_check()` dos módulos — **sem depender da fixture e sem Qt**.
-- [ ] As duas guardas da Regra 3: `ui/*.py` não importa `layout`/`card`/`io`, e
-      `"PySide6" not in sys.modules` depois de importar o núcleo inteiro.
+- [ ] As duas guardas da Regra 3: `ui/*.py` não importa `layout`/`card`/`mcrio`,
+      e `"PySide6" not in sys.modules` depois de importar o núcleo inteiro.
+- [ ] **O módulo de I/O chama-se `mcrio.py`, não `io.py`**, e o agregador tem de
+      importá-lo por esse nome. A §3.2 do plano dizia `io.py`, e a MCR-TASK-09
+      mediu que esse nome é inutilizável: com `tools/mcr` na frente do
+      `sys.path`, `import io` devolve o da stdlib — que o CPython cacheia antes
+      de qualquer código nosso rodar —, então um `io.py` aqui roda como script e
+      **não é importável**. O plano já foi corrigido; a asserção que o prova
+      mora no `self_check` do `mcrio.py`.
+- [ ] **São nove módulos com `self_check()`, não sete**: `card`, `layout`,
+      `attributes`, `numbers`, `text`, `domains`, `formation`, `model` e
+      `mcrio`. Os dois últimos nasceram na MCR-TASK-09, e o `mcrio` é o único
+      que roda o controle negativo da §5.2 inteiro (`--negative`, 5/5).
 - [ ] **A guarda da Regra 1 já existe e precisa ser agregada aqui**: a
       MCR-TASK-05 a escreveu como `layout.address_monopoly()`, com CLI
       `python3 tools/mcr/layout.py --rule1`. Ela varre `tools/mcr/*.py` (menos
