@@ -31,6 +31,8 @@ ciclo arquivado, o dele em
 | [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o `add_test` dele, e o `pes2_boot` ficou sem comentário | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, e a frase só descreve um dos dois tipos | Alta | [x] concluída | 2026-09-08 |
+| [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [ ] pendente | — |
+| [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -56,6 +58,8 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-015 — pôr cada `add_test` sob o comentário que o descreve
 - [x] CORR-MCR-016 — nomear os três módulos novos em vez de apontá-los por posição
 - [x] CORR-MCR-017 — pôr 16 e os dois tipos no perfil, e fazer o `controls.py` imprimir o resumo
+- [ ] CORR-MCR-018 — o probe relata o estímulo do arraste, o `ui_check.py` calcula o esperado, e o caso vermelho fica registrado
+- [ ] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
 
 ---
 
@@ -346,3 +350,45 @@ ciclo arquivado, o dele em
 - **Fix:** 16 e os dois tipos no perfil, e o `controls.py` passando a
   **imprimir** o resumo por tipo — reportar em vez de afirmar, como o
   `--edit-probe` da MCR-TASK-09 já faz.
+
+### CORR-MCR-018
+
+- **Arquivo com problema:** `tools/mcr/ui/app.py` (`write_probe`) e
+  `tools/mcr/ui_check.py` (o juiz)
+- **Sintoma:** o probe arrasta um marcador e relata `xy_after` **lido do
+  modelo depois da conversão**; o juiz compara isso com o que releu do disco.
+  Os dois lados saem da mesma aritmética, então concordam sempre, e a única
+  asserção que sobra é "mexeu alguma coisa". `PROBE_DRAG`, o deslocamento em
+  pixels de campo que é a entrada da conversão, não entra no relatório — o
+  juiz não tem como calcular o esperado. É a armadilha 7 do perfil no sentido
+  de volta, que só existe desde esta task; o de ida tem o controle
+  `formation-screen-factor`.
+- **Como foi detectado:** substituição em `to_card_x` numa cópia da árvore,
+  tirando a divisão por `X_SCALE` (casou 1×). `ui_check.py` sai `rc=0`,
+  `selftest --fast` sai `rc=0`, os dois cartões passam no round-trip — 48 é um
+  byte de X legal — e o gate imprime `[11, 32] -> [48, 43] in the card's own
+  units` como se estivesse certo. Nada mais exercita a conversão: ela não é
+  usada fora do arquivo que a define, `ui/` não tem `self_check`, os doze
+  módulos do `selftest` não a incluem, e nenhum controle toca
+  `formation_view.py`.
+- **Fix:** relatar o estímulo (pixels e fatores) e deixar a relação com o
+  juiz — ou, melhor, arrastar para um alvo em unidades de cartão que o gate
+  escolhe. Mais o caso vermelho registrado.
+
+### CORR-MCR-019
+
+- **Arquivo com problema:** `tests/CMakeLists.txt` (o bloco do `mcr_ui`) e
+  `docs/tasks/port-mcr/14-verificacao-final.md`
+- **Sintoma:** o commit `2c7ec25` reescreveu o comentário do `mcr_ui` de
+  inglês para português — 6 das 74 linhas de comentário do arquivo —, no mesmo
+  bloco que a MCR-TASK-10 escreveu em inglês depois de **medir** que o arquivo
+  é inglês e registrar "segui o idioma de cada arquivo". Os três alvos do
+  mesmo projeto ficaram documentados em dois idiomas lado a lado, e o item
+  aberto da MCR-TASK-14 continua afirmando que o arquivo é inglês e mandando
+  decidir com `sed -n '1,20p'`, que nem alcança as linhas novas. O conteúdo
+  novo está certo; o que mudou junto foi o idioma.
+- **Como foi detectado:** `git show 2c7ec25 -- tests/CMakeLists.txt` na
+  revisão da MCR-TASK-12, e a contagem de linhas de comentário por idioma.
+- **Fix:** repor o bloco em inglês **preservando a ressalva do
+  `WE2002_MCR_CARD`**, e reancorar o item da MCR-TASK-14 num comando que
+  alcance o arquivo inteiro.
