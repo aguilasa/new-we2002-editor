@@ -34,6 +34,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
+| [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -62,6 +63,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-018 — o gate escolhe o destino do arraste em unidades de cartão, a tela só executa, e os dois casos vermelhos são plantados a cada corrida
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
 - [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
+- [ ] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
 
 ---
 
@@ -417,3 +419,26 @@ ciclo arquivado, o dele em
   a faixa e mostrar o número real num rótulo dizendo por quê; acrescentar à
   legenda que o `0..10` vem da `malla2` e não do formato; e registrar o caso
   vermelho, que só aparece com um cartão que ninguém tem à mão.
+
+### CORR-MCR-021
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/progresso.md`, linha 159 (a
+  tabela "Estado medido")
+- **Sintoma:** a linha diz "**16/16 vermelhos** … **quinze** por substituição
+  literal" e `python3 tools/mcr/controls.py` — o comando que a própria linha
+  manda rodar — imprime `controls: 20 of 20 red (19 substitutions, 1 new
+  file)`. A conta subiu para 19 na MCR-TASK-12 (três controles) e para 20 na
+  MCR-TASK-13 (`formation-captain-not-written`). A MCR-TASK-14 é a task de
+  fechamento, reconciliou seis seções do plano, o `CLAUDE.md`, o `NOTICE.md`, o
+  perfil e **duas outras linhas desta mesma tabela**, e deixou esta. É a falha
+  que a [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) previu: ela fez o
+  `controls.py` imprimir o total e tirou o número copiado **do perfil**, que
+  hoje aponta para a saída — e não do `progresso.md`, que tem cópia própria.
+- **Como foi detectado:** `controls.py` rodado na revisão da MCR-TASK-14
+  contra o que a tabela afirma. Os controles estão certos — 20 de 20
+  vermelhos, com e sem fixture; o defeito é o número escrito ao lado.
+- **Fix:** citar a **linha inteira** que a ferramenta imprime em vez do total,
+  como o perfil já faz, e — o que fecha de vez — um check no `controls.py
+  --self-check` que varra os documentos do ciclo atrás de `N/N` e exija que
+  bata com `len(CONTROLS)`, na forma da `address_monopoly()` e da
+  `glossary.sweep()`.

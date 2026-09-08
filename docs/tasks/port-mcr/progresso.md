@@ -47,7 +47,7 @@ por princípio.
 | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | A casca Qt: janela, elenco, ficha em leitura | 3 | 10 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
-| [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | ⬜ pendente |
+| [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
