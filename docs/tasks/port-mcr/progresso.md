@@ -156,7 +156,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Tática | `0x64E2 = 1`, `0x6102 = 51`, nibbles `0/14` e `4/9` — escrita e nunca lida pelo original |
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
 | Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |
-| Controles negativos | **16/16 vermelhos**, com e sem fixture: quinze por substituição literal, um que cria um arquivo uma pasta abaixo. `python3 tools/mcr/controls.py` |
+| Controles negativos | **todos vermelhos**, com e sem fixture. Quantos são, e de que tipo, é a última linha de `python3 tools/mcr/controls.py` — hoje `controls: 20 of 20 red (19 substitutions, 1 new file)`, e o número sobe a cada task que acrescenta um. O `controls.py --self-check` varre este arquivo e o perfil e recusa total copiado que não bate ([CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md)) |
 | Gravação pela tela | um atributo pelo spin box move **1 byte** (`0x0590d`, dentro dos 12 do registro do jogador 0); o arraste levou o jogador de linha 1 de `[11, 32]` a `[14, 43]` em unidades do cartão; os dois cartões gravados passam nas duas formas do round-trip. `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
 | Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |

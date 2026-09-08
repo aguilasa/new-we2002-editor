@@ -3,7 +3,7 @@ id: CORR-MCR-021
 title: "Correção: a tabela \"Estado medido\" do ciclo ficou em 16/16 controles enquanto a ferramenta imprime 20 de 20 — a task de fechamento não a reconciliou"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -121,23 +121,93 @@ que não devia estar ali, em vez de uma convenção que se lembra de atualizar.
 
 ## Verificação
 
-- [ ] `grep -n "16/16" docs/tasks/port-mcr/progresso.md` sai vazio
-- [ ] o que a linha cita é a última linha de `python3 tools/mcr/controls.py`,
+- [x] `grep -n "16/16" docs/tasks/port-mcr/progresso.md` sai vazio
+- [x] o que a linha cita é a última linha de `python3 tools/mcr/controls.py`,
       palavra por palavra
-- [ ] `python3 tools/mcr/controls.py` continua **20 de 20 vermelhos**, com e
+- [x] `python3 tools/mcr/controls.py` continua **20 de 20 vermelhos**, com e
       sem fixture, e o `--self-check` do `controls.py` continua verde
-- [ ] se a varredura for escrita: com um `16/16` plantado num doc do ciclo,
+- [x] se a varredura for escrita: com um `16/16` plantado num doc do ciclo,
       `controls.py --self-check` sai `rc=1` nomeando o arquivo e a linha
-- [ ] `WE2002_MCR_CARD=… ctest -R 'tasks|mcr'` = **4 de 4**
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] `roms/` intocada; a fixture com o mesmo `sha256sum`
+- [x] `WE2002_MCR_CARD=… ctest -R 'tasks|mcr'` = **4 de 4**
+- [x] `python3 tools/check_tasks.py` verde
+- [x] `roms/` intocada; a fixture com o mesmo `sha256sum`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+O sintoma reproduziu exato: a linha 159 dizia `16/16 vermelhos … quinze por
+substituição literal`, e `controls.py` imprime
+`controls: 20 of 20 red (19 substitutions, 1 new file)`, com
+`len(controls.CONTROLS) == 20`.
+
+Fiz as **duas** metades da CORR, e a segunda é a que fecha. A linha do
+`progresso.md` passou a citar a última linha do comando **palavra por palavra**
+em vez de repetir um número — quem rodar compara duas frases iguais, não um
+número solto contra outro. E o `controls.py --self-check` ganhou a varredura:
+`count_sweep()` lê os documentos **vivos** do ciclo e recusa qualquer
+`N/N red` ou `N/N vermelhos` que não bata com `len(CONTROLS)`. É a forma da
+`layout.address_monopoly()` e da `glossary.sweep()` — uma varredura que recusa,
+no lugar de uma convenção que alguém tem de lembrar.
+
+**Só os documentos vivos são varridos**, e a escolha é deliberada: um Log de
+task que diz "15/15 vermelhas" é o registro do que **aquela** corrida mediu, e
+reescrevê-lo falsificaria a evidência — o ciclo já trata citação datada assim.
+O que não pode envelhecer é o estado que o leitor toma como atual: a tabela
+"Estado medido" do `progresso.md` e o perfil, que é o que os comandos leem
+antes de rodar qualquer coisa. Documento ausente é **pulado**, não acusado: os
+sandboxes plantados pelo `plant()` carregam `tools/mcr` e pouco mais, e uma
+queixa ali seria sobre o sandbox.
+
 **Problemas encontrados:**
 
+**1. A varredura achou uma segunda cópia velha, no arquivo cujo conserto foi
+justamente parar de copiar.** O perfil, na linha que a
+[CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) escreveu como exemplo do
+"hoje", dizia `controls: 16 of 16 red (15 substitutions, 1 new file)` — velha
+pelas mesmas quatro tasks. Ela **fica**, porque citar a linha inteira é o que
+torna a divergência visível; o que mudou é que agora ela é conferida por
+máquina, e o parágrafo diz isso.
+
+**2. O meu próprio comentário fez o módulo falhar na varredura de idioma.** Eu
+escrevi "Estado medido" em inglês corrente para nomear a tabela, e `medido`
+está no dicionário do `glossary.py`: `controls.py:223`, uma queixa, `selftest`
+com 2 falhas. Reescrito como "the *measured state* table of the cycle's
+progress file". É a §3.5 pegando exatamente o que ela existe para pegar, num
+comentário sobre documentos em português.
+
+**3. Uma falha de `mcr_card` que não reproduziu, e que não sei explicar.** Na
+primeira corrida de `ctest -R 'tasks|mcr'` depois do conserto ele saiu
+`***Failed` em 0,07 s — não é estouro de tempo, o limite é 600 s. Rodado
+sozinho na sequência, passou; e em **seis** corridas seguidas da mesma seleção,
+4 de 4 todas as vezes. Não capturei a saída daquela corrida — o `grep` que
+escrevi descartou tudo menos as linhas de resumo —, então não tenho evidência
+para atribuir causa, e prefiro registrar isso a inventar uma. Fica anotado: se
+voltar, a primeira coisa é `--output-on-failure`.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `controls.py`, com e sem cartão | **20 of 20 red (19 substitutions, 1 new file)**, idêntico |
+| a linha citada nos dois documentos | bate **palavra por palavra** com a saída (1 ocorrência em cada) |
+| `controls.py --self-check` | **8 checks** (eram 6), `0 failure(s)` |
+| a varredura, antes do conserto | **2** queixas: `progresso.md:159` e `perfil-mcr.md:161` |
+| o caso vermelho da varredura | com `16/16 vermelhos` plantado numa cópia, ela acusa e **nomeia o arquivo** |
+| `grep -n "16/16" progresso.md` | **vazio** |
+| `selftest.py` | `0 failure(s)` sobre 12 módulos |
+| `glossary.py` / `layout.py --rule1` | **0** queixas / **0** endereços |
+| `ctest -R 'tasks\|mcr'` | **4 de 4**, em 6 corridas — uma sétima, a primeira, teve a falha do item 3 |
+| `make test` | **10/10** |
+| `check_tasks.py` | `100 task(s), ok` |
+| fixture / `roms/` | `sha256 e53f4895…c47546`, intocada; `roms/` sem alteração |
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/controls.py` — `LIVE_DOCS`, `count_sweep()`, os dois checks novos
+  (a varredura e o caso vermelho dela)
+- `docs/tasks/port-mcr/progresso.md` — a linha dos controles aponta para a saída
+- `docs/prompts/perfil-mcr.md` — o exemplo atualizado, e a frase que diz que
+  agora há varredura (varredura de discrepância)

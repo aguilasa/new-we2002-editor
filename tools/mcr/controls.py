@@ -36,6 +36,7 @@ Usage:
 import argparse
 import dataclasses
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -207,6 +208,60 @@ CONTROLS = (
 BY_ID = {c.id: c for c in CONTROLS}
 
 
+# THE DOCUMENTS THAT MAY NOT COPY THE TOTAL, and the sweep that enforces it.
+#
+# CORR-MCR-017 made this file PRINT how many controls there are so nobody would
+# write the number down; the profile stopped copying it and `progresso.md` did
+# not, and four tasks later it said 16 where the tool said 20 -- CORR-MCR-021.
+# A convention that has to be remembered is not a guard. This is the same shape
+# as `layout.address_monopoly()` and `glossary.sweep()`: a sweep that refuses
+# what should not be there.
+#
+# ONLY THE LIVE DOCUMENTS ARE SWEPT. A task log saying "15/15 vermelhas" is a
+# record of what THAT run measured, and rewriting it would falsify the
+# evidence; the cycle already keeps dated citations as they are. What may not
+# age is the state a reader takes as current: the "measured state" table of the
+# cycle's progress file, and the profile the commands read before running
+# anything.
+LIVE_DOCS = (
+    os.path.join("docs", "tasks", "port-mcr", "progresso.md"),
+    os.path.join("docs", "prompts", "perfil-mcr.md"),
+)
+# `20 of 20 red`, `16/16 vermelhos` -- both spellings this cycle has used.
+_TOTAL = re.compile(r"(\d+)\s*(?:of|/)\s*(\d+)\s+(?:red\b|vermelh\w+)",
+                    re.IGNORECASE)
+
+
+def count_sweep(root: str | None = None) -> list[str]:
+    """Live documents whose stated control total is not the real one.
+
+    Empty is correct. A document that is missing is skipped rather than
+    reported: the planted sandboxes of `plant()` below carry `tools/mcr` and
+    little else, and a complaint there would be about the sandbox, not about
+    the tree.
+    """
+    root = root or _repo_root()
+    if root is None:
+        return []
+    total = len(CONTROLS)
+    complaints = []
+    for rel in LIVE_DOCS:
+        path = os.path.join(root, rel)
+        if not os.path.isfile(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            for lineno, line in enumerate(fh, 1):
+                for m in _TOTAL.finditer(line):
+                    got, of = int(m.group(1)), int(m.group(2))
+                    if got == total and of == total:
+                        continue
+                    complaints.append(
+                        f"{rel}:{lineno}: says {m.group().strip()!r} and there "
+                        f"are {total} controls; cite what `controls.py` prints "
+                        f"instead of copying the number")
+    return complaints
+
+
 def _repo_root() -> str | None:
     wte = layout.find_upward("wte")
     return os.path.dirname(wte) if wte else None
@@ -336,6 +391,35 @@ def _checks(c) -> None:
             and os.path.exists(os.path.join(MCR_DIR, k.module))]))
     ok("the repository is found from wherever this runs",
        _repo_root() is not None)
+
+    stale = c.attempt("sweep the live documents", count_sweep, default=None)
+    ok("no live document copies the control total", stale == [], f"{stale}")
+
+    # The red case: the same sweep over a copy with the old number planted.
+    root = _repo_root()
+    if root is None:
+        c.skip("the red case needs the repository")
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            planted = None
+            for rel in LIVE_DOCS:
+                src = os.path.join(root, rel)
+                if not os.path.isfile(src):
+                    continue
+                dst = os.path.join(tmp, rel)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                with open(src, encoding="utf-8") as fh:
+                    text = fh.read()
+                if planted is None:
+                    text += f"\n| Controles negativos | {len(CONTROLS) - 4}/" \
+                            f"{len(CONTROLS) - 4} vermelhos |\n"
+                    planted = rel
+                with open(dst, "w", encoding="utf-8") as fh:
+                    fh.write(text)
+            found = c.attempt("sweep the planted copy",
+                              lambda: count_sweep(tmp), default=None)
+            ok("a stale total is caught, and named",
+               found and any(planted in x for x in found), f"{found}")
 
 
 def self_check(verbose: bool = True) -> int:

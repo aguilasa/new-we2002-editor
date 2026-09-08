@@ -34,7 +34,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [ ] pendente | — |
+| [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [x] concluída | 2026-09-08 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -63,7 +63,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-018 — o gate escolhe o destino do arraste em unidades de cartão, a tela só executa, e os dois casos vermelhos são plantados a cada corrida
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
 - [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
-- [ ] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
+- [x] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
 
 ---
 

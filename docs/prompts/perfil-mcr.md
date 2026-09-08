@@ -158,11 +158,17 @@ quebrado**, não como vermelho; no tipo que cria, o equivalente é o caminho já
 estar ocupado.
 
 **Quantos são não se escreve aqui.** A última linha do comando diz — hoje
-`controls: 16 of 16 red (15 substitutions, 1 new file)` —, e a razão é medida:
+`controls: 20 of 20 red (19 substitutions, 1 new file)` —, e a razão é medida:
 o total viveu como número neste arquivo, a MCR-TASK-11 acrescentou o décimo
 sexto, e a linha do gate que os comandos leem antes de rodar qualquer coisa
 continuou dizendo quinze, enquanto o `progresso.md` — editado pela **mesma
 task** — já dizia dezesseis ([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)).
+Copiar aqui a linha inteira que o comando imprime é de propósito: quem rodar
+compara duas frases iguais, não um número solto contra outro. E deixou de ser
+convenção — o `controls.py --self-check` **varre** este arquivo e o
+`progresso.md` do ciclo e recusa total que não bate com `len(CONTROLS)`, que é
+o que a [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) mediu faltar: o
+número saiu daqui e ficou lá, quatro tasks para trás.
 
 ---
 
