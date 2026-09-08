@@ -47,8 +47,8 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       `layout`, `attributes`, `numbers`, `text`, `domains`, `formation`,
       `model`, `mcrio`) mais os três que esta task criou — `harness`,
       `glossary` e `controls`. O `mcrio` é o único que roda o controle negativo
-      da §5.2 inteiro (`--negative`, 5/5); o `controls` roda as quinze
-      substituições literais.
+      da §5.2 inteiro (`--negative`, 5/5); o `controls` roda os controles
+      negativos — quantos são é o que ele imprime.
 - [x] **A guarda da Regra 1 já existe e precisa ser agregada aqui**: a
       MCR-TASK-05 a escreveu como `layout.address_monopoly()`, com CLI
       `python3 tools/mcr/layout.py --rule1`. Ela varre `tools/mcr/**.py` (menos
@@ -141,10 +141,12 @@ sem cartão e sem UI, `ctest -R mcr` dá **1 passed, 2 skipped**; `make test` d�
 **10 de 10**.
 
 A decisão que a task pedia foi tomada: **o `negative` planta os controles**.
-As quinze substituições literais moram em `controls.py` e o `mcr_selftest` as
-roda a cada corrida — **15/15 vermelhas**, com e sem fixture. Eram catorze até
-a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md), que acrescentou a
-décima quinta.
+Eles moram em `controls.py` e o `mcr_selftest` os roda a cada corrida. **Na
+data desta task eram quinze, 15/15 vermelhos**, com e sem fixture — catorze
+até a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md), e dezesseis desde a
+[MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md). Os números abaixo são os
+desta corrida; o de hoje é o que a última linha do comando imprime
+([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)).
 
 E o que a execução ensinou: **um harness não se confere com ele mesmo.**
 
@@ -185,7 +187,7 @@ caminho que o `ok` não percorre. Depois disso o controle fica vermelho.
 Vale para quem escrever o próximo agregador: **toda ferramenta de medição
 precisa de um caminho de detecção que não passe por ela mesma.**
 
-### Os quinze controles, agora por comando
+### Os controles, agora por comando — quinze nesta corrida
 
 ```
 $ python3 tools/mcr/controls.py
@@ -216,10 +218,10 @@ errado.
 
 O sandbox leva `wte/re/mcr.md` e um symlink para `work/easy-mcr`, e o relatório
 **conta os `skip`** de cada corrida — as duas metades da lição da MCR-TASK-08.
-Sem fixture os quinze continuam vermelhos, e é por isso que o `mcr_selftest`
+Sem fixture eles continuam todos vermelhos, e é por isso que o `mcr_selftest`
 pode rodá-los sendo o alvo obrigatório.
 
-**O décimo quinto não é uma substituição, e é o único assim.** Ele **cria** um
+**Um deles não é substituição — o `ui-below-the-sweep`, e é o único assim.** Ele **cria** um
 arquivo — `ui/_probe.py`, uma pasta abaixo —, porque o defeito que ele mede é
 uma pasta que a varredura não desce, e nenhuma troca de linha num módulo
 existente exprime isso. "Casou uma vez" ali quer dizer que o caminho estava
@@ -304,7 +306,7 @@ que nada tenha mudado.
 | `ctest -R mcr` com cartão | 2 passed, 1 skipped (`mcr_ui`) |
 | `make test` | **10 de 10**, 0 falhas |
 | `selftest.py` | 0 falhas em 12 módulos + regras de desenho + controles |
-| `controls.py` | **15/15 vermelhos**, com e sem fixture |
+| `controls.py` | **15/15 vermelhos** nesta corrida, com e sem fixture |
 | `glossary.py` | 0 queixas em `tools/mcr/**.py` |
 | `layout.py --rule1` | 0 endereços fora de `layout.py` |
 | Regra 3 | `PySide6` ausente; a metade da UI **pula dizendo** que a pasta não existe |

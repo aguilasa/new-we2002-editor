@@ -112,8 +112,10 @@ if(Python3_FOUND)
     # The mandatory one needs nothing. Every module builds the card it needs in
     # memory, and selftest.py unsets WE2002_MCR_CARD before calling any of
     # them, so this runs the same on a machine that has never seen a memory
-    # card. It also plants the fifteen negative controls and demands each one
-    # go red -- a guard that has never been red is decoration.
+    # card. It also plants every negative control and demands each one go red
+    # -- a guard that has never been red is decoration. How many there are is
+    # what controls.py prints, not something spelled out here: CORR-MCR-017
+    # measured what a copied number costs.
     add_test(NAME mcr_selftest
         COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/mcr/selftest.py)

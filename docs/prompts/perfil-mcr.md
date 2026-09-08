@@ -138,7 +138,7 @@ docs/tasks/port-mcr/  este ciclo
 | gate | a partir de | o que julga |
 |---|---|---|
 | `ctest -R tasks` | já existe | as convenções de task, inclusive nesta subpasta |
-| `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e as 15 substituições literais, exigidas vermelhas** — sem fixture e sem Qt, ~13 s. **Obrigatório** |
+| `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e os controles negativos, todos exigidos vermelhos** — quantos são, e de que tipo, é o que a última linha do `controls.py` imprime — sem fixture e sem Qt, ~13 s. **Obrigatório** |
 | `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
 | `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display |
 
@@ -146,12 +146,22 @@ Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
 mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde
 2026-09-08 há**, e o `mcr_selftest` é o obrigatório.
 
-**Controle negativo se roda, não se descreve.** As quinze substituições moram
-em `tools/mcr/controls.py` — arquivo, função, linha exata, e o que ela vira —,
-e `python3 tools/mcr/controls.py` planta cada uma numa cópia da árvore e exige
-o vermelho. Substituição que casa zero ou duas vezes é reportada como
-**controle quebrado**, não como vermelho. O `mcr_selftest` as roda a cada
-corrida.
+**Controle negativo se roda, não se descreve.** Os controles moram em
+`tools/mcr/controls.py`, em **dois tipos**: a **substituição literal** —
+arquivo, função, linha exata, e o que ela vira — e o controle que **cria um
+arquivo** uma pasta abaixo (`creates=True`), que é como se prova que uma
+varredura **desce**. `python3 tools/mcr/controls.py` planta cada um numa cópia
+da árvore e exige o vermelho, e o `mcr_selftest` os roda a cada corrida.
+Substituição que casa zero ou duas vezes é reportada como **controle
+quebrado**, não como vermelho; no tipo que cria, o equivalente é o caminho já
+estar ocupado.
+
+**Quantos são não se escreve aqui.** A última linha do comando diz — hoje
+`controls: 16 of 16 red (15 substitutions, 1 new file)` —, e a razão é medida:
+o total viveu como número neste arquivo, a MCR-TASK-11 acrescentou o décimo
+sexto, e a linha do gate que os comandos leem antes de rodar qualquer coisa
+continuou dizendo quinze, enquanto o `progresso.md` — editado pela **mesma
+task** — já dizia dezesseis ([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)).
 
 ---
 

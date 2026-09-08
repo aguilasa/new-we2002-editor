@@ -3,7 +3,7 @@ id: CORR-MCR-017
 title: "Correção: o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, do décimo sexto o perfil não conhece nem a forma"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -125,22 +125,89 @@ reportar em vez de afirmar.
 
 ## Verificação
 
-- [ ] `grep -n "quinze substitui\|15 substitui" docs/prompts/perfil-mcr.md` sai
+- [x] `grep -n "quinze substitui\|15 substitui" docs/prompts/perfil-mcr.md` sai
       vazio
-- [ ] o número que o perfil cita é o que `python3 tools/mcr/controls.py`
+- [x] o número que o perfil cita é o que `python3 tools/mcr/controls.py`
       imprime, e os dois tipos estão descritos
-- [ ] `python3 tools/mcr/controls.py` continua **16 de 16 vermelhos**, com e
+- [x] `python3 tools/mcr/controls.py` continua **16 de 16 vermelhos**, com e
       sem fixture, e o `self_check` do `controls.py` continua com 5 checks
-- [ ] `ctest -R mcr` = **3 de 3**, e `make test` verde
-- [ ] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
-- [ ] `roms/` intocada; a fixture com o mesmo `sha256sum`
+- [x] `ctest -R mcr` = **3 de 3**, e `make test` verde
+- [x] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
+- [x] `roms/` intocada; a fixture com o mesmo `sha256sum`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+O sintoma reproduziu exato: `controls.py` imprime `16 of 16 red`, a contagem por
+tipo dá `16 15 1`, e o perfil dizia quinze nas linhas 141 e 149.
+
+**O conserto foi o segundo do que a CORR propõe, não o primeiro.** Corrigir os
+dois números deixaria a mesma armadilha armada para a próxima task que
+acrescentar um controle — e ela já disparou duas vezes neste ciclo (a
+CORR-MCR-015 achou "fourteen" no `tests/CMakeLists.txt`, a CORR-MCR-016 achou
+"catorze" no plano). O `controls.py` passou a **imprimir** o resumo por tipo —
+`controls: 16 of 16 red (15 substitutions, 1 new file)`, com singular e plural
+tratados nos dois lados —, e o perfil passou a **apontar para o comando** em
+vez de repetir o número. É a mesma escolha do `--edit-probe` da MCR-TASK-09:
+reportar em vez de afirmar.
+
+O parágrafo do perfil ganhou os **dois tipos**, que era a outra metade da CORR:
+a substituição literal, e o controle que cria um arquivo uma pasta abaixo, que
+é como se prova que uma varredura desce. Com o que cada tipo chama de "controle
+quebrado" — casar zero ou duas vezes num caso, caminho já ocupado no outro.
+
 **Problemas encontrados:**
 
+**1. A varredura achou o mesmo número copiado em mais quatro lugares, três
+deles em código vivo.** `tools/mcr/cli.py` duas vezes (a docstring do módulo e
+o `help=` do `--plant`), `tests/CMakeLists.txt` uma, e `docs/PLAN-MCR-PY.md`
+uma — esta última escrita por mim na CORR-MCR-016, três commits atrás, e já
+falsa. `tools/mcr/selftest.py` tinha uma quinta, indireta ("fifteen trees of
+fifteen"). Nenhum foi corrigido para dezesseis: os cinco passaram a não citar
+número, pelo mesmo motivo que o perfil.
+
+**2. A verificação da CORR pede que o `self_check` do `controls.py` "continue
+com 5 checks", e ele tem 6.** São seis desde a
+[CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md), que acrescentou a
+asserção espelhada do controle que cria arquivo (o caminho tem de estar livre).
+O item foi medido contra o estado real: **6, inalterado por esta correção**.
+
+**3. O Log da MCR-TASK-10 afirmava quinze no presente.** Ele mediu quinze, e
+isso é história — mas cinco frases estavam em tempo presente ("As quinze
+substituições literais **moram** em `controls.py`"), o que é outra coisa. Ficaram
+ancoradas na corrida delas ("na data desta task eram quinze"), com a linha do
+tempo completa — catorze até a CORR-MCR-014, dezesseis desde a MCR-TASK-11 — e
+o ponteiro para o comando. A transcrição do `controls: 15 of 15 red` não foi
+tocada: é a saída daquela corrida.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `controls.py` com cartão | **16 of 16 red (15 substitutions, 1 new file)** |
+| `controls.py` sem cartão | idêntico |
+| `controls.py --only ui-below-the-sweep` | `1 of 1 red (0 substitutions, 1 new file)` |
+| `controls.py --only card-write-guard` | `1 of 1 red (1 substitution, 0 new files)` — singular nos dois lados |
+| `controls.py --self-check` | **6 checks**, `0 failure(s)` |
+| `selftest.py` | `0 failure(s)` sobre 12 módulos |
+| `grep "quinze substitui\|15 substitui" docs/prompts/perfil-mcr.md` | **vazio** |
+| `grep -rn fifteen tools/mcr tests/CMakeLists.txt` | só a linha que **conta a história** desta CORR, dentro do `controls.py` |
+| `cmake --preset debug` | reconfigura sem aviso |
+| `ctest -R mcr` | **3 de 3**, `100% tests passed` |
+| `make test` | **10/10** |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / **1/1 Passed** |
+| conferência de link | forma só com alvo fora de `docs/`; existência **vazia** |
+| fixture / `roms/` | `sha256 e53f4895…c47546`, intocada; `roms/` sem alteração |
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/controls.py` — o resumo por tipo na última linha
+- `docs/prompts/perfil-mcr.md` — a linha do gate e o parágrafo dos dois tipos,
+  os dois apontando para o comando
+- `tools/mcr/cli.py`, `tools/mcr/selftest.py`, `tests/CMakeLists.txt`,
+  `docs/PLAN-MCR-PY.md` — o número deixou de ser copiado (varredura)
+- `docs/tasks/port-mcr/10-selftest-cli-e-gate.md` — as cinco frases ancoradas
+  na corrida delas (varredura)

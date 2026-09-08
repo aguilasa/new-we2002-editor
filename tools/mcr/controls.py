@@ -261,7 +261,17 @@ def run_all(only: str | None = None, card_path: str | None = None,
                   f"{control.function}{note}")
     if verbose:
         good = sum(1 for r in out if r.good)
-        print(f"controls: {good} of {len(out)} red")
+        # The breakdown by kind is REPORTED, not asserted in prose somewhere
+        # else: CORR-MCR-017 measured what the other way costs. The total lived
+        # as a number in perfil-mcr.md, MCR-TASK-11 added the sixteenth, and
+        # the file the commands read before running anything still said
+        # fifteen -- while progresso.md, edited by the same task, said sixteen.
+        # Same choice as --edit-probe in MCR-TASK-09: report it, do not claim it.
+        made = sum(1 for r in out if r.control.creates)
+        subs = len(out) - made
+        print(f"controls: {good} of {len(out)} red "
+              f"({subs} substitution{'' if subs == 1 else 's'}, "
+              f"{made} new file{'' if made == 1 else 's'})")
     return out
 
 

@@ -183,7 +183,8 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     # `--self-check` implies `--fast`, and that is not a shortcut: the controls
     # engine runs each module with that flag, and a selftest that re-planted
-    # inside an already planted sandbox would be fifteen trees of fifteen.
+    # inside an already planted sandbox would be one planted tree per control,
+    # each of them planting every control again.
     plant = not (a.fast or a.self_check)
     return 1 if run(verbose=not a.quiet, plant=plant) else 0
 

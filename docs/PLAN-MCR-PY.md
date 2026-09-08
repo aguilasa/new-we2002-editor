@@ -315,10 +315,12 @@ fora do `attempt()` matou a corrida e escondeu os checks seguintes. O
 `controls.py` porque o estímulo de cada controle negativo morava em prosa, e a
 [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) mediu que prosa não
 reproduz; agora é substituição literal versionada, como os roteiros de
-`tools/par/` são para o golden. São quinze, e **catorze** são substituição:
-o décimo quinto **cria** um arquivo uma pasta abaixo, porque o defeito que
+`tools/par/` são para o golden. São **dois tipos**: a substituição literal, e
+um punhado menor que **cria** um arquivo uma pasta abaixo, porque o defeito que
 ele mede é uma varredura que não desce
-([CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md)). O `ui_check.py`
+([CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md)). Quantos são de cada
+tipo é o que a última linha do `controls.py` imprime
+([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)). O `ui_check.py`
 porque o alvo `mcr_ui` precisa de um executável que decida sozinho entre
 pular e falhar.
 
