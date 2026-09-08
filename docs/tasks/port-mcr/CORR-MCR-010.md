@@ -3,7 +3,7 @@ id: CORR-MCR-010
 title: "Correção: são dois os nomes que enchem os dez bytes, não um — o slot 5 também"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -100,12 +100,41 @@ enchem os dez bytes".
 - [ ] `roms/` e `work/entrada.mcr` intocados — digest
       `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A §1.6 do plano e as quatro ocorrências da MCR-TASK-07 passaram a nomear os
+**dois** slots que enchem os dez bytes — o **5** (`ジｮｰ･ﾛﾚﾝｿﾝ`) e o **20**
+(`ガﾘｽ･ﾛバｰｽ`) — e a frase do plano agora diz de onde sai a contagem: do
+`text.py --check`, que marca os dois com `<-- fills all ten bytes`, não da
+prosa. A afirmação de invariante ("não é cadeia terminada em NUL") já estava
+certa e ficou; o que era incompleto era a enumeração.
+
+**Medições:**
+
+| gate | resultado |
+|---|---|
+| varredura independente da fixture | `[5, 20]` |
+| `text.py --check` | `23/23`, com **2** slots marcados `fills all ten bytes` |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / `1/1 Passed` |
+| fixture | `e53f4895…`, inalterada |
+
 **Problemas encontrados:**
 
+**Um terceiro sítio que a CORR não listava**, achado pela varredura: a tabela
+"Estado medido" do
+[`progresso.md`](/docs/tasks/port-mcr/progresso.md) do ciclo, linha 152, também
+dizia "o slot 20 usa os 10 bytes sem terminador". Corrigido na mesma passagem.
+Depois disso o termo só sobrevive na descrição do sintoma dentro do próprio
+`correcoes-progresso.md`, que é evidência.
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-MCR-PY.md` — §1.6
+- `docs/tasks/port-mcr/07-dorsais-e-nome.md` — Contexto, critério e as duas
+  passagens do Log
+- `docs/tasks/port-mcr/progresso.md` — a linha "Nome" da tabela "Estado medido"
+  (discrepância da varredura)

@@ -164,7 +164,10 @@ Duas consequências, as duas caras se descobertas tarde:
 - **O zetaprog assume ASCII** e tem o mesmo defeito, agravado por um
   `Regex.Replace(texto, "[^a-zA-Z.]", "")` antes de gravar.
 
-E o campo **não é cadeia terminada em NUL**: o slot 20 usa os 10 bytes. O
+E o campo **não é cadeia terminada em NUL**: os slots **5**
+(`ジｮｰ･ﾛﾚﾝｿﾝ`) e **20** (`ガﾘｽ･ﾛバｰｽ`) usam os dez bytes. São dois na
+fixture, e `python3 tools/mcr/text.py <cartão> --check` marca os dois com
+`<-- fills all ten bytes` — a contagem sai da ferramenta, não desta frase. O
 readme do Obocaman registra isso como correção da v0.98 ("the spaces in the
 players names").
 

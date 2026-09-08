@@ -149,7 +149,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Registro de jogador | `0x5904`, passo 32, 23 entradas — 12 B de atributo + 10 B de nome + 10 B intocados |
 | Dorsais | `0x5404`, 4 grupos de 4 B, 6 × 5 bits, deslocamentos `[0,5,2,7,4,1]`, guardado menos um |
 | Dorsal duplo | **23 de 23** concordam entre o bit-field do registro e a tabela |
-| Nome | **cp932**, não ASCII; o slot 20 usa os 10 bytes sem terminador |
+| Nome | **cp932**, não ASCII; os slots 5 e 20 usam os 10 bytes sem terminador |
 | Formação | X `0x62A8`, Y `0x62B2`, papéis `0x63D5` (índice + 2, sobre 20 rótulos) |
 | Cobradores | `0x614F, 0x6140, 0x6122, 0x6113, 0x6131` — tabela não-crescente; valem `[7,7,8,7,7]` |
 | `0x6500` | vale `8` — **capitão** pela nossa RE, "sexto cobrador" pelo upstream. Em aberto |

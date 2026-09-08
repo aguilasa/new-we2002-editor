@@ -20,7 +20,8 @@ status: concluído
   59 00` = `P･ジｮｰﾙズ`, mistura de ASCII, katakana meia-largura e Shift-JIS de 2
   bytes. O `KanjiToAscii` do `we2002_core` devolve **cinco espaços** para ele; o
   upstream assume ASCII e ainda filtra por `[^a-zA-Z.]`.
-- O campo **não é cadeia terminada em NUL**: o slot 20 usa os 10 bytes.
+- O campo **não é cadeia terminada em NUL**: os slots **5** e **20** usam os
+  10 bytes — são dois na fixture, e o `text.py --check` marca os dois.
 
 ---
 
@@ -66,8 +67,8 @@ de 10 bytes ↔ `str`).
 - [x] Os 23 dorsais da tabela batem com os 23 do bit-field do registro:
       **23/23**.
 - [x] `text.py` decodifica os 23 nomes da fixture em cp932 sem exceção, e
-      `encode(decode(b)) == b` nos 23 — inclusive o slot 20, que enche os 10
-      bytes.
+      `encode(decode(b)) == b` nos 23 — inclusive os slots 5 e 20, que enchem
+      os 10 bytes.
 - [x] Nome maior que 10 bytes **recusa**, não trunca em silêncio.
 - [x] Um comentário no módulo dizendo por que o `TextCodec` do `we2002_core`
       **não** serve aqui, com o exemplo do slot 0.
@@ -121,8 +122,9 @@ $ python3 tools/mcr/text.py work/mcr-entrada.mcr --check
 text.py --check: 23/23 names re-encode to the same bytes
 ```
 
-Os 23 decodificam em cp932 sem exceção; o slot 20 (`ガﾘｽ･ﾛバｰｽ`) enche os dez
-bytes sem terminador. Nome maior que dez bytes **recusa** dizendo de quantos
+Os 23 decodificam em cp932 sem exceção; os slots 5 (`ジｮｰ･ﾛﾚﾝｿﾝ`) e 20
+(`ガﾘｽ･ﾛバｰｽ`) enchem os dez bytes sem terminador — **dois**, não um, e é o
+`--check` que os conta. Nome maior que dez bytes **recusa** dizendo de quantos
 precisava, porque truncar cortaria um caractere de dois bytes ao meio.
 
 **E o `TextCodec` não serve — agora demonstrado, não afirmado.** O módulo traz
@@ -163,8 +165,8 @@ Seis defeitos plantados numa cópia em `/tmp`:
 
 **1. Um check verde que não provava nada.** O controle "parar no primeiro NUL"
 (`split(b"\0")[0]` no lugar de `rstrip`) passou **verde** na primeira rodada.
-Motivo: **nenhum dos 23 nomes da fixture tem NUL no meio**, e o slot 20 não tem
-NUL nenhum — para todos eles as duas leituras dão o mesmo resultado. A prosa
+Motivo: **nenhum dos 23 nomes da fixture tem NUL no meio**, e os slots 5 e 20
+não têm NUL nenhum — para todos eles as duas leituras dão o mesmo resultado. A prosa
 dizia "o campo não é cadeia terminada em NUL" e o teste não sabia disso.
 
 Consertado com um caso sintético — `AB\x00CD` seguido de padding — que é o
