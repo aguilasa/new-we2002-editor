@@ -3,7 +3,7 @@ id: CORR-MCR-015
 title: "Correção: o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o teste dele"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -87,19 +87,54 @@ lêem-se como a mesma. Nomear o projeto em cada uma resolve.
 
 ## Verificação
 
-- [ ] `grep -n "^# \|add_test(NAME" tests/CMakeLists.txt` mostra cada
+- [x] `grep -n "^# \|add_test(NAME" tests/CMakeLists.txt` mostra cada
       `add_test` imediatamente sob o comentário que o descreve
-- [ ] `cmake --preset debug` reconfigura sem aviso novo
-- [ ] `ctest -R mcr` sem cartão continua **1 passed, 2 skipped**
-- [ ] `make test` continua verde, com o mesmo número de testes
-- [ ] `roms/` intocada
+- [x] `cmake --preset debug` reconfigura sem aviso novo
+- [x] `ctest -R mcr` sem cartão continua **1 passed, 2 skipped**
+- [x] `make test` continua verde, com o mesmo número de testes
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+O bloco do `mcr_ui`, com o comentário dele, subiu para **antes** do comentário
+do `pes2_boot`. Cada `add_test` do arquivo voltou a ficar imediatamente sob o
+comentário que o descreve — conferido nos onze, não só nos dois.
+
+As duas frases "third … bracket" ficaram: elas contam faixas de projetos
+diferentes e agora dizem qual. A do PES2 passou a abrir com "Booting the PES2
+game is **that project's** third cost bracket"; a do `mcr` já se identificava
+("The third **mcr** bracket"), e o par de cima dela no mesmo `if` diz "The
+mandatory one" e "The second", então a numeração fecha.
+
 **Problemas encontrados:**
 
+**A varredura achou, no mesmo arquivo, um número que a CORR-MCR-014 tinha
+acabado de tornar falso.** O comentário do `mcr_selftest` dizia "It also plants
+the **fourteen** negative controls", e são quinze desde o commit anterior deste
+lote. É exatamente o caso que o `04-corrigir-tudo.md` prevê — a correção *k+1*
+alcança o doc que a *k* escreveu. Corrigido aqui, junto com as duas ocorrências
+gêmeas no `cli.py` (a docstring do módulo e o `help=` do `--negative`), que a
+mesma varredura trouxe.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `grep -n "^# \|add_test(NAME" tests/CMakeLists.txt` | cada `add_test` sob o seu comentário |
+| `cmake --preset debug` | reconfigura, **0** avisos |
+| `ctest -R mcr` sem cartão | **1 passed, 2 skipped** |
+| `make test` | **10/10**, `100% tests passed` |
+| `selftest.py` | `0 failure(s)` sobre 12 módulos |
+| `grep -rn 'fourteen\|catorze' tools/mcr tests/CMakeLists.txt` | **vazio** |
+| `roms/` | intocada |
+
 **Arquivos criados/modificados:**
+
+- `tests/CMakeLists.txt` — o bloco do `mcr_ui` movido, as duas frases "third
+  bracket" nomeando o projeto, e a contagem de controles
+- `tools/mcr/cli.py` — a mesma contagem, em dois lugares (varredura de
+  discrepância)

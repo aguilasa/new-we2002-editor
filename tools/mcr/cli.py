@@ -12,7 +12,7 @@ Subcommands:
     set <card> <slot> <field> <v>    write it -- on a COPY, never the fixture
     roundtrip <card>                 both forms of section 5.1
     negative [--plant]               the five injections; --plant adds the
-                                     fourteen literal source substitutions
+                                     fifteen literal source substitutions
     check [card]                     the fixture gate; exits 77 with no card
 
 `check` IS THE `mcr_card` TARGET, and 77 is not an error: it is what tells
@@ -246,7 +246,7 @@ def main(argv=None) -> int:
 
     p = sub.add_parser("negative", help="the injections, and the controls")
     p.add_argument("--plant", action="store_true",
-                   help="also plant the fourteen source substitutions")
+                   help="also plant the fifteen source substitutions")
     p.set_defaults(fn=cmd_negative)
 
     p = sub.add_parser("check", help="the fixture gate; 77 when there is none")

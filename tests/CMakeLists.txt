@@ -112,7 +112,7 @@ if(Python3_FOUND)
     # The mandatory one needs nothing. Every module builds the card it needs in
     # memory, and selftest.py unsets WE2002_MCR_CARD before calling any of
     # them, so this runs the same on a machine that has never seen a memory
-    # card. It also plants the fourteen negative controls and demands each one
+    # card. It also plants the fifteen negative controls and demands each one
     # go red -- a guard that has never been red is decoration.
     add_test(NAME mcr_selftest
         COMMAND ${Python3_EXECUTABLE}
@@ -133,11 +133,6 @@ if(Python3_FOUND)
         TIMEOUT 600)
 endif()
 
-# Booting the game is a third cost bracket: it needs DuckStation, an X
-# display and about ninety seconds of wall clock. Registered anyway, on the
-# same terms as the golden tests -- it skips itself unless PES2_IMAGE names
-# a working copy, so a machine without the emulator sees a skip and not a
-# failure. Never runs in CI, for the same reason golden does not.
 # The third mcr bracket needs the venv with PySide6 and an X display, which is
 # the same class of dependency as the golden tests -- so it is UNIX-only and
 # skips itself when the venv, the UI or the display is missing. Today it skips
@@ -151,6 +146,11 @@ if(UNIX AND Python3_FOUND)
         TIMEOUT 300)
 endif()
 
+# Booting the PES2 game is that project's third cost bracket: it needs
+# DuckStation, an X display and about ninety seconds of wall clock. Registered
+# anyway, on the same terms as the golden tests -- it skips itself unless
+# PES2_IMAGE names a working copy, so a machine without the emulator sees a
+# skip and not a failure. Never runs in CI, for the same reason golden does not.
 if(UNIX)
     add_test(NAME pes2_boot
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/boot_check.sh)
