@@ -25,6 +25,8 @@ ciclo arquivado, o dele em
 | [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | o plano diz que **um** nome enche os dez bytes e são dois: os slots 5 e 20 | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [x] concluída | 2026-09-07 |
+| [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | o check chamado "e nada mais" só afirma que algum byte mudou, e a exclusividade do caminho do dorsal fica sem guarda | Alta | [ ] pendente | — |
+| [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, não cita o `Save`, e a task atribui a frase à §5.1 | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -44,6 +46,8 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
 - [x] CORR-MCR-010 — nomear os dois slots que enchem os dez bytes, no plano e na task
 - [x] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
+- [ ] CORR-MCR-012 — fechar o conjunto de bytes no check do dorsal, nos dois módulos, com o caso vermelho
+- [ ] CORR-MCR-013 — pôr `Player`/`Save` na §3.2 do plano e corrigir a citação de seção na task
 
 ---
 
@@ -233,3 +237,39 @@ ciclo arquivado, o dele em
 - **Fix:** escrever a substituição e a **função** onde ela mora, e subir a
   convenção da CORR-MCR-009 para o perfil, que é onde as tasks 08 a 14 a leem
   antes de começar.
+
+### CORR-MCR-012
+
+- **Arquivo com problema:** `tools/mcr/model.py:285` (e o par em
+  `tools/mcr/mcrio.py:384`)
+- **Sintoma:** o check se chama "a number touches the record and the table, and
+  nothing else" e a condição é `len(moved) > 0`. Uma escrita perdida em
+  qualquer lugar do cartão o satisfaz. O check do atributo comum, doze linhas
+  acima, mede exclusividade de verdade com `all(...)` — o caminho do dorsal,
+  que é o único que grava em **dois** lugares, é o único sem essa asserção.
+- **Como foi detectado:** plantio em `Save._write_number` que escreve um byte
+  nos dez intocados do jogador 5 **só quando o dorsal muda** — sobrevive ao
+  round-trip, que regrava os mesmos valores. Os dois `--self-check` saem
+  `rc=0`, `FAIL=0`, e o check nomeado diz `ok`; só o
+  `mcrio.py --edit-probe 0 number 30` mostra, reportando **3** bytes
+  (`0x05404`, `0x05907`, `0x059ba`) contra os 2 do Log.
+- **Fix:** fechar o conjunto nos dois módulos — os destinos legítimos são o
+  registro de 12 bytes e os 4 grupos da tabela de 5 bits — e pôr o plantio na
+  tabela de controles da task, como substituição literal com a função.
+
+### CORR-MCR-013
+
+- **Arquivo com problema:** `docs/PLAN-MCR-PY.md` linha 295 (§3.2) e
+  `docs/tasks/port-mcr/09-modelo-e-round-trip.md` (critério de conclusão)
+- **Sintoma:** a árvore de módulos do plano diz `model.py  Card / Player /
+  Formation -- dataclasses`; o que existe é `Player` e `Save` no `model.py`,
+  `Card` como classe comum no `card.py` e `Formation` no `formation.py`. O
+  `Save` não aparece no plano inteiro. A task registra a divergência e a
+  justifica — corretamente —, mas a atribui à **§5.1**, que é o round-trip e
+  não nomeia classe nenhuma.
+- **Como foi detectado:** `grep -n "model.py" docs/PLAN-MCR-PY.md` e
+  `grep -n '\bSave\b' docs/PLAN-MCR-PY.md` (vazio) durante a revisão da
+  MCR-TASK-09; o commit `16a0ae0` editou a linha logo abaixo dessa.
+- **Fix:** levar a decisão ao plano — o inventário passa a nomear `Player` e
+  `Save`, e a dizer onde `Card` e `Formation` moram — e corrigir a citação de
+  seção na task para §3.2.
