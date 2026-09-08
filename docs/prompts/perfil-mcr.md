@@ -123,6 +123,7 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 ```text
 tools/mcr/            15 módulos: o núcleo, o harness, os controles, o CLI e os gates
 tools/mcr/ui/         a UI PySide6 -- só importa `model` e `domains`, e o selftest varre
+tools/mcr/oracle/     os 3 roteiros que dirigem o editor do Obocaman no :98 (MCR-TASK-13)
 work/venv-mcr/        o venv com PySide6 6.11.2 (fora do git, 663 MB)
 work/entrada.mcr      a fixture (fora do git) -- compartilhada com o ciclo wte/
 work/mcr-entrada.mcr  a copia que o `make mcr` edita; a fixture nao se abre

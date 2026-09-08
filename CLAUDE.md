@@ -728,6 +728,29 @@ Quatro coisas que custam tempo se descobertas tarde:
 O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
 **Cartão de jogo não se versiona**, mesma regra de `roms/`.
 
+Como se roda, e o que cada comando responde:
+
+| Comando | O que faz |
+|---|---|
+| `make mcr` / `mcr-98` | abre a UI Qt sobre uma **cópia** de `$(WE2002_MCR_CARD)`; o `-98` força o Xvfb |
+| `make mcr-venv` | cria `work/venv-mcr/` e instala PySide6 — **nunca por `apt`**, ver a armadilha do Python duplo |
+| `python3 tools/mcr/cli.py info\|dump\|get\|set\|roundtrip\|negative\|check <cartão>` | o CLI do núcleo; `check` é o alvo `mcr_card` |
+| `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 12 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |
+| `python3 tools/mcr/controls.py` | planta cada controle numa cópia da árvore e exige o vermelho; a última linha diz quantos são e de que tipo |
+| `python3 tools/mcr/mcrio.py <cópia> --roundtrip` | as duas formas do round-trip, que têm de dar 0 byte |
+| `python3 tools/mcr/layout.py --check` | os 17 destinos contra `wte/re/mcr.md`, nos dois sentidos |
+| `bash wte/tools/golden_run_wte.sh tools/mcr/oracle/<roteiro>.txt work/wte-japanese-shift-jis.bin` | dirige o editor do Obocaman no `:98`; foi assim que o `0x6500` foi medido |
+
+No `ctest` são três alvos: **`mcr_selftest`**, que não precisa de nada;
+**`mcr_card`**, que precisa de `WE2002_MCR_CARD`; e **`mcr_ui`**, que precisa do
+venv e do `:98`. Os dois últimos se reportam *skipped* (77) sem o que precisam —
+numa máquina sem venv e sem fixture, `ctest -R mcr` dá **1 passed, 2 skipped**.
+
+**E o `mcr_ui` só mede a gravação com `WE2002_MCR_CARD` apontado.** Sem a
+variável ele passa com a janela sozinha e imprime `note: no WE2002_MCR_CARD, so
+the write probe did not run`. Leia a linha, não o `Passed` — é a mesma armadilha
+que a receita de PES2 registra.
+
 ## Arquitetura
 
 ### Layout do repositório (pós-Fase 5)

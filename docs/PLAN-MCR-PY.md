@@ -1,8 +1,17 @@
 # Plano — port em Python do editor de `.mcr` do WE2002, com UI Qt
 
-> **Estado:** nenhuma fase executada. Este arquivo é a **fonte de verdade** do
-> ciclo `port-mcr`; o andamento fica em
+> **Estado:** as quatro fases executadas, e a definição de pronto conferida
+> item a item na
+> [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) em 2026-09-08 —
+> os seis fecharam. Este arquivo é a **fonte de verdade** do ciclo `port-mcr`;
+> o andamento fica em
 > [/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md).
+>
+> O que a execução mudou no plano está escrito onde muda, e não aqui: o
+> `0x6500` virou o capitão (§1.8), o `io.py` virou `mcrio.py` (§3.2), o
+> `tactics.py` nunca existiu (§3.2), a forma 2 do round-trip ganhou uma
+> companheira (§5.1), os campos do codec são 29 e não 30 (§5.4), e o veredito
+> do console continua **não obtido**, com a razão medida (§5.6).
 
 ---
 
@@ -66,6 +75,14 @@ de "era"), `0xFF`.
 
 Na fixture: `d[0:2] = 4d 43` (`MC`), e a entrada 1 do diretório é
 `51 00 00 00 | 00 40 00 00 | 01 00` — estado, tamanho 16.384 e link.
+
+**A cadeia tem dois blocos, e é `python3 tools/mcr/card.py <cartão> --json` que
+diz.** A entrada em bytes crus acima não diz isso sozinha, e é o que decide
+onde cada destino cai: `"blocks": [1, 2]`, `"declared_size": 16384`,
+`"bad_checksums": []`, e **um** bloco fora da cadeia —
+`"blocks_outside_the_chain": [{"block": 3, "state": "0xa0",
+"non_zero_bytes": 41}]`. É esse bloco 3, que o diretório declara livre, que
+guarda formação, cobradores e tática (§1.2).
 
 `we-team-editor/data/dat.bin` (145.408 B) começa com `MC`: a primeira metade é
 um **cartão-molde de 131.072 B**, e é dele que sai o cartão virgem do editor do
@@ -316,7 +333,6 @@ tools/mcr/
   numbers.py      os 23 dorsais de 5 bits (0x5404)
   text.py         o nome de 10 bytes <-> str, em cp932
   formation.py    X[10], Y[10], papeis[10], cobradores, capitao, os presets
-  tactics.py      os 6 campos de tatica -- somente leitura na v1
   domains.py      cabelos, posicoes, barbas, cores, alturas, idades, corpos, chuteiras, pe
   model.py        Player / Save -- dataclasses sobre os bytes crus, sem Qt,
                   sem endereco. O conteiner `Card` mora em card.py e e classe
@@ -349,6 +365,14 @@ tipo é o que a última linha do `controls.py` imprime
 ([CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md)). O `ui_check.py`
 porque o alvo `mcr_ui` precisa de um executável que decida sozinho entre
 pular e falhar.
+
+**O `tactics.py` deste esboço nunca existiu, e não devia mesmo.** A §1.9 e a
+§5.6 decidiram tática **somente leitura na v1**, e um módulo somente-leitura de
+seis bytes que ninguém lê não tem o que fazer: os seis destinos moram em
+`layout.TACTICS`, e quem os defende é um check do `formation.py` que exige que
+gravar a formação **não** toque em nenhum deles. Confirmado na MCR-TASK-14
+contra o disco — `ls tools/mcr/*.py` traz **15** módulos, e nenhum é
+`tactics.py`.
 
 **`mcrio.py` chamava-se `io.py` até 2026-09-08**, e o nome não funciona. Todo
 módulo daqui põe `tools/mcr` na frente do `sys.path`, e `io` é módulo da
@@ -416,7 +440,6 @@ Cada módulo abre com três linhas dizendo qual célula desta tabela ele é.
 | `numbers.py` | — | `wte/re/mcr.md` | upstream | próprio (§1.5) |
 | `text.py` | — | — | medido (§1.6) | próprio — **`TextCodec` não serve** |
 | `formation.py` | — | `wte/re/mcr.md` | **upstream** (§1.7) | próprio |
-| `tactics.py` | — | `wte/re/mcr.md` | aberta — sem oráculo | — |
 | `domains.py` | — | — | upstream inteiro | — |
 
 ### 3.5 Nomenclatura e idioma do código
@@ -431,9 +454,19 @@ português. Um módulo cuja docstring cita este plano traduz a frase, não o lin
 a referência continua sendo `§1.6 do plano`.
 
 O que a regra **não** alcança: `Makefile`, `tests/CMakeLists.txt` e o que mais
-for arquivo compartilhado do repositório. Eles são portugueses inteiros desde
-antes deste ciclo, e uma ilha de inglês dentro deles custa legibilidade sem
-comprar nada. Os alvos `mcr`/`mcr-98` seguem o idioma do arquivo em que moram.
+for arquivo compartilhado do repositório. A regra que vale ali é **o idioma do
+arquivo**, e os dois não estão no mesmo saco — esta seção os juntava até
+2026-09-08. Medido: o `Makefile` é português inteiro (`sed -n '1,10p' Makefile`),
+e as 74 linhas de comentário do `tests/CMakeLists.txt` são inglesas desde antes
+deste ciclo, o bloco de PES2 incluído (`grep -nE '^\s*#' tests/CMakeLists.txt`
+— o arquivo inteiro, e não as vinte primeiras linhas). Os alvos `mcr`/`mcr-98`
+seguem o idioma do arquivo em que moram, que é o que a regra sempre quis dizer.
+
+**E tolerar os dois idiomas num arquivo custa o único critério que sobra: a
+consistência dele.** A MCR-TASK-12 reescreveu o bloco do `mcr_ui` em português
+para acrescentar uma ressalva — 6 das 74 linhas, e nenhuma varredura reclamou,
+porque a `glossary.sweep()` cobre `tools/mcr/**.py` e não alcança o CMake, por
+desenho. A [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) repôs.
 
 O fonte de origem é espanhol, então `glossary.py` carrega o mapa
 (`jugador→player`, `cancha→pitch`, `formacion→formation`, `grabar→write`,
@@ -511,6 +544,13 @@ Duas formas, e a segunda é a que vale:
 `cmp` = **0 bytes** nas duas. Precedente: `golden-13-roundtrip` do ciclo `wte/`
 e o `iso.py roundtrip` dos 244 arquivos.
 
+**E a forma 2 precisa de uma companheira que prove que o escritor rodou.**
+Medido na MCR-TASK-09: um `Save.write()` cujo laço fosse `range(0)` deixa toda
+checagem de "não mudou byte" **verde**, porque escrever ninguém não muda byte
+nenhum — e "não mudou byte" é exatamente o que o round-trip pergunta. O par é
+round-trip idêntico **mais** uma edição que tem de reaparecer na releitura; o
+`model.py` tem esse check, e o controle `model-write-nobody` o mantém honesto.
+
 ### 5.2 Controle negativo
 
 "Um guard que nunca ficou vermelho é decoração" — a lição das
@@ -547,8 +587,13 @@ Mais a tripwire da §1.5: `1 + ((raw[3]>>2)&0x1f) == numbers[j]` para os 23
 slots. **23/23 na fixture.**
 
 Nível acima, se a transcrição de `Player.cpp` ficar em dúvida: `tests/golden_tool.cpp`
-já linka o `we2002_core`, e um subcomando que imprime os 30 campos de um blob
-dá o diff C++ × Python sem transcrição no meio.
+já linka o `we2002_core`, e um subcomando que imprime os **29** campos de um
+blob dá o diff C++ × Python sem transcrição no meio. (São 29, e não 30 como
+esta seção dizia até 2026-09-08: quem define o conjunto é o próprio
+`Player::Decode`, e
+`awk '/^void Player::Decode/,/^}/' src/core/Player.cpp | grep -oE '^\t[a-z_]+ =' | sed 's/[ \t=]//g' | sort -u | wc -l`
+devolve 29 — o mesmo que o primeiro check do `attributes.py --self-check`
+afirma.)
 
 ### 5.5 O oráculo do Obocaman
 
@@ -666,8 +711,12 @@ O quadro com as 14 tasks, dependências e datas está em
 
 ## 9. Entregáveis
 
-- `tools/mcr/` — o núcleo (12 módulos), o CLI e o `selftest`;
-- `tools/mcr/ui/` — a UI PySide6;
+- `tools/mcr/` — **15 módulos**, medidos com `ls tools/mcr/*.py`: os 12 que o
+  `selftest` roda, mais o `cli.py`, o próprio `selftest.py` e o `ui_check.py`;
+- `tools/mcr/ui/` — a UI PySide6, **5 módulos**;
+- `tools/mcr/oracle/` — os três roteiros da MCR-TASK-13, que dirigem o editor
+  do Obocaman no `:98`: o controle, o experimento do `0x6500` e o nome de
+  dez bytes;
 - três alvos em `tests/CMakeLists.txt` e dois no `Makefile` (`mcr`, `mcr-98`);
 - este plano atualizado com o que a execução medir, e
   [/docs/prompts/perfil-mcr.md](/docs/prompts/perfil-mcr.md) com o que for do
