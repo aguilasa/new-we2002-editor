@@ -69,17 +69,25 @@ def _rules(c) -> None:
     if not os.path.isdir(UI_DIR):
         c.skip("Rule 3: the UI does not exist yet (MCR-TASK-11)")
     else:
+        # The walk descends for the same reason the other two do
+        # (CORR-MCR-014): a `ui/widgets/` would be invisible to os.listdir,
+        # and this half of Rule 3 is the one the CORR's own table credited
+        # with reaching the UI.
         offenders = []
-        for name in sorted(os.listdir(UI_DIR)):
-            if not name.endswith(".py"):
-                continue
-            with open(os.path.join(UI_DIR, name), encoding="utf-8") as fh:
-                for lineno, line in enumerate(fh, 1):
-                    text = line.split("#")[0]
-                    for banned in FORBIDDEN_IN_UI:
-                        if (f"import {banned}" in text
-                                or f"from {banned} import" in text):
-                            offenders.append(f"ui/{name}:{lineno}: {banned}")
+        for root, dirs, names in os.walk(UI_DIR):
+            dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+            for name in sorted(names):
+                if not name.endswith(".py"):
+                    continue
+                path = os.path.join(root, name)
+                rel = os.path.relpath(path, UI_DIR)
+                with open(path, encoding="utf-8") as fh:
+                    for lineno, line in enumerate(fh, 1):
+                        text = line.split("#")[0]
+                        for banned in FORBIDDEN_IN_UI:
+                            if (f"import {banned}" in text
+                                    or f"from {banned} import" in text):
+                                offenders.append(f"ui/{rel}:{lineno}: {banned}")
         ok("Rule 3: the UI imports no core module that knows an address",
            offenders == [], f"{offenders}")
 

@@ -47,12 +47,13 @@ utilizável, e três alvos de `ctest` com faixas de custo distintas.
       `layout`, `attributes`, `numbers`, `text`, `domains`, `formation`,
       `model`, `mcrio`) mais os três que esta task criou — `harness`,
       `glossary` e `controls`. O `mcrio` é o único que roda o controle negativo
-      da §5.2 inteiro (`--negative`, 5/5); o `controls` roda as catorze
+      da §5.2 inteiro (`--negative`, 5/5); o `controls` roda as quinze
       substituições literais.
 - [x] **A guarda da Regra 1 já existe e precisa ser agregada aqui**: a
       MCR-TASK-05 a escreveu como `layout.address_monopoly()`, com CLI
-      `python3 tools/mcr/layout.py --rule1`. Ela varre `tools/mcr/*.py` (menos
-      o próprio `layout.py`) atrás de literal hexadecimal dentro de
+      `python3 tools/mcr/layout.py --rule1`. Ela varre `tools/mcr/**.py` (menos
+      o próprio `layout.py`; recursiva desde a
+      [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md)) atrás de literal hexadecimal dentro de
       `0x4000..0x8000` **e** dos mesmos endereços em decimal — o upstream
       escreve `22788` e `21508`, que passariam batido por varredura só de hex.
       Hoje devolve **0**; o `selftest` tem de chamá-la, não reimplementá-la.
@@ -140,8 +141,10 @@ sem cartão e sem UI, `ctest -R mcr` dá **1 passed, 2 skipped**; `make test` d�
 **10 de 10**.
 
 A decisão que a task pedia foi tomada: **o `negative` planta os controles**.
-As catorze substituições literais moram em `controls.py` e o `mcr_selftest` as
-roda a cada corrida — **14/14 vermelhas**, com e sem fixture.
+As quinze substituições literais moram em `controls.py` e o `mcr_selftest` as
+roda a cada corrida — **15/15 vermelhas**, com e sem fixture. Eram catorze até
+a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md), que acrescentou a
+décima quinta.
 
 E o que a execução ensinou: **um harness não se confere com ele mesmo.**
 
@@ -163,7 +166,9 @@ corpo roda dentro de um `try`, o que escapar vira **uma falha nomeada** com o
 Migração conferida por contagem: os nove módulos têm **exatamente** os mesmos
 checks de antes — card 27, layout 29, attributes 22, numbers 17, text 23,
 domains 15, formation 25, model 19, mcrio 17 —, e os três novos somam 13, 10 e
-5.
+**6** (era 5 até a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md), que
+acrescentou ao `controls` a asserção de que o caminho de um controle criador
+está livre).
 
 ### Um harness não se confere com ele mesmo
 
@@ -180,7 +185,7 @@ caminho que o `ok` não percorre. Depois disso o controle fica vermelho.
 Vale para quem escrever o próximo agregador: **toda ferramenta de medição
 precisa de um caminho de detecção que não passe por ela mesma.**
 
-### Os catorze controles, agora por comando
+### Os quinze controles, agora por comando
 
 ```
 $ python3 tools/mcr/controls.py
@@ -198,7 +203,8 @@ $ python3 tools/mcr/controls.py
   RED    mcrio-directory-guard      mcrio.py :: check_card
   RED    mcrio-readonly-guard       mcrio.py :: check_destination
   RED    harness-counts-nothing     harness.py :: Checker.ok
-controls: 14 of 14 red
+  RED    ui-below-the-sweep         ui/_probe.py :: a new file, one directory down
+controls: 15 of 15 red
 ```
 
 Cada um é **arquivo, função, linha exata e o que ela vira** — a forma que a
@@ -210,8 +216,20 @@ errado.
 
 O sandbox leva `wte/re/mcr.md` e um symlink para `work/easy-mcr`, e o relatório
 **conta os `skip`** de cada corrida — as duas metades da lição da MCR-TASK-08.
-Sem fixture os catorze continuam vermelhos, e é por isso que o `mcr_selftest`
+Sem fixture os quinze continuam vermelhos, e é por isso que o `mcr_selftest`
 pode rodá-los sendo o alvo obrigatório.
+
+**O décimo quinto não é uma substituição, e é o único assim.** Ele **cria** um
+arquivo — `ui/_probe.py`, uma pasta abaixo —, porque o defeito que ele mede é
+uma pasta que a varredura não desce, e nenhuma troca de linha num módulo
+existente exprime isso. "Casou uma vez" ali quer dizer que o caminho estava
+livre e foi escrito; caminho ocupado é **controle quebrado**, do mesmo jeito
+que um literal que casa duas vezes. E o espanhol que ele planta sai do
+dicionário do `glossary.py` em tempo de execução, não de literal no
+`controls.py` — escrito por extenso, ele faria o próprio catálogo tropeçar na
+varredura que o controle existe para exercitar (medido: duas queixas sobre o
+`controls.py`), e a saída fácil — pular o `controls.py` como o `glossary.py`
+pula a si mesmo — deixaria um vazamento de verdade sem vigilância.
 
 ### Os três alvos, medidos
 
@@ -286,8 +304,8 @@ que nada tenha mudado.
 | `ctest -R mcr` com cartão | 2 passed, 1 skipped (`mcr_ui`) |
 | `make test` | **10 de 10**, 0 falhas |
 | `selftest.py` | 0 falhas em 12 módulos + regras de desenho + controles |
-| `controls.py` | **14/14 vermelhos**, com e sem fixture |
-| `glossary.py` | 0 queixas em `tools/mcr/*.py` |
+| `controls.py` | **15/15 vermelhos**, com e sem fixture |
+| `glossary.py` | 0 queixas em `tools/mcr/**.py` |
 | `layout.py --rule1` | 0 endereços fora de `layout.py` |
 | Regra 3 | `PySide6` ausente; a metade da UI **pula dizendo** que a pasta não existe |
 | `check_tasks.py` | 100 task(s), ok |
@@ -297,7 +315,7 @@ que nada tenha mudado.
 
 - `tools/mcr/harness.py` — **novo**, os helpers e o guard externo
 - `tools/mcr/glossary.py` — **novo**, o mapa es→en e a varredura de idioma
-- `tools/mcr/controls.py` — **novo**, as 14 substituições literais e o motor
+- `tools/mcr/controls.py` — **novo**, as 15 substituições literais e o motor
 - `tools/mcr/selftest.py` — **novo**, o agregador (alvo `mcr_selftest`)
 - `tools/mcr/cli.py` — **novo**, os sete subcomandos (alvo `mcr_card`)
 - `tools/mcr/ui_check.py` — **novo**, o alvo `mcr_ui`

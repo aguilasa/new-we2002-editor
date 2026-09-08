@@ -47,6 +47,13 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
   `PYTHONPATH=tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir, e
   **confira que a substituição casou**: literal que não bate deixa a cópia
   intacta e a corrida sai verde.
+  **E há um controle que não é substituição: ele cria um arquivo.** O defeito
+  que a [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) mediu é uma pasta
+  que a varredura não desce — as duas varreduras de desenho enumeravam com
+  `os.listdir` —, e nenhuma troca de linha exprime isso. Ali "casou uma vez"
+  quer dizer caminho livre e escrito. E o espanhol que ele planta sai do
+  dicionário em tempo de execução: escrito por extenso no catálogo, ele faz o
+  próprio `controls.py` tropeçar na varredura que o controle exercita.
   **E casar não basta — o check que o defeito deveria acender tem de ter
   rodado.** Na MCR-TASK-08 um rótulo inventado passou verde com a substituição
   confirmada: a cópia em `/tmp` não enxergava `work/easy-mcr`, o check contra o
@@ -131,7 +138,7 @@ docs/tasks/port-mcr/  este ciclo
 | gate | a partir de | o que julga |
 |---|---|---|
 | `ctest -R tasks` | já existe | as convenções de task, inclusive nesta subpasta |
-| `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e as 14 substituições literais, exigidas vermelhas** — sem fixture e sem Qt, ~13 s. **Obrigatório** |
+| `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e as 15 substituições literais, exigidas vermelhas** — sem fixture e sem Qt, ~13 s. **Obrigatório** |
 | `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
 | `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. Registrado já; pula com 77 até a MCR-TASK-11 criar o `app.py` |
 
@@ -139,7 +146,7 @@ Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
 mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde
 2026-09-08 há**, e o `mcr_selftest` é o obrigatório.
 
-**Controle negativo se roda, não se descreve.** As catorze substituições moram
+**Controle negativo se roda, não se descreve.** As quinze substituições moram
 em `tools/mcr/controls.py` — arquivo, função, linha exata, e o que ela vira —,
 e `python3 tools/mcr/controls.py` planta cada uma numa cópia da árvore e exige
 o vermelho. Substituição que casa zero ou duas vezes é reportada como

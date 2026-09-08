@@ -103,7 +103,7 @@ e não aritmética), e os deslocamentos são `(0,5,2,7,4,1) = (5·(j mod 6)) mod
 ### A guarda da Regra 1, que é o que faz a regra existir
 
 "Só `layout.py` tem endereço" não vale nada como prosa. `address_monopoly()`
-varre `tools/mcr/*.py` — menos o próprio `layout.py` — atrás de literal
+varre `tools/mcr/**.py` — menos o próprio `layout.py` — atrás de literal
 hexadecimal dentro de `0x4000..0x8000` **e dos mesmos endereços em decimal**. O
 decimal não é zelo: o upstream escreve `22788` e `21508`, que passariam batido
 por varredura só de hex.

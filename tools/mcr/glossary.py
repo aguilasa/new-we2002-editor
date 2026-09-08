@@ -89,29 +89,40 @@ def sweep(directory: str = MCR_DIR) -> list[str]:
     This file is skipped: it CARRIES the words, and a sweep that flags its own
     dictionary is a sweep somebody switches off within a week -- the same
     reason `layout.address_monopoly()` skips `layout.py`.
+
+    The walk is recursive for the reason CORR-MCR-014 measured on the Rule 1
+    sweep: `os.listdir` stops at the top, and `tools/mcr/ui/` is exactly where
+    a transcription of the upstream WinForms carries raw Spanish. Complaints
+    name the path relative to `directory`, so `ui/app.py` is identified and
+    not just `app.py`.
     """
     complaints = []
-    for name in sorted(os.listdir(directory)):
-        if not name.endswith(".py") or name == SELF:
-            continue
-        with open(os.path.join(directory, name), encoding="utf-8") as fh:
-            for lineno, line in enumerate(fh, 1):
-                low = line.lower()
-                for word, english in SPANISH.items():
-                    if re.search(rf"\b{word}\b", low):
+    for root, dirs, names in os.walk(directory):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(names):
+            if not name.endswith(".py") or name == SELF:
+                continue
+            path = os.path.join(root, name)
+            rel = os.path.relpath(path, directory)
+            with open(path, encoding="utf-8") as fh:
+                for lineno, line in enumerate(fh, 1):
+                    low = line.lower()
+                    for word, english in SPANISH.items():
+                        if re.search(rf"\b{word}\b", low):
+                            complaints.append(
+                                f"{rel}:{lineno}: Spanish {word!r} -- the port "
+                                f"calls it {english!r}")
+                    for word in PORTUGUESE:
+                        if re.search(rf"\b{word}\b", low):
+                            complaints.append(
+                                f"{rel}:{lineno}: Portuguese {word!r} -- the "
+                                f"code of this port is en-US (section 3.5)")
+                    m = ACCENTED.search(line)
+                    if m:
                         complaints.append(
-                            f"{name}:{lineno}: Spanish {word!r} -- the port "
-                            f"calls it {english!r}")
-                for word in PORTUGUESE:
-                    if re.search(rf"\b{word}\b", low):
-                        complaints.append(
-                            f"{name}:{lineno}: Portuguese {word!r} -- the "
-                            f"code of this port is en-US (section 3.5)")
-                m = ACCENTED.search(line)
-                if m:
-                    complaints.append(
-                        f"{name}:{lineno}: {m.group()!r} is a Latin accented "
-                        f"letter; the code of this port is en-US (section 3.5)")
+                            f"{rel}:{lineno}: {m.group()!r} is a Latin "
+                            f"accented letter; the code of this port is en-US "
+                            f"(section 3.5)")
     return complaints
 
 

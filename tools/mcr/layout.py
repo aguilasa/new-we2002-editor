@@ -372,27 +372,40 @@ def address_monopoly(directory: str = MCR_DIR) -> list[str]:
     Both notations are swept, because the upstream writes them in decimal --
     22788 and 21508 read as ordinary numbers and would walk straight past a
     hex-only sweep.
+
+    THE WALK IS THE POINT, and CORR-MCR-014 is why: this enumerated with
+    `os.listdir`, which stops at the top, and `tools/mcr/ui/` -- the one place
+    where a literal transcription of the upstream WinForms is most likely to
+    carry a raw address -- was invisible to it. No skip, no change of count,
+    three green gates. The criterion says `tools/mcr/**.py`, and `**` is
+    recursive. Complaints name `rel`, not `name`: with the descent, `app.py`
+    alone no longer identifies a file and `ui/app.py` does.
     """
     known = {d.address for d in DESTINATIONS} | set(KICKER_ADDRESSES) \
         | {FORMATION_Y_ADDRESS}
     complaints = []
-    here = os.path.basename(__file__)
-    for name in sorted(os.listdir(directory)):
-        if not name.endswith(".py") or name == here:
-            continue
-        path = os.path.join(directory, name)
-        for lineno, text in _code_lines(path):
-            for m in _HEX.finditer(text):
-                v = int(m.group(), 16)
-                if SAVE_SPACE[0] <= v < SAVE_SPACE[1]:
-                    complaints.append(
-                        f"{name}:{lineno}: {m.group()} is in the save address "
-                        f"space; addresses belong in layout.py")
-            for m in _DEC.finditer(text):
-                if int(m.group()) in known:
-                    complaints.append(
-                        f"{name}:{lineno}: {m.group()} is a save address in "
-                        f"decimal; addresses belong in layout.py")
+    here = os.path.abspath(__file__)
+    for root, dirs, names in os.walk(directory):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__")
+        for name in sorted(names):
+            if not name.endswith(".py"):
+                continue
+            path = os.path.join(root, name)
+            if os.path.abspath(path) == here:
+                continue
+            rel = os.path.relpath(path, directory)
+            for lineno, text in _code_lines(path):
+                for m in _HEX.finditer(text):
+                    v = int(m.group(), 16)
+                    if SAVE_SPACE[0] <= v < SAVE_SPACE[1]:
+                        complaints.append(
+                            f"{rel}:{lineno}: {m.group()} is in the save "
+                            f"address space; addresses belong in layout.py")
+                for m in _DEC.finditer(text):
+                    if int(m.group()) in known:
+                        complaints.append(
+                            f"{rel}:{lineno}: {m.group()} is a save address in "
+                            f"decimal; addresses belong in layout.py")
     return complaints
 
 

@@ -58,6 +58,35 @@ class Control:
     new: str
     expect_red: tuple[str, ...]
     why: str
+    creates: bool = False
+    """`module` is a file that does NOT exist, and `new` is its whole content.
+
+    One control needs this: the defect is a file appearing in a directory the
+    sweep does not descend into, and no substitution in an existing module can
+    express that. `old` stays empty, and "matched once" means the path was free
+    and got written -- a path that already exists is a BROKEN control, exactly
+    as a literal matching twice is.
+    """
+
+
+def _ui_probe() -> str:
+    """The content of the file the descent control plants.
+
+    THE WORDS COME FROM THE DICTIONARY, not from literals here. Written out,
+    the two Spanish nouns would make THIS file trip the very sweep the control
+    exists to exercise -- measured, two complaints on `controls.py` itself. The
+    alternative, skipping `controls.py` the way `glossary.py` skips itself,
+    would leave a real leak in the catalogue unwatched. Reading the live
+    dictionary also keeps the control planting something the sweep must catch
+    if the dictionary is ever rewritten. The accented vowel is an escape for
+    the same reason: an escape in the source, the letter in the file written.
+    """
+    import glossary
+    player = next(k for k, v in glossary.SPANISH.items() if v == "player")
+    pitch = next(k for k, v in glossary.SPANISH.items() if v == "pitch")
+    return (f"# el {player} y su posici\u00f3n en la {pitch}\n"
+            f"{player.upper()}_X = 0x62A8\n"
+            f"{pitch.upper()}_Y = 25266\n")
 
 
 CONTROLS = (
@@ -123,6 +152,13 @@ CONTROLS = (
             "            self.fail(name, detail)", "            pass",
             ("harness",),
             "if a false check counts as a pass, EVERY module reports zero"),
+    Control("ui-below-the-sweep", os.path.join("ui", "_probe.py"),
+            "a new file, one directory down", "",
+            _ui_probe(),
+            ("layout", "glossary"),
+            "both sweeps have to DESCEND: ui/ is where the upstream's WinForms "
+            "is transcribed, and it is a directory",
+            creates=True),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}
@@ -168,12 +204,19 @@ def plant(control: Control, card_path: str | None = None) -> Result:
     with tempfile.TemporaryDirectory() as tmp:
         sandbox = _sandbox(root, tmp)
         path = os.path.join(sandbox, control.module)
-        with open(path) as fh:
-            text = fh.read()
-        matched = text.count(control.old)
-        if matched == 1:
-            with open(path, "w") as fh:
-                fh.write(text.replace(control.old, control.new))
+        if control.creates:
+            matched = 0 if os.path.exists(path) else 1
+            if matched == 1:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w", encoding="utf-8") as fh:
+                    fh.write(control.new)
+        else:
+            with open(path) as fh:
+                text = fh.read()
+            matched = text.count(control.old)
+            if matched == 1:
+                with open(path, "w") as fh:
+                    fh.write(text.replace(control.old, control.new))
         env = dict(os.environ, PYTHONPATH=sandbox)
         if card_path:
             env["WE2002_MCR_CARD"] = card_path
@@ -221,14 +264,23 @@ def _checks(c) -> None:
     ok = c.ok
 
     ok("every control has a unique id", len(BY_ID) == len(CONTROLS))
+    subs = [k for k in CONTROLS if not k.creates]
     ok("every control names a module that exists",
-       all(os.path.isfile(os.path.join(MCR_DIR, k.module)) for k in CONTROLS))
+       all(os.path.isfile(os.path.join(MCR_DIR, k.module)) for k in subs))
     ok("every substitution matches exactly once in the real tree",
        all(open(os.path.join(MCR_DIR, k.module)).read().count(k.old) == 1
-           for k in CONTROLS),
-       str([k.id for k in CONTROLS
+           for k in subs),
+       str([k.id for k in subs
             if open(os.path.join(MCR_DIR, k.module)).read().count(k.old) != 1]))
-    ok("no substitution is a no-op", all(k.old != k.new for k in CONTROLS))
+    ok("no substitution is a no-op", all(k.old != k.new for k in subs))
+    # The creating control is the mirror image: its path must be FREE, or the
+    # plant would overwrite somebody's file and the run would measure that.
+    ok("every creating control names a path that is free",
+       all(not os.path.exists(os.path.join(MCR_DIR, k.module))
+           and k.new and not k.old
+           for k in CONTROLS if k.creates),
+       str([k.id for k in CONTROLS if k.creates
+            and os.path.exists(os.path.join(MCR_DIR, k.module))]))
     ok("the repository is found from wherever this runs",
        _repo_root() is not None)
 
@@ -253,7 +305,7 @@ def main(argv=None) -> int:
     if a.list:
         for k in CONTROLS:
             print(f"{k.id:<26} {k.module} :: {k.function}")
-            print(f"    - {k.old.strip()}")
+            print(f"    - {k.old.strip() or '(the file does not exist)'}")
             print(f"    + {k.new.strip()}")
             print(f"    guards: {k.why}")
         return 0

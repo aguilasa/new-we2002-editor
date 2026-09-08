@@ -156,7 +156,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Tática | `0x64E2 = 1`, `0x6102 = 51`, nibbles `0/14` e `4/9` — escrita e nunca lida pelo original |
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
 | Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |
-| Controles negativos | **14/14 vermelhos**, com e sem fixture, plantados por substituição literal. `python3 tools/mcr/controls.py` |
+| Controles negativos | **15/15 vermelhos**, com e sem fixture, catorze por substituição literal e um que cria um arquivo uma pasta abaixo. `python3 tools/mcr/controls.py` |
 | Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |
 

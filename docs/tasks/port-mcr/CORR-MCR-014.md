@@ -3,7 +3,7 @@ id: CORR-MCR-014
 title: "Correção: as duas varreduras de desenho param no topo, e a `tools/mcr/ui/` que a MCR-TASK-11 vai criar fica invisível para as duas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -142,24 +142,95 @@ verdade e o plantio à mão deixar de ser possível sem sujar a árvore.
 
 ## Verificação
 
-- [ ] com o `_probe.py` da Evidência em `tools/mcr/ui/`: `layout.py --rule1`
+- [x] com o `_probe.py` da Evidência em `tools/mcr/ui/`: `layout.py --rule1`
       acusa **dois** endereços, `glossary.py` acusa o espanhol, e
       `selftest.py` sai `rc=1`
-- [ ] sem ele: os três verdes, e as contagens de check dos doze módulos
+- [x] sem ele: os três verdes, e as contagens de check dos doze módulos
       inalteradas (27, 29, 22, 17, 23, 15, 25, 19, 17, 13, 10, 5)
-- [ ] `python3 tools/mcr/controls.py` continua **todos vermelhos**, com o
+- [x] `python3 tools/mcr/controls.py` continua **todos vermelhos**, com o
       número novo declarado no Log da task
-- [ ] `ctest -R mcr` sem cartão = **1 passed, 2 skipped**; com cartão =
+- [x] `ctest -R mcr` sem cartão = **1 passed, 2 skipped**; com cartão =
       2 passed, 1 skipped
-- [ ] `make test` verde
-- [ ] `roms/` intocada; a fixture com o mesmo `sha256sum`
+- [x] `make test` verde
+- [x] `roms/` intocada; a fixture com o mesmo `sha256sum`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+O sintoma reproduziu. Com o `_probe.py` da Evidência em `tools/mcr/ui/`,
+`layout.py --rule1` deu `0 address(es)`, `glossary.py` deu `0 complaint(s)`, e
+o `selftest.py` saiu `rc=0` — as três guardas verdes sobre uma árvore com dois
+endereços de save e espanhol dentro.
+
+As duas varreduras descem com `os.walk`, pulando `__pycache__` e o próprio
+arquivo, e as queixas passaram a nomear o caminho **relativo** — `ui/_probe.py`
+identifica, `_probe.py` não. As duas docstrings dizem por que a descida existe.
+
+**A varredura de discrepância puxou uma terceira, que a CORR dava como boa.** A
+tabela do "Problema identificado" credita a Regra 3 do `selftest.py` com
+alcançar a `ui/` — e alcança, mas com o mesmo `os.listdir`: um `ui/widgets/`
+seria invisível também. É o mesmo defeito, no arquivo que a CORR não listou.
+Desceu junto, e nenhum `os.listdir` sobrou nas três.
+
 **Problemas encontrados:**
 
+**1. A Evidência da CORR conta quatro queixas do `glossary.py`, e o arquivo que
+ela mostra produz uma.** As duas palavras aparecem lá só como `JUGADOR_X` e
+`CANCHA_Y`, e o casamento é `\bjugador\b` — o `_` é caractere de palavra, então
+não há fronteira e nenhuma das duas dispara; o que sobra é o acento de
+`notação`. A transcrição também põe o acento na linha 1 e as palavras nas 2 e
+3, quando o acento está na última. **O sintoma central não depende disso** — as
+duas varreduras param no topo, medido —, e a Evidência do revisor fica como
+está. O que mudou foi o plantio: o controle usa um comentário onde as palavras
+têm fronteira, e aí as três guardas acendem de verdade.
+
+**2. O controle 15 não é substituição, e o motor não sabia criar arquivo.** O
+defeito é uma pasta que a varredura não desce; nenhuma troca de linha num
+módulo existente exprime isso. O `Control` ganhou `creates`, e ali "casou uma
+vez" quer dizer **caminho livre e escrito** — caminho ocupado é controle
+quebrado, do mesmo jeito que um literal que casa duas vezes. O `_checks` do
+`controls.py` ganhou a asserção espelhada (o caminho de um controle criador tem
+de estar livre), e por isso ele passou de 5 para **6** checks: é a única
+contagem de módulo que mudou, e mudou de propósito.
+
+**3. O payload literal fez o próprio catálogo tropeçar na varredura que ele
+exercita.** Escritas por extenso no `controls.py`, as duas palavras espanholas
+davam **2 queixas sobre o `controls.py`**, com o `selftest` vermelho sem nada
+plantado. A saída fácil — pular o `controls.py` como o `glossary.py` pula a si
+mesmo — deixaria um vazamento de verdade sem vigilância no arquivo mais
+propenso a carregá-lo. As palavras passaram a sair do **dicionário do
+`glossary.py` em tempo de execução**, o que ainda torna o controle mais forte:
+se o dicionário for reescrito, ele continua plantando algo que a varredura tem
+de pegar. O acento vai como escape no fonte e sai como letra no arquivo escrito.
+Uma segunda passada foi precisa: a docstring que eu escrevera para explicar
+isso citava as palavras e o acento por extenso, e tropeçava igual.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| o caso vermelho, `_probe.py` em `ui/` | `--rule1` **2 endereços**, `glossary.py` **3 queixas**, `selftest.py` `rc=1` com **7** falhas |
+| sem ele | `--rule1` **0**, `glossary.py` **0**, `selftest.py` `rc=0`, `0 failure(s)` sobre 12 módulos |
+| `controls.py` | **15 de 15 vermelhos**; o novo, sozinho, 1 de 1 |
+| contagens dos 12 módulos | 27, 29, 22, 17, 23, 15, 25, 19, 17, 13, **6**, 10 — só o `controls` mudou (5 → 6), pela asserção nova |
+| `ctest -R mcr` sem cartão | **1 passed, 2 skipped** |
+| `ctest -R mcr` com cartão (caminho absoluto) | **2 passed, 1 skipped** |
+| `make test` | **10/10**, `100% tests passed` |
+| fixture | `sha256 e53f4895…c47546`, intocada; `roms/` sem alteração |
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/layout.py` — `address_monopoly()` desce, e nomeia o caminho relativo
+- `tools/mcr/glossary.py` — `sweep()` idem
+- `tools/mcr/selftest.py` — a Regra 3 desce também (varredura de discrepância)
+- `tools/mcr/controls.py` — o campo `creates`, o décimo quinto controle, o
+  payload vindo do dicionário, e a asserção espelhada
+- `docs/tasks/port-mcr/10-selftest-cli-e-gate.md` — quinze controles, o escopo
+  recursivo das duas varreduras, e o `controls` em 6 checks
+- `docs/tasks/port-mcr/05-layout-e-cross-check.md` — o escopo da Regra 1
+- `docs/prompts/perfil-mcr.md` — 15 substituições, e a armadilha do controle
+  que cria arquivo
+- `docs/tasks/port-mcr/progresso.md` — a linha dos controles negativos
