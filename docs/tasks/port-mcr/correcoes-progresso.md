@@ -33,6 +33,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, e a frase só descreve um dos dois tipos | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
+| [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -60,6 +61,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-017 — pôr 16 e os dois tipos no perfil, e fazer o `controls.py` imprimir o resumo
 - [x] CORR-MCR-018 — o gate escolhe o destino do arraste em unidades de cartão, a tela só executa, e os dois casos vermelhos são plantados a cada corrida
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
+- [ ] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
 
 ---
 
@@ -392,3 +394,26 @@ ciclo arquivado, o dele em
 - **Fix:** repor o bloco em inglês **preservando a ressalva do
   `WE2002_MCR_CARD`**, e reancorar o item da MCR-TASK-14 num comando que
   alcance o arquivo inteiro.
+
+### CORR-MCR-020
+
+- **Arquivo com problema:** `tools/mcr/ui/formation_view.py`, linhas 283 e 291
+- **Sintoma:** os cinco cobradores e o capitão ganharam `setRange(0,
+  STARTERS - 1)` — o `0..10` medido na `malla2`. A divisão está certa (o núcleo
+  valida byte e preserva), mas um cartão com `CAPTAIN=15` ou `kicker0=19`
+  aparece na tela como **10**, sem rótulo, sem tooltip e sem cor. É o único
+  lugar do port que normaliza calado: o `domains.label()` devolve `"?"`, as
+  duas cópias do dorsal em desacordo são reportadas e não reconciliadas, e o
+  `formation.write` recusa papel fora da faixa nomeando o byte. O domínio, ao
+  contrário dos rótulos, vem da **grade do editor de terceiro** e não do
+  formato — o experimento desta task produziu `0..5` e nada mediu o teto.
+- **Como foi detectado:** cópia da fixture com `CAPTAIN=15` e `kicker0=19`
+  aberta na janela no `:98`, na revisão da MCR-TASK-13. O modelo mantém
+  `captain=15 kickers=[19, 7, 8, 7, 7]`, as caixas mostram `10` e `10`, e o
+  `Save` devolve o arquivo `cmp`-idêntico — o dado está seguro e a tela mente
+  sobre ele. Mexer na seta de qualquer das seis caixas dispara
+  `valueChanged` a partir do 10 recortado.
+- **Fix:** alargar para `0..0xFF` e **marcar** o que sai de `0..10`, ou manter
+  a faixa e mostrar o número real num rótulo dizendo por quê; acrescentar à
+  legenda que o `0..10` vem da `malla2` e não do formato; e registrar o caso
+  vermelho, que só aparece com um cartão que ninguém tem à mão.
