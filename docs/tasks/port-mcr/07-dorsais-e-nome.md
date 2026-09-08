@@ -140,18 +140,27 @@ CD, que é mesmo par de `0x82`.
 
 ### Os controles negativos
 
-Seis defeitos plantados numa cópia em `/tmp`:
+Seis defeitos plantados numa cópia do módulo (o do repositório não foi
+tocado). **Cada linha diz a substituição literal e a função onde ela mora** —
+convenção do perfil, e a terceira linha é justamente por que ela existe:
 
-| módulo | defeito plantado | resultado |
+| módulo | substituição plantada | resultado |
 |---|---|---|
-| `numbers` | tirar o `−1` da gravação | 🔴 7 falhas |
-| `numbers` | usar `[0,5,2,7,4,1]` como offset do grupo | 🔴 7 falhas |
-| `numbers` | montar a tabela do zero em vez de RMW | 🔴 2 falhas (bits sobrando, slot 24) |
-| `text` | tratar o nome como ASCII | 🔴 16 falhas |
-| `text` | parar no primeiro NUL | 🔴 1 falha |
-| `text` | truncar em vez de recusar | 🔴 2 falhas |
+| `numbers` | `stored = number - STORED_BIAS` → `stored = number` | 🔴 7 falhas |
+| `numbers` | `return group, WIDTH * within` → `return group, (0, 5, 2, 7, 4, 1)[within]`, no `_group_and_offset` | 🔴 7 falhas |
+| `numbers` | `raw = int.from_bytes(table, "little")` → `raw = 0`, **na `encode_table`** — a mesma linha existe na `decode_table`, e plantar lá dá **6** falhas, não 2 | 🔴 2 falhas (bits sobrando, slot 24) |
+| `text` | `ENCODING = "cp932"` → `ENCODING = "ascii"` | 🔴 16 falhas |
+| `text` | `raw.rstrip(bytes([PAD]))` → `raw.split(bytes([PAD]))[0]` | 🔴 1 falha |
+| `text` | `if len(raw) > NAME_BYTES:` → `if False:` | 🔴 2 falhas |
 
 **6/6 vermelhos, `rc=1` em todos.**
+
+> **Como replantar.** A cópia roda com `PYTHONPATH` apontando `tools/mcr` — os
+> dois módulos importam `layout`, e sem isso a corrida morre em
+> `ModuleNotFoundError` antes de medir. E **confira que a substituição casou**:
+> um literal que não bate deixa a cópia intacta, e a corrida sai
+> `0 failure(s)` — verde que parece resultado e é o defeito não ter sido
+> plantado.
 
 ### Arquivos criados/modificados
 

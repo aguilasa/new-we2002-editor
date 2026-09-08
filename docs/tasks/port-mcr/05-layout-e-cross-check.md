@@ -120,13 +120,13 @@ Seis defeitos plantados numa cópia do módulo (o do repositório não foi tocad
 **Onde a cópia mora decide se o resultado é legível** — ver "Como replantar",
 logo abaixo:
 
-| defeito plantado | `--check` | `--self-check` |
+| substituição plantada | `--check` | `--self-check` |
 |---|---|---|
 | apagar o destino `0x63D5` (16 em vez de 17) | 🔴 `LayoutError` nomeando `FORMATION_ROLES` e o `0x63d5` | **traceback, 0 asserções** |
 | inventar um 18º destino `0x6600`, **no fim** | 🔴 `1 problem(s)`, "is in layout.py and NOT in the measurement" | 🔴 3 falhas |
 | mover `0x5404` para `0x5405` | 🔴 `LayoutError` nomeando o destino que sumiu | **traceback, 0 asserções** |
-| tabela de cobradores em ordem crescente | verde — não é o papel dele | 🔴 1 falha, imprimindo a tabela |
-| deslocamentos `(0,1,2,3,4,5)` | verde | 🔴 1 falha, imprimindo os deslocamentos |
+| `KICKER_ADDRESSES = (0x614F, 0x6140, 0x6122, 0x6113, 0x6131)` → a mesma tupla `sorted()` | verde — não é o papel dele | 🔴 1 falha, imprimindo a tabela |
+| `SHIRT_NUMBER_BIT_SHIFTS = (0, 5, 2, 7, 4, 1)` → `(0, 1, 2, 3, 4, 5)` | verde | 🔴 1 falha, imprimindo os deslocamentos |
 | `PLAYER_STRIDE = 22` | 🔴 — | 🔴 3 falhas: passo, endereço do jogador 0/22, e o do nome |
 
 **6/6 vermelhos, `rc=1` em todos.** Mais quatro casos vermelhos que rodam

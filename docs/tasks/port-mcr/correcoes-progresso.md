@@ -24,7 +24,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | o plano diz que **um** nome enche os dez bytes e são dois: os slots 5 e 20 | Baixa | [x] concluída | 2026-09-07 |
-| [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [ ] pendente | — |
+| [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [x] concluída | 2026-09-07 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -43,7 +43,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-008 — registrar o efeito do erro de import na tabela de controles e exigir o `attempt()` em volta do import no `selftest`
 - [x] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
 - [x] CORR-MCR-010 — nomear os dois slots que enchem os dez bytes, no plano e na task
-- [ ] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
+- [x] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
 
 ---
 

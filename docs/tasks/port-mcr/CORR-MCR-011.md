@@ -3,7 +3,7 @@ id: CORR-MCR-011
 title: "Correção: a tabela de controles da MCR-TASK-07 voltou à prosa, e a linha ambígua custa duas tentativas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,12 +120,75 @@ A convenção sobe para o perfil, onde as tasks 08 a 14 a leem antes de começar
       determinísticos
 - [ ] `roms/` e `work/entrada.mcr` intocados
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-07
 
 **Resumo do que foi feito:**
 
+A tabela dos seis controles da MCR-TASK-07 passou a trazer a **substituição
+literal**, e a terceira linha nomeia a **função** — `raw = int.from_bytes(table,
+"little")` → `raw = 0` **na `encode_table`** —, dizendo ao lado que a mesma
+linha existe na `decode_table` e que plantar lá dá **6** falhas, não 2. Entrou
+também a nota "Como replantar".
+
+A convenção subiu para o `perfil-mcr.md`, entre as decisões confirmadas, onde as
+tasks 08 a 14 a leem antes de começar: controle negativo se registra pela
+substituição literal — origem, destino e a função onde ela mora.
+
+**Medições — os seis controles replantados, com `PYTHONPATH=tools/mcr`:**
+
+| substituição | falhas |
+|---|---:|
+| `stored = number - STORED_BIAS` → `stored = number` | 7 |
+| `return group, WIDTH * within` → `(0, 5, 2, 7, 4, 1)[within]` | 7 |
+| `raw = int.from_bytes(table, "little")` → `raw = 0`, na **`encode_table`** | **2** |
+| a mesma, na **`decode_table`** — a leitura errada | **6** |
+| `ENCODING = "cp932"` → `"ascii"` | 16 |
+| `raw.rstrip(bytes([PAD]))` → `raw.split(bytes([PAD]))[0]` | 1 |
+| `if len(raw) > NAME_BYTES:` → `if False:` | 2 |
+
+**6/6 vermelhos, `rc=1`**, com as contagens que o Log já trazia — 7, 7, 2, 16,
+1, 2. A ambiguidade da terceira linha confirma-se: 6 contra 2.
+
+Os demais gates:
+
+| gate | resultado |
+|---|---|
+| `numbers.py --self-check` | **17 asserções, 0 falhas**, determinístico |
+| `text.py --self-check` | **23 asserções, 0 falhas**, determinístico |
+| `numbers.py --check` / `text.py --check` | `23/23` nos dois |
+| `check_tasks.py` / `ctest -R tasks` | `100 task(s), ok` / `1/1 Passed` |
+| fixture | `e53f4895…`, inalterada |
+
 **Problemas encontrados:**
 
+**O meu próprio harness produziu o falso verde que esta CORR descreve**, e isso
+merece registro porque é a prova do ponto. Ao replantar o segundo controle, meu
+literal (`return group, within`) não casava com o fonte — a linha real é
+`return group, WIDTH * within` —, e o script deixou a cópia **intacta**: a
+corrida saiu `rc=0`, `0 falhas`. Lido depressa, parece um controle que não fica
+vermelho; é o defeito não ter sido plantado. Por isso a nota "Como replantar"
+manda **conferir que a substituição casou**, e a mesma frase foi para o perfil.
+
+**Uma discrepância que a promoção ao perfil criou.** Com a convenção valendo
+para o ciclo, duas linhas da tabela da
+[MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) deixaram de
+cumpri-la — "tabela de cobradores em ordem crescente" e "deslocamentos
+`(0,1,2,3,4,5)`" não dizem a linha. Foram para a forma literal, com as
+substituições que a [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md)
+replantou e mediu, e o cabeçalho da coluna acompanhou.
+
+A [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) **ficou como
+está, e cumpre a convenção**: as cinco linhas dela já são substituições
+literais (`if offset < HEADER_BYTES:` → `if False:` e as outras quatro); só a
+palavra do cabeçalho difere, e trocá-la mexeria numa tabela cuja nota datada
+preserva de propósito o texto de uma corrida anterior.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/07-dorsais-e-nome.md` — a tabela dos seis controles e a
+  nota "Como replantar"
+- `docs/prompts/perfil-mcr.md` — a convenção, entre as decisões confirmadas
+- `docs/tasks/port-mcr/05-layout-e-cross-check.md` — duas linhas para a forma
+  literal e o cabeçalho da coluna (discrepância criada pela promoção)

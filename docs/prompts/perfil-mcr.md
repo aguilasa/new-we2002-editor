@@ -37,6 +37,16 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
   exceção aberta**. (§3.5 do plano)
 - **Cartão de jogo não se versiona.** A fixture é `work/entrada.mcr`, apontada
   por `WE2002_MCR_CARD`. Mesma regra de `roms/`.
+- **Controle negativo se registra pela substituição literal**, nunca pela
+  descrição do efeito: a linha de origem, a de destino e a função onde ela mora.
+  Duas contagens da MCR-TASK-06 e uma da MCR-TASK-07 não reproduziram da prosa
+  ([CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md),
+  [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md)) — "trocar dois campos no
+  encoder" tem mais de uma leitura, e uma linha que aparece duas vezes no
+  arquivo precisa da função para ser identificada. A cópia plantada roda com
+  `PYTHONPATH=tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir, e
+  **confira que a substituição casou**: literal que não bate deixa a cópia
+  intacta e a corrida sai verde.
 
 ---
 
