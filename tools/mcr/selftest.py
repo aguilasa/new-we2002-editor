@@ -177,8 +177,15 @@ def main(argv=None) -> int:
                     help="only the failures and the totals")
     ap.add_argument("--fast", action="store_true",
                     help="skip the planted negative controls (about 6 s)")
+    ap.add_argument("--self-check", action="store_true",
+                    help="a plain run without planting; every module in this "
+                         "tree answers to this flag, and controls.py uses it")
     a = ap.parse_args(argv)
-    return 1 if run(verbose=not a.quiet, plant=not a.fast) else 0
+    # `--self-check` implies `--fast`, and that is not a shortcut: the controls
+    # engine runs each module with that flag, and a selftest that re-planted
+    # inside an already planted sandbox would be fifteen trees of fifteen.
+    plant = not (a.fast or a.self_check)
+    return 1 if run(verbose=not a.quiet, plant=plant) else 0
 
 
 if __name__ == "__main__":

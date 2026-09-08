@@ -152,6 +152,13 @@ CONTROLS = (
             "            self.fail(name, detail)", "            pass",
             ("harness",),
             "if a false check counts as a pass, EVERY module reports zero"),
+    Control("ui-imports-an-address", os.path.join("ui", "main_window.py"),
+            "module scope",
+            "import model                                             # noqa: E402",
+            "import model                                             # noqa: E402\n"
+            "import mcrio                                             # noqa: E402",
+            ("selftest",),
+            "Rule 3: the window may not reach a module that knows an address"),
     Control("ui-below-the-sweep", os.path.join("ui", "_probe.py"),
             "a new file, one directory down", "",
             _ui_probe(),

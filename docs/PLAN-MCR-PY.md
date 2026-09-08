@@ -352,6 +352,14 @@ guardas mecânicas no `selftest.py`: `tools/mcr/ui/*.py` não importa `layout`,
 `assert "PySide6" not in sys.modules`. Sem a segunda, o gate obrigatório passa
 a exigir Qt.
 
+**A porta da UI é o `model.load()`**, escrita na MCR-TASK-11: uma função, sem
+endereço e sem contêiner, que delega ao `mcrio` por **import adiado** — o
+`mcrio` importa o `model` no topo, então importá-lo de volta no escopo do
+módulo seria ciclo. A validação continua sendo a do `mcrio` (tamanho, magic e
+a entrada do diretório), porque escrever um segundo carregador, mais fraco,
+para a tela é exatamente como uma janela acaba lendo um cartão que o gate teria
+recusado.
+
 ### 3.4 Proveniência — quem sabe o quê
 
 Cada módulo abre com três linhas dizendo qual célula desta tabela ele é.

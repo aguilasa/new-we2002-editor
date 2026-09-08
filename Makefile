@@ -488,9 +488,9 @@ $(MCR_COPY): $(wildcard $(WE2002_MCR_CARD)) | $(WORK)
 
 mcr: $(MCR_PY) $(MCR_COPY)
 	@test -f '$(MCR_UI)' || { \
-	  echo 'ERRO: $(MCR_UI) ainda nao existe.'; \
-	  echo '      A UI e a MCR-TASK-11; o nucleo, a 04 a 10.'; \
-	  echo '      Ate la o venv ja esta pronto: make mcr-venv'; exit 1; }
+	  echo 'ERRO: $(MCR_UI) nao existe.'; \
+	  echo '      Sem a UI o nucleo continua utilizavel pela linha de'; \
+	  echo '      comando: python3 tools/mcr/cli.py dump <cartao>'; exit 1; }
 	@echo '>> $(MCR_PY) $(MCR_UI) $(MCR_COPY)   (DISPLAY=$(DISPLAY))'
 	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
 	  '$(MCR_PY)' '$(MCR_UI)' '$(MCR_COPY)' $(ARGS)

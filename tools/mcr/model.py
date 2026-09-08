@@ -163,6 +163,27 @@ class Save:
         formation_mod.write(self.card, self.formation)
 
 
+# --- the door the UI is allowed to open -------------------------------------
+
+def load(path) -> Save:
+    """Open a card and return the model. THE UI'S ONLY WAY IN.
+
+    Rule 3 forbids `tools/mcr/ui/*.py` from importing `layout`, `card` or
+    `mcrio`, and the selftest sweeps for it -- so the window needs a door that
+    is not one of those three. This is it: one function, no address, no
+    container, no path policy of its own.
+
+    The import is DEFERRED on purpose and not a style tic: `mcrio` imports this
+    module at its top, so importing it back here at module scope is a cycle.
+    Inside the function it runs after both modules exist. The validation is
+    still `mcrio`'s -- size, magic and the directory entry -- because writing a
+    second, weaker loader for the UI is exactly how a screen ends up reading a
+    card the gate would have refused.
+    """
+    import mcrio
+    return mcrio.load(path)
+
+
 # --- self-check ------------------------------------------------------------
 
 def self_check(card_path: str | None=None, verbose: bool=True) -> int:

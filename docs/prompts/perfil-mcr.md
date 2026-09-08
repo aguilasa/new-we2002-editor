@@ -122,7 +122,7 @@ raso, que é o ciclo de PES2. A regra está no "Passo 0" de cada prompt.
 
 ```text
 tools/mcr/            15 módulos: o núcleo, o harness, os controles, o CLI e os gates
-tools/mcr/ui/         a UI PySide6 -- não importa layout/card/io
+tools/mcr/ui/         a UI PySide6 -- só importa `model` e `domains`, e o selftest varre
 work/venv-mcr/        o venv com PySide6 6.11.2 (fora do git, 663 MB)
 work/entrada.mcr      a fixture (fora do git) -- compartilhada com o ciclo wte/
 work/mcr-entrada.mcr  a copia que o `make mcr` edita; a fixture nao se abre
@@ -140,7 +140,7 @@ docs/tasks/port-mcr/  este ciclo
 | `ctest -R tasks` | já existe | as convenções de task, inclusive nesta subpasta |
 | `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e as 15 substituições literais, exigidas vermelhas** — sem fixture e sem Qt, ~13 s. **Obrigatório** |
 | `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
-| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. Registrado já; pula com 77 até a MCR-TASK-11 criar o `app.py` |
+| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display |
 
 Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
 mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde
