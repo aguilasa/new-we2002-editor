@@ -187,6 +187,14 @@ CONTROLS = (
             creates=True),
 )
 
+# ONE CONTROL OF THIS CYCLE DOES NOT LIVE HERE, and saying so is the point.
+# The drag's way back from pitch pixels to the card's units -- `to_card_x` and
+# `to_card_y` of `ui/formation_view.py` -- is planted by `ui_check.py` instead
+# (its `BREAKS`), in the same literal-substitution form. The engine below runs
+# `<module>.py --self-check` under whatever interpreter started it, and the
+# module that catches that defect needs PySide6, the venv and a display; a
+# control here would plant it and measure nothing. CORR-MCR-018 is where that
+# gap was found, by planting it and watching every gate stay green.
 BY_ID = {c.id: c for c in CONTROLS}
 
 

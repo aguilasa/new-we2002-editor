@@ -22,6 +22,15 @@ because the part under test is the whole path: hit detection, the grab offset,
 and the division by the two screen factors. A probe that called the model
 directly would prove nothing about the screen.
 
+AND THE GATE NAMES THE DESTINATION, IN THE CARD'S OWN UNITS (`--drag-to X,Y`).
+The first version of this probe pushed a marker by a fixed number of pixels and
+reported where the model said it ended up -- which is the OUTPUT of the
+conversion under test, handed to a judge that compared it against itself.
+CORR-MCR-018 measured the cost: with the division removed from `to_card_x` the
+gate stayed green and printed `[48, 43]` "in the card's own units" as
+confidently as it prints the right answer. Now the screen is told where to land
+and the judge asks whether it did.
+
 THE DISPLAY IS `:98`. `:1` is the user's real session and a window there
 interrupts them; the rule is in `CLAUDE.md` and has no exception in this cycle.
 `make mcr-98` sets it, and so does `ui_check.py`.
@@ -32,7 +41,8 @@ Usage:
     work/venv-mcr/bin/python tools/mcr/ui/app.py <card.mcr>
     work/venv-mcr/bin/python tools/mcr/ui/app.py --smoke
     work/venv-mcr/bin/python tools/mcr/ui/app.py <card.mcr> --screenshot out.png
-    work/venv-mcr/bin/python tools/mcr/ui/app.py <copy.mcr> --write-probe DIR
+    work/venv-mcr/bin/python tools/mcr/ui/app.py <copy.mcr> \
+        --write-probe DIR --drag-to 14,43
 """
 
 import argparse
@@ -52,7 +62,6 @@ PROBE_SLOT = 0
 PROBE_FIELD = "technique"
 PROBE_NAME = "PROBE"
 PROBE_ROLE = 5
-PROBE_DRAG = 40          # widget pixels, towards the room the marker has
 
 
 def _settle(app: QtWidgets.QApplication, window: QtWidgets.QMainWindow,
@@ -69,10 +78,15 @@ def _other_value(field: str, current: int) -> int:
     return f.low if current != f.low else f.high
 
 
-def _drag(app, pitch, index: int, dx: float, dy: float) -> None:
-    """A real press, move and release on the pitch widget."""
+def _drag(app, pitch, index: int, target: tuple[int, int]) -> list[float]:
+    """A real press, move and release, landing marker `index` on `target`.
+
+    `target` is in the CARD's units and comes from the caller, so nothing the
+    conversion computes is used to decide where the mouse goes. Returns the
+    widget-space displacement, for the report.
+    """
     start = pitch.marker_point(index)
-    end = QtCore.QPointF(start.x() + dx, start.y() + dy)
+    end = pitch.point_for(*target)
     left = QtCore.Qt.MouseButton.LeftButton
     none = QtCore.Qt.KeyboardModifier.NoModifier
     for kind, point, button, buttons in (
@@ -85,9 +99,11 @@ def _drag(app, pitch, index: int, dx: float, dy: float) -> None:
                                   button, buttons, none)
         QtWidgets.QApplication.sendEvent(pitch, event)
         app.processEvents()
+    return [end.x() - start.x(), end.y() - start.y()]
 
 
-def write_probe(app, window, out_dir: str) -> dict:
+def write_probe(app, window, out_dir: str,
+                drag_to: tuple[int, int]) -> dict:
     """Drive the widgets, write two cards, and report what was done.
 
     Two files on purpose. The first carries ONE attribute change, so the gate
@@ -126,11 +142,14 @@ def write_probe(app, window, out_dir: str) -> dict:
 
     formation = save.formation
     before = (formation.x[0], formation.y[0])
-    room = formation_view.X_MAX / 2
-    _drag(app, window.formation.pitch, 0,
-          PROBE_DRAG if formation.x[0] < room else -PROBE_DRAG, PROBE_DRAG)
+    pixels = _drag(app, window.formation.pitch, 0, drag_to)
     report["xy_before"] = list(before)
+    report["drag_to"] = list(drag_to)
     report["xy_after"] = [formation.x[0], formation.y[0]]
+    # The stimulus, so the judge can say what the conversion should have done
+    # instead of only that it disagreed.
+    report["drag_pixels"] = pixels
+    report["scales"] = [formation_view.X_SCALE, formation_view.Y_SCALE]
 
     window.formation.roles[0].setCurrentIndex(PROBE_ROLE)
     kicker = 1 if formation.kickers[0] != 1 else 2
@@ -158,6 +177,11 @@ def main(argv=None) -> int:
     ap.add_argument("--write-probe", metavar="DIR",
                     help="edit through the widgets, write DIR/*.mcr, and "
                          "report what was done as JSON")
+    ap.add_argument("--drag-to", metavar="X,Y",
+                    help="where the drag must land, in the card's own units; "
+                         "required by --write-probe, and chosen by the gate "
+                         "so that the screen supplies neither the answer nor "
+                         "the rule")
     a = ap.parse_args(argv)
 
     app = QtWidgets.QApplication(sys.argv[:1])
@@ -180,9 +204,19 @@ def main(argv=None) -> int:
         if not opened:
             print("write-probe: give a card to open", file=sys.stderr)
             return 2
+        if not a.drag_to:
+            print("write-probe: --drag-to X,Y is required -- the destination "
+                  "is the gate's to choose", file=sys.stderr)
+            return 2
+        try:
+            x, y = (int(v) for v in a.drag_to.split(","))
+        except ValueError:
+            print(f"write-probe: --drag-to {a.drag_to!r} is not X,Y",
+                  file=sys.stderr)
+            return 2
         _settle(app, window)
         print("probe-json " + json.dumps(write_probe(app, window,
-                                                     a.write_probe)))
+                                                     a.write_probe, (x, y))))
         return 0
 
     if a.screenshot:

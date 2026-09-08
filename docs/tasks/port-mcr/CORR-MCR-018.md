@@ -3,7 +3,7 @@ id: CORR-MCR-018
 title: "Correção: quem arrasta é quem corrige a prova — a conversão de volta do arraste é julgada pela própria aritmética que ela usa"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -154,23 +154,80 @@ faz com as cinco injeções da §5.2.
 
 ## Verificação
 
-- [ ] com a substituição da Evidência aplicada numa cópia da árvore,
+- [x] com a substituição da Evidência aplicada numa cópia da árvore,
       `python3 tools/mcr/ui_check.py` sai **`rc=1`**, dizendo onde o arraste
-      deveria ter caído
-- [ ] sem ela, `rc=0`, e a linha do arraste continua `[11, 32] -> [14, 43]`
-- [ ] o mesmo para `to_card_y`, com `Y_SCALE`
-- [ ] `python3 tools/mcr/controls.py` continua **todos vermelhos**, com o total
-      novo declarado no Log da task
-- [ ] `ctest -R mcr` = **3 de 3** com `WE2002_MCR_CARD`, e `make test` verde
-- [ ] os dois cartões gravados continuam passando nas duas formas do round-trip
-- [ ] `roms/` intocada; a fixture com o mesmo `sha256sum`
+      deveria ter caído. **E não é mais preciso plantá-la à mão:** o próprio
+      gate a planta a cada corrida, e exige o vermelho
+- [x] sem ela, `rc=0`, e a linha do arraste diz agora o que o **gate pediu** e
+      o que a tela entregou: `the gate asked for [14, 43] in the card's own
+      units and the drag landed on [14, 43], from [11, 32]`
+- [x] o mesmo para `to_card_y`, com `Y_SCALE` — plantado ao lado do primeiro,
+      porque o juiz compara o **par** e uma guarda que só viu metade quebrada
+      é meia guarda. Vermelho com `[14, 86]`
+- [x] `python3 tools/mcr/controls.py` continua **todos vermelhos** — 19 de 19
+      (18 substituições, 1 arquivo novo). Os dois novos **não** entram nesse
+      total, e o `controls.py` diz por quê
+- [x] `ctest -R mcr` = **3 de 3** com `WE2002_MCR_CARD`, e `make test` **10 de
+      10**
+- [x] os dois cartões gravados continuam passando nas duas formas do round-trip
+- [x] `roms/` intocada; a fixture em
+      `e53f4895affe075bced499a32ba736d10a20f72b010c9c8c05c1269e77c47546`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+Reproduzido primeiro, e exatamente como a CORR descreve: com a divisão retirada
+de `to_card_x` numa cópia da árvore (casou 1×), `ui_check.py` sai `rc=0` e
+imprime `the drag moved outfield slot 1 from [11, 32] to [48, 43], in the
+card's own units`.
+
+Adotada a **forma melhor** que a própria CORR aponta, não a mínima. O gate
+escolhe o destino **em unidades de cartão**, lendo o cartão com `mcrio.load`
+antes de abrir a janela (`_target()`), e o passa por `--drag-to X,Y`; o probe
+converte esse par para pixels de widget com `PitchWidget.point_for()` — a
+transformada de ida, que já existia como `marker_point` — e arrasta para lá. O
+juiz exige `xy_after == alvo`, e exige o mesmo do que releu do disco. A tela
+deixou de fornecer o esperado **e** a regra: ela só executa.
+
+O deslocamento em pixels e os dois fatores continuam no relatório, mas como
+**diagnóstico** e nunca como conta do juiz: o delta é medido em pixels de
+**widget**, que carregam a escala do próprio widget por cima dos fatores, e
+dividi-lo por 7 e por 2 daria um número sem sentido. A primeira versão da
+mensagem fazia essa conta e foi trocada.
+
+O caso vermelho ficou no `ui_check.py`, como a CORR autoriza: o motor do
+`controls.py` planta uma cópia e roda `<módulo>.py --self-check` sob o
+interpretador do sistema, e quem pega este defeito precisa de PySide6, do venv
+e de display. Ficam **dois** — `to_card_x` e `to_card_y` —, plantados a cada
+corrida do gate, com a mesma disciplina do `controls.py`: literal exato, e
+substituição que casa zero ou duas vezes é **controle quebrado**, não vermelho.
+O `controls.py` ganhou o parágrafo dizendo que este controle mora fora dele e
+por quê — senão a ausência parece esquecimento.
+
 **Problemas encontrados:**
 
+- **A primeira mensagem de falha dividia pixels de widget pelos fatores da
+  tela**, e o número saía errado (`38,40 pitch pixels` → `[5, 20]` unidades,
+  para um arraste de 3 e 11). O delta é widget, não campo. Reescrita para dizer
+  o que o gate pediu, o que a tela entregou, e o deslocamento como diagnóstico.
+- Nada mais. A `to_card_y` quebrada é pega pelo mesmo juiz sem nenhuma linha a
+  mais, porque a comparação é do par.
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/ui/formation_view.py` — `point_for(x, y)`, e `marker_point(i)`
+  delegando a ela
+- `tools/mcr/ui/app.py` — `--drag-to X,Y`, `_drag` mirando um alvo em unidades
+  de cartão e devolvendo o deslocamento, e o relatório com `drag_to`,
+  `drag_pixels` e `scales`
+- `tools/mcr/ui_check.py` — `_target()`, `_run()`, `_judge()` e o
+  `negative_probe()` com os dois plantios
+- `tools/mcr/controls.py` — o parágrafo que diz onde mora o controle que não
+  mora ali
+- `docs/prompts/perfil-mcr.md` — a linha do `mcr_ui` na tabela de gates
+- `docs/tasks/port-mcr/12-ui-gravacao.md` — a linha dos dois controles novos e
+  os dois achados da revisão
+- `docs/tasks/port-mcr/correcoes-progresso.md`

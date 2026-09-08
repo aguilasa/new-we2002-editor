@@ -124,18 +124,30 @@ class PitchWidget(QtWidgets.QWidget):
                 return i
         return None
 
-    def marker_point(self, i: int):
-        """Where marker `i` sits in WIDGET coordinates -- the transform, not
-        its inverse.
+    def point_for(self, x: int, y: int):
+        """Where a marker at card coordinates `(x, y)` would sit, in WIDGET
+        coordinates -- the transform, not its inverse.
 
         The drag reads mouse positions and divides them back; this goes the
-        other way, and it is what lets a gate press exactly on a marker
-        instead of guessing. Same two factors, same one transform.
+        other way, and it is what lets a gate ask for an exact destination IN
+        THE CARD'S UNITS instead of pushing a marker by some pixels and then
+        believing whatever comes out. CORR-MCR-018 measured why that matters:
+        while the probe reported the post-conversion value and the judge
+        compared it against itself, removing the division from `to_card_x`
+        left the whole gate green and printed `[48, 43]` "in the card's own
+        units" with the same confidence as the right answer.
+
+        Returns the CENTRE, so a press here grabs the marker in the middle and
+        a move to `point_for(a, b)` lands the marker exactly on `(a, b)`.
         """
         scale, dx, dy = self._transform()
-        left = self._formation.x[i] * X_SCALE + MARKER / 2
-        top = self._formation.y[i] * Y_SCALE + MARKER / 2
+        left = x * X_SCALE + MARKER / 2
+        top = y * Y_SCALE + MARKER / 2
         return QtCore.QPointF(dx + left * scale, dy + top * scale)
+
+    def marker_point(self, i: int):
+        """Where marker `i` sits now, in widget coordinates."""
+        return self.point_for(self._formation.x[i], self._formation.y[i])
 
     def mousePressEvent(self, event) -> None:            # noqa: N802
         if event.button() != QtCore.Qt.MouseButton.LeftButton:

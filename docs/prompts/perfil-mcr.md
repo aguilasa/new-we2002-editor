@@ -140,7 +140,7 @@ docs/tasks/port-mcr/  este ciclo
 | `ctest -R tasks` | já existe | as convenções de task, inclusive nesta subpasta |
 | `mcr_selftest` | MCR-TASK-10 | os 12 `self_check()`, as três regras, a varredura de idioma **e os controles negativos, todos exigidos vermelhos** — quantos são, e de que tipo, é o que a última linha do `controls.py` imprime — sem fixture e sem Qt, ~13 s. **Obrigatório** |
 | `mcr_card` | MCR-TASK-10 | `cli.py check`: round-trip nas duas formas e os cross-checks contra `WE2002_MCR_CARD` (skip 77) |
-| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display |
+| `mcr_ui` | MCR-TASK-10 | `ui_check.py`: chama `ui/app.py --smoke` no `:98` com o venv. **Passa desde a MCR-TASK-11**; pula com 77 se faltar venv, `app.py` ou display. Com `WE2002_MCR_CARD` ele também dirige os widgets, grava dois cartões, confere o round-trip deles **e planta os dois controles negativos que o motor do `controls.py` não alcança** (a conversão de volta do arraste, que precisa de Qt para ser exercitada) |
 
 Antes da MCR-TASK-10 **não havia gate deste ciclo**, e é por isso que a ordem
 mandou: 05 antes de 06/07/08, 09 antes de 11, 10 antes de 12. **Desde

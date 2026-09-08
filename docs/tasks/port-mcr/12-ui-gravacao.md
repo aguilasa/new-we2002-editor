@@ -168,6 +168,7 @@ $PY tools/mcr/ui/app.py work/mcr-t12/full.mcr \
 | `mcr_ui` com cartão | `one attribute moved 1 byte(s) at ['0x590d'], inside slot 0's record at 0x05904`; arraste `[11, 32] -> [14, 43]`; os dois cartões passam nas formas 1 e 2 |
 | `make test` | **10 de 10** |
 | `python3 tools/mcr/controls.py` | **19 de 19 vermelhos** (18 substituições, 1 arquivo novo) |
+| `ui_check.py`, controles plantados | **2 de 2 vermelhos** — `to_card_x` e `to_card_y` com a divisão removida. Não moram no `controls.py`: o motor de lá roda `<módulo>.py --self-check` sem Qt, e quem pega esse defeito precisa de PySide6, do venv e de display. Acrescentados pela [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) |
 | `python3 tools/mcr/selftest.py` | 0 falhas em 12 módulos + regras de desenho + controles |
 | `python3 tools/mcr/layout.py --rule1` | 0 endereços fora de `layout.py` |
 | `python3 tools/mcr/glossary.py` | 0 queixas |
@@ -185,3 +186,15 @@ $PY tools/mcr/ui/app.py work/mcr-t12/full.mcr \
 - O comentário do `mcr_ui` no `tests/CMakeLists.txt` ainda dizia que o alvo
   pulava por causa da MCR-TASK-11, que fechou ontem. Corrigido, e passou a
   registrar que sem `WE2002_MCR_CARD` o alvo passa sem medir gravação.
+- **A lição 3 acima ficou meio aplicada, e a revisão mediu.** "Quem mede não é
+  quem julga" valeu para a localidade dos bytes e **não** para a conversão de
+  coordenada: o probe relatava `xy_after` lido do modelo **depois** da
+  conversão, e o juiz comparava isso com o que releu do disco — os dois lados
+  saídos da mesma aritmética. Tirar a divisão de `to_card_x` deixava o gate
+  verde imprimindo `[48, 43]` "in the card's own units". A
+  [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) inverteu: o gate escolhe
+  o destino **em unidades de cartão**, lendo o próprio cartão, e passa por
+  `--drag-to`; a tela só executa.
+- **O comentário do `mcr_ui` saiu em português** num arquivo que a MCR-TASK-10
+  mediu como inglês — o conteúdo estava certo, o idioma não.
+  [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md).
