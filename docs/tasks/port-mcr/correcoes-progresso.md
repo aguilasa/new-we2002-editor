@@ -23,6 +23,8 @@ ciclo arquivado, o dele em
 | [CORR-MCR-007](/docs/tasks/port-mcr/CORR-MCR-007.md) | [MCR-TASK-04](/docs/tasks/port-mcr/04-conteiner-do-cartao.md) | o `card.py` está em português e a regra de idioma do código passou a ser en-US | Média | [x] concluída | 2026-09-07 |
 | [CORR-MCR-008](/docs/tasks/port-mcr/CORR-MCR-008.md) | [MCR-TASK-05](/docs/tasks/port-mcr/05-layout-e-cross-check.md) | destino faltando mata o `layout.py` no import, e a tabela de controles não diz que ali o `--self-check` não roda | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-009](/docs/tasks/port-mcr/CORR-MCR-009.md) | [MCR-TASK-06](/docs/tasks/port-mcr/06-codec-de-atributos.md) | a tabela dos cinco controles descreve o defeito em prosa, e duas das cinco contagens de falha não reproduzem | Baixa | [x] concluída | 2026-09-07 |
+| [CORR-MCR-010](/docs/tasks/port-mcr/CORR-MCR-010.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | o plano diz que **um** nome enche os dez bytes e são dois: os slots 5 e 20 | Baixa | [ ] pendente | — |
+| [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -40,6 +42,8 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-007 — traduzir o `card.py` para en-US e fechar a dívida da §3.5
 - [x] CORR-MCR-008 — registrar o efeito do erro de import na tabela de controles e exigir o `attempt()` em volta do import no `selftest`
 - [x] CORR-MCR-009 — trocar a prosa dos controles pela substituição literal, e reconciliar as duas contagens
+- [ ] CORR-MCR-010 — nomear os dois slots que enchem os dez bytes, no plano e na task
+- [ ] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
 
 ---
 
@@ -200,3 +204,32 @@ ciclo arquivado, o dele em
   `tools/mcr`, senão morre em `ModuleNotFoundError` antes de medir. E deixar
   uma linha na MCR-TASK-10 para os controles virarem subcomando do `selftest`,
   onde a contagem passa a ser medida em vez de anotada.
+
+### CORR-MCR-010
+
+- **Arquivo com problema:** `docs/PLAN-MCR-PY.md` §1.6 (linha 167) e
+  `docs/tasks/port-mcr/07-dorsais-e-nome.md`
+- **Sintoma:** os dois dizem que **o slot 20** enche os dez bytes. São **dois**:
+  o slot 5 (`ジｮｰ･ﾛﾚﾝｿﾝ`) também, e o próprio `text.py --check` marca os dois
+  com `<-- fills all ten bytes`. A afirmação de invariante continua certa; a
+  enumeração é que está incompleta, e é ela que um teste copia.
+- **Como foi detectado:** varredura independente da cópia da fixture na revisão
+  da MCR-TASK-07 — `[j for j in range(23) if 0 not in nome(j)]` devolve
+  `[5, 20]`.
+- **Fix:** nomear os dois no plano e na task, e dizer que a contagem sai da
+  ferramenta.
+
+### CORR-MCR-011
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/07-dorsais-e-nome.md` (tabela
+  dos seis controles) e `docs/prompts/perfil-mcr.md` (onde falta a convenção)
+- **Sintoma:** as seis contagens estão **certas** — 7, 7, 2, 16, 1, 2,
+  replantadas e reproduzidas —, mas a descrição de uma delas não identifica a
+  linha, e `raw = int.from_bytes(table, "little")` existe **duas vezes**: na
+  `decode_table` (linha 70) e na `encode_table` (93). Plantar na primeira dá 6
+  falhas em vez de 2, e o leitor conclui que o Log erra.
+- **Como foi detectado:** os seis controles replantados na revisão da
+  MCR-TASK-07; o N3 precisou de duas tentativas.
+- **Fix:** escrever a substituição e a **função** onde ela mora, e subir a
+  convenção da CORR-MCR-009 para o perfil, que é onde as tasks 08 a 14 a leem
+  antes de começar.
