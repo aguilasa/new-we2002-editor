@@ -194,14 +194,16 @@ CONTROLS = (
             creates=True),
 )
 
-# ONE CONTROL OF THIS CYCLE DOES NOT LIVE HERE, and saying so is the point.
+# SOME CONTROLS OF THIS CYCLE DO NOT LIVE HERE, and saying so is the point.
 # The drag's way back from pitch pixels to the card's units -- `to_card_x` and
-# `to_card_y` of `ui/formation_view.py` -- is planted by `ui_check.py` instead
-# (its `BREAKS`), in the same literal-substitution form. The engine below runs
-# `<module>.py --self-check` under whatever interpreter started it, and the
-# module that catches that defect needs PySide6, the venv and a display; a
-# control here would plant it and measure nothing. CORR-MCR-018 is where that
-# gap was found, by planting it and watching every gate stay green.
+# `to_card_y` of `ui/formation_view.py` -- and the display of a set-piece taker
+# the oracle's grid cannot express are planted by `ui_check.py` instead (its
+# `BREAKS` and `OUTSIDE_BREAKS`), in the same literal-substitution form. The
+# engine below runs `<module>.py --self-check` under whatever interpreter
+# started it, and the modules that catch those defects need PySide6, the venv
+# and a display; a control here would plant them and measure nothing.
+# CORR-MCR-018 is where that gap was found, by planting one and watching every
+# gate stay green; CORR-MCR-020 is the second of the kind.
 BY_ID = {c.id: c for c in CONTROLS}
 
 

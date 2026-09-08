@@ -148,6 +148,14 @@ A §5.6 já dizia que **a definição de pronto da v1 não depende disso**.
   medidos (`SF LF RC LC PK`) e os seis passaram a `0..10`. O `--write-probe`
   edita o capitão e o `ui_check.py` exige o valor de volta do disco.
 
+  **O `0..10` das seis caixas virou orientação, não recorte, na
+  [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md).** Como o domínio vem da
+  grade do editor de terceiro e não do formato, um cartão de outra release pode
+  cair fora dele legitimamente — e um `QSpinBox` limitado a 10 mostrava **10**
+  para um cartão que guarda 15, calado, enquanto o núcleo preservava o byte e o
+  round-trip continuava em zero. As caixas passaram a aceitar o byte inteiro e
+  a marcar com sufixo visível o valor que a grade não oferece.
+
 ### Um achado sobre o oráculo, que vale a quem o usar
 
 **Abrir e aceitar a tela de tática no editor do Obocaman derruba em 1 o Y de
@@ -170,7 +178,11 @@ tem de contar com essa deriva.
 - `tools/mcr/ui/formation_view.py` — o campo `CP`, os cinco rótulos medidos e o
   domínio `0..10`
 - `tools/mcr/ui/app.py`, `tools/mcr/ui_check.py` — o probe edita o capitão e o
-  gate exige o valor de volta
+  gate exige o valor de volta. A
+  [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) acrescentou aos dois o
+  `--report-formation` e o passo que abre um cartão fora do domínio, com as
+  **duas** quebras que o reddenam — o `ui_check.py` passou a plantar quatro,
+  não dois
 - `tools/mcr/controls.py` — `formation-captain-not-written`
 - `wte/tools/dump_mcr.py` + `wte/re/mcr.md` + `wte/re/mcr.tsv` — **o gerador**,
   não o gerado: o campo passou a se chamar `capitao`, e a frase que afirmava

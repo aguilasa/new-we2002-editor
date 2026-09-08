@@ -102,6 +102,34 @@ def _drag(app, pitch, index: int, target: tuple[int, int]) -> list[float]:
     return [end.x() - start.x(), end.y() - start.y()]
 
 
+def report_formation(window) -> dict:
+    """What the six set-piece boxes SHOW, next to what the card holds.
+
+    The gate needs both halves from the same run, and it needs the SHOWN one to
+    come off the widget rather than off the model -- CORR-MCR-020 is exactly a
+    case where the two disagreed and every other measurement stayed green. The
+    suffix travels too: a box may report an out-of-domain value by carrying it
+    as text instead of as its number, and either is an answer.
+    """
+    view = window.formation
+    f = window.save.formation
+    return {
+        "card": {"captain": f.captain, "kickers": list(f.kickers)},
+        "shown": {
+            "captain": view.captain.value(),
+            "kickers": [s.value() for s in view.kickers],
+        },
+        "suffix": {
+            "captain": view.captain.suffix(),
+            "kickers": [s.suffix() for s in view.kickers],
+        },
+        "tooltip": {
+            "captain": view.captain.toolTip(),
+            "kickers": [s.toolTip() for s in view.kickers],
+        },
+    }
+
+
 def write_probe(app, window, out_dir: str,
                 drag_to: tuple[int, int]) -> dict:
     """Drive the widgets, write two cards, and report what was done.
@@ -183,6 +211,9 @@ def main(argv=None) -> int:
     ap.add_argument("--write-probe", metavar="DIR",
                     help="edit through the widgets, write DIR/*.mcr, and "
                          "report what was done as JSON")
+    ap.add_argument("--report-formation", action="store_true",
+                    help="open the card and report what the six set-piece "
+                         "boxes SHOW, as JSON, next to what the card holds")
     ap.add_argument("--drag-to", metavar="X,Y",
                     help="where the drag must land, in the card's own units; "
                          "required by --write-probe, and chosen by the gate "
@@ -195,7 +226,8 @@ def main(argv=None) -> int:
     # No modal may open in a gate: a QMessageBox spins its own event loop and
     # the run would hang until the timeout, reporting "did not exit" instead
     # of the refusal that caused it.
-    window.headless = bool(a.smoke or a.screenshot or a.write_probe)
+    window.headless = bool(a.smoke or a.screenshot or a.write_probe
+                           or a.report_formation)
 
     # In smoke and screenshot runs the card may come from the variable, so the
     # gate exercises a real read when the machine has a card and still opens an
@@ -205,6 +237,14 @@ def main(argv=None) -> int:
     opened = False
     if path and os.path.isfile(path):
         opened = window.open(path)
+
+    if a.report_formation:
+        if not opened:
+            print("report-formation: give a card to open", file=sys.stderr)
+            return 2
+        _settle(app, window)
+        print("formation-json " + json.dumps(report_formation(window)))
+        return 0
 
     if a.write_probe:
         if not opened:

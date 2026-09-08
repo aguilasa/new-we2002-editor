@@ -119,6 +119,18 @@ BREAKS = (
      "    return max(0, min(Y_MAX, round(pitch_px)))"),
 )
 
+# The break for the out-of-domain step, kept apart because it is judged by a
+# different probe: putting the cap back is exactly the defect CORR-MCR-020
+# found, and the box then shows 10 for a card holding 15 with nothing saying so.
+OUTSIDE_BREAKS = (
+    ("the captain's range",
+     "        self.captain.setRange(0, BYTE_MAX)",
+     "        self.captain.setRange(0, STARTERS - 1)"),
+    ("the annotation",
+     "        spin.setSuffix(OUTSIDE_SUFFIX)",
+     "        spin.setSuffix(\"\")"),
+)
+
 # How far the gate asks the drag to go, in the CARD's units, and the pitch
 # limits it stays inside. Away from the touchline on purpose, so the clamp in
 # `to_card_*` is never what decides where the marker lands.
@@ -230,23 +242,36 @@ def _judge(r: dict, source: str, before: bytes,
     return bad
 
 
+def _sandbox(tmp: str, name: str, old: str, new: str) -> tuple[str | None, str]:
+    """A copy of the tree with one substitution applied. `(path, why not)`.
+
+    Shared by both plants below, so the rule about a literal matching exactly
+    once is written down in one place -- it is the same rule `controls.py`
+    enforces, and the same failure it reports as a broken control.
+    """
+    sandbox = os.path.join(tmp, "mcr")
+    shutil.copytree(MCR_DIR, sandbox,
+                    ignore=shutil.ignore_patterns("__pycache__"))
+    broken = os.path.join(sandbox, BREAK_FILE)
+    with open(broken, encoding="utf-8") as fh:
+        text = fh.read()
+    if text.count(old) != 1:
+        return None, (f"the substitution for {name} matched "
+                      f"{text.count(old)} times, not once -- a literal "
+                      f"that does not match leaves the copy intact and "
+                      f"the run comes out green for the wrong reason")
+    with open(broken, "w", encoding="utf-8") as fh:
+        fh.write(text.replace(old, new))
+    return sandbox, ""
+
+
 def _plant(python: str, card: str, env: dict, name: str, old: str,
            new: str) -> tuple[bool, str]:
     """One substitution in a copy of the tree. `(did the gate redden, why)`."""
     with tempfile.TemporaryDirectory() as tmp:
-        sandbox = os.path.join(tmp, "mcr")
-        shutil.copytree(MCR_DIR, sandbox,
-                        ignore=shutil.ignore_patterns("__pycache__"))
-        broken = os.path.join(sandbox, BREAK_FILE)
-        with open(broken, encoding="utf-8") as fh:
-            text = fh.read()
-        if text.count(old) != 1:
-            return False, (f"the substitution for {name} matched "
-                           f"{text.count(old)} times, not once -- a literal "
-                           f"that does not match leaves the copy intact and "
-                           f"the run comes out green for the wrong reason")
-        with open(broken, "w", encoding="utf-8") as fh:
-            fh.write(text.replace(old, new))
+        sandbox, why = _sandbox(tmp, name, old, new)
+        if sandbox is None:
+            return False, why
 
         source = os.path.join(tmp, "probe.mcr")
         shutil.copyfile(card, source)
@@ -266,6 +291,158 @@ def _plant(python: str, card: str, env: dict, name: str, old: str,
                            f"still passed -- it reported {r['xy_after']} for "
                            f"a drag to {list(target)}")
         return True, bad[0]
+
+
+# The two values the out-of-domain probe plants. Both outside the oracle's
+# grid of 0..10, and both legal bytes: the core validates the byte and
+# preserves what it finds, so a card like this round-trips at zero and every
+# other measurement of this cycle stays green. CORR-MCR-020 measured the
+# screen showing 10 for each of them, with no label, no tooltip and no colour.
+OUTSIDE_CAPTAIN = 15
+OUTSIDE_KICKER = 19
+# The starting eleven, derived rather than typed: it is the ten the
+# formation carries X and Y for, plus the goalkeeper, which is why the
+# oracle's grid has eleven rows. `ui/formation_view.py` calls it STARTERS.
+STARTERS = layout.OUTFIELD_COUNT + 1
+
+
+def _report_formation(python: str, app: str, source: str, env: dict):
+    """One `--report-formation` run. `(report, output)`; report None on failure."""
+    run = subprocess.run([python, app, source, "--report-formation"],
+                         env=env, capture_output=True, text=True,
+                         timeout=TIMEOUT)
+    line = next((l for l in run.stdout.splitlines()
+                 if l.startswith("formation-json ")), None)
+    if run.returncode or line is None:
+        return None, run.stdout + run.stderr
+    return json.loads(line[len("formation-json "):]), run.stdout + run.stderr
+
+
+def _judge_formation(r: dict) -> list[str]:
+    """Everything wrong with one out-of-domain run. Empty is the pass.
+
+    THE RULE IS "SHOW IT OR SAY IT", and either answer is honest: the box may
+    carry the card's number, or it may carry another number and a LABEL naming
+    the card's. What it may not do is display a different number with nothing
+    saying so, which is what it did before CORR-MCR-020.
+
+    THE LABEL MEANS THE SUFFIX, NOT THE TOOLTIP, and that distinction is the
+    whole strictness of this judge. A tooltip is not a display: it costs a
+    hover nobody performs on a value that looks ordinary, and the number that
+    looks ordinary is exactly the failure. Measured while writing this: with
+    the cap put back, the tooltip still named 15 while the box read 10, and a
+    judge that accepted the tooltip called that a pass. The tooltip is carried
+    through anyway and printed in the complaint -- as diagnosis, never as the
+    answer.
+    """
+    bad = []
+    card, shown = r["card"], r["shown"]
+    pairs = [("captain", card["captain"], shown["captain"],
+              r["suffix"]["captain"], r["tooltip"]["captain"])]
+    for i, (held, on_screen, suffix, tip) in enumerate(zip(
+            card["kickers"], shown["kickers"],
+            r["suffix"]["kickers"], r["tooltip"]["kickers"])):
+        pairs.append((f"kicker {i}", held, on_screen, suffix, tip))
+
+    for what, held, on_screen, suffix, tip in pairs:
+        inside = 0 <= held < STARTERS
+        if on_screen == held:
+            if not inside and not suffix.strip():
+                bad.append(f"{what} holds {held}, outside the starting "
+                           f"{STARTERS}, and the box shows it with no visible "
+                           f"mark -- tooltip={tip[:40]!r}")
+            continue
+        # The number differs, so a VISIBLE label has to name the card's value.
+        if str(held) not in suffix:
+            bad.append(f"{what} holds {held} and the screen shows "
+                       f"{on_screen}, with no visible label naming {held} -- "
+                       f"suffix={suffix!r} tooltip={tip[:40]!r}")
+    return bad
+
+
+def _outside_card(card: str, dest: str) -> None:
+    """A copy of `card` with a captain and a kicker outside the grid."""
+    shutil.copyfile(card, dest)
+    save = mcrio.load(dest)
+    save.formation.captain = OUTSIDE_CAPTAIN
+    save.formation.kickers[0] = OUTSIDE_KICKER
+    save.write()
+    mcrio.store(save, dest, force=True)
+
+
+def outside_probe(python: str, card: str, env: dict) -> int:
+    """Open a card the oracle's grid cannot express, and demand it be told.
+
+    The core is not the thing under test here and is checked anyway: the
+    planted copy has to round-trip at zero in both forms, because that is what
+    made this defect invisible -- the byte was safe the whole time and only the
+    window lied about it.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        source = os.path.join(tmp, "outside.mcr")
+        _outside_card(card, source)
+        for form in (1, 2):
+            differ = mcrio.roundtrip(source, form=form)
+            if differ:
+                print(f"FAIL: the planted card does not round-trip in form "
+                      f"{form}, at {hex(differ[0])} -- the probe would be "
+                      f"measuring the core, not the screen")
+                return 1
+
+        r, output = _report_formation(python, APP, source, env)
+        if r is None:
+            print(output.rstrip())
+            print(f"FAIL: {APP} --report-formation did not report")
+            return 1
+        bad = _judge_formation(r)
+        print(f"outside: the card holds captain={r['card']['captain']} "
+              f"kickers={r['card']['kickers']}, and the screen shows "
+              f"captain={r['shown']['captain']}{r['suffix']['captain']!r} "
+              f"kicker0={r['shown']['kickers'][0]}"
+              f"{r['suffix']['kickers'][0]!r}")
+        if bad:
+            for line in bad:
+                print(f"FAIL: {line}")
+            return 1
+
+    return _outside_negative(python, card, env)
+
+
+def _plant_outside(python: str, card: str, env: dict, name: str, old: str,
+                   new: str) -> tuple[bool, str]:
+    """The same substitution machinery, judged by `_judge_formation`."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, old, new)
+        if sandbox is None:
+            return False, why
+        source = os.path.join(tmp, "outside.mcr")
+        _outside_card(card, source)
+        r, output = _report_formation(
+            python, os.path.join(sandbox, "ui", "app.py"), source, env)
+        if r is None:
+            return False, (f"the planted probe for {name} did not run, so "
+                           f"nothing was proved:\n{output.rstrip()}")
+        bad = _judge_formation(r)
+        if not bad:
+            return False, (f"{BREAK_FILE} :: {name} was broken "
+                           f"({old.strip()} -> {new.strip()}) and the gate "
+                           f"still passed -- it reported "
+                           f"{r['shown']['captain']} for a card holding "
+                           f"{r['card']['captain']}")
+        return True, bad[0]
+
+
+def _outside_negative(python: str, card: str, env: dict) -> int:
+    """Put the clamp back, and demand the step above reddens."""
+    failed = 0
+    for name, old, new in OUTSIDE_BREAKS:
+        red, why = _plant_outside(python, card, env, name, old, new)
+        if red:
+            print(f"negative: breaking {name} reddens the gate -- {why}")
+        else:
+            print(f"FAIL: {why}")
+            failed += 1
+    return 1 if failed else 0
 
 
 def negative_probe(python: str, card: str, env: dict) -> int:
@@ -333,7 +510,9 @@ def write_probe(python: str, env: dict) -> int:
                 print(f"FAIL: {line}")
             return 1
 
-    return negative_probe(python, card, env)
+    if negative_probe(python, card, env):
+        return 1
+    return outside_probe(python, card, env)
 
 
 def main() -> int:

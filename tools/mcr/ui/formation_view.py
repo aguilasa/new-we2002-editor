@@ -35,11 +35,23 @@ measurements that agree: the sixth marker of the oracle's own grid is labelled
 `Captain`, driving that grid writes this byte and no other, and the upstream's
 own local for it is called `CP`.
 
-THE RANGE OF THESE SPIN BOXES IS 0..10, AND THAT IS MEASURED, not guessed. The
-oracle's `malla2` is 144x176 with a 24x16 step -- six columns by ELEVEN rows --
-so what a kicker and the captain hold is a position in the starting eleven,
+THE MEASURED DOMAIN OF THESE SIX IS 0..10, and that is measured, not guessed.
+The oracle's `malla2` is 144x176 with a 24x16 step -- six columns by ELEVEN rows
+-- so what a kicker and the captain hold is a position in the starting eleven,
 never one of the twenty-three squad slots. MCR-TASK-12 offered 0..22 here, and
 that was wrong by a factor of two.
+
+BUT THE SPIN BOXES ACCEPT THE WHOLE BYTE, AND SAY SO WHEN THE CARD IS OUTSIDE
+THAT DOMAIN. They used to be capped at 10, and a card holding 15 was DISPLAYED
+as 10 -- no label, no tooltip, no colour, while the core preserved the byte and
+the round-trip stayed at zero. The screen was the only place in this port that
+normalised a value in silence, against what it does everywhere else in the same
+class: `domains.label()` answers `?` for an unnamed index instead of raising,
+the two copies of a shirt number in disagreement are REPORTED and never
+reconciled, and `formation.write` names the stored byte when it refuses. And
+the domain is not even from the format -- it comes from the third party's grid,
+so a card from another release, or written by another tool, can legitimately
+fall outside it. CORR-MCR-020: show what the card holds, and annotate it.
 """
 
 import os
@@ -71,6 +83,13 @@ SURFACE_HEIGHT = PITCH_HEIGHT + LABEL_DROP * Y_SCALE + 12
 # kicker or the captain is a position in the starting eleven -- not one of the
 # twenty-three squad slots, which is what MCR-TASK-12 offered here.
 STARTERS = 11
+# What the FIELD holds, as opposed to what the oracle's grid offers. The
+# spin boxes take the whole byte so that a card outside the measured
+# domain is shown, not silently brought inside it (CORR-MCR-020).
+BYTE_MAX = 0xFF
+# What a box wears when the card is outside the grid's 0..10. Short, so
+# it fits, and visible without hovering -- the tooltip carries the why.
+OUTSIDE_SUFFIX = "  (outside the 11)"
 
 # The five set-piece labels, transcribed from the oracle's `Label1..5` Hints
 # and confirmed by the upstream's own local variable names: SF, LF, RC, LC, PK
@@ -277,10 +296,10 @@ class FormationView(QtWidgets.QWidget):
         self.kickers = [QtWidgets.QSpinBox() for _ in range(5)]
         kick_box = QtWidgets.QGroupBox(
             f"Set pieces and captain, as positions in the starting "
-            f"{STARTERS} (0..{STARTERS - 1})")
+            f"{STARTERS} (0..{STARTERS - 1}); the field is a byte")
         kick_grid = QtWidgets.QHBoxLayout(kick_box)
         for k, spin in enumerate(self.kickers):
-            spin.setRange(0, STARTERS - 1)
+            spin.setRange(0, BYTE_MAX)
             spin.valueChanged.connect(
                 lambda value, slot=k: self._commit_kicker(slot, value))
             kick_grid.addWidget(QtWidgets.QLabel(KICKER_LABELS[k]))
@@ -288,7 +307,7 @@ class FormationView(QtWidgets.QWidget):
 
         kick_grid.addSpacing(24)
         self.captain = QtWidgets.QSpinBox()
-        self.captain.setRange(0, STARTERS - 1)
+        self.captain.setRange(0, BYTE_MAX)
         self.captain.valueChanged.connect(self._commit_captain)
         kick_grid.addWidget(QtWidgets.QLabel("CP"))
         kick_grid.addWidget(self.captain)
@@ -299,7 +318,10 @@ class FormationView(QtWidgets.QWidget):
             "units, scaled by 7 and 2 for this drawing only, and divided "
             "back before anything reaches the model. Role names come from "
             "the upstream editor and are not measured; the six set-piece "
-            "labels are, and so is the captain (MCR-TASK-13).")
+            "labels are, and so is the captain (MCR-TASK-13). The 0..10 of "
+            "those six comes from the upstream editor's own grid -- six "
+            "columns by eleven rows -- and not from the format: the field is "
+            "a byte, a card may hold more, and a box that does is marked.")
         caption.setWordWrap(True)
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -328,8 +350,8 @@ class FormationView(QtWidgets.QWidget):
                 role = self._formation.role[i]
                 combo.setCurrentIndex(role if 0 <= role < combo.count() else 0)
             for k, spin in enumerate(self.kickers):
-                spin.setValue(self._clamped(self._formation.kickers[k]))
-            self.captain.setValue(self._clamped(self._formation.captain))
+                self._show(spin, self._formation.kickers[k])
+            self._show(self.captain, self._formation.captain)
         finally:
             self._loading = False
 
@@ -346,16 +368,39 @@ class FormationView(QtWidgets.QWidget):
         self.changed.emit()
 
     @staticmethod
-    def _clamped(value: int) -> int:
-        """A card value brought into the spin box's range, for DISPLAY only.
+    def _show(spin, value: int) -> None:
+        """Put the card's own value in the box, and mark it when it is outside.
 
-        The measured domain is 0..10, but the field is a byte and a card
-        written by something else can hold anything. Refusing to show it would
-        be worse than showing the nearest legal value, and `formation.write`
-        still accepts the full byte -- what this clamp cannot do is silently
-        change the card, because nothing is written until the value is edited.
+        This used to clamp to 0..10 and show the nearest legal number, which
+        made a card holding 15 read as 10 with nothing saying so -- and worse,
+        it made the user edit from a number that was not the card's, because
+        the first click of the arrow committed the clamped value. The domain is
+        the oracle's grid, not the format; the byte is the truth. So the box
+        takes the whole byte, and a value the grid does not offer gets a suffix
+        and a tooltip. Nothing here writes: `set_save` holds `_loading`.
         """
-        return max(0, min(STARTERS - 1, value))
+        spin.setValue(value)
+        FormationView._mark(spin, value)
+
+    @staticmethod
+    def _mark(spin, value: int) -> None:
+        """The suffix and the tooltip alone, without touching the value.
+
+        The commit handlers call this and not `_show`: setting the value from
+        inside `valueChanged` would re-enter, and the box already holds what
+        the user typed.
+        """
+        if 0 <= value < STARTERS:
+            spin.setSuffix("")
+            spin.setToolTip("")
+            return
+        spin.setSuffix(OUTSIDE_SUFFIX)
+        spin.setToolTip(
+            f"The card holds {value}, which is outside the starting "
+            f"{STARTERS}. The measured domain 0..{STARTERS - 1} comes from the "
+            f"upstream editor's grid, not from the format, so this may be a "
+            f"legitimate card from another release or another tool. The value "
+            f"is shown and kept as it is; editing it replaces it.")
 
     def _commit_captain(self, value: int) -> None:
         if self._loading or self._formation is None:
@@ -363,6 +408,7 @@ class FormationView(QtWidgets.QWidget):
         if self._formation.captain == value:
             return
         self._formation.captain = value
+        self._mark(self.captain, value)
         self.changed.emit()
 
     def _commit_kicker(self, slot: int, value: int) -> None:
@@ -371,4 +417,5 @@ class FormationView(QtWidgets.QWidget):
         if self._formation.kickers[slot] == value:
             return
         self._formation.kickers[slot] = value
+        self._mark(self.kickers[slot], value)
         self.changed.emit()

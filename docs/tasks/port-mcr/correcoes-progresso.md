@@ -33,7 +33,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) | [MCR-TASK-11](/docs/tasks/port-mcr/11-ui-leitura.md) | o perfil promete 15 controles vermelhos e o `mcr_selftest` exige 16, e a frase só descreve um dos dois tipos | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-018](/docs/tasks/port-mcr/CORR-MCR-018.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o valor esperado do arraste vem da própria conversão sob teste: parar de dividir por `X_SCALE` deixa os dois gates verdes | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
-| [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [ ] pendente | — |
+| [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -61,7 +61,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-017 — pôr 16 e os dois tipos no perfil, e fazer o `controls.py` imprimir o resumo
 - [x] CORR-MCR-018 — o gate escolhe o destino do arraste em unidades de cartão, a tela só executa, e os dois casos vermelhos são plantados a cada corrida
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
-- [ ] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
+- [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
 
 ---
 
