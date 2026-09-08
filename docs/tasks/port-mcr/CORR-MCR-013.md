@@ -3,7 +3,7 @@ id: CORR-MCR-013
 title: "Correção: a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, e a task cita a §5.1 no lugar dela"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,20 +109,62 @@ Corrigir a referência de seção no primeiro item do critério de conclusão: �
 
 ## Verificação
 
-- [ ] `grep -n "model.py" docs/PLAN-MCR-PY.md` nomeia `Player` e `Save`, e não
+- [x] `grep -n "model.py" docs/PLAN-MCR-PY.md` nomeia `Player` e `Save`, e não
       atribui `Card` ao `model.py`
-- [ ] `grep -n '\bSave\b' docs/PLAN-MCR-PY.md` deixa de sair vazio
-- [ ] a citação de seção do critério da MCR-TASK-09 diz §3.2
-- [ ] conferência de forma e de existência de link de `.claude/rules/links.md`
+- [x] `grep -n '\bSave\b' docs/PLAN-MCR-PY.md` deixa de sair vazio
+- [x] a citação de seção do critério da MCR-TASK-09 diz §3.2
+- [x] conferência de forma e de existência de link de `.claude/rules/links.md`
       vazias
-- [ ] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
+- [x] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-08
 
 **Resumo do que foi feito:**
 
+Os três `grep` da Evidência reproduziram exatos: a linha 295 dizia
+`Card / Player / Formation`, `grep -n '\bSave\b' docs/PLAN-MCR-PY.md` saía
+**vazio**, e as seções são 283 (§3.2) e 429 (§5.1). A árvore confirma a
+distribuição: `card.py:141` tem `class Card` **sem decorador**, `model.py:58` e
+`model.py:77` são `Player` e `Save` decorados, `formation.py:60` é
+`Formation`.
+
+O inventário de módulos do plano passou a nomear `Player` e `Save`, e a dizer
+onde `Card` e `Formation` moram — inclusive que o `model.py` reexporta a
+`Formation`, que é o que faz a leitura antiga parecer certa. Nada mudou no
+código: a distribuição atual é a que a Regra 2 pede, com o contêiner guardando
+o `bytearray` e o modelo sendo vista sobre ele.
+
+A citação de seção do critério da MCR-TASK-09 passou de §5.1 para **§3.2**. As
+outras quatro menções à §5.1 na mesma task ficaram: o `fonte_de_verdade`
+(§5.1 é o round-trip, que é o que esta task mede), a referência do Contexto, e
+as duas sobre a companheira da forma 2 — nenhuma delas fala de classe.
+
 **Problemas encontrados:**
 
+**A varredura puxou a MCR-TASK-14, que a lista da CORR não previa.** O quadro
+de recontagem dela tem um item sobre a §3.2, e ele só cobria o primeiro erro
+daquela linha (`io.py` → `mcrio.py`, corrigido na MCR-TASK-09). A **mesma
+linha** errava uma segunda vez, que é esta correção — e sem dizê-lo, a
+verificação final reconferiria só metade do que a linha afirma. O item ganhou a
+cláusula, com o comando que confronta o plano contra o disco.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `grep -n "model.py" docs/PLAN-MCR-PY.md` | nomeia `Player / Save`, e não atribui `Card` ao `model.py` |
+| `grep -c '\bSave\b' docs/PLAN-MCR-PY.md` | **1** (era 0) |
+| a citação do critério da MCR-TASK-09 | **§3.2** |
+| conferência de forma de link | só alvo fora de `docs/` (`../NOTICE.md`, `../CLAUDE.md`, `../wte/re/mcr.md`) |
+| conferência de existência de link | **vazia** |
+| `tools/check_tasks.py` | **100 task(s), ok** |
+| `ctest -R tasks` | **1/1 Passed** |
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-MCR-PY.md` — a linha 295 da §3.2
+- `docs/tasks/port-mcr/09-modelo-e-round-trip.md` — a citação de seção
+- `docs/tasks/port-mcr/14-verificacao-final.md` — a cláusula do quadro de
+  recontagem (varredura de discrepância)

@@ -292,7 +292,10 @@ tools/mcr/
   formation.py    X[10], Y[10], papeis[10], cobradores, capitao, os presets
   tactics.py      os 6 campos de tatica -- somente leitura na v1
   domains.py      cabelos, posicoes, barbas, cores, alturas, idades, corpos, chuteiras, pe
-  model.py        Card / Player / Formation -- dataclasses, sem Qt, sem endereco
+  model.py        Player / Save -- dataclasses sobre os bytes crus, sem Qt,
+                  sem endereco. O conteiner `Card` mora em card.py e e classe
+                  comum; `Formation` mora em formation.py, e o model.py a
+                  reexporta
   mcrio.py        ler, gravar, validar, recusar
   glossary.py     es -> en, e a recusa de espanhol remanescente
   cli.py          argparse: info dump get set roundtrip negative check

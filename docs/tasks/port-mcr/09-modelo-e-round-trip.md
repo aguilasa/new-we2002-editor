@@ -36,7 +36,7 @@ round-trip que prova os dois.
 - [x] `Player`, `Save` e `Formation` como `dataclasses`; nenhum endereço fora de
       `layout.py`; nenhum `import` de Qt. O contêiner `card.Card` **continua
       classe comum** — ele guarda um `bytearray` mutável e valida no construtor,
-      e `@dataclass` ali não acrescentaria nada. A §5.1 escrevia "`Card`,
+      e `@dataclass` ali não acrescentaria nada. A **§3.2** escrevia "`Card`,
       `Player` e `Formation`"; o que a execução entregou é o nível do modelo:
       `Player` e `Save` novos em `model.py`, `Formation` já era `dataclass`.
 - [x] **Round-trip forma 1** — ler → gravar: `cmp` = **0 bytes**.

@@ -42,6 +42,13 @@ status: pendente
       continuam batendo com o disco:
       `ls tools/mcr/*.py` e `grep -n 'mcrio' docs/PLAN-MCR-PY.md`. A razão está
       medida no `self_check` do `mcrio.py` — `import io` devolve a stdlib.
+      **A mesma linha errava uma segunda vez**, e a
+      [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) a corrigiu: ela dava
+      `Card` como dataclass do `model.py`, e `Card` é classe comum e mora em
+      `card.py`, `Formation` mora em `formation.py`, e o `Save` não aparecia no
+      plano inteiro. Confira contra o disco:
+      `grep -n '^class \|^@dataclasses.dataclass' tools/mcr/model.py
+      tools/mcr/card.py tools/mcr/formation.py`.
 - [ ] **A §5.1 do plano diz "as duas formas" e não diz que a forma 2 precisa de
       companheira.** Medido na MCR-TASK-09: um `Save.write()` cujo laço não
       escreve ninguém deixa toda checagem de "não mudou byte" verde, porque
