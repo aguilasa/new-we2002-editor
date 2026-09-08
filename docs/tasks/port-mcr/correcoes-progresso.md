@@ -27,6 +27,9 @@ ciclo arquivado, o dele em
 | [CORR-MCR-011](/docs/tasks/port-mcr/CORR-MCR-011.md) | [MCR-TASK-07](/docs/tasks/port-mcr/07-dorsais-e-nome.md) | a tabela de controles voltou à prosa, e a linha que ela descreve aparece duas vezes no arquivo | Baixa | [x] concluída | 2026-09-07 |
 | [CORR-MCR-012](/docs/tasks/port-mcr/CORR-MCR-012.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | o check chamado "e nada mais" só afirma que algum byte mudou, e a exclusividade do caminho do dorsal fica sem guarda | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-013](/docs/tasks/port-mcr/CORR-MCR-013.md) | [MCR-TASK-09](/docs/tasks/port-mcr/09-modelo-e-round-trip.md) | a §3.2 do plano ainda põe `Card` como dataclass do `model.py`, não cita o `Save`, e a task atribui a frase à §5.1 | Baixa | [x] concluída | 2026-09-08 |
+| [CORR-MCR-014](/docs/tasks/port-mcr/CORR-MCR-014.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | a varredura da Regra 1 e a de idioma usam `os.listdir` e param no topo: a `tools/mcr/ui/` da MCR-TASK-11 fica invisível para as duas | Alta | [ ] pendente | — |
+| [CORR-MCR-015](/docs/tasks/port-mcr/CORR-MCR-015.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | o bloco do `mcr_ui` entrou entre o comentário do `pes2_boot` e o `add_test` dele, e o `pes2_boot` ficou sem comentário | Baixa | [ ] pendente | — |
+| [CORR-MCR-016](/docs/tasks/port-mcr/CORR-MCR-016.md) | [MCR-TASK-10](/docs/tasks/port-mcr/10-selftest-cli-e-gate.md) | "os três últimos nasceram na MCR-TASK-10" aponta `cli`/`selftest`/`ui_check`, e os três são `harness`/`controls`/`ui_check` | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -48,6 +51,9 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-011 — pôr a substituição literal na tabela da 07 e subir a convenção para o perfil
 - [x] CORR-MCR-012 — fechar o conjunto de bytes no check do dorsal, nos dois módulos, com o caso vermelho
 - [x] CORR-MCR-013 — pôr `Player`/`Save` na §3.2 do plano e corrigir a citação de seção na task
+- [ ] CORR-MCR-014 — descer as duas varreduras com `os.walk`, e registrar o caso vermelho da `ui/` como controle
+- [ ] CORR-MCR-015 — pôr cada `add_test` sob o comentário que o descreve
+- [ ] CORR-MCR-016 — nomear os três módulos novos em vez de apontá-los por posição
 
 ---
 
@@ -273,3 +279,48 @@ ciclo arquivado, o dele em
 - **Fix:** levar a decisão ao plano — o inventário passa a nomear `Player` e
   `Save`, e a dizer onde `Card` e `Formation` moram — e corrigir a citação de
   seção na task para §3.2.
+
+### CORR-MCR-014
+
+- **Arquivo com problema:** `tools/mcr/layout.py` (`address_monopoly`) e
+  `tools/mcr/glossary.py` (`sweep`)
+- **Sintoma:** as duas enumeram com `os.listdir` e não descem. A pasta
+  `tools/mcr/ui/`, que a **MCR-TASK-11** cria a seguir, sai do escopo das duas
+  sem aviso — enquanto a metade da Regra 3 que testa import **desce** e passa a
+  reportar `ok` sobre ela. O critério desta task escreve o escopo como
+  `tools/mcr/**.py`, e `**` é recursivo.
+- **Como foi detectado:** um `_probe.py` plantado em `tools/mcr/ui/` com
+  `0x62A8` e `25266` (as duas notações que a `address_monopoly` diz varrer) e
+  com `jugador`/`cancha` (que estão no dicionário): `--rule1` dá 0,
+  `glossary.py` dá 0, `selftest.py` dá 0 falhas e `ctest -R mcr_selftest`
+  passa. O mesmo arquivo apontado à mão é acusado com 4 queixas.
+- **Fix:** `os.walk` nas duas, caminho relativo nas mensagens, e o plantio na
+  `ui/` registrado como controle no `controls.py` — senão o caso deixa de ser
+  exercitável assim que a pasta existir de verdade.
+
+### CORR-MCR-015
+
+- **Arquivo com problema:** `tests/CMakeLists.txt`, linhas 136-155
+- **Sintoma:** o `if(UNIX AND Python3_FOUND) … mcr_ui` entrou **entre** o
+  comentário do `pes2_boot` e o `add_test` dele. Quem lê o `mcr_ui` atravessa
+  cinco linhas sobre DuckStation, `PES2_IMAGE` e noventa segundos; o
+  `pes2_boot` ficou sem comentário. Os dois blocos ainda dizem "third …
+  bracket" sobre coisas diferentes.
+- **Como foi detectado:** leitura do arquivo na revisão da MCR-TASK-10, com
+  `grep -n "^# \|add_test(NAME" tests/CMakeLists.txt`. O comportamento dos
+  dois testes está certo — 1 passed, 2 skipped —, o defeito é de leitura.
+- **Fix:** mover um dos dois blocos inteiro, comentário junto, e nomear o
+  projeto em cada frase "third bracket".
+
+### CORR-MCR-016
+
+- **Arquivo com problema:** `docs/PLAN-MCR-PY.md` linha 309 (§3.2)
+- **Sintoma:** "**Os três últimos nasceram na MCR-TASK-10**" — os três últimos
+  da lista são `cli.py`, `selftest.py` e `ui_check.py`; os três que a task
+  criou, e que o próprio parágrafo então explica, são `harness.py`,
+  `controls.py` e `ui_check.py`. Os dois primeiros foram inseridos no meio da
+  lista.
+- **Como foi detectado:** diff do bloco contra `68e55a2^` durante a revisão da
+  MCR-TASK-10.
+- **Fix:** nomear os três na abertura em vez de apontá-los por posição — nome
+  resiste a reordenação, posição não.
