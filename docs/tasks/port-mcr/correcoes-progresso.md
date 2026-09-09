@@ -36,6 +36,9 @@ ciclo arquivado, o dele em
 | [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [x] concluída | 2026-09-08 |
 | [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [x] concluída | 2026-09-09 |
+| [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o critério conta quatro cartões de PES2 e cinco recusas, e a ferramenta mede cinco e seis | Alta | [ ] pendente | — |
+| [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o `mcr_container` entrou e a §4.4 do plano continua com três alvos, e o perfil com `1 passed, 2 skipped` | Alta | [ ] pendente | — |
+| [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -66,6 +69,9 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
 - [x] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
 - [x] CORR-MCR-022 — escrever a entrada da Fase 5 no perfil, e recusar fase sem entrada no `check_tasks.py`
+- [ ] CORR-MCR-023 — remedir cinco/seis nos quatro lugares que dizem quatro/cinco
+- [ ] CORR-MCR-024 — o quarto alvo na §4.4 do plano, e `2 passed, 2 skipped` no plano e no perfil
+- [ ] CORR-MCR-025 — plantar o filtro dos diálogos em `OPEN_BREAKS`, e conferir que casa uma vez
 
 ---
 
@@ -465,3 +471,53 @@ ciclo arquivado, o dele em
   em `headless` levanta), e o que a fase fecha não desfaz o que a definição de
   pronto já media. E, para fechar de vez, o `check_tasks.py` recusando fase que
   não tenha entrada no perfil, na forma dos outros guards do ciclo.
+
+### CORR-MCR-023
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/16-conteiner-gme.md` (linhas
+  67, 99 e 282) e `tools/mcr/README.md:281`
+- **Sintoma:** o critério da task — que é a fonte de verdade dela — diz
+  "**quatro** dos oito `.gme` são de PES2" e "**cinco deles** continuam sendo
+  recusados por `check_card`". São **cinco** de PES2 e **seis** recusados
+  (`5 + o 34978, que não tem WEW-OPT`). O `mcr/README.md`, do commit anterior,
+  já diz certo; a task o contradiz e copiou o número errado para o `README` do
+  `tools/mcr/`.
+- **Como foi detectado:** `cli.py info` sobre os oito, e `mcrio.check_card`
+  direto sobre `gme.read_card`, na revisão da MCR-TASK-16: `refused: 6`.
+- **Fix:** os quatro números; e, se quem executar quiser fechar de vez, o
+  `gme.py --check` imprimindo quantos contêineres trazem um save que o
+  `check_card` aceita, na escolha que a CORR-MCR-017 já fez para o
+  `controls.py`.
+
+### CORR-MCR-024
+
+- **Arquivo com problema:** `docs/PLAN-MCR-PY.md` (item 6 da definição de
+  pronto, o título e a tabela da §4.4, e o critério abaixo dela) e
+  `docs/prompts/perfil-mcr.md`, a verificação da Fase 2
+- **Sintoma:** a MCR-TASK-16 acrescentou o `mcr_container` e o registrou no
+  `CMakeLists.txt`, na tabela de gates do perfil, no `CLAUDE.md`, no
+  `tools/mcr/README.md` e na §9 do plano — e não nos três lugares que ainda
+  descrevem a bateria como de três alvos com `1 passed, 2 skipped`. O plano se
+  contradiz: a §9 diz quatro, a §4.4 diz três. Medido: **2 passed, 2 skipped**
+  sem venv e sem fixture, **3 passed, 1 skipped** com venv e display e sem
+  cartão, **4/4** com tudo.
+- **Como foi detectado:** `ctest -R mcr` com e sem `WE2002_MCR_CARD` na revisão
+  da MCR-TASK-16, contra `grep -n "três alvos\|1 passed, 2 skipped"`.
+- **Fix:** o quarto alvo na §4.4 e os dois números; e no perfil os **dois**
+  pares, porque nesta máquina o que se vê ao não exportar a variável é o
+  segundo.
+
+### CORR-MCR-025
+
+- **Arquivo com problema:** `tools/mcr/ui_check.py`, o `_judge_open`
+- **Sintoma:** a asserção nova — os três formatos na string que os dois
+  diálogos passam — é a única coisa que casa o rótulo da janela com o que o
+  núcleo lê e grava, e **nenhum controle plantado a exercita**. O Log da task
+  diz que ela foi conferida à mão, num script descartável. O motor que a
+  plantaria está no mesmo arquivo: `OPEN_BREAKS`, que já planta as duas portas
+  de abrir cartão e é julgado pelo mesmo `_judge_open`.
+- **Como foi detectado:** contagem dos seis plantados do `ui_check.py`
+  (`BREAKS` 2, `OUTSIDE_BREAKS` 2, `OPEN_BREAKS` 2) contra as asserções do
+  `_judge_open`, na revisão da MCR-TASK-16.
+- **Fix:** uma tupla em `OPEN_BREAKS` trocando o `CARD_FILTER` por um que só
+  ofereça `.mcr`, com a conferência de que a substituição casa uma vez.
