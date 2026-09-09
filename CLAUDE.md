@@ -1059,7 +1059,10 @@ Regras que valem para os markdowns ficam em `.claude/rules/`. Hoje há duas:
   codifique num prompt o nome de um plano, um prefixo de ID, uma fase ou um
   mapeamento `ID → arquivo` — este repositório tem dois projetos no mesmo
   `progresso.md` e terá outros. `ctest -R tasks` (`tools/check_tasks.py`)
-  confere as quatro convenções que fazem isso funcionar.
+  confere as quatro convenções que fazem isso funcionar, mais a do perfil: a
+  fase que uma task declara tem de ter entrada na seção "Verificações
+  específicas por fase" do perfil do ciclo, que é onde o `/revisar` procura o
+  que perguntar dela.
 - [.claude/rules/links.md](.claude/rules/links.md)
   — link de um markdown de `docs/` para outro markdown dentro de `docs/` usa
   `/docs/` + o caminho do arquivo, nunca caminho relativo. Alvo fora de `docs/`

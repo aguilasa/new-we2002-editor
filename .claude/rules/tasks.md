@@ -190,3 +190,13 @@ python3 tools/check_tasks.py
 
 Ele confere as quatro coisas da lista acima em todas as tasks, e é o que impede
 a regra de virar prosa. Rode antes de commitar task nova.
+
+Desde a [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) ele confere
+também a convenção do perfil, um nível acima: **a fase que o `phase:` de uma
+task declara tem de ter entrada na seção "Verificações específicas por fase"**
+do perfil que o `progresso.md` da pasta nomeia. É onde o `/revisar` procura o
+que perguntar de uma fase, e fase nova costuma ser registrada no plano, no
+progresso e na tabela de gates — e não ali, que é o único lugar que o rito lê.
+Um `progresso.md` sem campo `perfil:`, um perfil que não existe, ou um perfil
+sem a seção ficam de fora: a conferência é sobre a fase que falta numa seção
+que existe.

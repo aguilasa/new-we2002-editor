@@ -243,3 +243,17 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   releitura é o gate, que pode importar os dois.
 - **Fase 4** — os seis itens da definição de pronto, cada um com o comando que o
   reproduz.
+- **Fase 5** — escopo pedido **depois** do fechamento. Ela **não reabre a
+  definição de pronto**: o que a Fase 4 mediu continua medido, e a §7 do plano
+  diz o mesmo — se uma task daqui derrubar um passo das fases 3 ou 4, isso é o
+  achado, não o escopo. Como o pedido nasce fora do plano, **a própria task é a
+  fonte de verdade**: confere-se o critério dela, não uma seção do plano.
+  Captura no `:98` no Log, como na Fase 3. Três perguntas que a MCR-TASK-15
+  fixou e valem para qualquer tela que entre aqui:
+  **um caminho, dois gatilhos** — botão e item de menu disparam a **mesma**
+  `QAction`, e há controle plantado que prova que trocar a ligação fica
+  vermelho; **modal nenhum sobe num gate** — a caixa mora atrás de um método
+  que o probe substitui, e alcançá-la numa corrida `headless` **levanta**, para
+  que o dia em que o seam sumir seja vermelho e não travamento (lição 2 da
+  MCR-TASK-12); e **os passos das fases 3 e 4 continuam no gate**, e a corrida
+  os mostra.

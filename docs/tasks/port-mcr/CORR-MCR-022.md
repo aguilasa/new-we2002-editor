@@ -3,7 +3,7 @@ id: CORR-MCR-022
 title: "Correção: a Fase 5 nasceu sem entrada em \"Verificações específicas por fase\", que é o único lugar onde o `/revisar` procura o que perguntar de uma fase"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -108,22 +108,86 @@ que recusa, em vez de uma convenção que alguém lembra.
 
 ## Verificação
 
-- [ ] `sed -n '/## Verificações específicas por fase/,$p' docs/prompts/perfil-mcr.md | grep -c "Fase 5"` devolve **1**
-- [ ] a entrada nomeia os três itens medidos pela MCR-TASK-15, cada um com o
+- [x] `sed -n '/## Verificações específicas por fase/,$p' docs/prompts/perfil-mcr.md | grep -c "Fase 5"` devolve **1**
+- [x] a entrada nomeia os três itens medidos pela MCR-TASK-15, cada um com o
       que o exercita
-- [ ] se a conferência for escrita: uma task com `phase: 9` e sem entrada no
+- [x] se a conferência for escrita: uma task com `phase: 9` e sem entrada no
       perfil faz `python3 tools/check_tasks.py` sair **1**, nomeando a fase
-- [ ] `python3 tools/check_tasks.py` verde na árvore como está (101 tasks)
-- [ ] `ctest -R tasks` verde
-- [ ] `WE2002_MCR_CARD=… ctest -R mcr` = 3 de 3, e `controls.py` todos vermelhos
-- [ ] `roms/` intocada; a fixture com o mesmo `sha256sum`
+- [x] `python3 tools/check_tasks.py` verde na árvore como está (101 tasks)
+- [x] `ctest -R tasks` verde
+- [x] `WE2002_MCR_CARD=… ctest -R mcr` = 3 de 3, e `controls.py` todos vermelhos
+- [x] `roms/` intocada; a fixture com o mesmo `sha256sum`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-09
 
 **Resumo do que foi feito:**
 
+O sintoma reproduziu: a seção "Verificações específicas por fase" ia da Fase 0 à
+4, a MCR-TASK-15 declara `phase: 5`, e a §7 do plano já tem a linha da fase.
+`grep -c "Fase 5"` na seção dava **0**.
+
+A entrada foi escrita com o que a MCR-TASK-15 exercitou — os três itens (um
+caminho com dois gatilhos, modal nenhum num gate, e os passos das fases 3 e 4
+continuando no gate) — mais as duas coisas que a CORR pede em prosa: que a Fase
+5 **não reabre a definição de pronto**, e que, como o pedido nasce fora do
+plano, **a própria task é a fonte de verdade**.
+
+E foi escrita a conferência, que é o que fecha. O `check_tasks.py` já lia o
+`phase:` de cada task; agora resolve o `perfil:` do `progresso.md` da pasta e
+**recusa** fase sem entrada na seção. Mesma forma dos outros guards do ciclo:
+uma varredura que recusa, no lugar de uma convenção que alguém lembra.
+
 **Problemas encontrados:**
 
+**1. A primeira forma da conferência daria falso vermelho nas oito fases do
+ciclo de PES2.** Os dois perfis escrevem a entrada de jeitos diferentes: o
+`perfil-mcr.md` usa `- **Fase 3** — …` e o `perfil-pes2.md` usa
+`**Fase 0 (tasks 01, 32, 33, 34) — …:**`, sem o traço. Medi antes de escrever:
+com o regex ancorado no traço, PES2 dava `entradas=[]` contra sete fases de
+task. O regex aceita as duas formas, e aí PES2 fecha 0–7 e só a Fase 5 do
+`port-mcr` falta — o raio de alcance da conferência é exatamente o defeito.
+
+**2. Três casos ficam de fora, e cada um por um motivo.** `progresso.md` sem
+campo `perfil:` (o do arquivo em `concluidos/` é assim, e é história), perfil
+que não existe no disco, e perfil sem a seção. Recusar esses alargaria a regra
+além do que esta CORR mediu — a conferência é sobre **fase que falta numa seção
+que existe**.
+
+**3. A varredura puxou dois documentos que a CORR não listava.** O
+`.claude/rules/tasks.md` diz "Ele confere as quatro coisas da lista acima" e o
+`CLAUDE.md` diz "confere as quatro convenções" — as duas frases passaram a ser
+falsas no instante em que a quinta entrou. Ganharam a convenção nova, com o
+motivo e com os três casos que ficam de fora.
+
+**4. A transcrição da Evidência tem duas linhas fora do lugar.** Ela dá
+`phase: 5` na linha 7 (é a **6**) e a linha da Fase 5 do plano na 668 (é a
+**671**). O sintoma não depende disso — a seção realmente não tinha a fase — e
+a Evidência do revisor fica como está.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `grep -c "Fase 5"` na seção, antes | **0** |
+| depois | **1**, com os três itens medidos pela MCR-TASK-15 |
+| caso vermelho A — `phase: 9` numa task | `check_tasks.py` sai **1**, nomeando a task, a fase e o perfil |
+| caso vermelho B — tirar a entrada da Fase 5 do perfil | `check_tasks.py` sai **1**, nomeando `phase: 5` |
+| raio de alcance, medido antes de escrever | `port-mcr` 0–4 contra fases 0–5; PES2 0–7 contra 0–7; `concluidos/` sem `perfil:`, fora |
+| `check_tasks.py` na árvore como está | **101 task(s), ok** |
+| `ctest -R tasks` | **1/1 Passed** |
+| `ctest -R 'tasks\|mcr'` | **4 de 4** |
+| `make test` | **10/10** |
+| `controls.py` | **20 of 20 red (19 substitutions, 1 new file)** |
+| `selftest.py` | `0 failure(s)` sobre 12 módulos |
+| conferência de existência de link | **vazia** |
+| fixture / `roms/` | `sha256 e53f4895…c47546`, intocada; `roms/` sem alteração |
+
 **Arquivos criados/modificados:**
+
+- `docs/prompts/perfil-mcr.md` — a entrada da Fase 5
+- `tools/check_tasks.py` — a quinta conferência, `entradas_de_fase()`, e o
+  docstring renumerado
+- `.claude/rules/tasks.md`, `CLAUDE.md` — a contagem do que o `check_tasks.py`
+  confere (varredura de discrepância)

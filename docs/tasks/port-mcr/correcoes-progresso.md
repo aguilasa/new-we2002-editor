@@ -35,7 +35,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [x] concluída | 2026-09-08 |
-| [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [ ] pendente | — |
+| [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [x] concluída | 2026-09-09 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -65,7 +65,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
 - [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
 - [x] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
-- [ ] CORR-MCR-022 — escrever a entrada da Fase 5 no perfil, e recusar fase sem entrada no `check_tasks.py`
+- [x] CORR-MCR-022 — escrever a entrada da Fase 5 no perfil, e recusar fase sem entrada no `check_tasks.py`
 
 ---
 

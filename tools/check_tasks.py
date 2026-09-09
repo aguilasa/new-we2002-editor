@@ -17,7 +17,14 @@ Quatro coisas, e a razao de cada uma esta na regra:
    o arquivo, desde que o mapeamento `ID -> arquivo` saiu dos prompts;
 4. `depends_on` so cita IDs que existem.
 
-E uma quinta, que nao e sobre task: pasta de `docs/tasks/` que tenha
+E uma quinta: fase que aparece no `phase:` de alguma task tem de ter entrada na
+secao "Verificacoes especificas por fase" do perfil que o `progresso.md` da
+pasta nomeia -- e ali que o `02-revisar.md` manda procurar o que se pergunta de
+uma fase, e fase sem entrada faz o revisor improvisar. A Fase 5 do ciclo
+`port-mcr` nasceu assim (CORR-MCR-022): registrada no plano, no progresso e na
+tabela de gates, e nao no unico lugar que o rito le.
+
+E uma sexta, que nao e sobre task: pasta de `docs/tasks/` que tenha
 `correcoes-progresso.md` e nao tenha `progresso.md` e recusada -- ela seria
 invisivel para a varredura, e um ciclo inteiro ficaria sem gate.
 
@@ -31,6 +38,14 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 TASKS = RAIZ / "docs" / "tasks"
 PROGRESSOS = "progresso.md", "correcoes-progresso.md"
+
+# A secao do perfil onde o `02-revisar.md` manda procurar, e as duas formas em
+# que os perfis deste repositorio escrevem uma entrada: `- **Fase 3** -- ...` no
+# `perfil-mcr.md` e `**Fase 0 (tasks ...) -- ...:**` no `perfil-pes2.md`. Casar
+# so a primeira daria falso vermelho nas oito fases do ciclo de PES2.
+SECAO_FASES = "## Verificações específicas por fase"
+ENTRADA_FASE = re.compile(r"^-?\s*\*\*Fase ([0-9]+)", re.M)
+PERFIL = re.compile(r"/docs/prompts/(perfil-[A-Za-z0-9._-]+\.md)")
 
 SIMBOLO = {
     "pendente": "⬜ Pendente",
@@ -99,6 +114,7 @@ def main() -> int:
 
 def confere(pasta: Path, erros: list[str]) -> int:
     progresso = (pasta / "progresso.md").read_text(encoding="utf-8")
+    entradas, perfil = entradas_de_fase(progresso)
     arquivos = tasks_de(pasta)
     if not arquivos:
         # pasta so com templates e um progresso recem-criado -- nada a conferir
@@ -147,7 +163,36 @@ def confere(pasta: Path, erros: list[str]) -> int:
             if dep not in ids:
                 erros.append(f"{nome}: `depends_on` cita {dep}, que nao existe")
 
+        # 5. a fase tem entrada no perfil
+        fase = (fm.get("phase") or "").strip()
+        if fase and entradas is not None and fase not in entradas:
+            erros.append(
+                f"{nome}: `phase: {fase}` e {perfil} nao tem entrada "
+                f'"Fase {fase}" na secao "{SECAO_FASES.lstrip("# ")}" '
+                f"-- e la que o /revisar procura o que perguntar da fase")
+
     return len(arquivos)
+
+
+def entradas_de_fase(progresso: str) -> tuple[set[str] | None, str | None]:
+    """As fases que o perfil do ciclo descreve. `(fases, nome do perfil)`.
+
+    `None` no lugar do conjunto quer dizer "nao ha o que conferir", e cada
+    motivo e deliberado: um `progresso.md` sem campo `perfil:` (o do arquivo em
+    `concluidos/` e assim, e e historia), um perfil que nao existe no disco, ou
+    um perfil sem a secao. Recusar esses casos aqui seria alargar a regra alem
+    do que a CORR-MCR-022 mediu.
+    """
+    m = PERFIL.search(progresso)
+    if not m:
+        return None, None
+    caminho = RAIZ / "docs" / "prompts" / m.group(1)
+    if not caminho.is_file():
+        return None, m.group(1)
+    partes = caminho.read_text(encoding="utf-8").split(SECAO_FASES)
+    if len(partes) < 2:
+        return None, m.group(1)
+    return set(ENTRADA_FASE.findall(partes[1])), m.group(1)
 
 
 if __name__ == "__main__":
