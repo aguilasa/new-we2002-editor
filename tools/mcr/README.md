@@ -1,8 +1,15 @@
 # `tools/mcr/` — o editor de memory card do WE2002
 
-Lê e grava o save do **Winning Eleven 2002 (PSX)** dentro de um `.mcr` de
+Lê e grava o save do **Winning Eleven 2002 (PSX)** dentro de um cartão de
 128 KiB: os 23 jogadores (atributos, nome, dorsal), a formação, os cobradores e
 o capitão. Núcleo Python puro aqui; UI **PySide6** em [`ui/`](ui/).
+
+**Três embalagens, um cartão.** `.mcr` e `.mcd` (o do emulador) são o mesmo
+dump cru de 131.072 bytes; `.gme` é o do DexDrive, com 3.904 bytes de cabeçalho
+na frente. Qualquer uma abre e qualquer uma grava, e `cli.py convert` vai de uma
+à outra. **Quem decide o que um arquivo é são os bytes dele, nunca o nome** — um
+`.gme` chamado `.mcr` abre igual. Quem decide o que se **escreve** é a extensão
+do destino. Detalhe e medição em [`gme.py`](gme.py).
 
 **O caminho curto é o [`Makefile`](Makefile) deste diretório** — `make -C
 tools/mcr` lista tudo. As seções abaixo mostram o alvo e, ao lado, o comando
@@ -252,6 +259,29 @@ $ echo $?
 
 É o alvo `mcr_card` do `ctest`, e o `77` é a convenção de *skip*.
 
+### `convert` — entre `.gme`, `.mcr` e `.mcd`
+
+```console
+$ python3 tools/mcr/cli.py convert mcr/pro-evolution-soccer-2.29939.gme work/c.mcr
+mcr/pro-evolution-soccer-2.29939.gme -> work/c.mcr (raw, 131072 bytes)
+$ python3 tools/mcr/cli.py convert work/c.mcr work/c.gme
+work/c.mcr -> work/c.gme (gme, 134976 bytes)
+note: the card had no wrapper, so the header was synthesized. ...
+```
+
+**Os dois sentidos não são simétricos, e a nota diz por quê.** Ir de `.gme` a
+cartão é um corte, e é sem perda. Voltar só devolve o **mesmo arquivo** se o
+cabeçalho original vier junto — e ele viaja com o *cartão em memória*, não com o
+`.mcr` no disco, que não tem onde guardá-lo. Medido sobre os oito `.gme` de
+[`mcr/`](../../mcr/README.md): **8 de 8** idênticos quando o cabeçalho viaja,
+**2 de 8** quando ele é sintetizado — os dois cujos bytes depois do espelho do
+diretório calham de ser todos `0xFF`. Os outros três de cabeçalho zerado nunca
+saem de uma síntese, que assina o que faz.
+
+O `convert` **não** exige que o cartão tenha um save do WE2002: quatro dos oito
+`.gme` versionados são de PES2 e um não tem option file. Contêiner não é save, e
+quem responde a segunda pergunta é o `info`.
+
 ### Os módulos, um a um
 
 Cada módulo do núcleo roda sozinho sobre um cartão, e é onde está o detalhe que
@@ -259,6 +289,8 @@ o `cli.py` resume:
 
 ```sh
 python3 tools/mcr/card.py      <cartão> --blocks     # ou --json
+python3 tools/mcr/gme.py       <arquivo>            # que embalagem é esta
+python3 tools/mcr/gme.py       --check              # os oito de mcr/, round-trip
 python3 tools/mcr/numbers.py   <cartão>              # os 23 dorsais de 5 bits
 python3 tools/mcr/text.py      <cartão>              # os nomes, byte a byte
 python3 tools/mcr/formation.py <cartão>              # X, Y, papéis, cobradores, capitão
@@ -366,16 +398,17 @@ app.py --open-probe --open-with <cópia>   # a janela vazia e as duas portas de 
 
 | comando | o que julga |
 |---|---|
-| `python3 tools/mcr/selftest.py` | **o obrigatório.** Os `self_check()` de 12 módulos, as três regras de desenho, a varredura de idioma e os controles negativos plantados. Não precisa de cartão, de venv, de Qt nem de display |
+| `python3 tools/mcr/selftest.py` | **o obrigatório.** Os `self_check()` de 13 módulos, as três regras de desenho, a varredura de idioma e os controles negativos plantados. Não precisa de cartão, de venv, de Qt nem de display |
 | `python3 tools/mcr/controls.py` | planta cada controle numa cópia da árvore e **exige o vermelho**; a última linha diz quantos são e de que tipo |
 | `python3 tools/mcr/ui_check.py` | a janela sobe no `:98`; com cartão, dirige os widgets, grava dois cartões, confere o round-trip deles e planta os próprios controles |
+| `python3 tools/mcr/gme.py --check` | os oito `.gme` de `mcr/`: cada um desmontado e remontado tem de dar o **mesmo arquivo**. Não precisa de fixture — é o único gate deste ciclo que roda em qualquer clone |
 | `python3 tools/mcr/glossary.py` | espanhol e português remanescentes em `tools/mcr/**.py` |
 | `python3 tools/mcr/layout.py --rule1` | endereço de save fora do `layout.py` |
 
-12 dos 15 módulos respondem a `--self-check` sozinhos; os três que não são o
+13 dos 16 módulos respondem a `--self-check` sozinhos; os três que não são o
 `cli.py`, o `harness.py` (que o agregador roda) e o `ui_check.py`.
 
-No `ctest`, três alvos:
+No `ctest`, quatro alvos:
 
 ```sh
 WE2002_MCR_CARD="$PWD/work/entrada.mcr" ctest --test-dir build -R mcr
@@ -383,9 +416,12 @@ WE2002_MCR_CARD="$PWD/work/entrada.mcr" ctest --test-dir build -R mcr
 
 - **`mcr_selftest`** — não precisa de nada, e nunca pula;
 - **`mcr_card`** — precisa de `WE2002_MCR_CARD`, senão pula com 77;
+- **`mcr_container`** — precisa só de `mcr/*.gme`, que está versionado;
 - **`mcr_ui`** — precisa do venv e do `:98`, senão pula com 77.
 
-Numa máquina sem venv e sem fixture: **1 passed, 2 skipped**.
+Numa máquina sem venv e sem fixture: **2 passed, 2 skipped** — o
+`mcr_container` passa junto com o `mcr_selftest`, porque a entrada dele veio no
+clone.
 
 > **O `mcr_ui` só mede gravação com `WE2002_MCR_CARD` apontado.** Sem a
 > variável ele passa com a janela sozinha e imprime `note: no WE2002_MCR_CARD,

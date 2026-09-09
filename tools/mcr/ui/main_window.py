@@ -58,6 +58,16 @@ from squad_view import SquadView                         # noqa: E402
 
 TITLE = "WE2002 memory card"
 
+# The three containers the core reads and writes, in one string both dialogs
+# use. It is a LABEL and not a rule: what a file IS gets decided by its bytes,
+# in `gme.py`, and what gets written comes from the destination's extension, in
+# `mcrio.write_card`. Rule 3 keeps that knowledge out of this file -- this line
+# only has to agree with it, and `ui_check.py` is what confirms it does.
+CARD_FILTER = ("Memory cards (*.mcr *.mcd *.gme);;"
+               "Raw dumps (*.mcr *.mcd);;"
+               "DexDrive containers (*.gme);;"
+               "All files (*)")
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, path: str | None = None):
@@ -180,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.headless:
             raise RuntimeError("the file dialog was reached in a headless run")
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "Open memory card", "", "Memory cards (*.mcr);;All files (*)")
+            self, "Open memory card", "", CARD_FILTER)
         return path
 
     def _confirm_discard(self) -> bool:
@@ -282,7 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
         target, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, "Write the memory card as",
             model.copy_target(self._path) if self._path else "",
-            "Memory cards (*.mcr);;All files (*)")
+            CARD_FILTER)
         return self.save_as(target) if target else None
 
     def save_as(self, target: str) -> str | None:

@@ -726,7 +726,21 @@ Quatro coisas que custam tempo se descobertas tarde:
   método para o ciclo `wte/` ficam em [NOTICE.md](NOTICE.md).
 
 O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
-**Cartão de jogo não se versiona**, mesma regra de `roms/`.
+**Cartão de jogo do usuário não se versiona**, mesma regra de `roms/`. A
+exceção medida é [`mcr/`](mcr/README.md): oito `.gme` de DexDrive baixados
+prontos, com checksum registrado ao lado, que entraram no git em 2026-09-09 e
+são a entrada do gate `mcr_container` — pequenos, públicos, e é o que faz esse
+gate rodar em qualquer clone. **`mcr/` é diretório de originais**, e o
+`mcrio.check_destination` o recusa como alvo de escrita, ao lado de `roms/`.
+
+**Três embalagens, um cartão.** `.mcr` e o `.mcd` do emulador são o mesmo dump
+cru de 131.072 bytes; o `.gme` põe 3.904 bytes de cabeçalho na frente. O port lê
+as três **por conteúdo** — o tamanho, e o `MC` em 3904 —, então a extensão pode
+estar errada; e grava na que a extensão do destino pedir. Uma assimetria vale
+saber: `.gme` → cartão é um corte sem perda, mas o caminho de volta só devolve o
+**mesmo arquivo** se o cabeçalho original vier junto, porque sintetizar um
+**assina** o resultado e três dos oito cartões têm cabeçalho de 3.904 zeros.
+Medido: 8 de 8 idênticos preservando, 2 de 8 sintetizando.
 
 Como se roda, e o que cada comando responde:
 
@@ -734,17 +748,20 @@ Como se roda, e o que cada comando responde:
 |---|---|
 | `make mcr` / `mcr-98` | abre a UI Qt sobre uma **cópia** de `$(WE2002_MCR_CARD)`; o `-98` força o Xvfb. **Sem cartão a janela sobe vazia** e o próprio editor abre um (`File > Open card...`, Ctrl+O) — desde a MCR-TASK-15 o alvo não aborta mais por falta de fixture |
 | `make mcr-venv` | cria `work/venv-mcr/` e instala PySide6 — **nunca por `apt`**, ver a armadilha do Python duplo |
-| `python3 tools/mcr/cli.py info\|dump\|get\|set\|roundtrip\|negative\|check <cartão>` | o CLI do núcleo; `check` é o alvo `mcr_card` |
-| `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 12 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |
+| `python3 tools/mcr/cli.py info\|dump\|get\|set\|roundtrip\|convert\|negative\|check <cartão>` | o CLI do núcleo; `check` é o alvo `mcr_card`, e `convert` vai entre `.gme`, `.mcr` e `.mcd` |
+| `python3 tools/mcr/gme.py <arquivo>` / `--check` | o contêiner do DexDrive; o `--check` desmonta e remonta os oito `.gme` de `mcr/` e é o alvo `mcr_container` |
+| `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 13 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |
 | `python3 tools/mcr/controls.py` | planta cada controle numa cópia da árvore e exige o vermelho; a última linha diz quantos são e de que tipo |
 | `python3 tools/mcr/mcrio.py <cópia> --roundtrip` | as duas formas do round-trip, que têm de dar 0 byte |
 | `python3 tools/mcr/layout.py --check` | os 17 destinos contra `wte/re/mcr.md`, nos dois sentidos |
 | `bash wte/tools/golden_run_wte.sh tools/mcr/oracle/<roteiro>.txt work/wte-japanese-shift-jis.bin` | dirige o editor do Obocaman no `:98`; foi assim que o `0x6500` foi medido |
 
-No `ctest` são três alvos: **`mcr_selftest`**, que não precisa de nada;
-**`mcr_card`**, que precisa de `WE2002_MCR_CARD`; e **`mcr_ui`**, que precisa do
-venv e do `:98`. Os dois últimos se reportam *skipped* (77) sem o que precisam —
-numa máquina sem venv e sem fixture, `ctest -R mcr` dá **1 passed, 2 skipped**.
+No `ctest` são quatro alvos: **`mcr_selftest`**, que não precisa de nada;
+**`mcr_container`**, que precisa só de `mcr/*.gme` e portanto roda em qualquer
+clone; **`mcr_card`**, que precisa de `WE2002_MCR_CARD`; e **`mcr_ui`**, que
+precisa do venv e do `:98`. Os dois últimos se reportam *skipped* (77) sem o que
+precisam — numa máquina sem venv e sem fixture, `ctest -R mcr` dá **2 passed, 2
+skipped**.
 
 **E o `mcr_ui` só mede a gravação com `WE2002_MCR_CARD` apontado.** Sem a
 variável ele passa com a janela sozinha e imprime `note: no WE2002_MCR_CARD, so

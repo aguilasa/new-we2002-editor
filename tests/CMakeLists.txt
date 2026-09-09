@@ -133,6 +133,20 @@ if(Python3_FOUND)
     set_tests_properties(mcr_card PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 600)
+
+    # The container gate (MCR-TASK-16), and it is the ONLY one of this cycle
+    # that needs no WE2002_MCR_CARD: its input is the eight DexDrive .gme
+    # committed under mcr/, so any clone can run it. It takes each one apart
+    # and puts it back together and demands the same bytes -- which is what
+    # proves the 3,904-byte header is PRESERVED and not regenerated, three of
+    # the eight carrying a header of zeros that no synthesis makes. It skips
+    # with 77 if the directory is not there, the same convention as the rest.
+    add_test(NAME mcr_container
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/mcr/gme.py --check)
+    set_tests_properties(mcr_container PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 120)
 endif()
 
 # The third mcr bracket needs the venv with PySide6 and an X display, which is

@@ -6,7 +6,7 @@ category: core
 phase: 5
 depends_on: ["MCR-TASK-15"]
 fonte_de_verdade: "/docs/tasks/port-mcr/16-conteiner-gme.md §Critério de conclusão"
-status: pendente
+status: concluído
 ---
 
 # MCR-TASK-16: `.gme` como formato de entrada e de saída, e a conversão nos dois sentidos
@@ -89,61 +89,61 @@ não muda de valor por causa disso.
 
 ## Critério de conclusão
 
-- [ ] **Um leitor de contêiner, por conteúdo.** Um módulo novo — sugerido
+- [x] **Um leitor de contêiner, por conteúdo.** Um módulo novo — sugerido
       `tools/mcr/gme.py`, separado do `card.py` porque este descreve *todo*
       cartão de PSX e aquele descreve uma embalagem em volta — devolve, de
       qualquer um dos três formatos, os 131.072 B do cartão **mais o cabeçalho
       quando havia um**. A decisão é `tamanho == 134.976 and dado[3904:3906] ==
       b"MC"`, nunca a extensão.
-- [ ] **Os oito `.gme` de `mcr/` abrem como contêiner**, os três de cabeçalho
+- [x] **Os oito `.gme` de `mcr/` abrem como contêiner**, os três de cabeçalho
       zerado inclusive; e **cinco deles continuam sendo recusados** por
       `check_card`, com a mensagem de hoje, por não terem `WEW-OPT`.
-- [ ] **`.gme` → `.gme` devolve o arquivo original, byte a byte**, nos oito —
+- [x] **`.gme` → `.gme` devolve o arquivo original, byte a byte**, nos oito —
       é o gate mais forte desta task, e o único que prova que o cabeçalho foi
       preservado em vez de regerado.
-- [ ] **`.gme` → `.mcr`/`.mcd` → `.gme`** devolve o `.gme` original nos oito,
+- [x] **`.gme` → `.mcr`/`.mcd` → `.gme`** devolve o `.gme` original nos oito,
       desde que o cabeçalho viaje junto; e o cartão intermediário bate byte a
       byte com `tail -c 131072` do original.
-- [ ] **`.mcr` → `.gme` sintetiza um cabeçalho válido**: assinatura em
+- [x] **`.mcr` → `.gme` sintetiza um cabeçalho válido**: assinatura em
       `0x00..0x0A`, os bytes fixos medidos acima, e `0x16..0x24` **espelhando
       os estados dos quadros 1..15 do cartão que vai junto**. Reabrir o
       resultado devolve o cartão de partida.
-- [ ] **O espelho é conferido na gravação, não só escrito.** Gravar um `.gme`
+- [x] **O espelho é conferido na gravação, não só escrito.** Gravar um `.gme`
       cujo espelho discorde do diretório do cartão é **recusado**, com a razão
       dita — um DexDrive listaria saves que não estão lá.
-- [ ] **`copy_target` deixa de mentir na extensão.** Abrir `x.gme` e gravar a
+- [x] **`copy_target` deixa de mentir na extensão.** Abrir `x.gme` e gravar a
       cópia padrão produz um `.gme` **de verdade** (134.976 B), não 131.072 B
       com nome errado. Gravar em outro formato é escolha explícita, não efeito
       colateral do nome.
-- [ ] **O CLI ganha a conversão**, no mínimo `convert <entrada> <saída>`, com o
+- [x] **O CLI ganha a conversão**, no mínimo `convert <entrada> <saída>`, com o
       formato saindo da extensão do destino e uma opção que a sobrepõe. As
       recusas de `mcrio` continuam no caminho.
-- [ ] **`mcr/` entra na lista de diretórios que não se escreve**, ao lado de
+- [x] **`mcr/` entra na lista de diretórios que não se escreve**, ao lado de
       `roms/` e pelo mesmo motivo: são originais versionados com checksum
       registrado. `--force` não levanta essa, como não levanta a de `roms/`.
-- [ ] **Os dois diálogos da UI nomeiam os três formatos** — abrir aceita
+- [x] **Os dois diálogos da UI nomeiam os três formatos** — abrir aceita
       `*.mcr *.mcd *.gme`, gravar oferece os três e o `.gme` sai `.gme`. O
       filtro é string na `ui/`; a decisão de formato é do núcleo.
-- [ ] **Caso vermelho plantado**, com a disciplina do `controls.py`: **dois** —
+- [x] **Caso vermelho plantado**, com a disciplina do `controls.py`: **dois** —
       (a) o escritor que **regera** o cabeçalho em vez de preservá-lo, que tem
       de derrubar o round-trip dos três zerados; (b) o leitor que decide pela
       **extensão** em vez do conteúdo, que tem de derrubar um `.gme` renomeado
       para `.mcr`. Casar zero ou duas vezes é controle quebrado, não vermelho.
-- [ ] **`self_check()` no módulo novo, com caso vermelho**, e ele entra na
+- [x] **`self_check()` no módulo novo, com caso vermelho**, e ele entra na
       contagem do `selftest.py` (que hoje diz `12 modules`).
-- [ ] **Gate sem fixture.** O passo novo do `ctest` roda **sem**
+- [x] **Gate sem fixture.** O passo novo do `ctest` roda **sem**
       `WE2002_MCR_CARD` — a entrada é `mcr/*.gme`, versionado. Se o alvo puder
       pular, ele imprime por quê, na convenção das duas linhas irmãs deste
       ciclo (`note: ...`): **leia a linha, não o `Passed`**.
-- [ ] **Captura no `:98`** do diálogo de abrir mostrando os três formatos,
+- [x] **Captura no `:98`** do diálogo de abrir mostrando os três formatos,
       anexada ao Log — e o probe **não** abre modal, como a MCR-TASK-15 fixou.
-- [ ] **Documentação atualizada**: `tools/mcr/README.md` (os três formatos e o
+- [x] **Documentação atualizada**: `tools/mcr/README.md` (os três formatos e o
       `convert`), `mcr/README.md` (a receita do `tail -c` passa a ser a
       alternativa manual, não a única) e o `CLAUDE.md`, cuja tabela do
       `tools/mcr/` diz hoje só `.mcr`.
-- [ ] Strings de módulo e de UI em **en-US** (§3.5); esta task e o Log, em
+- [x] Strings de módulo e de UI em **en-US** (§3.5); esta task e o Log, em
       português.
-- [ ] `python3 tools/mcr/selftest.py`, `python3 tools/mcr/controls.py` e
+- [x] `python3 tools/mcr/selftest.py`, `python3 tools/mcr/controls.py` e
       `ctest -R mcr` com `WE2002_MCR_CARD` apontado — os três verdes, com o
       número medido de cada um no Log.
 
@@ -163,4 +163,123 @@ não muda de valor por causa disso.
 
 ## Log de Execução
 
-*(a preencher)*
+**Executado em:** 2026-09-09
+
+### Resumo do que foi feito
+
+O contêiner virou uma **camada**, não um ramo escondido: `tools/mcr/gme.py`
+sabe desembrulhar e embrulhar, e nada mais no port sabe que existe um
+cabeçalho. As três embalagens passaram a ser a mesma coisa vista de fora —
+`.mcr` e `.mcd` são o dump cru, `.gme` é o dump com 3.904 bytes na frente —, e
+**quem decide o que um arquivo é são os bytes dele**: o tamanho, e o `MC` em
+3904. A extensão decide só o que se **escreve**.
+
+O que a execução ensinou, e não estava na task:
+
+1. **A assimetria é mais funda do que "preservar o cabeçalho".** O cabeçalho
+   viaja com o **cartão em memória**, não com o arquivo: um `.mcr` no disco não
+   tem onde guardá-lo. Então `gme → mcr → gme` em duas invocações de CLI **não
+   pode** devolver o original, e o critério da task ("desde que o cabeçalho
+   viaje junto") é sobre o objeto, não sobre o par de arquivos. Medido nos oito:
+   **8/8 idênticos** preservando, **2/8** sintetizando. O `convert` imprime uma
+   nota quando sintetiza, em vez de fingir simetria.
+2. **Dois números que a task não previa.** Só `0x27..0x34` — 14 bytes, quase
+   todos `0xFF` — separam a síntese do original nos cinco assinados; os dois que
+   ela reproduz são os que calham de ser `0xFF` inteiros. É a medição que
+   sustenta o desenho, e virou asserção: `synthesis reproduces two of those five
+   exactly`.
+3. **O `edit_probe` comparava maçã com laranja.** Ele lia o arquivo cru e
+   comparava com `card.to_bytes()`; com um `.gme` na entrada, todo offset sairia
+   deslocado em 3.904 e as diferenças **pareceriam edições que não houve**.
+   Entrou `mcrio.card_bytes_of()`, que tira o embrulho antes de comparar. O
+   mesmo valia para o `roundtrip`, que escrevia a cópia como `.mcr` e batia num
+   erro de **tamanho** em vez de medir byte.
+
+### Os dois controles, e as duas armadilhas que eles cobraram
+
+Os dois novos foram plantados na forma literal do `controls.py`, e **nenhum dos
+dois funcionou de primeira** — exatamente pelos dois motivos que o perfil
+registra:
+
+- **`gme-detect-by-extension` casou 2×.** `    if looks_wrapped(data):`
+  aparece em `read_card` e em `main()`. Controle quebrado, não vermelho. O
+  literal passou a levar a linha seguinte junto, que difere (`str(path)` contra
+  `a.path`).
+- **`gme-header-regenerated` ficou verde no `mcrio`.** O `.gme` plantado ali
+  era construído com `gme.wrap(raw)` — e um escritor que **sempre** regenera
+  produz o mesmo arquivo, então a comparação concordava consigo mesma. O
+  conserto foi montar o arquivo **à mão**, `bytes(HEADER_BYTES) + raw`: um
+  cabeçalho de zeros é a única forma que a regeneração não sabe inventar,
+  porque ela assina o que faz. É a mesma família do `model-write-nobody`.
+
+Total: `controls: 22 of 22 red (21 substitutions, 1 new file)`.
+
+**Um controle existente teve de ser reescrito**: `mcrio-readonly-guard` citava
+`    if READ_ONLY_DIR in parts:`, e a linha mudou de forma quando `mcr/` entrou
+ao lado de `roms/`. Sem isso, ele passaria a casar zero vezes — verde pelo
+motivo errado.
+
+### O que ficou medido
+
+| medição | valor |
+|---|---|
+| `gme.py --check` | `8/8 containers round-trip byte-identical` |
+| `.gme` → cartão → `.gme` preservando | **8 de 8** idênticos |
+| o mesmo, sintetizando o cabeçalho | **2 de 8** |
+| cartões assinados em `mcr/` | 5 de 8; os outros três, 3.904 bytes nulos |
+| `selftest.py` | `0 failure(s) over 13 modules plus the design rules` |
+| `controls.py` | `22 of 22 red (21 substitutions, 1 new file)` |
+| `ctest -R mcr` com fixture e `:98` | 4/4 passed |
+| `ctest -R mcr` sem fixture | `mcr_container` **passa**; só o `mcr_card` pula |
+
+### A tela
+
+A janela abre um `.gme` direto — `work/mcr-ui-gme.png`, uma cópia do
+`29939` aberta no `:98`, com a barra de estado dizendo
+`BISLPM-87056WEW-OPT  blocks [1, 2]  23 players  22 shirt number(s) DISAGREE`.
+**O `DISAGREE` não é defeito desta task**: é o que o `mcr/README.md` já
+registra — esses cartões têm nome trocado e time desbloqueado, e a área de
+jogador criado que os 17 destinos endereçam está vazia. A tripwire dos dorsais
+está certa ao acusar.
+
+O diálogo de abrir, em `work/mcr-ui-filtros.png`, mostra
+`Memory cards (*.mcr *.mcd *.gme)` e os oito arquivos de `mcr/`. Ele foi
+capturado **fora do gate**, num script descartável que constrói o
+`QFileDialog` direto: a regra da MCR-TASK-15 continua valendo, e nenhum probe
+abre modal. Quem julga o filtro é o `ui_check.py`, sobre a string que o
+`--open-probe` relata — e a asserção foi conferida à mão, plantando um filtro
+só de `.mcr` numa cópia da árvore: `FAIL: the file dialogs do not offer .mcd,
+.gme`.
+
+### Arquivos criados/modificados
+
+Conferido contra `git show --stat --format= HEAD`:
+
+- **`tools/mcr/gme.py`** — novo, o contêiner
+- `tools/mcr/card.py` — `Card.container`, e a mensagem de tamanho que dizia que
+  `.gme` "não serve aqui"
+- `tools/mcr/mcrio.py` — `read_card`, `card_bytes_of`, formato na gravação,
+  `READ_ONLY_DIRS`, e os checks do contêiner
+- `tools/mcr/cli.py` — o `convert`
+- `tools/mcr/controls.py` — dois controles novos, um reescrito
+- `tools/mcr/selftest.py` — `gme` na lista de módulos
+- `tools/mcr/ui/main_window.py` — `CARD_FILTER`, usado pelos dois diálogos
+- `tools/mcr/ui/app.py` — o probe relata o filtro
+- `tools/mcr/ui_check.py` — e o gate o julga
+- `tests/CMakeLists.txt` — o alvo `mcr_container`
+- `tools/mcr/README.md`, `mcr/README.md`, `CLAUDE.md`, `docs/PLAN-MCR-PY.md`,
+  `docs/prompts/perfil-mcr.md` — os três formatos, o `convert`, o gate novo, e
+  as contagens de módulo e de controle que a varredura do `controls.py` cobra
+- `docs/tasks/port-mcr/progresso.md` — a linha da task e o total de controles
+
+### Problemas encontrados
+
+Os três acima — o literal que casou duas vezes, o controle que se comparava
+consigo mesmo, e o `edit_probe`/`roundtrip` comparando arquivo embrulhado com
+cartão cru. Nenhum bloqueio.
+
+Uma decisão vale registrar: o `convert` **não** passa pelo `check_card`.
+Contêiner não é save, quatro dos oito `.gme` são de PES2 e um não tem option
+file; recusar a conversão deles seria responder a pergunta errada. Quem
+responde se o save serve a este editor é o `info`, com a mensagem que ele já
+tinha.

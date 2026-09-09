@@ -537,6 +537,17 @@ def _judge_open(r: dict) -> list[str]:
         bad.append(f"the save actions are enabled with no card open: "
                    f"{r['writable']}")
 
+    # THE THREE CONTAINERS HAVE TO BE OFFERED (MCR-TASK-16). The core reads any
+    # of them by content and writes the one the destination's name asks for; a
+    # dialog that advertises only `.mcr` hides two of the three from the person
+    # holding the file. This is a check on the LABEL -- the rule itself lives
+    # in `gme.py`, where Rule 3 keeps it out of the window.
+    missing = [e for e in (".mcr", ".mcd", ".gme")
+               if e not in r.get("card_filter", "")]
+    if missing:
+        bad.append(f"the file dialogs do not offer {', '.join(missing)}: "
+                   f"{r.get('card_filter')!r}")
+
     if r["asked_from_button"] != 1:
         bad.append(f"clicking the empty page's button reached the open path "
                    f"{r['asked_from_button']} time(s), not once -- the button "

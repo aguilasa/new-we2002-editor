@@ -54,11 +54,16 @@ import layout                                            # noqa: E402
 import numbers as numbers_mod                            # noqa: E402
 from card import (Card, CardError, FRAME_BYTES, Refused,   # noqa: E402
                   synthetic_card)
+import gme                                               # noqa: E402
 from model import Formation, Save                        # noqa: E402
 import harness                                           # noqa: E402
 
 CARD_ENV = "WE2002_MCR_CARD"
-READ_ONLY_DIR = "roms"
+# The directories that hold ORIGINALS and are never a tool's target. `roms/`
+# has been one since the first cycle; `mcr/` joined it when the eight DexDrive
+# containers were committed with their checksums recorded beside them -- same
+# reason, and the same refusal, which `--force` does not lift either.
+READ_ONLY_DIRS = ("roms", "mcr")
 
 
 class IoRefused(Exception):
@@ -87,9 +92,33 @@ def check_card(card: Card) -> Card:
     return card
 
 
+def read_card(path) -> Card:
+    """File -> card, whatever container the file is in.
+
+    `gme.read_card` decides by CONTENT, so a `.gme` under any name opens and a
+    `.mcd` -- which is a raw dump the emulator happens to spell differently --
+    comes straight in. The card remembers the wrapper it arrived in, and
+    `write_card` gives it back.
+    """
+    return gme.read_card(path)
+
+
+def card_bytes_of(path) -> bytes:
+    """The card inside the file, with any wrapper taken off.
+
+    An offset only means something against the card. Comparing a `.gme` file
+    against `card.to_bytes()` would shift every one of them by the 3,904 bytes
+    of header, and the differences would read as edits that never happened.
+    """
+    with open(path, "rb") as fh:
+        data = fh.read()
+    return gme.unwrap(data, origin=str(path))[0] if gme.looks_wrapped(data) \
+        else data
+
+
 def load(path) -> Save:
     """File -> validated card -> model. Size, magic and directory, in order."""
-    return Save.read(check_card(Card.from_file(path)))
+    return Save.read(check_card(read_card(path)))
 
 
 # --- writing ---------------------------------------------------------------
@@ -98,9 +127,10 @@ def check_destination(path, force: bool = False) -> str:
     """The path this module agrees to write, or a refusal naming the reason."""
     target = os.path.realpath(str(path))
     parts = target.split(os.sep)
-    if READ_ONLY_DIR in parts:
+    read_only = next((d for d in READ_ONLY_DIRS if d in parts), None)
+    if read_only is not None:
         raise IoRefused(
-            f"{target} is under a {READ_ONLY_DIR}/ directory, which holds the "
+            f"{target} is under a {read_only}/ directory, which holds the "
             f"originals and is never a tool's target. Copy into work/ and "
             f"point at the copy. --force does not lift this one.")
     fixture = os.environ.get(CARD_ENV)
@@ -136,17 +166,29 @@ def copy_target(path) -> str:
     return base + EDITED_SUFFIX + (ext or ".mcr")
 
 
-def write_card(card: Card, path, force: bool = False) -> str:
+def write_card(card: Card, path, force: bool = False,
+               fmt: str | None = None) -> str:
+    """Write the card at `path`, in the format the destination asks for.
+
+    The name decides -- `.gme` wraps, everything else writes the raw dump --
+    and `fmt` overrides it. This is the one place that knows, so the default
+    `copy_target`, the screen's Save As and the CLI all agree without any of
+    them holding a rule of their own. Before this, `copy_target` kept the
+    extension while the writer always wrote raw, so opening `x.gme` and saving
+    produced 131,072 bytes under a name that promised 134,976.
+    """
     target = check_destination(path, force=force)
+    data = gme.file_bytes(card, gme.format_for(target, fmt))
     with open(target, "wb") as fh:
-        fh.write(card.to_bytes())
+        fh.write(data)
     return target
 
 
-def store(save: Save, path, force: bool = False) -> str:
+def store(save: Save, path, force: bool = False,
+          fmt: str | None = None) -> str:
     """Model -> card (read-modify-write) -> file."""
     save.write()
-    return write_card(save.card, path, force=force)
+    return write_card(save.card, path, force=force, fmt=fmt)
 
 
 # --- the round-trips -------------------------------------------------------
@@ -163,13 +205,18 @@ def roundtrip(path, form: int = 2) -> list[int]:
     """
     with open(path, "rb") as fh:
         original = fh.read()
-    card = check_card(Card(original, origin=str(path)))
+    card = check_card(read_card(path))
     if form == 2:
         Save.read(card).write()
     elif form != 1:
         raise ValueError(f"form {form}: there are two, 1 and 2")
     with tempfile.TemporaryDirectory() as tmp:
-        out = write_card(card, os.path.join(tmp, "roundtrip.mcr"))
+        # THE COPY KEEPS THE SOURCE'S CONTAINER. Writing a `.gme` back as a raw
+        # dump would come out 3,904 bytes shorter and the round-trip would
+        # report a length mismatch instead of what it is about, which is
+        # whether any byte moved.
+        ext = os.path.splitext(str(path))[1] or ".mcr"
+        out = write_card(card, os.path.join(tmp, "roundtrip" + ext))
         with open(out, "rb") as fh:
             written = fh.read()
     if len(written) != len(original):
@@ -185,9 +232,8 @@ def edit_probe(path, index: int, field: str, value: int) -> list[int]:
     bytes it names and no others, and this reports them rather than asserting
     them, so the number in the log comes out of a versioned tool.
     """
-    with open(path, "rb") as fh:
-        original = fh.read()
-    card = check_card(Card(original, origin=str(path)))
+    original = card_bytes_of(path)
+    card = check_card(read_card(path))
     save = Save.read(card)
     if field == "number":
         save.set_number(index, value)
@@ -422,6 +468,84 @@ def _checks(c, card_path: str | None = None) -> None:
     ok("all five guards fire", len(cases) == 5
        and all(red for _, _, red in cases),
        f"green={[i for i, _, r in cases if not r]}")
+
+    # --- the containers, through the doors, with no fixture needed
+    with tempfile.TemporaryDirectory() as tmp:
+        raw = synthetic_card().to_bytes()
+        wrapped = os.path.join(tmp, "planted.gme")
+        # A HEADER OF ZEROS, on purpose: it is what three of the eight
+        # committed containers carry, and it is the one shape a regenerated
+        # header cannot reproduce, because regeneration signs what it makes.
+        # Wrapping with a synthesized header here would let a writer that
+        # never preserves anything pass this whole block.
+        # BUILT BY HAND, not with `wrap`: a writer that regenerates the header
+        # would produce a signed file here too, and comparing it against itself
+        # would agree. The file on disk has to be the one shape the writer
+        # cannot invent.
+        with open(wrapped, "wb") as fh:
+            fh.write(bytes(gme.HEADER_BYTES) + raw)
+        opened = attempt("open a .gme through the door",
+                         lambda: read_card(wrapped))
+        ok("the card comes out of the wrapper",
+           opened is not None and opened.to_bytes() == raw)
+        ok("and it remembers the wrapper it came in",
+           opened is not None and opened.container is not None)
+
+        # The default copy keeps the name AND now keeps the format with it.
+        copy = attempt("the default copy of a .gme",
+                       lambda: write_card(opened, copy_target(wrapped)))
+        ok("the copy of a .gme is a .gme, not a raw dump under that name",
+           copy is not None and os.path.getsize(copy) == gme.WRAPPED_BYTES,
+           f"size={os.path.getsize(copy) if copy else None}")
+        ok("and the two files are byte for byte the same",
+           copy is not None
+           and open(copy, "rb").read() == open(wrapped, "rb").read())
+
+        # FORM 1 ONLY, and the reason is the card and not the container: a
+        # synthetic card is zeros where the formation lives, and form 2 decodes
+        # it -- role 0 reads as -2 and the model refuses, which is right. Form 1
+        # is the I/O, which is what a container is about; form 2 runs against
+        # the fixture below.
+        ok("the round-trip of a .gme moves no byte",
+           attempt("roundtrip a .gme", lambda: roundtrip(wrapped, form=1),
+                   default=[-1]) == [])
+
+        # .gme -> .mcr -> .gme, which is the conversion that was asked for,
+        # and the one place where the two directions are NOT symmetric.
+        as_raw = os.path.join(tmp, "converted.mcr")
+        attempt("convert to raw", lambda: write_card(opened, as_raw))
+        ok("converting to .mcr writes the bare card",
+           os.path.getsize(as_raw) == len(raw))
+        ok("and the bare card is what was inside the container",
+           open(as_raw, "rb").read() == raw)
+
+        # THE WRAPPER TRAVELS WITH THE CARD, NOT WITH THE RAW FILE. Written
+        # from the same card, the container comes back byte for byte; read
+        # from the `.mcr`, there is no header on disk to come back, and the
+        # new one is synthesized and signed. Measured over `mcr/*.gme`: 8 of 8
+        # identical when the header travels, 2 of 8 when it does not -- the
+        # two whose tail happens to be all `0xFF`.
+        same_card = os.path.join(tmp, "same-card.gme")
+        attempt("write the same card out again",
+                lambda: write_card(opened, same_card))
+        ok("the container comes back byte for byte from the same card",
+           open(same_card, "rb").read() == open(wrapped, "rb").read())
+
+        back = attempt("read the raw one back", lambda: read_card(as_raw))
+        ok("a card read from a raw dump has no wrapper",
+           back is not None and back.container is None)
+        as_gme = os.path.join(tmp, "back.gme")
+        attempt("convert back", lambda: write_card(back, as_gme))
+        ok("and wrapping it again synthesizes a header instead of restoring "
+           "the one that was there",
+           os.path.getsize(as_gme) == gme.WRAPPED_BYTES
+           and open(as_gme, "rb").read() != open(wrapped, "rb").read()
+           and gme.signed(open(as_gme, "rb").read()[:gme.HEADER_BYTES]))
+
+    # `mcr/` joined `roms/` as a directory of originals.
+    refuses("refuses to write under mcr/",
+            lambda: check_destination("mcr/whatever.gme"),
+            "which holds the originals", kind=IoRefused)
 
     # --- against the real card
     card_path = card_path or os.environ.get(CARD_ENV)

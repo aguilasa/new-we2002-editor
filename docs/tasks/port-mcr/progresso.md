@@ -49,7 +49,7 @@ por princípio.
 | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | 12 | ✅ Concluído | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | 15 | ⬜ Pendente | — | ⬜ pendente |
+| [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | 15 | ✅ Concluído | 2026-09-09 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -125,7 +125,7 @@ Fase 3, que já foi revisada.
 - [x] MCR-TASK-15 — a janela sobe sem cartão, e abrir um `.mcr` do
       computador é botão e item de menu, não um diálogo que se antecipa
       à janela
-- [ ] MCR-TASK-16 — `.gme`, `.mcr` e `.mcd` como três embalagens do mesmo
+- [x] MCR-TASK-16 — `.gme`, `.mcr` e `.mcd` como três embalagens do mesmo
       cartão: qualquer uma abre, qualquer uma grava, e a conversão entre
       elas não perde byte
 
@@ -175,10 +175,11 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Tática | `0x64E2 = 1`, `0x6102 = 51`, nibbles `0/14` e `4/9` — escrita e nunca lida pelo original |
 | Codec de atributos | o mesmo de `src/core/Player.cpp`, campo por campo |
 | Round-trip | **0 bytes** de diferença nas duas formas da §5.1 — ler→gravar e ler→decodificar os 23→re-codificar→gravar. `python3 tools/mcr/mcrio.py <cópia> --roundtrip` |
-| Controles negativos | **todos vermelhos**, com e sem fixture. Quantos são, e de que tipo, é a última linha de `python3 tools/mcr/controls.py` — hoje `controls: 20 of 20 red (19 substitutions, 1 new file)`, e o número sobe a cada task que acrescenta um. O `controls.py --self-check` varre este arquivo e o perfil e recusa total copiado que não bate ([CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md)) |
+| Controles negativos | **todos vermelhos**, com e sem fixture. Quantos são, e de que tipo, é a última linha de `python3 tools/mcr/controls.py` — hoje `controls: 22 of 22 red (21 substitutions, 1 new file)`, e o número sobe a cada task que acrescenta um. O `controls.py --self-check` varre este arquivo e o perfil e recusa total copiado que não bate ([CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md)) |
 | Gravação pela tela | um atributo pelo spin box move **1 byte** (`0x0590d`, dentro dos 12 do registro do jogador 0); o arraste levou o jogador de linha 1 de `[11, 32]` a `[14, 43]` em unidades do cartão; os dois cartões gravados passam nas duas formas do round-trip. `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
 | Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
 | Abertura pela tela | a janela sobe **sem cartão**, mostrando a página vazia e um botão `Open card...` atrás da mesma ação do `File > Open card...` (`Ctrl+O`); diálogo cancelado não muda nada, arquivo que não é cartão é recusado e a janela continua abrindo no clique seguinte, e edição não gravada só se perde depois de uma pergunta (`asked=0` com o descarte recusado). `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
+| Contêiner | três embalagens do mesmo cartão: `.mcr` e `.mcd` são o dump cru de 131.072 B, `.gme` põe **3.904** de cabeçalho na frente e o `MC` cai em 3904. A leitura decide **por conteúdo**, a gravação pela extensão do destino. Dos oito `.gme` de `mcr/`, **cinco** trazem `123-456-STD` e três trazem 3.904 zeros; `0x16..0x24` espelham os quinze estados do diretório nos cinco assinados. `.gme` → cartão → `.gme` dá o mesmo arquivo em **8 de 8** preservando o cabeçalho e em **2 de 8** sintetizando — só `0x27..0x34` separa os outros três, e esses bytes não são entendidos. `python3 tools/mcr/gme.py --check` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |
 
 ---

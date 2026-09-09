@@ -72,12 +72,21 @@ editado de verdade continua sendo cartão gravado à mão.
 Os oito são **DexDrive `.gme`**: 134.976 bytes = **3.904 de cabeçalho** + os
 131.072 do cartão cru, que começa em `MC`.
 
-**Nada em `tools/mcr/` nem em `tools/pes2/` lê `.gme`.** Converta cortando pelo
-fim:
+**Desde a [MCR-TASK-16](../docs/tasks/port-mcr/16-conteiner-gme.md) o
+`tools/mcr/` lê `.gme` direto** — a decisão é por conteúdo (o tamanho, e o `MC`
+em 3904), então a extensão nem precisa estar certa:
+
+```sh
+python3 tools/mcr/cli.py info mcr/pro-evolution-soccer-2.29939.gme
+python3 tools/mcr/cli.py convert mcr/pro-evolution-soccer-2.29939.gme work/c.mcr
+python3 tools/mcr/gme.py --check          # os oito, desmontados e remontados
+```
+
+Gravar segue a extensão do destino, e `.gme` sai `.gme` de verdade. O
+`tools/pes2/` continua querendo o cartão cru, e para ele o corte manual vale:
 
 ```sh
 tail -c 131072 mcr/pro-evolution-soccer-2.29939.gme > work/entrada.mcr
-python3 tools/mcr/cli.py info work/entrada.mcr
 ```
 
 **Corte pelo fim, não pelo começo**, e o motivo está medido: três dos oito
@@ -85,6 +94,13 @@ python3 tools/mcr/cli.py info work/entrada.mcr
 assinatura `123-456-STD` que os outros cinco trazem. O `MC` está em 3904 nos
 oito assim mesmo, mas um script que valide a assinatura antes de cortar recusa
 três arquivos bons. `tail -c 131072` não olha para o cabeçalho.
+
+E é por causa desses três que **o caminho de volta preserva o cabeçalho em vez
+de regerá-lo**: síntese assina o que faz, e nenhum cabeçalho sintetizado é
+3.904 zeros. Medido: `.gme` → cartão → `.gme` dá o **mesmo arquivo nos oito**
+quando o cabeçalho viaja junto, e em **dois dos oito** quando ele é
+sintetizado. Os bytes de `0x27` a `0x34` — quase todos `0xFF`, com um `0x03`,
+`0x05` ou `0x07` avulso — não são entendidos.
 
 ## Winning Eleven 2002 (Japão), `SLPM-87056`
 

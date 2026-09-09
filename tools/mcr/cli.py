@@ -11,6 +11,7 @@ Subcommands:
     get <card> <slot> [field]        one player, or one field of one player
     set <card> <slot> <field> <v>    write it -- on a COPY, never the fixture
     roundtrip <card>                 both forms of section 5.1
+    convert <in> <out>               between .gme, .mcr and .mcd
     negative [--plant]               the five injections; --plant adds the
                                      source-level controls (controls.py
                                      prints how many, and of which kind)
@@ -37,6 +38,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import attributes                                        # noqa: E402
 import card as card_mod                                  # noqa: E402
+import gme                                               # noqa: E402
 import domains                                           # noqa: E402
 import formation as formation_mod                        # noqa: E402
 import layout                                            # noqa: E402
@@ -49,7 +51,7 @@ CARD_ENV = mcrio.CARD_ENV
 
 
 def _open(path):
-    return mcrio.check_card(card_mod.Card.from_file(path))
+    return mcrio.check_card(mcrio.read_card(path))
 
 
 def cmd_info(a) -> int:
@@ -146,6 +148,26 @@ def cmd_roundtrip(a) -> int:
               + (f" -- first at {moved[0]:#07x}" if moved else ""))
         rc |= 1 if moved else 0
     return rc
+
+
+def cmd_convert(a) -> int:
+    """Between the three containers. The card inside never changes.
+
+    This does NOT go through `check_card`: a container is not a save, and four
+    of the eight committed `.gme` are PES2 cards while a fifth has no option
+    file at all. Refusing to convert them would be answering a question nobody
+    asked -- whether the save inside is one this editor can open is what
+    `info` and `dump` are for.
+    """
+    source = mcrio.read_card(a.source)
+    fmt = gme.format_for(a.target, a.format)
+    written = mcrio.write_card(source, a.target, force=a.force, fmt=fmt)
+    print(f"{a.source} -> {written} ({fmt}, {os.path.getsize(written)} bytes)")
+    if fmt == gme.GME and source.container is None:
+        print("note: the card had no wrapper, so the header was synthesized. "
+              "The bytes after the directory mirror are not understood, and "
+              "two of the five signed headers measured reproduce exactly.")
+    return 0
 
 
 def cmd_negative(a) -> int:
@@ -245,6 +267,15 @@ def main(argv=None) -> int:
     p.add_argument("card")
     p.set_defaults(fn=cmd_roundtrip)
 
+    p = sub.add_parser("convert", help="between .gme, .mcr and .mcd")
+    p.add_argument("source")
+    p.add_argument("target")
+    p.add_argument("--format", choices=(gme.RAW, gme.GME),
+                   help="override what the target's extension says")
+    p.add_argument("--force", action="store_true",
+                   help="allow writing the card named by the variable")
+    p.set_defaults(fn=cmd_convert)
+
     p = sub.add_parser("negative", help="the injections, and the controls")
     p.add_argument("--plant", action="store_true",
                    help="also plant the source-level controls")
@@ -257,7 +288,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     try:
         return a.fn(a)
-    except (card_mod.CardError, mcrio.IoRefused) as e:
+    except (card_mod.CardError, gme.GmeError, mcrio.IoRefused) as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
 

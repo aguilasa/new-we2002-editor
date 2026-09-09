@@ -722,13 +722,16 @@ diálogo que aparece antes da janela.
 
 ## 9. Entregáveis
 
-- `tools/mcr/` — **15 módulos**, medidos com `ls tools/mcr/*.py`: os 12 que o
-  `selftest` roda, mais o `cli.py`, o próprio `selftest.py` e o `ui_check.py`;
+- `tools/mcr/` — **16 módulos**, medidos com `ls tools/mcr/*.py`: os 13 que o
+  `selftest` roda, mais o `cli.py`, o próprio `selftest.py` e o `ui_check.py`.
+  O décimo sexto é o `gme.py`, do contêiner do DexDrive, que a MCR-TASK-16
+  acrescentou depois do fechamento;
 - `tools/mcr/ui/` — a UI PySide6, **5 módulos**;
 - `tools/mcr/oracle/` — os três roteiros da MCR-TASK-13, que dirigem o editor
   do Obocaman no `:98`: o controle, o experimento do `0x6500` e o nome de
   dez bytes;
-- três alvos em `tests/CMakeLists.txt` e dois no `Makefile` (`mcr`, `mcr-98`);
+- quatro alvos em `tests/CMakeLists.txt` — o `mcr_container` entrou com a
+  MCR-TASK-16 — e dois no `Makefile` (`mcr`, `mcr-98`);
 - este plano atualizado com o que a execução medir, e
   [/docs/prompts/perfil-mcr.md](/docs/prompts/perfil-mcr.md) com o que for do
   ciclo;

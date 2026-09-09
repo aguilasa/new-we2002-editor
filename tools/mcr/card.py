@@ -147,13 +147,16 @@ class Card:
     reassembled, and that is why a byte-identical round-trip is reachable.
     """
 
-    def __init__(self, data: bytes, origin: str = "<memory>"):
+    def __init__(self, data: bytes, origin: str = "<memory>",
+                 container: bytes | None = None):
         if len(data) != CARD_BYTES:
             raise CardError(
                 f"{origin}: {len(data)} bytes, and a PSX memory card has "
                 f"{CARD_BYTES} ({CARD_BYTES // BLOCK_BYTES} blocks of "
-                f"{BLOCK_BYTES}). Formats with a header -- .gme, .vgs, an "
-                f"emulator .mcd -- are not raw dumps and do not serve here.")
+                f"{BLOCK_BYTES}). A file with a header in front of the card "
+                f"-- a DexDrive .gme -- is opened by `gme.read_card`, which "
+                f"takes the wrapper off and hands the card here. An emulator "
+                f".mcd is already a raw dump and comes straight in.")
         if data[:len(MAGIC)] != MAGIC:
             raise CardError(
                 f"{origin}: the first two bytes are "
@@ -161,6 +164,12 @@ class Card:
                 f"({MAGIC.hex(' ')}). This is not a formatted memory card.")
         self.data = bytearray(data)
         self.origin = origin
+        # The wrapper this card arrived in, when it arrived in one, kept whole
+        # so that writing it back out is the same file and not a lookalike.
+        # `gme.py` measured why: three of the eight committed containers have a
+        # header of 3,904 zero bytes, and no synthesis reproduces that -- it
+        # signs what it makes. `None` means the card came from a raw dump.
+        self.container = bytes(container) if container is not None else None
 
     # -- reading ----------------------------------------------------------
 

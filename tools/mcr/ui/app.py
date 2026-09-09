@@ -66,6 +66,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import attributes                                        # noqa: E402
 import formation_view                                    # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets             # noqa: E402
+import main_window                                       # noqa: E402
 from main_window import MainWindow                       # noqa: E402
 
 CARD_ENV = "WE2002_MCR_CARD"
@@ -245,6 +246,9 @@ def open_probe(app, window, card: str | None) -> dict:
         "open_enabled": window.act_open.isEnabled(),
         "open_shortcut": window.act_open.shortcut().toString(),
         "open_text": window.act_open.text(),
+        # The one string both dialogs pass. Reported, not judged -- what the
+        # core accepts is decided in `gme.py`, and this only has to name it.
+        "card_filter": main_window.CARD_FILTER,
         "writable": [a.isEnabled() for a in (window.act_save,
                                              window.act_save_as,
                                              window.act_overwrite)],

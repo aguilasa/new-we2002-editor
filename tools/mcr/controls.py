@@ -146,9 +146,9 @@ CONTROLS = (
             ("mcrio",),
             "a save entry marked free is not a save"),
     Control("mcrio-readonly-guard", "mcrio.py", "check_destination",
-            "    if READ_ONLY_DIR in parts:", "    if False:",
+            "    if read_only is not None:", "    if False:",
             ("mcrio",),
-            "roms/ is never a tool's target"),
+            "roms/ and mcr/ are never a tool's target"),
     Control("harness-counts-nothing", "harness.py", "Checker.ok",
             "            self.fail(name, detail)", "            pass",
             ("harness",),
@@ -186,6 +186,22 @@ CONTROLS = (
             ("mcrio",),
             "the default destination is a copy; the card that was opened is "
             "never written without being asked for"),
+    Control("gme-header-regenerated", "gme.py", "wrap",
+            "    if header is None:", "    if True:",
+            ("gme", "mcrio"),
+            "a container keeps the header it arrived with. Regenerating one "
+            "SIGNS it, and three of the eight measured cards carry 3,904 zero "
+            "bytes instead -- so a writer that regenerates comes out plausible "
+            "and is not the same file"),
+    Control("gme-detect-by-extension", "gme.py", "read_card",
+            "    if looks_wrapped(data):\n"
+            "        card_bytes, header = unwrap(data, origin=str(path))",
+            "    if str(path).lower().endswith(\".gme\"):\n"
+            "        card_bytes, header = unwrap(data, origin=str(path))",
+            ("gme",),
+            "what a file IS is decided by its bytes; nothing makes a "
+            "container be named .gme, and an emulator .mcd is a raw dump "
+            "under a third name"),
     Control("ui-below-the-sweep", os.path.join("ui", "_probe.py"),
             "a new file, one directory down", "",
             _ui_probe(),
