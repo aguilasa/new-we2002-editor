@@ -278,9 +278,11 @@ cabeçalho original vier junto — e ele viaja com o *cartão em memória*, não
 diretório calham de ser todos `0xFF`. Os outros três de cabeçalho zerado nunca
 saem de uma síntese, que assina o que faz.
 
-O `convert` **não** exige que o cartão tenha um save do WE2002: quatro dos oito
-`.gme` versionados são de PES2 e um não tem option file. Contêiner não é save, e
-quem responde a segunda pergunta é o `info`.
+O `convert` **não** exige que o cartão tenha um save do WE2002: **cinco** dos
+oito `.gme` versionados são de PES2 e um não tem option file, então o `info`
+recusa **seis** e aceita dois. Contêiner não é save, e quem responde a segunda
+pergunta é o `info`. Quem é de qual jogo está na tabela de
+[`mcr/README.md`](../../mcr/README.md), que é a fonte desta conta.
 
 ### Os módulos, um a um
 

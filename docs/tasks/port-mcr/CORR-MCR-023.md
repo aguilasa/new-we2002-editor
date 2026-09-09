@@ -3,7 +3,7 @@ id: CORR-MCR-023
 title: "Correção: a MCR-TASK-16 conta quatro cartões de PES2 e cinco recusas, e são cinco e seis"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -121,22 +121,61 @@ critério de quem executar: o mínimo desta CORR são os quatro números.
 
 ## Verificação
 
-- [ ] `grep -rn "quatro dos oito" docs/tasks/port-mcr tools/mcr` sai vazio
-- [ ] `grep -n "cinco deles" docs/tasks/port-mcr/16-conteiner-gme.md` sai vazio
-- [ ] o número escrito bate com o laço de `cli.py info` acima: **6 recusados,
+- [x] `grep -rn "quatro dos oito" docs/tasks/port-mcr tools/mcr` sai vazio
+- [x] `grep -n "cinco deles" docs/tasks/port-mcr/16-conteiner-gme.md` sai vazio
+- [x] o número escrito bate com o laço de `cli.py info` acima: **6 recusados,
       2 aceitos**
-- [ ] `python3 tools/mcr/gme.py --check` continua `8/8 containers round-trip
+- [x] `python3 tools/mcr/gme.py --check` continua `8/8 containers round-trip
       byte-identical`
-- [ ] `python3 tools/mcr/selftest.py` e `python3 tools/mcr/controls.py` verdes
-- [ ] `python3 tools/check_tasks.py` verde
-- [ ] `mcr/` e `roms/` intocadas
+- [x] `python3 tools/mcr/selftest.py` e `python3 tools/mcr/controls.py` verdes
+- [x] `python3 tools/check_tasks.py` verde
+- [x] `mcr/` e `roms/` intocadas
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-09
 
 **Resumo do que foi feito:**
 
+Os quatro números, com a **derivação à vista** em vez do total solto: onde a
+conta é usada como critério, ela agora diz de onde vem — "os cinco de PES2 mais
+o `34978`" — e aponta para a tabela do `mcr/README.md`, que é quem separa os
+oito por jogo. Um número derivado errado se denuncia na leitura; um total solto,
+não. Sobram dois aceitos, o `29939` e o `34218`, e isso passou a estar escrito.
+
 **Problemas encontrados:**
 
+**A segunda metade da CORR — "o que impede a próxima" — foi recusada, com
+motivo.** Ela propunha o `gme.py --check` imprimir quantos contêineres trazem um
+save que o `check_card` aceita, na escolha que a
+[CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) fez para o `controls.py`.
+Não dá, e não é detalhe de implementação: `mcrio.py` importa `gme.py`, então
+`gme.py` chamar `check_card` fecha um ciclo de import — e, pior, faria o módulo
+do **contêiner** saber o que é um save do WE2002, que é exatamente a separação
+de camadas que a MCR-TASK-16 defende na armadilha 1 ("misturar as duas camadas
+troca 'não é um cartão' por 'não é o cartão que eu queria'"). O lugar onde a
+conta caberia é o `cli.py`, que importa os dois; não vale um número a mais em
+código vivo para uma frase de prosa. A defesa que ficou é a derivação escrita.
+
+Nenhum outro lugar do repositório repetia a contagem: a varredura por
+`"dos oito"` em `docs/`, `.claude/`, `CLAUDE.md`, `tools/mcr/` e `mcr/` só
+devolve as linhas certas (três de cabeçalho zerado, cinco assinados, sete com
+`*-OPT`) e a transcrição do defeito dentro do próprio
+`correcoes-progresso.md`, que é evidência e não se reescreve.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `mcrio.check_card` sobre os oito | **6 recusados, 2 aceitos** |
+| `cli.py info` sobre os oito | idem, seis `error:` e dois relatórios |
+| entradas de diretório, por jogo | **5 PES2, 3 WE2002** (um sem `WEW-OPT`) |
+| `gme.py --check` | `8/8 containers round-trip byte-identical` |
+| `check_tasks.py` | `102 task(s), ok` |
+| `grep -rn "quatro dos oito" docs/tasks/port-mcr tools/mcr` | vazio |
+| `mcr/` e `roms/` | intocadas |
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/16-conteiner-gme.md` — as três linhas, com a derivação
+- `tools/mcr/README.md` — a linha do `convert`, apontando para o `mcr/README.md`

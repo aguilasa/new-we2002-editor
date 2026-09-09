@@ -61,10 +61,12 @@ Duas conclusões que decidem o desenho, e não são palpite:
 
 ### Três armadilhas para esta task
 
-1. **Contêiner não é save.** Quatro dos oito `.gme` de `mcr/` são de **PES2**
-   (`…PES-OPT`) e um de WE2002 **não tem option file** (só `WEW-D0A`). O
-   leitor de contêiner tem de abrir os oito e entregar um cartão de 131.072 B;
-   quem recusa cinco deles é o `check_card`, um nível acima, com a mensagem que
+1. **Contêiner não é save.** **Cinco** dos oito `.gme` de `mcr/` são de
+   **PES2** (`…PES-OPT`) e um de WE2002 **não tem option file** (só
+   `WEW-D0A`) — a tabela de [`../../../mcr/README.md`](../../../mcr/README.md)
+   é quem os separa. O leitor de contêiner tem de abrir os oito e entregar um
+   cartão de 131.072 B; quem recusa **seis** deles — os cinco de PES2 mais o
+   `34978` — é o `check_card`, um nível acima, com a mensagem que
    ele já tem. Misturar as duas camadas troca "não é um cartão" por "não é o
    cartão que eu queria", que é exatamente a confusão que a mensagem atual
    evita.
@@ -96,8 +98,10 @@ não muda de valor por causa disso.
       quando havia um**. A decisão é `tamanho == 134.976 and dado[3904:3906] ==
       b"MC"`, nunca a extensão.
 - [x] **Os oito `.gme` de `mcr/` abrem como contêiner**, os três de cabeçalho
-      zerado inclusive; e **cinco deles continuam sendo recusados** por
-      `check_card`, com a mensagem de hoje, por não terem `WEW-OPT`.
+      zerado inclusive; e **seis deles continuam sendo recusados** por
+      `check_card`, com a mensagem de hoje, por não terem `WEW-OPT` — os
+      **cinco** de PES2 mais o `34978`, que só tem cup data. Sobram
+      **dois** aceitos, o `29939` e o `34218`.
 - [x] **`.gme` → `.gme` devolve o arquivo original, byte a byte**, nos oito —
       é o gate mais forte desta task, e o único que prova que o cabeçalho foi
       preservado em vez de regerado.
@@ -279,7 +283,7 @@ consigo mesmo, e o `edit_probe`/`roundtrip` comparando arquivo embrulhado com
 cartão cru. Nenhum bloqueio.
 
 Uma decisão vale registrar: o `convert` **não** passa pelo `check_card`.
-Contêiner não é save, quatro dos oito `.gme` são de PES2 e um não tem option
+Contêiner não é save, cinco dos oito `.gme` são de PES2 e um não tem option
 file; recusar a conversão deles seria responder a pergunta errada. Quem
 responde se o save serve a este editor é o `info`, com a mensagem que ele já
 tinha.
