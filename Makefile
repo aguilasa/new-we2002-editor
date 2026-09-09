@@ -86,7 +86,8 @@ help:
 	@echo
 	@echo '  Editor de .mcr (memory card) -- projeto separado, Python + PySide6:'
 	@echo '  mcr-venv      cria $$(MCR_VENV) e instala PySide6 (nunca por apt)'
-	@echo '  mcr           abre o editor sobre uma COPIA de $$(WE2002_MCR_CARD)'
+	@echo '  mcr           abre o editor sobre uma COPIA de $$(WE2002_MCR_CARD);'
+	@echo '                sem cartao, sobe vazio e o proprio editor abre um'
 	@echo '  mcr-98        idem, forcando DISPLAY=$(XVFB)'
 	@echo
 	@echo '  fresh         descarta a copia de trabalho e refaz do original'
@@ -456,6 +457,11 @@ MCR_PY     := $(MCR_VENV)/bin/python
 WE2002_MCR_CARD ?= $(WORK)/entrada.mcr
 MCR_COPY   := $(WORK)/mcr-$(notdir $(WE2002_MCR_CARD))
 MCR_UI     := tools/mcr/ui/app.py
+# Cartao ausente NAO e erro desde a MCR-TASK-15: a janela sobe vazia e o
+# proprio editor abre um (File > Open card..., Ctrl+O). Por isso a copia so e
+# prerequisito quando ha o que copiar -- e o `$(wildcard)` e quem decide isso,
+# em tempo de parse.
+MCR_CARD_THERE := $(wildcard $(WE2002_MCR_CARD))
 
 .PHONY: mcr mcr-98 mcr-venv
 
@@ -478,22 +484,30 @@ $(MCR_PY):
 # caso para o qual foi escrita. Medido. Com o wildcard: existe -> prerequisito
 # de verdade, e a copia se refaz quando o cartao muda; nao existe -> lista
 # vazia, a receita roda e o `test -s` fala.
-$(MCR_COPY): $(wildcard $(WE2002_MCR_CARD)) | $(WORK)
+$(MCR_COPY): $(MCR_CARD_THERE) | $(WORK)
 	@test -s '$(WE2002_MCR_CARD)' || { \
-	  echo 'ERRO: cartao nao encontrado ou vazio: $(WE2002_MCR_CARD)'; \
+	  echo 'ERRO: cartao vazio: $(WE2002_MCR_CARD)'; \
 	  echo '      aponte WE2002_MCR_CARD para um .mcr de 128 KiB;'; \
 	  echo '      cartao de jogo nao e versionado, como roms/.'; exit 1; }
 	@echo '>> copiando $(WE2002_MCR_CARD) -> $@'
 	@cp --reflink=auto '$(WE2002_MCR_CARD)' '$@'
 
-mcr: $(MCR_PY) $(MCR_COPY)
+# Com cartao: copia em $(WORK) e abre sobre ela -- a fixture nunca se abre.
+# Sem cartao: a janela sobe vazia, e quem escolhe o arquivo e o usuario, pelo
+# botao da tela ou pelo File > Open card... (Ctrl+O). Abortar aqui, como este
+# alvo fazia ate a MCR-TASK-15, tirava do usuario a unica tela que sabe pedir
+# um cartao.
+mcr: $(MCR_PY) $(if $(MCR_CARD_THERE),$(MCR_COPY))
 	@test -f '$(MCR_UI)' || { \
 	  echo 'ERRO: $(MCR_UI) nao existe.'; \
 	  echo '      Sem a UI o nucleo continua utilizavel pela linha de'; \
 	  echo '      comando: python3 tools/mcr/cli.py dump <cartao>'; exit 1; }
-	@echo '>> $(MCR_PY) $(MCR_UI) $(MCR_COPY)   (DISPLAY=$(DISPLAY))'
+	@test -n '$(MCR_CARD_THERE)' || { \
+	  echo '>> sem cartao em "$(WE2002_MCR_CARD)" -- a janela sobe vazia;'; \
+	  echo '   escolha um .mcr pelo botao da tela ou por Ctrl+O.'; }
+	@echo '>> $(MCR_PY) $(MCR_UI) $(if $(MCR_CARD_THERE),$(MCR_COPY))   (DISPLAY=$(DISPLAY))'
 	@env $(if $(XAUTH),XAUTHORITY='$(XAUTH)') \
-	  '$(MCR_PY)' '$(MCR_UI)' '$(MCR_COPY)' $(ARGS)
+	  '$(MCR_PY)' '$(MCR_UI)' $(if $(MCR_CARD_THERE),'$(MCR_COPY)') $(ARGS)
 
 mcr-98:
 	@$(MAKE) --no-print-directory mcr DISPLAY=$(XVFB) XAUTH='$(XAUTH_XVFB)'

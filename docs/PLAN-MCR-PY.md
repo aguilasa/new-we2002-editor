@@ -668,9 +668,20 @@ fica registrada com a medição que a justifica. O precedente escrito está no
 | 2 | o gate — `selftest`, CLI e os três alvos de `ctest` |
 | 3 | a UI Qt (leitura e gravação) e o oráculo do Obocaman |
 | 4 | a verificação final contra a definição de pronto |
+| 5 | pedidos posteriores ao fechamento — hoje só abrir cartão pela tela |
 
-O quadro com as 14 tasks, dependências e datas está em
-[/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md).
+O quadro com as tasks, dependências e datas está em
+[/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md) — as 14
+das fases 0 a 4, mais o que a Fase 5 receber.
+
+**A Fase 5 não é reabertura.** Ela existe porque escopo pedido depois do
+fechamento não cabe numa fase já revisada: a definição de pronto acima
+continua conferida e fechada, e o que entra aqui se mede contra o critério da
+própria task. A primeira é a
+[MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md), de
+2026-09-09: a janela tem de subir com ou sem cartão, e escolher um `.mcr` do
+computador tem de ser ação visível dela — botão e item de menu —, nunca um
+diálogo que aparece antes da janela.
 
 **Ordem, e o que não pode ser pulado:**
 

@@ -39,6 +39,15 @@ here, passed in as `--drag-to`, and the screen has to hit it. The same
 substitution is planted in a copy of the tree at the end of every run, and the
 gate demands the red.
 
+THE THIRD CONTRACT IS MCR-TASK-15'S. `app.py --open-probe` brings the window up
+with NO card and reports how it offers to open one; this file judges. The rule
+it enforces is that the window is the way in: it comes up empty rather than
+throwing a file dialog on screen ahead of itself, the empty page carries a
+button, the button reaches the same action as the menu item, cancelling changes
+nothing, a named card opens, and unsaved edits are not discarded without a
+question. Two substitutions are planted in a copy of `ui/main_window.py` at the
+end -- the button's wiring and the dirty guard -- and the gate demands the red.
+
 THE DISPLAY IS `:98`, always. `:1` is the user's real session and a window
 there interrupts them; the rule is in `CLAUDE.md` and has no exception in this
 cycle. The server runs without `-auth`, so an EMPTY `XAUTHORITY` is the correct
@@ -242,17 +251,20 @@ def _judge(r: dict, source: str, before: bytes,
     return bad
 
 
-def _sandbox(tmp: str, name: str, old: str, new: str) -> tuple[str | None, str]:
+def _sandbox(tmp: str, name: str, old: str, new: str,
+             where: str = BREAK_FILE) -> tuple[str | None, str]:
     """A copy of the tree with one substitution applied. `(path, why not)`.
 
-    Shared by both plants below, so the rule about a literal matching exactly
+    Shared by every plant below, so the rule about a literal matching exactly
     once is written down in one place -- it is the same rule `controls.py`
-    enforces, and the same failure it reports as a broken control.
+    enforces, and the same failure it reports as a broken control. `where` is
+    the file to break: the drag and the domain plants live in
+    `ui/formation_view.py`, the open plants in `ui/main_window.py`.
     """
     sandbox = os.path.join(tmp, "mcr")
     shutil.copytree(MCR_DIR, sandbox,
                     ignore=shutil.ignore_patterns("__pycache__"))
-    broken = os.path.join(sandbox, BREAK_FILE)
+    broken = os.path.join(sandbox, where)
     with open(broken, encoding="utf-8") as fh:
         text = fh.read()
     if text.count(old) != 1:
@@ -465,6 +477,192 @@ def negative_probe(python: str, card: str, env: dict) -> int:
     return 1 if failed else 0
 
 
+# The two substitutions the open step plants, both in the window rather than in
+# the pitch -- so `_sandbox` is told where. The first unwires the empty page's
+# button from the action the menu item carries: the two ways in stop being one
+# path, and the probe's click reaches nothing. The second removes the guard
+# that asks before unsaved edits are discarded.
+OPEN_BREAK_FILE = os.path.join("ui", "main_window.py")
+OPEN_BREAKS = (
+    ("the button's wiring",
+     "        self.open_button.clicked.connect(self.act_open.trigger)",
+     "        self.open_button.clicked.connect(lambda: None)"),
+    ("the dirty guard",
+     "        if self._dirty and not self._confirm_discard():",
+     "        if False:"),
+)
+
+
+def _run_open(python: str, app: str, card: str | None, env: dict):
+    """One `--open-probe` run. `(report, output)`; report None on failure."""
+    argv = [python, app, "--open-probe"]
+    if card:
+        argv += ["--open-with", card]
+    run = subprocess.run(argv, env=env, capture_output=True, text=True,
+                         timeout=TIMEOUT)
+    line = next((l for l in run.stdout.splitlines()
+                 if l.startswith("open-json ")), None)
+    if run.returncode or line is None:
+        return None, run.stdout + run.stderr
+    return json.loads(line[len("open-json "):]), run.stdout + run.stderr
+
+
+def _judge_open(r: dict) -> list[str]:
+    """Everything wrong with one open run. Empty is the pass.
+
+    THE WINDOW IS THE WAY IN. Before MCR-TASK-15 `app.py` called `choose()`
+    ahead of `show()`, so a run with no card put a modal file dialog on screen
+    over nothing at all, and cancelling it left a window with no visible way to
+    open anything -- the menu item existed, and a person who had just dismissed
+    a dialog had no reason to look for it.
+    """
+    bad = []
+    if r["path"] is not None or not r["save_is_none"]:
+        bad.append(f"the window came up holding {r['path']}, and nothing "
+                   f"asked it to open a card")
+    if not r["empty_shown"]:
+        bad.append("with no card open the window is not showing the empty page")
+    if not r["button_visible"]:
+        bad.append("the empty page has no visible button to open a card")
+    if "open" not in r["button_text"].lower():
+        bad.append(f"the empty page's button says {r['button_text']!r}, which "
+                   f"does not offer to open anything")
+    if not r["open_enabled"] or "Open" not in r["open_text"]:
+        bad.append(f"the menu item is {r['open_text']!r}, "
+                   f"enabled={r['open_enabled']}")
+    if r["open_shortcut"] != "Ctrl+O":
+        bad.append(f"the open item's shortcut is {r['open_shortcut']!r}, "
+                   f"not the standard Ctrl+O")
+    if any(r["writable"]):
+        bad.append(f"the save actions are enabled with no card open: "
+                   f"{r['writable']}")
+
+    if r["asked_from_button"] != 1:
+        bad.append(f"clicking the empty page's button reached the open path "
+                   f"{r['asked_from_button']} time(s), not once -- the button "
+                   f"and the menu item are not the same way in")
+    if r["path_after_cancel"] is not None or not r["empty_after_cancel"]:
+        bad.append(f"cancelling the dialog changed the window: path="
+                   f"{r['path_after_cancel']}, empty={r['empty_after_cancel']}")
+
+    # A file that is not a card leaves the window alive and still offering the
+    # way in. The refusal is the core's and says why; what would be new damage
+    # is a window that ate it and then had nothing to click.
+    if not r["refusal_raised"]:
+        bad.append("a file that is not a memory card was accepted")
+    if r["path_after_refusal"] is not None or not r["empty_after_refusal"]:
+        bad.append(f"a refused file left the window holding "
+                   f"{r['path_after_refusal']}, empty="
+                   f"{r['empty_after_refusal']}")
+    if r["asked_after_refusal"] != 2:
+        bad.append(f"after a refusal the button reached the open path "
+                   f"{r['asked_after_refusal'] - 1} more time(s), not once")
+
+    if not r.get("with_card"):
+        return bad
+
+    if r["asked_from_menu"] != 1 or r["path_after_open"] != r["card"]:
+        bad.append(f"the menu item did not open the card the dialog named: "
+                   f"{r['path_after_open']} for {r['card']}")
+    if r["empty_after_open"]:
+        bad.append("the window kept the empty page after opening a card")
+    if not all(r["writable_after_open"]):
+        bad.append(f"the save actions stayed disabled with a card open: "
+                   f"{r['writable_after_open']}")
+
+    if not r["dirty_after_edit"]:
+        bad.append("editing through the form left the window clean, so the "
+                   "discard question below proves nothing")
+    if r["confirmed_while_dirty"] != 1:
+        bad.append(f"opening another card with unsaved edits asked for "
+                   f"confirmation {r['confirmed_while_dirty']} time(s), "
+                   f"not once")
+    if r["asked_while_dirty"] != 0:
+        bad.append("the file dialog opened even though the discard was "
+                   "refused -- the guard runs after the question, not before")
+    if not r["dirty_after_refusal"]:
+        bad.append("refusing the discard threw the edits away anyway")
+    if r["asked_after_confirm"] != 1 or r["dirty_after_confirm"]:
+        bad.append(f"accepting the discard asked for a card "
+                   f"{r['asked_after_confirm']} time(s) and left "
+                   f"dirty={r['dirty_after_confirm']}")
+    return bad
+
+
+def _plant_open(python: str, card: str, env: dict, name: str, old: str,
+                new: str) -> tuple[bool, str]:
+    """The same substitution machinery, judged by `_judge_open`."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, old, new, where=OPEN_BREAK_FILE)
+        if sandbox is None:
+            return False, why
+        source = os.path.join(tmp, "open.mcr")
+        shutil.copyfile(card, source)
+        r, output = _run_open(python, os.path.join(sandbox, "ui", "app.py"),
+                              source, env)
+        if r is None:
+            return False, (f"the planted probe for {name} did not run, so "
+                           f"nothing was proved:\n{output.rstrip()}")
+        bad = _judge_open(r)
+        if not bad:
+            return False, (f"{OPEN_BREAK_FILE} :: {name} was broken "
+                           f"({old.strip()} -> {new.strip()}) and the gate "
+                           f"still passed")
+        return True, bad[0]
+
+
+def open_probe(python: str, env: dict) -> int:
+    """The MCR-TASK-15 half: the window comes up, and it is the way in.
+
+    Runs with or without a fixture. Without one it still measures the empty
+    window, its button and the cancelled dialog; with one it also measures
+    opening and the discard guard, and plants the two red cases.
+    """
+    card = env.get(mcrio.CARD_ENV)
+    with tempfile.TemporaryDirectory() as tmp:
+        source = None
+        if card and os.path.isfile(card):
+            source = os.path.join(tmp, "open.mcr")
+            shutil.copyfile(card, source)
+        r, output = _run_open(python, APP, source, env)
+        if r is None:
+            print(output.rstrip())
+            print(f"FAIL: {APP} --open-probe did not report")
+            return 1
+        bad = _judge_open(r)
+        print(f"open: the window came up with no card, showing the empty page "
+              f"and a {r['button_text']!r} button behind "
+              f"{r['open_text'].replace('&', '')} "
+              f"({r['open_shortcut']}); cancelling changed nothing")
+        print(f"open: a file that is not a card was refused "
+              f"({r.get('refusal', '')[:52]}...) and the window stayed empty "
+              f"and still opened on the next click")
+        if r.get("with_card"):
+            print(f"open: the dialog named a card and the window opened it, "
+                  f"and an unsaved edit survived a refused discard "
+                  f"(asked={r['asked_while_dirty']}, "
+                  f"confirmed={r['confirmed_while_dirty']})")
+        else:
+            print(f"note: no {mcrio.CARD_ENV}, so the open probe stopped "
+                  f"after the empty window")
+        if bad:
+            for line in bad:
+                print(f"FAIL: {line}")
+            return 1
+
+    if not (card and os.path.isfile(card)):
+        return 0
+    failed = 0
+    for name, old, new in OPEN_BREAKS:
+        red, why = _plant_open(python, card, env, name, old, new)
+        if red:
+            print(f"negative: breaking {name} reddens the gate -- {why}")
+        else:
+            print(f"FAIL: {why}")
+            failed += 1
+    return 1 if failed else 0
+
+
 def write_probe(python: str, env: dict) -> int:
     """The MCR-TASK-12 half: edit through the widgets and judge the files.
 
@@ -550,9 +748,15 @@ def main() -> int:
     print(f"ok: the UI came up on {DISPLAY} and exited cleanly")
 
     try:
+        # The open step runs with or without a fixture -- what it measures
+        # first is a window with no card, which is exactly the machine that
+        # has none.
+        if open_probe(python, env):
+            return 1
         return write_probe(python, env)
-    except subprocess.TimeoutExpired:
-        print(f"FAIL: {APP} --write-probe did not exit within {TIMEOUT}s")
+    except subprocess.TimeoutExpired as e:
+        print(f"FAIL: {e.cmd[1] if len(e.cmd) > 1 else APP} did not exit "
+              f"within {TIMEOUT}s")
         return 1
 
 

@@ -732,7 +732,7 @@ Como se roda, e o que cada comando responde:
 
 | Comando | O que faz |
 |---|---|
-| `make mcr` / `mcr-98` | abre a UI Qt sobre uma **cópia** de `$(WE2002_MCR_CARD)`; o `-98` força o Xvfb |
+| `make mcr` / `mcr-98` | abre a UI Qt sobre uma **cópia** de `$(WE2002_MCR_CARD)`; o `-98` força o Xvfb. **Sem cartão a janela sobe vazia** e o próprio editor abre um (`File > Open card...`, Ctrl+O) — desde a MCR-TASK-15 o alvo não aborta mais por falta de fixture |
 | `make mcr-venv` | cria `work/venv-mcr/` e instala PySide6 — **nunca por `apt`**, ver a armadilha do Python duplo |
 | `python3 tools/mcr/cli.py info\|dump\|get\|set\|roundtrip\|negative\|check <cartão>` | o CLI do núcleo; `check` é o alvo `mcr_card` |
 | `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 12 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |

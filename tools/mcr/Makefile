@@ -53,7 +53,8 @@ XAUTH_XVFB = $(shell ps -o args= -C Xvfb 2>/dev/null \
 
 .DEFAULT_GOAL := help
 .PHONY: help check controls sweeps gate gates card copy info dump get set \
-        formation numbers names roundtrip probe negative ui ui-98 shot venv \
+        formation numbers names roundtrip probe negative ui ui-98 ui-vazia \
+        shot venv \
         oracle-controle oracle-capitao oracle-nome limpa
 
 help:
@@ -87,6 +88,8 @@ help:
 	@echo '  venv          cria $(VENV) com PySide6 -- nunca por apt'
 	@echo '  ui            abre a janela sobre uma copia'
 	@echo '  ui-98         idem, forcando DISPLAY=$(XVFB)'
+	@echo '  ui-vazia      abre a janela SEM cartao -- e o proprio editor abre'
+	@echo '                um, pelo botao da tela ou por Ctrl+O'
 	@echo '  shot          captura a janela em $$(OUT)  (TAB=0 jogadores, 1 formacao)'
 	@echo
 	@echo 'Oraculo (editor do Obocaman, sob Wine, no $(XVFB)):'
@@ -214,6 +217,12 @@ ui:
 ui-98:
 	@$(MAKE) --no-print-directory -C '$(RAIZ)' mcr-98 \
 	  WE2002_MCR_CARD='$(CARD)'
+
+# A janela vazia, que e o caminho da MCR-TASK-15: quem escolhe o arquivo e o
+# usuario, pelo botao da tela ou por Ctrl+O. Delegado como os outros dois --
+# com a variavel VAZIA, que e o que faz a raiz nao copiar nem passar cartao.
+ui-vazia:
+	@$(MAKE) --no-print-directory -C '$(RAIZ)' mcr WE2002_MCR_CARD=
 
 # A captura e propria daqui -- a raiz nao tem alvo para ela. Sempre no $(XVFB),
 # e sobre a COPIA: `--screenshot` nao grava no cartao, mas abrir o original

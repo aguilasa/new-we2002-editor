@@ -48,6 +48,7 @@ por princípio.
 | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | Gravação pela UI: ficha, formação, dorsais | 3 | 11 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | O oráculo do Obocaman: o `0x6500`, o nome cheio, o veredito do console | 3 | 09 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
+| [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | 12 | ✅ Concluído | 2026-09-09 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -75,6 +76,9 @@ revisão ainda não aconteceu.
 
 **A 13 pode ser antecipada** assim que a 09 fechar: ela precisa do leitor, não
 da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
+
+**A 15 pendura na 12**, e só nela: ela mexe na porta de leitura da janela e
+no estado vazio, e o que precisa estar de pé é a tela que grava.
 
 ---
 
@@ -109,6 +113,17 @@ da UI, e o veredito do `0x6500` muda o que a 12 desenha na tela.
 ### Fase 4 — fechamento
 
 - [x] MCR-TASK-14 — a definição de pronto do plano, item por item
+
+### Fase 5 — pedidos posteriores ao fechamento
+
+Aberta em **2026-09-09**, a pedido do usuário. A Fase 4 fechou a definição
+de pronto do plano e continua fechada; o que entra aqui é **escopo novo**,
+não reabertura — e por isso ganha fase própria em vez de uma linha a mais na
+Fase 3, que já foi revisada.
+
+- [x] MCR-TASK-15 — a janela sobe sem cartão, e abrir um `.mcr` do
+      computador é botão e item de menu, não um diálogo que se antecipa
+      à janela
 
 ---
 
@@ -159,6 +174,7 @@ Medido em 2026-09-07 contra `work/entrada.mcr` (131.072 B, `BISLPM-86600WEW-OPT`
 | Controles negativos | **todos vermelhos**, com e sem fixture. Quantos são, e de que tipo, é a última linha de `python3 tools/mcr/controls.py` — hoje `controls: 20 of 20 red (19 substitutions, 1 new file)`, e o número sobe a cada task que acrescenta um. O `controls.py --self-check` varre este arquivo e o perfil e recusa total copiado que não bate ([CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md)) |
 | Gravação pela tela | um atributo pelo spin box move **1 byte** (`0x0590d`, dentro dos 12 do registro do jogador 0); o arraste levou o jogador de linha 1 de `[11, 32]` a `[14, 43]` em unidades do cartão; os dois cartões gravados passam nas duas formas do round-trip. `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
 | Edição de um atributo | move **1 byte** (`0x0590D`, dentro dos 12 do registro do jogador 0); um dorsal move **2** (`0x05404` e `0x05907`), que são as duas cópias da §1.5. `--edit-probe` |
+| Abertura pela tela | a janela sobe **sem cartão**, mostrando a página vazia e um botão `Open card...` atrás da mesma ação do `File > Open card...` (`Ctrl+O`); diálogo cancelado não muda nada, arquivo que não é cartão é recusado e a janela continua abrindo no clique seguinte, e edição não gravada só se perde depois de uma pergunta (`asked=0` com o descarte recusado). `WE2002_MCR_CARD=$PWD/work/entrada.mcr python3 tools/mcr/ui_check.py` |
 | Upstream | SHA `30af1fe5`, sem licença, 5 commits em 2026-05-27 |
 
 ---

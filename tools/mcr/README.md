@@ -123,6 +123,7 @@ próprio `make` faz. Não há alvo que escreva no cartão que você apontou.
 | `negative` | as cinco injeções da §5.2 | `cli.py negative` |
 | `venv` | cria o venv com PySide6 | `make -C ../.. mcr-venv` |
 | `ui` / `ui-98` | abre a janela sobre uma cópia | `make -C ../.. mcr` / `mcr-98` |
+| `ui-vazia` | abre a janela **sem cartão** — quem escolhe o arquivo é o usuário | `make -C ../.. mcr WE2002_MCR_CARD=` |
 | `shot` | captura a janela em `$(OUT)` | `ui/app.py --screenshot` |
 | `oracle-controle` · `oracle-capitao` · `oracle-nome` | os três roteiros do editor do Obocaman | `wte/tools/golden_run_wte.sh …` |
 | `limpa` | apaga só o que estes alvos criam | — |
@@ -301,8 +302,27 @@ make -C tools/mcr shot TAB=1 OUT=/tmp/campo.png
 ```sh
 export DISPLAY=:98
 work/venv-mcr/bin/python tools/mcr/ui/app.py work/minha-copia.mcr
-work/venv-mcr/bin/python tools/mcr/ui/app.py            # sem argumento: abre o diálogo
+work/venv-mcr/bin/python tools/mcr/ui/app.py            # sem argumento: janela vazia
 ```
+
+### Escolher o cartão pela janela
+
+**A janela sobe com ou sem cartão**, e escolher um é ação dela: o botão
+`Open card...` do estado vazio e o item `File > Open card...` (`Ctrl+O`), que é
+o mesmo caminho — o botão dispara a ação do menu, não uma segunda cópia da
+lógica. Com um cartão aberto, o mesmo item troca de cartão; se houver edição que
+não está em arquivo nenhum, ele pergunta **antes** de abrir o diálogo.
+
+```sh
+make -C tools/mcr ui-vazia    # a janela sem cartao; ou, na raiz: make mcr WE2002_MCR_CARD=
+```
+
+Sem `WE2002_MCR_CARD` — ou com a variável apontando para arquivo que não existe
+— o `make mcr` **não aborta mais**: ele sobe a janela vazia e diz que é o editor
+quem abre o cartão. Até a MCR-TASK-15 ele parava com `ERRO: cartao nao
+encontrado`, o que tirava do usuário justamente a tela que sabe pedir um
+arquivo; e o `app.py` sem argumento abria o diálogo **antes** da janela, um
+modal sobre nada que, cancelado, não deixava nada visível.
 
 ### O que a janela faz
 
@@ -337,6 +357,7 @@ app.py --smoke                       # abre, pinta um quadro, sai 0. É o contra
 app.py <cartão> --screenshot out.png --tab 1
 app.py <cópia> --write-probe DIR --drag-to 14,43
 app.py <cartão> --report-formation
+app.py --open-probe --open-with <cópia>   # a janela vazia e as duas portas de abrir
 ```
 
 ---

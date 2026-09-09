@@ -25,6 +25,20 @@ file that is not 131,072 bytes, has no `MC`, or has no WE2002 save in its
 directory, and each refusal already says why -- so the window shows that
 sentence and stays up. The same is true of a write that is refused.
 
+THE WINDOW COMES UP FIRST, WITH OR WITHOUT A CARD (MCR-TASK-15). Opening one
+is an action OF the window -- the `File > Open card...` item and the button on
+the empty page, both of which trigger the same `QAction` -- and never a dialog
+that appears before there is a window to own it. Until this task `app.py` called
+`choose()` ahead of `show()`, so the first thing on screen was a modal over
+nothing, and cancelling it left a window with no visible way to try again.
+
+THE TWO MODALS OF THAT PATH SIT BEHIND SEAMS, `_ask_for_card` and
+`_confirm_discard`, for the reason `headless` exists at all: a gate that clicked
+the button would open a `QFileDialog`, which spins its own event loop, and the
+run would hang until the timeout. The gate replaces the seams and measures the
+whole path through them -- button, action, `choose`, `open` -- while reaching a
+real modal in a headless run raises instead of hanging.
+
 `headless` IS FOR THE GATE, and it exists because of what a modal does to one:
 `QMessageBox` spins its own event loop, so a refusal during `--smoke` or
 `--write-probe` would hang until the gate's timeout and report "did not exit"
@@ -38,7 +52,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import model                                             # noqa: E402
-from PySide6 import QtGui, QtWidgets                     # noqa: E402
+from PySide6 import QtCore, QtGui, QtWidgets            # noqa: E402
 from formation_view import FormationView                 # noqa: E402
 from squad_view import SquadView                         # noqa: E402
 
@@ -55,18 +69,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self._dirty = False
         self.headless = False
 
-        self.squad = SquadView()
-        self.formation = FormationView()
-        tabs = QtWidgets.QTabWidget()
-        tabs.addTab(self.squad, "Players")
-        tabs.addTab(self.formation, "Formation")
-        self.setCentralWidget(tabs)
-        self.squad.changed.connect(self._touched)
-        self.formation.changed.connect(self._touched)
-
+        # The menu is built first because the empty page's button triggers one
+        # of its actions: two ways in, one path, and nothing to keep in step.
         menu = self.menuBar().addMenu("&File")
-        self._add(menu, "&Open card...", self.choose,
-                  QtGui.QKeySequence.StandardKey.Open)
+        self.act_open = self._add(menu, "&Open card...", self.choose,
+                                  QtGui.QKeySequence.StandardKey.Open)
         menu.addSeparator()
         self.act_save = self._add(menu, "&Save a copy", self.save_copy,
                                   QtGui.QKeySequence.StandardKey.Save)
@@ -79,9 +86,56 @@ class MainWindow(QtWidgets.QMainWindow):
                   QtGui.QKeySequence.StandardKey.Quit)
         self._writable(False)
 
+        self.squad = SquadView()
+        self.formation = FormationView()
+        self.tabs = QtWidgets.QTabWidget()
+        self.tabs.addTab(self.squad, "Players")
+        self.tabs.addTab(self.formation, "Formation")
+        self.squad.changed.connect(self._touched)
+        self.formation.changed.connect(self._touched)
+
+        self._pages = QtWidgets.QStackedWidget()
+        self._pages.addWidget(self._empty_page())
+        self._pages.addWidget(self.tabs)
+        self.setCentralWidget(self._pages)
+        self._show_card(False)
+
         self.statusBar().showMessage("No card open")
         if path:
             self.open(path)
+
+    def _empty_page(self) -> QtWidgets.QWidget:
+        """What the window shows before there is a card: a way in.
+
+        The button does not call `choose` -- it triggers `act_open`, the same
+        action the menu item carries. One path, so a change to what opening
+        means cannot reach the menu and miss the button.
+        """
+        page = QtWidgets.QWidget()
+        box = QtWidgets.QVBoxLayout(page)
+        centre = QtCore.Qt.AlignmentFlag.AlignHCenter
+        box.addStretch(1)
+        text = QtWidgets.QLabel(
+            "No card open.\n\nOpen a .mcr memory card from this computer to "
+            "edit the WE2002 save inside it.\nWriting goes to a copy beside "
+            "the card unless you ask otherwise.")
+        text.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        box.addWidget(text)
+        box.addSpacing(16)
+        self.open_button = QtWidgets.QPushButton("Open card...")
+        self.open_button.setMinimumWidth(200)
+        self.open_button.clicked.connect(self.act_open.trigger)
+        box.addWidget(self.open_button, 0, centre)
+        box.addStretch(2)
+        return page
+
+    def _show_card(self, on: bool) -> None:
+        self._pages.setCurrentIndex(1 if on else 0)
+
+    @property
+    def showing_empty(self) -> bool:
+        """Whether the window is on the empty page. What the gate reads."""
+        return self._pages.currentIndex() == 0
 
     def _add(self, menu, text, slot, shortcut=None) -> QtGui.QAction:
         action = QtGui.QAction(text, self)
@@ -114,9 +168,45 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # -- reading ----------------------------------------------------------
 
-    def choose(self) -> None:
+    def _ask_for_card(self) -> str:
+        """The file dialog, alone in a method so the gate can go around it.
+
+        A `QFileDialog` runs its own event loop, so a headless run that reached
+        this would hang until the gate's timeout and report "did not exit"
+        instead of what happened -- the same trap MCR-TASK-12 measured with
+        `QMessageBox`. The gate replaces this method; reaching the real one
+        headless is a bug, and says so.
+        """
+        if self.headless:
+            raise RuntimeError("the file dialog was reached in a headless run")
         path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, "Open memory card", "", "Memory cards (*.mcr);;All files (*)")
+        return path
+
+    def _confirm_discard(self) -> bool:
+        """Ask before edits that are in no file yet are thrown away."""
+        if self.headless:
+            raise RuntimeError("the discard question was reached in a "
+                               "headless run")
+        answer = QtWidgets.QMessageBox.question(
+            self, "Open another card?",
+            "This card has edits that are not in any file yet, and opening "
+            "another one discards them.\n\nWrite a copy first with Ctrl+S.",
+            QtWidgets.QMessageBox.StandardButton.Discard
+            | QtWidgets.QMessageBox.StandardButton.Cancel,
+            QtWidgets.QMessageBox.StandardButton.Cancel)
+        return answer == QtWidgets.QMessageBox.StandardButton.Discard
+
+    def choose(self) -> None:
+        """Open a card: from the menu item, from the button, from Ctrl+O.
+
+        The dirty guard comes BEFORE the dialog on purpose -- asking which file
+        to open and only then saying the edits will be lost makes the person
+        answer two questions to undo one mistake.
+        """
+        if self._dirty and not self._confirm_discard():
+            return
+        path = self._ask_for_card()
         if path:
             self.open(path)
 
@@ -139,6 +229,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.squad.set_save(save)
         self.formation.set_save(save)
         self._writable(True)
+        self._show_card(True)
         self._describe()
         return True
 
