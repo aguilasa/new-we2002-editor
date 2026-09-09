@@ -38,7 +38,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [x] concluída | 2026-09-09 |
 | [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o critério conta quatro cartões de PES2 e cinco recusas, e a ferramenta mede cinco e seis | Alta | [x] concluída | 2026-09-09 |
 | [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o `mcr_container` entrou e a §4.4 do plano continua com três alvos, e o perfil com `1 passed, 2 skipped` | Alta | [x] concluída | 2026-09-09 |
-| [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [ ] pendente | — |
+| [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [x] concluída | 2026-09-09 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -71,7 +71,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-022 — escrever a entrada da Fase 5 no perfil, e recusar fase sem entrada no `check_tasks.py`
 - [x] CORR-MCR-023 — remedir cinco/seis nos quatro lugares que dizem quatro/cinco
 - [x] CORR-MCR-024 — o quarto alvo na §4.4 do plano, e `2 passed, 2 skipped` no plano e no perfil
-- [ ] CORR-MCR-025 — plantar o filtro dos diálogos em `OPEN_BREAKS`, e conferir que casa uma vez
+- [x] CORR-MCR-025 — plantar o filtro dos diálogos em `OPEN_BREAKS`, e conferir que casa uma vez
 
 ---
 

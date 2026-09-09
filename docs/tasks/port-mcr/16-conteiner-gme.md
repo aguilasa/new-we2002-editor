@@ -255,6 +255,13 @@ abre modal. Quem julga o filtro é o `ui_check.py`, sobre a string que o
 só de `.mcr` numa cópia da árvore: `FAIL: the file dialogs do not offer .mcd,
 .gme`.
 
+> **Conferência à mão não fica no repositório.** A
+> [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) plantou o caso vermelho
+> no `OPEN_BREAKS`, e ao plantá-lo mediu que a asserção era mais fraca do que
+> esta corrida à mão fez parecer: ela varria a string inteira do filtro, e os
+> grupos estreitos do fim a satisfaziam com o grupo default oferecendo `.mcr`
+> sozinho.
+
 ### Arquivos criados/modificados
 
 Conferido contra `git show --stat --format= HEAD`:

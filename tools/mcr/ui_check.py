@@ -451,6 +451,7 @@ def _outside_negative(python: str, card: str, env: dict) -> int:
         red, why = _plant_outside(python, card, env, name, old, new)
         if red:
             print(f"negative: breaking {name} reddens the gate -- {why}")
+            PLANTED.append(name)
         else:
             print(f"FAIL: {why}")
             failed += 1
@@ -471,6 +472,7 @@ def negative_probe(python: str, card: str, env: dict) -> int:
         red, why = _plant(python, card, env, name, old, new)
         if red:
             print(f"negative: breaking {name} reddens the gate -- {why}")
+            PLANTED.append(name)
         else:
             print(f"FAIL: {why}")
             failed += 1
@@ -490,7 +492,24 @@ OPEN_BREAKS = (
     ("the dirty guard",
      "        if self._dirty and not self._confirm_discard():",
      "        if False:"),
+    # MCR-TASK-16's guard, planted by CORR-MCR-025. `CARD_FILTER` is a LABEL,
+    # and Rule 3 keeps `gme.py` out of the window -- so the only thing tying
+    # what the dialogs advertise to what the core reads and writes is the
+    # assertion in `_judge_open`, and an assertion with no red case is a
+    # sentence, not a guard. Breaking the first line of the literal is enough:
+    # the dialogs then offer `.mcr` alone, which is exactly what they offered
+    # before that task.
+    ("the dialog filter",
+     'CARD_FILTER = ("Memory cards (*.mcr *.mcd *.gme);;"',
+     'CARD_FILTER = ("Memory cards (*.mcr);;"'),
 )
+
+# Every planted defect that actually reddened the gate, counted where it runs
+# instead of written down in prose. CORR-MCR-017 measured what a copied total
+# costs: the number outlives the run that produced it, in the very file the
+# commands read before running anything. The profile quotes this line.
+PLANTED: list[str] = []
+PLANTED_TOTAL = len(BREAKS) + len(OUTSIDE_BREAKS) + len(OPEN_BREAKS)
 
 
 def _run_open(python: str, app: str, card: str | None, env: dict):
@@ -542,11 +561,18 @@ def _judge_open(r: dict) -> list[str]:
     # dialog that advertises only `.mcr` hides two of the three from the person
     # holding the file. This is a check on the LABEL -- the rule itself lives
     # in `gme.py`, where Rule 3 keeps it out of the window.
-    missing = [e for e in (".mcr", ".mcd", ".gme")
-               if e not in r.get("card_filter", "")]
+    #
+    # IT IS THE FIRST GROUP THAT IS JUDGED, and CORR-MCR-025 measured why: Qt
+    # opens with that one selected, so a person who never touches the combo
+    # sees only what it names. Searching the whole string instead let the
+    # narrower groups below it -- "Raw dumps (*.mcr *.mcd)", "DexDrive
+    # containers (*.gme)" -- satisfy the check while the default offered
+    # `.mcr` alone, which is exactly the state this assertion exists to catch.
+    default = r.get("card_filter", "").split(";;")[0]
+    missing = [e for e in (".mcr", ".mcd", ".gme") if e not in default]
     if missing:
-        bad.append(f"the file dialogs do not offer {', '.join(missing)}: "
-                   f"{r.get('card_filter')!r}")
+        bad.append(f"the file dialogs open on a filter that does not offer "
+                   f"{', '.join(missing)}: {default!r}")
 
     if r["asked_from_button"] != 1:
         bad.append(f"clicking the empty page's button reached the open path "
@@ -668,6 +694,7 @@ def open_probe(python: str, env: dict) -> int:
         red, why = _plant_open(python, card, env, name, old, new)
         if red:
             print(f"negative: breaking {name} reddens the gate -- {why}")
+            PLANTED.append(name)
         else:
             print(f"FAIL: {why}")
             failed += 1
@@ -764,11 +791,14 @@ def main() -> int:
         # has none.
         if open_probe(python, env):
             return 1
-        return write_probe(python, env)
+        code = write_probe(python, env)
     except subprocess.TimeoutExpired as e:
         print(f"FAIL: {e.cmd[1] if len(e.cmd) > 1 else APP} did not exit "
               f"within {TIMEOUT}s")
         return 1
+    if code == 0 and PLANTED:
+        print(f"ui negative controls: {len(PLANTED)} of {PLANTED_TOTAL} red")
+    return code
 
 
 if __name__ == "__main__":

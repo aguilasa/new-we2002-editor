@@ -3,7 +3,7 @@ id: CORR-MCR-025
 title: "Correção: o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -120,24 +120,85 @@ mordeu os dois controles novos desta mesma task.
 
 ## Verificação
 
-- [ ] `WE2002_MCR_CARD=$PWD/work/entrada.mcr DISPLAY=:98 python3
+- [x] `WE2002_MCR_CARD=$PWD/work/entrada.mcr DISPLAY=:98 python3
       tools/mcr/ui_check.py` verde, e a corrida relata o controle novo **em
       vermelho**, nomeando-o
-- [ ] o plantio casa **uma** vez — cópia intacta é controle quebrado, não
+- [x] o plantio casa **uma** vez — cópia intacta é controle quebrado, não
       vermelho
-- [ ] `ctest -R mcr` = 4/4 com fixture e `:98`
-- [ ] `python3 tools/mcr/selftest.py` e `python3 tools/mcr/controls.py`
+- [x] `ctest -R mcr` = 4/4 com fixture e `:98`
+- [x] `python3 tools/mcr/selftest.py` e `python3 tools/mcr/controls.py`
       inalterados (`22 of 22 red`) — este controle não é do motor deles
-- [ ] a linha do `mcr_ui` no perfil diz quantos são, ou aponta para a saída
-- [ ] `mcr/` e `roms/` intocadas; `sha256sum work/entrada.mcr` =
+- [x] a linha do `mcr_ui` no perfil diz quantos são, ou aponta para a saída
+- [x] `mcr/` e `roms/` intocadas; `sha256sum work/entrada.mcr` =
       `e53f4895…c47546`
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-09
 
 **Resumo do que foi feito:**
 
+O sétimo plantio entrou no `OPEN_BREAKS`, na forma literal dos outros seis, e o
+`ui_check.py` passou a **imprimir quantos são** — `ui negative controls: 7 of 7
+red` — em vez de a prosa afirmar. A linha do `mcr_ui` no perfil deixou de dizer
+"seis" e passou a apontar para essa saída, que é a escolha da
+[CORR-MCR-017](/docs/tasks/port-mcr/CORR-MCR-017.md) aplicada ao segundo motor
+de controles deste ciclo.
+
+**E há um motivo mecânico para o número não voltar ao perfil:** o `count_sweep`
+do `controls.py` varre o `perfil-mcr.md` e o `progresso.md` atrás de `N of N
+red` e compara com `len(CONTROLS)`, que é o total dos **outros** controles, os
+22. Escrever `7 of 7 red` ali acenderia esse guard com um número que está
+certo. A frase no perfil diz isso, para quem for tentado a copiar.
+
 **Problemas encontrados:**
 
+**O plantio não ficou vermelho de primeira, e o motivo era um defeito na
+asserção — não no plantio.** Trocar a primeira linha do literal deixa o
+`CARD_FILTER` assim:
+
+```
+Memory cards (*.mcr);;Raw dumps (*.mcr *.mcd);;DexDrive containers (*.gme);;All files (*)
+```
+
+A asserção da MCR-TASK-16 procurava as três extensões na **string inteira**, e
+os grupos estreitos do fim a satisfaziam: `.mcd` está em "Raw dumps", `.gme`
+está em "DexDrive containers". Verde, com o diálogo abrindo num filtro que
+oferece `.mcr` sozinho — que é exatamente o estado que a asserção existe para
+pegar, porque o Qt abre com o **primeiro** grupo selecionado e quem não mexer
+no combo não vê os outros.
+
+O conserto é a asserção julgar o **grupo default** (`split(";;")[0]`), que é o
+que a pessoa vê. É a discrepância que o conserto revelou, e por isso entrou
+nesta invocação: o `03-corrigir.md` manda incluir o que o conserto descobrir.
+Vale como lição além deste caso — **guarda de rótulo julga o que a janela
+mostra, não o que a string contém** —, e ficou registrada na Fase 5 do perfil.
+
+Depois disso o plantio casou uma vez e ficou vermelho, com a mensagem certa:
+
+```
+negative: breaking the dialog filter reddens the gate -- the file dialogs open
+on a filter that does not offer .mcd, .gme: 'Memory cards (*.mcr)'
+```
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `ui_check.py` com fixture no `:98` | `ui negative controls: **7 of 7 red**` |
+| o plantio novo | casa **uma** vez; sem o conserto da asserção, verde |
+| `ctest -R mcr` com fixture e `:98` | **4/4 passed** |
+| `selftest.py` | `0 failure(s) over 13 modules plus the design rules` |
+| `controls.py --self-check` | `0 failure(s)`; nenhum doc vivo copia o total |
+| `check_tasks.py` | `102 task(s), ok` |
+| `sha256sum work/entrada.mcr` | `e53f4895…c47546`, intocada |
+| `mcr/` e `roms/` | intocadas |
+
 **Arquivos criados/modificados:**
+
+- `tools/mcr/ui_check.py` — o sétimo plantio, o julgamento do grupo default, e
+  o total impresso (`PLANTED` / `PLANTED_TOTAL`)
+- `docs/prompts/perfil-mcr.md` — a linha do `mcr_ui` apontando para a saída, e
+  a quarta pergunta da Fase 5
+- `docs/tasks/port-mcr/16-conteiner-gme.md` — o Log da task ancorado: a
+  conferência à mão virou controle, e o que ela não tinha medido
