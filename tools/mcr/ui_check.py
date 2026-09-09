@@ -11,7 +11,7 @@ THREE THINGS CAN BE MISSING, and none of them is a failure:
 
 Any of those exits 77, which is what tells ctest the test skipped -- the same
 convention as the golden tests and `pes2_image`. Section 4.4 of the plan wants
-a clean machine to report `1 passed, 2 skipped`, never `0 tests` and never a
+a clean machine to report `2 passed, 2 skipped`, never `0 tests` and never a
 red run.
 
 THE CONTRACT WITH THE UI, and MCR-TASK-11 has to satisfy it: `ui/app.py

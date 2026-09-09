@@ -19,7 +19,8 @@ Subcommands:
 
 `check` IS THE `mcr_card` TARGET, and 77 is not an error: it is what tells
 ctest the test skipped. Same convention as the golden tests and `pes2_image`.
-A machine with no memory card sees `1 passed, 2 skipped` and not a red run.
+A machine with no memory card and no venv sees `2 passed, 2 skipped` and not
+a red run -- the second pass is `mcr_container`, whose input is committed.
 
 WRITING IS THE ONE DANGEROUS VERB, so `set` goes through `mcrio.check_destination`
 like everything else: it refuses the card named by WE2002_MCR_CARD without
