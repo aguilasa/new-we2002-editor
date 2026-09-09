@@ -3,7 +3,7 @@ id: CORR-MCR-024
 title: "Correção: o `mcr_container` entrou e o plano continua com três alvos de `ctest`, e o perfil com `1 passed, 2 skipped`"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -112,22 +112,65 @@ parece falha.
 
 ## Verificação
 
-- [ ] `grep -n "1 passed, 2 skipped" docs/PLAN-MCR-PY.md docs/prompts/perfil-mcr.md`
-      sai vazio
-- [ ] `grep -n "três alvos" docs/PLAN-MCR-PY.md` sai vazio, e a tabela da §4.4
-      tem quatro linhas
-- [ ] `env -u WE2002_MCR_CARD ctest --test-dir build -R mcr` reproduz o par
+- [x] `grep -n "1 passed, 2 skipped" docs/PLAN-MCR-PY.md docs/prompts/perfil-mcr.md`
+      sai vazio — **salvo a frase que data o número velho**, que é registro e
+      fica
+- [x] `grep -n "três alvos" docs/PLAN-MCR-PY.md` sai vazio pelo mesmo critério,
+      e a tabela da §4.4 tem quatro linhas
+- [x] `env -u WE2002_MCR_CARD ctest --test-dir build -R mcr` reproduz o par
       escrito no perfil para esta máquina
-- [ ] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
-- [ ] a conferência de link de `.claude/rules/links.md` sai vazia
-- [ ] `mcr/` e `roms/` intocadas
+- [x] `python3 tools/check_tasks.py` e `ctest -R tasks` verdes
+- [x] a conferência de link de `.claude/rules/links.md` sai vazia
+- [x] `mcr/` e `roms/` intocadas
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-09
 
 **Resumo do que foi feito:**
 
+A §4.4 do plano ganhou a quarta linha e o título certo, o item 6 da definição de
+pronto e o critério da §4.4 passaram a **2 passed, 2 skipped**, e o perfil ganhou
+**os dois pares** — o da máquina limpa e o desta aqui, que tem venv e display e
+não exporta a variável. Sem o segundo, quem roda `ctest -R mcr` aqui vê três
+`passed` onde o documento promete dois e não sabe se é bug.
+
+**Os números velhos não foram apagados: foram datados.** O item 6 diz "era
+`1 passed, 2 skipped` quando esta definição fechou, com três alvos", e o perfil
+diz "eram 1 e 2 até a MCR-TASK-16". A Fase 5 **não reabre** a definição de
+pronto — o passo continua medido e continua passando; o que mudou foi o número
+dele, e essa é a informação que o registro tem de carregar. Apagar a data faria
+parecer que a definição sempre disse quatro alvos.
+
 **Problemas encontrados:**
 
+**A varredura puxou dois lugares que a CORR não listou**, os dois no mesmo
+plano:
+
+- `docs/PLAN-MCR-PY.md:668`, a tabela "o que cada fase fecha": "o gate —
+  `selftest`, CLI e os **três** alvos de `ctest`". É descrição de fase
+  encerrada, então ficou ancorada — "três na época; hoje quatro" — em vez de
+  reescrita;
+- a linha da **Fase 5** da mesma tabela dizia "hoje só abrir cartão pela tela",
+  e a fase tem duas tasks desde a MCR-TASK-16. Passou a nomear as duas.
+
+**O que ficou de propósito:** `docs/tasks/port-mcr/14-verificacao-final.md:105`
+mede `1 passed, 2 skipped` no Log daquela task. É o que foi medido naquele dia,
+com três alvos — transcrição de medição não se reescreve, como os `CORR-*` de
+`concluidos/` já ensinaram.
+
+**Medições:**
+
+| gate | número |
+|---|---|
+| `ctest -R mcr` sem fixture, com venv e `:98` | **3 passed, 1 skipped** (`mcr_card`) |
+| `ctest -R mcr` com fixture | 4/4, medido na revisão da MCR-TASK-16 |
+| `check_tasks.py` | `102 task(s), ok` |
+| conferência de link, forma e existência | só alvo fora de `docs/`; nenhum quebrado |
+| `mcr/` e `roms/` | intocadas |
+
 **Arquivos criados/modificados:**
+
+- `docs/PLAN-MCR-PY.md` — item 6, o título e a tabela da §4.4 com a quarta
+  linha, o critério abaixo dela, e as duas linhas da tabela de fases
+- `docs/prompts/perfil-mcr.md` — a verificação da Fase 2, com os dois pares

@@ -55,7 +55,11 @@ O que o editor edita, na v1:
    (§5.4);
 5. a UI abre no `:98`, lê um cartão, edita ficha e formação, grava, e o
    arquivo gravado passa no round-trip;
-6. `ctest -R mcr` numa máquina sem venv e sem fixture: **1 passed, 2 skipped**.
+6. `ctest -R mcr` numa máquina sem venv e sem fixture: **2 passed, 2
+   skipped** — o segundo `passed` é o `mcr_container`, que a MCR-TASK-16
+   acrescentou e que não precisa de fixture porque a entrada dele é
+   versionada. Era `1 passed, 2 skipped` quando esta definição fechou, com
+   três alvos.
 
 ---
 
@@ -516,16 +520,22 @@ A MCR-TASK-03 registra no Log a versão resolvida, o `python -VV` do venv e o
 Vale a regra do repositório sem exceção: `make mcr-98` para o Xvfb, e `:1`
 só a pedido explícito do usuário.
 
-### 4.4 Os três alvos de `ctest`
+### 4.4 Os quatro alvos de `ctest`
 
 | alvo | precisa | skip |
 |---|---|---|
 | `mcr_selftest` | nada — cartão sintético em memória | **nunca**; é o obrigatório |
 | `mcr_card` | `WE2002_MCR_CARD` apontando um `.mcr` | `SKIP_RETURN_CODE 77` |
+| `mcr_container` | `mcr/*.gme`, que é versionado | `SKIP_RETURN_CODE 77`, só se o diretório não existir |
 | `mcr_ui` | venv com PySide6 + `:98` | `SKIP_RETURN_CODE 77` |
 
+O `mcr_container` entrou com a MCR-TASK-16 e é o **único deste ciclo que roda
+em qualquer clone** — a entrada dele está no git, então nem fixture nem venv o
+seguram.
+
 Critério: máquina limpa, sem venv e sem variável → `ctest -R mcr` dá
-**1 passed, 2 skipped** — nunca `0 tests`, nunca erro.
+**2 passed, 2 skipped** — nunca `0 tests`, nunca erro. Com venv e display, mas
+ainda sem cartão, são **3 passed, 1 skipped**: só o `mcr_card` pula.
 
 ---
 
@@ -665,10 +675,10 @@ fica registrada com a medição que a justifica. O precedente escrito está no
 |---|---|
 | 0 | o ciclo em subpasta, a base legal, a fixture e o ambiente Qt |
 | 1 | o núcleo: contêiner, endereços, os quatro codecs, modelo e round-trip |
-| 2 | o gate — `selftest`, CLI e os três alvos de `ctest` |
+| 2 | o gate — `selftest`, CLI e os alvos de `ctest` (três na época; hoje quatro) |
 | 3 | a UI Qt (leitura e gravação) e o oráculo do Obocaman |
 | 4 | a verificação final contra a definição de pronto |
-| 5 | pedidos posteriores ao fechamento — hoje só abrir cartão pela tela |
+| 5 | pedidos posteriores ao fechamento — abrir cartão pela tela, e o contêiner `.gme` |
 
 O quadro com as tasks, dependências e datas está em
 [/docs/tasks/port-mcr/progresso.md](/docs/tasks/port-mcr/progresso.md) — as 14

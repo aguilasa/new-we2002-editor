@@ -222,8 +222,12 @@ autoriza — tarefa de fase adiante de que uma tarefa da fase corrente precisa.
   frente do `sys.path`, `import io` devolve o da stdlib, que o CPython cacheia
   antes de qualquer código nosso rodar; um `io.py` aqui roda como script e não
   é importável por ninguém. Medido na MCR-TASK-09, plano corrigido.
-- **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = 1 passed, 2
-  skipped. **E o harness não se confere com ele mesmo:** o controle
+- **Fase 2** — máquina sem venv e sem fixture: `ctest -R mcr` = **2 passed, 2
+  skipped**; com venv e display mas sem cartão, **3 passed, 1 skipped**. O
+  segundo par vale estar escrito porque é o que se vê nesta máquina ao não
+  exportar a variável — sem ele, "2 passed" parece falha. Eram 1 e 2 até a
+  MCR-TASK-16, que acrescentou o `mcr_container`.
+  **E o harness não se confere com ele mesmo:** o controle
   `harness-counts-nothing` (o ramo de falha do `Checker.ok` virando `pass`)
   deixou as catorze corridas **verdes**, porque toda asserção do próprio
   harness é um `ok(...)`. O conserto é a única exceção do port a "não use
