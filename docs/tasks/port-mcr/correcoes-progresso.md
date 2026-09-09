@@ -35,6 +35,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-019](/docs/tasks/port-mcr/CORR-MCR-019.md) | [MCR-TASK-12](/docs/tasks/port-mcr/12-ui-gravacao.md) | o comentário do `mcr_ui` voltou ao português num arquivo que a MCR-TASK-10 mediu como inglês, e a pendência da 14 ficou sem a evidência que cita | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-020](/docs/tasks/port-mcr/CORR-MCR-020.md) | [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) | cobrador ou capitão fora do onze aparece como 10 na tela, calado, num cartão que o núcleo preserva intacto | Baixa | [x] concluída | 2026-09-08 |
 | [CORR-MCR-021](/docs/tasks/port-mcr/CORR-MCR-021.md) | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | a tabela "Estado medido" ficou em 16/16 controles e a ferramenta imprime 20 de 20 — a CORR-MCR-017 tirou o número do perfil e não daqui | Alta | [x] concluída | 2026-09-08 |
+| [CORR-MCR-022](/docs/tasks/port-mcr/CORR-MCR-022.md) | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | a Fase 5 nasceu sem entrada em "Verificações específicas por fase", que é onde o `/revisar` procura o que perguntar de uma fase | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -64,6 +65,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-019 — repor o comentário do `mcr_ui` em inglês com o conteúdo novo, e reancorar o item da MCR-TASK-14
 - [x] CORR-MCR-020 — a tela mostra o valor do cartão ou diz que não o mostra, com caso vermelho
 - [x] CORR-MCR-021 — apontar a linha dos controles para a saída do `controls.py`, e varrer os docs do ciclo atrás de total copiado
+- [ ] CORR-MCR-022 — escrever a entrada da Fase 5 no perfil, e recusar fase sem entrada no `check_tasks.py`
 
 ---
 
@@ -442,3 +444,24 @@ ciclo arquivado, o dele em
   --self-check` que varra os documentos do ciclo atrás de `N/N` e exija que
   bata com `len(CONTROLS)`, na forma da `address_monopoly()` e da
   `glossary.sweep()`.
+
+### CORR-MCR-022
+
+- **Arquivo com problema:** `docs/prompts/perfil-mcr.md`, a seção
+  "Verificações específicas por fase"
+- **Sintoma:** a MCR-TASK-15 abriu a **Fase 5** — o plano ganhou a linha na §7
+  com o motivo de ela não ser reabertura, o `progresso.md` ganhou a fase no
+  quadro e no grafo, e a linha do `mcr_ui` na tabela de gates ganhou o que o
+  gate passou a exigir. A seção das fases continua indo só até a **Fase 4**. É
+  o caso que o `02-revisar.md` nomeia em letras: "se o perfil não tiver entrada
+  para essa fase, diga isso na saída em vez de improvisar — fase sem
+  verificação escrita é achado, e vira CORR". Quem revisar a próxima task de
+  Fase 5 abre a seção, não acha a fase e improvisa.
+- **Como foi detectado:** `grep -n "^- \*\*Fase" docs/prompts/perfil-mcr.md`
+  na revisão da MCR-TASK-15, contra o `phase: 5` do frontmatter da task.
+- **Fix:** escrever a entrada da Fase 5 — a substância já está medida, entre a
+  linha do `mcr_ui` e o critério da task: um caminho com dois gatilhos, modal
+  nenhum num gate (a caixa atrás de um seam que o probe substitui, e alcançá-la
+  em `headless` levanta), e o que a fase fecha não desfaz o que a definição de
+  pronto já media. E, para fechar de vez, o `check_tasks.py` recusando fase que
+  não tenha entrada no perfil, na forma dos outros guards do ciclo.
