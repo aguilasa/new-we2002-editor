@@ -148,3 +148,11 @@ wte/re/trace.log
 # Reextrair o texto: pdftotext -layout -enc UTF-8 <arquivo>.pdf
 # Reextrair as imagens: pdfimages -png -p <arquivo>.pdf docs/biblia-we2002/img/fig
 /docs/pdf/
+
+# ---- Editor de terceiro do PasionWEmods (`WE2002-EASY-MCR-V4/run-bottles.sh`) ----
+# O "Sofifa FC25 EasyMCR v4": app .NET 8 WinForms sem fonte e sem licenca, que
+# edita o save do WE2002 dentro de um `.mcr`. Sao 252 MB, dos quais 213 MB do
+# `mydatabase.db` que ele carrega. Roda sob Wine na bottle `easy-mcr`. Como o
+# `we-team-editor/` e as imagens de CD, o usuario mantem a pasta no disco e ela
+# nunca entra no versionamento.
+/WE2002-EASY-MCR-V4/
