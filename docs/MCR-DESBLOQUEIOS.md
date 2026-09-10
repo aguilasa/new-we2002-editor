@@ -1,10 +1,14 @@
 # Os desbloqueios no option file do WE2002
 
-**Medido em 2026-09-10**, sobre a release japonesa `SLPM-87056` (as três
-imagens de `roms/` declaram esse código). O que este arquivo diz é onde o
-option file guarda os **nove times secretos** e a opção de **escolher os times
-da Master League no modo exibição**, e como reescrever isso sem que o jogo
-recuse o cartão.
+**Medido em 2026-09-10**, sobre a release japonesa `SLPM-87056`, nas duas
+imagens que a medição usou: `roms/we2002-english/we2002-english.bin` e
+`roms/we2002-pt-br.bin`, as duas declarando esse código. (Não são as únicas —
+cinco `.bin` de `roms/` o declaram, a European Deluxe dos golden tests do
+`newWe2002` entre elas.)
+
+O que este arquivo diz é onde o option file guarda os **nove times secretos** e
+a opção de **escolher os times da Master League no modo exibição**, e como
+reescrever isso sem que o jogo recuse o cartão.
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar. A medição

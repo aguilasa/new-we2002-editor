@@ -124,8 +124,9 @@ que se mede.
 
 ### O veredito do console: **não obtido**, e a razão é medida
 
-A fixture é um save chamado `BISLPM-86600WEW-OPT`. As três imagens de `roms/`
-declaram `cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT` — mesmo sufixo
+A fixture é um save chamado `BISLPM-86600WEW-OPT`. As **cinco** imagens de
+WE2002 em `roms/` declaram `cdrom:SLPM_870.56` e escrevem
+`BISLPM-87056WEW-OPT` — mesmo sufixo
 `WEW-OPT`, que é por que todos os offsets batem, e **código de produto
 diferente**. Um jogo de PSX acha o save dele pelo nome, então este cartão é
 invisível para os discos desta máquina. Renomear a entrada do diretório é

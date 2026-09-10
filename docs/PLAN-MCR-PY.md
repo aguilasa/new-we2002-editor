@@ -628,8 +628,9 @@ afirma.)
    depende dele** — ela se mede contra o original, não contra o console.
 
    A MCR-TASK-13 mediu **por que ele não foi obtido**, e não é falta de vontade:
-   a fixture é um save chamado `BISLPM-86600WEW-OPT`, e as três imagens de
-   `roms/` declaram `cdrom:SLPM_870.56` e escrevem `BISLPM-87056WEW-OPT`. O
+   a fixture é um save chamado `BISLPM-86600WEW-OPT`, e as **cinco** imagens
+   de WE2002 em `roms/` declaram `cdrom:SLPM_870.56` e escrevem
+   `BISLPM-87056WEW-OPT`. O
    sufixo `WEW-OPT` é o mesmo — é por isso que todos os offsets batem —, mas o
    código de produto não, e um jogo de PSX acha o save dele **pelo nome**.
    Renomear a entrada do diretório é exatamente a escrita abaixo de `0x800` que
