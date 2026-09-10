@@ -3,7 +3,7 @@ id: CORR-MCR-029
 title: "Correção: \"a diferença entre c-opcao e c-opcao2 é a câmera e nada mais\" omite os 15 bytes de alta entropia"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -58,16 +58,41 @@ comportamento do campo de `0x02035`.
 
 ## Verificação
 
-- [ ] o diff byte a byte de `work/cards/c-opcao.mcr` × `c-opcao2.mcr` e a frase
+- [x] o diff byte a byte de `work/cards/c-opcao.mcr` × `c-opcao2.mcr` e a frase
       do doc dizem o mesmo número
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-10
 
 **Resumo do que foi feito:**
 
+A frase passou a dizer as duas coisas separadas, que é o que a medição sustenta:
+**no jogo mudou só a câmera; no cartão mudaram 17 bytes.** O bloco ganhou a
+terceira linha, os 15 de `0x02035..0x02043`, ao lado dos dois de interesse.
+
+E ganhou a consequência para quem for escrever o gravador, que é o motivo de a
+frase antiga importar: trocar um enum move dois bytes **que se sabe
+reproduzir** e quinze **que não** — e zero é aceito num cartão de primeira
+execução, que é a saída registrada. O par continua sendo o isolamento útil, e
+passou a ser também, explicitamente, a segunda amostra do comportamento do
+campo de alta entropia.
+
 **Problemas encontrados:**
 
+Nenhum. O diff deu exatamente os 17 bytes da CORR, na primeira corrida.
+
+**Medições:**
+
+| medida | valor |
+|---|---|
+| bytes diferentes entre `c-opcao` e `c-opcao2` | **17** |
+| de interesse | `0x02104` (`03` → `02`, a câmera), `0x02102` (`ad` → `ac`, a soma) |
+| campo de alta entropia | `0x02035..0x02043`, **15** bytes, trocados por inteiro |
+| `roms/`, `mcr/` | intocados (leitura pura) |
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md` — a distinção entre o que
+  mudou na tela e o que mudou no cartão, e a terceira linha do bloco

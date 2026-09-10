@@ -210,16 +210,22 @@ partir de um `first-boot` pode deixá-lo zerado.
 
 #### O que o `c-opcao2` isolou de brinde
 
-Ele foi gravado **sobre** o `c-opcao`, não a partir do zero, então a diferença
-entre os dois é a câmera e nada mais:
+Ele foi gravado **sobre** o `c-opcao`, não a partir do zero, e **no jogo mudou
+só a câmera**. No cartão mudaram **17 bytes**:
 
 ```
 0x02104   c-opcao=03   c-opcao2=02      <- a câmera
 0x02102   c-opcao=ad   c-opcao2=ac      <- a soma, acompanhando
+0x02035..0x02043   15 bytes             <- o campo de alta entropia
 ```
 
-Um byte de enum, e a soma andando junto. É a mesma forma que o campo de flags
-tem de ter.
+Um byte de enum e a soma andando junto — é a mesma forma que o campo de flags
+tem de ter, e é o que faz deste par o isolamento útil. Os outros 15 são o campo
+de `0x02035`, que muda por inteiro em **toda** gravação que mudou algo; o par é
+também a segunda amostra desse comportamento, e é por isso que "só a câmera"
+vale para a tela e não para os bytes. Quem for escrever o gravador precisa
+saber que trocar um enum move dois bytes **que se sabe reproduzir** e quinze
+**que não** — e que zero é aceito num cartão de primeira execução.
 
 #### O campo confirmado: `0x02184..0x02185`, um bit por opção
 
