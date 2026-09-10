@@ -422,24 +422,26 @@ pes2-status:
 # de outra imagem. `make fresh` zera as duas. O DuckStation nao escreve no
 # disco; o que ele escreve e o cartao.
 #
-# GAME_IMAGE aceita caminho com espaco -- o default tem -- e a imagem pode
-# estar dentro de uma subpasta de roms/, que e como as releases multi-arquivo
-# chegam.
+# GAME_IMAGE aceita caminho com espaco, e a imagem pode estar dentro de uma
+# subpasta de roms/, que e como as releases multi-arquivo chegam.
 
 # A imagem do JOGO nao e a do editor. $(IMAGE) e a European Deluxe porque e
 # ela que os golden tests medem; aqui o default e a traducao PT-BR, que e a
 # que se joga. As duas declaram `BOOT = cdrom:SLPM_870.56`, entao o
 # DuckStation da a ambas o mesmo titulo e portanto o MESMO option file --
 # trocar de imagem nao troca de cartao.
-GAME_IMAGE ?= roms/World Soccer Winning Eleven 2002/World Soccer Winning Eleven 2002 (Japan) (Track 1) [English].bin
+GAME_IMAGE ?= roms/we2002-english/we2002-english.bin
 
-# **Os nomes da copia sao FIXOS, e nao derivados de $(GAME_IMAGE).** O default
-# tem espacos no caminho, e funcao de make separa palavra por espaco: com
-# $(notdir) e $(basename) a mesma linha rendeu `target 'Soccer' given more
-# than once` e receitas para um alvo chamado `work/World`. Alvo de make nao
-# aceita espaco -- nao ha como escapar isso --, entao a copia se chama sempre
-# a mesma coisa e o caminho de origem so aparece dentro de aspas simples, no
-# shell da receita, onde espaco, parenteses e colchete nao significam nada.
+# **Os nomes da copia sao FIXOS, e nao derivados de $(GAME_IMAGE).** Funcao de
+# make separa palavra por espaco, e o default do dia em que isto foi escrito
+# tinha espacos: com $(notdir) e $(basename) a mesma linha rendeu `target
+# 'Soccer' given more than once` e receitas para um alvo chamado `work/World`.
+# Alvo de make nao aceita espaco -- nao ha como escapar isso. Aquele arquivo
+# desde entao foi renomeado (roms/ e minusculo e sem espaco, por convencao do
+# repositorio), mas GAME_IMAGE continua aceitando um caminho assim -- e e como
+# chega toda release multi-arquivo --, entao a copia se chama sempre a mesma
+# coisa e o caminho de origem so aparece dentro de aspas simples, no shell da
+# receita, onde espaco, parenteses e colchete nao significam nada.
 # O nome tambem NAO colide com $(COPY), entao a secao `run` e esta constroem
 # alvos diferentes ainda que apontadas para a mesma imagem -- ao preco de uma
 # segunda copia.
