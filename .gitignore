@@ -156,3 +156,15 @@ wte/re/trace.log
 # `we-team-editor/` e as imagens de CD, o usuario mantem a pasta no disco e ela
 # nunca entra no versionamento.
 /WE2002-EASY-MCR-V4/
+
+# ---- Editor de terceiro para PES6/WE2007 (`pes6editor/`) ----
+# O "PES 6 Editor 7.0": app Java (`pes-6-editor-7.0.jar`, 314 KB, `Main-Class:
+# Splasher`) que edita save de Pro Evolution Soccer 6 / Winning Eleven 2007 no
+# PS2 -- outro jogo, fora dos quatro projetos deste repositorio. Vem com a
+# GPL-3.0 ao lado, entao, ao contrario do `we-team-editor.exe` e do
+# `WE2002-EASY-MCR-V4/`, este tem licenca -- so que sem o fonte, e binario sem
+# fonte nao entra no versionamento de qualquer forma. A pasta traz tambem um
+# save (`*.max`, 844 KB) e o `PFE_settings.dat`, que e save de usuario pela
+# mesma regra de `roms/` e de `work/entrada.mcr`. O usuario mantem a pasta no
+# disco; roda por `pes-6-editor-7.0.bat` (javaw) no Windows.
+/pes6editor/
