@@ -152,6 +152,56 @@ recalcular a verificação, é recusado. Se a mesma verificação cobre a área 
 jogador — que é onde o port e o editor do Obocaman escrevem — é pergunta
 aberta, e agora testável: gravar pela ferramenta e abrir no jogo.
 
+#### A verificação: **um byte de soma por bloco**, medido em 2026-09-10
+
+Quatro amostras novas, todas gravadas **pelo jogo** e portanto válidas, a
+partir do cartão PT-BR — `a1`, `a2` (salvar sem mudar nada, duas vezes),
+`b-nome` (uma letra de um nome), `c-opcao` (várias opções) e `c-opcao2`
+(`c-opcao` **mais** a câmera, e só ela). Ficam em `$(WORK)/cards/`, pelo alvo
+`make we2002-card-snap LABEL=<nome>`.
+
+**A gravação é determinística.** `a1`, `a2` e o `we2002-ptbr-first-boot.mcr`
+são o mesmo md5 — salvar sem mudar nada não move um bit. Não há relógio nem
+contador no save, então todo diff daqui em diante é sinal.
+
+A regra, que reproduz **sete** cartões independentes (os quatro acima, os dois
+`first-boot` e o `29939`, de terceiro):
+
+```
+byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a   (mod 256)
+```
+
+`k = 0x8a` em todos os sete. A busca que a achou é de faixa consistente com
+todos os cartões ao mesmo tempo: as faixas válidas para `0x02102` **começam
+todas em `0x02044`** — o byte logo depois do campo de alta entropia —, e as de
+`0x02202` **começam todas em `0x02186`**, onde a anterior termina. São blocos
+encadeados, cada um com seu byte de soma dentro.
+
+E o inverso vale registrar: `0x0216d` e `0x02205` dão **zero** faixas
+consistentes. Não são verificação — são dado. O `0x0216d` muda quando uma opção
+muda, o que é o que se espera de um byte de opção.
+
+#### O campo de alta entropia `0x02035..0x02043`, 15 bytes
+
+Zero nos três cartões de primeira execução — e o jogo **aceita** os três.
+Preenchido com valor de alta entropia em toda gravação posterior que mudou
+algo (`b-nome`, `c-opcao`, `c-opcao2`, `29939`). Não foi identificado. O que
+importa para o objetivo é que **zero é aceito**, então um cartão editado a
+partir de um `first-boot` pode deixá-lo zerado.
+
+#### O que o `c-opcao2` isolou de brinde
+
+Ele foi gravado **sobre** o `c-opcao`, não a partir do zero, então a diferença
+entre os dois é a câmera e nada mais:
+
+```
+0x02104   c-opcao=03   c-opcao2=02      <- a câmera
+0x02102   c-opcao=ad   c-opcao2=ac      <- a soma, acompanhando
+```
+
+Um byte de enum, e a soma andando junto. É a mesma forma que o campo de flags
+tem de ter.
+
 ---
 
 ## Objetivo
