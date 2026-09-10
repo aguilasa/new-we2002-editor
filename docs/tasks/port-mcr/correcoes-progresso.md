@@ -39,6 +39,11 @@ ciclo arquivado, o dele em
 | [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o critério conta quatro cartões de PES2 e cinco recusas, e a ferramenta mede cinco e seis | Alta | [x] concluída | 2026-09-09 |
 | [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o `mcr_container` entrou e a §4.4 do plano continua com três alvos, e o perfil com `1 passed, 2 skipped` | Alta | [x] concluída | 2026-09-09 |
 | [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [x] concluída | 2026-09-09 |
+| [CORR-MCR-026](/docs/tasks/port-mcr/CORR-MCR-026.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro | Alta | [ ] pendente | — |
+| [CORR-MCR-027](/docs/tasks/port-mcr/CORR-MCR-027.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "as faixas válidas começam todas em `0x02044`" é falso como escrito, e o fim da segunda faixa está medido em `0x04e30` | Baixa | [ ] pendente | — |
+| [CORR-MCR-028](/docs/tasks/port-mcr/CORR-MCR-028.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | o mapa diz que três imagens de `roms/` declaram `SLPM-87056`, e são cinco | Baixa | [ ] pendente | — |
+| [CORR-MCR-029](/docs/tasks/port-mcr/CORR-MCR-029.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "a diferença entre `c-opcao` e `c-opcao2` é a câmera e nada mais" omite os 15 bytes de `0x02035` | Baixa | [ ] pendente | — |
+| [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a Fase 5 pede captura no Log, e as dez sondas do mapa só têm testemunho | Baixa | [ ] pendente | — |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -72,6 +77,11 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-023 — remedir cinco/seis nos quatro lugares que dizem quatro/cinco
 - [x] CORR-MCR-024 — o quarto alvo na §4.4 do plano, e `2 passed, 2 skipped` no plano e no perfil
 - [x] CORR-MCR-025 — plantar o filtro dos diálogos em `OPEN_BREAKS`, e conferir que casa uma vez
+- [ ] CORR-MCR-026 — recontar os cartões da regra da soma por padrão distinto, e a procedência
+- [ ] CORR-MCR-027 — trocar "começam todas em" por "nenhuma começa antes de", e registrar `b >= 0x04e30`
+- [ ] CORR-MCR-028 — cinco imagens declaram o código, ou nomear as duas usadas
+- [ ] CORR-MCR-029 — 17 bytes de diferença, dos quais 15 são o campo de alta entropia
+- [ ] CORR-MCR-030 — uma captura da sonda `mapa-completo`, ou dizer que a coluna é testemunho
 
 ---
 
@@ -521,3 +531,58 @@ ciclo arquivado, o dele em
   `_judge_open`, na revisão da MCR-TASK-16.
 - **Fix:** uma tupla em `OPEN_BREAKS` trocando o `CARD_FILTER` por um que só
   ofereça `.mcr`, com a conferência de que a substituição casa uma vez.
+
+### CORR-MCR-026
+
+- **Arquivo com problema:** `docs/MCR-DESBLOQUEIOS.md`:57 e
+  `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md`:167, :174, :186, :318
+- **Sintoma:** a regra da soma é creditada a "sete cartões independentes, dois
+  deles de terceiros". `a1`, `a2` e o `we2002-ptbr-first-boot.mcr` são o mesmo
+  md5 — o que a própria task mede quatro linhas acima —, então são **seis
+  padrões distintos**, e só o `29939` é de terceiro. A mesma contagem por
+  arquivo diz "três cartões de primeira execução" onde há dois.
+- **Como foi detectado:** `md5sum` dos oito cartões mais a regra aplicada a
+  cada um, na revisão da MCR-TASK-17.
+- **Fix:** recontar por padrão distinto nos quatro lugares, e corrigir a
+  procedência.
+
+### CORR-MCR-027
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md`:175
+- **Sintoma:** "as faixas válidas para `0x02102` começam todas em `0x02044`" —
+  a busca reproduzida dá 23.875 faixas consistentes, com início entre `0x02044`
+  e o próprio byte. O que a medição sustenta é o limite inferior. E o `0x02202`
+  só aparece quando a janela vai até o fim do bloco 2: fim mínimo `0x04e30`,
+  mais forte que o "não foi determinado" do mapa.
+- **Como foi detectado:** busca de faixa somada consistente sobre os seis
+  cartões distintos, com janela `0x2000..0x6000`.
+- **Fix:** "nenhuma começa antes de", com o número de faixas; e o limite do
+  `0x02202` no mapa.
+
+### CORR-MCR-028
+
+- **Arquivo com problema:** `docs/MCR-DESBLOQUEIOS.md`:3
+- **Sintoma:** "as três imagens de `roms/` declaram esse código" — são cinco,
+  e uma delas é a `golden-european-deluxe.bin`, que não é intuitivo.
+- **Como foi detectado:** `strings` sobre os primeiros 400 KB de cada imagem.
+- **Fix:** dizer cinco, ou nomear as duas que a medição usou.
+
+### CORR-MCR-029
+
+- **Arquivo com problema:** `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md`:194
+- **Sintoma:** "a diferença entre os dois é a câmera e nada mais" seguido de um
+  bloco de dois bytes; a diferença medida é de 17 bytes, com os 15 de
+  `0x02035..0x02043` junto.
+- **Como foi detectado:** diff byte a byte de `c-opcao` × `c-opcao2`.
+- **Fix:** separar o que mudou no jogo do que mudou no cartão.
+
+### CORR-MCR-030
+
+- **Arquivo com problema:** `docs/MCR-DESBLOQUEIOS.md`, a tabela de sondas
+- **Sintoma:** a Fase 5 do perfil pede captura no Log; não há nenhuma, e as dez
+  linhas da coluna "O que apareceu" — que são o mapa inteiro — existem só como
+  testemunho.
+- **Como foi detectado:** `grep -n "png\|captura\|screenshot"` nos dois
+  arquivos, vazio.
+- **Fix:** uma captura da sonda `mapa-completo`, ou a declaração explícita de
+  que a coluna é observação direta não capturada.
