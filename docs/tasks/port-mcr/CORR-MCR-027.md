@@ -3,7 +3,7 @@ id: CORR-MCR-027
 title: "Correção: \"as faixas válidas começam todas em 0x02044\" é falso como escrito, e o que se mediu é outra coisa"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -80,16 +80,60 @@ o segundo byte não é soma.
 
 ## Verificação
 
-- [ ] a busca reproduzida sobre os seis cartões distintos dá os números que o
+- [x] a busca reproduzida sobre os seis cartões distintos dá os números que o
       doc afirma (faixas, início mínimo, fim mínimo)
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-10
 
 **Resumo do que foi feito:**
 
+"Começam todas em `0x02044`" virou o que a medição sustenta: **nenhuma faixa
+consistente começa antes de** `0x02044`, com o número de faixas ao lado —
+23.875 para `0x02102`, 27.250 para `0x02202` — numa tabela de três colunas
+(faixas, início mínimo, fim mínimo). A frase agora diz o que o limite inferior
+fixa: **o campo de alta entropia está fora da soma**, que é o que permite
+deixá-lo zerado.
+
+O `MCR-DESBLOQUEIOS.md` ganhou o limite medido do segundo bloco —
+`b >= 0x04e30`, logo a segunda soma cobre a área de jogador — nas duas
+frases onde o fim aparecia como "não determinado", e a armadilha da janela:
+**uma busca que pare em `0x02400` acha zero faixas para o `0x02202`** e conclui
+que ele não é soma.
+
+**A busca entrou no bloco "Reproduzir"**, que só tinha a receita da sonda. Ela
+não é força-bruta: `k` de `[a, b)` é `2*byte[C] - (P[b] - P[a])`, então dois
+cartões concordam quando a diferença dos prefixos deles é constante, e os
+8.192 × 16.384 pares viram uma busca em dicionário — segundos, sem `numpy`,
+que não está instalado nesta máquina.
+
 **Problemas encontrados:**
 
+Nenhum. A reprodução deu os quatro números da CORR na primeira corrida, e o
+trecho como ficou escrito no doc foi rodado verbatim depois de colado.
+
+Duas coisas que o `0x02202` não tem, e que o doc agora não sugere ter: um `k`
+único — ele varia com a faixa (`0xa2` em `[0x02186, 0x04e30)`) — e um fim ao
+byte.
+
+**Medições:**
+
+| candidato | faixas consistentes | início mínimo | fim mínimo |
+|---|---:|---|---|
+| `0x02102` | **23.875** | `0x02044` | `0x02186` |
+| `0x02202` | **27.250** | `0x02186` | **`0x04e30`** |
+| `0x0216d` | **0** | — | — |
+| `0x02205` | **0** | — | — |
+
+Janela da busca: `a` em `[0x2000, 0x4000)`, `b` em `(a, 0x6000]`, seis cartões
+distintos. O trecho do doc reproduz os quatro resultados como escritos.
+`roms/`, `mcr/` e `work/cards/` intocados.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md` — o limite inferior no
+  lugar do "começam todas em", a tabela, e a nota da janela
+- `docs/MCR-DESBLOQUEIOS.md` — `b >= 0x04e30` nas duas frases, a armadilha da
+  janela curta, e a busca no bloco "Reproduzir"

@@ -175,10 +175,24 @@ byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a   (mod 
 ```
 
 `k = 0x8a` nos seis. A busca que a achou é de faixa consistente com
-todos os cartões ao mesmo tempo: as faixas válidas para `0x02102` **começam
-todas em `0x02044`** — o byte logo depois do campo de alta entropia —, e as de
-`0x02202` **começam todas em `0x02186`**, onde a anterior termina. São blocos
-encadeados, cada um com seu byte de soma dentro.
+todos os cartões ao mesmo tempo, com `a` no bloco 1 e `b` até o fim do bloco 2.
+Ela não devolve uma faixa: devolve **milhares** — 23.875 para `0x02102` e
+27.250 para `0x02202` —, e o que se mede é o **limite inferior** de cada uma:
+
+| candidato | faixas consistentes | início mínimo | fim mínimo |
+|---|---:|---|---|
+| `0x02102` | 23.875 | `0x02044` | `0x02186` |
+| `0x02202` | 27.250 | `0x02186` | `0x04e30` |
+
+**Nenhuma faixa consistente começa antes de `0x02044`** — o byte logo depois do
+campo de alta entropia —, e nenhuma das de `0x02202` começa antes de `0x02186`,
+onde a anterior termina. São blocos encadeados, cada um com seu byte de soma
+dentro. É esse limite inferior que fixa o achado que interessa: **o campo de
+alta entropia fica fora da soma**, e é o que permite deixá-lo zerado.
+
+E a janela da busca é parte do resultado: com `b < 0x02400` o `0x02202` dá
+**zero** faixas, e só aparece quando `b` alcança o fim do bloco 2. Uma busca
+curta conclui, errado, que o segundo byte não é soma.
 
 E o inverso vale registrar: `0x0216d` e `0x02205` dão **zero** faixas
 consistentes. Não são verificação — são dado. O `0x0216d` muda quando uma opção

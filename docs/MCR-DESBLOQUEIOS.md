@@ -68,8 +68,14 @@ option file — medido, e é o primeiro sintoma que aparece.
 
 O campo de flags está **dentro** da faixa dessa soma, então quem escreve ali
 sempre precisa refazê-la. Um segundo byte de soma, `0x02202`, cobre a faixa
-seguinte, que começa em `0x02186`; o fim dela não foi determinado, e **não é
-necessário** para escrever os flags.
+seguinte, que começa em `0x02186`; o fim dela não foi determinado ao byte, mas
+está medido em **`b >= 0x04e30`** — a segunda soma cobre a área de jogador. Não
+é necessário para escrever os flags.
+
+A busca é por faixa consistente com todos os cartões ao mesmo tempo, e ela
+devolve **milhares** de faixas, não uma: o que se mede é o início mínimo de
+cada bloco. **Uma busca que pare em `0x02400` acha zero faixas para o
+`0x02202`** e conclui, errado, que ele não é soma.
 
 ### O campo `0x02035..0x02043`, 15 bytes
 
@@ -153,10 +159,58 @@ A gravação do jogo é **determinística** — salvar sem mudar nada devolve o 
 md5 —, então todo diff de uma série destas é sinal, sem relógio nem contador
 para descontar.
 
+A busca de faixa, que é o que sustenta os limites acima. `k` de uma faixa
+`[a, b)` é `2*byte[C] - (P[b] - P[a])`, então duas cartas concordam quando a
+diferença dos prefixos delas é constante — o que torna a varredura de
+8.192 × 16.384 pares uma busca em dicionário:
+
+```sh
+python3 - <<'EOF'
+from collections import defaultdict
+HDR = 3904
+def load(p):
+    d = open(p, "rb").read()
+    return d[HDR:] if len(d) == 131072 + HDR else d
+CARDS = ["mcr/we2002-english-first-boot.mcr", "mcr/we2002-ptbr-first-boot.mcr",
+         "work/cards/b-nome.mcr", "work/cards/c-opcao.mcr",
+         "work/cards/c-opcao2.mcr", "mcr/pro-evolution-soccer-2.29939.gme"]
+D = [load(p) for p in CARDS]
+P = []
+for d in D:
+    p, s = [0] * (len(d) + 1), 0
+    for i, v in enumerate(d):
+        s = (s + v) & 0xff
+        p[i + 1] = s
+    P.append(p)
+LO, HI_A, HI_B = 0x2000, 0x4000, 0x6000            # bloco 1, bloco 2
+for C in (0x02102, 0x02202, 0x0216d, 0x02205):
+    V = {j: tuple((P[i][j] - P[0][j]) & 0xff for i in range(1, len(D)))
+         for j in range(LO, HI_B + 1)}
+    T = tuple((2 * (D[i][C] - D[0][C])) & 0xff for i in range(1, len(D)))
+    by = defaultdict(list)
+    for b in range(LO + 1, HI_B + 1):
+        by[V[b]].append(b)
+    hits = [(a, b) for a in range(LO, HI_A)
+            for b in by.get(tuple((V[a][i] + T[i]) & 0xff
+                                  for i in range(len(T))), ()) if b > a]
+    print(f"0x{C:05x}: {len(hits)} faixas", 
+          f"inicio_min=0x{min(a for a,_ in hits):05x}" if hits else "",
+          f"fim_min=0x{min(b for _,b in hits):05x}" if hits else "")
+EOF
+```
+
+```
+0x02102: 23875 faixas inicio_min=0x02044 fim_min=0x02186
+0x02202: 27250 faixas inicio_min=0x02186 fim_min=0x04e30
+0x0216d: 0 faixas
+0x02205: 0 faixas
+```
+
 ## O que fica em aberto
 
 - **Bit 9 e bits 11..15**: nada observável, causa desconhecida.
-- **O fim da faixa do `0x02202`**: indeterminado com os cartões disponíveis.
+- **O fim da faixa do `0x02202`**: indeterminado ao byte com os cartões
+  disponíveis; medido `b >= 0x04e30`.
 - **Os 15 bytes de `0x02035`**: não identificados; zero é aceito.
 - **Se a mesma verificação cobre a área de jogador**, que é onde o
   `tools/mcr/` e o editor do Obocaman escrevem. É a pergunta que a
