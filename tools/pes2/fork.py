@@ -79,6 +79,17 @@ PROCESS_NAMES = ("duckstation-qt", "AppRun", "DuckStation-x64")
 GAME_WINDOW = "^Pro Evolution Soccer 2$"
 DIALOGS = ("Automatic Updater", "DuckStation")
 
+# `--window ANY` for a game whose window title is not worth writing down.
+# DuckStation names the window after the game's DISPLAY TITLE, out of its
+# gamedb -- and for WE2002 that title is Japanese, because both the European
+# Deluxe and the PT-BR translation boot `SLPM_870.56`. Hardcoding
+# `ワールド・サッカー・ウイニング・イレブン２００２` in a caller would tie it to
+# one gamedb revision. ANY takes the widest window the PID owns that is not
+# one of these helpers, which is what `wait_for_main` does on the Linux side
+# of the golden tests, and for the same reason.
+ANY_WINDOW = "ANY"
+NOT_THE_GAME = ("Qt Selection Owner", "duckstation-qt")
+
 RECIPE = """\
 Getting the fork -- two ways, cheapest first.
 
@@ -314,7 +325,7 @@ def wait_for_mcp(deadline, host=None, port=None):
 
 
 def launch(image, display=None, timeout=120, home=None, verbose=True,
-           log=None):
+           log=None, match=GAME_WINDOW):
     """Boot the game under the fork and come back with an answering session.
 
     Returns `(pid, window, client)`. Each of the four ways this fails says
@@ -375,14 +386,28 @@ def launch(image, display=None, timeout=120, home=None, verbose=True,
                        f"{process.returncode}); last of {log}:\n"
                        + _tail(log))
         _dismiss_dialogs(display, min(deadline, time.time() + 3))
-        for w in _windows(display, GAME_WINDOW):
+        mine = []
+        for w in _windows(display, "." if match == ANY_WINDOW else match):
             owner = subprocess.run(["xprop", "-id", w, "_NET_WM_PID"],
                                    env=env_for(display, home),
                                    capture_output=True, text=True).stdout
             pid = owner.strip().split()[-1] if owner.strip() else ""
-            if pid.isdigit() and int(pid) == process.pid:
-                window = w
+            if not (pid.isdigit() and int(pid) == process.pid):
+                continue
+            if match != ANY_WINDOW:
+                mine = [w]
                 break
+            name = _xdotool(display, "getwindowname", w).stdout.strip()
+            if name in DIALOGS or any(h in name for h in NOT_THE_GAME):
+                continue
+            geom = _xdotool(display, "getwindowgeometry", "--shell", w).stdout
+            width = next((int(l.split("=")[1]) for l in geom.splitlines()
+                          if l.startswith("WIDTH=")), 0)
+            mine.append((width, w))
+        if match == ANY_WINDOW:
+            mine = [w for _, w in sorted(mine, reverse=True)]
+        if mine:
+            window = mine[0]
         if window is None:
             time.sleep(1)
     if window is None:
@@ -530,6 +555,9 @@ def main(argv=None):
     ap.add_argument("image", nargs="?", help=".cue of a working copy")
     ap.add_argument("--display", default=os.environ.get("PES2_DISPLAY", ":98"))
     ap.add_argument("--timeout", type=int, default=120)
+    ap.add_argument("--window", default=GAME_WINDOW,
+                    help="regex of the game window title, or ANY to take the "
+                         "widest window the process owns")
     ap.add_argument("--self-check", action="store_true")
     args = ap.parse_args(argv)
 
@@ -552,7 +580,8 @@ def main(argv=None):
             return 0
         pid, window, client = launch(
             args.image or os.environ.get("PES2_IMAGE"),
-            display=args.display, timeout=args.timeout)
+            display=args.display, timeout=args.timeout,
+            match=args.window)
         print(f"PID={pid}")
         print(f"WINDOW={window}")
         print(f"DISPLAY={args.display}")
