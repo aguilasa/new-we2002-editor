@@ -58,8 +58,9 @@ porque os 16 checksums que ele confere são os dos quadros.
 byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a   (mod 256)
 ```
 
-`k = 0x8a` em **seis cartões distintos**, um deles de terceiro (o `29939` de
-[`../mcr/README.md`](../mcr/README.md)). Oito arquivos foram medidos, e três
+`k = 0x8a` em **seis cartões distintos**, um deles de terceiro — o
+`pro-evolution-soccer-2.29939.gme`, descrito em
+[`../mcr/README.md`](../mcr/README.md). Oito arquivos foram medidos, e três
 deles são o mesmo cartão: `a1`, `a2` e o `we2002-ptbr-first-boot.mcr` têm o
 mesmo md5, porque a gravação é determinística — é resultado desta medição, não
 amostra perdida. (`work/cards/ptbr-original.mcr` e `ptbr-antes-do-v2.mcr` são
