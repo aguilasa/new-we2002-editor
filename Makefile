@@ -55,6 +55,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
         pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
         we2002-play we2002-play-fresh we2002-98 we2002-cards \
+        we2002-ptbr-play we2002-ptbr-play-fresh we2002-ptbr-98 \
         we2002-src-check \
         mcr mcr-98 mcr-venv
 
@@ -90,6 +91,8 @@ help:
 	@echo '  we2002-play   roda $$(GAME_IMAGE) na SUA tela, sobre o cartao que houver'
 	@echo '  we2002-play-fresh  idem, mas comecando com o option file zerado'
 	@echo '  we2002-98     idem, forcando DISPLAY=$(XVFB)'
+	@echo '  we2002-ptbr-play, -play-fresh, -98   os mesmos tres sobre a'
+	@echo '                traducao PT-BR (mesmo option file: mesmo serial)'
 	@echo '  we2002-cards  so a guarda: tira do caminho o option file que houver'
 	@echo
 	@echo '  Editor de .mcr (memory card) -- projeto separado, Python + PySide6:'
@@ -150,7 +153,7 @@ copy: $(COPY)
 # pior, e nela que fica a partida jogada a mao de que o save state depende
 # (ver o alvo pes2). Para zerar essa, `rm -rf $(PES2_DIR)`.
 fresh:
-	@rm -rf '$(COPY)' '$(GAME_COPY)' '$(GAME_CUE)' '$(GAME_SRC)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
+	@rm -rf '$(COPY)' $(WORK)/we2002-*.bin $(WORK)/we2002-*.cue $(WORK)/we2002-*.src '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
 	@$(MAKE) --no-print-directory copy
 
 run: build $(COPY)
@@ -445,9 +448,19 @@ GAME_IMAGE ?= roms/we2002-english/we2002-english.bin
 # O nome tambem NAO colide com $(COPY), entao a secao `run` e esta constroem
 # alvos diferentes ainda que apontadas para a mesma imagem -- ao preco de uma
 # segunda copia.
-GAME_COPY := $(WORK)/we2002-game.bin
-GAME_CUE  := $(WORK)/we2002-game.cue
-GAME_SRC  := $(WORK)/we2002-game.src
+# **O apelido, e nao o caminho, e o que nomeia a copia.** Ele existe para duas
+# imagens conviverem em $(WORK): com um nome unico, alternar entre elas
+# recopiaria 300 a 474 MB a cada troca, e o carimbo faria isso em silencio.
+# Espaco aqui quebraria tudo de novo, entao o apelido e curto e sem espaco --
+# quem o escreve e um alvo deste arquivo, nao o nome do arquivo de origem.
+GAME_SLUG ?= english
+GAME_COPY := $(WORK)/we2002-$(GAME_SLUG).bin
+GAME_CUE  := $(WORK)/we2002-$(GAME_SLUG).cue
+GAME_SRC  := $(WORK)/we2002-$(GAME_SLUG).src
+
+# O par que os alvos `-ptbr-` passam adiante. Uma variavel so, para os tres
+# nao saírem de sincronia.
+PTBR := GAME_IMAGE=roms/we2002-pt-br.bin GAME_SLUG=ptbr
 
 # A busca do cartao, uma vez so: a guarda que move e o aviso que so olha
 # tem de procurar EXATAMENTE a mesma coisa. Tres padroes, porque o nome
@@ -455,7 +468,7 @@ GAME_SRC  := $(WORK)/we2002-game.src
 # do alvo `we2002-cards`.
 GAME_CARD_FIND = find '$(DUCK_CARDS)' -maxdepth 1 -type f \
 	  \( -iname '*winning*eleven*' -o -iname '*slpm*870*56*' \
-	     -o -iname 'we2002-game*' \) 2>/dev/null | sort
+	     -o -iname 'we2002-*' \) 2>/dev/null | sort
 
 # Sobrescrevivel para quem tiver o DuckStation em outro $$XDG_DATA_HOME. O
 # default e onde ele guarda: e UM diretorio, entao uma instancia por vez.
@@ -500,11 +513,12 @@ $(GAME_CUE): $(GAME_COPY)
 	@img='$(GAME_IMAGE)'; src="$${img%.*}.cue"; \
 	 if [ -s "$$src" ]; then \
 	   echo '>> .cue da imagem, com o FILE apontado para a copia'; \
-	   sed 's|^FILE ".*" |FILE "we2002-game.bin" |' "$$src" > '$@'; \
+	   sed 's|^FILE ".*" |FILE "$(notdir $(GAME_COPY))" |' "$$src" > '$@'; \
 	 else \
 	   echo '>> a imagem nao tem .cue -- sintetizando so a trilha de dados'; \
 	   echo '   (o jogo boota; as trilhas de audio ficam de fora)'; \
-	   printf 'FILE "we2002-game.bin" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n' > '$@'; \
+	   printf 'FILE "%s" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n' \
+	     '$(notdir $(GAME_COPY))' > '$@'; \
 	 fi
 
 # A guarda. Tres padroes, porque o nome do cartao depende de como o
@@ -563,6 +577,22 @@ we2002-play-fresh: we2002-cards
 
 we2002-98:
 	@$(MAKE) --no-print-directory we2002-play GAME_DISPLAY=$(XVFB)
+
+# A traducao PT-BR, com as mesmas opcoes -- os tres alvos acima, so que
+# apontados para outra imagem e outro apelido. Copia propria em $(WORK), entao
+# alternar entre as duas nao recopia nada.
+#
+# **O option file e o MESMO.** As duas declaram `BOOT = cdrom:SLPM_870.56`, e o
+# cartao leva o nome que o DuckStation da ao titulo, nao a imagem: trocar de
+# alvo nao troca de save, e o `-fresh` de um zera o do outro.
+we2002-ptbr-play:
+	@$(MAKE) --no-print-directory we2002-play $(PTBR)
+
+we2002-ptbr-play-fresh:
+	@$(MAKE) --no-print-directory we2002-play-fresh $(PTBR)
+
+we2002-ptbr-98:
+	@$(MAKE) --no-print-directory we2002-play $(PTBR) GAME_DISPLAY=$(XVFB)
 
 # ------------------------------------------------- os dois outros editores ---
 #
