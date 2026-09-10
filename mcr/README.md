@@ -1,8 +1,9 @@
 # Saves de memory card — WE2002 (Japão) e PES2 (Europa)
 
-Nove cartões de PlayStation. **Oito baixados prontos**, e um **gravado aqui**
-pelo próprio jogo — `we2002-english-first-boot.mcr`, que tem seção própria mais
-abaixo e é o único desta pasta cuja procedência é esta máquina.
+Dez cartões de PlayStation. **Oito baixados prontos**, e **dois gravados aqui**
+pelo próprio jogo — `we2002-english-first-boot.mcr` e
+`we2002-ptbr-first-boot.mcr`, que têm seção própria mais abaixo e são os únicos
+desta pasta cuja procedência é esta máquina.
 
 Os oito baixados **não são todos do mesmo jogo**, apesar de todos os arquivos se
 chamarem `pro-evolution-soccer-2.*`: o nome vem de quem publicou o pacote, não
@@ -11,7 +12,7 @@ dizem **dois jogos e três discos**:
 
 | Código na entrada | Disco | Cartões | Projeto que os usa |
 |---|---|---|---|
-| `BISLPM-87056WEW-*` | `SLPM-87056` — World Soccer Winning Eleven 2002 (Japan) | `29939`, `34218`, `34978`, **`first-boot`** | o port do editor de `.mcr`, `tools/mcr/` |
+| `BISLPM-87056WEW-*` | `SLPM-87056` — World Soccer Winning Eleven 2002 (Japan) | `29939`, `34218`, `34978`, **os dois `first-boot`** | o port do editor de `.mcr`, `tools/mcr/` |
 | `BESLES-03946PES-*` | `SLES-03946` — Pro Evolution Soccer 2 (Europe) **(EnFrDe)** | `17738`, `18432`, `22507`, `7110` | o projeto PES2, `tools/pes2/` |
 | `BESLES-03957PES-*` | `SLES-03957` — Pro Evolution Soccer 2 (Europe) **(EsIt)** | `29818` | idem |
 
@@ -27,13 +28,14 @@ Cruzar os dois não dá erro bonito — dá vermelho que parece bug.
 
 ## Nem todo cartão é um option file
 
-**Oito dos nove trazem `*-OPT`**, e a maioria carrega outros saves junto. Um não
+**Nove dos dez trazem `*-OPT`**, e a maioria carrega outros saves junto. Um não
 traz option file nenhum:
 
 | Cartão | Jogo | Tem `*-OPT`? | O que mais tem |
 |---|---|---|---|
 | `29939` | WE2002 JP | sim | **nada** — só o OPT |
-| `first-boot` | WE2002 JP | sim | **nada** — só o OPT |
+| `english-first-boot` | WE2002 JP | sim | **nada** — só o OPT |
+| `ptbr-first-boot` | WE2002 JP | sim | **nada** — só o OPT |
 | `18432` | PES2 EnFrDe | sim | **nada** — só o OPT |
 | `17738` | PES2 EnFrDe | sim | ML (`D2A`) |
 | `22507` | PES2 EnFrDe | sim | ML (`D2A`) |
@@ -42,8 +44,8 @@ traz option file nenhum:
 | `7110` | PES2 EnFrDe | sim | ML (`D2A`) + formação (`D4B`) + replay (`R0A`) |
 | **`34978`** | WE2002 JP | **não** | **só cup data (`D0A`)** |
 
-Se o critério for "só option file, sem ruído": **`29939`** e
-**`we2002-english-first-boot`** (WE2002) e **`18432`** (PES2).
+Se o critério for "só option file, sem ruído": **`29939`** e os dois
+**`*-first-boot`** (WE2002) e **`18432`** (PES2).
 
 ### O que o `*-OPT` guarda, e o que não guarda
 
@@ -72,15 +74,16 @@ time editado**, e nenhum destes cartões tem isso — eles têm nome trocado e t
 desbloqueado. O dump está lendo área não usada; **não é bug**. Fixture com time
 editado de verdade continua sendo cartão gravado à mão.
 
-## Formato: `.gme` nos oito, `.mcr` no nono
+## Formato: `.gme` nos oito baixados, `.mcr` nos dois daqui
 
 Os **oito baixados** são **DexDrive `.gme`**: 134.976 bytes = **3.904 de
-cabeçalho** + os 131.072 do cartão cru, que começa em `MC`. O nono é o cartão
-cru direto, 131.072 bytes, porque foi assim que o DuckStation o escreveu.
+cabeçalho** + os 131.072 do cartão cru, que começa em `MC`. Os **dois gravados
+aqui** são o cartão cru direto, 131.072 bytes, porque foi assim que o
+DuckStation os escreveu.
 
 Uma consequência mecânica: o `gme.py --check` varre `mcr/*.gme` e portanto
-**não enxerga o `.mcr`** — o gate `mcr_container` continua dizendo `8/8`, e é o
-certo, já que não há contêiner nenhum para desmontar ali.
+**não enxerga os `.mcr`** — o gate `mcr_container` continua dizendo `8/8`, e é
+o certo, já que não há contêiner nenhum para desmontar ali.
 
 **Desde a [MCR-TASK-16](../docs/tasks/port-mcr/16-conteiner-gme.md) o
 `tools/mcr/` lê `.gme` direto** — a decisão é por conteúdo (o tamanho, e o `MC`
@@ -222,6 +225,48 @@ da cadeia declarada `[1, 2]`. O molde `dat.bin` dele entrega esse bloco
 **zerado**; um cartão de verdade o entrega `0xFF`. É o estado que a MCR-TASK-13
 manda levar ao experimento, e ainda falta o passo que o preenche.
 
+### `we2002-ptbr-first-boot.mcr`
+
+O irmão do anterior, e pelo mesmo caminho: **option file criado pelo jogo na
+primeira execução**, aqui a partir de `roms/we2002-pt-br.bin` — a tradução
+PT-BR —, por `make we2002-ptbr-play-fresh`, com o diretório de cartões vazio.
+2026-09-10.
+
+| Bloco | Estado | Entrada | Tamanho |
+|---|---|---|---|
+| 1–2 | `0x51`/`0x53` | `BISLPM-87056WEW-OPT` | 16.384 |
+
+`bad checksums none`, e as mesmas treze linhas de `outside chain` com 8.192
+bytes `0xFF` — é o preenchimento do DuckStation, descrito na seção do inglês.
+
+**O código de produto é o mesmo, e é por isso que os dois cartões existem
+separados.** As duas imagens declaram `BOOT = cdrom:SLPM_870.56`, então o
+DuckStation dá ao cartão o mesmo nome de arquivo: um sobrescreve o outro no
+diretório do emulador, e só aqui eles convivem. Quem quiser reproduzir tem de
+tirar o primeiro do caminho antes de gerar o segundo — que é o que
+`we2002-ptbr-play-fresh` faz sozinho, arquivando em `work/optionfiles-<data>/`.
+
+### Os dois `first-boot` divergem em 33 bytes
+
+Medido: `131.072` bytes, **33 diferentes**, todos dentro dos blocos 1 e 2 — a
+cadeia declarada. Nenhum fora dela, o que era de esperar já que o resto é
+`0xFF` nos dois.
+
+A forma da diferença é o que interessa: em quatro pontos um nome aparece
+**deslocado de um byte**.
+
+```
+0x030d2  en=59 6c 6f 6e 65 6e 00        ptbr=b2 59 6c 6f 6e 65 6e
+0x03c2f  en=00 4b 6f 76 74 75 6e        ptbr=4b 6f 76 74 75 6e 00
+0x044b4  en=44 65 20 41 6e 64 61 00     ptbr=b1 44 65 20 41 6e 64 61
+```
+
+`Ylonen`, `Kovtun`, `De Anda` — nomes da tabela editável que a seção "O que o
+`*-OPT` guarda" descreve. **As duas builds não guardam a mesma lista**, e é
+assim que isso se parece byte a byte. O resto são bytes avulsos (`0x02102`,
+`0x02184`, `0x04ca0` …). **Por que as listas diferem não foi investigado** —
+este README diz o que os cartões dizem.
+
 ## Pro Evolution Soccer 2 (Europa)
 
 Os cinco trazem o mesmo `PES-OPT` de 16 KiB, título
@@ -335,13 +380,16 @@ errada:
 São 8 × 132 KiB de fixture de leitura com procedência conhecida, e um clone que
 os traga junto reproduz o que este README mede sem depender de download.
 
-**O nono entrou em 2026-09-10, e é de outra natureza.** Os oito são públicos e
-baixados; o `we2002-english-first-boot.mcr` foi gravado nesta máquina. O que o
-mantém dentro da exceção é o resto do critério: 128 KiB, checksum registrado
-abaixo, e é o estímulo de uma medição que nenhum dos oito consegue ser — o
-único `BISLPM-87056WEW-OPT` que existe. E o que o separa de "save do usuário"
-é ele não ter partida nenhuma dentro: um option file de primeira execução, sem
-Master League e sem time editado.
+**Os dois `first-boot` entraram em 2026-09-10, e são de outra natureza.** Os
+oito são públicos e baixados; estes foram gravados nesta máquina. O que os
+mantém dentro da exceção é o resto do critério: 128 KiB cada, checksum
+registrado abaixo, e são o estímulo de uma medição que nenhum dos oito consegue
+ser — os únicos `BISLPM-87056WEW-OPT` que existem. E o que os separa de "save
+do usuário" é não terem partida nenhuma dentro: option file de primeira
+execução, sem Master League e sem time editado.
+
+Os dois, e não um, porque o nome do arquivo no emulador é o mesmo para as duas
+imagens: fora daqui, o segundo apaga o primeiro.
 
 **É exceção, e a regra continua valendo para o resto.** Cartão de jogo do
 usuário — `work/entrada.mcr`, o `WE2002_MCR_CARD`, e o do DuckStation — fica
@@ -361,6 +409,7 @@ c16f4d8cc9b8ad30ce63c913fece4c76  pro-evolution-soccer-2.34218.gme
 6f16010ac3b9c51f62781d3d4bc83fc3  pro-evolution-soccer-2.34978.gme
 e38289da6bf579bd90ac44cdf3956f84  pro-evolution-soccer-2.7110.gme
 72626c3bed4c773d8d9ca383f11a1661  we2002-english-first-boot.mcr
+e2de493f75399d3d60d5f940a7718576  we2002-ptbr-first-boot.mcr
 ```
 
 **Trabalhe sobre cópia**, como em todo o resto do repositório: os editores
