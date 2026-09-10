@@ -6,7 +6,7 @@ category: engenharia-reversa
 phase: 5
 depends_on: ["MCR-TASK-09"]
 fonte_de_verdade: "/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md §Critério de conclusão"
-status: pendente
+status: concluído
 ---
 
 # MCR-TASK-17: o mapa dos desbloqueios
@@ -233,31 +233,31 @@ option file, e **qual valor** significa ligado.
 
 ## Critério de conclusão
 
-- [ ] **O cartão inglês é mesmo o estado "travado".** Ele é chamado assim aqui
+- [x] **O cartão inglês é mesmo o estado "travado".** Ele é chamado assim aqui
       por ser de primeira execução, e isso é inferência. Abrir a ROM inglesa
       com ele e olhar a lista de times fecha a questão — e se ele já vier com
       algo aberto, todo o resto muda de leitura.
-- [ ] **O teste cruzado acima**, com as duas conclusões escritas. Se o
+- [x] **O teste cruzado acima**, com as duas conclusões escritas. Se o
       desbloqueio for da ROM e não do cartão, a task fecha aí, com a evidência
       — e é resultado, não falha.
-- [ ] **`0x02184..0x02185` confirmado ou derrubado.** Confirmar é mostrar o
+- [x] **`0x02184..0x02185` confirmado ou derrubado.** Confirmar é mostrar o
       jogo lendo: gravar um valor intermediário num cartão de trabalho, abrir,
       e ver **um subconjunto** dos times na tela. `ff ff` contra `00 00` sozinho
       não distingue "flags" de "dois bytes que mudaram junto".
-- [ ] **Um bit por opção, nomeado.** O experimento discriminante é
+- [x] **Um bit por opção, nomeado.** O experimento discriminante é
       diferencial e in-game: partir de um cartão sem nada aberto, ligar **uma**
       coisa, salvar, e comparar. Repetido, dá a tabela `bit → time`. Onde o
       jogo não deixar ligar uma sozinha, diga isso e mostre o que deu para
       isolar.
-- [ ] **A opção de Master League no modo exibição** localizada com o mesmo
+- [x] **A opção de Master League no modo exibição** localizada com o mesmo
       método. Ela pode não estar no mesmo campo dos times, e não há motivo para
       supor que esteja.
-- [ ] **O mapa vai para [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md)**,
+- [x] **O mapa vai para [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md)**,
       arquivo novo: endereço, máscara, o nome de cada opção como o jogo a
       escreve na tela, e o comando que reproduz cada medição. É o papel que o
       [`wte/re/mcr.md`](../../../wte/re/mcr.md) faz para os 17 destinos — a
       task que for implementar isso cita esse arquivo, e não este.
-- [ ] **Hipótese descartada fica registrada, com o motivo.** Os cinco bytes da
+- [x] **Hipótese descartada fica registrada, com o motivo.** Os cinco bytes da
       tabela de nomes são a primeira candidata a cair; se caírem, o arquivo diz
       por quê, para ninguém refazer a conta.
 
@@ -284,3 +284,66 @@ option file, e **qual valor** significa ligado.
 - **Ler nome de entrada sem olhar o estado inventa save que não existe** — a
   mesma armadilha que o README de `mcr/` registra para `N.Kanu` e
   `BASCUS-94254PRO-00`.
+
+---
+
+## Log de Execução
+
+**Executado em:** 2026-09-10
+
+### O mapa
+
+Está em [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md), que é o
+entregável. Resumo: `0x02184..0x02185`, dezesseis bits little-endian, bits 0–7
+para o Euro A.S. e as sete seleções *Classic*, **bit 8 para os times da Master
+League no modo exibição** e **bit 10 para o World A.S.** Bit 9 e bits 11–15 não
+fazem nada observável.
+
+### Duas linhas que a forma do mapa não deixava adivinhar
+
+O bit 8 **não é time**, e mora no meio da faixa deles; o World A.S. **não é
+vizinho** do Euro A.S. Quem as pegou foi o **controle** do teste em grupo: o
+World A.S. não apareceu em nenhuma das quatro sondas, o que daria assinatura
+`0000` — índice 0, já medido como Euro A.S. A contradição era visível, e sem
+ela o mapa teria sido lido como "bits 0..8 são os nove times", errado em duas
+linhas.
+
+Dez bits em **nove boots**: quatro de teste em grupo, três de busca binária
+sobre os bits altos, um de âncora (`01 00`) e um de confirmação ponta a ponta
+(`ff 05`, que devolveu as dez opções e nada além).
+
+### O achado que não estava no escopo, e sem o qual a task seguinte não anda
+
+O save tem verificação própria — um byte de soma por bloco encadeado —, e sem
+refazê-la o jogo **recusa** o option file. A regra vale para sete cartões
+independentes, dois deles de terceiros:
+
+```
+byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a
+```
+
+Ela custou a primeira sonda, que foi recusada, e mudou o método desta task no
+meio do caminho — o registro de como isso aconteceu ficou no Contexto, acima.
+
+### O que ficou por fazer, e por que não muda a conclusão
+
+**A segunda metade do teste cruzado** — ROM PT-BR com o cartão inglês — não
+rodou. A primeira metade respondeu a pergunta (ROM inglesa com o cartão PT-BR
+mostrou tudo), e as nove sondas a responderam de novo por outro caminho: se o
+desbloqueio fosse da ROM, trocar bits num cartão não mudaria a tela, e mudou
+nove vezes seguidas.
+
+Fica em aberto, e está listado no fim do mapa: bit 9 e bits 11–15; o fim da
+faixa do segundo byte de soma; os 15 bytes de `0x02035`; e se a mesma
+verificação cobre a área de jogador, que é a pergunta que a
+[MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) deixou como
+veredito do console e que agora é testável do mesmo jeito.
+
+### As amostras
+
+`work/cards/` guarda a série gravada pelo jogo (`a1`, `a2`, `b-nome`,
+`c-opcao`, `c-opcao2`), pelo alvo `make we2002-card-snap LABEL=<nome>`. As
+sondas construídas ficam em `work/` (`v2-*`, `t0..t4`, `u0..u2`,
+`mapa-completo`). **Nenhuma entra no git**: são derivadas do
+`we2002-english-first-boot.mcr`, que está versionado, e o bloco "Reproduzir" do
+mapa as reconstrói em quatro linhas.

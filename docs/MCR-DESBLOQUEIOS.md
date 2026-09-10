@@ -103,6 +103,11 @@ refeito. O jogo carrega, e o que aparece na tela é a resposta.
 | `u0` | `00 a8` | 11,13,15 | nada |
 | `u1` | `00 30` | 12,13 | nada |
 | `u2` | `00 c0` | 14,15 | nada |
+| `mapa-completo` | `ff 05` | 0..8, 10 | **os nove times e a opção de Master League, e nada além** |
+
+A última é a confirmação ponta a ponta: os dez bits da tabela ligados de uma
+vez devolvem exatamente as dez opções da tabela. É ela que tira o
+`bit 10 = World A.S.` da eliminação e o põe em observação direta.
 
 As quatro primeiras são **teste em grupo**: o bit `i` entra na sonda `t` se o
 bit `t` de `i` estiver ligado, então a assinatura de um nome — em quais sondas

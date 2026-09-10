@@ -50,7 +50,7 @@ por princípio.
 | [MCR-TASK-14](/docs/tasks/port-mcr/14-verificacao-final.md) | Verificação final contra a definição de pronto | 4 | 12, 13 | ✅ Concluído | 2026-09-08 | 2026-09-08 |
 | [MCR-TASK-15](/docs/tasks/port-mcr/15-abrir-cartao-pela-tela.md) | Abrir cartão pela tela: a janela sobe primeiro, e o Open é ação visível | 5 | 12 | ✅ Concluído | 2026-09-09 | 2026-09-09 |
 | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | Abrir e gravar `.gme`: o contêiner do DexDrive, nos dois sentidos | 5 | 15 | ✅ Concluído | 2026-09-09 | 2026-09-09 |
-| [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a Master League no modo exibição | 5 | 09 | ⬜ Pendente | — | ⬜ pendente |
+| [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | Onde o option file guarda os times secretos e a Master League no modo exibição | 5 | 09 | ✅ Concluído | 2026-09-10 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -129,9 +129,10 @@ Fase 3, que já foi revisada.
 - [x] MCR-TASK-16 — `.gme`, `.mcr` e `.mcd` como três embalagens do mesmo
       cartão: qualquer uma abre, qualquer uma grava, e a conversão entre
       elas não perde byte
-- [ ] MCR-TASK-17 — onde os nove times secretos e a opção de Master League no
-      modo exibição estão gravados no option file. **Descoberta e mapeamento
-      só**; marcar e desmarcar na ferramenta é task seguinte
+- [x] MCR-TASK-17 — `0x02184..0x02185`, dezesseis bits: os nove times, a opção
+      de Master League no bit 8 e o World A.S. no bit 10. Mais a verificação
+      que precisa ser refeita para o jogo aceitar o cartão. O mapa está em
+      [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md)
 
 ---
 
