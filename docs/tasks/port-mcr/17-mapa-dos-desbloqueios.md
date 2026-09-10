@@ -101,6 +101,15 @@ O teste que decide é cruzado, e é barato:
 Concordando, está respondido. Discordando, o achado é esse, e vale mais que o
 mapa.
 
+#### Respondida em 2026-09-10, pelo usuário: **está no cartão**
+
+A ROM **inglesa** aberta com o `we2002-ptbr-first-boot.mcr` mostrou **todas** as
+opções extras. O jogo lê os desbloqueios do option file, e o campo existe.
+
+O que isso ainda **não** diz: se a ROM PT-BR também os liga por conta própria — a
+outra metade do cruzado, que ficou por fazer e não bloqueia o mapa. Nem qual
+byte é: a prova é de que o cartão manda, e não de onde no cartão.
+
 ---
 
 ## Objetivo
