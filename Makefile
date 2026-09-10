@@ -55,6 +55,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
         pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
         we2002-play we2002-play-fresh we2002-98 we2002-cards \
+        we2002-src-check \
         mcr mcr-98 mcr-venv
 
 # ------------------------------------------------------------------ help ----
@@ -114,7 +115,8 @@ help:
 	@echo 'Copia:        $(COPY)'
 	@echo 'Copia Lazarus: $(LAZ_COPY)'
 	@echo 'Copia PES2:   $(PES2_DIR)/'
-	@echo 'Imagem jogo:  $(GAME_IMAGE)  ->  $(GAME_COPY)'
+	@echo 'Imagem jogo:  $(GAME_IMAGE)'
+	@echo '              ->  $(GAME_COPY)'
 	@echo 'Cartao .mcr:  $(WE2002_MCR_CARD)  ->  $(MCR_COPY)'
 
 # ----------------------------------------------------------------- build ----
@@ -148,7 +150,7 @@ copy: $(COPY)
 # pior, e nela que fica a partida jogada a mao de que o save state depende
 # (ver o alvo pes2). Para zerar essa, `rm -rf $(PES2_DIR)`.
 fresh:
-	@rm -rf '$(COPY)' '$(GAME_COPY)' '$(GAME_COPY_CUE)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
+	@rm -rf '$(COPY)' '$(GAME_COPY)' '$(GAME_CUE)' '$(GAME_SRC)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
 	@$(MAKE) --no-print-directory copy
 
 run: build $(COPY)
@@ -420,19 +422,30 @@ pes2-status:
 # de outra imagem. `make fresh` zera as duas. O DuckStation nao escreve no
 # disco; o que ele escreve e o cartao.
 #
-# Para ver no jogo o que o editor gravou, aponte os dois para a mesma imagem:
-# `make we2002-play GAME_IMAGE=$$(IMAGE)`.
+# GAME_IMAGE aceita caminho com espaco -- o default tem -- e a imagem pode
+# estar dentro de uma subpasta de roms/, que e como as releases multi-arquivo
+# chegam.
 
 # A imagem do JOGO nao e a do editor. $(IMAGE) e a European Deluxe porque e
 # ela que os golden tests medem; aqui o default e a traducao PT-BR, que e a
 # que se joga. As duas declaram `BOOT = cdrom:SLPM_870.56`, entao o
 # DuckStation da a ambas o mesmo titulo e portanto o MESMO option file --
 # trocar de imagem nao troca de cartao.
-GAME_IMAGE ?= roms/we2002-pt-br.bin
-GAME_STEM  := $(basename $(notdir $(GAME_IMAGE)))
-GAME_COPY  := $(WORK)/$(notdir $(GAME_IMAGE))
-GAME_CUE   := $(basename $(GAME_IMAGE)).cue
-GAME_COPY_CUE := $(WORK)/$(GAME_STEM).cue
+GAME_IMAGE ?= roms/World Soccer Winning Eleven 2002/World Soccer Winning Eleven 2002 (Japan) (Track 1) [English].bin
+
+# **Os nomes da copia sao FIXOS, e nao derivados de $(GAME_IMAGE).** O default
+# tem espacos no caminho, e funcao de make separa palavra por espaco: com
+# $(notdir) e $(basename) a mesma linha rendeu `target 'Soccer' given more
+# than once` e receitas para um alvo chamado `work/World`. Alvo de make nao
+# aceita espaco -- nao ha como escapar isso --, entao a copia se chama sempre
+# a mesma coisa e o caminho de origem so aparece dentro de aspas simples, no
+# shell da receita, onde espaco, parenteses e colchete nao significam nada.
+# O nome tambem NAO colide com $(COPY), entao a secao `run` e esta constroem
+# alvos diferentes ainda que apontadas para a mesma imagem -- ao preco de uma
+# segunda copia.
+GAME_COPY := $(WORK)/we2002-game.bin
+GAME_CUE  := $(WORK)/we2002-game.cue
+GAME_SRC  := $(WORK)/we2002-game.src
 
 # A busca do cartao, uma vez so: a guarda que move e o aviso que so olha
 # tem de procurar EXATAMENTE a mesma coisa. Tres padroes, porque o nome
@@ -440,7 +453,7 @@ GAME_COPY_CUE := $(WORK)/$(GAME_STEM).cue
 # do alvo `we2002-cards`.
 GAME_CARD_FIND = find '$(DUCK_CARDS)' -maxdepth 1 -type f \
 	  \( -iname '*winning*eleven*' -o -iname '*slpm*870*56*' \
-	     -o -iname '$(GAME_STEM)*' \) 2>/dev/null | sort
+	     -o -iname 'we2002-game*' \) 2>/dev/null | sort
 
 # Sobrescrevivel para quem tiver o DuckStation em outro $$XDG_DATA_HOME. O
 # default e onde ele guarda: e UM diretorio, entao uma instancia por vez.
@@ -451,34 +464,45 @@ DUCK_STATES := $(DUCK_DATA)/savestates
 # Como o `pes2`, e pelo mesmo motivo: o default nao depende de quem chamou.
 GAME_DISPLAY ?= $(DISPLAY)
 
-# So quando as duas imagens diferem: com GAME_IMAGE=$(IMAGE) o alvo seria o
-# mesmo $(COPY) que a secao `run` ja constroi, e make avisaria que uma receita
-# sobrescreve a outra.
-ifneq ($(GAME_COPY),$(COPY))
-$(GAME_COPY): $(GAME_IMAGE) | $(WORK)
-	@test -s '$(GAME_IMAGE)' || { \
-	  echo 'ERRO: imagem nao encontrada ou vazia: $(GAME_IMAGE)'; \
-	  echo '      as imagens ficam em roms/ e nao sao versionadas.'; exit 1; }
-	@echo '>> copiando $(GAME_IMAGE) -> $@'
-	@cp --reflink=auto '$(GAME_IMAGE)' '$@'
-endif
+# Trocar de GAME_IMAGE tem de refazer a copia, e make nao pode descobrir isso
+# sozinho: o caminho de origem tem espaco e portanto nao pode ser
+# pre-requisito. O carimbo guarda qual imagem esta copiada, e so e reescrito
+# quando o valor muda -- por isso a data dele nao anda a toa e a copia de 300
+# a 474 MB nao se refaz a cada corrida.
+.PHONY: we2002-src-check
+we2002-src-check:
+	@:
 
-# O .cue, e o unico ponto do arquivo que SINTETIZA um. Nem toda imagem de
-# roms/ tem o seu: a European Deluxe tem, com as nove trilhas; a PT-BR e a
-# japonesa nao. Copiar o .cue da vizinha NAO serve -- medido em 2026-09-10, a
-# PT-BR e 150 setores menor que a European Deluxe e o audio dela nao bate em
+$(GAME_SRC): we2002-src-check | $(WORK)
+	@printf '%s' '$(GAME_IMAGE)' | cmp -s - '$@' 2>/dev/null \
+	  || printf '%s' '$(GAME_IMAGE)' > '$@'
+
+$(GAME_COPY): $(GAME_SRC)
+	@test -s '$(GAME_IMAGE)' || { \
+	  echo 'ERRO: imagem nao encontrada ou vazia:'; \
+	  echo '      $(GAME_IMAGE)'; \
+	  echo '      as imagens ficam em roms/ e nao sao versionadas.'; exit 1; }
+	@echo '>> copiando a imagem do jogo -> $@'
+	@cp --reflink=auto '$(GAME_IMAGE)' '$@'
+
+# O .cue. Duas fontes, nesta ordem: o que estiver ao lado da imagem -- com a
+# linha FILE reescrita, porque ela nomeia o .bin de origem e a copia tem outro
+# nome --, ou, se nao houver, um SINTETIZADO aqui. Nem toda imagem de roms/
+# tem o seu, e copiar o da vizinha NAO serve: medido em 2026-09-10, a PT-BR e
+# 150 setores menor que a European Deluxe e o audio dela nao bate em
 # deslocamento nenhum, entao as nove trilhas daquela apontariam para o lugar
 # errado desta. O sintetizado declara so a trilha de dados, que e a forma do
 # `ptbr-remaster.cue` que o usuario ja mantem: o jogo boota, e o que fica de
 # fora e o CD-DA. roms/ nao e tocado -- o arquivo nasce em $(WORK).
-$(GAME_COPY_CUE): $(GAME_COPY) | $(WORK)
-	@if [ -s '$(GAME_CUE)' ]; then \
-	  cp --reflink=auto '$(GAME_CUE)' '$@'; \
+$(GAME_CUE): $(GAME_COPY)
+	@img='$(GAME_IMAGE)'; src="$${img%.*}.cue"; \
+	 if [ -s "$$src" ]; then \
+	   echo '>> .cue da imagem, com o FILE apontado para a copia'; \
+	   sed 's|^FILE ".*" |FILE "we2002-game.bin" |' "$$src" > '$@'; \
 	 else \
-	  echo '>> $(GAME_IMAGE) nao tem .cue -- sintetizando so a trilha de dados'; \
-	  echo '   (o jogo boota; as trilhas de audio ficam de fora)'; \
-	  printf 'FILE "%s" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n' \
-	    '$(notdir $(GAME_COPY))' > '$@'; \
+	   echo '>> a imagem nao tem .cue -- sintetizando so a trilha de dados'; \
+	   echo '   (o jogo boota; as trilhas de audio ficam de fora)'; \
+	   printf 'FILE "we2002-game.bin" BINARY\n  TRACK 01 MODE2/2352\n    INDEX 01 00:00:00\n' > '$@'; \
 	 fi
 
 # A guarda. Tres padroes, porque o nome do cartao depende de como o
@@ -511,7 +535,7 @@ we2002-cards: | $(WORK)
 # por partida e faria toda sessao comecar do zero -- e a mesma razao pela
 # qual `$(COPY)` so se refaz quando falta. Quem zera e `we2002-play-fresh`,
 # como quem zera a copia da imagem e `fresh`. Aqui o cartao so se anuncia.
-we2002-play: $(GAME_COPY) $(GAME_COPY_CUE)
+we2002-play: $(GAME_CUE)
 	@card=$$($(GAME_CARD_FIND)); \
 	 if [ -z "$$card" ]; then \
 	   echo '>> sem option file: o jogo vai criar um em $(DUCK_CARDS)/'; \
@@ -524,9 +548,9 @@ we2002-play: $(GAME_COPY) $(GAME_COPY_CUE)
 	  echo 'ERRO: fork do DuckStation ausente.'; \
 	  echo '      Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:'; \
 	  echo '        python3 tools/pes2/fork.py recipe'; exit 1; }
-	@echo '>> $(GAME_COPY_CUE)'
+	@echo '>> $(GAME_CUE)'
 	@echo '>> DISPLAY=$(GAME_DISPLAY)'
-	@python3 tools/pes2/fork.py launch '$(GAME_COPY_CUE)' \
+	@python3 tools/pes2/fork.py launch '$(GAME_CUE)' \
 	   --display '$(GAME_DISPLAY)' --window ANY
 	@echo '>> o cartao aparece em $(DUCK_CARDS)/ assim que o jogo gravar.'
 	@echo '   Encerre com `make pes2-kill` (o mesmo fork, os tres nomes).'
