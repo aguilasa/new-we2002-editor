@@ -56,6 +56,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
         we2002-play we2002-play-fresh we2002-98 we2002-cards \
         we2002-ptbr-play we2002-ptbr-play-fresh we2002-ptbr-98 \
+        we2002-card-snap we2002-card-list \
         we2002-src-check \
         mcr mcr-98 mcr-venv
 
@@ -94,6 +95,8 @@ help:
 	@echo '  we2002-ptbr-play, -play-fresh, -98   os mesmos tres sobre a'
 	@echo '                traducao PT-BR (mesmo option file: mesmo serial)'
 	@echo '  we2002-cards  so a guarda: tira do caminho o option file que houver'
+	@echo '  we2002-card-snap LABEL=x  guarda o cartao vivo como amostra'
+	@echo '  we2002-card-list         lista as amostras e os md5'
 	@echo
 	@echo '  Editor de .mcr (memory card) -- projeto separado, Python + PySide6:'
 	@echo '  mcr-venv      cria $$(MCR_VENV) e instala PySide6 (nunca por apt)'
@@ -593,6 +596,33 @@ we2002-ptbr-play-fresh:
 
 we2002-ptbr-98:
 	@$(MAKE) --no-print-directory we2002-play $(PTBR) GAME_DISPLAY=$(XVFB)
+
+# Guarda o cartao vivo com um rotulo, para uma serie de amostras. O option file
+# tem verificacao de integridade propria -- editar a mao e recusado pelo jogo
+# (MCR-TASK-17) --, entao a unica fonte de cartao valido e o proprio jogo, e
+# mapear qualquer campo dele exige uma serie: salvar, rotular, repetir.
+#
+#   make we2002-card-snap LABEL=antes
+#   ... muda uma coisa no jogo e salva ...
+#   make we2002-card-snap LABEL=depois
+CARD_DIR := $(WORK)/cards
+
+we2002-card-snap:
+	@test -n '$(LABEL)' || { \
+	  echo 'ERRO: falta o rotulo -- make we2002-card-snap LABEL=<nome>'; exit 1; }
+	@card=$$($(GAME_CARD_FIND) | head -1); \
+	 test -n "$$card" || { \
+	   echo 'ERRO: nenhum option file em $(DUCK_CARDS) para guardar.'; exit 1; }; \
+	 mkdir -p '$(CARD_DIR)'; \
+	 dest='$(CARD_DIR)/$(LABEL).mcr'; \
+	 test ! -e "$$dest" || { \
+	   echo "ERRO: $$dest ja existe -- escolha outro rotulo"; exit 1; }; \
+	 cp "$$card" "$$dest"; chmod 644 "$$dest"; \
+	 echo ">> $$dest"; md5sum "$$dest" | sed 's/^/   /'
+
+we2002-card-list:
+	@ls -la '$(CARD_DIR)' 2>/dev/null || echo '(nenhuma amostra ainda)'
+	@md5sum '$(CARD_DIR)'/*.mcr 2>/dev/null | sed 's/^/   /' || true
 
 # ------------------------------------------------- os dois outros editores ---
 #
