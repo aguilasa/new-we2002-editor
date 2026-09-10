@@ -43,7 +43,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-027](/docs/tasks/port-mcr/CORR-MCR-027.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "as faixas válidas começam todas em `0x02044`" é falso como escrito, e o fim da segunda faixa está medido em `0x04e30` | Baixa | [x] concluída | 2026-09-10 |
 | [CORR-MCR-028](/docs/tasks/port-mcr/CORR-MCR-028.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | o mapa diz que três imagens de `roms/` declaram `SLPM-87056`, e são cinco | Baixa | [x] concluída | 2026-09-10 |
 | [CORR-MCR-029](/docs/tasks/port-mcr/CORR-MCR-029.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "a diferença entre `c-opcao` e `c-opcao2` é a câmera e nada mais" omite os 15 bytes de `0x02035` | Baixa | [x] concluída | 2026-09-10 |
-| [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a Fase 5 pede captura no Log, e as dez sondas do mapa só têm testemunho | Baixa | [ ] pendente | — |
+| [CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a Fase 5 pede captura no Log, e as dez sondas do mapa só têm testemunho | Baixa | [x] concluída | 2026-09-10 |
 
 **Criticidade:** 🔴 Alta · 🟡 Média · 🟢 Baixa
 **Status:** `[ ]` pendente · `[x]` concluída · `[x]` envelhecida
@@ -81,7 +81,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-027 — trocar "começam todas em" por "nenhuma começa antes de", e registrar `b >= 0x04e30`
 - [x] CORR-MCR-028 — cinco imagens declaram o código, ou nomear as duas usadas
 - [x] CORR-MCR-029 — 17 bytes de diferença, dos quais 15 são o campo de alta entropia
-- [ ] CORR-MCR-030 — uma captura da sonda `mapa-completo`, ou dizer que a coluna é testemunho
+- [x] CORR-MCR-030 — uma captura da sonda `mapa-completo`, ou dizer que a coluna é testemunho
 
 ---
 

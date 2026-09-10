@@ -372,3 +372,22 @@ sondas construídas ficam em `work/` (`v2-*`, `t0..t4`, `u0..u2`,
 `mapa-completo`). **Nenhuma entra no git**: são derivadas do
 `we2002-english-first-boot.mcr`, que está versionado, e o bloco "Reproduzir" do
 mapa as reconstrói em quatro linhas.
+
+### O que não tem evidência versionada: **a tela**
+
+A Fase 5 do [perfil](/docs/prompts/perfil-mcr.md) pede captura no Log, e **este
+Log não tem nenhuma**. As nove corridas foram `make we2002-play` — sessão na
+tela do usuário, a exceção com nome próprio da regra do `:98` —, e esse caminho
+não tem gate que capture quadro; ninguém pediu a imagem no meio da série. A
+coluna "O que apareceu" da tabela de sondas é, portanto, **observação direta
+não capturada**, e o mapa passou a dizer isso onde a tabela está
+([CORR-MCR-030](/docs/tasks/port-mcr/CORR-MCR-030.md)).
+
+O que está versionado prova a regra da soma e o conteúdo de cada sonda — não o
+que a tela mostrou. A imagem continua alcançável, e o caminho está escrito no
+bloco "Reproduzir" do mapa; a tentativa de refazer a sonda `mapa-completo` para
+capturá-la parou onde tinha de parar: instalar a sonda exige escrever em
+`~/.local/share/duckstation/memcards/`, que é diretório do usuário, e o
+lançador não aceita cartão de outro lugar — resolver o caminho por
+`settings.ini` seria configurar o DuckStation, o que a decisão de 2026-09-02
+proíbe.

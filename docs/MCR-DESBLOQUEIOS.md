@@ -129,6 +129,16 @@ A última é a confirmação ponta a ponta: os dez bits da tabela ligados de uma
 vez devolvem exatamente as dez opções da tabela. É ela que tira o
 `bit 10 = World A.S.` da eliminação e o põe em observação direta.
 
+**A coluna "O que apareceu" é observação direta, não capturada.** Ela saiu das
+nove corridas de `make we2002-play` de 2026-09-10 — sessão na tela do usuário,
+a exceção com nome próprio da regra do `:98` —, e esse caminho não tem gate que
+capture quadro. Os artefatos versionados provam a **regra da soma** e o
+conteúdo de cada sonda; o que a tela mostrou é testemunho de quem estava
+olhando. Quem quiser a imagem tem o caminho escrito no bloco "Reproduzir"
+abaixo: montar a sonda, guardar o cartão vivo, pôr a sonda no lugar, e capturar
+com `python3 tools/pes2/pad.py shot` sobre a instância viva ou com
+`DISPLAY=:98 import -window root` se o boot for por `make we2002-98`.
+
 As quatro primeiras são **teste em grupo**: o bit `i` entra na sonda `t` se o
 bit `t` de `i` estiver ligado, então a assinatura de um nome — em quais sondas
 ele apareceu — **é** o índice do bit dele. Dez bits em quatro boots, em vez de
