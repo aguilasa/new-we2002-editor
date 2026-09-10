@@ -202,6 +202,26 @@ entre os dois é a câmera e nada mais:
 Um byte de enum, e a soma andando junto. É a mesma forma que o campo de flags
 tem de ter.
 
+#### O campo confirmado: `0x02184..0x02185`, um bit por opção
+
+Medido em 2026-09-10. Cartão inglês de primeira execução, `0x02184..85` posto
+em `01 00` e `0x02102` recalculado pela regra acima (`d9` → `da`), mais nada:
+o jogo **carregou** e mostrou **um** time extra, o **Euro A.S.**
+
+Duas coisas de uma vez, e é por isso que este era o teste a fazer:
+
+1. **A regra da soma está certa.** Carregar é a prova — o mesmo cartão sem o
+   recálculo tinha sido recusado.
+2. **`0x02184..0x02185` é o campo, e é bitmap.** `bit 0 = Euro A.S.`, que é o
+   primeiro da lista do enunciado. Não é enum nem contador.
+
+O resto do mapa sai por **teste em grupo**: com dez bits e o nome de cada opção
+visível na tela, quatro cartões bastam. O teste `t` liga os bits cujo índice
+tem o bit `t` — `t0 = 0x02aa`, `t1 = 0x00cc`, `t2 = 0x00f0`, `t3 = 0x0300` —, e
+a assinatura de um nome (em quais testes ele apareceu) **é** o índice do bit
+dele. O Euro A.S. não deve aparecer em nenhum dos quatro, que é o controle:
+índice 0 não tem bit ligado em assinatura nenhuma.
+
 ---
 
 ## Objetivo
