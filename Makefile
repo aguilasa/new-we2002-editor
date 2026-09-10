@@ -54,6 +54,7 @@ COPY := $(WORK)/$(notdir $(IMAGE))
         golden golden-gui install uipreview gen gen-check clean distclean \
         run-obocaman run-obocaman-98 run-lazarus run-lazarus-98 \
         pes2 pes2-play pes2-98 pes2-copy pes2-kill pes2-status \
+        we2002-play we2002-play-fresh we2002-98 we2002-cards \
         mcr mcr-98 mcr-venv
 
 # ------------------------------------------------------------------ help ----
@@ -83,6 +84,12 @@ help:
 	@echo '  pes2-kill     encerra o emulador (os tres nomes de processo)'
 	@echo '  pes2-status   diz o que esta rodando, e se e o fork ou o AppImage'
 	@echo '                PES2_TAG=EsIt|EnFrDe escolhe a release'
+	@echo
+	@echo '  O JOGO deste repositorio, sob o mesmo fork do DuckStation:'
+	@echo '  we2002-play   roda $$(IMAGE) na SUA tela, sobre o cartao que houver'
+	@echo '  we2002-play-fresh  idem, mas comecando com o option file zerado'
+	@echo '  we2002-98     idem, forcando DISPLAY=$(XVFB)'
+	@echo '  we2002-cards  so a guarda: tira do caminho o option file que houver'
 	@echo
 	@echo '  Editor de .mcr (memory card) -- projeto separado, Python + PySide6:'
 	@echo '  mcr-venv      cria $$(MCR_VENV) e instala PySide6 (nunca por apt)'
@@ -140,7 +147,7 @@ copy: $(COPY)
 # pior, e nela que fica a partida jogada a mao de que o save state depende
 # (ver o alvo pes2). Para zerar essa, `rm -rf $(PES2_DIR)`.
 fresh:
-	@rm -rf '$(COPY)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
+	@rm -rf '$(COPY)' '$(COPY_CUE)' '$(ORACLE_DIR)' '$(WTE_COPY)' '$(LAZ_COPY)'
 	@$(MAKE) --no-print-directory copy
 
 run: build $(COPY)
@@ -384,6 +391,121 @@ pes2-kill:
 
 pes2-status:
 	@python3 tools/pes2/fork.py status
+
+# ---------------------------------------------------------------- we2002 ----
+#
+# O JOGO, e nao o editor: `run` abre o newWe2002 SOBRE a imagem, `we2002-play`
+# poe a imagem para rodar, sob o mesmo fork do DuckStation que o alvo `pes2`
+# usa (tools/pes2/fork.py serve os dois -- o caminho diz pes2, o codigo nao).
+#
+# Por que ele existe: o option file -- o save `BISLPM-87056WEW-OPT` de um
+# memory card -- so nasce quando o PROPRIO JOGO grava. O que wte/re/mcr.md
+# mede sao os 17 destinos que o editor do Obocaman toca, e nao o save
+# inteiro: blocos 1 e 2 tem 5844 + 6243 bytes nao-zero, e os 17 explicam
+# ~490. Medir o resto pede um cartao emitido pelo jogo.
+#
+# `make we2002-play` CONTINUA sobre o cartao que houver, e diz qual. Quem
+# comeca do zero e `make we2002-play-fresh`, que roda a guarda antes: ela
+# MOVE para $(WORK)/optionfiles-<data>/ o que achar; nada e apagado.
+#
+# O cartao NAO mora em $(WORK), e este alvo nao muda isso: quem escolhe
+# onde ele fica e a configuracao do DuckStation da maquina
+# (`Card1Type = PerGameTitle`, `Directory = memcards`), e a decisao de
+# 2026-09-02 vale aqui como vale no pes2 -- nenhum alvo deste arquivo
+# configura o emulador. Por isso a guarda mexe no diretorio dele em vez de
+# apontar o emulador para outro lugar.
+#
+# A imagem e a COPIA de $(IMAGE) que o `run` ja usa -- a mesma, nao outra --,
+# entao o jogo mostra o que o editor gravou. `make fresh` zera as duas juntas.
+# O DuckStation nao escreve no disco; o que ele escreve e o cartao.
+#
+# Imagem sem .cue nao serve: a japonesa de arquivo unico so tem trilha de
+# dados (ver o CLAUDE.md), e o alvo recusa em vez de bootar sem audio.
+
+CUE      := $(basename $(IMAGE)).cue
+COPY_CUE := $(WORK)/$(notdir $(CUE))
+GAME_STEM := $(basename $(notdir $(IMAGE)))
+
+# A busca do cartao, uma vez so: a guarda que move e o aviso que so olha
+# tem de procurar EXATAMENTE a mesma coisa. Tres padroes, porque o nome
+# depende de como o DuckStation identificou a imagem -- ver o comentario
+# do alvo `we2002-cards`.
+GAME_CARD_FIND = find '$(DUCK_CARDS)' -maxdepth 1 -type f \
+	  \( -iname '*winning*eleven*' -o -iname '*slpm*870*56*' \
+	     -o -iname '$(GAME_STEM)*' \) 2>/dev/null | sort
+
+# Sobrescrevivel para quem tiver o DuckStation em outro $$XDG_DATA_HOME. O
+# default e onde ele guarda: e UM diretorio, entao uma instancia por vez.
+DUCK_DATA   ?= $(HOME)/.local/share/duckstation
+DUCK_CARDS  := $(DUCK_DATA)/memcards
+DUCK_STATES := $(DUCK_DATA)/savestates
+
+# Como o `pes2`, e pelo mesmo motivo: o default nao depende de quem chamou.
+GAME_DISPLAY ?= $(DISPLAY)
+
+$(COPY_CUE): $(CUE) | $(WORK)
+	@test -s '$(CUE)' || { \
+	  echo 'ERRO: sem .cue ao lado da imagem: $(CUE)'; \
+	  echo '      sem ele o DuckStation nao acha as trilhas de audio.'; \
+	  echo '      roms/japanese-shift-jis.bin e so trilha de dados e NAO'; \
+	  echo '      serve para jogar -- use a European Deluxe.'; exit 1; }
+	@cp --reflink=auto '$(CUE)' '$@'
+
+# A guarda. Tres padroes, porque o nome do cartao depende de como o
+# DuckStation identificou a imagem: pelo gamedb (o serial SLPM-87056 leva a
+# `World Soccer Winning Eleven 2002 (Japan)`) ou, sem casar, pelo nome do
+# arquivo. Cobrir os tres custa uma linha; adivinhar um custa um cartao
+# esquecido que o jogo carrega e a medicao seguinte le como novo.
+we2002-cards: | $(WORK)
+	@mkdir -p '$(DUCK_CARDS)'
+	@stale=$$($(GAME_CARD_FIND)); \
+	 if [ -z "$$stale" ]; then \
+	   echo '>> nenhum option file do jogo em $(DUCK_CARDS)'; \
+	 else \
+	   dest='$(WORK)/optionfiles-'$$(date +%Y%m%d-%H%M%S); \
+	   mkdir -p "$$dest"; \
+	   echo '>> option file ja existia -- movendo para fora do caminho'; \
+	   echo "$$stale" | while IFS= read -r f; do \
+	     echo "   $$f"; mv -- "$$f" "$$dest"/; done; \
+	   echo "   -> $$dest  (movido, nao apagado)"; \
+	 fi
+	@st=$$(find '$(DUCK_STATES)' -maxdepth 1 -type f -iname 'SLPM-87056*' \
+	   2>/dev/null | sort); \
+	 if [ -n "$$st" ]; then \
+	   echo '>> AVISO: ha save state deste jogo, e save state carrega o'; \
+	   echo '   cartao junto -- carregar um desfaz a guarda acima:'; \
+	   echo "$$st" | sed 's/^/   /'; \
+	 fi
+
+# **Ele NAO zera o cartao.** Zerar a cada corrida arquivaria um option file
+# por partida e faria toda sessao comecar do zero -- e a mesma razao pela
+# qual `$(COPY)` so se refaz quando falta. Quem zera e `we2002-play-fresh`,
+# como quem zera a copia da imagem e `fresh`. Aqui o cartao so se anuncia.
+we2002-play: $(COPY) $(COPY_CUE)
+	@card=$$($(GAME_CARD_FIND)); \
+	 if [ -z "$$card" ]; then \
+	   echo '>> sem option file: o jogo vai criar um em $(DUCK_CARDS)/'; \
+	 else \
+	   echo '>> continuando sobre o option file que ja existe:'; \
+	   echo "$$card" | sed 's/^/   /'; \
+	   echo '   (`make we2002-play-fresh` comeca do zero)'; \
+	 fi
+	@python3 tools/pes2/fork.py which >/dev/null 2>&1 || { \
+	  echo 'ERRO: fork do DuckStation ausente.'; \
+	  echo '      Ele nao e versionado (CC-BY-NC-ND-4.0). Para reconstruir:'; \
+	  echo '        python3 tools/pes2/fork.py recipe'; exit 1; }
+	@echo '>> $(COPY_CUE)'
+	@echo '>> DISPLAY=$(GAME_DISPLAY)'
+	@python3 tools/pes2/fork.py launch '$(COPY_CUE)' --display '$(GAME_DISPLAY)'
+	@echo '>> o cartao aparece em $(DUCK_CARDS)/ assim que o jogo gravar.'
+	@echo '   Encerre com `make pes2-kill` (o mesmo fork, os tres nomes).'
+
+# O par de `fresh`: tira o option file do caminho e so entao roda.
+we2002-play-fresh: we2002-cards
+	@$(MAKE) --no-print-directory we2002-play GAME_DISPLAY='$(GAME_DISPLAY)'
+
+we2002-98:
+	@$(MAKE) --no-print-directory we2002-play GAME_DISPLAY=$(XVFB)
 
 # ------------------------------------------------- os dois outros editores ---
 #
