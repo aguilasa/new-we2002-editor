@@ -110,6 +110,48 @@ O que isso ainda **não** diz: se a ROM PT-BR também os liga por conta própria
 outra metade do cruzado, que ficou por fazer e não bloqueia o mapa. Nem qual
 byte é: a prova é de que o cartão manda, e não de onde no cartão.
 
+#### E o save tem verificação de integridade — medido no mesmo dia
+
+O cartão inglês com **só** `0x02184..0x02185` trocado de `00 00` para `01 00`,
+e mais nada, foi **recusado pelo jogo** ao carregar o option file. O
+`cli.py info` o dá por íntegro (`bad checksums none`) porque os 16 checksums
+que ele confere são os **do diretório**, e a escrita foi no bloco 1, dentro do
+save.
+
+Três consequências, e elas mudam o método desta task:
+
+1. **Editar o campo à mão e ver o resultado na tela não funciona.** O critério
+   que dizia "gravar um valor intermediário e ver um subconjunto dos times"
+   está morto como escrito; o que resta dele é a intenção.
+2. **O caminho que resta é deixar o jogo recalcular.** Partir de um cartão que
+   carrega, mudar **uma** opção dentro do jogo, salvar, e comparar. O
+   diferencial entrega duas coisas de uma vez: qual bit é a opção, e **quais
+   bytes são a verificação**, porque estes se mexem em toda gravação.
+3. **A verificação também precisa ser mapeada**, ou o objetivo seguinte —
+   marcar e desmarcar na ferramenta — é inalcançável: gravar o bit sem
+   recalcular produz exatamente o erro acima.
+
+Três bytes avulsos são os primeiros candidatos a ser a verificação, por não
+terem forma de dado e por diferirem entre os três cartões:
+
+```
+0x02102  en=d9  ptbr=8f  29939=84
+0x0216d  en=e8  ptbr=a0  29939=a8
+0x02202  en=8b  ptbr=4d  29939=ed
+```
+
+**Não é soma de bytes de uma faixa contígua simples** — medido: os deltas entre
+inglês e PT-BR são `b6`, `b8` e `c2`, e nenhuma das faixas plausíveis
+(`0x2000..0x2102`, `0x2103..0x216d`, `0x2186..0x2202`, e as duas maiores)
+reproduz nenhum deles. Ou a faixa é outra, ou não é soma.
+
+**E isto toca a MCR-TASK-13.** O veredito do console ficou "não obtido", e a
+pergunta dele era se um cartão com dado gravado fora da cadeia declarada é
+válido para o jogo. Agora se sabe que dado gravado **dentro** da cadeia, sem
+recalcular a verificação, é recusado. Se a mesma verificação cobre a área de
+jogador — que é onde o port e o editor do Obocaman escrevem — é pergunta
+aberta, e agora testável: gravar pela ferramenta e abrir no jogo.
+
 ---
 
 ## Objetivo
