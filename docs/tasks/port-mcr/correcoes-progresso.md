@@ -39,7 +39,7 @@ ciclo arquivado, o dele em
 | [CORR-MCR-023](/docs/tasks/port-mcr/CORR-MCR-023.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o critério conta quatro cartões de PES2 e cinco recusas, e a ferramenta mede cinco e seis | Alta | [x] concluída | 2026-09-09 |
 | [CORR-MCR-024](/docs/tasks/port-mcr/CORR-MCR-024.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o `mcr_container` entrou e a §4.4 do plano continua com três alvos, e o perfil com `1 passed, 2 skipped` | Alta | [x] concluída | 2026-09-09 |
 | [CORR-MCR-025](/docs/tasks/port-mcr/CORR-MCR-025.md) | [MCR-TASK-16](/docs/tasks/port-mcr/16-conteiner-gme.md) | o julgamento do filtro dos diálogos não tem caso vermelho plantado, e o motor que o plantaria está no mesmo arquivo | Alta | [x] concluída | 2026-09-09 |
-| [CORR-MCR-026](/docs/tasks/port-mcr/CORR-MCR-026.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro | Alta | [ ] pendente | — |
+| [CORR-MCR-026](/docs/tasks/port-mcr/CORR-MCR-026.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro | Alta | [x] concluída | 2026-09-10 |
 | [CORR-MCR-027](/docs/tasks/port-mcr/CORR-MCR-027.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "as faixas válidas começam todas em `0x02044`" é falso como escrito, e o fim da segunda faixa está medido em `0x04e30` | Baixa | [ ] pendente | — |
 | [CORR-MCR-028](/docs/tasks/port-mcr/CORR-MCR-028.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | o mapa diz que três imagens de `roms/` declaram `SLPM-87056`, e são cinco | Baixa | [ ] pendente | — |
 | [CORR-MCR-029](/docs/tasks/port-mcr/CORR-MCR-029.md) | [MCR-TASK-17](/docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md) | "a diferença entre `c-opcao` e `c-opcao2` é a câmera e nada mais" omite os 15 bytes de `0x02035` | Baixa | [ ] pendente | — |
@@ -77,7 +77,7 @@ ciclo arquivado, o dele em
 - [x] CORR-MCR-023 — remedir cinco/seis nos quatro lugares que dizem quatro/cinco
 - [x] CORR-MCR-024 — o quarto alvo na §4.4 do plano, e `2 passed, 2 skipped` no plano e no perfil
 - [x] CORR-MCR-025 — plantar o filtro dos diálogos em `OPEN_BREAKS`, e conferir que casa uma vez
-- [ ] CORR-MCR-026 — recontar os cartões da regra da soma por padrão distinto, e a procedência
+- [x] CORR-MCR-026 — recontar os cartões da regra da soma por padrão distinto, e a procedência
 - [ ] CORR-MCR-027 — trocar "começam todas em" por "nenhuma começa antes de", e registrar `b >= 0x04e30`
 - [ ] CORR-MCR-028 — cinco imagens declaram o código, ou nomear as duas usadas
 - [ ] CORR-MCR-029 — 17 bytes de diferença, dos quais 15 são o campo de alta entropia

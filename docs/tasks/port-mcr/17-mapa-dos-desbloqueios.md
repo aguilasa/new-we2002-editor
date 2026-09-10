@@ -154,24 +154,27 @@ aberta, e agora testável: gravar pela ferramenta e abrir no jogo.
 
 #### A verificação: **um byte de soma por bloco**, medido em 2026-09-10
 
-Quatro amostras novas, todas gravadas **pelo jogo** e portanto válidas, a
+Cinco arquivos novos, todos gravados **pelo jogo** e portanto válidos, a
 partir do cartão PT-BR — `a1`, `a2` (salvar sem mudar nada, duas vezes),
 `b-nome` (uma letra de um nome), `c-opcao` (várias opções) e `c-opcao2`
-(`c-opcao` **mais** a câmera, e só ela). Ficam em `$(WORK)/cards/`, pelo alvo
+(`c-opcao` **mais** a câmera, e só ela). São **três padrões distintos**: `a1` e
+`a2` saíram idênticos ao PT-BR de partida, que é o achado do parágrafo
+seguinte. Ficam em `$(WORK)/cards/`, pelo alvo
 `make we2002-card-snap LABEL=<nome>`.
 
 **A gravação é determinística.** `a1`, `a2` e o `we2002-ptbr-first-boot.mcr`
 são o mesmo md5 — salvar sem mudar nada não move um bit. Não há relógio nem
 contador no save, então todo diff daqui em diante é sinal.
 
-A regra, que reproduz **sete** cartões independentes (os quatro acima, os dois
-`first-boot` e o `29939`, de terceiro):
+A regra, que reproduz **seis cartões distintos** — os três padrões novos
+(`b-nome`, `c-opcao`, `c-opcao2`), os dois `first-boot` e o `29939`, o único de
+terceiro:
 
 ```
 byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a   (mod 256)
 ```
 
-`k = 0x8a` em todos os sete. A busca que a achou é de faixa consistente com
+`k = 0x8a` nos seis. A busca que a achou é de faixa consistente com
 todos os cartões ao mesmo tempo: as faixas válidas para `0x02102` **começam
 todas em `0x02044`** — o byte logo depois do campo de alta entropia —, e as de
 `0x02202` **começam todas em `0x02186`**, onde a anterior termina. São blocos
@@ -183,7 +186,9 @@ muda, o que é o que se espera de um byte de opção.
 
 #### O campo de alta entropia `0x02035..0x02043`, 15 bytes
 
-Zero nos três cartões de primeira execução — e o jogo **aceita** os três.
+Zero nos dois cartões de primeira execução — o inglês e o PT-BR — e o jogo
+**aceita** os dois. (`a1`, `a2` e `ptbr-original` também estão zerados, e são
+esse mesmo cartão PT-BR.)
 Preenchido com valor de alta entropia em toda gravação posterior que mudou
 algo (`b-nome`, `c-opcao`, `c-opcao2`, `29939`). Não foi identificado. O que
 importa para o objetivo é que **zero é aceito**, então um cartão editado a
@@ -315,8 +320,8 @@ sobre os bits altos, um de âncora (`01 00`) e um de confirmação ponta a ponta
 ### O achado que não estava no escopo, e sem o qual a task seguinte não anda
 
 O save tem verificação própria — um byte de soma por bloco encadeado —, e sem
-refazê-la o jogo **recusa** o option file. A regra vale para sete cartões
-independentes, dois deles de terceiros:
+refazê-la o jogo **recusa** o option file. A regra vale para seis cartões
+distintos, um deles de terceiro:
 
 ```
 byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a

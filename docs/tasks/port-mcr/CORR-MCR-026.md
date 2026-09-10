@@ -3,7 +3,7 @@ id: CORR-MCR-026
 title: "Correção: a regra da soma é creditada a sete cartões independentes e dois de terceiros, e a medição dá seis padrões distintos e um de terceiro"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -107,19 +107,61 @@ que nomeia cinco rótulos.
 
 ## Verificação
 
-- [ ] `md5sum mcr/we2002-*.mcr work/cards/*.mcr` e a contagem do doc dizem o
+- [x] `md5sum mcr/we2002-*.mcr work/cards/*.mcr` e a contagem do doc dizem o
       mesmo número de padrões distintos
-- [ ] `grep -n "sete\|três cartões de primeira" docs/MCR-DESBLOQUEIOS.md
+- [x] `grep -n "sete\|três cartões de primeira" docs/MCR-DESBLOQUEIOS.md
       docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md` não sobra afirmação
       contada por arquivo
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-10
 
 **Resumo do que foi feito:**
 
+As duas contagens passaram a ser por **padrão distinto**, e não por arquivo.
+`k = 0x8a` vale em **seis cartões distintos**, um deles de terceiro — o
+`29939`; oito arquivos foram medidos, e três deles são o mesmo cartão porque a
+gravação é determinística, que é resultado desta task e não amostra perdida. As
+duas cópias de `work/cards/` (`ptbr-original`, `ptbr-antes-do-v2`) ficaram
+nomeadas como cópias.
+
+O campo de alta entropia é zero nos **dois** cartões de primeira execução — o
+inglês e o PT-BR —, e o `29939` entra ali como o caso oposto, de campo
+preenchido. No mapa, "os quatro acima" que nomeava cinco rótulos virou "cinco
+arquivos novos, três padrões distintos".
+
+**Medido de brinde, e escrito:** a forma da regra reaparece em outra release —
+os `BESLES-039xxPES-OPT` de PES2 em `mcr/` dão `k = 0x89` na mesma faixa. São
+**cinco** arquivos, não quatro como a evidência desta CORR dizia: `17738`,
+`18432`, `22507`, `29818` e `7110`, com cinco md5 distintos. O número escrito
+no doc é o medido.
+
 **Problemas encontrados:**
 
+Nenhum. A regra não estava em questão e continua valendo; o que estava errado
+era só o peso probatório declarado.
+
+Uma armadilha de reprodução vale registrar: a soma **exclui** o próprio byte de
+soma, e medir sem excluí-lo dá `k` variando de cartão para cartão (`0x4f`,
+`0x05`, `0x23`…) — o que parece derrubar a regra. O bloco "Reproduzir" do mapa
+já faz certo, zerando `d[C]` antes de somar.
+
+**Medições:**
+
+| medida | número |
+|---|---|
+| arquivos medidos com save `BISLPM-87056WEW-OPT` | **8** (mais 2 cópias em `work/cards/`) |
+| padrões distintos (md5) | **6** |
+| de terceiro | **1** (`pro-evolution-soccer-2.29939.gme`) |
+| `k` nos seis | `0x8a` em todos |
+| campo `0x02035..43` zerado | **2** cartões (inglês, PT-BR) — mais `a1`/`a2`/`ptbr-original`, que são o PT-BR |
+| `BESLES-039xxPES-OPT` de PES2 | **5** arquivos, `k = 0x89` |
+| `roms/`, `mcr/`, `work/cards/` | intocados (leitura pura) |
+
 **Arquivos criados/modificados:**
+
+- `docs/MCR-DESBLOQUEIOS.md` — as duas contagens, e o reforço do `k = 0x89`
+- `docs/tasks/port-mcr/17-mapa-dos-desbloqueios.md` — as mesmas contagens em
+  :157, :167, :174, :186 e :318

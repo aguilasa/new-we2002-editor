@@ -54,9 +54,17 @@ porque os 16 checksums que ele confere são os dos quadros.
 byte(0x02102) = ( soma de 0x02044..0x02186, exceto ele próprio ) + 0x8a   (mod 256)
 ```
 
-`k = 0x8a` em **sete** cartões independentes, dois deles de terceiros. Gravar o
-campo de flags sem refazer esse byte produz *ERROR* ao carregar o option file —
-medido, e é o primeiro sintoma que aparece.
+`k = 0x8a` em **seis cartões distintos**, um deles de terceiro (o `29939` de
+[`../mcr/README.md`](../mcr/README.md)). Oito arquivos foram medidos, e três
+deles são o mesmo cartão: `a1`, `a2` e o `we2002-ptbr-first-boot.mcr` têm o
+mesmo md5, porque a gravação é determinística — é resultado desta medição, não
+amostra perdida. (`work/cards/ptbr-original.mcr` e `ptbr-antes-do-v2.mcr` são
+outras duas cópias, do PT-BR e do `c-opcao2`, e não entram na conta.) A forma
+da regra reaparece em outra release: os cinco `BESLES-039xxPES-OPT` de PES2 em
+`mcr/` dão `k = 0x89` na mesma faixa.
+
+Gravar o campo de flags sem refazer esse byte produz *ERROR* ao carregar o
+option file — medido, e é o primeiro sintoma que aparece.
 
 O campo de flags está **dentro** da faixa dessa soma, então quem escreve ali
 sempre precisa refazê-la. Um segundo byte de soma, `0x02202`, cobre a faixa
@@ -66,7 +74,9 @@ necessário** para escrever os flags.
 ### O campo `0x02035..0x02043`, 15 bytes
 
 Alta entropia, muda por inteiro em toda gravação que mudou algo, e **é zero nos
-três cartões de primeira execução — que o jogo aceita**. Não foi identificado.
+dois cartões de primeira execução — o inglês e o PT-BR —, que o jogo aceita**.
+O `29939` entra aqui só como o caso oposto, o de campo preenchido: ele não é de
+primeira execução. Não foi identificado.
 Consequência prática: um cartão editado a partir de um `first-boot` pode
 deixá-lo zerado, e é o que as sondas desta medição fizeram.
 
