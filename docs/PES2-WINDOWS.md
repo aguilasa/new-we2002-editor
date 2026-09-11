@@ -34,16 +34,30 @@ C:\games\ps1\
   work\                                vazio: é onde a cópia de trabalho mora
 ```
 
-**`work\` começa vazio, e a §4 não roda sem ele.** Copiar a release inteira
-para lá é o primeiro passo, não um detalhe da regra acima — o comando de subir
-aponta para um `.cue` dentro de `work\` que ainda não existe num disco recém
-preparado. São 571 MiB, as oito trilhas:
+**`work\` começa vazio, e nada sobe sem ele.** Copiar a release inteira para lá
+é o primeiro passo, não um detalhe da regra acima. São 571 MiB, as oito
+trilhas, e desde 2026-09-11 o jeito curto é o alvo:
+
+```powershell
+.\make.ps1 pes2-copy
+```
+
+Ele confere **arquivo a arquivo** e copia só o que falta, então adota uma cópia
+que já exista e repõe uma trilha perdida sem recopiar as outras oito.
+
+À mão o comando é este, com uma ressalva que custa caro:
 
 ```powershell
 Copy-Item -Recurse `
   "C:\games\ps1\roms\Pro Evolution Soccer 2 (Europe) (EsIt)" `
   "C:\games\ps1\work\"
 ```
+
+**Ele só é seguro na primeira vez.** `Copy-Item -Recurse` cria o destino quando
+ele falta e, quando ele já existe, cria uma cópia **dentro** dele — rodar duas
+vezes rende
+`work\Pro Evolution Soccer 2 (Europe) (EsIt)\Pro Evolution Soccer 2 (Europe) (EsIt)\`
+e mais 571 MiB. O alvo não tem esse problema.
 
 **`roms\` são os originais.** PES2 e WE2002 gravam *in-place*, então nada que
 escreva aponta para lá — copie a release inteira para `work\` antes, como no
@@ -112,9 +126,22 @@ chamada — só impede jogar à mão.
 
 ## 4. Subir
 
-Desde 2026-09-11 o **`fork.py` roda aqui**, e é o caminho curto — ele boota,
-dispensa o modal se houver e **espera a porta responder** antes de devolver o
-controle, que é o que separa "subiu" de "está respondendo":
+Desde 2026-09-11 o **`fork.py` roda aqui**, e o [`make.ps1`](../make.ps1) da
+raiz embrulha ele — o caminho curto, que cuida da cópia e acha o `.cue`
+sozinho (o nome difere entre as releases: `(Es,It)` contra `(En,Fr,De)`):
+
+```powershell
+.\make.ps1 pes2            # copia se precisar, boota, espera a porta MCP
+.\make.ps1 pes2-status
+.\make.ps1 pes2-kill
+.\make.ps1                 # os alvos e o ambiente achado
+```
+
+`.\make.ps1 we2002-play` faz o mesmo com o **jogo WE2002** sob o mesmo fork, e
+`we2002-cards` tira o option file do caminho antes. Uma sessão por vez: o
+`launch` encerra todo DuckStation antes de subir, então um derruba o outro.
+
+Direto pelo `fork.py`, que é o que o alvo chama:
 
 ```powershell
 python tools\pes2\fork.py launch `
@@ -123,7 +150,10 @@ python tools\pes2\fork.py status
 python tools\pes2\fork.py kill
 ```
 
-À mão, se preferir:
+Ele boota, dispensa o modal se houver e **espera a porta responder** antes de
+devolver o controle — que é o que separa "subiu" de "está respondendo".
+
+Ou o `.exe` cru:
 
 ```powershell
 cd C:\games\ps1\duckstation-mcp
@@ -162,6 +192,7 @@ existem no Windows — Xvfb, `xdotool`, `import -window`, shell:
 | Ferramenta | No Windows | Por quê |
 |---|---|---|
 | `tools/pes2/fork.py` | **roda** desde 2026-09-11 | portado: `tasklist` no lugar do `pgrep`, `taskkill /F` no do `SIGKILL`, `ctypes`/`user32` no do `xdotool`, e nenhum display |
+| os alvos `pes2*` e `we2002-*` do `Makefile` | **rodam** pelo [`make.ps1`](../make.ps1) | o `Makefile` é GNU make + bash e não roda aqui; os alvos foram portados para o script da raiz. O par `-98` e o `pes2-play` não têm objeto e são **recusados com o motivo** |
 | `tools/pes2/drive.py` | **não roda** | dirige por `xdotool` e captura por `import -window` |
 | `tools/pes2/mcp_drive.py` | **sobe, mas as rotas não reconhecem a tela** | o `fork.launch()` de que ela depende agora funciona; o que falta são as assinaturas — ver a §7 |
 | `tools/pes2/boot_check.sh`, `asset_screen.sh`, `run_duckstation.sh` | **não rodam** | shell + Xvfb |
