@@ -149,6 +149,18 @@ CONTROLS = (
             "    if read_only is not None:", "    if False:",
             ("mcrio",),
             "roms/ and mcr/ are never a tool's target"),
+    Control("options-stale-checksum", "options.py", "write_camera",
+            "    card.write(rec.header + 2, bytes([checksum(payload)]))",
+            "    pass",
+            ("options",),
+            "the camera byte without its record checksum: the console loads "
+            "the card and the game drops the record"),
+    Control("options-assumed-icons", "options.py", "data_offset",
+            "    return save_start(card) + card_mod.FRAME_BYTES * (1 + icon_frames(card))",
+            "    return save_start(card) + card_mod.FRAME_BYTES * 2",
+            ("options",),
+            "the icon frame count is read from the save, not assumed -- a "
+            "save with two icons puts the data 128 bytes further on"),
     Control("harness-counts-nothing", "harness.py", "Checker.ok",
             "            self.fail(name, detail)", "            pass",
             ("harness",),

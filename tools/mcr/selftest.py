@@ -47,7 +47,7 @@ UI_DIR = os.path.join(MCR_DIR, "ui")
 # The order is the dependency order, so the first failure is the deepest one.
 MODULES = ("harness", "glossary", "controls", "card", "gme", "layout",
            "attributes", "numbers", "text", "domains", "formation", "model",
-           "mcrio")
+           "mcrio", "options")
 
 # What the UI is forbidden to import (Rule 3, section 3.3 of the plan).
 FORBIDDEN_IN_UI = ("layout", "card", "mcrio")

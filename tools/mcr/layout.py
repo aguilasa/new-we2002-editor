@@ -241,6 +241,84 @@ def kicker_address(kicker: int) -> int:
     return KICKER_ADDRESSES[kicker]
 
 
+# --- the option file's records --------------------------------------------
+#
+# A SECOND MEASUREMENT, AND A SEPARATE ONE. Everything above is the TEAM save:
+# 17 destinations measured out of `we-team-editor.exe`, addresses absolute in
+# the card, cross-checked against `wte/re/mcr.md`. Nothing below came from that
+# binary and nothing below is in that markdown, so `--check` does not touch it
+# and the count of 17 does not move.
+#
+# Provenance of this section:
+#
+#   container   card.py -- the block comes from the directory, and the PSX save
+#               header says how many icon frames stand between the block start
+#               and the first byte of data
+#   address     MEASURED HERE on 2026-09-11, by diffing four option files saved
+#               from one session of the game with nothing changed but the
+#               camera. The camera moved one byte and the record checksum in
+#               front of it; patching those two into the clean card reproduced
+#               each of the other three BYTE FOR BYTE, outside the title
+#               padding that the game leaves uninitialised
+#   semantics   the nine camera names are the game's own, off its option screen
+#   codec       --
+#
+# NOTHING HERE IS AN ABSOLUTE ADDRESS, and that is deliberate. The team save's
+# 17 are absolute because the upstream wrote them that way, and trap 6 of the
+# profile is what that costs: move the save to another block and every one of
+# them lands 8,192 bytes off, still looking plausible. These are offsets INSIDE
+# the save, and `options.py` resolves them against the block the directory
+# actually names. The user's cards hold this save in block 1, where every
+# absolute address above would be wrong by 8,192.
+
+
+@dataclasses.dataclass(frozen=True)
+class OptionField:
+    """One field inside one record of the option save."""
+
+    record: int             # index into OPTION_RECORD_OFFSETS
+    offset: int             # from the first byte of the record's PAYLOAD
+    size: int
+    field: str
+
+
+# Each record is `[u16 size, little endian][u8 checksum][payload]`, and the
+# checksum is the payload's bytes summed mod 256. Both were measured the same
+# way: the sum matches in all six cards on hand, and the two records of one
+# card have independent checksums that each moved only when their own payload
+# did.
+OPTION_RECORD_HEADER_BYTES = 3
+
+# Where each record starts, counted from the first byte of the save's data.
+# THE RECORDS ARE NOT PACKED. Record 0 ends 119 bytes before record 1 begins,
+# and the gap is zeros -- so walking the chain by `offset + 3 + size` reads a
+# size of 0 and concludes the save has one record. Measured; the offsets are a
+# table for that reason.
+OPTION_RECORD_OFFSETS = (0x000, 0x100)
+
+# What each record declared in all six cards. The reader takes the size from
+# the file and never from here; this is what `options.py --check` holds the
+# file up against, so a card with a different build of the save is NAMED
+# instead of being decoded into plausible nonsense.
+OPTION_RECORD_MEASURED_SIZES = (134, 12420)
+
+# The one field measured so far. The rest of record 0 is 50 little-endian
+# u16 pad masks -- the button configuration -- and 32 further bytes nobody has
+# moved one at a time yet.
+CAMERA = OptionField(record=0, offset=1, size=1, field="camera")
+
+OPTION_FIELDS: tuple[OptionField, ...] = (CAMERA,)
+
+
+def option_record_offset(index: int) -> int:
+    """Where record `index` starts, from the first byte of the save's data."""
+    if not 0 <= index < len(OPTION_RECORD_OFFSETS):
+        raise LayoutError(
+            f"option record {index} outside "
+            f"0..{len(OPTION_RECORD_OFFSETS) - 1}")
+    return OPTION_RECORD_OFFSETS[index]
+
+
 # --- the cross-check against `wte/re/mcr.md` -------------------------------
 
 _ROW = re.compile(
@@ -530,6 +608,34 @@ def _checks(c) -> None:
         globals()["DESTINATIONS"] = saved
 
     # --- Rule 1: no other module carries an address
+    # --- the option file's records, the second measurement
+    ok("one option field measured so far", len(OPTION_FIELDS) == 1,
+       f"n={len(OPTION_FIELDS)}")
+    ok("the camera is in record 0, one byte in",
+       (CAMERA.record, CAMERA.offset, CAMERA.size) == (0, 1, 1),
+       f"camera={CAMERA}")
+    ok("two records, and record 0 starts at the first data byte",
+       len(OPTION_RECORD_OFFSETS) == 2 and option_record_offset(0) == 0)
+    ok("as many measured sizes as records",
+       len(OPTION_RECORD_MEASURED_SIZES) == len(OPTION_RECORD_OFFSETS))
+    # The gap is the point: packed records would make a chain walk correct, and
+    # it is not. If a future measurement removes the gap, the walk in
+    # `options.py` can be simplified -- and this check is what would say so.
+    ok("record 0 ends before record 1 begins, with a gap",
+       OPTION_RECORD_HEADER_BYTES + OPTION_RECORD_MEASURED_SIZES[0]
+       < option_record_offset(1),
+       f"end={OPTION_RECORD_HEADER_BYTES + OPTION_RECORD_MEASURED_SIZES[0]:#x} "
+       f"next={option_record_offset(1):#x}")
+    # These are offsets into the save, never card addresses. A value that fell
+    # inside the team save's address space would mean somebody pasted an
+    # absolute address in here, which is the whole defect this section avoids.
+    ok("no option offset is a card address",
+       not any(SAVE_SPACE[0] <= o < SAVE_SPACE[1]
+               for o in OPTION_RECORD_OFFSETS))
+    c.refuses("refuses an option record that does not exist",
+              lambda: option_record_offset(len(OPTION_RECORD_OFFSETS)),
+              "outside 0..", kind=LayoutError)
+
     monopoly = attempt("the address sweep runs", address_monopoly, default=None)
     ok("no other module of tools/mcr/ has a save address", monopoly == [],
        f"complaints={monopoly}")
