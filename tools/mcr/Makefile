@@ -44,6 +44,16 @@ VALUE ?= 17
 OUT   ?= $(WORK)/mcr-tela.png
 TAB   ?= 0
 
+# A camera do option file, por nome ou por numero 0..8. Os nove nomes moram no
+# `options.py`; `camera-set` sem CAMERA= grava esta.
+CAMERA ?= normal-mid
+
+# Os quatro cartoes que o alvo `cameras` mede, num diretorio so: o limpo e os
+# tres que o jogo salvou com a camera trocada. CARTAO DE JOGO NAO SE VERSIONA,
+# mesma regra de roms/, entao sem a variavel o alvo PULA e diz que pulou --
+# nunca passa em silencio.
+CAMERAS ?= $(WE2002_MCR_CAMERA_CARDS)
+
 XVFB ?= :98
 # Recursiva de proposito: o `ps` so roda quando um alvo de GUI e chamado.
 # Vazio quando o servidor subiu sem `-auth` -- que e o caso do `:98` deste
@@ -53,7 +63,8 @@ XAUTH_XVFB = $(shell ps -o args= -C Xvfb 2>/dev/null \
 
 .DEFAULT_GOAL := help
 .PHONY: help check controls sweeps gate gates card copy info dump get set \
-        formation numbers names roundtrip probe negative ui ui-98 ui-vazia \
+        formation numbers names camera cameras camera-set \
+        roundtrip probe negative ui ui-98 ui-vazia \
         shot venv \
         oracle-controle oracle-capitao oracle-nome limpa
 
@@ -76,12 +87,17 @@ help:
 	@echo '  formation     X, Y, papeis, cobradores e capitao'
 	@echo '  numbers       os 23 dorsais de 5 bits'
 	@echo '  names         os nomes, byte a byte, em cp932'
+	@echo '  camera        a camera do option file, e os dois registros'
+	@echo '  cameras       o gate da medicao: dois bytes reproduzem os tres'
+	@echo '                cartoes que o jogo salvou. Pula sem $$(CAMERAS)'
 	@echo '  roundtrip     as duas formas; tem de dar 0 byte'
 	@echo
 	@echo 'Escrita (sobre $$(COPY), nunca sobre $$(CARD)):'
 	@echo '  copy          faz a copia de trabalho'
 	@echo '  set           grava um campo   (SLOT= FIELD= VALUE=)'
 	@echo '  probe         muda um campo e diz que bytes se moveram'
+	@echo '  camera-set    grava a camera  (CAMERA=$(CAMERA)) -- dois bytes:'
+	@echo '                o valor e o checksum do registro que o guarda'
 	@echo '  negative      as cinco injecoes da §5.2'
 	@echo
 	@echo 'Interface (delegados ao Makefile da raiz):'
@@ -119,6 +135,7 @@ sweeps:
 	@$(PY) $(AQUI)/glossary.py
 	@$(PY) $(AQUI)/layout.py --rule1
 	@$(PY) $(AQUI)/layout.py --check
+	@WE2002_MCR_CAMERA_CARDS='$(CAMERAS)' $(PY) $(AQUI)/options.py --check
 
 # Sem cartao ele sai 77, que e *skip* e nao falha -- e o `-` deixa o make
 # seguir, porque pular nao e erro.
@@ -171,6 +188,16 @@ names:
 	$(exige_cartao)
 	@$(PY) $(AQUI)/text.py '$(CARD)'
 
+camera:
+	$(exige_cartao)
+	@$(PY) $(AQUI)/options.py '$(CARD)'
+
+# Sem $(CAMERAS) ele imprime `skipped`, nomeia a variavel que falta e sai 0 --
+# pular nao e falhar. LEIA A LINHA, nao so o codigo de saida: e a mesma
+# armadilha que o `mcr_ui` registra no CLAUDE.md.
+cameras:
+	@WE2002_MCR_CAMERA_CARDS='$(CAMERAS)' $(PY) $(AQUI)/options.py --check
+
 roundtrip:
 	$(exige_cartao)
 	@$(PY) $(AQUI)/cli.py roundtrip '$(CARD)'
@@ -199,6 +226,14 @@ set: $(COPY)
 
 probe: $(COPY)
 	@$(PY) $(AQUI)/mcrio.py '$(COPY)' --edit-probe $(SLOT) $(FIELD) $(VALUE)
+
+# O `--out` e explicito de proposito. Sem ele o modulo grava numa copia
+# `-edited` AO LADO, que e o default certo para quem chama na mao -- mas aqui
+# $(COPY) ja e a copia, e encadear uma segunda so esconde o arquivo de quem for
+# procura-lo depois.
+camera-set: $(COPY)
+	@WE2002_MCR_CARD='$(CARD)' $(PY) $(AQUI)/options.py '$(COPY)' \
+	  --set '$(CAMERA)' --out '$(COPY)'
 
 negative:
 	@$(PY) $(AQUI)/cli.py negative

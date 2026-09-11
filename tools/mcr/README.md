@@ -113,7 +113,7 @@ próprio `make` faz. Não há alvo que escreva no cartão que você apontou.
 |---|---|---|
 | `check` | **o gate obrigatório** | `python3 selftest.py` |
 | `controls` | planta cada controle e exige o vermelho | `python3 controls.py` |
-| `sweeps` | idioma, endereço fora do `layout.py`, e os 17 destinos | `glossary.py` · `layout.py --rule1` · `layout.py --check` |
+| `sweeps` | idioma, endereço fora do `layout.py`, os 17 destinos e a medição da câmera | `glossary.py` · `layout.py --rule1` · `layout.py --check` · `options.py --check` |
 | `card` | o gate da fixture; 77 sem cartão | `cli.py check` |
 | `gate` | `ctest -R mcr` com a variável apontada | `ctest --test-dir build -R mcr -V` |
 | `gates` | os cinco acima, nessa ordem | — |
@@ -123,10 +123,13 @@ próprio `make` faz. Não há alvo que escreva no cartão que você apontou.
 | `formation` | X, Y, papéis, cobradores, capitão | `formation.py <cartão>` |
 | `numbers` | os 23 dorsais de 5 bits | `numbers.py <cartão>` |
 | `names` | os nomes byte a byte, em cp932 | `text.py <cartão>` |
+| `camera` | a câmera do option file, e os dois registros | `options.py <cartão>` |
+| `cameras` | o gate da medição; pula sem `$(CAMERAS)` | `options.py --check` |
 | `roundtrip` | as duas formas | `cli.py roundtrip <cartão>` |
 | `copy` | a cópia de trabalho | `cp --reflink=auto` |
 | `set` | grava um campo **na cópia** | `cli.py set <cópia> $(SLOT) $(FIELD) $(VALUE)` |
 | `probe` | muda um campo e diz que bytes se moveram | `mcrio.py <cópia> --edit-probe …` |
+| `camera-set` | grava a câmera **na cópia** — dois bytes | `options.py <cópia> --set $(CAMERA)` |
 | `negative` | as cinco injeções da §5.2 | `cli.py negative` |
 | `venv` | cria o venv com PySide6 | `make -C ../.. mcr-venv` |
 | `ui` / `ui-98` | abre a janela sobre uma cópia | `make -C ../.. mcr` / `mcr-98` |
@@ -136,12 +139,15 @@ próprio `make` faz. Não há alvo que escreva no cartão que você apontou.
 | `limpa` | apaga só o que estes alvos criam | — |
 
 As variáveis: `CARD` (default `$WE2002_MCR_CARD`, e ele default
-`work/entrada.mcr`), `SLOT`, `FIELD`, `VALUE`, `OUT`, `TAB`, `XVFB`, `PY`.
+`work/entrada.mcr`), `SLOT`, `FIELD`, `VALUE`, `OUT`, `TAB`, `XVFB`, `PY`,
+`CAMERA` e `CAMERAS` (default `$WE2002_MCR_CAMERA_CARDS`).
 
 ```sh
 make get SLOT=3 FIELD=speed          # 15
 make get SLOT=3 FIELD=               # a ficha inteira do slot 3
 make set SLOT=0 FIELD=speed VALUE=17 # na cópia, e diz o byte que moveu
+make camera                          # camera: 1 (normal-mid)
+make camera-set CAMERA=ov-far        # na cópia, e diz os dois bytes
 make shot TAB=1 OUT=/tmp/campo.png
 make info CARD=/caminho/outro.mcr
 ```
@@ -284,6 +290,82 @@ recusa **seis** e aceita dois. Contêiner não é save, e quem responde a segund
 pergunta é o `info`. Quem é de qual jogo está na tabela de
 [`mcr/README.md`](../../mcr/README.md), que é a fonte desta conta.
 
+## A câmera — `options.py`
+
+**Outro save, no mesmo cartão.** O `BISLPM-*WEW-OPT` guarda dois registros, e o
+editor de time só conhece o segundo. O primeiro tem 134 bytes e começa com a
+**câmera**: o byte que escolhe uma das nove vistas do jogo.
+
+```console
+$ python3 tools/mcr/options.py work/limpo.mcr
+camera: 1 (normal-mid)
+  at 0x02104, save data at 0x02100
+  record 0:    134 bytes at 0x02103, checksum 0xd9 ok
+  record 1:  12420 bytes at 0x02203, checksum 0x8b ok
+
+$ python3 tools/mcr/options.py work/limpo.mcr --set ov-far
+camera 1 (normal-mid) -> 8 (ov-far)
+  0x02104
+  0x02102
+written: work/limpo-edited.mcr
+```
+
+Os nove nomes são `normal-near`, `normal-mid`, `normal-far`, `wide`, `tv`,
+`zoom`, `ov-near`, `ov-mid`, `ov-far` — índices 0 a 8, e `--set` aceita nome ou
+número.
+
+**São sempre dois bytes, e o segundo é o que se esquece.** Cada registro carrega
+o próprio checksum na frente: a soma do payload, mod 256. Gravar só a câmera
+deixa um cartão que o console **carrega** e o jogo **descarta** — na tela isso
+parece "a edição não pegou", e é na verdade um save que o jogo jogou fora. O
+módulo refaz o checksum, e **recusa** gravar sobre um registro que já chegou com
+o checksum errado, em vez de corrigi-lo e esconder o que o estragou.
+
+**Nenhum endereço aqui é absoluto**, e essa é a diferença para os 17 destinos do
+editor de time. O bloco vem do diretório, o tamanho do quadro do contêiner e o
+número de quadros de ícone do cabeçalho do próprio save — só então se chega ao
+primeiro byte de dados. Escrito como constante, `0x02104` estaria certo nos
+cartões desta máquina e errado em qualquer um cujo save more noutro bloco, que é
+a armadilha 6 do perfil. Os offsets ficam no [`layout.py`](layout.py), na seção
+dos registros de opção, e são **relativos ao save**.
+
+### De onde vem a medição, e como ela se repete
+
+Quatro option files salvos numa sessão do jogo, sem mexer em nada além da
+câmera. Só duas coisas se moveram — o valor e o checksum:
+
+| câmera | byte `0x2104` | checksum `0x2102` |
+|---|---|---|
+| `normal-near` | `00` | `d8` |
+| `normal-mid` (o limpo) | `01` | `d9` |
+| `normal-far` | `02` | `da` |
+| `ov-far` | `08` | `e0` |
+
+Gravar esses dois bytes no cartão limpo reproduz cada um dos outros três **byte
+a byte**. O `--check` é essa medição, rodada de novo:
+
+```console
+$ WE2002_MCR_CAMERA_CARDS=~/cards python3 tools/mcr/options.py --check
+  ok    camera-normal-near: two bytes reproduce the card the game saved (12 in the title padding)
+  ok    camera-normal-far: two bytes reproduce the card the game saved (11 in the title padding)
+  ok    camera-ov-far: two bytes reproduce the card the game saved (12 in the title padding)
+options.py --check: 4 cards
+```
+
+**O "title padding" não é dado.** São os bytes depois do fim do título, dentro
+do cabeçalho do save PSX, onde o jogo deixa o que estava na memória — eles
+diferem entre dois saves da mesma sessão. O `--check` **conta** e os nomeia em
+vez de os varrer para debaixo do tapete: diferença que passe dessa faixa é
+diferença de verdade, e vira falha.
+
+**Cartão de jogo não se versiona**, mesma regra de `roms/`, então sem
+`WE2002_MCR_CAMERA_CARDS` o `--check` **pula e diz que pulou**. Os quatro nomes
+de arquivo que ele procura estão no `CAMERA_FIXTURES` do módulo.
+
+O que **não** foi medido: as cinco câmeras do meio (3 a 7). A ordem é a da tela
+com as duas pontas fixadas, e o `8` cair exatamente no último nome é o que faz
+disso mais do que palpite.
+
 ### Os módulos, um a um
 
 Cada módulo do núcleo roda sozinho sobre um cartão, e é onde está o detalhe que
@@ -298,6 +380,7 @@ python3 tools/mcr/text.py      <cartão>              # os nomes, byte a byte
 python3 tools/mcr/formation.py <cartão>              # X, Y, papéis, cobradores, capitão
 python3 tools/mcr/model.py     <cartão>              # a visão decodificada
 python3 tools/mcr/layout.py    --check               # os 17 destinos, nos dois sentidos
+python3 tools/mcr/options.py   <cartão>              # a câmera, e os dois registros
 python3 tools/mcr/mcrio.py     <cópia> --edit-probe 0 number 30
 ```
 
@@ -400,14 +483,15 @@ app.py --open-probe --open-with <cópia>   # a janela vazia e as duas portas de 
 
 | comando | o que julga |
 |---|---|
-| `python3 tools/mcr/selftest.py` | **o obrigatório.** Os `self_check()` de 13 módulos, as três regras de desenho, a varredura de idioma e os controles negativos plantados. Não precisa de cartão, de venv, de Qt nem de display |
+| `python3 tools/mcr/selftest.py` | **o obrigatório.** Os `self_check()` de 14 módulos, as três regras de desenho, a varredura de idioma e os controles negativos plantados. Não precisa de cartão, de venv, de Qt nem de display |
 | `python3 tools/mcr/controls.py` | planta cada controle numa cópia da árvore e **exige o vermelho**; a última linha diz quantos são e de que tipo |
 | `python3 tools/mcr/ui_check.py` | a janela sobe no `:98`; com cartão, dirige os widgets, grava dois cartões, confere o round-trip deles e planta os próprios controles |
 | `python3 tools/mcr/gme.py --check` | os oito `.gme` de `mcr/`: cada um desmontado e remontado tem de dar o **mesmo arquivo**. Não precisa de fixture — é o único gate deste ciclo que roda em qualquer clone |
 | `python3 tools/mcr/glossary.py` | espanhol e português remanescentes em `tools/mcr/**.py` |
 | `python3 tools/mcr/layout.py --rule1` | endereço de save fora do `layout.py` |
+| `python3 tools/mcr/options.py --check` | a medição da câmera, contra os quatro cartões; pula sem `WE2002_MCR_CAMERA_CARDS` |
 
-13 dos 16 módulos respondem a `--self-check` sozinhos; os três que não são o
+14 dos 17 módulos respondem a `--self-check` sozinhos; os três que não são o
 `cli.py`, o `harness.py` (que o agregador roda) e o `ui_check.py`.
 
 No `ctest`, quatro alvos:

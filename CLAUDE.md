@@ -707,7 +707,7 @@ aqui ele é forte:
   decodifica o mesmo blob campo por campo. A parte mais cara do port é um
   cross-check, não uma descoberta.
 
-Quatro coisas que custam tempo se descobertas tarde:
+Cinco coisas que custam tempo se descobertas tarde:
 
 - **O Python desta máquina é duplo.** `python3` do `PATH` é o mise 3.13.13;
   `/usr/bin/python3` é 3.12.3; o `build/CMakeCache.txt` fixou o mise. **`apt
@@ -724,6 +724,15 @@ Quatro coisas que custam tempo se descobertas tarde:
   do repositório, com o aviso na mesa. O fonte VB **não entra no git** — clone
   em `work/easy-mcr/`, SHA `30af1fe5` fixado. A linhagem e a diferença de
   método para o ciclo `wte/` ficam em [NOTICE.md](NOTICE.md).
+- **O option file guarda registros com checksum, e o editor de time não sabe
+  disso.** O mesmo save `WEW-OPT` tem dois registros `[u16 tamanho][u8
+  checksum][payload]`, e a **câmera** é o segundo byte do primeiro. Gravar o
+  valor sem refazer a soma deixa um cartão que o console **carrega** e o jogo
+  **descarta** — na tela parece “a edição não pegou”. Quem cuida disso é o
+  `tools/mcr/options.py`, e os offsets dele são **relativos ao save**, nunca
+  absolutos: os 17 destinos do editor de time são endereços de cartão e erram
+  por 8.192 bytes se o save mudar de bloco — nos cartões desta máquina ele mora
+  no bloco 1, e não no 2. Medido em 2026-09-11 por diff de quatro option files.
 
 O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
 **Cartão de jogo do usuário não se versiona**, mesma regra de `roms/`. A
@@ -750,10 +759,11 @@ Como se roda, e o que cada comando responde:
 | `make mcr-venv` | cria `work/venv-mcr/` e instala PySide6 — **nunca por `apt`**, ver a armadilha do Python duplo |
 | `python3 tools/mcr/cli.py info\|dump\|get\|set\|roundtrip\|convert\|negative\|check <cartão>` | o CLI do núcleo; `check` é o alvo `mcr_card`, e `convert` vai entre `.gme`, `.mcr` e `.mcd` |
 | `python3 tools/mcr/gme.py <arquivo>` / `--check` | o contêiner do DexDrive; o `--check` desmonta e remonta os oito `.gme` de `mcr/` e é o alvo `mcr_container` |
-| `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 13 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |
+| `python3 tools/mcr/selftest.py` | o gate **obrigatório**: os 14 `self_check()`, as três regras de desenho, a varredura de idioma e os controles negativos plantados |
 | `python3 tools/mcr/controls.py` | planta cada controle numa cópia da árvore e exige o vermelho; a última linha diz quantos são e de que tipo |
 | `python3 tools/mcr/mcrio.py <cópia> --roundtrip` | as duas formas do round-trip, que têm de dar 0 byte |
 | `python3 tools/mcr/layout.py --check` | os 17 destinos contra `wte/re/mcr.md`, nos dois sentidos |
+| `python3 tools/mcr/options.py <cartão>` / `--set <câmera>` / `--check` | a **câmera** do option file: um byte, mais o checksum do registro que o guarda. O `--check` reproduz a medição dos quatro cartões e pula sem `WE2002_MCR_CAMERA_CARDS` |
 | `bash wte/tools/golden_run_wte.sh tools/mcr/oracle/<roteiro>.txt work/wte-japanese-shift-jis.bin` | dirige o editor do Obocaman no `:98`; foi assim que o `0x6500` foi medido |
 
 No `ctest` são quatro alvos: **`mcr_selftest`**, que não precisa de nada;
