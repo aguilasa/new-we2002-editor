@@ -1154,6 +1154,7 @@ máquina, instalado pelo usuário em 2026-08-29:
 | BIOS | **quatro** — `scph1001`, `scph5500`, `scph5501`, `scph7502` |
 | biblioteca | `RecursivePaths = /home/ingmar/ROMs/psx`, onde a pasta `(EsIt)` está |
 | já rodou | sim — há `gameicons/SLES-03957.png` e um memory card gravado |
+| no Windows | o mesmo fork, do pacote `duckstation-windows-x64-release.zip` que o CI dele publica, em modo *portable* — receita, o que foi copiado e o que do ferramental **não** atravessa em [/docs/PES2-WINDOWS.md](/docs/PES2-WINDOWS.md) |
 
 Isso destrava o oráculo da §4.1 e, de brinde, a alavanca da §4.2.3 já
 tem munição: ver a §3.3.
