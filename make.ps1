@@ -50,6 +50,7 @@ param(
         'we2002-play', 'we2002-play-fresh',
         'we2002-ptbr-play', 'we2002-ptbr-play-fresh',
         'we2002-jp-play', 'we2002-jp-play-fresh',
+        'we2002-remaster-play', 'we2002-remaster-play-fresh',
         'we2002-cards', 'we2002-card-snap', 'we2002-card-list',
         # Recusados com explicacao -- ver Invoke-Recusa. Eles estao NESTA
         # lista de proposito: quem vem do Makefile digita o nome que conhece,
@@ -152,13 +153,26 @@ $PES2_DIR = Join-Path $GAMES_WORK ([System.IO.Path]::GetFileName($PES2_RELEASE))
 
 $CARD_DIR = Join-Path $GAMES_WORK 'cards'
 
-# As tres imagens que existem, e o apelido de cada uma. Os defaults do
-# Makefile (`we2002-english`, `we2002-pt-br`) estao mortos nas duas arvores.
-# As tres bootam SLPM_870.56, entao dividem o mesmo option file.
+# As imagens de WE2002 que existem, e o apelido de cada uma. Todas bootam
+# SLPM_870.56, entao dividem o mesmo option file -- trocar de imagem nao
+# troca de cartao.
+#
+# **`ptbr` e a `we2002-pt-br.bin`, e nao a `ptbr-remaster.bin`.** Sao duas
+# imagens PT-BR diferentes e a distincao e medida: a `we2002-pt-br.bin` tem
+# 201.714 setores, **150 a menos** que a European Deluxe, que e exatamente a
+# diferenca que o Makefile:506-514 registra ao proibir emprestar o .cue de
+# uma para a outra; a `ptbr-remaster.bin` tem 201.864, o mesmo da Deluxe. O
+# `PTBR` do Makefile (linha 466) aponta para a primeira, entao `ptbr` aqui
+# aponta para a mesma coisa -- e o remaster, que e a imagem dos golden do
+# `newWe2002`, ganhou apelido proprio.
+#
+# So a `we2002-pt-br.bin` e a japonesa nao tem .cue vizinho, entao sao as
+# duas que exercitam o ramo que SINTETIZA um.
 $JOGOS = @{
-    'deluxe' = 'we2002\golden-european-deluxe.bin'
-    'ptbr'   = 'we2002\ptbr-remaster.bin'
-    'jp'     = 'we2002\japanese-shift-jis.bin'
+    'deluxe'   = 'we2002\golden-european-deluxe.bin'
+    'ptbr'     = 'we2002\we2002-pt-br.bin'
+    'remaster' = 'we2002\ptbr-remaster.bin'
+    'jp'       = 'we2002\japanese-shift-jis.bin'
 }
 
 # **Capturado aqui, no escopo do script.** Dentro de uma funcao,
@@ -515,9 +529,12 @@ function Invoke-Help {
     Write-Host 'O JOGO deste repositorio, sob o mesmo fork:'
     Write-Host '  we2002-play        roda a imagem sobre o option file que houver'
     Write-Host '  we2002-play-fresh  idem, comecando com o option file zerado'
-    Write-Host '  we2002-ptbr-play, we2002-jp-play   e os pares -fresh:'
-    Write-Host '                     as outras duas imagens (mesmo option file:'
-    Write-Host '                     as tres bootam SLPM_870.56)'
+    Write-Host '  we2002-ptbr-play, we2002-jp-play, we2002-remaster-play'
+    Write-Host '                     e os pares -fresh: as outras tres imagens.'
+    Write-Host '                     Mesmo option file -- as quatro bootam'
+    Write-Host '                     SLPM_870.56, entao trocar de imagem nao'
+    Write-Host '                     troca de cartao. `ptbr` e a we2002-pt-br.bin;'
+    Write-Host '                     o remaster e outra imagem, 150 setores maior.'
     Write-Host '  we2002-cards       so a guarda: tira do caminho o option file'
     Write-Host '  we2002-card-snap -Label x   guarda o cartao vivo como amostra'
     Write-Host '  we2002-card-list            lista as amostras e os md5'
@@ -926,6 +943,8 @@ switch ($Alvo) {
     'we2002-ptbr-play-fresh' { Set-Jogo 'ptbr'; Invoke-We2002PlayFresh }
     'we2002-jp-play'         { Set-Jogo 'jp';   Invoke-We2002Play }
     'we2002-jp-play-fresh'   { Set-Jogo 'jp';   Invoke-We2002PlayFresh }
+    'we2002-remaster-play'       { Set-Jogo 'remaster'; Invoke-We2002Play }
+    'we2002-remaster-play-fresh' { Set-Jogo 'remaster'; Invoke-We2002PlayFresh }
     'we2002-cards'           { Invoke-We2002Cards }
     'we2002-card-snap'       { Invoke-We2002CardSnap }
     'we2002-card-list'       { Invoke-We2002CardList }
