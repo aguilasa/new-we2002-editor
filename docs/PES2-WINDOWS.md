@@ -215,37 +215,47 @@ máquina chega perto:
 
 | captura | média |
 |---|---|
-| FMV de abertura, o quadro mais claro que há | 0.308 |
+| aviso legal da adidas, t≈10..19 s, estável | 0.856 |
+| FMV de abertura, quadro claro isolado | 0.595 |
+| FMV de abertura, faixa típica | 0.19..0.33 |
 | tela de título | 0.0045 |
 | seleção de idioma | 0.048 |
 
 O `wait_for_mean` gasta as 90 fatias de 2 s e falha dizendo a média mais
 próxima. Parece laço infinito e não é — são três minutos de espera.
 
-**A causa é geometria de janela, não plataforma.** `ScreenshotMode =
-ScreenResolution` no `settings.ini` faz o `take_screenshot` devolver o
-**tamanho da janela**, e a barra preta do letterbox entra na média. Na janela
-daqui — 864×655 de área de cliente — a imagem útil ocupa 350 linhas, **53% da
-altura**: as barras respondem por quase metade do quadro e cortam a média pela
-metade. Recortando-as, o mesmo FMV lê **0.640** contra os 0.342 da janela
-inteira, e o 0.5526 do Linux cai entre os dois, que é exatamente o que se
-espera de uma janela com proporção de barra diferente.
+**A causa não é geometria de janela** — isso foi testado e descartado. A
+captura sai no tamanho da janela (`ScreenshotMode = ScreenResolution`), e a
+janela daqui é **864×655** contra os **800×655** em que as constantes foram
+medidas, o que parecia explicação. Não é: redimensionando a janela para dar
+captura de exatamente 800×655 e bootando de novo, a banda continua sem ser
+alcançada em 60 s.
 
-O `take_screenshot` do servidor aceita **só `path`** — não há como pedir um
-tamanho pela chamada. As saídas são três, e a escolha não é técnica:
+E o próprio `mcp_drive.py` já dizia isso, no bloco *WHY THE FRAME SIGNATURES
+ARE MOSTLY GONE*, entre as coisas que a PES2-TASK-34 eliminou no Linux:
+*"it is not the crop -- insetting the frame moves mean and standard deviation
+**together**, and the mean did not move"*. Também não é o caminho de captura
+(MCP e `import -window` concordam a 0.002245) nem a escala de resolução.
 
-1. **Fixar `ScreenshotMode = InternalResolution`** no `settings.ini`. Torna a
-   captura independente da janela, e é uma linha. Mas é a configuração do
-   **usuário**, e a decisão de 2026-09-02 é que nenhum lançador a escreve;
-   além disso as constantes mudam de valor e precisam ser remedidas de todo
-   jeito.
-2. **Remedir as constantes no Windows** e mantê-las por plataforma. É o menor
-   toque no que existe e o mais frágil: redimensionar a janela quebra de novo.
-3. **Recortar o letterbox dentro do `Frame.stats()`**, medindo só a imagem
-   útil. É o conserto estruturalmente certo — a assinatura passa a não
-   depender de geometria em nenhuma das duas plataformas — e o mais caro:
-   invalida a tabela de médias inteira, que foi calibrada contra os dois
-   binários no Linux.
+O que **está** medido aqui, e é pouco:
+
+* a banda não aparece em **70 s de amostragem a cada segundo** sem
+  fast-forward, nem em **60 s com** ele;
+* existe uma tela clara e estável em t≈10..19 s, mas ela é o aviso legal da
+  adidas, lendo **0.856** — não o título;
+* o título propriamente dito é **escuro**, 0.0045, e o `Start` a partir dele
+  leva ao *Seleziona Lingua*.
+
+Ou seja: a sequência de boot que esta máquina percorre não passa por nenhuma
+tela de média 0.55. Por que a do Linux passa **não está identificado**, e é a
+mesma natureza de mistério que a PES2-TASK-34 registrou ao aposentar o desvio
+padrão do critério — *"a number that cannot be reproduced or explained a day
+later, on the same binary, is not a criterion"*.
+
+**O próximo passo é medir os dois lados juntos**, não escolher um conserto: a
+mesma amostragem densa rodando no Linux, para ver em que instante e em que
+tela o 0.5526 aparece lá. Sem isso, qualquer mudança nas constantes é chute —
+inclusive a de recortar o letterbox, que parecia óbvia e está refutada.
 
 ## 8. A armadilha 35 não é coisa de Linux
 
