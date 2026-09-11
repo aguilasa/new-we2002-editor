@@ -51,6 +51,7 @@ param(
         'we2002-ptbr-play', 'we2002-ptbr-play-fresh',
         'we2002-jp-play', 'we2002-jp-play-fresh',
         'we2002-remaster-play', 'we2002-remaster-play-fresh',
+        'we2002-deluxe-play', 'we2002-deluxe-play-fresh',
         'we2002-cards', 'we2002-card-snap', 'we2002-card-list',
         # Recusados com explicacao -- ver Invoke-Recusa. Eles estao NESTA
         # lista de proposito: quem vem do Makefile digita o nome que conhece,
@@ -168,7 +169,13 @@ $CARD_DIR = Join-Path $GAMES_WORK 'cards'
 #
 # So a `we2002-pt-br.bin` e a japonesa nao tem .cue vizinho, entao sao as
 # duas que exercitam o ramo que SINTETIZA um.
+#
+# **O default e `english`**, como o `GAME_IMAGE` do Makefile (linha 439) --
+# e a imagem em que o grupo `we2002-*` foi pensado. Ela mora num
+# SUBDIRETORIO proprio, que e a unica da tabela nessa forma; o `.cue` dela
+# esta ao lado, dentro da mesma pasta, e e de onde `New-CueDoJogo` o le.
 $JOGOS = @{
+    'english'  = 'we2002\we2002-english\we2002-english.bin'
     'deluxe'   = 'we2002\golden-european-deluxe.bin'
     'ptbr'     = 'we2002\we2002-pt-br.bin'
     'remaster' = 'we2002\ptbr-remaster.bin'
@@ -191,8 +198,8 @@ function Set-Jogo([string]$slug) {
     if (-not $SLUG_DO_USUARIO)   { $script:GameSlug  = $slug }
 }
 
-if (-not $GameImage) { $GameImage = $JOGOS['deluxe'] }
-if (-not $GameSlug)  { $GameSlug  = 'deluxe' }
+if (-not $GameImage) { $GameImage = $JOGOS['english'] }
+if (-not $GameSlug)  { $GameSlug  = 'english' }
 
 # ---------------------------------------------------------------- copias ----
 
@@ -529,9 +536,10 @@ function Invoke-Help {
     Write-Host 'O JOGO deste repositorio, sob o mesmo fork:'
     Write-Host '  we2002-play        roda a imagem sobre o option file que houver'
     Write-Host '  we2002-play-fresh  idem, comecando com o option file zerado'
-    Write-Host '  we2002-ptbr-play, we2002-jp-play, we2002-remaster-play'
-    Write-Host '                     e os pares -fresh: as outras tres imagens.'
-    Write-Host '                     Mesmo option file -- as quatro bootam'
+    Write-Host '                     (o default e a we2002-english.bin)'
+    Write-Host '  we2002-ptbr-play, -jp-play, -remaster-play, -deluxe-play'
+    Write-Host '                     e os pares -fresh: as outras quatro imagens.'
+    Write-Host '                     Mesmo option file -- as cinco bootam'
     Write-Host '                     SLPM_870.56, entao trocar de imagem nao'
     Write-Host '                     troca de cartao. `ptbr` e a we2002-pt-br.bin;'
     Write-Host '                     o remaster e outra imagem, 150 setores maior.'
@@ -945,6 +953,8 @@ switch ($Alvo) {
     'we2002-jp-play-fresh'   { Set-Jogo 'jp';   Invoke-We2002PlayFresh }
     'we2002-remaster-play'       { Set-Jogo 'remaster'; Invoke-We2002Play }
     'we2002-remaster-play-fresh' { Set-Jogo 'remaster'; Invoke-We2002PlayFresh }
+    'we2002-deluxe-play'         { Set-Jogo 'deluxe';   Invoke-We2002Play }
+    'we2002-deluxe-play-fresh'   { Set-Jogo 'deluxe';   Invoke-We2002PlayFresh }
     'we2002-cards'           { Invoke-We2002Cards }
     'we2002-card-snap'       { Invoke-We2002CardSnap }
     'we2002-card-list'       { Invoke-We2002CardList }
