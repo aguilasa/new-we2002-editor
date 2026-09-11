@@ -332,7 +332,8 @@ dos registros de opção, e são **relativos ao save**.
 ### De onde vem a medição, e como ela se repete
 
 Quatro option files salvos numa sessão do jogo, sem mexer em nada além da
-câmera. Só duas coisas se moveram — o valor e o checksum:
+câmera. **O jogo escreveu, nós lemos.** Só duas coisas se moveram — o valor e o
+checksum:
 
 | câmera | byte `0x2104` | checksum `0x2102` |
 |---|---|---|
@@ -362,9 +363,22 @@ diferença de verdade, e vira falha.
 `WE2002_MCR_CAMERA_CARDS` o `--check` **pula e diz que pulou**. Os quatro nomes
 de arquivo que ele procura estão no `CAMERA_FIXTURES` do módulo.
 
-O que **não** foi medido: as cinco câmeras do meio (3 a 7). A ordem é a da tela
-com as duas pontas fixadas, e o `8` cair exatamente no último nome é o que faz
-disso mais do que palpite.
+### O outro sentido, que é o que importa
+
+As quatro linhas acima são **o jogo escrevendo e nós lendo**. Elas provam o
+decodificador e não provam a gravação: cartão que o jogo salvou é cartão que o
+jogo **já aceitou**, então relê-lo não diz nada sobre o checksum que **nós**
+calculamos ser o mesmo que ele valida.
+
+Em 2026-09-11 o sentido inverso foi fechado: este módulo gravou a câmera **5**
+por cima do cartão do DuckStation — dois bytes, saindo de `ov-far` — e o jogo
+subiu com **Zoom** selecionado na tela de opções. É a única evidência que diz que
+a gravação funciona, e ela não vinha dos quatro cartões.
+
+Ela também **fixa a ordem por dentro**: as duas pontas já estavam presas, e o `5`
+cair exatamente no quinto nome não deixa espaço para a lista estar deslocada.
+Sobram quatro sem confirmação direta — 3, 4, 6 e 7 —, e elas estão cercadas dos
+dois lados.
 
 ### Os módulos, um a um
 

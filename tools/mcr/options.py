@@ -39,6 +39,13 @@ byte for byte, outside the title padding -- which is uninitialised memory the
 game leaves in the PSX save header and is not data. `--check` is that
 measurement, run again.
 
+AND THE OTHER DIRECTION, which is the one that matters here. On 2026-09-11 this
+module wrote camera 5 over DuckStation's card -- two bytes, from `ov-far` -- and
+the game came up with Zoom selected. The four cards above cannot establish that
+on their own: a card the game saved is a card the game had already accepted, so
+reading it back proves the decoder and says nothing about whether the checksum
+we compute is the one the game validates. It is.
+
 Usage:
 
     python3 tools/mcr/options.py <card.mcr>
@@ -60,22 +67,37 @@ import mcrio                                             # noqa: E402
 from card import Card                                    # noqa: E402
 
 # The nine views of the option screen, in the order the byte counts them. The
-# four marked below were measured; the other five are the screen's order with
-# the two ends pinned, and 8 landing exactly on the last name is what makes the
-# ordering more than a guess.
+# four unmarked ones are the screen's order with both ends pinned and the
+# middle confirmed, which is what makes the ordering more than a guess.
 CAMERA_NAMES = (
-    "normal-near",      # 0   measured
-    "normal-mid",       # 1   measured -- the clean card
-    "normal-far",       # 2   measured
+    "normal-near",      # 0   read back
+    "normal-mid",       # 1   read back -- the clean card
+    "normal-far",       # 2   read back
     "wide",             # 3
     "tv",               # 4
-    "zoom",             # 5
+    "zoom",             # 5   WRITTEN, and the game showed it
     "ov-near",          # 6
     "ov-mid",           # 7
-    "ov-far",           # 8   measured
+    "ov-far",           # 8   read back
 )
 
-MEASURED_CAMERAS = (0, 1, 2, 8)
+# TWO KINDS OF EVIDENCE, AND THEY POINT OPPOSITE WAYS. Keeping them apart is
+# the point of having two tuples.
+#
+# READ_BACK: the game wrote the byte and we read it. That is what `--check`
+# repeats, and it proves the decoder.
+#
+# WRITTEN_BACK: we wrote the byte and the game read it -- 5, on 2026-09-11,
+# by replacing DuckStation's card and finding Zoom selected on the option
+# screen. That is the direction this module exists for, and the one the four
+# cards CANNOT establish: a card the game saved is a card the game already
+# accepted, so reading it back says nothing about whether our checksum is the
+# one it validates. It also settles the ordering from the inside -- both ends
+# were already pinned, and 5 landing on the fifth name leaves no room for the
+# list to be off by anything.
+READ_BACK_CAMERAS = (0, 1, 2, 8)
+WRITTEN_BACK_CAMERAS = (5,)
+MEASURED_CAMERAS = tuple(sorted(READ_BACK_CAMERAS + WRITTEN_BACK_CAMERAS))
 
 # The environment variable that points at the four cards `--check` needs. A
 # memory card is somebody's save and is not versioned -- same rule as roms/ --
@@ -412,6 +434,13 @@ def _checks(c, card_path: str | None = None) -> None:
        tuple(v for _, v in CAMERA_FIXTURES) == (1, 0, 2, 8))
     ok("every measured value is a camera",
        all(0 <= v < len(CAMERA_NAMES) for v in MEASURED_CAMERAS))
+    ok("the two kinds of evidence do not overlap",
+       not set(READ_BACK_CAMERAS) & set(WRITTEN_BACK_CAMERAS))
+    # The one the game accepted from us, and it is what pins the middle of the
+    # list: both ends were already fixed, so a name at index 5 that the game
+    # agrees with leaves the ordering no room to be off.
+    ok("camera 5 is the one the game read back from us",
+       WRITTEN_BACK_CAMERAS == (5,) and CAMERA_NAMES[5] == "zoom")
     ok("the checksum of nothing is zero", checksum(b"") == 0)
     ok("the checksum wraps at 256", checksum(b"\xff\x02") == 1)
 
