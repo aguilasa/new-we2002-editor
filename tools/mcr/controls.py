@@ -325,11 +325,12 @@ def plant(control: Control, card_path: str | None = None) -> Result:
                 with open(path, "w", encoding="utf-8") as fh:
                     fh.write(control.new)
         else:
-            with open(path) as fh:
+            with open(path, encoding="utf-8") as fh:
                 text = fh.read()
             matched = text.count(control.old)
             if matched == 1:
-                with open(path, "w") as fh:
+                with open(path, "w", encoding="utf-8",
+                          newline="") as fh:
                     fh.write(text.replace(control.old, control.new))
         env = dict(os.environ, PYTHONPATH=sandbox)
         if card_path:
@@ -382,6 +383,20 @@ def run_all(only: str | None = None, card_path: str | None = None,
     return out
 
 
+def _source(module: str) -> str:
+    """One module of the real tree, read as UTF-8.
+
+    THE ENCODING IS NOT A DETAIL. Left to the platform default this is cp1252
+    on Windows, and the first module carrying a non-ASCII byte -- `text.py`
+    holds Japanese, `glossary.py` holds accents -- raises `UnicodeDecodeError`
+    out of a check, which the outer guard turns into "the self-check itself
+    raised" and the rest of the run never happens. Measured on Windows: the
+    mandatory gate came back with five failures, none of them a real one.
+    """
+    with open(os.path.join(MCR_DIR, module), encoding="utf-8") as fh:
+        return fh.read()
+
+
 # --- self-check ------------------------------------------------------------
 
 def _checks(c) -> None:
@@ -392,10 +407,9 @@ def _checks(c) -> None:
     ok("every control names a module that exists",
        all(os.path.isfile(os.path.join(MCR_DIR, k.module)) for k in subs))
     ok("every substitution matches exactly once in the real tree",
-       all(open(os.path.join(MCR_DIR, k.module)).read().count(k.old) == 1
-           for k in subs),
+       all(_source(k.module).count(k.old) == 1 for k in subs),
        str([k.id for k in subs
-            if open(os.path.join(MCR_DIR, k.module)).read().count(k.old) != 1]))
+            if _source(k.module).count(k.old) != 1]))
     ok("no substitution is a no-op", all(k.old != k.new for k in subs))
     # The creating control is the mirror image: its path must be FREE, or the
     # plant would overwrite somebody's file and the run would measure that.

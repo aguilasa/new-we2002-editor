@@ -156,7 +156,8 @@ def _checks(c) -> None:
         ok("an untouched copy is clean", base == [], f"{base}")
 
         def plant(text):
-            with open(os.path.join(tmp, "victim.py"), "a") as fh:
+            with open(os.path.join(tmp, "victim.py"), "a",
+                      encoding="utf-8", newline="") as fh:
                 fh.write(text)
             return sweep(tmp)
 
