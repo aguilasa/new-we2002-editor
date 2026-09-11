@@ -168,3 +168,11 @@ wte/re/trace.log
 # mesma regra de `roms/` e de `work/entrada.mcr`. O usuario mantem a pasta no
 # disco; roda por `pes-6-editor-7.0.bat` (javaw) no Windows.
 /pes6editor/
+
+# ---- Claude Code: configuracao local de maquina ----
+# `.claude/commands/` e `.claude/rules/` sao do repositorio e entram no git; o
+# `settings.local.json` nao. Ele guarda o que uma maquina permitiu (allowlist de
+# comandos, servidores MCP), e o proprio Claude Code o escreve sozinho ao longo
+# da sessao -- versiona-lo daria conflito a cada maquina sem dizer nada sobre o
+# projeto.
+/.claude/settings.local.json
