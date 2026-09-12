@@ -67,6 +67,14 @@ seen and wrong for that one, reading the neighbouring block's fill and
 reporting a camera nobody set. The self-check builds the same save in two
 different blocks and demands the address follow.
 
+WHAT THAT DID NOT MEASURE IS THE WRITE. Nothing was changed on the game's own
+screen and nothing was saved, so whether the game writes back into the blocks
+it found, normalises to the first free ones, or does something else, is
+unknown. It changes nothing here -- this module re-reads the directory every
+time and finds the save wherever it is -- and it is written down because the
+gap between "read from any block" and "kept in any block" is exactly the kind
+of thing that gets assumed for free.
+
 Usage:
 
     python3 tools/mcr/options.py <card.mcr>

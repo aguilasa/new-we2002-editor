@@ -408,7 +408,8 @@ entradas antigas liberadas, duas novas escritas com a cadeia religada e o XOR
 refeito, e os 16 KiB de dados copiados. O jogo **carregou normalmente** e mostrou
 a câmera certa — e não regravou nada, digest idêntico depois.
 
-O console segue o **diretório**, como manda o formato. Duas consequências:
+**Na carga**, o console segue o **diretório**, como manda o formato. Duas
+consequências:
 
 - cartão de terceiro pode ter este save em **qualquer** bloco, e os cartões desta
   máquina o têm no **1** — já não é o 2, que é onde os 17 destinos absolutos do
@@ -420,6 +421,14 @@ O console segue o **diretório**, como manda o formato. Duas consequências:
 O `self-check` monta o **mesmo save em dois blocos diferentes** e exige que o
 endereço acompanhe, e o controle `options-assumed-block` planta a constante e
 exige o vermelho. Esse controle não depende de fixture — roda em qualquer clone.
+
+**O que este teste NÃO mediu: a gravação.** Nada foi alterado pela tela do jogo
+nem salvo, então não se sabe se ele grava de volta nos blocos 3-4 que achou, se
+normaliza para os primeiros livres, ou se faz outra coisa. **Isso não muda a
+ferramenta** — ela relê o diretório a cada abertura e acha o save onde ele
+estiver —, e fica registrado porque a diferença entre “lido de qualquer bloco” e
+“mantido em qualquer bloco” é justamente o tipo de coisa que se assume de graça
+e custa caro depois.
 
 ### Os módulos, um a um
 
