@@ -33,7 +33,7 @@ Nos cartões desta máquina, com o save no bloco 1, isso cai em **`0x02176`**.
 | 3 | `0x08` | **Timer** | `1` = ON, `0` = OFF |
 | 4 | `0x10` | **Score** | `1` = ON, `0` = OFF |
 | 5 | `0x20` | **Strategy** | `1` = ON, `0` = OFF |
-| 7–6 | `0xC0` | — | `00` nos dezesseis cartões medidos; não identificados |
+| 7–6 | `0xC0` | — | `00` nos dezenove cartões medidos; não identificados |
 
 O cartão limpo vale **`0x3E`** = `0011 1110`: radar em `10` = DOWN, e os quatro
 flags ligados.
@@ -194,7 +194,7 @@ python3 tools/mcr/options.py work/sonda.mcr     # o registro, e se a soma bate
 
 ## O que fica em aberto
 
-- **Bits 6–7**: `00` nos dezesseis cartões. Mesma situação dos bits 11..15 dos
+- **Bits 6–7**: `00` nos dezenove cartões. Mesma situação dos bits 11..15 dos
   desbloqueios, e a mesma ressalva: o bit 9 daquele mapa ficou dois dias como
   "nada observável" e saiu de lá quando se olhou **outra tela**. Tratar estes
   dois como *não procurados o bastante*, não como vazios.
