@@ -50,12 +50,19 @@ byte for byte, outside the title padding -- which is uninitialised memory the
 game leaves in the PSX save header and is not data. `--check` is that
 measurement, run again.
 
-AND THE OTHER DIRECTION, which is the one that matters here. On 2026-09-11 this
-module wrote camera 5 over DuckStation's card -- two bytes, from `ov-far` -- and
-the game came up with Zoom selected. The four cards above cannot establish that
-on their own: a card the game saved is a card the game had already accepted, so
-reading it back proves the decoder and says nothing about whether the checksum
-we compute is the one the game validates. It is.
+AND THE OTHER DIRECTION, which is the one that matters here. This module wrote
+5 on 2026-09-11, then 3, 6 and 7 on 2026-09-12, over DuckStation's card -- two
+bytes each time -- and the game came up with Zoom, Wide, OV Near and OV Mid
+selected. The four cards above cannot establish that on their own: a card the
+game saved is a card the game had already accepted, so reading it back proves
+the decoder and says nothing about whether the checksum we compute is the one
+the game validates. It is.
+
+WITH THOSE FOUR, EVERY CAMERA HAS BEEN SEEN. Four read back from the game's own
+saves, four written by us and shown on screen, and `tv` written by the game onto
+a card we had edited. Until 2026-09-12 the last two rested on being fenced
+between proven neighbours, which is an argument and not a sighting; a check
+demands the three routes cover all nine and claim none twice.
 
 THE BLOCK IS NOT THE SAVE'S ADDRESS, AND THAT IS MEASURED TOO. On 2026-09-12 the
 save was moved from blocks 1-2 to blocks 3-4, directory and all, and the game
@@ -120,31 +127,37 @@ CAMERA_NAMES = (
     "normal-near",      # 0   read back
     "normal-mid",       # 1   read back -- the clean card
     "normal-far",       # 2   read back
-    "wide",             # 3
-    "tv",               # 4
-    "zoom",             # 5   WRITTEN, and the game showed it
-    "ov-near",          # 6
-    "ov-mid",           # 7
+    "wide",             # 3   written, and the game showed it
+    "tv",               # 4   the game wrote it on a card we had edited
+    "zoom",             # 5   written, and the game showed it
+    "ov-near",          # 6   written, and the game showed it
+    "ov-mid",           # 7   written, and the game showed it
     "ov-far",           # 8   read back
 )
 
-# TWO KINDS OF EVIDENCE, AND THEY POINT OPPOSITE WAYS. Keeping them apart is
-# the point of having two tuples.
+# THREE KINDS OF EVIDENCE, AND THEY DO NOT POINT THE SAME WAY. Keeping them
+# apart is the point of having three tuples, and between them they now cover
+# all nine -- nothing here rests on being fenced between proven neighbours.
 #
 # READ_BACK: the game wrote the byte and we read it. That is what `--check`
-# repeats, and it proves the decoder.
+# repeats, and it proves the decoder. It CANNOT prove writing: a card the game
+# saved is a card the game already accepted, so reading it back says nothing
+# about whether our checksum is the one it validates.
 #
-# WRITTEN_BACK: we wrote the byte and the game read it -- 5 on 2026-09-11 and
-# 3 on 2026-09-12, by replacing DuckStation's card and finding Zoom, then Wide,
-# selected on the option screen. That is the direction this module exists for,
-# and the one the read-back cards CANNOT establish: a card the game saved is a
-# card the game already accepted, so reading it back says nothing about whether
-# our checksum is the one it validates. It also settles the ordering from the
-# inside -- both ends were already pinned, and 3 and 5 landing on the fourth
-# and sixth names leaves 4, 6 and 7 each fenced between proven neighbours.
+# WRITTEN_BACK: we wrote the byte and the game read it -- 5 on 2026-09-11, then
+# 3, 6 and 7 on 2026-09-12, by replacing DuckStation's card and finding Zoom,
+# Wide, OV Near and OV Mid selected on the option screen. This is the direction
+# the module exists for.
+#
+# GAME_WROTE_OVER_OURS: 4, on 2026-09-12. The strongest of the three and the
+# narrowest: the game saved the option file on a card this module had already
+# edited, and put the byte where this module reads it, with the checksum this
+# module computes. Both sides of the round trip, in one measurement.
 READ_BACK_CAMERAS = (0, 1, 2, 8)
-WRITTEN_BACK_CAMERAS = (3, 5)
-MEASURED_CAMERAS = tuple(sorted(READ_BACK_CAMERAS + WRITTEN_BACK_CAMERAS))
+WRITTEN_BACK_CAMERAS = (3, 5, 6, 7)
+GAME_WROTE_OVER_OURS = (4,)
+MEASURED_CAMERAS = tuple(sorted(READ_BACK_CAMERAS + WRITTEN_BACK_CAMERAS
+                                + GAME_WROTE_OVER_OURS))
 
 # The environment variable that points at the cards `--check` needs. A
 # memory card is somebody's save and is not versioned -- same rule as roms/ --
@@ -569,14 +582,25 @@ def _checks(c, card_path: str | None = None) -> None:
        tuple(v for _, v in CAMERA_FIXTURES) == (1, 0, 2, 8))
     ok("every measured value is a camera",
        all(0 <= v < len(CAMERA_NAMES) for v in MEASURED_CAMERAS))
-    ok("the two kinds of evidence do not overlap",
-       not set(READ_BACK_CAMERAS) & set(WRITTEN_BACK_CAMERAS))
+    ok("the kinds of evidence do not overlap",
+       not (set(READ_BACK_CAMERAS) & set(WRITTEN_BACK_CAMERAS))
+       and not (set(READ_BACK_CAMERAS) & set(GAME_WROTE_OVER_OURS))
+       and not (set(WRITTEN_BACK_CAMERAS) & set(GAME_WROTE_OVER_OURS)))
     # The one the game accepted from us, and it is what pins the middle of the
     # list: both ends were already fixed, so a name at index 5 that the game
     # agrees with leaves the ordering no room to be off.
-    ok("the two the game read back from us are 3 and 5",
-       WRITTEN_BACK_CAMERAS == (3, 5)
-       and [CAMERA_NAMES[v] for v in WRITTEN_BACK_CAMERAS] == ["wide", "zoom"])
+    # EVERY camera has been observed, by one of the three routes, and no route
+    # claims the same one twice. Until 2026-09-12 two of them rested on being
+    # fenced between proven neighbours, which is an argument and not a sighting.
+    ok("the three kinds of evidence cover all nine cameras",
+       MEASURED_CAMERAS == tuple(range(len(CAMERA_NAMES))),
+       f"measured={MEASURED_CAMERAS}")
+    ok("and no camera is claimed by two of them",
+       len(READ_BACK_CAMERAS) + len(WRITTEN_BACK_CAMERAS)
+       + len(GAME_WROTE_OVER_OURS) == len(CAMERA_NAMES))
+    ok("the four we wrote and the game showed",
+       [CAMERA_NAMES[v] for v in WRITTEN_BACK_CAMERAS]
+       == ["wide", "zoom", "ov-near", "ov-mid"])
     ok("the checksum of nothing is zero", checksum(b"") == 0)
     ok("the checksum wraps at 256", checksum(b"\xff\x02") == 1)
 

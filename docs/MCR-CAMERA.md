@@ -36,19 +36,29 @@ cartão deste repositório e erra o primeiro que vier de fora.
 | 3 | `wide` | **nós gravamos, o jogo mostrou** |
 | 4 | `tv` | o jogo gravou **depois** de nós editarmos o cartão |
 | 5 | `zoom` | **nós gravamos, o jogo mostrou** |
-| 6 | `ov-near` | cercado dos dois lados |
-| 7 | `ov-mid` | cercado dos dois lados |
+| 6 | `ov-near` | **nós gravamos, o jogo mostrou** |
+| 7 | `ov-mid` | **nós gravamos, o jogo mostrou** |
 | 8 | `ov-far` | o jogo gravou, nós lemos |
 
 Os nomes são os que o jogo escreve na tela.
 
-**As duas colunas da direita não são a mesma evidência**, e a diferença é a
-razão de a tabela ter essa coluna. Cartão que o jogo salvou é cartão que o jogo
-**já aceitou**: relê-lo prova o decodificador e não diz nada sobre gravar. Os
-valores 3 e 5 foram escritos por esta ferramenta e reconhecidos pelo jogo na
-tela; o 4 o jogo escreveu num cartão que a ferramenta já tinha editado. Só 6 e 7
-não têm observação direta, e cada um está entre dois vizinhos provados — com as
-duas pontas presas e o meio confirmado, a lista não tem como estar deslocada.
+**As nove foram vistas, e não são a mesma evidência**, que é a razão de a
+tabela ter essa coluna. São três rotas:
+
+| rota | valores | o que prova |
+|---|---|---|
+| o jogo gravou, nós lemos | 0, 1, 2, 8 | o decodificador |
+| nós gravamos, o jogo mostrou | 3, 5, 6, 7 | a gravação — a direção para a qual a ferramenta existe |
+| o jogo gravou sobre o nosso | 4 | os dois lados de uma vez: ele pôs o byte onde lemos, com a soma que calculamos |
+
+Cartão que o jogo salvou é cartão que o jogo **já aceitou**: relê-lo não diz
+nada sobre gravar, e é por isso que a primeira rota sozinha não bastava.
+
+Até 2026-09-12 o 6 e o 7 estavam aqui por **cerco** — cada um entre dois
+vizinhos provados —, o que é argumento e não observação. Duas corridas os
+tiraram dessa condição. Nenhum valor da tabela depende mais de inferência, e um
+check do módulo exige que as três rotas cubram as nove e não reivindiquem
+nenhuma duas vezes.
 
 ## A verificação: sem refazer a soma, o jogo dá `ERROR`
 
@@ -169,9 +179,12 @@ Gravar esses dois bytes no cartão limpo reproduz cada um dos outros três **byt
 a byte**, fora o padding do título. É o que o `--check` refaz.
 
 Daí em diante, cada pergunta virou uma corrida na tela: escrever `zoom` e ver
-`Zoom`; escrever `wide` e ver `Wide`; deixar a soma velha e ver `ERROR`; mover o
-save de bloco e ver se carrega; mudar pela tela do jogo e medir o que ele
-gravou.
+`Zoom`; depois `wide`, `ov-near` e `ov-mid`, e ver os três; deixar a soma velha
+e ver `ERROR`; mover o save de bloco e ver se carrega; mudar pela tela do jogo e
+medir o que ele gravou.
+
+**Dez corridas ao todo**, cada uma respondendo uma pergunta que os cartões
+sozinhos não respondiam.
 
 ### Reproduzir
 
@@ -197,8 +210,6 @@ sair, e a sonda vai junto.
 
 ## O que fica em aberto
 
-- **Câmeras 6 e 7** (`ov-near`, `ov-mid`): sem observação direta. Cercadas dos
-  dois lados, o que é forte mas não é ter visto.
 - **Os offsets 109 e 126** do registro 0: variam entre os cartões e não foram
   identificados. O `0x0216D`, que estava nesta lista, era a **velocidade do
   jogo** — e o [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) já o
