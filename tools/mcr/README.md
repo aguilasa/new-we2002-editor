@@ -22,8 +22,8 @@ se usa quando algo dá errado e se quer ver a ferramenta sozinha.
   [`docs/tasks/port-mcr/`](../../docs/tasks/port-mcr/progresso.md).
 - **Os mapas do option file** — [`docs/MCR-CAMERA.md`](../../docs/MCR-CAMERA.md)
   (a câmera, e o mapa consolidado do registro 0),
-  [`docs/MCR-OPCOES-TELA.md`](../../docs/MCR-OPCOES-TELA.md) (radar, nome,
-  cronômetro, placar, estratégia) e
+  [`docs/MCR-OPCOES-JOGO.md`](../../docs/MCR-OPCOES-JOGO.md) (radar, nome,
+  cronômetro, placar, estratégia, e a velocidade do jogo) e
   [`docs/MCR-DESBLOQUEIOS.md`](../../docs/MCR-DESBLOQUEIOS.md) (times secretos,
   Club House, times de ML no modo exibição). São **fonte de endereços**, como o
   `wte/re/mcr.md` é para o `layout.py`.

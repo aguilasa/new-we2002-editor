@@ -131,22 +131,26 @@ nenhuma de conteúdo, a faixa varia.
 
 ## O mapa do registro 0
 
-A câmera não está sozinha. O registro 0 tem **134 bytes** e é onde caem os três
-achados que este repositório mapeou até agora:
+A câmera não está sozinha. O registro 0 tem **134 bytes** e é onde caem todos os
+campos que este repositório mapeou até agora. Nos **dezenove cartões** medidos,
+**oito** offsets variam: seis já têm nome, dois não.
 
 | offset | addr (save no bloco 1) | o que é | onde está descrito |
 |---:|---|---|---|
 | 0 | `0x02103` | `00` em todos os cartões | — |
 | **1** | `0x02104` | **a câmera** | este arquivo |
 | 2..101 | `0x02105..0x02168` | 50 × `u16` LE, constantes em todos os cartões; têm cara de máscaras de pad | não identificado |
-| 106 | `0x0216D` | varia: `0xa0`, `0xe8` | não identificado |
+| **106..107** | `0x0216D..6E` | **a velocidade do jogo**, `u16` | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
 | 109 | `0x02170` | varia: `0x00`, `0x10` | não identificado |
-| **115** | `0x02176` | **as cinco opções de tela** | [`/docs/MCR-OPCOES-TELA.md`](/docs/MCR-OPCOES-TELA.md) |
+| **115** | `0x02176` | **as cinco opções de tela** | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
 | 126 | `0x02181` | varia: `0x00`, `0x02` | não identificado |
 | **129..130** | `0x02184..85` | **os desbloqueios**, 16 bits | [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) |
 
-Os demais 120 bytes são iguais nos dezesseis cartões medidos — o que não quer
-dizer que sejam fixos, e sim que nenhuma sonda os moveu ainda.
+Os outros **126 bytes** são iguais nos dezenove cartões — o que não quer dizer
+que sejam fixos, e sim que nenhuma sonda os moveu ainda. O offset 107 é a
+lembrança de que isso muda: ele ficou constante até uma sonda mudar a
+velocidade para zero barras, que é o único valor medido em que o `u16`
+transborda para o byte de cima.
 
 ## Como a medição foi feita
 
@@ -195,10 +199,11 @@ sair, e a sonda vai junto.
 
 - **Câmeras 6 e 7** (`ov-near`, `ov-mid`): sem observação direta. Cercadas dos
   dois lados, o que é forte mas não é ter visto.
-- **Os offsets 106, 109 e 126** do registro 0: variam entre os cartões e não
-  foram identificados. O `0x0216D` já aparece no
-  [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) como descartado da
-  lista de verificações, com a observação de que "acompanha uma opção de jogo".
+- **Os offsets 109 e 126** do registro 0: variam entre os cartões e não foram
+  identificados. O `0x0216D`, que estava nesta lista, era a **velocidade do
+  jogo** — e o [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) já o
+  tinha descartado da lista de verificações dizendo que "acompanha uma opção de
+  jogo", o que estava certo e agora tem nome.
 - **Os 15 bytes do padding do título**: não identificados; zero é aceito pelo
   jogo.
 - **O registro 1**, de 12.420 bytes: são os nomes editados, e nada além disso

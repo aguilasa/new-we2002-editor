@@ -704,7 +704,7 @@ O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
 | arquivo | o que mapeia | onde cai |
 |---|---|---|
 | [docs/MCR-CAMERA.md](docs/MCR-CAMERA.md) | a **câmera**, uma de nove vistas | offset 1 do registro 0 |
-| [docs/MCR-OPCOES-TELA.md](docs/MCR-OPCOES-TELA.md) | radar, nome, cronômetro, placar, estratégia | offset 115, um byte para as cinco |
+| [docs/MCR-OPCOES-JOGO.md](docs/MCR-OPCOES-JOGO.md) | radar, nome, cronômetro, placar, estratégia; e a velocidade do jogo | offset 115 (um byte para as cinco) e 106-107 (`u16`) |
 | [docs/MCR-DESBLOQUEIOS.md](docs/MCR-DESBLOQUEIOS.md) | os nove times secretos, o Club House e a opção de ML | offsets 129-130, 16 bits |
 
 **Offset, nunca endereço absoluto.** O save mora em qualquer bloco — medido: o

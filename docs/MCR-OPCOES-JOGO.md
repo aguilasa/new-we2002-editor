@@ -1,18 +1,21 @@
-# As opções de tela no option file do WE2002
+# As opções de jogo no option file do WE2002
 
 **Medido em 2026-09-12**, sobre a release japonesa `SLPM-87056`, num cartão do
 usuário gravado pelo jogo rodando sob o fork do DuckStation.
 
-O que este arquivo diz é onde o option file guarda as **cinco opções da tela de
-jogo** — radar, nome do jogador, cronômetro, placar e estratégia — e como
-reescrevê-las sem que o jogo recuse o cartão.
+O que este arquivo diz é onde o option file guarda as opções do menu de jogo e
+como reescrevê-las sem que o jogo recuse o cartão:
+
+- as **cinco opções de tela** — radar, nome do jogador, cronômetro, placar e
+  estratégia —, todas num byte;
+- a **velocidade do jogo**, a barra de dezesseis divisões, num `u16`.
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar.
 
-## O campo: **um byte**, no offset 115 do registro 0
+## As opções de tela: **um byte**, no offset 115 do registro 0
 
-As cinco opções cabem num byte só. **Não é um endereço absoluto**: o save
+As cinco cabem num byte só. **Não é um endereço absoluto**: o save
 `BISLPM-87056WEW-OPT` pode morar em qualquer bloco, medido em
 [`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md#onde-o-save-mora), então o que vale
 é o offset.
@@ -73,7 +76,53 @@ tanto que o byte:
 Se algum outro byte do registro tivesse mudado junto, os dois deltas
 divergiriam. Não divergem em nenhum dos seis.
 
-## Como a medição foi feita
+## A velocidade do jogo: um `u16`, nos offsets 106–107
+
+A barra de velocidade tem **dezesseis divisões** e vai de 0 a 16 acesas. O
+cartão limpo tem 8.
+
+```
+u16 little-endian nos bytes 106..107 (0x6A..0x6B) do payload do registro 0
+```
+
+Nos cartões desta máquina, com o save no bloco 1, isso cai em
+**`0x0216D..0x0216E`**.
+
+```
+u16 = 552 - 8 × barras
+```
+
+Quatro pontos medidos, e a reta passa exatamente pelos quatro:
+
+| barras | bytes | `u16` | `552 − 8×barras` |
+|---:|---|---:|---:|
+| 0 | `28 02` | 552 (`0x0228`) | 552 |
+| 4 | `08 02` | 520 (`0x0208`) | 520 |
+| 8 | `e8 01` | 488 (`0x01E8`) | 488 |
+| 16 | `a8 01` | 424 (`0x01A8`) | 424 |
+
+**O valor cresce quando as barras diminuem.** Zero barras é o maior número, e
+isso tem cara de **intervalo** e não de velocidade — mais barras, passo menor.
+É leitura da forma do dado, não medição: nada aqui olhou o que o motor faz com
+o número.
+
+**Só quatro bits se mexem**, os 6 a 9; os outros doze ficam em `0x0028` nos
+quatro cartões. Os três de baixo serem sempre zero é o que faz o passo ser 8:
+lido como `u16 >> 3`, o campo é simplesmente **`69 − barras`**, e vai de 69 a
+53. Qual das duas leituras o jogo usa não foi determinado, e para escrever dá
+no mesmo.
+
+### O quarto ponto é que fecha isso, e ele veio do lado inverso
+
+Os três primeiros cartões eram `0`, `8` e `16` — **todos múltiplos de 8**. A
+reta passava pelos três, mas "cada barra vale 8" era interpolação: um jogo que
+só gravasse em degraus de oito barras produziria dados idênticos.
+
+Em vez de pedir mais um cartão ao jogo, a sonda foi montada do outro lado:
+gravar `520`, que a reta prevê como **4 barras**, e olhar a tela. Apareceram
+quatro. Uma corrida, e a escala deixa de ser interpolação.
+
+## Como a medição das cinco foi feita
 
 O jogo é a única fonte de cartão válido. A série parte de um cartão limpo — o
 `limpo.mcr`, com radar em DOWN e as quatro opções em ON — e cada sonda é uma
@@ -123,6 +172,9 @@ v = (v & ~0x03) | 1                         # radar -> UP
 v &= ~0x08                                  # timer -> OFF
 c.write(rec.payload + OPT, bytes([v]))
 
+SPEED = 106                                 # o u16 da barra de velocidade
+c.write(rec.payload + SPEED, (552 - 8 * 12).to_bytes(2, "little"))   # 12 barras
+
 c.write(rec.header + 2,
         bytes([options.checksum(bytes(c.data[rec.payload:rec.payload + rec.size]))]))
 open("work/sonda.mcr", "wb").write(c.to_bytes())
@@ -148,9 +200,14 @@ python3 tools/mcr/options.py work/sonda.mcr     # o registro, e se a soma bate
   dois como *não procurados o bastante*, não como vazios.
 - **Radar `3`**: o quarto valor dos dois bits não existe na tela e não foi
   testado. Pode ser DOWN de novo, ou outra coisa.
-- **Os offsets 106, 109 e 126** do registro 0: variam entre os cartões e não
-  foram identificados. O mapa do registro está em
+- **A velocidade fora de `0..16`**: a fórmula é uma reta, e nada diz o que o
+  jogo faz com um valor abaixo de 424 ou acima de 552. Nem se ele o corrige ao
+  gravar de volta.
+- **O que o número significa para o motor**: ler "552 menos oito por barra" não
+  é saber o que o jogo faz com 488. A forma sugere intervalo; isso é conjectura.
+- **Os offsets 109 e 126** do registro 0: variam entre os cartões e não foram
+  identificados. O mapa do registro está em
   [`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md#o-mapa-do-registro-0).
 - **Marcar e desmarcar pela ferramenta**: o `tools/mcr/options.py` lê e grava a
-  câmera, e ainda não tem API para estas cinco. A sonda acima usa as peças dele
-  (`record`, `checksum`) diretamente.
+  câmera, e ainda não tem API para as cinco nem para a velocidade. A sonda acima
+  usa as peças dele (`record`, `checksum`) diretamente.
