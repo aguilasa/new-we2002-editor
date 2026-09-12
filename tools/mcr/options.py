@@ -67,13 +67,31 @@ seen and wrong for that one, reading the neighbouring block's fill and
 reporting a camera nobody set. The self-check builds the same save in two
 different blocks and demands the address follow.
 
-WHAT THAT DID NOT MEASURE IS THE WRITE. Nothing was changed on the game's own
-screen and nothing was saved, so whether the game writes back into the blocks
-it found, normalises to the first free ones, or does something else, is
-unknown. It changes nothing here -- this module re-reads the directory every
-time and finds the save wherever it is -- and it is written down because the
-gap between "read from any block" and "kept in any block" is exactly the kind
-of thing that gets assumed for free.
+AND THEN THE WRITE, which closed the last gap. With the save still in blocks
+3-4, the camera was changed to `tv` ON THE GAME'S OWN SCREEN and the option
+file saved. Three things came back, and all three matter:
+
+  the save stayed in blocks 3-4          the game writes back into the chain
+                                         it found; it does not normalise to
+                                         the first free blocks
+
+  the camera landed at data offset 4     the game wrote the byte this module
+                                         derives, on a card this module had
+                                         already edited
+
+  the checksum it wrote was OURS         0xdc, which is what `checksum()`
+                                         computes for that payload, accepted
+                                         with no adjustment
+
+The third is the one worth spelling out. Knowing the game REJECTS a wrong sum
+(above) is not the same as knowing the sum it PRODUCES is ours: a validator
+could accept our byte by coincidence and still generate a different one. It
+does not. Same algorithm, both directions.
+
+Sixteen bytes moved in total -- those three, and thirteen in the title padding,
+which is the same noise `--check` already excuses. The 12,420-byte record of
+names beside it was not touched, and that the padding varies between two of the
+GAME'S OWN writes is what confirms it was never data.
 
 Usage:
 
@@ -116,19 +134,19 @@ CAMERA_NAMES = (
 # READ_BACK: the game wrote the byte and we read it. That is what `--check`
 # repeats, and it proves the decoder.
 #
-# WRITTEN_BACK: we wrote the byte and the game read it -- 5, on 2026-09-11,
-# by replacing DuckStation's card and finding Zoom selected on the option
-# screen. That is the direction this module exists for, and the one the four
-# cards CANNOT establish: a card the game saved is a card the game already
-# accepted, so reading it back says nothing about whether our checksum is the
-# one it validates. It also settles the ordering from the inside -- both ends
-# were already pinned, and 5 landing on the fifth name leaves no room for the
-# list to be off by anything.
+# WRITTEN_BACK: we wrote the byte and the game read it -- 5 on 2026-09-11 and
+# 3 on 2026-09-12, by replacing DuckStation's card and finding Zoom, then Wide,
+# selected on the option screen. That is the direction this module exists for,
+# and the one the read-back cards CANNOT establish: a card the game saved is a
+# card the game already accepted, so reading it back says nothing about whether
+# our checksum is the one it validates. It also settles the ordering from the
+# inside -- both ends were already pinned, and 3 and 5 landing on the fourth
+# and sixth names leaves 4, 6 and 7 each fenced between proven neighbours.
 READ_BACK_CAMERAS = (0, 1, 2, 8)
-WRITTEN_BACK_CAMERAS = (5,)
+WRITTEN_BACK_CAMERAS = (3, 5)
 MEASURED_CAMERAS = tuple(sorted(READ_BACK_CAMERAS + WRITTEN_BACK_CAMERAS))
 
-# The environment variable that points at the four cards `--check` needs. A
+# The environment variable that points at the cards `--check` needs. A
 # memory card is somebody's save and is not versioned -- same rule as roms/ --
 # so the check SKIPS when the directory is not there, and says it skipped.
 CAMERA_DIR_ENV = "WE2002_MCR_CAMERA_CARDS"
@@ -141,6 +159,17 @@ CAMERA_FIXTURES = (
     ("camera-normal-far", 2),
     ("camera-ov-far", 8),
 )
+
+# A FIFTH CARD, AND IT IS OF A DIFFERENT KIND. The four above all hold the save
+# in blocks 1-2 and were saved by the game before this module existed. This one
+# the game wrote on 2026-09-12 AFTER we had moved the save to blocks 3-4 and
+# edited it: the camera it set is `tv`, in a chain we relinked by hand.
+#
+# It is what keeps the derived address anchored to a real file instead of only
+# to a synthetic one. A constant address reads the neighbouring block's fill
+# here and reports a camera nobody set -- so this row is the one that fails
+# first if somebody ever "simplifies" `data_offset`.
+MOVED_FIXTURE = ("jogo-gravou-tv-bloco3", 4, [3, 4])
 
 # The PSX save header, at the top of the first block of the chain: "SC", then a
 # byte whose low nibble counts the icon frames that follow the header.
@@ -415,8 +444,45 @@ def check(directory: str | None = None, verbose: bool = True) -> list[str]:
             print(f"  ok    {name}: two bytes reproduce the card the game "
                   f"saved ({len(moved)} in the title padding)")
 
+    # The moved card, when it is there. It is checked SEPARATELY and not folded
+    # into the loop above: that loop patches each card out of the clean one,
+    # and the clean one's save is in another block, so a patch between the two
+    # would be comparing different chains and would fail for the wrong reason.
+    name, expected, blocks = MOVED_FIXTURE
+    moved_path = os.path.join(path, name + ".mcr")
+    counted = len(CAMERA_FIXTURES)
+    if not os.path.isfile(moved_path):
+        if verbose:
+            print(f"  skip  {name}: the card the game wrote in block "
+                  f"{blocks[0]} is not here")
+    else:
+        counted += 1
+        c = Card.from_file(moved_path)
+        found = c.find_save()
+        where = list(found[1]) if found else None
+        if where != blocks:
+            problems.append(
+                f"{name}: the save is in blocks {where}, and the measurement "
+                f"put it in {blocks}")
+        else:
+            got = read_camera(c)
+            if got != expected:
+                problems.append(
+                    f"{name}: camera reads {got} ({camera_name(got)}), the "
+                    f"game set {expected} ({camera_name(expected)})")
+            bad = [r.index for r in records(c) if not r.checksum_ok]
+            if bad:
+                problems.append(
+                    f"{name}: record(s) {bad} have a checksum the game did "
+                    f"not agree with -- the sum it writes is not the one "
+                    f"`checksum()` computes")
+            elif verbose:
+                print(f"  ok    {name}: the game's own write, in blocks "
+                      f"{where} -- camera {got} ({camera_name(got)}) at "
+                      f"{camera_address(c):#07x}, its checksum is ours")
+
     if verbose:
-        print(f"options.py --check: {len(CAMERA_FIXTURES)} cards"
+        print(f"options.py --check: {counted} cards"
               + ("" if not problems else f", {len(problems)} problem(s)"))
         for p in problems:
             print(f"  FAIL {p}")
@@ -508,8 +574,9 @@ def _checks(c, card_path: str | None = None) -> None:
     # The one the game accepted from us, and it is what pins the middle of the
     # list: both ends were already fixed, so a name at index 5 that the game
     # agrees with leaves the ordering no room to be off.
-    ok("camera 5 is the one the game read back from us",
-       WRITTEN_BACK_CAMERAS == (5,) and CAMERA_NAMES[5] == "zoom")
+    ok("the two the game read back from us are 3 and 5",
+       WRITTEN_BACK_CAMERAS == (3, 5)
+       and [CAMERA_NAMES[v] for v in WRITTEN_BACK_CAMERAS] == ["wide", "zoom"])
     ok("the checksum of nothing is zero", checksum(b"") == 0)
     ok("the checksum wraps at 256", checksum(b"\xff\x02") == 1)
 

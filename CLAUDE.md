@@ -738,7 +738,11 @@ Cinco coisas que custam tempo se descobertas tarde:
   E **o bloco não é fixo de verdade**: em 2026-09-12 o save foi movido para os
   blocos 3-4, diretório junto, e o jogo **carregou** normalmente — na leitura
   quem diz onde o save está é o diretório, e cartão de terceiro pode tê-lo em
-  qualquer lugar. O que ele faz ao **gravar** não foi medido.
+  qualquer lugar. E ao **gravar** ele volta para a mesma cadeia: trocada a
+  câmera pela tela do jogo, o save ficou nos 3-4, a câmera caiu no byte que a
+  ferramenta deriva, e o checksum que o jogo escreveu é o que a ferramenta
+  calcula — **mesmo algoritmo nos dois sentidos**, o que rejeitar soma errada
+  ainda não provava.
 
 O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
 **Cartão de jogo do usuário não se versiona**, mesma regra de `roms/`. A

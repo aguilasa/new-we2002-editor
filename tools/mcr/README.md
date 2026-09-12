@@ -359,8 +359,9 @@ vez de os varrer para debaixo do tapete: diferença que passe dessa faixa é
 diferença de verdade, e vira falha.
 
 **Cartão de jogo não se versiona**, mesma regra de `roms/`, então sem
-`WE2002_MCR_CAMERA_CARDS` o `--check` **pula e diz que pulou**. Os quatro nomes
-de arquivo que ele procura estão no `CAMERA_FIXTURES` do módulo.
+`WE2002_MCR_CAMERA_CARDS` o `--check` **pula e diz que pulou**. Os nomes de
+arquivo que ele procura estão no `CAMERA_FIXTURES` e no `MOVED_FIXTURE` do
+módulo — e o quinto, que é de outra natureza, também pula sozinho.
 
 ### O outro sentido, que é o que importa
 
@@ -422,13 +423,38 @@ O `self-check` monta o **mesmo save em dois blocos diferentes** e exige que o
 endereço acompanhe, e o controle `options-assumed-block` planta a constante e
 exige o vermelho. Esse controle não depende de fixture — roda em qualquer clone.
 
-**O que este teste NÃO mediu: a gravação.** Nada foi alterado pela tela do jogo
-nem salvo, então não se sabe se ele grava de volta nos blocos 3-4 que achou, se
-normaliza para os primeiros livres, ou se faz outra coisa. **Isso não muda a
-ferramenta** — ela relê o diretório a cada abertura e acha o save onde ele
-estiver —, e fica registrado porque a diferença entre “lido de qualquer bloco” e
-“mantido em qualquer bloco” é justamente o tipo de coisa que se assume de graça
-e custa caro depois.
+### E a gravação, que fechou a última lacuna
+
+Com o save ainda nos blocos 3-4, a câmera foi trocada para `tv` **pela tela do
+próprio jogo** e o option file salvo. Voltaram três respostas, e as três
+importam:
+
+| o que se mediu | resultado |
+|---|---|
+| onde o save foi parar | **blocos 3-4** — o jogo grava de volta na cadeia que achou; não normaliza para os primeiros livres |
+| onde a câmera caiu | **offset 4 dos dados** (`0x06104`) — o byte que este módulo deriva, num cartão que este módulo já tinha editado |
+| que checksum ele escreveu | **`0xdc`** — exatamente o que o nosso `checksum()` calcula para aquele payload, aceito sem ajuste nenhum |
+
+**O terceiro é o que vale escrever por extenso.** Saber que o jogo *rejeita* uma
+soma errada não é a mesma coisa que saber que a soma que ele *produz* é a nossa:
+um validador poderia aceitar o nosso byte por coincidência e gerar outro. Não
+gera. Mesmo algoritmo, nos dois sentidos.
+
+Ao todo o jogo moveu **16 bytes**: esses três e treze no padding do título. O
+registro 1, com os 12.420 bytes de nomes, não foi tocado — e o padding variar
+entre duas gravações **do próprio jogo** é o que confirma que ele nunca foi dado.
+
+Esse cartão virou a **quinta fixture** do `--check`, e ela é de outra natureza:
+as quatro primeiras o jogo salvou antes deste módulo existir, com o save no
+bloco 1; esta ele escreveu **depois** de nós termos movido o save para o bloco 3
+e editado a câmera. É o que ancora o endereço derivado num arquivo real em vez
+de só num sintético — uma constante lê o preenchimento do bloco vizinho aqui, e
+esta linha é a primeira a cair se alguém “simplificar” o `data_offset`.
+
+```console
+  ok    jogo-gravou-tv-bloco3: the game's own write, in blocks [3, 4] -- camera 4 (tv) at 0x06104, its checksum is ours
+options.py --check: 5 cards
+```
 
 ### Os módulos, um a um
 
