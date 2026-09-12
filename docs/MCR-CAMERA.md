@@ -142,8 +142,8 @@ nenhuma de conteúdo, a faixa varia.
 ## O mapa do registro 0
 
 A câmera não está sozinha. O registro 0 tem **134 bytes** e é onde caem todos os
-campos que este repositório mapeou até agora. Nos **dezenove cartões** medidos,
-**oito** offsets variam: seis já têm nome, dois não.
+campos que este repositório mapeou até agora. Nos **trinta cartões** medidos,
+**treze** offsets variam: onze já têm nome, dois não.
 
 | offset | addr (save no bloco 1) | o que é | onde está descrito |
 |---:|---|---|---|
@@ -152,15 +152,22 @@ campos que este repositório mapeou até agora. Nos **dezenove cartões** medido
 | 2..101 | `0x02105..0x02168` | 50 × `u16` LE, constantes em todos os cartões; têm cara de máscaras de pad | não identificado |
 | **106..107** | `0x0216D..6E` | **a velocidade do jogo**, `u16` | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
 | 109 | `0x02170` | varia: `0x00`, `0x10` | não identificado |
+| **110..112** | `0x02171..73` | **os três volumes**: sound, BGM, narração | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
+| **113** | `0x02174` | **narração** ON/OFF | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
+| **114** | `0x02175` | **áudio** estéreo/mono | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
 | **115** | `0x02176` | **as cinco opções de tela** | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
 | 126 | `0x02181` | varia: `0x00`, `0x02` | não identificado |
 | **129..130** | `0x02184..85` | **os desbloqueios**, 16 bits | [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) |
 
-Os outros **126 bytes** são iguais nos dezenove cartões — o que não quer dizer
-que sejam fixos, e sim que nenhuma sonda os moveu ainda. O offset 107 é a
-lembrança de que isso muda: ele ficou constante até uma sonda mudar a
-velocidade para zero barras, que é o único valor medido em que o `u16`
-transborda para o byte de cima.
+Os outros **121 bytes** são iguais nos trinta cartões — o que não quer dizer que
+sejam fixos, e sim que nenhuma sonda os moveu ainda. O offset 107 é a lembrança
+de que isso muda: ele ficou constante até uma sonda mudar a velocidade para zero
+barras, que é o único valor medido em que o `u16` transborda para o byte de
+cima.
+
+**Os offsets 106 a 115 são um bloco contíguo de opções** — velocidade, os três
+volumes, narração, áudio e as cinco flags de tela —, e no meio dele o **109**
+continua sem nome, cercado dos dois lados por campos identificados.
 
 ## Como a medição foi feita
 
@@ -211,10 +218,13 @@ sair, e a sonda vai junto.
 ## O que fica em aberto
 
 - **Os offsets 109 e 126** do registro 0: variam entre os cartões e não foram
-  identificados. O `0x0216D`, que estava nesta lista, era a **velocidade do
-  jogo** — e o [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) já o
-  tinha descartado da lista de verificações dizendo que "acompanha uma opção de
-  jogo", o que estava certo e agora tem nome.
+  identificados. O 109 é o mais provável de cair rápido — ele está **dentro** do
+  bloco de opções, entre a velocidade e os volumes, e só tem dois valores
+  medidos (`0x00` e `0x10`). O `0x0216D`, que estava nesta lista, era a
+  **velocidade do jogo** — e o
+  [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) já o tinha descartado
+  da lista de verificações dizendo que "acompanha uma opção de jogo", o que
+  estava certo e agora tem nome.
 - **Os 15 bytes do padding do título**: não identificados; zero é aceito pelo
   jogo.
 - **O registro 1**, de 12.420 bytes: são os nomes editados, e nada além disso

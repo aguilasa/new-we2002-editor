@@ -8,7 +8,13 @@ como reescrevê-las sem que o jogo recuse o cartão:
 
 - as **cinco opções de tela** — radar, nome do jogador, cronômetro, placar e
   estratégia —, todas num byte;
-- a **velocidade do jogo**, a barra de dezesseis divisões, num `u16`.
+- a **velocidade do jogo**, a barra de dezesseis divisões, num `u16`;
+- as **cinco opções de som** — modo, narração e os três volumes —, em cinco
+  bytes consecutivos.
+
+Tudo isso vive no **registro 0** do save, em onze bytes entre os offsets 106 e
+115. O mapa consolidado do registro está em
+[`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md#o-mapa-do-registro-0).
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar.
@@ -122,7 +128,64 @@ Em vez de pedir mais um cartão ao jogo, a sonda foi montada do outro lado:
 gravar `520`, que a reta prevê como **4 barras**, e olhar a tela. Apareceram
 quatro. Uma corrida, e a escala deixa de ser interpolação.
 
-## Como a medição das cinco foi feita
+## As opções de som: **cinco bytes**, nos offsets 110 a 114
+
+Cinco campos independentes, um byte cada, consecutivos. Nenhum compartilha bits
+com outro: cada sonda moveu exatamente um byte.
+
+| offset | addr | campo | valores |
+|---:|---|---|---|
+| 110 | `0x02171` | **Sound Volume** | 0..31 |
+| 111 | `0x02172` | **BGM Volume** | 0..31 |
+| 112 | `0x02173` | **Commentary Volume** | 0..31 |
+| 113 | `0x02174` | **Commentary** | `1` = ON, `0` = OFF |
+| 114 | `0x02175` | **Audio** | `0` = STEREO, `1` = MONO |
+
+Os três volumes cabem em **5 bits** — os bits 5 a 7 são zero nos dezenove
+cartões, e nenhum valor passa de `0x1F`.
+
+### A escala dos volumes, e os dois sentidos dela
+
+A barra tem dezesseis divisões e o cartão limpo tem doze.
+
+```
+leitura   barras = ceil(valor / 2) = (valor + 1) // 2
+escrita   valor  = min(2 × barras, 31)
+```
+
+Seis pontos medidos, e os seis batem:
+
+| valor | barras | de onde |
+|---:|---:|---|
+| 0 | 0 | `sound-*-volume-0` |
+| 2 | 1 | sonda |
+| 10 | 5 | sonda |
+| 13 | **7** | sonda, valor **ímpar** |
+| 24 | 12 | o limpo |
+| 31 | 16 | `sound-*-volume-16` |
+
+**As duas fórmulas não são inversas exatas, e o topo é o que as separa.** As
+quinze primeiras barras andam de dois em dois; a décima sexta anda **um**,
+porque `32` não cabe em 5 bits. Ler `31` devolve 16, então o par fecha — mas
+`31` é o **único valor ímpar que o jogo produz**.
+
+**Valor ímpar não é estável.** Gravar `13` mostra 7 barras, e se o jogador
+mexer em qualquer coisa e salvar, o jogo escreve `14` no lugar. Quem editar
+esses bytes por fora deve escrever pares, ou aceitar que o número muda sozinho
+na primeira gravação.
+
+### O valor ímpar é que deu a regra
+
+Os três cartões originais eram `0`, `12` e `16` barras — e `min(2 × barras, 31)`
+os explica, mas `ceil(valor/2)` também, e qualquer curva que passe pelos três.
+Nenhum deles diz o que acontece **entre** as barras, porque a interface do jogo
+não consegue produzir um valor ímpar.
+
+A sonda levou os três volumes de uma vez, com valores diferentes: `10`, `13` e
+`2`. Uma corrida, três respostas — e a do meio, o `13`, é a que fixou o
+arredondamento em `ceil`. Com `floor` teria mostrado 6.
+
+## Como a medição das cinco de tela foi feita
 
 O jogo é a única fonte de cartão válido. A série parte de um cartão limpo — o
 `limpo.mcr`, com radar em DOWN e as quatro opções em ON — e cada sonda é uma
@@ -174,6 +237,11 @@ c.write(rec.payload + OPT, bytes([v]))
 
 SPEED = 106                                 # o u16 da barra de velocidade
 c.write(rec.payload + SPEED, (552 - 8 * 12).to_bytes(2, "little"))   # 12 barras
+
+for off, barras in ((110, 5), (111, 16), (112, 0)):   # sound, BGM, narracao
+    c.write(rec.payload + off, bytes([min(2 * barras, 31)]))
+c.write(rec.payload + 113, bytes([0]))      # narracao OFF
+c.write(rec.payload + 114, bytes([1]))      # audio MONO
 
 c.write(rec.header + 2,
         bytes([options.checksum(bytes(c.data[rec.payload:rec.payload + rec.size]))]))
