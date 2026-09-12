@@ -735,6 +735,9 @@ Cinco coisas que custam tempo se descobertas tarde:
   absolutos: os 17 destinos do editor de time são endereços de cartão e erram
   por 8.192 bytes se o save mudar de bloco — nos cartões desta máquina ele mora
   no bloco 1, e não no 2. Medido em 2026-09-11 por diff de quatro option files.
+  E **o bloco não é fixo de verdade**: em 2026-09-12 o save foi movido para os
+  blocos 3-4, diretório junto, e o jogo carregou normalmente — quem diz onde o
+  save está é o diretório, e cartão de terceiro pode tê-lo em qualquer lugar.
 
 O cartão de teste é `work/entrada.mcr`, apontado por `WE2002_MCR_CARD`.
 **Cartão de jogo do usuário não se versiona**, mesma regra de `roms/`. A

@@ -159,7 +159,7 @@ quebrado**, não como vermelho; no tipo que cria, o equivalente é o caminho já
 estar ocupado.
 
 **Quantos são não se escreve aqui.** A última linha do comando diz — hoje
-`controls: 24 of 24 red (23 substitutions, 1 new file)` —, e a razão é medida:
+`controls: 25 of 25 red (24 substitutions, 1 new file)` —, e a razão é medida:
 o total viveu como número neste arquivo, a MCR-TASK-11 acrescentou o décimo
 sexto, e a linha do gate que os comandos leem antes de rodar qualquer coisa
 continuou dizendo quinze, enquanto o `progresso.md` — editado pela **mesma

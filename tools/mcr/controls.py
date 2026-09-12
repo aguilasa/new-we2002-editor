@@ -155,6 +155,12 @@ CONTROLS = (
             ("options",),
             "the camera byte without its record checksum: measured, the "
             "game puts ERROR on the option file's load screen"),
+    Control("options-assumed-block", "options.py", "save_start",
+            "    start = blocks[0] * card_mod.BLOCK_BYTES",
+            "    start = card_mod.BLOCK_BYTES",
+            ("options",),
+            "the block comes from the directory -- measured, the game loads a "
+            "save from block 3, and a constant reads the wrong block"),
     Control("options-assumed-icons", "options.py", "data_offset",
             "    return save_start(card) + card_mod.FRAME_BYTES * (1 + icon_frames(card))",
             "    return save_start(card) + card_mod.FRAME_BYTES * 2",

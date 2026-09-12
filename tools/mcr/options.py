@@ -57,6 +57,16 @@ on their own: a card the game saved is a card the game had already accepted, so
 reading it back proves the decoder and says nothing about whether the checksum
 we compute is the one the game validates. It is.
 
+THE BLOCK IS NOT THE SAVE'S ADDRESS, AND THAT IS MEASURED TOO. On 2026-09-12 the
+save was moved from blocks 1-2 to blocks 3-4, directory and all, and the game
+loaded it and showed the right camera without touching the card. The console
+follows the directory, as it is supposed to, so a card from somebody else can
+hold this save anywhere. That is why `data_offset` derives instead of
+declaring: a constant would have been right for every card this repository has
+seen and wrong for that one, reading the neighbouring block's fill and
+reporting a camera nobody set. The self-check builds the same save in two
+different blocks and demands the address follow.
+
 Usage:
 
     python3 tools/mcr/options.py <card.mcr>
@@ -411,14 +421,53 @@ def self_check(card_path: str | None = None, verbose: bool = True) -> int:
     return harness.run("options.py", _checks, verbose, card_path=card_path)
 
 
-def _synthetic(camera: int = 1) -> Card:
-    """A card whose block 1 holds an option save shaped like the measured one.
+def _blank_card(first_block: int, blocks: int = 2,
+                save_name: str = "BISLPM-86600WEW-OPT") -> Card:
+    """A formatted card whose save chain starts at `first_block`.
+
+    `card_mod.synthetic_card` always starts at block 1, which is the one
+    arrangement this check must NOT be limited to. The directory is written the
+    way a real one is: `link` is 0-BASED over the data blocks, so the frame
+    that points at frame f stores f-1, and only the first entry carries the
+    name -- copied from the real card, where the last entry has size 0 and an
+    empty name.
+    """
+    data = bytearray(b"\x00" * card_mod.CARD_BYTES)
+    data[0:2] = card_mod.MAGIC
+    last = first_block + blocks - 1
+    for i in range(1, card_mod.DIRECTORY_FRAMES + 1):
+        q = bytearray(card_mod.FRAME_BYTES)
+        if first_block <= i <= last:
+            q[0] = 0x51 if i == first_block else (0x53 if i == last else 0x52)
+            q[8:10] = (card_mod.CHAIN_END if i == last
+                       else i).to_bytes(2, "little")
+            if i == first_block:
+                q[4:8] = (card_mod.BLOCK_BYTES * blocks).to_bytes(4, "little")
+                q[10:10 + len(save_name)] = save_name.encode("ascii")
+        else:
+            q[0] = 0xA0
+            q[8:10] = card_mod.CHAIN_END.to_bytes(2, "little")
+        q[card_mod.FRAME_BYTES - 1] = card_mod.frame_checksum(bytes(q))
+        data[i * card_mod.FRAME_BYTES:(i + 1) * card_mod.FRAME_BYTES] = q
+    data[card_mod.FRAME_BYTES - 1] = card_mod.frame_checksum(
+        bytes(data[0:card_mod.FRAME_BYTES]))
+    return Card(bytes(data), origin=f"<synthetic block {first_block}>")
+
+
+def _synthetic(camera: int = 1, first_block: int = 1) -> Card:
+    """A card holding an option save shaped like the measured one.
 
     Built here and not read from disk, so this self-check runs on a machine
     that has never seen a memory card -- the rule `selftest.py` is built on.
+
+    `first_block` is what makes this more than a fixture. The save does not
+    have to live in block 1, and on 2026-09-12 the game was measured loading
+    one from block 3: the directory is what says where it is, and the console
+    follows it. So the self-check builds the same save in two places and
+    demands the address follow, which a constant cannot do.
     """
-    card = card_mod.synthetic_card(blocks=2)
-    start = card_mod.BLOCK_BYTES
+    card = _blank_card(first_block, blocks=2)
+    start = first_block * card_mod.BLOCK_BYTES
     header = bytearray(card_mod.FRAME_BYTES)
     header[0:2] = SAVE_MAGIC
     header[2] = 0x11                     # one icon frame
@@ -507,6 +556,29 @@ def _checks(c, card_path: str | None = None) -> None:
             "outside 0..8")
     refuses("refuses writing a tenth camera",
             lambda: write_camera(card, 9), "outside 0..8")
+
+    # THE SAME SAVE, IN ANOTHER BLOCK. Measured on 2026-09-12: the game loaded
+    # an option save moved to block 3 and came up with the right camera, so the
+    # directory -- not the block number -- is what says where the save is. A
+    # constant address would read the neighbouring block's fill here and report
+    # a camera nobody set.
+    moved = attempt("build the same save in block 3",
+                    lambda: _synthetic(camera=3, first_block=3))
+    if moved is not None and card is not None:
+        ok("the save is found where the directory puts it",
+           moved.find_save()[1] == [3, 4], f"blocks={moved.find_save()[1]}")
+        shift = attempt("locate the camera in the moved save",
+                        lambda: camera_address(moved))
+        ok("and the address moves with it, by whole blocks",
+           shift is not None
+           and shift - (data_offset(card) + layout.option_record_offset(0)
+                        + layout.OPTION_RECORD_HEADER_BYTES
+                        + layout.CAMERA.offset)
+           == 2 * card_mod.BLOCK_BYTES,
+           f"moved={shift:#07x}" if shift else "not located")
+        ok("the camera still reads", read_camera(moved) == 3)
+        ok("and both records still verify",
+           all(r.checksum_ok for r in records(moved)))
 
     # A card with no WE2002 save has to be NAMED, not decoded: the offsets mean
     # nothing without the directory entry that anchors them.

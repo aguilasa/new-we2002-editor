@@ -397,6 +397,30 @@ nomes editados no registro 1 nunca correram risco.
 razão de o módulo **recusar** gravar sobre registro que já chegou quebrado: o
 conserto silencioso esconderia exatamente o sintoma que o jogo grita.
 
+### O bloco não é o endereço do save
+
+A decisão de design mais forte deste módulo — derivar o endereço do diretório em
+vez de escrever uma constante — tinha, até 2026-09-12, só cobertura sintética.
+Agora tem a de verdade.
+
+O save foi movido dos blocos **1-2 para os 3-4**, diretório junto: as duas
+entradas antigas liberadas, duas novas escritas com a cadeia religada e o XOR
+refeito, e os 16 KiB de dados copiados. O jogo **carregou normalmente** e mostrou
+a câmera certa — e não regravou nada, digest idêntico depois.
+
+O console segue o **diretório**, como manda o formato. Duas consequências:
+
+- cartão de terceiro pode ter este save em **qualquer** bloco, e os cartões desta
+  máquina o têm no **1** — já não é o 2, que é onde os 17 destinos absolutos do
+  editor de time o esperam;
+- uma constante `0x02104` estaria certa em todo cartão que este repositório viu e
+  errada naquele: leria o preenchimento do bloco vizinho e reportaria uma câmera
+  que ninguém escolheu.
+
+O `self-check` monta o **mesmo save em dois blocos diferentes** e exige que o
+endereço acompanhe, e o controle `options-assumed-block` planta a constante e
+exige o vermelho. Esse controle não depende de fixture — roda em qualquer clone.
+
 ### Os módulos, um a um
 
 Cada módulo do núcleo roda sozinho sobre um cartão, e é onde está o detalhe que
