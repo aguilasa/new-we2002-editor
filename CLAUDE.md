@@ -697,6 +697,20 @@ O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
 [docs/tasks/port-mcr/](docs/tasks/port-mcr/progresso.md), com prefixo
 `MCR-TASK-` e pool `CORR-MCR-`, e roda por `/executar port-mcr`.
 
+**Três mapas do option file**, que são fonte de endereços do jeito que
+`wte/re/mcr.md` é para os 17 destinos do editor de time. Os três descrevem o
+**mesmo registro de 134 bytes**, e o mapa consolidado dele mora no primeiro:
+
+| arquivo | o que mapeia | onde cai |
+|---|---|---|
+| [docs/MCR-CAMERA.md](docs/MCR-CAMERA.md) | a **câmera**, uma de nove vistas | offset 1 do registro 0 |
+| [docs/MCR-OPCOES-TELA.md](docs/MCR-OPCOES-TELA.md) | radar, nome, cronômetro, placar, estratégia | offset 115, um byte para as cinco |
+| [docs/MCR-DESBLOQUEIOS.md](docs/MCR-DESBLOQUEIOS.md) | os nove times secretos, o Club House e a opção de ML | offsets 129-130, 16 bits |
+
+**Offset, nunca endereço absoluto.** O save mora em qualquer bloco — medido: o
+jogo carrega e grava a partir do bloco 3 igual — e os cartões desta máquina o
+têm no **1**, que não é o 2 onde os 17 destinos do editor de time o esperam.
+
 **É cartão, não imagem de CD.** Não toca `roms/`, não estende o `we2002_core`, e
 não compartilha build com nada. O que empresta é conhecimento de formato — e
 aqui ele é forte:
