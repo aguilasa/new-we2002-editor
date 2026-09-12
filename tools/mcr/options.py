@@ -20,11 +20,22 @@ offsets against the block the directory actually names. The two coexist and do
 not share a byte: the camera lives at data offset 4, and the nearest
 destination of the other measurement is thousands of bytes away.
 
-THE CHECKSUM IS THE WHOLE RISK. Each record carries its own -- the payload's
-bytes summed mod 256 -- and the game will not take a record whose sum does not
-match. Writing the camera byte alone leaves a card the console loads and the
-game rejects, which looks like "the edit did nothing" and is in fact a save the
-game threw away. `write_camera` recomputes it; nothing else here writes.
+THE CHECKSUM IS THE WHOLE RISK, and the game is strict about it. Each record
+carries its own -- the payload's bytes summed mod 256.
+
+MEASURED on 2026-09-12, and it settled a guess this docstring had got wrong.
+One byte was changed on DuckStation's card, from `wide` to `tv`, leaving the
+sum at wide's `0xdb` instead of tv's `0xdc`. The game did not take the record,
+did not fall back to a default, and did not quietly ignore the edit: it put
+**ERROR** on screen while loading the option file, and refused to go on. The
+prose here used to say it "looks like the edit did nothing", which was a
+deduction, and the deduction was wrong -- it is loud, not silent.
+
+It also did not touch the card. The file's digest after the refusal was the one
+written before it, so a stale sum costs a failed load and nothing else; the
+12,420-byte record of edited names beside it was never at risk.
+
+`write_camera` recomputes the sum; nothing else here writes.
 
 Measured, four cards from one session:
 
@@ -290,9 +301,10 @@ def write_camera(card: Card, value: int) -> list[int]:
     """Write the camera and repair its record's checksum; returns what moved.
 
     TWO BYTES, ALWAYS, and never one. The record in front of the camera carries
-    the sum of its payload; leave it stale and the game drops the record, which
-    reads on screen as an edit that did nothing. The write itself goes through
-    `Card.write`, so the refusal below the directory still stands.
+    the sum of its payload; leave it stale and the game puts ERROR on screen
+    loading the option file and stops there -- measured, not deduced. The write
+    itself goes through `Card.write`, so the refusal below the directory still
+    stands.
     """
     if not 0 <= value < len(CAMERA_NAMES):
         raise OptionsError(
@@ -477,7 +489,8 @@ def _checks(c, card_path: str | None = None) -> None:
 
     # The red case for the checksum: writing the byte WITHOUT the repair has to
     # leave a record that fails. Without this, a `write_camera` that forgot the
-    # checksum would pass every check above.
+    # checksum would pass every check above -- and the game is the one that
+    # would catch it, with ERROR on the option file's load screen.
     stale = attempt("build another", lambda: _synthetic(1))
     if stale is not None:
         stale.data[camera_address(stale)] = 8

@@ -315,9 +315,8 @@ Os nove nomes são `normal-near`, `normal-mid`, `normal-far`, `wide`, `tv`,
 número.
 
 **São sempre dois bytes, e o segundo é o que se esquece.** Cada registro carrega
-o próprio checksum na frente: a soma do payload, mod 256. Gravar só a câmera
-deixa um cartão que o console **carrega** e o jogo **descarta** — na tela isso
-parece "a edição não pegou", e é na verdade um save que o jogo jogou fora. O
+o próprio checksum na frente: a soma do payload, mod 256, e o jogo **confere**.
+Gravar só a câmera dá **ERROR na carga do option file** — medido, ver abaixo. O
 módulo refaz o checksum, e **recusa** gravar sobre um registro que já chegou com
 o checksum errado, em vez de corrigi-lo e esconder o que o estragou.
 
@@ -375,10 +374,28 @@ por cima do cartão do DuckStation — dois bytes, saindo de `ov-far` — e o jo
 subiu com **Zoom** selecionado na tela de opções. É a única evidência que diz que
 a gravação funciona, e ela não vinha dos quatro cartões.
 
-Ela também **fixa a ordem por dentro**: as duas pontas já estavam presas, e o `5`
-cair exatamente no quinto nome não deixa espaço para a lista estar deslocada.
-Sobram quatro sem confirmação direta — 3, 4, 6 e 7 —, e elas estão cercadas dos
-dois lados.
+Em 2026-09-12 a `wide` (3) foi pelo mesmo caminho e o jogo subiu com **Wide**.
+Com `0`, `1`, `2`, `3`, `5` e `8` confirmados, os três que faltam — 4, 6 e 7 —
+estão cada um espremido entre dois vizinhos provados, e a lista não tem como
+estar deslocada.
+
+### O jogo confere o checksum, e reclama alto
+
+Esta página dizia que um checksum velho fazia o jogo **descartar** o registro, e
+que na tela isso "parecia que a edição não pegou". Era dedução, e estava errada.
+
+Em 2026-09-12 um byte só foi trocado no cartão do DuckStation — de `wide` (3)
+para `tv` (4) — deixando a soma no `0xdb` da wide em vez do `0xdc` da tv. O jogo
+não aceitou o registro, não caiu para um default e não ignorou a edição em
+silêncio: pôs **ERROR** na tela ao carregar o option file e parou ali.
+
+**E não encostou no cartão.** O digest depois da recusa era o de antes, byte a
+byte — uma soma velha custa uma carga que falha, e nada mais. Os 12.420 bytes de
+nomes editados no registro 1 nunca correram risco.
+
+É o que transforma o controle `options-stale-checksum` de teórico em medido, e a
+razão de o módulo **recusar** gravar sobre registro que já chegou quebrado: o
+conserto silencioso esconderia exatamente o sintoma que o jogo grita.
 
 ### Os módulos, um a um
 

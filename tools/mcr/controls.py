@@ -153,8 +153,8 @@ CONTROLS = (
             "    card.write(rec.header + 2, bytes([checksum(payload)]))",
             "    pass",
             ("options",),
-            "the camera byte without its record checksum: the console loads "
-            "the card and the game drops the record"),
+            "the camera byte without its record checksum: measured, the "
+            "game puts ERROR on the option file's load screen"),
     Control("options-assumed-icons", "options.py", "data_offset",
             "    return save_start(card) + card_mod.FRAME_BYTES * (1 + icon_frames(card))",
             "    return save_start(card) + card_mod.FRAME_BYTES * 2",

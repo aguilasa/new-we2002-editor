@@ -727,8 +727,10 @@ Cinco coisas que custam tempo se descobertas tarde:
 - **O option file guarda registros com checksum, e o editor de time não sabe
   disso.** O mesmo save `WEW-OPT` tem dois registros `[u16 tamanho][u8
   checksum][payload]`, e a **câmera** é o segundo byte do primeiro. Gravar o
-  valor sem refazer a soma deixa um cartão que o console **carrega** e o jogo
-  **descarta** — na tela parece “a edição não pegou”. Quem cuida disso é o
+  valor sem refazer a soma dá **`ERROR` na carga do option file** — medido em
+  2026-09-12, trocando um byte só: o jogo não cai para default nem ignora a
+  edição em silêncio, e **não encosta no cartão** (digest idêntico depois da
+  recusa). Quem cuida disso é o
   `tools/mcr/options.py`, e os offsets dele são **relativos ao save**, nunca
   absolutos: os 17 destinos do editor de time são endereços de cartão e erram
   por 8.192 bytes se o save mudar de bloco — nos cartões desta máquina ele mora
