@@ -6,9 +6,9 @@ imagens que a medição usou: `roms/we2002-english/we2002-english.bin` e
 cinco `.bin` de `roms/` o declaram, a European Deluxe dos golden tests do
 `newWe2002` entre elas.)
 
-O que este arquivo diz é onde o option file guarda os **nove times secretos** e
-a opção de **escolher os times da Master League no modo exibição**, e como
-reescrever isso sem que o jogo recuse o cartão.
+O que este arquivo diz é onde o option file guarda os **nove times secretos**,
+o **estádio Club House** e a opção de **escolher os times da Master League no
+modo exibição**, e como reescrever isso sem que o jogo recuse o cartão.
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar. A medição
@@ -32,6 +32,7 @@ cadeia declarada `[1, 2]` do save `BISLPM-87056WEW-OPT`.
 | 6 | `0x0040` | Clas. Brazil |
 | 7 | `0x0080` | Cl. Argentina |
 | 8 | `0x0100` | **times da Master League no modo exibição** |
+| 9 | `0x0200` | **estádio Club House** |
 | 10 | `0x0400` | World A.S. |
 
 Os nomes são os que o jogo escreve na tela, e a ordem da tabela é a dos bits,
@@ -40,13 +41,15 @@ não a da tela.
 **Três coisas que a forma do mapa não deixa adivinhar**, e cada uma custou um
 teste:
 
-- **O bit 8 não é time.** É a opção de Master League, no meio da faixa dos
-  times. Foi ele que quebrou a leitura "bits 0..8 são os nove times".
+- **Nem todo bit é time, e os que não são estão no meio.** O bit 8 é a opção
+  de Master League e o bit 9 é um **estádio**, os dois entre os times. Foi o 8
+  que quebrou a leitura "bits 0..8 são os nove times".
 - **O World A.S. não é vizinho do Euro A.S.** Ele está no bit **10**, com o
-  bit 9 vazio entre os dois.
-- **Bit 9 e bits 11..15 não fazem nada observável.** Ligados sozinhos, não
-  acrescentam time nem opção. Não quer dizer que sejam livres — quer dizer que
-  esta medição não os viu fazer nada.
+  Club House no 9 entre os dois.
+- **Bits 11..15 não fazem nada observável.** Ligados sozinhos, não acrescentam
+  time nem opção. Não quer dizer que sejam livres — quer dizer que esta medição
+  não os viu fazer nada, e o bit 9 é a prova de que essa distinção importa
+  (ver abaixo).
 
 ## A verificação: sem recalcular, o jogo **recusa** o cartão
 
@@ -72,7 +75,33 @@ Gravar o campo de flags sem refazer esse byte produz *ERROR* ao carregar o
 option file — medido, e é o primeiro sintoma que aparece.
 
 O campo de flags está **dentro** da faixa dessa soma, então quem escreve ali
-sempre precisa refazê-la. Um segundo byte de soma, `0x02202`, cobre a faixa
+sempre precisa refazê-la.
+
+### A mesma soma, descrita de outro jeito, em `tools/mcr/options.py`
+
+O [`options.py`](../tools/mcr/options.py) chegou a esse byte por outro caminho,
+medindo a câmera: para ele o `0x02102` é o **checksum do registro 0**, e a faixa
+somada é o payload que o próprio registro declara — `0x02103..0x02189`, 134
+bytes, com **`k = 0`**. Conferido sobre o mesmo cartão, as duas descrições dão o
+byte idêntico:
+
+```
+gravado no cartão                                  0xd9
+options.py        soma de 0x02103..0x02189, k=0    0xd9
+este arquivo      soma de 0x02044..0x02186, k=0x8a 0xd9
+```
+
+Não é coincidência, e a explicação está na própria busca: ela devolve **23.875
+faixas** consistentes, e a tabela acima registra o *início mínimo* de cada
+bloco. A do `options.py` é outra dessas faixas — a que o cabeçalho do registro
+nomeia, num formato `[u16 tamanho][u8 checksum][payload]` que se repete no
+`0x02202`. As duas medições são a mesma regra vista de dois lados; a deste
+arquivo é a que a busca acha sem saber do formato, e a do `options.py` é a que
+o formato explica.
+
+Consequência prática: **a sonda do bit 9 foi montada pelo módulo**, sem
+reimplementar soma nenhuma — o campo de flags cai dentro do payload do registro
+0, então a mesma função que conserta a soma ao gravar a câmera a conserta aqui. Um segundo byte de soma, `0x02202`, cobre a faixa
 seguinte, que começa em `0x02186`; o fim dela não foi determinado ao byte, mas
 está medido em **`b >= 0x04e30`** — a segunda soma cobre a área de jogador. Não
 é necessário para escrever os flags.
@@ -125,6 +154,7 @@ refeito. O jogo carrega, e o que aparece na tela é a resposta.
 | `u1` | `00 30` | 12,13 | nada |
 | `u2` | `00 c0` | 14,15 | nada |
 | `mapa-completo` | `ff 05` | 0..8, 10 | **os nove times e a opção de Master League, e nada além** |
+| `sonda-bit9` | `00 02` | 9 | **o estádio Club House** — 2026-09-12, na tela de estádios |
 
 A última é a confirmação ponta a ponta: os dez bits da tabela ligados de uma
 vez devolvem exatamente as dez opções da tabela. É ela que tira o
@@ -151,6 +181,29 @@ das quatro primeiras, o que daria assinatura `0000` — índice 0, já ocupado p
 Euro A.S. medido direto. Sem essa contradição visível, o mapa teria sido lido
 como "bits 0..8 são os nove times" e estaria errado em duas linhas.
 
+### O bit 9: o método tinha a resposta, faltava olhar
+
+O bit 9 ficou dois dias como "nada observável, causa desconhecida", e a
+causa do buraco **não foi o método** — foi a escolha do observável.
+
+O teste em grupo põe o bit `i` na sonda `t` quando o bit `t` de `i` está
+ligado. `9 = 1001b`, então o bit 9 entrou em **`t0` e `t3`**, e as duas
+corridas aconteceram. A assinatura `1001` estava lá para ser lida; ninguém a
+leu porque a coluna "O que apareceu" registra **a tela de seleção de times**, e
+um estádio não aparece nela. As duas linhas dizem "England, Nether, Germany,
+Argentina" e "só a opção de Master League" — e as duas estavam certas e
+incompletas ao mesmo tempo.
+
+Em 2026-09-12 a sonda isolada `00 02` foi montada sobre o cartão limpo, cujo
+campo estava em `0x0000`, e o **Club House** apareceu na tela de estádios. Dois
+bytes: `0x02185` e a soma.
+
+**A lição é sobre o custo de um observável a menos, não sobre o desenho do
+teste.** Quatro boots teriam bastado para os onze bits; foram nove, e um
+décimo dois dias depois, porque a pergunta feita à tela era "que times
+apareceram" e não "o que mudou". Vale para os bits 11..15, que continuam em
+aberto pela mesma razão possível: podem estar ligando algo que ninguém olhou.
+
 ### Reproduzir
 
 ```sh
@@ -162,6 +215,19 @@ d[0x02184], d[0x02185] = 0xff, 0x05        # os dez bits do mapa
 d[C] = 0
 d[C] = (sum(d[i] for i in range(A,B)) + 0x8a) & 0xff
 open("work/sonda.mcr","wb").write(bytes(d))
+EOF
+
+# ou, pelo modulo, que ja sabe refazer a soma desse registro:
+python3 - <<'EOF'
+import sys; sys.path.insert(0, "tools/mcr")
+import options, layout
+from card import Card
+c = Card.from_file("mcr/we2002-english-first-boot.mcr")
+rec = options.record(c, layout.CAMERA.record)
+c.write(0x02184, (0x0200).to_bytes(2, "little"))          # so o bit 9
+c.write(rec.header + 2,
+        bytes([options.checksum(bytes(c.data[rec.payload:rec.payload + rec.size]))]))
+open("work/sonda.mcr", "wb").write(c.to_bytes())
 EOF
 
 # guardar o cartao vivo antes de trocar, e por o da sonda no lugar
@@ -223,7 +289,10 @@ EOF
 
 ## O que fica em aberto
 
-- **Bit 9 e bits 11..15**: nada observável, causa desconhecida.
+- **Bits 11..15**: nada observável, causa desconhecida. O bit 9 esteve nesta
+  linha até 2026-09-12 e saiu dela quando se olhou **outra tela** — o que é
+  motivo para tratar estes cinco como "não procurados o bastante", e não como
+  "vazios".
 - **O fim da faixa do `0x02202`**: indeterminado ao byte com os cartões
   disponíveis; medido `b >= 0x04e30`.
 - **Os 15 bytes de `0x02035`**: não identificados; zero é aceito.
