@@ -141,33 +141,11 @@ nenhuma de conteúdo, a faixa varia.
 
 ## O mapa do registro 0
 
-A câmera não está sozinha. O registro 0 tem **134 bytes** e é onde caem todos os
-campos que este repositório mapeou até agora. Nos **trinta cartões** medidos,
-**treze** offsets variam: onze já têm nome, dois não.
-
-| offset | addr (save no bloco 1) | o que é | onde está descrito |
-|---:|---|---|---|
-| 0 | `0x02103` | `00` em todos os cartões | — |
-| **1** | `0x02104` | **a câmera** | este arquivo |
-| 2..101 | `0x02105..0x02168` | 50 × `u16` LE, constantes em todos os cartões; têm cara de máscaras de pad | não identificado |
-| **106..107** | `0x0216D..6E` | **a velocidade do jogo**, `u16` | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
-| 109 | `0x02170` | varia: `0x00`, `0x10` | não identificado |
-| **110..112** | `0x02171..73` | **os três volumes**: sound, BGM, narração | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
-| **113** | `0x02174` | **narração** ON/OFF | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
-| **114** | `0x02175` | **áudio** estéreo/mono | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
-| **115** | `0x02176` | **as cinco opções de tela** | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) |
-| 126 | `0x02181` | varia: `0x00`, `0x02` | não identificado |
-| **129..130** | `0x02184..85` | **os desbloqueios**, 16 bits | [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) |
-
-Os outros **121 bytes** são iguais nos trinta cartões — o que não quer dizer que
-sejam fixos, e sim que nenhuma sonda os moveu ainda. O offset 107 é a lembrança
-de que isso muda: ele ficou constante até uma sonda mudar a velocidade para zero
-barras, que é o único valor medido em que o `u16` transborda para o byte de
-cima.
-
-**Os offsets 106 a 115 são um bloco contíguo de opções** — velocidade, os três
-volumes, narração, áudio e as cinco flags de tela —, e no meio dele o **109**
-continua sem nome, cercado dos dois lados por campos identificados.
+A câmera não está sozinha: o registro 0 tem 134 bytes, e **treze** offsets
+variam nos trinta cartões medidos — onze com nome, dois sem. O mapa byte a
+byte, com os outros campos e o que continua obscuro, é o
+[`/docs/MCR-OPTION-FILE.md`](/docs/MCR-OPTION-FILE.md#3-o-registro-0--as-opções),
+que consolida os três arquivos de medição.
 
 ## Como a medição foi feita
 

@@ -14,7 +14,7 @@ como reescrevê-las sem que o jogo recuse o cartão:
 
 Tudo isso vive no **registro 0** do save, em onze bytes entre os offsets 106 e
 115. O mapa consolidado do registro está em
-[`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md#o-mapa-do-registro-0).
+[`/docs/MCR-OPTION-FILE.md`](/docs/MCR-OPTION-FILE.md#3-o-registro-0--as-opções).
 
 É o papel que [`../wte/re/mcr.md`](../wte/re/mcr.md) faz para os 17 destinos do
 editor do Obocaman: **fonte de endereços**, para a ferramenta citar.
@@ -275,7 +275,7 @@ python3 tools/mcr/options.py work/sonda.mcr     # o registro, e se a soma bate
   é saber o que o jogo faz com 488. A forma sugere intervalo; isso é conjectura.
 - **Os offsets 109 e 126** do registro 0: variam entre os cartões e não foram
   identificados. O mapa do registro está em
-  [`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md#o-mapa-do-registro-0).
+  [`/docs/MCR-OPTION-FILE.md`](/docs/MCR-OPTION-FILE.md#3-o-registro-0--as-opções).
 - **Marcar e desmarcar pela ferramenta**: o `tools/mcr/options.py` lê e grava a
   câmera, e ainda não tem API para as cinco nem para a velocidade. A sonda acima
   usa as peças dele (`record`, `checksum`) diretamente.

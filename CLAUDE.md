@@ -697,9 +697,11 @@ O plano é [docs/PLAN-MCR-PY.md](docs/PLAN-MCR-PY.md); o ciclo de tasks é
 [docs/tasks/port-mcr/](docs/tasks/port-mcr/progresso.md), com prefixo
 `MCR-TASK-` e pool `CORR-MCR-`, e roda por `/executar port-mcr`.
 
-**Três mapas do option file**, que são fonte de endereços do jeito que
-`wte/re/mcr.md` é para os 17 destinos do editor de time. Os três descrevem o
-**mesmo registro de 134 bytes**, e o mapa consolidado dele mora no primeiro:
+**O mapa do option file** é o [docs/MCR-OPTION-FILE.md](docs/MCR-OPTION-FILE.md):
+estrutura do save, o que cada byte conhecido significa, e o que continua
+obscuro. Os três abaixo são a **medição** de cada campo, com as corridas que a
+sustentam — fonte de endereços do jeito que `wte/re/mcr.md` é para os 17
+destinos do editor de time:
 
 | arquivo | o que mapeia | onde cai |
 |---|---|---|

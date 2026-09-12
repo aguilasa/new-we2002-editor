@@ -293,11 +293,17 @@ EOF
   linha até 2026-09-12 e saiu dela quando se olhou **outra tela** — o que é
   motivo para tratar estes cinco como "não procurados o bastante", e não como
   "vazios".
-- **O fim da faixa do `0x02202`**: indeterminado ao byte com os cartões
-  disponíveis; medido `b >= 0x04e30`.
+- ~~**O fim da faixa do `0x02202`**~~ — **resolvido em 2026-09-12**: o
+  `0x02202` é o **checksum do registro 1** do save, e o header do registro
+  declara o fim, `0x05287`. A busca aqui achou 27.250 faixas consistentes e
+  registrou a mínima; o formato explica qual delas é. Ver
+  [`/docs/MCR-OPTION-FILE.md`](/docs/MCR-OPTION-FILE.md#2-o-formato-registros-com-soma-própria).
 - **Os 15 bytes de `0x02035`**: não identificados; zero é aceito.
 - **Se a mesma verificação cobre a área de jogador**, que é onde o
   `tools/mcr/` e o editor do Obocaman escrevem. É a pergunta que a
   [MCR-TASK-13](/docs/tasks/port-mcr/13-oraculo-e-veredito.md) deixou como
   veredito do console, e agora é testável do mesmo jeito: gravar pela
-  ferramenta e abrir no jogo.
+  ferramenta e abrir no jogo. **Há evidência a favor**, medida em 2026-09-12:
+  os três destinos que caem dentro do save ficam **depois** do fim do registro
+  1, fora das duas somas, e os outros catorze caem fora do save inteiro. Isso
+  não é prova — pode haver verificação que esta medição não achou.
