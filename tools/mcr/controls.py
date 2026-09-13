@@ -313,8 +313,46 @@ def _sandbox(root: str, tmp: str) -> str:
         clone = os.path.join(root, "work", "easy-mcr")
         if os.path.isdir(clone):
             os.makedirs(os.path.join(tmp, "work"), exist_ok=True)
-            os.symlink(clone, os.path.join(tmp, "work", "easy-mcr"))
+            _link(clone, os.path.join(tmp, "work", "easy-mcr"))
     return os.path.join(tmp, "tools", "mcr")
+
+
+# Said once, not per control: 25 sandboxes would print it 25 times.
+_LINK_COMPLAINT: str | None = None
+
+
+def _link(target: str, link: str) -> None:
+    """Puts `target` inside the sandbox, by whatever the platform allows.
+
+    THE CLONE IS 585 MiB, so copying it is not an option -- the sandbox is
+    rebuilt once per control. A symlink is the cheap way and the one that works
+    everywhere except here: on Windows `os.symlink` needs SeCreateSymbolicLink,
+    which an ordinary account does not hold unless Developer Mode is on, and it
+    raises WinError 1314. A JUNCTION does the same job for reading a directory
+    and needs no privilege at all, so that is the fallback.
+
+    If neither works the sandbox goes without the clone, and that is SAID, not
+    swallowed: the checks that need it then skip, and this module's whole point
+    is that a control which skips reports "0 failure(s)" and reads as approval.
+    """
+    global _LINK_COMPLAINT
+    try:
+        os.symlink(target, link, target_is_directory=True)
+        return
+    except OSError as e:
+        why = f"symlink: {e}"
+    if os.name == "nt":
+        try:
+            import _winapi
+            _winapi.CreateJunction(target, link)
+            return
+        except Exception as e:                        # noqa: BLE001
+            why = f"{why}; junction: {e}"
+    if _LINK_COMPLAINT is None:
+        _LINK_COMPLAINT = why
+        print(f"  note: the sandbox has no {os.path.basename(target)} "
+              f"({why}) -- the checks that read it will SKIP, so the controls "
+              f"that depend on them are weaker than they look")
 
 
 @dataclasses.dataclass
