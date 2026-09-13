@@ -49,6 +49,7 @@ param(
         'pes2', 'pes2-copy', 'pes2-kill', 'pes2-status',
         'we2002-play', 'we2002-play-fresh',
         'we2002-ptbr-play', 'we2002-ptbr-play-fresh',
+        'we2002-japao-play', 'we2002-japao-play-fresh',
         'we2002-cards', 'we2002-card-snap', 'we2002-card-list',
         # Recusados com explicacao -- ver Invoke-Recusa. Eles estao NESTA
         # lista de proposito: quem vem do Makefile digita o nome que conhece,
@@ -170,7 +171,15 @@ $CARD_DIR = Join-Path $GAMES_WORK 'cards'
 # onde `New-CueDoJogo` o le. A `we2002-pt-br.bin` nao tem `.cue` vizinho,
 # entao e ela que exercita o ramo que SINTETIZA um.
 #
-# **Eram cinco ate 2026-09-11.** A japonesa, o `ptbr-remaster.bin` e a
+# A **japonesa** voltou em 2026-09-13, agora como `we-2002-original-japao`.
+# Ela e byte a byte a mesma coisa que o `japanese-shift-jis.bin` -- sha256
+# E853EB14... nos dois --, o que muda e so o nome. O dump de origem vem com
+# um `.cue` de NOVE arquivos e traz so a trilha 1, entao aquele cue nomeia
+# oito `.bin` que nao existem; o que esta em `roms/` foi reescrito para uma
+# trilha de dados so, que e a forma que o `ptbr-remaster.cue` tem e a que o
+# `New-CueDoJogo` sintetiza. O jogo boota; o CD-DA fica de fora.
+#
+# **Eram cinco ate 2026-09-11.** O `ptbr-remaster.bin` e a
 # `golden-european-deluxe.bin` sairam junto com as imagens, a pedido do
 # usuario: elas continuam em `roms/` DO REPOSITORIO, que e onde os golden
 # do `newWe2002` as procuram, e o que foi apagado foi a copia do disco de
@@ -179,6 +188,7 @@ $CARD_DIR = Join-Path $GAMES_WORK 'cards'
 $JOGOS = @{
     'english' = 'we2002\we2002-english\we2002-english.bin'
     'ptbr'    = 'we2002\we2002-pt-br.bin'
+    'japao'   = 'we2002\we-2002-original-japao.bin'
 }
 
 # **Capturado aqui, no escopo do script.** Dentro de uma funcao,
@@ -536,8 +546,9 @@ function Invoke-Help {
     Write-Host '  we2002-play        roda a imagem sobre o option file que houver'
     Write-Host '  we2002-play-fresh  idem, comecando com o option file zerado'
     Write-Host '                     (o default e a we2002-english.bin)'
-    Write-Host '  we2002-ptbr-play   e o par -fresh: a we2002-pt-br.bin.'
-    Write-Host '                     Mesmo option file -- as duas bootam'
+    Write-Host '  we2002-ptbr-play   e o par -fresh: a we2002-pt-br.bin'
+    Write-Host '  we2002-japao-play  e o par -fresh: a japonesa original'
+    Write-Host '                     Mesmo option file -- as tres bootam'
     Write-Host '                     SLPM_870.56, entao trocar de imagem nao'
     Write-Host '                     troca de cartao.'
     Write-Host '                     Outra imagem qualquer: -GameImage <bin>'
@@ -948,6 +959,8 @@ switch ($Alvo) {
     'we2002-play-fresh'      { Invoke-We2002PlayFresh }
     'we2002-ptbr-play'       { Set-Jogo 'ptbr'; Invoke-We2002Play }
     'we2002-ptbr-play-fresh' { Set-Jogo 'ptbr'; Invoke-We2002PlayFresh }
+    'we2002-japao-play'       { Set-Jogo 'japao'; Invoke-We2002Play }
+    'we2002-japao-play-fresh' { Set-Jogo 'japao'; Invoke-We2002PlayFresh }
     'we2002-cards'           { Invoke-We2002Cards }
     'we2002-card-snap'       { Invoke-We2002CardSnap }
     'we2002-card-list'       { Invoke-We2002CardList }
