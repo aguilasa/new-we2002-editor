@@ -141,8 +141,8 @@ nenhuma de conteúdo, a faixa varia.
 
 ## O mapa do registro 0
 
-A câmera não está sozinha: o registro 0 tem 134 bytes, e **treze** offsets
-variam nos trinta cartões medidos — onze com nome, dois sem. O mapa byte a
+A câmera não está sozinha: o registro 0 tem 134 bytes, e **dezesseis** offsets
+variam nos 59 cartões medidos — todos com nome desde 2026-09-13. O mapa byte a
 byte, com os outros campos e o que continua obscuro, é o
 [`/docs/MCR-OPTION-FILE.md`](/docs/MCR-OPTION-FILE.md#3-o-registro-0--as-opções),
 que consolida os três arquivos de medição.

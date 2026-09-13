@@ -707,6 +707,7 @@ destinos do editor de time:
 |---|---|---|
 | [docs/MCR-CAMERA.md](docs/MCR-CAMERA.md) | a **câmera**, uma de nove vistas | offset 1 do registro 0 |
 | [docs/MCR-OPCOES-JOGO.md](docs/MCR-OPCOES-JOGO.md) | as cinco de tela, a velocidade, e as cinco de som | offsets 106-115 do registro 0 |
+| [docs/MCR-OPCOES-PARTIDA.md](docs/MCR-OPCOES-PARTIDA.md) | as sete da tela que antecede a partida | offsets 109 e 123-126 |
 | [docs/MCR-DESBLOQUEIOS.md](docs/MCR-DESBLOQUEIOS.md) | os nove times secretos, o Club House e a opção de ML | offsets 129-130, 16 bits |
 
 **Offset, nunca endereço absoluto.** O save mora em qualquer bloco — medido: o

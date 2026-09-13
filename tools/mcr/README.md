@@ -25,7 +25,9 @@ se usa quando algo dá errado e se quer ver a ferramenta sozinha.
   estrutura, cada byte conhecido, e o que continua obscuro. A medição de cada
   campo fica em [`docs/MCR-CAMERA.md`](../../docs/MCR-CAMERA.md) (a câmera),
   [`docs/MCR-OPCOES-JOGO.md`](../../docs/MCR-OPCOES-JOGO.md) (as cinco de
-  tela, a velocidade e as cinco de som) e
+  tela, a velocidade e as cinco de som),
+  [`docs/MCR-OPCOES-PARTIDA.md`](../../docs/MCR-OPCOES-PARTIDA.md) (as sete da
+  tela que antecede a partida) e
   [`docs/MCR-DESBLOQUEIOS.md`](../../docs/MCR-DESBLOQUEIOS.md) (times secretos,
   Club House, times de ML no modo exibição). São **fonte de endereços**, como o
   `wte/re/mcr.md` é para o `layout.py`.

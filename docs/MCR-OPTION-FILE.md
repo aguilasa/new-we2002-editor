@@ -1,7 +1,7 @@
 # O option file do WE2002, mapeado
 
-**Medido entre 2026-09-10 e 2026-09-12**, sobre a release japonesa
-`SLPM-87056`, em **trinta cartões** — a maioria gravada pelo jogo rodando sob o
+**Medido entre 2026-09-10 e 2026-09-13**, sobre a release japonesa
+`SLPM-87056`, em **59 cartões** — a maioria gravada pelo jogo rodando sob o
 fork do DuckStation, o resto montado por sonda e confirmado na tela.
 
 Este é o **mapa consolidado**: a estrutura do save, o que cada byte conhecido
@@ -12,6 +12,7 @@ que a sustentam, fica nos três arquivos ao lado:
 |---|---|
 | [`/docs/MCR-CAMERA.md`](/docs/MCR-CAMERA.md) | a câmera, e a série de testes que provou a gravação nos dois sentidos |
 | [`/docs/MCR-OPCOES-JOGO.md`](/docs/MCR-OPCOES-JOGO.md) | as cinco de tela, a velocidade e as cinco de som |
+| [`/docs/MCR-OPCOES-PARTIDA.md`](/docs/MCR-OPCOES-PARTIDA.md) | as sete da tela que antecede a partida — hora, clima, duração, nível, prorrogação, gol de ouro e pênaltis |
 | [`/docs/MCR-DESBLOQUEIOS.md`](/docs/MCR-DESBLOQUEIOS.md) | os times secretos, o Club House e os times de ML no modo exibição |
 
 Quem lê e grava é o [`../tools/mcr/options.py`](../tools/mcr/options.py) — hoje
@@ -103,9 +104,9 @@ Três coisas que essa medição deu de brinde:
 
 ## 3. O registro 0 — as opções
 
-**134 bytes.** Nos trinta cartões, **treze** offsets variam: onze com nome, dois
-sem. Os outros 121 são iguais em todos — o que não quer dizer que sejam fixos, e
-sim que nenhuma sonda os moveu.
+**134 bytes.** Nos 59 cartões, **dezesseis** offsets variam, e desde 2026-09-13
+**todos têm nome**. Os outros 118 são iguais em todos — o que não quer dizer que
+sejam fixos, e sim que nenhuma sonda os moveu.
 
 | offset | addr | campo | valores |
 |---:|---|---|---|
@@ -114,21 +115,26 @@ sim que nenhuma sonda os moveu.
 | 2..105 | `0x02105..0x0216C` | — | 50 × `u16` LE, constantes; têm cara de máscaras de pad |
 | **106..107** | `0x0216D..6E` | **velocidade do jogo** | `u16` = `552 − 8 × barras` |
 | 108 | `0x0216F` | — | `00` em todos |
-| **109** | `0x02170` | ❓ **obscuro** | `0x00` ou `0x10` |
+| **109** | `0x02170` | **Time**, e os bits de Weather | [`/docs/MCR-OPCOES-PARTIDA.md`](/docs/MCR-OPCOES-PARTIDA.md) |
 | **110** | `0x02171` | **Sound Volume** | 0..31 |
 | **111** | `0x02172` | **BGM Volume** | 0..31 |
 | **112** | `0x02173` | **Commentary Volume** | 0..31 |
 | **113** | `0x02174` | **Commentary** | `1` = ON, `0` = OFF |
 | **114** | `0x02175` | **Audio** | `0` = STEREO, `1` = MONO |
 | **115** | `0x02176` | **opções de tela** | 5 campos num byte, abaixo |
-| 116..125 | `0x02177..0x02180` | — | `c0 00 f0 00 00 00 01 01 01 07` |
-| **126** | `0x02181` | ❓ **obscuro** | `0x00` ou `0x02` |
+| 116..122 | `0x02177..0x0217D` | — | `c0 00 f0 00 00 00 01` |
+| **123** | `0x0217E` | **Match Length** | `0..5` → 5..30 min |
+| **124** | `0x0217F` | **Level** | `0` Easy, `1` Normal, `2` Hard |
+| **125** | `0x02180` | **Extra Time / Golden Goal / Penalty** | três bits |
+| **126** | `0x02181` | **Weather** | `0` Short, `1` Long, `2` Random |
 | 127..128 | `0x02182..83` | — | `00 00` |
 | **129..130** | `0x02184..85` | **desbloqueios** | 16 bits, abaixo |
 | 131..133 | `0x02186..88` | — | `00 00 00` |
 
-**Os offsets 106 a 115 são um bloco contíguo de opções**, e o **109** está sem
-nome no meio dele, cercado dos dois lados.
+**Os offsets 106 a 115 e 123 a 126 são dois blocos de opções**, com sete bytes
+de constantes entre eles. O `109`, que ficou dois dias como obscuro no meio do
+primeiro bloco, é o Time — caiu quando a série da tela de partida passou por
+ele.
 
 ### 3.1 A câmera — offset 1
 
@@ -183,7 +189,30 @@ jogo escreve `14` por cima.
 O limpo vale `0x3E`. **A ordem do valor do radar não é a da tela** — a tela
 mostra *DOWN, OFF, UP*.
 
-### 3.5 Os desbloqueios — offsets 129..130
+### 3.5 As opções de partida — offsets 109 e 123..126
+
+As sete da tela que antecede cada partida, gravadas **ao fim** dela.
+
+| offset | campo | valores |
+|---:|---|---|
+| 109 | **Time** | bit 4 = Random; senão bit 0: `0` Day, `1` Night |
+| 109 | (Weather) | bit 2: `0` Sunny, `1` Rainny · bit 3: `0` Short, `1` Long |
+| 123 | **Match Length** | `0..5` → 5, 10, 15, 20, 25, 30 min |
+| 124 | **Level** | `0` Easy, `1` Normal, `2` Hard |
+| 125 | **Golden Goal** · **Extra Time** · **Penalty Kicks** | bits 0, 1, 2; `1` = Yes |
+| 126 | **Weather** | `0` Short, `1` Long, `2` Random |
+
+**Time e Weather têm cada um o seu Random, e em lugares diferentes** — o do Time
+é o bit 4 do `109`, o do Weather é `126 == 2`. O jogo consegue deixá-los em
+desacordo, e o resultado na tela é `Time: Random` com `Weather: Short/Sunny`.
+Detalhe e o cartão que o mostra em
+[`/docs/MCR-OPCOES-PARTIDA.md`](/docs/MCR-OPCOES-PARTIDA.md).
+
+Desligar Extra Time arrasta o Golden Goal, então os bits 0 e 1 do `125` só
+aparecem como `11` ou `00` em cartão do jogo; separá-los exigiu escrever `0x06`
+e olhar a tela.
+
+### 3.6 Os desbloqueios — offsets 129..130
 
 `u16` little-endian, um bit por item.
 
@@ -262,22 +291,28 @@ Em ordem do que parece mais alcançável:
 
 | o quê | onde | o que se sabe |
 |---|---|---|
-| **offset 109** | `0x02170` | dois valores, `0x00` e `0x10`. Está **dentro** do bloco de opções, entre a velocidade e os volumes — se houver uma opção nesse menu ainda não mexida, é o candidato |
-| **offset 126** | `0x02181` | dois valores, `0x00` e `0x02` |
 | **bits 6–7** das opções de tela | `0x02176` | `00` em todos |
+| **bit 1** do offset 109 | `0x02170` | `0` em todos os 59; o Time cabe no bit 0 e no 4 |
+| **bits 3–7** dos offsets 123, 125 e 126 | — | `0` em todos |
 | **bits 11–15** dos desbloqueios | `0x02185` | nada observável — mas ver a ressalva abaixo |
 | **radar `3`** | `0x02176` | o quarto valor dos dois bits não existe na tela |
 | **velocidade fora de `0..16`** | `0x0216D` | nada diz o que o jogo faz abaixo de 424 ou acima de 552 |
-| **os 121 bytes constantes** | registro 0 | iguais em trinta cartões; os 104 de `0x02105` têm cara de máscaras de pad |
+| **os 118 bytes constantes** | registro 0 | iguais nos 59 cartões; os 104 de `0x02105` têm cara de máscaras de pad |
 | **o registro 1** | `0x02203..0x05287` | 12.420 bytes; sabe-se que são nomes, e nada da estrutura |
 | **a região `0x05287..0x06000`** | — | 2.447 bytes não-zero, sem formato de registro; contém a área de jogador |
 | **o padding do título** | `0x02034` | 15 bytes; zero é aceito pelo jogo |
 
-> **"Nada observável" não quer dizer "vazio".** O bit 9 dos desbloqueios ficou
-> dois dias nesta lista e saiu dela quando se olhou **outra tela** — ele é o
-> Club House, e o teste em grupo que o mapeou já tinha a resposta: a coluna de
-> observação registrava a tela de seleção de times, e um estádio não aparece
-> nela. Todo item acima deve ser lido como *não procurado o bastante*.
+> **"Nada observável" não quer dizer "vazio", e a lista encolhe.** Em
+> 2026-09-13 os offsets **109 e 126** saíram daqui — eram o Time e o Weather da
+> tela de partida, e caíram na primeira série que passou por aquele menu.
+> Antes deles, o bit 9 dos desbloqueios ficou dois dias nesta lista e saiu
+> quando se olhou **outra tela**: é o Club House, e o teste em grupo que o
+> mapeou já tinha a resposta — a coluna de observação registrava a tela de
+> seleção de times, e um estádio não aparece nela.
+>
+> **Nenhum offset que varia continua sem nome.** Todo item que sobrou acima é
+> bit ou faixa que nunca foi visto mudar, e deve ser lido como *não procurado o
+> bastante*.
 
 ### A pergunta em aberto que mais importa
 
