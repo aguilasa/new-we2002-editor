@@ -180,36 +180,48 @@ endif()
 # The appearance viewer (docs/PLAN-LOOKS-PY.md) is the sixth project: Python 3
 # in tools/looks/, PySide6 in a venv of its own, no build shared with anything.
 #
-# This is its image gate, and it is registered here rather than in LOOKS-TASK-19
-# because the cycle profile promised it from LOOKS-TASK-05 and a promised target
-# that does not exist is worse than a missing one: `ctest -R looks` answered
-# "No tests were found!!!" and exited ZERO, which reads exactly like green
-# (CORR-LOOKS-012). The 19 closes the count; it no longer creates all three.
-#
-# It re-derives, against the real disc, what phase 1 measured: MODEL.BIN's 106
-# sections from 1816 and EDT_MOD.BIN's 20 from 216 -- 216 derived from the
-# pointer lists, not typed -- the two models of eleven with their mirrored
-# pairs, and that neither list is in file order. Its first read is a
-# Japanese-only file through the two-disc guard, because geometry is identical
-# on both discs: without that read, pointing WE2002_LOOKS_IMAGE at the English
-# translation would pass in silence, and that is the error this cycle exists to
-# make impossible. Without the variable it skips with 77 and names it.
-# The mandatory gate. It needs NOTHING -- no image, no venv, no display -- and
-# it must never skip its way to green: it runs every module's self-check, sweeps
-# the three design rules of section 3.3, and plants every negative control,
-# demanding each one go red. A guard that has never gone red is decoration.
-#
-# It drops WE2002_LOOKS_IMAGE from its own environment on purpose. With the
-# variable set a module could take a path that does not exist on a clean
-# machine, and the gate would be green here and red there.
-add_test(NAME looks_selftest
-    COMMAND ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/selftest.py --quiet)
-set_tests_properties(looks_selftest PROPERTIES TIMEOUT 300)
+# Both targets sit inside if(Python3_FOUND) like the other eight Python tests
+# above. They did not, and the one that suffers is the mandatory gate: with no
+# Python found, ${Python3_EXECUTABLE} expands to nothing, the command becomes
+# the bare .py path, and looks_selftest reports FAILED -- sending whoever reads
+# it into tools/looks/ to find a defect that is really a missing interpreter.
+# Its eight siblings simply do not appear, which is the right answer
+# (CORR-LOOKS-016).
+if(Python3_FOUND)
+    # The mandatory gate. It needs NOTHING -- no image, no venv, no display --
+    # and it must never skip its way to green: it runs every module's
+    # self-check, sweeps the three design rules of section 3.3, and plants
+    # every negative control, demanding each one go red. A guard that has never
+    # gone red is decoration.
+    #
+    # It drops WE2002_LOOKS_IMAGE from its own environment on purpose. With the
+    # variable set a module could take a path that does not exist on a clean
+    # machine, and the gate would be green here and red there.
+    add_test(NAME looks_selftest
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/selftest.py --quiet)
+    set_tests_properties(looks_selftest PROPERTIES TIMEOUT 300)
 
-add_test(NAME looks_image
-    COMMAND ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/modelfile.py --check-image)
-set_tests_properties(looks_image PROPERTIES
-    SKIP_RETURN_CODE 77
-    TIMEOUT 300)
+    # The image gate, registered in CORR-LOOKS-012 rather than in
+    # LOOKS-TASK-19, because the cycle profile promised it from LOOKS-TASK-05
+    # and a promised target that does not exist is worse than a missing one:
+    # `ctest -R looks` answered "No tests were found!!!" and exited ZERO, which
+    # reads exactly like green. The 19 closes the count; it no longer creates
+    # all three.
+    #
+    # It re-derives, against the real disc, what phase 1 measured: MODEL.BIN's
+    # 106 sections from 1816 and EDT_MOD.BIN's 20 from 216 -- 216 derived from
+    # the pointer lists, not typed -- the two models of eleven with their
+    # mirrored pairs, and that neither list is in file order. Its first read is
+    # a Japanese-only file through the two-disc guard, because geometry is
+    # identical on both discs: without that read, pointing WE2002_LOOKS_IMAGE
+    # at the English translation would pass in silence, and that is the error
+    # this cycle exists to make impossible. Without the variable it skips with
+    # 77 and names it.
+    add_test(NAME looks_image
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/modelfile.py --check-image)
+    set_tests_properties(looks_image PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 300)
+endif()
