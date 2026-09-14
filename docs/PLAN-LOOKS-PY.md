@@ -313,6 +313,53 @@ não acha nada; como `82 72 82 8B 82 89 82 8E`, acha em um lugar só.
 É o mesmo codec que o `KanjiToAscii` do `we2002_core` trata, e a mesma
 armadilha que o port do `.mcr` registra para o nome de 10 bytes.
 
+### 1.11 Como voltar a essa tela — porque o emulador não fica de pé
+
+As medições de RAM da §1.3 e da §1.6 foram tiradas com o jogo parado na tela
+`LOOKS SET`. **O emulador foi encerrado em 2026-09-14**, e nada do que está
+escrito acima depende dele para continuar valendo — mas reconferir depende, e
+por isso a receita fica registrada aqui.
+
+**Subir o emulador.** É o fork com servidor MCP, o mesmo do projeto de PES2;
+nenhum dos dois DuckStation está no `PATH`:
+
+```sh
+python tools/pes2/fork.py status          # diz se já há um de pé
+python tools/pes2/fork.py launch "C:/games/ps1/work/we2002-japao.cue"
+python tools/pes2/fork.py recipe          # como obter o binário, se faltar
+```
+
+**Qual disco.** As cópias de trabalho ficam em `C:\games\ps1\work\`, cada uma
+com um `.src` ao lado dizendo de onde veio:
+
+| cópia | origem |
+|---|---|
+| `we2002-japao.cue` | `…\roms\we2002\we-2002-original-japao.bin` |
+| `we2002-english.cue` | `…\roms\we2002\we2002-english\we2002-english.bin` |
+
+Esta sessão mediu no `we2002-english.cue`; pela §1.3 o patch não altera os dois
+arquivos de modelo, então o **japonês é o disco certo daqui em diante**, e é o
+que casa com a imagem de referência do plano.
+
+**A tela.** `EDIT` → `NEW PLAYER` → `LOOKS SET`. A tela de edição de jogador
+tem o título japonês `選手エディット` e sete itens à esquerda; `LOOKS SET` é o
+quarto, com o rodapé `Visual`.
+
+**Duas coisas medidas sobre o controle**, e as duas custaram tentativa:
+
+- **Círculo confirma** (não Cruz — é jogo japonês). E precisa de duração: com
+  `duration_frames: 3` o jogo **não registra**, e a tela fica igual, o que
+  parece botão errado. Com **8** entra.
+- **Cruz abre `Exit?`** com `CANCEL` já selecionado. Não é destrutivo, mas é um
+  desvio: confirmar ali com Círculo volta para onde estava.
+
+**O que ainda não é reproduzível, e é honesto dizer:** a sequência exata de
+botões da tela de título até o menu `EDIT` **não foi registrada** — esta sessão
+pegou o jogo já dentro dele. Escrever essa rota é tarefa da Fase 2, no
+`oracle.py`, no mesmo molde das rotas nomeadas do
+`tools/pes2/mcp_drive.py` (`route_title`, `route_main_menu`, `route_edit`).
+Enquanto ela não existir, chegar à tela é trabalho manual.
+
 ---
 
 ## 2. Ressalva legal e linhagem
