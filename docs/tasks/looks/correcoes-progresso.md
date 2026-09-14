@@ -33,6 +33,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-015](/docs/tasks/looks/CORR-LOOKS-015.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | O gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele sai 0 | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-016](/docs/tasks/looks/CORR-LOOKS-016.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | Os dois alvos de `looks` ficaram fora do `if(Python3_FOUND)` que guarda os outros oito | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | Sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | Média | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-018](/docs/tasks/looks/CORR-LOOKS-018.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | A palavra de página declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits | Alta | [ ] pendente | — |
+| [CORR-LOOKS-019](/docs/tasks/looks/CORR-LOOKS-019.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | O `--tmds` promete dizer se algum campo move um TMD e não pergunta: a metade negativa do veredito não sai de comando | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -64,6 +66,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-015 — `ctest -R looks` não acha os alvos em build nenhum, e sai 0
 - [x] CORR-LOOKS-016 — os dois alvos de `looks` estão fora da guarda de Python
 - [x] CORR-LOOKS-017 — o quarto pré-requisito do `--check-live` não tem caminho de skip
+- [ ] CORR-LOOKS-018 — 1.039 de 2.841 primitivas amostram em CLUT de 8 bits, e o plano só diz 4
+- [ ] CORR-LOOKS-019 — nenhum comando cruza o resíduo do `--fields` com o mapa de TMDs
 
 ## Detalhes por correção
 
@@ -322,3 +326,42 @@ e o ciclo arquivado, o dele em
   convertendo o `RuntimeError` em skip 77; e listar os pré-requisitos num só
   lugar, para o quinto não repetir a história
 
+### CORR-LOOKS-018
+
+- **Arquivo com problema:** `tools/looks/section.py` (`Primitive.tpage_vram`),
+  `docs/PLAN-LOOKS-PY.md` §1.6 e §1.7
+- **Sintoma:** a releitura da primitiva registrou **onde** a página de textura
+  está e não **como** ela é amostrada. Os bits 7-8 do `tpage` são a
+  profundidade, e os três valores do disco não concordam: `0x18` e `0x1A` são
+  4 bits, `0x99` é **8 bits** — e ele é **1.039 das 2.841** primitivas, 666
+  de 1.074 no `EDT_MOD.BIN`. O plano só tem a frase `4-bit CLUT`, de uma
+  amostra do `get_gpu_state`, e a §1.7 diz "128×128 a 4 bpp cada". CLUT de 4
+  bits tem 16 entradas, a de 8 tem 256: a LOOKS-TASK-10 caça a lista de
+  paletas por marcador e erra em silêncio com a largura errada. De quebra,
+  **duas das três páginas não têm entrada no `DAT2D.BIN`**
+- **Como foi detectado:** remedindo os 2.841 `tpage` do disco japês com o
+  `section.py` commitado e decodificando os bits do campo — as contagens por
+  arquivo e por página estão na CORR
+- **Fix:** `Primitive` expondo profundidade e semitransparência, com
+  `self_check()` afirmando as duas páginas; §1.6 com a contagem por página e a
+  profundidade de cada uma; §1.7 sem o "4 bpp" generalizado; e o critério da
+  LOOKS-TASK-10 exigindo as duas larguras
+
+### CORR-LOOKS-019
+
+- **Arquivo com problema:** `tools/looks/oracle.py` — `check_tmds()` e
+  `report_field()`
+- **Sintoma:** o docstring do `check_tmds()` pergunta *"and does any field move
+  one?"* e a função nunca aperta tecla; o `--fields`, que move campo, não
+  conhece TMD e joga tudo que não cai nos dois arquivos de modelo num contador
+  único (`in no model file: 202 byte(s)`). "Fora dos arquivos de modelo" e
+  "fora dos TMDs" são afirmações diferentes, e a segunda — que é a metade
+  negativa do veredito da incógnita (a) — não sai de comando nenhum
+- **Como foi detectado:** rodando `--tmds` e `--fields` e procurando a linha que
+  cruza os dois. Ela não existe; o cruzamento foi feito nesta revisão com
+  script descartável sobre a mesma API, e dá **0 de 202** (`SKIN` no slot 2) e
+  **0 de 124** (`HAIR` no slot 1) dentro de `0x800c1678..0x800c4948`+4 KiB — a
+  conclusão está certa, a evidência é que não está versionada
+- **Fix:** `_tmd_headers()` devolvendo extensão, um `tmd_spans()` no feitio do
+  `spans()`, o `report_field()` com **três** baldes (modelo, TMD, resto) e um
+  controle negativo que estrague o mapa de TMD e exija vermelho
