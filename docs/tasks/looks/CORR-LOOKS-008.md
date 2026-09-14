@@ -3,7 +3,7 @@ id: CORR-LOOKS-008
 title: "Correção: o `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -126,20 +126,85 @@ melhor: número que a ferramenta imprime não envelhece.
 
 ## Verificação
 
-- [ ] `python tools/looks/iso_source.py --check-discs <japonês> <inglês>` imprime
+- [x] `python tools/looks/iso_source.py --check-discs <japonês> <inglês>` imprime
       a base derivada dos dois arquivos de geometria, nos dois discos, e sai 0
-- [ ] uma constante de `BASE` trocada à mão faz o comando sair != 0 (controle
+- [x] uma constante de `BASE` trocada à mão faz o comando sair != 0 (controle
       manual, não commitado)
-- [ ] `python tools/looks/layout.py --check` e `--sweep` continuam verdes
-- [ ] `python tools/looks/iso_source.py --check` continua verde
-- [ ] `roms/` intocada — os dois discos abertos só para leitura
+- [x] `python tools/looks/layout.py --check` e `--sweep` continuam verdes
+- [x] `python tools/looks/iso_source.py --check` continua verde
+- [x] `roms/` intocada — os dois discos abertos só para leitura
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O `--check-discs` passou a **derivar** as duas bases dos arquivos reais, nos
+dois discos, a cada corrida. Um `_report_bases()` novo no `iso_source.py` chama
+`layout.derive_base()` e `layout.require_base()` por arquivo de
+`GEOMETRY_FILES`, imprime o veredito, e `WrongBase` conta como falha do mesmo
+jeito que `WrongDisc`. O lado inglês reusa a mesma função com o dicionário das
+bases já derivadas do lado japonês: geometria idêntica byte a byte tem de
+derivar o mesmo número, e divergência sai como
+`DIFFERS from 0x… on the other disc`.
+
+Os números de contexto — a advertência do `derive_base()` — são impressos junto,
+que era a opção que a CORR preferia:
+
+```
+Japanese disc -- everything must be accepted
+  accepted /BIN/DAT2D.BIN
+  accepted /BIN/EDT_MOD.BIN
+  accepted /BIN/MODEL.BIN
+  accepted /SELECT.BIN
+  base     /BIN/EDT_MOD.BIN      2 words -> 0x8011c000 (constant 0x8011c000) ok
+           642 word(s) with the top bit set, 24 of them inside the file under that base
+  base     /BIN/MODEL.BIN       18 words -> 0x8016e800 (constant 0x8016e800) ok
+           1703 word(s) with the top bit set, 240 of them inside the file under that base
+English disc -- geometry accepted, the Japanese-only files refused
+  ...
+  base     /BIN/EDT_MOD.BIN      2 words -> 0x8011c000 (constant 0x8011c000) ok
+  base     /BIN/MODEL.BIN       18 words -> 0x8016e800 (constant 0x8016e800) ok
+iso_source --check-discs: ok                                       (exit 0)
+```
+
+Os 2, 18, 642, 1.703, 24 e 240 do Log da
+[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) — que saíram
+de um script que não ficou — agora saem de comando versionado, e batem.
+
+E o controle, que é o que separa comando de decoração: com
+`layout.BASE[MODEL]` trocado para `0x80160000` em memória (nada commitado), o
+comando sai **1**:
+
+```
+  BASE     /BIN/MODEL.BIN: header derives base 0x8016e800, expected 0x80160000
+           -- a different release, a modified image, or not this file at all
+iso_source --check-discs: 2 unexpected result(s)                   (rc = 1)
+```
+
+São duas ocorrências porque os dois discos derivam, que é o desenho.
+
 **Problemas encontrados:**
 
+A contagem de palavras de bit alto **não pôde** morar no `iso_source.py`: ela
+precisa de `0x80000000`, que é endereço, e a regra 1 põe todo endereço no
+`layout.py` — o `--sweep` pegaria, e com razão. Virou
+`layout.pointer_density(data, base)`, com o porquê no docstring e duas
+asserções no `self_check()`. Ou seja, esta CORR tocou um arquivo que a lista
+dela não previa, e a razão é a regra 1, não descuido.
+
+A varredura de discrepância puxou o Log da LOOKS-TASK-03: o bloco `Medido:` é
+transcrição do script descartado, e **fica** como está — é registro da corrida
+que o produziu. O que entrou foi uma frase logo abaixo dizendo que os números
+são reproduzíveis desde esta CORR, e por qual comando.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/iso_source.py` — `_report_bases()` e as duas chamadas no
+  `_check_discs()`
+- `tools/looks/layout.py` — `pointer_density()` e as asserções dela
+- `docs/PLAN-LOOKS-PY.md` — §1.2, quem redeixa a derivação e a advertência medida
+- `docs/tasks/looks/03-fonte-de-disco-e-layout.md` — a remissão ao comando
+- `docs/tasks/looks/CORR-LOOKS-008.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

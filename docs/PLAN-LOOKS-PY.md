@@ -123,6 +123,33 @@ deduziu sem emulador e que a §2.2 do
 [ANALISE-REPOS-WE3D-DBMANAGER.md](/docs/ANALISE-REPOS-WE3D-DBMANAGER.md) já
 tinha conferido no disco.
 
+**E quem redeixa isso é um comando, não esta seção.** O
+`layout.derive_base()` implementa a regra acima — `base = min(ponteiros do
+cabeçalho) - 4 × (número de palavras do cabeçalho)` — e o
+`iso_source.py --check-discs` a **roda sobre os dois arquivos reais, nos dois
+discos**, a cada corrida. Sem isso as duas constantes ficariam cravadas na
+prática: o `derive_base()` só era exercitado sobre vetores sintéticos
+construídos para casar com o algoritmo, e uma regressão nele deixaria o
+`--check` verde até a Fase 2 ([`CORR-LOOKS-008`](/docs/tasks/looks/CORR-LOOKS-008.md)).
+
+```text
+  base     /BIN/EDT_MOD.BIN      2 words -> 0x8011c000 (constant 0x8011c000) ok
+           642 word(s) with the top bit set, 24 of them inside the file under that base
+  base     /BIN/MODEL.BIN       18 words -> 0x8016e800 (constant 0x8016e800) ok
+           1703 word(s) with the top bit set, 240 of them inside the file under that base
+```
+
+A segunda linha de cada par é a **advertência medida**, e não enfeite: é por
+isso que a derivação **não** varre o arquivo inteiro. São 642 e 1.703 palavras
+com o bit alto ligado — dado de vértice e de cor —, das quais só algumas
+dezenas apontam para dentro do arquivo. Ler tudo aquilo como tabela de
+endereço dá alvo na casa dos bilhões e uma base que não significa nada. O
+número é impresso pela ferramenta justamente para não envelhecer na prosa.
+
+Como a geometria é byte a byte idêntica nos dois discos, a base derivada do
+lado inglês tem de ser **a mesma** — asserção de graça sobre bytes que o
+comando já leu, e a razão de dirigir o disco inglês ser permitido.
+
 ### 1.3 A prova pelo emulador, e a divisão de trabalho entre dois discos
 
 Com o jogo parado na tela `LOOKS SET`, lendo a RAM pelo servidor MCP do

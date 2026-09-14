@@ -135,6 +135,12 @@ O 2 e o 18 não são chute: o `lzss.py -v` reporta os mesmos comprimentos de
 cabeçalho para estes arquivos, por leitura própria — **segunda testemunha** de
 onde a corrida termina.
 
+Os dois blocos acima são saída de um script desta execução, que **não ficou** — e
+era esse o defeito. Desde a
+[`CORR-LOOKS-008`](/docs/tasks/looks/CORR-LOOKS-008.md) quem deriva as duas
+bases sobre os arquivos reais, nos dois discos e a cada corrida, é o
+`iso_source.py --check-discs`, junto com os números do item 4 abaixo.
+
 **4. E a armadilha desse método: não rodar a derivação sobre o arquivo inteiro.**
 Dado de vértice e de cor está cheio de word com o bit alto ligado. Medido nesta
 corrida: **642** deles no `EDT_MOD.BIN` e **1.703** no `MODEL.BIN`, dos quais só

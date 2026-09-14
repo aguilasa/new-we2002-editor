@@ -23,7 +23,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-005](/docs/tasks/looks/CORR-LOOKS-005.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-006](/docs/tasks/looks/CORR-LOOKS-006.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A recusa do `/SELECT.BIN` sai como `digest mismatch` pelado | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | O `layout.py` diz que não faz I/O, e faz | Baixa | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [ ] pendente | — |
+| [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
@@ -46,7 +46,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-005 — nada obriga o `iso_source.py` a passar pela guarda
 - [x] CORR-LOOKS-006 — o `/SELECT.BIN` recusa sem dizer que o disco é o inglês
 - [x] CORR-LOOKS-007 — o docstring do `layout.py` promete o que a dívida da 03 ainda deve
-- [ ] CORR-LOOKS-008 — nenhum comando redeixa o `BASE` a partir dos arquivos reais
+- [x] CORR-LOOKS-008 — nenhum comando redeixa o `BASE` a partir dos arquivos reais
 - [ ] CORR-LOOKS-009 — o `--sweep` só foi visto verde, e não diz quanto varreu
 
 ## Detalhes por correção

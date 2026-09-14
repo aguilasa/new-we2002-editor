@@ -310,6 +310,32 @@ def derive_base(data: bytes) -> tuple[int, int]:
     return header, base
 
 
+def pointer_density(data: bytes, base: int) -> tuple[int, int]:
+    """Count the words that look like pointers, and those that land inside.
+
+    Returns (words with the top bit set, of those, how many fall inside the
+    file under *base*).  This is the measurement behind derive_base()'s
+    warning not to sweep the whole file: vertex and colour data is full of
+    words with the top bit set, and only a few dozen of them are addresses.
+    The docstring there carries the two pairs as prose; this is how a caller
+    re-derives them instead of trusting the prose.
+
+    It lives here rather than in the caller because 0x80000000 is an address,
+    and rule 1 of the plan puts every address in this file -- a caller
+    counting high-bit words itself would be caught by --sweep, correctly.
+    """
+    high = 0
+    inside = 0
+    for index in range(len(data) // 4):
+        word = int.from_bytes(data[index * 4:index * 4 + 4], "little")
+        if word < 0x80000000:
+            continue
+        high += 1
+        if 0 <= word - base < len(data):
+            inside += 1
+    return high, inside
+
+
 def require_base(disc_path: str, data: bytes) -> int:
     """Derive the load base of *data* and demand it match the known constant.
 
@@ -454,6 +480,16 @@ def self_check() -> None:
         assert "expected 0x8011c000" in str(exc).lower(), str(exc)
     else:
         raise AssertionError("require_base accepted a foreign base")
+
+    # pointer_density answers about the same synthetic vector: two header
+    # pointers set the top bit, the 512 zero bytes do not, and both header
+    # pointers land inside by construction -- which is what derive_base just
+    # demanded.  The point of the function is the ratio it reports on a real
+    # file, so the assertion here is only that it counts what it says.
+    assert pointer_density(synthetic, 0x8011C000) == (2, 2), pointer_density(
+        synthetic, 0x8011C000
+    )
+    assert pointer_density(bytes(64), 0x8011C000) == (0, 0)
 
     # -- the address tables agree with each other ---------------------------
     #

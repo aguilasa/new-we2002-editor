@@ -184,6 +184,41 @@ def self_check() -> None:
     print("iso_source: self_check ok")
 
 
+def _report_bases(disc, paths, seen: dict) -> int:
+    """Derive each file's load base from its own header and print the verdict.
+
+    *seen* carries the bases derived on an earlier disc: a path already in it
+    must derive the same number here, which is the assertion that geometry is
+    interchangeable between the two discs rather than merely claimed to be.
+
+    Returns the number of failures, so the caller can add it to its own.
+    """
+    failures = 0
+    for path in paths:
+        data = disc.read_unchecked(path)
+        try:
+            header, base = layout.derive_base(data)
+            layout.require_base(path, data)
+        except layout.WrongBase as exc:
+            failures += 1
+            print("  BASE     %s: %s" % (path, exc))
+            continue
+
+        high, inside = layout.pointer_density(data, base)
+        before = seen.get(path)
+        if before is not None and before != base:
+            failures += 1
+            mark = "DIFFERS from 0x%08x on the other disc" % before
+        else:
+            seen[path] = base
+            mark = "ok"
+        print("  base     %-20s %2d words -> 0x%08x (constant 0x%08x) %s"
+              % (path, header, base, layout.BASE[path], mark))
+        print("           %d word(s) with the top bit set, %d of them inside "
+              "the file under that base" % (high, inside))
+    return failures
+
+
 def _check_discs(japanese: str, english: str) -> int:
     """Read the measured files off both real discs and show the guard working.
 
@@ -193,7 +228,9 @@ def _check_discs(japanese: str, english: str) -> int:
     is to show what would have been returned, and then that read() refuses it.
     """
     paths = sorted(layout.DIGEST)
+    geometry = sorted(layout.GEOMETRY_FILES)
     failures = 0
+    derived = {}
 
     print("Japanese disc -- everything must be accepted")
     with open_disc(japanese) as disc:
@@ -204,6 +241,14 @@ def _check_discs(japanese: str, english: str) -> int:
             except layout.WrongDisc as exc:
                 failures += 1
                 print("  REFUSED  %s: %s" % (path, exc))
+
+        # The load base is derived from the file rather than read from the
+        # table, every time this command runs.  Without this the two BASE
+        # constants are nailed down in practice: derive_base() is exercised
+        # only on synthetic vectors built to match the algorithm, so a
+        # regression in it would keep --check green and surface in phase 2,
+        # far from here.
+        failures += _report_bases(disc, geometry, derived)
 
     print("English disc -- geometry accepted, the Japanese-only files refused")
     with open_disc(english) as disc:
@@ -222,6 +267,12 @@ def _check_discs(japanese: str, english: str) -> int:
             # And the escape hatch still hands the bytes over, which is what
             # makes the refusal above a decision rather than a read failure.
             assert disc.read_unchecked(path), path
+
+        # Geometry is byte-for-byte identical on both discs, so the base
+        # derived here has to equal the one derived there.  Free assertion on
+        # bytes this command has already read, and it is the reason driving
+        # the English disc is allowed at all.
+        failures += _report_bases(disc, geometry, derived)
 
     if failures:
         print("iso_source --check-discs: %d unexpected result(s)" % failures)
