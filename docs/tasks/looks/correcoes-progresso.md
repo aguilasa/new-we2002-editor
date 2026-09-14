@@ -27,6 +27,9 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `sweep_addresses()` guarda duas regex mortas com o nome das vivas | Baixa | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-012](/docs/tasks/looks/CORR-LOOKS-012.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O perfil promete o `looks_image` desde a 05, e `ctest -R looks` sai 0 sem achar teste | Alta | [ ] pendente | — |
+| [CORR-LOOKS-013](/docs/tasks/looks/CORR-LOOKS-013.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O cabeçalho do `MODEL.BIN` foi descrito por metade — duas corridas, e a lista 0 declara o 1816 | Média | [ ] pendente | — |
+| [CORR-LOOKS-014](/docs/tasks/looks/CORR-LOOKS-014.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O título da LOOKS-TASK-05 ainda diz onze seções; a tabela já diz vinte | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -52,6 +55,9 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-009 — o `--sweep` só foi visto verde, e não diz quanto varreu
 - [x] CORR-LOOKS-010 — a varredura do `EDT_MOD.BIN` leu 11 de 20 seções
 - [x] CORR-LOOKS-011 — duas regex mortas no `sweep_addresses()`, com o nome das vivas
+- [ ] CORR-LOOKS-012 — não existe alvo `looks_image`, e pedir por ele sai verde
+- [ ] CORR-LOOKS-013 — 12 listas miram 104 e 4 miram 232; a lista de 72 declara o 1816
+- [ ] CORR-LOOKS-014 — título da 05 no frontmatter diz 11, a tabela diz 20
 
 ## Detalhes por correção
 
@@ -206,4 +212,53 @@ e o ciclo arquivado, o dele em
   tools/looks/layout.py | grep hex_literal` — duas atribuições, nenhuma leitura
 - **Fix:** apagar as duas linhas mortas, ou promover as vivas a constante de
   módulo com nome próprio; um nome, uma definição
+
+### CORR-LOOKS-012
+
+- **Arquivo com problema:** `tests/CMakeLists.txt` (o alvo que falta) e a tabela
+  de gates de `docs/prompts/perfil-looks.md`
+- **Sintoma:** o perfil dá o `looks_image` como existente desde a LOOKS-TASK-05
+  e não há linha nenhuma sobre `looks` no `tests/CMakeLists.txt`.
+  `ctest --test-dir build -R looks` imprime `No tests were found!!!` e **sai
+  0** — ausência indistinguível de verde, que é o que o próprio perfil proíbe
+  ("mediu e passou, ou pulou com 77"). A verificação existe e é o
+  `modelfile.py --check-image`, que ninguém roda sem se lembrar dele. E a
+  LOOKS-TASK-19 diz criar "os três alvos", o que contradiz a tabela
+- **Como foi detectado:** `grep -rn looks tests/CMakeLists.txt` vazio, e
+  `ctest --test-dir build -R looks` com `echo $?`
+- **Fix:** registrar o `looks_image` (77 sem `WE2002_LOOKS_IMAGE`), e alinhar a
+  tabela de gates do perfil com a 19 sobre quem cria cada alvo
+
+### CORR-LOOKS-013
+
+- **Arquivo com problema:** o docstring de `layout.geometry_start()`, o último
+  item do critério da `05-arquivos-de-modelo.md`, a §1.5 do plano e a linha
+  encaminhada à `08-de-onde-vem-o-boneco.md`
+- **Sintoma:** "16 das 18 listas abrem com tag `0x80` mirando o offset 104" —
+  16 abrem com `0x80`, mas só **12** miram 104; **4** miram **232**, uma
+  **segunda** corrida de ponteiros (32 contra 64). E "1816 é fato que as listas
+  não declaram" — a lista de 72 tem uma entrada só, tag `0x02`, mirando
+  exatamente 1816; a de 88 mira 4792. A decisão de não derivar o início do
+  `MODEL.BIN` continua certa (`min` de todos os alvos é 104), mas a evidência
+  escrita não a sustenta, e a segunda corrida não está registrada em lugar
+  nenhum
+- **Como foi detectado:** `layout.read_pointer_entries()` sobre as 18 listas,
+  mais um parser independente que concorda, e `section.read_section()` em 104,
+  232, 1816 e 4792
+- **Fix:** corrigir os quatro textos com os números medidos, registrar as duas
+  corridas e as duas listas de uma entrada, e dizer o motivo verdadeiro de a
+  constante ficar
+
+### CORR-LOOKS-014
+
+- **Arquivo com problema:** `docs/tasks/looks/05-arquivos-de-modelo.md`,
+  frontmatter
+- **Sintoma:** o `title:` ainda diz "as 11 do `EDT_MOD.BIN`" e a célula da
+  tabela do `progresso.md` já diz "as 20" — a CORR-LOOKS-010 atualizou um dos
+  dois lugares onde o título mora. O `check_tasks.py` não confere título e fica
+  verde
+- **Como foi detectado:** `grep -n "^title:"` na task contra a linha 41 do
+  `progresso.md`
+- **Fix:** frontmatter passa a dizer 20, e um laço confere as vinte tasks de uma
+  vez
 
