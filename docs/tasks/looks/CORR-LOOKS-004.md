@@ -3,7 +3,7 @@ id: CORR-LOOKS-004
 title: "Correção: a LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -76,17 +76,46 @@ detalham, e agora não contradizem nada.
 
 ## Verificação
 
-- [ ] nenhuma frase da task afirma que os 50 têm tupla
-- [ ] o critério de conclusão continua exigindo veredito escrito para o `0.jpg`
-- [ ] `python tools/check_tasks.py` verde
-- [ ] a conferência de links do `.claude/rules/links.md` sai vazia
+- [x] nenhuma frase da task afirma que os 50 têm tupla
+- [x] o critério de conclusão continua exigindo veredito escrito para o `0.jpg`
+- [x] `python tools/check_tasks.py` verde
+- [x] a conferência de links do `.claude/rules/links.md` sai vazia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+O primeiro bullet do `## Contexto` foi reescrito na forma que a §5.4 do plano já
+usa — **50 JPGs, dos quais 49 nomeados pela tupla exata** —, com o exemplo
+`A-I3-A-F-A` intacto e meia linha remetendo ao terceiro bullet, que é quem
+detalha o `0.jpg`. Os outros bullets ficaram como estavam: agora eles detalham
+sem contradizer.
+
+Contagem reproduzida antes de editar:
+
+```
+$ ls ".../We2002/MCR/We DB - polipoli/Faces/" | wc -l
+50
+$ ls ".../Faces/" | grep -c '.jpg$'
+50
+$ ls ".../Faces/" | head -2
+0.jpg
+A-A1-A-A-A.jpg
+```
+
+As três menções a "50" que sobraram na task são o título, o bullet corrigido (que
+diz 50 arquivos e 49 tuplas na mesma frase) e o critério de conclusão, que fala
+de comparar contra os 50 — nenhuma afirma que os cinquenta têm tupla. E o
+critério continua exigindo **veredito escrito para o `0.jpg`**, que era o ponto
+do encaminhamento.
+
+**Problemas encontrados:** nenhum.
 
 **Arquivos criados/modificados:**
+
+- `docs/tasks/looks/18-corpus-dos-cinquenta-renders.md` — o primeiro bullet do
+  `## Contexto`
+- `docs/tasks/looks/CORR-LOOKS-004.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

@@ -14,8 +14,9 @@ status: pendente
 ## Contexto
 
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §5.4.
-- `MCR\We DB - polipoli\Faces\` tem **50 JPGs**, nomeados pela tupla exata:
-  `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de barba A.
+- `MCR\We DB - polipoli\Faces\` tem **50 JPGs**, dos quais **49 nomeados
+  pela tupla exata**: `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de
+  barba A. O quinquagésimo é o `0.jpg` do terceiro bullet.
 - **O caminho é relativo a `Superpackv6\We2002\`, não à raiz da coletânea** —
   `Superpackv6\MCR` não existe. Medido na
   [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md) em
