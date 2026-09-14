@@ -732,6 +732,18 @@ def self_check() -> None:
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 
+# What the sweep calls an address.  Anchored, because by the time they are
+# applied the candidate is already a whole NUMBER token from tokenize -- there
+# is nothing around it to search.
+#
+# They are module constants and not locals so there is ONE definition of each
+# to edit.  The tokenize rewrite left an unanchored pair behind in
+# sweep_addresses() under these same two names, dead but readable, and whoever
+# went to loosen or tighten the rule would have found those first, edited them,
+# changed nothing, and watched the gate stay green (CORR-LOOKS-011).
+_HEX_LITERAL = re.compile(r"\A0[xX][0-9a-fA-F]+\Z")
+_BIG_DECIMAL = re.compile(r"\A\d{4,}\Z")
+
 
 def sweep_addresses(root: str | None = None,
                     stats: dict | None = None) -> list[tuple[str, int, str]]:
@@ -771,8 +783,6 @@ def sweep_addresses(root: str | None = None,
     if root is None:
         root = os.path.dirname(os.path.abspath(__file__))
 
-    hex_literal = re.compile(r"0[xX][0-9a-fA-F]+")
-    big_decimal = re.compile(r"(?<![\w.])\d{4,}(?![\w.])")
     findings = []
     files = 0
     lines = 0
@@ -819,9 +829,6 @@ def _address_lines(source: str, path: str) -> set:
     one finding on line 1 rather than skipped.  Skipping would mean the sweep
     quietly stops covering a file at the exact moment somebody is changing it.
     """
-    hex_literal = re.compile(r"\A0[xX][0-9a-fA-F]+\Z")
-    big_decimal = re.compile(r"\A\d{4,}\Z")
-
     found = set()
     try:
         tokens = tokenize.generate_tokens(io.StringIO(source).readline)
@@ -829,7 +836,7 @@ def _address_lines(source: str, path: str) -> set:
             if kind != tokenize.NUMBER:
                 continue
             body = text.replace("_", "")
-            if hex_literal.match(body) or big_decimal.match(body):
+            if _HEX_LITERAL.match(body) or _BIG_DECIMAL.match(body):
                 found.add(row)
     except (tokenize.TokenError, IndentationError, SyntaxError):
         found.add(1)

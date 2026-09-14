@@ -26,7 +26,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 | Alta | [x] concluída | 2026-09-14 |
-| [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `sweep_addresses()` guarda duas regex mortas com o nome das vivas | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `sweep_addresses()` guarda duas regex mortas com o nome das vivas | Baixa | [x] concluída | 2026-09-14 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -51,7 +51,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-008 — nenhum comando redeixa o `BASE` a partir dos arquivos reais
 - [x] CORR-LOOKS-009 — o `--sweep` só foi visto verde, e não diz quanto varreu
 - [x] CORR-LOOKS-010 — a varredura do `EDT_MOD.BIN` leu 11 de 20 seções
-- [ ] CORR-LOOKS-011 — duas regex mortas no `sweep_addresses()`, com o nome das vivas
+- [x] CORR-LOOKS-011 — duas regex mortas no `sweep_addresses()`, com o nome das vivas
 
 ## Detalhes por correção
 

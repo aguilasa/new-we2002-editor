@@ -3,7 +3,7 @@ id: CORR-LOOKS-011
 title: "Correção: o `sweep_addresses()` guarda duas regex mortas com o nome das vivas"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -83,19 +83,78 @@ nome em escopos diferentes é o que não pode continuar.
 
 ## Verificação
 
-- [ ] `grep -n "hex_literal\|big_decimal" tools/looks/layout.py` mostra cada
+- [x] `grep -n "hex_literal\|big_decimal" tools/looks/layout.py` mostra cada
       nome definido **uma** vez
-- [ ] `python tools/looks/layout.py --check` verde, com o caso vermelho plantado
-- [ ] `python tools/looks/layout.py --sweep` continua achando zero e dizendo
+- [x] `python tools/looks/layout.py --check` verde, com o caso vermelho plantado
+- [x] `python tools/looks/layout.py --sweep` continua achando zero e dizendo
       quantos arquivos e linhas varreu
-- [ ] `python tools/looks/section.py --check` e `iso_source.py --check` verdes
+- [x] `python tools/looks/section.py --check` e `iso_source.py --check` verdes
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
-**Problemas encontrados:**
+As duas linhas mortas do `sweep_addresses()` saíram, e as vivas subiram a
+**constante de módulo** com nome próprio — que é a segunda metade que a CORR
+oferecia, e a que impede o mesmo tropeço de voltar:
+
+```python
+_HEX_LITERAL = re.compile(r"\A0[xX][0-9a-fA-F]+\Z")
+_BIG_DECIMAL = re.compile(r"\A\d{4,}\Z")
+```
+
+Ficam ao lado do `ADDRESS_OWNER`, com o comentário dizendo por que são
+ancoradas (quando são aplicadas, o candidato já é um token `NUMBER` inteiro do
+`tokenize`, e não há o que procurar em volta) e por que são de módulo: para
+haver **uma** definição de cada a editar.
+
+Depois: cada nome aparece **uma vez definido e uma vez usado**.
+
+```
+$ grep -n "hex_literal\|big_decimal\|_HEX_LITERAL\|_BIG_DECIMAL" tools/looks/layout.py
+744:_HEX_LITERAL = re.compile(...)
+745:_BIG_DECIMAL = re.compile(...)
+839:            if _HEX_LITERAL.match(body) or _BIG_DECIMAL.match(body):
+```
+
+O `import re` continua necessário, como a CORR previu.
+
+Gates, e o que importa aqui é que o **comportamento não mudou**:
+
+```
+$ python tools/looks/layout.py --check
+layout: self_check ok
+$ python tools/looks/layout.py --sweep
+layout --sweep: no address outside layout.py (3 file(s), 981 line(s) swept)
+$ python tools/looks/section.py --check
+section: self_check ok
+$ python tools/looks/iso_source.py --check
+iso_source: self_check ok
+```
+
+O caso vermelho plantado do `self_check()` continua achando os cinco que tem de
+achar. E, para não confiar só nele, um `PLANTED = 0x8011C000` acrescentado ao
+`section.py` real (nada commitado):
+
+```
+  section.py:483: PLANTED = 0x8011C000
+layout --sweep: 1 line(s) carrying an address outside layout.py (3 file(s), 983 line(s) swept)
+                                                                           (exit 1)
+```
+
+Arquivo restaurado e `git status` conferido antes do `git add`.
+
+**Problemas encontrados:** nenhum.
+
+A varredura de discrepância não achou documento que descreva as regex em si —
+o plano e a task 03 descrevem a **regra** ("literal hexadecimal ou decimal de
+quatro dígitos ou mais"), que continua verdadeira.
 
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — as duas linhas mortas removidas, as vivas
+  promovidas a `_HEX_LITERAL` e `_BIG_DECIMAL`
+- `docs/tasks/looks/CORR-LOOKS-011.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
