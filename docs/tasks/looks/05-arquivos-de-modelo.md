@@ -1,6 +1,6 @@
 ---
 id: LOOKS-TASK-05
-title: "`modelfile.py` — as 106 seções do `MODEL.BIN` e as 11 do `EDT_MOD.BIN`"
+title: "`modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN`"
 type: implementação
 category: formato
 phase: 1

@@ -3,7 +3,7 @@ id: CORR-LOOKS-014
 title: "Correção: o título da LOOKS-TASK-05 ainda diz onze seções; a tabela do progresso já diz vinte"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -89,17 +89,70 @@ PY
 
 ## Verificação
 
-- [ ] o `title:` do frontmatter e a célula da tabela dizem a mesma coisa
-- [ ] o laço acima não imprime `DIVERGE` para nenhuma das vinte tasks
-- [ ] `python tools/check_tasks.py` verde
-- [ ] a conferência de links do `.claude/rules/links.md` sai vazia
+- [x] o `title:` do frontmatter e a célula da tabela dizem a mesma coisa
+- [x] o laço acima não imprime `DIVERGE` para nenhuma das vinte tasks
+- [x] `python tools/check_tasks.py` verde
+- [x] a conferência de links do `.claude/rules/links.md` sai vazia
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O `title:` do frontmatter da
+[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md) passou a dizer
+**20**, igual ao da tabela do `progresso.md`. O `#` do corpo não cita número e
+ficou como está.
+
+O laço da CORR, sobre as vinte tasks do ciclo:
+
+```
+$ python - <<'PY'   (o laço desta CORR)
+conferidas: 20
+```
+
+Nenhum `DIVERGE`. `check_tasks: 123 task(s), ok` e a conferência de links vazia.
+
 **Problemas encontrados:**
 
+**Uma guarda permanente para isto seria errada, e foi medido antes de não a
+escrever.** O impulso é óbvio — a regra deste repositório é que regra que só
+vive na prosa não impede ninguém, e foi assim que as
+[`CORR-LOOKS-005`](/docs/tasks/looks/CORR-LOOKS-005.md) e
+[`CORR-LOOKS-009`](/docs/tasks/looks/CORR-LOOKS-009.md) fecharam. Aqui não
+serve. Rodando o laço sobre **todos** os ciclos:
+
+```
+tasks com title+linha: 147   divergencias: 70
+  docs/tasks           13  (PES2)
+  docs/tasks/port-mcr   7  (MCR)
+  docs/tasks/concluidos 37 (WTE, arquivado)
+```
+
+E as 70 não são erro: são **abreviações deliberadas**, a célula da tabela
+resumindo o título.
+
+```
+PES2-TASK-01 task  : Ferramental das fases 3 e 4 — numpy e desmontador MIPS
+PES2-TASK-01 tabela: `numpy` e desmontador MIPS — decisão do dono da máquina
+
+MCR-TASK-06  task  : `attributes.py` — o codec de 12 bytes, contra `Player::Decode/Encode`
+MCR-TASK-06  tabela: `attributes.py` — `Player::Decode/Encode`
+```
+
+Pôr isso no `tools/check_tasks.py` deixaria o alvo `tasks` — **gate global,
+compartilhado pelos quatro ciclos** — vermelho em 70 linhas que estão certas. O
+invariante "o título da task é substring da célula" simplesmente não vale neste
+repositório; o que valia aqui era outra coisa: a célula dizia **20** e o título
+dizia **11**, que é contradição de número medido, não resumo. O ciclo `looks`
+é o único em que os vinte batem ao pé da letra, e fica assim.
+
+Fica registrado para não se re-litigar: **não é descuido não haver guarda, é
+medição.**
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/looks/05-arquivos-de-modelo.md` — o `title:`
+- `docs/tasks/looks/CORR-LOOKS-014.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
