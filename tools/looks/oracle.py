@@ -28,6 +28,8 @@ Usage:
     python tools/looks/oracle.py --check-states   # the two .sav, no emulator
     python tools/looks/oracle.py --adopt-states   # copy them into the project
     python tools/looks/oracle.py --check-live     # boots the game and measures
+    python tools/looks/oracle.py --fields HAIR SKIN
+    python tools/looks/oracle.py --tmds          # unknown (a), the other half
 """
 
 from __future__ import annotations
@@ -53,6 +55,11 @@ WINDOWS = os.name == "nt"
 
 
 # --- what the environment names -------------------------------------------
+
+RAM_BASE = 0x80000000  # not-an-address: the console's own RAM window, not a datum
+RAM_SIZE = 2 * 1024 * 1024  # not-an-address: a size, in bytes
+SANE_COUNT = 4 * 1024  # not-an-address: the ceiling a TMD count has to be under
+"""All of PSX main RAM.  Not a disc address, so not layout.py's business."""
 
 ENV_STATES = "WE2002_LOOKS_STATES"
 """Where this project keeps its own copy of the two save states.
@@ -117,8 +124,29 @@ the two states differ by 0.003015 over the picture, which is the size of the
 animation's own wobble, while over this plate they differ by **0.119963**.
 """
 
+ROW_FIRST = 0.153
+ROW_HEIGHT = 0.0528
+"""Where the first row's cell starts, and how far apart the twelve rows sit.
+
+Measured off an 864x655 capture: the rows are 34.6 px apart, which is 0.0528 of
+the height, and DEFAUL's cell opens at 0.153.
+"""
+
+
+def row_value(index):
+    """The value cell of row *index*, as a fraction of the frame.
+
+    Per row and not one fixed box, because a value change has to be measured
+    ON the row that changed: over the whole picture one step of HAIR moves
+    0.005265, which is under the 0.02 that counts as movement and is the same
+    size as the model's own animation.  Over its own cell it moves 0.09.
+    """
+    return (0.660, ROW_FIRST + index * ROW_HEIGHT + 0.012,
+            0.920, ROW_FIRST + (index + 1) * ROW_HEIGHT - 0.012)
+
+
 ROW_VALUE = (0.600, 0.205, 0.960, 0.260)
-"""The value cell of the row the cursor sits on when a state loads."""
+"""The value cell of the row the cursor sits on when a state loads -- NAT."""
 
 BADGE_MEAN = {1: 0.291686, 2: 0.299999}
 """The plate's mean per slot, measured 2026-09-14.
@@ -149,6 +177,59 @@ drifting to 0.183844 as the model animates."""
 MOVED = 0.02
 """Above this, a region changed.  One Right on the top row moved its value cell
 by 0.097842; the same cell without a press moves by 0.000000."""
+
+FOOTER = (0.020, 0.800, 0.990, 0.900)
+"""The strip that names the selected field -- "Kind of Hair", "Visual".
+
+This is what tells one ROW from the next, and the whole frame is not: walking
+the twelve rows moves the whole picture by 0.0068 to 0.0215, which overlaps
+what the model's own animation does to it over the same 28 frames.  Over this
+strip the same ten presses move 0.0086 to 0.0548 and an idle pair moves
+0.000000.
+"""
+
+ROW_MOVED = 0.004
+"""Half the smallest measured row move, and above an idle difference of zero."""
+
+VALUE_MOVED = 0.010
+"""Above this, a value cell changed.
+
+Lower than MOVED because a value step is often ONE CHARACTER -- A1TYPE to
+A2TYPE moves its cell by 0.016759, where NAT's whole word moved 0.097842.
+
+**And the cell is not perfectly still**: the selected row wears a blinking
+cursor box with an arrow at each end, which moved the first, wider cell by
+0.005682 with nothing pressed.  Two things answer that, and both are needed:
+the box was narrowed to the value glyphs, away from the border and the arrows;
+and `field_diff` MEASURES the idle drift before trusting this floor, refusing
+rather than measuring if the cell turns out to move on its own by more.  A
+threshold between two numbers that were both measured is a threshold; one
+chosen because it looked safe is a guess.
+"""
+
+ROWS = ("DEFAUL", "NAT", "SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.",
+        "HEIG", "BODY", "AGE", "BOOTS", "FOOT")
+"""The rows of the LOOKS SET screen, top to bottom, as the screen spells them.
+
+**Positions, not semantics.**  What each field MEANS, what its domain is and
+what the labels expand to is LOOKS-TASK-13's subject, measured against
+`src/core/Player.cpp`.  All this list is for is knowing how many times to press
+Down: a save state restores the cursor on NAT, so a row is `index - 1` presses
+away.
+"""
+
+CURSOR_STARTS_ON = "NAT"
+"""Where both save states leave the cursor.  Asserted, not assumed: if a state
+were ever re-recorded elsewhere every row offset below would silently shift."""
+
+CHURN_PASSES = 3
+"""How many idle passes go into the churn set.
+
+The model on this screen is animated, so a byte can come back to its old value
+just by the animation coming round again -- which is why A/B/A alone called
+4.248 bytes "the field's" on the first run.  One pass samples one phase of the
+animation; three sample three.
+"""
 
 
 # --- refusals -------------------------------------------------------------
@@ -455,7 +536,7 @@ class Oracle:
 
     # -- input --
 
-    def press(self, button, box=None, expect_change=True):
+    def press(self, button, box=None, expect_change=True, least=None):
         """One button, held CONFIRM_FRAMES, then look.
 
         There is no variant that presses twice.  What the caller gets instead
@@ -469,13 +550,14 @@ class Oracle:
         self.step(CONFIRM_FRAMES + SETTLE_FRAMES)
         after = self.capture()
         if expect_change:
+            floor = MOVED if least is None else least
             moved = before.difference(after, pixels(before, box))
-            if moved <= MOVED:
+            if moved <= floor:
                 raise NotArrived(
                     "%s moved the screen by %.6f, which is no more than the "
                     "%.6f that counts as unchanged -- the press did not "
                     "register, or the region is the wrong one"
-                    % (button, moved, MOVED)
+                    % (button, moved, floor)
                 )
             self.say("%s moved it by %.6f" % (button, moved))
         return after
@@ -560,6 +642,96 @@ class Oracle:
                 "resolution scale has moved"
                 % (badge, slot, SLOTS[slot], want, BADGE_TOL)
             )
+
+    # -- rows, and what moving one does to memory --
+
+    def select_row(self, row):
+        """Put the cursor on a named row, counting the presses.
+
+        Each Down is asserted to move the picture, so a press the game dropped
+        is a refusal instead of an off-by-one that lands on a neighbouring
+        field and measures it instead.
+        """
+        if row not in ROWS:
+            raise OracleError("%r is not a row of this screen: %s"
+                              % (row, ", ".join(ROWS)))
+        for _ in range(ROWS.index(row) - ROWS.index(CURSOR_STARTS_ON)):
+            self.press("Down", box=FOOTER, least=ROW_MOVED)
+        # Captured under the row's name, because the footer of this screen
+        # spells out the selected field ("Kind of Hair") and the code cannot
+        # read it.  The presses are asserted to move; that the row they land
+        # on is the one named is checked by looking at the picture, and the
+        # picture is kept for that.
+        return self.capture("row-%s" % row.replace(".", ""))
+
+    def snapshot(self, tag):
+        """All of main RAM, as bytes."""
+        path = os.path.join(self.out_dir, "ram-%s.bin" % tag)
+        return self.read_ram(RAM_BASE, RAM_SIZE, path)
+
+    def churn(self, passes=CHURN_PASSES):
+        """Every byte that moves while the game merely runs.
+
+        Taken where the measurement will be taken -- same screen, same row --
+        because what churns depends on what is being drawn.
+        """
+        seen = set()
+        previous = self.snapshot("churn-0")
+        for index in range(passes):
+            self.step(CONFIRM_FRAMES + SETTLE_FRAMES)
+            current = self.snapshot("churn-%d" % (index + 1))
+            seen |= {i for i in range(len(previous))
+                     if previous[i] != current[i]}
+            previous = current
+        self.say("churn over %d pass(es): %d byte(s)" % (passes, len(seen)))
+        return seen
+
+    def field_diff(self, slot, row):
+        """What changing one field moves, with the animation filtered out.
+
+        Three filters, and each one is there because the two before it were not
+        enough:
+
+        1. **changed by Right** -- 20.150 bytes, nearly all of it the game
+           being alive;
+        2. **and put back by Left** -- 4.248, because the field returns to its
+           old value and so does anything that depends on it.  Still far too
+           many: the model is animated and a periodic byte comes back on its
+           own;
+        3. **and not in the churn set** -- 132.  That is the field's.
+
+        Returns the offsets, as offsets into RAM.
+        """
+        self.load_looks(slot)
+        cell = row_value(ROWS.index(row))
+        quiet = self.select_row(row)
+        noise = self.churn()
+        # The control for the threshold below: the cell this measurement
+        # watches must be still when nothing is pressed.  Without it, a floor
+        # of 0.004 would be a guess about a region that might be animated.
+        drift = quiet.difference(self.capture(), pixels(quiet, cell))
+        if drift > VALUE_MOVED:
+            raise NotArrived(
+                "the value cell of %s moved by %.6f with nothing pressed, "
+                "which is over the %.6f a press has to beat -- that region is "
+                "animated and cannot be the witness" % (row, drift,
+                                                        VALUE_MOVED))
+        self.say("the %s cell is still while idle: %.6f" % (row, drift))
+
+        self.load_looks(slot)
+        self.select_row(row)
+        before = self.snapshot("before")
+        self.press("Right", box=cell, least=VALUE_MOVED)
+        after = self.snapshot("after")
+        self.press("Left", box=cell, least=VALUE_MOVED)
+        back = self.snapshot("back")
+
+        moved = {i for i in range(len(before)) if before[i] != after[i]}
+        restored = {i for i in moved if back[i] == before[i]}
+        mine = sorted(restored - noise)
+        self.say("%s on slot %d: %d moved, %d put back, %d of them not churn"
+                 % (row, slot, len(moved), len(restored), len(mine)))
+        return mine, before, after
 
     # -- the amount of the file that is really loaded --
 
@@ -647,6 +819,117 @@ def _say_comparison(name, found):
               % (found["in_primitive"], section.PRIMITIVE_SIZE))
 
 
+def spans(image):
+    """Every span a changed byte can be attributed to, from the disc itself.
+
+    Built from the files rather than declared, so a section index in the output
+    is the same index `modelfile` prints and not a second numbering.
+    """
+    import iso_source
+
+    out = {}
+    with iso_source.open_disc(image) as disc:
+        for name in sorted(layout.BASE):
+            data = disc.read(name)
+            scan = section.scan(data, layout.GEOMETRY_START[name])
+            out[layout.BASE[name]] = (name, len(data), scan.sections)
+    return out
+
+
+def attribute(address, maps):
+    """Where one address falls: file, section, primitive or vertex, and byte."""
+    for base, (name, size, sections) in maps.items():
+        if not base <= address < base + size:
+            continue
+        offset = address - base
+        for index, one in enumerate(sections):
+            if not one.offset <= offset < one.end:
+                continue
+            inner = offset - one.offset - section.HEADER_SIZE
+            if inner < 0:
+                return (name, index, "header", offset, None)
+            primitives = len(one.primitives) * section.PRIMITIVE_SIZE
+            if inner < primitives:
+                return (name, index, "primitive %d" % (inner // 24),
+                        offset, inner % 24)
+            vertex = inner - primitives
+            return (name, index, "vertex %d" % (vertex // 8), offset,
+                    vertex % 8)
+        return (name, None, "outside every section", offset, None)
+    return None
+
+
+def lists_touched(name, indices, image):
+    """Which of a file's header lists own these section indices.
+
+    EDT_MOD.BIN holds two eleven-piece lists sharing two sections, and the
+    question of whether they are the goalkeeper and the outfield player is the
+    one the two save states were made to answer.  Answered by set membership
+    here rather than by eye, because "sections 11 and 16 to 19" and "the second
+    list" are the same claim only if something checks.
+    """
+    import iso_source
+    import modelfile
+
+    with iso_source.open_disc(image) as disc:
+        data = disc.read(name)
+        scan = section.scan(data, layout.GEOMETRY_START[name])
+        where = {one.offset: i for i, one in enumerate(scan.sections)}
+        out = {}
+        try:
+            models = modelfile.read_models(data)
+        except layout.BadPointerList:
+            # MODEL.BIN's header lists aim at flat pointer runs, not sections,
+            # so it has no readable model list yet and there is nothing to
+            # attribute to.  Not an error here: the file this question is
+            # about is EDT_MOD.BIN.
+            return None
+        for model in models:
+            owned = {where[target] for target in model.targets}
+            hit = sorted(set(indices) & owned)
+            if hit:
+                out[model.index] = hit
+    return out
+
+
+def report_field(found, before, after, maps, image=None, verbose=True):
+    """Group what a field moved by file and section, and say what is untouched.
+
+    The count of bytes that landed in NO model file is printed too, and that is
+    deliberate: "nothing outside" and "nothing measured" print the same when
+    only the hits are listed.
+    """
+    inside, elsewhere = {}, 0
+    for offset in found:
+        where = attribute(RAM_BASE + offset, maps)
+        if where is None:
+            elsewhere += 1
+            continue
+        name, index, part, at, byte = where
+        inside.setdefault((name, index), []).append((at, part, byte,
+                                                     before[offset],
+                                                     after[offset]))
+    for key in sorted(inside):
+        name, index = key
+        hits = inside[key]
+        bytes_in = sorted({b for _, _, b, _, _ in hits if b is not None})
+        if verbose:
+            print("      %s section %s: %d byte(s), at byte %s of the "
+                  "primitive" % (name, index, len(hits), bytes_in))
+            for at, part, _byte, old, new in hits[:4]:
+                print("          +%d %s: %d -> %d" % (at, part, old, new))
+    print("      in no model file: %d byte(s)" % elsewhere)
+    if image:
+        for name in sorted({key[0] for key in inside}):
+            indices = [key[1] for key in inside if key[0] == name]
+            owners = lists_touched(name, indices, image)
+            if owners:
+                print("      %s: %s" % (name, "; ".join(
+                    "list %d owns section(s) %s" % (k, v)
+                    for k, v in sorted(owners.items()))))
+    return inside, elsewhere
+
+
 def pixels(frame, frac):
     """A fractional box as pixels of this frame."""
     if frac is None:
@@ -719,6 +1002,85 @@ def check_live(verbose=True):
 
     print("oracle --check-live: %d failure(s)" % len(failures))
     return 1 if failures else 0
+
+
+def check_fields(rows=None, slots=(1, 2), verbose=True):
+    """Measure what each named field moves, on both states.
+
+    This is the measurement LOOKS-TASK-08 exists for, kept as a command so the
+    numbers in the plan come out of a script and not out of a session.
+    """
+    ready = preflight()
+    maps = spans(ready["image"])
+    rows = rows or ("HAIR", "SKIN", "FACE", "BODY")
+
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in sorted(SLOTS):
+            restore_state(slot, verbose=verbose)
+        for row in rows:
+            for slot in slots:
+                found, before, after = game.field_diff(slot, row)
+                print("  %s, slot %d (%s): %d byte(s)"
+                      % (row, slot, SLOTS[slot], len(found)))
+                report_field(found, before, after, maps,
+                             image=ready["image"], verbose=verbose)
+    return 0
+
+
+def check_tmds(verbose=True):
+    """Are the four TMDs of plan section 1.6 in RAM, and does any field move one?
+
+    The answer decides unknown (a) as much as the field diffs do, and it has to
+    come from a command: "I looked and they were zero" is exactly the kind of
+    claim this cycle keeps turning into a script.
+    """
+    ready = preflight()
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in sorted(SLOTS):
+            restore_state(slot, verbose=verbose)
+        for slot in sorted(SLOTS):
+            game.load_looks(slot)
+            data = game.snapshot("tmd-slot%d" % slot)
+            print("  slot %d (%s):" % (slot, SLOTS[slot]))
+            for address in layout.TMD_CLAIMED:
+                chunk = data[address - RAM_BASE:address - RAM_BASE + 32]
+                print("      %#010x  %s%s" % (address, chunk[:12].hex(),
+                                              "   ALL ZERO"
+                                              if not any(chunk) else ""))
+            found = _tmd_headers(data)
+            print("      TMDs actually in RAM: %d" % len(found))
+            if found:
+                lo, hi = found[0], found[-1]
+                print("          from %#010x to %#010x, %s vertices"
+                      % (lo[0], hi[0],
+                         "%d..%d" % (min(v for _, v, _ in found),
+                                     max(v for _, v, _ in found))))
+    return 0
+
+
+def _tmd_headers(data):
+    """Every word-aligned Sony TMD header in *data*, as (address, verts, prims).
+
+    A magic word alone is a four-byte coincidence, so the object table behind
+    it has to be sane too -- that is what keeps this from reporting hundreds of
+    hits in a 2 MiB scan.
+    """
+    import struct
+
+    out = []
+    magic = struct.pack("<I", layout.TMD_MAGIC)
+    at = data.find(magic)
+    while at != -1:
+        if at % 4 == 0 and at + 40 <= len(data):
+            flags, objects = struct.unpack_from("<2I", data, at + 4)
+            if flags in (0, 1) and 0 < objects < 64:
+                _vt, verts, _nt, _norms, _pt, prims, _scale = \
+                    struct.unpack_from("<7i", data, at + 12)
+                if (0 < verts < SANE_COUNT
+                        and 0 < prims < SANE_COUNT):
+                    out.append((RAM_BASE + at, verts, prims))
+        at = data.find(magic, at + 1)
+    return out
 
 
 # --- self-check -----------------------------------------------------------
@@ -981,6 +1343,10 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) == 2 and argv[1] == "--tmds":
+            return check_tmds()
+        if len(argv) >= 2 and argv[1] == "--fields":
+            return check_fields(rows=tuple(argv[2:]) or None)
     except Unavailable as exc:
         print("oracle: skipped -- %s" % exc)
         return SKIP

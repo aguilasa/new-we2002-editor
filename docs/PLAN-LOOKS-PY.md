@@ -280,14 +280,24 @@ passagem parou**, cauda consumida, e não o fim da última seção — no `MODEL
 os dois coincidem, que é justamente por que medir só ele não mostraria a
 diferença.
 
-E duas correções ao formato da primitiva, medidas na mesma corrida:
+E duas correções ao formato da primitiva, medidas na mesma corrida — a primeira
+delas **revista uma segunda vez** em 2026-09-14:
 
-- **O quarto byte de cada cor não é `pad`.** Na cor 0 ele **nunca** é zero —
-  120, 121, 122 ou 127 nas 1.767 primitivas do `MODEL.BIN`, e 120, 121 ou 122
-  nas 611 do `EDT_MOD.BIN` — e nas cores 1, 2 e 3 é **sempre** zero. É um byte
-  de **modo por primitiva**, guardado na primeira cor. O `we3d` o chama de pad,
-  e descartá-lo obrigaria a reescrever o parser na Fase 3, que é onde a
-  incógnita (d) depende dele.
+- **Os dezesseis primeiros bytes não são quatro cores.** São quatro pares
+  `(u, v)` mais um CLUT id e uma página de textura, na ordem do `POLY_FT4` do
+  hardware. Esta seção dizia outra coisa: *"o quarto byte de cada cor não é
+  `pad` — é um byte de modo por primitiva, guardado na primeira cor"*, com a
+  observação de que na cor 0 ele é 120, 121, 122 ou 127 e nas outras três é
+  sempre zero. **A observação estava certa e a conclusão errada:** aqueles
+  valores são `0x78..0x7F`, o byte **alto do CLUT id**, e o "sempre zero" das
+  outras três é o que o pacote da GPU manda zerar. A leitura inteira, com as
+  três medições que a sustentam, está na §1.6, que era a contradição que ela
+  resolve; quem a reescreveu foi a
+  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
+
+  Vale o registro de **por que a primeira leitura resistiu**: ela vinha do
+  `we3d`, batia com uma estatística real, e nada no parser dependia de estar
+  certa. Só o jogo, reescrevendo esses bytes ao vivo, desempatou.
 - **O `pad` do vértice, esse é pad mesmo**: zero em 2.461 de 2.461 no
   `MODEL.BIN`. É o que o distingue de uma quarta coordenada, e o
   `section.py` o preserva porque a regra 2 do plano diz que byte cru é
@@ -465,24 +475,55 @@ diz **qual** dos modelos de lá — e é onde a hipótese do `we3d`, de 14 jogad
 de 11 peças, se confere. A linha está escrita na
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
 
-### 1.6 A tela desenha com textura, e o formato de seção não tem textura
+### 1.6 A primitiva **tem** UV — a contradição era de leitura
 
-Aqui está a contradição que a Fase 3 tem de resolver, e vale ter na mesa desde
-já. Com o jogo na tela `LOOKS SET`:
+Esta seção se chamava *"A tela desenha com textura, e o formato de seção não tem
+textura"* e descrevia a contradição de maior risco do plano. Ela foi **resolvida
+em 2026-09-14** pela
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), e não havia
+contradição nenhuma: o que estava errado era a leitura da primitiva, herdada da
+análise do `we3d`.
 
-- `get_gpu_state --aspect draw` responde **`texture_color_mode: "4-bit CLUT"`**,
-  texpage em VRAM (704, 0), `texture_disable: false`;
-- há **quatro TMDs Sony de verdade** vivos na RAM — `id=0x41`, `flags=1`, ou
-  seja já *fixados* pelo `OpenTMD` —, em `0x0016821C`, `0x00168C0C`,
-  `0x0016A2C4` e `0x0016A650`, com 92, 261, 30 e 18 vértices, e primitivas de
-  modo **`0x2d`** e **`0x3d`** — quad texturizado, flat e gouraud;
-- mas a primitiva de 24 bytes das seções de `EDT_MOD.BIN`/`MODEL.BIN` é
-  *"gradation, no-texture"*: quatro cores RGB e quatro índices, **sem UV**.
+O que a seção media continua valendo, e é o lado direito da conta. Com o jogo na
+tela `LOOKS SET`, `get_gpu_state --aspect draw` responde
+**`texture_color_mode: "4-bit CLUT"`**, `texture_disable: false`.
 
-E os quatro TMDs texturizados ficam **fora** do span dos dois arquivos:
-`EDT_MOD.BIN` ocupa `0x8011C000..0x80124CE8`, `MODEL.BIN` ocupa
-`0x8016E800..0x8017E520`, e `0x00168xxx` não está em nenhum dos dois. Eles são
-outra coisa, ainda não identificada. É a incógnita de maior risco do plano.
+O que estava errado é o lado esquerdo. A primitiva de 24 bytes **não** é
+*"gradation, no-texture"* — ela é a metade de textura de um `POLY_FT4` do
+hardware, com os campos na ordem em que o pacote da GPU os põe:
+
+```text
+bytes  0, 1   u0, v0        bytes  2, 3   CLUT id      (u16)
+bytes  4, 5   u1, v1        bytes  6, 7   texture page (u16)
+bytes  8, 9   u2, v2        bytes 10, 11  zero
+bytes 12, 13  u3, v3        bytes 14, 15  zero
+bytes 16..23  quatro índices de vértice u16
+```
+
+Três medições independentes concordam, e cada uma sozinha seria fraca:
+
+1. **Nos 2.841 primitivas dos dois arquivos**, os bytes 10, 11, 14 e 15 são zero
+   **todas as vezes**. É a forma do pacote; quatro cores independentes não teriam
+   por que zerar sempre os mesmos quatro bytes.
+2. **O "mode byte"** que a leitura anterior guardava — sempre 120, 121, 122 ou
+   127 na cor 0, sempre zero nas outras três — é o byte **alto do CLUT id**:
+   `0x78..0x7F`, linhas de paleta perto de y=480 na VRAM. E a palavra em 6..7 é
+   `0x18`, `0x1A` ou `0x99` — páginas de textura em VRAM (512, 256), (640, 256)
+   e (576, 256). **A primeira é o gráfico do `DAT2D.BIN` no offset 8**, que é a
+   entrada que a tabela do CARP chama de *"Pelos Cuerpos y botines"* (§1.7).
+3. **O jogo, perguntado ao vivo, mexe exatamente nesses campos**: trocar `SKIN`
+   anda o byte baixo do CLUT de `0x40` em `0x40`, quatro valores ao todo;
+   trocar `HAIR` anda `v` de `0x20` em `0x20`. Paleta e faixa do atlas — não
+   recoloração.
+
+**E os quatro TMDs de `0x00168xxx` não existem nos dois save states.** Medido por
+`python tools/looks/oracle.py --tmds`: os quatro endereços que esta seção
+registrava estão **zerados** nos dois slots. Os TMDs que de fato vivem na RAM
+dessa tela são **29**, entre `0x800C1678` e `0x800C4948`, de 4 a 54 vértices, e
+**nenhum campo de LOOKS toca um deles**. Os quatro de 92/261/30/18 vértices foram
+medidos numa sessão que não se reproduz a partir dos states, e **nada deste ciclo
+pode ser construído sobre eles** — continuam registrados aqui como o que foram, e
+o `layout.TMD_CLAIMED` carrega a mesma ressalva ao lado dos endereços.
 
 ### 1.7 As texturas de aparência moram no `DAT2D.BIN`, e falta a lista de paletas
 
@@ -1128,12 +1169,34 @@ montagem; trocar uma paleta por outra.
 
 ## 6. As incógnitas, em ordem de risco
 
-**(a) O que são os quatro TMDs texturizados de `0x00168xxx`.** São TMD Sony de
-verdade, fixados, texturizados, e não pertencem a nenhum dos dois arquivos de
-modelo. Ou o boneco da tela é montado a partir deles — e aí o `EDT_MOD.BIN` é
-outra coisa —, ou eles são o cenário/UI e o boneco vem mesmo do `EDT_MOD.BIN`.
-**Nada de geometria deve ser escrito antes de responder isto**, e a resposta é
-uma corrida de `diff_memory` trocando `HAIR` na tela.
+**(a) O que são os quatro TMDs texturizados de `0x00168xxx` — RESPONDIDA em
+2026-09-14**, pela
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md). **O boneco vem
+dos dois arquivos de modelo, e não de TMD nenhum.** Trocar um campo na tela
+reescreve bytes *dentro* de `EDT_MOD.BIN` e de `MODEL.BIN` nos endereços de
+carga, de forma reprodutível, e **zero** bytes em qualquer TMD — que, nos dois
+save states, nem sequer estão nos endereços registrados (§1.6). Por campo, com
+o ruído da animação filtrado (`oracle.py --fields`):
+
+| campo | onde escreve | o que escreve |
+| --- | --- | --- |
+| `SKIN` | `EDT_MOD.BIN`, 5 a 7 seções, **mais** `MODEL.BIN` seção 24 | byte 2 — o byte baixo do CLUT, `+0x40` por passo |
+| `HAIR` | **só** `MODEL.BIN` seção 24, primitivas 1 e 14 | bytes 1, 5, 9, 13 — o `v` das quatro quinas, `+0x20` |
+| `FACE` | **só** `MODEL.BIN` seção 24 | os mesmos bytes de `v` |
+| `BODY` | **nenhum dos dois** | trabalha em buffers, não na geometria carregada |
+
+E o estímulo dos dois save states respondeu de graça a pergunta que a task
+guardava sobre as **duas listas** do `EDT_MOD.BIN`: mudar `SKIN` no goleiro toca
+as seções 11, 16, 17, 18 e 19, que são **da lista 1**; no jogador de linha toca
+as seções 0, 3, 4, 5, 6, 7 e 8, que são **da lista 0**. Interseção vazia. **A
+lista 0 é o jogador de linha e a lista 1 é o goleiro**, medido e não deduzido do
+tamanho.
+
+O que sobra em aberto, e agora com nome: o `MODEL.BIN` seção 24 é a peça que
+`HAIR`, `FACE` e `SKIN` compartilham — a cabeça —, e as ~130 a 320 bytes por
+campo que caem **fora** dos dois arquivos são buffers de trabalho, com duas
+faixas constantes (`0x80153000+` e `0x80162000+`, a 0xF000 uma da outra). Quem
+as nomeia é a [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md).
 
 **(b) Qual peça é qual.** Onze seções, cinco pares e uma sozinha. Nomeá-las
 pelo tamanho é palpite; nomeá-las trocando a opção no jogo e vendo qual muda é
@@ -1142,9 +1205,15 @@ medição.
 **(c) A tabela de montagem.** O que liga `HAIR = B3` à peça e à paleta certas.
 É o coração do projeto e a fase mais cara.
 
-**(d) Pele: paleta ou cor de vértice?** A GPU diz 4-bit CLUT; o formato de seção
-diz cor por vértice, sem UV. Os dois não podem estar certos para a mesma
-geometria. Decidir isto decide metade da Fase 3.
+**(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como
+subproduto da (a): cada passo de `SKIN` soma `0x40` ao byte baixo do CLUT id
+das primitivas da pele, em quatro valores — que são as quatro peles do
+`kSkin[4]`. Não há cor de vértice nenhuma em jogo; a pergunta nasceu da leitura
+errada da primitiva, corrigida na §1.6. **A incógnita continua sendo da
+[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md)**, que é quem
+fecha o que o renderizador tem de implementar — o que mudou é que ela começa
+com o veredito na mão em vez de com a pergunta.
 
 ---
 

@@ -844,6 +844,23 @@ not state it.  self_check() demands the derived and the recorded agree.
 """
 
 
+TMD_CLAIMED = (0x8016821C, 0x80168C0C, 0x8016A2C4, 0x8016A650)
+"""The four textured TMDs section 1.6 of the plan records living in RAM.
+
+Recorded there on 2026-09-13 as unknown (a) -- real Sony TMDs, already fixed by
+`OpenTMD`, textured, with 92, 261, 30 and 18 vertices, belonging to neither
+model file.  They are here because they are ADDRESSES and this module owns
+addresses, and because what LOOKS-TASK-08 measured about them has to sit beside
+them: **in both save states all four hold nothing but zeros**, and the TMDs that
+really are in RAM on that screen are 29 small ones between 0x800C1678 and
+0x800C4948, 4 to 54 vertices each, that no LOOKS field touches.  So the four
+addresses are not reproducible from the states, and nothing in this cycle may
+be built on them.
+"""
+
+TMD_MAGIC = 0x00000041
+"""The first word of a Sony TMD."""
+
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 

@@ -24,6 +24,24 @@ status: pendente
 
 ---
 
+- **A primitiva diz qual página ela amostra, e isso entra na contradição.**
+  Desde 2026-09-14 (§1.6, medida pela
+  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)) sabe-se que
+  os bytes 6..7 de cada primitiva são uma **página de textura**, e que nos dois
+  arquivos ela vale `0x18`, `0x1A` ou `0x99` — VRAM (512, 256), (640, 256) e
+  (576, 256). **A primeira é o gráfico do offset 8**, o que o CARP chama de
+  *"Pelos"*; o do offset 3.568 cai em (544, 256), que **nenhuma primitiva
+  nomeia**. Isso é evidência a favor do CARP e contra o tutorial do `zeta`,
+  **e não fecha a questão**: 3.568 pode ser amostrado por uma primitiva cujo
+  `u` passe dos 256 da página, que é como o hardware alcança o vizinho. Medir
+  isso é desta task — o veredito continua sendo dela, agora com um lado da
+  balança pesado.
+- **E `HAIR` anda `v` de `0x20` em `0x20`**, nas quatro quinas das primitivas 1
+  e 14 da `MODEL.BIN` seção 24. Se o cabelo é uma faixa de 32 pixels de altura
+  num atlas, é nessa página que a faixa tem de aparecer.
+
+---
+
 ## Objetivo
 
 Resolver a contradição por exportação, e deixar o rótulo de cada uma das 23

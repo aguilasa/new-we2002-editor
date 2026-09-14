@@ -31,6 +31,26 @@ status: pendente
 
 ---
 
+- **As duas listas do `EDT_MOD.BIN` já têm dono, e isso poda metade do
+  trabalho.** Medido em 2026-09-14 pela
+  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) com
+  `python tools/looks/oracle.py --fields SKIN`: trocar `SKIN` no **slot 1
+  (goleiro)** reescreve as seções 11, 16, 17, 18 e 19, que são as da **lista
+  1**; no **slot 2 (jogador de linha)**, as seções 0, 3, 4, 5, 6, 7 e 8, que
+  são as da **lista 0**. Interseção vazia. **Lista 0 é o jogador de linha,
+  lista 1 é o goleiro** — e as peças que cada uma nomeia já estão separadas por
+  boneco antes de esta task começar.
+- **A `MODEL.BIN` seção 24 é a cabeça, e é compartilhada.** `HAIR`, `FACE` e
+  `SKIN` escrevem os três nela, e só nela dentro do `MODEL.BIN`. É a primeira
+  peça que esta task pode nomear sem trocar nada.
+- **Sobram duas faixas de buffer por nomear.** Cada campo move de 130 a 320
+  bytes que caem **fora** dos dois arquivos de modelo, e eles se concentram em
+  `0x80153000+` e `0x80162000+` — a `0xF000` uma da outra, e **não** cópias uma
+  da outra (15,3% de bytes iguais). Nomeá-las é o que separa "a geometria
+  carregada" de "a geometria que a GPU desenhou", e é trabalho desta task.
+
+---
+
 ## Objetivo
 
 Cada uma das onze peças com nome medido, e o critério que sustentou o nome.

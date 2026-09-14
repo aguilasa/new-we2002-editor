@@ -127,6 +127,15 @@ CONTROLS = (
         "measuring two players instead of one field",
     ),
     Control(
+        "section-primitive-is-colours", "section.py", "read_primitive",
+        '    clut = struct.unpack_from("<H", data, offset + 2)[0]',
+        "    clut = data[offset + 3]",
+        ("section",),
+        "the reading this module carried until LOOKS-TASK-08: byte 3 as a mode "
+        "byte instead of the high half of the CLUT id, which is the half of "
+        "the claim that says where the texture comes from",
+    ),
+    Control(
         "oracle-preflight-late", "oracle.py", "PREREQUISITES",
         '    ("image", image_to_read),',
         '    # ("image", image_to_read),',

@@ -10,12 +10,17 @@ One section of a model file is:
 This module knows that shape and nothing about where sections live -- offsets
 belong to layout.py, and walking a whole file belongs to modelfile.py.  What it
 adds over the description in the `we3d` analysis is the gap rule below and the
-mode byte, both measured here.
+re-reading of the primitive, both measured here.
 
-IT IS NOT TMD.  The 24-byte primitive is a *gradation, no-texture* quad: four
-colours and four indices, with **no UV**.  Reading it as a TMD packet -- which
-carries a 4-byte header and, when textured, UV pairs -- misaligns everything
-after the first primitive and the damage looks like a wrong start offset.
+IT IS NOT A TMD FILE -- no TMD header, no object table, no `OpenTMD` fixing
+pass, so reading the whole thing as one misaligns everything after the first
+primitive and the damage looks like a wrong start offset.  **But the primitive
+itself is the texture half of a PSX textured quad**, and this module said the
+opposite until 2026-09-14: it called the first sixteen bytes "four colours, no
+UV", which is the `we3d` description.  Measured against all 2.841 primitives of
+both files, and against the game rewriting them live (LOOKS-TASK-08), they are
+four (u, v) pairs plus a CLUT id and a texture page.  See the Primitive
+docstring.
 
 Usage:
     python tools/looks/section.py --check
@@ -30,7 +35,7 @@ HEADER_SIZE = 8
 PRIMITIVE_SIZE = 24
 VERTEX_SIZE = 8
 
-COLOURS_PER_PRIMITIVE = 4
+CORNERS_PER_PRIMITIVE = 4
 INDICES_PER_PRIMITIVE = 4
 
 
@@ -39,35 +44,54 @@ class BadSection(Exception):
 
 
 class Primitive:
-    """One quad: four corner colours and four vertex indices.
+    """One textured quad: four (u, v) corners, a CLUT, a texture page, four
+    vertex indices.
 
-    Two things here are easy to get wrong, and both are recorded rather than
-    smoothed over.
+    **This used to say "four corner colours, no UV", and that was wrong.**  It
+    was the `we3d` reading, and it is what the plan carried into section 1.6 as
+    a contradiction: the GPU draws this screen with texture enabled in 4-bit
+    CLUT while the primitive supposedly had no texture coordinates at all.
+    There is no contradiction -- the sixteen bytes are the texture half of a PSX
+    `POLY_FT4`, laid out exactly as the hardware packet lays it out:
+
+        bytes  0, 1   u0, v0        bytes  2, 3   CLUT id      (u16)
+        bytes  4, 5   u1, v1        bytes  6, 7   texture page (u16)
+        bytes  8, 9   u2, v2        bytes 10, 11  zero
+        bytes 12, 13  u3, v3        bytes 14, 15  zero
+        bytes 16..23  four u16 vertex indices
+
+    Measured 2026-09-14, three ways that agree:
+
+    * over **all 2.841 primitives of both files**, bytes 10, 11, 14 and 15 are
+      zero every single time -- the shape of the packet, and not what four
+      independent colours would look like;
+    * the "mode byte" this class used to keep is byte 3, the HIGH half of the
+      CLUT id: 120, 121, 122 and 127 are 0x78..0x7F, CLUT rows near y=480 in
+      VRAM.  The word at bytes 6..7 is 0x18, 0x1A or 0x99 -- texture pages at
+      VRAM (512, 256), (640, 256) and (576, 256), the first of which is the
+      DAT2D.BIN image at offset 8;
+    * and the game, asked live, moves exactly these fields: changing SKIN steps
+      the CLUT low byte by 0x40, four values over, and changing HAIR steps v by
+      0x20.  A palette swap and a texture-atlas row, not a recolouring.
 
     **The index order as stored is v1, v0, v3, v2** -- not v0..v3.  That is the
     `we3d` reading and this module preserves the stored order in `indices`,
     offering `corners` for the untangled one.  Nothing here has *verified* the
     untangling: it is third-party opinion until something renders, so the raw
     order stays available and is what round-trips.
-
-    **The fourth byte of each colour is a mode byte, not padding.**  The `we3d`
-    description calls it pad.  Measured over all 1,767 primitives of MODEL.BIN
-    (2026-09-14): in colour 0 it is never zero -- 120, 121, 122 or 127 -- and
-    in colours 1, 2 and 3 it is always zero.  So it is one mode byte per
-    primitive, carried in the first colour, and this module keeps it.  It is
-    what unknown (d) of the plan turns on in phase 3, and a parser that
-    discarded it would have to be rewritten there.
     """
 
-    __slots__ = ("colours", "indices", "mode")
+    __slots__ = ("texcoords", "indices", "clut", "tpage")
 
-    def __init__(self, colours, indices, mode):
-        self.colours = colours
-        """4 x (blue, green, red) -- PSX byte order, not RGB."""
+    def __init__(self, texcoords, indices, clut, tpage):
+        self.texcoords = texcoords
+        """4 x (u, v), one per corner, in the stored corner order."""
         self.indices = indices
         """The four vertex indices exactly as stored: v1, v0, v3, v2."""
-        self.mode = mode
-        """The fourth byte of colour 0.  See the class docstring."""
+        self.clut = clut
+        """The CLUT id from bytes 2..3 -- which palette this quad samples."""
+        self.tpage = tpage
+        """The texture page from bytes 6..7 -- which page it samples from."""
 
     @property
     def corners(self):
@@ -75,8 +99,21 @@ class Primitive:
         v1, v0, v3, v2 = self.indices
         return (v0, v1, v2, v3)
 
+    @property
+    def clut_vram(self):
+        """(x, y) of this CLUT in VRAM, by the hardware's own encoding."""
+        return ((self.clut & 0x3F) * 16,  # not-an-address: the CLUT id's own encoding
+                self.clut >> 6)
+
+    @property
+    def tpage_vram(self):
+        """(x, y) of this texture page in VRAM."""
+        return ((self.tpage & 0x0F) * 64,  # not-an-address: the page id's encoding
+                ((self.tpage >> 4) & 1) * 256)  # not-an-address: idem
+
     def __repr__(self):
-        return "Primitive(mode=0x%02x, indices=%r)" % (self.mode, self.indices)
+        return ("Primitive(clut=0x%04x, tpage=0x%04x, indices=%r)"
+                % (self.clut, self.tpage, self.indices))
 
 
 class Vertex:
@@ -181,14 +218,12 @@ def read_primitive(data: bytes, offset: int) -> Primitive:
         raise BadSection(
             "primitive at %d runs past the %d bytes available" % (offset, len(data))
         )
-    colours = []
-    for slot in range(COLOURS_PER_PRIMITIVE):
-        blue, green, red, fourth = data[offset + slot * 4: offset + slot * 4 + 4]
-        colours.append((blue, green, red))
-        if slot == 0:
-            mode = fourth
-    indices = struct.unpack_from("<4H", data, offset + COLOURS_PER_PRIMITIVE * 4)
-    return Primitive(tuple(colours), indices, mode)
+    texcoords = tuple((data[offset + slot * 4], data[offset + slot * 4 + 1])
+                      for slot in range(CORNERS_PER_PRIMITIVE))
+    clut = struct.unpack_from("<H", data, offset + 2)[0]
+    tpage = struct.unpack_from("<H", data, offset + 6)[0]
+    indices = struct.unpack_from("<4H", data, offset + CORNERS_PER_PRIMITIVE * 4)
+    return Primitive(texcoords, indices, clut, tpage)
 
 
 def read_vertex(data: bytes, offset: int) -> Vertex:
@@ -328,17 +363,26 @@ def scan(data: bytes, start: int) -> Scan:
     return Scan(sections, groups, offset)
 
 
-def build_section(vertices, primitives, mode: int = 0x78) -> bytes:  # not-an-address: a primitive mode byte
+def build_section(vertices, primitives,
+                  clut: int = 0x7801,  # not-an-address: a CLUT id
+                  tpage: int = 0x0018) -> bytes:  # not-an-address: CLUT and texture page ids
     """Assemble a section from counts, for tests and for the red case.
 
     *vertices* and *primitives* are counts; the content is filler with a
     recognisable shape.  It exists so self_check() can assert against bytes it
     constructed rather than against a disc it may not have.
+
+    The filler is shaped like the real thing: the CLUT and the page ride in the
+    first two corners and the last two carry zeros there, which is the property
+    that separates this reading from the four-colours one.  Filler that ignored
+    it would let a parser that still read colours pass.
     """
     out = bytearray(struct.pack("<2I", vertices, primitives))
     for index in range(primitives):
-        out += bytes((1, 2, 3, mode))
-        out += bytes((4, 5, 6, 0)) * 3
+        out += struct.pack("<2BH", 1, 2, clut)
+        out += struct.pack("<2BH", 3, 4, tpage)
+        out += struct.pack("<2BH", 5, 6, 0)
+        out += struct.pack("<2BH", 7, 8, 0)
         out += struct.pack("<4H", index, index + 1, index + 2, index + 3)
     for index in range(vertices):
         out += struct.pack("<3hH", index, -index, index * 2, 0)
@@ -347,8 +391,12 @@ def build_section(vertices, primitives, mode: int = 0x78) -> bytes:  # not-an-ad
 
 def self_check() -> None:
     """Parse bytes we built, then break the primitive size and demand red."""
+    # Declared here because red 1 below rebinds it, and Python wants the
+    # declaration before the name is read anywhere in the function.
+    global PRIMITIVE_SIZE
+
     vertices, primitives = 5, 3
-    body = build_section(vertices, primitives, mode=0x7A)  # not-an-address: mode byte
+    body = build_section(vertices, primitives, clut=0x7A02)  # not-an-address: a CLUT id
     assert len(body) == section_size(vertices, primitives), len(body)
 
     section = read_section(body, 0)
@@ -357,9 +405,18 @@ def self_check() -> None:
     assert section.end == len(body)
 
     first = section.primitives[0]
-    assert first.mode == 0x7A, first.mode  # not-an-address: mode byte
-    assert first.colours[0] == (1, 2, 3), first.colours
-    assert first.colours[1] == (4, 5, 6), first.colours
+    assert first.clut == 0x7A02, first.clut  # not-an-address: a CLUT id
+    assert first.tpage == 0x0018, first.tpage  # not-an-address: a texture page
+    assert first.texcoords == ((1, 2), (3, 4), (5, 6), (7, 8)), first.texcoords
+
+    # The CLUT and the page live in the FIRST TWO corners only.  Asserted
+    # against the bytes, because it is the property that tells this reading
+    # apart from the four-colours one it replaced, and it holds over all 2.841
+    # primitives of both real files.
+    raw = body[HEADER_SIZE:HEADER_SIZE + PRIMITIVE_SIZE]
+    assert raw[10] == raw[11] == raw[14] == raw[15] == 0, raw.hex()
+    assert first.clut_vram == (32, 488), first.clut_vram
+    assert first.tpage_vram == (512, 256), first.tpage_vram
 
     # Stored order is v1, v0, v3, v2; `corners` is the untangling, and the two
     # have to disagree or the reordering is not being exercised at all.
@@ -384,7 +441,6 @@ def self_check() -> None:
     pair = build_section(2, 1) + build_section(3, 2)
     assert [section.offset for section, _ in walk(pair, 0)] == [0, len(build_section(2, 1))]
 
-    global PRIMITIVE_SIZE
     saved = PRIMITIVE_SIZE
     try:
         PRIMITIVE_SIZE = 20

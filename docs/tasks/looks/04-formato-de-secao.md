@@ -18,8 +18,16 @@ status: concluído
   [ANALISE-REPOS-WE3D-DBMANAGER.md](/docs/ANALISE-REPOS-WE3D-DBMANAGER.md), com
   **uma correção medida aqui**: a varredura contígua morre na seção 55 porque
   falta o par de zeros que separa grupos.
-- **Não é TMD.** A primitiva de 24 bytes é *gradation, no-texture*: quatro cores
-  e quatro índices, **sem UV**. Tratá-la como pacote TMD desalinha tudo.
+- **Não é arquivo TMD** — sem cabeçalho, sem tabela de objetos, sem passagem do
+  `OpenTMD`. Tratar o arquivo como um desalinha tudo.
+
+  > **A segunda metade deste bullet foi derrubada em 2026-09-14**, pela
+  > [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md). Ele dizia
+  > que a primitiva de 24 bytes é *gradation, no-texture*, "quatro cores e
+  > quatro índices, **sem UV**" — a leitura do `we3d`. Ela **tem** UV: são
+  > quatro pares `(u, v)` mais um CLUT id e uma página de textura, na ordem do
+  > `POLY_FT4`. O Log abaixo fica como está, porque descreve o que esta task
+  > mediu quando rodou; a leitura corrente é a §1.6 do plano.
 
 ---
 

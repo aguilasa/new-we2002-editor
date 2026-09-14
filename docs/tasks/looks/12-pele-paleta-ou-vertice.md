@@ -40,6 +40,23 @@ status: pendente
 
 ---
 
+- **A resposta já foi medida, e esta task começa com ela na mão.** Em
+  2026-09-14 a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
+  mediu, por `python tools/looks/oracle.py --fields SKIN`, que **cada passo de
+  `SKIN` soma `0x40` ao byte baixo do CLUT id** das primitivas da pele — quatro
+  valores ao todo, que são as quatro peles do `kSkin[4]`. **É paleta.** Não há
+  cor de vértice em jogo: a pergunta desta task nasceu da leitura errada da
+  primitiva, que dizia "quatro cores, sem UV" e foi corrigida na §1.6.
+- **O que continua sendo desta task** é o outro lado do critério: dizer o que o
+  renderizador tem de implementar, com a paleta **lida do disco** e não
+  deduzida, e o controle da §5.5 — trocar uma paleta por outra e exigir
+  vermelho — que a
+  [`LOOKS-TASK-06`](/docs/tasks/looks/06-harness-controles-e-selftest.md)
+  encaminhou para cá por não ter o que derrubar ainda. O veredito adianta a
+  direção; não substitui a medição da paleta.
+
+---
+
 ## Objetivo
 
 Saber como a cor chega ao boneco, e portanto o que o renderizador tem de fazer.
