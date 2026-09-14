@@ -3,7 +3,7 @@ id: CORR-LOOKS-002
 title: "Correção: o comentário do `.gitignore` guarda o número que a própria task derrubou"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -71,19 +71,63 @@ comentários vizinhos não têm acento.
 
 ## Verificação
 
-- [ ] o número do comentário bate com o `TOTAL` do
+- [x] o número do comentário bate com o `TOTAL` do
       `python tools/looks/superpack_count.py "C:/games/we2002/Superpackv6"`
-- [ ] `git check-ignore -v "Superpackv6/We2002/MCR/x.jpg"` continua casando
+- [x] `git check-ignore -v "Superpackv6/We2002/MCR/x.jpg"` continua casando
       `/Superpackv6/`
-- [ ] `git check-ignore -v work/venv-looks/pyvenv.cfg` continua casando
-- [ ] `roms/` intocada
+- [x] `git check-ignore -v work/venv-looks/pyvenv.cfg` continua casando
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O comentário da entrada `/Superpackv6/` passou a dizer **`4,5 GiB, 31.790
+arquivos`**, e ganhou a meia linha que a CORR pede: *"Destes, 28.720 estao na
+subpasta `We2002\`, que e a raiz de todo caminho `MCR\...` citado nos
+documentos."* — que é a mesma distinção que a §2 do plano e o `NOTICE.md` já
+faziam, e a única que impede a próxima leitura de concluir que os dois é que
+estão errados. O parágrafo foi reembrulhado em 78 colunas, sem acento, como os
+comentários vizinhos.
+
+Números conferidos contra a ferramenta antes de editar, não somados à mão:
+
+```
+$ python tools/looks/superpack_count.py "C:/games/we2002/Superpackv6"
+We2002                          28720 files     4452185957 B
+--------------------------------------------------------------
+TOTAL                           31790 files     4830420054 B  (4.50 GiB)
+```
+
+O `.gitignore` continua casando o que casava — as três verificações da CORR,
+depois da edição:
+
+```
+$ git check-ignore -v "Superpackv6/We2002/MCR/x.jpg"
+.gitignore:184:/Superpackv6/   Superpackv6/We2002/MCR/x.jpg
+$ git check-ignore -v "Superpackv6/MCR/We DB - polipoli/Faces/A-I3-A-F-A.jpg"
+.gitignore:184:/Superpackv6/   Superpackv6/MCR/We DB - polipoli/Faces/A-I3-A-F-A.jpg
+$ git check-ignore -v work/venv-looks/pyvenv.cfg
+.gitignore:48:work/            work/venv-looks/pyvenv.cfg
+```
+
 **Problemas encontrados:**
 
+O reembrulho moveu a entrada `/Superpackv6/` da linha 182 para a **184**, e o
+Log da [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md)
+transcreve um `git check-ignore -v` que imprime `.gitignore:182:`. A
+transcrição **fica como está**: ela é registro fiel da corrida que a produziu, e
+reescrevê-la para casar com o arquivo de hoje seria falsificar evidência — a
+mesma regra que o `.claude/rules/links.md` aplica aos `CORR-*.md`.
+
+A varredura por `4,2 GB` e `28.720` deixou vivas só as duas menções que
+**nomeiam** o valor como o erro anterior (§2 do plano e o título do achado na
+LOOKS-TASK-01). Essas são registro, e continuam certas.
+
 **Arquivos criados/modificados:**
+
+- `.gitignore` — o comentário da entrada `/Superpackv6/`
+- `docs/tasks/looks/CORR-LOOKS-002.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

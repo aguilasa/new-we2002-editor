@@ -170,15 +170,17 @@ wte/re/trace.log
 /pes6editor/
 
 # ---- Superpack v6 (`tools/looks/`, LOOKS-TASK-01) ----
-# Coletanea da cena de modding hispano-luso-italiana: 4,2 GB, 28.720 arquivos
+# Coletanea da cena de modding hispano-luso-italiana: 4,5 GiB, 31.790 arquivos
 # de binario, fonte, tutorial e arte, de muitas maos e sem licenca nenhuma --
-# nao ha nem a quem pedir. Como `roms/`, `we-team-editor/` e
-# `WE2002-EASY-MCR-V4/`, o usuario mantem a pasta no disco, FORA da arvore de
-# trabalho (nesta maquina em `C:\games\we2002\Superpackv6\`), e as
-# ferramentas a leem la. Esta entrada existe justamente porque hoje ela nao
-# casa com nada: e a guarda para o dia em que alguem copiar a pasta para
-# dentro do repositorio a fim de encurtar um caminho. Ver a secao
-# "appearance viewer" do NOTICE.md e a §2 do docs/PLAN-LOOKS-PY.md.
+# nao ha nem a quem pedir. Destes, 28.720 estao na subpasta `We2002\`, que e
+# a raiz de todo caminho `MCR\...` citado nos documentos. Como `roms/`,
+# `we-team-editor/` e `WE2002-EASY-MCR-V4/`, o usuario mantem a pasta no
+# disco, FORA da arvore de trabalho (nesta maquina em
+# `C:\games\we2002\Superpackv6\`), e as ferramentas a leem la. Esta entrada
+# existe justamente porque hoje ela nao casa com nada: e a guarda para o dia
+# em que alguem copiar a pasta para dentro do repositorio a fim de encurtar
+# um caminho. Ver a secao "appearance viewer" do NOTICE.md e a §2 do
+# docs/PLAN-LOOKS-PY.md.
 /Superpackv6/
 # Os 50 renders de `We DB - polipoli\Faces\` sao o corpus da LOOKS-TASK-18 e
 # saem da mesma coletanea: sao lidos onde estao, e copia-los para ca seria
