@@ -130,13 +130,23 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 
 ## Gates deste ciclo
 
-| alvo | precisa | a partir de |
+| alvo | precisa | existe desde |
 | --- | --- | --- |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | **CORR-LOOKS-012** |
 | `looks_selftest` | nada — **nunca pula** | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | LOOKS-TASK-05 |
 | `looks_ui` | venv + display (77 sem eles) | LOOKS-TASK-16 |
 
-Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped**.
+**A coluna é "existe desde", não "prometido para".** Ela dizia LOOKS-TASK-05
+para o `looks_image`, a 05 fechou, e o alvo não existia: `ctest -R looks`
+respondia `No tests were found!!!` **saindo zero**, que é indistinguível de
+verde e é exatamente o que a regra abaixo proíbe. Registrado em 2026-09-14
+pela [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md). Alvo que ainda
+não existe nesta tabela traz o **nome da task que o cria**, e enquanto ela não
+rodar ele não é gate de coisa nenhuma.
+
+Hoje, com um alvo só registrado: `ctest -R looks` dá **0 passed, 1 skipped**
+sem a variável, e **1 passed** com ela. Numa máquina limpa, depois da
+LOOKS-TASK-19, são **1 passed, 2 skipped**.
 
 **Antes da LOOKS-TASK-06 não há gate**, e isso é esperado: as tasks 01 a 05 se
 verificam pela saída da ferramenta, copiada para o Log. Depois dela, toda task

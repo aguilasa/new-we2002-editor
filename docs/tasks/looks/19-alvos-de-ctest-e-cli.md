@@ -32,11 +32,17 @@ os três alvos.
 
 - [ ] `cli.py` com `sections`, `pieces`, `texture`, `looks` e `check`.
 - [ ] `looks_selftest` registrado, sem dependência nenhuma, **nunca pula**.
-- [ ] `looks_image` registrado, com `SKIP_RETURN_CODE 77` e
-      `WE2002_LOOKS_IMAGE` nomeada na mensagem de skip.
+- [x] `looks_image` **já registrado** — entrou na
+      [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) em 2026-09-14,
+      porque o perfil o prometia desde a LOOKS-TASK-05 e `ctest -R looks`
+      respondia `No tests were found!!!` **saindo zero**, que se lê como
+      verde. Esta task **confere**, não cria: `SKIP_RETURN_CODE 77`,
+      `WE2002_LOOKS_IMAGE` nomeada na mensagem de skip, e o disco inglês
+      recusado em vez de aceito em silêncio.
 - [ ] `looks_ui` registrado sob `if(UNIX AND Python3_FOUND)`, também com 77.
 - [ ] Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped** — e o
-      número aparece no Log, copiado da saída.
+      número aparece no Log, copiado da saída. Até esta task são **0 passed,
+      1 skipped**: só o `looks_image` existe, e sem a variável ele pula.
 - [ ] Os alvos dos outros projetos continuam verdes: `ctest -R "pes2|mcr|tasks"`
       sem regressão, especialmente se a LOOKS-TASK-10 mexeu no
       `bin_archive.py`.

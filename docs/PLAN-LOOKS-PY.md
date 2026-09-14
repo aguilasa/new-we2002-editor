@@ -697,7 +697,7 @@ oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)
 controls.py     controles negativos por substituição literal no fonte
 selftest.py     o agregador -- alvo looks_selftest
-check_image.py  o alvo looks_image, que precisa da imagem
+(o alvo looks_image roda modelfile.py --check-image; ver 4.4)
 cli.py          sections | pieces | texture | looks | check
 ui/app.py       --smoke, --screenshot, --looks TUPLA
 ui/viewer.py    QOpenGLWidget, câmera orbital
@@ -816,13 +816,24 @@ mesma razão: a máquina é do usuário enquanto o trabalho corre.
 
 Mesma divisão por custo que o repositório já usa:
 
-| alvo | precisa | pula? |
-|---|---|---|
-| `looks_selftest` | nada | nunca |
-| `looks_image` | `WE2002_LOOKS_IMAGE` | 77 |
-| `looks_ui` | venv + display | 77 |
+| alvo | precisa | pula? | existe desde |
+|---|---|---|---|
+| `looks_selftest` | nada | nunca | LOOKS-TASK-06 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` | 77 | **2026-09-14** |
+| `looks_ui` | venv + display | 77 | LOOKS-TASK-16 |
 
-Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped**.
+Numa máquina limpa, ao fim do ciclo, `ctest -R looks` dá **1 passed, 2
+skipped**. **Hoje são 0 passed, 1 skipped**: só o `looks_image` está
+registrado.
+
+**O `looks_image` não tem módulo próprio.** A §3.2 previa um `check_image.py`,
+e o que existe é `modelfile.py --check-image` — onde a verificação já mora,
+porque é quem sabe ler os dois arquivos. Um módulo a mais só para chamar esse
+seria cerimônia. Sem argumento ele lê a `WE2002_LOOKS_IMAGE` e **pula com 77**
+nomeando a variável; a primeira coisa que faz é ler um arquivo **só-japonês**
+pela guarda, porque geometria é idêntica nos dois discos e sem essa leitura
+apontar a variável para o disco inglês passaria em silêncio
+([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md)).
 
 ### 4.5 As duas variáveis, e a guarda que faz a regra valer
 

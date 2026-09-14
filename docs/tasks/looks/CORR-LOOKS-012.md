@@ -3,7 +3,7 @@ id: CORR-LOOKS-012
 title: "Correção: o perfil promete o `looks_image` a partir desta task, e `ctest -R looks` sai 0 dizendo que não achou teste"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -123,23 +123,111 @@ zero.
 
 ## Verificação
 
-- [ ] `ctest --test-dir build -R looks` **acha** o alvo e não imprime
+- [x] `ctest --test-dir build -R looks` **acha** o alvo e não imprime
       "No tests were found"
-- [ ] sem `WE2002_LOOKS_IMAGE`, o alvo reporta **skipped (77)** e diz qual
+- [x] sem `WE2002_LOOKS_IMAGE`, o alvo reporta **skipped (77)** e diz qual
       variável falta
-- [ ] com a variável apontando `roms/japanese-shift-jis.bin`, o alvo passa e a
+- [x] com a variável apontando `roms/japanese-shift-jis.bin`, o alvo passa e a
       saída traz as duas linhas de contagem com o offset de início
-- [ ] apontar a variável para o disco **inglês** faz o alvo falhar pela guarda
+- [x] apontar a variável para o disco **inglês** faz o alvo falhar pela guarda
       dos dois discos, e não passar em silêncio
-- [ ] a tabela de gates do perfil e a 19 concordam sobre quem cria cada alvo
-- [ ] `roms/` intocada — o alvo lê a imagem, não escreve
+- [x] a tabela de gates do perfil e a 19 concordam sobre quem cria cada alvo
+- [x] `roms/` intocada — o alvo lê a imagem, não escreve
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O `looks_image` existe, e a divergência de dono foi **resolvida** e não
+contornada: o alvo nasce **aqui**, e a
+[`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) passa a
+conferi-lo em vez de criá-lo. O perfil deixou de prometer e passou a registrar.
+
+Três partes:
+
+**1. O alvo, em `tests/CMakeLists.txt`**, no molde dos de `mcr` e `pes2`:
+`modelfile.py --check-image`, `SKIP_RETURN_CODE 77`, `TIMEOUT 300`.
+
+**2. O `--check-image` sem argumento lê a `WE2002_LOOKS_IMAGE`** e **pula com
+77** quando ela não está lá, com a mensagem que o `iso_source.image_from_env()`
+já escrevia — a que nomeia **as duas** variáveis, porque apontar a de dirigir
+aqui é exatamente a confusão que os dois nomes existem para evitar. A lógica do
+skip ficou na ferramenta, e não na linha do `ctest`, pelo mesmo motivo: skip que
+não nomeia a variável é skip em que ninguém age.
+
+**3. O alvo recusa o disco errado.** Isto **não** estava funcionando, e a
+verificação da CORR pedia — apontar a variável para o disco inglês **passava**,
+exit 0. A causa: o `--check-image` só lia `MODEL.BIN` e `EDT_MOD.BIN`, que são
+byte a byte **idênticos** nos dois discos, então a guarda nunca era acionada. A
+primeira coisa que ele faz agora é ler o `/BIN/DAT2D.BIN` — só-japonês — pela
+`disc.read()`, e a recusa traz as três frases da
+[`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md).
+
+Medido, os três caminhos:
+
+```
+$ ctest -R looks                      (sem a variavel)
+The following tests did not run:
+         10 - looks_image (Skipped)
+100% tests passed out of 1
+
+$ WE2002_LOOKS_IMAGE=<japonesa> ctest -R looks
+1/1 Test #10: looks_image ......................   Passed    0.07 sec
+100% tests passed out of 1
+
+$ WE2002_LOOKS_IMAGE=<inglesa> ctest -R looks
+The following tests FAILED:
+         10 - looks_image (Failed)
+```
+
+E a ferramenta, direto:
+
+```
+$ python tools/looks/modelfile.py --check-image          # sem a variavel
+modelfile --check-image: skipped -- WE2002_LOOKS_IMAGE is not set: it names
+the Japanese data track (.bin) ...                                  (exit 77)
+
+$ WE2002_LOOKS_IMAGE=<inglesa> python tools/looks/modelfile.py --check-image
+  FAILED /BIN/DAT2D.BIN: read 4a4d6a4f... expected 0e914e58...  /BIN/DAT2D.BIN
+  differs between the Japanese original and the English translation patch ...
+modelfile --check-image: 1 failure(s)                               (exit 1)
+```
+
 **Problemas encontrados:**
 
+**1. O `build/` da raiz é de outra máquina.** Ele traz um `CMakeCache.txt`
+gerado em `/home/ingmar/desenvolvimento/github/new-we2002-editor/build`, e
+reconfigurá-lo aqui o destruiria. A verificação correu num diretório de build
+**novo**, no scratchpad, configurado com o toolchain do vcpkg
+(`-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -G Ninja`),
+que é o que acha o CURL nesta máquina. O `build/` da raiz não foi tocado.
+
+**2. O `pes2_selftest` falha nesta máquina, e não é regressão.** Ele lê
+`/proc/self/fd` para contar descritor vazado, e no Windows isso é
+`FileNotFoundError [WinError 3]`. Anterior a esta correção e de outro projeto —
+registrado aqui para não parecer efeito dela. O `core` aparece como *Not Run*
+porque o build novo foi só configurado, não compilado.
+
+**3. A §3.2 do plano previa um `check_image.py`** que não existe nem precisa:
+a verificação mora no `modelfile.py`, que é quem sabe ler os dois arquivos. A
+linha da §3.2 e a tabela da §4.4 passaram a dizer isso, com o número de hoje
+(**0 passed, 1 skipped**) ao lado do número do fim do ciclo.
+
+**4. O título da 19 ficou como está.** Trocá-lo para refletir "dois criados
+aqui" criaria divergência entre o `title:` e a célula da tabela — que é
+exatamente o defeito da [`CORR-LOOKS-014`](/docs/tasks/looks/CORR-LOOKS-014.md),
+no mesmo lote. O critério da 19 carrega a correção.
+
 **Arquivos criados/modificados:**
+
+- `tests/CMakeLists.txt` — o alvo `looks_image`
+- `tools/looks/modelfile.py` — `--check-image` sem argumento (77), e a leitura
+  do arquivo só-japonês pela guarda
+- `docs/prompts/perfil-looks.md` — a tabela de gates: "existe desde", e os
+  números de hoje
+- `docs/tasks/looks/19-alvos-de-ctest-e-cli.md` — o critério
+- `docs/PLAN-LOOKS-PY.md` — §3.2 e §4.4
+- `docs/tasks/looks/CORR-LOOKS-012.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

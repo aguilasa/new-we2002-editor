@@ -19,6 +19,7 @@ paid for once already.
 Usage:
     python tools/looks/modelfile.py --check
     python tools/looks/modelfile.py --check-image <japanese.bin>
+    python tools/looks/modelfile.py --check-image      # takes WE2002_LOOKS_IMAGE
 """
 
 from __future__ import annotations
@@ -288,6 +289,20 @@ def _check_image(image_path: str) -> int:
 
     failures = 0
     with iso_source.open_disc(image_path) as disc:
+        # First: is this the disc the variable claims?  Geometry is identical
+        # on both, so reading only geometry would accept the English disc
+        # without a word -- and WE2002_LOOKS_IMAGE names the Japanese track,
+        # which is where every read in this project comes from.  One read of a
+        # Japanese-only file through the guard settles it, and the refusal
+        # names the problem.
+        try:
+            disc.read(layout.DAT2D)
+            print("  disc is the Japanese one (%s accepted)" % layout.DAT2D)
+        except layout.WrongDisc as exc:
+            print("  FAILED %s" % exc)
+            print("modelfile --check-image: 1 failure(s)")
+            return 1
+
         for disc_path in (layout.MODEL, layout.EDT_MOD):
             data = disc.read(disc_path)
             try:
@@ -340,6 +355,20 @@ def main(argv: list[str]) -> int:
         return 0
     if len(argv) == 3 and argv[1] == "--check-image":
         return _check_image(argv[2])
+    if len(argv) == 2 and argv[1] == "--check-image":
+        # No path: take it from the environment, and SKIP rather than pass when
+        # it is not there.  77 is this repository's skip code across all five
+        # projects, and the reason it is here and not in the ctest line is the
+        # message -- a bare skip that does not name the variable is a skip
+        # nobody acts on.
+        import iso_source  # late, like _check_image: see its comment
+
+        try:
+            image = iso_source.image_from_env()
+        except RuntimeError as exc:
+            print("modelfile --check-image: skipped -- %s" % exc)
+            return 77
+        return _check_image(image)
     print(__doc__.strip())
     return 2
 
