@@ -511,7 +511,8 @@ o disco pelas ferramentas de `tools/pes2/` e não duplica nenhuma delas.
 ### 3.2 Os módulos
 
 ```
-iso_source.py   fachada fina sobre tools/pes2/iso.py; abre a imagem, entrega bytes
+iso_source.py   fachada fina sobre tools/pes2/iso.py; abre a imagem e entrega
+                bytes -- todo arquivo pela guarda do layout.py (ver 4.5)
 layout.py       O ÚNICO com endereço: LBA, BASE, offsets de lista, 157164,
                 mais a identidade dos dois discos e a guarda que a aplica (§4.5)
 section.py      o formato da §1.4: cabeçalho, primitiva de 24 B, vértice de 8 B
@@ -713,6 +714,16 @@ só diga "digest mismatch" manda o leitor olhar o parser.
 mesma release podem divergir na cauda e trazer os mesmos assets, e um patch de
 tradução pode manter o tamanho do disco e trocar exatamente este arquivo — que
 é o que acontece aqui.
+
+**E a guarda só vale porque não há outro caminho de leitura.** Função que recusa
+não impede nada se o chamador puder não chamá-la. O `iso_source.py` (§3.2,
+[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md)) é a
+**única** porta de leitura de disco do projeto, e passa **todo** arquivo pelo
+`require()` antes de devolver bytes — não por disciplina de quem escreve o
+chamador. Quem precisar dos bytes sem conferência (comparar dois discos é o caso
+legítimo, e é o que o `--check-discs` faz) usa função separada e nomeada, para o
+desvio aparecer no `grep`. Sem essa metade esta seção descreve uma função; com
+ela, descreve uma garantia.
 
 ---
 

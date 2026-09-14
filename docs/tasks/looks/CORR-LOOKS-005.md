@@ -3,7 +3,7 @@ id: CORR-LOOKS-005
 title: "Correção: a guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -108,19 +108,59 @@ garantia.
 
 ## Verificação
 
-- [ ] a 03 tem item de critério exigindo que a leitura passe por
+- [x] a 03 tem item de critério exigindo que a leitura passe por
       `layout.require()`, e outro exigindo o caso vermelho pelo `iso_source.py`
-- [ ] a §4.5 do plano diz quem chama a guarda, e não só que ela existe
-- [ ] `python tools/looks/layout.py --check` continua verde
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] a §4.5 do plano diz quem chama a guarda, e não só que ela existe
+- [x] `python tools/looks/layout.py --check` continua verde
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+A [`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) ganhou os
+**três** itens de critério da CORR, logo abaixo do "abre a imagem e entrega",
+que é a frase que descrevia um leitor sem guarda: a leitura passa por
+`layout.require()` e **não é opção do chamador**; o caso vermelho vivo é ler o
+`/BIN/DAT2D.BIN` do disco inglês pelo `iso_source.py` e receber `WrongDisc`; e
+quem precisar dos bytes sem conferência usa função **nomeada e separada**, para
+o desvio aparecer no `grep`. O primeiro item diz por que ele existe — sem ele a
+03 fecha removendo o único chamador da guarda sem pôr nenhum no lugar.
+
+A §4.5 do plano ganhou a outra metade da regra: *"a guarda só vale porque não há
+outro caminho de leitura"*. A seção descrevia uma função; agora descreve uma
+garantia, e nomeia o `iso_source.py` como a única porta.
+
+Evidência reproduzida antes de editar, e é o ponto inteiro da CORR:
+
+```
+$ grep -rn "require(" tools/ --include=*.py
+tools/looks/layout.py:113:def require(...)
+tools/looks/layout.py:162,168,180,189    (os casos do self_check)
+tools/looks/layout.py:220,230            (dentro de _check_discs)
+```
+
+Zero chamadores fora do `layout.py` — e o `_check_discs()`, que são esses dois,
+é o que a 03 manda mover.
+
 **Problemas encontrados:**
 
+A varredura de discrepância puxou um terceiro lugar que a CORR não previa: a
+§3.2 do plano descrevia o `iso_source.py` como *"abre a imagem, entrega bytes"*
+— a mesma frase sem guarda, na tabela de módulos. Corrigida no mesmo commit,
+com a remissão à §4.5, porque deixá-la seria manter viva exatamente a leitura
+que esta correção fecha.
+
+Nada de código mudou: as duas partes desta CORR são contrato. O
+`layout.py --check` foi rodado mesmo assim, por ser o gate da fase.
+
 **Arquivos criados/modificados:**
+
+- `docs/tasks/looks/03-fonte-de-disco-e-layout.md` — três itens de critério
+- `docs/PLAN-LOOKS-PY.md` — §4.5 (a metade que faltava) e §3.2 (a linha do
+  `iso_source.py`)
+- `docs/tasks/looks/CORR-LOOKS-005.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

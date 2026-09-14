@@ -49,6 +49,20 @@ status: pendente
 
 - [ ] `iso_source.py` abre a imagem por `tools/pes2/iso.py` e entrega
       `/BIN/EDT_MOD.BIN`, `/BIN/MODEL.BIN` e `/BIN/DAT2D.BIN`.
+- [ ] **Toda leitura de arquivo do disco no `iso_source.py` passa por
+      `layout.require()`** — não é opção do chamador. Um arquivo cujo digest
+      não bate não chega a virar bytes na mão de ninguém. Sem este item a 03
+      fecha deixando a guarda da LOOKS-TASK-02 completa, testada e
+      **inalcançável** — o único chamador dela hoje é o `_check_discs()`, que
+      esta mesma task manda mover.
+- [ ] **Caso vermelho vivo:** ler `/BIN/DAT2D.BIN` do disco **inglês** pelo
+      `iso_source.py` levanta `WrongDisc`, e o teste exige isso. É o mesmo
+      estímulo do `--check-discs`, agora pelo caminho que o resto do projeto
+      usa.
+- [ ] Se algum ponto legítimo precisar dos bytes sem conferência — comparar
+      dois discos, que é o que o `--check-discs` faz —, que seja função
+      **nomeada e separada** (`read_unchecked()` ou equivalente), para o
+      desvio aparecer no `grep`.
 - [ ] `layout.py` carrega, e é o único a carregar: os LBAs (5000, 8100, 5300),
       os dois `BASE` (`0x8011C000`, `0x8016E800`), o início de geometria do
       `MODEL.BIN` (1816) e o offset dos registros de jogador (157.164).
