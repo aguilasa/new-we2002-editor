@@ -163,12 +163,55 @@ is not save data, and §0 of the plan lists it under non-objectives.
 If you are Zetaprog, and want this use licensed, relicensed, or taken down,
 please open an issue.
 
+## Lineage of the appearance viewer (the `tools/looks/` tree)
+
+`tools/looks/` is a sixth product in this repository: a Python + Qt viewer of
+the 3D player model the game draws on its `LOOKS SET` screen, reading geometry,
+textures and palettes straight off the CD image. It writes nothing — not to the
+image, not to a memory card — and shares no build and no code with
+`newWe2002`, `wte/`, the PES2 tooling or `tools/mcr/`. Its plan is
+[`docs/PLAN-LOOKS-PY.md`](docs/PLAN-LOOKS-PY.md).
+
+It leans on **three** third-party materials whose legal situations are
+**different from one another**, and the whole point of this section is that they
+not be conflated. One is licensed and may be reused with credit; the other two
+are unlicensed, and each is unlicensed for its own reason.
+
+| Author | Work | License | What is taken |
+|---|---|---|---|
+| **Darkensses** | [`we3d`](https://github.com/Darkensses/we3d) — a browser viewer/editor of `.TMD` and `MODEL.BIN` built on Three.js | **MIT** — reusable **with credit**, which this row is | The `MODEL.BIN` section format (`uint32 numVertex`, `uint32 numPrimitive`, 24-byte primitives, 8-byte vertices), the count of 106 sections and their grouping into 14 models, and the *method* of deriving the RAM base address without an emulator. Measured independently against our own images in [`docs/ANALISE-REPOS-WE3D-DBMANAGER.md`](docs/ANALISE-REPOS-WE3D-DBMANAGER.md) §2 before use. Its `TMDParser.v2.js` is a cross-check on our counts, **not** a source to transcribe — the stack is web and ours is Python. |
+| **Haplo and polipoli** | the `en_we2000edit` MFC sources, found inside the Superpack | **None** — all rights reserved, the same position as our own `legacy/` | **Nothing.** It is a *witness*, not a source. Its `PlayerEditDlg.cpp` unpacks the same 12-byte appearance record bit for bit, and its label tables name the same 32 hairstyles, 4 skins and 8 colours — which is why it is worth reading and why nothing needs to come from it. |
+| **The Superpack v6 compilers** (many hands, the Spanish/Portuguese/Italian modding scene) | a 31,790-file, 4,830,420,054-byte collection of binaries, sources, tutorials and art, spanning fourteen games of the ISS/PES/WE line (measured 2026-09-14 by `tools/looks/superpack_count.py`; its `We2002\` subfolder alone is 28,720 files) | **None**, and no single holder to ask | **Nothing is redistributed.** Two things inside it are *read* where they lie: the 50 face renders of `We2002\MCR\We DB - polipoli\Faces\`, used as an independent render corpus (§5.4 of the plan), and the scene's own documentation, used as opinion to be checked. |
+
+**Nothing from the Superpack enters this repository** — not a file, not a long
+transcription. It is the arrangement `roms/`, `we-team-editor/` and
+`WE2002-EASY-MCR-V4/` already have: the user keeps the folder on disk, outside
+the working tree, and the tooling reads it there. `.gitignore` carries an
+anchored entry for the folder name anyway, against the day someone copies it in
+to make a path shorter.
+
+**Why the `en_we2000edit` row can say "nothing" where the `tools/mcr/` section
+above had to say "semantics".** The distinction is not a change of rule; it is
+the same rule meeting a different fact. Against Zetaprog's sources, the labels
+were the contribution — the bytes are in our fixture either way, and only he
+said what they meant. Here they are not: `kHair[32]`, `kSkin[4]` and
+`kLetters[8]` have been in `src/app/Commands.cpp` since the `defaultlook.txt`
+work, `tools/mcr/domains.py` has its own copy, and `src/core/Player.cpp` already
+decodes the record. Haplo and polipoli are the **fourth** implementation to
+agree, not the first to tell us. A fact that four independent sources state is
+not taken from any one of them, and §1.9 of the plan records the agreement
+rather than a derivation.
+
+If you are Darkensses, or Haplo, or polipoli, or hold rights to anything in the
+Superpack, and want this use licensed, relicensed, or taken down, please open an
+issue.
+
 ## Copyright and license status
 
 **This project has no license.**
 
-Neither Francesco Moriero, thyddralisk, Obocaman, nor Zetaprog released their
-work under any license:
+Neither Francesco Moriero, thyddralisk, Obocaman, Zetaprog, Haplo, polipoli,
+nor whoever assembled the Superpack released their work under any license:
 
 - The 2002 `readme.txt` contains only a liability disclaimer — no grant of
   rights to copy, modify, or redistribute.
@@ -181,6 +224,15 @@ work under any license:
 - Zetaprog's Easy MCR repository has no `LICENSE`, reports `"license": null`
   through the GitHub API, and states only `<Copyright>Copyright ©  2023</Copyright>`
   in its `.vbproj`. Its sources are not in this repository either.
+- The `en_we2000edit` sources by Haplo and polipoli carry no license and no
+  header either. They are read as a witness and nothing is taken from them; see
+  the appearance-viewer section above for why that is possible here.
+- The Superpack v6 is a compilation by many hands with no license text
+  anywhere in it, and no single holder to ask. None of it is redistributed.
+
+**The one exception is `Darkensses/we3d`, which is MIT** — reusable with
+credit, and credited above. It is named here so that the blanket statement of
+this section is not read as covering it too.
 
 By default, that means the inherited code — and Obocaman's binary, which is
 studied but not inherited, and Zetaprog's sources, which are read but not

@@ -34,7 +34,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
-| [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit` | 0 | — | ⬜ Pendente | — | — |
+| [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit` | 0 | — | ✅ Concluído | 2026-09-14 | ⬜ pendente |
 | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSYS | 0 | 01 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | 02 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | 03 | ⬜ Pendente | — | — |
@@ -150,7 +150,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 0 — abertura
 
-- [ ] `NOTICE.md` distingue os três materiais de terceiro e suas licenças.
+- [x] `NOTICE.md` distingue os três materiais de terceiro e suas licenças.
 - [ ] `work/venv-looks/` com PySide6, fora do git.
 - [ ] A guarda que recusa ler textura do disco inglês existe e tem caso vermelho.
 

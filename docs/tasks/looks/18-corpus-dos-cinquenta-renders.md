@@ -16,6 +16,16 @@ status: pendente
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §5.4.
 - `MCR\We DB - polipoli\Faces\` tem **50 JPGs**, nomeados pela tupla exata:
   `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de barba A.
+- **O caminho é relativo a `Superpackv6\We2002\`, não à raiz da coletânea** —
+  `Superpackv6\MCR` não existe. Medido na
+  [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md) em
+  2026-09-14, junto com a correção dos números da §2 do plano.
+- **São 50 arquivos, mas 49 tuplas.** O quinquagésimo se chama `0.jpg` e não
+  tem tupla no nome — conferido na mesma data, `50 .jpg`, o primeiro em ordem
+  sendo `0.jpg` e o segundo `A-A1-A-A-A.jpg`. Quem executar esta task decide o
+  que ele é (referência do default? descarte?) antes de contar cobertura: um
+  parser que exija tupla no nome **quebra** nele, e um que o ignore em silêncio
+  reporta 50 onde mediu 49.
 - **O valor deles é serem de outra pessoa.** O confronto da LOOKS-TASK-17 usa o
   mesmo caminho de código dos dois lados em parte do percurso; um corpus
   externo pega erro sistemático que ele não pegaria.
@@ -33,8 +43,9 @@ bonito.
 
 ## Critério de conclusão
 
-- [ ] As 50 tuplas parseadas do nome do arquivo, e a cobertura medida: quantos
-      dos 32 cabelos, das 4 peles e das 7 barbas o corpus toca.
+- [ ] As tuplas parseadas do nome do arquivo, e a cobertura medida: quantos
+      dos 32 cabelos, das 4 peles e das 7 barbas o corpus toca. **O `0.jpg` tem
+      veredito escrito** — o que ele é, e se entra ou fica de fora da conta.
 - [ ] Nosso render comparado contra os 50, com a mesma métrica da
       LOOKS-TASK-17.
 - [ ] **Os piores casos são olhados um a um**, não só tabulados — é onde erro

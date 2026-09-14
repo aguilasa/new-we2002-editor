@@ -407,20 +407,44 @@ Enquanto ela não existir, chegar à tela é trabalho manual.
 
 ## 2. Ressalva legal e linhagem
 
-- **O Superpack v6** (`C:\games\we2002\Superpackv6\`, 4,2 GB, 28.720 arquivos)
-  é coletânea de terceiros sem licença — binários, fontes e tutoriais da cena
-  de modding hispano-luso-italiana. **Nada dele entra no git**, nem arquivo nem
+- **O Superpack v6** (`C:\games\we2002\Superpackv6\`) é coletânea de terceiros
+  sem licença — binários, fontes e tutoriais da cena de modding
+  hispano-luso-italiana. **Nada dele entra no git**, nem arquivo nem
   transcrição extensa. Vale como o `roms/` e o `we-team-editor.exe`: o usuário
   mantém a pasta.
+
+  **Os números, e a subpasta que eles descrevem** — remedidos em 2026-09-14 pela
+  [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md). Esta seção
+  dizia *"4,2 GB, 28.720 arquivos"* da **raiz**, e eles são da subpasta
+  `We2002\` — 4.452.185.957 B em 28.720 arquivos. A raiz tem **31.790 arquivos
+  e 4.830.420.054 B**, repartidos em catorze pastas de jogo (`Iss1`, `Iss2`,
+  `Iss98`, `Mls`, `Pes1`, `Pes2`, `We2000 1st`, `We2000 2nd`, `We2000 u23`,
+  `We2001`, `We2002`, `We3`, `We4`) mais um `.htm` de cronologia. A diferença
+  importa por um motivo prático e não de contabilidade: **todo caminho `MCR\u2026`
+  citado neste plano é relativo a `Superpackv6\We2002\`**, não à raiz —
+  `Superpackv6\MCR` não existe, e procurá-lo ali dá "pasta não encontrada" que
+  parece Superpack errado.
+
+  ```sh
+  python tools/looks/superpack_count.py "C:/games/we2002/Superpackv6"
+  ```
 - **`Darkensses/we3d` é MIT** e pode ser reaproveitado **com crédito**. O
   parser dele serve como conferência cruzada de contagem, não como código a
   copiar — o stack é web.
 - **O fonte `en_we2000edit`** (Haplo/polipoli) não tem licença, igual ao nosso
   `legacy/`. Serve como **testemunha**, para confirmar o que já sabemos. Não se
   copia código de lá.
-- Obrigação: registrar a linhagem em [NOTICE.md](../NOTICE.md) quando a
-  primeira fase entrar, como o repositório já faz com o `WECompressor` e com o
-  `Easy-Mcr`.
+- Obrigação **cumprida em 2026-09-14** pela
+  [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md): o
+  [NOTICE.md](../NOTICE.md) tem a seção *"Lineage of the appearance viewer"*,
+  com os três materiais em linhas separadas, como o repositório já faz com o
+  `WECompressor` e com o `Easy-Mcr`. Duas coisas que a execução acrescentou ao
+  que esta seção previa: a seção *"Copyright and license status"* do mesmo
+  arquivo afirmava que **todo** material de terceiro daqui é sem licença, o que
+  o `we3d` desmente, e passou a nomear a exceção; e o `.gitignore` ganhou
+  `/Superpackv6/`, entrada que hoje **não casa com nada** de propósito — a
+  coletânea mora fora da árvore, e a linha é a guarda para o dia em que alguém
+  a copiar para dentro.
 
 ---
 
@@ -561,8 +585,13 @@ Um número que ninguém olhou não é verificação.
 
 ### 5.4 Os 50 renders do Superpack
 
-`MCR\We DB - polipoli\Faces\` tem **50 JPGs conferidos**, nomeados pela tupla
-exata: `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de barba A. É
+`We2002\MCR\We DB - polipoli\Faces\` tem **50 JPGs**, dos quais **49 nomeados
+pela tupla exata**: `A-I3-A-F-A` é pele A, cabelo I3, cor A, barba F, cor de
+barba A. O quinquagésimo se chama `0.jpg` e não tem tupla no nome — conferido
+em 2026-09-14, e a decisão sobre ele é da
+[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md), que
+ganhou a linha. **O caminho é relativo a `Superpackv6\We2002\`** e não à raiz
+da coletânea, como toda citação `MCR\…` deste plano (§2). É
 corpus independente, produzido por outra pessoa, com rótulo. Serve para pegar
 erro sistemático que o confronto com o emulador não pegaria por estar usando o
 mesmo caminho de código dos dois lados.
