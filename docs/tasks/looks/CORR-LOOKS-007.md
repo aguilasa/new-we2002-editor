@@ -3,7 +3,7 @@ id: CORR-LOOKS-007
 title: "Correção: o `layout.py` diz que não faz I/O, e faz"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -84,18 +84,59 @@ o `_check_discs()`.
 
 ## Verificação
 
-- [ ] nenhuma frase do módulo afirma propriedade que o arquivo não tem hoje
-- [ ] `python tools/looks/layout.py --check` verde
-- [ ] a linha da 03 sobre o `_check_discs()` manda tirar a ressalva junto com a
+- [x] nenhuma frase do módulo afirma propriedade que o arquivo não tem hoje
+- [x] `python tools/looks/layout.py --check` verde
+- [x] a linha da 03 sobre o `_check_discs()` manda tirar a ressalva junto com a
       função
-- [ ] `python tools/check_tasks.py` verde
+- [x] `python tools/check_tasks.py` verde
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O docstring de topo do `layout.py` parou de afirmar o que o arquivo ainda não
+é. A frase *"It also does no I/O"* saiu de onde estava — junto com as
+propriedades que valem hoje, e que continuam ditas como estavam — e virou
+parágrafo próprio, com a exceção **datada** e o destino dela:
+
+```
+It does no I/O with one exception, and the exception is dated.  `--check-discs`
+opens both real discs, because a guard nobody has watched go red on the real
+thing is a guard nobody has tested; it arrived with LOOKS-TASK-02 on 2026-09-14
+and it is LOOKS-TASK-03's debt to clear.  When the `iso_source.py` facade
+exists, _check_discs() moves behind it and this paragraph goes with it, leaving
+the no-I/O claim true of the whole file.
+```
+
+A metade que importa ficou intacta: o `self_check()` roda numa máquina sem
+imagem, e é isso que o parágrafo de cima continua dizendo.
+
+E a dívida ganhou a outra ponta: o item de critério da
+[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) que manda
+tirar o I/O agora manda **tirar a ressalva junto com a função**. Sem isso o
+conserto se pagaria com uma ressalva permanente, que é outra forma do mesmo
+defeito.
+
+```
+$ python tools/looks/layout.py --check
+layout: self_check ok
+$ python tools/check_tasks.py
+check_tasks: 123 task(s), ok
+```
+
 **Problemas encontrados:**
 
+A varredura por "sem I/O" / "no I/O" achou mais três menções, e as três estão
+**certas** como estão: as duas da 03 e a do Log da LOOKS-TASK-02 falam do
+contrato **depois** da 03 (*"deixando o `layout.py` sem I/O"*), que é
+exatamente a distinção que esta CORR abriu. Nenhuma delas afirma propriedade de
+hoje.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — o docstring de topo
+- `docs/tasks/looks/03-fonte-de-disco-e-layout.md` — o item do `_check_discs()`
+- `docs/tasks/looks/CORR-LOOKS-007.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

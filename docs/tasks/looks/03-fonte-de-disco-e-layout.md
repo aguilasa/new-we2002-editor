@@ -71,7 +71,11 @@ status: pendente
       **Acrescentados ao que a LOOKS-TASK-02 já pôs lá**, sem apagar a guarda
       dos discos nem os quatro casos vermelhos dela.
 - [ ] O `layout.py` fica **sem I/O**: o `_check_discs()` que hoje importa
-      `tools/pes2/iso.py` direto passa a ler pelo `iso_source.py`.
+      `tools/pes2/iso.py` direto passa a ler pelo `iso_source.py`. **A
+      ressalva do docstring de topo sai junto com a função** — ele hoje diz
+      "no I/O com uma exceção, e a exceção é datada"; movida a leitura, a
+      afirmação volta a valer para o arquivo inteiro
+      ([`CORR-LOOKS-007`](/docs/tasks/looks/CORR-LOOKS-007.md)).
 - [ ] Os dois `BASE` são **derivados do cabeçalho e conferidos** contra a
       constante, não apenas cravados — é o método que a §1.2 usa.
 - [ ] Varredura mecânica: nenhum endereço fora de `layout.py`.

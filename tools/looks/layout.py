@@ -3,9 +3,16 @@
 
 This is the module the drawing rules of the plan (section 3.3, rule 1) single
 out: every address of the `looks` project lives here, and nowhere else.  It
-knows no file format and imports no Qt.  It also does no I/O -- callers hand it
-bytes or digests and it answers questions about them, which is what lets its
-self_check() run on a machine with no disc image at all.
+knows no file format and imports no Qt.  Callers hand it bytes or digests and
+it answers questions about them, which is what lets its self_check() run on a
+machine with no disc image at all.
+
+It does no I/O with one exception, and the exception is dated.  `--check-discs`
+opens both real discs, because a guard nobody has watched go red on the real
+thing is a guard nobody has tested; it arrived with LOOKS-TASK-02 on 2026-09-14
+and it is LOOKS-TASK-03's debt to clear.  When the `iso_source.py` facade
+exists, _check_discs() moves behind it and this paragraph goes with it, leaving
+the no-I/O claim true of the whole file.
 
 Today it carries the two-disc rule and nothing more.  LOOKS-TASK-03 adds the
 LBAs, the two RAM base addresses and the player-record offset; this file is the
