@@ -43,6 +43,17 @@ status: pendente
   os dois é **posição ou uniforme**, não LOOKS — e isso separa dois eixos sem
   custo nenhum.
 
+- **O `MODEL.BIN` guarda uma terceira forma de ponteiro, ainda não lida**, e ela
+  é candidata junto com as outras. Medido em 2026-09-14 pela
+  [`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md): 16 das 18
+  listas do cabeçalho abrem com uma entrada de tag `0x80` mirando o offset
+  **104**, que **não é seção** — é uma corrida de ponteiros KSEG0 crus, sem
+  tag e sem terminador, apontando para dentro da região de geometria (15.152,
+  15.768, 16.384, 17.200, …). O `read_pointer_list()` não a lê, e ninguém
+  mediu o que ela agrupa. Se a resposta da incógnita (a) for "o boneco vem do
+  `MODEL.BIN`", **é essa corrida que diz qual dos modelos dele**, e a
+  hipótese do `we3d` — 14 jogadores de 11 peças — se confere ali.
+
 ---
 
 ## Objetivo

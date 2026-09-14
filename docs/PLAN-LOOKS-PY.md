@@ -395,6 +395,51 @@ palavras == 0x00000010 no arquivo: 3
 corpo** de uma seção que varre limpa. Não há textura no `EDT_MOD.BIN`; onde ela
 mora é no `DAT2D.BIN` (§1.7).
 
+#### O cabeçalho do `MODEL.BIN`: 18 listas, o slot vazio, e uma terceira forma
+
+Medido em 2026-09-14 pela
+[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md), ao fechar a
+pergunta que a §1.2 tinha deixado aberta — por que o início do `MODEL.BIN` é
+constante enquanto o do `EDT_MOD.BIN` é derivado.
+
+**Um par `(0, 0)` é slot vazio, não fim de lista.** O `read_pointer_list()`
+recusava seis das dezoito listas dizendo que a de 672 *"fecha com `0x00000000`
+em 736 e não com o terminador"*. Não fecha: 736 é a **entrada 8 de um par cujo
+tag também é zero**, e a lista segue até o `0x000000FF` de 768, como todas.
+Pulando o par vazio, as dezoito leem:
+
+```
+tamanhos: [1, 1, 12, 12, 12, 10, 12, 10, 12, 10, 12, 10, 12, 10, 12, 10, 12, 12]
+```
+
+Um ponteiro zero é **pulado e não guardado**: guardá-lo poria o offset 0 — o
+próprio cabeçalho — numa lista de inícios de seção, e uma varredura que
+recebesse isso entraria na tabela de ponteiros.
+
+**E o início continua constante, por um motivo que agora é medido e não
+procedimental.** Dezesseis das dezoito listas abrem com uma entrada de tag
+`0x80` mirando o offset **104**, e 104 **não é seção**:
+
+```
+secao em 104?  nao -> claims 2148999984 vertices and 2149000600 primitives
+words em 104:  80172330 80172598 80172800 80172b30 80172e60 ...
+               -> 15152  15768  16384  17200  18016 ...
+```
+
+É uma **corrida de ponteiros KSEG0 crus** — sem tag, sem terminador —, uma
+**terceira forma** de tabela neste arquivo, mirando dentro da região de
+geometria. Logo `min(alvos)` responderia 104, e o `geometry_start()` entregaria
+a uma varredura um início dentro da tabela de ponteiros: exatamente a falha que
+derivar o início existe para impedir. Por isso o `layout.is_derivable()` recusa
+este arquivo, e o `MODEL_GEOMETRY_START` guarda o **1816**, que é fato medido e
+não algo que as listas declarem.
+
+**O que fica aberto, e quem responde.** Ninguém mediu o que essa corrida
+agrupa. Se a incógnita (a) concluir que o boneco vem do `MODEL.BIN`, é ela que
+diz **qual** dos modelos de lá — e é onde a hipótese do `we3d`, de 14 jogadores
+de 11 peças, se confere. A linha está escrita na
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
+
 ### 1.6 A tela desenha com textura, e o formato de seção não tem textura
 
 Aqui está a contradição que a Fase 3 tem de resolver, e vale ter na mesa desde

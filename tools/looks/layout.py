@@ -351,7 +351,17 @@ LIST_TERMINATOR = 0x000000FF  # not-an-address: the word that closes a pointer l
 
 
 def read_pointer_list(data: bytes, offset: int, base: int) -> list[int]:
-    """Read one record list at *offset* and return its targets as file offsets.
+    """The targets of the record list at *offset*, as file offsets.
+
+    Thin wrapper over read_pointer_entries(); most callers want only the
+    offsets.  A caller that has to tell one kind of entry from another -- and
+    is_derivable() does -- wants the tags too.
+    """
+    return [target for _tag, target in read_pointer_entries(data, offset, base)]
+
+
+def read_pointer_entries(data: bytes, offset: int, base: int) -> list:
+    """Read one record list at *offset* and return its (tag, offset) entries.
 
     The shape this reads, measured 2026-09-14 on EDT_MOD.BIN: pairs of (tag,
     KSEG0 pointer) closed by LIST_TERMINATOR.  Both of that file's lists carry
@@ -359,13 +369,17 @@ def read_pointer_list(data: bytes, offset: int, base: int) -> list[int]:
     read off the file rather than assumed -- if the second word is a pointer,
     the pairs have already begun.
 
-    **MODEL.BIN's header lists are NOT all of this shape, and this refuses
-    them.** Measured the same day: its first two (at 72 and 88) read fine, and
-    the one at 672 opens with tag 0x80 and closes with a 0x00000000 word at
-    736 rather than with LIST_TERMINATOR.  Refusing is the right answer until
-    somebody measures that variant -- LOOKS-TASK-05's job -- which is why
-    MODEL_GEOMETRY_START is still a constant while EDT_MOD.BIN's start is
-    derived.
+    **The variant MODEL.BIN uses, measured 2026-09-14 by LOOKS-TASK-05: a
+    (0, 0) pair is an EMPTY SLOT, not the end.** The earlier reading called
+    the list at 672 malformed -- "it closes with 0x00000000 at 736 rather than
+    with LIST_TERMINATOR" -- and that was wrong twice over.  The word at 736 is
+    entry 8 of a pair whose tag is also zero, and the list goes on to close
+    with LIST_TERMINATOR at 768 like every other one.  Skipping the empty pair
+    reads it as ten targets, and all six lists that were refused read cleanly.
+
+    A zero pointer is skipped rather than kept because it is not an address:
+    keeping it would put offset 0 -- the file header -- in a list of section
+    starts, and a scan handed that walks into the pointer table.
 
     Every target is checked against the file's length.  A list that does not
     close, or that aims outside, raises: guessing here would produce a
@@ -395,6 +409,9 @@ def read_pointer_list(data: bytes, offset: int, base: int) -> list[int]:
         if tag == LIST_TERMINATOR:
             return targets
         pointer = word(index + 1)
+        if tag == 0 and pointer == 0:
+            index += 2  # an empty slot -- see the docstring
+            continue
         if pointer < 0x80000000:
             raise BadPointerList(
                 "pointer list at %d: entry %d holds 0x%08x, which is not a "
@@ -407,7 +424,7 @@ def read_pointer_list(data: bytes, offset: int, base: int) -> list[int]:
                 "pointer list at %d: entry %d aims at %d, outside the file's "
                 "%d bytes" % (offset, len(targets), target, len(data))
             )
-        targets.append(target)
+        targets.append((tag, target))
         index += 2
 
 
@@ -436,10 +453,25 @@ def geometry_start(data: bytes) -> int:
     checks.  Here it is also the fix for a specific failure -- a scan handed a
     hand-picked start reported an exact EOF and looked complete.
 
-    EDT_MOD.BIN answers 216.  MODEL.BIN raises, because read_pointer_list
-    does not yet accept every shape its header uses; MODEL_GEOMETRY_START
-    carries that file's answer until it does.
+    EDT_MOD.BIN answers 216.
+
+    **MODEL.BIN must NOT use this, and the reason is measured rather than
+    procedural.** Since the empty-slot variant was understood its header lists
+    all read, so the obstacle is no longer parsing -- it is the answer.  Every
+    one of those lists opens with an entry tagged 0x80 aiming at offset 104,
+    and 104 is not a section: it is a flat run of bare KSEG0 pointers, a third
+    shape this function does not read.  min(targets) would therefore answer
+    104, hand a scan a start inside the pointer table, and fail in the exact
+    way deriving the start was introduced to prevent.  MODEL_GEOMETRY_START
+    stays a constant because 1816 is a measured fact the lists do not state,
+    not because the lists cannot be read.
     """
+    if not is_derivable(data):
+        raise BadPointerList(
+            "this file's lists name a target that is not a section (the "
+            "0x80-tagged entry), so the lowest target is not the start of "
+            "geometry -- use the file's recorded constant instead"
+        )
     targets = [t for one in record_lists(data) for t in one]
     if not targets:
         raise BadPointerList("the header names no record at all")
@@ -727,6 +759,60 @@ def self_check() -> None:
         assert empty_stats == {"files": 0, "lines": 0}, empty_stats
 
     print("layout: self_check ok")
+
+
+def is_derivable(data: bytes) -> bool:
+    """Can geometry_start() be trusted for this file?
+
+    True when every entry of every header list is a plain section pointer.
+    False when any entry carries the 0x80 tag, which MODEL.BIN uses for the
+    entry that aims at its flat pointer array -- see geometry_start().
+
+    **It reads the ENTRY tags, not the first word each header pointer lands
+    on.** Those are the same word in MODEL.BIN, whose lists open straight into
+    pairs, and different in EDT_MOD.BIN, whose lists carry a [count][pad]
+    preamble.  A check that read the landing word answered correctly on both
+    real files while comparing two different things, and a list that combined
+    a preamble with a tagged entry walked past it.
+    """
+    try:
+        header, base = derive_base(data)
+        for index in range(header):
+            pointer = int.from_bytes(data[index * 4:index * 4 + 4], "little")
+            entries = read_pointer_entries(data, pointer - base, base)
+            if any(tag == SUBLIST_TAG for tag, _target in entries):
+                return False
+    except (WrongBase, BadPointerList):
+        return False
+    return True
+
+
+SUBLIST_TAG = 0x80  # not-an-address: the tag MODEL.BIN's lists open with
+
+GEOMETRY_EXPECTED = {
+    # (sections, vertices, primitives, end) for a scan from the file's start
+    # of geometry.  Counts rather than addresses, but they belong here for the
+    # same reason SIZE does: they are facts about one named file, and rule 1
+    # keeps modelfile.py free of numbers it would otherwise have to carry.
+    #
+    # **Each one is only meaningful with the offset the scan began at**, which
+    # is why GEOMETRY_START sits beside it.  A scan of EDT_MOD.BIN from 15,704
+    # reports 11/690/611 and an exact EOF, looks complete, and is 43% of the
+    # file (CORR-LOOKS-010).
+    MODEL: (106, 2461, 1767, 64800),
+    EDT_MOD: (20, 1218, 1074, 36072),
+}
+
+GEOMETRY_START = {
+    MODEL: MODEL_GEOMETRY_START,
+    EDT_MOD: 216,
+}
+"""Where a scan of each file begins.
+
+EDT_MOD.BIN's entry is the answer geometry_start() derives, kept here so a
+caller can compare the two; MODEL.BIN's is the constant, because its lists do
+not state it.  self_check() demands the derived and the recorded agree.
+"""
 
 
 ADDRESS_OWNER = "layout.py"
