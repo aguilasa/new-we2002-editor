@@ -40,7 +40,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | 03 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | `modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN` | 1 | 04 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | 05 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | `oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET` | 2 | 06 | ✅ Concluído | 2026-09-14 | ⬜ pendente |
+| [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | `oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET` | 2 | 06 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx` | 2 | 07 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho | 2 | 08 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha | 3 | 08 | ⬜ Pendente | — | — |

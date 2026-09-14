@@ -32,6 +32,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-014](/docs/tasks/looks/CORR-LOOKS-014.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O título da LOOKS-TASK-05 ainda diz onze seções; a tabela já diz vinte | Baixa | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-015](/docs/tasks/looks/CORR-LOOKS-015.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | O gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele sai 0 | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-016](/docs/tasks/looks/CORR-LOOKS-016.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | Os dois alvos de `looks` ficaram fora do `if(Python3_FOUND)` que guarda os outros oito | Média | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | Sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -62,6 +63,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-014 — título da 05 no frontmatter diz 11, a tabela diz 20
 - [x] CORR-LOOKS-015 — `ctest -R looks` não acha os alvos em build nenhum, e sai 0
 - [x] CORR-LOOKS-016 — os dois alvos de `looks` estão fora da guarda de Python
+- [ ] CORR-LOOKS-017 — o quarto pré-requisito do `--check-live` não tem caminho de skip
 
 ## Detalhes por correção
 
@@ -301,4 +303,22 @@ e o ciclo arquivado, o dele em
 - **Fix:** envolver os dois em `if(Python3_FOUND)`, e de passagem pôr cada
   comentário imediatamente acima do `add_test` que ele explica — hoje eles estão
   na ordem inversa
+
+### CORR-LOOKS-017
+
+- **Arquivo com problema:** `tools/looks/oracle.py`, a preflight do
+  `check_live()`
+- **Sintoma:** o `--check-live` precisa de **quatro** coisas e confere três.
+  Sem `WE2002_LOOKS_IMAGE` ele sobe o emulador, esconde a janela, roda cinco
+  verificações e então morre com `RuntimeError` e traceback (rc=1) dentro do
+  `verify_load()` — nem mediu nem pulou com 77, que é o contrato do perfil. A
+  mensagem certa já existe no `iso_source.image_from_env()`, e o módulo irmão
+  (`modelfile.py --check-image`) já converte esse mesmo erro em skip 77
+- **Como foi detectado:** rodando `--check-live` só com
+  `WE2002_LOOKS_DRIVE_IMAGE` posta; os outros três caminhos de skip foram
+  reproduzidos e saem 77 corretamente. Com as duas variáveis, o comando fecha
+  verde e **todos** os números do Log reproduzem
+- **Fix:** conferir a imagem japonesa na preflight, antes de qualquer `launch`,
+  convertendo o `RuntimeError` em skip 77; e listar os pré-requisitos num só
+  lugar, para o quinto não repetir a história
 
