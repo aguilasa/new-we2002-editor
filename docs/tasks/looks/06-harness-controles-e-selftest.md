@@ -43,6 +43,16 @@ status: pendente
       vermelho, e o relatório diz isso.
 - [ ] As três regras de desenho da §3.3 varridas mecanicamente, com
       `os.walk` — e não `os.listdir`, que não enxerga `ui/`.
+- [ ] **A regra 1 reusa o `layout.sweep_addresses()`**, que já existe desde a
+      [`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) — o
+      agregador não escreve um segundo varredor de endereço. Dois varredores
+      da mesma regra divergem em silêncio, e o que ficar sem chamador vira
+      código morto que ninguém percebe apodrecer
+      ([`CORR-LOOKS-009`](/docs/tasks/looks/CORR-LOOKS-009.md)).
+- [ ] O `looks_selftest` **falha** se a varredura da regra 1 achar alguma
+      coisa, e o Log copia a linha com a contagem que ela imprime — `(N
+      file(s), M line(s) swept)`. Varredura que não abriu arquivo nenhum tem
+      de ser visível na saída, não dedutível.
 - [ ] A contagem de controles é **impressa pela ferramenta**, nunca escrita em
       prosa.
 

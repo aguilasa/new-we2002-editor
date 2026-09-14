@@ -3,7 +3,7 @@ id: CORR-LOOKS-009
 title: "Correção: a varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -132,22 +132,111 @@ o que sobra sem chamador vira código morto que ninguém percebe apodrecer.
 
 ## Verificação
 
-- [ ] `python tools/looks/layout.py --check` verde, agora com o caso vermelho da
+- [x] `python tools/looks/layout.py --check` verde, agora com o caso vermelho da
       varredura (os cinco sub-casos acima)
-- [ ] `python tools/looks/layout.py --sweep` diz quantos arquivos e linhas
+- [x] `python tools/looks/layout.py --sweep` diz quantos arquivos e linhas
       varreu, e continua achando zero na árvore real
-- [ ] plantar um `0x8011C000` num módulo qualquer de `tools/looks/` faz o
+- [x] plantar um `0x8011C000` num módulo qualquer de `tools/looks/` faz o
       `--sweep` sair != 0 (controle manual, não commitado)
-- [ ] a 06 tem por critério reusar o `sweep_addresses()`
-- [ ] `python tools/looks/iso_source.py --check` continua verde
-- [ ] `python tools/check_tasks.py` verde
+- [x] a 06 tem por critério reusar o `sweep_addresses()`
+- [x] `python tools/looks/iso_source.py --check` continua verde
+- [x] `python tools/check_tasks.py` verde
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+As três partes.
+
+**1. Caso vermelho 8**, sobre uma árvore plantada em `tempfile` — sem imagem,
+sem venv, sem display, como os outros sete. São seis arquivos e cada um prova
+uma coisa:
+
+| plantado | esperado | o que prova |
+|---|---|---|
+| `bad.py` com `0x8011C000` | achado | o literal hexadecimal |
+| `ui/deep.py` com `157164` | achado | o decimal, **e que o `os.walk` desce** |
+| `ok.py` com `# not-an-address:` na linha | **não** achado | o escape funciona |
+| `above.py` com a anotação na linha **de cima** | achado | o escape é por linha |
+| `layout.py` na raiz, com endereço | **não** achado | o dono é isento |
+| `ui/layout.py`, com endereço | **achado** | a isenção é por caminho |
+
+**2. A contagem na saída.** `sweep_addresses()` ganhou um parâmetro `stats`
+opcional — o mesmo padrão que a
+[`CORR-LOOKS-003`](/docs/tasks/looks/CORR-LOOKS-003.md) usou no
+`superpack_count.py` —, e o `--sweep` imprime:
+
+```
+layout --sweep: no address outside layout.py (2 file(s), 500 line(s) swept)
+```
+
+Varredura que não abriu arquivo nenhum passou a ser **visível**, em vez de
+imprimir a mesma frase de uma árvore limpa. O `self_check()` exige isso nos dois
+sentidos: `stats["files"] == 5` e `stats["lines"] == 6` na árvore plantada, e
+`{"files": 0, "lines": 0}` numa pasta vazia.
+
+**3. A isenção do dono por caminho**, `os.path.relpath(path, root) ==
+ADDRESS_OWNER` em vez de `name ==`. A fresta que a CORR nomeou está fechada e
+tem caso vermelho.
+
+Gates e controles, nesta máquina:
+
+```
+$ python tools/looks/layout.py --check
+layout: self_check ok                                              (exit 0)
+$ python tools/looks/layout.py --sweep
+layout --sweep: no address outside layout.py (2 file(s), 500 line(s) swept)
+$ python tools/looks/iso_source.py --check
+iso_source: self_check ok
+```
+
+**Três controles**, nenhum commitado. O primeiro troca `.py` por `.pyx` no
+filtro — a varredura para de achar, e o caso novo pega:
+`AssertionError: set()`. O segundo devolve a isenção para `name ==` — e o caso
+pega o `ui/layout.py` escapando:
+`AssertionError: {('above.py', 2), ('bad.py', 1), ('ui\deep.py', 1)}`. O
+terceiro é o da CORR: um `PLANTED = 0x8011C000` acrescentado ao
+`iso_source.py` real, e o comando sai **1**:
+
+```
+  iso_source.py:297: PLANTED = 0x8011C000
+layout --sweep: 1 line(s) carrying an address outside layout.py (2 file(s), 502 line(s) swept)
+```
+
+O arquivo foi restaurado e o `git status` confirmou árvore igual à commitada
+antes de qualquer `git add`.
+
+**4. O contrato da 06.** A
+[`LOOKS-TASK-06`](/docs/tasks/looks/06-harness-controles-e-selftest.md) ganhou
+dois itens: o agregador **reusa** o `layout.sweep_addresses()` em vez de
+escrever um segundo varredor, e o `looks_selftest` falha se ele achar alguma
+coisa, com a linha da contagem copiada para o Log. Sem isso o `--sweep` viraria
+código morto ao lado de um varredor concorrente — a mesma forma da
+[`CORR-LOOKS-005`](/docs/tasks/looks/CORR-LOOKS-005.md).
+
 **Problemas encontrados:**
 
+A varredura de discrepância achou a §4.5 do plano dizendo **quatro** casos
+vermelhos. São **oito** — a contagem já estava atrasada em três desde a
+LOOKS-TASK-03, que acrescentou os de `derive_base()` sem remedir a frase, e o
+caso 8 desta CORR seria o quinto erro em cima. Os oito estão enumerados agora, e
+a seção diz por que **dois** deles são varredura e não caso de propriedade: a
+falha que fecham é por omissão. O parágrafo do `--sweep` ganhou a contagem e a
+regra da isenção por caminho.
+
+Duas menções a "três casos vermelhos" ficaram: as duas do Log da
+[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md), que
+registram o que aquela execução entregou. Pelo mesmo motivo, a transcrição do
+`--sweep` no Log da LOOKS-TASK-03 continua sem a contagem — é a saída da corrida
+que a produziu.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — caso vermelho 8, `stats` no `sweep_addresses()`,
+  isenção por caminho, e a contagem no `_sweep()`
+- `docs/tasks/looks/06-harness-controles-e-selftest.md` — dois itens de critério
+- `docs/PLAN-LOOKS-PY.md` — §4.5, a contagem de casos vermelhos e o `--sweep`
+- `docs/tasks/looks/CORR-LOOKS-009.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

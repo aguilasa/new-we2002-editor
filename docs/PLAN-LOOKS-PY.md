@@ -717,15 +717,21 @@ python tools/looks/iso_source.py --check
 python tools/looks/iso_source.py --check-discs <japonês.bin> <inglês.bin>
 ```
 
-O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **quatro
+O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **oito
 casos vermelhos** — conteúdo estranho no `DAT2D.BIN`, caminho que ninguém
-mediu, geometria que não bate, e a **varredura do `DIGEST` inteiro**, que
-exige dica não vazia para todo caminho medido. O quarto é varredura e não
-caso de propriedade porque a falha que ele fecha foi por **omissão**: o
-`/SELECT.BIN` não pertencia a família nenhuma e recusava com o
-"digest mismatch" pelado que o próprio módulo chama de erro
-([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)), e o próximo
-arquivo acrescentado ao mapa herdaria o mesmo silêncio.
+mediu, geometria que não bate, a **varredura do `DIGEST` inteiro** exigindo
+dica não vazia para todo caminho medido, base que joga um ponteiro do próprio
+cabeçalho para fora do arquivo, arquivo que não começa por ponteiro, base
+derivada que não bate com a constante, e a **árvore plantada** que a varredura
+da regra 1 tem de achar.
+
+Dois deles são varredura e não caso de propriedade, e pelo mesmo motivo: a
+falha que fecham é por **omissão**. O `/SELECT.BIN` não pertencia a família
+nenhuma e recusava com o "digest mismatch" pelado que o próprio módulo chama de
+erro ([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)); e o
+`sweep_addresses()` só era rodado contra a árvore real, que está limpa, então
+só era observado **verde**
+([`CORR-LOOKS-009`](/docs/tasks/looks/CORR-LOOKS-009.md)).
 
 O **`--sweep`** é a regra 1 conferida em vez de prometida: ele varre
 `tools/looks/` por literal hexadecimal e por decimal de quatro dígitos ou mais
@@ -733,6 +739,20 @@ fora do `layout.py`. É tripwire, não parser, então tem escape — uma linha c
 `# not-an-address: <razão>` sai da conta. **O marcador se chama pelo que ele
 afirma**: a primeira grafia era `# address:`, que se lê como o contrário do que
 o anotador quer dizer, e escape que se lê ao contrário é escape usado errado.
+
+**E ele diz quanto varreu**, porque "varri tudo e está limpo" e "não abri
+arquivo nenhum" imprimiam a mesma frase e saíam 0 — e essa frase é a que se lê
+como prova de que a regra 1 está sendo cumprida:
+
+```text
+layout --sweep: no address outside layout.py (2 file(s), 500 line(s) swept)
+```
+
+A isenção do dono é por **caminho**, não por nome: o `os.walk` desce, então um
+`ui/layout.py` sairia de graça se a comparação fosse pelo nome do arquivo — uma
+pasta inteira fora da regra, que é exatamente como o ciclo do `.mcr` perdeu a
+dele. O caso vermelho 8 planta as duas coisas e exige o resultado certo em
+cada uma.
 
 O **`iso_source.py --check`** exercita a fachada sobre um leitor de mentira, sem
 disco: a leitura conferida recusa, a `read_unchecked()` devolve, e é o par que

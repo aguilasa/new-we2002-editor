@@ -44,6 +44,7 @@ import hashlib
 import os
 import re
 import sys
+import tempfile
 
 # --- The two discs, and how a recipe names each one -----------------------
 #
@@ -508,6 +509,62 @@ def self_check() -> None:
     # MODEL.BIN's geometry starts after its header, not inside it.
     assert MODEL_GEOMETRY_START > 18 * 4
 
+    # -- the sweep itself, on a planted tree --------------------------------
+    #
+    # Red 8, and the reason it is here: --sweep is only ever run against the
+    # real tree, which is clean, so it was only ever observed GREEN.  A sweep
+    # that stopped matching .py, or blanked a line too eagerly, or resolved
+    # its root to an empty directory, prints the same "no address outside
+    # layout.py" and exits 0 -- the sentence a reader takes for proof.  The
+    # tree below is built to be found in, so the sweep is watched working.
+    planted = {
+        "bad.py": ["BASE = 0x8011C000"],
+        "ok.py": ["SHIRT = 0x1234  # not-an-address: a colour, not a pointer"],
+        "above.py": ["# not-an-address: this annotation is on the wrong line",
+                     "Y = 0x5678"],
+        ADDRESS_OWNER: ["BASE = 0x8016E800"],
+        os.path.join("ui", "deep.py"): ["OFFSET = 157164"],
+        os.path.join("ui", ADDRESS_OWNER): ["BASE = 0x8016E800"],
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, body in planted.items():
+            full = os.path.join(tmp, name)
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            with open(full, "w", encoding="utf-8") as handle:
+                for text in body:
+                    print(text, file=handle)
+
+        stats: dict = {}
+        caught = {(where, number) for where, number, _ in
+                  sweep_addresses(tmp, stats)}
+
+        # A hex literal is found, and so is a four-digit decimal in a
+        # SUBDIRECTORY -- which is what proves the walk descends.  os.listdir
+        # would miss ui/ entirely, and the .mcr cycle lost a whole package
+        # that way.
+        assert ("bad.py", 1) in caught, caught
+        assert (os.path.join("ui", "deep.py"), 1) in caught, caught
+
+        # The escape works, and it works PER LINE: an annotation written on
+        # the line above excuses nothing.
+        assert not any(where == "ok.py" for where, _ in caught), caught
+        assert ("above.py", 2) in caught, caught
+
+        # The owner is exempt by path.  A same-named file in a subdirectory is
+        # not the owner and does not inherit the exemption.
+        assert not any(where == ADDRESS_OWNER for where, _ in caught), caught
+        assert (os.path.join("ui", ADDRESS_OWNER), 1) in caught, caught
+
+        # And the sweep says how much it read, so "swept nothing" stops
+        # looking like "swept everything and found nothing".
+        assert stats["files"] == len(planted) - 1, stats
+        assert stats["lines"] == 6, stats
+
+        empty_stats: dict = {}
+        with tempfile.TemporaryDirectory() as nothing:
+            assert sweep_addresses(nothing, empty_stats) == []
+        assert empty_stats == {"files": 0, "lines": 0}, empty_stats
+
     print("layout: self_check ok")
 
 
@@ -515,8 +572,15 @@ ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 
 
-def sweep_addresses(root: str | None = None) -> list[tuple[str, int, str]]:
+def sweep_addresses(root: str | None = None,
+                    stats: dict | None = None) -> list[tuple[str, int, str]]:
     """Find addresses written outside this file.  Returns the offending lines.
+
+    *stats*, if given, is filled with how much was actually read -- "files" and
+    "lines".  A sweep that opened nothing and a sweep that read everything and
+    found nothing print the same sentence otherwise, and that sentence is the
+    one a reader takes for "rule 1 is being kept".  Same failure superpack_count
+    had, closed the same way (CORR-LOOKS-003, CORR-LOOKS-009).
 
     Rule 1 of the plan is what lets an offset move later without being hunted
     through the tree, and a rule nobody sweeps is a rule that decays one
@@ -543,14 +607,24 @@ def sweep_addresses(root: str | None = None) -> list[tuple[str, int, str]]:
     hex_literal = re.compile(r"0[xX][0-9a-fA-F]+")
     big_decimal = re.compile(r"(?<![\w.])\d{4,}(?![\w.])")
     findings = []
+    files = 0
+    lines = 0
 
     for parent, _dirs, names in os.walk(root):
         for name in sorted(names):
-            if not name.endswith(".py") or name == ADDRESS_OWNER:
+            if not name.endswith(".py"):
                 continue
             path = os.path.join(parent, name)
+            # The owner is exempt by its PATH, not by its name: os.walk
+            # descends, so a tools/looks/ui/layout.py would otherwise be
+            # excused for free -- a whole directory outside the rule, which is
+            # how the .mcr cycle lost one.
+            if os.path.relpath(path, root) == ADDRESS_OWNER:
+                continue
+            files += 1
             with open(path, encoding="utf-8") as handle:
                 for number, line in enumerate(handle, 1):
+                    lines += 1
                     code = _strip_strings_and_comments(line)
                     if "# not-an-address:" in line:
                         continue
@@ -558,6 +632,9 @@ def sweep_addresses(root: str | None = None) -> list[tuple[str, int, str]]:
                         findings.append(
                             (os.path.relpath(path, root), number, line.rstrip())
                         )
+    if stats is not None:
+        stats["files"] = files
+        stats["lines"] = lines
     return findings
 
 
@@ -589,14 +666,17 @@ def _strip_strings_and_comments(line: str) -> str:
 
 
 def _sweep(root: str | None = None) -> int:
-    findings = sweep_addresses(root)
+    stats: dict = {}
+    findings = sweep_addresses(root, stats)
+    swept = " (%d file(s), %d line(s) swept)" % (stats["files"], stats["lines"])
     if not findings:
-        print("layout --sweep: no address outside %s" % ADDRESS_OWNER)
+        print("layout --sweep: no address outside %s%s"
+              % (ADDRESS_OWNER, swept))
         return 0
     for path, number, line in findings:
         print("  %s:%d: %s" % (path, number, line.strip()))
-    print("layout --sweep: %d line(s) carrying an address outside %s"
-          % (len(findings), ADDRESS_OWNER))
+    print("layout --sweep: %d line(s) carrying an address outside %s%s"
+          % (len(findings), ADDRESS_OWNER, swept))
     return 1
 
 
