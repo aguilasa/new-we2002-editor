@@ -30,6 +30,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-012](/docs/tasks/looks/CORR-LOOKS-012.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O perfil promete o `looks_image` desde a 05, e `ctest -R looks` sai 0 sem achar teste | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-013](/docs/tasks/looks/CORR-LOOKS-013.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O cabeçalho do `MODEL.BIN` foi descrito por metade — duas corridas, e a lista 0 declara o 1816 | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-014](/docs/tasks/looks/CORR-LOOKS-014.md) | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | O título da LOOKS-TASK-05 ainda diz onze seções; a tabela já diz vinte | Baixa | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-015](/docs/tasks/looks/CORR-LOOKS-015.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | O gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele sai 0 | Alta | [ ] pendente | — |
+| [CORR-LOOKS-016](/docs/tasks/looks/CORR-LOOKS-016.md) | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | Os dois alvos de `looks` ficaram fora do `if(Python3_FOUND)` que guarda os outros oito | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -58,6 +60,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-012 — não existe alvo `looks_image`, e pedir por ele sai verde
 - [x] CORR-LOOKS-013 — 12 listas miram 104 e 4 miram 232; a lista de 72 declara o 1816
 - [x] CORR-LOOKS-014 — título da 05 no frontmatter diz 11, a tabela diz 20
+- [ ] CORR-LOOKS-015 — `ctest -R looks` não acha os alvos em build nenhum, e sai 0
+- [ ] CORR-LOOKS-016 — os dois alvos de `looks` estão fora da guarda de Python
 
 ## Detalhes por correção
 
@@ -261,4 +265,40 @@ e o ciclo arquivado, o dele em
   `progresso.md`
 - **Fix:** frontmatter passa a dizer 20, e um laço confere as vinte tasks de uma
   vez
+
+### CORR-LOOKS-015
+
+- **Arquivo com problema:** `docs/prompts/perfil-looks.md` (a tabela de gates) e
+  a `19-alvos-de-ctest-e-cli.md`
+- **Sintoma:** o `looks_selftest` está registrado no `tests/CMakeLists.txt` e
+  **nenhum** dos três diretórios de build deste worktree o conhece:
+  `ctest -R looks` responde `No tests were found!!!` e sai **0** nos três. O
+  remédio que o Log da task propõe — reconfigurar o build — não funciona aqui:
+  `cmake -S . -B <novo>` morre em `Could NOT find CURL`
+  (`src/core/CMakeLists.txt:1`), e o `tools/looks/` não precisa de curl, de Qt
+  nem de compilador. É o mesmo sintoma da CORR-LOOKS-012, que foi fechada sem
+  que o `ctest` desta máquina jamais tivesse listado o alvo
+- **Como foi detectado:** `ctest --test-dir {build,build-mingw,
+  build-windows-release} -R looks` com `echo $?`; `grep -rl looks --include=
+  CTestTestfile.cmake .` vazio; `CMAKE_HOME_DIRECTORY` do `build/` apontando
+  para `/home/ingmar/...`; e uma configuração nova falhando em CURL
+- **Fix:** o perfil passa a dizer, por alvo, o comando que roda **nesta**
+  máquina (`python tools/looks/selftest.py`), a armadilha do `ctest -R` vazio
+  saindo 0 entra na lista, e a 19 fecha a conta com o comando que existe.
+  Tornar os alvos de `looks` configuráveis sem o `src/core` é decisão do dono
+  do repositório, não de execução
+
+### CORR-LOOKS-016
+
+- **Arquivo com problema:** `tests/CMakeLists.txt`, linhas 205 e 210
+- **Sintoma:** os oito testes Python do arquivo estão dentro de
+  `if(Python3_FOUND)`; os dois de `looks` ficaram em `depth=0`. Sem Python
+  detectado, `${Python3_EXECUTABLE}` expande para nada e o `looks_selftest` —
+  o gate que "nunca pula" — aparece como **Failed** por executável inexistente,
+  mandando quem o vir procurar defeito em `tools/looks/`
+- **Como foi detectado:** mapa de `if`/`endif` do arquivo com a profundidade de
+  cada `add_test`
+- **Fix:** envolver os dois em `if(Python3_FOUND)`, e de passagem pôr cada
+  comentário imediatamente acima do `add_test` que ele explica — hoje eles estão
+  na ordem inversa
 
