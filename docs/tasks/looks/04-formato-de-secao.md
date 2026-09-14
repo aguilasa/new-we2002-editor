@@ -77,6 +77,13 @@ formato errado, e é a regra do intervalo. Com a corrida de palavras:
 /BIN/EDT_MOD.BIN    11 secoes   690 vert   611 prim  grupos=[1]*11                termina em 36072 (EOF=36072) EXATO
 ```
 
+> **Esta varredura começou no offset 15.704**, e o número acima é dela, não
+> do arquivo. Do 216 — o menor alvo das **duas** listas de ponteiros — são
+> **20 seções, 1.218 vértices, 1.074 primitivas**, fechando no mesmo EOF.
+> Medido pela [`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md) em
+> 2026-09-14; a transcrição acima fica como registro da corrida que a produziu.
+
+
 Os dois lados batem com o plano, inclusive os grupos `[55, 1, 34, 7, 5, 4]`.
 
 ### 2. Isso muda o *motivo* de precisar da lista de ponteiros

@@ -15,6 +15,14 @@ status: pendente
 
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §6,
   incógnita (a), e §1.6.
+- **São três candidatos, não dois.** O `EDT_MOD.BIN` traz **dois** modelos de
+  onze peças — duas listas de ponteiros, compartilhando duas peças, sobre o
+  mesmo esqueleto (§1.5, medido pela
+  [`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md) em 2026-09-14).
+  A pergunta "de onde vem o boneco" tem de escolher entre **lista A, lista
+  B e os TMDs de `0x00168xxx`**, e os dois save states — goleiro e jogador
+  de linha — são o estímulo óbvio para decidir se as duas listas são esses
+  dois bonecos.
 - **É a incógnita de maior risco do plano.** Quatro TMDs Sony de verdade —
   `id=0x41`, `flags=1`, texturizados, modos `0x2d` e `0x3d`, com 92, 261, 30 e
   18 vértices — vivem em `0x0016821C`, `0x00168C0C`, `0x0016A2C4` e

@@ -53,8 +53,17 @@ Não se revertem sem o usuário pedir.
 2. **A varredura contígua morre na seção 55 do `MODEL.BIN`.** Parece formato
    errado e é o par de zeros que separa grupos (§1.4). Foi o primeiro tropeço da
    sessão de investigação.
-3. **O `EDT_MOD.BIN` não é contíguo.** Varrer do começo sem a lista de ponteiros
-   pega uma seção e para.
+3. **O `EDT_MOD.BIN` é contíguo do offset 216 ao EOF**, e a lista serve para
+   outra coisa. Esta armadilha dizia *"não é contíguo — varrer do começo sem a
+   lista pega uma seção e para"*, e foi remedida em 2026-09-14
+   ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)): varrer **do 216**
+   acha as **20** seções e fecha no EOF. O que quebra é começar no offset 0 ou
+   no 8, que são o cabeçalho e as listas — `BadSection`, com contagens na casa
+   dos bilhões. A lista é necessária pela **ordem** e por dizer **qual peça
+   pertence a qual dos dois modelos**, não por alcance.
+   **E terminar no EOF não prova que a varredura leu o arquivo:** começar em
+   15.704 também fecha em 36.072 exato, com 11/690/611, e é metade do arquivo.
+   Contagem de seção sem o offset de partida não é medição.
 4. **A ordem da lista não é a ordem do arquivo.** O registro do offset 24.136 vem
    antes do 22.984. Assumir a do arquivo embaralha peça sem sintoma visível.
 5. **`bin_archive.py` responde `0 clut(s)` sem reclamar.** A lista de paletas do
@@ -194,8 +203,12 @@ sobre dado que pode não ser o que a tela desenha.
 - **Fase 1** — todo módulo novo traz `self_check()` com **caso vermelho**;
   nenhum endereço fora de `layout.py`, conferido por varredura e não por
   leitura; e nada em português no código (§3.5). As contagens são **asserção**,
-  não comentário: `MODEL.BIN` 106/2.461/1.767 terminando em 64.800, e
-  `EDT_MOD.BIN` 11/690/611 terminando em 36.072. **Uma varredura que não chega
+  não comentário: `MODEL.BIN` 106/2.461/1.767 **a partir de 1816** terminando
+  em 64.800, e `EDT_MOD.BIN` 20/1.218/1.074 **a partir de 216** terminando em
+  36.072. **Toda contagem vem com o offset de onde a varredura começou**, e
+  isso não é zelo: começar em 15.704 dá 11/690/611 fechando no mesmo EOF
+  exato, o que passou por leitura completa do arquivo e era metade dele
+  ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)). **Uma varredura que não chega
   ao EOF não é "quase certa", é errada** — foi exatamente assim que o formato
   revelou o separador de zeros. E o controle negativo do tamanho de primitiva
   (24 → 20) tem de ficar vermelho; se ficar verde, a varredura não está

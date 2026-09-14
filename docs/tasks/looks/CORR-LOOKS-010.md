@@ -3,7 +3,7 @@ id: CORR-LOOKS-010
 title: "Correção: o `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 e chamou o resto de EOF exato"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -182,21 +182,96 @@ listas. A segunda é melhor, e é o método que a
 
 ## Verificação
 
-- [ ] a §1.5 diz 20 seções e duas listas, com o que ela dizia antes e a data
-- [ ] nenhuma contagem de seção no plano ou nas tasks aparece sem o offset de
+- [x] a §1.5 diz 20 seções e duas listas, com o que ela dizia antes e a data
+- [x] nenhuma contagem de seção no plano ou nas tasks aparece sem o offset de
       onde a varredura começou
-- [ ] o critério da 05 pede 20/1.218/1.074 a partir de 216, e modelo por lista
-- [ ] o início do `EDT_MOD.BIN` é derivado ou é constante do `layout.py`, e o
+- [x] o critério da 05 pede 20/1.218/1.074 a partir de 216, e modelo por lista
+- [x] o início do `EDT_MOD.BIN` é derivado ou é constante do `layout.py`, e o
       `--sweep` continua verde
-- [ ] `python tools/looks/section.py --check` e `layout.py --check` verdes
-- [ ] `roms/` intocada
+- [x] `python tools/looks/section.py --check` e `layout.py --check` verdes
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O início do `EDT_MOD.BIN` deixou de ser um número escolhido à mão e passou a ser
+**derivado** — que é a parte que impede isso de acontecer de novo. Três funções
+novas no `layout.py`:
+
+- `read_pointer_list(data, offset, base)` — lê uma lista `(tag, ponteiro)`
+  fechada por `0x000000FF`, com ou sem o `[contagem][pad]` na frente (se a
+  segunda palavra é ponteiro, os pares já começaram), conferindo **cada alvo**
+  contra o tamanho do arquivo;
+- `record_lists(data)` — as listas que o cabeçalho nomeia, em ordem;
+- `geometry_start(data)` — o menor alvo de qualquer lista. Para o
+  `EDT_MOD.BIN` dá **216**, e a varredura a partir dele dá o arquivo inteiro.
+
+```
+geometry_start(EDT_MOD) = 216
+scan a partir dele: 20 sec  1218 vert  1074 prim  end=36072 (EOF=36072)
+listas: [11, 11]
+```
+
+Documentação, no lugar e com a data, como manda o perfil:
+
+- **§1.5 reescrita.** Título novo, o bloco de ressalva dizendo o que ela afirmava
+  antes e por quê (a varredura começou a 43% do arquivo e fechou no EOF exato),
+  a tabela das duas listas lado a lado, as quatro leituras, e o `0x10` de 3.228
+  desmontado como falso positivo de TIM dentro do corpo de uma seção.
+- **§1 "Definição de pronto" e a tabela da §1.4** — 20 seções. A tabela ganhou a
+  **linha antiga de propósito**, marcada, porque é ela que mostra que terminar
+  no EOF não diz nada sobre o começo.
+- **§8, armadilha 2** — dizia que o arquivo "não é contíguo". É: do 216 ao EOF.
+  O que quebra é começar em 0 ou em 8, medido: `BadSection` com contagens na
+  casa dos bilhões.
+- **`05-arquivos-de-modelo.md`** — critério pede 20/1.218/1.074 a partir de 216,
+  duas listas, `modelfile.py` entregando **modelo por lista**, as contagens
+  ditas por lista, e a regra nova: toda contagem vem com o offset de partida.
+- **`08-de-onde-vem-o-boneco.md`** — a incógnita (a) passou a ter **três**
+  candidatos: lista A, lista B e os TMDs de `0x00168xxx`.
+
+Casos vermelhos novos (9 e 10), sobre um modelo sintético na forma do
+`EDT_MOD.BIN` — duas listas, uma com `[contagem][pad]` e outra sem:
+
+| controle (nada commitado) | resultado |
+|---|---|
+| desligar a conferência de alvo **dentro do `read_pointer_list`** | `AssertionError: a pointer list aiming past the file was accepted`, exit 1 |
+| aceitar `2` como terminador | `AssertionError: [[], []]` |
+
+Gates: `layout --check`, `section --check`, `iso_source --check` verdes, e
+`layout --sweep` → `no address outside layout.py (3 file(s), 981 line(s) swept)`.
+
 **Problemas encontrados:**
 
+**1. O `MODEL.BIN` não entra nessa derivação, e isso é achado novo.** O
+`read_pointer_list()` **recusa** as listas dele: a de 672 abre com tag `0x80` e
+fecha com `0x00000000` em 736, não com o terminador. Recusar é a resposta certa
+até alguém medir a variante — afrouxar seria adivinhar formato —, então o
+`MODEL_GEOMETRY_START` continua constante, o docstring diz por quê, e a
+LOOKS-TASK-05 ganhou o item de medir ou registrar como aberto.
+
+**2. O perfil do ciclo estava errado em dois lugares**, e é o arquivo pelo qual
+o `/revisar` julga a fase: a verificação da Fase 1 exigia `EDT_MOD.BIN
+11/690/611` — agora `20/1.218/1.074`, com o offset de partida junto —, e a
+armadilha 3 dizia que o arquivo não é contíguo. Sem esse conserto a próxima
+revisão cobraria o número errado.
+
+**3. A transcrição do Log da LOOKS-TASK-04 fica como está**, com uma nota de
+bloco ao lado dizendo de que offset ela saiu e qual é o número do arquivo. É
+registro da corrida que a produziu.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — `BadPointerList`, `LIST_TERMINATOR`,
+  `read_pointer_list()`, `record_lists()`, `geometry_start()`, casos 9 e 10
+- `docs/PLAN-LOOKS-PY.md` — §1.5 reescrita, §1 (definição de pronto), a tabela
+  da §1.4 e a armadilha 2 da §8
+- `docs/tasks/looks/05-arquivos-de-modelo.md` — o critério
+- `docs/tasks/looks/08-de-onde-vem-o-boneco.md` — os três candidatos
+- `docs/tasks/looks/04-formato-de-secao.md` — a nota ao lado da transcrição
+- `docs/prompts/perfil-looks.md` — Fase 1 e armadilha 3
+- `docs/tasks/looks/CORR-LOOKS-010.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

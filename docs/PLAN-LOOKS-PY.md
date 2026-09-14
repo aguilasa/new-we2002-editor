@@ -46,10 +46,11 @@ mudança; é esse comportamento que se reproduz.
 ### Definição de pronto
 
 1. `python tools/looks/cli.py sections roms/japanese-shift-jis.bin` lista as
-   **11 seções** do `EDT_MOD.BIN` e as **106** do `MODEL.BIN`, e as duas
-   varreduras terminam **exatamente no EOF**.
-2. Cada uma das 11 peças do `EDT_MOD.BIN` tem nome medido — cabeça, tronco,
-   braço, coxa, pé —, decidido pelo emulador e não por palpite.
+   **20 seções** do `EDT_MOD.BIN` — duas listas de onze, com duas em comum
+   (§1.5) — e as **106** do `MODEL.BIN`, e as duas varreduras terminam
+   **exatamente no EOF**.
+2. Cada uma das 11 peças de **cada lista** do `EDT_MOD.BIN` tem nome medido —
+   cabeça, tronco, braço, coxa, pé —, decidido pelo emulador e não por palpite.
 3. `python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-F-A`
    produz um boneco reconhecível, com a pele e o cabelo daquela tupla.
 4. `ctest -R looks` numa máquina limpa: **1 passed, 2 skipped**.
@@ -256,12 +257,19 @@ Com a regra da corrida, a varredura fecha:
 | arquivo | a partir de | seções | vértices | primitivas | termina em |
 |---|---:|---:|---:|---:|---|
 | `MODEL.BIN` | 1816 | **106** | 2.461 | 1.767 | **64.800 = EOF exato** |
-| `EDT_MOD.BIN` | 15.704 | **11** | 690 | 611 | 36.064 + 8 = **36.072 = EOF exato** |
+| `EDT_MOD.BIN` | **216** | **20** | 1.218 | 1.074 | 36.064 + 8 = **36.072 = EOF exato** |
+| `EDT_MOD.BIN` | 15.704 | 11 | 690 | 611 | 36.064 + 8 = 36.072 = EOF exato |
 
 As 106 do `MODEL.BIN` confirmam a contagem que o repositório já tinha. O que é
 **novo** é que elas se dividem em **6 grupos**, de tamanhos
 `[55, 1, 34, 7, 5, 4]` — a fronteira de grupo é justamente a corrida de zeros.
-O `EDT_MOD.BIN` dá `[1] × 11`: cada peça é seu próprio grupo.
+O `EDT_MOD.BIN` dá `[1] × 20`: cada peça é seu próprio grupo.
+
+**A segunda linha da tabela está ali de propósito.** Começar em 15.704 também
+fecha no EOF exato, e por isso passou por leitura completa do arquivo até a
+[`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md): **terminar no fim não
+diz nada sobre o começo**. É a razão de a coluna "a partir de" existir nesta
+tabela, e de nenhuma contagem de seção ser escrita sem ela.
 
 **O `+ 8` da linha do `EDT_MOD.BIN` é cauda, e não detalhe de escrita.** A
 última seção dele acaba em 36.064 e o arquivo tem 36.072: há uma corrida de
@@ -285,71 +293,107 @@ E duas correções ao formato da primitiva, medidas na mesma corrida:
   `section.py` o preserva porque a regra 2 do plano diz que byte cru é
   normativo.
 
-### 1.5 O `EDT_MOD.BIN` é um jogador só, de onze peças
+### 1.5 O `EDT_MOD.BIN` tem 20 seções e **duas** listas de onze
 
-O `MODEL.BIN` é contíguo; o `EDT_MOD.BIN` **não é** — ele é dirigido pelo
-cabeçalho, e há dados não-geometria entre as seções. O cabeçalho é uma **lista
-de registros `(contagem, ponteiro)` terminada por `0x000000FF`**:
+> **Corrigido em 2026-09-14** pela
+> [`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md). Esta seção dizia
+> *"é um jogador só, de onze peças"*, que *"há dados não-geometria entre as
+> seções"*, e que a região entre 216 e 15.704 era *"material de textura"* com
+> *"um cabeçalho TIM em 3.228"*. As três coisas estavam erradas, e pela mesma
+> causa: a varredura que as mediu **começou no offset 15.704**, a 43% do
+> arquivo, e fechou no EOF exato — o que parece leitura completa e não é.
+
+O `MODEL.BIN` é contíguo; o `EDT_MOD.BIN` **também é**, do offset 216 ao EOF:
+seção, corrida de zeros, seção. O que não é geometria são os **216 bytes
+iniciais**, que são o cabeçalho e as duas listas. Varrendo dali:
 
 ```
-[ 0] 8011c070   [ 1] 8011c008  -> 8
-[ 2] 00000003   [ 3] 00000000
-[ 4] 00000002   [ 5] 80120bf0  -> 19440
-[ 6] 00000002   [ 7] 80121548  -> 21832
-...                            (onze registros de contagem 2)
-[26] 000000ff   [27] 00000000     <- fim da lista
-[28] 00000003   [29] 00000000     <- começa outra lista
+scan(edt, 15704) ->  11 sec   690 vert   611 prim  end=36072   (a leitura parcial)
+scan(edt,   216) ->  20 sec  1218 vert  1074 prim  end=36072
 ```
 
-Seguindo os onze ponteiros:
+Os dois fecham no EOF, e **é por isso que o primeiro engana**: começar perto do
+fim e terminar no fim não diz nada sobre o começo. Daí a regra que a
+[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md) passou a exigir:
+**toda contagem de seção vem acompanhada do offset de onde a varredura
+começou.**
 
-| # | offset | nVert | nPrim | folga até o próximo |
-|---:|---:|---:|---:|---:|
-| 0 | 15.704 | 63 | 56 | 12 |
-| 1 | 17.572 | 63 | 56 | 12 |
-| 2 | 19.440 | 84 | 71 | 8 |
-| 3 | 21.832 | 40 | 34 | 8 |
-| 4 | 22.984 | 40 | 34 | 8 |
-| 5 | 24.136 | 88 | 86 | 8 |
-| 6 | 26.920 | 88 | 86 | 8 |
-| 7 | 29.704 | 72 | 59 | 8 |
-| 8 | 31.712 | 72 | 59 | 8 |
-| 9 | 33.720 | 40 | 35 | 8 |
-| 10 | 34.896 | 40 | 35 | 8 |
+O início não é constante — é **derivado**, pelo `layout.geometry_start()`, como
+o `BASE` da §1.2: o menor alvo de qualquer lista do cabeçalho. Para este arquivo
+dá 216.
 
-Três leituras, todas de peso:
+#### As duas listas
 
-- **São cinco pares de contagem idêntica mais uma peça sozinha.** `63/56`,
-  `40/34`, `88/86`, `72/59` e `40/35` aparecem duas vezes cada; só `84/71`
-  aparece uma. Isso é um corpo: membros espelhados mais um tronco ou cabeça.
-- **Onze peças.** O `we3d` levantou, só do `MODEL.BIN` e sem conferir, que os
-  106 blocos de lá se combinam em **14 jogadores de 11 peças**. O `EDT_MOD.BIN`
-  tem exatamente 11 e é um jogador só — o boneco da tela de edição. A hipótese
-  do `we3d` acabou de ganhar confirmação vinda de outro arquivo.
-- **A ordem da lista não é a ordem do arquivo.** A lista inteira, lida em
-  2026-09-14 pela
-  [`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md):
+O cabeçalho tem **duas palavras**, e cada uma aponta para uma lista de onze
+registros `(contagem, ponteiro)` terminada por `0x000000FF`:
 
-  ```
-  lista:   19440 21832 24136 22984 26920 29704 33720 15704 31712 34896 17572
-  arquivo: 15704 17572 19440 21832 22984 24136 26920 29704 31712 33720 34896
-  ```
+```
+[ 0] 8011c070 -> 112   (lista A)
+[ 1] 8011c008 ->   8   (lista B)
+```
 
-  **O conjunto é o mesmo; a sequência não.** O 15.704 — a primeira seção do
-  arquivo — é o **oitavo** registro da lista. A lista é ordem de montagem ou de
+```
+lista A (em 112): 216 2608 4272 3440 6800 9328 13352 15704 11340 14528 17572
+lista B (em   8): 19440 21832 24136 22984 26920 29704 33720 15704 31712 34896 17572
+```
+
+**A união das duas é exatamente as 20 seções**, e elas compartilham duas:
+15.704 e 17.572, nas **mesmas posições** (7 e 10) das duas listas.
+
+| pos | lista A | | lista B | |
+|---:|---:|---|---:|---|
+| 0 | 216 | 84/71 | 19.440 | 84/71 |
+| 1 | 2.608 | 30/24 | 21.832 | 40/34 |
+| 2 | 4.272 | 80/78 | 24.136 | 88/86 |
+| 3 | 3.440 | 30/24 | 22.984 | 40/34 |
+| 4 | 6.800 | 80/78 | 26.920 | 88/86 |
+| 5 | 9.328 | 72/59 | 29.704 | 72/59 |
+| 6 | 13.352 | 40/35 | 33.720 | 40/35 |
+| 7 | **15.704** | 63/56 | **15.704** | 63/56 |
+| 8 | 11.340 | 72/59 | 31.712 | 72/59 |
+| 9 | 14.528 | 40/35 | 34.896 | 40/35 |
+| 10 | **17.572** | 63/56 | **17.572** | 63/56 |
+
+Quatro leituras, todas de peso:
+
+- **As duas listas têm a mesma forma.** Cada uma é uma peça sozinha (`84/71`,
+  na posição 0) mais **cinco pares de contagem idêntica**. Isso é um corpo:
+  membros espelhados mais um tronco ou cabeça. O que muda entre elas são as
+  contagens de três dos cinco pares — `30/24` e `80/78` na A contra `40/34` e
+  `88/86` na B —, e duas peças são **literalmente a mesma seção**.
+- **São dois modelos, não um.** O `we3d` levantou, só do `MODEL.BIN` e sem
+  conferir, que os 106 blocos de lá se combinam em **14 jogadores de 11
+  peças**. O `EDT_MOD.BIN` traz dois desses conjuntos de onze, montados sobre o
+  mesmo esqueleto.
+- **A pergunta que isso abre**, e que **não** se responde aqui: dois bonecos
+  (jogador de linha e goleiro?), duas qualidades do mesmo boneco, ou um modelo
+  mais um conjunto de variações? Quem decide é a
+  [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), pelo
+  emulador — e o estímulo já existe: os **dois save states** do usuário são
+  exatamente goleiro e jogador de linha. A incógnita (a) da §6 passou a ter
+  **três** respostas possíveis, não duas.
+- **A ordem da lista não é a ordem do arquivo**, nas duas. Na A, o 216 — a
+  primeira seção do arquivo — é o primeiro registro, mas o 4.272 vem antes do
+  3.440; na B, o 15.704 é o **oitavo**. A lista é ordem de montagem ou de
   desenho, não de armazenamento, e é ela que vale. Assumir ordem de arquivo
-  embaralha as peças sem sintoma óbvio, que é o mesmo erro que a §3.3 do
-  [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md) registra para elenco.
+  embaralha as peças sem sintoma óbvio — o mesmo erro que a §3.3 do
+  [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md) registra para elenco. **E é esta a
+  razão de precisar da lista**, não a de a varredura não alcançar as seções: a
+  varredura as alcança todas, do 216 ao EOF; o que ela não dá é a ordem, nem
+  qual peça pertence a qual modelo.
 
-  **E é esta a razão de precisar da lista — não a de que a varredura não
-  chegue lá.** Com a regra da corrida de zeros (§1.4), varrer o
-  `EDT_MOD.BIN` do offset 15.704 **encontra as onze seções** e termina no EOF
-  exato. O que a varredura não dá é a **ordem**, e ordem errada aqui é peça
-  trocada de lugar no boneco.
+#### O "cabeçalho TIM" de 3.228 era falso positivo
 
-Entre o offset 216 e o 15.704 há outra região, com nove alvos de ponteiro
-(216, 2.608, 3.440, 4.272, 6.800, 9.328, 11.340, 13.352, 14.528) e **um
-cabeçalho TIM em 3.228**. É material de textura, e é a §6(a).
+```
+e[3228:3244] = 1000000007002700110000000300e6ff
+palavra em 3228 == 0x10        : True
+seção que contém 3228          : 2608 .. 3432  (30 vert / 24 prim)
+palavras == 0x00000010 no arquivo: 3
+```
+
+`0x10` é a magia de um TIM e é também um inteiro qualquer. Este cai **dentro do
+corpo** de uma seção que varre limpa. Não há textura no `EDT_MOD.BIN`; onde ela
+mora é no `DAT2D.BIN` (§1.7).
 
 ### 1.6 A tela desenha com textura, e o formato de seção não tem textura
 
@@ -974,8 +1018,11 @@ geometria. Decidir isto decide metade da Fase 3.
 
 1. **A varredura ingênua morre na seção 55 do `MODEL.BIN`** e parece formato
    errado. É o par de zeros entre grupos (§1.4).
-2. **O `EDT_MOD.BIN` não é contíguo.** Varrer do começo sem a lista de
-   ponteiros pega uma seção e para.
+2. **O `EDT_MOD.BIN` é contíguo do 216 ao EOF**, e são **20** seções em duas
+   listas de onze (§1.5). Esta armadilha dizia o contrário até 2026-09-14
+   ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)). O que quebra é
+   começar em 0 ou em 8 — cabeçalho e listas —, e o que engana é começar em
+   15.704: também fecha no EOF exato, lendo metade do arquivo.
 3. **A ordem da lista não é a ordem do arquivo** (§1.5). Assumir a do arquivo
    embaralha peça sem sintoma.
 4. **`MSYS_NO_PATHCONV=1`** ou o caminho de dentro do ISO vira caminho Windows,

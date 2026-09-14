@@ -36,16 +36,34 @@ seções, preservando a ordem que a lista de montagem declara.
       1.767 primitivas**, terminando **exatamente em 64.800 = EOF**.
 - [ ] Os **6 grupos** do `MODEL.BIN` aparecem com os tamanhos
       `[55, 1, 34, 7, 5, 4]`.
-- [ ] O cabeçalho do `EDT_MOD.BIN` é lido como **lista de registros
-      `(contagem, ponteiro)` terminada por `0x000000FF`**.
-- [ ] `EDT_MOD.BIN` dá **11 seções, 690 vértices, 611 primitivas**, e a última
-      termina em 36.064, com o separador fechando em **36.072 = EOF**.
-- [ ] As **cinco duplas de contagem idêntica** (`63/56`, `40/34`, `88/86`,
-      `72/59`, `40/35`) e a **peça sozinha** (`84/71`) são identificadas como
-      tal — sem ainda dizer qual parte do corpo é qual, que é a Fase 2.
+- [ ] O cabeçalho do `EDT_MOD.BIN` é lido como **duas** listas de registros
+      `(contagem, ponteiro)` terminadas por `0x000000FF`, de **onze registros
+      cada** — não uma. Elas compartilham 15.704 e 17.572, nas mesmas posições.
+- [ ] `EDT_MOD.BIN` percorrido **a partir de 216** dá **20 seções, 1.218
+      vértices, 1.074 primitivas**, e a última termina em 36.064, com o
+      separador fechando em **36.072 = EOF**. O 216 vem do
+      `layout.geometry_start()`, **derivado** do menor alvo das listas, e não
+      de um número escolhido à mão.
+- [ ] **Toda contagem de seção afirmada vem com o offset de onde a varredura
+      começou.** Foi a metade que faltou na
+      [`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md): começar em
+      15.704 dá 11/690/611 fechando no EOF exato, o que parece leitura completa
+      e é metade do arquivo
+      ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)).
+- [ ] O `modelfile.py` entrega **modelo por lista**, não "as onze do
+      `EDT_MOD.BIN`". Cada lista é uma peça sozinha (`84/71`) mais **cinco
+      pares de contagem idêntica** — `30/24`, `80/78`, `72/59`, `40/35`,
+      `63/56` na lista A; `40/34`, `88/86`, `72/59`, `40/35`, `63/56` na B —,
+      identificados como tal, sem ainda dizer qual parte do corpo é qual, que
+      é a Fase 2. **O critério diz de qual lista cada contagem é.**
 - [ ] A ordem entregue é a **da lista**, e um controle negativo que a inverta
       fica vermelho.
 - [ ] As contagens acima valem como asserção, não como comentário.
+- [ ] **O `MODEL.BIN` continua com `MODEL_GEOMETRY_START` constante**, e a task
+      diz por quê: o `read_pointer_list()` recusa as listas dele — a de 672
+      abre com tag `0x80` e fecha com `0x00000000` em 736, e não com o
+      terminador. Medir essa variante, ou registrar que ela fica aberta, é
+      desta task.
 
 ---
 

@@ -150,6 +150,10 @@ MODEL_GEOMETRY_START = 1816
 """Offset of the first MODEL.BIN section: 107 vertices, 88 primitives.
 
 The number the `we3d` analysis reports for section 0, re-measured here.
+
+EDT_MOD.BIN has no constant beside this one on purpose: its first section is
+DERIVED, by geometry_start(), because deriving it is what would have caught
+the scan that began at 15,704 and reported the file as read (CORR-LOOKS-010).
 """
 
 PLAYER_RECORD_OFFSET = 157164
@@ -166,6 +170,10 @@ is only that the span fits, which is cheap and catches a typo.
 
 class WrongDisc(Exception):
     """Raised when a file is read from a disc that may not supply it."""
+
+
+class BadPointerList(Exception):
+    """Raised when a header pointer does not lead to a list of the known shape."""
 
 
 class WrongBase(Exception):
@@ -339,6 +347,105 @@ def pointer_density(data: bytes, base: int) -> tuple[int, int]:
     return high, inside
 
 
+LIST_TERMINATOR = 0x000000FF  # not-an-address: the word that closes a pointer list
+
+
+def read_pointer_list(data: bytes, offset: int, base: int) -> list[int]:
+    """Read one record list at *offset* and return its targets as file offsets.
+
+    The shape this reads, measured 2026-09-14 on EDT_MOD.BIN: pairs of (tag,
+    KSEG0 pointer) closed by LIST_TERMINATOR.  Both of that file's lists carry
+    a [count][pad] header before the pairs, and whether a list has one can be
+    read off the file rather than assumed -- if the second word is a pointer,
+    the pairs have already begun.
+
+    **MODEL.BIN's header lists are NOT all of this shape, and this refuses
+    them.** Measured the same day: its first two (at 72 and 88) read fine, and
+    the one at 672 opens with tag 0x80 and closes with a 0x00000000 word at
+    736 rather than with LIST_TERMINATOR.  Refusing is the right answer until
+    somebody measures that variant -- LOOKS-TASK-05's job -- which is why
+    MODEL_GEOMETRY_START is still a constant while EDT_MOD.BIN's start is
+    derived.
+
+    Every target is checked against the file's length.  A list that does not
+    close, or that aims outside, raises: guessing here would produce a
+    plausible list of offsets and a scan that walks into the middle of a
+    section.
+    """
+    words = len(data) // 4
+
+    def word(index):
+        if not 0 <= index < words:
+            raise BadPointerList(
+                "pointer list at %d runs past the file's %d bytes"
+                % (offset, len(data))
+            )
+        return int.from_bytes(data[index * 4:index * 4 + 4], "little")
+
+    if offset % 4:
+        raise BadPointerList("pointer list at %d is not word-aligned" % offset)
+
+    index = offset // 4
+    if word(index + 1) < 0x80000000:
+        index += 2  # a [count][pad] header, as in EDT_MOD.BIN
+
+    targets = []
+    while True:
+        tag = word(index)
+        if tag == LIST_TERMINATOR:
+            return targets
+        pointer = word(index + 1)
+        if pointer < 0x80000000:
+            raise BadPointerList(
+                "pointer list at %d: entry %d holds 0x%08x, which is not a "
+                "KSEG0 pointer and is not the terminator"
+                % (offset, len(targets), pointer)
+            )
+        target = pointer - base
+        if not 0 <= target < len(data):
+            raise BadPointerList(
+                "pointer list at %d: entry %d aims at %d, outside the file's "
+                "%d bytes" % (offset, len(targets), target, len(data))
+            )
+        targets.append(target)
+        index += 2
+
+
+def record_lists(data: bytes) -> list[list[int]]:
+    """Every record list the header of *data* names, in header order.
+
+    EDT_MOD.BIN has TWO, of eleven records each, sharing two of them.  Reading
+    only one of the two is how a scan came to start 43% into the file and
+    still close on an exact EOF -- the counts were right for what was read,
+    and what was read was half the file (CORR-LOOKS-010).
+
+    Raises BadPointerList on MODEL.BIN today: see read_pointer_list.
+    """
+    header, base = derive_base(data)
+    pointers = [
+        int.from_bytes(data[i * 4:i * 4 + 4], "little") for i in range(header)
+    ]
+    return [read_pointer_list(data, p - base, base) for p in pointers]
+
+
+def geometry_start(data: bytes) -> int:
+    """The offset of the first section: the lowest target of any header list.
+
+    Derived rather than stored, which is the same choice derive_base() makes
+    and for the same reason: a constant nobody re-derives is a constant nobody
+    checks.  Here it is also the fix for a specific failure -- a scan handed a
+    hand-picked start reported an exact EOF and looked complete.
+
+    EDT_MOD.BIN answers 216.  MODEL.BIN raises, because read_pointer_list
+    does not yet accept every shape its header uses; MODEL_GEOMETRY_START
+    carries that file's answer until it does.
+    """
+    targets = [t for one in record_lists(data) for t in one]
+    if not targets:
+        raise BadPointerList("the header names no record at all")
+    return min(targets)
+
+
 def require_base(disc_path: str, data: bytes) -> int:
     """Derive the load base of *data* and demand it match the known constant.
 
@@ -510,6 +617,58 @@ def self_check() -> None:
 
     # MODEL.BIN's geometry starts after its header, not inside it.
     assert MODEL_GEOMETRY_START > 18 * 4
+
+    # -- record_lists and geometry_start, on a synthetic model file ---------
+    #
+    # Built in EDT_MOD.BIN's shape: a two-word header of pointers, each aiming
+    # at a [count][pad] list of (tag, pointer) pairs closed by the terminator.
+    # Two lists, and the answer is the LOWEST target of either -- which is the
+    # whole point: reading one list and starting there is how nine sections
+    # went unread while the scan still closed on an exact EOF.
+    def _word(value):
+        return value.to_bytes(4, "little")
+
+    fake_base = 0x80100000
+    #      0: -> list one at 8        4: -> list two at 40
+    #
+    # The lower header pointer aims at offset 8, the first byte past the
+    # two-word run, because that is the rule derive_base() reads.
+    model = _word(fake_base + 8) + _word(fake_base + 40)
+    #      8: count, pad, then two records aiming at 200 and 120
+    model += _word(3) + _word(0)
+    model += _word(2) + _word(fake_base + 200)
+    model += _word(2) + _word(fake_base + 120)
+    model += _word(LIST_TERMINATOR)
+    model += bytes(40 - len(model))
+    #     40: a list with no [count][pad], aiming at 300
+    model += _word(2) + _word(fake_base + 300)
+    model += _word(LIST_TERMINATOR)
+    model += bytes(400 - len(model))
+
+    assert derive_base(model) == (2, fake_base), derive_base(model)
+    assert record_lists(model) == [[200, 120], [300]], record_lists(model)
+    assert geometry_start(model) == 120, geometry_start(model)
+
+    # Red 9: a list that aims outside the file is refused, not returned.  A
+    # plausible-looking offset here sends the scan into the middle of a
+    # section, where it reads a vertex count out of colour data.
+    far = model[:20] + _word(fake_base + 4000) + model[24:]  # the 200 pointer
+    try:
+        record_lists(far)
+    except BadPointerList as exc:
+        assert "outside the file" in str(exc), str(exc)
+    else:
+        raise AssertionError("a pointer list aiming past the file was accepted")
+
+    # Red 10: a list that never reaches its terminator is refused rather than
+    # read to the end of the file.
+    unclosed = model.replace(_word(LIST_TERMINATOR), _word(2), 1)
+    try:
+        record_lists(unclosed)
+    except BadPointerList as exc:
+        assert "runs past the file" in str(exc) or "not a KSEG0" in str(exc), exc
+    else:
+        raise AssertionError("an unterminated pointer list was accepted")
 
     # -- the sweep itself, on a planted tree --------------------------------
     #
