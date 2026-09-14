@@ -91,7 +91,16 @@ Não se revertem sem o usuário pedir.
 11. **O diretório de save states é compartilhado com o trabalho de PES2.**
     Slot nu é sobrescrevível por acidente; os dois `.sav` do ciclo se copiam
     para um caminho do projeto e se apontam por variável.
-12. **Os documentos da cena se contradizem.** O CARP rotula o offset 8 do
+12. **`ctest -R <padrao>` que não casa nada SAI 0.** Ele imprime
+    `No tests were found!!!` e devolve sucesso, e isso vale para os cinco
+    projetos do repositório. Já enganou **duas vezes** neste ciclo: a
+    [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) sobre um alvo que
+    não existia, e a
+    [`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md) sobre um alvo que
+    existe no fonte e em build nenhum. **Confira `N tests passed`, nunca só o
+    código de saída** — e, num alvo que deveria rodar, confira que o nome dele
+    aparece na listagem.
+13. **Os documentos da cena se contradizem.** O CARP rotula o offset 8 do
     `DAT2D.BIN` como "Pelos" e o 3.568 como "Caras"; o tutorial do `zeta` manda
     abrir o 3.568 para achar cabelo. Até a LOOKS-TASK-11 medir, **nenhum código
     crava nenhum dos dois**.
@@ -130,23 +139,50 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 
 ## Gates deste ciclo
 
-| alvo | precisa | existe desde |
-| --- | --- | --- |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | **CORR-LOOKS-012** |
-| `looks_selftest` | nada — **nunca pula** | LOOKS-TASK-06 |
-| `looks_ui` | venv + display (77 sem eles) | LOOKS-TASK-16 |
+| alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
+| --- | --- | --- | --- | --- |
+| `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
+| `looks_ui` | venv + display (77 sem eles) | — (nasce na 16) | `ctest -R looks_ui` | LOOKS-TASK-16 |
 
-**A coluna é "existe desde", não "prometido para".** Ela dizia LOOKS-TASK-05
-para o `looks_image`, a 05 fechou, e o alvo não existia: `ctest -R looks`
-respondia `No tests were found!!!` **saindo zero**, que é indistinguível de
-verde e é exatamente o que a regra abaixo proíbe. Registrado em 2026-09-14
-pela [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md). Alvo que ainda
-não existe nesta tabela traz o **nome da task que o cria**, e enquanto ela não
-rodar ele não é gate de coisa nenhuma.
+**Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
+coluna do meio existe. Medido em 2026-09-14
+([`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md)): `build`,
+`build-mingw` e `build-windows-release` respondem `No tests were found!!!` e
+**saem 0**, e nenhum `CTestTestfile.cmake` deles cita `looks`. O `build/` foi
+gerado noutra máquina (`CMAKE_HOME_DIRECTORY:INTERNAL=/home/ingmar/...`).
 
-Hoje, com um alvo só registrado: `ctest -R looks` dá **0 passed, 1 skipped**
-sem a variável, e **1 passed** com ela. Numa máquina limpa, depois da
-LOOKS-TASK-19, são **1 passed, 2 skipped**.
+**Mas o `ctest` é alcançável aqui — com o toolchain do vcpkg**, e a receita
+estava só na cabeça de quem a usou. Sem ela o `find_package(CURL REQUIRED)` do
+`src/core/CMakeLists.txt:1` derruba a configuração inteira, e com ela os dez
+testes Python de `tests/`, que não têm nada a ver com o CURL:
+
+```sh
+cmake -S . -B <build> -G Ninja \
+  -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+ctest --test-dir <build> -R looks
+```
+
+```text
+1/2 Test #10: looks_selftest ...................   Passed
+2/2 Test #11: looks_image ......................***Skipped   (sem a variavel)
+100% tests passed out of 2
+```
+
+Com `WE2002_LOOKS_IMAGE` apontada, os dois passam. **Use um diretório de build
+fora da árvore** — reconfigurar o `build/` do worktree destruiria o cache da
+outra máquina.
+
+`tools/looks/` **não precisa de compilador, libcurl, Qt nem venv** — o
+comentário do próprio alvo diz "It needs NOTHING", e ainda assim depende de um
+toolchain de C++ para ser listado. Tornar os alvos Python alcançáveis sem o
+`src/core` seria o conserto de verdade; alcança os **cinco** projetos e é
+**decisão de arquitetura de build, do dono do repositório** — não escolha de
+execução. Fica **aberta**, e enquanto estiver, a coluna do meio é o caminho
+curto: ela não depende de build nenhum.
+
+Hoje são **1 passed, 1 skipped**; depois da LOOKS-TASK-16, **1 passed,
+2 skipped**.
 
 **Antes da LOOKS-TASK-06 não há gate**, e isso é esperado: as tasks 01 a 05 se
 verificam pela saída da ferramenta, copiada para o Log. Depois dela, toda task

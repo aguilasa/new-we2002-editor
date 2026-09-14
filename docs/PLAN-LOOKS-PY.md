@@ -848,8 +848,18 @@ Mesma divisão por custo que o repositório já usa:
 | `looks_ui` | venv + display | 77 | LOOKS-TASK-16 |
 
 Numa máquina limpa, ao fim do ciclo, `ctest -R looks` dá **1 passed, 2
-skipped**. **Hoje são 0 passed, 1 skipped**: só o `looks_image` está
-registrado.
+skipped**. **Hoje são 1 passed, 1 skipped**: o `looks_selftest` passa e o
+`looks_image` pula sem a variável.
+
+**E o número tem de sair de uma corrida que listou os alvos pelo nome.**
+`ctest -R <padrão>` que não casa nada imprime `No tests were found!!!` e **sai
+0** — indistinguível de verde, e já passou por verde duas vezes neste ciclo
+([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md),
+[`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md)). Nenhum diretório de
+build do worktree lista os alvos de `looks`; a receita que funciona nesta
+máquina — build fora da árvore, `-G Ninja` com o toolchain do vcpkg — está na
+tabela de gates do
+[`perfil-looks.md`](/docs/prompts/perfil-looks.md).
 
 **O `looks_image` não tem módulo próprio.** A §3.2 previa um `check_image.py`,
 e o que existe é `modelfile.py --check-image` — onde a verificação já mora,

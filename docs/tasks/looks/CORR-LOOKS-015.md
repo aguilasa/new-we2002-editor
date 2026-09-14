@@ -3,7 +3,7 @@ id: CORR-LOOKS-015
 title: "Correção: o gate obrigatório não é alcançável por `ctest` nesta máquina, e pedir por ele continua saindo 0"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -150,20 +150,108 @@ ela.
 
 ## Verificação
 
-- [ ] o perfil diz, para cada alvo, o comando que **roda nesta máquina**
-- [ ] a armadilha do `ctest -R` vazio saindo 0 está na lista do perfil
-- [ ] a LOOKS-TASK-19 fecha a conta com o comando que existe, e não com um
+- [x] o perfil diz, para cada alvo, o comando que **roda nesta máquina**
+- [x] a armadilha do `ctest -R` vazio saindo 0 está na lista do perfil
+- [x] a LOOKS-TASK-19 fecha a conta com o comando que existe, e não com um
       `ctest -R looks` que responde "No tests were found"
-- [ ] `python tools/looks/selftest.py` continua saindo 0 e imprimindo as três
+- [x] `python tools/looks/selftest.py` continua saindo 0 e imprimindo as três
       linhas de contagem
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+O diagnóstico da CORR reproduz inteiro, e **uma das premissas dela não**: o
+`ctest` *é* alcançável nesta máquina. Ver "Problemas encontrados". As três
+partes pedidas foram feitas, e a terceira ficou melhor do que a CORR previa.
+
+**1. A tabela de gates do perfil ganhou duas colunas** — *como se roda AQUI* e
+*por `ctest`, onde o build configura*:
+
+| alvo | como se roda aqui |
+|---|---|
+| `looks_selftest` | `python tools/looks/selftest.py` |
+| `looks_image` | `python tools/looks/modelfile.py --check-image` |
+
+A coluna do meio não depende de build nenhum, e é o caminho curto enquanto a
+questão de arquitetura estiver aberta.
+
+**2. A armadilha entrou na lista do perfil, como item 12:** `ctest -R <padrão>`
+que não casa nada imprime `No tests were found!!!` e **sai 0**. Vale para os
+cinco projetos, e enganou **duas vezes** neste ciclo — a
+[`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) sobre alvo inexistente,
+esta sobre alvo que existe no fonte e em build nenhum. A regra escrita: conferir
+`N tests passed`, e que o **nome** do alvo apareceu na listagem.
+
+**3. A LOOKS-TASK-19** passou a fechar a conta com um número que sai de corrida
+que listou os alvos, e ganhou o ponteiro para a receita. De quebra, dois itens
+do critério dela estavam desatualizados: o `looks_selftest` já está registrado
+(pela LOOKS-TASK-06), e a conta "até esta task" era **0 passed, 1 skipped** e é
+**1 passed, 1 skipped**.
+
+Evidência reproduzida antes de editar:
+
+```
+$ for d in build build-mingw build-windows-release; do
+    ctest --test-dir $d -R looks 2>&1 | tail -1; done
+No tests were found!!!      rc=0
+No tests were found!!!      rc=0
+No tests were found!!!      rc=0
+
+$ grep -rl "looks" --include=CTestTestfile.cmake .
+(vazio)
+
+$ python tools/looks/selftest.py
+  ..... rule 1 swept 7 file(s), 2206 line(s)
+  ..... 8 of 8 controls red
+looks_selftest: 0 failure(s)                                        (rc=0)
+```
+
 **Problemas encontrados:**
 
+**O `ctest` é alcançável nesta máquina, e a CORR conclui que não é.** A
+evidência dela mostra um `cmake -G "MinGW Makefiles"` sem toolchain falhando em
+`Could NOT find CURL`, e disso tira que *"reconfigurar aqui não fecha nada"*.
+Fecha, com o toolchain do vcpkg — que é exatamente o que a
+[`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) usou algumas horas
+antes e **não escreveu em lugar nenhum**, que é o defeito de fundo. Medido
+agora, com o `tests/CMakeLists.txt` de hoje:
+
+```
+$ cmake -S . -B <fora da arvore> -G Ninja     -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+-- Configuring done (3.7s)
+
+$ ctest --test-dir <fora da arvore> -R looks
+1/2 Test #10: looks_selftest ...................   Passed    1.13 sec
+2/2 Test #11: looks_image ......................***Skipped   0.06 sec
+100% tests passed out of 2
+```
+
+Com `WE2002_LOOKS_IMAGE` apontada, os dois passam. A receita está agora na
+tabela de gates do perfil, junto com o aviso de **usar build fora da árvore** —
+reconfigurar o `build/` do worktree destruiria o cache da outra máquina.
+
+Isso **não invalida** a CORR: o caminho declarado continua respondendo verde
+sem medir nada, que é o achado. O que muda é o remédio — a opção 3 dela
+("conversa com o dono do repositório") deixa de ser a única saída e vira o
+conserto de fundo, registrado como **aberto** no perfil: `tools/looks/` não
+precisa de compilador, libcurl, Qt nem venv, e ainda assim depende de um
+toolchain de C++ para ser **listado**. Isso alcança os cinco projetos, não só
+este.
+
+**Segundo achado, de graça:** a §4.4 do plano dizia *"Hoje são 0 passed, 1
+skipped: só o `looks_image` está registrado"*, escrito antes de a LOOKS-TASK-06
+registrar o `looks_selftest`. Corrigido no mesmo commit, com a armadilha do
+`ctest -R` vazio ao lado.
+
 **Arquivos criados/modificados:**
+
+- `docs/prompts/perfil-looks.md` — a tabela de gates (duas colunas novas, a
+  receita medida) e a armadilha 12
+- `docs/tasks/looks/19-alvos-de-ctest-e-cli.md` — o critério
+- `docs/PLAN-LOOKS-PY.md` — §4.4
+- `docs/tasks/looks/CORR-LOOKS-015.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
