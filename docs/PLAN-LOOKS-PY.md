@@ -38,8 +38,8 @@ mudança; é esse comportamento que se reproduz.
 - **Não anima.** Pose parada. Animação mora no `ANIME.BIN` e é outro projeto.
 - **Não toca `roms/`.** Mesma regra de todos os projetos daqui.
 - **Não estende o `we2002_core`.** Nada em `src/` aprende o que é modelo 3D.
-- **Não reconstrói ISO.** O jogo acha arquivo por LBA fixo (§8.3); mesmo que a
-  v2 grave, será fit-or-fail.
+- **Não reconstrói ISO.** O jogo acha arquivo por LBA fixo (§8, item 8); mesmo
+  que a v2 grave, será fit-or-fail.
 
 ### Definição de pronto
 
@@ -63,8 +63,8 @@ A imagem de trabalho é **`roms/japanese-shift-jis.bin`** (307.187.664 B, dump
 de arquivo único, SLPM-87056), escolhida pelo dono do repositório em
 2026-09-13. As medições de RAM foram feitas no DuckStation rodando
 `C:\games\ps1\work\we2002-english.cue`, que é um patch de tradução de terceiro
-da mesma release — e a §1.3 mostra que o patch **não encosta** nos dois
-arquivos que interessam.
+da mesma release — e a §1.3 mostra **o que o patch encosta e o que não**, que é
+o que autoriza dirigir o emulador num disco e ler os bytes no outro.
 
 ### 1.1 Os dois arquivos de modelo, e o que eles não são
 
@@ -121,7 +121,7 @@ deduziu sem emulador e que a §2.2 do
 [ANALISE-REPOS-WE3D-DBMANAGER.md](/docs/ANALISE-REPOS-WE3D-DBMANAGER.md) já
 tinha conferido no disco.
 
-### 1.3 A prova pelo emulador — e o que ela diz de brinde
+### 1.3 A prova pelo emulador, e a divisão de trabalho entre dois discos
 
 Com o jogo parado na tela `LOOKS SET`, lendo a RAM pelo servidor MCP do
 DuckStation:
@@ -131,11 +131,42 @@ DuckStation:
 | `0x0011C000` | `70c0118008c0118003000000...` | `EDT_MOD.BIN[0:64]` **idêntico** |
 | `0x0016E800` | `48e8168058e8168068e91680...` | `MODEL.BIN[0:48]` **idêntico** |
 
-Os dois carregam crus, no endereço previsto, sem transformação nenhuma. E há um
-brinde: a RAM veio de um disco **com patch de tradução para inglês**, e bateu
-com o arquivo do **japonês original**. Ou seja, **o patch não altera nenhum dos
-dois arquivos de modelo** — o que autoriza medir no japonês e verificar no
-emulador com o patch, que é como esta sessão trabalhou.
+Os dois carregam crus, no endereço previsto, sem transformação nenhuma.
+
+E a RAM veio de um disco **com patch de tradução para inglês**, enquanto o
+arquivo veio do **japonês original**. Isso pedia conferência de verdade, e ela
+foi feita em 2026-09-14 comparando os arquivos inteiros, não os primeiros bytes:
+
+| arquivo | LBA/tamanho nos dois | japonês × inglês |
+|---|---|---|
+| `/BIN/EDT_MOD.BIN` | 5000 / 36.072 | **idêntico** (`6ff56894e7ce`) |
+| `/BIN/MODEL.BIN` | 8100 / 64.800 | **idêntico** (`0b3814bb0d3b`) |
+| `/BIN/DAT2D.BIN` | 5300 / 81.124 | **difere** |
+| `/SELECT.BIN` | 850 / 300.648 | **difere** |
+| `/SLPM_870.56` | 24 / 337.920 | **difere** |
+
+**Esta é a linha mais operacional do plano**, e decide como se trabalha:
+
+- **A geometria é a mesma nos dois discos.** Os dois arquivos de modelo são
+  byte a byte iguais, no mesmo LBA e com o mesmo tamanho. Logo a Fase 2 pode
+  dirigir o emulador no disco **inglês**, com os menus legíveis, sem risco
+  nenhum para o que ela mede.
+- **A textura não é a mesma.** O `DAT2D.BIN` **difere**, e é justamente o
+  arquivo que guarda cabelos, rostos, corpos, chuteiras e as paletas de pele
+  (§1.7). O patch mexeu ali — provavelmente na fonte dos menus, que mora no
+  mesmo contêiner. Portanto **toda medição de textura e de paleta sai do
+  japonês**, e ler offset de paleta no disco inglês é erro silencioso: o número
+  existe, o gráfico aparece, e é outro.
+
+A divisão, então: **o japonês é a fonte de verdade dos bytes; o inglês é o
+disco de dirigir.** As duas imagens japonesas desta máquina são o **mesmo
+dump** — `roms/japanese-shift-jis.bin` e
+`C:\games\ps1\roms\we2002\we-2002-original-japao.bin` têm o mesmo
+`sha256 e853eb14f5bddd50…`, 307.187.664 bytes, conferido em 2026-09-14.
+
+A imagem inglesa tem 306.834.864 bytes — **352.800 a menos**, 150 setores —,
+mas todos os LBAs conferidos batem, então o encolhimento está na cauda e não
+desloca nada que este plano leia.
 
 ### 1.4 O formato de seção, e a correção que ele exigiu
 
@@ -325,21 +356,31 @@ nenhum dos dois DuckStation está no `PATH`:
 
 ```sh
 python tools/pes2/fork.py status          # diz se já há um de pé
-python tools/pes2/fork.py launch "C:/games/ps1/work/we2002-japao.cue"
 python tools/pes2/fork.py recipe          # como obter o binário, se faltar
 ```
 
-**Qual disco.** As cópias de trabalho ficam em `C:\games\ps1\work\`, cada uma
-com um `.src` ao lado dizendo de onde veio:
+**Qual disco — e são dois, de propósito.** As cópias de trabalho ficam em
+`C:\games\ps1\work\`, cada uma com um `.src` ao lado dizendo de onde veio:
 
-| cópia | origem |
-|---|---|
-| `we2002-japao.cue` | `…\roms\we2002\we-2002-original-japao.bin` |
-| `we2002-english.cue` | `…\roms\we2002\we2002-english\we2002-english.bin` |
+| cópia | origem | papel |
+|---|---|---|
+| `we2002-english.cue` | `…\roms\we2002\we2002-english\we2002-english.bin` | **dirigir o emulador** |
+| `we2002-japao.cue` | `…\roms\we2002\we-2002-original-japao.bin` | conferência, quando a tela não importa |
 
-Esta sessão mediu no `we2002-english.cue`; pela §1.3 o patch não altera os dois
-arquivos de modelo, então o **japonês é o disco certo daqui em diante**, e é o
-que casa com a imagem de referência do plano.
+**Bote o inglês.** As duas imagens japonesas têm os menus em japonês, e a tela
+`LOOKS SET` inteira — os doze rótulos, o rodapé que nomeia o campo sob o cursor
+— fica ilegível para quem dirige. O patch resolve isso, e pela §1.3 ele é
+**byte a byte idêntico** nos dois arquivos de geometria, que é tudo que a Fase
+2 mede na tela.
+
+**Mas nunca leia textura dele.** O `DAT2D.BIN` difere entre os dois discos
+(§1.3). Offset de paleta medido no inglês é número que existe e está errado.
+
+O boot pelo lançador:
+
+```sh
+python tools/pes2/fork.py launch "C:/games/ps1/work/we2002-english.cue"
+```
 
 **A tela.** `EDIT` → `NEW PLAYER` → `LOOKS SET`. A tela de edição de jogador
 tem o título japonês `選手エディット` e sete itens à esquerda; `LOOKS SET` é o
@@ -612,10 +653,18 @@ geometria. Decidir isto decide metade da Fase 3.
    por isso crescer arquivo é impossível e rebuild de ISO é errado — não só
    caro (§2 do [PLAN-FEATURES.md](/docs/PLAN-FEATURES.md)).
 9. **`roms/` são os originais.** Cópia sempre, mesmo em leitura.
-10. **`numpy` não está instalado** nesta máquina, e a decisão de instalar é do
+10. **Dois discos, e cada um serve para uma coisa** (§1.3). O inglês tem os
+    menus legíveis e geometria idêntica, então é o de dirigir; o `DAT2D.BIN`
+    dele **difere**, então textura e paleta só se leem no japonês. O erro aqui
+    é silencioso: o offset existe nos dois e entrega gráfico diferente.
+11. **As duas imagens japonesas são o mesmo dump** —
+    `roms/japanese-shift-jis.bin` e `we-2002-original-japao.bin`, mesmo
+    `sha256 e853eb14…`. Nomes diferentes não significam imagens diferentes, e
+    conferir custou um `sha256sum`.
+12. **`numpy` não está instalado** nesta máquina, e a decisão de instalar é do
     dono. Por isso o render vai para a GPU via `QOpenGLWidget`, e nenhum
     rasterizador em Python puro é previsto.
-11. **Uma tecla de cada vez no emulador.** `Return`/`Circle` em laço fecha a
+13. **Uma tecla de cada vez no emulador.** `Return`/`Circle` em laço fecha a
     caixa seguinte junto; a regra está no [CLAUDE.md](../CLAUDE.md) e custou uma
     corrida inteira no ciclo `wte/`.
 
