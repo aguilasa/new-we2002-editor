@@ -25,6 +25,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | O `layout.py` diz que não faz I/O, e faz | Baixa | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `EDT_MOD.BIN` tem 20 seções e duas listas de onze — a varredura começou a 15.704 | Alta | [ ] pendente | — |
+| [CORR-LOOKS-011](/docs/tasks/looks/CORR-LOOKS-011.md) | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | O `sweep_addresses()` guarda duas regex mortas com o nome das vivas | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -48,6 +50,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-007 — o docstring do `layout.py` promete o que a dívida da 03 ainda deve
 - [x] CORR-LOOKS-008 — nenhum comando redeixa o `BASE` a partir dos arquivos reais
 - [x] CORR-LOOKS-009 — o `--sweep` só foi visto verde, e não diz quanto varreu
+- [ ] CORR-LOOKS-010 — a varredura do `EDT_MOD.BIN` leu 11 de 20 seções
+- [ ] CORR-LOOKS-011 — duas regex mortas no `sweep_addresses()`, com o nome das vivas
 
 ## Detalhes por correção
 
@@ -172,4 +176,34 @@ e o ciclo arquivado, o dele em
   subpasta, escape na linha, escape na linha de cima, `layout.py` sintético),
   contagem de arquivos e linhas na saída, isenção do dono por caminho e não por
   nome, e a 06 obrigada a reusar a função
+
+### CORR-LOOKS-010
+
+- **Arquivo com problema:** a §1.5 do plano, o critério da
+  `05-arquivos-de-modelo.md`, e o Log da `04-formato-de-secao.md`
+- **Sintoma:** a varredura do `EDT_MOD.BIN` começa no offset 15.704 — a 43% do
+  arquivo — e o Log a reporta como "11 seções … termina em 36.072 EXATO", sem
+  dizer de onde partiu. Do offset 216, que é o primeiro alvo da **segunda** lista
+  de ponteiros do cabeçalho, a mesma ferramenta acha **20 seções, 1.218
+  vértices, 1.074 primitivas**. São dois modelos de onze peças, compartilhando
+  15.704 e 17.572. A região que a §1.5 chama de "material de textura" é
+  geometria, e o "cabeçalho TIM em 3.228" cai dentro da seção 2.608–3.432
+- **Como foi detectado:** `section.scan(edt, 216)` contra `section.scan(edt,
+  15704)`, mais o dump das duas listas e dos bytes em 3.228
+- **Fix:** §1.5 reescrita no lugar; o critério da 05 pede 20/1.218/1.074 a
+  partir de 216 e modelo **por lista**; a 08 ganha a linha de que são três
+  candidatos e não dois; e o início do `EDT_MOD.BIN` passa a ser derivado ou
+  constante do `layout.py`
+
+### CORR-LOOKS-011
+
+- **Arquivo com problema:** `tools/looks/layout.py`, topo do `sweep_addresses()`
+- **Sintoma:** a reescrita para `tokenize` deixou `hex_literal` e `big_decimal`
+  compiladas e sem uso na função do comando, enquanto as que decidem vivem no
+  `_address_lines()` **com os mesmos nomes** e padrões ancorados. Quem for
+  mudar o que conta como endereço edita as de cima e não muda nada
+- **Como foi detectado:** `awk '/^def sweep_addresses/,/^def _address_lines/'
+  tools/looks/layout.py | grep hex_literal` — duas atribuições, nenhuma leitura
+- **Fix:** apagar as duas linhas mortas, ou promover as vivas a constante de
+  módulo com nome próprio; um nome, uma definição
 
