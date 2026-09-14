@@ -80,6 +80,14 @@ TEXTURE_FILES = frozenset({DAT2D})
 GEOMETRY_FILES = frozenset({EDT_MOD, MODEL})
 """Files proven identical on both discs, so either may supply them."""
 
+RECORD_FILES = frozenset({SELECT})
+"""Japanese-only too, but records rather than art -- so a hint of its own.
+
+/SELECT.BIN is the second of the two files that differ between the discs, and
+it holds the player records.  Folding it into TEXTURE_FILES would refuse it
+with a sentence about palettes, which is the wrong thing to go looking at.
+"""
+
 # The whole-image digest of the Japanese dump, so a recipe can confirm it is
 # pointed at the right dump before reading anything.  Both copies on this
 # machine -- roms/japanese-shift-jis.bin and the we-2002-original-japao.bin
@@ -110,6 +118,38 @@ def is_trusted(disc_path: str, data_digest: str) -> bool:
     return DIGEST.get(disc_path) == data_digest
 
 
+def _hint_for(disc_path: str) -> str:
+    """The sentence that names the real problem behind a refusal at *disc_path*.
+
+    Every path in DIGEST has to get one.  The families are not decoration: a
+    mismatch means something different for each, and the reader is being told
+    where to look.  self_check() walks DIGEST and demands a non-empty answer
+    for every entry, because the way this went wrong the first time was by
+    omission -- /SELECT.BIN belonged to no family and fell through to "",
+    leaving the bare "digest mismatch" the docstring above calls the failure.
+    """
+    if disc_path in TEXTURE_FILES:
+        return (
+            f"  {disc_path} differs between the Japanese original and the "
+            f"English translation patch, and textures and palettes may only "
+            f"be read from the Japanese one.  Point {ENV_IMAGE} at it; "
+            f"{ENV_DRIVE_IMAGE} is the disc you drive, not the disc you read."
+        )
+    if disc_path in RECORD_FILES:
+        return (
+            f"  {disc_path} differs between the Japanese original and the "
+            f"English translation patch, and the player records are read from "
+            f"the Japanese one.  Point {ENV_IMAGE} at it; {ENV_DRIVE_IMAGE} "
+            f"is the disc you drive, not the disc you read."
+        )
+    if disc_path in GEOMETRY_FILES:
+        return (
+            f"  {disc_path} is identical on both known discs, so a mismatch "
+            f"means a third disc -- another release, or a modified image."
+        )
+    return ""
+
+
 def require(disc_path: str, data: bytes, image: str = "<unknown image>") -> bytes:
     """Return *data*, or refuse it with a message that names the real problem.
 
@@ -128,19 +168,7 @@ def require(disc_path: str, data: bytes, image: str = "<unknown image>") -> byte
             f"trust it against (read from {image})"
         )
 
-    hint = ""
-    if disc_path in TEXTURE_FILES:
-        hint = (
-            f"  {disc_path} differs between the Japanese original and the "
-            f"English translation patch, and textures and palettes may only "
-            f"be read from the Japanese one.  Point {ENV_IMAGE} at it; "
-            f"{ENV_DRIVE_IMAGE} is the disc you drive, not the disc you read."
-        )
-    elif disc_path in GEOMETRY_FILES:
-        hint = (
-            f"  {disc_path} is identical on both known discs, so a mismatch "
-            f"means a third disc -- another release, or a modified image."
-        )
+    hint = _hint_for(disc_path)
 
     raise WrongDisc(
         f"{disc_path}: read {got} from {image}, expected {expected}.{hint}"
@@ -191,6 +219,32 @@ def self_check() -> None:
         assert "third disc" in str(exc), str(exc)
     else:
         raise AssertionError("geometry guard accepted foreign content")
+
+    # Red 4: EVERY measured path gets a hint, not just the three with a
+    # family.  This one is a sweep rather than a case, on purpose: /SELECT.BIN
+    # was refused with a bare "digest mismatch" for exactly as long as it
+    # belonged to no family, and the next path added to DIGEST would inherit
+    # that silence the same way -- by omission, which no single red case
+    # catches.
+    for measured in DIGEST:
+        assert _hint_for(measured), "no hint for %s" % measured
+        try:
+            require(measured, b"content from the wrong disc", "fake")
+        except WrongDisc as exc:
+            text = str(exc)
+            assert text.rstrip().endswith("."), text
+            assert len(text) > len(
+                "%s: read %s from fake, expected %s."
+                % (measured, digest(b"x"), DIGEST[measured])
+            ), text
+        else:
+            raise AssertionError("%s guard accepted foreign content" % measured)
+
+    # And the two Japanese-only files say so by name, since "you opened the
+    # English disc" is the overwhelmingly likely cause of either refusal.
+    for japanese_only in TEXTURE_FILES | RECORD_FILES:
+        assert ENV_IMAGE in _hint_for(japanese_only), japanese_only
+        assert "Japanese" in _hint_for(japanese_only), japanese_only
 
     # The two disc variables are two different names.  They have been one
     # name before, in another project, and it cost twelve runs.

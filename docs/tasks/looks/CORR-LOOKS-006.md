@@ -3,7 +3,7 @@ id: CORR-LOOKS-006
 title: "Correção: a recusa do `/SELECT.BIN` sai como `digest mismatch` pelado"
 type: correção
 category: comportamento
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -95,20 +95,89 @@ a dica falaria de paleta onde a coisa é registro de jogador. Duas partes:
 
 ## Verificação
 
-- [ ] `python tools/looks/layout.py --check` verde, com o caso novo que exige
+- [x] `python tools/looks/layout.py --check` verde, com o caso novo que exige
       dica para todo caminho de `DIGEST`
-- [ ] a recusa do `/SELECT.BIN` nomeia o disco japonês e a variável
-- [ ] `python tools/looks/layout.py --check-discs <japonês> <inglês>` continua
+- [x] a recusa do `/SELECT.BIN` nomeia o disco japonês e a variável
+- [x] `python tools/looks/layout.py --check-discs <japonês> <inglês>` continua
       dando `ok` nas oito linhas
-- [ ] nada em português no módulo, e nenhum endereço fora dele (§3.3 e §3.5)
-- [ ] `roms/` intocada
+- [x] nada em português no módulo, e nenhum endereço fora dele (§3.3 e §3.5)
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+As duas partes da CORR, e o conserto **não** foi enfiar o `SELECT` em
+`TEXTURE_FILES`:
+
+1. Um terceiro conjunto, `RECORD_FILES = frozenset({SELECT})`, com **dica
+   própria** — o arquivo difere entre os discos, os registros de jogador se leem
+   do japonês, e a variável a apontar é `WE2002_LOOKS_IMAGE`. O docstring dele
+   diz por que não foi para `TEXTURE_FILES`: a recusa falaria de paleta onde a
+   coisa é registro, que é mandar olhar o lugar errado. A escolha da mensagem
+   saiu de dentro do `require()` para um `_hint_for()`, que é o que torna a
+   varredura abaixo possível.
+2. O caso vermelho 4 do `self_check()`, que é **varredura** e não caso: percorre
+   o `DIGEST` inteiro, exige `_hint_for()` não vazio para **todo** caminho
+   medido, e confere que a exceção de cada um sai maior que a linha pelada. Mais
+   a asserção de que os dois japonês-só (`TEXTURE_FILES | RECORD_FILES`) nomeiam
+   "Japanese" e a variável. É varredura de propósito: a falha foi por **omissão**
+   — o `/SELECT.BIN` não pertencia a família nenhuma —, e omissão nenhum caso
+   pontual pega; o próximo arquivo acrescentado ao mapa herdaria o mesmo
+   silêncio.
+
+A recusa do `/SELECT.BIN`, depois:
+
+```
+WrongDisc: /SELECT.BIN: read 508d82ec… from we2002-english.bin, expected
+86d14a66….  /SELECT.BIN differs between the Japanese original and the English
+translation patch, and the player records are read from the Japanese one.
+Point WE2002_LOOKS_IMAGE at it; WE2002_LOOKS_DRIVE_IMAGE is the disc you
+drive, not the disc you read.
+```
+
+Gates, nesta máquina:
+
+```
+$ python tools/looks/layout.py --check
+layout: self_check ok                                    (exit 0)
+
+$ python tools/looks/layout.py --check-discs roms/japanese-shift-jis.bin     C:/games/ps1/work/we2002-english.bin
+...
+  refused  /SELECT.BIN          (wanted refused) ok
+layout --check-discs: ok                                 (exit 0)
+```
+
+As oito linhas continuam `ok`. E o caso novo foi visto **ficando vermelho**, que
+é o que separa guarda de decoração — numa cópia da árvore com
+`RECORD_FILES = frozenset()`:
+
+```
+AssertionError: no hint for /SELECT.BIN                  (exit 1)
+```
+
+Módulo conferido contra as §3.3 e §3.5: sem acento, e todo endereço continua
+aqui, que é o contrato deste arquivo.
+
 **Problemas encontrados:**
 
+A varredura de discrepância puxou a **contagem de casos vermelhos**, que três
+documentos afirmavam: a §4.5 do plano e duas linhas da
+[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) — o Contexto
+e o item de critério que manda não apagar os casos da 02. Os três passaram a
+dizer **quatro**, e o plano diz por que o quarto é varredura.
+
+Uma quarta menção ficou como está: a linha *"`self_check()` com três casos
+vermelhos"* na seção **Arquivos criados/modificados** do Log da
+[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md). É registro
+do que aquela execução entregou, e continua verdadeiro sobre ela.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — `RECORD_FILES`, `_hint_for()` e o caso vermelho 4
+- `docs/PLAN-LOOKS-PY.md` — §4.5, a contagem de casos vermelhos
+- `docs/tasks/looks/03-fonte-de-disco-e-layout.md` — Contexto e critério
+- `docs/tasks/looks/CORR-LOOKS-006.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

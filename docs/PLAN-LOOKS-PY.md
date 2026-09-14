@@ -685,9 +685,15 @@ python tools/looks/layout.py --check
 python tools/looks/layout.py --check-discs <japonês.bin> <inglês.bin>
 ```
 
-O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **três
+O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **quatro
 casos vermelhos** — conteúdo estranho no `DAT2D.BIN`, caminho que ninguém
-mediu, e geometria que não bate. O segundo é a demonstração viva contra os dois
+mediu, geometria que não bate, e a **varredura do `DIGEST` inteiro**, que
+exige dica não vazia para todo caminho medido. O quarto é varredura e não
+caso de propriedade porque a falha que ele fecha foi por **omissão**: o
+`/SELECT.BIN` não pertencia a família nenhuma e recusava com o
+"digest mismatch" pelado que o próprio módulo chama de erro
+([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)), e o próximo
+arquivo acrescentado ao mapa herdaria o mesmo silêncio. O segundo é a demonstração viva contra os dois
 discos reais, e é o que mostra a guarda ficando vermelha onde deve:
 
 ```text

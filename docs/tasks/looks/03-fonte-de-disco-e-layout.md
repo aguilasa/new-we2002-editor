@@ -26,8 +26,10 @@ status: pendente
   do plano precisava existir como código antes de qualquer leitura de textura.
   O que está lá hoje: os nomes das duas variáveis de ambiente, os quatro
   caminhos de dentro do ISO como constante, o sha256 de cada um como lido do
-  disco japonês, a exceção `WrongDisc`, `require()` e um `self_check()` com
-  três casos vermelhos. **Nenhum LBA, nenhum `BASE`, nenhum 157.164** — esses
+  disco japonês, a exceção `WrongDisc`, `require()`, o `_hint_for()` que dá
+  a cada família de arquivo a sua mensagem, e um `self_check()` com **quatro**
+  casos vermelhos — o quarto varre o `DIGEST` inteiro e exige dica para todo
+  caminho medido ([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)). **Nenhum LBA, nenhum `BASE`, nenhum 157.164** — esses
   são desta task.
 - **O `_check_discs()` do `layout.py` é dívida desta task.** Ele importa
   `tools/pes2/iso.py` direto, com um comentário dizendo que é temporário,
@@ -67,7 +69,7 @@ status: pendente
       os dois `BASE` (`0x8011C000`, `0x8016E800`), o início de geometria do
       `MODEL.BIN` (1816) e o offset dos registros de jogador (157.164).
       **Acrescentados ao que a LOOKS-TASK-02 já pôs lá**, sem apagar a guarda
-      dos discos nem os três casos vermelhos dela.
+      dos discos nem os quatro casos vermelhos dela.
 - [ ] O `layout.py` fica **sem I/O**: o `_check_discs()` que hoje importa
       `tools/pes2/iso.py` direto passa a ler pelo `iso_source.py`.
 - [ ] Os dois `BASE` são **derivados do cabeçalho e conferidos** contra a
