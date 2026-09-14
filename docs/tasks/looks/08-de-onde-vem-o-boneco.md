@@ -61,6 +61,32 @@ status: pendente
   não uma**, e a segunda pode ser justamente o que distingue os agrupamentos.
 - **E as duas listas de uma entrada do `MODEL.BIN` nomeiam seção**: tag `0x02`,
   mirando 1816 e 4792, que são as duas primeiras seções do arquivo.
+- **O jogo REESCREVE a geometria carregada, e o diff com o disco já aponta
+  onde.** Medido em 2026-09-14 pela
+  [`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md), com o
+  jogo parado na tela, por `python tools/looks/oracle.py --check-live`:
+
+  ```text
+  /BIN/EDT_MOD.BIN at 0x8011c000: 203 of 36072 byte(s) differ (99.44% equal), in section(s) 0, 3, 4, 5, 6, 7, 8, 9, 10
+      every one of them at byte [2] of a 24-byte primitive
+  /BIN/MODEL.BIN at 0x8016e800: 20 of 64800 byte(s) differ (99.97% equal), in section(s) 24, 32
+      every one of them at byte [1, 2, 5, 9] of a 24-byte primitive
+  ```
+
+  Quatro coisas para começar por aqui, em vez de por uma varredura de RAM:
+
+  1. **Cabeçalho e listas de ponteiro estão intactos nos dois arquivos** — só
+     corpo de seção muda, e em posição de primitiva.
+  2. **No `EDT_MOD.BIN` é sempre o byte 2 da primitiva de 24**, e em nove das
+     vinte seções. Uma primitiva só, nas seções 1 e 2, não é tocada.
+  3. **O `EDT_MOD.BIN` difere entre os dois states e o `MODEL.BIN` não**: 162
+     corridas de diferença entre goleiro e jogador de linha no primeiro,
+     **zero** no segundo. Isso é evidência direta sobre a incógnita (a) — mas é
+     evidência de *quem é reescrito*, não ainda de *quem é desenhado*, e a
+     distinção é a pergunta obrigatória desta fase.
+  4. **`oracle.verify_load()` já devolve isso pronto** — offsets, seção de cada
+     um e posição dentro da primitiva —, então o diff de `HAIR` do critério
+     abaixo se compara contra uma linha de base que já existe.
 
 ---
 

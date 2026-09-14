@@ -117,6 +117,15 @@ CONTROLS = (
         "a blind ok() approves its own blindness; only the bare raise in "
         "harness._checks reaches a path ok() is not on",
     ),
+    Control(
+        "oracle-any-screen", "oracle.py", "module constant",
+        "BADGE_TOL = 0.004",
+        "BADGE_TOL = 0.5",
+        ("oracle",),
+        "with the plate's tolerance opened up, load_looks accepts the other "
+        "state as the one it asked for -- and every later diff would then be "
+        "measuring two players instead of one field",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

@@ -42,6 +42,7 @@ MODULES = (
     "section",
     "modelfile",
     "iso_source",
+    "oracle",
     "controls",
     "superpack_count",
 )

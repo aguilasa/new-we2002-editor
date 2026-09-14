@@ -42,6 +42,17 @@ os três alvos.
       `WE2002_LOOKS_IMAGE` nomeada na mensagem de skip, e o disco inglês
       recusado em vez de aceito em silêncio.
 - [ ] `looks_ui` registrado sob `if(UNIX AND Python3_FOUND)`, também com 77.
+- [ ] **Decidir o que fazer com o `oracle.py --check-live`, que existe desde a
+      [`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md)** e
+      hoje não é alvo nenhum. Ele sobe o emulador, carrega os dois save states,
+      confere a chegada pelo quadro e compara a RAM com o disco; **pula com 77**
+      sem `WE2002_LOOKS_DRIVE_IMAGE`, sem os `.sav` de `work/looks-states/` ou
+      sem o fork. Ou vira um quarto alvo — e aí o título desta task e a tabela
+      de gates do [`perfil-looks.md`](/docs/prompts/perfil-looks.md) passam a
+      dizer quatro —, ou fica como comando de mão, e **isso fica escrito**. O
+      que não pode é continuar sendo um gate que só roda quem se lembra dele,
+      que é exatamente o que a
+      [`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu.
 - [ ] Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped** — e o
       número aparece no Log, **copiado da saída de uma corrida de verdade**.
       Até esta task são **1 passed, 1 skipped**: o `looks_selftest` passa e o

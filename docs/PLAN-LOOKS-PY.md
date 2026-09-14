@@ -648,6 +648,39 @@ build do emulador mudarem e os states pararem de carregar, ela volta a ser
 necessária, e escrevê-la é trabalho da Fase 2 no `oracle.py`, no molde das rotas
 nomeadas de `tools/pes2/mcp_drive.py`.
 
+**Desde 2026-09-14 isto é código**, no
+[`tools/looks/oracle.py`](../tools/looks/oracle.py), e o que a
+[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) mediu ao
+escrevê-lo muda três coisas desta receita:
+
+- **A chegada se confere pelo quadro, e o quadro diz qual slot é.** A média da
+  tela inteira **não** distingue os dois states — 0,182425 contra 0,183158, que
+  é do tamanho do balanço da própria animação. A placa de posição embaixo do
+  nome da camisa (`GK` num, `CB` no outro) difere em **0,119963**, e é por ela
+  que o `load_looks()` recusa um state carregado no lugar do outro.
+- **Recarregar devolve a mesma imagem até o último bit.** Dois `load_state` do
+  slot 1 dão diferença **0,000000** sobre o quadro inteiro. O baseline que esta
+  seção prometia está medido, e é o que autoriza a Fase 2 a ler um diff como
+  "só o campo que eu troquei".
+- **O state amarra imagem *e* build do emulador.** Ele guarda o caminho do
+  `.cue` e o estado interno da versão que o gravou: trocar de disco, de release
+  ou de binário do fork pode fazê-lo não carregar, e aí a rota manual acima
+  volta a ser o caminho. É por isso que ela fica escrita aqui mesmo depois de os
+  states existirem.
+
+E os dois `.sav` passaram a ter **cópia dentro do projeto**, em
+`work/looks-states/`, apontada por `WE2002_LOOKS_STATES`: o diretório de save
+states é o mesmo do trabalho de PES2, slot nu é sobrescrevível por acidente, e
+regravá-los custa uma navegação à mão que ferramenta nenhuma deste ciclo
+reproduz. A cópia do projeto é a mestra; o slot do emulador é posição de
+rascunho, restaurada dela quando divergir.
+
+**Uma armadilha de console, medida na mesma sessão:** o `get_status` do MCP
+devolve o título do jogo, que é japonês, e o console do Windows é cp1252 —
+imprimir a resposta crua mata o script com `UnicodeEncodeError`, num traceback
+que fala de `charmap` e não do emulador. O `oracle.py` não imprime o título; um
+script de sondagem que imprimir precisa de `PYTHONIOENCODING=utf-8`.
+
 ---
 
 ## 2. Ressalva legal e linhagem
@@ -1001,16 +1034,55 @@ que não tem como ser conferido.
 
 ### 5.1 A contagem fecha
 
-O `MODEL.BIN` percorrido tem de dar **106 seções terminando em 64.800**, e o
-`EDT_MOD.BIN` **11 terminando em 36.072**. É a asserção mais barata do plano e
-pega qualquer erro de tamanho de primitiva ou de vértice: errar 24 por 20
-desalinha na primeira seção e o fim não bate.
+O `MODEL.BIN` percorrido **a partir de 1816** tem de dar **106 seções
+terminando em 64.800**, e o `EDT_MOD.BIN` **a partir de 216**, **20 terminando
+em 36.072**. É a asserção mais barata do plano e pega qualquer erro de tamanho
+de primitiva ou de vértice: errar 24 por 20 desalinha na primeira seção e o fim
+não bate.
+
+**Esta seção dizia "`EDT_MOD.BIN` 11 terminando em 36.072", sem offset de
+partida**, e ficou assim até 2026-09-14, quando a
+[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) a releu.
+A §1.5 já tinha sido corrigida pela
+[`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md) e esta não: 11 é o que
+uma varredura começando em 15.704 acha, e ela **também** fecha em 36.072
+exato. Contagem sem o offset de onde a varredura partiu não é medição — é
+justamente por isso que os dois números andam juntos aqui agora.
 
 ### 5.2 A RAM bate com o disco
 
-`EDT_MOD.BIN` em `0x8011C000` e `MODEL.BIN` em `0x8016E800`, byte a byte. É
-reconferível a qualquer momento por MCP, e é o que amarra "o que eu li do
-arquivo" a "o que o jogo está desenhando".
+`EDT_MOD.BIN` em `0x8011C000` e `MODEL.BIN` em `0x8016E800`. É reconferível a
+qualquer momento por MCP — `python tools/looks/oracle.py --check-live` —, e é o
+que amarra "o que eu li do arquivo" a "o que o jogo está desenhando".
+
+**Mas não é byte a byte, e a diferença é o achado.** Esta seção prometia
+igualdade total até 2026-09-14, quando a
+[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) mediu pela
+primeira vez, com o jogo parado na tela `LOOKS SET`:
+
+```text
+/BIN/EDT_MOD.BIN at 0x8011c000: 203 of 36072 byte(s) differ (99.44% equal), in section(s) 0, 3, 4, 5, 6, 7, 8, 9, 10
+    every one of them at byte [2] of a 24-byte primitive
+/BIN/MODEL.BIN at 0x8016e800: 20 of 64800 byte(s) differ (99.97% equal), in section(s) 24, 32
+    every one of them at byte [1, 2, 5, 9] of a 24-byte primitive
+```
+
+Três coisas decorrem, e as três importam mais do que a igualdade prometida:
+
+1. **O cabeçalho e as listas de ponteiro são idênticos nos dois arquivos.** É
+   isso que prova que o arquivo está carregado naquele endereço, e é o que o
+   `oracle.verify_load()` **exige**; endereço errado falha aí.
+2. **Todo byte que difere cai dentro de uma seção, e em posição de primitiva**
+   — nunca num cabeçalho de seção, nunca na folga entre duas. O que o jogo
+   reescreve é cor de primitiva, que é exatamente onde a aparência mora.
+3. **O `EDT_MOD.BIN` difere entre os dois save states e o `MODEL.BIN` não.**
+   Goleiro e jogador de linha divergem em 162 corridas dentro do `EDT_MOD.BIN`;
+   os 20 bytes do `MODEL.BIN` são os mesmos nos dois. A incógnita (a) da §6
+   começa daí, e a
+   [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) tem a linha.
+
+E a diferença **reproduz**: dois `load_state` do mesmo slot devolvem RAM
+idêntica, o que é o baseline que a §1.11 promete, agora medido.
 
 ### 5.3 O emulador é o gabarito vivo
 
