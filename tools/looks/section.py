@@ -309,7 +309,8 @@ def scan(data: bytes, start: int) -> Scan:
     offset = start
 
     while offset + HEADER_SIZE <= len(data):
-        if is_separator(data, offset):
+        at_separator = is_separator(data, offset)
+        if at_separator:
             after = skip_gap(data, offset)
             if after == offset:
                 break

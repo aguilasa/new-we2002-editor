@@ -30,6 +30,14 @@ status: pendente
   máquina: sem CLI `zstd` e sem o módulo `zstandard`, ele lê cabeçalho e para.
 
 
+- **O terceiro controle negativo da §5.5 é desta fase, e está em aberto.**
+  A [`LOOKS-TASK-06`](/docs/tasks/looks/06-harness-controles-e-selftest.md)
+  entregou oito controles em 2026-09-14 e **não** o de paleta — *trocar uma
+  paleta por outra* não tem o que derrubar enquanto nada lê paleta. Quando
+  esta task decidir se a pele é troca de paleta ou de cor de vértice, o
+  controle entra no `tools/looks/controls.py` como substituição literal, e
+  o `looks_selftest` passa a exigi-lo vermelho como exige os outros oito.
+
 ---
 
 ## Objetivo

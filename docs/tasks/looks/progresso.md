@@ -39,7 +39,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | 02 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | 03 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | `modelfile.py` — as 106 seções do `MODEL.BIN` e as 20 do `EDT_MOD.BIN` | 1 | 04 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | 05 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | 05 | ✅ Concluído | 2026-09-14 | ⬜ pendente |
 | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | `oracle.py` — o emulador por MCP e a rota até a tela `LOOKS SET` | 2 | 06 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | Incógnita (a) — de onde vem o boneco: `EDT_MOD.BIN` ou os TMDs de `0x00168xxx` | 2 | 07 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Incógnita (b) — nomear as onze peças pelo emulador, não pelo tamanho | 2 | 08 | ⬜ Pendente | — | — |
@@ -159,7 +159,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 - [x] `MODEL.BIN`: 106 seções, 2.461 vértices, 1.767 primitivas, EOF exato (a partir de 1816).
 - [x] `EDT_MOD.BIN`: **20** seções, 1.218 vértices, 1.074 primitivas, EOF exato (a partir de 216) — as 11/690/611 são **uma das duas listas** ([CORR-LOOKS-010](/docs/tasks/looks/CORR-LOOKS-010.md)).
 - [x] Nenhum endereço fora de `layout.py`.
-- [ ] `looks_selftest` roda sem imagem, sem venv e sem display.
+- [x] `looks_selftest` roda sem imagem, sem venv e sem display.
 
 ### Fase 2 — o que o jogo desenha
 

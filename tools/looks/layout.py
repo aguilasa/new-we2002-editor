@@ -681,14 +681,34 @@ def self_check() -> None:
     model += _word(2) + _word(fake_base + 120)
     model += _word(LIST_TERMINATOR)
     model += bytes(40 - len(model))
-    #     40: a list with no [count][pad], aiming at 300
+    #     40: a list with no [count][pad], aiming at 300 and 360, with an
+    #         EMPTY SLOT between them -- a (0, 0) pair is not the end.
+    #
+    # The slot is in the MIDDLE and not at the front on purpose: a list that
+    # opens with (0, 0) is swallowed by the [count][pad] heuristic above,
+    # which reads any non-pointer second word as a preamble.  Planted at the
+    # front, the branch this exercises never runs, and its negative control
+    # comes out green -- measured.
     model += _word(2) + _word(fake_base + 300)
+    model += _word(0) + _word(0)
+    model += _word(2) + _word(fake_base + 360)
     model += _word(LIST_TERMINATOR)
     model += bytes(400 - len(model))
 
     assert derive_base(model) == (2, fake_base), derive_base(model)
-    assert record_lists(model) == [[200, 120], [300]], record_lists(model)
+    assert record_lists(model) == [[200, 120], [300, 360]], record_lists(model)
     assert geometry_start(model) == 120, geometry_start(model)
+
+    # Red 11: the empty slot is SKIPPED, not stored and not treated as the
+    # end.  Both wrong readings are silent -- storing it puts offset 0, the
+    # file header, in a list of section starts; ending there hid six of
+    # MODEL.BIN's eighteen lists behind "this list is malformed".  Without a
+    # (0, 0) pair in the synthetic above, the branch that handles it never ran
+    # and its negative control came out green.
+    assert 0 not in record_lists(model)[1], record_lists(model)
+    assert record_lists(model)[1] == [300, 360], record_lists(model)
+    entries = read_pointer_entries(model, 40, fake_base)
+    assert entries == [(2, 300), (2, 360)], entries
 
     # Red 9: a list that aims outside the file is refused, not returned.  A
     # plausible-looking offset here sends the scan into the middle of a

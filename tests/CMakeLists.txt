@@ -194,6 +194,19 @@ endif()
 # on both discs: without that read, pointing WE2002_LOOKS_IMAGE at the English
 # translation would pass in silence, and that is the error this cycle exists to
 # make impossible. Without the variable it skips with 77 and names it.
+# The mandatory gate. It needs NOTHING -- no image, no venv, no display -- and
+# it must never skip its way to green: it runs every module's self-check, sweeps
+# the three design rules of section 3.3, and plants every negative control,
+# demanding each one go red. A guard that has never gone red is decoration.
+#
+# It drops WE2002_LOOKS_IMAGE from its own environment on purpose. With the
+# variable set a module could take a path that does not exist on a clean
+# machine, and the gate would be green here and red there.
+add_test(NAME looks_selftest
+    COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/selftest.py --quiet)
+set_tests_properties(looks_selftest PROPERTIES TIMEOUT 300)
+
 add_test(NAME looks_image
     COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/modelfile.py --check-image)

@@ -158,14 +158,26 @@ def _build_file(groups, base_pointer, start_pad):
         list_offsets.append(cursor)
         cursor += 8 + len(members) * 8 + 8
 
+    # Sections are separated by a run of zero words, and the runs are not all
+    # the same length -- 12 bytes then 8 in EDT_MOD.BIN.  The synthetic copies
+    # that on purpose: with the sections back to back, a broken skip_gap has
+    # nothing to trip over and the control for it comes out green.
+    gaps = (12, 8)
+
     geometry_at = cursor + start_pad
     bodies = []
     offset = geometry_at
     placed = {}
+    first = True
     for members in groups:
         for name, (vertices, primitives) in members:
             if name in placed:
                 continue
+            if not first:
+                gap = gaps[len(placed) % len(gaps)]
+                bodies.append(b"\x00" * gap)
+                offset += gap
+            first = False
             body = section.build_section(vertices, primitives)
             placed[name] = offset
             bodies.append(body)
@@ -177,7 +189,13 @@ def _build_file(groups, base_pointer, start_pad):
     for members, start in zip(groups, list_offsets):
         assert len(out) == start, (len(out), start)
         out += struct.pack("<2I", len(members), 0)
-        for name, _counts in members:
+        # The list names its members in a DIFFERENT order from the one they
+        # were placed in -- reversed here -- because that is the property this
+        # module exists to preserve.  A synthetic whose list order happens to
+        # be file order cannot tell a reader that keeps the order from one that
+        # sorts it, and the negative control for exactly that came out green
+        # until this line stopped emitting them in placement order.
+        for name, _counts in reversed(members):
             out += struct.pack("<2I", 2, base_pointer + placed[name])
         out += struct.pack("<2I", layout.LIST_TERMINATOR, 0)
     out += b"\x00" * start_pad
@@ -210,8 +228,24 @@ def self_check() -> None:
         assert len(models) == len(groups), models
         assert [len(one.sections) for one in models] == [3, 3]
 
-        # Shared sections are shared: "trunk" is in both lists, once in the file.
-        assert models[0].targets[0] == models[1].targets[0]
+        # The order a model carries is the LIST's, not one this module chose.
+        # Asked as "does read_models agree with layout?", because the control
+        # that sorts the targets has to be able to fail here -- building a
+        # reversed Model by hand and comparing it with itself cannot catch it.
+        declared = layout.record_lists(data)
+        assert [one.targets for one in models] == declared, (
+            [one.targets for one in models], declared)
+        assert [one.targets for one in models] != [sorted(t) for t in declared], (
+            "the synthetic lists are already sorted, so sorting them would be "
+            "invisible and the order control would prove nothing")
+        assert [one.offset for one in models[0].sections] == declared[0]
+
+        # Shared sections are shared: "trunk" is in both lists, once in the
+        # file.  Asserted as an intersection and not by position, because the
+        # two lists name their members in different orders -- which is the
+        # whole point of the synthetic.
+        shared = set(models[0].targets) & set(models[1].targets)
+        assert shared == {placed["trunk"]}, (shared, placed)
         total = section.scan(data, start)
         assert len(total.sections) == 5, total  # 3 + 3, one of them shared
         assert total.end == len(data), (total.end, len(data))
