@@ -73,12 +73,23 @@ seções, preservando a ordem que a lista de montagem declara.
       todas. Um par `(0, 0)` é **slot vazio**, não fim; entendido isso, as seis
       listas recusadas leem, e o `MODEL.BIN` tem **18 listas** de tamanhos
       `[1, 1, 12, 12, 12, 10, 12, 10, 12, 10, 12, 10, 12, 10, 12, 10, 12, 12]`.
-      **O motivo de a constante ficar passou a ser outro, e é medido**: 16 das
-      18 listas abrem com uma entrada de tag `0x80` mirando o offset **104**, e
-      104 **não é seção** — é uma corrida de ponteiros KSEG0 crus, uma terceira
-      forma. `min(alvos)` responderia 104 e entregaria a uma varredura um
-      início dentro da tabela de ponteiros, que é exatamente o que derivar o
-      início existe para evitar.
+      **O motivo de a constante ficar passou a ser outro, e é medido** — e esta
+      frase também foi remedida, em 2026-09-14, pela
+      [`CORR-LOOKS-013`](/docs/tasks/looks/CORR-LOOKS-013.md), que achou dois
+      erros nela. São **16 das 18** listas que abrem com tag `0x80`, mas elas
+      miram **duas** corridas de ponteiros KSEG0 crus, não uma: **12** miram o
+      offset **104** (64 ponteiros) e **4** miram o **232** (32 ponteiros).
+      Nenhuma das duas é seção, e `min` sobre **todos** os alvos responde 104 —
+      um início dentro da tabela de ponteiros, que é exatamente o que derivar o
+      início existe para evitar. A decisão de manter a constante continua certa;
+      o número que a sustentava, não.
+- [x] **E as listas declaram o 1816.** As outras duas do cabeçalho têm **uma
+      entrada só**, tag `0x02`, mirando **1816** e **4792** — as duas primeiras
+      seções do arquivo. O critério dizia que *"1816 é fato medido que as listas
+      não declaram"*, e declaram: o menor alvo de entrada com tag `0x02` é
+      **1816** (144 entradas nas 16 listas distintas, 58 alvos distintos). A
+      constante fica por ser barata e porque essa derivação não foi exercitada
+      em nenhum segundo arquivo — não por a informação faltar.
 
 ---
 
@@ -161,6 +172,15 @@ guarda o 1816 porque ele é fato medido e não algo que as listas declarem.
 jogadores de 11 peças — se confere. A linha está escrita **na**
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), que é quem
 escolhe a origem do boneco, e não só aqui no Log.
+
+> **Dois números destes três parágrafos foram remedidos em 2026-09-14 pela
+> [`CORR-LOOKS-013`](/docs/tasks/looks/CORR-LOOKS-013.md)**, e ficam aqui como
+> registro do que esta corrida concluiu. São **duas** corridas de ponteiros, não
+> uma: das 16 listas que abrem com tag `0x80`, **12** miram o 104 (64 ponteiros)
+> e **4** miram o **232** (32 ponteiros). E as listas **declaram** o 1816: as
+> duas restantes têm uma entrada só, tag `0x02`, mirando 1816 e 4792, que são
+> seções. A conclusão — constante em vez de `geometry_start()` — continua
+> valendo, porque `min` sobre **todos** os alvos ainda responde 104.
 
 ### Um defeito latente que só o sintético pegou
 

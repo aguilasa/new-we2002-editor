@@ -395,7 +395,7 @@ palavras == 0x00000010 no arquivo: 3
 corpo** de uma seção que varre limpa. Não há textura no `EDT_MOD.BIN`; onde ela
 mora é no `DAT2D.BIN` (§1.7).
 
-#### O cabeçalho do `MODEL.BIN`: 18 listas, o slot vazio, e uma terceira forma
+#### O cabeçalho do `MODEL.BIN`: 18 listas, o slot vazio, e **duas** corridas
 
 Medido em 2026-09-14 pela
 [`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md), ao fechar a
@@ -418,24 +418,49 @@ recebesse isso entraria na tabela de ponteiros.
 
 **E o início continua constante, por um motivo que agora é medido e não
 procedimental.** Dezesseis das dezoito listas abrem com uma entrada de tag
-`0x80` mirando o offset **104**, e 104 **não é seção**:
+`0x80`, e essas entradas miram **duas** corridas diferentes — remedido em
+2026-09-14 pela
+[`CORR-LOOKS-013`](/docs/tasks/looks/CORR-LOOKS-013.md), que achou esta seção
+dizendo *"mirando o offset 104"* no singular:
+
+```
+open with tag 0x80        : 16 of 18
+open with (0x80 -> 104)   : 12 of 18      corrida de 64 ponteiros
+open with (0x80 -> 232)   :  4 of 18      corrida de 32 ponteiros
+```
 
 ```
 secao em 104?  nao -> claims 2148999984 vertices and 2149000600 primitives
-words em 104:  80172330 80172598 80172800 80172b30 80172e60 ...
-               -> 15152  15768  16384  17200  18016 ...
+words em 104:  80172330 80172598 80172800 80172b30 ... -> 15152 15768 16384 17200 ...
+words em 232:  8017aac0 8017aac0 8017ac40 8017ac40 ... -> 49856 49856 50240 50240 ...
 ```
 
-É uma **corrida de ponteiros KSEG0 crus** — sem tag, sem terminador —, uma
-**terceira forma** de tabela neste arquivo, mirando dentro da região de
-geometria. Logo `min(alvos)` responderia 104, e o `geometry_start()` entregaria
-a uma varredura um início dentro da tabela de ponteiros: exatamente a falha que
-derivar o início existe para impedir. Por isso o `layout.is_derivable()` recusa
-este arquivo, e o `MODEL_GEOMETRY_START` guarda o **1816**, que é fato medido e
-não algo que as listas declarem.
+As duas são **corridas de ponteiros KSEG0 crus** — sem tag, sem terminador —,
+uma **terceira forma** de tabela neste arquivo, e nenhuma das duas é seção.
+Logo `min` sobre **todos** os alvos responde 104, e o `geometry_start()`
+entregaria a uma varredura um início dentro da tabela de ponteiros: exatamente a
+falha que derivar o início existe para impedir. Por isso o
+`layout.is_derivable()` recusa este arquivo.
 
-**O que fica aberto, e quem responde.** Ninguém mediu o que essa corrida
-agrupa. Se a incógnita (a) concluir que o boneco vem do `MODEL.BIN`, é ela que
+**Mas as listas declaram o 1816.** As outras duas do cabeçalho têm **uma
+entrada só**, com tag `0x02`, e essas nomeiam seção:
+
+```
+  list@72  n=1  first=(0x02 -> 1816)     1816: SECTION 107 vert  88 prim, ends 4792
+  list@88  n=1  first=(0x02 -> 4792)     4792: SECTION  50 vert  48 prim, ends 6352
+
+min target with tag 0x02: 1816   (144 entradas nas 16 listas distintas, 58 alvos)
+min de todos os alvos   : 104
+```
+
+Esta seção dizia que o 1816 é *"fato medido e não algo que as listas declarem"*,
+e as listas o declaram. O `MODEL_GEOMETRY_START` fica por ser barato e porque a
+derivação por tag `0x02` não foi exercitada em nenhum segundo arquivo — não por
+a informação faltar. Motivo falso é o que impede alguém de reabrir a questão
+com dado na mão.
+
+**O que fica aberto, e quem responde.** Ninguém mediu o que essas **duas**
+corridas agrupam, nem por que são duas, de 64 e de 32 ponteiros. Se a incógnita (a) concluir que o boneco vem do `MODEL.BIN`, é ela que
 diz **qual** dos modelos de lá — e é onde a hipótese do `we3d`, de 14 jogadores
 de 11 peças, se confere. A linha está escrita na
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).

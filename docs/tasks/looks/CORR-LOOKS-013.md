@@ -3,7 +3,7 @@ id: CORR-LOOKS-013
 title: "Correção: o cabeçalho do `MODEL.BIN` foi descrito por metade — são duas corridas de ponteiros, e a primeira lista declara o 1816"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -161,21 +161,90 @@ dois agrupamentos candidatos, não um.
 
 ## Verificação
 
-- [ ] nenhum texto afirma que todas — ou 16 — as listas miram 104
-- [ ] as duas corridas (104, 64 ponteiros; 232, 32 ponteiros) estão registradas
-- [ ] está escrito que a lista de 72 declara 1816, e a de 88 declara 4792
-- [ ] `python tools/looks/layout.py --check`, `section.py --check`,
+- [x] nenhum texto afirma que todas — ou 16 — as listas miram 104
+- [x] as duas corridas (104, 64 ponteiros; 232, 32 ponteiros) estão registradas
+- [x] está escrito que a lista de 72 declara 1816, e a de 88 declara 4792
+- [x] `python tools/looks/layout.py --check`, `section.py --check`,
       `modelfile.py --check` e `layout.py --sweep` verdes
-- [ ] `python tools/looks/modelfile.py --check-image roms/japanese-shift-jis.bin`
+- [x] `python tools/looks/modelfile.py --check-image roms/japanese-shift-jis.bin`
       continua dando as mesmas contagens
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
 **Resumo do que foi feito:**
 
+A decisão ficou (constante em vez de `geometry_start()`, porque `min` sobre
+**todos** os alvos ainda responde 104, que não é seção); o que mudou foi a
+evidência, nos quatro lugares onde ela estava escrita.
+
+**Erro 1 — uma corrida virou duas.** São 16 das 18 listas abrindo com tag
+`0x80`, mas elas miram **duas** corridas de ponteiros KSEG0 crus:
+
+```
+open with tag 0x80        : 16 of 18
+open with (0x80 -> 104)   : 12 of 18      corrida de 64 ponteiros
+open with (0x80 -> 232)   :  4 of 18      corrida de 32 ponteiros
+
+words em 104: 80172330 80172598 80172800 80172b30 -> 15152 15768 16384 17200
+words em 232: 8017aac0 8017aac0 8017ac40 8017ac40 -> 49856 49856 50240 50240
+```
+
+O docstring do `geometry_start()` dizia *"**every one** of those lists opens
+with an entry tagged 0x80 aiming at offset 104"* — duas coisas erradas na mesma
+frase, já que duas listas abrem com tag `0x02`.
+
+**Erro 2 — "as listas não declaram o 1816".** Declaram. As duas listas de uma
+entrada nomeiam seção:
+
+```
+  list@72  n=1  first=(0x02 -> 1816)     1816: SECTION 107 vert  88 prim, ends 4792
+  list@88  n=1  first=(0x02 -> 4792)     4792: SECTION  50 vert  48 prim, ends 6352
+
+min target with tag 0x02: 1816
+min de todos os alvos   : 104
+```
+
+A constante continua, com o motivo certo: é barata, e a derivação por tag
+`0x02` não foi exercitada em nenhum segundo arquivo. Motivo falso é o que
+impede alguém de reabrir a questão com dado na mão.
+
+Corrigidos: o docstring do `layout.geometry_start()`, o critério da
+[`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md) (mais um item
+novo sobre o 1816), a §1.5 do plano — que ganhou título novo, *"18 listas, o
+slot vazio, e **duas** corridas"* — e a linha encaminhada à
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md), que agora
+manda procurar **duas** tabelas e registra que as duas listas de uma entrada
+nomeiam seção.
+
+Gates: `layout --check`, `section --check`, `modelfile --check` verdes;
+`--sweep` → `no address outside layout.py (4 file(s), 1358 line(s) swept)`; e o
+`--check-image` com as mesmas contagens de antes.
+
 **Problemas encontrados:**
 
+**1. O "144 entradas" da CORR é a contagem sobre as 16 listas distintas.** Sobre
+os **18** ponteiros do cabeçalho são **166** — duas listas (360 e 464) são
+apontadas duas vezes. O `min` e os 58 alvos distintos são os mesmos nas duas
+leituras, então o número da CORR está certo; faltava dizer sobre qual conjunto.
+Ficou escrito como "144 entradas nas 16 listas distintas".
+
+**2. Um achado de graça, dentro da corrida de 232:** os alvos vêm **em pares
+repetidos** (`49856 49856 50240 50240 …`), o que a de 104 não faz. Registrado
+na LOOKS-TASK-08, que é quem vai medir o que elas agrupam.
+
+**3. O Log da LOOKS-TASK-05 repete os dois erros em prosa**, e fica como está,
+com uma nota de bloco ao lado dando os números certos — é registro do que
+aquela execução concluiu, e a conclusão dela (a constante) continua valendo.
+
 **Arquivos criados/modificados:**
+
+- `tools/looks/layout.py` — o docstring de `geometry_start()`
+- `docs/tasks/looks/05-arquivos-de-modelo.md` — o critério, mais a nota ao lado
+  do Log
+- `docs/PLAN-LOOKS-PY.md` — a §1.5, subseção do cabeçalho do `MODEL.BIN`
+- `docs/tasks/looks/08-de-onde-vem-o-boneco.md` — as duas corridas
+- `docs/tasks/looks/CORR-LOOKS-013.md` — este Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

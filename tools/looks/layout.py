@@ -457,14 +457,23 @@ def geometry_start(data: bytes) -> int:
 
     **MODEL.BIN must NOT use this, and the reason is measured rather than
     procedural.** Since the empty-slot variant was understood its header lists
-    all read, so the obstacle is no longer parsing -- it is the answer.  Every
-    one of those lists opens with an entry tagged 0x80 aiming at offset 104,
-    and 104 is not a section: it is a flat run of bare KSEG0 pointers, a third
-    shape this function does not read.  min(targets) would therefore answer
-    104, hand a scan a start inside the pointer table, and fail in the exact
-    way deriving the start was introduced to prevent.  MODEL_GEOMETRY_START
-    stays a constant because 1816 is a measured fact the lists do not state,
-    not because the lists cannot be read.
+    all read, so the obstacle is no longer parsing -- it is the answer.
+    Sixteen of its eighteen header pointers lead to lists that open with an
+    entry tagged 0x80, and those entries aim at one of TWO flat runs of bare
+    KSEG0 pointers: twelve at offset 104, which is 64 pointers long, and four
+    at offset 232, which is 32.  Neither run is a section, and neither is a
+    shape this function reads.  min over all targets therefore answers 104,
+    which would hand a scan a start inside a pointer table and fail in the
+    exact way deriving the start was introduced to prevent.
+
+    The other two header pointers lead to lists of ONE entry, tagged 0x02, and
+    those do name sections: 1816 and 4792, the file's first two.  So the lists
+    DO state the constant -- a derivation by lowest 0x02-tagged target answers
+    1816, measured.  MODEL_GEOMETRY_START stays a constant because it is cheap
+    and because that derivation has not been exercised on any second file, not
+    because the information is absent (CORR-LOOKS-013 measured both claims:
+    this docstring used to say every list aims at 104, and that 1816 was a
+    fact the lists do not state).
     """
     if not is_derivable(data):
         raise BadPointerList(

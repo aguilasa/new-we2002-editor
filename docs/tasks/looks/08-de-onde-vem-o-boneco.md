@@ -43,16 +43,24 @@ status: pendente
   os dois é **posição ou uniforme**, não LOOKS — e isso separa dois eixos sem
   custo nenhum.
 
-- **O `MODEL.BIN` guarda uma terceira forma de ponteiro, ainda não lida**, e ela
-  é candidata junto com as outras. Medido em 2026-09-14 pela
-  [`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md): 16 das 18
-  listas do cabeçalho abrem com uma entrada de tag `0x80` mirando o offset
-  **104**, que **não é seção** — é uma corrida de ponteiros KSEG0 crus, sem
-  tag e sem terminador, apontando para dentro da região de geometria (15.152,
-  15.768, 16.384, 17.200, …). O `read_pointer_list()` não a lê, e ninguém
-  mediu o que ela agrupa. Se a resposta da incógnita (a) for "o boneco vem do
-  `MODEL.BIN`", **é essa corrida que diz qual dos modelos dele**, e a
-  hipótese do `we3d` — 14 jogadores de 11 peças — se confere ali.
+- **O `MODEL.BIN` guarda uma terceira forma de ponteiro, ainda não lida, e são
+  DUAS corridas dela** — candidatas junto com as outras. Medido em 2026-09-14
+  pela [`LOOKS-TASK-05`](/docs/tasks/looks/05-arquivos-de-modelo.md) e
+  remedido pela
+  [`CORR-LOOKS-013`](/docs/tasks/looks/CORR-LOOKS-013.md), que achou esta
+  linha falando de uma só: 16 das 18 listas do cabeçalho abrem com tag `0x80`,
+  e **12** miram o offset **104** enquanto **4** miram o **232**. Nenhum dos
+  dois é seção — são corridas de ponteiros KSEG0 crus, sem tag e sem
+  terminador, de **64** e de **32** ponteiros, apontando para dentro da região
+  de geometria (104: 15.152, 15.768, 16.384, 17.200, …; 232: 49.856, 49.856,
+  50.240, 50.240, … — e os pares repetidos ali são achado por si só). O
+  `read_pointer_list()` não as lê, e ninguém mediu o que agrupam nem por que
+  são duas. Se a resposta da incógnita (a) for "o boneco vem do `MODEL.BIN`",
+  **são essas corridas que dizem qual dos modelos dele**, e a hipótese do
+  `we3d` — 14 jogadores de 11 peças — se confere ali. **Procure duas tabelas,
+  não uma**, e a segunda pode ser justamente o que distingue os agrupamentos.
+- **E as duas listas de uma entrada do `MODEL.BIN` nomeiam seção**: tag `0x02`,
+  mirando 1816 e 4792, que são as duas primeiras seções do arquivo.
 
 ---
 
