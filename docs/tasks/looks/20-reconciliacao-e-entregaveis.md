@@ -41,6 +41,14 @@ disco.
 - [ ] `python tools/check_tasks.py` verde, e a conferência de link do
       [.claude/rules/links.md](../../../.claude/rules/links.md) sem linha nova.
 - [ ] `NOTICE.md` conferido contra o que o projeto de fato usou.
+- [ ] **O `CLAUDE.md` ganha a seção do `looks`.** Ele descreve cinco
+      projetos e não menciona o sexto — nem as duas variáveis da §4.5 do
+      plano (`WE2002_LOOKS_IMAGE` e `WE2002_LOOKS_DRIVE_IMAGE`), nem o
+      `work/venv-looks/`, nem os alvos de `ctest`. Encaminhado pela
+      [`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md)
+      em 2026-09-14, que criou as duas variáveis e o venv: documentar no
+      plano era o critério dela, e o `CLAUDE.md` é o arquivo que quem chega
+      lê primeiro.
 
 ---
 

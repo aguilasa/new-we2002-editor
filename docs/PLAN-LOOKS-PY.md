@@ -164,7 +164,24 @@ A divisão, então: **o japonês é a fonte de verdade dos bytes; o inglês é o
 disco de dirigir.** As duas imagens japonesas desta máquina são o **mesmo
 dump** — `roms/japanese-shift-jis.bin` e
 `C:\games\ps1\roms\we2002\we-2002-original-japao.bin` têm o mesmo
-`sha256 e853eb14f5bddd50…`, 307.187.664 bytes, conferido em 2026-09-14.
+`sha256 e853eb14f5bddd50…`, 307.187.664 bytes, **reconferido em 2026-09-14**
+pela [`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md):
+
+```sh
+python tools/looks/layout.py --check-discs <japonês.bin> <inglês.bin>
+```
+
+O `--check-discs` confere os quatro arquivos **por dentro do disco**, que é o
+que decide, e não a imagem inteira. Para a imagem inteira, que só responde "é
+este dump mesmo?":
+
+```powershell
+python -c "import hashlib,sys; h=hashlib.sha256(); f=open(sys.argv[1],'rb'); [h.update(b) for b in iter(lambda: f.read(1<<22), b'')]; print(h.hexdigest())" roms/japanese-shift-jis.bin
+```
+
+Os digests de dentro do disco, todos os quatro, estão na §4.5 — e o
+`layout.py` os carrega como constante, para que ler textura do disco errado
+**pare** em vez de entregar outro gráfico.
 
 A imagem inglesa tem 306.834.864 bytes — **352.800 a menos**, 150 setores —,
 mas todos os LBAs conferidos batem, então o encolhimento está na cauda e não
@@ -495,7 +512,8 @@ o disco pelas ferramentas de `tools/pes2/` e não duplica nenhuma delas.
 
 ```
 iso_source.py   fachada fina sobre tools/pes2/iso.py; abre a imagem, entrega bytes
-layout.py       O ÚNICO com endereço: LBA, BASE, offsets de lista, 157164
+layout.py       O ÚNICO com endereço: LBA, BASE, offsets de lista, 157164,
+                mais a identidade dos dois discos e a guarda que a aplica (§4.5)
 section.py      o formato da §1.4: cabeçalho, primitiva de 24 B, vértice de 8 B
 modelfile.py    EDT_MOD.BIN e MODEL.BIN: lista de (contagem, ponteiro), grupos
 texture.py      DAT2D.BIN por bin_archive.py + a lista de CLUTs que falta
@@ -552,6 +570,34 @@ gerenciador de pacote do sistema.
 No Windows, `python` resolve para 3.13.14; `python3` **não existe** e cai no
 atalho da Microsoft Store.
 
+**Criado em 2026-09-14** pela
+[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md), no
+Windows desta máquina:
+
+```powershell
+python -m venv work/venv-looks
+work/venv-looks/Scripts/python.exe -m pip install PySide6
+```
+
+O `pip freeze` resultante, que é o que o Log da task registra:
+
+```text
+PySide6==6.11.2
+PySide6_Addons==6.11.2
+PySide6_Essentials==6.11.2
+shiboken6==6.11.2
+```
+
+`PySide6` é o metapacote; quem traz o `QOpenGLWidget` da §0 é o
+`PySide6_Essentials` (`from PySide6.QtOpenGLWidgets import QOpenGLWidget`,
+conferido na mesma corrida). São ~246 MB baixados, e por isso o venv mora em
+`work/`, que o `.gitignore` já ignora inteiro.
+
+**O interpretador do venv se chama por caminho, não por `activate`.** Uma
+receita que dependa de ativação não é reproduzível num agente que não mantém
+estado de shell entre comandos; `work/venv-looks/Scripts/python.exe` (ou
+`work/venv-looks/bin/python` no Linux) funciona em qualquer invocação.
+
 ### 4.2 A armadilha do MSYS
 
 No Git Bash do Windows, um argumento que parece caminho absoluto POSIX é
@@ -565,6 +611,26 @@ python tools/pes2/lzss.py roms/japanese-shift-jis.bin --file /BIN/EDT_MOD.BIN
 O erro parece dizer que o arquivo não é form1, e o que houve foi outra coisa.
 **`MSYS_NO_PATHCONV=1` é obrigatório** em toda chamada que passe caminho de
 dentro do ISO. No PowerShell o problema não existe.
+
+**Reproduzido de novo em 2026-09-14**, palavra por palavra, ao fechar a
+[`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md):
+
+```sh
+$ python tools/pes2/lzss.py roms/japanese-shift-jis.bin --file /BIN/EDT_MOD.BIN
+C:/Program Files/Git/BIN/EDT_MOD.BIN: not a Form 1 /BIN/*.BIN of japanese-shift-jis.bin
+
+$ MSYS_NO_PATHCONV=1 python tools/pes2/lzss.py roms/japanese-shift-jis.bin --file /BIN/EDT_MOD.BIN
+japanese-shift-jis.bin   1 container(s) in /BIN/
+  /BIN/EDT_MOD.BIN          36072 B  header   2 w -> stream at     8  none  0 block(s), 36072 B outside
+```
+
+**E há uma saída melhor do que lembrar da variável: não passar o caminho pela
+linha de comando.** Os caminhos de dentro do ISO que este projeto usa são
+quatro e são fixos, então eles são **constantes do `layout.py`**
+(`layout.EDT_MOD`, `layout.MODEL`, `layout.DAT2D`, `layout.SELECT`) e nunca
+atravessam um shell. O `MSYS_NO_PATHCONV=1` fica valendo para as ferramentas de
+`tools/pes2/`, que recebem o caminho como argumento — é o caso do `lzss.py`
+acima, e é o caso de toda receita que este plano copiar de lá.
 
 ### 4.3 Tela
 
@@ -583,6 +649,70 @@ Mesma divisão por custo que o repositório já usa:
 | `looks_ui` | venv + display | 77 |
 
 Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped**.
+
+### 4.5 As duas variáveis, e a guarda que faz a regra valer
+
+A §1.3 mede que os dois discos servem para coisas diferentes. Esta seção diz
+como isso vira ferramenta. **São duas variáveis porque são dois arquivos**, e o
+segundo é um `.cue` e não um `.bin`:
+
+| variável | aponta para | serve a |
+| --- | --- | --- |
+| `WE2002_LOOKS_IMAGE` | `roms/japanese-shift-jis.bin` — a **trilha de dados** japonesa | tudo que **lê byte**: geometria, textura, paleta, registros |
+| `WE2002_LOOKS_DRIVE_IMAGE` | o **`.cue` inglês** (nesta máquina `C:\games\ps1\work\we2002-english.cue`) | dirigir o emulador, pelos menus legíveis |
+
+São duas famílias pela mesma razão que o PES2 tem `WE2002_PES2_*` e `PES2_*`:
+lá a receita passou um tempo só com a primeira, e nesse tempo o único gate que
+punha o jogo na tela se reportava *skipped* em 0,01 s enquanto a corrida
+imprimia `100% tests passed` (§6.11 do
+[`/docs/PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md)). Uma variável para dois
+papéis economiza uma linha e compra esse silêncio.
+
+**A regra não mora na prosa: mora no `tools/looks/layout.py`**, que guarda o
+sha256 de cada um dos quatro arquivos como lido de dentro do disco japonês, e
+**recusa** conteúdo que não bata. Medido em 2026-09-14:
+
+| arquivo no disco | sha256 (japonês) | inglês |
+| --- | --- | --- |
+| `/BIN/EDT_MOD.BIN` | `6ff56894e7ce94aa…` | **idêntico** |
+| `/BIN/MODEL.BIN` | `0b3814bb0d3b47f4…` | **idêntico** |
+| `/BIN/DAT2D.BIN` | `0e914e584c889635…` | `4a4d6a4fe301b116…` |
+| `/SELECT.BIN` | `86d14a66a3cd72b9…` | `c9e1eaf89151b0c0…` |
+
+```sh
+python tools/looks/layout.py --check
+python tools/looks/layout.py --check-discs <japonês.bin> <inglês.bin>
+```
+
+O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **três
+casos vermelhos** — conteúdo estranho no `DAT2D.BIN`, caminho que ninguém
+mediu, e geometria que não bate. O segundo é a demonstração viva contra os dois
+discos reais, e é o que mostra a guarda ficando vermelha onde deve:
+
+```text
+English disc -- geometry accepted, texture refused
+  accepted /BIN/EDT_MOD.BIN     (wanted accepted) ok
+  accepted /BIN/MODEL.BIN       (wanted accepted) ok
+  refused  /BIN/DAT2D.BIN       (wanted refused) ok
+  refused  /SELECT.BIN          (wanted refused) ok
+```
+
+**A mensagem de recusa nomeia o problema real**, e isso é tão importante quanto
+a recusa: o erro que ela pega é "você abriu o disco inglês", e uma exceção que
+só diga "digest mismatch" manda o leitor olhar o parser.
+
+```text
+/BIN/DAT2D.BIN: read 4a4d6a4f… from we2002-english.bin, expected 0e914e58….
+  /BIN/DAT2D.BIN differs between the Japanese original and the English
+  translation patch, and textures and palettes may only be read from the
+  Japanese one.  Point WE2002_LOOKS_IMAGE at it; WE2002_LOOKS_DRIVE_IMAGE is
+  the disc you drive, not the disc you read.
+```
+
+**A chave é o digest do arquivo, não o da imagem**, de propósito: dois dumps da
+mesma release podem divergir na cauda e trazer os mesmos assets, e um patch de
+tradução pode manter o tamanho do disco e trocar exatamente este arquivo — que
+é o que acontece aqui.
 
 ---
 
