@@ -211,6 +211,14 @@ como verde —, agora pela outra causa. O registro dos dois alvos foi conferido
 **textualmente** no `tests/CMakeLists.txt`, e cada um foi rodado pela linha de
 comando; quem reconfigurar o build no Linux fecha o `ctest -R looks`.
 
+> **A última frase estava incompleta**, e a
+> [`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md) a remediu no mesmo
+> dia: **fecha aqui também**, num build fora da árvore configurado com
+> `-G Ninja` e o toolchain do vcpkg — `1 passed, 1 skipped`. Sem o toolchain,
+> o `find_package(CURL REQUIRED)` do `src/core` derruba a configuração e leva
+> os dez testes Python junto. A receita está na tabela de gates do
+> [`perfil-looks.md`](/docs/prompts/perfil-looks.md).
+
 E o de sempre: **`tools/pes2/selftest.py` continua sem rodar aqui** (lê
 `/proc/self/fd`). O sandbox dos controles copia `tools/pes2/`, mas nunca o
 executa — só o `iso_source.py` precisa dele para importar.
