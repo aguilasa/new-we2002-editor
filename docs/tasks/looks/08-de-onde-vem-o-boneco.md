@@ -24,6 +24,16 @@ status: pendente
   geometria.
 - **Nada de geometria deve ser escrito antes de responder isto** — é a ordem
   obrigatória da §7 do plano.
+- **Comece por `load_state`.** Os dois states de 2026-09-14 põem o jogo na tela
+  de edição: **slot 1 goleiro, slot 2 jogador de linha**, os dois no disco
+  inglês. Recarregar entre medições dá baseline byte a byte idêntico, e é o que
+  faz o diff medir só o que você mudou.
+- **A RAM se lê por MCP vivo.** O `savestate.py` não alcança a RAM nesta
+  máquina: sem CLI `zstd` e sem o módulo `zstandard`, ele lê cabeçalho e para.
+- **Os dois states são um controle de graça.** Goleiro e jogador de linha usam
+  uniformes diferentes e, possivelmente, peças diferentes. O que diferir entre
+  os dois é **posição ou uniforme**, não LOOKS — e isso separa dois eixos sem
+  custo nenhum.
 
 ---
 
@@ -35,8 +45,14 @@ Decidir, por medição, qual dado o jogo está desenhando na tela `LOOKS SET`.
 
 ## Critério de conclusão
 
-- [ ] Trocar `HAIR` na tela e rodar `diff_memory` (ou `snapshot_memory` +
-      diff): as regiões que mudam ficam listadas, com endereço e tamanho.
+- [ ] Carregar o state, tirar `snapshot_memory`, trocar `HAIR`, e rodar
+      `diff_memory`: as regiões que mudam ficam listadas, com endereço e
+      tamanho.
+- [ ] A medição é **repetida a partir do state recarregado**, e dá o mesmo
+      resultado. Diff que não reproduz depois de `load_state` é ruído, não
+      achado.
+- [ ] O mesmo diff é feito no **slot 1 e no slot 2**, e a comparação entre os
+      dois diz o que é do boneco e o que é do uniforme.
 - [ ] Fica decidido, com a evidência ao lado, se o boneco vem do
       `EDT_MOD.BIN`, dos quatro TMDs, ou de uma combinação — e o que os quatro
       TMDs são, se não forem o boneco.

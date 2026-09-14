@@ -29,6 +29,12 @@ Não se revertem sem o usuário pedir.
   `MODEL.BIN` são byte a byte idênticos nos dois.
 - **`roms/japanese-shift-jis.bin` e `we-2002-original-japao.bin` são o mesmo
   dump** — `sha256 e853eb14f5bddd50…`. Nomes diferentes, arquivo igual.
+- **Dois save states prontos, e é por eles que se começa.** Gravados pelo
+  usuário em 2026-09-14, com o jogo na tela de edição do jogador:
+  **slot 1 = goleiro, slot 2 = jogador de linha**, os dois sobre
+  `we2002-english.cue`. O emulador sobe por `.\make.ps1 we2002-play`, que já
+  tem a inglesa como default. **Toda medição de tela começa em `load_state`** —
+  não pela rota manual, e não de onde a sessão anterior parou.
 - **Render por `QOpenGLWidget`**, não Qt3D e não rasterizador em Python.
   `numpy` não está instalado e instalar é decisão do dono da máquina.
 - **Não estende o `we2002_core`.** Nada em `src/` aprende o que é modelo 3D.
@@ -62,10 +68,24 @@ Não se revertem sem o usuário pedir.
    `CANCEL` já selecionado.
 8. **Uma tecla de cada vez.** Confirmação em laço fecha a caixa seguinte junto —
    regra do [CLAUDE.md](../../CLAUDE.md), que custou uma corrida no ciclo `wte/`.
-9. **Os documentos da cena se contradizem.** O CARP rotula o offset 8 do
-   `DAT2D.BIN` como "Pelos" e o 3.568 como "Caras"; o tutorial do `zeta` manda
-   abrir o 3.568 para achar cabelo. Até a LOOKS-TASK-11 medir, **nenhum código
-   crava nenhum dos dois**.
+9. **O nome do save state não diz de que disco ele veio.** O arquivo se chama
+   `SLPM-87056_N.sav` — serial **japonês** — mesmo quando o state foi feito na
+   imagem inglesa. Um state da japonesa teria exatamente o mesmo nome e traria
+   os menus ilegíveis. Quem decide é o campo `media` **de dentro** do arquivo.
+10. **`savestate.py` não alcança a RAM nesta máquina.** Ele chama o CLI `zstd`,
+    que não está no `PATH`, e o módulo `zstandard` também não está instalado.
+    Ele imprime o cabeçalho e **depois** estoura com
+    `FileNotFoundError [WinError 2]`, que não menciona `zstd` em lugar nenhum.
+    Consequência: **RAM se lê por MCP vivo** (`read_memory`, `search_memory`,
+    `snapshot_memory` + `diff_memory`), e o state serve como ponto de partida,
+    não como fonte de memória.
+11. **O diretório de save states é compartilhado com o trabalho de PES2.**
+    Slot nu é sobrescrevível por acidente; os dois `.sav` do ciclo se copiam
+    para um caminho do projeto e se apontam por variável.
+12. **Os documentos da cena se contradizem.** O CARP rotula o offset 8 do
+    `DAT2D.BIN` como "Pelos" e o 3.568 como "Caras"; o tutorial do `zeta` manda
+    abrir o 3.568 para achar cabelo. Até a LOOKS-TASK-11 medir, **nenhum código
+    crava nenhum dos dois**.
 
 ---
 
@@ -138,7 +158,11 @@ contrato é: mediu e passou, ou pulou com 77.
 
 - **O emulador é um só.** DuckStation usa um único diretório de dados, então
   roda **uma instância por vez**. Task que precisa do emulador não corre em
-  paralelo com outra que precisa.
+  paralelo com outra que precisa. E `.\make.ps1 pes2` **derruba** um
+  `we2002-play` em curso.
+- **Os dois save states são fixture compartilhada.** Não se sobrescrevem sem o
+  usuário pedir: refazê-los custa uma navegação manual que nenhuma ferramenta
+  do ciclo sabe reproduzir hoje.
 - **A tela do usuário.** Nada abre janela visível: `:98` no Linux, janela em
   −32000 no Windows.
 
@@ -176,7 +200,13 @@ sobre dado que pode não ser o que a tela desenha.
   revelou o separador de zeros. E o controle negativo do tamanho de primitiva
   (24 → 20) tem de ficar vermelho; se ficar verde, a varredura não está
   medindo o que diz medir.
-- **Fase 2** — a rota chega à tela **sozinha**, e o Log traz a captura. A
+- **Fase 2** — a tela é alcançada por **`load_state`**, e o Log traz a captura
+  e o `media` conferido de dentro do state. **Toda medição recarrega o state
+  antes**, e a revisão pergunta por isso: um diff tirado de uma sessão que já
+  andou mede também tudo que o jogo mexeu no caminho, e parece achado. Diff que
+  não reproduz a partir do state recarregado é ruído. As duas medições valem
+  nos **dois slots** — o que diferir entre goleiro e jogador de linha é
+  uniforme ou posição, não LOOKS, e essa separação sai de graça. A
   incógnita (a) tem veredito **com a evidência ao lado**, não com uma
   conclusão. Pergunta obrigatória da revisão: **o veredito distingue "medi e é
   isto" de "não achei o contrário"?** Os quatro TMDs de `0x00168xxx` não
@@ -204,7 +234,10 @@ sobre dado que pode não ser o que a tela desenha.
   imagens diferentes, senão o alvo passa desenhando sempre o mesmo boneco. E a
   regra 3 varrida: nenhum `import layout` em `ui/`, e `PySide6` fora de
   `sys.modules` depois de importar o núcleo.
-- **Fase 6** — **três tuplas, não uma**, e a métrica nomeada. Cada fonte de
+- **Fase 6** — **três tuplas, não uma**, e a métrica nomeada. A captura sai do
+  **mesmo quadro** em toda corrida — `pause` mais `frame_step` contado a partir
+  do `load_state`, nunca "depois de uns segundos"; senão o número muda entre
+  corridas sem que nada tenha mudado, e a variação vira falso achado. Cada fonte de
   diferença atribuída a pose, câmera, resolução ou filtro; o que sobrar sem
   explicação é achado e vira CORR. A §5.6 já avisa que a comparação **nunca**
   bate pixel a pixel — então a revisão pergunta o contrário do usual: **o

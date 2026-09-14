@@ -22,6 +22,13 @@ status: pendente
   o que é compatível com as duas hipóteses.
 - **Decidir isto decide metade da Fase 3**, e a resposta depende da
   LOOKS-TASK-08.
+- **Comece por `load_state`.** Os dois states de 2026-09-14 põem o jogo na tela
+  de edição: **slot 1 goleiro, slot 2 jogador de linha**, os dois no disco
+  inglês. Recarregar entre medições dá baseline byte a byte idêntico, e é o que
+  faz o diff medir só o que você mudou.
+- **A RAM se lê por MCP vivo.** O `savestate.py` não alcança a RAM nesta
+  máquina: sem CLI `zstd` e sem o módulo `zstandard`, ele lê cabeçalho e para.
+
 
 ---
 
@@ -33,8 +40,12 @@ Saber como a cor chega ao boneco, e portanto o que o renderizador tem de fazer.
 
 ## Critério de conclusão
 
-- [ ] Medido, com `diff_memory` ou leitura de VRAM, o que muda quando `SKIN`
-      vai de `A` a `D`: a CLUT em VRAM, as cores de vértice na RAM, ou as duas.
+- [ ] Medido, a partir de `load_state` e com `diff_memory` ou leitura de VRAM,
+      o que muda quando `SKIN` vai de `A` a `D`: a CLUT em VRAM, as cores de
+      vértice na RAM, ou as duas.
+- [ ] **Um passo de cada vez, recarregando o state entre eles.** `A→B→C→D`
+      numa sessão só acumula quatro mudanças e uma câmera que se moveu;
+      `A→D` a partir do mesmo baseline mede uma coisa.
 - [ ] Mesma medição para `H.COL` e `H.F.COL.`, que são candidatos a paleta pela
       matriz do Superpack (`65892 + raça*512 + tipo*32`).
 - [ ] **A matriz do Superpack é conferida** — quatro raças × oito tipos —, e

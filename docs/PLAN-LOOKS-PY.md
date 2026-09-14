@@ -378,11 +378,15 @@ python tools/pes2/fork.py recipe          # como obter o binário, se faltar
 **Mas nunca leia textura dele.** O `DAT2D.BIN` difere entre os dois discos
 (§1.3). Offset de paleta medido no inglês é número que existe e está errado.
 
-O boot pelo lançador:
+O boot, no Windows, é pelo `make.ps1` — ele já tem a inglesa como default e
+confere o carimbo `.src` da cópia:
 
-```sh
-python tools/pes2/fork.py launch "C:/games/ps1/work/we2002-english.cue"
+```powershell
+.\make.ps1 we2002-play          # sobre o option file que houver
+.\make.ps1 we2002-play-fresh    # com o option file zerado
 ```
+
+O `tools/pes2/fork.py launch <cue>` continua valendo, e é o caminho no Linux.
 
 **A tela.** `EDIT` → `NEW PLAYER` → `LOOKS SET`. A tela de edição de jogador
 tem o título japonês `選手エディット` e sete itens à esquerda; `LOOKS SET` é o
@@ -396,12 +400,38 @@ quarto, com o rodapé `Visual`.
 - **Cruz abre `Exit?`** com `CANCEL` já selecionado. Não é destrutivo, mas é um
   desvio: confirmar ali com Círculo volta para onde estava.
 
-**O que ainda não é reproduzível, e é honesto dizer:** a sequência exata de
-botões da tela de título até o menu `EDIT` **não foi registrada** — esta sessão
-pegou o jogo já dentro dele. Escrever essa rota é tarefa da Fase 2, no
-`oracle.py`, no mesmo molde das rotas nomeadas do
-`tools/pes2/mcp_drive.py` (`route_title`, `route_main_menu`, `route_edit`).
-Enquanto ela não existir, chegar à tela é trabalho manual.
+**Dois save states resolvem a chegada.** O usuário gravou em 2026-09-14, com o
+jogo já na tela de edição do jogador:
+
+| slot | arquivo | mostra |
+|---|---|---|
+| 1 | `…/duckstation-mcp/savestates/SLPM-87056_1.sav` | **goleiro** |
+| 2 | `…/duckstation-mcp/savestates/SLPM-87056_2.sav` | **jogador de linha** |
+
+Os dois apontam para `C:\games\ps1\work\we2002-english.cue` — conferido no
+campo `media` de dentro do arquivo, e não pelo nome, que **não diz de que disco
+o state veio**: ele usa o serial japonês `SLPM-87056` mesmo no disco inglês.
+
+**O ganho maior não é pular a navegação, é o baseline.** `load_state` devolve um
+estado byte a byte idêntico antes de cada medição, e é isso que faz o diff da
+Fase 2 medir só o campo que se trocou, em vez de medir também tudo que o jogo
+mexeu no caminho. Os dois slots ainda dão um controle de graça: o que diferir
+entre goleiro e jogador de linha é **uniforme ou posição**, não LOOKS.
+
+**A RAM, porém, não sai do arquivo de state.** Medido em 2026-09-14: o
+`tools/pes2/savestate.py` lê o cabeçalho e para — ele chama o CLI `zstd`, que
+não está no `PATH` desta máquina, e o módulo `zstandard` também não está
+instalado. Ele imprime o cabeçalho e **depois** estoura com
+`FileNotFoundError [WinError 2]`, mensagem que não menciona `zstd` em lugar
+nenhum. Portanto a memória se lê **por MCP vivo** — `read_memory`,
+`search_memory`, `snapshot_memory` + `diff_memory` —, e o state é o ponto de
+partida, não a fonte.
+
+**O que continua não registrado:** a sequência de botões da tela de título até o
+menu `EDIT`. Enquanto os states existirem ela não faz falta; se o disco ou o
+build do emulador mudarem e os states pararem de carregar, ela volta a ser
+necessária, e escrevê-la é trabalho da Fase 2 no `oracle.py`, no molde das rotas
+nomeadas de `tools/pes2/mcp_drive.py`.
 
 ---
 
