@@ -11,10 +11,12 @@
 > e cada linha traz o comando que a reproduz. Onde há opinião de terceiro ainda
 > não conferida, está dito na própria linha.
 >
-> Ciclo de tasks: **ainda não criado**. Quando for, mora em
-> `docs/tasks/looks/` com prefixo `LOOKS-TASK-` e pool `CORR-LOOKS-`, e precisa
-> de um `/docs/prompts/perfil-looks.md` — ver
-> [.claude/rules/tasks.md](../.claude/rules/tasks.md).
+> Ciclo de tasks: **aberto em 2026-09-14**, em
+> [`/docs/tasks/looks/progresso.md`](/docs/tasks/looks/progresso.md) — 20 tasks,
+> prefixo `LOOKS-TASK-`, pool `CORR-LOOKS-`, perfil
+> [`/docs/prompts/perfil-looks.md`](/docs/prompts/perfil-looks.md). Roda por
+> `/executar looks`. A §7 ganhou uma **Fase 0** que a primeira versão não tinha:
+> linhagem e ambiente precisam existir antes do primeiro módulo.
 
 ---
 
@@ -612,6 +614,7 @@ geometria. Decidir isto decide metade da Fase 3.
 
 | Fase | O que fecha |
 |---|---|
+| 0 | Abertura: linhagem no `NOTICE.md`, `work/venv-looks/`, e a guarda que recusa ler textura do disco errado |
 | 1 | Leitor e formato: `iso_source`, `section`, `modelfile`; as duas varreduras terminando no EOF, com controle negativo |
 | 2 | **A incógnita (a) e a (b)**: o que o jogo desenha, e qual peça é qual — por `diff_memory` e troca de opção na tela |
 | 3 | Texturas: a lista de CLUTs que falta no `DAT2D.BIN`, a contradição 8 × 3.568 resolvida, e a incógnita (d) |
@@ -631,6 +634,8 @@ geometria. Decidir isto decide metade da Fase 3.
   pode estar deslocada e ainda assim renderizar algo que parece um corpo.
 - **A incógnita (a) antes da Fase 3.** Não adianta caçar paleta para uma
   geometria que talvez não seja a que está na tela.
+- **A Fase 0 antes de qualquer leitura de textura.** É ela que planta a guarda
+  contra ler paleta do disco inglês, e esse erro não tem sintoma (§1.3).
 
 ---
 
