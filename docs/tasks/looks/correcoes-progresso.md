@@ -20,6 +20,9 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-002](/docs/tasks/looks/CORR-LOOKS-002.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | O comentário do `.gitignore` guarda o número que a própria task derrubou | Baixa | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-003](/docs/tasks/looks/CORR-LOOKS-003.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | `superpack_count.py` descarta entrada ilegível em silêncio | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-004](/docs/tasks/looks/CORR-LOOKS-004.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos | Baixa | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-005](/docs/tasks/looks/CORR-LOOKS-005.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la | Alta | [ ] pendente | — |
+| [CORR-LOOKS-006](/docs/tasks/looks/CORR-LOOKS-006.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A recusa do `/SELECT.BIN` sai como `digest mismatch` pelado | Média | [ ] pendente | — |
+| [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | O `layout.py` diz que não faz I/O, e faz | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -38,6 +41,9 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-002 — o `.gitignore` ainda descreve a raiz com o número da subpasta
 - [x] CORR-LOOKS-003 — `superpack_count.py` tem de falhar alto no que não conseguiu ler
 - [x] CORR-LOOKS-004 — o primeiro bullet da LOOKS-TASK-18 desmente o terceiro
+- [ ] CORR-LOOKS-005 — nada obriga o `iso_source.py` a passar pela guarda
+- [ ] CORR-LOOKS-006 — o `/SELECT.BIN` recusa sem dizer que o disco é o inglês
+- [ ] CORR-LOOKS-007 — o docstring do `layout.py` promete o que a dívida da 03 ainda deve
 
 ## Detalhes por correção
 
@@ -88,3 +94,43 @@ e o ciclo arquivado, o dele em
   mesma execução corrigiu certo, mais a contagem da pasta (50 `.jpg`, o
   primeiro em ordem sendo `0.jpg`)
 - **Fix:** reescrever o primeiro bullet na forma da §5.4
+
+### CORR-LOOKS-005
+
+- **Arquivo com problema:** `docs/tasks/looks/03-fonte-de-disco-e-layout.md` e
+  a §4.5 do plano
+- **Sintoma:** `layout.require()` recusa certo, mas o único chamador é o
+  `_check_discs()` — que a 03 tem por critério **mover**. Nenhum critério da 03
+  manda o `iso_source.py` passar pela guarda, e fechada ao pé da letra o ciclo
+  fica com uma guarda testada e inalcançável
+- **Como foi detectado:** `grep -rn "require(" tools/ --include=*.py` acha três
+  ocorrências, todas dentro do próprio `layout.py`, mais a leitura do critério
+  da 03
+- **Fix:** item de critério na 03 exigindo que toda leitura passe por
+  `layout.require()`, com caso vermelho vivo pelo `iso_source.py`, e a §4.5
+  dizendo quem chama a guarda e não só que ela existe
+
+### CORR-LOOKS-006
+
+- **Arquivo com problema:** `tools/looks/layout.py`, ramo de dica do `require()`
+- **Sintoma:** `/SELECT.BIN` não está em `TEXTURE_FILES` nem em
+  `GEOMETRY_FILES`, então recusa com `digest mismatch` pelado — a mensagem que
+  o docstring do módulo diz ser a errada. É um dos dois arquivos que diferem
+  entre os discos, e a causa provável da recusa é a mesma do `DAT2D.BIN`
+- **Como foi detectado:** `require(layout.SELECT, …)` direto, comparado com o
+  mesmo estímulo no `DAT2D.BIN`; e os digests dos dois discos remedidos
+  (`86d14a66…` × `c9e1eaf8…`)
+- **Fix:** dica própria para o `/SELECT.BIN` e um `assert` no `self_check()` de
+  que **todo** caminho de `DIGEST` produz dica não vazia
+
+### CORR-LOOKS-007
+
+- **Arquivo com problema:** `tools/looks/layout.py`, docstring de topo
+- **Sintoma:** diz "It also does no I/O" e o `_check_discs()` do mesmo arquivo
+  abre duas imagens de CD. A dívida é conhecida e está na 03; o que está errado
+  é afirmar hoje a propriedade que só vale depois dela
+- **Como foi detectado:** leitura do módulo contra ele mesmo — `grep -n
+  "iso.Image\|import iso" tools/looks/layout.py` dá três linhas
+- **Fix:** ressalva no docstring, com a data e o destino, e a linha da 03
+  mandando removê-la junto com a função
+
