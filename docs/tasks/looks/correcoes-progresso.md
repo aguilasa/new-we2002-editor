@@ -16,7 +16,7 @@ e o ciclo arquivado, o dele em
 
 | ID | ID Task Origem | Título | Criticidade | Status | Concluída em |
 | -- | -------------- | ------ | ----------- | ------ | ------------ |
-| [CORR-LOOKS-001](/docs/tasks/looks/CORR-LOOKS-001.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A raiz do Superpack tem treze pastas de jogo, não catorze | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-001](/docs/tasks/looks/CORR-LOOKS-001.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A raiz do Superpack tem treze pastas de jogo, não catorze | Baixa | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-002](/docs/tasks/looks/CORR-LOOKS-002.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | O comentário do `.gitignore` guarda o número que a própria task derrubou | Baixa | [ ] pendente | — |
 | [CORR-LOOKS-003](/docs/tasks/looks/CORR-LOOKS-003.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | `superpack_count.py` descarta entrada ilegível em silêncio | Média | [ ] pendente | — |
 | [CORR-LOOKS-004](/docs/tasks/looks/CORR-LOOKS-004.md) | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | A LOOKS-TASK-18 se contradiz sobre as 50 tuplas em dois bullets seguidos | Baixa | [ ] pendente | — |
@@ -34,7 +34,7 @@ e o ciclo arquivado, o dele em
 
 ## Checklist
 
-- [ ] CORR-LOOKS-001 — treze pastas na raiz do Superpack, não catorze
+- [x] CORR-LOOKS-001 — treze pastas na raiz do Superpack, não catorze
 - [ ] CORR-LOOKS-002 — o `.gitignore` ainda descreve a raiz com o número da subpasta
 - [ ] CORR-LOOKS-003 — `superpack_count.py` tem de falhar alto no que não conseguiu ler
 - [ ] CORR-LOOKS-004 — o primeiro bullet da LOOKS-TASK-18 desmente o terceiro

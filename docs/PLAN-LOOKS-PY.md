@@ -447,7 +447,7 @@ nomeadas de `tools/pes2/mcp_drive.py`.
   [`LOOKS-TASK-01`](/docs/tasks/looks/01-base-legal-e-linhagem.md). Esta seção
   dizia *"4,2 GB, 28.720 arquivos"* da **raiz**, e eles são da subpasta
   `We2002\` — 4.452.185.957 B em 28.720 arquivos. A raiz tem **31.790 arquivos
-  e 4.830.420.054 B**, repartidos em catorze pastas de jogo (`Iss1`, `Iss2`,
+  e 4.830.420.054 B**, repartidos em treze pastas (`Iss1`, `Iss2`,
   `Iss98`, `Mls`, `Pes1`, `Pes2`, `We2000 1st`, `We2000 2nd`, `We2000 u23`,
   `We2001`, `We2002`, `We3`, `We4`) mais um `.htm` de cronologia. A diferença
   importa por um motivo prático e não de contabilidade: **todo caminho `MCR\u2026`

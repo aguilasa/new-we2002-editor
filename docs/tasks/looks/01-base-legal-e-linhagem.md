@@ -99,12 +99,18 @@ TOTAL                           31790 files     4830420054 B  (4.50 GiB)
 ```
 
 Os 28.720 estão lá, na linha `We2002`. A raiz tem **31.790 arquivos e
-4.830.420.054 B**, em catorze pastas de jogo da linha ISS/PES/WE. A diferença
+4.830.420.054 B**, em treze pastas da linha ISS/PES/WE. A diferença
 importa por um motivo prático, e não de contabilidade: **todo caminho `MCR\…`
 do plano é relativo a `Superpackv6\We2002\`** — `Superpackv6\MCR` **não
 existe**, e quem seguir o plano ao pé da letra recebe "pasta não encontrada" e
 desconfia de estar com o Superpack errado. Corrigido na §2 e na §5.4, no lugar,
 como manda o perfil.
+
+Esta frase dizia **catorze pastas de jogo**, e foi remedida pela
+[`CORR-LOOKS-001`](/docs/tasks/looks/CORR-LOOKS-001.md): catorze é o número de
+**linhas** da saída acima, e uma delas é o arquivo
+`Cronologia We-Pes-IssPro.htm`. São treze pastas — e **onze** jogos, porque
+`We2000 1st`, `We2000 2nd` e `We2000 u23` são três pastas do mesmo.
 
 De quebra, olhando a pasta do corpus: são **50 arquivos, todos `.jpg`, mas 49
 tuplas** — o quinquagésimo se chama `0.jpg`. A §5.4 dizia "50 JPGs conferidos,
