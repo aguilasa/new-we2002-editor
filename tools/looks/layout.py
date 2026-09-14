@@ -41,9 +41,11 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import io
 import os
 import re
 import sys
+import tokenize
 import tempfile
 
 # --- The two discs, and how a recipe names each one -----------------------
@@ -587,16 +589,22 @@ def sweep_addresses(root: str | None = None,
     commit at a time.
 
     What counts as an address: a hexadecimal literal, or a decimal literal of
-    four digits or more.  Both are crude on purpose -- this is a tripwire, not
-    a parser -- so two escapes exist, and both have to be written down at the
-    site rather than assumed:
+    four digits or more, **written as code**.  The escape is one line:
 
     * a line carrying `# not-an-address: <why>` is exempt.  The marker is
       spelled as the claim it makes -- an earlier spelling, `# address:`, read
       as the opposite of what the annotator meant, and a tripwire whose
-      escape hatch reads backwards will be used wrongly;
-    * digits inside a string are not addresses, so a sha256 in a docstring or
-      a message does not trip it.
+      escape hatch reads backwards will be used wrongly.
+
+    Strings and comments are not code, so a sha256 in a message and a date in
+    a docstring are not addresses.  **That reading comes from `tokenize` and
+    not from scanning for quote characters.** The hand-rolled stripper this
+    replaced could not see triple quotes, so every prose paragraph in a module
+    was swept as if it were code: `section.py` arrived with four dates in
+    docstrings and the gate went red on 2026-09-14 over the word "2026".
+    Annotating prose with `# not-an-address:` would have been the wrong repair
+    -- it would train the exemption on text that was never a candidate, and
+    the exemption is supposed to be rare enough to read.
 
     The walk uses os.walk and not os.listdir: `ui/` is a directory, and the
     .mcr cycle left one of those outside its own sweep exactly this way.
@@ -623,46 +631,50 @@ def sweep_addresses(root: str | None = None,
                 continue
             files += 1
             with open(path, encoding="utf-8") as handle:
-                for number, line in enumerate(handle, 1):
-                    lines += 1
-                    code = _strip_strings_and_comments(line)
-                    if "# not-an-address:" in line:
-                        continue
-                    if hex_literal.search(code) or big_decimal.search(code):
-                        findings.append(
-                            (os.path.relpath(path, root), number, line.rstrip())
-                        )
+                source = handle.read()
+            source_lines = source.splitlines()
+            lines += len(source_lines)
+            exempt = {
+                number for number, line in enumerate(source_lines, 1)
+                if "# not-an-address:" in line
+            }
+            for number in _address_lines(source, path):
+                if number in exempt:
+                    continue
+                text = source_lines[number - 1] if number <= len(source_lines) else ""
+                findings.append((os.path.relpath(path, root), number, text.rstrip()))
     if stats is not None:
         stats["files"] = files
         stats["lines"] = lines
     return findings
 
 
-def _strip_strings_and_comments(line: str) -> str:
-    """Blank out quoted runs and trailing comments, so only code digits remain.
+def _address_lines(source: str, path: str) -> set:
+    """Line numbers of *source* holding a numeric literal that looks like an address.
 
-    Deliberately simple: it does not understand triple quotes or escapes, and
-    it does not need to.  A digit that survives inside a docstring is a false
-    positive a reader can dismiss; a digit hidden from the sweep is the
-    failure that matters, and blanking only closed quote pairs cannot hide one
-    that is written as bare code.
+    Uses `tokenize`, so a number is only a candidate when Python itself calls
+    it a NUMBER token: text inside a string and text after a `#` are other
+    token kinds and never reach the test.
+
+    A file that will not tokenize -- a syntax error mid-edit -- is reported as
+    one finding on line 1 rather than skipped.  Skipping would mean the sweep
+    quietly stops covering a file at the exact moment somebody is changing it.
     """
-    out = []
-    quote = None
-    for char in line:
-        if quote:
-            out.append(" ")
-            if char == quote:
-                quote = None
-            continue
-        if char in "\"'":
-            quote = char
-            out.append(" ")
-            continue
-        if char == "#":
-            break
-        out.append(char)
-    return "".join(out)
+    hex_literal = re.compile(r"\A0[xX][0-9a-fA-F]+\Z")
+    big_decimal = re.compile(r"\A\d{4,}\Z")
+
+    found = set()
+    try:
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        for kind, text, (row, _col), _end, _line in tokens:
+            if kind != tokenize.NUMBER:
+                continue
+            body = text.replace("_", "")
+            if hex_literal.match(body) or big_decimal.match(body):
+                found.add(row)
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        found.add(1)
+    return found
 
 
 def _sweep(root: str | None = None) -> int:

@@ -35,7 +35,18 @@ disco.
 - [ ] Cada afirmação da §1 que a execução tiver desmentido está **corrigida no
       lugar**, com a data e o que ela dizia antes.
 - [ ] `perfil-looks.md` reflete as armadilhas que o ciclo realmente encontrou,
-      e não só as previstas.
+      e não só as previstas. **Duas já têm conserto medido**, encaminhadas
+      pela [`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md) em
+      2026-09-14:
+      - a **armadilha 2** diz “o par de zeros que separa grupos”; são **8
+        bytes no `MODEL.BIN` e 12 nas duas primeiras folgas do
+        `EDT_MOD.BIN`**, então a regra é *corrida de palavras zero*, e a
+        forma fixa é que produz o `nPrim` na casa dos bilhões (§1.4);
+      - a **armadilha 3** diz que varrer o `EDT_MOD.BIN` sem a lista
+        “pega uma seção e para”. Com a regra da corrida a varredura
+        **acha as onze e termina no EOF exato**; a lista continua
+        necessária, mas pela **ordem** — que é outra (§1.5). Reescrever a
+        armadilha pelo motivo certo vale mais que apagá-la.
 - [ ] A definição de pronto da §0 é percorrida item a item, com o resultado de
       cada um.
 - [ ] `python tools/check_tasks.py` verde, e a conferência de link do

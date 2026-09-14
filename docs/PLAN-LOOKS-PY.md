@@ -228,14 +228,30 @@ seção:      uint32 numVertex | uint32 numPrimitive
             vértice[numVertex]        (8 bytes cada)
 ```
 
-Isso está certo, **e incompleto**: a varredura ingênua morre na seção 55, e foi
-o que aconteceu aqui na primeira tentativa. O que falta é o separador:
+Isso está certo, **e incompleto** em dois pontos. A varredura ingênua morre na
+seção 55, e foi o que aconteceu aqui na primeira tentativa; o que falta é o
+separador. A primeira redação desta seção dizia:
 
 ```
 depois da última seção de um grupo vêm 8 bytes de zero
 ```
 
-Com a regra do separador, a varredura fecha:
+**e o "8" estava errado** — corrigido em 2026-09-14 pela
+[`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md), que implementou a
+regra e a mediu nos dois arquivos:
+
+```
+depois da última seção de um grupo vem uma CORRIDA de palavras zero
+```
+
+No `MODEL.BIN` a corrida tem sempre 8 bytes, então a regra fixa funciona lá por
+coincidência. No `EDT_MOD.BIN` as duas primeiras folgas têm **12 bytes** e as
+oito seguintes têm 8 — medido `[12, 12, 8, 8, 8, 8, 8, 8, 8, 8]`, mais 8 de
+cauda. Um varredor que consuma sempre 8 cai 4 bytes dentro do próximo cabeçalho
+e lê `nVert = 65.563` e `nPrim` na casa dos bilhões. **É o mesmo sintoma da
+seção 55**: parece formato errado, e é a regra do intervalo.
+
+Com a regra da corrida, a varredura fecha:
 
 | arquivo | a partir de | seções | vértices | primitivas | termina em |
 |---|---:|---:|---:|---:|---|
@@ -244,7 +260,30 @@ Com a regra do separador, a varredura fecha:
 
 As 106 do `MODEL.BIN` confirmam a contagem que o repositório já tinha. O que é
 **novo** é que elas se dividem em **6 grupos**, de tamanhos
-`[55, 1, 34, 7, 5, 4]` — a fronteira de grupo é justamente o par de zeros.
+`[55, 1, 34, 7, 5, 4]` — a fronteira de grupo é justamente a corrida de zeros.
+O `EDT_MOD.BIN` dá `[1] × 11`: cada peça é seu próprio grupo.
+
+**O `+ 8` da linha do `EDT_MOD.BIN` é cauda, e não detalhe de escrita.** A
+última seção dele acaba em 36.064 e o arquivo tem 36.072: há uma corrida de
+zeros **depois** da última seção. Quem afirmar "termina no EOF" comparando o
+fim da última seção erra por 8 bytes num arquivo que leu perfeitamente, e vai
+procurar uma seção que não falta. Por isso o `section.scan()` devolve **onde a
+passagem parou**, cauda consumida, e não o fim da última seção — no `MODEL.BIN`
+os dois coincidem, que é justamente por que medir só ele não mostraria a
+diferença.
+
+E duas correções ao formato da primitiva, medidas na mesma corrida:
+
+- **O quarto byte de cada cor não é `pad`.** Na cor 0 ele **nunca** é zero —
+  120, 121, 122 ou 127 nas 1.767 primitivas do `MODEL.BIN`, e 120, 121 ou 122
+  nas 611 do `EDT_MOD.BIN` — e nas cores 1, 2 e 3 é **sempre** zero. É um byte
+  de **modo por primitiva**, guardado na primeira cor. O `we3d` o chama de pad,
+  e descartá-lo obrigaria a reescrever o parser na Fase 3, que é onde a
+  incógnita (d) depende dele.
+- **O `pad` do vértice, esse é pad mesmo**: zero em 2.461 de 2.461 no
+  `MODEL.BIN`. É o que o distingue de uma quarta coordenada, e o
+  `section.py` o preserva porque a regra 2 do plano diz que byte cru é
+  normativo.
 
 ### 1.5 O `EDT_MOD.BIN` é um jogador só, de onze peças
 
@@ -287,11 +326,26 @@ Três leituras, todas de peso:
   106 blocos de lá se combinam em **14 jogadores de 11 peças**. O `EDT_MOD.BIN`
   tem exatamente 11 e é um jogador só — o boneco da tela de edição. A hipótese
   do `we3d` acabou de ganhar confirmação vinda de outro arquivo.
-- **A ordem da lista não é a ordem do arquivo.** O registro do offset 24.136 vem
-  antes do 22.984. A lista é ordem de montagem ou de desenho, não de
-  armazenamento — e é ela que vale. Assumir ordem de arquivo embaralha as peças
-  sem sintoma óbvio, que é o mesmo erro que a §3.3 do
+- **A ordem da lista não é a ordem do arquivo.** A lista inteira, lida em
+  2026-09-14 pela
+  [`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md):
+
+  ```
+  lista:   19440 21832 24136 22984 26920 29704 33720 15704 31712 34896 17572
+  arquivo: 15704 17572 19440 21832 22984 24136 26920 29704 31712 33720 34896
+  ```
+
+  **O conjunto é o mesmo; a sequência não.** O 15.704 — a primeira seção do
+  arquivo — é o **oitavo** registro da lista. A lista é ordem de montagem ou de
+  desenho, não de armazenamento, e é ela que vale. Assumir ordem de arquivo
+  embaralha as peças sem sintoma óbvio, que é o mesmo erro que a §3.3 do
   [PLAN-PES2-PSX.md](/docs/PLAN-PES2-PSX.md) registra para elenco.
+
+  **E é esta a razão de precisar da lista — não a de que a varredura não
+  chegue lá.** Com a regra da corrida de zeros (§1.4), varrer o
+  `EDT_MOD.BIN` do offset 15.704 **encontra as onze seções** e termina no EOF
+  exato. O que a varredura não dá é a **ordem**, e ordem errada aqui é peça
+  trocada de lugar no boneco.
 
 Entre o offset 216 e o 15.704 há outra região, com nove alvos de ponteiro
 (216, 2.608, 3.440, 4.272, 6.800, 9.328, 11.340, 13.352, 14.528) e **um
