@@ -130,13 +130,13 @@ def self_check() -> None:
             (os.path.join(tmp, "top.txt"), 3),
             (os.path.join(tmp, "a", "one.bin"), 10),
             (os.path.join(tmp, "a", "deep", "two.bin"), 100),
-            (os.path.join(tmp, "b", "three.bin"), 1000),
+            (os.path.join(tmp, "b", "three.bin"), 1000),  # not-an-address: a test file size
         ]:
             with open(path, "wb") as handle:
                 handle.write(b"\0" * size)
 
         files, total, missed = walk_count(tmp)
-        assert (files, total, missed) == (4, 1113, 0), (files, total, missed)
+        assert (files, total, missed) == (4, 1113, 0), (files, total, missed)  # not-an-address: byte total of the four files above
 
         rows = breakdown(tmp)
         assert [r[0] for r in rows] == ["a", "b", "top.txt"], rows
@@ -190,7 +190,7 @@ def main(argv: list[str]) -> int:
     files, total, missed = walk_count(root)
     print("-" * 62)
     print("%-28s %8d files %14d B  (%.2f GiB)"
-          % ("TOTAL", files, total, total / 1024 ** 3))
+          % ("TOTAL", files, total, total / 1024 ** 3))  # not-an-address: GiB divisor
     print("skipped: %d" % missed)
     if missed:
         print("incomplete: %d %s could not be read, so the totals above are a "

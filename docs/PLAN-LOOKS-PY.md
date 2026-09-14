@@ -168,11 +168,14 @@ dump** — `roms/japanese-shift-jis.bin` e
 pela [`LOOKS-TASK-02`](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md):
 
 ```sh
-python tools/looks/layout.py --check-discs <japonês.bin> <inglês.bin>
+python tools/looks/iso_source.py --check-discs <japonês.bin> <inglês.bin>
 ```
 
 O `--check-discs` confere os quatro arquivos **por dentro do disco**, que é o
-que decide, e não a imagem inteira. Para a imagem inteira, que só responde "é
+que decide, e não a imagem inteira. **Ele mora no `iso_source.py` desde a
+[`LOOKS-TASK-03`](/docs/tasks/looks/03-fonte-de-disco-e-layout.md)**
+(2026-09-14), e não mais no `layout.py`: ler disco é trabalho da fachada, e o
+`layout.py` não faz I/O. Para a imagem inteira, que só responde "é
 este dump mesmo?":
 
 ```powershell
@@ -682,7 +685,9 @@ sha256 de cada um dos quatro arquivos como lido de dentro do disco japonês, e
 
 ```sh
 python tools/looks/layout.py --check
-python tools/looks/layout.py --check-discs <japonês.bin> <inglês.bin>
+python tools/looks/layout.py --sweep
+python tools/looks/iso_source.py --check
+python tools/looks/iso_source.py --check-discs <japonês.bin> <inglês.bin>
 ```
 
 O primeiro é o gate: roda sem imagem, sem venv e sem display, e tem **quatro
@@ -693,16 +698,35 @@ caso de propriedade porque a falha que ele fecha foi por **omissão**: o
 `/SELECT.BIN` não pertencia a família nenhuma e recusava com o
 "digest mismatch" pelado que o próprio módulo chama de erro
 ([`CORR-LOOKS-006`](/docs/tasks/looks/CORR-LOOKS-006.md)), e o próximo
-arquivo acrescentado ao mapa herdaria o mesmo silêncio. O segundo é a demonstração viva contra os dois
-discos reais, e é o que mostra a guarda ficando vermelha onde deve:
+arquivo acrescentado ao mapa herdaria o mesmo silêncio.
+
+O **`--sweep`** é a regra 1 conferida em vez de prometida: ele varre
+`tools/looks/` por literal hexadecimal e por decimal de quatro dígitos ou mais
+fora do `layout.py`. É tripwire, não parser, então tem escape — uma linha com
+`# not-an-address: <razão>` sai da conta. **O marcador se chama pelo que ele
+afirma**: a primeira grafia era `# address:`, que se lê como o contrário do que
+o anotador quer dizer, e escape que se lê ao contrário é escape usado errado.
+
+O **`iso_source.py --check`** exercita a fachada sobre um leitor de mentira, sem
+disco: a leitura conferida recusa, a `read_unchecked()` devolve, e é o par que
+importa — se as duas recusassem, o caso vermelho da primeira deixaria de estar
+medindo a guarda.
+
+O **`--check-discs`** é a demonstração viva contra os dois discos reais, e é o
+que mostra a guarda ficando vermelha onde deve:
 
 ```text
-English disc -- geometry accepted, texture refused
+English disc -- geometry accepted, the Japanese-only files refused
+  refused  /BIN/DAT2D.BIN       (wanted refused) ok
   accepted /BIN/EDT_MOD.BIN     (wanted accepted) ok
   accepted /BIN/MODEL.BIN       (wanted accepted) ok
-  refused  /BIN/DAT2D.BIN       (wanted refused) ok
   refused  /SELECT.BIN          (wanted refused) ok
 ```
+
+E a cada linha dessas o `--check-discs` ainda chama a `read_unchecked()` no
+mesmo arquivo e exige bytes de volta — os 81.124 do `DAT2D.BIN`, no caso. É o
+que faz a recusa acima ser uma **decisão** e não uma falha de leitura
+disfarçada de guarda.
 
 **A mensagem de recusa nomeia o problema real**, e isso é tão importante quanto
 a recusa: o erro que ela pega é "você abriu o disco inglês", e uma exceção que
@@ -727,8 +751,8 @@ não impede nada se o chamador puder não chamá-la. O `iso_source.py` (§3.2,
 **única** porta de leitura de disco do projeto, e passa **todo** arquivo pelo
 `require()` antes de devolver bytes — não por disciplina de quem escreve o
 chamador. Quem precisar dos bytes sem conferência (comparar dois discos é o caso
-legítimo, e é o que o `--check-discs` faz) usa função separada e nomeada, para o
-desvio aparecer no `grep`. Sem essa metade esta seção descreve uma função; com
+legítimo, e é o que o `--check-discs` faz) usa função separada e nomeada —
+`Disc.read_unchecked()` —, para o desvio aparecer no `grep`. Sem essa metade esta seção descreve uma função; com
 ela, descreve uma garantia.
 
 ---

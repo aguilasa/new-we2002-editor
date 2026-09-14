@@ -36,7 +36,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | -- | ------ | ---- | ------------ | ------ | ------------ | ----------- |
 | [LOOKS-TASK-01](/docs/tasks/looks/01-base-legal-e-linhagem.md) | Base legal e linhagem — `we3d` (MIT), Superpack e o fonte `en_we2000edit` | 0 | — | ✅ Concluído | 2026-09-14 | 2026-09-14 |
 | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | Ambiente — o venv, os dois discos e seus papéis, e a armadilha do MSYS | 0 | 01 | ✅ Concluído | 2026-09-14 | 2026-09-14 |
-| [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | 02 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | `iso_source.py` e `layout.py` — a fachada de disco e o monopólio de endereço | 1 | 02 | ✅ Concluído | 2026-09-14 | ⬜ pendente |
 | [LOOKS-TASK-04](/docs/tasks/looks/04-formato-de-secao.md) | `section.py` — primitiva de 24 B, vértice de 8 B e o separador de zeros | 1 | 03 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-05](/docs/tasks/looks/05-arquivos-de-modelo.md) | `modelfile.py` — as 106 seções do `MODEL.BIN` e as 11 do `EDT_MOD.BIN` | 1 | 04 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-06](/docs/tasks/looks/06-harness-controles-e-selftest.md) | `harness.py`, `controls.py` e `selftest.py` — o gate e os primeiros casos vermelhos | 1 | 05 | ⬜ Pendente | — | — |
@@ -158,7 +158,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 - [ ] `MODEL.BIN`: 106 seções, 2.461 vértices, 1.767 primitivas, EOF exato.
 - [ ] `EDT_MOD.BIN`: 11 seções, 690 vértices, 611 primitivas, EOF exato.
-- [ ] Nenhum endereço fora de `layout.py`.
+- [x] Nenhum endereço fora de `layout.py`.
 - [ ] `looks_selftest` roda sem imagem, sem venv e sem display.
 
 ### Fase 2 — o que o jogo desenha
