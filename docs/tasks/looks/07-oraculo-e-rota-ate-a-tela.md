@@ -231,6 +231,13 @@ Os três caminhos de skip, conferidos um a um e todos saindo **77**: sem
 `WE2002_LOOKS_DRIVE_IMAGE`, sem a cópia de projeto dos states, e com o fork
 apontado para um caminho que não existe.
 
+> **São quatro pré-requisitos, e esta corrida conferiu três.** O quarto é a
+> `WE2002_LOOKS_IMAGE`, que o `verify_load()` pedia lá dentro, com o emulador
+> já de pé: sem ela o comando saía **1, com traceback**, em vez de pular. A
+> [`CORR-LOOKS-017`](/docs/tasks/looks/CORR-LOOKS-017.md) remediou no mesmo
+> dia, movendo o que pode faltar para uma lista única conferida **antes** do
+> launch. Os quatro saem 77 hoje.
+
 `roms/` só foi lida, nunca escrita; o disco inglês é o que o emulador boota e
 dele não se leu textura nenhuma.
 

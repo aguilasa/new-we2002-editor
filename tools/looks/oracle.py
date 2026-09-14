@@ -329,6 +329,55 @@ def check_states(verbose: bool = True) -> int:
     return 0
 
 
+# --- what has to be there before anything is launched ---------------------
+
+def image_to_read() -> str:
+    """The Japanese track, as an Unavailable rather than a RuntimeError.
+
+    The same conversion `modelfile.py --check-image` makes, and for the same
+    reason: an unset variable is something to skip on, not a defect in this
+    module.  It lives here so the preflight can ask for the track BEFORE the
+    emulator goes up -- `verify_load()` asks for it far too late, with the
+    fork running and three states already restored (CORR-LOOKS-017).
+    """
+    import iso_source
+
+    try:
+        return iso_source.image_from_env()
+    except RuntimeError as exc:
+        raise Unavailable(str(exc)) from None
+
+
+PREREQUISITES = (
+    ("cue", drive_image),
+    ("image", image_to_read),
+    ("states", lambda: check_states(verbose=False)),
+)
+"""Everything `--check-live` needs before it may launch anything.
+
+**The list is the point.**  The Japanese track was not on it, and was asked
+for at its point of use instead -- so a run without it booted the emulator,
+hid the window, restored three states, passed five checks and only then died
+in a traceback: neither measured nor skipped, which is exactly what the cycle
+profile forbids.  A check that comes to need something new adds it HERE.
+
+The fork is deliberately not on the list: only the launch proves it is
+installed where this thinks, and `Oracle.__enter__` already turns `fork.Skip`
+into `Unavailable`.  Everything that can be known WITHOUT starting a process
+is known first.
+"""
+
+
+def preflight() -> dict:
+    """Every prerequisite, in order, before anything is launched.
+
+    Each one raises `Unavailable`, which `main()` reports as 77 -- so a
+    machine missing any of them is told what is missing, in seconds, with no
+    emulator started.
+    """
+    return {key: need() for key, need in PREREQUISITES}
+
+
 # --- the window -----------------------------------------------------------
 
 def hide_window(handle) -> bool:
@@ -613,10 +662,11 @@ def check_live(verbose=True):
     """Everything this module claims, against a running game.
 
     Skips rather than fails when the machine has no emulator or no states --
-    77, this repository's code across all five projects.
+    77, this repository's code across all five projects.  Everything it needs
+    is named by PREREQUISITES and asked for here, before the launch.
     """
-    cue = drive_image()
-    check_states(verbose=False)
+    ready = preflight()
+    cue = ready["cue"]
 
     failures = []
 
@@ -659,7 +709,7 @@ def check_live(verbose=True):
             print("      %s" % str(exc).split(" -- ")[0])
 
         game.load_looks(1)
-        report = game.verify_load()
+        report = game.verify_load(ready["image"])
         ok("both model files are loaded where layout.py says",
            set(report) == set(layout.BASE))
 
@@ -804,6 +854,57 @@ def _checks(c) -> None:
                     os.environ.pop(name, None)
                 else:
                     os.environ[name] = was
+
+    # -- the preflight, and the order that makes it worth having -----------
+    #
+    # The red case of CORR-LOOKS-017.  What went wrong was not the check but
+    # WHEN it ran, so this is about when: with the Japanese track missing,
+    # check_live has to refuse without ever constructing an Oracle.  Driving
+    # it needs no emulator precisely because it must not get that far.
+    ok("the Japanese track is on the prerequisite list",
+       "image" in dict(PREREQUISITES))
+
+    calls = []
+    kept = globals()["PREREQUISITES"]
+    globals()["PREREQUISITES"] = tuple(
+        (key, (lambda k=key: calls.append(k) or k)) for key in "abc")
+    try:
+        walked = attempt("walk the prerequisite list", preflight, default=None)
+    finally:
+        globals()["PREREQUISITES"] = kept
+    ok("the preflight runs every prerequisite on the list",
+       calls == ["a", "b", "c"] and walked == {"a": "a", "b": "b", "c": "c"},
+       "ran %s" % calls)
+
+    saved = {name: os.environ.pop(name, None)
+             for name in (layout.ENV_IMAGE, layout.ENV_DRIVE_IMAGE)}
+    launched = []
+
+    class NeverLaunches:
+        """An Oracle that cannot be built -- constructing one is the failure."""
+
+        def __init__(self, *args, **kwargs):
+            launched.append(args)
+            raise AssertionError("the emulator was launched anyway")
+
+    was_oracle = globals()["Oracle"]
+    globals()["Oracle"] = NeverLaunches
+    # A .cue that does not exist: the point is that the run never gets far
+    # enough to open it.  Without it the refusal would come from the FIRST
+    # prerequisite and say nothing about the fourth.
+    os.environ[layout.ENV_DRIVE_IMAGE] = "no-such-disc.cue"
+    try:
+        c.refuses("an unset Japanese track is a skip, not a RuntimeError",
+                  image_to_read, layout.ENV_DRIVE_IMAGE, Unavailable)
+        c.refuses("--check-live refuses when only the drive image is set",
+                  lambda: check_live(verbose=False), "is not set", Unavailable)
+        ok("and it refused before launching anything", not launched)
+    finally:
+        globals()["Oracle"] = was_oracle
+        os.environ.pop(layout.ENV_DRIVE_IMAGE, None)
+        for name, value in saved.items():
+            if value is not None:
+                os.environ[name] = value
 
     # -- the RAM comparison -------------------------------------------------
     #

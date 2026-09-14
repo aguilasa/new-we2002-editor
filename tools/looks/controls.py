@@ -126,6 +126,15 @@ CONTROLS = (
         "state as the one it asked for -- and every later diff would then be "
         "measuring two players instead of one field",
     ),
+    Control(
+        "oracle-preflight-late", "oracle.py", "PREREQUISITES",
+        '    ("image", image_to_read),',
+        '    # ("image", image_to_read),',
+        ("oracle",),
+        "a prerequisite asked for at its point of use instead of in the "
+        "preflight: --check-live booted the emulator and died in a traceback "
+        "thirty seconds later, neither measuring nor skipping",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

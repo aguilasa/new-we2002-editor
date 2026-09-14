@@ -46,8 +46,11 @@ os três alvos.
       [`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md)** e
       hoje não é alvo nenhum. Ele sobe o emulador, carrega os dois save states,
       confere a chegada pelo quadro e compara a RAM com o disco; **pula com 77**
-      sem `WE2002_LOOKS_DRIVE_IMAGE`, sem os `.sav` de `work/looks-states/` ou
-      sem o fork. Ou vira um quarto alvo — e aí o título desta task e a tabela
+      sem `WE2002_LOOKS_DRIVE_IMAGE`, sem `WE2002_LOOKS_IMAGE`, sem os `.sav`
+      de `work/looks-states/` ou sem o fork — os quatro conferidos antes de o
+      emulador subir, desde a
+      [`CORR-LOOKS-017`](/docs/tasks/looks/CORR-LOOKS-017.md). Ou vira um
+      quarto alvo — e aí o título desta task e a tabela
       de gates do [`perfil-looks.md`](/docs/prompts/perfil-looks.md) passam a
       dizer quatro —, ou fica como comando de mão, e **isso fica escrito**. O
       que não pode é continuar sendo um gate que só roda quem se lembra dele,

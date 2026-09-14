@@ -3,7 +3,7 @@ id: CORR-LOOKS-017
 title: "Correção: sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -144,22 +144,125 @@ qualquer `launch`), melhor — é o que torna a regra permanente.
 
 ## Verificação
 
-- [ ] `WE2002_LOOKS_DRIVE_IMAGE` posta e `WE2002_LOOKS_IMAGE` ausente:
+- [x] `WE2002_LOOKS_DRIVE_IMAGE` posta e `WE2002_LOOKS_IMAGE` ausente:
       `--check-live` sai **77**, com a mensagem que nomeia as duas variáveis
-- [ ] e **não** sobe o emulador nesse caminho (nenhuma linha `fork ... on this
+- [x] e **não** sobe o emulador nesse caminho (nenhuma linha `fork ... on this
       desktop`, e `Get-Process` sem DuckStation depois)
-- [ ] os outros três caminhos de skip continuam saindo 77
-- [ ] com as duas variáveis, `--check-live` continua dando `0 failure(s)` e as
+- [x] os outros três caminhos de skip continuam saindo 77
+- [x] com as duas variáveis, `--check-live` continua dando `0 failure(s)` e as
       mesmas contagens de RAM
-- [ ] `python tools/looks/selftest.py` verde, com os 9 controles vermelhos
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py` verde, com os controles vermelhos —
+      hoje **10 de 10**, porque esta correção acrescentou o décimo
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-14
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A preflight do `check_live()` deixou de ser uma sequência de conferências
+escritas à mão e passou a ser uma **lista**, `PREREQUISITES`, que a nova
+`preflight()` percorre antes de qualquer `launch`. A imagem japonesa entrou
+nela pela `image_to_read()`, que converte o `RuntimeError` do
+`iso_source.image_from_env()` em `Unavailable` — a mesma conversão que o
+`modelfile.py --check-image` já fazia, e que o `main()` reporta como **77**.
 
-**Arquivos criados/modificados:**
+O valor validado é **usado**, e não só conferido: o `verify_load()` passou a
+receber `ready["image"]` em vez de ir buscar a variável de novo. Uma
+conferência cujo resultado se joga fora volta a divergir do uso na primeira
+mudança.
+
+**O fork continua fora da lista, de propósito.** Só o `launch` prova que ele
+está instalado onde o módulo pensa, e o `Oracle.__enter__` já converte o
+`fork.Skip` em `Unavailable`. A regra que a lista carrega é a outra: tudo que
+pode ser sabido **sem iniciar processo** é sabido primeiro.
+
+### A evidência, antes e depois
+
+Antes, com apenas a `WE2002_LOOKS_DRIVE_IMAGE` posta — reproduzido byte a
+byte como a CORR descreve, emulador de pé, janela escondida, três states
+restaurados, cinco verificações passadas, e então:
+
+```
+RuntimeError: WE2002_LOOKS_IMAGE is not set: ...                     (rc=1)
+```
+
+Depois, o mesmo comando:
+
+```
+oracle: skipped -- WE2002_LOOKS_IMAGE is not set: it names the Japanese data
+track (.bin), which is what every read comes from.  WE2002_LOOKS_DRIVE_IMAGE
+is the English .cue you drive the emulator with, and it is not a substitute.
+                                                                    (rc=77)
+```
+
+Nenhuma linha `fork ... on this desktop`, e `Get-Process` sem DuckStation
+depois: a recusa vem antes do custo, não depois dele.
+
+Os outros três continuam:
+
+```
+sem WE2002_LOOKS_DRIVE_IMAGE      ->  rc=77, nomeia as duas variaveis
+WE2002_LOOKS_STATES=C:/nope...    ->  rc=77, "run --adopt-states"
+PES2_FORK=C:/nowhere-fork         ->  rc=77, "fork.py recipe"; nenhum diretorio criado
+```
+
+E o caminho verde mede o mesmo de antes, número por número:
+
+```
+  the plate differs by 0.119963 between the slots
+  /BIN/EDT_MOD.BIN at 0x8011c000: 203 of 36072 byte(s) differ ... section(s) 0, 3, 4, 5, 6, 7, 8, 9, 10
+  /BIN/MODEL.BIN at 0x8016e800: 20 of 64800 byte(s) differ ... section(s) 24, 32
+  Right moved it by 0.108086
+oracle --check-live: 0 failure(s)                                    (rc=0)
+```
+
+### O caso vermelho, e por que ele é sobre ordem
+
+O defeito não era uma conferência errada, era uma conferência **tarde** — então
+o caso vermelho é sobre quando. No `self_check()`, com a `WE2002_LOOKS_IMAGE`
+ausente e a `WE2002_LOOKS_DRIVE_IMAGE` apontando para um `.cue` que não existe,
+o `check_live()` tem de recusar **sem nunca construir um `Oracle`**: o global é
+trocado por uma classe cujo construtor é a falha. Isso roda no gate obrigatório,
+que não tem emulador nenhum, precisamente porque a corrida não pode chegar até
+lá.
+
+Duas asserções estruturais junto, para o quinto pré-requisito não repetir a
+história: a imagem japonesa **está na lista**, e a `preflight()` chama **todas**
+as entradas da lista — conferido trocando `PREREQUISITES` por três marcadores e
+exigindo os três chamados, em ordem.
+
+E o controle plantado que torna a regra permanente, o décimo do catálogo:
+`oracle-preflight-late` comenta a entrada da imagem em `PREREQUISITES`, e o
+`selftest` fica vermelho. A contagem é a que a ferramenta imprime:
+
+```
+  ..... 10 of 10 controls red
+rule 1 swept 8 file(s), 3220 line(s)
+looks_selftest: 0 failure(s)
+```
+
+### Problemas encontrados
+
+Nenhum no conserto. Uma discrepância que a varredura puxou, e que é a mesma
+falha escrita em prosa: o Log da
+[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) afirma
+"os três caminhos de skip, conferidos um a um" e o critério da
+[`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) lista os mesmos
+três. Os dois foram ao quatro — o Log por nota ao lado, porque ele registra o
+que aquela corrida fez, e a 19 no texto, porque ela é critério de task
+pendente.
+
+### Arquivos criados/modificados
+
+- `tools/looks/oracle.py` — `image_to_read()`, `PREREQUISITES`, `preflight()`;
+  `check_live()` usa a lista e passa a imagem ao `verify_load()`; os quatro
+  casos vermelhos novos no `self_check()`
+- `tools/looks/controls.py` — o décimo controle, `oracle-preflight-late`
+- `docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md` — a nota dos quatro
+  pré-requisitos ao lado do Log
+- `docs/tasks/looks/19-alvos-de-ctest-e-cli.md` — o critério passa a listar os
+  quatro
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-017.md` — este arquivo
