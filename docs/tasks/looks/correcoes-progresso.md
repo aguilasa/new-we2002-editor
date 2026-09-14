@@ -23,6 +23,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-005](/docs/tasks/looks/CORR-LOOKS-005.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A guarda dos dois discos não tem quem a chame, e nada obriga a 03 a chamá-la | Alta | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-006](/docs/tasks/looks/CORR-LOOKS-006.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | A recusa do `/SELECT.BIN` sai como `digest mismatch` pelado | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-007](/docs/tasks/looks/CORR-LOOKS-007.md) | [LOOKS-TASK-02](/docs/tasks/looks/02-ambiente-e-os-dois-discos.md) | O `layout.py` diz que não faz I/O, e faz | Baixa | [x] concluída | 2026-09-14 |
+| [CORR-LOOKS-008](/docs/tasks/looks/CORR-LOOKS-008.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | O `BASE` é derivável e nunca é derivado — `require_base()` não tem chamador nenhum | Média | [ ] pendente | — |
+| [CORR-LOOKS-009](/docs/tasks/looks/CORR-LOOKS-009.md) | [LOOKS-TASK-03](/docs/tasks/looks/03-fonte-de-disco-e-layout.md) | A varredura da regra 1 não tem caso vermelho, e nada diz quanto ela varreu | Alta | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -44,6 +46,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-005 — nada obriga o `iso_source.py` a passar pela guarda
 - [x] CORR-LOOKS-006 — o `/SELECT.BIN` recusa sem dizer que o disco é o inglês
 - [x] CORR-LOOKS-007 — o docstring do `layout.py` promete o que a dívida da 03 ainda deve
+- [ ] CORR-LOOKS-008 — nenhum comando redeixa o `BASE` a partir dos arquivos reais
+- [ ] CORR-LOOKS-009 — o `--sweep` só foi visto verde, e não diz quanto varreu
 
 ## Detalhes por correção
 
@@ -133,4 +137,39 @@ e o ciclo arquivado, o dele em
   "iso.Image\|import iso" tools/looks/layout.py` dá três linhas
 - **Fix:** ressalva no docstring, com a data e o destino, e a linha da 03
   mandando removê-la junto com a função
+
+### CORR-LOOKS-008
+
+- **Arquivo com problema:** `tools/looks/iso_source.py` (o `_check_discs()`), e
+  a §4.5 do plano
+- **Sintoma:** `derive_base()` e `require_base()` só rodam sobre vetores
+  sintéticos dentro do `self_check()`. O único comando que abre os discos reais
+  confere digest e não deriva base nenhuma, então as duas constantes de `BASE`
+  ficam cravadas na prática, contra o que o critério da task pede. Os números do
+  Log (2/18 palavras, 642/1.703, 24/240, alvos 8..112 e 72..1.712) vieram de
+  script descartado, e reconferi-los exigiu escrever outro
+- **Como foi detectado:** `grep -rn "require_base\|derive_base" tools/
+  --include=*.py | grep -v layout.py` sai vazio; a derivação reproduzida à mão
+  bate com o Log nos dois arquivos
+- **Fix:** o `--check-discs` chama `require_base()` nos dois arquivos de
+  geometria, nos dois discos, imprime cabeçalho/base/constante e sai != 0 em
+  `WrongBase`
+
+### CORR-LOOKS-009
+
+- **Arquivo com problema:** `tools/looks/layout.py` (`sweep_addresses()`) e o
+  critério da `06-harness-controles-e-selftest.md`
+- **Sintoma:** a varredura que faz cumprir a regra 1 é a única peça do módulo
+  sem caso vermelho, e nunca foi observada achando nada. Filtro quebrado, raiz
+  errada ou blanqueamento demais imprimem a mesma frase verde, porque a saída
+  não diz quantos arquivos varreu. E nenhum alvo a roda: o critério da 06 não
+  nomeia o `sweep_addresses()`, então autoriza um segundo varredor
+- **Como foi detectado:** `grep -n sweep tools/looks/layout.py` não acha
+  ocorrência dentro do `self_check()`; árvore sintética em `tempfile` mostra
+  que a varredura funciona — teste que esta revisão teve de escrever e que não
+  fica
+- **Fix:** caso vermelho no `self_check()` com os cinco sub-casos (hex,
+  subpasta, escape na linha, escape na linha de cima, `layout.py` sintético),
+  contagem de arquivos e linhas na saída, isenção do dono por caminho e não por
+  nome, e a 06 obrigada a reusar a função
 
