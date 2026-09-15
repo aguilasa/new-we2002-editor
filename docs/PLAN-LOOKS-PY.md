@@ -1162,7 +1162,8 @@ skin.py         a grade de 16 janelas dentro de uma paleta larga, e qual
 pieces.py       qual seção é qual peça, por espelho e pelo jogo (a incógnita (b))
 looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...),
                 a tupla do corpus, e os registros de /SELECT.BIN
-assembly.py     campo de LOOKS -> peça + paleta. O coração, e a Fase 4
+assembly.py     campo de LOOKS -> a edição medida que ele faz na primitiva,
+                e daí a lista de desenho. O coração, e a Fase 4
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)
 controls.py     controles negativos por substituição literal no fonte
@@ -1628,8 +1629,38 @@ confere os dois últimos:
    são a 9 e a 10, nos dois slots — as mesmas a que a regra 3 chegou pelo outro
    lado.
 
-**(c) A tabela de montagem.** O que liga `HAIR = B3` à peça e à paleta certas.
-É o coração do projeto e a fase mais cara.
+**(c) A tabela de montagem — MEDIDA EM PARTE, 2026-09-15**, pela
+[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), que **continua
+pendente**. O que liga `HAIR = B3` à peça e à paleta certas é o coração do
+projeto, e o que se sabe agora é isto:
+
+**A geometria nunca muda.** Nenhum vértice se mexeu em nenhum dos seis campos
+andados de ponta a ponta (`oracle.py --assembly`), e campo nenhum troca uma
+seção por outra. Um campo de LOOKS reescreve o **CLUT id** de algumas
+primitivas ou o **`v`** de algumas primitivas, e nada mais — de modo que a
+lista de desenho é **as seções do disco com uma edição pequena aplicada**, e
+não uma escolha entre malhas.
+
+| campo | o que anda | passo | alcance na tela | quem ele move |
+|---|---|---|---:|---|
+| `SKIN` | linha do CLUT | `+0x40` | 4 de 4 | 8 primitivas da cabeça, mais a pele nua da figura |
+| `H.COL` | coluna do CLUT | `+1` | 8 de 8 | 7 primitivas da cabeça |
+| `H.F.COL.` | coluna do CLUT | `+1` | 7 de 7 nomeadas | as 2 da barba |
+| `BOOTS` | coluna do CLUT | `+1` | 8 de 8 | 42 das 56 primitivas de cada pé |
+| `FACE` | `v` | 16 linhas | **5** de 7 | as 2 da barba |
+| `HAIR` | `v` | 16 linhas | **3** de 32 | as 2 do cabelo |
+
+**E o fundo de cada campo é o estado que o disco guarda** — descer a linha até
+o fim devolve byte a byte o que o arquivo tem, o que torna a tabela absoluta em
+vez de relativa. Os seis **travam nas pontas**; nenhum dá a volta.
+
+**O que continua aberto, e é o que mantém a task pendente:** os **32 cabelos
+não têm mapa**. A tela alcança três faixas da imagem 3.568 — 0, 2 e 1, nessa
+ordem — e trinta teclas seguintes não mudam nada; malha nenhuma se mexe, então
+os 32 estilos não são 32 malhas, e 128 linhas de imagem dão oito faixas, que
+ainda não são 32. Onde moram os outros 29 não foi medido, e `faixa = estilo`
+seria um mapa que desenha perfeitamente e está errado. Sem ele, o cross-check
+contra as 50 tuplas do corpus também fica aberto.
 
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como

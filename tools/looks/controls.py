@@ -231,6 +231,25 @@ CONTROLS = (
         "mirrors the right shin of the OTHER -- which renames every limb",
     ),
     Control(
+        "assembly-table-off-by-one", "assembly.py", "edits",
+        "        step = values[name] - effect.field.bias",
+        "        step = values[name] - effect.field.bias + 1",
+        ("assembly",),
+        "the table shifted by one index, which is what the task asks for: the "
+        "bottom of every field is the state the disc already holds, so a "
+        "shifted table asks for an edit where the game asks for none -- and "
+        "every piece still draws",
+    ),
+    Control(
+        "assembly-effects-do-not-compose", "assembly.py", "combine",
+        "        clut, band = apply_to(clut, band, effect, step)",
+        "        clut, band = apply_to(primitive.clut, 0, effect, step)",
+        ("assembly",),
+        "each field applied to the DISC's value instead of the running one: "
+        "six of the head's primitives are owned by two fields, so the second "
+        "undoes the first and SKIN A to D comes out moving nothing",
+    ),
+    Control(
         "looks-cross-check-blind", "looks.py", "disagreements",
         "            if theirs != mine:",
         "            if False:",

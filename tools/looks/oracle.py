@@ -32,6 +32,7 @@ Usage:
     python tools/looks/oracle.py --tmds          # unknown (a), the other half
     python tools/looks/oracle.py --buffers       # what the residue bands are
     python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
+    python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
 """
 
 from __future__ import annotations
@@ -1251,54 +1252,120 @@ def clut_address(image, name, index, primitive):
             + primitive * section.PRIMITIVE_SIZE + section.CLUT_IN_PRIMITIVE)
 
 
+def section_address(image, name, index):
+    """(first byte, length) of one whole section's BODY in main RAM.
+
+    Primitives **and** vertices, and the second half is not padding: a hair
+    style is a different shape, so it moves the mesh as well as the band of the
+    atlas it samples.  Watching only the primitives is what turned a 32-value
+    HAIR walk into three -- two styles that share a `v` band have identical
+    primitive blocks, and the walk read the repeat as the end of the range.
+    """
+    import iso_source
+
+    with iso_source.open_disc(image) as disc:
+        data = disc.read(name)
+    scan = section.scan(data, layout.GEOMETRY_START[name])
+    one = scan.sections[index]
+    return (layout.BASE[name] + one.offset + section.HEADER_SIZE,
+            len(one.primitives) * section.PRIMITIVE_SIZE
+            + len(one.vertices) * section.VERTEX_SIZE)
+
+
+SETTLE_TRIES = 8
+"""How many extra looks a sample gets before it is called settled.
+
+**The game rewrites a section's primitives over MORE THAN ONE FRAME**, and the
+28 frames a press already waits are not always enough.  Measured 2026-09-15 on
+the first walk of BOOTS: one press left 34 of the 42 primitives it moves on the
+new CLUT and 8 still on the old, in the same read.  Two consequences, and the
+second is what makes this a guard rather than a comfort:
+
+* a half-written block is a state that never existed, and a table built from
+  one describes a frame the game never drew;
+* a sample taken before the write STARTS equals the one before it, which the
+  walk reads as the end of the range.  That is what turned a 32-value HAIR walk
+  into three values and an 8-value BOOTS walk into nine.
+"""
+
+
+def steady(game, sample):
+    """*sample()* read until two looks in a row agree.
+
+    Refuses rather than returning the last look: a block that will not settle
+    is either animated -- in which case it is the wrong thing to watch -- or
+    the emulator is not paused, and both make every value after it fiction.
+    """
+    previous = sample()
+    for _ in range(SETTLE_TRIES):
+        game.step(SETTLE_FRAMES)
+        current = sample()
+        if current == previous:
+            return current
+        previous = current
+    raise OracleError(
+        "what this is watching never settled in %d x %d frame(s): it is being "
+        "written every frame, or the emulator is not paused"
+        % (SETTLE_TRIES, SETTLE_FRAMES))
+
+
+def walk(game, slot, row, sample, verbose=True):
+    """Every state one field reaches, from one end of its range to the other.
+
+    `sample()` answers whatever the caller wants watched -- a CLUT id, a whole
+    block of primitives -- and has to answer something comparable, because a
+    repeat is how the end of the range is found.
+
+    **These fields clamp; they do not wrap.**  Measured 2026-09-15: a fourth
+    Right on SKIN leaves the id exactly where the third put it.  So the walk is
+    Left until the sample stops moving, then Right until it stops moving, which
+    comes back with the whole domain in order.
+    """
+    game.load_looks(slot)
+    game.select_row(row)
+
+    def to_the_end(button):
+        seen = []
+        for _ in range(WALK_LIMIT):
+            previous = steady(game, sample)
+            game.press(button, expect_change=False)
+            value = steady(game, sample)
+            if value == previous:
+                return seen
+            seen.append(value)
+        raise OracleError(
+            "%s on slot %d kept moving for %d presses of %s"
+            % (row, slot, WALK_LIMIT, button))
+
+    start = steady(game, sample)
+    to_the_end("Left")
+    values = [steady(game, sample)] + to_the_end("Right")
+    if start not in values:
+        raise OracleError(
+            "%s started at a state the walk never came back to" % row)
+    if verbose:
+        game.say("%s reaches %d value(s)" % (row, len(values)))
+    return values, values.index(start)
+
+
 def walk_field(game, slot, row, address, verbose=True):
-    """Every CLUT id one field reaches, from one end of its range to the other.
+    """Every CLUT id one field reaches, in the order it reaches them.
 
     The assertion is the RAM and not the picture: the id says which palette the
     next frame will read, where the value cell only says that the label
-    changed.
-
-    **These fields clamp; they do not wrap.**  Measured 2026-09-15: a fourth
-    Right on SKIN leaves the id exactly where the third put it.  So a repeat is
-    the END of the range and not a dropped press, and the walk is Left until
-    the id stops moving, then Right until it stops moving -- which comes back
-    with the whole domain in order, and which is how the beard's columns were
-    counted without assuming how many there are.
+    changed.  `walk()` does the walking; this says what to watch.
     """
     import struct
 
-    game.load_looks(slot)
-    game.select_row(row)
     path = os.path.join(game.out_dir, "clut.bin")
 
     def read():
         return struct.unpack("<H", game.read_ram(address, 2, path))[0]
 
-    def to_the_end(button):
-        seen = []
-        for _ in range(WALK_LIMIT):
-            previous = read()
-            game.press(button, expect_change=False)
-            value = read()
-            if value == previous:
-                return seen
-            seen.append(value)
-        raise OracleError(
-            "%s on slot %d kept moving for %d presses of %s: %s"
-            % (row, slot, WALK_LIMIT, button,
-               ["%#06x" % v for v in seen]))
-
-    start = read()
-    to_the_end("Left")
-    values = [read()] + to_the_end("Right")
-    if start not in values:
-        raise OracleError(
-            "%s started at %#06x and the walk never came back to it: %s"
-            % (row, start, ["%#06x" % v for v in values]))
+    values, _start = walk(game, slot, row, read, verbose=False)
     if verbose:
-        game.say("%s reaches %d value(s), starting at %#06x: %s"
-                 % (row, len(values), start,
-                    ", ".join("%#06x" % v for v in values)))
+        game.say("%s reaches %d value(s): %s"
+                 % (row, len(values), ", ".join("%#06x" % v for v in values)))
     return values
 
 
@@ -1434,6 +1501,127 @@ def check_palettes(slot=2, verbose=True):
     for line in problems:
         print("    %s" % line)
     return 1 if problems else 0
+
+
+def check_assembly(rows=None, slot=2, verbose=True):
+    """What every value of a field does to the primitives it owns.
+
+    The measurement LOOKS-TASK-14 is built on, and the reason it is a walk
+    rather than one step: LOOKS-TASK-08 stepped HAIR ONCE and recorded "+0x20
+    to v", which is true of the first step and says nothing about the
+    thirty-second.  A field is walked end to end and every value it reaches is
+    printed with the whole primitive beside it.
+
+    What is watched is the section's **primitive block**, not one witness:
+    which primitives a field moves is part of the answer, and picking the
+    witness first would decide it in advance.
+    """
+    import iso_source
+    import looks
+
+    ready = preflight()
+    rows = rows or tuple(ASSEMBLY_ROWS)
+    with iso_source.open_disc(ready["image"]) as disc:
+        discs = {name: disc.read(name) for name in layout.BASE}
+
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        for row in rows:
+            if row not in ASSEMBLY_ROWS:
+                raise OracleError("%r is not a row this measures: %s"
+                                  % (row, ", ".join(ASSEMBLY_ROWS)))
+            name, index = ASSEMBLY_ROWS[row]
+            base, length = section_address(ready["image"], name, index)
+            path = os.path.join(game.out_dir, "prims.bin")
+
+            def read(base=base, length=length, path=path):
+                return game.read_ram(base, length, path)
+
+            # Down to the bottom of the range FIRST, so that index 0 of what
+            # comes back is the field's lowest value and not wherever the save
+            # state happened to leave it.  An anchored table is the difference
+            # between "these bands exist" and "band 0 is hair style A1".
+            count = looks.BY_ROW[row].values
+            game.load_looks(slot)
+            game.select_row(row)
+            started = steady(game, read)
+            for _ in range(count):
+                game.press("Left", expect_change=False)
+            values = [steady(game, read)]
+            for _ in range(count):
+                game.press("Right", expect_change=False)
+                values.append(steady(game, read))
+            distinct = len({bytes(v) for v in values})
+            print("  %s on slot %d: %d press(es) of Left then %d of Right; "
+                  "%d distinct state(s) in %d value(s); the state the disc "
+                  "holds is %s"
+                  % (row, slot, count, count, distinct, len(values),
+                     "number %d" % values.index(started)
+                     if started in values else "NOT among them"))
+            _say_primitives(row, name, index, values,
+                            values.index(started) if started in values else -1,
+                            discs[name])
+    return 0
+
+
+ASSEMBLY_ROWS = {
+    "HAIR": (layout.MODEL, layout.HEAD_SECTION),
+    "FACE": (layout.MODEL, layout.HEAD_SECTION),
+    "H.COL": (layout.MODEL, layout.HEAD_SECTION),
+    "H.F.COL.": (layout.MODEL, layout.HEAD_SECTION),
+    "SKIN": (layout.MODEL, layout.HEAD_SECTION),
+    "BOOTS": (layout.EDT_MOD, layout.BOOT_SECTIONS[0]),
+}
+"""Which section to watch while a row is walked.
+
+One section each, and the section is the piece the field was already measured
+to touch -- LOOKS-TASK-08 for the head, LOOKS-TASK-09 for the boots.  A field
+that turned out to move something else would show up as a section that never
+changes, which is a refusal this prints rather than hides.
+"""
+
+
+def _say_primitives(row, name, index, values, at, disc_data):
+    """Print what changed, primitive by primitive, value by value."""
+    scan = section.scan(disc_data, layout.GEOMETRY_START[name])
+    prim_bytes = len(scan.sections[index].primitives) * section.PRIMITIVE_SIZE
+    first = values[0]
+    moved = set()
+    vertices = 0
+    for block in values[1:]:
+        for i in range(0, prim_bytes, section.PRIMITIVE_SIZE):
+            if block[i:i + section.PRIMITIVE_SIZE] != \
+                    first[i:i + section.PRIMITIVE_SIZE]:
+                moved.add(i // section.PRIMITIVE_SIZE)
+        vertices = max(vertices, sum(
+            1 for i in range(prim_bytes, len(first), section.VERTEX_SIZE)
+            if block[i:i + section.VERTEX_SIZE]
+            != first[i:i + section.VERTEX_SIZE]))
+    if not moved and not vertices:
+        print("      nothing in %s section %d moved -- this row does not own "
+              "this section" % (name, index))
+        return
+    print("      %s section %d: %d primitive(s) move: %s"
+          % (name, index, len(moved), sorted(moved)))
+    if vertices:
+        print("      and up to %d vertex(es) move with them -- this row "
+              "changes the MESH, not only what it samples" % vertices)
+    # One line per value, and the SHAPE of the change rather than every
+    # primitive: what a field does to forty-two primitives at once is one fact,
+    # and printing it forty-two times buries it.  The whole list is above.
+    for step, block in enumerate(values):
+        prims = [section.read_primitive(block, w * section.PRIMITIVE_SIZE)
+                 for w in sorted(moved or {0})]
+        cluts = sorted({p.clut for p in prims})
+        pages = sorted({p.tpage for p in prims})
+        us = sorted({u for p in prims for u, _v in p.texcoords})
+        vs = sorted({v for p in prims for _u, v in p.texcoords})
+        print("        %2d%s  clut %s  page %s  u %d..%d  v %d..%d"
+              % (step, " <-- the disc" if step == at else "     ",
+                 ", ".join("%#06x" % c for c in cluts),
+                 ", ".join("%#06x" % p for p in pages),
+                 us[0], us[-1], vs[0], vs[-1]))
 
 
 def check_buffers(verbose=True):
@@ -1906,6 +2094,8 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) >= 2 and argv[1] == "--assembly":
+            return check_assembly(rows=tuple(argv[2:]) or None)
         if len(argv) == 2 and argv[1] == "--palettes":
             return check_palettes()
         if len(argv) == 2 and argv[1] == "--buffers":

@@ -336,6 +336,23 @@ settles it: walked end to end by `oracle.py --palettes`, H.F.COL. reaches
 **seven** values, columns 9 to 15, and the grid comes out exactly full.
 """
 
+BOOT_SECTIONS = (9, 10)
+"""The two EDT_MOD.BIN sections the BOOTS field rewrites, in both slots.
+
+The only two sections the two figures share byte for byte, which is how
+LOOKS-TASK-09 named them the feet before BOOTS was asked; `pieces.py` carries
+the same pair as BOOTS_SECTIONS, per slot, and this is the file-level name
+`oracle.py --assembly` addresses one of them by.
+"""
+
+ATLAS_BAND = 16
+"""Rows of an image record that one step of HAIR or of FACE walks.
+
+Measured 2026-09-15 by `oracle.py --assembly`, pressing each row from the
+bottom of its range to the top: the `v` of the two primitives each owns moves
+in blocks of sixteen rows of the record at HAIR_IMAGE, and never anything else.
+"""
+
 HAIR_COLOUR_PRIMITIVES = (0, 1, 4, 9, 14, 16, 17)
 """The HEAD_SECTION primitives whose CLUT id the H.COL field walks.
 

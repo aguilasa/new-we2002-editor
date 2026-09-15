@@ -153,7 +153,22 @@ Não se revertem sem o usuário pedir.
     `DEFAUL` e `NAT`, das doze linhas da tela, **não guardam nada** — são as duas
     metades do default por nacionalidade do `data/defaultlook.txt`. Contar doze
     campos porque a tela tem doze linhas erra por dois.
-18. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+18. **O jogo reescreve o bloco de primitivas ao longo de MAIS DE UM QUADRO.**
+    Medido em 2026-09-15
+    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)): uma
+    leitura logo depois da tecla trouxe 34 das 42 primitivas do `BOOTS` no CLUT
+    novo e 8 ainda no velho — um estado que nunca existiu. E uma amostra tirada
+    **antes** de a escrita começar é igual à anterior, o que uma varredura lê
+    como fim do alcance: foi assim que 32 valores de `HAIR` viraram três e 8 de
+    `BOOTS` viraram nove. Leia até **duas leituras seguidas concordarem**
+    (`oracle.steady`), e recuse se nunca concordarem.
+19. **Alcance de tela não é domínio de campo, e os dois se medem separado.**
+    `beard_style` guarda oito, os rótulos de terceiro nomeiam sete, e a tela
+    anda **cinco**. `hair_style` guarda 32 e a tela mostra **três** estados na
+    geometria. Contar valores pelo domínio, ou domínio pelo que a tela anda, dá
+    número com ar de medido nos dois sentidos — e parar na repetição só funciona
+    quando a observação muda a **cada** passo, que não é o caso do `HAIR`.
+20. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam
@@ -204,6 +219,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
