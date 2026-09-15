@@ -64,6 +64,20 @@ status: pendente
 
 ---
 
+- **As quatro peles estão localizadas no disco desde 2026-09-15**, pela
+  [`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md): são os
+  quatro registros de **256 entradas** em VRAM (0, 480), (0, 481), (0, 482) e
+  (0, 483), nos offsets **65.892 / 66.404 / 66.916 / 67.428** do `DAT2D.BIN`. O
+  `+0x40` que a LOOKS-TASK-08 mediu no CLUT id é **exatamente uma linha de
+  VRAM**, o que amarra a medição de RAM ao arquivo.
+- **Lê-las é uma chamada:** `texture.palette_for(data, primitive)` devolve as
+  entradas que aquela primitiva amostra, na largura que a página dela declara.
+  A parte que continua sendo desta task é dizer **o que o renderizador faz com
+  elas** — e que a pele nua amostra 16 entradas de dentro de uma paleta de 256,
+  o que um renderizador ingênuo lê como paleta inteira.
+
+---
+
 ## Objetivo
 
 Saber como a cor chega ao boneco, e portanto o que o renderizador tem de fazer.

@@ -634,12 +634,99 @@ As três primeiras são as que interessam, segundo a tabela do CARP
 | 3.568 | (544, 256) | *"Caras"* — rostos |
 | 7.456 | (512, 384) | *"Cuerpo"* |
 
-**Mas `0 clut(s)`**, e isso é uma lacuna real: o `entries()` do `bin_archive.py`
-acha a lista de imagens e **não** acha a lista de paletas deste arquivo. Que ela
-existe, a tabela do CARP diz — as paletas começam em **65.892**, logo depois do
-fim da lista de imagens (65.508 + 23×16 = 65.876). Fazer esse varredor achar as
-duas listas é trabalho da Fase 3, e é a única mudança prevista em código de
-outro projeto.
+**O `0 clut(s)` era verdade sobre o varredor e mentira sobre o arquivo — medido
+em 2026-09-15** pela
+[`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md). Esta seção
+dizia que o `entries()` do `bin_archive.py` "não acha a lista de paletas deste
+arquivo", e a lista está lá: **267 registros**, do offset 76.836 até o fim do
+arquivo. O que a esconde é uma palavra do registro, que o
+`tools/pes2/bin_archive.py` documenta assim:
+
+```text
+[7] 0x800f    a constant tag, and the thing that makes the record
+              findable without knowing where the list is
+```
+
+**Não é constante e não é tag.** É o **banco de 64 KiB** do offset de 16 bits do
+campo 6, com viés para que o banco 0 valha `0x800f`:
+
+```text
+offset = campo[6] + (campo[7] - 0x800F) * 0x10000
+```
+
+A prova não é a aritmética — é o que cai no endereço resolvido. Com o banco, o
+fluxo LZSS de cada registro de imagem descomprime **exatamente** para o
+retângulo que o próprio registro declara; sem ele, não:
+
+| arquivo | bytes | campo 7 | banco | imagens que descomprimem para o retângulo declarado |
+|---|---:|---|---:|---|
+| `DAT2D.BIN` | 81.124 | `0x800f` | +0 | 23 de 23 |
+| `DATSEL3.BIN` | 65.884 | `0x800f` | +0 | 20 de 20 |
+| `EDTR_2D.BIN` | 73.856 | `0x8010` | +1 | 2 de 2 |
+| `DATSEL2.BIN` | 124.812 | `0x8010` | +1 | 15 de 15 |
+| `DAT_CG.BIN` | 101.416 | `0x8010` | +1 | 9 de 9 |
+| `DATSEL.BIN` | 223.496 | `0x8012` | +3 | 6 de 6 |
+
+A constante `0x800f` funciona em todo contêiner cujo payload cabe nos primeiros
+64 KiB, que é **todo contêiner dos quatro discos da família PES2** que o outro
+projeto mediu. Ela nunca esteve errada lá, e nunca esteve certa.
+
+**O que o arquivo guarda, e como se sabe que a leitura fechou.** A lista de
+imagens termina em 65.878; o banco de paletas começa em **65.892**, depois de
+catorze bytes de zero. Dali até 76.836 os payloads **ladrilham exato** —
+**262 paletas de 16 entradas e 5 de 256**, que dão 10.944 bytes, e
+65.892 + 10.944 = 76.836, onde a lista de CLUTs começa. **A conferência é o
+ladrilho, não o offset:** uma resolução errada por um banco, ou uma largura lida
+na profundidade errada, deixa buraco ou sobreposição na hora.
+
+As paletas caem na VRAM em três formas, e a geometria usa as três:
+
+| linhas de VRAM | registros | entradas | o que a geometria faz com elas |
+|---|---:|---:|---|
+| 480, 481, 482, 483 | 1 cada | 256 | as quatro peles |
+| 484 | 7 | 256 e 16 | as chuteiras, e seis paletas estreitas ao lado |
+| 496 a 511 | 16 cada | 16 | 256 paletas estreitas numa grade 16×16 |
+
+**Um CLUT id de 4 bits pode apontar para DENTRO de uma paleta de 256 entradas**,
+e este disco faz isso o tempo todo: a pele nua amostra (0, 480), a cabeça
+amostra (16, 480) e (144, 480), e as três são entradas do **mesmo** registro
+largo em (0, 480). Então "qual paleta" não é busca por igualdade — é o registro
+cujo intervalo **cobre** o id, na largura que a profundidade da página da
+primitiva pede. Errar isso é a falha silenciosa desta fase: as dezesseis
+entradas erradas continuam sendo dezesseis entradas, e continuam desenhando.
+
+Das nove ids distintas que a geometria nomeia, **cinco resolvem neste arquivo e
+quatro vêm de outro lugar** — as três de 8 bits em (0, 485), (0, 486) e
+(0, 488), que são os uniformes, e uma estreita em (336, 510). É a mesma lacuna
+que as duas páginas de textura ausentes já apontavam, agora com as paletas
+juntas, e é matéria da
+[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md).
+
+**E os dois rótulos do CARP viraram medição, nenhum por confiança:**
+
+- **"Pieles" em 65.892 / 66.404 / 66.916 / 67.428** são os quatro registros em
+  VRAM (0, 480) a (0, 483), 256 entradas cada. O que confirma não é o passo de
+  512 bytes: é que a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
+  mediu o `SKIN` somando `0x40` ao CLUT id, que é **exatamente uma linha de
+  VRAM**, e que quem ele move são as peças de pele nua.
+- **"Botines" em 67.940** é o quinto registro largo, em VRAM (0, 484). A
+  confirmação é independente do rótulo: as seções 9 e 10 — as que a
+  [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) nomeou pé, por
+  espelho e por serem as duas únicas que os dois bonecos compartilham — amostram
+  **(0, 484) e mais nada**, e nenhuma outra peça a toca.
+
+**O conserto não foi para o `bin_archive.py`, e a razão é medida.** Quem lê as
+paletas é o `tools/looks/texture.py`, que acha a lista pelo mesmo marcador e lê
+o banco do próprio registro. Generalizar o `entries()` para aceitar qualquer
+palavra de banco — mesmo validando cada registro pelo que ele declara — faz
+aparecerem **2.151 registros a mais em 40 outros contêineres deste disco**, os
+estádios `GDC_*` incluídos, que aquele módulo separa de propósito. Mexer no
+varredor que guarda o PES2 para servir a um arquivo de um quinto disco moveria
+o chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
+**A correção do modelo de registro — o campo 7 é banco, não tag — é dívida com o
+ciclo de PES2**, onde ela vale para `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN`
+e `EDTR_2D.BIN` também; está registrada na
+[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).
 
 ### 1.8 Uma contradição entre dois documentos da cena
 
@@ -651,6 +738,15 @@ estar certos. **O disco decide**, e decidir isso é barato: exportar as duas
 imagens por `bin_archive.py export` e olhar.
 
 Enquanto não estiver decidido, nenhum código pode cravar nenhum dos dois.
+
+**E o que a LOOKS-TASK-10 mediu não decide isto**, embora tenha decidido algo
+sobre a fonte: os **dois rótulos de paleta** do CARP — as quatro "Pieles" e o
+bloco "Botines" — se confirmaram contra o disco em 2026-09-15 (§1.7). Isso diz
+que a tabela do CARP foi feita olhando o arquivo, não que os rótulos de
+**imagem** dela estejam certos. A contradição continua de pé e continua sendo a
+[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md); tomar o
+acerto de um rótulo como aval dos outros é exatamente o passo que esta seção
+existe para não dar.
 
 ### 1.9 O lado dos bits já está resolvido, e com três testemunhas
 
@@ -1342,6 +1438,13 @@ errada da primitiva, corrigida na §1.6. **A incógnita continua sendo da
 [`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md)**, que é quem
 fecha o que o renderizador tem de implementar — o que mudou é que ela começa
 com o veredito na mão em vez de com a pergunta.
+
+E desde 2026-09-15 as quatro paletas estão localizadas no disco (§1.7): são os
+quatro registros de **256 entradas** em VRAM (0, 480) a (0, 483), nos offsets
+65.892, 66.404, 66.916 e 67.428 do `DAT2D.BIN`. O `+0x40` do CLUT id é
+**exatamente uma linha de VRAM**, o que fecha o círculo entre o que a RAM mostra
+e o que o arquivo guarda: a 12 não precisa mais achar as paletas, só dizer como
+o renderizador as amostra.
 
 ---
 

@@ -21,6 +21,16 @@ status: pendente
 
 ---
 
+- **Existe um segundo gate de disco desde 2026-09-15**, e ele não está em
+  `ctest` nenhum: `python tools/looks/texture.py --check-image`, da
+  [`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md). Ele pula
+  com 77 sem `WE2002_LOOKS_IMAGE`, como o `looks_image` já faz. **Decidir se o
+  `looks_image` passa a rodar os dois `--check-image`** — o do `modelfile.py` e
+  o do `texture.py` — ou se nasce um alvo terceiro é desta task; deixá-lo fora é
+  um alvo verde que não roda metade do que existe.
+
+---
+
 ## Objetivo
 
 `tools/looks/cli.py` responde pelas perguntas do projeto, e o `ctest` registra

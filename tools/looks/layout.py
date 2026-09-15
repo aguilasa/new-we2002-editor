@@ -156,6 +156,50 @@ DERIVED, by geometry_start(), because deriving it is what would have caught
 the scan that began at 15,704 and reported the file as read (CORR-LOOKS-010).
 """
 
+# --- The BIN container's record model -------------------------------------
+#
+# A record list closes with the pair [bank word][RECORD_LIST_END], and every
+# record of it carries that same bank word in field 7.  `tools/pes2/bin_archive.py`
+# documents that word as "0x800f, a constant tag"; LOOKS-TASK-10 measured that
+# it is the 64 KiB page of the 16-bit offset in field 6, biased so bank 0 reads
+# 0x800f.  The four discs that project measured never needed the bank, because
+# no payload of theirs sits past the first 64 KiB.  This one does: DAT2D.BIN's
+# palettes are at bank 1 and DATSEL.BIN's images at bank 3.
+RECORD_TAG_BASE = 0x800F  # not-an-address: field 7 when the payload is in bank 0
+RECORD_BANK = 0x10000  # not-an-address: the 64 KiB page that field 7 counts
+RECORD_LIST_END = 0x00FF  # not-an-address: the halfword that closes a list
+
+VRAM_WIDTH = 1024  # not-an-address: PSX frame-buffer width in 16-bit units
+VRAM_HEIGHT = 512  # not-an-address: PSX frame-buffer height in rows
+CLUT_ROW_FIRST = 480
+"""The first VRAM row a palette may live on.
+
+The strip at the bottom of the frame buffer that PSX games keep CLUTs in, and
+the rule `bin_archive.py` already states.  On this disc the four skin palettes
+are rows 480 to 483, the boots row 484, and 256 narrow palettes fill 496..511.
+"""
+
+TEXTURE_EXPECTED = {
+    # (image records, clut records, palettes of 16 entries, palettes of 256)
+    DAT2D: (23, 267, 262, 5),
+}
+
+TEXTURE_BANK = {
+    # (first byte of the palette payloads, first byte of the record list that
+    # indexes them).  The payloads tile exactly between the two: 262 x 32 B
+    # plus 5 x 512 B is 10,944 B, and 65,892 + 10,944 is 76,836.
+    DAT2D: (65892, 76836),
+}
+
+BOOTS_PALETTE = 67940
+"""The palette the boots sample, at VRAM (0, 484).
+
+The CARP table labels this offset "Botines".  What confirms it is not the label
+but the geometry: the two EDT_MOD.BIN sections LOOKS-TASK-09 named the feet --
+by mirroring and by being the only two both figures share -- sample this
+palette and nothing else, and no other section samples it.
+"""
+
 PLAYER_RECORD_OFFSET = 157164
 PLAYER_RECORD_COUNT = 1242
 PLAYER_RECORD_SIZE = 12

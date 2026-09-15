@@ -55,6 +55,20 @@ status: pendente
 
 ---
 
+- **A metade "paleta" da tabela já tem leitor e regra**, desde 2026-09-15
+  ([`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md)): o
+  `tools/looks/texture.py` acha as 267 paletas do `DAT2D.BIN` e resolve um CLUT
+  id pelo registro que o **cobre**, não pelo que lhe é igual. A distinção é da
+  tabela de montagem: as chuteiras são (0, 484), a pele nua (0, 480), e a cabeça
+  (16, 480) e (144, 480) — as três últimas **dentro da mesma paleta larga**, de
+  modo que "campo → paleta" não é um par de offsets e sim `(x, y, largura)`.
+- **E o campo que move a peça move a linha de VRAM inteira:** um passo de `SKIN`
+  soma `0x40` ao id, que é uma linha, e leva pele, cabeça e tudo que amostra
+  daquela paleta junto. Uma linha de tabela que mande `SKIN` trocar só a pele
+  estaria descrevendo outro jogo.
+
+---
+
 ## Objetivo
 
 `tools/looks/assembly.py`: dada uma tupla de LOOKS, dizer quais peças desenhar

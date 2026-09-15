@@ -181,6 +181,25 @@ CONTROLS = (
         "(a) -- no field touches a TMD -- would then read zero for free",
     ),
     Control(
+        "texture-bank-ignored", "texture.py", "Record.__init__",
+        "        self.offset = fields[6] + bank * layout.RECORD_BANK",
+        "        self.offset = fields[6]",
+        ("texture",),
+        "field 7 is the 64 KiB bank of a 16-bit offset, not a tag; with it "
+        "dropped every palette of DAT2D.BIN is read 65,536 bytes early -- "
+        "inside the compressed images, where the bytes are still bytes and "
+        "still make colours",
+    ),
+    Control(
+        "texture-clut-any-record", "texture.py", "covering",
+        "    hits = [r for r in records if r.is_clut and r.covers(x, y, colours)]",
+        "    hits = [r for r in records if r.is_clut]",
+        ("texture",),
+        "this is the swap the task asks for: with the span ignored, every "
+        "piece resolves to the first palette in the file, the render still "
+        "draws, and the boots come out the colour of the skin",
+    ),
+    Control(
         "pieces-mirror-unconfined", "pieces.py", "mirrors",
         "                    if groups is None or _together(i, j, groups)]",
         "                    if True]",

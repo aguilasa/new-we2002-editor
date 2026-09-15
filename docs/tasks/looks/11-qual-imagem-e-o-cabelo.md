@@ -42,6 +42,25 @@ status: pendente
 
 ---
 
+- **As paletas do `DAT2D.BIN` já estão achadas e lidas** — 267, por
+  `python tools/looks/texture.py --report`, medido em 2026-09-15 pela
+  [`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md). O que esta
+  task ganha com isso é poder **exportar a imagem candidata já colorida**, em
+  vez de olhar índices: o cabelo mora em `MODEL.BIN` seção 24, cujas primitivas
+  amostram (16, 480) e (144, 480) — dentro da paleta larga da pele corrente.
+- **E quatro dos nove CLUT ids da geometria não estão neste arquivo:** os três
+  de 8 bits em (0, 485), (0, 486) e (0, 488) — que são os uniformes, jogador de
+  linha e goleiro — e um estreito em (336, 510). Junto com as duas páginas de
+  textura que a §1.7 já registrava como ausentes, é a mesma pergunta: **de qual
+  contêiner vem o resto**. Achar isso é desta task, e o `texture.py` lê qualquer
+  `BIN/*.BIN` do disco, não só o `DAT2D.BIN`.
+- **A tabela do CARP acertou os dois rótulos de paleta** (as quatro "Pieles" e
+  "Botines"), o que diz que ela foi feita olhando o arquivo — e **não** diz nada
+  sobre os rótulos de imagem, que são justamente o que contradiz o tutorial do
+  `zeta`. §1.8 do plano.
+
+---
+
 ## Objetivo
 
 Resolver a contradição por exportação, e deixar o rótulo de cada uma das 23

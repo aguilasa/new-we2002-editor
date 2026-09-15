@@ -66,9 +66,19 @@ Não se revertem sem o usuário pedir.
    Contagem de seção sem o offset de partida não é medição.
 4. **A ordem da lista não é a ordem do arquivo.** O registro do offset 24.136 vem
    antes do 22.984. Assumir a do arquivo embaralha peça sem sintoma visível.
-5. **`bin_archive.py` responde `0 clut(s)` sem reclamar.** A lista de paletas do
-   `DAT2D.BIN` existe e o varredor não a acha. Ler isso como "não tem paleta" é
-   erro.
+5. **`bin_archive.py` responde `0 clut(s)` sem reclamar**, e ler isso como "não
+   tem paleta" continua sendo erro — mas o motivo não era o que esta linha
+   dizia. Ela dizia *"a lista existe e o varredor não a acha"*, como se fosse
+   falha de varredura. **Remedido em 2026-09-15**
+   ([`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md)): a lista
+   existe — 267 registros a partir de 76.836 — e o que a esconde é o **campo 7**
+   do registro, que o `bin_archive.py` documenta como a tag constante `0x800f` e
+   que é, medido, o **banco de 64 KiB do offset de 16 bits do campo 6**. O
+   varredor está certo para os quatro discos que ele mede, onde nenhum payload
+   passa dos primeiros 64 KiB. Quem lê paleta neste ciclo é o
+   `tools/looks/texture.py`; `bin_archive.py` não foi tocado, e a razão é medida:
+   generalizar o `entries()` faz aparecerem 2.151 registros a mais em 40 outros
+   contêineres deste disco, os estádios incluídos. §1.7 do plano.
 6. **`MSYS_NO_PATHCONV=1`** em toda chamada do Git Bash que passe caminho de
    dentro do ISO. Sem ele `/BIN/EDT_MOD.BIN` vira `C:/Program Files/Git/BIN/…` e
    a mensagem de erro acusa "not a Form 1", que culpa a coisa errada.
@@ -144,6 +154,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
 | `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
 | `looks_ui` | venv + display (77 sem eles) | — (nasce na 16) | `ctest -R looks_ui` | LOOKS-TASK-16 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
@@ -274,7 +285,11 @@ sobre dado que pode não ser o que a tela desenha.
   nomeada traz **como se soube** — trocar a opção e ver o que muda, nunca
   deduzir do número de vértices.
 - **Fase 3** — toda leitura de textura sai do **disco japonês**, e a revisão
-  confere isso explicitamente em cada comando do Log. A lista de CLUTs é achada
+  confere isso explicitamente em cada comando do Log. **E toda paleta tem
+  largura de registro, nunca de arquivo:** o `DAT2D.BIN` guarda 262 de 16
+  entradas e 5 de 256, e um id de 4 bits pode apontar para dentro de uma de 256
+  — ler a largura errada devolve dezesseis entradas que desenham perfeitamente e
+  são as cores erradas. A lista de CLUTs é achada
   **por marcador**, não por offset constante — é a regra que o
   `bin_archive.entries()` já segue e a razão de o mapa de PES2 nunca ancorar em
   constante. A contradição 8 × 3.568 tem veredito com o documento errado

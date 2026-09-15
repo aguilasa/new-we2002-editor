@@ -21,6 +21,21 @@ status: pendente
 
 ---
 
+- **Dívida com o ciclo de PES2, medida aqui e não corrigida aqui.** Em
+  2026-09-15 a [`LOOKS-TASK-10`](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md)
+  mediu que o campo 7 do registro de `BIN/*.BIN` **não é a tag constante
+  `0x800f`** que o `tools/pes2/bin_archive.py` documenta: é o banco de 64 KiB do
+  offset de 16 bits do campo 6, com viés para que o banco 0 valha `0x800f`
+  (§1.7 do plano, com a tabela de seis contêineres que o prova pelo LZSS). O
+  efeito **alcança os discos de PES2**: hoje o `entries()` não vê as listas de
+  `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN` e `EDTR_2D.BIN` na release
+  `(EsIt)`. Não foi consertado por aqui porque `bin_archive.py` é de outro ciclo
+  e o pool de correções não atravessa pasta. **Esta task leva o item adiante:
+  registrar a dívida para o ciclo de PES2 é entregável, consertá-la lá é decisão
+  do usuário.**
+
+---
+
 ## Objetivo
 
 Fechar o ciclo com plano, perfil e entregáveis batendo com o que existe no
