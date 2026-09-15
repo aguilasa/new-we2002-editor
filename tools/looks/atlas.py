@@ -690,6 +690,19 @@ def _elsewhere(image_path: str) -> int:
                                   for k, v in sorted(owners.items())[:2])
                  + (" ..." if len(owners) > 2 else "") if owners else
                  "  -- IN NONE OF THEM"))
+        # How many palettes of this width the container holds ALTOGETHER, and
+        # not only how many answer this id.  The "x2" above was read as "the
+        # file has two, home and away" and written into a task log; the file
+        # has five (CORR-LOOKS-025).  Two counts that differ by a factor of
+        # two and a half print one line apart now.
+        if owners:
+            totals = collections.Counter(
+                sum(1 for r in records[one] if r.is_clut
+                    and r.colours == colours)
+                for one in owners)
+            print("          %d-entry palette(s) per container, in total: %s"
+                  % (colours, ", ".join("%d in %d file(s)" % (k, v)
+                                        for k, v in sorted(totals.items()))))
     return 0
 
 

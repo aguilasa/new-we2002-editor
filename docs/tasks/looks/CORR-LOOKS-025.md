@@ -3,7 +3,7 @@ id: CORR-LOOKS-025
 title: "Correção: cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o \"casa e fora\" é inferência sem medição"
 type: correção
 category: textura
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -110,20 +110,68 @@ diferença entre "duas, casa e fora" e "duas desta id, de cinco no arquivo".
 
 ## Verificação
 
-- [ ] a frase diz cinco por arquivo, e nomeia a id que a geometria não usa
-- [ ] "casa e fora" aparece como hipótese, com o gesto que a decide
-- [ ] o `--elsewhere` imprime o total de paletas de 256 do contêiner ao lado do
+- [x] a frase diz cinco por arquivo, e nomeia a id que a geometria não usa
+      — (256, 480)
+- [x] "casa e fora" aparece como hipótese, com o gesto que a decide
+- [x] o `--elsewhere` imprime o total de paletas de 256 do contêiner ao lado do
       `x2`
-- [ ] `python tools/looks/atlas.py --check-image` continua `ok`
-- [ ] `python tools/looks/selftest.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/atlas.py --check-image` continua `ok`
+- [x] `python tools/looks/selftest.py` verde, 21 de 21 controles vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+O conserto nasceu onde a frase deveria ter nascido: no comando. O
+`--elsewhere` já imprimia `TEX_00.BIN x2` — quantas paletas daquele contêiner
+respondem **àquela id** — e agora imprime, uma linha abaixo, quantas o
+contêiner tem **ao todo**:
 
-**Arquivos criados/modificados:**
+```text
+      (   0, 486) x256    414 primitive(s)  in 105 container(s): TEX_00.BIN x2 ...
+          256-entry palette(s) per container, in total: 5 in 105 file(s)
+      (   0, 488) x256    540 primitive(s)  in 105 container(s): TEX_00.BIN x2 ...
+          256-entry palette(s) per container, in total: 5 in 105 file(s)
+```
+
+Duas contagens que diferem por um fator de dois e meio, agora a uma linha uma
+da outra. São **cinco por arquivo** — duas em (0, 486), duas em (0, 488) e uma
+em **(256, 480), que a geometria não nomeia** —, idêntico nos 105:
+
+```text
+palettes per TEX file: {5: 105}
+palette ids across the 105: {(0,486,256): 210, (0,488,256): 210, (256,480,256): 105}
+```
+
+### "Casa e fora" virou hipótese, com o gesto ao lado
+
+A explicação continua plausível e pode estar certa. O que mudou é a tipografia:
+ela estava escrita ao lado de números medidos, com a mesma cara deles, e
+**nenhuma corrida trocou o uniforme do time na tela** para ver qual das duas
+paletas de uma id se move. Esse é o método da LOOKS-TASK-09, e é o que decide.
+Está escrito na task 11 e na §1.7 como hipótese, com a quinta paleta como
+pergunta aberta ao lado.
+
+Isso importa para a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md),
+que vai escrever `campo → peça + paleta`: o uniforme é o único campo com **duas
+candidatas por id**, e escolher "a primeira" porque a prosa disse que são duas
+desenha perfeitamente, nas cores erradas — com cinco no arquivo, "a primeira"
+nem é bem definida.
+
+### Problemas encontrados
+
+Nenhum. O achado não desmente o veredito da task: os CLUT ids de 8 bits que o
+`DAT2D.BIN` não tem moram nos `TEX_*.BIN`, e isso reproduz.
+
+### Arquivos criados/modificados
+
+- `tools/looks/atlas.py` — o total de paletas por contêiner ao lado do `x2` no
+  `--elsewhere`
+- `docs/tasks/looks/11-qual-imagem-e-o-cabelo.md` — cinco por arquivo, a quinta
+  id nomeada, e "casa e fora" como hipótese
+- `docs/PLAN-LOOKS-PY.md` — §1.7, o mesmo no lugar
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-025.md` — este arquivo

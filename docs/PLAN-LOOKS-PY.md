@@ -725,14 +725,28 @@ juntas.
 | o que falta aqui | quem tem |
 |---|---|
 | VRAM (576, 256), (576, 384) e (608, 256) | **105 `TEX_*.BIN`** (mais `DATSEL2.BIN` e `SELECT2.BIN` em duas delas) |
-| CLUT (0, 486) e (0, 488), 256 entradas | **105 `TEX_*.BIN`, duas de cada por arquivo** |
+| CLUT (0, 486) e (0, 488), 256 entradas | **105 `TEX_*.BIN`, duas de cada id por arquivo** |
 | CLUT (0, 485) e (336, 510) | **contêiner nenhum deste disco** |
 
 A resposta é uma frase: **o uniforme é por time**, e por isso não mora no
-arquivo comum — mora nos 105 contêineres de textura de time, e as duas paletas
-de 256 por arquivo são o jogo de casa e o de fora. As duas ids que não estão em
-lugar nenhum ficam abertas, e a de (336, 510) é justamente a das 136 primitivas
-das seções 0 e 1 do `MODEL.BIN`.
+arquivo comum — mora nos 105 contêineres de textura de time.
+
+**Cada `TEX_*.BIN` tem cinco paletas de 256, não duas** — duas em (0, 486),
+duas em (0, 488) e uma em **(256, 480), que a geometria não nomeia** —, o mesmo
+nos 105. Esta seção dizia "as duas paletas de 256 por arquivo", lendo o `x2` do
+`--elsewhere` como o total do arquivo; medido em 2026-09-15
+([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)), o `x2` é quantas
+respondem àquela id. O comando imprime as duas contagens uma linha abaixo da
+outra desde então.
+
+**E "casa e fora" é hipótese, não medição.** Ninguém trocou o uniforme do time
+na tela para ver qual das duas de uma id se move, que é o método da
+LOOKS-TASK-09 — e é o que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+vai precisar, porque o uniforme é o único campo com **duas candidatas por id**.
+A quinta paleta fica como pergunta aberta ao lado.
+
+As duas ids que não estão em lugar nenhum ficam abertas, e a de (336, 510) é
+justamente a das 136 primitivas das seções 0 e 1 do `MODEL.BIN`.
 
 **E os dois rótulos do CARP viraram medição, nenhum por confiança:**
 

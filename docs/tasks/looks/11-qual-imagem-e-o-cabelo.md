@@ -220,9 +220,27 @@ peças da [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) a toca
 ```
 
 **O uniforme é por time**, e é por isso que não está no arquivo comum: mora nos
-**105 `TEX_*.BIN`**, com **duas** paletas de 256 entradas em cada — casa e fora.
-Duas ids ficam abertas, em contêiner nenhum: (0, 485) e (336, 510) — esta última
-a das 136 primitivas da 10.248.
+**105 `TEX_*.BIN`**. Cada um deles tem **cinco** paletas de 256 entradas, e o
+`x2` da saída acima é quantas respondem *àquela id*, não quantas o arquivo tem:
+
+```text
+      (   0, 486) x256    414 primitive(s)  in 105 container(s): TEX_00.BIN x2 ...
+          256-entry palette(s) per container, in total: 5 in 105 file(s)
+```
+
+Duas em (0, 486), duas em (0, 488) e **uma em (256, 480) que a geometria não
+nomeia** — o mesmo em todos os 105. Duas ids ficam abertas, em contêiner
+nenhum: (0, 485) e (336, 510) — esta última a das 136 primitivas da 10.248.
+
+> **Hipótese, não medição: "casa e fora".** O par por id é explicação plausível
+> para `x2`, e **nenhuma corrida desta task trocou o uniforme do time na tela
+> para ver qual das duas se move** — que é o método que a
+> [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) estabeleceu.
+> A frase original dizia "duas por arquivo — casa e fora" ao lado de números
+> medidos e com a mesma tipografia; corrigida em 2026-09-15
+> ([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)). Quem decidir isto
+> troca o uniforme na tela e mede — e a quinta paleta, a de (256, 480), fica
+> como pergunta aberta junto.
 
 ### Gates medidos
 
