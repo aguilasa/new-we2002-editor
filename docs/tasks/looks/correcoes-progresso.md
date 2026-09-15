@@ -38,7 +38,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Quatro seções têm dois parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-022](/docs/tasks/looks/CORR-LOOKS-022.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | Os "2.151 registros a mais em 40 contêineres" que decidem onde o conserto mora não reproduzem por nenhuma leitura | Alta | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -75,7 +75,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-020 — o pareamento de espelho escolhe entre dois candidatos em silêncio
 - [x] CORR-LOOKS-021 — braço e antebraço têm malha diferente nos dois bonecos, e o resumo diz que não
 - [x] CORR-LOOKS-022 — o número que justifica não tocar o `bin_archive.py` não reproduz
-- [ ] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
+- [x] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
 
 ## Detalhes por correção
 

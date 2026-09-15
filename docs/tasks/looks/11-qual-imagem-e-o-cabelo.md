@@ -54,6 +54,15 @@ status: pendente
   textura que a §1.7 já registrava como ausentes, é a mesma pergunta: **de qual
   contêiner vem o resto**. Achar isso é desta task, e o `texture.py` lê qualquer
   `BIN/*.BIN` do disco, não só o `DAT2D.BIN`.
+- **Seis seções do `MODEL.BIN` compartilham a paleta da chuteira**, e são
+  candidatas nomeáveis pelo mesmo método que nomeou as onze peças. Medido em
+  2026-09-15 ([`CORR-LOOKS-023`](/docs/tasks/looks/CORR-LOOKS-023.md)): as
+  seções **11, 12, 22, 23, 63 e 64**, cinco primitivas cada, amostram
+  (0, 484) — a paleta que no `EDT_MOD.BIN` é só do pé. A cabeça **não** está
+  entre elas: a seção 24 amostra (16, 480) e (144, 480) e nunca (0, 484), o que
+  reforça que a geometria da cabeça é outra coisa. Luva, meião ou o que for, o
+  gesto que nomeia é o da LOOKS-TASK-09 — trocar a opção no jogo e ver o que
+  muda.
 - **A tabela do CARP acertou os dois rótulos de paleta** (as quatro "Pieles" e
   "Botines"), o que diz que ela foi feita olhando o arquivo — e **não** diz nada
   sobre os rótulos de imagem, que são justamente o que contradiz o tutorial do

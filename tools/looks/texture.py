@@ -598,26 +598,38 @@ def _check_image(image_path: str) -> int:
         # already records that pages the geometry names are not all here, and
         # naming which palettes are missing is what LOOKS-TASK-11 and 12 need.
         used = collections.Counter()
+        # Per file as well as in total: the sum alone hid that six MODEL.BIN
+        # sections sample the boots palette, because the boots line below was
+        # measured inside EDT_MOD.BIN only and the totals were never split
+        # (CORR-LOOKS-023).
+        by_file = collections.defaultdict(collections.Counter)
+        sections_of = {}
         for path in (layout.EDT_MOD, layout.MODEL):
             body = disc.read(path)
-            for sec in modelfile.scan(body, path).sections:
+            sections_of[path] = modelfile.scan(body, path).sections
+            for index, sec in enumerate(sections_of[path]):
                 for prim in sec.primitives:
                     used[(prim.clut_vram, prim.tpage_depth)] += 1
+                    by_file[(prim.clut_vram, prim.tpage_depth)][path] += 1
         here = absent = 0
         print("  the %d distinct CLUT id(s) the geometry names:" % len(used))
         for (vram, depth), n in sorted(used.items()):
             colours = WIDE if depth else NARROW
+            split = "  (%s)" % ", ".join(
+                "%s %d" % (os.path.basename(f), c)
+                for f, c in sorted(by_file[(vram, depth)].items()))
             try:
                 rec = covering(pal, vram[0], vram[1], colours)
             except NoPalette:
                 absent += 1
-                print("      vram %-11s %d bpp  x%-4d  NOT in %s"
-                      % ("(%d,%d)" % vram, 4 if not depth else 8, n, layout.DAT2D))
+                print("      vram %-11s %d bpp  x%-4d  NOT in %s%s"
+                      % ("(%d,%d)" % vram, 4 if not depth else 8, n,
+                         layout.DAT2D, split))
                 continue
             here += 1
-            print("      vram %-11s %d bpp  x%-4d  <- %d entries at %d"
+            print("      vram %-11s %d bpp  x%-4d  <- %d entries at %d%s"
                   % ("(%d,%d)" % vram, 4 if not depth else 8, n,
-                     rec.colours, rec.offset))
+                     rec.colours, rec.offset, split))
         print("  %d of %d resolve in this file; %d come from elsewhere"
               % (here, len(used), absent))
 
@@ -654,9 +666,24 @@ def _check_image(image_path: str) -> int:
         else:
             vram = only.pop()
             rec = covering(pal, vram[0], vram[1], NARROW)
+            # The exclusivity holds among the pieces pieces.name_pieces()
+            # knows, which are EDT_MOD.BIN's.  Saying only "no other piece
+            # touches it" invited the reader to doubt the CLUT reading when
+            # MODEL.BIN turned up sampling it too -- so the scope is stated,
+            # and what falls outside it is counted rather than left out.
+            elsewhere = {
+                index: sum(1 for prim in sec.primitives
+                           if prim.clut_vram == vram)
+                for index, sec in enumerate(sections_of[layout.MODEL])
+                if any(prim.clut_vram == vram for prim in sec.primitives)}
             print("  CARP's \"Botines\": %d -- the only palette the %s "
-                  "section(s) sample, at vram (%d,%d), and no other piece "
-                  "touches it" % (rec.offset, pieces.FOOT, vram[0], vram[1]))
+                  "section(s) sample among the NAMED pieces, at vram (%d,%d)"
+                  % (rec.offset, pieces.FOOT, vram[0], vram[1]))
+            print("      %d primitive(s) in %d %s section(s) share it: %s"
+                  % (sum(elsewhere.values()), len(elsewhere),
+                     os.path.basename(layout.MODEL),
+                     ", ".join("%d x%d" % kv for kv in sorted(elsewhere.items()))
+                     or "none"))
             if rec.offset != layout.BOOTS_PALETTE:
                 failures += 1
                 print("  FAILED the boots palette is at %d, recorded %d"

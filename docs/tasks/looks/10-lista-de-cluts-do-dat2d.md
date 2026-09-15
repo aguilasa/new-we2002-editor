@@ -147,8 +147,10 @@ duas páginas de textura que a §1.7 já registrava como ausentes.
 ```text
 CARP's "Pieles": 65892, 66404, 66916, 67428 -- four 256-entry palettes on
   rows 480..483, and SKIN moves a CLUT id by one row
-CARP's "Botines": 67940 -- the only palette the foot section(s) sample,
-  at vram (0,484), and no other piece touches it
+CARP's "Botines": 67940 -- the only palette the foot section(s) sample among
+  the NAMED pieces, at vram (0,484)
+      30 primitive(s) in 6 MODEL.BIN section(s) share it: 11 x5, 12 x5, 22 x5,
+      23 x5, 63 x5, 64 x5
 ```
 
 - **"Pieles"** — o passo de 512 bytes por si não confirma nada; o que confirma é
@@ -158,9 +160,19 @@ CARP's "Botines": 67940 -- the only palette the foot section(s) sample,
 - **"Botines"** — a confirmação é independente do rótulo e vem da task anterior:
   as seções 9 e 10, que a [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md)
   nomeou **pé** por espelho e por serem as duas únicas compartilhadas pelos dois
-  bonecos, amostram **(0, 484) e mais nada**, e nenhuma outra peça a toca. A
-  ferramenta calcula isso a partir do `pieces.name_pieces()`, e não de uma lista
-  de seções escrita à mão.
+  bonecos, amostram **(0, 484) e mais nada**, e nenhuma outra **peça nomeada** a
+  toca. A ferramenta calcula isso a partir do `pieces.name_pieces()`, e não de
+  uma lista de seções escrita à mão.
+
+  **O alcance dessa exclusividade é o `EDT_MOD.BIN`, e dizê-lo custa uma
+  palavra.** A linha dizia *"nenhuma outra peça a toca"* até 2026-09-15, quando
+  a [`CORR-LOOKS-023`](/docs/tasks/looks/CORR-LOOKS-023.md) mediu que **seis
+  seções do `MODEL.BIN` — 11, 12, 22, 23, 63 e 64, cinco primitivas cada —
+  também amostram (0, 484)**. É `112 + 30 = 142`, que é exatamente o total que
+  a linha daquele id já imprimia duas linhas acima e que ninguém tinha
+  repartido. O rótulo continua confirmado; o que mudou é a fronteira da frase, e
+  as trinta primitivas de fora são **pergunta aberta para a Fase 3**, não
+  problema.
 
 ### Onde o conserto mora, e por quê
 

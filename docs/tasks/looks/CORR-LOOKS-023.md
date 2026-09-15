@@ -3,7 +3,7 @@ id: CORR-LOOKS-023
 title: "Correção: \"nenhuma outra peça toca a paleta das chuteiras\" é conferido só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram"
 type: correção
 category: textura
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -105,22 +105,67 @@ chuteira: são candidatas nomeáveis pelo mesmo método que nomeou as onze peça
 
 ## Verificação
 
-- [ ] a linha do "Botines" diz **entre as peças nomeadas**, e diz quantas
+- [x] a linha do "Botines" diz **entre as peças nomeadas**, e diz quantas
       primitivas de fora compartilham a paleta
-- [ ] o relatório soma cada id de CLUT **por arquivo**, e `112 + 30 = 142` fecha
+- [x] o relatório soma cada id de CLUT **por arquivo**, e `112 + 30 = 142` fecha
       na saída
-- [ ] as seis seções do `MODEL.BIN` estão nomeadas na LOOKS-TASK-11 como
+- [x] as seis seções do `MODEL.BIN` estão nomeadas na LOOKS-TASK-11 como
       candidatas
-- [ ] `python tools/looks/texture.py --check-image` continua `ok`
-- [ ] `python tools/looks/selftest.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/texture.py --check-image` continua `ok`
+- [x] `python tools/looks/selftest.py` verde, 19 de 19 controles vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A frase ganhou o alcance que lhe faltava, e a conta que a teria mostrado sozinha
+passou a ser impressa. A tabela dos ids de CLUT agora **reparte cada total por
+arquivo**:
 
-**Arquivos criados/modificados:**
+```text
+  the 9 distinct CLUT id(s) the geometry names:
+      vram (0,480)     4 bpp  x446   <- 256 entries at 65892  (EDT_MOD.BIN 296, MODEL.BIN 150)
+      vram (0,484)     4 bpp  x142   <- 256 entries at 67940  (EDT_MOD.BIN 112, MODEL.BIN 30)
+      vram (0,485)     8 bpp  x85    NOT in /BIN/DAT2D.BIN  (MODEL.BIN 85)
+      ...
+  CARP's "Botines": 67940 -- the only palette the foot section(s) sample among
+      the NAMED pieces, at vram (0,484)
+      30 primitive(s) in 6 MODEL.BIN section(s) share it: 11 x5, 12 x5, 22 x5,
+      23 x5, 63 x5, 64 x5
+```
+
+`112 + 30 = 142` fecha na saída, e as trinta primitivas que faltavam à conta
+têm endereço. O rótulo do CARP continua confirmado pelo mesmo argumento — a
+paleta é exclusiva **entre as peças que o `pieces.name_pieces()` nomeia** —, e
+é o alcance que passou a estar escrito.
+
+A repartição por arquivo é o que teria mostrado isto sem ninguém procurar: o
+total de 142 estava impresso duas linhas acima da frase que dizia "e nenhuma
+outra peça a toca", e as duas nunca se encontraram.
+
+### O que vai para a Fase 3
+
+As seis seções — 11, 12, 22, 23, 63 e 64 — entraram na
+[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) como
+**candidatas nomeáveis** pelo método da LOOKS-TASK-09, e não como problema. Com
+a nota que separa o que já se sabe: a **cabeça não está entre elas** — a seção
+24 amostra (16, 480) e (144, 480) e nunca (0, 484).
+
+### Problemas encontrados
+
+Nenhum. O achado não desmente nada da task: a exclusividade que confirma o
+rótulo é a de dentro do `EDT_MOD.BIN`, e ela reproduz.
+
+### Arquivos criados/modificados
+
+- `tools/looks/texture.py` — a repartição por arquivo de cada id de CLUT, e a
+  linha do "Botines" com o alcance e as seções de fora dele
+- `docs/tasks/looks/10-lista-de-cluts-do-dat2d.md` — a transcrição atualizada e
+  o item "Botines" com a fronteira da afirmação
+- `docs/tasks/looks/11-qual-imagem-e-o-cabelo.md` — as seis seções como
+  candidatas, e a cabeça descartada entre elas
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-023.md` — este arquivo
