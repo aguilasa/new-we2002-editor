@@ -3,7 +3,7 @@ id: CORR-LOOKS-019
 title: "Correção: o `--tmds` promete dizer se algum campo move um TMD, e não pergunta — a metade negativa do veredito não sai de comando nenhum"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -145,23 +145,87 @@ offset dentro dela, tem de cair no balde de TMD e não no de resíduo.
 
 ## Verificação
 
-- [ ] `python tools/looks/oracle.py --fields SKIN` imprime, por slot, quantos
+- [x] `python tools/looks/oracle.py --fields SKIN` imprime, por slot, quantos
       bytes caíram **em TMD** — e o número é zero por medição, não por omissão
-- [ ] `--tmds` cumpre o que o docstring promete, ou o docstring deixa de
-      prometer
-- [ ] há caso vermelho: com o mapa de TMD estragado, a contagem muda
-- [ ] a §1.6 do plano cita o comando que sustenta *"nenhum campo de LOOKS toca
-      um deles"*, e não só o `--tmds` de hoje
-- [ ] `python tools/looks/selftest.py` verde, com os controles todos vermelhos
-- [ ] `python tools/looks/oracle.py --check` continua `0 failure(s)`
-- [ ] `roms/` intocada
+- [x] `--tmds` cumpre o que o docstring promete: ele mexe em campo e cruza
+- [x] há caso vermelho: `oracle-tmd-span-short`, o décimo segundo do catálogo
+- [x] a §1.6 do plano cita o comando que sustenta *"nenhum campo de LOOKS toca
+      um deles"*, com a saída dos três baldes ao lado
+- [x] `python tools/looks/selftest.py` verde, **12 de 12 controles vermelhos**
+- [x] `python tools/looks/oracle.py --check` continua `0 failure(s)`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+O módulo ganhou o mapa que faltava. `tmd_spans(data)` percorre cada TMD **até o
+fim** — cabeçalho, tabela de objetos, vértices, normais, e os pacotes de
+primitiva, que são de tamanho variável e por isso se andam um a um —, e
+`attribute_tmd()` diz em qual deles um endereço cai. O `report_field()` passou a
+imprimir **três** baldes: arquivo de modelo, **TMD** (com o índice), e nenhum
+dos dois. O `check_fields()` monta o mapa **do mesmo snapshot** de que o diff
+saiu; mapa tirado noutro instante seria mapa de outra RAM.
 
-**Arquivos criados/modificados:**
+E o `--tmds` cumpre o docstring: depois de imprimir os quatro endereços e os
+TMDs achados, ele mexe em `HAIR` no slot 1 e em `SKIN` no slot 2 — os dois
+pares da evidência do plano — e imprime o cruzamento.
+
+```text
+TMDs actually in RAM: 29
+    from 0x800c1678 to 0x800c4948, 4..54 vertices
+    walked to their ends: 96..896 byte(s) each, 13104 byte(s) of RAM in all
+HAIR, slot 1 (goalkeeper): 132 byte(s)
+    /BIN/MODEL.BIN section 24: 8 byte(s), at byte [1, 5, 9, 13] of the primitive
+    in a TMD: 0 byte(s)
+    in neither: 124 byte(s)
+SKIN, slot 2 (outfield player): 326 byte(s)
+    /BIN/EDT_MOD.BIN section 0, 3, 4, 5, 6, 7, 8 and MODEL.BIN section 24
+    in a TMD: 0 byte(s)
+    in neither: 202 byte(s)
+```
+
+**Zero, medido.** Os resíduos de 124 e 202 são exatamente os da CORR, agora com
+o terceiro balde ao lado deles em vez de um só.
+
+### Problemas encontrados
+
+**Um, e foi a linha nova que o pegou.** Na primeira corrida ao vivo os 29 TMDs
+saíram com **40 bytes cada, todos** — de 4 a 54 vértices, todos 40. Isso é
+exatamente header (12) mais uma entrada de tabela (28): o `tmd_spans()` estava
+descartando os três ponteiros de cada objeto.
+
+A causa é de sinal. Os TMDs deste jogo têm **FIXP ligado**, então os ponteiros
+já vêm resolvidos como endereços KSEG0 — e a tabela é lida com `<7i`, *signed*,
+de modo que `0x800C16A0` chega como `-2146691296`. Subtrair a base da RAM disso
+dá offset negativo, todo ponteiro é rejeitado por estar fora do buffer, e o
+span colapsa para o cabeçalho. `_tmd_pointer()` passou a mascarar com
+`& 0xFFFFFFFF`, e o `self_check()` ganhou o **mesmo** TMD sintético escrito nas
+duas formas, exigindo o mesmo fim das duas: o forjado tinha FIXP **desligado**,
+que é a forma que os arquivos reais não usam, e por isso passava contente
+enquanto o real fazia o oposto.
+
+A confirmação de que agora está certo não é o `0 failure(s)`: os 29 spans
+corrigidos **fecham exatamente nos cabeçalhos seguintes** — 304, 800, 832, 592,
+… — sem uma única sobreposição, e o último termina em `0x800C49A8`. Uma região
+contígua de 13.104 bytes, que é o que uma lista de modelos carregada em
+sequência tem de ser.
+
+E é o achado que justifica a linha: **a extensão impressa é o que tornou o
+defeito visível.** Sem ela o mapa curto teria ficado, e o "0 bytes em TMD" — a
+resposta certa — teria vindo de uma medição que não media quase nada. Que é
+precisamente o defeito que esta CORR abriu, uma volta acima.
+
+### Arquivos criados/modificados
+
+- `tools/looks/oracle.py` — `tmd_spans()`, `attribute_tmd()`, `_tmd_pointer()`,
+  `_walk_tmd_primitives()`; o terceiro balde do `report_field()`; o
+  `check_fields()` passando o mapa do snapshot certo; o `check_tmds()` medindo
+  o cruzamento; e os seis casos vermelhos novos no `self_check()`
+- `tools/looks/controls.py` — o décimo segundo controle,
+  `oracle-tmd-span-short`
+- `docs/PLAN-LOOKS-PY.md` — §1.6 com o comando e os três baldes
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-019.md` — este arquivo

@@ -859,6 +859,90 @@ def attribute(address, maps):
     return None
 
 
+TMD_HEADER_SIZE = 12
+TMD_OBJECT_SIZE = 28
+
+
+def _tmd_pointer(value, flags, table):
+    """One of a TMD object's three pointers, as an offset into main RAM.
+
+    Bit 0 of the file flags is Sony's FIXP: set, the pointers were resolved to
+    real addresses when the file was loaded; clear, they are offsets from the
+    start of the object table.  Both spellings appear in this console's files,
+    and reading one as the other lands the span somewhere plausible and wrong.
+
+    **The mask is not decoration.**  A resolved pointer is a KSEG0 address with
+    the top bit set, and the object table is read as signed words -- so it
+    arrives NEGATIVE.  Subtracting the RAM base from it gives a negative
+    offset, every span collapses to header-plus-table, and every TMD comes out
+    exactly 40 bytes long.  Measured that way here first: 29 TMDs of 4 to 54
+    vertices, all "40 bytes".  It was the printed extent that gave it away.
+    """
+    if flags & 1:
+        return (value & 0xFFFFFFFF) - RAM_BASE  # not-an-address: a width mask
+    return table + value
+
+
+def _walk_tmd_primitives(data, at, count):
+    """The end of *count* TMD packets starting at *at*, or None if they run out.
+
+    TMD primitives are variable length -- byte 1 of each packet header is its
+    payload in words -- so the only way to know where they end is to walk them.
+    Assuming a fixed size is how a span comes out short, and a span that comes
+    out short puts real bytes in the residue bucket.
+    """
+    if at is None:
+        return None
+    for _ in range(count):
+        if at < 0 or at + 4 > len(data):
+            return None
+        at += 4 + data[at + 1] * 4
+    return at if at <= len(data) else None
+
+
+def tmd_spans(data):
+    """(start, end, verts, prims) of every TMD in *data*, walked to its end.
+
+    The header alone gives the counts; where the object ENDS takes reading the
+    object table and walking the primitive packets.  This exists so a byte a
+    field moved can be attributed to a TMD instead of only to "not in a model
+    file" -- the two are different claims, and only the second was ever printed
+    (CORR-LOOKS-019).
+    """
+    import struct
+
+    out = []
+    for address, verts, prims in _tmd_headers(data):
+        at = address - RAM_BASE
+        flags, objects = struct.unpack_from("<2I", data, at + 4)
+        table = at + TMD_HEADER_SIZE
+        end = table + objects * TMD_OBJECT_SIZE
+        for index in range(objects):
+            here = table + index * TMD_OBJECT_SIZE
+            if here + TMD_OBJECT_SIZE > len(data):
+                break
+            (vert_top, n_vert, norm_top, n_norm,
+             prim_top, n_prim, _scale) = struct.unpack_from("<7i", data, here)
+            for top, count in ((vert_top, n_vert), (norm_top, n_norm)):
+                start = _tmd_pointer(top, flags, table)
+                if 0 <= start <= len(data):
+                    end = max(end, min(len(data), start + count * 8))
+            walked = _walk_tmd_primitives(
+                data, _tmd_pointer(prim_top, flags, table), n_prim)
+            if walked is not None:
+                end = max(end, walked)
+        out.append((RAM_BASE + at, RAM_BASE + end, verts, prims))
+    return out
+
+
+def attribute_tmd(address, spans):
+    """Which TMD of *spans* an address falls in, or None."""
+    for index, (start, end, _verts, _prims) in enumerate(spans):
+        if start <= address < end:
+            return index
+    return None
+
+
 def lists_touched(name, indices, image):
     """Which of a file's header lists own these section indices.
 
@@ -892,18 +976,30 @@ def lists_touched(name, indices, image):
     return out
 
 
-def report_field(found, before, after, maps, image=None, verbose=True):
+def report_field(found, before, after, maps, tmds=(), image=None,
+                 verbose=True):
     """Group what a field moved by file and section, and say what is untouched.
 
-    The count of bytes that landed in NO model file is printed too, and that is
+    **Three buckets, not two.**  Model file, TMD, and neither -- because "not
+    in a model file" and "not in a TMD" are different claims, and the verdict
+    of unknown (a) rests on the second one.  Until CORR-LOOKS-019 only the
+    first was printed, and the negative half of the verdict was two reports
+    read side by side rather than one measurement.
+
+    The count of bytes that landed in NEITHER is printed too, and that is
     deliberate: "nothing outside" and "nothing measured" print the same when
     only the hits are listed.
     """
     inside, elsewhere = {}, 0
+    in_tmd = {}
     for offset in found:
         where = attribute(RAM_BASE + offset, maps)
         if where is None:
-            elsewhere += 1
+            which = attribute_tmd(RAM_BASE + offset, tmds)
+            if which is None:
+                elsewhere += 1
+            else:
+                in_tmd[which] = in_tmd.get(which, 0) + 1
             continue
         name, index, part, at, byte = where
         inside.setdefault((name, index), []).append((at, part, byte,
@@ -918,7 +1014,12 @@ def report_field(found, before, after, maps, image=None, verbose=True):
                   "primitive" % (name, index, len(hits), bytes_in))
             for at, part, _byte, old, new in hits[:4]:
                 print("          +%d %s: %d -> %d" % (at, part, old, new))
-    print("      in no model file: %d byte(s)" % elsewhere)
+    print("      in a TMD: %d byte(s)%s"
+          % (sum(in_tmd.values()),
+             "" if not in_tmd
+             else "  " + ", ".join("TMD %d: %d" % (k, v)
+                                   for k, v in sorted(in_tmd.items()))))
+    print("      in neither: %d byte(s)" % elsewhere)
     if image:
         for name in sorted({key[0] for key in inside}):
             indices = [key[1] for key in inside if key[0] == name]
@@ -1022,19 +1123,29 @@ def check_fields(rows=None, slots=(1, 2), verbose=True):
                 found, before, after = game.field_diff(slot, row)
                 print("  %s, slot %d (%s): %d byte(s)"
                       % (row, slot, SLOTS[slot], len(found)))
-                report_field(found, before, after, maps,
+                # Built from the SAME snapshot the diff came from: a TMD map
+                # taken at another moment would be a map of another RAM.
+                report_field(found, before, after, maps, tmd_spans(before),
                              image=ready["image"], verbose=verbose)
     return 0
 
 
-def check_tmds(verbose=True):
+def check_tmds(rows=(("HAIR", 1), ("SKIN", 2)), verbose=True):
     """Are the four TMDs of plan section 1.6 in RAM, and does any field move one?
 
     The answer decides unknown (a) as much as the field diffs do, and it has to
     come from a command: "I looked and they were zero" is exactly the kind of
     claim this cycle keeps turning into a script.
+
+    **The second half used to be missing**, and this docstring promised it
+    anyway: the command printed the four addresses and the TMDs it found, and
+    never pressed a key.  "No field moves one" was then two reports read side
+    by side.  It now measures the crossing for *rows* -- (field, slot) pairs,
+    the two of the plan's own evidence by default -- and prints the count
+    (CORR-LOOKS-019).
     """
     ready = preflight()
+    maps = spans(ready["image"])
     with Oracle(ready["cue"], verbose=verbose) as game:
         for slot in sorted(SLOTS):
             restore_state(slot, verbose=verbose)
@@ -1055,6 +1166,19 @@ def check_tmds(verbose=True):
                       % (lo[0], hi[0],
                          "%d..%d" % (min(v for _, v, _ in found),
                                      max(v for _, v, _ in found))))
+                walked = tmd_spans(data)
+                print("          walked to their ends: %d..%d byte(s) each, "
+                      "%d byte(s) of RAM in all"
+                      % (min(e - s for s, e, _v, _p in walked),
+                         max(e - s for s, e, _v, _p in walked),
+                         sum(e - s for s, e, _v, _p in walked)))
+
+        for row, slot in rows:
+            found, before, after = game.field_diff(slot, row)
+            print("  %s, slot %d (%s): %d byte(s)"
+                  % (row, slot, SLOTS[slot], len(found)))
+            report_field(found, before, after, maps, tmd_spans(before),
+                         image=ready["image"], verbose=verbose)
     return 0
 
 
@@ -1216,6 +1340,76 @@ def _checks(c) -> None:
                     os.environ.pop(name, None)
                 else:
                     os.environ[name] = was
+
+    # -- a TMD is walked to its end, and a byte inside one is named --------
+    #
+    # Built rather than fixtured: the gate has no emulator, so the TMD is
+    # forged.  It is the third bucket of report_field that this makes possible,
+    # and without it the count of bytes "in a TMD" prints 0 forever whether or
+    # not anything was measured (CORR-LOOKS-019).
+    import struct
+
+    at = 64
+    forged = bytearray(256)
+    struct.pack_into("<3I", forged, at, layout.TMD_MAGIC, 0, 1)  # id, flags, 1 object
+    # Pointers are offsets from the object table (FIXP clear).  Vertices right
+    # after the table, then one primitive packet of three payload words.
+    scale = 4096  # not-an-address: a TMD's fixed-point scale
+    struct.pack_into("<7i", forged, at + 12, 28, 3, 0, 0, 52, 1, scale)
+    forged[at + 12 + 52 + 1] = 3            # the packet's ilen, in words
+    forged[at + 12 + 52 + 3] = 0x2D  # not-an-address: a TMD mode byte
+
+    heads = attempt("find the forged TMD", lambda: _tmd_headers(bytes(forged)),
+                    default=[])
+    ok("a forged TMD is found where it was put",
+       heads == [(RAM_BASE + at, 3, 1)], "%s" % heads)
+
+    walked = attempt("walk the forged TMD", lambda: tmd_spans(bytes(forged)),
+                     default=[])
+    ok("and it is walked past its variable-length primitives",
+       walked == [(RAM_BASE + at, RAM_BASE + at + 80, 3, 1)], "%s" % walked)
+
+    # The byte at +70 is INSIDE the primitive packet, which only the walk
+    # reaches: a span that stopped at the vertex block would miss it and call
+    # it residue.
+    ok("a byte inside the packets belongs to the TMD",
+       attribute_tmd(RAM_BASE + at + 70, walked) == 0)
+    ok("a byte one past the end does not",
+       attribute_tmd(RAM_BASE + at + 80, walked) is None)
+    ok("and neither does one before the header",
+       attribute_tmd(RAM_BASE + at - 4, walked) is None)
+
+    # The SAME object with FIXP set, which is how every TMD in this game's RAM
+    # is actually written.  It has to walk to the same end: read as a signed
+    # word a resolved KSEG0 pointer is negative, and a span built from that
+    # collapses to header-plus-table -- 40 bytes for every TMD, whatever its
+    # size.  The synthetic one with FIXP clear passed happily while the real
+    # ones did exactly that.
+    fixp = bytearray(forged)
+    struct.pack_into("<I", fixp, at + 4, 1)          # not-an-address: the FIXP flag
+    struct.pack_into("<i", fixp, at + 12, RAM_BASE + at + 12 + 28 - (1 << 32))
+    struct.pack_into("<i", fixp, at + 12 + 16, RAM_BASE + at + 12 + 52 - (1 << 32))
+    resolved = attempt("walk a FIXP TMD", lambda: tmd_spans(bytes(fixp)),
+                       default=[])
+    ok("a resolved TMD walks to the same end as the relative one",
+       resolved == walked, "%s vs %s" % (resolved, walked))
+
+    # And the bucket the whole correction is about: with no model file to
+    # attribute to, a byte in the TMD has to leave the residue count.
+    import contextlib
+    import io
+
+    quiet = io.StringIO()  # report_field prints its buckets; this is a check
+    with contextlib.redirect_stdout(quiet):
+        counted = attempt(
+            "report one byte that lands in a TMD",
+            lambda: report_field([at + 70], forged, forged, {}, walked,
+                                 verbose=False),
+            default=None)
+    ok("and the report says so out loud", "in a TMD: 1 byte(s)"
+       in quiet.getvalue(), quiet.getvalue().strip())
+    ok("a byte in a TMD is not counted as residue",
+       counted is not None and counted[1] == 0, "%s" % (counted,))
 
     # -- the preflight, and the order that makes it worth having -----------
     #

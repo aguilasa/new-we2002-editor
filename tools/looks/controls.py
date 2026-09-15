@@ -144,6 +144,15 @@ CONTROLS = (
         "preflight: --check-live booted the emulator and died in a traceback "
         "thirty seconds later, neither measuring nor skipping",
     ),
+    Control(
+        "oracle-tmd-span-short", "oracle.py", "tmd_spans",
+        "            if walked is not None:",
+        "            if False:",
+        ("oracle",),
+        "a TMD span that stops before its variable-length primitives puts "
+        "real bytes in the residue bucket, and the negative half of unknown "
+        "(a) -- no field touches a TMD -- would then read zero for free",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

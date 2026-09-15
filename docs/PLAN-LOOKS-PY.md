@@ -544,7 +544,32 @@ afirma as duas profundidades.
 `python tools/looks/oracle.py --tmds`: os quatro endereços que esta seção
 registrava estão **zerados** nos dois slots. Os TMDs que de fato vivem na RAM
 dessa tela são **29**, entre `0x800C1678` e `0x800C4948`, de 4 a 54 vértices, e
-**nenhum campo de LOOKS toca um deles**. Os quatro de 92/261/30/18 vértices foram
+**nenhum campo de LOOKS toca um deles**.
+
+**Essa última frase é medição, e é o mesmo comando que a faz.** Desde
+2026-09-15 ([`CORR-LOOKS-019`](/docs/tasks/looks/CORR-LOOKS-019.md)) o `--tmds`
+percorre cada TMD **até o fim** — cabeçalho, tabela de objetos, vértices e os
+pacotes de primitiva, que são de tamanho variável — e depois mexe em campo,
+cruzando o resíduo do `field_diff()` com esse mapa:
+
+```text
+TMDs actually in RAM: 29
+    from 0x800c1678 to 0x800c4948, 4..54 vertices
+    walked to their ends: 96..896 byte(s) each, 13104 byte(s) of RAM in all
+HAIR, slot 1 (goalkeeper): 132 byte(s)
+    in a TMD: 0 byte(s)
+    in neither: 124 byte(s)
+SKIN, slot 2 (outfield player): 326 byte(s)
+    in a TMD: 0 byte(s)
+    in neither: 202 byte(s)
+```
+
+O `--fields` imprime os mesmos **três** baldes. Antes eram dois — arquivo de
+modelo e "fora" —, e *"fora dos arquivos de modelo"* não é *"fora dos TMDs"*:
+a metade negativa do veredito era leitura de dois relatórios que não se
+cruzavam.
+
+Os quatro de 92/261/30/18 vértices foram
 medidos numa sessão que não se reproduz a partir dos states, e **nada deste ciclo
 pode ser construído sobre eles** — continuam registrados aqui como o que foram, e
 o `layout.TMD_CLAIMED` carrega a mesma ressalva ao lado dos endereços.
