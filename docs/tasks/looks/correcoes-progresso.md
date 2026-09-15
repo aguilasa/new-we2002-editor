@@ -35,7 +35,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | Sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-018](/docs/tasks/looks/CORR-LOOKS-018.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | A palavra de página declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits | Alta | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-019](/docs/tasks/looks/CORR-LOOKS-019.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | O `--tmds` promete dizer se algum campo move um TMD e não pergunta: a metade negativa do veredito não sai de comando | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Quatro seções têm dois parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | Média | [ ] pendente | — |
+| [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Quatro seções têm dois parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
@@ -70,7 +70,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-017 — o quarto pré-requisito do `--check-live` não tem caminho de skip
 - [x] CORR-LOOKS-018 — 1.039 de 2.841 primitivas amostram em CLUT de 8 bits, e o plano só diz 4
 - [x] CORR-LOOKS-019 — nenhum comando cruza o resíduo do `--fields` com o mapa de TMDs
-- [ ] CORR-LOOKS-020 — o pareamento de espelho escolhe entre dois candidatos em silêncio
+- [x] CORR-LOOKS-020 — o pareamento de espelho escolhe entre dois candidatos em silêncio
 - [ ] CORR-LOOKS-021 — braço e antebraço têm malha diferente nos dois bonecos, e o resumo diz que não
 
 ## Detalhes por correção

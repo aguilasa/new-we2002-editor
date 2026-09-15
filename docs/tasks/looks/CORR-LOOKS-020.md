@@ -3,7 +3,7 @@ id: CORR-LOOKS-020
 title: "Correção: quatro seções têm DOIS parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -131,21 +131,87 @@ cópia ou é recusado.
 
 ## Verificação
 
-- [ ] `mirrors()` pareia dentro da lista, e `pieces.py --check-image` continua
+- [x] `mirrors()` pareia dentro da lista, e `pieces.py --check-image` continua
       dando os mesmos onze nomes por boneco
-- [ ] ambiguidade que sobre é **recusada** com `BadPieces`, nomeando os
+- [x] ambiguidade que sobre é **recusada** com `BadPieces`, nomeando os
       candidatos
-- [ ] o `self_check()` tem o caso sintético de dois candidatos e roda sem disco
-- [ ] há controle novo, e o `selftest` conta um controle a mais, todos vermelhos
-- [ ] `python tools/looks/pieces.py --check` e `--check-image` verdes
-- [ ] `roms/` intocada
+- [x] o `self_check()` tem o caso sintético de dois candidatos e roda sem disco
+- [x] há controle novo — `pieces-mirror-unconfined` —, e o `selftest` conta
+      **16 de 16** vermelhos
+- [x] `python tools/looks/pieces.py --check` e `--check-image` verdes
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+O `mirrors()` deixou de parar no primeiro parceiro que serve. A busca virou
+duas peças: `mirror_candidates()`, que devolve **todos** os espelhos de cada
+seção, e o `mirrors()`, que filtra por **lista do cabeçalho** — par de espelho é
+esquerda e direita *da mesma figura* — e **recusa** com `BadPieces` se ainda
+sobrar mais de um, nomeando os candidatos. Escolher em silêncio era o defeito;
+o conserto não troca a escolha por outra, tira a escolha.
 
-**Arquivos criados/modificados:**
+O `name_pieces()` passou a ler as listas **antes** de parear, que é a ordem que
+a regra exige. As seções que as duas listas compartilham — 9 e 10, os pés —
+continuam parceiras uma da outra, porque estão juntas nos dois grupos.
+
+E o `report()` diz o que antes não aparecia em lugar nenhum:
+
+```text
+  also mirrored across the two lists: 7~[19], 8~[18], 18~[8], 19~[7]
+      the two figures carry the same shin mesh, so the pairing is confined to
+      one list on purpose
+```
+
+### A evidência, reproduzida antes
+
+```text
+  section  7 has 2 mirror candidates: [(8, 'z'), (19, 'z')]
+  section  8 has 2 mirror candidates: [(7, 'z'), (18, 'z')]
+  section 18 has 2 mirror candidates: [(8, 'z'), (19, 'z')]
+  section 19 has 2 mirror candidates: [(7, 'z'), (18, 'z')]
+identical vertex sets (no negation): [(7, 18), (8, 19)]
+mirrors() on file order:            {7: 8, 8: 7, 18: 19, 19: 18}   <- certo
+mirrors() on order 7,19,8,18,...:   {7: 19, 19: 7, 8: 18, 18: 8}   <- cruza
+```
+
+A terceira linha é o mesmo arquivo, a mesma função e as mesmas seções, só
+chegando noutra ordem. Depois do conserto, as duas ordens dão a mesma resposta,
+e é isso que o caso sintético afirma.
+
+### O caso vermelho, que roda sem disco
+
+Duas cópias de um par espelhado — quatro seções, dois candidatos cada, que é a
+forma do arquivo real em miniatura. Os três negativos que já existiam
+(translação, comprimento diferente, eixo errado) não dizem nada sobre **duas
+respostas certas**, que é o caso que este arquivo tem. Quatro asserções novas:
+
+- cada uma das quatro tem exatamente dois candidatos;
+- sem grupos, o pareamento **recusa** em vez de escolher;
+- confinado às listas, cada cópia pareia dentro de si;
+- e **a resposta não depende da ordem em que as seções chegam** — a mesma
+  armadilha, montada como `7, 19, 8, 18`.
+
+O controle `pieces-mirror-unconfined` planta o defeito de volta: com o filtro
+de lista aberto (`if True`), o `pieces` fica vermelho.
+
+### Problemas encontrados
+
+Um erro meu na montagem do caso sintético, pego pelo próprio caso: a primeira
+versão da ordem embaralhada punha as duas malhas iguais no mesmo grupo, de modo
+que nenhuma seção tinha parceiro elegível e o pareamento saía vazio — verde por
+não medir, exatamente o que este ciclo persegue. A ordem certa é a do arquivo:
+`7` e `18` são a mesma malha, `8` e `19` são o espelho dela, e as listas são
+`{7, 8}` e `{18, 19}`.
+
+### Arquivos criados/modificados
+
+- `tools/looks/pieces.py` — `mirror_candidates()`, `_together()`, o `mirrors()`
+  confinado e recusador, o `name_pieces()` lendo as listas primeiro, a linha do
+  `report()`, e os casos vermelhos novos no `self_check()`
+- `tools/looks/controls.py` — o controle `pieces-mirror-unconfined`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-020.md` — este arquivo

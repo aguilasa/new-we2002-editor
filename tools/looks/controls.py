@@ -180,6 +180,15 @@ CONTROLS = (
         "real bytes in the residue bucket, and the negative half of unknown "
         "(a) -- no field touches a TMD -- would then read zero for free",
     ),
+    Control(
+        "pieces-mirror-unconfined", "pieces.py", "mirrors",
+        "                    if groups is None or _together(i, j, groups)]",
+        "                    if True]",
+        ("pieces",),
+        "with the pairing free to look outside the figure's own list, four "
+        "sections have two partners each and the left shin of one player "
+        "mirrors the right shin of the OTHER -- which renames every limb",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

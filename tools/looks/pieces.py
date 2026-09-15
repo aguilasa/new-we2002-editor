@@ -156,20 +156,63 @@ def mirror_axis(one, other):
     return None
 
 
-def mirrors(sections):
-    """index -> (partner index, axis), for every section that has one."""
-    found = {}
+def mirror_candidates(sections):
+    """index -> EVERY section that is this one reflected, not just the first.
+
+    Kept separate from `mirrors()` because the interesting fact about this file
+    is the plural: four sections have two candidates each, and a search that
+    stopped at the first would never be able to say so.
+    """
+    out = {}
     for i, one in enumerate(sections):
-        if i in found:
-            continue
-        for j in range(i + 1, len(sections)):
-            if j in found:
+        for j, other in enumerate(sections):
+            if i == j:
                 continue
-            axis = mirror_axis(one, sections[j])
+            axis = mirror_axis(one, other)
             if axis is not None:
-                found[i] = (j, axis)
-                found[j] = (i, axis)
-                break
+                out.setdefault(i, []).append((j, axis))
+    return out
+
+
+def _together(i, j, groups):
+    """Do these two sections appear in the same header list?"""
+    return any(i in group and j in group for group in groups)
+
+
+def mirrors(sections, groups=None):
+    """index -> (partner index, axis), for every section that has one.
+
+    **A partner is not unique in this file, and the first draft assumed it
+    was.**  The two players share the shin mesh vertex for vertex, so the left
+    shin of one is a mirror of the right shin of BOTH -- four sections with two
+    candidates each.  The old loop took the first and broke, and got the right
+    answer only because 8 comes before 19 in file order.  Handed the same
+    sections in the order 7, 19, 8, 18 it paired ACROSS the two players, with
+    nothing in the output saying a choice had been made (CORR-LOOKS-020).
+
+    *groups* are the header lists as sets of section indices.  A mirror pair is
+    left-and-right OF THE SAME FIGURE, so a candidate only counts if the two
+    share a list; the sections both lists own stay partners of each other.
+    Given none, every section is a candidate for every other -- which is what
+    the synthetic self-check wants, and what the red case exercises.
+
+    Ambiguity that survives the filter is **refused**, not resolved.
+    """
+    candidates = mirror_candidates(sections)
+    found = {}
+    for i in sorted(candidates):
+        eligible = [(j, axis) for j, axis in candidates[i]
+                    if groups is None or _together(i, j, groups)]
+        if not eligible:
+            continue
+        if len(eligible) > 1:
+            raise BadPieces(
+                "section %d has %d mirror partners in its own list -- %s -- "
+                "and picking one of them is a guess, not a measurement"
+                % (i, len(eligible),
+                   ", ".join("%d in %s" % pair for pair in eligible))
+            )
+        found[i] = eligible[0]
     return found
 
 
@@ -206,9 +249,10 @@ def name_pieces(data):
     """Every section of EDT_MOD.BIN, named, with the rule that named it."""
     scan = section.scan(data, layout.GEOMETRY_START[layout.EDT_MOD])
     index_of = {one.offset: i for i, one in enumerate(scan.sections)}
-    paired = mirrors(scan.sections)
-    partner_of = {i: pair[0] for i, pair in paired.items()}
 
+    # The lists come FIRST, because the pairing needs them: a mirror pair is
+    # left and right of the same figure, and without that this file has four
+    # sections with two partners each.
     models = modelfile.read_models(data)
     owners = {}
     orders = {}
@@ -217,6 +261,10 @@ def name_pieces(data):
         orders[model.index] = order
         for index in order:
             owners.setdefault(index, []).append(model.index)
+
+    paired = mirrors(scan.sections,
+                     [set(order) for order in orders.values()])
+    partner_of = {i: pair[0] for i, pair in paired.items()}
 
     shared = {i for i, lists in owners.items() if len(lists) > 1}
     if not shared:
@@ -349,6 +397,21 @@ def report(data, verbose=True):
                      ("%s in %s" % (piece.partner, paired[index][1]))
                      if piece.partner is not None else "-",
                      x1 - x0, y1 - y0, z1 - z0, piece.why))
+        groups = [set(order) for order in orders.values()]
+        across = {}
+        for index, candidates in mirror_candidates(scan.sections).items():
+            other = [j for j, _axis in candidates
+                     if not _together(index, j, groups)]
+            if other:
+                across[index] = other
+        if across:
+            # Said out loud because it is the interesting fact about this file,
+            # and because it is what makes the pairing a decision rather than a
+            # lookup: these sections would pair OUTSIDE their own list too.
+            print("  also mirrored across the two lists: %s"
+                  % ", ".join("%d~%s" % (i, v) for i, v in sorted(across.items())))
+            print("      the two figures carry the same shin mesh, so the "
+                  "pairing is confined to one list on purpose")
         for slot in sorted(SKIN_SECTIONS):
             print("  SKIN on slot %d rewrote: %s"
                   % (slot, ", ".join(bare_skin(pieces, slot))))
@@ -413,6 +476,42 @@ def _checks(c) -> None:
     ok("a translated copy is not a mirror", mirror_axis(one, moved) is None)
     ok("a different length is not a mirror",
        mirror_axis(one, Flipped(list(one.vertices)[:-1])) is None)
+
+    # -- two right answers, which is the case the real file has ------------
+    #
+    # Two copies of one mirrored pair: every section is then a mirror of two
+    # others, and the three negative cases above -- translation, wrong length,
+    # wrong axis -- say nothing about it.  This is what CORR-LOOKS-020 opened:
+    # the old search took the first candidate and broke.
+    twice = [one, flip(2), one, flip(2)]
+    counted = attempt("count the candidates",
+                      lambda: mirror_candidates(twice), default={})
+    ok("every section of two identical pairs has two candidates",
+       sorted(len(v) for v in counted.values()) == [2, 2, 2, 2],
+       "%s" % {k: len(v) for k, v in sorted(counted.items())})
+
+    refuses("an unconfined pairing refuses rather than picks",
+            lambda: mirrors(twice), "picking one of them is a guess")
+
+    # Confined to a list, each copy pairs within itself -- and, crucially, the
+    # SAME answer whichever order the sections arrive in.  The old code got
+    # file order right by luck: 8 comes before 19.
+    within = attempt("pair within the lists",
+                     lambda: mirrors(twice, [{0, 1}, {2, 3}]), default={})
+    ok("confined to a list, each copy pairs inside itself",
+       {k: v[0] for k, v in within.items()} == {0: 1, 1: 0, 2: 3, 3: 2},
+       "%s" % within)
+
+    # The real file's own trap, in miniature: sections 7, 19, 8, 18 handed over
+    # in that order.  7 and 18 are the same mesh, 8 and 19 are its mirror, and
+    # the lists are {7, 8} and {18, 19} -- so a pairing that ignored the lists
+    # would cross the two figures here.
+    shuffled = [one, flip(2), flip(2), one]
+    other = attempt("pair the same sections in another order",
+                    lambda: mirrors(shuffled, [{0, 2}, {1, 3}]), default={})
+    ok("and the answer does not depend on the order they arrive in",
+       {k: v[0] for k, v in other.items()} == {0: 2, 2: 0, 1: 3, 3: 1},
+       "%s" % other)
 
     # The chain is cut where the side flips, and the cut is what names the
     # pieces.  Driven with the real file's order, spelled out here so the rule
