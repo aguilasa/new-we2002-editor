@@ -44,9 +44,13 @@ status: pendente
   própria geometria nomeia. O `atlas.texel()` e o `atlas.image_at()` são o que o
   renderizador precisa para ir de `(página, u, v)` ao texel certo.
 - **E o uniforme vem de outro arquivo, por time.** As páginas e as paletas de
-  kit estão em **105 `TEX_*.BIN`**; duas paletas de 256 entradas por arquivo.
-  Um visualizador que carregue só o `DAT2D.BIN` desenha o boneco pelado — não
-  por bug, por arquivo faltando.
+  kit estão em **105 `TEX_*.BIN`**, com **cinco** paletas de 256 entradas em
+  cada — duas em (0, 486), duas em (0, 488) e uma em (256, 480) que a geometria
+  não nomeia ([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)). Qual
+  das duas de uma id o jogo usa é pergunta da
+  [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), e chega aqui
+  decidida. Um visualizador que carregue só o `DAT2D.BIN` desenha o boneco
+  pelado — não por bug, por arquivo faltando.
 - **Duas paletas que a geometria nomeia não estão em contêiner nenhum do
   disco:** (0, 485) e (336, 510). Se o render sair com uma peça cinza, é uma
   delas, e não um erro de leitura.

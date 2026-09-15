@@ -84,9 +84,17 @@ status: pendente
   `tools/looks/atlas.py` resolve `(página, u, v)` para o registro certo; usá-lo
   é mais barato do que repetir a conta.
 - **O uniforme não está no arquivo comum.** As 1.039 primitivas de kit amostram
-  páginas e paletas que moram em **105 `TEX_*.BIN`**, um por time, com duas
-  paletas de 256 em cada — casa e fora. Uma tabela de montagem que procure o
-  uniforme no `DAT2D.BIN` não acha nada e não diz por quê.
+  páginas e paletas que moram em **105 `TEX_*.BIN`**, um por time. Uma tabela de
+  montagem que procure o uniforme no `DAT2D.BIN` não acha nada e não diz por
+  quê.
+- **E é aqui que a escolha da paleta do uniforme fica ambígua.** Cada
+  `TEX_*.BIN` tem **cinco** paletas de 256 — duas em (0, 486), duas em (0, 488)
+  e uma em (256, 480) que a geometria não nomeia. **"Casa e fora" é hipótese**,
+  não medição: ninguém trocou o uniforme do time na tela para ver qual das duas
+  de uma id se move ([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)).
+  O uniforme é o único campo com **duas candidatas por id**, e é desta task
+  decidir por medição — escolher "a primeira" desenha perfeitamente, nas cores
+  erradas.
 
 ---
 
