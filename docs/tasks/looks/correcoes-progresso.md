@@ -41,7 +41,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [ ] pendente | — |
+| [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [x] concluída | 2026-09-15 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -81,7 +81,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
 - [x] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
 - [x] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
-- [ ] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
+- [x] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
 
 ## Detalhes por correção
 

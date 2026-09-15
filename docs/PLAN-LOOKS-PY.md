@@ -715,8 +715,19 @@ entradas erradas continuam sendo dezesseis entradas, e continuam desenhando.
 **E um registro de 256 entradas é uma fileira de dezesseis CLUTs de 4 bits**, o
 que a §6(d) fechou em 2026-09-15: os três campos de cor da tela são duas
 coordenadas dessa grade — `SKIN` anda a linha, `H.COL` e `H.F.COL.` andam a
-coluna —, e as dezesseis colunas de cada registro se dividem em 1 janela de pele
-nua, 8 de cabelo e 7 de barba.
+coluna —, e os três **alcançam** as dezesseis colunas de um registro: 1 janela
+de pele nua, 8 de cabelo e 7 de barba.
+
+**Alcance não é identidade, e a diferença tem número.** A conta acima diz para
+onde os campos vão; não diz o que cada coluna é. Medido pelo
+`skin.py --check-image`: na linha 480, a coluna **1** — *"cabelo 0"* pelo lado
+do campo — é onde **948 primitivas de 50 seções do `MODEL.BIN`** repousam, e só
+**16** delas são a cabeça. As outras 932 nunca são tocadas por campo de cor
+nenhum. E as colunas 2..8 e 10..15 **não têm primitiva nenhuma no disco**: elas
+existem como destino de tecla, não como estado gravado. Quem escrever a tabela
+de montagem (§4) a partir de *"colunas 1..8 são as oito cores de cabelo"* dá a
+932 primitivas uma cor de cabelo que elas não têm, e o boneco **desenha
+perfeitamente** ([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)).
 
 **A regra do "mais estreito ganha" é a da própria GPU, e isso foi medido.** O
 `oracle.py --palettes` compara as **21 linhas de CLUT** deste contêiner contra a
@@ -1605,11 +1616,25 @@ coordenadas dessa grade**, medidas com o jogo rodando
 | `H.COL` | a **coluna** | `+1` | 8 (colunas 1..8) | 7 primitivas da cabeça, as duas do `HAIR` entre elas |
 | `H.F.COL.` | a **coluna** | `+1` | 7 (colunas 9..15) | exatamente as duas primitivas que o `FACE` move |
 
-**A grade fecha exata:** 1 janela de pele nua + 8 cabelos + 7 barbas = 16. O
+**Os três campos alcançam as dezesseis colunas:** 1 janela de pele nua + 8
+cabelos + 7 barbas = 16. **Isso é sobre os campos, não sobre as colunas** — a
+coluna 1 é também a janela de repouso de 948 primitivas em 50 seções do
+`MODEL.BIN`, das quais 16 são a cabeça, e as colunas 2..8 e 10..15 não têm
+primitiva nenhuma no disco (§1.7,
+[`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). O
 alcance de cada campo foi **andado até as duas pontas**, não deduzido — e aí
 apareceu uma propriedade da tela que não estava escrita em lugar nenhum: **os
 campos de LOOKS travam nas pontas, não dão a volta.** O quarto `Right` no `SKIN`
 deixa o id onde o terceiro o pôs.
+
+**Nove das dezoito primitivas da cabeça não andam com campo de cor nenhum.**
+A união dos três é `{0, 1, 4, 8, 9, 13, 14, 16, 17}`, e as outras nove ficam na
+linha 480 **inclusive depois de trocar a pele**: o jogador de pele negra desenha
+essas nove janelas na paleta da pele branca. Parte da cabeça **não é pele** —
+olho, boca, sobrancelha, o que for —, e nomeá-la é o que falta à §6(b), onde a
+cabeça entrou como uma peça só. A **primitiva 4** é a única exceção ao
+"linha × coluna": anda com `H.COL` e não com `SKIN`. Achado por subtração —
+o que um campo **não** move é tão medido quanto o que ele move.
 
 **Nenhum byte de vértice se mexe em nenhum dos seis pares campo × slot.** Todo
 acerto cai no **byte 2 da primitiva**, que é o byte baixo do CLUT id. Uma

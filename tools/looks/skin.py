@@ -29,8 +29,16 @@ So the four "Pieles" records at VRAM (0, 480) to (0, 483) are not four
 palettes: they are a grid of four rows by sixteen columns of sixteen-entry
 windows, and the three fields are coordinates into it.
 
+**A column is where a field goes, not what a window is.**  The three fields
+between them reach all sixteen columns of a row, and that is a statement about
+the fields.  Column 1 -- "hair colour 0" from the field's side -- is also the
+resting window of 948 primitives in 50 sections of MODEL.BIN, and only 16 of
+those are the head.  Whoever writes the assembly table from "columns 1..8 are
+the eight hair colours" gives 932 primitives a hair colour they do not have,
+and it draws perfectly ([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)).
+
     row    = skin_colour      SKIN steps it, +0x40 to the id: one whole record
-    column = 0                the bare-skin window, which no hair colour uses
+    column = 0                where the bare-skin primitives rest
     column = 1 + hair_colour   H.COL steps it, +1 to the id
     column = 9 + beard_colour  H.F.COL. steps it, +1 to the id
 
@@ -156,10 +164,11 @@ class Field:
 
 
 FIELDS = (
-    Field("SKIN", "row", 0, 4, None, layout.HAIR_PRIMITIVES[0],
+    Field("SKIN", "row", 0, 4, layout.SKIN_COLOUR_PRIMITIVES,
+          layout.HAIR_PRIMITIVES[0],
           "0x40 per step, which is one whole 256-entry record: it moves every "
-          "bare-skin primitive of both figures AND the head, and the head's "
-          "column is untouched"),
+          "bare-skin primitive of both figures AND eight of the head's, and "
+          "the column of each is untouched"),
     Field("H.COL", "column", layout.HAIR_COLUMN, 8,
           layout.HAIR_COLOUR_PRIMITIVES, layout.HAIR_PRIMITIVES[0],
           "+1 per step, seven primitives of the head and nothing else: the "
@@ -253,6 +262,60 @@ def moving_entries(data: bytes, record, columns) -> list:
     grids = [entries(data, record, c) for c in columns]
     return [i for i in range(texture.NARROW)
             if len({g[i] for g in grids}) > 1]
+
+
+def moved_by_colour() -> tuple:
+    """Every head primitive some colour field moves -- the union of the three.
+
+    Nine of the head's eighteen, and the subtraction is the measurement: the
+    other nine keep their CLUT id through every step of all three fields,
+    INCLUDING a change of skin, so the dark-skinned player draws those nine
+    windows out of the pale skin's row.  Part of the head is not skin --
+    eye, mouth, brow, whatever it turns out to be -- and naming it closes
+    section 6(b) at a point LOOKS-TASK-09 left open, where the head went in
+    as one piece.
+    """
+    out = set()
+    for field in FIELDS:
+        out |= set(field.primitives or ())
+    return tuple(sorted(out))
+
+
+def unmoved_head(total: int) -> tuple:
+    """The head primitives no colour field moves, out of *total* on the disc."""
+    moved = set(moved_by_colour())
+    return tuple(i for i in range(total) if i not in moved)
+
+
+def column_owners(scans: dict) -> dict:
+    """{(row, column): {file: count}} plus how many sections of each file.
+
+    `named_windows` answers how many primitives name a window; this answers
+    WHO, which is the question the "accounted for" block was closing without
+    asking.  Same walk, one level of bookkeeping more.
+    """
+    out = {}
+    for name, scan in scans.items():
+        for index, one in enumerate(scan.sections):
+            for primitive in one.primitives:
+                key = grid(primitive.clut)
+                per_file = out.setdefault(key, {})
+                entry = per_file.setdefault(name, {"primitives": 0,
+                                                   "sections": set()})
+                entry["primitives"] += 1
+                entry["sections"].add(index)
+    return out
+
+
+def say_owners(owners: dict, key: tuple) -> str:
+    """One line of who samples a window: counts per file, sections included."""
+    per_file = owners.get(key)
+    if not per_file:
+        return "no primitive names it"
+    return ", ".join(
+        "%d in %d section(s) of %s"
+        % (entry["primitives"], len(entry["sections"]), name)
+        for name, entry in sorted(per_file.items()))
 
 
 def named_windows(*scans) -> dict:
@@ -359,6 +422,28 @@ def _checks(c) -> None:
     ok("the hair colour field moves the two primitives HAIR moves, and more",
        set(layout.HAIR_PRIMITIVES) < set(layout.HAIR_COLOUR_PRIMITIVES))
 
+    # What the three fields do NOT move.  Asserted because it was found by
+    # subtraction and nothing else prints it: the union is nine, so nine of
+    # the head's eighteen keep the pale skin's window whatever the screen
+    # says (CORR-LOOKS-026).
+    ok("the three colour fields move nine of the head's eighteen primitives",
+       len(moved_by_colour()) == 9, "got %d: %s"
+       % (len(moved_by_colour()), list(moved_by_colour())))
+    ok("and nine of eighteen is what is left when they are taken out",
+       len(unmoved_head(18)) == 9, "got %s" % list(unmoved_head(18)))
+    # The one place "row x column" does not hold, and the reason the two
+    # coordinates cannot be assumed independent when the table is written.
+    ok("primitive 4 moves with H.COL and stays put when the skin changes",
+       4 in BY_ROW["H.COL"].primitives
+       and 4 not in BY_ROW["SKIN"].primitives,
+       "H.COL %s, SKIN %s"
+       % (list(BY_ROW["H.COL"].primitives), list(BY_ROW["SKIN"].primitives)))
+    ok("every other primitive H.COL moves also follows the row",
+       set(BY_ROW["H.COL"].primitives) - {4}
+       < set(BY_ROW["SKIN"].primitives))
+    ok("and the beard's two follow the row as well",
+       set(BY_ROW["H.F.COL."].primitives) < set(BY_ROW["SKIN"].primitives))
+
 
 # ---- the report ----------------------------------------------------------
 
@@ -424,9 +509,12 @@ def _check_image(image_path: str) -> int:
         problems.append("the four races do not move the same entries, so the "
                         "window is not one shape")
 
-    scans = [section.scan(mod, layout.GEOMETRY_START[layout.MODEL]),
-             section.scan(edt, layout.GEOMETRY_START[layout.EDT_MOD])]
-    named = named_windows(*scans)
+    scans = {layout.MODEL: section.scan(mod,
+                                       layout.GEOMETRY_START[layout.MODEL]),
+             layout.EDT_MOD: section.scan(edt,
+                                          layout.GEOMETRY_START[layout.EDT_MOD])}
+    owners = column_owners(scans)
+    named = named_windows(*scans.values())
     print()
     print("the (row, column) pairs the geometry names, over both files")
     for (row, column), count in sorted(named.items()):
@@ -455,19 +543,62 @@ def _check_image(image_path: str) -> int:
     # screen had to be asked separately.  Player.cpp gives beard_colour three
     # bits, and eight columns from 9 would need a column 16 the record does
     # not have; the screen stops at 15.
+    #
+    # And the two counts stand side by side ON PURPOSE.  The left half is what
+    # the fields REACH; the right half is who RESTS there, and for column 1
+    # they differ by a factor of sixty.  Printing only the left half is what
+    # CORR-LOOKS-026 corrected.
     print()
-    print("the sixteen columns of a skin record, accounted for")
-    print("    column  %2d      the bare-skin window"
-          % layout.BARE_SKIN_COLUMN)
+    print("the sixteen columns of the first skin row: what reaches them, and "
+          "who rests in them")
+    reached = {layout.BARE_SKIN_COLUMN: "no colour field steps here"}
     for field in FIELDS:
         if field.steps == "column":
-            print("    columns %2d..%-2d  %s, %d value(s)"
-                  % (field.base, field.last, field.row, field.reaches))
+            for column in range(field.base, field.last + 1):
+                reached[column] = "%s = %d" % (field.row, column - field.base)
+    for column in range(COLUMNS):
+        print("    column %2d   %-18s %s"
+              % (column, reached.get(column, "-- nothing reaches it"),
+                 say_owners(owners, (first, column))))
     used = 1 + sum(f.reaches for f in FIELDS if f.steps == "column")
-    print("    %d of %d column(s) spoken for" % (used, COLUMNS))
+    print("    the three fields reach %d of %d column(s)" % (used, COLUMNS))
     if used != COLUMNS:
-        problems.append("%d of the %d columns are accounted for, and the grid "
-                        "was measured to come out exactly full" % (used, COLUMNS))
+        problems.append("the three fields reach %d of the %d columns, and they "
+                        "were measured to reach all sixteen" % (used, COLUMNS))
+
+    # What a column IS, which is not what a field reaches.
+    hair_column = owners.get((first, layout.HAIR_COLUMN), {})
+    resting = sum(e["primitives"] for e in hair_column.values())
+    head_here = sum(1 for p in scans[layout.MODEL]
+                    .sections[layout.HEAD_SECTION].primitives
+                    if grid(p.clut) == (first, layout.HAIR_COLUMN))
+    print("    column %d is ALSO where %d primitive(s) rest, and %d of them "
+          "are the head: a name taken from the field alone gives the other %d "
+          "a hair colour they do not have"
+          % (layout.HAIR_COLUMN, resting, head_here, resting - head_here))
+    if resting <= head_here:
+        problems.append("column %d holds %d primitive(s) and %d of them are "
+                        "the head, so the column and the field say the same "
+                        "thing -- which is not what the disc held when this "
+                        "was measured"
+                        % (layout.HAIR_COLUMN, resting, head_here))
+
+    # What does NOT move, which is how CORR-LOOKS-026 found the nine.
+    head = scans[layout.MODEL].sections[layout.HEAD_SECTION]
+    moved = moved_by_colour()
+    still = unmoved_head(len(head.primitives))
+    print()
+    print("the head is %d primitive(s); the three colour fields move %d of them"
+          % (len(head.primitives), len(moved)))
+    print("    moved:   %s" % (", ".join(str(i) for i in moved)))
+    print("    not moved: %s  -- these keep the pale skin's row through every "
+          "step of all three fields" % (", ".join(str(i) for i in still)))
+    if len(moved) + len(still) != len(head.primitives):
+        problems.append("the moved and the unmoved do not add up to the "
+                        "head's %d primitive(s)" % len(head.primitives))
+    if max(moved) >= len(head.primitives):
+        problems.append("a field was measured moving primitive %d of a head "
+                        "that has %d" % (max(moved), len(head.primitives)))
 
     print("skin --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

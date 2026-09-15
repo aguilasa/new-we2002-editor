@@ -336,6 +336,21 @@ the hair is two of them, and the other five are hair-coloured parts of the head
 that the HAIR field does not reshape.  The whole hit list, not a sample.
 """
 
+SKIN_COLOUR_PRIMITIVES = (0, 1, 8, 9, 13, 14, 16, 17)
+"""The HEAD_SECTION primitives whose CLUT id the SKIN field walks.
+
+Eight, measured identically on both slots (`oracle.py --fields SKIN`,
+2026-09-15): a step adds 0x40 to byte 2, which is one whole 256-entry record --
+the row of the grid, with the column left where it was.
+
+It is here to be crossed with HAIR_COLOUR_PRIMITIVES, and the crossing is the
+point: the union of the three colour fields is **nine** of the head's eighteen
+primitives, and primitive 4 is in H.COL and NOT here -- the one place in the
+head where "row x column" does not hold.  Recorded by
+[`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md), which found it by
+subtraction: what a field does not move is as measured as what it does.
+"""
+
 BOOTS_PALETTE = 67940
 """The palette the boots sample, at VRAM (0, 484).
 

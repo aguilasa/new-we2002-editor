@@ -3,7 +3,7 @@ id: CORR-LOOKS-026
 title: "Correção: a grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 e não andam com campo nenhum"
 type: correção
 category: textura
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -146,24 +146,103 @@ como erro, como o que a grade **não** diz.
 
 ## Verificação
 
-- [ ] o `--check-image` imprime, por coluna, quem a amostra, e a coluna 1
-      aparece com as 948
-- [ ] nenhum lugar diz que as dezesseis colunas estão explicadas pelos três
-      campos
-- [ ] existe asserção de que nove das dezoito primitivas da cabeça não são
+- [x] o `--check-image` imprime, por coluna, quem a amostra, e a coluna 1
+      aparece com as 948 em 50 seções
+- [x] nenhum lugar diz que as dezesseis colunas estão explicadas pelos três
+      campos — a §1.7, a §6(d), a LOOKS-TASK-14 e o `skin.py` dizem
+      **alcançam**
+- [x] existe asserção de que nove das dezoito primitivas da cabeça não são
       movidas por campo de cor nenhum, e de que a 4 é a exceção ao "linha ×
       coluna"
-- [ ] a LOOKS-TASK-09 registra as nove como o que falta nomear na cabeça
-- [ ] `python tools/looks/skin.py --check` e `--check-image` verdes
-- [ ] `python tools/looks/selftest.py` verde, com todos os controles vermelhos
-- [ ] `roms/` intocada
+- [x] a LOOKS-TASK-09 registra as nove como o que falta nomear na cabeça
+- [x] `python tools/looks/skin.py --check` e `--check-image` verdes
+- [x] `python tools/looks/selftest.py` verde, 24 de 24 controles vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduziu dos dois lados antes de qualquer edição. Do disco, com
+o `section.py` commitado:
 
-**Arquivos criados/modificados:**
+```text
+row 480 col 1 total: 948 {'/BIN/MODEL.BIN': 948}
+sections: 50
+head: 16
+head primitive count: 18
+```
+
+E do jogo rodando, `oracle.py --fields SKIN` e `--fields SKIN H.COL H.F.COL.`,
+a partir de `load_state` nos dois slots — idênticos nos dois:
+
+```text
+SKIN      /BIN/MODEL.BIN section 24: 8 byte(s), at byte [2] of the primitive
+          primitive 0, 1, 9, 14, 16, 17: 1 -> 65    primitive 8, 13: 9 -> 73
+H.COL     /BIN/MODEL.BIN section 24: 7 byte(s)
+          primitive 0, 1, 4, 9, 14, 16, 17: 1 -> 2
+H.F.COL.  /BIN/MODEL.BIN section 24: 2 byte(s)
+          primitive 8: 9 -> 10     primitive 13: 9 -> 10
+```
+
+### O bloco de fecho passou a imprimir as duas contagens lado a lado
+
+A esquerda é o que os campos **alcançam**; a direita é quem **repousa** ali. O
+fecho antigo tinha só a esquerda, e por isso fechava:
+
+```text
+the sixteen columns of the first skin row: what reaches them, and who rests in them
+    column  0   no colour field steps here 296 in 12 section(s) of /BIN/EDT_MOD.BIN, 150 in 28 section(s) of /BIN/MODEL.BIN
+    column  1   H.COL = 0          948 in 50 section(s) of /BIN/MODEL.BIN
+    column  2   H.COL = 1          no primitive names it
+    ...
+    column  9   H.F.COL. = 0       126 in 38 section(s) of /BIN/MODEL.BIN
+    column 10   H.F.COL. = 1       no primitive names it
+    ...
+    the three fields reach 16 of 16 column(s)
+    column 1 is ALSO where 948 primitive(s) rest, and 16 of them are the head: a name taken from the field alone gives the other 932 a hair colour they do not have
+```
+
+**E a tabela inteira diz mais do que a CORR pediu:** as colunas **2..8 e
+10..15 não têm primitiva nenhuma no disco**. As oito cores de cabelo existem
+como destino de tecla, não como estado gravado — o disco só repousa em 0, 1 e
+9. Isso está no plano junto com as 948.
+
+### O que **não** se move virou asserção
+
+A CORR achou as nove por subtração, e subtração não deixa rastro em saída
+nenhuma. Agora o `skin.py` guarda o conjunto medido do `SKIN` em
+`layout.SKIN_COLOUR_PRIMITIVES`, cruza os três no `self_check()` — nove de
+dezoito, e a **4** anda com `H.COL` e não com `SKIN` — e o `--check-image`
+imprime as duas listas contra o que o disco diz que a cabeça é:
+
+```text
+the head is 18 primitive(s); the three colour fields move 9 of them
+    moved:   0, 1, 4, 8, 9, 13, 14, 16, 17
+    not moved: 2, 3, 5, 6, 7, 10, 11, 12, 15  -- these keep the pale skin's row through every step of all three fields
+```
+
+Controle negativo novo, `skin-union-of-one-field`: a união dos três campos
+tomada como a lista do último. Vermelho.
+
+### Problemas encontrados
+
+Nenhum no conserto. A varredura de discrepância puxou um arquivo que a lista
+da CORR não previa — a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+repetia *"a grade fecha exata: 1 + 8 + 7 = 16"*, que é exatamente a frase de
+que ela é a vítima. Reconciliada em commit próprio.
+
+### Arquivos criados/modificados
+
+- `tools/looks/layout.py` — `SKIN_COLOUR_PRIMITIVES`, o conjunto medido do
+  `SKIN`, com o cruzamento como razão de existir
+- `tools/looks/skin.py` — `column_owners()`, `moved_by_colour()`,
+  `unmoved_head()`, o bloco de fecho com as duas contagens, e as asserções
+- `tools/looks/controls.py` — o controle `skin-union-of-one-field`
+- `docs/tasks/looks/09-nomear-as-onze-pecas.md` — as nove como o que falta
+  nomear na cabeça
+- `docs/PLAN-LOOKS-PY.md` — §1.7 e §6(d)
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-026.md` — este arquivo

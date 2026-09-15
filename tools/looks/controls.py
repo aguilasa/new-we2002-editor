@@ -259,6 +259,17 @@ CONTROLS = (
         "kit' can be written about all eleven pieces again -- and a renderer "
         "reading that draws the goalkeeper with the outfield player's arm",
     ),
+    Control(
+        "skin-union-of-one-field", "skin.py", "moved_by_colour",
+        "        out |= set(field.primitives or ())",
+        "        out = set(field.primitives or ())",
+        ("skin",),
+        "the union of the three colour fields taken as the last one's list: "
+        "with it, nothing says nine of the head's eighteen primitives keep "
+        "the pale skin's window whatever the screen says, and the nine that "
+        "are not skin go back to being invisible -- which is the state "
+        "CORR-LOOKS-026 found",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

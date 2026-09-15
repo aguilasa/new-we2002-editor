@@ -296,6 +296,14 @@ disco inglês, que o emulador boota, não se leu textura nenhuma.
   onze peças de corpo por boneco mais a cabeça, que mora na `MODEL.BIN` seção
   24. O `pieces.py` guarda isso numa constante em vez de deixar a conta "onze"
   sugerir que a cabeça é uma delas.
+- **E a cabeça entrou aqui como uma peça só, o que ela não é.** Das suas
+  **dezoito** primitivas, os três campos de cor movem **nove** —
+  `{0, 1, 4, 8, 9, 13, 14, 16, 17}`; as outras nove ficam na mesma janela de
+  paleta **inclusive depois de trocar a pele**, medido nos dois slots
+  ([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). Parte da cabeça
+  não é pele — olho, boca, sobrancelha, o que for. **Nomeá-las é a pergunta
+  seguinte, e o método é o desta task:** trocar a opção na tela e ver o que
+  muda. Fica aberta aqui em vez de virar nome inventado.
 - E o de sempre: `ctest -R looks` neste worktree responde `No tests were
   found!!!` e sai 0 ([`CORR-LOOKS-015`](/docs/tasks/looks/CORR-LOOKS-015.md));
   os gates acima saíram dos comandos da coluna do meio do
