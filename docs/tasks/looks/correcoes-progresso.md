@@ -39,7 +39,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-022](/docs/tasks/looks/CORR-LOOKS-022.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | Os "2.151 registros a mais em 40 contêineres" que decidem onde o conserto mora não reproduzem por nenhuma leitura | Alta | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [ ] pendente | — |
+| [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
@@ -78,7 +78,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-021 — braço e antebraço têm malha diferente nos dois bonecos, e o resumo diz que não
 - [x] CORR-LOOKS-022 — o número que justifica não tocar o `bin_archive.py` não reproduz
 - [x] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
-- [ ] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
+- [x] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
 - [ ] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
 
 ## Detalhes por correção

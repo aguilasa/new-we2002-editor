@@ -621,18 +621,35 @@ respondia de outro jeito
 
 **E duas das três páginas que a geometria nomeia não têm entrada aqui.** Em
 y=256 o `DAT2D.BIN` ocupa (512, 256), (544, 256), (896, 256) e (928, 256) —
-nada em (576, 256) nem em (640, 256). Então **1.175 das 2.841 primitivas
-amostram de páginas que não vêm deste arquivo**, e de onde elas vêm é pergunta
-da Fase 3, ao lado da lista de paletas.
+nada em (576, 256) nem em (640, 256).
+
+**São 1.039 primitivas amostrando de fora deste arquivo, e não 1.175** — medido
+em 2026-09-15 pelo `atlas.py --check-image`
+([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). A diferença são as
+**136** primitivas da página `0x1A`, e ela ensina a regra que a Fase 4 vai
+precisar: **o que resolve um registro é o texel, não a base da página**. Uma
+página de 4 bits cobre 256 texels e as imagens do arquivo têm 128, então um `u`
+alto atravessa para o registro seguinte. Essas 136 são das seções **0 e 1 do
+`MODEL.BIN`**, com `u` 130..186 e `v` 130..187 — VRAM x 672..686, y 386..443,
+**dentro** do registro em 10.248 (672, 384), que a §1.8 lista como a terceira
+imagem que a geometria amostra. Contar por base de página as dava como
+ausentes.
 
 As três primeiras são as que interessam, segundo a tabela do CARP
 (`Offsets\Offsets WE2002 - CARP\Dat\DAT2D.BIN.txt`):
 
-| offset | VRAM | rótulo do CARP |
-|---:|---|---|
-| 8 | (512, 256) | *"Pelos Cuerpos y botines"* — cabelos, corpos e chuteiras |
-| 3.568 | (544, 256) | *"Caras"* — rostos |
-| 7.456 | (512, 384) | *"Cuerpo"* |
+| offset | VRAM | rótulo do CARP | o que foi medido |
+|---:|---|---|---|
+| 8 | (512, 256) | *"Pelos Cuerpos y botines"* | **não é o cabelo** — §1.8 |
+| 3.568 | (544, 256) | *"Caras"* | **cabelo e rosto**, os dois — §1.8 |
+| 7.456 | (512, 384) | *"Cuerpo"* | sem veredito |
+
+A coluna do meio é **transcrição** do rótulo de terceiro, que é o objeto do
+confronto, e nada mais: a tradução *"cabelos, corpos e chuteiras"* que esta
+tabela trazia ao lado do 8 é exatamente a leitura que a §1.8 derrubou em
+2026-09-15 ([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). Quem lia
+esta seção e parava aqui saía com a resposta errada da contradição que a seção
+seguinte resolve.
 
 **O `0 clut(s)` era verdade sobre o varredor e mentira sobre o arquivo — medido
 em 2026-09-15** pela
@@ -821,9 +838,15 @@ enquanto o tutorial ao lado dele está certo.
 
 #### O que sobra rotulado por opinião
 
-Das 23 imagens, a geometria amostra **três**: 8, 3.568 e 10.248. As outras vinte
-não têm veredito, e o `atlas.py --labels` as imprime pelo que são — seis com o
-rótulo do CARP marcado *scene opinion*, dezessete sem rótulo nenhum. Inclusive
+Das 23 imagens, a geometria amostra **três**: 8, 3.568 e 10.248. As outras
+vinte não têm veredito, e o `atlas.py --labels` as imprime pelo que são —
+**três** com o rótulo do CARP marcado *scene opinion* e **dezessete** sem
+rótulo nenhum, que com as três medidas fecham as 23. A tabela
+`DAT2D_SCENE_LABELS` tem seis linhas, mas três delas caem justamente nos
+registros já medidos, e opinião sobre o que foi medido deixa de ser o que a
+imagem carrega. Esta frase dizia "seis e dezessete" — 6 + 17 = 23 sobre um
+conjunto de 20 —, e foi corrigida em 2026-09-15
+([`CORR-LOOKS-024`](/docs/tasks/looks/CORR-LOOKS-024.md)). Inclusive
 a 10.248, que **136 primitivas** amostram: elas são todas das seções 0 e 1 do
 `MODEL.BIN`, nenhuma das doze peças, e "bandeirinha de escanteio e bolas" é o
 que o CARP diz, não o que se mediu.

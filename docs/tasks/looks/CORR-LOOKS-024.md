@@ -3,7 +3,7 @@ id: CORR-LOOKS-024
 title: "Correção: a §1.7 do plano ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo — as duas a task 11 desmentiu"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -129,20 +129,66 @@ método que esta task substituiu.
 
 ## Verificação
 
-- [ ] a §1.7 não traduz mais o rótulo do 8 como "cabelos", e aponta para a §1.8
-- [ ] o número da §1.7 é **1.039**, com a explicação das 136
-- [ ] a §1.8 diz três, e 3 + 3 + 17 = 23 fecha na frase como fecha no comando
-- [ ] `python tools/looks/atlas.py --check-image` continua `ok` e é a fonte dos
+- [x] a §1.7 não traduz mais o rótulo do 8 como "cabelos", e aponta para a §1.8
+- [x] o número da §1.7 é **1.039**, com a explicação das 136
+- [x] a §1.8 diz três, e 3 + 3 + 17 = 23 fecha na frase como fecha no comando
+- [x] `python tools/looks/atlas.py --check-image` continua `ok` e é a fonte dos
       três números
-- [ ] `python tools/looks/selftest.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py` verde, 21 de 21 controles vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+As três afirmações foram corrigidas **na seção que muda**, que é a §1.7 — e não
+por nota na §1.8, que já estava certa.
 
-**Arquivos criados/modificados:**
+**A tabela de rótulos** ganhou uma quarta coluna e perdeu a tradução. A do meio
+passou a ser transcrição pura do rótulo de terceiro, que é o objeto do
+confronto; o que foi medido tem coluna própria:
+
+| offset | VRAM | rótulo do CARP | o que foi medido |
+|---:|---|---|---|
+| 8 | (512, 256) | *"Pelos Cuerpos y botines"* | **não é o cabelo** |
+| 3.568 | (544, 256) | *"Caras"* | **cabelo e rosto**, os dois |
+| 7.456 | (512, 384) | *"Cuerpo"* | sem veredito |
+
+**O número passou a ser 1.039**, com a regra que explica a diferença escrita ao
+lado — porque é a regra que a Fase 4 vai usar: **o que resolve um registro é o
+texel, não a base da página**. As 136 da página `0x1A` atravessam para o
+registro em 10.248, e contar por base de página as dava como ausentes:
+
+```text
+tpage 0x1a primitives per MODEL section: {0: 88, 1: 48} total 136
+u range 130..186   v range 130..187
+    -> VRAM x = 640 + u/4 = 672..686,  y = 256 + v = 386..443
+    -> dentro do registro @10248, vram (672, 384)
+```
+
+`1.039 + 136 = 1.175`, que é exatamente o número velho.
+
+**E a §1.8 passou a dizer três.** A conta que não fechava — 6 + 17 = 23 sobre um
+conjunto de 20 — vira 3 medidas + 3 de opinião + 17 sem rótulo, que é o que o
+comando imprime:
+
+```text
+  3 of 23 record(s) carry a measured label; 3 carry the scene's opinion and 17 carry none
+```
+
+A `DAT2D_SCENE_LABELS` tem mesmo seis linhas; três delas caem nos registros já
+medidos, e opinião sobre o que foi medido deixa de ser o que a imagem carrega.
+
+### Problemas encontrados
+
+Nenhum. Os três números saem do `atlas.py --check-image`, que a task entregou e
+que continua `ok`; o que faltava era a seção anterior concordar com ele.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` — §1.7 (a tabela de rótulos e o 1.039 com a regra do
+  texel) e §1.8 (três, e a conta que fecha)
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-024.md` — este arquivo
