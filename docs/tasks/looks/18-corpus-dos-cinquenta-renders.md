@@ -35,6 +35,29 @@ status: pendente
 
 ---
 
+- **As 49 tuplas já foram parseadas, e a cobertura medida.** Em 2026-09-15
+  ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)), com
+  o `looks.parse_tuple` sobre os nomes de arquivo:
+
+  ```text
+  50 .jpg   parsed: 49   refused: 1
+      0.jpg -- '0' has 1 part(s) and a tuple has 5
+      skin_colour    4 of  4 value(s) covered
+      hair_style     9 of 32 value(s) covered
+      hair_colour    4 of  8 value(s) covered
+      beard_style    6 of  8 value(s) covered
+      beard_colour   2 of  8 value(s) covered
+  ```
+
+  As 49 formatam de volta para o próprio nome, e o `0.jpg` **recusa com a
+  mensagem certa** em vez de virar índice zero — que é o caso que o terceiro
+  bullet deste Contexto pedia para não passar em silêncio. A cobertura está
+  medida e é baixa onde importa: **9 dos 32 cabelos**, e duas das oito cores de
+  barba. Conclusão de cobertura sobre o corpus inteiro é conclusão sobre esse
+  pedaço.
+
+---
+
 ## Objetivo
 
 Usar o corpus para procurar erro sistemático, não para produzir um número

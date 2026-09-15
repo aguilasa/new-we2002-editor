@@ -139,7 +139,21 @@ Não se revertem sem o usuário pedir.
     entradas diferentes e parece defeito de leitura; resolver cada `x` pelo
     `texture.covering` dá **zero** nas 21 linhas de CLUT do arquivo. O desempate
     "mais estreito ganha" não é convenção nossa: é o que o console faz.
-16. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+16. **Número de terceiro vem em par, e só uma metade costuma estar certa.**
+    O `Offsets We2002.txt` do Superpack dá *"157.164, 1.242 jogadores"* para os
+    registros do `/SELECT.BIN`. Medido em 2026-09-15
+    ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)): o
+    **offset está certo** — o `OFS_PLAYER_ATTR` do próprio repositório cai no
+    mesmo byte — e a **contagem está 207 curta**, são 1.449. Conferir a metade
+    fácil e herdar a outra é o jeito de escrever um número errado com ar de
+    medido; e aqui as duas metades se medem de graça, uma pelo `ofs_map.py` e a
+    outra pela altura que deixa de ser plausível.
+17. **Rótulo de tela não é nome de campo, e campo de tela nem sempre é campo.**
+    A linha `FACE` é o `beard_style` e a `H.F.COL.` é o `beard_colour`; e
+    `DEFAUL` e `NAT`, das doze linhas da tela, **não guardam nada** — são as duas
+    metades do default por nacionalidade do `data/defaultlook.txt`. Contar doze
+    campos porque a tela tem doze linhas erra por dois.
+18. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam
@@ -189,6 +203,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
@@ -340,7 +355,12 @@ sobre dado que pode não ser o que a tela desenha.
   `tools/pes2/bin_archive.py`, o `pes2_selftest` verde aparece no Log.
 - **Fase 4** — os domínios conferidos **campo a campo** contra
   `src/core/Player.cpp`, com o cross-check dentro do `self_check()` e não só na
-  prosa da task. Para a 14, a pergunta que decide: **cada linha da tabela de
+  prosa da task — e **mecanicamente**: o `looks.py` lê as expressões daquele
+  arquivo e roda as duas lado a lado sobre blobs, que é o que separa "conferido"
+  de "redigitado". A revisão pergunta também **quantos valores o campo guarda e
+  quantos alguém nomeou**: três campos têm menos rótulo do que bits, e um
+  índice sem rótulo é lacuna de terceiro, não defeito — recusar nele faz a
+  ferramenta rejeitar um disco que o jogo roda. Para a 14, a pergunta que decide: **cada linha da tabela de
   montagem diz de onde veio?** Tabela derivada de medição e tabela plausível
   são indistinguíveis depois de escritas, e a armadilha das oito listas de nome
   de time do PES2 é o precedente. Buraco nomeado vale mais que mapeamento

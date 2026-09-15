@@ -136,6 +136,23 @@ status: pendente
 
 ---
 
+- **São dez campos guardados, não doze**, e o `tools/looks/looks.py` os entrega
+  decodificados desde 2026-09-15
+  ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)).
+  `DEFAUL` e `NAT` não guardam nada: são as duas metades do *default look por
+  nacionalidade*, cuja tabela é o `data/defaultlook.txt` deste repositório — 95
+  nações × as **mesmas cinco colunas** da tupla do corpus. Uma tabela de
+  montagem com doze linhas tem duas que não têm de onde vir.
+- **E o rótulo da tela não é o nome do campo:** `FACE` é o `beard_style`,
+  `H.F.COL.` é o `beard_colour`, `HEIG` é `height` e `BODY` é `build`. O
+  `looks.BY_ROW` e o `looks.BY_NAME` dão os dois sentidos.
+- **Três campos têm menos rótulo do que valor** — barba e cor de barba guardam
+  oito e têm sete nomes, o pé guarda quatro e tem três. Nos 1.449 registros do
+  disco nenhum passa do último rótulo, mas a montagem tem de **suportar** o
+  índice sem nome em vez de recusar: `looks.label()` devolve `?`.
+
+---
+
 ## Objetivo
 
 `tools/looks/assembly.py`: dada uma tupla de LOOKS, dizer quais peças desenhar

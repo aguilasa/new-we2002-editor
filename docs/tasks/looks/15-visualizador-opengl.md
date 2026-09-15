@@ -72,6 +72,17 @@ status: pendente
 
 ---
 
+- **O `--looks TUPLA` já tem parser, e ele recusa alto.** Desde 2026-09-15
+  ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)):
+  `looks.parse_tuple("A-I3-A-F-A")` devolve os cinco campos, `looks.format_tuple`
+  faz a volta, e um rótulo que o campo não tem sai como `BadLooks` com a lista
+  dos válidos — não como índice zero em silêncio.
+- **A UI mostra rótulo, e rótulo pode faltar.** Três campos guardam mais valores
+  do que alguém nomeou; `looks.label()` devolve `?` nesses, e a janela tem de
+  saber desenhar isso.
+
+---
+
 ## Objetivo
 
 Uma janela que desenha o boneco de uma tupla de LOOKS, e que se deixa dirigir

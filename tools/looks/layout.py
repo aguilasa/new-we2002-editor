@@ -361,14 +361,23 @@ palette and nothing else, and no other section samples it.
 """
 
 PLAYER_RECORD_OFFSET = 157164
-PLAYER_RECORD_COUNT = 1242
+PLAYER_RECORD_COUNT = 1449
 PLAYER_RECORD_SIZE = 12
 """The packed appearance/attribute records inside /SELECT.BIN.
 
-1,242 x 12 B = 14,904 B ending at 172,068, inside the file's 300,648.  The
-offset is third-party opinion (the `Offsets We2002.txt` of the en_we2000edit
-sources) and LOOKS-TASK-13 is what confirms the contents; what is checked here
-is only that the span fits, which is cheap and catches a typo.
+1,449 x 12 B = 17,388 B ending at 174,552, inside the file's 300,648.
+
+**The offset came from a third party and is now measured**, by two witnesses
+that never met it: `OFS_PLAYER_ATTR` of `src/core/include/we2002/Offsets.hpp`
+resolves to exactly this byte of exactly this file (`tools/pes2/ofs_map.py`),
+and that offset is one the golden tests verify against `ed.exe`.
+
+**The count came from the same third party and was wrong.**  It said 1,242
+until 2026-09-15, when LOOKS-TASK-13 measured 1,449 twice over: it is
+`PLAYERS_TOTAL - PLAYERS_NC` of `src/core/include/we2002/Types.hpp`, which is
+what `Database::Load` reads, and the disc says the same without being asked --
+the first 1,449 records decode to a height between 155 and 202, and record
+1,449 is the first that is all zero.
 """
 
 

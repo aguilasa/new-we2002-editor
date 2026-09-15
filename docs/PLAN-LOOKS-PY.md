@@ -923,9 +923,39 @@ Batem com o `kHair[32]`, `kSkin[4]` e `kLetters[8]` que o
 `tools/mcr/domains.py`. **São quatro implementações concordando**; o assunto
 está encerrado e não é fase deste plano.
 
-No disco, os registros ficam em `/SELECT.BIN`, offset **157.164**, **1.242
-jogadores × 12 bytes = 14.904 B** (fonte: `Offsets We2002.txt` do mesmo editor —
-opinião de terceiro, a conferir na Fase 4).
+**Três campos têm menos rótulo do que valor, e isso não é erro de transcrição:**
+`facialhair` e `facialhaircolor` guardam três bits — oito — e têm sete nomes;
+`foot` guarda dois e tem três. **O disco concorda**: nos 1.449 registros, a
+barba chega a 6, a cor de barba a 3 e o pé a 2, e nenhum passa do último
+rótulo. E a tela concorda por um terceiro caminho — a
+[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) andou
+`H.F.COL.` de ponta a ponta e ele oferece **sete**. Índice sem rótulo é lacuna
+de nomenclatura de terceiro, não defeito.
+
+**O rótulo da tela e o nome do campo não são a mesma coisa:** a linha `FACE` é
+o `beard_style` e a `H.F.COL.` é o `beard_colour` — medido, as duas movem as
+**mesmas duas primitivas** da seção 24, que amostram a folha de cabelo.
+
+**E duas das doze linhas da tela não são campo nenhum.** `DEFAUL` e `NAT` são
+as duas metades do *default look por nacionalidade* — a tabela que este
+repositório já versiona como `data/defaultlook.txt`, 95 nações, cujas cinco
+colunas de aparência são **exatamente as cinco da tupla do corpus**. São dez
+campos guardados, não doze.
+
+No disco, os registros ficam em `/SELECT.BIN`, offset **157.164** — e desde
+2026-09-15 as duas metades dessa frase têm medição, pela
+[`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md):
+
+- **o offset está certo, e não por confiança**: o `OFS_PLAYER_ATTR` do
+  `src/core/include/we2002/Offsets.hpp` resolve para **exatamente esse byte
+  desse arquivo** (`python tools/pes2/ofs_map.py`), e é um offset que os golden
+  conferem contra o `ed.exe`;
+- **a contagem estava errada.** Esta seção dizia *"1.242 jogadores × 12 bytes =
+  14.904 B"*, do `Offsets We2002.txt`, e são **1.449 × 12 = 17.388 B**, de
+  157.164 a 174.552. É o `PLAYERS_TOTAL - PLAYERS_NC` que o `Database::Load`
+  percorre, e o disco diz o mesmo sem ser perguntado: os 1.449 primeiros
+  decodificam para altura entre 155 e 202, e o de índice 1.449 é o primeiro
+  todo zerado.
 
 ### 1.10 A tabela de texto do editor
 
@@ -1130,7 +1160,8 @@ atlas.py        qual registro de imagem cada primitiva amostra (a §1.8)
 skin.py         a grade de 16 janelas dentro de uma paleta larga, e qual
                 coordenada dela cada campo de cor anda (a incógnita (d))
 pieces.py       qual seção é qual peça, por espelho e pelo jogo (a incógnita (b))
-looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...)
+looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...),
+                a tupla do corpus, e os registros de /SELECT.BIN
 assembly.py     campo de LOOKS -> peça + paleta. O coração, e a Fase 4
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)

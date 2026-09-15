@@ -231,6 +231,24 @@ CONTROLS = (
         "mirrors the right shin of the OTHER -- which renames every limb",
     ),
     Control(
+        "looks-cross-check-blind", "looks.py", "disagreements",
+        "            if theirs != mine:",
+        "            if False:",
+        ("looks",),
+        "the cross-check against src/core/Player.cpp is the whole evidence "
+        "that this codec is the one ed.exe is measured against; unable to "
+        "disagree, it approves any mask at all",
+    ),
+    Control(
+        "looks-record-count", "layout.py", "module constant",
+        "PLAYER_RECORD_COUNT = 1449",
+        "PLAYER_RECORD_COUNT = 1242",
+        ("looks",),
+        "the third party's count, which was short by 207: with it the block "
+        "stops inside the players and every later coverage figure is taken "
+        "over six sevenths of the disc's squad",
+    ),
+    Control(
         "skin-matrix-at-the-record", "layout.py", "module constant",
         "HAIR_MATRIX_FIRST = 65924",
         "HAIR_MATRIX_FIRST = 65892",

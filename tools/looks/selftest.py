@@ -44,6 +44,7 @@ MODULES = (
     "texture",
     "atlas",
     "skin",
+    "looks",
     "pieces",
     "iso_source",
     "oracle",

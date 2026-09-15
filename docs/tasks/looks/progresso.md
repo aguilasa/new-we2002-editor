@@ -46,7 +46,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A lista de CLUTs do `DAT2D.BIN` que o `bin_archive.py` não acha | 3 | 08 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
 | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A contradição 8 × 3.568 — qual imagem do `DAT2D.BIN` é o cabelo | 3 | 10 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
 | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | Incógnita (d) — pele é troca de paleta ou de cor de vértice? | 3 | 11 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
-| [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | 09 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | 09 | ✅ Concluído | 2026-09-15 | ⬜ pendente |
 | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | `assembly.py` — campo de LOOKS → peça + paleta | 4 | 12, 13 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ⬜ Pendente | — | — |
@@ -175,7 +175,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 4 — montagem
 
-- [ ] Os doze campos com domínio conferido contra `src/core/Player.cpp`.
+- [x] Os doze campos com domínio conferido contra `src/core/Player.cpp`, mecanicamente: o `looks.py` lê as expressões do `Player::Decode()` e roda as duas implementações lado a lado. **Dez guardam alguma coisa** — `DEFAUL` e `NAT` são o default por nacionalidade, não campo —, e os registros do `/SELECT.BIN` são **1.449**, não 1.242.
 - [ ] Os 32 cabelos e as 4 peles resolvidos, ou o buraco nomeado.
 
 ### Fase 5 — render
