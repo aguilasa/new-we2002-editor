@@ -3,7 +3,7 @@ id: CORR-LOOKS-022
 title: "Correção: os \"2.151 registros a mais em 40 contêineres\" que justificam não tocar o `bin_archive.py` não reproduzem por nenhuma leitura"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -149,21 +149,84 @@ ciclo faz.
 
 ## Verificação
 
-- [ ] o docstring do `plausible()` não credita mais 2.151 a si mesmo, e diz qual
+- [x] o docstring do `plausible()` não credita mais 2.151 a si mesmo, e diz qual
       das condições mede
-- [ ] existe comando que imprime a conta, e o número do Log sai dele
-- [ ] o parágrafo da decisão traz o número medido e os cinco arquivos nomeados
-- [ ] `python tools/looks/texture.py --check` e `--check-image` continuam verdes
-- [ ] `python tools/looks/selftest.py` verde, com todos os controles vermelhos
-- [ ] `tools/pes2/` continua intocado (`git status --short tools/pes2` vazio)
-- [ ] `roms/` intocada
+- [x] existe comando que imprime a conta — `texture.py --survey` —, e o número
+      do Log sai dele
+- [x] o parágrafo da decisão traz o número medido e os cinco arquivos nomeados
+- [x] `python tools/looks/texture.py --check` e `--check-image` continuam verdes
+- [x] `python tools/looks/selftest.py` verde, **19 de 19** controles vermelhos
+- [x] `tools/pes2/` continua intocado (`git status --short tools/pes2` vazio)
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+O número saiu da prosa e virou comando. `texture.py --survey` varre os 245
+arquivos do disco e imprime as três contas que estavam escritas de memória:
+quantos registros a varredura acha, quanto custa ler o banco como banco em vez
+de casar um tag fixo, e **o que cada uma das cinco condições do `plausible()`
+suprime**.
 
-**Arquivos criados/modificados:**
+```text
+  245 file(s) on the disc, 236 readable
+  the sweep as it stands: 1711 record(s) in 135 file(s)
+  a fixed tag word would find 1364 -- so reading the bank as a bank costs 347
+      record(s) in 6 file(s)
+      outside /BIN/DAT2D.BIN: 80 record(s) in 5 file(s) -- DAT_CG.BIN 41,
+          ENDCSR.BIN 16, DATSEL2.BIN 15, DATSEL.BIN 6, EDTR_2D.BIN 2
+      stadium (GDC*) file(s) among them: 0
+  what each condition of plausible() suppresses:
+      without kind     +123 record(s), 44 file(s) change
+      without shape      +0 record(s), 0 file(s) change
+      without vram       +0 record(s), 0 file(s) change
+      without clut       +0 record(s), 0 file(s) change
+      without size       +0 record(s), 0 file(s) change
+      with ONLY kind      +197 record(s)
+      with none of them  +70978 record(s)
+```
+
+**80 em cinco, nenhum estádio** — não 2.151 em 40. Para o `--survey` poder
+soltar uma condição de cada vez, o `plausible()` foi decomposto em cinco testes
+nomeados (`CONDITIONS`), e o `tables()` ganhou um `skip`. A lógica é a mesma
+linha por linha; o que mudou é poder perguntar a ela.
+
+### A decisão, com o argumento que sobrevive ao número
+
+O conserto continua em `tools/looks/texture.py`, e o `tools/pes2/bin_archive.py`
+continua intocado — mas por **escopo**, não por volume: aquele varredor é de
+outro projeto, cujo gate (`pes2_selftest`) não é medido por este ciclo, e o
+`texture.py` já entrega o que este ciclo precisa. Oitenta registros novos em
+cinco arquivos ainda são oitenta, e nenhum deles foi conferido contra nada.
+
+A dívida com o ciclo de PES2 — o campo 7 é banco e não tag — continua escrita
+onde estava, na LOOKS-TASK-20 e na §1.7.
+
+### Problemas encontrados
+
+**A tabela da própria CORR tem os dois números de `kind` trocados**, e o
+`--survey` mostra por quê: são perguntas diferentes.
+
+- *sem o teste de `kind`, as outras quatro mantidas*: **+123**
+- *só o teste de `kind`, as outras quatro fora*: **+197**
+
+A CORR rotula o 197 como "sem o teste de `kind` de `plausible()`, o resto
+igual", que é a primeira pergunta e dá 123. A conclusão que ela tira — **só o
+`kind` suprime alguma coisa neste disco** — está certa e é o que importa:
+soltar qualquer uma das outras quatro, ou três juntas, muda **zero** registros
+nos 245 arquivos. O `--survey` imprime as duas leituras lado a lado justamente
+para a confusão não voltar.
+
+### Arquivos criados/modificados
+
+- `tools/looks/texture.py` — `CONDITIONS` e os cinco testes nomeados, o `skip`
+  do `plausible()`/`tables()`, o `_survey()` e o `--survey`; os docstrings com
+  os números medidos
+- `docs/tasks/looks/10-lista-de-cluts-do-dat2d.md` — "Onde o conserto mora" com
+  a saída do comando e o argumento de escopo
+- `docs/PLAN-LOOKS-PY.md` — §1.8, o mesmo número no lugar
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-022.md` — este arquivo

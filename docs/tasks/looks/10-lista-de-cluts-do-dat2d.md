@@ -165,13 +165,31 @@ CARP's "Botines": 67940 -- the only palette the foot section(s) sample,
 ### Onde o conserto mora, e por quê
 
 **Em `tools/looks/texture.py`, e o `tools/pes2/bin_archive.py` não foi tocado.**
-A razão é medida, não preferência: uma regra de varredura geral o bastante para
-achar esta lista — aceitar qualquer palavra de banco, validando cada registro
-pelo que ele declara — faz aparecerem **2.151 registros a mais em 40 outros
-contêineres deste mesmo disco**, os estádios `GDC_*` incluídos, que aquele
-módulo separa de propósito (`is_stadium`). Mexer no varredor que guarda o PES2
-para servir a um arquivo de um quinto disco moveria o chão de um gate alheio sem
-entregar nada que o `texture.py` já não entregue.
+
+> **O número que esta seção dava não reproduzia**, e foi corrigido em
+> 2026-09-15 pela
+> [`CORR-LOOKS-022`](/docs/tasks/looks/CORR-LOOKS-022.md). Dizia *"2.151
+> registros a mais em 40 outros contêineres, os estádios `GDC_*` incluídos"*.
+> Medido pelo `texture.py --survey`, que passou a existir para isso: são **80
+> registros a mais em cinco contêineres, e nenhum deles é estádio**.
+
+A razão continua sendo medida, e o `--survey` a imprime:
+
+```text
+  the sweep as it stands: 1711 record(s) in 135 file(s)
+  a fixed tag word would find 1364 -- so reading the bank as a bank costs 347
+      record(s) in 6 file(s)
+      outside /BIN/DAT2D.BIN: 80 record(s) in 5 file(s) -- DAT_CG.BIN 41,
+          ENDCSR.BIN 16, DATSEL2.BIN 15, DATSEL.BIN 6, EDTR_2D.BIN 2
+      stadium (GDC*) file(s) among them: 0
+```
+
+Oitenta registros novos em cinco arquivos ainda são oitenta, e nenhum deles foi
+conferido contra nada — mas **o argumento que decide é outro**, e sobrevive ao
+número: o `bin_archive.py` é o varredor de **outro projeto**, cujo gate
+(`pes2_selftest`) não é medido por este ciclo, e o `texture.py` já entrega o que
+este ciclo precisa. Mexer no chão de um gate alheio para servir a um arquivo de
+um quinto disco é custo sem entrega.
 
 **Mas a correção do modelo de registro é dívida real com o ciclo de PES2** — lá
 o `entries()` não vê as listas de `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN` e

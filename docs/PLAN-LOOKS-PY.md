@@ -715,14 +715,18 @@ juntas, e é matéria da
   espelho e por serem as duas únicas que os dois bonecos compartilham — amostram
   **(0, 484) e mais nada**, e nenhuma outra peça a toca.
 
-**O conserto não foi para o `bin_archive.py`, e a razão é medida.** Quem lê as
-paletas é o `tools/looks/texture.py`, que acha a lista pelo mesmo marcador e lê
-o banco do próprio registro. Generalizar o `entries()` para aceitar qualquer
-palavra de banco — mesmo validando cada registro pelo que ele declara — faz
-aparecerem **2.151 registros a mais em 40 outros contêineres deste disco**, os
-estádios `GDC_*` incluídos, que aquele módulo separa de propósito. Mexer no
-varredor que guarda o PES2 para servir a um arquivo de um quinto disco moveria
-o chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
+**O conserto não foi para o `bin_archive.py`, e a razão é de escopo.** Quem lê
+as paletas é o `tools/looks/texture.py`, que acha a lista pelo mesmo marcador e
+lê o banco do próprio registro. Generalizar o `entries()` para aceitar qualquer
+palavra de banco custa **80 registros a mais em cinco contêineres deste disco**
+— `DAT_CG.BIN` 41, `ENDCSR.BIN` 16, `DATSEL2.BIN` 15, `DATSEL.BIN` 6 e
+`EDTR_2D.BIN` 2 —, **nenhum deles estádio**, medido pelo `texture.py --survey`.
+Esta seção dizia *"2.151 em 40, os `GDC_*` incluídos"* até 2026-09-15, e esse
+número não reproduzia por leitura nenhuma
+([`CORR-LOOKS-022`](/docs/tasks/looks/CORR-LOOKS-022.md)). O que decide é o
+escopo: o `bin_archive.py` é o varredor de outro projeto, cujo gate não é
+medido aqui, e mexer nele para servir a um arquivo de um quinto disco moveria o
+chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
 **A correção do modelo de registro — o campo 7 é banco, não tag — é dívida com o
 ciclo de PES2**, onde ela vale para `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN`
 e `EDTR_2D.BIN` também; está registrada na

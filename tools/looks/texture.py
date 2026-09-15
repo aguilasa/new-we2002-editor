@@ -83,6 +83,7 @@ Usage:
     python tools/looks/texture.py --check
     python tools/looks/texture.py --check-image [<japanese.bin>]
     python tools/looks/texture.py --report [<japanese.bin>]
+    python tools/looks/texture.py --survey [<japanese.bin>]
 """
 
 from __future__ import annotations
@@ -184,28 +185,67 @@ class Table:
                 % (self.tag, self.bank, len(self.records), self.start, self.end))
 
 
-def plausible(fields, size: int) -> bool:
+def _kind_ok(fields, size: int) -> bool:
+    """The record says it is an image or a CLUT."""
+    return fields[0] & 0xFF in (KIND_IMAGE, KIND_CLUT)  # not-an-address: the record's own layout
+
+
+def _shape_ok(fields, size: int) -> bool:
+    """It has a width and a height, and the word that is always zero is."""
+    return fields[5] == 0 and fields[3] != 0 and fields[4] != 0
+
+
+def _vram_ok(fields, size: int) -> bool:
+    """It lands somewhere a PSX frame buffer has."""
+    return fields[1] <= layout.VRAM_WIDTH and fields[2] < layout.VRAM_HEIGHT
+
+
+def _clut_ok(fields, size: int) -> bool:
+    """A CLUT is one row of 16 or 256, below the palette rows."""
+    if fields[0] & 0xFF != KIND_CLUT:  # not-an-address: idem
+        return True
+    return (fields[4] == 1 and fields[3] in (NARROW, WIDE)
+            and fields[2] >= layout.CLUT_ROW_FIRST)
+
+
+def _size_ok(fields, size: int) -> bool:
+    """An image starts inside the file that holds it."""
+    if fields[0] & 0xFF == KIND_CLUT:  # not-an-address: idem
+        return True
+    return fields[6] < size
+
+
+CONDITIONS = (("kind", _kind_ok), ("shape", _shape_ok), ("vram", _vram_ok),
+              ("clut", _clut_ok), ("size", _size_ok))
+"""The five tests of `plausible()`, separately, so `--survey` can drop one.
+
+**Only `kind` suppresses anything on this disc**, and that is measured, not
+assumed: dropping any one of the other four -- or three of them together --
+changes zero records across all 245 files, while dropping `kind` alone lets
+**123** more through and keeping ONLY `kind` lets **197**.  Those two are
+different numbers for different questions, and the prose this replaces had them
+confused.  The other four conditions are here for the record this disc does not
+contain, not for the one it does; `--survey` is what keeps the claim honest
+(CORR-LOOKS-022).
+"""
+
+
+def plausible(fields, size: int, skip=()) -> bool:
     """Is this eight-field tuple a record, or a coincidence in a stream?
 
     The tag alone is two bytes and turns up inside compressed data; what makes
     a run of records a list is that every one of them describes something a
-    container can hold.  Without this the same sweep over this disc reports
-    2,151 more "records" in 40 other files, the stadium meshes included.
+    container can hold.  Without the whole filter the same sweep over this disc
+    reports **70,978** more "records", the stadium meshes included; with the
+    `kind` test dropped and the rest kept, **123** more.  Both come out of
+    `--survey`, which exists because the number this docstring used to carry --
+    2,151 in 40 files -- reproduced under no reading at all.
     """
-    kind = fields[0] & 0xFF  # not-an-address: the record's own layout
-    if kind not in (KIND_IMAGE, KIND_CLUT):
-        return False
-    if fields[5] != 0 or fields[3] == 0 or fields[4] == 0:
-        return False
-    if fields[1] > layout.VRAM_WIDTH or fields[2] >= layout.VRAM_HEIGHT:
-        return False
-    if kind == KIND_CLUT:
-        return (fields[4] == 1 and fields[3] in (NARROW, WIDE)
-                and fields[2] >= layout.CLUT_ROW_FIRST)
-    return fields[6] < size
+    return all(test(fields, size) for name, test in CONDITIONS
+               if name not in skip)
 
 
-def tables(data: bytes) -> list:
+def tables(data: bytes, skip=()) -> list:
     """Every record list in one container, found by its terminator.
 
     The marker is the pair `[bank word][0x00ff]`, which is the same one
@@ -229,7 +269,7 @@ def tables(data: bytes) -> list:
         q = i - RECORD
         while q >= 0 and struct.unpack_from("<H", data, q + RECORD - 2)[0] == tag:
             fields = struct.unpack_from("<8H", data, q)
-            if not plausible(fields, len(data)):
+            if not plausible(fields, len(data), skip):
                 break
             run.append(Record(q, fields, bank))
             q -= RECORD
@@ -629,6 +669,84 @@ def _check_image(image_path: str) -> int:
     return 0
 
 
+def _survey(image_path: str) -> int:
+    """What the sweep costs across the whole disc, as a command.
+
+    Three questions, all of them once answered in prose and none of them
+    reproducible afterwards (CORR-LOOKS-022):
+
+    * how many records the sweep finds, and in how many files;
+    * how many MORE a fixed tag word would miss -- which is the decision this
+      cycle took, to fix the record model here and not in the sweep
+      `tools/pes2/bin_archive.py` owns;
+    * what each of the five conditions of `plausible()` actually suppresses.
+
+    It is a disc read and nothing else: no emulator, no venv.
+    """
+    import iso_source
+
+    with iso_source.open_disc(image_path) as disc:
+        paths = sorted(disc._image.files)
+        bodies = {}
+        for one in paths:
+            try:
+                bodies[one] = disc.read_unchecked(one)
+            except Exception:  # noqa: BLE001 -- Form 2 and unreadable entries
+                pass
+
+    def count(skip=(), tag=None):
+        total, files = 0, 0
+        per = {}
+        for one, body in bodies.items():
+            found = [t for t in tables(body, skip)
+                     if tag is None or t.tag == tag]
+            n = sum(len(t.records) for t in found)
+            if n:
+                total += n
+                files += 1
+                per[one] = n
+        return total, files, per
+
+    print("  %d file(s) on the disc, %d readable" % (len(paths), len(bodies)))
+    strict, files, per = count()
+    print("  the sweep as it stands: %d record(s) in %d file(s)"
+          % (strict, files))
+
+    # The decision: a fixed tag word against a bank word read as a bank.
+    fixed, _f, per_fixed = count(tag=layout.RECORD_TAG_BASE)
+    extra = {one: per[one] - per_fixed.get(one, 0) for one in per
+             if per[one] != per_fixed.get(one, 0)}
+    outside = {one: n for one, n in extra.items() if one != layout.DAT2D}
+    print("  a fixed tag word would find %d -- so reading the bank as a bank "
+          "costs %d record(s) in %d file(s)"
+          % (fixed, sum(extra.values()), len(extra)))
+    print("      outside %s: %d record(s) in %d file(s) -- %s"
+          % (layout.DAT2D, sum(outside.values()), len(outside),
+             ", ".join("%s %d" % (os.path.basename(k), v)
+                       for k, v in sorted(outside.items(),
+                                          key=lambda kv: -kv[1]))))
+    print("      stadium (GDC*) file(s) among them: %d"
+          % sum(1 for one in outside if "GDC" in one.upper()))
+
+    # And what each condition is worth, which is the claim a docstring cannot
+    # carry on its own.
+    print("  what each condition of plausible() suppresses:")
+    for name, _test in CONDITIONS:
+        total, _files, changed = count(skip=(name,))
+        moved = sum(1 for one in changed
+                    if changed[one] != per.get(one, 0))
+        print("      without %-6s %+6d record(s), %d file(s) change"
+              % (name, total - strict, moved))
+    # Both readings of "only kind matters", because they are different
+    # numbers and the prose that opened CORR-LOOKS-022 had them swapped.
+    total, _files, _changed = count(
+        skip=tuple(n for n, _ in CONDITIONS if n != "kind"))
+    print("      with ONLY kind    %+6d record(s)" % (total - strict))
+    total, _files, _changed = count(skip=tuple(n for n, _ in CONDITIONS))
+    print("      with none of them  %+6d record(s)" % (total - strict))
+    return 0
+
+
 def _from_env():
     import iso_source
     return iso_source.image_from_env()
@@ -645,6 +763,13 @@ def main(argv: list[str]) -> int:
         except RuntimeError as exc:
             print("texture --check-image: skipped -- %s" % exc)
             return 77
+    if argv[1:2] == ["--survey"]:
+        try:
+            image = argv[2] if len(argv) == 3 else _from_env()
+        except RuntimeError as exc:
+            print("texture --survey: skipped -- %s" % exc)
+            return 77
+        return _survey(image)
     if argv[1:2] == ["--report"]:
         import iso_source
         try:
