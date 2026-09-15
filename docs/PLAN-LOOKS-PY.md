@@ -486,7 +486,9 @@ análise do `we3d`.
 
 O que a seção media continua valendo, e é o lado direito da conta. Com o jogo na
 tela `LOOKS SET`, `get_gpu_state --aspect draw` responde
-**`texture_color_mode: "4-bit CLUT"`**, `texture_disable: false`.
+**`texture_color_mode: "4-bit CLUT"`**, `texture_disable: false`. **Isso é uma
+amostra de um desenho num instante, e não generaliza para o arquivo** — ver a
+profundidade por página logo abaixo.
 
 O que estava errado é o lado esquerdo. A primitiva de 24 bytes **não** é
 *"gradation, no-texture"* — ela é a metade de textura de um `POLY_FT4` do
@@ -516,6 +518,28 @@ Três medições independentes concordam, e cada uma sozinha seria fraca:
    trocar `HAIR` anda `v` de `0x20` em `0x20`. Paleta e faixa do atlas — não
    recoloração.
 
+**A palavra de página traz mais do que a posição: os bits 7-8 são a
+profundidade da CLUT**, e as três páginas **não concordam**. Contado sobre os
+dois arquivos em 2026-09-15 ([`CORR-LOOKS-018`](/docs/tasks/looks/CORR-LOOKS-018.md)),
+pelo `section.py` commitado:
+
+| `tpage` | VRAM | profundidade | `EDT_MOD.BIN` | `MODEL.BIN` | total |
+|---|---|---|---:|---:|---:|
+| `0x0018` | (512, 256) | **4 bits** | 408 | 1.258 | 1.666 |
+| `0x001A` | (640, 256) | **4 bits** | — | 136 | 136 |
+| `0x0099` | (576, 256) | **8 bits** | 666 | 373 | **1.039** |
+
+São **1.039 de 2.841 primitivas — 36,6% — amostrando em CLUT de 8 bits**, e no
+`EDT_MOD.BIN` elas são a **maioria**: 666 de 1.074. A semitransparência (bits
+5-6) é zero nas três.
+
+**Isso decide a largura da paleta**, e é por isso que está aqui e não num
+comentário: CLUT de 4 bits tem 16 entradas (32 bytes), a de 8 bits tem 256 (512
+bytes). Uma varredura de paletas que assuma dezesseis lê um dezesseis avos da
+que existe e acha paleta onde não há — sem mensagem nenhuma. O
+`Primitive.tpage_depth` e o `tpage_abr` carregam a leitura, e o `self_check()`
+afirma as duas profundidades.
+
 **E os quatro TMDs de `0x00168xxx` não existem nos dois save states.** Medido por
 `python tools/looks/oracle.py --tmds`: os quatro endereços que esta seção
 registrava estão **zerados** nos dois slots. Os TMDs que de fato vivem na RAM
@@ -533,9 +557,23 @@ MSYS_NO_PATHCONV=1 python tools/pes2/bin_archive.py ls \
 #  /BIN/DAT2D.BIN   81124 B   23 image(s), 0 clut(s)
 ```
 
-As 23 imagens saem inteiras — 128×128 a 4 bpp cada, com as coordenadas de VRAM
-que o modelo vai precisar. As três primeiras são as que interessam, segundo a
-tabela do CARP (`Offsets\Offsets WE2002 - CARP\Dat\DAT2D.BIN.txt`):
+As 23 imagens saem inteiras, com as coordenadas de VRAM que o modelo vai
+precisar. O que o `bin_archive.py` imprime de cada uma é
+`128x128 px 4bpp / 64x128 8bpp`, e as duas leituras são do mesmo bloco de 8.192
+bytes: **qual delas vale depende da profundidade da página que a amostra**, que
+a §1.6 mede primitiva a primitiva. Esta seção dizia "128×128 a 4 bpp cada" até
+2026-09-15, e isso decidia por conta própria uma coisa que a geometria já
+respondia de outro jeito
+([`CORR-LOOKS-018`](/docs/tasks/looks/CORR-LOOKS-018.md)).
+
+**E duas das três páginas que a geometria nomeia não têm entrada aqui.** Em
+y=256 o `DAT2D.BIN` ocupa (512, 256), (544, 256), (896, 256) e (928, 256) —
+nada em (576, 256) nem em (640, 256). Então **1.175 das 2.841 primitivas
+amostram de páginas que não vêm deste arquivo**, e de onde elas vêm é pergunta
+da Fase 3, ao lado da lista de paletas.
+
+As três primeiras são as que interessam, segundo a tabela do CARP
+(`Offsets\Offsets WE2002 - CARP\Dat\DAT2D.BIN.txt`):
 
 | offset | VRAM | rótulo do CARP |
 |---:|---|---|

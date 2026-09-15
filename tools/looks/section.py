@@ -111,6 +111,25 @@ class Primitive:
         return ((self.tpage & 0x0F) * 64,  # not-an-address: the page id's encoding
                 ((self.tpage >> 4) & 1) * 256)  # not-an-address: idem
 
+    @property
+    def tpage_depth(self):
+        """0 = 4-bit CLUT, 1 = 8-bit CLUT, 2 = 15-bit direct.  Bits 7-8.
+
+        **It decides the WIDTH of the palette**, which is why it is read here
+        and not left in the raw word: a 4-bit CLUT is 16 entries (32 bytes), an
+        8-bit one is 256 (512 bytes).  Both occur on this disc -- 1.802 of the
+        2.841 primitives sample at 4 bits and **1.039 at 8** -- so a palette
+        sweep that assumes sixteen entries reads a sixteenth of the palette
+        that is there and finds palettes where none are, with no message
+        (CORR-LOOKS-018).
+        """
+        return (self.tpage >> 7) & 3  # not-an-address: the page id's encoding
+
+    @property
+    def tpage_abr(self):
+        """The semi-transparency mode, bits 5-6.  Zero everywhere on this disc."""
+        return (self.tpage >> 5) & 3  # not-an-address: idem
+
     def __repr__(self):
         return ("Primitive(clut=0x%04x, tpage=0x%04x, indices=%r)"
                 % (self.clut, self.tpage, self.indices))
@@ -417,6 +436,16 @@ def self_check() -> None:
     assert raw[10] == raw[11] == raw[14] == raw[15] == 0, raw.hex()
     assert first.clut_vram == (32, 488), first.clut_vram
     assert first.tpage_vram == (512, 256), first.tpage_vram
+    assert first.tpage_depth == 0, first.tpage_depth   # 0x0018: 4-bit CLUT
+    assert first.tpage_abr == 0, first.tpage_abr
+
+    # The OTHER depth this disc uses, and the majority of EDT_MOD.BIN: 0x0099
+    # is (576, 256) at 8 bits.  Built rather than described, so a consumer that
+    # assumed sixteen palette entries has something to fail against.
+    wide = read_section(build_section(1, 1, tpage=0x0099), 0)  # not-an-address: a texture page
+    assert wide.primitives[0].tpage_vram == (576, 256), wide.primitives[0].tpage_vram
+    assert wide.primitives[0].tpage_depth == 1, wide.primitives[0].tpage_depth
+    assert wide.primitives[0].tpage_abr == 0, wide.primitives[0].tpage_abr
 
     # Stored order is v1, v0, v3, v2; `corners` is the untangling, and the two
     # have to disagree or the reordering is not being exercised at all.
