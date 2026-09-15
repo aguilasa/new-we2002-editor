@@ -164,6 +164,15 @@ foram medidos numa sessão que não se reproduz a partir dos states — registra
 agora no `layout.TMD_CLAIMED` **com essa ressalva ao lado**, que é o único lugar
 onde um endereço deste ciclo pode morar.
 
+> **"Nenhum campo toca um deles" era, nesta corrida, leitura de dois relatórios
+> que não se cruzavam** — o `--tmds` acima e o `--fields`, que contava o resíduo
+> como *"in no model file"*, coisa diferente de *"fora dos TMDs"*. A
+> [`CORR-LOOKS-019`](/docs/tasks/looks/CORR-LOOKS-019.md) fez do cruzamento um
+> comando em 2026-09-15: cada TMD percorrido até o fim (96..896 B cada, 13.104
+> B ao todo) e o resíduo atribuído contra esse mapa — **0 bytes em TMD** para
+> `HAIR` no slot 1 e `SKIN` no slot 2. A conclusão desta corrida não muda; o
+> que passou a existir é a medição que a sustenta.
+
 ### A contradição da §1.6 era de leitura, e a primitiva **tem** UV
 
 Este é o achado que vale mais que o veredito, e ele caiu do veredito.
