@@ -145,6 +145,33 @@ CONTROLS = (
         "thirty seconds later, neither measuring nor skipping",
     ),
     Control(
+        "pieces-mirror-x-only", "pieces.py", "mirror_axis",
+        "    for axis in range(3):",
+        "    for axis in range(1):",
+        ("pieces",),
+        "this model mirrors in z and x is the obvious guess; a search that "
+        "only tries x finds no pair at all, and every name downstream rests "
+        "on the pairs",
+    ),
+    Control(
+        "pieces-witness-blind", "pieces.py", "agrees_with_the_game",
+        "    problems = []",
+        "    problems = []; return problems",
+        ("pieces",),
+        "the emulator is the only witness that tells the upper arm from the "
+        "forearm; with it blind, a naming that swaps the two passes",
+    ),
+    Control(
+        "oracle-list-walk-lax", "oracle.py", "walk_packets",
+        "        if code not in GPU_COMMANDS or GPU_COMMANDS[code][1] != length:",
+        "        if code not in GPU_COMMANDS:",
+        ("oracle",),
+        "the agreement between a node's declared length and its command's real "
+        "length is what makes the walk evidence and not a byte histogram; "
+        "without it any region with a 0x2C in it starts counting as drawn "
+        "geometry",
+    ),
+    Control(
         "oracle-tmd-span-short", "oracle.py", "tmd_spans",
         "            if walked is not None:",
         "            if False:",

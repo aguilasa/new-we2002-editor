@@ -25,6 +25,27 @@ status: pendente
 
 ---
 
+- **Quatro linhas da tabela já estão medidas, e com o mecanismo junto.**
+  Das tasks [`08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) e
+  [`09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md), por
+  `python tools/looks/oracle.py --fields`:
+
+  | campo | peça | o que ele muda na primitiva |
+  |---|---|---|
+  | `SKIN` | tronco (pescoço), antebraço, coxa, perna | o **CLUT**, `+0x40` por passo |
+  | `HAIR` | cabeça (`MODEL.BIN` seção 24) | o **`v`** das quatro quinas, `+0x20` |
+  | `H.COL` | cabeça | o **CLUT** |
+  | `BOOTS` | pé | o **CLUT** |
+
+  O padrão é o que importa para esta task: **a peça nunca é trocada — o que
+  muda é a paleta ou a faixa do atlas.** Uma tabela de montagem que mapeie
+  campo → *peça diferente* estaria descrevendo um jogo que não é este.
+- **E as peças têm nome medido**, com o mapa em `tools/looks/pieces.py`: tronco,
+  braço, antebraço, coxa, perna, pé (espelhados em `z`) e a cabeça, que mora no
+  outro arquivo.
+
+---
+
 ## Objetivo
 
 `tools/looks/assembly.py`: dada uma tupla de LOOKS, dizer quais peças desenhar

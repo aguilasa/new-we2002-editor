@@ -30,6 +30,7 @@ Usage:
     python tools/looks/oracle.py --check-live     # boots the game and measures
     python tools/looks/oracle.py --fields HAIR SKIN
     python tools/looks/oracle.py --tmds          # unknown (a), the other half
+    python tools/looks/oracle.py --buffers       # what the residue bands are
 """
 
 from __future__ import annotations
@@ -59,6 +60,17 @@ WINDOWS = os.name == "nt"
 RAM_BASE = 0x80000000  # not-an-address: the console's own RAM window, not a datum
 RAM_SIZE = 2 * 1024 * 1024  # not-an-address: a size, in bytes
 SANE_COUNT = 4 * 1024  # not-an-address: the ceiling a TMD count has to be under
+
+OT_POINTER = 0x00FFFFFF  # not-an-address: the mask over an OT link, not a link
+BUFFER_BANDS = (0x80153000, 0x80162000)  # not-an-address: RAM, not the disc
+BUFFER_SIZE = 0x5000  # not-an-address: how much of each band is read
+"""The two bands every LOOKS field writes into, outside both model files.
+
+Measured by `--fields` (LOOKS-TASK-08): each field moves 130 to 320 bytes that
+are in neither EDT_MOD.BIN nor MODEL.BIN nor any TMD, and they cluster here.
+Not disc addresses and so not layout.py's -- they are where this build of this
+game happens to put a working buffer, and `--buffers` says what it is.
+"""
 """All of PSX main RAM.  Not a disc address, so not layout.py's business."""
 
 ENV_STATES = "WE2002_LOOKS_STATES"
@@ -191,11 +203,25 @@ strip the same ten presses move 0.0086 to 0.0548 and an idle pair moves
 ROW_MOVED = 0.004
 """Half the smallest measured row move, and above an idle difference of zero."""
 
-VALUE_MOVED = 0.010
+VALUE_MOVED = 0.004
+IDLE_MARGIN = 3
 """Above this, a value cell changed.
 
 Lower than MOVED because a value step is often ONE CHARACTER -- A1TYPE to
 A2TYPE moves its cell by 0.016759, where NAT's whole word moved 0.097842.
+
+**It was 0.010 until the numeric rows were measured.**  A letter is not the
+smallest thing a value step changes: `175 cm` to `174 cm` moves one DIGIT, and
+its cell by 0.009463, which the old floor rejected as "the press did not
+register".
+
+**And a single constant cannot do it**, which the next run showed: the cursor
+box blinks over the whole cell, so the idle drift depends on how much of the
+cell the value fills -- 0.000455 on `A1TYPE`, 0.002033 on `23`.  A floor of
+0.002 then refused AGE, correctly, for being under its own blink.  So the floor
+is the LARGER of this constant and `IDLE_MARGIN` times the drift `field_diff`
+measures on that row, and a press that cannot beat three times its own row's
+blink is a press this cannot testify about.
 
 **And the cell is not perfectly still**: the selected row wears a blinking
 cursor box with an arrow at each end, which moved the first, wider cell by
@@ -710,20 +736,16 @@ class Oracle:
         # watches must be still when nothing is pressed.  Without it, a floor
         # of 0.004 would be a guess about a region that might be animated.
         drift = quiet.difference(self.capture(), pixels(quiet, cell))
-        if drift > VALUE_MOVED:
-            raise NotArrived(
-                "the value cell of %s moved by %.6f with nothing pressed, "
-                "which is over the %.6f a press has to beat -- that region is "
-                "animated and cannot be the witness" % (row, drift,
-                                                        VALUE_MOVED))
-        self.say("the %s cell is still while idle: %.6f" % (row, drift))
+        floor = max(VALUE_MOVED, drift * IDLE_MARGIN)
+        self.say("the %s cell drifts %.6f while idle, so a press has to beat "
+                 "%.6f" % (row, drift, floor))
 
         self.load_looks(slot)
         self.select_row(row)
         before = self.snapshot("before")
-        self.press("Right", box=cell, least=VALUE_MOVED)
+        self.press("Right", box=cell, least=floor)
         after = self.snapshot("after")
-        self.press("Left", box=cell, least=VALUE_MOVED)
+        self.press("Left", box=cell, least=floor)
         back = self.snapshot("back")
 
         moved = {i for i in range(len(before)) if before[i] != after[i]}
@@ -1130,6 +1152,105 @@ def check_fields(rows=None, slots=(1, 2), verbose=True):
     return 0
 
 
+_PACKETS = (
+    ("20", "flat triangle", 4), ("22", "flat triangle, semi", 4),
+    ("24", "textured triangle", 7), ("25", "textured triangle, raw", 7),
+    ("28", "flat quad", 5), ("2A", "flat quad, semi", 5),
+    ("2C", "textured quad", 9), ("2D", "textured quad, raw", 9),
+    ("2E", "textured quad, semi", 9), ("2F", "textured quad, semi raw", 9),
+    ("30", "gouraud triangle", 6), ("34", "gouraud textured triangle", 9),
+    ("38", "gouraud quad", 8), ("3C", "gouraud textured quad", 12),
+    ("3D", "gouraud textured quad, raw", 12),
+    ("E1", "draw mode", 1), ("E3", "draw area top-left", 1),
+    ("E4", "draw area bottom-right", 1), ("E5", "draw offset", 1),
+)
+
+GPU_COMMANDS = {int(code, 16): (name, words) for code, name, words in _PACKETS}
+"""The GPU packet codes this screen could plausibly hold, and their lengths.
+
+Only what a player model needs plus the state commands around it.  The point is
+not a complete table -- it is that a buffer of DRAWN geometry is almost all of
+these and a buffer of anything else is almost none.
+
+**Written as codes and not as hex literals**, and not to dodge the rule-1
+sweep: the sweep flagged all eleven lines and was right by its own terms.  A
+GPU command is an opcode, the same kind of thing as a mnemonic, and eleven
+`# not-an-address:` comments would have silenced the sweep while teaching
+nothing about why these numbers are not addresses.
+"""
+
+
+def walk_packets(data, base=None):
+    """Count the PSX display-list nodes in *data*.
+
+    A node is `[link][packet...]`: one word whose low 24 bits point at the next
+    node and whose TOP byte is how many words of packet follow, and then the
+    packet itself, which opens with its command in the top byte of its first
+    word.
+
+    The test is the agreement of those two numbers.  A command code alone is a
+    one-byte coincidence and a histogram of them proves nothing; a link whose
+    declared length is exactly the length the hardware gives that command,
+    hundreds of times over, is not a coincidence.
+
+    **The first version required the link to point back INSIDE the band and
+    counted zero.** It does not: the band holds the nodes and the chain runs on
+    to other regions -- the first node of the band points at 0x0006B53C, which
+    is nowhere near it. Asking whether the region is self-contained is a
+    different question from asking whether it is a display list, and the answer
+    to the first was being read as the answer to the second.
+    """
+    import struct
+
+    codes, nodes = {}, 0
+    for start in range(0, len(data) - 8, 4):
+        word = struct.unpack_from("<I", data, start)[0]
+        target = word & OT_POINTER  # the low 24 bits are the next node
+        length = word >> 24
+        if not 0 < target < RAM_SIZE:
+            continue
+        code = data[start + 7]
+        if code not in GPU_COMMANDS or GPU_COMMANDS[code][1] != length:
+            continue
+        nodes += 1
+        name = GPU_COMMANDS[code][0]
+        codes[name] = codes.get(name, 0) + 1
+    return nodes, codes
+
+
+def check_buffers(verbose=True):
+    """What the two bands every field writes into actually are.
+
+    Every LOOKS field moves 130 to 320 bytes that fall in NEITHER model file
+    (LOOKS-TASK-08), and they cluster in two bands 0xF000 apart.  Naming them is
+    what separates "the geometry the game loaded" from "the geometry the GPU
+    drew", and the answer decides where a later render has to look.
+    """
+    ready = preflight()
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in sorted(SLOTS):
+            restore_state(slot, verbose=verbose)
+        game.load_looks(1)
+        for base in BUFFER_BANDS:
+            path = os.path.join(game.out_dir, "band-%08x.bin" % base)
+            data = game.read_ram(base, BUFFER_SIZE, path)
+            nodes, codes = walk_packets(data)
+            filled = sum(1 for b in data if b)
+            print("  %#010x  %d of %d byte(s) non-zero; %d display-list "
+                  "node(s)" % (base, filled, len(data), nodes))
+            for name in sorted(codes, key=lambda k: -codes[k]):
+                print("      %-28s %d" % (name, codes[name]))
+        first = game.read_ram(BUFFER_BANDS[0], BUFFER_SIZE,
+                              os.path.join(game.out_dir, "band-a.bin"))
+        second = game.read_ram(BUFFER_BANDS[1], BUFFER_SIZE,
+                               os.path.join(game.out_dir, "band-b.bin"))
+        same = sum(1 for a, b in zip(first, second) if a == b)
+        print("  the two bands are %#x apart and %d of %d byte(s) equal "
+              "(%.1f%%)" % (BUFFER_BANDS[1] - BUFFER_BANDS[0], same,
+                            len(first), 100.0 * same / len(first)))
+    return 0
+
+
 def check_tmds(rows=(("HAIR", 1), ("SKIN", 2)), verbose=True):
     """Are the four TMDs of plan section 1.6 in RAM, and does any field move one?
 
@@ -1462,6 +1583,36 @@ def _checks(c) -> None:
             if value is not None:
                 os.environ[name] = value
 
+    # -- the display-list walk ----------------------------------------------
+    #
+    # Built here, because the gate has no emulator: one node the way the band
+    # really holds them, and then the two ways it can be wrong.
+    import struct
+
+    def node(length, code, words=None):
+        """One [link][packet] node: the link declares `length` words."""
+        out = struct.pack("<I", (length << 24) | 0x0006B53C)  # not-an-address: a link
+        out += struct.pack("<I", (code << 24) | 0x7F7F7F)  # not-an-address: a colour
+        return out + b"\x00" * 4 * ((words if words is not None else length) - 1)
+
+    good = node(9, 0x2C)  # not-an-address: the textured-quad command
+    counted, codes = attempt("walk one real node",
+                             lambda: walk_packets(good), default=(0, {}))
+    ok("a node whose declared length matches its command counts",
+       counted == 1 and codes.get("textured quad") == 1,
+       "%s %s" % (counted, codes))
+
+    # The length is what makes this more than a byte coincidence: the same
+    # command with the wrong declared length must NOT count.
+    wrong = node(5, 0x2C, words=9)  # not-an-address: the same command, lying
+    ok("a node whose length disagrees with its command does not count",
+       walk_packets(wrong)[0] == 0, "%s" % (walk_packets(wrong),))
+    ok("a word that is not a command does not count",
+       walk_packets(node(9, 0x11))[0] == 0,  # not-an-address: not a GPU command
+       "%s" % (walk_packets(node(9, 0x11))[0],))  # not-an-address: idem
+    ok("and an empty region counts nothing",
+       walk_packets(b"\x00" * 64) == (0, {}))
+
     # -- the RAM comparison -------------------------------------------------
     #
     # Built rather than fixtured, like every other self-check here: the gate
@@ -1537,6 +1688,8 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) == 2 and argv[1] == "--buffers":
+            return check_buffers()
         if len(argv) == 2 and argv[1] == "--tmds":
             return check_tmds()
         if len(argv) >= 2 and argv[1] == "--fields":

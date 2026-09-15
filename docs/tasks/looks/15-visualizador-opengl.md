@@ -24,6 +24,19 @@ status: pendente
 
 ---
 
+- **Existe um gabarito da geometria já desenhada, e ele é alcançável.** Medido
+  em 2026-09-15 pela
+  [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) com
+  `python tools/looks/oracle.py --buffers`: as duas faixas de RAM em que todo
+  campo de LOOKS escreve são **listas de display do PSX**, dobradas —
+  `0x80153000` e `0x80162000`, a `0xF000` uma da outra, com 365 e 440 nós, a
+  maioria esmagadora deles **quad texturizado**. Cada nó é `[link][pacote]`, e o
+  pacote traz os `(u, v)`, o CLUT e a página de textura **já resolvidos**, mais
+  as coordenadas de tela. Se o render sair diferente do jogo, é ali que se
+  compara vértice a vértice, em vez de só comparar quadros.
+
+---
+
 ## Objetivo
 
 Uma janela que desenha o boneco de uma tupla de LOOKS, e que se deixa dirigir

@@ -22,6 +22,22 @@ status: pendente
 
 ---
 
+- **Dois dos doze campos não entram no render, e isso está medido.** Em
+  2026-09-15 a [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md)
+  rodou `python tools/looks/oracle.py --fields NAT AGE HEIG` nos dois slots:
+  **`NAT` e `AGE` não tocam um único byte** de `EDT_MOD.BIN`, de `MODEL.BIN` ou
+  de qualquer TMD — o `AGE` move quatro bytes em toda a RAM. `HEIG` também não
+  toca a geometria carregada, mas mexe na lista de display, ou seja **é escala
+  na hora de desenhar**. Os três continuam sendo campos do registro e desta
+  task; o que mudou é que se sabe quais têm efeito visual.
+- **E os rótulos da tela, na ordem em que ela os mostra**, já estão no
+  `oracle.ROWS`: `DEFAUL, NAT, SKIN, HAIR, H.COL, FACE, H.F.COL., HEIG, BODY,
+  AGE, BOOTS, FOOT`. São **posições de linha**, postas ali para saber quantas
+  vezes apertar `Down`; o domínio e o significado de cada um continuam sendo o
+  assunto desta task, contra o `src/core/Player.cpp`.
+
+---
+
 ## Objetivo
 
 `tools/looks/looks.py`: a tupla de aparência, com domínio e rótulo de cada

@@ -41,6 +41,7 @@ MODULES = (
     "layout",
     "section",
     "modelfile",
+    "pieces",
     "iso_source",
     "oracle",
     "controls",

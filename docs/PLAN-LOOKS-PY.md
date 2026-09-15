@@ -350,6 +350,12 @@ lista B (em   8): 19440 21832 24136 22984 26920 29704 33720 15704 31712 34896 17
 **A união das duas é exatamente as 20 seções**, e elas compartilham duas:
 15.704 e 17.572, nas **mesmas posições** (7 e 10) das duas listas.
 
+**E as posições da tabela abaixo têm nome desde 2026-09-15** (§6, incógnita
+(b)): 0 é o tronco; 1 e 3 os braços, 2 e 4 os antebraços; 5 e 8 as coxas, 6 e 9
+as pernas, 7 e 10 os pés — que são justamente as duas compartilhadas, porque os
+dois bonecos calçam a mesma chuteira. A **lista A é o jogador de linha e a
+lista B é o goleiro**, medido pela LOOKS-TASK-08.
+
 | pos | lista A | | lista B | |
 |---:|---:|---|---:|---|
 | 0 | 216 | 84/71 | 19.440 | 84/71 |
@@ -1225,8 +1231,12 @@ montagem; trocar uma paleta por outra.
 2. **A câmera.** O jogo escolhe enquadramento por campo — fecha no rosto em
    `SKIN` e `HAIR`, abre o corpo em `BODY`. Reproduzir isso é adivinhação até
    alguém achar a tabela; a v1 usa câmera orbital livre.
-3. **`NAT` e `AGE`.** Provavelmente não afetam a geometria. "Provavelmente" é a
-   palavra certa até a Fase 2 medir — e medir é barato.
+3. **`NAT` e `AGE` — medidos em 2026-09-15**, e "provavelmente" saiu.
+   `python tools/looks/oracle.py --fields NAT AGE`: nos dois slots, **nenhum
+   dos dois toca um único byte** de `EDT_MOD.BIN`, de `MODEL.BIN` ou de
+   qualquer TMD. O `AGE` move **4 bytes** em toda a RAM, o `NAT` move 70 e 138,
+   e todos fora da geometria. Eles não entram no render, e não custou nada
+   saber.
 
 ---
 
@@ -1261,9 +1271,42 @@ campo que caem **fora** dos dois arquivos são buffers de trabalho, com duas
 faixas constantes (`0x80153000+` e `0x80162000+`, a 0xF000 uma da outra). Quem
 as nomeia é a [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md).
 
-**(b) Qual peça é qual.** Onze seções, cinco pares e uma sozinha. Nomeá-las
-pelo tamanho é palpite; nomeá-las trocando a opção no jogo e vendo qual muda é
-medição.
+**(b) Qual peça é qual — RESPONDIDA em 2026-09-15**, pela
+[`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md), por
+`python tools/looks/pieces.py --check-image`. Onze seções por boneco, e nenhuma
+nomeada pelo tamanho:
+
+| posição na lista | seções (lista 0 / lista 1) | peça |
+|---|---|---|
+| 0 | 0 / 11 | **tronco** |
+| 1 e 3 | 1, 2 / 12, 13 | **braço** (parte alta) |
+| 2 e 4 | 3, 4 / 14, 15 | **antebraço** |
+| 5 e 8 | 5, 6 / 16, 17 | **coxa** |
+| 6 e 9 | 7, 8 / 18, 19 | **perna** |
+| 7 e 10 | 9, 10 (compartilhadas) | **pé** |
+| — | `MODEL.BIN` seção 24 | **cabeça** |
+
+Cinco argumentos independentes, e o módulo implementa os três primeiros e
+confere os dois últimos:
+
+1. **Os pares são espelhos exatos em `z`** — conjunto de vértices igual, vértice
+   a vértice, com `z` negado; nove pares em nove. O eixo é **procurado**, não
+   suposto: `x` é o palpite, e `x` não é. O que sobra sem par em cada lista é
+   uma seção só: o tronco.
+2. **A lista do cabeçalho é uma cadeia, não um saco.** `0 | 1 3 | 2 4 | 5 7 9 |
+   6 8 10`: tronco, depois um membro, depois o espelho dele, e dentro do membro
+   de dentro para fora. O corte sai de onde o lado troca, o que não exige saber
+   o que é um membro.
+3. **O que as duas listas compartilham são as seções 9 e 10**, byte a byte
+   iguais: as chuteiras. Membro que termina em seção compartilhada é perna.
+4. **E o jogo concorda.** `SKIN` reescreve o CLUT exatamente das peças de pele
+   nua: no jogador de linha o antebraço e **não** o braço — manga curta —, no
+   goleiro **nenhum dos dois** — manga comprida —, as pernas nos dois, e o pé em
+   nenhum, por causa da chuteira. É a testemunha que separa braço de antebraço,
+   que a regra 2 sozinha teria de tomar por confiança.
+5. **E `BOOTS` concorda sem ter sido perguntado:** as únicas seções que ele toca
+   são a 9 e a 10, nos dois slots — as mesmas a que a regra 3 chegou pelo outro
+   lado.
 
 **(c) A tabela de montagem.** O que liga `HAIR = B3` à peça e à paleta certas.
 É o coração do projeto e a fase mais cara.
