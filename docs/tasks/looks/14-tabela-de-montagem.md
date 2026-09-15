@@ -104,7 +104,18 @@ status: pendente
   de 256 entradas é uma fileira de **dezesseis CLUTs de 4 bits**, e os três
   campos de cor são **duas coordenadas** dessa grade — `SKIN` anda a linha
   (a raça, quatro), `H.COL` e `H.F.COL.` andam a coluna (oito cabelos a partir
-  da 1, sete barbas a partir da 9). A grade fecha exata: 1 + 8 + 7 = 16.
+  da 1, sete barbas a partir da 9). Os três **alcançam** as dezesseis colunas:
+  1 + 8 + 7 = 16.
+
+  **E alcance não é identidade — é aqui que esta task erra em silêncio.** A
+  coluna 1 não é "cabelo 0": é onde repousam **948 primitivas de 50 seções do
+  `MODEL.BIN`**, das quais só **16** são a cabeça, e as colunas 2..8 e 10..15
+  não têm primitiva nenhuma no disco
+  ([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). Escrever
+  `coluna 1 → cor de cabelo 0` na tabela dá a 932 primitivas uma cor de cabelo
+  que elas não têm, e o boneco **desenha perfeitamente**. Quem preenche uma
+  linha desta tabela a partir de campo de tela tem de dizer **a peça também**,
+  nunca só a coordenada.
 
   | campo | peça | primitivas | coordenada | alcance |
   |---|---|---|---|---|
