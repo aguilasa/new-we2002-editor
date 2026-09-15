@@ -78,6 +78,22 @@ status: pendente
 
 ---
 
+- **Uma testemunha de fora concorda com as quatro peles, e dá a grade de
+  dentro delas.** Medido em 2026-09-15 pela
+  [`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md), lendo o
+  tutorial do `zeta` em vez de resumi-lo: a tabela dele tem quatro colunas
+  chamadas *blanca, amarilla, canela, negra*, nos offsets **65.892 / 66.404 /
+  66.916 / 67.428** — as quatro "Pieles" que a LOOKS-TASK-10 mediu —, e os
+  **oito tipos de cabelo** andam **32 bytes** dentro de cada uma.
+- **32 bytes são 16 halfwords de VRAM, que é um passo de `x` no CLUT id.** Então
+  a paleta de 256 entradas de uma pele é uma **grade de dezesseis sub-paletas de
+  16**, e `H.COL` anda `x` dentro dela enquanto `SKIN` anda `y` de uma linha para
+  a outra. A cabeça amostra `(16, 480)` e `(144, 480)`, que são a sub-paleta 1 e
+  a 9 dessa grade. O que esta task fecha é o que o renderizador faz com isso; o
+  endereçamento já está medido dos dois lados.
+
+---
+
 ## Objetivo
 
 Saber como a cor chega ao boneco, e portanto o que o renderizador tem de fazer.

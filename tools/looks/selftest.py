@@ -42,6 +42,7 @@ MODULES = (
     "section",
     "modelfile",
     "texture",
+    "atlas",
     "pieces",
     "iso_source",
     "oracle",

@@ -699,8 +699,23 @@ Das nove ids distintas que a geometria nomeia, **cinco resolvem neste arquivo e
 quatro vêm de outro lugar** — as três de 8 bits em (0, 485), (0, 486) e
 (0, 488), que são os uniformes, e uma estreita em (336, 510). É a mesma lacuna
 que as duas páginas de textura ausentes já apontavam, agora com as paletas
-juntas, e é matéria da
-[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md).
+juntas.
+
+**E ela fechou em 2026-09-15**, pela
+[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md), com
+`python tools/looks/atlas.py --elsewhere` varrendo os 235 contêineres do disco:
+
+| o que falta aqui | quem tem |
+|---|---|
+| VRAM (576, 256), (576, 384) e (608, 256) | **105 `TEX_*.BIN`** (mais `DATSEL2.BIN` e `SELECT2.BIN` em duas delas) |
+| CLUT (0, 486) e (0, 488), 256 entradas | **105 `TEX_*.BIN`, duas de cada por arquivo** |
+| CLUT (0, 485) e (336, 510) | **contêiner nenhum deste disco** |
+
+A resposta é uma frase: **o uniforme é por time**, e por isso não mora no
+arquivo comum — mora nos 105 contêineres de textura de time, e as duas paletas
+de 256 por arquivo são o jogo de casa e o de fora. As duas ids que não estão em
+lugar nenhum ficam abertas, e a de (336, 510) é justamente a das 136 primitivas
+das seções 0 e 1 do `MODEL.BIN`.
 
 **E os dois rótulos do CARP viraram medição, nenhum por confiança:**
 
@@ -738,25 +753,84 @@ ciclo de PES2**, onde ela vale para `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN`
 e `EDTR_2D.BIN` também; está registrada na
 [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).
 
-### 1.8 Uma contradição entre dois documentos da cena
+### 1.8 A contradição da cena — RESPONDIDA: o cabelo é o 3.568
 
 O tutorial de cabelo do `zeta`
 (`MCR\Apariencia fisica jugadores\Tutorial para pintar el cabello a jugadores WE2002 - zeta.pdf`)
 manda abrir o gráfico no **offset 3.568** para achar os cabelos. A tabela do
-CARP rotula o 3.568 como *"Caras"* e o **8** como *"Pelos"*. Os dois não podem
-estar certos. **O disco decide**, e decidir isso é barato: exportar as duas
-imagens por `bin_archive.py export` e olhar.
+CARP rotula o 3.568 como *"Caras"* e o **8** como *"Pelos"*. Os dois não podiam
+estar certos.
 
-Enquanto não estiver decidido, nenhum código pode cravar nenhum dos dois.
+**Medido em 2026-09-15** pela
+[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md), por
+`python tools/looks/atlas.py --check-image`: **o cabelo é o 3.568. O tutorial do
+`zeta` está certo; o *"Pelos"* que o CARP põe no offset 8 está errado.**
 
-**E o que a LOOKS-TASK-10 mediu não decide isto**, embora tenha decidido algo
-sobre a fonte: os **dois rótulos de paleta** do CARP — as quatro "Pieles" e o
-bloco "Botines" — se confirmaram contra o disco em 2026-09-15 (§1.7). Isso diz
-que a tabela do CARP foi feita olhando o arquivo, não que os rótulos de
-**imagem** dela estejam certos. A contradição continua de pé e continua sendo a
-[`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md); tomar o
-acerto de um rótulo como aval dos outros é exatamente o passo que esta seção
-existe para não dar.
+#### Por que a página decide, e não o olho
+
+Uma página de textura do PSX tem **64 halfwords de VRAM** de largura. A 4 bits
+por texel isso são **256 texels**, então o `u` de 0 a 255 atravessa **duas** das
+imagens de 32 unidades deste arquivo, lado a lado:
+
+```text
+página (512, 256)   u   0..127  ->  VRAM x 512..543  ->  o registro em 8
+                    u 128..255  ->  VRAM x 544..575  ->  o registro em 3.568
+```
+
+As dezoito primitivas da seção 24 do `MODEL.BIN` — a cabeça, nomeada pela
+[`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) — declaram todas
+a página `0x0018`, que é essa, a 4 bits. Então a pergunta vira uma subtração:
+
+| campo | primitivas | passo | `u` | registro |
+|---|---|---|---|---|
+| `HAIR` | 1 e 14 | `v` `+0x20` | 176..199 | **3.568** |
+| `FACE` | 8 e 13 | `v` `+0x10` | 152..174 | **3.568** |
+| — | as outras catorze | — | 16..62 | 8 |
+
+As primitivas de `HAIR` vêm da [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md);
+as de `FACE` foram medidas aqui, nos dois save states. **Nenhum dos dois campos
+toca o registro em 8.**
+
+#### Duas testemunhas independentes, e nenhuma é nossa ferramenta
+
+- **O tutorial, lido em vez de resumido:** *"ubiquémonos en el gráfico en el
+  offset 3568 ... Tendremos la imagen base de los cabellos"*, e as **32 linhas**
+  da tabela dele têm 3.568 em toda a coluna *Gráfico*.
+- **A tabela de paletas do mesmo tutorial reproduz o que a LOOKS-TASK-10 mediu**,
+  sem ter sido perguntada: as quatro colunas dele são *blanca, amarilla, canela,
+  negra* em **65.892 / 66.404 / 66.916 / 67.428** — as quatro "Pieles" da §1.7 —
+  e os oito tipos de cabelo andam **32 bytes** dentro de cada uma, que são 16
+  halfwords de VRAM, que é exatamente o CLUT id **(16, 480)** que as primitivas
+  da cabeça carregam. Duas medições feitas com dezenove anos de distância e
+  métodos sem nada em comum chegando ao mesmo lugar.
+
+#### O arquivo com o nome da resposta é a outra imagem
+
+`Caras - zeta/cabellowe2002.bmp` — *"cabelo we2002"*, 128×128 a 4 bits — é
+**byte a byte o registro em 8**, e não o cabelo: 100,0% dos índices batem com
+esse registro no `DAT2D.BIN` que o próprio `zeta` distribui, e 85,7% no de
+fábrica. Contra o 3.568 ele dá **9,2%**, que é *pior* que os 16,4% de chutar o
+índice mais comum em toda parte.
+
+**O nulo é o ponto.** Numa folha em que um índice cobre um quinto dos texels,
+85,7% só se lê como acerto, e 9,2% só se lê como erro, depois de saber quanto
+vale concordar por acaso — e é por isso que o
+`python tools/looks/atlas.py --compare` imprime o nulo ao lado de cada linha.
+**Nome de arquivo de terceiro é rótulo como qualquer outro**, e este está errado
+enquanto o tutorial ao lado dele está certo.
+
+#### O que sobra rotulado por opinião
+
+Das 23 imagens, a geometria amostra **três**: 8, 3.568 e 10.248. As outras vinte
+não têm veredito, e o `atlas.py --labels` as imprime pelo que são — seis com o
+rótulo do CARP marcado *scene opinion*, dezessete sem rótulo nenhum. Inclusive
+a 10.248, que **136 primitivas** amostram: elas são todas das seções 0 e 1 do
+`MODEL.BIN`, nenhuma das doze peças, e "bandeirinha de escanteio e bolas" é o
+que o CARP diz, não o que se mediu.
+
+E a tabela do CARP tem um erro de transcrição que vale saber antes de confiar
+numa linha dela: a linha 20 lê o próprio hex `D59C` e escreve 23.964, que não é
+54.684. O hex está certo e o decimal, errado.
 
 ### 1.9 O lado dos bits já está resolvido, e com três testemunhas
 

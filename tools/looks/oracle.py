@@ -1034,7 +1034,13 @@ def report_field(found, before, after, maps, tmds=(), image=None,
         if verbose:
             print("      %s section %s: %d byte(s), at byte %s of the "
                   "primitive" % (name, index, len(hits), bytes_in))
-            for at, part, _byte, old, new in hits[:4]:
+            # Every hit, not a sample.  Four lines is EXACTLY one textured
+            # quad, so a field that moves two primitives printed one of them
+            # and the reader had to infer the other -- which is how FACE was
+            # nearly recorded against a primitive nobody had seen move
+            # (LOOKS-TASK-11).  A section this field touched is small by
+            # construction; listing it whole costs nothing.
+            for at, part, _byte, old, new in hits:
                 print("          +%d %s: %d -> %d" % (at, part, old, new))
     print("      in a TMD: %d byte(s)%s"
           % (sum(in_tmd.values()),

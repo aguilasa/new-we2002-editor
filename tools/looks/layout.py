@@ -191,6 +191,76 @@ TEXTURE_BANK = {
     DAT2D: (65892, 76836),
 }
 
+HEAD_SECTION = 24
+"""The MODEL.BIN section that is the head.
+
+Named by LOOKS-TASK-09 -- it is the piece HAIR, FACE and SKIN share, and the
+only one of the twelve that does not live in EDT_MOD.BIN.  `pieces.py` carries
+the same number for the same reason; it is here as well because `atlas.py`
+addresses the section by index and rule 1 owns indices into a named file.
+"""
+
+HAIR_PRIMITIVES = (1, 14)
+"""The two primitives of HEAD_SECTION whose `v` the HAIR field walks.
+
+Measured in RAM by LOOKS-TASK-08 with the game running: a step of HAIR adds
+0x20 to the `v` of all four corners of these two and of nothing else.  They are
+the whole evidence of section 1.8 -- their `u` is 176..199, past the halfway
+mark of a 4-bit page, so what they sample is the SECOND image record of that
+page and not the first.
+"""
+
+FACE_PRIMITIVES = (8, 13)
+"""The two primitives of HEAD_SECTION whose `v` the FACE field walks.
+
+Measured in RAM by LOOKS-TASK-11, both save states, a step of 0x10.  They were
+nearly recorded as one primitive: `report_field` printed four hits, which is
+exactly one textured quad, and the second of the pair was below the cut.
+Their `u` is 152..174 -- past the halfway mark, like the hair's -- so FACE
+samples the SAME image record the hair does.
+"""
+
+HAIR_IMAGE = 3568
+"""The DAT2D.BIN image record hair, facial hair and face detail come from.
+
+VRAM (544, 256), the second half of texture page 0x18.  The CARP table calls
+this one "Caras" and calls 8 "Pelos"; the zeta tutorial sends the reader here
+for hair.  LOOKS-TASK-11 measured that the tutorial is right -- both the two
+primitives HAIR moves and the two FACE moves sample this record, and neither
+field touches the one at 8.
+"""
+
+FLAG_IMAGE = 10248
+"""The one other DAT2D.BIN image the geometry samples, at VRAM (672, 384).
+
+136 primitives reach it, all of them from MODEL.BIN sections 0 and 1 -- none of
+the twelve pieces LOOKS-TASK-09 named.  The CARP table calls it "Banderin
+pelotas"; nothing here confirms that, and the measured claim is only that the
+player is not what samples it.
+"""
+
+DAT2D_SCENE_LABELS = {
+    # `Offsets WE2002 - CARP/Dat/DAT2D.BIN.txt`, transcribed 2026-09-15 so that
+    # what the scene says and what the disc says can be compared row by row.
+    # Opinion, not measurement: its other seventeen rows are blank or a
+    # signature, and its line 20 misconverts its own hex D59C to 23,964
+    # instead of 54,684.
+    8: "Pelos Cuerpos y botines",
+    3568: "Caras",
+    7456: "Cuerpo",
+    9296: "Redes del arco",
+    10248: "Banderin pelotas",
+    22200: "Banderitas del menu",
+}
+
+SKIN_IMAGE = 8
+"""The DAT2D.BIN image record at VRAM (512, 256): bodies, boots and bare skin.
+
+The first half of the same page, and by far the most sampled thing in the
+container.  CARP's label for it, "Pelos Cuerpos y botines", is right about the
+bodies and the boots and wrong about the hair.
+"""
+
 BOOTS_PALETTE = 67940
 """The palette the boots sample, at VRAM (0, 484).
 

@@ -69,6 +69,27 @@ status: pendente
 
 ---
 
+- **Mais duas linhas da tabela medidas, e agora com a imagem junto.** Em
+  2026-09-15 ([`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md)):
+
+  | campo | peça | primitivas | o que muda | imagem |
+  |---|---|---|---|---|
+  | `HAIR` | cabeça | 1 e 14 | `v` `+0x20` | `DAT2D.BIN` **3.568** |
+  | `FACE` | cabeça | 8 e 13 | `v` `+0x10` | `DAT2D.BIN` **3.568** |
+
+- **Uma linha da tabela precisa de três coisas, não duas:** peça, paleta **e
+  imagem** — e a imagem não se deduz da página, porque uma página de 4 bits
+  cobre 256 texels e as imagens deste arquivo têm 128. `u` acima de 127 amostra
+  a imagem seguinte, e foi exatamente isso que decidiu a §1.8. O
+  `tools/looks/atlas.py` resolve `(página, u, v)` para o registro certo; usá-lo
+  é mais barato do que repetir a conta.
+- **O uniforme não está no arquivo comum.** As 1.039 primitivas de kit amostram
+  páginas e paletas que moram em **105 `TEX_*.BIN`**, um por time, com duas
+  paletas de 256 em cada — casa e fora. Uma tabela de montagem que procure o
+  uniforme no `DAT2D.BIN` não acha nada e não diz por quê.
+
+---
+
 ## Objetivo
 
 `tools/looks/assembly.py`: dada uma tupla de LOOKS, dizer quais peças desenhar

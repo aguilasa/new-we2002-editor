@@ -200,6 +200,28 @@ CONTROLS = (
         "draws, and the boots come out the colour of the skin",
     ),
     Control(
+        "atlas-page-is-one-record", "atlas.py", "image_at",
+        "        if rec.x <= x < rec.x + rec.w and rec.y <= y < rec.y + rec.h:",
+        "        if rec.y <= y < rec.y + rec.h:",
+        ("atlas",),
+        "a 4-bit texture page is 256 texels wide and every image record of "
+        "DAT2D.BIN is 128, so the page holds TWO of them; with the column "
+        "ignored both halves resolve to the first record on the row, the hair "
+        "and the bodies become the same sheet, and the CARP label that section "
+        "1.8 disproved would read as confirmed",
+    ),
+    Control(
+        "atlas-depth-fixed-at-four", "atlas.py", "texel",
+        "    return (page_x + u // texels_per_unit(primitive.tpage_depth), page_y + v)",
+        "    return (page_x + u // 4, page_y + v)",
+        ("atlas",),
+        "the page depth is the primitive's, not the image's, and at 8 bits a "
+        "halfword is two texels and not four; fixing it at four puts the 1,039 "
+        "kit primitives a whole page to the left, where DAT2D.BIN does have "
+        "records -- so the sweep for what is missing comes back empty and the "
+        "kits look like they live here",
+    ),
+    Control(
         "pieces-mirror-unconfined", "pieces.py", "mirrors",
         "                    if groups is None or _together(i, j, groups)]",
         "                    if True]",

@@ -38,6 +38,20 @@ status: pendente
 
 ---
 
+- **Dois domínios ganharam testemunha independente**, em 2026-09-15
+  ([`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md)): a tabela
+  do tutorial do `zeta` enumera **8 tipos de cor de cabelo** (A a H) × **4
+  raças** (*blanca, amarilla, canela, negra*), e os endereços que ela dá são os
+  que a LOOKS-TASK-10 mediu no disco. Isso é uma **quinta** implementação
+  concordando com `kSkin[4]` e `kLetters[8]` — e, ao contrário das outras
+  quatro, esta não é código: é endereço de paleta.
+- **`FACE` mexe em duas primitivas, não numa.** As primitivas 8 e 13 da seção 24
+  do `MODEL.BIN`, passo `+0x10` no `v`, nos dois save states. É o par irmão do
+  `HAIR` (primitivas 1 e 14, passo `+0x20`), e os quatro amostram a **mesma**
+  imagem do `DAT2D.BIN`, a do offset 3.568.
+
+---
+
 ## Objetivo
 
 `tools/looks/looks.py`: a tupla de aparência, com domínio e rótulo de cada

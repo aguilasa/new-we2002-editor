@@ -115,10 +115,23 @@ Não se revertem sem o usuário pedir.
     existe no fonte e em build nenhum. **Confira `N tests passed`, nunca só o
     código de saída** — e, num alvo que deveria rodar, confira que o nome dele
     aparece na listagem.
-13. **Os documentos da cena se contradizem.** O CARP rotula o offset 8 do
-    `DAT2D.BIN` como "Pelos" e o 3.568 como "Caras"; o tutorial do `zeta` manda
-    abrir o 3.568 para achar cabelo. Até a LOOKS-TASK-11 medir, **nenhum código
-    crava nenhum dos dois**.
+13. **Os documentos da cena se contradizem, e o vencedor foi o tutorial.**
+    O CARP rotula o offset 8 do `DAT2D.BIN` como "Pelos" e o 3.568 como
+    "Caras"; o tutorial do `zeta` manda abrir o 3.568 para achar cabelo.
+    **Medido em 2026-09-15**
+    ([`LOOKS-TASK-11`](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md)): o
+    cabelo é o **3.568** — as primitivas que `HAIR` e `FACE` movem têm `u`
+    152..199, e numa página de 4 bits isso é a segunda metade. O `zeta` acertou;
+    o *"Pelos"* do CARP está errado. O que fica de armadilha é outra coisa, e
+    mais geral: **nome de arquivo de terceiro é rótulo como qualquer outro.**
+    O `cabellowe2002.bmp` que vem ao lado do tutorial — "cabelo" no nome — é
+    byte a byte o registro em **8**, e não o cabelo.
+14. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+    bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
+    índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
+    "diferente" e "85,7%" por "parecido", quando os números diziam
+    *não relacionado* e *é o mesmo arquivo editado*. O
+    `atlas.py --compare` imprime o nulo em cada linha por isso.
 
 ---
 
@@ -160,6 +173,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
 | `looks_ui` | venv + display (77 sem eles) | — (nasce na 16) | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
@@ -294,7 +308,10 @@ sobre dado que pode não ser o que a tela desenha.
   largura de registro, nunca de arquivo:** o `DAT2D.BIN` guarda 262 de 16
   entradas e 5 de 256, e um id de 4 bits pode apontar para dentro de uma de 256
   — ler a largura errada devolve dezesseis entradas que desenham perfeitamente e
-  são as cores erradas. A lista de CLUTs é achada
+  são as cores erradas. **E toda imagem tem página, não só offset:** uma página
+  de 4 bits cobre 256 texels e as imagens deste arquivo têm 128, então `u` acima
+  de 127 amostra a imagem **seguinte** — foi disso que saiu o veredito da §1.8,
+  e é o que um mapa campo → imagem erra sem sintoma. A lista de CLUTs é achada
   **por marcador**, não por offset constante — é a regra que o
   `bin_archive.entries()` já segue e a razão de o mapa de PES2 nunca ancorar em
   constante. A contradição 8 × 3.568 tem veredito com o documento errado
