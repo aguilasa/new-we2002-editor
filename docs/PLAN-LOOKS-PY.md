@@ -1520,6 +1520,13 @@ corpus independente, produzido por outra pessoa, com rótulo. Serve para pegar
 erro sistemático que o confronto com o emulador não pegaria por estar usando o
 mesmo caminho de código dos dois lados.
 
+**Quem mede os nomes é `looks.py --corpus`**, com a pasta por argumento ou em
+`WE2002_LOOKS_CORPUS`, e sem ela o comando pula com 77 — o Superpack não entra
+no git (§2). Ele conta quantos parseiam, quantos recusam e quantos formatam de
+volta para o próprio nome, imprime a cobertura por campo, e **falha se nada for
+recusado**: um parser permissivo devolveria 50 de 50 e a linha leria melhor que
+a verdadeira ([`CORR-LOOKS-027`](/docs/tasks/looks/CORR-LOOKS-027.md)).
+
 ### 5.5 Controle negativo
 
 Pelo molde do `tools/mcr/controls.py`: cada guarda ganha uma injeção que a faz
