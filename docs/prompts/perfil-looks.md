@@ -76,9 +76,14 @@ Não se revertem sem o usuário pedir.
    que é, medido, o **banco de 64 KiB do offset de 16 bits do campo 6**. O
    varredor está certo para os quatro discos que ele mede, onde nenhum payload
    passa dos primeiros 64 KiB. Quem lê paleta neste ciclo é o
-   `tools/looks/texture.py`; `bin_archive.py` não foi tocado, e a razão é medida:
-   generalizar o `entries()` faz aparecerem 2.151 registros a mais em 40 outros
-   contêineres deste disco, os estádios incluídos. §1.7 do plano.
+   `tools/looks/texture.py`; `bin_archive.py` **não foi tocado, e a razão é de
+   escopo**: ele é o varredor de outro projeto, cujo gate não é medido aqui.
+   Esta linha dizia que generalizar o `entries()` faz aparecerem *"2.151
+   registros a mais em 40 outros contêineres, os estádios incluídos"*, e esse
+   número não reproduz por leitura nenhuma
+   ([`CORR-LOOKS-022`](/docs/tasks/looks/CORR-LOOKS-022.md)): medido pelo
+   `texture.py --survey`, o custo é de **80 registros em cinco contêineres, e
+   nenhum deles é estádio**. §1.8 do plano.
 6. **`MSYS_NO_PATHCONV=1`** em toda chamada do Git Bash que passe caminho de
    dentro do ISO. Sem ele `/BIN/EDT_MOD.BIN` vira `C:/Program Files/Git/BIN/…` e
    a mensagem de erro acusa "not a Form 1", que culpa a coisa errada.

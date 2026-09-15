@@ -713,7 +713,13 @@ juntas, e é matéria da
   confirmação é independente do rótulo: as seções 9 e 10 — as que a
   [`LOOKS-TASK-09`](/docs/tasks/looks/09-nomear-as-onze-pecas.md) nomeou pé, por
   espelho e por serem as duas únicas que os dois bonecos compartilham — amostram
-  **(0, 484) e mais nada**, e nenhuma outra peça a toca.
+  **(0, 484) e mais nada**, e nenhuma outra **peça nomeada** a toca. A
+  exclusividade vale dentro do `EDT_MOD.BIN`, que é onde moram as peças
+  nomeadas: **seis seções do `MODEL.BIN` — 11, 12, 22, 23, 63 e 64, cinco
+  primitivas cada — também amostram (0, 484)**, e `112 + 30 = 142` fecha o total
+  que o `--check-image` imprime para esse id
+  ([`CORR-LOOKS-023`](/docs/tasks/looks/CORR-LOOKS-023.md)). Quem são essas
+  seis é pergunta da Fase 3, e a cabeça não está entre elas.
 
 **O conserto não foi para o `bin_archive.py`, e a razão é de escopo.** Quem lê
 as paletas é o `tools/looks/texture.py`, que acha a lista pelo mesmo marcador e
