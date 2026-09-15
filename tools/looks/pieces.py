@@ -305,6 +305,106 @@ def name_pieces(data):
     return pieces, orders, paired
 
 
+# --- the two figures, compared piece by piece -------------------------------
+
+def compare_lists(data, orders, sections):
+    """Position by position, how the two lists' sections differ.
+
+    A row per position: the two section indices, whether they are the SAME
+    section, whether the sizes match, and -- when they do -- how many bytes
+    differ and how many of those are vertex bytes rather than texture ones.
+
+    **This exists because a sentence about it went wrong and nothing could
+    catch it.**  The task's summary put the torso among the pieces of
+    different size (it is not), gave the torso's two vertex bytes as if they
+    described the thighs and shins too (22 and 0), and concluded "same mesh,
+    different kit" for all eleven (CORR-LOOKS-021).  A renderer reading that
+    loads one mesh and swaps the palette, and draws the goalkeeper with the
+    outfield player's arm.  As a computation it cannot drift.
+    """
+    lists = [order for _index, order in sorted(orders.items())]
+    if len(lists) != 2:
+        raise BadPieces("comparing the figures needs exactly two lists, not %d"
+                        % len(lists))
+    rows = []
+    for position, (i, j) in enumerate(zip(*lists)):
+        one, other = sections[i], sections[j]
+        row = {"position": position, "a": i, "b": j, "same_section": i == j,
+               "verts": (len(one.vertices), len(other.vertices)),
+               "prims": (len(one.primitives), len(other.primitives)),
+               "sizes": (one.end - one.offset, other.end - other.offset),
+               "differ": None, "vertex_bytes": None}
+        if i != j and row["sizes"][0] == row["sizes"][1]:
+            left = data[one.offset:one.end]
+            right = data[other.offset:other.end]
+            first_vertex = (section.HEADER_SIZE
+                            + len(one.primitives) * section.PRIMITIVE_SIZE)
+            differ = [k for k in range(len(left)) if left[k] != right[k]]
+            row["differ"] = len(differ)
+            row["vertex_bytes"] = sum(1 for k in differ if k >= first_vertex)
+        rows.append(row)
+    return rows
+
+
+def mesh_agrees(rows, pieces):
+    """Do the pieces whose MESH differs between the figures carry arm names?
+
+    The measurement and the naming are independent, and this makes them check
+    each other.  Where the two figures differ in mesh is the arm chain -- long
+    sleeve against short -- and nowhere else: torso and thigh have the same
+    vertex and primitive counts, the shin is identical byte for byte in the
+    vertex block, and the feet are literally the same section.  A run where
+    some other piece came out a different mesh means the names and the bytes
+    have stopped agreeing, and one of them is wrong.
+
+    The local is spelled `disagreements` rather than `problems` so the control
+    that blinds `agrees_with_the_game()` keeps matching exactly one line --
+    same reason `section.scan()` carries its own spelling (LOOKS-TASK-06).
+    """
+    disagreements = []
+    for row in rows:
+        if row["same_section"]:
+            continue
+        differs = row["sizes"][0] != row["sizes"][1]
+        for index in (row["a"], row["b"]):
+            if index not in pieces:
+                continue
+            name = pieces[index].name
+            if differs and name not in ARM_CHAIN:
+                disagreements.append(
+                    "section %d is named %r and has a different mesh in the "
+                    "other list -- only the arm chain should"
+                    % (index, name))
+            elif not differs and name in ARM_CHAIN:
+                disagreements.append(
+                    "section %d is named %r and has the same mesh in both "
+                    "lists -- the arm chain is where they differ"
+                    % (index, name))
+    return disagreements
+
+
+def say_comparison(rows):
+    """The comparison as lines, for the report."""
+    out = []
+    for row in rows:
+        if row["same_section"]:
+            out.append("      pos %2d: section %d is SHARED by both lists"
+                       % (row["position"], row["a"]))
+        elif row["sizes"][0] != row["sizes"][1]:
+            out.append("      pos %2d: %2d vs %2d  DIFFERENT MESH  %d/%d vs "
+                       "%d/%d vert/prim, %d vs %d byte(s)"
+                       % (row["position"], row["a"], row["b"],
+                          row["verts"][0], row["prims"][0],
+                          row["verts"][1], row["prims"][1],
+                          row["sizes"][0], row["sizes"][1]))
+        else:
+            out.append("      pos %2d: %2d vs %2d  same size, %d of %d byte(s) "
+                       "differ, %d of them vertex"
+                       % (row["position"], row["a"], row["b"], row["differ"],
+                          row["sizes"][0], row["vertex_bytes"]))
+    return out
+
+
 # --- the fourth witness ----------------------------------------------------
 
 def bare_skin(pieces, slot):
@@ -397,6 +497,9 @@ def report(data, verbose=True):
                      ("%s in %s" % (piece.partner, paired[index][1]))
                      if piece.partner is not None else "-",
                      x1 - x0, y1 - y0, z1 - z0, piece.why))
+        print("  the two figures, one list against the other:")
+        for line in say_comparison(compare_lists(data, orders, scan.sections)):
+            print(line)
         groups = [set(order) for order in orders.values()]
         across = {}
         for index, candidates in mirror_candidates(scan.sections).items():
@@ -429,7 +532,9 @@ def _check_image(path):
     with iso_source.open_disc(path) as disc:
         data = disc.read(layout.EDT_MOD)
     pieces, orders = report(data)
+    scan = section.scan(data, layout.GEOMETRY_START[layout.EDT_MOD])
     problems = agrees_with_the_game(pieces, orders)
+    problems += mesh_agrees(compare_lists(data, orders, scan.sections), pieces)
     for line in problems:
         print("  FAIL  %s" % line)
     print("pieces --check-image: %s"
@@ -567,6 +672,35 @@ def _checks(c) -> None:
     boots = agrees_with_the_game(mislaid, orders)
     ok("and disagrees when the foot name is on the wrong section",
        any("BOOTS" in line for line in boots), "%s" % boots)
+
+    # -- the two figures differ in mesh at the arms, and only there ---------
+    #
+    # Synthetic, because the gate has no disc: rows in the shape compare_lists
+    # produces, and a naming to check them against.  The sentence this replaces
+    # put the torso among the pieces of different size and generalised one
+    # piece's two vertex bytes to all eleven (CORR-LOOKS-021); a computation
+    # cannot drift that way, but only if something demands the two agree.
+    named = naming(UPPER_ARM, FOREARM)
+
+    def row(a, b, same_section=False, same_size=True):
+        return {"position": 0, "a": a, "b": b, "same_section": same_section,
+                "verts": (1, 1), "prims": (1, 1),
+                "sizes": (100, 100 if same_size else 200),
+                "differ": 3, "vertex_bytes": 1}
+
+    real = [row(0, 11), row(1, 12, same_size=False),
+            row(3, 14, same_size=False), row(5, 16), row(7, 18),
+            row(9, 9, same_section=True)]
+    ok("the arms differ in mesh and nothing else does",
+       mesh_agrees(real, named) == [], "%s" % mesh_agrees(real, named))
+
+    # Red, both ways round: a torso that differs, and an arm that does not.
+    bad_torso = mesh_agrees([row(0, 11, same_size=False)], named)
+    ok("a torso with a different mesh is a disagreement",
+       len(bad_torso) == 2, "%s" % bad_torso)
+    bad_arm = mesh_agrees([row(1, 12)], named)
+    ok("and so is an arm with the same mesh", len(bad_arm) == 2,
+       "%s" % bad_arm)
 
     # The head is not in this file, and saying so is the point of the constant.
     ok("the head is recorded as MODEL.BIN's section, not EDT_MOD.BIN's",

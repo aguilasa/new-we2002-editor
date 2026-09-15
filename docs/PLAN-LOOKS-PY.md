@@ -375,8 +375,30 @@ Quatro leituras, todas de peso:
 - **As duas listas têm a mesma forma.** Cada uma é uma peça sozinha (`84/71`,
   na posição 0) mais **cinco pares de contagem idêntica**. Isso é um corpo:
   membros espelhados mais um tronco ou cabeça. O que muda entre elas são as
-  contagens de três dos cinco pares — `30/24` e `80/78` na A contra `40/34` e
-  `88/86` na B —, e duas peças são **literalmente a mesma seção**.
+  contagens de **dois** dos cinco pares — `30/24` e `80/78` na A contra `40/34`
+  e `88/86` na B —, e duas peças são **literalmente a mesma seção**.
+
+  **Mesma forma não é mesma malha, e a diferença é de dois pares e só deles.**
+  Comparadas posição a posição pelo `pieces.py --check-image`, que imprime a
+  conta desde 2026-09-15
+  ([`CORR-LOOKS-021`](/docs/tasks/looks/CORR-LOOKS-021.md)):
+
+  ```text
+  pos  0:  0 vs 11  same size, 505 of 2384 byte(s) differ, 2 of them vertex
+  pos  1:  1 vs 12  DIFFERENT MESH  30/24 vs 40/34 vert/prim, 824 vs 1144 byte(s)
+  pos  2:  3 vs 14  DIFFERENT MESH  80/78 vs 88/86 vert/prim, 2520 vs 2776 byte(s)
+  pos  5:  5 vs 16  same size, 250 of 2000 byte(s) differ, 22 of them vertex
+  pos  6:  7 vs 18  same size, 240 of 1168 byte(s) differ, 0 of them vertex
+  pos  7: section 9 is SHARED by both lists
+  ```
+
+  Ou seja: **braço e antebraço são malha diferente** — manga comprida contra
+  manga curta —, o tronco difere em **2** bytes de vértice, a coxa em **22**, e
+  a perna em **nenhum**. O goleiro é o mesmo esqueleto com **duas peças
+  remodeladas**, não um remapeamento de textura do jogador de linha. Quem
+  escrever montagem lendo "mesma forma" como "mesma malha" carrega uma malha só
+  e desenha o goleiro com o braço errado; o `mesh_agrees()` do `pieces.py`
+  recusa se essa correspondência deixar de valer.
 - **São dois modelos, não um.** O `we3d` levantou, só do `MODEL.BIN` e sem
   conferir, que os 106 blocos de lá se combinam em **14 jogadores de 11
   peças**. O `EDT_MOD.BIN` traz dois desses conjuntos de onze, montados sobre o

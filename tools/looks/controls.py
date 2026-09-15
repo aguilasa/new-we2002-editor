@@ -189,6 +189,15 @@ CONTROLS = (
         "sections have two partners each and the left shin of one player "
         "mirrors the right shin of the OTHER -- which renames every limb",
     ),
+    Control(
+        "pieces-mesh-check-blind", "pieces.py", "mesh_agrees",
+        "            if differs and name not in ARM_CHAIN:",
+        "            if False:",
+        ("pieces",),
+        "with the mesh comparison unable to disagree, 'same mesh, different "
+        "kit' can be written about all eleven pieces again -- and a renderer "
+        "reading that draws the goalkeeper with the outfield player's arm",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

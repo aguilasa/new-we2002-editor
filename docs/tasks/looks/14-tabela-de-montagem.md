@@ -40,6 +40,15 @@ status: pendente
   O padrão é o que importa para esta task: **a peça nunca é trocada — o que
   muda é a paleta ou a faixa do atlas.** Uma tabela de montagem que mapeie
   campo → *peça diferente* estaria descrevendo um jogo que não é este.
+
+  **Isso vale dentro de um boneco, e a escolha do boneco vem antes.** Os dois
+  não compartilham as peças de braço: medido em 2026-09-15
+  ([`CORR-LOOKS-021`](/docs/tasks/looks/CORR-LOOKS-021.md)), braço e antebraço
+  têm **malha diferente** entre as duas listas — 30/24 contra 40/34 e 80/78
+  contra 88/86 — e só a perna e o pé são de fato a mesma malha. Quem monta
+  escolhe **a lista primeiro** (A é o jogador de linha, B é o goleiro) e só
+  depois aplica campo; carregar uma malha e trocar só paleta desenha o goleiro
+  de manga curta.
 - **E as peças têm nome medido**, com o mapa em `tools/looks/pieces.py`: tronco,
   braço, antebraço, coxa, perna, pé (espelhados em `z`) e a cabeça, que mora no
   outro arquivo.

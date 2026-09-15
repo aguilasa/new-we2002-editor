@@ -154,10 +154,28 @@ Quatro respostas do critério caem daí:
   em toda a RAM. A §5.6 do plano dizia "provavelmente"; agora diz o número.
 - **`HEIG` e `BODY` são escala na hora de desenhar.** Nenhum byte na geometria
   carregada, e os dois escrevem na lista de display.
-- **Goleiro contra jogador de linha:** as peças de tamanho igual entre os dois
-  bonecos (coxa, perna, pé) e as de tamanho diferente (tronco, braço, antebraço)
-  se separam sozinhas — e as que diferem, diferem **só** em `u`, `v` e CLUT,
-  mais dois bytes de vértice. Mesma malha, uniforme diferente.
+- **Goleiro contra jogador de linha:** o segundo boneco é **o mesmo esqueleto
+  com duas peças remodeladas**, e não um remapeamento de textura do primeiro.
+  Medido posição a posição pelo `pieces.py --check-image`, que desde
+  2026-09-15 imprime a comparação
+  ([`CORR-LOOKS-021`](/docs/tasks/looks/CORR-LOOKS-021.md)):
+
+  | posição | seções | o que difere |
+  |---|---|---|
+  | tronco | 0 × 11 | **mesmo tamanho** — 505 de 2.384 B, **2** deles de vértice |
+  | braço | 1 × 12, 2 × 13 | **malha diferente** — 30/24 contra 40/34 |
+  | antebraço | 3 × 14, 4 × 15 | **malha diferente** — 80/78 contra 88/86 |
+  | coxa | 5 × 16, 6 × 17 | mesmo tamanho, 250 de 2.000 B, **22** de vértice |
+  | perna | 7 × 18, 8 × 19 | mesmo tamanho, 240 de 1.168 B, **zero** de vértice |
+  | pé | 9, 10 | a **mesma seção**, compartilhada pelas duas listas |
+
+  **Esta linha dizia outra coisa até 2026-09-15**, e as três estavam erradas:
+  punha o tronco entre as de tamanho diferente (ele tem o mesmo tamanho, e a
+  tabela da §1.5 já dizia), dava os dois bytes de vértice do tronco como se
+  descrevessem as três, e concluía *"mesma malha, uniforme diferente"* para as
+  onze. Vale só da perna e do pé. Quem ler a frase velha e escrever montagem
+  carrega **uma** malha e troca paleta — e desenha o goleiro com o braço do
+  jogador de linha.
 
 ### As duas faixas de residuo: são a lista de display, dobrada
 

@@ -3,7 +3,7 @@ id: CORR-LOOKS-021
 title: "Correção: \"mesma malha, uniforme diferente\" não vale para quatro das onze peças, e o tronco está do lado errado da conta"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -142,22 +142,87 @@ esta.
 
 ## Verificação
 
-- [ ] o item do Log não põe mais o tronco entre as peças de tamanho diferente
-- [ ] os três números aparecem separados: 2 bytes de vértice no tronco, 22 na
+- [x] o item do Log não põe mais o tronco entre as peças de tamanho diferente
+- [x] os três números aparecem separados: 2 bytes de vértice no tronco, 22 na
       coxa, 0 na perna
-- [ ] "mesma malha, uniforme diferente" só é dito das peças de que é verdade
-- [ ] a §1.5 registra que braço e antebraço têm malha diferente entre os dois
-      bonecos
-- [ ] se a comparação virar asserção, `pieces.py --check-image` a imprime e o
-      `--check` tem caso vermelho para ela
-- [ ] `roms/` intocada
+- [x] "mesma malha, uniforme diferente" só é dito das peças de que é verdade —
+      a perna e o pé
+- [x] a §1.5 registra que braço e antebraço têm malha diferente entre os dois
+      bonecos, e o "três dos cinco pares" dela virou **dois**
+- [x] a comparação virou asserção: `pieces.py --check-image` a imprime, o
+      `mesh_agrees()` a confere contra os nomes, e há três casos vermelhos no
+      `--check` mais o controle `pieces-mesh-check-blind`
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A frase virou **conta**. O `pieces.py` ganhou `compare_lists()`, que percorre as
+duas listas posição a posição e devolve, por posição, as duas seções, se são a
+mesma, se os tamanhos batem e — quando batem — quantos bytes diferem e quantos
+deles são de **vértice** e não de textura. O `say_comparison()` imprime, e o
+`--check-image` mostra:
 
-**Arquivos criados/modificados:**
+```text
+  the two figures, one list against the other:
+      pos  0:  0 vs 11  same size, 505 of 2384 byte(s) differ, 2 of them vertex
+      pos  1:  1 vs 12  DIFFERENT MESH  30/24 vs 40/34 vert/prim, 824 vs 1144 byte(s)
+      pos  2:  3 vs 14  DIFFERENT MESH  80/78 vs 88/86 vert/prim, 2520 vs 2776 byte(s)
+      pos  3:  2 vs 13  DIFFERENT MESH  30/24 vs 40/34 vert/prim, 824 vs 1144 byte(s)
+      pos  4:  4 vs 15  DIFFERENT MESH  80/78 vs 88/86 vert/prim, 2520 vs 2776 byte(s)
+      pos  5:  5 vs 16  same size, 250 of 2000 byte(s) differ, 22 of them vertex
+      pos  6:  7 vs 18  same size, 240 of 1168 byte(s) differ, 0 of them vertex
+      pos  7: section 9 is SHARED by both lists
+      pos  8:  6 vs 17  same size, 250 of 2000 byte(s) differ, 22 of them vertex
+      pos  9:  8 vs 19  same size, 240 of 1168 byte(s) differ, 0 of them vertex
+      pos 10: section 10 is SHARED by both lists
+```
+
+**O tronco tem o mesmo tamanho** e difere em **2** bytes de vértice; a coxa em
+**22**; a perna em **zero**; braço e antebraço são **malha diferente**; o pé é
+literalmente a mesma seção. Os três números que a frase fundia agora aparecem
+separados, e cada um sai de comando.
+
+E a conta **confere contra os nomes**, que é o que a torna asserção e não
+relatório: o `mesh_agrees()` exige que as peças de malha diferente sejam
+exatamente a cadeia do braço — manga comprida contra manga curta — e que
+nenhuma peça do braço tenha malha igual. As duas medições são independentes (a
+nomeação vem do espelho, da cadeia e do emulador; esta vem dos bytes), então
+uma passa a poder derrubar a outra.
+
+### O que mudou nos documentos
+
+- **LOOKS-TASK-09** — o item reescrito como tabela medida, com a leitura no
+  lugar da frase: *o segundo boneco é o mesmo esqueleto com duas peças
+  remodeladas*, não um remapeamento de textura do primeiro.
+- **§1.5 do plano** — a comparação entrou onde quem escrever montagem vai ler.
+  E uma discrepância que a varredura puxou: a seção dizia que **três** dos cinco
+  pares mudam de contagem entre as listas; são **dois** — a própria tabela ao
+  lado já dizia, e o número nunca tinha sido conferido contra ela.
+- **LOOKS-TASK-14** — a ressalva ao lado do padrão *"a peça nunca é trocada"*:
+  vale dentro de um boneco, e os dois não compartilham o braço. Quem monta
+  escolhe a lista primeiro.
+
+### Problemas encontrados
+
+**Uma colisão de controle, do tipo que a LOOKS-TASK-06 já tinha pago.** O
+`mesh_agrees()` nasceu abrindo com `problems = []`, que é exatamente a linha que
+o controle `pieces-witness-blind` substitui — e a substituição passou a casar
+**duas** vezes, o que é controle **quebrado**, não vermelho. O `--check` do
+catálogo pegou antes de qualquer sandbox, e o conserto é o mesmo de lá: grafia
+própria, `disagreements = []`, com o motivo no docstring.
+
+### Arquivos criados/modificados
+
+- `tools/looks/pieces.py` — `compare_lists()`, `mesh_agrees()`,
+  `say_comparison()`; a comparação no `report()` e a asserção no
+  `_check_image()`; três casos vermelhos novos no `self_check()`
+- `tools/looks/controls.py` — o controle `pieces-mesh-check-blind`
+- `docs/tasks/looks/09-nomear-as-onze-pecas.md` — o item reescrito
+- `docs/PLAN-LOOKS-PY.md` — §1.5, a comparação e o "dois dos cinco pares"
+- `docs/tasks/looks/14-tabela-de-montagem.md` — a ressalva
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-021.md` — este arquivo
