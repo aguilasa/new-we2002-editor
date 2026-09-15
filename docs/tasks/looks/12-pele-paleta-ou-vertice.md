@@ -15,9 +15,16 @@ status: pendente
 
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §6,
   incógnita (d), e §1.6.
-- A GPU responde **4-bit CLUT** com textura ligada; a primitiva de 24 bytes das
-  seções carrega **cor por vértice e nenhum UV**. Os dois não podem valer para
-  a mesma geometria.
+- **Este bullet dizia** que a GPU responde 4-bit CLUT enquanto a primitiva
+  carrega *"cor por vértice e nenhum UV"*, e que os dois não podiam valer para
+  a mesma geometria. As duas metades caíram, e o bloco no fim deste Contexto
+  diz por quê: a primitiva **tem** UV (§1.6, LOOKS-TASK-08), e a profundidade
+  **não é sempre 4 bits** — `0x0099` amostra em CLUT de **8 bits**, e são 1.039
+  das 2.841 primitivas
+  ([`CORR-LOOKS-018`](/docs/tasks/looks/CORR-LOOKS-018.md)). O `4-bit CLUT` do
+  `get_gpu_state` é amostra de um desenho, não propriedade do arquivo. **A
+  paleta que esta task tem de ler pode ter 16 ou 256 entradas**, e qual delas
+  sai da palavra de página da primitiva que a usa.
 - Na tela, `SKIN` de `A` para `D` mudou o tom **sem mexer em vértice nenhum** —
   o que é compatível com as duas hipóteses.
 - **Decidir isto decide metade da Fase 3**, e a resposta depende da
