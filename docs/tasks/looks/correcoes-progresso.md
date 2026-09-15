@@ -42,6 +42,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [x] concluída | 2026-09-15 |
+| [CORR-LOOKS-027](/docs/tasks/looks/CORR-LOOKS-027.md) | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | O cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -82,6 +83,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
 - [x] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
 - [x] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
+- [ ] CORR-LOOKS-027 — nenhum comando lê os nomes dos 50 JPGs, e o critério diz que leu
 
 ## Detalhes por correção
 
@@ -518,3 +520,21 @@ e o ciclo arquivado, o dele em
 - **Fix:** o bloco imprimindo quem amostra cada coluna, a linha de fecho dizendo
   o que é verdade, asserção sobre o que **não** se move, e as nove primitivas
   escritas na LOOKS-TASK-09 como o que falta nomear na cabeça
+
+### CORR-LOOKS-027
+
+- **Arquivo com problema:** `tools/looks/looks.py` (sem comando de corpus); o
+  critério da LOOKS-TASK-13, que marca as duas testemunhas da tupla como feitas
+- **Sintoma:** das duas, só a do `data/defaultlook.txt` virou asserção — o
+  `--check` afirma as 95 nações e as cinco colunas. Os **50 nomes de JPG** não
+  são lidos por comando nenhum: o `--report` recebe **tupla**, não pasta, e
+  `grep` por `.jpg`, `parsed:` ou `refused:` em `tools/looks/` não acha nada. Os
+  números (49 parseiam, 1 recusa, e o round-trip para o próprio nome) reproduzem,
+  e a cobertura `4/9/4/6/2` foi **encaminhada à LOOKS-TASK-18 como medida**
+- **Como foi detectado:** rodando `--report` com a pasta (recusa, porque espera
+  tupla), grepando os módulos, e remedindo os 50 nomes com um script sobre o
+  `looks.parse_tuple`/`format_tuple` commitados
+- **Fix:** um `--corpus <pasta>` que conte parse, recusa e round-trip, imprima a
+  cobertura por campo, **exija** a recusa e **pule com 77** sem a pasta — o
+  contrato dos outros gates de dado externo, já que o Superpack não entra no
+  git; mais o caso sintético no `self_check()`, que roda em qualquer clone
