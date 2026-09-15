@@ -41,6 +41,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
+| [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -80,6 +81,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
 - [x] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
 - [x] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
+- [ ] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
 
 ## Detalhes por correção
 
@@ -495,3 +497,24 @@ e o ciclo arquivado, o dele em
 - **Fix:** a frase com os cinco e a id não nomeada; "casa e fora" marcado como
   hipótese, com o gesto que a decide; e o `--elsewhere` imprimindo quantas
   paletas de 256 o contêiner tem ao todo, ao lado do `x2`
+
+### CORR-LOOKS-026
+
+- **Arquivo com problema:** `tools/looks/skin.py`, o bloco *"the sixteen
+  columns of a skin record, accounted for"*
+- **Sintoma:** a conta fecha em dezesseis medindo **o que os três campos
+  alcançam**, e lê-se como o que cada coluna **é**. Medido: **948 primitivas em
+  50 seções do `MODEL.BIN`** amostram a linha 480 coluna 1 — a coluna que a
+  tabela chama de "cor de cabelo 1" — e nenhum dos três campos toca 932 delas;
+  **nove das dezoito primitivas da própria cabeça** não são movidas por campo de
+  cor nenhum, e continuam na paleta da pele branca depois de trocar a pele; e a
+  **primitiva 4** anda com `H.COL` e **não** com `SKIN`, única exceção ao
+  "linha × coluna". Quem escrever a tabela de montagem a partir da frase mapeia
+  932 primitivas para uma cor de cabelo que elas não têm, e desenha
+  perfeitamente
+- **Como foi detectado:** rodando `--fields SKIN`, `--fields H.COL H.F.COL.` nos
+  dois slots e tirando a união dos três conjuntos (nove de dezoito); e contando
+  no disco quem amostra (16, 480)
+- **Fix:** o bloco imprimindo quem amostra cada coluna, a linha de fecho dizendo
+  o que é verdade, asserção sobre o que **não** se move, e as nove primitivas
+  escritas na LOOKS-TASK-09 como o que falta nomear na cabeça
