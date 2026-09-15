@@ -35,18 +35,21 @@ status: pendente
 
 ---
 
-- **As 49 tuplas já foram parseadas, e a cobertura medida.** Em 2026-09-15
-  ([`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md)), com
-  o `looks.parse_tuple` sobre os nomes de arquivo:
+- **As 49 tuplas já foram parseadas, e a cobertura medida — por comando.**
+  `python tools/looks/looks.py --corpus <pasta>`, ou com a pasta em
+  `WE2002_LOOKS_CORPUS`. **Não copie os números daqui: rode.** Esta
+  transcrição é de 2026-09-15
+  ([`CORR-LOOKS-027`](/docs/tasks/looks/CORR-LOOKS-027.md)), e a cobertura
+  muda com a pasta que a variável apontar.
 
   ```text
-  50 .jpg   parsed: 49   refused: 1
-      0.jpg -- '0' has 1 part(s) and a tuple has 5
-      skin_colour    4 of  4 value(s) covered
-      hair_style     9 of 32 value(s) covered
-      hair_colour    4 of  8 value(s) covered
-      beard_style    6 of  8 value(s) covered
-      beard_colour   2 of  8 value(s) covered
+  refused: 0.jpg -- '0' has 1 part(s) and a tuple has 5: skin_colour, ...
+  50 .jpg   parsed: 49   refused: 1   round-trip to its own name: 49
+     skin_colour    4 of  4 value(s) covered
+     hair_style     9 of 32 value(s) covered
+     hair_colour    4 of  8 value(s) covered
+     beard_style    6 of  8 value(s) covered
+     beard_colour   2 of  8 value(s) covered
   ```
 
   As 49 formatam de volta para o próprio nome, e o `0.jpg` **recusa com a

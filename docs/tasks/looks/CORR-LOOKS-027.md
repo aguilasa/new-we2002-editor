@@ -3,7 +3,7 @@ id: CORR-LOOKS-027
 title: "Correção: o cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -133,22 +133,88 @@ partes já deixa isto vermelho, e se não existir, é um controle a mais.
 
 ## Verificação
 
-- [ ] `python tools/looks/looks.py --corpus <pasta>` imprime 50 / 49 / 1 e o
+- [x] `python tools/looks/looks.py --corpus <pasta>` imprime 50 / 49 / 1 e o
       round-trip, e a cobertura por campo
-- [ ] sem a pasta, o mesmo comando **pula com 77** e diz o que falta
-- [ ] o `self_check()` exercita a regra com nomes sintéticos, recusa incluída
-- [ ] o critério da LOOKS-TASK-13 aponta para o comando, e a LOOKS-TASK-18 herda
+- [x] sem a pasta, o mesmo comando **pula com 77** e diz o que falta
+- [x] o `self_check()` exercita a regra com nomes sintéticos, recusa incluída
+- [x] o critério da LOOKS-TASK-13 aponta para o comando, e a LOOKS-TASK-18 herda
       a cobertura dele e não da prosa
-- [ ] `python tools/looks/looks.py --check` e `--check-image` continuam verdes
-- [ ] `python tools/looks/selftest.py` verde, com todos os controles vermelhos
-- [ ] `roms/` intocada, e nada do Superpack entra no git
+- [x] `python tools/looks/looks.py --check` e `--check-image` continuam verdes
+- [x] `python tools/looks/selftest.py` verde, 27 de 27 controles vermelhos
+- [x] `roms/` intocada, e nada do Superpack entra no git
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-15
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência bateu dos dois lados antes de qualquer edição: os números
+reproduzem e o comando não existe. O `grep` por `jpg|parsed:|refused:` em
+`tools/looks/*.py` só acha a palavra `refused:` dentro do texto de um controle
+sobre outra coisa.
 
-**Arquivos criados/modificados:**
+O conserto é o script descartável virando comando, com código de saída:
+
+```text
+$ python tools/looks/looks.py --corpus "<pasta dos 50 JPGs>"
+the corpus of renders: <pasta>
+   refused: 0.jpg -- '0' has 1 part(s) and a tuple has 5: skin_colour, ...
+50 .jpg   parsed: 49   refused: 1   round-trip to its own name: 49
+   skin_colour    4 of  4 value(s) covered
+   hair_style     9 of 32 value(s) covered
+   hair_colour    4 of  8 value(s) covered
+   beard_style    6 of  8 value(s) covered
+   beard_colour   2 of  8 value(s) covered
+looks --corpus: ok
+```
+
+E sem a pasta, o contrato do perfil — **mediu e passou, ou pulou com 77**:
+
+```text
+$ python tools/looks/looks.py --corpus
+looks: skipped -- no corpus folder: pass one, or point WE2002_LOOKS_CORPUS at
+  the folder of renders named by tuple.  It is the third party's and is not in
+  this tree
+exit=77
+```
+
+A pasta vem por argumento **ou** por `WE2002_LOOKS_CORPUS`, que é o que
+permite à LOOKS-TASK-19 registrá-la como alvo de `ctest` ao lado das outras.
+
+### A recusa é o que o comando exige, e é onde a linha engana
+
+`survey_problems()` **falha quando nada é recusado**. Um parser permissivo
+imprime `50 parsed, 0 refused` — uma linha que lê **melhor** que a verdadeira —,
+e é exatamente a forma de verde-pelo-motivo-errado que este ciclo já encontrou
+duas vezes. O round-trip entrou na mesma conta: o Log afirmava que as 49
+formatam de volta para o próprio nome e nenhuma corrida exercitava isso; agora
+são 49 de 49, contadas.
+
+Controle negativo novo, `looks-tuple-any-length`: o `parse_tuple` aceitando
+qualquer número de partes. Vermelho.
+
+O `self_check()` exercita a regra inteira com **cinco nomes sintéticos** —
+quatro válidos e um inválido —, então ela roda em clone sem Superpack, que é
+metade do motivo de o caso vermelho existir.
+
+### Problemas encontrados
+
+Nenhum. A varredura de discrepância puxou dois documentos que a lista da CORR
+não previa: a tabela de gates do perfil, que lista cada comando e não tinha
+linha para este, e a §5.4 do plano, que descreve o corpus sem dizer com o que
+se mede. Reconciliados em commit próprio.
+
+### Arquivos criados/modificados
+
+- `tools/looks/looks.py` — `survey_tuples()`, `say_survey()`,
+  `survey_problems()`, `corpus_names()`, o `--corpus` e o caso vermelho no
+  `self_check()`
+- `tools/looks/layout.py` — `ENV_CORPUS`
+- `tools/looks/controls.py` — o controle `looks-tuple-any-length`
+- `docs/tasks/looks/13-campos-e-dominios-de-looks.md` — o critério aponta para
+  o comando
+- `docs/tasks/looks/18-corpus-dos-cinquenta-renders.md` — herda a cobertura do
+  comando, com o aviso de rodar em vez de copiar
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-027.md` — este arquivo

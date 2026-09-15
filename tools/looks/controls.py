@@ -288,6 +288,16 @@ CONTROLS = (
         "are not skin go back to being invisible -- which is the state "
         "CORR-LOOKS-026 found",
     ),
+    Control(
+        "looks-tuple-any-length", "looks.py", "parse_tuple",
+        "    if len(parts) != len(TUPLE_ORDER):",
+        "    if False:",
+        ("looks",),
+        "a parser that takes any number of parts: the corpus survey then "
+        "reports 50 of 50 parsed and 0 refused, which reads BETTER than the "
+        "true line -- the exact shape of green-for-the-wrong-reason this "
+        "cycle keeps meeting",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

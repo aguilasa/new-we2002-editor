@@ -106,11 +106,17 @@ campo, e a conversão de e para os 12 bytes.
       por `raw[` e roda as duas implementações sobre 64 blobs. O caso vermelho
       do próprio cross-check está junto: uma expressão entortada de propósito
       tem de ser pega.
-- [x] A tupla de texto do corpus (`A-I3-A-F-A`) é lida e escrita. Conferida
-      contra os nomes dos 50 JPGs: **49 parseiam e formatam de volta para o
-      próprio nome**, e o `0.jpg` recusa com a mensagem certa. E contra as 95
-      linhas do `data/defaultlook.txt`, que têm as **mesmas cinco colunas** —
-      fixture versionada, então essa parte do gate roda em qualquer clone.
+- [x] A tupla de texto do corpus (`A-I3-A-F-A`) é lida e escrita, e as duas
+      testemunhas são **comando**, não prosa. Contra os nomes dos 50 JPGs:
+      `python tools/looks/looks.py --corpus <pasta>` — **49 parseiam e formatam
+      de volta para o próprio nome**, o `0.jpg` recusa com a mensagem certa, e
+      o comando **falha se nada for recusado**, porque um parser permissivo
+      imprime 50 de 50 e a linha fica melhor que a verdadeira. Sem a pasta ele
+      **pula com 77**: o Superpack é do usuário e não entra no git. Contra as
+      95 linhas do `data/defaultlook.txt`, que têm as **mesmas cinco colunas**,
+      é o `--check` — fixture versionada, então essa metade roda em qualquer
+      clone. A primeira metade era script descartável até
+      2026-09-15 ([`CORR-LOOKS-027`](/docs/tasks/looks/CORR-LOOKS-027.md)).
 - [x] Os registros no disco são conferidos, e a opinião de terceiro se partiu
       ao meio: o offset **157.164 está certo** — o `OFS_PLAYER_ATTR` deste
       repositório cai no mesmo byte do mesmo arquivo — e a contagem **estava 207

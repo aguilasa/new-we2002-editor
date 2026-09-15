@@ -62,6 +62,14 @@ ENV_IMAGE = "WE2002_LOOKS_IMAGE"
 ENV_DRIVE_IMAGE = "WE2002_LOOKS_DRIVE_IMAGE"
 """The English .cue.  The disc to drive the emulator with."""
 
+ENV_CORPUS = "WE2002_LOOKS_CORPUS"
+"""The folder of the fifty renders, whose names are corpus tuples.
+
+Third party's, and not in the git tree (plan section 2), so it is named the
+way every other external fixture of this repository is: by variable, and the
+gate that reads it skips with 77 when it is not set.
+"""
+
 # --- Paths inside the disc ------------------------------------------------
 EDT_MOD = "/BIN/EDT_MOD.BIN"
 MODEL = "/BIN/MODEL.BIN"

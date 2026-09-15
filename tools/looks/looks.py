@@ -44,6 +44,7 @@ Usage:
     python tools/looks/looks.py --check
     python tools/looks/looks.py --check-image
     python tools/looks/looks.py --report [<tuple>]
+    python tools/looks/looks.py --corpus [<folder of renders>]
 """
 
 from __future__ import annotations
@@ -284,6 +285,82 @@ def format_tuple(values: dict) -> str:
                                 for name in TUPLE_ORDER)
 
 
+CORPUS_SUFFIX = ".jpg"
+"""What a render of the corpus is called.  The names are the measurement."""
+
+
+def survey_tuples(names) -> dict:
+    """Parse every name of *names* as a tuple, and say what came of it.
+
+    The round trip is the half of the claim that is easy to skip: a parser can
+    read `A-I3-A-F-A` correctly and a formatter can spell it back differently,
+    and nothing downstream would notice until the corpus was compared against a
+    render by name.  So it is counted, not assumed.
+    """
+    out = {"names": list(names), "parsed": [], "refused": [],
+           "round_trip": 0,
+           "coverage": {name: set() for name in TUPLE_ORDER}}
+    for name in out["names"]:
+        stem = name[:-len(CORPUS_SUFFIX)] if name.endswith(CORPUS_SUFFIX)             else name
+        try:
+            values = parse_tuple(stem)
+        except BadLooks as exc:
+            out["refused"].append((name, str(exc)))
+            continue
+        out["parsed"].append((name, values))
+        if format_tuple(values) == stem:
+            out["round_trip"] += 1
+        for field, value in values.items():
+            out["coverage"][field].add(value)
+    return out
+
+
+def say_survey(found: dict) -> None:
+    """The survey as the task log spells it, printed by the tool this time."""
+    for name, why in found["refused"]:
+        print("   refused: %s -- %s" % (name, why))
+    print("%d %s   parsed: %d   refused: %d   round-trip to its own name: %d"
+          % (len(found["names"]), CORPUS_SUFFIX, len(found["parsed"]),
+             len(found["refused"]), found["round_trip"]))
+    for field in TUPLE_ORDER:
+        print("   %-13s %2d of %2d value(s) covered"
+              % (field, len(found["coverage"][field]),
+                 BY_NAME[field].values))
+
+
+def survey_problems(found: dict) -> list:
+    """What makes a corpus survey worthless.  [] is good.
+
+    The refusal is the one that matters and the one a reader would not think
+    to ask for: with a permissive parser every name parses, the line reads
+    `50 parsed, 0 refused`, and it looks BETTER than the true one.  A corpus
+    whose names are all tuples cannot exercise that, so it is a problem here
+    and not a silent pass.
+    """
+    problems = []
+    if not found["names"]:
+        problems.append("no %s in the folder: a survey of nothing passes "
+                        "every count it prints" % CORPUS_SUFFIX)
+    if not found["refused"]:
+        problems.append("every name parsed as a tuple, so nothing here "
+                        "exercised the refusal -- a parser that accepts any "
+                        "number of parts would print exactly this")
+    if found["round_trip"] != len(found["parsed"]):
+        problems.append("%d of %d parsed name(s) format back to a different "
+                        "name than the one they came from"
+                        % (len(found["parsed"]) - found["round_trip"],
+                           len(found["parsed"])))
+    return problems
+
+
+def corpus_names(folder: str) -> list:
+    """The render file names of *folder*, sorted, without reading the images."""
+    if not os.path.isdir(folder):
+        raise BadLooks("%r is not a folder" % folder)
+    return sorted(name for name in os.listdir(folder)
+                  if name.lower().endswith(CORPUS_SUFFIX))
+
+
 def default_looks(path: str = DEFAULT_LOOK) -> list:
     """The look table of `data/defaultlook.txt`, as (nation, values) pairs.
 
@@ -521,6 +598,38 @@ def _checks(c) -> None:
     refuses("a label the field does not have is refused",
             lambda: parse_tuple("A-Z9-A-F-A"), "is not a hair_style")
 
+    # The corpus rule, on synthetic names: the Superpack is the user's folder
+    # and is not in this tree, but nothing about the rule needs it.
+    made = attempt("survey five synthetic render names",
+                   lambda: survey_tuples(["A-A1-A-A-A.jpg", "A-I3-A-F-A.jpg",
+                                          "B-B2-C-D-A.jpg", "D-P1-H-G-B.jpg",
+                                          "0.jpg"]))
+    if made is not None:
+        ok("four names parse and the fifth is refused",
+           (len(made["parsed"]), len(made["refused"])) == (4, 1),
+           "%d parsed, %d refused"
+           % (len(made["parsed"]), len(made["refused"])))
+        ok("and every one that parsed formats back to its own name",
+           made["round_trip"] == len(made["parsed"]),
+           "%d of %d" % (made["round_trip"], len(made["parsed"])))
+        ok("the refusal says what is wrong with the name",
+           "part(s) and a tuple has 5" in made["refused"][0][1],
+           made["refused"][0][1])
+        ok("coverage is counted per field",
+           len(made["coverage"]["skin_colour"]) == 3
+           and len(made["coverage"]["hair_style"]) == 4,
+           "%r" % ({k: sorted(v) for k, v in made["coverage"].items()},))
+        ok("a survey with nothing wrong in it has nothing to report",
+           survey_problems(made) == [], "%r" % (survey_problems(made),))
+        # The red case of the survey itself.  A corpus in which every name
+        # parses is indistinguishable from a parser that accepts anything,
+        # and the line it prints reads BETTER than the true one.
+        ok("a survey where nothing was refused is a problem, not a better run",
+           [p for p in survey_problems(survey_tuples(["A-A1-A-A-A.jpg"]))
+            if "refus" in p])
+        ok("and so is an empty folder",
+           [p for p in survey_problems(survey_tuples([])) if "no .jpg" in p])
+
     # The 95 nations are a fixture this repository already ships, so this runs
     # with no disc and no Superpack in the room.
     table = attempt("read data/defaultlook.txt", lambda: default_looks())
@@ -604,6 +713,37 @@ first 1,449 lands in 155..202 and record 1,449 is all zero.
 """
 
 
+def _check_corpus(folder: str) -> int:
+    """The fifty renders, by name.  The half of the cross-check that was prose.
+
+    LOOKS-TASK-13 claimed both witnesses of the tuple and only one of them was
+    a command: the 95 nations of `data/defaultlook.txt` are asserted by
+    `--check`, and the fifty file names were parsed by a throwaway script
+    (CORR-LOOKS-027).  This is that script, with a red case and an exit code.
+    """
+    names = corpus_names(folder)
+    print("the corpus of renders: %s" % folder)
+    found = survey_tuples(names)
+    say_survey(found)
+    problems = survey_problems(found)
+    print("looks --corpus: %s"
+          % ("ok" if not problems else "%d problem(s)" % len(problems)))
+    for line in problems:
+        print("    %s" % line)
+    return 1 if problems else 0
+
+
+def corpus_from_env(argument: str | None = None) -> str:
+    """The corpus folder, from the argument or the environment."""
+    folder = argument or os.environ.get(layout.ENV_CORPUS)
+    if not folder:
+        raise RuntimeError("no corpus folder: pass one, or point %s at the "
+                           "folder of renders named by tuple.  It is the "
+                           "third party's and is not in this tree"
+                           % layout.ENV_CORPUS)
+    return folder
+
+
 def _report(text: str | None = None) -> int:
     print("the twelve rows of LOOKS SET")
     for row in SCREEN:
@@ -633,6 +773,13 @@ def main(argv: list[str]) -> int:
         return self_check()
     if len(argv) >= 2 and argv[1] == "--report":
         return _report(argv[2] if len(argv) > 2 else None)
+    if len(argv) >= 2 and argv[1] == "--corpus":
+        try:
+            folder = corpus_from_env(argv[2] if len(argv) > 2 else None)
+        except RuntimeError as exc:
+            print("looks: skipped -- %s" % exc)
+            return SKIP
+        return _check_corpus(folder)
     if len(argv) == 2 and argv[1] == "--check-image":
         import iso_source
 
