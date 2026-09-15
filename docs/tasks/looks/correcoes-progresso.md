@@ -39,6 +39,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-022](/docs/tasks/looks/CORR-LOOKS-022.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | Os "2.151 registros a mais em 40 contêineres" que decidem onde o conserto mora não reproduzem por nenhuma leitura | Alta | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-023](/docs/tasks/looks/CORR-LOOKS-023.md) | [LOOKS-TASK-10](/docs/tasks/looks/10-lista-de-cluts-do-dat2d.md) | A exclusividade da paleta de chuteira é conferida só no `EDT_MOD.BIN`, e seis seções do `MODEL.BIN` a amostram | Baixa | [x] concluída | 2026-09-15 |
+| [CORR-LOOKS-024](/docs/tasks/looks/CORR-LOOKS-024.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | A §1.7 ainda diz que o cabelo está no offset 8 e que 1.175 primitivas amostram fora do arquivo | Média | [ ] pendente | — |
+| [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -76,6 +78,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-021 — braço e antebraço têm malha diferente nos dois bonecos, e o resumo diz que não
 - [x] CORR-LOOKS-022 — o número que justifica não tocar o `bin_archive.py` não reproduz
 - [x] CORR-LOOKS-023 — trinta primitivas do `MODEL.BIN` também amostram a paleta da chuteira
+- [ ] CORR-LOOKS-024 — a §1.7 guarda as duas afirmações que a §1.8 derrubou, e a §1.8 diz seis por três
+- [ ] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
 
 ## Detalhes por correção
 
@@ -451,3 +455,43 @@ e o ciclo arquivado, o dele em
   fora compartilham a paleta; o relatório somando cada id de CLUT **por
   arquivo**; e as seis seções escritas na LOOKS-TASK-11 como candidatas a
   nomear pelo mesmo método das onze peças
+
+### CORR-LOOKS-024
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md`, §1.7 (tabela de rótulos e
+  o parágrafo das páginas ausentes) e §1.8 (a conta dos rótulos)
+- **Sintoma:** a §1.8 foi reescrita com o veredito, mas a §1.7 — que é o
+  `fonte_de_verdade` da task 10 e a seção que o Contexto da 11 manda ler —
+  continua traduzindo o rótulo do CARP como *"cabelos, corpos e chuteiras"* no
+  offset 8, que é o erro derrubado; e continua dizendo **1.175** primitivas
+  amostrando de páginas fora do arquivo, quando o medido é **1.039** — as 136
+  da diferença são as seções 0 e 1 do `MODEL.BIN`, `u` 130..186 e `v` 130..187,
+  **dentro** do registro em 10.248. Contar por base de página é o método que
+  esta task substituiu por contar por texel. E a §1.8 diz que das **vinte**
+  restantes "seis" carregam o rótulo do CARP e dezessete nenhum: 6 + 17 = 23, e
+  o comando imprime **três**
+- **Como foi detectado:** rodando `atlas.py --check-image` e comparando linha a
+  linha com o texto das duas seções; e remedindo as 136 primitivas de
+  `tpage=0x1a` no disco
+- **Fix:** §1.7 sem a tradução "cabelos" e apontando para a §1.8; o número
+  1.039 com a explicação das 136 e a regra que a Fase 4 vai usar (**o que
+  resolve um registro é o texel, não a base da página**); e "seis" virando
+  "três" na §1.8
+
+### CORR-LOOKS-025
+
+- **Arquivo com problema:** o Log da LOOKS-TASK-11, seção "E de onde vem o
+  uniforme"; e o `--elsewhere` do `tools/looks/atlas.py`, que tem os dados e não
+  os imprime
+- **Sintoma:** *"mora nos 105 `TEX_*.BIN`, com **duas** paletas de 256 entradas
+  em cada — casa e fora"*. Medido: **cinco** por arquivo, idêntico nos 105 —
+  duas em (0, 486), duas em (0, 488) e uma em (256, 480), que a geometria não
+  nomeia. O `x2` da saída é por id, não por arquivo. E "casa e fora" é leitura
+  do par: ninguém trocou o uniforme na tela para ver qual das duas se move, que
+  é o método que a task 09 estabeleceu. A LOOKS-TASK-14 vai escolher entre as
+  duas, e escolher errado desenha perfeitamente nas cores erradas
+- **Como foi detectado:** varrendo os 105 contêineres com o `texture.palettes()`
+  commitado — `{5: 105}`, e `210 / 210 / 105` por id
+- **Fix:** a frase com os cinco e a id não nomeada; "casa e fora" marcado como
+  hipótese, com o gesto que a decide; e o `--elsewhere` imprimindo quantas
+  paletas de 256 o contêiner tem ao todo, ao lado do `x2`
