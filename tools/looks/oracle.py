@@ -31,6 +31,7 @@ Usage:
     python tools/looks/oracle.py --fields HAIR SKIN
     python tools/looks/oracle.py --tmds          # unknown (a), the other half
     python tools/looks/oracle.py --buffers       # what the residue bands are
+    python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
 """
 
 from __future__ import annotations
@@ -1224,6 +1225,217 @@ def walk_packets(data, base=None):
     return nodes, codes
 
 
+WALK_LIMIT = 32
+"""How many presses a field walk may take before it is called a runaway.
+
+Twice the sixteen windows a 256-entry record holds, so a field with a domain
+this cycle has not met yet still comes back with its whole cycle instead of a
+refusal -- and a field that never returns to where it started still stops.
+"""
+
+
+def clut_address(image, name, index, primitive):
+    """Where one primitive's CLUT id lives in main RAM.
+
+    Derived from the disc and the load address, never written down: the file is
+    loaded whole at `layout.BASE`, so the offset a scan gives is the offset in
+    RAM.  `verify_load()` is what earns that.
+    """
+    import iso_source
+
+    with iso_source.open_disc(image) as disc:
+        data = disc.read(name)
+    scan = section.scan(data, layout.GEOMETRY_START[name])
+    one = scan.sections[index]
+    return (layout.BASE[name] + one.offset + section.HEADER_SIZE
+            + primitive * section.PRIMITIVE_SIZE + section.CLUT_IN_PRIMITIVE)
+
+
+def walk_field(game, slot, row, address, verbose=True):
+    """Every CLUT id one field reaches, from one end of its range to the other.
+
+    The assertion is the RAM and not the picture: the id says which palette the
+    next frame will read, where the value cell only says that the label
+    changed.
+
+    **These fields clamp; they do not wrap.**  Measured 2026-09-15: a fourth
+    Right on SKIN leaves the id exactly where the third put it.  So a repeat is
+    the END of the range and not a dropped press, and the walk is Left until
+    the id stops moving, then Right until it stops moving -- which comes back
+    with the whole domain in order, and which is how the beard's columns were
+    counted without assuming how many there are.
+    """
+    import struct
+
+    game.load_looks(slot)
+    game.select_row(row)
+    path = os.path.join(game.out_dir, "clut.bin")
+
+    def read():
+        return struct.unpack("<H", game.read_ram(address, 2, path))[0]
+
+    def to_the_end(button):
+        seen = []
+        for _ in range(WALK_LIMIT):
+            previous = read()
+            game.press(button, expect_change=False)
+            value = read()
+            if value == previous:
+                return seen
+            seen.append(value)
+        raise OracleError(
+            "%s on slot %d kept moving for %d presses of %s: %s"
+            % (row, slot, WALK_LIMIT, button,
+               ["%#06x" % v for v in seen]))
+
+    start = read()
+    to_the_end("Left")
+    values = [read()] + to_the_end("Right")
+    if start not in values:
+        raise OracleError(
+            "%s started at %#06x and the walk never came back to it: %s"
+            % (row, start, ["%#06x" % v for v in values]))
+    if verbose:
+        game.say("%s reaches %d value(s), starting at %#06x: %s"
+                 % (row, len(values), start,
+                    ", ".join("%#06x" % v for v in values)))
+    return values
+
+
+def vram_region(game, x, y, width, height):
+    """One rectangle of the GPU's own frame buffer, as rows of (r, g, b).
+
+    The fork answers `read_vram_region` with a **PNG file**, not with
+    halfwords, so this is as close to the raw VRAM as the server gets.  The
+    comparison downstream is made at five bits a channel, which is what the
+    hardware stores and what survives the trip either way.
+    """
+    import atlas
+
+    reply = game.client.call("read_vram_region", x=x, y=y,
+                             width=width, height=height)
+    path = reply.get("output_path")
+    if not path or not os.path.exists(path):
+        raise OracleError("read_vram_region reported %r and there is no file "
+                          "there" % path)
+    got_w, got_h, rows = atlas.read_png(path)
+    if (got_w, got_h) != (width, height):
+        raise OracleError("asked VRAM for %dx%d at (%d, %d) and the PNG is "
+                          "%dx%d" % (width, height, x, y, got_w, got_h))
+    return rows
+
+
+def _five_bits(pixel):
+    """An 8-bit PNG pixel back down to the five bits the hardware holds."""
+    return tuple(channel >> 3 for channel in pixel[:3])
+
+
+def _disc_five_bits(value):
+    """The same three channels out of one BGR555 halfword on the disc."""
+    return (value & 0x1F, (value >> 5) & 0x1F, (value >> 10) & 0x1F)  # not-an-address: the BGR555 fields
+
+
+def check_palettes(slot=2, verbose=True):
+    """Unknown (d), from the GPU's side: the palettes are the disc's, and static.
+
+    Three things, and the third is the one that makes the first two worth
+    having:
+
+    1. the palette strip in VRAM **is** what `DAT2D.BIN` holds, entry for
+       entry, resolved by the same rule a renderer will use -- so the file a
+       renderer reads is the file the console draws with.  The rule is
+       `texture.covering`, narrower record wins, and row 484 is what makes
+       that a test rather than a formality: six 16-entry records sit on top of
+       a 256-entry one there, and VRAM holds the narrow ones;
+    2. stepping a colour field does **not** write to that strip -- the palettes
+       do not move, the id that points at them does;
+    3. each field's whole cycle of CLUT ids, read out of RAM after every press,
+       which says which windows of the grid it can reach.
+    """
+    import struct
+
+    import iso_source
+    import skin
+    import texture
+
+    ready = preflight()
+    address = clut_address(ready["image"], layout.MODEL, layout.HEAD_SECTION,
+                           layout.HAIR_PRIMITIVES[0])
+    beard = clut_address(ready["image"], layout.MODEL, layout.HEAD_SECTION,
+                         layout.FACE_PRIMITIVES[0])
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = disc.read(layout.DAT2D)
+    records = texture.palettes(data)
+    wide = sorted((r for r in records if r.colours == texture.WIDE),
+                  key=lambda r: r.offset)
+    # How far across each CLUT row to compare: the width of a wide record,
+    # which is as far as this container's own records reach.  Past it the row
+    # belongs to whatever else the frame buffer is holding -- on row 480 that
+    # is a kit palette out of a TEX_*.BIN, and it is not this file's to check.
+    span = texture.WIDE
+
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        game.load_looks(slot)
+
+        print("  every CLUT row of /BIN/DAT2D.BIN against VRAM, resolved the "
+              "way a renderer resolves it")
+        for y in sorted({r.y for r in records}):
+            got = vram_region(game, 0, y, span, 1)[0]
+            differ, unresolved = [], 0
+            for x in range(span):
+                try:
+                    record = texture.covering(records, x, y, 1)
+                except texture.NoPalette:
+                    unresolved += 1
+                    continue
+                want = struct.unpack_from(
+                    "<H", data, record.offset + 2 * (x - record.x))[0]
+                if _five_bits(got[x]) != _disc_five_bits(want):
+                    differ.append(x)
+            print("      row %d: %d of %d entr(y/ies) differ, %d that no "
+                  "record covers" % (y, len(differ), span - unresolved,
+                                     unresolved))
+            if differ:
+                problems.append("VRAM row %d differs from the disc at %d "
+                                "entr(y/ies), first at x=%d"
+                                % (y, len(differ), differ[0]))
+
+        first = wide[0]
+        before = vram_region(game, first.x, first.y, first.colours, 1)
+        game.select_row("H.COL")
+        game.press("Right", expect_change=False)
+        after = vram_region(game, first.x, first.y, first.colours, 1)
+        moved = sum(1 for i in range(first.colours) if before[0][i] != after[0][i])
+        print("  one step of H.COL moved %d of the %d entries of the palette "
+              "in VRAM" % (moved, first.colours))
+        if moved:
+            problems.append("stepping H.COL rewrote %d palette entr(y/ies) in "
+                            "VRAM: the field is not only choosing a window"
+                            % moved)
+
+        print("  the windows each field reaches, read out of RAM per press")
+        for row, at in (("SKIN", address), ("H.COL", address),
+                        ("H.F.COL.", beard)):
+            seen = walk_field(game, slot, row, at, verbose=verbose)
+            cells = [skin.grid(v) for v in seen]
+            print("      %-9s %d value(s): %s"
+                  % (row, len(seen),
+                     ", ".join("row %d col %d" % cell for cell in cells)))
+            if len({cell[0] for cell in cells}) > 1 and \
+                    len({cell[1] for cell in cells}) > 1:
+                problems.append("%s moved both coordinates of the grid, and "
+                                "each field was measured to move one" % row)
+
+    print("oracle --palettes: %s"
+          % ("ok" if not problems else "%d problem(s)" % len(problems)))
+    for line in problems:
+        print("    %s" % line)
+    return 1 if problems else 0
+
+
 def check_buffers(verbose=True):
     """What the two bands every field writes into actually are.
 
@@ -1694,6 +1906,8 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) == 2 and argv[1] == "--palettes":
+            return check_palettes()
         if len(argv) == 2 and argv[1] == "--buffers":
             return check_buffers()
         if len(argv) == 2 and argv[1] == "--tmds":

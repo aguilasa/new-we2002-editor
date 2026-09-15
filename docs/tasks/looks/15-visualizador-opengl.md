@@ -57,6 +57,21 @@ status: pendente
 
 ---
 
+- **O que o renderizador tem de implementar está medido, e é uma frase.**
+  [`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md),
+  2026-09-15: **textura com CLUT e nenhuma cor de vértice** — o índice sai do
+  texel da imagem que a página e o `u` resolvem (`atlas.image_at`), e a cor sai
+  da **janela de dezesseis entradas** que o CLUT id da primitiva nomeia dentro
+  do registro de 256 (`texture.palette_for`, `skin.grid`), nunca do registro
+  inteiro. Uma primitiva deste formato não tem campo de cor nenhum.
+- **E o que ele NÃO precisa fazer:** as paletas na VRAM são as do arquivo e
+  ficam paradas. Medido: as 21 linhas de CLUT do `DAT2D.BIN` batem com a VRAM
+  entrada por entrada, e um passo de `H.COL` reescreve **zero** das 256
+  entradas. Trocar de cor é trocar o **id**, então não há upload de paleta para
+  emular — carregue as 267 uma vez e indexe.
+
+---
+
 ## Objetivo
 
 Uma janela que desenha o boneco de uma tupla de LOOKS, e que se deixa dirigir

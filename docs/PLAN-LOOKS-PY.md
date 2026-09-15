@@ -712,6 +712,20 @@ cujo intervalo **cobre** o id, na largura que a profundidade da página da
 primitiva pede. Errar isso é a falha silenciosa desta fase: as dezesseis
 entradas erradas continuam sendo dezesseis entradas, e continuam desenhando.
 
+**E um registro de 256 entradas é uma fileira de dezesseis CLUTs de 4 bits**, o
+que a §6(d) fechou em 2026-09-15: os três campos de cor da tela são duas
+coordenadas dessa grade — `SKIN` anda a linha, `H.COL` e `H.F.COL.` andam a
+coluna —, e as dezesseis colunas de cada registro se dividem em 1 janela de pele
+nua, 8 de cabelo e 7 de barba.
+
+**A regra do "mais estreito ganha" é a da própria GPU, e isso foi medido.** O
+`oracle.py --palettes` compara as **21 linhas de CLUT** deste contêiner contra a
+VRAM do jogo parado na tela, resolvendo cada `x` pelo `texture.covering`: **zero
+entradas diferentes em todas as 21**. A linha 484 é o caso que decide — seis
+registros de 16 entradas ficam **por cima** do de 256 ali, e comparar contra o
+largo dá **71** entradas diferentes. O desempate que a LOOKS-TASK-10 escolheu
+por elegância é o que o console faz.
+
 Das nove ids distintas que a geometria nomeia, **cinco resolvem neste arquivo e
 quatro vêm de outro lugar** — as três de 8 bits em (0, 485), (0, 486) e
 (0, 488), que são os uniformes, e uma estreita em (336, 510). É a mesma lacuna
@@ -751,7 +765,10 @@ justamente a das 136 primitivas das seções 0 e 1 do `MODEL.BIN`.
 **E os dois rótulos do CARP viraram medição, nenhum por confiança:**
 
 - **"Pieles" em 65.892 / 66.404 / 66.916 / 67.428** são os quatro registros em
-  VRAM (0, 480) a (0, 483), 256 entradas cada. O que confirma não é o passo de
+  VRAM (0, 480) a (0, 483), 256 entradas cada. (A tabela do CARP transcreve os
+  oito campos do quarto registro certos e **erra a própria aritmética**:
+  escreve 67.248 onde os campos dizem 67.428. Dois dígitos trocados, achado ao
+  ler a transcrição em vez de resumi-la, 2026-09-15.) O que confirma não é o passo de
   512 bytes: é que a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md)
   mediu o `SKIN` somando `0x40` ao CLUT id, que é **exatamente uma linha de
   VRAM**, e que quem ele move são as peças de pele nua.
@@ -1098,6 +1115,10 @@ layout.py       O ÚNICO com endereço: LBA, BASE, offsets de lista, 157164,
 section.py      o formato da §1.4: cabeçalho, primitiva de 24 B, vértice de 8 B
 modelfile.py    EDT_MOD.BIN e MODEL.BIN: lista de (contagem, ponteiro), grupos
 texture.py      DAT2D.BIN por bin_archive.py + a lista de CLUTs que falta
+atlas.py        qual registro de imagem cada primitiva amostra (a §1.8)
+skin.py         a grade de 16 janelas dentro de uma paleta larga, e qual
+                coordenada dela cada campo de cor anda (a incógnita (d))
+pieces.py       qual seção é qual peça, por espelho e pelo jogo (a incógnita (b))
 looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...)
 assembly.py     campo de LOOKS -> peça + paleta. O coração, e a Fase 4
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
@@ -1423,7 +1444,10 @@ Três coisas decorrem, e as três importam mais do que a igualdade prometida:
    `oracle.verify_load()` **exige**; endereço errado falha aí.
 2. **Todo byte que difere cai dentro de uma seção, e em posição de primitiva**
    — nunca num cabeçalho de seção, nunca na folga entre duas. O que o jogo
-   reescreve é cor de primitiva, que é exatamente onde a aparência mora.
+   reescreve é o **CLUT id** da primitiva (byte 2) e o `v` das quinas (bytes 1,
+   5, 9, 13), que é exatamente onde a aparência mora. Esta linha dizia "cor de
+   primitiva" até 2026-09-15, e uma primitiva deste formato não tem cor: é a
+   última sobra da leitura que a §1.6 corrigiu.
 3. **O `EDT_MOD.BIN` difere entre os dois save states e o `MODEL.BIN` não.**
    Goleiro e jogador de linha divergem em 162 corridas dentro do `EDT_MOD.BIN`;
    os 20 bytes do `MODEL.BIN` são os mesmos nos dois. A incógnita (a) da §6
@@ -1461,6 +1485,14 @@ ficar **vermelha**, plantada por substituição literal numa cópia da árvore.
 *Guarda que nunca ficou vermelha é decoração.* Os primeiros três, óbvios:
 trocar 24 por 20 no tamanho de primitiva; inverter a ordem da lista de
 montagem; trocar uma paleta por outra.
+
+**Os três existem, e são vinte e três no total** — contados pelo
+`python tools/looks/controls.py`, que imprime a linha. O terceiro ficou em
+aberto até haver o que derrubar, e acabou virando dois, um por jeito de trocar
+uma paleta por outra: `texture-clut-any-record` ignora o intervalo do registro
+(LOOKS-TASK-10) e `skin-matrix-at-the-record` começa a matriz de cabelo no
+registro em vez de uma janela adiante (LOOKS-TASK-12) — que é o erro que o
+critério da própria task trazia escrito.
 
 ### 5.6 O que não tem oráculo — dito antes de começar
 
@@ -1555,17 +1587,48 @@ confere os dois últimos:
 subproduto da (a): cada passo de `SKIN` soma `0x40` ao byte baixo do CLUT id
 das primitivas da pele, em quatro valores — que são as quatro peles do
 `kSkin[4]`. Não há cor de vértice nenhuma em jogo; a pergunta nasceu da leitura
-errada da primitiva, corrigida na §1.6. **A incógnita continua sendo da
-[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md)**, que é quem
-fecha o que o renderizador tem de implementar — o que mudou é que ela começa
-com o veredito na mão em vez de com a pergunta.
+errada da primitiva, corrigida na §1.6.
 
-E desde 2026-09-15 as quatro paletas estão localizadas no disco (§1.7): são os
-quatro registros de **256 entradas** em VRAM (0, 480) a (0, 483), nos offsets
-65.892, 66.404, 66.916 e 67.428 do `DAT2D.BIN`. O `+0x40` do CLUT id é
-**exatamente uma linha de VRAM**, o que fecha o círculo entre o que a RAM mostra
-e o que o arquivo guarda: a 12 não precisa mais achar as paletas, só dizer como
-o renderizador as amostra.
+**E fechada em 2026-09-15** pela
+[`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md), que mediu os
+outros dois campos de cor e o lado da GPU. As quatro paletas estão no disco
+(§1.7) — os quatro registros de **256 entradas** em VRAM (0, 480) a (0, 483),
+offsets 65.892, 66.404, 66.916 e 67.428 —, e um registro de 256 entradas não é
+uma paleta: é uma **fileira de dezesseis CLUTs de 4 bits**, porque o CLUT id
+endereça `x` em passos de dezesseis entradas. Os três campos são **duas
+coordenadas dessa grade**, medidas com o jogo rodando
+(`oracle.py --fields`, `oracle.py --palettes`):
+
+| campo | o que anda | passo no CLUT id | alcance medido | quem ele move |
+|---|---|---|---|---|
+| `SKIN` | a **linha** | `+0x40` | 4 (linhas 480..483) | toda pele nua dos dois bonecos, mais a cabeça |
+| `H.COL` | a **coluna** | `+1` | 8 (colunas 1..8) | 7 primitivas da cabeça, as duas do `HAIR` entre elas |
+| `H.F.COL.` | a **coluna** | `+1` | 7 (colunas 9..15) | exatamente as duas primitivas que o `FACE` move |
+
+**A grade fecha exata:** 1 janela de pele nua + 8 cabelos + 7 barbas = 16. O
+alcance de cada campo foi **andado até as duas pontas**, não deduzido — e aí
+apareceu uma propriedade da tela que não estava escrita em lugar nenhum: **os
+campos de LOOKS travam nas pontas, não dão a volta.** O quarto `Right` no `SKIN`
+deixa o id onde o terceiro o pôs.
+
+**Nenhum byte de vértice se mexe em nenhum dos seis pares campo × slot.** Todo
+acerto cai no **byte 2 da primitiva**, que é o byte baixo do CLUT id. Uma
+primitiva deste formato não tem cor nenhuma para trocar (§1.6): a pergunta da
+incógnita só existia enquanto a leitura da primitiva estava errada.
+
+**E a paleta em si não se mexe.** Medido pelo lado da GPU: as **21 linhas de
+CLUT** do `DAT2D.BIN` batem com a VRAM **entrada por entrada**, resolvidas pela
+mesma regra que o renderizador vai usar — `texture.covering`, registro mais
+estreito ganha —, e um passo de `H.COL` reescreve **zero** das 256 entradas. A
+linha 484 é o que torna isso um teste e não uma formalidade: seis registros de
+16 entradas ficam **por cima** de um de 256 ali, e o que a VRAM guarda são os
+estreitos — comparar contra o largo dá 71 entradas diferentes, e comparar pela
+regra dá zero.
+
+**O que o renderizador tem de implementar, em uma frase:** textura com CLUT e
+nenhuma cor de vértice — o índice sai do texel, e a cor sai da **janela de
+dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
+256, nunca do registro inteiro.
 
 ---
 

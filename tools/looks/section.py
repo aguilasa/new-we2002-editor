@@ -38,6 +38,15 @@ VERTEX_SIZE = 8
 CORNERS_PER_PRIMITIVE = 4
 INDICES_PER_PRIMITIVE = 4
 
+CLUT_IN_PRIMITIVE = 2
+"""Where the CLUT id sits inside a primitive.
+
+Named because it is what every LOOKS colour field writes to and what a live
+read has to aim at: `oracle.py --palettes` walks a field by reading this
+halfword out of RAM after each press.  It was a bare `+ 2` in one function
+until LOOKS-TASK-12 needed to address it from outside.
+"""
+
 
 class BadSection(Exception):
     """Raised when bytes at an offset do not parse as a section."""
@@ -239,7 +248,7 @@ def read_primitive(data: bytes, offset: int) -> Primitive:
         )
     texcoords = tuple((data[offset + slot * 4], data[offset + slot * 4 + 1])
                       for slot in range(CORNERS_PER_PRIMITIVE))
-    clut = struct.unpack_from("<H", data, offset + 2)[0]
+    clut = struct.unpack_from("<H", data, offset + CLUT_IN_PRIMITIVE)[0]
     tpage = struct.unpack_from("<H", data, offset + 6)[0]
     indices = struct.unpack_from("<4H", data, offset + CORNERS_PER_PRIMITIVE * 4)
     return Primitive(texcoords, indices, clut, tpage)

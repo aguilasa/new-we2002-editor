@@ -241,6 +241,84 @@ def write_png(path: str, width: int, height: int, indices: bytes,
     return len(body)
 
 
+def read_png(path: str) -> tuple:
+    """(width, height, [rows of (r, g, b)]) out of an 8-bit PNG.
+
+    Written by hand for the same reason `write_png` was: this tree keeps no
+    image dependency.  What it is FOR is the emulator -- `read_vram_region`
+    answers with a PNG file and not with halfwords, so the only way to compare
+    what the GPU holds against what the disc holds is to decode it.
+
+    Colour types 0, 2, 3 and 6 at eight bits, which is every shape DuckStation
+    writes.  Anything else raises rather than guessing: a misread PNG comes out
+    as plausible colours.
+    """
+    import struct
+    import zlib
+
+    with open(path, "rb") as handle:
+        blob = handle.read()
+    if blob[:8] != b"\x89PNG\r\n\x1a\n":
+        raise NoImage("%s does not open with a PNG signature" % path)
+    at = 8
+    header, palette, data = None, [], bytearray()
+    while at + 8 <= len(blob):
+        length, tag = struct.unpack_from(">I4s", blob, at)
+        body = blob[at + 8:at + 8 + length]
+        at += 12 + length
+        if tag == b"IHDR":
+            header = struct.unpack(">IIBBBBB", body)
+        elif tag == b"PLTE":
+            palette = [tuple(body[i:i + 3]) for i in range(0, len(body), 3)]
+        elif tag == b"IDAT":
+            data += body
+        elif tag == b"IEND":
+            break
+    if header is None:
+        raise NoImage("%s has no IHDR" % path)
+    width, height, depth, colour, _comp, _filt, interlace = header
+    if depth != 8 or interlace or colour not in (0, 2, 3, 6):
+        raise NoImage("%s is depth %d colour type %d interlace %d, and this "
+                      "reader does 8-bit non-interlaced 0/2/3/6"
+                      % (path, depth, colour, interlace))
+    channels = {0: 1, 2: 3, 3: 1, 6: 4}[colour]
+    raw = zlib.decompress(bytes(data))
+    stride = width * channels
+    out, previous = [], bytearray(stride)
+    at = 0
+    for _ in range(height):
+        kind = raw[at]
+        line = bytearray(raw[at + 1:at + 1 + stride])
+        at += 1 + stride
+        for i in range(stride):
+            left = line[i - channels] if i >= channels else 0
+            up = previous[i]
+            upleft = previous[i - channels] if i >= channels else 0
+            if kind == 1:
+                line[i] = (line[i] + left) & 0xFF  # not-an-address: a byte mask
+            elif kind == 2:
+                line[i] = (line[i] + up) & 0xFF  # not-an-address: idem
+            elif kind == 3:
+                line[i] = (line[i] + (left + up) // 2) & 0xFF  # not-an-address: idem
+            elif kind == 4:
+                guess = left + up - upleft
+                best = min((abs(guess - left), 0, left),
+                           (abs(guess - up), 1, up),
+                           (abs(guess - upleft), 2, upleft))
+                line[i] = (line[i] + best[2]) & 0xFF  # not-an-address: idem
+            elif kind:
+                raise NoImage("%s uses filter %d on a row" % (path, kind))
+        previous = line
+        if colour == 3:
+            out.append([palette[v] for v in line])
+        elif colour == 0:
+            out.append([(v, v, v) for v in line])
+        else:
+            out.append([tuple(line[i:i + 3])
+                        for i in range(0, stride, channels)])
+    return (width, height, out)
+
+
 # ---- the labels ----------------------------------------------------------
 
 MEASURED = "measured"
@@ -324,7 +402,7 @@ def self_check(verbose: bool = True) -> int:
 
 
 def _checks(c) -> None:
-    ok = c.ok
+    ok, attempt = c.ok, c.attempt
 
     # The arithmetic that settles section 1.8, on the numbers that settle it.
     page = (512, 256)
@@ -380,6 +458,22 @@ def _checks(c) -> None:
         with open(out, "rb") as fh:
             head = fh.read(8)
         ok("and it carries the PNG signature", head == b"\x89PNG\r\n\x1a\n")
+
+        # Round trip, because the reader exists to decode a PNG this tree did
+        # not write -- the emulator's VRAM answer -- and the only way to test
+        # it without one in the room is against the writer next door.
+        back = attempt("read the PNG back", lambda: read_png(out))
+        ok("the reader returns the size the writer was given",
+           back is not None and back[:2] == (2, 2), "%r" % (back and back[:2],))
+        ok("and the pixels come back in the order they went in",
+           back is not None and back[2] == [[(255, 0, 0), (0, 255, 0)],
+                                            [(0, 0, 0), (0, 0, 0)]],
+           "%r" % (back and back[2],))
+        broken = os.path.join(tmp, "not.png")
+        with open(broken, "wb") as fh:
+            fh.write(b"not a png at all")
+        c.refuses("a file that is not a PNG is refused, not decoded",
+                  lambda: read_png(broken), "PNG signature", NoImage)
 
     # The labels are a table with provenance, and the two claims this module
     # makes are the two the geometry measured.

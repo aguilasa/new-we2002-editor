@@ -261,6 +261,81 @@ container.  CARP's label for it, "Pelos Cuerpos y botines", is right about the
 bodies and the boots and wrong about the hair.
 """
 
+SKIN_PALETTES = (65892, 66404, 66916, 67428)
+"""The four 256-entry palettes at VRAM (0, 480) to (0, 483), one per skin.
+
+LOOKS-TASK-10 found them by tiling the palette bank; LOOKS-TASK-08 found which
+one a figure uses by moving SKIN on the screen and watching the CLUT id walk
+0x40 at a time, which is exactly one VRAM row.  The CARP table calls them
+"Pieles A" to "Pieles D" and gets the fourth wrong -- it prints 67,248 where the
+record says 67,428, two digits swapped in its own arithmetic.
+
+They are a tuple and not four names because the index IS the field's value:
+`skin_colour` is two bits in `src/core/Player.cpp`, and row = 480 + that.
+"""
+
+HAIR_MATRIX_FIRST = 65924
+"""Where the eight hair colours of the first skin start: SKIN_PALETTES[0] + 32.
+
+The offsets of the zeta tutorial's table, read out of the PDF in 2026-09-15
+rather than summarised: `Tipo A` of `Raza Blanca` is 65,924, and the table walks
+32 bytes per type and 512 per race.  **Thirty-two bytes past the skin palette's
+own start**, which is the thing that makes it the FIRST hair colour and not the
+zeroth -- LOOKS-TASK-12's own criterion wrote the matrix as
+`65892 + race*512 + kind*32`, off by one column, and the disc says otherwise:
+column 0 of each record is the bare-skin window, which no hair colour uses.
+"""
+
+HAIR_MATRIX_RACE_STEP = 512
+"""512 B is 256 entries is one whole palette record, so one VRAM row."""
+
+HAIR_MATRIX_KIND_STEP = 32
+"""32 B is 16 entries is one 4-bit CLUT, so one step of x in the CLUT id."""
+
+HAIR_MATRIX_KINDS = 8
+"""Eight hair colours, `Tipo A` to `Tipo H` in the tutorial's own table.
+
+The same eight `src/core/Player.cpp` packs into the three bits of
+`hair_colour`, and the same eight for `beard_colour` beside it.  Two witnesses
+that never met, agreeing on a count.
+"""
+
+BARE_SKIN_COLUMN = 0
+"""Column 0 of a skin record: the window with no hair colour in it.
+
+446 primitives name it -- the bare arms, legs and faces -- and it is the only
+column whose sixteen entries look nothing like the other fifteen.
+"""
+
+HAIR_COLUMN = 1
+"""The column `hair_colour` 0 selects.
+
+Measured on the screen: the head's primitives carry column 1 on the disc, and
+one step of H.COL takes byte 2 of the CLUT id from 1 to 2 on both save states.
+The zeta table starts at the same place from the other side -- its `Tipo A` is
+32 bytes past the record.
+"""
+
+BEARD_COLUMN = 9
+"""The column `beard_colour` 0 selects.
+
+Measured the same way: the two FACE primitives carry column 9 on the disc, and
+one step of H.F.COL. takes them from 9 to 10, on both slots.
+
+`src/core/Player.cpp` gives `beard_colour` three bits, and eight columns from 9
+would need a column 16, which a 256-entry record does not have.  The screen
+settles it: walked end to end by `oracle.py --palettes`, H.F.COL. reaches
+**seven** values, columns 9 to 15, and the grid comes out exactly full.
+"""
+
+HAIR_COLOUR_PRIMITIVES = (0, 1, 4, 9, 14, 16, 17)
+"""The HEAD_SECTION primitives whose CLUT id the H.COL field walks.
+
+Seven, measured identically on both slots, and HAIR_PRIMITIVES is a subset:
+the hair is two of them, and the other five are hair-coloured parts of the head
+that the HAIR field does not reshape.  The whole hit list, not a sample.
+"""
+
 BOOTS_PALETTE = 67940
 """The palette the boots sample, at VRAM (0, 484).
 

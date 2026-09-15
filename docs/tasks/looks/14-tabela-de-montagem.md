@@ -98,6 +98,33 @@ status: pendente
 
 ---
 
+- **Paleta larga não é uma linha da tabela: é dezesseis.** Medido em
+  2026-09-15 pela
+  [`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md): um registro
+  de 256 entradas é uma fileira de **dezesseis CLUTs de 4 bits**, e os três
+  campos de cor são **duas coordenadas** dessa grade — `SKIN` anda a linha
+  (a raça, quatro), `H.COL` e `H.F.COL.` andam a coluna (oito cabelos a partir
+  da 1, sete barbas a partir da 9). A grade fecha exata: 1 + 8 + 7 = 16.
+
+  | campo | peça | primitivas | coordenada | alcance |
+  |---|---|---|---|---|
+  | `SKIN` | toda pele nua, mais a cabeça | 196 e 326 bytes, por slot | linha | 4 |
+  | `H.COL` | cabeça | 0, 1, 4, 9, 14, 16, 17 | coluna | 8 (1..8) |
+  | `H.F.COL.` | cabeça | 8 e 13 | coluna | 7 (9..15) |
+
+- **`H.COL` move sete primitivas, não as duas do cabelo.** As duas que o `HAIR`
+  reformata estão entre elas; as outras cinco são partes da cabeça pintadas com
+  a cor do cabelo. Uma linha de montagem que ligue `H.COL` só ao cabelo deixa
+  cinco primitivas com a cor errada.
+- **O desempate "registro mais estreito ganha" é o que o console faz**, e agora
+  está medido contra a VRAM: as 21 linhas de CLUT do `DAT2D.BIN` batem entrada
+  por entrada quando resolvidas pelo `texture.covering`, e a linha 484 — onde
+  seis paletas de 16 entradas ficam por cima de uma de 256 — dá **71** entradas
+  diferentes se resolvida pelo registro largo. A tabela de montagem pode usar o
+  `covering` sem ressalva.
+
+---
+
 ## Objetivo
 
 `tools/looks/assembly.py`: dada uma tupla de LOOKS, dizer quais peças desenhar

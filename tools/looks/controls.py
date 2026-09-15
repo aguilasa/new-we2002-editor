@@ -128,7 +128,7 @@ CONTROLS = (
     ),
     Control(
         "section-primitive-is-colours", "section.py", "read_primitive",
-        '    clut = struct.unpack_from("<H", data, offset + 2)[0]',
+        '    clut = struct.unpack_from("<H", data, offset + CLUT_IN_PRIMITIVE)[0]',
         "    clut = data[offset + 3]",
         ("section",),
         "the reading this module carried until LOOKS-TASK-08: byte 3 as a mode "
@@ -229,6 +229,26 @@ CONTROLS = (
         "with the pairing free to look outside the figure's own list, four "
         "sections have two partners each and the left shin of one player "
         "mirrors the right shin of the OTHER -- which renames every limb",
+    ),
+    Control(
+        "skin-matrix-at-the-record", "layout.py", "module constant",
+        "HAIR_MATRIX_FIRST = 65924",
+        "HAIR_MATRIX_FIRST = 65892",
+        ("skin",),
+        "section 5.5's third control -- one palette for another -- in the "
+        "exact shape it nearly took: the hair colours start one 16-entry "
+        "window PAST the skin record, and starting at the record itself gives "
+        "type A the bare-skin window and every other type its neighbour's.  "
+        "LOOKS-TASK-12's own criterion wrote the matrix this way",
+    ),
+    Control(
+        "skin-window-unaligned-ok", "skin.py", "column_of",
+        "    if inside % (texture.NARROW * 2):",
+        "    if False:",
+        ("skin",),
+        "an offset that is not a whole window rounded down instead of "
+        "refused: the sixteen entries it returns straddle two colours, and "
+        "they still draw",
     ),
     Control(
         "pieces-mesh-check-blind", "pieces.py", "mesh_agrees",

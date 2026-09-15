@@ -126,7 +126,20 @@ Não se revertem sem o usuário pedir.
     mais geral: **nome de arquivo de terceiro é rótulo como qualquer outro.**
     O `cabellowe2002.bmp` que vem ao lado do tutorial — "cabelo" no nome — é
     byte a byte o registro em **8**, e não o cabelo.
-14. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+14. **Os campos da tela travam nas pontas; não dão a volta.** Medido em
+    2026-09-15 ([`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md)):
+    o quarto `Right` no `SKIN` deixa o CLUT id exatamente onde o terceiro o
+    pôs. Quem anda um campo esperando o ciclo voltar ao início lê esse valor
+    repetido como **pressão que o jogo ignorou** e acusa falha — foi o que a
+    primeira corrida do `--palettes` fez. O jeito de medir o alcance de um campo
+    é andar até a ponta de baixo, depois até a de cima, e contar.
+15. **Registro largo e registro estreito se sobrepõem na VRAM, e o estreito
+    ganha.** Na linha 484 do `DAT2D.BIN` seis paletas de 16 entradas ficam por
+    cima de uma de 256. Comparar a VRAM contra o registro largo dá **71**
+    entradas diferentes e parece defeito de leitura; resolver cada `x` pelo
+    `texture.covering` dá **zero** nas 21 linhas de CLUT do arquivo. O desempate
+    "mais estreito ganha" não é convenção nossa: é o que o console faz.
+16. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam
@@ -174,6 +187,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | `looks_ui` | venv + display (77 sem eles) | — (nasce na 16) | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
@@ -315,8 +330,14 @@ sobre dado que pode não ser o que a tela desenha.
   **por marcador**, não por offset constante — é a regra que o
   `bin_archive.entries()` já segue e a razão de o mapa de PES2 nunca ancorar em
   constante. A contradição 8 × 3.568 tem veredito com o documento errado
-  nomeado. E se o conserto tocou `tools/pes2/bin_archive.py`, o `pes2_selftest`
-  verde aparece no Log.
+  nomeado. **E paleta larga não é paleta: é grade** — um registro de 256
+  entradas são dezesseis CLUTs de 4 bits lado a lado, e um campo que "troca a
+  paleta" pode estar andando a linha (a pele) ou a coluna (o cabelo, a barba);
+  a revisão pergunta **qual das duas**, porque as duas se escrevem no mesmo
+  byte do CLUT id. Alcance de campo é **andado até as duas pontas**, nunca
+  deduzido do número de bits que o `Player.cpp` reserva: `beard_colour` tem três
+  bits e a tela oferece sete valores. E se o conserto tocou
+  `tools/pes2/bin_archive.py`, o `pes2_selftest` verde aparece no Log.
 - **Fase 4** — os domínios conferidos **campo a campo** contra
   `src/core/Player.cpp`, com o cross-check dentro do `self_check()` e não só na
   prosa da task. Para a 14, a pergunta que decide: **cada linha da tabela de

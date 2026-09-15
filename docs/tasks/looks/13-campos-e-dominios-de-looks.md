@@ -52,6 +52,35 @@ status: pendente
 
 ---
 
+- **Três domínios já estão medidos na tela, e um deles discorda do
+  `Player.cpp`.** Andados de ponta a ponta em 2026-09-15 pela
+  [`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md), por
+  `python tools/looks/oracle.py --palettes`, lendo o CLUT id na RAM depois de
+  cada tecla:
+
+  | campo | valores na tela | bits no `src/core/Player.cpp` |
+  |---|---:|---:|
+  | `SKIN` | **4** | 2 (`skin_colour`) |
+  | `H.COL` | **8** | 3 (`hair_colour`) |
+  | `H.F.COL.` | **7** | 3 (`beard_colour`) — oito |
+
+  A terceira linha é o trabalho: **a tela oferece sete e o campo comporta
+  oito.** A grade de paletas explica por que sete — as colunas de barba vão da
+  9 à 15 e a décima sexta não existe —, mas o que o jogo faz com um
+  `beard_colour` 7 gravado no registro do jogador **não foi medido**, e é
+  pergunta desta task.
+- **Campo desta tela trava nas pontas; não dá a volta.** O quarto `Right` no
+  `SKIN` deixa o valor onde o terceiro o pôs. Domínio se mede andando até a
+  ponta de baixo e depois até a de cima — contar ciclo aqui acusa falha que não
+  houve.
+- **`FACE` é a barba, não o rosto.** `FACE` e `H.F.COL.` movem **as mesmas duas
+  primitivas** da seção 24 (8 e 13), que amostram a folha de cabelo do offset
+  3.568 — e o `Player.cpp` tem `beard_style` e `beard_colour` lado a lado, nos
+  bits que sobram ao lado de `hair_style` e `hair_colour`. O rótulo da tela e o
+  nome do campo não são a mesma coisa, e aqui é o nome que está certo.
+
+---
+
 ## Objetivo
 
 `tools/looks/looks.py`: a tupla de aparência, com domínio e rótulo de cada
