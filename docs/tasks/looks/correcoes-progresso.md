@@ -35,6 +35,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-017](/docs/tasks/looks/CORR-LOOKS-017.md) | [LOOKS-TASK-07](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) | Sem `WE2002_LOOKS_IMAGE` o `--check-live` sobe o emulador e morre num traceback, em vez de pular com 77 | Média | [x] concluída | 2026-09-14 |
 | [CORR-LOOKS-018](/docs/tasks/looks/CORR-LOOKS-018.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | A palavra de página declara a profundidade da CLUT, e 1.039 das 2.841 primitivas dizem 8 bits | Alta | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-019](/docs/tasks/looks/CORR-LOOKS-019.md) | [LOOKS-TASK-08](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) | O `--tmds` promete dizer se algum campo move um TMD e não pergunta: a metade negativa do veredito não sai de comando | Média | [x] concluída | 2026-09-15 |
+| [CORR-LOOKS-020](/docs/tasks/looks/CORR-LOOKS-020.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | Quatro seções têm dois parceiros de espelho, e o `mirrors()` fica com o primeiro sem dizer que havia escolha | Média | [ ] pendente | — |
+| [CORR-LOOKS-021](/docs/tasks/looks/CORR-LOOKS-021.md) | [LOOKS-TASK-09](/docs/tasks/looks/09-nomear-as-onze-pecas.md) | "Mesma malha, uniforme diferente" não vale para quatro das onze peças, e o tronco está do lado errado da conta | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -68,6 +70,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-017 — o quarto pré-requisito do `--check-live` não tem caminho de skip
 - [x] CORR-LOOKS-018 — 1.039 de 2.841 primitivas amostram em CLUT de 8 bits, e o plano só diz 4
 - [x] CORR-LOOKS-019 — nenhum comando cruza o resíduo do `--fields` com o mapa de TMDs
+- [ ] CORR-LOOKS-020 — o pareamento de espelho escolhe entre dois candidatos em silêncio
+- [ ] CORR-LOOKS-021 — braço e antebraço têm malha diferente nos dois bonecos, e o resumo diz que não
 
 ## Detalhes por correção
 
@@ -365,3 +369,42 @@ e o ciclo arquivado, o dele em
 - **Fix:** `_tmd_headers()` devolvendo extensão, um `tmd_spans()` no feitio do
   `spans()`, o `report_field()` com **três** baldes (modelo, TMD, resto) e um
   controle negativo que estrague o mapa de TMD e exija vermelho
+
+### CORR-LOOKS-020
+
+- **Arquivo com problema:** `tools/looks/pieces.py`, `mirrors()`
+- **Sintoma:** o `break` assume parceiro único, e **quatro seções têm dois** —
+  7, 8, 18 e 19 —, porque as pernas dos dois bonecos têm conjunto de vértices
+  idêntico (7≡18 e 8≡19, sem espelho). O resultado de hoje está certo por
+  adjacência de índice, não por regra: alimentado com as seções na ordem
+  `7, 19, 8, 18`, o `mirrors()` pareia **cruzando os dois bonecos** e nada na
+  saída diz que houve escolha. Todos os nomes dependem do pareamento, porque o
+  `limbs()` corta por onde o lado troca
+- **Como foi detectado:** chamando o `mirror_axis()` commitado para todos os
+  pares de seções do `EDT_MOD.BIN` e contando candidatos por seção; e rodando
+  o `mirrors()` em três ordens diferentes das mesmas seções
+- **Fix:** parear **dentro da lista do cabeçalho** (a definição de esquerda e
+  direita do mesmo boneco, e as listas já estão lidas), recusar com
+  `BadPieces` a ambiguidade que sobrar, e controle novo mais caso sintético no
+  `self_check()`
+
+### CORR-LOOKS-021
+
+- **Arquivo com problema:** `docs/tasks/looks/09-nomear-as-onze-pecas.md`, o
+  item "Goleiro contra jogador de linha"; e a §1.5 do plano, que não registra
+  a comparação
+- **Sintoma:** o resumo põe o **tronco** entre as peças de tamanho diferente, e
+  ele é igual nos dois bonecos — `84/71`, 2.384 bytes, extensão
+  `108, 150, 76`, como a tabela da própria §1.5 diz; generaliza "mais **dois**
+  bytes de vértice", que vale só do tronco (a coxa difere em **22** e a perna
+  em **zero**); e conclui "mesma malha, uniforme diferente", que **não vale**
+  para braço e antebraço, cuja contagem de vértice difere entre os dois bonecos
+  (30/24 contra 40/34, 80/78 contra 88/86). Quem ler a frase ao escrever
+  montagem carrega uma malha e desenha o goleiro com o braço do jogador de
+  linha
+- **Como foi detectado:** comparando byte a byte as nove seções
+  correspondentes das duas listas, e conferindo contra a tabela da §1.5
+- **Fix:** o item reescrito com os números separados e a leitura certa — o
+  segundo modelo é o mesmo esqueleto com **duas peças remodeladas** —, a
+  comparação registrada na §1.5, a ressalva na LOOKS-TASK-14, e a conta virando
+  asserção no `pieces.py` para não poder envelhecer sozinha
