@@ -43,6 +43,12 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-027](/docs/tasks/looks/CORR-LOOKS-027.md) | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | O cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode | Baixa | [x] concluída | 2026-09-15 |
+| [CORR-LOOKS-028](/docs/tasks/looks/CORR-LOOKS-028.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `draw_list` aplica a primeira das faixas que o `HAIR_MAP` mediu e descarta as outras, sem dizer | Alta | [ ] pendente | — |
+| [CORR-LOOKS-029](/docs/tasks/looks/CORR-LOOKS-029.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `HEAD_RUNS` diz "todo corpo distinto, cada um com sua janela" e o disco diz doze corpos e catorze janelas | Média | [ ] pendente | — |
+| [CORR-LOOKS-030](/docs/tasks/looks/CORR-LOOKS-030.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A décima terceira seção do mapa de cabelo — o `E2` na 54 — não está em nenhuma das três listas | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A constante `AGREEMENT` justifica o piso do corpus com 0,005 e a medição dá 0,008 | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -84,6 +90,12 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
 - [x] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
 - [x] CORR-LOOKS-027 — nenhum comando lê os nomes dos 50 JPGs, e o critério diz que leu
+- [ ] CORR-LOOKS-028 — a segunda faixa medida do cabelo é descartada em silêncio
+- [ ] CORR-LOOKS-029 — "32 corpos distintos" são 32 seções; as malhas são 12 e 24
+- [ ] CORR-LOOKS-030 — o `E2` e a seção 54 faltam nas três listas que dizem treze
+- [ ] CORR-LOOKS-031 — o piso do corpus é justificado com 0,005 e a medição dá 0,008
+- [ ] CORR-LOOKS-032 — os gates transcritos são de antes dos controles da própria task
+- [ ] CORR-LOOKS-033 — a fonte de verdade ainda diz que a LOOKS-TASK-14 está pendente
 
 ## Detalhes por correção
 
@@ -538,3 +550,99 @@ e o ciclo arquivado, o dele em
   cobertura por campo, **exija** a recusa e **pule com 77** sem a pasta — o
   contrato dos outros gates de dado externo, já que o Superpack não entra no
   git; mais o caso sintético no `self_check()`, que roda em qualquer clone
+
+
+### CORR-LOOKS-028
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, o `draw_list`
+- **Sintoma:** o `HAIR_MAP` guarda **as faixas** em que os quads de cada estilo
+  caíram, e dez dos 29 estilos mapeados têm mais de uma; o `draw_list` escreve
+  `bands[0]` em todos os quads nomeados e não registra que a escolha não é
+  medida. Alcança um estilo hoje — o `B1`, faixas (0, 1) na seção 26, cujos
+  quads (1 e 3) saem os dois em `band +0` —, porque os outros nove moram em
+  seções sem quad nomeado. É o mesmo tipo de dúvida que o `head_of` **recusa**
+  em vez de preencher
+- **Como foi detectado:** listando as entradas de faixa múltipla do `HAIR_MAP`
+  contra o `layout.HAIR_QUADS`, e rodando `assembly.py --tuple A-B1-A-A-A`
+- **Fix:** medir a atribuição quad↔faixa pelo `oracle.py --writes`, que já lê
+  `a0` e `a2` no mesmo acerto; enquanto não estiver medida, recusar ou aplicar
+  com o comentário e um caso vermelho
+
+### CORR-LOOKS-029
+
+- **Arquivo com problema:** `tools/looks/layout.py` (`HEAD_RUNS`),
+  `tools/looks/assembly.py` (`head_runs`) e o Log da LOOKS-TASK-14
+- **Sintoma:** o docstring afirma "thirty-two sections each, **every body
+  distinct**" e "each with its **own window** on that sheet", e fecha dizendo
+  que o bloco é "**sixteen pairs** rather than 32 independent heads" — as duas
+  primeiras contra a terceira. Medido no disco: 32 blobs de seção distintos,
+  mas **12** arrays de vértices distintos no primeiro bloco e **24** no
+  segundo, com 15 dos 16 pares partilhando o array; e **14** janelas distintas
+  para as 32 seções, quatro delas (32, 33, 36, 37) sem janela nenhuma. O 32
+  impresso vem de contar `bytes(data[offset:end])` e chamar isso de `body`
+- **Como foi detectado:** script próprio sobre `roms/japanese-shift-jis.bin`
+  comparando arrays de vértices e janelas de `v`, ao lado de
+  `assembly.py --check-image`
+- **Fix:** imprimir "byte-distinct section(s)" e acrescentar a contagem de
+  malhas, com asserção de 12 e 24; reescrever as duas frases do `HEAD_RUNS` e a
+  linha do Log com as janelas medidas
+
+### CORR-LOOKS-030
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md` §6(c),
+  `tools/looks/layout.py` (`HEAD_RUNS`), `tools/looks/assembly.py`
+  (`HAIR_MAP`) e o critério da LOOKS-TASK-14
+- **Sintoma:** os três dizem **treze** seções e enumeram **doze** — falta a 54,
+  que é do `E2`. A letra `E` não aparece em nenhuma das listas, só na frase que
+  chama o `E1` de esquisitice por reescrever a seção do `D` e sugere que o `E`
+  não foi nomeado; o mapa mostra que foi. E o "par de treses" (três estilos
+  mudos, três seções pares nunca nomeadas) **só fecha com a 54 contada**:
+  16 pares − 13 nomeadas = 3
+- **Como foi detectado:** cruzando `assembly.HAIR_MAP` com `looks.HAIR_STYLES`
+  e contando as seções distintas — 13, que é o que `HAIR_MAP_SECTIONS` afirma
+- **Fix:** acrescentar o `E` às três listas, dizendo que é a única letra
+  partida em duas seções (48 com o `D`, e a 54 sozinha), e reescrever a frase
+  do `E1`
+
+### CORR-LOOKS-031
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, o docstring de
+  `AGREEMENT`
+- **Sintoma:** ele justifica o piso de 0,80 dizendo que os renders de `HAIR` e
+  `H.COL` mudam "within 0.005 of each other"; a corrida imprime 0,361 e 0,353,
+  que distam **0,008** — e é 0,008 o que o plano e o Log da task escrevem. É a
+  frase que impede o piso de parecer calibrado no resultado, então o número
+  dela é o que se lê
+- **Como foi detectado:** `assembly.py --corpus` sobre os 50 JPGs, duas vezes,
+  com o mesmo resultado
+- **Fix:** 0,008 no docstring, mais a razão aritmética do piso — com quatro
+  linhas o rho só assume 1,0, 0,8, 0,6, de modo que 0,8 tolera exatamente uma
+  inversão entre vizinhas
+
+### CORR-LOOKS-032
+
+- **Arquivo com problema:** `docs/tasks/looks/14-tabela-de-montagem.md`, a
+  seção `### Gates medidos`
+- **Sintoma:** ela transcreve "rule 1 swept 14 file(s), **8916** line(s)" e
+  "**29 of 29** controls red", que é a árvore da primeira das quatro passagens;
+  a árvore commitada dá **10.182** linhas e **32 de 32** — inclusive os três
+  controles que a própria task acrescentou (29 → 31 → 32)
+- **Como foi detectado:** `python tools/looks/selftest.py --quiet` sobre o
+  commit `cef4921`, e `grep` dos cinco controles de montagem no `controls.py`
+- **Fix:** trocar o bloco pela saída do fechamento; se a corrida da primeira
+  passagem valer como registro, ela fica datada dentro da seção daquela
+  passagem
+
+### CORR-LOOKS-033
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md`, o cabeçalho da §6(c)
+- **Sintoma:** ele diz "**MEDIDA EM PARTE**, 2026-09-15 … que **continua
+  pendente**", enquanto o corpo da mesma seção já traz a medição de 2026-09-16
+  que fechou a task, o `progresso.md` a marca `✅ Concluído` e o frontmatter diz
+  `status: concluído`. É a fonte de verdade da task contradizendo o progresso
+  na primeira linha
+- **Como foi detectado:** `grep -n "continua pendente" docs/PLAN-LOOKS-PY.md`
+  contra a linha 50 do `progresso.md`
+- **Fix:** reescrever o cabeçalho com o veredito de hoje — medida em
+  2026-09-16, com o resíduo nomeado e encaminhado às tasks 15 e 17 —, deixando
+  a data de 2026-09-15 no corpo, onde descreve a primeira metade
