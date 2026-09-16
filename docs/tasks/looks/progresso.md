@@ -49,7 +49,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | 09 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
 | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | `assembly.py` — campo de LOOKS → peça + paleta | 4 | 12, 13 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | ⬜ pendente |
+| [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os três alvos de `ctest` | 7 | 18 | ⬜ Pendente | — | — |

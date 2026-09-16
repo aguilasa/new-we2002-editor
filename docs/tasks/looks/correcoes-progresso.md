@@ -55,6 +55,9 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | As alturas da cabeça e da chuteira estão escritas com o sinal trocado | Baixa | [x] concluída | 2026-09-16 |
 
 | [CORR-LOOKS-038](/docs/tasks/looks/CORR-LOOKS-038.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A cor de barba troca a superfície e não muda um pixel do quadro | Média | [ ] pendente | — |
+| [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | Os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | Média | [ ] pendente | — |
+| [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | Média | [ ] pendente | — |
+| [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -107,6 +110,9 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-036 — a varredura da regra 1 foi anotada antes do fim da task
 - [x] CORR-LOOKS-037 — os intervalos de y são os do render, não os do arquivo
 - [ ] CORR-LOOKS-038 — a cor de barba muda a superfície e não muda o desenho
+- [ ] CORR-LOOKS-039 — o gate da UI mede a única cabeça em que o código funcionava
+- [ ] CORR-LOOKS-040 — onze das doze peças estão fora do gate da UI
+- [ ] CORR-LOOKS-041 — a varredura foi anotada antes da última edição, outra vez
 
 ## Detalhes por correção
 
@@ -722,3 +728,52 @@ e o ciclo arquivado, o dele em
   y -3, with UP = -1" do `scene --check-image`
 - **Fix:** escrever os intervalos como o disco os guarda e dizer, na mesma
   frase, que o render os vira porque `UP` é `-1`
+
+
+### CORR-LOOKS-039
+
+- **Arquivo com problema:** `tools/looks/ui_check.py`, a constante `PAIRS`
+- **Sintoma:** as três tuplas do gate — a referência e os dois pares — são da
+  família `A`, que veste a seção 24, **a única cabeça a que as linhas de cor
+  chegavam** antes da [`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md).
+  O `looks_ui` rodou verde durante todo o defeito; quem o achou foi a revisão,
+  à mão. A CORR-034 pôs o caso cruzado no `scene.py --check-image` e não aqui
+- **Como foi detectado:** replantando `where_head = HEAD` numa cópia da árvore
+  e rodando os dois gates sobre ela — o do núcleo fica vermelho com duas
+  queixas, e o da UI sai **0**
+- **Fix:** um par de cabeça não-`A` no `PAIRS` (`A-I3-A-A-A` contra
+  `B-I3-A-A-A`, medido em 14,54%), o que pede uma referência por par; mais um
+  controle negativo que reponha a chave fixa e exija o vermelho
+
+### CORR-LOOKS-040
+
+- **Arquivo com problema:** `tools/looks/ui_check.py`, `PIECE = "head"` e o
+  descarte da saída do `--smoke`
+- **Sintoma:** as quatro corridas julgadas desenham só a cabeça — pela razão
+  certa, que é não diluir as diferenças de cor — e **nada** julga as outras
+  onze peças. A corrida de `--smoke` desenha a figura inteira e imprime as
+  contagens; o gate lê dela apenas `window up` e o `-32000`. Apagando o corpo
+  numa cópia (593 primitivas e 12 seções viram 18 e 1), o `looks_ui` passa
+  **verde**
+- **Como foi detectado:** plantando `sections_of` devolvendo `[]` e rodando os
+  três gates: o `scene --check-image` fica vermelho ("no head or no boots, so
+  up was not measured"), o `looks_selftest` fica vermelho, e o `looks_ui` sai 0
+- **Fix:** afirmar sobre as contagens que o `--smoke` já imprime, e julgar um
+  PNG da figura inteira com os mesmos juízes de quadro; mais o controle
+  negativo que apaga o corpo
+
+### CORR-LOOKS-041
+
+- **Arquivo com problema:** `docs/tasks/looks/16-contratos-da-ui.md`, o bloco
+  `### Gates medidos`
+- **Sintoma:** ele transcreve "18 file(s), **12609** line(s)"; os dois commits
+  da task medem **12.613**. As quatro linhas são as que a própria task
+  acrescentou ao docstring do `ui_check.py` no fim, ao trocar o inexistente
+  `make looks-venv` pela receita da §4.1. Terceira ocorrência do mesmo defeito
+  no ciclo, e a segunda em duas tasks seguidas
+- **Como foi detectado:** `selftest.py --quiet` em worktrees destacados em
+  `9f1e3af` e `cb26d88` — o mesmo 12.613 nos dois
+- **Fix:** 12.613 com o commit nomeado ao lado, na forma que a CORR-LOOKS-036
+  deixou na task vizinha; e a regra na seção de gates do perfil, porque três
+  ocorrências dizem que "reexecutar o gate ao escrever o Log" não está escrito
+  onde quem executa lê
