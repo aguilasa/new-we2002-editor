@@ -57,6 +57,24 @@ status: pendente
 
 ---
 
+- **A cabeça vem do `assembly.head_of()`, não da seção 24.** Medido em
+  2026-09-16 pela
+  [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md): a linha `HAIR`
+  **escolhe** uma das treze seções pares do primeiro bloco de cabeças (a letra
+  do rótulo) e uma faixa de dezesseis linhas da folha 3.568 (o dígito).
+  Desenhar sempre a 24 desenha sempre a família `A`, e desenha perfeitamente.
+- **Três estilos — `H1`, `M1` e `N1` — o `head_of` RECUSA**, porque o mapa não
+  os alcançou. Quem desenhar tem de tratar a recusa: uma tupla do corpus com um
+  deles não é erro do visualizador.
+- **A faixa só é aplicada em quatro cabeças de treze** (`layout.HAIR_QUADS`);
+  nas outras nove a janela é a do disco. Se uma tupla dessas sair com o cabelo
+  "errado mas plausível", é isto, e é medição que falta, não bug de render.
+- **E o mapa é do jogador de linha.** O segundo bloco de cabeças (74..105) é o
+  do goleiro e ninguém andou a linha nele; o `sections_of()` deixa a cabeça do
+  disco para a figura 1 de propósito.
+
+---
+
 - **O que o renderizador tem de implementar está medido, e é uma frase.**
   [`LOOKS-TASK-12`](/docs/tasks/looks/12-pele-paleta-ou-vertice.md),
   2026-09-15: **textura com CLUT e nenhuma cor de vértice** — o índice sai do

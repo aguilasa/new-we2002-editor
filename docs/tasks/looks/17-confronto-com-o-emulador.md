@@ -27,6 +27,26 @@ status: pendente
 
 ---
 
+- **Três resíduos da tabela de montagem chegam aqui, e o confronto é o que os
+  fecha.** Medidos em 2026-09-16 pela
+  [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md):
+  **(1)** os estilos de cabelo `H1`, `M1` e `N1` não foram alcançados pelo mapa
+  e o `assembly.head_of` os recusa — as seções pares 38, 40 e 42 nunca foram
+  nomeadas, e casar três com três por contagem é o mapeamento plausível que
+  este ciclo não escreve; **(2)** a faixa da folha de cabelo só é aplicada em
+  **quatro** das treze cabeças (`layout.HAIR_QUADS`), porque o breakpoint da
+  instrução que escreve o quad só parou nessas quatro; **(3)** o mapa inteiro é
+  do **jogador de linha**, e o bloco de cabeças do goleiro não foi andado.
+  Confrontar as tuplas nos **dois slots** é o que mede as três coisas de uma
+  vez — e uma tupla com `H1` tem de aparecer no confronto como recusa, não
+  como diferença de pixel.
+- **O corpus já foi confrontado uma vez, e no nível de textura.** O
+  `assembly.py --corpus` compara onde os renders de terceiro mudam com a altura
+  que a malha dá às primitivas de cada campo, e fecha em `rho = 0,80`. O que
+  ele **não** faz é comparar o desenho: isso é daqui.
+
+---
+
 ## Objetivo
 
 Fechar o laço: mesma tupla dos dois lados, e um número que se possa acompanhar

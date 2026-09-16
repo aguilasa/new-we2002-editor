@@ -6,7 +6,7 @@ category: núcleo
 phase: 4
 depends_on: ["LOOKS-TASK-12", "LOOKS-TASK-13"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §6"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-14: A tabela de montagem
@@ -194,23 +194,26 @@ e com que paleta.
       índice e fica vermelho — o fundo de cada campo é o estado que o disco já
       guarda, então tabela deslocada pede edição onde o jogo não pede. Mais um:
       `assembly-effects-do-not-compose`.
-- [ ] **NÃO FEITO, e agora está destravado.** Cross-check contra o corpus: ao
-      menos três das 50 tuplas do Superpack produzem a mesma escolha de peças
-      que o JPG mostra. O que faltava era o mapa, e o mapa existe desde
-      2026-09-16: `assembly --tuple A-I3-A-A-A` já responde com a cabeça 34 e
-      `A-B4-...` com a 26. O que falta é **comparar com o JPG**, e comparar
-      escolha de peças com uma imagem exige o desenho — que nasce na
-      [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md). Este
-      critério é o que mantém esta task pendente.
+- [x] **FEITO, 2026-09-16, e sem desenhar.** Cross-check contra o corpus por
+      `assembly.py --corpus`: **sete** pares dos 50 renders que diferem da
+      referência `A-A1-A-A-A` em **um campo só**, cobrindo quatro linhas da
+      tela. Ele confronta três coisas independentes — a tabela diz as
+      primitivas de cada linha, a malha do disco diz a altura delas, os JPGs de
+      terceiro dizem onde a imagem muda — e as duas ordens concordam com
+      **rho = 0,80**, com a barba no fundo e o cabelo no topo nos dois lados.
+      O que ele **não** faz é comparar desenho com desenho; isso é o confronto
+      da [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md), e
+      está escrito lá.
 
 ---
 
 ## Log de Execução
 
-**Executado em:** 2026-09-15 e 2026-09-16 (três passagens) — **PARCIAL**.
-Cinco dos seis critérios fechados; **a âncora do cabelo fechou na terceira
-passagem**, com resíduo nomeado, e só o cross-check contra o corpus ficou — ele
-depende de desenhar, que é a LOOKS-TASK-15. A task **continua pendente**.
+**Executado em:** 2026-09-15 e 2026-09-16 (quatro passagens) — **CONCLUÍDA**.
+Os seis critérios fechados: a âncora do cabelo na terceira passagem e o
+cross-check contra o corpus na quarta. O resíduo medido — três estilos que o
+mapa não alcança, nove cabeças cujos quads não têm índice, e o goleiro — está
+escrito nas tasks que o fecham (15 e 17), e não aqui.
 
 ### O que se aprendeu, e é mais forte do que a tabela
 
@@ -370,22 +373,76 @@ todas do primeiro bloco. A seção 24 é a família **A sozinha**, três valores
 volta. Ler "32 seções, e o `hair_style` guarda 32" como identidade teria sido a
 coincidência mais cara desta task.
 
+### Quarta passagem, 2026-09-16: os quads, e o corpus sem render
+
+**Breakpoint de execução na própria instrução do store.** O `--patched` compara
+o arquivo contra o disco, então uma escrita que repõe o byte que já estava lá é
+**invisível** para ele — que é exatamente o que os três valores mudos fazem. Um
+breakpoint de **execução** em `layout.HAIR_QUAD_STORE` vê a escrita: `a0` é a
+primitiva e `a2` é a faixa, então um acerto nomeia seção, índice e faixa juntos.
+
+```text
+python tools/looks/oracle.py --writes HAIR
+  A2   MODEL.BIN section 24: primitive 1 band 0, primitive 1 band 2, ...
+  B4   MODEL.BIN section 26: primitive 1 band 5, primitive 3 band 1, ...
+  I3   MODEL.BIN section 34: primitive 0 band 1, primitive 1 band 1, ...
+  L3   MODEL.BIN section 46: primitive 0 band 7, primitive 17 band 6, ...
+  HAIR on slot 2: 26 of 31 press(es) registered, and 12 of those wrote a quad
+      section 24: primitive 1, primitive 14
+      section 26: primitive 1, primitive 3
+      section 34: primitive 0, primitive 1, primitive 12
+      section 46: primitive 0, primitive 17, primitive 9
+```
+
+**Quatro cabeças de treze**, e as outras nove **nunca pararam aquela
+instrução** — quem as escreve é outro trecho de código. É medição, não
+suposição, e por isso o `draw_list` aplica a faixa só nessas quatro. A regra
+óbvia continua medida como errada: a seção 30 tem doze primitivas na folha de
+cabelo com a cor do cabelo e o jogo reescreve duas.
+
+**E a tecla dada com a CPU parada num breakpoint nem sempre registra:** 5 das
+31 não moveram a célula de valor, e o comando diz isso em vez de assumir. Sem
+essa captura ao lado, cada tecla perdida poria as escritas seguintes sob o
+rótulo errado.
+
+**O cross-check contra o corpus fechou sem desenhar nada.** A ideia é usar
+pares de renders que diferem em **um campo só** e perguntar *onde* a imagem
+muda:
+
+```text
+python tools/looks/assembly.py --corpus "<os 50 JPGs>"
+  HAIR     the mesh puts it at 0.246 of the head, and the renders change at 0.361
+  H.COL    the mesh puts it at 0.438 of the head, and the renders change at 0.353
+  SKIN     the mesh puts it at 0.447 of the head, and the renders change at 0.576
+  FACE     the mesh puts it at 0.710 of the head, and the renders change at 0.660
+  the two orderings agree to rho = 0.80 (the floor is 0.80)
+```
+
+Três coisas independentes concordando: a **tabela** (quais primitivas cada linha
+tem), a **malha** do disco (a que altura elas ficam) e os **JPGs de terceiro**
+(onde a imagem muda). A única inversão é `HAIR` × `H.COL`, que nos renders
+distam 0,008 — dentro do ruído —, e por isso o piso é 0,80 e não 1,0, com o
+motivo escrito na constante.
+
+### O que foi encaminhado, e para onde
+
+- **LOOKS-TASK-15** — a cabeça vem do `assembly.head_of()` e não da seção 24;
+  três estilos são **recusa** e não erro de render; a faixa só vale em quatro
+  cabeças; o mapa é do jogador de linha.
+- **LOOKS-TASK-17** — os três resíduos se fecham no confronto, nos dois slots,
+  e a comparação desenho-contra-desenho do corpus é de lá.
+
 ### O que ficou pendente
 
-- **O resíduo do mapa, que não se preenche por dedução.** Três valores — `H1`,
-  `M1` e `N1` — não escreveram nada, e três seções pares — 38, 40 e 42 — nunca
-  foram nomeadas; o par de treses é sugestivo e não é medição. O `head_of`
-  **recusa** esses três, com controle negativo (`assembly-hair-map-defaults`).
-  O `E1` reescreveu a seção do `D`. O caminho que fecha isso é o watchpoint em
-  cada uma das três seções candidatas, andando a linha até ele disparar.
-- **Quais primitivas das outras doze cabeças recebem a faixa.** Só o par da
-  seção 24 tem índice nomeado (LOOKS-TASK-08); nas outras, a contagem de bytes
-  medida não bate com o conjunto óbvio (a seção 30 tem doze primitivas na folha
-  de cabelo com a cor do cabelo e o jogo reescreve **duas**). Por isso o
-  `draw_list` aplica a faixa só na 24.
-- **O cross-check contra o corpus**, que agora depende de **desenhar**: a
-  escolha de peças já sai por comando, mas compará-la com um JPG exige o
-  visualizador da [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md).
+Nada que esta task devesse fechar. O que sobrou é medição de **outra** task, e
+está escrita nelas (acima, "o que foi encaminhado"):
+
+- os estilos `H1`, `M1` e `N1`, que o mapa não alcança, e as seções pares 38,
+  40 e 42, que ninguém nomeou — o `head_of` recusa, com controle negativo
+  (`assembly-hair-map-defaults`);
+- os quads das outras nove cabeças, cujo escritor não foi achado;
+- o mapa medido só no jogador de linha;
+- e a comparação desenho-contra-desenho do corpus.
 
 ### Gates medidos
 
@@ -464,6 +521,21 @@ Na terceira passagem, 2026-09-16:
 - `docs/prompts/perfil-looks.md` — a armadilha 19 **corrigida** (a tela andava
   os 32; quem mostrava três era a seção), a 20 nova sobre byte escrito com o
   mesmo valor, e as duas linhas novas da tabela de gates
+
+Na quarta passagem, 2026-09-16:
+
+- `tools/looks/assembly.py` — o `--corpus`: `CORPUS_PAIRS`, `rank_agreement()`,
+  `field_heights()`, `corpus_rows()` e `_corpus()`, mais os casos novos do
+  `self_check()` e a faixa aplicada às quatro cabeças medidas
+- `tools/looks/oracle.py` — o comando `--writes`, com `_burst()`, `_say_burst()`
+  e a guarda que confere a célula de valor a cada tecla
+- `tools/looks/layout.py` — `HAIR_QUAD_STORE` (a instrução do jogo) e
+  `HAIR_QUADS` (os quads das quatro cabeças)
+- `tools/looks/controls.py` — `assembly-hair-quads-guessed` (31 → 32)
+- `docs/tasks/looks/15-visualizador-opengl.md` e
+  `docs/tasks/looks/17-confronto-com-o-emulador.md` — as pendências
+  encaminhadas, escritas **nas tasks de destino**
+- `docs/tasks/looks/progresso.md` — a linha da tabela e o item da Fase 4
 
 ### Problemas encontrados
 

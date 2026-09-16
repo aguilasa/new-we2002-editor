@@ -61,9 +61,14 @@ back a head that would draw perfectly and be somebody else's.  **E1 is a fourth
 oddity**: it rewrote D's section, which may be the game putting D's head back
 rather than naming E1's own.
 
-**And which primitives of the other twelve heads take the band is not
-measured** -- only section 24's pair is named by index (LOOKS-TASK-08), so only
-family A's band is applied here.
+**And the quads are named for four heads of thirteen.**  An execute breakpoint
+on the store itself, walked over the whole row (`oracle.py --writes`), reads
+`a0` at every write and names the primitive: section 24 is 1 and 14, section 26
+is 1 and 3, section 34 is 0, 1 and 12, section 46 is 0, 9 and 17.  The other
+nine sections never stopped that instruction, so something else writes them and
+this module leaves their window alone.  The obvious rule is measured wrong:
+section 30 has twelve primitives on the hair sheet in the hair colour's column
+and the game rewrites two.
 
 **FACE reaches five**, of the seven its third-party labels name and the eight
 its three bits hold.  Bands 0 to 4 of the same image, 16 rows each, and then it
@@ -75,6 +80,7 @@ Usage:
     python tools/looks/assembly.py --check
     python tools/looks/assembly.py --check-image
     python tools/looks/assembly.py --tuple A-I3-A-F-A
+    python tools/looks/assembly.py --corpus <folder of the 50 renders>
 """
 
 from __future__ import annotations
@@ -213,10 +219,11 @@ the four would be the mapping that draws perfectly and is wrong.
 HEAD_BAND = Effect(
     "HAIR", BAND, layout.ATLAS_BAND, len(HAIR_MAP),
     {HEAD: layout.HAIR_PRIMITIVES},
-    "the band HAIR_MAP measured for this style, applied to the two hair quads "
-    "of section 24 -- the one section whose hair quads are named by index "
-    "(LOOKS-TASK-08).  The other twelve heads keep the disc's own window, "
-    "because which of their primitives take the band is not measured")
+    "the band HAIR_MAP measured for this style, applied to the hair quads of "
+    "the head the style names -- for the four sections whose quads the "
+    "breakpoint of oracle.py --writes caught by index (layout.HAIR_QUADS).  "
+    "The other nine keep the disc's own window, because the instruction that "
+    "writes them has not been found")
 """HAIR's edit where it IS known: family A's own section.
 
 Not in EFFECTS, and that is the point: `edits()` walks EFFECTS with the field's
@@ -349,13 +356,14 @@ def draw_list(disc, values: dict, figure: int) -> list:
     out = []
     if figure == HEAD_FIGURE:
         chosen, bands = head_of(values)
-        if chosen == layout.HEAD_SECTION:
-            # The only section whose hair quads are known BY INDEX: the walk
-            # of LOOKS-TASK-08 named them on this one.  Which primitives of
-            # the other twelve take the band is not measured, so nothing is
-            # banded there -- they keep the disc's own window.
-            plan.setdefault((layout.MODEL, chosen), {})[
-                layout.HAIR_PRIMITIVES] = (HEAD_BAND, bands[0])
+        quads = layout.HAIR_QUADS.get(chosen)
+        if quads:
+            # Four of the thirteen heads have their quads named by index, by
+            # the breakpoint of LOOKS-TASK-14.  The other nine are written by
+            # some other instruction and keep the disc's own window until
+            # something measures them -- a wrong guess here repaints the skull.
+            plan.setdefault((layout.MODEL, chosen), {})[quads] = (
+                HEAD_BAND, bands[0])
     for name, index in sections_of(disc, figure, values):
         scan = section.scan(disc[name], layout.GEOMETRY_START[name])
         one = scan.sections[index]
@@ -416,6 +424,173 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
 
 HEAD_FIGURE = 0
 """The figure HAIR_MAP was measured on: slot 2, the outfield player."""
+
+
+# ---- the corpus, as an outside witness -----------------------------------
+
+CORPUS_REFERENCE = "A-A1-A-A-A"
+CORPUS_PAIRS = (
+    ("FACE", "A-A1-A-F-A"),
+    ("FACE", "A-A1-A-C-A"),
+    ("H.COL", "A-A1-C-A-A"),
+    ("H.COL", "A-A1-F-A-A"),
+    ("HAIR", "A-I3-A-A-A"),
+    ("HAIR", "A-L3-A-A-A"),
+    ("SKIN", "B-A1-A-A-A"),
+)
+"""Renders that differ from the reference in exactly ONE field of the tuple.
+
+Seven of the corpus's fifty, covering four rows of the screen.  Which field each
+one moves is not asserted here -- `parse_tuple` is asked, and a pair that turns
+out to move two fields is a failure of this list rather than a reading.
+"""
+
+CORPUS_TOLERANCE = 40
+"""Sum over three channels, above which two renders differ at a pixel.
+
+They are JPEGs, so a threshold cannot be avoided; this one is measured to leave
+the background at zero while the beard of `A-A1-A-F-A` comes out at 730 pixels.
+"""
+
+AGREEMENT = 0.8
+"""How well the two orderings must agree, as Spearman's rho over the rows.
+
+Not 1.0, and the reason is measured: HAIR and H.COL sit at 0.25 and 0.44 of the
+head on the disc and their renders change within 0.005 of each other, so which
+of the two is higher is inside the noise of both.  What the corpus witnesses is
+the order of the extremes -- the beard at the bottom, the hair at the top -- and
+one inversion between neighbours costs exactly 0.2.
+"""
+
+
+def rank_agreement(first: dict, second: dict) -> float:
+    """Spearman's rho between two orderings of the same keys.
+
+    Pure arithmetic, so the gate has something to be wrong about without a disc
+    or a folder of JPEGs: `self_check` shuffles one side and demands it fall.
+    """
+    keys = sorted(first)
+    if sorted(second) != keys or len(keys) < 2:
+        raise BadAssembly("the two orderings do not cover the same rows")
+
+    def ranked(values):
+        order = sorted(keys, key=lambda key: values[key])
+        return {key: index for index, key in enumerate(order)}
+
+    ours, theirs = ranked(first), ranked(second)
+    count = len(keys)
+    squares = sum((ours[key] - theirs[key]) ** 2 for key in keys)
+    return 1.0 - 6.0 * squares / (count * (count * count - 1))
+
+
+def field_heights(data: bytes) -> dict:
+    """{row: how high its primitives sit}, 0 at the crown and 1 at the chin.
+
+    Out of the disc's own vertices, and this is what makes the corpus a test:
+    the table says which primitives a row owns, the mesh says how high they are,
+    and the renders say where the picture changes.  Three independent things
+    that have to come out in the same order.
+    """
+    import section
+
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    head = scan.sections[layout.HEAD_SECTION]
+    ys = [vertex.y for vertex in head.vertices]
+    low, high = min(ys), max(ys)
+    owners = {
+        "HAIR": layout.HAIR_PRIMITIVES,
+        "FACE": layout.FACE_PRIMITIVES,
+        "H.COL": layout.HAIR_COLOUR_PRIMITIVES,
+        "SKIN": layout.SKIN_COLOUR_PRIMITIVES,
+    }
+    out = {}
+    for row, primitives in owners.items():
+        picked = [head.vertices[index].y
+                  for one in primitives
+                  for index in head.primitives[one].corners]
+        out[row] = (sum(picked) / len(picked) - low) / (high - low)
+    return out
+
+
+def corpus_rows(folder: str) -> dict:
+    """{row: where the renders change}, 0 at the top of the picture, 1 at the
+    bottom.
+
+    One number per row of the screen, averaged over the pairs that move it.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        raise BadAssembly("PIL is not installed, so the renders cannot be "
+                          "read") from None
+
+    def load(name):
+        path = os.path.join(folder, name + ".jpg")
+        if not os.path.isfile(path):
+            raise BadAssembly("the corpus has no %s.jpg" % name)
+        return Image.open(path).convert("RGB")
+
+    reference = load(CORPUS_REFERENCE)
+    width, height = reference.size
+    here = reference.load()
+    base = looks.parse_tuple(CORPUS_REFERENCE)
+    found = {}
+    for row, name in CORPUS_PAIRS:
+        moved = [field for field, value in looks.parse_tuple(name).items()
+                 if base[field] != value]
+        if [looks.BY_NAME[field].row for field in moved] != [row]:
+            raise BadAssembly("%s differs from %s in %r, not in %s alone"
+                              % (name, CORPUS_REFERENCE, moved, row))
+        other = load(name)
+        if other.size != reference.size:
+            raise BadAssembly("%s is %r and the reference is %r"
+                              % (name, other.size, reference.size))
+        there = other.load()
+        rows = []
+        for y in range(height):
+            for x in range(width):
+                if sum(abs(one - two)
+                       for one, two in zip(here[x, y], there[x, y])) \
+                        > CORPUS_TOLERANCE:
+                    rows.append(y)
+        if not rows:
+            raise BadAssembly("%s and %s are the same picture, and their "
+                              "tuples are not" % (name, CORPUS_REFERENCE))
+        found.setdefault(row, []).append(sum(rows) / len(rows) / height)
+    return {row: sum(values) / len(values) for row, values in found.items()}
+
+
+def _corpus(image_path: str, folder: str) -> int:
+    """The cross-check: the disc, this table, and somebody else's renders."""
+    disc = _load(image_path)
+    heights = field_heights(disc[layout.MODEL])
+    rows = corpus_rows(folder)
+    print("  the corpus: %s, %d pair(s) over %d row(s) of the screen"
+          % (folder, len(CORPUS_PAIRS), len(rows)))
+    for row in sorted(heights, key=lambda one: heights[one]):
+        print("      %-8s the mesh puts it at %.3f of the head, and the "
+              "renders change at %.3f" % (row, heights[row], rows[row]))
+    rho = rank_agreement(heights, rows)
+    print("      the two orderings agree to rho = %.2f (the floor is %.2f)"
+          % (rho, AGREEMENT))
+    problems = []
+    if rho < AGREEMENT:
+        problems.append("the mesh's order and the renders' order agree to "
+                        "%.2f, under the %.2f floor" % (rho, AGREEMENT))
+    lowest = max(heights, key=lambda one: heights[one])
+    if max(rows, key=lambda one: rows[one]) != lowest:
+        problems.append("the mesh puts %s lowest and the renders do not"
+                        % lowest)
+    highest = min(heights, key=lambda one: heights[one])
+    if rows[highest] >= 0.5:
+        problems.append("%s is the highest thing this table owns and its "
+                        "renders change at %.3f, below the middle"
+                        % (highest, rows[highest]))
+    print("assembly --corpus: %s"
+          % ("ok" if not problems else "%d problem(s)" % len(problems)))
+    for line in problems:
+        print("    %s" % line)
+    return 1 if problems else 0
 
 
 # ---- the gate ------------------------------------------------------------
@@ -535,6 +710,31 @@ def _checks(c) -> None:
        and apply_to(one.clut, 0, HEAD_BAND, 0) == (one.clut, 0))
     refuses("a beard style past the five the screen reaches is refused",
             lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "measured to reach")
+
+    # The quads the breakpoint named, tied back to the map and to the pair
+    # LOOKS-TASK-08 measured by hand.
+    named = {one[0] for one in HAIR_MAP if one}
+    ok("every head whose quads are named is a head the map names",
+       set(layout.HAIR_QUADS) <= named,
+       "%r" % sorted(set(layout.HAIR_QUADS) - named))
+    ok("and section 24's entry is the pair the field walk named",
+       layout.HAIR_QUADS[layout.HEAD_SECTION] == layout.HAIR_PRIMITIVES)
+    ok("the quads are named for four of the thirteen heads",
+       len(layout.HAIR_QUADS) == 4 and len(named) == HAIR_MAP_SECTIONS)
+
+    # The corpus's arithmetic, which needs neither a disc nor the JPEGs.
+    same = {"a": 0.1, "b": 0.2, "c": 0.3, "d": 0.4}
+    ok("two orderings that agree come out at 1.0",
+       rank_agreement(same, dict(same)) == 1.0)
+    swapped = dict(same, a=0.2, b=0.1)
+    ok("one inversion between neighbours costs 0.2, which is the floor",
+       abs(rank_agreement(same, swapped) - AGREEMENT) < 1e-9)
+    upside = {key: -value for key, value in same.items()}
+    ok("and an ordering read backwards is under the floor",
+       rank_agreement(same, upside) < AGREEMENT)
+    refuses("two orderings over different rows are refused",
+            lambda: rank_agreement(same, {"a": 1.0, "b": 2.0}),
+            "same rows")
 
     # The head a tuple wears: the map answers, and refuses where it is empty.
     ok("the bottom tuple wears section 24, band 0",
@@ -751,7 +951,7 @@ def _tuple(image_path: str, text: str, figure: int = 0) -> int:
 def main(argv: list[str]) -> int:
     if len(argv) == 2 and argv[1] == "--check":
         return self_check()
-    if len(argv) >= 2 and argv[1] in ("--check-image", "--tuple"):
+    if len(argv) >= 2 and argv[1] in ("--check-image", "--tuple", "--corpus"):
         import iso_source
 
         try:
@@ -759,6 +959,16 @@ def main(argv: list[str]) -> int:
         except RuntimeError as exc:
             print("assembly: skipped -- %s" % exc)
             return SKIP
+        if argv[1] == "--corpus":
+            import looks as _looks
+
+            try:
+                folder = _looks.corpus_from_env(
+                    argv[2] if len(argv) > 2 else None)
+            except RuntimeError as exc:
+                print("assembly: skipped -- %s" % exc)
+                return SKIP
+            return _corpus(image, folder)
         if argv[1] == "--tuple":
             if len(argv) < 3:
                 print("--tuple needs a tuple, like A-A1-A-A-A")

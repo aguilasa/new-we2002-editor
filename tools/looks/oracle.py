@@ -36,6 +36,7 @@ Usage:
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
     python tools/looks/oracle.py --patched [HAIR]  # which sections the game has edited, value by value
+    python tools/looks/oracle.py --writes [HAIR]   # every quad the game writes, value by value
 """
 
 from __future__ import annotations
@@ -1871,6 +1872,135 @@ def _say_primitives(row, name, index, values, at, disc_data):
                  us[0], us[-1], vs[0], vs[-1]))
 
 
+BURST_SECONDS = 6
+BURST_LIMIT = 64
+"""How long one press's burst of writes is collected, and how many hits it may
+hold.
+
+The game rewrites a head in a burst of calls, not one, so the end of a press is
+silence rather than a count -- and the limit is what stops a routine that turns
+out to run every frame from becoming an infinite loop instead of a measurement.
+"""
+
+
+def check_writes(row="HAIR", slot=2, verbose=True):
+    """Every hair quad the game writes at each value of a field, with the band.
+
+    The instrument the other two commands were missing.  `--patched` compares
+    the file against the disc, so a write that puts back the byte that is
+    already there is **invisible** to it -- which is exactly what three of
+    HAIR's 32 values did, and why `assembly.HAIR_MAP` has three empty rows.
+
+    An **execute** breakpoint on `layout.HAIR_QUAD_STORE` sees the write
+    itself: `a0` is the primitive being written and `a2` the band, so one hit
+    names the section, the primitive index and the band together.  That also
+    answers the other open half -- which primitives of a head take the band --
+    for every section the row visits, and not only for the one whose pair
+    LOOKS-TASK-08 named.
+    """
+    import looks
+    import who_writes
+
+    ready = preflight()
+    count = looks.BY_ROW[row].values
+    maps = model_maps(ready["image"])
+    out = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        game.load_looks(slot)
+        game.select_row(row)
+        cell = row_value(ROWS.index(row))
+        quiet = game.capture()
+        drift = quiet.difference(game.capture(), pixels(quiet, cell))
+        floor = max(VALUE_MOVED, drift * IDLE_MARGIN)
+        for _ in range(count):
+            game.press("Left", expect_change=False)
+        before = game.capture()
+        for step in range(1, count):
+            hits = _burst(game, maps, press="Right")
+            # **The press has to be proved, because it is made while the CPU
+            # is free-running and stopping at a breakpoint.**  A press the
+            # game never read would put every write after it under the wrong
+            # label, which is worse than a gap.
+            after = game.capture()
+            moved = after.difference(before, pixels(after, cell)) > floor
+            before = after
+            out.append((step, moved, hits))
+            print("      %-4s %s%s"
+                  % (looks.BY_ROW[row].label(step), _say_burst(hits),
+                     "" if moved else "   [the value cell did not move]"),
+                  flush=True)
+    landed = [one for one in out if one[1]]
+    print("  %s on slot %d: %d of %d press(es) registered, and %d of those "
+          "wrote a quad"
+          % (row, slot, len(landed), len(out),
+             sum(1 for one in landed if one[2])), flush=True)
+    sections = sorted({where[1] for _s, _m, hits in out for _band, where in hits})
+    print("      the sections it wrote: %s" % sections, flush=True)
+    quads = {}
+    for _s, _m, hits in out:
+        for _band, where in hits:
+            quads.setdefault(where[1], set()).add(where[2])
+    for index in sorted(quads):
+        print("      section %d: %s" % (index, ", ".join(sorted(quads[index]))),
+              flush=True)
+    return 0
+
+
+def _burst(game, maps, press=None):
+    """[(band, where)] for every write the game makes after one press.
+
+    Collected until the writes stop, not counted: a head is rebuilt in a burst
+    whose length is the game's business.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.HAIR_QUAD_STORE))
+    hits = []
+    try:
+        client.call("continue")
+        if press:
+            client.call("press_button", button=press,
+                        duration_frames=CONFIRM_FRAMES)
+        for _ in range(BURST_LIMIT):
+            if not _wait_for_hit(game, BURST_SECONDS):
+                break
+            registers = client.call("read_registers", group="gpr")
+            target = who_writes.register_value(registers, "a0")
+            value = who_writes.register_value(registers, "v1")
+            if target is not None and value is not None:
+                where = attribute(target, maps)
+                if where:
+                    hits.append(((value - BAND_TOP) // layout.ATLAS_BAND,
+                                 where))
+            client.call("continue")
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+        except Exception:  # noqa: BLE001
+            pass
+    return hits
+
+
+def _say_burst(hits):
+    """One press's writes, folded to one line."""
+    if not hits:
+        return "wrote nothing"
+    folded = {}
+    for band, where in hits:
+        folded.setdefault((where[0], where[1]), []).append(
+            (where[2], band))
+    return "; ".join(
+        "%s section %d: %s" % (name, index,
+                               ", ".join("%s band %d" % (what, band)
+                                         for what, band in sorted(set(parts))))
+        for (name, index), parts in sorted(folded.items(), key=lambda kv: kv[0][1]))
+
+
 def check_patched(row="HAIR", slot=2, verbose=True):
     """Which sections of a model file differ from the DISC at every value.
 
@@ -2642,6 +2772,8 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) >= 2 and argv[1] == "--writes":
+            return check_writes(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--patched":
             return check_patched(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) == 2 and argv[1] == "--hair":

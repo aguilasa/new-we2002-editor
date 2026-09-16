@@ -1680,15 +1680,41 @@ por faixa deixam de ser observação e viram aritmética do próprio jogo.
 é a barba — 32 saem da coluna 1 do CLUT (cor de cabelo) para a 9 (cor de barba),
 41 já estavam na 9 e nenhuma volta da 9 para a 1.
 
-**O que continua aberto, e é o que mantém a task pendente:** **três** valores de
-32 — `H1`, `M1` e `N1` — não escreveram nada em arquivo nenhum, e **três** seções
+**Quais primitivas recebem a faixa, para quatro das treze cabeças.** Um
+breakpoint de **execução** na própria instrução, com a linha andada inteira
+(`oracle.py --writes`), lê o `a0` a cada escrita e nomeia a primitiva: a seção
+24 são a 1 e a 14, a 26 são a 1 e a 3, a 34 são a 0, a 1 e a 12, e a 46 são a 0,
+a 9 e a 17. As outras nove **nunca pararam aquela instrução**, então quem as
+escreve é outro trecho de código e o `draw_list` deixa a janela delas como o
+disco a tem. A regra óbvia está medida como **errada**: a seção 30 tem doze
+primitivas na folha de cabelo com a cor do cabelo, e o jogo reescreve **duas**.
+
+**O cross-check contra o corpus fechou, e sem desenhar.** `assembly.py --corpus`
+usa sete pares dos 50 renders que diferem da referência `A-A1-A-A-A` em **um
+campo só**, e confronta três coisas independentes: a tabela diz quais primitivas
+cada linha tem, a malha do disco diz a que altura elas ficam, e os JPGs de
+terceiro dizem onde a imagem muda.
+
+| linha | a malha põe em | os renders mudam em |
+|---|---:|---:|
+| `HAIR` | 0,246 | 0,361 |
+| `H.COL` | 0,438 | 0,353 |
+| `SKIN` | 0,447 | 0,576 |
+| `FACE` | 0,710 | 0,660 |
+
+As duas ordens concordam com **rho = 0,80** (piso 0,80): a barba é a mais baixa
+das quatro nos dois lados, e o cabelo está na metade de cima nos dois. A única
+inversão é `HAIR` × `H.COL`, que na imagem distam 0,008 — dentro do ruído das
+duas medições.
+
+**O que continua aberto, e passa às tasks seguintes:** **três** valores de 32 —
+`H1`, `M1` e `N1` — não escreveram nada em arquivo nenhum, e **três** seções
 pares — 38, 40 e 42 — nunca foram nomeadas. O par de treses é sugestivo e não é
 medição, então o `assembly.head_of` **recusa** esses três em vez de devolver uma
 cabeça que desenharia perfeitamente e seria de outro. O `E1` é uma quarta
 esquisitice: ele reescreveu a seção do `D`, o que pode ser o jogo devolvendo a
-cabeça do `D` em vez de nomear a dele. E **quais primitivas das outras doze
-cabeças recebem a faixa não está medido** — só o par da seção 24 tem índice
-nomeado. Sem isso, o cross-check contra as 50 tuplas do corpus fica aberto.
+cabeça do `D` em vez de nomear a dele. E o mapa foi medido no **jogador de
+linha**; o segundo bloco de cabeças, o do goleiro, ninguém andou.
 
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como

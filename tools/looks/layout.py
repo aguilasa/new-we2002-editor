@@ -365,6 +365,50 @@ The first run is therefore **sixteen pairs** rather than 32 independent heads:
 `assembly.head_pairs` measures what separates a pair, and it is the beard.
 """
 
+HAIR_QUADS = {
+    24: (1, 14),
+    26: (1, 3),
+    34: (0, 1, 12),
+    46: (0, 9, 17),
+}
+"""Which primitives of a head take the hair band, per MODEL.BIN section.
+
+Measured 2026-09-16 by `oracle.py --writes`, which puts an EXECUTE breakpoint
+on HAIR_QUAD_STORE and reads `a0` -- the primitive the game is writing -- at
+every hit while the row is walked.  Four of the thirteen sections the row
+visits came out this way; the other nine are written somewhere else, because
+walking every value of the row never stopped that instruction with their
+addresses in `a0`.
+
+**So this is a measured four, not a rule for thirteen.**  The obvious rule --
+"the primitives that sample the hair sheet in the hair colour's column" -- is
+measured WRONG: section 30 has twelve of those and the game rewrites two.
+"""
+
+HAIR_QUAD_STORE = 0x80011590
+"""The instruction in the GAME that writes a hair quad's `v`.
+
+Found on 2026-09-16 by a write watchpoint on section 24's own quad
+(LOOKS-TASK-14), which stopped one instruction past it:
+
+    0x80011580  andi  v0, a2, 0x00ff      the band, as the caller passed it
+    0x80011584  sll   v0, v0, 4           ATLAS_BAND rows a band
+    0x80011588  addiu v1, v0, 15
+    0x8001158C  addiu v0, v0, 1
+    0x80011590  sb v1, 0x1(a0)            <- this one
+    0x80011594  sb v0, 0x5(a0)
+    0x80011598  sb v1, 0x9(a0)
+    0x8001159C  sb v0, 0xd(a0)
+
+An **execute** breakpoint here is what turns "which bytes changed" into "which
+primitive of which section, and with what band" -- `a0` is the primitive and
+`a2` is the band -- and it sees a write even when the value written is the one
+already there, which a memory diff cannot.
+
+It is an address in the game's own code, not in a file this project reads, and
+it is here for the same reason every other address is.
+"""
+
 ATLAS_BAND = 16
 """Rows of an image record that one step of HAIR or of FACE walks.
 

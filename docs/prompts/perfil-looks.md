@@ -179,14 +179,28 @@ Não se revertem sem o usuário pedir.
     watchpoint de escrita distingue as duas coisas; um diff de memória, não.
     Por isso o `oracle.catch_write` devolve `None` em vez de estourar quando
     ninguém escreve: "este valor não escreve" é resultado.
-21. **Display list de cena animada não é observação.** As duas faixas de
+21. **Breakpoint de execução vê o que diff de memória não vê, e é assim que
+    se mede escrita de valor igual.** O jogo reescreve o quad de cabelo com o
+    **mesmo** byte quando o estilo não muda de família, e `--patched` (diff
+    contra o disco) lê isso como "nada aconteceu". Um breakpoint na instrução
+    do store — `layout.HAIR_QUAD_STORE` — dá a primitiva em `a0` e a faixa em
+    `a2` a cada escrita. **E um store não serve o arquivo inteiro:** aquela
+    instrução escreve os quads de quatro das treze cabeças, e as outras nove
+    têm outro dono, que ninguém achou ainda. Medido em 2026-09-16
+    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)).
+22. **Tecla dada com a CPU parada num breakpoint pode não registrar.** Na
+    varredura do `--writes`, **5 de 31** teclas não moveram a célula de valor —
+    e sem a captura ao lado, cada uma delas poria as escritas seguintes sob o
+    rótulo errado. Quem anda um campo em execução livre **confere a tela a cada
+    passo** e diz quantas não pegaram, em vez de assumir que pegaram.
+23. **Display list de cena animada não é observação.** As duas faixas de
     buffer da §6(a) se reescrevem a **cada quadro**, porque o boneco anima:
     andar um campo lendo-as morre no `steady()` com *"never settled"*, e está
     certo que morra. Medido em 2026-09-16
     ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)). Quem
     precisar do que o campo escreve lá usa o filtro de churn do `field_diff`,
     ou breakpoint de escrita — que o fork oferece e este ciclo ainda não usou.
-22. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+24. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam
@@ -240,6 +254,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --patched HAIR` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~15 min | `python tools/looks/oracle.py --hair` | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | idem, e leva ~12 min | `python tools/looks/oracle.py --writes HAIR` | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a

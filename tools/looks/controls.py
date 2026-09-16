@@ -250,6 +250,15 @@ CONTROLS = (
         "undoes the first and SKIN A to D comes out moving nothing",
     ),
     Control(
+        "assembly-hair-quads-guessed", "layout.py", "module constant",
+        "    24: (1, 14),",
+        "    24: (1, 15),",
+        ("assembly",),
+        "one of the four quad pairs the breakpoint named replaced by its "
+        "neighbour: the band would land on a primitive the game never writes, "
+        "and the head would draw with a stripe of somebody else's hair",
+    ),
+    Control(
         "assembly-hair-map-defaults", "assembly.py", "head_of",
         "    if found is None:",
         "    if found is None and False:",
