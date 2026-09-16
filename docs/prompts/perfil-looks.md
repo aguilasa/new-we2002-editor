@@ -231,6 +231,19 @@ Não se revertem sem o usuário pedir.
     plantio **distinguir "não rodou" de "rodou e o juiz reprovou"** — sem essa
     separação, um controle que quebra o import passa por guarda exercitada para
     sempre.
+28. **A célula de valor não conta valores.** A caixa do `oracle.row_value`
+    contém a seta de fim de curso — que some na ponta do alcance — e o cursor
+    amarelo que **pisca** entre dois brilhos. Contando por diferença crua da
+    célula, o `FACE` deu **8** valores num slot e 7 no outro, numa linha que
+    mostra sete rótulos nos dois. A letra não pisca: o `confront.glyph_mask`
+    lê só os pixels lavanda do rótulo, com controle ocioso antes. Medido em
+    2026-09-16 ([`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)).
+29. **Um quadro do jogo e um render nosso não se comparam por pixel.** A pose e
+    a câmera mudam quase todo pixel sem que a tupla mude; o que a tupla muda é
+    o **histograma de cor**, e as cores dos quads saem exatas, sem modulação.
+    E vitória por pouco não é derrota: uma interseção não pode liderar por mais
+    do que os **nossos** dois renders distam entre si, e o `confront.verdict`
+    imprime esse teto ao lado.
 
 ---
 
@@ -287,6 +300,9 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(o que o `looks_ui` dirige)* | venv + a imagem; **nada aparece na tela** | `work/venv-looks/Scripts/python tools/looks/ui/app.py --smoke` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | idem | `… tools/looks/ui/app.py --looks <tupla> --screenshot <png>` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | só o venv | `… tools/looks/ui/app.py --compare <png> <png>` | — | LOOKS-TASK-15 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states, o emulador e o venv; ~40 min | `python tools/looks/confront.py --run` | — | LOOKS-TASK-17 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--run` | `python tools/looks/confront.py --score` | — | LOOKS-TASK-17 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/confront.py --reach <LINHA>` | — | LOOKS-TASK-17 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14

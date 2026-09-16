@@ -250,6 +250,55 @@ CONTROLS = (
         "undoes the first and SKIN A to D comes out moving nothing",
     ),
     Control(
+        "confront-margin-ignored", "confront.py", "verdict",
+        "        if right - wrong >= MARGIN:",
+        "        if right - wrong >= -1.0:",
+        ("confront",),
+        "a win by nothing is a coin toss; without the margin every tuple "
+        "whose colours nearly match another's is called a hit",
+    ),
+    Control(
+        "confront-tie-passes", "confront.py", "verdict",
+        "        elif right > wrong:",
+        "        elif right >= wrong:",
+        ("confront",),
+        "a tie between the right render and a wrong one is no verdict; "
+        "letting it rank first calls a coincidence a hit",
+    ),
+    Control(
+        "confront-background-counted", "confront.py", "histogram",
+        "            if colour == drop:",
+        "            if False:",
+        ("confront",),
+        "our render's background counted as a drawn colour dilutes every "
+        "score by the same amount and makes the wrong tuples look close",
+    ),
+    Control(
+        "confront-diagonal-any-clut", "confront.py", "diagonal",
+        "        here = [p for c, p in packets if c == clut]",
+        "        here = [p for c, p in packets]",
+        ("confront",),
+        "matching texcoords across every CLUT finds the hair's order in the "
+        "face's packets, and the diagonal verdict reads somebody else's quad",
+    ),
+    Control(
+        "confront-mask-sees-blink", "confront.py", "glyph_mask",
+        "            if b >= GLYPH_BLUE and b > r:",
+        "            if b >= GLYPH_BLUE or r >= GLYPH_BLUE:",
+        ("confront",),
+        "a mask that takes the yellow cursor box counts its blink as a value; "
+        "that is how a seven-label row was counted as eight",
+    ),
+    Control(
+        "confront-twins-vote", "confront.py", "diagonal",
+        "        if by_set[(clut, frozenset(uvs))] > 1:",
+        "        if False:",
+        ("confront",),
+        "two mirrored primitives share one set of texcoords, so one packet "
+        "answers for both; letting each vote counts it twice, and one of the "
+        "two votes is in the other order",
+    ),
+    Control(
         "scene-texel-in-halfwords", "scene.py", "local_texel",
         "    x = (page_x - record.x) * per + u",
         "    x = (page_x - record.x) + u",

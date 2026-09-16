@@ -57,6 +57,9 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | Os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | Baixa | [x] concluída | 2026-09-16 |
+| [CORR-LOOKS-042](/docs/tasks/looks/CORR-LOOKS-042.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14 | Média | [ ] pendente | — |
+| [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [ ] pendente | — |
+| [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -112,6 +115,9 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-039 — o gate da UI mede a única cabeça em que o código funcionava
 - [x] CORR-LOOKS-040 — onze das doze peças estão fora do gate da UI
 - [x] CORR-LOOKS-041 — a varredura foi anotada antes da última edição, outra vez
+- [ ] CORR-LOOKS-042 — o jogo reescreve o `v` do quad de cabelo, e nós somamos ao do disco
+- [ ] CORR-LOOKS-043 — a recusa do `head_of` só vale para a figura 0
+- [ ] CORR-LOOKS-044 — `FACE` recusa `F` e `G`, que a tela oferece nos dois slots
 
 ## Detalhes por correção
 
@@ -776,3 +782,36 @@ e o ciclo arquivado, o dele em
   deixou na task vizinha; e a regra na seção de gates do perfil, porque três
   ocorrências dizem que "reexecutar o gate ao escrever o Log" não está escrito
   onde quem executa lê
+
+### CORR-LOOKS-042
+
+- **Arquivo com problema:** `tools/looks/scene.py` (`part_for` soma a faixa ao
+  `v` do disco) e `tools/looks/assembly.py`
+- **Sintoma:** os quads 1 e 14 da seção 24 são desenhados com `v` 14 onde o
+  jogo desenha 15 — uma linha de texel a menos, em toda faixa
+- **Como foi detectado:** `confront.py --score`, na leitura da display list:
+  `stored, one row off 2`, exatamente as duas primitivas do `HAIR_QUADS[24]`;
+  o `layout.HAIR_QUAD_STORE` já documentava o `addiu v1, v0, 15`
+- **Fix:** o `v` desses quads sai da regra do store, não do disco; controle que
+  volte ao disco
+
+### CORR-LOOKS-043
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, `sections_of`
+- **Sintoma:** na figura 1 o `head_of` não é consultado; `A-I3-A-A-A` e
+  `A-H1-A-A-A` desenham a seção 24, idênticos ao `A-A1-A-A-A`, sem recusa
+- **Como foi detectado:** `confront.py --score`, slot 1 — os três renders
+  intersectam em 1,000, e só o slot 2 imprime a recusa do `H1`
+- **Fix:** recusar na figura 1 o que o mapa não mediu nela, ou medir o mapa no
+  slot 1
+
+### CORR-LOOKS-044
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, `Effect("FACE", ..., 5)`
+- **Sintoma:** `reach` é definido como o alcance da tela, e a tela alcança
+  **sete** valores nos dois slots; `F` e `G` são recusados com a frase "the
+  screen was measured to reach 5", e dezesseis renders do corpus caem nela
+- **Como foi detectado:** `confront.py --reach FACE`, por máscara de glifo com
+  controle ocioso, e os quadros `reach-{1,2}-FACE-*.png` olhados
+- **Fix:** separar o que a tela oferece do que a tabela sabe aplicar, e medir
+  o que `F` e `G` escrevem

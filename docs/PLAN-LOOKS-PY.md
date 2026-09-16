@@ -1178,6 +1178,8 @@ looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...),
                 a tupla do corpus, e os registros de /SELECT.BIN
 assembly.py     campo de LOOKS -> a edição medida que ele faz na primitiva,
                 e daí a lista de desenho. O coração, e a Fase 4
+confront.py     o confronto da §5.3: rota na tela do jogo, captura contada,
+                histograma de cor contra os nossos renders, e a display list
 scene.py        a lista de desenho virando pontos, (u, v) e textura RGBA --
                 ainda sem Qt, que é o que deixa o render conferível sem tela
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
@@ -1544,6 +1546,41 @@ visualizador, e comparar. A diferença **não precisa ser zero** — resolução
 filtro e câmera diferem —, mas precisa ser **medida, registrada e explicada**.
 Um número que ninguém olhou não é verificação.
 
+**Medido em 2026-09-16 pela
+[`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)**, e o
+comando é `python tools/looks/confront.py --run` (capturas e veredito) ou
+`--score` (só o veredito, sobre as capturas guardadas).
+
+**A métrica não é diferença de pixel, e não pode ser.** Nosso quadro é uma
+prateleira sob câmera livre; o do jogo é uma figura posada, animada, sob o
+enquadramento dele — quase todo pixel difere pela pose e pela câmera, e nada
+disso é a tupla. O que sobrevive a pose, câmera e resolução é **quais cores
+aparecem e em que proporção**, e nesta tela isso é a tupla inteira: as catorze
+cores de 15 bits da nossa cabeça `A-A1-A-A-A` aparecem **exatas** no quadro do
+jogo, porque o PSX desenha esses quads sem modulação. A métrica é a
+**interseção de histogramas de cor de 15 bits** (Swain e Ballard), sobre as
+cores que o nosso lado desenha, e **nunca lida sozinha**: cada quadro do jogo é
+pontuado contra todos os nossos renders do slot, e o veredito é se a tupla
+certa vence a própria linha.
+
+| slot | vence por ≥ 0,02 | em primeiro, abaixo da margem | resíduo nomeado | falha |
+|---|---|---|---|---|
+| 2 — jogador de linha | `B-A1-A-A-A` (0,536), `A-A1-C-A-A` (0,253), `A-I3-A-A-A` (0,028) | `A-A1-A-A-A` (0,016), `A-A1-A-B-E` (0,010) | — | 0 |
+| 1 — goleiro | `B-A1-A-A-A` (0,536), `A-A1-C-A-A` (0,265) | `A-A1-A-A-A` (0,016), `A-A1-A-B-E` (0,010) | `A-I3-A-A-A`, `A-H1-A-A-A` | 0 |
+
+As vitórias "abaixo da margem" são o limite da métrica e não do render:
+`I(g, a) − I(g, b) ≤ 1 − I(a, b)`, e os nossos renders da referência e da barba
+`B`/`E` distam só **0,039** — a barba move 2,39% da cabeça
+([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O `A-H1-A-A-A` do
+slot 2 é **recusa**, não pontuação. A captura se repete **pixel a pixel** a
+partir do `load_state`, nos dois slots.
+
+**E a display list decidiu a diagonal:** dos quads da cabeça que um pacote
+identifica sem ambiguidade, **sete** vêm na ordem em que o arquivo guarda e
+**nenhum** na do `we3d`. O `scene.TRIANGLES` estava certo. Quatro são gêmeos
+de espelho (mesmo conjunto de `(u, v)`, e um pacote não diz qual dos dois é) e
+sete não aparecem nas duas faixas lidas.
+
 ### 5.4 Os 50 renders do Superpack
 
 `We2002\MCR\We DB - polipoli\Faces\` tem **50 JPGs**, dos quais **49 nomeados
@@ -1592,6 +1629,11 @@ critério da própria task trazia escrito.
    as doze peças nas coordenadas do arquivo empilha o boneco inteiro num ponto
    só. Quem posiciona
    é o jogo, na display list da §6(a), em tempo de desenho.
+
+   **O confronto da §5.3 não precisou dela.** A métrica escolhida é de cor, e
+   cor não depende de onde a peça fica; a pose continua **não medida**, e
+   passa à [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)
+   como incógnita aberta com a razão.
 
    A v1 desenha então uma **prateleira**, não uma pose: as peças em fila, cada
    uma inteira, nenhuma sobre a outra (`scene.shelf`). O nome é escolhido para

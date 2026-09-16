@@ -47,6 +47,7 @@ MODULES = (
     "looks",
     "assembly",
     "scene",
+    "confront",
     "ui_check",
     "pieces",
     "iso_source",

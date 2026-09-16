@@ -16,9 +16,9 @@ Two things the GPU here is asked NOT to do, both measured decisions:
 * **no lighting and no vertex colour.**  LOOKS-TASK-12 measured that a
   primitive of this format carries no colour field at all: the pixel is a texel
   index through a CLUT, and anything else would be this window inventing shade.
-* **no back-face culling.**  Which way a quad winds is the diagonal question
-  `scene.TRIANGLES` leaves open; culling on an unverified winding would hide
-  half the figure and look like missing geometry.
+* **no back-face culling.**  The diagonal is measured (`scene.TRIANGLES`), and
+  the winding is not: culling on an unverified winding would hide half the
+  figure and look like missing geometry.
 
 The GL constants are spelled out below because PySide6 exports none of them --
 `QOpenGLFunctions` carries the calls and not the names.  They are numbers of the
@@ -44,12 +44,14 @@ GL_DEPTH_BUFFER_BIT = 0x0100  # not-an-address: idem
 FLOATS_PER_VERTEX = 5
 """x, y, z, u, v -- interleaved, one buffer for the whole scene."""
 
-EDGES = ((0, 1), (1, 2), (2, 3), (3, 0))
-"""The wireframe: the four stored corners in a ring.
+EDGES = ((0, 1), (1, 3), (3, 2), (2, 0))
+"""The wireframe: the outline of a quad, and neither diagonal.
 
-It draws the quad's outline and neither diagonal, on purpose -- the diagonal is
-the thing `scene.TRIANGLES` says is unverified, and a wireframe that drew one
-would state the answer in the picture.
+**It was (0, 1), (1, 2), (2, 3), (3, 0) until 2026-09-16, and that ring drew
+BOTH diagonals.**  The GPU draws a packet as (0, 1, 2) and (1, 2, 3), so the
+shared edge is 1-2 and the outline runs 0-1-3-2; the stored order is the packet
+order, measured by LOOKS-TASK-17 against the game's display list.  The first
+wireframe capture was a lattice of crossing lines, and it read as a busy mesh.
 """
 
 VERTEX_SHADER = """

@@ -36,6 +36,21 @@ status: pendente
 
 ---
 
+- **Três incógnitas chegam aqui abertas da LOOKS-TASK-17, cada uma com a razão
+  medida.** 2026-09-16
+  ([`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)):
+  **(1) a pose** — onde cada peça fica não está em arquivo nenhum lido, e o
+  confronto não precisou dela porque a métrica é de cor; quem posiciona é a
+  display list, que dá coordenada de tela e não de modelo. **(2) o uniforme** —
+  237 das 593 primitivas amostram páginas dos 105 `TEX_*.BIN`, que não têm
+  digest no `layout.py`; o confronto foi feito na cabeça para não depender
+  deles. **(3) sete quads da cabeça não aparecem nas duas faixas de display list
+  lidas** no quadro de referência (`confront.py --score`, `absent 7`) — a
+  hipótese é descarte de face de costas para a câmera do jogo, e não foi
+  medida. As três vão para a §6 como abertas, com isto escrito.
+
+---
+
 ## Objetivo
 
 Fechar o ciclo com plano, perfil e entregáveis batendo com o que existe no

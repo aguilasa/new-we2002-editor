@@ -68,6 +68,18 @@ status: pendente
   recusadas** — 13 por `FACE=F`, 3 por `FACE=G`, 2 pelo estilo `H1`, que o
   `HAIR_MAP` não alcançou, e o `0.jpg`. **Rode, não copie**: o número é da
   pasta que a variável apontar.
+- **A métrica da LOOKS-TASK-17 existe e tem nome:** interseção de histogramas
+  de cor de 15 bits (`confront.histogram`, `confront.intersection`,
+  `confront.verdict`), com o teto de liderança impresso ao lado. **Os JPGs não
+  são o PSX**: compressão com perda não guarda cor de 15 bits exata, então
+  quantizar como a 17 quantiza e esperar as mesmas cores é o erro a evitar — o
+  que a 17 mediu é que o **quadro do emulador** traz as cores exatas, não que
+  um render de terceiro traz.
+- **A tela da barba alcança SETE valores nos dois slots**, medido em 2026-09-16
+  pela [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md)
+  (`confront.py --reach FACE`). A primeira das duas hipóteses abaixo caiu: não
+  é editor gravando o campo direto. A tabela recusa `F` e `G` por outra razão,
+  e é defeito: [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md).
 - **As 16 recusas de barba são um achado, não um limite.** O `assembly` mediu a
   tela da barba chegando a cinco valores e o corpus mostra sete em uso; ou a
   varredura parou cedo (armadilha 19), ou os renders foram feitos por editor

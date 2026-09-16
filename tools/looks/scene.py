@@ -49,11 +49,12 @@ SKIP = 77
 TRIANGLES = ((0, 1, 2), (1, 2, 3))
 """How a quad becomes two triangles, over the four indices AS STORED.
 
-The diagonal this picks is 1-2.  `Primitive.corners` would pick 0-3, and the
-difference is visible on any quad whose four points are not coplanar.  Nothing
-in this cycle has rendered against the game yet, so the stored order stands and
-the alternative is named -- a silent pick here would be indistinguishable from
-a measured one three tasks later.
+The diagonal this picks is 1-2; `Primitive.corners` would pick 0-3.  **Measured
+on 2026-09-16 by LOOKS-TASK-17**, against the game's own display list on the
+reference frame: of the head's quads a packet identifies unambiguously, seven
+carry their texcoords in the order the file stores them and none in the `we3d`
+order (`confront.py --score`).  The GPU draws a packet as (0, 1, 2) and
+(1, 2, 3), so the stored order is the drawn order.
 """
 
 UP = -1
