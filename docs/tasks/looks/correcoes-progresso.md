@@ -48,7 +48,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-030](/docs/tasks/looks/CORR-LOOKS-030.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A décima terceira seção do mapa de cabelo — o `E2` na 54 — não está em nenhuma das três listas | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A constante `AGREEMENT` justifica o piso do corpus com 0,005 e a medição dá 0,008 | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | Baixa | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [x] concluída | 2026-09-16 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -95,7 +95,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-030 — o `E2` e a seção 54 faltam nas três listas que dizem treze
 - [x] CORR-LOOKS-031 — o piso do corpus é justificado com 0,005 e a medição dá 0,008
 - [x] CORR-LOOKS-032 — os gates transcritos são de antes dos controles da própria task
-- [ ] CORR-LOOKS-033 — a fonte de verdade ainda diz que a LOOKS-TASK-14 está pendente
+- [x] CORR-LOOKS-033 — a fonte de verdade ainda diz que a LOOKS-TASK-14 está pendente
 
 ## Detalhes por correção
 

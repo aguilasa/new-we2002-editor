@@ -1629,10 +1629,30 @@ confere os dois últimos:
    são a 9 e a 10, nos dois slots — as mesmas a que a regra 3 chegou pelo outro
    lado.
 
-**(c) A tabela de montagem — MEDIDA EM PARTE, 2026-09-15**, pela
-[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), que **continua
-pendente**. O que liga `HAIR = B3` à peça e à paleta certas é o coração do
-projeto, e o que se sabe agora é isto:
+**(c) A tabela de montagem — MEDIDA, 2026-09-16, com resíduo nomeado**, pela
+[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), em quatro
+passagens: a primeira mediu os cinco campos que reescrevem CLUT e `v`
+(2026-09-15) e a quarta fechou a âncora do cabelo, os quads e o cross-check
+contra o corpus. O que liga `HAIR = B3` à peça e à paleta certas é o coração do
+projeto, e está medido — com quatro buracos **nomeados**, nenhum preenchido por
+dedução:
+
+- **três estilos** — `H1`, `M1`, `N1` — não escreveram nada, e **três seções
+  pares** — 38, 40, 42 — nunca foram nomeadas; o `head_of` **recusa** os três
+  em vez de devolver a cabeça de outro → [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md);
+- **os quads de nove das treze cabeças**, cujo escritor o breakpoint não
+  achou, e — para os dez estilos de faixa múltipla — **qual quad recebe qual
+  faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)) →
+  [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md) desenha com a
+  marca `BAND NOT MEASURED`;
+- **o mapa foi medido só no jogador de linha**; o segundo bloco de cabeças, o
+  do goleiro, ninguém andou → [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md),
+  que corre nos dois slots;
+- **a comparação desenho contra desenho** do corpus, que aqui foi feita por
+  altura de malha e não por pixel →
+  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md).
+
+O que se sabe é isto:
 
 **A geometria nunca muda.** Nenhum vértice se mexeu em nenhum dos seis campos
 andados de ponta a ponta (`oracle.py --assembly`), e campo nenhum troca uma
