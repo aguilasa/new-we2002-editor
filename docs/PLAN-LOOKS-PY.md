@@ -1572,13 +1572,18 @@ certa vence a própria linha.
 | slot | vence por ≥ 0,02 | em primeiro, abaixo da margem | resíduo nomeado | falha |
 |---|---|---|---|---|
 | 2 — jogador de linha | `B-A1-A-A-A` (0,536), `A-A1-C-A-A` (0,253), `A-I3-A-A-A` (0,028) | `A-A1-A-A-A` (0,016), `A-A1-A-B-E` (0,010) | — | 0 |
-| 1 — goleiro | `B-A1-A-A-A` (0,536), `A-A1-C-A-A` (0,265) | `A-A1-A-A-A` (0,016), `A-A1-A-B-E` (0,010) | `A-I3-A-A-A`, `A-H1-A-A-A` | 0 |
+| 1 — goleiro | `B-A1-A-A-A` (0,550), `A-A1-C-A-A` (0,247), `A-I3-A-A-A` (0,028) | `A-A1-A-A-A` (0,016), `A-A1-A-B-E` (0,010) | — | 0 |
 
 As vitórias "abaixo da margem" são o limite da métrica e não do render:
 `I(g, a) − I(g, b) ≤ 1 − I(a, b)`, e os nossos renders da referência e da barba
 `B`/`E` distam só **0,039** — a barba move 2,39% da cabeça
-([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O `A-H1-A-A-A` do
-slot 2 é **recusa**, não pontuação. A captura se repete **pixel a pixel** a
+([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O `A-H1-A-A-A` é
+**recusa**, não pontuação, nos dois slots. A linha do goleiro dizia
+`A-I3-A-A-A` recusado e vitórias de 0,536 e 0,265 até 2026-09-16: a
+[`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md) mediu o mapa de cabelo
+dele, o `I3` voltou a desenhar, e o slot 1 foi re-julgado com o nosso lado
+re-renderizado (a paleta da matriz cresceu com as cores do `I3`, daí os números
+novos). A captura se repete **pixel a pixel** a
 partir do `load_state`, nos dois slots.
 
 **E a display list decidiu a diagonal:** dos quads da cabeça que um pacote
@@ -1746,9 +1751,14 @@ dedução:
   faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)) →
   [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md) desenha com a
   marca `BAND NOT MEASURED`;
-- **o mapa foi medido só no jogador de linha**; o segundo bloco de cabeças, o
-  do goleiro, ninguém andou → [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md),
-  que corre nos dois slots;
+- ~~o mapa foi medido só no jogador de linha~~ — **fechado em 2026-09-16**
+  ([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)): andado no goleiro
+  (`oracle.py --patched HAIR 1`), o mapa volta **igual valor a valor**, nas
+  **mesmas** seções do primeiro bloco (24..55) — nada do segundo bloco
+  (74..105) se mexe — e com as mesmas faixas; `H1`, `M1` e `N1` também não
+  escrevem nada lá. O `--writes HAIR 1` acha os mesmos quads nas mesmas quatro
+  cabeças. A figura 1 veste o `assembly.HAIR_MAP_GOALKEEPER`, e os goleiros do
+  disco recusados por estilo de cabelo caíram de **136 para 4** dos 179;
 - **a comparação desenho contra desenho** do corpus, que aqui foi feita por
   altura de malha e não por pixel →
   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md).
@@ -1839,7 +1849,10 @@ três em vez de devolver uma cabeça que desenharia perfeitamente e seria de
 outro. O `E1` é uma quarta esquisitice, e a pergunta é **por que ele usa a
 seção do `D`** — não se o `E` tem seção: tem, a 54, nomeada pelo `E2`
 ([`CORR-LOOKS-030`](/docs/tasks/looks/CORR-LOOKS-030.md)). E o mapa foi medido no **jogador de
-linha**; o segundo bloco de cabeças, o do goleiro, ninguém andou.
+linha** e, desde 2026-09-16, também no **goleiro**, onde volta igual e nas
+mesmas seções do primeiro bloco
+([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)); esta frase dizia
+que o segundo bloco de cabeças, o do goleiro, ninguém tinha andado.
 
 **As quatro linhas de cor pintam a cabeça que a tupla veste, e não a 24.** O
 `assembly.EFFECTS` endereçava `SKIN`, `H.COL`, `H.F.COL.` e `FACE` à constante

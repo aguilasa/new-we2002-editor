@@ -35,8 +35,8 @@ Usage:
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
-    python tools/looks/oracle.py --patched [HAIR]  # which sections the game has edited, value by value
-    python tools/looks/oracle.py --writes [HAIR]   # every quad the game writes, value by value
+    python tools/looks/oracle.py --patched [HAIR [SLOT]]  # which sections the game has edited, value by value
+    python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
 """
 
 from __future__ import annotations
@@ -2762,6 +2762,24 @@ def _checks(c) -> None:
 
 # --- entry point ----------------------------------------------------------
 
+def row_and_slot(args) -> tuple:
+    """(row, slot) out of `[<ROW> [<SLOT>]]`: HAIR and 2 when left out.
+
+    The slot is what makes the goalkeeper's walk a command and not a script
+    (CORR-LOOKS-047): both measurements always took it, and the command line
+    only ever passed the row.
+    """
+    row = args[0] if args else "HAIR"
+    if len(args) > 2:
+        raise OracleError("a row and a slot at most, and got %r" % (args,))
+    if len(args) < 2:
+        return (row, 2)
+    if not args[1].isdigit() or int(args[1]) not in SLOTS:
+        raise OracleError("slot %r, and the states are %s"
+                          % (args[1], sorted(SLOTS)))
+    return (row, int(args[1]))
+
+
 def main(argv):
     try:
         if len(argv) == 2 and argv[1] == "--check":
@@ -2773,9 +2791,9 @@ def main(argv):
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
         if len(argv) >= 2 and argv[1] == "--writes":
-            return check_writes(row=argv[2] if len(argv) > 2 else "HAIR")
+            return check_writes(*row_and_slot(argv[2:]))
         if len(argv) >= 2 and argv[1] == "--patched":
-            return check_patched(row=argv[2] if len(argv) > 2 else "HAIR")
+            return check_patched(*row_and_slot(argv[2:]))
         if len(argv) == 2 and argv[1] == "--hair":
             return check_hair()
         if len(argv) >= 2 and argv[1] == "--where":

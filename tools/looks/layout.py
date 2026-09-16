@@ -371,6 +371,11 @@ which is its own, so thirteen sections for twelve whole letters and one split.
 The digit picks a sixteen-row band of HAIR_IMAGE inside that section.  The table is `assembly.HAIR_MAP`, which also carries the
 three values that rewrote nothing and the three even sections nobody named.
 
+**And the goalkeeper's hair is the FIRST run too.**  Walked on slot 1
+(CORR-LOOKS-047), the row rewrites the same even sections with the same bands,
+and not one section of 74..105 moved at any press.  So "two runs, two figures"
+is still the coincidence it was: what the second run is, nothing has measured.
+
 The first run is therefore **sixteen pairs** rather than 32 independent heads:
 `assembly.head_pairs` measures what separates a pair, and it is the beard.
 """

@@ -116,9 +116,10 @@ GOALKEEPER_HEAD = ("the goalkeeper's head: HAIR_MAP was measured on the "
                    "outfield player only, so figure 1 draws the disc's section "
                    "24 whatever the style -- and draws it without refusing "
                    "(CORR-LOOKS-043)")
-"""Kept as the record of the residue it named.  Since CORR-LOOKS-043 figure 1
-REFUSES those styles, our side of the matrix drops them the way slot 2 drops
-H1, and EXPECTED has nothing left to excuse."""
+"""Kept as the record of the residue it named.  CORR-LOOKS-043 made figure 1
+REFUSE those styles, and CORR-LOOKS-047 measured the goalkeeper's map, so
+figure 1 draws them again -- with the head its own walk names, and refusing
+only H1, the way slot 2 does.  EXPECTED has nothing left to excuse."""
 
 EXPECTED = {}
 """Misses that are a named residue and not a finding.  Anything else that loses

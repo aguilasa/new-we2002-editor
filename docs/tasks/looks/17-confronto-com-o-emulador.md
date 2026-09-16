@@ -248,6 +248,11 @@ wireframe — dito aqui para não parecer coberto.
   2026-09-16 pela recusa:** a figura 1 aceita só o `A1`, e o slot 1 re-julgado
   dá `2 win, 2 ranked, 0 expected`. O mapa do goleiro continua sem medição —
   é o resíduo, e a transcrição acima é da corrida desta task.
+  **Resíduo fechado em 2026-09-16** pela
+  [`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md): o mapa andado no
+  slot 1 volta igual ao do slot 2, a figura 1 desenha `A-I3-A-A-A` de novo, e o
+  slot 1 re-julgado dá `3 win, 2 ranked, 0 expected, 0 unexplained`. Goleiros
+  do disco recusados por estilo: 136 → 4.
 - **A tela da barba alcança sete valores, e a tabela diz cinco e recusa `F` e
   `G`** ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md)). A hipótese
   "editor gravando direto" da LOOKS-TASK-18 caiu, e a linha está lá.

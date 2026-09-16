@@ -79,7 +79,10 @@ status: concluído
   "errado mas plausível", é isto, e é medição que falta, não bug de render.
 - **E o mapa é do jogador de linha.** O segundo bloco de cabeças (74..105) é o
   do goleiro e ninguém andou a linha nele; o `sections_of()` deixa a cabeça do
-  disco para a figura 1 de propósito.
+  disco para a figura 1 de propósito. *(Até 2026-09-16. A
+  [`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md) andou a linha no
+  goleiro: ele escreve as mesmas seções do primeiro bloco, com as mesmas
+  faixas, e a figura 1 veste o próprio mapa.)*
 
 ---
 

@@ -51,7 +51,9 @@ The writer is in the game, and it is four stores:
     sb    v0, 0xd(a0)
 
 `HAIR_MAP` is that measurement, with the three values that wrote nothing left
-empty rather than filled in.
+empty rather than filled in.  **And it is both figures' map**: walked again on
+the goalkeeper, slot 1, it comes back equal value for value, in the same first
+run of heads -- `HAIR_MAP_GOALKEEPER` (CORR-LOOKS-047).
 
 ## What is still a hole
 
@@ -245,6 +247,66 @@ which E2 answers.  Guessing any of
 the four would be the mapping that draws perfectly and is wrong.
 """
 
+HAIR_MAP_GOALKEEPER = (
+    (24, (0,)),          # A1
+    (24, (2,)),          # A2
+    (24, (1,)),          # A3
+    (26, (0, 1)),        # B1
+    (26, (2,)),          # B2
+    (26, (1,)),          # B3
+    (26, (5,)),          # B4
+    (26, (3,)),          # B5
+    (26, (4,)),          # B6
+    (30, (0, 1)),        # C1
+    (30, (2,)),          # C2
+    (48, (0, 1)),        # D1
+    (48, (2,)),          # D2
+    (48, (0,)),          # E1
+    (54, (0, 1)),        # E2
+    (52, (0, 1, 3)),     # F1
+    (52, (1,)),          # F2
+    (52, (4,)),          # F3
+    (28, (0, 1)),        # G1
+    None,                # H1
+    (34, (0,)),          # I1
+    (34, (2,)),          # I2
+    (34, (1,)),          # I3
+    (36, (0, 1)),        # J1
+    (32, (0, 1, 3, 4)),  # K1
+    (46, (5,)),          # L1
+    (46, (6,)),          # L2
+    (46, (7,)),          # L3
+    None,                # M1
+    None,                # N1
+    (44, (0, 1)),        # O1
+    (50, (0, 1)),        # P1
+)
+"""The same map, measured on the GOALKEEPER: slot 1, figure 1.
+
+**Measured 2026-09-16** by `oracle.py --patched HAIR 1` (CORR-LOOKS-047), the
+walk that found `HAIR_MAP` on slot 2, from slot 1's `load_state`.  It comes back
+equal, value for value -- and that is the finding, not a copy:
+
+* every style rewrites a section of the **first** run, 24..55, and nothing of
+  the second run (74..105) moved at any of the 32 presses.  The second run is
+  not the goalkeeper's hair, whatever it is;
+* the bands are the outfield player's, style for style;
+* and H1, M1 and N1 wrote nothing here either.
+
+Written out on its own, one row a style, and not as `HAIR_MAP` again: two maps
+that agree by measurement and two names for one tuple are different things,
+and the day a remeasure disagrees, this is the row that changes.
+"""
+
+HEAD_FIGURE = 0
+"""The figure a caller with no figure in hand gets: slot 2, the outfield player."""
+
+HAIR_MAPS = {
+    HEAD_FIGURE: HAIR_MAP,
+    1: HAIR_MAP_GOALKEEPER,
+}
+"""Figure -> the hair map measured on it.  Both of EDT_MOD.BIN's two lists."""
+
 HEAD_BAND = Effect(
     "HAIR", BAND, layout.ATLAS_BAND, len(HAIR_MAP),
     {HEAD: layout.HAIR_PRIMITIVES},
@@ -261,7 +323,10 @@ value as the step, and HAIR's value is not a band -- it is a row of HAIR_MAP.
 
 HAIR_MAP_SILENT = 3
 HAIR_MAP_SECTIONS = 13
-"""How many values wrote nothing, and how many distinct sections were named.
+HAIR_MAP_GOALKEEPER_SILENT = 3
+HAIR_MAP_GOALKEEPER_SECTIONS = 13
+"""How many values wrote nothing, and how many distinct sections were named --
+on the outfield player, and on the goalkeeper (CORR-LOOKS-047).
 
 Asserted in `_checks` so that a later measurement which fills the holes has to
 come here and change these two numbers.
@@ -409,8 +474,16 @@ def colour_is_measured(head: int) -> bool:
     return head == HEAD_COLOUR_MEASURED
 
 
-def head_of(values: dict) -> tuple:
-    """(section, band) of the head one tuple draws, out of HAIR_MAP.
+def hair_map(figure: int) -> tuple:
+    """The hair map measured on one figure, or a refusal naming the figure."""
+    if figure not in HAIR_MAPS:
+        raise BadAssembly("figure %d has no hair map; the map was measured on "
+                          "figure(s) %s" % (figure, sorted(HAIR_MAPS)))
+    return HAIR_MAPS[figure]
+
+
+def head_of(values: dict, figure: int = HEAD_FIGURE) -> tuple:
+    """(section, band) of the head one tuple draws, out of the figure's map.
 
     Refuses for the three values that wrote nothing when the map was measured.
     A fallback to section 24 would draw every one of them as an A, perfectly
@@ -419,48 +492,17 @@ def head_of(values: dict) -> tuple:
     style = values.get(looks.BY_ROW["HAIR"].name)
     if style is None:
         raise BadAssembly("this tuple says nothing about HAIR")
-    if not 0 <= style < len(HAIR_MAP):
+    found_map = hair_map(figure)
+    if not 0 <= style < len(found_map):
         raise BadAssembly("hair style %d, and the field holds %d"
-                          % (style, len(HAIR_MAP)))
-    found = HAIR_MAP[style]
+                          % (style, len(found_map)))
+    found = found_map[style]
     if found is None:
         raise BadAssembly(
             "hair style %s wrote nothing to either model file when the map "
             "was measured, so which head it draws is not known -- see "
             "assembly.HAIR_MAP" % looks.BY_ROW["HAIR"].label(style))
     return found
-
-
-DISC_STYLE = 0
-"""The hair style the disc's own head IS: A1, section 24 at band 0.
-
-The only style figure 1 can draw truthfully.  HAIR_MAP was measured on the
-outfield player; nothing has walked the row on the goalkeeper, whose heads are
-the second run (74..105), so any other style on figure 1 would be the disc's A1
-head wearing another label -- measured in LOOKS-TASK-17, three styles on slot 1
-drew histograms 1.000 alike (CORR-LOOKS-043).
-"""
-
-
-def goalkeeper_head(values: dict) -> None:
-    """Refuse, for figure 1, every hair style but the disc's own.
-
-    The refusal the outfield player gets from head_of, extended to the figure
-    the map was never measured on.  Drawing section 24 for an I3 is exactly
-    what head_of refuses to do for an H1, and the goalkeeper was doing it in
-    silence.
-    """
-    style = values.get(looks.BY_ROW["HAIR"].name)
-    if style is None or style == DISC_STYLE:
-        return
-    raise BadAssembly(
-        "hair style %s on figure 1: HAIR_MAP was measured on the outfield "
-        "player only, and the goalkeeper's heads (MODEL.BIN %d..%d) were never "
-        "walked -- figure 1 draws the disc's own head, which is %s, and "
-        "nothing else"
-        % (looks.BY_ROW["HAIR"].label(style), layout.HEAD_RUNS[1][0],
-           layout.HEAD_RUNS[1][1] - 1,
-           looks.BY_ROW["HAIR"].label(DISC_STYLE)))
 
 
 def apply_to(clut: int, band: int, effect, step) -> tuple:
@@ -514,36 +556,35 @@ def draw_list(disc, values: dict, figure: int) -> list:
     dropped: dict = {}
     borrowed: dict = {}
     stored: dict = {}
-    head = head_of(values)[0] if figure == HEAD_FIGURE else None
-    plan = edits(values, head)
-    if figure == HEAD_FIGURE:
-        chosen, bands = head_of(values)
-        if not colour_is_measured(chosen):
-            # The colour rows reach this head now, and their primitive
-            # indices were read off section 24.  Applied, and said.
-            borrowed[(layout.MODEL, chosen)] = tuple(
-                sorted({at for _row, primitives in plan.get(
-                    (layout.MODEL, chosen), {})
-                    if primitives is not None for at in primitives}))
-        quads = layout.HAIR_QUADS.get(chosen)
-        if quads:
-            # Four of the thirteen heads have their quads named by index, by
-            # the breakpoint of LOOKS-TASK-14.  The other nine are written by
-            # some other instruction and keep the disc's own window until
-            # something measures them -- a wrong guess here repaints the skull.
-            plan.setdefault((layout.MODEL, chosen), {})[
-                (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
-            # And their `v` is what the game's store writes, not the file's
-            # plus the band -- see hair_texcoords.
-            stored[(layout.MODEL, chosen)] = quads
-            # And when the style landed in more than one band, WHICH quad took
-            # which was never measured.  The first is applied, and every
-            # primitive it is applied to carries the ones that were dropped, so
-            # the choice travels with the picture instead of disappearing into
-            # a `band +0` that reads like any other.
-            left = unmeasured_bands(chosen, bands)
-            if left:
-                dropped[(layout.MODEL, chosen)] = (quads, left)
+    # Both figures wear the head their own map names (CORR-LOOKS-047).
+    chosen, bands = head_of(values, figure)
+    plan = edits(values, chosen)
+    if not colour_is_measured(chosen):
+        # The colour rows reach this head now, and their primitive
+        # indices were read off section 24.  Applied, and said.
+        borrowed[(layout.MODEL, chosen)] = tuple(
+            sorted({at for _row, primitives in plan.get(
+                (layout.MODEL, chosen), {})
+                if primitives is not None for at in primitives}))
+    quads = layout.HAIR_QUADS.get(chosen)
+    if quads:
+        # Four of the thirteen heads have their quads named by index, by
+        # the breakpoint of LOOKS-TASK-14.  The other nine are written by
+        # some other instruction and keep the disc's own window until
+        # something measures them -- a wrong guess here repaints the skull.
+        plan.setdefault((layout.MODEL, chosen), {})[
+            (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
+        # And their `v` is what the game's store writes, not the file's
+        # plus the band -- see hair_texcoords.
+        stored[(layout.MODEL, chosen)] = quads
+        # And when the style landed in more than one band, WHICH quad took
+        # which was never measured.  The first is applied, and every
+        # primitive it is applied to carries the ones that were dropped, so
+        # the choice travels with the picture instead of disappearing into
+        # a `band +0` that reads like any other.
+        left = unmeasured_bands(chosen, bands)
+        if left:
+            dropped[(layout.MODEL, chosen)] = (quads, left)
     for name, index in sections_of(disc, figure, values):
         scan = section.scan(disc[name], layout.GEOMETRY_START[name])
         one = scan.sections[index]
@@ -584,15 +625,15 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
     share the arm pieces (CORR-LOOKS-021), so loading one and recolouring it
     draws the goalkeeper in short sleeves.
 
-    **The head is the tuple's**, when a tuple is given: `HAIR_MAP` says which of
-    MODEL.BIN's heads the style names.  Without one the disc's own
+    **The head is the tuple's**, when a tuple is given: the figure's map says
+    which of MODEL.BIN's heads the style names.  Without one the disc's own
     `layout.HEAD_SECTION` stands in, which is style A1's head and no other's.
 
-    The map was measured on the OUTFIELD player, figure 0.  The second run of
-    heads (74..105) is the other figure's, and nothing has walked the row on it
-    -- so figure 1 keeps the disc's head, and **refuses** every style that
-    head is not (goalkeeper_head).  It used to draw them all as A1, which made
-    the gap a picture instead of a refusal (CORR-LOOKS-043).
+    **On both figures.**  The goalkeeper drew the disc's head for every style
+    until CORR-LOOKS-043 made it refuse them, because the map had been measured
+    on the outfield player only.  CORR-LOOKS-047 walked the row on slot 1: the
+    goalkeeper rewrites the same sections of the first run with the same bands,
+    so figure 1 wears `HAIR_MAP_GOALKEEPER` and refuses what it left empty.
     """
     import modelfile
 
@@ -608,15 +649,9 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
     out = [(layout.EDT_MOD, where[target])
            for target in models[figure].targets]
     head = HEAD
-    if values is not None and figure == HEAD_FIGURE:
-        head = (layout.MODEL, head_of(values)[0])
-    elif values is not None:
-        goalkeeper_head(values)
+    if values is not None:
+        head = (layout.MODEL, head_of(values, figure)[0])
     return out + [head]
-
-
-HEAD_FIGURE = 0
-"""The figure HAIR_MAP was measured on: slot 2, the outfield player."""
 
 
 # ---- the corpus, as an outside witness -----------------------------------
@@ -883,18 +918,39 @@ def _checks(c) -> None:
     refuses("a quad without four corners is refused",
             lambda: hair_texcoords(disc_quad[:3], 0), "corners")
 
-    # Figure 1 draws the disc's own head and refuses every other style,
-    # because the map was never walked on the goalkeeper (CORR-LOOKS-043).
-    ok("figure 1 accepts the style its head is",
-       attempt("the disc's style on figure 1",
-               lambda: goalkeeper_head(looks.parse_tuple("A-A1-A-A-A")),
-               default="raised") is None)
-    refuses("and refuses one it is not, naming the map it was measured on",
-            lambda: goalkeeper_head(looks.parse_tuple("A-I3-A-A-A")),
-            "outfield")
-    refuses("including a style the map could not place on figure 0",
-            lambda: goalkeeper_head(looks.parse_tuple("A-H1-A-A-A")),
-            "outfield")
+    # Figure 1 wears the head the GOALKEEPER's map names.  It drew section 24
+    # for every style, then refused them all (CORR-LOOKS-043), and the walk on
+    # slot 1 is what lets it draw them (CORR-LOOKS-047).
+    ok("figure 1 wears section 24 for A1",
+       attempt("A1 on figure 1",
+               lambda: head_of(looks.parse_tuple("A-A1-A-A-A"), 1),
+               default=None) == (layout.HEAD_SECTION, (0,)))
+    ok("and section 34 for I3, the style it used to refuse",
+       attempt("I3 on figure 1",
+               lambda: head_of(looks.parse_tuple("A-I3-A-A-A"), 1),
+               default=None) == (34, (1,)))
+    refuses("and refuses H1, which wrote nothing on the goalkeeper either",
+            lambda: head_of(looks.parse_tuple("A-H1-A-A-A"), 1),
+            "wrote nothing")
+    refuses("a figure with no measured map is refused, not defaulted",
+            lambda: head_of(looks.parse_tuple("A-A1-A-A-A"), 2), "no hair map")
+    ok("both of EDT_MOD.BIN's figures have a map", sorted(HAIR_MAPS) == [0, 1])
+    ok("the goalkeeper's map has a row for every value, three of them empty",
+       len(HAIR_MAP_GOALKEEPER) == 32
+       and sum(1 for one in HAIR_MAP_GOALKEEPER if one is None)
+       == HAIR_MAP_GOALKEEPER_SILENT)
+    keeper = {one[0] for one in HAIR_MAP_GOALKEEPER if one}
+    ok("and names %d sections, all in the FIRST head run -- none of 74..105"
+       % HAIR_MAP_GOALKEEPER_SECTIONS,
+       len(keeper) == HAIR_MAP_GOALKEEPER_SECTIONS
+       and all(layout.HEAD_RUNS[0][0] <= index < layout.HEAD_RUNS[0][1]
+               for index in keeper), "%r" % sorted(keeper))
+    # Measured equal, row for row.  A remeasure that disagrees changes the
+    # goalkeeper's rows and this line, not the outfield player's map.
+    ok("the goalkeeper's walk came back equal to the outfield player's",
+       HAIR_MAP_GOALKEEPER == HAIR_MAP,
+       "%r" % [i for i, (a, b) in enumerate(zip(HAIR_MAP, HAIR_MAP_GOALKEEPER))
+               if a != b])
 
     ok("a style with one band chooses nothing",
        unmeasured_bands(24, (0,)) == ())
@@ -1296,16 +1352,18 @@ def _check_image(image_path: str) -> int:
     # draw a different head, and the same one twice is the failure a defaulted
     # map would hide.
     heads = {}
-    for text in ("A-A1-A-A-A", "A-I3-A-A-A", "A-B4-A-A-A"):
-        parts = draw_list(disc, looks.parse_tuple(text), HEAD_FIGURE)
-        heads[text] = sorted({p["section"] for p in parts
-                              if p["file"] == layout.MODEL})
+    for figure in sorted(HAIR_MAPS):
+        for text in ("A-A1-A-A-A", "A-I3-A-A-A", "A-B4-A-A-A"):
+            parts = draw_list(disc, looks.parse_tuple(text), figure)
+            heads["%s on figure %d" % (text, figure)] = sorted(
+                {p["section"] for p in parts if p["file"] == layout.MODEL})
     print("  the head each tuple wears: %s"
           % ", ".join("%s -> %s" % (text, sections)
                       for text, sections in heads.items()))
-    if len({tuple(v) for v in heads.values()}) != len(heads):
-        problems.append("two of the three tuples wear the same head, and they "
-                        "name three different sections in HAIR_MAP")
+    if len({tuple(v) for v in heads.values()}) != len(heads) // len(HAIR_MAPS):
+        problems.append("two of the three tuples wear the same head on a "
+                        "figure, and they name three different sections in "
+                        "its map")
     if any(len(v) != 1 for v in heads.values()):
         problems.append("a tuple drew %r head section(s) out of MODEL.BIN, "
                         "and a figure wears one" % [len(v) for v in

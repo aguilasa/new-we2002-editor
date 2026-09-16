@@ -293,9 +293,9 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --patched HAIR` | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min | `python tools/looks/oracle.py --patched HAIR [<SLOT>]` — o slot existe desde a CORR-LOOKS-047, e sem ele é o 2 | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~15 min | `python tools/looks/oracle.py --hair` | — | LOOKS-TASK-14 |
-| *(sem alvo ainda)* | idem, e leva ~12 min | `python tools/looks/oracle.py --writes HAIR` | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | idem, e leva ~3 a 12 min | `python tools/looks/oracle.py --writes HAIR [<SLOT>]` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |

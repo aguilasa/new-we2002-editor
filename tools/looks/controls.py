@@ -455,13 +455,14 @@ CONTROLS = (
         "4, and the figure draws a beard nobody has seen",
     ),
     Control(
-        "assembly-goalkeeper-draws-any-style", "assembly.py", "goalkeeper_head",
-        "    if style is None or style == DISC_STYLE:",
-        "    if True:",
+        "assembly-goalkeeper-unmapped", "assembly.py", "HAIR_MAPS",
+        "    1: HAIR_MAP_GOALKEEPER,",
+        "",
         ("assembly",),
-        "figure 1 accepting every hair style: the goalkeeper draws the disc's "
-        "A1 head under any label, perfectly and in silence, which is what "
-        "head_of refuses to do for the outfield player",
+        "figure 1 back to having no map: every goalkeeper refuses, I3 "
+        "included, which is where CORR-LOOKS-043 left it and 136 of the "
+        "disc's 179 goalkeepers with it -- the walk on slot 1 is what took "
+        "them back (CORR-LOOKS-047)",
     ),
     Control(
         "assembly-hair-v-from-disc", "assembly.py", "hair_texcoords",
