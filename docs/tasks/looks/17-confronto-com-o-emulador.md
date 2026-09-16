@@ -140,6 +140,14 @@ por mais do que os **nossos** dois renders distam. A referência e a barba
 código e aqui, porque regra escrita depois do dado é o tipo que se ajusta a
 ele; a razão é o limite, não o número.
 
+*E até 2026-09-16 o código usava o número, não o limite*
+([`CORR-LOOKS-045`](/docs/tasks/looks/CORR-LOOKS-045.md)): a condição era
+`right > wrong`, que aceitava liderança de 0,001 sob teto de 0,5. Agora o
+`ranked` só vale onde o **teto** tornou a margem inalcançável — teto abaixo de
+`2 × MARGIN`, isto é, a margem pedindo mais que metade do possível. Fora disso,
+liderança abaixo da margem é `unexplained`. Os dois `ranked` desta corrida
+(teto 0,039) continuam passando, e o re-julgamento dá o mesmo placar.
+
 **A display list é juiz de ordem de vértice.** A GPU desenha um pacote como
 (0, 1, 2) e (1, 2, 3); casar os `(u, v)` de cada primitiva com os pacotes diz
 em que ordem o jogo as manda. A ordem **guardada** ganhou por 7 a 0, e isso

@@ -243,7 +243,10 @@ Não se revertem sem o usuário pedir.
     o **histograma de cor**, e as cores dos quads saem exatas, sem modulação.
     E vitória por pouco não é derrota: uma interseção não pode liderar por mais
     do que os **nossos** dois renders distam entre si, e o `confront.verdict`
-    imprime esse teto ao lado.
+    imprime esse teto ao lado. **Mas só onde o teto explica:** liderança abaixo
+    da margem passa como `ranked` quando o teto é menor que `2 × MARGIN`, e
+    falha sob teto largo — até a
+    [`CORR-LOOKS-045`](/docs/tasks/looks/CORR-LOOKS-045.md) passava sempre.
 
 ---
 

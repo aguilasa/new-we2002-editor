@@ -259,8 +259,8 @@ CONTROLS = (
     ),
     Control(
         "confront-tie-passes", "confront.py", "verdict",
-        "        elif right > wrong:",
-        "        elif right >= wrong:",
+        "        elif right > wrong and ceiling < 2 * MARGIN:",
+        "        elif right >= wrong and ceiling < 2 * MARGIN:",
         ("confront",),
         "a tie between the right render and a wrong one is no verdict; "
         "letting it rank first calls a coincidence a hit",
@@ -416,6 +416,16 @@ CONTROLS = (
         "the pale skin's window whatever the screen says, and the nine that "
         "are not skin go back to being invisible -- which is the state "
         "CORR-LOOKS-026 found",
+    ),
+    Control(
+        "confront-ranked-ignores-ceiling", "confront.py", "verdict",
+        "        elif right > wrong and ceiling < 2 * MARGIN:",
+        "        elif right > wrong:",
+        ("confront",),
+        "the ranked verdict back to any lead above zero: a lead of 0.001 "
+        "under a ceiling of 0.5 passes, and prints the 0.5 that says it "
+        "should not have -- the case confront-margin-ignored does not reach, "
+        "because that one turns losses into wins and reddens for that",
     ),
     Control(
         "assembly-unmeasured-as-unreached", "assembly.py", "edits",

@@ -229,7 +229,13 @@ def verdict(scores: dict, slot: int, alike: dict | None = None,
     of the head (CORR-LOOKS-038) -- so the most either can lead the other by is
     0.039, and a MARGIN of 0.02 asks for half the ceiling from frames that score
     0.77 of a perfect match.  A lead under MARGIN is therefore printed with that
-    ceiling beside it, and does not fail; ranking second does.
+    ceiling beside it, and does not fail -- **but only where the ceiling is what
+    made MARGIN unreachable**: a ceiling under `2 * MARGIN`, so that MARGIN asks
+    for more than half of the most any lead can be.  Under a wide ceiling a lead
+    below MARGIN is a coin toss the bound does not excuse, and it fails as
+    unexplained.  The rule used to be `right > wrong`, which accepted a lead of
+    0.001 under a ceiling of 0.5 and printed the 0.5 beside it
+    (CORR-LOOKS-045).  Ranking second fails either way.
 
     Two renders IDENTICAL on our side (alike 1.0) say nothing about each other,
     so a twin is left out of the comparison -- when EXPECTED names it.  An
@@ -257,14 +263,18 @@ def verdict(scores: dict, slot: int, alike: dict | None = None,
             continue
         best = max(rivals, key=lambda o: scores[(game, o)])
         wrong = scores[(game, best)]
+        ceiling = 1.0 - alike.get((game, best), 0.0)
         if right - wrong >= MARGIN:
             out[game] = ("win", "by %.3f over %s" % (right - wrong, best))
-        elif right > wrong:
+        elif right > wrong and ceiling < 2 * MARGIN:
             out[game] = ("ranked", "first by %.3f over %s, whose render ours "
                                    "is %.3f apart from -- the most any lead "
-                                   "can be" % (right - wrong, best,
-                                               1.0 - alike.get((game, best),
-                                                               0.0)))
+                                   "can be" % (right - wrong, best, ceiling))
+        elif right > wrong:
+            out[game] = ("unexplained",
+                         "first by only %.3f over %s, and our two renders are "
+                         "%.3f apart, so the bound does not explain the margin "
+                         "being missed" % (right - wrong, best, ceiling))
         else:
             out[game] = ("unexplained", "%.3f, and %s scores %.3f"
                          % (right, best, wrong))
@@ -475,9 +485,13 @@ def _checks(c) -> None:
                     ("B", "A"): 0.1}, 2)
     ok("scoring second is a failure", lost["A"][0] == "unexplained",
        "%r" % (lost,))
+    # Under a NARROW ceiling, which is the only place a thin lead ranks --
+    # without it the tie would fail for the ceiling's sake and a control that
+    # lets ties rank would stay green (CORR-LOOKS-045 moved the branch).
     tie = verdict({("A", "A"): 0.8, ("A", "B"): 0.8, ("B", "B"): 0.9,
-                   ("B", "A"): 0.1}, 2)
-    ok("and so is a tie", tie["A"][0] == "unexplained", "%r" % (tie,))
+                   ("B", "A"): 0.1}, 2, {("A", "B"): 0.99, ("B", "A"): 0.99})
+    ok("and so is a tie, even under a ceiling narrow enough to rank",
+       tie["A"][0] == "unexplained", "%r" % (tie,))
     twin = verdict({("A", "A"): 0.8, ("A", "B"): 0.8, ("B", "B"): 0.8,
                     ("B", "A"): 0.8}, 2, {("A", "B"): 1.0, ("B", "A"): 1.0})
     ok("two identical renders fail unless a residue names them",
@@ -500,6 +514,21 @@ def _checks(c) -> None:
     ok("a named residue is expected, and its twin is judged without it",
        gk["A-I3-A-A-A"][0] == "expected" and gk["A-A1-A-A-A"][0] == "win",
        "%r" % (gk,))
+    # A thin lead under a WIDE ceiling is a coin toss, and the bound does not
+    # excuse it (CORR-LOOKS-045).  The two real `ranked` of LOOKS-TASK-17 sit
+    # under a ceiling of 0.039 and must keep passing.
+    wide = verdict({("X", "X"): 0.500, ("X", "Y"): 0.499,
+                    ("Y", "Y"): 0.900, ("Y", "X"): 0.100},
+                   2, {("X", "Y"): 0.5, ("Y", "X"): 0.5})
+    ok("a lead of 0.001 under a ceiling of 0.5 is unexplained, not ranked",
+       wide["X"][0] == "unexplained", "%r" % (wide,))
+    narrow = verdict({("A", "A"): 0.770, ("A", "B"): 0.754,
+                      ("B", "B"): 0.760, ("B", "A"): 0.750},
+                     2, {("A", "B"): 0.961, ("B", "A"): 0.961})
+    ok("and the real pair, 0.016 and 0.010 under a ceiling of 0.039, ranks",
+       narrow["A"][0] == "ranked" and narrow["B"][0] == "ranked",
+       "%r" % (narrow,))
+
     ok("the bound the ranked verdict leans on holds: a lead never exceeds how "
        "far apart the two renders are",
        intersection(h_game, h_a) - intersection(h_game, h_b)

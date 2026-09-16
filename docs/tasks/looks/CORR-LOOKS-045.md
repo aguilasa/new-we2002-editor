@@ -3,7 +3,7 @@ id: CORR-LOOKS-045
 title: "Correção: o veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -115,14 +115,83 @@ liderança fraca sob teto largo.
 
 ## Verificação
 
-- [ ] `python tools/looks/confront.py --score` verde, com os mesmos dois
+- [x] `python tools/looks/confront.py --score` verde, com os mesmos dois
       `ranked` e os mesmos três `win` do slot 2
-- [ ] `verdict` com teto 0,5 e liderança 0,001 devolve `unexplained`
-- [ ] o controle novo fica vermelho
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `verdict` com teto 0,5 e liderança 0,001 devolve `unexplained`
+- [x] o controle novo fica vermelho (`confront-ranked-ignores-ceiling`)
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
+
+**Executado em:** 2026-09-16
+
+### Resumo do que foi feito
+
+A evidência reproduz com o módulo commitado:
+
+```text
+X ('ranked', 'first by 0.001 over Y, whose render ours is 0.500 apart from
+              -- the most any lead can be')
+```
+
+**A forma escolhida:** `ranked` só quando `right > wrong` **e** o teto
+`1 − alike` está abaixo de `2 × MARGIN`. É a condição que a docstring usava
+para justificar o nível — "uma margem de 0,02 pede metade do teto" —, escrita
+agora no código. A outra forma que a CORR sugeria, "liderança ≥ metade do
+teto", é redundante aqui: com teto ≥ 0,04, metade dele já é ≥ `MARGIN`, e isso
+é `win`. Liderança abaixo da margem sob teto largo sai `unexplained`, com a
+mensagem dizendo por quê:
+
+```text
+first by only 0.001 over Y, and our two renders are 0.500 apart, so the bound
+does not explain the margin being missed
+```
+
+### O que tinha de ser preservado, preservou
+
+```text
+$ python tools/looks/confront.py --score
+      A-A1-A-A-A   RANKED   first by 0.016 over A-A1-A-B-E … 0.039 apart
+      A-A1-A-B-E   RANKED   first by 0.010 over A-A1-A-A-A … 0.039 apart
+  slot 2: 3 win, 2 ranked, 0 expected, 0 unexplained
+  slot 1: 2 win, 2 ranked, 0 expected, 0 unexplained
+confront: ok
+```
+
+O `self_check()` tem os dois lados, sem emulador: teto 0,5 com liderança 0,001
+dá `unexplained`, e o par real (0,016 e 0,010 sob teto 0,039) dá `ranked`.
+
+Controle novo `confront-ranked-ignores-ceiling`: a condição de volta a
+`right > wrong`. Vermelho — pelo caso de teto largo, que é o que o
+`confront-margin-ignored` não alcançava, porque aquele troca a margem por
+`-1.0` e fica vermelho por transformar derrota em vitória. Os dois continuam
+vermelhos.
+
+### Problemas encontrados
+
+Um, pego pelo próprio selftest: o controle **`confront-tie-passes`** ficou
+**verde**. Ele substitui a linha literal `elif right > wrong:`, e o conserto
+criou um ramo novo com essa mesma linha — o do `unexplained` sob teto largo,
+onde um empate já falha de qualquer jeito. O controle continuava casando uma
+vez, então não aparecia como quebrado; só deixou de medir. Reapontado para o
+ramo do `ranked` (`elif right > wrong and ceiling < 2 * MARGIN:`), e o caso
+sintético do empate passou a usar teto estreito — o único lugar onde um empate
+**poderia** ranquear. Os três controles do `verdict` vermelhos, 51 de 51.
+
+A §5.3 do plano não descreve a regra; quem a descrevia era o Log da
+LOOKS-TASK-17 e a armadilha 29 do perfil, atualizados.
+
+### Arquivos criados/modificados
+
+- `tools/looks/confront.py` — a condição do `ranked`, a mensagem do caso
+  largo, a docstring e os dois casos sintéticos
+- `tools/looks/controls.py` — `confront-ranked-ignores-ceiling`
+- `docs/tasks/looks/17-confronto-com-o-emulador.md` — a frase do nível
+  `ranked`
+- `docs/prompts/perfil-looks.md` — armadilha 29
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-045.md` — este arquivo
 
 **Executado em:**
 

@@ -60,7 +60,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-042](/docs/tasks/looks/CORR-LOOKS-042.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14 | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [ ] pendente | — |
+| [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [x] concluída | 2026-09-16 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -119,7 +119,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-042 — o jogo reescreve o `v` do quad de cabelo, e nós somamos ao do disco
 - [x] CORR-LOOKS-043 — a recusa do `head_of` só vale para a figura 0
 - [x] CORR-LOOKS-044 — `FACE` recusa `F` e `G`, que a tela oferece nos dois slots
-- [ ] CORR-LOOKS-045 — o piso do confronto é zero, e a justificativa diz outra coisa
+- [x] CORR-LOOKS-045 — o piso do confronto é zero, e a justificativa diz outra coisa
 
 ## Detalhes por correção
 
