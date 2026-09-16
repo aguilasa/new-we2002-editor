@@ -14,8 +14,8 @@ ours, the right tuple has to win its own row.  What is NOT the same is the
 input, and the difference is measured rather than assumed:
 
 * the emulator's frame carries the palette's 15-bit colours EXACTLY; a JPEG
-  does not.  Over our own head colours, only about half of a corpus head's
-  pixels land on the same 15-bit colour -- the rest were moved by compression;
+  does not.  Compression moves a head's pixels off the palette, and a pixel-art
+  face more than a flat background, so no threshold measured on one fits both;
 * so each JPEG pixel is first SNAPPED to the nearest colour it could have come
   from, and the candidates are not only our palette: the background and the
   shirt are colours too, read off the JPEG's own corner and hem.  A pixel whose

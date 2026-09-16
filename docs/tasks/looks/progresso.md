@@ -51,7 +51,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | ⬜ pendente |
 | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os três alvos de `ctest` | 7 | 18 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ⬜ Pendente | — | — |
 
@@ -189,7 +189,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 - [x] Três tuplas confrontadas contra o emulador, com a métrica nomeada — cinco pontuadas e uma recusa, nos dois slots, por interseção de histogramas de cor de 15 bits (`confront.py`); nenhuma tupla fora do primeiro lugar da própria linha.
 - [x] Cada fonte de diferença atribuída — pose e câmera fora da métrica por construção, cor exata, sem filtro; o resto virou `CORR-LOOKS-042` a `044` e três incógnitas escritas na LOOKS-TASK-20.
-- [ ] Os 50 JPGs medidos, e os piores casos olhados.
+- [x] Os 50 JPGs medidos, e os piores casos olhados — `corpus.py`: o `0.jpg` é quadro branco, 47 das 49 tuplas desenham; pele, cor de cabelo e cor de barba acertam em todos (47/47, 47/47, 26/26), forma não é testemunhável por cor (controle do emulador); os seis piores, olhados, deram a `CORR-LOOKS-049`.
 
 ### Fase 7 — fechamento
 

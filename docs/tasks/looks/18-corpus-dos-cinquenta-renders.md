@@ -6,7 +6,7 @@ category: oráculo
 phase: 6
 depends_on: ["LOOKS-TASK-17"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §5.4"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-18: O corpus dos cinquenta
@@ -104,19 +104,155 @@ bonito.
 
 ## Critério de conclusão
 
-- [ ] As tuplas parseadas do nome do arquivo, e a cobertura medida: quantos
-      dos 32 cabelos, das 4 peles e das 7 barbas o corpus toca. **O `0.jpg` tem
-      veredito escrito** — o que ele é, e se entra ou fica de fora da conta.
-- [ ] Nosso render comparado contra os 50, com a mesma métrica da
-      LOOKS-TASK-17.
-- [ ] **Os piores casos são olhados um a um**, não só tabulados — é onde erro
-      sistemático aparece.
-- [ ] Divergência que não se explique por pose ou câmera vira **CORR**, com a
-      tupla nomeada.
-- [ ] O gate pula (77) sem a variável que aponta o corpus.
+- [x] Tuplas e cobertura, pelo `looks.py --corpus`: 49 parseiam, 1 recusa;
+      9 de 32 cabelos, 4 de 4 peles, 6 de 8 barbas (a tela oferece 7), 4 de 8
+      cores de cabelo, 2 de 8 cores de barba. **O `0.jpg` é um quadro branco**
+      — uma cor só, nenhuma figura —, e fica fora da conta; o `corpus.py` diz
+      isso a cada corrida, e distingue "branco" de "nome que não é tupla".
+- [x] Comparado contra os 49 com tupla, pela métrica da LOOKS-TASK-17
+      (`confront.intersection` e `confront.verdict`), com o passo que o JPEG
+      exige escrito e sem limiar à mão. 47 desenham, 2 recusam (`H1`).
+- [x] Piores casos **olhados**: a tira `work/looks-corpus/worst.png`, que a
+      ferramenta grava, com os seis piores lado a lado com o nosso render.
+- [x] A divergência que não se explica por pose ou câmera virou
+      [`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), com as seis
+      tuplas nomeadas.
+- [x] Sem `WE2002_LOOKS_CORPUS` nem pasta por argumento, `corpus.py --score`
+      sai **77** com a mensagem que nomeia a variável.
 
 ---
 
 ## Log de Execução
 
-*(preencher ao executar)*
+**Executado em:** 2026-09-16 — **CONCLUÍDA**.
+
+### O que se aprendeu
+
+**Uma métrica sobre dado de terceiro, sem um controle de verdade conhecida ao
+lado, não diz de quem é a falha.** Na matriz de 47 renders, 35 JPEGs não ficam
+em primeiro, e isso parecia render errado. Os quadros **do emulador** da
+LOOKS-TASK-17 — cores exatas, tupla conhecida — contra a mesma matriz põem a
+própria verdade em 3º e 4º. Histograma de cor resolve **cor** e não **forma**:
+câmera e pose mexem na proporção entre as cores mais do que um estilo de cabelo
+mexe. O veredito passou a ser por campo, e **foi escrito depois da primeira
+corrida lida** — dito no código e aqui, porque a razão é o controle, não o
+número.
+
+**O JPEG pede um passo a mais, e o passo não precisa de limiar.** Compressão
+com perda tira pixel da cor exata da paleta — e mais num rosto de pixel art do
+que num fundo liso, então um limiar medido no fundo erraria por baixo. Cada
+pixel vai para a cor mais próxima de onde poderia ter vindo — a paleta que
+desenhamos, **ou** o fundo e a camisa lidos do próprio JPEG, que não contam. O
+sumidouro evita escolher o número.
+
+**O corpus achou o que existe para achar: um erro sistemático.** Agrupando a
+nota de cada JPEG contra o próprio render, só um grupo despenca — **outra
+cabeça com outra pele, 0,411** — e olhando as seis piores a pele nova pinta a
+testa e deixa o rosto na pele `A`. São os índices de cor medidos na seção 24 e
+emprestados às outras cabeças desde a CORR-LOOKS-034, que ela mesma chamou de
+suposição. O confronto da LOOKS-TASK-17 não pegava: as cinco tuplas dele não
+tinham pele diferente de `A` em cabeça diferente de `A1`.
+
+### As corridas
+
+Na árvore de `0efd5e2`, com os renders refeitos nela; a saída é idêntica, linha
+a linha, à do `--score` sobre os renders da corrida anterior.
+
+```text
+$ python tools/looks/looks.py --corpus <pasta>
+   refused: 0.jpg -- '0' has 1 part(s) and a tuple has 5: ...
+50 .jpg   parsed: 49   refused: 1   round-trip to its own name: 49
+   skin_colour    4 of  4 value(s) covered
+   hair_style     9 of 32 value(s) covered
+   hair_colour    4 of  8 value(s) covered
+   beard_style    6 of  8 value(s) covered
+   beard_colour   2 of  8 value(s) covered
+looks --corpus: ok
+
+$ python tools/looks/corpus.py --run <pasta>
+      50 file(s): 49 tuple(s), 1 blank, 0 other
+      0.jpg -- a blank picture: one colour and no figure; not a tuple (...), left out of the score
+      our side: 47 drawn, 2 refused, 81 colour(s) drawn in all
+      refused A-H1-A-A-A -- ... hair style H1 wrote nothing to either model file ...
+      refused D-H1-A-A-A -- ... hair style H1 wrote nothing to either model file ...
+      the 47-way matrix, confront.verdict: 9 win, 3 ranked, 35 not first -- shape is beyond the metric, see the control
+      control A-A1-A-A-A   the emulator's own frame ranks its tuple 4 of 47
+      control A-A1-C-A-A   the emulator's own frame ranks its tuple 3 of 47
+      control A-I3-A-A-A   the emulator's own frame ranks its tuple 3 of 47
+      control B-A1-A-A-A   the emulator's own frame ranks its tuple 1 of 47
+      the control, 4 picture(s), the best render agrees on: skin_colour 4/4, hair_colour 4/4,
+          beard_colour 0/0, hair_style 2/4 (reported), beard_style 3/4 (reported)
+      the corpus, 47 picture(s), the best render agrees on: skin_colour 47/47, hair_colour 47/47,
+          beard_colour 26/26, hair_style 26/47 (reported), beard_style 23/47 (reported)
+      self-score, grouped by head and skin:
+        hair style A1     skin A       9 picture(s), mean 0.721, lowest 0.660
+        hair style A1     skin not A  14 picture(s), mean 0.641, lowest 0.540
+        hair style not A1 skin A      12 picture(s), mean 0.697, lowest 0.544
+        hair style not A1 skin not A  12 picture(s), mean 0.411, lowest 0.266
+      the 6 lowest self-scores -- drawn beside ours in <raiz>\work\looks-corpus\worst.png:
+        D-I3-A-A-A   own 0.266  best D-A1-A-A-A   0.553  shape: hair_style disagree, beard_style agree
+        C-I3-A-C-A   own 0.312  best C-A1-A-A-A   0.671  shape: hair_style disagree, beard_style disagree
+        B-I3-A-A-A   own 0.316  best B-A1-A-A-A   0.730  shape: hair_style disagree, beard_style agree
+        C-I3-A-A-A   own 0.317  best C-A1-A-A-A   0.719  shape: hair_style disagree, beard_style agree
+        C-K1-A-E-A   own 0.344  best C-A1-A-A-A   0.609  shape: hair_style disagree, beard_style disagree
+        C-O1-A-A-A   own 0.353  best C-A1-A-C-A   0.707  shape: hair_style disagree, beard_style disagree
+corpus: ok
+
+$ python tools/looks/corpus.py --score           # sem a variável
+corpus: skipped -- no corpus folder: pass one, or point WE2002_LOOKS_CORPUS at ...
+exit 77
+```
+
+**Olhadas, as seis:** no JPEG o rosto inteiro está na pele do nome; no nosso,
+só a faixa de cima. Em `C-I3-A-C-A` e `C-K1-A-E-A` o JPEG tem barba e o nosso
+não. `scene.py --tuple B-I3-A-A-A` imprime `colour borrowed 9`, e
+`B-A1-A-A-A`, 0.
+
+### Gates medidos
+
+```text
+$ python tools/looks/selftest.py --quiet        # na arvore de 0efd5e2
+  ..... rule 1 swept 20 file(s), 15168 line(s)
+  ..... 57 of 57 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/<modelfile|texture|atlas|skin|looks|assembly|pieces|scene>.py --check-image
+  8 de 8: ok
+$ python tools/looks/oracle.py --check      oracle.py: 0 failure(s)
+$ python tools/looks/confront.py --check    confront.py: 0 failure(s)
+$ python tools/looks/corpus.py --check      corpus.py: 0 failure(s)
+$ python tools/check_tasks.py               check_tasks: 123 task(s), ok
+```
+
+Controles de 54 para 57: `corpus-ties-to-palette`,
+`corpus-beard-colour-always-seen` e `corpus-shape-judged`.
+
+### Problemas encontrados, e para onde foram
+
+- **Os índices de cor emprestados da seção 24 erram nas outras cabeças** —
+  [`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), Alta.
+- **Nenhum confronto do ciclo testemunha forma** — estilo de cabelo e barba —,
+  e isso vai para a §6 como aberto, escrito na
+  [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).
+- **As duas recusas de `H1`** continuam o que eram; o mapa não alcança o
+  estilo, e nada nesta task mede isso.
+
+### Arquivos criados/modificados
+
+Commit `0efd5e2`:
+
+- `tools/looks/corpus.py` — novo
+- `tools/looks/controls.py` — três controles
+- `tools/looks/selftest.py` — `corpus` na lista de módulos
+- `docs/PLAN-LOOKS-PY.md` — §3.2 e §5.4 com a tabela por campo e o achado
+- `docs/prompts/perfil-looks.md` — armadilha 30 e duas linhas de gate
+- `docs/tasks/looks/20-reconciliacao-e-entregaveis.md` — a quarta incógnita
+  aberta, escrita na task de destino
+- `docs/tasks/looks/CORR-LOOKS-049.md` e
+  `docs/tasks/looks/correcoes-progresso.md` — a correção aberta
+
+Commit seguinte: este Log, o frontmatter, `docs/tasks/looks/progresso.md` e
+`tools/looks/corpus.py` — três linhas da docstring reescritas sem mudar de
+tamanho, porque traziam uma proporção tirada de sonda descartável ("cerca de
+metade") e a regra do ciclo é número de ferramenta. O gate remedido depois
+delas dá o mesmo: 20 arquivos, 15.168 linhas, 57 de 57.
