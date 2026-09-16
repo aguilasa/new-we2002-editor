@@ -71,9 +71,19 @@ def _report(view: Viewer, drawn) -> dict:
     print("  sections %d, shelf %s, wireframe %s, camera yaw %.0f pitch %.0f"
           % (numbers["sections"], "on" if view.shelved else "off",
              "on" if view.wireframe else "off", view.yaw, view.pitch))
+    # Two kinds of note, and they are not the same statement.  "no image",
+    # "no palette" and "off the record" say a part came out UNTEXTURED; the
+    # others say it was textured from something this cycle has not measured.
+    # Printing both under "not textured" was true of the first three and false
+    # of the rest (CORR-LOOKS-028's band, CORR-LOOKS-034's borrowed index).
+    untextured = ("no image", "no palette", "off the record")
     for name, count in sorted(numbers["notes"].items()):
-        if count:
+        if not count:
+            continue
+        if name in untextured:
             print("  not textured -- %s: %d" % (name, count))
+        else:
+            print("  textured, but %s: %d" % (name, count))
     return numbers
 
 
