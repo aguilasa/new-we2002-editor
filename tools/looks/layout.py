@@ -395,6 +395,18 @@ addresses in `a0`.
 measured WRONG: section 30 has twelve of those and the game rewrites two.
 """
 
+HAIR_QUAD_ROWS = (15, 1, 15, 1)
+"""The row inside a band that the game writes into each corner's `v`.
+
+Read off the store below: `v1 = band * 16 + 15` goes to bytes 0x1 and 0x9 of
+the primitive -- corners 0 and 2 -- and `v0 = band * 16 + 1` to 0x5 and 0xd,
+corners 1 and 3.  **An absolute value, not a displacement.**  The disc does not
+hold these rows: section 24 keeps 14/1, 26 keeps 14 and 0 or 1, 34 keeps 15/2,
+46 keeps 79/66.  Adding the band to the disc's `v` drew every hair quad a row
+off -- measured in the game's own display list, where section 24's two quads
+carry `v` 15 and the file 14 (CORR-LOOKS-042).
+"""
+
 HAIR_QUAD_STORE = 0x80011590
 """The instruction in the GAME that writes a hair quad's `v`.
 

@@ -418,6 +418,16 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "assembly-hair-v-from-disc", "assembly.py", "hair_texcoords",
+        "    return tuple((u, rows + row)",
+        "    return tuple((u, rows + _v)",
+        ("assembly",),
+        "the hair quad drawn from the file's v plus the band, instead of the "
+        "absolute rows the game's store writes: every hair quad a texel row "
+        "off, on all four heads whose quads are known, and the picture looks "
+        "fine",
+    ),
+    Control(
         "ui-whole-figure-unjudged", "ui_check.py", "judge_whole",
         "        if counts.get(name, 0) < floor:",
         "        if False:",

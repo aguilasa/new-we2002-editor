@@ -268,7 +268,7 @@ def surface_for(data: bytes, record, depth: int, clut: int,
 
 def part_for(primitive, vertices, record, surface, clut: int, band: int,
              where: tuple, at: int, band_unmeasured=(),
-             colour_borrowed: bool = False) -> Part:
+             colour_borrowed: bool = False, texcoords=None) -> Part:
     """One primitive as points and normalised (u, v), or as a flat placeholder.
 
     Split out of `build` so the arithmetic can be checked with no disc in the
@@ -292,9 +292,14 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
     else:
         per = atlas.texels_per_unit(primitive.tpage_depth)
         width, height = record.w * per, record.h
+        # A hair quad arrives with the texcoords the game's store writes,
+        # which already hold the band; everything else is the file's own `v`
+        # moved by it (CORR-LOOKS-042).
+        corners = (texcoords if texcoords is not None
+                   else [(u, v + band) for u, v in primitive.texcoords])
         try:
-            for u, v in primitive.texcoords:
-                x, y = local_texel(primitive, record, u, v + band)
+            for u, v in corners:
+                x, y = local_texel(primitive, record, u, v)
                 # Half a texel in, so a coordinate on the edge samples the
                 # texel it names instead of whatever the sampler rounds to.
                 uvs.append(((x + 0.5) / width, (y + 0.5) / height))
@@ -351,7 +356,8 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
             notes["no image"] += 1
         part = part_for(primitive, one.vertices, record, surface,
                         entry["clut"], entry["band"], (name, index), at,
-                        entry["band_unmeasured"], entry["colour_borrowed"])
+                        entry["band_unmeasured"], entry["colour_borrowed"],
+                        entry.get("texcoords"))
         if surface is not None and part.surface is None:
             notes["off the record"] += 1
         if part.band_unmeasured:

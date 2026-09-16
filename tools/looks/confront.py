@@ -316,6 +316,12 @@ Measured on 2026-09-16: the game draws the two hair quads of section 24 with
 `v` 15 where the file holds 14 -- the store at `layout.HAIR_QUAD_STORE` writes
 `band * 16 + 15`, and the file does not.  An exact match would call those two
 quads absent; a slack of one row finds them, and says it did.
+
+**Since CORR-LOOKS-042 the diagonal compares against what we DRAW**, and the
+hair quads are drawn with the store's rows (`assembly.hair_texcoords`), so the
+same capture now reads `stored 7` and `stored, one row off 0`.  The slack stays:
+a nonzero "one row off" is exactly how a drawn `v` drifting from the game's
+would show up again, and it is printed rather than hidden.
 """
 
 
@@ -703,7 +709,15 @@ def score(slots=(2, 1), image=None) -> int:
             data = disc.read(layout.MODEL)
         head = section.scan(data, layout.GEOMETRY_START[layout.MODEL]) \
             .sections[layout.HEAD_SECTION]
-        stored = [(one.clut, tuple(one.texcoords)) for one in head.primitives]
+        import assembly
+
+        # What we DRAW for the reference tuple, which is band 0: the hair
+        # quads carry the rows the game's store writes, not the file's.
+        quads = layout.HAIR_QUADS.get(layout.HEAD_SECTION, ())
+        stored = [(one.clut,
+                   assembly.hair_texcoords(one.texcoords, 0) if at in quads
+                   else tuple(one.texcoords))
+                  for at, one in enumerate(head.primitives)]
         found = diagonal(stored, packets)
         answer = diagonal_verdict(found)
         print("  the diagonal: %d textured quad packet(s) in the two bands, "

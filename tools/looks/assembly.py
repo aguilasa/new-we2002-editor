@@ -280,6 +280,22 @@ def multi_band_styles() -> list:
             if entry is not None and len(entry[1]) > 1]
 
 
+def hair_texcoords(texcoords, rows: int) -> tuple:
+    """The four (u, v) the game draws a hair quad with, at *rows* into the sheet.
+
+    `u` is the file's.  `v` is NOT the file's plus the band: the store at
+    `layout.HAIR_QUAD_STORE` writes an absolute row into every corner --
+    `rows + 15` into corners 0 and 2 and `rows + 1` into 1 and 3 -- and the file
+    holds other rows than those, on all four sections whose quads are known
+    (CORR-LOOKS-042).
+    """
+    if len(texcoords) != len(layout.HAIR_QUAD_ROWS):
+        raise BadAssembly("a hair quad has %d corners and this has %d"
+                          % (len(layout.HAIR_QUAD_ROWS), len(texcoords)))
+    return tuple((u, rows + row)
+                 for (u, _v), row in zip(texcoords, layout.HAIR_QUAD_ROWS))
+
+
 def unmeasured_bands(chosen: int, bands) -> tuple:
     """The bands `draw_list` drops when it applies the first one.
 
@@ -445,6 +461,7 @@ def draw_list(disc, values: dict, figure: int) -> list:
     out = []
     dropped: dict = {}
     borrowed: dict = {}
+    stored: dict = {}
     head = head_of(values)[0] if figure == HEAD_FIGURE else None
     plan = edits(values, head)
     if figure == HEAD_FIGURE:
@@ -464,6 +481,9 @@ def draw_list(disc, values: dict, figure: int) -> list:
             # something measures them -- a wrong guess here repaints the skull.
             plan.setdefault((layout.MODEL, chosen), {})[
                 (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
+            # And their `v` is what the game's store writes, not the file's
+            # plus the band -- see hair_texcoords.
+            stored[(layout.MODEL, chosen)] = quads
             # And when the style landed in more than one band, WHICH quad took
             # which was never measured.  The first is applied, and every
             # primitive it is applied to carries the ones that were dropped, so
@@ -477,8 +497,13 @@ def draw_list(disc, values: dict, figure: int) -> list:
         one = scan.sections[index]
         for at, primitive in enumerate(one.primitives):
             clut, band = combine(primitive, plan.get((name, index), {}), at)
-            corner = atlas.texel(primitive, primitive.texcoords[0][0],
-                                 primitive.texcoords[0][1] + band)
+            texcoords = None
+            if at in stored.get((name, index), ()):
+                texcoords = hair_texcoords(primitive.texcoords, band)
+                corner = atlas.texel(primitive, *texcoords[0])
+            else:
+                corner = atlas.texel(primitive, primitive.texcoords[0][0],
+                                     primitive.texcoords[0][1] + band)
             record = atlas.image_at(images, *corner)
             x, y = skin.grid(clut)[1] * texture.NARROW, skin.grid(clut)[0]
             try:
@@ -494,6 +519,7 @@ def draw_list(disc, values: dict, figure: int) -> list:
                 "palette": None if window is None else (x, y, texture.NARROW),
                 "band_unmeasured": left if at in quads else (),
                 "colour_borrowed": at in lent,
+                "texcoords": texcoords,
             })
     del modelfile  # imported for the reader below; the draw list does not need it
     return out
@@ -784,6 +810,24 @@ def _checks(c) -> None:
        len(reach) == HAIR_MAP_BANDS_UNMEASURED
        and [looks.HAIR_STYLES[i] for i in reach] == ["B1"],
        "%d: %s" % (len(reach), [looks.HAIR_STYLES[i] for i in reach]))
+    # The hair quad's `v`, the way the game's store writes it: an absolute
+    # row per corner, not the file's plus the band (CORR-LOOKS-042).  Section
+    # 24's quad 1 is on the disc as rows 14/1/14/1; the game draws 15/1/15/1.
+    disc_quad = ((188, 14), (188, 1), (199, 14), (199, 1))
+    ok("a hair quad is drawn with the rows the store writes, at band 0",
+       hair_texcoords(disc_quad, 0)
+       == ((188, 15), (188, 1), (199, 15), (199, 1)),
+       "%r" % (hair_texcoords(disc_quad, 0),))
+    ok("and a band moves all four corners by whole bands",
+       [v for _u, v in hair_texcoords(disc_quad, 2 * layout.ATLAS_BAND)]
+       == [47, 33, 47, 33],
+       "%r" % (hair_texcoords(disc_quad, 2 * layout.ATLAS_BAND),))
+    ok("and u is the file's, untouched",
+       [u for u, _v in hair_texcoords(disc_quad, 0)]
+       == [u for u, _v in disc_quad])
+    refuses("a quad without four corners is refused",
+            lambda: hair_texcoords(disc_quad[:3], 0), "corners")
+
     ok("a style with one band chooses nothing",
        unmeasured_bands(24, (0,)) == ())
     ok("and neither does a multi-band style whose quads are unknown",
