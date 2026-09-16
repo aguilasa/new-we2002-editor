@@ -162,13 +162,18 @@ e com que paleta.
 
 ## Critério de conclusão
 
-- [ ] **NÃO RESOLVIDO, e o buraco está nomeado com a medição ao lado.** Os
-      32 cabelos não têm mapa. O que se mediu é o **mecanismo** — `HAIR` anda o
-      `v` das primitivas 1 e 14 da seção 24 em faixas de **16 linhas** da imagem
-      3.568, e **malha nenhuma se mexe** — e o que se mediu é também o limite:
-      descendo a linha até o fundo (32 `Left`) e subindo (32 `Right`), a seção 24
-      alcança **três** estados, faixas 0, 2 e 1 nessa ordem, e as trinta teclas
-      seguintes não mudam nada. Onde moram os outros 29 não foi medido.
+- [ ] **METADE RESOLVIDA, 2026-09-16.** **Onde moram** os 32 cabelos está
+      medido: o `MODEL.BIN` guarda **dois blocos de 32 seções de cabeça** —
+      **24 a 55** e **74 a 105** —, todo corpo distinto, as 32 do primeiro
+      amostrando a folha de cabelo em 3.568 com janela própria cada uma, e 16 do
+      segundo. Trinta e dois é exatamente o que o `hair_style` guarda, e dois
+      blocos é exatamente as duas figuras que as duas listas do `EDT_MOD.BIN` já
+      mostravam.
+      **Como o campo chega a uma delas, não.** Andando a linha do fundo ao topo,
+      a seção 24 alcança **três** estados — faixas `v` 0, 2 e 1 — que **não
+      batem com a janela de seção nenhuma**, e as trinta teclas seguintes não
+      mudam nada. E **nenhum vértice se mexe nos 33 estados**, então a linha
+      também não troca um desses 32 corpos para dentro do lugar da 24.
 - [x] As **4 peles** resolvidas, pelo mecanismo que a LOOKS-TASK-12 decidiu:
       `SKIN` anda a **linha** do CLUT id, `+0x40` por passo, e alcança as quatro
       — andado de ponta a ponta, não deduzido.
@@ -198,8 +203,9 @@ e com que paleta.
 
 ## Log de Execução
 
-**Executado em:** 2026-09-15 — **PARCIAL**. Quatro dos seis critérios fechados;
-os dois de cabelo, não. A task **continua pendente**.
+**Executado em:** 2026-09-15 e 2026-09-16 — **PARCIAL**. Quatro dos seis
+critérios fechados; o de cabelo pela metade e o do corpus não. A task
+**continua pendente**.
 
 ### O que se aprendeu, e é mais forte do que a tabela
 
@@ -264,16 +270,48 @@ aqui não alcança.
    movendo **zero** primitivas. Verde no `self_check`, vazio contra o disco. O
    `combine()` existe por isso, e tem controle próprio.
 
+### Segunda passagem, 2026-09-16: onde moram os 32
+
+A pendência de cima começava pela pista errada, e a corrida mostrou isso em
+dois minutos: **as duas faixas de buffer se reescrevem a cada quadro** — o
+boneco anima —, então o `oracle.py --where`, que anda o campo lendo as duas
+faixas, morre no `steady()` com *"never settled in 8 x 20 frame(s)"*. Está
+certo que morra: display list de cena animada não é observação estável. O
+comando fica, porque a recusa é a medição.
+
+A pista boa estava no disco, de graça. Varrendo as 106 seções do `MODEL.BIN`
+atrás de quem amostra a folha de cabelo:
+
+```text
+python tools/looks/assembly.py --check-image
+  MODEL.BIN sections 24..55:  32 distinct body(ies), 32 of them sampling the hair sheet
+  MODEL.BIN sections 74..105: 32 distinct body(ies), 16 of them sampling the hair sheet
+```
+
+**Dois blocos de 32 cabeças.** Trinta e dois é o domínio do `hair_style`; dois
+blocos são as duas figuras. Cada uma das 32 do primeiro bloco tem janela própria
+na folha — da 24 (`v` 1..14 no par do cabelo) à 52 (`v` 8..126) — e os pares
+vizinhos compartilham **o mesmo array de vértices** com UV diferente: as 24 e 25
+têm vértices idênticos, corpo diferente.
+
+**E a metade que falta continua faltando, agora com um "não" medido no lugar de
+uma dúvida:** as três faixas que a tela alcança **não batem com a janela de
+seção nenhuma** das 32, e **nenhum vértice se mexe em nenhum dos 33 estados** —
+o que descarta a leitura óbvia, a de que a linha troca o corpo da seção. Onde o
+valor do campo vira uma daquelas 32 seções segue sem medição.
+
 ### O que ficou pendente
 
-- **O mapa dos 32 cabelos.** O que falta medir é onde vão parar os 29 estilos
-  que a seção 24 não mostra. As duas pistas: os ~124 bytes que todo passo de
-  `HAIR` move **fora** dos dois arquivos de modelo (LOOKS-TASK-08), que caem nas
-  duas faixas de buffer da §6(a); e a hipótese de a linha da tela estar limitada
-  por algo do jogador carregado, que se testa trocando de jogador antes de andar
-  a linha.
-- **O cross-check contra o corpus**, que depende do mapa: as tuplas dos 50 JPGs
-  nomeiam cabelo, e sem o mapa não há escolha de peças a comparar.
+- **A âncora do mapa de cabelo:** por que a tela alcança três faixas, e como o
+  valor do campo escolhe uma das 32 seções. As pistas que sobram, nesta ordem:
+  **(1)** trocar de jogador antes de andar a linha — o alcance de três pode ser
+  do jogador carregado e não do campo; **(2)** pôr um **breakpoint de escrita**
+  no par de primitivas da seção 24 e ler quem escreve, que é o que o fork
+  oferece e este ciclo ainda não usou; **(3)** o `vram_watch` na página do
+  cabelo, pelo mesmo motivo. A pista dos **buffers está descartada** por
+  medição: eles não assentam.
+- **O cross-check contra o corpus**, que depende da âncora: as tuplas dos 50
+  JPGs nomeiam cabelo, e sem a âncora não há escolha de peças a comparar.
 
 ### Gates medidos
 
@@ -320,8 +358,10 @@ e a janela dele foi para −32000 na abertura. `roms/` só foi lida.
   vermelhos, e `--check`, `--check-image`, `--tuple`
 - `tools/looks/oracle.py` — o comando `--assembly`: `section_address()` (agora
   o corpo inteiro da seção, vértices incluídos), `walk()` generalizado,
-  `steady()`, `check_assembly()` e `_say_primitives()`
-- `tools/looks/layout.py` — `ATLAS_BAND` e `BOOT_SECTIONS`
+  `steady()`, `check_assembly()` e `_say_primitives()`; e o `--where`, que anda
+  um campo lendo as duas faixas de buffer — e **recusa**, porque elas não
+  assentam
+- `tools/looks/layout.py` — `ATLAS_BAND`, `BOOT_SECTIONS` e `HEAD_RUNS`
 - `tools/looks/controls.py` — `assembly-table-off-by-one` e
   `assembly-effects-do-not-compose`
 - `tools/looks/selftest.py` — `assembly` no `MODULES`

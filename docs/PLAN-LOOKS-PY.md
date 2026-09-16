@@ -1654,13 +1654,22 @@ não uma escolha entre malhas.
 o fim devolve byte a byte o que o arquivo tem, o que torna a tabela absoluta em
 vez de relativa. Os seis **travam nas pontas**; nenhum dá a volta.
 
-**O que continua aberto, e é o que mantém a task pendente:** os **32 cabelos
-não têm mapa**. A tela alcança três faixas da imagem 3.568 — 0, 2 e 1, nessa
-ordem — e trinta teclas seguintes não mudam nada; malha nenhuma se mexe, então
-os 32 estilos não são 32 malhas, e 128 linhas de imagem dão oito faixas, que
-ainda não são 32. Onde moram os outros 29 não foi medido, e `faixa = estilo`
-seria um mapa que desenha perfeitamente e está errado. Sem ele, o cross-check
-contra as 50 tuplas do corpus também fica aberto.
+**Onde moram os 32 cabelos, medido em 2026-09-16:** o `MODEL.BIN` guarda **dois
+blocos de 32 seções de cabeça** — **24 a 55** e **74 a 105** —, todo corpo
+distinto, as 32 do primeiro amostrando a folha de 3.568 com janela própria cada
+uma e 16 do segundo. Trinta e dois é o domínio do `hair_style` e dois blocos são
+as duas figuras; os pares vizinhos compartilham o array de vértices e diferem no
+UV.
+
+**O que continua aberto, e é o que mantém a task pendente, é a âncora:** como o
+valor do campo escolhe uma daquelas 32. A tela alcança **três** faixas em
+`MODEL.BIN` seção 24 — 0, 2 e 1 — e as trinta teclas seguintes não mudam nada;
+essas três **não batem com a janela de seção nenhuma**, e **nenhum vértice se
+mexe**, o que descarta por medição a leitura óbvia de que a linha troca o corpo
+da seção. As duas faixas de buffer da §6(a) também estão descartadas como
+observação: elas se reescrevem a cada quadro e nunca assentam. O que sobra é
+breakpoint de escrita, que o fork oferece e este ciclo ainda não usou. Sem a
+âncora, o cross-check contra as 50 tuplas do corpus também fica aberto.
 
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como

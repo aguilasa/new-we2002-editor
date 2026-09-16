@@ -33,6 +33,7 @@ Usage:
     python tools/looks/oracle.py --buffers       # what the residue bands are
     python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
+    python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
 """
 
 from __future__ import annotations
@@ -1607,6 +1608,17 @@ def _say_primitives(row, name, index, values, at, disc_data):
     if vertices:
         print("      and up to %d vertex(es) move with them -- this row "
               "changes the MESH, not only what it samples" % vertices)
+
+    else:
+        # Does the row SWAP a body in?  `MODEL.BIN` holds two runs of 32 head
+        # sections, which is exactly what `hair_style` holds, so "the row picks
+        # a section" is the obvious reading -- and an obvious reading is the
+        # kind this cycle measures instead of believing.  The vertices answer
+        # it: a swapped body brings another section's mesh with it, and not one
+        # vertex moved across every value walked.
+        print("      and NO vertex moves in any of the %d value(s): the mesh "
+              "in this slot is the disc's throughout, so the row does not swap "
+              "another section's body in" % len(values))
     # One line per value, and the SHAPE of the change rather than every
     # primitive: what a field does to forty-two primitives at once is one fact,
     # and printing it forty-two times buries it.  The whole list is above.
@@ -1622,6 +1634,86 @@ def _say_primitives(row, name, index, values, at, disc_data):
                  ", ".join("%#06x" % c for c in cluts),
                  ", ".join("%#06x" % p for p in pages),
                  us[0], us[-1], vs[0], vs[-1]))
+
+
+def check_where(row="HAIR", slot=2, verbose=True):
+    """Where a field's values go when the geometry does not show them.
+
+    LOOKS-TASK-14 measured that `MODEL.BIN` section 24 shows **three** states
+    while `hair_style` holds 32.  This is the other half of that question: the
+    field is pressed through its whole domain and what is watched is the two
+    working bands -- the display list the GPU is actually fed -- instead of the
+    file.  If the styles are in there, the count comes out of this; if they are
+    not, the answer is that they are nowhere this cycle has looked, which is
+    also worth knowing and is what "a named hole" would then mean.
+    """
+    import looks
+
+    ready = preflight()
+    count = looks.BY_ROW[row].values
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        game.load_looks(slot)
+        game.select_row(row)
+        path = os.path.join(game.out_dir, "bands.bin")
+
+        def read():
+            return b"".join(game.read_ram(base, BUFFER_SIZE, path)
+                            for base in BUFFER_BANDS)
+
+        for _ in range(count):
+            game.press("Left", expect_change=False)
+        states = [steady(game, read)]
+        for _ in range(count):
+            game.press("Right", expect_change=False)
+            states.append(steady(game, read))
+
+    seen, order = {}, []
+    for state in states:
+        key = bytes(state)
+        if key not in seen:
+            seen[key] = len(seen)
+            order.append(key)
+        else:
+            order.append(key)
+    print("  %s over %d value(s): %d distinct state(s) in the two bands"
+          % (row, len(states), len(seen)))
+    print("      the order they appear in: %s"
+          % ", ".join(str(seen[k]) for k in order))
+    if len(seen) > 1:
+        first, second = order[0], next(k for k in order if k != order[0])
+        differ = [i for i in range(len(first)) if first[i] != second[i]]
+        print("      the first two differ at %d byte(s), from %#010x"
+              % (len(differ), _band_address(differ[0])))
+        print("      %s" % _say_runs(differ))
+    return 0
+
+
+def _band_address(offset):
+    """A byte of the joined bands, back as a RAM address."""
+    if offset < BUFFER_SIZE:
+        return BUFFER_BANDS[0] + offset
+    return BUFFER_BANDS[1] + offset - BUFFER_SIZE
+
+
+def _say_runs(offsets, most=6):
+    """The differing bytes as runs, which is how a display list differs."""
+    runs, start, last = [], None, None
+    for offset in offsets:
+        if start is None:
+            start, last = offset, offset
+        elif offset == last + 1:
+            last = offset
+        else:
+            runs.append((start, last))
+            start, last = offset, offset
+    if start is not None:
+        runs.append((start, last))
+    shown = ", ".join("%#010x+%d" % (_band_address(a), b - a + 1)
+                      for a, b in runs[:most])
+    return ("%d run(s): %s%s"
+            % (len(runs), shown, " ..." if len(runs) > most else ""))
 
 
 def check_buffers(verbose=True):
@@ -2094,6 +2186,8 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) >= 2 and argv[1] == "--where":
+            return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
             return check_assembly(rows=tuple(argv[2:]) or None)
         if len(argv) == 2 and argv[1] == "--palettes":

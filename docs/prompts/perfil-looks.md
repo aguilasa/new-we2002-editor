@@ -168,7 +168,14 @@ Não se revertem sem o usuário pedir.
     geometria. Contar valores pelo domínio, ou domínio pelo que a tela anda, dá
     número com ar de medido nos dois sentidos — e parar na repetição só funciona
     quando a observação muda a **cada** passo, que não é o caso do `HAIR`.
-20. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+20. **Display list de cena animada não é observação.** As duas faixas de
+    buffer da §6(a) se reescrevem a **cada quadro**, porque o boneco anima:
+    andar um campo lendo-as morre no `steady()` com *"never settled"*, e está
+    certo que morra. Medido em 2026-09-16
+    ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)). Quem
+    precisar do que o campo escreve lá usa o filtro de churn do `field_diff`,
+    ou breakpoint de escrita — que o fork oferece e este ciclo ainda não usou.
+21. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam

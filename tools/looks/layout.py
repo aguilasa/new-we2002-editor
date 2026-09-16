@@ -345,6 +345,22 @@ the same pair as BOOTS_SECTIONS, per slot, and this is the file-level name
 `oracle.py --assembly` addresses one of them by.
 """
 
+HEAD_RUNS = ((24, 56), (74, 106))
+"""The two runs of MODEL.BIN sections that are heads, as half-open ranges.
+
+**Thirty-two sections each, every body distinct**, measured 2026-09-16.  All
+32 of the first run sample HAIR_IMAGE, each with its own window on that sheet;
+of the second run, 16 do.  Thirty-two is exactly what `hair_style` holds, and
+two runs is exactly the two figures EDT_MOD.BIN's two lists already showed.
+
+**What is NOT measured is the anchoring**, and the difference matters: nothing
+here says that style N is section 24 + N.  Walking HAIR on the screen moves the
+`v` of section 24's own hair pair through three values that match no section's
+own window, and no vertex moves at any point -- so the row does not swap one of
+these bodies in either.  Where the row's 32 values become one of these 32
+sections is the open half of LOOKS-TASK-14.
+"""
+
 ATLAS_BAND = 16
 """Rows of an image record that one step of HAIR or of FACE walks.
 

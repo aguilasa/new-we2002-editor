@@ -22,13 +22,22 @@ applied -- not a choice between meshes.
 
 ## Two holes, named rather than filled
 
-**HAIR is not resolved, and the shape of the failure is worth more than a
-guess.**  `hair_style` holds 32 values and the screen, walked from the bottom
-of the row with 32 presses of Left and then 32 of Right, reaches **three**
-states in `MODEL.BIN` section 24 -- `v` bands 0, 2 and 1, in that order -- and
-then thirty further presses change nothing at all.  No vertex moves either, so
-the 32 styles are not 32 meshes.  Where the other 29 live is not measured, and
-writing `band = style` would be a mapping that draws perfectly and is wrong.
+**HAIR is half resolved, and the half that is missing is named.**
+
+Where the 32 hair styles LIVE is measured: `MODEL.BIN` holds **two runs of 32
+head sections** -- 24 to 55 and 74 to 105 -- every body distinct, all 32 of the
+first run sampling the hair sheet at 3,568 with a window of its own, and 16 of
+the second.  Thirty-two is exactly what `hair_style` holds, and two runs is
+exactly the two figures `EDT_MOD.BIN`'s two lists already showed.
+
+**How the field reaches one of them is not.**  Walked from the bottom of the
+row with 32 presses of Left and then 32 of Right, `MODEL.BIN` section 24
+reaches **three** states -- `v` bands 0, 2 and 1, in that order -- and thirty
+further presses change nothing; those three match no section's own window.  And
+**no vertex moves in any of the 33 states**, so the row does not swap one of
+the 32 bodies into that slot either.  Writing `style = section 24 + N` would be
+a mapping that draws perfectly and may be wrong, which is the one thing this
+module is for not doing.
 
 **FACE reaches five**, of the seven its third-party labels name and the eight
 its three bits hold.  Bands 0 to 4 of the same image, 16 rows each, and then it
@@ -361,9 +370,69 @@ def _load(image_path):
                 for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D)}
 
 
+def head_runs(data: bytes) -> list:
+    """[(first, last, distinct bodies, how many sample the hair sheet)] per run.
+
+    The 32 heads of each run, counted rather than asserted: `layout.HEAD_RUNS`
+    says where they are and this says what is in them, so a disc that does not
+    hold them comes out as a number and not as a crash.
+    """
+    import atlas
+    import section
+
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    out = []
+    for first, stop in layout.HEAD_RUNS:
+        bodies, hairy = set(), 0
+        for index in range(first, stop):
+            one = scan.sections[index]
+            bodies.add(bytes(data[one.offset:one.end]))
+            if any(True for p in one.primitives
+                   if (atlas.image_at(_IMAGES, *atlas.corners(p)[0])
+                       or _NOTHING).offset == layout.HAIR_IMAGE):
+                hairy += 1
+        out.append((first, stop - 1, len(bodies), hairy))
+    return out
+
+
+HEAD_RUN_HAIRY = (32, 16)
+"""How many of each run's 32 heads sample the hair sheet.
+
+All of the first run and half of the second, measured 2026-09-16.  Written down
+because it is the one asymmetry between the two runs, and because a run that
+came out 32 and 32 would mean the reader had stopped telling them apart.
+"""
+
+
+class _NothingHere:
+    offset = None
+
+
+_NOTHING = _NothingHere()
+_IMAGES: list = []
+
+
 def _check_image(image_path: str) -> int:
     disc = _load(image_path)
     problems = []
+
+    global _IMAGES
+    _IMAGES = texture.images(disc[layout.DAT2D])
+    runs = head_runs(disc[layout.MODEL])
+    for (first, last, bodies, hairy), want in zip(runs, HEAD_RUN_HAIRY):
+        print("  MODEL.BIN sections %d..%d: %d distinct body(ies), %d of them "
+              "sampling the hair sheet" % (first, last, bodies, hairy))
+        if bodies != last - first + 1:
+            problems.append("sections %d..%d hold %d distinct body(ies) and "
+                            "the run is %d long" % (first, last, bodies,
+                                                    last - first + 1))
+        if hairy != want:
+            problems.append("sections %d..%d: %d sample the hair sheet, and "
+                            "%d was measured" % (first, last, hairy, want))
+    if len(runs) != 2 or any(r[1] - r[0] + 1 != looks.BY_ROW["HAIR"].values
+                             for r in runs):
+        problems.append("the two runs are not %d sections each, which is what "
+                        "hair_style holds" % looks.BY_ROW["HAIR"].values)
     base = looks.parse_tuple("A-A1-A-A-A")
     for figure in (0, 1):
         parts = draw_list(disc, base, figure)
