@@ -467,13 +467,28 @@ está escrita nelas (acima, "o que foi encaminhado"):
 
 ### Gates medidos
 
+**Na árvore que fecha a task**, o commit `cef4921` — e o commit está escrito
+porque a árvore anda: esta task teve quatro passagens e cada uma plantou
+controle novo. Medido lá, não copiado daqui:
+
 ```text
 python tools/looks/selftest.py --quiet
   modules:  0 failure(s)
-  rules:    0 failure(s)      ..... rule 1 swept 14 file(s), 8916 line(s)
-  controls: 0 failure(s)      ..... 29 of 29 controls red
+  rules:    0 failure(s)      ..... rule 1 swept 14 file(s), 10182 line(s)
+  controls: 0 failure(s)      ..... 32 of 32 controls red
   looks_selftest: 0 failure(s)
 ```
+
+Os **cinco** controles de montagem que esta task plantou estão nesses 32:
+`assembly-table-off-by-one` e `assembly-effects-do-not-compose` na primeira
+passagem, `assembly-hair-map-defaults` e `assembly-hair-map-is-one-section` na
+terceira, `assembly-hair-quads-guessed` na quarta.
+
+> A primeira passagem media **8.916 linhas e 29 de 29 controles**, e este bloco
+> ficou com aquele número até 2026-09-16
+> ([`CORR-LOOKS-032`](/docs/tasks/looks/CORR-LOOKS-032.md)) — isto é, declarava
+> a árvore **anterior** aos casos vermelhos que a própria task existe para ter
+> plantado.
 
 ```text
 python tools/looks/assembly.py --check        ->  assembly.py: 0 failure(s)

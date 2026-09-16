@@ -3,7 +3,7 @@ id: CORR-LOOKS-032
 title: "Correção: o bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -83,17 +83,52 @@ não na seção que fecha a task.
 
 ## Verificação
 
-- [ ] `python tools/looks/selftest.py --quiet` e o bloco da task dizem o mesmo
-      número de arquivos, de linhas e de controles
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py --quiet` e o bloco da task dizem o mesmo
+      número de arquivos, de linhas e de controles — **na árvore que fecha a
+      task**, que o bloco agora nomeia pelo commit
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+O número novo veio de comando, e de um comando rodado **na árvore certa**: um
+worktree destacado em `cef4921`, o commit que fecha a task.
 
-**Arquivos criados/modificados:**
+```text
+$ git worktree add --detach <tmp> cef4921
+$ cd <tmp> && python tools/looks/selftest.py --quiet
+  ..... rule 1 swept 14 file(s), 10182 line(s)
+  ..... 32 of 32 controls red
+  looks_selftest: 0 failure(s)
+```
+
+É o que o bloco diz agora, com **o commit escrito ao lado**. Essa parte não
+estava na CORR e é o que impede a correção de envelhecer outra vez: a árvore
+anda a cada correção — enquanto este lote corria ela foi de 32 para 33
+controles e de 10.182 para 10.348 linhas —, então um bloco que declara
+"a árvore" sem dizer **qual** volta a estar errado no commit seguinte. A task
+fechou uma árvore, e é essa que ela declara.
+
+Os cinco controles de montagem que a task plantou estão nomeados ali, com a
+passagem de cada um, porque é isso que o bloco existe para testemunhar.
+
+### A corrida da primeira passagem virou nota
+
+Ela não foi apagada: fica num bloco `>` ao lado, dizendo o que media — 8.916
+linhas, 29 de 29 — e que era a árvore **anterior** aos casos vermelhos que a
+própria task existe para ter plantado. Apagá-la perderia justamente o que torna
+o achado legível.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `docs/tasks/looks/14-tabela-de-montagem.md` — o bloco `### Gates medidos`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-032.md` — este arquivo
