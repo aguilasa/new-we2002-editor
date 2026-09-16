@@ -119,10 +119,10 @@ class Part:
     """
 
     __slots__ = ("file", "section", "primitive", "points", "uvs", "surface",
-                 "why", "clut", "band", "band_unmeasured")
+                 "why", "clut", "band", "band_unmeasured", "colour_borrowed")
 
     def __init__(self, file, index, primitive, points, uvs, surface, why,
-                 clut, band, band_unmeasured=()):
+                 clut, band, band_unmeasured=(), colour_borrowed=False):
         self.file = file
         self.section = index
         self.primitive = primitive
@@ -133,6 +133,7 @@ class Part:
         self.clut = clut
         self.band = band
         self.band_unmeasured = band_unmeasured
+        self.colour_borrowed = colour_borrowed
 
     @property
     def textured(self) -> bool:
@@ -233,7 +234,8 @@ def surface_for(data: bytes, record, depth: int, clut: int,
 
 
 def part_for(primitive, vertices, record, surface, clut: int, band: int,
-             where: tuple, at: int, band_unmeasured=()) -> Part:
+             where: tuple, at: int, band_unmeasured=(),
+             colour_borrowed: bool = False) -> Part:
     """One primitive as points and normalised (u, v), or as a flat placeholder.
 
     Split out of `build` so the arithmetic can be checked with no disc in the
@@ -268,7 +270,7 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
     if surface is None:
         uvs = [(0.0, 0.0)] * len(points)
     return Part(where[0], where[1], at, points, uvs, surface, why, clut, band,
-                band_unmeasured)
+                band_unmeasured, colour_borrowed)
 
 
 # ---- the scene -----------------------------------------------------------
@@ -289,7 +291,7 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
     scans: dict = {}
     surfaces: dict = {}
     notes = {"no image": 0, "no palette": 0, "off the record": 0,
-             "band unmeasured": 0}
+             "band unmeasured": 0, "colour borrowed": 0}
     out = []
     for entry in parts:
         name, index, at = entry["file"], entry["section"], entry["primitive"]
@@ -316,11 +318,13 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
             notes["no image"] += 1
         part = part_for(primitive, one.vertices, record, surface,
                         entry["clut"], entry["band"], (name, index), at,
-                        entry["band_unmeasured"])
+                        entry["band_unmeasured"], entry["colour_borrowed"])
         if surface is not None and part.surface is None:
             notes["off the record"] += 1
         if part.band_unmeasured:
             notes["band unmeasured"] += 1
+        if part.colour_borrowed:
+            notes["colour borrowed"] += 1
         out.append(part)
     return Scene(out, {k: v for k, v in surfaces.items() if v is not None},
                  values, figure, notes)
@@ -701,6 +705,29 @@ def _check_image(image_path: str) -> int:
     if not theirs - ours:
         problems.append("a hair style drew the same sections, so head_of is "
                         "not reaching the scene")
+
+    # And the two axes CROSSED, which is the case neither check above makes:
+    # a tuple that changes the head AND the colour has to differ in surfaces
+    # from the same head in another colour.  Without it, colour rows addressed
+    # to a section the scene does not draw pass both checks above -- the
+    # colour one runs on family A, where they work, and the head one only asks
+    # which sections are drawn (CORR-LOOKS-034).
+    far = from_image(image_path, "B-I3-A-A-A")
+    print("      A-I3-A-A-A has %d surface(s), B-I3-A-A-A has %d, %d shared"
+          % (len(head_swap.surfaces), len(far.surfaces),
+             len(set(head_swap.surfaces) & set(far.surfaces))))
+    if set(head_swap.surfaces) == set(far.surfaces):
+        problems.append("a skin changed no surface on a head that is not "
+                        "section 24, so the colour rows are addressed to a "
+                        "section this tuple does not draw")
+    borrowed = far.notes.get("colour borrowed", 0)
+    print("      and %d of its %d part(s) take colour by an index measured on "
+          "section %d" % (borrowed, len(far.parts),
+                          assembly.HEAD_COLOUR_MEASURED))
+    if not borrowed:
+        problems.append("no part of a non-A head is marked as taking colour "
+                        "by a borrowed index, and the indices were measured "
+                        "on section %d only" % assembly.HEAD_COLOUR_MEASURED)
 
     print("scene --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

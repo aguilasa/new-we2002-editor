@@ -137,6 +137,14 @@ class Effect:
 
 
 HEAD = (layout.MODEL, layout.HEAD_SECTION)
+"""The head the colour rows were MEASURED on, and a placeholder key.
+
+Section 24 is family A's head and no other's (HAIR_MAP).  `edits()` rewrites
+this key to whichever head the tuple actually wears -- without that, a tuple
+whose HAIR is not an A addresses a section the scene does not draw, the plan
+comes back empty, and SKIN, H.COL, H.F.COL. and FACE move nothing at all while
+the figure draws perfectly (CORR-LOOKS-034).
+"""
 
 EFFECTS = (
     Effect("SKIN", CLUT_ROW, 1, 4,
@@ -305,13 +313,26 @@ line here is a measurement or a declared gap; neither is a guess.
 
 # ---- the edit ------------------------------------------------------------
 
-def edits(values: dict) -> dict:
+def edits(values: dict, head: int | None = None) -> dict:
     """{(file, section): {primitive: (clut, band)}} for one tuple of LOOKS.
 
     `clut` is the id to write, `band` how many rows to add to every `v`.  A
     primitive absent from the answer is one the tuple does not touch, which is
     most of them: the edit is small by measurement, not by choice.
+
+    **The inner key is (row, primitives) and not primitives alone**, because
+    two rows can own the same primitives: H.F.COL. and FACE both move the
+    beard's two, one by CLUT column and the other by band.  Keyed by the tuple
+    of primitives, the second silently replaced the first and H.F.COL. moved
+    nothing on ANY head -- found while asserting that all four colour rows
+    reach the head a tuple wears (CORR-LOOKS-034).
+
+    *head* is the MODEL.BIN section the tuple's HAIR names, and every effect
+    that owns the HEAD key is re-addressed to it.  The default keeps the
+    measured head, so a caller with no tuple in hand gets what the constants
+    describe.
     """
+    where_head = HEAD if head is None else (layout.MODEL, head)
     out: dict = {}
     for effect in EFFECTS:
         name = effect.field.name
@@ -324,9 +345,32 @@ def edits(values: dict) -> dict:
                 "-- %s" % (effect.row, effect.field.label(values[name]), step,
                            effect.reach, effect.why))
         for key, primitives in effect.where.items():
+            key = where_head if key == HEAD else key
             out.setdefault(key, {})
-            out[key][primitives] = (effect, step)
+            out[key][(effect.row, primitives)] = (effect, step)
     return out
+
+
+HEAD_COLOUR_MEASURED = layout.HEAD_SECTION
+"""The one head whose colour primitives were measured, by index.
+
+`SKIN_COLOUR_PRIMITIVES`, `HAIR_COLOUR_PRIMITIVES` and `FACE_PRIMITIVES` were
+read off section 24 with the game running, and the thirteen heads do not hold
+the same number of primitives -- 34 draws 23 where 24 draws 18.  Applying the
+same indices to the other twelve is the plausible assumption this cycle refuses
+elsewhere (HAIR_QUADS covers four heads of thirteen BY MEASUREMENT, and head_of
+refuses three styles rather than invent them).
+
+So they are applied -- a head that takes no colour at all is the defect
+CORR-LOOKS-034 fixed -- and every part they touch on another head is marked.
+What fills this in is the sibling of LOOKS-TASK-14's --writes run: which
+primitives of each of the thirteen heads each colour row moves.
+"""
+
+
+def colour_is_measured(head: int) -> bool:
+    """Whether the colour rows' primitive indices were measured on *head*."""
+    return head == HEAD_COLOUR_MEASURED
 
 
 def head_of(values: dict) -> tuple:
@@ -376,7 +420,7 @@ def combine(primitive, byname: dict, at: int) -> tuple:
     the fields have to compose, not each start again from the file.
     """
     clut, band = primitive.clut, 0
-    for primitives, (effect, step) in byname.items():
+    for (_row, primitives), (effect, step) in byname.items():
         if primitives is not None and at not in primitives:
             continue
         clut, band = apply_to(clut, band, effect, step)
@@ -397,20 +441,29 @@ def draw_list(disc, values: dict, figure: int) -> list:
     data2d = disc[layout.DAT2D]
     images = texture.images(data2d)
     palettes = texture.palettes(data2d)
-    plan = edits(values)
 
     out = []
     dropped: dict = {}
+    borrowed: dict = {}
+    head = head_of(values)[0] if figure == HEAD_FIGURE else None
+    plan = edits(values, head)
     if figure == HEAD_FIGURE:
         chosen, bands = head_of(values)
+        if not colour_is_measured(chosen):
+            # The colour rows reach this head now, and their primitive
+            # indices were read off section 24.  Applied, and said.
+            borrowed[(layout.MODEL, chosen)] = tuple(
+                sorted({at for _row, primitives in plan.get(
+                    (layout.MODEL, chosen), {})
+                    if primitives is not None for at in primitives}))
         quads = layout.HAIR_QUADS.get(chosen)
         if quads:
             # Four of the thirteen heads have their quads named by index, by
             # the breakpoint of LOOKS-TASK-14.  The other nine are written by
             # some other instruction and keep the disc's own window until
             # something measures them -- a wrong guess here repaints the skull.
-            plan.setdefault((layout.MODEL, chosen), {})[quads] = (
-                HEAD_BAND, bands[0])
+            plan.setdefault((layout.MODEL, chosen), {})[
+                (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
             # And when the style landed in more than one band, WHICH quad took
             # which was never measured.  The first is applied, and every
             # primitive it is applied to carries the ones that were dropped, so
@@ -433,12 +486,14 @@ def draw_list(disc, values: dict, figure: int) -> list:
             except texture.NoPalette:
                 window = None
             quads, left = dropped.get((name, index), ((), ()))
+            lent = borrowed.get((name, index), ())
             out.append({
                 "file": name, "section": index, "primitive": at,
                 "clut": clut, "band": band,
                 "image": record.offset if record else None,
                 "palette": None if window is None else (x, y, texture.NARROW),
                 "band_unmeasured": left if at in quads else (),
+                "colour_borrowed": at in lent,
             })
     del modelfile  # imported for the reader below; the draw list does not need it
     return out
@@ -665,7 +720,7 @@ def self_check(verbose: bool = True) -> int:
 
 
 def _checks(c) -> None:
-    ok = c.ok
+    ok, attempt = c.ok, c.attempt
     refuses = c.refusing(BadAssembly)
 
     ok("every effect names a row of the screen",
@@ -684,6 +739,35 @@ def _checks(c) -> None:
     unresolved = sorted(e.row for e in EFFECTS if not e.resolved)
     ok("one row of the five does not walk to the end of what its bits hold",
        unresolved == ["FACE", "H.F.COL."], "%r" % (unresolved,))
+
+    # The colour rows have to reach the head the tuple WEARS, not the head
+    # they were measured on.  Without this every tuple whose HAIR is not an A
+    # draws a figure no colour field touches (CORR-LOOKS-034).
+    away = attempt("parse a tuple whose head is not section 24",
+                   lambda: looks.parse_tuple("B-I3-A-A-A"))
+    if away is not None:
+        chosen = head_of(away)[0]
+        ok("a style of another letter wears another section",
+           chosen != layout.HEAD_SECTION, "got %d" % chosen)
+        plan = attempt("plan the edits for it",
+                       lambda: edits(away, chosen))
+        if plan is not None:
+            ok("and the colour rows are addressed to the head it wears",
+               (layout.MODEL, chosen) in plan,
+               "keys: %r" % (sorted(plan),))
+            ok("with nothing left addressed to the head they were measured on",
+               HEAD not in plan, "keys: %r" % (sorted(plan),))
+            ok("and all four colour rows reach it",
+               len(plan[(layout.MODEL, chosen)]) == 4,
+               "%d row(s)" % len(plan[(layout.MODEL, chosen)]))
+        home = attempt("plan the edits for a head-24 tuple",
+                       lambda: edits(looks.parse_tuple("B-A1-A-A-A"),
+                                     layout.HEAD_SECTION))
+        if home is not None:
+            ok("a family A tuple still addresses section 24", HEAD in home)
+        ok("and only section 24's colour primitives were measured by index",
+           colour_is_measured(layout.HEAD_SECTION)
+           and not colour_is_measured(chosen))
 
     # The band a multi-band style draws with is a CHOICE, not a measurement.
     # Asserted here so the day --writes pairs quad to band -- it reads a0, the
@@ -772,15 +856,31 @@ def _checks(c) -> None:
     # the case that went wrong: the answer may not depend on which came first.
     both_ways = []
     for order in (("SKIN", "H.COL"), ("H.COL", "SKIN")):
-        byname = {BY_ROW[r].where[HEAD]: (BY_ROW[r], 2) for r in order}
+        byname = {(r, BY_ROW[r].where[HEAD]): (BY_ROW[r], 2) for r in order}
         both_ways.append(combine(one, byname, 0))
     ok("two fields on the same primitive compose, and in either order",
        both_ways[0] == both_ways[1]
        == (skin.clut_id(layout.CLUT_ROW_FIRST + 2, layout.HAIR_COLUMN + 2), 0),
        "%r" % (both_ways,))
     ok("and a field passes over a primitive it does not own",
-       combine(one, {BY_ROW["H.F.COL."].where[HEAD]: (BY_ROW["H.F.COL."], 3)},
-               0) == (one.clut, 0))
+       combine(one, {("H.F.COL.", BY_ROW["H.F.COL."].where[HEAD]):
+                     (BY_ROW["H.F.COL."], 3)}, 0) == (one.clut, 0))
+    # Two ROWS that own the SAME primitives, which is the case the plan's key
+    # lost: H.F.COL. moves the beard's column and FACE moves the beard's band,
+    # and both name layout.FACE_PRIMITIVES.  Keyed by the primitives alone the
+    # second replaced the first and H.F.COL. moved nothing, on any head
+    # (CORR-LOOKS-034).
+    beard = looks.parse_tuple("A-A1-A-A-E")
+    rows = [effect.row
+            for effect, _step in edits(beard, layout.HEAD_SECTION)[HEAD]
+            .values()]
+    ok("two rows that own the same primitives both survive the plan",
+       sorted(rows) == ["FACE", "H.COL", "H.F.COL.", "SKIN"], "%r" % (rows,))
+    ok("and a step of H.F.COL. is in it, so the beard colour reaches the head",
+       ("H.F.COL.", 4) in [(e.row, s) for e, s
+                           in edits(beard, layout.HEAD_SECTION)[HEAD].values()],
+       "%r" % ([(e.row, s) for e, s
+                in edits(beard, layout.HEAD_SECTION)[HEAD].values()],))
 
     ok("a tuple inside every reach becomes an edit",
        len(edits(looks.parse_tuple("A-A1-A-A-A"))) >= 1)
@@ -1098,17 +1198,21 @@ def _tuple(image_path: str, text: str, figure: int = 0) -> int:
     seen: dict = {}
     for part in parts:
         key = (part["file"], part["section"], part["image"], part["palette"],
-               part["band"], part["band_unmeasured"])
+               part["band"], part["band_unmeasured"], part["colour_borrowed"])
         seen[key] = seen.get(key, 0) + 1
-    for (name, index, image, palette, band, left), count in sorted(
+    for (name, index, image, palette, band, left, lent), count in sorted(
             seen.items(), key=lambda kv: str(kv[0])):
         print("    %-18s section %-3d image %-6s palette %-16s band %+d  "
-              "x%d%s"
+              "x%d%s%s"
               % (name, index, image, palette, band, count,
                  "" if not left
                  else "   BAND NOT MEASURED: the style also landed in band(s)"
                       " %s, and which quad takes which was never measured"
-                      % ", ".join(str(b) for b in left)))
+                      % ", ".join(str(b) for b in left),
+                 "" if not lent
+                 else "   COLOUR BY BORROWED INDEX: the colour rows were "
+                      "measured on section %d, not this one"
+                      % HEAD_COLOUR_MEASURED))
     return 0
 
 

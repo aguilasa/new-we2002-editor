@@ -1776,6 +1776,31 @@ seção do `D`** — não se o `E` tem seção: tem, a 54, nomeada pelo `E2`
 ([`CORR-LOOKS-030`](/docs/tasks/looks/CORR-LOOKS-030.md)). E o mapa foi medido no **jogador de
 linha**; o segundo bloco de cabeças, o do goleiro, ninguém andou.
 
+**As quatro linhas de cor pintam a cabeça que a tupla veste, e não a 24.** O
+`assembly.EFFECTS` endereçava `SKIN`, `H.COL`, `H.F.COL.` e `FACE` à constante
+`(MODEL.BIN, 24)`, que é a cabeça da família `A` e de nenhuma outra — para os
+29 estilos restantes o plano voltava vazio e **nenhum campo de cor movia um
+pixel**, com o boneco desenhando perfeitamente. O `edits()` recebe a seção
+escolhida e re-endereça a chave
+([`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md)); medido depois do
+conserto, `SKIN` move 14,54% da cabeça `I3` e `H.COL` 2,90%, onde antes os dois
+moviam zero.
+
+**E os índices de primitiva das quatro linhas foram medidos na seção 24.** As
+treze cabeças não têm o mesmo número de primitivas — a 34 desenha 23 onde a 24
+desenha 18 —, então aplicá-los às outras doze é suposição, não medição. Eles
+são aplicados, porque cabeça sem cor nenhuma é o defeito de cima, e cada parte
+que eles tocam noutra cabeça sai marcada **`COLOUR BY BORROWED INDEX`** na
+tabela e como `colour borrowed` nas notas da cena. O que preenche isso é a
+irmã da corrida do `--writes`: quais primitivas de cada uma das treze cabeças
+cada linha de cor move.
+
+**A chave do plano é (linha, primitivas).** `H.F.COL.` e `FACE` nomeiam as
+mesmas duas primitivas da barba — uma anda a coluna do CLUT, a outra a faixa —
+e, com o plano guardado por primitivas, a segunda substituía a primeira:
+**`H.F.COL.` não movia nada em cabeça nenhuma**, nem na 24. Achado ao afirmar
+que as quatro linhas chegam à cabeça, na mesma correção.
+
 **E há um resíduo dentro do que foi medido: a faixa por quad.** O `--patched`
 diz em **quais** faixas os quads reescritos de um estilo caíram, e **dez** dos
 29 mapeados caíram em duas ou mais. Qual quad recebe qual, ninguém mediu. Hoje

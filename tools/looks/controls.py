@@ -369,6 +369,25 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "assembly-colour-stays-on-24", "assembly.py", "edits",
+        "            key = where_head if key == HEAD else key",
+        "            key = key",
+        ("assembly",),
+        "the colour rows addressed to the head they were MEASURED on instead "
+        "of the head the tuple wears: for the 29 styles that are not an A the "
+        "plan comes back empty, and SKIN, H.COL, H.F.COL. and FACE move "
+        "nothing while the figure draws perfectly",
+    ),
+    Control(
+        "assembly-plan-key-drops-a-row", "assembly.py", "edits",
+        "            out[key][(effect.row, primitives)] = (effect, step)",
+        "            out[key][primitives] = (effect, step)",
+        ("assembly",),
+        "the plan keyed by primitives alone: H.F.COL. and FACE both own the "
+        "beard's two, so the second replaces the first and the beard colour "
+        "moves nothing on any head at all",
+    ),
+    Control(
         "assembly-band-choice-silent", "assembly.py", "unmeasured_bands",
         "    if not layout.HAIR_QUADS.get(chosen) or len(bands) < 2:",
         "    if True:",

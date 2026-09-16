@@ -3,7 +3,7 @@ id: CORR-LOOKS-034
 title: "Correção: nenhum campo de cor alcança a cabeça quando o cabelo não é da família A"
 type: correção
 category: núcleo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -124,20 +124,103 @@ conserto não possa voltar em silêncio.
 
 ## Verificação
 
-- [ ] `python tools/looks/assembly.py --tuple B-I3-A-A-A` move a paleta da
-      seção 34, ou diz que não a mediu — nunca devolve a de `A-I3`
-- [ ] `python tools/looks/scene.py --check-image` verde, com o caso cruzado
-- [ ] `python tools/looks/ui_check.py` verde, e um par de família não-`A`
-      diferindo acima do piso
-- [ ] `python tools/looks/selftest.py --quiet` com todos os controles vermelhos
-- [ ] `roms/` intocada
+- [x] `python tools/looks/assembly.py --tuple B-I3-A-A-A` move a paleta da
+      seção 34 **e** diz que a move por índice medido noutra cabeça
+- [x] `python tools/looks/scene.py --check-image` verde, com o caso cruzado
+- [x] `python tools/looks/ui_check.py` verde, e um par de família não-`A`
+      diferindo acima do piso — `SKIN` move 14,54% da cabeça `I3`
+- [x] `python tools/looks/selftest.py --quiet` verde, 39 de 39 controles
+      vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz inteira. Na tabela, a mesma troca de pele nas duas
+famílias:
 
-**Arquivos criados/modificados:**
+```text
+A-A1-A-A-A -> B-A1-A-A-A   palette (144, 480) -> (144, 481)   move
+A-I3-A-A-A -> B-I3-A-A-A   palette (144, 480) -> (144, 480)   NÃO move
+```
+
+O `edits()` passou a receber a cabeça que a tupla veste e a re-endereçar a
+chave `HEAD`. Depois disso:
+
+```text
+A-I3-A-A-A vs B-I3-A-A-A   14,54% dos pixels da cabeça   (era 0,00%)
+A-I3-A-A-A vs A-I3-C-A-A    2,90%                        (era 0,00%)
+A-I3-A-A-A vs A-I3-A-E-A    0,09%                        (era 0,00%)
+```
+
+E a segunda metade que a CORR pede ficou escrita em vez de suposta: os índices
+de primitiva foram medidos **na seção 24**, e a 34 desenha 23 primitivas onde a
+24 desenha 18. Eles são aplicados — cabeça que não recebe cor nenhuma é o
+defeito que esta CORR conserta —, e cada parte que eles tocam noutra cabeça sai
+marcada:
+
+```text
+/BIN/MODEL.BIN section 34 … palette (16, 481, 16) band +16 x2
+    COLOUR BY BORROWED INDEX: the colour rows were measured on section 24,
+    not this one
+```
+
+A marca viaja pelo `Scene.notes` junto com a `band unmeasured` da
+CORR-LOOKS-028 — `colour borrowed: 9` de 598 partes na `B-I3` —, e o
+`scene --check-image` **exige** que ela apareça: uma cabeça não-`A` sem nenhuma
+parte marcada significaria que o re-endereçamento sumiu.
+
+### O segundo defeito, que a asserção do conserto achou
+
+Ao afirmar que **as quatro** linhas de cor chegam à cabeça, saíram três. O
+plano guardava `{primitivas: (efeito, passo)}`, e `H.F.COL.` e `FACE` nomeiam
+as **mesmas** duas primitivas da barba — uma anda a coluna do CLUT, a outra a
+faixa. A segunda substituía a primeira, e **`H.F.COL.` não movia nada em cabeça
+nenhuma**, nem na 24:
+
+```text
+A-A1-A-A-A -> [SKIN, H.COL, FACE]
+A-A1-A-A-E -> [SKIN, H.COL, FACE]      (a cor de barba E não aparece)
+```
+
+A chave interna virou `(linha, primitivas)`. Agora:
+
+```text
+A-A1-A-A-E -> [SKIN, H.COL, H.F.COL. 4, FACE]
+    section 24 … palette (144, 480, 16) -> (208, 480, 16)
+```
+
+Isso **corrige a atribuição de causa da própria evidência desta CORR**: o
+`A-I3-A-A-E` que ela mede em 0,00% não era só a chave da cabeça — era também a
+colisão, e a colisão valia para a família `A` igualmente, onde a CORR supunha o
+código funcionando.
+
+### O que ficou aberto, e virou CORR
+
+Com a colisão consertada, a cor de barba **muda a superfície e não muda um
+pixel**: as janelas 9 e 13 do registro de pele diferem em seis das dezesseis
+entradas (`[2, 5, 12, 13, 14, 15]`), o `Scene` constrói duas texturas
+diferentes (CLUT `30729` contra `30733`), e o quadro sai byte a byte igual nas
+duas cabeças. Pode ser correto — os texels da barba talvez só usem as dez
+entradas iguais — e não está medido. Aberto como
+[`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md).
+
+### Problemas encontrados
+
+Os dois acima. Nenhum gate global quebrou em nenhum momento.
+
+### Arquivos criados/modificados
+
+- `tools/looks/assembly.py` — `edits(values, head)`, a chave
+  `(linha, primitivas)`, `HEAD_COLOUR_MEASURED`, `colour_is_measured()`, a
+  marca no `--tuple` e as asserções
+- `tools/looks/scene.py` — `Part.colour_borrowed`, a nota `colour borrowed`, e
+  o caso cruzado no `--check-image`
+- `tools/looks/controls.py` — `assembly-colour-stays-on-24` e
+  `assembly-plan-key-drops-a-row`
+- `docs/PLAN-LOOKS-PY.md` — §6(c): a chave e o que falta medir
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-034.md` — este arquivo
