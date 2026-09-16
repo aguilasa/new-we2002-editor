@@ -117,6 +117,11 @@ what it says it covers.  `B-I3-A-A-A` against `A-I3-A-A-A` wears section 34 and
 moves **14.54%** of the pixels, measured the same day, and its floor is its
 own: the I3 head answers a skin change with less of the picture than A1 does,
 so copying A1's 40% would have failed a working viewer.
+
+**Remeasured after CORR-LOOKS-042**, which moved every hair quad a texel row to
+where the game's store puts it: 48.29%, 15.81% and 13.66%.  The three floors
+hold with the same room, and the figures above stay as what that day's tree
+measured.
 """
 
 REFUSED = "A-A1-A-F-A"

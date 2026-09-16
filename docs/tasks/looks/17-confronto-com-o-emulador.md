@@ -233,6 +233,8 @@ wireframe — dito aqui para não parecer coberto.
 
 - **Os quads de cabelo saem uma linha curtos** — o jogo desenha `v` 15 onde o
   disco guarda 14 ([`CORR-LOOKS-042`](/docs/tasks/looks/CORR-LOOKS-042.md)).
+  **Consertado em 2026-09-16:** as mesmas capturas dão agora `stored 7` e
+  `stored, one row off 0`; a transcrição acima é da corrida desta task.
 - **O goleiro desenha qualquer estilo como `A`, sem recusar**
   ([`CORR-LOOKS-043`](/docs/tasks/looks/CORR-LOOKS-043.md)).
 - **A tela da barba alcança sete valores, e a tabela diz cinco e recusa `F` e

@@ -81,7 +81,11 @@ pode medir.
 - [x] Duas tuplas visivelmente diferentes produzem **imagens diferentes** —
       `B-A1-A-A-A` difere da referência em **47,13%** dos pixels (piso 40%),
       `A-A1-C-A-A` em **17,17%** (piso 12%) e, desde 2026-09-16,
-      `B-I3-A-A-A` difere de `A-I3-A-A-A` em **14,54%** (piso 10%), que é o
+      `B-I3-A-A-A` difere de `A-I3-A-A-A` em **14,54%** (piso 10%) — números
+      da árvore desta task; depois da
+      [`CORR-LOOKS-042`](/docs/tasks/looks/CORR-LOOKS-042.md), que pôs cada
+      quad de cabelo na linha do store do jogo, são 48,29%, 15,81% e 13,66%,
+      com os mesmos pisos —, que é o
       par de cabeça não-`A`. E a mesma tupla duas vezes difere em **0,00%**,
       que é o que faz os números acima significarem alguma coisa. **Com o
       defeito da [`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md)
