@@ -1585,9 +1585,12 @@ critério da própria task trazia escrito.
 1. **A pose — e é pior do que "pose neutra", medido em 2026-09-16 pela
    [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md).** Não é só a
    animação que falta: **nenhum dos dois arquivos de modelo diz onde uma peça
-   fica.** Cada seção é modelada em torno da **própria origem** — a cabeça vai
-   de y -15 a 48 e a chuteira de -15 a 18 —, então desenhar as doze peças nas
-   coordenadas do arquivo empilha o boneco inteiro num ponto só. Quem posiciona
+   fica.** Cada seção é modelada em torno da **própria origem** — nas
+   coordenadas do arquivo, a cabeça vai de y **-48 a 15** e a chuteira de
+   **-18 a 15**; no render elas aparecem viradas, porque o `scene.UP` é `-1`
+   ([`CORR-LOOKS-037`](/docs/tasks/looks/CORR-LOOKS-037.md)) —, então desenhar
+   as doze peças nas coordenadas do arquivo empilha o boneco inteiro num ponto
+   só. Quem posiciona
    é o jogo, na display list da §6(a), em tempo de desenho.
 
    A v1 desenha então uma **prateleira**, não uma pose: as peças em fila, cada

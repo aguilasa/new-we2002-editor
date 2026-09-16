@@ -155,8 +155,11 @@ de fora.
 ### O que se aprendeu, e é o achado da task
 
 **Nenhum dos dois arquivos de modelo diz onde uma peça fica.** Cada seção é
-modelada em torno da própria origem — a cabeça de y -15 a 48, a chuteira de -15
-a 18 —, então desenhar as doze nas coordenadas do arquivo empilha a figura num
+modelada em torno da própria origem — **nas coordenadas do arquivo** a cabeça
+vai de y -48 a 15 e a chuteira de -18 a 15, e no render elas aparecem viradas
+porque o `scene.UP` é `-1`
+([`CORR-LOOKS-037`](/docs/tasks/looks/CORR-LOOKS-037.md)) —, então desenhar as
+doze nas coordenadas do arquivo empilha a figura num
 ponto só, e cada peça isolada parece perfeita. Quem posiciona é o jogo, em tempo
 de desenho, na display list que a LOOKS-TASK-09 mediu. O plano previa "pose
 neutra" (§5.6); o disco não dá nem isso, e a §5.6 foi corrigida no lugar.

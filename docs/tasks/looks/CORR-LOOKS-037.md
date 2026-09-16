@@ -3,7 +3,7 @@ id: CORR-LOOKS-037
 title: "Correção: as alturas da cabeça e da chuteira estão escritas com o sinal trocado"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -78,18 +78,44 @@ linha e fazem a frase sobreviver a quem for conferir no disco.
 
 ## Verificação
 
-- [ ] os intervalos escritos são os que um `section.scan` devolve, e o texto
-      diz de qual eixo fala
-- [ ] `python tools/looks/scene.py --check-image` verde (o `UP` continua medido
+- [x] os intervalos escritos são os que um `section.scan` devolve, e o texto
+      diz de qual eixo fala — e diz também onde os do render aparecem
+- [x] `python tools/looks/scene.py --check-image` verde (o `UP` continua medido
       pela cabeça ficar acima da chuteira, não declarado)
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+Lido do disco pelo `section.scan`, que é o que a frase dizia estar citando:
 
-**Arquivos criados/modificados:**
+```text
+head section 24: y -48..15
+boot section 9:  y -18..15
+boot section 10: y -18..15
+```
+
+Os dois lugares — a §5.6 do plano e o Log da task — passaram a trazer os
+intervalos do **arquivo**, com a segunda metade na mesma frase: no render eles
+aparecem virados porque o `scene.UP` é `-1`. As duas metades juntas custam meia
+linha e fazem a frase sobreviver a quem for conferir no disco — que era o
+problema, já que a versão antiga convidava a conferir e a achar o contrário.
+
+O achado não muda: a peça continua modelada em torno da própria origem, e somar
+as doze continua empilhando o boneco num ponto só.
+
+### Problemas encontrados
+
+Nenhum. O `UP` continua **medido** pelo `--check-image` — a cabeça fica em
+y 17 e a chuteira em y -3 —, não declarado, que é o que torna esta correção só
+de texto.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` — §5.6
+- `docs/tasks/looks/15-visualizador-opengl.md` — o Log
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-037.md` — este arquivo
