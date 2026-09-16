@@ -336,6 +336,19 @@ fecha com o `selftest` verde.
 `note:` sobre o que não mediu é a armadilha que o `mcr_ui` pagou; aqui o
 contrato é: mediu e passou, ou pulou com 77.
 
+**A transcrição do gate se tira DEPOIS do último commit da task, e nomeia o
+commit.** Não é zelo: a árvore anda a cada edição da própria task, e o número
+copiado no meio da execução descreve uma árvore que não existe mais. Três vezes
+neste ciclo, em três tasks seguidas — 8.916 contra 10.182 na
+[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+([`CORR-LOOKS-032`](/docs/tasks/looks/CORR-LOOKS-032.md)), 11.789 contra 11.831
+na [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)
+([`CORR-LOOKS-036`](/docs/tasks/looks/CORR-LOOKS-036.md)) e 12.609 contra
+12.613 na [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)
+([`CORR-LOOKS-041`](/docs/tasks/looks/CORR-LOOKS-041.md)). A forma que
+sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
+`git worktree add --detach <tmp> <sha>` e rodar o gate lá.
+
 ---
 
 ## Arquivos quentes deste ciclo

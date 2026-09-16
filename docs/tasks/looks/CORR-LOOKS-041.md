@@ -3,7 +3,7 @@ id: CORR-LOOKS-041
 title: "Correção: o bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -90,17 +90,50 @@ nomeia o commit.
 
 ## Verificação
 
-- [ ] o número do bloco é o que a varredura imprime no commit que ele nomeia
-- [ ] o perfil diz quando a transcrição do gate se tira
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] o número do bloco é o que a varredura imprime no commit que ele nomeia
+- [x] o perfil diz quando a transcrição do gate se tira, com as três
+      ocorrências nomeadas e o comando de remedir
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+Remedido nos **dois** commits da task, e o número é o mesmo nos dois:
 
-**Arquivos criados/modificados:**
+```text
+$ git worktree add --detach <tmp> 9f1e3af && cd <tmp>
+  ..... rule 1 swept 18 file(s), 12613 line(s)
+$ git worktree add --detach <tmp2> cb26d88 && cd <tmp2>
+  ..... rule 1 swept 18 file(s), 12613 line(s)
+```
+
+O bloco diz **12.613** e nomeia `cb26d88`, na forma que a CORR-LOOKS-036 deixou
+na task vizinha.
+
+### E a causa, que é o que esta CORR acrescenta às outras duas
+
+Três ocorrências em três tasks seguidas dizem que "reexecutar o gate ao
+escrever o Log" não estava em lugar nenhum que quem executa leia. Entrou na
+seção de gates do [`perfil-looks.md`](/docs/prompts/perfil-looks.md) — que é o
+arquivo que os cinco prompts carregam — com as três medições nomeadas,
+a forma que sobrevive (`# na arvore de <sha>` ao lado do comando) e o comando
+de remedir depois (`git worktree add --detach`).
+
+Vale o número que mostra por que a forma importa: enquanto **este lote** corria,
+a mesma varredura foi de 12.613 para **12.999** linhas e os controles de 37
+para 41. Um bloco que diz "a árvore" sem dizer qual erra no commit seguinte.
+
+### Problemas encontrados
+
+Nenhum. O resto do Log da task reproduz inteiro, como a CORR já dizia.
+
+### Arquivos criados/modificados
+
+- `docs/tasks/looks/16-contratos-da-ui.md` — o bloco de gates
+- `docs/prompts/perfil-looks.md` — a regra, na seção de gates
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-041.md` — este arquivo

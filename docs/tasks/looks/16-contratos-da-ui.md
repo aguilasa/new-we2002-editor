@@ -185,9 +185,13 @@ $ WE2002_LOOKS_IMAGE=<japonesa> ctest --test-dir <build> -R looks
 **1 passed, 2 skipped numa máquina limpa** — o que a §4.4 prometia para o fim
 do ciclo, agora medido.
 
+Na árvore que fecha a task, o commit `cb26d88` — e o commit está escrito
+porque a árvore anda a cada correção
+([`CORR-LOOKS-041`](/docs/tasks/looks/CORR-LOOKS-041.md)):
+
 ```text
-$ python tools/looks/selftest.py --quiet
-  ..... rule 1 swept 18 file(s), 12609 line(s)
+$ python tools/looks/selftest.py --quiet       # na arvore de cb26d88
+  ..... rule 1 swept 18 file(s), 12613 line(s)
   ..... 37 of 37 controls red
 looks_selftest: 0 failure(s)
 

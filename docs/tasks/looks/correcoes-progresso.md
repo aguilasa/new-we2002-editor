@@ -57,7 +57,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-038](/docs/tasks/looks/CORR-LOOKS-038.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A cor de barba troca a superfície e não muda um pixel do quadro | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | Os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-041](/docs/tasks/looks/CORR-LOOKS-041.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O bloco de gates da LOOKS-TASK-16 diz 12.609 linhas e a árvore dela tem 12.613 | Baixa | [x] concluída | 2026-09-16 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -112,7 +112,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-038 — a cor de barba muda a superfície e não muda o desenho
 - [x] CORR-LOOKS-039 — o gate da UI mede a única cabeça em que o código funcionava
 - [x] CORR-LOOKS-040 — onze das doze peças estão fora do gate da UI
-- [ ] CORR-LOOKS-041 — a varredura foi anotada antes da última edição, outra vez
+- [x] CORR-LOOKS-041 — a varredura foi anotada antes da última edição, outra vez
 
 ## Detalhes por correção
 
