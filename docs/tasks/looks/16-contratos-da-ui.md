@@ -202,6 +202,11 @@ aos juízes numa máquina onde o gate inteiro pularia.
   plantados e o `self_check()`
 - `tools/looks/selftest.py` — `ui_check` na lista de módulos
 - `tests/CMakeLists.txt` — o alvo `looks_ui`, com `SKIP_RETURN_CODE 77`
+- `docs/tasks/looks/19-alvos-de-ctest-e-cli.md` — o item do `looks_ui`, que
+  esta task fechou: marcado, e com o `if(UNIX AND Python3_FOUND)` do
+  enunciado corrigido para o `if(Python3_FOUND)` que a máquina exige. A
+  linha vai **na task de destino**, porque quem executar a 19 lê o arquivo
+  dela e não este Log
 - `docs/PLAN-LOOKS-PY.md` — a §4.4: o `looks_ui` precisa também da imagem, e o
   "1 passed, 2 skipped" deixou de ser promessa
 - `docs/prompts/perfil-looks.md` — a linha do `looks_ui` na tabela de gates, o
