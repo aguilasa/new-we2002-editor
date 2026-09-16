@@ -49,6 +49,10 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A constante `AGREEMENT` justifica o piso do corpus com 0,005 e a medição dá 0,008 | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [x] concluída | 2026-09-16 |
+| [CORR-LOOKS-034](/docs/tasks/looks/CORR-LOOKS-034.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | Nenhum campo de cor alcança a cabeça quando o cabelo não é da família A | Alta | [ ] pendente | — |
+| [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A definição de pronto do plano pede uma tupla que a tabela recusa | Média | [ ] pendente | — |
+| [CORR-LOOKS-036](/docs/tasks/looks/CORR-LOOKS-036.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | O critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831 | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | As alturas da cabeça e da chuteira estão escritas com o sinal trocado | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -96,6 +100,10 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-031 — o piso do corpus é justificado com 0,005 e a medição dá 0,008
 - [x] CORR-LOOKS-032 — os gates transcritos são de antes dos controles da própria task
 - [x] CORR-LOOKS-033 — a fonte de verdade ainda diz que a LOOKS-TASK-14 está pendente
+- [ ] CORR-LOOKS-034 — SKIN, H.COL, H.F.COL. e FACE não movem um pixel fora da seção 24
+- [ ] CORR-LOOKS-035 — o item 3 da definição de pronto sai 2
+- [ ] CORR-LOOKS-036 — a varredura da regra 1 foi anotada antes do fim da task
+- [ ] CORR-LOOKS-037 — os intervalos de y são os do render, não os do arquivo
 
 ## Detalhes por correção
 
@@ -646,3 +654,68 @@ e o ciclo arquivado, o dele em
 - **Fix:** reescrever o cabeçalho com o veredito de hoje — medida em
   2026-09-16, com o resíduo nomeado e encaminhado às tasks 15 e 17 —, deixando
   a data de 2026-09-15 no corpo, onde descreve a primeira metade
+
+
+### CORR-LOOKS-034
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, a constante `HEAD` do
+  `EFFECTS`
+- **Sintoma:** as quatro linhas de cor são endereçadas a `(MODEL.BIN, 24)` e o
+  `sections_of()` desenha a cabeça que o `head_of()` nomeia, que só é a 24 para
+  os três estilos da família `A`. Nos outros 29 a chave não casa, o `combine()`
+  recebe um plano vazio e `SKIN`, `H.COL`, `H.F.COL.` e `FACE` **não fazem
+  nada** — quatro quadros byte a byte idênticos na cabeça 34, contra 47,13% e
+  17,17% na 24. O `HAIR` escapa porque o `draw_list` o aplica à seção escolhida
+- **Como foi detectado:** desenhando `A-I3-A-A-A` contra `B-I3`, `A-I3-C`,
+  `A-I3-A-E` e `A-I3-A-A-E` e contando os pixels com o decodificador do
+  `ui_check.py`; confirmado na tabela pelo `assembly.py --tuple`, onde a
+  família `A` move a linha 480 para a 481 e a `I` não move nada. Nenhum gate
+  via: o caso de cor do `scene --check-image` usa duas tuplas da família `A`
+- **Fix:** endereçar a chave à cabeça desenhada; e, porque as treze cabeças não
+  têm o mesmo número de primitivas, ou medir quais primitivas cada linha move
+  em cada uma, ou marcar "cor não medida nesta cabeça" em vez de pintar por
+  índice emprestado. Mais o caso cruzado no `--check-image` e um controle
+  negativo
+
+### CORR-LOOKS-035
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md`, o item 3 da Definição de
+  pronto
+- **Sintoma:** ele manda rodar `--looks A-I3-A-F-A` e esperar "um boneco
+  reconhecível"; a tupla é **recusada** desde que a LOOKS-TASK-14 mediu a linha
+  `FACE` alcançando cinco valores, e o comando sai **2** sem escrever nada. A
+  LOOKS-TASK-15 registrou a recusa no próprio critério e corrigiu a §5.6, mas
+  esta linha — que é o critério de aceitação do projeto — ficou
+- **Como foi detectado:** rodando o comando do item; e o `scene.py --corpus`
+  mostra que não é caso isolado — 16 das 50 tuplas do corpus caem na mesma
+  recusa (13 com `F`, 3 com `G`)
+- **Fix:** trocar pela vizinha desenhável (`A-I3-A-E-A`, a que a 15 desenhou) e
+  **acrescentar a recusa como segunda metade do item**: pronto é desenhar a
+  tupla medida e recusar a não medida com saída 2
+
+### CORR-LOOKS-036
+
+- **Arquivo com problema:** `docs/tasks/looks/15-visualizador-opengl.md`, o
+  último critério
+- **Sintoma:** ele afirma "17 arquivos, 11.789 linhas" para a varredura da
+  regra 1; a árvore que a task commitou tem **11.831**. Os arquivos batem; as
+  linhas foram anotadas no meio da execução
+- **Como foi detectado:** `selftest.py --quiet` num worktree destacado em
+  `f2df3fc`, duas vezes, o mesmo número
+- **Fix:** 11.831 no critério, com o commit nomeado ao lado — é o que a
+  CORR-LOOKS-032 fez com o bloco da 14, e o que impede o número de envelhecer
+  no commit seguinte
+
+### CORR-LOOKS-037
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md` §5.6 e o Log da
+  `docs/tasks/looks/15-visualizador-opengl.md`
+- **Sintoma:** os dois dizem "a cabeça vai de y -15 a 48 e a chuteira de -15 a
+  18" numa frase que declara estar citando **as coordenadas do arquivo**; no
+  arquivo elas são **-48..15** e **-18..15**. Os valores escritos são os do
+  render, já virados pelo `scene.UP = -1`. O achado não muda; o eixo, sim
+- **Como foi detectado:** lendo os vértices das seções 24, 9 e 10 pelo
+  `section.scan`, e conferindo contra o "the head sits at y 17 and the boots at
+  y -3, with UP = -1" do `scene --check-image`
+- **Fix:** escrever os intervalos como o disco os guarda e dizer, na mesma
+  frase, que o render os vira porque `UP` é `-1`
