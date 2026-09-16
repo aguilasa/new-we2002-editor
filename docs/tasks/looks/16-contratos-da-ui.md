@@ -32,6 +32,13 @@ status: concluído
   que desenharam (primitivas, texturizadas, superfícies, triângulos): um quadro
   em branco e um boneco escrevem PNG do mesmo tamanho, e só os números separam
   os dois antes de alguém olhar.
+- **E esses números são asserção desde 2026-09-16**
+  ([`CORR-LOOKS-040`](/docs/tasks/looks/CORR-LOOKS-040.md)). O gate lia da
+  saída do `--smoke` só o `window up` e o `-32000`, e jogava as contagens fora
+  — de modo que, com os pares em `--piece head`, **onze das doze peças ficavam
+  fora de julgamento nenhum**. Agora a figura inteira tem piso (100 primitivas,
+  2 seções, alguma texturizada) e um PNG próprio, julgado pelas mesmas regras
+  de quadro.
 - **Medido no dia, para o gate ter piso:** `A-A1-A-A-A` contra `B-A1-A-A-A`
   difere em **47,13%** dos pixels e contra `A-A1-C-A-A` em **17,17%** — a
   cabeça sozinha, 640x640. Duas tuplas iguais dariam 0,00%.

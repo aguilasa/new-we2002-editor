@@ -3,7 +3,7 @@ id: CORR-LOOKS-040
 title: "Correção: o `looks_ui` só julga a cabeça, e passa com a figura inteira apagada"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -90,18 +90,70 @@ vermelho, como apagar os triângulos já deixa.
 
 ## Verificação
 
-- [ ] `python tools/looks/ui_check.py` verde, julgando também a figura inteira
-- [ ] o mesmo gate fica **vermelho** com `sections_of` devolvendo `[]`
-- [ ] as contagens do `--smoke` entram numa asserção, não só na impressão
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/ui_check.py` verde, julgando também a figura inteira
+- [x] o mesmo gate fica **vermelho** com `sections_of` devolvendo `[]` —
+      `exit=1`, com as duas linhas dizendo qual piso caiu
+- [x] as contagens do `--smoke` entram numa asserção, não só na impressão
+- [x] `python tools/looks/selftest.py --quiet` verde, 41 de 41 controles
+      vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz: com o corpo apagado, o `--smoke` cai de 593 primitivas em
+doze seções para **18 em uma**, e o gate saía **0**.
 
-**Arquivos criados/modificados:**
+As duas metades da CORR foram feitas, e nenhuma delas troca o `--piece head`,
+que está certo pela razão escrita.
+
+**1. As contagens viraram asserção.** O `_counted()` lê a linha que o app já
+imprimia e o `judge_whole()` a julga contra `WHOLE = {primitives: 100,
+sections: 2, textured: 1}` — o menor enunciado que separa uma figura de uma
+peça dela. Não são os números do disco nem os da cabeça: a cabeça sozinha é 18
+em uma seção, e é exatamente isso que um corpo que não desenhou produz.
+
+**2. A figura inteira ganhou um PNG julgado**, pelas mesmas regras de quadro
+dos outros:
+
+```text
+the whole figure: 640x640, 44 colour(s), the commonest covers 91.91%
+```
+
+### A prova de que agora cobre
+
+Com o `sections_of` devolvendo `[]` na árvore:
+
+```text
+  A-A1-A-A-A, figure 0: 18 primitive(s), 18 textured, 3 surface(s), 36 triangle(s)
+FAIL: the whole figure came out with primitives 18 and the floor is 100 …
+FAIL: the whole figure came out with sections 1 and the floor is 2 …
+exit=1
+```
+
+Antes deste conserto, a mesma árvore com o mesmo plantio saía **0**.
+
+Controle novo `ui-whole-figure-unjudged`: as contagens lidas e **não**
+julgadas. Vermelho — e este cabe no `controls.py`, ao contrário do da
+CORR-LOOKS-039, porque o julgamento mora no `self_check()` e não precisa de
+janela.
+
+### Problemas encontrados
+
+Nenhum no conserto. Vale registrar um limite que a medição mostrou: a figura
+inteira cobre **91,91%** de uma cor só, contra os 95% do
+`BACKGROUND_CEILING` — o boneco na prateleira ocupa pouco do quadro, então o
+teto de fundo é uma guarda frouxa para ela. Quem a segura são as contagens, não
+o teto; está dito aqui porque é o que alguém confundiria ao ler o gate passar.
+
+### Arquivos criados/modificados
+
+- `tools/looks/ui_check.py` — `WHOLE`, `_counted()`, `judge_whole()`, o PNG da
+  figura inteira, o `piece` do `draw()` e as quatro asserções
+- `tools/looks/controls.py` — o controle `ui-whole-figure-unjudged`
+- `docs/tasks/looks/16-contratos-da-ui.md` — o contexto
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-040.md` — este arquivo

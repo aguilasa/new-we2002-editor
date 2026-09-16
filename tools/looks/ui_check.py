@@ -407,15 +407,67 @@ def run_app(python: str, app: str, args: list, env: dict):
     return (done.returncode, done.stdout + done.stderr)
 
 
-def draw(python: str, app: str, name: str, out: str, env: dict):
+def draw(python: str, app: str, name: str, out: str, env: dict,
+         piece: str = None):
     """One tuple to one PNG.  `(picture, output)`; picture None on failure."""
     code, output = run_app(python, app,
-                           ["--looks", name, "--piece", PIECE,
+                           ["--looks", name, "--piece", piece or PIECE,
                             "--size", "%dx%d" % SIZE, "--screenshot", out],
                            env)
     if code or not os.path.isfile(out):
         return (None, output)
     return (picture(out), output)
+
+
+WHOLE = {"primitives": 100, "sections": 2, "textured": 1}
+"""The floors the WHOLE FIGURE has to clear, in the `--smoke` report.
+
+Not the head's numbers and not the disc's: the smallest statement that
+separates a figure from one piece of it.  The head alone is 18 primitives in
+one section and the figure the viewer draws is 593 in twelve, so a body that
+vanished comes back as 18 and 1 and trips these.
+
+They exist because `--piece head` is right for the colour pairs -- the head is
+the piece those tuples change -- and it left eleven of the twelve pieces
+outside every judgement this file makes.  The `--smoke` line already printed
+these counts and the gate threw them away (CORR-LOOKS-040).
+"""
+
+
+def _counted(output: str) -> dict:
+    """The counts out of `app.py --smoke`, as a dict, or {} if the line is gone.
+
+    Parsed rather than trusted: the numbers are the app's own report, so this
+    gate reads them the way it reads a PNG -- evidence produced by the code
+    under test, checked against a floor it does not get to choose.
+    """
+    found = {}
+    for line in output.splitlines():
+        if "primitive(s)" in line and "textured" in line:
+            words = line.replace(",", " ").split()
+            for index, word in enumerate(words):
+                if index and word.startswith("primitive("):
+                    found["primitives"] = int(words[index - 1])
+                elif word == "textured":
+                    found["textured"] = int(words[index - 1])
+        if line.strip().startswith("sections "):
+            found["sections"] = int(line.split()[1].rstrip(","))
+    return found
+
+
+def judge_whole(counts: dict) -> list:
+    """The figure the smoke run drew, by its own counts.  [] is the pass."""
+    bad = []
+    if not counts:
+        return ["app.py --smoke printed no counts, so nothing says the figure "
+                "it drew is a figure and not one piece of it"]
+    for name, floor in sorted(WHOLE.items()):
+        if counts.get(name, 0) < floor:
+            bad.append("the whole figure came out with %s %s and the floor is "
+                       "%d -- eleven of the twelve pieces are the body, and a "
+                       "body that did not draw looks exactly like this"
+                       % (name, counts.get(name, "missing"), floor))
+    return bad
 
 
 def _compared(output: str) -> int | None:
@@ -631,6 +683,11 @@ def main(argv: list | None = None) -> int:
         print("FAIL: the window is not parked off the desktop, and the rule "
               "of CLAUDE.md is that nothing opens on the user's screen")
         return 1
+    whole = judge_whole(_counted(output))
+    if whole:
+        for line in whole:
+            print("FAIL: %s" % line)
+        return 1
 
     with tempfile.TemporaryDirectory() as tmp:
         shots, theirs, bad, broke = measure(python, APP, tmp, env)
@@ -652,6 +709,21 @@ def main(argv: list | None = None) -> int:
                   "%.1f%%, and app.py --compare says %s"
                   % (start, name, row, count, shot[0] * shot[1],
                      percent(count, base), floor, theirs.get(name, "nothing")))
+        # The colour pairs are `--piece head` for a measured reason, and that
+        # leaves the other eleven pieces out of every picture judged above.
+        # One more, the whole figure, by the same frame rules.
+        entire, output = draw(python, APP, REFERENCE,
+                              os.path.join(tmp, "whole.png"), env,
+                              piece="all")
+        if entire is None:
+            print("FAIL: the whole figure did not draw: %s" % output.rstrip())
+            return 1
+        seen = colours(entire)
+        print("  the whole figure: %dx%d, %d colour(s), the commonest covers "
+              "%.2f%%" % (entire[0], entire[1], len(seen),
+                          percent(max(seen.values()), entire)))
+        bad += judge_frame("the whole figure", entire)
+
         bad += judge_refusal(python, APP, tmp, env)
         if bad:
             for line in bad:
@@ -772,6 +844,30 @@ def _checks(c) -> None:
     ok("and at least one of them starts from a head that is not section 24's",
        any(not pair[0].split("-")[1].startswith("A") for pair in PAIRS),
        "%r" % ([pair[0] for pair in PAIRS],))
+
+    # The whole figure, by the counts the app prints.  The colour pairs are
+    # `--piece head` for a measured reason, and this is what keeps the other
+    # eleven pieces inside a judgement (CORR-LOOKS-040).
+    figure = ("  A-A1-A-A-A, figure 0: 593 primitive(s), 356 textured, "
+              "5 surface(s), 1186 triangle(s)\n"
+              "  sections 12, shelf on, wireframe off, camera yaw 180 "
+              "pitch 0")
+    ok("the counts are read out of the app's own line",
+       _counted(figure) == {"primitives": 593, "textured": 356,
+                            "sections": 12},
+       "%r" % (_counted(figure),))
+    ok("and a whole figure passes the floors",
+       judge_whole(_counted(figure)) == [],
+       "%s" % judge_whole(_counted(figure)))
+    alone = ("  A-A1-A-A-A, figure 0: 18 primitive(s), 18 textured, "
+             "3 surface(s), 36 triangle(s)\n"
+             "  sections 1, shelf on, wireframe off, camera yaw 180 "
+             "pitch 0")
+    ok("a body that did not draw is caught by them",
+       len(judge_whole(_counted(alone))) == 2,
+       "%s" % judge_whole(_counted(alone)))
+    ok("and a report with no counts at all is caught too",
+       judge_whole(_counted("window up")) != [])
 
     refuses("two pictures of different sizes, rather than counting anyway",
             lambda: differing(drawn, small), "channel")

@@ -369,6 +369,16 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "ui-whole-figure-unjudged", "ui_check.py", "judge_whole",
+        "        if counts.get(name, 0) < floor:",
+        "        if False:",
+        ("ui_check",),
+        "the counts app.py --smoke prints, read and then not judged: the "
+        "colour pairs draw --piece head, so with this blind a figure missing "
+        "eleven of its twelve pieces passes the gate that is the only one to "
+        "put the window up",
+    ),
+    Control(
         "scene-texel-window-ignored", "scene.py", "indices_in_quad",
         "    points = [local_texel(primitive, record, u, v + band)",
         "    points = [local_texel(primitive, record, u, v)",
