@@ -3,7 +3,7 @@ id: CORR-LOOKS-031
 title: "Correção: a constante `AGREEMENT` justifica o piso com 0,005 e a medição dá 0,008"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -76,17 +76,46 @@ exatamente uma inversão entre vizinhas e nada mais.
 
 ## Verificação
 
-- [ ] `python tools/looks/assembly.py --corpus <pasta>` verde, e o número do
-      docstring é a diferença que ele imprime
-- [ ] `python tools/looks/assembly.py --check` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/assembly.py --corpus <pasta>` verde, e o número do
+      docstring é a diferença que ele imprime — 0,361 − 0,353 = **0,008**
+- [x] `python tools/looks/assembly.py --check` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A corrida confirma o que o plano e o Log já diziam, e o docstring não:
 
-**Arquivos criados/modificados:**
+```text
+HAIR     the mesh puts it at 0.246 of the head, and the renders change at 0.361
+H.COL    the mesh puts it at 0.438 of the head, and the renders change at 0.353
+the two orderings agree to rho = 0.80 (the floor is 0.80)
+```
+
+`0,361 − 0,353 = 0,008`. O docstring agora **traz os dois números impressos** e
+a diferença ao lado, em vez de um só valor arredondado por fora da corrida —
+que é como o 0,005 apareceu.
+
+### E a frase ganhou o que faltava para ela sustentar o piso
+
+O argumento contra "limiar calibrado no resultado" precisa de duas metades, e
+só uma estava escrita. A segunda entrou: com quatro linhas, o rho de Spearman
+só assume 1,0, 0,8, 0,6 … — **0,8 é o degrau imediatamente abaixo de 1,0**, e
+uma inversão entre vizinhas custa exatamente 0,2. O piso tolera **uma** e mais
+nada; não é um número escolhido por caber.
+
+### Problemas encontrados
+
+Nenhum. Varredura por `0.005` em `docs/` e `tools/looks/`: os dois acertos que
+sobram são de outro assunto — a deriva de célula do `oracle.py`, 0,005265 e
+0,005682 —, e o terceiro é o texto da própria CORR no
+`correcoes-progresso.md`, que é o registro do achado.
+
+### Arquivos criados/modificados
+
+- `tools/looks/assembly.py` — o docstring do `AGREEMENT`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-031.md` — este arquivo

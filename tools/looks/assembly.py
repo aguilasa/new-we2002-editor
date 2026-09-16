@@ -513,10 +513,18 @@ AGREEMENT = 0.8
 """How well the two orderings must agree, as Spearman's rho over the rows.
 
 Not 1.0, and the reason is measured: HAIR and H.COL sit at 0.25 and 0.44 of the
-head on the disc and their renders change within 0.005 of each other, so which
-of the two is higher is inside the noise of both.  What the corpus witnesses is
-the order of the extremes -- the beard at the bottom, the hair at the top -- and
-one inversion between neighbours costs exactly 0.2.
+head on the disc and their renders change at 0.361 and 0.353 -- **0.008 apart**,
+so which of the two is higher is inside the noise of both.  What the corpus
+witnesses is the order of the extremes -- the beard at the bottom, the hair at
+the top.
+
+**And 0.8 is the step immediately below 1.0, not a round number.**  Over four
+rows Spearman's rho can only be 1.0, 0.8, 0.6 and so on down, and one inversion
+between neighbours costs exactly 0.2.  So this floor tolerates one such
+inversion and nothing else -- which is what keeps it from being a threshold
+calibrated on the result it had to accept.  The 0.008 is the number the run
+prints, and it is printed rather than quoted here for the same reason
+(CORR-LOOKS-031).
 """
 
 
