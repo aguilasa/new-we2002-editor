@@ -130,7 +130,8 @@ de fora.
       perfeitamente (controle `texture-window-at-record-start`).
 - [x] **Desenha a tupla, e a do enunciado é uma RECUSA medida.** O
       `A-I3-A-F-A` deste critério é de antes da LOOKS-TASK-14: o `assembly`
-      mediu a tela da barba chegando a cinco valores e recusa o `F`, então a
+      mediu a tela da barba chegando a cinco valores *(eram sete na tela e cinco
+      aplicados, remedido depois — [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md))* e recusa o `F`, então a
       janela imprime a recusa e sai **2**, em vez de desenhar um `E` calado. O
       que se desenhou e se olhou foi `A-I3-A-E-A`, mais quatro tuplas — a
       recusa e o desenho estão os dois no Log.

@@ -187,7 +187,9 @@ e com que paleta.
       **`BOOTS` resolvido** (8 colunas do registro de chuteira, 42 das 56
       primitivas de cada pé); **`H.F.COL.` resolvido** (7 colunas, 9 a 15);
       **`FACE` alcança 5** das sete que os rótulos nomeiam e das oito que os bits
-      guardam — buraco nomeado; **`BODY` não toca geometria nenhuma**, medido
+      guardam — buraco nomeado *(remedido em 2026-09-16 pela LOOKS-TASK-17: a
+      **tela** oferece 7; o 5 é o alcance da faixa nos dois quads de barba, que
+      é o que esta tabela sabe aplicar — [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md))*; **`BODY` não toca geometria nenhuma**, medido
       pela LOOKS-TASK-08, e está no `assembly.UNTOUCHED` com a razão, junto com
       `HEIG`, `AGE`, `NAT`, `DEFAUL` e `FOOT`.
 - [x] A tabela é **derivada de medição**, e cada linha diz de onde veio: o
@@ -260,7 +262,10 @@ que desenha perfeitamente e está errado — que é exatamente o que esta task
 existe para não fazer.
 
 **`FACE` alcança 5**, das sete que os rótulos de terceiro nomeiam e das oito que
-os três bits guardam. É um terceiro número na mesma família do `beard_colour`
+os três bits guardam. *(Remedido em 2026-09-16: andada letra a letra, a tela
+oferece **7**. O que esta passagem mediu foi a faixa dos dois quads de barba da
+seção 24, que vai até 4 — o alcance do que a tabela sabe aplicar, não o da tela
+— [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md).)* É um terceiro número na mesma família do `beard_colour`
 da LOOKS-TASK-13 (oito bits, sete nomes) — mas ali a tela alcançava os sete, e
 aqui não alcança.
 
