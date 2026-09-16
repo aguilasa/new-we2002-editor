@@ -250,6 +250,40 @@ CONTROLS = (
         "undoes the first and SKIN A to D comes out moving nothing",
     ),
     Control(
+        "scene-texel-in-halfwords", "scene.py", "local_texel",
+        "    x = (page_x - record.x) * per + u",
+        "    x = (page_x - record.x) + u",
+        ("scene",),
+        "the page offset counted in halfwords instead of texels: the picture "
+        "stays seamless and samples a quarter of the sheet",
+    ),
+    Control(
+        "scene-up-is-down", "scene.py", "module constant",
+        "UP = -1",
+        "UP = 1",
+        ("scene",),
+        "the model's y grows downward; with the flip gone the figure draws "
+        "upside down and every part still looks like a part",
+    ),
+    Control(
+        "scene-shelf-stacks", "scene.py", "shelf",
+        "        at += (high_x - low_x) + SHELF_GAP",
+        "        at += 0.0",
+        ("scene",),
+        "the shelf exists because the files carry no placement; with the step "
+        "gone every piece lands on the origin, which is the pile this task "
+        "measured and named",
+    ),
+    Control(
+        "texture-window-at-record-start", "texture.py", "window_for",
+        "    return (record, x - record.x)",
+        "    return (record, 0)",
+        ("texture", "scene"),
+        "a 4-bit id inside a 256-entry record names one of sixteen windows; "
+        "reading from the record's start returns window zero -- sixteen "
+        "colours that draw perfectly and are somebody else's",
+    ),
+    Control(
         "assembly-hair-quads-guessed", "layout.py", "module constant",
         "    24: (1, 14),",
         "    24: (1, 15),",

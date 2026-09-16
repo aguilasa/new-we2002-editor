@@ -1164,6 +1164,8 @@ looks.py        os 12 campos, seus domínios e os rótulos (A1..P1, A..D, ...),
                 a tupla do corpus, e os registros de /SELECT.BIN
 assembly.py     campo de LOOKS -> a edição medida que ele faz na primitiva,
                 e daí a lista de desenho. O coração, e a Fase 4
+scene.py        a lista de desenho virando pontos, (u, v) e textura RGBA --
+                ainda sem Qt, que é o que deixa o render conferível sem tela
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)
 controls.py     controles negativos por substituição literal no fonte
@@ -1194,6 +1196,7 @@ Copiadas do `tools/mcr/`, onde já são varridas mecanicamente pelo `selftest.py
 | `layout.py` | todo endereço | formato, Qt |
 | `section.py` | o formato de 24/8 bytes | onde as seções estão |
 | `assembly.py` | a tabela de montagem | como desenhar |
+| `scene.py` | pontos, texel e paleta resolvidos | Qt, e endereço próprio |
 | `ui/` | como desenhar | onde qualquer coisa mora |
 
 ### 3.5 Idioma
@@ -1546,9 +1549,23 @@ critério da própria task trazia escrito.
 
 ### 5.6 O que não tem oráculo — dito antes de começar
 
-1. **A pose.** O boneco da tela está numa pose de animação, e a animação está no
-   `ANIME.BIN`, fora de escopo. Nosso render será em pose neutra, e por isso a
-   comparação da §5.3 nunca vai bater pixel a pixel.
+1. **A pose — e é pior do que "pose neutra", medido em 2026-09-16 pela
+   [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md).** Não é só a
+   animação que falta: **nenhum dos dois arquivos de modelo diz onde uma peça
+   fica.** Cada seção é modelada em torno da **própria origem** — a cabeça vai
+   de y -15 a 48 e a chuteira de -15 a 18 —, então desenhar as doze peças nas
+   coordenadas do arquivo empilha o boneco inteiro num ponto só. Quem posiciona
+   é o jogo, na display list da §6(a), em tempo de desenho.
+
+   A v1 desenha então uma **prateleira**, não uma pose: as peças em fila, cada
+   uma inteira, nenhuma sobre a outra (`scene.shelf`). O nome é escolhido para
+   não mentir — inventar articulação plausível desenharia um boneco que parece
+   certo e é de ninguém, que é exatamente o que o `head_of` recusa fazer com os
+   três estilos de cabelo não medidos. A pose de verdade, se for querida, sai da
+   display list e é medição da
+   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md). E a
+   comparação da §5.3 continua não batendo pixel a pixel, agora por dois
+   motivos em vez de um.
 2. **A câmera.** O jogo escolhe enquadramento por campo — fecha no rosto em
    `SKIN` e `HAIR`, abre o corpo em `BODY`. Reproduzir isso é adivinhação até
    alguém achar a tabela; a v1 usa câmera orbital livre.

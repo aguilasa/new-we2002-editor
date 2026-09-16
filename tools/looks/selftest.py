@@ -46,6 +46,7 @@ MODULES = (
     "skin",
     "looks",
     "assembly",
+    "scene",
     "pieces",
     "iso_source",
     "oracle",

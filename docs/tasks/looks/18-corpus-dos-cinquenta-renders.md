@@ -61,6 +61,24 @@ status: pendente
 
 ---
 
+- **Quantas das 50 o visualizador consegue desenhar já está medido, e é menos
+  que a cobertura de parse.** 2026-09-16
+  ([`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)),
+  `python tools/looks/scene.py --corpus <pasta>`: **31 desenhadas, 19
+  recusadas** — 13 por `FACE=F`, 3 por `FACE=G`, 2 pelo estilo `H1`, que o
+  `HAIR_MAP` não alcançou, e o `0.jpg`. **Rode, não copie**: o número é da
+  pasta que a variável apontar.
+- **As 16 recusas de barba são um achado, não um limite.** O `assembly` mediu a
+  tela da barba chegando a cinco valores e o corpus mostra sete em uso; ou a
+  varredura parou cedo (armadilha 19), ou os renders foram feitos por editor
+  que grava o campo direto, sem passar pela tela. As duas hipóteses se separam
+  andando o campo nos dois slots, e isso é da
+  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) — aqui
+  entra como conta: comparar 31 e chamar de "o corpus" é dizer 50 onde se mediu
+  31.
+
+---
+
 ## Objetivo
 
 Usar o corpus para procurar erro sistemático, não para produzir um número

@@ -200,7 +200,21 @@ Não se revertem sem o usuário pedir.
     ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)). Quem
     precisar do que o campo escreve lá usa o filtro de churn do `field_diff`,
     ou breakpoint de escrita — que o fork oferece e este ciclo ainda não usou.
-24. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
+24. **Nenhum dos dois arquivos de modelo diz ONDE uma peça fica.** Cada seção
+    é modelada em torno da própria origem, então desenhar as doze nas
+    coordenadas do arquivo empilha o boneco num ponto só — e cada peça, isolada,
+    parece perfeita. Quem posiciona é o jogo, na display list. Medido em
+    2026-09-16
+    ([`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)); o
+    visualizador desenha uma **prateleira** (`scene.shelf`) e diz que é uma.
+25. **Uniforme int do PySide6 se escreve com `setUniformValue1i`.** Passar um
+    `int` para o `setUniformValue` geral chega no shader como zero, sem erro
+    nenhum: o primeiro render saiu com o boneco inteiro na cor de espaço
+    reservado, o que parece textura que não carregou. O mesmo vale para o
+    sampler. E a segunda armadilha da mesma família: o modelo olha para **-z**,
+    então a câmera em yaw 0 fotografa a nuca — um crânio preto que também
+    parece falha de textura.
+26. **Percentual de semelhança sem o nulo ao lado não se lê.** Na folha de 4
     bits deste arquivo um índice cobre um quinto dos texels, então chutar esse
     índice em toda parte já dá ~16%. Foi o que quase fez "9,2% igual" passar por
     "diferente" e "85,7%" por "parecido", quando os números diziam
@@ -257,6 +271,11 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem, e leva ~12 min | `python tools/looks/oracle.py --writes HAIR` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |
+| *(sem alvo ainda)* | as duas variáveis (77 sem elas) | `python tools/looks/scene.py --corpus` | — | LOOKS-TASK-15 |
+| `looks_ui` (nasce na 16) | venv + a imagem; **nada aparece na tela** | `work/venv-looks/Scripts/python tools/looks/ui/app.py --smoke` | — | LOOKS-TASK-15 |
+| *(sem alvo ainda)* | idem | `… tools/looks/ui/app.py --looks <tupla> --screenshot <png>` | — | LOOKS-TASK-15 |
+| *(sem alvo ainda)* | só o venv | `… tools/looks/ui/app.py --compare <png> <png>` | — | LOOKS-TASK-15 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14

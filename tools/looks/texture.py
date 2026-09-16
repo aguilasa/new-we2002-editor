@@ -347,31 +347,57 @@ def covering(records, x: int, y: int, colours: int) -> Record:
     return hits[0]
 
 
-def read_palette(data: bytes, record: Record, colours: int | None = None) -> list:
+def read_palette(data: bytes, record: Record, colours: int | None = None,
+                 first: int = 0) -> list:
     """`colours` RGBA entries from a palette record, BGR555 on the disc.
 
     The top bit is the PSX semi-transparency flag; an entry that is black with
     that bit clear is the transparent one.  `colours` defaults to the record's
     own width and is passed in when a 4-bit primitive samples a slice of a
     256-entry palette.
+
+    `first` is WHICH slice, in entries from the start of the record, and it is
+    not decoration: a 4-bit CLUT id that lands inside a 256-entry record names
+    one of its sixteen windows, and reading from the record's own start hands
+    back window zero -- sixteen entries that draw perfectly and are somebody
+    else's colours.  `window_for` is what resolves the pair.
     """
     want = record.colours if colours is None else colours
-    if want > record.colours:
-        raise BadTable("asked for %d entries of a %d-entry palette"
-                       % (want, record.colours))
-    raw = data[record.offset:record.offset + want * 2]
+    if first < 0 or first + want > record.colours:
+        raise BadTable("asked for %d entries from %d of a %d-entry palette"
+                       % (want, first, record.colours))
+    at = record.offset + first * 2
+    raw = data[at:at + want * 2]
     if len(raw) < want * 2:
         raise BadTable("palette at %d wants %d B and the file has %d left"
-                       % (record.offset, want * 2, len(raw)))
-    out = []
-    for i in range(want):
-        v = struct.unpack_from("<H", raw, 2 * i)[0]
-        r = (v & 0x1F) << 3  # not-an-address: the BGR555 field
-        g = ((v >> 5) & 0x1F) << 3  # not-an-address: idem
-        b = ((v >> 10) & 0x1F) << 3  # not-an-address: idem
-        opaque = v & 0x8000 or (v & 0x7FFF)  # not-an-address: the STP bit
-        out.append((r | r >> 5, g | g >> 5, b | b >> 5, 255 if opaque else 0))
-    return out
+                       % (at, want * 2, len(raw)))
+    return [_rgba(struct.unpack_from("<H", raw, 2 * i)[0])
+            for i in range(want)]
+
+
+def _rgba(value: int) -> tuple:
+    """One BGR555 halfword as the RGBA tuple `read_palette` returns.
+
+    Written once and used by both, so the gate compares against the reading
+    rule rather than against a second copy of it.
+    """
+    r = (value & 0x1F) << 3  # not-an-address: the BGR555 field
+    g = ((value >> 5) & 0x1F) << 3  # not-an-address: idem
+    b = ((value >> 10) & 0x1F) << 3  # not-an-address: idem
+    opaque = value & 0x8000 or (value & 0x7FFF)  # not-an-address: the STP bit
+    return (r | r >> 5, g | g >> 5, b | b >> 5, 255 if opaque else 0)
+
+
+def window_for(records, x: int, y: int, colours: int) -> tuple:
+    """(record, first entry) of the `colours` entries at VRAM (x, y).
+
+    The second half is what `covering` alone cannot say.  A record's `x` is
+    where the record starts, not where the read does, so a narrow id inside a
+    wide record has to be told how far in it sits -- and getting that wrong
+    costs no error and no crash, only the wrong colours.
+    """
+    record = covering(records, x, y, colours)
+    return (record, x - record.x)
 
 
 def palette_for(data: bytes, primitive, records=None) -> list:
@@ -385,7 +411,8 @@ def palette_for(data: bytes, primitive, records=None) -> list:
         records = palettes(data)
     colours = WIDE if primitive.tpage_depth else NARROW
     x, y = primitive.clut_vram
-    return read_palette(data, covering(records, x, y, colours), colours)
+    record, first = window_for(records, x, y, colours)
+    return read_palette(data, record, colours, first)
 
 
 # ---- the synthetic container, for a gate that runs without a disc --------
@@ -405,7 +432,17 @@ def build_container(entries, bank: int = 1, gap: int = 0) -> bytes:
         if records:
             body += bytes(gap)
         records.append((len(body), x, y, colours))
-        body += struct.pack("<H", fill) * colours
+        # `fill` may be one halfword for every entry, or one per entry.  The
+        # second shape exists so a gate can tell one window of a wide record
+        # from another: with a single fill every window reads back the same,
+        # and an offset that is never applied passes.
+        values = ([fill] * colours if isinstance(fill, int)
+                  else list(fill))
+        if len(values) != colours:
+            raise BadTable("%d fill value(s) for a %d-entry palette"
+                           % (len(values), colours))
+        for value in values:
+            body += struct.pack("<H", value)
     tag = layout.RECORD_TAG_BASE + bank
     table = bytearray()
     for offset, x, y, colours in records:
@@ -485,6 +522,36 @@ def _checks(c) -> None:
        "%r %r" % (inside, own))
     ok("and they do not read back the same entries",
        read_palette(data, inside, NARROW) != read_palette(data, own, NARROW))
+
+    # The window inside a wide record, which is the half `covering` does not
+    # answer.  Every entry of this one differs from every other, so a read that
+    # ignores the offset comes back with window zero and is caught; with a
+    # single fill value the two reads are equal and the defect passes.
+    steps = tuple(range(1, WIDE + 1))
+    graded = build_container(((0, layout.CLUT_ROW_FIRST, WIDE, steps),))
+    wide = palettes(graded)[0]
+    pair = attempt("resolve the window of a narrow id inside a wide record",
+                   lambda: window_for(palettes(graded), 3 * NARROW,
+                                      layout.CLUT_ROW_FIRST, NARROW),
+                   default=(None, None))
+    ok("the record is the wide one and the offset is the window, in entries",
+       pair[0] is not None and pair[0].w == WIDE and pair[1] == 3 * NARROW,
+       "%r" % (pair,))
+    shifted = attempt("read that window",
+                      lambda: read_palette(graded, wide, NARROW, pair[1]),
+                      default=[])
+    zeroth = attempt("read window zero of the same record",
+                     lambda: read_palette(graded, wide, NARROW), default=[])
+    ok("a window past the first does not read back as the first",
+       bool(shifted) and shifted != zeroth, "%r" % (shifted[:2],))
+    ok("and it is the entries the record really holds there",
+       shifted == [_rgba(v) for v in steps[3 * NARROW:4 * NARROW]],
+       "%r" % (shifted[:2],))
+
+    # Red: a window that runs off the end of the record refuses instead of
+    # reading whatever follows it in the file.
+    bad("a window past the end of a record refuses",
+        lambda: read_palette(graded, wide, NARROW, WIDE - 8), "asked for")
 
     # Red: an id nothing covers refuses instead of falling back on a neighbour.
     refuses("an uncovered CLUT id refuses",

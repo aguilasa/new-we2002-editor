@@ -48,7 +48,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | Incógnita (d) — pele é troca de paleta ou de cor de vértice? | 3 | 11 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
 | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | `looks.py` — os doze campos, seus domínios e os rótulos | 4 | 09 | ✅ Concluído | 2026-09-15 | 2026-09-15 |
 | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | `assembly.py` — campo de LOOKS → peça + paleta | 4 | 12, 13 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | `ui/viewer.py` e `ui/app.py` — `QOpenGLWidget`, câmera orbital e uma tupla na tela | 5 | 14 | ✅ Concluído | 2026-09-16 | ⬜ pendente |
 | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ⬜ Pendente | — | — |
@@ -180,9 +180,9 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 5 — render
 
-- [ ] `--looks A-I3-A-F-A` desenha aquela tupla.
-- [ ] Nenhuma janela aparece para o usuário.
-- [ ] Duas tuplas diferentes produzem imagens diferentes.
+- [x] `--looks <tupla>` desenha aquela tupla — e a `A-I3-A-F-A` deste item é uma **recusa** medida: o `assembly` mediu a tela da barba chegando a cinco valores e recusa o `F`, com a mensagem dela e saída 2. Desenhadas e olhadas: `A-A1-A-A-A`, `A-I3-A-A-A`, `A-I3-A-E-A`, `A-A1-C-A-A` e `B-A1-A-A-A`.
+- [x] Nenhuma janela apareceu para o usuário: a janela é posta em −32000,−32000 antes do `show()`, e o relatório de cada corrida imprime onde ela está.
+- [x] Duas tuplas diferentes produzem imagens diferentes, medido pelo `app.py --compare`: 47,13% dos pixels entre `A-A1-A-A-A` e `B-A1-A-A-A`, 17,17% para a cor de cabelo `C` e 36,57% para o estilo `I3`. As três imagens foram olhadas, não só contadas.
 
 ### Fase 6 — confronto
 

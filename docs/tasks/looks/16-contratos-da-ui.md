@@ -23,6 +23,29 @@ status: pendente
 
 ---
 
+- **A janela e os três comandos que o gate dirige já existem**, desde
+  2026-09-16 ([`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md)):
+  `ui/app.py --smoke`, `--looks <tupla> --screenshot <png>` e
+  `--compare <png> <png>`, este último devolvendo quantos pixels diferem e em
+  que porcentagem — é o que fecha o segundo critério abaixo sem escrever um
+  comparador novo. O `--smoke` e o `--screenshot` **imprimem as contagens** do
+  que desenharam (primitivas, texturizadas, superfícies, triângulos): um quadro
+  em branco e um boneco escrevem PNG do mesmo tamanho, e só os números separam
+  os dois antes de alguém olhar.
+- **Medido no dia, para o gate ter piso:** `A-A1-A-A-A` contra `B-A1-A-A-A`
+  difere em **47,13%** dos pixels e contra `A-A1-C-A-A` em **17,17%** — a
+  cabeça sozinha, 640x640. Duas tuplas iguais dariam 0,00%.
+- **Uma tupla pode ser RECUSADA, e isso não é falha da janela.** Três estilos de
+  cabelo e os valores de barba acima de `E` saem como recusa da tabela de
+  montagem, com a mensagem dela e **saída 2**. O gate tem de distinguir recusa
+  de queda: `--smoke` e `--screenshot` saem 0, recusa sai 2, e falta de venv ou
+  de imagem sai 77.
+- **Peças cinza são esperadas**, e o gate não pode julgá-las como quadro
+  errado: 237 das 593 primitivas da figura inteira amostram páginas que não
+  estão no `DAT2D.BIN` — são o uniforme, que mora nos 105 `TEX_*.BIN`.
+
+---
+
 ## Objetivo
 
 `tools/looks/ui_check.py` mede o que a janela realmente fez, e pula quando não

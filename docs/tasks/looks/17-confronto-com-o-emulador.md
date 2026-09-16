@@ -47,6 +47,37 @@ status: pendente
 
 ---
 
+- **A POSE NÃO ESTÁ EM ARQUIVO NENHUM QUE ESTE CICLO LÊ, e isso chega aqui.**
+  Medido em 2026-09-16 pela
+  [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md): cada seção é
+  modelada em torno da **própria origem** — a cabeça vai de y -15 a 48 e a
+  chuteira de -15 a 18 —, então nem "pose neutra" o disco dá. O visualizador
+  desenha uma **prateleira** (`scene.shelf`), peças em fila. Quem posiciona é o
+  jogo, na display list da §6(a) do plano, que é justamente o que se lê com o
+  emulador de pé — então **medir o deslocamento de cada peça é trabalho desta
+  task**, e sem ele o confronto compara uma fila com um jogador e a métrica não
+  quer dizer nada.
+- **Qual das duas diagonais um quad é continua sem veredito.** O
+  `scene.TRIANGLES` usa a ordem **como o arquivo guarda** — (0, 1, 2) e
+  (1, 2, 3) — e o `section.Primitive.corners` oferece a leitura do `we3d`, que
+  escolhe a outra. As duas desenham; só o confronto contra o quadro do jogo
+  diz qual. Escolher aqui em silêncio é o que esta linha existe para impedir.
+- **O uniforme não é desenhado, e não é bug:** 237 das 593 primitivas da figura
+  amostram páginas que o `DAT2D.BIN` não tem — elas vivem nos 105
+  `TEX_*.BIN`, um por time, cada um com cinco paletas de 256 entradas
+  ([`CORR-LOOKS-025`](/docs/tasks/looks/CORR-LOOKS-025.md)). Saem em cinza de
+  espaço reservado. Qual contêiner e qual das cinco paletas o jogo usa é
+  pergunta que só o emulador responde, e o `layout.DIGEST` ainda não tem esses
+  arquivos.
+- **A tela da barba pode alcançar mais do que a varredura mediu.** O
+  `assembly` mede `FACE` chegando a **cinco** valores (A..E) e **recusa** `F` e
+  `G`; o corpus de terceiro traz dezesseis renders com eles
+  (`scene.py --corpus`: 31 dos 50 desenhados, 16 recusados por isso). É a
+  armadilha 19 outra vez, do outro lado: andar o campo até a ponta nos **dois**
+  slots é o que separa "a tela trava em E" de "a varredura parou em E".
+
+---
+
 ## Objetivo
 
 Fechar o laço: mesma tupla dos dois lados, e um número que se possa acompanhar
