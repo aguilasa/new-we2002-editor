@@ -53,7 +53,6 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A definição de pronto do plano pede uma tupla que a tabela recusa | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-036](/docs/tasks/looks/CORR-LOOKS-036.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | O critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831 | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | As alturas da cabeça e da chuteira estão escritas com o sinal trocado | Baixa | [x] concluída | 2026-09-16 |
-
 | [CORR-LOOKS-038](/docs/tasks/looks/CORR-LOOKS-038.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A cor de barba troca a superfície e não muda um pixel do quadro | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-039](/docs/tasks/looks/CORR-LOOKS-039.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | Os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-040](/docs/tasks/looks/CORR-LOOKS-040.md) | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | O `looks_ui` só julga a cabeça, e passa com a figura inteira apagada | Média | [x] concluída | 2026-09-16 |
