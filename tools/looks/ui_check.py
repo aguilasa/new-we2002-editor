@@ -127,8 +127,9 @@ measured.
 REFUSED = "A-A1-A-F-A"
 """A tuple the assembly table refuses, and the exit code is the contract.
 
-`FACE=F` is value 5 of a row the screen was measured to reach 5 of, so the
-table raises instead of drawing a beard nobody measured.  The gate demands
+`FACE=F` is value 5 of a row whose screen offers seven and whose table knows
+five -- F is on the screen, and what it writes was never read (CORR-LOOKS-044)
+-- so the table raises instead of drawing a beard nobody measured.  The gate demands
 exit 2 and NO file: a refusal that still writes a picture would be drawn from
 something, and that something would be invented.
 """

@@ -54,11 +54,16 @@ mudança; é esse comportamento que se reproduz.
 3. `python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-E-A`
    produz um boneco reconhecível, com a pele e o cabelo daquela tupla — **e**
    `--looks A-I3-A-F-A` **recusa**, com a mensagem da tabela e saída **2**. As
-   duas metades são o critério: o `FACE` alcança **cinco** dos oito valores que
-   os bits guardam, medido de ponta a ponta pela
-   [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), e desenhar um
-   `E` calado no lugar de um `F` seria a falha que este projeto existe para não
-   cometer. O enunciado pedia a `A-I3-A-F-A` até 2026-09-16
+   duas metades são o critério. A **tela** do `FACE` oferece **sete** valores,
+   `A` a `G`, andada letra a letra nos dois slots pela
+   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md); a
+   **tabela** sabe aplicar **cinco** — as faixas 0 a 4 dos dois quads de barba
+   que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md) mediu.
+   `F` e `G` estão na tela e o que escrevem não foi lido, então a recusa diz
+   **"não medido"**, e não "fora de alcance" — que é o que dizia até a
+   [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md). Desenhar um `E`
+   calado no lugar de um `F` continua sendo a falha que este projeto existe
+   para não cometer. O enunciado pedia a `A-I3-A-F-A` até 2026-09-16
    ([`CORR-LOOKS-035`](/docs/tasks/looks/CORR-LOOKS-035.md)), quando o alcance
    ainda não estava medido.
 
@@ -66,7 +71,8 @@ mudança; é esse comportamento que se reproduz.
    `FACE=F` e três por `FACE=G` —, e são a maior parte das 19 que o
    `scene.py --corpus` recusa. A
    [`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) lê
-   isso como alcance de campo, não como falha de render.
+   isso como **medição que falta** — o que `F` e `G` escrevem —, não como
+   alcance de campo nem como falha de render.
 4. `ctest -R looks` numa máquina limpa: **1 passed, 2 skipped**.
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
@@ -1762,7 +1768,7 @@ não uma escolha entre malhas.
 | `H.COL` | coluna do CLUT | `+1` | 8 de 8 | 7 primitivas da cabeça |
 | `H.F.COL.` | coluna do CLUT | `+1` | 7 de 7 nomeadas | as 2 da barba |
 | `BOOTS` | coluna do CLUT | `+1` | 8 de 8 | 42 das 56 primitivas de cada pé |
-| `FACE` | `v` | 16 linhas | **5** de 7 | as 2 da barba |
+| `FACE` | `v` | 16 linhas | **7** de 7 na tela, **5** aplicados | as 2 da barba, nas faixas 0 a 4; `F` e `G` escrevem outra coisa, não lida ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md)) |
 | `HAIR` | **escolhe a seção** | — | 32 de 32 | a cabeça inteira — ver abaixo |
 
 **E o fundo de cada campo é o estado que o disco guarda** — descer a linha até

@@ -418,6 +418,15 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "assembly-unmeasured-as-unreached", "assembly.py", "edits",
+        "        if step >= effect.known:",
+        "        if False:",
+        ("assembly",),
+        "a value the screen offers and nobody measured, applied anyway: F and "
+        "G on FACE become bands 5 and 6 of a sheet whose beard bands stop at "
+        "4, and the figure draws a beard nobody has seen",
+    ),
+    Control(
         "assembly-goalkeeper-draws-any-style", "assembly.py", "goalkeeper_head",
         "    if style is None or style == DISC_STYLE:",
         "    if True:",

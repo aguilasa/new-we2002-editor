@@ -807,7 +807,7 @@ def _check_image(image_path: str) -> int:
     print("      a beard colour moves %d of the window's %d entries: %s"
           % (len(moves), texture.NARROW, sorted(moves)))
     bands = {}
-    for band in range(assembly.BY_ROW["FACE"].reach):
+    for band in range(assembly.BY_ROW["FACE"].known):
         used = set()
         for at in layout.FACE_PRIMITIVES:
             primitive = head.primitives[at]

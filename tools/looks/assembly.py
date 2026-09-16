@@ -111,20 +111,31 @@ class BadAssembly(Exception):
 class Effect:
     """One field, and the measured edit it makes to a named set of primitives.
 
-    `reach` is how many values the SCREEN offers, walked end to end; `looks`
-    knows how many the field HOLDS.  The two differ for three of the six, and
-    keeping them apart is the whole honesty of this table.
+    Three numbers, and they are three different measurements:
+
+    * `reach` -- how many values the SCREEN offers, walked end to end;
+    * `known` -- how many of those this table knows how to APPLY, because the
+      edit was measured for them;
+    * and `looks` knows how many the field HOLDS.
+
+    `known` exists because FACE was written down as reach 5 -- "bands 0 to 4,
+    and then it clamps" -- and that was the reach of ONE thing, the band in the
+    `v` of section 24's two beard quads.  The screen, walked by the letter on
+    both slots, offers seven (CORR-LOOKS-044).  Values past `known` and inside
+    `reach` are refused as NOT MEASURED, never as out of reach: the screen goes
+    there, and what it does there nobody has read.
     """
 
-    __slots__ = ("row", "what", "step", "reach", "where", "why")
+    __slots__ = ("row", "what", "step", "reach", "where", "why", "known")
 
-    def __init__(self, row, what, step, reach, where, why):
+    def __init__(self, row, what, step, reach, where, why, known=None):
         self.row = row
         self.what = what
         self.step = step
         self.reach = reach
         self.where = where
         self.why = why
+        self.known = reach if known is None else known
 
     @property
     def field(self):
@@ -163,10 +174,13 @@ EFFECTS = (
            {(layout.EDT_MOD, s): None for s in layout.BOOT_SECTIONS},
            "one window a step of the boots record at VRAM (0, 484); 42 of "
            "the 56 primitives of each foot move"),
-    Effect("FACE", BAND, layout.ATLAS_BAND, 5,
+    Effect("FACE", BAND, layout.ATLAS_BAND, 7,
            {HEAD: layout.FACE_PRIMITIVES},
-           "16 rows a band of the same image, bands 0 to 4, and then it "
-           "clamps.  Its labels name seven and its bits hold eight"),
+           "16 rows a band of the same image, bands 0 to 4 on the two beard "
+           "quads of section 24.  The screen offers SEVEN -- A to G, walked "
+           "by the letter on both slots -- and what F and G write is not "
+           "that band, and has not been read",
+           known=5),
 )
 
 BY_ROW = {effect.row: effect for effect in EFFECTS}
@@ -360,6 +374,12 @@ def edits(values: dict, head: int | None = None) -> dict:
                 "%s=%s is value %d, and the screen was measured to reach %d "
                 "-- %s" % (effect.row, effect.field.label(values[name]), step,
                            effect.reach, effect.why))
+        if step >= effect.known:
+            raise BadAssembly(
+                "%s=%s is value %d: the screen offers it -- it reaches %d -- "
+                "and what it writes was not measured; this table knows %d "
+                "-- %s" % (effect.row, effect.field.label(values[name]), step,
+                           effect.reach, effect.known, effect.why))
         for key, primitives in effect.where.items():
             key = where_head if key == HEAD else key
             out.setdefault(key, {})
@@ -925,8 +945,24 @@ def _checks(c) -> None:
     # cycle failed to reach.
     ok("H.F.COL. reaches every value anyone has named",
        BY_ROW["H.F.COL."].reach == len(BY_ROW["H.F.COL."].field.labels))
-    ok("FACE does not, which is what makes it a hole and not a gap in naming",
-       BY_ROW["FACE"].reach < len(BY_ROW["FACE"].field.labels))
+    # FACE reaches every value anyone has named too -- seven on the screen,
+    # seven labels -- and the hole is elsewhere: this table only KNOWS five of
+    # them (CORR-LOOKS-044).  The earlier assertion here said the screen
+    # stopped at five, and the screen said otherwise.
+    ok("FACE's screen reaches every value anyone has named",
+       BY_ROW["FACE"].reach == len(BY_ROW["FACE"].field.labels) == 7,
+       "reach %d, labels %d"
+       % (BY_ROW["FACE"].reach, len(BY_ROW["FACE"].field.labels)))
+    ok("and the table knows how to apply five of them, which is the hole",
+       BY_ROW["FACE"].known == 5 < BY_ROW["FACE"].reach)
+    ok("every other row knows everything its screen offers",
+       all(e.known == e.reach for e in EFFECTS if e.row != "FACE"))
+    refuses("a value the screen offers and nobody measured is refused as that",
+            lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "not measured")
+    # The eighth value the bits hold has no label, so it is built as a
+    # value and not parsed: past the screen, which is a different refusal.
+    refuses("and a value past the screen is refused as out of reach",
+            lambda: edits({looks.BY_ROW["FACE"].name: 7}), "measured to reach")
 
     # The edit itself, on a primitive built here so the check needs no disc.
     class Fake:
@@ -988,8 +1024,8 @@ def _checks(c) -> None:
     ok("so applying the bottom tuple changes nothing",
        apply_to(one.clut, 0, BY_ROW["SKIN"], 0) == (one.clut, 0)
        and apply_to(one.clut, 0, HEAD_BAND, 0) == (one.clut, 0))
-    refuses("a beard style past the five the screen reaches is refused",
-            lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "measured to reach")
+    refuses("a beard style past the five this table knows is refused",
+            lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "not measured")
 
     # The quads the breakpoint named, tied back to the map and to the pair
     # LOOKS-TASK-08 measured by hand.

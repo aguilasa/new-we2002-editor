@@ -80,14 +80,14 @@ status: pendente
   (`confront.py --reach FACE`). A primeira das duas hipóteses abaixo caiu: não
   é editor gravando o campo direto. A tabela recusa `F` e `G` por outra razão,
   e é defeito: [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md).
-- **As 16 recusas de barba são um achado, não um limite.** O `assembly` mediu a
-  tela da barba chegando a cinco valores e o corpus mostra sete em uso; ou a
-  varredura parou cedo (armadilha 19), ou os renders foram feitos por editor
-  que grava o campo direto, sem passar pela tela. As duas hipóteses se separam
-  andando o campo nos dois slots, e isso é da
-  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) — aqui
-  entra como conta: comparar 31 e chamar de "o corpus" é dizer 50 onde se mediu
-  31.
+- **As 16 recusas de barba são medição que falta, não limite.** Hipótese
+  resolvida: a varredura da LOOKS-TASK-14 parou cedo — mediu a faixa dos dois
+  quads da seção 24, que vai até 4, e escreveu isso como alcance da tela. Desde
+  a CORR-LOOKS-044 a recusa diz o que é: `FACE=F is value 5: the screen offers
+  it -- it reaches 7 -- and what it writes was not measured`. O que destrava as
+  16 é `oracle.py --patched FACE` nos dois slots — pode ser outra seção, como o
+  `HAIR` era. Aqui continua entrando como conta: comparar 31 e chamar de "o
+  corpus" é dizer 50 onde se mediu 31.
 
 ---
 
