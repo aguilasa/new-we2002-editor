@@ -411,6 +411,38 @@ def head_of(values: dict) -> tuple:
     return found
 
 
+DISC_STYLE = 0
+"""The hair style the disc's own head IS: A1, section 24 at band 0.
+
+The only style figure 1 can draw truthfully.  HAIR_MAP was measured on the
+outfield player; nothing has walked the row on the goalkeeper, whose heads are
+the second run (74..105), so any other style on figure 1 would be the disc's A1
+head wearing another label -- measured in LOOKS-TASK-17, three styles on slot 1
+drew histograms 1.000 alike (CORR-LOOKS-043).
+"""
+
+
+def goalkeeper_head(values: dict) -> None:
+    """Refuse, for figure 1, every hair style but the disc's own.
+
+    The refusal the outfield player gets from head_of, extended to the figure
+    the map was never measured on.  Drawing section 24 for an I3 is exactly
+    what head_of refuses to do for an H1, and the goalkeeper was doing it in
+    silence.
+    """
+    style = values.get(looks.BY_ROW["HAIR"].name)
+    if style is None or style == DISC_STYLE:
+        return
+    raise BadAssembly(
+        "hair style %s on figure 1: HAIR_MAP was measured on the outfield "
+        "player only, and the goalkeeper's heads (MODEL.BIN %d..%d) were never "
+        "walked -- figure 1 draws the disc's own head, which is %s, and "
+        "nothing else"
+        % (looks.BY_ROW["HAIR"].label(style), layout.HEAD_RUNS[1][0],
+           layout.HEAD_RUNS[1][1] - 1,
+           looks.BY_ROW["HAIR"].label(DISC_STYLE)))
+
+
 def apply_to(clut: int, band: int, effect, step) -> tuple:
     """(clut, band) after one field's step, applied to what is already there.
 
@@ -538,8 +570,9 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
 
     The map was measured on the OUTFIELD player, figure 0.  The second run of
     heads (74..105) is the other figure's, and nothing has walked the row on it
-    -- so figure 1 keeps its own head here, and that is a named gap, not a
-    reading.
+    -- so figure 1 keeps the disc's head, and **refuses** every style that
+    head is not (goalkeeper_head).  It used to draw them all as A1, which made
+    the gap a picture instead of a refusal (CORR-LOOKS-043).
     """
     import modelfile
 
@@ -557,6 +590,8 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
     head = HEAD
     if values is not None and figure == HEAD_FIGURE:
         head = (layout.MODEL, head_of(values)[0])
+    elif values is not None:
+        goalkeeper_head(values)
     return out + [head]
 
 
@@ -827,6 +862,19 @@ def _checks(c) -> None:
        == [u for u, _v in disc_quad])
     refuses("a quad without four corners is refused",
             lambda: hair_texcoords(disc_quad[:3], 0), "corners")
+
+    # Figure 1 draws the disc's own head and refuses every other style,
+    # because the map was never walked on the goalkeeper (CORR-LOOKS-043).
+    ok("figure 1 accepts the style its head is",
+       attempt("the disc's style on figure 1",
+               lambda: goalkeeper_head(looks.parse_tuple("A-A1-A-A-A")),
+               default="raised") is None)
+    refuses("and refuses one it is not, naming the map it was measured on",
+            lambda: goalkeeper_head(looks.parse_tuple("A-I3-A-A-A")),
+            "outfield")
+    refuses("including a style the map could not place on figure 0",
+            lambda: goalkeeper_head(looks.parse_tuple("A-H1-A-A-A")),
+            "outfield")
 
     ok("a style with one band chooses nothing",
        unmeasured_bands(24, (0,)) == ())

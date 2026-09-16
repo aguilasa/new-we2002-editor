@@ -418,6 +418,15 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "assembly-goalkeeper-draws-any-style", "assembly.py", "goalkeeper_head",
+        "    if style is None or style == DISC_STYLE:",
+        "    if True:",
+        ("assembly",),
+        "figure 1 accepting every hair style: the goalkeeper draws the disc's "
+        "A1 head under any label, perfectly and in silence, which is what "
+        "head_of refuses to do for the outfield player",
+    ),
+    Control(
         "assembly-hair-v-from-disc", "assembly.py", "hair_texcoords",
         "    return tuple((u, rows + row)",
         "    return tuple((u, rows + _v)",

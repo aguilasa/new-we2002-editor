@@ -115,11 +115,11 @@ GOALKEEPER_HEAD = ("the goalkeeper's head: HAIR_MAP was measured on the "
                    "outfield player only, so figure 1 draws the disc's section "
                    "24 whatever the style -- and draws it without refusing "
                    "(CORR-LOOKS-043)")
+"""Kept as the record of the residue it named.  Since CORR-LOOKS-043 figure 1
+REFUSES those styles, our side of the matrix drops them the way slot 2 drops
+H1, and EXPECTED has nothing left to excuse."""
 
-EXPECTED = {
-    (1, "A-I3-A-A-A"): GOALKEEPER_HEAD,
-    (1, "A-H1-A-A-A"): GOALKEEPER_HEAD,
-}
+EXPECTED = {}
 """Misses that are a named residue and not a finding.  Anything else that loses
 its row is unexplained, and the run fails."""
 
@@ -207,7 +207,8 @@ def intersection(first: dict, second: dict) -> float:
                for colour, n in first.items())
 
 
-def verdict(scores: dict, slot: int, alike: dict | None = None) -> dict:
+def verdict(scores: dict, slot: int, alike: dict | None = None,
+            expected: dict | None = None) -> dict:
     """{tuple: (outcome, why)} over one slot's matrix.
 
     `scores[(game tuple, our tuple)]` is the intersection, and `alike[(ours,
@@ -235,16 +236,17 @@ def verdict(scores: dict, slot: int, alike: dict | None = None) -> dict:
     unnamed twin is our side drawing two tuples the same, and it fails.
     """
     alike = alike or {}
+    expected = EXPECTED if expected is None else expected
     ours = sorted({mine for _game, mine in scores})
     out = {}
     for game in sorted({g for g, _mine in scores}):
         if game not in ours:
             continue
-        if (slot, game) in EXPECTED:
-            out[game] = ("expected", EXPECTED[(slot, game)])
+        if (slot, game) in expected:
+            out[game] = ("expected", expected[(slot, game)])
             continue
         twins = [o for o in ours if o != game and alike.get((game, o)) == 1.0]
-        if any((slot, o) not in EXPECTED for o in twins):
+        if any((slot, o) not in expected for o in twins):
             out[game] = ("unexplained", "our render of it is identical to %s"
                          % ", ".join(twins))
             continue
@@ -491,7 +493,10 @@ def _checks(c) -> None:
                   ("B-A1-A-A-A", "A-A1-A-A-A"): 0.1,
                   ("B-A1-A-A-A", "A-I3-A-A-A"): 0.1},
                  1, {("A-A1-A-A-A", "A-I3-A-A-A"): 1.0,
-                     ("A-I3-A-A-A", "A-A1-A-A-A"): 1.0})
+                     ("A-I3-A-A-A", "A-A1-A-A-A"): 1.0},
+                 {(1, "A-I3-A-A-A"): GOALKEEPER_HEAD})
+    # A synthetic residue, because the real EXPECTED is empty since
+    # CORR-LOOKS-043 -- and a mechanism nothing exercises is not a mechanism.
     ok("a named residue is expected, and its twin is judged without it",
        gk["A-I3-A-A-A"][0] == "expected" and gk["A-A1-A-A-A"][0] == "win",
        "%r" % (gk,))
