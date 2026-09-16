@@ -1294,11 +1294,30 @@ Mesma divisão por custo que o repositório já usa:
 |---|---|---|---|
 | `looks_selftest` | nada | nunca | LOOKS-TASK-06 |
 | `looks_image` | `WE2002_LOOKS_IMAGE` | 77 | **2026-09-14** |
-| `looks_ui` | venv + display | 77 | LOOKS-TASK-16 |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` | 77 | **2026-09-16** |
 
-Numa máquina limpa, ao fim do ciclo, `ctest -R looks` dá **1 passed, 2
-skipped**. **Hoje são 1 passed, 1 skipped**: o `looks_selftest` passa e o
-`looks_image` pula sem a variável.
+Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped**, e desde
+2026-09-16 é o que ele dá de fato — medido, com os três alvos listados pelo
+nome:
+
+```text
+1/3 Test #10: looks_selftest ...................   Passed
+2/3 Test #11: looks_image ......................***Skipped
+3/3 Test #12: looks_ui .........................***Skipped
+100% tests passed out of 3
+```
+
+Com `WE2002_LOOKS_IMAGE` apontada e o venv no lugar, os três passam — o
+`looks_ui` em ~30 s, que é o custo das oito janelas que ele abre (quatro para
+medir, e uma árvore plantada por controle negativo).
+
+**O `looks_ui` precisa da imagem, e não só do venv e do display.** A linha da
+tabela acima dizia "venv + display" enquanto a 16 não existia; quando ela
+passou a medir, o que faltava era o disco: um visualizador sem disco não tem o
+que desenhar, e o alvo **pula** em vez de subir a janela vazia e passar. É a
+distinção que a [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)
+existe para não errar — o `mcr_ui` passava com a janela sozinha e imprimia um
+`note:` que ninguém lia.
 
 **E o número tem de sair de uma corrida que listou os alvos pelo nome.**
 `ctest -R <padrão>` que não casa nada imprime `No tests were found!!!` e **sai

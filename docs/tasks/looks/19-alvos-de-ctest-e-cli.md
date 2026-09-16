@@ -51,7 +51,16 @@ os três alvos.
       verde. Esta task **confere**, não cria: `SKIP_RETURN_CODE 77`,
       `WE2002_LOOKS_IMAGE` nomeada na mensagem de skip, e o disco inglês
       recusado em vez de aceito em silêncio.
-- [ ] `looks_ui` registrado sob `if(UNIX AND Python3_FOUND)`, também com 77.
+- [x] `looks_ui` **já registrado**, pela
+      [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md) em 2026-09-16,
+      com `SKIP_RETURN_CODE 77`. Esta task **confere**, não cria — e confere
+      uma coisa a mais, porque o enunciado deste item dizia
+      `if(UNIX AND Python3_FOUND)` e isso está **medido como errado**: a janela
+      sobe nativa nesta máquina Windows, estacionada em −32000, sem Xvfb
+      nenhum. Sob `if(UNIX …)` o alvo desapareceria justamente de onde ele
+      roda, e `ctest -R looks_ui` responderia `No tests were found!!!`
+      **saindo zero** — a armadilha 12 outra vez. Ele entrou no mesmo
+      `if(Python3_FOUND)` dos outros dois.
 - [ ] **Decidir o que fazer com o `oracle.py --check-live`, que existe desde a
       [`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md)** e
       hoje não é alvo nenhum. Ele sobe o emulador, carrega os dois save states,

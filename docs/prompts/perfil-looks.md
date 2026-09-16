@@ -220,6 +220,17 @@ Não se revertem sem o usuário pedir.
     "diferente" e "85,7%" por "parecido", quando os números diziam
     *não relacionado* e *é o mesmo arquivo editado*. O
     `atlas.py --compare` imprime o nulo em cada linha por isso.
+27. **Árvore plantada que nem importa fica vermelha, e vermelho pela causa
+    errada não prova nada.** Medido em 2026-09-16
+    ([`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md)): a primeira
+    corrida do `ui_check.py` anunciou **3 de 3** controles vermelhos, e os três
+    tinham morrido em `ModuleNotFoundError: No module named 'lzss'` — o
+    `atlas.py` alcança `tools/pes2/` de lado, e a cópia levava só
+    `tools/looks/`. O `controls.py` já copiava as duas pastas, com a razão
+    escrita. Duas consequências: **copie o que a árvore alcança**, e faça o
+    plantio **distinguir "não rodou" de "rodou e o juiz reprovou"** — sem essa
+    separação, um controle que quebra o import passa por guarda exercitada para
+    sempre.
 
 ---
 
@@ -259,7 +270,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
 | `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
-| `looks_ui` | venv + display (77 sem eles) | — (nasce na 16) | `ctest -R looks_ui` | LOOKS-TASK-16 |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
@@ -273,7 +284,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | as duas variáveis (77 sem elas) | `python tools/looks/scene.py --corpus` | — | LOOKS-TASK-15 |
-| `looks_ui` (nasce na 16) | venv + a imagem; **nada aparece na tela** | `work/venv-looks/Scripts/python tools/looks/ui/app.py --smoke` | — | LOOKS-TASK-15 |
+| *(o que o `looks_ui` dirige)* | venv + a imagem; **nada aparece na tela** | `work/venv-looks/Scripts/python tools/looks/ui/app.py --smoke` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | idem | `… tools/looks/ui/app.py --looks <tupla> --screenshot <png>` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | só o venv | `… tools/looks/ui/app.py --compare <png> <png>` | — | LOOKS-TASK-15 |
 
@@ -313,8 +324,9 @@ toolchain de C++ para ser listado. Tornar os alvos Python alcançáveis sem o
 execução. Fica **aberta**, e enquanto estiver, a coluna do meio é o caminho
 curto: ela não depende de build nenhum.
 
-Hoje são **1 passed, 1 skipped**; depois da LOOKS-TASK-16, **1 passed,
-2 skipped**.
+Hoje são **1 passed, 2 skipped** numa máquina limpa — medido em 2026-09-16,
+com os três alvos listados pelo nome —, e **3 passed** com a imagem apontada e
+o venv no lugar.
 
 **Antes da LOOKS-TASK-06 não há gate**, e isso é esperado: as tasks 01 a 05 se
 verificam pela saída da ferramenta, copiada para o Log. Depois dela, toda task

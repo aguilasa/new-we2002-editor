@@ -224,4 +224,26 @@ if(Python3_FOUND)
     set_tests_properties(looks_image PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 300)
+
+    # The third bracket, and the dearest: it needs the venv with PySide6, the
+    # disc AND a place to put a window. It draws three tuples through the real
+    # window, decodes the PNGs in the standard library -- not through the code
+    # under test -- and demands that two tuples differing in one field come out
+    # as different pictures, that the same tuple twice come out identical, and
+    # that a tuple the assembly table refuses exit 2 with nothing written.
+    #
+    # It is NOT if(UNIX). The window runs on this Windows machine with no Xvfb,
+    # parked at -32000 the way CLAUDE.md says; on Linux the same file sets
+    # DISPLAY=:98 and resolves XAUTHORITY like `make run-98`.
+    #
+    # Missing any of the four things makes it skip with 77 and name what is
+    # gone. What it must never do is pass with a `note:` about what it could
+    # not measure -- that is the shape `mcr_ui` had, green with the window
+    # alone whenever the fixture was missing (section 4.4 of the plan).
+    add_test(NAME looks_ui
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/ui_check.py)
+    set_tests_properties(looks_ui PROPERTIES
+        SKIP_RETURN_CODE 77
+        TIMEOUT 600)
 endif()
