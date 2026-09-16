@@ -92,18 +92,31 @@ read back out of the file rather than assumed.
 """
 
 REFERENCE = "A-A1-A-A-A"
-PAIRS = (
-    ("B-A1-A-A-A", "SKIN", 40.0),
-    ("A-A1-C-A-A", "H.COL", 12.0),
-)
-"""(tuple, the row it moves, the floor in percent of pixels).
+"""The tuple drawn twice, to prove the viewer does not wobble between runs."""
 
-Measured 2026-09-16 with `--piece head` at 640x640: `B-A1-A-A-A` differs from
-the reference in **47.13%** of the pixels and `A-A1-C-A-A` in **17.17%**.  The
-floors sit under those and well over nothing, because what they have to catch
-is a viewer that draws the same boneco for every tuple -- which answers 0.00%,
-not 39%.  They are not a tolerance on the rendering: this gate does not own
-what the picture looks like, only that the tuple reached it.
+PAIRS = (
+    ("A-A1-A-A-A", "B-A1-A-A-A", "SKIN", 40.0),
+    ("A-A1-A-A-A", "A-A1-C-A-A", "H.COL", 12.0),
+    ("A-I3-A-A-A", "B-I3-A-A-A", "SKIN", 10.0),
+)
+"""(the tuple to start from, the tuple to compare, the row, the floor in %).
+
+Measured with `--piece head` at 640x640.  On 2026-09-16: `B-A1-A-A-A` differs
+from `A-A1-A-A-A` in **47.13%** of the pixels and `A-A1-C-A-A` in **17.17%**.
+The floors sit under those and well over nothing, because what they have to
+catch is a viewer that draws the same boneco for every tuple -- which answers
+0.00%, not 39%.  They are not a tolerance on the rendering: this gate does not
+own what the picture looks like, only that the tuple reached it.
+
+**Each pair carries its own base, and that is why the third exists.**  The
+first two are family A, which wears MODEL.BIN section 24 -- the only head the
+colour rows reached until CORR-LOOKS-034, so this gate ran green through that
+whole defect while `scene --check-image` went red on it.  A gate whose sample
+avoids the broken region is not a weaker gate; it is one that does not cover
+what it says it covers.  `B-I3-A-A-A` against `A-I3-A-A-A` wears section 34 and
+moves **14.54%** of the pixels, measured the same day, and its floor is its
+own: the I3 head answers a skin change with less of the picture than A1 does,
+so copying A1's 40% would have failed a working viewer.
 """
 
 REFUSED = "A-A1-A-F-A"
@@ -293,19 +306,18 @@ def judge_pairs(shots: dict, theirs: dict) -> list:
     exactly this verdict and not a second implementation of it.
     """
     bad = []
-    base = shots[REFERENCE]
-    for name, row, floor in PAIRS:
+    for start, name, row, floor in PAIRS:
+        base = shots[start]
         count = differing(base, shots[name])
         share = percent(count, base)
         if share < floor:
             bad.append("%s moves %s and differs from %s in %.2f%% of the "
                        "pixels, under the %.1f%% floor -- the tuple did not "
-                       "reach the picture" % (name, row, REFERENCE, share,
-                                              floor))
+                       "reach the picture" % (name, row, start, share, floor))
         if name in theirs and theirs[name] != count:
             bad.append("the gate counted %d differing pixel(s) between %s and "
                        "%s and app.py --compare counted %d"
-                       % (count, REFERENCE, name, theirs[name]))
+                       % (count, start, name, theirs[name]))
     return bad
 
 
@@ -430,7 +442,9 @@ def measure(python: str, app: str, where: str, env: dict) -> tuple:
     all three controls reported red, and all three had died at `import lzss`.
     """
     shots, theirs, bad = {}, {}, []
-    wanted = [REFERENCE] + [name for name, _row, _floor in PAIRS]
+    wanted = [REFERENCE]
+    for start, name, _row, _floor in PAIRS:
+        wanted += [one for one in (start, name) if one not in wanted]
     for name in wanted:
         shot, output = draw(python, app, name,
                             os.path.join(where, "%s.png" % name), env)
@@ -448,10 +462,10 @@ def measure(python: str, app: str, where: str, env: dict) -> tuple:
                 % (REFERENCE, output.rstrip()))
     bad += judge_repeat(shots[REFERENCE], again)
 
-    for name, _row, _floor in PAIRS:
+    for start, name, _row, _floor in PAIRS:
         code, output = run_app(
             python, app,
-            ["--compare", os.path.join(where, "%s.png" % REFERENCE),
+            ["--compare", os.path.join(where, "%s.png" % start),
              os.path.join(where, "%s.png" % name)], env)
         counted = _compared(output) if code == 0 else None
         if counted is None:
@@ -629,14 +643,14 @@ def main(argv: list | None = None) -> int:
             print("  %s: %dx%d, %d colour(s), the commonest covers %.2f%%"
                   % (name, shot[0], shot[1], len(seen),
                      percent(max(seen.values()), shot)))
-        base = shots.get(REFERENCE)
-        for name, row, floor in PAIRS:
+        for start, name, row, floor in PAIRS:
+            base = shots.get(start)
             if base is None or name not in shots:
                 continue
             count = differing(base, shots[name])
             print("  %s vs %s (%s): %d of %d pixel(s) differ (%.2f%%), floor "
                   "%.1f%%, and app.py --compare says %s"
-                  % (REFERENCE, name, row, count, shot[0] * shot[1],
+                  % (start, name, row, count, shot[0] * shot[1],
                      percent(count, base), floor, theirs.get(name, "nothing")))
         bad += judge_refusal(python, APP, tmp, env)
         if bad:
@@ -742,16 +756,22 @@ def _checks(c) -> None:
     ok("a viewer that wobbles between runs is caught",
        judge_repeat(drawn, other) != [])
 
-    shots = {REFERENCE: drawn, PAIRS[0][0]: other, PAIRS[1][0]: other}
-    counts = {name: differing(drawn, other) for name, _r, _f in PAIRS}
+    shots = {start: drawn for start, _n, _r, _f in PAIRS}
+    shots.update({name: other for _s, name, _r, _f in PAIRS})
+    counts = {name: differing(drawn, other) for _s, name, _r, _f in PAIRS}
     ok("pictures that differ by more than the floor pass the pair judge",
        judge_pairs(shots, counts) == [], "%s" % judge_pairs(shots, counts))
-    same = {REFERENCE: drawn, PAIRS[0][0]: drawn, PAIRS[1][0]: drawn}
+    same = {one: drawn for pair in PAIRS for one in (pair[0], pair[1])}
     ok("a viewer that ignores the tuple is caught",
-       judge_pairs(same, {name: 0 for name, _r, _f in PAIRS}) != [])
+       judge_pairs(same, {name: 0 for _s, name, _r, _f in PAIRS}) != [])
     ok("and a --compare that disagrees with this file is caught",
-       judge_pairs(shots, {name: counts[name] + 1 for name, _r, _f in PAIRS})
-       != [])
+       judge_pairs(shots, {name: counts[name] + 1
+                           for _s, name, _r, _f in PAIRS}) != [])
+    ok("every pair says which tuple it starts from",
+       all(len(pair) == 4 and pair[0] in shots for pair in PAIRS))
+    ok("and at least one of them starts from a head that is not section 24's",
+       any(not pair[0].split("-")[1].startswith("A") for pair in PAIRS),
+       "%r" % ([pair[0] for pair in PAIRS],))
 
     refuses("two pictures of different sizes, rather than counting anyway",
             lambda: differing(drawn, small), "channel")

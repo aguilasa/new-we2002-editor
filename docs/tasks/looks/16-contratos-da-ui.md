@@ -35,6 +35,16 @@ status: concluído
 - **Medido no dia, para o gate ter piso:** `A-A1-A-A-A` contra `B-A1-A-A-A`
   difere em **47,13%** dos pixels e contra `A-A1-C-A-A` em **17,17%** — a
   cabeça sozinha, 640x640. Duas tuplas iguais dariam 0,00%.
+- **E um par de cabeça não-`A`, desde 2026-09-16**
+  ([`CORR-LOOKS-039`](/docs/tasks/looks/CORR-LOOKS-039.md)): `A-I3-A-A-A`
+  contra `B-I3-A-A-A`, que veste a seção **34**, difere em **14,54%** (piso
+  10%). Os dois primeiros pares são da família `A`, que é a seção 24 — **a
+  única cabeça a que as linhas de cor chegavam** até a
+  [`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md), de modo que este
+  gate passou verde pelo defeito inteiro. Cada par traz **a tupla de onde
+  parte** e piso próprio: a cabeça `I3` responde a uma troca de pele com menos
+  da imagem que a `A1`, e copiar os 40% dela reprovaria um visualizador que
+  funciona.
 - **Uma tupla pode ser RECUSADA, e isso não é falha da janela.** Três estilos de
   cabelo e os valores de barba acima de `E` saem como recusa da tabela de
   montagem, com a mensagem dela e **saída 2**. O gate tem de distinguir recusa
@@ -62,10 +72,14 @@ pode medir.
       38,47%. Quadro em branco é uma cor só, e o controle que zera os
       triângulos o produz.
 - [x] Duas tuplas visivelmente diferentes produzem **imagens diferentes** —
-      `B-A1-A-A-A` difere da referência em **47,13%** dos pixels (piso 40%) e
-      `A-A1-C-A-A` em **17,17%** (piso 12%). E a mesma tupla duas vezes difere
-      em **0,00%**, que é o que faz os dois números acima significarem alguma
-      coisa.
+      `B-A1-A-A-A` difere da referência em **47,13%** dos pixels (piso 40%),
+      `A-A1-C-A-A` em **17,17%** (piso 12%) e, desde 2026-09-16,
+      `B-I3-A-A-A` difere de `A-I3-A-A-A` em **14,54%** (piso 10%), que é o
+      par de cabeça não-`A`. E a mesma tupla duas vezes difere em **0,00%**,
+      que é o que faz os números acima significarem alguma coisa. **Com o
+      defeito da [`CORR-LOOKS-034`](/docs/tasks/looks/CORR-LOOKS-034.md)
+      replantado, o gate sai 1** — antes do terceiro par ele saía 0
+      ([`CORR-LOOKS-039`](/docs/tasks/looks/CORR-LOOKS-039.md)).
 - [x] Sem venv ou sem display, **pula com 77** e a mensagem nomeia o que falta.
       Medido nos dois caminhos que esta máquina alcança: sem
       `WE2002_LOOKS_IMAGE`, e a partir de uma árvore sem `work/venv-looks`

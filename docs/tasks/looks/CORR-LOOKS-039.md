@@ -3,7 +3,7 @@ id: CORR-LOOKS-039
 title: "Correção: os pares do `looks_ui` nunca saem da família A, e o defeito da CORR-LOOKS-034 passou por eles"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -92,18 +92,76 @@ entre cobrir e coincidir.
 
 ## Verificação
 
-- [ ] `python tools/looks/ui_check.py` verde, com um par de cabeça não-`A`
-- [ ] o mesmo gate fica **vermelho** com `where_head = HEAD` replantado
-- [ ] cada piso novo tem a corrida que o mediu escrita ao lado
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/ui_check.py` verde, com um par de cabeça não-`A`
+- [x] o mesmo gate fica **vermelho** com `where_head = HEAD` replantado —
+      `exit=1`, e antes deste conserto saía `exit=0`
+- [x] cada piso novo tem a corrida que o mediu escrita ao lado
+- [x] `python tools/looks/selftest.py --quiet` verde, 40 de 40 controles
+      vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz, e com o defeito replantado in loco:
 
-**Arquivos criados/modificados:**
+```text
+$ python tools/looks/ui_check.py          # com where_head = HEAD de volta
+looks_ui: 3 of 3 negative control(s) red, and the window drew every tuple …
+exit=0
+$ python tools/looks/scene.py --check-image
+scene --check-image: 2 problem(s)
+```
+
+O `PAIRS` virou `(de onde parte, com quem compara, a linha, o piso)` — cada par
+diz a própria base — e ganhou o terceiro:
+
+```text
+A-A1-A-A-A vs B-A1-A-A-A (SKIN):  193050 of 409600 (47.13%), floor 40.0%
+A-A1-A-A-A vs A-A1-C-A-A (H.COL):  70336 of 409600 (17.17%), floor 12.0%
+A-I3-A-A-A vs B-I3-A-A-A (SKIN):   59548 of 409600 (14.54%), floor 10.0%
+```
+
+**O piso do terceiro é dele, e é por isso que não se copia:** a cabeça `I3`
+responde a uma troca de pele com 14,54% da imagem, e os 40% da `A1` reprovariam
+um visualizador que funciona.
+
+### A prova de que agora cobre
+
+Replantado o `where_head = HEAD` na árvore e rodado o gate inteiro:
+
+```text
+A-I3-A-A-A vs B-I3-A-A-A (SKIN): 0 of 409600 pixel(s) differ (0.00%), floor 10.0%
+FAIL: B-I3-A-A-A moves SKIN and differs from A-I3-A-A-A in 0.00% of the
+      pixels, under the 10.0% floor -- the tuple did not reach the picture
+exit=1
+```
+
+Antes deste conserto, a mesma árvore com o mesmo defeito saía **0**. É a
+diferença entre cobrir e coincidir.
+
+### O controle negativo não cabe no `controls.py`, e a razão está medida
+
+O motor de controles roda `<módulo>.py --check`, que no `ui_check.py` é o
+`self_check()` — a metade sintética, que julga imagens plantadas em memória e
+**não** abre janela nem lê disco. Um controle que mexe no `assembly.py` não
+alcança esse caminho. O que cobre o defeito é o gate inteiro, e a corrida
+acima é a medição dele; o que entrou no `self_check()` foram duas asserções
+sobre a **forma** dos pares: que cada um diz de onde parte, e que ao menos um
+parte de cabeça que não é a da seção 24 — de modo que apagar o terceiro par
+fica vermelho sem precisar de janela.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `tools/looks/ui_check.py` — `PAIRS` com base por par, o par `I3`, os três
+  usos que liam a referência fixa, e as duas asserções de forma
+- `docs/tasks/looks/16-contratos-da-ui.md` — o contexto e o critério
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-039.md` — este arquivo
