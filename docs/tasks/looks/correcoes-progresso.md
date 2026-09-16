@@ -60,6 +60,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-042](/docs/tasks/looks/CORR-LOOKS-042.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Os quads de cabelo saem uma linha curtos — o jogo desenha v 15 onde o disco guarda 14 | Média | [ ] pendente | — |
 | [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [ ] pendente | — |
 | [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [ ] pendente | — |
+| [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -118,6 +119,7 @@ e o ciclo arquivado, o dele em
 - [ ] CORR-LOOKS-042 — o jogo reescreve o `v` do quad de cabelo, e nós somamos ao do disco
 - [ ] CORR-LOOKS-043 — a recusa do `head_of` só vale para a figura 0
 - [ ] CORR-LOOKS-044 — `FACE` recusa `F` e `G`, que a tela oferece nos dois slots
+- [ ] CORR-LOOKS-045 — o piso do confronto é zero, e a justificativa diz outra coisa
 
 ## Detalhes por correção
 
@@ -815,3 +817,20 @@ e o ciclo arquivado, o dele em
   controle ocioso, e os quadros `reach-{1,2}-FACE-*.png` olhados
 - **Fix:** separar o que a tela oferece do que a tabela sabe aplicar, e medir
   o que `F` e `G` escrevem
+
+### CORR-LOOKS-045
+
+- **Arquivo com problema:** `tools/looks/confront.py`, o `verdict`
+- **Sintoma:** o gate só falha quando a tupla certa empata ou perde; toda
+  liderança abaixo de `MARGIN` sai `ranked` e passa. A justificativa do
+  `ranked` — o limite `I(g, a) − I(g, b) ≤ 1 − I(a, b)` — está certa e vale
+  para o par de teto 0,039, onde 0,02 é metade do possível; o código não
+  consulta o teto, e com dois renders a 0,5 de distância uma liderança de
+  0,001 também passa, com a mensagem imprimindo o 0,5 que a desmente
+- **Como foi detectado:** `confront.py --score` duas vezes sobre as capturas
+  guardadas (os dois `ranked` reais são o par de teto 0,039, e estão certos);
+  depois chamando o `verdict` commitado com teto 0,5 e liderança 0,001
+- **Fix:** condicionar o `ranked` ao teto — a liderança tem de alcançar uma
+  fração dele, ou o teto tem de estar abaixo de `2 × MARGIN` —, preservando os
+  dois `ranked` reais; mais um controle que reponha `right > wrong` e um caso
+  de teto largo no `self_check()`
