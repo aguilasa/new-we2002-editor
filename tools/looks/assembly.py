@@ -832,11 +832,18 @@ def _load(image_path):
 
 
 def head_runs(data: bytes) -> list:
-    """[(first, last, distinct bodies, how many sample the hair sheet)] per run.
+    """[(first, last, byte-distinct sections, distinct meshes, hairy)] per run.
 
     The 32 heads of each run, counted rather than asserted: `layout.HEAD_RUNS`
     says where they are and this says what is in them, so a disc that does not
     hold them comes out as a number and not as a crash.
+
+    **Two counts, because they disagree and the difference is the finding.**
+    Byte-distinct sections is 32 in both runs -- that is the file, and calling
+    it "bodies" is what let a second reading of this run conclude "two blocks of
+    32 heads" (CORR-LOOKS-029).  Distinct VERTEX ARRAYS is **12** in the first
+    run and 24 in the second: the sections differ, the meshes repeat, and
+    fifteen of the sixteen pairs share theirs byte for byte.
     """
     import atlas
     import section
@@ -844,15 +851,42 @@ def head_runs(data: bytes) -> list:
     scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
     out = []
     for first, stop in layout.HEAD_RUNS:
-        bodies, hairy = set(), 0
+        blobs, meshes, hairy = set(), set(), 0
         for index in range(first, stop):
             one = scan.sections[index]
-            bodies.add(bytes(data[one.offset:one.end]))
+            blobs.add(bytes(data[one.offset:one.end]))
+            meshes.add(tuple((v.x, v.y, v.z) for v in one.vertices))
             if any(True for p in one.primitives
                    if (atlas.image_at(_IMAGES, *atlas.corners(p)[0])
                        or _NOTHING).offset == layout.HAIR_IMAGE):
                 hairy += 1
-        out.append((first, stop - 1, len(bodies), hairy))
+        out.append((first, stop - 1, len(blobs), len(meshes), hairy))
+    return out
+
+
+def hair_windows(data: bytes, run: int = 0) -> dict:
+    """{(first v, last v) or None: [section]} over one run of heads.
+
+    The window a head takes on the hair sheet, read the way LOOKS-TASK-14
+    defines one: the `v` span of the primitives that sample HAIR_IMAGE in the
+    CLUT's hair column.  It is a dict rather than a count because the shape is
+    what matters -- the windows REPEAT, and four sections have none at all.
+    """
+    import atlas
+    import section
+
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    first, stop = layout.HEAD_RUNS[run]
+    out: dict = {}
+    for index in range(first, stop):
+        rows = []
+        for primitive in scan.sections[index].primitives:
+            image = atlas.image_at(_IMAGES, *atlas.corners(primitive)[0])
+            if (image is not None and image.offset == layout.HAIR_IMAGE
+                    and skin.grid(primitive.clut)[1] == layout.HAIR_COLUMN):
+                rows += [corner[1] for corner in atlas.corners(primitive)]
+        key = (min(rows), max(rows)) if rows else None
+        out.setdefault(key, []).append(index)
     return out
 
 
@@ -896,6 +930,26 @@ colour's and move by a row or two.  **Nothing goes from 9 back to 1.**  A run
 whose pairs differ by "more beard" is sixteen heads twice over, not 32 hairs.
 """
 
+HEAD_RUN_MESHES = (12, 24)
+"""How many DISTINCT VERTEX ARRAYS each run of 32 sections holds.
+
+Measured 2026-09-16 (CORR-LOOKS-029).  The sections are 32 byte-distinct blobs
+in both runs; the meshes are twelve and 24.  This is the number that says the
+first run is sixteen pairs and not 32 heads, and it is asserted rather than
+described because the word "body" was read as mesh once already.
+"""
+
+HEAD_RUN_WINDOWS = 14
+HEAD_RUN_NO_WINDOW = (32, 33, 36, 37)
+"""How many distinct hair windows the first run's 32 sections take, and who
+takes none.
+
+Fourteen, not 32: the windows repeat -- sections 25, 26 and 27 share one, and
+34, 35, 40 and 41 share another -- and four sections sample the hair sheet in
+the hair column not at all.  "Each with its own window" was written from the
+count of sections, without comparing the windows (CORR-LOOKS-029).
+"""
+
 HEAD_RUN_HAIRY = (32, 16)
 """How many of each run's 32 heads sample the hair sheet.
 
@@ -920,16 +974,33 @@ def _check_image(image_path: str) -> int:
     global _IMAGES
     _IMAGES = texture.images(disc[layout.DAT2D])
     runs = head_runs(disc[layout.MODEL])
-    for (first, last, bodies, hairy), want in zip(runs, HEAD_RUN_HAIRY):
-        print("  MODEL.BIN sections %d..%d: %d distinct body(ies), %d of them "
-              "sampling the hair sheet" % (first, last, bodies, hairy))
-        if bodies != last - first + 1:
-            problems.append("sections %d..%d hold %d distinct body(ies) and "
-                            "the run is %d long" % (first, last, bodies,
-                                                    last - first + 1))
+    for (first, last, blobs, meshes, hairy), want, shapes in zip(
+            runs, HEAD_RUN_HAIRY, HEAD_RUN_MESHES):
+        print("  MODEL.BIN sections %d..%d: %d byte-distinct section(s) but "
+              "only %d distinct mesh(es), %d of them sampling the hair sheet"
+              % (first, last, blobs, meshes, hairy))
+        if blobs != last - first + 1:
+            problems.append("sections %d..%d hold %d byte-distinct section(s) "
+                            "and the run is %d long" % (first, last, blobs,
+                                                        last - first + 1))
+        if meshes != shapes:
+            problems.append("sections %d..%d hold %d distinct mesh(es) and %d "
+                            "was measured" % (first, last, meshes, shapes))
         if hairy != want:
             problems.append("sections %d..%d: %d sample the hair sheet, and "
                             "%d was measured" % (first, last, hairy, want))
+    windows = hair_windows(disc[layout.MODEL])
+    blind = tuple(sorted(windows.get(None, ())))
+    print("  and they take %d distinct window(s) on the hair sheet, not %d: "
+          "%s take none at all"
+          % (len(windows), layout.HEAD_RUNS[0][1] - layout.HEAD_RUNS[0][0],
+             ", ".join(str(i) for i in blind) if blind else "none"))
+    if len(windows) != HEAD_RUN_WINDOWS:
+        problems.append("the first run takes %d distinct window(s) and %d was "
+                        "measured" % (len(windows), HEAD_RUN_WINDOWS))
+    if blind != HEAD_RUN_NO_WINDOW:
+        problems.append("the sections with no window are %s and %s was "
+                        "measured" % (blind, HEAD_RUN_NO_WINDOW))
     pairs, differ, columns = head_pairs(disc[layout.MODEL])
     print("  MODEL.BIN sections %d..%d are %d pair(s): %d primitive(s) differ "
           "inside a pair, and their columns move %s"

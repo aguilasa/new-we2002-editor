@@ -3,7 +3,7 @@ id: CORR-LOOKS-029
 title: "Correção: o `HEAD_RUNS` diz \"todo corpo distinto, cada um com sua janela\" e o disco diz doze corpos e catorze janelas"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -127,20 +127,72 @@ medição ao lado, como manda o perfil ("o plano se corrige na seção que muda"
 
 ## Verificação
 
-- [ ] `python tools/looks/assembly.py --check-image` imprime blobs e malhas
+- [x] `python tools/looks/assembly.py --check-image` imprime blobs e malhas
       separados, e afirma 12 e 24
-- [ ] `python tools/looks/assembly.py --check` verde
-- [ ] `python tools/looks/selftest.py --quiet` verde, com todos os controles
+- [x] `python tools/looks/assembly.py --check` verde
+- [x] `python tools/looks/selftest.py --quiet` verde, 33 de 33 controles
       vermelhos
-- [ ] nenhuma frase restante diz "every body distinct" ou "janela própria"
-- [ ] `roms/` intocada
+- [x] nenhuma frase restante diz "every body distinct" ou "janela própria" —
+      as duas transcrições que sobram estão dentro de bloco de saída da
+      segunda passagem, com a nota de correção ao lado
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+As duas medições reproduzem, e as duas contrariam o docstring:
 
-**Arquivos criados/modificados:**
+```text
+run 24..55:  32 distinct section blob(s), 12 distinct vertex arra(ys)
+run 74..105: 32 distinct section blob(s), 24 distinct vertex arra(ys)
+run 1: 32 sections, 14 distinct column-1 hair windows
+```
+
+O conserto começou onde a palavra nasceu. O `head_runs` contava
+`bytes(data[offset:end])` e chamava aquilo de `body`; agora conta as duas
+coisas e imprime as duas, com o nome de cada uma:
+
+```text
+MODEL.BIN sections 24..55: 32 byte-distinct section(s) but only 12 distinct
+    mesh(es), 32 of them sampling the hair sheet
+MODEL.BIN sections 74..105: 32 byte-distinct section(s) but only 24 distinct
+    mesh(es), 16 of them sampling the hair sheet
+and they take 14 distinct window(s) on the hair sheet, not 32: 32, 33, 36, 37
+    take none at all
+```
+
+`HEAD_RUN_MESHES = (12, 24)`, `HEAD_RUN_WINDOWS = 14` e
+`HEAD_RUN_NO_WINDOW = (32, 33, 36, 37)` são asserção do `--check-image`, não
+prosa — é a mesma lição da CORR-LOOKS-026 uma linha adiante: o número que
+decide alguma coisa vem de comando.
+
+### A segunda afirmação era a mais cara
+
+"Cada uma das 32 tem janela própria" não é erro de rótulo: é a frase que faria
+alguém ler 32 janelas onde há **catorze**, com as 25, 26 e 27 dividindo uma e
+quatro seções sem nenhuma. Ela sustentava, do outro lado, a leitura "dois
+blocos de 32 cabeças" que a terceira passagem teve de desfazer — e o docstring
+do `HEAD_RUNS` se contradizia dentro de si mesmo, dizendo "every body distinct"
+no primeiro parágrafo e "sixteen pairs rather than 32 independent heads" no
+último. Os dois parágrafos agora dizem a mesma coisa, que é a medida.
+
+### Problemas encontrados
+
+Nenhum. As duas transcrições que ainda dizem `distinct body(ies)` estão dentro
+do bloco de saída da segunda passagem da task, que é **registro da corrida
+daquele dia** — reescrever seria falsificar a evidência. Ganharam a nota de
+correção ao lado, que é o precedente do ciclo.
+
+### Arquivos criados/modificados
+
+- `tools/looks/assembly.py` — `head_runs` com as duas contagens,
+  `hair_windows()`, `HEAD_RUN_MESHES`, `HEAD_RUN_WINDOWS`,
+  `HEAD_RUN_NO_WINDOW` e as asserções
+- `tools/looks/layout.py` — o docstring do `HEAD_RUNS`, sem a contradição
+- `docs/tasks/looks/14-tabela-de-montagem.md` — a nota ao lado da transcrição
+  e a frase da janela corrigida no lugar
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-029.md` — este arquivo

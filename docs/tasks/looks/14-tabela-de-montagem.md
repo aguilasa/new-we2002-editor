@@ -300,11 +300,25 @@ python tools/looks/assembly.py --check-image
   MODEL.BIN sections 74..105: 32 distinct body(ies), 16 of them sampling the hair sheet
 ```
 
+> **Corrigido em 2026-09-16**
+> ([`CORR-LOOKS-029`](/docs/tasks/looks/CORR-LOOKS-029.md)): `distinct
+> body(ies)` contava **blobs de seção**, não corpos, e a palavra levou o
+> parágrafo abaixo junto. O comando hoje imprime as duas contagens: **32
+> seções byte a byte distintas, 12 malhas** no primeiro bloco e 24 no segundo.
+> A transcrição fica como está — é o que a corrida daquele dia disse.
+
 **Dois blocos de 32 cabeças.** Trinta e dois é o domínio do `hair_style`; dois
-blocos são as duas figuras. Cada uma das 32 do primeiro bloco tem janela própria
-na folha — da 24 (`v` 1..14 no par do cabelo) à 52 (`v` 8..126) — e os pares
-vizinhos compartilham **o mesmo array de vértices** com UV diferente: as 24 e 25
-têm vértices idênticos, corpo diferente.
+blocos são as duas figuras. Os pares vizinhos compartilham **o mesmo array de
+vértices** com UV diferente: as 24 e 25 têm vértices idênticos, corpo
+diferente.
+
+*A frase acima dizia também que cada uma das 32 tem janela própria na folha, da
+24 (`v` 1..14) à 52 (`v` 8..126). Os dois extremos estão certos e o "cada uma"
+não: medido, o primeiro bloco toma **catorze** janelas distintas, não 32 — as
+25, 26 e 27 dividem uma; as 34, 35, 40 e 41, outra — e **quatro seções (32, 33,
+36 e 37) não tomam nenhuma**. Pela leitura larga, sem filtrar a coluna do
+cabelo, são 22. Nenhuma das duas dá 32. O `--check-image` imprime a contagem e
+as quatro sem janela.*
 
 **E a metade que falta continua faltando, agora com um "não" medido no lugar de
 uma dúvida:** as três faixas que a tela alcança **não batem com a janela de

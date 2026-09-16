@@ -348,10 +348,19 @@ the same pair as BOOTS_SECTIONS, per slot, and this is the file-level name
 HEAD_RUNS = ((24, 56), (74, 106))
 """The two runs of MODEL.BIN sections that are heads, as half-open ranges.
 
-**Thirty-two sections each, every body distinct**, measured 2026-09-16.  All
-32 of the first run sample HAIR_IMAGE, each with its own window on that sheet;
-of the second run, 16 do.  Thirty-two is exactly what `hair_style` holds, and
-two runs is exactly the two figures EDT_MOD.BIN's two lists already showed.
+**Thirty-two sections each, byte for byte distinct** -- and that is a count of
+SECTIONS, not of bodies.  Measured 2026-09-16, remeasured by CORR-LOOKS-029:
+the first run holds **twelve** distinct vertex arrays and the second 24, and
+fifteen of the first run's sixteen pairs share theirs byte for byte.  Thirty-two
+is exactly what `hair_style` holds and two runs is exactly the two figures
+EDT_MOD.BIN's two lists already showed, which is what makes the coincidence
+worth refusing rather than reading.
+
+All 32 of the first run sample HAIR_IMAGE and 16 of the second do, but **not
+each with its own window**: the 32 take **fourteen** distinct windows on that
+sheet, several shared -- 25, 26 and 27 take one between them -- and sections
+32, 33, 36 and 37 take none at all.  `assembly.hair_windows` measures it and
+`assembly.HEAD_RUN_WINDOWS` asserts it.
 
 **The anchoring is measured, and it is not `24 + N`.**  On 2026-09-16
 `oracle.py --patched HAIR` read the whole loaded file after every press and
