@@ -65,6 +65,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [ ] pendente | — |
+| [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -128,6 +129,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-047 — a figura 1 só desenha o `A1`, e três em cada quatro goleiros são recusados
 - [x] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
 - [ ] CORR-LOOKS-049 — o corpus mede errado o índice de cor emprestado da seção 24
+- [ ] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
 
 ## Detalhes por correção
 
@@ -892,3 +894,22 @@ e o ciclo arquivado, o dele em
   `worst.png` olhada; `scene.py --tuple` imprime `colour borrowed 9` nessas
   cabeças e 0 na `A1`
 - **Fix:** medir os índices de cor por cabeça, e recusar onde faltarem
+
+### CORR-LOOKS-050
+
+- **Arquivo com problema:** `tools/looks/corpus.py`, o julgamento por campo e a
+  autopontuação por grupo
+- **Sintoma:** com a CORR-LOOKS-049 presente — doze peles desenhadas só na
+  testa —, a corrida diz `skin_colour 47/47` e `corpus: ok`. O campo é julgado
+  pelo **rótulo do render de maior nota**, e nas seis piores esse render é a
+  cabeça `A1` com a pele certa; o render da própria tupla tira 0,266 e não entra
+  no julgamento. O erro sistemático só aparece na tabela **impressa** por grupo
+  (`not A1 / not A`, média 0,411), que nada afirma — e é por ela que a própria
+  CORR-049 manda verificar o conserto
+- **Como foi detectado:** `corpus.py --run` e duas vezes `--score` sobre a árvore
+  de `a2f122f`, saídas idênticas, com a CORR-049 pendente; e a tira
+  `worst.png` olhada
+- **Fix:** julgar a autopontuação por grupo contra o grupo de referência
+  (`A1`/`A`), sem limiar à mão; nomear o resíduo enquanto a CORR-049 estiver
+  aberta, com a condição de deixar de isentar quando o grupo se recuperar; e
+  dizer na linha de campo o que ela mede
