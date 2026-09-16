@@ -31,6 +31,7 @@ Usage:
     python tools/looks/confront.py --check
     python tools/looks/confront.py --run            # both slots, ~40 min
     python tools/looks/confront.py --run 2          # one slot
+    python tools/looks/confront.py --render         # our side again, no game
     python tools/looks/confront.py --score          # re-judge the last run
     python tools/looks/confront.py --reach FACE     # how far a row walks
 """
@@ -587,6 +588,42 @@ def _checks(c) -> None:
     ok("the packet reader finds the quad, its CLUT and its four pairs",
        (5, uvs) in found, "%r" % (found,))
 
+    # Our side of a run, on a scratch directory and a fake viewer: a tuple
+    # that refused last time and draws now (CORR-LOOKS-046).
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as where:
+        def draws(text, figure, out):
+            with open(out, "wb") as handle:
+                handle.write(b"png")
+            return ("picture", None)
+
+        def refuses(text, figure, out):
+            return (None, "no")
+
+        path = ours_path(where, 2, TUPLES[0])
+        with open(path + REFUSED, "w", encoding="utf-8") as handle:
+            handle.write("an old refusal\n")
+        render_ours((2,), where, draws, verbose=False)
+        ok("a re-render that draws removes the old refusal",
+           not os.path.exists(path + REFUSED) and os.path.exists(path))
+        ok("and the tuple is then read as drawn",
+           attempt("read our side", lambda: ours_side(where, 2, TUPLES[0]),
+                   default=(None,))[0] == "drawn")
+        render_ours((2,), where, refuses, verbose=False)
+        ok("a re-render that refuses removes the old picture",
+           not os.path.exists(path) and os.path.exists(path + REFUSED))
+        with open(path, "wb") as handle:
+            handle.write(b"png")
+        c.refusing(ConfrontError)(
+            "a picture beside a refusal is a failure naming the tuple, not a "
+            "refusal", lambda: ours_side(where, 2, TUPLES[0]), TUPLES[0])
+        os.remove(path)
+        os.remove(path + REFUSED)
+        c.refusing(ConfrontError)(
+            "a tuple with neither file is a failure",
+            lambda: ours_side(where, 2, TUPLES[0]), TUPLES[0])
+
 
 # ---- the live run --------------------------------------------------------
 
@@ -648,6 +685,64 @@ def out_dir() -> str:
     return os.path.join(oracle.ROOT, OUT_DIR)
 
 
+REFUSED = ".refused"
+"""The suffix of the file our side leaves instead of a PNG when it refuses."""
+
+
+def ours_path(where: str, slot: int, text: str) -> str:
+    return os.path.join(where, "ours-%d-%s.png" % (slot, text))
+
+
+def ours_side(where: str, slot: int, text: str) -> tuple:
+    """('drawn', the PNG) or ('refused', the reason) for one tuple of a run.
+
+    **Both files present is a failure, not a refusal.**  It is an old run mixed
+    with a new one, and reading the refusal first took out of the matrix the
+    very tuple a measurement had just made draw -- the gate then printed `ok`
+    over a tuple it never judged (CORR-LOOKS-046).
+    """
+    path = ours_path(where, slot, text)
+    drawn = os.path.exists(path)
+    refused = os.path.exists(path + REFUSED)
+    if drawn and refused:
+        raise ConfrontError(
+            "slot %d %s has both a render and a refusal -- an old run mixed "
+            "with a new one; re-render our side with --render" % (slot, text))
+    if refused:
+        with open(path + REFUSED, encoding="utf-8") as handle:
+            return ("refused", handle.read().strip())
+    if not drawn:
+        raise ConfrontError("slot %d %s has neither a render nor a refusal "
+                            "under %s" % (slot, text, where))
+    return ("drawn", path)
+
+
+def render_ours(slots=(2, 1), where=None, renderer=None, verbose=True) -> None:
+    """Our side of every tuple, into the run's directory.  No emulator.
+
+    What was there before goes first, BOTH files: a tuple that refused last
+    time and draws now must not keep its old refusal beside the new picture.
+    This is what `--render` runs, so a measurement that turns a refusal into a
+    drawing is re-judged by `--render` and `--score` with no game at all.
+    """
+    where = where or out_dir()
+    renderer = renderer or render
+    os.makedirs(where, exist_ok=True)
+    for slot in slots:
+        for text in TUPLES:
+            path = ours_path(where, slot, text)
+            for stale in (path, path + REFUSED):
+                if os.path.exists(stale):
+                    os.remove(stale)
+            picture, why = renderer(text, SLOT_FIGURE[slot], path)
+            if picture is None:
+                with open(path + REFUSED, "w", encoding="utf-8") as handle:
+                    handle.write(why + "\n")
+            if verbose:
+                print("  slot %d %s: %s" % (slot, text, "drawn" if picture
+                                             is not None else "refused"))
+
+
 def run(slots=(2, 1), verbose=True) -> int:
     import iso_source
     import oracle
@@ -655,17 +750,7 @@ def run(slots=(2, 1), verbose=True) -> int:
     ready = oracle.preflight()
     _python_and_app()
     where = out_dir()
-    os.makedirs(where, exist_ok=True)
-
-    for slot in slots:
-        for text in TUPLES:
-            path = os.path.join(where, "ours-%d-%s.png" % (slot, text))
-            if os.path.exists(path):
-                os.remove(path)
-            picture, why = render(text, SLOT_FIGURE[slot], path)
-            if picture is None:
-                with open(path + ".refused", "w", encoding="utf-8") as handle:
-                    handle.write(why + "\n")
+    render_ours(slots, where)
 
     failures = 0
     with oracle.Oracle(ready["cue"], out_dir=where, verbose=verbose) as game:
@@ -711,12 +796,11 @@ def score(slots=(2, 1), image=None) -> int:
         for text in TUPLES:
             games[text] = ui_check.picture(
                 os.path.join(where, "game-%d-%s.png" % (slot, text)))
-            path = os.path.join(where, "ours-%d-%s.png" % (slot, text))
-            if os.path.exists(path + ".refused"):
-                with open(path + ".refused", encoding="utf-8") as handle:
-                    refused[text] = handle.read().strip()
+            kind, what = ours_side(where, slot, text)
+            if kind == "refused":
+                refused[text] = what
             else:
-                ours[text] = ui_check.picture(path)
+                ours[text] = ui_check.picture(what)
         again = ui_check.picture(os.path.join(where, "game-%d-repeat.png"
                                               % slot))
         same = histogram(again, box=PANEL) == histogram(games[TUPLES[0]],
@@ -905,10 +989,14 @@ def main(argv: list[str]) -> int:
     try:
         import oracle
 
-        if len(argv) >= 2 and argv[1] in ("--run", "--score"):
+        if len(argv) >= 2 and argv[1] in ("--run", "--score", "--render"):
             slots = tuple(int(a) for a in argv[2:]) or (2, 1)
             if argv[1] == "--score":
                 return 1 if score(slots) else 0
+            if argv[1] == "--render":
+                _python_and_app()
+                render_ours(slots)
+                return 0
             return run(slots)
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])

@@ -398,6 +398,24 @@ CONTROLS = (
         "they still draw",
     ),
     Control(
+        "confront-render-keeps-refusal", "confront.py", "render_ours",
+        "            for stale in (path, path + REFUSED):",
+        "            for stale in (path,):",
+        ("confront",),
+        "the re-render back to removing only the PNG: a tuple that refused "
+        "last time and draws now keeps its old refusal beside the new picture, "
+        "and the score drops from the matrix the tuple a measurement just "
+        "unlocked -- green, over a tuple it never judged (CORR-LOOKS-046)",
+    ),
+    Control(
+        "confront-score-prefers-refusal", "confront.py", "ours_side",
+        "    if drawn and refused:",
+        "    if False:",
+        ("confront",),
+        "a picture beside a refusal read as the refusal: the same silent skip, "
+        "reached from a directory some other hand left mixed",
+    ),
+    Control(
         "pieces-mesh-check-blind", "pieces.py", "mesh_agrees",
         "            if differs and name not in ARM_CHAIN:",
         "            if False:",

@@ -61,7 +61,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | Alta | [ ] pendente | — |
+| [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [ ] pendente | — |
 | [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [ ] pendente | — |
 
@@ -123,7 +123,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-043 — a recusa do `head_of` só vale para a figura 0
 - [x] CORR-LOOKS-044 — `FACE` recusa `F` e `G`, que a tela oferece nos dois slots
 - [x] CORR-LOOKS-045 — o piso do confronto é zero, e a justificativa diz outra coisa
-- [ ] CORR-LOOKS-046 — o `.refused` velho tira da matriz a tupla que a próxima medição destrava
+- [x] CORR-LOOKS-046 — o `.refused` velho tira da matriz a tupla que a próxima medição destrava
 - [ ] CORR-LOOKS-047 — a figura 1 só desenha o `A1`, e três em cada quatro goleiros são recusados
 - [ ] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
 

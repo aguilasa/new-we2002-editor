@@ -3,7 +3,7 @@ id: CORR-LOOKS-046
 title: "Correção: um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -96,22 +96,83 @@ com os dois arquivos presentes exigindo a falha.
 
 ## Verificação
 
-- [ ] com um `.refused` velho ao lado de um PNG novo, o `--score` **falha**
+- [x] com um `.refused` velho ao lado de um PNG novo, o `--score` **falha**
       nomeando a tupla, em vez de a pular
-- [ ] o re-render do nosso lado existe como comando, sem emulador, e apaga os
+- [x] o re-render do nosso lado existe como comando, sem emulador, e apaga os
       dois arquivos
-- [ ] `python tools/looks/confront.py --score` sobre a corrida atual continua
+- [x] `python tools/looks/confront.py --score` sobre a corrida atual continua
       `ok`, com os mesmos placares
-- [ ] controle negativo vermelho
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] controle negativo vermelho
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz com o módulo commitado: o `run` removia só o PNG, e o
+`score` lia o `.refused` primeiro. Três peças no `confront.py`:
 
-**Arquivos criados/modificados:**
+- **`render_ours(slots, where, renderer)`** — o laço do nosso lado, fora do
+  `run`, apagando **os dois** arquivos de cada tupla antes de renderizar. O
+  `run` o chama; o comando novo `--render` também, **sem emulador**.
+- **`ours_side(where, slot, text)`** — o que o `score` lê de cada tupla:
+  `drawn` ou `refused`, e **`ConfrontError` nomeando a tupla** quando existem
+  os dois arquivos (corrida velha misturada com nova) ou nenhum.
+- `self_check()` — cinco casos com um renderizador falso num diretório
+  temporário: re-render que desenha apaga a recusa velha, re-render que recusa
+  apaga o PNG velho, PNG ao lado de recusa falha nomeando a tupla, e tupla sem
+  arquivo nenhum falha.
+
+### Gates
+
+```text
+$ python tools/looks/confront.py --render
+  slot 2 A-A1-A-A-A: drawn            ... slot 2 A-H1-A-A-A: refused
+  slot 1 A-I3-A-A-A: refused          ... slot 1 A-H1-A-A-A: refused
+real 0m14.506s
+
+$ python tools/looks/confront.py --score      # antes e depois do --render
+diff score-antes score-depois: IDENTICAL
+  slot 2: 3 win, 2 ranked, 0 expected, 0 unexplained
+  slot 1: 2 win, 2 ranked, 0 expected, 0 unexplained
+confront: ok
+```
+
+O estado misturado, plantado na corrida real (cópia de um PNG ao lado do
+`.refused` do `H1` no slot 2) e removido em seguida:
+
+```text
+confront FAILED: slot 2 A-H1-A-A-A has both a render and a refusal -- an old
+run mixed with a new one; re-render our side with --render
+```
+
+Controles novos, os dois vermelhos:
+
+```text
+  RED    confront-render-keeps-refusal confront.py :: render_ours
+  RED    confront-score-prefers-refusal confront.py :: ours_side
+
+$ python tools/looks/selftest.py --quiet
+  ..... 53 of 53 controls red
+looks_selftest: 0 failure(s)
+```
+
+`roms/` intocada: todo acesso foi leitura; nada fora de `work/looks-confront/`
+foi escrito, e ali só os doze arquivos do nosso lado, regenerados.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `tools/looks/confront.py` — `REFUSED`, `ours_path`, `ours_side`,
+  `render_ours`, o `--render`, e os cinco casos do `self_check()`
+- `tools/looks/controls.py` — `confront-render-keeps-refusal` e
+  `confront-score-prefers-refusal`
+- `docs/prompts/perfil-looks.md` — a linha do `--render` na tabela de gates, e
+  a do `--score` dizendo que falha no estado misturado
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

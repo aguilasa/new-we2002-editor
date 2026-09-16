@@ -304,7 +304,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem | `… tools/looks/ui/app.py --looks <tupla> --screenshot <png>` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | só o venv | `… tools/looks/ui/app.py --compare <png> <png>` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states, o emulador e o venv; ~40 min | `python tools/looks/confront.py --run` | — | LOOKS-TASK-17 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--run` | `python tools/looks/confront.py --score` | — | LOOKS-TASK-17 |
+| *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE`; **sem emulador**, ~15 s | `python tools/looks/confront.py --render` — refaz só o **nosso** lado, apagando PNG **e** `.refused` de cada tupla | — | CORR-LOOKS-046 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--run` | `python tools/looks/confront.py --score` — **falha** se uma tupla tiver PNG e `.refused` ao mesmo tempo | — | LOOKS-TASK-17 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/confront.py --reach <LINHA>` | — | LOOKS-TASK-17 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
