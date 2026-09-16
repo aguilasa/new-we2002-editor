@@ -3,7 +3,7 @@ id: CORR-LOOKS-035
 title: "Correção: a definição de pronto do plano pede uma tupla que a tabela recusa"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -78,17 +78,58 @@ render quando chegar.
 
 ## Verificação
 
-- [ ] o comando do item 3 roda e sai **0**, escrevendo um PNG
-- [ ] a recusa continua escrita como resultado esperado, com a saída 2
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] o comando do item 3 roda e sai **0**, escrevendo um PNG de 640×640
+- [x] a recusa continua escrita como resultado esperado, com a saída 2
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+As duas metades rodaram antes de a linha ser escrita:
 
-**Arquivos criados/modificados:**
+```text
+$ <venv>/python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-E-A
+  A-I3-A-E-A, figure 0: 598 primitive(s), 361 textured, 5 surface(s), 1196 triangle(s)
+  wrote …/done3.png, 640x640
+exit=0
+
+$ … --looks A-I3-A-F-A
+app: A-I3-A-F-A refuses -- FACE=F is value 5, and the screen was measured to
+reach 5 …
+exit=2
+```
+
+O item 3 passou a pedir a `A-I3-A-E-A` — a vizinha imediata, e a que a
+LOOKS-TASK-15 desenhou — **e** a recusa da `A-I3-A-F-A` com saída 2. A recusa
+entrou como **segunda metade do critério**, não como ressalva: desenhar um `E`
+calado no lugar de um `F` é exatamente a falha que o ciclo existe para não
+cometer, então saber recusar é resultado.
+
+E a linha sobre o corpus está lá, medida:
+
+```text
+$ python tools/looks/scene.py --corpus <os 50 JPGs>
+      31 drawn, 19 refused
+      13 x FACE=F is value 5
+       3 x FACE=G is value 6
+```
+
+**Dezesseis das cinquenta** caem na recusa por `FACE`, e a LOOKS-TASK-18 vai
+ler isso como alcance de campo em vez de falha de render quando chegar.
+
+### Problemas encontrados
+
+Nenhum nesta correção. A varredura que a antecedeu puxou um defeito de rótulo
+no `app.py` — ele chamava toda nota da cena de "not textured", o que é falso
+para a `colour borrowed` e para a `band unmeasured` —, consertado em commit
+próprio antes deste.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` — a Definição de pronto, item 3
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-035.md` — este arquivo

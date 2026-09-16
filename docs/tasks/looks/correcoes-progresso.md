@@ -50,7 +50,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-032](/docs/tasks/looks/CORR-LOOKS-032.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O bloco de gates da LOOKS-TASK-14 ficou na primeira passagem — 29 controles contra 32 | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-033](/docs/tasks/looks/CORR-LOOKS-033.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A §6(c) do plano ainda se declara medida em parte, com a task pendente | Baixa | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-034](/docs/tasks/looks/CORR-LOOKS-034.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | Nenhum campo de cor alcança a cabeça quando o cabelo não é da família A | Alta | [x] concluída | 2026-09-16 |
-| [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A definição de pronto do plano pede uma tupla que a tabela recusa | Média | [ ] pendente | — |
+| [CORR-LOOKS-035](/docs/tasks/looks/CORR-LOOKS-035.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | A definição de pronto do plano pede uma tupla que a tabela recusa | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-036](/docs/tasks/looks/CORR-LOOKS-036.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | O critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831 | Baixa | [ ] pendente | — |
 | [CORR-LOOKS-037](/docs/tasks/looks/CORR-LOOKS-037.md) | [LOOKS-TASK-15](/docs/tasks/looks/15-visualizador-opengl.md) | As alturas da cabeça e da chuteira estão escritas com o sinal trocado | Baixa | [ ] pendente | — |
 
@@ -103,7 +103,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-032 — os gates transcritos são de antes dos controles da própria task
 - [x] CORR-LOOKS-033 — a fonte de verdade ainda diz que a LOOKS-TASK-14 está pendente
 - [x] CORR-LOOKS-034 — SKIN, H.COL, H.F.COL. e FACE não movem um pixel fora da seção 24
-- [ ] CORR-LOOKS-035 — o item 3 da definição de pronto sai 2
+- [x] CORR-LOOKS-035 — o item 3 da definição de pronto sai 2
 - [ ] CORR-LOOKS-036 — a varredura da regra 1 foi anotada antes do fim da task
 - [ ] CORR-LOOKS-037 — os intervalos de y são os do render, não os do arquivo
 - [ ] CORR-LOOKS-038 — a cor de barba muda a superfície e não muda o desenho

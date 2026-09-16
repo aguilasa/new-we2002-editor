@@ -51,8 +51,22 @@ mudança; é esse comportamento que se reproduz.
    **exatamente no EOF**.
 2. Cada uma das 11 peças de **cada lista** do `EDT_MOD.BIN` tem nome medido —
    cabeça, tronco, braço, coxa, pé —, decidido pelo emulador e não por palpite.
-3. `python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-F-A`
-   produz um boneco reconhecível, com a pele e o cabelo daquela tupla.
+3. `python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-E-A`
+   produz um boneco reconhecível, com a pele e o cabelo daquela tupla — **e**
+   `--looks A-I3-A-F-A` **recusa**, com a mensagem da tabela e saída **2**. As
+   duas metades são o critério: o `FACE` alcança **cinco** dos oito valores que
+   os bits guardam, medido de ponta a ponta pela
+   [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), e desenhar um
+   `E` calado no lugar de um `F` seria a falha que este projeto existe para não
+   cometer. O enunciado pedia a `A-I3-A-F-A` até 2026-09-16
+   ([`CORR-LOOKS-035`](/docs/tasks/looks/CORR-LOOKS-035.md)), quando o alcance
+   ainda não estava medido.
+
+   **Dezesseis das cinquenta tuplas do corpus caem nessa recusa** — treze por
+   `FACE=F` e três por `FACE=G` —, e são a maior parte das 19 que o
+   `scene.py --corpus` recusa. A
+   [`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) lê
+   isso como alcance de campo, não como falha de render.
 4. `ctest -R looks` numa máquina limpa: **1 passed, 2 skipped**.
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
