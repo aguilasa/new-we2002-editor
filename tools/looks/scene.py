@@ -207,6 +207,38 @@ def local_texel(primitive, record, u: int, v: int) -> tuple:
     return (x, y)
 
 
+def indices_in_quad(indices: bytes, width: int, primitive, record,
+                    band: int = 0) -> set:
+    """The palette indices inside one quad's rect, over a decoded image.
+
+    Split from `sampled_indices` so the gathering can be checked with a plain
+    buffer and no LZSS stream in the room -- which is also what makes the
+    band's red case reachable.
+    """
+    points = [local_texel(primitive, record, u, v + band)
+              for u, v in primitive.texcoords]
+    xs = [x for x, _y in points]
+    ys = [y for _x, y in points]
+    return {indices[y * width + x]
+            for y in range(min(ys), max(ys) + 1)
+            for x in range(min(xs), max(xs) + 1)}
+
+
+def sampled_indices(data: bytes, primitive, record, band: int = 0) -> set:
+    """The palette indices one quad's texels actually hold, at *band*.
+
+    A colour field moves the CLUT id, which swaps the sixteen entries the
+    indices are looked up in.  Whether that changes the PICTURE depends on
+    which indices the quad samples -- and a window whose differing entries the
+    quad never names is a palette change with no pixel behind it.  Reading
+    them is the only way to tell that from a colour that failed to arrive
+    (CORR-LOOKS-038).
+    """
+    indices, width, _height = atlas.read_image(data, record,
+                                               primitive.tpage_depth)
+    return indices_in_quad(indices, width, primitive, record, band)
+
+
 def surface_for(data: bytes, record, depth: int, clut: int,
                 palettes) -> Surface:
     """One image record read at `depth`, coloured through one CLUT id.
@@ -586,6 +618,23 @@ def _checks(c) -> None:
                              vertices, rec, fake, 0, 0, ("/BIN/X", 0), 0),
             "vertex 99")
 
+    # Which indices a quad samples, and the BAND that moves it.  A buffer
+    # rather than a stream, so the arithmetic is checked with no disc here:
+    # row 0 holds index 1, row 16 holds index 5, and the quad is one texel.
+    flat = _FakeRecord(page[0], 0, 8, 32, 12)
+    wide_flat = flat.w * atlas.texels_per_unit(0)
+    buffer = bytearray(wide_flat * flat.h)
+    for x in range(wide_flat):
+        buffer[x] = 1
+        buffer[16 * wide_flat + x] = 5
+    dot = _FakePrimitive(((0, 0),) * 4, (0, 1, 2, 3), 0, page, 0)
+    ok("a quad samples the indices under it",
+       indices_in_quad(bytes(buffer), wide_flat, dot, flat, 0) == {1},
+       "%r" % (indices_in_quad(bytes(buffer), wide_flat, dot, flat, 0),))
+    ok("and a band moves it to another strip of the same sheet",
+       indices_in_quad(bytes(buffer), wide_flat, dot, flat, 16) == {5},
+       "%r" % (indices_in_quad(bytes(buffer), wide_flat, dot, flat, 16),))
+
     # The colour path, on a synthetic container: the index comes from the
     # image and the colour from the WINDOW the id names, so two ids over one
     # image are two surfaces.  This is LOOKS-TASK-12's finding, as arithmetic.
@@ -728,6 +777,47 @@ def _check_image(image_path: str) -> int:
         problems.append("no part of a non-A head is marked as taking colour "
                         "by a borrowed index, and the indices were measured "
                         "on section %d only" % assembly.HEAD_COLOUR_MEASURED)
+
+    # A colour that changes the SURFACE and changes no PIXEL: declared, with
+    # the reason, instead of passing in silence.  Measured 2026-09-16
+    # (CORR-LOOKS-038): FACE band 0 is the BEARDLESS face, and its two quads
+    # sample none of the entries a beard colour moves -- so H.F.COL. painting
+    # nothing there is correct.  Every other band samples them, and a beard
+    # colour that stopped working would show up here as bands 1..4 going empty.
+    import iso_source
+
+    with iso_source.open_disc(image_path) as disc:
+        data2d = disc.read(layout.DAT2D)
+        model = disc.read(layout.MODEL)
+    scan = section.scan(model, layout.GEOMETRY_START[layout.MODEL])
+    head = scan.sections[layout.HEAD_SECTION]
+    images = texture.images(data2d)
+    palettes = texture.palettes(data2d)
+    record = [r for r in palettes if r.is_clut
+              and r.offset == layout.SKIN_PALETTES[0]][0]
+    beard_columns = range(layout.BEARD_COLUMN, skin.COLUMNS)
+    moves = set(skin.moving_entries(data2d, record, beard_columns))
+    print("      a beard colour moves %d of the window's %d entries: %s"
+          % (len(moves), texture.NARROW, sorted(moves)))
+    bands = {}
+    for band in range(assembly.BY_ROW["FACE"].reach):
+        used = set()
+        for at in layout.FACE_PRIMITIVES:
+            primitive = head.primitives[at]
+            where = atlas.image_at(images, *atlas.corners(primitive)[0])
+            used |= sampled_indices(data2d, primitive, where,
+                                    band * layout.ATLAS_BAND)
+        bands[band] = sorted(used & moves)
+        print("      FACE band %d samples %d of them: %s"
+              % (band, len(bands[band]), bands[band]))
+    if bands.get(0):
+        problems.append("FACE band 0 samples entries a beard colour moves, "
+                        "and it was measured as the beardless face")
+    empty = [band for band, used in bands.items() if band and not used]
+    if empty:
+        problems.append("FACE band(s) %s sample none of the entries a beard "
+                        "colour moves, so H.F.COL. paints nothing on them"
+                        % empty)
 
     print("scene --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

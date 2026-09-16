@@ -1812,6 +1812,18 @@ tabela e como `colour borrowed` nas notas da cena. O que preenche isso é a
 irmã da corrida do `--writes`: quais primitivas de cada uma das treze cabeças
 cada linha de cor move.
 
+**E a faixa 0 do `FACE` é o rosto SEM BARBA — medido, não suposto.** Com a
+`H.F.COL.` de volta no plano, ela troca a janela de CLUT e **não muda um
+pixel** quando o `FACE` é `A`. Isso está certo, e o que decide são os índices
+que os dois quads da barba amostram: uma cor de barba mexe em **seis** das
+dezesseis entradas da janela (`[2, 5, 12, 13, 14, 15]`), e a faixa 0 **não
+amostra nenhuma delas**; as faixas 1 a 4 amostram cinco ou seis. Na tela:
+`A-A1-A-A-E` contra `A-A1-A-A-A` move 0,00% dos pixels e `A-A1-A-B-E` contra
+`A-A1-A-B-A` move **2,39%**
+([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)). O
+`scene --check-image` afirma as duas metades, de modo que uma cor de barba que
+parasse de funcionar apareceria como as faixas 1..4 esvaziando.
+
 **A chave do plano é (linha, primitivas).** `H.F.COL.` e `FACE` nomeiam as
 mesmas duas primitivas da barba — uma anda a coluna do CLUT, a outra a faixa —
 e, com o plano guardado por primitivas, a segunda substituía a primeira:

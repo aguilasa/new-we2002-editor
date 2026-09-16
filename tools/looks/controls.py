@@ -369,6 +369,16 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "scene-texel-window-ignored", "scene.py", "indices_in_quad",
+        "    points = [local_texel(primitive, record, u, v + band)",
+        "    points = [local_texel(primitive, record, u, v)",
+        ("scene",),
+        "the band dropped when reading which indices a quad samples: every "
+        "FACE band then reports band 0's texels, the beardless face, and the "
+        "measurement that says H.F.COL. paints nothing there -- and paints on "
+        "the other four -- comes back saying it paints nowhere",
+    ),
+    Control(
         "assembly-colour-stays-on-24", "assembly.py", "edits",
         "            key = where_head if key == HEAD else key",
         "            key = key",
