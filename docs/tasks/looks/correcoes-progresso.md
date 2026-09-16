@@ -61,6 +61,9 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-043](/docs/tasks/looks/CORR-LOOKS-043.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O goleiro desenha qualquer estilo de cabelo como família A, e não recusa | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-044](/docs/tasks/looks/CORR-LOOKS-044.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | A tabela diz que a tela da barba alcança cinco valores, e a tela alcança sete | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-045](/docs/tasks/looks/CORR-LOOKS-045.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O veredito `ranked` aceita qualquer liderança acima de zero, e a razão escrita só cobre teto pequeno | Média | [x] concluída | 2026-09-16 |
+| [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | Alta | [ ] pendente | — |
+| [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [ ] pendente | — |
+| [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -120,6 +123,9 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-043 — a recusa do `head_of` só vale para a figura 0
 - [x] CORR-LOOKS-044 — `FACE` recusa `F` e `G`, que a tela oferece nos dois slots
 - [x] CORR-LOOKS-045 — o piso do confronto é zero, e a justificativa diz outra coisa
+- [ ] CORR-LOOKS-046 — o `.refused` velho tira da matriz a tupla que a próxima medição destrava
+- [ ] CORR-LOOKS-047 — a figura 1 só desenha o `A1`, e três em cada quatro goleiros são recusados
+- [ ] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
 
 ## Detalhes por correção
 
@@ -834,3 +840,40 @@ e o ciclo arquivado, o dele em
   fração dele, ou o teto tem de estar abaixo de `2 × MARGIN` —, preservando os
   dois `ranked` reais; mais um controle que reponha `right > wrong` e um caso
   de teto largo no `self_check()`
+
+### CORR-LOOKS-046
+
+- **Arquivo com problema:** `tools/looks/confront.py`, o `run` e o `score`
+- **Sintoma:** o `run` apaga o PNG velho e não o `.refused` velho; o `--score`
+  decide pelo `.refused` primeiro. Uma tupla que passa de recusada a desenhada
+  fica com os dois arquivos, sai da matriz sem ser julgada, e o confronto
+  imprime `ok`
+- **Como foi detectado:** leitura do código ao fechar o lote 042–045, onde o
+  re-render do nosso lado precisou de script próprio que apagasse os dois
+- **Fix:** apagar os dois; recusar o estado ambíguo no `--score`; o re-render
+  do nosso lado como comando sem emulador. Vem antes da 047 e da 048, que são
+  exatamente as que viram recusa em desenho
+
+### CORR-LOOKS-047
+
+- **Arquivo com problema:** `tools/looks/assembly.py` (`goalkeeper_head`) e a
+  medição que ele substitui
+- **Sintoma:** o `HAIR_MAP` foi medido só no slot 2; a figura 1 recusa todo
+  estilo que não seja `A1`, e isso são **136 dos 179** registros de posição
+  `GK` do disco
+- **Como foi detectado:** contando os registros do `/SELECT.BIN` por posição e
+  estilo, depois da CORR-LOOKS-043
+- **Fix:** `--patched HAIR 1` no goleiro (o `--patched` ganha o slot), o mapa
+  da figura 1 ao lado do da figura 0, e a recusa reduzida ao que a medição não
+  alcançar
+
+### CORR-LOOKS-048
+
+- **Arquivo com problema:** `tools/looks/assembly.py`, o `Effect` do `FACE`
+- **Sintoma:** a tela oferece 7 valores e a tabela aplica 5; `F` e `G` recusam
+  como "não medido" — **28** jogadores do disco (1,9%) e **16** dos 50 renders
+  do corpus
+- **Como foi detectado:** contando os registros do `/SELECT.BIN` por
+  `beard_style`, depois da CORR-LOOKS-044
+- **Fix:** `--patched FACE` nos dois slots, e o que `F` e `G` escreverem entra
+  na tabela — ou a recusa passa a dizer, medido, que não escrevem nada
