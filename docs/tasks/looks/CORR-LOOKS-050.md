@@ -3,7 +3,7 @@ id: CORR-LOOKS-050
 title: "Correção: o `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -116,21 +116,89 @@ deixa de ser o outlier" lido na tela.
 
 ## Verificação
 
-- [ ] `python tools/looks/corpus.py --score <pasta>` **vermelho** com o
+- [x] `python tools/looks/corpus.py --score <pasta>` **vermelho** com o
       empréstimo de cor presente, ou verde só por resíduo nomeado que aponte a
       CORR-049
-- [ ] o resíduo deixa de isentar quando o grupo se recupera — com um caso no
+- [x] o resíduo deixa de isentar quando o grupo se recupera — com um caso no
       `self_check()` que prove isso sem os JPGs
-- [ ] o controle novo fica vermelho
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] o controle novo fica vermelho
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz na árvore de `faa9e1d`: `corpus.py --score` imprime
+`skin_colour 47/47` e o grupo "not A1 / not A" com média 0,411, e fecha em
+`corpus: ok`.
 
-**Arquivos criados/modificados:**
+**O julgamento do grupo — e por que não é a forma sugerida.** A forma que esta
+CORR propõe ("média abaixo da menor nota do grupo `A1`/`A`") não fecha com os
+números que ela mesma cita: o piso seria **0,660**, e o grupo `A1`/pele não-`A`
+tem média **0,641** — ficaria vermelho, num grupo onde nada é emprestado. A
+frase "os outros três grupos, com médias de 0,641 a 0,721, ficam acima" está
+errada por esse 0,641. A regra adotada também não escolhe número à mão:
+
+> um grupo é **outlier** quando a **média** dele fica abaixo da **pior nota de
+> todos os outros grupos** — a pior imagem de qualquer outro lugar, que já paga
+> pose, câmera e JPEG. Grupo nomeado por resíduo não entra no piso dos outros.
+
+Medido: "not A1 / not A" 0,411 contra 0,540 → outlier; os outros três passam
+(pisos 0,266, 0,540 e 0,540, que viram 0,544, 0,540 e 0,540 sem o grupo do
+resíduo).
+
+- `corpus.py` — `GROUP_RESIDUES` com o grupo `(False, False)` apontando a
+  CORR-LOOKS-049; `group_failures(grouped, residues)` devolve falhas e
+  esperados; **o resíduo expira**: grupo nomeado que não é outlier (recuperado,
+  ou fora do corpus) é falha, pedindo a remoção. A linha de campo passou a dizer
+  "the best-scoring render carries the name's letter for", que é o que ela
+  mede. Sete casos no `self_check()`, sem JPEG.
+- `controls.py` — `corpus-groups-unjudged` (o grupo nunca vira outlier) e
+  `corpus-residue-never-expires` (o resíduo isenta para sempre).
+- `CORR-LOOKS-049.md` — a primeira verificação agora é este gate: verde **sem**
+  o resíduo.
+- `PLAN-LOOKS-PY.md` §5.4 — o que a linha de campo mede, e a regra do grupo.
+- `18-corpus-dos-cinquenta-renders.md` — nota datada abaixo da transcrição.
+
+### Gates
+
+```text
+$ python tools/looks/corpus.py --score        # com o resíduo
+      the corpus, 47 picture(s), the best-scoring render carries the name's letter for: skin_colour 47/47, ...
+      EXPECTED hair style not A1, skin not A: mean 0.411 under the floor 0.540 -- CORR-LOOKS-049: ...
+corpus: ok
+
+# o mesmo score com GROUP_RESIDUES = {}
+      GROUP OUTLIER hair style not A1, skin not A: mean 0.411 is under 0.540, the lowest self-score of every other group, and no residue names it
+corpus: 1 failure(s)
+
+$ python tools/looks/corpus.py --check
+corpus.py: 0 failure(s)
+$ python tools/looks/controls.py --only corpus-groups-unjudged
+  RED    corpus-groups-unjudged     corpus.py :: group_failures
+$ python tools/looks/controls.py --only corpus-residue-never-expires
+  RED    corpus-residue-never-expires corpus.py :: group_failures
+$ python tools/looks/selftest.py --quiet
+  ..... 59 of 59 controls red
+looks_selftest: 0 failure(s)
+```
+
+`roms/` intocada (só leitura); os renders de `work/looks-corpus/` não foram
+refeitos, só pontuados.
+
+### Problemas encontrados
+
+- A forma sugerida desta CORR ficaria vermelha no grupo `A1`/pele não-`A`
+  (0,641 < 0,660) sem causa nenhuma; ver acima. A regra adotada é outra, e
+  diz por quê.
+
+### Arquivos criados/modificados
+
+- `tools/looks/corpus.py`, `tools/looks/controls.py`
+- `docs/tasks/looks/CORR-LOOKS-049.md` — a verificação
+- `docs/PLAN-LOOKS-PY.md` — §5.4
+- `docs/tasks/looks/18-corpus-dos-cinquenta-renders.md` — a nota
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

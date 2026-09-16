@@ -65,7 +65,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [ ] pendente | — |
-| [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [ ] pendente | — |
+| [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [x] concluída | 2026-09-16 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -129,7 +129,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-047 — a figura 1 só desenha o `A1`, e três em cada quatro goleiros são recusados
 - [x] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
 - [ ] CORR-LOOKS-049 — o corpus mede errado o índice de cor emprestado da seção 24
-- [ ] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
+- [x] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
 
 ## Detalhes por correção
 

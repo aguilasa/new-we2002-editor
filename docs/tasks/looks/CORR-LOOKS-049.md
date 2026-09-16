@@ -82,8 +82,12 @@ cor nela **recusam** em vez de pintar por empréstimo — a mesma escolha do
 
 ## Verificação
 
-- [ ] `corpus.py --score`: o grupo "not A1 / not A" deixa de ser o outlier, ou
-      as tuplas dele saem como recusa
+- [ ] `corpus.py --score` **verde sem o resíduo** `(False, False)` em
+      `corpus.GROUP_RESIDUES` — o gate da
+      [`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md): com o conserto o
+      grupo deixa de ser outlier, e o resíduo tem de sair (ele mesmo fica
+      vermelho se sobrar); se as tuplas do grupo saírem como recusa, o grupo
+      some do corpus e o resíduo sai pelo mesmo motivo
 - [ ] `scene.py --tuple B-I3-A-A-A` sem `colour borrowed`
 - [ ] controle negativo vermelho
 

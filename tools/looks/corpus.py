@@ -94,6 +94,17 @@ figure as the corpus."""
 WORST = 6
 """How many of the lowest self-scores are drawn into the strip and printed."""
 
+GROUP_RESIDUES = {
+    (False, False): "CORR-LOOKS-049: on a head that is not A1 the colour rows "
+                    "paint by indices borrowed from section 24, and a skin "
+                    "that is not A lands on the forehead only",
+}
+"""Groups whose mean is known to sit under the floor, and the open correction.
+
+A residue EXEMPTS its group only while the group is an outlier.  A group that
+recovers while its residue is still here is a failure too: an exemption that
+outlives its fix is a hole with a date (CORR-LOOKS-050)."""
+
 
 class CorpusError(Exception):
     """A corpus that could not be measured, or measured wrong."""
@@ -238,6 +249,61 @@ def field_failures(judged_fields: dict) -> list:
             for field in COLOUR_FIELDS if verdicts[field] == "DISAGREE"]
 
 
+def group_failures(grouped: dict, residues: dict) -> tuple:
+    """(failures, expected) for the self-score groups.
+
+    A group is an OUTLIER when its MEAN self-score is under the LOWEST
+    self-score of every other group: its average picture scores worse than the
+    worst picture anywhere else.  No number is chosen by hand, and pose, camera
+    and JPEG, which every group pays, set the floor themselves.  A group a
+    residue names is known broken, so it sets no floor for the others -- its
+    worst picture would otherwise hide a second defect.
+
+    An outlier with a residue is expected; one without is a failure; and a
+    residue whose group is not an outlier -- recovered, or gone from the corpus
+    -- is a failure as well, naming the residue to remove.
+
+    The field verdicts cannot see this, and that is measured: a render that
+    draws the skin on the forehead only still loses to a render of ANOTHER head
+    with the right skin, whose letter agrees, so "skin_colour 47/47" printed
+    beside twelve skins drawn wrong (CORR-LOOKS-050).
+    """
+    if len(grouped) < 2:
+        raise CorpusError("%d group(s) of self-scores, and an outlier needs "
+                          "another group to be measured against"
+                          % len(grouped))
+    outliers, floors = [], {}
+    for key, values in sorted(grouped.items()):
+        others = [min(v) for other, v in grouped.items()
+                  if other != key and other not in residues]
+        if not others:
+            continue
+        floors[key] = min(others)
+        if sum(values) / len(values) < floors[key]:
+            outliers.append(key)
+    failures, expected = [], []
+    for key in outliers:
+        mean = sum(grouped[key]) / len(grouped[key])
+        if key in residues:
+            expected.append((key, mean, floors[key], residues[key]))
+        else:
+            failures.append("%s: mean %.3f is under %.3f, the lowest "
+                            "self-score of every other group, and no residue "
+                            "names it" % (group_label(key), mean, floors[key]))
+    for key in sorted(residues):
+        if key not in outliers:
+            failures.append("%s: the residue still exempts it, and the group "
+                            "is not an outlier -- remove the residue (%s)"
+                            % (group_label(key), residues[key].split(":")[0]))
+    return failures, expected
+
+
+def group_label(key) -> str:
+    a1, skin_a = key
+    return "hair style %s, skin %s" % ("A1" if a1 else "not A1",
+                                       "A" if skin_a else "not A")
+
+
 def say_fields(label: str, judged_fields: dict) -> None:
     total = len(judged_fields)
     parts = []
@@ -247,7 +313,8 @@ def say_fields(label: str, judged_fields: dict) -> None:
         parts.append("%s %d/%d%s" % (field, judged.count("agree"), len(judged),
                                      "" if field in COLOUR_FIELDS
                                      else " (reported)"))
-    print("      %s, %d picture(s), the best render agrees on: %s"
+    print("      %s, %d picture(s), the best-scoring render carries the "
+          "name's letter for: %s"
           % (label, total, ", ".join(parts)))
 
 
@@ -348,6 +415,41 @@ def _checks(c) -> None:
     ok("and a picture with a figure is not", not is_blank(jpeg))
     ok("the palette of a render leaves its background out",
        palette_of(_shot([teal, skin, hair, teal], 2)) == {skin, hair})
+    # The groups, each against the worst picture of the others
+    # (CORR-LOOKS-050), on the shape the corpus measured: one group low by
+    # interaction, one a little under the best group's worst picture.
+    ref, low = (True, True), (False, False)
+    grouped = {ref: [0.66, 0.72, 0.78], (True, False): [0.54, 0.74],
+               (False, True): [0.544, 0.85], low: [0.27, 0.55]}
+    failures, expected = attempt("judge the groups", lambda: group_failures(
+        grouped, {}), default=(["raised"], []))
+    ok("a group whose mean is under every other group's worst picture fails",
+       len(failures) == 1 and "not A1, skin not A" in failures[0],
+       "%r" % (failures,))
+    ok("and a group merely under the BEST group's worst picture does not",
+       not any("hair style A1," in f for f in failures), "%r" % (failures,))
+    failures, expected = group_failures(grouped, {low: "CORR-X: a residue"})
+    ok("a residue exempts its outlier, and says so",
+       failures == [] and [e[0] for e in expected] == [low],
+       "%r %r" % (failures, expected))
+    recovered = dict(grouped)
+    recovered[low] = [0.70, 0.72]
+    failures, expected = group_failures(recovered, {low: "CORR-X: a residue"})
+    ok("a residue whose group recovered fails, naming it for removal",
+       len(failures) == 1 and "remove the residue" in failures[0]
+       and "CORR-X" in failures[0] and expected == [], "%r" % (failures,))
+    gone = {ref: grouped[ref], (True, False): [0.70, 0.74]}
+    ok("and so does a residue whose group left the corpus",
+       len(group_failures(gone, {low: "CORR-X: a residue"})[0]) == 1)
+    c.refusing(CorpusError)("one group alone has nothing to be measured "
+                            "against", lambda: group_failures({low: [0.5]}, {}),
+                            "another group")
+    shielded = dict(grouped)
+    shielded[(True, False)] = [0.30, 0.40]
+    ok("a residue's group sets no floor, so it cannot hide a second outlier",
+       any("hair style A1, skin not A" in f for f in group_failures(
+           shielded, {low: "CORR-X: a residue"})[0]))
+
     ok("the two sink boxes are inside the picture and do not overlap",
        BACKGROUND_BOX[3] < SHIRT_BOX[1]
        and all(0.0 <= v <= 1.0 for v in BACKGROUND_BOX + SHIRT_BOX))
@@ -445,12 +547,18 @@ def score(folder: str, where: str | None = None, worst: int = 6) -> int:
                                                                field))
 
     print("      self-score, grouped by head and skin:")
-    for (a1, skin_a), values in sorted(groups(scores, ours).items(),
-                                       reverse=True):
+    grouped = groups(scores, ours)
+    for (a1, skin_a), values in sorted(grouped.items(), reverse=True):
         print("        hair style %-6s skin %-6s %2d picture(s), mean %.3f, "
               "lowest %.3f" % ("A1" if a1 else "not A1",
                                "A" if skin_a else "not A", len(values),
                                sum(values) / len(values), min(values)))
+    outliers, expected = group_failures(grouped, GROUP_RESIDUES)
+    for key, mean, floor, why in expected:
+        print("      EXPECTED %s: mean %.3f under the floor %.3f -- %s"
+              % (group_label(key), mean, floor, why))
+    for line in outliers:
+        print("      GROUP OUTLIER %s" % line)
 
     order = sorted(ours, key=lambda t: scores[(t, t)])
     print("      the %d lowest self-scores -- drawn beside ours in %s:"
@@ -463,7 +571,7 @@ def score(folder: str, where: str | None = None, worst: int = 6) -> int:
                            for f in SHAPE_FIELDS)))
     _strip(folder, where, order[:WORST])
 
-    bad = len(failures) + control
+    bad = len(failures) + control + len(outliers)
     print("corpus: %s" % ("ok" if not bad else "%d failure(s)" % bad))
     return bad
 

@@ -1630,7 +1630,11 @@ contra os quadros **do emulador** da §5.3 — cores exatas, tupla conhecida —
 põem a própria verdade em 3º e 4º lugar: histograma de cor resolve **cor** e
 não resolve **forma**, porque câmera e pose mexem na proporção entre as cores
 mais do que um estilo mexe. Os campos de cor são julgados; os de forma, só
-reportados:
+reportados. **E o que a linha mede é a letra do vencedor**, não a cor do
+render: "pele 47/47" quer dizer que o render de **maior nota** para cada JPEG
+tem a letra de pele do nome — um render que pinta a pele só na testa perde para
+o de outra cabeça com a pele inteira, e a letra bate assim mesmo
+([`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md)):
 
 | | pele | cor de cabelo | cor de barba | estilo (reportado) | barba (reportado) |
 |---|---|---|---|---|---|
@@ -1648,6 +1652,16 @@ cabeça com outra pele, 0,411**. Olhadas as seis piores, a pele nova pinta só a
 testa e o rosto fica na pele `A` — os índices de cor medidos na seção 24 e
 aplicados às outras cabeças por empréstimo erram
 ([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)).
+
+**E desde 2026-09-16 isso é asserção, não tabela impressa**
+([`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md)). Um grupo falha quando
+a **média** dele fica abaixo da **pior nota** de todos os outros grupos — a pior
+imagem de qualquer outro lugar, que já paga pose, câmera e JPEG; nenhum número
+escolhido à mão. Hoje: 0,411 contra 0,540, vermelho; os outros três passam. O
+grupo sai como **resíduo nomeado** apontando a CORR-LOOKS-049
+(`corpus.GROUP_RESIDUES`), e o resíduo **expira**: grupo que deixa de ser
+outlier com o resíduo ainda lá também falha. Um resíduo não entra no piso dos
+outros, para não esconder um segundo defeito.
 
 ### 5.5 Controle negativo
 

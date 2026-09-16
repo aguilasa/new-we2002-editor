@@ -559,6 +559,24 @@ CONTROLS = (
         "one that was",
     ),
     Control(
+        "corpus-groups-unjudged", "corpus.py", "group_failures",
+        "        if sum(values) / len(values) < floors[key]:",
+        "        if False:",
+        ("corpus",),
+        "the self-score groups printed and never judged: skin_colour 47/47 "
+        "passes beside twelve skins drawn on the forehead only, and the "
+        "corpus run says ok over the error it exists to find (CORR-LOOKS-050)",
+    ),
+    Control(
+        "corpus-residue-never-expires", "corpus.py", "group_failures",
+        "        if key not in outliers:",
+        "        if False:",
+        ("corpus",),
+        "a residue that keeps exempting its group after the group recovered: "
+        "the exemption outlives the fix, and a later regression of that group "
+        "comes back green -- a hole with a date",
+    ),
+    Control(
         "looks-tuple-any-length", "looks.py", "parse_tuple",
         "    if len(parts) != len(TUPLE_ORDER):",
         "    if False:",

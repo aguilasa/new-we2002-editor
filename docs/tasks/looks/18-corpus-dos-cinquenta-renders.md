@@ -203,6 +203,13 @@ corpus: skipped -- no corpus folder: pass one, or point WE2002_LOOKS_CORPUS at .
 exit 77
 ```
 
+*(A transcrição acima é da árvore desta task. Desde a
+[`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md) a linha de campo diz
+"the best-scoring render carries the name's letter for", e a tabela de grupos é
+julgada: o grupo "not A1 / not A" sai `EXPECTED`, pelo resíduo da
+[`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), e sem o resíduo o
+`corpus:` fica vermelho.)*
+
 **Olhadas, as seis:** no JPEG o rosto inteiro está na pele do nome; no nosso,
 só a faixa de cima. Em `C-I3-A-C-A` e `C-K1-A-E-A` o JPEG tem barba e o nosso
 não. `scene.py --tuple B-I3-A-A-A` imprime `colour borrowed 9`, e
