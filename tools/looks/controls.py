@@ -335,6 +335,16 @@ CONTROLS = (
         "CORR-LOOKS-026 found",
     ),
     Control(
+        "assembly-band-choice-silent", "assembly.py", "unmeasured_bands",
+        "    if not layout.HAIR_QUADS.get(chosen) or len(bands) < 2:",
+        "    if True:",
+        ("assembly",),
+        "the band dropped when a style landed in two: with nothing reporting "
+        "it, B1 draws with bands[0] and the draw list says `band +0` like "
+        "every other line -- a pairing nobody measured, wearing the look of "
+        "one that was",
+    ),
+    Control(
         "looks-tuple-any-length", "looks.py", "parse_tuple",
         "    if len(parts) != len(TUPLE_ORDER):",
         "    if False:",

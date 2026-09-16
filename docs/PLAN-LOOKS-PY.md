@@ -1716,6 +1716,17 @@ esquisitice: ele reescreveu a seção do `D`, o que pode ser o jogo devolvendo a
 cabeça do `D` em vez de nomear a dele. E o mapa foi medido no **jogador de
 linha**; o segundo bloco de cabeças, o do goleiro, ninguém andou.
 
+**E há um resíduo dentro do que foi medido: a faixa por quad.** O `--patched`
+diz em **quais** faixas os quads reescritos de um estilo caíram, e **dez** dos
+29 mapeados caíram em duas ou mais. Qual quad recebe qual, ninguém mediu. Hoje
+isso alcança **um** estilo — o `B1`, seção 26, o único de faixa múltipla cujos
+quads o `layout.HAIR_QUADS` conhece —, e o `draw_list` aplica a primeira: o
+`--tuple` marca essa linha com **`BAND NOT MEASURED`** em vez de imprimir um
+`band +0` igual aos outros
+([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)). A medição é de uma
+corrida: o `oracle.py --writes` lê `a0` — a primitiva — e `a2` — a faixa — no
+**mesmo** acerto do breakpoint, então o par sai junto.
+
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como
 subproduto da (a): cada passo de `SKIN` soma `0x40` ao byte baixo do CLUT id

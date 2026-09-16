@@ -238,6 +238,45 @@ Asserted in `_checks` so that a later measurement which fills the holes has to
 come here and change these two numbers.
 """
 
+HAIR_MAP_MULTI_BAND = 10
+HAIR_MAP_BANDS_UNMEASURED = 1
+"""How many styles landed in more than one band, and how many of those draw.
+
+`--patched` says WHICH bands a style's rewritten quads landed in; it does not
+say **which quad took which**.  For a style with one band there is nothing to
+choose.  For the ten with two or more there is, and `draw_list` applies the
+first -- which is a choice and not a measurement, so it is named here, printed
+in the draw list, and counted, rather than left to the reader of a `band +0`
+that looks like every other.
+
+Only one of the ten reaches the draw list today (`B1`, section 26): the other
+nine name sections whose quads `layout.HAIR_QUADS` does not know, so no band is
+applied to them at all and there is nothing to choose.  When
+`oracle.py --writes` fills those in -- it reads `a0`, the primitive, and `a2`,
+the band, at the SAME breakpoint hit, so the pairing is one run away -- this
+number goes up before the measurement lands, which is the point of counting it.
+"""
+
+
+def multi_band_styles() -> list:
+    """[(style index, section, bands)] for every style with more than one band."""
+    return [(index, entry[0], entry[1])
+            for index, entry in enumerate(HAIR_MAP)
+            if entry is not None and len(entry[1]) > 1]
+
+
+def unmeasured_bands(chosen: int, bands) -> tuple:
+    """The bands `draw_list` drops when it applies the first one.
+
+    Empty for a style with one band, and empty for a section whose quads are
+    unknown -- there no band is applied at all, so nothing was chosen.  What
+    comes back non-empty is exactly the case where the picture depends on a
+    pairing nobody measured.
+    """
+    if not layout.HAIR_QUADS.get(chosen) or len(bands) < 2:
+        return ()
+    return tuple(bands[1:])
+
 
 UNTOUCHED = {
     "BODY": "works in buffers: LOOKS-TASK-08 measured it moving no byte of "
@@ -354,6 +393,7 @@ def draw_list(disc, values: dict, figure: int) -> list:
     plan = edits(values)
 
     out = []
+    dropped: dict = {}
     if figure == HEAD_FIGURE:
         chosen, bands = head_of(values)
         quads = layout.HAIR_QUADS.get(chosen)
@@ -364,6 +404,14 @@ def draw_list(disc, values: dict, figure: int) -> list:
             # something measures them -- a wrong guess here repaints the skull.
             plan.setdefault((layout.MODEL, chosen), {})[quads] = (
                 HEAD_BAND, bands[0])
+            # And when the style landed in more than one band, WHICH quad took
+            # which was never measured.  The first is applied, and every
+            # primitive it is applied to carries the ones that were dropped, so
+            # the choice travels with the picture instead of disappearing into
+            # a `band +0` that reads like any other.
+            left = unmeasured_bands(chosen, bands)
+            if left:
+                dropped[(layout.MODEL, chosen)] = (quads, left)
     for name, index in sections_of(disc, figure, values):
         scan = section.scan(disc[name], layout.GEOMETRY_START[name])
         one = scan.sections[index]
@@ -377,11 +425,13 @@ def draw_list(disc, values: dict, figure: int) -> list:
                 window = texture.covering(palettes, x, y, texture.NARROW)
             except texture.NoPalette:
                 window = None
+            quads, left = dropped.get((name, index), ((), ()))
             out.append({
                 "file": name, "section": index, "primitive": at,
                 "clut": clut, "band": band,
                 "image": record.offset if record else None,
                 "palette": None if window is None else (x, y, texture.NARROW),
+                "band_unmeasured": left if at in quads else (),
             })
     del modelfile  # imported for the reader below; the draw list does not need it
     return out
@@ -619,6 +669,29 @@ def _checks(c) -> None:
     unresolved = sorted(e.row for e in EFFECTS if not e.resolved)
     ok("one row of the five does not walk to the end of what its bits hold",
        unresolved == ["FACE", "H.F.COL."], "%r" % (unresolved,))
+
+    # The band a multi-band style draws with is a CHOICE, not a measurement.
+    # Asserted here so the day --writes pairs quad to band -- it reads a0, the
+    # primitive, and a2, the band, at the same breakpoint hit -- the numbers
+    # have to come through this file (CORR-LOOKS-028).
+    multi = multi_band_styles()
+    ok("ten styles landed in more than one band",
+       len(multi) == HAIR_MAP_MULTI_BAND,
+       "%d: %s" % (len(multi), [looks.HAIR_STYLES[i] for i, _s, _b in multi]))
+    reach = [i for i, chosen, bands in multi
+             if unmeasured_bands(chosen, bands)]
+    ok("and exactly one of them reaches the draw list: the other nine name "
+       "sections whose quads are unknown, so no band is applied at all",
+       len(reach) == HAIR_MAP_BANDS_UNMEASURED
+       and [looks.HAIR_STYLES[i] for i in reach] == ["B1"],
+       "%d: %s" % (len(reach), [looks.HAIR_STYLES[i] for i in reach]))
+    ok("a style with one band chooses nothing",
+       unmeasured_bands(24, (0,)) == ())
+    ok("and neither does a multi-band style whose quads are unknown",
+       unmeasured_bands(30, (0, 1)) == ())
+    ok("but B1 reports the band the draw list dropped",
+       unmeasured_bands(26, (0, 1)) == (1,),
+       "%s" % (unmeasured_bands(26, (0, 1)),))
 
     # The map, and the three values it could not place.  A later run that
     # fills them has to come here and change these numbers.
@@ -939,12 +1012,17 @@ def _tuple(image_path: str, text: str, figure: int = 0) -> int:
     seen: dict = {}
     for part in parts:
         key = (part["file"], part["section"], part["image"], part["palette"],
-               part["band"])
+               part["band"], part["band_unmeasured"])
         seen[key] = seen.get(key, 0) + 1
-    for (name, index, image, palette, band), count in sorted(
+    for (name, index, image, palette, band, left), count in sorted(
             seen.items(), key=lambda kv: str(kv[0])):
         print("    %-18s section %-3d image %-6s palette %-16s band %+d  "
-              "x%d" % (name, index, image, palette, band, count))
+              "x%d%s"
+              % (name, index, image, palette, band, count,
+                 "" if not left
+                 else "   BAND NOT MEASURED: the style also landed in band(s)"
+                      " %s, and which quad takes which was never measured"
+                      % ", ".join(str(b) for b in left)))
     return 0
 
 

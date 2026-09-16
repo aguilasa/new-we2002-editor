@@ -174,7 +174,11 @@ e com que paleta.
       e `N1` — não escreveram nada, e três seções pares — 38, 40 e 42 — nunca
       foram nomeadas; o `head_of` **recusa** esses três. O `E1` reescreveu a
       seção do `D`. E **quais primitivas das outras doze cabeças recebem a
-      faixa** não está medido.
+      faixa** não está medido — nem, para os **dez** estilos que caíram em duas
+      faixas ou mais, **qual quad recebe qual**. O `draw_list` aplica a
+      primeira; onde isso chega a desenhar, que hoje é só o `B1`, a linha sai
+      marcada `BAND NOT MEASURED`
+      ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)).
 - [x] As **4 peles** resolvidas, pelo mecanismo que a LOOKS-TASK-12 decidiu:
       `SKIN` anda a **linha** do CLUT id, `+0x40` por passo, e alcança as quatro
       — andado de ponta a ponta, não deduzido.

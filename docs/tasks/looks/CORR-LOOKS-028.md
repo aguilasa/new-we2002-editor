@@ -3,7 +3,7 @@ id: CORR-LOOKS-028
 title: "Correção: o `draw_list` joga fora a segunda faixa que o `HAIR_MAP` mediu, e não diz"
 type: correção
 category: núcleo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -110,20 +110,73 @@ quantos estilos têm mais de uma faixa (dez) e quantos deles alcançam o
 
 ## Verificação
 
-- [ ] `python tools/looks/assembly.py --check` verde, com o caso novo vermelho
-      quando plantado
-- [ ] `python tools/looks/assembly.py --check-image` verde
-- [ ] `python tools/looks/assembly.py --tuple A-B1-A-A-A` diz faixa por quad, ou
-      recusa com a razão — nunca aplica uma faixa escolhida em silêncio
-- [ ] `python tools/looks/selftest.py --quiet` com todos os controles vermelhos
-- [ ] `roms/` intocada
+- [x] `python tools/looks/assembly.py --check` verde, com o caso novo vermelho
+      quando plantado (`assembly-band-choice-silent`)
+- [x] `python tools/looks/assembly.py --check-image` verde
+- [x] `python tools/looks/assembly.py --tuple A-B1-A-A-A` **marca** a linha:
+      aplica a primeira faixa e diz, ali mesmo, que a atribuição quad↔faixa não
+      foi medida — nunca um `band +0` igual aos outros
+- [x] `python tools/looks/selftest.py --quiet` verde, 33 de 33 controles
+      vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz: dez estilos de faixa múltipla, e só o `B1` com quads
+conhecidos.
 
-**Arquivos criados/modificados:**
+```text
+B1  section 26  bands (0, 1)  quads known: (1, 3)
+C1  section 30  bands (0, 1)  quads known: None
+...  (dez ao todo; nos outros nove o draw_list não aplica faixa nenhuma)
+```
+
+A v1 desenha o `B1`, então o caminho escolhido foi o segundo da CORR — aplicar
+`bands[0]` **dizendo que a atribuição não foi medida**, em vez de recusar um
+estilo que o jogo tem. O que mudou é que a escolha deixou de ser invisível:
+
+```text
+$ python tools/looks/assembly.py --tuple A-B1-A-A-A
+    /BIN/MODEL.BIN  section 26  image 3568  palette (16, 480, 16)  band +0  x2
+        BAND NOT MEASURED: the style also landed in band(s) 1, and which quad
+        takes which was never measured
+```
+
+A marca viaja com a primitiva (`band_unmeasured` em cada parte da lista de
+desenho), não com uma nota de rodapé: são as duas primitivas do
+`layout.HAIR_QUADS[26]` — 1 e 3 — e nenhuma outra linha da lista é tocada.
+
+### Os dois números têm nome, e é por eles que a medição vai passar
+
+`HAIR_MAP_MULTI_BAND = 10` e `HAIR_MAP_BANDS_UNMEASURED = 1`, asseridos no
+`self_check()` contra o próprio `HAIR_MAP` cruzado com o `layout.HAIR_QUADS`.
+O segundo sobe assim que o `--writes` nomear os quads das outras nove seções —
+**antes** de a atribuição quad↔faixa ser medida —, que é exatamente o momento
+em que alguém precisa ser avisado.
+
+E a medição que falta é de uma corrida só: o breakpoint do `--writes` lê `a0`,
+a primitiva, e `a2`, a faixa, no **mesmo** acerto. O par sai junto; ninguém o
+pediu ainda.
+
+Controle novo, `assembly-band-choice-silent`: o `unmeasured_bands` devolvendo
+sempre vazio. Vermelho.
+
+### Problemas encontrados
+
+Nenhum. A varredura de discrepância não puxou nada além dos dois documentos
+que a própria CORR previa.
+
+### Arquivos criados/modificados
+
+- `tools/looks/assembly.py` — `multi_band_styles()`, `unmeasured_bands()`, os
+  dois números, a marca em cada parte da lista de desenho e a linha do
+  `--tuple`
+- `tools/looks/controls.py` — o controle `assembly-band-choice-silent`
+- `docs/PLAN-LOOKS-PY.md` — §6(c), o resíduo da faixa por quad
+- `docs/tasks/looks/14-tabela-de-montagem.md` — o mesmo no critério
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-028.md` — este arquivo

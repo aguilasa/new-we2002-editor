@@ -43,7 +43,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-025](/docs/tasks/looks/CORR-LOOKS-025.md) | [LOOKS-TASK-11](/docs/tasks/looks/11-qual-imagem-e-o-cabelo.md) | Cada `TEX_*.BIN` tem cinco paletas de 256, não duas, e o "casa e fora" é inferência sem medição | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-026](/docs/tasks/looks/CORR-LOOKS-026.md) | [LOOKS-TASK-12](/docs/tasks/looks/12-pele-paleta-ou-vertice.md) | A grade dá conta do que os três campos alcançam, não do que o registro é — 948 primitivas moram na coluna 1 | Média | [x] concluída | 2026-09-15 |
 | [CORR-LOOKS-027](/docs/tasks/looks/CORR-LOOKS-027.md) | [LOOKS-TASK-13](/docs/tasks/looks/13-campos-e-dominios-de-looks.md) | O cross-check contra os 50 JPGs é critério marcado e não existe comando que o rode | Baixa | [x] concluída | 2026-09-15 |
-| [CORR-LOOKS-028](/docs/tasks/looks/CORR-LOOKS-028.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `draw_list` aplica a primeira das faixas que o `HAIR_MAP` mediu e descarta as outras, sem dizer | Alta | [ ] pendente | — |
+| [CORR-LOOKS-028](/docs/tasks/looks/CORR-LOOKS-028.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `draw_list` aplica a primeira das faixas que o `HAIR_MAP` mediu e descarta as outras, sem dizer | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-029](/docs/tasks/looks/CORR-LOOKS-029.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | O `HEAD_RUNS` diz "todo corpo distinto, cada um com sua janela" e o disco diz doze corpos e catorze janelas | Média | [ ] pendente | — |
 | [CORR-LOOKS-030](/docs/tasks/looks/CORR-LOOKS-030.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A décima terceira seção do mapa de cabelo — o `E2` na 54 — não está em nenhuma das três listas | Baixa | [ ] pendente | — |
 | [CORR-LOOKS-031](/docs/tasks/looks/CORR-LOOKS-031.md) | [LOOKS-TASK-14](/docs/tasks/looks/14-tabela-de-montagem.md) | A constante `AGREEMENT` justifica o piso do corpus com 0,005 e a medição dá 0,008 | Baixa | [ ] pendente | — |
@@ -90,7 +90,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-025 — são cinco paletas de 256 por `TEX_*.BIN`, e "casa e fora" não foi medido
 - [x] CORR-LOOKS-026 — nove primitivas da cabeça não andam com campo de cor nenhum, e a coluna 1 tem 948 moradores
 - [x] CORR-LOOKS-027 — nenhum comando lê os nomes dos 50 JPGs, e o critério diz que leu
-- [ ] CORR-LOOKS-028 — a segunda faixa medida do cabelo é descartada em silêncio
+- [x] CORR-LOOKS-028 — a segunda faixa medida do cabelo é descartada em silêncio
 - [ ] CORR-LOOKS-029 — "32 corpos distintos" são 32 seções; as malhas são 12 e 24
 - [ ] CORR-LOOKS-030 — o `E2` e a seção 54 faltam nas três listas que dizem treze
 - [ ] CORR-LOOKS-031 — o piso do corpus é justificado com 0,005 e a medição dá 0,008
