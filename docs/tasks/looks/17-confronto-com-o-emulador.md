@@ -67,6 +67,8 @@ status: concluído
   (1, 2, 3) — e o `section.Primitive.corners` oferece a leitura do `we3d`, que
   escolhe a outra. As duas desenham; só o confronto contra o quadro do jogo
   diz qual. Escolher aqui em silêncio é o que esta linha existe para impedir.
+  **Respondido ao executar:** a ordem guardada, 7 a 0 contra a do `we3d`, pela
+  display list do jogo (`confront.py --score`, Log abaixo).
 - **O uniforme não é desenhado, e não é bug:** 237 das 593 primitivas da figura
   amostram páginas que o `DAT2D.BIN` não tem — elas vivem nos 105
   `TEX_*.BIN`, um por time, cada um com cinco paletas de 256 entradas
@@ -80,6 +82,9 @@ status: concluído
   (`scene.py --corpus`: 31 dos 50 desenhados, 16 recusados por isso). É a
   armadilha 19 outra vez, do outro lado: andar o campo até a ponta nos **dois**
   slots é o que separa "a tela trava em E" de "a varredura parou em E".
+  **Respondido ao executar:** a varredura parou — a tela vai a `G` nos dois
+  slots (`confront.py --reach FACE`), e isso é a
+  [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md).
 
 ---
 
