@@ -73,9 +73,12 @@ this module leaves their window alone.  The obvious rule is measured wrong:
 section 30 has twelve primitives on the hair sheet in the hair colour's column
 and the game rewrites two.
 
-**FACE reaches five**, of the seven its third-party labels name and the eight
-its three bits hold.  Bands 0 to 4 of the same image, 16 rows each, and then it
-clamps.
+**FACE's screen reaches seven**, of the eight its three bits hold.  A to E are
+bands 0 to 4 of the same image, 16 rows each, on the head HAIR picked; F and G
+draw that head's TWIN, the odd section after it, with the twin's own beard
+quads at band 5 and band 6 (FACE_TWINS, CORR-LOOKS-048).  This line said
+"FACE reaches five" until CORR-LOOKS-044, and "and F and G are not read" until
+CORR-LOOKS-048.
 
 **And every field clamps; none wraps.**  Measured on all six.
 
@@ -100,6 +103,9 @@ import skin  # noqa: E402
 import texture  # noqa: E402
 
 SKIP = 77
+
+HEAD_FIGURE_OUTFIELD = 0
+"""Figure 0 of EDT_MOD.BIN, the outfield player (slot 2)."""
 
 CLUT_ROW = "clut row"
 CLUT_COLUMN = "clut column"
@@ -179,13 +185,42 @@ EFFECTS = (
     Effect("FACE", BAND, layout.ATLAS_BAND, 7,
            {HEAD: layout.FACE_PRIMITIVES},
            "16 rows a band of the same image, bands 0 to 4 on the two beard "
-           "quads of section 24.  The screen offers SEVEN -- A to G, walked "
-           "by the letter on both slots -- and what F and G write is not "
-           "that band, and has not been read",
-           known=5),
+           "quads of the head HAIR picked.  F and G are not bands 5 and 6 of "
+           "that head: they draw its TWIN, the odd section after it, with the "
+           "twin's own beard quads at the disc's band and one band on "
+           "(FACE_TWINS, layout.FACE_TWIN_QUADS)"),
 )
 
 BY_ROW = {effect.row: effect for effect in EFFECTS}
+
+FACE_TWIN_FROM = 5
+"""The first beard value that draws the head's twin: F.  G is the second."""
+
+FACE_TWINS = {
+    HEAD_FIGURE_OUTFIELD: {24: 25, 26: 27, 28: 29, 30: 31, 32: 33, 34: 35,
+                           36: 37, 44: 45, 46: 47, 48: 49, 50: 51, 52: 53,
+                           54: 55},
+    1: {24: 25, 26: 27, 28: 29, 30: 31, 32: 33, 34: 35, 36: 37, 44: 45,
+        46: 47, 48: 49, 50: 51, 52: 53, 54: 55},
+}
+"""Figure -> {the head HAIR picked: the section beard F and G draw instead}.
+
+**Measured 2026-09-16** by `oracle.py --patched FACE <slot> <tuple ...>` from
+one tuple on each of the thirteen heads (CORR-LOOKS-048).  At every one of them
+A to E move the beard quads of the head HAIR picked, band by band, and F and G
+write nothing of it: they write the ODD section right after it -- F puts the
+store's rows in its hair quads and leaves its beard at the disc's band, which
+is 5, and G moves that beard by one band.  So the twin is DRAWN for F and G,
+the way a HAIR style's section is drawn: the game edits the section it is about
+to show.
+
+Walked on BOTH figures, the same thirteen starts on each: slot 1 printed the
+same sections and the same primitives with the same corners, line for line.
+Written twice for the reason HAIR_MAP_GOALKEEPER is.
+
+`head_pairs` had already measured what separates a pair on the disc -- the
+beard -- and read the pairs as a coincidence to refuse.  This is the reading.
+"""
 
 CHOOSES = {
     "HAIR": "does not edit a primitive of one section at all: it picks WHICH "
@@ -408,6 +443,48 @@ line here is a measurement or a declared gap; neither is a guess.
 
 # ---- the edit ------------------------------------------------------------
 
+def check_step(effect, value: int) -> int:
+    """The step of one field's value, or a refusal saying which kind.
+
+    Past the screen is one refusal; inside the screen and past what the table
+    knows how to apply is another, and it says NOT MEASURED.  Every row knows
+    its whole reach since CORR-LOOKS-048, and the second branch stays because a
+    row measured halfway is exactly how FACE was written down before it.
+    """
+    step = value - effect.field.bias
+    if not 0 <= step < effect.reach:
+        raise BadAssembly(
+            "%s=%s is value %d, and the screen was measured to reach %d "
+            "-- %s" % (effect.row, effect.field.label(value), step,
+                       effect.reach, effect.why))
+    if step >= effect.known:
+        raise BadAssembly(
+            "%s=%s is value %d: the screen offers it -- it reaches %d -- "
+            "and what it writes was not measured; this table knows %d "
+            "-- %s" % (effect.row, effect.field.label(value), step,
+                       effect.reach, effect.known, effect.why))
+    return step
+
+
+def wears_twin(values: dict) -> bool:
+    """Whether the tuple's beard draws the head's twin: F or G."""
+    face = BY_ROW["FACE"]
+    value = values.get(face.field.name)
+    return value is not None and value - face.field.bias >= FACE_TWIN_FROM
+
+
+def twin_of(chosen: int, figure: int = HEAD_FIGURE_OUTFIELD) -> int:
+    """The section beard F and G draw in place of *chosen*, or a refusal."""
+    twins = FACE_TWINS.get(figure)
+    if twins is None:
+        raise BadAssembly("beard F and G on figure %d: the twin was measured "
+                          "on figure(s) %s" % (figure, sorted(FACE_TWINS)))
+    if chosen not in twins:
+        raise BadAssembly("beard F and G on section %d: no twin was measured "
+                          "for it" % chosen)
+    return twins[chosen]
+
+
 def edits(values: dict, head: int | None = None) -> dict:
     """{(file, section): {primitive: (clut, band)}} for one tuple of LOOKS.
 
@@ -422,29 +499,36 @@ def edits(values: dict, head: int | None = None) -> dict:
     nothing on ANY head -- found while asserting that all four colour rows
     reach the head a tuple wears (CORR-LOOKS-034).
 
-    *head* is the MODEL.BIN section the tuple's HAIR names, and every effect
-    that owns the HEAD key is re-addressed to it.  The default keeps the
-    measured head, so a caller with no tuple in hand gets what the constants
-    describe.
+    *head* is the MODEL.BIN section the figure DRAWS -- the one HAIR names, or
+    its twin for beard F and G -- and every effect that owns the HEAD key is
+    re-addressed to it.  The default keeps the measured head, so a caller with
+    no tuple in hand gets what the constants describe.
+
+    **F and G are not bands 5 and 6 of FACE_PRIMITIVES** (CORR-LOOKS-048): they
+    address the twin's own beard quads, layout.FACE_TWIN_QUADS, whose disc
+    window is already band 5 -- so F adds nothing and G adds one band.
     """
-    where_head = HEAD if head is None else (layout.MODEL, head)
+    if head is None:
+        head = (twin_of(layout.HEAD_SECTION) if wears_twin(values)
+                else layout.HEAD_SECTION)
+    where_head = (layout.MODEL, head)
     out: dict = {}
     for effect in EFFECTS:
         name = effect.field.name
         if name not in values:
             continue
-        step = values[name] - effect.field.bias
-        if not 0 <= step < effect.reach:
-            raise BadAssembly(
-                "%s=%s is value %d, and the screen was measured to reach %d "
-                "-- %s" % (effect.row, effect.field.label(values[name]), step,
-                           effect.reach, effect.why))
-        if step >= effect.known:
-            raise BadAssembly(
-                "%s=%s is value %d: the screen offers it -- it reaches %d -- "
-                "and what it writes was not measured; this table knows %d "
-                "-- %s" % (effect.row, effect.field.label(values[name]), step,
-                           effect.reach, effect.known, effect.why))
+        step = check_step(effect, values[name])
+        if effect.row == "FACE" and step >= FACE_TWIN_FROM:
+            quads = layout.FACE_TWIN_QUADS.get(head)
+            if quads is None:
+                raise BadAssembly(
+                    "FACE=%s draws a head's twin, and section %d is not a "
+                    "twin whose beard quads were measured"
+                    % (effect.field.label(values[name]), head))
+            out.setdefault(where_head, {})
+            out[where_head][(effect.row, quads)] = (effect,
+                                                    step - FACE_TWIN_FROM)
+            continue
         for key, primitives in effect.where.items():
             key = where_head if key == HEAD else key
             out.setdefault(key, {})
@@ -505,6 +589,18 @@ def head_of(values: dict, figure: int = HEAD_FIGURE) -> tuple:
     return found
 
 
+def worn_head(values: dict, figure: int = HEAD_FIGURE) -> tuple:
+    """(the section drawn, the section HAIR picked, its bands) for one tuple.
+
+    The two sections differ for beard F and G, which draw the picked head's
+    twin (FACE_TWINS).  Everything that says WHICH quads take the hair band is
+    keyed by the picked one; everything that says what is DRAWN, by the other.
+    """
+    chosen, bands = head_of(values, figure)
+    drawn = twin_of(chosen, figure) if wears_twin(values) else chosen
+    return (drawn, chosen, bands)
+
+
 def apply_to(clut: int, band: int, effect, step) -> tuple:
     """(clut, band) after one field's step, applied to what is already there.
 
@@ -556,27 +652,33 @@ def draw_list(disc, values: dict, figure: int) -> list:
     dropped: dict = {}
     borrowed: dict = {}
     stored: dict = {}
-    # Both figures wear the head their own map names (CORR-LOOKS-047).
-    chosen, bands = head_of(values, figure)
-    plan = edits(values, chosen)
-    if not colour_is_measured(chosen):
+    # Both figures wear the head their own map names (CORR-LOOKS-047), and
+    # beard F and G draw its twin (CORR-LOOKS-048).
+    drawn, chosen, bands = worn_head(values, figure)
+    plan = edits(values, drawn)
+    if not colour_is_measured(drawn):
         # The colour rows reach this head now, and their primitive
-        # indices were read off section 24.  Applied, and said.
-        borrowed[(layout.MODEL, chosen)] = tuple(
-            sorted({at for _row, primitives in plan.get(
-                (layout.MODEL, chosen), {})
-                if primitives is not None for at in primitives}))
+        # indices were read off section 24.  Applied, and said.  FACE's own
+        # twin quads were measured on the twin, and are not borrowed.
+        borrowed[(layout.MODEL, drawn)] = tuple(
+            sorted({at for row, primitives in plan.get(
+                (layout.MODEL, drawn), {})
+                if primitives is not None
+                and not (row == "FACE" and wears_twin(values))
+                for at in primitives}))
+    # A twin takes the hair quads of the head it pairs with, by index --
+    # measured on the four whose quads are known (layout.HAIR_QUADS).
     quads = layout.HAIR_QUADS.get(chosen)
     if quads:
         # Four of the thirteen heads have their quads named by index, by
         # the breakpoint of LOOKS-TASK-14.  The other nine are written by
         # some other instruction and keep the disc's own window until
         # something measures them -- a wrong guess here repaints the skull.
-        plan.setdefault((layout.MODEL, chosen), {})[
+        plan.setdefault((layout.MODEL, drawn), {})[
             (HEAD_BAND.row, quads)] = (HEAD_BAND, bands[0])
         # And their `v` is what the game's store writes, not the file's
         # plus the band -- see hair_texcoords.
-        stored[(layout.MODEL, chosen)] = quads
+        stored[(layout.MODEL, drawn)] = quads
         # And when the style landed in more than one band, WHICH quad took
         # which was never measured.  The first is applied, and every
         # primitive it is applied to carries the ones that were dropped, so
@@ -584,7 +686,7 @@ def draw_list(disc, values: dict, figure: int) -> list:
         # a `band +0` that reads like any other.
         left = unmeasured_bands(chosen, bands)
         if left:
-            dropped[(layout.MODEL, chosen)] = (quads, left)
+            dropped[(layout.MODEL, drawn)] = (quads, left)
     for name, index in sections_of(disc, figure, values):
         scan = section.scan(disc[name], layout.GEOMETRY_START[name])
         one = scan.sections[index]
@@ -650,7 +752,7 @@ def sections_of(disc, figure: int, values: dict | None = None) -> list:
            for target in models[figure].targets]
     head = HEAD
     if values is not None:
-        head = (layout.MODEL, head_of(values, figure)[0])
+        head = (layout.MODEL, worn_head(values, figure)[0])
     return out + [head]
 
 
@@ -1009,12 +1111,18 @@ def _checks(c) -> None:
        BY_ROW["FACE"].reach == len(BY_ROW["FACE"].field.labels) == 7,
        "reach %d, labels %d"
        % (BY_ROW["FACE"].reach, len(BY_ROW["FACE"].field.labels)))
-    ok("and the table knows how to apply five of them, which is the hole",
-       BY_ROW["FACE"].known == 5 < BY_ROW["FACE"].reach)
-    ok("every other row knows everything its screen offers",
-       all(e.known == e.reach for e in EFFECTS if e.row != "FACE"))
+    # And since CORR-LOOKS-048 the table knows all seven: F and G are the
+    # head's twin.  The not-measured refusal stays, exercised on a row built
+    # here, because a row measured halfway is how FACE was written down.
+    ok("every row knows everything its screen offers, FACE included",
+       all(e.known == e.reach for e in EFFECTS))
+    half = Effect("FACE", BAND, layout.ATLAS_BAND, 7, {}, "a synthetic half",
+                  known=5)
     refuses("a value the screen offers and nobody measured is refused as that",
-            lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "not measured")
+            lambda: check_step(half, half.field.bias + 5), "not measured")
+    ok("and a value the table knows is its step",
+       attempt("a known step", lambda: check_step(half, half.field.bias + 4))
+       == 4)
     # The eighth value the bits hold has no label, so it is built as a
     # value and not parsed: past the screen, which is a different refusal.
     refuses("and a value past the screen is refused as out of reach",
@@ -1080,8 +1188,37 @@ def _checks(c) -> None:
     ok("so applying the bottom tuple changes nothing",
        apply_to(one.clut, 0, BY_ROW["SKIN"], 0) == (one.clut, 0)
        and apply_to(one.clut, 0, HEAD_BAND, 0) == (one.clut, 0))
-    refuses("a beard style past the five this table knows is refused",
-            lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "not measured")
+    # Beard F and G draw the twin of the head HAIR picked, with the twin's own
+    # beard quads: F at the disc's band, G one band on (CORR-LOOKS-048).
+    beard_f = looks.parse_tuple("A-A1-A-F-A")
+    beard_g = looks.parse_tuple("A-I3-A-G-A")
+    ok("F on A1 draws section 25, the twin of 24",
+       attempt("F's head", lambda: worn_head(beard_f), default=(None,))[0] == 25)
+    ok("and G on I3 draws 35, the twin of the 34 I3 picks, on both figures",
+       [attempt("G's head", lambda f=f: worn_head(beard_g, f),
+                default=(None,))[:2] for f in (0, 1)] == [(35, 34)] * 2)
+    twin_plan = attempt("plan F", lambda: edits(beard_f, 25), default={})
+    ok("F addresses the twin's beard quads with no band added",
+       twin_plan.get((layout.MODEL, 25), {}).get(
+           ("FACE", layout.FACE_TWIN_QUADS[25]), (None, None))[1] == 0,
+       "%r" % (twin_plan,))
+    g_plan = attempt("plan G", lambda: edits(beard_g, 35), default={})
+    ok("and G adds one band to them",
+       g_plan.get((layout.MODEL, 35), {}).get(
+           ("FACE", layout.FACE_TWIN_QUADS[35]), (None, None))[1] == 1,
+       "%r" % (g_plan,))
+    ok("and a caller with no head in hand is sent to the twin, not to 24",
+       sorted(attempt("plan F with no head", lambda: edits(beard_f),
+                      default={})) == [(layout.MODEL, 25)])
+    refuses("F on a section with no measured twin is refused",
+            lambda: edits(beard_f, 26), "not a twin")
+    ok("every head HAIR names has a twin, one section on, and every twin has "
+       "its beard quads",
+       all(sorted(twins) == sorted({one[0] for one in hair_map(f) if one})
+           and all(twin == head + 1 for head, twin in twins.items())
+           and set(twins.values()) == set(layout.FACE_TWIN_QUADS)
+           for f, twins in FACE_TWINS.items()),
+       "%r" % (FACE_TWINS,))
 
     # The quads the breakpoint named, tied back to the map and to the pair
     # LOOKS-TASK-08 measured by hand.
@@ -1368,6 +1505,34 @@ def _check_image(image_path: str) -> int:
         problems.append("a tuple drew %r head section(s) out of MODEL.BIN, "
                         "and a figure wears one" % [len(v) for v in
                                                     heads.values()])
+
+    # The twins, against the disc: every twin's beard quads hold band 5 of the
+    # sheet already, which is what makes F draw them with no band added --
+    # and F and G on every head draw the twin (CORR-LOOKS-048).
+    import section
+
+    model = section.scan(disc[layout.MODEL],
+                         layout.GEOMETRY_START[layout.MODEL])
+    off = {twin: sorted({min(v for _u, v in
+                             model.sections[twin].primitives[at].texcoords)
+                         // layout.ATLAS_BAND for at in quads})
+           for twin, quads in layout.FACE_TWIN_QUADS.items()}
+    print("  the twins' beard quads sit in band(s): %s"
+          % ", ".join("%d -> %s" % (k, v) for k, v in sorted(off.items())))
+    if any(v != [FACE_TWIN_FROM] for v in off.values()):
+        problems.append("a twin's beard quads are not all in band %d on the "
+                        "disc, so F would not draw them as the game does"
+                        % FACE_TWIN_FROM)
+    for figure in sorted(FACE_TWINS):
+        for text in ("A-A1-A-F-A", "A-I3-A-G-A"):
+            worn = sorted({p["section"] for p in draw_list(
+                disc, looks.parse_tuple(text), figure)
+                if p["file"] == layout.MODEL})
+            print("  %s on figure %d wears %s" % (text, figure, worn))
+            if worn != [twin_of(head_of(looks.parse_tuple(text), figure)[0],
+                                figure)]:
+                problems.append("%s on figure %d does not wear the twin"
+                                % (text, figure))
 
     print("assembly --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

@@ -258,7 +258,9 @@ wireframe — dito aqui para não parecer coberto.
   "editor gravando direto" da LOOKS-TASK-18 caiu, e a linha está lá.
   **Consertado em 2026-09-16 pela metade que é código:** a tabela diz 7 na tela
   e 5 aplicados, e a recusa de `F` e `G` diz "não medido" em vez de "fora de
-  alcance". O que `F` e `G` escrevem continua sem leitura.
+  alcance". O que `F` e `G` escrevem continua sem leitura. **Lido em
+  2026-09-16** pela [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md):
+  eles desenham o gêmeo da cabeça, e a tabela aplica os sete.
 - **A pose, o uniforme e sete quads fora da display list lida** ficam abertos,
   com a razão escrita na
   [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).

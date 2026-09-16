@@ -231,9 +231,9 @@ CONTROLS = (
         "mirrors the right shin of the OTHER -- which renames every limb",
     ),
     Control(
-        "assembly-table-off-by-one", "assembly.py", "edits",
-        "        step = values[name] - effect.field.bias",
-        "        step = values[name] - effect.field.bias + 1",
+        "assembly-table-off-by-one", "assembly.py", "check_step",
+        "    step = value - effect.field.bias",
+        "    step = value - effect.field.bias + 1",
         ("assembly",),
         "the table shifted by one index, which is what the task asks for: the "
         "bottom of every field is the state the disc already holds, so a "
@@ -446,13 +446,23 @@ CONTROLS = (
         "because that one turns losses into wins and reddens for that",
     ),
     Control(
-        "assembly-unmeasured-as-unreached", "assembly.py", "edits",
-        "        if step >= effect.known:",
-        "        if False:",
+        "assembly-unmeasured-as-unreached", "assembly.py", "check_step",
+        "    if step >= effect.known:",
+        "    if False:",
         ("assembly",),
         "a value the screen offers and nobody measured, applied anyway: F and "
-        "G on FACE become bands 5 and 6 of a sheet whose beard bands stop at "
-        "4, and the figure draws a beard nobody has seen",
+        "G on FACE became bands 5 and 6 of a sheet whose beard bands stop at "
+        "4, and the figure drew a beard nobody had seen -- which is how they "
+        "were before CORR-LOOKS-048 measured the twin",
+    ),
+    Control(
+        "assembly-face-twin-ignored", "assembly.py", "worn_head",
+        "    drawn = twin_of(chosen, figure) if wears_twin(values) else chosen",
+        "    drawn = chosen",
+        ("assembly",),
+        "beard F and G drawn on the head HAIR picked instead of its twin: the "
+        "even section's beard quads get the twin's band, a head the game never "
+        "shows for F or G, drawing perfectly (CORR-LOOKS-048)",
     ),
     Control(
         "assembly-goalkeeper-unmapped", "assembly.py", "HAIR_MAPS",

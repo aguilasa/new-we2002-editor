@@ -124,12 +124,14 @@ hold with the same room, and the figures above stay as what that day's tree
 measured.
 """
 
-REFUSED = "A-A1-A-F-A"
+REFUSED = "A-H1-A-A-A"
 """A tuple the assembly table refuses, and the exit code is the contract.
 
-`FACE=F` is value 5 of a row whose screen offers seven and whose table knows
-five -- F is on the screen, and what it writes was never read (CORR-LOOKS-044)
--- so the table raises instead of drawing a beard nobody measured.  The gate demands
+`HAIR=H1` wrote nothing to either model file when the map was walked, on both
+figures, so which head it draws is not known and the table raises instead of
+drawing somebody else's.  This was `A-A1-A-F-A` until CORR-LOOKS-048 measured
+what beard F draws -- a refusal tuple has to be one the table still refuses,
+or the gate reddens a working viewer.  The gate demands
 exit 2 and NO file: a refusal that still writes a picture would be drawn from
 something, and that something would be invented.
 """

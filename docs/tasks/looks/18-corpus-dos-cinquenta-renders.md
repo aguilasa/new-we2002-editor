@@ -67,7 +67,9 @@ status: pendente
   `python tools/looks/scene.py --corpus <pasta>`: **31 desenhadas, 19
   recusadas** — 13 por `FACE=F`, 3 por `FACE=G`, 2 pelo estilo `H1`, que o
   `HAIR_MAP` não alcançou, e o `0.jpg`. **Rode, não copie**: o número é da
-  pasta que a variável apontar.
+  pasta que a variável apontar. **Remedido em 2026-09-16, depois da
+  [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md): 47 desenhadas, 3
+  recusadas** — as duas de `H1` e o `0.jpg`. As 16 de `F` e `G` desenham.
 - **A métrica da LOOKS-TASK-17 existe e tem nome:** interseção de histogramas
   de cor de 15 bits (`confront.histogram`, `confront.intersection`,
   `confront.verdict`), com o teto de liderança impresso ao lado. **Os JPGs não
@@ -87,7 +89,9 @@ status: pendente
   it -- it reaches 7 -- and what it writes was not measured`. O que destrava as
   16 é `oracle.py --patched FACE` nos dois slots — pode ser outra seção, como o
   `HAIR` era. Aqui continua entrando como conta: comparar 31 e chamar de "o
-  corpus" é dizer 50 onde se mediu 31.
+  corpus" é dizer 50 onde se mediu 31. **Destravado em 2026-09-16** pela
+  [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md): era outra seção —
+  `F` e `G` desenham o gêmeo da cabeça —, e a conta agora é 47 de 50.
 
 ---
 

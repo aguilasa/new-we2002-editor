@@ -35,7 +35,7 @@ Usage:
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
-    python tools/looks/oracle.py --patched [HAIR [SLOT]]  # which sections the game has edited, value by value
+    python tools/looks/oracle.py --patched [HAIR [SLOT [TUPLE ...]]]  # which sections the game has edited, value by value
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
 """
 
@@ -2001,7 +2001,7 @@ def _say_burst(hits):
         for (name, index), parts in sorted(folded.items(), key=lambda kv: kv[0][1]))
 
 
-def check_patched(row="HAIR", slot=2, verbose=True):
+def check_patched(row="HAIR", slot=2, starts=(), verbose=True):
     """Which sections of a model file differ from the DISC at every value.
 
     The walk this task was built on watched **one** section, the head, because
@@ -2014,48 +2014,79 @@ def check_patched(row="HAIR", slot=2, verbose=True):
     sections the live copy no longer matches.  A style that picks another
     section shows up as that section's index; a style that changes nothing in
     the file at all shows up as an empty line, which is also an answer.
+
+    *starts* are tuples to put on the screen first, one walk each from a fresh
+    `load_state`: a row whose effect depends on another row -- FACE on the head
+    HAIR picked -- is measured on each of them and not only on the state's own
+    A1 (CORR-LOOKS-048).  Every changed primitive is printed with the corners
+    it was left with, because "section 25 changed" does not say which quads.
     """
+    import confront
     import iso_source
     import looks
 
     ready = preflight()
     count = looks.BY_ROW[row].values
+    for start in starts:
+        looks.parse_tuple(start)
     with iso_source.open_disc(ready["image"]) as disc:
         data = disc.read(layout.MODEL)
     scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
-    maps = {layout.BASE[layout.MODEL]: (layout.MODEL, len(data),
-                                        scan.sections)}
+    walks = []
     with Oracle(ready["cue"], verbose=verbose) as game:
         for one in sorted(SLOTS):
             restore_state(one, verbose=verbose)
-        game.load_looks(slot)
-        game.select_row(row)
         path = os.path.join(game.out_dir, "model.bin")
 
         def read():
             return game.read_ram(layout.BASE[layout.MODEL], len(data), path)
 
-        for _ in range(count):
-            game.press("Left", expect_change=False)
-        states = [steady(game, read)]
-        for _ in range(count):
-            game.press("Right", expect_change=False)
-            states.append(steady(game, read))
+        for start in starts or (None,):
+            game.load_looks(slot)
+            if start is None:
+                game.select_row(row)
+            else:
+                confront.route(game, start, sys.modules[__name__])
+                way, distance = confront.moves(ROWS, confront.SHOT_ROW, row)
+                for _ in range(distance):
+                    game.press(way, box=FOOTER, least=ROW_MOVED)
+            before = steady(game, read)
+            for _ in range(count):
+                game.press("Left", expect_change=False)
+            states = [steady(game, read)]
+            for _ in range(count):
+                game.press("Right", expect_change=False)
+                states.append(steady(game, read))
+            walks.append((start, before, states))
 
-    print("  %s on slot %d: %d value(s); what CHANGED at each press, and "
-          "what the live %s no longer matches on the disc"
-          % (row, slot, len(states), layout.MODEL), flush=True)
-    for step, live in enumerate(states):
-        changed = _sections_touched(
-            states[step - 1] if step else data, live, scan, data)
-        against = _sections_touched(data, live, scan, data)
-        print("      %2d  changed: %s   |   differs from the disc in: %s"
-              % (step,
-                 ", ".join("section %d (%d byte(s), band(s) %s)"
-                           % (index, count, bands)
-                           for index, count, bands in changed) or "nothing",
-                 ", ".join(str(index) for index, _c, _b in against)
-                 or "nothing"), flush=True)
+    for start, before, states in walks:
+        print("  %s on slot %d%s: %d value(s); what CHANGED at each press, and "
+              "what the live %s no longer matches on the disc"
+              % (row, slot, "" if start is None else " from %s" % start,
+                 len(states), layout.MODEL), flush=True)
+        for step, live in enumerate(states):
+            old = states[step - 1] if step else (data if start is None
+                                                 else before)
+            changed = _sections_touched(old, live, scan, data)
+            against = _sections_touched(data, live, scan, data)
+            print("      %2d  changed: %s   |   differs from the disc in: %s"
+                  % (step,
+                     ", ".join("section %d (%d byte(s), band(s) %s)"
+                               % (index, many, bands)
+                               for index, many, bands in changed) or "nothing",
+                     ", ".join(str(index) for index, _c, _b in against)
+                     or "nothing"), flush=True)
+            for index, _many, _bands in changed:
+                one = scan.sections[index]
+                first = one.offset + section.HEADER_SIZE
+                for at in range(len(one.primitives)):
+                    offset = first + at * section.PRIMITIVE_SIZE
+                    if old[offset:offset + section.PRIMITIVE_SIZE] ==                             live[offset:offset + section.PRIMITIVE_SIZE]:
+                        continue
+                    prim = section.read_primitive(live, offset)
+                    print("            section %d primitive %d: clut 0x%04x, "
+                          "(u, v) %s" % (index, at, prim.clut,
+                                         list(prim.texcoords)), flush=True)
     return 0
 
 
@@ -2793,7 +2824,8 @@ def main(argv):
         if len(argv) >= 2 and argv[1] == "--writes":
             return check_writes(*row_and_slot(argv[2:]))
         if len(argv) >= 2 and argv[1] == "--patched":
-            return check_patched(*row_and_slot(argv[2:]))
+            return check_patched(*row_and_slot(argv[2:4]),
+                                 starts=tuple(argv[4:]))
         if len(argv) == 2 and argv[1] == "--hair":
             return check_hair()
         if len(argv) >= 2 and argv[1] == "--where":

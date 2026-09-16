@@ -189,7 +189,9 @@ e com que paleta.
       **`FACE` alcança 5** das sete que os rótulos nomeiam e das oito que os bits
       guardam — buraco nomeado *(remedido em 2026-09-16 pela LOOKS-TASK-17: a
       **tela** oferece 7; o 5 é o alcance da faixa nos dois quads de barba, que
-      é o que esta tabela sabe aplicar — [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md))*; **`BODY` não toca geometria nenhuma**, medido
+      é o que esta tabela sabe aplicar — [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md);
+      e `F` e `G`, lidos pela [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md),
+      desenham o gêmeo da cabeça, então a tabela aplica os sete)*; **`BODY` não toca geometria nenhuma**, medido
       pela LOOKS-TASK-08, e está no `assembly.UNTOUCHED` com a razão, junto com
       `HEIG`, `AGE`, `NAT`, `DEFAUL` e `FOOT`.
 - [x] A tabela é **derivada de medição**, e cada linha diz de onde veio: o
@@ -265,7 +267,9 @@ existe para não fazer.
 os três bits guardam. *(Remedido em 2026-09-16: andada letra a letra, a tela
 oferece **7**. O que esta passagem mediu foi a faixa dos dois quads de barba da
 seção 24, que vai até 4 — o alcance do que a tabela sabe aplicar, não o da tela
-— [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md).)* É um terceiro número na mesma família do `beard_colour`
+— [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md). E `F` e `G` não são
+faixas 5 e 6 desses quads: desenham o gêmeo da cabeça, a seção ímpar seguinte —
+[`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md).)* É um terceiro número na mesma família do `beard_colour`
 da LOOKS-TASK-13 (oito bits, sete nomes) — mas ali a tela alcançava os sete, e
 aqui não alcança.
 

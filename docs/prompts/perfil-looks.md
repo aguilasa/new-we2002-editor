@@ -164,7 +164,11 @@ Não se revertem sem o usuário pedir.
     (`oracle.steady`), e recuse se nunca concordarem.
 19. **Alcance de tela não é domínio de campo — e "a tela alcança três" pode
     ser a JANELA, não a tela.** `beard_style` guarda oito, os rótulos nomeiam
-    sete e a tela anda **cinco**: aí o alcance é do campo. Já o `HAIR` guarda 32
+    sete e a tela anda **sete** — esta linha dizia **cinco**, e era a mesma
+    armadilha: cinco é a faixa dos dois quads da seção 24, e `F` e `G` desenham
+    **outra seção**, o gêmeo da cabeça
+    ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md),
+    [`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)). Já o `HAIR` guarda 32
     e a varredura leu **três**, e isso estava **errado** — corrigido em
     2026-09-16 ([`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)):
     a célula de valor da linha se mexe em **32 de 32** teclas; o que assenta em
@@ -293,7 +297,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
-| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min | `python tools/looks/oracle.py --patched HAIR [<SLOT>]` — o slot existe desde a CORR-LOOKS-047, e sem ele é o 2 | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min, e ~30 s por tupla | `python tools/looks/oracle.py --patched <LINHA> [<SLOT> [<TUPLA> ...]]` — o slot desde a CORR-LOOKS-047 (sem ele é o 2); as tuplas desde a CORR-LOOKS-048, uma caminhada por tupla a partir de `load_state`, com as primitivas mudadas impressas | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~15 min | `python tools/looks/oracle.py --hair` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~3 a 12 min | `python tools/looks/oracle.py --writes HAIR [<SLOT>]` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |

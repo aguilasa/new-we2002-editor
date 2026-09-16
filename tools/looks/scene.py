@@ -806,8 +806,11 @@ def _check_image(image_path: str) -> int:
     moves = set(skin.moving_entries(data2d, record, beard_columns))
     print("      a beard colour moves %d of the window's %d entries: %s"
           % (len(moves), texture.NARROW, sorted(moves)))
+    # The bands are A to E only.  F and G are not bands 5 and 6 of these two
+    # quads: they draw the head's TWIN (CORR-LOOKS-048), so they are swept
+    # below on the twin's own beard quads, at the disc's band and one on.
     bands = {}
-    for band in range(assembly.BY_ROW["FACE"].known):
+    for band in range(assembly.FACE_TWIN_FROM):
         used = set()
         for at in layout.FACE_PRIMITIVES:
             primitive = head.primitives[at]
@@ -817,6 +820,24 @@ def _check_image(image_path: str) -> int:
         bands[band] = sorted(used & moves)
         print("      FACE band %d samples %d of them: %s"
               % (band, len(bands[band]), bands[band]))
+    twin_index = assembly.twin_of(layout.HEAD_SECTION)
+    twin = scan.sections[twin_index]
+    for step in range(assembly.FACE_TWIN_FROM,
+                      assembly.BY_ROW["FACE"].reach):
+        used = set()
+        for at in layout.FACE_TWIN_QUADS[twin_index]:
+            primitive = twin.primitives[at]
+            where = atlas.image_at(images, *atlas.corners(primitive)[0])
+            used |= sampled_indices(
+                data2d, primitive, where,
+                (step - assembly.FACE_TWIN_FROM) * layout.ATLAS_BAND)
+        bands[step] = sorted(used & moves)
+        print("      FACE %s is section %d's own beard quads, %d band(s) on: "
+              "they sample %d of them: %s"
+              % (assembly.BY_ROW["FACE"].field.label(
+                  assembly.BY_ROW["FACE"].field.bias + step), twin_index,
+                 step - assembly.FACE_TWIN_FROM, len(bands[step]),
+                 bands[step]))
     if bands.get(0):
         problems.append("FACE band 0 samples entries a beard colour moves, "
                         "and it was measured as the beardless face")

@@ -53,26 +53,26 @@ mudança; é esse comportamento que se reproduz.
    cabeça, tronco, braço, coxa, pé —, decidido pelo emulador e não por palpite.
 3. `python tools/looks/ui/app.py --screenshot out.png --looks A-I3-A-E-A`
    produz um boneco reconhecível, com a pele e o cabelo daquela tupla — **e**
-   `--looks A-I3-A-F-A` **recusa**, com a mensagem da tabela e saída **2**. As
+   `--looks A-H1-A-A-A` **recusa**, com a mensagem da tabela e saída **2**. As
    duas metades são o critério. A **tela** do `FACE` oferece **sete** valores,
    `A` a `G`, andada letra a letra nos dois slots pela
-   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md); a
-   **tabela** sabe aplicar **cinco** — as faixas 0 a 4 dos dois quads de barba
-   que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md) mediu.
-   `F` e `G` estão na tela e o que escrevem não foi lido, então a recusa diz
-   **"não medido"**, e não "fora de alcance" — que é o que dizia até a
-   [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md). Desenhar um `E`
-   calado no lugar de um `F` continua sendo a falha que este projeto existe
-   para não cometer. O enunciado pedia a `A-I3-A-F-A` até 2026-09-16
-   ([`CORR-LOOKS-035`](/docs/tasks/looks/CORR-LOOKS-035.md)), quando o alcance
-   ainda não estava medido.
+   [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md), e a
+   **tabela** sabe aplicar os sete: `A` a `E` são as faixas 0 a 4 dos dois
+   quads de barba que a [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md)
+   mediu, e `F` e `G` desenham o **gêmeo** da cabeça — a seção ímpar seguinte
+   —, com os quads de barba dele na faixa do disco e uma adiante
+   ([`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)). A metade que
+   recusa é o `H1`, que não escreveu nada nas duas figuras.
 
-   **Dezesseis das cinquenta tuplas do corpus caem nessa recusa** — treze por
-   `FACE=F` e três por `FACE=G` —, e são a maior parte das 19 que o
-   `scene.py --corpus` recusa. A
-   [`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) lê
-   isso como **medição que falta** — o que `F` e `G` escrevem —, não como
-   alcance de campo nem como falha de render.
+   **Este item pedia a recusa de `A-I3-A-F-A` até 2026-09-16.** Ela era honesta
+   enquanto ninguém tinha lido `F` e `G` — a recusa dizia "não medido" desde a
+   [`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md), e antes disso
+   "fora de alcance" —, e dezesseis das cinquenta tuplas do corpus caíam nela.
+   Medido, `A-I3-A-F-A` **desenha**; a recusa que continua sendo critério é a
+   de um estilo que não escreveu nada, e desenhar um `A1` calado no lugar de um
+   `H1` é a falha que este projeto existe para não cometer.
+   `scene.py --corpus` passou de **31 desenhadas e 19 recusadas** para
+   **47 e 3**: as duas de `H1` e o `0.jpg`.
 4. `ctest -R looks` numa máquina limpa: **1 passed, 2 skipped**.
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
@@ -1778,7 +1778,7 @@ não uma escolha entre malhas.
 | `H.COL` | coluna do CLUT | `+1` | 8 de 8 | 7 primitivas da cabeça |
 | `H.F.COL.` | coluna do CLUT | `+1` | 7 de 7 nomeadas | as 2 da barba |
 | `BOOTS` | coluna do CLUT | `+1` | 8 de 8 | 42 das 56 primitivas de cada pé |
-| `FACE` | `v` | 16 linhas | **7** de 7 na tela, **5** aplicados | as 2 da barba, nas faixas 0 a 4; `F` e `G` escrevem outra coisa, não lida ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md)) |
+| `FACE` | `v` e, em `F`/`G`, **a seção** | 16 linhas | **7** de 7 na tela, **7** aplicados | `A`–`E`: as 2 da barba, nas faixas 0 a 4. `F` e `G`: **o gêmeo** da cabeça (seção + 1), com os quads de barba dele (`layout.FACE_TWIN_QUADS`) na faixa 5 do disco e na 6 — medido nas treze cabeças e nas duas figuras ([`CORR-LOOKS-048`](/docs/tasks/looks/CORR-LOOKS-048.md)); até ela, "`F` e `G` escrevem outra coisa, não lida" |
 | `HAIR` | **escolhe a seção** | — | 32 de 32 | a cabeça inteira — ver abaixo |
 
 **E o fundo de cada campo é o estado que o disco guarda** — descer a linha até

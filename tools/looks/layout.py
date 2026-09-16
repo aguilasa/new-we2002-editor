@@ -398,6 +398,37 @@ addresses in `a0`.
 **So this is a measured four, not a rule for thirteen.**  The obvious rule --
 "the primitives that sample the hair sheet in the hair colour's column" -- is
 measured WRONG: section 30 has twelve of those and the game rewrites two.
+
+**And the twins of these four take the same indices.**  When FACE picks the
+odd section (FACE_TWIN_QUADS), the game rewrites 25's 1 and 14, 27's 1 and 3,
+35's 0, 1 and 12 and 47's 0, 9 and 17 with the store's rows -- read off
+`oracle.py --patched FACE` on 2026-09-16 (CORR-LOOKS-048).
+"""
+
+FACE_TWIN_QUADS = {
+    25: (8, 13),
+    27: (4, 7),
+    29: (9, 17),
+    31: (0, 3),
+    33: (7, 10, 11),
+    35: (7, 10, 11),
+    37: (7, 10, 11),
+    45: (7, 10, 11),
+    47: (6, 7, 8),
+    49: (0, 3),
+    51: (7, 10, 11),
+    53: (0, 3),
+    55: (7, 10, 11),
+}
+"""The beard quads of each head's TWIN, the odd section FACE F and G draw.
+
+Measured 2026-09-16 by `oracle.py --patched FACE 2 <tuple>` from a tuple on
+each of the thirteen heads HAIR names (CORR-LOOKS-048): beard F rewrites
+nothing of the even section and writes the odd one after it, and beard G moves
+these primitives of that odd section by one band.  Section 25 is the pair
+LOOKS-TASK-11 named on section 24, FACE_PRIMITIVES, one section along.
+
+The twin holds its beard at band 5 on the disc, which is F; G is band 6.
 """
 
 HAIR_QUAD_ROWS = (15, 1, 15, 1)
