@@ -236,7 +236,10 @@ wireframe — dito aqui para não parecer coberto.
   **Consertado em 2026-09-16:** as mesmas capturas dão agora `stored 7` e
   `stored, one row off 0`; a transcrição acima é da corrida desta task.
 - **O goleiro desenha qualquer estilo como `A`, sem recusar**
-  ([`CORR-LOOKS-043`](/docs/tasks/looks/CORR-LOOKS-043.md)).
+  ([`CORR-LOOKS-043`](/docs/tasks/looks/CORR-LOOKS-043.md)). **Consertado em
+  2026-09-16 pela recusa:** a figura 1 aceita só o `A1`, e o slot 1 re-julgado
+  dá `2 win, 2 ranked, 0 expected`. O mapa do goleiro continua sem medição —
+  é o resíduo, e a transcrição acima é da corrida desta task.
 - **A tela da barba alcança sete valores, e a tabela diz cinco e recusa `F` e
   `G`** ([`CORR-LOOKS-044`](/docs/tasks/looks/CORR-LOOKS-044.md)). A hipótese
   "editor gravando direto" da LOOKS-TASK-18 caiu, e a linha está lá.
