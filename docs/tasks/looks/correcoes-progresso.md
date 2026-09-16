@@ -64,6 +64,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-046](/docs/tasks/looks/CORR-LOOKS-046.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Um `.refused` velho faz o `--score` pular uma tupla que já desenha, e o gate passa sem julgá-la | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-047](/docs/tasks/looks/CORR-LOOKS-047.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | O mapa de cabelo do goleiro não foi medido, e 136 dos 179 goleiros do disco são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [x] concluída | 2026-09-16 |
+| [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -126,6 +127,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-046 — o `.refused` velho tira da matriz a tupla que a próxima medição destrava
 - [x] CORR-LOOKS-047 — a figura 1 só desenha o `A1`, e três em cada quatro goleiros são recusados
 - [x] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
+- [ ] CORR-LOOKS-049 — o corpus mede errado o índice de cor emprestado da seção 24
 
 ## Detalhes por correção
 
@@ -877,3 +879,16 @@ e o ciclo arquivado, o dele em
   `beard_style`, depois da CORR-LOOKS-044
 - **Fix:** `--patched FACE` nos dois slots, e o que `F` e `G` escreverem entra
   na tabela — ou a recusa passa a dizer, medido, que não escrevem nada
+
+### CORR-LOOKS-049
+
+- **Arquivo com problema:** `tools/looks/assembly.py` (o empréstimo dos índices
+  de cor) e `tools/looks/layout.py` (índices só da seção 24)
+- **Sintoma:** em `D-I3-A-A-A`, `C-I3-A-C-A`, `B-I3-A-A-A`, `C-I3-A-A-A`,
+  `C-K1-A-E-A` e `C-O1-A-A-A` a pele do nome pinta só a testa, o rosto fica na
+  pele `A`, e a barba do nome não aparece
+- **Como foi detectado:** `corpus.py --score` — a nota média do grupo "cabeça
+  não-`A1`, pele não-`A`" é 0,411 contra 0,641 a 0,721 nos outros três; a tira
+  `worst.png` olhada; `scene.py --tuple` imprime `colour borrowed 9` nessas
+  cabeças e 0 na `A1`
+- **Fix:** medir os índices de cor por cabeça, e recusar onde faltarem

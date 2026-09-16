@@ -48,6 +48,14 @@ status: pendente
   lidas** no quadro de referência (`confront.py --score`, `absent 7`) — a
   hipótese é descarte de face de costas para a câmera do jogo, e não foi
   medida. As três vão para a §6 como abertas, com isto escrito.
+- **E uma quarta, da LOOKS-TASK-18: forma não tem testemunha.** 2026-09-16
+  ([`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md)):
+  histograma de cor resolve pele, cor de cabelo e cor de barba, e **não**
+  resolve estilo de cabelo nem barba — nem contra os quadros do emulador, onde a
+  verdade é conhecida (`corpus.py --score`, o controle). Nenhum dos dois
+  confrontos do ciclo verifica, então, que a **malha** desenhada é a do estilo
+  certo; quem verifica isso hoje é só o `--patched` da LOOKS-TASK-14. Fica
+  aberta, com a razão.
 
 ---
 

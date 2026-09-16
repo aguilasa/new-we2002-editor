@@ -1186,6 +1186,8 @@ assembly.py     campo de LOOKS -> a edição medida que ele faz na primitiva,
                 e daí a lista de desenho. O coração, e a Fase 4
 confront.py     o confronto da §5.3: rota na tela do jogo, captura contada,
                 histograma de cor contra os nossos renders, e a display list
+corpus.py       os 50 JPGs da §5.4 pela mesma métrica, com o controle dos
+                quadros do emulador ao lado
 scene.py        a lista de desenho virando pontos, (u, v) e textura RGBA --
                 ainda sem Qt, que é o que deixa o render conferível sem tela
 oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
@@ -1611,6 +1613,41 @@ no git (§2). Ele conta quantos parseiam, quantos recusam e quantos formatam de
 volta para o próprio nome, imprime a cobertura por campo, e **falha se nada for
 recusado**: um parser permissivo devolveria 50 de 50 e a linha leria melhor que
 a verdadeira ([`CORR-LOOKS-027`](/docs/tasks/looks/CORR-LOOKS-027.md)).
+
+**Quem compara os desenhos é `corpus.py --run`** (e `--score`, sobre os renders
+guardados), medido em 2026-09-16 pela
+[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md). O
+`0.jpg` é **um quadro branco**, uma cor só e nenhuma figura: fica fora da conta,
+dito pela ferramenta. Das 49 tuplas, **47** desenham e 2 recusam (`H1`).
+
+A métrica é a da §5.3, com um passo a mais que o JPEG exige: compressão com
+perda tira as cores da paleta, então cada pixel vai para a cor mais próxima de
+onde **poderia** ter vindo — a paleta que desenhamos, **ou** o fundo e a camisa
+lidos do próprio JPEG, que não contam. Nenhum limiar escolhido à mão.
+
+**E o veredito é por campo, por causa de um controle.** Os mesmos 47 renders,
+contra os quadros **do emulador** da §5.3 — cores exatas, tupla conhecida —,
+põem a própria verdade em 3º e 4º lugar: histograma de cor resolve **cor** e
+não resolve **forma**, porque câmera e pose mexem na proporção entre as cores
+mais do que um estilo mexe. Os campos de cor são julgados; os de forma, só
+reportados:
+
+| | pele | cor de cabelo | cor de barba | estilo (reportado) | barba (reportado) |
+|---|---|---|---|---|---|
+| corpus, 47 | 47/47 | 47/47 | 26/26 | 26/47 | 23/47 |
+| controle, 4 quadros do emulador | 4/4 | 4/4 | 0/0 | 2/4 | 3/4 |
+
+A cor de barba só é julgada onde o nome tem barba: sem ela, os quads da barba
+não amostram nenhuma entrada que a cor mexe
+([`CORR-LOOKS-038`](/docs/tasks/looks/CORR-LOOKS-038.md)).
+
+**O corpus achou um erro sistemático, e é o que ele existe para achar.** A nota
+de cada JPEG contra o próprio render, agrupada: cabeça `A1` com pele `A` 0,721;
+cabeça `A1` com outra pele 0,641; outra cabeça com pele `A` 0,697; **outra
+cabeça com outra pele, 0,411**. Olhadas as seis piores, a pele nova pinta só a
+testa e o rosto fica na pele `A` — os índices de cor medidos na seção 24 e
+aplicados às outras cabeças por empréstimo erram
+([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)).
 
 ### 5.5 Controle negativo
 

@@ -250,6 +250,31 @@ CONTROLS = (
         "undoes the first and SKIN A to D comes out moving nothing",
     ),
     Control(
+        "corpus-ties-to-palette", "corpus.py", "snapped_histogram",
+        "                    if far is None or d < far:",
+        "                    if far is None or d <= far:",
+        ("corpus",),
+        "a JPEG pixel exactly as near the background as a head colour is not "
+        "evidence about the head; handing ties to the palette counts noise",
+    ),
+    Control(
+        "corpus-beard-colour-always-seen", "corpus.py", "visible",
+        "        return values[\"beard_style\"] != base",
+        "        return True",
+        ("corpus",),
+        "with no beard the beard's quads sample none of the entries a beard "
+        "colour moves (CORR-LOOKS-038); judging it there fails two renders "
+        "for a colour that is not in the picture",
+    ),
+    Control(
+        "corpus-shape-judged", "corpus.py", "field_failures",
+        "            for field in COLOUR_FIELDS if verdicts[field] == \"DISAGREE\"]",
+        "            for field in COLOUR_FIELDS + SHAPE_FIELDS if verdicts[field] == \"DISAGREE\"]",
+        ("corpus",),
+        "the emulator's own frames rank their true hair style third and "
+        "fourth; judging shape by colour fails the metric, not the render",
+    ),
+    Control(
         "confront-margin-ignored", "confront.py", "verdict",
         "        if right - wrong >= MARGIN:",
         "        if right - wrong >= -1.0:",

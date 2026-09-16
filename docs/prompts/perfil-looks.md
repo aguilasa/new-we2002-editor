@@ -251,6 +251,15 @@ Não se revertem sem o usuário pedir.
     da margem passa como `ranked` quando o teto é menor que `2 × MARGIN`, e
     falha sob teto largo — até a
     [`CORR-LOOKS-045`](/docs/tasks/looks/CORR-LOOKS-045.md) passava sempre.
+30. **Histograma de cor resolve cor e não resolve forma — e quem prova é o
+    controle, não o corpus.** Contra os 47 renders do corpus, 35 JPEGs não ficam
+    em primeiro; lido sozinho, isso parece render errado. Os quadros do
+    **emulador**, com a verdade conhecida, ficam em 3º e 4º na mesma matriz.
+    Pele, cor de cabelo e cor de barba o argmax acerta sempre; estilo e barba,
+    metade. Medido em 2026-09-16
+    ([`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md)).
+    **Métrica sobre dado de terceiro sem controle de verdade conhecida ao lado
+    não diz de quem é a falha.**
 
 ---
 
@@ -311,6 +320,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE`; **sem emulador**, ~15 s | `python tools/looks/confront.py --render` — refaz só o **nosso** lado, apagando PNG **e** `.refused` de cada tupla | — | CORR-LOOKS-046 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--run` | `python tools/looks/confront.py --score` — **falha** se uma tupla tiver PNG e `.refused` ao mesmo tempo | — | LOOKS-TASK-17 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/confront.py --reach <LINHA>` | — | LOOKS-TASK-17 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE`, `WE2002_LOOKS_CORPUS` (77 sem ela), o venv e o PIL | `python tools/looks/corpus.py --run` | — | LOOKS-TASK-18 |
+| *(sem alvo ainda)* | idem, sem venv; o controle roda se houver capturas da 17 | `python tools/looks/corpus.py --score` | — | LOOKS-TASK-18 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14
