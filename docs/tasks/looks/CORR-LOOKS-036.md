@@ -3,7 +3,7 @@ id: CORR-LOOKS-036
 title: "Correção: o critério da LOOKS-TASK-15 conta 11.789 linhas e a árvore dela tem 11.831"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -72,16 +72,41 @@ número que declara "a árvore" sem dizer qual volta a estar errado.
 
 ## Verificação
 
-- [ ] o número do critério é o que a varredura imprime no commit que ele nomeia
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] o número do critério é o que a varredura imprime no commit que ele nomeia
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+Remedido num worktree destacado em `f2df3fc`, o commit que fecha a task:
 
-**Arquivos criados/modificados:**
+```text
+$ git worktree add --detach <tmp> f2df3fc
+$ cd <tmp> && python tools/looks/selftest.py --quiet
+  ..... rule 1 swept 17 file(s), 11831 line(s)
+  ..... 37 of 37 controls red
+```
+
+O critério diz **11.831** e **nomeia o commit** ao lado — que é o que a
+[`CORR-LOOKS-032`](/docs/tasks/looks/CORR-LOOKS-032.md) estabeleceu depois de a
+LOOKS-TASK-14 pagar o mesmo erro, e o que impede o número de envelhecer no
+commit seguinte. Vale medir quanto isso importa: enquanto **este lote** corria,
+a mesma varredura foi de 17 arquivos e 11.831 linhas para **18 e 12.773**, e os
+controles de 37 para 39.
+
+A transcrição do `selftest` mais abaixo, na seção de gates, levou o mesmo
+conserto e o mesmo comentário de commit — era a outra cópia do número.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `docs/tasks/looks/15-visualizador-opengl.md` — o critério e a transcrição
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-036.md` — este arquivo

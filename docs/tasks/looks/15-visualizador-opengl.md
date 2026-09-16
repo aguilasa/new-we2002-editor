@@ -142,7 +142,9 @@ de fora.
 - [x] Varredura: o `selftest` passou a varrer `ui/` de verdade (a regra 3 não
       tinha o que varrer até hoje) — nenhum import proibido, e `PySide6` fora
       de `sys.modules` depois de importar o núcleo inteiro. A regra 1 alcança
-      `ui/`: 17 arquivos, 11.789 linhas.
+      `ui/`: 17 arquivos, **11.831** linhas — medido na árvore que fecha a
+      task, o commit `f2df3fc`
+      ([`CORR-LOOKS-036`](/docs/tasks/looks/CORR-LOOKS-036.md)).
 
 ---
 
@@ -181,8 +183,8 @@ desenharia uma figura que parece certa e é de ninguém — a mesma recusa que o
 ### As corridas, e o que elas mediram
 
 ```text
-$ python tools/looks/selftest.py
-  ..... rule 1 swept 17 file(s), 11789 line(s)
+$ python tools/looks/selftest.py          # na arvore de f2df3fc
+  ..... rule 1 swept 17 file(s), 11831 line(s)
   ..... 37 of 37 controls red
 looks_selftest: 0 failure(s)
 
