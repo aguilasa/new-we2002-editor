@@ -17,27 +17,53 @@ applied -- not a choice between meshes.
     H.COL     the CLUT's COLUMN   +1             seven head primitives
     H.F.COL.  the CLUT's COLUMN   +1             the two beard primitives
     BOOTS     the CLUT's COLUMN   +1             42 primitives of each foot
-    HAIR      the `v`             +16 a band     the two hair primitives
     FACE      the `v`             +16 a band     the two beard primitives
 
-## Two holes, named rather than filled
+...with **one exception, and it is the biggest row of the screen**.
 
-**HAIR is half resolved, and the half that is missing is named.**
+## HAIR does not edit a section: it picks one
 
-Where the 32 hair styles LIVE is measured: `MODEL.BIN` holds **two runs of 32
-head sections** -- 24 to 55 and 74 to 105 -- every body distinct, all 32 of the
-first run sampling the hair sheet at 3,568 with a window of its own, and 16 of
-the second.  Thirty-two is exactly what `hair_style` holds, and two runs is
-exactly the two figures `EDT_MOD.BIN`'s two lists already showed.
+Measured 2026-09-16 by `oracle.py --patched HAIR`, which walks the row from the
+bottom and reads the **whole loaded file** after every press.  What changes at
+press N is the section value N uses, and the shape of the answer is:
 
-**How the field reaches one of them is not.**  Walked from the bottom of the
-row with 32 presses of Left and then 32 of Right, `MODEL.BIN` section 24
-reaches **three** states -- `v` bands 0, 2 and 1, in that order -- and thirty
-further presses change nothing; those three match no section's own window.  And
-**no vertex moves in any of the 33 states**, so the row does not swap one of
-the 32 bodies into that slot either.  Writing `style = section 24 + N` would be
-a mapping that draws perfectly and may be wrong, which is the one thing this
-module is for not doing.
+* the **letter** of a style's label is a head section of `MODEL.BIN`'s first
+  run -- A is 24, B is 26, C 30, D 48, F 52, G 28, I 34, J 36, K 32, L 46,
+  O 44, P 50;
+* the **digit** is a band of sixteen rows of the hair sheet at 3,568, written
+  into that section's hair quads;
+* and section 24 -- the section every earlier walk in this cycle watched -- is
+  family **A** alone.  Three values of 32 use it, which is exactly the "three
+  states" that walk saw and read as the field's whole reach.  The screen was
+  moving all 32: measured twice by `oracle.py --hair`, the row's value cell
+  moves on 32 of 32 presses while section 24 settles into three states.
+
+The writer is in the game, and it is four stores:
+
+    andi  v0, a2, 0x00ff      the band, as the caller passed it
+    sll   v0, v0, 4           sixteen rows a band
+    addiu v1, v0, 15
+    addiu v0, v0, 1
+    sb    v1, 0x1(a0)         the `v` of the quad's four corners
+    sb    v0, 0x5(a0)
+    sb    v1, 0x9(a0)
+    sb    v0, 0xd(a0)
+
+`HAIR_MAP` is that measurement, with the three values that wrote nothing left
+empty rather than filled in.
+
+## What is still a hole
+
+**Three styles of 32 wrote nothing** -- H1, M1 and N1 -- and three even sections
+of the run, 38, 40 and 42, were never named.  The pair of threes is suggestive
+and is not a measurement, so `head_of` refuses those three instead of handing
+back a head that would draw perfectly and be somebody else's.  **E1 is a fourth
+oddity**: it rewrote D's section, which may be the game putting D's head back
+rather than naming E1's own.
+
+**And which primitives of the other twelve heads take the band is not
+measured** -- only section 24's pair is named by index (LOOKS-TASK-08), so only
+family A's band is applied here.
 
 **FACE reaches five**, of the seven its third-party labels name and the eight
 its three bits hold.  Bands 0 to 4 of the same image, 16 rows each, and then it
@@ -122,11 +148,6 @@ EFFECTS = (
            {(layout.EDT_MOD, s): None for s in layout.BOOT_SECTIONS},
            "one window a step of the boots record at VRAM (0, 484); 42 of "
            "the 56 primitives of each foot move"),
-    Effect("HAIR", BAND, layout.ATLAS_BAND, 3,
-           {HEAD: layout.HAIR_PRIMITIVES},
-           "16 rows of the image at 3,568 a band -- and only THREE bands are "
-           "reachable on the screen, in the order 0, 2, 1.  The field holds "
-           "32; where the other 29 live is not measured"),
     Effect("FACE", BAND, layout.ATLAS_BAND, 5,
            {HEAD: layout.FACE_PRIMITIVES},
            "16 rows a band of the same image, bands 0 to 4, and then it "
@@ -134,6 +155,82 @@ EFFECTS = (
 )
 
 BY_ROW = {effect.row: effect for effect in EFFECTS}
+
+CHOOSES = {
+    "HAIR": "does not edit a primitive of one section at all: it picks WHICH "
+            "head section of MODEL.BIN's first run is drawn, and which band "
+            "of the hair sheet that section's quads sample.  HAIR_MAP is the "
+            "measurement",
+}
+"""The rows that choose a section instead of editing one -- one, so far.
+
+Kept apart from EFFECTS because the difference is the whole finding of
+2026-09-16: an effect edits named primitives of a section the figure already
+draws, and this replaces the section.
+"""
+
+HAIR_MAP = (
+    (24, (0,)), (24, (2,)), (24, (1,)),
+    (26, (0, 1)), (26, (2,)), (26, (1,)), (26, (5,)), (26, (3,)), (26, (4,)),
+    (30, (0, 1)), (30, (2,)),
+    (48, (0, 1)), (48, (2,)),
+    (48, (0,)), (54, (0, 1)),
+    (52, (0, 1, 3)), (52, (1,)), (52, (4,)),
+    (28, (0, 1)),
+    None,
+    (34, (0,)), (34, (2,)), (34, (1,)),
+    (36, (0, 1)),
+    (32, (0, 1, 3, 4)),
+    (46, (5,)), (46, (6,)), (46, (7,)),
+    None, None,
+    (44, (0, 1)),
+    (50, (0, 1)),
+)
+"""Style index -> (MODEL.BIN section, the bands its rewritten quads landed in).
+
+**Measured 2026-09-16 on slot 2** by `oracle.py --patched HAIR`, which walks the
+row from the bottom and reads the WHOLE loaded file after every press: what
+changes at press N is the section that value N uses.  It is the anchor
+LOOKS-TASK-14 was missing, and it says what the one-section walk could not:
+
+* the letter of a style's label is its **section** -- A is 24, B is 26, C 30,
+  D 48, F 52, G 28, I 34, J 36, K 32, L 46, O 44, P 50, and every one of those
+  letters' variants rewrites that same section;
+* the digit is the **band** of the hair sheet at 3,568 -- B's six variants come
+  back as bands 0/1, 2, 1, 5, 3 and 4 of one section;
+* and section 24, the one every earlier walk watched, is family **A** alone.
+  Three values of 32 use it, which is exactly the "three states" that walk saw
+  and read as the field's whole reach.
+
+`None` is a value that rewrote **nothing** in the file: measured, not assumed.
+Three of them -- H1, M1 and N1 -- and three even sections of the run (38, 40
+and 42) never appeared, which is a suggestive pair of threes and no more than
+that.  E1 is a fourth oddity: it rewrote section 48, which is D's, and may be
+the game putting D's section back rather than naming E1's own.  Guessing any of
+the four would be the mapping that draws perfectly and is wrong.
+"""
+
+HEAD_BAND = Effect(
+    "HAIR", BAND, layout.ATLAS_BAND, len(HAIR_MAP),
+    {HEAD: layout.HAIR_PRIMITIVES},
+    "the band HAIR_MAP measured for this style, applied to the two hair quads "
+    "of section 24 -- the one section whose hair quads are named by index "
+    "(LOOKS-TASK-08).  The other twelve heads keep the disc's own window, "
+    "because which of their primitives take the band is not measured")
+"""HAIR's edit where it IS known: family A's own section.
+
+Not in EFFECTS, and that is the point: `edits()` walks EFFECTS with the field's
+value as the step, and HAIR's value is not a band -- it is a row of HAIR_MAP.
+"""
+
+HAIR_MAP_SILENT = 3
+HAIR_MAP_SECTIONS = 13
+"""How many values wrote nothing, and how many distinct sections were named.
+
+Asserted in `_checks` so that a later measurement which fills the holes has to
+come here and change these two numbers.
+"""
+
 
 UNTOUCHED = {
     "BODY": "works in buffers: LOOKS-TASK-08 measured it moving no byte of "
@@ -177,6 +274,28 @@ def edits(values: dict) -> dict:
             out.setdefault(key, {})
             out[key][primitives] = (effect, step)
     return out
+
+
+def head_of(values: dict) -> tuple:
+    """(section, band) of the head one tuple draws, out of HAIR_MAP.
+
+    Refuses for the three values that wrote nothing when the map was measured.
+    A fallback to section 24 would draw every one of them as an A, perfectly
+    and wrongly, which is the failure this whole task exists to avoid.
+    """
+    style = values.get(looks.BY_ROW["HAIR"].name)
+    if style is None:
+        raise BadAssembly("this tuple says nothing about HAIR")
+    if not 0 <= style < len(HAIR_MAP):
+        raise BadAssembly("hair style %d, and the field holds %d"
+                          % (style, len(HAIR_MAP)))
+    found = HAIR_MAP[style]
+    if found is None:
+        raise BadAssembly(
+            "hair style %s wrote nothing to either model file when the map "
+            "was measured, so which head it draws is not known -- see "
+            "assembly.HAIR_MAP" % looks.BY_ROW["HAIR"].label(style))
+    return found
 
 
 def apply_to(clut: int, band: int, effect, step) -> tuple:
@@ -228,7 +347,16 @@ def draw_list(disc, values: dict, figure: int) -> list:
     plan = edits(values)
 
     out = []
-    for name, index in sections_of(disc, figure):
+    if figure == HEAD_FIGURE:
+        chosen, bands = head_of(values)
+        if chosen == layout.HEAD_SECTION:
+            # The only section whose hair quads are known BY INDEX: the walk
+            # of LOOKS-TASK-08 named them on this one.  Which primitives of
+            # the other twelve take the band is not measured, so nothing is
+            # banded there -- they keep the disc's own window.
+            plan.setdefault((layout.MODEL, chosen), {})[
+                layout.HAIR_PRIMITIVES] = (HEAD_BAND, bands[0])
+    for name, index in sections_of(disc, figure, values):
         scan = section.scan(disc[name], layout.GEOMETRY_START[name])
         one = scan.sections[index]
         for at, primitive in enumerate(one.primitives):
@@ -251,12 +379,21 @@ def draw_list(disc, values: dict, figure: int) -> list:
     return out
 
 
-def sections_of(disc, figure: int) -> list:
-    """(file, section) of every piece of one figure, plus the head.
+def sections_of(disc, figure: int, values: dict | None = None) -> list:
+    """(file, section) of every piece of one figure, plus the head it wears.
 
     The figure comes first and the fields come second: the two models do not
     share the arm pieces (CORR-LOOKS-021), so loading one and recolouring it
     draws the goalkeeper in short sleeves.
+
+    **The head is the tuple's**, when a tuple is given: `HAIR_MAP` says which of
+    MODEL.BIN's heads the style names.  Without one the disc's own
+    `layout.HEAD_SECTION` stands in, which is style A1's head and no other's.
+
+    The map was measured on the OUTFIELD player, figure 0.  The second run of
+    heads (74..105) is the other figure's, and nothing has walked the row on it
+    -- so figure 1 keeps its own head here, and that is a named gap, not a
+    reading.
     """
     import modelfile
 
@@ -271,7 +408,14 @@ def sections_of(disc, figure: int) -> list:
     where = {one.offset: i for i, one in enumerate(scan.sections)}
     out = [(layout.EDT_MOD, where[target])
            for target in models[figure].targets]
-    return out + [HEAD]
+    head = HEAD
+    if values is not None and figure == HEAD_FIGURE:
+        head = (layout.MODEL, head_of(values)[0])
+    return out + [head]
+
+
+HEAD_FIGURE = 0
+"""The figure HAIR_MAP was measured on: slot 2, the outfield player."""
 
 
 # ---- the gate ------------------------------------------------------------
@@ -286,21 +430,56 @@ def _checks(c) -> None:
 
     ok("every effect names a row of the screen",
        all(e.row in looks.SCREEN for e in EFFECTS))
-    ok("and every row is either an effect or a named hole",
-       set(looks.SCREEN) == set(BY_ROW) | set(UNTOUCHED),
-       "%r" % sorted(set(looks.SCREEN) ^ (set(BY_ROW) | set(UNTOUCHED))))
-    ok("no row is both",
-       not set(BY_ROW) & set(UNTOUCHED))
-    ok("three effects move a palette and three move an atlas band",
-       sorted(e.what for e in EFFECTS).count(BAND) == 2)
+    ok("and every row is either an effect, a choice, or a named hole",
+       set(looks.SCREEN) == set(BY_ROW) | set(UNTOUCHED) | set(CHOOSES),
+       "%r" % sorted(set(looks.SCREEN)
+                     ^ (set(BY_ROW) | set(UNTOUCHED) | set(CHOOSES))))
+    ok("no row is in two of the three",
+       not (set(BY_ROW) & set(UNTOUCHED) or set(BY_ROW) & set(CHOOSES)
+            or set(UNTOUCHED) & set(CHOOSES)))
+    ok("four effects move a palette and one moves an atlas band",
+       sorted(e.what for e in EFFECTS).count(BAND) == 1)
 
-    # The two holes, asserted rather than described: a later run that resolves
-    # HAIR has to come here and say so.
+    # The hole that is left, asserted rather than described.
     unresolved = sorted(e.row for e in EFFECTS if not e.resolved)
-    ok("three rows do not walk to the end of what their bits hold",
-       unresolved == ["FACE", "H.F.COL.", "HAIR"], "%r" % (unresolved,))
-    ok("and HAIR reaches three of its thirty-two",
-       BY_ROW["HAIR"].reach == 3 and BY_ROW["HAIR"].field.values == 32)
+    ok("one row of the five does not walk to the end of what its bits hold",
+       unresolved == ["FACE", "H.F.COL."], "%r" % (unresolved,))
+
+    # The map, and the three values it could not place.  A later run that
+    # fills them has to come here and change these numbers.
+    ok("the map has a row for every value the field holds",
+       len(HAIR_MAP) == looks.BY_ROW["HAIR"].values == 32)
+    ok("three of them wrote nothing and are left empty",
+       sum(1 for one in HAIR_MAP if one is None) == HAIR_MAP_SILENT)
+    named = {one[0] for one in HAIR_MAP if one}
+    ok("the sections it names are %d, all even, all in the first head run"
+       % HAIR_MAP_SECTIONS,
+       len(named) == HAIR_MAP_SECTIONS
+       and all(index % 2 == 0 for index in named)
+       and all(layout.HEAD_RUNS[0][0] <= index < layout.HEAD_RUNS[0][1]
+               for index in named),
+       "%r" % sorted(named))
+    ok("every band it names is one of the sheet's eight",
+       all(0 <= band < texture.tall(layout.HAIR_IMAGE) // layout.ATLAS_BAND
+           for one in HAIR_MAP if one for band in one[1])
+       if hasattr(texture, "tall") else
+       all(0 <= band < 8 for one in HAIR_MAP if one for band in one[1]))
+    # A letter is a section: every variant of a label's letter names the same
+    # one.  E1 is the measured exception, and it is named rather than smoothed
+    # over -- it rewrote D's section, which may be the game putting D's head
+    # back rather than naming E1's own.
+    letters = {}
+    for index, one in enumerate(HAIR_MAP):
+        if one is None:
+            continue
+        letters.setdefault(looks.HAIR_STYLES[index][0], set()).add(one[0])
+    astray = sorted(k for k, v in letters.items() if len(v) > 1)
+    ok("each letter of the labels is one section, and E is the exception",
+       astray == ["E"], "%r" % (astray,))
+    ok("family A is section 24, which is why one-section walks saw three",
+       letters["A"] == {layout.HEAD_SECTION}
+       and sum(1 for one in HAIR_MAP
+               if one and one[0] == layout.HEAD_SECTION) == 3)
     # H.F.COL. is the one of the three that is NOT a hole: its bits hold
     # eight, its labels name seven, and seven is what the screen walks --
     # the eighth is an index nobody named (LOOKS-TASK-13), not a value this
@@ -323,8 +502,8 @@ def _checks(c) -> None:
     ok("a step of H.COL moves the column and leaves the row",
        apply_to(one.clut, 0, BY_ROW["H.COL"], 3)[0]
        == skin.clut_id(layout.CLUT_ROW_FIRST, layout.HAIR_COLUMN + 3))
-    ok("a step of HAIR moves no CLUT and answers a band",
-       apply_to(one.clut, 0, BY_ROW["HAIR"], 2)
+    ok("a band of HAIR moves no CLUT and answers rows of the sheet",
+       apply_to(one.clut, 0, HEAD_BAND, 2)
        == (one.clut, 2 * layout.ATLAS_BAND))
     # The two together, in both orders, because a primitive that both own is
     # the case that went wrong: the answer may not depend on which came first.
@@ -353,11 +532,20 @@ def _checks(c) -> None:
        steps == [0], "%r" % (steps,))
     ok("so applying the bottom tuple changes nothing",
        apply_to(one.clut, 0, BY_ROW["SKIN"], 0) == (one.clut, 0)
-       and apply_to(one.clut, 0, BY_ROW["HAIR"], 0) == (one.clut, 0))
-    refuses("a hair style past the three the screen reaches is refused",
-            lambda: edits(looks.parse_tuple("A-I3-A-A-A")), "measured to reach")
-    refuses("and so is a beard style past the five",
+       and apply_to(one.clut, 0, HEAD_BAND, 0) == (one.clut, 0))
+    refuses("a beard style past the five the screen reaches is refused",
             lambda: edits(looks.parse_tuple("A-A1-A-F-A")), "measured to reach")
+
+    # The head a tuple wears: the map answers, and refuses where it is empty.
+    ok("the bottom tuple wears section 24, band 0",
+       head_of(looks.parse_tuple("A-A1-A-A-A")) == (layout.HEAD_SECTION, (0,)))
+    ok("and a style of another letter wears another section",
+       head_of(looks.parse_tuple("A-I3-A-A-A"))[0] != layout.HEAD_SECTION)
+    refuses("a style the map could not place is refused, not defaulted",
+            lambda: head_of(looks.parse_tuple("A-H1-A-A-A")),
+            "wrote nothing")
+    refuses("and a tuple with no HAIR at all is refused",
+            lambda: head_of({}), "says nothing")
 
 
 # ---- the disc ------------------------------------------------------------
@@ -395,6 +583,46 @@ def head_runs(data: bytes) -> list:
     return out
 
 
+def head_pairs(data: bytes) -> tuple:
+    """(pairs, primitives that differ, {(column before, column after): count}).
+
+    The first run of heads is **sixteen pairs**, not thirty-two independent
+    bodies: section 24 and section 25 differ in 28 bytes of 592, and so on down
+    the run.  What differs inside a pair is measured here rather than described,
+    because it decides what the run IS -- and the answer is the beard: every
+    primitive that changes its palette inside a pair moves from the hair
+    colour's column to the beard colour's, and none moves the other way.
+
+    So "32 sections and hair_style holds 32" is a coincidence worth refusing
+    until something measures the mapping.  Sixteen pairs is what the disc holds.
+    """
+    import section
+
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    first, stop = layout.HEAD_RUNS[0]
+    pairs, differ, columns = 0, 0, {}
+    for index in range(first, stop, 2):
+        pairs += 1
+        one, other = scan.sections[index], scan.sections[index + 1]
+        for left, right in zip(one.primitives, other.primitives):
+            if (left.texcoords, left.clut, left.tpage) ==                     (right.texcoords, right.clut, right.tpage):
+                continue
+            differ += 1
+            key = (skin.grid(left.clut)[1], skin.grid(right.clut)[1])
+            columns[key] = columns.get(key, 0) + 1
+    return (pairs, differ, columns)
+
+
+HEAD_PAIR_COLUMNS = {(1, 1): 18, (1, 9): 32, (9, 9): 41}
+"""What the sixteen pairs' 91 differing primitives do to the CLUT's column.
+
+Measured 2026-09-16, and the shape is the finding: 32 primitives move from
+column 1 to column 9 -- the hair colour's window to the beard colour's -- 41
+were already in the beard's and only move on the sheet, and 18 stay in the hair
+colour's and move by a row or two.  **Nothing goes from 9 back to 1.**  A run
+whose pairs differ by "more beard" is sixteen heads twice over, not 32 hairs.
+"""
+
 HEAD_RUN_HAIRY = (32, 16)
 """How many of each run's 32 heads sample the hair sheet.
 
@@ -429,6 +657,20 @@ def _check_image(image_path: str) -> int:
         if hairy != want:
             problems.append("sections %d..%d: %d sample the hair sheet, and "
                             "%d was measured" % (first, last, hairy, want))
+    pairs, differ, columns = head_pairs(disc[layout.MODEL])
+    print("  MODEL.BIN sections %d..%d are %d pair(s): %d primitive(s) differ "
+          "inside a pair, and their columns move %s"
+          % (layout.HEAD_RUNS[0][0], layout.HEAD_RUNS[0][1] - 1, pairs, differ,
+             ", ".join("%d->%d: %d" % (a, b, n)
+                       for (a, b), n in sorted(columns.items()))))
+    if columns != HEAD_PAIR_COLUMNS:
+        problems.append("the pairs' columns came out %r and %r was measured"
+                        % (columns, HEAD_PAIR_COLUMNS))
+    if any(b == layout.HAIR_COLUMN and a == layout.BEARD_COLUMN
+           for a, b in columns):
+        problems.append("a primitive moves from the beard's column back to "
+                        "the hair colour's, which no pair did when this was "
+                        "measured")
     if len(runs) != 2 or any(r[1] - r[0] + 1 != looks.BY_ROW["HAIR"].values
                              for r in runs):
         problems.append("the two runs are not %d sections each, which is what "
@@ -462,6 +704,25 @@ def _check_image(image_path: str) -> int:
     if any(skin.grid(second[k])[0] - skin.grid(first[k])[0] != 3
            for k in moved):
         problems.append("SKIN moved something by other than three rows")
+
+    # The map, against the disc: two tuples that differ only in HAIR have to
+    # draw a different head, and the same one twice is the failure a defaulted
+    # map would hide.
+    heads = {}
+    for text in ("A-A1-A-A-A", "A-I3-A-A-A", "A-B4-A-A-A"):
+        parts = draw_list(disc, looks.parse_tuple(text), HEAD_FIGURE)
+        heads[text] = sorted({p["section"] for p in parts
+                              if p["file"] == layout.MODEL})
+    print("  the head each tuple wears: %s"
+          % ", ".join("%s -> %s" % (text, sections)
+                      for text, sections in heads.items()))
+    if len({tuple(v) for v in heads.values()}) != len(heads):
+        problems.append("two of the three tuples wear the same head, and they "
+                        "name three different sections in HAIR_MAP")
+    if any(len(v) != 1 for v in heads.values()):
+        problems.append("a tuple drew %r head section(s) out of MODEL.BIN, "
+                        "and a figure wears one" % [len(v) for v in
+                                                    heads.values()])
 
     print("assembly --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

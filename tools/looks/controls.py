@@ -250,6 +250,24 @@ CONTROLS = (
         "undoes the first and SKIN A to D comes out moving nothing",
     ),
     Control(
+        "assembly-hair-map-defaults", "assembly.py", "head_of",
+        "    if found is None:",
+        "    if found is None and False:",
+        ("assembly",),
+        "the three styles the map could not place handed back family A's head "
+        "instead of a refusal: each of them would draw perfectly, wearing "
+        "somebody else's hair",
+    ),
+    Control(
+        "assembly-hair-map-is-one-section", "assembly.py", "module constant",
+        "    (34, (0,)), (34, (2,)), (34, (1,)),",
+        "    (34, (0,)), (36, (2,)), (34, (1,)),",
+        ("assembly",),
+        "one variant of a letter moved into its neighbour's section -- what "
+        "the walk measured is that a letter IS a section, and a table that "
+        "does not hold that is a table nobody measured",
+    ),
+    Control(
         "looks-cross-check-blind", "looks.py", "disagreements",
         "            if theirs != mine:",
         "            if False:",

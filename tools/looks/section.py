@@ -48,6 +48,18 @@ until LOOKS-TASK-12 needed to address it from outside.
 """
 
 
+TEXCOORD_STRIDE = 4
+V_IN_TEXCOORD = 1
+"""Where one corner's `v` sits inside a primitive: corner *c* at c * 4 + 1.
+
+The stride is not `2` because the four (u, v) pairs are NOT adjacent -- the
+CLUT id and the texture page sit between the first three of them, which is what
+the hardware packet looks like.  Named for the same reason CLUT_IN_PRIMITIVE
+is: LOOKS-TASK-14 needs to put a write watchpoint on one `v` byte in live RAM,
+and an address worked out at the call site is an address nobody can sweep.
+"""
+
+
 class BadSection(Exception):
     """Raised when bytes at an offset do not parse as a section."""
 
@@ -246,7 +258,8 @@ def read_primitive(data: bytes, offset: int) -> Primitive:
         raise BadSection(
             "primitive at %d runs past the %d bytes available" % (offset, len(data))
         )
-    texcoords = tuple((data[offset + slot * 4], data[offset + slot * 4 + 1])
+    texcoords = tuple((data[offset + slot * TEXCOORD_STRIDE],
+                       data[offset + slot * TEXCOORD_STRIDE + V_IN_TEXCOORD])
                       for slot in range(CORNERS_PER_PRIMITIVE))
     clut = struct.unpack_from("<H", data, offset + CLUT_IN_PRIMITIVE)[0]
     tpage = struct.unpack_from("<H", data, offset + 6)[0]

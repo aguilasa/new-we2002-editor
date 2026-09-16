@@ -162,18 +162,19 @@ e com que paleta.
 
 ## Critério de conclusão
 
-- [ ] **METADE RESOLVIDA, 2026-09-16.** **Onde moram** os 32 cabelos está
-      medido: o `MODEL.BIN` guarda **dois blocos de 32 seções de cabeça** —
-      **24 a 55** e **74 a 105** —, todo corpo distinto, as 32 do primeiro
-      amostrando a folha de cabelo em 3.568 com janela própria cada uma, e 16 do
-      segundo. Trinta e dois é exatamente o que o `hair_style` guarda, e dois
-      blocos é exatamente as duas figuras que as duas listas do `EDT_MOD.BIN` já
-      mostravam.
-      **Como o campo chega a uma delas, não.** Andando a linha do fundo ao topo,
-      a seção 24 alcança **três** estados — faixas `v` 0, 2 e 1 — que **não
-      batem com a janela de seção nenhuma**, e as trinta teclas seguintes não
-      mudam nada. E **nenhum vértice se mexe nos 33 estados**, então a linha
-      também não troca um desses 32 corpos para dentro do lugar da 24.
+- [x] **RESOLVIDO COM RESÍDUO NOMEADO, 2026-09-16 (terceira passagem).** O
+      `HAIR` **não edita uma seção: escolhe uma.** Medido pelo
+      `oracle.py --patched HAIR`, que lê o arquivo inteiro depois de cada tecla:
+      a **letra** do rótulo é uma seção **par** do primeiro bloco (A→24, B→26,
+      C→30, D→48, F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50) e o **dígito**
+      é a faixa de dezesseis linhas da folha 3.568 escrita nos quads daquela
+      seção. A seção 24 é a família **A sozinha**, que é de onde vinham os
+      "três estados". A tabela é o `assembly.HAIR_MAP`.
+      **O resíduo, que não se preenche por dedução:** três valores — `H1`, `M1`
+      e `N1` — não escreveram nada, e três seções pares — 38, 40 e 42 — nunca
+      foram nomeadas; o `head_of` **recusa** esses três. O `E1` reescreveu a
+      seção do `D`. E **quais primitivas das outras doze cabeças recebem a
+      faixa** não está medido.
 - [x] As **4 peles** resolvidas, pelo mecanismo que a LOOKS-TASK-12 decidiu:
       `SKIN` anda a **linha** do CLUT id, `+0x40` por passo, e alcança as quatro
       — andado de ponta a ponta, não deduzido.
@@ -193,19 +194,23 @@ e com que paleta.
       índice e fica vermelho — o fundo de cada campo é o estado que o disco já
       guarda, então tabela deslocada pede edição onde o jogo não pede. Mais um:
       `assembly-effects-do-not-compose`.
-- [ ] **NÃO FEITO.** Cross-check contra o corpus: ao menos três das 50 tuplas
-      do Superpack produzem a mesma escolha de peças que o JPG mostra. Depende
-      do item de cima — as tuplas do corpus nomeiam cabelo (`A-I3-...`), e sem o
-      mapa dos 32 não há o que comparar. As 49 tuplas **já parseiam**
-      (LOOKS-TASK-13); o que falta é a escolha de peças para elas.
+- [ ] **NÃO FEITO, e agora está destravado.** Cross-check contra o corpus: ao
+      menos três das 50 tuplas do Superpack produzem a mesma escolha de peças
+      que o JPG mostra. O que faltava era o mapa, e o mapa existe desde
+      2026-09-16: `assembly --tuple A-I3-A-A-A` já responde com a cabeça 34 e
+      `A-B4-...` com a 26. O que falta é **comparar com o JPG**, e comparar
+      escolha de peças com uma imagem exige o desenho — que nasce na
+      [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md). Este
+      critério é o que mantém esta task pendente.
 
 ---
 
 ## Log de Execução
 
-**Executado em:** 2026-09-15 e 2026-09-16 — **PARCIAL**. Quatro dos seis
-critérios fechados; o de cabelo pela metade e o do corpus não. A task
-**continua pendente**.
+**Executado em:** 2026-09-15 e 2026-09-16 (três passagens) — **PARCIAL**.
+Cinco dos seis critérios fechados; **a âncora do cabelo fechou na terceira
+passagem**, com resíduo nomeado, e só o cross-check contra o corpus ficou — ele
+depende de desenhar, que é a LOOKS-TASK-15. A task **continua pendente**.
 
 ### O que se aprendeu, e é mais forte do que a tabela
 
@@ -300,18 +305,87 @@ seção nenhuma** das 32, e **nenhum vértice se mexe em nenhum dos 33 estados**
 o que descarta a leitura óbvia, a de que a linha troca o corpo da seção. Onde o
 valor do campo vira uma daquelas 32 seções segue sem medição.
 
+### Terceira passagem, 2026-09-16: a âncora
+
+**A pergunta estava mal posta, e a primeira medição da passagem mostrou isso.**
+A pendência dizia "por que a tela alcança três faixas". O `oracle.py --hair`
+anda a linha inteira capturando a **célula de valor da linha** junto com a
+seção, e o que ele mede é:
+
+```text
+python tools/looks/oracle.py --hair
+  HAIR on slot 2: the value cell moved on 32 of 32 press(es) of Right,
+  and /BIN/MODEL.BIN section 24 reached 3 distinct state(s) in 33 value(s)
+```
+
+A tela **anda os 32**. O que assentava em três era a seção que a varredura
+olhava. Duas corridas, o mesmo número.
+
+**O escritor, por breakpoint — o primeiro deste ciclo.** Um watchpoint de
+escrita no `v` do quad de cabelo da seção 24 (`0x80172351`, derivado do disco
+mais o `layout.BASE`) para em `0x80011594`, e a rotina é:
+
+```text
+0x80011580  andi  v0, a2, 0x00ff      a banda, como o chamador a passou
+0x80011584  sll   v0, v0, 4           dezesseis linhas por banda
+0x80011588  addiu v1, v0, 15
+0x8001158C  addiu v0, v0, 1
+0x80011590  sb v1, 0x1(a0)            o `v` das quatro quinas do quad
+0x80011594  sb v0, 0x5(a0)
+0x80011598  sb v1, 0x9(a0)
+0x8001159C  sb v0, 0xd(a0)
+      a0 = 0x80172350 -> /BIN/MODEL.BIN section 24, primitive 1
+      chamado de ra = 0x80012694, que carrega a banda de `0x80(sp)`
+```
+
+As dezesseis linhas por faixa deixam de ser observação e viram aritmética do
+jogo. **E o byte só é escrito em alguns valores**: 90 s de execução livre no
+valor seguinte sem um único toque.
+
+**A âncora veio de ler o arquivo inteiro, não um byte.** O `oracle.py --patched`
+anda a linha e compara os 64.800 bytes do `MODEL.BIN` vivo contra o disco depois
+de cada tecla:
+
+```text
+python tools/looks/oracle.py --patched HAIR
+   0  changed: section 24 (4 byte(s), band(s) [0]), section 32 (16 byte(s), ...)
+   1  changed: section 24 (8 byte(s), band(s) [2])
+   2  changed: section 24 (8 byte(s), band(s) [1])
+   3  changed: section 26 (8 byte(s), band(s) [0, 1])
+   ...
+  25  changed: section 46 (12 byte(s), band(s) [5])
+  30  changed: section 44 (4 byte(s), band(s) [0, 1])
+  31  changed: section 50 (4 byte(s), band(s) [0, 1])
+```
+
+**A letra do rótulo é a seção; o dígito é a faixa.** A→24, B→26, C→30, D→48,
+F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50 — treze seções, todas **pares**,
+todas do primeiro bloco. A seção 24 é a família **A sozinha**, três valores de
+32: é daí que vinham os "três estados". O mapa é o `assembly.HAIR_MAP`, e o
+`assembly.head_of` é quem responde por uma tupla.
+
+**E o bloco 24..55 é dezesseis PARES.** Medido no disco pelo
+`assembly.head_pairs`: 91 primitivas diferem dentro de um par, e o que as separa
+é a barba — 32 saem da coluna 1 do CLUT para a 9, 41 já estavam na 9, nenhuma
+volta. Ler "32 seções, e o `hair_style` guarda 32" como identidade teria sido a
+coincidência mais cara desta task.
+
 ### O que ficou pendente
 
-- **A âncora do mapa de cabelo:** por que a tela alcança três faixas, e como o
-  valor do campo escolhe uma das 32 seções. As pistas que sobram, nesta ordem:
-  **(1)** trocar de jogador antes de andar a linha — o alcance de três pode ser
-  do jogador carregado e não do campo; **(2)** pôr um **breakpoint de escrita**
-  no par de primitivas da seção 24 e ler quem escreve, que é o que o fork
-  oferece e este ciclo ainda não usou; **(3)** o `vram_watch` na página do
-  cabelo, pelo mesmo motivo. A pista dos **buffers está descartada** por
-  medição: eles não assentam.
-- **O cross-check contra o corpus**, que depende da âncora: as tuplas dos 50
-  JPGs nomeiam cabelo, e sem a âncora não há escolha de peças a comparar.
+- **O resíduo do mapa, que não se preenche por dedução.** Três valores — `H1`,
+  `M1` e `N1` — não escreveram nada, e três seções pares — 38, 40 e 42 — nunca
+  foram nomeadas; o par de treses é sugestivo e não é medição. O `head_of`
+  **recusa** esses três, com controle negativo (`assembly-hair-map-defaults`).
+  O `E1` reescreveu a seção do `D`. O caminho que fecha isso é o watchpoint em
+  cada uma das três seções candidatas, andando a linha até ele disparar.
+- **Quais primitivas das outras doze cabeças recebem a faixa.** Só o par da
+  seção 24 tem índice nomeado (LOOKS-TASK-08); nas outras, a contagem de bytes
+  medida não bate com o conjunto óbvio (a seção 30 tem doze primitivas na folha
+  de cabelo com a cor do cabelo e o jogo reescreve **duas**). Por isso o
+  `draw_list` aplica a faixa só na 24.
+- **O cross-check contra o corpus**, que agora depende de **desenhar**: a
+  escolha de peças já sai por comando, mas compará-la com um JPG exige o
+  visualizador da [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md).
 
 ### Gates medidos
 
@@ -361,7 +435,8 @@ e a janela dele foi para −32000 na abertura. `roms/` só foi lida.
   `steady()`, `check_assembly()` e `_say_primitives()`; e o `--where`, que anda
   um campo lendo as duas faixas de buffer — e **recusa**, porque elas não
   assentam
-- `tools/looks/layout.py` — `ATLAS_BAND`, `BOOT_SECTIONS` e `HEAD_RUNS`
+- `tools/looks/layout.py` — `ATLAS_BAND`, `BOOT_SECTIONS` e `HEAD_RUNS` (esta
+  com a âncora medida no lugar do buraco, na terceira passagem)
 - `tools/looks/controls.py` — `assembly-table-off-by-one` e
   `assembly-effects-do-not-compose`
 - `tools/looks/selftest.py` — `assembly` no `MODULES`
@@ -370,6 +445,25 @@ e a janela dele foi para −32000 na abertura. `roms/` só foi lida.
 - `docs/prompts/perfil-looks.md` — duas armadilhas novas (o bloco se escreve em
   mais de um quadro; alcance de tela não é domínio de campo) e o gate novo
 - `docs/tasks/looks/14-tabela-de-montagem.md` — os critérios e este Log
+
+Na terceira passagem, 2026-09-16:
+
+- `tools/looks/assembly.py` — o `HAIR_MAP` e o `head_of()`, o `HEAD_BAND`, o
+  `CHOOSES` (a linha que escolhe seção em vez de editar uma), o `head_pairs()`
+  com o `HEAD_PAIR_COLUMNS`, o `sections_of()` que passa a receber a tupla e a
+  asserção nova do `--check-image`
+- `tools/looks/oracle.py` — os comandos `--hair` e `--patched`, o
+  `catch_write()` com o controle de execução livre, o `texcoord_address()`, o
+  `model_maps()`/`pointers_into_models()`, o `band_of()` e o `_say_writer()`
+- `tools/looks/section.py` — `TEXCOORD_STRIDE` e `V_IN_TEXCOORD`, para o
+  watchpoint ter um endereço que a varredura da regra 1 enxerga
+- `tools/looks/controls.py` — `assembly-hair-map-defaults` e
+  `assembly-hair-map-is-one-section` (29 → 31)
+- `tools/looks/layout.py` — o `HEAD_RUNS` com a âncora medida no lugar do buraco
+- `docs/PLAN-LOOKS-PY.md` — §6(c) com a âncora, a rotina do jogo e o resíduo
+- `docs/prompts/perfil-looks.md` — a armadilha 19 **corrigida** (a tela andava
+  os 32; quem mostrava três era a seção), a 20 nova sobre byte escrito com o
+  mesmo valor, e as duas linhas novas da tabela de gates
 
 ### Problemas encontrados
 

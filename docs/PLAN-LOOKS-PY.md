@@ -1648,28 +1648,47 @@ não uma escolha entre malhas.
 | `H.F.COL.` | coluna do CLUT | `+1` | 7 de 7 nomeadas | as 2 da barba |
 | `BOOTS` | coluna do CLUT | `+1` | 8 de 8 | 42 das 56 primitivas de cada pé |
 | `FACE` | `v` | 16 linhas | **5** de 7 | as 2 da barba |
-| `HAIR` | `v` | 16 linhas | **3** de 32 | as 2 do cabelo |
+| `HAIR` | **escolhe a seção** | — | 32 de 32 | a cabeça inteira — ver abaixo |
 
 **E o fundo de cada campo é o estado que o disco guarda** — descer a linha até
 o fim devolve byte a byte o que o arquivo tem, o que torna a tabela absoluta em
 vez de relativa. Os seis **travam nas pontas**; nenhum dá a volta.
 
-**Onde moram os 32 cabelos, medido em 2026-09-16:** o `MODEL.BIN` guarda **dois
-blocos de 32 seções de cabeça** — **24 a 55** e **74 a 105** —, todo corpo
-distinto, as 32 do primeiro amostrando a folha de 3.568 com janela própria cada
-uma e 16 do segundo. Trinta e dois é o domínio do `hair_style` e dois blocos são
-as duas figuras; os pares vizinhos compartilham o array de vértices e diferem no
-UV.
+**A âncora do cabelo, medida em 2026-09-16.** O `HAIR` **não edita uma seção:
+ele escolhe uma.** Quem mediu foi o `oracle.py --patched HAIR`, que anda a linha
+do fundo ao topo e lê o **arquivo inteiro** depois de cada tecla — o que muda na
+tecla N é a seção que o valor N usa:
 
-**O que continua aberto, e é o que mantém a task pendente, é a âncora:** como o
-valor do campo escolhe uma daquelas 32. A tela alcança **três** faixas em
-`MODEL.BIN` seção 24 — 0, 2 e 1 — e as trinta teclas seguintes não mudam nada;
-essas três **não batem com a janela de seção nenhuma**, e **nenhum vértice se
-mexe**, o que descarta por medição a leitura óbvia de que a linha troca o corpo
-da seção. As duas faixas de buffer da §6(a) também estão descartadas como
-observação: elas se reescrevem a cada quadro e nunca assentam. O que sobra é
-breakpoint de escrita, que o fork oferece e este ciclo ainda não usou. Sem a
-âncora, o cross-check contra as 50 tuplas do corpus também fica aberto.
+- a **letra** do rótulo é uma seção **par** do primeiro bloco de cabeças:
+  A é a 24, B a 26, C a 30, D a 48, F a 52, G a 28, I a 34, J a 36, K a 32,
+  L a 46, O a 44 e P a 50;
+- o **dígito** é uma faixa de dezesseis linhas da folha em 3.568, escrita nos
+  quads de cabelo daquela seção;
+- e a seção **24 é a família A sozinha** — três valores de 32. É exatamente a
+  origem dos "três estados" que toda varredura anterior leu como alcance do
+  campo: elas olhavam uma seção só. **A tela andava os 32**, medido duas vezes
+  pelo `oracle.py --hair`: a célula de valor se mexe em 32 de 32 teclas enquanto
+  a seção 24 assenta em três estados.
+
+E o escritor está no jogo, achado por **breakpoint de escrita** — o primeiro
+deste ciclo — em `0x80011580`: `andi v0, a2, 0xff` / `sll v0, v0, 4` /
+`addiu v1, v0, 15` e quatro `sb` nos quatro cantos do quad. As dezesseis linhas
+por faixa deixam de ser observação e viram aritmética do próprio jogo.
+
+**O bloco 24..55 é dezesseis PARES, não 32 cabeças independentes.** Medido pelo
+`assembly.head_pairs`: 91 primitivas diferem dentro de um par e o que as separa
+é a barba — 32 saem da coluna 1 do CLUT (cor de cabelo) para a 9 (cor de barba),
+41 já estavam na 9 e nenhuma volta da 9 para a 1.
+
+**O que continua aberto, e é o que mantém a task pendente:** **três** valores de
+32 — `H1`, `M1` e `N1` — não escreveram nada em arquivo nenhum, e **três** seções
+pares — 38, 40 e 42 — nunca foram nomeadas. O par de treses é sugestivo e não é
+medição, então o `assembly.head_of` **recusa** esses três em vez de devolver uma
+cabeça que desenharia perfeitamente e seria de outro. O `E1` é uma quarta
+esquisitice: ele reescreveu a seção do `D`, o que pode ser o jogo devolvendo a
+cabeça do `D` em vez de nomear a dele. E **quais primitivas das outras doze
+cabeças recebem a faixa não está medido** — só o par da seção 24 tem índice
+nomeado. Sem isso, o cross-check contra as 50 tuplas do corpus fica aberto.
 
 **(d) Pele: paleta ou cor de vértice? — PALETA**, medido em 2026-09-14 pela
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) como

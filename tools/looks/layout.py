@@ -353,12 +353,16 @@ HEAD_RUNS = ((24, 56), (74, 106))
 of the second run, 16 do.  Thirty-two is exactly what `hair_style` holds, and
 two runs is exactly the two figures EDT_MOD.BIN's two lists already showed.
 
-**What is NOT measured is the anchoring**, and the difference matters: nothing
-here says that style N is section 24 + N.  Walking HAIR on the screen moves the
-`v` of section 24's own hair pair through three values that match no section's
-own window, and no vertex moves at any point -- so the row does not swap one of
-these bodies in either.  Where the row's 32 values become one of these 32
-sections is the open half of LOOKS-TASK-14.
+**The anchoring is measured, and it is not `24 + N`.**  On 2026-09-16
+`oracle.py --patched HAIR` read the whole loaded file after every press and
+found the row rewriting the **even** sections of the first run, one per LETTER
+of the style's label: A is 24, B is 26, C 30, D 48, F 52, G 28, I 34, J 36,
+K 32, L 46, O 44, P 50, and the digit picks a sixteen-row band of HAIR_IMAGE
+inside that section.  The table is `assembly.HAIR_MAP`, which also carries the
+three values that rewrote nothing and the three even sections nobody named.
+
+The first run is therefore **sixteen pairs** rather than 32 independent heads:
+`assembly.head_pairs` measures what separates a pair, and it is the beard.
 """
 
 ATLAS_BAND = 16

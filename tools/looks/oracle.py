@@ -34,6 +34,8 @@ Usage:
     python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
+    python tools/looks/oracle.py --hair          # who writes the hair window, and from where
+    python tools/looks/oracle.py --patched [HAIR]  # which sections the game has edited, value by value
 """
 
 from __future__ import annotations
@@ -1273,6 +1275,36 @@ def section_address(image, name, index):
             + len(one.vertices) * section.VERTEX_SIZE)
 
 
+WATCH_SECONDS = 90
+"""How long a write watchpoint is given before silence is called a failure.
+
+A watchpoint that never fires is a **result only if it was waited for**: the
+`who_writes.py` of the PES2 tree says the same thing, and the reason is that an
+address nothing writes and an emulator that stopped stepping are the same
+silence.
+"""
+
+IDLE_SECONDS = 5
+"""How long the watchpoint runs with NOTHING pressed, before the press.
+
+The control for the measurement below.  If the byte is written while the game
+merely animates, then a hit after a press says nothing about the press, and
+every reading built on it would be about the renderer's own housekeeping.
+"""
+
+WINDOW_BEFORE = 8
+WINDOW_AFTER = 4
+CALLER_BEFORE = 12
+"""How much disassembly is read around the stop.
+
+The fork stops on the instruction AFTER the store on this build -- measured by
+PES2 in 2026-09-03 and the reason `who_writes.split_store` scans a window
+instead of one line.
+"""
+
+INSTRUCTION_SIZE = 4
+
+
 SETTLE_TRIES = 8
 """How many extra looks a sample gets before it is called settled.
 
@@ -1288,6 +1320,209 @@ second is what makes this a guard rather than a comfort:
   walk reads as the end of the range.  That is what turned a 32-value HAIR walk
   into three values and an 8-value BOOTS walk into nine.
 """
+
+
+def texcoord_address(image, name, index, primitive, corner=0):
+    """Where one corner's `v` byte of one primitive lives in main RAM.
+
+    Same derivation as `clut_address`: the disc says the offset, `layout.BASE`
+    says where the file is loaded, and `verify_load()` is what earns the sum.
+    """
+    import iso_source
+
+    with iso_source.open_disc(image) as disc:
+        data = disc.read(name)
+    scan = section.scan(data, layout.GEOMETRY_START[name])
+    one = scan.sections[index]
+    return (layout.BASE[name] + one.offset + section.HEADER_SIZE
+            + primitive * section.PRIMITIVE_SIZE
+            + corner * section.TEXCOORD_STRIDE + section.V_IN_TEXCOORD)
+
+
+def _wait_for_hit(game, seconds):
+    """True if the armed watchpoint fired within *seconds*, False if it did not.
+
+    No exception either way: this is used once as a CONTROL, where not firing
+    is the good answer, and once as the measurement, where firing is.  Which
+    silence is a failure is the caller's to say.
+    """
+    import time
+
+    import who_writes
+
+    deadline = time.time() + seconds
+    while time.time() < deadline:
+        if who_writes.is_paused(game.client.call("wait_for_pause")):
+            return True
+    return False
+
+
+def catch_write(game, address, seconds=WATCH_SECONDS, presses=0,
+                button="Right"):
+    """Arm a write watchpoint on one byte and come back with the hit.
+
+    `presses` is how many times *button* may be pressed while waiting: zero
+    means the byte is expected to be written by the game on its own, which is
+    what the head's scratch copy turned out to do -- it is rewritten every
+    frame whether or not anything is pressed (measured 2026-09-16), and that is
+    why this does not insist on a press being the cause.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="write",
+                address=who_writes.hx(address))
+    try:
+        client.call("continue")
+        # The press comes FIRST when there is one.  This byte is not written
+        # every frame -- measured: 90s of free running at one value of the
+        # field and nothing touched it -- so waiting before pressing spends
+        # the whole budget on a machine that has nothing to say.
+        hit = False
+        for _ in range(max(1, presses)):
+            if presses:
+                client.call("press_button", button=button,
+                            duration_frames=CONFIRM_FRAMES)
+            hit = _wait_for_hit(game, max(1, seconds // max(1, presses)))
+            if hit:
+                break
+        if not hit:
+            raise OracleError(
+                "nothing wrote %s in %ds%s: either the address is not what "
+                "this thinks it is, or the emulator stopped stepping -- "
+                "silence is not an answer here"
+                % (who_writes.hx(address), seconds,
+                   " and %d press(es) of %s" % (presses, button)
+                   if presses else ""))
+        registers = client.call("read_registers", group="gpr")
+        pc = who_writes.register_value(registers, "pc")
+        if pc is None:
+            raise OracleError("the register read gave no pc: %r"
+                              % (str(registers)[:200],))
+        window = client.call(
+            "disassemble",
+            address=who_writes.hx(pc - WINDOW_BEFORE * INSTRUCTION_SIZE),
+            count=WINDOW_BEFORE + WINDOW_AFTER)
+        rows = window if isinstance(window, list) else []
+        store = None
+        for row in rows:
+            text = row.get("instruction") if isinstance(row, dict) else str(row)
+            parts = who_writes.split_store(text)
+            if not parts:
+                continue
+            _mnemonic, _source, offset, base = parts
+            value = who_writes.register_value(registers, base)
+            if value is not None and value + offset == address:
+                store = (row, parts, value)
+                break
+        caller = []
+        ra = who_writes.register_value(registers, "ra")
+        if ra is not None:
+            reply = client.call(
+                "disassemble",
+                address=who_writes.hx(ra - CALLER_BEFORE * INSTRUCTION_SIZE),
+                count=CALLER_BEFORE + WINDOW_AFTER)
+            caller = reply if isinstance(reply, list) else []
+        return {"pc": pc, "registers": registers, "rows": rows,
+                "store": store, "caller": caller}
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _flat_registers(registers):
+    """(name, value) for every register in whatever shape the fork answers in."""
+    import who_writes
+
+    out = []
+    stack = [registers]
+    while stack:
+        item = stack.pop()
+        if not isinstance(item, dict):
+            continue
+        for key, value in item.items():
+            if isinstance(value, dict):
+                stack.append(value)
+                continue
+            if not isinstance(value, (str, int)):
+                continue
+            try:
+                out.append((key, who_writes.parse_address(value)))
+            except who_writes.Fail:
+                # A register file can carry a name, a flag word or a status
+                # string beside the numbers; one of those is not a failure of
+                # this sweep, it is simply not an address.
+                continue
+    return sorted(set(out))
+
+
+def model_maps(image):
+    """{load address: (name, size, sections)} for both model files.
+
+    What `attribute()` needs to say which SECTION a live pointer is inside --
+    which is the whole question this task is missing an answer to.
+    """
+    import iso_source
+
+    maps = {}
+    with iso_source.open_disc(image) as disc:
+        for name in sorted(layout.BASE):
+            data = disc.read(name)
+            scan = section.scan(data, layout.GEOMETRY_START[name])
+            maps[layout.BASE[name]] = (name, len(data), scan.sections)
+    return maps
+
+
+def pointers_into_models(registers, maps):
+    """Every register that lands inside a model file, with where it lands."""
+    found = []
+    for name, value in _flat_registers(registers):
+        if name in ("pc", "ra"):
+            continue
+        where = attribute(value, maps)
+        if where:
+            found.append((name, value, where))
+    return found
+
+
+def _say_writer(found, address, maps=None):
+    """The reading of one watchpoint hit, printed."""
+    import who_writes
+
+    print("      stopped at %s, watching %s"
+          % (who_writes.hx(found["pc"]), who_writes.hx(address)))
+    if found["store"]:
+        row, (mnemonic, source, offset, base), value = found["store"]
+        print("      written by %s  %s %s, %s(%s)   [%s = %s]"
+              % (row.get("address"), mnemonic, source,
+                 who_writes.hx(offset), base, base, who_writes.hx(value)))
+        held = who_writes.register_value(found["registers"], source)
+        if held is not None:
+            print("      and the value stored is %s = %s"
+                  % (source, who_writes.hx(held)))
+    else:
+        print("      no instruction in the window resolves to that byte -- "
+              "read the disassembly below", flush=True)
+    ra = who_writes.register_value(found["registers"], "ra")
+    if ra is not None:
+        print("      called from ra = %s" % who_writes.hx(ra), flush=True)
+        for row in found.get("caller") or ():
+            if isinstance(row, dict):
+                print("        caller  %s  %s"
+                      % (row.get("address"), row.get("instruction")))
+    if maps:
+        for name, value, where in pointers_into_models(found["registers"],
+                                                       maps):
+            print("      %-4s = %s  ->  %s section %s, %s"
+                  % (name, who_writes.hx(value), where[0], where[1], where[2]))
+    for row in found["rows"]:
+        if isinstance(row, dict):
+            mark = " <--" if found["store"] and row is found["store"][0] else ""
+            print("        %s  %s%s"
+                  % (row.get("address"), row.get("instruction"), mark))
 
 
 def steady(game, sample):
@@ -1449,7 +1684,7 @@ def check_palettes(slot=2, verbose=True):
         game.load_looks(slot)
 
         print("  every CLUT row of /BIN/DAT2D.BIN against VRAM, resolved the "
-              "way a renderer resolves it")
+              "way a renderer resolves it", flush=True)
         for y in sorted({r.y for r in records}):
             got = vram_region(game, 0, y, span, 1)[0]
             differ, unresolved = [], 0
@@ -1478,13 +1713,13 @@ def check_palettes(slot=2, verbose=True):
         after = vram_region(game, first.x, first.y, first.colours, 1)
         moved = sum(1 for i in range(first.colours) if before[0][i] != after[0][i])
         print("  one step of H.COL moved %d of the %d entries of the palette "
-              "in VRAM" % (moved, first.colours))
+              "in VRAM" % (moved, first.colours), flush=True)
         if moved:
             problems.append("stepping H.COL rewrote %d palette entr(y/ies) in "
                             "VRAM: the field is not only choosing a window"
                             % moved)
 
-        print("  the windows each field reaches, read out of RAM per press")
+        print("  the windows each field reaches, read out of RAM per press", flush=True)
         for row, at in (("SKIN", address), ("H.COL", address),
                         ("H.F.COL.", beard)):
             seen = walk_field(game, slot, row, at, verbose=verbose)
@@ -1500,7 +1735,7 @@ def check_palettes(slot=2, verbose=True):
     print("oracle --palettes: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))
     for line in problems:
-        print("    %s" % line)
+        print("    %s" % line, flush=True)
     return 1 if problems else 0
 
 
@@ -1601,13 +1836,13 @@ def _say_primitives(row, name, index, values, at, disc_data):
             != first[i:i + section.VERTEX_SIZE]))
     if not moved and not vertices:
         print("      nothing in %s section %d moved -- this row does not own "
-              "this section" % (name, index))
+              "this section" % (name, index), flush=True)
         return
     print("      %s section %d: %d primitive(s) move: %s"
           % (name, index, len(moved), sorted(moved)))
     if vertices:
         print("      and up to %d vertex(es) move with them -- this row "
-              "changes the MESH, not only what it samples" % vertices)
+              "changes the MESH, not only what it samples" % vertices, flush=True)
 
     else:
         # Does the row SWAP a body in?  `MODEL.BIN` holds two runs of 32 head
@@ -1618,7 +1853,7 @@ def _say_primitives(row, name, index, values, at, disc_data):
         # vertex moved across every value walked.
         print("      and NO vertex moves in any of the %d value(s): the mesh "
               "in this slot is the disc's throughout, so the row does not swap "
-              "another section's body in" % len(values))
+              "another section's body in" % len(values), flush=True)
     # One line per value, and the SHAPE of the change rather than every
     # primitive: what a field does to forty-two primitives at once is one fact,
     # and printing it forty-two times buries it.  The whole list is above.
@@ -1634,6 +1869,227 @@ def _say_primitives(row, name, index, values, at, disc_data):
                  ", ".join("%#06x" % c for c in cluts),
                  ", ".join("%#06x" % p for p in pages),
                  us[0], us[-1], vs[0], vs[-1]))
+
+
+def check_patched(row="HAIR", slot=2, verbose=True):
+    """Which sections of a model file differ from the DISC at every value.
+
+    The walk this task was built on watched **one** section, the head, because
+    that is the section LOOKS-TASK-08 saw move.  A field that stops writing
+    there and starts writing somewhere else looks, through that window, exactly
+    like a field that stopped doing anything -- and `MODEL.BIN` holds two runs
+    of 32 head sections, so "somewhere else" has 31 candidates.
+
+    So this reads the whole loaded file after every press and says which
+    sections the live copy no longer matches.  A style that picks another
+    section shows up as that section's index; a style that changes nothing in
+    the file at all shows up as an empty line, which is also an answer.
+    """
+    import iso_source
+    import looks
+
+    ready = preflight()
+    count = looks.BY_ROW[row].values
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = disc.read(layout.MODEL)
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    maps = {layout.BASE[layout.MODEL]: (layout.MODEL, len(data),
+                                        scan.sections)}
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        game.load_looks(slot)
+        game.select_row(row)
+        path = os.path.join(game.out_dir, "model.bin")
+
+        def read():
+            return game.read_ram(layout.BASE[layout.MODEL], len(data), path)
+
+        for _ in range(count):
+            game.press("Left", expect_change=False)
+        states = [steady(game, read)]
+        for _ in range(count):
+            game.press("Right", expect_change=False)
+            states.append(steady(game, read))
+
+    print("  %s on slot %d: %d value(s); what CHANGED at each press, and "
+          "what the live %s no longer matches on the disc"
+          % (row, slot, len(states), layout.MODEL), flush=True)
+    for step, live in enumerate(states):
+        changed = _sections_touched(
+            states[step - 1] if step else data, live, scan, data)
+        against = _sections_touched(data, live, scan, data)
+        print("      %2d  changed: %s   |   differs from the disc in: %s"
+              % (step,
+                 ", ".join("section %d (%d byte(s), band(s) %s)"
+                           % (index, count, bands)
+                           for index, count, bands in changed) or "nothing",
+                 ", ".join(str(index) for index, _c, _b in against)
+                 or "nothing"), flush=True)
+    return 0
+
+
+def _sections_touched(before, after, scan, disc_data):
+    """[(section, bytes that differ, the bands its differing primitives sit in)].
+
+    The band is `v // ATLAS_BAND` of every corner of every primitive that
+    differs, read out of *after* -- which is what turns "this section was
+    rewritten" into "this section was pointed at band 3 of the hair sheet".
+    """
+    out = []
+    for index, one in enumerate(scan.sections):
+        differ = [offset for offset in range(one.offset, one.end)
+                  if before[offset] != after[offset]]
+        if not differ:
+            continue
+        bands = set()
+        first = one.offset + section.HEADER_SIZE
+        for offset in differ:
+            inner = offset - first
+            if not 0 <= inner < len(one.primitives) * section.PRIMITIVE_SIZE:
+                continue
+            at = first + (inner // section.PRIMITIVE_SIZE)                 * section.PRIMITIVE_SIZE
+            live = section.read_primitive(after, at)
+            bands |= {v // layout.ATLAS_BAND for _u, v in live.texcoords}
+        out.append((index, len(differ), sorted(bands)))
+    return out
+
+
+def check_hair(slot=2, verbose=True):
+    """The anchor of the hair map, asked twice in one session.
+
+    **First, whether the SCREEN moves at all where the section does not.**  The
+    walk of LOOKS-TASK-14 pressed 32 times and read the file's section, and got
+    three states out of it; what it never asserted is that the row's own value
+    cell was moving under those presses.  A field whose value cell stops moving
+    after three presses and a field whose value cell walks 32 values while the
+    section holds still are different findings with the same section reading,
+    and only one of them means the styles are somewhere else.
+
+    **Then, who writes the window.**  A write watchpoint on the `v` byte of the
+    first hair primitive, with the control before it -- the same watchpoint
+    armed over free running with nothing pressed -- so that a hit is about the
+    press.  What it buys is the instruction, the register it stores and where
+    that register was loaded from, which is the table this task is missing.
+    """
+    import looks
+
+    ready = preflight()
+    row = "HAIR"
+    count = looks.BY_ROW[row].values
+    name, index = ASSEMBLY_ROWS[row]
+    base, length = section_address(ready["image"], name, index)
+    witness = texcoord_address(ready["image"], name, index,
+                               layout.HAIR_PRIMITIVES[0])
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        game.load_looks(slot)
+        cell = row_value(ROWS.index(row))
+        quiet = game.select_row(row)
+        drift = quiet.difference(game.capture(), pixels(quiet, cell))
+        floor = max(VALUE_MOVED, drift * IDLE_MARGIN)
+        game.say("the %s cell drifts %.6f while idle, so a press has to beat "
+                 "%.6f" % (row, drift, floor))
+        path = os.path.join(game.out_dir, "hair.bin")
+
+        def read():
+            return game.read_ram(base, length, path)
+
+        for _ in range(count):
+            game.press("Left", expect_change=False)
+        previous = game.capture()
+        blocks = [steady(game, read)]
+        cells = 0
+        for _ in range(count):
+            game.press("Right", expect_change=False)
+            frame = game.capture()
+            if frame.difference(previous, pixels(frame, cell)) > floor:
+                cells += 1
+            previous = frame
+            blocks.append(steady(game, read))
+        print("  %s on slot %d: the value cell moved on %d of %d press(es) "
+              "of Right, and %s section %d reached %d distinct state(s) in "
+              "%d value(s)"
+              % (row, slot, cells, count, name, index,
+                 len({bytes(b) for b in blocks}), len(blocks)))
+
+        # Back to the bottom, so that the samples below walk the domain
+        # upward from the field's lowest value instead of from wherever the
+        # first half of this left it.
+        for _ in range(count):
+            game.press("Left", expect_change=False)
+        maps = model_maps(ready["image"])
+        game.say("watching the `v` of primitive %d of %s section %d, at %#010x"
+                 % (layout.HAIR_PRIMITIVES[0], name, index, witness))
+        bands, said = [], False
+        for step in range(1, count + 1):
+            found = catch_write(game, witness, seconds=BAND_SECONDS,
+                                presses=1, button="Right", required=False)
+            if found and not said:
+                _say_writer(found, witness, maps)
+                said = True
+            bands.append(band_of(found) if found else None)
+        if not said:
+            raise OracleError(
+                "%d press(es) of Right and not one of them wrote %#010x: the "
+                "byte, the row or the address is wrong" % (count, witness))
+        print("  %s: what each press writes to the hair quad, from the bottom "
+              "of the row up -- `-` is a press that wrote nothing"
+              % row, flush=True)
+        print("      %s" % ", ".join(
+            "%s=%s" % (looks.BY_ROW[row].label(step),
+                       "-" if band is None else band)
+            for step, band in enumerate(bands, 1)), flush=True)
+        print("      %d of %d press(es) wrote the quad, over %d distinct "
+              "band(s): %s"
+              % (sum(1 for b in bands if b is not None), count,
+                 len({b for b in bands if b is not None}),
+                 sorted({b for b in bands if b is not None})), flush=True)
+    return 0
+
+
+BAND_SECONDS = 8
+"""How long one value of the field is given to write the hair quad.
+
+Short on purpose: most values write nothing, and the sweep is 32 of them.  The
+budget is what makes the difference between "this value does not write it" and
+"we did not wait", so it is named rather than inlined -- and it is generous
+against a press that takes 28 frames to land.
+"""
+
+
+def band_of(found):
+    """Which 16-row band one hit wrote, out of the value it stored.
+
+    The routine is four stores of the same two bytes -- `v = band * 16 + 1` on
+    two corners and `+ 15` on the other two -- so the band comes back out of
+    either of them by arithmetic, and no table of ours is involved:
+
+        andi  v0, a2, 0x00ff      the band, as the caller passed it
+        sll   v0, v0, 4           sixteen rows a band
+        addiu v1, v0, 15
+        sb    v1, 0x1(a0)         the `v` of corner 0
+
+    Measured 2026-09-16 on the LOOKS SET screen.
+    """
+    import who_writes
+
+    if not found["store"]:
+        return None
+    _row, (_mnemonic, source, _offset, _base), _value = found["store"]
+    held = who_writes.register_value(found["registers"], source)
+    if held is None:
+        return None
+    return (held - BAND_TOP) // layout.ATLAS_BAND
+
+
+BAND_TOP = 15
+"""The `+15` the routine adds for the bottom corners of the quad.
+
+One less than the band's sixteen rows: the quad covers rows 1..15 of its band,
+not 0..15, which is what keeps it off the seam with the band above.
+"""
 
 
 def check_where(row="HAIR", slot=2, verbose=True):
@@ -2186,6 +2642,10 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) >= 2 and argv[1] == "--patched":
+            return check_patched(row=argv[2] if len(argv) > 2 else "HAIR")
+        if len(argv) == 2 and argv[1] == "--hair":
+            return check_hair()
         if len(argv) >= 2 and argv[1] == "--where":
             return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
