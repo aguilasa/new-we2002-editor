@@ -29,7 +29,8 @@ press N is the section value N uses, and the shape of the answer is:
 
 * the **letter** of a style's label is a head section of `MODEL.BIN`'s first
   run -- A is 24, B is 26, C 30, D 48, F 52, G 28, I 34, J 36, K 32, L 46,
-  O 44, P 50;
+  O 44, P 50, and **E is split in two**: E1 in 48, which is D's, and E2 in 54,
+  which is its own.  Thirteen sections, twelve whole letters and one split;
 * the **digit** is a band of sixteen rows of the hair sheet at 3,568, written
   into that section's hair quads;
 * and section 24 -- the section every earlier walk in this cycle watched -- is
@@ -201,7 +202,10 @@ LOOKS-TASK-14 was missing, and it says what the one-section walk could not:
 
 * the letter of a style's label is its **section** -- A is 24, B is 26, C 30,
   D 48, F 52, G 28, I 34, J 36, K 32, L 46, O 44, P 50, and every one of those
-  letters' variants rewrites that same section;
+  letters' variants rewrites that same section -- **except E**, the one letter
+  split across two: E1 rewrites 48, which is D's, and E2 rewrites 54, which no
+  other style names.  That is why HAIR_MAP_SECTIONS is thirteen and the letters
+  above are twelve (CORR-LOOKS-030);
 * the digit is the **band** of the hair sheet at 3,568 -- B's six variants come
   back as bands 0/1, 2, 1, 5, 3 and 4 of one section;
 * and section 24, the one every earlier walk watched, is family **A** alone.
@@ -211,8 +215,11 @@ LOOKS-TASK-14 was missing, and it says what the one-section walk could not:
 `None` is a value that rewrote **nothing** in the file: measured, not assumed.
 Three of them -- H1, M1 and N1 -- and three even sections of the run (38, 40
 and 42) never appeared, which is a suggestive pair of threes and no more than
-that.  E1 is a fourth oddity: it rewrote section 48, which is D's, and may be
-the game putting D's section back rather than naming E1's own.  Guessing any of
+that.  The pair only closes with 54 counted as named: the run holds sixteen
+even sections and 16 - 13 = 3.  E1 is a fourth oddity: it rewrote section 48,
+which is D's, and may be the game putting D's section back rather than naming
+E1's own -- the question is why E1 uses D's, not whether E has one of its own,
+which E2 answers.  Guessing any of
 the four would be the mapping that draws perfectly and is wrong.
 """
 

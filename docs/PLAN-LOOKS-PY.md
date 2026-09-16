@@ -1661,7 +1661,9 @@ tecla N é a seção que o valor N usa:
 
 - a **letra** do rótulo é uma seção **par** do primeiro bloco de cabeças:
   A é a 24, B a 26, C a 30, D a 48, F a 52, G a 28, I a 34, J a 36, K a 32,
-  L a 46, O a 44 e P a 50;
+  L a 46, O a 44 e P a 50 — e o **`E` é a exceção, partido em duas**: o `E1`
+  cai na 48, que é do `D`, e o `E2` na **54**, que é só dele. São **treze**
+  seções: doze letras inteiras e uma partida;
 - o **dígito** é uma faixa de dezesseis linhas da folha em 3.568, escrita nos
   quads de cabelo daquela seção;
 - e a seção **24 é a família A sozinha** — três valores de 32. É exatamente a
@@ -1709,11 +1711,13 @@ duas medições.
 
 **O que continua aberto, e passa às tasks seguintes:** **três** valores de 32 —
 `H1`, `M1` e `N1` — não escreveram nada em arquivo nenhum, e **três** seções
-pares — 38, 40 e 42 — nunca foram nomeadas. O par de treses é sugestivo e não é
-medição, então o `assembly.head_of` **recusa** esses três em vez de devolver uma
-cabeça que desenharia perfeitamente e seria de outro. O `E1` é uma quarta
-esquisitice: ele reescreveu a seção do `D`, o que pode ser o jogo devolvendo a
-cabeça do `D` em vez de nomear a dele. E o mapa foi medido no **jogador de
+pares — 38, 40 e 42 — nunca foram nomeadas. **A aritmética fecha com as treze
+contadas:** o bloco 24..55 tem dezesseis seções pares, e 16 − 13 = 3. O par de
+treses é sugestivo e não é medição, então o `assembly.head_of` **recusa** esses
+três em vez de devolver uma cabeça que desenharia perfeitamente e seria de
+outro. O `E1` é uma quarta esquisitice, e a pergunta é **por que ele usa a
+seção do `D`** — não se o `E` tem seção: tem, a 54, nomeada pelo `E2`
+([`CORR-LOOKS-030`](/docs/tasks/looks/CORR-LOOKS-030.md)). E o mapa foi medido no **jogador de
 linha**; o segundo bloco de cabeças, o do goleiro, ninguém andou.
 
 **E há um resíduo dentro do que foi medido: a faixa por quad.** O `--patched`

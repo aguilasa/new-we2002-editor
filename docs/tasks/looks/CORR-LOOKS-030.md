@@ -3,7 +3,7 @@ id: CORR-LOOKS-030
 title: "Correção: a treze seções de cabelo faltou uma na lista — o `E2` e a seção 54 não aparecem em lugar nenhum"
 type: correção
 category: engenharia-reversa
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -100,19 +100,64 @@ O critério repete a lista de doze; acrescentar o `E` e a 54.
 
 ## Verificação
 
-- [ ] as três listas têm treze seções, e a aritmética 16 − 13 = 3 aparece ao
-      lado do "par de treses"
-- [ ] `python tools/looks/assembly.py --check` verde
+- [x] as **quatro** listas têm treze seções — a §6(c), o `HEAD_RUNS`, o
+      `HAIR_MAP` e as duas do critério da task —, e a aritmética 16 − 13 = 3
+      aparece ao lado do "par de treses"
+- [x] `python tools/looks/assembly.py --check` verde
       (`HAIR_MAP_SECTIONS` segue 13)
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py --quiet` verde, 33 de 33 controles
+      vermelhos
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-16
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz: o mapa nomeia treze seções e a 54 é do `E2`.
 
-**Arquivos criados/modificados:**
+```text
+distinct sections: 13
+  48 ['D1', 'D2', 'E1']
+  54 ['E2']
+NONE: ['H1', 'M1', 'N1']   HAIR_MAP_SECTIONS = 13
+```
+
+Nada de código mudou — o `HAIR_MAP_SECTIONS = 13` já estava certo e o
+`--check-image` já o conferia. O que faltava era a **letra** nas prosas, e
+eram **quatro** listas, não três: a §6(c), o docstring do `HEAD_RUNS`, o
+docstring do `HAIR_MAP` (que é o lugar onde o leitor do mapa está) e **duas**
+no arquivo da task — o critério e o texto da terceira passagem.
+
+As quatro dizem agora a mesma coisa: **treze seções, doze letras inteiras e uma
+partida** — `E1` na 48, que é do `D`, e `E2` na 54, que é só dele.
+
+### O "par de treses" só fecha com a 54 contada
+
+Está escrito ao lado, porque é o que torna a simetria uma conta em vez de uma
+impressão: o bloco 24..55 tem **dezesseis** seções pares, e 16 − 13 = 3. Pela
+lista de doze, as não nomeadas seriam quatro — 38, 40, 42 **e 54** — e a
+simetria que os três documentos chamam de sugestiva desapareceria sem que
+ninguém notasse de onde.
+
+### E a frase do `E1` estava perguntando a coisa errada
+
+Ela dizia que o `E1` reescrever a seção do `D` *"pode ser o jogo devolvendo a
+cabeça do `D` em vez de nomear a dele"* — uma dúvida sobre se o `E` tem seção.
+Tem, a 54, e é o próprio mapa que diz. A pergunta aberta é **por que o `E1` usa
+a do `D`**, e é assim que ela está escrita nos três lugares.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` — §6(c): a lista, a aritmética e a pergunta do `E1`
+- `tools/looks/layout.py` — o docstring do `HEAD_RUNS`
+- `tools/looks/assembly.py` — os dois docstrings, o do módulo e o do `HAIR_MAP`
+- `docs/tasks/looks/14-tabela-de-montagem.md` — o critério e a terceira
+  passagem
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
+- `docs/tasks/looks/CORR-LOOKS-030.md` — este arquivo

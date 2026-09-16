@@ -366,8 +366,9 @@ sheet, several shared -- 25, 26 and 27 take one between them -- and sections
 `oracle.py --patched HAIR` read the whole loaded file after every press and
 found the row rewriting the **even** sections of the first run, one per LETTER
 of the style's label: A is 24, B is 26, C 30, D 48, F 52, G 28, I 34, J 36,
-K 32, L 46, O 44, P 50, and the digit picks a sixteen-row band of HAIR_IMAGE
-inside that section.  The table is `assembly.HAIR_MAP`, which also carries the
+K 32, L 46, O 44, P 50 -- and E in TWO, E1 in 48 which is D's and E2 in 54
+which is its own, so thirteen sections for twelve whole letters and one split.
+The digit picks a sixteen-row band of HAIR_IMAGE inside that section.  The table is `assembly.HAIR_MAP`, which also carries the
 three values that rewrote nothing and the three even sections nobody named.
 
 The first run is therefore **sixteen pairs** rather than 32 independent heads:

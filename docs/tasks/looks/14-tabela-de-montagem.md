@@ -166,7 +166,8 @@ e com que paleta.
       `HAIR` **não edita uma seção: escolhe uma.** Medido pelo
       `oracle.py --patched HAIR`, que lê o arquivo inteiro depois de cada tecla:
       a **letra** do rótulo é uma seção **par** do primeiro bloco (A→24, B→26,
-      C→30, D→48, F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50) e o **dígito**
+      C→30, D→48, F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50; o `E` é
+      partido, `E1`→48 e `E2`→**54**, que fecha as treze) e o **dígito**
       é a faixa de dezesseis linhas da folha 3.568 escrita nos quads daquela
       seção. A seção 24 é a família **A sozinha**, que é de onde vinham os
       "três estados". A tabela é o `assembly.HAIR_MAP`.
@@ -380,8 +381,10 @@ python tools/looks/oracle.py --patched HAIR
 ```
 
 **A letra do rótulo é a seção; o dígito é a faixa.** A→24, B→26, C→30, D→48,
-F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50 — treze seções, todas **pares**,
-todas do primeiro bloco. A seção 24 é a família **A sozinha**, três valores de
+F→52, G→28, I→34, J→36, K→32, L→46, O→44, P→50, e o `E` **partido em duas** —
+`E1`→48, que é do `D`, e `E2`→**54**, que é só dele. Treze seções, todas
+**pares**, todas do primeiro bloco: doze letras inteiras e uma partida
+([`CORR-LOOKS-030`](/docs/tasks/looks/CORR-LOOKS-030.md)). A seção 24 é a família **A sozinha**, três valores de
 32: é daí que vinham os "três estados". O mapa é o `assembly.HAIR_MAP`, e o
 `assembly.head_of` é quem responde por uma tupla.
 
