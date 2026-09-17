@@ -16,6 +16,28 @@ status: pendente
 - **Referência:** [`/docs/PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md) §10.3 (l), e o rito da Fase 1 (§1.4).
 - **Só começa se a [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md) disse que a pose vem do `ANIME.BIN`.** Se disse outra
   coisa, esta task muda de arquivo e de título, e isso se registra aqui antes.
+- **Ela disse que vem, em 2026-09-17, e deixou o começo do formato medido**
+  (`oracle.py --pose`; §10.3 (j) do plano):
+  - o arquivo está na RAM **byte a byte** em `layout.ANIME_BASE` = `0x8017EE00`,
+    nos dois slots — 396.804 de 396.804;
+  - **a base NÃO sai do `layout.derive_base()`**, e tentar é perder tempo: a
+    regra lê "palavra com bit alto" e o payload deste arquivo abre com
+    `0x9000040A`, então a corrida de ponteiros não fecha nas 204 palavras; e
+    mesmo cortada ali, o ponteiro mais baixo mira o offset **912**, não o 816
+    que a regra supõe. A base medida veio de **conteúdo** (uma corrida de 64
+    bytes do offset 1.000 aparece uma vez só na RAM);
+  - o cabeçalho é de **204 entradas**, uma por animação, e a tela toca a
+    **entrada 5** — nenhuma outra é lida (watchpoint de leitura nas 204 de uma
+    vez);
+  - a entrada aponta uma **lista de quadros**; o estado em
+    `layout.ANIME_STATE` guarda a lista (+0x18), o quadro corrente (+0x1C) e o
+    índice (+0x329), que anda todo quadro e **volta a zero** quando a entrada
+    ao lado marca o fim — é a passada se repetindo;
+  - o quadro é lido por `0x80011E80`, `0x80011E94`, `0x80011EB0` e
+    `0x80011ECC`, e o código logo antes (`0x80011D48`…) **desempacota ângulos
+    de uma palavra** com `sll`/`sra` e os guarda no scratchpad (`0x1F800120`,
+    `0x1F800122`, …). **Os nove números da matriz não estão no arquivo:** o
+    que está são ângulos empacotados, e a matriz é calculada deles.
 - **O gabarito é a [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md).** Matriz de determinante 1 e boneco em pé é
   plausível, não certo.
 - **As regras da Fase 1 valem inteiras:** endereço só no `layout.py`; contagem

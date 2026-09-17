@@ -681,6 +681,25 @@ CONTROLS = (
         "the message of its own failure",
     ),
     Control(
+        "oracle-matrix-scan-takes-any-ctc2", "oracle.py", "_ctc2_matrix_loads",
+        "        if ((word >> 11) & 0x1F) == MATRIX_REGISTER:  # not-an-address: rd field",
+        "        if True:",
+        ("oracle",),
+        "every `ctc2` taken for a matrix load: 261 of them are in RAM against "
+        "the 30 that write the matrix's first register, and arming all 261 "
+        "would name an instruction that loads something else entirely",
+    ),
+    Control(
+        "oracle-matrix-scan-skips-the-last-word", "oracle.py",
+        "_ctc2_matrix_loads",
+        "    for offset in range(0, len(ram) - 3, 4):",
+        "    for offset in range(0, len(ram) - 4, 4):",
+        ("oracle",),
+        "the scan stopping one word short of the end: invisible over two "
+        "megabytes and total over a four-byte input, which is how it was "
+        "found -- a sweep that silently never looks at its last word",
+    ),
+    Control(
         "looks-nation-code-is-the-index", "looks.py", "NATION_CODES",
         "NATION_CODES = ((1, 54, -1), (55, 79, 40))",
         "NATION_CODES = ((1, 79, -1),)",

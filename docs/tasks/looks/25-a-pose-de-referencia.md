@@ -23,6 +23,20 @@ status: pendente
 - **A hierarquia não se deduz da anatomia.** Se a matriz do antebraço é
   absoluta ou composta com a do braço, mede-se: a translação da filha varia com
   a rotação da mãe, ou não varia.
+- **Onde a matriz entra, medido pela [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md)
+  em 2026-09-17** (`oracle.py --pose`), e o que ela deixou para cá:
+  - dos **30** `ctc2` da RAM que escrevem o primeiro registrador da matriz,
+    **cinco** rodam nesta tela, e dois carregam quase tudo:
+    `layout.POSE_MATRIX` (`0x80012168`) e `layout.POSE_MATRIX_SECOND`
+    (`0x8001229C`) — 18 e 18 de 40 paradas, contra 2, 1 e 1 dos outros três;
+  - **qual carga é de qual peça é desta task**, e é o que falta: a 24 conta
+    paradas, não peças. O número de paradas antes de a sequência se repetir
+    **varia entre corridas** (207 e 408 medidos), então ele não serve de
+    contagem — quem conta quadro é esta, com `pause` + `frame_step`;
+  - **um `continue` só nomeia a primeira instrução que dispara, não as que
+    disparam.** As mesmas trinta, armadas igual, deram `0x80012168` numa
+    corrida e `0x80010E38` na seguinte; o que transforma isso em contagem é
+    soltar o emulador dezenas de vezes e ler o `hit_count` de cada uma.
 
 ---
 

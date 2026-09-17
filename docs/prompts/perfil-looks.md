@@ -377,6 +377,30 @@ Não se revertem sem o usuário pedir.
     diziam, até então, que `DEFAUL` e `NAT` eram "as duas metades do default
     por nacionalidade" — inferência pelo nome das colunas, e `DEFAUL` é o
     **botão de confirmar** da tela, que não aplica nada.
+42. **Watchpoint de leitura funciona nesta build — e amostra de quatro
+    endereços num arquivo de 400 KB é silêncio que não significa nada.** A
+    primeira tentativa de saber se o `ANIME.BIN` é lido vigiou quatro
+    endereços, não viu nada em 8 s cada, e a conclusão pronta era "a pose não
+    vem daí". A entrada que o jogo lê é a **sexta palavra** do cabeçalho:
+    armando as **204 de uma vez**, ela aparece na primeira corrida. Duas
+    regras: **arme a faixa inteira**, e **tenha um controle do instrumento** —
+    um watchpoint sobre um objeto de texto que a rotina de impressão recebe
+    dispara, e é ele que dá direito de ler silêncio como resposta. Medido em
+    2026-09-17 ([`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md)).
+43. **Um `continue` só nomeia a PRIMEIRA que dispara.** O emulador para no
+    primeiro acerto e fica lá, então armar trinta breakpoints, soltar uma vez e
+    listar responde "qual disparou primeiro" — e a resposta muda de corrida
+    para corrida: as mesmas trinta deram `0x80012168` numa e `0x80010E38` na
+    seguinte, as duas verdadeiras e nenhuma sendo a pergunta. O que vira
+    contagem é soltar dezenas de vezes e ler o `hit_count` de cada uma; aí são
+    **cinco** que rodam, com duas carregando quase tudo.
+44. **`derive_base()` é a regra dos dois arquivos de modelo, e não generaliza.**
+    No `ANIME.BIN` ela erra por 96 bytes, por duas razões independentes: a
+    corrida de ponteiros é reconhecida por "bit alto" e o payload abre com
+    `0x9000040A`; e o ponteiro mais baixo mira o offset 912, não o 816 que a
+    regra supõe. Base de arquivo novo se mede **por conteúdo** — uma corrida de
+    64 bytes que apareça uma vez só na RAM —, e a regra do cabeçalho só depois,
+    se quiser, como confirmação.
 
 ---
 
@@ -448,6 +472,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem, sem venv; o controle roda se houver capturas da 17 | `python tools/looks/corpus.py --score` | — | LOOKS-TASK-18 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo); ~12 min | `python tools/looks/oracle.py --screen` — anda as doze linhas e compara com o `screen.json`; `--screen --write` é o gerador do arquivo | — | LOOKS-TASK-21 |
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |

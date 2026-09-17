@@ -41,6 +41,7 @@ Usage:
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
     python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
     python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
+    python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
 """
 
 from __future__ import annotations
@@ -3467,6 +3468,46 @@ def check_keys(sequence=None, slot=2, verbose=True):
     return 1 if bad else 0
 
 
+CTC2_MASK = 0xFFE00000  # not-an-address: the opcode field of an instruction
+CTC2_OPCODE = 0x48C00000  # not-an-address: COP2 + CT, an instruction
+"""`ctc2 rt, rd` -- a write into a GTE CONTROL register.
+
+Not an address, and the sweep is right that it is a number: it is an opcode,
+like the GPU commands above.  COP2 is 010010 in the top six bits and CT is
+00110 in the next five, which is what these two constants spell.
+"""
+
+MATRIX_REGISTER = 0
+"""GTE control register 0, the first word of the rotation matrix (R11R12).
+
+A `ctc2` into it is the start of a matrix load, which is why the scan looks
+for that one register rather than for every `ctc2`: 261 of those are in RAM
+and 30 write this one.
+"""
+
+POSE_FRAMES = 4
+"""Frames watched at the matrix instruction, so the count per frame is a
+count and not a sample."""
+
+WATCH_LIMIT = 8
+"""Seconds a read watchpoint is given before silence counts as silence."""
+
+
+def _ctc2_matrix_loads(ram):
+    """Every instruction in RAM that writes the GTE's first matrix word."""
+    out = []
+    # `len(ram) - 3` and not `- 4`: the last whole word is a word like any
+    # other, and stopping short of it left a four-byte input with nothing to
+    # scan -- which is exactly what the self-check below hands it.
+    for offset in range(0, len(ram) - 3, 4):
+        word = int.from_bytes(ram[offset:offset + 4], "little")
+        if (word & CTC2_MASK) != CTC2_OPCODE:
+            continue
+        if ((word >> 11) & 0x1F) == MATRIX_REGISTER:  # not-an-address: rd field
+            out.append(RAM_BASE + offset)
+    return out
+
+
 NATIONS = ("Ireland", "Sweden", "Brazil", "Japan", "Nigeria", "Algeria")
 """The nations `--default` walks to: spread across the row, and one of them --
 `Brazil`, skin B -- has a file line that is not all `A`, which is what tells
@@ -3488,6 +3529,246 @@ def _nation_byte(game, slot=None):
     path = os.path.join(game.out_dir, "nation.bin")
     return [game.read_ram(address, 1, path)[0]
             for address in layout.PLAYER_NATION]
+
+
+def _anime_in_ram(game, image, verbose=True):
+    """The whole of ANIME.BIN against RAM at `layout.ANIME_BASE`."""
+    import iso_source
+
+    with iso_source.open_disc(image) as disc:
+        want = disc.read(layout.ANIME)
+    path = os.path.join(game.out_dir, "ram-anime.bin")
+    got = game.read_ram(layout.ANIME_BASE, len(want), path)
+    same = sum(1 for a, b in zip(want, got) if a == b)
+    if verbose:
+        print("  %s at %#010x: %d of %d byte(s) equal"
+              % (layout.ANIME, layout.ANIME_BASE, same, len(want)))
+    return want, same
+
+
+def _watch_reads(game, addresses, seconds=WATCH_LIMIT, stops=1):
+    """Arm a read watchpoint on each of *addresses* and run.
+
+    Returns `(hits, pcs)`: the watches that fired with their counts, and the
+    program counters that were sitting on them.  **All of them at once**: a
+    sample of four of this file's 204 header entries read as silence, and the
+    one entry the game does read is the sixth.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    for address in addresses:
+        client.call("breakpoint", action="add", type="read",
+                    address=who_writes.hx(address))
+    pcs = {}
+    try:
+        for _ in range(stops):
+            client.call("continue")
+            if not _wait_for_hit(game, seconds):
+                break
+            pc = who_writes.register_value(
+                client.call("read_registers", group="all"), "pc")
+            pcs[pc] = pcs.get(pc, 0) + 1
+        listed = client.call("breakpoint", action="list")
+        hits = [(int(w["address"], 16), w["hit_count"]) for w in listed
+                if w["hit_count"]]
+    finally:
+        try:
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+        client.call("breakpoint", action="clear")
+    return hits, pcs
+
+
+def check_pose(slot=None, verbose=True):
+    """`--pose`: where the pose on the LOOKS SET screen comes from.
+
+    The incognita this answers is the riskiest of the v2, and the shape of the
+    run is the argument:
+
+      **is the file even there** -- the whole of ANIME.BIN against RAM at
+          `layout.ANIME_BASE`, byte for byte, on both states;
+      **is it read** -- a read watchpoint on every one of the 204 header
+          entries at once, and the entry that fires named.  The control for
+          the instrument comes first: a read watchpoint on a text object the
+          print routine is handed has to fire, or silence over the file would
+          mean nothing;
+      **where the matrix reaches the GTE** -- every `ctc2` in RAM that writes
+          the matrix's first control register, armed together, and the one
+          that fires on this screen;
+      **how many pieces pass through it** in one frame.
+    """
+    import who_writes
+
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in slots:
+            restore_state(one, verbose=verbose)
+            game.load_looks(one)
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+
+            want, same = _anime_in_ram(game, ready["image"], verbose)
+            if same != len(want):
+                problems.append("slot %d: %d of %d bytes of %s differ at "
+                                "%#010x" % (one, len(want) - same, len(want),
+                                            layout.ANIME, layout.ANIME_BASE))
+
+            # The control for the instrument, before the silence is read as an
+            # answer: a text object the print routine is handed every frame.
+            objects = screen_objects(game)
+            control, _pcs = _watch_reads(game, [objects[0]["at"]])
+            if not control:
+                problems.append("slot %d: a read watchpoint on the text object "
+                                "at %#010x never fired, so this build cannot "
+                                "tell 'not read' from 'not watched'"
+                                % (one, objects[0]["at"]))
+                continue
+            print("    control: the text object at %s is read, so a read "
+                  "watchpoint fires on this build"
+                  % who_writes.hx(objects[0]["at"]))
+
+            header = [layout.ANIME_BASE + 4 * word
+                      for word in range(layout.ANIME_HEADER_WORDS)]
+            hits, pcs = _watch_reads(game, header, stops=3)
+            if not hits:
+                problems.append("slot %d: none of the %d header entries of %s "
+                                "was read" % (one, len(header), layout.ANIME))
+            else:
+                for address, count in hits:
+                    entry = (address - layout.ANIME_BASE) // 4
+                    print("    header entry %d (%s) read %d time(s), by %s"
+                          % (entry, who_writes.hx(address), count,
+                             ", ".join(who_writes.hx(pc) for pc in pcs)))
+
+            # From the entry to the numbers: the state holds the frame list
+            # and the frame being played, and whoever reads that frame is
+            # what turns ANIME.BIN into angles.
+            path = os.path.join(game.out_dir, "anime-state.bin")
+            raw = game.read_ram(layout.ANIME_STATE + layout.ANIME_STATE_LIST,
+                                8, path)
+            frame_list = int.from_bytes(raw[0:4], "little")
+            frame = int.from_bytes(raw[4:8], "little")
+            print("    the state at %s plays list %s, frame %s"
+                  % (who_writes.hx(layout.ANIME_STATE),
+                     who_writes.hx(frame_list), who_writes.hx(frame)))
+            end = layout.ANIME_BASE + layout.SIZE[layout.ANIME]
+            for what, pointer in (("frame list", frame_list),
+                                  ("frame", frame)):
+                if not layout.ANIME_BASE <= pointer < end:
+                    problems.append("slot %d: the %s is %s, outside %s in RAM "
+                                    "(%s..%s) -- the pose would be coming "
+                                    "from somewhere else"
+                                    % (one, what, who_writes.hx(pointer),
+                                       layout.ANIME,
+                                       who_writes.hx(layout.ANIME_BASE),
+                                       who_writes.hx(end)))
+            inside = layout.ANIME_BASE <= frame_list < end
+            if not inside:
+                pass
+            elif RAM_BASE <= frame < RAM_BASE + RAM_SIZE:
+                words = [frame + 4 * word for word in range(16)]
+                hits, readers = _watch_reads(game, words, stops=4)
+                print("    the frame is read by %s, on %d of its words"
+                      % (", ".join(who_writes.hx(pc) for pc in readers)
+                         or "nobody", len(hits)))
+                if not hits:
+                    problems.append("slot %d: nothing read the frame at %s"
+                                    % (one, who_writes.hx(frame)))
+
+            ram = game.snapshot("pose")
+            loads = _ctc2_matrix_loads(ram)
+            fired = _fired_among(game, loads)
+            print("    %d instruction(s) write the GTE's first matrix word; "
+                  "%d run on this screen: %s"
+                  % (len(loads), len(fired),
+                     ", ".join("%s x%d" % (who_writes.hx(a), n)
+                               for a, n in fired) or "none"))
+            if layout.POSE_MATRIX not in [a for a, _n in fired]:
+                problems.append("slot %d: layout.POSE_MATRIX is %s and it did "
+                                "not run; what did is %r"
+                                % (one, who_writes.hx(layout.POSE_MATRIX),
+                                   [who_writes.hx(a) for a, _n in fired]))
+                continue
+            if layout.POSE_MATRIX_SECOND not in [a for a, _n in fired]:
+                problems.append("slot %d: %s is recorded as the other matrix "
+                                "load and it did not run"
+                                % (one, who_writes.hx(
+                                    layout.POSE_MATRIX_SECOND)))
+            cycle = _matrix_stops(game)
+            print("    %s: %d stop(s) before the sequence repeated -- the "
+                  "number moves between runs, and the frame-accurate count "
+                  "with a piece on each is LOOKS-TASK-25"
+                  % (who_writes.hx(layout.POSE_MATRIX), cycle))
+            if not cycle:
+                problems.append("slot %d: the matrix instruction never came "
+                                "round" % one)
+
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --pose: %d problem(s)" % len(problems))
+    return 1 if problems else 0
+
+
+FIRED_STOPS = 40
+"""How many times a run of armed breakpoints is let go before it is counted.
+
+**The emulator BREAKS on the first hit and stays there**, so one `continue`
+and a sleep answers "which fired FIRST", not "which fire".  Measured on
+2026-09-17: the same thirty instructions, armed the same way, named
+0x80012168 in one run and 0x80010E38 in the next -- two right answers to a
+question nobody meant to ask.  Letting it go forty times is what turns it
+into a count.
+"""
+
+
+def _fired_among(game, addresses, stops=FIRED_STOPS, seconds=4):
+    """Arm an execute breakpoint on each and report which ones run, and how
+    often, over *stops* stops."""
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    for address in addresses:
+        client.call("breakpoint", action="add", type="execute",
+                    address=who_writes.hx(address))
+    try:
+        for _ in range(stops):
+            client.call("continue")
+            if not _wait_for_hit(game, seconds):
+                break
+        listed = client.call("breakpoint", action="list")
+        return sorted(((int(w["address"], 16), w["hit_count"])
+                       for w in listed if w["hit_count"]),
+                      key=lambda pair: -pair[1])
+    finally:
+        try:
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+        client.call("breakpoint", action="clear")
+
+
+def _matrix_stops(game):
+    """Stops at the matrix instruction before the sequence comes round.
+
+    **A cycle, and this task does not claim it is a frame.**  The repetition
+    that closes it is the same one the screen's objects are counted by, but
+    there the objects are eight and here the stops are in the hundreds, and
+    nothing yet says a piece is one stop.  Attributing loads to pieces is
+    LOOKS-TASK-25, which counts the frame from `load_state` and names them.
+    """
+    import who_writes
+
+    def read(registers):
+        return tuple(who_writes.register_value(registers, name)
+                     for name in ("a0", "a1", "s0"))
+
+    return len(_stops(game, layout.POSE_MATRIX, read, OBJECT_REPEAT,
+                      GLYPH_LIMIT))
 
 
 def check_default(slot=2, verbose=True):
@@ -3648,6 +3929,21 @@ def self_check(verbose: bool = True) -> int:
 
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
+
+    # The scan that finds where a matrix reaches the GTE, on words made here.
+    # `ctc2 t0, r0` is 0x48C80000: COP2, CT, rt=t0, rd=0.
+    matrix = (0x48C80000).to_bytes(4, "little")  # not-an-address: ctc2 t0, r0
+    other = (0x48C80800).to_bytes(4, "little")  # not-an-address: ctc2 t0, r1
+    mfc = (0x48080000).to_bytes(4, "little")  # not-an-address: mfc2, a read
+    ok("the scan finds a ctc2 into the matrix's first register",
+       _ctc2_matrix_loads(matrix) == [RAM_BASE])
+    ok("and passes over a ctc2 into another control register",
+       _ctc2_matrix_loads(other) == [])
+    ok("and over an instruction that reads the GTE instead of writing it",
+       _ctc2_matrix_loads(mfc) == [])
+    ok("it reports the address of each hit, not the count",
+       _ctc2_matrix_loads(mfc + matrix + other + matrix)
+       == [RAM_BASE + 4, RAM_BASE + 12])
 
     # The session taken by another client, on a fake server (CORR-LOOKS-051).
     import io
@@ -4073,6 +4369,8 @@ def main(argv):
                 raise OracleError("--screen takes --write and nothing else, "
                                   "and got %r" % argv[2])
             return check_screen(write=len(argv) == 3)
+        if len(argv) >= 2 and argv[1] == "--pose":
+            return check_pose(int(argv[2]) if len(argv) > 2 else None)
         if len(argv) >= 2 and argv[1] == "--default":
             return check_default(int(argv[2]) if len(argv) > 2 else 2)
         if len(argv) >= 2 and argv[1] == "--keys":

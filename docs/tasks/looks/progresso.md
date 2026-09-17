@@ -64,7 +64,7 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais | 8 | 20 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
 | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | 21 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
 | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica | 8 | 22 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ✅ Concluído | 2026-09-17 | ⬜ pendente |
 | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | 24 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | `anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada | 9 | 25 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ⬜ Pendente | — | — |
@@ -257,7 +257,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 9 — montado (v2)
 
-- [ ] A fonte da pose medida — `ANIME.BIN` ou não —, com a instrução que carrega a matriz e a origem dos números.
+- [x] A fonte da pose medida: é o `ANIME.BIN`, na RAM byte a byte, com a entrada 5 do cabeçalho, a lista de quadros que dá a volta, os ângulos empacotados e as duas instruções que carregam o GTE — `oracle.py --pose`.
 - [ ] A pose de referência capturada num quadro contado, repetível, com a hierarquia medida.
 - [ ] O `anime.py` reproduz as matrizes do jogo exatamente, e a varredura fecha no EOF.
 - [ ] O painel mostra o boneco montado, e a silhueta concorda com a do emulador com a câmera do jogo.

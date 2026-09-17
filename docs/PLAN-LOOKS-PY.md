@@ -2168,7 +2168,11 @@ encaminharam à
 escreve aqui. Nenhuma é respondida; cada uma diz **por que** está aberta e o que
 a destravaria.
 
-**(e) A pose — ABERTA.** Onde cada peça fica **não está em arquivo lido**:
+**(e) A pose — a FONTE está medida desde 2026-09-17, o resto continua aberto.**
+A §10.3 (j) tem a cadeia: `ANIME.BIN` na RAM, a entrada 5 do cabeçalho, a lista
+de quadros que dá a volta, os ângulos empacotados e as duas instruções que
+carregam o GTE. O que esta alínea dizia — e continua valendo para o *arquivo* —
+é que onde cada peça fica **não está em arquivo lido pelo visualizador**:
 cada seção é modelada em torno da própria origem, e desenhar as doze nas
 coordenadas do disco empilha o boneco num ponto só (armadilha 24 do perfil). O
 visualizador desenha uma **prateleira** (`scene.shelf`) e diz que é uma. O
@@ -2530,6 +2534,52 @@ poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 `ANIME.BIN` antes de saber é o erro que a
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) existiu para não cometer.
 [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md).
+
+> **Respondida em 2026-09-17**, por `oracle.py --pose`, e a resposta é o
+> primeiro candidato — **com o terceiro dentro dele**: a pose vem do
+> `ANIME.BIN`, mas não como nove números por peça. A cadeia medida, ponta a
+> ponta, nos dois save states:
+>
+> 1. **O arquivo está na RAM byte a byte** — 396.804 de 396.804 — em
+>    `layout.ANIME_BASE` = `0x8017EE00`, logo depois do `MODEL.BIN`. A base foi
+>    medida **por conteúdo**: uma corrida de 64 bytes do offset 1.000 aparece
+>    uma única vez nos dois megabytes. O `derive_base()` **não** a deriva, por
+>    duas razões que valem para o próximo arquivo: a corrida de ponteiros é
+>    reconhecida por "bit alto", e o payload deste arquivo abre com
+>    `0x9000040A`; e o ponteiro mais baixo mira o offset 912, não o 816 que a
+>    regra supõe. Ele responde `0x8017EE60`, 96 bytes alto, e contra essa base
+>    **279.034 bytes diferem** — é o controle vermelho deste comando.
+> 2. **O cabeçalho é de 204 entradas, uma por animação, e a tela toca a de
+>    índice 5.** Medido com um watchpoint de leitura nas 204 de uma vez:
+>    nenhuma outra é lida. O leitor é `0x800270B8`, que guarda o ponteiro no
+>    estado de animação.
+> 3. **O estado (`layout.ANIME_STATE`) toca uma lista de quadros:** a lista em
+>    +0x18, o quadro corrente em +0x1C e o índice em +0x329, que anda a cada
+>    quadro e **volta a zero** quando a entrada ao lado marca o fim. É a
+>    passada se repetindo, e é por isso que o boneco caminha sem que nada seja
+>    apertado.
+> 4. **O quadro é lido por quatro instruções** (`0x80011E80`, `0x80011E94`,
+>    `0x80011EB0`, `0x80011ECC`), e o código ao redor **desempacota ângulos**
+>    de uma palavra com `sll`/`sra`, guardando-os no scratchpad (`0x1F800120`
+>    em diante). **Os nove números não estão no arquivo:** o que está são
+>    ângulos empacotados, e a matriz é calculada deles — o que explica o
+>    "matrizes calculadas em código" do segundo candidato sem que ele seja a
+>    fonte.
+> 5. **A matriz chega ao GTE em duas instruções**, de 30 `ctc2` que escrevem o
+>    primeiro registrador dela e 5 que rodam nesta tela:
+>    `layout.POSE_MATRIX` (`0x80012168`) e `POSE_MATRIX_SECOND`
+>    (`0x8001229C`), 18 e 18 de 40 paradas.
+>
+> **O controle do instrumento vem antes da conclusão**, e é o que separa "medi"
+> de "não achei": um watchpoint de leitura sobre um objeto de texto que a
+> rotina de impressão recebe **dispara** nesta build, então o silêncio sobre
+> uma faixa é silêncio do jogo e não do fork. A primeira tentativa vigiou
+> **quatro** endereços do arquivo, não viu nada e quase virou "o `ANIME.BIN`
+> não é lido"; a entrada que o jogo lê é a sexta palavra do cabeçalho.
+>
+> **O que fica para a [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md):** qual carga de matriz é de qual peça. A 24
+> conta paradas, e o número antes de a sequência se repetir varia entre
+> corridas (207 e 408), então ele não é contagem de quadro.
 
 **(k) A hierarquia e a convenção.** Rotação em ponto fixo 4.12, `y` para
 baixo — a v1 já desenha com `UP = -1` —, e se a matriz de cada peça é absoluta

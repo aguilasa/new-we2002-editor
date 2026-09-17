@@ -75,6 +75,7 @@ EDT_MOD = "/BIN/EDT_MOD.BIN"
 MODEL = "/BIN/MODEL.BIN"
 DAT2D = "/BIN/DAT2D.BIN"
 SELECT = "/SELECT.BIN"
+ANIME = "/BIN/ANIME.BIN"
 
 # --- Identity of what may be read, measured 2026-09-14 --------------------
 #
@@ -91,13 +92,32 @@ DIGEST = {
     # and reading a palette out of that one is the silent error above.
     DAT2D: "0e914e584c889635f0c3a7a64d87ed5c773541c76b35455b6475c19c9f50de7b",
     SELECT: "86d14a66a3cd72b9363832260d4f3842e15d530c2f76eb0d6a3f6823cd603ce1",
+    # Identical on both discs too, measured 2026-09-17 (LOOKS-TASK-24): the
+    # same 396,804 bytes and the same digest on the Japanese dump and on the
+    # English one that drives the emulator.
+    ANIME: "9b43fe0443e6818391cf2f5a106d26332e4e9c6155614ba59d2ff424bd35427a",
 }
 
 TEXTURE_FILES = frozenset({DAT2D})
 """Files that may only ever be read from the Japanese disc."""
 
 GEOMETRY_FILES = frozenset({EDT_MOD, MODEL})
-"""Files proven identical on both discs, so either may supply them."""
+"""Files proven identical on both discs, so either may supply them.
+
+The set is exactly the keys of BASE, and self_check() asserts that: these are
+the files the game loads whole at a known address and this cycle walks as
+sections.
+"""
+
+ANIMATION_FILES = frozenset({ANIME})
+"""Identical on both discs too, and loaded whole -- but not geometry.
+
+Measured on 2026-09-17 (LOOKS-TASK-24): the same 396,804 bytes and the same
+digest on both dumps, so either disc may answer for it.  It is kept out of
+GEOMETRY_FILES because that set is the keys of BASE, which `spans()` and
+`verify_load()` walk expecting a file `section.scan` can read; ANIME.BIN is
+not one, and its load address is ANIME_BASE.
+"""
 
 RECORD_FILES = frozenset({SELECT})
 """Japanese-only too, but records rather than art -- so a hint of its own.
@@ -132,6 +152,7 @@ LBA = {
     MODEL: 8100,
     DAT2D: 5300,
     SELECT: 850,
+    ANIME: 3000,
 }
 
 SIZE = {
@@ -139,6 +160,7 @@ SIZE = {
     MODEL: 64800,
     DAT2D: 81124,
     SELECT: 300648,
+    ANIME: 396804,
 }
 
 # --- Where each model file loads in RAM -----------------------------------
@@ -695,7 +717,7 @@ def _hint_for(disc_path: str) -> str:
             f"the Japanese one.  Point {ENV_IMAGE} at it; {ENV_DRIVE_IMAGE} "
             f"is the disc you drive, not the disc you read."
         )
-    if disc_path in GEOMETRY_FILES:
+    if disc_path in GEOMETRY_FILES | ANIMATION_FILES:
         return (
             f"  {disc_path} is identical on both known discs, so a mismatch "
             f"means a third disc -- another release, or a modified image."
@@ -1390,6 +1412,76 @@ screen shows on both states -- three offsets matched -- and then pressing Right
 on HEIG and on AGE: these two followed (175 to 176, 23 to 24) and the third,
 0x800E9470, stayed where it was.  Both are read and required to agree; which
 of the two the game draws from is not measured.
+"""
+
+ANIME_BASE = 0x8017EE00
+"""Where `/BIN/ANIME.BIN` is loaded while the LOOKS SET screen runs.
+
+**Measured by content, not derived**, on 2026-09-17 (LOOKS-TASK-24): a 64-byte
+run from offset 1,000 of the file occurs exactly once in the two megabytes of
+RAM, at 0x8017F1E8, and from that base the WHOLE file matches -- 396,804 of
+396,804 bytes, on both save states.  It sits right after MODEL.BIN, which ends
+at 0x8017E5E0.
+
+**`derive_base()` does not derive it, and that is worth knowing before anyone
+tries.**  Two things defeat the rule there.  The run of KSEG0 pointers is read
+as "words with the top bit set", and this file's payload opens with
+0x9000040A, which has it -- so the run does not stop at the header's end.  And
+even with the run cut at 204 words, where the pointers really end, the rule's
+second half fails: it assumes the lowest pointer aims just past the run, and
+this file's lowest aims at offset 912, not 816.  So the base it computes is
+0x8017EE60, ninety-six bytes high, and every byte compared against it differs.
+
+It is deliberately NOT in `BASE`: that dict is the model files', and `spans()`
+and `verify_load()` walk it expecting a file `section.scan` can read.
+"""
+
+POSE_MATRIX = 0x80012168
+POSE_MATRIX_SECOND = 0x8001229C
+"""The two instructions that hand the GTE most of its rotation matrices here.
+
+`ctc2` into control register 0, the matrix's first word.  Found on 2026-09-17
+(LOOKS-TASK-24) by scanning RAM for every `ctc2` that writes that register --
+**30** of them -- arming an execute breakpoint on all thirty at once and
+letting the screen run: **five** ever run, and these two carry the traffic
+(18 and 17 of 40 stops, against 2, 2 and 1 for 0x80010E38, 0x8003C990 and
+0x800407C0).
+
+**One `continue` names the wrong thing.**  The emulator breaks on the first
+hit and stays there, so a single run answers "which fired first": the same
+thirty, armed the same way, named 0x80012168 in one run and 0x80010E38 in the
+next.  Both were true and neither was the question.
+
+Which load belongs to which piece is NOT measured here -- that is
+LOOKS-TASK-25, which counts the frame and names the pieces.
+"""
+
+ANIME_STATE = 0x80076040
+ANIME_STATE_LIST = 0x18
+ANIME_STATE_FRAME = 0x1C
+ANIME_STATE_INDEX = 0x329
+"""The animation the screen is playing, as the game keeps it.
+
+Measured on 2026-09-17 (LOOKS-TASK-24) by reading the code around the two
+instructions a read watchpoint on `ANIME.BIN` caught:
+
+    +0x18   the pointer the header entry gave -- the animation's frame list
+    +0x1C   the frame being played, taken from that list
+    +0x329  the index into the list, a byte, stepped every time and reset to
+            zero when the word beside the entry says the list has ended
+
+The list is walked at 0x80027838..0x8002787C: index, `lw` the entry, compare,
+step or wrap, then `lw` the frame pointer and store it at +0x1C.  That wrap is
+the walk cycle repeating, and it is why the figure keeps walking with nothing
+pressed.
+"""
+
+ANIME_HEADER_WORDS = 204
+"""Pointer entries at the head of `ANIME.BIN`, each one an animation.
+
+The screen plays entry 5: the game loads it from ANIME_BASE + 0x14 and keeps
+the pointer in its animation state, which is what a read watchpoint over all
+204 entries caught -- and only that entry is ever read on this screen.
 """
 
 PLAYER_NATION = (0x800E7E0C, 0x800E946B)
