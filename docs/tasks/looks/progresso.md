@@ -30,6 +30,13 @@ A §0 do plano **proíbe** estender o `we2002_core`.
 mediu o formato dos dois arquivos de modelo com o jogo rodando instrumentado.
 O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 
+**E reabre em 2026-09-17 para a v2**, a pedido do usuário, com a v1 fechada nas
+tasks 01 a 20: a **tela `LOOKS SET`** do jogo — as doze linhas trocáveis, como
+os save states dos slots 1 e 2 a mostram — com o boneco **montado**,
+**vestido** e **andando** dentro dela, como uma gravação de tela do usuário
+mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
+§10 do plano.
+
 ## Resumo
 
 | ID | Tarefa | Fase | Dependências | Status | Concluída em | Revisado em |
@@ -54,6 +61,21 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
 | [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
+| [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais | 8 | 20 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | 21 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica | 8 | 22 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | 24 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | `anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada | 9 | 25 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-31](/docs/tasks/looks/31-o-painel-e-o-cenario.md) | Incógnita (o) — o painel e o cenário da tela: do disco ou da GPU | 10 | 22, 28 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-32](/docs/tasks/looks/32-o-ciclo-da-caminhada.md) | Incógnita (p) — o ciclo da caminhada: quadros por passada, interpolação e balanço | 11 | 26 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-33](/docs/tasks/looks/33-a-janela-animada.md) | A janela animada — o boneco caminhando na tela `LOOKS SET`, no ritmo do jogo | 11 | 28, 32 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-34](/docs/tasks/looks/34-o-goleiro-andando.md) | O goleiro — figura 1 montada e andando na tela, conferida no slot 1 | 11 | 33 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-35](/docs/tasks/looks/35-fechamento-da-v2.md) | Fechamento da v2 — gates, `make.ps1 looks` e reconciliação do plano | 11 | 23, 29, 30, 31, 34 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -83,6 +105,10 @@ corpus de 50 renders de terceiro. Ver
 | 5 — render | 15 a 16 | a janela `QOpenGLWidget` e o gate que a julga de fora |
 | 6 — confronto | 17 a 18 | a diferença medida contra o emulador e contra os 50 JPGs |
 | 7 — fechamento | 19 a 20 | os quatro alvos de `ctest` e a reconciliação do plano |
+| 8 — a tela (v2) | 21 a 23 | a tela `LOOKS SET` medida no jogo, a janela que a reproduz com as linhas trocáveis, e o default por nacionalidade |
+| 9 — montado (v2) | 24 a 29 | de onde vem a pose, a pose de referência, o `ANIME.BIN`, as peças no lugar, a câmera do jogo, e altura e corpo |
+| 10 — vestido (v2) | 30 a 31 | o uniforme dos `TEX_*.BIN`, e o painel e o cenário da tela |
+| 11 — andando (v2) | 32 a 35 | o ciclo medido, a janela animada, o goleiro e o fechamento |
 
 **O que não pode ser pulado**, com a razão de cada ordem:
 
@@ -100,6 +126,14 @@ corpus de 50 renders de terceiro. Ver
   de montagem é chute.
 - **A 02 antes de qualquer leitura de textura.** É ela que planta a guarda que
   recusa ler paleta do disco errado — e esse erro é silencioso.
+- **A 21 antes da 22.** Janela escrita antes de a tela ser medida inventa o
+  texto de cada valor, e o gate dela confere a invenção contra ela mesma.
+- **A 24 antes de tudo da Fase 9.** Um leitor de `ANIME.BIN` escrito sem saber
+  que a pose sai dele lê perfeitamente e desenha outra coisa — é a 08 outra vez.
+- **A 25 antes da 26, a 28 antes de qualquer silhueta, a 32 antes da 33.** A
+  pose capturada é o gabarito do leitor, a câmera do jogo é o que torna o
+  desenho comparável, e o ritmo medido é o que impede uma caminhada inventada
+  (§10.5 do plano).
 
 ---
 
@@ -125,6 +159,20 @@ Fase 6                                                    17 ◄───┘
                                                                  │
 Fase 7                                                    19 ◄───┘
                                                            └──► 20
+                                                                 │
+Fase 8   (v2, a tela)                                     21 ◄───┤
+                                                           └──► 22 ──► 23
+                                                                 │
+Fase 9   (v2, montado)                     24 ◄──────────────────┤
+                                            └──► 25 ──► 26 ──► 27 ◄── 22
+                                                              └──► 28 ──► 29 ◄── 22
+                                                                    │
+Fase 10  (v2, vestido)                     30 ◄── 20        31 ◄── 22, 28
+                                                                    │
+Fase 11  (v2, andando)                     32 ◄── 26               │
+                                            └──────────► 33 ◄──────┘
+                                                          └──► 34
+                                           35 ◄── 23, 29, 30, 31, 34
 ```
 
 **Sequência mínima de execução:**
@@ -137,6 +185,10 @@ Fase 7                                                    19 ◄───┘
 5.  11 ► 12             textura, em cadeia
 6.  13 pode andar junto com 10-12 — só depende da 09
 7.  14 ► 15 ► 16 ► 17 ► 18 ► 19 ► 20
+8.  21 ► 22 ► 23                    a tela LOOKS SET, sobre a v1 como está
+9.  24 ► 25 ► 26 ► 27 ► 28 ► 29     o boneco montado
+10. 30 pode andar junto — só depende da 20; 31 depois da 28
+11. 32 depois da 26; 33 ► 34; 35 fecha
 ```
 
 **A 13 é a candidata natural a antecipação.** Ela depende só da 09, é barata —
@@ -196,6 +248,31 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 - [x] `ctest -R looks` = **1 passed, 3 skipped** numa máquina limpa — eram 2 skipped até a LOOKS-TASK-19 registrar o quarto alvo, `looks_live`; e 4 passed com as duas variáveis, o venv e o fork.
 - [x] Cada incógnita da §6 com veredito — (a) a (d) respondidas; os resíduos da (c) e as cinco novas, (e) a (i), abertas com a razão e o que as destravaria.
 - [x] `check_tasks.py` verde — `123 task(s), ok`, na árvore de `4023c65`.
+
+### Fase 8 — a tela (v2)
+
+- [ ] O texto de cada valor, a ajuda, o cursor e os valores iniciais dos dois slots medidos no jogo.
+- [ ] A janela é a tela `LOOKS SET`: doze linhas trocáveis, o boneco redesenhado a cada troca, e a mesma sequência de teclas dando o mesmo texto que no jogo.
+- [ ] `NAT` e `DEFAUL` aplicam o default que o jogo aplica.
+
+### Fase 9 — montado (v2)
+
+- [ ] A fonte da pose medida — `ANIME.BIN` ou não —, com a instrução que carrega a matriz e a origem dos números.
+- [ ] A pose de referência capturada num quadro contado, repetível, com a hierarquia medida.
+- [ ] O `anime.py` reproduz as matrizes do jogo exatamente, e a varredura fecha no EOF.
+- [ ] O painel mostra o boneco montado, e a silhueta concorda com a do emulador com a câmera do jogo.
+- [ ] `HEIG` e `BODY` mudam o desenho como mudam no jogo.
+
+### Fase 10 — vestido (v2)
+
+- [ ] O uniforme lido pela guarda e desenhado; zero primitiva sem textura, ou o resto nomeado.
+- [ ] O painel e o cenário da tela medidos e reproduzidos.
+
+### Fase 11 — andando (v2)
+
+- [ ] O período do ciclo medido em quadros do jogo, e qualquer quadro do ciclo reproduzido.
+- [ ] O painel anima no ritmo do jogo, com a silhueta conferida em vários quadros, nos dois slots.
+- [ ] `.\make.ps1 looks` abre a tela com o boneco montado, vestido e andando.
 
 ---
 
@@ -260,10 +337,11 @@ new-we2002-editor/
 ├── tools/looks/
 │   ├── iso_source.py layout.py section.py modelfile.py
 │   ├── texture.py atlas.py skin.py pieces.py looks.py assembly.py scene.py
+│   ├── screen.py anime.py                ← v2
 │   ├── oracle.py confront.py corpus.py
 │   ├── harness.py controls.py selftest.py superpack_count.py cli.py
 │   ├── ui_check.py
-│   └── ui/app.py ui/viewer.py
+│   └── ui/app.py ui/viewer.py ui/looks_set.py   ← looks_set: v2
 └── work/venv-looks/                  ← fora do git
 ```
 

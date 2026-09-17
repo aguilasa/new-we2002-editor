@@ -9,6 +9,12 @@
 > cada item; a definição de pronto da §0 foi percorrida item a item, com o
 > resultado ao lado.
 >
+> **E reaberto em 2026-09-17 para a v2**, a pedido do usuário: a **tela
+> `LOOKS SET`** do jogo, com as linhas que trocam pele, cabelo e o resto, e o
+> boneco **montado**, **vestido** e **andando** dentro dela. O escopo, as
+> incógnitas e as fases estão na §10; as tasks são as `LOOKS-TASK-21` a `35`,
+> no mesmo ciclo.
+>
 > Este arquivo é a **fonte de verdade** do projeto `looks`, o sexto deste
 > repositório, ao lado do `newWe2002`, do `wte/`, do PES2 e do port do `.mcr`.
 > Ele não compartilha build nem código com nenhum deles; o que empresta é
@@ -45,6 +51,10 @@ mudança; é esse comportamento que se reproduz.
 - **Não grava nada.** Nem na imagem de CD, nem no cartão. v1 é visualizador, e
   a decisão é do dono do repositório (2026-09-13).
 - **Não anima.** Pose parada. Animação mora no `ANIME.BIN` e é outro projeto.
+  **Revogado para a v2 em 2026-09-17**, por decisão do usuário: animar a
+  caminhada da tela `LOOKS SET` passou a ser objetivo, e é a §10. A v1 fechou
+  como estava escrito aqui; o que continua valendo para a v2 é o resto desta
+  lista — não grava, não toca `roms/`, não estende o `we2002_core`.
 - **Não toca `roms/`.** Mesma regra de todos os projetos daqui.
 - **Não estende o `we2002_core`.** Nada em `src/` aprende o que é modelo 3D.
 - **Não reconstrói ISO.** O jogo acha arquivo por LBA fixo (§8, item 8); mesmo
@@ -2206,6 +2216,10 @@ leitura nas duas, com a tela trocando de time.
 | 5 | Render: `QOpenGLWidget`, câmera orbital, uma tupla na tela |
 | 6 | Confronto: nosso quadro × emulador × os 50 JPGs, com a diferença medida |
 | 7 | Gates no `ctest`, `perfil-looks.md`, `NOTICE.md` |
+| 8 | **v2** — a tela `LOOKS SET`: as doze linhas medidas no jogo, a janela que as reproduz, e o default por nacionalidade (§10) |
+| 9 | **v2** — o boneco montado: de onde vem a pose, a pose de referência, o `ANIME.BIN`, as peças no lugar, a câmera, e altura e corpo (§10) |
+| 10 | **v2** — o uniforme dos `TEX_*.BIN`, e o painel e o cenário da tela (§10) |
+| 11 | **v2** — a caminhada: o ciclo medido, a janela animada, o goleiro, e o fechamento (§10) |
 
 ### O que não pode ser pulado
 
@@ -2295,3 +2309,186 @@ leitura nas duas, com a tela trocando de time.
 | `NOTICE.md` | conferido contra o que o projeto de fato usou; a linha do `we3d` deixou de dizer que tomou o agrupamento em 14 modelos, que nada aqui usa, e passou a dizer o que dele foi medido errado |
 | o ciclo e o perfil | `check_tasks.py` verde; o perfil com as armadilhas que o ciclo encontrou |
 | `CLAUDE.md` | ganhou a seção do projeto, que não tinha |
+
+---
+
+## 10. v2 — a tela `LOOKS SET`, com o boneco montado, vestido e andando
+
+### 10.1 O pedido, e o que ele muda
+
+Em 2026-09-17, com a v1 fechada, o usuário pediu duas coisas, e a segunda na
+mesma conversa:
+
+1. que o visualizador mostre o jogador **como a tela `LOOKS SET` do jogo
+   mostra**: **montado** — não uma prateleira de peças — e **animado,
+   caminhando**. A referência é uma gravação de tela do usuário,
+   `Gravação de Tela 2026-09-17 130706.mp4`, que **fica na pasta dele e não
+   entra no git**, pela mesma regra do Superpack;
+2. que a janela **seja a própria tela `LOOKS SET`**, como os dois save states a
+   mostram: as doze linhas, com o cursor, onde se escolhe a cor da pele, o
+   cabelo e o resto, e o boneco redesenhado a cada troca.
+
+**A tela, como os dois save states a mostram** — captura do
+`oracle.py --check-live`, que se repete pixel a pixel a partir do `load_state`
+(§1.11):
+
+- uma barra de título com `LOOKS SET`;
+- em cima, à esquerda, a **placa de posição** — `GK` no slot 1, `CB` no slot 2
+  — e o nome da camisa;
+- à esquerda, o **painel** com degradê azul e borda clara, e o boneco dentro;
+- à direita, as **doze linhas**, rótulo e valor, com um retângulo de cursor e
+  uma seta no valor da linha selecionada. Os valores que os dois states
+  mostram: `DEFAUL O.K.`, `NAT Unknown`, `SKIN A TYPE`, `HAIR A1 TYPE`,
+  `H.COL A TYPE`, `FACE A TYPE`, `H.F.COL. A TYPE`, `HEIG 175 cm`,
+  `BODY A TYPE`, `AGE 23`, `BOOTS A TYPE`, `FOOT RIGHT`;
+- embaixo, uma **caixa de ajuda** com um texto sobre a linha — `Visual` nas
+  capturas.
+
+**O que a gravação mostra**, olhado quadro a quadro (e **nenhum número dela
+entra aqui**: quem mede ritmo, quadros e ângulo é o emulador, na
+[`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md)):
+
+- o jogador **caminha parado no lugar**, de frente para a câmera, balançando o
+  tronco e os braços — um ciclo de passada que se repete;
+- as peças estão **montadas**: cabeça no pescoço, braços nos ombros, pernas no
+  quadril;
+- o **uniforme tem cor**: camisa, calção e meião num lilás, com dobras
+  desenhadas na textura — são as primitivas que a v1 deixa cinza (§6 (f)).
+
+**A ordem das fases segue o pedido, não o risco.** A tela vem primeiro porque
+se constrói sobre a v1 como ela está — as linhas de cor e de cabelo já andam no
+`assembly.py` — e o usuário a usa enquanto a pose é medida. O risco maior da v2
+continua sendo a (j), e ela abre a Fase 9.
+
+**O que a v2 não muda:** continua só lendo, lendo do disco japonês, sem tocar
+`roms/`, sem estender o `we2002_core`, e cada número vindo de ferramenta.
+
+### 10.2 O que já se sabe, e de onde
+
+- **As doze linhas, os domínios e os rótulos** estão no `looks.py` desde a
+  [`LOOKS-TASK-13`](/docs/tasks/looks/13-campos-e-dominios-de-looks.md), conferidos mecanicamente contra
+  o `src/core/Player.cpp`; `DEFAUL` e `NAT` não guardam nada e são o default por
+  nacionalidade do `data/defaultlook.txt` (armadilha 17 do perfil). O que
+  **não** está medido é o **texto** que a tela escreve para cada valor —
+  `A1 TYPE`, `175 cm`, `RIGHT` —, nem a caixa de ajuda.
+- **Os campos travam nas pontas e não dão a volta** (armadilha 14), medido nas
+  linhas de cor e de cabelo; nas outras seis, não.
+- **A pose não está nos dois arquivos de modelo.** Cada seção é modelada em
+  torno da própria origem (§6 (e)); a v1 desenha uma prateleira por isso.
+- **O `ANIME.BIN` existe no disco japonês e é cru.** Medido em 2026-09-17:
+
+  ```sh
+  MSYS_NO_PATHCONV=1 python tools/pes2/iso.py ls roms/japanese-shift-jis.bin
+  #  /BIN/ANIME.BIN   lba=3000   size=396804   form1
+  MSYS_NO_PATHCONV=1 python tools/pes2/lzss.py roms/japanese-shift-jis.bin --file /BIN/ANIME.BIN
+  #  /BIN/ANIME.BIN   396804 B  header 204 w -> stream at 816  none  0 block(s), 396804 B outside
+  ```
+
+  Cabeçalho de **204 palavras** de ponteiro KSEG0 — a mesma forma dos dois
+  arquivos de modelo (§1.2), com a largura que a §6.13 do
+  [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md) já contava. **Que o `ANIME.BIN`
+  é o que a tela usa é hipótese, pelo nome**: a
+  [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md) mede antes de qualquer leitor ser
+  escrito, como a [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) mediu os modelos antes
+  da Fase 3.
+- **`BODY` não escreve em nenhum dos dois arquivos de modelo** (§6 (a)), e
+  `HEIG` também não foi visto escrevendo; se os dois mudam o desenho, é na
+  transformação, e é por isso que a (s) mora na Fase 9.
+- **O uniforme mora nos `TEX_*.BIN`**, que não têm digest na guarda (§6 (f)).
+- **A forma não tem testemunha** (§6 (h)). Um boneco montado na pose do jogo é
+  o que a dá: a mesma silhueta no mesmo quadro passa a ser comparável.
+- **O emulador já chega à tela** pelos dois save states, com a captura
+  repetível pixel a pixel (§5.3), e o fork tem breakpoint de execução e de
+  escrita, leitura de registrador e de VRAM.
+
+### 10.3 As incógnitas da v2
+
+**(q) A tela — o que ela escreve e como anda.** O texto de cada valor de cada
+linha, o da caixa de ajuda, o comportamento do cursor nas pontas das doze
+linhas, e os valores iniciais que cada save state carrega. Texto de tela
+inventado a partir do rótulo é o erro que a armadilha 17 descreve.
+[`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md).
+
+**(r) `DEFAUL` e `NAT`.** Qual nação é qual valor da linha `NAT`, e se `DEFAUL`
+aplica exatamente a linha do `data/defaultlook.txt` — medido no jogo, nunca
+suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md).
+
+**(j) De onde vem a pose — o maior risco.** Três candidatos, e nenhum medido:
+o `ANIME.BIN` lido a cada quadro; matrizes calculadas em código a partir de
+poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
+`ANIME.BIN` antes de saber é o erro que a
+[`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md) existiu para não cometer.
+[`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md).
+
+**(k) A hierarquia e a convenção.** Rotação em ponto fixo 4.12, `y` para
+baixo — a v1 já desenha com `UP = -1` —, e se a matriz de cada peça é absoluta
+ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md).
+
+**(l) O formato do `ANIME.BIN`.** Os 204 ponteiros, o que cada um nomeia, e se a
+varredura fecha no EOF — o rito da Fase 1 (§1.4).
+[`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md).
+
+**(m) A câmera do jogo.** Projeção, deslocamento de tela e a translação da
+câmera, para que o nosso quadro e o do emulador sejam o mesmo desenho.
+[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
+
+**(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
+peça, ou nada — medido pela pose de dois valores de cada.
+[`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md).
+
+**(n) Qual `TEX_*.BIN` a tela veste.** A §6 (f): digest na guarda, o arquivo
+que o time dos save states usa, e as primitivas resolvidas.
+[`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
+
+**(o) O painel e o cenário.** Se o degradê, a borda, a barra de título, as
+faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do `EDT_2D.BIN`, ou
+polígonos da GPU. [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md).
+
+**(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
+interpola entre quadros-chave, e se o tronco que balança é da animação ou da
+câmera. [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
+
+### 10.4 Como se verifica
+
+**O gabarito é o emulador, no mesmo estado.** O `load_state` dá o baseline, e o
+`frame_step` e as teclas contadas a partir dele dão o estado N — é o que as
+Fases 2 e 6 já fazem. A v2 acrescenta três comparações, todas com controle
+antes do teste:
+
+1. **Tecla contra tecla, na tela.** A mesma sequência de teclas a partir do
+   `load_state`, no jogo e na nossa janela, e o texto de cada linha comparado
+   — o do jogo lido por ferramenta, nunca transcrito à mão. O controle é a
+   mesma sequência duas vezes no jogo, que tem de dar o mesmo texto.
+2. **Matriz contra matriz.** O que o nosso leitor diz para a peça P no quadro N
+   contra o que o GTE carregou para P no quadro N, lido por breakpoint. Ponto
+   fixo é inteiro: a comparação é **exata**, e qualquer diferença é achado.
+3. **Silhueta contra silhueta.** A máscara do boneco no nosso quadro contra a
+   do emulador, no mesmo N, com a câmera da (m). O controle é o emulador contra
+   ele mesmo em dois `load_state` — que já dá **zero pixel** (§5.3) — e um
+   quadro deslocado de propósito, que tem de dar diferença. **O limiar sai do
+   controle, e é escrito depois de medido e dito que foi.**
+
+**E a caminhada se confere em vários N, não em um.** Um quadro certo é pose;
+vários quadros certos em sequência é animação.
+
+### 10.5 As fases da v2
+
+| Fase | Tasks | O que entrega |
+|---|---|---|
+| 8 — a tela | 21 a 23 | a tela medida no jogo, a janela que a reproduz sobre a v1, e o default por nacionalidade |
+| 9 — montado | 24 a 29 | a fonte da pose, a pose de referência, o leitor do `ANIME.BIN`, as peças no lugar, a câmera do jogo, e altura e corpo |
+| 10 — vestido | 30 a 31 | o uniforme, e o painel e o cenário da tela |
+| 11 — andando | 32 a 35 | o ciclo medido, a janela animada, o goleiro, e o fechamento |
+
+**O que não pode ser pulado:**
+
+- **A 21 antes da 22.** Uma janela escrita antes de a tela ser medida inventa
+  o texto de cada valor, e o gate dela confere a invenção contra ela mesma.
+- **A 24 antes de tudo da Fase 9.** Leitor de formato escrito para o arquivo
+  errado lê perfeitamente e desenha outra coisa.
+- **A 25 antes da 26.** A pose capturada do jogo é o gabarito do leitor; sem
+  ela, um leitor plausível passa.
+- **A 28 antes de qualquer silhueta.** Comparar desenho com câmera diferente
+  mede a câmera.
+- **A 32 antes da 33.** Animar num ritmo inventado produz caminhada bonita e
+  errada.

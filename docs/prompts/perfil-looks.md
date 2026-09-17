@@ -22,6 +22,14 @@ Não se revertem sem o usuário pedir.
 
 - **v1 é só visualizador.** Não grava na imagem, não grava no cartão. Decisão do
   dono do repositório em 2026-09-13.
+- **A v2 é a tela `LOOKS SET` animada, e continua só lendo.** Decisão do
+  usuário em 2026-09-17: a janela é a própria tela do jogo — doze linhas
+  trocáveis, como os save states dos slots 1 e 2 a mostram — com o boneco
+  montado, vestido e caminhando, como uma gravação de tela dele mostra. **A
+  gravação é referência só visual**: não entra no git, e número nenhum sai
+  dela; quem mede é o emulador. O não-objetivo "não anima" da §0 do plano está
+  revogado para a v2; os outros continuam. **A tela vem antes da pose** por
+  pedido do usuário, não por risco: ela roda sobre a v1 como está.
 - **Dois discos, com papéis separados** (§1.3 do plano). `roms/japanese-shift-jis.bin`
   é a fonte de verdade dos **bytes**; o `.cue` inglês em
   `C:\games\ps1\work\we2002-english.cue` é o de **dirigir o emulador**, porque
@@ -553,3 +561,40 @@ sobre dado que pode não ser o que a tela desenha.
   destravaria. Cada afirmação da §1 que a execução desmentiu **corrigida no
   lugar**, com a data e o que ela dizia antes — o plano não ganha apêndice de
   erratas. E o `check_tasks.py` verde.
+- **Fase 8** — **todo texto que a janela mostra veio do jogo, lido por
+  ferramenta** — da tabela de texto em RAM ou das células capturadas —, nunca
+  do rótulo do `looks.py` nem de transcrição à mão (armadilha 17). O cursor foi
+  andado até as duas pontas nas **doze** linhas, não só nas de cor. A recusa é
+  **visível**: valor que o `assembly` recusa aparece na ajuda e não desenha a
+  cabeça de outro estilo. O gate dirige a janela por tecla, fora da tela, e a
+  comparação com o jogo é a mesma sequência de teclas a partir do
+  `load_state`, com a sequência repetida no jogo como controle. E `NAT` →
+  linha do `defaultlook.txt` é medido no jogo — casar por índice aplica o
+  default da nação errada com cara de certo.
+- **Fase 9** — a pergunta que decide a fase é a da Fase 2, um nível acima:
+  **o veredito sobre a fonte da pose distingue "medi e é isto" de "não achei o
+  contrário"?** Um `ANIME.BIN` que carrega na RAM não prova que a pose sai dele.
+  Toda captura de matriz sai de **quadro contado** a partir do `load_state`, e
+  duas capturas do mesmo quadro são idênticas número a número — e dois quadros
+  diferentes, diferentes, senão a captura lê uma constante. Matriz é ponto
+  fixo: a comparação do leitor contra o jogo é **exata**, e "quase igual" é
+  achado, não tolerância. Contagem do `ANIME.BIN` sempre com o offset de
+  partida, e a varredura até o EOF (Fase 1). Silhueta só se compara com a
+  câmera do jogo, e o limiar sai do controle — emulador contra emulador no
+  mesmo quadro dá zero, em quadro deslocado dá diferença —, escrito depois de
+  medido e dito que foi. `HEIG` e `BODY` se medem pela pose, nunca pela
+  suposição de escala linear.
+- **Fase 10** — toda leitura de `TEX_*.BIN` sai do **disco japonês**, pela
+  guarda, com o digest escrito antes do primeiro byte lido; a forma de cada
+  arquivo (form1 ou form2) **medida** no japonês, não herdada da
+  `golden-european-deluxe.bin`. Qual arquivo a tela veste se mede na VRAM, não
+  pelo nome nem pelo time. Cenário que é imagem sai do disco; cenário que é
+  polígono se desenha — e qual é qual, pela display list. E a revisão pergunta:
+  **o confronto de cor da Fase 6 foi re-rodado com o uniforme**, e as tuplas
+  continuam em primeiro?
+- **Fase 11** — o ritmo sai de `frame_step` contado, **nunca** da gravação do
+  usuário, que tem a cadência do gravador. Interpolação é medida contra quadros
+  que não são quadro-chave. A animação se confere em **vários** quadros do
+  ciclo, nos dois slots — um quadro certo é pose. Os gates desenham `--frame N`
+  determinístico; o timer é só para quem olha. Nenhuma janela aparece nos
+  gates; só o `.\make.ps1 looks` abre visível.
