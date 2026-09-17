@@ -99,13 +99,70 @@ abre com `0x9000040A`; e supõe que o ponteiro mais baixo mira logo depois da
 corrida, quando aqui ele mira o offset 912 e não o 816. Contra a base derivada,
 **279.034 bytes diferem** — que é justamente o controle vermelho do comando.
 
-### Gates, na árvore de `SHA_DA_TASK`
+### Gates, na árvore de `0b2d087`
 
-*(transcritos abaixo, depois do commit)*
+Tirados **depois** do commit da task, que é a regra do perfil.
+
+```text
+# na arvore de 0b2d087
+$ python tools/looks/selftest.py
+  ..... 75 of 75 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 6 of 6 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/oracle.py --pose          # os dois slots, identicos
+  /BIN/ANIME.BIN at 0x8017ee00: 396804 of 396804 byte(s) equal
+    control: the text object at 0x800C7B00 is read, so a read watchpoint
+    fires on this build
+    header entry 5 (0x8017EE14) read 3 time(s), by 0x800270B8
+    the state at 0x80076040 plays list 0x801947F4, frame 0x80194194
+    the frame is read by 0x80011E80, 0x80011E94, 0x80011EB0, 0x80011ECC
+    30 instruction(s) write the GTE's first matrix word; 5 run on this
+    screen: 0x80012168 x18, 0x8001229C x18, 0x8003C990 x2, 0x80010E38 x1,
+    0x800407C0 x1
+oracle --pose: 0 problem(s)
+```
+
+**O vermelho, na cópia da árvore com a base que o `derive_base()` calcula**
+(`ANIME_BASE = 0x8017EE60`):
+
+```text
+$ python <copia>/tools/looks/oracle.py --pose 2
+  /BIN/ANIME.BIN at 0x8017ee60: 117770 of 396804 byte(s) equal
+  FAIL  slot 2: 279034 of 396804 bytes of /BIN/ANIME.BIN differ at 0x8017ee60
+  FAIL  slot 2: none of the 204 header entries of /BIN/ANIME.BIN was read
+oracle --pose: 2 problem(s)
+```
 
 ### Arquivos criados/modificados
 
-*(conferidos contra `git show --stat --format= HEAD`)*
+Conferidos contra `git show --stat --format= HEAD`:
+
+- `tools/looks/layout.py` — `ANIME` (caminho, digest, LBA, tamanho),
+  `ANIMATION_FILES`, `ANIME_BASE` com a razão de o `derive_base()` falhar,
+  `ANIME_STATE` e seus três offsets, `ANIME_HEADER_WORDS`, `POSE_MATRIX` e
+  `POSE_MATRIX_SECOND`.
+- `tools/looks/oracle.py` — `--pose`: o arquivo contra a RAM, o controle do
+  watchpoint, as 204 entradas armadas de uma vez, a cadeia até o quadro, a
+  varredura de `ctc2` e as instruções que rodam; mais os casos de self-check
+  da varredura.
+- `tools/looks/controls.py` — dois controles plantados novos
+  (`oracle-matrix-scan-takes-any-ctc2`,
+  `oracle-matrix-scan-skips-the-last-word`).
+- `docs/PLAN-LOOKS-PY.md` — §10.3 (j) com o veredito datado, e a §6 (e)
+  corrigida no lugar.
+- `docs/prompts/perfil-looks.md` — armadilhas 42, 43 e 44, e a linha do
+  `--pose` na tabela de gates.
+- `docs/tasks/looks/25-a-pose-de-referencia.md` e
+  `docs/tasks/looks/26-o-formato-do-anime-bin.md` — o que esta task deixou
+  para cada uma, escrito **na task de destino**.
+- `docs/tasks/looks/progresso.md` e este arquivo.
 
 ### Problemas encontrados
 
