@@ -273,6 +273,16 @@ Não se revertem sem o usuário pedir.
     qualquer projeto. Todo recurso adquirido no `__enter__` se solta ali mesmo
     se o resto dele falhar. Medido em 2026-09-17
     ([`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md)).
+32. **O servidor MCP do fork guarda UMA sessão, e o editor é um segundo
+    cliente.** O `.mcp.json` registra o fork na porta 2346 no escopo do projeto;
+    um `initialize` de qualquer outro cliente invalida a sessão de quem a tinha,
+    e a próxima chamada volta `HTTP 400 ... missing or invalid MCP-Session-Id`.
+    Medido em 2026-09-17, **3 de 3** com um segundo cliente de propósito
+    ([`CORR-LOOKS-051`](/docs/tasks/looks/CORR-LOOKS-051.md)) — é o vermelho
+    sem causa que o `looks_live` deu uma vez em catorze. O `oracle.OneSession`
+    refaz o `initialize` **uma vez** e imprime `MCP session taken by another
+    client`; ver essa linha num Log é sinal de dois clientes na porta, e perder
+    de novo logo depois do novo handshake falha — não é caso de rodar até passar.
 
 ---
 

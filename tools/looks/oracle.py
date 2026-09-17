@@ -513,6 +513,52 @@ def hide_window(handle) -> bool:
 
 # --- the session ----------------------------------------------------------
 
+SESSION_LOST = "invalid MCP-Session-Id"
+"""What the fork answers when the session this client holds is no longer its.
+
+**The server keeps one session.**  Measured 2026-09-17, three runs of three:
+a second client's `initialize` on the same port makes the first client's next
+call fail with exactly this, and every call after it (CORR-LOOKS-051).  This
+repository registers the fork in `.mcp.json`, so the editor is a second client
+on port 2346, and one `looks_live` run in fourteen lost its session at the first
+`pause` that way."""
+
+
+class OneSession:
+    """The fork's MCP client, handshaken again ONCE when its session is taken.
+
+    Once per loss, and said every time, never silently: a call refused for a
+    lost session was refused before it ran, so repeating it after a new
+    `initialize` is the same call and not a second one.  A loss right after
+    the new handshake raises -- two clients fighting over the port is a
+    machine to fix, not a run to repeat until it passes.
+    """
+
+    def __init__(self, client):
+        self._client = client
+        self.renewed = 0
+
+    def call(self, name, **arguments):
+        import mcp
+
+        try:
+            return self._client.call(name, **arguments)
+        except mcp.ToolError as exc:
+            if SESSION_LOST not in str(exc):
+                raise
+        self._client.session = None
+        self._client.server = None
+        self._client.initialize()
+        self.renewed += 1
+        print("  MCP session taken by another client on the port -- "
+              "initialised again before %s (%d time(s) this run)"
+              % (name, self.renewed), flush=True)
+        return self._client.call(name, **arguments)
+
+    def __getattr__(self, attribute):
+        return getattr(self._client, attribute)
+
+
 class Oracle:
     """A booted game, paused, with an MCP session against it.
 
@@ -546,6 +592,7 @@ class Oracle:
                 cue, verbose=self.verbose, match=fork.ANY_WINDOW)
         except fork.Skip as exc:
             raise Unavailable(str(exc)) from None
+        self.client = OneSession(self.client)
         # From here on the emulator is up, and `__exit__` does not run for an
         # exception raised inside `__enter__`.  The first `looks_live` run
         # under ctest lost its MCP session at this `pause()` and left the
@@ -2555,6 +2602,51 @@ def self_check(verbose: bool = True) -> int:
 
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
+
+    # The session taken by another client, on a fake server (CORR-LOOKS-051).
+    import io
+    import contextlib
+    import mcp
+
+    class Fake:
+        def __init__(self, losses, other=False):
+            self.losses, self.other = losses, other
+            self.session, self.server, self.handshakes, self.calls = "s", {}, 0, 0
+
+        def initialize(self):
+            self.handshakes += 1
+            self.server = {}
+
+        def call(self, name, **arguments):
+            self.calls += 1
+            if self.other:
+                raise mcp.ToolError("HTTP 500 from the server: something else")
+            if self.losses:
+                self.losses -= 1
+                raise mcp.ToolError("HTTP 400 from the server: Bad Request: "
+                                    "missing or invalid MCP-Session-Id")
+            return "done"
+
+    once = Fake(1)
+    wrapped = OneSession(once)
+    said = io.StringIO()
+    with contextlib.redirect_stdout(said):
+        answer = attempt("a call whose session was taken",
+                         lambda: wrapped.call("pause"))
+    ok("a lost session is handshaken again once, and the call goes through",
+       answer == "done" and once.handshakes == 1 and wrapped.renewed == 1,
+       "%r %d" % (answer, once.handshakes))
+    ok("and it says so", "taken by another client" in said.getvalue())
+    twice = OneSession(Fake(2))
+    with contextlib.redirect_stdout(io.StringIO()):
+        c.refusing(mcp.ToolError)("lost again right after the new handshake "
+                                  "raises", lambda: twice.call("pause"),
+                                  "MCP-Session-Id")
+    other = Fake(0, other=True)
+    c.refusing(mcp.ToolError)("any other refusal raises with no handshake",
+                              lambda: OneSession(other).call("pause"),
+                              "something else")
+    ok("and handshakes nothing", other.handshakes == 0)
     refuses_disc = c.refusing(WrongDisc)
     refuses_screen = c.refusing(NotArrived)
     refuses_ram = c.refusing(RamMismatch)

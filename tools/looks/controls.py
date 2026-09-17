@@ -136,6 +136,16 @@ CONTROLS = (
         "the claim that says where the texture comes from",
     ),
     Control(
+        "oracle-session-never-renewed", "oracle.py", "OneSession.call",
+        "            if SESSION_LOST not in str(exc):",
+        "            if True:",
+        ("oracle",),
+        "a session taken by another client on the fork's port, not handshaken "
+        "again: the run dies at its first call, red for no cause in the "
+        "tool, and whoever reads it learns to rerun until green "
+        "(CORR-LOOKS-051)",
+    ),
+    Control(
         "oracle-preflight-late", "oracle.py", "PREREQUISITES",
         '    ("image", image_to_read),',
         '    # ("image", image_to_read),',
