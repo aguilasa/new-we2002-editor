@@ -223,11 +223,14 @@ Cada uma custou tempo real nesta máquina. A lista completa é a §8 do plano.
    e geometria idêntica; o `DAT2D.BIN` dele **difere**. Ler paleta no inglês
    entrega gráfico diferente **sem erro nenhum**.
 2. **A varredura contígua morre na seção 55 do `MODEL.BIN`** e parece formato
-   errado. É o par de zeros que separa grupos.
+   errado. É a corrida de palavras zero que separa grupos — 8 bytes lá, 12 nas
+   duas primeiras folgas do `EDT_MOD.BIN`; dizia "o par de zeros" até
+   2026-09-17.
 3. **`MSYS_NO_PATHCONV=1`** ou o caminho de dentro do ISO vira caminho Windows,
    e o erro culpa a coisa errada — diz que o arquivo não é form1.
 4. **`bin_archive.py` responde `0 clut(s)` sem reclamar.** Ler isso como "não
-   tem paleta" é erro; a lista existe e o varredor não a acha.
+   tem paleta" é erro; a lista existe, e o que a esconde é o campo 7 do
+   registro, que é banco de 64 KiB e não tag (§1.7).
 5. **Círculo confirma e precisa de 8 frames.** Com 3 a tela fica igual, o que
    parece botão errado.
 6. **Uma tecla de cada vez.** Confirmação em laço fecha a caixa seguinte junto.
@@ -256,8 +259,9 @@ new-we2002-editor/
 │       └── correcoes-progresso.md
 ├── tools/looks/
 │   ├── iso_source.py layout.py section.py modelfile.py
-│   ├── texture.py looks.py assembly.py oracle.py
-│   ├── harness.py controls.py selftest.py cli.py
+│   ├── texture.py atlas.py skin.py pieces.py looks.py assembly.py scene.py
+│   ├── oracle.py confront.py corpus.py
+│   ├── harness.py controls.py selftest.py superpack_count.py cli.py
 │   ├── ui_check.py
 │   └── ui/app.py ui/viewer.py
 └── work/venv-looks/                  ← fora do git

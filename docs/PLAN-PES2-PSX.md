@@ -755,6 +755,37 @@ O byte baixo do campo 0 é `0x0a` para **imagem** e `0x09` para **CLUT**; o
 byte alto é 0 em toda imagem e varia nos CLUT. Listas terminam na halfword
 `0x00ff`. A carga de uma imagem é um fluxo LZSS; a de um CLUT é **crua**.
 
+> **Dívida aberta, medida por outro ciclo em 2026-09-15 e 2026-09-17: o campo
+> 7 não é tag constante.** O ciclo do visualizador de aparência mediu, no
+> `DAT2D.BIN` do WE2002, que ele é o **banco de 64 KiB** do offset de 16 bits do
+> campo 6, com viés para que o banco 0 valha `0x800f`:
+> `offset = campo[6] + (campo[7] - 0x800F) * 0x10000`. A prova é que, com o
+> banco, o fluxo LZSS de cada registro descomprime exatamente para o retângulo
+> que o registro declara (§1.7 do
+> [`PLAN-LOOKS-PY.md`](/docs/PLAN-LOOKS-PY.md), com a tabela de seis
+> contêineres).
+>
+> **E alcança este projeto.** Numa cópia da `(EsIt)`, em 2026-09-17
+> ([`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)):
+>
+> ```text
+> $ python tools/looks/texture.py --survey "<copia>/…(Es,It) (Track 1).bin"
+>   a fixed tag word would find 1750 -- so reading the bank as a bank costs 78 record(s) in 5 file(s)
+>       outside /BIN/DAT2D.BIN: 78 record(s) in 5 file(s) -- DAT_CG.BIN 39, ENDCSR.BIN 16, EDTR_2D.BIN 11, DATSEL_I.BIN 7, DATSEL2I.BIN 5
+>
+> $ python tools/pes2/bin_archive.py ls "<copia>/…(Es,It) (Track 1).bin" --file /BIN/<X>.BIN
+> /BIN/DAT_CG.BIN          101124 B   0 image(s), 0 clut(s)
+> /BIN/ENDCSR.BIN          136492 B   13 image(s), 0 clut(s), 1 of another kind
+> /BIN/EDTR_2D.BIN          98240 B   0 image(s), 0 clut(s)
+> /BIN/DATSEL_I.BIN        214232 B   0 image(s), 0 clut(s)
+> /BIN/DATSEL2I.BIN        143848 B   0 image(s), 0 clut(s)
+> ```
+>
+> Quatro contêineres fora do índice do `bin_archive.py`, e um em parte. **Não
+> foi consertado**: o `bin_archive.py` é deste projeto, o pool de correções não
+> atravessa pasta, e mexer nele é decisão do usuário — com o `pes2_selftest`
+> e o `pes2_image` verdes no critério. A `(EnFrDe)` não foi medida.
+
 **Onde a lista mora não é fixo, e por isso ela é achada, não calculada.**
 `DAT2D.BIN` põe os 21 registros de imagem numa lista só depois do último
 fluxo, e uma segunda lista de 266 CLUTs depois dela; `TEX_00.BIN` põe **um**

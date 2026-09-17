@@ -51,8 +51,14 @@ Não se revertem sem o usuário pedir.
    nenhuma mensagem. É a razão de a LOOKS-TASK-02 plantar uma guarda por digest
    em vez de confiar em disciplina.
 2. **A varredura contígua morre na seção 55 do `MODEL.BIN`.** Parece formato
-   errado e é o par de zeros que separa grupos (§1.4). Foi o primeiro tropeço da
-   sessão de investigação.
+   errado e é a **corrida de palavras zero** que separa grupos (§1.4). Foi o
+   primeiro tropeço da sessão de investigação. Esta linha dizia *"o par de zeros"*
+   até 2026-09-17, e o par é a leitura que quebra: a corrida tem 8 bytes no
+   `MODEL.BIN` — onde a forma fixa funciona por coincidência — e **12** nas duas
+   primeiras folgas do `EDT_MOD.BIN`. Um varredor que consome sempre 8 cai 4
+   bytes dentro do cabeçalho seguinte e lê `nPrim` na casa dos bilhões — o mesmo
+   sintoma da seção 55, pela regra oposta
+   ([`LOOKS-TASK-04`](/docs/tasks/looks/04-formato-de-secao.md)).
 3. **O `EDT_MOD.BIN` é contíguo do offset 216 ao EOF**, e a lista serve para
    outra coisa. Esta armadilha dizia *"não é contíguo — varrer do começo sem a
    lista pega uma seção e para"*, e foi remedida em 2026-09-14
@@ -292,7 +298,7 @@ Não se revertem sem o usuário pedir.
 | --- | --- | --- |
 | geometria | `/BIN/EDT_MOD.BIN`, `/BIN/MODEL.BIN` | igual nos dois discos |
 | textura e paleta | `/BIN/DAT2D.BIN` | **só o japonês** |
-| registros de jogador | `/SELECT.BIN` +157.164, 1.242 × 12 B | japonês (a conferir na 13) |
+| registros de jogador | `/SELECT.BIN` +157.164, **1.449** × 12 B — dizia 1.242, o número do Superpack, até a LOOKS-TASK-13 medir (armadilha 16) | japonês |
 | corpus de render | 50 JPGs do Superpack | terceiro, fora do git |
 
 Leitura pura em todas. **Nenhuma task deste ciclo escreve em imagem de CD** —
@@ -417,8 +423,10 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 
 - `tools/looks/layout.py` — todo endereço passa por aqui. Duas tasks editando
   este arquivo ao mesmo tempo se atropelam.
-- `tools/pes2/bin_archive.py` — **arquivo de outro projeto**. A LOOKS-TASK-10
-  pode precisar mexer nele; se mexer, o `pes2_selftest` tem de continuar verde,
+- `tools/pes2/bin_archive.py` — **arquivo de outro projeto**, e o ciclo **não o
+  tocou**: a LOOKS-TASK-10 leu as paletas pelo `texture.py`, e a dívida do campo
+  7 ficou registrada no plano de PES2 pela LOOKS-TASK-20. Se alguém mexer nele
+  por aqui, o `pes2_selftest` tem de continuar verde,
   e isso entra no critério de conclusão, não na esperança.
 - `tests/CMakeLists.txt` — os quatro alvos entram aqui, junto com os dos outros
   quatro projetos.

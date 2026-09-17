@@ -805,6 +805,75 @@ variável ele passa com a janela sozinha e imprime `note: no WE2002_MCR_CARD, so
 the write probe did not run`. Leia a linha, não o `Passed` — é a mesma armadilha
 que a receita de PES2 registra.
 
+## Visualizador de aparência — projeto separado, em `tools/looks/`
+
+Um **sexto projeto**, aberto em 2026-09-14 e com o ciclo fechado em 2026-09-17:
+um visualizador Python + Qt do **modelo 3D do jogador** que o WE2002 desenha na
+tela `LOOKS SET`, lendo geometria, textura e paleta **direto do disco**. Núcleo
+Python puro em `tools/looks/`, UI **PySide6** em `tools/looks/ui/`, desenho por
+`QOpenGLWidget`. **v1 só lê**: não grava na imagem nem no cartão, por decisão
+do dono do repositório.
+
+O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
+[docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
+`CORR-LOOKS-`, perfil [docs/prompts/perfil-looks.md](docs/prompts/perfil-looks.md),
+e roda por `/executar looks`. Não estende o `we2002_core` e não compartilha
+build; o que empresta é leitura de disco de `tools/pes2/` (`iso.py`, `lzss.py`,
+`mcp.py`, `fork.py`) e conhecimento de formato.
+
+**Dois discos, e cada um serve para uma coisa.** Os dois arquivos de modelo
+são byte a byte iguais no japonês e na tradução inglesa; o `DAT2D.BIN`, que tem
+textura e paleta, **difere**. Ler paleta do inglês entrega gráfico errado sem
+erro nenhum — por isso são variáveis separadas, e o `layout.py` confere o
+digest de todo arquivo que lê e **recusa** o disco errado:
+
+| variável | aponta | serve para |
+|---|---|---|
+| `WE2002_LOOKS_IMAGE` | a trilha de dados **japonesa** (`.bin`) | toda leitura |
+| `WE2002_LOOKS_DRIVE_IMAGE` | o **`.cue` inglês** | dirigir o emulador, com menus legíveis |
+| `WE2002_LOOKS_STATES` | a pasta dos dois save states (default `work/looks-states/`) | chegar à tela: slot 1 goleiro, slot 2 jogador de linha |
+| `WE2002_LOOKS_CORPUS` | os 50 JPGs do Superpack, pasta do usuário | o corpus de terceiro |
+
+**O venv é `work/venv-looks/`**, com PySide6 por `pip`, e o interpretador se
+chama **por caminho** (`work/venv-looks/Scripts/python.exe` no Windows,
+`work/venv-looks/bin/python` no Linux) — receita que depende de `activate` não
+se reproduz num agente sem estado de shell. O núcleo não precisa dele.
+
+| Comando | O que faz |
+|---|---|
+| `python tools/looks/selftest.py` | o gate **obrigatório**: os self-checks, as três regras de desenho e os controles negativos plantados |
+| `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os oito `--check-image` e é o alvo `looks_image` |
+| `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py --looks A-I3-A-E-A --screenshot out.png` | desenha uma tupla fora da tela; tupla que a tabela recusa sai **2** |
+| `python tools/looks/ui_check.py` | o alvo `looks_ui`: julga os PNGs de fora, sem o código sob teste |
+| `python tools/looks/oracle.py --check-live` | o alvo `looks_live`: sobe o fork, carrega os states e confere a RAM contra o disco |
+| `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
+| `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
+
+No `ctest` são quatro alvos: **`looks_selftest`**, que não precisa de nada e
+nunca pula; **`looks_image`**, que precisa de `WE2002_LOOKS_IMAGE`;
+**`looks_ui`**, que precisa do venv, da imagem e de onde pôr janela; e
+**`looks_live`**, que precisa das duas variáveis, dos states e do fork, e tem
+`RESOURCE_LOCK duckstation` junto com o `pes2_boot`. Numa máquina limpa,
+`ctest -R looks` dá **1 passed, 3 skipped**.
+
+Quatro coisas que custam tempo se descobertas tarde:
+
+- **`ctest -R <padrão>` que não casa nada sai 0**, com `No tests were
+  found!!!`. Nenhum diretório de build do worktree lista os alvos de `looks`
+  nesta máquina Windows; a corrida sai de um build **fora da árvore**,
+  `cmake -S . -B <fora> -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake`.
+  Confira os nomes dos alvos na saída, não o código de saída.
+- **`MSYS_NO_PATHCONV=1`** no Git Bash para toda ferramenta de `tools/pes2/`
+  que receba caminho de dentro do ISO: `/BIN/EDT_MOD.BIN` vira
+  `C:/Program Files/Git/BIN/…`, e o erro acusa "not a Form 1". As de
+  `tools/looks/` não recebem esse caminho — ele é constante do `layout.py`.
+- **O emulador é um só**, e os dois `.sav` são fixture: a cópia mestra fica em
+  `work/looks-states/`, e o slot do DuckStation é rascunho restaurado dela.
+- **O boneco sai numa prateleira, com o uniforme cinza, e isso é medição, não
+  defeito.** A pose não está em arquivo lido e os `TEX_*.BIN` do uniforme não
+  têm digest na guarda; as duas estão abertas na §6 do plano, com o que as
+  destravaria.
+
 ## Arquitetura
 
 ### Layout do repositório (pós-Fase 5)

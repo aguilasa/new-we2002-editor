@@ -1,6 +1,13 @@
 # Plano — visualizador 3D da aparência do jogador, em Python + Qt
 
-> **Estado: plano escrito em 2026-09-14, nenhuma fase executada.**
+> **Estado: as oito fases executadas, e o ciclo fechado em 2026-09-17** pela
+> [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md). Este
+> banner dizia *"plano escrito em 2026-09-14, nenhuma fase executada"*. O que a
+> execução mudou está **na seção que mudou**, com a data e o que ela dizia
+> antes; o índice dessas mudanças são as tasks e as `CORR-LOOKS-*` que cada
+> seção cita. O que ficou aberto está na §6, com a razão e o que destravaria
+> cada item; a definição de pronto da §0 foi percorrida item a item, com o
+> resultado ao lado.
 >
 > Este arquivo é a **fonte de verdade** do projeto `looks`, o sexto deste
 > repositório, ao lado do `newWe2002`, do `wte/`, do PES2 e do port do `.mcr`.
@@ -80,6 +87,19 @@ mudança; é esse comportamento que se reproduz.
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
    **medida e explicada**.
+
+#### A definição de pronto, percorrida em 2026-09-17
+
+Pela [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md),
+item a item, com a ferramenta de cada um:
+
+| item | resultado | medido por |
+|---|---|---|
+| 1 | **cumprido.** `EDT_MOD.BIN` a partir de 216: 20 seções, 1.218 vértices, 1.074 primitivas, para em 36.072, o fim do arquivo; `MODEL.BIN` a partir de 1816: 106 seções, 2.461, 1.767, para em 64.800, o fim do arquivo | `cli.py sections` |
+| 2 | **cumprido.** As onze de cada lista nomeadas, e o jogo concorda | `pieces.py --check-image`, dentro do `cli.py check` |
+| 3 | **cumprido na metade que o item mede, com uma ressalva na palavra "boneco".** `A-I3-A-E-A` sai 0 e grava o PNG; a cabeça traz a pele, o cabelo e a barba da tupla, olhada. `A-H1-A-A-A` recusa com a mensagem do `assembly.HAIR_MAP` e sai **2**. O que a imagem **não** é: um boneco montado. As peças saem numa prateleira, porque a pose não está em arquivo lido (§6 (e)), e 237 primitivas saem sem textura, porque as páginas delas são dos `TEX_*.BIN` (§6 (f)) | `ui/app.py --screenshot --looks` |
+| 4 | **cumprido.** 1 passed, 3 skipped numa máquina limpa, os quatro alvos listados pelo nome | `ctest -R looks`, no Log da LOOKS-TASK-20 |
+| 5 | **cumprido.** Os dois slots se repetem pixel a pixel a partir do `load_state`; cinco tuplas pontuadas e uma recusa em cada: 3 `win`, 2 `ranked`, 0 sem explicação; e a display list decide a diagonal pela ordem guardada | `confront.py --score` |
 
 ---
 
@@ -526,6 +546,16 @@ diz **qual** dos modelos de lá — e é onde a hipótese do `we3d`, de 14 jogad
 de 11 peças, se confere. A linha está escrita na
 [`LOOKS-TASK-08`](/docs/tasks/looks/08-de-onde-vem-o-boneco.md).
 
+**Veredito de 2026-09-17, na reconciliação
+([`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md)):
+continua aberto, e deixou de ser pergunta do visualizador.** A incógnita (a)
+concluiu que o boneco vem dos **dois** arquivos: do `MODEL.BIN` só a cabeça, e
+qual cabeça é escolhida pelo `HAIR` entre as seções do bloco 24..55 (§6 (c)).
+Nenhuma medição do ciclo leu as duas corridas nem conferiu os 14 jogadores, e
+nada no código depende deles — a hipótese do `we3d` fica como ele a escreveu,
+não confirmada. Destravaria: um breakpoint de leitura nas duas corridas, com a
+tela mudando de time.
+
 ### 1.6 A primitiva **tem** UV — a contradição era de leitura
 
 Esta seção se chamava *"A tela desenha com textura, e o formato de seção não tem
@@ -625,13 +655,16 @@ medidos numa sessão que não se reproduz a partir dos states, e **nada deste ci
 pode ser construído sobre eles** — continuam registrados aqui como o que foram, e
 o `layout.TMD_CLAIMED` carrega a mesma ressalva ao lado dos endereços.
 
-### 1.7 As texturas de aparência moram no `DAT2D.BIN`, e falta a lista de paletas
+### 1.7 As texturas de aparência moram no `DAT2D.BIN`, e a lista de paletas — ACHADA
 
 ```sh
 MSYS_NO_PATHCONV=1 python tools/pes2/bin_archive.py ls \
   roms/japanese-shift-jis.bin --file /BIN/DAT2D.BIN
 #  /BIN/DAT2D.BIN   81124 B   23 image(s), 0 clut(s)
 ```
+
+*O título desta seção dizia "e falta a lista de paletas" até 2026-09-17; a
+lista foi achada em 2026-09-15, abaixo.*
 
 As 23 imagens saem inteiras, com as coordenadas de VRAM que o modelo vai
 precisar. O que o `bin_archive.py` imprime de cada uma é
@@ -708,8 +741,29 @@ retângulo que o próprio registro declara; sem ele, não:
 | `DATSEL.BIN` | 223.496 | `0x8012` | +3 | 6 de 6 |
 
 A constante `0x800f` funciona em todo contêiner cujo payload cabe nos primeiros
-64 KiB, que é **todo contêiner dos quatro discos da família PES2** que o outro
-projeto mediu. Ela nunca esteve errada lá, e nunca esteve certa.
+64 KiB. **Nos discos de PES2 isso não é todo contêiner** — medido em 2026-09-17
+pela [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md),
+numa cópia da `(EsIt)`. Esta frase dizia *"que é todo contêiner dos quatro
+discos da família PES2 que o outro projeto mediu. Ela nunca esteve errada lá"*,
+e a própria seção, parágrafos abaixo, dizia o contrário:
+
+```text
+$ python tools/looks/texture.py --survey "<copia>/…(Es,It) (Track 1).bin"
+  the sweep as it stands: 1828 record(s) in 144 file(s)
+  a fixed tag word would find 1750 -- so reading the bank as a bank costs 78 record(s) in 5 file(s)
+      outside /BIN/DAT2D.BIN: 78 record(s) in 5 file(s) -- DAT_CG.BIN 39, ENDCSR.BIN 16, EDTR_2D.BIN 11, DATSEL_I.BIN 7, DATSEL2I.BIN 5
+
+$ python tools/pes2/bin_archive.py ls "<copia>/…(Es,It) (Track 1).bin" --file /BIN/<X>.BIN
+/BIN/DAT_CG.BIN          101124 B   0 image(s), 0 clut(s)
+/BIN/ENDCSR.BIN          136492 B   13 image(s), 0 clut(s), 1 of another kind
+/BIN/EDTR_2D.BIN          98240 B   0 image(s), 0 clut(s)
+/BIN/DATSEL_I.BIN        214232 B   0 image(s), 0 clut(s)
+/BIN/DATSEL2I.BIN        143848 B   0 image(s), 0 clut(s)
+```
+
+Quatro contêineres de PES2 **inteiros** fora do índice, e um em parte. A dívida
+está registrada no [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md), na seção do
+índice do contêiner; o conserto é decisão do usuário.
 
 **O que o arquivo guarda, e como se sabe que a leitura fechou.** A lista de
 imagens termina em 65.878; o banco de paletas começa em **65.892**, depois de
@@ -832,8 +886,10 @@ medido aqui, e mexer nele para servir a um arquivo de um quinto disco moveria o
 chão de um gate alheio sem entregar nada que o `texture.py` já não entregue.
 **A correção do modelo de registro — o campo 7 é banco, não tag — é dívida com o
 ciclo de PES2**, onde ela vale para `DAT_CG.BIN`, `DATSEL2I.BIN`, `DATSEL_I.BIN`
-e `EDTR_2D.BIN` também; está registrada na
-[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).
+e `EDTR_2D.BIN` também — e para o `ENDCSR.BIN`, em parte, que esta lista não
+tinha até a medição de 2026-09-17 acima. A
+[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) a
+registrou no [`PLAN-PES2-PSX.md`](/docs/PLAN-PES2-PSX.md).
 
 ### 1.8 A contradição da cena — RESPONDIDA: o cabelo é o 3.568
 
@@ -1197,6 +1253,8 @@ oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)
 controls.py     controles negativos por substituição literal no fonte
 selftest.py     o agregador -- alvo looks_selftest
+superpack_count.py  o tamanho do Superpack que o NOTICE.md afirma, contado
+                (LOOKS-TASK-01), e não somado à mão
 cli.py          sections | pieces | texture | looks | check -- e o check,
                 que roda os oito --check-image, é o alvo looks_image (4.4)
 ui/app.py       --smoke, --screenshot, --looks TUPLA
@@ -1842,12 +1900,21 @@ dedução:
 
 - **três estilos** — `H1`, `M1`, `N1` — não escreveram nada, e **três seções
   pares** — 38, 40, 42 — nunca foram nomeadas; o `head_of` **recusa** os três
-  em vez de devolver a cabeça de outro → [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md);
+  em vez de devolver a cabeça de outro. Esta linha apontava para a
+  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md); o
+  confronto **não** os resolveu — o `A-H1-A-A-A` é a recusa das duas linhas da
+  matriz dele. **Continua ABERTO em 2026-09-17**: `scene.py --corpus` ainda
+  recusa `A-H1-A-A-A` e `D-H1-A-A-A`. Destravaria: ler, com o estilo na tela,
+  **o que o jogo desenha** — a display list ou a VRAM —, já que nenhum dos dois
+  arquivos de modelo é escrito;
 - **os quads de nove das treze cabeças**, cujo escritor o breakpoint não
   achou, e — para os dez estilos de faixa múltipla — **qual quad recebe qual
-  faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)) →
+  faixa** ([`CORR-LOOKS-028`](/docs/tasks/looks/CORR-LOOKS-028.md)). A
   [`LOOKS-TASK-15`](/docs/tasks/looks/15-visualizador-opengl.md) desenha com a
-  marca `BAND NOT MEASURED`;
+  marca `BAND NOT MEASURED`, e o `layout.HAIR_QUADS` continua com as quatro
+  cabeças de 2026-09-16. **ABERTO**; destravaria um watchpoint de escrita no `v`
+  dos quads de uma das nove — a seção 30 é a candidata, porque é onde a regra
+  óbvia está medida como errada;
 - ~~o mapa foi medido só no jogador de linha~~ — **fechado em 2026-09-16**
   ([`CORR-LOOKS-047`](/docs/tasks/looks/CORR-LOOKS-047.md)): andado no goleiro
   (`oracle.py --patched HAIR 1`), o mapa volta **igual valor a valor**, nas
@@ -1857,8 +1924,12 @@ dedução:
   cabeças. A figura 1 veste o `assembly.HAIR_MAP_GOALKEEPER`, e os goleiros do
   disco recusados por estilo de cabelo caíram de **136 para 4** dos 179;
 - **a comparação desenho contra desenho** do corpus, que aqui foi feita por
-  altura de malha e não por pixel →
-  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md).
+  altura de malha e não por pixel — **feita em 2026-09-16**, pela
+  [`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) contra o
+  emulador (§5.3) e pela
+  [`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) contra
+  os 50 JPGs (§5.4), por histograma de cor. O que ela não alcança é a (h)
+  abaixo.
 
 O que se sabe é isto:
 
@@ -2067,6 +2138,60 @@ nenhuma cor de vértice — o índice sai do texel, e a cor sai da **janela de
 dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
 256, nunca do registro inteiro.
 
+### As que ficaram abertas
+
+Esta seção tinha quatro incógnitas, e as quatro estão respondidas acima. A
+execução abriu outras cinco, que **não** estavam aqui até 2026-09-17: a
+[`LOOKS-TASK-17`](/docs/tasks/looks/17-confronto-com-o-emulador.md) e a
+[`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) as
+encaminharam à
+[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md), que as
+escreve aqui. Nenhuma é respondida; cada uma diz **por que** está aberta e o que
+a destravaria.
+
+**(e) A pose — ABERTA.** Onde cada peça fica **não está em arquivo lido**:
+cada seção é modelada em torno da própria origem, e desenhar as doze nas
+coordenadas do disco empilha o boneco num ponto só (armadilha 24 do perfil). O
+visualizador desenha uma **prateleira** (`scene.shelf`) e diz que é uma. O
+confronto não precisou da pose porque a métrica é de cor. *Por que está
+aberta:* quem posiciona é o jogo, e o que se leu dele — a display list — dá
+coordenada de **tela**, depois da transformação, não de modelo. *Destravaria:*
+achar a matriz por peça em RAM, ou a animação parada do `ANIME.BIN`, que o §0
+põe fora do escopo.
+
+**(f) O uniforme — ABERTA.** Das 593 primitivas da figura 0, **237** amostram
+páginas que não são do `DAT2D.BIN` (629 e 429 na figura 1), medido pelo
+`assembly.py --check-image`; são as dos 105 `TEX_*.BIN`, e saem sem textura.
+*Por que está aberta:* os `TEX_*.BIN` não têm digest no `layout.py`, e a guarda
+dos dois discos não pode deixar ler o que não sabe conferir; o confronto foi
+feito na cabeça para não depender deles. *Destravaria:* os digests dos
+`TEX_*.BIN` japoneses na guarda, e a regra de qual deles cada time veste.
+
+**(g) Sete quads da cabeça fora da display list — ABERTA.** No quadro de
+referência, das 18 primitivas da cabeça, 7 vêm na ordem guardada, 4 são gêmeas
+de espelho e **7 não aparecem** nas duas faixas lidas (`confront.py --score`,
+`absent 7`). *Por que está aberta:* a hipótese é descarte de face de costas para
+a câmera do jogo, e não foi medida. *Destravaria:* girar a câmera do jogo — ou
+ler a display list noutro quadro da animação — e ver se o conjunto ausente
+muda.
+
+**(h) A forma não tem testemunha — ABERTA.** Histograma de cor resolve pele,
+cor de cabelo e cor de barba, e **não** resolve estilo de cabelo nem barba —
+nem contra os quadros do emulador, onde a verdade é conhecida
+(`corpus.py --score`, o controle; §5.4). Nenhum dos dois confrontos verifica,
+então, que a **malha** desenhada é a do estilo certo; quem verifica isso hoje é
+só o `oracle.py --patched` da
+[`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), pela seção que o
+jogo escreve. *Por que está aberta:* uma métrica de forma precisa de pose e
+câmera iguais às do jogo, e a pose é a (e). *Destravaria:* a (e), e depois uma
+comparação de silhueta no mesmo quadro.
+
+**(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
+ponteiros (§1.5), onde a hipótese do `we3d` de 14 jogadores de 11 peças seria
+conferida. *Por que está aberta:* a (a) respondeu de onde vem o boneco sem
+passar por elas, e nada no visualizador as usa. *Destravaria:* um breakpoint de
+leitura nas duas, com a tela trocando de time.
+
 ---
 
 ## 7. Fases
@@ -2101,7 +2226,10 @@ dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
 ## 8. Armadilhas conhecidas
 
 1. **A varredura ingênua morre na seção 55 do `MODEL.BIN`** e parece formato
-   errado. É o par de zeros entre grupos (§1.4).
+   errado. É a **corrida de palavras zero** entre grupos (§1.4) — 8 bytes no
+   `MODEL.BIN`, 12 nas duas primeiras folgas do `EDT_MOD.BIN`. Dizia *"o par de
+   zeros"* até 2026-09-17, e um varredor que consome um par fixo cai 4 bytes
+   dentro do cabeçalho seguinte do `EDT_MOD.BIN`.
 2. **O `EDT_MOD.BIN` é contíguo do 216 ao EOF**, e são **20** seções em duas
    listas de onze (§1.5). Esta armadilha dizia o contrário até 2026-09-14
    ([`CORR-LOOKS-010`](/docs/tasks/looks/CORR-LOOKS-010.md)). O que quebra é
@@ -2155,3 +2283,15 @@ dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
   `/docs/prompts/perfil-looks.md`.
 - Este plano, mantido: **o que a execução mudar, muda aqui, na seção que
   mudou.**
+
+**Conferidos contra o disco em 2026-09-17** pela
+[`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md):
+
+| entregável | estado |
+|---|---|
+| os módulos da §3.2 | **todos no disco**, e só eles — a lista da §3.2 foi comparada com `tools/looks/*.py` e `ui/*.py`; faltava o `superpack_count.py`, que entrou nela |
+| os quatro alvos | registrados e medidos: 1 passed, 3 skipped numa máquina limpa |
+| os controles negativos | contados pelo `selftest.py`, e nenhum número deles escrito aqui |
+| `NOTICE.md` | conferido contra o que o projeto de fato usou; a linha do `we3d` deixou de dizer que tomou o agrupamento em 14 modelos, que nada aqui usa, e passou a dizer o que dele foi medido errado |
+| o ciclo e o perfil | `check_tasks.py` verde; o perfil com as armadilhas que o ciclo encontrou |
+| `CLAUDE.md` | ganhou a seção do projeto, que não tinha |
