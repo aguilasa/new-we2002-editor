@@ -807,12 +807,20 @@ que a receita de PES2 registra.
 
 ## Visualizador de aparência — projeto separado, em `tools/looks/`
 
-Um **sexto projeto**, aberto em 2026-09-14 e com o ciclo fechado em 2026-09-17:
-um visualizador Python + Qt do **modelo 3D do jogador** que o WE2002 desenha na
-tela `LOOKS SET`, lendo geometria, textura e paleta **direto do disco**. Núcleo
-Python puro em `tools/looks/`, UI **PySide6** em `tools/looks/ui/`, desenho por
-`QOpenGLWidget`. **v1 só lê**: não grava na imagem nem no cartão, por decisão
-do dono do repositório.
+Um **sexto projeto**, aberto em 2026-09-14: um visualizador Python + Qt do
+**modelo 3D do jogador** que o WE2002 desenha na tela `LOOKS SET`, lendo
+geometria, textura e paleta **direto do disco**. Núcleo Python puro em
+`tools/looks/`, UI **PySide6** em `tools/looks/ui/`, desenho por
+`QOpenGLWidget`. **Só lê**: não grava na imagem nem no cartão, por decisão do
+dono do repositório, e isso não muda na v2.
+
+**A v1 fechou em 2026-09-17 e a v2 abriu no mesmo dia** — o ciclo está
+**aberto**, com as fases 8 a 11 (tasks 21 a 35). O alvo da v2 é a própria tela
+do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
+a caixa de ajuda e o boneco no painel. Já entregues a tela medida no jogo
+(21) e a tela na janela (22); faltam a pose e o boneco montado (fase 9), o
+uniforme e o cenário (10) e a caminhada (11). Até lá o boneco do painel é a
+prateleira da v1.
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -839,13 +847,23 @@ chama **por caminho** (`work/venv-looks/Scripts/python.exe` no Windows,
 `work/venv-looks/bin/python` no Linux) — receita que depende de `activate` não
 se reproduz num agente sem estado de shell. O núcleo não precisa dele.
 
+**O único arquivo gerado do ciclo é `tools/looks/screen.json`** — o que a tela
+escreve em cada valor das doze linhas, a ajuda de cada uma, o cursor e as
+caixas, tudo **medido no jogo**. Quem o escreve é `oracle.py --screen --write`,
+e quem o remede é `oracle.py --screen`. Não se edita à mão: texto de tela
+inventado a partir de um rótulo é o erro que essa fase existe para não cometer.
+
 | Comando | O que faz |
 |---|---|
 | `python tools/looks/selftest.py` | o gate **obrigatório**: os self-checks, as três regras de desenho e os controles negativos plantados |
 | `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os oito `--check-image` e é o alvo `looks_image` |
-| `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py --looks A-I3-A-E-A --screenshot out.png` | desenha uma tupla fora da tela; tupla que a tabela recusa sai **2** |
-| `python tools/looks/ui_check.py` | o alvo `looks_ui`: julga os PNGs de fora, sem o código sob teste |
+| `.\make.ps1 looks` | **abre a tela `LOOKS SET`** — `-State 1\|2` escolhe goleiro ou jogador de linha, `-Tuple A-I3-A-E-A` abre o visualizador de uma tupla só. É o **único** alvo do ciclo que mostra janela ao usuário; opção de visualizador sem `-Tuple` é **recusada**, não ignorada |
+| `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py` | o mesmo app: **sem** `--looks` abre a tela (com `--state`, `--keys`, `--screenshot`); **com** `--looks <tupla>` desenha uma tupla fora da tela, e tupla que a tabela recusa sai **2** |
+| `python tools/looks/screen.py --check` / `--report` | a tabela da tela: decodificação, caixas, cursor e os rótulos do `looks.py` contra ela; o `--report` imprime o que a tabela diz |
+| `python tools/looks/ui_check.py` | o alvo `looks_ui`: julga os PNGs de fora, sem o código sob teste, e anda as doze linhas até as duas pontas nos dois slots por tecla sintética |
 | `python tools/looks/oracle.py --check-live` | o alvo `looks_live`: sobe o fork, carrega os states e confere a RAM contra o disco |
+| `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
+| `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
 
@@ -856,7 +874,7 @@ nunca pula; **`looks_image`**, que precisa de `WE2002_LOOKS_IMAGE`;
 `RESOURCE_LOCK duckstation` junto com o `pes2_boot`. Numa máquina limpa,
 `ctest -R looks` dá **1 passed, 3 skipped**.
 
-Quatro coisas que custam tempo se descobertas tarde:
+Cinco coisas que custam tempo se descobertas tarde:
 
 - **`ctest -R <padrão>` que não casa nada sai 0**, com `No tests were
   found!!!`. Nenhum diretório de build do worktree lista os alvos de `looks`
@@ -871,8 +889,14 @@ Quatro coisas que custam tempo se descobertas tarde:
   `work/looks-states/`, e o slot do DuckStation é rascunho restaurado dela.
 - **O boneco sai numa prateleira, com o uniforme cinza, e isso é medição, não
   defeito.** A pose não está em arquivo lido e os `TEX_*.BIN` do uniforme não
-  têm digest na guarda; as duas estão abertas na §6 do plano, com o que as
-  destravaria.
+  têm digest na guarda; as duas estão abertas na §6 do plano, e são as tasks
+  24 a 27 e a 30 da v2 que as destravam.
+- **Janela e tabela concordam de graça; quem desempata é o jogo.** A janela
+  não decide nada sobre a tela — as travas, a volta do cursor e o texto de
+  cada valor saem do `screen.json` —, então o `looks_ui` prova que a janela não
+  inventou nada **por cima da tabela**, e não que a tela está certa. Se a
+  tabela mentir, os dois mentem juntos e o gate fica verde: medido. Quem julga
+  a tela é o `oracle.py --keys`, contra o emulador.
 
 ## Arquitetura
 

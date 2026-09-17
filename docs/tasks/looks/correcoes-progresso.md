@@ -71,7 +71,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [x] concluída | 2026-09-17 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -141,7 +141,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
 - [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
-- [ ] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
+- [x] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
 
 ## Detalhes por correção
 

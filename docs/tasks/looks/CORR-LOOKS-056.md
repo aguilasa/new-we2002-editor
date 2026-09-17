@@ -3,7 +3,7 @@ id: CORR-LOOKS-056
 title: "Correção: o `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -105,19 +105,73 @@ que precisa olhar para lá.
 
 ## Verificação
 
-- [ ] `grep -n "ciclo fechado" CLAUDE.md` não acha a frase na seção do `looks`
-- [ ] `screen.py`, `screen.json`, `--screen`, `--keys` e `make.ps1 looks`
+- [x] `grep -n "ciclo fechado" CLAUDE.md` não acha a frase na seção do `looks`
+- [x] `screen.py`, `screen.json`, `--screen`, `--keys` e `make.ps1 looks`
       aparecem na seção
-- [ ] a linha do `app.py` diz o que o default faz hoje
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] a linha do `app.py` diz o que o default faz hoje
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-17
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `06749b0`: `"ciclo fechado em 2026-09-17"` na linha 810
+do `CLAUDE.md`, **zero** menções a `screen.py`, `screen.json`, `make.ps1 looks`
+ou `--keys`, e o último commit do arquivo é o `4023c65`, da LOOKS-TASK-20 —
+anterior à abertura da v2 (`46f828a`) e à tela na janela (`1fb8488`).
 
-**Arquivos criados/modificados:**
+A seção do sexto projeto passou a dizer o que existe:
+
+- **o ciclo está aberto**, com a v1 fechada em 2026-09-17, a v2 aberta no mesmo
+  dia, as fases 8 a 11 (tasks 21 a 35), o que já saiu (21 e 22) e o que falta —
+  pose e boneco montado, uniforme e cenário, caminhada. "Só lê" continua, e
+  deixou de estar preso à v1;
+- **`.\make.ps1 looks`** entrou na tabela como o que abre a tela, com
+  `-State 1|2` e `-Tuple` para o visualizador de uma tupla, e a ressalva de ser
+  o único alvo do ciclo que mostra janela — opção de visualizador sem `-Tuple`
+  é recusada, não ignorada;
+- **a linha do `app.py` diz o default de hoje**: sem `--looks` abre a tela, com
+  `--looks` desenha uma tupla fora da tela;
+- **`screen.py --check`/`--report`, `oracle.py --screen` e `oracle.py --keys`**
+  entraram, com o que cada um mede, e um parágrafo diz que o `screen.json` é o
+  **único arquivo gerado do ciclo**, escrito por `--screen --write` e não à mão;
+- a linha do `ui_check.py` passou a dizer que ele anda as doze linhas até as
+  duas pontas nos dois slots por tecla sintética;
+- e entrou a armadilha que a LOOKS-TASK-22 mediu: **janela e tabela concordam
+  de graça; quem julga a tela é o `--keys`, contra o emulador.** Sem ela, a
+  linha do `looks_ui` ali convida a ler o verde dele como "a tela está certa".
+
+O cabeçalho da lista virou "Cinco coisas", que é quantas são.
+
+No perfil, o `CLAUDE.md` entrou nos **arquivos quentes**, com a razão: ele é a
+porta de entrada de quem ainda não sabe que existe plano, nenhuma varredura do
+rito o alcança, e foi exatamente assim que ele ficou para trás.
+
+### Gates
+
+```text
+$ grep -n "ciclo fechado" CLAUDE.md
+                                   # nada
+$ grep -c "screen.py\|screen.json\|make.ps1 looks\|--keys" CLAUDE.md
+8                                  # era 0
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+$ python tools/looks/selftest.py --quiet
+  ..... 71 of 71 controls red
+looks_selftest: 0 failure(s)
+```
+
+`roms/` intocada; correção de documentação, nenhum emulador subiu.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `CLAUDE.md` — a seção do sexto projeto
+- `docs/prompts/perfil-looks.md` — o `CLAUDE.md` nos arquivos quentes
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

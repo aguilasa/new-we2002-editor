@@ -509,6 +509,14 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 - `NOTICE.md` — tocado pela 01 e reconferido pela 20.
 - `docs/PLAN-LOOKS-PY.md` — **o plano se corrige na seção que muda**, nunca num
   apêndice de erratas.
+- [`CLAUDE.md`](../../CLAUDE.md) — **tem seção deste ciclo, e envelhece com
+  ele.** Ela é a porta de entrada de quem ainda não sabe que existe plano, e
+  por isso não é coberta por nenhuma varredura do rito: o plano, o perfil e as
+  tasks se reconciliam entre si e ela fica para trás sozinha. Aconteceu em
+  2026-09-17 ([`CORR-LOOKS-056`](/docs/tasks/looks/CORR-LOOKS-056.md)): a v2
+  abriu e a primeira entrega chegou com a seção ainda dizendo "ciclo fechado" e
+  descrevendo um visualizador de tupla. **Task que muda o que o ciclo entrega
+  ou como se roda olha para lá antes de fechar.**
 
 ---
 
