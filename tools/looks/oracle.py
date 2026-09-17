@@ -2842,8 +2842,8 @@ class ScreenReading:
                 for name in looks.SCREEN}
 
     def outside(self):
-        """{title, shirt, plate: (text, [x, y])}: the kind-33 object, and the
-        two left of the rows box, upper then lower."""
+        """{title, shirt, plate: the object}: the kind-33 one, and the two left
+        of the rows box, upper then lower."""
         import screen
 
         left = sorted((o for o in self.objects
@@ -2856,12 +2856,67 @@ class ScreenReading:
             raise OracleError("expected a title and two strings left of the "
                               "rows box, and got %d and %d"
                               % (len(titles), len(left)))
-        def text(obj):
-            return (" ".join(line.strip() for line in obj["lines"]).strip(),
-                    [obj["x"], obj["y"]])
+        return {"title": titles[0], "shirt": left[0], "plate": left[1]}
 
-        return {"title": text(titles[0]), "shirt": text(left[0]),
-                "plate": text(left[1])}
+
+def object_text(obj):
+    """The one line an object outside the rows box holds."""
+    return " ".join(line.strip() for line in obj["lines"]).strip()
+
+
+def outside_control(reading, glyphs, frames, origin):
+    """The three texts outside the rows box, each against what the frame shows.
+
+    The rows are checked decode-against-glyph on every run, and until
+    CORR-LOOKS-054 these three were not -- which is how a title nobody had
+    compared came to be stored as the string its object holds.
+
+    The shirt name and the position plate DO go through the glyph routine, so
+    they are compared string for string, the way a row is.  The title does not:
+    it is printed with the second font (`ASCII_KINDS[1]`), and measured, that
+    one draws nothing the glyph routine reports.  So what is checked there is
+    what its band holds -- one run of white per letter its font has a glyph
+    for, counted off the finished frames (`screen.TITLE_FONT`).
+    """
+    import screen
+
+    objects = reading.outside()
+    # Left of the rows box, and only there: the plate shares its line with NAT,
+    # whose label and value are drawn on the same y and belong to the row.
+    left_of_rows = reading.geometry["left"]
+    for name in ("shirt", "plate"):
+        obj = objects[name]
+        held = object_text(obj)
+        drawn = [text.strip() for x, y, text in glyphs
+                 if y == obj["y"] and x < left_of_rows]
+        if drawn != [held]:
+            raise OracleError("the %s object holds %r and the glyph routine "
+                              "drew %r left of the rows box on its line"
+                              % (name, held, drawn))
+    title = objects["title"]
+    held = object_text(title)
+    if any(y == title["y"] for _, y, _ in glyphs):
+        raise OracleError("the title's line goes through the glyph routine "
+                          "now, and this counts its letters off the frame "
+                          "because it did not")
+    band = screen.title_band((title["x"], title["y"]), title["width"], origin)
+    want = len(screen.title_drawn(held).replace(" ", ""))
+    # A finished buffer with an empty band is the blink the cursor also has:
+    # measured, one dump in eight held the boxes and no title.  A buffer
+    # holding a DIFFERENT number of letters is a difference, and refused.
+    counted = sorted({len(screen.ink_runs(frame, band)) for frame in frames})
+    if want not in counted or any(n not in (0, want) for n in counted):
+        raise OracleError("the title object holds %r, whose font draws %r -- "
+                          "%d letter(s) -- and the band %r holds %r over %d "
+                          "finished dump(s)"
+                          % (held, screen.title_drawn(held), want, band,
+                             counted, len(frames)))
+    return {"title": screen.title_drawn(held), "title_object": held,
+            "title_skipped": screen.title_skipped(held),
+            "shirt": object_text(objects["shirt"]),
+            "plate": object_text(objects["plate"]),
+            "anchors": {name: [obj["x"], obj["y"]]
+                        for name, obj in objects.items()}}
 
 
 def _line_grid(glyphs, labels):
@@ -3012,23 +3067,22 @@ def measure_screen(game, verbose=True):
             raise OracleError("slot %d draws its pieces in another order"
                               % slot)
         orders = slot_orders
-        outside = reading.outside()
+        outside = outside_control(reading, glyphs, frames, origin)
         cursor_row, cursor_box = _cursor_row(frames, regions, geometry, origin)
         record = screen_record(game)
-        plate = outside["plate"][0]
-        anchors = {name: xy for name, (_, xy) in outside.items()}
-        anchors["labels"] = [labels["x"], labels["y"]]
-        table["initial"][str(slot)] = {
-            "rows": reading.rows(orders), "title": outside["title"][0],
-            "shirt": outside["shirt"][0], "plate": plate,
-            "help": screen_help(game), "cursor": looks.SCREEN[cursor_row],
-            "record": record, "anchors": anchors}
+        plate = outside["plate"]
+        outside["anchors"]["labels"] = [labels["x"], labels["y"]]
+        table["initial"][str(slot)] = dict(
+            outside, rows=reading.rows(orders),
+            help=screen_help(game), cursor=looks.SCREEN[cursor_row],
+            record=record)
         say = print if verbose else (lambda *a: None)
         say("  slot %d on load: %s, plate %s, cursor on %s, help %r; %d "
-            "glyph string(s) checked against %d object(s)"
+            "glyph string(s) checked against %d object(s); the title object "
+            "holds %r and the band draws %r"
             % (slot, SLOTS[slot], plate, looks.SCREEN[cursor_row],
                table["initial"][str(slot)]["help"], len(glyphs),
-               len(objects)))
+               len(objects), outside["title_object"], outside["title"]))
         if slot == min(SLOTS):
             table["cursor_box_on_load"] = list(cursor_box)
 

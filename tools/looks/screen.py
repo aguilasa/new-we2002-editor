@@ -79,6 +79,48 @@ The three boxes of the screen -- the player's panel, the twelve rows, the help
 of the 8 px font is 12 px tall or 24 px wide, so these floors keep text out.
 """
 
+TITLE_FONT = "-12AEJSTW"
+"""The characters the title's font has a glyph for.
+
+The title is printed with the second of the two ASCII fonts (`kind` 33), and
+that one does NOT go through the glyph routine the rows are checked against --
+measured, nothing at all is drawn on the title's line by it.  What its font
+draws was measured instead on 2026-09-17, by writing an eleven-byte marker over
+the string the title object points at, in the RAM of the running game, and
+reading the band back off VRAM (the state was reloaded afterwards, and the
+string read `LOOKS SET  ` again):
+
+    AAAAAAAAAAA   draws eleven As
+    ABCDEFGHIJK   draws AEJ
+    0123456789A   draws 12A
+
+Of the seventy-one printable characters swept one at a time, these nine draw;
+the other sixty-two draw NOTHING AND DO NOT MOVE THE PEN.  A space moves it
+without drawing: five of them push the next glyph 42 px right.
+
+So the screen's own title is `S SET` -- `LOOK` has no glyph and is skipped --
+and that is the game drawing, not a capture cut short: the band holds the same
+four letters over 600 frames.  Whoever draws this screen writes what the screen
+writes, and `screen.json` keeps both (CORR-LOOKS-054).
+"""
+
+TITLE_BAND = 14
+"""Rows of the title's own band, from its object's y down.  Measured: its
+letters fill rows 21 to 30 of the native frame for an object at y=20, and the
+next text below starts at 41."""
+
+INK_FLOOR = 200
+"""The title's letters are neutral white -- (239,239,239) on the native frame.
+The teal banner behind them, the grey borders (173 and 189) and the lavender of
+the rows are not."""
+
+INK_GAP = 4
+"""Empty columns between two letters of the title's font.
+
+Measured on the eleven-A marker: exactly four between each pair, and no gap of
+two inside a glyph.  The space of `S SET` leaves sixteen, which is the same
+separation read wider -- counting runs counts letters either way."""
+
 CURSOR_FLOOR = 64
 """The cursor box is yellow -- red equal to green, blue under half of them.
 
@@ -133,6 +175,28 @@ def help_text(raw: bytes) -> str:
         raise BadScreen("the help string %r is not Shift-JIS: %s"
                         % (raw, exc)) from None
     return unicodedata.normalize("NFKC", text).rstrip()
+
+
+def title_drawn(text: str) -> str:
+    """What the title band SHOWS of the string the title object holds.
+
+    A character the font has no glyph for is skipped, pen and all; a space
+    moves the pen and draws nothing.  Trailing spaces move it past the last
+    letter, so they are not part of what anyone reads.
+    """
+    return "".join(character for character in text
+                   if character == " " or character in TITLE_FONT).rstrip()
+
+
+def title_skipped(text: str) -> str:
+    """The characters of *text* the title's font has no glyph for, in order.
+
+    `LOOK` of `LOOKS SET`.  Kept beside the title in the table because it is
+    the difference itself: if the font, the string or the screen changes, this
+    is what changes with them.
+    """
+    return "".join(character for character in text
+                   if character != " " and character not in TITLE_FONT)
 
 
 def glyph_strings(calls) -> list:
@@ -283,6 +347,42 @@ def _yellow(pixel) -> bool:
     return red == green and red >= CURSOR_FLOOR and blue * 2 < red
 
 
+def _white(pixel) -> bool:
+    red, green, blue = pixel[:3]
+    return red == green == blue and red >= INK_FLOOR
+
+
+def title_band(anchor, width: int, origin) -> tuple:
+    """The title's band on the native frame, from its object's own anchor.
+
+    *anchor* and *width* are the object's, in coordinates of the display's
+    centre; *origin* is that centre.  Inclusive corners, like `boxes`.
+    """
+    x = anchor[0] + origin[0]
+    y = anchor[1] + origin[1]
+    return (x, y, x + width - 1, y + TITLE_BAND - 1)
+
+
+def ink_runs(rows, box) -> list:
+    """The white letters inside *box*, as (first column, last column).
+
+    The title is the one text of this screen drawn by a font the glyph routine
+    never reports, so what it drew is counted off the finished frame instead of
+    read off a call -- one run per letter, `TITLE_FONT` says which.
+    """
+    x0, y0, x1, y1 = box
+    columns = sorted({x for y in range(y0, y1 + 1) for x in range(x0, x1 + 1)
+                      if _white(rows[y][x])})
+    out, start = [], None
+    for index, x in enumerate(columns):
+        if start is None:
+            start = x
+        if index + 1 == len(columns) or columns[index + 1] - x >= INK_GAP:
+            out.append((start, x))
+            start = None
+    return out
+
+
 def fraction(box, display) -> list:
     """A native box as fractions of the display, for a window of any size."""
     width, height = display
@@ -358,8 +458,34 @@ def validate(table: dict) -> list:
             if name in rows and shown not in rows[name].get("texts", []):
                 problems.append("slot %s shows %r on %s, which the walk never "
                                 "reached" % (slot, shown, name))
+        problems += _title_problems(slot, state)
     if sorted(table.get("initial", {})) != ["1", "2"]:
         problems.append("the initial values are not those of slots 1 and 2")
+    return problems
+
+
+def _title_problems(slot, state: dict) -> list:
+    """The title a state stores has to be what its object's string draws.
+
+    Three fields say one thing three ways -- the string the object holds, the
+    letters the band shows, and the ones the font skips -- and a table that
+    stores the object's string as the title (`LOOKS SET`, which no frame of
+    this screen has ever shown) is refused here.  It is the check the measured
+    table went without until CORR-LOOKS-054.
+    """
+    held = state.get("title_object")
+    if not isinstance(held, str):
+        return ["slot %s does not say what string the title object holds"
+                % slot]
+    problems = []
+    if state.get("title") != title_drawn(held):
+        problems.append("slot %s stores the title %r, and the object holds "
+                        "%r, which draws %r"
+                        % (slot, state.get("title"), held, title_drawn(held)))
+    if state.get("title_skipped") != title_skipped(held):
+        problems.append("slot %s says the title skips %r and this font skips "
+                        "%r of %r" % (slot, state.get("title_skipped"),
+                                      title_skipped(held), held))
     return problems
 
 
@@ -442,8 +568,10 @@ def report(table: dict) -> None:
               % (name, len(texts), row["left"], row["right"], row["help"]))
         print("            %s" % " | ".join(shown))
     for slot, state in sorted(table["initial"].items()):
-        print("  slot %s: plate %s, shirt %r, title %r"
-              % (slot, state["plate"], state["shirt"], state["title"]))
+        print("  slot %s: plate %s, shirt %r, title %r (the object holds %r, "
+              "and this font has no %r)"
+              % (slot, state["plate"], state["shirt"], state["title"],
+                 state["title_object"], state["title_skipped"]))
     for name, box in sorted(table["regions"].items()):
         print("  region %-8s native %s  fraction %s"
               % (name, box["native"], box["fraction"]))
@@ -490,6 +618,23 @@ def _checks(c) -> None:
     ok("full-width help folds to the letters",
        help_text("Ｓｋｉｎ　Ｃｏｌｏｕｒ　■　Ｔｕｒｎ　　".encode("cp932"))
        == "Skin Colour ■ Turn")
+
+    # The title, against the three markers written into the running game's RAM
+    # on 2026-09-17 and read back off the band (TITLE_FONT).
+    ok("the title the screen shows is not the string the object holds",
+       title_drawn("LOOKS SET  ") == "S SET"
+       and title_skipped("LOOKS SET  ") == "LOOK",
+       "%r / %r" % (title_drawn("LOOKS SET  "),
+                    title_skipped("LOOKS SET  ")))
+    ok("a marker of eleven As draws eleven, and one of A to K draws three",
+       title_drawn("AAAAAAAAAAA") == "AAAAAAAAAAA"
+       and title_drawn("ABCDEFGHIJK") == "AEJ",
+       "%r" % title_drawn("ABCDEFGHIJK"))
+    ok("the digits that have a glyph are the two the marker drew",
+       title_drawn("0123456789A") == "12A", "%r" % title_drawn("0123456789A"))
+    ok("a space moves the pen where a letter without a glyph does not",
+       title_drawn("01234     A") == "12     A",
+       "%r" % title_drawn("01234     A"))
 
     calls = [(ord("A"), 5, 7, 1), (ord("1"), 5, 7, 1),
              (ord("A"), 5, 7, 0), (ord("1"), 13, 7, 0),
@@ -546,6 +691,19 @@ def _checks(c) -> None:
     ok("fractions close on the far edge",
        fraction((0, 0, 511, 239), (512, 240)) == [0.0, 0.0, 1.0, 1.0])
 
+    ok("the title's band comes off its object's own anchor",
+       title_band((-224, -100), 256, (256, 120)) == (32, 20, 287, 33),
+       "%r" % (title_band((-224, -100), 256, (256, 120)),))
+    band = _frame(64, 40)
+    for x in list(range(10, 17)) + list(range(21, 26)):
+        band[5][x] = (239, 239, 239)  # two letters, the measured four apart
+    band[6][30] = (173, 173, 173)  # a border
+    band[6][34] = (115, 115, 247)  # a letter of the rows
+    band[20][12] = (239, 239, 239)  # white below the band
+    ok("one run per letter, and neither border nor lavender counts",
+       ink_runs(band, (0, 0, 63, 10)) == [(10, 16), (21, 25)],
+       "%r" % ink_runs(band, (0, 0, 63, 10)))
+
     table = _toy_table()
     ok("a whole toy table validates", validate(table) == [],
        "%r" % validate(table))
@@ -565,6 +723,17 @@ def _checks(c) -> None:
     broken["initial"]["1"]["rows"]["AGE"] = "99"
     ok("an initial value the walk never reached is refused",
        any("never reached" in p for p in validate(broken)))
+    broken = json.loads(json.dumps(table))
+    broken["initial"]["1"]["title"] = broken["initial"]["1"]["title_object"]
+    ok("a table storing the title the OBJECT holds is refused, which is the "
+       "table this cycle wrote before CORR-LOOKS-054",
+       any("which draws" in p for p in validate(broken)),
+       "%r" % validate(broken))
+    broken = json.loads(json.dumps(table))
+    del broken["initial"]["2"]["title_object"]
+    ok("and a title with no string beside it is refused",
+       any("what string the title object holds" in p
+           for p in validate(broken)))
     refuses("writing a broken table is refused before the file is touched",
             lambda: write(broken, os.devnull), "refusing to write")
 
@@ -594,7 +763,10 @@ def _toy_table() -> dict:
                       "stored": field.name if field else None}
     rows["SKIN"]["texts"] = ["A TYPE", "B TYPE", "C TYPE", "D TYPE"]
     initial = {slot: {"rows": {name: rows[name]["texts"][0]
-                               for name in looks.SCREEN}}
+                               for name in looks.SCREEN},
+                      "title": title_drawn("LOOKS SET  "),
+                      "title_object": "LOOKS SET  ",
+                      "title_skipped": title_skipped("LOOKS SET  ")}
                for slot in ("1", "2")}
     return {"order_of_rows": list(looks.SCREEN), "rows": rows,
             "vertical": {"up": "wraps", "down": "wraps"}, "initial": initial}

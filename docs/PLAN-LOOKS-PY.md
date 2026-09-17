@@ -2420,7 +2420,23 @@ inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 >   três códigos de controle (`\n`, `\t`+1, `\r`+3), e o que o
 >   `screen.decode` faz delas é conferido, a cada corrida, contra os glifos que
 >   a rotina `layout.SCREEN_GLYPH` desenha: 34 strings, nos dois states e na
->   ponta de cada uma das doze linhas.
+>   ponta de cada uma das doze linhas. **A placa e o nome da camisa entram
+>   nessa conferência** desde a [`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md);
+>   o título não pode entrar, e é o item seguinte.
+> - **O título não é o que o objeto diz: o objeto guarda `LOOKS SET` e a tela
+>   mostra `S SET`.** Medido em 2026-09-17
+>   ([`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)), escrevendo
+>   marcador de onze bytes sobre a string na RAM do jogo em execução e lendo a
+>   faixa de volta da VRAM: o título é impresso pela **segunda** fonte ASCII
+>   (`kind` 33), que não passa pela rotina de glifos, e ela tem glifo para
+>   **nove** dos 71 caracteres imprimíveis varridos — `AEJSTW12-`. Caractere
+>   sem glifo **não desenha e não anda com a caneta**; espaço anda sem
+>   desenhar. Por isso `LOOK` some. Não é captura cortada: a faixa mostra as
+>   mesmas quatro letras ao longo de 600 quadros. O `screen.json` guarda o que
+>   a tela desenha (`title`), o que o objeto guarda (`title_object`) e o que a
+>   fonte pula (`title_skipped`); o `screen.py --check` recusa tabela em que os
+>   três não concordem, e o `--screen` conta as letras da faixa contra o que a
+>   fonte desenharia.
 > - **As doze linhas travam nas duas pontas**, e **o cursor vertical dá a
 >   volta** nos dois sentidos — lido pela caixa amarela na VRAM, não pela
 >   contagem de teclas. Nenhuma linha de valor mexe em outra ao ser andada,

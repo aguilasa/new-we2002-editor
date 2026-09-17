@@ -35,9 +35,13 @@ status: pendente
     148..211), `FACE` e `H.F.COL.` (7 de 8) e `FOOT` (3 de 4). Uma tupla vinda
     de fora com valor fora do alcance não tem texto medido: recusa visível, como
     o `H1`;
-  - o título que o objeto de texto recebe é `LOOKS SET`, mas o quadro mostra
-    `S SET` em todas as capturas e dumps da 21 — por quê não foi medido; o
-    que a janela desenha ali é decisão desta task, dita no Log.
+  - o título que o objeto de texto recebe é `LOOKS SET`, e o quadro mostra
+    `S SET` — **medido em 2026-09-17**
+    ([`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)): a fonte do
+    título tem glifo para nove caracteres (`AEJSTW12-`), e o que ela não tem
+    não desenha nem anda com a caneta. A janela escreve o campo `title` da
+    tabela, que é o que a tela desenha; `title_object` e `title_skipped` estão
+    ao lado para quem precisar da string inteira.
 - **A regra 3 continua:** a `ui/` não conhece endereço nem lê disco; troca de
   valor vira tupla, e a tupla vai ao `scene.py`.
 - **Recusa é visível, nunca silenciosa.** `HAIR H1` não foi medido e o

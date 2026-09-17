@@ -659,6 +659,17 @@ CONTROLS = (
         "at one x, and the control that checks decoding against the glyphs "
         "would be comparing against a text the screen never shows",
     ),
+    Control(
+        "screen-title-as-the-object-holds-it", "screen.py", "title_drawn",
+        "    return \"\".join(character for character in text\n"
+        "                   if character == \" \" or character in TITLE_FONT).rstrip()",
+        "    return text.rstrip()",
+        ("screen",),
+        "the title taken from the string the object holds, which is what this "
+        "cycle stored until CORR-LOOKS-054: `LOOKS SET` where every frame of "
+        "the screen shows `S SET`, and a window built from the table would "
+        "write a title the game does not write",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

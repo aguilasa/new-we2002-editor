@@ -322,6 +322,17 @@ Não se revertem sem o usuário pedir.
     amarelo nenhum. Regra de cor calibrada numa fase só recusa as outras; o
     `oracle._cursor_row` ignora o dump sem cursor e exige dois que o mostrem no
     mesmo lugar.
+37. **A fonte do título pula o que não tem glifo, e o objeto de texto não sabe
+    disso.** O objeto guarda `LOOKS SET` e a tela mostra `S SET`. Medido em
+    2026-09-17 ([`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)) por
+    marcador escrito na RAM do jogo em execução: a segunda fonte ASCII
+    (`kind` 33) tem glifo para nove dos 71 caracteres varridos — `AEJSTW12-` —,
+    e caractere sem glifo não desenha **nem anda com a caneta** (espaço anda
+    sem desenhar). Duas consequências: **texto de objeto não é texto de tela**
+    enquanto alguém não comparar com o desenho — a conferência
+    decode-contra-glifo existia para as doze linhas e o título tinha ficado de
+    fora —, e a fonte do título **não** passa pela rotina de glifos, então o
+    que a confere é a contagem de letras na faixa (`screen.ink_runs`).
 
 ---
 

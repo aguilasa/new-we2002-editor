@@ -61,7 +61,9 @@
     "SKIN": "A TYPE"
    },
    "shirt": "SHIRT N",
-   "title": "LOOKS SET"
+   "title": "S SET",
+   "title_object": "LOOKS SET",
+   "title_skipped": "LOOK"
   },
   "2": {
    "anchors": {
@@ -112,7 +114,9 @@
     "SKIN": "A TYPE"
    },
    "shirt": "SHIRT N",
-   "title": "LOOKS SET"
+   "title": "S SET",
+   "title_object": "LOOKS SET",
+   "title_skipped": "LOOK"
   }
  },
  "order_of_rows": [
