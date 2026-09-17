@@ -297,6 +297,31 @@ Não se revertem sem o usuário pedir.
     refaz o `initialize` **uma vez** e imprime `MCP session taken by another
     client`; ver essa linha num Log é sinal de dois clientes na porta, e perder
     de novo logo depois do novo handshake falha — não é caso de rodar até passar.
+33. **`get_gpu_state` antes do `load_state` responde o modo da tela de boot.**
+    Medido em 2026-09-17
+    ([`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md)): num emulador
+    recém-subido ele diz 256×239, e a tela `LOOKS SET` é 512×240. Recortar a
+    VRAM com o tamanho errado deixa o painel e perde a caixa das linhas — e
+    oito corridas seguidas leram isso como quadro pela metade, arquivo PNG
+    incompleto e buffer deslocado, três explicações plausíveis e falsas. **O
+    tamanho do display se pergunta depois do `load_state`**, e a pergunta que
+    teria cortado as oito é a da armadilha 27: *o vermelho é pela causa que eu
+    acho?* — reler o mesmo dump com o recorte certo custava uma linha.
+34. **Objeto de texto não tem lugar fixo.** O de `NAT` está em `x=-80`
+    enquanto escreve `Unknown` e em `x=-104` com qualquer nação. Chave de
+    objeto por posição transforma o mesmo objeto em outro no primeiro passo; o
+    `screen.pieces` usa o endereço do próprio objeto, e decide se ele pertence
+    às linhas pela caixa em que é disposto (`x + largura`), não por onde começa.
+35. **A caixa de ajuda mente sobre o cursor logo depois do `load_state`.** Ela
+    mostra `Visual`, sobra do menu, até a primeira tecla; só então passa a
+    dizer a linha (`Nation`, `Skin Colour ■ Turn`…). Quem confere "cheguei na
+    linha" pela ajuda sem apertar nada recusa a linha certa — foi o que a
+    caminhada de `NAT` fez. Sem tecla, a testemunha é a caixa amarela na VRAM.
+36. **O cursor amarelo pisca, e numa das fases some.** As cores medidas são
+    (132,132,8), (181,181,57) e (189,189,66), e um dump em seis não tem pixel
+    amarelo nenhum. Regra de cor calibrada numa fase só recusa as outras; o
+    `oracle._cursor_row` ignora o dump sem cursor e exige dois que o mostrem no
+    mesmo lugar.
 
 ---
 
@@ -323,6 +348,11 @@ tools/looks/ui/     PySide6 — ZERO endereço, ZERO leitura de disco
 work/venv-looks/    fora do git
 docs/tasks/looks/   este ciclo
 ```
+
+**O único arquivo gerado do ciclo é `tools/looks/screen.json`**, desde a
+LOOKS-TASK-21, e o gerador é `oracle.py --screen --write`, que anda a tela do
+jogo. Não se edita à mão: `oracle.py --screen` remede e acusa diferença, e o
+`screen.py --check` recusa uma tabela que não fecha.
 
 As três regras de desenho (§3.3 do plano) são varridas mecanicamente pelo
 `selftest.py`, e a varredura usa `os.walk` — `os.listdir` não enxerga `ui/`, e
@@ -361,6 +391,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/confront.py --reach <LINHA>` | — | LOOKS-TASK-17 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE`, `WE2002_LOOKS_CORPUS` (77 sem ela), o venv e o PIL | `python tools/looks/corpus.py --run` | — | LOOKS-TASK-18 |
 | *(sem alvo ainda)* | idem, sem venv; o controle roda se houver capturas da 17 | `python tools/looks/corpus.py --score` | — | LOOKS-TASK-18 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo); ~12 min | `python tools/looks/oracle.py --screen` — anda as doze linhas e compara com o `screen.json`; `--screen --write` é o gerador do arquivo | — | LOOKS-TASK-21 |
+| *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14

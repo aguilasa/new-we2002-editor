@@ -19,6 +19,25 @@ status: pendente
   prateleira até a [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) o montar dentro do mesmo painel.
 - **A tabela vem da [`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md).** A janela não conhece texto de valor nenhum que o
   `screen.py` não tenha.
+- **O que a [`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md) entrega, e como adaptou o que esta task
+  esperava** (tudo em `tools/looks/screen.json`, lido pelo `screen.load()`):
+  - o texto de cada valor de cada linha, com o valor guardado ao lado
+    (`values`), para a tupla ir e voltar sem rótulo inventado;
+  - as doze linhas **travam** nas pontas e o cursor vertical **dá a volta**
+    (`screen.step`, `screen.move`);
+  - a ajuda de cada linha, e **`Visual` na caixa ao carregar o state** até a
+    primeira tecla (`help_on_load`) — reproduzir isso é fidelidade, não
+    defeito;
+  - **as regiões estão em pixels do display nativo de 512×240** e em frações
+    dele, **não** em frações do quadro capturado: a captura do emulador corta
+    overscan conforme a configuração, e fração dela não é o arranjo do jogo;
+  - **o alcance da tela é menor que o do campo** em `HEIG` (155..210 de
+    148..211), `FACE` e `H.F.COL.` (7 de 8) e `FOOT` (3 de 4). Uma tupla vinda
+    de fora com valor fora do alcance não tem texto medido: recusa visível, como
+    o `H1`;
+  - o título que o objeto de texto recebe é `LOOKS SET`, mas o quadro mostra
+    `S SET` em todas as capturas e dumps da 21 — por quê não foi medido; o
+    que a janela desenha ali é decisão desta task, dita no Log.
 - **A regra 3 continua:** a `ui/` não conhece endereço nem lê disco; troca de
   valor vira tupla, e a tupla vai ao `scene.py`.
 - **Recusa é visível, nunca silenciosa.** `HAIR H1` não foi medido e o

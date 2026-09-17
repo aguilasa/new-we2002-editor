@@ -38,6 +38,7 @@ Usage:
     python tools/looks/oracle.py --patched [HAIR [SLOT [TUPLE ...]]]  # which sections the game has edited, value by value
     python tools/looks/oracle.py --colour SKIN [SLOT [TUPLE ...]]  # which primitives of each head a colour row moves
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
+    python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
 """
 
 from __future__ import annotations
@@ -2594,6 +2595,687 @@ def _tmd_headers(data):
     return out
 
 
+# --- the LOOKS SET screen, measured (LOOKS-TASK-21) ------------------------
+#
+# What the window of LOOKS-TASK-22 may draw, read off the game and never off
+# a label: the text of every value of every row, the help of each row, how
+# the cursor and the values move, the initial values of both states, and where
+# the boxes are.  `--screen --write` writes screen.json; `--screen` walks it
+# all again and fails on any difference.
+
+OBJECT_SIZE = 16
+"""The bytes of a text object that layout.SCREEN_PRINT documents."""
+
+STRING_READ = 256
+"""How much of a string is read before its terminating zero is looked for.
+The longest string this screen prints -- the twelve labels -- is 71 bytes."""
+
+OBJECT_REPEAT = 2
+GLYPH_REPEAT = 8
+"""How many stops have to come round again before a frame counts as seen.
+
+One is not enough for glyphs: the measuring pass puts every letter of a word at
+the same x and y, so `BOOTS` alone repeats `O` at one key, and a cycle that
+began on that `O` would close after one stop.  Eight distinct stops in the same
+order again is a frame."""
+
+OBJECT_LIMIT = 64
+GLYPH_LIMIT = 1024  # not-an-address: a count of stops
+"""A frame that has not come round by then is refused.  Measured: 8 objects
+and 268 glyphs per frame on LOOKS SET."""
+
+CYCLE_SECONDS = 120
+"""The wall clock a frame of stops may take before the breakpoint is presumed
+to be somewhere the game no longer goes."""
+
+SCREEN_WALK_LIMIT = 160
+"""Presses in one direction before a walk that neither locked nor came round
+is refused.  The longest measured row, HEIG, walks 64."""
+
+DUMP_SAMPLES = 6
+"""VRAM dumps per picture, a frame apart, of which the finished ones must
+agree."""
+
+ASCII_KINDS = (32, 33)
+"""The `kind` bytes of the two ASCII fonts this screen prints with."""
+
+
+def _signed16(value):
+    value &= 0xFFFF  # not-an-address: a halfword mask
+    return value - 0x10000 if value & 0x8000 else value  # not-an-address: the sign bit of a halfword
+
+
+def _stops(game, address, read, repeat, limit):
+    """What *read* makes of each stop at an execute breakpoint, one frame of them.
+
+    The frame is closed by repetition, not by the clock: the first *repeat*
+    stops coming round again in the same order.  The emulator is left paused.
+    """
+    import time
+
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(address))
+    out = []
+    deadline = time.time() + CYCLE_SECONDS
+    try:
+        client.call("continue")
+        while True:
+            if time.time() > deadline:
+                raise OracleError("%s stopped %d time(s) in %ds and never came "
+                                  "round -- the screen is not drawing"
+                                  % (who_writes.hx(address), len(out),
+                                     CYCLE_SECONDS))
+            if not who_writes.is_paused(client.call("wait_for_pause")):
+                continue
+            out.append(read(client.call("read_registers", group="gpr")))
+            if (len(out) >= 2 * repeat
+                    and out[-repeat:] == out[:repeat]):
+                del out[-repeat:]
+                return out
+            if len(out) > limit:
+                raise OracleError("%s stopped %d times without a frame coming "
+                                  "round" % (who_writes.hx(address), limit))
+            client.call("continue")
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _cstring(game, address, size=STRING_READ):
+    size = min(size, RAM_BASE + RAM_SIZE - address)
+    path = os.path.join(game.out_dir, "string.bin")
+    return game.read_ram(address, size, path).split(b"\0")[0]
+
+
+def screen_objects(game):
+    """Every text object the print routine is handed in one frame."""
+    import struct
+
+    import screen
+    import who_writes
+
+    path = os.path.join(game.out_dir, "object.bin")
+
+    def read(registers):
+        at = who_writes.register_value(registers, "a0")
+        raw = game.read_ram(at, OBJECT_SIZE, path)
+        pointer = struct.unpack_from("<I", raw, 8)[0]
+        text = (_cstring(game, pointer)
+                if RAM_BASE <= pointer < RAM_BASE + RAM_SIZE else b"")
+        return (at, raw, text)
+
+    out = []
+    for at, raw, text in _stops(game, layout.SCREEN_PRINT, read,
+                                OBJECT_REPEAT, OBJECT_LIMIT):
+        x, y = struct.unpack_from("<hh", raw, 0)
+        kind = raw[12]
+        out.append({"at": at, "x": x, "y": y,
+                    "width": struct.unpack_from("<H", raw, 6)[0],
+                    "kind": kind, "raw": text,
+                    "lines": (screen.decode(text) if kind in ASCII_KINDS
+                              else None)})
+    return out
+
+
+def screen_glyphs(game):
+    """(x, y, text) of every string the glyph routine draws in one frame."""
+    import screen
+    import who_writes
+
+    def read(registers):
+        value = lambda name: who_writes.register_value(registers, name)
+        return (value("a0"), _signed16(value("a1")), _signed16(value("a2")),
+                value("a3"))
+
+    return screen.glyph_strings(_stops(game, layout.SCREEN_GLYPH, read,
+                                       GLYPH_REPEAT, GLYPH_LIMIT))
+
+
+def screen_help(game):
+    """The help box's text, through the pointer its setter keeps."""
+    import struct
+
+    import screen
+
+    path = os.path.join(game.out_dir, "help.bin")
+    pointer = struct.unpack("<I", game.read_ram(layout.SCREEN_HELP, 4, path))[0]
+    if not RAM_BASE <= pointer < RAM_BASE + RAM_SIZE:
+        raise OracleError("the help pointer holds %#x, which is not RAM"
+                          % pointer)
+    return screen.help_text(_cstring(game, pointer))
+
+
+def screen_record(game):
+    """The ten stored fields of the player on screen, from both live copies."""
+    import looks
+
+    path = os.path.join(game.out_dir, "record.bin")
+    copies = [game.read_ram(at, layout.PLAYER_RECORD_SIZE, path)
+              for at in layout.PLAYER_RAM]
+    if len(set(copies)) != 1:
+        raise OracleError("the two live copies of the player disagree: %s"
+                          % " / ".join(c.hex() for c in copies))
+    return looks.decode(copies[0])
+
+
+def screen_frames(game, display):
+    """The finished frame buffers of the next few frames, and their boxes.
+
+    From `dump_vram`: one call, the whole 1024x512 VRAM at its own resolution,
+    in exact 15-bit colours.  The first runs blamed `read_vram_region` for a
+    missing rows box; the cause was the display size asked for before the
+    load (see `measure_screen`), and `read_vram_region` was never re-tried.
+
+    **And one dump is not a picture.**  The game draws into one buffer while it
+    shows the other: measured, one of four dumps a frame apart held no box at
+    all, and a PNG of a different size.  So this dumps DUMP_SAMPLES times and
+    keeps the dumps holding the most boxes; at least two have to agree box for
+    box.
+
+    **Only the TOP buffer, at VRAM row 0**, whose origin is the display's: the
+    label object's x=-56 lands on native column 200 and its y=-79 on row 41.
+    """
+    import atlas
+    import screen
+
+    width, height = display
+    seen, per_dump = [], []
+    for sample in range(DUMP_SAMPLES):
+        game.step(1)
+        # A name per dump, removed first: a file left by an earlier dump under
+        # the same name would be read as this one if the emulator did not
+        # write, and nothing would say so.
+        path = os.path.join(game.out_dir, "vram-%d.png" % sample)
+        if os.path.exists(path):
+            os.remove(path)
+        game.client.call("dump_vram", path=path, format="png")
+        if not os.path.exists(path):
+            raise OracleError("dump_vram reported %s and there is no file "
+                              "there" % path)
+        _, _, rows = atlas.read_png(path)
+        frame = [row[:width] for row in rows[:height]]
+        boxes = screen.boxes(frame, width, height)
+        seen.append((frame, boxes))
+        per_dump.append(len(boxes))
+    most = max(len(boxes) for _, boxes in seen)
+    kept = [(frame, boxes) for frame, boxes in seen if len(boxes) == most]
+    if len(kept) < 2 or any(boxes != kept[0][1] for _, boxes in kept):
+        raise OracleError("over %d dumps no two finished buffers agree on the "
+                          "boxes: %r, boxes per dump %r"
+                          % (DUMP_SAMPLES,
+                             sorted({tuple(b) for _, b in seen}), per_dump))
+    return [frame for frame, _ in kept], kept[0][1]
+
+
+def tap(game, button):
+    """One press, the same length the rest of the oracle uses, and no picture."""
+    game.client.call("press_button", button=button,
+                     duration_frames=CONFIRM_FRAMES)
+    game.step(CONFIRM_FRAMES + SETTLE_FRAMES)
+
+
+class ScreenReading:
+    """One reading of the screen: objects, rows, and what sits left of the rows."""
+
+    def __init__(self, geometry, objects):
+        import screen
+
+        self.objects = objects
+        self.pieces = screen.pieces(
+            [o for o in objects if o["lines"] is not None],
+            geometry["row0_y"], geometry["pitch"], geometry["left"],
+            geometry["top"])
+        self.geometry = geometry
+
+    def rows(self, orders):
+        import looks
+        import screen
+
+        return {name: screen.compose(self.pieces[name], orders[name])
+                for name in looks.SCREEN}
+
+    def outside(self):
+        """{title, shirt, plate: (text, [x, y])}: the kind-33 object, and the
+        two left of the rows box, upper then lower."""
+        import screen
+
+        left = sorted((o for o in self.objects
+                       if not screen.in_rows(o, self.geometry["left"],
+                                             self.geometry["top"])
+                       and o["kind"] == ASCII_KINDS[0]),
+                      key=lambda o: o["y"])
+        titles = [o for o in self.objects if o["kind"] == ASCII_KINDS[1]]
+        if len(left) != 2 or len(titles) != 1:
+            raise OracleError("expected a title and two strings left of the "
+                              "rows box, and got %d and %d"
+                              % (len(titles), len(left)))
+        def text(obj):
+            return (" ".join(line.strip() for line in obj["lines"]).strip(),
+                    [obj["x"], obj["y"]])
+
+        return {"title": text(titles[0]), "shirt": text(left[0]),
+                "plate": text(left[1])}
+
+
+def _line_grid(glyphs, labels):
+    """(row0_y, pitch), measured on the drawn labels: each on its own line,
+    evenly apart."""
+    import looks
+
+    ys = []
+    for name in looks.SCREEN:
+        found = [y for x, y, text in glyphs
+                 if x == labels["x"] and text.strip() == name]
+        if len(found) != 1:
+            raise OracleError("the label %r was drawn %d time(s) at x=%d"
+                              % (name, len(found), labels["x"]))
+        ys.append(found[0])
+    steps = {b - a for a, b in zip(ys, ys[1:])}
+    if len(steps) != 1 or ys[0] != labels["y"]:
+        raise OracleError("the labels are not on an even grid from the "
+                          "object's own y: %r" % ys)
+    return ys[0], steps.pop()
+
+
+def _named_boxes(found, anchor):
+    """The three boxes by where they sit: the one holding the labels, the one
+    left of it, the one under it."""
+    rows = [b for b in found
+            if b[0] <= anchor[0] <= b[2] and b[1] <= anchor[1] <= b[3]]
+    if len(rows) != 1:
+        raise OracleError("%d box(es) hold the labels: %r" % (len(rows), found))
+    rows = rows[0]
+    panel = [b for b in found if b[2] < rows[0]]
+    helps = [b for b in found if b[1] > rows[3]]
+    if len(panel) != 1 or len(helps) != 1 or len(found) != 3:
+        raise OracleError("expected the rows box, one box left of it and one "
+                          "under it, and found %r" % (found,))
+    return {"rows": rows, "panel": panel[0], "help": helps[0]}
+
+
+def _orders(reading, glyphs):
+    """Left to right, per row: which object each drawn piece came from."""
+    import looks
+    import screen
+
+    geometry = reading.geometry
+    orders, problems = {}, []
+    for index, name in enumerate(looks.SCREEN):
+        line_y = geometry["row0_y"] + index * geometry["pitch"]
+        drawn = sorted((x, text.strip()) for x, y, text in glyphs
+                       if y == line_y and x >= geometry["left"]
+                       and text.strip() and text.strip() != name)
+        pieces = reading.pieces[name]
+        if sorted(t for _, t in drawn) != sorted(pieces.values()):
+            problems.append("%s: drawn %r, decoded %r"
+                            % (name, [t for _, t in drawn],
+                               sorted(pieces.values())))
+            continue
+        keys, used = [], set()
+        for _, text in drawn:
+            key = next(k for k, v in sorted(pieces.items())
+                       if v == text and k not in used)
+            used.add(key)
+            keys.append(key)
+        orders[name] = keys
+    if problems:
+        raise OracleError("the decoded strings are not what the game drew: %s"
+                          % "; ".join(problems))
+    return orders
+
+
+def _control(game, reading, orders):
+    """The glyphs drawn NOW against the rows the objects compose NOW."""
+    glyphs = screen_glyphs(game)
+    again = _orders(reading, glyphs)
+    for name, keys in again.items():
+        if keys != orders[name]:
+            raise OracleError("%s draws its pieces in the order %r here and "
+                              "%r on load" % (name, keys, orders[name]))
+    return len(glyphs)
+
+
+def _cursor_row(frames, regions, geometry, origin):
+    """The row the yellow box sits on, the same in every finished buffer."""
+    import looks
+    import screen
+
+    # A frame with no cursor at all is the blink, not a disagreement: measured,
+    # one dump in six held the three boxes and no yellow pixel.
+    shown = [screen.cursor(frame, regions["rows"]) for frame in frames]
+    boxes = {box for box in shown if box is not None}
+    if len(boxes) != 1 or sum(box is not None for box in shown) < 2:
+        raise OracleError("the cursor box reads %r over %d finished dump(s)"
+                          % (shown, len(frames)))
+    box = boxes.pop()
+    hits = [index for index in range(len(looks.SCREEN))
+            if box[1] <= geometry["row0_y"] + index * geometry["pitch"]
+            + origin[1] <= box[3]]
+    if len(hits) != 1:
+        raise OracleError("the cursor box %r covers %d row line(s)"
+                          % (box, len(hits)))
+    return hits[0], box
+
+
+def measure_screen(game, verbose=True):
+    """Everything screen.json holds, measured on the running game."""
+    import time
+
+    import looks
+    import screen
+
+    started = time.time()
+    table = {"order_of_rows": list(looks.SCREEN),
+             "initial": {}, "rows": {name: {} for name in looks.SCREEN}}
+    orders, geometry, regions, display = None, None, None, None
+
+    for slot in sorted(SLOTS):
+        game.load_looks(slot)
+        # AFTER the load, never before: asked of a freshly booted emulator the
+        # GPU answers 256x239, the boot screen's mode, and a frame cut to 256
+        # columns holds the panel and no rows box.  Four runs of this
+        # measurement failed on exactly that, and were first taken for a
+        # screen caught mid-draw.
+        gpu = game.client.call("get_gpu_state")
+        here_display = (int(gpu["display_width"]),
+                        int(gpu["display_height"]))
+        if display not in (None, here_display):
+            raise OracleError("slot %d displays %r and the other %r"
+                              % (slot, here_display, display))
+        display = here_display
+        origin = (display[0] // 2, display[1] // 2)
+        table["display"] = list(display)
+        objects = screen_objects(game)
+        labels = screen.labels_object(objects)
+        glyphs = screen_glyphs(game)
+        row0_y, pitch = _line_grid(glyphs, labels)
+        frames, found = screen_frames(game, display)
+        named = _named_boxes(found, (labels["x"] + origin[0],
+                                     labels["y"] + origin[1]))
+        here = {"row0_y": row0_y, "pitch": pitch,
+                "left": named["rows"][0] - origin[0],
+                "top": named["rows"][1] - origin[1]}
+        if geometry not in (None, here) or regions not in (None, named):
+            raise OracleError("slot %d lays the screen out differently: %r %r"
+                              % (slot, here, named))
+        geometry, regions = here, named
+        reading = ScreenReading(geometry, objects)
+        slot_orders = _orders(reading, glyphs)
+        if orders not in (None, slot_orders):
+            raise OracleError("slot %d draws its pieces in another order"
+                              % slot)
+        orders = slot_orders
+        outside = reading.outside()
+        cursor_row, cursor_box = _cursor_row(frames, regions, geometry, origin)
+        record = screen_record(game)
+        plate = outside["plate"][0]
+        anchors = {name: xy for name, (_, xy) in outside.items()}
+        anchors["labels"] = [labels["x"], labels["y"]]
+        table["initial"][str(slot)] = {
+            "rows": reading.rows(orders), "title": outside["title"][0],
+            "shirt": outside["shirt"][0], "plate": plate,
+            "help": screen_help(game), "cursor": looks.SCREEN[cursor_row],
+            "record": record, "anchors": anchors}
+        say = print if verbose else (lambda *a: None)
+        say("  slot %d on load: %s, plate %s, cursor on %s, help %r; %d "
+            "glyph string(s) checked against %d object(s)"
+            % (slot, SLOTS[slot], plate, looks.SCREEN[cursor_row],
+               table["initial"][str(slot)]["help"], len(glyphs),
+               len(objects)))
+        if slot == min(SLOTS):
+            table["cursor_box_on_load"] = list(cursor_box)
+
+    first = table["initial"][str(min(SLOTS))]
+    for slot, state in table["initial"].items():
+        for key in ("help", "cursor"):
+            if state[key] != first[key]:
+                raise OracleError("the states differ in %s: %r and %r"
+                                  % (key, first[key], state[key]))
+    table["help_on_load"] = first["help"]
+    table["cursor_on_load"] = first["cursor"]
+    table["row0_y"], table["pitch"] = geometry["row0_y"], geometry["pitch"]
+    table["rows_left"] = geometry["left"]
+    table["rows_top"] = geometry["top"]
+    table["orders"] = orders
+
+    walk_slot = max(SLOTS)
+    helps, vertical, boxes_by_row = _walk_cursor(game, walk_slot, display,
+                                                 regions, geometry, origin,
+                                                 verbose)
+    table["vertical"] = vertical
+    for name in looks.SCREEN:
+        table["rows"][name]["help"] = helps[name]
+
+    for index, name in enumerate(looks.SCREEN):
+        table["rows"][name].update(
+            _walk_row(game, walk_slot, name, table, geometry, orders,
+                      verbose))
+
+    table["regions"] = {}
+    for name, box in sorted(regions.items()):
+        table["regions"][name] = {"native": list(box),
+                                  "fraction": screen.fraction(box, display)}
+    top = boxes_by_row[looks.SCREEN[0]]
+    bottom = boxes_by_row[looks.SCREEN[-1]]
+    table["regions"]["cursor"] = {
+        "native": list(boxes_by_row[table["cursor_on_load"]]),
+        "fraction": screen.fraction(boxes_by_row[table["cursor_on_load"]],
+                                    display),
+        "row": table["cursor_on_load"],
+        "step": (bottom[1] - top[1]) // (len(looks.SCREEN) - 1)}
+    for slot, state in table["initial"].items():
+        _require_initial(table, slot, state)
+    if verbose:
+        print("  screen measured in %.0fs" % (time.time() - started))
+    return table
+
+
+def _walk_cursor(game, slot, display, regions, geometry, origin, verbose):
+    """Up past the top and Down past the bottom, the cursor read off VRAM."""
+    import looks
+
+    game.load_looks(slot)
+    helps, boxes = {}, {}
+
+    def where():
+        frames, _ = screen_frames(game, display)
+        row, box = _cursor_row(frames, regions, geometry, origin)
+        return row, box
+
+    def press(button, expect):
+        for attempt in range(2):
+            tap(game, button)
+            row, box = where()
+            if row == expect or attempt:
+                return row, box
+        return row, box
+
+    row, box = where()
+    row, box = press("Up", row - 1)
+    helps[looks.SCREEN[row]] = screen_help(game)
+    boxes[looks.SCREEN[row]] = box
+    last = len(looks.SCREEN) - 1
+    after_up, _ = press("Up", last)
+    vertical = {"up": "wraps" if after_up == last else
+                "locks" if after_up == 0 else "moves to %d" % after_up}
+    if after_up != last:
+        row = after_up
+        while row != last:
+            row, box = press("Down", row + 1)
+            helps.setdefault(looks.SCREEN[row], screen_help(game))
+            boxes.setdefault(looks.SCREEN[row], box)
+    else:
+        helps.setdefault(looks.SCREEN[last], screen_help(game))
+        row, box = press("Down", 0)
+        if row != 0:
+            raise OracleError("Down from the bottom after Up wrapped went to "
+                              "row %d" % row)
+        while row != last:
+            row, box = press("Down", row + 1)
+            helps.setdefault(looks.SCREEN[row], screen_help(game))
+            boxes.setdefault(looks.SCREEN[row], box)
+    after_down, _ = press("Down", 0)
+    vertical["down"] = ("wraps" if after_down == 0 else
+                        "locks" if after_down == last else
+                        "moves to %d" % after_down)
+    for name in looks.SCREEN:
+        if name not in helps:
+            raise OracleError("the cursor never reached %s" % name)
+    if verbose:
+        print("  cursor: Up past the top %s, Down past the bottom %s"
+              % (vertical["up"], vertical["down"]))
+    return helps, vertical, boxes
+
+
+def _walk_row(game, slot, name, table, geometry, orders, verbose):
+    """Every value one row walks, both ends, and what moves beside it."""
+    import looks
+
+    game.load_looks(slot)
+    here = looks.SCREEN.index(table["cursor_on_load"])
+    target = looks.SCREEN.index(name)
+    button = "Down" if target > here else "Up"
+    for _ in range(abs(target - here)):
+        tap(game, button)
+    # With no press the help still reads what it read on load ("Visual"), and
+    # the witness is the cursor box, which the load already read off VRAM.
+    want = (table["rows"][name]["help"] if target != here
+            else table["help_on_load"])
+    if screen_help(game) != want:
+        raise OracleError("pressed %s %d time(s) to reach %s and the help "
+                          "reads %r" % (button, abs(target - here), name,
+                                        screen_help(game)))
+    field = looks.BY_ROW.get(name)
+
+    def read():
+        reading = ScreenReading(geometry, screen_objects(game))
+        rows = reading.rows(orders)
+        value = screen_record(game)[field.name] if field else None
+        return rows, value
+
+    rows, value = read()
+    initial = dict(rows)
+    moved, dropped = set(), 0
+
+    def go(direction, texts, values):
+        nonlocal dropped
+        for _ in range(SCREEN_WALK_LIMIT):
+            tap(game, direction)
+            rows, value = read()
+            if rows[name] == texts[-1]:
+                tap(game, direction)
+                rows, value = read()
+                if rows[name] == texts[-1]:
+                    return "locks"
+                dropped += 1
+            moved.update(other for other in looks.SCREEN
+                         if other != name and rows[other] != initial[other])
+            if rows[name] in texts:
+                return "wraps"
+            texts.append(rows[name])
+            values.append(value)
+        raise OracleError("%s walked %s %d times without an end"
+                          % (name, direction, SCREEN_WALK_LIMIT))
+
+    left_texts, left_values = [rows[name]], [value]
+    left = go("Left", left_texts, left_values)
+    if left == "wraps":
+        raise OracleError("%s wraps going Left; a wrapping row is not "
+                          "modelled, and the walk says so rather than guess"
+                          % name)
+    texts, values = [left_texts[-1]], [left_values[-1]]
+    right = go("Right", texts, values)
+    if right == "wraps":
+        raise OracleError("%s wraps going Right after locking going Left"
+                          % name)
+    if list(reversed(left_texts)) != texts[:len(left_texts)]:
+        raise OracleError("%s: Left walked %r and Right came back %r"
+                          % (name, left_texts, texts))
+    glyphs = _control(game, ScreenReading(geometry, screen_objects(game)),
+                      orders)
+    out = {"texts": texts, "left": left, "right": right,
+           "stored": field.name if field else None,
+           "moves_beside": sorted(moved, key=looks.SCREEN.index)}
+    if field:
+        if values != list(range(values[0], values[0] + len(values))):
+            raise OracleError("%s: the stored value did not step by one with "
+                              "the text: %r" % (name, values))
+        out["values"] = values
+    if verbose:
+        shown = texts if len(texts) <= 6 else texts[:3] + ["..."] + texts[-2:]
+        print("  %-9s %3d value(s), Left %s, Right %s%s%s; end checked "
+              "against %d drawn string(s)%s"
+              % (name, len(texts), left, right,
+                 ", stored %d..%d" % (values[0], values[-1]) if field else "",
+                 ", moves %s" % out["moves_beside"] if moved else "",
+                 glyphs, ", %d press(es) dropped" % dropped if dropped else ""))
+        print("            %s" % " | ".join(shown))
+    return out
+
+
+def _require_initial(table, slot, state):
+    """Each stored row shows the text of the value the record holds."""
+    import looks
+
+    for name, field in looks.BY_ROW.items():
+        row = table["rows"][name]
+        want = row["texts"][row["values"].index(state["record"][field.name])]
+        if state["rows"][name] != want:
+            raise OracleError("slot %s holds %s=%d, which is %r on the walk, "
+                              "and the screen showed %r"
+                              % (slot, field.name, state["record"][field.name],
+                                 want, state["rows"][name]))
+
+
+def check_screen(write=False, verbose=True):
+    """`--screen`: measure the screen and compare with, or write, screen.json."""
+    import json
+
+    import screen
+
+    ready = preflight()
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in sorted(SLOTS):
+            restore_state(slot, verbose=verbose)
+        measured = measure_screen(game, verbose)
+    measured = json.loads(json.dumps(measured))
+    problems = screen.validate(measured)
+    if problems:
+        for problem in problems:
+            print("  FAIL  %s" % problem)
+        print("oracle --screen: the measurement does not hold together")
+        return 1
+    if write:
+        screen.write(measured)
+        print("oracle --screen --write: wrote %s" % screen.TABLE)
+        return 0
+    table = screen.load()
+    differences = _differences(table, measured)
+    for path, want, got in differences:
+        print("  FAIL  %s: screen.json has %r, the game shows %r"
+              % (path, want, got))
+    print("oracle --screen: %d difference(s) from screen.json"
+          % len(differences))
+    return 1 if differences else 0
+
+
+def _differences(want, got, path=""):
+    if isinstance(want, dict) and isinstance(got, dict):
+        out = []
+        for key in sorted(set(want) | set(got)):
+            out += _differences(want.get(key), got.get(key),
+                                "%s.%s" % (path, key) if path else key)
+        return out
+    return [] if want == got else [(path, want, got)]
+
+
 # --- self-check -----------------------------------------------------------
 
 def self_check(verbose: bool = True) -> int:
@@ -3017,6 +3699,11 @@ def main(argv):
             return adopt_states()
         if len(argv) == 2 and argv[1] == "--check-live":
             return check_live()
+        if len(argv) in (2, 3) and argv[1] == "--screen":
+            if len(argv) == 3 and argv[2] != "--write":
+                raise OracleError("--screen takes --write and nothing else, "
+                                  "and got %r" % argv[2])
+            return check_screen(write=len(argv) == 3)
         if len(argv) >= 2 and argv[1] == "--writes":
             return check_writes(*row_and_slot(argv[2:]))
         if len(argv) >= 2 and argv[1] == "--colour":
@@ -3043,6 +3730,13 @@ def main(argv):
         print("oracle: skipped -- %s" % exc)
         return SKIP
     except OracleError as exc:
+        print("oracle FAILED: %s" % exc, file=sys.stderr)
+        return 1
+    except Exception as exc:  # noqa: BLE001
+        import screen
+
+        if not isinstance(exc, screen.BadScreen):
+            raise
         print("oracle FAILED: %s" % exc, file=sys.stderr)
         return 1
     print(__doc__.strip())

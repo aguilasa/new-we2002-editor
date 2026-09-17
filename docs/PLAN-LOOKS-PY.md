@@ -2409,6 +2409,42 @@ linhas, e os valores iniciais que cada save state carrega. Texto de tela
 inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 [`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md).
 
+> **Respondida em 2026-09-17**, por `oracle.py --screen --write`, e a resposta
+> é o [`tools/looks/screen.json`](../tools/looks/screen.json) — escrito pela
+> ferramenta, remedido por `oracle.py --screen`. O que se aprendeu:
+>
+> - **O texto sai de onde o jogo o imprime.** A rotina `layout.SCREEN_PRINT`
+>   recebe oito objetos de texto por quadro — os doze rótulos num só, as
+>   unidades noutro, os valores de `SKIN` a `BOOTS` num terceiro, `NAT` e
+>   `FOOT` um cada, mais placa, nome da camisa e título. As strings trazem
+>   três códigos de controle (`\n`, `\t`+1, `\r`+3), e o que o
+>   `screen.decode` faz delas é conferido, a cada corrida, contra os glifos que
+>   a rotina `layout.SCREEN_GLYPH` desenha: 34 strings, nos dois states e na
+>   ponta de cada uma das doze linhas.
+> - **As doze linhas travam nas duas pontas**, e **o cursor vertical dá a
+>   volta** nos dois sentidos — lido pela caixa amarela na VRAM, não pela
+>   contagem de teclas. Nenhuma linha de valor mexe em outra ao ser andada,
+>   `NAT` inclusive.
+> - **O alcance da tela, com o valor guardado ao lado de cada texto:**
+>   `DEFAUL` 1 (`O.K.`), `NAT` 80 (de `Unknown` a `New Zeland`, com os nomes
+>   truncados que o jogo escreve — `Swi`, `Cze`, `Portuga`), `SKIN` 4,
+>   `HAIR` 32, `H.COL` 8, `FACE` 7, `H.F.COL.` 7, `HEIG` **56** (155 a 210 cm,
+>   de um campo que guarda 148 a 211), `BODY` 8, `AGE` 32, `BOOTS` 8, `FOOT` 3.
+>   **Todo rótulo de terceiro do `looks.py` é o que o jogo escreve** em cada
+>   valor alcançável — agora checado pelo `screen.py --check`.
+> - **A ajuda de cada linha** é única — `Confirm`, `Nation`,
+>   `Skin Colour ■ Turn`… — e é a testemunha de qual linha o cursor ocupa.
+>   **Ao carregar o state ela mostra `Visual`**, sobra do menu anterior, até a
+>   primeira tecla.
+> - **Os dois states começam iguais em tudo menos a placa** (`GK`, `CB`): cursor
+>   em `NAT`, `Unknown`, `A`, `A1`, `175 cm`, `23`, `RIGHT`; o registro do
+>   jogador, lido das duas cópias vivas (`layout.PLAYER_RAM`), diz o mesmo.
+> - **As caixas, em pixels do display nativo de 512×240**, e não em frações da
+>   captura, que corta overscan: painel `(16,66)-(161,185)`, linhas
+>   `(176,37)-(496,185)`, ajuda `(16,187)-(496,221)`, cursor na linha `NAT`
+>   `(314,53)-(476,64)` e um passo de 12 por linha. Os textos estão em
+>   coordenadas do centro do display, com as linhas a partir de `y=-79`.
+
 **(r) `DEFAUL` e `NAT`.** Qual nação é qual valor da linha `NAT`, e se `DEFAUL`
 aplica exatamente a linha do `data/defaultlook.txt` — medido no jogo, nunca
 suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md).

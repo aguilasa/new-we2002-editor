@@ -21,6 +21,17 @@ status: pendente
 - **Duas cópias do arquivo, e elas têm de bater** (`CLAUDE.md`): o
   `Debug/defaultlook.txt` do `ed.exe` é gitignored e já divergiu. Quem lê aqui
   é o `data/`, versionado.
+- **O que a [`LOOKS-TASK-21`](/docs/tasks/looks/21-a-tela-medida.md) mediu da linha, e deixa para cá** (em
+  `tools/looks/screen.json`): `NAT` anda **80** valores, de `Unknown` a
+  `New Zeland`, com os nomes truncados que o jogo escreve (`Swi`, `Cze`,
+  `Portuga`) — contra **95** linhas do `data/defaultlook.txt`, então a
+  correspondência não é de um para um e pelo menos quinze linhas do arquivo não
+  têm valor na tela. Andar `NAT` **não muda nenhuma outra linha**: o default não
+  se aplica sozinho. `DEFAUL` tem um valor só, `O.K.`, trava nas duas pontas com
+  `Left`/`Right`, e a ajuda dele é `Confirm` — o que o aplica é outra tecla,
+  não medida. E nenhum dos dois está nos 12 bytes do registro
+  (`layout.PLAYER_RAM`): onde o jogo guarda a nação escolhida é pergunta desta
+  task.
 - **Que a ordem da linha `NAT` é a ordem do arquivo é suposição.** O índice de
   nação do arquivo é o do `ed.exe`; o jogo pode ordenar de outro jeito, e casar
   por índice aplica o default da nação errada com cara de certo.

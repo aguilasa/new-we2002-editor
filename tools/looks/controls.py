@@ -632,6 +632,33 @@ CONTROLS = (
         "rest have; calling that green passes a gate that measured less than "
         "it says",
     ),
+    Control(
+        "screen-skips-unknown-control", "screen.py", "decode",
+        "            raise BadScreen(\"byte %#04x at %d of %r is not a character and not \"",
+        "            at += 1\n            continue\n            raise BadScreen(\"byte %#04x at %d of %r is not a character and not \"",
+        ("screen",),
+        "a decoder that steps over a byte it does not know: the value block "
+        "still decodes, and a code the screen has not shown yet turns into a "
+        "letter missing from the text with nothing to say so",
+    ),
+    Control(
+        "screen-help-not-a-witness", "screen.py", "validate",
+        "    if len(set(helps)) != len(helps):",
+        "    if False:",
+        ("screen",),
+        "two rows sharing a help pass: the help is what the walk reads to know "
+        "which row the cursor is on, so a shared one lets a Down that did not "
+        "register measure the neighbouring row under this row's name",
+    ),
+    Control(
+        "screen-glyph-keeps-measuring-pass", "screen.py", "glyph_strings",
+        "        if measuring:\n            current = None\n            continue\n",
+        "        if measuring:\n            current = None\n",
+        ("screen",),
+        "the width-measuring pass kept as if drawn: every word comes out twice "
+        "at one x, and the control that checks decoding against the glyphs "
+        "would be comparing against a text the screen never shows",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

@@ -1338,6 +1338,60 @@ be built on them.
 TMD_MAGIC = 0x00000041
 """The first word of a Sony TMD."""
 
+
+# --- the LOOKS SET screen, in the game's own RAM and code -----------------
+#
+# Found on 2026-09-17 by LOOKS-TASK-21, on the ENGLISH disc the emulator is
+# driven with -- the text the screen writes is the patch's, so these are
+# addresses of that build of the game, and the measurement that uses them
+# re-proves each one every run rather than trusting it.
+
+SCREEN_PRINT = 0x8010AA0C
+"""The game routine that prints ONE text object.
+
+Found by a read watchpoint on the row labels (`DEFAUL\\nNAT \\n...`), which
+stopped in the glyph loop; this is the entry of the function around it.  `a0`
+is the object:
+
+    +0  s16  x, from the centre of the 512x240 display
+    +2  s16  y, likewise
+    +6  u16  width of the box the text is laid out in
+    +8  u32  pointer to the string, with the control bytes screen.py decodes
+    +12 u8   kind: 32 and 33 are the ASCII fonts this screen uses
+
+An execute breakpoint here stops eight times per frame on LOOKS SET -- once per
+object, all twelve rows in five objects -- where the glyph routine below stops
+268 times.  That is what makes walking every value of every row affordable.
+"""
+
+SCREEN_GLYPH = 0x8010BB04
+"""The game routine that draws ONE glyph: `a0` the code, `a1` x, `a2` y.
+
+`a3` says which of two passes: 1 is the pass that measures the string's width
+(every glyph at the same x), 0 is the pass that draws it.  Only the draw pass
+is what the screen shows, and it is the witness the decoding of SCREEN_PRINT's
+strings is checked against.
+"""
+
+SCREEN_HELP = 0x800E8338
+"""A pointer to the help string the box at the bottom shows.
+
+The setter at 0x800CFCC8 compares its argument against this pointer with
+`strcmp` and redraws only when they differ, so this is the text on screen, not
+the text asked for.  Found by a read watchpoint on `Skin Colour` in Shift-JIS,
+which fired inside that `strcmp` when Down moved the cursor to SKIN.
+"""
+
+PLAYER_RAM = (0x8007DF60, 0x800E9450)
+"""The two live copies of the twelve bytes of the player LOOKS SET edits.
+
+Found by decoding every offset of RAM with `looks.decode` against what the
+screen shows on both states -- three offsets matched -- and then pressing Right
+on HEIG and on AGE: these two followed (175 to 176, 23 to 24) and the third,
+0x800E9470, stayed where it was.  Both are read and required to agree; which
+of the two the game draws from is not measured.
+"""
+
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 

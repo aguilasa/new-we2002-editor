@@ -45,6 +45,7 @@ MODULES = (
     "atlas",
     "skin",
     "looks",
+    "screen",
     "assembly",
     "scene",
     "confront",
