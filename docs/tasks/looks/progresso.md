@@ -52,7 +52,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ✅ Concluído | 2026-09-17 | ⬜ pendente |
 | [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
@@ -193,7 +193,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 
 ### Fase 7 — fechamento
 
-- [ ] `ctest -R looks` = 1 passed, 2 skipped numa máquina limpa.
+- [x] `ctest -R looks` = **1 passed, 3 skipped** numa máquina limpa — eram 2 skipped até a LOOKS-TASK-19 registrar o quarto alvo, `looks_live`; e 4 passed com as duas variáveis, o venv e o fork.
 - [ ] Cada incógnita da §6 com veredito.
 - [ ] `check_tasks.py` verde.
 
