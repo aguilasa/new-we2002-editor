@@ -1396,8 +1396,19 @@ PLAYER_NATION = (0x800E7E0C, 0x800E946B)
 """The byte the `NAT` row of LOOKS SET writes: the player's nationality.
 
 Not one of the twelve, which is the point -- `NAT` is a row of that screen and
-not a field of the record (`looks.UNSTORED`).  It is stored as the row's index
-**minus one**, so the first nation the row offers, `Ireland`, is 0.
+not a field of the record (`looks.UNSTORED`).
+
+**The byte is a nation CODE, and the code is not the row's position.** Values 1
+to 54 hold 0 to 53, and from 55 on the code JUMPS 41: `Iceland`, the row's
+value 55, holds 95, and the row ends at 119.  The rule and the two runs it is
+made of are `looks.NATION_CODES` and `looks.nation_code`; whoever needs the
+code asks them, and never arithmetic written here.
+
+This said "it is stored as the row's index **minus one**" until 2026-09-17
+(CORR-LOOKS-057), which is true of the first 54 values and false of the other
+25.  It came from five samples that all landed under the jump -- the same
+inference the walk that measured the row records as its own problem 2 -- and
+the byte is plausible at any value, so nothing shows when it is wrong.
 
 Found on 2026-09-17 (LOOKS-TASK-23) by two runs of the SAME number of presses
 from one `load_state`, landing on different nations -- eleven Rights against

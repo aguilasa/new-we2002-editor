@@ -72,7 +72,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [ ] pendente | — |
+| [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [x] concluída | 2026-09-17 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -143,7 +143,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
 - [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
 - [x] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
-- [ ] CORR-LOOKS-057 — a regra errada do código de nação sobrevive no `layout.py`
+- [x] CORR-LOOKS-057 — a regra errada do código de nação sobrevive no `layout.py`
 
 ## Detalhes por correção
 
