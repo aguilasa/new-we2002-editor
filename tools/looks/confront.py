@@ -654,6 +654,33 @@ def render(text: str, figure: int, out: str):
     return (ui_check.picture(out), None)
 
 
+def press_value(game, button: str, row: str, oracle) -> None:
+    """One press on a row's value, proved by the label's glyphs.
+
+    Not by the raw difference of the value cell, which is trap 28 of the
+    profile: E to F on FACE moves that cell by 0.0029, under the 0.004 that
+    counts as unchanged -- F is E without its bottom bar -- and the route died
+    on a press that had registered (CORR-LOOKS-049).  The glyph mask does not
+    read the blink, and any letter that changes changes it.
+    """
+    import ui_check
+
+    cell = oracle.row_value(oracle.ROWS.index(row))
+    box = (GLYPH_LEFT, cell[1], cell[2], cell[3])
+
+    def mask(frame_path):
+        return glyph_mask(ui_check.picture(frame_path), box)
+
+    game.capture()
+    scratch = os.path.join(game.out_dir, "scratch.png")
+    before = mask(scratch)
+    game.press(button, expect_change=False)
+    game.capture()
+    if mask(scratch) == before:
+        raise ConfrontError("%s on %s did not change the label -- the press "
+                            "did not register" % (button, row))
+
+
 def route(game, text: str, oracle) -> int:
     """Put one tuple on the game's screen.  Returns frames since load_state."""
     frames = oracle.LOAD_FRAMES
@@ -665,9 +692,8 @@ def route(game, text: str, oracle) -> int:
             game.press(way, box=oracle.FOOTER, least=oracle.ROW_MOVED)
             frames += press
         here = row
-        cell = oracle.row_value(oracle.ROWS.index(row))
         for _ in range(count):
-            game.press(button, box=cell, least=oracle.VALUE_MOVED)
+            press_value(game, button, row, oracle)
             frames += press
     game.step(SHOT_FRAMES)
     return frames + SHOT_FRAMES

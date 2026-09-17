@@ -161,7 +161,12 @@ Não se revertem sem o usuário pedir.
     **antes** de a escrita começar é igual à anterior, o que uma varredura lê
     como fim do alcance: foi assim que 32 valores de `HAIR` viraram três e 8 de
     `BOOTS` viraram nove. Leia até **duas leituras seguidas concordarem**
-    (`oracle.steady`), e recuse se nunca concordarem.
+    (`oracle.steady`), e recuse se nunca concordarem. **E duas leituras 20
+    quadros separadas não bastam para uma cabeça inteira:** as listas de
+    primitivas de `SKIN` (8) e `H.COL` (7) da seção 24 saíram assim, e das duas
+    pontas assentadas, 300 quadros entre as leituras, são 14 e 12
+    ([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). Quem mede **o que
+    um campo move** compara as pontas (`oracle.py --colour`), não passo a passo.
 19. **Alcance de tela não é domínio de campo — e "a tela alcança três" pode
     ser a JANELA, não a tela.** `beard_style` guarda oito, os rótulos nomeiam
     sete e a tela anda **sete** — esta linha dizia **cinco**, e era a mesma
@@ -309,6 +314,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min, e ~30 s por tupla | `python tools/looks/oracle.py --patched <LINHA> [<SLOT> [<TUPLA> ...]]` — o slot desde a CORR-LOOKS-047 (sem ele é o 2); as tuplas desde a CORR-LOOKS-048, uma caminhada por tupla a partir de `load_state`, com as primitivas mudadas impressas | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~15 min | `python tools/looks/oracle.py --hair` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~3 a 12 min | `python tools/looks/oracle.py --writes HAIR [<SLOT>]` | — | LOOKS-TASK-14 |
+| *(sem alvo ainda)* | idem; ~45 s por tupla | `python tools/looks/oracle.py --colour <LINHA> [<SLOT> [<TUPLA> ...]]` — as primitivas que uma linha de cor move em cada cabeça, pelas duas pontas assentadas | — | CORR-LOOKS-049 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |

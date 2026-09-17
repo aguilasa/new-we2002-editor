@@ -36,6 +36,7 @@ Usage:
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
     python tools/looks/oracle.py --patched [HAIR [SLOT [TUPLE ...]]]  # which sections the game has edited, value by value
+    python tools/looks/oracle.py --colour SKIN [SLOT [TUPLE ...]]  # which primitives of each head a colour row moves
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
 """
 
@@ -2090,6 +2091,101 @@ def check_patched(row="HAIR", slot=2, starts=(), verbose=True):
     return 0
 
 
+COLOUR_SETTLE_FRAMES = 300
+"""Frames between the two reads that must agree at each end of a colour walk.
+
+Not SETTLE_FRAMES: walked press by press with reads 20 frames apart, SKIN on
+section 24 came back with primitive 7 moved once and never again, and the
+press past the end of the range still writing -- the rewrite of a head's CLUT
+ids runs longer than two reads 20 frames apart can see (CORR-LOOKS-049)."""
+
+
+def check_colour(row="SKIN", slot=2, starts=(), verbose=True):
+    """Which primitives of each head a colour row moves, from its two ends.
+
+    For each start tuple: the row walked to the bottom, then to the top, and at
+    each end the loaded MODEL.BIN is read until two reads COLOUR_SETTLE_FRAMES
+    apart agree.  A primitive belongs to the row where its CLUT id differs
+    between the two ends.  Ends and not steps, because what a step reads can be
+    a state the game is still in the middle of writing (trap 18).
+    """
+    import confront
+    import iso_source
+    import looks
+
+    import assembly
+
+    ready = preflight()
+    count = looks.BY_ROW[row].values
+    # FACE moves the `v` of its quads, and past E it draws another section:
+    # its top end is E, and what differs is the texcoords (CORR-LOOKS-048).
+    up = assembly.FACE_TWIN_FROM - 1 if row == "FACE" else count
+    for start in starts:
+        looks.parse_tuple(start)
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = disc.read(layout.MODEL)
+    scan = section.scan(data, layout.GEOMETRY_START[layout.MODEL])
+    out = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in sorted(SLOTS):
+            restore_state(one, verbose=verbose)
+        path = os.path.join(game.out_dir, "model.bin")
+
+        def settled():
+            first = game.read_ram(layout.BASE[layout.MODEL], len(data), path)
+            for _ in range(SETTLE_TRIES):
+                game.step(COLOUR_SETTLE_FRAMES)
+                again = game.read_ram(layout.BASE[layout.MODEL], len(data),
+                                      path)
+                if again == first:
+                    return again
+                first = again
+            raise OracleError("MODEL.BIN never settled at an end of %s" % row)
+
+        for start in starts or (None,):
+            game.load_looks(slot)
+            if start is None:
+                game.select_row(row)
+            else:
+                confront.route(game, start, sys.modules[__name__])
+                way, distance = confront.moves(ROWS, confront.SHOT_ROW, row)
+                for _ in range(distance):
+                    game.press(way, box=FOOTER, least=ROW_MOVED)
+            for _ in range(count):
+                game.press("Left", expect_change=False)
+            bottom = settled()
+            for _ in range(up):
+                game.press("Right", expect_change=False)
+            top = settled()
+            moved = {}
+            for index, one in enumerate(scan.sections):
+                first = one.offset + section.HEADER_SIZE
+                for at in range(len(one.primitives)):
+                    offset = first + at * section.PRIMITIVE_SIZE
+                    low = section.read_primitive(bottom, offset)
+                    high = section.read_primitive(top, offset)
+                    if (low.clut, low.texcoords) != (high.clut,
+                                                     high.texcoords):
+                        moved.setdefault(index, []).append(
+                            (at, low.clut, high.clut))
+            out.append((start, moved))
+
+    for start, moved in out:
+        print("  %s on slot %d from %s: primitives whose CLUT id or texcoords "
+              "differ between the two settled ends" % (row, slot, start),
+              flush=True)
+        if not moved:
+            print("      nothing", flush=True)
+        for index in sorted(moved):
+            print("      section %d: %s" % (index, tuple(at for at, _l, _h
+                                                     in moved[index])),
+                  flush=True)
+            print("          %s" % ", ".join("%d 0x%04x->0x%04x" % one
+                                             for one in moved[index]),
+                  flush=True)
+    return 0
+
+
 def _sections_touched(before, after, scan, disc_data):
     """[(section, bytes that differ, the bands its differing primitives sit in)].
 
@@ -2823,6 +2919,9 @@ def main(argv):
             return check_live()
         if len(argv) >= 2 and argv[1] == "--writes":
             return check_writes(*row_and_slot(argv[2:]))
+        if len(argv) >= 2 and argv[1] == "--colour":
+            return check_colour(*row_and_slot(argv[2:4]),
+                                starts=tuple(argv[4:]))
         if len(argv) >= 2 and argv[1] == "--patched":
             return check_patched(*row_and_slot(argv[2:4]),
                                  starts=tuple(argv[4:]))

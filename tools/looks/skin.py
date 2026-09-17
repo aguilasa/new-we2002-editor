@@ -167,12 +167,13 @@ FIELDS = (
     Field("SKIN", "row", 0, 4, layout.SKIN_COLOUR_PRIMITIVES,
           layout.HAIR_PRIMITIVES[0],
           "0x40 per step, which is one whole 256-entry record: it moves every "
-          "bare-skin primitive of both figures AND eight of the head's, and "
-          "the column of each is untouched"),
+          "bare-skin primitive of both figures AND fourteen of section 24's, "
+          "and the column of each is untouched"),
     Field("H.COL", "column", layout.HAIR_COLUMN, 8,
           layout.HAIR_COLOUR_PRIMITIVES, layout.HAIR_PRIMITIVES[0],
-          "+1 per step, seven primitives of the head and nothing else: the "
-          "two the HAIR field moves, and five more that are hair-coloured"),
+          "+1 per step, twelve primitives of section 24 and nothing else: the "
+          "two the HAIR field moves, and ten more of the window it shares "
+          "with the skin"),
     Field("H.F.COL.", "column", layout.BEARD_COLUMN, 7,
           layout.FACE_PRIMITIVES, layout.FACE_PRIMITIVES[0],
           "+1 per step, and exactly the two primitives the FACE field moves -- "
@@ -267,13 +268,13 @@ def moving_entries(data: bytes, record, columns) -> list:
 def moved_by_colour() -> tuple:
     """Every head primitive some colour field moves -- the union of the three.
 
-    Nine of the head's eighteen, and the subtraction is the measurement: the
-    other nine keep their CLUT id through every step of all three fields,
-    INCLUDING a change of skin, so the dark-skinned player draws those nine
-    windows out of the pale skin's row.  Part of the head is not skin --
-    eye, mouth, brow, whatever it turns out to be -- and naming it closes
-    section 6(b) at a point LOOKS-TASK-09 left open, where the head went in
-    as one piece.
+    Fourteen of section 24's eighteen, and the subtraction is the
+    measurement: the other four -- 3, 6, 10 and 11 -- keep their CLUT id
+    through every step of all three fields, INCLUDING a change of skin.  This
+    said NINE until 2026-09-16 (CORR-LOOKS-026 found it by subtraction): the
+    field lists it subtracted from had been read before the game finished
+    rewriting the head, and from the two settled ends of each row the union is
+    fourteen (CORR-LOOKS-049).
     """
     out = set()
     for field in FIELDS:
@@ -423,24 +424,20 @@ def _checks(c) -> None:
        set(layout.HAIR_PRIMITIVES) < set(layout.HAIR_COLOUR_PRIMITIVES))
 
     # What the three fields do NOT move.  Asserted because it was found by
-    # subtraction and nothing else prints it: the union is nine, so nine of
-    # the head's eighteen keep the pale skin's window whatever the screen
-    # says (CORR-LOOKS-026).
-    ok("the three colour fields move nine of the head's eighteen primitives",
-       len(moved_by_colour()) == 9, "got %d: %s"
+    # subtraction and nothing else prints it.  It was nine of eighteen, with
+    # primitive 4 the one place "row x column" did not hold (CORR-LOOKS-026),
+    # and both came out of lists read mid-rewrite: from the settled ends the
+    # union is fourteen and every H.COL primitive follows the row
+    # (CORR-LOOKS-049).
+    ok("the three colour fields move fourteen of section 24's eighteen",
+       len(moved_by_colour()) == 14, "got %d: %s"
        % (len(moved_by_colour()), list(moved_by_colour())))
-    ok("and nine of eighteen is what is left when they are taken out",
-       len(unmoved_head(18)) == 9, "got %s" % list(unmoved_head(18)))
-    # The one place "row x column" does not hold, and the reason the two
-    # coordinates cannot be assumed independent when the table is written.
-    ok("primitive 4 moves with H.COL and stays put when the skin changes",
-       4 in BY_ROW["H.COL"].primitives
-       and 4 not in BY_ROW["SKIN"].primitives,
+    ok("and four are left when they are taken out: 3, 6, 10 and 11",
+       unmoved_head(18) == (3, 6, 10, 11), "got %s" % list(unmoved_head(18)))
+    ok("every primitive H.COL moves follows the row too, primitive 4 included",
+       set(BY_ROW["H.COL"].primitives) < set(BY_ROW["SKIN"].primitives),
        "H.COL %s, SKIN %s"
        % (list(BY_ROW["H.COL"].primitives), list(BY_ROW["SKIN"].primitives)))
-    ok("every other primitive H.COL moves also follows the row",
-       set(BY_ROW["H.COL"].primitives) - {4}
-       < set(BY_ROW["SKIN"].primitives))
     ok("and the beard's two follow the row as well",
        set(BY_ROW["H.F.COL."].primitives) < set(BY_ROW["SKIN"].primitives))
 
@@ -583,7 +580,8 @@ def _check_image(image_path: str) -> int:
                         "was measured"
                         % (layout.HAIR_COLUMN, resting, head_here))
 
-    # What does NOT move, which is how CORR-LOOKS-026 found the nine.
+    # What does NOT move, which is how CORR-LOOKS-026 found what it called
+    # nine and CORR-LOOKS-049 remeasured as four.
     head = scans[layout.MODEL].sections[layout.HEAD_SECTION]
     moved = moved_by_colour()
     still = unmoved_head(len(head.primitives))

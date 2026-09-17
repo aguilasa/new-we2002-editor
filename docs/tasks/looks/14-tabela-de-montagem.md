@@ -126,7 +126,9 @@ status: concluído
 - **`H.COL` move sete primitivas, não as duas do cabelo.** As duas que o `HAIR`
   reformata estão entre elas; as outras cinco são partes da cabeça pintadas com
   a cor do cabelo. Uma linha de montagem que ligue `H.COL` só ao cabelo deixa
-  cinco primitivas com a cor errada.
+  cinco primitivas com a cor errada. *(Remedido em 2026-09-16 pela
+  [`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), das duas pontas
+  assentadas: são **doze** na seção 24, e o `SKIN` move quatorze, não oito.)*
 - **O desempate "registro mais estreito ganha" é o que o console faz**, e agora
   está medido contra a VRAM: as 21 linhas de CLUT do `DAT2D.BIN` batem entrada
   por entrada quando resolvidas pelo `texture.covering`, e a linha 484 — onde

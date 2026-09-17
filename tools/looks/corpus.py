@@ -94,16 +94,17 @@ figure as the corpus."""
 WORST = 6
 """How many of the lowest self-scores are drawn into the strip and printed."""
 
-GROUP_RESIDUES = {
-    (False, False): "CORR-LOOKS-049: on a head that is not A1 the colour rows "
-                    "paint by indices borrowed from section 24, and a skin "
-                    "that is not A lands on the forehead only",
-}
+GROUP_RESIDUES = {}
 """Groups whose mean is known to sit under the floor, and the open correction.
 
 A residue EXEMPTS its group only while the group is an outlier.  A group that
 recovers while its residue is still here is a failure too: an exemption that
-outlives its fix is a hole with a date (CORR-LOOKS-050)."""
+outlives its fix is a hole with a date (CORR-LOOKS-050).
+
+Empty since CORR-LOOKS-049.  It held `(False, False)` -- a head that is not A1
+with a skin that is not A, mean 0.411 -- while the colour rows painted by
+section 24's indices; with each head's own, measured, the group scores 0.659,
+and the gate went red asking for the residue to go, which is how it went."""
 
 
 class CorpusError(Exception):

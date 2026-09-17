@@ -455,10 +455,9 @@ CONTROLS = (
         "        out = set(field.primitives or ())",
         ("skin",),
         "the union of the three colour fields taken as the last one's list: "
-        "with it, nothing says nine of the head's eighteen primitives keep "
-        "the pale skin's window whatever the screen says, and the nine that "
-        "are not skin go back to being invisible -- which is the state "
-        "CORR-LOOKS-026 found",
+        "with it, nothing says which of the head's primitives keep the pale "
+        "skin's window whatever the screen says -- four of section 24's "
+        "eighteen since CORR-LOOKS-049, nine as CORR-LOOKS-026 first read it",
     ),
     Control(
         "confront-ranked-ignores-ceiling", "confront.py", "verdict",
@@ -531,13 +530,22 @@ CONTROLS = (
     ),
     Control(
         "assembly-colour-stays-on-24", "assembly.py", "edits",
-        "            key = where_head if key == HEAD else key",
-        "            key = key",
+        "                key = where_head",
+        "                key = HEAD",
         ("assembly",),
         "the colour rows addressed to the head they were MEASURED on instead "
         "of the head the tuple wears: for the 29 styles that are not an A the "
         "plan comes back empty, and SKIN, H.COL, H.F.COL. and FACE move "
         "nothing while the figure draws perfectly",
+    ),
+    Control(
+        "assembly-colour-borrowed-from-24", "assembly.py", "colour_primitives",
+        "    return table[head]",
+        "    return table[layout.HEAD_SECTION]",
+        ("assembly",),
+        "section 24's indices applied to every head, which is what the corpus "
+        "measured: a skin that is not A on the forehead only, and the beard "
+        "missing, on twelve heads drawing perfectly (CORR-LOOKS-049)",
     ),
     Control(
         "assembly-plan-key-drops-a-row", "assembly.py", "edits",

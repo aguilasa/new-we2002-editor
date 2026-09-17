@@ -1651,16 +1651,20 @@ cabeça `A1` com outra pele 0,641; outra cabeça com pele `A` 0,697; **outra
 cabeça com outra pele, 0,411**. Olhadas as seis piores, a pele nova pinta só a
 testa e o rosto fica na pele `A` — os índices de cor medidos na seção 24 e
 aplicados às outras cabeças por empréstimo erram
-([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)).
+([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). **Consertado em
+2026-09-16:** medidos cabeça a cabeça, os índices de cada uma entram no
+`layout.COLOUR_PRIMITIVES`, e o grupo sobe de 0,411 para **0,659** (os outros:
+0,721, 0,641, 0,713); a tira dos piores mostra o rosto inteiro na pele do nome.
 
 **E desde 2026-09-16 isso é asserção, não tabela impressa**
 ([`CORR-LOOKS-050`](/docs/tasks/looks/CORR-LOOKS-050.md)). Um grupo falha quando
 a **média** dele fica abaixo da **pior nota** de todos os outros grupos — a pior
 imagem de qualquer outro lugar, que já paga pose, câmera e JPEG; nenhum número
-escolhido à mão. Hoje: 0,411 contra 0,540, vermelho; os outros três passam. O
-grupo sai como **resíduo nomeado** apontando a CORR-LOOKS-049
-(`corpus.GROUP_RESIDUES`), e o resíduo **expira**: grupo que deixa de ser
-outlier com o resíduo ainda lá também falha. Um resíduo não entra no piso dos
+escolhido à mão. Com o empréstimo presente, 0,411 contra 0,540, vermelho, e o
+grupo saiu como **resíduo nomeado** apontando a CORR-LOOKS-049
+(`corpus.GROUP_RESIDUES`). O resíduo **expira**: grupo que deixa de ser outlier
+com o resíduo ainda lá também falha — e foi o que aconteceu com o conserto da
+049, que esvaziou o `GROUP_RESIDUES`. Um resíduo não entra no piso dos
 outros, para não esconder um segundo defeito.
 
 ### 5.5 Controle negativo
@@ -1915,14 +1919,14 @@ escolhida e re-endereça a chave
 conserto, `SKIN` move 14,54% da cabeça `I3` e `H.COL` 2,90%, onde antes os dois
 moviam zero.
 
-**E os índices de primitiva das quatro linhas foram medidos na seção 24.** As
-treze cabeças não têm o mesmo número de primitivas — a 34 desenha 23 onde a 24
-desenha 18 —, então aplicá-los às outras doze é suposição, não medição. Eles
-são aplicados, porque cabeça sem cor nenhuma é o defeito de cima, e cada parte
-que eles tocam noutra cabeça sai marcada **`COLOUR BY BORROWED INDEX`** na
-tabela e como `colour borrowed` nas notas da cena. O que preenche isso é a
-irmã da corrida do `--writes`: quais primitivas de cada uma das treze cabeças
-cada linha de cor move.
+**E os índices de primitiva das quatro linhas são os de cada cabeça**, desde
+2026-09-16 ([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)). Até ali
+eles tinham sido medidos só na seção 24 e aplicados às outras doze por
+empréstimo, marcados **`COLOUR BY BORROWED INDEX`** — e o corpus mostrou o que
+isso desenhava: pele nova só na testa. O `oracle.py --colour` anda cada linha
+nas treze cabeças e nos treze gêmeos e compara as duas pontas assentadas; a
+tabela é o `layout.COLOUR_PRIMITIVES`, e cabeça fora dela **recusa**. A marca
+saiu da tabela e da cena.
 
 **E a faixa 0 do `FACE` é o rosto SEM BARBA — medido, não suposto.** Com a
 `H.F.COL.` de volta no plano, ela troca a janela de CLUT e **não muda um
@@ -1972,8 +1976,8 @@ coordenadas dessa grade**, medidas com o jogo rodando
 
 | campo | o que anda | passo no CLUT id | alcance medido | quem ele move |
 |---|---|---|---|---|
-| `SKIN` | a **linha** | `+0x40` | 4 (linhas 480..483) | toda pele nua dos dois bonecos, mais a cabeça |
-| `H.COL` | a **coluna** | `+1` | 8 (colunas 1..8) | 7 primitivas da cabeça, as duas do `HAIR` entre elas |
+| `SKIN` | a **linha** | `+0x40` | 4 (linhas 480..483) | toda pele nua dos dois bonecos, mais 14 das 18 primitivas da cabeça 24 |
+| `H.COL` | a **coluna** | `+1` | 8 (colunas 1..8) | 12 primitivas da cabeça 24, as duas do `HAIR` entre elas |
 | `H.F.COL.` | a **coluna** | `+1` | 7 (colunas 9..15) | exatamente as duas primitivas que o `FACE` move |
 
 **Os três campos alcançam as dezesseis colunas:** 1 janela de pele nua + 8
@@ -1987,14 +1991,20 @@ apareceu uma propriedade da tela que não estava escrita em lugar nenhum: **os
 campos de LOOKS travam nas pontas, não dão a volta.** O quarto `Right` no `SKIN`
 deixa o id onde o terceiro o pôs.
 
-**Nove das dezoito primitivas da cabeça não andam com campo de cor nenhum.**
-A união dos três é `{0, 1, 4, 8, 9, 13, 14, 16, 17}`, e as outras nove ficam na
-linha 480 **inclusive depois de trocar a pele**: o jogador de pele negra desenha
-essas nove janelas na paleta da pele branca. Parte da cabeça **não é pele** —
-olho, boca, sobrancelha, o que for —, e nomeá-la é o que falta à §6(b), onde a
-cabeça entrou como uma peça só. A **primitiva 4** é a única exceção ao
-"linha × coluna": anda com `H.COL` e não com `SKIN`. Achado por subtração —
-o que um campo **não** move é tão medido quanto o que ele move.
+**Quatro das dezoito primitivas da cabeça 24 não andam com campo de cor
+nenhum: 3, 6, 10 e 11.** A união dos três é
+`{0, 1, 2, 4, 5, 7, 8, 9, 12, 13, 14, 15, 16, 17}`, e as quatro ficam na linha
+480 **inclusive depois de trocar a pele**. Achado por subtração — o que um campo
+**não** move é tão medido quanto o que ele move.
+
+**Este parágrafo dizia nove, e uma exceção, até 2026-09-16:** a união
+`{0, 1, 4, 8, 9, 13, 14, 16, 17}`, `SKIN` com 8 e `H.COL` com 7, e a
+primitiva 4 andando com `H.COL` e não com `SKIN`
+([`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md)). As listas tinham
+sido lidas **antes de o jogo terminar de reescrever a cabeça** (armadilha 18 do
+perfil); das duas pontas assentadas, `SKIN` move 14, `H.COL` 12, todas as de
+`H.COL` andam também com a linha, e a exceção some
+([`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md)).
 
 **Nenhum byte de vértice se mexe em nenhum dos seis pares campo × slot.** Todo
 acerto cai no **byte 2 da primitiva**, que é o byte baixo do CLUT id. Uma

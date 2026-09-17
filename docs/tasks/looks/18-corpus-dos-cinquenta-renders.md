@@ -237,7 +237,9 @@ Controles de 54 para 57: `corpus-ties-to-palette`,
 ### Problemas encontrados, e para onde foram
 
 - **Os índices de cor emprestados da seção 24 erram nas outras cabeças** —
-  [`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), Alta.
+  [`CORR-LOOKS-049`](/docs/tasks/looks/CORR-LOOKS-049.md), Alta. **Consertado
+  em 2026-09-16:** índices medidos por cabeça; o grupo "not A1 / not A" sobe
+  de 0,411 para 0,659.
 - **Nenhum confronto do ciclo testemunha forma** — estilo de cabelo e barba —,
   e isso vai para a §6 como aberto, escrito na
   [`LOOKS-TASK-20`](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md).

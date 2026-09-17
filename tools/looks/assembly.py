@@ -530,32 +530,30 @@ def edits(values: dict, head: int | None = None) -> dict:
                                                     step - FACE_TWIN_FROM)
             continue
         for key, primitives in effect.where.items():
-            key = where_head if key == HEAD else key
+            if key == HEAD:
+                primitives = colour_primitives(effect.row, head)
+                key = where_head
             out.setdefault(key, {})
             out[key][(effect.row, primitives)] = (effect, step)
     return out
 
 
-HEAD_COLOUR_MEASURED = layout.HEAD_SECTION
-"""The one head whose colour primitives were measured, by index.
+def colour_primitives(row: str, head: int) -> tuple:
+    """The primitives one colour row moves on one head, or a refusal.
 
-`SKIN_COLOUR_PRIMITIVES`, `HAIR_COLOUR_PRIMITIVES` and `FACE_PRIMITIVES` were
-read off section 24 with the game running, and the thirteen heads do not hold
-the same number of primitives -- 34 draws 23 where 24 draws 18.  Applying the
-same indices to the other twelve is the plausible assumption this cycle refuses
-elsewhere (HAIR_QUADS covers four heads of thirteen BY MEASUREMENT, and head_of
-refuses three styles rather than invent them).
-
-So they are applied -- a head that takes no colour at all is the defect
-CORR-LOOKS-034 fixed -- and every part they touch on another head is marked.
-What fills this in is the sibling of LOOKS-TASK-14's --writes run: which
-primitives of each of the thirteen heads each colour row moves.
-"""
-
-
-def colour_is_measured(head: int) -> bool:
-    """Whether the colour rows' primitive indices were measured on *head*."""
-    return head == HEAD_COLOUR_MEASURED
+    Measured per head (layout.COLOUR_PRIMITIVES, CORR-LOOKS-049).  Until then
+    the indices read off section 24 were applied to every head, and the corpus
+    showed what that drew: a skin that is not A on the forehead only.  A head
+    with no entry refuses, the way `head_of` refuses a style that wrote
+    nothing -- a colour painted on the wrong primitives draws perfectly.
+    """
+    table = layout.COLOUR_PRIMITIVES.get(row, {})
+    if head not in table:
+        raise BadAssembly(
+            "%s on MODEL.BIN section %d: which primitives it moves there was "
+            "not measured -- layout.COLOUR_PRIMITIVES knows section(s) %s"
+            % (row, head, sorted(table)))
+    return table[head]
 
 
 def hair_map(figure: int) -> tuple:
@@ -650,22 +648,13 @@ def draw_list(disc, values: dict, figure: int) -> list:
 
     out = []
     dropped: dict = {}
-    borrowed: dict = {}
     stored: dict = {}
     # Both figures wear the head their own map names (CORR-LOOKS-047), and
     # beard F and G draw its twin (CORR-LOOKS-048).
     drawn, chosen, bands = worn_head(values, figure)
+    # Every colour row's primitives are the drawn head's own, measured
+    # (CORR-LOOKS-049); edits() refuses a head they were not measured on.
     plan = edits(values, drawn)
-    if not colour_is_measured(drawn):
-        # The colour rows reach this head now, and their primitive
-        # indices were read off section 24.  Applied, and said.  FACE's own
-        # twin quads were measured on the twin, and are not borrowed.
-        borrowed[(layout.MODEL, drawn)] = tuple(
-            sorted({at for row, primitives in plan.get(
-                (layout.MODEL, drawn), {})
-                if primitives is not None
-                and not (row == "FACE" and wears_twin(values))
-                for at in primitives}))
     # A twin takes the hair quads of the head it pairs with, by index --
     # measured on the four whose quads are known (layout.HAIR_QUADS).
     quads = layout.HAIR_QUADS.get(chosen)
@@ -706,14 +695,12 @@ def draw_list(disc, values: dict, figure: int) -> list:
             except texture.NoPalette:
                 window = None
             quads, left = dropped.get((name, index), ((), ()))
-            lent = borrowed.get((name, index), ())
             out.append({
                 "file": name, "section": index, "primitive": at,
                 "clut": clut, "band": band,
                 "image": record.offset if record else None,
                 "palette": None if window is None else (x, y, texture.NARROW),
                 "band_unmeasured": left if at in quads else (),
-                "colour_borrowed": at in lent,
                 "texcoords": texcoords,
             })
     del modelfile  # imported for the reader below; the draw list does not need it
@@ -983,9 +970,29 @@ def _checks(c) -> None:
                                      layout.HEAD_SECTION))
         if home is not None:
             ok("a family A tuple still addresses section 24", HEAD in home)
-        ok("and only section 24's colour primitives were measured by index",
-           colour_is_measured(layout.HEAD_SECTION)
-           and not colour_is_measured(chosen))
+        # And on the head it wears, the primitives are THAT head's, measured
+        # -- not section 24's by index (CORR-LOOKS-049).
+        if plan is not None:
+            skin_row = [p for (row, p) in plan[(layout.MODEL, chosen)]
+                        if row == "SKIN"]
+            ok("SKIN on section 34 moves 34's own eighteen, not 24's fourteen",
+               skin_row == [layout.COLOUR_PRIMITIVES["SKIN"][chosen]]
+               and len(skin_row[0]) == 18, "%r" % (skin_row,))
+    ok("every head HAIR names, and every twin, has all three colour rows",
+       all(set(layout.COLOUR_PRIMITIVES[row]) == set(FACE_TWINS[0])
+           | set(FACE_TWINS[0].values())
+           for row in ("SKIN", "H.COL", "H.F.COL.")))
+    ok("and FACE's own quads on every head HAIR names",
+       set(layout.COLOUR_PRIMITIVES["FACE"]) == set(FACE_TWINS[0]))
+    ok("section 24's constants are the table's row for 24",
+       layout.SKIN_COLOUR_PRIMITIVES == layout.COLOUR_PRIMITIVES["SKIN"][24]
+       and layout.FACE_PRIMITIVES == layout.COLOUR_PRIMITIVES["FACE"][24]
+       and layout.FACE_PRIMITIVES == layout.COLOUR_PRIMITIVES["H.F.COL."][24])
+    ok("a twin's FACE quads are among the primitives its beard colour moves",
+       all(set(quads) <= set(layout.COLOUR_PRIMITIVES["H.F.COL."][twin])
+           for twin, quads in layout.FACE_TWIN_QUADS.items()))
+    refuses("a colour row on a head nobody measured is refused, not borrowed",
+            lambda: edits(looks.parse_tuple("B-A1-A-A-A"), 40), "not measured")
 
     # The band a multi-band style draws with is a CHOICE, not a measurement.
     # Asserted here so the day --writes pairs quad to band -- it reads a0, the
@@ -1549,21 +1556,17 @@ def _tuple(image_path: str, text: str, figure: int = 0) -> int:
     seen: dict = {}
     for part in parts:
         key = (part["file"], part["section"], part["image"], part["palette"],
-               part["band"], part["band_unmeasured"], part["colour_borrowed"])
+               part["band"], part["band_unmeasured"])
         seen[key] = seen.get(key, 0) + 1
-    for (name, index, image, palette, band, left, lent), count in sorted(
+    for (name, index, image, palette, band, left), count in sorted(
             seen.items(), key=lambda kv: str(kv[0])):
         print("    %-18s section %-3d image %-6s palette %-16s band %+d  "
-              "x%d%s%s"
+              "x%d%s"
               % (name, index, image, palette, band, count,
                  "" if not left
                  else "   BAND NOT MEASURED: the style also landed in band(s)"
                       " %s, and which quad takes which was never measured"
-                      % ", ".join(str(b) for b in left),
-                 "" if not lent
-                 else "   COLOUR BY BORROWED INDEX: the colour rows were "
-                      "measured on section %d, not this one"
-                      % HEAD_COLOUR_MEASURED))
+                      % ", ".join(str(b) for b in left)))
     return 0
 
 

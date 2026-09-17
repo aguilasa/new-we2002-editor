@@ -475,27 +475,144 @@ bottom of its range to the top: the `v` of the two primitives each owns moves
 in blocks of sixteen rows of the record at HAIR_IMAGE, and never anything else.
 """
 
-HAIR_COLOUR_PRIMITIVES = (0, 1, 4, 9, 14, 16, 17)
-"""The HEAD_SECTION primitives whose CLUT id the H.COL field walks.
+COLOUR_PRIMITIVES = {
+    "SKIN": {
+        24: (0, 1, 2, 4, 5, 7, 8, 9, 12, 13, 14, 15, 16, 17),
+        25: (0, 1, 2, 4, 5, 7, 8, 9, 12, 13, 14, 15, 16, 17),
+        26: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 19, 20, 21),
+        27: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 19, 20, 21),
+        28: (0, 1, 2, 4, 6, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25),
+        29: (0, 1, 2, 4, 6, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25),
+        30: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 24),
+        31: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 24),
+        32: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        33: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        34: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        35: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        36: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        37: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        44: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 27, 30, 31),
+        45: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 27, 30, 31),
+        46: (0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 22, 24, 25, 28, 29, 30, 32, 33),
+        47: (0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 22, 24, 25, 28, 29, 30, 32, 33),
+        48: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23),
+        49: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23),
+        50: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 20, 21, 22, 23, 24, 26),
+        51: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 20, 21, 22, 23, 24, 26),
+        52: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25),
+        53: (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25),
+        54: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        55: (0, 1, 2, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+    },
+    "H.COL": {
+        24: (0, 1, 2, 4, 5, 7, 9, 12, 14, 15, 16, 17),
+        25: (0, 1, 2, 4, 5, 7, 9, 14, 15, 17),
+        26: (0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 18, 19, 20, 21),
+        27: (0, 1, 3, 5, 8, 9, 11, 12, 14, 15, 18, 19, 20, 21),
+        28: (0, 1, 2, 4, 6, 8, 10, 12, 13, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25),
+        29: (0, 1, 2, 6, 8, 10, 12, 13, 15, 18, 19, 20, 21, 22, 23, 24, 25),
+        30: (1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 24),
+        31: (1, 2, 4, 6, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 24),
+        32: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        33: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 19, 20, 22),
+        34: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        35: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 19, 20, 22),
+        36: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        37: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 19, 20, 22),
+        44: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 27, 30, 31),
+        45: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 19, 20, 22, 23, 24, 25, 27, 30, 31),
+        46: (0, 1, 2, 4, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 22, 24, 25, 28, 29, 30, 32, 33),
+        47: (0, 1, 2, 4, 9, 11, 12, 13, 15, 16, 17, 18, 22, 24, 25, 28, 29, 30, 32, 33),
+        48: (1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23),
+        49: (1, 2, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23),
+        50: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 20, 21, 22, 23, 24, 26),
+        51: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 20, 22, 23, 24, 26),
+        52: (1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25),
+        53: (1, 2, 4, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 21, 22, 23, 24, 25),
+        54: (0, 1, 2, 5, 8, 9, 12, 13, 15, 16, 17, 19, 20, 21, 22),
+        55: (0, 1, 2, 5, 8, 9, 12, 15, 16, 17, 19, 20, 22),
+    },
+    "H.F.COL.": {
+        24: (8, 13),
+        25: (8, 12, 13, 16),
+        26: (4, 7),
+        27: (2, 4, 6, 7),
+        28: (9, 17),
+        29: (4, 9, 16, 17),
+        30: (0, 3),
+        31: (0, 3, 5, 7),
+        32: (7, 10, 11),
+        33: (7, 10, 11, 13, 21),
+        34: (7, 10, 11),
+        35: (7, 10, 11, 13, 21),
+        36: (7, 10, 11),
+        37: (7, 10, 11, 13, 21),
+        44: (7, 10, 11),
+        45: (7, 10, 11, 13, 21),
+        46: (6, 7, 8),
+        47: (6, 7, 8, 10, 14),
+        48: (0, 3),
+        49: (0, 3, 5, 7),
+        50: (7, 10, 11),
+        51: (7, 10, 11, 13, 21),
+        52: (0, 3),
+        53: (0, 3, 5, 6),
+        54: (7, 10, 11),
+        55: (7, 10, 11, 13, 21),
+    },
+    "FACE": {
+        24: (8, 13),
+        26: (4, 7),
+        28: (9, 17),
+        30: (0, 3),
+        32: (7, 10, 11),
+        34: (7, 10, 11),
+        36: (7, 10, 11),
+        44: (7, 10, 11),
+        46: (6, 7, 8),
+        48: (0, 3),
+        50: (7, 10, 11),
+        52: (0, 3),
+        54: (7, 10, 11),
+    },
+}
+"""Row -> {MODEL.BIN head section: the primitives that row moves there}.
 
-Seven, measured identically on both slots, and HAIR_PRIMITIVES is a subset:
-the hair is two of them, and the other five are hair-coloured parts of the head
-that the HAIR field does not reshape.  The whole hit list, not a sample.
+**Measured 2026-09-16 by `oracle.py --colour <ROW> 2 <tuple ...>`**
+(CORR-LOOKS-049), from a tuple on each of the thirteen heads HAIR names and on
+each one's twin (beard F): the row walked to the bottom and to the top, and at
+each end the loaded file read until two reads 300 frames apart agree.  A
+primitive belongs to the row where its CLUT id -- or, for FACE, its texcoords
+between A and E -- differs between the two ends.  Slot 1 was walked on six of
+the same starts and came back identical.
+
+**Every head has its own**, and that is the finding: the colour rows had been
+applied to the other twelve heads by the indices of section 24, and on 34 SKIN
+moves eighteen primitives that are not section 24's fourteen.  FACE has no twin
+entries: F and G draw the twin with FACE_TWIN_QUADS.  A head missing here is a
+head whose colour is not known, and the assembly refuses it.
 """
 
-SKIN_COLOUR_PRIMITIVES = (0, 1, 8, 9, 13, 14, 16, 17)
-"""The HEAD_SECTION primitives whose CLUT id the SKIN field walks.
+HAIR_COLOUR_PRIMITIVES = COLOUR_PRIMITIVES["H.COL"][HEAD_SECTION]
+"""The HEAD_SECTION primitives whose CLUT id the H.COL field walks: twelve.
 
-Eight, measured identically on both slots (`oracle.py --fields SKIN`,
-2026-09-15): a step adds 0x40 to byte 2, which is one whole 256-entry record --
-the row of the grid, with the column left where it was.
+**This said seven until 2026-09-16** -- `(0, 1, 4, 9, 14, 16, 17)`, "the whole
+hit list, not a sample".  It was a sample: read before the game had finished
+rewriting the head (trap 18 of the profile), and remeasured from the two
+settled ends of the row (CORR-LOOKS-049).  HAIR_PRIMITIVES is still a subset.
+"""
 
-It is here to be crossed with HAIR_COLOUR_PRIMITIVES, and the crossing is the
-point: the union of the three colour fields is **nine** of the head's eighteen
-primitives, and primitive 4 is in H.COL and NOT here -- the one place in the
-head where "row x column" does not hold.  Recorded by
-[`CORR-LOOKS-026`](/docs/tasks/looks/CORR-LOOKS-026.md), which found it by
-subtraction: what a field does not move is as measured as what it does.
+SKIN_COLOUR_PRIMITIVES = COLOUR_PRIMITIVES["SKIN"][HEAD_SECTION]
+"""The HEAD_SECTION primitives whose CLUT id the SKIN field walks: fourteen.
+
+A step adds 0x40 to byte 2, one whole 256-entry record -- the row of the grid,
+with the column left where it was.  **This said eight until 2026-09-16**,
+`(0, 1, 8, 9, 13, 14, 16, 17)` from `oracle.py --fields SKIN`, and the union of
+the three colour fields was written down as nine of eighteen, with primitive 4
+the one place "row x column" did not hold (CORR-LOOKS-026).  Both were the same
+partial read: from the two settled ends SKIN moves fourteen, H.COL's twelve are
+all among them, primitive 4 included, and four primitives of the head -- 3, 6,
+10 and 11 -- move with no colour row (CORR-LOOKS-049).
 """
 
 BOOTS_PALETTE = 67940

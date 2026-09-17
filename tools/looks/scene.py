@@ -120,10 +120,10 @@ class Part:
     """
 
     __slots__ = ("file", "section", "primitive", "points", "uvs", "surface",
-                 "why", "clut", "band", "band_unmeasured", "colour_borrowed")
+                 "why", "clut", "band", "band_unmeasured")
 
     def __init__(self, file, index, primitive, points, uvs, surface, why,
-                 clut, band, band_unmeasured=(), colour_borrowed=False):
+                 clut, band, band_unmeasured=()):
         self.file = file
         self.section = index
         self.primitive = primitive
@@ -134,7 +134,6 @@ class Part:
         self.clut = clut
         self.band = band
         self.band_unmeasured = band_unmeasured
-        self.colour_borrowed = colour_borrowed
 
     @property
     def textured(self) -> bool:
@@ -268,7 +267,7 @@ def surface_for(data: bytes, record, depth: int, clut: int,
 
 def part_for(primitive, vertices, record, surface, clut: int, band: int,
              where: tuple, at: int, band_unmeasured=(),
-             colour_borrowed: bool = False, texcoords=None) -> Part:
+             texcoords=None) -> Part:
     """One primitive as points and normalised (u, v), or as a flat placeholder.
 
     Split out of `build` so the arithmetic can be checked with no disc in the
@@ -308,7 +307,7 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
     if surface is None:
         uvs = [(0.0, 0.0)] * len(points)
     return Part(where[0], where[1], at, points, uvs, surface, why, clut, band,
-                band_unmeasured, colour_borrowed)
+                band_unmeasured)
 
 
 # ---- the scene -----------------------------------------------------------
@@ -329,7 +328,7 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
     scans: dict = {}
     surfaces: dict = {}
     notes = {"no image": 0, "no palette": 0, "off the record": 0,
-             "band unmeasured": 0, "colour borrowed": 0}
+             "band unmeasured": 0}
     out = []
     for entry in parts:
         name, index, at = entry["file"], entry["section"], entry["primitive"]
@@ -356,14 +355,11 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
             notes["no image"] += 1
         part = part_for(primitive, one.vertices, record, surface,
                         entry["clut"], entry["band"], (name, index), at,
-                        entry["band_unmeasured"], entry["colour_borrowed"],
-                        entry.get("texcoords"))
+                        entry["band_unmeasured"], entry.get("texcoords"))
         if surface is not None and part.surface is None:
             notes["off the record"] += 1
         if part.band_unmeasured:
             notes["band unmeasured"] += 1
-        if part.colour_borrowed:
-            notes["colour borrowed"] += 1
         out.append(part)
     return Scene(out, {k: v for k, v in surfaces.items() if v is not None},
                  values, figure, notes)
@@ -776,14 +772,19 @@ def _check_image(image_path: str) -> int:
         problems.append("a skin changed no surface on a head that is not "
                         "section 24, so the colour rows are addressed to a "
                         "section this tuple does not draw")
-    borrowed = far.notes.get("colour borrowed", 0)
-    print("      and %d of its %d part(s) take colour by an index measured on "
-          "section %d" % (borrowed, len(far.parts),
-                          assembly.HEAD_COLOUR_MEASURED))
-    if not borrowed:
-        problems.append("no part of a non-A head is marked as taking colour "
-                        "by a borrowed index, and the indices were measured "
-                        "on section %d only" % assembly.HEAD_COLOUR_MEASURED)
+    # And the skin lands on that head's OWN primitives: measured per head,
+    # never section 24's indices by borrowing (CORR-LOOKS-049).  The parts
+    # whose CLUT row the skin moved are exactly the table's row for 34.
+    moved = sorted(p.primitive for p in far.parts
+                   if p.file == layout.MODEL and p.section == 34
+                   and p.clut != next(q.clut for q in head_swap.parts
+                                      if (q.file, q.section, q.primitive)
+                                      == (p.file, p.section, p.primitive)))
+    print("      skin B on section 34 moves primitive(s) %s" % moved)
+    if tuple(moved) != layout.COLOUR_PRIMITIVES["SKIN"][34]:
+        problems.append("skin B on section 34 moved %s, and the table "
+                        "measured %s" % (moved,
+                                         layout.COLOUR_PRIMITIVES["SKIN"][34]))
 
     # A colour that changes the SURFACE and changes no PIXEL: declared, with
     # the reason, instead of passing in silence.  Measured 2026-09-16
