@@ -72,6 +72,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [x] concluída | 2026-09-17 |
+| [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -142,6 +143,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
 - [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
 - [x] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
+- [ ] CORR-LOOKS-057 — a regra errada do código de nação sobrevive no `layout.py`
 
 ## Detalhes por correção
 
@@ -1013,3 +1015,17 @@ e o ciclo arquivado, o dele em
 - **Fix:** a seção passa a dizer o ciclo aberto na v2, a tela e como abri-la, e
   os comandos novos; o perfil ganha a linha de que o `CLAUDE.md` tem seção
   deste ciclo e envelhece com ele
+
+### CORR-LOOKS-057
+
+- **Arquivo com problema:** `tools/looks/layout.py`
+- **Sintoma:** o docstring do `PLAYER_NATION` diz que o byte é "the row's index
+  minus one", e a mesma task mediu que os valores 1 a 54 guardam 0 a 53 e o
+  código salta 41 daí em diante (`Iceland` 95, `Algeria` 105, fim em 119). Quem
+  usa o endereço a partir do módulo dos endereços erra 25 das 79 nações, sem
+  sintoma
+- **Como foi detectado:** `looks.NATION_CODES` contra o docstring; a regra
+  ingênua só sobrevive ali (`grep -rn "minus one" tools/looks/`), e o controle
+  `looks-nation-code-is-the-index` existe para reprovar quem a escrever
+- **Fix:** o docstring passa a dizer o salto e a apontar `looks.NATION_CODES`,
+  com a data e o que dizia antes
