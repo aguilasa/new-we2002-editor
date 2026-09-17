@@ -12,6 +12,7 @@
       .\make.ps1                      lista os alvos e o ambiente achado
       .\make.ps1 run-obocaman         o we-team-editor.exe do Obocaman
       .\make.ps1 run-lazarus          o WE2002 - Lazarus Editor
+      .\make.ps1 looks                o visualizador 3D da aparencia
       .\make.ps1 fresh                descarta as copias de trabalho
 
   `-Image <caminho>` troca a imagem de origem, `-Work <dir>` o diretorio das
@@ -51,6 +52,7 @@ param(
         'we2002-ptbr-play', 'we2002-ptbr-play-fresh',
         'we2002-japao-play', 'we2002-japao-play-fresh',
         'we2002-cards', 'we2002-card-snap', 'we2002-card-list',
+        'looks', 'looks-venv',
         # Recusados com explicacao -- ver Invoke-Recusa. Eles estao NESTA
         # lista de proposito: quem vem do Makefile digita o nome que conhece,
         # e a recusa do ValidateSet e uma parede de alternativas sem motivo
@@ -102,6 +104,21 @@ param(
     # visivel no Explorer e isso e mudanca no sistema de quem chamou.
     [string]$Subst,
 
+    # ------------------------------------------------ visualizador ----
+    #
+    # A imagem que o `looks` LE. Tem de ser a trilha de dados JAPONESA: o
+    # DAT2D.BIN da inglesa difere, e a guarda do layout.py recusa. Nasce nula:
+    # o default e WE2002_LOOKS_IMAGE, e sem ela roms\japanese-shift-jis.bin --
+    # so leitura, nada no visualizador grava (docs/PLAN-LOOKS-PY.md secao 0).
+    [string]$LooksImage,
+
+    # A tupla que abre, no formato do corpus: pele-cabelo-cor-barba-cor.
+    [string]$Tuple = 'A-A1-A-A-A',
+
+    # 0 e o jogador de linha, 1 o goleiro.
+    [ValidateSet(0, 1)]
+    [int]$Figure = 0,
+
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Resto
 )
@@ -114,6 +131,9 @@ $OBO_DIR  = Join-Path $ROOT 'we-team-editor'
 $OBO_EXE  = Join-Path $OBO_DIR 'we-team-editor.exe'
 $LAZ_MAKE = Join-Path $WTE 'make.ps1'
 $LAZ_BIN  = Join-Path $WTE 'build\wte.exe'
+$LOOKS_VENV = Join-Path $ROOT 'work\venv-looks'
+$LOOKS_PY   = Join-Path $LOOKS_VENV 'Scripts\python.exe'
+$LOOKS_APP  = Join-Path $ROOT 'tools\looks\ui\app.py'
 
 function Resolve-Absoluto([string]$p) {
     if ([System.IO.Path]::IsPathRooted($p)) { return $p }
@@ -535,6 +555,14 @@ function Invoke-Help {
     Write-Host '  run-lazarus   o WE2002 - Lazarus Editor, sobre a propria copia'
     Write-Host '  fresh         descarta as copias de trabalho'
     Write-Host ''
+    Write-Host 'Visualizador 3D da aparencia do jogador -- so le, nao grava:'
+    Write-Host '  looks         abre a janela: arrastar gira, roda aproxima,'
+    Write-Host '                W liga o arame, S a prateleira'
+    Write-Host '                -Tuple A-I3-A-E-A escolhe a tupla, -Figure 1 o'
+    Write-Host '                goleiro; o resto vai direto ao app.py'
+    Write-Host '                (--wireframe, --piece head, --no-shelf ...)'
+    Write-Host '  looks-venv    cria work\venv-looks com PySide6 (~246 MB)'
+    Write-Host ''
     Write-Host 'PES2 -- outro jogo, outro projeto, e nao tem editor:'
     Write-Host '  pes2          abre o JOGO sob o fork do DuckStation (com MCP)'
     Write-Host '  pes2-copy     so a copia da release (~571 MB, 8 trilhas)'
@@ -580,6 +608,9 @@ function Invoke-Help {
     Write-Host "  Obocaman        $OBO_EXE$(if (Test-Path $OBO_EXE) { '' } else { '   <AUSENTE>' })"
     Write-Host "  Lazarus         $LAZ_BIN$(if (Test-Path $LAZ_BIN) { '' } else { '   <sera compilado>' })"
     Write-Host "  copias em       $WORK_DIR"
+    Write-Host "  venv looks      $LOOKS_VENV$(if (Test-Path $LOOKS_PY) { '' } else { '   <AUSENTE -- looks-venv>' })"
+    $imgLooks = Get-ImagemLooks
+    Write-Host "  imagem looks    $imgLooks$(if (Test-Path -LiteralPath $imgLooks) { '' } else { '   <AUSENTE>' })"
 
     $py = $null
     try { $py = Get-Python } catch { }
@@ -720,6 +751,63 @@ function Invoke-RunLazarus {
     $argumentos = @($copia)
     if ($Resto) { $argumentos += $Resto }
     Start-Process -FilePath $LAZ_BIN -ArgumentList $argumentos -Wait -NoNewWindow
+}
+
+# ------------------------------------------------------ visualizador ----
+
+function Get-ImagemLooks {
+    <#
+      A imagem que o visualizador le: -LooksImage, senao WE2002_LOOKS_IMAGE,
+      senao a japonesa de roms\. A ordem e a das ferramentas do ciclo, que
+      leem a variavel; o parametro so ganha dela.
+    #>
+    if ($LooksImage) { return (Resolve-Absoluto $LooksImage) }
+    if ($env:WE2002_LOOKS_IMAGE) { return (Resolve-Absoluto $env:WE2002_LOOKS_IMAGE) }
+    return (Join-Path $ROOT 'roms\japanese-shift-jis.bin')
+}
+
+function Invoke-LooksVenv {
+    if (Test-Path $LOOKS_PY) {
+        Write-Host ">> $LOOKS_VENV ja existe"
+        & $LOOKS_PY -m pip show PySide6 2>$null | Select-String '^(Name|Version):'
+        return
+    }
+    # Por pip num venv, nunca por pacote do sistema: a mesma regra do
+    # work\venv-mcr, e a secao 4.1 do docs/PLAN-LOOKS-PY.md.
+    $py = Get-Python
+    Write-Host ">> $py -m venv $LOOKS_VENV"
+    & $py -m venv $LOOKS_VENV
+    if ($LASTEXITCODE -ne 0) { throw "venv saiu $LASTEXITCODE" }
+    Write-Host '>> pip install PySide6 (~246 MB)'
+    & $LOOKS_PY -m pip install PySide6
+    if ($LASTEXITCODE -ne 0) { throw "pip saiu $LASTEXITCODE" }
+}
+
+function Invoke-Looks {
+    if (-not (Test-Path $LOOKS_PY)) {
+        throw @"
+nao ha venv em $LOOKS_VENV.
+Crie uma vez com: .\make.ps1 looks-venv
+"@
+    }
+    $img = Get-ImagemLooks
+    if (-not (Test-Path -LiteralPath $img)) {
+        throw @"
+imagem ausente: $img
+Aponte a trilha de dados JAPONESA com -LooksImage <bin> ou WE2002_LOOKS_IMAGE.
+"@
+    }
+    # **--visible e o ponto do alvo.** O app estaciona a janela em -32000 por
+    # default, porque e o que os gates rodam; aqui quem chama e o usuario
+    # pedindo para olhar, que e o unico caso que o CLAUDE.md admite.
+    $argumentos = @($LOOKS_APP, '--image', $img, '--looks', $Tuple,
+                    '--figure', "$Figure", '--visible')
+    if ($Resto) { $argumentos += $Resto }
+    Write-Host ">> $LOOKS_PY $($argumentos -join ' ')"
+    & $LOOKS_PY @argumentos
+    # 2 e recusa da tabela de montagem (um estilo que ninguem mediu), e a
+    # mensagem ja foi impressa pelo app; o codigo sobe para quem chamou.
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # --------------------------------------------------- alvos do emulador ----
@@ -949,6 +1037,9 @@ switch ($Alvo) {
     'run-obocaman'           { Invoke-RunObocaman }
     'run-lazarus'            { Invoke-RunLazarus }
     'fresh'                  { Invoke-Fresh }
+
+    'looks'                  { Invoke-Looks }
+    'looks-venv'             { Invoke-LooksVenv }
 
     'pes2'                   { Invoke-Pes2 }
     'pes2-copy'              { Invoke-Pes2Copy }
