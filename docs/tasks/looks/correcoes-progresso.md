@@ -71,6 +71,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
+| [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -140,6 +141,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
 - [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
+- [ ] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
 
 ## Detalhes por correção
 
@@ -997,3 +999,17 @@ e o ciclo arquivado, o dele em
   depois de o título entrar nele
 - **Fix:** garantir a saída antes de imprimir texto medido; o `■` fica na
   tabela, que é o que o jogo desenha
+
+### CORR-LOOKS-056
+
+- **Arquivo com problema:** `CLAUDE.md`
+- **Sintoma:** a seção do sexto projeto diz "ciclo fechado em 2026-09-17" com a v2
+  aberta e duas tasks dela concluídas; a tabela de comandos descreve o
+  `app.py --looks` como o modo normal, quando o default virou a tela; e não
+  menciona `screen.py`, o `screen.json` gerado, `oracle.py --screen`,
+  `oracle.py --keys` nem `.\make.ps1 looks`, que é a forma de ver a tela
+- **Como foi detectado:** `grep -c "screen.py\|screen.json\|make.ps1 looks\|--keys" CLAUDE.md`
+  devolve 0, e o último commit do arquivo é o `4023c65`, da LOOKS-TASK-20
+- **Fix:** a seção passa a dizer o ciclo aberto na v2, a tela e como abri-la, e
+  os comandos novos; o perfil ganha a linha de que o `CLAUDE.md` tem seção
+  deste ciclo e envelhece com ele
