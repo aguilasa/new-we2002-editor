@@ -333,6 +333,17 @@ Não se revertem sem o usuário pedir.
     decode-contra-glifo existia para as doze linhas e o título tinha ficado de
     fora —, e a fonte do título **não** passa pela rotina de glifos, então o
     que a confere é a contagem de letras na faixa (`screen.ink_runs`).
+38. **Texto medido não cabe no console desta máquina, e quem morre é o `print`
+    da falha.** A ajuda de cada linha traz o glifo de botão `■`, a saída padrão
+    daqui é cp1252, e `UnicodeEncodeError: 'charmap' codec can't encode
+    character` derrubava o `screen.py --report` na terceira das doze linhas. O
+    caminho caro era o outro: a mensagem que o `oracle._walk_row` levanta
+    quando o cursor erra a linha carrega a mesma ajuda, então uma corrida de
+    doze minutos terminaria no erro do `print` **em vez** do diagnóstico.
+    Desde 2026-09-17
+    ([`CORR-LOOKS-055`](/docs/tasks/looks/CORR-LOOKS-055.md)) o `main()` das
+    ferramentas que imprimem esse texto chama `screen.printable_output()`. A
+    regra que fica: **o `■` não sai da medição — quem se ajusta é a saída.**
 
 ---
 

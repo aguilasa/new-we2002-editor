@@ -1174,8 +1174,17 @@ rascunho, restaurada dela quando divergir.
 **Uma armadilha de console, medida na mesma sessão:** o `get_status` do MCP
 devolve o título do jogo, que é japonês, e o console do Windows é cp1252 —
 imprimir a resposta crua mata o script com `UnicodeEncodeError`, num traceback
-que fala de `charmap` e não do emulador. O `oracle.py` não imprime o título; um
-script de sondagem que imprimir precisa de `PYTHONIOENCODING=utf-8`.
+que fala de `charmap` e não do emulador.
+
+**E não é só o título do emulador: texto medido também não cabe no console.**
+A ajuda de cada linha da tela traz o glifo de botão `■`, e com ele o
+`screen.py --report` morria na terceira das doze linhas — e a mensagem de falha
+que o `oracle._walk_row` levanta morreria no mesmo lugar, no `print` da própria
+falha. Desde 2026-09-17
+([`CORR-LOOKS-055`](/docs/tasks/looks/CORR-LOOKS-055.md)) o `main()` dos dois
+passa as saídas por `screen.printable_output()` — UTF-8 com `replace` —, então
+**a ferramenta não precisa mais de `PYTHONIOENCODING`**. Script de sondagem
+escrito à mão continua precisando, ou da mesma chamada.
 
 ---
 

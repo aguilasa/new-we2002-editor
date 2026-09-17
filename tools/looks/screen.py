@@ -39,6 +39,7 @@ Usage:
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import sys
@@ -161,6 +162,34 @@ def decode(raw: bytes) -> list:
         raise BadScreen("%r ends inside the arguments of a control code" % raw)
     lines.append("".join(current))
     return lines
+
+
+def make_printable(stream) -> bool:
+    """Let *stream* carry the text the game draws, whatever the console is.
+
+    The help of a row holds the button glyph `■` (U+25A0), and this machine's
+    standard output is cp1252, which has no such character.  Printing it there
+    raises `UnicodeEncodeError` -- `--report` died on the third of the twelve
+    rows, and the message `oracle._walk_row` raises when the cursor missed a
+    row would have died in the same place, in the print of its own failure
+    (CORR-LOOKS-055).
+
+    So the stream is asked for UTF-8, and for `replace` on top of it: a console
+    that cannot carry a character prints a substitute, and nothing anywhere
+    stops to complain.  What is NOT done is taking the `■` out of the
+    measurement -- it is what the screen draws.
+    """
+    reconfigure = getattr(stream, "reconfigure", None)
+    if reconfigure is None:  # a stream someone replaced with their own object
+        return False
+    reconfigure(encoding="utf-8", errors="replace")
+    return True
+
+
+def printable_output() -> None:
+    """Both standard streams, for the main() of a tool that prints this text."""
+    make_printable(sys.stdout)
+    make_printable(sys.stderr)
 
 
 def help_text(raw: bytes) -> str:
@@ -619,6 +648,16 @@ def _checks(c) -> None:
        help_text("Ｓｋｉｎ　Ｃｏｌｏｕｒ　■　Ｔｕｒｎ　　".encode("cp932"))
        == "Skin Colour ■ Turn")
 
+    # A console of this machine's default encoding, which the help does not fit.
+    console = io.TextIOWrapper(io.BytesIO(), encoding="cp1252", newline="\n")
+    c.refuses("a console that cannot carry the help's glyph says so",
+              lambda: console.write("Skin Colour ■ Turn"),
+              "charmap", UnicodeEncodeError)
+    ok("and after make_printable the same write goes through",
+       make_printable(console) and console.write("Skin Colour ■ Turn") > 0)
+    ok("a stream that cannot be reconfigured is left alone, not broken",
+       make_printable(object()) is False)
+
     # The title, against the three markers written into the running game's RAM
     # on 2026-09-17 and read back off the band (TITLE_FONT).
     ok("the title the screen shows is not the string the object holds",
@@ -773,6 +812,7 @@ def _toy_table() -> dict:
 
 
 def main(argv) -> int:
+    printable_output()
     if len(argv) == 2 and argv[1] == "--check":
         return 1 if self_check() else 0
     if len(argv) == 2 and argv[1] == "--report":

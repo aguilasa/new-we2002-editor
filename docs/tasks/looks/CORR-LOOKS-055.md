@@ -3,7 +3,7 @@ id: CORR-LOOKS-055
 title: "Correção: `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual"
 type: correção
 category: ferramenta
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -95,20 +95,87 @@ a das mensagens de erro do `oracle.py`, que é a que custa uma corrida.
 
 ## Verificação
 
-- [ ] `python tools/looks/screen.py --report` imprime as doze linhas e sai 0
+- [x] `python tools/looks/screen.py --report` imprime as doze linhas e sai 0
       **sem** `PYTHONIOENCODING`
-- [ ] uma mensagem de `OracleError` que carregue a ajuda de uma linha imprime
+- [x] uma mensagem de `OracleError` que carregue a ajuda de uma linha imprime
       sem estourar
-- [ ] o controle negativo fica vermelho (`controls.py`)
-- [ ] `python tools/looks/selftest.py --quiet` verde, e o `■` continua na
+- [x] o controle negativo fica vermelho (`controls.py`)
+- [x] `python tools/looks/selftest.py --quiet` verde, e o `■` continua na
       tabela medida
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-17
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `45b9763`: `screen.py --report` sai **1** com um
+`UnicodeEncodeError` de `charmap`, com pipe e sem pipe, e imprime as 32 linhas
+só com `PYTHONIOENCODING=utf-8`.
 
-**Arquivos criados/modificados:**
+O conserto é o primeiro dos dois que a CORR admitia: `screen.make_printable`
+pede UTF-8 **com `errors="replace"`** à saída, e `screen.printable_output()`
+faz isso com as duas padrão. O `main()` do `screen.py` e o do `oracle.py`
+chamam antes de qualquer impressão — o do oracle com a razão escrita ao lado,
+que é a mensagem de erro do `_walk_row`, não o `--report`.
+
+**O `■` não saiu da medição.** Ele é o que a tela desenha, e continua no
+`screen.json` e no `help_text`; quem se ajusta é a saída. Um console que não
+carregue um caractere imprime substituto em vez de derrubar a corrida.
+
+### Gates
+
+```text
+$ python tools/looks/screen.py --report > /dev/null 2>&1; echo $?
+0                                  # era 1
+$ python tools/looks/screen.py --report | wc -l
+32                                 # as doze linhas, os dois slots, as regiões
+$ python tools/looks/screen.py --report | grep -c Turn
+6                                  # as seis ajudas que trazem o glifo
+
+$ python - <<'PY'                  # o caminho que custava uma corrida
+import sys; sys.path.insert(0, "tools/looks")
+import screen, oracle
+screen.printable_output()
+print(oracle.OracleError("pressed Down 2 time(s) to reach SKIN and the help "
+                         "reads %r" % "Skin Colour \u25a0 Turn"))
+PY
+pressed Down 2 time(s) to reach SKIN and the help reads 'Skin Colour ■ Turn'
+exit=0
+
+$ python tools/looks/screen.py --check
+screen.py: 0 failure(s)
+$ python tools/looks/oracle.py --check
+oracle.py: 0 failure(s)
+$ python tools/looks/controls.py --only screen-output-left-as-the-console
+  RED    screen-output-left-as-the-console screen.py :: make_printable
+$ python tools/looks/selftest.py --quiet
+  ..... 69 of 69 controls red
+looks_selftest: 0 failure(s)
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**O que não foi re-rodado, e por quê:** o `oracle.py --screen` inteiro (~12
+min). A mudança é de saída, não de medição, e a caminhada fechou verde
+(`0 difference(s)`, 716 s) em `9ed647b`, meia hora antes. O `oracle.py --check`
+cobre o módulo alterado.
+
+`roms/` intocada; nenhum emulador subiu nesta correção.
+
+### Problemas encontrados
+
+- A primeira edição do `controls.py` casou a linha errada e emendou os dois
+  controles de tela num só, duplicando o da CORR-LOOKS-054. O `--list` acusou
+  70 catalogados; o bloco duplicado saiu e são **69**, sem id repetido.
+
+### Arquivos criados/modificados
+
+- `tools/looks/screen.py` — `make_printable`, `printable_output`, três casos no
+  `self_check()`, e a chamada no `main()`
+- `tools/looks/oracle.py` — a chamada no `main()`
+- `tools/looks/controls.py` — `screen-output-left-as-the-console`
+- `docs/PLAN-LOOKS-PY.md` — a armadilha de console da §1.11, que dizia que o
+  jeito era a variável de ambiente
+- `docs/prompts/perfil-looks.md` — armadilha 38
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

@@ -70,7 +70,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [ ] pendente | — |
+| [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -139,7 +139,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-052 — um controle vermelho por uma propriedade que o gate não tem
 - [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
-- [ ] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
+- [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
 
 ## Detalhes por correção
 

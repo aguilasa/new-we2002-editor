@@ -670,6 +670,16 @@ CONTROLS = (
         "the screen shows `S SET`, and a window built from the table would "
         "write a title the game does not write",
     ),
+    Control(
+        "screen-output-left-as-the-console", "screen.py", "make_printable",
+        "    reconfigure(encoding=\"utf-8\", errors=\"replace\")\n    return True",
+        "    return True",
+        ("screen",),
+        "the standard streams left as the console handed them over: on this "
+        "machine that is cp1252, and the first help text with the button glyph "
+        "in it kills the print -- `--report` on the third row, and the walk in "
+        "the message of its own failure",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

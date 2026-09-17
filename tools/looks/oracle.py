@@ -3744,6 +3744,11 @@ def row_and_slot(args) -> tuple:
 
 
 def main(argv):
+    import screen
+
+    # Before anything prints: a row's help carries `■`, and so does the error
+    # this walk raises when the cursor missed a row (CORR-LOOKS-055).
+    screen.printable_output()
     try:
         if len(argv) == 2 and argv[1] == "--check":
             return self_check()
