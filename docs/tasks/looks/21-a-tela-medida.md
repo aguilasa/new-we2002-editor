@@ -83,6 +83,15 @@ minutos. Os dois juntos são a verificação: o `screen.decode` desfaz os três
 códigos de controle das strings e o resultado é conferido contra os glifos
 desenhados — 34 strings, nos dois states e na ponta de cada linha.
 
+**O título ficou fora dessa conferência, e era onde as duas leituras
+divergiam** — corrigido em 2026-09-17 pela
+[`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md). Ele é impresso pela
+**segunda** fonte ASCII, que não passa pela `layout.SCREEN_GLYPH`: o objeto
+guarda `LOOKS SET` e a tela desenha `S SET`, porque essa fonte tem glifo para
+nove dos 71 caracteres varridos e o que ela não tem não desenha nem anda com a
+caneta. A placa e o nome da camisa passaram a ser comparados string por string;
+o título, pela contagem de letras da faixa.
+
 O resto veio junto: a ajuda de cada linha por um ponteiro que o próprio jogo
 compara antes de redesenhar (`layout.SCREEN_HELP`), o registro de 12 bytes do
 jogador em **duas cópias vivas** que andam com a tela (`layout.PLAYER_RAM`; uma

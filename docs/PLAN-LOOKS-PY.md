@@ -2332,7 +2332,11 @@ mesma conversa:
 `oracle.py --check-live`, que se repete pixel a pixel a partir do `load_state`
 (§1.11):
 
-- uma barra de título com `LOOKS SET`;
+- uma barra de título, que desenha `S SET` — o objeto de texto guarda
+  `LOOKS SET`, e a fonte do título não tem glifo para `L`, `O` nem `K`
+  (§10.3 (q), [`CORR-LOOKS-054`](/docs/tasks/looks/CORR-LOOKS-054.md)). Esta
+  linha dizia "uma barra de título com `LOOKS SET`" até 2026-09-17, e era o
+  texto do objeto, não o da tela;
 - em cima, à esquerda, a **placa de posição** — `GK` no slot 1, `CB` no slot 2
   — e o nome da camisa;
 - à esquerda, o **painel** com degradê azul e borda clara, e o boneco dentro;
