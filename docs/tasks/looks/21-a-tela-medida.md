@@ -130,7 +130,20 @@ jogo. Painel `(16,66)-(161,185)`, linhas `(176,37)-(496,185)`, ajuda
 Título, placa e nome da camisa ficam como âncora de texto, em coordenadas do
 centro do display, que é o sistema em que o jogo as passa.
 
-**Gates.** A transcrição sai depois do commit desta task e o nomeia.
+**Gates, na árvore de `2b19a84`:**
+
+```
+$ python tools/looks/selftest.py
+looks_selftest: 0 failure(s)          # e 67 of 67 controls red
+$ python tools/looks/screen.py --check
+screen.py: 0 failure(s)
+$ WE2002_LOOKS_IMAGE=<japonesa> python tools/looks/cli.py check
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+```
+
+A medição viva rodou **antes** do commit, sobre o mesmo código: o
+`oracle.py --screen` deu `0 difference(s) from screen.json` em 769 s, depois de
+o `--screen --write` ter escrito o arquivo em 706 s.
 
 O controle veio antes de o verde valer: com `HEIG` `155 cm` trocado para
 `154 cm` e a `BOOTS` do slot 1 para `B TYPE` no `screen.json`, a mesma corrida
