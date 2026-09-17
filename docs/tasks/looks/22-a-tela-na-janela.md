@@ -239,7 +239,7 @@ oracle --keys: 2 difference(s) after 19 press(es), ...  # exit 1
    câmera orbital nem prateleira, e o `app.py` engole a opção sem uma palavra.
    O alvo agora **recusa** os dois, dizendo qual é o equivalente na tela
    (`-State 1` é o goleiro) e como chamar o visualizador. Achado por pergunta
-   do usuário depois do commit da task, e consertado em `4f5c2e1`.
+   do usuário depois do commit da task, e consertado em `f7834ff`.
 
    **E o primeiro guarda não disparou, pela armadilha do escopo:** dentro de
    uma função, `$PSBoundParameters` é o **da função**, que não declara
