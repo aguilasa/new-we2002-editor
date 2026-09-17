@@ -73,7 +73,10 @@ mudança; é esse comportamento que se reproduz.
    `H1` é a falha que este projeto existe para não cometer.
    `scene.py --corpus` passou de **31 desenhadas e 19 recusadas** para
    **47 e 3**: as duas de `H1` e o `0.jpg`.
-4. `ctest -R looks` numa máquina limpa: **1 passed, 2 skipped**.
+4. `ctest -R looks` numa máquina limpa: **1 passed, 3 skipped**. Dizia *2
+   skipped* até 2026-09-17, quando a
+   [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) registrou o
+   quarto alvo, `looks_live` (§4.4).
 5. O confronto da §5.3 roda: nosso quadro contra o quadro do emulador na mesma
    tupla, com a diferença medida e registrada — não necessariamente zero, mas
    **medida e explicada**.
@@ -1194,8 +1197,8 @@ oracle.py       o emulador por MCP: capturar quadro, ler RAM, comparar
 harness.py      Checker: ok/attempt/refuses/skip/report   (molde: tools/mcr)
 controls.py     controles negativos por substituição literal no fonte
 selftest.py     o agregador -- alvo looks_selftest
-(o alvo looks_image roda modelfile.py --check-image; ver 4.4)
-cli.py          sections | pieces | texture | looks | check
+cli.py          sections | pieces | texture | looks | check -- e o check,
+                que roda os oito --check-image, é o alvo looks_image (4.4)
 ui/app.py       --smoke, --screenshot, --looks TUPLA
 ui/viewer.py    QOpenGLWidget, câmera orbital
 ui_check.py     o alvo looks_ui, julgando a UI de fora
@@ -1310,30 +1313,51 @@ No Linux, `DISPLAY=:98`, pela regra do [CLAUDE.md](../CLAUDE.md). No Windows,
 janela lançada e **movida para fora da tela** (`SetWindowPos` em −32000), pela
 mesma razão: a máquina é do usuário enquanto o trabalho corre.
 
-### 4.4 Os três alvos de `ctest`
+### 4.4 Os quatro alvos de `ctest`
 
 Mesma divisão por custo que o repositório já usa:
 
-| alvo | precisa | pula? | existe desde |
-|---|---|---|---|
-| `looks_selftest` | nada | nunca | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` | 77 | **2026-09-14** |
-| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` | 77 | **2026-09-16** |
+| alvo | precisa | pula? | roda | existe desde |
+|---|---|---|---|---|
+| `looks_selftest` | nada | nunca | `selftest.py --quiet` | LOOKS-TASK-06 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` | 77 | `cli.py check` | **2026-09-14** |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` | 77 | `ui_check.py` | **2026-09-16** |
+| `looks_live` | as duas variáveis, os dois states e o fork | 77 | `oracle.py --check-live` | **2026-09-17** |
 
-Numa máquina limpa, `ctest -R looks` dá **1 passed, 2 skipped**, e desde
-2026-09-16 é o que ele dá de fato — medido, com os três alvos listados pelo
-nome:
+**Eram três até 2026-09-17**, e esta seção se chamava *"Os três alvos"*. A
+[`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) tinha de
+decidir o que fazer com o `oracle.py --check-live`, que existia desde a
+[`LOOKS-TASK-07`](/docs/tasks/looks/07-oraculo-e-rota-ate-a-tela.md) e não era
+alvo nenhum — um gate que só roda quem se lembra dele, a forma que a
+[`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md) abriu. Ele virou o
+quarto alvo, e o que decidiu foi medido: ele confere os quatro pré-requisitos
+**antes** de subir processo nenhum, e pula com 77 nomeando o que falta; com
+tudo no lugar, custa **8,77 s** pelo `ctest`, com a janela fora da tela e o
+emulador derrubado na saída. Tem `RESOURCE_LOCK duckstation`, e o `pes2_boot`
+ganhou o mesmo: o DuckStation tem um diretório de dados só.
+
+Numa máquina limpa, `ctest -R looks` dá **1 passed, 3 skipped** — medido em
+2026-09-17, com os quatro alvos listados pelo nome:
 
 ```text
-1/3 Test #10: looks_selftest ...................   Passed
-2/3 Test #11: looks_image ......................***Skipped
-3/3 Test #12: looks_ui .........................***Skipped
-100% tests passed out of 3
+1/4 Test #10: looks_selftest ...................   Passed
+2/4 Test #11: looks_image ......................***Skipped
+3/4 Test #12: looks_ui .........................***Skipped
+4/4 Test #13: looks_live .......................***Skipped
+100% tests passed out of 4
 ```
 
-Com `WE2002_LOOKS_IMAGE` apontada e o venv no lugar, os três passam — o
-`looks_ui` em ~30 s, que é o custo das oito janelas que ele abre (quatro para
-medir, e uma árvore plantada por controle negativo).
+Com as duas variáveis apontadas, o venv e o fork no lugar, os quatro passam —
+o `looks_ui` é o caro, pelas janelas que abre (quatro para medir, e uma árvore
+plantada por controle negativo).
+
+**O `looks_live` perdeu a sessão MCP uma vez em catorze corridas**, no primeiro
+`pause` depois de o emulador subir, e as outras treze passaram. A causa não foi
+separada; está aberta na
+[`CORR-LOOKS-051`](/docs/tasks/looks/CORR-LOOKS-051.md). O que aquela corrida
+também mostrou — o emulador ficando de pé quando a exceção sai do
+`Oracle.__enter__`, onde o `__exit__` não roda — foi consertado na própria
+LOOKS-TASK-19.
 
 **O `looks_ui` precisa da imagem, e não só do venv e do display.** A linha da
 tabela acima dizia "venv + display" enquanto a 16 não existia; quando ela
@@ -1353,14 +1377,27 @@ máquina — build fora da árvore, `-G Ninja` com o toolchain do vcpkg — est�
 tabela de gates do
 [`perfil-looks.md`](/docs/prompts/perfil-looks.md).
 
-**O `looks_image` não tem módulo próprio.** A §3.2 previa um `check_image.py`,
-e o que existe é `modelfile.py --check-image` — onde a verificação já mora,
-porque é quem sabe ler os dois arquivos. Um módulo a mais só para chamar esse
-seria cerimônia. Sem argumento ele lê a `WE2002_LOOKS_IMAGE` e **pula com 77**
-nomeando a variável; a primeira coisa que faz é ler um arquivo **só-japonês**
-pela guarda, porque geometria é idêntica nos dois discos e sem essa leitura
-apontar a variável para o disco inglês passaria em silêncio
-([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md)).
+**O `looks_image` roda os oito `--check-image`, e não um.** Até 2026-09-17 ele
+rodava só o `modelfile.py --check-image`, e esta seção dizia que *"um módulo a
+mais só para chamar esse seria cerimônia"* — o que era verdade enquanto ele era
+o único. Quando a LOOKS-TASK-19 fechou, sete outros módulos tinham o seu —
+`texture`, `atlas`, `skin`, `looks`, `assembly`, `pieces` e `scene` —, e
+nenhum estava em alvo: verde no `looks_image` media um oitavo do que o gate de
+disco sabe. Quem roda os oito é o `cli.py check`, e a lista não fica por
+confiança: o self-check dele lê os fontes atrás de todo módulo que responde
+`--check-image` e falha se algum não estiver na corrida. Três regras do
+agregador, cada uma com controle negativo:
+
+- **o `modelfile` roda primeiro**, porque a primeira leitura dele é um arquivo
+  **só-japonês** pela guarda. Geometria é idêntica nos dois discos, e sem essa
+  leitura apontar a variável para o disco inglês passaria em silêncio
+  ([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md)). Medido: contra o
+  `.bin` inglês, **sete dos oito falham e o `pieces` passa** — ele só lê
+  geometria, e a resposta dele está certa nos dois discos;
+- **pulo parcial é falha**: com a imagem dada, um módulo que ainda responde 77
+  está sem algo que os outros têm, e oito resultados com um pulo no meio não
+  são o verde de oito. Só os oito pulando é pulo;
+- **nada rodado não é verde.**
 
 ### 4.5 As duas variáveis, e a guarda que faz a regra valer
 
@@ -2098,9 +2135,14 @@ dezesseis entradas** que o CLUT id da primitiva nomeia dentro do registro de
 ## 9. Entregáveis
 
 - Os módulos da §3.2, em `tools/looks/` e `tools/looks/ui/`.
-- **Três alvos** em `tests/CMakeLists.txt`, na convenção de brackets já usada:
-  um que não precisa de nada, um com `SKIP_RETURN_CODE 77` e variável de
-  ambiente, e um de UI sob `if(UNIX AND Python3_FOUND)`.
+- **Quatro alvos** em `tests/CMakeLists.txt`, na convenção de brackets já
+  usada: um que não precisa de nada, e três com `SKIP_RETURN_CODE 77` — o de
+  disco, o de UI e o do emulador —, todos sob `if(Python3_FOUND)` (§4.4). Este
+  item dizia *"três alvos"* e *"um de UI sob `if(UNIX AND Python3_FOUND)`"* até
+  2026-09-17: o `UNIX` estava medido como errado desde a
+  [`LOOKS-TASK-16`](/docs/tasks/looks/16-contratos-da-ui.md) — a janela sobe
+  nativa no Windows —, e o quarto alvo é da
+  [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md).
 - Os controles negativos, contados pela ferramenta e nunca escritos em prosa.
 - [NOTICE.md](../NOTICE.md) com a linhagem do `we3d` (MIT, com crédito) e a
   ressalva do Superpack.

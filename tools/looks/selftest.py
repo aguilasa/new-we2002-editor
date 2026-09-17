@@ -55,6 +55,7 @@ MODULES = (
     "oracle",
     "controls",
     "superpack_count",
+    "cli",
 )
 """Every module with a self_check, in dependency order.
 

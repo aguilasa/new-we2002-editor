@@ -546,10 +546,18 @@ class Oracle:
                 cue, verbose=self.verbose, match=fork.ANY_WINDOW)
         except fork.Skip as exc:
             raise Unavailable(str(exc)) from None
-        if hide_window(self.window):
-            self.say("window moved off the visible desktop")
-        os.makedirs(self.out_dir, exist_ok=True)
-        self.pause()
+        # From here on the emulator is up, and `__exit__` does not run for an
+        # exception raised inside `__enter__`.  The first `looks_live` run
+        # under ctest lost its MCP session at this `pause()` and left the
+        # emulator running with nobody to kill it (LOOKS-TASK-19).
+        try:
+            if hide_window(self.window):
+                self.say("window moved off the visible desktop")
+            os.makedirs(self.out_dir, exist_ok=True)
+            self.pause()
+        except BaseException:
+            fork.kill(verbose=False)
+            raise
         return self
 
     def __exit__(self, *exc):

@@ -52,7 +52,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-16](/docs/tasks/looks/16-contratos-da-ui.md) | `ui_check.py` — a UI julgada de fora, e o alvo `looks_ui` | 5 | 15 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
-| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os três alvos de `ctest` | 7 | 18 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ⬜ Pendente | — | — |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
@@ -82,7 +82,7 @@ corpus de 50 renders de terceiro. Ver
 | 4 — montagem | 13 a 14 | os doze campos e a tabela `LOOKS → peça + paleta` |
 | 5 — render | 15 a 16 | a janela `QOpenGLWidget` e o gate que a julga de fora |
 | 6 — confronto | 17 a 18 | a diferença medida contra o emulador e contra os 50 JPGs |
-| 7 — fechamento | 19 a 20 | os três alvos de `ctest` e a reconciliação do plano |
+| 7 — fechamento | 19 a 20 | os quatro alvos de `ctest` e a reconciliação do plano |
 
 **O que não pode ser pulado**, com a razão de cada ordem:
 
@@ -257,7 +257,7 @@ new-we2002-editor/
 ├── tools/looks/
 │   ├── iso_source.py layout.py section.py modelfile.py
 │   ├── texture.py looks.py assembly.py oracle.py
-│   ├── harness.py controls.py selftest.py check_image.py cli.py
+│   ├── harness.py controls.py selftest.py cli.py
 │   ├── ui_check.py
 │   └── ui/app.py ui/viewer.py
 └── work/venv-looks/                  ← fora do git

@@ -265,6 +265,14 @@ Não se revertem sem o usuário pedir.
     ([`LOOKS-TASK-18`](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md)).
     **Métrica sobre dado de terceiro sem controle de verdade conhecida ao lado
     não diz de quem é a falha.**
+31. **Exceção dentro do `__enter__` não passa pelo `__exit__`.** O `Oracle`
+    sobe o emulador no `__enter__` e o derruba no `__exit__`; quando o primeiro
+    `pause` falhou, na primeira corrida do `looks_live` pelo `ctest`, o
+    emulador **ficou de pé** depois de o teste terminar — e o DuckStation tem
+    um diretório de dados só, então a sobra derruba a próxima corrida de
+    qualquer projeto. Todo recurso adquirido no `__enter__` se solta ali mesmo
+    se o resto dele falhar. Medido em 2026-09-17
+    ([`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md)).
 
 ---
 
@@ -303,21 +311,22 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os oito `--check-image`, o `modelfile` primeiro; até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
 | `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` | `ctest -R looks_ui` | LOOKS-TASK-16 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
+| `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador; ~1 min, e ~30 s por tupla | `python tools/looks/oracle.py --patched <LINHA> [<SLOT> [<TUPLA> ...]]` — o slot desde a CORR-LOOKS-047 (sem ele é o 2); as tuplas desde a CORR-LOOKS-048, uma caminhada por tupla a partir de `load_state`, com as primitivas mudadas impressas | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~15 min | `python tools/looks/oracle.py --hair` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem, e leva ~3 a 12 min | `python tools/looks/oracle.py --writes HAIR [<SLOT>]` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | idem; ~45 s por tupla | `python tools/looks/oracle.py --colour <LINHA> [<SLOT> [<TUPLA> ...]]` — as primitivas que uma linha de cor move em cada cabeça, pelas duas pontas assentadas | — | CORR-LOOKS-049 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` + `WE2002_LOOKS_CORPUS` (77 sem elas) | `python tools/looks/assembly.py --corpus` | — | LOOKS-TASK-14 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_CORPUS`, ou a pasta por argumento (77 sem ela) | `python tools/looks/looks.py --corpus` | — | CORR-LOOKS-027 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/scene.py --check-image` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | as duas variáveis (77 sem elas) | `python tools/looks/scene.py --corpus` | — | LOOKS-TASK-15 |
 | *(o que o `looks_ui` dirige)* | venv + a imagem; **nada aparece na tela** | `work/venv-looks/Scripts/python tools/looks/ui/app.py --smoke` | — | LOOKS-TASK-15 |
 | *(sem alvo ainda)* | idem | `… tools/looks/ui/app.py --looks <tupla> --screenshot <png>` | — | LOOKS-TASK-15 |
@@ -365,9 +374,11 @@ toolchain de C++ para ser listado. Tornar os alvos Python alcançáveis sem o
 execução. Fica **aberta**, e enquanto estiver, a coluna do meio é o caminho
 curto: ela não depende de build nenhum.
 
-Hoje são **1 passed, 2 skipped** numa máquina limpa — medido em 2026-09-16,
-com os três alvos listados pelo nome —, e **3 passed** com a imagem apontada e
-o venv no lugar.
+Hoje são **1 passed, 3 skipped** numa máquina limpa — medido em 2026-09-17,
+com os quatro alvos listados pelo nome —, e **4 passed** com as duas variáveis
+apontadas, o venv e o fork no lugar. Eram *1 passed, 2 skipped* e *3 passed*
+até a [`LOOKS-TASK-19`](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md), que
+registrou o `looks_live`.
 
 **Antes da LOOKS-TASK-06 não há gate**, e isso é esperado: as tasks 01 a 05 se
 verificam pela saída da ferramenta, copiada para o Log. Depois dela, toda task
@@ -399,7 +410,7 @@ sobrevive é `# na arvore de <sha>` ao lado do comando; remedir depois é
 - `tools/pes2/bin_archive.py` — **arquivo de outro projeto**. A LOOKS-TASK-10
   pode precisar mexer nele; se mexer, o `pes2_selftest` tem de continuar verde,
   e isso entra no critério de conclusão, não na esperança.
-- `tests/CMakeLists.txt` — os três alvos entram aqui, junto com os dos outros
+- `tests/CMakeLists.txt` — os quatro alvos entram aqui, junto com os dos outros
   quatro projetos.
 - `NOTICE.md` — tocado pela 01 e reconferido pela 20.
 - `docs/PLAN-LOOKS-PY.md` — **o plano se corrige na seção que muda**, nunca num

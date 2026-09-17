@@ -174,13 +174,14 @@ if(UNIX)
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../tools/pes2/boot_check.sh)
     set_tests_properties(pes2_boot PROPERTIES
         SKIP_RETURN_CODE 77
+        RESOURCE_LOCK duckstation
         TIMEOUT 600)
 endif()
 
 # The appearance viewer (docs/PLAN-LOOKS-PY.md) is the sixth project: Python 3
 # in tools/looks/, PySide6 in a venv of its own, no build shared with anything.
 #
-# Both targets sit inside if(Python3_FOUND) like the other eight Python tests
+# All four targets sit inside if(Python3_FOUND) like the other eight Python tests
 # above. They did not, and the one that suffers is the mandatory gate: with no
 # Python found, ${Python3_EXECUTABLE} expands to nothing, the command becomes
 # the bare .py path, and looks_selftest reports FAILED -- sending whoever reads
@@ -218,9 +219,18 @@ if(Python3_FOUND)
     # at the English translation would pass in silence, and that is the error
     # this cycle exists to make impossible. Without the variable it skips with
     # 77 and names it.
+    #
+    # Since LOOKS-TASK-19 it runs `cli.py check`, which is modelfile's check
+    # FIRST and then the seven other modules that grew a --check-image of their
+    # own (texture, atlas, skin, looks, assembly, pieces, scene). Until then
+    # this target ran one of eight, and green here said nothing about the
+    # palette list, the atlas or the assembly table. The list is not trusted to
+    # stay whole: cli.py's self-check reads the sources for every module that
+    # answers --check-image and fails when one is missing from the run. A
+    # module that skips while the others ran fails the target too.
     add_test(NAME looks_image
         COMMAND ${Python3_EXECUTABLE}
-                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/modelfile.py --check-image)
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/cli.py check)
     set_tests_properties(looks_image PROPERTIES
         SKIP_RETURN_CODE 77
         TIMEOUT 300)
@@ -245,5 +255,33 @@ if(Python3_FOUND)
                 ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/ui_check.py)
     set_tests_properties(looks_ui PROPERTIES
         SKIP_RETURN_CODE 77
+        TIMEOUT 600)
+
+    # The fourth bracket, added by LOOKS-TASK-19: the game itself. It boots the
+    # DuckStation fork with the MCP server, restores the cycle's two save
+    # states, proves by the picture which one loaded and that the wrong one is
+    # refused, compares both model files in RAM with the disc, and presses one
+    # key. It existed since LOOKS-TASK-07 as `oracle.py --check-live` and was in
+    # no target -- a gate only whoever remembered it ran, which is the shape
+    # CORR-LOOKS-012 was opened for. Its time is in the LOOKS-TASK-19 log.
+    #
+    # Every prerequisite is checked BEFORE a process starts (oracle.PREREQUISITES):
+    # WE2002_LOOKS_DRIVE_IMAGE (the English .cue), WE2002_LOOKS_IMAGE (the
+    # Japanese .bin), the two states under work/looks-states/, and then the
+    # fork at launch. Missing any is a skip with 77 that names it. The window
+    # goes off the desktop at once (-32000 on Windows), and the emulator is
+    # killed on the way out.
+    #
+    # It writes one thing outside this tree, and it is worth knowing: when the
+    # emulator's own slot 1 or 2 differs from the project copy, the copy is put
+    # back there, loudly.
+    add_test(NAME looks_live
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/../tools/looks/oracle.py --check-live)
+    # DuckStation keeps ONE data directory, so one instance at a time across
+    # the whole repository -- the same lock sits on pes2_boot.
+    set_tests_properties(looks_live PROPERTIES
+        SKIP_RETURN_CODE 77
+        RESOURCE_LOCK duckstation
         TIMEOUT 600)
 endif()

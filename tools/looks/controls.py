@@ -594,6 +594,33 @@ CONTROLS = (
         "true line -- the exact shape of green-for-the-wrong-reason this "
         "cycle keeps meeting",
     ),
+    Control(
+        "cli-check-forgets-a-module", "cli.py", "module constant",
+        "    \"scene\",\n)",
+        ")",
+        ("cli",),
+        "the disc gate running seven of the eight --check-image: green, and "
+        "blind to the one left out -- the shape looks_image had for five "
+        "tasks, when it ran modelfile alone",
+    ),
+    Control(
+        "cli-guard-read-not-first", "cli.py", "module constant",
+        "    \"modelfile\",\n    \"texture\",",
+        "    \"texture\",\n    \"modelfile\",",
+        ("cli",),
+        "modelfile's first read is the Japanese-only file through the guard; "
+        "run later, geometry checks pass on the English disc before anything "
+        "notices (CORR-LOOKS-012)",
+    ),
+    Control(
+        "cli-partial-skip-passes", "cli.py", "combine",
+        "    if all(code == 0 for code in codes):",
+        "    if all(code in (0, SKIP) for code in codes):",
+        ("cli",),
+        "a module skipping while the others ran means it lacks something the "
+        "rest have; calling that green passes a gate that measured less than "
+        "it says",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

@@ -1,6 +1,6 @@
 ---
 id: LOOKS-TASK-19
-title: "`cli.py` e os três alvos de `ctest`"
+title: "`cli.py` e os quatro alvos de `ctest`"
 type: implementação
 category: verificação
 phase: 7

@@ -66,6 +66,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-048](/docs/tasks/looks/CORR-LOOKS-048.md) | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Ninguém leu o que as barbas `F` e `G` escrevem, e 28 jogadores do disco e 16 renders do corpus são recusados | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [x] concluída | 2026-09-16 |
+| [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | O `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -130,6 +131,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-048 — `F` e `G` estão na tela e o que escrevem não foi lido
 - [x] CORR-LOOKS-049 — o corpus mede errado o índice de cor emprestado da seção 24
 - [x] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
+- [ ] CORR-LOOKS-051 — `missing or invalid MCP-Session-Id` logo depois de o emulador subir
 
 ## Detalhes por correção
 
@@ -913,3 +915,16 @@ e o ciclo arquivado, o dele em
   (`A1`/`A`), sem limiar à mão; nomear o resíduo enquanto a CORR-049 estiver
   aberta, com a condição de deixar de isentar quando o grupo se recuperar; e
   dizer na linha de campo o que ela mede
+
+### CORR-LOOKS-051
+
+- **Arquivo com problema:** `tools/looks/oracle.py` (`Oracle.__enter__`), ou o
+  ambiente — não medido qual
+- **Sintoma:** a primeira corrida do `looks_live` pelo `ctest` morreu no
+  `pause` com `HTTP 400 ... missing or invalid MCP-Session-Id`, um pedido depois
+  de o `initialize` ser aceito; as treze corridas seguintes passaram
+- **Como foi detectado:** registrando o alvo na LOOKS-TASK-19 e rodando
+  `ctest -R looks` com as duas variáveis apontadas
+- **Fix:** separar as duas hipóteses por contagem (outro cliente MCP na porta,
+  ou a sessão reiniciada na subida) antes de mexer; refazer a chamada em laço
+  não é correção
