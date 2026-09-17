@@ -70,6 +70,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [x] concluída | 2026-09-17 |
+| [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -138,6 +139,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-052 — um controle vermelho por uma propriedade que o gate não tem
 - [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
 - [x] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
+- [ ] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
 
 ## Detalhes por correção
 
@@ -982,3 +984,16 @@ e o ciclo arquivado, o dele em
   (`title_object`) e o que a fonte pula (`title_skipped`) ao lado. **A razão foi
   medida e ocupa o lugar do resíduo:** a fonte do título tem glifo para nove dos
   71 caracteres varridos, e o que ela não tem não desenha nem anda com a caneta
+
+### CORR-LOOKS-055
+
+- **Arquivo com problema:** `tools/looks/screen.py`, `tools/looks/oracle.py`
+- **Sintoma:** `screen.py --report` para na terceira das doze linhas com
+  `UnicodeEncodeError: 'charmap' codec can't encode character '■'` e sai 1;
+  só imprime com `PYTHONIOENCODING=utf-8`. O `oracle._walk_row` põe a mesma
+  ajuda na mensagem do `OracleError`, então uma corrida de doze minutos que
+  errasse a linha terminaria no erro do `print`, sem dizer qual linha errou
+- **Como foi detectado:** varredura da CORR-LOOKS-054, ao conferir o `--report`
+  depois de o título entrar nele
+- **Fix:** garantir a saída antes de imprimir texto medido; o `■` fica na
+  tabela, que é o que o jogo desenha
