@@ -129,6 +129,60 @@ prateleira da v1), e o cenário (task [`31`](/docs/tasks/looks/31-o-painel-e-o-c
 setas `◀ ▶` ao lado do valor, o alinhamento à direita do valor dentro da caixa
 do cursor, e as caixas próprias da placa e da camisa.
 
+### Gates, na árvore de `1fb8488`
+
+Tirados **depois** do commit da task, que é a regra do perfil: a árvore anda a
+cada edição do próprio arquivo, e número copiado no meio descreve uma árvore
+que não existe mais.
+
+```text
+# na arvore de 1fb8488
+$ python tools/looks/selftest.py
+  ..... 71 of 71 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/screen.py --check
+screen.py: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+  H1 TYPE is refused on the screen: the row keeps the game's text, the help
+  box carries the table's sentence, and the panel draws nothing
+  the screen walked by key: 24 row(s) to both ends across 2 state(s), the
+  cursor past both ends, and every text, help, plate and title is what
+  screen.json measured off the game
+looks_ui: 6 of 6 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/oracle.py --keys "" 2
+  control: the same sequence twice in the game gives the same twelve rows and
+  the same help
+oracle --keys: 0 difference(s) after 19 press(es), across the game,
+screen.json and our window
+
+$ python tools/looks/oracle.py --keys "" 1
+  control: the same sequence twice in the game gives the same twelve rows and
+  the same help
+oracle --keys: 0 difference(s) after 19 press(es), across the game,
+screen.json and our window
+```
+
+**O vermelho, medido na cópia da árvore com a mentira plantada** (`HEIG=178`
+escrito `178 CM` no `screen.json` da cópia):
+
+```text
+$ python <copia>/tools/looks/ui_check.py
+looks_ui: 6 of 6 negative control(s) red, ...          # exit 0 -- VERDE
+
+$ python <copia>/tools/looks/oracle.py --keys
+  control: the same sequence twice in the game gives the same twelve rows ...
+  FAIL  HEIG: the game shows '178 cm' and screen.json says a press leaves '178 CM'
+  FAIL  HEIG: the game shows '178 cm' and our window shows '178 CM'
+oracle --keys: 2 difference(s) after 19 press(es), ...  # exit 1
+```
+
 ### Arquivos criados/modificados
 
 - `tools/looks/ui/looks_set.py` — **novo**: a tela como widget; arranjo em
