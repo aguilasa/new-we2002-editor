@@ -20,12 +20,28 @@ the same line `tools/mcr/domains.py` draws, for the same reason.
 
 ## The twelve rows are not twelve stored fields
 
-Ten of them are.  `DEFAUL` and `NAT` are not: they are the two halves of the
-game's own *default look per nationality*, the table this repository already
-ships as `data/defaultlook.txt` -- 95 nations, and its five look columns are
-exactly the five of the corpus tuple.  Measured on 2026-09-15 by
-LOOKS-TASK-09 from the other side: neither field moves a byte of either model
-file, and `AGE` moves four bytes in all of RAM.
+Ten of them are.  `DEFAUL` and `NAT` are not, and what they ARE was measured on
+2026-09-17 by LOOKS-TASK-23, in the running game:
+
+  `DEFAUL` is the screen's **confirm button**.  Its one value is `O.K.`, its
+      help is `Confirm`, and Circle on it leaves LOOKS SET for the player-edit
+      menu.  It applies NOTHING: the twelve rows and the twelve-byte record
+      come out of the press unchanged, with the nation chosen or without.
+  `NAT` chooses the player's **nationality**, which is stored as one byte
+      outside the twelve (`layout.PLAYER_NATION`) and survives leaving the
+      screen -- the edit menu shows it as `NAT. BRA`.  It moves no look row.
+
+**This block said, until that measurement, that the two were "the two halves of
+the game's own default look per nationality", over `data/defaultlook.txt`.**
+That was inference from the column names and it is wrong twice: the game
+applies no default from this screen, and that file is the EDITOR's table, keyed
+by TEAM -- its own header says `TEAM;NAME;...` -- listing nations AND clubs
+(`Inter`, `Bayern`, `Clas. Brazil`), which the game's list of nationalities is
+not.  See `nation_lines()`.
+
+Measured on 2026-09-15 by LOOKS-TASK-09 from the other side, and still true:
+neither row moves a byte of either model file, and `AGE` moves four bytes in
+all of RAM.
 
 ## The count in section 1.9 was third-party opinion, and it was wrong
 
@@ -205,12 +221,16 @@ BY_NAME = {field.name: field for field in FIELDS}
 BY_ROW = {field.row: field for field in FIELDS}
 
 UNSTORED = {
-    "DEFAUL": "applies the default look of the nationality beside it; the "
-              "table is data/defaultlook.txt, 95 nations by five columns",
-    "NAT": "chooses that nationality.  Neither row is a field of the twelve "
-           "bytes, and neither moves a byte of either model file",
+    "DEFAUL": "the screen's confirm button: one value, `O.K.`, help `Confirm`, "
+              "and Circle on it leaves LOOKS SET applying nothing -- measured "
+              "in the game on 2026-09-17 (LOOKS-TASK-23)",
+    "NAT": "chooses the player's nationality, kept in one byte outside the "
+           "twelve (layout.PLAYER_NATION) and moving no look row.  Neither "
+           "row is a field of the twelve bytes, and neither moves a byte of "
+           "either model file",
 }
-"""The two rows of the screen that store nothing -- see the module docstring."""
+"""The two rows of the screen that store none of the twelve bytes -- see the
+module docstring, and note that `NAT` does store something, elsewhere."""
 
 SCREEN = ("DEFAUL", "NAT", "SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.",
           "HEIG", "BODY", "AGE", "BOOTS", "FOOT")
@@ -387,6 +407,108 @@ def default_looks(path: str = DEFAULT_LOOK) -> list:
                 values[name] = BY_NAME[name].index_of(cell.strip())
         out.append((cells[1], values))
     return out
+
+
+NATION_CODES = ((1, 54, -1), (55, 79, 40))
+"""How a value of the `NAT` row maps to the byte the game stores, in runs.
+
+`(first index, last index, what to add)`, and the two runs are the finding:
+the row's values 1 to 54 store 0 to 53, and then the code **jumps 41** -- value
+55 (`Iceland`) stores 95, and the row runs out at 119.  So codes 54 to 94, all
+forty-one of them, name something the screen does not offer.
+
+Measured on 2026-09-17 (LOOKS-TASK-23) by `oracle.py --default`, which walks
+every value of the row and reads `layout.PLAYER_NATION` at each one -- and
+re-walks it on every run, so this is a claim a command re-measures rather than
+a number copied out of a session.  Value 0, `Unknown`, has no code: the two
+copies of the byte do not even agree there until the first press.
+
+Why it matters beyond bookkeeping: `Algeria` is value 65 and stores 105.  Any
+pairing that treats the row's position as the game's number is wrong from
+value 55 on, and wrong quietly.
+"""
+
+UNKNOWN_NATION = 0
+"""The value of the row that names no nation, and stores no code."""
+
+
+def nation_code(index: int) -> int:
+    """The byte the game stores for value *index* of the `NAT` row."""
+    for first, last, add in NATION_CODES:
+        if first <= index <= last:
+            return index + add
+    raise BadLooks("value %d of NAT stores no nationality code; the row runs "
+                   "%d..%d and %d is Unknown"
+                   % (index, NATION_CODES[0][0], NATION_CODES[-1][1],
+                      UNKNOWN_NATION))
+
+
+def nation_index(code: int) -> int:
+    """The inverse, for a code the row can reach."""
+    for first, last, add in NATION_CODES:
+        if first + add <= code <= last + add:
+            return code - add
+    raise BadLooks("no value of NAT stores %d; the row reaches %s"
+                   % (code, ", ".join("%d..%d" % (first + add, last + add)
+                                      for first, last, add in NATION_CODES)))
+
+
+def nation_lines(nat_texts) -> dict:
+    """The screen's `NAT` values against the lines of `data/defaultlook.txt`.
+
+    **The two lists are not the same list, and that is the finding.**  The file
+    is the EDITOR's table, keyed by TEAM: nations and clubs together
+    (`Inter`, `Bayern`, `Clas. Brazil`, `Euro All Stars`).  The screen's row is
+    the game's list of nationalities, which carries countries the file has not
+    got (`Senegal`, `Uzbekistan`, `Trin y Tobago`) and spells the long ones
+    short, because the cell is narrow: `Portuga`, `Netherl`, `Swi`, `Cze`.
+
+    So the pairing is by NAME, never by index.  The first sixteen coincide in
+    both order and position, which is exactly the trap: an index pairing looks
+    right for a screenful and then applies another team's line -- a club's,
+    further down.
+
+    Returns `{"paired", "screen_only", "file_only", "truncated", "prefix_of"}`;
+    every count a document quotes comes out of here.
+    """
+    file_rows = default_looks()
+    by_name = {}
+    for name, values in file_rows:
+        by_name.setdefault(name, values)
+    out = {"paired": {}, "screen_only": [], "file_only": [],
+           "truncated": [], "prefix_of": {}}
+    taken = set()
+    for index, shown in enumerate(nat_texts):
+        if shown in by_name:
+            out["paired"][index] = (shown, by_name[shown])
+            taken.add(shown)
+            continue
+        # A cell too narrow for the name: the game cuts it, so the file's name
+        # starts with what the screen shows.  Only a UNIQUE completion counts;
+        # two candidates would be a guess, and this module does not guess.
+        starts = [name for name in by_name if name.startswith(shown)]
+        if len(starts) == 1:
+            out["paired"][index] = (starts[0], by_name[starts[0]])
+            out["truncated"].append((shown, starts[0]))
+            out["prefix_of"][shown] = starts[0]
+            taken.add(starts[0])
+        else:
+            out["screen_only"].append((index, shown, len(starts)))
+    out["file_only"] = [name for name, _v in file_rows if name not in taken]
+    return out
+
+
+def nation_by_index(nat_texts, skip: int = 0) -> dict:
+    """The pairing this module refuses: value N of the row against line N of
+    the file, optionally dropping the first *skip* values of the row.
+
+    It exists so a check can show what it costs.  `skip=1` -- past `Unknown`,
+    which no line of the file names -- is the version somebody would actually
+    write, and it holds for a screenful before it starts naming other teams.
+    """
+    file_rows = default_looks()
+    return {index + skip: file_rows[index][0]
+            for index in range(min(len(nat_texts) - skip, len(file_rows)))}
 
 
 # ---- the records on the disc ---------------------------------------------
@@ -642,9 +764,75 @@ def _checks(c) -> None:
            "%r" % (outside[:3],))
         ok("its five look columns are the five of the corpus tuple",
            all(set(values) <= set(TUPLE_ORDER) for _n, values in table))
+        _nation_checks(c)
 
 
 # ---- the disc ------------------------------------------------------------
+
+def _nation_checks(c) -> None:
+    """`NAT` against the file, and what pairing them by index costs.
+
+    Skipped where `screen.json` is not there: the row's values are a
+    measurement of the game (LOOKS-TASK-21), and this module does not carry a
+    copy of them.
+    """
+    import screen
+
+    if not os.path.exists(screen.TABLE):
+        c.skip("NAT against defaultlook.txt", "screen.json is not measured yet")
+        return
+    ok = c.ok
+    nat = screen.load()["rows"]["NAT"]["texts"]
+    found = nation_lines(nat)
+    paired, only_screen = found["paired"], found["screen_only"]
+    ok("the row and the file are not the same list",
+       len(paired) < len(nat) and found["file_only"],
+       "%d paired of %d, %d file line(s) unused"
+       % (len(paired), len(nat), len(found["file_only"])))
+    ok("the truncated names complete to one file name each and no more",
+       all(short != full and full.startswith(short)
+           for short, full in found["truncated"]), "%r" % found["truncated"])
+    ok("a name two file lines could complete is left unpaired, not guessed",
+       all(count != 1 for _i, _shown, count in only_screen))
+    ok("Unknown pairs with nothing",
+       any(shown == "Unknown" for _i, shown, _n in only_screen))
+
+    # The red case, and it is the one somebody would actually write: drop
+    # `Unknown` and pair by position.  It holds for sixteen values and then
+    # starts handing nations the lines of CLUBS.
+    by_index = nation_by_index(nat, 1)
+    run = 1
+    while (run < len(nat) and paired.get(run)
+           and by_index.get(run) == paired[run][0]):
+        run += 1
+    ok("pairing by index holds for a screenful and then stops",
+       run - 1 == 16 and by_index.get(run) != nat[run],
+       "ends at index %d (%r), where the file line is %r"
+       % (run - 1, nat[run - 1], by_index.get(run)))
+    wrong = sum(1 for index in paired
+                if by_index.get(index) not in (None, paired[index][0]))
+    invented = sum(1 for index in by_index
+                   if index not in paired)
+    ok("and pairing by index gives a line to values that have none",
+       wrong and invented, "%d wrong team(s), %d invented" % (wrong, invented))
+
+    # The codes, which are the other half of the same lesson: the row's
+    # position is not the game's number either.
+    ok("the code runs with the index and then jumps",
+       nation_code(1) == 0 and nation_code(54) == 53
+       and nation_code(55) == 95 and nation_code(len(nat) - 1) == 119,
+       "%d, %d, %d, %d" % (nation_code(1), nation_code(54), nation_code(55),
+                           nation_code(len(nat) - 1)))
+    ok("every value but Unknown has a code, and it round-trips",
+       all(nation_index(nation_code(i)) == i for i in range(1, len(nat))))
+    c.refuses("Unknown has no code, and is refused rather than given one",
+              lambda: nation_code(UNKNOWN_NATION), "stores no nationality",
+              BadLooks)
+    c.refuses("and a code in the gap belongs to no value of the row",
+              lambda: nation_index(54), "no value of NAT stores", BadLooks)
+    ok("the gap is forty-one codes the screen cannot reach",
+       nation_code(55) - nation_code(54) - 1 == 41)
+
 
 def _check_image(image_path: str) -> int:
     """The record block: where it starts, how long it runs, what it holds."""

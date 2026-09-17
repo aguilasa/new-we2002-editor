@@ -681,6 +681,25 @@ CONTROLS = (
         "the message of its own failure",
     ),
     Control(
+        "looks-nation-code-is-the-index", "looks.py", "NATION_CODES",
+        "NATION_CODES = ((1, 54, -1), (55, 79, 40))",
+        "NATION_CODES = ((1, 79, -1),)",
+        ("looks",),
+        "the nationality code taken for the row's own position: it is, for the "
+        "first fifty-four values, and then the game jumps 41 -- `Algeria` is "
+        "value 65 and stores 105.  A rule fitted to a sample of five would "
+        "look exactly like this one",
+    ),
+    Control(
+        "looks-nation-pairs-any-prefix", "looks.py", "nation_lines",
+        "        if len(starts) == 1:",
+        "        if starts:",
+        ("looks",),
+        "a truncated name completed by the FIRST file line that starts with "
+        "it, where two could: the screen writes `Cze` and `Chl`, and a guess "
+        "there pairs a nation with another team's line and looks right",
+    ),
+    Control(
         "screen-row-walks-past-its-end", "screen.py", "step",
         "        if index + 1 < len(texts):\n            return index + 1\n"
         "        return 0 if table[\"rows\"][row][\"right\"] == \"wraps\" else index",

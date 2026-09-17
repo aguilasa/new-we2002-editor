@@ -40,6 +40,7 @@ Usage:
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
     python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
+    python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
 """
 
 from __future__ import annotations
@@ -3466,6 +3467,169 @@ def check_keys(sequence=None, slot=2, verbose=True):
     return 1 if bad else 0
 
 
+NATIONS = ("Ireland", "Sweden", "Brazil", "Japan", "Nigeria", "Algeria")
+"""The nations `--default` walks to: spread across the row, and one of them --
+`Brazil`, skin B -- has a file line that is not all `A`, which is what tells
+"the default was applied" from "nothing happened to a look that was already
+the default".  `Algeria` is there because the index pairing puts a CLUB's line
+on it (`looks.nation_by_index`), so a run that silently paired by index would
+have to disagree with the game somewhere visible."""
+
+LOOK_ROWS = ("SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.")
+"""The five the file has a column for, and the five a default would move."""
+
+CONFIRM_SETTLE = 120
+"""Frames given to the fade after Circle on `DEFAUL`.  The screen leaves, and
+a frame read before the fade is over is black and says nothing."""
+
+
+def _nation_byte(game, slot=None):
+    """The two copies of the nationality, as the machine holds them now."""
+    path = os.path.join(game.out_dir, "nation.bin")
+    return [game.read_ram(address, 1, path)[0]
+            for address in layout.PLAYER_NATION]
+
+
+def check_default(slot=2, verbose=True):
+    """`--default`: what `NAT` and `DEFAUL` do, measured in the game.
+
+    The task this answers assumed the two rows were the halves of a default
+    look per nationality, over `data/defaultlook.txt`.  They are not, and the
+    shape of this run is what says so rather than asserting it:
+
+      for each nation, the five look rows are read BEFORE and AFTER pressing
+          Circle on `DEFAUL`, and so is the twelve-byte record.  A default
+          being applied would move them;
+      the file's line for that nation is printed beside them, so a reader sees
+          what would have changed if it had been;
+      the nationality byte is read at `layout.PLAYER_NATION`, which is where
+          the choice DOES land, and checked against the row's own index;
+      the control is the same nation reached twice, which has to read the
+          same -- without it a difference between two nations says nothing.
+    """
+    import looks
+    import screen
+
+    table = screen.load()
+    geometry = _screen_geometry(table)
+    orders = table["orders"]
+    texts = table["rows"]["NAT"]["texts"]
+    lines = looks.nation_lines(texts)
+    ready = preflight()
+    problems, applied = [], []
+
+    def rows(game):
+        return ScreenReading(geometry, screen_objects(game)).rows(orders)
+
+    def walk_to(game, nation):
+        game.load_looks(slot)
+        for _ in range(texts.index(nation)):
+            tap(game, "Right")
+        return rows(game)
+
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        restore_state(slot, verbose=verbose)
+
+        # The control first: one nation reached twice, from load_state both
+        # times, has to read the same row, the same five looks and the same
+        # nationality byte.
+        first = walk_to(game, NATIONS[0])
+        first_byte = _nation_byte(game)
+        again = walk_to(game, NATIONS[0])
+        again_byte = _nation_byte(game)
+        if first != again or first_byte != again_byte:
+            print("  FAIL  control: %s read %r/%r and then %r/%r"
+                  % (NATIONS[0], first, first_byte, again, again_byte))
+            print("oracle --default: the control failed, so no difference "
+                  "below would mean anything")
+            return 1
+        print("  control: %s twice from load_state reads the same row, the "
+              "same five looks and the same nationality byte %r"
+              % (NATIONS[0], first_byte))
+
+        # The whole row, one press at a time, reading the byte at each value.
+        # Every value and not a sample: the code runs with the index for
+        # fifty-four values and then jumps 41, and a sample of five would have
+        # been taken for "the code is the index minus one" -- which is what
+        # the first run of this command reported, until `Algeria` disagreed.
+        game.load_looks(slot)
+        codes = []
+        for index in range(len(texts)):
+            if index:
+                tap(game, "Right")
+            codes.append(_nation_byte(game))
+        for index, byte in enumerate(codes):
+            if index == looks.UNKNOWN_NATION:
+                if byte[0] == byte[1]:
+                    problems.append("the two copies agree on %r before a "
+                                    "nation was chosen, and the measurement "
+                                    "says they do not" % texts[index])
+                continue
+            if byte[0] != byte[1]:
+                problems.append("%s: the two copies read %r"
+                                % (texts[index], byte))
+            want = looks.nation_code(index)
+            if byte[0] != want:
+                problems.append("%s is value %d of the row and stores %d; "
+                                "looks.NATION_CODES says %d"
+                                % (texts[index], index, byte[0], want))
+        # Written over the runs the rule declares, not over two: a planted
+        # rule with one run has to reach the comparison and report what it
+        # got wrong, and an index error here would be a red that measured
+        # nothing (trap 27 of the profile).
+        jumps = ["%r (%d to %d)" % (texts[first], codes[first - 1][0],
+                                    codes[first][0])
+                 for first, _last, _add in looks.NATION_CODES[1:]]
+        print("  the row's %d value(s) walked: codes %d..%d%s"
+              % (len(texts), codes[1][0], codes[-1][0],
+                 ", with the jump at %s" % ", ".join(jumps) if jumps
+                 else ", in one run"))
+
+        for nation in NATIONS:
+            index = texts.index(nation)
+            before = walk_to(game, nation)
+            record_before = screen_record(game)
+            nation_byte = _nation_byte(game)
+            if before["NAT"] != nation:
+                problems.append("walking to %s left the row on %r"
+                                % (nation, before["NAT"]))
+                continue
+            tap(game, "Up")          # NAT is one below DEFAUL
+            tap(game, "Circle")      # the confirm, which is what DEFAUL is
+            game.step(CONFIRM_SETTLE)
+            after_byte = _nation_byte(game)
+            # The screen is gone by now, so the rows are read from the RAM the
+            # print routine last wrote plus the record, which survives.
+            record_after = screen_record(game)
+            line = lines["paired"].get(index)
+            moved = {name: (record_before[looks.BY_ROW[name].name],
+                            record_after[looks.BY_ROW[name].name])
+                     for name in LOOK_ROWS
+                     if record_before[looks.BY_ROW[name].name]
+                     != record_after[looks.BY_ROW[name].name]}
+            if moved:
+                applied.append((nation, moved))
+            if verbose:
+                shown = {name: before[name] for name in LOOK_ROWS}
+                print("  %-9s value %2d, nationality byte %r -> %r after the "
+                      "confirm" % (nation, index, nation_byte, after_byte))
+                print("            the screen showed %r" % shown)
+                print("            defaultlook.txt says %s"
+                      % ("%r" % (line[1],) if line else "nothing -- no line "
+                                                        "of its own"))
+                print("            the record moved: %s"
+                      % (moved if moved else "nothing"))
+
+    for line in problems:
+        print("  FAIL  %s" % line)
+    if applied:
+        print("  DEFAUL moved the record on %d nation(s): %r"
+              % (len(applied), applied))
+    print("oracle --default: %d problem(s); DEFAUL applied a default on %d of "
+          "%d nation(s)" % (len(problems), len(applied), len(NATIONS)))
+    return 1 if problems else 0
+
+
 def _differences(want, got, path=""):
     if isinstance(want, dict) and isinstance(got, dict):
         out = []
@@ -3909,6 +4073,8 @@ def main(argv):
                 raise OracleError("--screen takes --write and nothing else, "
                                   "and got %r" % argv[2])
             return check_screen(write=len(argv) == 3)
+        if len(argv) >= 2 and argv[1] == "--default":
+            return check_default(int(argv[2]) if len(argv) > 2 else 2)
         if len(argv) >= 2 and argv[1] == "--keys":
             slot = int(argv[3]) if len(argv) > 3 else 2
             return check_keys(argv[2] if len(argv) > 2 else None, slot)

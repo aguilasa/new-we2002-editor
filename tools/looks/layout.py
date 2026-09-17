@@ -1392,6 +1392,31 @@ on HEIG and on AGE: these two followed (175 to 176, 23 to 24) and the third,
 of the two the game draws from is not measured.
 """
 
+PLAYER_NATION = (0x800E7E0C, 0x800E946B)
+"""The byte the `NAT` row of LOOKS SET writes: the player's nationality.
+
+Not one of the twelve, which is the point -- `NAT` is a row of that screen and
+not a field of the record (`looks.UNSTORED`).  It is stored as the row's index
+**minus one**, so the first nation the row offers, `Ireland`, is 0.
+
+Found on 2026-09-17 (LOOKS-TASK-23) by two runs of the SAME number of presses
+from one `load_state`, landing on different nations -- eleven Rights against
+six Rights and five Lefts -- and keeping the bytes that differ.  **The equal
+press count is the whole method:** the first attempt walked to three nations
+with three different numbers of presses and turned up twenty-one bytes that
+"stepped with the index", all of which were CLOCKS -- they kept counting when
+nothing was pressed.
+
+A third value confirmed these, and leaving the screen separated them from a
+fourth (0x800E96C8) that the next screen reuses.  The second address is
+0x800E9450 + 27, so the twelve-byte record this cycle reads sits inside a
+larger player structure and the nationality is 27 bytes into it.
+
+On a freshly loaded state, with the row showing `Unknown`, the two do not hold
+a nation index and do not even agree (253 and 139); one press makes them agree.
+What the screen shows for every other non-nation value is NOT measured.
+"""
+
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 

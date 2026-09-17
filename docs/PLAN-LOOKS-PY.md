@@ -2478,6 +2478,52 @@ inventado a partir do rótulo é o erro que a armadilha 17 descreve.
 aplica exatamente a linha do `data/defaultlook.txt` — medido no jogo, nunca
 suposto pelo nome da coluna. [`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md).
 
+> **Respondida em 2026-09-17**, por `oracle.py --default`, e a resposta desmente
+> a pergunta em três pontos. O que se mediu:
+>
+> - **`DEFAUL` não aplica default nenhum: é o botão de confirmar da tela.** Um
+>   valor só (`O.K.`), ajuda `Confirm`, e `Circle` sobre ele **sai** do
+>   `LOOKS SET` para o menu de edição do jogador. Medido em **seis** nações
+>   espalhadas, incluindo três cuja linha do arquivo não é toda `A`: as doze
+>   linhas e os doze bytes do registro saem da tecla **iguais** — `0 de 6`.
+> - **`NAT` escolhe a nacionalidade, e ela é guardada fora dos doze bytes**, em
+>   `layout.PLAYER_NATION`, sobrevivendo à saída da tela (o menu mostra
+>   `NAT. BRA`). Um dos dois endereços é `0x800E9450 + 27`, ou seja: o registro
+>   de 12 bytes que este ciclo lê mora dentro de uma estrutura maior.
+> - **O código da nação não é a posição na linha.** Andando os **80** valores e
+>   lendo o byte em cada um: os valores 1 a 54 guardam 0 a 53, e aí o código
+>   **salta 41** — `Iceland` (valor 55) guarda 95, e a linha acaba em 119. Os
+>   códigos 54 a 94 nomeiam algo que a tela não oferece. `Algeria` é o valor 65
+>   e guarda 105. Está em `looks.NATION_CODES`, e o comando reanda a linha
+>   inteira a cada corrida.
+> - **O `data/defaultlook.txt` é a tabela do EDITOR, não do jogo**, e o
+>   cabeçalho dele diz: `TEAM;NAME;…`. São 95 **times** — nações e clubes
+>   juntos (`Inter`, `Bayern`, `Clas. Brazil`, `Euro All Stars`) —, enquanto a
+>   linha `NAT` é a lista de nacionalidades do jogo, com países que o arquivo
+>   não tem (`Senegal`, `Uzbekistan`, `Trin y Tobago`) e nomes cortados pela
+>   largura da célula (`Portuga`, `Netherl`, `Swi`, `Cze`). Casadas **por
+>   nome** (`looks.nation_lines`): **44** dos 80 valores da tela têm linha, 12
+>   deles por truncamento; **36** não têm; e **51** linhas do arquivo não têm
+>   valor na tela.
+> - **Casar por índice é o erro caro, e ele tem cara de certo.** Pulando
+>   `Unknown` e pareando por posição, a correspondência **vale até o valor 16**
+>   (`Sweden`) e depois desanda: no 17 o jogo diz `Finland` e a linha do
+>   arquivo é `Islanda`, e mais adiante `Algeria` receberia a linha do
+>   **Arsenal**. Medido: 2 times trocados e 35 valores recebendo uma linha que
+>   não é deles.
+>
+> O controle da medição é a mesma nação alcançada duas vezes a partir do
+> `load_state`, que tem de ler igual; e o vermelho existe — com a regra ingênua
+> (`código = índice − 1` até o fim) plantada numa cópia da árvore, a corrida
+> acusa **25 problemas**, um por valor depois do salto.
+>
+> **O que fica aberto:** se alguma outra tela do jogo aplica um default a
+> partir da nacionalidade (criar jogador novo, `RESET`, `BASE COPY` do menu de
+> edição) não foi medido — esta task mediu a tela `LOOKS SET`. E o que a tela
+> mostra para um código que não é de nação: no `load_state` as duas cópias do
+> byte nem concordam (253 e 139) e a linha diz `Unknown`, mas não se escreveu
+> valor nenhum na RAM para varrer o resto.
+
 **(j) De onde vem a pose — o maior risco.** Três candidatos, e nenhum medido:
 o `ANIME.BIN` lido a cada quadro; matrizes calculadas em código a partir de
 poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de

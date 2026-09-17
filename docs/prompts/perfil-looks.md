@@ -356,6 +356,27 @@ Não se revertem sem o usuário pedir.
     `oracle.py --keys` **vermelho nas duas frentes**. A regra que fica:
     **toda afirmação sobre a tela fecha contra o emulador**; o gate sem
     emulador cobre a outra metade, e dizer que ele cobre a tela é o erro.
+40. **Diff filtrado pelo número de teclas acha o relógio.** Procurando onde o
+    jogo guarda a nação, a primeira tentativa andou até três nações com três
+    números de teclas diferentes e guardou os bytes que "andaram com o índice":
+    **21 deles**, todos contadores de tempo — continuaram subindo com a tela
+    parada. O jeito que funciona é **duas corridas com o MESMO número de
+    teclas** terminando em valores diferentes: o que conta tempo anda igual nas
+    duas e cai fora sozinho. Medido em 2026-09-17
+    ([`LOOKS-TASK-23`](/docs/tasks/looks/23-default-por-nacionalidade.md)).
+41. **`data/defaultlook.txt` é a tabela do EDITOR, e o cabeçalho dela diz
+    `TEAM`.** São 95 **times** — nações e clubes juntos (`Inter`, `Bayern`,
+    `Clas. Brazil`) —, e a linha `NAT` da tela é a lista de **nacionalidades**
+    do jogo, com 80 valores que o arquivo não cobre e nomes cortados
+    (`Portuga`, `Swi`, `Cze`). Casadas por nome, 44 batem; 36 valores da tela
+    não têm linha e 51 linhas não têm valor. **Casar por índice funciona até o
+    valor 16 e depois entrega a linha de um clube a uma nação** — `Algeria`
+    receberia a do `Arsenal`. E o próprio jogo não numera a linha pela
+    posição: os valores 1 a 54 guardam 0 a 53 e o código então **salta 41**
+    (`looks.NATION_CODES`). Medido em 2026-09-17; este perfil e o `looks.py`
+    diziam, até então, que `DEFAUL` e `NAT` eram "as duas metades do default
+    por nacionalidade" — inferência pelo nome das colunas, e `DEFAUL` é o
+    **botão de confirmar** da tela, que não aplica nada.
 
 ---
 
@@ -427,6 +448,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem, sem venv; o controle roda se houver capturas da 17 | `python tools/looks/corpus.py --score` | — | LOOKS-TASK-18 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo); ~12 min | `python tools/looks/oracle.py --screen` — anda as doze linhas e compara com o `screen.json`; `--screen --write` é o gerador do arquivo | — | LOOKS-TASK-21 |
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |
 
