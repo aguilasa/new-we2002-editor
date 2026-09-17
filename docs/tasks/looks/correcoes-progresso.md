@@ -67,6 +67,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-049](/docs/tasks/looks/CORR-LOOKS-049.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Nas cabeças que não são A1, a pele pinta só a testa e a barba não aparece — os índices emprestados da seção 24 erram | Alta | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | O `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | Média | [ ] pendente | — |
+| [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -132,6 +134,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-049 — o corpus mede errado o índice de cor emprestado da seção 24
 - [x] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
 - [ ] CORR-LOOKS-051 — `missing or invalid MCP-Session-Id` logo depois de o emulador subir
+- [ ] CORR-LOOKS-052 — um controle vermelho por uma propriedade que o gate não tem
+- [ ] CORR-LOOKS-053 — prosa vencida dentro da própria task
 
 ## Detalhes por correção
 
@@ -928,3 +932,35 @@ e o ciclo arquivado, o dele em
 - **Fix:** separar as duas hipóteses por contagem (outro cliente MCP na porta,
   ou a sessão reiniciada na subida) antes de mexer; refazer a chamada em laço
   não é correção
+
+### CORR-LOOKS-052
+
+- **Arquivo com problema:** `tools/looks/cli.py` (`CHECK_IMAGE` e o self-check),
+  o controle `cli-guard-read-not-first`, e a mesma regra na §4.4 do plano, na
+  tabela de gates do perfil e no Log da LOOKS-TASK-19
+- **Sintoma:** "o `modelfile` roda primeiro, senão o disco inglês passaria em
+  silêncio" é regra com controle negativo, e o `cmd_check` roda os oito até o
+  fim e junta os códigos no `combine()` — a ordem não muda o veredito. Com
+  `pieces` primeiro e `modelfile` por último, o disco inglês sai `1 ok, 7
+  failed -- FAILED`, igual à ordem commitada. O controle fica vermelho por
+  asserção literal, não por deixar passar nada, e entra na contagem de guardas
+  exercitadas
+- **Como foi detectado:** lendo `cmd_check`/`combine` e reordenando a lista numa
+  cópia da árvore, com os dois discos
+- **Fix:** tirar a regra de ordem e trocar o controle por um que remova o
+  `modelfile` da lista — o que de fato protege —, ou fazer o `check` parar no
+  primeiro vermelho da guarda para a ordem passar a importar
+
+### CORR-LOOKS-053
+
+- **Arquivo com problema:** `docs/tasks/looks/19-alvos-de-ctest-e-cli.md`, o
+  Contexto e o Objetivo
+- **Sintoma:** o título diz **quatro** alvos e o Objetivo, duas linhas abaixo,
+  **três**; o Contexto apresenta `if(UNIX AND Python3_FOUND)` como convenção
+  para display/venv, que o terceiro critério da mesma task mede como errado
+  neste ciclo. Os dois sem marca de "enunciado original", ao contrário das
+  outras frases velhas do arquivo
+- **Como foi detectado:** `grep` por "três alvos" e `UNIX AND Python3_FOUND`
+  nos documentos do ciclo — o plano e o perfil já estão reconciliados, com data
+- **Fix:** "quatro alvos" no Objetivo, e a convenção do Contexto com a exceção
+  deste ciclo dita na mesma linha
