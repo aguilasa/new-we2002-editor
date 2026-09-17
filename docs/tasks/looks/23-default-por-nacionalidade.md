@@ -113,13 +113,69 @@ linhas do arquivo não têm valor. Pareando por índice — pulando `Unknown` �
 coisa **vale até o valor 16** (`Sweden`) e depois desanda: no 17 o jogo diz
 `Finland` e a linha é `Islanda`, e `Algeria` receberia a linha do **Arsenal**.
 
-### Gates, na árvore de `SHA_DA_TASK`
+### Gates, na árvore de `07f33ea`
 
-*(transcritos abaixo, depois do commit)*
+Tirados **depois** do commit da task, que é a regra do perfil.
+
+```text
+# na arvore de 07f33ea
+$ python tools/looks/selftest.py
+  ..... 73 of 73 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/screen.py --check
+screen.py: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 6 of 6 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/oracle.py --default
+  control: Ireland twice from load_state reads the same row, the same five
+  looks and the same nationality byte [0, 0]
+  the row's 80 value(s) walked: codes 0..119, with the jump at 'Iceland'
+  (53 to 95)
+oracle --default: 0 problem(s); DEFAUL applied a default on 0 of 6 nation(s)
+
+$ python tools/looks/oracle.py --keys "Right,...x42"   # NAT ate Brazil
+  control: the same sequence twice in the game gives the same twelve rows and
+  the same help
+oracle --keys: 0 difference(s) after 42 press(es), across the game,
+screen.json and our window
+```
+
+**O vermelho, na cópia da árvore com a regra ingênua plantada**
+(`NATION_CODES = ((1, 79, -1),)`):
+
+```text
+$ python <copia>/tools/looks/oracle.py --default
+  the row's 80 value(s) walked: codes 0..119, in one run
+  FAIL  Iceland is value 55 of the row and stores 95; looks.NATION_CODES says 54
+  FAIL  Uzbekistan is value 56 of the row and stores 96; ...
+oracle --default: 25 problem(s); DEFAUL applied a default on 0 of 6 nation(s)
+```
 
 ### Arquivos criados/modificados
 
-*(conferidos contra `git show --stat --format= HEAD`)*
+Conferidos contra `git show --stat --format= HEAD`:
+
+- `tools/looks/looks.py` — `NATION_CODES`, `nation_code`/`nation_index`,
+  `nation_lines`/`nation_by_index`, os casos de self-check, e a **correção**
+  do que o módulo afirmava sobre `DEFAUL` e `NAT` (docstring e `UNSTORED`).
+- `tools/looks/layout.py` — `PLAYER_NATION`, com o método que o achou e o
+  falso positivo que ele evita.
+- `tools/looks/oracle.py` — `--default`: a linha inteira andada, as seis
+  nações, o controle e o resumo escrito sobre os trechos que a regra declara.
+- `tools/looks/controls.py` — dois controles plantados novos
+  (`looks-nation-code-is-the-index`, `looks-nation-pairs-any-prefix`).
+- `docs/PLAN-LOOKS-PY.md` — §10.3 (r) com o veredito datado e o que ficou
+  aberto.
+- `docs/prompts/perfil-looks.md` — armadilhas 40 e 41, e a linha do
+  `--default` na tabela de gates.
+- `docs/tasks/looks/progresso.md` e este arquivo.
 
 ### Problemas encontrados
 
