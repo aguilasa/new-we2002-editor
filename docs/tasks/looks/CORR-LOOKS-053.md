@@ -3,7 +3,7 @@ id: CORR-LOOKS-053
 title: "Correção: a LOOKS-TASK-19 diz \"quatro alvos\" no título e \"três\" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -98,17 +98,51 @@ repositório e dizer, na mesma linha, que **neste ciclo** o de display não é
 
 ## Verificação
 
-- [ ] nenhuma linha sem marca de "enunciado original" diz três alvos ou
+- [x] nenhuma linha sem marca de "enunciado original" diz três alvos ou
       `if(UNIX …)` como regra deste ciclo
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-17
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `54dba19`: as linhas 20 (`if(UNIX AND Python3_FOUND)`
+como convenção) e 37 ("os três alvos") da LOOKS-TASK-19 sem marca nenhuma.
 
-**Arquivos criados/modificados:**
+- **Objetivo:** "os quatro alvos", com a nota de que dizia "três" até
+  2026-09-17, contra o título.
+- **Contexto:** a convenção do repositório fica — o `mcr_ui` está mesmo sob
+  `if(UNIX AND Python3_FOUND)` —, e a mesma linha diz que **neste ciclo não**:
+  os quatro de `looks` estão no `if(Python3_FOUND)`, porque sob `if(UNIX …)` o
+  `looks_ui` sumiria da máquina Windows e `ctest -R looks_ui` sairia zero,
+  apontando o critério do `looks_ui`, que é onde isso foi medido.
+
+### Gates
+
+```text
+$ grep -n "três alvos\|UNIX AND Python3_FOUND" docs/tasks/looks/19-alvos-de-ctest-e-cli.md
+20:  sob `if(UNIX AND Python3_FOUND)` — **no repositório**, onde o `mcr_ui` está
+65:      `if(UNIX AND Python3_FOUND)` e isso está **medido como errado**: a janela
+```
+
+Nenhuma linha diz "três alvos". A 20 nomeia a convenção como do repositório e
+nega-a para o ciclo na mesma frase; a 65 é o critério que registra a medição.
+
+```text
+$ python tools/check_tasks.py
+check_tasks: 123 task(s), ok
+```
+
+`roms/` intocada (só documentação).
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `docs/tasks/looks/19-alvos-de-ctest-e-cli.md` — Contexto e Objetivo
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

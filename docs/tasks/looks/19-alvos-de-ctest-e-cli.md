@@ -17,7 +17,12 @@ status: concluído
 - A convenção do repositório é **um alvo por faixa de custo**: um obrigatório
   que não precisa de nada e nunca pula; os dependentes de fixture com
   `SKIP_RETURN_CODE 77` e a variável nomeada na mensagem; os de display/venv
-  sob `if(UNIX AND Python3_FOUND)`.
+  sob `if(UNIX AND Python3_FOUND)` — **no repositório**, onde o `mcr_ui` está
+  assim. **Neste ciclo não:** os quatro de `looks` ficam no `if(Python3_FOUND)`,
+  porque sob `if(UNIX …)` o `looks_ui` sumiria da máquina Windows onde roda e
+  `ctest -R looks_ui` sairia zero — medido no critério do `looks_ui` abaixo. *(Até
+  2026-09-17 esta linha trazia só a convenção, e lida de cima era instrução —
+  [`CORR-LOOKS-053`](/docs/tasks/looks/CORR-LOOKS-053.md).)*
 
 ---
 
@@ -34,7 +39,8 @@ status: concluído
 ## Objetivo
 
 `tools/looks/cli.py` responde pelas perguntas do projeto, e o `ctest` registra
-os três alvos.
+os quatro alvos. *(Dizia "três" até 2026-09-17, contra o título —
+[`CORR-LOOKS-053`](/docs/tasks/looks/CORR-LOOKS-053.md).)*
 
 ---
 

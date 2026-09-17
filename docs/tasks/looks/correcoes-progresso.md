@@ -68,7 +68,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-050](/docs/tasks/looks/CORR-LOOKS-050.md) | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | O `corpus.py` julga a pele 47 de 47 com doze peles desenhadas erradas, e o erro que ele achou não o deixa vermelho | Média | [x] concluída | 2026-09-16 |
 | [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | O `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [x] concluída | 2026-09-17 |
-| [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -135,7 +135,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-050 — o gate do corpus não fica vermelho no erro sistemático que existe para achar
 - [x] CORR-LOOKS-051 — `missing or invalid MCP-Session-Id` logo depois de o emulador subir
 - [x] CORR-LOOKS-052 — um controle vermelho por uma propriedade que o gate não tem
-- [ ] CORR-LOOKS-053 — prosa vencida dentro da própria task
+- [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
 
 ## Detalhes por correção
 
