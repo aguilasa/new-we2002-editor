@@ -232,7 +232,22 @@ oracle --keys: 2 difference(s) after 19 press(es), ...  # exit 1
    Ele apertava `Left` com o cursor noutra linha e concluía que a linha
    travava; passaria numa tela cujas linhas não travassem nada. O cursor vai
    para a linha **antes** da caminhada.
-5. **A cópia da árvore não acha os save states nem o venv.** O `oracle.py` de
+5. **Trocar o default de um alvo deixa duas opções órfãs, e elas ficam
+   caladas.** Com a tela como default do `.\make.ps1 looks`, `-Figure 1` e
+   `--wireframe` **sozinhos** — que antes abriam o visualizador de uma tupla e
+   faziam o que dizem — passaram a ser aceitos e ignorados: a tela não tem
+   câmera orbital nem prateleira, e o `app.py` engole a opção sem uma palavra.
+   O alvo agora **recusa** os dois, dizendo qual é o equivalente na tela
+   (`-State 1` é o goleiro) e como chamar o visualizador. Achado por pergunta
+   do usuário depois do commit da task, e consertado em `4f5c2e1`.
+
+   **E o primeiro guarda não disparou, pela armadilha do escopo:** dentro de
+   uma função, `$PSBoundParameters` é o **da função**, que não declara
+   parâmetro nenhum — então `ContainsKey('Figure')` é sempre falso ali. O
+   efeito foi o pior possível: a recusa não veio, o alvo abriu com `--visible`
+   e **a janela apareceu na tela do usuário**, que é exatamente o que a regra
+   do `CLAUDE.md` proíbe. Quem lê `-Figure` agora é o escopo do script.
+6. **A cópia da árvore não acha os save states nem o venv.** O `oracle.py` de
    uma cópia resolve `work/` a partir dela, então o controle vermelho precisa
    de `WE2002_LOOKS_STATES` apontado e de uma junção para o venv — e a junção
    se desfaz pelo link, nunca por `rm -rf`, que apagaria o venv de verdade.

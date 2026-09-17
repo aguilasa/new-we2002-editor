@@ -152,6 +152,14 @@ function Resolve-Absoluto([string]$p) {
 $IMG      = Resolve-Absoluto $Image
 $WORK_DIR = Resolve-Absoluto $Work
 
+# Quem digitou -Figure, e nao o valor dele: 0 e um valor legitimo, entao
+# `$Figure -eq 0` nao distingue "pediu o jogador de linha" de "nao pediu
+# nada". **Tem de ser lido AQUI**, no escopo do script: dentro de uma funcao
+# `$PSBoundParameters` e o da funcao, que nao tem parametro nenhum -- medido em
+# 2026-09-17, e o efeito foi o guarda de `Invoke-Looks` nao disparar e a janela
+# abrir na tela do usuario.
+$FIGURE_PEDIDA = $PSBoundParameters.ContainsKey('Figure')
+
 # ------------------------------------------------------------- emulador ----
 
 $GAMES_ROOT = Resolve-Absoluto $Games
@@ -580,6 +588,9 @@ function Invoke-Help {
     Write-Host '                o arame, S a prateleira; -Figure 1 o goleiro'
     Write-Host '                O resto vai direto ao app.py (--wireframe,'
     Write-Host '                --piece head, --no-shelf ...)'
+    Write-Host '                Opcao de visualizador sem -Tuple e RECUSADA,'
+    Write-Host '                nao ignorada: a tela nao tem camera nem'
+    Write-Host '                prateleira, e calar seria abrir outra coisa'
     Write-Host '  looks-venv    cria work\venv-looks com PySide6 (~246 MB)'
     Write-Host ''
     Write-Host 'PES2 -- outro jogo, outro projeto, e nao tem editor:'
@@ -826,6 +837,30 @@ Aponte a trilha de dados JAPONESA com -LooksImage <bin> ou WE2002_LOOKS_IMAGE.
         $argumentos = @($LOOKS_APP, '--image', $img, '--looks', $Tuple,
                         '--figure', "$Figure", '--visible')
     } else {
+        # **Opcao de visualizador sem -Tuple e RECUSADA, nao ignorada.** Ate a
+        # LOOKS-TASK-22 o alvo so tinha o visualizador de tupla, entao
+        # `-Figure 1` e `--wireframe` sozinhos FAZIAM alguma coisa; agora o
+        # default e a tela, que nao tem camera nem prateleira, e passa-los
+        # calado deixaria o alvo abrir outra coisa sem dizer. A regra do
+        # .DESCRIPTION: dizer por que.
+        $soDoVisualizador = @('--wireframe', '--no-shelf', '--piece',
+                              '--yaw', '--pitch', '--size')
+        $presentes = @($Resto | Where-Object { $soDoVisualizador -contains $_ })
+        if ($FIGURE_PEDIDA) {
+            throw @"
+-Figure e do visualizador de uma tupla, e sem -Tuple o alvo abre a TELA.
+Na tela quem escolhe a figura e o save state: -State 1 e o goleiro (placa
+GK), -State 2 o jogador de linha (CB).
+Para o visualizador: .\make.ps1 looks -Tuple $($Tuple ? $Tuple : 'A-A1-A-A-A') -Figure $Figure
+"@
+        }
+        if ($presentes) {
+            throw @"
+$($presentes -join ', ') e do visualizador de uma tupla -- a tela nao tem
+camera orbital nem prateleira, e o app.py ignoraria a opcao em silencio.
+Para o visualizador: .\make.ps1 looks -Tuple A-A1-A-A-A $($presentes -join ' ')
+"@
+        }
         $argumentos = @($LOOKS_APP, '--image', $img, '--state', "$State",
                         '--visible')
     }
