@@ -111,13 +111,15 @@ os três alvos.
 `modelfile.py --check-image`, e sete módulos ganharam o seu depois disso sem
 entrar em alvo nenhum. A decisão que esta task pedia — os dois
 `--check-image` ou um alvo terceiro — tinha envelhecido para oito. O
-`cli.py check` roda os oito, o `modelfile` primeiro, e a lista **se confere
+`cli.py check` roda os oito, até o fim, e a lista **se confere
 contra os fontes** no self-check, porque a lista escrita à mão é exatamente o
 que deixou sete de fora. Pulo parcial falha; nada rodado não é verde.
 
 **Contra o disco inglês, sete falham e o `pieces` passa** — e está certo: ele
-só lê geometria, que é igual nos dois. É a razão medida de o `modelfile` ir
-primeiro.
+só lê geometria, que é igual nos dois. É a razão medida de o `modelfile`
+**estar** no `check`. *(Até 2026-09-17 esta frase dizia "de o `modelfile` ir
+primeiro", e a ordem não muda o veredito —
+[`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md).)*
 
 **O `--check-live` virou alvo porque é barato e se recusa cedo.** Os quatro
 pré-requisitos são conferidos antes de subir processo; com tudo no lugar, 8,9 s.
@@ -186,7 +188,9 @@ O `pes2_boot` ganhou `RESOURCE_LOCK` e é `if(UNIX)`: não existe neste build.
 
 Controles de 60 para 63, cada um conferido vermelho pela **própria** causa:
 `cli-check-forgets-a-module` (*on disc but not listed: ['scene']*),
-`cli-guard-read-not-first` (*modelfile runs first*) e `cli-partial-skip-passes`
+`cli-guard-read-not-first` (*modelfile runs first* — trocado pela
+[`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md) por
+`cli-guard-read-left-out`, que tira o `modelfile` da lista) e `cli-partial-skip-passes`
 (*a pass with a skip beside it is NOT a pass*).
 
 ### Problemas encontrados, e para onde foram

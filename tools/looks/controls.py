@@ -614,13 +614,14 @@ CONTROLS = (
         "tasks, when it ran modelfile alone",
     ),
     Control(
-        "cli-guard-read-not-first", "cli.py", "module constant",
-        "    \"modelfile\",\n    \"texture\",",
-        "    \"texture\",\n    \"modelfile\",",
+        "cli-guard-read-left-out", "cli.py", "module constant",
+        "    \"modelfile\",\n",
+        "",
         ("cli",),
-        "modelfile's first read is the Japanese-only file through the guard; "
-        "run later, geometry checks pass on the English disc before anything "
-        "notices (CORR-LOOKS-012)",
+        "modelfile out of the check: the Japanese-only read through the guard "
+        "leaves the image gate, and pointed at the English disc the run leans "
+        "on the others to notice. Its POSITION in the list was guarded here "
+        "until CORR-LOOKS-052, and moving it changes no verdict",
     ),
     Control(
         "cli-partial-skip-passes", "cli.py", "combine",

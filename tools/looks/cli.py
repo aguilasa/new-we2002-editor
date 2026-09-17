@@ -33,10 +33,14 @@ list is not trusted to stay complete either: the self-check finds every module
 that answers `--check-image` by reading the sources, and fails when the two
 disagree.
 
-`modelfile` runs FIRST, and that is not alphabetical: its first read is a
-Japanese-only file through the guard.  Geometry is identical on both discs, so
-without that read a run pointed at the English image would pass the geometry
-checks before anything noticed (CORR-LOOKS-012).
+`modelfile` has to be IN the run, and where it runs does not matter.  Its first
+read is a Japanese-only file through the guard, and geometry is identical on
+both discs, so a run without it pointed at the English image would lean on the
+others to notice (CORR-LOOKS-012) -- measured, six of them do and `pieces`
+does not.  `check` runs all eight to the end and `combine` fails on any
+failure, so the order changes nothing: reordered with `modelfile` LAST, the
+English disc still comes out `1 ok, 7 failed -- FAILED`.  This said "runs
+FIRST" until CORR-LOOKS-052, and a control guarded the position.
 
 **A partial skip is a failure.**  With the image given, a module that still
 answers 77 is missing something the others are not, and eight results with a
@@ -78,9 +82,10 @@ CHECK_IMAGE = (
 )
 """Every module with a `--check-image`, in the order `check` runs them.
 
-`modelfile` first, for the guard read described above; the rest in dependency
-order, so the first failure printed is the lowest one.  The self-check compares
-this with `image_checkers()` and fails on any difference.
+The order is for reading: dependency order, so the first failure printed is the
+lowest one.  It is not a guard -- `check` runs every module to the end.  What
+guards is MEMBERSHIP: the self-check compares this with `image_checkers()` and
+fails on any difference, and asserts `modelfile` by name (CORR-LOOKS-052).
 """
 
 FLAG = "--check-image"
@@ -252,8 +257,8 @@ def _checks(c) -> None:
        "on disc but not listed: %s; listed but not on disc: %s"
        % (sorted(found - set(CHECK_IMAGE)), sorted(set(CHECK_IMAGE) - found)))
     ok("and none is listed twice", len(CHECK_IMAGE) == len(set(CHECK_IMAGE)))
-    ok("modelfile runs first -- its first read is the guard's",
-       CHECK_IMAGE[:1] == ("modelfile",), "%r" % (CHECK_IMAGE[:1],))
+    ok("modelfile is in the run -- its first read is the guard's",
+       "modelfile" in CHECK_IMAGE, "%r" % (CHECK_IMAGE,))
 
     ok("eight passes are a pass", combine([0] * 8) == 0)
     ok("eight skips are a skip", combine([SKIP] * 8) == SKIP)

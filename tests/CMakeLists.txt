@@ -220,9 +220,10 @@ if(Python3_FOUND)
     # this cycle exists to make impossible. Without the variable it skips with
     # 77 and names it.
     #
-    # Since LOOKS-TASK-19 it runs `cli.py check`, which is modelfile's check
-    # FIRST and then the seven other modules that grew a --check-image of their
-    # own (texture, atlas, skin, looks, assembly, pieces, scene). Until then
+    # Since LOOKS-TASK-19 it runs `cli.py check`: modelfile's check and the
+    # seven other modules that grew a --check-image of their own (texture,
+    # atlas, skin, looks, assembly, pieces, scene), all run to the end, so the
+    # order is for reading and not a guard (CORR-LOOKS-052). Until then
     # this target ran one of eight, and green here said nothing about the
     # palette list, the atlas or the assembly table. The list is not trusted to
     # stay whole: cli.py's self-check reads the sources for every module that

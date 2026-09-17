@@ -3,7 +3,7 @@ id: CORR-LOOKS-052
 title: "Correção: \"o `modelfile` roda primeiro\" é regra com controle, e a ordem não muda o veredito do `cli.py check`"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -109,20 +109,86 @@ A frase de ordem sai (ou passa a dizer o que a opção 2 fizer), e a medição d
 
 ## Verificação
 
-- [ ] nenhum controle fica vermelho por uma propriedade que não muda o
+- [x] nenhum controle fica vermelho por uma propriedade que não muda o
       veredito — conferido reordenando a lista e rodando o disco inglês
-- [ ] tirar o `modelfile` do `CHECK_IMAGE` fica vermelho
-- [ ] `python tools/looks/cli.py check <inglesa .bin>` continua FAILED, e
+- [x] tirar o `modelfile` do `CHECK_IMAGE` fica vermelho
+- [x] `python tools/looks/cli.py check <inglesa .bin>` continua FAILED, e
       `<japonesa>` continua ok
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-17
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `54dba19`: numa cópia da árvore com `pieces` primeiro e
+`modelfile` por último, o disco inglês dá `1 ok, 0 skipped, 7 failed -- FAILED`
+e o japonês `8 ok`, iguais à ordem commitada.
 
-**Arquivos criados/modificados:**
+**Opção 1 da CORR — tirar a regra.** O `cmd_check` roda os oito até o fim e o
+`combine()` falha em qualquer falha; nenhuma corrida precisa parar cedo.
+
+- `cli.py` — o parágrafo "`modelfile` runs FIRST" virou "`modelfile` has to be
+  IN the run, and where it runs does not matter", com a medição do `pieces`
+  como razão de **estar** e a reordenação como prova de que a posição não muda
+  o veredito. O docstring do `CHECK_IMAGE` diz que a ordem é de leitura e que
+  quem guarda é a **pertença**. O assert `CHECK_IMAGE[:1] == ("modelfile",)`
+  virou `"modelfile" in CHECK_IMAGE`.
+- `controls.py` — `cli-guard-read-not-first` saiu; entrou
+  `cli-guard-read-left-out`, que **tira** o `modelfile` da lista.
+- `tests/CMakeLists.txt` — o comentário do `looks_image` dizia
+  "modelfile's check FIRST"; agora diz que os oito rodam até o fim e a ordem é
+  de leitura. Arquivo quente de cinco projetos: só o comentário mudou.
+- `PLAN-LOOKS-PY.md` §4.4, `perfil-looks.md` (tabela de gates) e
+  `19-alvos-de-ctest-e-cli.md` — a frase de ordem trocada no lugar, com a data
+  e o que dizia; a medição do `pieces` ficou, como razão de o `modelfile`
+  estar no `check`.
+
+### Gates
+
+```text
+$ python tools/looks/cli.py check C:/games/ps1/work/we2002-english.bin
+cli check: 8 module(s), 1 ok, 0 skipped, 7 failed -- FAILED
+$ python tools/looks/cli.py check roms/japanese-shift-jis.bin
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+
+# cópia da árvore, CHECK_IMAGE com o modelfile por ÚLTIMO
+['texture', 'atlas', 'skin', 'looks', 'assembly', 'pieces', 'scene', 'modelfile']
+  FAIL  texture    exit 1   texture --check-image: 1 failure(s)
+  FAIL  atlas      exit 1   atlas --check-image: 1 failure(s)
+  FAIL  skin       exit 1   layout.WrongDisc: /BIN/DAT2D.BIN ...
+  FAIL  looks      exit 1   layout.WrongDisc: /SELECT.BIN ...
+  FAIL  assembly   exit 1   layout.WrongDisc: /BIN/DAT2D.BIN ...
+  ok    pieces     exit 0   pieces --check-image: ok
+  FAIL  scene      exit 1   layout.WrongDisc: /BIN/DAT2D.BIN ...
+  FAIL  modelfile  exit 1   modelfile --check-image: 1 failure(s)
+cli check: 8 module(s), 1 ok, 0 skipped, 7 failed -- FAILED
+$ python <cópia>/tools/looks/cli.py --check
+cli.py: 0 failure(s)            # nenhum controle ficaria vermelho pela ordem
+
+$ python tools/looks/controls.py --only cli-guard-read-left-out
+  RED    cli-guard-read-left-out    cli.py :: module constant
+$ python tools/looks/selftest.py --quiet
+  ..... 64 of 64 controls red
+looks_selftest: 0 failure(s)
+$ python tools/check_tasks.py
+check_tasks: 123 task(s), ok
+```
+
+`roms/` intocada (só leitura).
+
+### Problemas encontrados
+
+- O primeiro literal do controle novo saiu com o `\n` expandido pelo shell e
+  quebrou o `controls.py` (`SyntaxError`); consertado pelo editor antes de
+  qualquer gate.
+
+### Arquivos criados/modificados
+
+- `tools/looks/cli.py`, `tools/looks/controls.py`
+- `tests/CMakeLists.txt` — um comentário
+- `docs/PLAN-LOOKS-PY.md`, `docs/prompts/perfil-looks.md`,
+  `docs/tasks/looks/19-alvos-de-ctest-e-cli.md`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

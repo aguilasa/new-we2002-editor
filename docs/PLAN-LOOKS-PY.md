@@ -1388,12 +1388,17 @@ confiança: o self-check dele lê os fontes atrás de todo módulo que responde
 `--check-image` e falha se algum não estiver na corrida. Três regras do
 agregador, cada uma com controle negativo:
 
-- **o `modelfile` roda primeiro**, porque a primeira leitura dele é um arquivo
-  **só-japonês** pela guarda. Geometria é idêntica nos dois discos, e sem essa
-  leitura apontar a variável para o disco inglês passaria em silêncio
+- **o `modelfile` está na corrida**, porque a primeira leitura dele é um
+  arquivo **só-japonês** pela guarda. Geometria é idêntica nos dois discos, e
+  sem essa leitura o disco inglês dependeria dos outros para ser notado
   ([`CORR-LOOKS-012`](/docs/tasks/looks/CORR-LOOKS-012.md)). Medido: contra o
   `.bin` inglês, **sete dos oito falham e o `pieces` passa** — ele só lê
-  geometria, e a resposta dele está certa nos dois discos;
+  geometria, e a resposta dele está certa nos dois discos. **A posição não
+  importa:** o `check` roda os oito até o fim, e com o `modelfile` por último o
+  veredito é o mesmo, `1 ok, 7 failed -- FAILED`. Esta regra dizia "o
+  `modelfile` roda **primeiro**" até 2026-09-17, com um controle da posição
+  ([`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); o controle agora
+  tira o `modelfile` da lista;
 - **pulo parcial é falha**: com a imagem dada, um módulo que ainda responde 77
   está sem algo que os outros têm, e oito resultados com um pulo no meio não
   são o verde de oito. Só os oito pulando é pulo;
