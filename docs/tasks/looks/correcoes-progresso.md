@@ -69,6 +69,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-051](/docs/tasks/looks/CORR-LOOKS-051.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | O `looks_live` perde a sessão MCP no primeiro `pause`, uma vez em catorze corridas | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-052](/docs/tasks/looks/CORR-LOOKS-052.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | "O `modelfile` roda primeiro" é regra com controle, e a ordem não muda o veredito do `cli.py check` | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-053](/docs/tasks/looks/CORR-LOOKS-053.md) | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | A LOOKS-TASK-19 diz "quatro alvos" no título e "três" no objetivo, e mantém como convenção o `if(UNIX …)` que ela mediu errado | Baixa | [x] concluída | 2026-09-17 |
+| [CORR-LOOKS-054](/docs/tasks/looks/CORR-LOOKS-054.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | O `screen.json` guarda o título `LOOKS SET`, a tela desenha `S SET`, e nenhum gate compara os dois | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -136,6 +137,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-051 — `missing or invalid MCP-Session-Id` logo depois de o emulador subir
 - [x] CORR-LOOKS-052 — um controle vermelho por uma propriedade que o gate não tem
 - [x] CORR-LOOKS-053 — prosa vencida dentro da própria task
+- [ ] CORR-LOOKS-054 — o título da tela não passa pela conferência contra os glifos
 
 ## Detalhes por correção
 
@@ -964,3 +966,17 @@ e o ciclo arquivado, o dele em
   nos documentos do ciclo — o plano e o perfil já estão reconciliados, com data
 - **Fix:** "quatro alvos" no Objetivo, e a convenção do Contexto com a exceção
   deste ciclo dita na mesma linha
+
+### CORR-LOOKS-054
+
+- **Arquivo com problema:** `tools/looks/screen.json`, `tools/looks/oracle.py`
+- **Sintoma:** a tabela guarda `"title": "LOOKS SET"` nos dois slots, e o quadro
+  da tela desenha `S SET` na âncora do mesmo objeto; a conferência
+  decode-contra-glifo cobre as 34 strings das linhas e deixa título, placa e
+  nome da camisa de fora, então `oracle.py --screen` dá `0 difference(s)` com a
+  divergência presente
+- **Como foi detectado:** recorte nativo de 512×240 do `work/looks-shots/vram-0.png`
+  na faixa `y=0..70`, contra o `title` do `screen.json`
+- **Fix:** título, placa e nome da camisa na mesma conferência das linhas; onde
+  diferirem, o `screen.json` guarda o que a tela desenha, com o texto do objeto
+  ao lado e o resíduo nomeado, e a §10.3 (q) do plano registra a diferença
