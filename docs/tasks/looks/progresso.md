@@ -62,7 +62,7 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
 | [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
 | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | Incógnita (q) — a tela `LOOKS SET` medida no jogo: texto de cada valor, ajuda, cursor e valores iniciais | 8 | 20 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | 21 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | A tela `LOOKS SET` na janela — doze linhas trocáveis, e o boneco redesenhado a cada troca | 8 | 21 | ✅ Concluído | 2026-09-17 | ⬜ pendente |
 | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | Incógnita (r) — `DEFAUL` e `NAT`: a nação escolhida e o default que ela aplica | 8 | 22 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | 24 | ⬜ Pendente | — | — |
@@ -252,7 +252,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 ### Fase 8 — a tela (v2)
 
 - [x] O texto de cada valor, a ajuda, o cursor e os valores iniciais dos dois slots medidos no jogo — `tools/looks/screen.json`, escrito e remedido por `oracle.py --screen`.
-- [ ] A janela é a tela `LOOKS SET`: doze linhas trocáveis, o boneco redesenhado a cada troca, e a mesma sequência de teclas dando o mesmo texto que no jogo.
+- [x] A janela é a tela `LOOKS SET`: doze linhas trocáveis, o boneco redesenhado a cada troca, e a mesma sequência de teclas dando o mesmo texto que no jogo — `oracle.py --keys`, 0 diferença nos dois slots, com o controle do jogo contra si mesmo antes.
 - [ ] `NAT` e `DEFAUL` aplicam o default que o jogo aplica.
 
 ### Fase 9 — montado (v2)

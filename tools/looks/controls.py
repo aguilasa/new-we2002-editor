@@ -680,6 +680,25 @@ CONTROLS = (
         "in it kills the print -- `--report` on the third row, and the walk in "
         "the message of its own failure",
     ),
+    Control(
+        "screen-row-walks-past-its-end", "screen.py", "step",
+        "        if index + 1 < len(texts):\n            return index + 1\n"
+        "        return 0 if table[\"rows\"][row][\"right\"] == \"wraps\" else index",
+        "        return (index + 1) % len(texts)",
+        ("screen",),
+        "every row wrapping, where the walk measured twelve that lock: a "
+        "window built on it answers the press the game ignores, and the two "
+        "drift apart from the first end reached",
+    ),
+    Control(
+        "screen-help-honest-from-the-first-frame", "screen.py", "help_text",
+        "        if not self.pressed:\n            return self.table[\"help_on_load\"]",
+        "        if False:\n            return self.table[\"help_on_load\"]",
+        ("screen",),
+        "the help box naming the row before any button was pressed: the game "
+        "shows the previous menu's `Visual` until the first press (trap 35), "
+        "and a window that improves on that disagrees with it on frame one",
+    ),
 )
 
 BY_ID = {c.id: c for c in CONTROLS}

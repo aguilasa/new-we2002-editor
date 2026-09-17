@@ -53,6 +53,7 @@ Usage:
 
 from __future__ import annotations
 
+import ast
 import os
 import shutil
 import struct
@@ -65,6 +66,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import harness  # noqa: E402
 import layout  # noqa: E402
+import screen  # noqa: E402
 
 SKIP = 77
 LOOKS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -134,6 +136,14 @@ what beard F draws -- a refusal tuple has to be one the table still refuses,
 or the gate reddens a working viewer.  The gate demands
 exit 2 and NO file: a refusal that still writes a picture would be drawn from
 something, and that something would be invented.
+"""
+
+REFUSED_TEXT = "H1 TYPE"
+"""What the game writes for the hair style the table refuses.
+
+The text, not the label: `REFUSED` above is a tuple this gate spells, and this
+is what the SCREEN shows for the same style -- measured, and the difference
+between the two is the whole reason `screen.json` exists.
 """
 
 PIECE = "head"
@@ -406,10 +416,17 @@ def environment() -> dict:
 
 
 def run_app(python: str, app: str, args: list, env: dict):
-    """(exit code, output) of one app run, or (None, output) when it hung."""
+    """(exit code, output) of one app run, or (None, output) when it hung.
+
+    Decoded as UTF-8 and not by the console's own codec: the help of a row
+    carries the button glyph, this machine's default is cp1252, and a gate that
+    died reading its subject's output would be red for the one cause that says
+    nothing about the window (CORR-LOOKS-055).
+    """
     try:
         done = subprocess.run([python, app] + args, env=env,
-                              capture_output=True, text=True, timeout=TIMEOUT)
+                              capture_output=True, text=True, timeout=TIMEOUT,
+                              encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
         return (None, "did not exit within %ds" % TIMEOUT)
     return (done.returncode, done.stdout + done.stderr)
@@ -538,6 +555,202 @@ def measure(python: str, app: str, where: str, env: dict) -> tuple:
     return (shots, theirs, bad, "")
 
 
+# ---- the screen, judged by key --------------------------------------------
+
+TUPLE_ROWS = ("SKIN", "HAIR", "H.COL", "FACE", "H.F.COL.")
+"""The five rows a press of which has to reach the figure.
+
+They are the five of `looks.TUPLE_ORDER`, and the gate spells them here rather
+than importing that list so that a row silently dropped from the tuple shows up
+as a disagreement instead of as two files agreeing with each other.
+"""
+
+
+def read_screen(output: str) -> dict:
+    """The screen's report out of `app.py`, as a dict, or {} if it is not there.
+
+    Parsed, never reconstructed: these are the window's own words about what it
+    draws, and the whole judgement below is that they agree with `screen.py`.
+    """
+    seen: dict = {"rows": {}}
+    for line in output.splitlines():
+        text = line.strip()
+        if text.startswith("screen: slot "):
+            # Cut at the two field names and not by splitting on ", ": the
+            # help box carries the refusal sentence when there is one, commas
+            # and all, and a split ate it the first time this ran.
+            head, _, rest = text[len("screen: slot "):].partition(", cursor ")
+            seen["slot"] = head
+            where, _, helped = rest.partition(", help ")
+            seen["cursor"] = where
+            if helped:
+                seen["help"] = ast.literal_eval(helped)
+        elif text.startswith("row "):
+            name, _, value = text[len("row "):].partition(" = ")
+            seen["rows"][name.strip()] = ast.literal_eval(value)
+        elif text.startswith("tuple "):
+            head, _, built = text[len("tuple "):].partition(", scene built ")
+            seen["tuple"] = head
+            seen["builds"] = int(built.split()[0]) if built else None
+        elif text.startswith("presses "):
+            seen["presses"] = text[len("presses "):]
+        elif text.startswith("refused: "):
+            seen["refused"] = text[len("refused: "):]
+        elif text.startswith("plate "):
+            parts = text.split(", ")
+            seen["plate"] = parts[0][len("plate "):]
+            for part in parts[1:]:
+                if part.startswith("title "):
+                    seen["title"] = ast.literal_eval(part[len("title "):])
+    return seen
+
+
+def expected(table: dict, slot: int, buttons: list) -> dict:
+    """The same presses through `screen.py`, which is what the window is
+    judged against."""
+    state = screen.State(table, slot)
+    moved = state.press_all(buttons)
+    return {"slot": str(slot), "cursor": state.row, "help": state.help_text(),
+            "rows": state.texts(), "tuple": state.tuple_text(),
+            "presses": "".join("+" if one else "." for one in moved),
+            "plate": state.plate(), "title": state.title()}
+
+
+def judge_walk(python: str, app: str, env: dict, table: dict, slot: int,
+               buttons: list, what: str) -> list:
+    """One key sequence into the window, against the same one into `screen.py`."""
+    code, output = run_app(python, app,
+                           ["--state", str(slot), "--keys", ",".join(buttons),
+                            "--smoke"], env)
+    if code != 0:
+        return ["%s: app.py exited %s -- %s" % (what, code, output.rstrip())]
+    seen = read_screen(output)
+    if not seen.get("rows"):
+        return ["%s: app.py printed no screen report" % what]
+    want = expected(table, slot, buttons)
+    bad = []
+    for name in ("cursor", "help", "tuple", "presses", "plate", "title"):
+        if seen.get(name) != want[name]:
+            bad.append("%s: the window says %s %r and screen.py says %r"
+                       % (what, name, seen.get(name), want[name]))
+    for name, text in sorted(want["rows"].items()):
+        if seen["rows"].get(name) != text:
+            bad.append("%s: the window shows %s as %r and the game writes %r"
+                       % (what, name, seen["rows"].get(name), text))
+    return bad
+
+
+def judge_keys(python: str, app: str, env: dict) -> list:
+    """Every row walked to both ends, by key, against the measured table.
+
+    This is the judgement LOOKS-TASK-22 exists for, and it is stronger than
+    "the window did not crash" in one specific way: the window prints what it
+    DRAWS -- its own state, its own text, its own count of figures built -- and
+    every line of it is compared with a walk of `screen.py` that shares no code
+    with the widget.  A window that did its own arithmetic about where a press
+    lands would agree with itself and disagree here.
+    """
+    table = screen.load()
+    bad = []
+    for slot in (2, 1):
+        for name in table["order_of_rows"]:
+            index = table["order_of_rows"].index(name)
+            start = table["order_of_rows"].index(table["cursor_on_load"])
+            steps = (index - start) % len(table["order_of_rows"])
+            to_row = ["Down"] * steps
+            # Left to one end and Right to the other, one press further than
+            # the row is long: the extra press is what tells a lock from a
+            # wrap, and it is the press this gate is here for.
+            walk = (to_row + screen.walk_to_end(table, name, "Left")
+                    + screen.walk_to_end(table, name, "Right"))
+            bad += judge_walk(python, app, env, table, slot, walk,
+                              "slot %d, %s to both ends" % (slot, name))
+            if slot == 2 and name in TUPLE_ROWS:
+                bad += judge_figure(python, app, env, table, name, to_row)
+    # The cursor's own two ends, which wrap where the rows lock.
+    rows = len(table["order_of_rows"])
+    for button in ("Up", "Down"):
+        bad += judge_walk(python, app, env, table, 2, [button] * (rows + 1),
+                          "the cursor all the way %s and one more" % button)
+    return bad
+
+
+def judge_figure(python: str, app: str, env: dict, table: dict, name: str,
+                 to_row: list) -> list:
+    """A press on a row of the tuple has to reach the figure.
+
+    The count of scenes built is the witness: the window builds one on the way
+    up and one per change after that, so a row that moved the text without
+    moving the tuple comes back as a build that did not happen -- which is
+    exactly the window whose rows are a picture of a screen rather than the
+    screen.
+    """
+    code, output = run_app(python, app,
+                           ["--keys", ",".join(to_row + ["Right"]), "--smoke"],
+                           env)
+    if code != 0:
+        return ["%s: app.py exited %s pressing Right on it -- %s"
+                % (name, code, output.rstrip())]
+    seen = read_screen(output)
+    want = expected(table, 2, to_row + ["Right"])
+    bad = []
+    if seen.get("tuple") != want["tuple"]:
+        bad.append("%s: one Right leaves the window's tuple %r and screen.py "
+                   "says %r" % (name, seen.get("tuple"), want["tuple"]))
+    if seen.get("builds") != 2:
+        bad.append("%s: one Right built %s figure(s) and the window builds one "
+                   "on the way up and one per change, so this row did not "
+                   "reach the scene" % (name, seen.get("builds")))
+    return bad
+
+
+SLOTS = (2, 1)
+"""The two save states, outfield first.  Both are walked: the plate is the one
+thing they differ in, and a screen that ignored the slot would pass on one."""
+
+
+def judge_screen_refusal(python: str, app: str, env: dict,
+                         table: dict) -> list:
+    """The refused style, reached BY KEY, shown and not drawn.
+
+    The viewer's own refusal (`judge_refusal`) is an exit code; this is the
+    other half, and the one the task is about: on the screen the row still
+    shows what the game shows, the help box carries the table's sentence, and
+    no figure is built for it.  A window that fell back to another head would
+    pass the exit-code check and fail here.
+    """
+    order = table["order_of_rows"]
+    start = order.index(table["cursor_on_load"])
+    keys = ["Down"] * ((order.index("HAIR") - start) % len(order))
+    keys += ["Right"] * screen.index_of(table, "HAIR", REFUSED_TEXT)
+    code, output = run_app(python, app,
+                           ["--keys", ",".join(keys), "--smoke"], env)
+    if code != 0:
+        return ["walking HAIR to %s: app.py exited %s -- %s"
+                % (REFUSED_TEXT, code, output.rstrip())]
+    seen = read_screen(output)
+    bad = []
+    if seen.get("rows", {}).get("HAIR") != REFUSED_TEXT:
+        bad.append("the row the table refuses shows %r and the game writes "
+                   "%r -- a refusal may not change what the screen says"
+                   % (seen.get("rows", {}).get("HAIR"), REFUSED_TEXT))
+    if not seen.get("refused"):
+        bad.append("%s was reached by key and the window said nothing about "
+                   "refusing it" % REFUSED_TEXT)
+    elif seen.get("help") != seen["refused"]:
+        bad.append("the refusal is not what the help box shows: help %r, "
+                   "refusal %r" % (seen.get("help"), seen["refused"]))
+    want = expected(table, 2, keys)
+    if seen.get("tuple") != want["tuple"]:
+        bad.append("the refused tuple reads %r and screen.py says %r"
+                   % (seen.get("tuple"), want["tuple"]))
+    if not bad:
+        print("  %s is refused on the screen: the row keeps the game's text, "
+              "the help box carries the table's sentence, and the panel draws "
+              "nothing" % REFUSED_TEXT)
+    return bad
+
+
 def judge_refusal(python: str, app: str, where: str, env: dict) -> list:
     """A tuple the table refuses: exit 2, the table's words, and no file."""
     out = os.path.join(where, "refused.png")
@@ -583,6 +796,32 @@ is the failure `judge_frame` exists for.  The third leaves `--compare`
 answering zero for two pictures that differ, which is the failure the
 agreement between the two counts exists for -- and it is the one that would
 otherwise be invisible, because `--compare` is the code under test.
+"""
+
+KEY_ROW = "SKIN"
+"""The row the planted trees are walked on: four values, so a walk to its end
+and one press past it is five presses rather than eighty."""
+
+KEY_BREAKS = (
+    ("the arrows reaching the screen", os.path.join("ui", "looks_set.py"),
+     "        self.press(button)\n        event.accept()",
+     "        event.accept()"),
+    ("the figure following the rows", os.path.join("ui", "looks_set.py"),
+     "        if self.state.tuple_text() != before:",
+     "        if False:"),
+    ("the row's own text", os.path.join("ui", "looks_set.py"),
+     '            "rows": {name: self.state.text_of(name)',
+     '            "rows": {name: name'),
+)
+"""(name, file, the exact line, what it becomes) -- one defect each, and all
+three are invisible to the picture judgement above.
+
+The first leaves a window that draws the right figure and answers no key.  The
+second leaves the rows moving and the figure frozen on the tuple it opened
+with -- the screen this task exists to avoid, where the twelve rows are a
+picture of a screen.  The third has the window report the row's NAME instead of
+the game's text, which is what a window that invented its texts would look like
+from outside.
 """
 
 PLANTED: list = []
@@ -637,6 +876,42 @@ def plant(python: str, env: dict, name: str, where: str, old: str,
                            "was proved: %s" % (name, broke))
         if not bad:
             return (False, "%s :: %s was broken (%s -> %s) and the gate still "
+                           "passed" % (where, name, old.strip(), new.strip()))
+        return (True, bad[0])
+
+
+def plant_keys(python: str, env: dict, name: str, where: str, old: str,
+               new: str) -> tuple:
+    """The same, for the judgement that walks the screen by key.
+
+    A separate path because `plant` runs the PICTURE judgement, and a screen
+    whose arrows do nothing draws the starting tuple perfectly well: the three
+    controls above would all stay green on it.  A judgement with no red case of
+    its own is a judgement nobody has seen fail.
+
+    The walk is cut to one row and the two cursor ends -- twenty-four rows per
+    planted tree would be four minutes of the gate to prove what one row
+    proves.
+    """
+    table = screen.load()
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        app = os.path.join(sandbox, "ui", "app.py")
+        code, output = run_app(python, app, ["--smoke"], env)
+        if code != 0 or not read_screen(output).get("rows"):
+            return (False, "the planted tree for %s did not run, so nothing "
+                           "was proved: %s" % (name, output.rstrip()))
+        order = table["order_of_rows"]
+        start = order.index(table["cursor_on_load"])
+        to_row = ["Down"] * ((order.index(KEY_ROW) - start) % len(order))
+        bad = judge_walk(python, app, env, table, 2,
+                         to_row + screen.walk_to_end(table, KEY_ROW, "Right"),
+                         "planted: %s to its right end" % KEY_ROW)
+        bad += judge_figure(python, app, env, table, KEY_ROW, to_row)
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the walk still "
                            "passed" % (where, name, old.strip(), new.strip()))
         return (True, bad[0])
 
@@ -740,6 +1015,21 @@ def main(argv: list | None = None) -> int:
         print("  %s is refused by the table, exits 2 and writes no picture"
               % REFUSED)
 
+    table = screen.load()
+    bad = judge_screen_refusal(python, APP, env, table)
+    walked = 0
+    if not bad:
+        bad = judge_keys(python, APP, env)
+        walked = len(table["order_of_rows"]) * len(SLOTS)
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    print("  the screen walked by key: %d row(s) to both ends across %d "
+          "state(s), the cursor past both ends, and every text, help, plate "
+          "and title is what screen.json measured off the game"
+          % (walked, len(SLOTS)))
+
     failed = 0
     for name, where, old, new in BREAKS:
         red, why = plant(python, env, name, where, old, new)
@@ -749,10 +1039,19 @@ def main(argv: list | None = None) -> int:
         else:
             print("FAIL: %s" % why)
             failed += 1
+    for name, where, old, new in KEY_BREAKS:
+        red, why = plant_keys(python, env, name, where, old, new)
+        if red:
+            print("negative: breaking %s reddens the walk -- %s" % (name, why))
+            PLANTED.append(name)
+        else:
+            print("FAIL: %s" % why)
+            failed += 1
     if failed:
         return 1
     print("looks_ui: %d of %d negative control(s) red, and the window drew "
-          "every tuple it was asked for" % (len(PLANTED), len(BREAKS)))
+          "every tuple it was asked for and answered every key with what the "
+          "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)))
     return 0
 
 

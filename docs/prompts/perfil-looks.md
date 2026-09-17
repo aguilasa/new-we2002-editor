@@ -344,6 +344,18 @@ Não se revertem sem o usuário pedir.
     ([`CORR-LOOKS-055`](/docs/tasks/looks/CORR-LOOKS-055.md)) o `main()` das
     ferramentas que imprimem esse texto chama `screen.printable_output()`. A
     regra que fica: **o `■` não sai da medição — quem se ajusta é a saída.**
+39. **Janela e tabela concordam de graça; quem desempata é o jogo.** A janela
+    da [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md) não decide
+    nada sobre a tela — o `screen.State` carrega as travas, a volta do cursor,
+    o texto de cada valor e a ajuda —, e é justamente por isso que o
+    `ui_check.py` comparar a janela contra o `screen.py` **não** prova que a
+    tela está certa: prova que a janela não inventou nada por cima da tabela.
+    Se a tabela mentir, os dois mentem juntos, em silêncio e com gate verde.
+    Medido em 2026-09-17: uma mentira plantada na tabela de uma cópia da
+    árvore (`HEIG=178` como `178 CM`) deixa o `looks_ui` **verde** e o
+    `oracle.py --keys` **vermelho nas duas frentes**. A regra que fica:
+    **toda afirmação sobre a tela fecha contra o emulador**; o gate sem
+    emulador cobre a outra metade, e dizer que ele cobre a tela é o erro.
 
 ---
 
@@ -415,6 +427,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem, sem venv; o controle roda se houver capturas da 17 | `python tools/looks/corpus.py --score` | — | LOOKS-TASK-18 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo); ~12 min | `python tools/looks/oracle.py --screen` — anda as doze linhas e compara com o `screen.json`; `--screen --write` é o gerador do arquivo | — | LOOKS-TASK-21 |
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
+| *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |
 
 **Nenhum diretório de build do worktree alcança alvo nenhum**, e por isso a
 coluna do meio existe. Medido em 2026-09-14

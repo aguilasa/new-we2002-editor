@@ -20,8 +20,23 @@ target, which is LOOKS-TASK-16 -- is what judges; this reports.
 run that drew nothing and a run that drew a figure both write a PNG, and only
 the counts and the picture tell them apart.
 
+## Two modes, and the screen is the default
+
+Without `--looks` this opens the **LOOKS SET screen** of the game -- the twelve
+rows, the cursor, the help box -- starting from what a save state shows, which
+is LOOKS-TASK-22.  With `--looks TUPLE` it opens the plain viewer of
+LOOKS-TASK-15, one tuple and an orbital camera, which is what the colour pairs
+of `ui_check.py` are drawn with.
+
+`--keys Down,Right,Right` presses buttons into the screen before reporting, as
+**Qt key events**, which is the path a keyboard takes: a gate that called
+`press()` directly would leave `keyPressEvent` untested and pass on a window
+nobody could type into.
+
 Usage:
     <venv>/python tools/looks/ui/app.py --smoke
+    <venv>/python tools/looks/ui/app.py --state 1 --visible
+    <venv>/python tools/looks/ui/app.py --keys Down,Right --screenshot out.png
     <venv>/python tools/looks/ui/app.py --looks A-I3-A-F-A --screenshot out.png
     <venv>/python tools/looks/ui/app.py --looks A-A1-A-A-A --wireframe \\
         --screenshot wire.png
@@ -41,9 +56,13 @@ import scene as core  # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets  # noqa: E402
 import viewer as viewer_module  # noqa: E402
 from viewer import Viewer  # noqa: E402
+from looks_set import KEYS, LooksSet, SCALE  # noqa: E402
 
 OFF_THE_DESKTOP = -32000  # not-an-address: the parking spot CLAUDE.md names
 DEFAULT_TUPLE = "A-A1-A-A-A"
+DEFAULT_STATE = 2
+"""The outfield player's state.  Slot 1 is the goalkeeper, and the plate on the
+screen -- `CB` against `GK` -- is the difference the walk measured."""
 DEFAULT_SIZE = (640, 640)
 FRAMES = 5
 """Paints to let through before a picture is taken.
@@ -142,10 +161,113 @@ def _compare(first: str, second: str) -> int:
     return 0
 
 
+def _send_keys(app: QtWidgets.QApplication, window: LooksSet,
+               buttons: list) -> list:
+    """The buttons into the window as Qt key events, and what each one moved.
+
+    `sendEvent`, not a call to `press`: the keyboard is the interface this task
+    is about, and a gate that skipped `keyPressEvent` would pass on a window
+    that never bound the arrows to anything.  One press at a time, with the
+    events drained after each -- the rule of CLAUDE.md that a key fired in a
+    loop lands somewhere nobody meant.
+    """
+    where = {name: key for key, name in KEYS.items()}
+    moved = []
+    for button in buttons:
+        key = where[button]
+        for kind in (QtCore.QEvent.Type.KeyPress,
+                     QtCore.QEvent.Type.KeyRelease):
+            event = QtGui.QKeyEvent(kind, key,
+                                    QtCore.Qt.KeyboardModifier.NoModifier)
+            before = window.state.texts(), window.state.row
+            app.sendEvent(window, event)
+            if kind == QtCore.QEvent.Type.KeyPress:
+                moved.append((window.state.texts(), window.state.row) != before)
+        app.processEvents()
+    return moved
+
+
+def _screen_report(window: LooksSet, moved: list) -> dict:
+    """What the screen shows, in the shape `ui_check.py` parses."""
+    seen = window.report()
+    print("screen: slot %s, cursor %s, help %r"
+          % (seen["slot"], seen["cursor"], seen["help"]))
+    print("  plate %s, shirt %r, title %r"
+          % (seen["plate"], seen["shirt"], seen["title"]))
+    for name in window.state.order:
+        print("  row %-9s = %r" % (name, seen["rows"][name]))
+    print("  tuple %s, scene built %d time(s)"
+          % (seen["tuple"], seen["builds"]))
+    if seen["refused"]:
+        print("  refused: %s" % seen["refused"])
+    if moved:
+        print("  presses %s"
+              % "".join("+" if one else "." for one in moved))
+    return seen
+
+
+def _screen(app: QtWidgets.QApplication, args) -> int:
+    """The LOOKS SET screen: the window this task is about."""
+    try:
+        state = core.screen_state(args.state)
+        buttons = core.screen_keys(args.keys) if args.keys else []
+    except core.BadScreen as exc:
+        print("app: %s" % exc, file=sys.stderr)
+        return 2
+
+    image = args.image
+    if not image:
+        try:
+            image = core.image_from_env()
+        except RuntimeError as exc:
+            print("app: skipped -- %s" % exc)
+            return core.SKIP
+    builder = core.Builder(image, state.figure())
+
+    window = LooksSet(state, builder, args.scale)
+    window.setWindowTitle("LOOKS SET -- slot %s" % state.slot)
+    _park(window, args.visible)
+    _settle(app, window)
+    window.setFocus()
+    moved = _send_keys(app, window, buttons)
+    _settle(app, window)
+
+    if window.drawn is not None:
+        _report(window.viewer, window.drawn)
+    _screen_report(window, moved)
+
+    if args.screenshot:
+        picture = window.picture()
+        if not picture.save(args.screenshot):
+            print("could not write %s" % args.screenshot, file=sys.stderr)
+            return 1
+        print("  wrote %s, %dx%d"
+              % (args.screenshot, picture.width(), picture.height()))
+    if args.smoke or args.screenshot:
+        print("  window %s, off the desktop at %d,%d"
+              % ("up" if window.isVisible() else "NOT up", window.x(),
+                 window.y()))
+        return 0
+    return app.exec()
+
+
 def main(argv=None) -> int:
+    try:  # The help of a row carries a button glyph this console cannot spell.
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, OSError):
+        pass
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--looks", default=DEFAULT_TUPLE,
-                        help="the tuple to draw, like A-I3-A-F-A")
+    parser.add_argument("--looks", default=None,
+                        help="the tuple to draw, like A-I3-A-F-A; without it "
+                             "the LOOKS SET screen opens instead")
+    parser.add_argument("--state", default=DEFAULT_STATE,
+                        choices=("1", "2", 1, 2),
+                        help="which save state the screen starts from: 1 is "
+                             "the goalkeeper, 2 the outfield player")
+    parser.add_argument("--keys", help="buttons to press first, like "
+                                       "Down,Down,Right")
+    parser.add_argument("--scale", type=int, default=SCALE,
+                        help="window pixels per game pixel")
     parser.add_argument("--figure", type=int, default=0,
                         help="0 is the outfield player, 1 the goalkeeper")
     parser.add_argument("--image", help="the Japanese data track; the "
@@ -174,6 +296,8 @@ def main(argv=None) -> int:
 
     if args.compare:
         return _compare(*args.compare)
+    if args.looks is None:
+        return _screen(app, args)
 
     image = args.image
     if not image:

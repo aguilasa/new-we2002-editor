@@ -389,6 +389,39 @@ def from_image(image_path: str, text: str,
         raise BadScene(str(exc)) from exc
 
 
+class Builder:
+    """The disc read once, and a scene per tuple after that.
+
+    The screen redraws the figure on every press, and `from_image` opens the
+    image and reads three files each time it is called -- fine for a gate that
+    draws four pictures, wrong for a window where Left and Right are held down.
+    The bytes do not change between presses, so they are read once.
+
+    It lives here and not in the window for rule 3: opening the disc is
+    `iso_source`'s, and `ui/` may not import it.
+    """
+
+    __slots__ = ("image_path", "figure", "_data")
+
+    def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE):
+        import iso_source
+
+        self.image_path = image_path
+        self.figure = figure
+        with iso_source.open_disc(image_path) as disc:
+            self._data = {name: disc.read(name)
+                          for name in (layout.EDT_MOD, layout.MODEL,
+                                       layout.DAT2D)}
+
+    def build(self, text: str) -> Scene:
+        """*text* as a scene, or `BadScene` carrying the table's own sentence."""
+        try:
+            values = looks.parse_tuple(text)
+            return build(self._data, values, self.figure)
+        except (looks.BadLooks, assembly.BadAssembly) as exc:
+            raise BadScene(str(exc)) from exc
+
+
 SHELF_GAP = 8.0
 """Space left between two pieces on the shelf, in the file's own units."""
 
@@ -463,6 +496,55 @@ def image_from_env() -> str:
     import iso_source
 
     return iso_source.image_from_env()
+
+
+class BadScreen(Exception):
+    """What `screen_state` refuses: a slot nobody measured, a button the screen
+    does not answer to, a table that does not hold together.
+
+    A separate name from `screen.BadScreen` only so the window can catch it
+    without importing the module that reads the table -- the same reason
+    `image_from_env` is here, and the same rule (3) behind both.  The instance
+    raised IS the one `screen.py` raised; nothing is reworded.
+    """
+
+
+def screen_state(slot: int | str = 2):
+    """The measured LOOKS SET screen, as something the window can walk.
+
+    **The window does not decide what a press does.**  `screen.State` carries
+    the locks, the wrap, the texts of every value and the help of every row,
+    all of them written by `oracle.py --screen --write` off the running game;
+    the widget sends `press` and draws what comes back.  That separation is
+    what the gate is able to judge: `ui_check.py` re-derives the same walk from
+    `screen.py` and compares, and it could not if the widget did the walking.
+    """
+    import screen
+
+    try:
+        return screen.State(screen.load(), slot)
+    except (OSError, screen.BadScreen) as exc:
+        raise BadScreen(str(exc)) from exc
+
+
+def screen_press(state, button: str) -> bool:
+    """One press on *state*, with the refusal reworded into this module's."""
+    import screen
+
+    try:
+        return state.press(button)
+    except screen.BadScreen as exc:
+        raise BadScreen(str(exc)) from exc
+
+
+def screen_keys(text: str) -> list:
+    """`Down,Right` to the presses it names, or this module's refusal."""
+    import screen
+
+    try:
+        return screen.parse_keys(text)
+    except screen.BadScreen as exc:
+        raise BadScreen(str(exc)) from exc
 
 
 def summary(scene: Scene) -> dict:

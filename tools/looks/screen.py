@@ -583,6 +583,195 @@ def move(table: dict, cursor_row: int, button: str) -> int:
     raise BadScreen("%r moves no cursor; Up and Down do" % button)
 
 
+# ---- the screen as a thing that is walked --------------------------------
+
+BUTTONS = ("Up", "Down", "Left", "Right")
+"""The four the screen answers to.  A fifth is refused, not ignored: a gate
+that sends `Cross` and gets silence would report a screen that never moved."""
+
+
+class State:
+    """Where the screen is, after N presses from a save state's own start.
+
+    **The window owns none of this.**  Rule 3 keeps address and disc out of
+    `ui/`, and this keeps the SCREEN out of it too: what a press does is
+    measured (`step`, `move`, the locks and the wrap), so the widget that
+    draws the screen must not be the thing that decides where a press lands.
+    It reads `text_of`, `help_text` and `tuple_text`, and sends `press`.
+
+    That split is what makes the gate's judgement mean anything: `ui_check.py`
+    compares what the window PRINTS against what this class says, and the two
+    would agree by construction if the window did its own arithmetic.
+    """
+
+    __slots__ = ("table", "slot", "cursor", "indices", "pressed")
+
+    def __init__(self, table: dict, slot: int | str = 2):
+        slot = str(slot)
+        if slot not in table.get("initial", {}):
+            raise BadScreen("slot %s was not measured; the states are %s"
+                            % (slot, ", ".join(sorted(table["initial"]))))
+        self.table = table
+        self.slot = slot
+        start = table["initial"][slot]
+        self.cursor = list(looks.SCREEN).index(table["cursor_on_load"])
+        self.indices = {name: index_of(table, name, start["rows"][name])
+                        for name in looks.SCREEN}
+        self.pressed = 0
+
+    # -- what the screen shows --------------------------------------------
+
+    @property
+    def row(self) -> str:
+        """The row the cursor is on."""
+        return looks.SCREEN[self.cursor]
+
+    @property
+    def order(self) -> list:
+        """The rows, top to bottom.  The window draws them in this order and
+        may not know where it comes from (rule 3)."""
+        return list(looks.SCREEN)
+
+    def text_of(self, row: str) -> str:
+        return self.table["rows"][row]["texts"][self.indices[row]]
+
+    def texts(self) -> dict:
+        return {name: self.text_of(name) for name in looks.SCREEN}
+
+    def help_text(self) -> str:
+        """The help box, INCLUDING the lie it tells before the first press.
+
+        Trap 35: after `load_state` the box still shows the menu's `Visual`,
+        and only the first press makes it say the row.  Reproducing that is
+        fidelity -- a window that shows `Nation` from the start disagrees with
+        the game on frame one, which is exactly what the key-against-key
+        comparison would catch and be right to.
+        """
+        if not self.pressed:
+            return self.table["help_on_load"]
+        return self.table["rows"][self.row]["help"]
+
+    def plate(self) -> str:
+        return self.table["initial"][self.slot]["plate"]
+
+    def shirt(self) -> str:
+        return self.table["initial"][self.slot]["shirt"]
+
+    def title(self) -> str:
+        """What the title band DRAWS -- `S SET`, not the `LOOKS SET` the object
+        holds (CORR-LOOKS-054)."""
+        return self.table["initial"][self.slot]["title"]
+
+    def figure(self) -> int:
+        """0 is the outfield player and 1 the goalkeeper, as `scene` counts
+        them; slot 1 is the goalkeeper's state and slot 2 the other one."""
+        return 1 if self.slot == "1" else 0
+
+    def layout(self) -> dict:
+        """Where everything sits, in the display's own 512x240 pixels.
+
+        The table keeps text in the coordinates the game prints them in --
+        from the centre of the display -- and the boxes in native pixels.  A
+        widget wants one system, so the conversion happens here, once, where
+        the origin is known: `x + width/2`, `y + height/2`.
+
+        **Native pixels, not fractions of a capture.**  The emulator's picture
+        crops overscan by however it is configured, so a fraction of it is not
+        the game's arrangement; that is why the walk stored both and why this
+        reads the native half (LOOKS-TASK-21).
+        """
+        width, height = self.table["display"]
+        origin = (width // 2, height // 2)
+        anchors = self.table["initial"][self.slot]["anchors"]
+
+        def native(point):
+            return [point[0] + origin[0], point[1] + origin[1]]
+
+        cursor = list(self.table["regions"]["cursor"]["native"])
+        first = self.table["regions"]["cursor"]["row"]
+        step_down = self.table["pitch"] * list(looks.SCREEN).index(first)
+        return {
+            "display": list(self.table["display"]),
+            "pitch": self.table["pitch"],
+            "rows_y": native([0, self.table["row0_y"]])[1],
+            "labels_x": native(anchors["labels"])[0],
+            "values_x": cursor[0],
+            # The cursor rectangle of the FIRST row: the walk measured it on
+            # the row the state loads on, and the pitch carries it from there.
+            "cursor": [cursor[0], cursor[1] - step_down,
+                       cursor[2], cursor[3] - step_down],
+            "title": native(anchors["title"]),
+            "plate": native(anchors["plate"]),
+            "shirt": native(anchors["shirt"]),
+            "panel": list(self.table["regions"]["panel"]["native"]),
+            "rows": list(self.table["regions"]["rows"]["native"]),
+            "help": list(self.table["regions"]["help"]["native"]),
+        }
+
+    # -- what a press does -------------------------------------------------
+
+    def value_of(self, row: str):
+        """What the row stores at its current text, or None for the two that
+        store nothing (trap 17: DEFAUL and NAT are not fields)."""
+        values = self.table["rows"][row].get("values")
+        return None if values is None else values[self.indices[row]]
+
+    def values(self) -> dict:
+        """The stored fields, by their `looks.py` names."""
+        out = {}
+        for name in looks.SCREEN:
+            field = looks.BY_ROW.get(name)
+            value = self.value_of(name)
+            if field is not None and value is not None:
+                out[field.name] = value
+        return out
+
+    def tuple_text(self) -> str:
+        """The five fields the scene is built from, as `A-A1-A-A-A`."""
+        return looks.format_tuple(self.values())
+
+    def press(self, button: str) -> bool:
+        """One press.  True if anything moved -- False at a lock."""
+        if button not in BUTTONS:
+            raise BadScreen("%r is not one of the four this screen answers "
+                            "to: %s" % (button, ", ".join(BUTTONS)))
+        self.pressed += 1
+        if button in ("Up", "Down"):
+            where = move(self.table, self.cursor, button)
+            moved = where != self.cursor
+            self.cursor = where
+            return moved
+        row = self.row
+        where = step(self.table, row, self.indices[row], button)
+        moved = where != self.indices[row]
+        self.indices[row] = where
+        return moved
+
+    def press_all(self, buttons) -> list:
+        """A sequence, and what each press did.  The order is the measurement."""
+        return [self.press(button) for button in buttons]
+
+
+def parse_keys(text: str) -> list:
+    """`Down,Down,Right` to the three presses it names, refusing the rest."""
+    buttons = [part.strip() for part in text.split(",") if part.strip()]
+    for button in buttons:
+        if button not in BUTTONS:
+            raise BadScreen("%r is not one of the four this screen answers "
+                            "to: %s" % (button, ", ".join(BUTTONS)))
+    return buttons
+
+
+def walk_to_end(table: dict, row: str, button: str) -> list:
+    """The presses that take *row* from one end to the other, plus one more.
+
+    The extra press is the point: it is what tells a lock from a wrap, and it
+    is the press the gate judges.  Length is `len(texts)`, so it reaches the
+    far end from ANY starting index and then tries to go past it.
+    """
+    return [button] * len(table["rows"][row]["texts"])
+
+
 def report(table: dict) -> None:
     print("display %dx%d, rows from y=%d every %d"
           % (tuple(table["display"]) + (table["row0_y"], table["pitch"])))
@@ -788,8 +977,75 @@ def _checks(c) -> None:
             wrong["rows"]["HAIR"]["texts"][19] = "I1 TYPE"
             ok("and a hair style the game spells differently is caught",
                any("HAIR=19" in p for p in label_disagreements(wrong)))
+            _state_checks(c, measured)
     else:
         c.skip("screen.json", "not measured yet: oracle.py --screen --write")
+
+
+def _state_checks(c, table: dict) -> None:
+    """The walking of the screen, on the measured table -- what the window
+    drives and what `ui_check.py` judges the window against."""
+    ok = c.ok
+    refuses = c.refusing(BadScreen)
+
+    state = State(table, 2)
+    ok("a state starts where the save state starts",
+       state.row == table["cursor_on_load"]
+       and state.texts() == table["initial"]["2"]["rows"],
+       "%s, %r" % (state.row, state.texts()))
+    ok("and the help box lies about the cursor until the first press, as the "
+       "game does", state.help_text() == table["help_on_load"])
+    state.press("Down")
+    ok("after one press the help names the row the cursor is on",
+       state.help_text() == table["rows"][state.row]["help"],
+       "%r on %s" % (state.help_text(), state.row))
+
+    top = State(table, 2)
+    while top.row != looks.SCREEN[0]:
+        top.press("Up")
+    ok("one more Up leaves the top row for the last one -- the cursor wraps, "
+       "which the rows do not", top.press("Up")
+       and top.row == looks.SCREEN[-1], top.row)
+
+    # The two ends of a row, the way the gate walks them.  The cursor goes to
+    # the row FIRST: pressing Left with the cursor elsewhere leaves SKIN where
+    # it was for a reason that has nothing to do with SKIN's ends, and a check
+    # written that way would pass on a screen whose rows did not lock at all.
+    walker = State(table, 2)
+    while walker.row != "SKIN":
+        walker.press("Down")
+    moved = walker.press_all(walk_to_end(table, "SKIN", "Right"))
+    ok("Right walks SKIN to its last value and the last press moves nothing",
+       walker.text_of("SKIN") == table["rows"]["SKIN"]["texts"][-1]
+       and moved[-1] is False, "%r, %r" % (walker.text_of("SKIN"), moved))
+    ok("and walking SKIN left no other row where it was not",
+       all(walker.text_of(name) == table["initial"]["2"]["rows"][name]
+           for name in looks.SCREEN if name != "SKIN"))
+
+    ok("the tuple the scene is built from follows the rows",
+       walker.tuple_text().split("-")[0]
+       == looks.BY_NAME["skin_colour"].label(walker.value_of("SKIN")),
+       walker.tuple_text())
+    ok("and the two rows that store nothing have no value",
+       State(table, 2).value_of("NAT") is None
+       and State(table, 2).value_of("DEFAUL") is None)
+
+    ok("slot 1 is the goalkeeper, plate and figure together",
+       State(table, 1).plate() == table["initial"]["1"]["plate"]
+       and State(table, 1).figure() == 1 and State(table, 2).figure() == 0)
+    ok("the title a state reports is what the band draws, not what the "
+       "object holds (CORR-LOOKS-054)",
+       State(table, 1).title() == table["initial"]["1"]["title"]
+       and State(table, 1).title() != table["initial"]["1"]["title_object"])
+
+    refuses("a button this screen does not answer to is refused, not ignored",
+            lambda: State(table, 2).press("Cross"), "is not one of the four")
+    refuses("and a slot nobody measured is refused",
+            lambda: State(table, 3), "was not measured")
+    refuses("a key sequence with a stranger in it is refused whole",
+            lambda: parse_keys("Down,Cross,Up"), "is not one of the four")
+    ok("a key sequence parses to the presses it names",
+       parse_keys("Down, Right ,Up") == ["Down", "Right", "Up"])
 
 
 def _toy_table() -> dict:

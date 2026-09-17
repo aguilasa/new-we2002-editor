@@ -2524,6 +2524,23 @@ antes do teste:
    `load_state`, no jogo e na nossa janela, e o texto de cada linha comparado
    — o do jogo lido por ferramenta, nunca transcrito à mão. O controle é a
    mesma sequência duas vezes no jogo, que tem de dar o mesmo texto.
+
+   > **Fechada em 2026-09-17** pela
+   > [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md), e o comando é
+   > `oracle.py --keys [SEQUÊNCIA [SLOT]]`, ~30 s por corrida. Ele compara
+   > **três** lados depois de uma sequência de 19 teclas: o jogo, o
+   > `screen.json` e a nossa janela — as doze linhas e a caixa de ajuda.
+   > Medido: **0 diferença** no slot 2 e **0 no slot 1**, com o controle —
+   > a mesma sequência duas vezes no jogo — concordando linha a linha antes.
+   > E o vermelho existe: com **uma** mentira plantada na tabela de uma cópia
+   > da árvore (`HEIG=178` escrito `178 CM`), a corrida dá **2 diferenças**,
+   > uma contra o `screen.json` e outra contra a janela que acreditou nele,
+   > com o controle ainda verde — que é o que mostra que quem julga é o jogo.
+   >
+   > A sequência default sai de `oracle.KEY_SEQUENCE` e é escolhida para ser
+   > incômoda: sai da linha em que o state carrega, anda para cima e para
+   > baixo, e aperta `Left` onde a linha já está na ponta esquerda — uma tecla
+   > que o jogo ignora e que uma janela ingênua atenderia.
 2. **Matriz contra matriz.** O que o nosso leitor diz para a peça P no quadro N
    contra o que o GTE carregou para P no quadro N, lido por breakpoint. Ponto
    fixo é inteiro: a comparação é **exata**, e qualquer diferença é achado.

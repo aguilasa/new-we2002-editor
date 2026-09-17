@@ -12,7 +12,7 @@
       .\make.ps1                      lista os alvos e o ambiente achado
       .\make.ps1 run-obocaman         o we-team-editor.exe do Obocaman
       .\make.ps1 run-lazarus          o WE2002 - Lazarus Editor
-      .\make.ps1 looks                o visualizador 3D da aparencia
+      .\make.ps1 looks                a tela `LOOKS SET` do jogo, na janela
       .\make.ps1 fresh                descarta as copias de trabalho
 
   `-Image <caminho>` troca a imagem de origem, `-Work <dir>` o diretorio das
@@ -113,7 +113,16 @@ param(
     [string]$LooksImage,
 
     # A tupla que abre, no formato do corpus: pele-cabelo-cor-barba-cor.
-    [string]$Tuple = 'A-A1-A-A-A',
+    # NASCE VAZIA de proposito: sem ela o alvo abre a tela `LOOKS SET` do
+    # jogo -- as doze linhas, o cursor e a caixa de ajuda --, que e o que a
+    # LOOKS-TASK-22 entrega. Com ela abre o visualizador de uma tupla so, que
+    # e o da LOOKS-TASK-15.
+    [string]$Tuple,
+
+    # De qual save state a tela comeca: 1 e o goleiro (placa GK), 2 o jogador
+    # de linha (CB). So vale na tela; o visualizador de tupla usa -Figure.
+    [ValidateSet(1, 2)]
+    [int]$State = 2,
 
     # 0 e o jogador de linha, 1 o goleiro.
     [ValidateSet(0, 1)]
@@ -556,11 +565,21 @@ function Invoke-Help {
     Write-Host '  fresh         descarta as copias de trabalho'
     Write-Host ''
     Write-Host 'Visualizador 3D da aparencia do jogador -- so le, nao grava:'
-    Write-Host '  looks         abre a janela: arrastar gira, roda aproxima,'
-    Write-Host '                W liga o arame, S a prateleira'
-    Write-Host '                -Tuple A-I3-A-E-A escolhe a tupla, -Figure 1 o'
-    Write-Host '                goleiro; o resto vai direto ao app.py'
-    Write-Host '                (--wireframe, --piece head, --no-shelf ...)'
+    Write-Host '  looks         abre a TELA `LOOKS SET` do jogo: doze linhas,'
+    Write-Host '                cursor e caixa de ajuda, com o boneco no painel'
+    Write-Host '                SETAS: cima/baixo movem o cursor (ele da a'
+    Write-Host '                volta), esquerda/direita trocam o valor (as'
+    Write-Host '                doze linhas TRAVAM nas pontas) -- medido no'
+    Write-Host '                jogo, e o boneco se redesenha a cada troca'
+    Write-Host '                -State 1 comeca do goleiro (placa GK), -State 2'
+    Write-Host '                do jogador de linha (CB); 2 e o default'
+    Write-Host '                Valor que a tabela de montagem recusa aparece'
+    Write-Host '                na ajuda e o painel fica VAZIO -- e medicao'
+    Write-Host '                -Tuple A-I3-A-E-A abre o visualizador de uma'
+    Write-Host '                tupla so: arrastar gira, roda aproxima, W liga'
+    Write-Host '                o arame, S a prateleira; -Figure 1 o goleiro'
+    Write-Host '                O resto vai direto ao app.py (--wireframe,'
+    Write-Host '                --piece head, --no-shelf ...)'
     Write-Host '  looks-venv    cria work\venv-looks com PySide6 (~246 MB)'
     Write-Host ''
     Write-Host 'PES2 -- outro jogo, outro projeto, e nao tem editor:'
@@ -800,8 +819,16 @@ Aponte a trilha de dados JAPONESA com -LooksImage <bin> ou WE2002_LOOKS_IMAGE.
     # **--visible e o ponto do alvo.** O app estaciona a janela em -32000 por
     # default, porque e o que os gates rodam; aqui quem chama e o usuario
     # pedindo para olhar, que e o unico caso que o CLAUDE.md admite.
-    $argumentos = @($LOOKS_APP, '--image', $img, '--looks', $Tuple,
-                    '--figure', "$Figure", '--visible')
+    # Sem -Tuple abre a TELA (as doze linhas, o cursor, a ajuda); com ela, o
+    # visualizador de uma tupla so. Os dois estacionam a janela em -32000 por
+    # default e so o `--visible` daqui a traz para a tela do usuario.
+    if ($Tuple) {
+        $argumentos = @($LOOKS_APP, '--image', $img, '--looks', $Tuple,
+                        '--figure', "$Figure", '--visible')
+    } else {
+        $argumentos = @($LOOKS_APP, '--image', $img, '--state', "$State",
+                        '--visible')
+    }
     if ($Resto) { $argumentos += $Resto }
     Write-Host ">> $LOOKS_PY $($argumentos -join ' ')"
     & $LOOKS_PY @argumentos

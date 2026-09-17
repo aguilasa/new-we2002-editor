@@ -39,6 +39,7 @@ Usage:
     python tools/looks/oracle.py --colour SKIN [SLOT [TUPLE ...]]  # which primitives of each head a colour row moves
     python tools/looks/oracle.py --writes [HAIR [SLOT]]  # every quad the game writes, value by value
     python tools/looks/oracle.py --screen [--write]  # LOOKS SET measured: every text, help, cursor and box; --write makes screen.json
+    python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
 """
 
 from __future__ import annotations
@@ -3320,6 +3321,151 @@ def check_screen(write=False, verbose=True):
     return 1 if differences else 0
 
 
+KEY_SEQUENCE = ("Down,Right,Right,Down,Right,Down,Down,Left,Down,Right,"
+                "Up,Up,Right,Down,Down,Down,Right,Right,Right")
+"""The sequence `--keys` presses when nobody names one.
+
+Chosen to be awkward on purpose: it leaves the row it loads on, walks a row up
+as well as down, presses Left where the row is already at its left end -- a
+press the game ignores and a window might not -- and ends on a row three
+values along.  Nineteen presses, because the comparison is worth having only
+where a disagreement has somewhere to hide.
+"""
+
+
+def _screen_geometry(table):
+    """The four numbers `ScreenReading` needs, out of the measured table."""
+    return {"row0_y": table["row0_y"], "pitch": table["pitch"],
+            "left": table["rows_left"], "top": table["rows_top"]}
+
+
+def _press_sequence(game, slot, buttons, geometry, orders):
+    """*buttons* from a fresh `load_state`, and what the screen then shows."""
+    game.load_looks(slot)
+    for button in buttons:
+        tap(game, button)
+    reading = ScreenReading(geometry, screen_objects(game))
+    return {"rows": reading.rows(orders), "help": screen_help(game)}
+
+
+def _window_sequence(slot, buttons, verbose=True, shot=None):
+    """The same buttons into OUR window, or None if the venv is not here.
+
+    Spawned rather than imported: the window needs PySide6, which lives in
+    `work/venv-looks` and not in the interpreter that drives the emulator.
+    """
+    import subprocess
+
+    import ui_check
+
+    python = ui_check.venv_python()
+    if python is None or not os.path.isfile(ui_check.APP):
+        return None
+    arguments = ["--state", str(slot), "--keys", ",".join(buttons)]
+    arguments += ["--screenshot", shot] if shot else ["--smoke"]
+    code, output = ui_check.run_app(python, ui_check.APP, arguments,
+                                    ui_check.environment())
+    if code != 0:
+        raise OracleError("the window exited %s on the same keys: %s"
+                          % (code, output.rstrip()))
+    seen = ui_check.read_screen(output)
+    if not seen.get("rows"):
+        raise OracleError("the window printed no screen report")
+    if verbose:
+        print("  the window answered the same %d press(es)" % len(buttons))
+    return seen
+
+
+def check_keys(sequence=None, slot=2, verbose=True):
+    """`--keys`: the same presses in the game and in our window, text by text.
+
+    This is comparison (1) of section 10.4 of the plan, and the shape of it is
+    the point:
+
+      the CONTROL comes first -- the same sequence twice in the GAME, from
+          `load_state` both times, and the twelve rows have to come back
+          identical.  Without it a disagreement below says nothing about the
+          window, because nothing has shown the game answers a sequence the
+          same way twice;
+      then the game against `screen.py`, which is what the table claims a
+          press does;
+      then the game against OUR WINDOW, which is what the task delivers.
+
+    Every text is read by tool on both sides: the game's off the objects it
+    prints, the window's off its own report.  Nothing here is transcribed.
+    """
+    import screen
+
+    table = screen.load()
+    buttons = screen.parse_keys(sequence) if sequence else screen.parse_keys(
+        KEY_SEQUENCE)
+    geometry = _screen_geometry(table)
+    orders = table["orders"]
+
+    ready = preflight()
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        restore_state(slot, verbose=verbose)
+        if verbose:
+            print("  pressing %d button(s) in slot %d: %s"
+                  % (len(buttons), slot, ",".join(buttons)))
+        first = _press_sequence(game, slot, buttons, geometry, orders)
+        again = _press_sequence(game, slot, buttons, geometry, orders)
+        # The pair a person looks at, both written by tool: the game's frame
+        # after the presses, and ours after the same ones.
+        theirs = game.capture("keys-slot%d" % slot)
+        ours_shot = os.path.join(game.out_dir, "keys-slot%d-window.png" % slot)
+
+    control = [(name, first["rows"][name], again["rows"][name])
+               for name in table["order_of_rows"]
+               if first["rows"][name] != again["rows"][name]]
+    if first["help"] != again["help"]:
+        control.append(("help", first["help"], again["help"]))
+    for name, one, two in control:
+        print("  FAIL  control: the game answered the same sequence with %s "
+              "%r and then %r" % (name, one, two))
+    if control:
+        print("oracle --keys: the control failed, so nothing the window does "
+              "would mean anything")
+        return 1
+    print("  control: the same sequence twice in the game gives the same "
+          "twelve rows and the same help")
+
+    state = screen.State(table, slot)
+    state.press_all(buttons)
+    ours = {"rows": state.texts(), "help": state.help_text()}
+    window = _window_sequence(slot, buttons, verbose, ours_shot)
+    if window is not None:
+        print("  the pair to look at: the game %s, our window %s"
+              % (theirs.path, ours_shot))
+
+    bad = []
+    for name in table["order_of_rows"]:
+        played = first["rows"][name]
+        if ours["rows"][name] != played:
+            bad.append("%s: the game shows %r and screen.json says a press "
+                       "leaves %r" % (name, played, ours["rows"][name]))
+        if window is not None and window["rows"].get(name) != played:
+            bad.append("%s: the game shows %r and our window shows %r"
+                       % (name, played, window["rows"].get(name)))
+    if ours["help"] != first["help"]:
+        bad.append("the help: the game shows %r and screen.json says %r"
+                   % (first["help"], ours["help"]))
+    if window is not None and window.get("help") != first["help"]:
+        bad.append("the help: the game shows %r and our window shows %r"
+                   % (first["help"], window.get("help")))
+    for line in bad:
+        print("  FAIL  %s" % line)
+    if verbose and not bad:
+        for name in table["order_of_rows"]:
+            print("    %-9s %r" % (name, first["rows"][name]))
+        print("    help      %r" % first["help"])
+    print("oracle --keys: %d difference(s) after %d press(es), across the "
+          "game, screen.json and %s"
+          % (len(bad), len(buttons),
+             "our window" if window is not None else "no window (no venv)"))
+    return 1 if bad else 0
+
+
 def _differences(want, got, path=""):
     if isinstance(want, dict) and isinstance(got, dict):
         out = []
@@ -3763,6 +3909,9 @@ def main(argv):
                 raise OracleError("--screen takes --write and nothing else, "
                                   "and got %r" % argv[2])
             return check_screen(write=len(argv) == 3)
+        if len(argv) >= 2 and argv[1] == "--keys":
+            slot = int(argv[3]) if len(argv) > 3 else 2
+            return check_keys(argv[2] if len(argv) > 2 else None, slot)
         if len(argv) >= 2 and argv[1] == "--writes":
             return check_writes(*row_and_slot(argv[2:]))
         if len(argv) >= 2 and argv[1] == "--colour":

@@ -19,6 +19,22 @@ status: pendente
   fonte podem ser imagem do `DAT2D.BIN` ou do `EDT_2D.BIN`, ou polígonos da
   GPU — e isso decide se a janela lê ou desenha.
 - **A display list já é legível** (`oracle.walk_packets`, §6 (a)).
+- **O que a [`LOOKS-TASK-22`](/docs/tasks/looks/22-a-tela-na-janela.md) deixou
+  para cá, olhando a dupla de capturas que ela pôs no Log** — a janela ao lado
+  do quadro do emulador, com os mesmos doze textos:
+  - **as duas setas `◀ ▶` ao lado do valor da linha selecionada.** O jogo as
+    desenha coladas na caixa do cursor e elas **somem na ponta do alcance** —
+    é o que a armadilha 28 do perfil já media pelo outro lado, contando valor
+    pela célula. A janela não as desenha, porque o `screen.json` guarda a
+    caixa do cursor e não elas. Medir de onde saem (objeto de texto, glifo ou
+    polígono) responde de quebra se a seta que some é a testemunha barata de
+    "esta ponta travou";
+  - **o valor é alinhado à DIREITA dentro da caixa do cursor** no jogo, e a
+    janela o escreve a partir da esquerda dela. A caixa está medida; a posição
+    do texto dentro dela, não;
+  - **a placa (`GK`/`CB`) e o nome da camisa têm caixa própria**, com uma
+    barra vazia ao lado da camisa e um ícone à esquerda dela;
+  - as cores, o degradê e a fonte, que é o objeto desta task.
 
 ---
 
