@@ -53,7 +53,7 @@ O plano já nasce com a §1 medida; o que as tasks fazem é construir sobre ela.
 | [LOOKS-TASK-17](/docs/tasks/looks/17-confronto-com-o-emulador.md) | Confronto — nosso quadro contra o quadro do emulador, na mesma tupla | 6 | 16 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-18](/docs/tasks/looks/18-corpus-dos-cinquenta-renders.md) | Os 50 renders do Superpack como corpus independente | 6 | 17 | ✅ Concluído | 2026-09-16 | 2026-09-16 |
 | [LOOKS-TASK-19](/docs/tasks/looks/19-alvos-de-ctest-e-cli.md) | `cli.py` e os quatro alvos de `ctest` | 7 | 18 | ✅ Concluído | 2026-09-17 | 2026-09-17 |
-| [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-20](/docs/tasks/looks/20-reconciliacao-e-entregaveis.md) | Reconciliação do plano, `perfil-looks.md` e os entregáveis | 7 | 19 | ✅ Concluído | 2026-09-17 | ⬜ pendente |
 
 **Legenda:** ⬜ Pendente · 🔄 Em andamento · ✅ Concluído · ❌ Bloqueado · ⏭️ Pulado
 
@@ -194,8 +194,8 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 ### Fase 7 — fechamento
 
 - [x] `ctest -R looks` = **1 passed, 3 skipped** numa máquina limpa — eram 2 skipped até a LOOKS-TASK-19 registrar o quarto alvo, `looks_live`; e 4 passed com as duas variáveis, o venv e o fork.
-- [ ] Cada incógnita da §6 com veredito.
-- [ ] `check_tasks.py` verde.
+- [x] Cada incógnita da §6 com veredito — (a) a (d) respondidas; os resíduos da (c) e as cinco novas, (e) a (i), abertas com a razão e o que as destravaria.
+- [x] `check_tasks.py` verde — `123 task(s), ok`, na árvore de `4023c65`.
 
 ---
 
