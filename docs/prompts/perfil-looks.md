@@ -448,6 +448,19 @@ Não se revertem sem o usuário pedir.
     chegou com 0,0071 e reprovou uma medição correta. Todo limiar deste ciclo
     se escreve **depois** dos dois slots.
 
+50. **Controle que fecha e controle que olha não são o mesmo controle.** A
+    captura da pose tinha dois controles verdes — a mesma captura repetida, e
+    dois quadros diferentes diferindo — e uma mentira plantada passou por eles
+    intacta: com o registrador base da câmera plantado na carga da peça, as
+    doze peças saíram **idênticas**, a hierarquia com dispersão 0,0 e a cabeça
+    na altura dos pés, e o comando disse **0 problemas**. Os dois controles
+    comparam capturas **entre si** e nenhum olhava dentro de uma. Medido em
+    2026-09-18
+    ([`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md)): a
+    pergunta que faltava era *o que esta captura afirma, olhada sozinha?*. E
+    ela só apareceu porque o plantio foi **rodado**; imaginado, teria ficado
+    verde para sempre.
+
 ---
 
 ## As fontes de verdade binárias

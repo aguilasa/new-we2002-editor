@@ -133,7 +133,19 @@ lacuna.
 6. **O limiar da composição foi escrito de uma amostra só.** 0,006 saiu do pior
    caso do slot 2 (0,0013) e o slot 1 veio com 0,0071 e reprovou. O limiar
    agora é 0,02, escrito dos dois slots.
-7. **A regra 1 acusou os literais 4.12 do self-check.** `4096` é escala, não
+7. **O vermelho vivo saiu VERDE na primeira tentativa, e o buraco era do
+   gate.** Plantando numa cópia da árvore o registrador base da câmera na
+   carga da peça — de modo que as doze peças fossem lidas do mesmo lugar —, a
+   corrida imprimiu doze peças idênticas, hierarquia com dispersão **0,0** e
+   `infx`, e a cabeça na altura dos pés, e ainda assim disse **0 problemas**:
+   o controle de repetição fecha (a captura repete), o de constante compara
+   quadros (e a câmera muda de quadro para quadro), e nenhum dos dois olhava
+   **dentro** da passada. O comando agora recusa passada em que duas cargas
+   tragam os mesmos números — medido em 16 passadas nos dois slots, as doze
+   sempre diferem —, e aí o plantio dá **2 problemas**, um por quadro. A regra
+   que fica: **o controle plantado se roda de verdade**; um controle que só
+   foi imaginado teria deixado esse gate passar para sempre.
+8. **A regra 1 acusou os literais 4.12 do self-check.** `4096` é escala, não
    endereço; virou `FIXED_ONE` com a anotação, e as três linhas de matriz de
    teste levam `# not-an-address:` cada uma — a anotação vale para a **linha**,
    e uma acima não conta.

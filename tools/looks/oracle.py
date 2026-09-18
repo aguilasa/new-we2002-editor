@@ -4260,6 +4260,26 @@ def check_pose_frames(slot=None, frames=None, verbose=True):
             if verbose:
                 _say_pose(taken[0])
 
+            # A pass whose loads are all the same numbers is not a pose,
+            # however well it repeats.  Measured over 16 passes on both
+            # slots: all twelve loads differ, every time.  Planting the
+            # camera's own base register on the piece load -- so every piece
+            # is read off the camera -- gives twelve identical loads, a
+            # hierarchy of zero spreads and the head at the height of the
+            # feet, and the run was GREEN until this check existed.
+            for record in taken:
+                distinct = {(tuple(piece["rotation"]),
+                             tuple(piece["translation"]))
+                            for piece in record["pieces"]}
+                if len(distinct) != len(record["pieces"]):
+                    problems.append(
+                        "slot %d frame %d: %d of the %d loads carry the same "
+                        "numbers as another -- a pass in which the pieces do "
+                        "not differ is not a pose, whatever it repeats like"
+                        % (one, record["frame"],
+                           len(record["pieces"]) - len(distinct),
+                           len(record["pieces"])))
+
             # A capture that reads a constant passes the control perfectly.
             moved = [record for record in taken[1:]
                      if _by_piece(record) != _by_piece(taken[0])]
