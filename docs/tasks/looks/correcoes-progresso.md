@@ -76,6 +76,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
+| [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -150,6 +151,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-058 — 18 e 17 no módulo, 18 e 18 em toda corrida
 - [x] CORR-LOOKS-059 — a base errada não é a que a regra responde, é a que sobra dela
 - [x] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
+- [ ] CORR-LOOKS-061 — oito capturas entram, oito somem, e a linha diz oito
 
 ## Detalhes por correção
 
@@ -1072,3 +1074,17 @@ e o ciclo arquivado, o dele em
   slots
 - **Fix:** escrever o que a corrida imprime — primeiro par verdadeiro em 4,6x e
   maior dos outros em 2,5x —, que é a folga real e não envelhece
+
+### CORR-LOOKS-061
+
+- **Arquivo com problema:** `tools/looks/anime.py` (`_against_pose`), e as
+  frases que saem dele no plano e na LOOKS-TASK-26
+- **Sintoma:** o `--poses` grava 16 capturas (192 peças) e o `--against-pose`
+  julga 8 (96), descartando em silêncio toda captura sem nenhum `pair`; a linha
+  impressa diz "8 capture(s), 96 piece(s) drawn" e o "0 piece(s) drew before any
+  unpack stop" reforça a leitura de cobertura inteira
+- **Como foi detectado:** recaptura ao vivo na árvore de `d9314b2` e contagem do
+  campo `pair` das 16 capturas: oito com 12 pares, oito com zero
+- **Fix:** contar e imprimir as capturas postas de lado, com o motivo (nenhuma
+  parada de desempacotamento; ângulos do scratchpad anterior), reprovar se o
+  número mudar, e escrever "96 de 192" onde hoje se lê "96 de 96"
