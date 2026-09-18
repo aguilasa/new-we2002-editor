@@ -42,20 +42,20 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
       breakpoint, com o comando que os lê — `oracle.py --camera`. **E o
       deslocamento de tela do GTE é ZERO**, que é achado: quem põe o boneco
       dentro do painel é o deslocamento de desenho da GPU.
-- [ ] O painel desenha com eles, no tamanho do painel do jogo. **NÃO FEITO** —
-      a silhueta se calcula no núcleo (`scene.silhouette`), no tamanho do
-      painel, e a **janela** ainda desenha com a câmera orbital da v1.
+- [x] O painel desenha com eles, no tamanho do painel do jogo — a janela recebe
+      do núcleo a 4x4 do jogo (`scene.panel_camera`), construída no tamanho
+      **nativo** do painel e conferida contra o `project()` ao pixel.
 - [x] `confront.py --silhouette [SLOT]`: máscara nos dois quadros e a
       diferença impressa.
 - [x] **Controles antes do teste:** o mesmo quadro contado duas vezes dá **0**
       pixel de diferença, e quadros diferentes dão 603 a 1.680. Os limiares
       saem daí e estão escritos como medidos.
-- [x] Um estilo trocado de propósito **discorda**: `A-I3` pontua 696 a 834
-      onde o estilo que o state veste pontua 179 a 426 — 1,8x a 3,9x pior, nos
-      dois slots. *(Os **três** estilos andados no próprio jogo ficam de fora:
-      o controle troca o nosso lado, não o do emulador.)*
-- [x] §6 (h) e §10.3 (m) com o veredito e a data — a (h) **fecha**: a forma tem
-      testemunha. A (m) fica **parcial**, pela janela.
+- [ ] Três estilos de cabelo diferentes, dois slots: a silhueta concorda, e um
+      estilo trocado de propósito discorda. **A metade do controle passa** — um
+      estilo trocado no nosso lado pontua pior, nos dois slots. **A metade dos
+      três estilos andados no jogo DISCORDA**, e é achado: ver o Log, terceira
+      sessão. `confront.py --silhouette-styles` a mede e reprova.
+- [x] §6 (h) e §10.3 (m) com o veredito e a data.
 
 ---
 
@@ -283,3 +283,101 @@ check_tasks: 138 task(s), ok
    leitura "não há ponte"; o que há é um atraso com teto, e o teto se mede.
 4. **Janela de varredura que o resultado encosta não é janela** — a de dois
    quadros devolveu o melhor na borda nas duas direções.
+
+---
+
+### Terceira sessão — a janela, e os estilos no jogo
+
+**O painel desenha com a câmera do jogo.** O núcleo constrói a 4x4
+(`scene.camera_matrix`) a partir do que o `--camera` mediu, e a janela só a
+envia ao shader — a regra 3 no ponto da câmera. Ela é construída no tamanho
+**nativo** do painel (146x120), não no do widget: `H` é contado em pixels do
+jogo, e uma projeção feita para o widget desenharia a figura em tamanho nativo
+dentro de uma área duas vezes maior. O self-check roda a matriz contra o
+`project()` em pontos inventados e exige o **mesmo pixel** — pior caso
+**0,000000 px**. Olhado nos dois slots: o jogador em pé, as duas chuteiras,
+enchendo o painel como no jogo. Onde a **raiz** cai dentro do painel é escolha
+de enquadramento (`scene.ROOT_AT`) e está dito que é: o deslocamento de desenho
+da GPU continua sem medida.
+
+**Dois achados andando o `HAIR` no jogo**, e o segundo mantém a task aberta:
+
+1. **Com uma linha de CABEÇA sob o cursor, o jogo aproxima a câmera na cabeça.**
+   A foto tirada logo depois das teclas é um close-up, com `Kind of Hair` na
+   caixa de ajuda, **o dobro** da tinta da figura inteira (4.374 a 5.154 contra
+   2.376 a 2.532) e a caminhada parada num quadro só. Não é assentamento —
+   trezentos quadros depois continua igual. A foto passou a ser tirada com o
+   cursor de volta em `NAT`, onde a câmera é a de corpo inteiro que o
+   `--camera` mediu. **E a janela não faz esse close-up** — encaminhado para a
+   [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md), com a linha
+   escrita lá.
+2. **No corpo inteiro, a foto do jogo com `C1` ou `I3` casa com o NOSSO `A1`.**
+   A tela lê `I3 TYPE` — a troca ficou —, e mesmo assim:
+
+   ```text
+   slot 2  A-C1: o nosso A1 dá 430, o nosso C1 dá  903
+           A-I3: o nosso A1 dá 412, o nosso I3 dá  769
+   slot 1  A-C1: o nosso A1 dá 446, o nosso C1 dá 1052
+           A-I3: o nosso A1 dá 433, o nosso I3 dá  825
+   ```
+
+   Duas leituras cabem e nenhuma foi medida: **o corpo inteiro desenha uma
+   cabeça que não depende do estilo** (um nível de detalhe menor), ou **a tabela
+   `HAIR` → cabeça do `assembly` discorda do jogo nesse tamanho**. O que separa
+   as duas é o close-up: medir a câmera com o cursor em `HAIR` e comparar os
+   estilos **lá**, onde o estilo aparece. É o próximo passo desta task.
+
+**E isto não reabre a §6 (h).** A (h) pedia uma testemunha de forma, e ela
+existe e **funciona** — foi ela que achou a discordância. O que ficou aberto é
+uma pergunta nova sobre o cabelo, e é critério desta task.
+
+**Arquivos criados/modificados** *(conferidos contra o commit)*
+
+- `tools/looks/scene.py` — `camera_matrix()`, `clip_to_pixel()`,
+  `apply_matrix()`, `ROOT_AT`, `panel_camera()` e o self-check contra o
+  `project()`
+- `tools/looks/ui/viewer.py` — `game_camera`, e o `_camera()` que a envia
+- `tools/looks/ui/looks_set.py` — `panel_native()`
+- `tools/looks/ui/app.py` — o painel da tela desenha com a câmera do jogo
+- `tools/looks/confront.py` — `_judged()`, `route_row()`, `game_at_tuple()`,
+  `STYLE_TUPLES`, `STYLE_SETTLE` e o `--silhouette-styles`
+- `docs/PLAN-LOOKS-PY.md`, `docs/prompts/perfil-looks.md`,
+  `docs/tasks/looks/31-o-painel-e-o-cenario.md`,
+  `docs/tasks/looks/28-a-camera-do-jogo.md`
+
+**Gates, na árvore commitada**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 87 of 87 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 7 of 7 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/confront.py --silhouette
+  the picture trails the draw by [0, 1, 2] frame(s) of the walk over 6
+  comparison(s), and the bound is 2
+confront --silhouette: 0 problem(s) over 2 slot(s)
+
+$ python tools/looks/confront.py --silhouette-styles
+confront --silhouette: 12 problem(s) over 2 slot(s)   <- o critério aberto
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+O `looks_ui` e as duas silhuetas correram na árvore que difere da commitada só
+por **comentários** no `scene.py` — as anotações `not-an-address` que a
+varredura da regra 1 pediu depois. O `selftest`, o `cli check` e o
+`check_tasks` correram na árvore commitada.
+
+**Problemas encontrados**
+
+1. **A câmera muda por linha**, e uma foto tirada com o cursor numa linha de
+   cabeça é outro desenho — o dobro da tinta, com cara de tela ainda assentando.
+2. **Os estilos andados no jogo discordam do nosso lado** — o critério aberto.

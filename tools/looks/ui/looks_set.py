@@ -85,6 +85,16 @@ class LooksSet(QtWidgets.QWidget):
 
     # -- geometry ----------------------------------------------------------
 
+    def panel_native(self) -> tuple:
+        """The panel in the GAME's own pixels, which is what `H` is counted in.
+
+        Not the widget's size: the widget is the panel times `scale`, and a
+        projection built for it would draw the figure at native size inside a
+        viewport twice as wide instead of scaling the picture up.
+        """
+        left, top, right, bottom = self.places["panel"]
+        return (right - left + 1, bottom - top + 1)
+
     def _rect(self, box) -> QtCore.QRect:
         """A box of the table, in this window's pixels."""
         x0, y0, x1, y1 = box

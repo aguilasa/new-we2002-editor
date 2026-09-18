@@ -1159,6 +1159,95 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table):
     return (anime.frame_of_pair(data, entry, pair), panel_mask(frame, box))
 
 
+STYLE_TUPLES = ("A-A1-A-A-A", "A-C1-A-A-A", "A-I3-A-A-A")
+"""Three hair styles walked ON THE GAME, and why three and why these.
+
+**And today they DISAGREE, which is a finding and not a tuning problem.**
+Measured 2026-09-18, with the screen reading `I3 TYPE` and the cursor back on
+`NAT` so the full-body camera is the one measured: the game's picture after
+walking to C1 or I3 matches our **A1** silhouette (412 to 446 pixels) and not
+our C1 or I3 (769 to 1052).  Either the full-body view draws a head that does
+not depend on the style, or the assembly table's HAIR -> head disagrees with
+the game at that size.  `--silhouette-styles` runs it and fails; `--silhouette`
+does not include it.
+
+Three because one is an anchor and two is a pair: what has to hold is that the
+silhouette follows the mesh the SCREEN is showing, in every style the screen
+can reach, and not only in the one the save state happens to load with.  These
+three because the assembly table draws all of them and they move the outline
+by 656 and 783 pixels of 2686 against each other -- measured on the panel's own
+size, so they are distinguishable at the size the comparison is made at.
+"""
+
+STYLE_SETTLE = 300
+"""Frames let run after the keys, before the pair is read and the picture taken.
+
+The screen rewrites the figure over MANY frames (pitfall 18), and twenty-four
+is not enough: measured 2026-09-18, a picture taken that soon after the keys
+carries **4572 to 5154** pixels of ink against the 2376 to 2532 of a settled
+panel -- about twice, which is two figures at once -- and matches no frame of
+the walk.  Three hundred is what CORR-LOOKS-049 measured a whole head to take.
+"""
+
+
+def route_row(text: str, oracle) -> str:
+    """The row `route` leaves the cursor on for *text*: the last one it edits."""
+    here = oracle.CURSOR_STARTS_ON
+    for row, _button, _count in plan(text, oracle.ROWS, here):
+        here = row
+    return here
+
+
+def game_at_tuple(game, slot, text, oracle, anime, data, entry, table):
+    """(the walk frame being drawn, the panel's mask) with *text* on screen.
+
+    Same single-run shape as `game_at` -- pair and picture at one stop, with no
+    frame stepped between them -- except that the screen is walked to *text*
+    first.  The counted frame is whatever the walking costs, which is why the
+    frame is READ rather than assumed: the pair names it.
+    """
+    import layout
+    import who_writes
+
+    oracle.restore_state(slot, verbose=False)
+    game.load_looks(slot, label="style-%d-%s" % (slot, text))
+    route(game, text, oracle)
+    # Back to the row the state loads on, and it is not tidiness: with a HEAD
+    # row under the cursor the game ZOOMS the panel onto the head -- measured,
+    # the picture is a close-up with "Kind of Hair" in the help box, twice the
+    # ink of the full figure and a walk that stops at one frame.  The camera
+    # `oracle.py --camera` measured is the full-body one, on `NAT`, so the
+    # photograph is taken there.
+    here = route_row(text, oracle)
+    way, distance = moves(oracle.ROWS, here, oracle.CURSOR_STARTS_ON)
+    for _ in range(distance):
+        game.press(way, box=oracle.FOOTER, least=oracle.ROW_MOVED)
+    game.step(STYLE_SETTLE)
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.ANIME_UNPACK))
+    try:
+        client.call("continue")
+        if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
+            raise ConfrontError("the unpack at %s never ran with %s on screen"
+                                % (who_writes.hx(layout.ANIME_UNPACK), text))
+        registers = client.call("read_registers", group="gpr")
+        pair = (who_writes.register_value(registers,
+                                          layout.ANIME_UNPACK_BASE)
+                - layout.ANIME_BASE)
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+        except Exception:  # noqa: BLE001
+            pass
+    import screen as screen_module
+
+    frame = still_frame(game, table["display"], oracle, screen_module)
+    box = table["regions"]["panel"]["native"]
+    return (anime.frame_of_pair(data, entry, pair), panel_mask(frame, box))
+
+
 def our_silhouette(data, text, figure, frame, camera, size, centre):
     """Our own mask for one tuple at one frame of the walk."""
     import scene
@@ -1199,8 +1288,70 @@ def fit_centre(theirs, projected, size):
             (yours[1] + yours[3] - projected[1] - projected[3]) / 2.0)
 
 
+def _judged(label, theirs, named, cycle, data, text, figure, camera, size,
+            scene, offsets, key) -> list:
+    """One picture against the whole walk.  The problems, and it prints the row.
+
+    It is a function because the frame captures and the style captures ask the
+    same four questions of the same numbers, and two copies of four thresholds
+    is two things to keep right.
+    """
+    scores = {}
+    for step in range(-NEIGHBOURS, NEIGHBOURS + 1):
+        at = (named + step) % cycle
+        drawn = scene.build(data, looks.parse_tuple(text), figure, at)
+        centre = fit_centre(theirs, scene.projected_box(drawn, camera), size)
+        ours = our_silhouette(data, text, figure, at, camera, size, centre)
+        scores[at] = scene.masks_differ(theirs, ours)
+    best = min(scores, key=scores.get)
+    # The control of the whole comparison: our side drawn at the same frame
+    # with a hair the screen is not showing.  It has to score WORSE, or this
+    # is not seeing the mesh -- which is exactly what section 6 (h) says
+    # colour could not do.
+    wrong_text = swapped_style(text)
+    wrong_drawn = scene.build(data, looks.parse_tuple(wrong_text), figure, best)
+    wrong = our_silhouette(
+        data, wrong_text, figure, best, camera, size,
+        fit_centre(theirs, scene.projected_box(wrong_drawn, camera), size))
+    wrong_score = scene.masks_differ(theirs, wrong)
+    behind = (named - best) % cycle
+    offsets[key] = behind
+    ink = sum(theirs)
+    problems = []
+    if behind > WALK_LAG:
+        problems.append(
+            "%s: the game's pair names walk frame %d and the picture matches "
+            "frame %d, %d behind -- over the %d a one-frame lag can be"
+            % (label, named, best, behind, WALK_LAG))
+    if scores[best] > ink * MATCH_SHARE:
+        problems.append(
+            "%s: the best silhouette is %d pixel(s) from the game's %d of ink "
+            "(%.0f%%), over the %.0f%% a matching figure takes"
+            % (label, scores[best], ink, 100.0 * scores[best] / ink,
+               100.0 * MATCH_SHARE))
+    if wrong_score < scores[best] * STYLE_MARGIN:
+        problems.append(
+            "%s: %s scores %d and %s scores %d -- a style the screen is not "
+            "showing has to be at least %.1fx worse, or the silhouette is not "
+            "seeing the mesh"
+            % (label, text, scores[best], wrong_text, wrong_score,
+               STYLE_MARGIN))
+    if scores[best] * MATCH_MARGIN > max(scores.values()):
+        problems.append(
+            "%s: the best of the sweep beats the worst by only %.1fx, under "
+            "the %.1fx a real minimum takes -- a sweep with no minimum is not "
+            "comparing figures"
+            % (label, max(scores.values()) / float(scores[best] or 1),
+               MATCH_MARGIN))
+    print("    %-22s pair names walk frame %2d; best at %2d, %d behind, %d of "
+          "%d (%.0f%%); %s scores %d"
+          % (label, named, best, behind, scores[best], ink,
+             100.0 * scores[best] / ink, wrong_text, wrong_score))
+    return problems
+
+
 def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
-                     verbose=True) -> int:
+                     verbose=True, styles=False) -> int:
     """`--silhouette [SLOT]`: our shape against the game's, with the camera.
 
     The measurement colour could not make (section 6 (h)): a histogram tells
@@ -1292,70 +1443,21 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                      [moved[counted] for counted in frames[1:]]))
 
             for counted in frames:
-                named = plays[counted]
-                scores = {}
-                for step in range(-NEIGHBOURS, NEIGHBOURS + 1):
-                    at = (named + step) % cycle
-                    drawn = scene.build(data, looks.parse_tuple(text),
-                                        figure, at)
-                    centre = fit_centre(theirs[counted],
-                                        scene.projected_box(drawn, camera),
-                                        size)
-                    ours = our_silhouette(data, text, figure, at, camera,
-                                          size, centre)
-                    scores[at] = scene.masks_differ(theirs[counted], ours)
-                best = min(scores, key=scores.get)
-                # The control of the whole comparison: our side drawn at the
-                # same frame with a hair the state does not have.  It has to
-                # score WORSE, or this is not seeing the mesh -- which is
-                # exactly what section 6 (h) says colour could not do.
-                wrong_text = swapped_style(text)
-                wrong_drawn = scene.build(data, looks.parse_tuple(wrong_text),
-                                          figure, best)
-                wrong = our_silhouette(
-                    data, wrong_text, figure, best, camera, size,
-                    fit_centre(theirs[counted],
-                               scene.projected_box(wrong_drawn, camera), size))
-                wrong_score = scene.masks_differ(theirs[counted], wrong)
-                behind = (named - best) % cycle
-                offsets[(slot, counted)] = behind
-                ink = sum(theirs[counted])
-                if behind > WALK_LAG:
-                    problems.append(
-                        "slot %d frame %d: the game's pair names walk frame %d "
-                        "and the picture matches frame %d, %d behind -- over "
-                        "the %d a one-frame lag can be"
-                        % (slot, counted, named, best, behind, WALK_LAG))
-                if scores[best] > ink * MATCH_SHARE:
-                    problems.append(
-                        "slot %d frame %d: the best silhouette is %d pixel(s) "
-                        "from the game's %d of ink (%.0f%%), over the %.0f%% a "
-                        "matching figure takes"
-                        % (slot, counted, scores[best], ink,
-                           100.0 * scores[best] / ink, 100.0 * MATCH_SHARE))
-                if wrong_score < scores[best] * STYLE_MARGIN:
-                    problems.append(
-                        "slot %d frame %d: %s scores %d and %s scores %d -- a "
-                        "style the state does not wear has to be at least "
-                        "%.1fx worse, or the silhouette is not seeing the mesh"
-                        % (slot, counted, text, scores[best], wrong_text,
-                           wrong_score, STYLE_MARGIN))
-                if scores[best] * MATCH_MARGIN > max(scores.values()):
-                    problems.append(
-                        "slot %d frame %d: the best of the sweep beats the "
-                        "worst by only %.1fx, under the %.1fx a real minimum "
-                        "takes -- a sweep with no minimum is not comparing "
-                        "figures"
-                        % (slot, counted,
-                           max(scores.values()) / float(scores[best] or 1),
-                           MATCH_MARGIN))
-                print("    frame %-3d: the game's pair names walk frame %d; "
-                      "best match at %d, %d frame(s) behind, %d pixel(s) apart "
-                      "of %d (%.0f%%); %s scores %d; the sweep %s"
-                      % (counted, named, best, behind, scores[best], ink,
-                         100.0 * scores[best] / ink, wrong_text, wrong_score,
-                         ", ".join("%d:%d" % (at, scores[at])
-                                   for at in sorted(scores))))
+                problems += _judged(
+                    "slot %d frame %d" % (slot, counted), theirs[counted],
+                    plays[counted], cycle, data, text, figure, camera, size,
+                    scene, offsets, (slot, counted))
+
+            # And the same, with three hair styles walked ON THE GAME: the
+            # save state loads with one, and a silhouette that only ever saw
+            # that one would say nothing about the mesh the screen picks.
+            for style in (STYLE_TUPLES if styles else ()):
+                named, mask = game_at_tuple(game, slot, style, oracle, anime,
+                                            data[layout.ANIME], entry, table)
+                problems += _judged(
+                    "slot %d %s" % (slot, style), mask, named, cycle, data,
+                    style, figure, camera, size, scene, offsets,
+                    (slot, style))
 
     if offsets:
         print("  the picture trails the draw by %s frame(s) of the walk over "
@@ -1460,9 +1562,16 @@ def main(argv: list[str]) -> int:
                 render_ours(slots)
                 return 0
             return run(slots)
-        if len(argv) >= 2 and argv[1] == "--silhouette":
+        if len(argv) >= 2 and argv[1] in ("--silhouette",
+                                           "--silhouette-styles"):
+            # Two commands and not one flag inside a green gate: the styles
+            # walked on the game DISAGREE today (LOOKS-TASK-28), and a
+            # comparison that fails for a reason nobody has measured must not
+            # ride inside the one that passes -- nor be quietly turned into a
+            # note that passes with it.
             return check_silhouette(
-                (int(argv[2]),) if len(argv) > 2 else (2, 1))
+                (int(argv[2]),) if len(argv) > 2 else (2, 1),
+                styles=argv[1] == "--silhouette-styles")
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])
     except oracle.Unavailable as exc:

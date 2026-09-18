@@ -605,6 +605,19 @@ Não se revertem sem o usuário pedir.
     quadro contado 20 o painel traz 2.726 pixels de tinta contra 2.376 a 2.532
     de todos os outros, e nenhum quadro da caminhada casa melhor que 3.570 —
     pior que a própria tinta. Medição de painel começa no **60**.
+67. **A câmera do painel muda com a linha sob o cursor.** Com uma linha de
+    cabeça selecionada o jogo aproxima a câmera na cabeça: a foto é um
+    close-up, com o dobro da tinta, `Kind of Hair` na caixa de ajuda e a
+    caminhada parada. Parece tela ainda assentando e não é — trezentos quadros
+    depois continua igual. Foto de painel que se compara com a câmera de corpo
+    inteiro se tira com o cursor em `NAT`, que é onde ela foi medida.
+68. **Estilo de cabelo andado no jogo, no corpo inteiro, casa com o NOSSO
+    `A1`.** Com a tela lendo `I3 TYPE`, a silhueta do jogo fica a 412–446 px do
+    nosso `A1` e a 769–1.052 do nosso `I3`/`C1`. Não está medido por quê — uma
+    cabeça de detalhe menor no corpo inteiro, ou a tabela `HAIR` → cabeça
+    discordando nesse tamanho —, e é o critério aberto da
+    [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md). Quem
+    confrontar cabelo pelo corpo inteiro lê isto antes.
 ---
 
 ## As fontes de verdade binárias
@@ -679,6 +692,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min | `python tools/looks/oracle.py --camera [SLOT]` — `H`, `OFX`, `OFY` e a matriz da câmera lidos do GTE na carga da matriz por peça, com três controles: o mesmo quadro duas vezes, a projeção igual nas doze cargas, e um quadro contado adiante concordando | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | idem, mais `work/looks-camera/`; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, em três quadros contados por slot: o mesmo quadro duas vezes de controle, quadros diferentes de segundo controle, e um **estilo de cabelo trocado** que tem de pontuar pior. Fecha a §6 (h) | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | idem; ~12 min | `python tools/looks/confront.py --silhouette-styles [SLOT]` — o mesmo, mais **três estilos de cabelo andados no jogo**; hoje **reprova** (armadilha 68), e está separado do `--silhouette` para que um vermelho sem causa medida não viaje dentro do verde | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |

@@ -231,6 +231,15 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
 
     window = LooksSet(state, builder, args.scale)
     window.viewer.shelved = False
+    # The panel draws with the camera the game projects with, when there is a
+    # measured one on disc.  Without it the window says so and keeps the v1
+    # orbit -- a projection invented here would look like a measurement.
+    try:
+        window.viewer.game_camera = core.panel_camera(
+            window.drawn, int(state.slot), window.panel_native())
+        print("  the panel draws with the game's own camera")
+    except core.NoCamera as exc:
+        print("  the panel keeps the v1 orbit: %s" % exc)
     window.setWindowTitle("LOOKS SET -- slot %s" % state.slot)
     _park(window, args.visible)
     _settle(app, window)

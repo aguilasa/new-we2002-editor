@@ -2775,7 +2775,7 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > mistura é o estado da animação entre quadros, e isso é a
 > [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
 
-**(m) A câmera do jogo — PARCIAL, 2026-09-18.** Projeção, deslocamento de tela
+**(m) A câmera do jogo — MEDIDA e na janela, 2026-09-18; o cabelo segue aberto.** Projeção, deslocamento de tela
 e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
 desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 
@@ -2809,9 +2809,17 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > única mantida fixa soa mais rigorosa e mede outra coisa: o melhor casamento
 > foi de 13% da tinta para 72%.
 >
-> **O que falta para a (m) fechar** é a **janela**: a silhueta se calcula no
-> núcleo, no tamanho do painel, e o painel da tela ainda desenha com a câmera
-> orbital da v1.
+> **E a janela desenha com ela**, desde a terceira sessão: o núcleo constrói a
+> 4x4 no tamanho **nativo** do painel e a janela só a envia ao shader, com um
+> self-check que exige o mesmo pixel que o `project()` — pior caso 0,000000 px.
+>
+> **O que segue aberto é o cabelo, não a câmera.** Andando o `HAIR` no próprio
+> jogo, duas coisas: com uma linha de cabeça sob o cursor, **o jogo aproxima a
+> câmera na cabeça** (o dobro da tinta, `Kind of Hair` na ajuda); e, de volta ao
+> corpo inteiro com a tela lendo `I3 TYPE`, a foto casa com o **nosso `A1`**
+> (412 a 446 px) e não com o nosso `C1`/`I3` (769 a 1.052). Ou o corpo inteiro
+> desenha uma cabeça que não depende do estilo, ou a tabela `HAIR` → cabeça
+> discorda do jogo nesse tamanho; o close-up é o que separa as duas.
 
 **(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.

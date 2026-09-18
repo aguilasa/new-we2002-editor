@@ -36,6 +36,14 @@ status: pendente
     barra vazia ao lado da camisa e um ícone à esquerda dela;
   - as cores, o degradê e a fonte, que é o objeto desta task.
 
+- **O painel aproxima a câmera na CABEÇA quando a linha sob o cursor é de
+  cabeça** — medido pela [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md)
+  em 2026-09-18: com o cursor em `HAIR` a foto é um close-up, com `Kind of Hair`
+  na caixa de ajuda e o dobro da tinta da figura inteira. A janela não faz isso:
+  ela desenha sempre a câmera de corpo inteiro que o `oracle.py --camera` mediu
+  com o cursor em `NAT`. Medir a câmera do close-up e trocá-la por linha é
+  desta task, junto com o resto do painel.
+
 ---
 
 ## Objetivo

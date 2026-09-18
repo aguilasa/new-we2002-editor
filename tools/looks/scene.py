@@ -791,6 +791,104 @@ def project(point, camera) -> tuple:
             found["OFY"] + found["H"] * view[1] / view[2])
 
 
+NEAR_PLANE = 16.0
+FAR_PLANE = 16384.0
+"""The depth range the game's own camera space is mapped into.
+
+They decide nothing about where a pixel lands -- `H` and the matrix do that --
+and only how depth is resolved between pieces.  Wide enough to hold the whole
+figure at the z the camera measured (about 4125) with room either side.
+"""
+
+
+def camera_matrix(camera: dict, size: tuple, centre: tuple) -> list:
+    """The game's camera as one 4x4, row major, for points in the DRAWN frame.
+
+    What it is FOR: the window draws the panel with the projection the game
+    projects with, instead of the orbital camera of the v1.  What it is NOT is
+    a second implementation of `project()` -- `self_check` runs the two against
+    each other on made-up points and demands they land on the same pixel, so a
+    change to one that the other does not follow is a failure rather than a
+    slow drift between the picture and the measurement.
+
+    Three things are folded in, in this order: the flip of `y` (`part_for`
+    stores the drawn frame and the camera is in the file's), the camera's own
+    rotation and translation, and `RTPS` -- `SX = OFX + H * x / z` -- turned
+    into clip space for a viewport of *size* with the camera's axis at
+    *centre*.
+    """
+    width, height = size
+    found = camera["projection"]
+    matrix, place = camera["rotation"], camera["translation"]
+    focal = float(found["H"])
+    across = 2.0 * (found["OFX"] + centre[0]) / width - 1.0
+    down = 1.0 - 2.0 * (found["OFY"] + centre[1]) / height
+    depth = (FAR_PLANE + NEAR_PLANE) / (FAR_PLANE - NEAR_PLANE)
+    shift = -2.0 * FAR_PLANE * NEAR_PLANE / (FAR_PLANE - NEAR_PLANE)
+    # view: the drawn frame flipped back, then R / ONE and + T.
+    view = []
+    for axis in range(3):
+        row = [matrix[axis * 3 + k] / float(ONE) for k in range(3)]
+        row[1] *= UP
+        view.append(row + [float(place[axis])])
+    view.append([0.0, 0.0, 0.0, 1.0])
+    projection = [
+        [2.0 * focal / width, 0.0, across, 0.0],
+        [0.0, -2.0 * focal / height, down, 0.0],
+        [0.0, 0.0, depth, shift],
+        [0.0, 0.0, 1.0, 0.0],
+    ]
+    out = []
+    for row in projection:
+        for column in range(4):
+            out.append(sum(row[k] * view[k][column] for k in range(4)))
+    return out
+
+
+ROOT_AT = (0.5, 0.85)
+"""Where the figure's ROOT is put inside the panel, as a fraction of it.
+
+**A framing choice, and it is said to be one.**  Where the game puts the figure
+inside the panel is the GPU's draw offset, which this cycle has not measured
+(`oracle.py --camera` measured the GTE's offsets and they are zero), so the
+window places the root itself.  The root and not the ink box: the root is the
+ground the figure stands on and does not move with the pose, where a box
+centred per frame would make the figure bob as the walk swings.
+"""
+
+
+def panel_camera(drawn: Scene, slot: int, size: tuple) -> list:
+    """The game's camera as a 4x4 for the panel, root placed by `ROOT_AT`.
+
+    *size* is the panel in NATIVE pixels, never the widget's: `H` is in the
+    game's own pixels, so a viewport twice as wide scales the whole picture
+    rather than halving the figure inside it.
+    """
+    camera = load_camera(slot)
+    origin = project((0.0, 0.0, 0.0), camera)
+    if origin is None:
+        raise BadScene("the figure's root is behind the camera")
+    return camera_matrix(camera, size,
+                         (size[0] * ROOT_AT[0] - origin[0],
+                          size[1] * ROOT_AT[1] - origin[1]))
+
+
+def clip_to_pixel(clip, size: tuple) -> tuple:
+    """(x, y) in pixels out of a clip-space point, or None behind the lens."""
+    width, height = size
+    if clip[3] <= 0.0:
+        return None
+    return ((clip[0] / clip[3] + 1.0) * width / 2.0,
+            (1.0 - clip[1] / clip[3]) * height / 2.0)
+
+
+def apply_matrix(matrix: list, point) -> list:
+    """One point through a row-major 4x4, as (x, y, z, w)."""
+    wide = (point[0], point[1], point[2], 1.0)
+    return [sum(matrix[row * 4 + k] * wide[k] for k in range(4))
+            for row in range(4)]
+
+
 def _fill(mask, width, height, triangle) -> None:
     """One triangle into *mask*, by scanline, with no library.
 
@@ -1280,6 +1378,30 @@ def _checks(c) -> None:
     ok("an ankle inside the swing of a walk is left alone",
        standing(upright, dict(square,
                               **{"foot b": -40.0 + ANKLE_DEEP - 1})) == [])
+
+    # -- the 4x4 the window draws with is the same arithmetic as project() --
+    #
+    # Two implementations of one projection is how a picture and a measurement
+    # drift apart without either looking wrong.  Made-up camera, made-up
+    # points, and they have to land on the same pixel.
+    # not-an-address: a camera made up in the shape of the measured one
+    turn = [3195, 0, 635, -27, 2488, 133, -635, -268, 3195]  # not-an-address: 4.12 matrix entries
+    made_up = {"rotation": turn,
+               "translation": [-480, 192, 4125],  # not-an-address: model units
+               "projection": {"H": 1376, "OFX": 0.0, "OFY": 0.0}}  # not-an-address: pixels
+    size, centre = (146, 120), (70.0, 55.0)
+    built = camera_matrix(made_up, size, centre)
+    worst = 0.0
+    for point in ((0, 0, 0), (30, -200, 10), (-40, 100, -25), (5, 419, -281)):
+        flat = project((point[0], point[1] * UP, point[2]), made_up)
+        through = clip_to_pixel(apply_matrix(built, point), size)
+        worst = max(worst, max(abs(a + b - c) for a, b, c
+                               in zip(flat, centre, through)))
+    ok("the window's 4x4 lands where project() lands, to the pixel",
+       worst < 0.001, "worst %.6f px" % worst)
+    behind = apply_matrix(built, (0, 0, -10000))  # not-an-address: a point behind the lens
+    ok("and a point behind the lens has no pixel",
+       clip_to_pixel(behind, size) is None)
 
     ok("the scene reports what it could not texture instead of hiding it",
        set(Scene([], {}, {}, 0, {"no image": 0}).notes) == {"no image"})

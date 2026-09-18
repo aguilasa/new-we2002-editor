@@ -120,6 +120,11 @@ class Viewer(QOpenGLWidget):
         self._holders = []
         self.wireframe = False
         self.shelved = True
+        # The game's own 4x4, when there is one: sixteen floats the CORE built
+        # out of what `oracle.py --camera` measured off the GTE.  The window
+        # does no projection arithmetic of its own with it -- it uploads it,
+        # which is rule 3 of section 3.3 at the camera.
+        self.game_camera = None
         self.yaw = FRONT
         self.pitch = 0.0
         self.distance = 3.0
@@ -269,6 +274,9 @@ class Viewer(QOpenGLWidget):
             self._textures[key] = texture
 
     def _camera(self) -> QtGui.QMatrix4x4:
+        if self.game_camera is not None:
+            # Row major, which is the order QMatrix4x4 takes its sixteen in.
+            return QtGui.QMatrix4x4(*self.game_camera)
         matrix = QtGui.QMatrix4x4()
         ratio = self.width() / float(max(self.height(), 1))
         matrix.perspective(45.0, ratio, 0.1, self._radius * 100.0)
