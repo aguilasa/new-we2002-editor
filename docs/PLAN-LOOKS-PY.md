@@ -2198,21 +2198,32 @@ a câmera do jogo, e não foi medida. *Destravaria:* girar a câmera do jogo —
 ler a display list noutro quadro da animação — e ver se o conjunto ausente
 muda.
 
-**(h) A forma não tem testemunha — FECHADA em 2026-09-18.** Histograma de cor resolve pele,
+**(h) A forma não tem testemunha — ABERTA para o cabelo; a pose tem.** Histograma de cor resolve pele,
 cor de cabelo e cor de barba, e **não** resolve estilo de cabelo nem barba —
 nem contra os quadros do emulador, onde a verdade é conhecida
 (`corpus.py --score`, o controle; §5.4). Nenhum dos dois confrontos verifica,
 então, que a **malha** desenhada é a do estilo certo; quem verifica isso hoje é
 só o `oracle.py --patched` da
 [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), pela seção que o
-jogo escreve. *Como fechou:* a pose veio da (e) e da
-[`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), a câmera da
-[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), e a silhueta
-comparada no mesmo quadro (`confront.py --silhouette`) **separa a malha**: um
-estilo de cabelo que o state não veste pontua 696 a 834 onde o certo pontua 179
-a 426, nos dois slots. E o que dá direito de chamar isso de testemunha de
-**forma** é o par que não mexe — trocar a **cor de pele** muda **0** pixel da
-silhueta, porque pele é paleta e não geometria.
+jogo escreve. *O que a silhueta testemunha, e o que não:* com a pose da (e) e da
+[`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) e a câmera da
+[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), a silhueta no
+mesmo quadro (`confront.py --silhouette`) **testemunha a pose e o corpo**: seis
+comparações, dois slots, 7% a 18% da tinta, mínimo nítido em todas.
+
+**E NÃO testemunha o estilo de cabelo no corpo inteiro.** Esta seção foi dada
+como fechada em 2026-09-18 com um controle de estilo trocado que pontuava 696 a
+834 contra 179 a 426 — e esses números eram artefato: o `pose()` só posava a
+cabeça de referência, e a cabeça do `I3` estava na origem do arquivo, fora do
+pescoço. Com todas as cabeças posadas (`scene.place_for`), as fotos do próprio
+jogo com `A1`, `C1` e `I3` diferem só **15 e 29 pixels**, e a foto `A1` do jogo
+casa com o nosso `I3` (378) melhor que com o nosso `A1` (399). No corpo inteiro,
+estilo de cabelo é um punhado de pixels.
+
+*Destravaria:* o **close-up** que o jogo mostra com uma linha de cabeça sob o
+cursor, onde o estilo é grande — as fotos do jogo diferem 422 e 1.843 pixels ali.
+Medido com a câmera do close-up e restrito à faixa da cabeça, a silhueta escolhe
+o estilo certo em **2 de 3**, nos dois slots; o `A1` é o que ela erra.
 
 **(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
 ponteiros (§1.5), onde a hipótese do `we3d` de 14 jogadores de 11 peças seria
@@ -2813,13 +2824,13 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > 4x4 no tamanho **nativo** do painel e a janela só a envia ao shader, com um
 > self-check que exige o mesmo pixel que o `project()` — pior caso 0,000000 px.
 >
-> **O que segue aberto é o cabelo, não a câmera.** Andando o `HAIR` no próprio
-> jogo, duas coisas: com uma linha de cabeça sob o cursor, **o jogo aproxima a
-> câmera na cabeça** (o dobro da tinta, `Kind of Hair` na ajuda); e, de volta ao
-> corpo inteiro com a tela lendo `I3 TYPE`, a foto casa com o **nosso `A1`**
-> (412 a 446 px) e não com o nosso `C1`/`I3` (769 a 1.052). Ou o corpo inteiro
-> desenha uma cabeça que não depende do estilo, ou a tabela `HAIR` → cabeça
-> discorda do jogo nesse tamanho; o close-up é o que separa as duas.
+> **O que segue aberto é o cabelo, não a câmera.** Com uma linha de cabeça sob
+> o cursor, **o jogo aproxima a câmera na cabeça** — medida também pelo
+> `--camera <SLOT> HAIR`: o mesmo `H`, a translação em z de 999 contra 4125, e
+> girada. E a primeira leitura dos estilos no corpo inteiro ("a foto `I3` casa
+> com o nosso `A1`") era **defeito nosso**: o `pose()` só posava a cabeça de
+> referência. Corrigido, no corpo inteiro os estilos simplesmente não se
+> separam — ver a §6 (h).
 
 **(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.

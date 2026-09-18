@@ -51,11 +51,13 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
       pixel de diferença, e quadros diferentes dão 603 a 1.680. Os limiares
       saem daí e estão escritos como medidos.
 - [ ] Três estilos de cabelo diferentes, dois slots: a silhueta concorda, e um
-      estilo trocado de propósito discorda. **A metade do controle passa** — um
-      estilo trocado no nosso lado pontua pior, nos dois slots. **A metade dos
-      três estilos andados no jogo DISCORDA**, e é achado: ver o Log, terceira
-      sessão. `confront.py --silhouette-styles` a mede e reprova.
-- [x] §6 (h) e §10.3 (m) com o veredito e a data.
+      estilo trocado de propósito discorda. **NÃO FEITO, e agora com a razão
+      medida:** no corpo inteiro o estilo **não se separa** — as fotos do próprio
+      jogo diferem só 15 e 29 pixels. No close-up a faixa da cabeça escolhe o
+      estilo certo em **2 de 3**, nos dois slots, e erra o `A1`. Ver o Log,
+      quarta sessão.
+- [x] §6 (h) e §10.3 (m) com o veredito e a data — a (h) **reaberta** para o
+      cabelo, pela quarta sessão; a pose e o corpo têm testemunha.
 
 ---
 
@@ -381,3 +383,117 @@ varredura da regra 1 pediu depois. O `selftest`, o `cli check` e o
 1. **A câmera muda por linha**, e uma foto tirada com o cursor numa linha de
    cabeça é outro desenho — o dobro da tinta, com cara de tela ainda assentando.
 2. **Os estilos andados no jogo discordam do nosso lado** — o critério aberto.
+
+---
+
+### Quarta sessão — o defeito que fabricou a evidência
+
+**A §6 (h) foi fechada na segunda sessão com um número que era defeito, e fica
+reaberta aqui.** O controle de estilo trocado pontuava 696–834 contra 179–426,
+e isso foi lido como *"a silhueta vê a malha"*. Não era: o `scene.pose()` só
+sabia posar a cabeça de referência, a seção **24**. O `HAIR` escolhe outra seção
+do `MODEL.BIN` para cada estilo — **30** para `C1`, **34** para `I3` —, e essas
+cabeças ficavam na origem do arquivo, **fora do pescoço**, 25 e 23 primitivas
+sem pose, com todos os gates verdes, porque todos desenhavam a tupla de
+referência. O controle estava pontuando uma cabeça flutuando.
+
+Como apareceu, na ordem:
+
+1. **As fotos do próprio jogo, umas contra as outras:** `A1` e `I3` diferem
+   **15 px**, `A1` e `C1` **29 px**, todos na faixa da cabeça. O jogo desenha
+   cabeças diferentes — mas quase iguais nesse tamanho.
+2. **As nossas, com a mesma translação:** 206 e 235 px — oito a catorze vezes
+   mais que as do jogo. Parte do "656/783" antigo era o alinhamento por caixa
+   deslocando o corpo inteiro quando a cabeça muda de altura.
+3. **A câmera do close-up**, medida com o cursor em `HAIR`
+   (`oracle.py --camera <SLOT> HAIR`): o mesmo `H = 1376`, a translação em z de
+   **999** contra 4125, e girada — igual nos dois slots.
+4. **Uma conferência independente da câmera de corpo inteiro:** `T_peça − R·lugar`
+   dá **exatamente** `[-480, 192, 4125]` nas doze peças, nos dois slots — o que
+   o `--camera` leu. Câmera e lugares se confirmam um pelo outro.
+5. **No close-up os nossos `C1` e `I3` saíram idênticos e 2.150 px menores** —
+   e foi aí que o defeito apareceu: sem pose, a cabeça deles caía fora do
+   painel. `scene.place_for` dá a qualquer cabeça do `MODEL.BIN` a pose da
+   cabeça.
+
+**O que vale depois do conserto:**
+
+- **no corpo inteiro, estilo não se separa.** A foto `A1` do jogo casa com o
+  nosso `I3` (378) melhor que com o nosso `A1` (399); `C1` e `I3` ganham os
+  próprios por 7%. A silhueta testemunha **a pose e o corpo** — as seis
+  comparações por quadro continuam a 7–18% — e **não** o cabelo. O controle de
+  estilo trocado passa a ser impresso, não afirmado, no `--silhouette`;
+- **no close-up**, com a câmera do close-up, lugares absolutos e o eixo no
+  centro da tela (as caixas das duas máscaras ficam a 3 px), a faixa da cabeça
+  escolhe o estilo certo em **2 de 3** nos dois slots e em qualquer largura de
+  faixa — 30, 40 ou 50 linhas —, e erra o `A1`, que casa melhor com o nosso
+  `C1`. Por que o `A1` erra não está medido.
+
+**E a guarda que teria pegado o defeito:** o `scene.py --check-image` desenha
+agora `A1`, `C1` e `I3` e exige **zero** primitiva sem pose — as três
+desenham as seções 24, 30 e 34, todas posadas —, e o controle plantado
+`scene-pose-knows-one-head` tira a regra e fica vermelho.
+
+**Arquivos criados/modificados** *(conferidos contra o commit)*
+
+- `tools/looks/scene.py` — `place_for()`, `POSED_STYLES`, a guarda no
+  `--check-image` e o self-check da regra
+- `tools/looks/oracle.py` — `CLOSE_UP_SETTLE`, a linha no `capture_camera`, o
+  `write_camera` por linha e o `--camera <SLOT> <LINHA>`
+- `tools/looks/confront.py` — o controle de estilo só afirmado no
+  `--silhouette-styles`, e as docstrings de `STYLE_SWAP` e `STYLE_TUPLES`
+  corrigidas
+- `tools/looks/controls.py` — `scene-pose-knows-one-head`
+- `docs/PLAN-LOOKS-PY.md` — a §6 (h) reaberta e a (m) corrigida
+- `docs/prompts/perfil-looks.md` — a armadilha 68 corrigida e a 69
+- `docs/tasks/looks/28-a-camera-do-jogo.md` — este Log
+
+**Gates, na árvore commitada**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 88 of 88 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/scene.py --check-image
+      A-A1-A-A-A draws head section(s) [24], 0 primitive(s) not posed
+      A-C1-A-A-A draws head section(s) [30], 0 primitive(s) not posed
+      A-I3-A-A-A draws head section(s) [34], 0 primitive(s) not posed
+scene --check-image: ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 7 of 7 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/oracle.py --camera 2 HAIR   (e o slot 1)
+    H 1376 px, principal point (0.00, 0.00), the same at all 12 load(s)
+    the camera matrix is [3067, 0, -1097, 45, 2488, 128, 1097, -268, 3067],
+    translation [-120, 266, 999]
+oracle --camera: 0 problem(s) over 1 slot(s)
+
+$ python tools/looks/confront.py --silhouette
+  the picture trails the draw by [0, 1, 2] frame(s) of the walk over 6
+  comparison(s), and the bound is 2
+confront --silhouette: 0 problem(s) over 2 slot(s)
+
+$ python tools/looks/confront.py --silhouette-styles
+confront --silhouette: 12 problem(s) over 2 slot(s)   <- o critério aberto
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+O `--silhouette` correu antes da última edição do `confront.py`, que mexeu só
+em docstring; o `--silhouette-styles`, antes de o controle de estilo deixar de
+ser afirmado no corpo inteiro — os doze problemas dele eram, àquela altura, o
+controle de estilo nas seis comparações por quadro e nas seis por estilo.
+
+**Problemas encontrados**
+
+1. **Um defeito da LOOKS-TASK-27 fabricou a evidência que fechou a §6 (h).**
+   Gate que só desenha a tupla de referência mede a tupla de referência.
+2. **Alinhamento por caixa amplifica mudança de cabeça.** Uma cabeça mais alta
+   desloca o centro da caixa e o corpo inteiro com ele.

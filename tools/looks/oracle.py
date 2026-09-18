@@ -4546,17 +4546,35 @@ def gte_projection(registers):
     }
 
 
-def capture_camera(game, slot, frame=0):
+CLOSE_UP_SETTLE = 300
+"""Frames let run after the cursor lands on a row, before the camera is read.
+
+The panel changes camera with the row under the cursor (pitfall 67), and the
+change is not instant.  Three hundred is what the head took to settle in
+CORR-LOOKS-049, and what the style photographs of LOOKS-TASK-28 needed.
+"""
+
+
+def capture_camera(game, slot, frame=0, row=None):
     """The projection and the camera of one counted frame.
 
     Read at the per-piece matrix load, which is inside the figure's own draw:
     a projection read anywhere else in the frame could be the panel's, the
     text's or the background's, and the three are not the same viewport.
+
+    *row* moves the cursor there first.  The panel ZOOMS onto the head when a
+    head row is selected (pitfall 67), so the camera of `NAT` -- where the
+    state loads -- is not the camera of `HAIR`, and each is measured where it
+    is used rather than assumed to be the other.
     """
     import who_writes
 
     restore_state(slot, verbose=False)
-    game.load_looks(slot, label="camera-%d-%d" % (slot, frame))
+    game.load_looks(slot, label="camera-%d-%d-%s" % (slot, frame, row or ""))
+    if row is not None:
+        for _ in range(ROWS.index(row) - ROWS.index(CURSOR_STARTS_ON)):
+            game.press("Down", box=FOOTER, least=ROW_MOVED)
+        game.step(CLOSE_UP_SETTLE)
     game.step(frame)
     client = game.client
     client.call("breakpoint", action="clear")
@@ -4579,7 +4597,7 @@ def capture_camera(game, slot, frame=0):
         except Exception:  # noqa: BLE001
             pass
     camera = _camera_matrix(game)
-    return {"slot": slot, "state": SLOTS[slot], "frame": frame,
+    return {"slot": slot, "state": SLOTS[slot], "frame": frame, "row": row,
             "projection": seen, "camera": camera}
 
 
@@ -4588,18 +4606,25 @@ CAMERA_DIR = os.path.join(ROOT, "work", "looks-camera")
 
 
 def write_camera(record):
-    """One JSON per slot, in `work/looks-camera/`."""
+    """One JSON per slot and row, in `work/looks-camera/`.
+
+    `slotN.json` is the camera of the row the state loads on; a camera
+    measured on another row is `slotN-ROW.json`, so the one the window draws
+    the full figure with is never overwritten by a close-up.
+    """
     import json
 
     os.makedirs(CAMERA_DIR, exist_ok=True)
-    path = os.path.join(CAMERA_DIR, "slot%d.json" % record["slot"])
+    row = record.get("row")
+    path = os.path.join(CAMERA_DIR, "slot%d%s.json"
+                        % (record["slot"], "-" + row if row else ""))
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(record, handle, indent=2, sort_keys=True)
         handle.write("\n")
     return path
 
 
-def check_camera(slot=None, verbose=True):
+def check_camera(slot=None, verbose=True, row=None):
     """`--camera [SLOT]`: the projection and the camera, with the controls.
 
     Three, and the order is the point:
@@ -4621,8 +4646,8 @@ def check_camera(slot=None, verbose=True):
     with Oracle(ready["cue"], verbose=verbose) as game:
         for one in slots:
             print("  -- slot %d (%s) --" % (one, SLOTS[one]))
-            first = capture_camera(game, one, 0)
-            again = capture_camera(game, one, 0)
+            first = capture_camera(game, one, 0, row)
+            again = capture_camera(game, one, 0, row)
             if first != again:
                 problems.append(
                     "slot %d: two captures of the same frame differ, so the "
@@ -4648,7 +4673,7 @@ def check_camera(slot=None, verbose=True):
                   "%d load(s)" % (found["H"], found["OFX"], found["OFY"],
                                   len(first["projection"])))
 
-            later = capture_camera(game, one, POSE_CAPTURE_FRAMES[-1])
+            later = capture_camera(game, one, POSE_CAPTURE_FRAMES[-1], row)
             if later["projection"][0] != found:
                 problems.append(
                     "slot %d: frame %d projects with %r and frame 0 with %r -- "
@@ -5637,7 +5662,8 @@ def main(argv):
                                          [int(one) for one in argv[3:]])
             return check_pose(int(argv[2]) if len(argv) > 2 else None)
         if len(argv) >= 2 and argv[1] == "--camera":
-            return check_camera(int(argv[2]) if len(argv) > 2 else None)
+            return check_camera(int(argv[2]) if len(argv) > 2 else None,
+                                row=argv[3] if len(argv) > 3 else None)
         if len(argv) == 2 and argv[1] == "--pose-lag":
             return check_draw_lag()
         if len(argv) >= 2 and argv[1] == "--poses":

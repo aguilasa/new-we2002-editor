@@ -611,13 +611,24 @@ Não se revertem sem o usuário pedir.
     caminhada parada. Parece tela ainda assentando e não é — trezentos quadros
     depois continua igual. Foto de painel que se compara com a câmera de corpo
     inteiro se tira com o cursor em `NAT`, que é onde ela foi medida.
-68. **Estilo de cabelo andado no jogo, no corpo inteiro, casa com o NOSSO
-    `A1`.** Com a tela lendo `I3 TYPE`, a silhueta do jogo fica a 412–446 px do
-    nosso `A1` e a 769–1.052 do nosso `I3`/`C1`. Não está medido por quê — uma
-    cabeça de detalhe menor no corpo inteiro, ou a tabela `HAIR` → cabeça
-    discordando nesse tamanho —, e é o critério aberto da
-    [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md). Quem
-    confrontar cabelo pelo corpo inteiro lê isto antes.
+68. **No corpo inteiro, estilo de cabelo é um punhado de pixels.** As fotos do
+    próprio jogo com `A1`, `C1` e `I3` diferem **15 e 29** pixels, todos na
+    cabeça; a silhueta do corpo inteiro não separa estilos, e a foto `A1` do
+    jogo casa com o nosso `I3` melhor que com o nosso `A1`. Esta linha dizia
+    que a foto `I3` casava com o nosso `A1` "por motivo não medido" — o motivo
+    era a armadilha 69. Estilo se confronta no **close-up** (armadilha 67), onde
+    as fotos do jogo diferem 422 e 1.843 pixels.
+69. **Pose por seção deixa sem pose toda cabeça que não é a de referência.** O
+    `HAIR` escolhe uma seção do `MODEL.BIN` — 24 para `A`, 30 para `C1`, 34
+    para `I3` —, o `ANIME.BIN` tem um par de cabeça só, e o `pose()` o buscava
+    pela seção 24. Toda outra cabeça ficava na origem do arquivo, **fora do
+    pescoço**, 23 a 25 primitivas, com todo gate verde — porque todo gate
+    desenhava a tupla de referência. E o defeito **fabricou uma evidência**: o
+    controle de estilo trocado pontuava 696–834 contra 179–426 pela cabeça
+    flutuando, e a §6 (h) foi dada como fechada por ele. Medido e corrigido em
+    2026-09-18 ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md));
+    o `--check-image` agora desenha três estilos e exige zero primitiva sem
+    pose. **Gate que só desenha a referência mede a referência.**
 ---
 
 ## As fontes de verdade binárias
@@ -691,8 +702,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min | `python tools/looks/oracle.py --camera [SLOT]` — `H`, `OFX`, `OFY` e a matriz da câmera lidos do GTE na carga da matriz por peça, com três controles: o mesmo quadro duas vezes, a projeção igual nas doze cargas, e um quadro contado adiante concordando | — | LOOKS-TASK-28 |
-| *(sem alvo ainda)* | idem, mais `work/looks-camera/`; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, em três quadros contados por slot: o mesmo quadro duas vezes de controle, quadros diferentes de segundo controle, e um **estilo de cabelo trocado** que tem de pontuar pior. Fecha a §6 (h) | — | LOOKS-TASK-28 |
-| *(sem alvo ainda)* | idem; ~12 min | `python tools/looks/confront.py --silhouette-styles [SLOT]` — o mesmo, mais **três estilos de cabelo andados no jogo**; hoje **reprova** (armadilha 68), e está separado do `--silhouette` para que um vermelho sem causa medida não viaje dentro do verde | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | idem, mais `work/looks-camera/`; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, em três quadros contados por slot: o mesmo quadro duas vezes de controle, quadros diferentes de segundo controle, com o estilo trocado **impresso e não afirmado** (armadilha 69). Testemunha a pose e o corpo, **não** o cabelo | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | idem; ~12 min | `python tools/looks/confront.py --silhouette-styles [SLOT]` — o mesmo, mais **três estilos de cabelo andados no jogo**; **reprova**, e com razão medida: no corpo inteiro estilo não se separa (armadilha 68) | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |

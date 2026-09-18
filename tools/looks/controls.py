@@ -747,6 +747,16 @@ CONTROLS = (
         "and the pass still counts right",
     ),
     Control(
+        "scene-pose-knows-one-head", "scene.py", "place_for",
+        "    if found is None and where[0] == layout.MODEL:",
+        "    if False:",
+        ("scene",),
+        "the pose keyed by section alone: every hair style but the reference "
+        "picks another MODEL.BIN head, which then keeps its place at the "
+        "file's origin -- the figure draws with its head off the neck and "
+        "every check that draws the reference stays green (LOOKS-TASK-28)",
+    ),
+    Control(
         "scene-standing-accepts-any-order", "scene.py", "standing",
         "                    and middles[above] * UP < middles[below] * UP:",
         "                    and False:",

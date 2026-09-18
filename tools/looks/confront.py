@@ -991,7 +991,20 @@ at 603 to 1483 pixels for a wrong frame of the same walk.
 """
 
 STYLE_SWAP = ("A1", "I3")
-"""The two hair styles a comparison is re-run between, as its control.
+"""The two hair styles a comparison is re-run between, and why it is printed
+and NOT asserted on the full figure.
+
+**This docstring claimed the opposite until LOOKS-TASK-28's fourth session,
+and the claim was an artifact.**  The numbers below -- 656 and 783 pixels
+between styles -- were measured while `pose()` posed only the reference head:
+C1's and I3's heads sat at the file's origin, off the neck, and the "control"
+was scoring a floating head.  With every head posed (`scene.place_for`), at
+the full figure's size our A1 and I3 differ by a few tens of pixels, the
+game's own A1 and I3 photographs by 15 and C1 by 29, and our I3 matches the
+game's A1 picture at 378 against our A1's 399.  The full-body silhouette does
+not separate hair styles, and asserting that it did is what this used to do.
+It is still run and printed, and `--silhouette-styles` asserts it -- and fails.
+The rest of what this said, measured before the fix, follows as it was:
 
 Hair, because it is the field that changes the MESH: measured 2026-09-18 on
 the panel's own size, `A-I3` differs from `A-A1` in 656 of 2686 silhouette
@@ -1162,14 +1175,19 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table):
 STYLE_TUPLES = ("A-A1-A-A-A", "A-C1-A-A-A", "A-I3-A-A-A")
 """Three hair styles walked ON THE GAME, and why three and why these.
 
-**And today they DISAGREE, which is a finding and not a tuning problem.**
-Measured 2026-09-18, with the screen reading `I3 TYPE` and the cursor back on
-`NAT` so the full-body camera is the one measured: the game's picture after
-walking to C1 or I3 matches our **A1** silhouette (412 to 446 pixels) and not
-our C1 or I3 (769 to 1052).  Either the full-body view draws a head that does
-not depend on the style, or the assembly table's HAIR -> head disagrees with
-the game at that size.  `--silhouette-styles` runs it and fails; `--silhouette`
-does not include it.
+**What it measured, twice, and the second time is the one that holds.**  The
+first run found the game's C1 and I3 pictures matching OUR A1 -- and the cause
+was ours: `pose()` posed only the reference head, so our C1 and I3 drew their
+heads at the file's origin (`scene.place_for` fixes it, and `--check-image`
+now guards it).  With every head posed, at the full figure's size, each style
+matches its own by a few percent -- C1 402 against A1's 430, I3 391 against
+412 -- but the game's A1 picture matches our I3 (378) better than our A1 (399).
+The game's own three photographs differ by only 15 and 29 pixels: at this size
+a hair style is a handful of pixels, and the silhouette does not separate them.
+`--silhouette-styles` asserts that it does, and fails; `--silhouette` does not
+include it.  Where a style IS big is the close-up the game shows with a head
+row under the cursor -- measured there, the head band picks the right style in
+2 of 3, A1 being the one it misses.
 
 Three because one is an anchor and two is a pair: what has to hold is that the
 silhouette follows the mesh the SCREEN is showing, in every style the screen
@@ -1289,7 +1307,7 @@ def fit_centre(theirs, projected, size):
 
 
 def _judged(label, theirs, named, cycle, data, text, figure, camera, size,
-            scene, offsets, key) -> list:
+            scene, offsets, key, style_control=False) -> list:
     """One picture against the whole walk.  The problems, and it prints the row.
 
     It is a function because the frame captures and the style captures ask the
@@ -1329,7 +1347,7 @@ def _judged(label, theirs, named, cycle, data, text, figure, camera, size,
             "(%.0f%%), over the %.0f%% a matching figure takes"
             % (label, scores[best], ink, 100.0 * scores[best] / ink,
                100.0 * MATCH_SHARE))
-    if wrong_score < scores[best] * STYLE_MARGIN:
+    if style_control and wrong_score < scores[best] * STYLE_MARGIN:
         problems.append(
             "%s: %s scores %d and %s scores %d -- a style the screen is not "
             "showing has to be at least %.1fx worse, or the silhouette is not "
@@ -1457,7 +1475,7 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                 problems += _judged(
                     "slot %d %s" % (slot, style), mask, named, cycle, data,
                     style, figure, camera, size, scene, offsets,
-                    (slot, style))
+                    (slot, style), style_control=True)
 
     if offsets:
         print("  the picture trails the draw by %s frame(s) of the walk over "

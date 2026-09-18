@@ -376,11 +376,14 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
     window may not import `anime`, `layout` or `pieces`, and a pose applied at
     draw time would be a second placement to keep right beside `shelf()`.
     """
+    import pieces
+
     places = pose(disc, frame)
+    head = (layout.MODEL, pieces.HEAD_SECTION)
     notes["not posed"] = 0
     out = []
     for part in parts:
-        found = places.get((part.file, part.section))
+        found = place_for(places, (part.file, part.section), head)
         if found is None:
             notes["not posed"] += 1
             out.append(part)
@@ -392,6 +395,23 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
                      part.band_unmeasured)
         out.append(moved)
     return out
+
+
+def place_for(places: dict, where: tuple, head: tuple):
+    """The pose of one drawn section, or None.
+
+    **Every head the HAIR row can pick takes the HEAD's pose.**  The row
+    chooses a MODEL.BIN section -- 24 for A, 30 for C1, 34 for I3 -- and
+    ANIME.BIN carries one head pair whichever it is.  Keyed by section alone,
+    every style but the reference kept its head at the file's origin, 23 to 25
+    primitives floating off the neck, and every check stayed green because the
+    checks drew the reference.  Found by LOOKS-TASK-28's silhouette, which drew
+    C1 and I3 headless.
+    """
+    found = places.get(where)
+    if found is None and where[0] == layout.MODEL:
+        found = places.get(head)
+    return found
 
 
 def from_image(image_path: str, text: str,
@@ -490,6 +510,13 @@ own camera translation is the candidate.
 REFERENCE_FRAME = 0
 """The frame of the screen's animation a scene is posed in when none is asked
 for.  Frame 0 of `layout.ANIME_SCREEN_ENTRY`, which is where the walk starts."""
+
+POSED_STYLES = ("A-A1-A-A-A", "A-C1-A-A-A", "A-I3-A-A-A")
+"""Three hair styles whose heads are three different MODEL.BIN sections.
+
+24, 30 and 34.  One is the reference and passes by construction; the other two
+are why this exists -- a pose keyed by one head section left theirs unposed.
+"""
 
 SIDES_APART = 55
 """How far apart in y the two sides of one limb pair may sit, in file units.
@@ -1333,6 +1360,15 @@ def _checks(c) -> None:
                "upper arm b": -300, "forearm a": -230, "forearm b": -230,
                "thigh a": -160, "thigh b": -160, "shin a": -50, "shin b": -50,
                "foot a": 10, "foot b": 10}
+    # -- whichever head the HAIR row picks, it is posed as the head ---------
+    fake = {(layout.MODEL, 24): "the head's pose",
+            (layout.EDT_MOD, 5): "a thigh's pose"}
+    ok("a head of another style takes the head's pose",
+       place_for(fake, (layout.MODEL, 34), (layout.MODEL, 24))
+       == "the head's pose")
+    ok("and a body section with no pose of its own gets none, not the head's",
+       place_for(fake, (layout.EDT_MOD, 9), (layout.MODEL, 24)) is None)
+
     ok("a figure in order is a figure", standing(upright) == [],
        "%r" % (standing(upright),))
     boot_up = dict(upright, **{"foot a": -170, "foot b": -170})
@@ -1573,7 +1609,8 @@ def _check_image(image_path: str) -> int:
     # captures, and this says the DISC's own bytes agree with it.
     with iso_source.open_disc(image_path) as disc:
         posed = {name: disc.read(name)
-                 for name in (layout.EDT_MOD, layout.MODEL, layout.ANIME)}
+                 for name in (layout.EDT_MOD, layout.MODEL, layout.ANIME,
+                              layout.DAT2D)}
     places = pose(posed, REFERENCE_FRAME)
     scans = {name: section.scan(posed[name], layout.GEOMETRY_START[name])
              for name in (layout.EDT_MOD, layout.MODEL)}
@@ -1607,6 +1644,27 @@ def _check_image(image_path: str) -> int:
                   for boot, shin in (("foot a", "shin a"), ("foot b", "shin b"))
                   if boot in depths and shin in depths)))
         problems += standing(middles, depths)
+
+    # --- every head the HAIR row picks is posed ------------------------------
+    #
+    # `standing` measures the figure the reference tuple draws, and the
+    # reference wears section 24 -- the one head `pose()` knew by section.
+    # Every other style picks another section and kept its head at the file's
+    # origin, 23 to 25 primitives off the neck, while every check above stayed
+    # green.  LOOKS-TASK-28's silhouette found it by drawing C1 and I3
+    # headless; this is the guard that does not need an emulator to.
+    for text in POSED_STYLES:
+        drawn = build(posed, looks.parse_tuple(text), assembly.HEAD_FIGURE,
+                      REFERENCE_FRAME)
+        heads = sorted({part.section for part in drawn.parts
+                        if part.file == layout.MODEL})
+        left = drawn.notes.get("not posed", 0)
+        print("      %s draws head section(s) %s, %d primitive(s) not posed"
+              % (text, heads, left))
+        if left:
+            problems.append(
+                "%s leaves %d primitive(s) without a pose -- its head sits at "
+                "the file's origin, off the neck" % (text, left))
 
     print("scene --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))
