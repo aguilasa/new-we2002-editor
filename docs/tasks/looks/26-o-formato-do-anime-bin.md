@@ -47,8 +47,11 @@ status: concluído
     exige saber **a câmera daquele quadro**, que está no mesmo JSON (`camera`),
     e não só os ângulos do arquivo. Comparar a matriz crua do `ANIME.BIN`
     contra o JSON sem compor a câmera dá diferença em tudo e não é achado;
-  - **são 12 cargas por passada, não 11**: as onze peças da figura mais uma
-    raiz sem ponteiro de modelo;
+  - **são 12 cargas por passada, não 11**: uma por peça desenhada, e a última
+    sem ponteiro de modelo que a nomeie. Este item dizia *"as onze peças da
+    figura mais uma raiz"* até 2026-09-18
+    ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)): não há raiz — a
+    carga sem ponteiro é a da **segunda chuteira**, a seção 10;
   - **a comparação é exata** — meias-palavras 4.12 —, e o formato da struct do
     jogo é 9 rotações, 2 bytes de enchimento, 3 translações de 32 bits;
   - **o quadro N é contado a partir do `load_state`**, e duas capturas do mesmo

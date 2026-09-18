@@ -765,6 +765,16 @@ CONTROLS = (
         "walk is 27 units where that is hundreds",
     ),
     Control(
+        "scene-boot-may-hang-off-another-leg", "scene.py", "standing",
+        "        if deep > ANKLE_DEEP:",
+        "        if False:",
+        ("scene",),
+        "each boot allowed to sit anywhere in depth: the second boot was "
+        "placed by mirroring the first until CORR-LOOKS-062, which leaves "
+        "every HEIGHT right and puts the foot 276 units from its own shin "
+        "against the 59 an ankle takes",
+    ),
+    Control(
         "oracle-pose-reads-the-pointer-on-time", "oracle.py", "_named_pass",
         "        drawn = found[(order + DRAW_LAG) % count]",
         "        drawn = found[order]",

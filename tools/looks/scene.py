@@ -377,7 +377,6 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
     """
     places = pose(disc, frame)
     notes["not posed"] = 0
-    notes["placed by its mirror"] = 0
     out = []
     for part in parts:
         found = places.get((part.file, part.section))
@@ -385,9 +384,7 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
             notes["not posed"] += 1
             out.append(part)
             continue
-        matrix, place, mirrored = found
-        if mirrored:
-            notes["placed by its mirror"] += 1
+        matrix, place = found
         moved = Part(part.file, part.section, part.primitive,
                      drawn_points(part.points, matrix, place), part.uvs,
                      part.surface, part.why, part.clut, part.band,
@@ -467,26 +464,61 @@ class Builder:
 
 ONE = 4096  # not-an-address: 1.0 in the 4.12 the matrix is in
 
-REFERENCE_PIECE = "root"
+REFERENCE_PIECE = "foot b"
 """The piece every place is measured from.
 
-It is the one load of a pass that carries no model pointer (LOOKS-TASK-25), so
-nothing is drawn for it -- what it gives is the origin.  ANIME.BIN stores
-places relative to one another, and the figure is assembled around this one.
+ANIME.BIN stores places relative to one another, so assembling means picking
+one of them and subtracting it; the game does the same and lets its camera
+carry the rest.  This is the twelfth pair of a frame, and it is a PIECE like
+the other eleven -- the second boot, measured in CORR-LOOKS-062.
+
+It read `root` until 2026-09-18, on the reading that the twelfth load draws
+nothing: `anime.PIECE_ORDER` carries the three measurements that name it.  What
+changes here beyond the name is that the second boot is no longer PLACED by
+mirroring the first -- it has a place of its own, and it is this one, so it
+sits at the origin.
+
+**The anchor swings, and that is a real consequence.**  A boot in a walk moves
+against the body, so posing frame after frame around this one slides the whole
+figure by the stride.  It does not show in one frame, which is all the panel
+draws today; the walk (LOOKS-TASK-32) is where the anchor has to become
+something that does not swing, and the file gives no such piece -- the game's
+own camera translation is the candidate.
 """
 
 REFERENCE_FRAME = 0
 """The frame of the screen's animation a scene is posed in when none is asked
 for.  Frame 0 of `layout.ANIME_SCREEN_ENTRY`, which is where the walk starts."""
 
-SIDES_APART = 45
+SIDES_APART = 55
 """How far apart in y the two sides of one limb pair may sit, in file units.
 
 Measured over ALL seventeen frames of the screen's walk and not over the one
-frame the check poses (pitfall 49): the widest a mirrored pair ever gets is
-the shin at 26.7, with the forearm at 16.2 and the boots at 0.  A walking
-figure swings, so this is not zero and cannot be; what it catches is a pose
-read one piece off, which puts one elbow above its own shoulder.
+frame the check poses (pitfall 49): the widest a pair ever gets is the BOOTS
+at 36.7, then the shin at 26.7, the forearm at 16.0, the thigh at 12.1 and the
+upper arm at 5.9.  A walking figure swings, so this is not zero and cannot be;
+what it catches is a pose read one piece off, which puts one elbow above its
+own shoulder.
+
+**It read 45 until CORR-LOOKS-062, on a measurement that had the boots at 0.**
+That zero was not the walk, it was the mirror: the second boot was placed by
+reflecting the first, and a reflection in z leaves y untouched, so the pair
+this check compares was the same number twice.  The widest pair of the walk
+turned out to be exactly that one, and the value moved to clear it.
+"""
+
+ANKLE_DEEP = 90
+"""How far in z a boot may sit from its own shin's middle, in file units.
+
+Measured over the seventeen frames, both boots: 41.3 on the `a` side and 59.1
+on the `b`, so this clears the widest by half again (pitfall 49).
+
+This is the check the pair comparison could not be.  The two boots of a stride
+are legitimately far apart in z -- 219 at the widest of the walk, because that
+is what a stride IS -- so no threshold between them can separate a stride from
+a boot in the wrong place.  What has a narrow range is the ANKLE, which is the
+rigid joint the draw lag was settled by (`anime.PIECE_ORDER`): the mirror that
+CORR-LOOKS-062 removed put `foot b` 276.5 from its shin, three times this.
 """
 
 
@@ -506,12 +538,29 @@ def piece_names(disc) -> dict:
     return out
 
 
+def _figure_sections(disc) -> dict:
+    """{model list: the EDT_MOD sections that list draws}.
+
+    The file's own two lists (`modelfile`), not a grouping made here: the
+    goalkeeper and the outfield player share the boots and nothing else, and
+    which list a section belongs to is the only thing that says whose leg a
+    boot is on.
+    """
+    import modelfile
+
+    data = disc[layout.EDT_MOD]
+    scan = section.scan(data, layout.GEOMETRY_START[layout.EDT_MOD])
+    index_of = {one.offset: i for i, one in enumerate(scan.sections)}
+    return {model.index: {index_of[target] for target in model.targets}
+            for model in modelfile.read_models(data)}
+
+
 def mirror_of(name: str) -> str:
     """The partner of a mirrored piece, or None.
 
     `pieces.py` pairs the limbs and calls one of each pair `a` and the other
-    `b`; ANIME.BIN carries a pair for one boot and not for the other, so the
-    one it does not carry is placed from its partner's.
+    `b`.  What uses it is `standing()`, to check a pair against itself; nothing
+    places a piece from its partner any more (CORR-LOOKS-062).
     """
     if name.endswith(" a"):
         return name[:-2] + " b"
@@ -531,10 +580,14 @@ def pose(disc, frame: int = REFERENCE_FRAME,
     bones would draw a figure that looks right and is nobody's -- the same
     failure `shelf()` refuses to commit by being honest about being a shelf.
 
-    The one piece whose place is NOT measured is the second boot: the file
-    carries eleven pairs for twelve drawn sections, and the screen reads both
-    boot sections (LOOKS-TASK-26).  It is placed by mirroring its partner in
-    z, and `posed_notes()` says so rather than letting it pass for measured.
+    **Every drawn piece has a place of its own here, the second boot too.**
+    Until CORR-LOOKS-062 that boot was the exception -- placed by mirroring its
+    partner in z, because the file was read as carrying eleven pairs for twelve
+    drawn sections.  It carries twelve: the pair that was called `root` is the
+    second boot (`anime.PIECE_ORDER`).  The mirror was not a small error.  It
+    put the boot 258 units from its own shin against the other boot's 18, and
+    the leg in the air ended without a foot, because the two legs of a stride
+    are not reflections of each other.
     """
     import anime
 
@@ -552,41 +605,50 @@ def pose(disc, frame: int = REFERENCE_FRAME,
     out = {}
     for where, name in piece_names(disc).items():
         carried = by_name.get(name)
-        mirrored = False
-        if carried is None:
-            partner = mirror_of(name)
-            carried = by_name.get(partner) if partner else None
-            mirrored = carried is not None
         if carried is None:
             continue
         matrix = anime.rotation(carried["angles"])
-        place = [carried["position"][axis] - origin[axis] for axis in range(3)]
-        if mirrored:
-            matrix = _mirrored_in_z(matrix)
-            place[2] = -place[2]
-        out[where] = (matrix, tuple(place), mirrored)
+        place = tuple(carried["position"][axis] - origin[axis]
+                      for axis in range(3))
+        out[where] = (matrix, place)
     return out
 
 
 CHAINS = (("head", "torso", "thigh a", "shin a", "foot a"),
-          ("upper arm a", "forearm a"))
+          ("torso", "thigh b", "shin b", "foot b"),
+          ("upper arm a", "forearm a"),
+          ("upper arm b", "forearm b"))
 """The pieces that have to come in this order DOWN the figure.
 
-Two chains and not one: the shoulder sits at the torso's own middle -- 3 units
+Four chains and not one: the shoulder sits at the torso's own middle -- 3 units
 apart, measured -- so an arm is not "below the torso", and demanding it would
 be anatomy invented to make a check pass.  What is here is what the model
 files themselves say: the thigh's origin is its hip and it reaches 111 units
 down, the shin's is its knee, the boot's is its ankle.
+
+**Both sides, since CORR-LOOKS-062.**  Naming only the `a` pieces left the
+whole `b` leg out of every order this asserts, and the boot that was wrong was
+`foot b` -- the one chain that could have caught it was the one not written.
+The pair check below does not cover for that: it compares a piece with its own
+partner, so a leg that is wrong in the same way on both sides passes it.
 """
 
 
-def standing(middles: dict) -> list:
+def standing(middles: dict, depths: dict = None) -> list:
     """Everything wrong with where the pieces ended up.  [] is a figure.
 
-    *middles* is {piece name: the middle of its y}, in the file's own units.
-    This is the assertion LOOKS-TASK-27 opened for and could not close until
-    the draw lag was measured: one stop off, every number is in range, each
-    piece is individually perfect, and the boot comes out at thigh height.
+    *middles* is {piece name: the middle of its y}, in the file's own units,
+    and *depths* the same in z.  This is the assertion LOOKS-TASK-27 opened
+    for and could not close until the draw lag was measured: one stop off,
+    every number is in range, each piece is individually perfect, and the boot
+    comes out at thigh height.
+
+    **The depths are what makes it able to fail on a boot** (CORR-LOOKS-062).
+    Height alone cannot: a boot placed by mirroring its partner has its
+    partner's height exactly, so every y here agreed while the foot sat a
+    stride away from its own leg.  Passing them is optional so that the
+    made-up figures of the self check can still be one dict, but a run with a
+    disc in hand passes both.
     """
     bad = []
     for order in CHAINS:
@@ -610,19 +672,20 @@ def standing(middles: dict) -> list:
                 "%s sits %.0f from %s, over the %d a walking pose takes -- the "
                 "two sides are not the same figure"
                 % (left, apart, right, SIDES_APART))
+    # And each boot is on the end of its OWN leg.  The ankle is the one joint
+    # of this figure that holds rigid (`anime.PIECE_ORDER`), so it is the one
+    # distance a threshold can be written for.
+    for side in ("a", "b"):
+        boot, shin = "foot " + side, "shin " + side
+        if depths is None or boot not in depths or shin not in depths:
+            continue
+        deep = abs(depths[boot] - depths[shin])
+        if deep > ANKLE_DEEP:
+            bad.append(
+                "%s sits %.0f in z from %s, over the %d an ankle takes -- that "
+                "boot is not on that leg"
+                % (boot, deep, shin, ANKLE_DEEP))
     return bad
-
-
-def _mirrored_in_z(matrix: list) -> list:
-    """The same turn seen in a mirror across z.
-
-    `pieces.py` measured that the limbs pair by reflection in z, so the
-    partner's turn is this one with the z row and column negated -- which is
-    `M . R . M` for `M = diag(1, 1, -1)`, written out.
-    """
-    signs = (1, 1, -1)
-    return [matrix[row * 3 + column] * signs[row] * signs[column]
-            for row in range(3) for column in range(3)]
 
 
 def drawn_points(points, matrix, place) -> list:
@@ -1020,9 +1083,14 @@ def _checks(c) -> None:
     ok("a boot at thigh height is not", standing(boot_up))
     ok("and the message names the two pieces out of order",
        "foot a" in standing(boot_up)[0] and "shin a" in standing(boot_up)[0])
-    # The b side, and deliberately: the chains above only name the a pieces,
-    # so moving b is what leaves the pair check as the only thing that can
-    # catch it.
+    # The b side, which the chains name since CORR-LOOKS-062 -- before that
+    # the pair check below was the only thing that could catch it, and a boot
+    # is exactly what the pair check cannot catch.
+    boot_up_b = dict(upright, **{"foot b": -170})
+    ok("a boot at thigh height on the b leg is not either",
+       standing(boot_up_b))
+    ok("and the message names the b pieces out of order",
+       "foot b" in standing(boot_up_b)[0] and "shin b" in standing(boot_up_b)[0])
     lopsided = dict(upright, **{"forearm b": -230 + SIDES_APART * 2})
     ok("one arm hung far from its own pair is not either",
        standing(lopsided))
@@ -1030,6 +1098,30 @@ def _checks(c) -> None:
     ok("a pair inside the swing of a walk is left alone",
        standing(dict(upright,
                      **{"forearm b": -230 + SIDES_APART - 1})) == [])
+
+    # -- the boot is on its own leg, in z ----------------------------------
+    #
+    # The red case is the defect CORR-LOOKS-062 found, written as it was: the
+    # second boot placed by mirroring the first, which leaves every HEIGHT
+    # right -- `mirrored` below passes `standing(middles)` with no depths, and
+    # that is the point, not an aside.
+    # The numbers are frame 0's own, off the disc: `--check-image` prints the
+    # two ankles as 41 and 23, and the mirror put the second boot at +236.
+    square = {"shin a": -195.0, "foot a": -236.0, "shin b": -40.0,
+              "foot b": -17.0}
+    ok("a figure whose boots are each on their own leg is a figure",
+       standing(upright, square) == [], "%r" % (standing(upright, square),))
+    mirrored = dict(square, **{"foot b": 236.0})
+    ok("a boot placed by mirroring its partner is not",
+       standing(upright, mirrored))
+    ok("and it passes on heights alone, which is why the depths are here",
+       standing(upright) == [])
+    ok("the message names the boot and its own shin",
+       "foot b" in standing(upright, mirrored)[0]
+       and "shin b" in standing(upright, mirrored)[0])
+    ok("an ankle inside the swing of a walk is left alone",
+       standing(upright, dict(square,
+                              **{"foot b": -40.0 + ANKLE_DEEP - 1})) == [])
 
     ok("the scene reports what it could not texture instead of hiding it",
        set(Scene([], {}, {}, 0, {"no image": 0}).notes) == {"no image"})
@@ -1206,17 +1298,35 @@ def _check_image(image_path: str) -> int:
     scans = {name: section.scan(posed[name], layout.GEOMETRY_START[name])
              for name in (layout.EDT_MOD, layout.MODEL)}
     names = piece_names(posed)
-    middles = {}
-    for where, (matrix, place, _mirrored) in places.items():
-        points = [(v.x, v.y, v.z) for v in scans[where[0]].sections[
-            where[1]].vertices]
-        heights = [one[1] for one in place_points(points, matrix, place)]
-        middles[names[where]] = (min(heights) + max(heights)) / 2.0
-    for order in CHAINS:
-        print("      the figure, top down: %s"
-              % ", ".join("%s %.0f" % (name, middles[name]) for name in order
-                          if name in middles))
-    problems += standing(middles)
+    # ONE FIGURE AT A TIME, since CORR-LOOKS-062.  The two model lists name
+    # their sections apart -- the outfield player's torso is section 0 and the
+    # goalkeeper's is 11 -- and both are called "torso" here, so a single dict
+    # kept whichever came last and asserted a figure that is neither.  The two
+    # boots are shared, which is why the leg they belong to has to be checked
+    # against the legs of the SAME list.
+    for lists, over in sorted(_figure_sections(posed).items()):
+        middles, depths = {}, {}
+        for where, (matrix, place) in places.items():
+            if where[0] == layout.EDT_MOD and where[1] not in over:
+                continue
+            points = [(v.x, v.y, v.z) for v in scans[where[0]].sections[
+                where[1]].vertices]
+            moved = place_points(points, matrix, place)
+            heights = [one[1] for one in moved]
+            deep = [one[2] for one in moved]
+            middles[names[where]] = (min(heights) + max(heights)) / 2.0
+            depths[names[where]] = (min(deep) + max(deep)) / 2.0
+        for order in CHAINS:
+            print("      figure %d, top down: %s"
+                  % (lists, ", ".join("%s %.0f" % (name, middles[name])
+                                      for name in order if name in middles)))
+        print("      figure %d, the ankles in z: %s"
+              % (lists, ", ".join(
+                  "%s to %s %.0f"
+                  % (boot, shin, abs(depths[boot] - depths[shin]))
+                  for boot, shin in (("foot a", "shin a"), ("foot b", "shin b"))
+                  if boot in depths and shin in depths)))
+        problems += standing(middles, depths)
 
     print("scene --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

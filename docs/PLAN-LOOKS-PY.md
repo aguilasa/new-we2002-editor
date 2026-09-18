@@ -2621,8 +2621,15 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   nenhum nome sai de tamanho nem de ordem suposta. A passada tem **12 cargas**
 >   nos dois slots: as onze peças da figura daquele slot (o goleiro usa as
 >   seções 11 a 19 e o jogador de linha as 0 a 8, e os dois compartilham a 9) e
->   uma que **não carrega ponteiro nenhum**, com matriz igual à da câmera a
->   menos de uma volta pequena — a raiz.
+>   uma que **não carrega ponteiro nenhum** — a carga da **segunda chuteira**,
+>   a seção 10. Ponteiro não a nomeia porque cada carga é nomeada pela parada
+>   seguinte e a primeira parada de uma passada vem com os três registradores
+>   zerados; quem a nomeia é a junta. Esta linha dizia *"a raiz"*, com matriz
+>   *"igual à da câmera a menos de uma volta pequena"*, até 2026-09-18
+>   ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)): a rotação dessa
+>   parada balança **4362** ao longo de oito quadros, acompanhando os 4074 da
+>   canela `b`, enquanto a da câmera é constante — quem quase não se mexe é o
+>   tronco, com 185.
 > - **A passada se fecha pela sequência se repetindo**, nunca pelo contador de
 >   quadros: o `internal_frame_number` vira **no meio** da passada, e cortar por
 >   ele entrega cinco peças em vez de doze.
@@ -2634,16 +2641,19 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 > - **A hierarquia se mede pelo quadro da mãe**, não pela anatomia: a origem da
 >   filha vista de dentro da mãe, `d = M_mãe⁻¹ (t_filha − t_mãe)`, é constante
 >   se há junta e balança se não há. **Cinco pares se separam nos dois slots** —
->   raiz↔cabeça (14,5x e 14,6x), canela a↔coxa a (10,5x e 9,2x), canela b↔coxa b
->   (9,9x e 12,8x), braço a↔tronco (5,3x e 4,9x) e braço b↔antebraço a (5,0x e
->   4,6x) —, e **nenhuma linha fora desses cinco pares passa de 2,5x** (2,2x no
->   slot 1; 2,5x no slot 2, a cabeça, cuja melhor candidata própria é o tronco
->   enquanto o par verdadeiro a nomeia do lado da raiz), o que é dizer que não
->   se separam. A folga é de **4,6x contra 2,5x**. Esta frase dizia
->   *"todos os outros ficam abaixo de 2,3x"* até 2026-09-18
->   ([`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)): 2,3x é o teto do
->   slot 1 lido como se fosse dos dois, e o `--poses` imprime 2,5x no slot 2
->   desde a primeira corrida. **O esqueleto do jogo não é rígido**: os pés, os antebraços
+>   cabeça↔tronco (14,5x e 14,6x), chuteira a↔canela a (10,5x e 9,2x),
+>   chuteira b↔canela b (9,9x e 12,8x), antebraço a↔braço a (5,3x e 4,9x) e
+>   antebraço b↔braço b (5,0x e 4,6x) —, e **nenhuma linha fora desses cinco
+>   pares passa de 3,3x** (3,3x no slot 1, o tronco; 2,5x no slot 2), o que é
+>   dizer que não se separam. A folga é de **4,6x contra 3,3x**. Os nomes destes
+>   pares eram outros — *raiz↔cabeça, canela a↔coxa a, canela b↔coxa b,
+>   braço a↔tronco, braço b↔antebraço a* —, e cada um estava um elo fora: são os
+>   mesmos números lidos com a nomeação de antes do atraso de desenho, que só
+>   foi corrigida no fim de 2026-09-18
+>   ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)). O teto de fora
+>   também mudou com a nomeação: foi *"2,3x"* até
+>   [`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md), depois 2,5x, e a
+>   corrida com os nomes certos imprime 3,3x. **O esqueleto do jogo não é rígido**: os pés, os antebraços
 >   restantes, as coxas e o tronco não ficam a distância fixa de candidato
 >   nenhum. Isso é resultado, e é justamente por isso que o leitor não compõe.
 > - **`y` cresce para baixo**, como o `UP = -1` do `scene.py` já supunha: a
@@ -2654,13 +2664,24 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   e `z` por ~0,80, então `|t_filha − t_mãe|` varia 25% com a peça girando,
 >   sem osso nenhum esticar. Quem desfaz a câmera é o `M_mãe⁻¹` acima.
 >
-> **O que fica aberto, medido e não explicado:** a tela desenha **dois**
-> chuteiras e só **uma** seção de chuteira carrega matriz. As seções 9 e 10 são
-> lidas **as duas** — watchpoint de leitura, uma corrida por seção, 2 e 2,
-> com uma seção desenhada como controle —, então a segunda chuteira é desenhada
-> **sem carga de matriz própria**, reaproveitando a rotação que já está no GTE.
-> Um leitor que suponha uma matriz por peça desenhada erra essa. Encaminhado
-> para a [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md).
+> **O que ficou aberto aqui, e fechou em 2026-09-18**
+> ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)): esta seção dizia
+> que a tela desenha **duas** chuteiras e só **uma** seção de chuteira carrega
+> matriz, e que a segunda seria desenhada *"sem carga de matriz própria,
+> reaproveitando a rotação que já está no GTE"*. As seções 9 e 10 são lidas as
+> duas — watchpoint de leitura, uma corrida por seção, 2 e 2, com uma seção
+> desenhada como controle —, e **as duas carregam matriz**: são doze cargas
+> para doze seções desenhadas. O que falta à segunda é **nome**, não carga.
+>
+> A carga sem ponteiro é o **par 12** de cada quadro do `ANIME.BIN`, lido até
+> então como uma raiz que não desenha nada. Ele é a chuteira `b`, e a junta o
+> diz três vezes: no **arquivo**, sobre os dezessete quadros da caminhada, a
+> origem dele no referencial da canela `b` fica em (0,2, 69,1, −2,2) com
+> dispersão máxima **5,6** — o mesmo tornozelo que a canela `a` segura a
+> (0,3, 68,2, 3,3) com 5,1 —, contra 356 medido da canela errada e 229 do
+> tronco; nas **capturas**, 16,8 no slot 1 e 15,6 no slot 2, contra 212 e 195
+> da canela errada; e a aritmética fecha, porque a seção que captura nenhuma
+> nomeia é justamente a 10.
 
 **(l) O formato do `ANIME.BIN`.** Os 204 ponteiros, o que cada um nomeia, e se a
 varredura fecha no EOF — o rito da Fase 1 (§1.4).
@@ -2820,7 +2841,9 @@ antes do teste:
    > (`oracle.py --pose-lag`). Corrigido o atraso, os pares `a`/`b` ficam
    > simétricos — quadris a −224 e −217, ombros a −341 e −342 — e os lugares
    > do próprio arquivo empilham a figura da cabeça em −420 à chuteira em 0,
-   > que é o chão em que a raiz se apoia.
+   > que é a chuteira contra a qual todos os outros lugares são medidos
+   > ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md); esta linha dizia
+   > "o chão em que a raiz se apoia", e a raiz é a segunda chuteira).
 3. **Silhueta contra silhueta.** A máscara do boneco no nosso quadro contra a
    do emulador, no mesmo N, com a câmera da (m). O controle é o emulador contra
    ele mesmo em dois `load_state` — que já dá **zero pixel** (§5.3) — e um

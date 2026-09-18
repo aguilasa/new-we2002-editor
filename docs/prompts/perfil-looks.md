@@ -432,17 +432,29 @@ Não se revertem sem o usuário pedir.
     `10: 0` contra `controle: 4` — que se lê como "a tela nunca toca o `foot
     b`" —, e uma corrida **por seção** dá **2 e 2**: ela é lida, e a janela
     mostrava duas chuteiras o tempo todo. É a armadilha 42 pelo outro lado: lá
-    a amostra era pequena demais, aqui o instrumento era disputado. E a
-    conclusão que sobrou é medição: **uma peça pode ser desenhada sem carga de
-    matriz própria**, reaproveitando a rotação que já está no GTE.
+    a amostra era pequena demais, aqui o instrumento era disputado.
+    **E a conclusão que parecia sobrar era falsa.** Ela dizia *"uma peça pode
+    ser desenhada sem carga de matriz própria, reaproveitando a rotação que já
+    está no GTE"*, e a passada tem **doze cargas para doze seções desenhadas**
+    ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md), 2026-09-18): a
+    carga da seção 10 existe, o que não existe é **quem a nomeie**, porque cada
+    carga é nomeada pelo ponteiro da parada seguinte e a primeira parada de uma
+    passada não carrega ponteiro. Ponteiro que não nomeia não é peça que não
+    existe — é a armadilha 47 pela terceira vez, com o instrumento calado em
+    vez de disputado.
 48. **Espalhe os quadros, ou a hierarquia não se mede.** Dez quadros
     consecutivos mexem tão pouco no boneco que toda peça parece grudada em toda
     peça — a melhor mãe ganha da segunda por 1,0x a 8,6x, o que não nomeia
     nada. Com oito quadros espalhados por 140, as juntas verdadeiras vão a
-    4,6x-14,6x e nenhuma linha fora dos cinco pares passa de **2,5x** — dizia
+    4,6x-14,6x e nenhuma linha fora dos cinco pares passa de **3,3x** — dizia
     2,3x até 2026-09-18
     ([`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)), que é o teto do
-    slot 1; o slot 2 imprime 2,5x na cabeça. E **distância entre peças não
+    slot 1 sozinho, e 2,5x até a
+    [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md), do mesmo dia: com
+    os nomes certos das peças, o teto de fora é o **tronco** no slot 1, a 3,3x,
+    e o slot 2 imprime 2,5x. As cinco juntas verdadeiras também trocaram de
+    nome ali, e cada uma estava um elo fora — o que era "raiz↔cabeça" é
+    cabeça↔tronco, e o que era "canela↔coxa" é chuteira↔canela. E **distância entre peças não
     mede osso**: a câmera escala `y` por 0,61 e `x`/`z` por 0,80, então
     `|t_filha − t_mãe|` varia 25% com a peça girando, sem osso nenhum esticar —
     quem desfaz a câmera é `M_mãe⁻¹`.

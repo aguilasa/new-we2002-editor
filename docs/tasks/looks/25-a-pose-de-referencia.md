@@ -60,8 +60,12 @@ cabeça —, e dizer qual peça é filha de qual.
       e a segunda conferência é do próprio comando (`reading a constant`).
 - [x] A hierarquia medida, com a evidência. **E o resultado é que ela não é
       rígida:** cinco pares se separam por 4,6x a 14,6x nos dois slots e
-      nenhuma linha fora deles passa de 2,5x (2,2x no slot 1, 2,5x no 2 —
-      corrigido de 2,3x em 2026-09-18, [`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)). O leitor não compõe hierarquia — o que
+      nenhuma linha fora deles passa de 3,3x (3,3x no slot 1, 2,5x no 2 —
+      corrigido de 2,3x para 2,5x em 2026-09-18,
+      [`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md), e de 2,5x para
+      3,3x no mesmo dia pela
+      [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md), que trocou o
+      nome de cada peça por aquela que a matriz desenha). O leitor não compõe hierarquia — o que
       chega ao GTE por peça já é absoluto.
 - [x] A convenção escrita: ordem de aplicação, escala 4.12, e o sinal de `y`
       contra o `UP = -1` do `scene.py`. Medido: `y` cresce para baixo, a
@@ -179,9 +183,12 @@ oracle --pose: 2 problem(s) over 2 frame(s) and 1 slot(s)
 3. **Dez quadros seguidos não nomeiam hierarquia nenhuma.** O boneco se mexe
    tão pouco entre quadros vizinhos que toda peça parece grudada em toda peça:
    1,0x a 8,6x. Espalhando os oito quadros por 140, as juntas verdadeiras vão a
-   4,6x-14,6x e nenhuma linha fora dos cinco pares passa de 2,5x — 2,2x no
-   slot 1 e 2,5x no slot 2, na cabeça, cuja melhor candidata própria é o
-   tronco enquanto o par verdadeiro a nomeia do lado da raiz.
+   4,6x-14,6x e nenhuma linha fora dos cinco pares passa de 3,3x — o tronco
+   no slot 1, e 2,5x no slot 2. Os números desta task saíram com a nomeação
+   de antes do atraso de desenho, então cada par estava um elo fora: o que
+   aqui se lê "raiz↔cabeça" é cabeça↔tronco, e as duas "canela↔coxa" são
+   chuteira↔canela ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)).
+   As transcrições abaixo ficam como foram lidas.
 4. **Distância entre peças pareceu osso elástico, e era a câmera.** A câmera
    escala `y` por 0,61 e `x`/`z` por 0,80, então `|t_filha − t_mãe|` varia 25%
    com a peça girando. A conclusão "nenhum osso é rígido" chegou a ser escrita

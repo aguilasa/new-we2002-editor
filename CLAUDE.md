@@ -906,8 +906,19 @@ Cinco coisas que custam tempo se descobertas tarde:
   jogo entrega ao GTE por peça é a câmera já composta com a volta daquela peça,
   então um leitor reproduz doze transformações prontas em vez de compor uma
   hierarquia — medido em 2026-09-18, com cinco juntas se separando e o resto
-  não. E **uma peça pode ser desenhada sem carga de matriz própria**: a tela
-  mostra duas chuteiras e só uma seção de chuteira carrega matriz.
+  não.
+- **São doze cargas de matriz e doze seções desenhadas, uma por peça.** Esta
+  linha dizia o contrário até 2026-09-18 — *"uma peça pode ser desenhada sem
+  carga de matriz própria: a tela mostra duas chuteiras e só uma seção de
+  chuteira carrega matriz"* —, e o erro é do **instrumento**, não do jogo
+  ([`CORR-LOOKS-062`](docs/tasks/looks/CORR-LOOKS-062.md)). Cada carga é
+  nomeada pelo ponteiro de modelo da parada **seguinte** (o atraso acima), e a
+  primeira parada de uma passada não carrega ponteiro nenhum: a carga da
+  segunda chuteira é a única que fica sem quem a nomeie. Ela foi lida como
+  "raiz" — peça que não desenha —, e é a **seção 10**. Quem a nomeia é a junta:
+  a origem dela no referencial da própria canela `b` fica a 69,1 unidades com
+  dispersão 5,6 nos dezessete quadros do arquivo, contra 5,1 do outro
+  tornozelo, e nas capturas 16,8 contra 212 da canela errada.
 - **Janela e tabela concordam de graça; quem desempata é o jogo.** A janela
   não decide nada sobre a tela — as travas, a volta do cursor e o texto de
   cada valor saem do `screen.json` —, então o `looks_ui` prova que a janela não

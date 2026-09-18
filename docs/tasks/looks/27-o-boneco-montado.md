@@ -26,13 +26,17 @@ status: concluído
     peça —, então montar não é compor hierarquia: é aplicar doze
     transformações prontas. O esqueleto do jogo **não é rígido** (cinco juntas
     se separam, o resto não), e supor uma cadeia anatômica é inventar;
-  - **a tela desenha DUAS chuteiras e só UMA carrega matriz.** As seções 9 e 10
-    são lidas as duas (watchpoint de leitura, uma corrida por seção, 2 e 2, com
-    seção desenhada de controle), e a passada tem uma carga só para a 9. A
-    segunda chuteira é desenhada **reaproveitando a rotação que já está no
-    GTE**. Uma montagem que espere uma matriz por peça desenhada deixa um pé
-    para trás ou o põe no lugar errado — **medir onde a segunda chuteira cai é
-    desta task**, e a captura da 25 não a nomeia;
+  - **a tela desenha DUAS chuteiras, e as duas carregam matriz.** As seções 9 e
+    10 são lidas as duas (watchpoint de leitura, uma corrida por seção, 2 e 2,
+    com seção desenhada de controle). Este item dizia que só a 9 carregava
+    matriz e que a segunda chuteira seria desenhada *"reaproveitando a rotação
+    que já está no GTE"*; corrigido em 2026-09-18
+    ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)). São doze cargas
+    para doze seções desenhadas, e a carga da seção 10 é a única **sem quem a
+    nomeie**: cada carga é nomeada pelo ponteiro da parada seguinte, e a
+    primeira parada de uma passada não carrega ponteiro. Ela foi lida como uma
+    raiz que não desenha nada, e quem a nomeia é o tornozelo — a junta rígida
+    que já decidiu o atraso de desenho;
   - **`y` cresce para baixo** (cabeça em `y = −8`, pé mais baixo em `y = 60`),
     de acordo com o `UP = -1` que o `scene.py` já usa, e **nenhuma matriz tem
     determinante negativo** — o espelho das peças `b` está na geometria.
@@ -77,7 +81,8 @@ sinal, `z` nos 31:21 com sinal, e `y` em dez bits que o jogo remonta
 **trocados** — os bits 11..15 viram os cinco altos e os 16..20 os cinco baixos
 —, com o sinal nos dois bits de cima da **primeira** palavra. É o código em
 `0x80011F0C..0x80011F50` lido de volta, e a conferência é contra as translações
-que o próprio jogo entregou ao GTE: com o lugar da raiz subtraído e a câmera
+que o próprio jogo entregou ao GTE: com o lugar do décimo segundo par
+subtraído (a segunda chuteira, [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)) e a câmera
 aplicada, **96 peças batem com erro máximo de 4 unidades** (79 delas com 1).
 
 **E com esses lugares a figura não fica em pé.** Montada, a chuteira cai na
@@ -178,10 +183,13 @@ delas olhando a figura:
   Com o atraso lido na hora, o tornozelo não era junta nenhuma.
 
 **E os lugares do próprio arquivo então empilham a figura**: cabeça em −420,
-torso, braços, coxas, canelas e a chuteira em **0**, que é o chão em que a raiz
-se apoia. O `scene.py --check-image` afirma essa ordem (`scene.standing`) e a
-simetria dos pares, com `SIDES_APART = 45` escrito depois de medir os
-**dezessete** quadros da caminhada nos dois lados (o pior é a canela, 26,7).
+torso, braços, coxas, canelas e a chuteira em **0**, que é a chuteira contra a
+qual todos os outros lugares são medidos — dizia "o chão em que a raiz se
+apoia" até a [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md). O
+`scene.py --check-image` afirma essa ordem (`scene.standing`) e a simetria dos
+pares; `SIDES_APART` saiu daqui como **45** e a mesma correção o levou a **55**,
+porque o par mais aberto dos dezessete quadros é o das **chuteiras**, a 36,7, e
+ele aparecia como 0 enquanto a segunda chuteira era posta por espelho.
 
 **Um segundo defeito apareceu só no desenho, e é de referencial.** O
 `part_for` já guarda `y * UP`, então os pontos de uma `Part` estão no
@@ -275,3 +283,20 @@ check_tasks: 138 task(s), ok
    quatro peças o ciclo dá a volta e o atraso 2 devolve o mesmo par rígido ao
    contrário, com a mesma pontuação do atraso certo. Sete peças, na ordem em
    que o jogo desenha, separam.
+
+---
+
+### Depois da task — a segunda chuteira, medida
+
+A revisão desta task abriu a
+[`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md) porque **o pé que o
+Contexto mandava medir não tinha sido medido**: o `scene.pose()` o punha
+espelhando o outro em `z`, e as duas pernas de uma passada não são reflexo uma
+da outra — a chuteira `b` caía a 258 unidades da própria canela contra 18 da
+outra, e a perna no ar terminava sem pé. Fechada em 2026-09-18, e o resultado
+muda o que esta task afirma no Contexto: o par 12 de cada quadro do
+`ANIME.BIN`, lido até então como uma **raiz** que não desenha nada, é a
+**chuteira `b`** — a seção 10, cuja carga de matriz existe e é a única que
+ponteiro nenhum nomeia. As duas asserções que deviam ter pego isso eram vazias:
+o `standing()` só percorria a cadeia do lado `a`, e o par `a`/`b` era conferido
+em `y`, que o espelho preserva.

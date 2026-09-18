@@ -3940,7 +3940,7 @@ def _pose_cycle(game, maps, names):
                 "order": None,
                 "file": where[0] if where else None,
                 "section": where[1] if where else None,
-                "piece": names.get(where) if where else ROOT_PIECE,
+                "piece": names.get(where) if where else UNPOINTED_PIECE,
                 "rotation": rotation,
                 "translation": translation,
                 "angles": angles,
@@ -4029,14 +4029,27 @@ def _named_pass(found):
     return found
 
 
-ROOT_PIECE = "root"
-"""The one load of a pass that carries no model pointer.
+UNPOINTED_PIECE = "foot b"
+"""The one load of a pass that carries no model pointer, and which piece it is.
 
 Measured on 2026-09-18: at that stop the three pointer registers the other
-eleven loads carry the piece in are all zero, and the matrix is the camera's
-to within a small turn while every other one swings with the walk.  It is
-named here rather than left blank because the pass is counted by its pieces
-coming round, and an unnamed member of that count is a hole in the count.
+eleven loads carry the piece in are all zero.  It is named here rather than
+left blank because the pass is counted by its pieces coming round, and an
+unnamed member of that count is a hole in the count.
+
+**It was named `root` -- a piece that draws nothing -- until CORR-LOOKS-062.**
+The pointer cannot name it, so what names it is elimination and the joint: a
+pass loads twelve matrices and draws twelve sections, eleven of them named by
+the pointer of the stop after them, and section 10 -- the second boot -- is
+the one no capture ever names.  Against `shin b` this stop's origin holds to
+4.8 units across the eight captures of slot 1 and 4.3 of slot 2, where against
+`shin a` it spreads 356.8 and 328.3: it is bolted to the b leg's shin, which is
+what an ankle is (`LAG_CHAIN`).
+
+The line this replaces also said the matrix was "the camera's to within a
+small turn", and that was wrong twice over: this stop's rotation swings 4362
+across those frames, tracking shin b's 4074, and the camera's is constant.
+The piece that barely moves is the torso, at 185.
 """
 
 
@@ -4229,16 +4242,25 @@ def _by_piece(record):
     return {one["id"]: one for one in record["pieces"]}
 
 
-LAG_CHAIN = (("shin a", "foot a"), ("shin b", "foot a"))
+LAG_CHAIN = (("shin a", "foot a"), ("shin b", "foot a"),
+             ("shin b", "foot b"), ("shin a", "foot b"))
 """The joint the lag is measured on, and why it is the boot's.
 
 A limb that hangs off another keeps its origin STILL in the parent's own
 frame, whatever the parent does -- that is `joint_offset`, and it needs no
 anatomy.  The boot is the piece to ask because it is the one the wrong lag
 moves furthest: one stop away it inherits the hip's matrix and lands at thigh
-height.  `shin b` is in the pair list as the control that has to LOSE: the
-boot hangs off one shin and not off both, so a lag that makes it rigid
+height.  Each boot comes with the OTHER shin as the control that has to LOSE:
+a boot hangs off one shin and not off both, so a lag that makes it rigid
 against either shin is not measuring a joint.
+
+**Both boots since CORR-LOOKS-062**, and the second one is only nameable
+since then: the twelfth stop of a pass was called `root` and read as drawing
+nothing.  Measured over the captures of 2026-09-18, at the winning lag `shin b ->
+foot b` holds to 4.8 on slot 1 and 4.3 on slot 2, against 356.8 and 328.3 for
+the same boot against the other shin -- and `shin a -> foot a`, 5.0 and 6.4,
+is the same joint on the same run.  A capture from before the rename carries no `foot b`,
+and the two pairs that name it are skipped rather than failing the run.
 """
 
 LAG_MARGIN = 5.0
@@ -4609,13 +4631,22 @@ def check_pose_frames(slot=None, frames=None, verbose=True):
                     if piece["file"] == layout.EDT_MOD))
                 for index in missing:
                     if read[(layout.EDT_MOD, index)]:
-                        print("      section %d is READ and carries no matrix "
-                              "load of its own, so a piece can be drawn "
-                              "without one -- whatever draws it reuses the "
-                              "rotation already in the GTE.  %d section(s) "
-                              "carry a load this pass: %s"
+                        # NOT "drawn without a matrix".  The pass loads one
+                        # matrix per drawn section; what this section has no
+                        # share of is a NAME, because a load is named by the
+                        # model pointer of the stop after it and the first
+                        # stop of a pass carries none (CORR-LOOKS-062).  The
+                        # nameless load is this one, and the ankle says so.
+                        print("      section %d is READ and no load NAMES it: "
+                              "a load is named by the pointer of the next "
+                              "stop, and the first stop of a pass carries no "
+                              "pointer, so the load of the piece drawn before "
+                              "it goes unnamed.  %d load(s) name a section "
+                              "this pass: %s -- and the unnamed one is %s "
+                              "(`anime.PIECE_ORDER`, `LAG_CHAIN`)"
                               % (index, len(loads),
-                                 ", ".join(str(one) for one in loads)))
+                                 ", ".join(str(one) for one in loads),
+                                 UNPOINTED_PIECE))
                 if not read[(layout.EDT_MOD, control)]:
                     problems.append(
                         "slot %d: section %d is drawn every pass and a read "

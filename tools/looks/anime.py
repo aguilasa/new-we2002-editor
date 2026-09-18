@@ -70,7 +70,7 @@ PIECE_PAIRS = 12
 PAIR_BYTES = 8
 BLOCK_END = 0x0000000B  # not-an-address: the word that closes an animation
 WORD_OF_FRAME_FIVE = 0x8FE3FC02  # not-an-address: a packed angle triple
-WORD_OF_ROOT_PLACE = 0xFF1967F8  # not-an-address: a packed place
+WORD_OF_BOOT_PLACE = 0xFF1967F8  # not-an-address: a packed place
 ANGLE_BITS = 10  # not-an-address: the width of one packed angle
 ANGLE_SHIFT = 4  # not-an-address: how far the game shifts an angle left
 ANGLE_STEP = 16  # not-an-address: the unit a stored angle is a multiple of
@@ -87,7 +87,7 @@ in a drawing and total in a comparison."""
 
 PIECE_ORDER = (
     "head", "torso", "upper arm a", "forearm a", "upper arm b", "forearm b",
-    "thigh a", "shin a", "foot a", "thigh b", "shin b", "root",
+    "thigh a", "shin a", "foot a", "thigh b", "shin b", "foot b",
 )
 """Which piece each pair of a frame belongs to, in draw order.
 
@@ -113,7 +113,31 @@ is measured three ways and none of them is "it looks right":
     -341 and -342, where the other reading puts one elbow above its own
     shoulder;
     the file's own places then stack the figure from the head at -420 to the
-    boot at 0, which is the ground the root sits on.
+    boot at 0, which is the boot every other place is measured against.
+
+**And the twelfth pair was called `root` until 2026-09-18** -- a piece that
+draws nothing, whose only job was to be the origin (CORR-LOOKS-062).  It is
+the SECOND BOOT, and the name was wrong because it is the one pair the capture
+cannot name: the eleven others are named by the model pointer of the stop
+after them, and the pass's first stop carries no pointer at all, so the piece
+drawn by the twelfth matrix has nothing to name it.  Three measurements name
+it, and the first is the same ankle the lag was settled by:
+
+    in the FILE, over all seventeen frames of the screen's walk, the twelfth
+    pair's place sits in shin b's own frame at a mean of (0.2, 69.1, -2.2)
+    with a spread of at most 5.6 -- which is an ankle, and the same ankle
+    shin a holds foot a at (0.3, 68.2, 3.3), spread at most 5.1.  Against
+    shin a it spreads 356, and against the torso 229;
+    in the CAPTURES, the twelfth stop's origin sits in shin b's own frame to
+    within 4.8 units on slot 1 and 4.3 on slot 2, against 356.8 and 328.3
+    against the other shin (`oracle.py --pose-lag`), and its rotation swings
+    with the walk -- 4362 of spread across eight frames, tracking shin b's
+    4074 -- where the camera is constant and different.  The docstring it replaces said that matrix
+    "is the camera's to within a small turn", and it is not: the piece that
+    barely moves is the torso, at 185;
+    the arithmetic closes: twelve matrix loads a pass and twelve drawn
+    sections (the head, plus 0..10 of the figure), eleven of them named by a
+    pointer, and the one section no capture ever names is 10, the second boot.
 """
 
 
@@ -247,11 +271,13 @@ def position(word0: int, word1: int) -> tuple:
     low five -- with the top two bits of the FIRST word deciding its sign.
 
     That is the code at 0x80011F0C..0x80011F50 read back, and the check is the
-    game's own translations: with the root's place subtracted and the camera
+    game's own translations: with the twelfth pair's place subtracted and the
+    camera
     applied, they reproduce what the GTE was handed to within a few units.
 
     The places are relative to each other, not to the screen: what the figure
-    is placed against is the root's own place, and the camera carries the rest.
+    is placed against is the twelfth pair's own place -- the second boot's,
+    measured in CORR-LOOKS-062 -- and the camera carries the rest.
     """
     flags = word0 >> 30
     high = (word1 >> 6) & 0x3E0  # not-an-address: bits 11..15, moved up five
@@ -428,7 +454,7 @@ def _checks(c) -> None:
        angles(0xC0000000) == (0, 0, 0))  # not-an-address: two flag bits
     # The cross-check that matters, and it is a MEASUREMENT: this word is the
     # first pair of frame 5 of the animation the screen plays, and the triple
-    # is what the game had in its scratchpad when it drew `root` from that
+    # is what the game had in its scratchpad when it drew `foot b` from that
     # frame (oracle.py --pose, 2026-09-18).
     ok("a word of the real file unpacks to what the game left in scratchpad",
        angles(WORD_OF_FRAME_FIVE)
@@ -448,11 +474,11 @@ def _checks(c) -> None:
        position(0, 1 << 16) == (0, 1, 0), "%r" % (position(0, 1 << 16),))
     ok("and the high five of y are bits 11..15",
        position(0, 1 << 11) == (0, 32, 0), "%r" % (position(0, 1 << 11),))
-    # The pair the capture read for `root` in frame 5 of the screen's
+    # The pair the capture read for the twelfth piece in frame 5 of the screen's
     # animation, and the place it put it at.
-    ok("the real pair places the root where the game placed it",
-       position(WORD_OF_FRAME_FIVE, WORD_OF_ROOT_PLACE) == (-8, -409, -8),
-       "%r" % (position(WORD_OF_FRAME_FIVE, WORD_OF_ROOT_PLACE),))
+    ok("the real pair places the second boot where the game placed it",
+       position(WORD_OF_FRAME_FIVE, WORD_OF_BOOT_PLACE) == (-8, -409, -8),
+       "%r" % (position(WORD_OF_FRAME_FIVE, WORD_OF_BOOT_PLACE),))
 
     # -- the sine table -----------------------------------------------------
     table = sine_table()
