@@ -6,7 +6,7 @@ category: oráculo
 phase: 9
 depends_on: ["LOOKS-TASK-27"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (m)"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-28: A câmera do jogo
@@ -50,14 +50,13 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
 - [x] **Controles antes do teste:** o mesmo quadro contado duas vezes dá **0**
       pixel de diferença, e quadros diferentes dão 603 a 1.680. Os limiares
       saem daí e estão escritos como medidos.
-- [ ] Três estilos de cabelo diferentes, dois slots: a silhueta concorda, e um
-      estilo trocado de propósito discorda. **NÃO FEITO, e agora com a razão
-      medida:** no corpo inteiro o estilo **não se separa** — as fotos do próprio
-      jogo diferem só 15 e 29 pixels. No close-up a faixa da cabeça escolhe o
-      estilo certo em **2 de 3**, nos dois slots, e erra o `A1`. Ver o Log,
-      quarta sessão.
-- [x] §6 (h) e §10.3 (m) com o veredito e a data — a (h) **reaberta** para o
-      cabelo, pela quarta sessão; a pose e o corpo têm testemunha.
+- [x] Três estilos de cabelo diferentes, dois slots: a silhueta concorda, e um
+      estilo trocado de propósito discorda — **no close-up**, onde o estilo é
+      grande: cada foto do jogo escolhe o próprio estilo entre os três, 6 de 6,
+      por 1,4x a 4,4x (`--silhouette-styles`). No corpo inteiro o estilo não se
+      separa, e está dito (quarta sessão).
+- [x] §6 (h) e §10.3 (m) com o veredito e a data — as duas **fechadas** em
+      2026-09-18: a (h) pela pose no corpo inteiro e pelo cabelo no close-up.
 
 ---
 
