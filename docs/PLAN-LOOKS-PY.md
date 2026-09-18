@@ -2770,9 +2770,33 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > mistura é o estado da animação entre quadros, e isso é a
 > [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
 
-**(m) A câmera do jogo.** Projeção, deslocamento de tela e a translação da
-câmera, para que o nosso quadro e o do emulador sejam o mesmo desenho.
-[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
+**(m) A câmera do jogo — PARCIAL, 2026-09-18.** Projeção, deslocamento de tela
+e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
+desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
+
+> **Medido:** `H = 1376 px`, a matriz `[3195, 0, 635, -27, 2488, 133, -635,
+> -268, 3195]` e a translação `[-480, 192, 4125]`, iguais nos dois slots, lidos
+> do GTE na carga da matriz por peça — com o mesmo quadro capturado duas vezes,
+> as doze cargas de uma passada carregando a mesma projeção, e um quadro
+> contado adiante concordando (`oracle.py --camera`).
+>
+> **E o deslocamento de tela do GTE é ZERO.** `OFX` e `OFY` valem 0,00, então
+> a projeção sai com a origem no eixo da câmera e **quem põe o boneco dentro do
+> painel é o deslocamento de desenho da GPU**, não o GTE. Isso e a nossa
+> escolha de medir lugares a partir da raiz viram **uma** translação, medida
+> uma vez e mantida fixa.
+>
+> **A projeção confere na largura:** a nossa figura projeta **50,5 px** de
+> largura onde a do jogo mede **50** no painel.
+>
+> **O que falta é a ponte de quadro.** A foto do painel e a leitura do par que
+> nomeia o quadro do `ANIME.BIN` são corridas separadas, e a animação anda
+> entre elas: varrendo o ciclo inteiro, o quadro contado 80 casa melhor um
+> quadro **antes** do que o par nomeia e o 20 casa seis quadros fora, com um
+> mínimo raso. Dois deslocamentos diferentes não são ponte, e o
+> `confront.py --silhouette` reprova em vez de escolher. Enquanto isso não
+> fechar, a §6 (h) **segue aberta**: comparar silhueta em três estilos mediria
+> diferença de pose e não de malha.
 
 **(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.

@@ -222,7 +222,7 @@ referencial do arquivo, que é o que o `--check-image` usa.
 
 ```text
 $ python tools/looks/selftest.py
-  ..... 86 of 86 controls red
+  ..... 87 of 87 controls red
 looks_selftest: 0 failure(s)
 
 $ python tools/looks/cli.py check
@@ -279,7 +279,12 @@ check_tasks: 138 task(s), ok
    lida uma casa fora **também** desenha algo alto. O `looks_ui` diz isso na
    própria constante e desenha a **pilha** de propósito para ter um vermelho
    que não dependa da proporção; quem julga a ordem é o `scene --check-image`.
-4. **Um sintético de quatro peças empata os atrasos.** No `_synthetic_pass`, com
+4. **A transcrição do gate saiu de uma corrida anterior à última edição.**
+   Esta seção dizia `86 of 86` porque a corrida foi feita antes de o último
+   controle entrar; a árvore commitada mede **87**, e quem conferiu foi a
+   LOOKS-TASK-28 rodando a ferramenta sobre o commit. Número de gate se
+   transcreve da corrida feita **na árvore que se commita**.
+5. **Um sintético de quatro peças empata os atrasos.** No `_synthetic_pass`, com
    quatro peças o ciclo dá a volta e o atraso 2 devolve o mesmo par rígido ao
    contrário, com a mesma pontuação do atraso certo. Sete peças, na ordem em
    que o jogo desenha, separam.

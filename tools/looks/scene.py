@@ -30,6 +30,7 @@ Usage:
 
 from __future__ import annotations
 
+import math
 import os
 import sys
 
@@ -719,6 +720,163 @@ def place_points(points, matrix, place) -> list:
                   / float(ONE) for axis in range(3)]
         out.append(tuple(turned[axis] + place[axis] for axis in range(3)))
     return out
+
+# --- the game's own camera, and the shape it projects ----------------------
+
+CAMERA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "work", "looks-camera")
+"""Where `oracle.py --camera` leaves what it measured, one JSON per slot."""
+
+
+class NoCamera(BadScene):
+    """No measured camera on disc, so nothing may be projected."""
+
+
+def load_camera(slot: int = 2) -> dict:
+    """What `oracle.py --camera` measured, or `NoCamera`.
+
+    It is never defaulted and never guessed at: a projection invented here
+    would make every silhouette comparison a comparison of two inventions, and
+    the whole point of section 10.4 (3) is that the camera comes from the game.
+    """
+    import json
+
+    path = os.path.join(CAMERA_DIR, "slot%d.json" % slot)
+    if not os.path.isfile(path):
+        raise NoCamera("no %s -- run `oracle.py --camera %d` first, which is "
+                       "what measures H and the camera matrix off the GTE"
+                       % (path, slot))
+    with open(path, encoding="utf-8") as handle:
+        record = json.load(handle)
+    projections = {tuple(sorted(one.items())) for one in record["projection"]}
+    if len(projections) != 1:
+        raise NoCamera("%s carries %d different projections, so there is no "
+                       "one camera in it" % (path, len(projections)))
+    return {"rotation": record["camera"]["rotation"],
+            "translation": record["camera"]["translation"],
+            "projection": record["projection"][0]}
+
+
+def to_camera(point, camera) -> tuple:
+    """One point of the FILE's frame, in the camera's.
+
+    `v = R * p / ONE + T`, with `R` the matrix the game hands the GTE for the
+    camera and `T` its translation -- both measured, both 4.12 and whole units
+    respectively, exactly as the hardware has them.
+    """
+    matrix, place = camera["rotation"], camera["translation"]
+    return tuple(sum(matrix[axis * 3 + k] * point[k] for k in range(3))
+                 / float(ONE) + place[axis] for axis in range(3))
+
+
+NEAR = 1.0
+"""Camera-space z under which a point is behind the lens and is not drawn."""
+
+
+def project(point, camera) -> tuple:
+    """(sx, sy) in pixels, by the GTE's own `RTPS`, or None behind the lens.
+
+    `SX = OFX + H * x / z`.  The offsets measured on this screen are ZERO --
+    the panel is placed by the GPU's own draw offset and not by the GTE -- so
+    what comes out is in the figure's own screen frame, with the camera's axis
+    at the origin.  Where that frame sits inside the panel is one translation,
+    and `silhouette` takes it rather than inventing it.
+    """
+    view = to_camera(point, camera)
+    if view[2] <= NEAR:
+        return None
+    found = camera["projection"]
+    return (found["OFX"] + found["H"] * view[0] / view[2],
+            found["OFY"] + found["H"] * view[1] / view[2])
+
+
+def _fill(mask, width, height, triangle) -> None:
+    """One triangle into *mask*, by scanline, with no library.
+
+    A top-left rule is not wanted here and would be wrong to invent: what this
+    builds is a SILHOUETTE, so a pixel touched by any triangle is set, and the
+    seam between two triangles of one quad must not leave a hole.
+    """
+    ys = [one[1] for one in triangle]
+    top = max(0, int(math.floor(min(ys))))
+    bottom = min(height - 1, int(math.ceil(max(ys))))
+    for y in range(top, bottom + 1):
+        middle = y + 0.5
+        crossings = []
+        for index in range(3):
+            (x0, y0), (x1, y1) = triangle[index], triangle[(index + 1) % 3]
+            if (y0 <= middle) == (y1 <= middle):
+                continue
+            crossings.append(x0 + (middle - y0) * (x1 - x0) / (y1 - y0))
+        if len(crossings) < 2:
+            continue
+        left = max(0, int(math.floor(min(crossings))))
+        right = min(width - 1, int(math.ceil(max(crossings))))
+        row = y * width
+        for x in range(left, right + 1):
+            mask[row + x] = 1
+
+
+def silhouette(drawn: Scene, camera: dict, size: tuple,
+               centre: tuple) -> bytearray:
+    """The figure's mask, `size` wide and tall, as one byte per pixel.
+
+    *centre* is where the camera's own axis lands inside the picture, in
+    pixels.  It is the ONE thing this cannot measure -- the GTE's offsets are
+    zero on this screen and the panel is placed by the GPU's draw offset -- so
+    it is an argument, measured once by the caller and then held still across
+    every comparison.  A centre refitted per picture would turn a prediction
+    into a fit.
+    """
+    width, height = size
+    mask = bytearray(width * height)
+    for part in drawn.parts:
+        # The points are in the DRAWN frame, where `part_for` has already
+        # flipped y; the camera is in the file's.  `UP` is its own inverse.
+        flat = [project((one[0], one[1] * UP, one[2]), camera)
+                for one in part.points]
+        if any(one is None for one in flat):
+            continue
+        moved = [(one[0] + centre[0], one[1] + centre[1]) for one in flat]
+        for corners in TRIANGLES:
+            _fill(mask, width, height, [moved[at] for at in corners])
+    return mask
+
+
+def projected_box(drawn: Scene, camera: dict) -> tuple:
+    """(left, top, right, bottom) of the projected points, UNCLIPPED.
+
+    `silhouette` rasterises into a picture and so cannot say where a figure
+    landed when it landed outside it -- and with the GTE's offsets measured at
+    zero it always does, by about 170 pixels.  This is what the one
+    translation is measured from.
+    """
+    flat = [project((one[0], one[1] * UP, one[2]), camera)
+            for part in drawn.parts for one in part.points]
+    flat = [one for one in flat if one is not None]
+    if not flat:
+        raise BadScene("every point of the scene is behind the lens")
+    xs = [one[0] for one in flat]
+    ys = [one[1] for one in flat]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def mask_box(mask: bytearray, size: tuple) -> tuple:
+    """(left, top, right, bottom) of what is set, or None when nothing is."""
+    width, _height = size
+    on = [index for index, value in enumerate(mask) if value]
+    if not on:
+        return None
+    xs = [index % width for index in on]
+    ys = [index // width for index in on]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def masks_differ(one: bytearray, two: bytearray) -> int:
+    """How many pixels one mask has and the other has not, both ways."""
+    return sum(1 for a, b in zip(one, two) if a != b)
+
 
 SHELF_GAP = 8.0
 """Space left between two pieces on the shelf, in the file's own units."""

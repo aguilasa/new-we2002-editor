@@ -205,6 +205,28 @@ def block(data: bytes, at: int) -> dict:
             "end": cursor + WORD}
 
 
+def frame_of_pair(data: bytes, at: int, pair: int) -> int:
+    """Which frame of the block at *at* holds the pair at file offset *pair*.
+
+    The bridge between a counted frame of the emulator and a frame of this
+    file.  `oracle.py --pose <SLOT> <N>` records, per piece, the pair the game
+    was READING (pitfall 54); this says which of the block's frames that pair
+    belongs to, so a picture taken at emulator frame N can be compared with
+    the pose this file holds -- and not with frame 0 of the walk, which is a
+    different figure.
+
+    `BadAnime` when the pair is in no frame of that block: the animation
+    playing is not the one asked about, and guessing the nearest frame would
+    put a plausible pose against the wrong picture.
+    """
+    one = block(data, at)
+    for index, start in enumerate(one["frames"]):
+        if start <= pair < start + FRAME_BYTES:
+            return index
+    raise BadAnime("the pair at %d is in none of the %d frame(s) of the block "
+                   "at %d" % (pair, len(one["frames"]), at))
+
+
 def blocks(data: bytes) -> list:
     """Every animation in the file, in file order.
 

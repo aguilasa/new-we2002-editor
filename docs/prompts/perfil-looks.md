@@ -557,6 +557,29 @@ Não se revertem sem o usuário pedir.
     as capturas em disco, sem emulador, e recusa se o número escolher outro
     atraso. **Vale para qualquer instrumento que leia registrador numa
     parada: o que ele vê pode ser o resto do passo anterior.**
+60. **Número de gate se transcreve da corrida feita NA ÁRVORE QUE SE
+    COMMITA.** O Log da
+    [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) foi commitado
+    dizendo `86 of 86` controles porque a corrida de onde o número saiu foi
+    feita antes de o último controle entrar na árvore; o commit mede **87**.
+    Ninguém percebe olhando — os dois são plausíveis e a corrida foi de
+    verdade. Quem fecha uma task roda o gate **depois** da última edição, e não
+    reaproveita a saída de meia hora antes.
+61. **Janela de varredura que o resultado encosta não é janela.** Procurando
+    qual quadro do `ANIME.BIN` casa com a foto, a primeira varredura olhou dois
+    quadros para cada lado e devolveu o melhor **na borda**, nas duas
+    comparações e em direções opostas — o que não localiza mínimo nenhum.
+    Alargada para o ciclo inteiro, com a volta, os mínimos caem no interior.
+    Medido em 2026-09-18
+    ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md)).
+62. **O `OFX`/`OFY` do GTE é ZERO nesta tela, e o painel é posicionado pela
+    GPU.** Quem procurar "o deslocamento de tela" nos registradores de controle
+    acha zero e pode ler isso como leitura falhada. Não é: a projeção sai com a
+    origem no eixo da câmera, e onde ela cai dentro do painel é o deslocamento
+    de desenho da GPU somado à posição do boneco no mundo — duas incógnitas que
+    viram **uma** translação, medida uma vez e mantida fixa. Medida por
+    comparação, ela é ajuste; mantida fixa nas comparações seguintes, elas são
+    previsão.
 ---
 
 ## As fontes de verdade binárias
@@ -629,6 +652,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min | `python tools/looks/oracle.py --camera [SLOT]` — `H`, `OFX`, `OFY` e a matriz da câmera lidos do GTE na carga da matriz por peça, com três controles: o mesmo quadro duas vezes, a projeção igual nas doze cargas, e um quadro contado adiante concordando | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | idem, mais `work/looks-camera/` e as capturas; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, com o mesmo quadro contado duas vezes de controle e um quadro diferente de segundo controle | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |

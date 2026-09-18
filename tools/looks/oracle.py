@@ -4496,6 +4496,181 @@ def _sections_read(game, maps, wanted):
     return found
 
 
+# --- the camera the game projects with ------------------------------------
+
+PROJECTION = ("H", "OFX", "OFY")
+"""The three GTE control registers that turn camera space into screen pixels.
+
+`RTPS` computes `SX = OFX + H * IR1 / SZ` in 16.16, so `H` is the focal length
+in pixels and `OFX`/`OFY` are the principal point -- the middle of whatever
+viewport the game is drawing into.  They are CONTROL registers, written by
+`ctc2` like the matrix, so they are read the same way and at the same stop.
+"""
+
+CAMERA_STOPS = 12
+"""Matrix loads read before the projection is called constant over a pass.
+
+One stop would answer; the pass is twelve pieces and the question is whether
+the game changes the viewport between them -- the panel is a window inside a
+512x240 screen, and a projection measured on one piece and applied to twelve
+would be a reading, not a measurement.
+"""
+
+
+HALFWORD = (1 << 16) - 1
+"""Mask of one GTE control halfword.  Written as a shift and not as a hex
+literal because rule 1's sweep reads hex as an address, and it is right to:
+what makes this not one is that it is a field width."""
+
+
+def _signed_word(value):
+    """One 32-bit GTE control field, signed."""
+    span = 1 << 32
+    value &= span - 1
+    return value - span if value >= span // 2 else value
+
+
+def gte_projection(registers):
+    """{H, OFX, OFY} out of a `get_gte_registers` answer, in pixels.
+
+    `OFX` and `OFY` are 16.16 fixed point -- the hardware adds them to a 16.16
+    product -- and `H` is a plain unsigned halfword.  Dividing here rather than
+    at the point of use is what keeps the number that reaches a document in
+    the unit the document says.
+    """
+    control = registers["control_registers"]
+    return {
+        "H": int(control["H"], 16) & HALFWORD,
+        "OFX": _signed_word(int(control["OFX"], 16)) / 65536.0,
+        "OFY": _signed_word(int(control["OFY"], 16)) / 65536.0,
+    }
+
+
+def capture_camera(game, slot, frame=0):
+    """The projection and the camera of one counted frame.
+
+    Read at the per-piece matrix load, which is inside the figure's own draw:
+    a projection read anywhere else in the frame could be the panel's, the
+    text's or the background's, and the three are not the same viewport.
+    """
+    import who_writes
+
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="camera-%d-%d" % (slot, frame))
+    game.step(frame)
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
+    seen = []
+    try:
+        for _ in range(CAMERA_STOPS):
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError("%s stopped %d time(s) and then stopped "
+                                  "stopping"
+                                  % (who_writes.hx(layout.POSE_PIECE_MATRIX),
+                                     len(seen)))
+            seen.append(gte_projection(client.call("get_gte_registers")))
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    camera = _camera_matrix(game)
+    return {"slot": slot, "state": SLOTS[slot], "frame": frame,
+            "projection": seen, "camera": camera}
+
+
+CAMERA_DIR = os.path.join(ROOT, "work", "looks-camera")
+"""Where `--camera` writes one JSON per slot, for the window to draw with."""
+
+
+def write_camera(record):
+    """One JSON per slot, in `work/looks-camera/`."""
+    import json
+
+    os.makedirs(CAMERA_DIR, exist_ok=True)
+    path = os.path.join(CAMERA_DIR, "slot%d.json" % record["slot"])
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(record, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    return path
+
+
+def check_camera(slot=None, verbose=True):
+    """`--camera [SLOT]`: the projection and the camera, with the controls.
+
+    Three, and the order is the point:
+
+      **the same frame twice** -- captured from `load_state` both times, and
+          identical number by number, or the capture is measuring the
+          emulator's mood;
+      **constant over the pass** -- the twelve pieces of one figure share one
+          projection, or the panel is not one viewport and a single H would
+          be an average;
+      **a different frame agrees** -- the projection is screen setup and not
+          animation, so it must NOT move with the walk.  If it did, every
+          comparison against a counted frame would need it re-read, and this
+          says so instead of assuming.
+    """
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+            first = capture_camera(game, one, 0)
+            again = capture_camera(game, one, 0)
+            if first != again:
+                problems.append(
+                    "slot %d: two captures of the same frame differ, so the "
+                    "projection is not repeatable" % one)
+                print("    %r" % (first,))
+                print("    %r" % (again,))
+                continue
+            print("    control: frame 0 captured twice, %d stop(s) each, "
+                  "identical number by number" % len(first["projection"]))
+
+            distinct = {tuple(sorted(each.items()))
+                        for each in first["projection"]}
+            if len(distinct) != 1:
+                problems.append(
+                    "slot %d: the %d matrix loads of one pass carry %d "
+                    "different projections, so the figure is not drawn into "
+                    "one viewport: %r"
+                    % (one, len(first["projection"]), len(distinct),
+                       sorted(distinct)))
+                continue
+            found = first["projection"][0]
+            print("    H %d px, principal point (%.2f, %.2f), the same at all "
+                  "%d load(s)" % (found["H"], found["OFX"], found["OFY"],
+                                  len(first["projection"])))
+
+            later = capture_camera(game, one, POSE_CAPTURE_FRAMES[-1])
+            if later["projection"][0] != found:
+                problems.append(
+                    "slot %d: frame %d projects with %r and frame 0 with %r -- "
+                    "the projection moves with the walk, so it cannot be read "
+                    "once" % (one, later["frame"], later["projection"][0],
+                              found))
+            else:
+                print("    and frame %d projects with the same three, so the "
+                      "projection is screen setup and not animation"
+                      % later["frame"])
+
+            print("    the camera matrix is %s, translation %s"
+                  % (first["camera"]["rotation"],
+                     first["camera"]["translation"]))
+            print("    wrote %s" % write_camera(first))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --camera: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 def check_pose_frames(slot=None, frames=None, verbose=True):
     """`--pose <SLOT> <N> [N ...]`: the pose of counted frames, per piece.
 
@@ -5461,6 +5636,8 @@ def main(argv):
                 return check_pose_frames(int(argv[2]),
                                          [int(one) for one in argv[3:]])
             return check_pose(int(argv[2]) if len(argv) > 2 else None)
+        if len(argv) >= 2 and argv[1] == "--camera":
+            return check_camera(int(argv[2]) if len(argv) > 2 else None)
         if len(argv) == 2 and argv[1] == "--pose-lag":
             return check_draw_lag()
         if len(argv) >= 2 and argv[1] == "--poses":

@@ -933,6 +933,276 @@ blue than red.  The cursor box that blinks over the cell is yellow and the row
 is dark teal, so neither passes, and the blink leaves the mask alone."""
 
 
+# ---- the silhouette, which is the witness colour could not be --------------
+
+PANEL_INSET = 3
+"""Pixels of the panel's own border left out of every mask.
+
+The panel is drawn with a light edge, and the row-by-row background rule below
+reads that edge as figure -- measured: with the border in, the figure's box is
+the whole 146x120 panel.  Three is the border, not a margin chosen to make a
+number come out.
+"""
+
+PANEL_APART = 24
+"""How far a pixel must sit from its row's background to count as figure.
+
+Sum of the three channels' distance.  The panel's background is a GRADIENT --
+339 distinct colours in one panel -- so the background is taken per ROW, where
+it is nearly flat, and not as one colour for the whole box.
+"""
+
+SILHOUETTE_FRAMES = (20, 80)
+"""Counted frames a silhouette is taken at, and they are not any two.
+
+Both are frames whose whole draw pass reads pairs from ONE frame of
+ANIME.BIN.  Frame 0 straddles two (the animation advances in the middle of a
+pass -- pitfall 51), and a picture compared against either half would be
+compared against a figure the game never drew.
+"""
+
+NEIGHBOURS = 8
+"""How far either side of the named frame the match is looked for.
+
+The point is not to find the best fit: it is to ask whether the frame the
+game's own pair NAMES is the one whose silhouette matches, and a sweep that
+only looked at that frame could not tell a match from the only thing offered.
+
+**Eight, so the sweep covers the whole walk** -- the screen's animation is 17
+frames, and a sweep of two came back with its best AT THE EDGE in both
+directions on the first run, which says nothing about where the minimum is.
+A window that the answer leans against is not a window.
+"""
+
+
+def panel_mask(frame, box, inset: int = PANEL_INSET,
+               apart: int = PANEL_APART) -> bytearray:
+    """The figure's mask out of one native frame, one byte per pixel.
+
+    *frame* is a list of rows of (r, g, b), native 512x240, and *box* the
+    panel's own rectangle out of `screen.json` -- never a rectangle written
+    here, because the screen measured it.
+    """
+    left, top, right, bottom = box
+    width, height = right - left + 1, bottom - top + 1
+    mask = bytearray(width * height)
+    for y in range(top + inset, bottom + 1 - inset):
+        line = [tuple(frame[y][x])[:3] for x in range(left, right + 1)]
+        counts: dict = {}
+        for pixel in line:
+            counts[pixel] = counts.get(pixel, 0) + 1
+        background = max(counts, key=counts.get)
+        for x in range(inset, width - inset):
+            if sum(abs(a - b) for a, b in zip(line[x], background)) > apart:
+                mask[(y - top) * width + x] = 1
+    return mask
+
+
+def playing_frame(game, slot, frame, oracle, anime, data, entry):
+    """Which frame of ANIME.BIN the game is drawing, at counted *frame*.
+
+    One stop, not a whole pass: the pair the game is reading is enough, and a
+    full capture would cost twenty seconds to answer the same question.
+    """
+    import layout
+    import who_writes
+
+    oracle.restore_state(slot, verbose=False)
+    game.load_looks(slot, label="silhouette-%d-%d" % (slot, frame))
+    game.step(frame)
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.ANIME_UNPACK))
+    try:
+        client.call("continue")
+        if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
+            raise ConfrontError("the unpack at %s never ran at frame %d"
+                                % (who_writes.hx(layout.ANIME_UNPACK), frame))
+        registers = client.call("read_registers", group="gpr")
+        pair = (who_writes.register_value(registers,
+                                          layout.ANIME_UNPACK_BASE)
+                - layout.ANIME_BASE)
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+        except Exception:  # noqa: BLE001
+            pass
+    return anime.frame_of_pair(data, entry, pair)
+
+
+def game_silhouette(game, slot, frame, oracle, screen_table):
+    """The panel's mask at counted *frame*, from the native frame buffer."""
+    oracle.restore_state(slot, verbose=False)
+    game.load_looks(slot, label="shot-%d-%d" % (slot, frame))
+    game.step(frame)
+    frames, _boxes = oracle.screen_frames(game, screen_table["display"])
+    box = screen_table["regions"]["panel"]["native"]
+    return panel_mask(frames[0], box), box
+
+
+def our_silhouette(data, text, figure, frame, camera, size, centre):
+    """Our own mask for one tuple at one frame of the walk."""
+    import scene
+
+    drawn = scene.build(data, looks.parse_tuple(text), figure, frame)
+    return scene.silhouette(drawn, camera, size, centre)
+
+
+def fit_centre(theirs, projected, size):
+    """The one translation the comparison needs, from the two boxes.
+
+    The GTE's offsets are ZERO on this screen -- measured -- so where the
+    figure's own screen frame sits inside the panel is the GPU's draw offset,
+    and our places are relative to the root rather than to the game's world.
+    Both fold into ONE translation, of about 170 pixels.
+
+    It is measured HERE, once, and then held still for every other comparison,
+    which is what keeps the rest predictions instead of fits.  *projected* is
+    the UNCLIPPED box our points land in: a rasterised mask cannot be measured
+    from, because with no translation the figure lands outside the picture
+    entirely and the mask comes back empty.
+    """
+    import scene
+
+    yours = scene.mask_box(theirs, size)
+    if yours is None:
+        raise ConfrontError("the game's mask is empty, so no centre can be "
+                            "measured from it")
+    return ((yours[0] + yours[2] - projected[0] - projected[2]) / 2.0,
+            (yours[1] + yours[3] - projected[1] - projected[3]) / 2.0)
+
+
+def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
+                     verbose=True) -> int:
+    """`--silhouette [SLOT]`: our shape against the game's, with the camera.
+
+    The measurement colour could not make (section 6 (h)): a histogram tells
+    skin from skin and says nothing about which MESH was drawn.  A silhouette
+    does, and it only means anything once the projection is the game's -- which
+    is what `oracle.py --camera` measured and this reads off disc.
+
+    Two controls, both before any comparison:
+
+      **the same counted frame twice** -- the panel's mask has to come back
+          identical, or the picture is measuring the emulator's mood;
+      **a different counted frame** -- it has to differ, or the capture is
+          reading a constant and the first control passes perfectly.
+
+    And what is asserted is not "the difference is small".  It is that the
+    frame of ANIME.BIN the game's OWN pair names is the frame whose silhouette
+    matches best, at the same offset every time: the sweep looks NEIGHBOURS
+    frames either side, and a bridge that named the wrong frame would show up
+    as a different winner here and there rather than as one constant.
+    """
+    import anime
+    import iso_source
+    import layout
+    import oracle
+    import scene
+    import screen
+
+    ready = oracle.preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = {name: disc.read(name)
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME)}
+    entry = anime.header(data[layout.ANIME])[layout.ANIME_SCREEN_ENTRY]
+    # The walk is a CYCLE, so the sweep wraps: a window that ran off the end
+    # of the block raised instead of looking at the frame the game would play
+    # next, which is the frame either side of the join.
+    cycle = len(anime.block(data[layout.ANIME], entry)["frames"])
+    box = table["regions"]["panel"]["native"]
+    size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
+    print("  the panel is %dx%d native pixels, from screen.json" % size)
+
+    problems = []
+    centre = None
+    offsets = {}
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
+            camera = scene.load_camera(slot)
+            state = scene.screen_state(slot)
+            text, figure = state.tuple_text(), state.figure()
+            print("    the state shows %s, figure %d; H %d px"
+                  % (text, figure, camera["projection"]["H"]))
+
+            theirs = {}
+            first, _box = game_silhouette(game, slot, frames[0], oracle, table)
+            again, _box = game_silhouette(game, slot, frames[0], oracle, table)
+            apart = scene.masks_differ(first, again)
+            if apart:
+                problems.append(
+                    "slot %d: the panel at frame %d differs from itself in %d "
+                    "pixel(s), so no difference below means anything"
+                    % (slot, frames[0], apart))
+                continue
+            print("    control: frame %d captured twice, %d pixel(s) of ink, "
+                  "identical" % (frames[0], sum(first)))
+            theirs[frames[0]] = first
+            for counted in frames[1:]:
+                theirs[counted], _box = game_silhouette(game, slot, counted,
+                                                        oracle, table)
+            moved = {counted: scene.masks_differ(first, theirs[counted])
+                     for counted in frames[1:]}
+            if not any(moved.values()):
+                problems.append(
+                    "slot %d: frames %s draw the same panel as frame %d -- the "
+                    "capture is reading a constant"
+                    % (slot, list(frames[1:]), frames[0]))
+                continue
+            print("    control: frame(s) %s differ from it by %s pixel(s)"
+                  % (list(frames[1:]),
+                     [moved[counted] for counted in frames[1:]]))
+
+            for counted in frames:
+                named = playing_frame(game, slot, counted, oracle, anime,
+                                      data[layout.ANIME], entry)
+                scores = {}
+                for step in range(-NEIGHBOURS, NEIGHBOURS + 1):
+                    at = (named + step) % cycle
+                    if centre is None:
+                        drawn = scene.build(data, looks.parse_tuple(text),
+                                            figure, at)
+                        centre = fit_centre(theirs[counted],
+                                            scene.projected_box(drawn, camera),
+                                            size)
+                        print("    the one translation, measured HERE and held "
+                              "for every comparison after: (%.1f, %.1f) px"
+                              % centre)
+                    ours = our_silhouette(data, text, figure, at, camera,
+                                          size, centre)
+                    scores[at] = scene.masks_differ(theirs[counted], ours)
+                best = min(scores, key=scores.get)
+                offsets[(slot, counted)] = (best - named) % cycle
+                print("    frame %-3d: the game's pair names ANIME frame %d; "
+                      "best match at %d (%+d of %d), %d pixel(s) apart of %d; "
+                      "the sweep %s"
+                      % (counted, named, best, (best - named) % cycle, cycle,
+                         scores[best],
+                         sum(theirs[counted]),
+                         ", ".join("%d:%d" % (at, scores[at])
+                                   for at in sorted(scores))))
+
+    found = sorted(set(offsets.values()))
+    if len(found) > 1:
+        problems.append(
+            "the best-matching frame sits %s from the one the pair names, "
+            "depending on the capture -- one constant offset would be the "
+            "bridge, several are a coincidence: %r" % (found, offsets))
+    elif found:
+        print("  the best match sits %+d frame(s) from the one the game's own "
+              "pair names, the same in all %d comparison(s)"
+              % (found[0], len(offsets)))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --silhouette: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 def glyph_mask(shot, box) -> frozenset:
     """The set of glyph pixels inside a box -- what the LABEL is, blink-free.
 
@@ -1025,6 +1295,9 @@ def main(argv: list[str]) -> int:
                 render_ours(slots)
                 return 0
             return run(slots)
+        if len(argv) >= 2 and argv[1] == "--silhouette":
+            return check_silhouette(
+                (int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])
     except oracle.Unavailable as exc:
