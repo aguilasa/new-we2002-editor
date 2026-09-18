@@ -25,22 +25,26 @@ LOOKS-TASK-24 answered *where the pose comes from* and LOOKS-TASK-25 captured
     by four; the top two bits are flags this module does not read.  **The
     matrix is not in the file.**  The game builds it from those three angles.
 
-WHAT IS EXACT HERE AND WHAT IS NOT
-----------------------------------
-The angles are exact.  `frame_angles()` reproduces, integer for integer, the
-three halfwords the game leaves in the scratchpad for every piece of every
-captured pass on both save states -- 96 of 96 on the last run.  The link is
-the PAIR the game was reading (`layout.ANIME_UNPACK`), not the frame the
+WHAT IS EXACT, AND WHAT THE GAME BLENDS
+---------------------------------------
+Both, and measured against the pose captures of both save states:
+
+    96 of 96 pieces carry the angles the file holds at the pair the game was
+    reading, integer for integer;
+    90 of those 96 matrices come out EXACT -- every one of the nine
+    halfwords -- and the other 6 are matrices the game BLENDED.
+
+The link is the PAIR the game reads (`layout.ANIME_UNPACK`), not the frame the
 animation state names: the state's frame is right for the outfield player and
 wrong for the goalkeeper.
 
-The matrix is NOT exact, and saying so is the point.  `rotation()` builds
-`Rz . Ry . Rx` from the same sine table the game uses -- measured, see
-`sine_table()` -- and lands within **one** unit of 4096 on 90 of those 96,
-exact on 32.  The last unit is the GTE's: the game's `RotMatrix` at 0x8003D4BC
-feeds the products through the coprocessor, whose rounding this module does
-not emulate.  Six limbs of one pass sit further out and are not explained.
-Both are what LOOKS-TASK-26 still owes.
+`rotation()` is the game's `RotMatrix` at 0x8003D4BC written out term by term,
+not a rotation of the same name -- the order of its twelve shifts is what
+makes it exact rather than one unit away.  The six that are not exact are the
+game's own averaging path (`(a + b) >> 1` at 0x80011F90), and they are named
+by a sweep of every pair in the file rather than by how far they missed:
+`no_pair_explains()`.  What decides that blend is the animation state across
+frames, which is LOOKS-TASK-32 and not this file.
 
 Usage:
     python tools/looks/anime.py --check
@@ -68,20 +72,17 @@ BLOCK_END = 0x0000000B  # not-an-address: the word that closes an animation
 WORD_OF_FRAME_FIVE = 0x8FE3FC02  # not-an-address: a packed angle triple
 ANGLE_BITS = 10  # not-an-address: the width of one packed angle
 ANGLE_SHIFT = 4  # not-an-address: how far the game shifts an angle left
+ANGLE_STEP = 16  # not-an-address: the unit a stored angle is a multiple of
 TURN = 4096  # not-an-address: angle units in a full turn, and 1.0 in 4.12
 ONE = 4096  # not-an-address: 1.0 in the 4.12 fixed point the GTE uses
-MATRIX_UNITS = 1  # not-an-address: how far the GTE's rounding puts us
-"""How far a matrix built here may sit from the game's and still be rounding.
+MATRIX_UNITS = 1  # not-an-address: the unit a wrong shift order costs
+"""How far a matrix lands when the products are shifted in another order.
 
-Measured on 2026-09-18 over both save states: where the angles are the pair's
--- and they are, 96 of 96 -- 90 of 96 matrices land within one unit of 4096,
-and 32 of those are exact.  The game runs the same products through the GTE
-and this module does not emulate that coprocessor, so the last unit is its.
-
-The other six are one pass of the goalkeeper and they are NOT rounding: they
-sit 92 to 188 apart with angles that are the pair's exactly and the same
-camera as every other capture.  Unexplained, and counted rather than
-smoothed."""
+Kept because it is the measurement that found the right order: writing the
+same nine terms with a single shift at the end, or composing `Rz . Ry . Rx`
+with two shifts, lands ONE unit away on two thirds of the pieces -- 5 of 13
+exact that way against 90 of 96 the game's way.  One unit of 4096 is invisible
+in a drawing and total in a comparison."""
 
 PIECE_ORDER = (
     "root", "head", "torso", "upper arm a", "forearm a", "upper arm b",
@@ -259,28 +260,86 @@ def _product(a: list, b: list) -> list:
             for row in range(3) for column in range(3)]
 
 
+def _inverse(m: list):
+    """The inverse of a 3x3, in floats -- only ever used to undo the camera."""
+    det = (m[0] * (m[4] * m[8] - m[5] * m[7])
+           - m[1] * (m[3] * m[8] - m[5] * m[6])
+           + m[2] * (m[3] * m[7] - m[4] * m[6]))
+    if not det:
+        return None
+    cofactors = [
+        (m[4] * m[8] - m[5] * m[7]), -(m[1] * m[8] - m[2] * m[7]),
+        (m[1] * m[5] - m[2] * m[4]),
+        -(m[3] * m[8] - m[5] * m[6]), (m[0] * m[8] - m[2] * m[6]),
+        -(m[0] * m[5] - m[2] * m[3]),
+        (m[3] * m[7] - m[4] * m[6]), -(m[0] * m[7] - m[1] * m[6]),
+        (m[0] * m[4] - m[1] * m[3]),
+    ]
+    return [value / det for value in cofactors]
+
+
 def rotation(three: tuple) -> list:
-    """The 4.12 rotation matrix of three angles: `Rz . Ry . Rx`.
+    """The 4.12 rotation matrix of three angles, as the game builds it.
 
-    The order is measured, not chosen: decomposing the matrices the game
-    loaded gives back angles that are multiples of 16 -- which is what the
-    file stores -- only under this order, and the reconstruction then lands
-    within one unit of the game's own numbers.
-
-    **Within one unit, not on it.**  The game runs the same products through
-    the GTE, and the last unit is that coprocessor's rounding.  Callers that
-    need the game's exact matrix take it from a pose capture; callers that
-    need the pose take this.
+    **This is `RotMatrix` at 0x8003D4BC, not a rotation of the same name.**
+    Disassembled on 2026-09-18 and written out term by term: the routine loads
+    six table entries, then runs three `gpf sf` -- the GTE's interpolation,
+    `IRn = (IR0 * IRn) >> 12` -- and assembles the nine halfwords out of the
+    products, shifting by twelve at each step.  Writing the same products with
+    a single shift at the end, or in another order, lands one unit away on
+    two thirds of the pieces: measured, 5 of 13 exact that way against
+    **90 of 96** this way.  The order of the shifts IS the answer.
     """
     ax, ay, az = three
     sx, cx = sin(ax), cos(ax)
     sy, cy = sin(ay), cos(ay)
     sz, cz = sin(az), cos(az)
-    rx = [ONE, 0, 0, 0, cx, -sx, 0, sx, cx]
-    ry = [cy, 0, sy, 0, ONE, 0, -sy, 0, cy]
-    rz = [cz, -sz, 0, sz, cz, 0, 0, 0, ONE]
-    inner = [value >> 12 for value in _product(ry, rx)]
-    return [value >> 12 for value in _product(rz, inner)]
+    # The six products the first two `gpf` leave in IR1..IR3, each already
+    # shifted -- t0..t5 in the routine's own registers.
+    cx_sy = (cx * sy) >> 12
+    cx_sz = (cx * sz) >> 12
+    cx_cz = (cx * cz) >> 12
+    sx_sy = (sx * sy) >> 12
+    sx_sz = (sx * sz) >> 12
+    sx_cz = (sx * cz) >> 12
+    return [
+        (cz * cy) >> 12, ((cz * sx_sy) >> 12) - cx_sz,
+        ((cz * cx_sy) >> 12) + sx_sz,
+        (sz * cy) >> 12, ((sz * sx_sy) >> 12) + cx_cz,
+        ((sz * cx_sy) >> 12) - sx_cz,
+        -sy, (cy * sx) >> 12, (cx * cy) >> 12,
+    ]
+
+
+def compose(camera: list, three: tuple) -> list:
+    """The matrix the game hands the GTE for a piece: the camera over its turn.
+
+    One shift of twelve at the end, arithmetic -- which is what the game does
+    and what `(value + 2048) >> 12` is not: rounding here misses every piece.
+    """
+    return [value >> 12 for value in _product(camera, rotation(three))]
+
+
+def no_pair_explains(data: bytes, camera: list, matrix: list) -> bool:
+    """Is this matrix the turn of NO pair in the file, under this camera?
+
+    The witness that a matrix is one the game BLENDED rather than one this
+    module got wrong.  The game has a path that averages a fresh matrix with
+    the one it kept (`(a + b) >> 1` at 0x80011F90), and the average of two
+    turns is not the turn of anything stored.
+
+    **It sweeps every pair of the file, and that is the point.**  The first
+    witness tried was cheaper -- undo the camera, read the turn back, and call
+    it a blend when the angles are not multiples of sixteen -- and it was
+    wrong for one piece in six: the average of two triples 32 apart IS a
+    multiple of sixteen, and that piece was reported as a defect.  A witness
+    that can be fooled by arithmetic is not a witness.
+    """
+    for offset in range(HEADER_WORDS * WORD, len(data) - WORD, PAIR_BYTES):
+        three = angles(struct.unpack("<I", data[offset:offset + WORD])[0])
+        if compose(camera, three) == matrix:
+            return False
+    return True
 
 
 def pose(data: bytes, animation: int, index: int) -> list:
@@ -460,8 +519,9 @@ def against_pose(data: bytes, captures: list) -> dict:
     pieces carry the angles the file holds at that pair, and how far the
     matrix built from them lands from the one the game loaded.
     """
-    exact = wrong = pieces = matrix_exact = unlinked = 0
+    exact = wrong = pieces = matrix_exact = unlinked = blended = 0
     worst = 0
+    off = []
     for record in captures:
         camera = record["camera"]["rotation"]
         for piece in record["pieces"]:
@@ -481,13 +541,20 @@ def against_pose(data: bytes, captures: list) -> dict:
                 wrong += 1
                 continue
             exact += 1
-            built = [value >> 12 for value in _product(camera, rotation(three))]
+            built = compose(camera, three)
             apart = max(abs(a - b) for a, b in zip(built, piece["rotation"]))
             worst = max(worst, apart)
-            matrix_exact += (apart == 0)
+            if apart == 0:
+                matrix_exact += 1
+            elif no_pair_explains(data, camera, piece["rotation"]):
+                blended += 1
+            else:
+                off.append((apart, record["slot"], record["frame"],
+                            piece["id"]))
     return {"captures": len(captures), "pieces": pieces, "exact": exact,
-            "wrong": wrong, "unlinked": unlinked,
-            "matrix_exact": matrix_exact, "matrix_worst": worst}
+            "wrong": wrong, "unlinked": unlinked, "blended": blended,
+            "matrix_exact": matrix_exact, "matrix_worst": worst,
+            "off": sorted(off, reverse=True)}
 
 
 def _pairs_by_position(data: bytes) -> list:
@@ -539,20 +606,19 @@ def _against_pose(image_path: str, directory: str) -> int:
           "read, integer for integer" % (found["exact"], found["pieces"]))
     print("  %d piece(s) drew before any unpack stop, so no pair names them"
           % found["unlinked"])
-    print("  %d matrices of %d are exact, and the worst entry is %d apart "
-          "of %d" % (found["matrix_exact"], found["exact"],
-                     found["matrix_worst"], ONE))
+    print("  %d matrices of %d are EXACT, %d are blends the game made, and %d "
+          "are neither" % (found["matrix_exact"], found["exact"],
+                           found["blended"], len(found["off"])))
     failures = 0
     if found["wrong"]:
         print("  FAIL  %d piece(s) carry angles the pair does not hold -- the "
               "decode is wrong, not the game" % found["wrong"])
         failures += 1
-    if found["matrix_worst"] > MATRIX_UNITS:
-        print("  open  the worst matrix is %d apart and not %d -- measured "
-              "2026-09-18, six limbs of ONE pass of the goalkeeper, whose "
-              "angles are the pair's exactly.  Everything else lands within "
-              "one unit, which is the GTE's own rounding"
-              % (found["matrix_worst"], MATRIX_UNITS))
+    for apart, slot, frame, name in found["off"]:
+        print("  FAIL  slot %d frame %d: %s is %d apart, and a pair of the "
+              "file DOES reproduce it -- the pair this piece was given is "
+              "the wrong one" % (slot, frame, name, apart))
+        failures += 1
     print("anime --against-pose: %d failure(s)" % failures)
     return 1 if failures else 0
 

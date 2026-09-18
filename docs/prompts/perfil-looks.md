@@ -500,6 +500,23 @@ Não se revertem sem o usuário pedir.
     errados com cara de certo — doze peças de 108 casaram assim. O valor se
     **consome** por peça, e quem não tem o seu é contado como não ligado.
 
+56. **A mesma álgebra na ordem errada erra por UMA unidade, e uma unidade é
+    tudo.** A matriz de pose se reproduz escrevendo a `RotMatrix` do jogo
+    termo a termo — três `gpf` do GTE, deslocando doze a cada passo. Escrita
+    com um deslocamento só no fim, ou compondo `Rz·Ry·Rx` com dois, ela dá
+    **5 de 13** exatas em vez de **90 de 96**, sempre errando por 1 de 4.096:
+    invisível em desenho, total em comparação exata. **Desmontar a rotina
+    resolveu; tentar variantes de arredondamento não chegava lá.** Medido em
+    2026-09-18
+    ([`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)).
+57. **Testemunha barata que pode ser enganada por aritmética não é
+    testemunha.** Para separar *"o jogo misturou esta matriz"* de *"o leitor
+    errou"*, a primeira regra foi ler a volta de volta e exigir ângulos
+    múltiplos de 16 — e ela **errou uma em seis**, porque a média de dois
+    trios a 32 de distância também é múltipla de 16, e a peça foi acusada de
+    defeito. A que vale varre **todos** os pares do arquivo e pergunta se
+    algum reproduz a matriz (`anime.no_pair_explains`).
+
 ---
 
 ## As fontes de verdade binárias

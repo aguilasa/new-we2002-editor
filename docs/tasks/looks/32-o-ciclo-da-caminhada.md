@@ -23,19 +23,25 @@ status: pendente
 - **O tronco balança na gravação.** Raiz da animação ou câmera muda onde o
   balanço mora.
 
-- **A interpolação NÃO está medida, e o que esta linha dizia era artefato.**
-  Em 2026-09-18 a [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)
-  escreveu aqui que *"96 de 192 peças trazem ângulos que o `ANIME.BIN` não
-  guarda"*, e portanto que metade dos quadros era construída. **Remedido no
-  mesmo dia:** com a ponte certa — `s0` na instrução `0x80011D48`, o ponteiro
-  que o jogo está lendo, e não o quadro que o estado nomeia — são **96 de 96**
-  que vêm do arquivo, inteiro por inteiro. Nada aqui diz que o jogo interpola.
-- **O que continua valendo como pista:** o código em `0x80011F90` soma dois
-  valores halfword a halfword e desloca um bit (`sra 1`) sobre a matriz recém
-  construída, e o dispatch em `0x80011DA0` tem **dez** variantes de
-  desempacotamento, algumas das quais andam o ponteiro do par de ±8 e ±16.
-  Quem medir o ritmo mede também isso; e a pergunta "o jogo interpola?" se
-  responde contando quadros com `frame_step`, não por ângulo que não achou par.
+- **O jogo MISTURA matrizes, e medir isso é desta task.** Medido em 2026-09-18
+  pela [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md), sobre
+  96 peças desenhadas nos dois slots:
+  - **os ângulos vêm sempre do arquivo** — 96 de 96, inteiro por inteiro, no
+    par que o jogo está lendo. Uma versão anterior desta linha dizia que
+    metade dos quadros era construída, e aquilo era artefato da ponte errada
+    (o quadro que o estado nomeia, que erra no goleiro);
+  - **mas 6 das 96 matrizes não são a volta de par nenhum do arquivo** —
+    varredura de todos os pares, `anime.no_pair_explains()`. O caminho que as
+    produz é `0x80011F90`: ele **soma a matriz recém-construída com a que o
+    jogo guardou e desloca um bit** (`sra 1`), meia-palavra a meia-palavra, e
+    quem escolhe esse caminho é o byte em `0x0(s3)`;
+  - as seis eram todas de **um passe só**, e as peças que vieram do quadro
+    anterior da animação — o passe atravessou a troca de quadro. **De onde vem
+    a segunda matriz da soma é o que falta**, e é o que decide o ritmo.
+  - As ferramentas já entregam o que essa medição precisa:
+    `oracle.py --pose <SLOT> <N>` grava, por peça, o ângulo e **o par que o
+    jogo leu**; `anime.py --against-pose` separa exatas, misturadas e
+    inexplicadas a cada corrida.
 
 ---
 

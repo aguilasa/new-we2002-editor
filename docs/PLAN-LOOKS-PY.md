@@ -2705,10 +2705,10 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 >   lado: decompondo as matrizes que o jogo carregou, os ângulos que voltam são
 >   **múltiplos de 16** — que é o que o arquivo guarda — só sob essa ordem.
 >
-> **O que fica aberto, com o número.** Esta passagem dizia, até mais tarde no
+> **A ponte, e a correção que ela exigiu.** Esta passagem dizia, mais cedo no
 > mesmo dia, que *"96 de 192 peças trazem ângulos que quadro nenhum do arquivo
 > guarda — são os quadros que o jogo constrói entre os quadros-chave"*. **Era
-> artefato da ponte, não do jogo**, e a correção é a lição:
+> artefato da ponte**, e a lição é dela:
 >
 > - a primeira ponte entre a captura e o arquivo foi o **quadro que o estado
 >   de animação nomeia** (`layout.ANIME_STATE`). Ele está certo para o jogador
@@ -2720,16 +2720,27 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 >   ângulos que o par guarda, inteiro por inteiro**;
 > - e **dez variantes de desempacotamento** dividem o mesmo dispatch
 >   (`0x80011DA0`): a peça que toma outra não para na instrução vigiada, e
->   herdar o par da peça anterior nomeia bytes errados com cara de certo. A
->   captura marca essas peças como não ligadas em vez de adivinhar.
+>   herdar o par da peça anterior nomeia bytes errados com cara de certo.
 >
-> **O que continua aberto, e é o que falta para a task fechar:** a matriz não
-> sai exata. Das 96 peças cujos ângulos são os do par, **32 matrizes saem
-> exatas e 90 ficam dentro de UMA unidade de 4.096** — o último passo é do
-> GTE, que a `RotMatrix` usa e este leitor não emula. As outras **seis** são
-> um passe só do goleiro, com ângulos certos e a mesma câmera, e não têm
-> explicação. Enquanto esses dois pontos estiverem abertos, a task **não está
-> concluída**.
+> **A matriz sai EXATA, e a exatidão está na ordem dos deslocamentos.** A
+> `RotMatrix` do jogo (`0x8003D4BC`) carrega seis entradas da tabela, roda três
+> `gpf sf` — a interpolação do GTE, `IRn = (IR0 × IRn) >> 12` — e monta as nove
+> meias-palavras deslocando doze a cada passo. Escrita assim, ela reproduz
+> **90 das 96** matrizes capturadas **entrada por entrada**; escrita com um
+> deslocamento só no fim, ou com a composição em outra ordem, erra por **uma**
+> unidade em dois terços das peças (5 de 13 exatas). Uma unidade de 4.096 é
+> invisível no desenho e total na comparação.
+>
+> **As outras seis são misturas que o jogo faz**, não erro do leitor: o
+> caminho em `0x80011F90` **soma a matriz recém-construída com a que ele
+> guardou e desloca um bit**, e a média de duas voltas não é a volta de coisa
+> nenhuma guardada. Quem diz isso não é a distância — é uma varredura de
+> **todos** os pares do arquivo (`anime.no_pair_explains`): nenhum deles
+> reproduz aquelas seis. A primeira testemunha era mais barata — ler a volta de
+> volta e exigir múltiplos de 16 — e **errou uma em seis**, porque a média de
+> dois trios a 32 de distância também é múltipla de 16. O que decide essa
+> mistura é o estado da animação entre quadros, e isso é a
+> [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
 
 **(m) A câmera do jogo.** Projeção, deslocamento de tela e a translação da
 câmera, para que o nosso quadro e o do emulador sejam o mesmo desenho.
