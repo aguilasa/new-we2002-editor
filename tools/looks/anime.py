@@ -27,17 +27,20 @@ LOOKS-TASK-24 answered *where the pose comes from* and LOOKS-TASK-25 captured
 
 WHAT IS EXACT HERE AND WHAT IS NOT
 ----------------------------------
-The angles are exact: `frame_angles()` reproduces, integer for integer, the
+The angles are exact.  `frame_angles()` reproduces, integer for integer, the
 three halfwords the game leaves in the scratchpad for every piece of every
-frame of both save states (`oracle.py --pose` records them beside each piece).
+captured pass on both save states -- 96 of 96 on the last run.  The link is
+the PAIR the game was reading (`layout.ANIME_UNPACK`), not the frame the
+animation state names: the state's frame is right for the outfield player and
+wrong for the goalkeeper.
 
-The matrix is NOT exact yet, and saying so is the point.  `rotation()` builds
+The matrix is NOT exact, and saying so is the point.  `rotation()` builds
 `Rz . Ry . Rx` from the same sine table the game uses -- measured, see
-`sine_table()` -- and lands within **1** of the game's own entries, on a 4096
-scale.  The last unit is the GTE's: the game's `RotMatrix` at 0x8003D4BC feeds
-the products through the coprocessor, whose saturation and truncation this
-module does not emulate.  Reproducing it exactly is what LOOKS-TASK-26 still
-owes, and the run says so rather than rounding the claim away.
+`sine_table()` -- and lands within **one** unit of 4096 on 90 of those 96,
+exact on 32.  The last unit is the GTE's: the game's `RotMatrix` at 0x8003D4BC
+feeds the products through the coprocessor, whose rounding this module does
+not emulate.  Six limbs of one pass sit further out and are not explained.
+Both are what LOOKS-TASK-26 still owes.
 
 Usage:
     python tools/looks/anime.py --check
@@ -70,11 +73,15 @@ ONE = 4096  # not-an-address: 1.0 in the 4.12 fixed point the GTE uses
 MATRIX_UNITS = 1  # not-an-address: how far the GTE's rounding puts us
 """How far a matrix built here may sit from the game's and still be rounding.
 
-Measured on 2026-09-18: where the angles are the named frame's and the piece
-is the outfield player's, every entry lands within one unit of 4096 -- the
-game runs the same products through the GTE and this module does not emulate
-that coprocessor.  Six of the goalkeeper's limbs land 92 to 188 apart with the
-SAME angles, which is not rounding and not measured yet."""
+Measured on 2026-09-18 over both save states: where the angles are the pair's
+-- and they are, 96 of 96 -- 90 of 96 matrices land within one unit of 4096,
+and 32 of those are exact.  The game runs the same products through the GTE
+and this module does not emulate that coprocessor, so the last unit is its.
+
+The other six are one pass of the goalkeeper and they are NOT rounding: they
+sit 92 to 188 apart with angles that are the pair's exactly and the same
+camera as every other capture.  Unexplained, and counted rather than
+smoothed."""
 
 PIECE_ORDER = (
     "root", "head", "torso", "upper arm a", "forearm a", "upper arm b",
@@ -442,54 +449,44 @@ def _check_image(image_path: str) -> int:
 def against_pose(data: bytes, captures: list) -> dict:
     """The file against what the game loaded, piece by piece.
 
-    Three numbers, and none of them rounded into another:
+    The link is the PAIR the game was reading -- `layout.ANIME_UNPACK_BASE` at
+    the instruction that reads it -- and not the frame the animation state
+    names.  The difference is not a nicety: the state's frame is right for the
+    outfield player and wrong for the goalkeeper, whose angles then match
+    nothing in 3952 frames (measured 2026-09-18, 80 of 96 pieces).  A pointer
+    that says where the game IS reading beats one that says what it is playing.
 
-      **how many pieces the file holds outright** -- the three angles the game
-          had in its scratchpad ARE the pair of a key frame, integer for
-          integer;
-      **how many it does not hold at all** -- the same search over every frame
-          of every animation finds nothing.  Those are the frames the game
-          builds between key frames, and what it builds them from is not
-          measured yet (LOOKS-TASK-32);
-      **how far the matrix is** -- on the pieces the file does hold, the
-          matrix this module builds against the one the game loaded.
+    Two numbers come out and neither is rounded into the other: how many
+    pieces carry the angles the file holds at that pair, and how far the
+    matrix built from them lands from the one the game loaded.
     """
-    index = _pairs_by_position(data)
-    exact = missing = matrix_exact = pieces = elsewhere = 0
+    exact = wrong = pieces = matrix_exact = unlinked = 0
     worst = 0
     for record in captures:
         camera = record["camera"]["rotation"]
         for piece in record["pieces"]:
             pieces += 1
-            name = piece["piece"]
-            if name not in PIECE_ORDER:
-                raise BadAnime("the capture drew %r, which no pair names"
-                               % name)
-            position = PIECE_ORDER.index(name)
-            three = tuple(piece["angles"])
-            at = piece["animation_frame"] - layout.ANIME_BASE
-            named = None
-            if 0 <= at <= len(data) - FRAME_BYTES:
-                named = frame_angles(data, at)[position]["angles"]
-            if named == three:
-                # The reliable link, and the only one the matrix is compared
-                # on: the triple IS the pair of the frame the state named.  A
-                # triple that merely turns up somewhere in 3952 frames can be
-                # another frame's, and comparing a matrix against those was
-                # what put six of slot 1's limbs 90 to 188 units apart --
-                # false matches, not a broken build.
-                exact += 1
-                built = [value >> 12 for value in
-                         _product(camera, rotation(three))]
-                apart = max(abs(a - b) for a, b in zip(built, piece["rotation"]))
-                worst = max(worst, apart)
-                matrix_exact += (apart == 0)
-            elif three in index[position]:
-                elsewhere += 1
-            else:
-                missing += 1
+            at = piece.get("pair")
+            if at is None:
+                # The first load of a pass can come before any unpack stop,
+                # so the pair is not known for it.  It is one piece of twelve
+                # and it is counted, not guessed at.
+                unlinked += 1
+                continue
+            if not 0 <= at <= len(data) - PAIR_BYTES:
+                raise BadAnime("a piece read a pair at %d, outside the %d "
+                               "byte(s) of %s" % (at, len(data), layout.ANIME))
+            three = angles(struct.unpack("<I", data[at:at + WORD])[0])
+            if three != tuple(piece["angles"]):
+                wrong += 1
+                continue
+            exact += 1
+            built = [value >> 12 for value in _product(camera, rotation(three))]
+            apart = max(abs(a - b) for a, b in zip(built, piece["rotation"]))
+            worst = max(worst, apart)
+            matrix_exact += (apart == 0)
     return {"captures": len(captures), "pieces": pieces, "exact": exact,
-            "missing": missing, "elsewhere": elsewhere,
+            "wrong": wrong, "unlinked": unlinked,
             "matrix_exact": matrix_exact, "matrix_worst": worst}
 
 
@@ -526,36 +523,35 @@ def _against_pose(image_path: str, directory: str) -> int:
         print("anime --against-pose: skipped -- no captures in %s; run "
               "oracle.py --poses first" % directory)
         return 77
-    captures = _load_captures(directory)
+    captures = [one for one in _load_captures(directory)
+                if any(piece.get("pair") is not None
+                       for piece in one["pieces"])]
     if not captures:
         print("anime --against-pose: skipped -- %s holds no capture with the "
-              "angles beside each piece" % directory)
+              "pair beside each piece" % directory)
         return 77
     with iso_source.open_disc(image_path) as disc:
         data = read(disc)
     found = against_pose(data, captures)
     print("  %d capture(s), %d piece(s) drawn" % (found["captures"],
                                                   found["pieces"]))
-    print("  %d of %d carry angles the file holds, integer for integer"
-          % (found["exact"], found["pieces"]))
-    print("  %d carry angles the file holds at that pair but NOT in the "
-          "frame the state named" % found["elsewhere"])
-    print("  %d carry angles NO frame of the file holds -- the in-between "
-          "frames, still open (LOOKS-TASK-32)" % found["missing"])
-    print("  of the %d the file holds, %d matrices are exact and the worst "
-          "entry is %d apart of %d"
-          % (found["exact"], found["matrix_exact"], found["matrix_worst"],
-             ONE))
+    print("  %d of %d carry the angles the file holds at the pair the game "
+          "read, integer for integer" % (found["exact"], found["pieces"]))
+    print("  %d piece(s) drew before any unpack stop, so no pair names them"
+          % found["unlinked"])
+    print("  %d matrices of %d are exact, and the worst entry is %d apart "
+          "of %d" % (found["matrix_exact"], found["exact"],
+                     found["matrix_worst"], ONE))
     failures = 0
-    if not found["exact"]:
-        print("  FAIL  not one piece carries angles this module finds in the "
-              "file: the decode is wrong, not the game")
+    if found["wrong"]:
+        print("  FAIL  %d piece(s) carry angles the pair does not hold -- the "
+              "decode is wrong, not the game" % found["wrong"])
         failures += 1
     if found["matrix_worst"] > MATRIX_UNITS:
-        print("  open  the worst matrix is %d apart and not %d: the pieces "
-              "that miss are the goalkeeper's limbs, whose angles ARE the "
-              "named frame's -- so something else reaches their matrix, and "
-              "naming it is what LOOKS-TASK-26 still owes"
+        print("  open  the worst matrix is %d apart and not %d -- measured "
+              "2026-09-18, six limbs of ONE pass of the goalkeeper, whose "
+              "angles are the pair's exactly.  Everything else lands within "
+              "one unit, which is the GTE's own rounding"
               % (found["matrix_worst"], MATRIX_UNITS))
     print("anime --against-pose: %d failure(s)" % failures)
     return 1 if failures else 0

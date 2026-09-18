@@ -2705,17 +2705,31 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 >   lado: decompondo as matrizes que o jogo carregou, os ângulos que voltam são
 >   **múltiplos de 16** — que é o que o arquivo guarda — só sob essa ordem.
 >
-> **O que fica aberto, com o número:** contra 16 capturas e 192 peças
-> desenhadas, **96 trazem ângulos que o arquivo guarda, inteiro por inteiro**,
-> e **96 trazem ângulos que quadro nenhum do arquivo guarda** — são os quadros
-> que o jogo constrói **entre** os quadros-chave, e o código logo adiante
-> (`0x80011F90`…) soma dois valores e desloca um bit, que é uma média. Como ele
-> escolhe os dois é a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md);
-> a média dos vizinhos na lista **não** reproduz (medido: 0 de 96). E das 96
-> que o arquivo guarda, **32 matrizes saem exatas** e a pior entra **188** de
-> 4.096 — as que erram são seis membros do **goleiro**, cujos ângulos *são* os
-> do quadro nomeado, então alguma outra coisa chega à matriz deles. Enquanto
-> esses dois pontos estiverem abertos, a task **não está concluída**.
+> **O que fica aberto, com o número.** Esta passagem dizia, até mais tarde no
+> mesmo dia, que *"96 de 192 peças trazem ângulos que quadro nenhum do arquivo
+> guarda — são os quadros que o jogo constrói entre os quadros-chave"*. **Era
+> artefato da ponte, não do jogo**, e a correção é a lição:
+>
+> - a primeira ponte entre a captura e o arquivo foi o **quadro que o estado
+>   de animação nomeia** (`layout.ANIME_STATE`). Ele está certo para o jogador
+>   de linha e **errado para o goleiro**, cujos ângulos então não casavam com
+>   nada em 3.952 quadros;
+> - a ponte que vale é o **ponteiro que o jogo está lendo**: `s0` na instrução
+>   `0x80011D48` (`layout.ANIME_UNPACK`), que anda o arquivo de oito em oito,
+>   um par por peça, nos dois slots. Com ela, **96 de 96 peças trazem os
+>   ângulos que o par guarda, inteiro por inteiro**;
+> - e **dez variantes de desempacotamento** dividem o mesmo dispatch
+>   (`0x80011DA0`): a peça que toma outra não para na instrução vigiada, e
+>   herdar o par da peça anterior nomeia bytes errados com cara de certo. A
+>   captura marca essas peças como não ligadas em vez de adivinhar.
+>
+> **O que continua aberto, e é o que falta para a task fechar:** a matriz não
+> sai exata. Das 96 peças cujos ângulos são os do par, **32 matrizes saem
+> exatas e 90 ficam dentro de UMA unidade de 4.096** — o último passo é do
+> GTE, que a `RotMatrix` usa e este leitor não emula. As outras **seis** são
+> um passe só do goleiro, com ângulos certos e a mesma câmera, e não têm
+> explicação. Enquanto esses dois pontos estiverem abertos, a task **não está
+> concluída**.
 
 **(m) A câmera do jogo.** Projeção, deslocamento de tela e a translação da
 câmera, para que o nosso quadro e o do emulador sejam o mesmo desenho.

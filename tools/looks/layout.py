@@ -1467,6 +1467,22 @@ every frame.  `POSE_PIECE_MATRIX` below is the name the pose capture uses,
 so that nothing reads the pose off the camera by picking the wrong one.
 """
 
+ANIME_UNPACK = 0x80011D48
+ANIME_UNPACK_BASE = "s0"
+"""The instruction that reads a piece's pair out of the ANIME.BIN frame.
+
+`lw v0, 0x0(s0)`, and **`s0` is the pair itself** -- measured on 2026-09-18
+(LOOKS-TASK-26): it walks the file eight bytes at a time, one pair per piece,
+on both save states, and every value of it lands inside the file.
+
+This is the bridge between a pose capture and the file, and it replaced a
+worse one.  The animation state (`ANIME_STATE`) names a frame, and reading it
+at each matrix load looked like enough: it is, for the outfield player, and it
+is NOT for the goalkeeper, whose angles then matched nothing in 3952 frames.
+A pointer that names where the game IS reading beats a pointer that names
+where the game says it is playing.
+"""
+
 POSE_ANGLES = 0x1F800120
 """Scratchpad, where the three angles of the piece being drawn are unpacked.
 

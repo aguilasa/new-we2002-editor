@@ -3894,11 +3894,16 @@ def _pose_cycle(game, maps, names):
 
     client = game.client
     client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
+    # Two breakpoints, and the pair matters: the unpack names WHERE in
+    # ANIME.BIN the angles came from, and the matrix load names which piece
+    # they were for.  Neither alone is the bridge.
+    for address in (layout.ANIME_UNPACK, layout.POSE_PIECE_MATRIX):
+        client.call("breakpoint", action="add", type="execute",
+                    address=who_writes.hx(address))
     path = os.path.join(game.out_dir, "piece-matrix.bin")
     out = []
     keys = []
+    pair = None
     try:
         while True:
             client.call("continue")
@@ -3908,6 +3913,10 @@ def _pose_cycle(game, maps, names):
                     "screen is not drawing"
                     % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
             registers = client.call("read_registers", group="gpr")
+            if who_writes.register_value(registers, "pc")                     == layout.ANIME_UNPACK:
+                pair = (who_writes.register_value(
+                    registers, layout.ANIME_UNPACK_BASE) - layout.ANIME_BASE)
+                continue
             where = _drawn_section(registers, maps)
             base = who_writes.register_value(registers,
                                              layout.POSE_PIECE_MATRIX_BASE)
@@ -3936,7 +3945,14 @@ def _pose_cycle(game, maps, names):
                 "translation": translation,
                 "angles": angles,
                 "animation_frame": playing,
+                "pair": pair,
             })
+            # Consumed: the next piece gets its own pair or none at all.  Ten
+            # unpack variants share the dispatch at 0x80011DA0 and only one is
+            # the instruction watched here, so a piece that took another one
+            # leaves no stop -- and inheriting the previous piece's pair would
+            # name the wrong bytes with a straight face.
+            pair = None
             period = _repeating_period(keys)
             if period:
                 return _named_pass(out[-period:])

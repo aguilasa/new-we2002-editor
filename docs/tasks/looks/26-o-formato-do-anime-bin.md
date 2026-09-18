@@ -80,12 +80,12 @@ entrada do cabeçalho nomeia, e devolve, para a animação da tela e um quadro,
       `layout.ANIME_SCREEN_ENTRY = 5`, do watchpoint de leitura sobre as 204
       entradas de uma vez (LOOKS-TASK-24), e não do tamanho do bloco.
 - [ ] **As matrizes do quadro N da [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md) reproduzidas exatamente**, nas onze
-      peças e na cabeça, nos dois slots. **NÃO FEITO — é o que falta**, e o
-      estado está medido em dois números: das 192 peças capturadas, **96
-      trazem ângulos que o arquivo guarda inteiro por inteiro** e **96 trazem
-      ângulos que quadro nenhum do arquivo guarda**; e das 96 que ele guarda,
-      **32 matrizes saem exatas**, com a pior entrada **188** de 4.096 — todas
-      as que erram são membros do goleiro.
+      peças e na cabeça, nos dois slots. **NÃO FEITO — é o único critério que
+      falta**, e o estado está medido: os **ângulos** saem exatos, **96 de
+      96**, nos dois slots; das matrizes, **32 saem exatas e 90 ficam dentro
+      de uma unidade de 4.096**, que é o arredondamento do GTE; e **seis** —
+      um passe só do goleiro, com ângulos certos e a mesma câmera — ficam de
+      92 a 188, sem explicação.
 - [x] Dois controles negativos — ordem de campo e escala —, vermelhos pela
       própria causa. São **três**: a ordem dos campos, a escala do ângulo e a
       tabela de seno truncada em vez de arredondada. 81 de 81 vermelhos.
@@ -96,7 +96,7 @@ entrada do cabeçalho nomeia, e devolve, para a animação da tela e um quadro,
 
 ## Log de Execução
 
-**Executado em:** 2026-09-18 — **PARCIAL**
+**Executado em:** 2026-09-18 — **PARCIAL** (duas sessões no mesmo dia)
 
 **Resumo do que foi aprendido**
 
@@ -104,87 +104,68 @@ O formato está medido inteiro e o leitor existe: cabeçalho de 204 ponteiros
 **absolutos**, payload que se divide em 197 blocos `[quadros][lista][0x0B]` e
 **fecha no EOF exato sem um buraco**, quadro de doze pares — um par por peça
 desenhada, na ordem em que a tela as desenha —, e três ângulos de 10 bits com
-sinal por par, deslocados quatro. A ponte com o gabarito é a captura da pose,
-que agora grava **o ângulo e o quadro tocado ao lado de cada peça**: os ângulos
-do scratchpad são, par por par, os do quadro do arquivo.
+sinal por par, deslocados quatro.
 
-**O que falta, e é por isso que a task não está concluída:** metade dos quadros
-que o jogo mostra não está no arquivo — são construídos entre quadros-chave —, e
-seis membros do goleiro recebem uma matriz que os ângulos do quadro nomeado não
-explicam.
+**A lição da segunda sessão é sobre a ponte.** A primeira ligou captura e
+arquivo pelo **quadro que o estado de animação nomeia**, e isso está certo para
+o jogador de linha e **errado para o goleiro** — metade das peças não casava
+com nada em 3.952 quadros, e a conclusão pronta era *"o jogo interpola metade
+dos quadros"*, que chegou a ser escrita no plano e encaminhada para a
+[`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md). A ponte que
+vale é o **ponteiro que o jogo está lendo**: `s0` na instrução `0x80011D48`,
+que anda o arquivo de oito em oito, um par por peça, nos dois slots. Com ela,
+**96 de 96** peças trazem os ângulos do par, inteiro por inteiro, e a
+interpolação deixa de ser um achado.
 
-**Arquivos criados/modificados**
+**O que falta, e é por isso que a task não está concluída:** a matriz não sai
+exata — 32 de 96 saem, 90 ficam dentro de uma unidade de 4.096 (o GTE, que a
+`RotMatrix` usa e este leitor não emula), e seis ficam mais longe sem
+explicação.
+
+**Arquivos criados/modificados** *(conferidos contra os dois commits)*
 
 - `tools/looks/anime.py` — **novo**: o formato, o decode dos ângulos, a tabela
   de seno gerada, a rotação, `--check`, `--check-image`, `--report` e
   `--against-pose`
-- `tools/looks/layout.py` — `ANIME_SCREEN_ENTRY` e `POSE_ANGLES`
-- `tools/looks/oracle.py` — a captura passa a gravar, por peça, os três ângulos
-  do scratchpad e **o quadro da animação que estava tocando naquela parada**
+- `tools/looks/layout.py` — `ANIME_SCREEN_ENTRY`, `POSE_ANGLES`, e
+  `ANIME_UNPACK` / `ANIME_UNPACK_BASE`, que é a ponte que vale
+- `tools/looks/oracle.py` — a captura grava, por peça, os três ângulos do
+  scratchpad, o quadro que a animação tocava e **o par que o jogo leu**, com o
+  par consumido a cada peça
 - `tools/looks/cli.py` e `tools/looks/selftest.py` — o módulo novo nas duas
   listas
 - `tools/looks/controls.py` — três controles plantados, e o
   `cli-check-forgets-a-module` repontado para o último da lista
-- `docs/PLAN-LOOKS-PY.md` — §10.3 (l) com o formato e o que ficou aberto
-- `docs/tasks/looks/32-o-ciclo-da-caminhada.md` — a interpolação medida pela
-  metade, encaminhada com os números e o endereço do código que mistura
+- `docs/PLAN-LOOKS-PY.md` — §10.3 (l) com o formato, e a correção no lugar do
+  que ela dizia sobre interpolação
+- `docs/tasks/looks/32-o-ciclo-da-caminhada.md` — o encaminhamento **corrigido**:
+  o que foi mandado para lá de manhã era artefato, e a linha diz isso
+- `docs/prompts/perfil-looks.md` — a linha de gate e as armadilhas
+- `CLAUDE.md` — a linha do comando novo na tabela do ciclo
 - `docs/tasks/looks/progresso.md` — a task segue `⬜ Pendente`, de propósito
-
-**Gates, na árvore de `caefe1b`**
-
-```text
-$ python tools/looks/selftest.py
-  ..... 81 of 81 controls red
-controls: 0 failure(s)
-looks_selftest: 0 failure(s)
-
-$ python tools/looks/cli.py check
-  ok    anime      exit 0   anime --check-image: 0 failure(s)
-cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
-
-$ python tools/looks/anime.py --check-image
-  ok    the header names 204 animation(s), 197 of them distinct
-  ok    the walk from offset 816 covers 197 block(s) and 3952 frame(s) and
-        ends at 396804   EOF 396804, 0 hole(s)
-  ok    every block closes with the same marker
-  ok    every frame is 96 byte(s), twelve pairs of words
-  ok    the entry the screen plays has a frame for each drawn piece
-  ok    and its matrices are rotations
-
-$ python tools/looks/anime.py --against-pose      # 16 capturas de --poses
-  96 of 192 carry angles the file holds, integer for integer
-  0 carry angles the file holds at that pair but NOT in the frame the state named
-  96 carry angles NO frame of the file holds -- the in-between frames, still open
-  of the 96 the file holds, 32 matrices are exact and the worst entry is 188 of 4096
-
-$ python tools/check_tasks.py
-check_tasks: 138 task(s), ok
-```
-
-**Os controles, plantados e rodados** — os três novos, cada um numa cópia da
-árvore:
-
-```text
-  RED    anime-angle-fields-in-the-wrong-order  anime.py :: angles
-  RED    anime-angle-loses-its-scale            anime.py :: module constant
-  RED    anime-sine-table-truncates             anime.py :: sine_table
-```
 
 **Problemas encontrados**
 
-1. **A animação avança NO MEIO de uma passada de desenho.** Ler o ponteiro do
-   quadro uma vez por captura nomeia os bytes errados para metade das peças —
-   as cinco primeiras de uma passada vieram de um quadro e as sete seguintes do
-   seguinte. A captura passou a ler o ponteiro **em cada parada**, e aí os
-   ângulos batem 24 de 24 no slot 2.
-2. **Casar ângulo por "existe no arquivo" produz falso positivo.** Procurando o
-   trio em todos os 3.952 quadros, seis membros do goleiro "acharam" um par que
-   não era o deles e a distância da matriz foi de 1 para 188. A comparação de
-   matriz só vale onde o trio é o do quadro **que o estado nomeou**.
-3. **A tabela de seno não precisa ser versionada, e isso é medição.** Despejada
+1. **O quadro que o estado nomeia não é o quadro que o jogo está lendo.**
+   Ligar captura e arquivo por `layout.ANIME_STATE` funciona no slot 2 e falha
+   inteiro no slot 1, e o sintoma é tentador: metade dos ângulos "não está no
+   arquivo", o que se lê como interpolação. Foi escrito como achado no plano e
+   na task 32 antes de ser remedido. **Ponteiro que diz onde o jogo ESTÁ lendo
+   ganha de ponteiro que diz o que ele está tocando.**
+2. **A animação avança NO MEIO de uma passada de desenho** — as cinco
+   primeiras peças de uma passada vieram de um quadro e as sete seguintes do
+   seguinte. É o que motivou ler por parada, e continua valendo.
+3. **Dez variantes de desempacotamento dividem o mesmo dispatch**
+   (`0x80011DA0`), e só uma para na instrução vigiada. Herdar o par da peça
+   anterior nomeia bytes errados com cara de certo: doze peças de 108 casaram
+   assim antes de o par ser **consumido** por peça.
+4. **Casar ângulo por "existe no arquivo" produz falso positivo.** Procurando o
+   trio nos 3.952 quadros, seis membros do goleiro acharam um par que não era o
+   deles e a distância da matriz foi de 1 para 188.
+5. **A tabela de seno não precisa ser versionada, e isso é medição.** Despejada
    da RAM (16 KB) e comparada com `round(sin·4096)`: 0 divergência em 4.096.
    Truncar dá 3.080 — o controle plantado usa exatamente essa troca.
-4. **O controle `cli-check-forgets-a-module` casava com o último nome da lista
-   do `cli.py`.** Acrescentar `anime` no fim fez o literal dele parar de casar,
-   e o gate acusou *"matched 0 times"*, não *"green"*. Controle que cita a
-   borda de uma lista envelhece quando a lista cresce.
+6. **O controle `cli-check-forgets-a-module` casava com o último nome da lista
+   do `cli.py`.** Acrescentar `anime` no fim fez o literal parar de casar, e o
+   gate acusou *"matched 0 times"* — nem verde nem vermelho: um controle que
+   deixou de existir.

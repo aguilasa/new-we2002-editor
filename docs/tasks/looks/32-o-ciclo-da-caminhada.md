@@ -23,21 +23,19 @@ status: pendente
 - **O tronco balança na gravação.** Raiz da animação ou câmera muda onde o
   balanço mora.
 
-- **A interpolação já está medida pela metade, e é desta task fechar.** Em
-  2026-09-18 a [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)
-  contou, sobre 16 capturas e 192 peças desenhadas: **96 trazem ângulos que o
-  `ANIME.BIN` guarda inteiro por inteiro, e 96 trazem ângulos que quadro
-  nenhum do arquivo guarda.** Metade dos quadros que o jogo mostra é
-  construída.
-  - **Não é a média dos vizinhos na lista:** testado contra o quadro anterior e
-    o seguinte da mesma animação, `(a + b) >> 1`, **0 de 96**.
-  - **O código que mistura é `0x80011F90`…**, e ele faz `lhu` de um ângulo,
-    `lh` de outro a partir de um segundo ponteiro, soma e `sra 1` — uma média
-    de dois, halfword a halfword. De onde vem o segundo ponteiro é o que falta.
-  - Quem mede isso mede também o ritmo: `python tools/looks/anime.py
-    --against-pose` imprime os três números a cada corrida, e
-    `oracle.py --pose <SLOT> <N>` grava a captura com o ângulo e o quadro
-    tocado **ao lado de cada peça**.
+- **A interpolação NÃO está medida, e o que esta linha dizia era artefato.**
+  Em 2026-09-18 a [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)
+  escreveu aqui que *"96 de 192 peças trazem ângulos que o `ANIME.BIN` não
+  guarda"*, e portanto que metade dos quadros era construída. **Remedido no
+  mesmo dia:** com a ponte certa — `s0` na instrução `0x80011D48`, o ponteiro
+  que o jogo está lendo, e não o quadro que o estado nomeia — são **96 de 96**
+  que vêm do arquivo, inteiro por inteiro. Nada aqui diz que o jogo interpola.
+- **O que continua valendo como pista:** o código em `0x80011F90` soma dois
+  valores halfword a halfword e desloca um bit (`sra 1`) sobre a matriz recém
+  construída, e o dispatch em `0x80011DA0` tem **dez** variantes de
+  desempacotamento, algumas das quais andam o ponteiro do par de ±8 e ±16.
+  Quem medir o ritmo mede também isso; e a pergunta "o jogo interpola?" se
+  responde contando quadros com `frame_step`, não por ângulo que não achou par.
 
 ---
 

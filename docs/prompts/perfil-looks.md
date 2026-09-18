@@ -482,6 +482,24 @@ Não se revertem sem o usuário pedir.
     disse `matched 0 time(s)` — que não é verde nem vermelho, é um controle que
     deixou de existir. Quem acrescenta módulo à lista reponta o controle.
 
+54. **Ponteiro que diz onde o jogo ESTÁ lendo ganha de ponteiro que diz o que
+    ele está tocando.** Ligar uma captura de pose ao `ANIME.BIN` pelo quadro
+    que o estado de animação nomeia (`layout.ANIME_STATE`) funciona no slot 2 e
+    **falha inteiro no slot 1**: metade das peças passa a ter ângulos que não
+    existem em 3.952 quadros. O sintoma é tentador — lê-se como *"o jogo
+    interpola metade dos quadros"* —, e chegou a ser escrito no plano e
+    encaminhado para a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md)
+    antes de ser remedido no mesmo dia. A ponte que vale é o registrador que a
+    instrução de leitura usa (`layout.ANIME_UNPACK`): com ele, **96 de 96**.
+    Medido em 2026-09-18
+    ([`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)).
+55. **Dez variantes dividem um dispatch, e vigiar uma delas é vigiar um
+    décimo.** A rotina que desempacota os ângulos tem dez caminhos
+    (`0x80011DA0`), cada um com o seu próprio `lw`. Um breakpoint na variante
+    comum perde as outras, e **herdar o valor da peça anterior** nomeia bytes
+    errados com cara de certo — doze peças de 108 casaram assim. O valor se
+    **consome** por peça, e quem não tem o seu é contado como não ligado.
+
 ---
 
 ## As fontes de verdade binárias
