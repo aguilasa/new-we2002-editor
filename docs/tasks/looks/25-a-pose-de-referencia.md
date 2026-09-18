@@ -107,6 +107,65 @@ lacuna.
 - `docs/tasks/looks/progresso.md` — a linha e o checklist da Fase 9
 - `CLAUDE.md` — a seção do ciclo, que envelhece com ele
 
+**Gates, na árvore de `9dfb713`**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 78 of 78 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 8 module(s), 8 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 6 of 6 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/oracle.py --poses
+  -- slot 1 (goalkeeper) --
+    control: frame 0 captured twice, 12 load(s), identical number by number
+    12 piece(s) every pass: foot a, forearm a, forearm b, head, root, shin a,
+      shin b, thigh a, thigh b, torso, upper arm a, upper arm b
+      section 10 (foot b) read 2 time(s)
+      section 19 (shin b) read 2 time(s)   <- control, drawn this pass
+      section 10 is READ and carries no matrix load of its own [...]
+    every matrix is the camera composed with a rotation: worst
+      |M x Mt - C x Ct| is 0.0071 of the largest entry (threshold 0.0200)
+    0 of 12 carry a mirrored matrix (negative determinant): none
+      root          child of head          spread  3.2, next at 46.8 (14.5x)
+      shin a        child of thigh a       spread  5.0, next at 52.3 (10.5x)
+      shin b        child of thigh b       spread  4.8, next at 47.2  (9.9x)
+      upper arm a   child of torso         spread 14.5, next at 76.5  (5.3x)
+      upper arm b   child of forearm a     spread 15.5, next at 77.2  (5.0x)
+      head          child of root          spread  6.3, next at 20.6  (3.3x)
+      (os outros seis: 1,1x a 2,2x -- nao se separam)
+    y grows DOWNWARD, as scene.UP = -1 already assumes: the head sits at
+      y=-10 and the lowest foot at y=55
+  -- slot 2 (outfield player) --
+    control: frame 0 captured twice, 12 load(s), identical number by number
+    worst |M x Mt - C x Ct| is 0.0015; 0 of 12 mirrored
+      root 14.6x, shin b 12.8x, shin a 9.2x, upper arm a 4.9x,
+      upper arm b 4.6x; os outros sete abaixo de 2,5x
+    y grows DOWNWARD: head y=-8, lowest foot y=60
+oracle --pose: 0 problem(s) over 8 frame(s) and 2 slot(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**O vermelho, plantado e rodado** — o registrador base da câmera na carga da
+peça (`POSE_PIECE_MATRIX_BASE`, `"v1"` → `"a0"`), numa cópia da árvore por
+`git worktree`:
+
+```text
+  FAIL  slot 2 frame 0: 11 of the 12 loads carry the same numbers as another
+        -- a pass in which the pieces do not differ is not a pose, whatever
+        it repeats like
+  FAIL  slot 2 frame 20: 11 of the 12 loads carry the same numbers as another
+oracle --pose: 2 problem(s) over 2 frame(s) and 1 slot(s)
+```
+
 **Problemas encontrados**
 
 1. **A rotação de `POSE_MATRIX` é a mesma para as doze peças, e quase virou "a
