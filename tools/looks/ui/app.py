@@ -285,6 +285,9 @@ def main(argv=None) -> int:
     parser.add_argument("--yaw", type=float, default=viewer_module.FRONT,
                         help="degrees around the figure; the default faces it")
     parser.add_argument("--pitch", type=float, default=0.0)
+    parser.add_argument("--frame", type=int, default=None,
+                        help="pose the figure by this frame of the screen's "
+                             "animation; without it the pieces sit on a shelf")
     parser.add_argument("--piece", choices=("all", "head"), default="all",
                         help="head draws the section the tuple actually "
                              "changes, and nothing else")
@@ -307,7 +310,8 @@ def main(argv=None) -> int:
             print("app: skipped -- %s" % exc)
             return core.SKIP
     try:
-        drawn = core.from_image(image, args.looks, args.figure)
+        drawn = core.from_image(image, args.looks, args.figure,
+                                args.frame)
     except core.BadScene as exc:
         print("app: %s refuses -- %s" % (args.looks, exc))
         return 2
@@ -315,7 +319,9 @@ def main(argv=None) -> int:
         drawn = core.head_only(drawn)
 
     view = Viewer(drawn)
-    view.shelved = not args.no_shelf
+    # A posed scene carries its own places; shelving it would move the
+    # pieces a second time.
+    view.shelved = not args.no_shelf and args.frame is None
     view.wireframe = args.wireframe
     view.yaw, view.pitch = args.yaw, args.pitch
     view.set_scene(drawn)

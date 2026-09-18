@@ -312,7 +312,8 @@ def part_for(primitive, vertices, record, surface, clut: int, band: int,
 
 # ---- the scene -----------------------------------------------------------
 
-def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
+def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE,
+          frame: int = None) -> Scene:
     """Everything the tuple draws, out of the disc's own bytes.
 
     The draw list is `assembly`'s and is not recomputed here: which primitive
@@ -361,12 +362,43 @@ def build(disc, values: dict, figure: int = assembly.HEAD_FIGURE) -> Scene:
         if part.band_unmeasured:
             notes["band unmeasured"] += 1
         out.append(part)
+    if frame is not None:
+        out = _posed(disc, out, frame, notes)
     return Scene(out, {k: v for k, v in surfaces.items() if v is not None},
                  values, figure, notes)
 
 
+def _posed(disc, parts: list, frame: int, notes: dict) -> list:
+    """Every part turned and placed by the frame's own pose.
+
+    The points are transformed HERE, in the core, and not by the window: the
+    window may not import `anime`, `layout` or `pieces`, and a pose applied at
+    draw time would be a second placement to keep right beside `shelf()`.
+    """
+    places = pose(disc, frame)
+    notes["not posed"] = 0
+    notes["placed by its mirror"] = 0
+    out = []
+    for part in parts:
+        found = places.get((part.file, part.section))
+        if found is None:
+            notes["not posed"] += 1
+            out.append(part)
+            continue
+        matrix, place, mirrored = found
+        if mirrored:
+            notes["placed by its mirror"] += 1
+        moved = Part(part.file, part.section, part.primitive,
+                     place_points(part.points, matrix, place), part.uvs,
+                     part.surface, part.why, part.clut, part.band,
+                     part.band_unmeasured)
+        out.append(moved)
+    return out
+
+
 def from_image(image_path: str, text: str,
-               figure: int = assembly.HEAD_FIGURE) -> Scene:
+               figure: int = assembly.HEAD_FIGURE,
+               frame: int = None) -> Scene:
     """The whole path, from a disc on disc to a scene -- what `ui/app.py` calls.
 
     It lives here and not in the window because the window is forbidden the
@@ -376,7 +408,8 @@ def from_image(image_path: str, text: str,
 
     with iso_source.open_disc(image_path) as disc:
         data = {name: disc.read(name)
-                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D)}
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME)}
     # A tuple the table refuses arrives here as BadScene, with the table's own
     # sentence kept whole.  The window is not allowed to import `assembly` or
     # `looks` to catch their exceptions, and a refusal that reaches it as a
@@ -384,7 +417,7 @@ def from_image(image_path: str, text: str,
     # it is -- three hair styles and one beard value are exactly that.
     try:
         values = looks.parse_tuple(text)
-        return build(data, values, figure)
+        return build(data, values, figure, frame)
     except (looks.BadLooks, assembly.BadAssembly) as exc:
         raise BadScene(str(exc)) from exc
 
@@ -411,16 +444,141 @@ class Builder:
         with iso_source.open_disc(image_path) as disc:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
-                                       layout.DAT2D)}
+                                       layout.DAT2D, layout.ANIME)}
 
-    def build(self, text: str) -> Scene:
+    def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
         try:
             values = looks.parse_tuple(text)
-            return build(self._data, values, self.figure)
+            return build(self._data, values, self.figure, frame)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
 
+
+
+
+# --- the pose: the pieces where the game puts them -------------------------
+
+ONE = 4096  # not-an-address: 1.0 in the 4.12 the matrix is in
+
+REFERENCE_PIECE = "root"
+"""The piece every place is measured from.
+
+It is the one load of a pass that carries no model pointer (LOOKS-TASK-25), so
+nothing is drawn for it -- what it gives is the origin.  ANIME.BIN stores
+places relative to one another, and the figure is assembled around this one.
+"""
+
+REFERENCE_FRAME = 0
+"""The frame of the screen's animation a scene is posed in when none is asked
+for.  Frame 0 of `layout.ANIME_SCREEN_ENTRY`, which is where the walk starts."""
+
+
+def piece_names(disc) -> dict:
+    """{(file, section): name} for every piece either figure draws.
+
+    The names are `pieces.py`'s -- measured in LOOKS-TASK-09 -- and the head is
+    MODEL.BIN's section 24.  They are what ties a section of the model files to
+    a pair of an ANIME.BIN frame, which carries no section number of its own.
+    """
+    import pieces
+
+    named, _orders, _paired = pieces.name_pieces(disc[layout.EDT_MOD])
+    out = {(layout.MODEL, pieces.HEAD_SECTION): pieces.HEAD}
+    for index, piece in named.items():
+        out[(layout.EDT_MOD, index)] = piece.full_name
+    return out
+
+
+def mirror_of(name: str) -> str:
+    """The partner of a mirrored piece, or None.
+
+    `pieces.py` pairs the limbs and calls one of each pair `a` and the other
+    `b`; ANIME.BIN carries a pair for one boot and not for the other, so the
+    one it does not carry is placed from its partner's.
+    """
+    if name.endswith(" a"):
+        return name[:-2] + " b"
+    if name.endswith(" b"):
+        return name[:-2] + " a"
+    return None
+
+
+def pose(disc, frame: int = REFERENCE_FRAME,
+         animation: int = None) -> dict:
+    """{(file, section): (matrix, place)} -- where the game puts each piece.
+
+    **Twelve transforms applied, not a hierarchy composed.**  LOOKS-TASK-25
+    measured that what reaches the GTE per piece is absolute, and that the
+    game's skeleton is not rigid: five joints hold and the rest do not.  So
+    assembling is applying what the frame stores, and inventing a chain of
+    bones would draw a figure that looks right and is nobody's -- the same
+    failure `shelf()` refuses to commit by being honest about being a shelf.
+
+    The one piece whose place is NOT measured is the second boot: the file
+    carries eleven pairs for twelve drawn sections, and the screen reads both
+    boot sections (LOOKS-TASK-26).  It is placed by mirroring its partner in
+    z, and `posed_notes()` says so rather than letting it pass for measured.
+    """
+    import anime
+
+    if animation is None:
+        animation = layout.ANIME_SCREEN_ENTRY
+    data = disc[layout.ANIME]
+    entries = anime.header(data)
+    one = anime.block(data, entries[animation])
+    if not 0 <= frame < len(one["frames"]):
+        raise BadScene("frame %d, and animation %d has %d"
+                       % (frame, animation, len(one["frames"])))
+    by_name = {piece["piece"]: piece
+               for piece in anime.frame_angles(data, one["frames"][frame])}
+    origin = by_name[REFERENCE_PIECE]["position"]
+    out = {}
+    for where, name in piece_names(disc).items():
+        carried = by_name.get(name)
+        mirrored = False
+        if carried is None:
+            partner = mirror_of(name)
+            carried = by_name.get(partner) if partner else None
+            mirrored = carried is not None
+        if carried is None:
+            continue
+        matrix = anime.rotation(carried["angles"])
+        place = [carried["position"][axis] - origin[axis] for axis in range(3)]
+        if mirrored:
+            matrix = _mirrored_in_z(matrix)
+            place[2] = -place[2]
+        out[where] = (matrix, tuple(place), mirrored)
+    return out
+
+
+def _mirrored_in_z(matrix: list) -> list:
+    """The same turn seen in a mirror across z.
+
+    `pieces.py` measured that the limbs pair by reflection in z, so the
+    partner's turn is this one with the z row and column negated -- which is
+    `M . R . M` for `M = diag(1, 1, -1)`, written out.
+    """
+    signs = (1, 1, -1)
+    return [matrix[row * 3 + column] * signs[row] * signs[column]
+            for row in range(3) for column in range(3)]
+
+
+def place_points(points, matrix, place) -> list:
+    """One piece's points, turned and put where the frame says.
+
+    The shift of twelve is the game's: the matrix is 4.12 and the points are
+    whole model units, so the product comes back to model units.
+    """
+    out = []
+    for point in points:
+        # The points are floats by the time they reach here -- `part_for`
+        # already divided the file's whole units -- so the shift is written as
+        # the division it is, and the matrix stays the game's 4.12 integers.
+        turned = [sum(matrix[axis * 3 + k] * point[k] for k in range(3))
+                  / float(ONE) for axis in range(3)]
+        out.append(tuple(turned[axis] + place[axis] for axis in range(3)))
+    return out
 
 SHELF_GAP = 8.0
 """Space left between two pieces on the shelf, in the file's own units."""

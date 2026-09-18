@@ -779,8 +779,8 @@ def judge_refusal(python: str, app: str, where: str, env: dict) -> list:
 # can run.
 BREAKS = (
     ("the tuple reaching the scene", os.path.join("ui", "app.py"),
-     "        drawn = core.from_image(image, args.looks, args.figure)",
-     "        drawn = core.from_image(image, DEFAULT_TUPLE, args.figure)"),
+     "        drawn = core.from_image(image, args.looks, args.figure,",
+     "        drawn = core.from_image(image, DEFAULT_TUPLE, args.figure,"),
     ("the triangles being drawn", os.path.join("ui", "viewer.py"),
      "                functions.glDrawArrays(GL_TRIANGLES, first, count)",
      "                functions.glDrawArrays(GL_TRIANGLES, first, 0)"),

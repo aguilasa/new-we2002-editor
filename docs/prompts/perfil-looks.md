@@ -523,6 +523,13 @@ Não se revertem sem o usuário pedir.
     defeito. A que vale varre **todos** os pares do arquivo e pergunta se
     algum reproduz a matriz (`anime.no_pair_explains`).
 
+58. **Literal plantado morre quando a linha muda de FORMA, não só de texto.**
+    Quebrar a chamada do `from_image` em duas para caber um argumento novo fez
+    o controle do `ui_check` acusar `matched 0 time(s)` — que não é verde nem
+    vermelho, é um controle que deixou de existir. Já aconteceu com a lista do
+    `cli.py` (armadilha 53) e agora com uma chamada: **quem muda uma linha
+    citada por um controle reponta o controle na mesma edição.**
+
 ---
 
 ## As fontes de verdade binárias

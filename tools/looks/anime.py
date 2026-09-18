@@ -70,6 +70,7 @@ PIECE_PAIRS = 12
 PAIR_BYTES = 8
 BLOCK_END = 0x0000000B  # not-an-address: the word that closes an animation
 WORD_OF_FRAME_FIVE = 0x8FE3FC02  # not-an-address: a packed angle triple
+WORD_OF_ROOT_PLACE = 0xFF1967F8  # not-an-address: a packed place
 ANGLE_BITS = 10  # not-an-address: the width of one packed angle
 ANGLE_SHIFT = 4  # not-an-address: how far the game shifts an angle left
 ANGLE_STEP = 16  # not-an-address: the unit a stored angle is a multiple of
@@ -214,6 +215,38 @@ def angles(word: int) -> tuple:
                  for n in range(3))
 
 
+POSITION_BITS = 11  # not-an-address: the width of the x and z fields
+POSITION_Y_HIGH = 5  # not-an-address: bits 11..15 of the second word
+POSITION_Y_LOW = 5  # not-an-address: bits 16..20, which come out lower
+
+
+def position(word0: int, word1: int) -> tuple:
+    """Where the piece sits, out of the pair's SECOND word.
+
+    **The file carries the whole pose, angles and place.**  Measured on
+    2026-09-18 against the captures of both save states: `x` is bits 10:0
+    signed, `z` is bits 31:21 signed, and `y` is ten bits that the game
+    reassembles SWAPPED -- bits 11..15 become the high five and bits 16..20 the
+    low five -- with the top two bits of the FIRST word deciding its sign.
+
+    That is the code at 0x80011F0C..0x80011F50 read back, and the check is the
+    game's own translations: with the root's place subtracted and the camera
+    applied, they reproduce what the GTE was handed to within a few units.
+
+    The places are relative to each other, not to the screen: what the figure
+    is placed against is the root's own place, and the camera carries the rest.
+    """
+    flags = word0 >> 30
+    high = (word1 >> 6) & 0x3E0  # not-an-address: bits 11..15, moved up five
+    low = (word1 >> 16) & 0x1F  # not-an-address: bits 16..20
+    y = high | low
+    y |= (flags - (flags & 2)) << 12
+    if flags >> 1:
+        y = -y
+    return (_signed(word1, POSITION_BITS), y,
+            _signed(word1 >> 21, POSITION_BITS))
+
+
 def frame_angles(data: bytes, at: int) -> list:
     """The twelve pieces of one frame, each with its three angles."""
     if at + FRAME_BYTES > len(data):
@@ -222,6 +255,7 @@ def frame_angles(data: bytes, at: int) -> list:
     words = struct.unpack("<%dI" % (FRAME_BYTES // WORD),
                           data[at:at + FRAME_BYTES])
     return [{"piece": PIECE_ORDER[n], "angles": angles(words[n * 2]),
+             "position": position(words[n * 2], words[n * 2 + 1]),
              "second": words[n * 2 + 1]}
             for n in range(PIECE_PAIRS)]
 
@@ -383,6 +417,25 @@ def _checks(c) -> None:
        angles(WORD_OF_FRAME_FIVE)
        == (32, 4080, 4064),  # not-an-address: three angles
        "%r" % (angles(WORD_OF_FRAME_FIVE),))
+
+    # -- the place, on words made here ---------------------------------
+    ok("a second word of zero places the piece at the origin",
+       position(0, 0) == (0, 0, 0))
+    ok("x is the low eleven bits, signed", position(0, 1) == (1, 0, 0))
+    ok("and it is signed",
+       position(0, 1 << (POSITION_BITS - 1))
+       == (-1024, 0, 0))  # not-an-address: a packed place
+    ok("z is the top eleven bits, signed",
+       position(0, 1 << 21) == (0, 0, 1))
+    ok("y comes out of bits 11..20, swapped",
+       position(0, 1 << 16) == (0, 1, 0), "%r" % (position(0, 1 << 16),))
+    ok("and the high five of y are bits 11..15",
+       position(0, 1 << 11) == (0, 32, 0), "%r" % (position(0, 1 << 11),))
+    # The pair the capture read for `root` in frame 5 of the screen's
+    # animation, and the place it put it at.
+    ok("the real pair places the root where the game placed it",
+       position(WORD_OF_FRAME_FIVE, WORD_OF_ROOT_PLACE) == (-8, -409, -8),
+       "%r" % (position(WORD_OF_FRAME_FIVE, WORD_OF_ROOT_PLACE),))
 
     # -- the sine table -----------------------------------------------------
     table = sine_table()
