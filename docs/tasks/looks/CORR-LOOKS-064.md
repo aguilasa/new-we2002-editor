@@ -3,7 +3,7 @@ id: CORR-LOOKS-064
 title: "Correção: \"603 a 1.680\" e \"1,4x a 4,4x\" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu"
 type: correção
 category: processo
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -114,23 +114,78 @@ que foi medido antes do conserto. O `fit_centre` perde a frase repetida.
 
 ## Verificação
 
-- [ ] `grep -rn "1.680\|4,4x" docs/PLAN-LOOKS-PY.md docs/tasks/looks/28-a-camera-do-jogo.md`
+- [x] `grep -rn "1.680\|4,4x" docs/PLAN-LOOKS-PY.md docs/tasks/looks/28-a-camera-do-jogo.md`
       vazio, e os números novos iguais ao que `confront.py --silhouette` e
       `--silhouette-styles` imprimem
-- [ ] `grep -n "and fails" tools/looks/confront.py` não alcança o
+- [x] `grep -n "and fails" tools/looks/confront.py` não alcança o
       `--silhouette-styles`
-- [ ] a §10.3 (m) não diz mais "mantida fixa" sobre a translação do painel
-- [ ] `python tools/looks/selftest.py --quiet` verde (a regra 1 varre as
+- [x] a §10.3 (m) não diz mais "mantida fixa" sobre a translação do painel
+- [x] `python tools/looks/selftest.py --quiet` verde (a regra 1 varre as
       docstrings)
-- [ ] `python tools/check_tasks.py` ok
-- [ ] `roms/` intocada
+- [x] `python tools/check_tasks.py` ok
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito**
 
-**Problemas encontrados:**
+A evidência bate nos cinco itens: `--silhouette` imprime 603/1.483 e
+670/1.452, o `--silhouette-styles` sai verde com as razões que a tabela dá,
+as três docstrings dizem o que está dito, a §10.3 (m) se contradiz e o Log abre
+com **PARCIAL**. Corrigidos:
 
-**Arquivos criados/modificados:**
+1. **"603 a 1.680"** virou **603 a 1.483 no slot 2 e 670 a 1.452 no slot 1**,
+   no critério 4 da task e na §10.3 (m) — os números que a corrida imprime.
+2. **"1,4x a 4,4x"** virou **1,36x a 4,10x contra o estilo errado mais
+   próximo**, no critério 5, no Log (quinta sessão) e na §6 (h). **Não é o
+   1,36x a 4,73x que a Correção propunha**: o 4,73x é 563/119, contra o estilo
+   errado **mais distante**, e a [`CORR-LOOKS-063`](/docs/tasks/looks/CORR-LOOKS-063.md)
+   fez o gate imprimir a razão contra o **mais próximo**, cuja maior é 488/119
+   = 4,10x. A Correção mandava escrever o que o gate passasse a imprimir, e é
+   isto.
+3. **As docstrings de `STYLE_SWAP` e `STYLE_TUPLES`** dizem o que o
+   `--silhouette-styles` faz hoje — close-up, 6 de 6, 1,36x a 4,10x —, com o
+   histórico dito sem repetir a frase falsa. O `fit_centre` perdeu a frase
+   duplicada, e a "raiz" dele virou a segunda chuteira
+   ([`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)).
+4. **§10.3 (m):** a translação do painel é ajustada **a cada comparação**; a
+   frase de "uma vez e fixada" foi reescrita dizendo que foi o que a primeira
+   sessão fez e que a segunda mediu pior. A mesma frase dizia "a partir da
+   raiz", e agora diz a partir de que peça.
+5. **O Log** abre com as cinco sessões — a primeira parcial, fechada na quinta.
+
+```text
+$ python tools/looks/confront.py --silhouette            # real 1m21.409s
+    control: frame(s) [80, 100] differ from it by [603, 1483] pixel(s)
+    control: frame(s) [80, 100] differ from it by [670, 1452] pixel(s)
+confront --silhouette: 0 problem(s) over 2 slot(s)
+
+$ python tools/looks/confront.py --silhouette-styles     # real 4m1.906s
+    ... nearest wrong 1.36x ... 4.10x ... 2.48x ... 1.60x ... 3.69x ... 2.12x
+confront --silhouette-styles: 0 problem(s) over 2 slot(s)
+
+$ grep -rn "1.680\|4,4x" docs/PLAN-LOOKS-PY.md docs/tasks/looks/28-a-camera-do-jogo.md
+$ grep -n "and fails" tools/looks/confront.py
+```
+
+**Problemas encontrados**
+
+1. **Nota histórica que cita o texto velho reprova a própria verificação.** As
+   primeiras versões das correções diziam *"esta linha dizia '1,4x a 4,4x'
+   até…"*, e os `grep` da seção Verificação voltavam com elas. O histórico
+   ficou, dito sem a frase literal.
+2. **A varredura achou dois tempos de corrida que nenhuma corrida mediu**, na
+   tabela de gates do perfil: `--silhouette-styles` "~12 min" (medido: **4 min
+   2 s**, os dois slots, já com o controle da 063) e `--silhouette` "~4 min por
+   slot" (medido: **1 min 21 s**, os dois). Corrigidos com o valor e a data.
+
+**Arquivos criados/modificados**
+
+- `docs/tasks/looks/28-a-camera-do-jogo.md` — critérios 4 e 5, o cabeçalho e a
+  quinta sessão do Log
+- `docs/PLAN-LOOKS-PY.md` — §6 (h) e §10.3 (m)
+- `tools/looks/confront.py` — só docstrings: `STYLE_SWAP`, `STYLE_TUPLES`,
+  `fit_centre`
+- `docs/prompts/perfil-looks.md` — os dois tempos de corrida

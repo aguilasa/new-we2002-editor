@@ -2229,7 +2229,8 @@ captura (+18,3°, −16,9°, +16,9°), e o giro está composto em cada peça e
 translação espalha 29 unidades; com a câmera derivada das próprias peças
 (`oracle.camera_from_pieces`), menos de uma. Com foto e câmera da **mesma
 parada**, cada foto do jogo escolhe o próprio estilo entre os três, nos dois
-slots: **6 de 6**, por 1,4x a 4,4x (`confront.py --silhouette-styles`). O
+slots: **6 de 6**, por 1,36x a 4,10x contra o estilo errado mais próximo
+(`confront.py --silhouette-styles`). O
 gate fecha um **controle antes** — o mesmo close-up duas vezes, 0 pixel e a
 mesma câmera derivada — e confere margem contra o estilo errado mais próximo
 (`CLOSEUP_MARGIN`) e teto para o certo (`CLOSEUP_SHARE`), desde a
@@ -2810,8 +2811,12 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > **E o deslocamento de tela do GTE é ZERO.** `OFX` e `OFY` valem 0,00, então
 > a projeção sai com a origem no eixo da câmera e **quem põe o boneco dentro do
 > painel é o deslocamento de desenho da GPU**, não o GTE. Isso e a nossa
-> escolha de medir lugares a partir da raiz viram **uma** translação, medida
-> uma vez e mantida fixa.
+> escolha de medir lugares a partir de uma peça (a segunda chuteira,
+> [`CORR-LOOKS-062`](/docs/tasks/looks/CORR-LOOKS-062.md)) somam **uma**
+> translação, e ela é **ajustada a cada comparação**, não fixada — ver
+> abaixo. Esta frase dizia que a translação era medida uma vez e fixada, até a
+> [`CORR-LOOKS-064`](/docs/tasks/looks/CORR-LOOKS-064.md), que é o que a
+> primeira sessão fez e o que a segunda mediu ser pior.
 >
 > **A projeção confere na largura:** a nossa figura projeta **50,5 px** de
 > largura onde a do jogo mede **50** no painel.
@@ -2822,7 +2827,7 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > ~3,5 do emulador —, com mínimo interior e nítido em todas as seis varreduras
 > e **7% a 18%** da tinta do jogo de diferença. Os controles fecham antes: o
 > mesmo quadro contado duas vezes dá **0** pixel, quadros diferentes dão 603 a
-> 1.680.
+> 1.483 no slot 2 e 670 a 1.452 no slot 1.
 >
 > Duas coisas custaram a chegar lá e ficam escritas: o segundo buffer de quadro
 > começa na linha **240** da VRAM e não na 256 — lido errado, a caixa de ajuda

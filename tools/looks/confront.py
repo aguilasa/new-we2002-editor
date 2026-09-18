@@ -1024,7 +1024,10 @@ the full figure's size our A1 and I3 differ by a few tens of pixels, the
 game's own A1 and I3 photographs by 15 and C1 by 29, and our I3 matches the
 game's A1 picture at 378 against our A1's 399.  The full-body silhouette does
 not separate hair styles, and asserting that it did is what this used to do.
-It is still run and printed, and `--silhouette-styles` asserts it -- and fails.
+It is still run and printed; what asserts hair styles is `--silhouette-styles`,
+and it does so in the CLOSE-UP, where it passes 6 of 6 (`STYLE_TUPLES`).
+Until CORR-LOOKS-064 this line had the styles gate asserting it and
+failing: true of the full-figure version, which is gone.
 The rest of what this said, measured before the fix, follows as it was:
 
 Hair, because it is the field that changes the MESH: measured 2026-09-18 on
@@ -1205,10 +1208,13 @@ matches its own by a few percent -- C1 402 against A1's 430, I3 391 against
 412 -- but the game's A1 picture matches our I3 (378) better than our A1 (399).
 The game's own three photographs differ by only 15 and 29 pixels: at this size
 a hair style is a handful of pixels, and the silhouette does not separate them.
-`--silhouette-styles` asserts that it does, and fails; `--silhouette` does not
-include it.  Where a style IS big is the close-up the game shows with a head
-row under the cursor -- measured there, the head band picks the right style in
-2 of 3, A1 being the one it misses.
+`--silhouette` does not assert it.  Where a style IS big is the close-up the
+game shows with a head row under the cursor, and that is where
+`--silhouette-styles` asks: with photograph and camera from the same stop
+(`closeup_at_tuple`), each of the game's six photographs picks its own style,
+by 1.36x to 4.10x against the nearest wrong one.  It read "2 of 3, A1 being
+the one it misses" -- the first close-up, with a camera from another moment --
+and had the gate asserting it and failing, until CORR-LOOKS-064.
 
 Three because one is an anchor and two is a pair: what has to hold is that the
 silhouette follows the mesh the SCREEN is showing, in every style the screen
@@ -1239,10 +1245,9 @@ def fit_centre(theirs, projected, size):
 
     The GTE's offsets are ZERO on this screen -- measured -- so where the
     figure's own screen frame sits inside the panel is the GPU's draw offset,
-    and our places are relative to the root rather than to the game's world.
-    Both fold into ONE translation, of about 170 pixels.
-
-    Both fold into one translation of about 170 pixels.  *projected* is
+    and our places are relative to one piece -- the second boot
+    (CORR-LOOKS-062) -- rather than to the game's world.  Both fold into ONE
+    translation, of about 170 pixels.  *projected* is
     the UNCLIPPED box our points land in: a rasterised mask cannot be measured
     from, because with no translation the figure lands outside the picture
     entirely and the mask comes back empty.

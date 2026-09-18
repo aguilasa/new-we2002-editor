@@ -48,12 +48,14 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
 - [x] `confront.py --silhouette [SLOT]`: máscara nos dois quadros e a
       diferença impressa.
 - [x] **Controles antes do teste:** o mesmo quadro contado duas vezes dá **0**
-      pixel de diferença, e quadros diferentes dão 603 a 1.680. Os limiares
+      pixel de diferença, e quadros diferentes dão 603 a 1.483 no slot 2 e 670 a
+      1.452 no slot 1. Os limiares
       saem daí e estão escritos como medidos.
 - [x] Três estilos de cabelo diferentes, dois slots: a silhueta concorda, e um
       estilo trocado de propósito discorda — **no close-up**, onde o estilo é
       grande: cada foto do jogo escolhe o próprio estilo entre os três, 6 de 6,
-      por 1,4x a 4,4x (`--silhouette-styles`). No corpo inteiro o estilo não se
+      por 1,36x a 4,10x contra o estilo errado mais próximo, que é o que o
+      `--silhouette-styles` imprime por foto. No corpo inteiro o estilo não se
       separa, e está dito (quarta sessão). Desde a
       [`CORR-LOOKS-063`](/docs/tasks/looks/CORR-LOOKS-063.md) o gate pergunta
       isso como o `--silhouette` pergunta o seu: **controle antes** (o mesmo
@@ -68,7 +70,8 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
 
 ## Log de Execução
 
-**Executado em:** 2026-09-18 — **PARCIAL**
+**Executado em:** 2026-09-18, em cinco sessões — a primeira **parcial**, fechada
+na quinta ("Quinta sessão", abaixo)
 
 **O que ficou medido**
 
@@ -545,7 +548,10 @@ slot 1  jogo A1:  nosso A1 178*  C1 323  I3 284
 ```
 
 **6 de 6**: cada foto escolhe o próprio estilo, e os outros dois — os estilos
-trocados — discordam, por 1,4x a 4,4x. Uma captura (slot 1, `C1`) derivou a
+trocados — discordam, por 1,36x a 4,10x contra o mais próximo (esta linha
+dava uma faixa arredondada, de conta à mão sobre a tabela, até a
+[`CORR-LOOKS-064`](/docs/tasks/looks/CORR-LOOKS-064.md); o gate não imprimia
+razão). Uma captura (slot 1, `C1`) derivou a
 câmera com espalhamento de 74 em 4.096 contra 3,7 das outras — dentro do limite,
 e provavelmente uma das matrizes que o jogo mistura (a
 [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md) mediu seis).
