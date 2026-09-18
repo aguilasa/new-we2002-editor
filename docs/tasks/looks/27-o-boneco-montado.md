@@ -6,7 +6,7 @@ category: render
 phase: 9
 depends_on: ["LOOKS-TASK-22", "LOOKS-TASK-26"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.4"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-27: O boneco montado
@@ -50,20 +50,23 @@ painel da tela `LOOKS SET` abre com o boneco montado.
 
 - [x] `scene.from_image(..., frame=N)` devolve os pontos transformados pela
       pose do quadro N; `scene.shelf` continua disponível.
-- [x] `ui/app.py --frame N`; sem ele, a prateleira de sempre.
-- [ ] **Conferido contra o jogo, peça a peça:** a ordem relativa dos centros
-      como asserção do `scene.py --check-image`. **NÃO FEITO, e a razão é um
-      achado:** com as posições que o arquivo guarda, a figura **não fica em
-      pé** — e isso não é erro de leitura (ver o Log).
-- [ ] Captura olhada no Log, nos dois slots.
-- [ ] `ui_check.py` julga a figura montada.
-- [ ] Controle negativo: a hierarquia invertida fica vermelha.
+- [x] `ui/app.py --frame N`; sem ele, a prateleira de sempre — e o **painel da
+      tela** abre montado, no quadro 0.
+- [x] **Conferido contra o jogo, peça a peça:** a ordem relativa dos centros é
+      asserção do `scene.py --check-image` (`scene.standing`), mais a simetria
+      dos pares `a`/`b`.
+- [x] Captura olhada no Log, nos dois slots.
+- [x] `ui_check.py` julga a figura montada.
+- [x] Controle negativo: quatro, e todos vermelhos.
 
 ---
 
 ## Log de Execução
 
-**Executado em:** 2026-09-18 — **PARCIAL**
+**Executado em:** 2026-09-18, em duas sessões. A primeira parou num
+bloqueio; a segunda o mediu e o desfez, e está registrada abaixo dela.
+
+### Primeira sessão — PARCIAL
 
 **Resumo do que foi aprendido**
 
@@ -140,3 +143,135 @@ segue aberto.
    Quebrar a chamada do `from_image` em duas linhas para caber o `frame` fez o
    literal parar de casar: `matched 0 time(s)`, nem verde nem vermelho. É a
    mesma armadilha 53, noutro arquivo.
+
+---
+
+### Segunda sessão — o bloqueio desfeito
+
+**O bloqueio não era o arquivo: era de quem é cada matriz.** A primeira sessão
+mediu que a chuteira cai na altura da coxa **nas translações que o próprio jogo
+carregou**, e concluiu que faltava alguma coisa fora do par. Faltava, e estava
+na captura: o ponteiro de modelo que os registradores carregam na parada da
+carga da matriz nomeia a peça que o jogo **acabou de desenhar** — a matriz
+entra no GTE primeiro e os ponteiros da peça são armados depois. Com isso cada
+peça ficava com a matriz da seguinte, e a chuteira herdava a do quadril. É
+`oracle.DRAW_LAG`, e vale para qualquer instrumento que leia registrador numa
+parada.
+
+**O que desempata é medido, e de propósito não é o desenho** — decidir pelo
+desenho seria usar o critério que se quer afirmar. Três medições, nenhuma
+delas olhando a figura:
+
+- **o tornozelo.** A origem da chuteira no referencial da própria canela tem
+  dispersão **5,0** unidades no atraso 1 e **158,8** no atraso 0, sobre oito
+  quadros espalhados, nos dois slots — e a **outra** canela, de controle, fica
+  solta em 357,3 no mesmo atraso, que é o que impede "achei um atraso que
+  gruda tudo". É o `oracle.py --pose-lag`, sem emulador, sobre as capturas em
+  disco;
+- **a simetria.** Corrigido o atraso, os pares `a`/`b` ficam à mesma altura —
+  quadris a −224 e −217, ombros a −341 e −342 —, onde o outro atraso põe um
+  cotovelo **acima do próprio ombro**;
+- **a captura viva, refeita.** A hierarquia que o `--pose <SLOT> <N>` mede
+  passa a nomear as juntas certas: `foot a` filha de `shin a` (dispersão 6,4,
+  ganho 9,2x), `head` filha de `torso` (3,0, 14,6x), `forearm a` de
+  `upper arm a` (16,4, 4,9x) e `forearm b` de `upper arm b` (17,1, 4,6x).
+  Com o atraso lido na hora, o tornozelo não era junta nenhuma.
+
+**E os lugares do próprio arquivo então empilham a figura**: cabeça em −420,
+torso, braços, coxas, canelas e a chuteira em **0**, que é o chão em que a raiz
+se apoia. O `scene.py --check-image` afirma essa ordem (`scene.standing`) e a
+simetria dos pares, com `SIDES_APART = 45` escrito depois de medir os
+**dezessete** quadros da caminhada nos dois lados (o pior é a canela, 26,7).
+
+**Um segundo defeito apareceu só no desenho, e é de referencial.** O
+`part_for` já guarda `y * UP`, então os pontos de uma `Part` estão no
+referencial **desenhado** e a pose está no do **arquivo**. Aplicada uma no
+referencial da outra, a figura sai de cabeça para baixo com **cada peça
+individualmente em pé** — cabeça embaixo, chuteira no ar. O `drawn_points`
+desfaz o espelho na entrada e refaz na saída; `place_points` continua puro, no
+referencial do arquivo, que é o que o `--check-image` usa.
+
+**Arquivos criados/modificados** *(conferidos contra o commit)*
+
+- `tools/looks/anime.py` — `PIECE_ORDER` girado uma casa, com as três medições
+  que o decidem
+- `tools/looks/oracle.py` — `DRAW_LAG`, o `_named_pass` que o aplica guardando
+  `pointer_*`, `draw_lag()`, `_synthetic_pass()`, `load_poses()` e o
+  `--pose-lag`
+- `tools/looks/scene.py` — `standing()`, `CHAINS`, `SIDES_APART`,
+  `drawn_points()`, o `frame` do `Builder`, a asserção no `--check-image` e os
+  self-checks do juiz
+- `tools/looks/ui_check.py` — `ink_box()`, `judge_posed()`, `measure_posed()`,
+  `POSED_FRAME` e o quarto controle plantado
+- `tools/looks/controls.py` — quatro controles novos
+- `tools/looks/ui/app.py` — o painel da tela abre montado
+- `docs/PLAN-LOOKS-PY.md` — o veredito da §10.4
+- `docs/prompts/perfil-looks.md` — armadilha 59 e a linha do `--pose-lag`
+- `CLAUDE.md` — a armadilha e o comando novo
+- `docs/tasks/looks/progresso.md` e `docs/tasks/looks/27-o-boneco-montado.md`
+
+**Gates, na árvore commitada**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 86 of 86 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/scene.py --check-image
+      the figure, top down: head -386, torso -298, thigh a -162, shin a -53, foot a 13
+      the figure, top down: upper arm a -301, forearm a -224
+scene --check-image: ok
+
+$ python tools/looks/oracle.py --pose-lag
+     lag 1 wins by 11.2x (needs 5.0x)        [slot 1]
+     lag 1 wins by 6.8x (needs 5.0x)         [slot 2]
+oracle --pose-lag: 0 problem(s) over 2 slot(s)
+
+$ python tools/looks/oracle.py --poses
+oracle --pose: 0 problem(s) over 8 frame(s) and 2 slot(s)
+
+$ python tools/looks/anime.py --against-pose
+  96 of 96 carry the angles the file holds at the pair the game read
+  90 matrices of 96 are EXACT, 6 are blends the game made, and 0 are neither
+anime --against-pose: 0 failure(s)
+
+$ python tools/looks/ui_check.py
+  the figure posed on frame 0: ink 187x521 (2.79 tall for one wide, floor 1.8)
+  against the shelf's 520x136 (0.26, ceiling 0.6)
+looks_ui: 7 of 7 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**As capturas, olhadas** (fora da tela, sem janela na sessão do usuário)
+
+- `ui/app.py --looks A-A1-A-A-A --frame 0 --screenshot`, 640x640: um jogador
+  **em pé, a meio passo** — cabeça, tronco, os dois braços, as duas pernas e a
+  chuteira no chão. É a figura que a primeira sessão não conseguiu montar.
+- `ui/app.py --state 1 --screenshot` e `--state 2`, 1024x480: o painel da tela
+  `LOOKS SET` abre com o boneco montado nos dois slots — o goleiro (`GK`) e o
+  jogador de linha (`CB`), cada um com as duas chuteiras. O uniforme continua
+  cinza, que é a task 30.
+
+**Problemas encontrados**
+
+1. **O ponteiro vivo nomeia a peça anterior** — a armadilha 59, e o bloqueio
+   inteiro da primeira sessão. O sintoma é o pior possível: todo número dentro
+   da faixa, cada peça isolada perfeita, e a figura não fica em pé.
+2. **Pose e desenho em referenciais diferentes.** O `part_for` já espelha `y`;
+   aplicar a pose do arquivo sobre esses pontos vira a figura de cabeça para
+   baixo sem virar nenhuma peça, que não se parece com erro de sinal.
+3. **Proporção de tinta é juiz fraco para ordem de peça.** A figura montada dá
+   2,79 de altura por largura, a pilha 1,75 e a prateleira 0,26 — mas uma pose
+   lida uma casa fora **também** desenha algo alto. O `looks_ui` diz isso na
+   própria constante e desenha a **pilha** de propósito para ter um vermelho
+   que não dependa da proporção; quem julga a ordem é o `scene --check-image`.
+4. **Um sintético de quatro peças empata os atrasos.** No `_synthetic_pass`, com
+   quatro peças o ciclo dá a volta e o atraso 2 devolve o mesmo par rígido ao
+   contrário, com a mesma pontuação do atraso certo. Sete peças, na ordem em
+   que o jogo desenha, separam.

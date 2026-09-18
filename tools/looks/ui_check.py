@@ -126,6 +126,14 @@ hold with the same room, and the figures above stay as what that day's tree
 measured.
 """
 
+POSED_FRAME = 0
+"""The frame of the screen's walk the assembled figure is judged on.
+
+Frame 0 of `scene.REFERENCE_FRAME`, spelled here rather than imported: the
+gate judges the window from outside, and a floor that read its number out of
+the code under test would move with it.
+"""
+
 REFUSED = "A-H1-A-A-A"
 """A tuple the assembly table refuses, and the exit code is the contract.
 
@@ -339,6 +347,126 @@ def judge_pairs(shots: dict, theirs: dict) -> list:
     return bad
 
 
+STANDING = 1.8
+"""How much taller than wide the POSED figure's ink has to be.
+
+Measured 2026-09-18 at 640x640 on `A-A1-A-A-A`: the assembled figure's ink box
+is 187x521, a ratio of 2.79; the shelf's is 520x136, a ratio of 0.26; and the
+PILE -- every piece at its own origin -- is 292x511, a ratio of 1.75.
+
+**And it is said here what this floor does not catch.**  A pose read one piece
+off still draws something tall, so the ratio separates a figure from a pile and
+from a shelf and nothing finer; what says the pieces are in the right ORDER is
+`scene.standing`, against the disc, in `scene.py --check-image`.  A gate that
+claimed the ratio for that would be claiming a coverage it does not have.
+"""
+
+LYING = 0.6
+"""And how much wider than tall the SHELF has to stay.
+
+The shelf is the other half of the same judgement: without it a viewer that
+ignored `--frame` entirely would draw the same picture twice and clear any
+floor written about one of them.
+"""
+
+
+def ink_box(shot: tuple) -> tuple:
+    """(width, height, pixels) of everything that is not the background.
+
+    The background is the commonest colour, which is how the rest of this file
+    already reads a picture -- there is no agreement with the viewer about
+    what it paints behind the figure, and there should not be.
+    """
+    width, _height, channels, rows = shot
+    back = max(colours(shot).items(), key=lambda one: one[1])[0]
+    left = top = None
+    right = bottom = -1
+    drawn = 0
+    for y, row in enumerate(rows):
+        for x in range(width):
+            if row[x * channels:(x + 1) * channels] == back:
+                continue
+            drawn += 1
+            left = x if left is None else min(left, x)
+            right = max(right, x)
+            top = y if top is None else min(top, y)
+            bottom = max(bottom, y)
+    if not drawn:
+        return (0, 0, 0)
+    return (right - left + 1, bottom - top + 1, drawn)
+
+
+def judge_posed(posed: tuple, shelved: tuple, piled: tuple = None) -> list:
+    """The assembled figure against the two pictures it is not.  [] is a pass.
+
+    Three things it must not be, and the third is the one that matters: the
+    SHELF (pieces in a row), the PILE (every piece at its own origin, which is
+    what neither model file says where to put -- pitfall 24), and a picture
+    lying on its side.  The pile is drawn on purpose rather than reasoned
+    about, because a pose that reached nothing draws exactly it -- and its ink
+    is 1.75 tall for one wide against the standing figure's 2.70, which is far
+    too close a call to leave to a ratio.
+    """
+    bad = []
+    wide, tall, drawn = ink_box(posed)
+    if not drawn:
+        return ["the posed figure drew nothing at all"]
+    ratio = tall / float(wide)
+    if ratio < STANDING:
+        bad.append("the posed figure's ink is %dx%d, %.2f tall for one wide, "
+                   "under the %.1f a standing figure takes -- this is what a "
+                   "pose read one piece off looks like"
+                   % (wide, tall, ratio, STANDING))
+    shelf_wide, shelf_tall, shelf_drawn = ink_box(shelved)
+    if not shelf_drawn:
+        return bad + ["the shelf drew nothing at all"]
+    shelf_ratio = shelf_tall / float(shelf_wide)
+    if shelf_ratio > LYING:
+        bad.append("the shelf's ink is %dx%d, %.2f tall for one wide, over "
+                   "the %.1f it takes for a row of pieces -- the shelf and "
+                   "the pose are not telling apart"
+                   % (shelf_wide, shelf_tall, shelf_ratio, LYING))
+    if not differing(posed, shelved):
+        bad.append("the posed figure and the shelf are the same picture, so "
+                   "--frame reached nothing")
+    if piled is not None and not differing(posed, piled):
+        bad.append("the posed figure is the PILE -- every piece at its own "
+                   "origin, which is where neither model file puts it -- so "
+                   "the pose reached no point")
+    return bad
+
+
+def measure_posed(python: str, app: str, where: str, env: dict) -> tuple:
+    """The whole figure and the same figure POSED.  `(bad, broke, shots)`.
+
+    It is a function and not four lines inside `main` for the reason the
+    first run of this gate wrote down: the planted trees run what this file
+    calls, so a judgement that lives only in `main` is one no control can
+    redden -- and a control that cannot go red is the thing this whole file
+    exists to refuse.
+    """
+    entire, output = draw(python, app, REFERENCE,
+                          os.path.join(where, "whole.png"), env, piece="all")
+    if entire is None:
+        return ([], "the whole figure did not draw: %s" % output.rstrip(),
+                None)
+    posed, output = draw(python, app, REFERENCE,
+                         os.path.join(where, "posed.png"), env,
+                         piece="all", frame=POSED_FRAME)
+    if posed is None:
+        return ([], "the posed figure did not draw: %s" % output.rstrip(),
+                None)
+    piled, output = draw(python, app, REFERENCE,
+                         os.path.join(where, "piled.png"), env,
+                         piece="all", shelf=False)
+    if piled is None:
+        return ([], "the pile did not draw: %s" % output.rstrip(), None)
+    bad = (judge_frame("the whole figure", entire)
+           + judge_frame("the posed figure", posed)
+           + judge_posed(posed, entire, piled))
+    return (bad, "", (entire, posed))
+
+
 def judge_repeat(first: tuple, again: tuple) -> list:
     """The same tuple drawn twice.  Anything but identical is a finding.
 
@@ -433,11 +561,14 @@ def run_app(python: str, app: str, args: list, env: dict):
 
 
 def draw(python: str, app: str, name: str, out: str, env: dict,
-         piece: str = None):
+         piece: str = None, frame: int = None, shelf: bool = True):
     """One tuple to one PNG.  `(picture, output)`; picture None on failure."""
     code, output = run_app(python, app,
                            ["--looks", name, "--piece", piece or PIECE,
-                            "--size", "%dx%d" % SIZE, "--screenshot", out],
+                            "--size", "%dx%d" % SIZE, "--screenshot", out]
+                           + ([] if frame is None
+                              else ["--frame", str(frame)])
+                           + ([] if shelf else ["--no-shelf"]),
                            env)
     if code or not os.path.isfile(out):
         return (None, output)
@@ -787,6 +918,9 @@ BREAKS = (
     ("app.py --compare counting pixels", os.path.join("ui", "app.py"),
      "            if one.pixel(x, y) != two.pixel(x, y):",
      "            if False:"),
+    ("the pose reaching the points", "scene.py",
+     "        out.append(moved)",
+     "        out.append(part)"),
 )
 """(name, file, the exact line, what it becomes) -- one defect each.
 
@@ -795,7 +929,9 @@ the floors exist for.  The second paints the clear colour and saves it, which
 is the failure `judge_frame` exists for.  The third leaves `--compare`
 answering zero for two pictures that differ, which is the failure the
 agreement between the two counts exists for -- and it is the one that would
-otherwise be invisible, because `--compare` is the code under test.
+otherwise be invisible, because `--compare` is the code under test.  The
+fourth leaves every piece where the file puts it, which is the shelf wearing
+the pose's name -- and it is what `judge_posed` exists for.
 """
 
 KEY_ROW = "SKIN"
@@ -874,6 +1010,11 @@ def plant(python: str, env: dict, name: str, where: str, old: str,
         if broke:
             return (False, "the planted tree for %s did not run, so nothing "
                            "was proved: %s" % (name, broke))
+        more, broke, _posed = measure_posed(python, app, shots, env)
+        if broke:
+            return (False, "the planted tree for %s did not draw the figure, "
+                           "so nothing was proved: %s" % (name, broke))
+        bad += more
         if not bad:
             return (False, "%s :: %s was broken (%s -> %s) and the gate still "
                            "passed" % (where, name, old.strip(), new.strip()))
@@ -994,18 +1135,25 @@ def main(argv: list | None = None) -> int:
                      percent(count, base), floor, theirs.get(name, "nothing")))
         # The colour pairs are `--piece head` for a measured reason, and that
         # leaves the other eleven pieces out of every picture judged above.
-        # One more, the whole figure, by the same frame rules.
-        entire, output = draw(python, APP, REFERENCE,
-                              os.path.join(tmp, "whole.png"), env,
-                              piece="all")
-        if entire is None:
-            print("FAIL: the whole figure did not draw: %s" % output.rstrip())
+        # Two more: the whole figure, and the whole figure ASSEMBLED, which is
+        # what LOOKS-TASK-27 delivers.
+        more, broke, shots = measure_posed(python, APP, tmp, env)
+        if broke:
+            print("FAIL: %s" % broke)
             return 1
+        entire, posed = shots
+        bad += more
         seen = colours(entire)
         print("  the whole figure: %dx%d, %d colour(s), the commonest covers "
               "%.2f%%" % (entire[0], entire[1], len(seen),
                           percent(max(seen.values()), entire)))
-        bad += judge_frame("the whole figure", entire)
+        wide, tall, drawn = ink_box(posed)
+        shelf_wide, shelf_tall, _shelf = ink_box(entire)
+        print("  the figure posed on frame %d: ink %dx%d (%.2f tall for one "
+              "wide, floor %.1f) against the shelf's %dx%d (%.2f, ceiling "
+              "%.1f)" % (POSED_FRAME, wide, tall, tall / float(wide),
+                         STANDING, shelf_wide, shelf_tall,
+                         shelf_tall / float(shelf_wide), LYING))
 
         bad += judge_refusal(python, APP, tmp, env)
         if bad:

@@ -3980,14 +3980,45 @@ def _repeating_period(keys):
     return None
 
 
+DRAW_LAG = 1
+"""How many stops the model pointer trails the matrix it belongs to.
+
+**The pointer at a matrix load names the piece the game has just DRAWN**, not
+the one the matrix is for: the matrix goes into the GTE first and the piece's
+own pointers are armed after it, so by the time the next load stops the
+emulator the registers hold the piece that was finished in between.  One, and
+measured -- `draw_lag()` re-measures it from any pass and refuses a pass where
+another lag wins.
+
+It cost LOOKS-TASK-27 a whole pass: read at lag 0 the boot took the hip's
+matrix, and the assembled figure put a boot at thigh height with every piece
+individually plausible and no number anywhere out of range.
+"""
+
+
 def _named_pass(found):
-    """The pass with each load numbered and named uniquely.
+    """The pass with each load numbered and named uniquely, at `DRAW_LAG`.
 
     A section drawn twice would be two loads and two pieces, and the second is
     not the first -- `foot a` and `foot a #2`.  This screen never does it, and
     the numbering is here so that a pass which does is not quietly collapsed
     into one piece.
+
+    What was OBSERVED is kept beside what it names: `pointer_piece` and
+    `pointer_section` are the registers as read at that stop, and `piece` and
+    `section` are the piece the matrix is for.  Keeping both is what lets
+    `draw_lag()` re-measure the shift instead of inheriting it.
     """
+    count = len(found)
+    for one in found:
+        one["pointer_file"] = one.get("file")
+        one["pointer_section"] = one.get("section")
+        one["pointer_piece"] = one["piece"]
+    for order, one in enumerate(found):
+        drawn = found[(order + DRAW_LAG) % count]
+        one["file"] = drawn["pointer_file"]
+        one["section"] = drawn["pointer_section"]
+        one["piece"] = drawn["pointer_piece"]
     seen = {}
     for order, one in enumerate(found):
         one["order"] = order
@@ -4196,6 +4227,193 @@ def hierarchy(frames):
 
 def _by_piece(record):
     return {one["id"]: one for one in record["pieces"]}
+
+
+LAG_CHAIN = (("shin a", "foot a"), ("shin b", "foot a"))
+"""The joint the lag is measured on, and why it is the boot's.
+
+A limb that hangs off another keeps its origin STILL in the parent's own
+frame, whatever the parent does -- that is `joint_offset`, and it needs no
+anatomy.  The boot is the piece to ask because it is the one the wrong lag
+moves furthest: one stop away it inherits the hip's matrix and lands at thigh
+height.  `shin b` is in the pair list as the control that has to LOSE: the
+boot hangs off one shin and not off both, so a lag that makes it rigid
+against either shin is not measuring a joint.
+"""
+
+LAG_MARGIN = 5.0
+"""How much better the winning lag must be than every other one."""
+
+
+def _pointer_named(loads, lag):
+    """{piece the matrix is for: load}, reading the pointers *lag* stops late.
+
+    Old captures carry the raw observation in `piece`; new ones keep it in
+    `pointer_piece` and put the corrected name in `piece`.  Reading the raw
+    field of whichever is present is what keeps this measurement from
+    inheriting the answer it is measuring.
+    """
+    count = len(loads)
+    raw = [one.get("pointer_piece", one["piece"]) for one in loads]
+    return {raw[(index + lag) % count]: one for index, one in enumerate(loads)}
+
+
+def draw_lag(records, lags=(0, 1, 2)):
+    """How many stops the model pointer trails the matrix, measured.
+
+    *records* is several captures of ONE slot -- the spread matters, and a
+    single frame names no joint at all (pitfall 48).  Each candidate lag is
+    scored by how still the boot's origin sits in the shin's own frame across
+    them, and the winner has to beat every other by `LAG_MARGIN`.
+
+    This is the measurement LOOKS-TASK-27 was missing.  Nothing here looks at
+    whether the assembled figure stands up: that is the thing being decided,
+    and using it to decide would be the circle.
+    """
+    loads = [sorted(one["pieces"], key=lambda q: q["order"]) for one in records]
+    scored = {}
+    for lag in lags:
+        named = [_pointer_named(one, lag) for one in loads]
+        for parent, child in LAG_CHAIN:
+            if any(parent not in one or child not in one for one in named):
+                continue
+            offsets = [joint_offset(one[parent], one[child]) for one in named]
+            if any(one is None for one in offsets):
+                continue
+            scored[(lag, parent, child)] = max(
+                max(one[k] for one in offsets) - min(one[k] for one in offsets)
+                for k in range(3))
+    if not scored:
+        raise OracleError("no capture carries both ends of %r, so the draw "
+                          "lag cannot be measured" % (LAG_CHAIN,))
+    best = {lag: min(spread for (one, _p, _c), spread in scored.items()
+                     if one == lag)
+            for lag in {key[0] for key in scored}}
+    winner = min(best, key=lambda lag: best[lag])
+    others = [best[lag] for lag in best if lag != winner]
+    if not others:
+        margin = 0.0
+    elif not best[winner]:
+        # A joint that holds to the integer is not a weak win, and dividing by
+        # it would say so.
+        margin = float("inf")
+    else:
+        margin = min(others) / best[winner]
+    return {"scored": scored, "best": best, "winner": winner,
+            "margin": margin}
+
+
+def _synthetic_pass(frames=5):
+    """Captures of a skeleton whose one joint is known, with the lag in them.
+
+    A boot bolted to `shin a` and a `shin b` that swings on its own, drawn in
+    that order, with the model pointers written one stop LATE -- which is what
+    the game does and what `_named_pass` undoes.  Nothing on a disc and no
+    emulator: it exists so that the lag has a red case.
+    """
+    import math
+
+    joint = (0, 60, 0)
+    # Six pieces, not four: in a pass of four the cycle wraps so that a lag of
+    # two hands back the SAME rigid pair the other way round, and scores 1.0
+    # against the true lag's 1.0.  A tie is a synthetic too small to tell the
+    # lags apart, not a finding about the game.
+    drawn = ("torso", "head", "thigh a", "shin a", "foot a", "thigh b",
+             "shin b")
+    out = []
+    for step in range(frames):
+        turns = {"torso": 0.0, "head": 0.1 * step, "shin a": 0.3 * step,
+                 "shin b": -0.5 * step, "thigh a": 0.7 * step,
+                 "thigh b": 0.9 * step}
+        turns["foot a"] = turns["shin a"]
+        spun = {}
+        for name, angle in turns.items():
+            cos = int(round(math.cos(angle) * FIXED_ONE))
+            sin = int(round(math.sin(angle) * FIXED_ONE))
+            spun[name] = [cos, -sin, 0, sin, cos, 0, 0, 0, FIXED_ONE]
+        places = {"torso": [0, 0, 0], "head": [0, -50 - step, 0],
+                  "shin a": [10 * step, 100, 0],
+                  "shin b": [-10 * step, 100, 40],
+                  "thigh a": [5 * step, 50, -20],
+                  "thigh b": [-5 * step, 50, 20]}
+        places["foot a"] = [
+            sum(spun["shin a"][axis * 3 + k] * joint[k] for k in range(3))
+            // FIXED_ONE + places["shin a"][axis] for axis in range(3)]
+        loads = []
+        for order, name in enumerate(drawn):
+            loads.append({
+                # The pointer is the piece drawn one stop EARLIER.
+                "piece": drawn[(order - DRAW_LAG) % len(drawn)],
+                "file": None, "section": None,
+                "rotation": spun[name], "translation": places[name],
+            })
+        out.append({"slot": 0, "frame": step,
+                    "camera": {"rotation": [FIXED_ONE, 0, 0, 0, FIXED_ONE, 0,
+                                            0, 0, FIXED_ONE],
+                               "translation": [0, 0, 0]},
+                    "pieces": _named_pass(loads)})
+    return out
+
+
+def load_poses(slot=None):
+    """Every capture `--pose <SLOT> <N>` left in `POSE_DIR`, by slot."""
+    import json
+
+    out = {}
+    if not os.path.isdir(POSE_DIR):
+        return out
+    for name in sorted(os.listdir(POSE_DIR)):
+        if not name.endswith(".json"):
+            continue
+        with open(os.path.join(POSE_DIR, name), encoding="utf-8") as handle:
+            record = json.load(handle)
+        if slot is not None and record["slot"] != slot:
+            continue
+        out.setdefault(record["slot"], []).append(record)
+    return out
+
+
+def check_draw_lag(verbose=True):
+    """`--pose-lag`: the pointer's lag, re-measured from the captures on disk.
+
+    No emulator: it reads what `--poses` already wrote.  It is the witness
+    that names which matrix belongs to which piece, and it fails if the lag
+    the code assumes is not the one the numbers pick.
+    """
+    taken = load_poses()
+    if not taken:
+        print("oracle --pose-lag: no capture in %s -- run --poses first"
+              % POSE_DIR)
+        return SKIP
+    problems = []
+    for slot in sorted(taken):
+        records = taken[slot]
+        if len(records) < 2:
+            problems.append("slot %d: %d capture(s), and one frame names no "
+                            "joint" % (slot, len(records)))
+            continue
+        found = draw_lag(records)
+        print("  -- slot %d, %d capture(s) --" % (slot, len(records)))
+        for (lag, parent, child), spread in sorted(found["scored"].items()):
+            print("     lag %d  %-13s -> %-13s spread %7.1f"
+                  % (lag, parent, child, spread))
+        print("     lag %d wins by %.1fx (needs %.1fx)"
+              % (found["winner"], found["margin"], LAG_MARGIN))
+        if found["winner"] != DRAW_LAG:
+            problems.append(
+                "slot %d: the numbers pick lag %d and the code reads lag %d -- "
+                "every piece would be named one stop off"
+                % (slot, found["winner"], DRAW_LAG))
+        elif found["margin"] < LAG_MARGIN:
+            problems.append(
+                "slot %d: lag %d beats the next by only %.1fx, under the %.1fx "
+                "that makes it a measurement"
+                % (slot, found["winner"], found["margin"], LAG_MARGIN))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --pose-lag: %d problem(s) over %d slot(s)"
+          % (len(problems), len(taken)))
+    return 1 if problems else 0
 
 
 def _say_pose(record):
@@ -4735,13 +4953,35 @@ def _checks(c) -> None:
        _repeating_period(twice) is None)
     ok("and a tail that happens to look like the head is not a period of one",
        _repeating_period(["a", "b", "c", "a"]) is None)
+    # The pointers trail the matrix by `DRAW_LAG`, so a pass that DRAWS
+    # torso, foot a, foot a carries them one stop late.
     named = _named_pass([{"piece": "foot a"}, {"piece": "torso"},
                          {"piece": "foot a"}])
     ok("a section drawn twice is two pieces, numbered",
-       [one["id"] for one in named] == ["foot a", "torso", "foot a #2"],
+       [one["id"] for one in named] == ["torso", "foot a", "foot a #2"],
        "%r" % ([one["id"] for one in named],))
+    ok("and what the registers actually said is kept beside it",
+       [one["pointer_piece"] for one in named]
+       == ["foot a", "torso", "foot a"])
     ok("and the draw order is kept as the number the caller reads",
        [one["order"] for one in named] == [0, 1, 2])
+
+    # -- the lag itself, on a skeleton whose joint is known ------------------
+    #
+    # A boot bolted rigidly to one shin, a second shin swinging on its own,
+    # and the pointers written one stop late -- which is what the game does.
+    # `draw_lag` has to find the one lag that makes the joint hold, and the
+    # WRONG shin has to stay loose under it, or the measurement is picking a
+    # lag that makes everything look attached.
+    synthetic = _synthetic_pass()
+    found = draw_lag(synthetic)
+    ok("the draw lag is measured back off a pass that carries it",
+       found["winner"] == DRAW_LAG, "%r" % (found["best"],))
+    ok("and it wins by more than the margin the check demands",
+       found["margin"] >= LAG_MARGIN, "%.1f" % found["margin"])
+    ok("the shin the boot does NOT hang off stays loose at the winning lag",
+       found["scored"][(DRAW_LAG, "shin b", "foot a")]
+       > found["scored"][(DRAW_LAG, "shin a", "foot a")] * LAG_MARGIN)
 
     # The pointer is the witness that names the piece, and two sections at
     # one stop would mean it is not.
@@ -5190,6 +5430,8 @@ def main(argv):
                 return check_pose_frames(int(argv[2]),
                                          [int(one) for one in argv[3:]])
             return check_pose(int(argv[2]) if len(argv) > 2 else None)
+        if len(argv) == 2 and argv[1] == "--pose-lag":
+            return check_draw_lag()
         if len(argv) >= 2 and argv[1] == "--poses":
             return check_pose_frames(int(argv[2]) if len(argv) > 2 else None,
                                      [int(one) for one in argv[3:]] or None)

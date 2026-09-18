@@ -2800,6 +2800,27 @@ antes do teste:
 2. **Matriz contra matriz.** O que o nosso leitor diz para a peça P no quadro N
    contra o que o GTE carregou para P no quadro N, lido por breakpoint. Ponto
    fixo é inteiro: a comparação é **exata**, e qualquer diferença é achado.
+   > **Fechada em 2026-09-18** pela
+   > [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), e o que ela
+   > acrescentou não estava previsto aqui: a comparação exata de matriz já
+   > estava verde na
+   > [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md) — 90 de
+   > 96 exatas — **e a figura montada com elas não ficava em pé**. Faltava
+   > dizer de *qual peça* é cada matriz, e essa pergunta não é sobre números:
+   > o ponteiro de modelo que o jogo carrega na parada da carga nomeia a peça
+   > que ele **acabou de desenhar**, uma parada atrás (`oracle.DRAW_LAG`).
+   > Lido na hora, a chuteira herda a matriz do quadril, cada peça continua
+   > individualmente perfeita e nenhum número sai da faixa.
+   >
+   > **O que desempata é medido e não é o desenho**, porque usar o desenho
+   > seria decidir pelo critério que se quer afirmar: a origem da chuteira no
+   > referencial da própria canela tem dispersão **5,0** unidades no atraso 1
+   > e **158,8** no atraso 0, sobre oito quadros espalhados dos dois slots,
+   > com a **outra** canela de controle ficando solta em 357,3
+   > (`oracle.py --pose-lag`). Corrigido o atraso, os pares `a`/`b` ficam
+   > simétricos — quadris a −224 e −217, ombros a −341 e −342 — e os lugares
+   > do próprio arquivo empilham a figura da cabeça em −420 à chuteira em 0,
+   > que é o chão em que a raiz se apoia.
 3. **Silhueta contra silhueta.** A máscara do boneco no nosso quadro contra a
    do emulador, no mesmo N, com a câmera da (m). O controle é o emulador contra
    ele mesmo em dois `load_state` — que já dá **zero pixel** (§5.3) — e um

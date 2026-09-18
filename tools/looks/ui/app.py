@@ -222,9 +222,15 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
         except RuntimeError as exc:
             print("app: skipped -- %s" % exc)
             return core.SKIP
-    builder = core.Builder(image, state.figure())
+    # The panel opens with the figure ASSEMBLED, which is what LOOKS-TASK-27
+    # delivers: `--frame` names another frame of the walk, and the shelf is
+    # still there behind `S` for looking at one piece.
+    builder = core.Builder(image, state.figure(),
+                           core.REFERENCE_FRAME if args.frame is None
+                           else args.frame)
 
     window = LooksSet(state, builder, args.scale)
+    window.viewer.shelved = False
     window.setWindowTitle("LOOKS SET -- slot %s" % state.slot)
     _park(window, args.visible)
     _settle(app, window)

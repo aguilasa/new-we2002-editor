@@ -44,6 +44,13 @@ status: pendente
     jogo leu**; `anime.py --against-pose` separa exatas, misturadas e
     inexplicadas a cada corrida.
 
+- **A [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) deixou uma
+  armadilha que alcança toda leitura de registrador numa parada:** o ponteiro
+  de modelo que o jogo carrega quando a matriz é carregada nomeia a peça que
+  ele **acabou de desenhar**, uma parada atrás (`oracle.DRAW_LAG`). Quem
+  acrescentar uma captura por breakpoint confere o atraso com
+  `oracle.py --pose-lag` em vez de supor que o registrador fala da peça da vez.
+
 ---
 
 ## Objetivo

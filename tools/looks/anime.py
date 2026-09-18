@@ -86,8 +86,8 @@ exact that way against 90 of 96 the game's way.  One unit of 4096 is invisible
 in a drawing and total in a comparison."""
 
 PIECE_ORDER = (
-    "root", "head", "torso", "upper arm a", "forearm a", "upper arm b",
-    "forearm b", "thigh a", "shin a", "foot a", "thigh b", "shin b",
+    "head", "torso", "upper arm a", "forearm a", "upper arm b", "forearm b",
+    "thigh a", "shin a", "foot a", "thigh b", "shin b", "root",
 )
 """Which piece each pair of a frame belongs to, in draw order.
 
@@ -95,8 +95,25 @@ PIECE_ORDER = (
 three unpacked angles out of the scratchpad at every matrix load and they are,
 pair for pair, the twelve pairs of the frame the animation state was playing
 (`oracle.py --pose <SLOT> <N>` writes both, and `--check-image` here has no
-way to check it -- what checks it is the capture).  `root` is the load that
-carries no model pointer; the other eleven are `pieces.py`'s names.
+way to check it -- what checks it is the capture).
+
+**And this tuple was one place off until 2026-09-18, which is the whole of
+LOOKS-TASK-27's blocker.**  The names come from the model pointer the game
+holds when it loads a matrix, and that pointer is the piece it has just
+DRAWN, not the one it is about to draw (`oracle.DRAW_LAG`): the matrix goes
+in first and the piece's own pointers are armed after it.  Read one stop off,
+the boot took the hip's matrix and the figure could not stand -- the boot came
+out at thigh height with every piece individually plausible.  What settles it
+is measured three ways and none of them is "it looks right":
+
+    the ANKLE is rigid at this reading and at no other -- the boot's origin
+    in the shin's own frame spreads 5 units across eight spread frames of
+    both slots, against 156 one stop away (`oracle.py --pose-lag`);
+    the a/b pairs become SYMMETRIC -- hips at -224 and -217, shoulders at
+    -341 and -342, where the other reading puts one elbow above its own
+    shoulder;
+    the file's own places then stack the figure from the head at -420 to the
+    boot at 0, which is the ground the root sits on.
 """
 
 

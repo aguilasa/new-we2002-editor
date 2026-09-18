@@ -67,7 +67,7 @@ mostra. As tasks 21 a 35 são as Fases 8 a 11, e a fonte de verdade delas é a
 | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | Incógnita (j) — de onde vem a pose: `ANIME.BIN`, código ou outra tabela | 9 | 20 | ✅ Concluído | 2026-09-17 | 2026-09-18 |
 | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | A pose de referência — as matrizes de cada peça num quadro contado, e a hierarquia | 9 | 24 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
 | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | `anime.py` — o formato do `ANIME.BIN`, medido contra a pose capturada | 9 | 25 | ✅ Concluído | 2026-09-18 | 2026-09-18 |
-| [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ⬜ Pendente | — | — |
+| [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | As peças no lugar — `scene.py` aplica a pose, e o painel da tela mostra o boneco montado | 9 | 22, 26 | ✅ Concluído | 2026-09-18 | ⬜ pendente |
 | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | A câmera do jogo — projeção medida, e a silhueta como testemunha de forma | 9 | 27 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-29](/docs/tasks/looks/29-altura-e-corpo.md) | Incógnita (s) — `HEIG` e `BODY`: o que mudam no desenho, medido pela pose | 9 | 22, 28 | ⬜ Pendente | — | — |
 | [LOOKS-TASK-30](/docs/tasks/looks/30-o-uniforme.md) | Incógnita (n) — o uniforme: qual `TEX_*.BIN`, na guarda, e as primitivas vestidas | 10 | 20 | ⬜ Pendente | — | — |
@@ -260,7 +260,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 - [x] A fonte da pose medida: é o `ANIME.BIN`, na RAM byte a byte, com a entrada 5 do cabeçalho, a lista de quadros que dá a volta, os ângulos empacotados e as duas instruções que carregam o GTE — `oracle.py --pose`.
 - [x] A pose de referência capturada num quadro contado, repetível, com a hierarquia medida — `oracle.py --pose <SLOT> <N>`: 12 cargas por passada nos dois slots, a matriz e a translação de cada peça lidas da struct que o jogo copia para o GTE, a captura repetida como controle antes de qualquer número, e a matriz medida **absoluta** (a câmera composta com a volta da peça). A hierarquia: cinco juntas se separam por 4,6x a 14,6x e nenhuma linha fora delas passa de 2,5x — o esqueleto do jogo não é rígido, e o leitor não compõe.
 - [x] O `anime.py` reproduz as matrizes do jogo exatamente, e a varredura fecha no EOF — a partir do offset 816: **197 blocos, 3.952 quadros, terminando em 396.804 = EOF, 0 buraco**; e contra as capturas de pose dos dois slots, **96 de 96 julgadas (de 192 capturadas) peças trazem os ângulos do par que o jogo leu** e **90 das 96 matrizes saem exatas entrada por entrada**, sendo as 6 restantes misturas que o próprio jogo faz.
-- [ ] O painel mostra o boneco montado, e a silhueta concorda com a do emulador com a câmera do jogo.
+- [x] O painel mostra o boneco montado — nos dois slots, com as doze peças na ordem que o `scene.standing` afirma contra o disco. O que faltava não era o arquivo: o ponteiro de modelo na parada da carga nomeia a peça **anterior** (`oracle.DRAW_LAG`), e lido na hora a chuteira herdava a matriz do quadril. Medido pelo tornozelo — dispersão 5,0 no atraso certo contra 158,8 no outro, com a canela errada de controle em 357,3 —, pela simetria dos pares e pela hierarquia da captura viva. **A silhueta contra a do emulador é a task 28.**
 - [ ] `HEIG` e `BODY` mudam o desenho como mudam no jogo.
 
 ### Fase 10 — vestido (v2)

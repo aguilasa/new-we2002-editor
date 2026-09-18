@@ -530,6 +530,21 @@ Não se revertem sem o usuário pedir.
     `cli.py` (armadilha 53) e agora com uma chamada: **quem muda uma linha
     citada por um controle reponta o controle na mesma edição.**
 
+59. **O ponteiro vivo numa parada nomeia a peça ANTERIOR.** Na carga da matriz
+    de uma peça, os registradores que apontam para o modelo ainda carregam a
+    peça que o jogo **acabou de desenhar** — a matriz entra no GTE primeiro e
+    os ponteiros da peça são armados depois. Lido na hora, cada peça fica com
+    a matriz da seguinte: a chuteira herda a do quadril e o boneco montado sai
+    com o pé na altura da coxa, **com todo número dentro da faixa e cada peça
+    isolada perfeita**. Custou uma passada inteira da
+    [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), e o que
+    desempata não é olhar o desenho — é o **tornozelo**: a origem da chuteira
+    no referencial da própria canela tem dispersão **5,0** unidades no atraso
+    certo e **158,8** no outro, nos dois slots, com a canela errada de
+    controle ficando solta (357,3). O `oracle.py --pose-lag` remede isso sobre
+    as capturas em disco, sem emulador, e recusa se o número escolher outro
+    atraso. **Vale para qualquer instrumento que leia registrador numa
+    parada: o que ele vê pode ser o resto do passo anterior.**
 ---
 
 ## As fontes de verdade binárias
@@ -602,6 +617,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
+| *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |

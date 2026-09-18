@@ -389,7 +389,7 @@ def _posed(disc, parts: list, frame: int, notes: dict) -> list:
         if mirrored:
             notes["placed by its mirror"] += 1
         moved = Part(part.file, part.section, part.primitive,
-                     place_points(part.points, matrix, place), part.uvs,
+                     drawn_points(part.points, matrix, place), part.uvs,
                      part.surface, part.why, part.clut, part.band,
                      part.band_unmeasured)
         out.append(moved)
@@ -434,13 +434,18 @@ class Builder:
     `iso_source`'s, and `ui/` may not import it.
     """
 
-    __slots__ = ("image_path", "figure", "_data")
+    __slots__ = ("image_path", "figure", "frame", "_data")
 
-    def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE):
+    def __init__(self, image_path: str, figure: int = assembly.HEAD_FIGURE,
+                 frame: int = None):
         import iso_source
 
         self.image_path = image_path
         self.figure = figure
+        # The frame every `build` poses in unless one is named.  The screen
+        # carries it so that the panel opens with the figure ASSEMBLED, which
+        # is what LOOKS-TASK-27 delivers; `None` is the shelf, still reachable.
+        self.frame = frame
         with iso_source.open_disc(image_path) as disc:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
@@ -450,7 +455,8 @@ class Builder:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
         try:
             values = looks.parse_tuple(text)
-            return build(self._data, values, self.figure, frame)
+            return build(self._data, values, self.figure,
+                         self.frame if frame is None else frame)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
 
@@ -472,6 +478,16 @@ places relative to one another, and the figure is assembled around this one.
 REFERENCE_FRAME = 0
 """The frame of the screen's animation a scene is posed in when none is asked
 for.  Frame 0 of `layout.ANIME_SCREEN_ENTRY`, which is where the walk starts."""
+
+SIDES_APART = 45
+"""How far apart in y the two sides of one limb pair may sit, in file units.
+
+Measured over ALL seventeen frames of the screen's walk and not over the one
+frame the check poses (pitfall 49): the widest a mirrored pair ever gets is
+the shin at 26.7, with the forearm at 16.2 and the boots at 0.  A walking
+figure swings, so this is not zero and cannot be; what it catches is a pose
+read one piece off, which puts one elbow above its own shoulder.
+"""
 
 
 def piece_names(disc) -> dict:
@@ -552,6 +568,51 @@ def pose(disc, frame: int = REFERENCE_FRAME,
     return out
 
 
+CHAINS = (("head", "torso", "thigh a", "shin a", "foot a"),
+          ("upper arm a", "forearm a"))
+"""The pieces that have to come in this order DOWN the figure.
+
+Two chains and not one: the shoulder sits at the torso's own middle -- 3 units
+apart, measured -- so an arm is not "below the torso", and demanding it would
+be anatomy invented to make a check pass.  What is here is what the model
+files themselves say: the thigh's origin is its hip and it reaches 111 units
+down, the shin's is its knee, the boot's is its ankle.
+"""
+
+
+def standing(middles: dict) -> list:
+    """Everything wrong with where the pieces ended up.  [] is a figure.
+
+    *middles* is {piece name: the middle of its y}, in the file's own units.
+    This is the assertion LOOKS-TASK-27 opened for and could not close until
+    the draw lag was measured: one stop off, every number is in range, each
+    piece is individually perfect, and the boot comes out at thigh height.
+    """
+    bad = []
+    for order in CHAINS:
+        for above, below in zip(order, order[1:]):
+            if above in middles and below in middles \
+                    and middles[above] * UP < middles[below] * UP:
+                bad.append(
+                    "the %s sits at y %.0f and the %s at %.0f, so the figure "
+                    "does not stand: %s is not above %s"
+                    % (above, middles[above], below, middles[below],
+                       above, below))
+    # And the two sides are the same height, which is what a pose read one
+    # piece off breaks first: it puts one elbow above its own shoulder.
+    for left in sorted(one for one in middles if one.endswith(" a")):
+        right = mirror_of(left)
+        if right not in middles:
+            continue
+        apart = abs(middles[left] - middles[right])
+        if apart > SIDES_APART:
+            bad.append(
+                "%s sits %.0f from %s, over the %d a walking pose takes -- the "
+                "two sides are not the same figure"
+                % (left, apart, right, SIDES_APART))
+    return bad
+
+
 def _mirrored_in_z(matrix: list) -> list:
     """The same turn seen in a mirror across z.
 
@@ -564,8 +625,24 @@ def _mirrored_in_z(matrix: list) -> list:
             for row in range(3) for column in range(3)]
 
 
+def drawn_points(points, matrix, place) -> list:
+    """`place_points`, for points that have already been flipped for drawing.
+
+    `part_for` stores `y * UP`, so the points a Part carries are in the DRAWN
+    frame and the pose is in the FILE's -- y down, as `ANIME.BIN` and the GTE
+    both have it.  Applying one in the other's frame turns the figure upside
+    down piece by piece while every piece stays individually upright, which is
+    what the first render of the assembled figure did: head at the bottom and
+    the boot in the air.  `UP` is its own inverse, so the flip undone on the
+    way in and redone on the way out is the whole of it.
+    """
+    turned = place_points([(one[0], one[1] * UP, one[2]) for one in points],
+                          matrix, place)
+    return [(one[0], one[1] * UP, one[2]) for one in turned]
+
+
 def place_points(points, matrix, place) -> list:
-    """One piece's points, turned and put where the frame says.
+    """One piece's points, turned and put where the frame says, IN FILE SPACE.
 
     The shift of twelve is the game's: the matrix is 4.12 and the points are
     whole model units, so the product comes back to model units.
@@ -928,6 +1005,32 @@ def _checks(c) -> None:
     ok("the shelf moves nothing in depth, because it is not a pose",
        all(place[2] == 0.0 for place in places.values()), "%r" % (places,))
 
+    # -- the figure stands, on numbers made up here ------------------------
+    #
+    # The real ones come off the disc in `--check-image`; these exist so the
+    # judge itself has a red case that needs no image, and the red one is the
+    # defect LOOKS-TASK-27 actually hit: the boot one stop off, at the thigh.
+    upright = {"head": -380, "torso": -300, "upper arm a": -300,
+               "upper arm b": -300, "forearm a": -230, "forearm b": -230,
+               "thigh a": -160, "thigh b": -160, "shin a": -50, "shin b": -50,
+               "foot a": 10, "foot b": 10}
+    ok("a figure in order is a figure", standing(upright) == [],
+       "%r" % (standing(upright),))
+    boot_up = dict(upright, **{"foot a": -170, "foot b": -170})
+    ok("a boot at thigh height is not", standing(boot_up))
+    ok("and the message names the two pieces out of order",
+       "foot a" in standing(boot_up)[0] and "shin a" in standing(boot_up)[0])
+    # The b side, and deliberately: the chains above only name the a pieces,
+    # so moving b is what leaves the pair check as the only thing that can
+    # catch it.
+    lopsided = dict(upright, **{"forearm b": -230 + SIDES_APART * 2})
+    ok("one arm hung far from its own pair is not either",
+       standing(lopsided))
+    ok("and the message names the pair", "forearm" in standing(lopsided)[0])
+    ok("a pair inside the swing of a walk is left alone",
+       standing(dict(upright,
+                     **{"forearm b": -230 + SIDES_APART - 1})) == [])
+
     ok("the scene reports what it could not texture instead of hiding it",
        set(Scene([], {}, {}, 0, {"no image": 0}).notes) == {"no image"})
     refuses("an empty scene refuses to have bounds",
@@ -1087,6 +1190,33 @@ def _check_image(image_path: str) -> int:
         problems.append("FACE band(s) %s sample none of the entries a beard "
                         "colour moves, so H.F.COL. paints nothing on them"
                         % empty)
+
+    # --- the figure stands up, and the file is what stands it up -----------
+    #
+    # The order of the pieces DOWN the figure, asserted rather than looked at.
+    # It is the check LOOKS-TASK-27 opened for and could not close until the
+    # draw lag was measured (`oracle.DRAW_LAG`): one stop off, every number
+    # here is in range and the boot comes out at thigh height.  What this adds
+    # to the lag measurement is the other half -- the lag is measured on the
+    # captures, and this says the DISC's own bytes agree with it.
+    with iso_source.open_disc(image_path) as disc:
+        posed = {name: disc.read(name)
+                 for name in (layout.EDT_MOD, layout.MODEL, layout.ANIME)}
+    places = pose(posed, REFERENCE_FRAME)
+    scans = {name: section.scan(posed[name], layout.GEOMETRY_START[name])
+             for name in (layout.EDT_MOD, layout.MODEL)}
+    names = piece_names(posed)
+    middles = {}
+    for where, (matrix, place, _mirrored) in places.items():
+        points = [(v.x, v.y, v.z) for v in scans[where[0]].sections[
+            where[1]].vertices]
+        heights = [one[1] for one in place_points(points, matrix, place)]
+        middles[names[where]] = (min(heights) + max(heights)) / 2.0
+    for order in CHAINS:
+        print("      the figure, top down: %s"
+              % ", ".join("%s %.0f" % (name, middles[name]) for name in order
+                          if name in middles))
+    problems += standing(middles)
 
     print("scene --check-image: %s"
           % ("ok" if not problems else "%d problem(s)" % len(problems)))

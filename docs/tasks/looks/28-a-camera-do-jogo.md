@@ -17,6 +17,12 @@ status: pendente
 - **Sem a câmera do jogo, comparar desenho mede a câmera.**
 - **Esta task fecha a §6 (h).** Figura montada na pose do jogo e mesma
   projeção: a silhueta passa a ser comparável, e forma ganha testemunha.
+- **A [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md) deixou uma
+  armadilha que alcança toda leitura de registrador numa parada:** o ponteiro
+  de modelo que o jogo carrega quando a matriz é carregada nomeia a peça que
+  ele **acabou de desenhar**, uma parada atrás (`oracle.DRAW_LAG`). Quem
+  acrescentar uma captura por breakpoint confere o atraso com
+  `oracle.py --pose-lag` em vez de supor que o registrador fala da peça da vez.
 - **O controle já existe:** a captura do emulador se repete em zero pixel a
   partir do `load_state` (§5.3). O limiar sai do controle, escrito depois de
   medido e dito que foi.

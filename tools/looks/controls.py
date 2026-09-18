@@ -747,6 +747,44 @@ CONTROLS = (
         "and the pass still counts right",
     ),
     Control(
+        "scene-standing-accepts-any-order", "scene.py", "standing",
+        "                    and middles[above] * UP < middles[below] * UP:",
+        "                    and False:",
+        ("scene",),
+        "the chain down the figure asserted and then not checked: a pose read "
+        "one piece off puts the boot at thigh height with every number in "
+        "range, and this is the only thing that says so (LOOKS-TASK-27)",
+    ),
+    Control(
+        "scene-sides-may-be-different-figures", "scene.py", "standing",
+        "        if apart > SIDES_APART:",
+        "        if False:",
+        ("scene",),
+        "the two sides of a limb pair allowed to sit anywhere: a pose one "
+        "piece off puts an elbow above its own shoulder, and the swing of a "
+        "walk is 27 units where that is hundreds",
+    ),
+    Control(
+        "oracle-pose-reads-the-pointer-on-time", "oracle.py", "_named_pass",
+        "        drawn = found[(order + DRAW_LAG) % count]",
+        "        drawn = found[order]",
+        ("oracle",),
+        "every piece named one stop early, which is what the model pointer at "
+        "a matrix load actually says: it is the piece already DRAWN.  Read on "
+        "time, the boot takes the hip's matrix and the assembled figure puts a "
+        "boot at thigh height with every number in range (LOOKS-TASK-27)",
+    ),
+    Control(
+        "oracle-lag-measured-off-the-corrected-name", "oracle.py",
+        "_pointer_named",
+        '    raw = [one.get("pointer_piece", one["piece"]) for one in loads]',
+        '    raw = [one["piece"] for one in loads]',
+        ("oracle",),
+        "the lag measured off the name the lag already fixed: it then answers "
+        "zero for any lag it was given, which is a measurement that agrees "
+        "with whatever it is handed",
+    ),
+    Control(
         "oracle-pose-matrix-forgets-the-camera", "oracle.py",
         "matrix_deviation",
         "    want = _multiply(camera, _transpose(camera))",

@@ -865,6 +865,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
 | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
+| `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
@@ -889,10 +890,18 @@ Cinco coisas que custam tempo se descobertas tarde:
   `tools/looks/` não recebem esse caminho — ele é constante do `layout.py`.
 - **O emulador é um só**, e os dois `.sav` são fixture: a cópia mestra fica em
   `work/looks-states/`, e o slot do DuckStation é rascunho restaurado dela.
-- **O boneco sai numa prateleira, com o uniforme cinza, e isso é medição, não
-  defeito.** Os `TEX_*.BIN` do uniforme não têm digest na guarda (task 30), e
-  a pose **já está medida** — vem do `ANIME.BIN` (task 24) e a de referência
-  está capturada peça a peça (task 25); quem a põe no painel é a task 27.
+- **O boneco sai montado e com o uniforme cinza, e o cinza é medição, não
+  defeito.** Os `TEX_*.BIN` do uniforme não têm digest na guarda (task 30). A
+  pose vem do `ANIME.BIN` (tasks 24 a 26) e desde a task 27 o painel abre com
+  ela: `ui/app.py --frame N` escolhe o quadro, e a prateleira da v1 continua
+  atrás do `S`.
+- **O ponteiro vivo numa parada nomeia a peça ANTERIOR.** Na carga da matriz
+  de uma peça os registradores ainda apontam para a peça que o jogo acabou de
+  desenhar — a matriz entra no GTE antes de os ponteiros serem armados. Lido
+  na hora, cada peça fica com a matriz da seguinte e o boneco sai com a
+  chuteira na altura da coxa, **com todo número na faixa**. Quem remede é
+  `oracle.py --pose-lag`, sobre as capturas em disco e sem emulador: a
+  dispersão do tornozelo é 5,0 no atraso certo e 158,8 no outro.
 - **A transformação por peça é absoluta, e o esqueleto não é rígido.** O que o
   jogo entrega ao GTE por peça é a câmera já composta com a volta daquela peça,
   então um leitor reproduz doze transformações prontas em vez de compor uma
