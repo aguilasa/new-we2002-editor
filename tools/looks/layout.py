@@ -1429,8 +1429,12 @@ as "words with the top bit set", and this file's payload opens with
 0x9000040A, which has it -- so the run does not stop at the header's end.  And
 even with the run cut at 204 words, where the pointers really end, the rule's
 second half fails: it assumes the lowest pointer aims just past the run, and
-this file's lowest aims at offset 912, not 816.  So the base it computes is
-0x8017EE60, ninety-six bytes high, and every byte compared against it differs.
+this file's lowest aims at offset 912, not 816.  So the base it WOULD compute
+is 0x8017EE60, ninety-six bytes high; written by hand into a copy of the tree
+it is the red control of `--pose`, where 279,034 of the 396,804 bytes differ
+and not one of the 204 header entries is read.  Called on this file as it
+stands, the function raises `WrongBase` -- the first reason fires first, and
+nobody ever sees that base come out of it (CORR-LOOKS-059).
 
 It is deliberately NOT in `BASE`: that dict is the model files', and `spans()`
 and `verify_load()` walk it expecting a file `section.scan` can read.

@@ -3,7 +3,7 @@ id: CORR-LOOKS-059
 title: "Correção: o plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -87,19 +87,80 @@ diz, com as duas metades separadas.
 
 ## Verificação
 
-- [ ] chamar `layout.derive_base()` sobre o `ANIME.BIN` e conferir que o texto
+- [x] chamar `layout.derive_base()` sobre o `ANIME.BIN` e conferir que o texto
       do plano descreve o que se vê
-- [ ] o `0x8017EE60` continua explicado como a base do controle, com a
+- [x] o `0x8017EE60` continua explicado como a base do controle, com a
       condição que a produz
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `cf98bb9`: chamado sobre o `ANIME.BIN`, o
+`derive_base()` **recusa o arquivo** — não responde base nenhuma.
 
-**Arquivos criados/modificados:**
+```text
+$ python -c "... layout.derive_base(iso_source.read_file(img, layout.ANIME))"
+WrongBase: base 0x8017ee2c puts header pointer 204 (0x9000040a) at 266868190,
+outside the file's 396804 bytes
+```
+
+As três frases passaram a contar as duas razões **em sequência**, que é como
+elas acontecem:
+
+1. a corrida de ponteiros é reconhecida por "bit alto", o payload abre com
+   `0x9000040A`, a corrida não para no fim do cabeçalho e a função **levanta
+   `WrongBase`** — é o que se vê ao chamá-la;
+2. **cortada a corrida em 204 palavras**, a segunda metade da regra ainda erra
+   (o ponteiro mais baixo mira o offset 912, não o 816) e daí sairia
+   `0x8017EE60`, 96 bytes alto — a base **escrita à mão** na cópia da árvore
+   que dá o controle vermelho: 279.034 de 396.804 bytes diferentes e nenhuma
+   das 204 entradas lida.
+
+- §10.3 (j) do plano: o item 1 virou os dois marcadores acima, com a data e o
+  que a frase dizia antes;
+- perfil, armadilha 44: "erra por 96 bytes" era o que a regra **faria** se
+  chegasse lá; o que ela faz é recusar;
+- LOOKS-TASK-24: o bloco do vermelho passou a dizer que a base é escrita à mão,
+  com a condição que a produziria.
+
+**Uma discrepância que o conserto revelou, e que a CORR não listava:** o
+docstring do `layout.ANIME_BASE` contava as duas razões certas — é dele que a
+CORR tira a separação —, mas fechava com *"every byte compared against it
+differs"*, e o medido é **279.034 de 396.804** (117.770 batem). Corrigido junto,
+por ser a mesma afirmação a uma linha de distância.
+
+### Gates
+
+```text
+$ python -c "... layout.derive_base(...)"     # depois, o texto do plano bate
+WrongBase: base 0x8017ee2c puts header pointer 204 (0x9000040a) at 266868190,
+outside the file's 396804 bytes
+
+$ python tools/looks/layout.py --check
+layout: self_check ok
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+$ python tools/looks/selftest.py --quiet
+  ..... 75 of 75 controls red
+looks_selftest: 0 failure(s)
+```
+
+O `0x8017EE60` continua explicado nos quatro lugares, sempre com a condição que
+o produz. `roms/` intocada (leitura pura); nenhum emulador subiu nesta correção.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` §10.3 (j)
+- `docs/prompts/perfil-looks.md` — armadilha 44
+- `docs/tasks/looks/24-de-onde-vem-a-pose.md` — o bloco do controle vermelho
+- `tools/looks/layout.py` — o fecho do docstring do `ANIME_BASE`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

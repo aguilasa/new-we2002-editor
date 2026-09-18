@@ -395,10 +395,17 @@ Não se revertem sem o usuário pedir.
     contagem é soltar dezenas de vezes e ler o `hit_count` de cada uma; aí são
     **cinco** que rodam, com duas carregando quase tudo.
 44. **`derive_base()` é a regra dos dois arquivos de modelo, e não generaliza.**
-    No `ANIME.BIN` ela erra por 96 bytes, por duas razões independentes: a
-    corrida de ponteiros é reconhecida por "bit alto" e o payload abre com
-    `0x9000040A`; e o ponteiro mais baixo mira o offset 912, não o 816 que a
-    regra supõe. Base de arquivo novo se mede **por conteúdo** — uma corrida de
+    No `ANIME.BIN` ela falha por duas razões **em sequência**, e a primeira é a
+    que se vê: a corrida de ponteiros é reconhecida por "bit alto" e o payload
+    abre com `0x9000040A`, então a corrida não para no fim do cabeçalho e a
+    função **recusa o arquivo** (`WrongBase`, com o ponteiro 204 caindo fora
+    dele). Só **cortada a corrida em 204 palavras** a segunda aparece: o
+    ponteiro mais baixo mira o offset 912, não o 816 que a regra supõe, e daí
+    sairiam os 96 bytes altos (`0x8017EE60`) que são a base do controle
+    vermelho. Esta linha dizia que a regra "erra por 96 bytes" até 2026-09-18
+    ([`CORR-LOOKS-059`](/docs/tasks/looks/CORR-LOOKS-059.md)) — errar por 96 é
+    o que ela faria se chegasse lá; o que ela faz é recusar.
+    Base de arquivo novo se mede **por conteúdo** — uma corrida de
     64 bytes que apareça uma vez só na RAM —, e a regra do cabeçalho só depois,
     se quiser, como confirmação.
 

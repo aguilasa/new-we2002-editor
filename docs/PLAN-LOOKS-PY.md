@@ -2543,12 +2543,25 @@ poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 > 1. **O arquivo está na RAM byte a byte** — 396.804 de 396.804 — em
 >    `layout.ANIME_BASE` = `0x8017EE00`, logo depois do `MODEL.BIN`. A base foi
 >    medida **por conteúdo**: uma corrida de 64 bytes do offset 1.000 aparece
->    uma única vez nos dois megabytes. O `derive_base()` **não** a deriva, por
->    duas razões que valem para o próximo arquivo: a corrida de ponteiros é
->    reconhecida por "bit alto", e o payload deste arquivo abre com
->    `0x9000040A`; e o ponteiro mais baixo mira o offset 912, não o 816 que a
->    regra supõe. Ele responde `0x8017EE60`, 96 bytes alto, e contra essa base
->    **279.034 bytes diferem** — é o controle vermelho deste comando.
+>    uma única vez nos dois megabytes. O `derive_base()` **não** a deriva, e as
+>    duas razões são **sequenciais, não paralelas** — a primeira acontece antes
+>    de a segunda ter vez:
+>
+>    - a corrida de ponteiros é reconhecida por "bit alto", e o payload deste
+>      arquivo abre com `0x9000040A`, que tem o bit. A corrida não para no fim
+>      do cabeçalho, e a função **recusa o arquivo** com
+>      `WrongBase: base 0x8017ee2c puts header pointer 204 (0x9000040a) at
+>      266868190, outside the file's 396804 bytes`. É isso que se vê ao chamá-la;
+>    - **cortada a corrida em 204 palavras**, onde os ponteiros de fato acabam,
+>      a segunda metade da regra ainda erra: ela supõe que o ponteiro mais baixo
+>      mire logo depois da corrida, e o deste arquivo mira o offset 912, não o
+>      816. Daí sairia `0x8017EE60`, 96 bytes alto — e é essa base, escrita à
+>      mão numa cópia da árvore, que dá o controle vermelho do comando:
+>      **279.034 de 396.804 bytes diferem** e nenhuma das 204 entradas é lida.
+>
+>    Esta frase dizia que a função *"responde `0x8017EE60`"* até 2026-09-18
+>    ([`CORR-LOOKS-059`](/docs/tasks/looks/CORR-LOOKS-059.md)), e ninguém obtém
+>    essa resposta: quem chamar recebe a exceção.
 > 2. **O cabeçalho é de 204 entradas, uma por animação, e a tela toca a de
 >    índice 5.** Medido com um watchpoint de leitura nas 204 de uma vez:
 >    nenhuma outra é lida. O leitor é `0x800270B8`, que guarda o ponteiro no

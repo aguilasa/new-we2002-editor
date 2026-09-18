@@ -129,8 +129,10 @@ $ python tools/looks/oracle.py --pose          # os dois slots, identicos
 oracle --pose: 0 problem(s)
 ```
 
-**O vermelho, na cópia da árvore com a base que o `derive_base()` calcula**
-(`ANIME_BASE = 0x8017EE60`):
+**O vermelho, na cópia da árvore com a base escrita à mão** (`ANIME_BASE =
+0x8017EE60` — a que a regra daria **se** a corrida de ponteiros fosse cortada
+em 204 palavras; chamada sobre este arquivo, ela recusa com `WrongBase` antes
+disso, ver a §10.3 (j) e a [`CORR-LOOKS-059`](/docs/tasks/looks/CORR-LOOKS-059.md)):
 
 ```text
 $ python <copia>/tools/looks/oracle.py --pose 2
