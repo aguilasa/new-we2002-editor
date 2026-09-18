@@ -73,6 +73,8 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-055](/docs/tasks/looks/CORR-LOOKS-055.md) | [LOOKS-TASK-21](/docs/tasks/looks/21-a-tela-medida.md) | `screen.py --report` morre no `■` da ajuda, e a mensagem de falha do `--screen` morreria igual | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-056](/docs/tasks/looks/CORR-LOOKS-056.md) | [LOOKS-TASK-22](/docs/tasks/looks/22-a-tela-na-janela.md) | O `CLAUDE.md` descreve um ciclo fechado e um visualizador de tupla, e o que existe é a tela `LOOKS SET` num ciclo aberto | Baixa | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [x] concluída | 2026-09-17 |
+| [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -144,6 +146,8 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-055 — o gate imprime texto medido numa saída que não o codifica
 - [x] CORR-LOOKS-056 — a seção do `looks` no `CLAUDE.md` ficou na v1
 - [x] CORR-LOOKS-057 — a regra errada do código de nação sobrevive no `layout.py`
+- [ ] CORR-LOOKS-058 — 18 e 17 no módulo, 18 e 18 em toda corrida
+- [ ] CORR-LOOKS-059 — a base errada não é a que a regra responde, é a que sobra dela
 
 ## Detalhes por correção
 
@@ -1029,3 +1033,27 @@ e o ciclo arquivado, o dele em
   `looks-nation-code-is-the-index` existe para reprovar quem a escrever
 - **Fix:** o docstring passa a dizer o salto e a apontar `looks.NATION_CODES`,
   com a data e o que dizia antes
+
+### CORR-LOOKS-058
+
+- **Arquivo com problema:** `tools/looks/layout.py`
+- **Sintoma:** o docstring do `POSE_MATRIX` diz "18 and 17 of 40 stops, against
+  2, 2 and 1", e o `oracle.py --pose` imprime `x18, x18, x2, x1, x1` — o plano e
+  o Log da task dizem 18 e 18, como a ferramenta
+- **Como foi detectado:** `oracle.py --pose` na árvore de `8a32160`, nos dois
+  slots, contra a linha 1447 do `layout.py`
+- **Fix:** o docstring diz a repartição que o comando imprime, ou diz que ela
+  varia e nomeia a corrida de onde saiu
+
+### CORR-LOOKS-059
+
+- **Arquivo com problema:** `docs/PLAN-LOOKS-PY.md` §10.3 (j), a armadilha 44 do
+  perfil e o Log da LOOKS-TASK-24
+- **Sintoma:** os três dizem que o `derive_base()` "responde `0x8017EE60`" / que
+  ele "erra por 96 bytes"; chamado sobre o `ANIME.BIN` ele levanta `WrongBase`,
+  porque lê o `0x9000040A` do payload como ponteiro. O `0x8017EE60` só existe
+  com a corrida cortada em 204 palavras, que é o que o `layout.ANIME_BASE` diz
+  certo
+- **Como foi detectado:** `layout.derive_base()` sobre o arquivo lido do disco
+- **Fix:** separar as duas metades no plano, no perfil e na task, como o
+  `ANIME_BASE` já as separa; a base plantada do controle continua explicada
