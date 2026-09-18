@@ -577,9 +577,34 @@ Não se revertem sem o usuário pedir.
     acha zero e pode ler isso como leitura falhada. Não é: a projeção sai com a
     origem no eixo da câmera, e onde ela cai dentro do painel é o deslocamento
     de desenho da GPU somado à posição do boneco no mundo — duas incógnitas que
-    viram **uma** translação, medida uma vez e mantida fixa. Medida por
-    comparação, ela é ajuste; mantida fixa nas comparações seguintes, elas são
-    previsão.
+    viram **uma** translação. Esta linha dizia, até a segunda sessão da mesma
+    task, que a translação se mede uma vez e se mantém fixa, e que assim as
+    comparações seguintes viram previsão. **Está errado, e medido:** ajustada
+    numa pose e aplicada à foto de outra, ela desloca a figura inteira — ver a
+    armadilha 64.
+63. **Buffer de quadro lido na linha errada desloca a foto sem parecer erro.**
+    O segundo buffer desta tela começa na linha **240** da VRAM, não na 256.
+    Lido com 256, o conteúdo chega dezesseis linhas deslocado e a caixa de
+    ajuda entra no retângulo do painel — a máscara conta o branco de `Visual`
+    como figura, a tinta sobe de 2.376 para 2.618 e **nenhum** quadro da
+    caminhada casa. O sintoma não é uma imagem visivelmente torta: é uma
+    comparação que não fecha. Medido em 2026-09-18
+    ([`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md)).
+64. **Translação única mantida fixa é pior que alinhamento por comparação.**
+    Soa mais rigoroso e mede outra coisa: ajustada numa pose e aplicada à foto
+    de outra, desloca a figura inteira e **todo** candidato pontua mal — o
+    melhor casamento foi de 13% da tinta para 72%. Alinhada por comparação, a
+    medida julga **forma e tamanho**; e aí se diz que ela **não** julga posição,
+    em vez de deixar a frase valer as duas coisas.
+65. **Limite não é constante, e exigir constante esconde a relação.** Entre o
+    quadro que o par nomeia e o que a foto mostra há um atraso de **0 a 2**
+    quadros da caminhada — um quadro dela dura ~3,5 do emulador, então o mesmo
+    atraso de um quadro do emulador cai em 0, 1 ou 2. Exigindo uma constante
+    saíram quatro respostas diferentes e a leitura *"não há ponte"*.
+66. **A tela ainda assenta nos primeiros quadros depois do `load_state`.** No
+    quadro contado 20 o painel traz 2.726 pixels de tinta contra 2.376 a 2.532
+    de todos os outros, e nenhum quadro da caminhada casa melhor que 3.570 —
+    pior que a própria tinta. Medição de painel começa no **60**.
 ---
 
 ## As fontes de verdade binárias
@@ -653,7 +678,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~3 min | `python tools/looks/oracle.py --camera [SLOT]` — `H`, `OFX`, `OFY` e a matriz da câmera lidos do GTE na carga da matriz por peça, com três controles: o mesmo quadro duas vezes, a projeção igual nas doze cargas, e um quadro contado adiante concordando | — | LOOKS-TASK-28 |
-| *(sem alvo ainda)* | idem, mais `work/looks-camera/` e as capturas; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, com o mesmo quadro contado duas vezes de controle e um quadro diferente de segundo controle | — | LOOKS-TASK-28 |
+| *(sem alvo ainda)* | idem, mais `work/looks-camera/`; ~4 min por slot | `python tools/looks/confront.py --silhouette [SLOT]` — a máscara do painel no quadro nativo contra a nossa, em três quadros contados por slot: o mesmo quadro duas vezes de controle, quadros diferentes de segundo controle, e um **estilo de cabelo trocado** que tem de pontuar pior. Fecha a §6 (h) | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |

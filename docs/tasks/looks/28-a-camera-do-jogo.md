@@ -41,20 +41,21 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
 - [x] `H`, o deslocamento de tela e a matriz de câmera lidos do GTE por
       breakpoint, com o comando que os lê — `oracle.py --camera`. **E o
       deslocamento de tela do GTE é ZERO**, que é achado: quem põe o boneco
-      dentro do painel é o deslocamento de desenho da GPU, não o `OFX`/`OFY`.
+      dentro do painel é o deslocamento de desenho da GPU.
 - [ ] O painel desenha com eles, no tamanho do painel do jogo. **NÃO FEITO** —
-      a silhueta se calcula no núcleo (`scene.silhouette`), e a janela ainda
-      desenha com a câmera orbital da v1.
-- [x] `confront.py --silhouette <SLOT>`: máscara nos dois quadros e a
+      a silhueta se calcula no núcleo (`scene.silhouette`), no tamanho do
+      painel, e a **janela** ainda desenha com a câmera orbital da v1.
+- [x] `confront.py --silhouette [SLOT]`: máscara nos dois quadros e a
       diferença impressa.
 - [x] **Controles antes do teste:** o mesmo quadro contado duas vezes dá **0**
-      pixel de diferença e um quadro diferente dá **1.300**.
-- [ ] Três estilos de cabelo diferentes, dois slots. **NÃO FEITO, e a razão
-      está no Log:** a ponte entre o quadro contado do emulador e o quadro do
-      `ANIME.BIN` que a tela mostra ainda não fecha, e sem ela a silhueta se
-      compara com uma pose que o jogo não estava desenhando.
-- [ ] §6 (h) e §10.3 (m) com o veredito e a data — a (m) fica com o veredito
-      **parcial**; a (h) segue aberta.
+      pixel de diferença, e quadros diferentes dão 603 a 1.680. Os limiares
+      saem daí e estão escritos como medidos.
+- [x] Um estilo trocado de propósito **discorda**: `A-I3` pontua 696 a 834
+      onde o estilo que o state veste pontua 179 a 426 — 1,8x a 3,9x pior, nos
+      dois slots. *(Os **três** estilos andados no próprio jogo ficam de fora:
+      o controle troca o nosso lado, não o do emulador.)*
+- [x] §6 (h) e §10.3 (m) com o veredito e a data — a (h) **fecha**: a forma tem
+      testemunha. A (m) fica **parcial**, pela janela.
 
 ---
 
@@ -177,3 +178,108 @@ check_tasks: 138 task(s), ok
    um degradê; o fundo tomado por **linha** entrega a silhueta limpa, e a borda
    do painel precisa de três pixels de recuo ou a caixa da figura vira o painel
    inteiro.
+
+---
+
+### Segunda sessão — a silhueta fecha
+
+**A ponte de quadro era um bug de recorte, não um mistério.** O segundo buffer
+de quadro desta tela começa na linha **240** da VRAM, não na 256; lido com 256,
+o conteúdo chega **dezesseis linhas deslocado** e a caixa de ajuda entra no
+retângulo do painel — a máscara então conta o branco de `Visual` como figura,
+2.618 pixels de tinta contra 2.376, e nenhum quadro da caminhada casa. Duas das
+seis comparações estavam assim, e a assinatura é sempre a mesma: **tinta acima
+do normal e varredura chata**.
+
+**E a comparação tinha de ser livre de translação.** A primeira versão media
+uma translação única e a mantinha fixa — o que soa mais rigoroso e é pior:
+ajustada numa pose e aplicada à foto de outra, ela desloca a figura inteira e
+**todo** candidato pontua mal (medido: o melhor casamento foi de 13% da tinta
+para 72%). Alinhada por comparação, a medida passa a julgar **forma e
+tamanho**, que é o que a §6 (h) pede; onde a figura cai dentro do painel é o
+deslocamento de desenho da GPU, e isto não o mede.
+
+**O resultado, nos dois slots e em três quadros contados cada:**
+
+```text
+slot 2   quadro 60  -> caminhada 0,  0 atrás, 399 de 2383 (17%)
+         quadro 80  -> caminhada 6,  2 atrás, 300 de 2454 (12%)
+         quadro 100 -> caminhada 14, 1 atrás, 198 de 2532 ( 8%)
+slot 1   quadro 60  -> caminhada 0,  0 atrás, 426 de 2376 (18%)
+         quadro 80  -> caminhada 7,  2 atrás, 331 de 2460 (13%)
+         quadro 100 -> caminhada 16, 2 atrás, 179 de 2426 ( 7%)
+```
+
+Cada varredura tem **mínimo interior e nítido**, e o quadro que o par do
+próprio jogo nomeia está sempre **0 a 2 quadros à frente** do que a foto
+mostra — que é o buffer anterior, com um quadro da caminhada durando ~3,5
+quadros do emulador. O atraso é um **limite**, não uma constante, e exigir uma
+constante foi o que fez a primeira leitura parecer ausência de ponte.
+
+**A §6 (h) fecha: a forma tem testemunha.** O controle é um estilo de cabelo
+que o state não veste — `A-I3` pontua **696 a 834** onde o certo pontua 179 a
+426. E o que dá direito de chamar isso de testemunha de **forma** é o par que
+não mexe: trocar a **cor de pele** (`B-A1` contra `A-A1`) muda **0** pixel da
+silhueta, porque pele é paleta e não geometria.
+
+**Por que a tomada começa no quadro 60:** antes disso a tela ainda assenta. No
+quadro contado 20 o painel traz 2.726 pixels de tinta contra os 2.376 a 2.532
+de todos os outros, e **nenhum** quadro da caminhada casa melhor que 3.570 —
+pior que a própria tinta.
+
+**Arquivos criados/modificados** *(conferidos contra o commit)*
+
+- `tools/looks/confront.py` — `BUFFERS`, `still_frame()`, `game_at()`,
+  `swapped_style()`, os limiares medidos (`WALK_LAG`, `MATCH_SHARE`,
+  `MATCH_MARGIN`, `STYLE_MARGIN`) e as asserções do `check_silhouette`
+- `docs/PLAN-LOOKS-PY.md` — o veredito da §10.3 (m) e o fechamento da §6 (h)
+- `docs/prompts/perfil-looks.md` — as armadilhas novas
+- `docs/tasks/looks/28-a-camera-do-jogo.md` — este Log
+
+**Gates, na árvore commitada**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 87 of 87 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 7 of 7 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/confront.py --silhouette
+    control: frame 60 captured twice, 2383 pixel(s) of ink, identical
+    control: frame(s) [80, 100] differ from it by [603, 1483] pixel(s)
+    (slot 1) control: frame(s) [80, 100] differ from it by [670, 1452]
+  the picture trails the draw by [0, 1, 2] frame(s) of the walk over 6
+  comparison(s), and the bound is 2
+confront --silhouette: 0 problem(s) over 2 slot(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**O que continua aberto**
+
+1. **A janela não desenha com a câmera do jogo.** A silhueta vive no núcleo; o
+   painel da tela ainda usa a órbita da v1. É o critério 2, e é o que falta
+   para a task fechar.
+2. **Os três estilos não foram andados no jogo.** O controle troca o **nosso**
+   lado sobre a mesma foto, que é o que prova que a silhueta vê a malha; andar
+   o `HAIR` no emulador e refotografar é o resto.
+
+**Problemas encontrados**
+
+1. **Buffer de quadro lido na linha errada desloca a foto sem parecer erro.**
+   240 e não 256 — e o sintoma é uma máscara com tinta demais que não casa com
+   nada, não uma imagem visivelmente torta.
+2. **Translação única mantida fixa é pior que alinhamento por comparação.**
+   Ela parece mais rigorosa e mede outra coisa: 13% viraram 72%.
+3. **Limite não é constante.** Exigir um deslocamento único entre o quadro que
+   o par nomeia e o que a foto mostra produziu quatro respostas diferentes e a
+   leitura "não há ponte"; o que há é um atraso com teto, e o teto se mede.
+4. **Janela de varredura que o resultado encosta não é janela** — a de dois
+   quadros devolveu o melhor na borda nas duas direções.

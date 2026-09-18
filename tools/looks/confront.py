@@ -952,13 +952,72 @@ Sum of the three channels' distance.  The panel's background is a GRADIENT --
 it is nearly flat, and not as one colour for the whole box.
 """
 
-SILHOUETTE_FRAMES = (20, 80)
-"""Counted frames a silhouette is taken at, and they are not any two.
+SILHOUETTE_FRAMES = (60, 80, 100)
+"""Counted frames a silhouette is taken at, and they are not any three.
 
-Both are frames whose whole draw pass reads pairs from ONE frame of
-ANIME.BIN.  Frame 0 straddles two (the animation advances in the middle of a
-pass -- pitfall 51), and a picture compared against either half would be
-compared against a figure the game never drew.
+**They start at 60 because the screen is still settling before it.**  Measured
+2026-09-18: at counted frame 20 the panel carries 2726 pixels of ink against
+the 2383 to 2532 of every later frame, and NO frame of the walk matches it
+better than 3570 -- worse than the ink itself.  From 60 on every capture has a
+sharp minimum at 198 to 399.
+
+And 120 is deliberately not among them: it photographs the same phase of the
+walk as 60, to the pixel (the control measures 0 between them), so it would
+make the "a different frame differs" control pass on two others and fail on it.
+"""
+
+WALK_LAG = 2
+"""How many frames of the walk the PICTURE may trail the draw in progress.
+
+The dump is taken with the CPU stopped inside the draw of one frame, so what
+is on screen is the frame finished before it.  That is one EMULATOR frame, and
+a frame of the walk lasts about three and a half of them -- 17 frames over the
+60 the cycle takes -- so the same one-frame lag lands 0, 1 or 2 frames back
+depending on where in the walk it falls.  Measured: 0, 2, 1 and 0 over the four
+captures of 2026-09-18.
+
+It is a bound and not a constant, and saying so is the point: an offset that
+had to be one number came out as four different ones and looked like no bridge
+at all, when what it is is a lag with a known ceiling.
+"""
+
+MATCH_SHARE = 0.25
+"""The most of the game's own ink the best match may differ by.
+
+Measured over the four captures: 399 of 2383, 300 of 2454, 198 of 2532 and 399
+of 2383 -- 8% to 17%.  The ceiling is written with room above the worst, and
+what it has to catch is a figure of the wrong SHAPE, which the controls price
+at 603 to 1483 pixels for a wrong frame of the same walk.
+"""
+
+STYLE_SWAP = ("A1", "I3")
+"""The two hair styles a comparison is re-run between, as its control.
+
+Hair, because it is the field that changes the MESH: measured 2026-09-18 on
+the panel's own size, `A-I3` differs from `A-A1` in 656 of 2686 silhouette
+pixels and `A-C1` in 783, while `B-A1` -- a skin colour, which is a palette and
+no geometry at all -- differs in **0**.  That zero is the reason the control is
+a style and not a colour: a witness of FORM has to be blind to colour, and
+this one is, measurably.
+"""
+
+
+def swapped_style(text: str) -> str:
+    """The same tuple wearing the OTHER of `STYLE_SWAP`."""
+    parts = text.split("-")
+    parts[1] = (STYLE_SWAP[1] if parts[1] == STYLE_SWAP[0]
+                else STYLE_SWAP[0])
+    return "-".join(parts)
+
+STYLE_MARGIN = 1.5
+"""How much worse the wrong style must score than the right one."""
+
+MATCH_MARGIN = 2.5
+"""How much better the best candidate must be than the worst of the sweep.
+
+Measured: 4.0x, 4.4x and 8.3x.  A sweep with no minimum -- every frame equally
+far -- is the shape of a comparison that is not comparing figures at all, and
+it is what the capture at counted frame 20 did.
 """
 
 NEIGHBOURS = 8
@@ -998,18 +1057,74 @@ def panel_mask(frame, box, inset: int = PANEL_INSET,
     return mask
 
 
-def playing_frame(game, slot, frame, oracle, anime, data, entry):
-    """Which frame of ANIME.BIN the game is drawing, at counted *frame*.
+BUFFERS = (0, 240)
+"""VRAM rows the two frame buffers of this screen start at.
 
-    One stop, not a whole pass: the pair the game is reading is enough, and a
-    full capture would cost twenty seconds to answer the same question.
+The game draws into one and shows the other, so which one a dump holds
+alternates; it is decided per dump by the boxes the screen's own border rule
+finds, never assumed to be the top one -- which is the reading that made one
+dump in four come back with no box at all.
+
+**240 and not 256, and the difference is sixteen rows of somebody else's
+picture.**  With 256 the second buffer's content arrives shifted up by
+sixteen, which puts the help box's `Visual` inside the panel's own rectangle:
+the mask then carries the white of the text as if it were the figure, 2618
+pixels of ink against 2376, and no frame of the walk matches it.  The screen is
+240 lines tall -- `screen.json` says so -- and the second buffer starts where
+the first one ends.
+"""
+
+
+def still_frame(game, display, oracle, screen):
+    """The finished frame buffer, dumped with the CPU STOPPED.
+
+    Nothing is stepped here, and that is the whole point: `screen_frames`
+    steps a frame per sample, so the walk moves between reading which pair the
+    game is on and photographing it -- which is exactly what left LOOKS-TASK-28
+    with two different offsets and no bridge.
+    """
+    import atlas
+
+    width, height = display
+    path = os.path.join(game.out_dir, "still.png")
+    if os.path.exists(path):
+        os.remove(path)
+    game.client.call("dump_vram", path=path, format="png")
+    if not os.path.exists(path):
+        raise ConfrontError("dump_vram reported %s and there is no file there"
+                            % path)
+    _width, _height, rows = atlas.read_png(path)
+    best, found = None, -1
+    for origin in BUFFERS:
+        frame = [row[:width] for row in rows[origin:origin + height]]
+        if len(frame) < height:
+            continue
+        count = len(screen.boxes(frame, width, height))
+        if count > found:
+            best, found = frame, count
+    if best is None or not found:
+        raise ConfrontError("neither buffer at VRAM rows %s holds a box, so "
+                            "neither is a finished picture of this screen"
+                            % (BUFFERS,))
+    return best
+
+
+def game_at(game, slot, counted, oracle, anime, data, entry, table):
+    """(the ANIME frame being drawn, the panel's mask) at counted *counted*.
+
+    **One run, and no frame stepped between the two halves.**  The pair says
+    which frame of the file the game is drawing; the dump, taken at that same
+    stop, holds the frame it finished just before.  Read in two runs -- which
+    is how this started -- the walk advances in between by however many frames
+    the photograph costs, and the offset between the two answers stops being
+    the same number twice.
     """
     import layout
     import who_writes
 
     oracle.restore_state(slot, verbose=False)
-    game.load_looks(slot, label="silhouette-%d-%d" % (slot, frame))
-    game.step(frame)
+    game.load_looks(slot, label="silhouette-%d-%d" % (slot, counted))
+    game.step(counted)
     client = game.client
     client.call("breakpoint", action="clear")
     client.call("breakpoint", action="add", type="execute",
@@ -1018,7 +1133,8 @@ def playing_frame(game, slot, frame, oracle, anime, data, entry):
         client.call("continue")
         if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
             raise ConfrontError("the unpack at %s never ran at frame %d"
-                                % (who_writes.hx(layout.ANIME_UNPACK), frame))
+                                % (who_writes.hx(layout.ANIME_UNPACK),
+                                   counted))
         registers = client.call("read_registers", group="gpr")
         pair = (who_writes.register_value(registers,
                                           layout.ANIME_UNPACK_BASE)
@@ -1028,17 +1144,19 @@ def playing_frame(game, slot, frame, oracle, anime, data, entry):
             client.call("breakpoint", action="clear")
         except Exception:  # noqa: BLE001
             pass
-    return anime.frame_of_pair(data, entry, pair)
+    import screen as screen_module
 
-
-def game_silhouette(game, slot, frame, oracle, screen_table):
-    """The panel's mask at counted *frame*, from the native frame buffer."""
-    oracle.restore_state(slot, verbose=False)
-    game.load_looks(slot, label="shot-%d-%d" % (slot, frame))
-    game.step(frame)
-    frames, _boxes = oracle.screen_frames(game, screen_table["display"])
-    box = screen_table["regions"]["panel"]["native"]
-    return panel_mask(frames[0], box), box
+    # One frame, and it is what makes the picture a FINISHED one: stopped
+    # inside the draw, the buffer the dump would catch is the one being
+    # written, which holds part of this figure over part of the last -- more
+    # ink than either and matching neither.  Measured: two of six captures came
+    # back that way, at 2618 and 2726 pixels of ink against the 2376 to 2532 of
+    # the good ones, with a flat sweep.  Letting the frame finish costs about a
+    # third of a frame of the walk, which is inside `WALK_LAG`.
+    game.step(1)
+    frame = still_frame(game, table["display"], oracle, screen_module)
+    box = table["regions"]["panel"]["native"]
+    return (anime.frame_of_pair(data, entry, pair), panel_mask(frame, box))
 
 
 def our_silhouette(data, text, figure, frame, camera, size, centre):
@@ -1057,11 +1175,19 @@ def fit_centre(theirs, projected, size):
     and our places are relative to the root rather than to the game's world.
     Both fold into ONE translation, of about 170 pixels.
 
-    It is measured HERE, once, and then held still for every other comparison,
-    which is what keeps the rest predictions instead of fits.  *projected* is
+    Both fold into one translation of about 170 pixels.  *projected* is
     the UNCLIPPED box our points land in: a rasterised mask cannot be measured
     from, because with no translation the figure lands outside the picture
     entirely and the mask comes back empty.
+
+    **It is measured per comparison, which makes the comparison translation
+    free on purpose.**  One translation held across every comparison sounded
+    stricter and was worse: fitted on one pose and applied to a photograph of
+    another, it moved the whole figure and every candidate scored badly --
+    measured, the best match went from 13% of the ink to 72%.  What this
+    comparison judges is therefore SHAPE and SIZE, not where the figure sits in
+    the panel; where it sits is the GPU's draw offset, which nothing here
+    measures and which this says rather than implying.
     """
     import scene
 
@@ -1118,7 +1244,6 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
     print("  the panel is %dx%d native pixels, from screen.json" % size)
 
     problems = []
-    centre = None
     offsets = {}
     with oracle.Oracle(ready["cue"], verbose=verbose) as game:
         for slot in slots:
@@ -1129,10 +1254,18 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
             print("    the state shows %s, figure %d; H %d px"
                   % (text, figure, camera["projection"]["H"]))
 
-            theirs = {}
-            first, _box = game_silhouette(game, slot, frames[0], oracle, table)
-            again, _box = game_silhouette(game, slot, frames[0], oracle, table)
+            theirs, plays = {}, {}
+            named, first = game_at(game, slot, frames[0], oracle, anime,
+                                   data[layout.ANIME], entry, table)
+            twice, again = game_at(game, slot, frames[0], oracle, anime,
+                                   data[layout.ANIME], entry, table)
             apart = scene.masks_differ(first, again)
+            if named != twice:
+                problems.append(
+                    "slot %d: frame %d read ANIME frame %d once and %d the "
+                    "next time, so the run is not repeatable"
+                    % (slot, frames[0], named, twice))
+                continue
             if apart:
                 problems.append(
                     "slot %d: the panel at frame %d differs from itself in %d "
@@ -1141,10 +1274,11 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                 continue
             print("    control: frame %d captured twice, %d pixel(s) of ink, "
                   "identical" % (frames[0], sum(first)))
-            theirs[frames[0]] = first
+            theirs[frames[0]], plays[frames[0]] = first, named
             for counted in frames[1:]:
-                theirs[counted], _box = game_silhouette(game, slot, counted,
-                                                        oracle, table)
+                plays[counted], theirs[counted] = game_at(
+                    game, slot, counted, oracle, anime, data[layout.ANIME],
+                    entry, table)
             moved = {counted: scene.masks_differ(first, theirs[counted])
                      for counted in frames[1:]}
             if not any(moved.values()):
@@ -1158,44 +1292,75 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                      [moved[counted] for counted in frames[1:]]))
 
             for counted in frames:
-                named = playing_frame(game, slot, counted, oracle, anime,
-                                      data[layout.ANIME], entry)
+                named = plays[counted]
                 scores = {}
                 for step in range(-NEIGHBOURS, NEIGHBOURS + 1):
                     at = (named + step) % cycle
-                    if centre is None:
-                        drawn = scene.build(data, looks.parse_tuple(text),
-                                            figure, at)
-                        centre = fit_centre(theirs[counted],
-                                            scene.projected_box(drawn, camera),
-                                            size)
-                        print("    the one translation, measured HERE and held "
-                              "for every comparison after: (%.1f, %.1f) px"
-                              % centre)
+                    drawn = scene.build(data, looks.parse_tuple(text),
+                                        figure, at)
+                    centre = fit_centre(theirs[counted],
+                                        scene.projected_box(drawn, camera),
+                                        size)
                     ours = our_silhouette(data, text, figure, at, camera,
                                           size, centre)
                     scores[at] = scene.masks_differ(theirs[counted], ours)
                 best = min(scores, key=scores.get)
-                offsets[(slot, counted)] = (best - named) % cycle
-                print("    frame %-3d: the game's pair names ANIME frame %d; "
-                      "best match at %d (%+d of %d), %d pixel(s) apart of %d; "
-                      "the sweep %s"
-                      % (counted, named, best, (best - named) % cycle, cycle,
-                         scores[best],
-                         sum(theirs[counted]),
+                # The control of the whole comparison: our side drawn at the
+                # same frame with a hair the state does not have.  It has to
+                # score WORSE, or this is not seeing the mesh -- which is
+                # exactly what section 6 (h) says colour could not do.
+                wrong_text = swapped_style(text)
+                wrong_drawn = scene.build(data, looks.parse_tuple(wrong_text),
+                                          figure, best)
+                wrong = our_silhouette(
+                    data, wrong_text, figure, best, camera, size,
+                    fit_centre(theirs[counted],
+                               scene.projected_box(wrong_drawn, camera), size))
+                wrong_score = scene.masks_differ(theirs[counted], wrong)
+                behind = (named - best) % cycle
+                offsets[(slot, counted)] = behind
+                ink = sum(theirs[counted])
+                if behind > WALK_LAG:
+                    problems.append(
+                        "slot %d frame %d: the game's pair names walk frame %d "
+                        "and the picture matches frame %d, %d behind -- over "
+                        "the %d a one-frame lag can be"
+                        % (slot, counted, named, best, behind, WALK_LAG))
+                if scores[best] > ink * MATCH_SHARE:
+                    problems.append(
+                        "slot %d frame %d: the best silhouette is %d pixel(s) "
+                        "from the game's %d of ink (%.0f%%), over the %.0f%% a "
+                        "matching figure takes"
+                        % (slot, counted, scores[best], ink,
+                           100.0 * scores[best] / ink, 100.0 * MATCH_SHARE))
+                if wrong_score < scores[best] * STYLE_MARGIN:
+                    problems.append(
+                        "slot %d frame %d: %s scores %d and %s scores %d -- a "
+                        "style the state does not wear has to be at least "
+                        "%.1fx worse, or the silhouette is not seeing the mesh"
+                        % (slot, counted, text, scores[best], wrong_text,
+                           wrong_score, STYLE_MARGIN))
+                if scores[best] * MATCH_MARGIN > max(scores.values()):
+                    problems.append(
+                        "slot %d frame %d: the best of the sweep beats the "
+                        "worst by only %.1fx, under the %.1fx a real minimum "
+                        "takes -- a sweep with no minimum is not comparing "
+                        "figures"
+                        % (slot, counted,
+                           max(scores.values()) / float(scores[best] or 1),
+                           MATCH_MARGIN))
+                print("    frame %-3d: the game's pair names walk frame %d; "
+                      "best match at %d, %d frame(s) behind, %d pixel(s) apart "
+                      "of %d (%.0f%%); %s scores %d; the sweep %s"
+                      % (counted, named, best, behind, scores[best], ink,
+                         100.0 * scores[best] / ink, wrong_text, wrong_score,
                          ", ".join("%d:%d" % (at, scores[at])
                                    for at in sorted(scores))))
 
-    found = sorted(set(offsets.values()))
-    if len(found) > 1:
-        problems.append(
-            "the best-matching frame sits %s from the one the pair names, "
-            "depending on the capture -- one constant offset would be the "
-            "bridge, several are a coincidence: %r" % (found, offsets))
-    elif found:
-        print("  the best match sits %+d frame(s) from the one the game's own "
-              "pair names, the same in all %d comparison(s)"
-              % (found[0], len(offsets)))
+    if offsets:
+        print("  the picture trails the draw by %s frame(s) of the walk over "
+              "%d comparison(s), and the bound is %d"
+              % (sorted(set(offsets.values())), len(offsets), WALK_LAG))
     for line in problems:
         print("  FAIL  %s" % line)
     print("confront --silhouette: %d problem(s) over %d slot(s)"

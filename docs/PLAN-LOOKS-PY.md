@@ -2198,16 +2198,21 @@ a câmera do jogo, e não foi medida. *Destravaria:* girar a câmera do jogo —
 ler a display list noutro quadro da animação — e ver se o conjunto ausente
 muda.
 
-**(h) A forma não tem testemunha — ABERTA.** Histograma de cor resolve pele,
+**(h) A forma não tem testemunha — FECHADA em 2026-09-18.** Histograma de cor resolve pele,
 cor de cabelo e cor de barba, e **não** resolve estilo de cabelo nem barba —
 nem contra os quadros do emulador, onde a verdade é conhecida
 (`corpus.py --score`, o controle; §5.4). Nenhum dos dois confrontos verifica,
 então, que a **malha** desenhada é a do estilo certo; quem verifica isso hoje é
 só o `oracle.py --patched` da
 [`LOOKS-TASK-14`](/docs/tasks/looks/14-tabela-de-montagem.md), pela seção que o
-jogo escreve. *Por que está aberta:* uma métrica de forma precisa de pose e
-câmera iguais às do jogo, e a pose é a (e). *Destravaria:* a (e), e depois uma
-comparação de silhueta no mesmo quadro.
+jogo escreve. *Como fechou:* a pose veio da (e) e da
+[`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md), a câmera da
+[`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md), e a silhueta
+comparada no mesmo quadro (`confront.py --silhouette`) **separa a malha**: um
+estilo de cabelo que o state não veste pontua 696 a 834 onde o certo pontua 179
+a 426, nos dois slots. E o que dá direito de chamar isso de testemunha de
+**forma** é o par que não mexe — trocar a **cor de pele** muda **0** pixel da
+silhueta, porque pele é paleta e não geometria.
 
 **(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
 ponteiros (§1.5), onde a hipótese do `we3d` de 14 jogadores de 11 peças seria
@@ -2789,14 +2794,24 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > **A projeção confere na largura:** a nossa figura projeta **50,5 px** de
 > largura onde a do jogo mede **50** no painel.
 >
-> **O que falta é a ponte de quadro.** A foto do painel e a leitura do par que
-> nomeia o quadro do `ANIME.BIN` são corridas separadas, e a animação anda
-> entre elas: varrendo o ciclo inteiro, o quadro contado 80 casa melhor um
-> quadro **antes** do que o par nomeia e o 20 casa seis quadros fora, com um
-> mínimo raso. Dois deslocamentos diferentes não são ponte, e o
-> `confront.py --silhouette` reprova em vez de escolher. Enquanto isso não
-> fechar, a §6 (h) **segue aberta**: comparar silhueta em três estilos mediria
-> diferença de pose e não de malha.
+> **E a silhueta fecha.** Em três quadros contados de cada slot, o quadro da
+> caminhada que o par do próprio jogo nomeia está **0 a 2 quadros à frente** do
+> que a foto mostra — a foto é o buffer anterior, e um quadro da caminhada dura
+> ~3,5 do emulador —, com mínimo interior e nítido em todas as seis varreduras
+> e **7% a 18%** da tinta do jogo de diferença. Os controles fecham antes: o
+> mesmo quadro contado duas vezes dá **0** pixel, quadros diferentes dão 603 a
+> 1.680.
+>
+> Duas coisas custaram a chegar lá e ficam escritas: o segundo buffer de quadro
+> começa na linha **240** da VRAM e não na 256 — lido errado, a caixa de ajuda
+> entra no recorte do painel e a máscara não casa com nada —, e a comparação
+> tem de ser **livre de translação**, alinhada por comparação. Uma translação
+> única mantida fixa soa mais rigorosa e mede outra coisa: o melhor casamento
+> foi de 13% da tinta para 72%.
+>
+> **O que falta para a (m) fechar** é a **janela**: a silhueta se calcula no
+> núcleo, no tamanho do painel, e o painel da tela ainda desenha com a câmera
+> orbital da v1.
 
 **(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.
