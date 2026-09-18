@@ -3,7 +3,7 @@ id: CORR-LOOKS-060
 title: "Correção: \"todos os outros ficam abaixo de 2,3x\" — a corrida imprime 2,5x na cabeça do slot 2"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -85,17 +85,79 @@ existem.
 
 ## Verificação
 
-- [ ] `grep -rn "2,3x" docs/` não acha a afirmação
-- [ ] o número escrito é o que `oracle.py --poses` imprime como maior "outro"
-- [ ] `python tools/check_tasks.py` verde
-- [ ] `roms/` intocada
+- [x] `grep -rn "2,3x" docs/` não acha a afirmação
+- [x] o número escrito é o que `oracle.py --poses` imprime como maior "outro"
+- [x] `python tools/check_tasks.py` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `a12d753`: o `--poses` imprime `head … next torso at
+19.7 (2.5x)` no slot 2, e quatro documentos afirmavam que todos os outros ficam
+abaixo de **2,3x**.
 
-**Arquivos criados/modificados:**
+**A conferência mostrou mais do que a CORR previa, e o número sozinho não
+bastava.** No slot 1 a linha da `head` diz **3,3x** — e ela não é um "outro":
+é o par raiz↔cabeça visto do outro lado, o mesmo que a linha da `root` mede em
+14,5x. Trocar 2,3 por 2,5 deixaria a frase falsa de novo, agora pelo slot 1.
+
+Por isso a frase passou a delimitar o conjunto: **nenhuma linha fora dos cinco
+pares passa de 2,5x** — 2,2x no slot 1, 2,5x no slot 2, na cabeça, cuja melhor
+candidata própria é o tronco enquanto o par verdadeiro a nomeia do lado da
+raiz. A folga do veredito fica dita como ela é: **4,6x contra 2,5x**.
+
+Corrigido nos quatro lugares, cada um com a data e o que dizia antes: §10.3 (k)
+do plano, armadilha 48 do perfil, critério de conclusão e Log da LOOKS-TASK-25,
+mais a linha da Fase 9 do `progresso.md`, que a CORR não listava e repetia a
+mesma frase.
+
+### Gates
+
+```text
+$ python tools/looks/oracle.py --poses            # 2026-09-18, os dois slots
+  -- slot 1 (goalkeeper) --
+      head          child of root    spread  6.3, next torso at 20.6 (3.3x)
+      thigh a       no parent        spread 25.0, next forearm b at 55.7 (2.2x)
+      ... (as outras cinco linhas fora dos pares: 1,1x a 1,7x)
+  -- slot 2 (outfield player) --
+      head          no parent        spread  7.9, next torso at 19.7 (2.5x)
+      ... (as outras seis: 1,1x a 1,8x)
+oracle --pose: 0 problem(s) over 8 frame(s) and 2 slot(s)
+```
+
+As cinco separações reproduzem número a número — 14,5x/14,6x, 10,5x/9,2x,
+9,9x/12,8x, 5,3x/4,9x e 5,0x/4,6x.
+
+```text
+$ grep -rn "2,3x" docs tools
+docs/PLAN-LOOKS-PY.md:2643      # o registro datado
+docs/prompts/perfil-looks.md:443 # idem
+                                 # mais a tabela de correções, que nomeia o erro
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+$ python tools/looks/selftest.py --quiet
+  ..... 78 of 78 controls red
+looks_selftest: 0 failure(s)
+```
+
+`roms/` intocada (leitura pura); os dois states só carregados; nenhum
+DuckStation de pé no fim. As capturas de pose caem em `work/looks-pose/`, em
+JSON de alguns KB — nenhuma cópia de imagem.
+
+### Problemas encontrados
+
+- A CORR aponta a armadilha **45** do perfil; ela é a **48** hoje — o arquivo
+  ganhou três armadilhas entre a revisão e esta execução. Achada pelo texto,
+  não pelo número.
+
+### Arquivos criados/modificados
+
+- `docs/PLAN-LOOKS-PY.md` §10.3 (k)
+- `docs/prompts/perfil-looks.md` — armadilha 48
+- `docs/tasks/looks/25-a-pose-de-referencia.md` — critério e Log
+- `docs/tasks/looks/progresso.md` — a linha da Fase 9
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

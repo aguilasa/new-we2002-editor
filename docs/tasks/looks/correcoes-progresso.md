@@ -75,7 +75,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-057](/docs/tasks/looks/CORR-LOOKS-057.md) | [LOOKS-TASK-23](/docs/tasks/looks/23-default-por-nacionalidade.md) | O docstring do `layout.PLAYER_NATION` ensina a regra `código = índice − 1` que a própria task desmentiu | Média | [x] concluída | 2026-09-17 |
 | [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [ ] pendente | — |
+| [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -149,7 +149,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-057 — a regra errada do código de nação sobrevive no `layout.py`
 - [x] CORR-LOOKS-058 — 18 e 17 no módulo, 18 e 18 em toda corrida
 - [x] CORR-LOOKS-059 — a base errada não é a que a regra responde, é a que sobra dela
-- [ ] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
+- [x] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
 
 ## Detalhes por correção
 

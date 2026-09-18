@@ -258,7 +258,7 @@ enquanto a Fase 3 mede textura não custa nada e destrava duas tasks adiante.
 ### Fase 9 — montado (v2)
 
 - [x] A fonte da pose medida: é o `ANIME.BIN`, na RAM byte a byte, com a entrada 5 do cabeçalho, a lista de quadros que dá a volta, os ângulos empacotados e as duas instruções que carregam o GTE — `oracle.py --pose`.
-- [x] A pose de referência capturada num quadro contado, repetível, com a hierarquia medida — `oracle.py --pose <SLOT> <N>`: 12 cargas por passada nos dois slots, a matriz e a translação de cada peça lidas da struct que o jogo copia para o GTE, a captura repetida como controle antes de qualquer número, e a matriz medida **absoluta** (a câmera composta com a volta da peça). A hierarquia: cinco juntas se separam por 4,6x a 14,6x e o resto fica abaixo de 2,3x — o esqueleto do jogo não é rígido, e o leitor não compõe.
+- [x] A pose de referência capturada num quadro contado, repetível, com a hierarquia medida — `oracle.py --pose <SLOT> <N>`: 12 cargas por passada nos dois slots, a matriz e a translação de cada peça lidas da struct que o jogo copia para o GTE, a captura repetida como controle antes de qualquer número, e a matriz medida **absoluta** (a câmera composta com a volta da peça). A hierarquia: cinco juntas se separam por 4,6x a 14,6x e nenhuma linha fora delas passa de 2,5x — o esqueleto do jogo não é rígido, e o leitor não compõe.
 - [ ] O `anime.py` reproduz as matrizes do jogo exatamente, e a varredura fecha no EOF.
 - [ ] O painel mostra o boneco montado, e a silhueta concorda com a do emulador com a câmera do jogo.
 - [ ] `HEIG` e `BODY` mudam o desenho como mudam no jogo.

@@ -439,7 +439,10 @@ Não se revertem sem o usuário pedir.
     consecutivos mexem tão pouco no boneco que toda peça parece grudada em toda
     peça — a melhor mãe ganha da segunda por 1,0x a 8,6x, o que não nomeia
     nada. Com oito quadros espalhados por 140, as juntas verdadeiras vão a
-    4,6x-14,6x e o resto fica abaixo de 2,3x. E **distância entre peças não
+    4,6x-14,6x e nenhuma linha fora dos cinco pares passa de **2,5x** — dizia
+    2,3x até 2026-09-18
+    ([`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)), que é o teto do
+    slot 1; o slot 2 imprime 2,5x na cabeça. E **distância entre peças não
     mede osso**: a câmera escala `y` por 0,61 e `x`/`z` por 0,80, então
     `|t_filha − t_mãe|` varia 25% com a peça girando, sem osso nenhum esticar —
     quem desfaz a câmera é `M_mãe⁻¹`.

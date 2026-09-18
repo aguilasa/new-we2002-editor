@@ -2636,8 +2636,14 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 >   se há junta e balança se não há. **Cinco pares se separam nos dois slots** —
 >   raiz↔cabeça (14,5x e 14,6x), canela a↔coxa a (10,5x e 9,2x), canela b↔coxa b
 >   (9,9x e 12,8x), braço a↔tronco (5,3x e 4,9x) e braço b↔antebraço a (5,0x e
->   4,6x) —, e **todos os outros ficam abaixo de 2,3x**, o que é dizer que não
->   se separam. **O esqueleto do jogo não é rígido**: os pés, os antebraços
+>   4,6x) —, e **nenhuma linha fora desses cinco pares passa de 2,5x** (2,2x no
+>   slot 1; 2,5x no slot 2, a cabeça, cuja melhor candidata própria é o tronco
+>   enquanto o par verdadeiro a nomeia do lado da raiz), o que é dizer que não
+>   se separam. A folga é de **4,6x contra 2,5x**. Esta frase dizia
+>   *"todos os outros ficam abaixo de 2,3x"* até 2026-09-18
+>   ([`CORR-LOOKS-060`](/docs/tasks/looks/CORR-LOOKS-060.md)): 2,3x é o teto do
+>   slot 1 lido como se fosse dos dois, e o `--poses` imprime 2,5x no slot 2
+>   desde a primeira corrida. **O esqueleto do jogo não é rígido**: os pés, os antebraços
 >   restantes, as coxas e o tronco não ficam a distância fixa de candidato
 >   nenhum. Isso é resultado, e é justamente por isso que o leitor não compõe.
 > - **`y` cresce para baixo**, como o `UP = -1` do `scene.py` já supunha: a
