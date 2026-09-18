@@ -80,7 +80,7 @@ entrada do cabeçalho nomeia, e devolve, para a animação da tela e um quadro,
       `layout.ANIME_SCREEN_ENTRY = 5`, do watchpoint de leitura sobre as 204
       entradas de uma vez (LOOKS-TASK-24), e não do tamanho do bloco.
 - [x] **As matrizes do quadro N da [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md) reproduzidas exatamente**, nas onze
-      peças e na cabeça, nos dois slots: **90 das 96 peças capturadas saem
+      peças e na cabeça, nos dois slots: **90 das 96 peças julgadas saem
       exatas, entrada por entrada**, e as **6** restantes não são erro do
       leitor — são matrizes que o **jogo mistura**, provadas por varredura de
       todos os pares do arquivo (nenhum as reproduz). Sete dos oito passes
@@ -113,11 +113,14 @@ animação nomeia está certo para o jogador de linha e **errado para o goleiro*
 — metade das peças não casava com nada em 3.952 quadros, e a conclusão pronta
 era *"o jogo interpola metade dos quadros"*, que chegou a ser escrita no plano
 e encaminhada para a task 32. A ponte que vale é o **ponteiro que o jogo está
-lendo** (`s0` em `0x80011D48`): com ela, **96 de 96**.
+lendo** (`s0` em `0x80011D48`): com ela, **96 de 96** — das **192**
+capturadas, porque oito das dezesseis capturas não pararam no
+desempacotamento e são postas de lado, o que o comando passou a imprimir
+na [`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md).
 
 A segunda é a **ordem dos deslocamentos**. A `RotMatrix` do jogo roda três
 `gpf sf` do GTE e desloca doze a cada passo; escrita assim, ela reproduz
-**90 das 96** matrizes **entrada por entrada**. Escrita com um deslocamento só
+**90 das 96** matrizes julgadas **entrada por entrada** (de 192 capturadas). Escrita com um deslocamento só
 no fim — que é a mesma álgebra — erra por **uma** unidade em dois terços das
 peças. Uma unidade de 4.096 não aparece em desenho nenhum e reprova toda
 comparação exata.

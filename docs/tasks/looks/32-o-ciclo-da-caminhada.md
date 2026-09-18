@@ -25,7 +25,8 @@ status: pendente
 
 - **O jogo MISTURA matrizes, e medir isso é desta task.** Medido em 2026-09-18
   pela [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md), sobre
-  96 peças desenhadas nos dois slots:
+  96 peças julgadas (de 192 capturadas — oito capturas não param no
+  desempacotamento) nos dois slots:
   - **os ângulos vêm sempre do arquivo** — 96 de 96, inteiro por inteiro, no
     par que o jogo está lendo. Uma versão anterior desta linha dizia que
     metade dos quadros era construída, e aquilo era artefato da ponte errada

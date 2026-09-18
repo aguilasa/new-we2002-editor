@@ -434,6 +434,28 @@ def _checks(c) -> None:
     attempt("a frame index the animation does not have is refused", BadAnime,
             lambda: pose(made, 0, 9))
 
+    # -- what the run leaves out, and saying so (CORR-LOOKS-061) ------------
+    def capture(slot, frame, paired):
+        return {"slot": slot, "frame": frame, "unpacked": 12 if paired else 0,
+                "pieces": [{"piece": "head", "pair": 3 if paired else None}]}
+
+    made_captures = [capture(1, 0, True), capture(1, 40, False),
+                     capture(2, 0, True), capture(2, 40, False)]
+    judged, aside = split_captures(made_captures)
+    ok("a capture with no pair on any piece is set aside, not judged",
+       [capture_name(one) for one in judged] == ["slot1-frame0", "slot2-frame0"]
+       and [capture_name(one) for one in aside] == ["slot1-frame40",
+                                                    "slot2-frame40"],
+       "%r / %r" % (judged, aside))
+    ok("the floor sits under the measured half, so half judged passes",
+       len(judged) >= JUDGED_FLOOR * len(made_captures))
+    thin = [capture(1, 0, True)] + [capture(1, n, False)
+                                    for n in range(1, 16)]
+    ok("and the run the floor exists for -- one capture carrying the verdict "
+       "-- falls under it",
+       len(split_captures(thin)[0]) == 1
+       and len(split_captures(thin)[0]) < JUDGED_FLOOR * len(thin))
+
     # -- membership in the image gate ---------------------------------------
     import cli
 
@@ -567,6 +589,37 @@ def _pairs_by_position(data: bytes) -> list:
     return index
 
 
+JUDGED_FLOOR = 1.0 / 3.0
+"""The share of captures that has to carry a pair for a run to mean anything.
+
+A capture whose pass never stopped at the unpack routine has no pair beside any
+piece, and the angles in it are whatever the scratchpad still held -- they are
+NOT what that frame drew, so judging them would measure the leftovers.  Setting
+them aside is right; doing it in silence is not, and until CORR-LOOKS-061 half
+the captures left the run without a line saying so.
+
+Measured on 2026-09-18, twice: **8 of 16** captures carry pairs, the same eight
+frames both times.  The floor sits at a third, well under the measured half,
+because a floor written AT the measurement turns ordinary variation into a red
+(trap 49 of the profile).  What it has to catch is the run where the stop moves
+and one or two captures carry the whole verdict.
+"""
+
+
+def split_captures(records: list) -> tuple:
+    """(judged, set aside): a capture with no pair on any piece is set aside."""
+    judged, aside = [], []
+    for one in records:
+        paired = sum(1 for piece in one["pieces"]
+                     if piece.get("pair") is not None)
+        (judged if paired else aside).append(one)
+    return judged, aside
+
+
+def capture_name(one: dict) -> str:
+    return "slot%s-frame%s" % (one.get("slot"), one.get("frame"))
+
+
 def _load_captures(directory: str) -> list:
     import json
     import os
@@ -590,9 +643,8 @@ def _against_pose(image_path: str, directory: str) -> int:
         print("anime --against-pose: skipped -- no captures in %s; run "
               "oracle.py --poses first" % directory)
         return 77
-    captures = [one for one in _load_captures(directory)
-                if any(piece.get("pair") is not None
-                       for piece in one["pieces"])]
+    records = _load_captures(directory)
+    captures, aside = split_captures(records)
     if not captures:
         print("anime --against-pose: skipped -- %s holds no capture with the "
               "pair beside each piece" % directory)
@@ -600,8 +652,14 @@ def _against_pose(image_path: str, directory: str) -> int:
     with iso_source.open_disc(image_path) as disc:
         data = read(disc)
     found = against_pose(data, captures)
-    print("  %d capture(s), %d piece(s) drawn" % (found["captures"],
-                                                  found["pieces"]))
+    print("  %d of %d capture(s) judged, %d piece(s) of %d drawn"
+          % (len(captures), len(records), found["pieces"],
+             sum(len(one["pieces"]) for one in records)))
+    if aside:
+        print("  %d set aside -- the pass never stopped at the unpack, so the "
+              "angles beside each piece are the scratchpad's, not that "
+              "frame's: %s" % (len(aside),
+                               ", ".join(capture_name(one) for one in aside)))
     print("  %d of %d carry the angles the file holds at the pair the game "
           "read, integer for integer" % (found["exact"], found["pieces"]))
     print("  %d piece(s) drew before any unpack stop, so no pair names them"
@@ -610,6 +668,13 @@ def _against_pose(image_path: str, directory: str) -> int:
           "are neither" % (found["matrix_exact"], found["exact"],
                            found["blended"], len(found["off"])))
     failures = 0
+    if len(captures) < JUDGED_FLOOR * len(records):
+        print("  FAIL  only %d of %d capture(s) carry a pair, under the %.0f%% "
+              "this run needs to mean anything -- the unpack stop moved, and "
+              "a verdict drawn from what is left describes those frames, not "
+              "the animation"
+              % (len(captures), len(records), JUDGED_FLOOR * 100))
+        failures += 1
     if found["wrong"]:
         print("  FAIL  %d piece(s) carry angles the pair does not hold -- the "
               "decode is wrong, not the game" % found["wrong"])

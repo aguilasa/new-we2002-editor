@@ -2717,7 +2717,13 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > - a ponte que vale é o **ponteiro que o jogo está lendo**: `s0` na instrução
 >   `0x80011D48` (`layout.ANIME_UNPACK`), que anda o arquivo de oito em oito,
 >   um par por peça, nos dois slots. Com ela, **96 de 96 peças trazem os
->   ângulos que o par guarda, inteiro por inteiro**;
+>   ângulos que o par guarda, inteiro por inteiro** — 96 das **192**
+>   capturadas, porque oito das dezesseis capturas são postas de lado: a
+>   passada delas não parou no desempacotamento, e o que está gravado ali é
+>   o scratchpad anterior, não o que aquele quadro desenhou. O
+>   `--against-pose` imprime as duas contas e **reprova** se menos de um
+>   terço das capturas carregar par
+>   ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md));
 > - e **dez variantes de desempacotamento** dividem o mesmo dispatch
 >   (`0x80011DA0`): a peça que toma outra não para na instrução vigiada, e
 >   herdar o par da peça anterior nomeia bytes errados com cara de certo.
@@ -2726,7 +2732,8 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > `RotMatrix` do jogo (`0x8003D4BC`) carrega seis entradas da tabela, roda três
 > `gpf sf` — a interpolação do GTE, `IRn = (IR0 × IRn) >> 12` — e monta as nove
 > meias-palavras deslocando doze a cada passo. Escrita assim, ela reproduz
-> **90 das 96** matrizes capturadas **entrada por entrada**; escrita com um
+> **90 das 96** matrizes julgadas **entrada por entrada** (das 192
+> capturadas; ver a nota das oito postas de lado acima); escrita com um
 > deslocamento só no fim, ou com a composição em outra ordem, erra por **uma**
 > unidade em dois terços das peças (5 de 13 exatas). Uma unidade de 4.096 é
 > invisível no desenho e total na comparação.

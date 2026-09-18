@@ -76,7 +76,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-058](/docs/tasks/looks/CORR-LOOKS-058.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [ ] pendente | — |
+| [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [x] concluída | 2026-09-18 |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -151,7 +151,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-058 — 18 e 17 no módulo, 18 e 18 em toda corrida
 - [x] CORR-LOOKS-059 — a base errada não é a que a regra responde, é a que sobra dela
 - [x] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
-- [ ] CORR-LOOKS-061 — oito capturas entram, oito somem, e a linha diz oito
+- [x] CORR-LOOKS-061 — oito capturas entram, oito somem, e a linha diz oito
 
 ## Detalhes por correção
 

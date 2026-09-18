@@ -4062,9 +4062,14 @@ def capture_pose(game, slot, frame, maps, names):
     game.step(frame)
     drawn = _pose_cycle(game, maps, names)
     camera = _camera_matrix(game)
+    # Said here rather than inferred from the absence of `pair`: on a pass
+    # where the game never stopped at the unpack, the angles beside each piece
+    # are what the scratchpad still held, and whoever reads this file has to
+    # know that before counting anything (CORR-LOOKS-061).
+    paired = sum(1 for piece in drawn if piece.get("pair") is not None)
     return {"slot": slot, "state": SLOTS[slot], "frame": frame,
             "camera": camera, "animation": _animation_now(game),
-            "pieces": drawn}
+            "unpacked": paired, "pieces": drawn}
 
 
 def _animation_now(game):

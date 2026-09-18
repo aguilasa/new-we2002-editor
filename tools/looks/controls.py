@@ -727,6 +727,16 @@ CONTROLS = (
         "shows and every exact comparison does",
     ),
     Control(
+        "anime-keeps-the-scratchpad-captures", "anime.py", "split_captures",
+        "        (judged if paired else aside).append(one)",
+        "        judged.append(one)",
+        ("anime",),
+        "the captures whose pass never stopped at the unpack judged along with "
+        "the rest: their angles are whatever the scratchpad still held, so the "
+        "comparison would be measuring leftovers and calling it the animation "
+        "(CORR-LOOKS-061)",
+    ),
+    Control(
         "oracle-pose-drops-the-second-draw-of-a-section", "oracle.py",
         "_named_pass",
         '        one["id"] = name if seen[name] == 1 else "%s #%d" % (name, seen[name])',

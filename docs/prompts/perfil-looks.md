@@ -490,7 +490,13 @@ Não se revertem sem o usuário pedir.
     interpola metade dos quadros"* —, e chegou a ser escrito no plano e
     encaminhado para a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md)
     antes de ser remedido no mesmo dia. A ponte que vale é o registrador que a
-    instrução de leitura usa (`layout.ANIME_UNPACK`): com ele, **96 de 96**.
+    instrução de leitura usa (`layout.ANIME_UNPACK`): com ele, **96 de 96** —
+    das **192** capturadas, porque oito das dezesseis capturas não param no
+    desempacotamento e são postas de lado, com os ângulos do scratchpad
+    anterior. O `--against-pose` imprime as duas contas desde a
+    [`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md), e reprova se
+    menos de um terço das capturas carregar par: **gate que escolhe sozinho
+    o que não vai medir tem de dizer quanto deixou de fora.**
     Medido em 2026-09-18
     ([`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)).
 55. **Dez variantes dividem um dispatch, e vigiar uma delas é vigiar um
@@ -590,7 +596,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
-| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |

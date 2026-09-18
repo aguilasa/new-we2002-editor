@@ -3,7 +3,7 @@ id: CORR-LOOKS-061
 title: "Correção: o `--against-pose` descarta metade das capturas sem dizer, e o \"96 de 96\" se lê como cobertura inteira"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -121,20 +121,95 @@ Onde está "96 de 96" e "90 das 96", dizer de quantas capturadas: 96 peças **de
 
 ## Verificação
 
-- [ ] `anime.py --against-pose` imprime quantas capturas julgou **e** quantas
+- [x] `anime.py --against-pose` imprime quantas capturas julgou **e** quantas
       pôs de lado, com o motivo
-- [ ] um número de descartadas fora do esperado **reprova**
-- [ ] os documentos dizem 96 de 192, não 96 de 96
-- [ ] `python tools/looks/selftest.py --quiet` verde, com controle plantado
+- [x] um número de descartadas fora do esperado **reprova**
+- [x] os documentos dizem 96 de 192, não 96 de 96
+- [x] `python tools/looks/selftest.py --quiet` verde, com controle plantado
       para o descarte silencioso
-- [ ] `roms/` intocada
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `08ac05f`: `work/looks-pose/` tem **16** capturas, oito
+sem par em peça nenhuma, e o `--against-pose` dizia `8 capture(s), 96 piece(s)
+drawn` sem uma linha sobre as outras oito.
 
-**Arquivos criados/modificados:**
+- **`anime.py`** — o filtro virou `split_captures()`, que devolve as julgadas e
+  as postas de lado; o comando imprime `8 of 16 capture(s) judged, 96 piece(s)
+  of 192 drawn`, a linha das postas de lado **com o motivo e os nomes**, e
+  **reprova** se menos de `JUDGED_FLOOR` (um terço) das capturas carregar par.
+  Três casos novos no `self_check()`.
+- **`oracle.py`** — a captura grava `"unpacked": <peças com par>`, para o
+  consumidor não ter de inferir da ausência. Os 16 arquivos recapturados hoje
+  trazem o campo.
+- **Plano §10.3 (l), perfil (armadilha 54 e a linha do gate), LOOKS-TASK-26,
+  LOOKS-TASK-32 e a linha da Fase 9 do `progresso.md`** — onde se lia "96 de
+  96" e "90 das 96", agora se lê de quantas capturadas: **96 de 192**, com as
+  oito postas de lado ditas.
+
+**Sobre o piso.** O medido é metade (8 de 16, três corridas: as duas da task e
+a de hoje, sempre os mesmos oito quadros). O piso ficou em **um terço**, abaixo
+do medido de propósito — a armadilha 49 do próprio perfil diz que limiar
+escrito no valor medido transforma variação normal em vermelho. O que ele tem
+de pegar é a corrida em que a parada se move e uma ou duas capturas carregam o
+veredito inteiro; 15 de 16 fora reprova.
+
+### Gates
+
+```text
+$ python tools/looks/oracle.py --poses            # recaptura, 2026-09-18
+oracle --pose: 0 problem(s) over 8 frame(s) and 2 slot(s)
+$ python -c "... campo unpacked"
+capturas com campo unpacked: 16 de 16
+unpacked=0: slot1-frame40/60/100/120, slot2-frame40/60/120/140
+
+$ python tools/looks/anime.py --against-pose
+  8 of 16 capture(s) judged, 96 piece(s) of 192 drawn
+  8 set aside -- the pass never stopped at the unpack, so the angles beside
+  each piece are the scratchpad's, not that frame's: slot1-frame100,
+  slot1-frame120, slot1-frame40, slot1-frame60, slot2-frame120,
+  slot2-frame140, slot2-frame40, slot2-frame60
+  96 of 96 carry the angles the file holds at the pair the game read, integer
+  for integer
+  0 piece(s) drew before any unpack stop, so no pair names them
+  90 matrices of 96 are EXACT, 6 are blends the game made, and 0 are neither
+anime --against-pose: 0 failure(s)
+
+$ python tools/looks/anime.py --check
+anime.py: 0 failure(s)
+$ python tools/looks/controls.py --only anime-keeps-the-scratchpad-captures
+  RED    anime-keeps-the-scratchpad-captures anime.py :: split_captures
+$ python tools/looks/selftest.py --quiet
+  ..... 82 of 82 controls red
+looks_selftest: 0 failure(s)
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+As oito postas de lado são **as mesmas** nas três corridas que existem, e os
+números do veredito (96/96, 90 exatas, 6 misturas) não mudaram — o que mudou é
+a corrida dizer de quanto ela partiu.
+
+`roms/` intocada (leitura pura); os dois states só carregados; nenhum
+DuckStation de pé no fim; as capturas são JSON de alguns KB em
+`work/looks-pose/`.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `tools/looks/anime.py` — `JUDGED_FLOOR`, `split_captures`, `capture_name`, o
+  relatório e a reprovação, mais três casos no `self_check()`
+- `tools/looks/oracle.py` — o campo `unpacked` na captura
+- `tools/looks/controls.py` — `anime-keeps-the-scratchpad-captures`
+- `docs/PLAN-LOOKS-PY.md` §10.3 (l), `docs/prompts/perfil-looks.md`
+  (armadilha 54 e a linha do gate), `docs/tasks/looks/26-o-formato-do-anime-bin.md`,
+  `docs/tasks/looks/32-o-ciclo-da-caminhada.md`, `docs/tasks/looks/progresso.md`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist
