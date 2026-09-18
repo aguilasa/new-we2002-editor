@@ -78,7 +78,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-062](/docs/tasks/looks/CORR-LOOKS-062.md) | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | A segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso | Média | [x] concluída | 2026-09-18 |
-| [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | O `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | Alta | [ ] pendente | — |
+| [CORR-LOOKS-063](/docs/tasks/looks/CORR-LOOKS-063.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | O `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o "estilo trocado discorda" não é asserção | Alta | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-064](/docs/tasks/looks/CORR-LOOKS-064.md) | [LOOKS-TASK-28](/docs/tasks/looks/28-a-camera-do-jogo.md) | "603 a 1.680" e "1,4x a 4,4x" não são o que as corridas imprimem, e três textos ainda dizem o que a quinta sessão desmentiu | Baixa | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
@@ -156,7 +156,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
 - [x] CORR-LOOKS-061 — oito capturas entram, oito somem, e a linha diz oito
 - [x] CORR-LOOKS-062 — o pé que a task ia medir saiu espelhado, e a asserção que o cobriria é vazia
-- [ ] CORR-LOOKS-063 — o gate dos estilos no close-up não tem controle nem margem
+- [x] CORR-LOOKS-063 — o gate dos estilos no close-up não tem controle nem margem
 - [ ] CORR-LOOKS-064 — os números e a prosa da LOOKS-TASK-28 ficaram atrás das próprias corridas
 
 ## Detalhes por correção
