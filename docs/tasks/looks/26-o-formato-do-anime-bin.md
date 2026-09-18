@@ -40,6 +40,20 @@ status: pendente
     que está são ângulos empacotados, e a matriz é calculada deles.
 - **O gabarito é a [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md).** Matriz de determinante 1 e boneco em pé é
   plausível, não certo.
+- **Ela existe desde 2026-09-18**, em `work/looks-pose/slot<S>-frame<N>.json`,
+  gravada por `oracle.py --pose <SLOT> <N> [N ...]`, e o que ela obriga:
+  - **o que o jogo carrega por peça é ABSOLUTO** — a câmera já composta com a
+    volta da peça (`M x Mt = C x Ct`, medido) —, então reproduzir o gabarito
+    exige saber **a câmera daquele quadro**, que está no mesmo JSON (`camera`),
+    e não só os ângulos do arquivo. Comparar a matriz crua do `ANIME.BIN`
+    contra o JSON sem compor a câmera dá diferença em tudo e não é achado;
+  - **são 12 cargas por passada, não 11**: as onze peças da figura mais uma
+    raiz sem ponteiro de modelo;
+  - **a comparação é exata** — meias-palavras 4.12 —, e o formato da struct do
+    jogo é 9 rotações, 2 bytes de enchimento, 3 translações de 32 bits;
+  - **o quadro N é contado a partir do `load_state`**, e duas capturas do mesmo
+    N são idênticas número a número: é o controle do gabarito, e o leitor se
+    mede contra ele no mesmo N.
 - **As regras da Fase 1 valem inteiras:** endereço só no `layout.py`; contagem
   com o offset de partida; varredura que não chega ao EOF é errada; módulo novo
   com `self_check()` e caso vermelho.

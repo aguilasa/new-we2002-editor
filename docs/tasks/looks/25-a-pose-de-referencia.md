@@ -6,7 +6,7 @@ category: oráculo
 phase: 9
 depends_on: ["LOOKS-TASK-24"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (k)"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-25: A pose de referência
@@ -50,20 +50,90 @@ cabeça —, e dizer qual peça é filha de qual.
 
 ## Critério de conclusão
 
-- [ ] `oracle.py --pose <SLOT> <N>` grava em `work/looks-pose/` um JSON por
+- [x] `oracle.py --pose <SLOT> <N>` grava em `work/looks-pose/` um JSON por
       quadro, com matriz e translação **inteiras** de cada peça, a peça nomeada
-      pelo `pieces.py` e o N ao lado.
-- [ ] **Repetível:** duas capturas do mesmo N idênticas número a número; e
+      pelo `pieces.py` e o N ao lado. `--poses` roda os dois slots e os oito
+      quadros de `oracle.POSE_CAPTURE_FRAMES` de uma vez.
+- [x] **Repetível:** duas capturas do mesmo N idênticas número a número; e
       dois N diferentes, diferentes — sem isso a captura pode ler uma
-      constante.
-- [ ] A hierarquia medida, com a evidência.
-- [ ] A convenção escrita: ordem de aplicação, escala 4.12, e o sinal de `y`
-      contra o `UP = -1` do `scene.py`.
-- [ ] Os dois slots.
-- [ ] §10.3 (k) com o veredito e a data.
+      constante. O controle fecha **antes** de qualquer outro número ser lido,
+      e a segunda conferência é do próprio comando (`reading a constant`).
+- [x] A hierarquia medida, com a evidência. **E o resultado é que ela não é
+      rígida:** cinco pares se separam por 4,6x a 14,6x nos dois slots e todos
+      os outros ficam abaixo de 2,3x. O leitor não compõe hierarquia — o que
+      chega ao GTE por peça já é absoluto.
+- [x] A convenção escrita: ordem de aplicação, escala 4.12, e o sinal de `y`
+      contra o `UP = -1` do `scene.py`. Medido: `y` cresce para baixo, a
+      composição é câmera × volta da peça (`M x Mt = C x Ct`, pior caso
+      0,0071 contra 0,99 de uma matriz que não é composta assim), e nenhuma
+      matriz tem determinante negativo.
+- [x] Os dois slots.
+- [x] §10.3 (k) com o veredito e a data.
 
 ---
 
 ## Log de Execução
 
-*(preencher ao executar)*
+**Executado em:** 2026-09-18
+
+**Resumo do que foi aprendido**
+
+A pose por peça **é absoluta**: `layout.POSE_PIECE_MATRIX` entrega, para cada
+peça desenhada, a câmera já composta com a volta daquela peça, e um leitor
+nosso reproduz doze transformações prontas em vez de compor uma hierarquia.
+As duas cargas que a [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md)
+contou como "duas instruções" **não são do mesmo tipo**: a primeira
+(`POSE_MATRIX`) repete a mesma rotação em toda parada da passada enquanto a
+translação anda pelas peças — é a câmera —, e ler a pose dela daria doze peças
+com a mesma orientação. A hierarquia, medida pelo quadro da mãe, separa **cinco
+pares** e mais nada: o esqueleto do jogo não é rígido, e isso é resultado, não
+lacuna.
+
+**Arquivos criados/modificados**
+
+- `tools/looks/oracle.py` — a captura (`capture_pose`, `_pose_cycle`,
+  `_repeating_period`, `_named_pass`, `_camera_matrix`, `_matrix_struct`,
+  `piece_names`, `_drawn_section`, `write_pose`), a leitura dos números
+  (`matrix_deviation`, `joint_offset`, `hierarchy`, `_multiply`, `_transpose`,
+  `_determinant`, `_inverse`), a medição de seção lida (`_sections_read`,
+  `_section_addresses`), o comando `check_pose_frames` e os self-checks novos
+- `tools/looks/layout.py` — `POSE_PIECE_MATRIX`, `POSE_PIECE_MATRIX_BASE` e
+  `POSE_MATRIX_BASE`, e o `POSE_MATRIX` corrigido sobre qual carga é qual
+- `tools/looks/controls.py` — três controles plantados novos (78 de 78)
+- `docs/PLAN-LOOKS-PY.md` — §10.3 (k) com o veredito e a data
+- `docs/tasks/looks/26-o-formato-do-anime-bin.md` e
+  `docs/tasks/looks/27-o-boneco-montado.md` — o que esta task lhes deixa
+- `docs/prompts/perfil-looks.md` — a linha de gate e as armadilhas 45 a 47
+- `docs/tasks/looks/progresso.md` — a linha e o checklist da Fase 9
+- `CLAUDE.md` — a seção do ciclo, que envelhece com ele
+
+**Problemas encontrados**
+
+1. **A rotação de `POSE_MATRIX` é a mesma para as doze peças, e quase virou "a
+   pose".** Só a translação anda. O que separou as duas cargas foi olhar a
+   rotação peça a peça em vez de aceitar a primeira que dispara.
+2. **O contador de quadros vira no MEIO da passada.** Cortar a passada pelo
+   `internal_frame_number` entregou **cinco** peças na primeira captura e doze
+   na seguinte, sem erro nenhum. Quem fecha a passada é a sequência se
+   repetindo.
+3. **Dez quadros seguidos não nomeiam hierarquia nenhuma.** O boneco se mexe
+   tão pouco entre quadros vizinhos que toda peça parece grudada em toda peça:
+   1,0x a 8,6x. Espalhando os oito quadros por 140, as juntas verdadeiras vão a
+   4,6x-14,6x e o resto fica abaixo de 2,3x.
+4. **Distância entre peças pareceu osso elástico, e era a câmera.** A câmera
+   escala `y` por 0,61 e `x`/`z` por 0,80, então `|t_filha − t_mãe|` varia 25%
+   com a peça girando. A conclusão "nenhum osso é rígido" chegou a ser escrita
+   por esse caminho antes de o `M_mãe⁻¹` desfazer a câmera.
+5. **Watchpoints de seção armados juntos leram silêncio que não existia.** O
+   emulador para no primeiro acerto e fica lá, então a seção desenhada tomou as
+   quatro paradas e a seção 10 leu **0** — o que se lê como "a tela nunca toca
+   o `foot b`". Uma corrida por seção: **2 e 2**, e a janela mostrava duas
+   chuteiras o tempo todo. É a armadilha 42 de novo, de outro lado: lá o erro
+   foi amostrar pouco, aqui foi disputar a parada com o controle.
+6. **O limiar da composição foi escrito de uma amostra só.** 0,006 saiu do pior
+   caso do slot 2 (0,0013) e o slot 1 veio com 0,0071 e reprovou. O limiar
+   agora é 0,02, escrito dos dois slots.
+7. **A regra 1 acusou os literais 4.12 do self-check.** `4096` é escala, não
+   endereço; virou `FIXED_ONE` com a anotação, e as três linhas de matriz de
+   teste levam `# not-an-address:` cada uma — a anotação vale para a **linha**,
+   e uma acima não conta.

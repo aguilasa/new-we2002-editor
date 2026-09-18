@@ -20,6 +20,22 @@ status: pendente
   `ui/` só desenha.
 - **A prateleira não some.** É o jeito de olhar uma peça isolada, e o `S` a
   alterna; o que muda é o default.
+- **O que a [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md)
+  mediu em 2026-09-18 e esta task tem de honrar:**
+  - **a transformação por peça é absoluta** — a câmera composta com a volta da
+    peça —, então montar não é compor hierarquia: é aplicar doze
+    transformações prontas. O esqueleto do jogo **não é rígido** (cinco juntas
+    se separam, o resto não), e supor uma cadeia anatômica é inventar;
+  - **a tela desenha DUAS chuteiras e só UMA carrega matriz.** As seções 9 e 10
+    são lidas as duas (watchpoint de leitura, uma corrida por seção, 2 e 2, com
+    seção desenhada de controle), e a passada tem uma carga só para a 9. A
+    segunda chuteira é desenhada **reaproveitando a rotação que já está no
+    GTE**. Uma montagem que espere uma matriz por peça desenhada deixa um pé
+    para trás ou o põe no lugar errado — **medir onde a segunda chuteira cai é
+    desta task**, e a captura da 25 não a nomeia;
+  - **`y` cresce para baixo** (cabeça em `y = −8`, pé mais baixo em `y = 60`),
+    de acordo com o `UP = -1` que o `scene.py` já usa, e **nenhuma matriz tem
+    determinante negativo** — o espelho das peças `b` está na geometria.
 
 ---
 

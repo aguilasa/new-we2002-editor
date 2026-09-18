@@ -864,6 +864,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --check-live` | o alvo `looks_live`: sobe o fork, carrega os states e confere a RAM contra o disco |
 | `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
 | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
+| `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
 
@@ -888,9 +889,15 @@ Cinco coisas que custam tempo se descobertas tarde:
 - **O emulador é um só**, e os dois `.sav` são fixture: a cópia mestra fica em
   `work/looks-states/`, e o slot do DuckStation é rascunho restaurado dela.
 - **O boneco sai numa prateleira, com o uniforme cinza, e isso é medição, não
-  defeito.** A pose não está em arquivo lido e os `TEX_*.BIN` do uniforme não
-  têm digest na guarda; as duas estão abertas na §6 do plano, e são as tasks
-  24 a 27 e a 30 da v2 que as destravam.
+  defeito.** Os `TEX_*.BIN` do uniforme não têm digest na guarda (task 30), e
+  a pose **já está medida** — vem do `ANIME.BIN` (task 24) e a de referência
+  está capturada peça a peça (task 25); quem a põe no painel é a task 27.
+- **A transformação por peça é absoluta, e o esqueleto não é rígido.** O que o
+  jogo entrega ao GTE por peça é a câmera já composta com a volta daquela peça,
+  então um leitor reproduz doze transformações prontas em vez de compor uma
+  hierarquia — medido em 2026-09-18, com cinco juntas se separando e o resto
+  não. E **uma peça pode ser desenhada sem carga de matriz própria**: a tela
+  mostra duas chuteiras e só uma seção de chuteira carrega matriz.
 - **Janela e tabela concordam de graça; quem desempata é o jogo.** A janela
   não decide nada sobre a tela — as travas, a volta do cursor e o texto de
   cada valor saem do `screen.json` —, então o `looks_ui` prova que a janela não

@@ -2598,6 +2598,64 @@ poucos parâmetros; ou uma tabela noutro arquivo. Escrever um leitor de
 baixo — a v1 já desenha com `UP = -1` —, e se a matriz de cada peça é absoluta
 ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md).
 
+> **Respondida em 2026-09-18**, por `oracle.py --pose <SLOT> <N> [N ...]`, e a
+> resposta é **absoluta**: o que chega ao GTE por peça já é a câmera composta
+> com a volta daquela peça, e um leitor nosso não compõe hierarquia nenhuma —
+> reproduz doze transformações prontas. O que se mediu, nos dois slots, em oito
+> quadros contados a partir do `load_state`:
+>
+> - **As duas cargas de matriz da §10.3 (j) não são duas do mesmo tipo.**
+>   `layout.POSE_MATRIX` entrega a **mesma** rotação em toda parada de uma
+>   passada, enquanto a translação anda pelas peças — é a câmera;
+>   `layout.POSE_PIECE_MATRIX` (o `POSE_MATRIX_SECOND`) entrega uma rotação
+>   **diferente por peça**, mudando a cada quadro. Ler a pose da primeira daria
+>   doze peças com a mesma orientação.
+> - **A matriz não está na instrução nem ainda no GTE:** cinco pares
+>   `lw`/`ctc2` a copiam de uma struct de 32 bytes — nove meias-palavras 4.12
+>   de rotação nos offsets 0 a 0x10, dois de enchimento, e três palavras de
+>   translação em 0x14, 0x18 e 0x1C. A captura lê **a struct**, pelo registrador
+>   base (`v1` na da peça, `a0` na da câmera): ler o GTE na parada traz a
+>   matriz da peça **anterior**, porque a carga ainda não aconteceu.
+> - **Quem é a peça, o ponteiro diz.** Na parada, os registradores de ponteiro
+>   caem dentro da seção que está sendo desenhada, e o `pieces.py` a nomeia —
+>   nenhum nome sai de tamanho nem de ordem suposta. A passada tem **12 cargas**
+>   nos dois slots: as onze peças da figura daquele slot (o goleiro usa as
+>   seções 11 a 19 e o jogador de linha as 0 a 8, e os dois compartilham a 9) e
+>   uma que **não carrega ponteiro nenhum**, com matriz igual à da câmera a
+>   menos de uma volta pequena — a raiz.
+> - **A passada se fecha pela sequência se repetindo**, nunca pelo contador de
+>   quadros: o `internal_frame_number` vira **no meio** da passada, e cortar por
+>   ele entrega cinco peças em vez de doze.
+> - **Absoluta, e a prova é aritmética.** Se `M = C x R` com `R` uma rotação
+>   verdadeira, então `M x Mt = C x Ct` — e é o que se mede: o pior caso das
+>   duas corridas fica em **0,0071** da maior entrada (a segunda pior, 0,0015),
+>   contra **0,99** de uma matriz que não é a câmera composta com nada. O
+>   arredondamento para meia-palavra é toda a folga.
+> - **A hierarquia se mede pelo quadro da mãe**, não pela anatomia: a origem da
+>   filha vista de dentro da mãe, `d = M_mãe⁻¹ (t_filha − t_mãe)`, é constante
+>   se há junta e balança se não há. **Cinco pares se separam nos dois slots** —
+>   raiz↔cabeça (14,5x e 14,6x), canela a↔coxa a (10,5x e 9,2x), canela b↔coxa b
+>   (9,9x e 12,8x), braço a↔tronco (5,3x e 4,9x) e braço b↔antebraço a (5,0x e
+>   4,6x) —, e **todos os outros ficam abaixo de 2,3x**, o que é dizer que não
+>   se separam. **O esqueleto do jogo não é rígido**: os pés, os antebraços
+>   restantes, as coxas e o tronco não ficam a distância fixa de candidato
+>   nenhum. Isso é resultado, e é justamente por isso que o leitor não compõe.
+> - **`y` cresce para baixo**, como o `UP = -1` do `scene.py` já supunha: a
+>   cabeça em `y = −8` e o pé mais baixo em `y = 60`. E **nenhuma das doze
+>   matrizes tem determinante negativo** — o espelho das peças `b` está na
+>   geometria, não num eixo invertido na matriz.
+> - **Distância entre peças não mede osso.** A câmera escala `y` por 0,61 e `x`
+>   e `z` por ~0,80, então `|t_filha − t_mãe|` varia 25% com a peça girando,
+>   sem osso nenhum esticar. Quem desfaz a câmera é o `M_mãe⁻¹` acima.
+>
+> **O que fica aberto, medido e não explicado:** a tela desenha **dois**
+> chuteiras e só **uma** seção de chuteira carrega matriz. As seções 9 e 10 são
+> lidas **as duas** — watchpoint de leitura, uma corrida por seção, 2 e 2,
+> com uma seção desenhada como controle —, então a segunda chuteira é desenhada
+> **sem carga de matriz própria**, reaproveitando a rotação que já está no GTE.
+> Um leitor que suponha uma matriz por peça desenhada erra essa. Encaminhado
+> para a [`LOOKS-TASK-27`](/docs/tasks/looks/27-o-boneco-montado.md).
+
 **(l) O formato do `ANIME.BIN`.** Os 204 ponteiros, o que cada um nomeia, e se a
 varredura fecha no EOF — o rito da Fase 1 (§1.4).
 [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md).

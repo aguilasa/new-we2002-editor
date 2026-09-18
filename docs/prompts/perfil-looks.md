@@ -409,6 +409,45 @@ Não se revertem sem o usuário pedir.
     64 bytes que apareça uma vez só na RAM —, e a regra do cabeçalho só depois,
     se quiser, como confirmação.
 
+45. **Duas cargas de matriz não são duas do mesmo tipo.** A
+    [`LOOKS-TASK-24`](/docs/tasks/looks/24-de-onde-vem-a-pose.md) contou
+    `POSE_MATRIX` e `POSE_MATRIX_SECOND` como "as duas instruções que carregam
+    a matriz", 18 e 18 de 40 paradas. Medido em 2026-09-18
+    ([`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-referencia.md)): a
+    primeira repete a **mesma** rotação nas doze paradas de uma passada
+    enquanto a translação anda pelas peças — é a **câmera** —, e só a segunda
+    muda por peça. Ler a pose da primeira dá doze peças com a mesma orientação,
+    todas plausíveis. Duas instruções que fazem a mesma coisa **na mesma tela**
+    ainda podem não fazer a mesma coisa; quem separa é olhar o valor peça a
+    peça, não a contagem de paradas.
+46. **O contador de quadros vira no MEIO do desenho.** O
+    `internal_frame_number` do `get_status` avança entre a última perna e a
+    cabeça, então uma passada cortada por ele entrega **cinco** peças numa
+    captura e doze na seguinte, sem erro nenhum. Quem fecha uma passada é a
+    **sequência se repetindo** (`oracle._repeating_period`), com duas voltas
+    inteiras e nunca uma — um fim que por acaso parece o começo tem período 1.
+47. **Watchpoints armados juntos disputam a parada, e quem perde lê silêncio.**
+    O emulador para no primeiro acerto e fica lá. Perguntando se a seção 10 do
+    `EDT_MOD.BIN` é lida, armá-la **junto** com a seção de controle deu
+    `10: 0` contra `controle: 4` — que se lê como "a tela nunca toca o `foot
+    b`" —, e uma corrida **por seção** dá **2 e 2**: ela é lida, e a janela
+    mostrava duas chuteiras o tempo todo. É a armadilha 42 pelo outro lado: lá
+    a amostra era pequena demais, aqui o instrumento era disputado. E a
+    conclusão que sobrou é medição: **uma peça pode ser desenhada sem carga de
+    matriz própria**, reaproveitando a rotação que já está no GTE.
+48. **Espalhe os quadros, ou a hierarquia não se mede.** Dez quadros
+    consecutivos mexem tão pouco no boneco que toda peça parece grudada em toda
+    peça — a melhor mãe ganha da segunda por 1,0x a 8,6x, o que não nomeia
+    nada. Com oito quadros espalhados por 140, as juntas verdadeiras vão a
+    4,6x-14,6x e o resto fica abaixo de 2,3x. E **distância entre peças não
+    mede osso**: a câmera escala `y` por 0,61 e `x`/`z` por 0,80, então
+    `|t_filha − t_mãe|` varia 25% com a peça girando, sem osso nenhum esticar —
+    quem desfaz a câmera é `M_mãe⁻¹`.
+49. **Limiar escrito de uma amostra é limiar de uma amostra.** O da composição
+    de matriz saiu do pior caso do slot 2 (0,0013), virou 0,006, e o slot 1
+    chegou com 0,0071 e reprovou uma medição correta. Todo limiar deste ciclo
+    se escreve **depois** dos dois slots.
+
 ---
 
 ## As fontes de verdade binárias
@@ -480,6 +519,7 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo); ~12 min | `python tools/looks/oracle.py --screen` — anda as doze linhas e compara com o `screen.json`; `--screen --write` é o gerador do arquivo | — | LOOKS-TASK-21 |
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |

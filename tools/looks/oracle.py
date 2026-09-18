@@ -42,6 +42,8 @@ Usage:
     python tools/looks/oracle.py --keys [SEQUENCE [SLOT]]  # the same presses in the game, in screen.json and in our window
     python tools/looks/oracle.py --default [SLOT]  # what NAT and DEFAUL do: the nationality byte, and the default that is not applied
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
+    python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
+    python tools/looks/oracle.py --poses [SLOT [N ...]]  # the same over both slots and the eight spread frames
 """
 
 from __future__ import annotations
@@ -50,6 +52,7 @@ import ctypes
 import hashlib
 import os
 import shutil
+import struct
 import sys
 
 import harness
@@ -3771,6 +3774,626 @@ def _matrix_stops(game):
                       GLYPH_LIMIT))
 
 
+
+# --- the reference pose: which matrix belongs to which piece ---------------
+
+POSE_DIR = os.path.join(ROOT, "work", "looks-pose")
+"""Where `--pose <SLOT> <N>` writes one JSON per captured frame."""
+
+POSE_CAPTURE_FRAMES = (0, 20, 40, 60, 80, 100, 120, 140)
+"""The frames captured when none are named, counted from `load_state`.
+
+**Spread, and that is the whole point.**  Frames close together move the
+figure so little that every piece looks rigidly attached to every other one.
+Measured on 2026-09-18, all three on slot 2: ten CONSECUTIVE frames name the
+winner by 1.0x to 8.6x and are worthless; 0..24 in fours puts the two knees at
+11x and 13x but leaves the shoulder at 3.3x; these eight put every joint that
+IS a joint at 4.7x or better and every pair that is not under 1.6x.
+"""
+
+MATRIX_STRUCT = 32
+"""Bytes of the matrix the game hands the GTE: nine 4.12 halfwords, two of
+padding, then three 32-bit translations.  The shape is not assumed -- it is
+what the `lw`/`ctc2` pairs at `layout.POSE_PIECE_MATRIX` read, offsets 0 to
+0x10 for the rotation and 0x14 to 0x1C for the translation."""
+
+POSE_CYCLE_LIMIT = 40
+"""Stops allowed before a draw pass is declared not to come round."""
+
+CAMERA_READS = 3
+"""Times the camera load is read before it is called constant."""
+
+MATRIX_TOLERANCE = 0.02
+"""How far `M x Mt` may sit from `C x Ct`, as a fraction of the largest entry.
+
+`M = C x R` with `R` a true rotation in 4.12 gives `M x Mt = C x Ct` exactly in
+real arithmetic; what the game stores is rounded to whole halfwords, so the
+equality is approximate and the size of the slack is a measurement, not a
+taste.  Measured on 2026-09-18 over both slots and eight frames each, the
+worst piece of a pass sits at **0.0071** -- this threshold is not quite three
+times that.  It is wide for rounding and hopeless as a hiding place: a matrix
+that is NOT the camera composed with a rotation misses by orders of
+magnitude, and the identity against this camera reads **0.99**.
+
+The first threshold written here was 0.006, from a slot-2 run whose worst was
+0.0013, and slot 1 came in at 0.0071 and failed it.  A bound fitted to one
+slot is a bound fitted to one sample.
+"""
+
+HIERARCHY_GAP = 3.0
+"""How much better the chosen parent must be than the runner-up.
+
+A ratio and not a distance: the spreads themselves are in model units and a
+piece that swings far from every candidate would pass a fixed bound just by
+standing still.  Measured over the eight spread frames; ten consecutive ones
+do not reach it, which is the point of `POSE_CAPTURE_FRAMES`.
+"""
+
+
+def _matrix_struct(game, base, path):
+    """The matrix at *base*, as the game stores it: 9 rotation, 3 translation."""
+    raw = game.read_ram(base, MATRIX_STRUCT, path)
+    return (list(struct.unpack("<9h", raw[:18])),
+            list(struct.unpack("<3i", raw[20:32])))
+
+
+def piece_names(image):
+    """{(file, section): name} for every piece either figure draws.
+
+    The names are `pieces.py`'s, and the head is MODEL.BIN's section 24 --
+    the eleven-plus-one of LOOKS-TASK-09, not a naming invented here.
+    """
+    import iso_source
+    import pieces
+
+    with iso_source.open_disc(image) as disc:
+        data = disc.read(layout.EDT_MOD)
+    named, orders, _paired = pieces.name_pieces(data)
+    out = {(layout.MODEL, pieces.HEAD_SECTION): pieces.HEAD}
+    for index, piece in named.items():
+        out[(layout.EDT_MOD, index)] = piece.full_name
+    return out, orders
+
+
+def _drawn_section(registers, maps):
+    """Which section the live pointers are inside, or None when none are.
+
+    One section or nothing: every register that lands in a model file has to
+    land in the SAME one, because the piece this matrix belongs to is what the
+    caller is about to name.  Two different sections at one stop would mean
+    the pointer is not the witness it is being used as, and that is a refusal
+    rather than a pick.
+    """
+    seen = {(where[0], where[1])
+            for _name, _value, where in pointers_into_models(registers, maps)
+            if where[1] is not None}
+    if len(seen) > 1:
+        raise OracleError("one matrix load points into %d sections at once "
+                          "(%s) -- the pointer does not name the piece"
+                          % (len(seen), sorted(seen)))
+    return seen.pop() if seen else None
+
+
+def _pose_cycle(game, maps, names):
+    """One draw pass of the per-piece matrix load, in the order it happens.
+
+    **The pass is closed by the sequence REPEATING, not by a piece coming
+    round a second time and not by the frame counter.**  Both of the easy
+    rules are wrong here, and each was measured wrong on 2026-09-18:
+
+      `internal_frame_number` ticks in the MIDDLE of a pass -- between the
+      last leg and the head -- so cutting on it splits one figure across two
+      frames and hands the first capture five pieces instead of thirteen;
+
+      cutting at the first piece that appears twice would lose the last load
+      of a pass that draws one section twice.  This screen does not -- the
+      period is 12 and every section appears once -- but the rule costs
+      nothing and the alternative is a silent truncation.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.POSE_PIECE_MATRIX))
+    path = os.path.join(game.out_dir, "piece-matrix.bin")
+    out = []
+    keys = []
+    try:
+        while True:
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError(
+                    "%s stopped %d time(s) and then stopped stopping -- the "
+                    "screen is not drawing"
+                    % (who_writes.hx(layout.POSE_PIECE_MATRIX), len(out)))
+            registers = client.call("read_registers", group="gpr")
+            where = _drawn_section(registers, maps)
+            base = who_writes.register_value(registers,
+                                             layout.POSE_PIECE_MATRIX_BASE)
+            rotation, translation = _matrix_struct(game, base, path)
+            keys.append(where)
+            out.append({
+                "order": None,
+                "file": where[0] if where else None,
+                "section": where[1] if where else None,
+                "piece": names.get(where) if where else ROOT_PIECE,
+                "rotation": rotation,
+                "translation": translation,
+            })
+            period = _repeating_period(keys)
+            if period:
+                return _named_pass(out[-period:])
+            if len(out) > POSE_CYCLE_LIMIT:
+                raise OracleError("%d matrix loads and the draw order never "
+                                  "repeated" % POSE_CYCLE_LIMIT)
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _repeating_period(keys):
+    """The length of the pass, once it has been seen twice, or None.
+
+    Two whole turns, never one: a sequence that happens to end the way it
+    began has a period of one by that reading, and this one draws the same
+    section twice inside a single pass.
+    """
+    for period in range(2, len(keys) // 2 + 1):
+        if keys[-period:] == keys[-2 * period:-period]:
+            return period
+    return None
+
+
+def _named_pass(found):
+    """The pass with each load numbered and named uniquely.
+
+    A section drawn twice would be two loads and two pieces, and the second is
+    not the first -- `foot a` and `foot a #2`.  This screen never does it, and
+    the numbering is here so that a pass which does is not quietly collapsed
+    into one piece.
+    """
+    seen = {}
+    for order, one in enumerate(found):
+        one["order"] = order
+        name = one["piece"]
+        seen[name] = seen.get(name, 0) + 1
+        one["instance"] = seen[name]
+        one["id"] = name if seen[name] == 1 else "%s #%d" % (name, seen[name])
+    return found
+
+
+ROOT_PIECE = "root"
+"""The one load of a pass that carries no model pointer.
+
+Measured on 2026-09-18: at that stop the three pointer registers the other
+eleven loads carry the piece in are all zero, and the matrix is the camera's
+to within a small turn while every other one swings with the walk.  It is
+named here rather than left blank because the pass is counted by its pieces
+coming round, and an unnamed member of that count is a hole in the count.
+"""
+
+
+def _camera_matrix(game):
+    """The matrix the OTHER load hands the GTE, read until it repeats.
+
+    `layout.POSE_MATRIX` is not a piece's: measured on 2026-09-18, it carries
+    the SAME rotation at every stop of a pass while its translation walks the
+    pieces, which is what a camera does and what a pose does not.  Reading it
+    three times and demanding the three agree is what makes "constant" a
+    measurement instead of a reading.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.POSE_MATRIX))
+    path = os.path.join(game.out_dir, "camera-matrix.bin")
+    found = []
+    try:
+        for _ in range(CAMERA_READS):
+            client.call("continue")
+            if not _wait_for_hit(game, WATCH_SECONDS):
+                raise OracleError("%s never ran, so there is no camera matrix "
+                                  "to compose against"
+                                  % who_writes.hx(layout.POSE_MATRIX))
+            registers = client.call("read_registers", group="gpr")
+            base = who_writes.register_value(registers, layout.POSE_MATRIX_BASE)
+            found.append(_matrix_struct(game, base, path))
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    rotations = {tuple(one[0]) for one in found}
+    if len(rotations) != 1:
+        raise OracleError("the camera load handed %d different rotations in "
+                          "%d reads: %r" % (len(rotations), len(found),
+                                            sorted(rotations)))
+    return {"rotation": found[0][0], "translation": found[0][1]}
+
+
+def capture_pose(game, slot, frame, maps, names):
+    """The pose of one COUNTED frame: `load_state`, N steps, one draw pass.
+
+    Every capture starts from the state again.  It has to: the pass is taken
+    with the emulator running free between breakpoint hits, so a second
+    capture in the same session is no longer N frames from anywhere.
+    """
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="pose-%d-%d" % (slot, frame))
+    game.step(frame)
+    drawn = _pose_cycle(game, maps, names)
+    camera = _camera_matrix(game)
+    return {"slot": slot, "state": SLOTS[slot], "frame": frame,
+            "camera": camera, "pieces": drawn}
+
+
+def write_pose(record):
+    """One JSON per captured frame, in `work/looks-pose/`."""
+    import json
+
+    os.makedirs(POSE_DIR, exist_ok=True)
+    path = os.path.join(POSE_DIR, "slot%d-frame%d.json"
+                        % (record["slot"], record["frame"]))
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(record, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    return path
+
+
+# --- reading the numbers ---------------------------------------------------
+
+def _multiply(a, b):
+    return [sum(a[row * 3 + k] * b[k * 3 + column] for k in range(3))
+            for row in range(3) for column in range(3)]
+
+
+def _transpose(m):
+    return [m[column * 3 + row] for row in range(3) for column in range(3)]
+
+
+def _determinant(m):
+    return (m[0] * (m[4] * m[8] - m[5] * m[7])
+            - m[1] * (m[3] * m[8] - m[5] * m[6])
+            + m[2] * (m[3] * m[7] - m[4] * m[6]))
+
+
+def _inverse(m):
+    det = _determinant(m)
+    if not det:
+        return None
+    cofactors = [
+        (m[4] * m[8] - m[5] * m[7]), -(m[1] * m[8] - m[2] * m[7]),
+        (m[1] * m[5] - m[2] * m[4]),
+        -(m[3] * m[8] - m[5] * m[6]), (m[0] * m[8] - m[2] * m[6]),
+        -(m[0] * m[5] - m[2] * m[3]),
+        (m[3] * m[7] - m[4] * m[6]), -(m[0] * m[7] - m[1] * m[6]),
+        (m[0] * m[4] - m[1] * m[3]),
+    ]
+    return [value / det for value in cofactors]
+
+
+def matrix_deviation(rotation, camera):
+    """How far `M x Mt` is from `C x Ct`, as a fraction of the largest entry.
+
+    Near zero says the matrix is the camera composed with a true rotation --
+    which is what makes the piece matrices ABSOLUTE, in the camera's space,
+    rather than each piece's own turn waiting to be composed by whoever draws
+    it.
+    """
+    want = _multiply(camera, _transpose(camera))
+    got = _multiply(rotation, _transpose(rotation))
+    scale = max(abs(value) for value in want) or 1
+    return max(abs(a - b) for a, b in zip(want, got)) / scale
+
+
+def joint_offset(parent, child):
+    """Where the child's origin sits in the parent's own frame, in 4.12.
+
+    `t_child - t_parent = M_parent x d`, so `d = inverse(M_parent) x (t_child
+    - t_parent)`.  If the child hangs off the parent, `d` is the joint and does
+    not move; if it does not, `d` swings with both poses.  This is where the
+    hierarchy comes from, and it needs no anatomy.
+    """
+    inverse = _inverse(parent["rotation"])
+    if inverse is None:
+        return None
+    delta = [child["translation"][k] - parent["translation"][k]
+             for k in range(3)]
+    return [sum(inverse[row * 3 + k] * delta[k] for k in range(3)) * FIXED_ONE
+            for row in range(3)]
+
+
+def hierarchy(frames):
+    """Each piece's best parent, and how clearly it beat the runner-up.
+
+    *frames* is a list of {piece name: record}.  A piece with no parent shows
+    up as a poor best against a nearly as poor runner-up; the caller decides
+    with `HIERARCHY_GAP`, and this function never decides for it.
+    """
+    names = sorted(frames[0])
+    out = {}
+    for child in names:
+        scored = []
+        for parent in names:
+            if parent == child:
+                continue
+            offsets = [joint_offset(frame[parent], frame[child])
+                       for frame in frames]
+            if any(one is None for one in offsets):
+                continue
+            spread = max(max(one[k] for one in offsets)
+                         - min(one[k] for one in offsets) for k in range(3))
+            scored.append((spread, parent))
+        scored.sort()
+        if len(scored) < 2:
+            continue
+        (best, parent), (second, runner_up) = scored[0], scored[1]
+        out[child] = {"parent": parent, "spread": best,
+                      "runner_up": runner_up, "runner_up_spread": second,
+                      "gap": second / best if best else float("inf")}
+    return out
+
+
+
+def _by_piece(record):
+    return {one["id"]: one for one in record["pieces"]}
+
+
+def _say_pose(record):
+    """One captured frame, printed in the order the game drew it."""
+    print("    frame %d, %d load(s) in draw order:" % (record["frame"],
+                                                       len(record["pieces"])))
+    camera = record["camera"]["rotation"]
+    for one in record["pieces"]:
+        deviation = matrix_deviation(one["rotation"], camera)
+        sign = "mirrored" if _determinant(one["rotation"]) < 0 else "        "
+        print("      %-2d %-16s %-9s t=%-22s dev=%.4f  %s"
+              % (one["order"], one["id"],
+                 "" if one["section"] is None
+                 else "sec %d" % one["section"],
+                 tuple(one["translation"]), deviation, sign))
+
+
+SECTION_SAMPLE = 48
+"""Addresses watched inside one section when asking whether it is read.
+
+Spread over the whole section, never a handful from one end: four addresses
+of a 400 KB file read as silence in LOOKS-TASK-24 and nearly became "the pose
+does not come from there" (pitfall 42).  A sample of a section is a different
+size of the same mistake, so the sample is even and the control is a section
+the same pass is known to draw.
+"""
+
+
+def _section_addresses(maps, where, count=SECTION_SAMPLE):
+    """*count* addresses spread evenly across one section's bytes."""
+    for base, (name, _size, sections) in maps.items():
+        if name != where[0]:
+            continue
+        one = sections[where[1]]
+        step = max(4, (one.end - one.offset) // count)
+        return [base + offset
+                for offset in range(one.offset, one.end, step)][:count]
+    raise OracleError("no section %r in the model maps" % (where,))
+
+
+def _sections_read(game, maps, wanted):
+    """Which of *wanted* the game reads, each one watched on a run of its own.
+
+    **One section per run, and that is the whole correctness of it.**  Armed
+    together, the emulator breaks on the FIRST hit and stays there, so a
+    section the pass draws every frame takes every stop and the one being
+    asked about never gets a turn -- silence that says nothing about the game.
+    Measured on 2026-09-18, and it was not a nicety: all of them armed at once
+    read `section 10: 0` beside the control's 4, which reads as *the screen
+    never touches foot b*.  One run each, and section 10 reads **2**, exactly
+    what the control reads.  The window had shown two boots all along.
+    """
+    found = {}
+    for where in wanted:
+        hits, _pcs = _watch_reads(game, _section_addresses(maps, where),
+                                  stops=2)
+        found[where] = sum(count for _address, count in hits)
+    return found
+
+
+def check_pose_frames(slot=None, frames=None, verbose=True):
+    """`--pose <SLOT> <N> [N ...]`: the pose of counted frames, per piece.
+
+    The gabarito of Phase 9, and the shape of the run is the argument:
+
+      **the control before the measurement** -- the first frame is captured
+          TWICE and the two have to be identical number by number.  A capture
+          that does not repeat measures the emulator's mood, and every number
+          under it would be a reading;
+      **two different N differ** -- without it a capture that reads a
+          constant passes the control perfectly;
+      **whose matrix is whose** -- the piece registers name the section at
+          each stop, and `pieces.py` names the section;
+      **absolute or composed** -- `M x Mt` against the camera's `C x Ct`,
+          which is zero only when the matrix is the camera composed with a
+          true rotation;
+      **the hierarchy** -- the child's origin in the parent's own frame,
+          across the frames: constant where there is a joint, swinging where
+          there is not.
+    """
+    ready = preflight()
+    slots = (slot,) if slot else tuple(sorted(SLOTS))
+    wanted = tuple(frames) if frames else POSE_CAPTURE_FRAMES
+    if len(wanted) < 2:
+        raise OracleError("two frames at least, or nothing says the capture "
+                          "is not reading a constant (got %r)" % (wanted,))
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        maps = model_maps(ready["image"])
+        names, orders = piece_names(ready["image"])
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+
+            # The control, before anything below is read as a measurement.
+            first = capture_pose(game, one, wanted[0], maps, names)
+            again = capture_pose(game, one, wanted[0], maps, names)
+            if first != again:
+                problems.append(
+                    "slot %d: two captures of frame %d differ, so the capture "
+                    "is not repeatable and no number under it means anything"
+                    % (one, wanted[0]))
+                _say_pose(first)
+                _say_pose(again)
+                continue
+            print("    control: frame %d captured twice, %d load(s), "
+                  "identical number by number"
+                  % (wanted[0], len(first["pieces"])))
+
+            taken = [first]
+            for frame in wanted[1:]:
+                taken.append(capture_pose(game, one, frame, maps, names))
+            for record in taken:
+                print("    wrote %s" % write_pose(record))
+            if verbose:
+                _say_pose(taken[0])
+
+            # A capture that reads a constant passes the control perfectly.
+            moved = [record for record in taken[1:]
+                     if _by_piece(record) != _by_piece(taken[0])]
+            if not moved:
+                problems.append(
+                    "slot %d: frames %s all read the same numbers as frame "
+                    "%d -- the capture is reading a constant"
+                    % (one, list(wanted[1:]), wanted[0]))
+
+            # Every pass draws the same pieces, or the draw order is not what
+            # closes a pass and the captures are not comparable.
+            sets = {tuple(sorted(_by_piece(record))) for record in taken}
+            if len(sets) != 1:
+                problems.append("slot %d: the passes drew %d different sets "
+                                "of pieces: %r" % (one, len(sets),
+                                                   sorted(sets)))
+                continue
+            drawn = set(sets.pop())
+            print("    %d piece(s) every pass: %s"
+                  % (len(drawn), ", ".join(sorted(drawn))))
+            figure = {name for (where, name) in names.items()
+                      if where[0] == layout.EDT_MOD}
+            never = sorted(name for name in figure
+                           if name not in drawn) if figure else []
+            if never:
+                print("    named by pieces.py and never loaded here: %s "
+                      "-- the other figure's list, plus whatever this screen "
+                      "does not draw" % ", ".join(never))
+            # A piece of THIS figure's list that no load names is either not
+            # drawn or drawn under somebody else's matrix, and the two call
+            # for different readers.  A read watchpoint tells them apart, with
+            # a section the same pass drew as the control for the instrument.
+            drawn_here = {piece["section"] for piece in taken[0]["pieces"]
+                          if piece["file"] == layout.EDT_MOD}
+            # This slot's own list, picked by what it drew: the file holds two
+            # figures and the goalkeeper's sections are 11..19, so asking
+            # after list 0's sections on slot 1 watches the OTHER player and
+            # reads his absence as a finding.
+            mine = max(orders.values(),
+                       key=lambda order: len(drawn_here & set(order)))
+            missing = [index for index in sorted(mine)
+                       if index not in drawn_here]
+            if missing:
+                control = sorted(drawn_here)[-1]
+                wanted_sections = [(layout.EDT_MOD, control)]
+                wanted_sections += [(layout.EDT_MOD, index)
+                                    for index in missing]
+                read = _sections_read(game, maps, wanted_sections)
+                for where, count in sorted(read.items(),
+                                           key=lambda pair: pair[0][1]):
+                    print("      section %-2d (%-12s) read %d time(s)%s"
+                          % (where[1], names.get(where, "?"), count,
+                             "   <- control, drawn this pass"
+                             if where[1] == control else ""))
+                loads = sorted(set(
+                    piece["section"] for piece in taken[0]["pieces"]
+                    if piece["file"] == layout.EDT_MOD))
+                for index in missing:
+                    if read[(layout.EDT_MOD, index)]:
+                        print("      section %d is READ and carries no matrix "
+                              "load of its own, so a piece can be drawn "
+                              "without one -- whatever draws it reuses the "
+                              "rotation already in the GTE.  %d section(s) "
+                              "carry a load this pass: %s"
+                              % (index, len(loads),
+                                 ", ".join(str(one) for one in loads)))
+                if not read[(layout.EDT_MOD, control)]:
+                    problems.append(
+                        "slot %d: section %d is drawn every pass and a read "
+                        "watchpoint over it never fired, so silence over the "
+                        "others means nothing" % (one, control))
+
+            # Absolute, or each piece's own turn?  M x Mt against C x Ct.
+            worst = 0.0
+            for record in taken:
+                camera = record["camera"]["rotation"]
+                for piece in record["pieces"]:
+                    deviation = matrix_deviation(piece["rotation"], camera)
+                    worst = max(worst, deviation)
+                    if deviation > MATRIX_TOLERANCE:
+                        problems.append(
+                            "slot %d frame %d: %s sits %.4f from the camera's "
+                            "own product, over the %.4f a rounded rotation "
+                            "takes -- this matrix is not the camera composed "
+                            "with a rotation"
+                            % (one, record["frame"], piece["id"],
+                               deviation, MATRIX_TOLERANCE))
+            print("    every matrix is the camera composed with a rotation: "
+                  "worst |M x Mt - C x Ct| is %.4f of the largest entry "
+                  "(threshold %.4f)" % (worst, MATRIX_TOLERANCE))
+
+            mirrored = sorted(piece["id"] for piece in taken[0]["pieces"]
+                              if _determinant(piece["rotation"]) < 0)
+            print("    %d of %d carry a mirrored matrix (negative "
+                  "determinant): %s"
+                  % (len(mirrored), len(taken[0]["pieces"]),
+                     ", ".join(mirrored) or "none"))
+
+            # The hierarchy, from the frames themselves.
+            tree = hierarchy([_by_piece(record) for record in taken])
+            for child in sorted(tree):
+                found = tree[child]
+                verdict = ("child of %s" % found["parent"]
+                           if found["gap"] >= HIERARCHY_GAP else "no parent")
+                print("      %-13s %-22s spread %7.1f, next %s at %7.1f "
+                      "(%.1fx)"
+                      % (child, verdict, found["spread"], found["runner_up"],
+                         found["runner_up_spread"], found["gap"]))
+            joined = [child for child in tree
+                      if tree[child]["gap"] >= HIERARCHY_GAP]
+            if not joined:
+                problems.append("slot %d: no piece hangs off another by more "
+                                "than %.1fx, so these frames name no "
+                                "hierarchy" % (one, HIERARCHY_GAP))
+
+            # The sign of y, against the UP = -1 the v1 already draws with.
+            head = _by_piece(taken[0]).get("head")
+            feet = [piece for piece in taken[0]["pieces"]
+                    if piece["piece"] and piece["piece"].startswith("foot")]
+            if head and feet:
+                low = max(piece["translation"][1] for piece in feet)
+                print("    y grows %s: the head sits at y=%d and the lowest "
+                      "foot at y=%d"
+                      % ("DOWNWARD, as scene.UP = -1 already assumes"
+                         if low > head["translation"][1] else "UPWARD",
+                         head["translation"][1], low))
+
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --pose: %d problem(s) over %d frame(s) and %d slot(s)"
+          % (len(problems), len(wanted), len(slots)))
+    return 1 if problems else 0
+
+
 def check_default(slot=2, verbose=True):
     """`--default`: what `NAT` and `DEFAUL` do, measured in the game.
 
@@ -3927,6 +4550,19 @@ def self_check(verbose: bool = True) -> int:
     return harness.run("oracle.py", _checks, verbose)
 
 
+FIXED_ONE = 4096  # not-an-address: 1.0 in the 4.12 fixed point the GTE uses
+SPAN = 4096  # not-an-address: the size of the made-up file the check builds
+
+
+class _FakeSection:
+    """A section span for the self-check, with only what `attribute()` reads."""
+
+    def __init__(self, offset, end):
+        self.offset = offset
+        self.end = end
+        self.primitives = ()
+
+
 def _checks(c) -> None:
     ok, attempt = c.ok, c.attempt
 
@@ -3944,6 +4580,110 @@ def _checks(c) -> None:
     ok("it reports the address of each hit, not the count",
        _ctc2_matrix_loads(mfc + matrix + other + matrix)
        == [RAM_BASE + 4, RAM_BASE + 12])
+
+    # -- the pose capture's arithmetic, on matrices made here ---------------
+    #
+    # 4.12 is the scale, so the identity is 4096 on the diagonal, and a
+    # quarter turn about y is the permutation with one sign flipped.
+    one = [FIXED_ONE, 0, 0, 0, FIXED_ONE, 0, 0, 0, FIXED_ONE]
+    turn = [0, 0, FIXED_ONE, 0, FIXED_ONE, 0, -FIXED_ONE, 0, 0]
+    # Nine 4.12 matrix entries read off the live camera, one per line so the
+    # rule-1 sweep sees each of them annotated.
+    camera = [3195, 0, 635,  # not-an-address: 4.12 matrix entries
+              -27, 2488, 133,  # not-an-address: 4.12 matrix entries
+              -635, -268, 3195]  # not-an-address: 4.12 matrix entries
+    ok("the identity times anything is that thing",
+       _multiply(one, turn) == [value * FIXED_ONE for value in turn])
+    ok("a quarter turn has determinant 4096 cubed",
+       _determinant(turn) == FIXED_ONE ** 3)
+    ok("and the mirror of it has the negative of that -- which is how a "
+       "mirrored piece is told from a turned one",
+       _determinant([-value for value in turn]) == -(FIXED_ONE ** 3))
+
+    # The composition test: C times a rotation keeps C's own product, and a
+    # matrix that is NOT C times a rotation does not.
+    ok("the camera composed with a turn sits at zero from the camera",
+       matrix_deviation([value // FIXED_ONE
+                         for value in _multiply(camera, turn)],
+                        camera) < MATRIX_TOLERANCE)
+    ok("the camera without its own scale does not",
+       matrix_deviation([FIXED_ONE if i in (0, 4, 8) else 0
+                         for i in range(9)],
+                        camera) > MATRIX_TOLERANCE)
+
+    # The joint: a child that sits at a fixed point of the parent's frame
+    # reads the same offset whatever the parent is doing.
+    joint = [1000, 0, 0]  # not-an-address: a length in model units
+
+    def hung(rotation, at):
+        """A child hung at *joint* off a parent turned by *rotation*."""
+        moved = [sum(rotation[row * 3 + k] * joint[k]
+                     for k in range(3)) // FIXED_ONE
+                 for row in range(3)]
+        return {"rotation": rotation,
+                "translation": [at[k] + moved[k] for k in range(3)]}
+
+    parents = [{"rotation": one, "translation": [10, 20, 30]},
+               {"rotation": turn, "translation": [40, 50, 60]}]
+    children = [hung(parent["rotation"], parent["translation"])
+                for parent in parents]
+    offsets = [joint_offset(parent, child)
+               for parent, child in zip(parents, children)]
+    ok("a child hung off a parent reads the same joint under any turn",
+       all(abs(offsets[0][k] - offsets[1][k]) < 2.0 for k in range(3)),
+       "%r vs %r" % (offsets[0], offsets[1]))
+    ok("and the joint it reads is the one it was hung at",
+       all(abs(offsets[0][k] - joint[k]) < 2.0 for k in range(3)),
+       "%r" % (offsets[0],))
+    loose = [{"rotation": one, "translation": [0, 0, 0]},
+             {"rotation": one, "translation": [500, 0, 0]}]
+    adrift = [joint_offset(parents[i], loose[i]) for i in range(2)]
+    ok("a child that is NOT hung off it reads a different joint each frame",
+       max(abs(adrift[0][k] - adrift[1][k]) for k in range(3)) > 100,
+       "%r vs %r" % (adrift[0], adrift[1]))
+
+    # And the search over those offsets picks the parent, with the runner-up
+    # beside it so the caller can see how clear the win was.
+    frames = [{"p": parents[i], "kid": children[i], "away": loose[i]}
+              for i in range(2)]
+    tree = hierarchy(frames)
+    ok("the search names the parent a piece is hung off",
+       tree["kid"]["parent"] == "p", "%r" % (tree["kid"],))
+    ok("and reports the runner-up it beat",
+       tree["kid"]["runner_up"] in ("away",) and tree["kid"]["gap"] > 1.0)
+
+    # -- the pass closes on the sequence repeating, not on a piece returning -
+    #
+    # The boots are one section drawn twice, so the easy rule -- cut when a
+    # piece comes round -- drops the last load of the pass.
+    twice = ["r", "h", "t", "f", "l", "f"]
+    ok("a pass with a piece drawn twice is found whole, not cut at the repeat",
+       _repeating_period(twice + twice) == len(twice))
+    ok("one turn is not enough to call it a period",
+       _repeating_period(twice) is None)
+    ok("and a tail that happens to look like the head is not a period of one",
+       _repeating_period(["a", "b", "c", "a"]) is None)
+    named = _named_pass([{"piece": "foot a"}, {"piece": "torso"},
+                         {"piece": "foot a"}])
+    ok("a section drawn twice is two pieces, numbered",
+       [one["id"] for one in named] == ["foot a", "torso", "foot a #2"],
+       "%r" % ([one["id"] for one in named],))
+    ok("and the draw order is kept as the number the caller reads",
+       [one["order"] for one in named] == [0, 1, 2])
+
+    # The pointer is the witness that names the piece, and two sections at
+    # one stop would mean it is not.
+    class Where:
+        pass
+
+    attempt("two sections pointed at by one matrix load are refused",
+            OracleError,
+            lambda: _drawn_section({"s6": "0x8011C788", "s7": "0x8011CC78"},
+                                   {layout.BASE[layout.EDT_MOD]: (
+                                       layout.EDT_MOD, SPAN,
+                                       [_FakeSection(0, SPAN // 2),
+                                        _FakeSection(SPAN // 2,
+                                                     SPAN)])}))
 
     # The session taken by another client, on a fake server (CORR-LOOKS-051).
     import io
@@ -4370,7 +5110,17 @@ def main(argv):
                                   "and got %r" % argv[2])
             return check_screen(write=len(argv) == 3)
         if len(argv) >= 2 and argv[1] == "--pose":
+            # `--pose [SLOT]` is where the pose comes FROM (LOOKS-TASK-24);
+            # naming frames after the slot captures the pose itself
+            # (LOOKS-TASK-25).  One flag, because they answer one question
+            # from two ends and share every prerequisite.
+            if len(argv) > 3:
+                return check_pose_frames(int(argv[2]),
+                                         [int(one) for one in argv[3:]])
             return check_pose(int(argv[2]) if len(argv) > 2 else None)
+        if len(argv) >= 2 and argv[1] == "--poses":
+            return check_pose_frames(int(argv[2]) if len(argv) > 2 else None,
+                                     [int(one) for one in argv[3:]] or None)
         if len(argv) >= 2 and argv[1] == "--default":
             return check_default(int(argv[2]) if len(argv) > 2 else 2)
         if len(argv) >= 2 and argv[1] == "--keys":

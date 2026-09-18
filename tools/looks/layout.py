@@ -1459,8 +1459,30 @@ hit and stays there, so a single run answers "which fired first": the same
 thirty, armed the same way, named 0x80012168 in one run and 0x80010E38 in the
 next.  Both were true and neither was the question.
 
-Which load belongs to which piece is NOT measured here -- that is
-LOOKS-TASK-25, which counts the frame and names the pieces.
+**Which load is which, measured on 2026-09-18 (LOOKS-TASK-25).**  They are
+not two of a kind: `POSE_MATRIX` hands the GTE the SAME rotation at every
+stop of a draw pass while its translation walks the pieces -- the camera --
+and `POSE_MATRIX_SECOND` hands a different rotation per piece, changing
+every frame.  `POSE_PIECE_MATRIX` below is the name the pose capture uses,
+so that nothing reads the pose off the camera by picking the wrong one.
+"""
+
+POSE_PIECE_MATRIX = POSE_MATRIX_SECOND
+POSE_PIECE_MATRIX_BASE = "v1"
+POSE_MATRIX_BASE = "a0"
+"""The per-piece matrix load, and the register each load reads it through.
+
+The matrix is not in the instruction and not in the GTE yet: five `lw`/`ctc2`
+pairs copy it from a 32-byte struct in memory, and the struct's address is in
+this register when the first `ctc2` is about to run.  Reading the struct is
+what makes the capture EXACT -- reading the GTE instead would take the
+previous piece's matrix, because at the stop the load has not happened.
+
+Both structs are the same shape: nine 4.12 halfwords of rotation at offsets 0
+to 0x10, two of padding, then three 32-bit translations at 0x14, 0x18, 0x1C.
+`POSE_MATRIX` reads its own through `a0`, which is `sp + 16` -- the camera on
+the stack in scratchpad -- and `POSE_PIECE_MATRIX` reads the piece's through
+`v1`.
 """
 
 ANIME_STATE = 0x80076040

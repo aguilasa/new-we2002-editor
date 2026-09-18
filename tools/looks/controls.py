@@ -700,6 +700,36 @@ CONTROLS = (
         "found -- a sweep that silently never looks at its last word",
     ),
     Control(
+        "oracle-pose-drops-the-second-draw-of-a-section", "oracle.py",
+        "_named_pass",
+        '        one["id"] = name if seen[name] == 1 else "%s #%d" % (name, seen[name])',
+        '        one["id"] = name',
+        ("oracle",),
+        "a section drawn twice in one pass collapsed into one piece: the "
+        "second load overwrites the first in every dict keyed by the name, "
+        "and the pass still counts right",
+    ),
+    Control(
+        "oracle-pose-matrix-forgets-the-camera", "oracle.py",
+        "matrix_deviation",
+        "    want = _multiply(camera, _transpose(camera))",
+        "    want = [FIXED_ONE ** 2 if i in (0, 4, 8) else 0 for i in range(9)]",
+        ("oracle",),
+        "the composition test written as if the camera were a pure rotation: "
+        "this camera scales y by 0.61 and x and z by 0.80, so every real "
+        "matrix of the game fails a test that demands an orthonormal product",
+    ),
+    Control(
+        "oracle-pose-joint-skips-the-parents-turn", "oracle.py",
+        "joint_offset",
+        "    return [sum(inverse[row * 3 + k] * delta[k] for k in range(3)) * FIXED_ONE",
+        "    return [sum((FIXED_ONE if row == k else 0) * delta[k] for k in range(3)) * FIXED_ONE",
+        ("oracle",),
+        "the joint read in the CAMERA's frame instead of the parent's: the "
+        "offset then swings with the parent's own rotation, and no child "
+        "looks attached to anything",
+    ),
+    Control(
         "looks-nation-code-is-the-index", "looks.py", "NATION_CODES",
         "NATION_CODES = ((1, 54, -1), (55, 79, 40))",
         "NATION_CODES = ((1, 79, -1),)",
