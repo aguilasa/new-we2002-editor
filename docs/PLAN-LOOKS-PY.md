@@ -2198,7 +2198,7 @@ a câmera do jogo, e não foi medida. *Destravaria:* girar a câmera do jogo —
 ler a display list noutro quadro da animação — e ver se o conjunto ausente
 muda.
 
-**(h) A forma não tem testemunha — ABERTA para o cabelo; a pose tem.** Histograma de cor resolve pele,
+**(h) A forma não tem testemunha — FECHADA em 2026-09-18: a pose no corpo inteiro, o cabelo no close-up.** Histograma de cor resolve pele,
 cor de cabelo e cor de barba, e **não** resolve estilo de cabelo nem barba —
 nem contra os quadros do emulador, onde a verdade é conhecida
 (`corpus.py --score`, o controle; §5.4). Nenhum dos dois confrontos verifica,
@@ -2220,10 +2220,16 @@ jogo com `A1`, `C1` e `I3` diferem só **15 e 29 pixels**, e a foto `A1` do jogo
 casa com o nosso `I3` (378) melhor que com o nosso `A1` (399). No corpo inteiro,
 estilo de cabelo é um punhado de pixels.
 
-*Destravaria:* o **close-up** que o jogo mostra com uma linha de cabeça sob o
-cursor, onde o estilo é grande — as fotos do jogo diferem 422 e 1.843 pixels ali.
-Medido com a câmera do close-up e restrito à faixa da cabeça, a silhueta escolhe
-o estilo certo em **2 de 3**, nos dois slots; o `A1` é o que ela erra.
+*Como fechou para o cabelo:* no **close-up** que o jogo mostra com uma linha de
+cabeça sob o cursor, onde o estilo é grande — as fotos do jogo diferem 422 e
+1.843 pixels ali. A primeira tentativa escolheu o estilo certo em **2 de 3**, e o
+que faltava era medida: **o close-up gira o modelo**, um ângulo diferente a cada
+captura (+18,3°, −16,9°, +16,9°), e o giro está composto em cada peça e
+**ausente** da carga de câmera que o `--camera` lê — composta com ela, a
+translação espalha 29 unidades; com a câmera derivada das próprias peças
+(`oracle.camera_from_pieces`), menos de uma. Com foto e câmera da **mesma
+parada**, cada foto do jogo escolhe o próprio estilo entre os três, nos dois
+slots: **6 de 6**, por 1,4x a 4,4x (`confront.py --silhouette-styles`).
 
 **(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
 ponteiros (§1.5), onde a hipótese do `we3d` de 14 jogadores de 11 peças seria
@@ -2786,7 +2792,7 @@ varredura fecha no EOF — o rito da Fase 1 (§1.4).
 > mistura é o estado da animação entre quadros, e isso é a
 > [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
 
-**(m) A câmera do jogo — MEDIDA e na janela, 2026-09-18; o cabelo segue aberto.** Projeção, deslocamento de tela
+**(m) A câmera do jogo — FECHADA em 2026-09-18.** Projeção, deslocamento de tela
 e a translação da câmera, para que o nosso quadro e o do emulador sejam o mesmo
 desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 
@@ -2824,13 +2830,15 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > 4x4 no tamanho **nativo** do painel e a janela só a envia ao shader, com um
 > self-check que exige o mesmo pixel que o `project()` — pior caso 0,000000 px.
 >
-> **O que segue aberto é o cabelo, não a câmera.** Com uma linha de cabeça sob
-> o cursor, **o jogo aproxima a câmera na cabeça** — medida também pelo
-> `--camera <SLOT> HAIR`: o mesmo `H`, a translação em z de 999 contra 4125, e
-> girada. E a primeira leitura dos estilos no corpo inteiro ("a foto `I3` casa
-> com o nosso `A1`") era **defeito nosso**: o `pose()` só posava a cabeça de
-> referência. Corrigido, no corpo inteiro os estilos simplesmente não se
-> separam — ver a §6 (h).
+> **E há duas câmeras, não uma.** Com uma linha de cabeça sob o cursor **o jogo
+> aproxima a câmera na cabeça** — o mesmo `H`, z em 999 contra 4125 — e **gira o
+> modelo**, um ângulo por captura que a carga de câmera não traz. A câmera que
+> vale para o close-up sai das próprias peças (`oracle.camera_from_pieces`),
+> conferida contra as doze: rotação a 3,7/4096, translação a meia unidade. No
+> corpo inteiro as duas leituras coincidem (controle: giro de ±0,03°). A
+> primeira leitura dos estilos no corpo inteiro era defeito nosso — o `pose()`
+> só posava a cabeça de referência —, e corrigido, no corpo inteiro os estilos
+> não se separam; no close-up, sim (§6 h).
 
 **(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.

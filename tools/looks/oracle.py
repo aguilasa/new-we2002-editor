@@ -4601,6 +4601,64 @@ def capture_camera(game, slot, frame=0, row=None):
             "projection": seen, "camera": camera}
 
 
+def camera_from_pieces(pieces, anime_data, spread_limit=2.0):
+    """The camera the game composed into THESE pieces, out of the pieces.
+
+    `M = C . R_pose` and `T = C . place + T_cam` for every piece, with `R_pose`
+    and `place` read out of ANIME.BIN at the pair the piece read.  So
+    `C = M . R_pose^T` and `T_cam = T - C . place`, once per piece -- and the
+    twelve answers have to AGREE, which is the check that the pose read off the
+    file is the pose the game used.
+
+    **Why not the camera load at `layout.POSE_MATRIX`.**  On the full figure
+    the two are the same.  In the close-up the game shows with a head row under
+    the cursor they are NOT: the figure turns, and the turn is composed into
+    every piece and absent from that load -- measured 2026-09-18, an extra
+    18.3, -16.9 and 16.9 degrees about y over three captures, the same to 0.05
+    degrees across the twelve pieces of each, and 0.03 on the full figure.
+    Composed with the load's camera, the translations spread 29 units; with
+    the camera derived here, under one.
+    """
+    import anime
+
+    rotations, turned = [], []
+    for piece in pieces:
+        at = piece.get("pair")
+        if at is None:
+            continue
+        first, second = struct.unpack("<2I", anime_data[at:at + 8])
+        pose = [value / float(FIXED_ONE)
+                for value in anime.rotation(anime.angles(first))]
+        # C = M . R^T, the rotation of a pose being its own inverse's transpose
+        camera = [sum(piece["rotation"][row * 3 + k] * pose[column * 3 + k]
+                      for k in range(3))
+                  for row in range(3) for column in range(3)]
+        rotations.append(camera)
+        turned.append((piece["translation"], anime.position(first, second)))
+    if len(rotations) < 2:
+        raise OracleError("%d piece(s) carry a pair, and a camera derived from "
+                          "fewer than two is not checked against anything"
+                          % len(rotations))
+    mean = [sum(one[index] for one in rotations) / len(rotations)
+            for index in range(9)]
+    worst = max(abs(one[index] - mean[index])
+                for one in rotations for index in range(9))
+    if worst > spread_limit * FIXED_ONE / 100.0:
+        raise OracleError("the %d pieces imply cameras up to %.0f of %d apart "
+                          "-- the pose read off the file is not the pose the "
+                          "game composed" % (len(rotations), worst, FIXED_ONE))
+    offsets = [[translation[axis]
+                - sum(mean[axis * 3 + k] * place[k] for k in range(3))
+                / float(FIXED_ONE) for axis in range(3)]
+               for translation, place in turned]
+    place = [sum(one[axis] for one in offsets) / len(offsets)
+             for axis in range(3)]
+    apart = max(abs(one[axis] - place[axis])
+                for one in offsets for axis in range(3))
+    return {"rotation": mean, "translation": place,
+            "rotation_spread": worst, "translation_spread": apart}
+
+
 CAMERA_DIR = os.path.join(ROOT, "work", "looks-camera")
 """Where `--camera` writes one JSON per slot, for the window to draw with."""
 

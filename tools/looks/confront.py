@@ -1197,73 +1197,12 @@ by 656 and 783 pixels of 2686 against each other -- measured on the panel's own
 size, so they are distinguishable at the size the comparison is made at.
 """
 
-STYLE_SETTLE = 300
-"""Frames let run after the keys, before the pair is read and the picture taken.
-
-The screen rewrites the figure over MANY frames (pitfall 18), and twenty-four
-is not enough: measured 2026-09-18, a picture taken that soon after the keys
-carries **4572 to 5154** pixels of ink against the 2376 to 2532 of a settled
-panel -- about twice, which is two figures at once -- and matches no frame of
-the walk.  Three hundred is what CORR-LOOKS-049 measured a whole head to take.
-"""
-
-
 def route_row(text: str, oracle) -> str:
     """The row `route` leaves the cursor on for *text*: the last one it edits."""
     here = oracle.CURSOR_STARTS_ON
     for row, _button, _count in plan(text, oracle.ROWS, here):
         here = row
     return here
-
-
-def game_at_tuple(game, slot, text, oracle, anime, data, entry, table):
-    """(the walk frame being drawn, the panel's mask) with *text* on screen.
-
-    Same single-run shape as `game_at` -- pair and picture at one stop, with no
-    frame stepped between them -- except that the screen is walked to *text*
-    first.  The counted frame is whatever the walking costs, which is why the
-    frame is READ rather than assumed: the pair names it.
-    """
-    import layout
-    import who_writes
-
-    oracle.restore_state(slot, verbose=False)
-    game.load_looks(slot, label="style-%d-%s" % (slot, text))
-    route(game, text, oracle)
-    # Back to the row the state loads on, and it is not tidiness: with a HEAD
-    # row under the cursor the game ZOOMS the panel onto the head -- measured,
-    # the picture is a close-up with "Kind of Hair" in the help box, twice the
-    # ink of the full figure and a walk that stops at one frame.  The camera
-    # `oracle.py --camera` measured is the full-body one, on `NAT`, so the
-    # photograph is taken there.
-    here = route_row(text, oracle)
-    way, distance = moves(oracle.ROWS, here, oracle.CURSOR_STARTS_ON)
-    for _ in range(distance):
-        game.press(way, box=oracle.FOOTER, least=oracle.ROW_MOVED)
-    game.step(STYLE_SETTLE)
-    client = game.client
-    client.call("breakpoint", action="clear")
-    client.call("breakpoint", action="add", type="execute",
-                address=who_writes.hx(layout.ANIME_UNPACK))
-    try:
-        client.call("continue")
-        if not oracle._wait_for_hit(game, oracle.WATCH_SECONDS):
-            raise ConfrontError("the unpack at %s never ran with %s on screen"
-                                % (who_writes.hx(layout.ANIME_UNPACK), text))
-        registers = client.call("read_registers", group="gpr")
-        pair = (who_writes.register_value(registers,
-                                          layout.ANIME_UNPACK_BASE)
-                - layout.ANIME_BASE)
-    finally:
-        try:
-            client.call("breakpoint", action="clear")
-        except Exception:  # noqa: BLE001
-            pass
-    import screen as screen_module
-
-    frame = still_frame(game, table["display"], oracle, screen_module)
-    box = table["regions"]["panel"]["native"]
-    return (anime.frame_of_pair(data, entry, pair), panel_mask(frame, box))
 
 
 def our_silhouette(data, text, figure, frame, camera, size, centre):
@@ -1368,8 +1307,136 @@ def _judged(label, theirs, named, cycle, data, text, figure, camera, size,
     return problems
 
 
+HEAD_BAND = 40
+"""Rows from the top of the game's ink that a close-up is judged on.
+
+The HEAD, and only the head: below it the game's dark kit sits on a dark
+background and the row-by-row mask loses it -- measured, the masks' boxes sit
+3 pixels apart while the body scores half the ink.  A style is a head, so the
+band is where the question is.  Measured at 30, 40 and 50 rows on the first
+close-ups and the verdict did not move between them.
+"""
+
+CLOSE_UP_ROW = "HAIR"
+"""The row the cursor sits on for a close-up -- the one whose value moves."""
+
+
+def closeup_at_tuple(game, slot, text, oracle, anime, adata, entry, table,
+                     maps, names):
+    """(walk frame, the panel's mask, the camera) of one close-up, ONE stop.
+
+    **The camera is derived from the pieces of this very pass**
+    (`oracle.camera_from_pieces`), not read off the camera load: the figure
+    TURNS in the close-up, by a different angle at every capture -- 18.3,
+    -16.9 and 16.9 degrees on the first three -- and the load does not carry
+    the turn.  A photograph and a camera from two different moments would be
+    comparing a turned head with an unturned one, which is what made the first
+    close-up verdict "2 of 3".
+    """
+    oracle.restore_state(slot, verbose=False)
+    game.load_looks(slot, label="closeup-%d-%s" % (slot, text))
+    route(game, text, oracle)
+    here = route_row(text, oracle)
+    way, distance = moves(oracle.ROWS, here, CLOSE_UP_ROW)
+    for _ in range(distance):
+        game.press(way, box=oracle.FOOTER, least=oracle.ROW_MOVED)
+    game.step(oracle.CLOSE_UP_SETTLE)
+    pieces = oracle._pose_cycle(game, maps, names)
+    import screen as screen_module
+
+    frame = still_frame(game, table["display"], oracle, screen_module)
+    box = table["regions"]["panel"]["native"]
+    camera = oracle.camera_from_pieces(pieces, adata)
+    head = [one for one in pieces if one.get("pair") is not None][0]
+    return (anime.frame_of_pair(adata, entry, head["pair"]),
+            panel_mask(frame, box), camera)
+
+
+def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
+    """`--silhouette-styles [SLOT]`: three hair styles, in the close-up.
+
+    The full figure cannot answer it -- a style is 15 to 29 pixels of it, in
+    the game's own photographs -- so this walks the game to each style, puts
+    the cursor on HAIR, and compares HEADS: each game photograph against our
+    three styles, drawn with the camera of that same stop.  What is asserted
+    is that every photograph picks its own style, in both slots.
+    """
+    import anime
+    import iso_source
+    import layout
+    import oracle
+    import scene
+    import screen
+
+    ready = oracle.preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = {name: disc.read(name)
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME)}
+    entry = anime.header(data[layout.ANIME])[layout.ANIME_SCREEN_ENTRY]
+    block = anime.block(data[layout.ANIME], entry)
+    box = table["regions"]["panel"]["native"]
+    size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
+    width = size[0]
+    # Where the camera's axis falls inside the panel: the screen's own middle,
+    # because the GTE's offsets are zero -- measured, the two masks' boxes land
+    # 3 pixels apart with nothing fitted.
+    centre = (table["display"][0] / 2.0 - box[0],
+              table["display"][1] / 2.0 - box[1])
+    maps = oracle.model_maps(ready["image"])
+    names, _orders = oracle.piece_names(ready["image"])
+    problems = []
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
+            figure = scene.screen_state(slot).figure()
+            focal = scene.load_camera(slot)["projection"]
+            for shown in STYLE_TUPLES:
+                walk, theirs, derived = closeup_at_tuple(
+                    game, slot, shown, oracle, anime, data[layout.ANIME],
+                    entry, table, maps, names)
+                reference = {one["piece"]: one for one in anime.frame_angles(
+                    data[layout.ANIME], block["frames"][walk])}[
+                        scene.REFERENCE_PIECE]["position"]
+                rotation = derived["rotation"]
+                camera = {"rotation": rotation, "projection": focal,
+                          "translation": [
+                              derived["translation"][axis]
+                              + sum(rotation[axis * 3 + k] * reference[k]
+                                    for k in range(3)) / float(scene.ONE)
+                              for axis in range(3)]}
+                top = scene.mask_box(theirs, size)[1]
+                scores = {}
+                for ours in STYLE_TUPLES:
+                    drawn = scene.build(data, looks.parse_tuple(ours), figure,
+                                        walk)
+                    mask = scene.silhouette(drawn, camera, size, centre)
+                    scores[ours] = sum(
+                        1 for index, (a, b) in enumerate(zip(theirs, mask))
+                        if a != b and top <= index // width < top + HEAD_BAND)
+                best = min(scores, key=scores.get)
+                print("    game %s: camera spread %.1f / %.2f, walk frame %d; "
+                      "head band %s"
+                      % (shown, derived["rotation_spread"],
+                         derived["translation_spread"], walk,
+                         "  ".join("%s %d%s" % (ours[2:4], scores[ours],
+                                                "*" if ours == best else "")
+                                   for ours in STYLE_TUPLES)))
+                if best != shown:
+                    problems.append(
+                        "slot %d: the game shows %s and its head matches our "
+                        "%s better (%d against %d)"
+                        % (slot, shown, best, scores[best], scores[shown]))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --silhouette-styles: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
 def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
-                     verbose=True, styles=False) -> int:
+                     verbose=True) -> int:
     """`--silhouette [SLOT]`: our shape against the game's, with the camera.
 
     The measurement colour could not make (section 6 (h)): a histogram tells
@@ -1465,17 +1532,6 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
                     "slot %d frame %d" % (slot, counted), theirs[counted],
                     plays[counted], cycle, data, text, figure, camera, size,
                     scene, offsets, (slot, counted))
-
-            # And the same, with three hair styles walked ON THE GAME: the
-            # save state loads with one, and a silhouette that only ever saw
-            # that one would say nothing about the mesh the screen picks.
-            for style in (STYLE_TUPLES if styles else ()):
-                named, mask = game_at_tuple(game, slot, style, oracle, anime,
-                                            data[layout.ANIME], entry, table)
-                problems += _judged(
-                    "slot %d %s" % (slot, style), mask, named, cycle, data,
-                    style, figure, camera, size, scene, offsets,
-                    (slot, style), style_control=True)
 
     if offsets:
         print("  the picture trails the draw by %s frame(s) of the walk over "
@@ -1587,9 +1643,10 @@ def main(argv: list[str]) -> int:
             # comparison that fails for a reason nobody has measured must not
             # ride inside the one that passes -- nor be quietly turned into a
             # note that passes with it.
-            return check_silhouette(
-                (int(argv[2]),) if len(argv) > 2 else (2, 1),
-                styles=argv[1] == "--silhouette-styles")
+            chosen = (int(argv[2]),) if len(argv) > 2 else (2, 1)
+            if argv[1] == "--silhouette-styles":
+                return check_closeup_styles(chosen)
+            return check_silhouette(chosen)
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])
     except oracle.Unavailable as exc:

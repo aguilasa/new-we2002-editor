@@ -497,3 +497,95 @@ controle de estilo nas seis comparações por quadro e nas seis por estilo.
    Gate que só desenha a tupla de referência mede a tupla de referência.
 2. **Alinhamento por caixa amplifica mudança de cabeça.** Uma cabeça mais alta
    desloca o centro da caixa e o corpo inteiro com ele.
+
+---
+
+### Quinta sessão — o close-up gira, e os três estilos fecham
+
+**Qual cabeça o jogo desenha no close-up.** A captura de pose, rodada com o
+cursor em `HAIR` depois de andar o estilo, nomeia a seção de cada carga: **24
+para `A1`, 30 para `C1`, 34 para `I3`** — exatamente as da nossa tabela. O
+mapeamento `HAIR` → cabeça está certo.
+
+**E no close-up o modelo gira.** Todas as doze peças erravam a nossa matriz por
+700 a 1.000 de 4.096 — não só a cabeça. Resolvendo `C⁻¹·M·R_poseᵀ` peça a peça,
+sai a **mesma** rotação extra em `y` para as doze: **+18,3°** numa captura,
+**−16,9°** e **+16,9°** nas outras duas, igual a 0,05° entre as peças de cada
+uma, e **±0,03°** no corpo inteiro, que é o controle. O giro está composto em
+cada peça e **ausente** da carga de câmera que o `--camera` lê: com ela, a
+translação `T_peça − R·lugar` espalha **29** unidades; com a câmera derivada das
+próprias peças, menos de uma.
+
+**Uma correção da quarta invocação.** Eu escrevi, na saída dela, que no close-up
+`T_peça − R·lugar` ficava "a ±1" da câmera lida. Estava errado: imprimi os quatro
+primeiros valores de uma lista ordenada, não o intervalo — que era de 29
+unidades. Nada disso entrou em documento, e a armadilha 71 registra a forma do
+erro.
+
+**`oracle.camera_from_pieces`** deriva a câmera das peças que ela compôs —
+`C = M·R_poseᵀ` e `T = T_peça − C·lugar`, uma vez por peça — e **recusa** se as
+doze não concordarem. Conferida contra o corpo inteiro, bate com a lida a uma
+unidade.
+
+**Os três estilos, com foto e câmera da mesma parada** (`--silhouette-styles`),
+comparados na faixa da cabeça (40 linhas a partir do topo da tinta do jogo):
+
+```text
+slot 2  jogo A1:  nosso A1 202*  C1 357  I3 274
+        jogo C1:  nosso A1 488   C1 119* I3 563
+        jogo I3:  nosso A1 385   C1 559  I3 155*
+slot 1  jogo A1:  nosso A1 178*  C1 323  I3 284
+        jogo C1:  nosso A1 469   C1 127* I3 561
+        jogo I3:  nosso A1 373   C1 542  I3 176*
+```
+
+**6 de 6**: cada foto escolhe o próprio estilo, e os outros dois — os estilos
+trocados — discordam, por 1,4x a 4,4x. Uma captura (slot 1, `C1`) derivou a
+câmera com espalhamento de 74 em 4.096 contra 3,7 das outras — dentro do limite,
+e provavelmente uma das matrizes que o jogo mistura (a
+[`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md) mediu seis).
+
+**Arquivos criados/modificados** *(conferidos contra o commit)*
+
+- `tools/looks/oracle.py` — `camera_from_pieces()`
+- `tools/looks/confront.py` — `HEAD_BAND`, `CLOSE_UP_ROW`,
+  `closeup_at_tuple()`, `check_closeup_styles()`, o `--silhouette-styles`
+  ligado a ele, e o caminho morto do corpo inteiro removido (`game_at_tuple`,
+  `STYLE_SETTLE`, o laço de estilos do `check_silhouette`)
+- `docs/PLAN-LOOKS-PY.md` — a §6 (h) e a §10.3 (m) fechadas
+- `docs/prompts/perfil-looks.md` — as armadilhas 70 e 71 e a linha do gate
+- `CLAUDE.md` — os comandos novos e a armadilha das duas câmeras
+- `docs/tasks/looks/28-a-camera-do-jogo.md` — este Log
+
+**Gates, na árvore commitada**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 88 of 88 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/confront.py --silhouette
+    control: frame 60 captured twice, 2383 pixel(s) of ink, identical
+    control: frame(s) [80, 100] differ from it by [603, 1483] pixel(s)
+  the picture trails the draw by [0, 1, 2] frame(s) of the walk over 6
+  comparison(s), and the bound is 2
+confront --silhouette: 0 problem(s) over 2 slot(s)
+
+$ python tools/looks/confront.py --silhouette-styles
+confront --silhouette-styles: 0 problem(s) over 2 slot(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+O `looks_ui` não foi rodado de novo: esta sessão mudou só o `oracle.py` e o
+`confront.py`, que o `ui_check.py` não importa, e a última corrida dele —
+**7 de 7**, na quarta sessão — foi na árvore que já tinha o `scene.py` de hoje.
+
+**Problemas encontrados**
+
+1. **O close-up gira o modelo, e a câmera lida não traz o giro** — armadilha 70.
+2. **Um intervalo lido pela cabeça de uma lista ordenada** — armadilha 71.

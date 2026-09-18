@@ -866,6 +866,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
+| `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |
+| `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
@@ -895,6 +897,12 @@ Cinco coisas que custam tempo se descobertas tarde:
   pose vem do `ANIME.BIN` (tasks 24 a 26) e desde a task 27 o painel abre com
   ela: `ui/app.py --frame N` escolhe o quadro, e a prateleira da v1 continua
   atrás do `S`.
+- **Há duas câmeras na tela, e a do close-up gira o modelo.** Com uma linha de
+  cabeça sob o cursor o jogo aproxima a câmera na cabeça e gira o boneco, um
+  ângulo por captura que a carga de câmera do GTE **não** traz — a câmera que
+  vale ali se deriva das próprias peças (`oracle.camera_from_pieces`). O painel
+  da nossa janela desenha com a câmera de corpo inteiro (task 28), e o close-up
+  por linha é da task 31.
 - **O ponteiro vivo numa parada nomeia a peça ANTERIOR.** Na carga da matriz
   de uma peça os registradores ainda apontam para a peça que o jogo acabou de
   desenhar — a matriz entra no GTE antes de os ponteiros serem armados. Lido
