@@ -3,7 +3,7 @@ id: CORR-LOOKS-063
 title: "Correção: o `--silhouette-styles` decide por mínimo, sem controle e sem margem, e o \"estilo trocado discorda\" não é asserção"
 type: correção
 category: verificação
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -129,20 +129,77 @@ linha do gate no perfil diz que o controle fecha antes.
 
 ## Verificação
 
-- [ ] `confront.py --silhouette-styles` imprime a linha de controle (mesmo
+- [x] `confront.py --silhouette-styles` imprime a linha de controle (mesmo
       close-up duas vezes, 0 pixel) antes das seis comparações
-- [ ] cada foto imprime a razão contra o segundo melhor, e uma razão abaixo do
+- [x] cada foto imprime a razão contra o segundo melhor, e uma razão abaixo do
       limiar reprova
-- [ ] controle plantado em `controls.py` que tira a margem fica vermelho
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] controle plantado em `controls.py` que tira a margem fica vermelho
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+**Resumo do que foi feito**
 
-**Problemas encontrados:**
+A evidência bate número a número — as seis linhas da tabela, `0 problem(s)`, e
+nenhuma linha de controle. O `--silhouette-styles` agora pergunta como o
+`--silhouette` pergunta:
 
-**Arquivos criados/modificados:**
+1. **Controle antes.** Em cada slot, o close-up de `A-A1-A-A-A` capturado duas
+   vezes; o gate recusa o slot inteiro se a máscara, o quadro da caminhada ou a
+   câmera derivada diferirem. A segunda captura é reaproveitada como a foto
+   desse estilo, então o controle custa um close-up por slot.
+2. **Margem, contra o estilo errado mais próximo.** Impressa por foto e
+   conferida contra `CLOSEUP_MARGIN = 1.2`, abaixo do mínimo medido de
+   **1,36x**. Não é o `STYLE_MARGIN = 1.5` do corpo inteiro, e o docstring diz
+   por quê: com 1,5 a corrida correta de hoje reprovaria na foto mais apertada.
+3. **Teto para o escore certo**, `CLOSEUP_SHARE = 0.25` da tinta da faixa da
+   cabeça — medido **6% a 8%**, o mesmo espaço que o `MATCH_SHARE` deixa sobre
+   os seus 8% a 17%.
+
+O julgamento saiu para uma função pura, `closeup_verdict()`, porque o
+controle plantado precisa de caminho sem emulador: o `self_check` do
+`confront.py` a alimenta com os números da foto `A1` do slot 2 e com três casos
+vermelhos que um mínimo simples deixa passar (vitória por um fio, estilo
+trocado, escore certo longe da cabeça do jogo).
+
+A corrida, depois do conserto:
+
+```text
+$ python tools/looks/confront.py --silhouette-styles
+  -- slot 2 (outfield player) --
+    control: A-A1-A-A-A close-up captured twice, walk frame 12 and 12, 0 pixel(s) apart, camera identical
+    game A-A1-A-A-A: ... head band A1 202*  C1 357  I3 274; nearest wrong 1.36x, right 202 of 2379 (8%)
+    game A-C1-A-A-A: ... head band A1 488  C1 119*  I3 563; nearest wrong 4.10x, right 119 of 2120 (6%)
+    game A-I3-A-A-A: ... head band A1 385  C1 559  I3 155*; nearest wrong 2.48x, right 155 of 2059 (8%)
+  -- slot 1 (goalkeeper) --
+    control: A-A1-A-A-A close-up captured twice, walk frame 12 and 12, 0 pixel(s) apart, camera identical
+    game A-A1-A-A-A: ... head band A1 178*  C1 323  I3 284; nearest wrong 1.60x, right 178 of 2440 (7%)
+    game A-C1-A-A-A: ... head band A1 469  C1 127*  I3 561; nearest wrong 3.69x, right 127 of 2124 (6%)
+    game A-I3-A-A-A: ... head band A1 373  C1 542  I3 176*; nearest wrong 2.12x, right 176 of 2097 (8%)
+confront --silhouette-styles: 0 problem(s) over 2 slot(s)
+```
+
+**Problemas encontrados**
+
+1. **A razão que interessa é contra o mais próximo, e ela não é a da CORR.**
+   A evidência calcula 1,36x a **4,73x**, e o 4,73x é 563/119 — contra o estilo
+   errado **mais distante**. Um veredito só é tão seguro quanto o estilo que
+   ele quase escolheu, então o gate imprime a razão contra o mais próximo, e a
+   maior dela é **4,10x** (488/119). É esse o número que a
+   [`CORR-LOOKS-064`](/docs/tasks/looks/CORR-LOOKS-064.md) tem de escrever.
+2. **A regra 1 pegou os casos do self check**: 2379 e 2200 soltos parecem
+   endereço. O número da tinta virou um local com `# not-an-address:`, e os
+   outros saíram dele.
+
+**Arquivos criados/modificados**
+
+- `tools/looks/confront.py` — `CLOSEUP_MARGIN`, `CLOSEUP_SHARE`,
+  `closeup_verdict()`, o controle e a linha impressa no
+  `check_closeup_styles()`, quatro casos no `self_check`
+- `tools/looks/controls.py` — controle `confront-closeup-minimum-only`
+- `docs/tasks/looks/28-a-camera-do-jogo.md` (critério 5),
+  `docs/PLAN-LOOKS-PY.md` (§6 (h)), `docs/prompts/perfil-looks.md` (a linha do
+  gate)

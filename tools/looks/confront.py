@@ -418,6 +418,27 @@ def _checks(c) -> None:
     rows = oracle.ROWS
     start = oracle.CURSOR_STARTS_ON
 
+    # -- the close-up verdict, on the numbers of 2026-09-18 --------------
+    #
+    # Slot 2's A1 photograph is the tightest the gate has met: our I3 scores
+    # 274 against the right 202, 1.36x.  CORR-LOOKS-063 is about the verdict
+    # that stayed green on a bare minimum, so the red cases are the ones a
+    # minimum lets through.
+    right = {"A-A1-A-A-A": 202, "A-C1-A-A-A": 357, "A-I3-A-A-A": 274}
+    ink = 2379  # not-an-address: the game's head-band pixels, that photograph
+    ratio, share, wrong = closeup_verdict(2, "A-A1-A-A-A", right, ink)
+    ok("the close-up of 2026-09-18 passes, at the ratio it printed",
+       wrong == [] and round(ratio, 2) == 1.36, "%r %r" % (ratio, wrong))
+    hair = dict(right, **{"A-I3-A-A-A": 210})
+    ok("a right style that wins by a hair is refused, though it is the minimum",
+       closeup_verdict(2, "A-A1-A-A-A", hair, ink)[2])
+    swapped = dict(right, **{"A-I3-A-A-A": 150})
+    ok("a swapped style is refused, and the message names it",
+       "I3" in "".join(closeup_verdict(2, "A-A1-A-A-A", swapped, ink)[2]))
+    far = {"A-A1-A-A-A": ink // 3, "A-C1-A-A-A": ink, "A-I3-A-A-A": ink}
+    ok("a right style far from the game's head is refused, though it wins",
+       closeup_verdict(2, "A-A1-A-A-A", far, ink)[2])
+
     ok("the reference tuple is the start, so it costs no press",
        plan(START, rows, start) == [(SHOT_ROW, None, 0)],
        "%r" % (plan(START, rows, start),))
@@ -1320,6 +1341,33 @@ close-ups and the verdict did not move between them.
 CLOSE_UP_ROW = "HAIR"
 """The row the cursor sits on for a close-up -- the one whose value moves."""
 
+CLOSEUP_MARGIN = 1.2
+"""How much worse the nearest WRONG style must score than the right one, in
+the close-up.
+
+Measured 2026-09-18 over the six photographs of both slots (CORR-LOOKS-063):
+the nearest wrong style scores **1.36x** the right one at the tightest -- slot
+2's A1 photograph against our I3 -- and 4.10x at the widest (slot 2, C1), and
+the ceiling is written below the smallest (pitfall 49).  The nearest, not the
+worst: against the worst the widest is 4.73x, and a verdict is only as safe
+as the style it almost picked.  It is NOT
+`STYLE_MARGIN`'s 1.5, and on purpose: that one was written for the full
+figure, where it was never met, and at 1.5 the correct run of today would
+fail on its tightest photograph.  What this catches is the verdict that is
+right only by a hair -- two styles the head band cannot tell apart, which a
+bare minimum passes as long as the order does not flip.
+"""
+
+CLOSEUP_SHARE = 0.25
+"""The most of the game's head-band ink the right style may differ by.
+
+The close-up's own `MATCH_SHARE`: without it the right style passes at any
+score, as long as the two wrong ones score worse.  Measured 2026-09-18 over
+the six photographs of both slots: **6% to 8%** -- 119 of 2120 to 202 of 2379
+-- so the ceiling sits at three times the worst, which is the room
+`MATCH_SHARE` leaves over its own 8% to 17%.
+"""
+
 
 def closeup_at_tuple(game, slot, text, oracle, anime, adata, entry, table,
                      maps, names):
@@ -1352,6 +1400,38 @@ def closeup_at_tuple(game, slot, text, oracle, anime, adata, entry, table,
             panel_mask(frame, box), camera)
 
 
+def closeup_verdict(slot, shown, scores, ink) -> tuple:
+    """(ratio, share, problems) for one close-up photograph.
+
+    *scores* is {our tuple: pixels apart in the head band}, *shown* the tuple
+    the game was walked to, *ink* the game's own head-band pixels.  Pure, so
+    that the self check can hand it made-up numbers and a planted control can
+    break it without an emulator (CORR-LOOKS-063).
+    """
+    problems = []
+    best = min(scores, key=scores.get)
+    nearest = min(score for ours, score in scores.items() if ours != shown)
+    ratio = nearest / float(scores[shown] or 1)
+    share = scores[shown] / float(ink or 1)
+    if best != shown:
+        problems.append(
+            "slot %d: the game shows %s and its head matches our %s better "
+            "(%d against %d)" % (slot, shown, best, scores[best],
+                                 scores[shown]))
+    elif ratio < CLOSEUP_MARGIN:
+        problems.append(
+            "slot %d: the game shows %s and the nearest wrong style scores "
+            "only %.2fx its own, under the %.1fx that tells two heads apart"
+            % (slot, shown, ratio, CLOSEUP_MARGIN))
+    if share > CLOSEUP_SHARE:
+        problems.append(
+            "slot %d: the game shows %s and our %s still differs in %d of %d "
+            "head-band pixel(s) (%.0f%%), over the %.0f%% a match takes"
+            % (slot, shown, shown, scores[shown], ink, 100.0 * share,
+               100.0 * CLOSEUP_SHARE))
+    return ratio, share, problems
+
+
 def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
     """`--silhouette-styles [SLOT]`: three hair styles, in the close-up.
 
@@ -1360,6 +1440,13 @@ def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
     the cursor on HAIR, and compares HEADS: each game photograph against our
     three styles, drawn with the camera of that same stop.  What is asserted
     is that every photograph picks its own style, in both slots.
+
+    Since CORR-LOOKS-063 the question is asked the way `--silhouette` asks
+    its own: a **control** first -- the same close-up twice, which has to come
+    back identical -- and then not only "is the minimum the right one" but by
+    how much (`CLOSEUP_MARGIN`, against the nearest wrong style) and how close
+    the right one is at all (`CLOSEUP_SHARE`).  A bare minimum over three
+    candidates catches a swapped style and nothing else.
     """
     import anime
     import iso_source
@@ -1392,10 +1479,37 @@ def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
             print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
             figure = scene.screen_state(slot).figure()
             focal = scene.load_camera(slot)["projection"]
+            # The control, before any comparison (CORR-LOOKS-063): the same
+            # close-up twice has to come back the same -- walk frame, mask
+            # and derived camera -- or the photographs below are measuring
+            # the emulator's mood.  The close-up is deterministic, so the
+            # expected difference is zero, not "small".
+            first = closeup_at_tuple(game, slot, STYLE_TUPLES[0], oracle,
+                                     anime, data[layout.ANIME], entry, table,
+                                     maps, names)
+            again = closeup_at_tuple(game, slot, STYLE_TUPLES[0], oracle,
+                                     anime, data[layout.ANIME], entry, table,
+                                     maps, names)
+            apart = sum(1 for a, b in zip(first[1], again[1]) if a != b)
+            same_camera = first[2]["rotation"] == again[2]["rotation"]
+            print("    control: %s close-up captured twice, walk frame %d and "
+                  "%d, %d pixel(s) apart, camera %s"
+                  % (STYLE_TUPLES[0], first[0], again[0], apart,
+                     "identical" if same_camera else "DIFFERENT"))
+            if apart or first[0] != again[0] or not same_camera:
+                problems.append(
+                    "slot %d: the same close-up twice differs (%d pixel(s), "
+                    "walk %d and %d, camera %s), so no photograph of this "
+                    "slot is judged" % (slot, apart, first[0], again[0],
+                                        "same" if same_camera else "not"))
+                continue
             for shown in STYLE_TUPLES:
-                walk, theirs, derived = closeup_at_tuple(
-                    game, slot, shown, oracle, anime, data[layout.ANIME],
-                    entry, table, maps, names)
+                if shown == STYLE_TUPLES[0]:
+                    walk, theirs, derived = again
+                else:
+                    walk, theirs, derived = closeup_at_tuple(
+                        game, slot, shown, oracle, anime, data[layout.ANIME],
+                        entry, table, maps, names)
                 reference = {one["piece"]: one for one in anime.frame_angles(
                     data[layout.ANIME], block["frames"][walk])}[
                         scene.REFERENCE_PIECE]["position"]
@@ -1416,18 +1530,19 @@ def check_closeup_styles(slots=(2, 1), verbose=True) -> int:
                         1 for index, (a, b) in enumerate(zip(theirs, mask))
                         if a != b and top <= index // width < top + HEAD_BAND)
                 best = min(scores, key=scores.get)
+                ink = sum(1 for index, a in enumerate(theirs)
+                          if a and top <= index // width < top + HEAD_BAND)
+                ratio, share, wrong = closeup_verdict(slot, shown, scores, ink)
                 print("    game %s: camera spread %.1f / %.2f, walk frame %d; "
-                      "head band %s"
+                      "head band %s; nearest wrong %.2fx, right %d of %d "
+                      "(%.0f%%)"
                       % (shown, derived["rotation_spread"],
                          derived["translation_spread"], walk,
                          "  ".join("%s %d%s" % (ours[2:4], scores[ours],
                                                 "*" if ours == best else "")
-                                   for ours in STYLE_TUPLES)))
-                if best != shown:
-                    problems.append(
-                        "slot %d: the game shows %s and its head matches our "
-                        "%s better (%d against %d)"
-                        % (slot, shown, best, scores[best], scores[shown]))
+                                   for ours in STYLE_TUPLES),
+                         ratio, scores[shown], ink, 100.0 * share))
+                problems += wrong
     for line in problems:
         print("  FAIL  %s" % line)
     print("confront --silhouette-styles: %d problem(s) over %d slot(s)"

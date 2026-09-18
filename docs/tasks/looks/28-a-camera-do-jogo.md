@@ -54,7 +54,13 @@ comparar a silhueta do nosso quadro com a do emulador no mesmo quadro N.
       estilo trocado de propósito discorda — **no close-up**, onde o estilo é
       grande: cada foto do jogo escolhe o próprio estilo entre os três, 6 de 6,
       por 1,4x a 4,4x (`--silhouette-styles`). No corpo inteiro o estilo não se
-      separa, e está dito (quarta sessão).
+      separa, e está dito (quarta sessão). Desde a
+      [`CORR-LOOKS-063`](/docs/tasks/looks/CORR-LOOKS-063.md) o gate pergunta
+      isso como o `--silhouette` pergunta o seu: **controle antes** (o mesmo
+      close-up duas vezes, 0 pixel e câmera idêntica nos dois slots), razão
+      contra o estilo errado **mais próximo** impressa por foto e conferida
+      (`CLOSEUP_MARGIN = 1.2`), e teto para o escore certo
+      (`CLOSEUP_SHARE = 0.25`, medido 6% a 8% da tinta da faixa).
 - [x] §6 (h) e §10.3 (m) com o veredito e a data — as duas **fechadas** em
       2026-09-18: a (h) pela pose no corpo inteiro e pelo cabelo no close-up.
 

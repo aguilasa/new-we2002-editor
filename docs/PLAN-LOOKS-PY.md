@@ -2229,7 +2229,12 @@ captura (+18,3°, −16,9°, +16,9°), e o giro está composto em cada peça e
 translação espalha 29 unidades; com a câmera derivada das próprias peças
 (`oracle.camera_from_pieces`), menos de uma. Com foto e câmera da **mesma
 parada**, cada foto do jogo escolhe o próprio estilo entre os três, nos dois
-slots: **6 de 6**, por 1,4x a 4,4x (`confront.py --silhouette-styles`).
+slots: **6 de 6**, por 1,4x a 4,4x (`confront.py --silhouette-styles`). O
+gate fecha um **controle antes** — o mesmo close-up duas vezes, 0 pixel e a
+mesma câmera derivada — e confere margem contra o estilo errado mais próximo
+(`CLOSEUP_MARGIN`) e teto para o certo (`CLOSEUP_SHARE`), desde a
+[`CORR-LOOKS-063`](/docs/tasks/looks/CORR-LOOKS-063.md): antes ele perguntava
+só qual dos três escores era o menor.
 
 **(i) As duas corridas de ponteiros do `MODEL.BIN` — ABERTA.** A de 64 e a de 32
 ponteiros (§1.5), onde a hipótese do `we3d` de 14 jogadores de 11 peças seria

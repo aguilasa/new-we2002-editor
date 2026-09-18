@@ -293,6 +293,16 @@ CONTROLS = (
         "whose colours nearly match another's is called a hit",
     ),
     Control(
+        "confront-closeup-minimum-only", "confront.py", "closeup_verdict",
+        "    elif ratio < CLOSEUP_MARGIN:",
+        "    elif False:",
+        ("confront",),
+        "the close-up asked only which of three styles is smallest: a head "
+        "that the band cannot tell from its neighbour passes as long as the "
+        "order does not flip, and the tightest photograph of 2026-09-18 wins "
+        "by 1.36x (CORR-LOOKS-063)",
+    ),
+    Control(
         "confront-tie-passes", "confront.py", "verdict",
         "        elif right > wrong and ceiling < 2 * MARGIN:",
         "        elif right >= wrong and ceiling < 2 * MARGIN:",
