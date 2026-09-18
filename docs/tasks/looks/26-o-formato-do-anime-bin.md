@@ -130,6 +130,46 @@ explicam.
   metade, encaminhada com os números e o endereço do código que mistura
 - `docs/tasks/looks/progresso.md` — a task segue `⬜ Pendente`, de propósito
 
+**Gates, na árvore de `caefe1b`**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 81 of 81 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+  ok    anime      exit 0   anime --check-image: 0 failure(s)
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/anime.py --check-image
+  ok    the header names 204 animation(s), 197 of them distinct
+  ok    the walk from offset 816 covers 197 block(s) and 3952 frame(s) and
+        ends at 396804   EOF 396804, 0 hole(s)
+  ok    every block closes with the same marker
+  ok    every frame is 96 byte(s), twelve pairs of words
+  ok    the entry the screen plays has a frame for each drawn piece
+  ok    and its matrices are rotations
+
+$ python tools/looks/anime.py --against-pose      # 16 capturas de --poses
+  96 of 192 carry angles the file holds, integer for integer
+  0 carry angles the file holds at that pair but NOT in the frame the state named
+  96 carry angles NO frame of the file holds -- the in-between frames, still open
+  of the 96 the file holds, 32 matrices are exact and the worst entry is 188 of 4096
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**Os controles, plantados e rodados** — os três novos, cada um numa cópia da
+árvore:
+
+```text
+  RED    anime-angle-fields-in-the-wrong-order  anime.py :: angles
+  RED    anime-angle-loses-its-scale            anime.py :: module constant
+  RED    anime-sine-table-truncates             anime.py :: sine_table
+```
+
 **Problemas encontrados**
 
 1. **A animação avança NO MEIO de uma passada de desenho.** Ler o ponteiro do
