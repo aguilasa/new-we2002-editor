@@ -3,7 +3,7 @@ id: CORR-LOOKS-058
 title: "Correção: o docstring do `layout.POSE_MATRIX` reparte as 40 paradas de um jeito que a ferramenta não reproduz"
 type: correção
 category: dados
-status: pendente
+status: concluído
 depends_on: []
 ---
 
@@ -80,17 +80,62 @@ duas corridas deram o mesmo hoje, em dois slots.
 
 ## Verificação
 
-- [ ] `python tools/looks/oracle.py --pose` e o docstring dizem a mesma coisa,
+- [x] `python tools/looks/oracle.py --pose` e o docstring dizem a mesma coisa,
       ou o docstring diz que a repartição varia e nomeia a corrida
-- [ ] `python tools/looks/selftest.py --quiet` verde
-- [ ] `roms/` intocada
+- [x] `python tools/looks/selftest.py --quiet` verde
+- [x] `roms/` intocada
 
-## Log de Execução *(preenchido após execução)*
+## Log de Execução
 
-**Executado em:**
+**Executado em:** 2026-09-18
 
-**Resumo do que foi feito:**
+### Resumo do que foi feito
 
-**Problemas encontrados:**
+A evidência reproduz em `cf98bb9`: o docstring dizia `18 and 17 of 40 stops,
+against 2, 2 and 1 for 0x80010E38, 0x8003C990 and 0x800407C0`, e o comando
+imprime `x18, x18, x2, x1, x1` — com o `x2` no `0x8003C990`, não no
+`0x80010E38`. Duas repartições que somam 40, e só uma sai da ferramenta.
 
-**Arquivos criados/modificados:**
+**Escolhi fixar o número, e não declarar que varia**, porque ele não variou: a
+corrida de hoje (2026-09-18) deu `18, 18, 2, 1, 1` **nos dois slots**, igual à
+de ontem transcrita na CORR — quatro observações. É o contrário da contagem de
+paradas até a sequência repetir, que o próprio `--pose` imprime dizendo que
+"the number moves between runs" (207 hoje), e que por isso continua sem número
+fixo no módulo.
+
+A frase velha ficou registrada com a data, na forma do ciclo.
+
+### Gates
+
+```text
+$ python tools/looks/oracle.py --pose          # 2026-09-18, os dois slots
+  -- slot 1 (goalkeeper) --
+    30 instruction(s) write the GTE's first matrix word; 5 run on this screen:
+    0x80012168 x18, 0x8001229C x18, 0x8003C990 x2, 0x80010E38 x1, 0x800407C0 x1
+  -- slot 2 (outfield player) --
+    30 instruction(s) write the GTE's first matrix word; 5 run on this screen:
+    0x80012168 x18, 0x8001229C x18, 0x8003C990 x2, 0x80010E38 x1, 0x800407C0 x1
+oracle --pose: 0 problem(s)
+
+$ python tools/looks/layout.py --check
+layout: self_check ok
+$ python tools/looks/selftest.py --quiet
+  ..... 75 of 75 controls red
+looks_selftest: 0 failure(s)
+```
+
+Varredura: `18 and 17` / `2, 2 and 1` não sobra em lugar nenhum da árvore além
+do registro datado e da tabela de correções, que nomeia o erro. O plano já
+dizia "18 e 18".
+
+`roms/` intocada (leitura pura); os dois states só carregados; nenhum
+DuckStation de pé no fim.
+
+### Problemas encontrados
+
+Nenhum.
+
+### Arquivos criados/modificados
+
+- `tools/looks/layout.py` — o docstring do `POSE_MATRIX`
+- `docs/tasks/looks/correcoes-progresso.md` — tabela e checklist

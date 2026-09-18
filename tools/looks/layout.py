@@ -1443,9 +1443,12 @@ POSE_MATRIX_SECOND = 0x8001229C
 `ctc2` into control register 0, the matrix's first word.  Found on 2026-09-17
 (LOOKS-TASK-24) by scanning RAM for every `ctc2` that writes that register --
 **30** of them -- arming an execute breakpoint on all thirty at once and
-letting the screen run: **five** ever run, and these two carry the traffic
-(18 and 17 of 40 stops, against 2, 2 and 1 for 0x80010E38, 0x8003C990 and
-0x800407C0).
+letting the screen run: **five** ever run, and these two carry the traffic.
+The split `oracle.py --pose` prints, on both slots of two runs a day apart
+(2026-09-17 and 2026-09-18), is **18 and 18 of 40 stops**, against 2 for
+0x8003C990 and 1 each for 0x80010E38 and 0x800407C0.  This said "18 and 17 ...
+against 2, 2 and 1" until 2026-09-18 (CORR-LOOKS-058): that split sums to 40
+too, and is not the one any run produces.
 
 **One `continue` names the wrong thing.**  The emulator breaks on the first
 hit and stays there, so a single run answers "which fired first": the same
