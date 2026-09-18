@@ -52,6 +52,7 @@ MODULES = (
     "corpus",
     "ui_check",
     "pieces",
+    "anime",
     "iso_source",
     "oracle",
     "controls",

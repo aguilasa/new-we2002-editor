@@ -464,6 +464,24 @@ Não se revertem sem o usuário pedir.
     ela só apareceu porque o plantio foi **rodado**; imaginado, teria ficado
     verde para sempre.
 
+51. **A animação avança no MEIO de uma passada de desenho.** O estado de
+    animação troca de quadro entre duas peças da mesma passada — medido em
+    2026-09-18: as cinco primeiras peças vieram de um quadro do `ANIME.BIN` e
+    as sete seguintes do seguinte. Ler o ponteiro do quadro uma vez por
+    captura nomeia os bytes errados para metade das peças, e a comparação
+    acusa o arquivo. Lê-se **em cada parada**.
+52. **"Existe no arquivo" não é "é este".** Procurando um trio de ângulos nos
+    3.952 quadros do `ANIME.BIN`, seis membros do goleiro casaram com um par
+    que não era o deles, e a distância da matriz saltou de 1 para 188 unidades
+    de 4.096. Casamento vale contra o quadro **que o estado nomeou**; a busca
+    ampla serve para dizer *não está em lugar nenhum*, não para dizer *é
+    aquele*.
+53. **Controle que cita a borda de uma lista envelhece com a lista.** O
+    `cli-check-forgets-a-module` apagava o **último** nome do `CHECK_IMAGE` do
+    `cli.py`. Acrescentado o `anime` no fim, o literal parou de casar e o gate
+    disse `matched 0 time(s)` — que não é verde nem vermelho, é um controle que
+    deixou de existir. Quem acrescenta módulo à lista reponta o controle.
+
 ---
 
 ## As fontes de verdade binárias
@@ -536,6 +554,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_selftest`)* | nada | `python tools/looks/screen.py --check` — decodificação, caixas, cursor, a tabela medida validada e os rótulos do `looks.py` contra ela | — | LOOKS-TASK-21 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~40 s | `python tools/looks/oracle.py --pose [SLOT]` — o `ANIME.BIN` na RAM byte a byte, a entrada do cabeçalho que a tela toca, o quadro e quem o lê, e as instruções que carregam a matriz no GTE, com o controle do watchpoint antes | — | LOOKS-TASK-24 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~8 min nos dois slots | `python tools/looks/oracle.py --pose <SLOT> <N> [N ...]` ou `--poses` — a pose de quadros contados: a matriz e a translação de cada peça desenhada, a hierarquia medida e a convenção, com a captura repetida como controle antes | — | LOOKS-TASK-25 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
+| *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |
 | *(dentro do `looks_ui`)* | venv + display + a imagem | o `ui_check.py` anda as **doze linhas até as duas pontas nos dois slots** por tecla sintética do Qt, mais o cursor além das duas pontas e a recusa alcançada por tecla; ~1 min 40 s ao todo | `ctest -R looks_ui` | LOOKS-TASK-22 |

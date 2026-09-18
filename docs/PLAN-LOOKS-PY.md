@@ -2666,6 +2666,57 @@ ou relativa à peça-mãe. [`LOOKS-TASK-25`](/docs/tasks/looks/25-a-pose-de-refe
 varredura fecha no EOF — o rito da Fase 1 (§1.4).
 [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md).
 
+> **Medida em 2026-09-18, e a incógnita continua ABERTA em um ponto.** O
+> `tools/looks/anime.py` lê o arquivo inteiro; o que falta é reproduzir a
+> matriz do jogo número a número. O formato:
+>
+> ```text
+> offset 0     204 palavras, uma por animação, cada uma um endereço ABSOLUTO
+>              dentro da imagem de carga do próprio arquivo (ANIME_BASE).
+>              197 são distintas — sete animações são nomeadas duas vezes.
+> offset 816   o payload, um bloco por animação e mais nada:
+>                  quadro[N]     96 bytes cada
+>                  ponteiro[N]   um por quadro, absoluto como o cabeçalho
+>                  0x0000000B    uma palavra, fechando o bloco
+>              A entrada do cabeçalho aponta a LISTA, não os quadros: eles
+>              ficam imediatamente antes dela.
+> ```
+>
+> - **A varredura fecha exato.** A partir do offset **816**: **197 blocos,
+>   3.952 quadros, terminando em 396.804 = EOF, com ZERO buraco.** O offset de
+>   partida anda junto com a contagem, como a §1.4 exige.
+> - **Um quadro é doze pares de palavras, um par por peça desenhada**, na
+>   ordem em que a tela as desenha (`anime.PIECE_ORDER`) — a mesma ordem das
+>   doze cargas de matriz da §10.3 (k). A correspondência **foi medida**: a
+>   captura da pose lê os três ângulos do scratchpad em cada carga, e eles são,
+>   par por par, os doze pares do quadro que o estado estava tocando.
+> - **A primeira palavra do par traz três ângulos de 10 bits com sinal**, nos
+>   bits 9:0, 19:10 e 29:20, cada um deslocado quatro para a esquerda. Não é
+>   leitura de formato: é o que o código em `0x80011D48` faz, instrução por
+>   instrução (`sll 22 / sra 18`, `sll 12 / sra 22 / sll 4`, `sll 2 / sra 22 /
+>   sll 4`). Os dois bits de cima são bandeira e este leitor não os lê.
+> - **A matriz não está no arquivo, e a rotina que a constrói é `0x8003D4BC`**,
+>   chamada com os ângulos no scratchpad (`layout.POSE_ANGLES`) e o destino em
+>   `0x1F8000D0`. Ela indexa uma tabela de 4.096 palavras em `0x8005B148`,
+>   cada uma `(cos << 16) | sin` em 4.12. **A tabela é gerada, não versionada:**
+>   despejada da RAM e comparada com `round(sin(2πi/4096) × 4096)`, dá **0
+>   divergência em 4.096** (contra 3.080 se fosse truncamento).
+> - **A ordem da composição é `Rz · Ry · Rx`**, e isso foi medido pelo outro
+>   lado: decompondo as matrizes que o jogo carregou, os ângulos que voltam são
+>   **múltiplos de 16** — que é o que o arquivo guarda — só sob essa ordem.
+>
+> **O que fica aberto, com o número:** contra 16 capturas e 192 peças
+> desenhadas, **96 trazem ângulos que o arquivo guarda, inteiro por inteiro**,
+> e **96 trazem ângulos que quadro nenhum do arquivo guarda** — são os quadros
+> que o jogo constrói **entre** os quadros-chave, e o código logo adiante
+> (`0x80011F90`…) soma dois valores e desloca um bit, que é uma média. Como ele
+> escolhe os dois é a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md);
+> a média dos vizinhos na lista **não** reproduz (medido: 0 de 96). E das 96
+> que o arquivo guarda, **32 matrizes saem exatas** e a pior entra **188** de
+> 4.096 — as que erram são seis membros do **goleiro**, cujos ângulos *são* os
+> do quadro nomeado, então alguma outra coisa chega à matriz deles. Enquanto
+> esses dois pontos estiverem abertos, a task **não está concluída**.
+
 **(m) A câmera do jogo.** Projeção, deslocamento de tela e a translação da
 câmera, para que o nosso quadro e o do emulador sejam o mesmo desenho.
 [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).

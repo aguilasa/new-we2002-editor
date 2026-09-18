@@ -3912,6 +3912,20 @@ def _pose_cycle(game, maps, names):
             base = who_writes.register_value(registers,
                                              layout.POSE_PIECE_MATRIX_BASE)
             rotation, translation = _matrix_struct(game, base, path)
+            # The three angles the game unpacked for THIS piece, still in the
+            # scratchpad when the matrix built from them is loaded.  They are
+            # the bridge between the capture and ANIME.BIN: the file holds
+            # these numbers and nothing else of the pose (LOOKS-TASK-26).
+            angles = list(struct.unpack(
+                "<3h", game.read_ram(layout.POSE_ANGLES, 6, path)))
+            # And WHICH animation frame those angles came out of, read at this
+            # stop and not at the end of the pass: measured 2026-09-18, the
+            # animation advances IN THE MIDDLE of a draw pass -- the first
+            # five pieces of a pass came from one frame of ANIME.BIN and the
+            # rest from the next.  One frame pointer for the whole pass names
+            # the wrong file bytes for half the pieces.
+            playing = struct.unpack("<I", game.read_ram(
+                layout.ANIME_STATE + layout.ANIME_STATE_FRAME, 4, path))[0]
             keys.append(where)
             out.append({
                 "order": None,
@@ -3920,6 +3934,8 @@ def _pose_cycle(game, maps, names):
                 "piece": names.get(where) if where else ROOT_PIECE,
                 "rotation": rotation,
                 "translation": translation,
+                "angles": angles,
+                "animation_frame": playing,
             })
             period = _repeating_period(keys)
             if period:
@@ -4031,7 +4047,22 @@ def capture_pose(game, slot, frame, maps, names):
     drawn = _pose_cycle(game, maps, names)
     camera = _camera_matrix(game)
     return {"slot": slot, "state": SLOTS[slot], "frame": frame,
-            "camera": camera, "pieces": drawn}
+            "camera": camera, "animation": _animation_now(game),
+            "pieces": drawn}
+
+
+def _animation_now(game):
+    """Which ANIME.BIN frame the state is playing, as the game holds it.
+
+    Written beside the pose so the capture says WHERE in the file it came
+    from: the list, the frame inside it, and the index that walks the list.
+    """
+    path = os.path.join(game.out_dir, "anime-now.bin")
+    raw = game.read_ram(layout.ANIME_STATE + layout.ANIME_STATE_LIST, 8, path)
+    frame_list, frame = struct.unpack("<2I", raw)
+    index = game.read_ram(layout.ANIME_STATE + layout.ANIME_STATE_INDEX,
+                          1, path)[0]
+    return {"list": frame_list, "frame": frame, "index": index}
 
 
 def write_pose(record):

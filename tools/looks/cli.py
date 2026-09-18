@@ -79,6 +79,7 @@ CHECK_IMAGE = (
     "assembly",
     "pieces",
     "scene",
+    "anime",
 )
 """Every module with a `--check-image`, in the order `check` runs them.
 

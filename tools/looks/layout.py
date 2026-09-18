@@ -1467,6 +1467,18 @@ every frame.  `POSE_PIECE_MATRIX` below is the name the pose capture uses,
 so that nothing reads the pose off the camera by picking the wrong one.
 """
 
+POSE_ANGLES = 0x1F800120
+"""Scratchpad, where the three angles of the piece being drawn are unpacked.
+
+Measured on 2026-09-18 (LOOKS-TASK-26): the code at 0x80011D48 reads the
+piece's first word out of the ANIME.BIN frame and writes three halfwords here
+-- `sll 22 / sra 18`, `sll 12 / sra 22 / sll 4`, `sll 2 / sra 22 / sll 4`, so
+three SIGNED 10-bit fields at bits 9:0, 19:10 and 29:20, each shifted left by
+four.  The routine at 0x8003D4BC is then called with this address and turns
+them into the matrix.  It is the bridge between the pose capture and the file:
+what ANIME.BIN stores of a pose is these numbers.
+"""
+
 POSE_PIECE_MATRIX = POSE_MATRIX_SECOND
 POSE_PIECE_MATRIX_BASE = "v1"
 POSE_MATRIX_BASE = "a0"
@@ -1503,6 +1515,14 @@ The list is walked at 0x80027838..0x8002787C: index, `lw` the entry, compare,
 step or wrap, then `lw` the frame pointer and store it at +0x1C.  That wrap is
 the walk cycle repeating, and it is why the figure keeps walking with nothing
 pressed.
+"""
+
+ANIME_SCREEN_ENTRY = 5
+"""The header entry the LOOKS SET screen plays.
+
+Measured on 2026-09-17 (LOOKS-TASK-24) with a read watchpoint over all 204 at
+once: it is the only one the screen reads.  An index, not an address, and it
+is here because `anime.py` must not choose an animation by its size.
 """
 
 ANIME_HEADER_WORDS = 204

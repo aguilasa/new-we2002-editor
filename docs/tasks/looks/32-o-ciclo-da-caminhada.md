@@ -23,6 +23,22 @@ status: pendente
 - **O tronco balança na gravação.** Raiz da animação ou câmera muda onde o
   balanço mora.
 
+- **A interpolação já está medida pela metade, e é desta task fechar.** Em
+  2026-09-18 a [`LOOKS-TASK-26`](/docs/tasks/looks/26-o-formato-do-anime-bin.md)
+  contou, sobre 16 capturas e 192 peças desenhadas: **96 trazem ângulos que o
+  `ANIME.BIN` guarda inteiro por inteiro, e 96 trazem ângulos que quadro
+  nenhum do arquivo guarda.** Metade dos quadros que o jogo mostra é
+  construída.
+  - **Não é a média dos vizinhos na lista:** testado contra o quadro anterior e
+    o seguinte da mesma animação, `(a + b) >> 1`, **0 de 96**.
+  - **O código que mistura é `0x80011F90`…**, e ele faz `lhu` de um ângulo,
+    `lh` de outro a partir de um segundo ponteiro, soma e `sra 1` — uma média
+    de dois, halfword a halfword. De onde vem o segundo ponteiro é o que falta.
+  - Quem mede isso mede também o ritmo: `python tools/looks/anime.py
+    --against-pose` imprime os três números a cada corrida, e
+    `oracle.py --pose <SLOT> <N>` grava a captura com o ângulo e o quadro
+    tocado **ao lado de cada peça**.
+
 ---
 
 ## Objetivo

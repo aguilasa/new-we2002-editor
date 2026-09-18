@@ -865,6 +865,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --screen` / `--screen --write` | anda as doze linhas no jogo e compara com o `screen.json`; o `--write` é o **gerador** desse arquivo (~12 min) |
 | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` | a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle fechando antes — é quem julga a tela |
 | `python tools/looks/oracle.py --pose [SLOT]` / `--pose <SLOT> <N> [N ...]` | de onde vem a pose, e a pose em si: a matriz e a translação de cada peça de um quadro contado, em `work/looks-pose/`, com a captura repetida como controle |
+| `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
 

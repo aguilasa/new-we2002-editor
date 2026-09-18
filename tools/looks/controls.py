@@ -606,10 +606,10 @@ CONTROLS = (
     ),
     Control(
         "cli-check-forgets-a-module", "cli.py", "module constant",
-        "    \"scene\",\n)",
+        "    \"anime\",\n)",
         ")",
         ("cli",),
-        "the disc gate running seven of the eight --check-image: green, and "
+        "the disc gate running eight of the nine --check-image: green, and "
         "blind to the one left out -- the shape looks_image had for five "
         "tasks, when it ran modelfile alone",
     ),
@@ -698,6 +698,33 @@ CONTROLS = (
         "the scan stopping one word short of the end: invisible over two "
         "megabytes and total over a four-byte input, which is how it was "
         "found -- a sweep that silently never looks at its last word",
+    ),
+    Control(
+        "anime-angle-fields-in-the-wrong-order", "anime.py", "angles",
+        "                 for n in range(3))",
+        "                 for n in (2, 1, 0))",
+        ("anime",),
+        "the three packed angles read back to front: every pose stays a "
+        "plausible rotation and the figure is bent the wrong way, which is "
+        "the failure a reader cannot see in its own output",
+    ),
+    Control(
+        "anime-angle-loses-its-scale", "anime.py", "module constant",
+        "ANGLE_SHIFT = 4  # not-an-address: how far the game shifts an angle left",
+        "ANGLE_SHIFT = 0  # not-an-address: how far the game shifts an angle left",
+        ("anime",),
+        "the angle taken as stored instead of shifted left by four: a "
+        "sixteenth of every turn, which reads as a figure that barely moves "
+        "rather than as an error",
+    ),
+    Control(
+        "anime-sine-table-truncates", "anime.py", "sine_table",
+        "    return [int(math.floor(math.sin(2 * math.pi * i / TURN) * ONE + 0.5))",
+        "    return [int(math.sin(2 * math.pi * i / TURN) * ONE)",
+        ("anime",),
+        "the sine table truncated instead of rounded: it is the game's table "
+        "in 1016 of 4096 entries and off by one in the rest, which no drawing "
+        "shows and every exact comparison does",
     ),
     Control(
         "oracle-pose-drops-the-second-draw-of-a-section", "oracle.py",
