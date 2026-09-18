@@ -77,6 +77,7 @@ e o ciclo arquivado, o dele em
 | [CORR-LOOKS-059](/docs/tasks/looks/CORR-LOOKS-059.md) | [LOOKS-TASK-24](/docs/tasks/looks/24-de-onde-vem-a-pose.md) | O plano diz que o `derive_base()` responde `0x8017EE60` para o `ANIME.BIN`, e ele recusa o arquivo | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-060](/docs/tasks/looks/CORR-LOOKS-060.md) | [LOOKS-TASK-25](/docs/tasks/looks/25-a-pose-de-referencia.md) | "Todos os outros ficam abaixo de 2,3x" — a corrida imprime 2,5x na cabeça do slot 2 | Baixa | [x] concluída | 2026-09-18 |
 | [CORR-LOOKS-061](/docs/tasks/looks/CORR-LOOKS-061.md) | [LOOKS-TASK-26](/docs/tasks/looks/26-o-formato-do-anime-bin.md) | O `--against-pose` descarta metade das capturas sem dizer, e o "96 de 96" se lê como cobertura inteira | Média | [x] concluída | 2026-09-18 |
+| [CORR-LOOKS-062](/docs/tasks/looks/CORR-LOOKS-062.md) | [LOOKS-TASK-27](/docs/tasks/looks/27-o-boneco-montado.md) | A segunda chuteira é posta por espelho em z, cai a 258 unidades da própria canela, e nenhum gate pode ver isso | Média | [ ] pendente | — |
 
 **Legenda de status:** `[ ] pendente` · `[~] em andamento` · `[x] concluída`
 
@@ -152,6 +153,7 @@ e o ciclo arquivado, o dele em
 - [x] CORR-LOOKS-059 — a base errada não é a que a regra responde, é a que sobra dela
 - [x] CORR-LOOKS-060 — o limiar da hierarquia escrito 0,2 abaixo do medido
 - [x] CORR-LOOKS-061 — oito capturas entram, oito somem, e a linha diz oito
+- [ ] CORR-LOOKS-062 — o pé que a task ia medir saiu espelhado, e a asserção que o cobriria é vazia
 
 ## Detalhes por correção
 
@@ -1088,3 +1090,17 @@ e o ciclo arquivado, o dele em
 - **Fix:** contar e imprimir as capturas postas de lado, com o motivo (nenhuma
   parada de desempacotamento; ângulos do scratchpad anterior), reprovar se o
   número mudar, e escrever "96 de 192" onde hoje se lê "96 de 96"
+
+### CORR-LOOKS-062
+
+- **Arquivo com problema:** `tools/looks/scene.py` (`pose`, `CHAINS`,
+  `SIDES_APART`), e o Log da LOOKS-TASK-27
+- **Sintoma:** o Contexto da task manda medir onde a segunda chuteira cai; ela é
+  **posta** por espelho em z e fica a `(-55, 63, 258)` da própria canela, contra
+  `(0, 67, -18)` do outro pé — no desenho de 640x640 a perna no ar termina sem
+  chuteira. O `scene.standing()` só nomeia a cadeia do lado `a`, e o par `a`/`b`
+  é conferido em `y`, que o espelho preserva: a asserção não pode reprovar
+- **Como foi detectado:** `scene.pose(disc, 0)` peça a peça, a captura fora da
+  tela e o `scene.py --check-image` verde com a chuteira fora do lugar
+- **Fix:** medir a translação em vigor quando a seção 10 é desenhada; enquanto
+  não medida, não inventar; e pôr a cadeia `b` e o eixo `z` na asserção
