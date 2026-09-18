@@ -149,6 +149,46 @@ a [`LOOKS-TASK-32`](/docs/tasks/looks/32-o-ciclo-da-caminhada.md).
 - `CLAUDE.md` — a linha do comando novo na tabela do ciclo
 - `docs/tasks/looks/progresso.md` — a linha e o checklist da Fase 9
 
+**Gates, na árvore de `910dc1a`**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 81 of 81 controls red
+controls: 0 failure(s)
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/anime.py --check-image
+  ok    the header names 204 animation(s), 197 of them distinct
+  ok    the walk from offset 816 covers 197 block(s) and 3952 frame(s) and
+        ends at 396804   EOF 396804, 0 hole(s)
+  ok    every block closes with the same marker
+  ok    every frame is 96 byte(s), twelve pairs of words
+  ok    the entry the screen plays has a frame for each drawn piece
+  ok    and its matrices are rotations
+anime --check-image: 0 failure(s)
+
+$ python tools/looks/anime.py --against-pose   # 8 capturas de --poses, 2 slots
+  96 of 96 carry the angles the file holds at the pair the game read,
+      integer for integer
+  0 piece(s) drew before any unpack stop, so no pair names them
+  90 matrices of 96 are EXACT, 6 are blends the game made, and 0 are neither
+anime --against-pose: 0 failure(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**Os controles, plantados e rodados** — cada um numa cópia da árvore:
+
+```text
+  RED    anime-angle-fields-in-the-wrong-order  anime.py :: angles
+  RED    anime-angle-loses-its-scale            anime.py :: module constant
+  RED    anime-sine-table-truncates             anime.py :: sine_table
+```
+
 **Problemas encontrados**
 
 1. **O quadro que o estado nomeia não é o quadro que o jogo está lendo.**
