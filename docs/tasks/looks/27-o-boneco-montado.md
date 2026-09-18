@@ -99,6 +99,35 @@ não importa `anime`), `ui/app.py --frame N`, e a captura fora da tela.
 - `tools/looks/ui_check.py` — a linha plantada seguiu a linha que mudou de forma
 - `docs/tasks/looks/27-o-boneco-montado.md` — este Log
 
+**Gates, na árvore de `d8ce2ee`**
+
+```text
+$ python tools/looks/selftest.py
+  ..... 81 of 81 controls red
+looks_selftest: 0 failure(s)
+
+$ python tools/looks/cli.py check
+cli check: 9 module(s), 9 ok, 0 skipped, 0 failed -- ok
+
+$ python tools/looks/ui_check.py
+looks_ui: 6 of 6 negative control(s) red, and the window drew every tuple it
+was asked for and answered every key with what the game shows
+
+$ python tools/looks/anime.py --against-pose
+  96 of 96 carry the angles the file holds at the pair the game read
+  90 matrices of 96 are EXACT, 6 are blends the game made, and 0 are neither
+anime --against-pose: 0 failure(s)
+
+$ python tools/check_tasks.py
+check_tasks: 138 task(s), ok
+```
+
+**A captura da figura montada** (`ui/app.py --looks A-A1-A-A-A --frame 0
+--screenshot`, fora da tela, 640x640): as doze peças aparecem **cada uma no seu
+lugar e nenhuma no lugar certo** — cabeça embaixo, chuteira no ar à altura da
+coxa. É a imagem do bloqueio, e é por ela que o critério da ordem dos centros
+segue aberto.
+
 **Problemas encontrados**
 
 1. **A figura montada com o que o arquivo diz não fica em pé**, e a medição do
