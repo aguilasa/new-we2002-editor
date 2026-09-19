@@ -6,7 +6,7 @@ category: montagem
 phase: 9
 depends_on: ["LOOKS-TASK-22", "LOOKS-TASK-28"]
 fonte_de_verdade: "/docs/PLAN-LOOKS-PY.md §10.3 (s)"
-status: pendente
+status: concluído
 ---
 
 # LOOKS-TASK-29: Altura e corpo
