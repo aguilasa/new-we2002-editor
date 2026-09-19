@@ -2439,6 +2439,8 @@ continua sendo a (j), e ela abre a Fase 9.
 - **`BODY` não escreve em nenhum dos dois arquivos de modelo** (§6 (a)), e
   `HEIG` também não foi visto escrevendo; se os dois mudam o desenho, é na
   transformação, e é por isso que a (s) mora na Fase 9.
+  > **Medido em 2026-09-18** ([`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md)):
+  > é na transformação, e é na **câmera** — ver a (s).
 - **O uniforme mora nos `TEX_*.BIN`**, que não têm digest na guarda (§6 (f)).
 - **A forma não tem testemunha** (§6 (h)). Um boneco montado na pose do jogo é
   o que a dá: a mesma silhueta no mesmo quadro passa a ser comparável.
@@ -2850,9 +2852,61 @@ desenho. [`LOOKS-TASK-28`](/docs/tasks/looks/28-a-camera-do-jogo.md).
 > só posava a cabeça de referência —, e corrigido, no corpo inteiro os estilos
 > não se separam; no close-up, sim (§6 h).
 
-**(s) `HEIG` e `BODY`.** O que mudam no desenho — escala na matriz, troca de
+**(s) `HEIG` e `BODY` — FECHADA em 2026-09-18.** O que mudam no desenho — escala na matriz, troca de
 peça, ou nada — medido pela pose de dois valores de cada.
 [`LOOKS-TASK-29`](/docs/tasks/looks/29-altura-e-corpo.md).
+
+> **Veredito: uma escala por eixo, dentro da câmera.** Nenhuma peça muda e a
+> pose não muda: o jogo guarda um vetor de escala da figura e o aplica às
+> **colunas** da rotação da figura, truncando para zero, antes de multiplicar
+> a vista (`stature.py`):
+>
+> ```text
+> h     = HEIG + 148
+> x = z = (h << 12) / (tabela[BODY] + 10)     tabela = 210 200 195 190 185 180 175 170
+> y     = (h << 12) / 180
+> câmera = (VISTA · trunc(Ry(128) · diag(x, y, z))) >> 12
+> peça   = (câmera · pose) >> 12
+> ```
+>
+> Então **`HEIG` escala os três eixos** — o jogador alto é também largo — e
+> **`BODY` só largura e profundidade**; `H TYPE` é o único corpo tão largo
+> quanto alto. O que não muda: a translação da câmera, o `y` com o `BODY`, a
+> pose e as peças. A regra não está escrita em lugar nenhum do código nosso:
+> bias, deslocamento, os dois divisores e a tabela saem das instruções do
+> `/SELECT8.BIN` (base `0x800CB000`), que o `stature.rule` decodifica e
+> recusa se não forem as medidas — o `/180` é a multiplicação mágica
+> `0xB60B60B7` com `sra 7`, não um `div`.
+>
+> Medido por `oracle.py --stature`, os dois slots:
+>
+> - **a caminhada** — os 56 valores de `HEIG` (155 a 210 cm) e os 8 de
+>   `BODY`, 62 teclas por slot: vetor de escala e carga de câmera contra a
+>   regra, **0 fora**, e **62 cargas diferentes**;
+> - **a pose** — o estado duas vezes (controle), as pontas de `HEIG`, os oito
+>   `BODY` e `155 cm` com `H TYPE` juntos, nos **mesmos quadros da
+>   caminhada** que o controle: **12 de 12 peças exatas** em cada uma das 12
+>   capturas dos dois slots, rotação e translação, inteiro por inteiro;
+> - **a janela** — o `looks_ui` fotografa a tela nas pontas e exige a razão da
+>   regra na tinta do painel: 88×165 a 155 cm, 100×187 a 175, 122×222 a 210 e
+>   123×188 em `H TYPE`, com os dois controles plantados vermelhos.
+>
+> E a silhueta (`confront.py --silhouette-stature`), pelos limiares da
+> LOOKS-TASK-28: 155 cm a 18% e 16% da tinta, 210 cm a 12% e 11%, `D TYPE` a
+> 16% e 18%, `H TYPE` a 6% e 7% (slot 2 e slot 1), atraso de 0 a 2 quadros.
+> A nossa figura **na estatura do estado** pontua 897/801, 969/989 e 754/784
+> contra essas fotos, todas acima do que a estatura certa erra. `D TYPE` fica **abaixo da
+> resolução**: a foto do jogo muda 405 e 408 pixels, menos que os 428 e 457
+> que a nossa melhor comparação já erra, e aí a ordem não se afirma
+> (armadilha 76 do perfil).
+>
+> Três coisas que a medição teve de aprender, no perfil como armadilhas 73 a
+> 75: depois de trocar um valor, o mesmo quadro contado **não** é o mesmo
+> quadro da caminhada, e uma passada desenha dois quadros do `ANIME.BIN`
+> cortados numa peça que muda; no goleiro o quadro 0 é mistura (o controle o
+> recusa: `foot b` 92 de 4096 fora, com os ângulos iguais aos do arquivo); e
+> escalar linhas ou colunas dá a mesma matriz nesta tela, então nenhum
+> controle separa as duas.
 
 **(n) Qual `TEX_*.BIN` a tela veste.** A §6 (f): digest na guarda, o arquivo
 que o time dos save states usa, e as primitivas resolvidas.

@@ -643,6 +643,42 @@ Não se revertem sem o usuário pedir.
     os quatro primeiros valores ordenados, todos a ±1, e foi lida como
     "constante" — o intervalo inteiro era de **29** unidades. Conferência de
     constância imprime **mínimo e máximo**, nunca a cabeça da lista.
+72. **`HEIG` e `BODY` moram na CÂMERA, não na pose.** O jogo guarda um vetor
+    de escala da figura (`layout.FIGURE_SCALE`) e escala as **colunas** da
+    rotação da figura antes de multiplicar a vista: `x = z = (h<<12)/(tabela
+    [BODY]+10)`, `y = (h<<12)/180`, `h = HEIG+148`. Então `HEIG` escala os três
+    eixos — o alto também é largo — e `BODY` só largura e profundidade. Palpite
+    de "escala linear em altura" teria errado dois eixos de três. A regra se
+    **lê do código** do `/SELECT8.BIN` (`stature.rule`), incluindo o `/180`,
+    que não é `div`: é a multiplicação mágica `0xB60B60B7` com `sra 7`.
+73. **Quadro contado igual não é quadro da caminhada igual depois de trocar um
+    valor.** Acolchoar toda captura até o mesmo quadro contado desde o
+    `load_state` devolveu passada **sem par** em 155 e 210 cm onde o estado,
+    no mesmo quadro, tinha doze: a troca de valor desloca a fase da caminhada.
+    E uma passada quase sempre desenha **dois** quadros do `ANIME.BIN` — a
+    animação avança no meio dela —, cortados numa peça que muda com a fase:
+    comparar os pares peça a peça gastou 80 passadas procurando um corte que
+    não voltava. O que nomeia a pose é o **conjunto de quadros**
+    (`oracle._stature_frames`).
+74. **No goleiro, as peças do quadro 0 não são as do arquivo** — com os
+    ângulos do scratchpad **iguais** aos do par. É a volta do ciclo, onde o jogo
+    mistura com o quadro anterior (a "mistura" da task 26), e acontece na
+    estatura do próprio estado. Controle que caísse ali cobraria da regra de
+    estatura um erro do leitor de pose; o `--stature` exige que o controle seja
+    uma passada que o leitor reproduz **inteira** e imprime as que recusa.
+75. **Escalar linhas ou colunas dá os mesmos nove inteiros nesta tela.** Com
+    `sx = sz` e a figura girada só em `y`, as duas leituras coincidem, e nenhum
+    controle as separa — um controle plantado com a troca ficou **verde**, e
+    saiu em vez de ficar fingindo. O `stature.camera` recusa qualquer outro
+    giro, que é onde a diferença começaria a aparecer.
+76. **Silhueta só ordena o que o próprio jogo separa.** `D TYPE` é 10% mais
+    largo que o estado, e a foto do jogo em `D` difere da do estado em
+    **menos** pixels do que a nossa melhor comparação já erra — então a nossa
+    figura na estatura do estado pontuou *melhor* que a certa, nos dois slots,
+    com todos os limiares da task 28 verdes. Não é defeito da regra (as peças
+    batem inteiras): é resolução, a mesma da armadilha 68. O
+    `--silhouette-stature` só afirma a ordem quando a mudança do jogo supera o
+    resíduo, e imprime o resto como "abaixo da resolução".
 ---
 
 ## As fontes de verdade binárias
@@ -685,8 +721,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | alvo | precisa | **como se roda AQUI** | por `ctest`, onde o build configura | existe desde |
 | --- | --- | --- | --- | --- |
 | `looks_selftest` | nada — **nunca pula** | `python tools/looks/selftest.py` | `ctest -R looks_selftest` | LOOKS-TASK-06 |
-| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os oito `--check-image`, todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
-| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` | `ctest -R looks_ui` | LOOKS-TASK-16 |
+| `looks_image` | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/cli.py check` — os dez `--check-image` (desde a LOOKS-TASK-29, com o `stature`), todos até o fim (a ordem é de leitura, não guarda — [`CORR-LOOKS-052`](/docs/tasks/looks/CORR-LOOKS-052.md)); até a LOOKS-TASK-19 era só o `modelfile.py --check-image` | `ctest -R looks_image` | CORR-LOOKS-012 |
+| `looks_ui` | venv + display + `WE2002_LOOKS_IMAGE` (77 sem eles) | `python tools/looks/ui_check.py` — desde a LOOKS-TASK-29 também fotografa a tela em 155, 175 e 210 cm e em `H TYPE` e exige que a tinta do painel siga as razões da regra (`STATURE_SLACK`), com dois controles plantados; sem câmera medida em `work/looks-camera/` diz que não julgou | `ctest -R looks_ui` | LOOKS-TASK-16 |
 | `looks_live` | as duas variáveis, os dois states e o fork (77 sem eles, antes de subir processo) | `python tools/looks/oracle.py --check-live` | `ctest -R looks_live` | LOOKS-TASK-19 (o comando, da LOOKS-TASK-07) |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/texture.py --check-image` | — | LOOKS-TASK-10 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/atlas.py --check-image` | — | LOOKS-TASK-11 |
@@ -720,6 +756,9 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(sem alvo ainda)* | idem; ~4 min (medido 2026-09-18, os dois slots, 4 min 2 s) | `python tools/looks/confront.py --silhouette-styles [SLOT]` — **três estilos de cabelo andados no jogo, no close-up**: foto e câmera da mesma parada, a câmera derivada das peças (armadilha 70), e cada foto tem de escolher o próprio estilo pela faixa da cabeça. **O controle fecha antes** — o mesmo close-up duas vezes, 0 pixel e câmera idêntica —, e cada foto imprime a razão contra o estilo errado mais próximo (reprova abaixo de `CLOSEUP_MARGIN`) e a fração da tinta que o certo erra (reprova acima de `CLOSEUP_SHARE`), desde a CORR-LOOKS-063. No corpo inteiro não se separa (armadilha 68) | — | LOOKS-TASK-28 |
 | *(sem alvo ainda)* | as capturas de um `--poses` (77 sem elas); **sem emulador**, instantâneo | `python tools/looks/oracle.py --pose-lag` — quantas paradas o ponteiro de modelo atrasa em relação à matriz, medido pela dispersão do tornozelo em cada atraso candidato, com a canela errada de controle (armadilha 59) | — | LOOKS-TASK-27 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/anime.py --check-image` | — | LOOKS-TASK-26 |
+| *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/stature.py --check-image` — a regra de `HEIG` e `BODY` decodificada das instruções do `/SELECT8.BIN`, recusando instrução que não seja a medida, e a cadeia contra quatro cargas de câmera do jogo | — | LOOKS-TASK-29 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~35 min (medido 2026-09-18, os dois slots, 34 min 6 s) | `python tools/looks/oracle.py --stature [SLOT]` — **o controle fecha antes** (o estado capturado duas vezes, idêntico, numa passada que o leitor de pose reproduz inteira — armadilha 74), depois as pontas de `HEIG`, os oito `BODY` e um cruzado **nos mesmos quadros da caminhada** (armadilha 73), cada um com vetor de escala, carga de câmera e peças contra `stature`; e a caminhada por todos os valores das duas linhas, vetor e câmera contra a regra | — | LOOKS-TASK-29 |
+| *(sem alvo ainda)* | idem, mais `work/looks-camera/` com a cadeia; ~6 min (medido 2026-09-18, os dois slots, 6 min 15 s) | `python tools/looks/confront.py --silhouette-stature [SLOT]` — a silhueta do jogo andado a 155 cm, 210 cm, `D TYPE` e `H TYPE` contra a nossa com a câmera composta para a estatura, pelos limiares da LOOKS-TASK-28; controles: o estado fotografado duas vezes, cada estatura mexendo a foto, e a nossa figura **na estatura do estado** pontuando pior | — | LOOKS-TASK-29 |
 | *(sem alvo ainda)* | `WE2002_LOOKS_IMAGE` e as capturas de um `--poses` (77 sem elas) | `python tools/looks/anime.py --against-pose` — o arquivo contra o que o jogo carregou: quantas capturas julgou **e quantas pôs de lado com o motivo** ([`CORR-LOOKS-061`](/docs/tasks/looks/CORR-LOOKS-061.md)), quantas peças trazem ângulo que o arquivo guarda, quantas não, e a distância da matriz | — | LOOKS-TASK-26 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~4 min | `python tools/looks/oracle.py --default [SLOT]` — anda os 80 valores de `NAT` lendo o byte da nacionalidade, e confere o que `DEFAUL` aplica (nada) em seis nações, com o controle da mesma nação duas vezes | — | LOOKS-TASK-23 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork (77 sem eles); ~30 s | `python tools/looks/oracle.py --keys [SEQUÊNCIA [SLOT]]` — a mesma sequência de teclas no jogo, no `screen.json` e na nossa janela, com o controle (a sequência duas vezes no jogo) fechando antes | — | LOOKS-TASK-22 |

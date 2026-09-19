@@ -817,10 +817,9 @@ dono do repositório, e isso não muda na v2.
 **A v1 fechou em 2026-09-17 e a v2 abriu no mesmo dia** — o ciclo está
 **aberto**, com as fases 8 a 11 (tasks 21 a 35). O alvo da v2 é a própria tela
 do jogo: a janela **é** a `LOOKS SET`, com as doze linhas trocáveis, o cursor,
-a caixa de ajuda e o boneco no painel. Já entregues a tela medida no jogo
-(21) e a tela na janela (22); faltam a pose e o boneco montado (fase 9), o
-uniforme e o cenário (10) e a caminhada (11). Até lá o boneco do painel é a
-prateleira da v1.
+a caixa de ajuda e o boneco no painel. Entregues a tela (fase 8) e o boneco
+montado, na pose e na câmera do jogo, com altura e corpo (fase 9, até a
+task 29); faltam o uniforme e o cenário (10) e a caminhada (11).
 
 O plano é [docs/PLAN-LOOKS-PY.md](docs/PLAN-LOOKS-PY.md); o ciclo é
 [docs/tasks/looks/](docs/tasks/looks/progresso.md), prefixo `LOOKS-TASK-`, pool
@@ -856,7 +855,7 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | Comando | O que faz |
 |---|---|
 | `python tools/looks/selftest.py` | o gate **obrigatório**: os self-checks, as três regras de desenho e os controles negativos plantados |
-| `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os oito `--check-image` e é o alvo `looks_image` |
+| `python tools/looks/cli.py sections\|pieces\|texture\|looks [tupla]\|check` | a linha de comando do núcleo; `check` roda os dez `--check-image` e é o alvo `looks_image` |
 | `.\make.ps1 looks` | **abre a tela `LOOKS SET`** — `-State 1\|2` escolhe goleiro ou jogador de linha, `-Tuple A-I3-A-E-A` abre o visualizador de uma tupla só. É o **único** alvo do ciclo que mostra janela ao usuário; opção de visualizador sem `-Tuple` é **recusada**, não ignorada |
 | `work/venv-looks/Scripts/python.exe tools/looks/ui/app.py` | o mesmo app: **sem** `--looks` abre a tela (com `--state`, `--keys`, `--screenshot`); **com** `--looks <tupla>` desenha uma tupla fora da tela, e tupla que a tabela recusa sai **2** |
 | `python tools/looks/screen.py --check` / `--report` | a tabela da tela: decodificação, caixas, cursor e os rótulos do `looks.py` contra ela; o `--report` imprime o que a tabela diz |
@@ -868,6 +867,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/oracle.py --pose-lag` | quantas paradas o ponteiro de modelo atrasa em relação à matriz que ele nomeia, medido sobre as capturas em disco, sem emulador |
 | `python tools/looks/oracle.py --camera [SLOT [LINHA]]` | a câmera do jogo lida do GTE — `H`, os deslocamentos (zero nesta tela) e a matriz —, em `work/looks-camera/`; com `LINHA` (ex.: `HAIR`) mede a câmera do close-up |
 | `python tools/looks/confront.py --silhouette` / `--silhouette-styles` | a nossa silhueta contra a do jogo: no corpo inteiro testemunha a **pose**; no close-up, três estilos de cabelo andados no jogo, cada foto escolhendo o próprio |
+| `python tools/looks/oracle.py --stature [SLOT]` | o que `HEIG` e `BODY` fazem: o vetor de escala, a câmera e as peças contra a regra do `stature.py`, nos mesmos quadros da caminhada, e todos os valores das duas linhas |
+| `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |
@@ -903,6 +904,12 @@ Cinco coisas que custam tempo se descobertas tarde:
   vale ali se deriva das próprias peças (`oracle.camera_from_pieces`). O painel
   da nossa janela desenha com a câmera de corpo inteiro (task 28), e o close-up
   por linha é da task 31.
+- **`HEIG` e `BODY` moram na câmera, e escalam por eixo.** O jogo escala as
+  colunas da rotação da figura por um vetor antes da vista: `HEIG` mexe nos
+  três eixos, `BODY` só em largura e profundidade. A regra — bias, divisores e
+  tabela — se lê das instruções do `/SELECT8.BIN` (`stature.py`), que difere
+  entre os discos e por isso tem digest japonês na guarda. A janela recompõe a
+  câmera quando uma das duas linhas muda (LOOKS-TASK-29).
 - **O ponteiro vivo numa parada nomeia a peça ANTERIOR.** Na carga da matriz
   de uma peça os registradores ainda apontam para a peça que o jogo acabou de
   desenhar — a matriz entra no GTE antes de os ponteiros serem armados. Lido

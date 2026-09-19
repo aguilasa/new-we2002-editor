@@ -75,6 +75,12 @@ class LooksSet(QtWidgets.QWidget):
         self.builds = 0
         self.drawn = None
         self.tuple_text = state.tuple_text()
+        # Where the game's camera comes from, handed in by whoever built the
+        # window: a callable of the rows' values.  The window does not compose
+        # it -- that is the core's (`scene.panel_camera`), and the camera is
+        # where HEIG and BODY live (LOOKS-TASK-29).
+        self.camera_for = None
+        self.camera_note: str | None = None
         width, height = self.places["display"]
         self.setFixedSize(width * scale, height * scale)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
@@ -139,7 +145,26 @@ class LooksSet(QtWidgets.QWidget):
         self.builds += 1
         self.drawn = drawn
         self.viewer.set_scene(drawn)
+        self.aim()
         self.viewer.show()
+
+    def aim(self) -> None:
+        """Point the panel's camera at the figure the rows now describe.
+
+        `HEIG` and `BODY` change no piece of the figure: the game puts them in
+        the CAMERA, as a scale per axis, and so does this -- by asking
+        `camera_for` again with the values on screen.  Without a measured
+        camera the note says why and the v1 orbit stays.
+        """
+        if self.camera_for is None or self.drawn is None:
+            return
+        try:
+            self.viewer.game_camera = self.camera_for(self.state.values())
+            self.camera_note = None
+        except core.BadScene as exc:
+            self.viewer.game_camera = None
+            self.camera_note = str(exc)
+        self.viewer.update()
 
     def picture(self) -> QtGui.QImage:
         """The whole screen as one image, the panel included.
@@ -162,11 +187,21 @@ class LooksSet(QtWidgets.QWidget):
     # -- the four buttons --------------------------------------------------
 
     def press(self, button: str) -> bool:
-        """One press, and the figure redrawn if the tuple changed."""
+        """One press, and the figure redrawn if the tuple changed.
+
+        Or re-aimed, if what changed is the figure's stature: `HEIG` and
+        `BODY` are not in the tuple, and until LOOKS-TASK-29 they moved the
+        text and nothing else.
+        """
         before = self.state.tuple_text()
+        values = self.state.values()
+        stature = (values.get("height"), values.get("build"))
         moved = core.screen_press(self.state, button)
+        now = self.state.values()
         if self.state.tuple_text() != before:
             self.redraw()
+        elif (now.get("height"), now.get("build")) != stature:
+            self.aim()
         self.update()
         return moved
 

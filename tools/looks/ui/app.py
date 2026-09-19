@@ -234,12 +234,16 @@ def _screen(app: QtWidgets.QApplication, args) -> int:
     # The panel draws with the camera the game projects with, when there is a
     # measured one on disc.  Without it the window says so and keeps the v1
     # orbit -- a projection invented here would look like a measurement.
-    try:
-        window.viewer.game_camera = core.panel_camera(
-            window.drawn, int(state.slot), window.panel_native())
+    # HEIG and BODY live in that camera, as the figure's scale (LOOKS-TASK-29),
+    # so the window asks for it again whenever either row moves.
+    window.camera_for = lambda values: core.panel_camera(
+        window.drawn, int(state.slot), window.panel_native(),
+        builder.scale(values))
+    window.aim()
+    if window.camera_note is None and window.viewer.game_camera is not None:
         print("  the panel draws with the game's own camera")
-    except core.NoCamera as exc:
-        print("  the panel keeps the v1 orbit: %s" % exc)
+    else:
+        print("  the panel keeps the v1 orbit: %s" % window.camera_note)
     window.setWindowTitle("LOOKS SET -- slot %s" % state.slot)
     _park(window, args.visible)
     _settle(app, window)

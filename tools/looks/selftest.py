@@ -53,6 +53,7 @@ MODULES = (
     "ui_check",
     "pieces",
     "anime",
+    "stature",
     "iso_source",
     "oracle",
     "controls",

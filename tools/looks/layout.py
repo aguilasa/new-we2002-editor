@@ -76,6 +76,7 @@ MODEL = "/BIN/MODEL.BIN"
 DAT2D = "/BIN/DAT2D.BIN"
 SELECT = "/SELECT.BIN"
 ANIME = "/BIN/ANIME.BIN"
+SELECT8 = "/SELECT8.BIN"
 
 # --- Identity of what may be read, measured 2026-09-14 --------------------
 #
@@ -96,6 +97,11 @@ DIGEST = {
     # same 396,804 bytes and the same digest on the Japanese dump and on the
     # English one that drives the emulator.
     ANIME: "9b43fe0443e6818391cf2f5a106d26332e4e9c6155614ba59d2ff424bd35427a",
+    # Japanese only, measured 2026-09-18 (LOOKS-TASK-29).  The English disc has
+    # 9512941d8d4cb93367fdb102cb0fa43440377b2a083a328603a62fca514ac2fd here --
+    # the overlay carries the screen's text, and the patch translated it.  The
+    # part this cycle reads, the stature rule, is the same on both.
+    SELECT8: "b735ed9c1ebaef001088de57c807c8e9680b3296516928fb23b4af612befef8e",
 }
 
 TEXTURE_FILES = frozenset({DAT2D})
@@ -127,6 +133,17 @@ it holds the player records.  Folding it into TEXTURE_FILES would refuse it
 with a sentence about palettes, which is the wrong thing to go looking at.
 """
 
+CODE_FILES = frozenset({SELECT8})
+"""Japanese-only as well, and CODE: the overlay the LOOKS SET screen runs.
+
+Read for the stature rule (`STATURE_*` below), which is the same instructions
+and the same table on both discs -- measured 2026-09-18, the bytes the rule is
+made of compare equal in the Japanese file, the English file and the running
+game's RAM.  The file as a whole is not, because the overlay also carries the
+screen's text and the translation rewrote it.  So the guard reads it from the
+Japanese disc like everything else that differs, and the hint says why.
+"""
+
 # The whole-image digest of the Japanese dump, so a recipe can confirm it is
 # pointed at the right dump before reading anything.  Both copies on this
 # machine -- roms/japanese-shift-jis.bin and the we-2002-original-japao.bin
@@ -153,6 +170,7 @@ LBA = {
     DAT2D: 5300,
     SELECT: 850,
     ANIME: 3000,
+    SELECT8: 1800,
 }
 
 SIZE = {
@@ -161,6 +179,7 @@ SIZE = {
     DAT2D: 81124,
     SELECT: 300648,
     ANIME: 396804,
+    SELECT8: 125176,
 }
 
 # --- Where each model file loads in RAM -----------------------------------
@@ -717,6 +736,14 @@ def _hint_for(disc_path: str) -> str:
             f"the Japanese one.  Point {ENV_IMAGE} at it; {ENV_DRIVE_IMAGE} "
             f"is the disc you drive, not the disc you read."
         )
+    if disc_path in CODE_FILES:
+        return (
+            f"  {disc_path} differs between the Japanese original and the "
+            f"English translation patch -- it is the screen's overlay, text "
+            f"included -- and code is read from the Japanese one like "
+            f"everything else that differs.  Point {ENV_IMAGE} at it; "
+            f"{ENV_DRIVE_IMAGE} is the disc you drive, not the disc you read."
+        )
     if disc_path in GEOMETRY_FILES | ANIMATION_FILES:
         return (
             f"  {disc_path} is identical on both known discs, so a mismatch "
@@ -1074,7 +1101,7 @@ def self_check() -> None:
 
     # And the two Japanese-only files say so by name, since "you opened the
     # English disc" is the overwhelmingly likely cause of either refusal.
-    for japanese_only in TEXTURE_FILES | RECORD_FILES:
+    for japanese_only in TEXTURE_FILES | RECORD_FILES | CODE_FILES:
         assert ENV_IMAGE in _hint_for(japanese_only), japanese_only
         assert "Japanese" in _hint_for(japanese_only), japanese_only
 
@@ -1583,6 +1610,73 @@ larger player structure and the nationality is 27 bytes into it.
 On a freshly loaded state, with the row showing `Unknown`, the two do not hold
 a nation index and do not even agree (253 and 139); one press makes them agree.
 What the screen shows for every other non-nation value is NOT measured.
+"""
+
+SELECT8_BASE = 0x800CB000
+"""Where `/SELECT8.BIN` loads in RAM: the LOOKS SET screen's overlay.
+
+Derived, not assumed: on 2026-09-18 (LOOKS-TASK-29) the stature code caught
+writing the figure's scale ran at 0x800E5890, and its 48 bytes occur once on
+the whole Japanese disc, at offset 0x1A890 of this file -- the table the code
+reads, 0x800E8220 in RAM, sits at 0x1D220 of it, the same distance apart.
+"""
+
+STATURE_HEIGHT_BIAS = 0x800E589C
+STATURE_HEIGHT_SHIFT = 0x800E58AC
+STATURE_TABLE_LOAD = 0x800E58A8
+STATURE_TABLE_EXTRA = 0x800E58B0
+STATURE_MAGIC_HIGH = 0x800E58E4
+STATURE_MAGIC_LOW = 0x800E591C
+STATURE_MAGIC_SHIFT = 0x800E593C
+STATURE_WIDTH_STORES = (0x800E58FC, 0x800E58F8)
+STATURE_HEIGHT_STORE = 0x800E594C
+"""The instructions that turn `HEIG` and `BODY` into the figure's scale.
+
+Found on 2026-09-18 (LOOKS-TASK-29) by a write watchpoint on the scale vector
+(`FIGURE_SCALE`) with `Right` pressed on `BODY`, and read in full:
+
+    h = HEIG field + 148                       STATURE_HEIGHT_BIAS, addiu
+    x = z = (h << 12) / (table[BODY] + 10)     SHIFT, TABLE_LOAD, TABLE_EXTRA
+    y     = (h << 12) / 180                    MAGIC_HIGH/LOW, MAGIC_SHIFT
+
+The `/ 180` is not a `div`: it is the compiler's multiply by the magic
+0xB60B60B7 and a shift of 7, and `stature.rule` turns those two back into the
+divisor instead of this file writing 180 down.  The two width stores go to
+the x and z words, the height store to y -- which is what says WHICH axis the
+height alone decides.  `stature.rule` reads every one of these out of the
+file and refuses one that is not the instruction it is said to be.
+"""
+
+STATURE_TABLE = 0x800E8220
+"""Eight bytes, one per `BODY` value A to H: the width divisor, less ten.
+
+Read by `STATURE_TABLE_LOAD` as `lbu v1, -0x7DE0(at)` with `at` = 0x800F0000
++ BODY, so the address is also derived by `stature.rule` from the instruction
+itself and compared with this one.
+"""
+
+FIGURE_SCALE = 0x80075CDC
+FIGURE_ANGLES = 0x80075CD4
+FIGURE_PLACE = 0x80075CB6
+"""The figure's own transform, as the game keeps it between frames.
+
+`FIGURE_SCALE` is three 32-bit words, x y z, in 4.12 -- (3258, 3982, 3258) on
+both save states, at 175 cm and `A TYPE`.  `FIGURE_ANGLES` is three halfwords,
+(0, 128, 0): the figure turned 11.25 degrees about y.  `FIGURE_PLACE` is three
+halfwords, (-480, 32, 1056).  Measured on 2026-09-18 by reading the code that
+builds the camera (`CAMERA_BUILD`), which loads the three from these.
+"""
+
+CAMERA_BUILD = 0x80010E38
+CAMERA_VIEW_BASE = "s7"
+"""Where the camera is composed, and the register that holds the view.
+
+The code before this instruction builds `RotMatrix(FIGURE_ANGLES)` and scales
+its COLUMNS by `FIGURE_SCALE`, truncating toward zero; this `ctc2` loads the
+VIEW matrix through `s7` -- a 32-byte struct in scratchpad, the same shape as
+the pose's -- and the GTE then multiplies the two.  The product is the matrix
+`POSE_MATRIX` hands the GTE at every piece, and it is why a taller player is
+drawn taller: the scale is inside the camera, not in the pose (LOOKS-TASK-29).
 """
 
 ADDRESS_OWNER = "layout.py"

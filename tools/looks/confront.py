@@ -34,6 +34,9 @@ Usage:
     python tools/looks/confront.py --render         # our side again, no game
     python tools/looks/confront.py --score          # re-judge the last run
     python tools/looks/confront.py --reach FACE     # how far a row walks
+    python tools/looks/confront.py --silhouette [SLOT]          # the pose, by shape
+    python tools/looks/confront.py --silhouette-styles [SLOT]   # hair, in the close-up
+    python tools/looks/confront.py --silhouette-stature [SLOT]  # HEIG and BODY, by shape
 """
 
 from __future__ import annotations
@@ -1146,8 +1149,12 @@ def still_frame(game, display, oracle, screen):
     return best
 
 
-def game_at(game, slot, counted, oracle, anime, data, entry, table):
+def game_at(game, slot, counted, oracle, anime, data, entry, table,
+            steps=()):
     """(the ANIME frame being drawn, the panel's mask) at counted *counted*.
+
+    *steps* walks rows first -- `((row, text), ...)`, as `oracle.py
+    --stature` walks them -- and *counted* is then counted from the last press.
 
     **One run, and no frame stepped between the two halves.**  The pair says
     which frame of the file the game is drawing; the dump, taken at that same
@@ -1161,6 +1168,8 @@ def game_at(game, slot, counted, oracle, anime, data, entry, table):
 
     oracle.restore_state(slot, verbose=False)
     game.load_looks(slot, label="silhouette-%d-%d" % (slot, counted))
+    if steps:
+        oracle._stature_walk(game, slot, steps, table)
     game.step(counted)
     client = game.client
     client.call("breakpoint", action="clear")
@@ -1664,6 +1673,143 @@ def check_silhouette(slots=(2, 1), frames=SILHOUETTE_FRAMES,
     return 1 if problems else 0
 
 
+STATURE_SHOWN = (
+    ("155 cm", (("HEIG", "155 cm"),)),
+    ("210 cm", (("HEIG", "210 cm"),)),
+    ("D TYPE", (("BODY", "D TYPE"),)),
+    ("H TYPE", (("BODY", "H TYPE"),)),
+)
+"""The statures `--silhouette-stature` walks the game to: the two ends of
+`HEIG`, and two `BODY` -- the middle of the table and its widest end.  The
+state's own 175 cm and `A TYPE` is the control each one is held against."""
+
+STATURE_FRAME = 60
+"""Counted frames after the last press before the photograph: the first of
+`SILHOUETTE_FRAMES`, so the sweep starts where `--silhouette` settled."""
+
+
+def check_silhouette_stature(slots=(2, 1), verbose=True) -> int:
+    """`--silhouette-stature [SLOT]`: HEIG and BODY against the game's shape.
+
+    The same judgement as `--silhouette` -- the sweep around the frame the
+    game's own pair names, `MATCH_SHARE`, `WALK_LAG` and `MATCH_MARGIN`, the
+    thresholds LOOKS-TASK-28 measured -- on the game walked to another stature,
+    and our figure drawn with the camera `scene.load_camera` composes for it.
+
+    Controls, before and beside:
+
+      **the state photographed twice** -- identical, or no pixel below means
+          anything;
+      **the statures move the game's picture** -- every walked photograph has
+          to differ from the state's, or the walk reached nothing;
+      **the state's own stature on our side** -- our figure at 175 cm and
+          `A TYPE`, fitted the same way, has to score WORSE than the stature
+          the rows show.  The comparison is translation free, so what is left
+          to tell them apart is size and shape, which is what HEIG and BODY
+          change -- and only where the game's own photograph moved by MORE
+          than our best match misses by.  Under that the ranking is noise and
+          is printed as such, not asserted either way (pitfall 76).
+    """
+    import anime
+    import iso_source
+    import layout
+    import oracle
+    import scene
+    import screen
+    import stature
+
+    ready = oracle.preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        data = {name: disc.read(name)
+                for name in (layout.EDT_MOD, layout.MODEL, layout.DAT2D,
+                             layout.ANIME, layout.SELECT8)}
+    found = stature.rule(data[layout.SELECT8])
+    entry = anime.header(data[layout.ANIME])[layout.ANIME_SCREEN_ENTRY]
+    cycle = len(anime.block(data[layout.ANIME], entry)["frames"])
+    box = table["regions"]["panel"]["native"]
+    size = (box[2] - box[0] + 1, box[3] - box[1] + 1)
+    problems = []
+    offsets = {}
+    with oracle.Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, oracle.SLOTS[slot]))
+            state = scene.screen_state(slot)
+            text, figure = state.tuple_text(), state.figure()
+            own = state.values()
+            base = scene.load_camera(slot)
+            named, first = game_at(game, slot, STATURE_FRAME, oracle, anime,
+                                   data[layout.ANIME], entry, table)
+            twice, again = game_at(game, slot, STATURE_FRAME, oracle, anime,
+                                   data[layout.ANIME], entry, table)
+            if (named, first) != (twice, again):
+                problems.append("slot %d: the state photographed twice "
+                                "differs, so nothing below is a measurement"
+                                % slot)
+                continue
+            print("    control: the state (%d cm, %s TYPE) photographed "
+                  "twice, identical, %d pixel(s) of ink"
+                  % (own["height"], "ABCDEFGH"[own["build"]], sum(first)))
+            for name, steps in STATURE_SHOWN:
+                plays, theirs = game_at(game, slot, STATURE_FRAME, oracle,
+                                        anime, data[layout.ANIME], entry,
+                                        table, steps)
+                moved = scene.masks_differ(first, theirs)
+                if not moved:
+                    problems.append("slot %d, %s: the game's picture is the "
+                                    "state's -- the walk reached nothing"
+                                    % (slot, name))
+                    continue
+                values = dict(own)
+                walked = scene.screen_state(slot)
+                for row, value in steps:
+                    walked.indices[row] = screen.index_of(table, row, value)
+                values.update(walked.values())
+                camera = scene.load_camera(slot, stature.scale(
+                    found, values["height"], values["build"]))
+                label = "slot %d %s" % (slot, name)
+                problems += _judged(label, theirs, plays, cycle, data, text,
+                                    figure, camera, size, scene, offsets,
+                                    (slot, name))
+                behind = offsets[(slot, name)]
+                at = (plays - behind) % cycle
+                right = _stature_score(data, text, figure, at, camera, size,
+                                       theirs, scene)
+                wrong = _stature_score(data, text, figure, at, base, size,
+                                       theirs, scene)
+                print("      the game's picture moved %d pixel(s) off the "
+                      "state's; at frame %d our %s scores %d and the state's "
+                      "own stature %d" % (moved, at, name, right, wrong))
+                if moved <= right:
+                    # Under the silhouette's resolution, and said so: the
+                    # game's OWN two pictures differ by less than our best
+                    # match already misses by, so no ranking of statures is
+                    # a measurement here (pitfall 76).  `D TYPE` is 10% wider
+                    # than the state and lands here in both slots.
+                    print("      below the silhouette's resolution: the game's "
+                          "own pictures differ by %d, under the %d our match "
+                          "misses by -- not ranked" % (moved, right))
+                elif wrong <= right:
+                    problems.append(
+                        "slot %d, %s: our figure at the state's stature scores "
+                        "%d against the %d of the stature on screen -- the "
+                        "comparison does not see HEIG and BODY"
+                        % (slot, name, wrong, right))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("confront --silhouette-stature: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def _stature_score(data, text, figure, frame, camera, size, theirs, scene):
+    """Pixels apart, our figure at *frame* under *camera*, fitted as usual."""
+    drawn = scene.build(data, looks.parse_tuple(text), figure, frame)
+    centre = fit_centre(theirs, scene.projected_box(drawn, camera), size)
+    return scene.masks_differ(theirs, scene.silhouette(drawn, camera, size,
+                                                       centre))
+
+
 def glyph_mask(shot, box) -> frozenset:
     """The set of glyph pixels inside a box -- what the LABEL is, blink-free.
 
@@ -1757,7 +1903,8 @@ def main(argv: list[str]) -> int:
                 return 0
             return run(slots)
         if len(argv) >= 2 and argv[1] in ("--silhouette",
-                                           "--silhouette-styles"):
+                                           "--silhouette-styles",
+                                           "--silhouette-stature"):
             # Two commands and not one flag inside a green gate: the styles
             # walked on the game DISAGREE today (LOOKS-TASK-28), and a
             # comparison that fails for a reason nobody has measured must not
@@ -1766,6 +1913,8 @@ def main(argv: list[str]) -> int:
             chosen = (int(argv[2]),) if len(argv) > 2 else (2, 1)
             if argv[1] == "--silhouette-styles":
                 return check_closeup_styles(chosen)
+            if argv[1] == "--silhouette-stature":
+                return check_silhouette_stature(chosen)
             return check_silhouette(chosen)
         if len(argv) == 3 and argv[1] == "--reach":
             return reach(argv[2])

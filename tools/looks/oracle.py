@@ -44,6 +44,7 @@ Usage:
     python tools/looks/oracle.py --pose [SLOT]  # where the pose comes from: ANIME.BIN in RAM, the entry the screen plays, and the GTE matrix load
     python tools/looks/oracle.py --pose <SLOT> <N> [N ...]  # the pose ITSELF: the matrix and translation of every piece of frame N, and the hierarchy
     python tools/looks/oracle.py --poses [SLOT [N ...]]  # the same over both slots and the eight spread frames
+    python tools/looks/oracle.py --stature [SLOT]  # what HEIG and BODY do: the scale, the camera and the pieces, against stature.py
 """
 
 from __future__ import annotations
@@ -4598,7 +4599,57 @@ def capture_camera(game, slot, frame=0, row=None):
             pass
     camera = _camera_matrix(game)
     return {"slot": slot, "state": SLOTS[slot], "frame": frame, "row": row,
-            "projection": seen, "camera": camera}
+            "projection": seen, "camera": camera,
+            "chain": _camera_chain(game)}
+
+
+def _camera_chain(game):
+    """What the camera is BUILT from, read where the game builds it.
+
+    {"view": {rotation, translation}, "angles", "place", "scale"} -- the view
+    matrix the `ctc2` at `layout.CAMERA_BUILD` loads through `s7`, and the
+    figure's own turn, place and scale it is composed with (LOOKS-TASK-29).
+    `stature.camera` composes them back into the load, and `scene.load_camera`
+    refuses a chain that does not reproduce it: the chain is what lets the
+    window draw a figure of another height with the camera the game would use.
+    """
+    import who_writes
+
+    client = game.client
+    client.call("breakpoint", action="clear")
+    client.call("breakpoint", action="add", type="execute",
+                address=who_writes.hx(layout.CAMERA_BUILD))
+    path = os.path.join(game.out_dir, "camera-chain.bin")
+    try:
+        client.call("continue")
+        if not _wait_for_hit(game, WATCH_SECONDS):
+            raise OracleError("%s never ran, so the camera was not built"
+                              % who_writes.hx(layout.CAMERA_BUILD))
+        registers = client.call("read_registers", group="gpr")
+        base = who_writes.register_value(registers, layout.CAMERA_VIEW_BASE)
+        rotation, translation = _matrix_struct(game, base, path)
+        figure = _figure_now(game)
+    finally:
+        try:
+            client.call("breakpoint", action="clear")
+            client.call("pause")
+        except Exception:  # noqa: BLE001
+            pass
+    return dict(figure, view={"rotation": rotation,
+                              "translation": translation})
+
+
+def _figure_now(game):
+    """The figure's angles, place and scale, as the game holds them now."""
+    path = os.path.join(game.out_dir, "figure.bin")
+    return {
+        "angles": list(struct.unpack(
+            "<3h", game.read_ram(layout.FIGURE_ANGLES, 6, path))),
+        "place": list(struct.unpack(
+            "<3h", game.read_ram(layout.FIGURE_PLACE, 6, path))),
+        "scale": list(struct.unpack(
+            "<3i", game.read_ram(layout.FIGURE_SCALE, 12, path))),
+    }
 
 
 def camera_from_pieces(pieces, anime_data, spread_limit=2.0):
@@ -4752,6 +4803,398 @@ def check_camera(slot=None, verbose=True, row=None):
     print("oracle --camera: %d problem(s) over %d slot(s)"
           % (len(problems), len(slots)))
     return 1 if problems else 0
+
+
+STATURE_DIR = os.path.join(ROOT, "work", "looks-stature")
+"""Where `--stature` writes what it captured, one JSON per slot."""
+
+STATURE_POSED = (
+    ("state", ()),
+    ("state again", ()),
+    ("155 cm", (("HEIG", "155 cm"),)),
+    ("210 cm", (("HEIG", "210 cm"),)),
+    ("B TYPE", (("BODY", "B TYPE"),)),
+    ("C TYPE", (("BODY", "C TYPE"),)),
+    ("D TYPE", (("BODY", "D TYPE"),)),
+    ("E TYPE", (("BODY", "E TYPE"),)),
+    ("F TYPE", (("BODY", "F TYPE"),)),
+    ("G TYPE", (("BODY", "G TYPE"),)),
+    ("H TYPE", (("BODY", "H TYPE"),)),
+    ("155 cm, H TYPE", (("HEIG", "155 cm"), ("BODY", "H TYPE"))),
+)
+"""The captures of `--stature` that carry a pose pass, in order.
+
+The state's own values twice -- the control, which has to come back on the
+same frames of the walk with the same camera, and identical number by number
+on every piece that read the same pair -- then the two ends of `HEIG` (the state's 175 is the middle),
+every other `BODY`, and one of each together: a rule that holds for the rows
+one at a time could still be two rules that do not compose.
+"""
+
+STATURE_SETTLE = 60
+"""Frames let run after the last press, before the first pass is read."""
+
+STATURE_PASSES = 80
+"""Draw passes a capture may read, one after another, to meet its frame.
+
+**The same frame is the same frame of ANIME.BIN, named by the pairs -- not the
+same counted frame.**  The first version padded every capture to one counted
+frame from `load_state`, and it does not hold: measured 2026-09-18, the
+captures walked to 155 and to 210 cm came back with no pair at all where the
+state, padded to the same count, had twelve -- a change of value moves the
+walk's phase.  So each capture reads passes until one carries the control's
+own pairs, and a capture that never meets them in this many is a failure, not
+a pose.  The walk cycle comes round long before: the pose captures on disk
+repeat their frames within 80 counted frames.
+"""
+
+
+def _stature_presses(table, slot, row, text):
+    """(button, count) that walks *row* from the state's value to *text*."""
+    import screen
+
+    state = screen.State(table, slot)
+    target = screen.index_of(table, row, text)
+    count = target - state.indices[row]
+    return ("Right" if count > 0 else "Left", abs(count))
+
+
+def _stature_walk(game, slot, steps, table):
+    """Put *steps* on the game's screen; returns the presses it cost."""
+    import confront
+
+    here = CURSOR_STARTS_ON
+    presses = 0
+    for row, text in steps:
+        way = "Down" if ROWS.index(row) > ROWS.index(here) else "Up"
+        for _ in range(abs(ROWS.index(row) - ROWS.index(here))):
+            game.press(way, box=FOOTER, least=ROW_MOVED)
+            presses += 1
+        here = row
+        button, count = _stature_presses(table, slot, row, text)
+        for _ in range(count):
+            confront.press_value(game, button, row, oracle_module())
+            presses += 1
+    return presses
+
+
+def oracle_module():
+    """This module, for the helpers of `confront` that take it as an argument."""
+    return sys.modules[__name__]
+
+
+def _stature_capture(game, slot, steps, table, maps, names, reference,
+                     anime_data):
+    """One capture, on the control's frames of the walk.
+
+    *reference* is the control's frames (`_stature_frames`), and passes are
+    read one after another until one draws them (`STATURE_PASSES`); how many
+    it took is kept beside the capture.  None makes this the CONTROL, which
+    takes the first pass that is two things:
+
+      **every piece carries a pair** -- a pass with eleven came back 0 of 11
+          exact on 2026-09-18: the game was interpolating (the averaging at
+          0x80011F90..0x800120D0, `(a+b)>>1` per term), so the pairs were read
+          and the matrices are not the file's;
+      **the pose reader reproduces it whole** at the state's own camera --
+          on the goalkeeper the pieces of walk frame 0 come back off the file
+          with the angles in scratchpad EQUAL to the file's, at the state's own
+          stature as much as at any other -- the refused passes are printed,
+          with how far their worst piece is off.  Frame 0 is where
+          the cycle wraps and the game blends it (task 26's "mistura"): the
+          pose reader's open question, not the stature's, and a control on it
+          would charge it to the rule.
+    """
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="stature-%d" % slot)
+    _stature_walk(game, slot, steps, table)
+    game.step(STATURE_SETTLE)
+    for passes in range(1, STATURE_PASSES + 1):
+        figure = _figure_now(game)
+        pieces = _pose_cycle(game, maps, names)
+        frames = _stature_frames(pieces, anime_data)
+        if frames is None or (reference is not None and frames != reference):
+            continue
+        record = {"steps": [list(one) for one in steps], "passes": passes,
+                  "frames": list(frames), "figure": figure,
+                  "camera": _camera_matrix(game), "pieces": pieces}
+        if reference is None:
+            exact, total, misses = _stature_pieces(record, anime_data)
+            if exact != total:
+                print("      control refuses pass %d, frames %s: %d of %d "
+                      "exact, %s off by up to %d of 4096 with the scratchpad "
+                      "angles the file's own"
+                      % (passes, list(frames), exact, total, misses,
+                         _stature_worst(record, anime_data)))
+                continue
+        return record
+    raise OracleError("slot %d, %r: %d passes and none on the control's "
+                      "frame of the walk" % (slot, steps, STATURE_PASSES))
+
+
+def _stature_pairs(pieces):
+    """{piece: pair} -- by NAME, never by position in the pass."""
+    return {one["piece"]: one.get("pair") for one in pieces}
+
+
+def _stature_frames(pieces, anime_data):
+    """The frames of the walk a pass drew, as a sorted tuple, or None.
+
+    None unless EVERY piece carries a pair.  **A pass is usually two frames,
+    not one**: measured 2026-09-18, the walk advances in the middle of a draw
+    pass, so a pass reads frames (1, 2) or (3, 4) -- split between them at a
+    piece that moves with the phase.  Two captures of the same frames split
+    them at different pieces, and a comparison of the pairs piece by piece
+    spent eighty passes looking for a split it would not meet.  The frames are
+    what names the pose; the split is where the draw happened to be.
+    """
+    import anime
+
+    pairs = [one.get("pair") for one in pieces]
+    if any(one is None for one in pairs):
+        return None
+    entry = anime.header(anime_data)[layout.ANIME_SCREEN_ENTRY]
+    return tuple(sorted({anime.frame_of_pair(anime_data, entry, one)
+                         for one in pairs}))
+
+
+def _stature_worst(record, anime_data):
+    """The largest term any piece of *record* is off the chain by."""
+    import anime
+    import stature
+
+    worst = 0
+    for piece in record["pieces"]:
+        first, second = struct.unpack(
+            "<2I", anime_data[piece["pair"]:piece["pair"] + 8])
+        rotation, _place = stature.piece(record["camera"],
+                                         anime.rotation(anime.angles(first)),
+                                         anime.position(first, second))
+        worst = max([worst] + [abs(one - two) for one, two
+                               in zip(rotation, piece["rotation"])])
+    return worst
+
+
+def _stature_values(table, slot, steps):
+    """{height, build} on screen after *steps*, off the measured table."""
+    import screen
+
+    state = screen.State(table, slot)
+    for row, text in steps:
+        state.indices[row] = screen.index_of(table, row, text)
+    values = state.values()
+    return values["height"], values["build"]
+
+
+def _stature_pieces(record, anime_data):
+    """(exact, total, misses) of the pieces that carry a pair."""
+    import anime
+    import stature
+
+    exact, total, misses = 0, 0, []
+    for piece in record["pieces"]:
+        at = piece.get("pair")
+        if at is None:
+            continue
+        first, second = struct.unpack("<2I", anime_data[at:at + 8])
+        rotation, place = stature.piece(record["camera"],
+                                        anime.rotation(anime.angles(first)),
+                                        anime.position(first, second))
+        total += 1
+        if (rotation, place) == (piece["rotation"], piece["translation"]):
+            exact += 1
+        else:
+            misses.append(piece["piece"])
+    return exact, total, misses
+
+
+def check_stature(slot=None, verbose=True):
+    """`--stature [SLOT]`: what `HEIG` and `BODY` do, measured against the rule.
+
+    Two halves, and the controls close first in each:
+
+      **the pose** -- `STATURE_POSED`, every capture on the same frames of
+          the walk: the state twice (the same, or nothing below means anything),
+          then the ends of `HEIG`, every `BODY` and one of each together.  For
+          each, the scale vector the game holds against `stature.scale`, the
+          camera it loads against `stature.camera`, and every piece that
+          carries a pair against `stature.piece` -- exact, integer for
+          integer.  And the pairs of every capture have to be the control's:
+          the same frame of the walk, so the only thing that moved is the
+          stature;
+      **the walk** -- every value of `HEIG` and of `BODY`, one press at a
+          time from the state's own, the scale vector and the camera load
+          read after each press and held against the rule.  Two different
+          values have to give two different loads, or the capture is reading
+          a constant.
+    """
+    import iso_source
+    import screen
+    import stature
+
+    ready = preflight()
+    table = screen.load()
+    with iso_source.open_disc(ready["image"]) as disc:
+        found = stature.rule(disc.read(layout.SELECT8))
+        anime_data = disc.read(layout.ANIME)
+    maps = model_maps(ready["image"])
+    names, _orders = piece_names(ready["image"])
+    slots = (slot,) if slot else tuple(sorted(SLOTS, reverse=True))
+    problems = []
+    written = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for one in slots:
+            print("  -- slot %d (%s) --" % (one, SLOTS[one]))
+            first = _stature_capture(game, one, (), table, maps, names,
+                                     None, anime_data)
+            chain = _camera_chain(game)
+            print("    the chain: view %s %s, figure turned %s at %s, scale %s"
+                  % (chain["view"]["rotation"], chain["view"]["translation"],
+                     chain["angles"], chain["place"], chain["scale"]))
+            reference = tuple(first["frames"])
+            own = _stature_pairs(first["pieces"])
+            records = []
+            for name, steps in STATURE_POSED:
+                record = (first if name == "state" else
+                          _stature_capture(game, one, steps, table, maps,
+                                           names, reference, anime_data))
+                height, build = _stature_values(table, one, steps)
+                record.update(name=name, height=height, build=build)
+                records.append(record)
+                want = stature.scale(found, height, build)
+                built = stature.camera(chain, want)
+                exact, total, misses = _stature_pieces(record, anime_data)
+                pairs = _stature_pairs(record["pieces"])
+                shared = sum(1 for piece, pair in pairs.items()
+                             if own.get(piece) == pair)
+                marks = []
+                if tuple(record["figure"]["scale"]) != want:
+                    marks.append("scale %s, the rule says %s"
+                                 % (record["figure"]["scale"], list(want)))
+                if (record["camera"]["rotation"] != built["rotation"]
+                        or record["camera"]["translation"]
+                        != built["translation"]):
+                    marks.append("camera %s, the chain says %s"
+                                 % (record["camera"], built))
+                if exact != total:
+                    marks.append("pieces %s off the chain" % misses)
+                if tuple(record["frames"]) != reference or total != len(pairs):
+                    marks.append("not the control's frames of the walk: %s"
+                                 % record["frames"])
+                for mark in marks:
+                    problems.append("slot %d, %s: %s" % (one, name, mark))
+                print("    %-15s %3d cm %s  scale %-18s pieces %2d/%-2d exact"
+                      ", frames %s, %2d with the control's own pair  %s"
+                      % (name, height, "ABCDEFGH"[build],
+                         tuple(record["figure"]["scale"]), exact, total,
+                         record["frames"], shared,
+                         "ok" if not marks else "PROBLEM"))
+            # The control: the state twice.  The SAME frames of the walk, the
+            # same camera and scale, and every piece that carries the same
+            # pair carrying the same matrix.  Not the whole pass number for
+            # number: under free running the fork does not repeat the pass at
+            # which the walk's two frames split -- measured 2026-09-18 on the
+            # goalkeeper, both captures on frames (3, 4) and 9 of 12 pieces on
+            # the same pair -- and the split is where the draw happened to be,
+            # not a property of the pose (pitfall 73).
+            one_, two_ = records[0], records[1]
+            same = [piece for piece in one_["pieces"]
+                    if _stature_pairs(two_["pieces"]).get(piece["piece"])
+                    == piece["pair"]]
+            twin = {piece["piece"]: piece for piece in two_["pieces"]}
+            agree = all((piece["rotation"], piece["translation"])
+                        == (twin[piece["piece"]]["rotation"],
+                            twin[piece["piece"]]["translation"])
+                        for piece in same)
+            if (one_["frames"] != two_["frames"]
+                    or one_["camera"] != two_["camera"]
+                    or one_["figure"] != two_["figure"] or not agree
+                    or not same):
+                problems.append("slot %d: the state captured twice differs, "
+                                "so nothing else here is a measurement" % one)
+            else:
+                print("    control: the state captured twice -- the same "
+                      "frames %s, camera and scale, and the %d piece(s) on "
+                      "the same pair identical number by number"
+                      % (one_["frames"], len(same)))
+            loads = {tuple(r["camera"]["rotation"]) for r in records}
+            print("    %d captures, %d different camera loads, translation "
+                  "%s in all of them"
+                  % (len(records), len(loads),
+                     "the same" if len({tuple(r["camera"]["translation"])
+                                        for r in records}) == 1
+                     else "NOT the same"))
+            walked = _stature_walk_all(game, one, table, found, chain,
+                                       problems)
+            os.makedirs(STATURE_DIR, exist_ok=True)
+            path = os.path.join(STATURE_DIR, "slot%d.json" % one)
+            import json
+
+            with open(path, "w", encoding="utf-8") as handle:
+                json.dump({"slot": one, "rule": found, "chain": chain,
+                           "posed": records,
+                           "walked": walked}, handle, indent=1)
+                handle.write("\n")
+            written.append(path)
+    for path in written:
+        print("  wrote %s" % path)
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --stature: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def _stature_walk_all(game, slot, table, found, chain, problems):
+    """Every value of HEIG and BODY, a press at a time, against the rule."""
+    import confront
+    import screen
+    import stature
+
+    walked = []
+    for row in ("HEIG", "BODY"):
+        texts = table["rows"][row]["texts"]
+        start = screen.State(table, slot).indices[row]
+        for button, ends in (("Left", 0), ("Right", len(texts) - 1)):
+            if start == ends:
+                continue
+            restore_state(slot, verbose=False)
+            game.load_looks(slot, label="stature-walk-%d" % slot)
+            for _ in range(ROWS.index(row) - ROWS.index(CURSOR_STARTS_ON)):
+                game.press("Down", box=FOOTER, least=ROW_MOVED)
+            for index in range(start, ends, 1 if button == "Right" else -1):
+                confront.press_value(game, button, row, oracle_module())
+                text = texts[index + (1 if button == "Right" else -1)]
+                height, build = _stature_values(table, slot, ((row, text),))
+                figure = _figure_now(game)
+                load = _camera_matrix(game)
+                want = stature.scale(found, height, build)
+                built = stature.camera(chain, want)
+                good = (tuple(figure["scale"]) == want
+                        and load["rotation"] == built["rotation"]
+                        and load["translation"] == built["translation"])
+                if not good:
+                    problems.append("slot %d, %s %s: scale %s camera %s, the "
+                                    "rule says %s and %s"
+                                    % (slot, row, text, figure["scale"],
+                                       load, list(want), built))
+                walked.append({"row": row, "text": text, "height": height,
+                               "build": build, "scale": figure["scale"],
+                               "camera": load, "ok": good})
+    heights = sorted({one["height"] for one in walked if one["row"] == "HEIG"}
+                     | {screen.State(table, slot).values()["height"]})
+    builds = sorted({one["build"] for one in walked if one["row"] == "BODY"}
+                    | {screen.State(table, slot).values()["build"]})
+    loads = {tuple(one["camera"]["rotation"]) for one in walked}
+    print("    walk: %d presses, %d heights (%d..%d cm) and %d builds, %d of "
+          "them off the rule; %d different camera loads"
+          % (len(walked), len(heights), heights[0], heights[-1], len(builds),
+             sum(1 for one in walked if not one["ok"]), len(loads)))
+    if len(loads) != len(walked):
+        problems.append("slot %d: %d presses and only %d different loads -- "
+                        "two values drew the same camera"
+                        % (slot, len(walked), len(loads)))
+    return walked
 
 
 def check_pose_frames(slot=None, frames=None, verbose=True):
@@ -5724,6 +6167,8 @@ def main(argv):
                                 row=argv[3] if len(argv) > 3 else None)
         if len(argv) == 2 and argv[1] == "--pose-lag":
             return check_draw_lag()
+        if len(argv) in (2, 3) and argv[1] == "--stature":
+            return check_stature(int(argv[2]) if len(argv) > 2 else None)
         if len(argv) >= 2 and argv[1] == "--poses":
             return check_pose_frames(int(argv[2]) if len(argv) > 2 else None,
                                      [int(one) for one in argv[3:]] or None)

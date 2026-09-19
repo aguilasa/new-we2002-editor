@@ -616,10 +616,10 @@ CONTROLS = (
     ),
     Control(
         "cli-check-forgets-a-module", "cli.py", "module constant",
-        "    \"anime\",\n)",
+        "    \"stature\",\n)",
         ")",
         ("cli",),
-        "the disc gate running eight of the nine --check-image: green, and "
+        "the disc gate running nine of the ten --check-image: green, and "
         "blind to the one left out -- the shape looks_image had for five "
         "tasks, when it ran modelfile alone",
     ),
@@ -765,6 +765,16 @@ CONTROLS = (
         "picks another MODEL.BIN head, which then keeps its place at the "
         "file's origin -- the figure draws with its head off the neck and "
         "every check that draws the reference stays green (LOOKS-TASK-28)",
+    ),
+    Control(
+        "stature-height-on-the-wrong-axis", "stature.py", "scale",
+        '    return (across, _divide(numerator, found["height_divisor"]), across)',
+        '    return (_divide(numerator, found["height_divisor"]), across,\n'
+        '            _divide(numerator, found["height_divisor"]))',
+        ("stature",),
+        "HEIG's divisor put on x and z and BODY's on y: a figure as tall as "
+        "it should be wide, every number in range -- and the camera the game "
+        "loaded at 210 cm is what says no (LOOKS-TASK-29)",
     ),
     Control(
         "scene-standing-accepts-any-order", "scene.py", "standing",

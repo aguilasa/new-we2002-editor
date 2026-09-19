@@ -1057,6 +1057,156 @@ def plant_keys(python: str, env: dict, name: str, where: str, old: str,
         return (True, bad[0])
 
 
+# ---- HEIG and BODY in the drawing (LOOKS-TASK-29) --------------------------
+
+STATURE_SHOTS = (
+    ("175 cm, A TYPE", (), 175, 0),
+    ("155 cm", (("HEIG", "Left", 20),), 155, 0),
+    ("210 cm", (("HEIG", "Right", 35),), 210, 0),
+    ("H TYPE", (("BODY", "Right", 7),), 175, 7),
+)
+"""(name, [(row, button, presses)], height, BODY) -- the stature ends.
+
+From the state's own 175 cm and `A TYPE`, which `screen.json` measured on both
+states: twenty Lefts to 155, thirty-five Rights to 210, seven to `H TYPE`.
+"""
+
+SCREEN_SCALE = 2
+"""Window pixels per game pixel in screen mode: `looks_set.SCALE`, the app's
+default `--scale`.  Written here because this gate may not import the widget
+(it needs no Qt), and it only ever runs the app with the default."""
+
+STATURE_SLACK = 0.06
+"""How far the ink's ratio may sit from the rule's before the window is wrong.
+
+The rule's ratios are exact (`stature.scale`); the ink is not, because the
+figure is rasterised at the panel's native size, doubled, and a row of pixels
+at either end of the figure is about 0.01 of it.  The slack is a few such rows
+each side; a height applied on the wrong axis -- the failure this exists for --
+misses by far more.
+"""
+
+
+def stature_keys(table: dict, steps) -> list:
+    """The presses of one `STATURE_SHOTS` entry, from the cursor on load."""
+    order = table["order_of_rows"]
+    here = order.index(table["cursor_on_load"])
+    out = []
+    for row, button, count in steps:
+        there = order.index(row)
+        out += ["Down" if there > here else "Up"] * abs(there - here)
+        here = there
+        out += [button] * count
+    return out
+
+
+def panel_ink(shot: tuple, box, scale: int) -> tuple:
+    """`ink_box` of the panel alone, cut out of a picture of the whole screen."""
+    _width, _height, channels, rows = shot
+    left, top, right, bottom = [one * scale for one in box]
+    cut = [row[left * channels:(right + scale) * channels]
+           for row in rows[top:bottom + scale]]
+    return ink_box((right + scale - left, len(cut), channels, cut))
+
+
+def measure_stature(python: str, app: str, where: str, env: dict) -> tuple:
+    """The panel at the stature ends.  `(bad, broke, inks)`.
+
+    What is judged is the window's PICTURE, not its code: the ink of the panel
+    has to grow with `HEIG` in both directions and with `BODY` only across, by
+    the ratios `stature` computes for the game's own scale vectors.  With no
+    measured camera on disc the window draws the v1 orbit, where the stature
+    does not reach by design; `inks` comes back None and the caller says so
+    instead of judging.
+    """
+    import iso_source
+    import layout
+    import stature
+
+    table = screen.load()
+    box = table["regions"]["panel"]["native"]
+    inks = {}
+    for name, steps, _height, _build in STATURE_SHOTS:
+        out = os.path.join(where, "stature-%s.png" % name.split()[0])
+        keys = stature_keys(table, steps)
+        code, output = run_app(python, app,
+                               ["--state", "2"]
+                               + (["--keys", ",".join(keys)] if keys else [])
+                               + ["--screenshot", out], env)
+        if code != 0 or not os.path.isfile(out):
+            return ([], "the screen at %s did not draw: %s"
+                    % (name, output.rstrip()), None)
+        if "game's own camera" not in output:
+            return ([], "", None)
+        inks[name] = panel_ink(picture(out), box, SCREEN_SCALE)
+    with iso_source.open_disc(env[layout.ENV_IMAGE]) as disc:
+        found = stature.rule(disc.read(layout.SELECT8))
+    scales = {name: stature.scale(found, height, build)
+              for name, _steps, height, build in STATURE_SHOTS}
+    bad = []
+
+    def near(what, got, want):
+        if abs(got - want) > STATURE_SLACK:
+            bad.append("%s: the ink says %.3f and the game's scale %.3f"
+                       % (what, got, want))
+
+    base, low = inks["175 cm, A TYPE"], inks["155 cm"]
+    tall, wide = inks["210 cm"], inks["H TYPE"]
+    near("210 cm against 155 cm, height", tall[1] / float(low[1]),
+         scales["210 cm"][1] / float(scales["155 cm"][1]))
+    near("210 cm against 175 cm, width", tall[0] / float(base[0]),
+         scales["210 cm"][0] / float(scales["175 cm, A TYPE"][0]))
+    near("H TYPE against A TYPE, width", wide[0] / float(base[0]),
+         scales["H TYPE"][0] / float(scales["175 cm, A TYPE"][0]))
+    near("H TYPE against A TYPE, height", wide[1] / float(base[1]),
+         scales["H TYPE"][1] / float(scales["175 cm, A TYPE"][1]))
+    return (bad, "", inks)
+
+
+def plant_stature(python: str, env: dict, name: str, where: str, old: str,
+                  new: str) -> tuple:
+    """A defect in a copy of the tree, judged by `measure_stature` alone.
+
+    The measured camera comes along into the copy: `scene` finds it beside the
+    tree, and a sandbox without it draws the orbit, where no stature judgement
+    runs -- a green that proved nothing.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        sandbox, why = _sandbox(tmp, name, where, old, new)
+        if sandbox is None:
+            return (False, why)
+        cameras = os.path.join(os.path.dirname(os.path.dirname(LOOKS_DIR)),
+                               "work", "looks-camera")
+        shutil.copytree(cameras, os.path.join(tmp, "work", "looks-camera"))
+        shots = os.path.join(tmp, "shots")
+        os.makedirs(shots)
+        app = os.path.join(sandbox, "ui", "app.py")
+        bad, broke, inks = measure_stature(python, app, shots, env)
+        if broke or inks is None:
+            return (False, "the planted tree for %s did not judge the "
+                           "stature, so nothing was proved: %s"
+                    % (name, broke or "no game camera in the copy"))
+        if not bad:
+            return (False, "%s :: %s was broken (%s -> %s) and the stature "
+                           "still passed" % (where, name, old.strip(),
+                                             new.strip()))
+        return (True, bad[0])
+
+
+STATURE_BREAKS = (
+    ("the stature reaching the camera", os.path.join("ui", "looks_set.py"),
+     '        elif (now.get("height"), now.get("build")) != stature:',
+     "        elif False:"),
+    ("the height on its own axis", "stature.py",
+     '    return (across, _divide(numerator, found["height_divisor"]), across)',
+     '    return (_divide(numerator, found["height_divisor"]), across,\n'
+     '            _divide(numerator, found["height_divisor"]))'),
+)
+"""The window whose rows stop at the text, and the rule with the height on the
+wrong axis -- the negative control LOOKS-TASK-29 asks for, judged by the
+picture the window draws."""
+
+
 # ---- the gate itself ------------------------------------------------------
 
 def skip(why: str) -> int:
@@ -1178,7 +1328,34 @@ def main(argv: list | None = None) -> int:
           "and title is what screen.json measured off the game"
           % (walked, len(SLOTS)))
 
+    with tempfile.TemporaryDirectory() as tmp:
+        bad, broke, inks = measure_stature(python, APP, tmp, env)
+    if broke:
+        print("FAIL: %s" % broke)
+        return 1
+    if bad:
+        for line in bad:
+            print("FAIL: %s" % line)
+        return 1
+    judged_stature = inks is not None
+    if judged_stature:
+        print("  HEIG and BODY reach the panel, ink wide x tall: %s" % ", ".join(
+            "%s %dx%d" % (name, one[0], one[1]) for name, one in inks.items()))
+    else:
+        print("  HEIG and BODY not judged: the window has no game camera "
+              "(oracle.py --camera), and the v1 orbit carries no stature")
+
     failed = 0
+    if judged_stature:
+        for name, where, old, new in STATURE_BREAKS:
+            red, why = plant_stature(python, env, name, where, old, new)
+            if red:
+                print("negative: breaking %s reddens the stature -- %s"
+                      % (name, why))
+                PLANTED.append(name)
+            else:
+                print("FAIL: %s" % why)
+                failed += 1
     for name, where, old, new in BREAKS:
         red, why = plant(python, env, name, where, old, new)
         if red:
@@ -1199,7 +1376,8 @@ def main(argv: list | None = None) -> int:
         return 1
     print("looks_ui: %d of %d negative control(s) red, and the window drew "
           "every tuple it was asked for and answered every key with what the "
-          "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)))
+          "game shows" % (len(PLANTED), len(BREAKS) + len(KEY_BREAKS)
+                          + (len(STATURE_BREAKS) if judged_stature else 0)))
     return 0
 
 

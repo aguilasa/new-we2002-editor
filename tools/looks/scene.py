@@ -467,7 +467,8 @@ class Builder:
         with iso_source.open_disc(image_path) as disc:
             self._data = {name: disc.read(name)
                           for name in (layout.EDT_MOD, layout.MODEL,
-                                       layout.DAT2D, layout.ANIME)}
+                                       layout.DAT2D, layout.ANIME,
+                                       layout.SELECT8)}
 
     def build(self, text: str, frame: int = None) -> Scene:
         """*text* as a scene, or `BadScene` carrying the table's own sentence."""
@@ -477,6 +478,10 @@ class Builder:
                          self.frame if frame is None else frame)
         except (looks.BadLooks, assembly.BadAssembly) as exc:
             raise BadScene(str(exc)) from exc
+
+    def scale(self, values: dict) -> tuple:
+        """The figure's scale for the screen's `HEIG` and `BODY` (`stature`)."""
+        return figure_scale(self._data, values)
 
 
 
@@ -760,12 +765,19 @@ class NoCamera(BadScene):
     """No measured camera on disc, so nothing may be projected."""
 
 
-def load_camera(slot: int = 2) -> dict:
+def load_camera(slot: int = 2, scale=None) -> dict:
     """What `oracle.py --camera` measured, or `NoCamera`.
 
     It is never defaulted and never guessed at: a projection invented here
     would make every silhouette comparison a comparison of two inventions, and
     the whole point of section 10.4 (3) is that the camera comes from the game.
+
+    **With *scale*, the camera of a figure of another height or build.**  The
+    game puts `HEIG` and `BODY` INSIDE the camera (`stature`): the matrix it
+    hands the GTE is the view times the figure's own turn scaled per axis.  So
+    the camera for another scale is composed from the chain `--camera` read
+    beside the load, and the chain has to reproduce the load at the state's own
+    scale, integer for integer, before it is trusted with any other.
     """
     import json
 
@@ -780,9 +792,48 @@ def load_camera(slot: int = 2) -> dict:
     if len(projections) != 1:
         raise NoCamera("%s carries %d different projections, so there is no "
                        "one camera in it" % (path, len(projections)))
-    return {"rotation": record["camera"]["rotation"],
-            "translation": record["camera"]["translation"],
-            "projection": record["projection"][0]}
+    camera = {"rotation": record["camera"]["rotation"],
+              "translation": record["camera"]["translation"],
+              "projection": record["projection"][0]}
+    if scale is None:
+        return camera
+    import stature
+
+    chain = record.get("chain")
+    if chain is None:
+        raise NoCamera("%s has no chain -- it was written before LOOKS-TASK-29;"
+                       " run `oracle.py --camera %d` again, which reads the "
+                       "view and the figure's scale beside the load"
+                       % (path, slot))
+    try:
+        own = stature.camera(chain, chain["scale"])
+    except stature.BadStature as exc:
+        raise NoCamera("%s: %s" % (path, exc)) from exc
+    if (own["rotation"] != camera["rotation"]
+            or own["translation"] != camera["translation"]):
+        raise NoCamera("%s: the chain composes %r at the state's own scale, "
+                       "and the game loaded %r -- the chain is not the camera"
+                       % (path, own, record["camera"]))
+    try:
+        composed = stature.camera(chain, scale)
+    except stature.BadStature as exc:
+        raise NoCamera("%s: %s" % (path, exc)) from exc
+    return dict(camera, rotation=composed["rotation"],
+                translation=composed["translation"])
+
+
+def figure_scale(disc, values: dict) -> tuple:
+    """(x, y, z) in 4.12 for the `height` and `build` of *values*.
+
+    Read off the screen's own overlay, never written here (`stature.rule`).
+    """
+    import stature
+
+    try:
+        found = stature.rule(disc[layout.SELECT8])
+        return stature.scale(found, values["height"], values["build"])
+    except stature.BadStature as exc:
+        raise BadScene(str(exc)) from exc
 
 
 def to_camera(point, camera) -> tuple:
@@ -884,14 +935,16 @@ centred per frame would make the figure bob as the walk swings.
 """
 
 
-def panel_camera(drawn: Scene, slot: int, size: tuple) -> list:
+def panel_camera(drawn: Scene, slot: int, size: tuple, scale=None) -> list:
     """The game's camera as a 4x4 for the panel, root placed by `ROOT_AT`.
 
     *size* is the panel in NATIVE pixels, never the widget's: `H` is in the
     game's own pixels, so a viewport twice as wide scales the whole picture
-    rather than halving the figure inside it.
+    rather than halving the figure inside it.  *scale* is `figure_scale` of
+    the rows on screen, so `HEIG` and `BODY` reach the drawing the way the
+    game makes them reach it -- through the camera (LOOKS-TASK-29).
     """
-    camera = load_camera(slot)
+    camera = load_camera(slot, scale)
     origin = project((0.0, 0.0, 0.0), camera)
     if origin is None:
         raise BadScene("the figure's root is behind the camera")
