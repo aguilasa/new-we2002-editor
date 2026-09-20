@@ -2952,9 +2952,40 @@ resolvidas. [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md).
 > qual deles estes dois screens subiram; a regra por time é outra pergunta, e
 > nenhuma task aberta a faz.
 
-**(o) O painel e o cenário.** Se o degradê, a borda, a barra de título, as
-faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do `EDT_2D.BIN`, ou
-polígonos da GPU. [`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md).
+**(o) O painel e o cenário — PARCIAL em 2026-09-20.** Se o degradê, a borda, a
+barra de título, as faixas das linhas e a fonte são imagem do `DAT2D.BIN` ou do
+`EDT_2D.BIN`, ou polígonos da GPU.
+[`LOOKS-TASK-31`](/docs/tasks/looks/31-o-painel-e-o-cenario.md).
+
+> **Três elementos respondidos, e são polígonos.** O `oracle.py --scenery` lê a
+> display list na RAM e fica só com os pacotes cujas cores são as que o
+> console mostrou dentro do retângulo deles — o que separa a lista viva das
+> sobras, porque as bandas guardam também a lista da tela anterior (as linhas
+> dela ficam a 9 pixels onde as desta ficam a 12). Sobram **28 pacotes**, os
+> mesmos nas duas leituras:
+>
+> | o que | pacote | cores |
+> |---|---|---|
+> | o painel do boneco, (17,66)-(160,185) | um quad gouraud | (0,48,128) no topo a (48,40,80) embaixo |
+> | a caixa de ajuda, (16,187)-(496,221) | um quad gouraud | (0,24,40) a (16,80,120) |
+> | as doze faixas das linhas, x 177 a 495 | 26 quads chatos | (0,53,55) e (0,38,45) alternando, e a primeira linha em preto |
+>
+> **Nenhum deles é imagem**: não há registro de `DAT2D.BIN` envolvido, e o
+> desenho é do próprio GPU. Os pacotes texturizados que a varredura acha são
+> **o boneco**, e as páginas que eles amostram confirmam a
+> [`LOOKS-TASK-30`](/docs/tasks/looks/30-o-uniforme.md) de graça: a cabeça sai
+> da página (512,256) do `DAT2D.BIN` e o corpo da (576,256), que é do kit e
+> que o `DAT2D.BIN` não tem.
+>
+> **O que falta, e por que não saiu daqui.** A barra de título, a placa
+> (`GK`/`CB`), a caixa da camisa, as setas `◀ ▶` e os textos **não estão em
+> lista nenhuma da RAM** — varrida inteira (`layout.SCENERY_SWEEP`), com
+> quads, triângulos e sprites, e nada cai fora do painel. E não é que sejam
+> pintados uma vez: o `oracle.py --repaint` sobrescreve os **dois** buffers
+> com magenta e deixa o jogo correr, e a tela **inteira** volta — tudo é
+> redesenhado a cada quadro. Então o caminho de impressão
+> (`layout.SCREEN_PRINT`) manda os comandos sem deixar nó em memória, e medir
+> o que ele manda é a continuação desta task.
 
 **(p) O ritmo do ciclo.** Quantos quadros do jogo dura uma passada, se o jogo
 interpola entre quadros-chave, e se o tronco que balança é da animação ou da

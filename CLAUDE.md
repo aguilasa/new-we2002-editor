@@ -872,6 +872,8 @@ inventado a partir de um rótulo é o erro que essa fase existe para não comete
 | `python tools/looks/confront.py --silhouette-stature [SLOT]` | a silhueta do jogo andado às pontas de `HEIG` e a dois `BODY`, contra a nossa com a câmera daquela estatura |
 | `python tools/looks/oracle.py --kit [SLOT]` | qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer do console |
 | `python tools/looks/confront.py --kit-control [SLOT]` | o uniforme de outro time desenhado na mesma tupla, para medir que o kit decide a figura |
+| `python tools/looks/oracle.py --scenery [SLOT] [--write]` | os pacotes que desenham a mobília da tela, lidos da display list e conferidos contra o quadro; o `--write` é de onde a janela pinta |
+| `python tools/looks/oracle.py --repaint [SLOT]` | que partes da tela o jogo redesenha a cada quadro, medido sobrescrevendo os dois buffers |
 | `python tools/looks/anime.py --check-image` / `--report` / `--against-pose` | o `ANIME.BIN`: 204 animações, a varredura que fecha no EOF, os três ângulos de cada peça de cada quadro, e o confronto com a pose capturada |
 | `python tools/looks/confront.py --score` / `--run` | nosso quadro contra o do emulador, por histograma de cor; o `--run` leva ~40 min |
 | `python tools/looks/corpus.py --score` / `--run` | os 50 JPGs pela mesma métrica, com os quadros do emulador de controle |

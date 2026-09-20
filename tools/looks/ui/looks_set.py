@@ -81,12 +81,26 @@ class LooksSet(QtWidgets.QWidget):
         # where HEIG and BODY live (LOOKS-TASK-29).
         self.camera_for = None
         self.camera_note: str | None = None
+        # The furniture the game draws, measured (LOOKS-TASK-31).  Without it
+        # the window says so and keeps the colours the v2 chose by eye -- a
+        # silent fallback would make the picture a description of itself.
+        try:
+            self.scenery = core.load_scenery(int(state.slot))
+            self.scenery_note = None
+        except core.BadScene as exc:
+            self.scenery, self.scenery_note = [], str(exc)
         width, height = self.places["display"]
         self.setFixedSize(width * scale, height * scale)
         self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
         self.viewer = Viewer(None, self)
         self.viewer.setGeometry(self._rect(self.places["panel"]))
+        panel = self._scenery_at(self.places["panel"])
+        if panel is not None:
+            # The panel's own gradient, measured: the viewer clears to its top
+            # colour, which is what the figure is seen against.
+            self.viewer.clear_colour = tuple(
+                [one / 255.0 for one in panel["colours"][0]] + [1.0])
         self.redraw()
 
     # -- geometry ----------------------------------------------------------
@@ -221,6 +235,7 @@ class LooksSet(QtWidgets.QWidget):
         broken the drawing was."""
         return {
             "slot": self.state.slot,
+            "scenery": len(self.scenery),
             "cursor": self.state.row,
             "help": self.refusal if self.refusal else self.state.help_text(),
             "rows": {name: self.state.text_of(name)
@@ -235,16 +250,54 @@ class LooksSet(QtWidgets.QWidget):
 
     # -- the drawing -------------------------------------------------------
 
+    def _scenery_at(self, box):
+        """The measured packet that covers *box*, or None."""
+        for packet in self.scenery:
+            xs = [point[0] for point in packet["points"]]
+            ys = [point[1] for point in packet["points"]]
+            if (abs(min(xs) - box[0]) <= 2 and abs(min(ys) - box[1]) <= 2
+                    and abs(max(xs) - box[2]) <= 2
+                    and abs(max(ys) - box[3]) <= 2):
+                return packet
+        return None
+
+    def _paint_scenery(self, painter) -> None:
+        """The measured furniture: one rectangle per packet, flat or graded.
+
+        The packets are the game's own -- `oracle.py --scenery` reads them out
+        of the display list and keeps only those whose colours are the ones
+        the console showed inside them.  A gradient is drawn as the hardware
+        shades it between the first corner's colour and the third's.
+        """
+        s = self.scale
+        for packet in self.scenery:
+            xs = [point[0] for point in packet["points"]]
+            ys = [point[1] for point in packet["points"]]
+            box = QtCore.QRect(min(xs) * s, min(ys) * s,
+                               (max(xs) - min(xs)) * s,
+                               (max(ys) - min(ys)) * s)
+            colours = [QtGui.QColor(*one) for one in packet["colours"]]
+            if packet["gradient"] and len(colours) > 2:
+                shade = QtGui.QLinearGradient(box.topLeft(), box.bottomLeft())
+                shade.setColorAt(0.0, colours[0])
+                shade.setColorAt(1.0, colours[2])
+                painter.fillRect(box, QtGui.QBrush(shade))
+            else:
+                painter.fillRect(box, colours[0])
+
     def paintEvent(self, event) -> None:
         painter = QtGui.QPainter(self)
         painter.fillRect(self.rect(), BACKGROUND)
         s = self.scale
         small = self._font(max(7, self.places["pitch"] * s - 4))
+        self._paint_scenery(painter)
 
         # The panel.  Empty when the tuple was refused -- the viewer is hidden
-        # and nothing takes its place.
+        # and nothing takes its place.  Its colour is the measured gradient
+        # when there is one, and the v2's own blue when there is not.
         panel = self._rect(self.places["panel"])
-        painter.fillRect(panel, PANEL if not self.refusal else BACKGROUND)
+        if not self.scenery or self.refusal:
+            painter.fillRect(panel, PANEL if not self.refusal else BACKGROUND)
         painter.setPen(BOX)
         painter.drawRect(panel.adjusted(0, 0, -1, -1))
         painter.drawRect(self._rect(self.places["rows"]).adjusted(0, 0, -1, -1))

@@ -699,6 +699,21 @@ Não se revertem sem o usuário pedir.
     era `(offset, profundidade, CLUT)` e passou a incluir o contêiner: sem
     isso a página do corpo e a da cabeça colidem na tabela do viewer, e o
     desenho morre com `KeyError` numa chave que parece legítima.
+80. **As bandas guardam a lista da tela ANTERIOR junto com a desta.** Andar
+    uma cadeia de nós bem formados na RAM dá 74 pacotes plausíveis que não são
+    desta tela — as faixas de lá ficam a 9 pixels, as daqui a 12. O que separa
+    é a **figura**: a cor que o pacote declara contra o pixel que o console
+    mostrou dentro do retângulo dele (`oracle.py --scenery`). Geometria
+    plausível não é evidência de que o pacote foi desenhado.
+81. **O texto da tela não está em lista nenhuma da RAM.** Varrida inteira, com
+    quads, triângulos e sprites: só aparecem o painel, a ajuda, as faixas e o
+    boneco. E o `--repaint` mostra que **tudo** é redesenhado a cada quadro —
+    então o caminho de impressão manda os comandos sem deixar nó. Procurar o
+    título e os glifos na display list é procurar onde não está.
+82. **O `gpu_dump` do fork sai em `.zst`, e esta máquina não lê zstd.** Nem
+    `zstandard` no Python, nem `zstd` no `PATH` — a mesma armadilha que o
+    `savestate.py` registra. O caminho que funciona aqui é ler a RAM e a VRAM
+    por MCP.
 ---
 
 ## As fontes de verdade binárias
@@ -749,6 +764,8 @@ foi assim que o ciclo do `.mcr` deixou uma pasta inteira fora da regra.
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/skin.py --check-image` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o emulador | `python tools/looks/oracle.py --palettes` | — | LOOKS-TASK-12 |
 | *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~4 min (medido 2026-09-20, os dois slots) | `python tools/looks/oracle.py --kit [SLOT]` — qual dos 105 `TEX_*.BIN` a tela veste, lido do frame buffer: cada retângulo que cada contêiner declara contra a VRAM, halfword a halfword, com o controle (a mesma VRAM lida duas vezes, idêntica) fechando antes. Exige **uma página e uma paleta** exatas e que nenhum outro contêiner as reproduza (armadilha 77) | — | LOOKS-TASK-30 |
+| *(sem alvo ainda)* | as duas variáveis, os dois states e o fork; ~6 min por slot (a RAM inteira é lida) | `python tools/looks/oracle.py --scenery [SLOT] [--write]` — os pacotes que desenham a mobília da tela, lidos da display list e **conferidos contra o quadro** (armadilha 80), com o controle (a tela carregada duas vezes) fechando antes; o `--write` deixa `work/looks-scenery/slotN.json`, que é de onde a janela pinta | — | LOOKS-TASK-31 |
+| *(sem alvo ainda)* | idem; ~3 min por slot | `python tools/looks/oracle.py --repaint [SLOT]` — sobrescreve os dois buffers e deixa o jogo correr: o mapa diz que parte da tela é redesenhada a cada quadro e que parte foi pintada uma vez, com o controle do mesmo mapa duas vezes | — | LOOKS-TASK-31 |
 | *(sem alvo ainda)* | venv + `WE2002_LOOKS_IMAGE` e as capturas de um `--run`; **sem emulador**, ~1 min | `python tools/looks/confront.py --kit-control [SLOT]` — a mesma tupla desenhada no uniforme de outros dois times, contra a foto do jogo: o kit medido tem de ficar `KIT_CONTROL_MARGIN` mais perto. É o controle negativo do uniforme, porque o `--score` não o alcança (armadilha 78) | — | LOOKS-TASK-30 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/looks.py --check-image` | — | LOOKS-TASK-13 |
 | *(dentro do `looks_image`)* | `WE2002_LOOKS_IMAGE` (77 sem ela) | `python tools/looks/assembly.py --check-image` | — | LOOKS-TASK-14 |

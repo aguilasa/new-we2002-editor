@@ -33,6 +33,8 @@ Usage:
     python tools/looks/oracle.py --buffers       # what the residue bands are
     python tools/looks/oracle.py --palettes      # unknown (d), from the GPU side
     python tools/looks/oracle.py --kit [SLOT]    # which TEX_*.BIN the screen wears, off VRAM
+    python tools/looks/oracle.py --scenery [SLOT] [--write]  # what draws the screen's furniture, off the display list
+    python tools/looks/oracle.py --repaint [SLOT]  # which parts of the screen the game redraws every frame
     python tools/looks/oracle.py --assembly [HAIR ...]  # every value of a field
     python tools/looks/oracle.py --where [HAIR]  # where a field goes when the file does not move
     python tools/looks/oracle.py --hair          # who writes the hair window, and from where
@@ -2009,6 +2011,511 @@ def check_kit(slots=(2, 1), verbose=True):
     print("oracle --kit: %d problem(s) over %d slot(s)"
           % (len(problems), len(slots)))
     return 1 if problems else 0
+
+
+SCENERY_CENTRE = (256, 120)
+"""The draw offset the screen's packets are written around.
+
+Every vertex in the band is signed and small -- the row stripes run from -79 to
++65 -- because the game sets the GPU's drawing offset to the middle of the
+512x240 display and writes the furniture around it.  The same centre
+`screen.json` stores its text anchors in (LOOKS-TASK-21), which is what says
+this is the screen's own frame and not a coincidence.
+"""
+
+SCENERY_SLACK = 10
+"""How far a packet's colour may sit from the pixel the screen shows there.
+
+Eight bits a channel in the packet, five in the frame buffer, and the shading
+the hardware applies to a flat colour is not the identity -- so the match is a
+distance and not an equality.  Measured 2026-09-20: the furniture that IS on
+screen lands within 4 of its packet, and the stale packets left in the band --
+another screen's rows, 9 pixels apart where this screen's are 12 -- miss by 20
+and more.
+"""
+
+_FURNITURE = (("28", 5, False, 4), ("2A", 5, False, 4), ("38", 8, True, 4),
+              ("20", 4, False, 3), ("22", 4, False, 3), ("30", 6, True, 3))
+SCENERY_QUADS = {int(code, 16): (words, gradient, corners)
+                 for code, words, gradient, corners in _FURNITURE}
+"""The untextured packet codes, as (words, gradient, corners).
+
+Flat and gouraud, quads and triangles: what a 2D screen paints a panel, a
+stripe and a band with.  Written as codes and read back with `int`, like
+`_PACKETS` above and for its reason: a GPU opcode is not an address, and a
+`# not-an-address:` on each line would silence the sweep while teaching
+nothing.
+"""
+
+_SPRITES = (("64", 4, None), ("65", 4, None), ("66", 4, None),
+            ("74", 3, 8), ("75", 3, 8), ("7C", 3, 16), ("7D", 3, 16))
+SPRITE_CODES = {int(code, 16): (words, size) for code, words, size in _SPRITES}
+"""The textured RECTANGLE codes, as (words, fixed size or None).
+
+A sprite carries a corner and, for the variable form, a size; the page comes
+from the draw mode in force rather than from the packet.  Kept apart from the
+quads because a sprite is where a screen's text would be -- if the text were
+in a list in RAM at all, which on this screen it is not.
+"""
+
+_TEXTURED = (("2C", 9), ("2D", 9), ("2E", 9), ("2F", 9), ("24", 7), ("25", 7),
+             ("34", 9), ("3C", 12))
+TEXTURED_QUADS = {int(code, 16): words for code, words in _TEXTURED}
+"""The textured quad codes, by length: the figure, and anything else cut from
+a page in VRAM."""
+
+SCENERY_DIR = os.path.join(ROOT, "work", "looks-scenery")
+"""Where `--scenery` writes what it measured, one JSON per slot."""
+
+
+def _signed_vertex(word):
+    """One GPU vertex word as (x, y), both signed 16-bit."""
+    x, y = word & 0xFFFF, (word >> 16) & 0xFFFF  # not-an-address: two halves
+    return (x - (1 << 16) if x >> 15 else x, y - (1 << 16) if y >> 15 else y)
+
+
+def _packet_colour(word):
+    """One GPU colour word as (r, g, b)."""
+    return (word & 0xFF, (word >> 8) & 0xFF, (word >> 16) & 0xFF)  # not-an-address: three channels
+
+
+def scenery_nodes(data, base):
+    """Every well-formed furniture packet in a band, in screen coordinates.
+
+    A node is `[link][packet]`, the link's top byte saying how many words
+    follow, and a packet is kept only when that count is the length the
+    hardware gives its command -- the same test `walk_packets` makes, which is
+    what separates a display list from a histogram of bytes.
+    """
+    out = []
+    for at in range(0, len(data) - 8, 4):
+        link = struct.unpack_from("<I", data, at)[0]
+        length, code = link >> 24, data[at + 7]
+        if code not in SCENERY_QUADS or SCENERY_QUADS[code][0] != length:
+            continue
+        words, gradient, count = SCENERY_QUADS[code]
+        if at + 4 * (words + 1) > len(data):
+            continue
+        step = 8 if gradient else 4
+        corners, colours = [], []
+        for index in range(count):
+            corners.append(_signed_vertex(struct.unpack_from(
+                "<I", data, at + 8 + step * index)[0]))
+            colours.append(_packet_colour(struct.unpack_from(
+                "<I", data, at + 4 + (step * index if gradient else 0))[0]))
+        points = [(x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
+                  for x, y in corners]
+        out.append({"at": base + at, "code": code, "gradient": gradient,
+                    "points": points, "colours": colours})
+    return out
+
+
+def scenery_pages(data, display):
+    """The textured packets of a band, grouped by the VRAM page they sample.
+
+    A textured quad carries its page in the second half of the `uv1` word and
+    its CLUT in the second half of `uv0`, which is where the hardware reads
+    them from.  What comes back is {(page, clut): (count, box on screen)} --
+    the question section 10.3 (o) asks about the title band, the plate and the
+    glyphs: they are images, and this says which page they are cut from.
+    """
+    out = {}
+    for at in range(0, len(data) - 40, 4):
+        link = struct.unpack_from("<I", data, at)[0]
+        length, code = link >> 24, data[at + 7]
+        if code in TEXTURED_QUADS and TEXTURED_QUADS[code] == length:
+            points = [_signed_vertex(struct.unpack_from(
+                "<I", data, at + 8 + 8 * i)[0]) for i in range(4)]
+            clut = struct.unpack_from("<H", data, at + 14)[0]
+            page = struct.unpack_from("<H", data, at + 22)[0]
+        elif code in SPRITE_CODES and SPRITE_CODES[code][0] == length:
+            # A sprite is one corner plus a size, and it takes the page from
+            # the draw mode in force rather than carrying one: the glyphs of
+            # this screen are sprites, and reading only quads is what made the
+            # first sweep come back with the figure and nothing else.
+            words, size = SPRITE_CODES[code]
+            corner = _signed_vertex(struct.unpack_from("<I", data, at + 8)[0])
+            clut = struct.unpack_from("<H", data, at + 14)[0]
+            page = None
+            if size is None:
+                wide, tall = struct.unpack_from("<hh", data, at + 16)
+            else:
+                wide = tall = size
+            points = [corner, (corner[0] + wide, corner[1] + tall)]
+        else:
+            continue
+        points = [(x + SCENERY_CENTRE[0], y + SCENERY_CENTRE[1])
+                  for x, y in points]
+        if not _inside(points, display):
+            continue
+        xs = [x for x, _y in points]
+        ys = [y for _x, y in points]
+        key = (page, clut)
+        count, box = out.get(key, (0, None))
+        here = (min(xs), min(ys), max(xs), max(ys))
+        if box is not None:
+            here = (min(box[0], here[0]), min(box[1], here[1]),
+                    max(box[2], here[2]), max(box[3], here[3]))
+        out[key] = (count + 1, here)
+    return out
+
+
+def page_vram(page):
+    """(x, y, bits) the page word names in VRAM."""
+    return ((page & 0x0F) * 64, ((page >> 4) & 1) * 256,  # not-an-address: page fields
+            (4, 8, 16, 16)[(page >> 7) & 3])
+
+
+def clut_vram(clut):
+    """(x, y) the CLUT word names in VRAM."""
+    return ((clut & 0x3F) * 16, (clut >> 6) & 0x1FF)  # not-an-address: clut fields
+
+
+def _inside(points, display):
+    return all(0 <= x <= display[0] and 0 <= y <= display[1]
+               for x, y in points)
+
+
+def _corner_pixels(frame, points, display):
+    """The frame's pixel a touch inside each corner of a quad, or None."""
+    xs = sorted({x for x, _y in points})
+    ys = sorted({y for _x, y in points})
+    if len(xs) < 2 or len(ys) < 2:
+        return None
+    left, right, top, bottom = xs[0], xs[-1], ys[0], ys[-1]
+    if right - left < 2 or bottom - top < 2:
+        return None
+    out = []
+    for x, y in ((left, top), (right, top), (left, bottom), (right, bottom)):
+        px = min(max(x + (1 if x == left else -1), 0), display[0] - 1)
+        py = min(max(y + (1 if y == top else -1), 0), display[1] - 1)
+        pixel = frame[py][px]
+        out.append(tuple(pixel[:3]))
+    return out
+
+
+def _colour_gap(packet, shown):
+    """The largest channel distance between a packet's corners and the frame's.
+
+    The frame keeps five bits a channel, so the packet's eight are rounded
+    before the comparison -- otherwise every colour is off by up to seven for
+    a reason that has nothing to do with which packet drew it.
+    """
+    worst = 0
+    for want, got in zip(packet, shown):
+        for one, two in zip(want, got):
+            worst = max(worst, abs((one >> 3) - (two >> 3)) * 8)
+    return worst
+
+
+def check_scenery(slots=(2, 1), write=False, verbose=True):
+    """`--scenery [SLOT]`: what draws the screen's furniture, off the band.
+
+    The question of section 10.3 (o): is the panel's gradient, the row
+    stripes, the title band and the help box an IMAGE off the disc or a
+    polygon of the GPU?  The answer is read where the game writes it -- the
+    display list in RAM -- and then held against the picture:
+
+      **the packet has to be on screen** -- its colours are compared with the
+          pixels the frame shows inside its own rectangle, and a packet that
+          misses is not this screen's.  The bands hold the previous screen's
+          list as well (its rows are 9 pixels apart where this screen's are
+          12), and geometry alone cannot tell the two apart;
+      **the control** -- the same slot loaded twice has to give the same
+          furniture, or the reading is the emulator's mood.
+
+    `--write` leaves `work/looks-scenery/slotN.json` for the window to draw
+    from, the way `--camera` leaves the camera.
+    """
+    import confront
+    import screen
+
+    ready = preflight()
+    table = screen.load()
+    display = table["display"]
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            found, pages = _scenery_of(game, slot, table, display, confront,
+                                       screen)
+            again, _pages = _scenery_of(game, slot, table, display, confront,
+                                        screen)
+            if [one["points"] for one in found] != [one["points"]
+                                                    for one in again]:
+                problems.append("slot %d: the furniture read twice is not the "
+                                "same, so nothing below is a measurement"
+                                % slot)
+                continue
+            print("    control: the screen loaded twice draws the same %d "
+                  "packet(s)" % len(found))
+            _say_scenery(found, table)
+            _say_pages(pages, table)
+            if write:
+                print("    wrote %s" % write_scenery(slot, found, display))
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --scenery: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def _scenery_of(game, slot, table, display, confront, screen):
+    """The furniture packets one load of *slot* actually draws."""
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="scenery-%d" % slot)
+    game.step(SCENERY_SETTLE)
+    frame = confront.still_frame(game, display, oracle_module(), screen)
+    bands = []
+    first, size, step = layout.SCENERY_SWEEP
+    for base in range(first, first + size, step):
+        path = os.path.join(game.out_dir, "scenery-%08x.bin" % base)
+        bands.append((base, game.read_ram(base, step, path)))
+    out = []
+    pages = {}
+    for base, data in bands:
+        for key, value in scenery_pages(data, display).items():
+            count, box = pages.get(key, (0, value[1]))
+            here = value[1]
+            if key in pages:
+                here = (min(box[0], here[0]), min(box[1], here[1]),
+                        max(box[2], here[2]), max(box[3], here[3]))
+            pages[key] = (count + value[0], here)
+        for node in scenery_nodes(data, base):
+            if not _inside(node["points"], display):
+                continue
+            shown = _corner_pixels(frame, node["points"], display)
+            if shown is None:
+                continue
+            node["gap"] = _colour_gap(node["colours"], shown)
+            node["shown"] = shown
+            if node["gap"] <= SCENERY_SLACK:
+                out.append(node)
+    # The two bands are the double buffer and hold the same furniture; keeping
+    # both would count every rectangle twice.
+    seen, unique = set(), []
+    for node in sorted(out, key=lambda one: (one["points"], one["at"])):
+        key = (tuple(node["points"]), tuple(node["colours"]))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(node)
+    return unique, pages
+
+
+def _say_pages(pages, table):
+    """Print the textured packets grouped by the VRAM page they sample.
+
+    What they answer for section 10.3 (o) is the other half of the question:
+    everything that is NOT one of the flat rectangles above is cut from a page
+    in VRAM, and this says which page, how many packets, and whether
+    `DAT2D.BIN` -- the only 2D container this cycle reads -- holds it.
+    """
+    import atlas
+    import iso_source
+    import texture
+
+    ready = preflight()
+    with iso_source.open_disc(ready["image"]) as disc:
+        records = texture.images(disc.read(layout.DAT2D))
+    print("    the textured packets by page, and what holds that page:")
+    for (page, clut), (count, box) in sorted(pages.items(),
+                                             key=lambda one: -one[1][0]):
+        cx, cy = clut_vram(clut)
+        if page is None:
+            print("        sprite, page from the draw mode, clut (%3d,%3d): "
+                  "%3d packet(s) over (%3d,%3d)-(%3d,%3d)"
+                  % (cx, cy, count, box[0], box[1], box[2], box[3]))
+            continue
+        x, y, bits = page_vram(page)
+        held = atlas.image_at(records, x, y)
+        print("        page %04x (%3d,%3d) %2d-bit, clut (%3d,%3d): %3d "
+              "packet(s) over (%3d,%3d)-(%3d,%3d); %s"
+              % (page, x, y, bits, cx, cy, count, box[0], box[1], box[2],
+                 box[3], "in DAT2D.BIN" if held else "in no DAT2D record"))
+
+
+def _gpu_name(code):
+    """The name of a GPU command code, for a report line."""
+    return GPU_COMMANDS.get(code, ("%#04x" % code,))[0]
+
+
+SCENERY_SETTLE = 8
+"""Frames let run after the state loads, before the band and the frame are
+read together.  The screen is static; this is for the load itself to finish."""
+
+
+def _say_scenery(found, table):
+    """Print the furniture grouped by the region of the screen it lands in."""
+    regions = {name: box for name, box in
+               ((one, table["regions"][one]["native"])
+                for one in table["regions"])}
+    groups = {}
+    for node in found:
+        xs = [x for x, _y in node["points"]]
+        ys = [y for _x, y in node["points"]]
+        box = (min(xs), min(ys), max(xs), max(ys))
+        where = "elsewhere"
+        for name, region in regions.items():
+            if (box[0] >= region[0] - 1 and box[1] >= region[1] - 1
+                    and box[2] <= region[2] + 1 and box[3] <= region[3] + 1):
+                where = name
+                break
+        groups.setdefault(where, []).append((box, node))
+    for where in sorted(groups):
+        items = groups[where]
+        flats = [one for _box, one in items if not one["gradient"]]
+        grads = [one for _box, one in items if one["gradient"]]
+        print("    %-10s %3d packet(s): %d flat, %d gradient"
+              % (where, len(items), len(flats), len(grads)))
+        for box, node in sorted(items)[:4]:
+            colours = node["colours"]
+            print("        (%3d,%3d)-(%3d,%3d) %-8s %s%s"
+                  % (box[0], box[1], box[2], box[3],
+                     "gradient" if node["gradient"] else "flat",
+                     colours[0],
+                     " -> %s" % (colours[2],) if node["gradient"] else ""))
+        if len(items) > 4:
+            print("        ... and %d more" % (len(items) - 4))
+
+
+def write_scenery(slot, found, display):
+    """One JSON per slot, in `work/looks-scenery/`."""
+    import json
+
+    os.makedirs(SCENERY_DIR, exist_ok=True)
+    path = os.path.join(SCENERY_DIR, "slot%d.json" % slot)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump({"slot": slot, "display": list(display),
+                   "centre": list(SCENERY_CENTRE),
+                   "packets": [{"points": one["points"],
+                                "colours": one["colours"],
+                                "gradient": one["gradient"]}
+                               for one in found]},
+                  handle, indent=1)
+        handle.write("\n")
+    return path
+
+
+REPAINT_TILE = (32, 30)
+"""The tile the repaint map is read at, in screen pixels.
+
+Sixteen across and eight down over a 512x240 screen.  Small enough that the
+panel, the rows and the help box land in tiles of their own; big enough that
+one glyph's worth of ink does not decide a tile.
+"""
+
+REPAINT_COLOUR = ((1 << 15) - 1) ^ (0x1F << 5)  # not-an-address: a BGR555 colour
+"""The halfword written over the screen: magenta, full red and blue, no green.
+
+A colour the screen does not hold anywhere -- the furniture is teal, dark blue
+and black -- so "came back" and "stayed" are the same question as "is this
+pixel magenta".
+"""
+
+REPAINT_FRAMES = 8
+"""Frames let run after the damage, before the buffers are read again.
+
+Both buffers are damaged and the console flips between them, so a rectangle
+the game redraws every frame is back in both within two flips; eight is four
+times that.
+"""
+
+REPAINT_BACK = 0.98
+"""How much of a tile has to come back before it is called redrawn."""
+
+
+def check_repaint(slots=(2, 1), verbose=True):
+    """`--repaint [SLOT]`: which parts of the screen the game draws per frame.
+
+    The other half of section 10.3 (o), and the one the display list cannot
+    answer: `--scenery` finds the panel, the help box and the row stripes as
+    polygons in the band and finds **nothing** for the title band, the plate,
+    the shirt box or the text -- so either they are drawn by a path that
+    leaves no list in main RAM, or they are painted once and left.
+
+    This asks the console.  Both frame buffers are overwritten with a colour
+    the screen does not use, the game is let run, and the buffers are read
+    again: what comes back is redrawn every frame; what stays magenta was
+    painted once.  The control is the same map twice.
+    """
+    import confront
+    import screen
+
+    ready = preflight()
+    table = screen.load()
+    width, height = table["display"]
+    problems = []
+    with Oracle(ready["cue"], verbose=verbose) as game:
+        for slot in slots:
+            print("  -- slot %d (%s) --" % (slot, SLOTS[slot]))
+            first = _repaint_map(game, slot, width, height, confront, screen)
+            again = _repaint_map(game, slot, width, height, confront, screen)
+            if first != again:
+                problems.append("slot %d: the repaint map read twice differs, "
+                                "so it is not a measurement" % slot)
+                continue
+            print("    control: the map read twice is the same")
+            _say_repaint(first, table, width, height)
+    for line in problems:
+        print("  FAIL  %s" % line)
+    print("oracle --repaint: %d problem(s) over %d slot(s)"
+          % (len(problems), len(slots)))
+    return 1 if problems else 0
+
+
+def _repaint_map(game, slot, width, height, confront, screen):
+    """{tile: 'redrawn' | 'painted once' | 'part'} for one load of a slot."""
+    restore_state(slot, verbose=False)
+    game.load_looks(slot, label="repaint-%d" % slot)
+    game.step(SCENERY_SETTLE)
+    before = confront.still_frame(game, (width, height), oracle_module(),
+                                  screen)
+    path = os.path.join(game.out_dir, "magenta.bin")
+    with open(path, "wb") as handle:
+        handle.write(struct.pack("<H", REPAINT_COLOUR) * (width * height))
+    for origin in confront.BUFFERS:
+        game.client.call("write_vram_region", x=0, y=origin, width=width,
+                         height=height, input_path=path, format="raw")
+    game.step(REPAINT_FRAMES)
+    after = confront.still_frame(game, (width, height), oracle_module(),
+                                 screen)
+    across, down = REPAINT_TILE
+    out = {}
+    for ty in range(0, height, down):
+        for tx in range(0, width, across):
+            same = total = 0
+            for y in range(ty, min(ty + down, height)):
+                for x in range(tx, min(tx + across, width)):
+                    total += 1
+                    same += tuple(after[y][x][:3]) == tuple(before[y][x][:3])
+            share = same / float(total or 1)
+            out[(tx, ty)] = ("redrawn" if share >= REPAINT_BACK
+                             else "part" if share > 1 - REPAINT_BACK
+                             else "painted once")
+    return out
+
+
+def _say_repaint(found, table, width, height):
+    """Print the repaint map as the screen's own shape, and name the regions."""
+    across, down = REPAINT_TILE
+    mark = {"redrawn": "#", "part": "+", "painted once": "."}
+    print("    the screen, %dx%d tiles of %dx%d -- # redrawn every frame, "
+          "+ partly, . painted once"
+          % (width // across, height // down, across, down))
+    for ty in range(0, height, down):
+        line = "".join(mark[found[(tx, ty)]]
+                       for tx in range(0, width, across))
+        print("        %3d  %s" % (ty, line))
+    for name in sorted(table["regions"]):
+        box = table["regions"][name]["native"]
+        kinds = {}
+        for (tx, ty), kind in found.items():
+            if (tx + across > box[0] and tx <= box[2]
+                    and ty + down > box[1] and ty <= box[3]):
+                kinds[kind] = kinds.get(kind, 0) + 1
+        print("        %-8s %s" % (name, ", ".join(
+            "%d %s" % (n, kind) for kind, n in sorted(kinds.items()))))
 
 
 def check_assembly(rows=None, slot=2, verbose=True):
@@ -6398,6 +6905,12 @@ def main(argv):
             return check_where(row=argv[2] if len(argv) > 2 else "HAIR")
         if len(argv) >= 2 and argv[1] == "--assembly":
             return check_assembly(rows=tuple(argv[2:]) or None)
+        if len(argv) in (2, 3) and argv[1] == "--repaint":
+            return check_repaint((int(argv[2]),) if len(argv) > 2 else (2, 1))
+        if len(argv) >= 2 and argv[1] == "--scenery":
+            rest = [a for a in argv[2:] if a != "--write"]
+            return check_scenery((int(rest[0]),) if rest else (2, 1),
+                                 write="--write" in argv)
         if len(argv) in (2, 3) and argv[1] == "--kit":
             return check_kit((int(argv[2]),) if len(argv) > 2 else (2, 1))
         if len(argv) == 2 and argv[1] == "--palettes":

@@ -851,6 +851,42 @@ def figure_scale(disc, values: dict) -> tuple:
         raise BadScene(str(exc)) from exc
 
 
+SCENERY_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "work", "looks-scenery")
+"""Where `oracle.py --scenery --write` leaves what it measured, per slot."""
+
+
+class NoScenery(BadScene):
+    """No measured furniture on disc, so the window has none to draw."""
+
+
+def load_scenery(slot: int = 2) -> list:
+    """The screen's furniture as the game draws it, or `NoScenery`.
+
+    One entry per packet: `{"points", "colours", "gradient"}`, in the display's
+    own 512x240 pixels, measured off the display list in RAM and held against
+    the frame the console showed (LOOKS-TASK-31).  It is never defaulted: the
+    colours the window used before this were chosen by eye, and a table that
+    quietly fell back to them would make the window's picture a description of
+    itself.
+    """
+    import json
+
+    path = os.path.join(SCENERY_DIR, "slot%d.json" % slot)
+    if not os.path.isfile(path):
+        raise NoScenery("no %s -- run `oracle.py --scenery %d --write` first, "
+                        "which is what measures the furniture off the band"
+                        % (path, slot))
+    with open(path, encoding="utf-8") as handle:
+        record = json.load(handle)
+    packets = record.get("packets") or []
+    if not packets:
+        raise NoScenery("%s holds no packet, so there is no furniture in it"
+                        % path)
+    return packets
+
+
 def to_camera(point, camera) -> tuple:
     """One point of the FILE's frame, in the camera's.
 

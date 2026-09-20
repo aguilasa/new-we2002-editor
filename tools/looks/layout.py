@@ -1908,6 +1908,16 @@ the pose's -- and the GTE then multiplies the two.  The product is the matrix
 drawn taller: the scale is inside the camera, not in the pose (LOOKS-TASK-29).
 """
 
+SCENERY_SWEEP = (0x80000000, 0x200000, 0x20000)
+"""(first byte, how much, per read) of the RAM the screen's furniture is
+looked for in: all of main memory, a chunk at a time.
+
+It has to be all of it.  The figure's own display list is in the two bands of
+`oracle.BUFFER_BANDS`, and the screen's title band, plate and text are not --
+a sweep of those two comes back with the panel, the help box and the row
+stripes and nothing else (measured 2026-09-20, LOOKS-TASK-31).
+"""
+
 ADDRESS_OWNER = "layout.py"
 """The one module of tools/looks/ allowed to carry an address (plan 3.3, rule 1)."""
 

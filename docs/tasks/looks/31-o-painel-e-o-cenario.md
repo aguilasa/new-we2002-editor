@@ -67,4 +67,63 @@ na janela, lido do disco quando for do disco.
 
 ## Log de Execução
 
-*(preencher ao executar)*
+**PARCIAL — a task continua `⬜ Pendente`.** Três dos elementos estão medidos e
+desenhados; o título, a placa, a camisa, as setas e os textos não, e o motivo
+é um achado, não falta de tentativa.
+
+- **Executado em:** 2026-09-20
+- **Resumo do que foi feito:** a mobília da tela se lê na **display list**, e o
+  que separa a lista viva das sobras é o quadro: as bandas guardam também a
+  lista da tela anterior (as faixas dela ficam a 9 pixels, as desta a 12), e
+  geometria plausível não prova que o pacote foi desenhado. O `oracle.py
+  --scenery` fica só com os pacotes cuja cor é a que o console mostrou dentro
+  do retângulo deles — sobram **28**, iguais nas duas leituras: o painel do
+  boneco e a caixa de ajuda são **quads gouraud** (degradês medidos), e as
+  doze faixas das linhas são **26 quads chatos** em duas cores alternadas, com
+  a primeira linha em preto. **Nenhum é imagem.** Os texturizados que a
+  varredura acha são o boneco, e confirmam a LOOKS-TASK-30 de graça: cabeça da
+  página (512,256) do `DAT2D.BIN`, corpo da (576,256), que é do kit.
+- **Arquivos criados/modificados:** `tools/looks/oracle.py` (`--scenery` e
+  `--repaint`, com os decodificadores de pacote, sprite e página);
+  `tools/looks/layout.py` (`SCENERY_SWEEP`); `tools/looks/scene.py`
+  (`load_scenery`, `NoScenery`); `tools/looks/ui/looks_set.py` (pinta a
+  mobília medida, e o painel manda a cor no viewer);
+  `tools/looks/ui/viewer.py` (`clear_colour`); `docs/PLAN-LOOKS-PY.md`
+  (§10.3 (o) com o veredito parcial e a data);
+  `docs/prompts/perfil-looks.md` (armadilhas 80 a 82 e duas linhas de gate);
+  `CLAUDE.md` (as duas linhas de comando).
+- **Problemas encontrados:**
+  1. **Seguir a cadeia de nós na RAM dá a tela errada.** Uma cadeia de 74
+     pacotes bem formados é de outra tela, ainda na banda. Quem desempata é o
+     quadro (armadilha 80).
+  2. **O texto não está em lista nenhuma.** Varri a RAM inteira com quads,
+     triângulos e sprites: nada cai fora do painel. E não é que seja pintado
+     uma vez — o `--repaint` sobrescreve os dois buffers e **a tela inteira
+     volta**, então o caminho de impressão (`layout.SCREEN_PRINT`) manda os
+     comandos sem deixar nó em memória (armadilha 81).
+  3. **O `gpu_dump` do fork sai em `.zst`**, e esta máquina não tem
+     descompressor de zstd — nem módulo nem CLI (armadilha 82). Era a fonte
+     exata dos comandos do quadro, e está fechada aqui.
+  4. **A regra 1 pegou os opcodes e a faixa de varredura.** Os códigos de
+     comando viraram tabela de strings, como o `_PACKETS` já fazia, e o
+     endereço foi para o `layout.py`.
+
+### O que falta para fechar esta task
+
+- **A barra de título, a placa (`GK`/`CB`), a caixa da camisa, as setas
+  `◀ ▶` e a fonte dos textos.** O caminho é o de impressão: parar em
+  `layout.SCREEN_PRINT` / `layout.SCREEN_GLYPH` e ler o que ele manda ao GPU
+  (página, CLUT, posição e cor), que é a medição que a display list não dá.
+- **A comparação do nosso quadro com o do emulador fora da silhueta**, com o
+  controle do emulador contra ele mesmo — critério 3, intocado.
+- **A câmera do close-up por linha**, que o contexto desta task traz da
+  LOOKS-TASK-22: a janela desenha sempre a câmera de corpo inteiro, e a
+  LOOKS-TASK-28 já mediu que o jogo aproxima na cabeça quando a linha sob o
+  cursor é de cabeça.
+- **O alinhamento à direita do valor dentro da caixa do cursor**, também da
+  LOOKS-TASK-22.
+
+**Gates, na árvore commitada:** `selftest` 0 falhas, 90 de 90 controles
+vermelhos; `cli check` 10 de 10; `oracle.py --scenery` 0 problemas nos dois
+slots (28 pacotes, iguais nas duas leituras); `oracle.py --repaint` 0
+problemas; `looks_ui` 10 de 10 controles vermelhos; `check_tasks` 138 ok.

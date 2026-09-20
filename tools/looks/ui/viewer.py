@@ -120,6 +120,11 @@ class Viewer(QOpenGLWidget):
         self._holders = []
         self.wireframe = False
         self.shelved = True
+        # What the panel is cleared to.  The measured gradient when the screen
+        # hands one over (LOOKS-TASK-31), and the v1's own grey otherwise --
+        # never the measured one silently defaulted, which would make the
+        # window's panel a description of itself.
+        self.clear_colour = BACKGROUND
         # The game's own 4x4, when there is one: sixteen floats the CORE built
         # out of what `oracle.py --camera` measured off the GTE.  The window
         # does no projection arithmetic of its own with it -- it uploads it,
@@ -217,7 +222,7 @@ class Viewer(QOpenGLWidget):
 
     def initializeGL(self) -> None:
         functions = QtGui.QOpenGLContext.currentContext().functions()
-        functions.glClearColor(*BACKGROUND)
+        functions.glClearColor(*self.clear_colour)
         functions.glEnable(GL_DEPTH_TEST)
 
         self._program = QOpenGLShaderProgram(self)
@@ -290,7 +295,7 @@ class Viewer(QOpenGLWidget):
 
     def paintGL(self) -> None:
         functions = QtGui.QOpenGLContext.currentContext().functions()
-        functions.glClearColor(*BACKGROUND)
+        functions.glClearColor(*self.clear_colour)
         functions.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         if self._program is None or not self._groups:
             return
